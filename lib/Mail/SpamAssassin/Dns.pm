@@ -165,25 +165,19 @@ sub register_rbl_subtest {
 
 ###########################################################################
 
-# TODO: If a RBL has more than one hit (on different IP addresses), some of
-# the hits will be logged under the wrong rule name.  We need to fix
-# test_log() to be rule-specific or change the DNSBL code to run test_log()
-# and got_hit() after harvesting is done.
 sub dnsbl_hit {
   my ($self, $rule, $question, $answer) = @_;
 
   if (substr($rule, 0, 2) ne "__") {
+    my $log = "";
     if ($answer->type eq 'TXT') {
-      my $rdatastr = $answer->rdatastr;
-      $rdatastr =~ s/^"(.*)"$/$1/;
-      $self->test_log($rdatastr);
+      $log = $answer->rdatastr;
+      $log =~ s/^"(.*)"$/$1/;
     }
     elsif ($question->string =~ m/^(\d+)\.(\d+)\.(\d+)\.(\d+)\.(\S+\w)/) {
-      $self->test_log("$4.$3.$2.$1 listed in $5");
+      $log = "$4.$3.$2.$1 listed in $5";
     }
-  }
-  if (!defined $self->{tests_already_hit}->{$rule}) {
-    $self->got_hit($rule, "RBL: ");
+    push @{$self->{dnsresult}->{$rule}}, $log;
   }
 }
 
@@ -289,6 +283,15 @@ sub harvest_dnsbl_queries {
   for my $query (@left) {
     undef $query->[BGSOCK];
   }
+  # register hits
+  while (my ($rule, $logs) = each %{ $self->{dnsresult} }) {
+    for my $log (@{$logs}) {
+      $self->test_log($log) if $log;
+    }
+    if (!defined $self->{tests_already_hit}->{$rule}) {
+      $self->got_hit($rule, "RBL: ");
+    }
+  }
 }
 
 ###########################################################################
@@ -300,6 +303,7 @@ sub rbl_finish {
   delete $self->{dnscache};
   # TODO: do not remove this since it can be retained!
   delete $self->{dnspost};
+  delete $self->{dnsresult};
 }
 
 ###########################################################################
