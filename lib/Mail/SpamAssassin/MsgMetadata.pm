@@ -122,9 +122,9 @@ sub check_language {
   $self->{languages_body_len} = length($body);
 
   # need about 256 bytes for reasonably accurate match (experimentally derived)
-  if ($self->{languages_body_len} < 256)
-  {
+  if ($self->{languages_body_len} < 256) {
     dbg("Message too short for language analysis");
+    $self->{textcat_matches} = [];
     return;
   }
 
