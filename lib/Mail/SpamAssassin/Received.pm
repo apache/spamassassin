@@ -1,4 +1,4 @@
-# $Id: Received.pm,v 1.27 2003/08/21 00:48:46 jmason Exp $
+# $Id: Received.pm,v 1.28 2003/08/23 02:38:17 jmason Exp $
 
 # ---------------------------------------------------------------------------
 
@@ -125,7 +125,7 @@ sub parse_received_headers {
       # do we know what the IP addresses of the "by" host in the first
       # header is?  If not, set them from this header, since it's the
       # first one.  NOTE: this is a ref to an array, NOT a string.
-      if (!defined $first_by) {
+      if (!defined $first_by && $self->is_dns_available()) {
 	$first_by = [ $self->lookup_all_ips ($relay->{by}) ];
       }
 
@@ -134,6 +134,13 @@ sub parse_received_headers {
       if ($relay->{ip_is_reserved}) {
 	dbg ("received-header: 'from' ".$relay->{ip}." has reserved IP");
 	$inferred_as_trusted = 1;
+      }
+
+      # can we use DNS?  If not, we cannot use this algorithm, as we
+      # cannot lookup hostnames. :(
+      # Consider the first relay trusted, and all others untrusted.
+      if (!$self->is_dns_available()) {
+	dbg ("received-header: cannot use DNS, do not trust any hosts from here on");
       }
 
       # if the 'from' IP addr shares the same class B mask (/16) as
@@ -226,6 +233,11 @@ sub parse_received_headers {
 sub lookup_all_ips {
   my ($self, $hostname) = @_;
 
+  # cannot use gethostbyname without DNS :(
+  if (!$self->is_dns_available()) {
+    return ();
+  }
+  
   my ($name,$aliases,$addrtype,$length,@addrs) = gethostbyname ($hostname);
   my @moreaddrs;
 

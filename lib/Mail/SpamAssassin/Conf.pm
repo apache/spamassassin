@@ -458,9 +458,9 @@ other words, if the host that connected to your MX had an IP address that
 mapped to 'sendinghost.spamassassin.org', you should specify
 C<sendinghost.spamassassin.org> or just C<spamassassin.org> here.
 
-Note that this requires that C<trusted_networks> be correct.  For simple
-cases, it will be, but for a complex network, you may get better results
-by setting that parameter.
+Note that this requires that C<trusted_networks> be correct.  For simple cases,
+it will be, but for a complex network, or if you're running with DNS checks off
+or with C<-L>, you may get better results by setting that parameter.
 
 e.g.
 
@@ -1324,7 +1324,8 @@ catch dialup-sent spam, without penalizing people who properly relay through
 their ISP.
 
 See also C<trusted_networks>, to specify which the relays you trust.  This
-is a much better way to control DNSBL-checking behaviour.
+is a much better way to control DNSBL-checking behaviour, and C<num_check_received>
+is deprecated as a result.
 
 =cut
 
@@ -1355,13 +1356,14 @@ This operates additively, so a C<trusted_networks> line after another one
 will result in all those networks becoming trusted.  To clear out the
 existing entries, use C<clear_trusted_networks>.
 
-SpamAssassin includes code to infer your trusted networks on the fly, so
-this may not be necessary.  This inference works as follows:
+If you're running with DNS checks enabled, SpamAssassin includes code to infer
+your trusted networks on the fly, so this may not be necessary.  This inference
+works as follows:
 
 =over 4
 
 =item if the 'from' IP address is on the same /16 network as the top Received
-line's, it's trusted
+line's 'by' host, it's trusted
 
 =item if the address of the 'from' host is in a reserved network range,
 then it's trusted
@@ -1930,6 +1932,10 @@ via its outgoing SMTP server instead of sending directly to your MX.
 When checking a 'nice' DNSBL (a DNS whitelist?), you cannot trust
 Received headers further back than the very first 'untrusted' one.
 This is accomplished by naming the set 'foo-lastuntrusted'.
+
+Note that this requires that C<trusted_networks> be correct.  For simple cases,
+it will be, but for a complex network, or if you're running with DNS checks off
+or with C<-L>, you may get better results by setting that parameter.
 
 =back
 
