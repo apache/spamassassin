@@ -275,6 +275,9 @@ sub new {
   # defaults for SQL based auto-whitelist
   $self->{user_awl_sql_table} = 'awl';
 
+  $self->{user_scores_ldap_username} = 'username';
+  $self->{user_scores_ldap_password} = '';
+
   # Make sure we add in X-Spam-Checker-Version
   $self->{headers_spam}->{"Checker-Version"} = "SpamAssassin _VERSION_ (_SUBVERSION_) on _HOSTNAME_";
   $self->{headers_ham}->{"Checker-Version"} = $self->{headers_spam}->{"Checker-Version"};
@@ -2473,6 +2476,18 @@ This option gives the password used by the above DSN.
 If you load user scores from an SQL database, this will set the DSN
 used to connect.  Example: C<DBI:mysql:spamassassin:localhost>
 
+If you load user scores from an LDAP directory, this will set the DSN used to
+connect. You have to write the DSN as an LDAP URL, the components being the
+host and port to connect to, the base DN for the seasrch, the scope of the
+search (base, one or sub), the single attribute being the multivalued attribute
+used to hold the configuration data (space separated pairs of key and value,
+just as in a file) and finally the filter being the expression used to filter
+out the wanted username. Note that the filter expression is being used in a
+sprintf statement with the username as the only parameter, thus is can hold a
+single __USERNAME__ expression. This will be replaced with the username.
+
+Example: C<ldap://localhost:389/dc=koehntopp,dc=de?spamassassinconfig?uid=__USERNAME__>
+
 =cut
 
     if ( $key eq 'user_scores_dsn' ) {
@@ -2539,6 +2554,28 @@ The table user auto-whitelists are stored in, for the above DSN.
 =cut
     if ( $key eq 'user_awl_sql_table' ) {
       $self->{user_awl_sql_table} = $value; next;
+    }
+
+=item user_scores_ldap_username
+
+This is the Bind DN used to connect to the LDAP server.
+
+Example: C<cn=master,dc=koehntopp,dc=de>
+
+=cut
+
+    if (/^user_scores_ldap_username\s+(.*?)\s*$/) {
+      $self->{user_scores_ldap_username} = $1; next;
+    }
+
+=item user_scores_ldap_password
+
+This is the password used to connect to the LDAP server.
+
+=cut
+ 
+    if (/^user_scores_ldap_password\s+(.*?)\s*$/) {
+      $self->{user_scores_ldap_password} = $1; next;
     }
 
 =item loadplugin PluginModuleName /path/to/module.pm

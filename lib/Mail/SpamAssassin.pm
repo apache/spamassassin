@@ -67,6 +67,7 @@ require 5.006_001;
 
 use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::ConfSourceSQL;
+use Mail::SpamAssassin::ConfSourceLDAP;
 use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::MsgParser;
 use Mail::SpamAssassin::Bayes;
@@ -1033,6 +1034,29 @@ sub load_scoreonly_sql {
   $src->load($username);
 }
 
+###########################################################################
+
+=item $f->load_scoreonly_ldap ($username)
+
+Read configuration paramaters from an LDAP server and parse scores from it.
+This will only take effect if the perl C<Net::LDAP> and C<URI> modules are
+installed, and the configuration parameters C<user_scores_dsn>,
+C<user_scores_ldap_username>, and C<user_scores_ldap_password> are set
+correctly.
+
+The username in C<$username> will also be used for the C<username> attribute of
+the Mail::SpamAssassin object.
+
+=cut
+
+sub load_scoreonly_ldap {
+  my ($self, $username) = @_;
+
+  dbg("load_scoreonly_ldap($username)");
+  my $src = Mail::SpamAssassin::ConfSourceLDAP->new ($self);
+  $self->{username} = $username;
+  $src->load($username);
+}
 
 ###########################################################################
 
@@ -1092,7 +1116,11 @@ sub compile_now {
   # load SQL modules now as well
   my $dsn = $self->{conf}->{user_scores_dsn};
   if ($dsn ne '') {
-    Mail::SpamAssassin::ConfSourceSQL::load_modules();
+    if ($dsn =~ /^ldap:/i) {
+      Mail::SpamAssassin::ConfSourceLDAP::load_modules();
+    } else {
+      Mail::SpamAssassin::ConfSourceSQL::load_modules();
+    }
   }
 
   $self->{bayes_scanner}->sanity_check_is_untied();

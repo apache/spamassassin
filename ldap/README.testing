@@ -1,0 +1,55 @@
+
+- install openldap server, using apt-get etc.
+
+- Patch '/etc/openldap/schema/inetorgperson.schema' as follows:
+
+--- /etc/openldap/schema/inetorgperson.schema.default   2003-10-23 07:26:01.000000000 -0700
++++ /etc/openldap/schema/inetorgperson.schema   2004-02-05 22:07:01.000000000 -0800
+@@ -121,6 +121,13 @@
+        DESC 'RFC2798: personal identity information, a PKCS #12 PFX'
+        SYNTAX 1.3.6.1.4.1.1466.115.121.1.5 )
+ 
++# spamassassin
++# see http://SpamAssassin.org/ .
++attributetype ( 2.16.840.1.113730.3.1.220
++       NAME 'spamassassin'
++       DESC 'SpamAssassin user preferences settings'
++       EQUALITY caseExactMatch
++       SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 )
+ 
+ # inetOrgPerson
+ # The inetOrgPerson represents people who are associated with an
+@@ -138,5 +145,5 @@
+                labeledURI $ mail $ manager $ mobile $ o $ pager $
+                photo $ roomNumber $ secretary $ uid $ userCertificate $
+                x500uniqueIdentifier $ preferredLanguage $
+-               userSMIMECertificate $ userPKCS12 )
++               userSMIMECertificate $ userPKCS12 $ spamassassin )
+        )
+
+
+- set up according to:
+
+  http://yolinux.com/TUTORIALS/LinuxTutorialLDAP.html#TUTORIAL
+
+  However, do not use "stooges.ldif"; use "sa_test.ldif" instead.
+  (This LDIF file adds a "spamassassin" line to the "curley" user.)
+
+  ldapadd -f sa_test.ldif -xv -D "cn=StoogeAdmin,o=stooges" \
+		-h 127.0.0.1 -w secret1
+
+
+- install Net::LDAP using CPAN:
+
+  perl -MCPAN -e shell
+  install Net::LDAP
+  quit
+
+
+- create the test flag file:
+
+  touch t/do_ldap
+
+
+- now "make test" will test against the LDAP server as well.
+

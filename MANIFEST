@@ -33,6 +33,7 @@ lib/Mail/SpamAssassin/BayesStoreSQL.pm
 lib/Mail/SpamAssassin/CmdLearn.pm
 lib/Mail/SpamAssassin/Conf.pm
 lib/Mail/SpamAssassin/ConfSourceSQL.pm
+lib/Mail/SpamAssassin/ConfSourceLDAP.pm
 lib/Mail/SpamAssassin/DBBasedAddrList.pm
 lib/Mail/SpamAssassin/Dns.pm
 lib/Mail/SpamAssassin/EvalTests.pm
@@ -288,3 +289,7 @@ t/data/whitelists/ryanairmail.com
 t/data/whitelists/sf.net
 t/data/whitelists/winxpnews.com
 t/data/whitelists/yahoo-inc.com
+ldap/README
+ldap/sa_test.ldif
+ldap/README.testing
+t/spamd_ldap.t

@@ -62,12 +62,11 @@ linked-libraries or imported perl modules there is the potential for abuse of
 both the running uid of spamd, and the uid of the username supplied by spamc
 (and this could be any user).
 
-When run as root, spamd will change uid's to the user invoking spamc in 
-order to read and write to their configurations. This functionality
-is not possible if spamd does not run as root and is a disadvantage if
-you rely on this. If you use mysql for per-user configuration there
-is no reason in the world to run as root, and this remains fully
-functional.
+When run as root, spamd will change uid's to the user invoking spamc in order
+to read and write to their configurations. This functionality is not possible
+if spamd does not run as root and is a disadvantage if you rely on this. If you
+use mysql or LDAP for per-user configuration there is no reason in the world
+to run as root, and this remains fully functional.
 
 If you do not need to let your users define their own rules, maintain
 their own whitelists, or have non-world-readable home and ~/.spamassassin
@@ -118,8 +117,8 @@ spamc clients to make spamd:
 If users do not have the opportunity to invoke spamc themselves, and
 the network is secure, running spamd as root is the preferred option,
 Be clear that the issues above dont affect you. Note: if you use mysql
-for per-user configuration on systems, you will remain vulnerable to
-(1.) and (2.). 
+or LDAP for per-user configuration on systems, you will remain vulnerable
+to (1.) and (2.).
 
 configuration:              Mysql           .spamassassin/user_prefs
                              / \                  / \

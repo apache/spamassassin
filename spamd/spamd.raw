@@ -123,8 +123,10 @@ GetOptions(
   'max-children|m=i'            => \$opt{'max-children'},
   'port|p=i'                    => \$opt{'port'},
   'sql-config!'                 => \$opt{'sql-config'},
+  'ldap-config!'                => \$opt{'ldap-config'},
     'q'                         => \$opt{'sql-config'},
   'setuid-with-sql'             => \$opt{'setuid-with-sql'},
+  'setuid-with-ldap'            => \$opt{'setuid-with-ldap'},
     'Q'                         => \$opt{'setuid-with-sql'},
   'virtual-config|V=s'          => \$opt{'virtual-config'},
   'virtual-config-dir=s'        => \$opt{'virtual-config-dir'},
@@ -665,11 +667,16 @@ sub check {
                 {
                   if ($opt{'sql-config'}) {
                     handle_user_sql($current_user);
+		  } elsif ($opt{'ldap-config'}) {
+		    handle_user_ldap($current_user);
                   } elsif ($opt{'virtual-config'} || $opt{'virtual-config-dir'}) {
                     handle_virtual_user($current_user);
                   } elsif ($opt{'setuid-with-sql'}) {
                     handle_user_setuid_with_sql($current_user);
                     $setuid_to_user = 1; #to benefit from any paranoia.
+		  } elsif ($opt{'setuid-with-ldap'}) {
+		    handle_user_setuid_with_ldap($current_user);
+		    $setuid_to_user = 1; # as above
                   }
                 } else {
                   handle_user($current_user);
@@ -712,6 +719,10 @@ sub check {
 
     if ($opt{'sql-config'} && !defined($current_user)) {
         handle_user_sql('nobody');
+    }
+
+    if ($opt{'ldap-config'} && !defined($current_user)) {
+        handle_user_ldap('nobody');
     }
 
     my $resp = "EX_OK";
@@ -991,7 +1002,7 @@ sub handle_user
 }
 
 # Handle user configs without the necessity of having individual users or a
-# SQL database.
+# SQL/LDAP database.
 sub handle_virtual_user
 {
     my $username = shift;
@@ -1057,6 +1068,14 @@ sub handle_user_sql
     return 1;
 }
 
+sub handle_user_ldap
+{
+    my $username = shift;
+    Mail::SpamAssassin::dbg("handle_user_ldap($username)");
+    $spamtest->load_scoreonly_ldap ($username);
+    return 1;
+}
+
 sub handle_user_setuid_with_sql
 {
     my $username = shift;
@@ -1100,6 +1119,51 @@ sub handle_user_setuid_with_sql
     }
 	  
     $spamtest->load_scoreonly_sql ($username);
+
+    $spamtest->signal_user_changed ({ username => $username });
+    return 1;
+}
+
+sub handle_user_setuid_with_ldap
+{
+    my $username = shift;
+    my ($name,$pwd,$uid,$gid,$quota,$comment,$gcos,$dir,$etc) = getpwnam($username);
+
+    if ( !$spamtest->{'paranoid'} && !defined($uid) ) {
+       #if we are given a username, but can't look it up,
+       #Maybe NIS is down? lets break out here to allow
+       #them to get 'defaults' when we are not running paranoid.
+       logmsg "handle_user() -> unable to find user [$username]!\n";
+       return 0;
+    }
+
+    if ($setuid_to_user) {
+       $) = "$gid $gid"; # change eGID
+       $> = $uid; # change eUID
+       if ( !defined($uid) || ($> != $uid and $> != ($uid-2**32))) {
+           logmsg "fatal: setuid to $username failed";
+          die;         # make it fatal to avoid security breaches
+        }
+       else
+       {
+          logmsg "info: setuid to $username succeeded, reading scores from LDAP.";
+        }
+    }
+
+    my $spam_conf_dir = $dir . '/.spamassassin';  #needed for AWL, Bayes, etc.
+    if ( ! -d $spam_conf_dir )
+    {
+       if ( mkdir $spam_conf_dir, 0700 )
+       {
+          logmsg "info: created $spam_conf_dir for $username.";
+       }
+       else
+       {
+          logmsg "info: failed to create $spam_conf_dir for $username.";
+       }
+    }
+
+    $spamtest->load_scoreonly_ldap ($username);
 
     $spamtest->signal_user_changed ({ username => $username });
     return 1;
@@ -1337,6 +1401,9 @@ Options:
  -q, --sql-config                   Enable SQL config (only useful with -x)
  -Q, --setuid-with-sql              Enable SQL config (only useful with -x,
                                     enables use of -H)
+ --ldap-config                      Enable LDAP config (only useful with -x)
+ --setuid-with-ldap                 Enable LDAP config (only useful with -x,
+                                    enables use of -a and -H)
  -V, --virtual-config=dir           Enable Virtual configs (needs -x)
  --virtual-config-dir=dir           Enable pattern based Virtual configs (needs -x)
  -r pidfile, --pidfile              Write the process id to pidfile
@@ -1429,12 +1496,23 @@ database.
 If your spamc client does not support sending the C<User:> header,
 like C<exiscan>, then the SQL username used will always be B<nobody>.
 
+=item B<--ldap-config>
+
+Turn on LDAP lookups. This is completely analog to C<--sql-config>,
+only it is using an LDAP server.
+
 =item B<-Q>, B<--setuid-with-sql>
 
 Turn on SQL lookups even when per-user config files have been disabled
 with B<-x> and also setuid to the user.  This is useful for spamd hosts
 which want to load user preferences from an SQL database but also wish to
 support the use of B<-a> (AWL) and B<-H> (Helper home directories.)
+
+=item B<--setuid-with-ldap>
+
+Turn on LDAP lookups even when per-user config files have been disabled
+with B<-x> and also setuid to the user.  This is again completely analog
+to C<--setuid-with-sql>, only it is using an LDAP server.
 
 =item B<--virtual-config-dir>=I<pattern>
 
@@ -1476,7 +1554,7 @@ will be loaded as the user's preferences.  The auto-whitelist and/or Bayes
 databases for that user will be stored in this directory.
 
 Note that this B<requires> that B<-x> is used, and cannot be combined with
-SQL-based configuration.
+SQL- or LDAP-based configuration.
 
 The pattern B<must> expand to an absolute directory when spamd is running
 daemonized (B<-d>).
@@ -1497,7 +1575,7 @@ restricted to:
 All others will be replaced by underscores (C<_>).
 
 Note that this B<requires> that B<-x> is used, and cannot be combined with
-SQL-based configuration.
+SQL- or LDAP-based configuration.
 
 If a subdirectory is found in that directory, called B<I<username>>, and it is
 writable, it will be used to store auto-whitelist and/or Bayes databases for
