@@ -395,6 +395,14 @@ sub parse_received_line {
       $envfrom = $1;
     }
 
+    # bug 3236: ignore Squirrelmail injection steps.
+    # from 142.169.110.122 (SquirrelMail authenticated user synapse) by
+    # mail.nomis80.org with HTTP; Sat, 3 Apr 2004 10:33:43 -0500 (EST)
+    if (/ \(SquirrelMail authenticated user /) {
+      dbg ("received-header: ignored SquirrelMail injection: $_");
+      return;
+    }
+
     if (/Exim/) {
       # one of the HUGE number of Exim formats :(
       # This must be scriptable.
@@ -874,10 +882,10 @@ sub parse_received_line {
       $helo = $1; $ip = $2; $by = $3; goto enough;
     }
 
-    # from 165.228.131.11 (proxying for 139.130.20.189) (SquirrelMail authenticated user jmmail) by jmason.org with HTTP
-    if (/^from (\S+) \(proxying for (${IP_ADDRESS})\) \([A-Za-z][^\)]+\) by (\S+) with /) {
-      $ip = $2; $by = $3; goto enough;
-    }
+    # # from 165.228.131.11 (proxying for 139.130.20.189) (SquirrelMail authenticated user jmmail) by jmason.org with HTTP
+    # if (/^from (\S+) \(proxying for (${IP_ADDRESS})\) \([A-Za-z][^\)]+\) by (\S+) with /) {
+    # $ip = $2; $by = $3; goto enough;
+    # }
     if (/^from (${IP_ADDRESS}) \([A-Za-z][^\)]+\) by (\S+) with /) {
       $ip = $1; $by = $2; goto enough;
     }
