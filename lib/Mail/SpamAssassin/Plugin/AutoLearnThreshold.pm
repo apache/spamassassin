@@ -1,12 +1,12 @@
 # <@LICENSE>
 # Copyright 2004 Apache Software Foundation
-#
+# 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
-#
+# 
 #     http://www.apache.org/licenses/LICENSE-2.0
-#
+# 
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,39 +16,39 @@
 
 =head1 NAME
 
-Mail::SpamAssassin::Plugin::DefaultAutoLearnDiscriminator - default discriminator for Bayes auto-learning
+Mail::SpamAssassin::Plugin::AutoLearnThreshold - threshold-based discriminator for Bayes auto-learning
 
 =head1 SYNOPSIS
 
-  loadplugin     Mail::SpamAssassin::Plugin::DefaultAutoLearnDiscriminator
+  loadplugin     Mail::SpamAssassin::Plugin::AutoLearnThreshold
 
 =head1 DESCRIPTION
 
-This plugin implements SpamAssassin's default Bayes auto-learning
-discriminator.  Auto-learning is a mechanism whereby high-scoring mails
-(or low-scoring mails, for non-spam) are fed into its learning systems
-without user intervention, during scanning.
+This plugin implements the threshold-based auto-learning discriminator
+for SpamAssassin's Bayes subsystem.  Auto-learning is a mechanism
+whereby high-scoring mails (or low-scoring mails, for non-spam) are fed
+into its learning systems without user intervention, during scanning.
 
 Note that certain tests are ignored when determining whether a message
 should be trained upon:
 
-  - rules with tflags set to 'learn' (the Bayesian rules)
-
-  - rules with tflags set to 'userconf' (user white/black-listing rules, etc)
-
-  - rules with tflags set to 'noautolearn'
-
-Also note that auto-learning occurs using scores from either scoreset
-0 or 1, depending on what scoreset is used during message check.  It is
-likely that the message check and auto-learn scores will be different.
-
-The following configuration settings are used to control auto-learning:
-
 =over 4
+
+=item * rules with tflags set to 'learn' (the Bayesian rules)
+
+=item * rules with tflags set to 'userconf' (user configuration)
+
+=item * rules with tflags set to 'noautolearn'
+
+=back
+
+Also note that auto-learning occurs using scores from either scoreset 0
+or 1, depending on what scoreset is used during message check.  It is
+likely that the message check and auto-learn scores will be different.
 
 =cut
 
-package Mail::SpamAssassin::Plugin::DefaultAutoLearnDiscriminator;
+package Mail::SpamAssassin::Plugin::AutoLearnThreshold;
 
 # Make the main dbg() accessible in our package w/o an extra function
 *dbg=\&Mail::SpamAssassin::Plugin::dbg;
@@ -77,6 +77,10 @@ sub new {
 sub set_config {
   my($self, $conf) = @_;
   my @cmds = ();
+
+=head1 USER OPTIONS
+
+The following configuration settings are used to control auto-learning:
 
 =item bayes_auto_learn_threshold_nonspam n.nn   (default: 0.1)
 
