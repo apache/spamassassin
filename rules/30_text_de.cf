@@ -33,7 +33,6 @@ lang de describe TO_NO_USER               To: fehlender lokaler Anteil vor dem @
 lang de describe TO_MALFORMED             To: ist eine ungueltige Adresse
 lang de describe TO_LOCALPART_EQ_REAL     To: wiederholt den lokalen Anteil als echten Namen
 lang de describe FROM_MALFORMED           From: ist eine ungueltige Adresse
-lang de describe PLING                    Subject: enthaelt ein Ausrufezeichen
 lang de describe PLING_PLING              Subject: enthaelt mehrere Ausrufezeichen
 lang de describe SUBJ_HAS_UNIQ_ID         Subject: enthaelt eine eindeutige ID-Nummer
 lang de describe SUBJ_HAS_SPACES          Betreff enthaelt Unmengen an Leerzeichen
@@ -46,20 +45,14 @@ lang de describe MSGID_SPAMSIGN_1         Message-Id wuerde von einem Spam-Tool 
 lang de describe INVALID_MSGID            Message-Id ist laut RFC-2822 nicht gueltig
 lang de describe INVALID_DATE             Ungueltiges Datum: Header enthaelt AM/PM-Angabe
 lang de describe INVALID_DATE_TZ_ABSURD   Ungueltiges Datum: Header enthaelt ungueltige Zeitzone
-lang de describe DATE_IN_FUTURE           Date: ist in der Zukunft oder nicht zerlegbar
-lang de describe SUBJ_HAS_Q_MARK          Subject: enthaelt ein Fragezeichen
-lang de describe SUBJ_ENDS_IN_Q_MARK      Subject: endet in einem Fragezeichen
 lang de describe ADVERT_CODE              Subject: enthaelt Werbespruch
 lang de describe FRIEND_AT_PUBLIC         Gesendet an you@you.com oder aehnliche Adressen
 lang de describe TO_EMPTY                 To: ist leer
 lang de describe REPLY_TO_EMPTY           Reply-To: ist leer
-lang de describe ALL_CAPS_SUBJECT         SUBJECT: header gefunden
-lang de describe X_EM_VER_PRESENT         Ein X-Em-Version: Header wurde gefunden
 lang de describe X_PMFLAGS_PRESENT        Ein X-PMFLAGS: (alles grossgeschrieben) Header wurde gefunden
 lang de describe X_UIDL_SPAMSIGN          X-UIDL: Header enthaelt ungueltige Zeichen
 lang de describe NO_MX_FOR_FROM           Keinen MX-Eintrag fuer die From: Domain gefunden
 lang de describe KNOWN_BAD_DIALUPS        Empfangen von einem Spam-unterstuetzenden Provider
-lang de describe FROM_AND_TO_SAME         From und To sind dieselbe Adresse
 lang de describe BAD_HELO_WARNING         Gefaelschter Name beim SMTP HELO Befehl benutzt
 lang de describe SUBJ_FULL_OF_8BITS       Betreff ist voller 8-bit Zeichen
 lang de describe MDAEMON_2_7_4            Empfangen von einem fehlerhaften SMPT-Server (MDaemon 2.7.4SP4R)
@@ -80,7 +73,6 @@ lang de describe RCVD_IN_BL_SPAMCOP_NET   Empfangen von einem Relais in der bl.s
 lang de describe FORGED_RCVD_FOUND        Moeglicherweise gefaelschten 'Received:' Header gefunden
 lang de describe YR_MEMBERSHIP_EXCH       Betreff enthaelt 'Your Membership Exchange'
 lang de describe LOTS_OF_CC_LINES         Unmengen an Cc: Headern
-lang de describe FROM_NAME_EQ_FROM_ADDR   'From:' Adresse wird auch als echten Namen fuer den Sender verwendet
 lang de describe FORGED_HOTMAIL_RCVD      Gefaelschten Hotmail 'Received:' Header gefunden
 lang de describe FORGED_EUDORAMAIL_RCVD   Gefaelschter eudoramail.com 'Received:' Header gefunden
 lang de describe FORGED_YAHOO_RCVD        Gefaelschter yahoo.com 'Received:' Header gefunden
@@ -129,7 +121,6 @@ lang de describe PORN_6                   Enthaelt pornographische Begriffe und 
 lang de describe WANTS_CREDIT_CARD        Fragt nach den Daten der Kreditkarte
 lang de describe ASKS_BILLING_ADDRESS     Fragt nach einer Rechnungsadresse
 lang de describe CYBER_FIRE_POWER         Erwaehnt Cyber FirePower!, ein Spam-Tool
-lang de describe LINE_OF_YELLING          Eine ganze Zeile mit Geschrei gefunden
 lang de describe MURKOWSKI_CRUFT          Alten Murkowski Haftungsausschluss gefunden
 lang de describe MAIL_IN_ORDER_FORM       Enthaelt ein mail-in Bestellformular
 lang de describe FOR_INSTANT_ACCESS       Instant Access Schaltflaeche
@@ -144,8 +135,6 @@ lang de describe WE_HATE_SPAM             Behauptet: "We strongly oppose the use
 lang de describe IN_ACCORDANCE_WITH_LAWS  Behauptet im Einklang mit gaengigen Anti-Spam-Gesetzen zu sein.
 lang de describe HR_3113                  Erwaehnt Anti-Spam-Gesetz "H.R. 3113"
 lang de describe UCE_MAIL_ACT             Erwaehnt Anti-Spam-Gesetz "UCE-Mail Act"
-lang de describe A_HREF_TO_REMOVE         Verlinkt zu einer ULR welche "remove" enthaelt
-lang de describe REMOVE_SCRIPT            URL des CGI script heisst "remove"
 lang de describe REMOVE_PAGE              URL der Seite heisst "remove"
 lang de describe WEB_BUGS                 Web-Bug: Bild mit ID-Code zur erneuten Identifizierung
 lang de describe RELAYING_FRAME           Frame will URL ausserhalb der momentanen Domain laden
@@ -160,6 +149,4 @@ lang de describe NIGERIAN_SCAM_8        Abgewandelter Nigeria-Betrug (8)
 lang de describe UNNEEDED_HTML_ENCODING   Unnoetige Kodierung der HTML-Tags
 lang de describe BALANCE_FOR_LONG         Nachricht ist ueber 500 Zeilen lang
 lang de describe USER_IN_WHITELIST        From: Adresse ist in der White-List des Anwenders
-lang de describe SIRCAM_SIGNATURE         SECURITY: Der Sircam Wurm
-lang de describe BADTRANS_WORM            SECURITY: Der BadTrans Wurm, siehe http://securityresponse.symantec.com/avcenter/venc/data/w32.badtrans.b@mm.html
 
