@@ -194,3 +194,16 @@ describe FORGED_IMS_TAGS	IMS can't send HTML in this format
 
 meta FORGED_OUTLOOK_TAGS	(__ANY_OUTLOOK_MUA && __MIME_HTML && !(__TAG_EXISTS_HTML && __TAG_EXISTS_HEAD && __TAG_EXISTS_META && __TAG_EXISTS_BODY))
 describe FORGED_OUTLOOK_TAGS	Outlook can't send HTML in this format
+
+header RATWARE_BAD_REFS		References =~ /^[^<]\S+\$\S+\@\S+[^>]$/
+describe RATWARE_BAD_REFS	References header has bad format
+
+# http://marc.theaimsgroup.com/?l=spamassassin-talk&m=105203882531351&w=2
+header RATWARE_X_SCANNER	X-Scanner =~ /^: /
+describe RATWARE_X_SCANNER	Has X-Scanner header
+
+header __RATWARE_EXISCAN	X-Scanner =~ /exiscan/
+header __RATWARE_ANTIABUSE	X-AntiAbuse =~ /Originator.Caller UID.GID - \[\d \d\] \/ \[\d \d\]/
+meta RATWARE_EXISCAN_FORGERY	(__RATWARE_EXISCAN && __RATWARE_ANTIABUSE && __HAS_MSMAIL_PRI)
+describe RATWARE_EXISCAN_FORGERY	Headers indicate forged Exiscan message
+

@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.519 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.520 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -108,17 +108,13 @@ describe T_RATWARE_RCVD_BONUS_SPC Received headers forged (extra spaces)
 # Message-Id: format tests
 # hotmail (this rule makes me nervous, I wonder if any of us gets
 # enough hotmail ham to get a good score for it)
+# 2003-05-25: tvd
+# it actually is a strong spamsign for me.  almost 1% of spam, 0 fps.
 header T_MSGID_ADDED_BY_HOTMAIL	Message-Id =~ /<MC\d{1,2}-F{1,2}\w{21,22}\@\S*hotmail\.com>/
 # 13 hexadecimal digits instead of 12
 header T_MSGID_OUTLOOK_HEX	Message-Id =~ /<[a-f0-9]{13}\$[a-f0-9]{8}\$[a-f0-9]{8}\@/
 # this one high correlation with ratware "EMWAC SMTPRS"
 header T_MSGID_B_DIGITS		Message-Id =~ /<B\d{10}\@/
-# pretty good spamware sign, looks like it uses random numbers with no padding
-#   Message-Id: <\d{1,3}\.\d{1,6}\.\d{1,6}@\S+>h
-#   usually also has INVALID_DATE and NO_REAL_NAME
-# this rule excludes about 0.02% of matches since some low random
-# numbers in the second or third part will be missed.
-header T_MSGID_THREESIXSIX_03	Message-Id =~ /<\d{1,3}\.\d{3,6}\.\d{3,6}\@\S+>/
 
 # NOTE: uses __ANY_OUTLOOK_MUA.  This catches Send-Safe and a few others
 header __OL_STYLE_FROM		From =~ /\".*\" <.+>/
@@ -298,18 +294,9 @@ tflags T_RCVD_IN_BONDEDSENDER net
 header T_FAKE_HELO_YAHOO	eval:check_for_rdns_helo_mismatch("yahoo\.com","yahoo\.com")
 header T_FAKE_HELO_NETSCAPE_COM	eval:check_for_rdns_helo_mismatch("(?:netscape|netcenter|aol)\.(?:com|net)","netscape\.com")
 
-# http://marc.theaimsgroup.com/?l=spamassassin-talk&m=105203882531351&w=2
-header T_RATWARE_X_SCANNER	X-Scanner =~ /^: /
-
-header __RATWARE_EXISCAN	X-Scanner =~ /exiscan/
-header __RATWARE_ANTIABUSE	X-AntiAbuse =~ /Originator.Caller UID.GID - \[\d \d\] \/ \[\d \d\]/
-meta T_RATWARE_EXISCAN_FORGERY	(__RATWARE_EXISCAN && __RATWARE_ANTIABUSE && __HAS_MSMAIL_PRI)
-
-# also, References headers have a format
-header T_RATWARE_BAD_REFS	References =~ /^[^<]\S+\$\S+\@\S+[^>]$/
-
 # hmm, interesting.   Ensure the MUA is using consistent priorities.
 # http://www3.cds.ne.jp/~marimo/oka/research/em/data0002.html
+# tvd, 2003.05.25 - HI works well for me, MD isn't good, and LO hits 0.
 header __X_PRI_HI		X-Priority =~ /^[12]/
 header __X_PRI_MD		X-Priority =~ /^3/
 header __X_PRI_LO		X-Priority =~ /^[456789]/
@@ -324,10 +311,6 @@ meta T_X_PRI_MISMATCH_LO	(__X_PRI_LO && __HAS_MSMAIL_PRI && !__X_MSPRI_LO)
 uri T_IP_LINK_PLUS	/^https?\:\/\/(?:\S*\@)?\d+\.\d+\.\d+\.\d+.{0,20}(?:cgi|click|ads|id\=)/i
 describe T_IP_LINK_PLUS		Dotted-decimal IP address followed by GCI, clickthru, etc.
 
-# works on old email okay
-uri T_YAHOO_REDIR		/^https?\:\/\/rd\.yahoo\.com\/(?:[0-9]{4,}|partner\b|dir\b)/i
-describe T_YAHOO_REDIR		Yahoo Redirect
-
 # Justin says Yahoo stopped using this hostname entirely (which makes me
 # wonder if spammers will still use it and whether it will work on our
 # older corpus mail)
@@ -337,17 +320,8 @@ describe T_YAHOO_REDIRECTOR	Uses commonly-spammed redirector URL
 uri T_BIZ_LINKS			/(?:^https?\:\/\/|^mailto\:).{0,20}\.bi?z/i
 describe T_BIZ_LINKS		Links to .biz .bz
 
-uri T_MORTGAGE_LINKS		/(?:^https?\:\/\/|^mailto\:).{0,20}(?:low|about)mortgage/i
-describe T_MORTGAGE_LINKS		Links to discount mortgage spammers
-
 uri T_STRANGE_CHAR_LINKS		/^https?\:\/\/.{0,20}(?:[%@]|=2E)/i
 describe T_STRANGE_CHAR_LINKS	Links with strange characters
-
-uri T_SEX_BANNED_LINKS	/(?:^https?\:\/\/|^mailto\:).{0,15}(?:hugefist|enlargepills|yourpenis|freakyfarm|latex-teens|animalobsession|bukkakehouse)/i
-describe T_SEX_BANNED_LINKS	Links to Sex Sites
-
-uri T_SEX_PHRASE_LINKS	/(?:^https?\:\/\/|^mailto\:).{0,20}(?:bimbos|farmsex|porn.*mail|girls4u|cumslut)/i
-describe T_SEX_PHRASE_LINKS	Links with Sex Phrases
 
 uri T_SUSPICIOUS_LINKS	/(?:^https?\:\/\/|^mailto\:).{0,25}(?:poker\.net|get-deal|bargain[zs\-]|clicks|spree|members\=|lotto|offer[sz]|4you)/i
 describe T_SUSPICIOUS_LINKS	Links containing suspicious phrases
@@ -376,13 +350,6 @@ describe T_HREF_3D		Uses href=3D Trick
 # bug 1876
 rawbody		T_PUSHHERELINK		/<a[^>]*>[^<]*((push|go)\s(here|this) |cease.{1,10}mail)[^<]*<\/a>/i
 describe	T_PUSHHERELINK		Link asks you to "push here" or "go here" or "cease mail" or the like
-
-uri 		T_DOLLARMACHINE 		/dollar.?machine/i
-uri 		T_HITBOX 			/hitbox\.com/i
-
-# bug 1900
-body		T_BETTERMEMORY		/Better Memory/i
-describe	T_BETTERMEMORY		Describes "better memory"
 
 # idea from Robert Menschel <RMSA@Menschel.net>
 header T_FROM_MIXED_ALPHANUM_01	From:addr =~ /[a-z]+\d+[a-z]+\d+[a-z]+\@/i
