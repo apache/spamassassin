@@ -773,14 +773,6 @@ describe T_DRUGS_MANYKINDS 	contains refs to four different kinds of drugs
 # I'm curious, may help explain more ALL_TRUSTED fps
 body T_SA_MARKED_UP     /Spam detection software, running on the system /
 
-# possible replacements for SUSPICIOUS_RECIPS
-header T_SUSPICIOUS_RECIPS_55	eval:similar_recipients('0.55','undef')
-header T_SUSPICIOUS_RECIPS_60	eval:similar_recipients('0.60','undef')
-header T_SUSPICIOUS_RECIPS_65	eval:similar_recipients('0.65','undef')
-header T_SUSPICIOUS_RECIPS_70	eval:similar_recipients('0.70','undef')
-header T_SUSPICIOUS_RECIPS_75	eval:similar_recipients('0.75','undef')
-header T_SUSPICIOUS_RECIPS_80	eval:similar_recipients('0.80','undef')
-
 header T_BAD_TIMEZONE_EST	ALL =~ /[+-]\d\d[30]0(?<!-0500|-0300|\+1000|\+1100) \(EST\)/
 header T_BAD_TIMEZONE_CST	ALL =~ /[+-]\d\d[30]0(?<!-0600|-0400|\+0800|\+0930) \(CST\)/
 header T_BAD_TIMEZONE_EST_2	ALL =~ /[+-]\d\d[30]0(?<!-0500|-0300|\+1000|\+1100) \(?EST\)?\b/

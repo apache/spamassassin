@@ -394,7 +394,7 @@ header __HAS_SUBJECT		exists:Subject
 meta MISSING_SUBJECT		!__HAS_SUBJECT
 describe MISSING_SUBJECT	Missing Subject: header
 
-header SUSPICIOUS_RECIPS	eval:similar_recipients('0.6','undef')
+header SUSPICIOUS_RECIPS	eval:similar_recipients('0.65','undef')
 describe SUSPICIOUS_RECIPS	Similar addresses in recipient list
 
 header SORTED_RECIPS		eval:sorted_recipients()
