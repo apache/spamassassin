@@ -66,6 +66,8 @@ if ($opt_p) {
 my %done = ();
 my @tests = ();
 foreach my $test (keys %freq_spam, keys %freq_nonspam) {
+  next if ($test =~ /^__/);
+
   next if $done{$test}; $done{$test} = 1;
   push (@tests, $test);
 
@@ -86,6 +88,8 @@ foreach my $test (keys %freq_spam, keys %freq_nonspam) {
 }
 
 foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
+  next if ($test =~ /^__/);
+
   my $fs = $freq_spam{$test}; $fs ||= 0;
   my $fn = $freq_nonspam{$test}; $fn ||= 0;
   my $fa = $fs+$fn;
