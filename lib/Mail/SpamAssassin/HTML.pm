@@ -135,6 +135,7 @@ sub html_end {
   $self->put_results(comment => $self->{comment});
   $self->put_results(title => $self->{title});
   $self->put_results(anchor => $self->{anchor});
+  $self->put_results(blank_uri => $self->{blank_uri});
 
   # final result hashes
   $self->put_results(inside => $self->{inside});
@@ -337,7 +338,7 @@ sub html_uri {
   if ($tag =~ /^(?:body|table|tr|td)$/) {
     if (defined $attr->{background}) {
       if ($attr->{background} eq '') {
-        $self->put_results('blank_background' => $tag);
+	push(@{$self->{blank_uri}}, $tag);
       }
       $self->push_uri($attr->{background});
     }
@@ -345,7 +346,7 @@ sub html_uri {
   elsif ($tag =~ /^(?:a|area|link)$/) {
     if (defined $attr->{href}) {
       if ($attr->{href} eq '') {
-        $self->put_results('blank_href' => $tag)
+	push(@{$self->{blank_uri}}, $tag);
       }
       $self->push_uri($attr->{href});
     }
@@ -353,7 +354,7 @@ sub html_uri {
   elsif ($tag =~ /^(?:img|frame|iframe|embed|script)$/) {
     if (defined $attr->{src}) {
       if ($attr->{src} eq '') {
-        $self->put_results('blank_src' => $tag)
+	push(@{$self->{blank_uri}}, $tag);
       }
       $self->push_uri($attr->{src});
     }
@@ -361,7 +362,7 @@ sub html_uri {
   elsif ($tag eq "form") {
     if (defined $attr->{action}) {
       if ($attr->{action} eq '') {
-        $self->put_results('blank_action' => $tag)
+	push(@{$self->{blank_uri}}, $tag);
       }
       $self->push_uri($attr->{action});
     }
