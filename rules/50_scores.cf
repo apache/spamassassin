@@ -1,5 +1,5 @@
 # SpamAssassin rules file: scores.
-# $Id: 50_scores.cf,v 1.197.2.5 2002/08/23 09:59:25 hughescr Exp $
+# $Id: 50_scores.cf,v 1.197.2.6 2002/08/23 16:51:52 jmason Exp $
 ###########################################################################
 # Default scores.   Note that if a test is named in the files, but a score is
 # not assigned here, the default score will be set to 1.
@@ -267,7 +267,6 @@ score MSG_ID_ADDED_BY_MTA_3          0.207
 score NAME_BRAND		     1.0
 score NEW_CUSTOMER		     1.0
 score NEW_DOMAIN_EXTENSIONS          4.255
-score NMS_CGI_NOT_BUGGY              -10
 score NONEXISTENT_CHARSET            4.523
 score NORMAL_HTTP_TO_IP              3.312
 score NOT_INTENDED                   1.135
@@ -629,8 +628,9 @@ score GENUINE_EBAY_RCVD		   -10.0
 ###########################################################################
 # Compensation for common false positives.
 
-score HABEAS_SWE                   -20.0
-score EVITE			    -10.0
+score HABEAS_SWE                    -20
+score EVITE			    -10
+score NMS_CGI_NOT_BUGGY             -10
 
 # GA never changes the whitelist/blacklist scores
 
