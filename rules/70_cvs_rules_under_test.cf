@@ -161,14 +161,13 @@ header __CT			exists:Content-Type
 header __CTE			exists:Content-Transfer-Encoding
 header __MIME_VERSION		exists:MIME-Version
 
-# best four variants so far
+# best four variants so far (rename later)
 meta T_MIME_NO_VERSION_ODD	((__CD + __CTE + __CT == 1) && !__MIME_VERSION)
 meta T_MIME_NO_VERSION_LONER	(__CD + __CTE + __CT + __MIME_VERSION == 1)
 meta T_MIME_NO_VERSION_CTYPE	(__CT && !__MIME_VERSION)
 meta T_MIME_NO_VERSION_ANY	((__CD || __CTE || __CT) && !__MIME_VERSION)
-# more test variants (not expected to do better)
-meta T_MIME_NO_VERSION_ODD0	((__CD + __CTE + __CT == 0) && !__MIME_VERSION)
-meta T_MIME_NO_VERSION_ODD2	((__CD + __CTE + __CT == 2) && !__MIME_VERSION)
+# new test variants (at least as good as the above variants)
+meta T_MIME_HEADER_CTYPE_ONLY	(!__CD && !__CTE && __CT && !__MIME_VERSION)
 
 ########################################################################
 # bug 1106: forged MUAs
