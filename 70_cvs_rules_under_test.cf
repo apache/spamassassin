@@ -470,6 +470,8 @@ header T_HELO_DYNAMIC_DIALIN X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[a-z][A-F0
 header T_HELO_DYNAMIC_HEXIP X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=0x[a-f0-9]{8}\./
 # 118.Red-80-35-201.pooles.rima-tde.net
 header T_HELO_DYNAMIC_SPLIT_IP X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\d+\.\S+\d+\D\d+\D\d+\D/
+# YahooBB219173000034.bbtec.net [219.173.0.34]
+header T_HELO_DYNAMIC_YAHOOBB X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=YahooBB/i
 
 # TODO:
 # port-212-202-77-203.reverse.qsc.de [212.202.77.203]
