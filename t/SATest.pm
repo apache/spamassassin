@@ -30,7 +30,7 @@ sub sa_t_init {
   $scr ||= "$perl_path -w ../spamassassin";
 
   $spamd = $ENV{'SPAMD_SCRIPT'};
-  $spamd ||= "$perl -w ../spamd/spamd -x";
+  $spamd ||= "$perl_path -w ../spamd/spamd -x";
 
   $spamc = $ENV{'SPAMC_SCRIPT'};
   $spamc ||= "../spamd/spamc";
@@ -344,13 +344,6 @@ sub skip_all_patterns {
 sub clear_pattern_counters {
   %found = ();
   %found_anti = ();
-}
-
-sub figure_out_perl_interpreter {
-  # this should return the path to the *current* perl interpreter,
-  # so if "make test" uses a specific interpreter, the scripts
-  # run by the .t's will use that one too.
-  return $Config{perlpath};
 }
 
 1;
