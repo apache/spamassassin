@@ -379,6 +379,9 @@ describe X_MAIL_ID_PRESENT     Found an X-MailingID header
 header   X_SERV_HOST_PRESENT   X-ServerHost =~ /./
 describe X_SERV_HOST_PRESENT   Found an X-ServerHost header
 
+header   X_NOT_PRESENT         ALL !~ /\nX-/s
+describe X_NOT_PRESENT         Message has no X- headers
+
 header   X_X_PRESENT           X-x =~ /./
 describe X_X_PRESENT           Found an X-x header
 
