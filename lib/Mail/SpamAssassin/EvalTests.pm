@@ -1094,7 +1094,7 @@ sub check_lots_of_cc_lines {
 ###########################################################################
 
 sub check_rbl_backend {
-  my ($self, $rule, $set, $rbl_server, $type) = @_;
+  my ($self, $rule, $set, $rbl_server, $type, $subtest) = @_;
   local ($_);
 
   # First check that DNS is available, if not do not perform this check
@@ -1163,7 +1163,7 @@ sub check_rbl_backend {
     foreach my $ip (@ips) {
       next unless ($ip =~ /(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/);
       $self->do_rbl_lookup($rule, $set, $type, $rbl_server,
-			   "$4.$3.$2.$1.$rbl_server");
+			   "$4.$3.$2.$1.$rbl_server", $subtest);
     }
   };
 
@@ -1173,13 +1173,13 @@ sub check_rbl_backend {
 }
 
 sub check_rbl {
-  my ($self, $rule, $set, $rbl_server) = @_;
-  $self->check_rbl_backend ($rule, $set, $rbl_server, 'A');
+  my ($self, $rule, $set, $rbl_server, $subtest) = @_;
+  $self->check_rbl_backend ($rule, $set, $rbl_server, 'A', $subtest);
 }
 
 sub check_rbl_txt {
-  my ($self, $rule, $set, $rbl_server) = @_;
-  $self->check_rbl_backend ($rule, $set, $rbl_server, 'TXT');
+  my ($self, $rule, $set, $rbl_server, $subtest) = @_;
+  $self->check_rbl_backend ($rule, $set, $rbl_server, 'TXT', $subtest);
 }
 
 # run for first message 

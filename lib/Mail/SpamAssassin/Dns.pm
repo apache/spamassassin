@@ -135,16 +135,25 @@ use constant SETS => 2;
 
 # TODO: $server is currently unused
 sub do_rbl_lookup {
-  my ($self, $rule, $set, $type, $server, $host) = @_;
+  my ($self, $rule, $set, $type, $server, $host, $subtest) = @_;
 
-  if (defined $self->{dnscache}->{$type}->{$host}->[BGSOCK]) {
-    # additional query for host, we have one pending
-    push @{$self->{dnscache}->{$type}->{$host}->[RULES]}, $rule;
-    push @{$self->{dnscache}->{$type}->{$host}->[SETS]}, $set;
+  # only make a specific query once
+  if (!defined $self->{dnscache}->{$type}->{$host}->[BGSOCK]) {
+    dbg("rbl: launching DNS $type query for $host in background", "rbl", -1);
+    $self->{rbl_launch} = time;
+    $self->{dnscache}->{$type}->{$host}->[BGSOCK] =
+	$self->{res}->bgsend($host, $type);
+  }
+
+  # always add set
+  push @{$self->{dnscache}->{$type}->{$host}->[SETS]}, $set;
+
+  # sometimes match or always match
+  if (defined $subtest) {
+    $self->{dnspost}->{$set}->{$subtest} = $rule;
   }
   else {
-    # first query for host
-    $self->launch_dnsbl_query($rule, $set, $type, $host);
+    push @{$self->{dnscache}->{$type}->{$host}->[RULES]}, $rule;
   }
 }
 
@@ -152,23 +161,6 @@ sub do_rbl_lookup {
 sub register_rbl_subtest {
   my ($self, $rule, $set, $subtest) = @_;
   $self->{dnspost}->{$set}->{$subtest} = $rule;
-}
-
-###########################################################################
-
-sub launch_dnsbl_query {
-  my ($self, $rule, $set, $type, $host) = @_;
-
-  dbg("rbl: launching DNS $type query for $host in background", "rbl", -1);
-
-  # update last launch time
-  $self->{rbl_launch} = time;
-
-  my $query = $self->{dnscache}->{$type}->{$host};
-
-  $query->[BGSOCK] = $self->{res}->bgsend($host, $type);
-  push @{$query->[RULES]}, $rule;
-  push @{$query->[SETS]}, $set;
 }
 
 ###########################################################################
