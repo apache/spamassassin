@@ -572,7 +572,7 @@ gotone:
   dbg ("round-the-world: mail relayed through $relay by ".	
   	"$relayerip (HELO $relayer, rev DNS says $revdns");
 
-  if ($revdns =~ /\.${$ROUND_THE_WORLD_RELAYERS}$/oi) {
+  if ($revdns =~ /\.${ROUND_THE_WORLD_RELAYERS}$/oi) {
     dbg ("round-the-world: yep, I think so");
     return 1;
   }
