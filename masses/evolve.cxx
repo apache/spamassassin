@@ -399,27 +399,24 @@ main (int argc, char **argv) {
     if (gens % 5 == 0) {
       cout << "."; cout.flush();
 
-      if (gens % 300 == 0) {
+      if (gens % 30 == 0) {
 	cout << "\nProgress: gen=" << gens << " convergence="
-	  	<< ga.statistics().convergence()
-	  	<< ":\n";
-
-	genome = ga.statistics().bestIndividual();
-	fullcounthitsfromgenome (genome); printhits (stdout);
-	write_to_file (genome, "tmp/results.in_progress");
+	      << ga.statistics().convergence()
+	      << ":\n";
       }
+
+      genome = ga.statistics().bestIndividual();
+      fullcounthitsfromgenome (genome); printhits (stdout);
+      write_to_file (genome, "results.evolved");
     }
   }
   cout << endl;
 
-  genome = ga.statistics().bestIndividual();
-
   cout << "Best genome found:" << endl;
-  fullcounthitsfromgenome (genome);
-  printhits (stdout);
-  //cout << "Stats:\n" << ga.statistics() << endl;
-
+  genome = ga.statistics().bestIndividual();
+  fullcounthitsfromgenome (genome); printhits (stdout);
   write_to_file (genome, "results.evolved");
+
   cout << "Scores for this genome written to \"results.evolved\"." << endl;
   return 0;
 }
