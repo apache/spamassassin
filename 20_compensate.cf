@@ -137,15 +137,14 @@ tflags FROM_EGROUPS		nice
 test FROM_EGROUPS  ok           sentto-2537484-52529-1020428367-Sxm=olswang.com@returns.groups.yahoo.com
 test FROM_EGROUPS  fail         spammer@returns.groups.yahoo.com
 
-header FWD_MSG                  Subject =~ /\[?Fwd:?\s*/
+# thanks Rod, these work better
+header FWD_MSG                  Subject =~ /\[?Fwd:?\s/
 describe FWD_MSG                Forwarded email
 tflags FWD_MSG		        nice
 
-# very common in spam: about 0.72 S/O ratio
-#  1.58     1.83     1.35    0.57   -0.30  OUTLOOK_FW_MSG (fn)
-#header OUTLOOK_FW_MSG           Subject =~ /\[?Fw:?\s*/
-#describe OUTLOOK_FW_MSG         Forwarded email (Outlook style)
-#tflags OUTLOOK_FW_MSG		nice
+header OUTLOOK_FW_MSG           Subject =~ /\[?F[Ww]:\s/
+describe OUTLOOK_FW_MSG         Forwarded email (Outlook style)
+tflags OUTLOOK_FW_MSG		nice
 
 # compensate for common false pos on above rule: Yahoo! webmail
 header YAHOO_MSGID_ADDED        ALL =~ /Message-Id: <\S+\.mail.yahoo.com>\nReceived: .*by \S+mail.yahoo.com via HTTP;/s
