@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl -w -T
 
 use File::Spec;
 
@@ -609,6 +609,9 @@ for spamtrapping, and set up spamassassin in its F<.forward> file.
 The B<spamassassin> command is part of the B<Mail::SpamAssassin> Perl module.
 Install this as a normal Perl module, using C<perl -MCPAN -e shell>, or by
 hand.
+
+For further details on how to install, please read the C<INSTALL> file
+from the SpamAssassin distribution.
 
 =head1 ENVIRONMENT
 

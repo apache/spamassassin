@@ -375,8 +375,13 @@ describe FORGED_AOL_RCVD	Received forged, contains fake AOL relays
 header FORGED_TELESP_RCVD	Received =~ /\.(?!br).. \(\d+-\d+-\d+-\d+\.dsl\.telesp\.net\.br /
 describe FORGED_TELESP_RCVD	Contains forged hostname for a DSL IP in Brazil
 
+# a forged Hotmail message; host HELO'd as hotmail.com, but it wasn't
 header FORGED_HOTMAIL_RCVD	eval:check_for_forged_hotmail_received_headers()
 describe FORGED_HOTMAIL_RCVD	Forged hotmail.com 'Received:' header found
+
+# this, by comparison is more common: from was @hotmail.com, but it wasn't
+header SEMIFORGED_HOTMAIL_RCVD	eval:check_for_no_hotmail_received_headers()
+describe SEMIFORGED_HOTMAIL_RCVD hotmail.com 'From' address, but no 'Received:'
 
 header FORGED_EUDORAMAIL_RCVD	eval:check_for_forged_eudoramail_received_headers()
 describe FORGED_EUDORAMAIL_RCVD	Forged eudoramail.com 'Received:' header found

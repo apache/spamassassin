@@ -219,16 +219,15 @@ the bl.spamcop.net test is called RCVD_IN_BL_SPAMCOP_NET.
 
 These are commercial services, so you need to pay money to use them.
 
-Having said that, the bl.spamcop.net service gets my recommendation as the
-most useful blacklisting DNS service I've found.  More information on it
-can be found at http://spamcop.net/bl.shtml .  It is available without
-being a customer of spamcop.net, although a donation is asked for.  See
-http://spamcop.net/fom-serve/cache/299.html for details.
+Having said that, the bl.spamcop.net service gets my recommendation as one
+of the more useful blacklisting DNS services I've found.  More information
+on it can be found at http://spamcop.net/bl.shtml .  The maintainers ask
+for a voluntary contribution if you use it for non personal use.
 
-The mail-abuse.org tests are free for personal use, for now -- so if
-you're using SpamAssassin as a personal mail filter you may turn them on.
-More information on the mail-abuse.org services can be found here:
-http://mail-abuse.org/rbl+/ and
+The mail-abuse.org tests are free, with caveats.  You must subscribe,
+asking for free access for personal use -- if you're using SpamAssassin as
+a personal mail filter you may turn them on.  More information on the
+mail-abuse.org services can be found here: http://mail-abuse.org/rbl+/ and
 http://www.mail-abuse.org/feestructure.html .
 
 To turn on the tests, simply assign them a non-zero score, e.g. by adding
@@ -239,6 +238,8 @@ these lines to your ~/.spamassassin/user_prefs file:
     score RCVD_IN_DUL               1
     score RCVD_IN_BL_SPAMCOP_NET    3
 
+To see how RBL checks work, use `spamassassin -D rbl=-3'. This will
+display all debug messages related to rbl checking.
 
 
 Automatic Whitelist System

@@ -307,10 +307,20 @@ so it doesn't provide a shortcut around SpamAssassin.
 
 Whitelist and blacklist addresses are now file-glob-style patterns, so
 C<friend@somewhere.com>, C<*@isp.com>, or C<*.domain.net> will all work.
+Specifically, C<*> and C<?> are allowed, but all other metacharacters are not.
 Regular expressions are not used for security reasons.
 
-Multiple addresses per line, separated by spaces, is OK.  Multiple C<whitelist_from> lines is also
-OK.
+Multiple addresses per line, separated by spaces, is OK.  Multiple
+C<whitelist_from> lines is also OK.
+
+The headers checked for whitelist addresses are as follows: if C<Resent-From>
+is set, use that; otherwise check all addresses taken from the following
+set of headers:
+
+	Envelope-Sender
+	Resent-Sender
+	X-Envelope-From
+	From
 
 e.g.
 
@@ -325,9 +335,9 @@ e.g.
 
 =item unwhitelist_from add@ress.com
 
-Used to override a default whitelist_from entry, so for example a distribution whitelist_from
-can be overriden in a local.cf file, or an individual user can override a whitelist_from entry
-in their own C<user_prefs> file.
+Used to override a default whitelist_from entry, so for example a distribution
+whitelist_from can be overriden in a local.cf file, or an individual user can
+override a whitelist_from entry in their own C<user_prefs> file.
 
 e.g.
 
@@ -344,7 +354,8 @@ e.g.
 
 Use this to supplement the whitelist_from addresses with a check against the
 Received headers. The first parameter is the address to whitelist, and the
-second is a domain to match in the received headers.
+second is a domain to match in the Received headers.  This does not
+allow globbing, and must be followed by a numeric IP address in brackets.
 
 e.g.
 
@@ -445,6 +456,11 @@ installing SpamAssassin, you should probably set the default to be something
 much more conservative, like 8.0 or 10.0.  Experience has shown that you
 B<will> get plenty of user complaints otherwise!
 
+Francesco Potorti reports 'on a system running for about 500 users, I set
+required_hits to 5.7, for marking, and set a limit of 15 (by looking at
+X-Spam-Level with procmail) for automatic discarding to an (infrequently
+checked) quarantine directory.'
+
 =cut
 
     if (/^required[-_]hits\s+(\S+)$/) {
@@ -460,9 +476,8 @@ SpamAssassin as a handle for that test; for example, 'FROM_ENDS_IN_NUMS'.
 Note that test names which begin with '__' are reserved for meta-match
 sub-rules, and are not scored or listed in the 'tests hit' reports.
 
-Test names should not start with a number, and must contain only alphanumerics
-and underscores.  It is suggested that lower-case characters not be used, as an
-informal convention.
+The default score is 1.0, or 0.01 for tests whose names begin with 'T_'
+(this is used to indicate a rule under test).
 
 =cut
 
@@ -1278,8 +1293,14 @@ C<modifiers> as regexp modifiers in the usual style.
 If the C<[if-unset: STRING]> tag is present, then C<STRING> will
 be used if the header is not found in the mail message.
 
+Test names should not start with a number, and must contain only alphanumerics
+and underscores.  It is suggested that lower-case characters not be used, as an
+informal convention.  Dashes are not allowed.
+
 Note that test names which begin with '__' are reserved for meta-match
 sub-rules, and are not scored or listed in the 'tests hit' reports.
+Test names which begin with 'T_' are reserved for tests which are
+undergoing QA, and these are given a very low score.
 
 If you add or modify a test, please be sure to run a sanity check afterwards
 by running C<spamassassin --lint>.  This will avoid confusing error
@@ -1466,6 +1487,8 @@ count towards the final score unless the entire meta-rule matches, give the
 sub-rules names that start with '__' (two underscores).  SpamAssassin will
 ignore these for scoring.
 
+Meta rules cannot use other meta rules as sub-rules in this release.
+
 =cut
 
     if (/^meta\s+(\S+)\s+(.*)$/) {
@@ -1559,13 +1582,13 @@ probably be more effective with an individual database per user.
 
 =item timelog_path /path/to/dir		(default: NULL)
 
-If you set this value, razor will try to create logfiles for each message I
-processes and dump information on how fast it ran, and in which parts of the
-code the time was spent.
-The files will be named: unixdate_mesgid (i.e 1023257504_chuvn31gdu@4ax.com)
+If you set this value, SpamAssassin will try to create logfiles for each
+message it processes and dump information on how fast it ran, and in which
+parts of the code the time was spent.  The files will be named:
+C<unixdate_messageid> (i.e 1023257504_chuvn31gdu@4ax.com)
 
-Make sure  SA can write  the log file, if  you're not sure  what permissions
-needed, make the log directory chmod'ed 1777, and adjust later.
+Make sure  SA can write the log file; if you're not sure what permissions are
+needed, chmod the log directory to 1777, and adjust later.
 
 =cut
 

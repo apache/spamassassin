@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.57 2002/12/18 21:54:22 quinlan Exp $
+# $Id: HTML.pm,v 1.58 2002/12/19 19:04:49 jmason Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -233,6 +233,7 @@ sub html_tests {
     }
   }
   if ($tag eq "font" && exists $attr->{face}) {
+    #print STDERR "FONT " . $attr->{face} . "\n";
     $self->{html}{font_face_caps} = 1 if $attr->{face} =~ /[A-Z]{3}/;
     if ($attr->{face} !~ /^[a-z][a-z -]*[a-z](?:,\s*[a-z][a-z -]*[a-z])*$/i) {
       $self->{html}{font_face_bad} = 1;
