@@ -222,7 +222,10 @@ sub new {
 
     # Alternately, if a multipart mime boundary is found in the header area,
     # aka it's malformed, exit out as well and treat it as part of the body.
-    last if (defined $boundary && $message[0] =~ /^--\Q$boundary\E(?:--|\s*$)/);
+    if (defined $boundary && $message[0] =~ /^--\Q$boundary\E(?:--|\s*$)/) {
+      $self->{'missing_head_body_separator'} = 1;
+      last;
+    }
   }
 
   # Store the pristine body for later -- store as a copy since @message
