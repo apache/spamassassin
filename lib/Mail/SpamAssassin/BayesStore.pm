@@ -969,7 +969,7 @@ sub add_touches_to_journal {
   # touches missed.
   my $writ = 0;
   while ($writ < $nbytes) {
-    my $len = syswrite (OUT, $self->{string_to_journal});
+    my $len = syswrite (OUT, $self->{string_to_journal}, $nbytes-$writ);
 
     if ($len < 0) {
       # argh, write failure, give up
