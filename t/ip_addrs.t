@@ -26,7 +26,7 @@ my $sa = Mail::SpamAssassin->new({
     rules_filename => "$prefix/rules",
 });
 
-plan tests => 58;
+plan tests => 66;
 
 sub tryone {
   my ($pat, $testip) = @_;
@@ -91,4 +91,25 @@ ok (tryone ($Mail::SpamAssassin::LOCALHOST, "0:0:0:0:0:0:0:1"));
 ok (!tryone ($Mail::SpamAssassin::LOCALHOST, "3ffe:fffff:100:f101:210:a4ff:fee3:9566"));
 ok (!tryone ($Mail::SpamAssassin::LOCALHOST, "::192.168.0.1"));
 ok (!tryone ($Mail::SpamAssassin::LOCALHOST, "notlocalhost"));
+
+sub tsttrim {
+  my $dom = shift;
+  my $want = shift;
+  my $got = Mail::SpamAssassin::Util::trim_domain_to_registrar_boundary ($dom);
+  if ($got eq $want) {
+    return 1;
+  } else {
+    warn "trimmed $dom, wanted $want, got $got\n";
+    return 0;
+  }
+}
+
+ok (tsttrim ("foo.demon.co.uk", "foo.demon.co.uk"));
+ok (tsttrim ("bar.foo.demon.co.uk", "foo.demon.co.uk"));
+ok (tsttrim ("a.b.c.d.e.f.g.g.h.bar.foo.demon.co.uk", "foo.demon.co.uk"));
+ok (tsttrim ("de", "de"));
+ok (tsttrim ("jmason.org", "jmason.org"));
+ok (tsttrim ("localhost.jmason.org", "jmason.org"));
+ok (tsttrim ("localhost.jmason.edu.au", "jmason.edu.au"));
+ok (tsttrim ("localhost.jmason.edu.net", "edu.net"));
 

@@ -2156,13 +2156,38 @@ sub get_envelope_from {
   }
 
   # procmailrc notes this, amavisd are adding it, we recommend it
-  if ($envf = $self->get ("X-Envelope-From")) { goto ok; }
+  # (although we now recommend adding to Received instead)
+  if ($envf = $self->get ("X-Envelope-From")) {
+    # heuristic: this could have been relayed via a list which then used
+    # a *new* Envelope-from.  check
+    if ($self->get ("ALL") =~ /(?:^|\n)Received:\s.*\nX-Envelope-From:\s/s) {
+      dbg ("X-Envelope-From header found after 1 or more Received lines, cannot trust envelope-from");
+    } else {
+      goto ok;
+    }
+  }
 
   # qmail, new-inject(1)
-  if ($envf = $self->get ("Envelope-Sender")) { goto ok; }
+  if ($envf = $self->get ("Envelope-Sender")) {
+    # heuristic: this could have been relayed via a list which then used
+    # a *new* Envelope-from.  check
+    if ($self->get ("ALL") =~ /(?:^|\n)Received:\s.*\nEnvelope-Sender:\s/s) {
+      dbg ("Envelope-Sender header found after 1 or more Received lines, cannot trust envelope-from");
+    } else {
+      goto ok;
+    }
+  }
 
   # Postfix, sendmail, also mentioned in RFC821
-  if ($envf = $self->get ("Return-Path")) { goto ok; }
+  if ($envf = $self->get ("Return-Path")) {
+    # heuristic: this could have been relayed via a list which then used
+    # a *new* Envelope-from.  check
+    if ($self->get ("ALL") =~ /(?:^|\n)Received:\s.*\nReturn-Path:\s/s) {
+      dbg ("Return-Path header found after 1 or more Received lines, cannot trust envelope-from");
+    } else {
+      goto ok;
+    }
+  }
 
   # give up.
   return undef;

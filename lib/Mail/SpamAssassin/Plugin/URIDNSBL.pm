@@ -121,6 +121,10 @@ sub parsed_metadata {
 
   # only hit DNSBLs for which score != 0
   foreach my $rulename (keys %{$scanner->{conf}->{uridnsbls}}) {
+    # trim_rules() will remove the head_evals entry for this
+    next unless ($scanner->{conf}->{head_evals}->{$rulename});
+    # set score to 0 should also block the rule
+    next unless ($scanner->{conf}->{scores}->{$rulename});
     $scanstate->{active_rules}->{$rulename} = 1;
   }
 
@@ -217,6 +221,8 @@ sub check_post_dnsbl {
       $scan->got_hit ($rulename, "");
     }
   }
+
+  $self->abort_remaining_lookups ($scanstate);
 }
 
 # ---------------------------------------------------------------------------
@@ -269,7 +275,9 @@ sub lookup_domain_ns {
 
 sub complete_ns_lookup {
   my ($self, $scanstate, $ent, $dom) = @_;
+
   my $packet = $self->{res}->bgread($ent->{sock});
+  $self->close_ent_socket ($ent);
   my @answer = $packet->answer;
 
   foreach my $rr (@answer) {
@@ -301,6 +309,7 @@ sub complete_a_lookup {
   my ($self, $scanstate, $ent, $hname) = @_;
 
   my $packet = $self->{res}->bgread($ent->{sock});
+  $self->close_ent_socket ($ent);
   my @answer = $packet->answer;
 
   foreach my $rr (@answer) {
@@ -348,6 +357,7 @@ sub complete_dnsbl_lookup {
   my ($self, $scanstate, $ent, $dnsblip) = @_;
 
   my $packet = $self->{res}->bgread($ent->{sock});
+  $self->close_ent_socket ($ent);
   my @answer = $packet->answer;
   foreach my $rr (@answer) {
     my $str = $rr->string;
@@ -380,6 +390,7 @@ sub start_lookup {
 
 # perform a poll of our lookups, to see if any are completed; if they
 # are, the next lookup in the sequence will be kicked off.
+
 sub complete_lookups {
   my ($self, $scanstate) = @_;
   my %typecount = ();
@@ -452,6 +463,7 @@ sub complete_lookups {
 	$scanstate->{times_count_was_same}++;
 	if ($scanstate->{times_count_was_same} > 20) {
 	  dbg ("URIDNSBL: escaping: must have lost requests");
+	  $self->abort_remaining_lookups ($scanstate);
 	  $stillwaiting = 0;
 	}
       } else {
@@ -462,6 +474,33 @@ sub complete_lookups {
   }
 
   return (!$stillwaiting);
+}
+
+# ---------------------------------------------------------------------------
+
+sub abort_remaining_lookups  {
+  my ($self, $scanstate) = @_;
+
+  my $pending = $scanstate->{pending_lookups};
+  my $foundone = 0;
+  foreach my $key (keys %{$pending})
+  {
+    if (!$foundone) {
+      dbg ("URIDNSBL: aborting remaining lookups");
+      $foundone = 1;
+    }
+
+    $self->close_ent_socket ($pending->{$key});
+    delete $pending->{$key};
+  }
+}
+
+sub close_ent_socket {
+  my ($ent) = @_;
+  if ($ent->{sock}) {
+    $ent->{sock}->close();
+    delete $ent->{sock};
+  }
 }
 
 # ---------------------------------------------------------------------------

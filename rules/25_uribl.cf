@@ -17,7 +17,8 @@ uridnsbl	URIBL_DSBL	list.dsbl.org.		TXT
 header		URIBL_DSBL	eval:check_uridnsbl('URIBL_DSBL')
 describe	URIBL_DSBL	Contains a URL listed in the DSBL blocklist
 
-uridnsbl	URIBL_SORBS	dnsbl.sorbs.net.	A
-header		URIBL_SORBS	eval:check_uridnsbl('URIBL_SORBS')
-describe	URIBL_SORBS	Contains a URL listed in the SORBS blocklist
+# SORBS has many, many FPs in this form
+#uridnsbl	URIBL_SORBS	dnsbl.sorbs.net.	A
+#header		URIBL_SORBS	eval:check_uridnsbl('URIBL_SORBS')
+#describe	URIBL_SORBS	Contains a URL listed in the SORBS blocklist
 

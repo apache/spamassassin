@@ -700,6 +700,13 @@ sub parse_received_line {
       $rdns = $1; $ip = $2; $by = $3; goto enough;
     }
 
+    # Received: from smtp.greyware.com(208.14.208.51, HELO smtp.sff.net) by x.x.org via smap (V1.3)
+    # id xma002908; Fri, 27 Feb 04 14:16:56 -0800
+    if (/^from (\S+)\((${IP_ADDRESS}), HELO (\S+)\) by (\S+) via smap /) {
+      $mta_looked_up_dns = 1;
+      $rdns = $1; $ip = $2; $helo = $3; $by = $4; goto enough;
+    }
+
     # Received: from [192.168.0.71] by web01-nyc.clicvu.com (Post.Office MTA
     # v3.5.3 release 223 ID# 0-64039U1000L100S0V35) with SMTP id com for
     # <x@x.org>; Tue, 25 Mar 2003 11:42:04 -0500

@@ -295,10 +295,21 @@ sub harvest_dnsbl_queries {
 sub rbl_finish {
   my ($self) = @_;
 
+  foreach my $type (keys %{$self->{dnspending}}) {
+    foreach my $host (keys %{$self->{dnspending}->{$type}}) {
+      if (defined $self->{dnspending}->{$type}->{$host}->[BGSOCK]) {
+	eval {
+	  # ensure the sockets are closed
+	  delete $self->{dnspending}->{$type}->{$host}->[BGSOCK];
+	};
+      }
+    }
+  }
   delete $self->{rbl_launch};
   delete $self->{dnspending};
+
+  # TODO: do not remove these since they can be retained!
   delete $self->{dnscache};
-  # TODO: do not remove this since it can be retained!
   delete $self->{dnspost};
   delete $self->{dnsresult};
   delete $self->{dnsuri};

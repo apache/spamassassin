@@ -3145,34 +3145,31 @@ sub _check_spf {
   my $sender = '';
 
   if ($ishelo) {
-    dbg ("SPF: checking HELO");
-
-    # drop any hostname parts, if we can.
-    my @domparts = split (/\./, $helo);
-    my $numparts = scalar @domparts;
-
-    # for the HELO variant, drop the first bit of the HELO (ie. turn
-    # "host.dom.ain" into "dom.ain".)
-    if ($numparts > 0) {
-      my $partsreqd = 2;
-      if (Mail::SpamAssassin::Util::is_in_subdelegated_cctld ($helo)) {
-        $partsreqd = 3;
-      }
-      if ($numparts >= $partsreqd) { $helo =~ s/^[^\.]+\.//; }
-    }
+    dbg ("SPF: checking HELO (helo=$helo, ip=$ip)");
+    $helo = Mail::SpamAssassin::Util::trim_domain_to_registrar_boundary ($helo);
+    dbg ("SPF: trimmed HELO down to '$helo'");
 
   } else {
-    dbg ("SPF: checking EnvelopeFrom");
     $sender = $lasthop->{envfrom};
 
     if ($sender) {
       dbg ("SPF: found Envelope-From in last untrusted Received header");
+    }
+    else {
+      # We cannot use the env-from data, since it went through 1 or
+      # more relays since the untrusted sender and they may have
+      # rewritten it.
+      #
+      if ($self->{num_relays_trusted} > 0) {
+	dbg ("SPF: relayed through one or more trusted relays, cannot use header-based Envelope-From, skipping");
+	return;
+      }
 
-    } else {
       # we can (apparently) use whatever the current Envelope-From was,
       # from the Return-Path, X-Envelope-From, or whatever header.
       # it's better to get it from Received though, as that is updated
       # hop-by-hop.
+      #
       $sender = $self->get ("EnvelopeFrom");
     }
 
@@ -3180,6 +3177,7 @@ sub _check_spf {
       dbg ("SPF: cannot get Envelope-From, cannot use SPF");
       return;
     }
+    dbg ("SPF: checking EnvelopeFrom (helo=$helo, ip=$ip, envfrom=$sender)");
   }
 
   if (!$ip || !$helo) {

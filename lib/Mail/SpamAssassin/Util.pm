@@ -751,6 +751,41 @@ sub is_in_subdelegated_cctld {
 
 ###########################################################################
 
+sub trim_domain_to_registrar_boundary {
+  my ($domain) = @_;
+
+  # drop any hostname parts, if we can.
+  my @domparts = split (/\./, $domain);
+  my $numparts = scalar @domparts;
+
+  # for the HELO variant, drop the first bit of the HELO (ie. turn
+  # "host.dom.ain" into "dom.ain".)
+  if ($numparts > 0) {
+    my $partsreqd = 2;
+
+    # the "Demon case"; Demon Internet registers domains for
+    # its customers, ie. "foo.demon.co.uk".
+    if ($domain =~ /\. (?:
+		      demon\.co\.uk
+		      )$/ix)
+    {
+      $partsreqd = 4;
+    }
+    # Subdelegated CCTLD
+    elsif (is_in_subdelegated_cctld ($domain)) {
+      $partsreqd = 3;
+    }
+
+    while ($numparts > $partsreqd) {
+      $domain =~ s/^[^\.]+\.//;
+      $numparts--;
+    }
+  }
+  $domain;
+}
+
+###########################################################################
+
 sub dbg { Mail::SpamAssassin::dbg (@_); }
 
 1;
