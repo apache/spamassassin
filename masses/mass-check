@@ -23,6 +23,9 @@ use Mail::SpamAssassin;
 use Mail::SpamAssassin::NoMailAudit;
 use Getopt::Long;
 
+# flush buffer immediately so if mass-check fails or stops we don't get a corrupt line
+$|++;
+
 GetOptions("c=s", "f", "all", "head=i", "mh", "ms", "mn", "single", "sort",
 	   "tail=i");
 
@@ -139,7 +142,9 @@ sub mass_check_tar_file {
 sub mass_check_mh_folder {
   my $sub = shift;
   my $folder = shift;
-  my @files = <$folder/[0-9]*>;
+  opendir(DIR, $folder) || die "Can't open $folder dir: $!";
+  my @files = grep { -f } map { "$folder/$_" } grep { /^[0-9]/ } readdir(DIR);
+  closedir(DIR);
 
   @files = sortbynum(@files) if $opt_sort;
   splice(@files, $opt_head) if $opt_head;
@@ -166,7 +171,13 @@ sub mass_check_mh_folder {
 sub mass_check_maildir {
   my $sub = shift;
   my $folder = shift;
-  my @files = <$folder/{cur,new}/*>;
+  opendir(CURDIR, "$folder/cur") || die "Can't open $folder/cur dir: $!";
+  opendir(NEWDIR, "$folder/new") || die "Can't open $folder/new dir: $!";
+  my @files;
+  push @files, grep { -f } map { "$folder/cur/$_" } readdir(CURDIR);
+  push @files, grep { -f } map { "$folder/new/$_" } readdir(NEWDIR);
+  closedir(CURDIR);
+  closedir(NEWDIR);
 
   @files = sortbynum(@files) if $opt_sort;
   splice(@files, $opt_head) if $opt_head;
