@@ -16,6 +16,8 @@ Mail::SpamAssassin::Conf - SpamAssassin configuration file
 
   score A_HREF_TO_REMOVE          2.0
 
+  lang es describe FROM_FORGED_HOTMAIL Forzado From: simula ser de hotmail.com
+
 =head1 DESCRIPTION
 
 SpamAssassin is configured using some traditional UNIX-style configuration
@@ -143,9 +145,22 @@ sub _parse {
   my ($self, $rules, $scoresonly) = @_;
   local ($_);
 
+  my $lang = $ENV{'LC_ALL'};
+  $lang ||= $ENV{'LANGUAGE'};
+  $lang ||= $ENV{'LC_MESSAGES'};
+  $lang ||= $ENV{'LANG'};
+  $lang ||= 'C';
+
+  if ($lang eq 'C') { $lang = 'en_US'; }
+  $lang =~ s/[\.\@].*$//;	# .utf8 or @euro
+
   foreach $_ (split (/\n/, $rules)) {
     s/\r//g; s/(^|(?<!\\))\#.*$/$1/;
     s/^\s+//; s/\s+$//; /^$/ and next;
+
+    # handle i18n
+    if (s/^lang\s+(\S\S_\S\S)\s+//) { next if ($lang ne $1); }
+    if (s/^lang\s+(\S\S)\s+//) { my $l = $1; next if ($lang !~ /${l}$/i); }
 
     # note: no eval'd code should be loaded before the SECURITY line below.
 ###########################################################################
@@ -662,6 +677,12 @@ sub sa_die { Mail::SpamAssassin::sa_die (@_); }
 __END__
 
 =back
+
+=head1 LOCALI[SZ]ATION
+
+A line starting with the text C<lang xx> will only be interpreted
+if the user is in that locale, allowing test descriptions and
+templates to be set for that language.
 
 =head1 SEE ALSO
 
