@@ -57,10 +57,10 @@ describe PLING_QUERY		Subject has exclamation mark and question mark
 header SUBJ_HAS_UNIQ_ID		eval:check_for_unique_subject_id()
 describe SUBJ_HAS_UNIQ_ID	Subject contains a unique ID
 
-header SUBJ_HAS_SPACES		Subject =~ /(?: {6}|\t)\S/
+header SUBJ_HAS_SPACES		Subject =~ /(?:\s{6}|\t\s|\s\t)\S/
 describe SUBJ_HAS_SPACES	Subject contains lots of white space
 
-header SUBJ_ENDS_IN_SPACE	Subject =~ /(?:[ ]{6}|\t)$/
+header SUBJ_ENDS_IN_SPACE	Subject =~ /(?:\s{6}|\t\s|\s\t)$/
 describe SUBJ_ENDS_IN_SPACE	Subject ends with lots of white space
 
 header SUBJ_ALL_CAPS		eval:subject_is_all_caps()
