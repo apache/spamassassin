@@ -236,10 +236,12 @@ if ($opt{'create-prefs'}) { $dontcopy = 0; }
 
 my $kidslimit = 5;	# max number of kids allowed
 my $kidsfree = 5;	# number we can spawn before hitting $kidslimit
-if ($opt{'max-children'} && $opt{'max-children'} > 0) {
-  $kidslimit = $kidsfree = $opt{'max-children'};
-} else {
-  $kidslimit = $kidsfree = 99999;
+if (defined $opt{'max-children'}) {
+  if ($opt{'max-children'} > 0) {
+    $kidslimit = $kidsfree = $opt{'max-children'};
+  } else {		# unlimited
+    $kidslimit = $kidsfree = 99999;
+  }
 }
 
 # Untaint the pidfile path before we use it
