@@ -34,6 +34,6 @@ ok (start_spamd ("--virtual-config-dir=log/virtualconfig/%u -L"));
 ok (spamcrun ("-u testuser < data/spam/009", \&patterns_run_cb));
 ok (stop_spamd ());
 
-checkfile ("spamd_allow_user_rules.spamd", \&patterns_run_cb);
+checkfile ("spamd_allow_user_rules-spamd.err", \&patterns_run_cb);
 ok_all_patterns();
 
