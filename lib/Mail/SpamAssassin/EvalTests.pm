@@ -871,6 +871,9 @@ sub _check_whitelist {
 
 sub all_from_addrs {
   my ($self) = @_;
+
+  if (exists $self->{all_from_addrs}) { return @{$self->{all_from_addrs}}; }
+
   my @addrs;
 
   # Resent- headers take priority, if present. see bug 672
@@ -892,11 +895,15 @@ sub all_from_addrs {
   }
 
   dbg ("all '*From' addrs: ".join (" ", @addrs));
+  $self->{all_from_addrs} = \@addrs;
   return @addrs;
 }
 
 sub all_to_addrs {
   my ($self) = @_;
+
+  if (exists $self->{all_to_addrs}) { return @{$self->{all_to_addrs}}; }
+
   my @addrs;
 
   # Resent- headers take priority, if present. see bug 672
@@ -936,6 +943,7 @@ sub all_to_addrs {
   }
 
   dbg ("all '*To' addrs: ".join (" ", @addrs));
+  $self->{all_to_addrs} = \@addrs;
   return @addrs;
 
 # http://www.cs.tut.fi/~jkorpela/headers.html is useful here, also

@@ -367,13 +367,17 @@ This may not be what you want to do.  If it is not, then don't use B<-a -t>.
 =item B<-r>, B<--report>
 
 Report this message as verified spam.  This will submit the mail message read
-from STDIN to various spam-blocker databases.  Currently, these are Vipul's Razor (
-http://razor.sourceforge.net/ ) and the Distributed Checksum Clearinghouse (
-http://www.rhyolite.com/anti-spam/dcc/ ).
+from STDIN to various spam-blocker databases.  Currently, these are Vipul's
+Razor ( http://razor.sourceforge.net/ ), the Distributed Checksum
+Clearinghouse ( http://www.rhyolite.com/anti-spam/dcc/ ), and Pyzor.
 
 If the message contains SpamAssassin markup, this will be stripped out
-automatically before submission.  The support modules for DCC and Razor
-must be installed for spam to be reported to each service.
+automatically before submission.  The support modules for DCC, Razor
+and/or Pyzor must be installed for spam to be reported to each service.
+
+The message will also be submitted to SpamAssassin's learning systems;
+currently this is the internal Bayesian statistical-filtering system
+(the BAYES rules).
 
 =item B<--lint>
 
