@@ -57,10 +57,11 @@ B<sa-learn> [options] --single < I<message>
 
 Options:
 
- --ham				   Learn messages as ham
+ --ham				   Learn messages as ham (non-spam)
  --spam				   Learn messages as spam
  --forget			   Forget a message
  --rebuild			   Rebuild the database
+ --force-expire			   With --rebuild, force an expiry run
  -f file, --folders=file           Read list of files/directories from file
  --dir                             Learn a directory of RFC 822 files
  --file                            Learn a file in RFC 822 format
@@ -83,15 +84,18 @@ this tool will feed each mail to SpamAssassin, allowing it to 'learn' what
 signs are likely to mean spam, and which are likely to mean non-spam.
 
 Simply run this command once for each of your mail folders, and it will
-''learn'' from the mail therein.  If you make a mistake and scan a mail as
-non-spam when it is spam or vice versa, simply rescan it correctly and the
-mistake will be corrected.
+''learn'' from the mail therein.
 
 Note that I<globbing> in the mail folder names is supported; in other words,
 listing a folder name as C<*> will scan every folder that matches.
 
 SpamAssassin remembers which mail messages it's learnt already, and will not
 re-learn those messages again, unless you use the B<--forget> option.
+
+If you make a mistake and scan a mail as non-spam when it is spam, or vice
+versa, simply rerun this command with the correct classification, and the
+mistake will be corrected.  SpamAssassin will automatically 'forget' the
+previous indications.
 
 =head1 INTRODUCTION TO BAYESIAN FILTERING
 
@@ -168,19 +172,12 @@ Otherwise, the results may be pretty skewed.
 
 =item Use this tool to teach SpamAssassin about these samples, like so:
 
-	sa-learn --no-rebuild --spam /path/to/spam/folder
-	sa-learn --no-rebuild --ham /path/to/ham/folder
+	sa-learn --spam /path/to/spam/folder
+	sa-learn --ham /path/to/ham/folder
 	...
 
 Let SpamAssassin proceed, learning stuff. When it finds spam and non-spam
 it will add the "interesting tokens" to the database.
-
-=item Once you've learnt everything you want in this session, run
-this tool with the B<--rebuild> option to put those changes into the
-production database.
-
-This will probably take 30 seconds to several minutes to complete, depending on
-how much mail you trained with, and how fast your machine is.
 
 =item If you need SpamAssassin to forget about specific messages, use
 the B<--forget> option.
@@ -300,11 +297,17 @@ Learn the input message(s) as spam.
 
 =item B<--rebuild>
 
-Rebuild the databases, typically done after learning with B<--no-rebuild>.
+Rebuild the databases, typically done after learning with B<--no-rebuild>,
+or if you wish to periodically clean the Bayes databases once a day on
+a busy server.
+
+=item B<--force-expire>
+
+Forces an expiry run when specified with B<--rebuild>.
 
 =item B<--forget>
 
-Forget a given message previously learned.
+Forget a given message previously learnt.
 
 =item B<-a>, B<--auto-whitelist>
 
@@ -349,6 +352,97 @@ not perform network access while learning; but future versions may.
 
 =back
 
+=head1 FILES
+
+B<sa-learn> and the other parts of SpamAssassin's Bayesian learner,
+use a set of persistent database files to store the learnt tokens, as follows.
+
+=over 4
+
+=item bayes_toks
+
+The database of tokens, containing the tokens learnt, their count of
+occurrences in ham and spam, and the message count of the last message
+they were seen in.
+
+This database also contains some 'magic' tokens, as follows: the number of ham
+and spam messages learnt, the number of tokens in the database, the
+message-count of the last expiry run, the message-count of the oldest token in
+the database, and the message-count of the current message (to the nearest
+5000).
+
+This is a database file, using the first one of the following database modules
+that SpamAssassin can find in your perl installation: C<DB_File>, C<GDBM_File>,
+C<NDBM_File>, or C<SDBM_File>.
+
+=item bayes_seen
+
+A map of message-ID to what that message was learnt as.  This is used
+so that SpamAssassin can avoid re-learning a message it's already seen,
+and so it can reverse the training if you later decide that message
+was previously learnt incorrectly.
+
+This is a database file, using the first one of the following database modules
+that SpamAssassin can find in your perl installation: C<DB_File>, C<GDBM_File>,
+C<NDBM_File>, or C<SDBM_File>.
+
+=item bayes_journal
+
+While SpamAssassin is scanning mails, it needs to track which tokens it uses in
+its calculations.  So that many processes can read the databases
+simultaneously, but only one can write at a time, this uses a 'journal' file.
+
+When you run C<sa-learn --rebuild>, the journal is read, and the tokens that
+were accessed during the journal's lifetime will have their last-access time
+updated in the C<bayes_toks> database.
+
+=item bayes_msgcount
+
+Every time SpamAssassin accesses a mail message for scanning, or every time
+the C<sa-learn> command is run, the 'message count' is increased by one.
+This is used to control expiration of old tokens.
+
+Since many processes may be running simultaneously, SpamAssassin does not
+use a locked database file for this operation; instead, it uses the size
+of this file as a counter, appending one byte for each message.  Once it
+hits 5000 bytes, the C<bayes_toks> database is locked, and the message
+counter entry in that database is increased accordingly.
+
+=back
+
+=head1 EXPIRATION
+
+Since SpamAssassin auto-learns, the Bayes database files could increase
+perpetually until they fill your disk or you run out of memory.  To control
+this, SpamAssassin performs expiration.
+
+Every C<bayes_expiry_scan_count> / 2 messages, or when C<sa-learn --rebuild
+--force-expire> is run, SpamAssassin will attempt an expiry run, as follows.
+
+SpamAssassin runs through every token in the database.  If that token has not
+been used during the scanning of the last C<bayes_expiry_scan_count> messages,
+it is marked for deletion.
+
+Next, if that operation would bring the number of tokens below the
+C<bayes_expiry_min_db_size> threshold, it removes tokens from the for-deletion
+list until the resulting database would contain C<bayes_expiry_min_db_size>
+token entries.
+
+It then removes the listed tokens and updates the 'last expiry' setting.
+
+The SpamAssassin configuration settings which control this operation are:
+
+=over 4
+
+=item C<bayes_expiry_min_db_size> is part of the SpamAssassin configuration.
+The default value is 100000, which is roughly equivalent to a 5Mb database file
+if you're using DB_File.
+
+=item C<bayes_expiry_scan_count> is also part of the SpamAssassin
+configuration.  The default value is 5000.
+
+=back
+
 =head1 INSTALLATION
 
 The B<sa-learn> command is part of the B<Mail::SpamAssassin> Perl module.
@@ -365,13 +459,13 @@ be set.
 Mail::SpamAssassin(3)
 spamassassin(1)
 
-http://www.paulgraham.com, Paul Graham's "A Plan For Spam" paper
+http://www.paulgraham.com/ , Paul Graham's "A Plan For Spam" paper
 
-http://radio.weblogs.com/0101454/stories/2002/09/16/spamDetection.html, Gary
+http://radio.weblogs.com/0101454/stories/2002/09/16/spamDetection.html , Gary
 Robinson's f(x) and combining algorithms
 
-http://www.bgl.nu/~glouis/bogofilter/test6000.html, discussion of various Bayes
-training regimes, including 'train on error' and unsupervised training
+http://www.bgl.nu/~glouis/bogofilter/test6000.html , discussion of various
+Bayes training regimes, including 'train on error' and unsupervised training
 
 =head1 AUTHOR
 
