@@ -1,13 +1,4 @@
-=head1 NON-PUBLIC CLASS NAME
-
-Mail::SpamAssassin::Message - interface to Mail::Audit message text
-
-=head1 NOTES
-
-I could have done this more OO, using subclasses; but this is faster,
-both to code and to run (less class files to load).
-
-=cut
+# Mail::SpamAssassin::Message - interface to Mail::Audit message text
 
 package Mail::SpamAssassin::Message;
 

@@ -1,10 +1,6 @@
-=head1 NON-PUBLIC CLASS NAME
-
-Mail::SpamAssassin::EncappedMessage - interface to Mail::Audit message text,
-for versions of Mail::Audit with methods to encapsulate the message text
-itself (ie. not exposing a Mail::Internet object).
-
-=cut
+# Mail::SpamAssassin::EncappedMessage - interface to Mail::Audit message text,
+# for versions of Mail::Audit with methods to encapsulate the message text
+# itself (ie. not exposing a Mail::Internet object).
 
 package Mail::SpamAssassin::EncappedMessage;
 

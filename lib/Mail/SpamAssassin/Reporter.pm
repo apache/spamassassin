@@ -1,8 +1,4 @@
-=head1 NON-PUBLIC CLASS NAME
-
-Mail::SpamAssassin::Reporter - report a message as spam
-
-=cut
+# Mail::SpamAssassin::Reporter - report a message as spam
 
 package Mail::SpamAssassin::Reporter;
 
