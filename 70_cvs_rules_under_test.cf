@@ -458,16 +458,14 @@ header T_JAPANESE_UCE_SUBJECT_3	Subject =~ /L\$\>5Bz9\-9p\"\(/
 describe T_JAPANESE_UCE_SUBJECT_3 Subject: contains Japanese mandatory unsolicited mail tag
 # quinlan: 2003-03-23 here are more generic Japanese iso-2022-jp codes
 # ("not yet acceptance" or "email") + "announcement"
+# FWIW, according to Peter Evans, this should be sufficient to catch the UCE tag
+# and a common attempt at evasion (using the "sue" instead of "mi" Chinese
+# character).
 header T_JAPANESE_UCE_SUBJECT_0	Subject =~ /\e\$B.*(?:L\$>5Bz|EE;R%a!<%k)9-9p/
 # "not yet acceptance announcement"
 header T_JAPANESE_UCE_SUBJECT_1	Subject =~ /\e\$B.*L\$>5Bz9-9p/
 # "email announcement"
 header T_JAPANESE_UCE_SUBJECT_2	Subject =~ /\e\$B.*EE;R%a!<%k9-9p/
-
-# according to Peter Evans, this should be sufficient to catch the UCE tag
-# and a common attempt at evasion (using the "sue" instead of "mi" Chinese
-# character).  Let's see!
-header T_JAPANESE_UCE_SUBJECT_4	Subject:raw =~ /NUJ6OS05cCIoGyhC/
 
 # quinlan: "advertisement" in Russian KOI8-R
 header T_RUSSIAN_UCE_SUBJECT	Subject =~ /\xf0\xe5\xea\xeb\xe0\xec\xf3/
