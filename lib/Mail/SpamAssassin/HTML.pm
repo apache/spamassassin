@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.83 2003/05/08 23:48:10 quinlan Exp $
+# $Id: HTML.pm,v 1.84 2003/05/15 18:01:07 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -467,6 +467,50 @@ sub html_tests {
     }
     if ($width <= 1 && $height <= 1) {
       $self->{html}{image_web_bugs} = 1;
+    }
+    if ($width < 2 && $height < 2) {  
+      if ($attr->{src} =~ /\.(?:pl|cgi|php|asp)/)
+      {
+	$self->{html}{'t_image_web_bugs0'} = 1;
+      }
+      if ($attr->{src} =~ /\.(?:pl|cgi|php|asp)/i)
+      {
+	$self->{html}{'t_image_web_bugs1'} = 1;
+      }
+      if ($attr->{src} =~ /\.(?:pl|cgi|php|asp|jsp|cfm)/i)
+      {
+	$self->{html}{'t_image_web_bugs2'} = 1;
+      }
+      if ($attr->{src} =~ /\.(?:pl|cgi|php|asp|jsp|cfm)\b/i)
+      {
+	$self->{html}{'t_image_web_bugs3'} = 1;
+      }
+      if ($attr->{src} !~ /\.(?:jpe?g|gif|png)$/i && $attr->{src} !~ /^cid:/i)
+      {
+	$self->{html}{'t_image_web_bugs4'} = 1;
+      }
+    }
+    if ($width <= 1 && $height <= 1) {  
+      if ($attr->{src} =~ /\.(?:pl|cgi|php|asp)/)
+      {
+	$self->{html}{'t_image_web_bugs5'} = 1;
+      }
+      if ($attr->{src} =~ /\.(?:pl|cgi|php|asp)/i)
+      {
+	$self->{html}{'t_image_web_bugs6'} = 1;
+      }
+      if ($attr->{src} =~ /\.(?:pl|cgi|php|asp|jsp|cfm)/i)
+      {
+	$self->{html}{'t_image_web_bugs7'} = 1;
+      }
+      if ($attr->{src} =~ /\.(?:pl|cgi|php|asp|jsp|cfm)\b/i)
+      {
+	$self->{html}{'t_image_web_bugs8'} = 1;
+      }
+      if ($attr->{src} !~ /\.(?:jpe?g|gif|png)$/i && $attr->{src} !~ /^cid:/i)
+      {
+	$self->{html}{'t_image_web_bugs9'} = 1;
+      }
     }
   }
   if ($tag eq "form" && exists $attr->{action}) {
