@@ -16,6 +16,7 @@ require 5.005;
 # INST_SITELIB	       +  $(INSTALLSITELIB)
 #
 # RUN_RAZOR2_TESTS        (prompt if Razor 2 found)
+# CONTACT_ADDRESS         (prompt: default="the administrator of that system")
 # ENABLE_SSL           *  'no'
 #
 # PERL_BIN             *  current path to Perl
