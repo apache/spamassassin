@@ -301,7 +301,7 @@ sub _check_whitelist {
 
   study $addr;
   foreach my $regexp (values %{$list}) {
-    if ($addr =~ /$regexp/) { return 1; }
+    if ($addr =~ /$regexp/i) { return 1; }
   }
 
   return 0;
