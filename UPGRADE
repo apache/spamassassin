@@ -4,7 +4,10 @@ Note for Users Upgrading to SpamAssassin 3.0.0
 - The SpamAssassin 2.6x release series was the last set of releases to
   officially support perl versions earlier than perl 5.6.1.  If you are
   using an earlier version of perl, you will need to upgrade before you
-  can use the 3.0.0 version of SpamAssassin.
+  can use the 3.0.0 version of SpamAssassin.  You will also want to make
+  sure that you have the appropriate versions of required and optional
+  modules as they may have changed from old versions.  The INSTALL
+  document has the modules and version requirements listed.
 
 - SpamAssassin 3.0.0 has a significantly different API (Application
   Program Interface) from the 2.x series of code.  This means that if you
@@ -19,11 +22,12 @@ Note for Users Upgrading to SpamAssassin 3.0.0
 - The --virtual-config switch for spamd had to be dropped, due to licensing
   issues.  It is replaced by the --virtual-config-dir switch.
 
-- The "rewrite_subject" configuration setting was deprecated and is now
-  removed. Instead, use "rewrite_header Subject [your desired setting]".
-  e.g.
+- The "rewrite_subject" and "subject_tag" configuration options were
+  deprecated and are now removed. Instead, using "rewrite_header Subject
+  [your desired setting]".  e.g.
 
-    rewrite_subject ****SPAM(_SCORE_)****
+    rewrite_subject 1
+    subject_tag ****SPAM(_SCORE_)****
 
   becomes
 
