@@ -27,10 +27,10 @@ const double regression_coefficient = 0.5;
 
 const double crossover_rate = 0.0;
 
-const int pop_size = 2000;
-const int replace_num = 500;
+const int pop_size = 500;
+const int replace_num = 100;
 
-const int maxiter = 10000;
+const int maxiter = 20000;
 
 void init_data()
 {
@@ -44,6 +44,12 @@ void init_data()
   MPI_Bcast(num_tests_hit, num_tests, MPI_CHAR, 0, MPI_COMM_WORLD);
   MPI_Bcast(is_spam, num_tests, MPI_CHAR, 0, MPI_COMM_WORLD);
   MPI_Bcast(tests_hit, num_tests*max_hits_per_msg, MPI_SHORT, 0, MPI_COMM_WORLD);
+  MPI_Bcast(&num_scores, 1, MPI_INT, 0, MPI_COMM_WORLD);
+  MPI_Bcast(is_mutatable, num_scores, MPI_CHAR, 0, MPI_COMM_WORLD);
+  MPI_Bcast(range_lo, num_scores, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+  MPI_Bcast(range_hi, num_scores, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+  MPI_Bcast(bestscores, num_scores, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+  MPI_Bcast(scores, num_scores, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 }
 
 int main(int argc, char **argv) {
