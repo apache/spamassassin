@@ -112,7 +112,6 @@ sub html_render {
   $self->{html}{image_area} = 0;
   $self->{html}{shouting} = 0;
   $self->{html}{max_shouting} = 0;
-  $self->{html}{total_comment_ratio} = 0;
   $self->{html}{title_index} = -1;
   $self->{html}{max_size} = 3;	# start at default size
   $self->{html}{min_size} = 3;	# start at default size
@@ -918,7 +917,7 @@ sub html_tests {
       $self->{html}{web_bugs} = 1;
     }
     if (exists $attr->{src} &&
-	$attr->{src} =~ /\.(?:pl|cgi|php|asp|jsp|cfm|\/$)\b/i)
+	$attr->{src} =~ /(?:\.(?:pl|cgi|php|asp|jsp|cfm)\b|\/$)/i)
     {
       $self->{html}{t_web_bugs} = 1;
     }
@@ -1092,10 +1091,6 @@ sub html_comment {
     if ($text =~ /font(?:-size)?:\s*(\d+(?:\.\d*)?|\.\d+)(p[tx])/i) {
       $self->examine_text_style ($1, $2);
     }
-  }
-  else {
-    # one last try before we bail on HTML_COMMENT_RATIO
-    $self->{html}{total_comment_length} += length($text);
   }
 
   if (exists $self->{html}{shouting} && $self->{html}{shouting} > 1) {

@@ -380,10 +380,6 @@ sub rendered {
       }
       $r->{non_space_len} = $r->{html_length} - $space;
       $r->{ratio} = ($raw - $r->{html_length}) / $raw;
-      if (exists $r->{total_comment_length} && $r->{html_length} > 0) {
-        $r->{total_comment_ratio} = 
-	    $r->{total_comment_length} / $r->{html_length};
-      }
       if (exists $r->{elements} && exists $r->{tags}) {
 	$r->{bad_tag_ratio} = ($r->{tags} - $r->{elements}) / $r->{tags};
 	$r->{non_element_ratio} =
