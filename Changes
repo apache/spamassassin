@@ -1,48 +1,53 @@
-2003-05-19 18:25  felicity
+2003-05-19 15:34  felicity
+
+	* Changes, lib/Mail/SpamAssassin.pm: updated changes and devel flag
+	for 2.55 release
+
+2003-05-19 15:25  felicity
 
 	* lib/Mail/SpamAssassin/Conf.pm: bug 1929: looks like we never
 	specified that "score 0" disables a rule from running.
 
-2003-05-18 20:20  felicity
+2003-05-18 17:20  felicity
 
 	* spamassassin.raw, lib/Mail/SpamAssassin/Conf.pm: bug 1917: docs
 	still talk about 'spamassassin -c', which was deprecated for
 	'spamassassin -C' ...
 
-2003-05-18 20:19  felicity
+2003-05-18 17:19  felicity
 
 	* spamd/spamd.raw: bug 1905: in perl 5.005, mkdir needs a umask
 	parameter
 
-2003-05-18 20:03  felicity
+2003-05-18 17:03  felicity
 
 	* Makefile.PL: bug 1893: a few warnings pop up if razor isn't
 	installed for testing.	simple cleanup.
 
-2003-05-18 10:48  felicity
+2003-05-18 07:48  felicity
 
 	* spamassassin.spec: updated spec file for 2.55
 
-2003-05-17 21:25  duncf
+2003-05-17 18:25  duncf
 
 	* debian/rules: Argh. More Debian packaging fixed.
 
-2003-05-17 19:11  duncf
+2003-05-17 16:11  duncf
 
 	* debian/rules: More woody build failures :-( This should work now,
 	I hope. Someone test please.
 
-2003-05-17 18:48  duncf
+2003-05-17 15:48  duncf
 
 	* debian/: changelog.in, spamassassin.preinst: last fix...
 	honestly! handles case where debconf not installed
 
-2003-05-17 18:19  duncf
+2003-05-17 15:19  duncf
 
 	* debian/control: Forgot to change debian/control for woody compat.
 	Fixed
 
-2003-05-17 17:59  duncf
+2003-05-17 14:59  duncf
 
 	* debian/: control, logcheck, rules, spamassassin.config,
 	spamassassin.dirs, spamassassin.links, spamassassin.postinst,
@@ -50,68 +55,68 @@
 	examples/muttrc, po/fr.po, po/pt_BR.po, po/templates.pot: Debian
 	packaging for 2,54. Includes a good upgrade from 2.20-1woody
 
-2003-05-14 13:27  felicity
+2003-05-14 10:27  felicity
 
 	* spamd/redhat-rc-script.sh: bug 1915: didn't list condrestart as
 	an option under usage
 
-2003-05-12 15:23  jmason
+2003-05-12 12:23  jmason
 
 	* lib/Mail/SpamAssassin.pm: 2.55 devel cycle started, not that
 	we'll need it of course ;)
 
-2003-05-12 15:20  jmason
+2003-05-12 12:20  jmason
 
 	* build/2.54_change_summary: 2.54 RELEASED
 
-2003-05-11 00:22  jmason
+2003-05-10 21:22  jmason
 
 	* build/2.54_change_summary: change summary for 2.54 release
 
-2003-05-11 00:19  jmason
+2003-05-10 21:19  jmason
 
 	* build/README: updated build README
 
-2003-05-11 00:17  jmason
+2003-05-10 21:17  jmason
 
 	* Changes, build/README, build/cvs2cl-branch: added cvs2cl-branch,
 	fixed Changes file
 
-2003-05-10 23:38  felicity
+2003-05-10 20:38  felicity
 
 	* Changes: Updated for 2.54rc1
 
-2003-05-10 21:05  duncf
+2003-05-10 18:05  duncf
 
 	* lib/Mail/SpamAssassin.pm: Ready to release?
 
-2003-05-10 20:34  felicity
+2003-05-10 17:34  felicity
 
 	* rules/: 20_head_tests.cf, 30_text_de.cf, 30_text_fr.cf,
 	30_text_it.cf, 50_scores.cf, 70_broken_rules.cf: bug 1891:
 	RCVD_IN_VISI is no longer available
 
-2003-05-09 20:46  felicity
+2003-05-09 17:46  felicity
 
 	* lib/Mail/SpamAssassin/CmdLearn.pm: bug 1887: sa-learn didn't
 	accept parameters to -D
 
-2003-05-09 20:28  felicity
+2003-05-09 17:28  felicity
 
 	* spamd/spamd.raw: bug 1818: spamd fails to create ~/.spamassassin
 	when running setuid with sql
 
-2003-05-08 23:59  jmason
+2003-05-08 20:59  jmason
 
 	* spamd/libspamc.c: bug 1879: libspamc was closing fds it didn't
 	open
 
-2003-05-08 19:28  jmason
+2003-05-08 16:28  jmason
 
 	* spamd/: README.spamd, spamc.pod: bug 1799: doco updated to note
 	protocol change compared to 2.4x, 2.6x
 
-2003-05-08 17:47  felicity
+2003-05-08 14:47  felicity
 
 	* lib/Mail/SpamAssassin/BayesStore.pm: bug 1869: came up with a
 	kluge for the "tokens have 16-bit atime" problem.  if the expire
@@ -120,46 +125,46 @@
 	anything, but it should keep the useful tokens around instead of
 	the semi-random expire that was occuring in earlier versions.
 
-2003-05-08 17:42  jmason
+2003-05-08 14:42  jmason
 
 	* spamd/libspamc.c: bug 1762: sscanf should not use %f due to
 	locale issues
 
-2003-05-07 23:41  jmason
+2003-05-07 20:41  jmason
 
 	* spamd/spamd.raw: bug 1802: REPORT_IFSPAM is unhandled if message
 	is ham
 
-2003-05-07 19:50  felicity
+2003-05-07 16:50  felicity
 
 	* rules/: STATISTICS-set1.txt, STATISTICS-set2.txt,
 	STATISTICS-set3.txt, STATISTICS.txt: bug 1589: generated
 	STATISTICS* files for the new GA run
 
-2003-05-07 18:23  felicity
+2003-05-07 15:23  felicity
 
 	* lib/Mail/SpamAssassin/PerMsgStatus.pm: bug 1868:
 	X-Spam-Checker-Version may or may not have parens depending on if
 	the message was considered spam or not.  Just add in the parens...
 
-2003-05-07 16:06  jmason
+2003-05-07 13:06  jmason
 
 	* spamd/spamd.raw: bug 1725: spamd taint mode problem with ARGV
 	fixed
 
-2003-05-07 08:38  felicity
+2003-05-07 05:38  felicity
 
 	* lib/Mail/SpamAssassin/BayesStore.pm: bug 1782: a potential but in
 	stdio could cause journal data to be corrupted by multiple writes
 	to the same area of the journal.  switch to using syswrite()
 	instead of just print (stdio) to help address this issue.
 
-2003-05-07 02:26  jmason
+2003-05-06 23:26  jmason
 
 	* lib/Mail/SpamAssassin/Bayes.pm: bug 1860: Bayes was not using
 	hapaxes
 
-2003-05-06 09:14  felicity
+2003-05-06 06:14  felicity
 
 	* rules/: 20_meta_tests.cf, 50_scores.cf: bug 1589: spammers have
 	been targeting our nice rules to get themselves negative overall
@@ -167,33 +172,33 @@
 	should help deal with the forgeries.  also added a "TOO_MANY_MUA"
 	rule that will catch when multiple USER_AGENT rules hit.
 
-2003-05-02 02:25  jmason
+2003-05-01 23:25  jmason
 
 	* spamd/spamd.raw: bug 1799: REPORT should use local report
 	template, not default
 
-2003-05-02 02:19  jmason
+2003-05-01 23:19  jmason
 
 	* sa-learn.raw, spamassassin.raw: bug 1737: Bayes doco improved
 
-2003-04-24 00:48  felicity
+2003-04-23 21:48  felicity
 
 	* t/spamd_utf8.t: bug 1708: UTF-8 locale was specified incorrectly
 	(glibc version)
 
-2003-04-22 08:14  felicity
+2003-04-22 05:14  felicity
 
 	* USAGE: bug 1739: USAGE file says that a test message will have
 	the subject rewritten, but rewrite_subject is off by default in
 	2.5x.  change the docs to reflect this.
 
-2003-04-22 08:00  felicity
+2003-04-22 05:00  felicity
 
 	* lib/Mail/SpamAssassin/BayesStore.pm: bug 1706: fixed a small
 	issue where the code was expecting a shift but got a pop, so we
 	need to look at the end of the array, not the beginning. :(
 
-2003-04-22 07:54  felicity
+2003-04-22 04:54  felicity
 
 	* lib/Mail/SpamAssassin/BayesStore.pm: bug 1706: when bayes was
 	expiring tokens, it would check to see if there were enough tokens
@@ -202,7 +207,7 @@
 	would likely be left in the DB.  the code will now sort the tokens
 	by atime and reprieval the most recently used tokens first.
 
-2003-04-19 15:35  felicity
+2003-04-19 12:35  felicity
 
 	* lib/Mail/SpamAssassin/PerMsgStatus.pm: bug 1800: messages with
 	large positive scores (if they hit GTUBE at 1000 points for
@@ -211,78 +216,78 @@
 	max score of 100.  that makes it obvious the message is really spam
 	while staying RFC compliant.
 
-2003-04-10 11:27  felicity
+2003-04-10 08:27  felicity
 
 	* lib/Mail/SpamAssassin/EvalTests.pm: bug 1524: EvalTests looking
 	for/storing IPs would sometimes catch extra chars that occur around
 	the IP address (such as [ in Received headers).  Use a new regexp
 	to only match IP addresses.
 
-2003-04-06 21:29  felicity
+2003-04-06 18:29  felicity
 
 	* spamd/utils.c: bug 1755: a c++ comment slipped in, and some
 	compilers don't know what to do with it.
 
-2003-04-06 15:56  felicity
+2003-04-06 12:56  felicity
 
 	* lib/Mail/SpamAssassin/Util.pm: bug 1741: allow ~ and space in
 	file path (good for Windows), return blank if blank passed in,
 	fixed return only if RE matches
 
-2003-04-05 14:36  felicity
+2003-04-05 11:36  felicity
 
 	* lib/Mail/SpamAssassin/CmdLearn.pm: bug 1691: sa-learn was sending
 	non-error output to stderr instead of stdout (specifically the
 	"Learned # messages" string)
 
-2003-04-03 20:48  duncf
+2003-04-03 17:48  duncf
 
 	* debian/: changelog.in, control, logcheck, spamassassin.default,
 	spamassassin.templates, watch, po/POTFILES.in, po/pt_BR.po,
 	po/templates.pot: Updated debian packaging for CVS builds; adds
 	po-debconf support
 
-2003-04-03 20:48  felicity
+2003-04-03 17:48  felicity
 
 	* spamassassin.spec: updated spec file since 2.51 prepared for 2.54
 	release
 
-2003-04-03 20:34  jmason
+2003-04-03 17:34  jmason
 
 	* build/preprocessor.pm: backport: preprocessor being indexed by
 	CPAN, avoid for next version
 
-2003-04-03 20:33  jmason
+2003-04-03 17:33  jmason
 
 	* lib/Mail/SpamAssassin.pm: Starting 2.54
 
-2003-03-31 20:42  jmason
+2003-03-31 17:42  jmason
 
 	* Changes, build/README, lib/Mail/SpamAssassin/BayesStore.pm: ready
 	for release
 
-2003-03-31 19:43  jmason
+2003-03-31 16:43  jmason
 
 	* lib/Mail/SpamAssassin/BayesStore.pm: bug 1689: exists method does
 	not exist in NDBM_File for some reason.  worked around
 
-2003-03-31 19:08  jmason
+2003-03-31 16:08  jmason
 
 	* lib/Mail/SpamAssassin/Conf.pm: moved dialup_codes into more
 	privileged area
 
-2003-03-29 22:26  jmason
+2003-03-29 19:26  jmason
 
 	* lib/Mail/SpamAssassin.pm: ready to release
 
-2003-03-29 20:42  felicity
+2003-03-29 17:42  felicity
 
 	* MANIFEST, Makefile.PL, t/SATest.pm, t/rule_tests.t,
 	t/zz_cleanup.t: bug 1703: Makefile.PL would set a razor1 test if
 	razor1 wasn't installed.  rule_tests.t was still trying to use
 	bytes.pm.  spamd tests were using user's preferences/bayes/etc.
 
-2003-03-29 20:28  felicity
+2003-03-29 17:28  felicity
 
 	* lib/Mail/SpamAssassin/BayesStore.pm: bug 1707: When syncing the
 	journal, the code took advantage of a UNIX-ism where you can open a
@@ -291,24 +296,24 @@
 	before we open, and add a "can we read the file" check beforehand
 	to avoid messy cleanup.
 
-2003-03-29 20:10  felicity
+2003-03-29 17:10  felicity
 
 	* lib/Mail/SpamAssassin/Bayes.pm: bug 1699: a slight change to the
 	last patch, during tokenization, strip the extra chars before
 	skipping magic tokens.
 
-2003-03-28 16:28  jmason
+2003-03-28 13:28  jmason
 
 	* MANIFEST, spamd/libspamc.c, spamd/libspamc.h, t/spamc_B.t,
 	t/data/spam/bsmtp: bug 1595: BSMTP mode (spamc -B) fixed
 
-2003-03-28 15:26  felicity
+2003-03-28 12:26  felicity
 
 	* lib/Mail/SpamAssassin/: Bayes.pm, BayesStore.pm: bug 1699:
 	slightly better regex.	ignore actual magic token strings, not just
 	magic token prefixes.  this leaves more tokens able to be used.
 
-2003-03-28 15:14  felicity
+2003-03-28 12:14  felicity
 
 	* lib/Mail/SpamAssassin/: Bayes.pm, BayesStore.pm: Bug 1699: The
 	code wasn't protecting the Bayes DB "magic" tokens (tracks num
@@ -316,7 +321,7 @@
 	message.  This allows mails to corrupt the DB either maliciously or
 	if they discuss the tokens.
 
-2003-03-28 01:41  jmason
+2003-03-27 22:41  jmason
 
 	* lib/Mail/: SpamAssassin.pm, SpamAssassin/BayesStore.pm,
 	SpamAssassin/CmdLearn.pm, SpamAssassin/DBBasedAddrList.pm,
@@ -324,25 +329,25 @@
 	SpamAssassin/Win32Locker.pm: bug 1690: now has different lock
 	timeouts for different bayes operations
 
-2003-03-27 22:25  felicity
+2003-03-27 19:25  felicity
 
 	* lib/Mail/SpamAssassin/Bayes.pm: bug 1696: you could continuously
 	"forget" tokens from messages you've learned, and even those you
 	hadn't learned.
 
-2003-03-27 22:18  felicity
+2003-03-27 19:18  felicity
 
 	* spamassassin.raw, t/reportheader.t: bug 1695: report_header was
 	removed in 2.5x but still was in the POD docs and a test config.
 
-2003-03-27 22:16  felicity
+2003-03-27 19:16  felicity
 
 	* sa-learn.raw: bug 1502: sa-learn wasn't paying attention to the
 	compile-time paths for rules and the like.  The problem was that
 	the variables were declared my() which aren't accessible by other
 	packages.
 
-2003-03-27 20:27  jmason
+2003-03-27 17:27  jmason
 
 	* lib/Mail/: SpamAssassin.pm, SpamAssassin/BayesStore.pm,
 	SpamAssassin/CmdLearn.pm, SpamAssassin/Conf.pm,
@@ -350,7 +355,7 @@
 	SpamAssassin/UnixLocker.pm, SpamAssassin/Win32Locker.pm: backing
 	out lock_timeout patch for redo
 
-2003-03-27 20:01  jmason
+2003-03-27 17:01  jmason
 
 	* lib/Mail/: SpamAssassin.pm, SpamAssassin/BayesStore.pm,
 	SpamAssassin/CmdLearn.pm, SpamAssassin/Conf.pm,
@@ -358,33 +363,33 @@
 	SpamAssassin/UnixLocker.pm, SpamAssassin/Win32Locker.pm: bug 1690:
 	now has different lock timeouts for different bayes operations
 
-2003-03-27 19:27  jmason
+2003-03-27 16:27  jmason
 
 	* spamassassin.raw: bug 1608: spamassassin.1 lists incorrect paths
 	for config files
 
-2003-03-27 19:15  jmason
+2003-03-27 16:15  jmason
 
 	* spamd/: libspamc.c, spamc.c, spamc.pod: bug 1697: spamc fails to
 	dump message when running out of memory
 
-2003-03-27 16:18  jmason
+2003-03-27 13:18  jmason
 
 	* spamd/spamd.raw: bug 1536: kernel reporting SIGWAIT problem on
 	recent Red Hat kernels
 
-2003-03-27 16:13  jmason
+2003-03-27 13:13  jmason
 
 	* lib/Mail/SpamAssassin/DBBasedAddrList.pm: bug 1661: user_prefs
 	was world-writable after AWL tie, due to failure to set umask
 	correctly
 
-2003-03-27 16:12  jmason
+2003-03-27 13:12  jmason
 
 	* lib/Mail/SpamAssassin/EvalTests.pm: bug 1401: check_rbl was
 	checking incorrect number of Received hdrs
 
-2003-03-27 15:35  felicity
+2003-03-27 12:35  felicity
 
 	* lib/Mail/SpamAssassin/: Dns.pm, Reporter.pm: bug 1632: Razor
 	modifies %ENV so we tried to use a local() to make a temp version,
@@ -392,7 +397,7 @@
 	we'll let the helper_mode functions handle backing up/restoring
 	%ENV as appropriate.
 
-2003-03-27 12:55  felicity
+2003-03-27 09:55  felicity
 
 	* spamd/spamd.raw: bug 1514: spamd was trying to use "../lib" which
 	is ok most of the time, but during a "make test" on perl 5.005 it
@@ -400,93 +405,93 @@
 	"../blib/lib" first and use it if it exists.  otherwise, we
 	continue with "../lib".
 
-2003-03-27 12:48  felicity
+2003-03-27 09:48  felicity
 
 	* lib/Mail/SpamAssassin.pm: bug 1685: we should clean PATH when we
 	start if we're in taint mode.  This fixes a Sys::Hostname problem
 	in 5.005, but it's a good idea anyway since we won't be able to use
 	PATH unless it's cleaned in taint mode anyway.
 
-2003-03-26 20:53  jmason
+2003-03-26 17:53  jmason
 
 	* lib/Mail/SpamAssassin.pm: bug 1630: add-all-addrs-to-blacklist
 	was a no-op, due to > vs >= bug
 
-2003-03-26 15:18  jmason
+2003-03-26 12:18  jmason
 
 	* sa-learn.raw, lib/Mail/SpamAssassin/CmdLearn.pm: bug 1572:
 	sa-learn doco was still talking about auto-whitelists, although
 	this was never implemented
 
-2003-03-26 15:08  jmason
+2003-03-26 12:08  jmason
 
 	* spamd/README.spamd: bug 1674: README.spamd didn't know that
 	auto-learning had been implemented
 
-2003-03-26 15:06  jmason
+2003-03-26 12:06  jmason
 
 	* MANIFEST.SKIP: updated MANIFEST.SKIP likewise
 
-2003-03-26 15:05  jmason
+2003-03-26 12:05  jmason
 
 	* spamd/.cvsignore: updated cvsignore to ignore sslspamc
 
-2003-03-26 15:04  jmason
+2003-03-26 12:04  jmason
 
 	* spamd/spamd.raw: bug 1684: syslog-socket had a typo, fixed
 
-2003-03-26 15:01  jmason
+2003-03-26 12:01  jmason
 
 	* spamd/libspamc.c, spamd/utils.c, spamd/utils.h, .cvsignore: bug
 	1637: compilation of spamd/sslspamc broken, fixed
 
-2003-03-26 14:13  jmason
+2003-03-26 11:13  jmason
 
 	* config.h.in, configure, configure.in, .cvsignore, .cvsignore: bug
 	1542: configure doesn't detect SSL_CTX_free on NetBSD, fixed
 
-2003-03-26 13:20  msquadrat
+2003-03-26 10:20  msquadrat
 
 	* configure, Makefile.PL, .cvsignore: bug 1542: configure wasn't
 	updated, so the fix for this bug didn't work per default
 
-2003-03-24 20:22  jmason
+2003-03-24 17:22  jmason
 
 	* lib/Mail/SpamAssassin.pm: 2.53 devel cycle started
 
-2003-03-24 20:20  jmason
+2003-03-24 17:20  jmason
 
 	* Changes: 2.52 RELEASED
 
-2003-03-24 20:11  jmason
+2003-03-24 17:11  jmason
 
 	* INSTALL: last-minute doco change: recommend using DB_File
 
-2003-03-24 17:39  msquadrat
+2003-03-24 14:39  msquadrat
 
 	* lib/Mail/SpamAssassin.pm: ready for release
 
-2003-03-24 17:21  msquadrat
+2003-03-24 14:21  msquadrat
 
 	* spamassassin.raw: bug 1260: corrected description of
 	--nocreate-prefs option
 
-2003-03-24 17:17  msquadrat
+2003-03-24 14:17  msquadrat
 
 	* spamd/netbsd-rc-script.sh: bug 1656: updated init script for
 	NetBSD
 
-2003-03-24 16:28  msquadrat
+2003-03-24 13:28  msquadrat
 
 	* configure.in: bug 1542: configure didn't detect SSL_CTX_free on
 	NetBSD
 
-2003-03-24 16:11  msquadrat
+2003-03-24 13:11  msquadrat
 
 	* spamd/spamd.raw: bug 1601: option --syslog-socket wasn't
 	implemented
 
-2003-03-23 20:10  felicity
+2003-03-23 17:10  felicity
 
 	* lib/Mail/SpamAssassin/: Bayes.pm, BayesStore.pm: bug 1664: the
 	only entries in the bayes journal are token access time updates
@@ -504,81 +509,81 @@
 	and then a journal read failure means we don't need to rename the
 	temp file back.
 
-2003-03-23 19:52  felicity
+2003-03-23 16:52  felicity
 
 	* lib/Mail/SpamAssassin/Bayes.pm: bug 1672: a typo in a backported
 	patch for 2.51 caused bayes to sometimes not unlock the db.
 
-2003-03-20 15:31  jmason
+2003-03-20 12:31  jmason
 
 	* lib/Mail/SpamAssassin.pm: 2.51 devel cycle started
 
-2003-03-20 15:27  jmason
+2003-03-20 12:27  jmason
 
 	* Changes, build/update_devel, lib/Mail/SpamAssassin.pm: 2.51
 	RELEASED
 
-2003-03-20 15:07  jmason
+2003-03-20 12:07  jmason
 
 	* Changes, lib/Mail/SpamAssassin.pm: 2.5.1 RELEASED
 
-2003-03-20 14:38  jmason
+2003-03-20 11:38  jmason
 
 	* lib/Mail/SpamAssassin.pm: ready to release
 
-2003-03-20 01:53  jmason
+2003-03-19 22:53  jmason
 
 	* sa-learn.raw, lib/Mail/SpamAssassin/CmdLearn.pm: bug 1638:
 	--force-rebuild doco is unclear. fixed
 
-2003-03-20 01:51  quinlan
+2003-03-19 22:51  quinlan
 
 	* lib/Mail/SpamAssassin/Conf.pm: trivial documentation correction
 
-2003-03-19 17:26  msquadrat
+2003-03-19 14:26  msquadrat
 
 	* Makefile.PL: bug 1652: Perl 5.6.0 and 5.6.1 ship different
 	versions of ExtUtils::MakeMaker; both carry the version 5.45 though
 
-2003-03-19 14:29  felicity
+2003-03-19 11:29  felicity
 
 	* Makefile.PL: bug 1652: the suggested patch doesn't work.  perl
 	5.6.0 and perl 5.6.1 both have EU:MM 5.45, but the one in 5.6.1 has
 	PM_FILTER.  so reverting the initial patch since it doesn't take
 	this into account.
 
-2003-03-19 00:27  felicity
+2003-03-18 21:27  felicity
 
 	* lib/Mail/SpamAssassin/Bayes.pm: bug 1655: we tie to check # of
 	Bayes tokens, but we don't untie if # ham/spam is too low.  fixed.
 
-2003-03-18 23:52  jmason
+2003-03-18 20:52  jmason
 
 	* MANIFEST: bug 1541: removed trim_bayes_db from distro
 
-2003-03-18 21:38  jmason
+2003-03-18 18:38  jmason
 
 	* lib/Mail/SpamAssassin/BayesStore.pm: bug 1636: incorrect errors
 	from bayes if an error occurred during big scan-counter increment
 
-2003-03-18 20:56  felicity
+2003-03-18 17:56  felicity
 
 	* lib/Mail/SpamAssassin/BayesStore.pm: bug 1626: if a token's atime
 	in the bayes db is > current scan count, there was an expiry error,
 	so we'll reset the atime to the last expire time.
 
-2003-03-18 18:13  quinlan
+2003-03-18 15:13  quinlan
 
 	* lib/Mail/: SpamAssassin.pm, SpamAssassin/Conf.pm,
 	SpamAssassin/PerMsgStatus.pm: bug 1576: need safer way to render
 	attachments for broken clients
 
-2003-03-18 17:52  felicity
+2003-03-18 14:52  felicity
 
 	* t/: razor.t, razor2.t: bug 1619: razor tests were failing because
 	the rule description changed from what was being tested
 
-2003-03-18 17:11  felicity
+2003-03-18 14:11  felicity
 
 	* lib/Mail/: SpamAssassin.pm, SpamAssassin/Bayes.pm,
 	SpamAssassin/BayesStore.pm, SpamAssassin/PerMsgStatus.pm: bug 1566:
@@ -586,40 +591,40 @@
 	doesn't detect when nspam/nham have gone over the min # required
 	(200) and enable automatically.
 
-2003-03-18 17:04  felicity
+2003-03-18 14:04  felicity
 
 	* lib/Mail/SpamAssassin/BayesStore.pm: bug 1579: there were several
 	undef warnings in the Bayes code.  cleaned that out.
 
-2003-03-18 16:58  felicity
+2003-03-18 13:58  felicity
 
 	* lib/Mail/SpamAssassin/: Bayes.pm, BayesStore.pm, PerMsgStatus.pm:
 	bug 1556: PerMsgStatus wasn't cleaning up bayes DB ties after it
 	was done scanning which caused problems with MailScanner.
 
-2003-03-18 16:55  felicity
+2003-03-18 13:55  felicity
 
 	* lib/Mail/SpamAssassin/HTML.pm: bug 1653: HTML tests had undef
 	warnings sometimes.  do better parsing via RE.
 
-2003-03-17 22:27  felicity
+2003-03-17 19:27  felicity
 
 	* spamd/spamd.raw: bug 1640: spamd was sending the Content-Length
 	header instead of the Spam: header for protocol 1.2 clients.  it
 	should have been sending just the Spam header, not the
 	Content-Length one.
 
-2003-03-17 22:21  felicity
+2003-03-17 19:21  felicity
 
 	* lib/Mail/SpamAssassin/Conf.pm: bug 1648: unwhitelist_from_rcvd
 	was non-functional due to typo.  also updated some docs.
 
-2003-03-17 22:14  felicity
+2003-03-17 19:14  felicity
 
 	* Makefile.PL: bug 1652: we checked for version < 5.45, but the
 	feature was added > 5.45, so we get confused when == 5.45.
 
-2003-03-17 18:56  felicity
+2003-03-17 15:56  felicity
 
 	* rules/: 10_misc.cf, 20_anti_ratware.cf, 20_body_tests.cf,
 	20_compensate.cf, 20_head_tests.cf, 20_html_tests.cf,
@@ -631,20 +636,20 @@
 	70_cvs_rules_under_test.cf, regression_tests.cf: bug 1607: add
 	license information to the rule files
 
-2003-03-17 14:07  felicity
+2003-03-17 11:07  felicity
 
 	* lib/Mail/SpamAssassin/Bayes.pm: bug 1651: if for some reason a
 	Bayes scan() doesn't occur (too few tokens, tokens without enough
 	probability, etc,) but the DBs were already tied, we didn't untie
 	them.
 
-2003-03-17 10:24  felicity
+2003-03-17 07:24  felicity
 
 	* sa-learn.raw, spamassassin.raw, spamd/spamc.pod: bug 1605: SA
 	documentation ought to specify what "ham" is for people who don't
 	necessarily know it means non-spam.
 
-2003-03-17 10:19  felicity
+2003-03-17 07:19  felicity
 
 	* lib/Mail/: SpamAssassin.pm, SpamAssassin/Bayes.pm,
 	SpamAssassin/EvalTests.pm, SpamAssassin/PerMsgStatus.pm: fix for
@@ -655,7 +660,7 @@
 	would be done (determining scoreset, etc.)  cleaned up scan() a
 	little (let is_scan_available check for # of tokens)
 
-2003-03-17 10:12  felicity
+2003-03-17 07:12  felicity
 
 	* lib/Mail/SpamAssassin/BayesStore.pm: fix for bug 1610: after a
 	bayes expire, the current message scan count would return to 0. 
@@ -666,112 +671,112 @@
 	current message scan.  this should never happen in actual usage and
 	only appears if this bug has occured.
 
-2003-03-17 02:25  quinlan
+2003-03-16 23:25  quinlan
 
 	* debian/: README.Upgrade, changelog.in, copyright,
 	spamassassin.README.Debian, spamassassin.docs,
 	spamassassin.examples: bug 1643: backport Debian 2.50 changes to
 	2.50 branch
 
-2003-03-15 13:29  msquadrat
+2003-03-15 10:29  msquadrat
 
 	* lib/Mail/SpamAssassin/Dns.pm: bug 1641: don't load razor if it is
 	not available
 
-2003-03-15 13:24  msquadrat
+2003-03-15 10:24  msquadrat
 
 	* t/: SATest.pm, db_awl_path.t, reportheader.t, whitelist_to.t: bug
 	1639: permission issue in testbench
 
-2003-03-15 13:19  msquadrat
+2003-03-15 10:19  msquadrat
 
 	* lib/Mail/SpamAssassin/UnixLocker.pm: bug 1635: warn when removing
 	a stale lock file fails
 
-2003-03-15 13:16  msquadrat
+2003-03-15 10:16  msquadrat
 
 	* lib/Mail/SpamAssassin/BayesStore.pm: bug 1625: problem with
 	sync_journal() when journal is out-of-date
 
-2003-03-15 11:41  msquadrat
+2003-03-15 08:41  msquadrat
 
 	* lib/Mail/SpamAssassin/CmdLearn.pm: bug 1545: possible warning
 	about undefined veriable in sa-learn
 
-2003-03-15 11:33  msquadrat
+2003-03-15 08:33  msquadrat
 
 	* sa-learn.raw, lib/Mail/SpamAssassin/CmdLearn.pm: bug 1578: fix
 	problem with --single in sa-learn
 
-2003-03-15 11:23  msquadrat
+2003-03-15 08:23  msquadrat
 
 	* rules/30_text_de.cf: bug 1568: small type in German translation
 
-2003-03-15 11:19  msquadrat
+2003-03-15 08:19  msquadrat
 
 	* sa-learn.raw, lib/Mail/SpamAssassin/BayesStore.pm: bug 1545:
 	extended docu for sa-learn
 
-2003-03-15 11:10  msquadrat
+2003-03-15 08:10  msquadrat
 
 	* lib/Mail/SpamAssassin/: Bayes.pm, BayesStore.pm, UnixLocker.pm,
 	Win32Locker.pm: bug 1545: locking problems in combination with
 	GDBM_File
 
-2003-03-15 11:03  msquadrat
+2003-03-15 08:03  msquadrat
 
 	* lib/Mail/SpamAssassin/BayesStore.pm: bug 1513: permission issues
 	with bayes_msgcount
 
-2003-03-15 10:56  msquadrat
+2003-03-15 07:56  msquadrat
 
 	* lib/Mail/SpamAssassin/Conf.pm: bug 1528: wrong clear statement in
 	unsafe_report docu
 
-2003-03-15 10:50  msquadrat
+2003-03-15 07:50  msquadrat
 
 	* lib/Mail/SpamAssassin/PerMsgStatus.pm: bug 1570: tab instead of
 	space in X-Spam-Status header
 
-2003-03-14 13:49  quinlan
+2003-03-14 10:49  quinlan
 
 	* lib/Mail/SpamAssassin/Conf.pm: bug 1554: documentation bug for
 	ok_locales
 
-2003-03-14 13:48  quinlan
+2003-03-14 10:48  quinlan
 
 	* lib/Mail/SpamAssassin/PerMsgStatus.pm: fix bug 1546: use our
 	local_tz() function instead of non-standard strftime %z extension
 	to get local timezone
 
-2003-03-13 22:59  felicity
+2003-03-13 19:59  felicity
 
 	* lib/Mail/SpamAssassin/BayesStore.pm: fix for bug 1611
 
-2003-03-13 22:34  felicity
+2003-03-13 19:34  felicity
 
 	* lib/Mail/SpamAssassin/NoMailAudit.pm: fix for bug 1544
 
-2003-03-13 22:23  felicity
+2003-03-13 19:23  felicity
 
 	* spamd/spamd.raw: fix for bug 1604
 
-2003-03-13 22:10  felicity
+2003-03-13 19:10  felicity
 
 	* lib/Mail/SpamAssassin/EncappedMessage.pm,
 	masses/rewrite-cf-with-new-scores, masses/score-ranges-from-freqs:
 	bug 1558
 
-2003-03-13 21:59  felicity
+2003-03-13 18:59  felicity
 
 	* spamassassin.spec: bug 1593, and updated spec file to 2.51
 	version
 
-2003-03-13 21:50  felicity
+2003-03-13 18:50  felicity
 
 	* lib/Mail/SpamAssassin/Util.pm: fix for bug 1559
 
-2003-02-24 11:09  msquadrat
+2003-02-24 08:09  msquadrat
 
 	* lib/Mail/SpamAssassin/Conf.pm: backport fix for bug 1537: better
 	docu of dns_available
