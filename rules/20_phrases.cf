@@ -476,15 +476,5 @@ describe MORE_SEX 		Talks about a bigger drive for sex
 body BANG_GUAR	         	/\bguaranteed?\!/i
 describe BANG_GUAR		Something is emphatically guaranteed
 
-# Feb 18 2003 jm: try another combo.  I'm not sure __NIGERIAN_HONESTY is req'd.
-body __NIGERIAN_CODE_CONDUCT	/\bcode of conduct\b/i
-body __NIGERIAN_CIV_SERVICE	/\bcivil service\b/i
-body __NIGERIAN_TOP_SECRET	/\btop secret\b/i
-body __NIGERIAN_STRICT_CONF	/\b(?:strictest confidence|utmost secrecy)\b/i
-body __NIGERIAN_HONESTY		/\btransparent honesty\b/i
-body __NIGERIAN_DISBURSE	/\bdisburs/i
-meta NIGERIAN_BODY_GOVT_3	((__NIGERIAN_CODE_CONDUCT + __NIGERIAN_CIV_SERVICE + __NIGERIAN_HONESTY + __NIGERIAN_TOP_SECRET + __NIGERIAN_STRICT_CONF + __NIGERIAN_DISBURSE) >= 3)
-describe NIGERIAN_BODY_GOVT_3	Message body has many indications of Nigerian scam
-
 body SEE_FOR_YOURSELF		/See (?:for|it|it for) yourself\b/i
 describe SEE_FOR_YOURSELF       See for yourself 
