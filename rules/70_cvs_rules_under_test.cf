@@ -139,6 +139,22 @@ body T_ACCEPT_CREDIT_CARDS	/\b(?:accept\b|are accepting).{1,15}credit cards?\b/i
 # possible replacement for ADVERT_CODE2 (rather minor improvement)
 header T_ADVERT_CODE2		Subject =~ /\bA\s*D\s*V\b/i
 
+# HTML control -- HTML spam rules should all have better S/O than this
+body T_HTML_MESSAGE		eval:html_message()
+score T_HTML_MESSAGE		0.0000001
+
+# HTML input form tests
+body T_HTML_INPUT_TYPE_HIDDEN	eval:html_test('input_type_hidden')
+body T_HTML_INPUT_NAME_EMAIL	eval:html_test('input_name_email')
+body T_HTML_INPUT_VALUE_EMAIL	eval:html_test('input_value_email')
+# HTML image tricks
+body T_HTML_IMG_ALT_ONLY1	eval:html_test('img_alt_only1')
+body T_HTML_IMG_ALT_ONLY2	eval:html_test('img_alt_only2')
+body T_HTML_IMG_SRC_NO_IMAGE	eval:html_test('img_src_no_image')
+# possible improvements for WEB_BUGS (code into HTML.pm if it works)
+body T_HTML_WEB_BUGS1		eval:html_test('t_web_bugs1')
+body T_HTML_WEB_BUGS2		eval:html_test('t_web_bugs2')
+
 ###########################################################################
 
 # it's BANG, not PLING (Brits!)
