@@ -311,7 +311,6 @@ inst_cfs: $(PKG_LOCAL_RULES_DIR) $(PKG_LOCAL_RULES_DIR)/local.cf
 $(PKG_LOCAL_RULES_DIR):
 	$(MKPATH) $@
 
-# use "..." for the -e arg, on win32 '...' will not work
 $(PKG_LOCAL_RULES_DIR)/local.cf: rules/local.cf
 	$(PERL) -e "use File::Copy; (-f '$@') or copy ('$?', '$@');"
 
