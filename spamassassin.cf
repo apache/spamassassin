@@ -165,7 +165,7 @@ body CALL_NOW			/CALL NOW/
 body CALL_888			/call.*888-\d+-\d+/i
 body ONLINE_BIZ_OPS		/online business opportunities/i
 body REMOVAL_INSTRUCTIONS	/Removal instructions/i
-body BILLION_DOLLARS		/[BM]ILLION DOLLARS/
+body BILLION_DOLLARS		/[BM]ILLION DOLLAR/
 body OPT_IN			/opt-in/i
 body DIRECT_EMAIL		/direct e-*mail/i
 body MASS_EMAIL			/mass e-*mail/i
@@ -200,6 +200,9 @@ body PORN_2			/\bwild\b.*\bhardcore\b/i
 body PORN_3			/(?:(?:\bcum|\bteen|\baction\b|\bhot\b).*){2,}/i
 
 body TRACKER_ID			/^\s*\W{4,} \w{10,} \W{4,}\s*$/
+
+body OPPORTUNITY		/OPPORTUNITY/
+body PURE_PROFIT		/PURE PROFIT/
 
 ###########################################################################
 # Compensation for common false positives.
