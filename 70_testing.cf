@@ -362,24 +362,6 @@ body T_NO_SCRIP_NEEDED		/no.{1,10}P(?:er|re)scription.{1,10}(?:needed|require|ne
 
 ########################################################################
 
-# deal with those annoying probe-like mails
-# For TVD:
-#  No subject or body text:
-#  1.417   1.5839   0.0000    1.000   1.00    0.01  T_EMPTY_MSG
-#  No subject exists and no body text:
-#  1.397   1.5609   0.0000    1.000   0.67    0.01  T_EMPTY_MSG2
-#  No subject exists and no body text and it's to undisclosed-recips:
-#  1.351   1.5102   0.0000    1.000   0.33    0.01  T_EMPTY_MSG3
-body __NONEMPTY_BODY    /\S/
-meta T_EMPTY_MSG	!__NONEMPTY_BODY
-meta T_EMPTY_MSG2	!__HAS_SUBJECT && !__NONEMPTY_BODY
-meta T_EMPTY_MSG3	UNDISC_RECIPS && !__HAS_SUBJECT && !__NONEMPTY_BODY
-meta T_EMPTY_MSG4	UNDISC_RECIPS && !__NONEMPTY_BODY
-# __MIME_ATTACHMENT defined in 20_html_tests.cf, put a note there
-# if one of these is promoted
-meta T_EMPTY_MSG5	!__MIME_ATTACHMENT && !__HAS_SUBJECT && !__NONEMPTY_BODY
-meta T_EMPTY_MSG6	!__MIME_ATTACHMENT && !__NONEMPTY_BODY
-
 # idea of looking for consonant strings seen in airmax.cf
 header T_NOVOWEL_FROM_6_LC	From =~ /[bcdfghjklmnpqrstvwxyz]{6}/
 header T_NOVOWEL_FROM_6_AC	From =~ /[bcdfghjklmnpqrstvwxyz]{6}/i
