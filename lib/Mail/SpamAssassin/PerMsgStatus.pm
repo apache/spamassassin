@@ -280,6 +280,9 @@ sub learn {
     return;
   }
 
+  my $learner_said_ham_hits = -1.0;
+  my $learner_said_spam_hits = 1.0;
+
   if ($isspam) {
     my $required_body_hits = 3;
     my $required_head_hits = 3;
@@ -292,6 +295,18 @@ sub learn {
     if ($self->{head_only_hits} < $required_head_hits) {
       dbg ("auto-learn? no: too few head hits (".
 		  $self->{head_only_hits}." < ".$required_head_hits.")");
+      return;
+    }
+    if ($self->{learned_hits} < $learner_said_ham_hits) {
+      dbg ("auto-learn? no: learner indicated ham (".
+		  $self->{learned_hits}." < ".$learner_said_ham_hits.")");
+      return;
+    }
+
+  } else {
+    if ($self->{learned_hits} > $learner_said_spam_hits) {
+      dbg ("auto-learn? no: learner indicated spam (".
+		  $self->{learned_hits}." > ".$learner_said_spam_hits.")");
       return;
     }
   }
