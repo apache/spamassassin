@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.29 2002/10/07 08:48:16 quinlan Exp $
+# $Id: HTML.pm,v 1.30 2002/10/07 19:18:43 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -8,12 +8,16 @@ use HTML::Parser 3.00 ();
 
 use strict;
 
+use vars qw{
+  $re_loose $re_strict
+};
+
 # HTML decoding TODOs
 # - add URIs to list for faster URI testing
 
 # elements defined by the HTML 4.01 and XHTML 1.0 DTDs (do not change them!)
-my $re_loose = 'applet|basefont|center|dir|font|frame|frameset|iframe|isindex|menu|noframes|s|strike|u';
-my $re_strict = 'a|abbr|acronym|address|area|b|base|bdo|big|blockquote|body|br|button|caption|cite|code|col|colgroup|dd|del|dfn|div|dl|dt|em|fieldset|form|h1|h2|h3|h4|h5|h6|head|hr|html|i|img|input|ins|kbd|label|legend|li|link|map|meta|noscript|object|ol|optgroup|option|p|param|pre|q|samp|script|select|small|span|strong|style|sub|sup|table|tbody|td|textarea|tfoot|th|thead|title|tr|tt|ul|var';
+$re_loose = 'applet|basefont|center|dir|font|frame|frameset|iframe|isindex|menu|noframes|s|strike|u';
+$re_strict = 'a|abbr|acronym|address|area|b|base|bdo|big|blockquote|body|br|button|caption|cite|code|col|colgroup|dd|del|dfn|div|dl|dt|em|fieldset|form|h1|h2|h3|h4|h5|h6|head|hr|html|i|img|input|ins|kbd|label|legend|li|link|map|meta|noscript|object|ol|optgroup|option|p|param|pre|q|samp|script|select|small|span|strong|style|sub|sup|table|tbody|td|textarea|tfoot|th|thead|title|tr|tt|ul|var';
 
 sub html_tag {
   my ($self, $tag, $attr, $num) = @_;
