@@ -360,19 +360,33 @@ sub expire_old_tokens_trapped {
   # some of the toks we deleted.
   my $reprieved = 0;
 
-  while ($kept+$reprieved < $self->{expiry_min_db_size} && $deleted-$reprieved > 0) {
-    my $deld = shift @deleted_toks;
-    last unless defined $deld;
+  # do we need to reprieve any tokens?
+  if ( $kept < $self->{expiry_min_db_size} ) {
+    # sort the deleted tokens so the most recent ones are at the end of the array
+    @deleted_toks = sort { $a->[3] <=> $b->[3] } @deleted_toks;
+  
+    # Go through until the DB is at least min_db_size, and there are still tokens to reprieve
+    while ($kept+$reprieved < $self->{expiry_min_db_size} && $#deleted_toks > -1) {
+      my $oatime;
 
-    my ($tok, $ts, $th, $atime) = @{$deld};
-    next unless (defined $tok && defined $ts && defined $th);
+      # reprieve all tokens with a given atime at once
+      while ( $#deleted_toks > -1 && (!defined $oatime || $deleted_toks[0]->[3] == $oatime) ) {
+        my $deld = pop @deleted_toks; # pull the token off the backside
+        last unless defined $deld; # this shouldn't happen, but just in case ...
 
-    $new_toks{$tok} = tok_pack ($ts, $th, $atime);
-    if (defined($atime) && (!defined($oldest) || $atime < $oldest)) {
-      $oldest = $atime;
+        my ($tok, $ts, $th, $atime) = @{$deld};
+        next unless (defined $tok && defined $ts && defined $th);
+        $oatime = $atime;
+
+        $new_toks{$tok} = tok_pack ($ts, $th, $atime);
+        if (defined($atime) && (!defined($oldest) || $atime < $oldest)) {
+          $oldest = $atime;
+        }
+        $reprieved++;
+      }
     }
-    $reprieved++;
   }
+
   @deleted_toks = ();		# free 'em up
   $deleted -= $reprieved;
 
