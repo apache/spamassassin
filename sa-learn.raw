@@ -97,6 +97,7 @@ GetOptions(
   'sync'        => \$synconly,
   'rebuild'     => sub { $synconly = 1; warn "The --rebuild option has been deprecated.  Please use --sync instead.\n" },
 
+  'username|u=s'    => \$opt{'username'},
   'configpath|config-file|config-dir|c|C=s' => \$opt{'configpath'},
   'prefspath|prefs-file|p=s'                => \$opt{'prefspath'},
   'siteconfigpath=s'                        => \$opt{'siteconfigpath'},
@@ -186,6 +187,7 @@ $spamtest = new Mail::SpamAssassin(
     rules_filename      => $opt{'configpath'},
     site_rules_filename => $opt{'siteconfigpath'},
     userprefs_filename  => $opt{'prefspath'},
+    username            => $opt{'username'},
     debug               => defined( $opt{'debug-level'} ),
     local_tests_only    => 1,
     dont_copy_prefs     => 1,
@@ -516,6 +518,7 @@ Options:
  --backup                          Backup, to STDOUT, existing database
  --restore <filename>              Restore a database from filename
 
+ -u username, --username=username  Override username taken from the runtime environment
  -C path, --configpath=path, --config-file=path   Path to standard configuration dir
  -p prefs, --prefspath=file, --prefs-file=file    Set user preferences file
  --siteconfigpath=path             Path for site configs (def: /etc/mail/spamassassin)
@@ -636,6 +639,12 @@ WARNING: This is a destructive operation, previous Bayes data will be wiped out.
 =item B<-h>, B<--help>
 
 Print help message and exit.
+
+=item B<-u> I<username>, B<--username>=I<username>
+
+If specified this username will override the username taken from the runtime
+environment.  You can use this option to specify users in a virtual user
+configuration.
 
 =item B<-C> I<path>, B<--configpath>=I<path>, B<--config-file>=I<path>
 
