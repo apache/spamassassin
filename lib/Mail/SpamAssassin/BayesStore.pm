@@ -60,6 +60,8 @@ use vars qw{
 # it into place.
 @DB_EXTENSIONS = ('', '.db', '.dir', '.pag', '.dbm', '.cdb');
 
+# These are the magic tokens we use to track stuff in the DB.
+# The format MUST be '**' followed by a capital letter ([A-Z]).
 $NSPAM_MAGIC_TOKEN = '**NSPAM';
 $NHAM_MAGIC_TOKEN = '**NHAM';
 $OLDEST_TOKEN_AGE_MAGIC_TOKEN = '**OLDESTAGE';
@@ -324,13 +326,7 @@ sub expire_old_tokens_trapped {
   if ($showdots) { print STDERR "\n"; }
 
   foreach my $tok (keys %{$self->{db_toks}}) {
-    next if ($tok eq $NSPAM_MAGIC_TOKEN
-	  || $tok eq $NHAM_MAGIC_TOKEN
-	  || $tok eq $LAST_EXPIRE_MAGIC_TOKEN
-	  || $tok eq $NTOKENS_MAGIC_TOKEN
-	  || $tok eq $OLDEST_TOKEN_AGE_MAGIC_TOKEN
-	  || $tok eq $SCANCOUNT_BASE_MAGIC_TOKEN
-	  || $tok eq $RUNNING_EXPIRE_MAGIC_TOKEN);
+    next if ($tok =~ /^\*\*[A-Z]/); # skip magic tokens
 
     my ($ts, $th, $atime) = $self->tok_get ($tok);
 
@@ -715,6 +711,10 @@ sub tok_put {
   my ($self, $tok, $ts, $th, $atime) = @_;
   $ts ||= 0;
   $th ||= 0;
+
+  if ( $tok =~ /^\*\*[A-Z]/ ) { # magic token prefix?  Ignore it!
+    return;
+  }
 
   my $exists_already = exists $self->{db_toks}->{$tok};
 
