@@ -1,4 +1,4 @@
-# $Id: Received.pm,v 1.29.2.1 2003/09/29 19:41:06 felicity Exp $
+# $Id: Received.pm,v 1.29.2.2 2003/11/15 02:44:14 jmason Exp $
 
 # ---------------------------------------------------------------------------
 
@@ -477,6 +477,12 @@ sub parse_received_line {
     if (/^from (\S+) \((\S+) \[(${IP_ADDRESS})\]\)(?: \(authenticated bits=\d+\)|) by (\S+) \(/) { # sendmail
       $mta_looked_up_dns = 1;
       $helo = $1; $rdns = $2; $ip = $3; $by = $4; goto enough;
+    }
+
+    # Received: from imo-m01.mx.aol.com ([64.12.136.4]) by eagle.glenraven.com
+    # via smtpd (for [198.85.87.98]) with SMTP; Wed, 08 Oct 2003 16:25:37 -0400
+    if (/^from (\S+) \(\[(${IP_ADDRESS})\]\) by (\S+) via smtpd \(/) {
+      $helo = $1; $ip = $2; $by = $3; goto enough;
     }
 
     # Received: from cabbage.jmason.org [127.0.0.1]
