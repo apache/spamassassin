@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.538 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.539 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -369,5 +369,12 @@ header __PALM_EUDORA_MUA	X-Mailer =~ /^Eudora \d+.\d+ for PalmOS\b/
 meta T_FORGED_MUA_EUDORA          (__EUDORA_MUA && !__EUDORA_MSGID && !__UNUSABLE_MSGID && !X_LOOP && !__HAS_X_MAILING_LIST && !__T_MAC_EUDORA_MUA && !__PALM_EUDORA_MUA && !__OLD_EUDORA1 && !(__OLD_EUDORA2 && !__QUALCOMM))
 
 rawbody T_OBFUSCATING_BAD_TAG	/\w(?:<\s*\/\s+[^>]*>)+\w/
-describe T_OBFUSCATING_BAD_TAG	Contains illegal HTML tags to obfuscate text
+describe T_OBFUSCATING_BAD_TAG	Contains illegal HTML closing tags to obfuscate text
+
+rawbody T_OBFUSCATING_BAD_PI	/\w(?:<\s*\?\s+[^>]*>)+\w/
+describe T_OBFUSCATING_BAD_PI	Contains illegal XML PI to obfuscate text
+
+rawbody T_OBFUSCATING_BAD_TAG_2	/\w(?:<\s*[^>]*>)+\w/
+describe T_OBFUSCATING_BAD_TAG_2 Contains illegal HTML tags to obfuscate text
+
 
