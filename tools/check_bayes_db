@@ -14,7 +14,7 @@ use vars qw{
 use Getopt::Long;
 GetOptions("dbpath=s");
 
-@DBNAMES = qw(count toks_ham toks_spam probs);
+@DBNAMES = qw(toks probs);
 
 my $path = $opt_dbpath;
 $path ||= $ENV{HOME}."/.spamassassin/bayes";
@@ -27,15 +27,12 @@ foreach my $dbname (@DBNAMES) {
 }
 
 printf ("%3.3f %8d %8d   %s\n", 0.0, 0,
-	$h{db_count}->{'nspam'}, 'non-token data: nspam');
+	$h{db_probs}->{'**NSPAM'}, 'non-token data: nspam');
 printf ("%3.3f %8d %8d   %s\n", 0.0, 0,
-	$h{db_count}->{'nham'}, 'non-token data: nham');
-printf ("%3.3f %8d %3.3f   %s\n", 0.0, 0,
-	$h{db_count}->{'robinson_x'}, 'non-token data: robinson_x');
+	$h{db_probs}->{'**NHAM'}, 'non-token data: nham');
 
 my %seen = ();
-my @k = ( keys(%{$h{db_toks_spam}}) , keys(%{$h{db_toks_ham}}) );
-for my $key (@k) {
+for my $key ( keys(%{$h{db_toks}}) ) {
   next if (exists $seen{$key});
   $seen{$key} = 1;
 
@@ -46,9 +43,10 @@ for my $key (@k) {
     $prob = 0.5;
   }
 
-  my $sp = $h{db_toks_spam}->{$key}; $sp ||= 0;
-  my $ns = $h{db_toks_ham}->{$key};  $ns ||= 0;
-  printf ("%3.3f %8d %8d   %s\n", $prob, $sp, $ns, $key);
+  my ($ts, $th) = tok_unpack ($h{db_toks}->{$key});
+  $ts ||= 0;
+  $th ||= 0;
+  printf ("%3.3f %8d %8d   %s\n", $prob, $ts, $th, $key);
 }
 
 foreach my $dbname (@DBNAMES) {
@@ -56,3 +54,6 @@ foreach my $dbname (@DBNAMES) {
   my $db_var = 'db_'.$dbname;
   untie %{$h{$db_var}};
 }
+
+sub tok_unpack { return unpack ("LL", $_[0] || 0); }
+

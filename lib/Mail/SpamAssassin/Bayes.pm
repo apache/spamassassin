@@ -7,13 +7,13 @@ Mail::SpamAssassin::Bayes - determine spammishness using a Bayesian classifier
 =head1 DESCRIPTION
 
 This is a Bayesian-like form of probability-analysis classification, using an
-algorithm based on the one detailed in Paul Graham's "A Plan For Spam" paper
+algorithm based on the one detailed in Paul Graham's I<A Plan For Spam> paper
 at:
 
   http://www.paulgraham.com/
 
-It also incorporates some other aspects taken from Graham Robinson's webpage on
-the subject at:
+It also incorporates some other aspects taken from Graham Robinson's webpage
+on the subject at:
 
   http://radio.weblogs.com/0101454/stories/2002/09/16/spamDetection.html
 
@@ -39,6 +39,7 @@ use AnyDBM_File;
 
 use vars qw{ @ISA @DBNAMES
   $IGNORED_HDRS
+  @FLAG_PRESENCE_HDRS
   $MIN_SPAM_CORPUS_SIZE_FOR_BAYES
   $MIN_HAM_CORPUS_SIZE_FOR_BAYES
   %HEADER_NAME_COMPRESSION
@@ -50,33 +51,67 @@ use vars qw{ @ISA @DBNAMES
 # to pick up spurious clues from some.  What we now do is use all of them
 # *less* these well-known headers; that way we can pick up spammers' tracking
 # headers (which are obviously not well-known in advance!).
-#
-# Don't use the following... From, To, Cc; frequently forged.  Date: can provide
-# incorrect cues if your spam corpus is older/newer than nonspam.  Subject:
-# already included as part of body.  List headers: a spamfiltering mailing list
-# will become a nonspam sign.  Received: handled specially.
-# Spam-filter or virus-filter signs: obvious reasons.
 
-$IGNORED_HDRS = qr{(?:
-		  From |To |Cc |CC |MIME-Version |Content-Transfer-Encoding
-		  |List-Unsubscribe |List-Subscribe |List-Owner
-		  |X-List-Host |Received |Date |Subject
-		  |Sender |X-MailScanner |X-MailScanner-SpamCheck
-		  |Delivered-To |X-Spam-Status |X-Spam-Level
-		  |Reply-To |Errors-To |X-Antispam 
-		  |Return-Path |Delivery-Return-Path
-		  |X-Pyzor |Content-Class |Thread-Index
-		  |X-Mailman-Version |X-Beenthere
-		  |X-OriginalArrivalTime |X-MimeOLE
-		  |X-Spam-Checker-Version |X-Spam-Report
-		  |X-Spam-Flag |X-Original-Date |List-Archive
-		  |List-Id |List-Post |List-Help |X-RBL-Warning
-		  |X-MDaemon-Deliver-To| X-Virus-Scanned
-		  |X-MIME-Autoconverted | Status |Content-Length
-		  |Lines |X-UID |Delivery-Date |X-Virus-Scanned
-		  |X-Spam-hits |X-Spam |X-Spam-Score
-		  |X-Mass-Check-Id |Replied
+$IGNORED_HDRS = qr{(?: Sender			# misc noise
+		  |Delivered-To |Delivery-Date
+		  |X-MIME-Autoconverted
+
+		  |Received	# handled specially
+
+		  # Date: can provide invalid cues if your spam corpus is
+		  # older/newer than nonspam
+		  |Date	
+
+		  # List headers: ignore. a spamfiltering mailing list will
+		  # become a nonspam sign.
+		  |List-Unsubscribe |List-Subscribe |List-Owner |X-List-Host
+		  |X-Mailman-Version |X-Beenthere |List-Post |List-Help
+		  |X-Original-Date |List-Archive |List-Id |Mail-Followup-To
+
+		  # Spamfilter/virus-scanner headers: too easy to chain from
+		  # these
+		  |X-MailScanner |X-MailScanner-SpamCheck |X-Spam-Status
+		  |X-Spam-Level |X-Antispam |X-Spam-Checker-Version
+		  |X-Spam-Report |X-Spam-Flag |X-RBL-Warning
+		  |X-MDaemon-Deliver-To |X-Virus-Scanned |X-Spam-hits |X-Spam
+		  |X-Spam-Score |X-Mass-Check-Id |X-Pyzor
+
+		  # some noisy Outlook headers that add no good clues:
+		  |Content-Class |Thread-Index
+		  |X-OriginalArrivalTime
+
+		  # Annotations from IMAP, POP, and MH:
+		  |Status |Content-Length
+		  |Lines |X-UID	|X-UIDL
+		  |Replied |Forwarded
 		)}x;
+
+# Note the presence or absence of some headers.  by default the PRESENT/ABSENT
+# token this generates will exist alongside the tokens in the header; if you
+# don't want to see tokens from these headers *at all* except for the
+# PRESENT/ABSENT token, add them to IGNORED_HDRS too.  This is off by default.
+#
+# to replace In-Reply-To et al with a header presence/absence token, add
+# this to IGNORED_HDRS above: "|In-Reply-To |References" and turn on
+# TRY_NOTE_HEADER_PRESENCE_ABSENCE.  But it does not seem to be a win.
+
+use constant TRY_NOTE_HEADER_PRESENCE_ABSENCE => 0;
+@FLAG_PRESENCE_HDRS = qw{
+		  From To Cc CC MIME-Version Content-Transfer-Encoding Date
+		  Subject Sender Reply-To Errors-To Return-Receipt-To
+		  Return-Path Content-Class Thread-Index X-OriginalArrivalTime
+		  X-Mailer User-Agent Content-Type X-Priority X-Msmail-Priority
+		  Importance X-Mimeole In-Reply-To References 
+		};
+
+# tweaks tested as of Nov 18 2002 by jm: see SpamAssassin-devel list archives
+# for results.  The winners are now the default settings.
+use constant TRY_IGNORE_TITLE_CASE_AT_START_OF_SENTENCE => 1;
+use constant TRY_IGNORE_TITLE_CASE_EVERYWHERE => 0;
+use constant TRY_DUP_TOKENS_AS_LOWERCASE => 0;
+use constant TRY_DUP_TOKENS_WITH_CASEI_PREFIX => 0;
+use constant TRY_KEEP_AT_SIGNS => 1;
+use constant TRY_KEEP_THIRD_RECEIVED => 0;
 
 # We store header-mined tokens in the db with a "HHeaderName:val" format.
 # some headers may contain lots of gibberish tokens, so allow a little basic
@@ -93,11 +128,10 @@ $IGNORED_HDRS = qr{(?:
   'User-Agent' => '*u',
   'References' => '*f',
   'In-Reply-To' => '*i',
-  'X-Originalarrivaltime' => '*o',
 );
 
 # How big should the corpora be before we allow scoring using Bayesian tests?
-# Do not use constants here, these may be better as conf items. TODO
+# Do not use constants here. Also these may be better as conf items. TODO
 $MIN_SPAM_CORPUS_SIZE_FOR_BAYES = 200;
 $MIN_HAM_CORPUS_SIZE_FOR_BAYES = 200;
 
@@ -108,15 +142,14 @@ $MIN_HAM_CORPUS_SIZE_FOR_BAYES = 200;
 use constant USE_ROBINSON_FX_EQUATION_FOR_LOW_FREQS => 1;
 
 # This (apparently) works well as a value for 's' in the f(w) equation.
-use constant ROBINSON_S_CONSTANT => 0.45;
+use constant ROBINSON_S_CONSTANT => 0.30;
 
 # How many of the most significant tokens should we use for the p(w)
 # calculation?
-use constant N_SIGNIFICANT_TOKENS => 50;
+use constant N_SIGNIFICANT_TOKENS => 150;
 
-# Should we ignore tokens very close to the middle ground?  This value
-# is anecdotally effective.
-use constant ROBINSON_MIN_PROB_STRENGTH => 0.1;
+# Should we ignore tokens with probs very close to the middle ground (.5)?
+use constant ROBINSON_MIN_PROB_STRENGTH => 0.27;
 
 # How long a token should we hold onto?  (note: German speakers typically
 # will require a longer token than English ones.)
@@ -130,10 +163,10 @@ use constant PROB_BOUND_UPPER => 0.999;
 
 # we have 5 databases for efficiency.  To quote Matt:
 # > need five db files though to make it real fast:
-# [count] 1. ngood and nbad (two entries, so could be a flat file rather 
-# than a db file).
-# [toks_ham] 2. good token -> number seen
-# [toks_spam]  3. bad token -> number seen
+# [probs] 1. ngood and nbad (two entries, so could be a flat file rather 
+# than a db file).	(now 2 entries in db_probs)
+# [toks]  2. good token -> number seen
+# [toks]  3. bad token -> number seen (both are packed into 1 entry in 1 db)
 # [probs]  4. Consolidated good token -> probability
 # [probs]  5. Consolidated bad token -> probability
 # > As you add new mails, you update the entry in 2 or 3, then regenerate
@@ -147,7 +180,7 @@ use constant PROB_BOUND_UPPER => 0.999;
 # [seen]  6. a list of Message-IDs of messages already learnt from. values
 # are 's' for learnt-as-spam, 'h' for learnt-as-ham.
 
-@DBNAMES = qw(count toks_ham toks_spam probs seen);
+@DBNAMES = qw(toks probs seen);
 
 ###########################################################################
 
@@ -184,7 +217,7 @@ sub tie_db_readonly {
   }
 
   my $path = $main->sed_path ($main->{conf}->{bayes_path});
-  if (!-f $path.'_count') {
+  if (!-f $path.'_probs') {
     dbg ("bayes: no dbs present, cannot scan");
     return 0;
   }
@@ -321,12 +354,12 @@ sub tokenize {
   $self->{tokens} = [ ];
 
   for (@{$body}) {
-    $wc += $self->tokenize_line ($_, '', 0);
+    $wc += $self->tokenize_line ($_, '', 1, 1);
   }
 
   my %hdrs = $self->tokenize_headers ($msg);
   foreach my $prefix (keys %hdrs) {
-    $wc += $self->tokenize_line ($hdrs{$prefix}, "H$prefix:", 1);
+    $wc += $self->tokenize_line ($hdrs{$prefix}, "H$prefix:", 1, 0);
   }
 
   my @toks = @{$self->{tokens}}; delete $self->{tokens};
@@ -338,13 +371,25 @@ sub tokenize_line {
   local ($_) = $_[1];
   my $tokprefix = $_[2];
   my $casesensitive = $_[3];
-  #my $killtitlecase = $_[4];
+  my $killtitlecase = $_[4];
 
   # include quotes, .'s and -'s for URIs, and [$,]'s for Nigerian-scam strings,
   # and ISO-8859-15 alphas.  DO split on @'s, so username and domains in
   # mail addrs are separate tokens.
   # Some useful tokens: "$31,000,000" "www.clock-speed.net"
-  tr/-A-Za-z0-9,_'"\$.\241-\377 / /cs;
+  if (TRY_KEEP_AT_SIGNS) {
+    tr/-A-Za-z0-9,\@_'"\$.\241-\377 / /cs;
+  } else {
+    tr/-A-Za-z0-9,_'"\$.\241-\377 / /cs;
+  }
+
+  if (TRY_IGNORE_TITLE_CASE_AT_START_OF_SENTENCE) {
+    if ($killtitlecase) {
+      # lower-case Title Case at start of a full-stop-delimited line (as would
+      # be seen in a Western language).
+      s/(?:^|\.\s+)([A-Z])([^A-Z]+)(?:\s|$)/ ' '. (lc $1) . $2 . ' ' /ge;
+    }
+  }
 
   my $wc = 0;
 
@@ -357,19 +402,31 @@ sub tokenize_line {
     $wc++;
 
     if ($casesensitive) {
+      if (TRY_IGNORE_TITLE_CASE_EVERYWHERE) {
+	if ($killtitlecase) { # lowercase Title Case words anyway
+	  $token =~ s/^([A-Z])([^A-Z]+)$/ (lc $1) . $2 /ge;
+	}
+      }
       push (@{$self->{tokens}}, $tokprefix.$token);
     }
-
-    #if ($killtitlecase) {
-    #$token =~ s/^([A-Z])([^A-Z]+)$/ (lc $1) . $2 /ge;
-    #}
 
     # now do some token abstraction; in other words, make them act like
     # patterns instead of text copies.
 
     # case...
-    $token =~ tr/A-Z/a-z/;
-    push (@{$self->{tokens}}, $tokprefix.$token);
+    if (TRY_DUP_TOKENS_AS_LOWERCASE) {
+      $token =~ tr/A-Z/a-z/;
+      push (@{$self->{tokens}}, $tokprefix.$token);
+    }
+
+    if (TRY_DUP_TOKENS_WITH_CASEI_PREFIX) {
+      if ($token =~ /[A-Z]/) {
+	$token =~ tr/A-Z/a-z/;
+	push (@{$self->{tokens}}, 'C:'.$tokprefix.$token);
+      } else {
+	push (@{$self->{tokens}}, 'C:'.$tokprefix.$token);
+      }
+    }
 
     # replace digits with 'N'...
     if ($token =~ /\d/) {
@@ -395,12 +452,30 @@ sub tokenize_headers {
 
   # and now delete lines for headers we don't want (incl all Receiveds)
   $hdrs =~ s/^From \S+[^\n]+$//gim;
+
+  my @newhdrs = ();
+
+  if (TRY_NOTE_HEADER_PRESENCE_ABSENCE) {
+    foreach my $hdr (@FLAG_PRESENCE_HDRS) {
+      if ($hdrs =~ /^${hdr}: /m) {
+	push (@newhdrs, "\n", $hdr, ": PRESENT");
+      } else {
+	push (@newhdrs, "\n", $hdr, ": ABSENT");
+      }
+    }
+  }
+
   $hdrs =~ s/^${IGNORED_HDRS}: [^\n]*$//gim;
+  $hdrs .= join ('', @newhdrs);
 
   # and re-add the last 2 received lines: usually a good source of
   # spamware tokens and HELO names.
   if ($#rcvdlines >= 0) { $hdrs .= "\n".$rcvdlines[$#rcvdlines]; }
   if ($#rcvdlines >= 1) { $hdrs .= "\n".$rcvdlines[$#rcvdlines-1]; }
+
+  if (TRY_KEEP_THIRD_RECEIVED) {
+    if ($#rcvdlines >= 2) { $hdrs .= "\n".$rcvdlines[$#rcvdlines-2]; }
+  }
 
   while ($hdrs =~ /^(\S+): ([^\n]*)$/gim) {
     my $hdr = $1;
@@ -487,12 +562,12 @@ sub learn_trapped {
   }
 
   if ($isspam) {
-    $self->{db_count}->{'nspam'}++;
+    $self->{db_probs}->{'**NSPAM'}++;
   } else {
-    $self->{db_count}->{'nham'}++;
+    $self->{db_probs}->{'**NHAM'}++;
   }
-  my $ns = $self->{db_count}->{'nspam'};
-  my $nn = $self->{db_count}->{'nham'};
+  my $ns = $self->{db_probs}->{'**NSPAM'};
+  my $nn = $self->{db_probs}->{'**NHAM'};
   $ns ||= 0;
   $nn ||= 0;
 
@@ -502,11 +577,9 @@ sub learn_trapped {
   for (@tokens) {
     if ($seen{$_}) { next; } else { $seen{$_} = 1; }
 
-    if ($isspam) {
-      $self->{db_toks_spam}->{$_}++;
-    } else {
-      $self->{db_toks_ham}->{$_}++;
-    }
+    my ($ts, $th) = tok_unpack ($self->{db_toks}->{$_});
+    if ($isspam) { $ts++; } else { $th++; }
+    $self->{db_toks}->{$_} = tok_pack ($ts, $th);
 
     # if we don't have both corpora, skip generating probabilities.
     # we can't get useful results without both.
@@ -572,43 +645,37 @@ sub forget_trapped {
     }
   }
 
-  my $ns = $self->{db_count}->{'nspam'};
-  my $nn = $self->{db_count}->{'nham'};
+  my $ns = $self->{db_probs}->{'**NSPAM'};
+  my $nn = $self->{db_probs}->{'**NHAM'};
   $ns ||= 0;
   $nn ||= 0;
 
   # protect against going negative
   if ($isspam) {
     $ns--; if ($ns < 0) { $ns = 0; }
-    $self->{db_count}->{'nspam'} = $ns;
+    $self->{db_probs}->{'**NSPAM'} = $ns;
   } else {
     $nn--; if ($nn < 0) { $nn = 0; }
-    $self->{db_count}->{'nham'} = $nn;
+    $self->{db_probs}->{'**NHAM'} = $nn;
   }
 
   my ($wc, @tokens) = $self->tokenize ($msg, $body);
   my %seen = ();
   for (@tokens) {
     if ($seen{$_}) { next; } else { $seen{$_} = 1; }
+    my ($ts, $th) = tok_unpack ($self->{db_toks}->{$_});
 
     if ($isspam) {
-      my $count = $self->{db_toks_spam}->{$_};
-      $count = (!defined $count ? 0 : ($count <= 1 ? 0 : $count-1));
-      if ($count == 0) {
-	delete $self->{db_toks_spam}->{$_};
-	delete $self->{db_probs}->{$_};
-      } else {
-	$self->{db_toks_spam}->{$_} = $count;
-      }
+      $ts = (!defined $ts ? 0 : ($ts <= 1 ? 0 : $ts-1));
     } else {
-      my $count = $self->{db_toks_ham}->{$_};
-      $count = (!defined $count ? 0 : ($count <= 1 ? 0 : $count-1));
-      if ($count == 0) {
-	delete $self->{db_toks_ham}->{$_};
-	delete $self->{db_probs}->{$_};
-      } else {
-	$self->{db_toks_ham}->{$_} = $count;
-      }
+      $th = (!defined $th ? 0 : ($th <= 1 ? 0 : $th-1));
+    }
+
+    if ($ts == 0 && $th == 0) {
+      delete $self->{db_toks}->{$_};
+      delete $self->{db_probs}->{$_};
+    } else {
+      $self->{db_toks}->{$_} = tok_pack ($ts, $th);
     }
 
     # if we don't have both corpora, skip generating probabilities.
@@ -695,14 +762,22 @@ sub recompute_all_probs {
   return $ret;
 }
 
-# this function is trapped by the wrapper above
+# this function is trapped by the wrapper above.
+#
+# TODO: BTW, this would be faster if we create a totally-new DB file instead of
+# using the existing one, since we will typically visit 99.99% of the entries
+# in the DB anyway.  However we cannot simply unlink() at the start of the fn,
+# as any reader processes will then not have Bayes scoring until we've completed.
+# Instead we should create a "new" db in parallel, then rename() it in once
+# we've finished.
+
 sub recompute_all_probs_trapped {
   my ($self) = @_;
 
   my $start = time;
 
-  my $ns = $self->{db_count}->{'nspam'};
-  my $nn = $self->{db_count}->{'nham'};
+  my $ns = $self->{db_probs}->{'**NSPAM'};
+  my $nn = $self->{db_probs}->{'**NHAM'};
   $ns ||= 0;
   $nn ||= 0;
   if ($nn == 0 || $ns == 0) {
@@ -716,8 +791,7 @@ sub recompute_all_probs_trapped {
   dbg("bayes: recomputing all probabilities for $ns spam msgs and $nn ham msgs...");
 
   my %done = ();
-  foreach my $token (keys %{$self->{db_toks_spam}}, keys %{$self->{db_toks_ham}})
-  {
+  foreach my $token (keys %{$self->{db_toks}}) {
     next if (exists $done{$token}); $done{$token}=1;
     my $prob = $self->compute_prob_for_token ($token, $ns, $nn);
     if (defined $prob) { $probstotal += $prob; }
@@ -725,8 +799,7 @@ sub recompute_all_probs_trapped {
   }
 
   # for debugging, let's see this figure
-  $self->{db_count}->{'robinson_x'} = ($count ? ($probstotal / $count) : 0);
-  dbg ("bayes: Robinson x = ".$self->{db_count}->{'robinson_x'});
+  dbg ("bayes: computed Robinson x = ".($count ? ($probstotal / $count) : 0));
 
 done:
   my $now = time;
@@ -740,19 +813,16 @@ sub compute_prob_for_token {
   my ($self, $token, $ns, $nn) = @_;
 
   # precompute the probability that that token is spammish
-  my $s = $self->{db_toks_spam}->{$token};
-  my $n = $self->{db_toks_ham}->{$token};
+  my ($s, $n) = tok_unpack ($self->{db_toks}->{$token});
   $s ||= 0;
   $n ||= 0;
 
   if (!USE_ROBINSON_FX_EQUATION_FOR_LOW_FREQS) {
     return if ($s + $n < 10);      # ignore low-freq tokens
-
-  # TEST: allow use of hapaxes; just modulate them using Robinson's f(x)
-  # } else {
-    # return if ($s + $n < 2);       # ignore hapaxes (1-occurence only)
-
   }
+
+  # to *not* use hapaxes: return if ($s + $n < 2);
+  # but this does not seem to be a win at all.
 
   my $ratios = ($s / $ns);
   my $ration = ($n / $nn);
@@ -761,24 +831,21 @@ sub compute_prob_for_token {
   if (USE_ROBINSON_FX_EQUATION_FOR_LOW_FREQS) {
     # use Robinson's f(x) equation for low-n tokens, instead of just
     # ignoring them
-    my $robx = $self->{robinson_x};
     my $robn = $s+$n;
     $prob = ($self->{robinson_s_dot_x} + ($robn * $prob)) /
 		  (ROBINSON_S_CONSTANT + $robn);
   }
 
   $self->{db_probs}->{$token} = pack ('f', $prob);
-  #dbg ("learnt '$token' $s $n  p(s) = $prob");
-
   return $prob;
 }
 
 sub precompute_robinson_constants {
   my $self = shift;
 
-  $self->{robinson_x} = 0.5;	#TODO - use computed one?
+  my $robinson_x = 0.5;		#TODO - use computed one?
   # precompute this here for speed
-  $self->{robinson_s_dot_x} = ($self->{robinson_x} * ROBINSON_S_CONSTANT);
+  $self->{robinson_s_dot_x} = ($robinson_x * ROBINSON_S_CONSTANT);
 }
 
 ###########################################################################
@@ -789,8 +856,8 @@ sub scan {
 
   if (!$self->tie_db_readonly()) { goto skip; }
 
-  my $ns = $self->{db_count}->{'nspam'};
-  my $nn = $self->{db_count}->{'nham'};
+  my $ns = $self->{db_probs}->{'**NSPAM'};
+  my $nn = $self->{db_probs}->{'**NHAM'};
   $ns ||= 0;
   $nn ||= 0;
 
@@ -821,8 +888,9 @@ sub scan {
       else {
 	$pw = unpack ('f', $pw);
 
-	# enforce (max .01 (min .99 (score))) as per Graham; it allows
-	# a majority of spam clues to override 1 or 2 very-strong nonspam clues.
+	# enforce (max PROB_BOUND_LOWER (min PROB_BOUND_UPPER (score))) as per
+	# Graham; it allows a majority of spam clues to override 1 or 2
+	# very-strong nonspam clues.
 	#
 	if ($pw < PROB_BOUND_LOWER) {
 	  ($_ => PROB_BOUND_LOWER);
@@ -856,11 +924,6 @@ sub scan {
     $Q *= $pw;
 
     dbg ("bayes token '$_' => $pw");
-
-    # dump token counts as well: requires 2 more db lookups. off by default.
-    #my $s = $self->{db_toks_spam}->{$_};
-    #my $n = $self->{db_toks_ham}->{$_};
-    #dbg ("bayes token '$_' => $pw (spamhits=$s hamhits=$n) (P=$P Q=$Q)");
   }
 
   $P = 1 - ($P ** (1 / $wc));
@@ -886,6 +949,13 @@ skip:
 
 sub dbg { Mail::SpamAssassin::dbg (@_); }
 sub sa_die { Mail::SpamAssassin::sa_die (@_); }
+
+###########################################################################
+
+# token packing format in db_toks: "token" => pack ("LL", $nspam, $nham).
+# note: no $self, so not OO: static instead, for speed
+sub tok_unpack { return unpack ("LL", $_[0] || 0); }
+sub tok_pack { return pack ("LL", $_[0] || 0, $_[1] || 0); }
 
 ###########################################################################
 
