@@ -234,11 +234,7 @@ lang fr describe FROM_MISSING   L'entête From: est absent
 score FROM_MISSING                   4.257
 #
 #
-#   1.097    0.513    1.450    0.26    1.00  FROM_NAME_NO_SPACES
-lang fr describe FROM_NAME_NO_SPACES	Le nom de l'entête From: ne contient aucune espace
 #
-#
-#   0.429    0.043    0.662    0.06   -1.00  FWD_MSG_2
 #   0.534    0.593    0.499    0.54   -1.00  FWD_MSG
 header FWD_MSG                  Subject =~ /Fwd:\s/
 describe FWD_MSG                Forwarded email
@@ -267,9 +263,6 @@ body HTML_COMMENT_UNIQUE_ID	eval:html_test('comment_unique_id')
 describe HTML_COMMENT_UNIQUE_ID	Contains a comment with nothing but unique ID
 #
 #
-#   0.004    0.003    0.005    0.42    1.00  INCREASE_SALES
-lang fr describe INCREASE_SALES Propose d'augmenter les ventes
-#
 #
 #   0.000    0.001    0.000    1.00    1.00  INCREDIBLE
 body INCREDIBLE		        /\bincredible secrets\b/i
@@ -288,10 +281,6 @@ score INCREDIBLE		     1.0
 #score ITS_EFFECTIVE                  1.0
 #body ITS_EFFECTIVE              /\bit's effective\b/i
 #describe ITS_EFFECTIVE          Something claims to be effective
-#
-#
-#   0.094    0.100    0.090    0.53    1.00  KNOWN_BAD_DIALUPS
-lang fr describe KNOWN_BAD_DIALUPS      Mèl reçu depuis un FAI hébergeant des SPAMeurs
 #
 #
 #   0.000    0.000    0.000    0.00    3.90  LASER_PRINTER

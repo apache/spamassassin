@@ -1,5 +1,5 @@
 # SpamAssassin rules file: scores.
-# $Id: 50_scores.cf,v 1.197.2.7 2002/08/26 22:55:18 jmason Exp $
+# $Id: 50_scores.cf,v 1.197.2.8 2002/08/26 23:00:14 jmason Exp $
 ###########################################################################
 # Default scores.   Note that if a test is named in the files, but a score is
 # not assigned here, the default score will be set to 1.
@@ -39,7 +39,6 @@ score BAD_CREDIT		     1.0
 score BAD_HELO_WARNING               2.540
 score BANKRUPTCY		     1.0
 score BASE64_ENC_TEXT                2.062
-score BCC                            0.500
 score BEEN_TURNED_DOWN		     1.0
 score BE_AMAZED                      4.202
 score BE_BOSS			     1.0
@@ -73,7 +72,6 @@ score COMPLETELY_FREE                3.422
 score CONGRATULATIONS		     1.0
 score CONSOLIDATE_DEBT		     1.0
 score COPY_ACCURATELY                3.410
-score COPY_DVDS                      3.699
 score COUPON			     1.0
 score CREDITORS_CALLING		     1.0
 score CREDIT_BUREAU		     1.0
@@ -187,7 +185,6 @@ score GUARANTEE                      1.500
 score GUARANTEED_100_PERCENT         0.587
 score GUARANTEED_STUFF		     1.0
 score HAIR_LOSS			     1.0
-score HARD_CASH			     1.0
 score HEADER_8BITS                   2.0
 score HGH			     1.0
 score HIDDEN_CHARGES		     1.0
@@ -212,7 +209,6 @@ score INVESTOR_SPEC_SHEET            3.046
 #score IN_ACCORDANCE_WITH_LAWS        3.160
 score IN_REP_TO                      -3.382
 score JAVASCRIPT                     1.524
-score JAVASCRIPT_OBFUSCATING         1.0
 score JAVASCRIPT_UNSAFE              0.693
 score JAVASCRIPT_URI                 0.099
 score JAVASCRIPT_VERY_UNSAFE         3.338
@@ -461,7 +457,6 @@ score EXCUSE_ES_01                   1.0
 score EXCUSE_ES_02                   1.0
 score EXCUSE_ES_03                   1.0
 score INTERNET_TERROR_RANT           1.0
-score JUST_MAILED_PAGE               0.2
 score MAIL_IN_ORDER_FORM             4.8
 score ONLINE_BIZ_OPS                 1.0
 score REMOVE_ES_01                   1.0
@@ -474,7 +469,6 @@ score X_FIX_PRESENT                  1.0
 score X_ACCEPT_LANG                  -1.0
 score    OBFUSCATING_COMMENT    2.0
 
-score FROM_NEWS_LIST            -0.5
 score FROM_US_PHONE             -0.5
 score SUBJECT_IS_NEWS           -0.1
 score SUBJECT_FREQ              -1.0
@@ -491,12 +485,7 @@ score MSN_GROUPS                -3.0
 score GROUPS_YAHOO_1            -1.0
 score DISCLAIMER_LEGALESE       -1.0
 score VAR_REF_IN_RECEIVED       4.0
-score USERNAME_IN_SUBJECT       1.0
-score USERNAME_IN_SUBJECT_2     0.5
-score USERNAME_IN_SUBJECT_3     2.0
-score USERNAME_IN_SUBJECT_4     1.5
-score USERNAME_IN_SUBJECT_5     1.0
-score USERNAME_IN_SUBJECT_6     0.5
+score USERNAME_IN_SUBJECT       2.0
 
 # a common FP, believe it or not
 score SUBJ_MISSING              0.399
@@ -505,7 +494,6 @@ score FORGOTTEN_PASSWORD        -2.0
 score REG_THANKS                -1.0
 score ACCOUNT_CLICK             -1.0
 score KNOWN_MAILING_LIST        -2.5
-score KNOWN_MOD_MAILING_LIST    -10.0
 score LISTBUILDER               -5.0
 
 score USER_AGENT_PINE           -1.0
