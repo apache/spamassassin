@@ -129,12 +129,15 @@ sub tok_get_all {
                     WHERE id = ?
                       AND token IN ";
 
-  my $single_sql = "SELECT token, spam_count, ham_count, atime
-                      FROM bayes_token
-                     WHERE id = ?
-                       AND token = ?";
-
-  foreach my $bunch_size (@bunch_sizes) {
+  # fetch tokens in bunches of 100 until there are <= 100 left, then just fetch the rest
+  while ($token_list_size > $search_index) {
+    my $bunch_size;
+    if ($token_list_size - $search_index > 100) {
+      $bunch_size = 100;
+    }
+    else {
+      $bunch_size = $token_list_size - $search_index;
+    }
     while ($token_list_size - $search_index >= $bunch_size) {
       my @bindings;
       my $in_str = '(';
@@ -183,38 +186,6 @@ sub tok_get_all {
 	$result->[3] = 0 if (!$result->[3]);
 	$tok_results[$results_index++] = $result;
       }
-    }
-  }
-
-  while ($search_index < $token_list_size) {
-    my $sth = $self->{_dbh}->prepare_cached($single_sql);
-
-    unless (defined($sth)) {
-      dbg("bayes: tok_get_all: SQL error: ".$self->{_dbh}->errstr());
-      return [];
-    }
-
-    $sth->bind_param(1, $self->{_userid});
-    $sth->bind_param(2, $tokens[$search_index++], { pg_type => DBD::Pg::PG_BYTEA });
-
-    my $rc = $sth->execute();
-
-    unless ($rc) {
-      dbg("bayes: tok_get_all: SQL error: ".$self->{_dbh}->errstr());
-      return [];
-    }
-
-    my $result = $sth->fetchrow_arrayref();
-
-    $sth->finish();
-
-    if (defined($result)) {
-      # Make sure that spam_count and ham_count are not negative
-      $result->[1] = 0 if (!$result->[1] || $result->[1] < 0);
-      $result->[2] = 0 if (!$result->[2] || $result->[2] < 0);
-      # Make sure that atime has a value
-      $result->[3] = 0 if (!$result->[3]);
-      $tok_results[$results_index++] = $result 
     }
   }
 
