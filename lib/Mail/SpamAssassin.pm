@@ -69,7 +69,7 @@ use vars	qw{
 @ISA = qw();
 
 $VERSION = "2.0";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.49 2001/12/18 04:59:17 jmason Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.50 2001/12/19 04:12:19 jmason Exp $';
 
 sub Version { $VERSION; }
 
@@ -260,7 +260,7 @@ sub add_all_addresses_to_whitelist {
   my ($self, $mail_obj) = @_;
 
   my $list = Mail::SpamAssassin::AutoWhitelist->new($self);
-  foreach my $addr ($self->_find_all_addrs_in_mail ($mail_obj)) {
+  foreach my $addr ($self->find_all_addrs_in_mail ($mail_obj)) {
     if ($list->add_known_good_address ($addr)) {
       print "SpamAssassin auto-whitelist: adding address: $addr\n";
     }
@@ -282,7 +282,7 @@ sub remove_all_addresses_from_whitelist {
   my ($self, $mail_obj) = @_;
 
   my $list = Mail::SpamAssassin::AutoWhitelist->new($self);
-  foreach my $addr ($self->_find_all_addrs_in_mail ($mail_obj)) {
+  foreach my $addr ($self->find_all_addrs_in_mail ($mail_obj)) {
     if ($list->remove_address ($addr)) {
       print "SpamAssassin auto-whitelist: removing address: $addr\n";
     }
@@ -717,57 +717,47 @@ sub encapsulate_mail_object {
   }
 }
 
-sub _find_all_addrs_in_mail {
+sub find_all_addrs_in_mail {
   my ($self, $mail_obj) = @_;
 
   $self->init(1);
   my $mail = $self->encapsulate_mail_object ($mail_obj);
 
-  my $addrlist = '';
+  my @addrlist = ();
   foreach my $header (qw(To From Cc Reply-To Sender
   				Errors-To Mail-Followup-To))
   {
     my @hdrs = $mail->get_header ($header);
     if ($#hdrs < 0) { next; }
-    $_ = join (" ", @hdrs);
-
-    while (s/([-a-z0-9_\+\:\.\/]+
-    		\@[-a-z0-9_\+\:\.\/]+
-		\.[-a-z0-9_\+\:\/]{2,3})//ix)
-    { $addrlist .= "$1,"; }
+    push (@addrlist, $self->find_all_addrs_in_line (join (" ", @hdrs)));
   }
 
   # find addrs in body, too
   foreach my $line (@{$mail->get_body()}) {
-    $_ = $line;
-
-    while (s/([-a-z0-9_\+\:\.\/]+
-    		\@[-a-z0-9_\+\:\.\/]+
-		\.[-a-z0-9_\+\:\/]{2,3})//ix)
-    { $addrlist .= "$1,"; }
+    push (@addrlist, $self->find_all_addrs_in_line ($line));
   }
 
-  $addrlist =~ s/[\r\n]+/ , /gs;
-  $addrlist =~ s/,\s*$//gs;
-  # $addrlist =~ s/\s\"[^\"]+\"\s/ , /gs;	# remove names
-  # $addrlist =~ s/\([^\)]+\)/ , /gs;		# same
-
-  dbg ("found addresses for whitelisting: $addrlist");
   my @ret = ();
   my %done = ();
 
-  foreach $_ (split (/\s*,\s*/, $addrlist)) {
-    next if ($_ !~ /\S/);
-
-    #s/^.*?<(.+)>\s*$/$1/g               # Foo Blah <jm@foo>
-    #or s/^(.+)\s\(.*?\)\s*$/$1/g;   # jm@foo (Foo Blah)
-    #if (!/^\S+\@\S+$/) { dbg ("wierd address, ignored: $_"); next; }
-
+  foreach $_ (@addrlist) {
     next if defined ($done{$_}); $done{$_} = 1;
     push (@ret, $_);
   }
 
   @ret;
+}
+
+sub find_all_addrs_in_line {
+  my ($self, $line) = @_;
+
+  my @addrs = ();
+  while ($line =~ s/([-a-z0-9_\+\:\.\/]+
+	      \@[-a-z0-9_\+\:\.\/]+
+	      \.[-a-z0-9_\+\:\/]{2,3})//ix)
+  { push (@addrs, $1); }
+
+  return @addrs;
 }
 
 sub dbg {
