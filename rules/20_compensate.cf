@@ -46,9 +46,11 @@ header REFERENCES		References =~ /^(<(?:[a-zA-Z0-9.!\#\$%&'*\+\/=?\^_{}|~-]+|\".
 describe REFERENCES		Has a valid-looking References header
 tflags REFERENCES               nice
 
-# these headers have very low correlation with spam
+# User-Agent isn't usually found with spam, but ignore it if we already account with a compensate rule
 header __USER_AGENT		exists:User-Agent
-meta USER_AGENT			( __USER_AGENT && ((USER_AGENT.+ +) < 1) )
+meta USER_AGENT			( __USER_AGENT && !USER_AGENT_PINE && !USER_AGENT_MUTT && !USER_AGENT_MOZILLA_UA && !USER_AGENT_MOZILLA_XM && !USER_AGENT_MACOE && !USER_AGENT_ENTOURAGE && !USER_AGENT_KMAIL && !USER_AGENT_IMP && !USER_AGENT_TONLINE && !USER_AGENT_APPLEMAIL && !USER_AGENT_GNUS_UA && !USER_AGENT_GNUS_XM && !USER_AGENT_VM && !USER_AGENT_MSN && !USER_AGENT_FORTE )
+
+# these headers have very low correlation with spam
 header CRON_ENV                 exists:X-Cron-Env
 header IN_REP_TO                exists:In-Reply-To
 header X_AUTH_WARNING           exists:X-Authentication-Warning
