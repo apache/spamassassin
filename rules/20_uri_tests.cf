@@ -142,3 +142,6 @@ describe URI_HEX	URI hostname has long hexadecimal sequence
 
 uri URI_NOVOWEL		m%^https?://[^/?]*[bcdfghjklmnpqrstvwxz]{7}%i
 describe URI_NOVOWEL	URI hostname has long non-vowel sequence
+
+uri URI_UNSUBSCRIBE		/\b(?:gone|opened|out)\.php/i
+describe URI_UNSUBSCRIBE	URI contains suspicious unsubscribe link
