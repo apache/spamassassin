@@ -218,6 +218,12 @@ body T_HTML_IMAGE_AREA17	eval:html_range('total_image_area','700000','800000')
 body T_HTML_IMAGE_AREA18	eval:html_range('total_image_area','800000','900000')
 body T_HTML_IMAGE_AREA19	eval:html_range('total_image_area','1000000')
 
+# test 300000 to 400000 with better precision
+body T_HTML_IMAGE_AREA_3A       eval:html_range('total_image_area','300000','325000')
+body T_HTML_IMAGE_AREA_3B       eval:html_range('total_image_area','325000','350000')
+body T_HTML_IMAGE_AREA_3C       eval:html_range('total_image_area','350000','375000')
+body T_HTML_IMAGE_AREA_3D       eval:html_range('total_image_area','375000','400000')
+
 # quinlan: this is not very good
 #
 #OVERALL%   SPAM% NONSPAM%     S/O    RANK   SCORE  NAME
@@ -395,14 +401,6 @@ body T_HTML_SHOUTING9            eval:html_range('max_shouting','8')
 
 ##################################################################
 
-# Dec  6 2002 jm:
-# 0 hits on all corpora!  Is this in a MIME header or something?
-# Dec  9 2002 quinlan:
-# trying it as rawbody instead of body
-# Dec 10 2002 jm:
-# still nothing for some reason.  wierd
-rawbody T_HTML_MAIL_ONLY             /HTML only email, sorry/i
-
 # actually, this looks really good!  Dec  6 2002 jm: except for rod's
 # corpus ;)
 header T_FROM_OFFERS            From:addr =~ /offers\S*\@/i
@@ -413,8 +411,6 @@ header T_FROM_OFFERS_3          From:addr =~ /\@\S*offers/i
 # quinlan: these may overlap some existing CLICK rules, check before adding
 body     T_HTML_LINK_CLICK_HERE eval:html_eval('anchor_text', '=~ /click\s+here/i')
 body     T_HTML_LINK_CLICK_CAPS eval:html_eval('anchor_text', '=~ /CLICK/')
-body     T_HTML_LINK_MONEY      eval:html_eval('anchor_text', '=~/\s\$/')
-body     T_HTML_LINK_UNSUB      eval:html_eval('anchor_text', '=~/unsubscribe/i')
 
 # Nov 12 2002 jm: still not sure about this one. ALL.current reports
 # 0.108   0.4001   0.0062    0.985   0.93    1.00  T_IDENT_NOBODY
