@@ -371,7 +371,8 @@ sub wanted {
 sub message_should_be_deencapped {
   my ($ma) = @_;
 
-  if (scalar @{$ma->{body_parts}} > 0) {
+  # not sure why this is undefined, but it is sometimes
+  if (defined $ma->{body_parts} && scalar @{$ma->{body_parts}} > 0) {
     my $firstpart = $ma->{body_parts}->[0];
     if (!$firstpart->{headers}->{'content-type'}
         || $firstpart->{headers}->{'content-type'} ne 'text/plain')
