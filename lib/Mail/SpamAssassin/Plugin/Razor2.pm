@@ -51,8 +51,8 @@ sub new {
   }
   else {
     if (eval { require Razor2::Client::Agent; }) {
-      dbg("razor2: razor2 is available");
       $self->{razor2_available} = 1;
+      dbg("razor2: razor2 is available, version " . $Razor2::Client::Version::VERSION . "\n");
     }
     else {
       dbg("razor2: razor2 is not available");
@@ -112,25 +112,28 @@ Currently this is left to Razor to decide.
   $conf->{parser}->register_commands(\@cmds);
 }
 
-sub razor2_lookup {
-  my ($self, $permsgstatus, $fulltext) = @_;
+# This is to reset the alarm before die() - spamd can die of a stray alarm!
+sub adie {
+  my $msg = shift;
+  alarm 0;
+  die $msg;
+}
+
+sub razor2_access {
+  my ($self, $fulltext, $type) = @_;
   my $timeout=$self->{main}->{conf}->{razor_timeout};
+  my $return = 0;
+  my @results = ();
 
-  # Set the score for the ranged checks
-  $self->{razor2_cf_score} = 0;
-  return $self->{razor2_result} if ( defined $self->{razor2_result} );
-  $self->{razor2_result} = 0;
-
-  return unless $self->{main}->{conf}->{use_razor2};
-  return unless $self->{razor2_available};
-  
   # razor also debugs to stdout. argh. fix it to stderr...
   if ($Mail::SpamAssassin::DEBUG) {
     open (OLDOUT, ">&STDOUT");
     open (STDOUT, ">&STDERR");
   }
 
-  $permsgstatus->enter_helper_run_mode();
+  my $debug = $type eq 'check' ? 'razor2' : 'reporter';
+
+  Mail::SpamAssassin::PerMsgStatus::enter_helper_run_mode($self);
 
     eval {
       local ($^W) = 0;    # argh, warnings in Razor
@@ -139,24 +142,29 @@ sub razor2_lookup {
       alarm $timeout;
 
       # everything's in the module!
-      my $rc = Razor2::Client::Agent->new('razor-check');
+      my $rc = Razor2::Client::Agent->new("razor-$type");
 
       if ($rc) {
-        my %opt = (
+        $rc->{opt} = {
 		   debug      => ($Mail::SpamAssassin::DEBUG &&
-				  $Mail::SpamAssassin::facilities{razor2}), 
+				  ($Mail::SpamAssassin::facilities{all} ||
+				   $Mail::SpamAssassin::facilities{razor2})),
 		   foreground => 1,
 		   config     => $self->{main}->{conf}->{razor_config}
-        );
-        $rc->{opt} = \%opt;
-        $rc->do_conf() or die "razor2: " . $rc->errstr;
+        };
+        $rc->do_conf() or adie "$debug: " . $rc->errstr;
 
-	my $tmptext = $$fulltext;
-	my @msg = (\$tmptext);
+        # Razor2 requires authentication for reporting
+        my $ident;
+	if ($type ne 'check') {
+	  $ident = $rc->get_ident
+            or adie("reporter: razor2: $type requires authentication");
+        }
 
+        my @msg = ($fulltext);
         my $objects = $rc->prepare_objects( \@msg )
-          or die "razor2: error in prepare_objects";
-        $rc->get_server_info() or die $rc->errprefix("razor2: spamassassin");
+          or adie "$debug: error in prepare_objects";
+        $rc->get_server_info() or adie $rc->errprefix("$debug: spamassassin");
 
 	# let's reset the alarm since get_server_info() calls
 	# nextserver() which calls discover() which very likely will
@@ -164,22 +172,33 @@ sub razor2_lookup {
 	alarm $timeout;
 
         my $sigs = $rc->compute_sigs($objects)
-          or die "razor2: error in compute_sigs";
+          or adie "$debug: error in compute_sigs";
 
         # 
         # if mail isn't whitelisted, check it out
+	# see 'man razor-whitelist'
         #   
-        if ( ! $rc->local_check( $objects->[0] ) ) {
-          if (!$rc->connect()) {
-            # provide a better error message when servers are unavailable,
-            # than "Bad file descriptor Died".
-            die "razor2: could not connect to any servers\n";
+        if ( $type ne 'check' || ! $rc->local_check($objects->[0]) ) {
+          # provide a better error message when servers are unavailable,
+          # than "Bad file descriptor Died".
+          $rc->connect() or adie "$debug: could not connect to any servers\n";
+
+	  # Talk to the Razor server and do work
+          if ($type eq 'check') {
+            $rc->check($objects) or adie $rc->errprefix("$debug: spamassassin");
+	  }
+	  else {
+            $rc->authenticate($ident) or adie($rc->errprefix("$debug: spamassassin"));
+            $rc->report($objects) or adie($rc->errprefix("$debug: spamassassin"));
           }
-          $rc->check($objects) or die $rc->errprefix("razor2: spamassassin");
-          $rc->disconnect() or die $rc->errprefix("razor2: spamassassin");
+
+          $rc->disconnect() or adie $rc->errprefix("$debug: spamassassin");
 
 	  # if we got here, we're done doing remote stuff, abort the alert
 	  alarm 0;
+
+          # Razor 2.14 says that if we get here, we did ok.
+          $return = 1;
 
           # figure out if we have a log file we need to close...
           if (ref($rc->{logref}) && exists $rc->{logref}->{fd}) {
@@ -197,55 +216,53 @@ sub razor2_lookup {
             close $rc->{logref}->{fd} if ($untie);
           }
 
-	  dbg("razor2: using results from Razor version " .
-	      $Razor2::Client::Version::VERSION . "\n");
+          if ($type eq 'check') {
+	    # so $objects->[0] is the first (only) message, and ->{spam} is a general yes/no
+	    push(@results, { result => $objects->[0]->{spam} });
 
-	  # so $objects->[0] is the first (only) message, and ->{spam} is a general yes/no
-          $self->{razor2_result} = $objects->[0]->{spam} || 0;
+	    # great for debugging, but leave this off!
+	    #use Data::Dumper;
+	    #print Dumper($objects),"\n";
 
-	  # great for debugging, but leave this off!
-	  #use Data::Dumper;
-	  #print Dumper($objects),"\n";
+	    # ->{p} is for each part of the message
+	    # so go through each part, taking the highest cf we find
+	    # of any part that isn't contested (ct).  This helps avoid false
+	    # positives.  equals logic_method 4.
+	    #
+	    # razor-agents < 2.14 have a different object format, so we now support both.
+	    # $objects->[0]->{resp} vs $objects->[0]->{p}->[part #]->{resp}
+	    my $part = 0;
+	    my $arrayref = $objects->[0]->{p} || $objects;
+	    if ( defined $arrayref ) {
+	      foreach my $cf ( @{$arrayref} ) {
+	        if ( exists $cf->{resp} ) {
+	          for (my $response=0;$response<@{$cf->{resp}};$response++) {
+	            my $tmp = $cf->{resp}->[$response];
+	      	    my $tmpcf = $tmp->{cf} || 0; # Part confidence
+	      	    my $tmpct = $tmp->{ct} || 0; # Part contested?
+		    my $engine = $cf->{sent}->[$response]->{e};
 
-	  # ->{p} is for each part of the message
-	  # so go through each part, taking the highest cf we find
-	  # of any part that isn't contested (ct).  This helps avoid false
-	  # positives.  equals logic_method 4.
-	  #
-	  # razor-agents < 2.14 have a different object format, so we now support both.
-	  # $objects->[0]->{resp} vs $objects->[0]->{p}->[part #]->{resp}
-	  my $part = 0;
-	  my $arrayref = $objects->[0]->{p} || $objects;
-	  if ( defined $arrayref ) {
-	    foreach my $cf ( @{$arrayref} ) {
-	      if ( exists $cf->{resp} ) {
-	        for (my $response=0;$response<@{$cf->{resp}};$response++) {
-	          my $tmp = $cf->{resp}->[$response];
-	      	  my $tmpcf = $tmp->{cf} || 0; # Part confidence
-	      	  my $tmpct = $tmp->{ct} || 0; # Part contested?
-		  my $engine = $cf->{sent}->[$response]->{e};
-	          dbg("razor2: found razor2 part: part=$part engine=$engine ct=$tmpct cf=$tmpcf");
-	          $self->{razor2_cf_score} = $tmpcf if ( !$tmpct && $tmpcf > $self->{razor2_cf_score} );
+		    push(@results,
+		      { part => $part, engine => $engine, contested => $tmpct, confidence => $tmpcf });
+	          }
 	        }
+	        else {
+		  push(@results, { part => $part, noreponse => 1 });
+	        }
+	        $part++;
 	      }
-	      else {
-		my $text = "part=$part noresponse";
-		$text .= " skipme=1" if ( $cf->{skipme} );
-	        dbg("razor2: found razor2 part: $text");
-	      }
-	      $part++;
 	    }
-	  }
-	  else {
-	    # If we have some new $objects format that isn't close to
-	    # the current razor-agents 2.x version, we won't FP but we
-	    # should alert in debug.
-	    dbg("razor2: it looks like the internal Razor object has changed format!");
-	  }
-        }
+	    else {
+	      # If we have some new $objects format that isn't close to
+	      # the current razor-agents 2.x version, we won't FP but we
+	      # should alert in debug.
+	      dbg("$debug: it looks like the internal Razor object has changed format!");
+	    }
+          }
+	}
       }
       else {
-        warn "razor2: undefined Razor2::Client::Agent\n";
+        warn "$debug: undefined Razor2::Client::Agent\n";
       }
   
       alarm 0;
@@ -255,21 +272,23 @@ sub razor2_lookup {
   
     if ($@) {
       if ( $@ =~ /alarm/ ) {
-          dbg("razor2: check timed out after $timeout seconds");
-        } elsif ($@ =~ /(?:could not connect|network is unreachable)/) {
-          # make this a dbg(); SpamAssassin will still continue,
-          # but without Razor checking.  otherwise there may be
-          # DSNs and errors in syslog etc., yuck
-          dbg("razor2: check could not connect to any servers");
-        } else {
-          warn("razor2: check skipped: $! $@");
-        }
+          dbg("$debug: razor2 $type timed out after $timeout seconds");
+      } elsif ($@ =~ /(?:could not connect|network is unreachable)/) {
+        # make this a dbg(); SpamAssassin will still continue,
+        # but without Razor checking.  otherwise there may be
+        # DSNs and errors in syslog etc., yuck
+        dbg("$debug: razor2 $type could not connect to any servers");
+      } elsif ($@ =~ /timeout/i) {
+        dbg("$debug: razor2 $type timed out connecting to razor servers");
+      } else {
+        warn("$debug: razor2 $type failed: $! $@");
       }
+    }
 
   # work around serious brain damage in Razor2 (constant seed)
   srand;
 
-  $permsgstatus->leave_helper_run_mode();
+  Mail::SpamAssassin::PerMsgStatus::leave_helper_run_mode($self);
 
   # razor also debugs to stdout. argh. fix it to stderr...
   if ($Mail::SpamAssassin::DEBUG) {
@@ -277,24 +296,89 @@ sub razor2_lookup {
     close OLDOUT;
   }
 
-  dbg("razor2: results: spam? " . $self->{razor2_result} .
-      "  highest cf score: " . $self->{razor2_cf_score} . "\n");
+  return wantarray ? ($return, @results) : $return;
+}
 
-  if ($self->{razor2_result} > 0) {
-      return 1;
+sub plugin_report {
+  my($self, $options) = @_;
+
+  return unless $self->{razor2_available};
+  return if $self->{main}->{local_tests_only};
+  return unless $self->{main}->{conf}->{use_razor2};
+  return if $options->{report}->{options}->{dont_report_to_razor};
+
+  if ($self->razor2_access($options->{text}, 'report')) {
+    $options->{report}->{report_available} = 1;
+    dbg ('reporter: spam reported to Razor.');
+    $options->{report}->{report_return} = 1;
   }
-  return 0;
+  else {
+    dbg ('reporter: could not report spam to Razor.');
+  }
+}
+
+sub plugin_revoke {
+  my($self, $options) = @_;
+
+  return unless $self->{razor2_available};
+  return if $self->{main}->{local_tests_only};
+  return unless $self->{main}->{conf}->{use_razor2};
+  return if $options->{revoke}->{options}->{dont_report_to_razor};
+
+  if ($self->razor2_access($options->{text}, 'revoke')) {
+    $options->{revoke}->{revoke_available} = 1;
+    dbg('reporter: spam revoked from Razor');
+    $options->{revoke}->{revoke_return} = 1;
+  }
+  else {
+    dbg('reporter: could not revoke spam from Razor');
+  }
 }
 
 sub check_razor2 {
-  my ($self, $permsgstatus) = @_;
+  my ($self, $permsgstatus, $full) = @_;
 
-  return unless $self->{main}->{conf}->{use_razor2};
+  return $permsgstatus->{razor2_result} if (defined $permsgstatus->{razor2_result});
+  $permsgstatus->{razor2_result} = 0;
+  $permsgstatus->{razor2_cf_score} = 0;
+
   return unless $self->{razor2_available};
-  return $self->{razor2_result} if (defined $self->{razor2_result});
+  return unless $self->{main}->{conf}->{use_razor2};
 
-  my $full = $permsgstatus->{msg}->get_pristine();
-  return $self->razor2_lookup ($permsgstatus, \$full);
+  my $return;
+  my @results = ();
+
+  # TODO: check for cache header, set results appropriately
+
+  # do it this way to make it easier to get out the results later from the
+  # netcache plugin
+  ($return, @results) = $self->razor2_access($full, 'check');
+  $self->{main}->call_plugins ('process_razor_result', @results);
+
+  foreach my $result (@results) {
+    if (exists $result->{result}) {
+      $permsgstatus->{razor2_result} = $result->{result} if $result->{result};
+    }
+    elsif ($result->{noresponse}) {
+      dbg('razor2: part=' . $result->{part} . ' noresponse');
+    }
+    else {
+      dbg('razor2: part=' . $result->{part} .
+        ' engine=' .  $result->{engine} .
+	' contested=' . $result->{contested} .
+	' confidence=' . $result->{confidence});
+
+      next if $result->{contested};
+      if ($result->{confidence} > $permsgstatus->{razor2_cf_score}) {
+        $permsgstatus->{razor2_cf_score} = $result->{confidence};
+      }
+    }
+  }
+
+  dbg("razor2: results: spam? " . $permsgstatus->{razor2_result} .
+    "  highest cf score: " . $permsgstatus->{razor2_cf_score} . "\n");
+
+  return $permsgstatus->{razor2_result};
 }
 
 # Check the cf value of a given message and return if it's within the
@@ -304,20 +388,21 @@ sub check_razor2_range {
 
   # If Razor2 isn't available, or the general test is disabled, don't
   # continue.
-  return 0 unless $self->{main}->{conf}->{use_razor2};
   return unless $self->{razor2_available};
-  return 0 unless $self->{main}->{conf}->{scores}->{'RAZOR2_CHECK'};
+  return unless $self->{main}->{conf}->{use_razor2};
+  return unless $self->{main}->{conf}->{scores}->{'RAZOR2_CHECK'};
 
   # If Razor2 hasn't been checked yet, go ahead and run it.
-  if (!defined $self->{razor2_result}) {
-    $self->check_razor2($permsgstatus);
+  unless (defined $permsgstatus->{razor2_result}) {
+    $self->check_razor2($permsgstatus, $body);
   }
 
-  if ($self->{razor2_cf_score} >= $min && $self->{razor2_cf_score} <= $max) {
-    $permsgstatus->test_log(sprintf ("cf: %3d", $self->{razor2_cf_score}));
+  if ($permsgstatus->{razor2_cf_score} >= $min && $permsgstatus->{razor2_cf_score} <= $max) {
+    $permsgstatus->test_log(sprintf ("cf: %3d", $permsgstatus->{razor2_cf_score}));
     return 1;
   }
-  return 0;
+
+  return;
 }
 
 sub dbg { Mail::SpamAssassin::dbg(@_); }

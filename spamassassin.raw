@@ -405,11 +405,11 @@ sub wanted {
     $mail->finish();
 
     my $failed;
-    if ( $opt{'report'} && $spamtest->report_as_spam($new_mail) ) {
+    if ( $opt{'report'} && !$spamtest->report_as_spam($new_mail) ) {
       $failed = 'report';
     }
 
-    if ( $opt{'revoke'} && $spamtest->revoke_as_spam($new_mail) ) {
+    if ( $opt{'revoke'} && !$spamtest->revoke_as_spam($new_mail) ) {
       $failed = 'revoke';
     }
 
