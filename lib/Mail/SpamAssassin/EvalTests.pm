@@ -3396,4 +3396,45 @@ sub check_ratware_envelope_from {
   return 0;
 }
 
+sub check_ratware_envelope_from2 {
+  my ($self) = @_;
+
+  my $to = $self->get('To:addr');
+  my $from = $self->get('EnvelopeFrom');
+
+  return 0 unless ($to && $from);
+
+  if ($to =~ /^([^@]+)@(.+)$/) {
+    my($user,$dom) = ($1,$2);
+    $dom = Mail::SpamAssassin::Util::RegistrarBoundaries::trim_domain($dom);
+    return unless
+        (Mail::SpamAssassin::Util::RegistrarBoundaries::is_domain_valid($dom));
+
+    return 1 if ($from =~ /\b\Q$dom\E\?\Q$user\E@/i);
+  }
+
+  return 0;
+}
+
+sub check_ratware_envelope_from4 {
+  my ($self) = @_;
+
+  my $to = $self->get('To:addr');
+  my $from = $self->get('EnvelopeFrom');
+
+  return 0 unless ($to && $from);
+  return 0 if ($from =~ /^SRS\d=/);
+
+  if ($to =~ /^([^@]+)@(.+)$/) {
+    my($user,$dom) = ($1,$2);
+    $dom = Mail::SpamAssassin::Util::RegistrarBoundaries::trim_domain($dom);
+    return unless
+        (Mail::SpamAssassin::Util::RegistrarBoundaries::is_domain_valid($dom));
+
+    return 1 if ($from =~ /\b\Q$dom\E.\Q$user\E@/i);
+  }
+
+  return 0;
+}
+
 1;
