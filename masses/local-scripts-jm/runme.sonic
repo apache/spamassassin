@@ -18,13 +18,15 @@ date
 
 mkdir -p logs/old 2>/dev/null
 mv spam.sonic nonspam.sonic logs/old
+:> spam.sonic
+:> nonspam.sonic
 
 for mb in /home/jm/lib/spamtrap/nonspam.mbox.*.gz ; do
-  ./mass-check $mb > nonspam.sonic
+  ./mass-check $mb >> nonspam.sonic
 done
 
 for mb in /home/jm/lib/spamtrap/spam.mbox.*.gz ; do
-  ./mass-check $mb > spam.sonic
+  ./mass-check $mb >> spam.sonic
 done
 
 rm -f scanning.sonic
