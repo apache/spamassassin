@@ -409,7 +409,7 @@ get_current_user(char **username)
         *username = strdup(*username);
 	if (username == NULL)
 	    goto fail;
-	return EX_OK;
+	goto pass;
     }
 
 #ifndef _WIN32
