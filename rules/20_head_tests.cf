@@ -50,11 +50,10 @@ describe FROM_ALL_NUMS          From an address that is all numbers (non-phone)
 describe FROM_OFFERS		From address is "at something-offers"
 header FROM_OFFERS		From:addr =~ /\@\S*offers/i
 
-# (contrib: David Hull - fixed to support "foo @ foo . com" <foo@foo.com>)
-header FROM_NO_USER		From =~ /(?:^\@|<\@| \@[^<]*$|<>)/ [if-unset: unset@unset.unset]
+header FROM_NO_USER		From =~ /(?:^\@|<\@| \@[^\)<]*$|<>)/ [if-unset: unset@unset.unset]
 describe FROM_NO_USER		From: has no local-part before @ sign
 
-header TO_NO_USER		To =~ /(?:^\@|<\@| \@[^<]*$|<>)/ [if-unset: unset@unset.unset]
+header TO_NO_USER		To =~ /(?:^\@|<\@| \@[^\)<]*$|<>)/ [if-unset: unset@unset.unset]
 describe TO_NO_USER		To: has no local-part before @ sign
 
 header TO_HAS_SPACES            To:addr =~ /\s/
