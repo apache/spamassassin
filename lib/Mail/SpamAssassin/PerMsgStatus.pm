@@ -737,6 +737,7 @@ sub _process_header {
   my ($self, $hdr_name, $hdr_data) = @_;
 
   $hdr_data = $self->_replace_tags($hdr_data);
+  $hdr_data =~ s/(?:\r?\n)+$//; # make sure there are no trailing newlines ...
 
   if ($self->{conf}->{fold_headers} ) {
     if ($hdr_data =~ /\n/) {
