@@ -230,8 +230,11 @@ sub check_from_in_blacklist {
 sub check_to_in_whitelist {
   my ($self) = @_;
   local ($_);
-  $_ = $self->get ('To:addr');
-  return $self->_check_whitelist ($self->{conf}->{whitelist_to}, $_);
+  foreach $_ ($self->{main}->find_all_addrs_in_line
+  			($self->get ('To') . $self->get ('Cc')))
+  {
+    return $self->_check_whitelist ($self->{conf}->{whitelist_to}, $_);
+  }
 }
 
 
@@ -241,8 +244,11 @@ sub check_to_in_whitelist {
 sub check_to_in_more_spam {
   my ($self) = @_;
   local ($_);
-  $_ = $self->get ('To:addr');
-  return $self->_check_whitelist ($self->{conf}->{more_spam_to}, $_);
+  foreach $_ ($self->{main}->find_all_addrs_in_line
+  			($self->get ('To') . $self->get ('Cc')))
+  {
+    return $self->_check_whitelist ($self->{conf}->{more_spam_to}, $_);
+  }
 }
 
 
@@ -252,8 +258,11 @@ sub check_to_in_more_spam {
 sub check_to_in_all_spam {
   my ($self) = @_;
   local ($_);
-  $_ = $self->get ('To:addr');
-  return $self->_check_whitelist ($self->{conf}->{all_spam_to}, $_);
+  foreach $_ ($self->{main}->find_all_addrs_in_line
+  			($self->get ('To') . $self->get ('Cc')))
+  {
+    return $self->_check_whitelist ($self->{conf}->{all_spam_to}, $_);
+  }
 }
 
 ###########################################################################
