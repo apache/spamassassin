@@ -69,7 +69,7 @@ use vars	qw{
 @ISA = qw();
 
 $VERSION = "2.1";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.65 2002/02/10 01:37:29 hughescr Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.66 2002/02/26 11:43:24 hughescr Exp $';
 
 sub Version { $VERSION; }
 
@@ -506,7 +506,7 @@ sub init {
     $self->{config_text} = '';
 
     my $fname = $self->first_existing_path (@default_rules_path);
-    $self->{config_text} .= $self->read_cf ($fname, 'default rules dir');
+    $self->{rules_filename} or $self->{config_text} .= $self->read_cf ($fname, 'default rules dir');
 
     $fname = $self->{rules_filename};
     $fname ||= $self->first_existing_path (@site_rules_path);
