@@ -42,6 +42,9 @@ use MIME::QuotedPrint;
 
 =item new()
 
+Generates an empty Node object and returns it.  Typically only called
+by functions in Message.
+
 =cut
 
 sub new {
@@ -60,6 +63,22 @@ sub new {
 }
 
 =item find_parts()
+
+Used to search the tree for specific MIME parts.  An array of matching
+Node objects (pointers into the tree) is returned.  The parameters that
+can be passed in are (in order, all scalars):
+
+Regexp - Used to match against each part's Content-Type header,
+specifically the type and not the rest of the header.  ie: "Content-type:
+text/html; encoding=quoted-printable" has a type of "text/html".  If no
+regexp is specified, find_parts() will return an empty array.
+
+Only_leaves - By default, find_parts() will return any part that matches
+the regexp, including multipart.  If you only want to see leaves of the
+tree (ie: parts that aren't multipart), set this to true (1).
+
+Recursive - By default, when find_parts() finds a multipart which has
+parts underneath it, it will recurse.
 
 =cut
 
@@ -106,6 +125,21 @@ sub _find_parts {
 
 =item header()
 
+Stores and retrieves headers from a specific MIME part.  The first
+parameter is the header name.  If there is no other parameter, the header
+is retrieved.  If there is a second parameter, the header is stored.
+
+Header names are case-insensitive and are stored in both raw and
+decoded form.  Using header(), only the decoded form is retrievable.
+
+For retrieval, if header() is called in an array context, an array will
+be returned with each header entry in a different element.  In a scalar
+context, the last specific header is returned.
+
+ie: If 'Subject' is specified as the header, and there are 2 Subject
+headers in a message, the last/bottom one in the message is returned in
+scalar context or both are returned in array context.
+
 =cut
 
 # Store or retrieve headers from a given MIME object
@@ -113,6 +147,10 @@ sub _find_parts {
 sub header {
   my $self   = shift;
   my $rawkey = shift;
+
+  return unless ( defined $rawkey );
+
+  # we're going to do things case insensitively
   my $key    = lc($rawkey);
 
   # Trim whitespace off of the header keys
@@ -145,6 +183,17 @@ sub header {
 
 =item raw_header()
 
+Retrieves the raw version of headers from a specific MIME part.  The only
+parameter is the header name.  Header names are case-insensitive.
+
+For retrieval, if raw_header() is called in an array context, an array
+will be returned with each header entry in a different element.  In a
+scalar context, the last specific header is returned.
+
+ie: If 'Subject' is specified as the header, and there are 2 Subject
+headers in a message, the last/bottom one in the message is returned in
+scalar context or both are returned in array context.
+
 =cut
 
 # Retrieve raw headers from a given MIME object
@@ -168,6 +217,8 @@ sub raw_header {
 }
 
 =item add_body_part()
+
+Adds a Node child object to the current node object.
 
 =cut
 
@@ -194,7 +245,7 @@ sub is_leaf {
 
 =item raw()
 
-Return a reference to the the raw array.
+Return a reference to the the raw array.  Treat this as READ ONLY.
 
 =cut
 
@@ -204,11 +255,13 @@ sub raw {
 
 =item decode()
 
-Decode base64 and quoted-printable parts.
+If necessary, decode the part text as base64 or quoted-printable.
+The decoded text will be returned as a scalar.  An optional length
+parameter can be passed in which limits how much decoded data is returned.
+If the scalar isn't needed, call with "0" as a parameter.
 
 =cut
 
-# TODO: accept a length param
 sub decode {
   my($self, $bytes) = @_;
 
@@ -258,6 +311,8 @@ sub decode {
 # Look at a text scalar and determine whether it should be rendered
 # as text/html.  Based on a heuristic which simulates a certain
 # well-used/common mail client.
+#
+# We don't need to advertise this in the POD doc.
 # 
 sub _html_near_start {
   my ($pad) = @_;
@@ -270,10 +325,11 @@ sub _html_near_start {
 
 =item rendered()
 
-render_text() takes the given text/* type MIME part, and attempt
-to render it into a text scalar.  It will always render text/html,
-and will use a heuristic to determine if other text/* parts should be
-considered text/html.
+render_text() takes the given text/* type MIME part, and attempts to
+render it into a text scalar.  It will always render text/html, and will
+use a heuristic to determine if other text/* parts should be considered
+text/html.  Two scalars are returned: the rendered type (either text/html
+or whatever the original type was), and the rendered text.
 
 =cut
 
@@ -344,8 +400,7 @@ sub rendered {
 =item content_summary()
 
 Returns an array of scalars describing the mime parts of the message.
-Note: This function requires that the message be parsed first via
-_do_parse()!
+Note: This function requires that the message be parsed first!
 
 =cut
 
@@ -381,6 +436,8 @@ sub content_summary {
 
 =item delete_header()
 
+Delete the specified header (decoded and raw) from the Node information.
+
 =cut
 
 sub delete_header {
@@ -395,6 +452,7 @@ sub delete_header {
   $self->{'header_order'} = \@neworder;
 }
 
+# decode a header appropriately.  don't bother adding it to the pod documents.
 sub __decode_header {
   my ( $encoding, $cte, $data ) = @_;
 
@@ -432,6 +490,19 @@ sub _decode_header {
 
 =item get_header()
 
+Retrieve a specific header.  Will have a newline at the end and will be
+unfolded.  The first parameter is the header name (case-insensitive),
+and the second parameter (optional) is whether or not to return the
+raw header.
+
+If get_header() is called in an array context, an array will be returned
+with each header entry in a different element.  In a scalar context,
+the last specific header is returned.
+
+ie: If 'Subject' is specified as the header, and there are 2 Subject
+headers in a message, the last/bottom one in the message is returned in
+scalar context or both are returned in array context.
+
 =cut
 
 sub get_header {
@@ -458,6 +529,15 @@ sub get_header {
 }
 
 =item get_all_headers()
+
+Retrieve all headers.  Each header will have a newline at the end and
+will be unfolded.  The first parameter (optional) is whether or not to
+return the raw headers, and the second parameter (optional) is whether
+or not to include the mbox seperator.
+
+If get_all_header() is called in an array context, an array will be
+returned with each header entry in a different element.  In a scalar
+context, the headers are returned in a single scalar.
 
 =cut
 
@@ -486,8 +566,7 @@ sub get_all_headers {
 
 =item finish()
 
-Clean up an object so that it can be destroyed.   no-op for MIME parts
-currently.
+Clean up the object so that it can be destroyed.
 
 =cut
 
