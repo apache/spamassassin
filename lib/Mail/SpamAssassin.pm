@@ -468,6 +468,11 @@ databases? (optional, default 0).
 
 Whether or not to wait a long time for locks to complete (optional, default 0).
 
+=item opportunistic_expire_check_only
+
+During the opportunistic journal sync and expire check, don't actually do the
+expire but report back whether or not it should occur (optional, default 0).
+
 =back
 
 =cut
@@ -485,6 +490,7 @@ sub init_learner {
   if (defined $opts->{learn_to_journal}) { $self->{learn_to_journal} = $opts->{learn_to_journal}; }
   if (defined $opts->{caller_will_untie}) { $self->{learn_caller_will_untie} = $opts->{caller_will_untie}; }
   if (defined $opts->{wait_for_lock}) { $self->{learn_wait_for_lock} = $opts->{wait_for_lock}; }
+  if (defined $opts->{opportunistic_expire_check_only}) { $self->{opportunistic_expire_check_only} = $opts->{opportunistic_expire_check_only}; }
   1;
 }
 

@@ -1317,7 +1317,15 @@ skip:
   }
 
   # Take any opportunistic actions we can take
-  $self->opportunistic_calls();
+  if ($self->{main}->{opportunistic_expire_check_only}) {
+    # we're supposed to report on expiry only -- so do the
+    # opportunistic_calls() run for the journal only.
+    $self->opportunistic_calls(1);
+    $permsgstatus->{bayes_expiry_due} = $self->{store}->expiry_due();
+  }
+  else {
+    $self->opportunistic_calls();
+  }
 
   # Do any cleanup we need to do
   $self->{store}->cleanup();
