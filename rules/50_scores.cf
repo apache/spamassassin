@@ -681,7 +681,7 @@ ifplugin Mail::SpamAssassin::Plugin::SPF
 score SPF_PASS -0.001
 score SPF_HELO_PASS -0.001
 # <gen:mutable>
-score SPF_FAIL 0 0 0 0.875
+score SPF_FAIL 0 0.001 0 0.875
 score SPF_SOFTFAIL 0.500 0.842 0.500 0.500
 score SPF_HELO_FAIL 0 0.405 0 0.001
 score SPF_HELO_SOFTFAIL 0 1.002 0 3.140
