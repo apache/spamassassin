@@ -17,6 +17,7 @@ use Time::Local;
 use strict;
 
 use vars qw{
+	$IP_ADDRESS
 	$CCTLDS_WITH_LOTS_OF_OPEN_RELAYS
 	$ROUND_THE_WORLD_RELAYERS
 	$WORD_OBFUSCATION_CHARS 
@@ -42,6 +43,7 @@ $ROUND_THE_WORLD_RELAYERS = qr{(?:net|com|ca)};
 # for figuring this. any ccTLD with > about 40000 domains is left out of this
 # regexp.  Then I threw in some unscientific seasoning to taste. ;)
 
+$IP_ADDRESS = '(?:\b|[^\d])\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?:\b|[^\d])';
 $WORD_OBFUSCATION_CHARS = '*_.,/|-+=';
 
 ###########################################################################
@@ -306,7 +308,7 @@ sub check_for_forged_hotmail_received_headers {
   $rcvd =~ s/\s+/ /gs;		# just spaces, simplify the regexp
 
   my $ip = $self->get ('X-Originating-Ip');
-  if ($ip =~ /\d+\.\d+\.\d+\.\d+/) { $ip = 1; } else { $ip = 0; }
+  if ($ip =~ /$IP_ADDRESS/) { $ip = 1; } else { $ip = 0; }
 
   # Hotmail formats its received headers like this:
   # Received: from hotmail.com (f135.law8.hotmail.com [216.33.241.135])
@@ -365,7 +367,7 @@ sub check_for_forged_eudoramail_received_headers {
   $rcvd =~ s/\s+/ /gs;		# just spaces, simplify the regexp
 
   my $ip = $self->get ('X-Sender-Ip');
-  if ($ip =~ /\d+\.\d+\.\d+\.\d+/) { $ip = 1; } else { $ip = 0; }
+  if ($ip =~ /$IP_ADDRESS/) { $ip = 1; } else { $ip = 0; }
 
   # Eudoramail formats its received headers like this:
   # Received: from Unknown/Local ([?.?.?.?]) by shared1-mail.whowhere.com;
@@ -430,7 +432,7 @@ sub check_for_forged_yahoo_received_headers {
   if ($rcvd =~ /by web\S+\.mail\.yahoo\.com via HTTP/) { return 0; }
   if ($rcvd =~ /by smtp\.\S+\.yahoo\.com with SMTP/) { return 0; }
   if ($rcvd =~
-      /from \[\d+\.\d+\.\d+\.\d+\] by \S+\.(?:groups|grp\.scd)\.yahoo\.com with NNFMP/) {
+      /from \[$IP_ADDRESS\] by \S+\.(?:groups|grp\.scd)\.yahoo\.com with NNFMP/) {
     return 0;
   }
   if ($rcvd =~ /by \w+\.\w+\.yahoo\.com \(\d+\.\d+\.\d+\/\d+\.\d+\.\d+\) id \w+/) {
@@ -454,12 +456,12 @@ sub check_for_forged_juno_received_headers {
   my $rcvd = $self->get('Received');
 
   if (!$xorig) {  # New style Juno has no X-Originating-IP header, and other changes
-    if($rcvd !~ /from.*\bjuno\.com.*[\[\(][0-9]+\.[0-9]+\.[0-9]+\.[0-9]+[\]\)].*by/
+    if($rcvd !~ /from.*\bjuno\.com.*[\[\(]$IP_ADDRESS[\]\)].*by/
         && $rcvd !~ / cookie\.juno\.com /) { return 1; }
     if($xmailer !~ /Juno /) { return 1; }
   } else {
-    if($rcvd !~ /from.*\bmail\.com.*\[[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\].*by/) { return 1; }
-    if($xorig !~ /[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/) { return 1; }
+    if($rcvd !~ /from.*\bmail\.com.*\[$IP_ADDRESS\].*by/) { return 1; }
+    if($xorig !~ /$IP_ADDRESS/) { return 1; }
     if($xmailer !~ /\bmail\.com/) { return 1; }
   }
 
@@ -497,7 +499,7 @@ sub check_for_from_domain_in_received_headers {
 
   my $rcvd = $self->get('Received');
 
-  if ($rcvd =~ /from.*\b\Q$domain\E.*[\[\(][0-9]+\.[0-9]+\.[0-9]+\.[0-9]+[\]\)].*by.*\b\Q$domain\E/) {
+  if ($rcvd =~ /from.*\b\Q$domain\E.*[\[\(]$IP_ADDRESS[\]\)].*by.*\b\Q$domain\E/) {
       $self->{from_domain_in_received}->{$domain} = 1;
       return ($desired eq 'true');
   }
@@ -819,7 +821,7 @@ sub check_rbl {
   dbg ("checking RBL $rbl_domain, set $set", "rbl", -1);
 
   my $rcv = $self->get ('Received');
-  my @ips = ($rcv =~ /[\[\(](\d+\.\d+\.\d+\.\d+)[\]\)]/g);
+  my @ips = ($rcv =~ /[\[\(]($IP_ADDRESS)[\]\)]/g);
   return 0 unless ($#ips >= 0);
 
   # First check that DNS is available, if not do not perform this check
@@ -874,7 +876,7 @@ sub check_rbl {
 	dbg("Skipping $ip, already matched in other zones for $set", "rbl", -1);
 	next;
       }
-      next unless ($ip =~ /(\d+)\.(\d+)\.(\d+)\.(\d+)/);
+      next unless ($ip =~ /(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/);
      ($b1, $b2, $b3, $b4) = ($1, $2, $3, $4);
       
       # By default, we accept any return on an RBL
@@ -1173,7 +1175,7 @@ sub check_for_faraway_charset {
 sub check_for_faraway_charset_in_body {
   my ($self, $fulltext) = @_;
 
-  my $content_type = $self->{msg}->get_header('Content-Type');
+  my $content_type = $self->get('Content-Type');
   $content_type = '' unless defined $content_type;
   $content_type =~ /\bboundary\s*=\s*["']?(.*?)["']?(?:;|$)/i;
   my $boundary = "\Q$1\E";
@@ -1217,8 +1219,7 @@ sub check_for_faraway_charset_in_headers {
   return 0 if grep { $_ eq "all" } @locales;
 
   for my $h (qw(From Subject)) {
-# Can't use just get() because it un-mime header
-    my @hdrs = $self->{msg}->get_header ($h);
+    my @hdrs = $self->get ("$h:raw");
     if ($#hdrs >= 0) {
       $hdr = join (" ", @hdrs);
     } else {
@@ -1269,7 +1270,7 @@ sub check_for_round_the_world_received {
   #     Fri, 30 Nov 2001 08:57:47 +1000
   if ($rcvd =~ /
   	\nfrom\b.{0,20}\s(\S+\.${CCTLDS_WITH_LOTS_OF_OPEN_RELAYS})\s\(.{0,200}
-  	\nfrom\b.{0,20}\s([-_A-Za-z0-9.]+)\s.{0,30}\[(\d+\.\d+\.\d+\.\d+)\]
+  	\nfrom\b.{0,20}\s([-_A-Za-z0-9.]+)\s.{0,30}\[($IP_ADDRESS)\]
   /osix) { $relay = $1; $relayer = $2; $relayerip = $3; goto gotone; }
 
   return 0;
@@ -1950,7 +1951,7 @@ sub _check_attachments {
       elsif (/$re_cd/) { $cd = lc($1); }
     }
     if ($self->{found_encoding_quoted_printable} &&
-	length > 77 && /\=[0-9A-Fa-f]{2}/)
+	length > 77 && /\=[0-9A-F]{2}/)
     {
       $self->{mime_long_line_qp} = 1;
     }
