@@ -190,6 +190,9 @@ sub _check_spf {
   my $query;
   eval {
     require Mail::SPF::Query;
+    if ($Mail::SPF::Query::VERSION < 1.996) {
+      die "Mail::SPF::Query 1.996 or later required, this is $Mail::SPF::Query::VERSION\n";
+    }
     $query = Mail::SPF::Query->new (ip => $ip, sender => $sender, helo => $helo,
 		debug => $Mail::SpamAssassin::DEBUG->{rbl},
 		trusted => 1
