@@ -40,13 +40,20 @@ tflags HASHCASH_23            nice userconf
 tflags HASHCASH_24            nice userconf
 tflags HASHCASH_25            nice userconf
 tflags HASHCASH_HIGH          nice userconf
+describe HASHCASH_20          Contains valid Hashcash token (20 bits)
+describe HASHCASH_21          Contains valid Hashcash token (21 bits)
+describe HASHCASH_22          Contains valid Hashcash token (22 bits)
+describe HASHCASH_23          Contains valid Hashcash token (23 bits)
+describe HASHCASH_24          Contains valid Hashcash token (24 bits)
+describe HASHCASH_25          Contains valid Hashcash token (25 bits)
+describe HASHCASH_HIGH        Contains valid Hashcash token (>25 bits)
 
 # This should NOT be a high score; it's possible for this to happen if
 # a mail is sent to a list, and CC'd to you.   However, if it does fire,
 # it'll cancel out the hashcash "bonus" rule.
 #
 header HASHCASH_2SPEND        eval:check_hashcash_double_spend()
-describe HASHCASH_2SPEND      HashCash token already spent in another mail
+describe HASHCASH_2SPEND      Hashcash token already spent in another mail
 tflags HASHCASH_2SPEND        userconf
 
 endif   # Mail::SpamAssassin::Plugin::Hashcash
