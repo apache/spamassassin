@@ -1862,12 +1862,12 @@ Print a brief help message, then exit without further action.
 
 =item B<-i> I<ipaddress>, B<--listen-ip>=I<ipaddress>, B<--ip-address>=I<ipaddress>
 
-Tells spamd to listen on the specified IP address [defaults to 127.0.0.1].  Use
+Tells spamd to listen on the specified IP address (defaults to 127.0.0.1).  Use
 0.0.0.0 to listen on all interfaces.
 
 =item B<-p> I<port>, B<--port>=I<port>
 
-Optionally specifies the port number for the server to listen on.
+Optionally specifies the port number for the server to listen on (default: 783).
 
 =item B<-q>, B<--sql-config>
 
