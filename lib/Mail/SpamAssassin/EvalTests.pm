@@ -1448,7 +1448,7 @@ sub _check_date_diff {
   if ($received[0] =~ /\bfrom (?:localhost\s|(\S+ ){1,2}\S*\b127\.0\.0\.1\b)|qmail \d+ invoked by uid \d+/) {
     push @local, (shift @received);
   }
-  elsif ($received[0] =~ /\bby localhost with \w+ \(fetchmail-[\d.]+/) {
+  if ($received[0] =~ /\bby localhost with \w+ \(fetchmail-[\d.]+/) {
     push @local, (shift @received);
   }
   elsif (@local) {
