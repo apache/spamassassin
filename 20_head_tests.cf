@@ -676,3 +676,9 @@ describe X_PRIORITY_CC		Cc: after X-Priority: (bulk email fingerprint)
 
 header    SUBJ_CONSONANTS       Subject =~ /\b[bcghjklmnpqrstvwxz]{6,20}\b/
 describe  SUBJ_CONSONANTS       Subject contains consecutive consonants in "word"
+
+# catch non-RFC2047 compliant messages
+# Apple Mail has a bug where headers will have whitespace around the encoded
+# text, so try to ignore that
+header BAD_ENC_HEADER		ALL =~ /=\?[^?\s]+\?[^?\s]\?\s*[^?]+\s(?!\?=)/
+describe BAD_ENC_HEADER		Message has bad MIME encoding in the header
