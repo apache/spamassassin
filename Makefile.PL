@@ -184,6 +184,7 @@ my %makefile = (
 
     # be quite explicit about this; afaik CPAN.pm is sensible using this
     'PREREQ_PM' => {
+        'Digest::SHA1'  => 0,             # 2.0 is oldest tested version
         'File::Spec'    => 0.8,           # older versions lack some routines we need
         'File::Copy'    => 2.02,          # this version is shipped with 5.005_03, the oldest version known to work
         'Pod::Usage'    => 1.10,          # all versions prior to this do seem to be buggy
