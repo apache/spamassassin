@@ -118,7 +118,7 @@ body PROFITS			/\bPROFITS\b/
 describe PROFITS		Contains word 'profits' in all-caps
 body NO_QS_ASKED		/\bNO QUESTIONS ASKED\b/i
 describe NO_QS_ASKED		Doesn't ask any questions
-body FULL_REFUND		/\bFULL REFUND\b/i
+body FULL_REFUND		/full refund|refunds? your money in full/i
 describe FULL_REFUND		Offers a full refund
 
 # note Marc Perkel's fix: require capital-F Free.  better -- less FPs
