@@ -7,31 +7,31 @@
 # Whitelist and blacklist addresses are now file-glob-style patterns, so
 # "friend@somewhere.com", "*@isp.com", or "*.domain.net" will all work.
 
-whitelist_from	billing@networksolutions.com
-whitelist_from	hostmaster@internic.net
-whitelist_from	support@register.com
-whitelist_from	nytdirect@nytimes.com
-whitelist_from	petitions@petitiononline.com
+whitelist_from_rcvd	billing@networksolutions.com        networksolutions.com
+whitelist_from_rcvd	hostmaster@internic.net             internic.net
+whitelist_from_rcvd	support@register.com                register.com
+whitelist_from_rcvd	nytdirect@nytimes.com               nytimes.com
+whitelist_from_rcvd	petitions@petitiononline.com        petitiononline.com
 
-whitelist_from  *@*.amazon.com
-whitelist_from  *@amazon.co.uk
-whitelist_from  *@*.amazon.co.uk
-whitelist_from	*@ora.com		# O'Reilly
-whitelist_from  *@*.ora.com
-whitelist_from  *@walmart.com
-whitelist_from  *@bn.com
-whitelist_from  *@online.telstra.com.au
+whitelist_from_rcvd  *@*.amazon.com                         amazon.com
+whitelist_from_rcvd  *@amazon.co.uk                         amazon.co.uk
+whitelist_from_rcvd  *@*.amazon.co.uk                       amazon.co.uk
+whitelist_from_rcvd	*@ora.com		            oreilly.com
+whitelist_from_rcvd  *@*.ora.com                            oreilly.com
+whitelist_from_rcvd  *@walmart.com                          walmart.com
+whitelist_from_rcvd  *@bn.com                               bn.com
+whitelist_from_rcvd  *@online.telstra.com.au                telstra.com.au
 
-whitelist_from  *@yahoo-inc.com         # Subscriptions required
-whitelist_from  *@mypoints.com          # Subscriptions required
-whitelist_from  *@*.mypoints.com
+whitelist_from_rcvd  *@yahoo-inc.com                        yahoo-inc.com
+whitelist_from_rcvd  *@mypoints.com                         mypoints.com
+whitelist_from_rcvd  *@*.mypoints.com                       mypoints.com
 
 # bugtraq: can contain malicious Javascript etc.
-whitelist_from  *@securityfocus.com
+whitelist_from_rcvd  *@securityfocus.com                    securityfocus.com
 
-whitelist_from  freshmeat-news-admin@lists.freshmeat.net
-whitelist_from  *@mailer.whitehat.com
-whitelist_from  *@mediaunspun.imakenews.net
-whitelist_from  *@spamex.com
+whitelist_from_rcvd  freshmeat-news-admin@lists.freshmeat.net  freshmeat.net
+whitelist_from_rcvd  *@mailer.whitehat.com                     whitehat.com
+whitelist_from_rcvd  *@mediaunspun.imakenews.net               imakenews.net
+whitelist_from_rcvd  *@spamex.com                              spamex.com
 
 whitelist_from_rcvd  *@lists.sourceforge.net  sourceforge.net
