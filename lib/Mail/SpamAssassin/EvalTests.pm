@@ -42,11 +42,12 @@ sub check_for_from_mx {
   # First check that DNS is available, if not do not perform this check
   return 0 unless $self->is_dns_available();
 
-  # Try 5 times to protect against temporary outages
+  # Try 5 times to protect against temporary outages.  sleep between checks
+  # to give the DNS a chance to recover.
   for my $i (1..5) {
     my @mx = mx ($self->{res}, $_);
     if (scalar @mx >= 0) { return 0; }
-    sleep 10;
+    sleep 5;
   }
 
   return 1;
