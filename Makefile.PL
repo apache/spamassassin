@@ -1069,7 +1069,7 @@ sub MY::tools_other {
     $line = macro_def($macro);
   }
   
-  set_macro('LN_S', join(' ', macro_ref('PERLRUN'), qq{build/do}, qq{link}));
+  set_macro('LN_S', join(' ', macro_ref('PERLRUN'), qq{build/do}, qq{symlink}));
   push(@code, macro_def('LN_S'));
   
   clean_MY_globals($self);
@@ -1118,6 +1118,21 @@ sub MY::dist {
   clean_MY_globals($self);
   return join("\n", @code);
 }
+
+#sub MY::test_via_harness {
+#  my $self = shift;
+#  my @code = split(/\n/, $self->SUPER::test_via_harness(@_));
+#  init_MY_globals($self);
+# 
+#  foreach my $line (@code) {
+#    # Insert an -It before the -e switch, keep the quoting.
+#    $line =~ s/(\s["']?)(-e)(["']?\s)/$1-It$3$1$2$3/;
+#  }
+# 
+#  clean_MY_globals($self);
+#  return join("\n", @code);
+#}
+
 
 
 sub MY::postamble {
