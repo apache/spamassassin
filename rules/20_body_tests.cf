@@ -922,7 +922,7 @@ describe REFINANCE		Refinance Home
 #body SEARCH_ENGINE	        /\b(?:(?:submit|traffic|top).{0.10} search engines?|site ranking)\b/i
 #describe SEARCH_ENGINE		Search Engine Site Ranking
 
-body SEARCH_ENGINE_PROMO        /\b(?:(?:submitt?|list)(?:ed|ing|s)?|place(?:d|ment))\b.{0,15}\b(?:in|to).{0,15}\b(?:search(?:ing)?\s*(?:engine|site)|director(?:y|ies))s?\b/is
+body T_SEARCH_ENGINE_PROMO        /\b(?:(?:submitt?|list)(?:ed|ing|s)?|place(?:d|ment))\b.{1,15}\b(?:in|to)[\s_-]+.{0,15}\b(?:search(?:ing)?\s*(?:engine|site)|director(?:y|ies))s?\b/is
 describe SEARCH_ENGINE_PROMO    Discusses search engine listings
 
 body OPPORTUNITY_2		/\b(?:opportunity (?:pass|of a lifetime|is knocking|for you)|(?:investment|unique) opportunity)\b/i
