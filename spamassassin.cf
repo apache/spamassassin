@@ -216,6 +216,7 @@ body HTML_WITH_BGCOLOR		/<body .*bgcolor=\S+/i
 body SPAM_FORM			/CHANGE EMAIL ADDRESS IN ACTION OF FORM/
 body SPAM_FORM_RETURN		/return validate_form/
 body SPAM_FORM_INPUT		/<input name=.*submit type=.*submit value=.*" *Submit By E-Mail *">/i
+body DOLLAR_DOLLAR_DOLLAR	/\$\$\$/
 
 body SENT_IN_COMPLIANCE		/message .*sen(?:d|t) in compliance (?:of|with)/
 body PARA_A_2_C_OF_1618		/Paragraph .a.*2.*C. of S. 1618/i
@@ -332,6 +333,11 @@ full AOL_USERS_LINK		/AOL\s+Users\s+Click\s+Here/is
 
 full WEB_BUGS			/<\s*img\s[^>]*src[^>]+\?/i
 describe WEB_BUGS		Image tag with an ID code to identify you
+
+# many spammers seem to do this nowadays (and probably track
+# their customers with it).  (contrib: WW)
+full RELAYING_FRAME		/<frame\b[^>]+\bsrc=[3D=\s"']*http:\/\//is
+describe RELAYING_FRAME		Frame wanted to load outside URL
 
 # Cyber FirePower! rants about 'Internet terrorists' aka spam fighters
 # (contrib: WW)
@@ -502,6 +508,7 @@ score WEB_BUGS			5
 score FILL_OUT_HERE		2
 score CYBER_FIRE_POWER		4
 score INTERNET_TERROR_RANT	8
+score RELAYING_FRAME		5
 
 ###########################################################################
 # Compensation for common false positives.
