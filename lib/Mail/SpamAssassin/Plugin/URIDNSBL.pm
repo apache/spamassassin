@@ -496,6 +496,9 @@ sub complete_dnsbl_lookup {
   my $packet = $self->{res}->bgread($ent->{sock});
   $self->close_ent_socket ($ent);
   my @answer = $packet->answer;
+  my $uridnsbl_subs = $conf->{uridnsbl_subs}->{$ent->{zone}};
+  my $uridnsbl_subs_bits = 0;
+  $uridnsbl_subs_bits |= $_ for keys %{$uridnsbl_subs};
   foreach my $rr (@answer)
   {
     next if ($rr->type ne 'A' && $rr->type ne 'TXT');
@@ -505,10 +508,15 @@ sub complete_dnsbl_lookup {
 
     if (!$rulecf->{is_subrule}) {
       # this zone is a simple rule, not a set of subrules
+      # skip any A record that isn't on 127/8
+      next if ($rr->type eq 'A' && $rr->rdatastr !~ /^127\./);
       $self->got_dnsbl_hit ($scanstate, $ent, $rdatastr, $dom, $rulename);
     }
     else {
-      my $uridnsbl_subs = $conf->{uridnsbl_subs}->{$ent->{zone}};
+      # skip any A record that isn't on 127/8 if we're not looking for
+      # any bits in the first octet, this is a workaround for bug 3997
+      next if ($rr->type eq 'A' && $rr->rdatastr !~ /^127\./ &&
+	       !($uridnsbl_subs_bits & 0xff000000));
       foreach my $subtest (keys (%{$uridnsbl_subs}))
       {
         my $subrulename = $uridnsbl_subs->{$subtest}->{rulename};
