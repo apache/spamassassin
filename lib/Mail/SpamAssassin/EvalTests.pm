@@ -90,7 +90,7 @@ sub _check_for_from_dns {
   my ($self) = @_;
 
   my $from;
-  foreach $from ( $self->get('Reply-To:addr'), $self->get ('From:addr') ) {
+  foreach $from ($self->get('Reply-To:addr'), $self->get('From:addr')) {
     next unless defined $from;
 
     # bug 3366
@@ -390,13 +390,13 @@ sub _check_for_forged_hotmail_received_headers {
   $self->{hotmail_addr_with_forged_hotmail_received} = 0;
   $self->{hotmail_addr_but_no_hotmail_received} = 0;
 
-  my $rcvd = $self->get ('Received');
+  my $rcvd = $self->get('Received');
   $rcvd =~ s/\s+/ /gs;		# just spaces, simplify the regexp
 
   return if ($rcvd =~
         /from mail pickup service by hotmail\.com with Microsoft SMTPSVC;/);
 
-  my $ip = $self->get ('X-Originating-Ip');
+  my $ip = $self->get('X-Originating-Ip');
   my $IP_ADDRESS = IP_ADDRESS;
 
   if ($ip =~ /$IP_ADDRESS/) { $ip = 1; } else { $ip = 0; }
@@ -419,7 +419,7 @@ sub _check_for_forged_hotmail_received_headers {
     $self->{hotmail_addr_with_forged_hotmail_received} = 1;
   } else {
     # check to see if From claimed to be @hotmail.com
-    my $from = $self->get ('From:addr');
+    my $from = $self->get('From:addr');
     if ($from !~ /hotmail.com/) { return; }
     $self->{hotmail_addr_but_no_hotmail_received} = 1;
   }
@@ -452,7 +452,7 @@ sub check_for_msn_groups_headers {
   return 0 unless $self->get('X-Loop') =~ /^notifications\@groups\.msn\.com/;
   return 0 unless $self->get('EnvelopeFrom') =~ /<$listname-bounce\@groups\.msn\.com>/;
 
-  $_ = $self->get ('Received');
+  $_ = $self->get('Received');
   return 0 if !/from mail pickup service by groups\.msn\.com\b/;
   return 1;
 
@@ -475,13 +475,13 @@ sub check_for_msn_groups_headers {
 sub check_for_forged_eudoramail_received_headers {
   my ($self) = @_;
 
-  my $from = $self->get ('From:addr');
+  my $from = $self->get('From:addr');
   if ($from !~ /eudoramail.com/) { return 0; }
 
-  my $rcvd = $self->get ('Received');
+  my $rcvd = $self->get('Received');
   $rcvd =~ s/\s+/ /gs;		# just spaces, simplify the regexp
 
-  my $ip = $self->get ('X-Sender-Ip');
+  my $ip = $self->get('X-Sender-Ip');
   my $IP_ADDRESS = IP_ADDRESS;
   if ($ip =~ /$IP_ADDRESS/) { $ip = 1; } else { $ip = 0; }
 
@@ -505,10 +505,10 @@ sub check_for_forged_eudoramail_received_headers {
 sub check_for_forged_excite_received_headers {
   my ($self) = @_;
 
-  my $from = $self->get ('From:addr');
+  my $from = $self->get('From:addr');
   if ($from !~ /excite.com/) { return 0; }
 
-  my $rcvd = $self->get ('Received');
+  my $rcvd = $self->get('Received');
   $rcvd =~ s/\s+/ /gs;		# just spaces, simplify the regexp
 
   # Excite formats its received headers like this:
@@ -534,10 +534,10 @@ sub check_for_forged_excite_received_headers {
 sub check_for_forged_yahoo_received_headers {
   my ($self) = @_;
 
-  my $from = $self->get ('From:addr');
+  my $from = $self->get('From:addr');
   if ($from !~ /yahoo\.com$/) { return 0; }
 
-  my $rcvd = $self->get ('Received');
+  my $rcvd = $self->get('Received');
   
   if ($self->get("Resent-From") && $self->get("Resent-To")) {
     my $xrcvd = $self->get("X-Received");
@@ -648,10 +648,10 @@ sub check_for_from_domain_in_received_headers {
 sub gated_through_received_hdr_remover {
   my ($self) = @_;
 
-  my $txt = $self->get ("Mailing-List");
+  my $txt = $self->get("Mailing-List");
   if (defined $txt && $txt =~ /^contact \S+\@\S+\; run by ezmlm$/) {
-    my $dlto = $self->get ("Delivered-To");
-    my $rcvd = $self->get ("Received");
+    my $dlto = $self->get("Delivered-To");
+    my $rcvd = $self->get("Received");
 
     # ensure we have other indicative headers too
     if ($dlto =~ /^mailing list \S+\@\S+/ &&
@@ -665,13 +665,13 @@ sub gated_through_received_hdr_remover {
     # not required.
   }
 
-  if ($self->get ("Received") !~ /\S/) {
+  if ($self->get("Received") !~ /\S/) {
     # we have no Received headers!  These tests cannot run in that case
     return 1;
   }
 
   # MSN groups removes Received lines. thanks MSN
-  if ($self->get ("Received") =~ /from groups\.msn\.com \(\S+\.msn\.com /) {
+  if ($self->get("Received") =~ /from groups\.msn\.com \(\S+\.msn\.com /) {
     return 1;
   }
 
@@ -786,8 +786,8 @@ sub are_more_high_bits_set {
 sub check_for_missing_to_header {
   my ($self) = @_;
 
-  my $hdr = $self->get ('To');
-  $hdr ||= $self->get ('Apparently-To');
+  my $hdr = $self->get('To');
+  $hdr ||= $self->get('Apparently-To');
   return 1 if ($hdr eq '');
 
   return 0;
@@ -1069,7 +1069,7 @@ sub all_from_addrs {
 
   # Resent- headers take priority, if present. see bug 672
   # http://www.hughes-family.org/bugzilla/show_bug.cgi?id=672
-  my $resent = $self->get ('Resent-From');
+  my $resent = $self->get('Resent-From');
   if (defined $resent && $resent =~ /\S/) {
     @addrs = $self->{main}->find_all_addrs_in_line ($resent);
 
@@ -1083,11 +1083,11 @@ sub all_from_addrs {
     # bug 3366: some addresses come in as 'foo@bar...', which is invalid.
     # so deal with the multiple periods.
     @addrs = grep { defined($_) && length($_) > 0 } map { tr/././s; $_; }
-        ($self->get ('From:addr'),                  # std
-         $self->get ('Envelope-Sender:addr'),       # qmail: new-inject(1)
-         $self->get ('Resent-Sender:addr'),         # procmailrc manpage
-         $self->get ('X-Envelope-From:addr'),       # procmailrc manpage
-         $self->get ('EnvelopeFrom:addr'));	    # SMTP envelope
+        ($self->get('From:addr'),		# std
+         $self->get('Envelope-Sender:addr'),	# qmail: new-inject(1)
+         $self->get('Resent-Sender:addr'),	# procmailrc manpage
+         $self->get('X-Envelope-From:addr'),	# procmailrc manpage
+         $self->get('EnvelopeFrom:addr'));	# SMTP envelope
     # http://www.cs.tut.fi/~jkorpela/headers.html is useful here
   }
 
@@ -1095,7 +1095,7 @@ sub all_from_addrs {
   my %addrs = map { $_ => 1 } @addrs;
   @addrs = keys %addrs;
 
-  dbg ("all '*From' addrs: ".join (" ", @addrs));
+  dbg("all '*From' addrs: " . join(" ", @addrs));
   $self->{all_from_addrs} = \@addrs;
   return @addrs;
 }
@@ -1109,11 +1109,11 @@ sub all_to_addrs {
 
   # Resent- headers take priority, if present. see bug 672
   # http://www.hughes-family.org/bugzilla/show_bug.cgi?id=672
-  my $resent = $self->get ('Resent-To') . $self->get ('Resent-Cc');
+  my $resent = $self->get('Resent-To') . $self->get('Resent-Cc');
   if (defined $resent && $resent =~ /\S/) {
     @addrs = $self->{main}->find_all_addrs_in_line (
-  	 $self->get ('Resent-To') .             # std, rfc822
-  	 $self->get ('Resent-Cc'));             # std, rfc822
+  	 $self->get('Resent-To') .             # std, rfc822
+  	 $self->get('Resent-Cc'));             # std, rfc822
 
   } else {
     # OK, a fetchmail trick: try to find the recipient address from
@@ -1121,37 +1121,35 @@ sub all_to_addrs {
     # since it does not add a helpful header like exim, qmail
     # or Postfix do.
     #
-    my $rcvd = $self->get ('Received');
+    my $rcvd = $self->get('Received');
     $rcvd =~ s/\n[ \t]+/ /gs;
     $rcvd =~ s/\n+/\n/gs;
 
-    my @rcvdlines = split (/\n/, $rcvd, 4); pop @rcvdlines; # forget last one
+    my @rcvdlines = split(/\n/, $rcvd, 4); pop @rcvdlines; # forget last one
     my @rcvdaddrs = ();
     foreach my $line (@rcvdlines) {
       if ($line =~ / for (\S+\@\S+);/) { push (@rcvdaddrs, $1); }
     }
 
     @addrs = $self->{main}->find_all_addrs_in_line (
-	 join (" ", @rcvdaddrs)."\n" .
-         $self->get ('To') .                    # std
-  	 $self->get ('Apparently-To') .         # sendmail, from envelope
-  	 $self->get ('Delivered-To') .          # Postfix, poss qmail
-  	 $self->get ('Envelope-Recipients') .   # qmail: new-inject(1)
-  	 $self->get ('Apparently-Resent-To') .  # procmailrc manpage
-  	 $self->get ('X-Envelope-To') .         # procmailrc manpage
-  	 $self->get ('Envelope-To') .           # exim
-	 $self->get ('X-Delivered-To') .	# procmail quick start
-	 $self->get ('X-Original-To') .		# procmail quick start
-	 $self->get ('X-Rcpt-To') .		# procmail quick start
-	 $self->get ('X-Real-To') .		# procmail quick start
-	 $self->get ('Cc'));                    # std
-
-    # those are taken from various sources; thanks to Nancy McGough,
-    # who noted some in <http://www.ii.com/internet/robots/procmail/qs/#envelope>
-
+	 join(" ", @rcvdaddrs)."\n" .
+         $self->get('To') .			# std 
+  	 $self->get('Apparently-To') .		# sendmail, from envelope
+  	 $self->get('Delivered-To') .		# Postfix, poss qmail
+  	 $self->get('Envelope-Recipients') .	# qmail: new-inject(1)
+  	 $self->get('Apparently-Resent-To') .	# procmailrc manpage
+  	 $self->get('X-Envelope-To') .		# procmailrc manpage
+  	 $self->get('Envelope-To') .		# exim
+	 $self->get('X-Delivered-To') .		# procmail quick start
+	 $self->get('X-Original-To') .		# procmail quick start
+	 $self->get('X-Rcpt-To') .		# procmail quick start
+	 $self->get('X-Real-To') .		# procmail quick start
+	 $self->get('Cc'));			# std
+    # those are taken from various sources; thanks to Nancy McGough, who
+    # noted some in <http://www.ii.com/internet/robots/procmail/qs/#envelope>
   }
 
-  dbg ("all '*To' addrs: ".join (" ", @addrs));
+  dbg("all '*To' addrs: " . join(" ", @addrs));
   $self->{all_to_addrs} = \@addrs;
   return @addrs;
 
@@ -1278,7 +1276,7 @@ sub check_to_in_all_spam {
 sub check_lots_of_cc_lines {
   my ($self) = @_;
   local ($_);
-  $_ = $self->get ('Cc');
+  $_ = $self->get('Cc');
   my @count = /\n/gs;
   if ($#count > 20) { return 1; }
   return 0;
@@ -1450,6 +1448,28 @@ sub check_rbl_from_host {
   }
 }
 
+# this only checks the address host name and not the domain name because
+# using the domain name had much worse results for dsn.rfc-ignorant.org
+sub check_rbl_envfrom {
+  my ($self, $rule, $set, $rbl_server) = @_;
+
+  return 0 if $self->{conf}->{skip_rbl_checks};
+  return 0 unless $self->is_dns_available();
+
+  my %hosts;
+  for my $from ($self->get('EnvelopeFrom:addr')) {
+    if ($from =~ m/\@(\S+\.\S+)/) {
+      $hosts{lc($1)} = 1;
+    }
+  }
+  return unless scalar keys %hosts;
+
+  $self->load_resolver();
+  for my $host (keys %hosts) {
+    $self->do_rbl_lookup($rule, $set, 'A', $rbl_server, "$host.$rbl_server");
+  }
+}
+
 sub ip_list_uniq_and_strip_reserved {
   my ($self, @origips) = @_;
   my @ips = ();
@@ -1469,7 +1489,7 @@ sub ip_list_uniq_and_strip_reserved {
 sub check_for_unique_subject_id {
   my ($self) = @_;
   local ($_);
-  $_ = lc $self->get ('Subject');
+  $_ = lc $self->get('Subject');
   study;
 
   my $id = 0;
@@ -1663,7 +1683,7 @@ sub check_for_forged_gw05_received_headers {
   my ($self) = @_;
   local ($_);
 
-  my $rcv = $self->get ('Received');
+  my $rcv = $self->get('Received');
 
   # e.g.
   # Received: from mail3.icytundra.com by gw05 with ESMTP; Thu, 21 Jun 2001 02:28:32 -0400
@@ -1683,7 +1703,7 @@ sub check_for_forged_gw05_received_headers {
 sub check_for_faraway_charset {
   my ($self, $body) = @_;
 
-  my $type = $self->get ('Content-Type');
+  my $type = $self->get('Content-Type');
 
   my @locales = $self->get_my_locales();
 
@@ -1699,7 +1719,7 @@ sub check_for_faraway_charset {
     # 7-bit charset as well, so make sure we actually have a high
     # number of 8-bit chars in the body text first.
 
-    $body = join ("\n", @$body);
+    $body = join("\n", @$body);
     if ($self->are_more_high_bits_set ($body)) {
       return 1;
     }
@@ -1717,9 +1737,9 @@ sub check_for_faraway_charset_in_headers {
   return 0 if grep { $_ eq "all" } @locales;
 
   for my $h (qw(From Subject)) {
-    my @hdrs = $self->get ("$h:raw");
+    my @hdrs = $self->get("$h:raw");
     if ($#hdrs >= 0) {
-      $hdr = join (" ", @hdrs);
+      $hdr = join(" ", @hdrs);
     } else {
       $hdr = '';
     }
@@ -1742,7 +1762,7 @@ sub get_charset_from_ct_line {
 sub get_my_locales {
   my ($self) = @_;
 
-  my @locales = split (' ', $self->{conf}->{ok_locales});
+  my @locales = split(' ', $self->{conf}->{ok_locales});
   my $lang = $ENV{'LC_ALL'};
   $lang ||= $ENV{'LANGUAGE'};
   $lang ||= $ENV{'LC_MESSAGES'};
@@ -1759,7 +1779,7 @@ sub _check_for_round_the_world_received {
 
   $self->{round_the_world_revdns} = 0;
   $self->{round_the_world_helo} = 0;
-  my $rcvd = $self->get ('Received');
+  my $rcvd = $self->get('Received');
   my $IPV4_ADDRESS = IPV4_ADDRESS;
 
   # TODO: use new Received header parser
@@ -2128,13 +2148,13 @@ sub body_charset_is_likely_to_fp {
   #
   $self->_check_attachments unless exists $self->{mime_checked_attachments};
   my @charsets = ();
-  my $type = $self->get ('Content-Type');
+  my $type = $self->get('Content-Type');
   $type = get_charset_from_ct_line ($type);
   if (defined $type) {
     push (@charsets, $type);
   }
   if (defined $self->{mime_html_charsets}) {
-    push (@charsets, split (' ', $self->{mime_html_charsets}));
+    push (@charsets, split(' ', $self->{mime_html_charsets}));
   }
 
   foreach my $charset (@charsets) {
@@ -2271,7 +2291,7 @@ sub _check_language {
   }
 
   $self->{undesired_language_body} = 0;
-  my @languages = split (' ', $self->{conf}->{ok_languages});
+  my @languages = split(' ', $self->{conf}->{ok_languages});
 
   if (grep { $_ eq "all" } @languages) {
     return $self->{undesired_language_body};
@@ -2313,7 +2333,7 @@ sub _check_language {
 sub check_for_body_8bits {
   my ($self, $body) = @_;
 
-  my @languages = split (' ', $self->{conf}->{ok_languages});
+  my @languages = split(' ', $self->{conf}->{ok_languages});
 
   for (@languages) {
     return 0 if $_ eq "all";
@@ -2687,7 +2707,7 @@ sub check_for_fake_aol_relay_in_rcvd {
   my ($self) = @_;
   local ($_);
 
-  $_ = $self->get ('Received'); s/\s/ /gs;
+  $_ = $self->get('Received'); s/\s/ /gs;
 
   # this is the hostname format used by AOL for their relays. Spammers love 
   # forging it.  Don't make it more specific to match aol.com only, though --
@@ -2823,14 +2843,14 @@ sub check_messageid_not_usable {
   local ($_);
 
   # Lyris eats message-ids.  also some ezmlm, I think :(
-  $_ = $self->get ("List-Unsubscribe");
+  $_ = $self->get("List-Unsubscribe");
   return 1 if (/<mailto:(?:leave-\S+|\S+-unsubscribe)\@\S+>$/);
 
   # ezmlm again
   if($self->gated_through_received_hdr_remover()) { return 1; }
 
   # Allen notes this as 'Wacky sendmail version?'
-  $_ = $self->get ("Received");
+  $_ = $self->get("Received");
   return 1 if /\/CWT\/DCE\)/;
 
   # Apr  2 2003 jm: iPlanet rewrites lots of stuff, including Message-IDs
@@ -2970,10 +2990,10 @@ sub check_access_database {
 sub sent_by_applemail {
   my ($self) = @_;
 
-  return 0 unless ($self->get ("MIME-Version") =~ /Apple Message framework/);
-  return 0 unless ($self->get ("X-Mailer") =~ /^Apple Mail \(\d+\.\d+\)/);
-  return 0 unless ($self->get ("Message-Id") =~
-				/^<[A-F0-9]+(?:-[A-F0-9]+){4}\@\S+.\S+>$/);
+  return 0 unless ($self->get("MIME-Version") =~ /Apple Message framework/);
+  return 0 unless ($self->get("X-Mailer") =~ /^Apple Mail \(\d+\.\d+\)/);
+  return 0 unless ($self->get("Message-Id") =~
+		   /^<[A-F0-9]+(?:-[A-F0-9]+){4}\@\S+.\S+>$/);
   return 1;
 }
 
