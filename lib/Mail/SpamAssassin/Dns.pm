@@ -43,9 +43,14 @@ BEGIN {
     require Net::DNS;
     require Net::DNS::Resolver;
   };
+
+  # Use Razor2 if it's available, Razor1 otherwise
   eval {
+    require Razor2::Client::Agent;
+  } or eval {
     require Razor::Client;
   };
+
   eval {
     require MIME::Base64;
   };
@@ -201,9 +206,17 @@ sub is_razor_available {
     return 0;
   }
 
-  eval {
-    require Razor::Client;
-  };
+  # Use Razor2 if it's available, Razor1 otherwise
+eval { require Razor2::Client::Agent; };
+if ($@) {
+  dbg("Razor2 is not available", "razor", -1);
+}
+else {
+  dbg("Razor2 is available", "razor", -1);
+  return 1;
+}
+
+eval { require Razor::Client; };
   
   if ($@) {
     dbg ("Razor is not available", "razor", -1);
@@ -226,13 +239,7 @@ sub razor_lookup {
 
   timelog("Razor -> Starting razor test ($timeout secs max)", "razor", 1);
   
-  my @msg = split (/^/m, $$fulltext);
-
   my $response = undef;
-  my $config = $self->{conf}->{razor_config};
-  my %options = (
-    'debug'	=> ($Mail::SpamAssassin::DEBUG->{enabled} and $Mail::SpamAssassin::DEBUG->{razor} < -2)
-  );
 
   # razor also debugs to stdout. argh. fix it to stderr...
   if ($Mail::SpamAssassin::DEBUG) {
@@ -242,44 +249,111 @@ sub razor_lookup {
 
   my $oldslash = $/;
 
-  eval {
-    require Razor::Client;
-    require Razor::Agent;
-    local ($^W) = 0;		# argh, warnings in Razor
+  # Use Razor2 if it's available
+  eval { require Razor2::Client::Agent; };
+  if ( !$@ ) {
+    eval {
+      local ($^W) = 0;    # argh, warnings in Razor
 
-    local $SIG{ALRM} = sub { die "alarm\n" };
-    alarm $timeout;
+      local $SIG{ALRM} = sub { die "alarm\n" };
+      alarm $timeout;
 
-    my $rc = Razor::Client->new ($config, %options);
+      my $rc =
+        Razor2::Client::Agent->new('razor-check')
+        ;                 # everything's in the module!
 
-    if ($rc) {
-      my $ver = $Razor::Client::VERSION;
-      if ($ver >= 1.12) {
-        my $respary = $rc->check ('spam' => \@msg);
-        # response can be "0" or "1". there can be many responses.
-        # so if we get 5 responses, and one of them's 1, we
-        # wind up with "00010", which +0 below turns to 10, ie. != 0.
-        for my $resp (@$respary) { $response .= $resp; }
+      if ($rc) {
+        my %opt = (
+          debug      => $Mail::SpamAssassin::DEBUG,
+          foreground => 1
+        );
+        $rc->{opt} = \%opt;
+        $rc->do_conf() or die $rc->errstr;
 
+        my @msg     = ($fulltext);
+        my $objects = $rc->prepare_objects( \@msg )
+          or die "error in prepare_objects";
+        $rc->get_server_info() or die $rc->errprefix("checkit");
+        my $sigs = $rc->compute_sigs($objects)
+          or die "error in compute_sigs";
+
+        # 
+        # if mail is whitelisted, its not spam, so abort.
+        #   
+        if ( $rc->local_check( $objects->[0] ) ) {
+          $response = 0;
+        }
+        else {
+          $rc->connect() or die $rc->errprefix("checkit");
+          $rc->check($objects) or die $rc->errprefix("checkit");
+          $rc->disconnect() or die $rc->errprefix("checkit");
+          $response = $objects->[0]->{spam};
+        }
       }
       else {
-          $response = $rc->check (\@msg);
+        warn "undefined Razor2::Client::Agent\n";
       }
-    }
-    else {
-        warn "Problem while trying to load Razor: $!";
-    }
-    
-    alarm 0;
-  };
+  
+      alarm 0;
+    };
+  
+    if ($@) {
+      $response = undef;
+      if ( $@ =~ /alarm/ ) {
+        dbg("razor2 check timed out after $timeout secs.");
+        }
+        else {
+        warn("razor2 check skipped: $! $@");
+        }
+      }
+  }
+  else {
+    eval {
+      require Razor::Client;
+      require Razor::Agent;
+      local ($^W) = 0;		# argh, warnings in Razor
+  
+      local $SIG{ALRM} = sub { die "alarm\n" };
+      alarm $timeout;
+  
+      my $config = $self->{conf}->{razor_config};
+      my %options = (
+        'debug'	=> ($Mail::SpamAssassin::DEBUG->{enabled} and $Mail::SpamAssassin::DEBUG->{razor} < -2)
+      );
 
-  if ($@) {
-    $response = undef;
-    if ($@ =~ /alarm/) {
-      dbg ("razor check timed out after $timeout secs.", "razor", -1);
-      timelog("Razor -> interrupted after $timeout secs", "razor", 2);
-    } else {
-      warn ("razor check skipped: $! $@");
+      my $rc = Razor::Client->new ($config, %options);
+  
+      if ($rc) {
+        my $ver = $Razor::Client::VERSION;
+        my @msg = split (/^/m, $$fulltext);
+
+        if ($ver >= 1.12) {
+          my $respary = $rc->check ('spam' => \@msg);
+          # response can be "0" or "1". there can be many responses.
+          # so if we get 5 responses, and one of them's 1, we
+          # wind up with "00010", which +0 below turns to 10, ie. != 0.
+          for my $resp (@$respary) { $response .= $resp; }
+  
+        }
+        else {
+            $response = $rc->check (\@msg);
+        }
+      }
+      else {
+          warn "Problem while trying to load Razor: $!";
+      }
+      
+      alarm 0;
+    };
+
+    if ($@) {
+      $response = undef;
+      if ($@ =~ /alarm/) {
+        dbg ("razor check timed out after $timeout secs.", "razor", -1);
+        timelog("Razor -> interrupted after $timeout secs", "razor", 2);
+      } else {
+        warn ("razor check skipped: $! $@");
+      }
     }
   }
 

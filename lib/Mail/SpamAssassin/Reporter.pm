@@ -67,6 +67,16 @@ sub is_razor_available {
     return 0;
   }
   
+  # Use Razor2 if it's available, Razor1 otherwise
+  eval { require Razor2::Client::Agent; };
+  if ($@) {
+    dbg("Razor2 is not available");
+  }
+  else {
+    dbg("Razor2 is available");
+    return 1;
+  }
+
   eval {
     require Razor::Client;
   };
@@ -83,13 +93,8 @@ sub is_razor_available {
 sub razor_report {
   my ($self, $fulltext) = @_;
 
-  my @msg = split (/^/m, $fulltext);
   my $timeout = 10;             # seconds
   my $response;
-  my $config = $self->{main}->{conf}->{razor_config};
-  my %options = (
-    'debug'     => $Mail::SpamAssassin::DEBUG
-  );
 
   # razor also debugs to stdout. argh. fix it to stderr...
   if ($Mail::SpamAssassin::DEBUG) {
@@ -99,36 +104,100 @@ sub razor_report {
 
   my $oldslash = $/;
 
-  eval {
-    require Razor::Client;
-    require Razor::Agent;
-    local ($^W) = 0;            # argh, warnings in Razor
+  # Use Razor2 if it's available
+  eval { require Razor2::Client::Agent; };
+  if ( !$@ ) {
+    eval {
+      local ($^W) = 0;    # argh, warnings in Razor
 
-    local $SIG{ALRM} = sub { die "alarm\n" };
-    alarm 10;
+      local $SIG{ALRM} = sub { die "alarm\n" };
+      alarm $timeout;
 
-    my $rc = Razor::Client->new ($config, %options);
-    die "Problem while loading Razor: $!" if (!$rc);
+      my $rc =
+        Razor2::Client::Agent->new('razor-report')
+        ;                 # everything's in the module!
 
-    my $ver = $Razor::Client::VERSION;
-    if ($ver >= 1.12) {
-      my $respary = $rc->report ('spam' => \@msg);
-      for my $resp (@$respary) { $response .= $resp; }
-    } else {
-      $response = $rc->report (\@msg);
-    }
+      if ($rc) {
+        my %opt = (
+          debug      => $Mail::SpamAssassin::DEBUG,
+          foreground => 1
+        );
+        $rc->{opt} = \%opt;
+        $rc->do_conf() or die $rc->errstr;
 
-    alarm 0;
-    dbg ("Razor: spam reported, response is \"$response\".");
-  };
+        # Razor2 requires authentication for reporting
+        my $ident = $rc->get_ident
+          or die "Razor2 reporting requires authentication";
+
+        my @msg     = ( \$fulltext );
+        my $objects = $rc->prepare_objects( \@msg )
+          or die "error in prepare_objects";
+        $rc->get_server_info() or die $rc->errprefix("reportit");
+        my $sigs = $rc->compute_sigs($objects)
+          or die "error in compute_sigs";
+
+        $rc->connect() or die $rc->errprefix("reportit");
+        $rc->authenticate($ident) or die $rc->errprefix("reportit");
+        $rc->report($objects)     or die $rc->errprefix("reportit");
+        $rc->disconnect() or die $rc->errprefix("reportit");
+        $response = $objects->[0]->{resp}->[0]->{res};
+      }
+      else {
+        warn "undefined Razor2::Client::Agent\n";
+      }
+
+      alarm 0;
+      dbg("Razor2: spam reported, response is \"$response\".");
+    };
+
+    if ($@) {
+      if ( $@ =~ /alarm/ ) {
+        dbg("razor2 report timed out after $timeout secs.");
+      }
+      else {
+        warn "razor2 report failed: $! $@";
+      }
+      undef $response;
+      }
+  }
+  else {
+    my @msg = split (/^/m, $fulltext);
+    my $config = $self->{main}->{conf}->{razor_config};
+    my %options = (
+      'debug'     => $Mail::SpamAssassin::DEBUG
+    );
+
+    eval {
+      require Razor::Client;
+      require Razor::Agent;
+      local ($^W) = 0;            # argh, warnings in Razor
   
-  if ($@) {
-    if ($@ =~ /alarm/) {
-      dbg ("razor report timed out after $timeout secs.");
-    } else {
-      warn "razor-report failed: $! $@";
+      local $SIG{ALRM} = sub { die "alarm\n" };
+      alarm 10;
+  
+      my $rc = Razor::Client->new ($config, %options);
+      die "Problem while loading Razor: $!" if (!$rc);
+  
+      my $ver = $Razor::Client::VERSION;
+      if ($ver >= 1.12) {
+        my $respary = $rc->report ('spam' => \@msg);
+        for my $resp (@$respary) { $response .= $resp; }
+      } else {
+        $response = $rc->report (\@msg);
+      }
+  
+      alarm 0;
+      dbg ("Razor: spam reported, response is \"$response\".");
+    };
+    
+    if ($@) {
+      if ($@ =~ /alarm/) {
+        dbg ("razor report timed out after $timeout secs.");
+      } else {
+        warn "razor-report failed: $! $@";
+      }
+      undef $response;
     }
-    undef $response;
   }
 
   $/ = $oldslash;
