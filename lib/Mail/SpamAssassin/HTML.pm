@@ -46,6 +46,12 @@ my $events = 'on(?:activate|afterupdate|beforeactivate|beforecopy|beforecut|befo
 # other non-standard tags
 $re_other = 'o:\w+/?|x-sigsep|x-tab';
 
+# attributes: HTML 4.01 deprecated, loose DTD, frameset DTD
+my $re_attr = 'abbr|accept-charset|accept|accesskey|action|align|alink|alt|archive|axis|background|bgcolor|border|cellpadding|cellspacing|char|charoff|charset|checked|cite|class|classid|clear|code|codebase|codetype|color|cols|colspan|compact|content|coords|data|datetime|declare|defer|dir|disabled|enctype|face|for|frame|frameborder|headers|height|href|hreflang|hspace|http-equiv|id|ismap|label|lang|language|link|longdesc|marginheight|marginwidth|maxlength|media|method|multiple|name|nohref|noresize|noshade|nowrap|object|onblur|onchange|onclick|ondblclick|onfocus|onkeydown|onkeypress|onkeyup|onload|onmousedown|onmousemove|onmouseout|onmouseover|onmouseup|onreset|onselect|onsubmit|onunload|profile|prompt|readonly|rel|rev|rows|rowspan|rules|scheme|scope|scrolling|selected|shape|size|span|src|standby|start|style|summary|tabindex|target|text|title|type|usemap|valign|value|valuetype|version|vlink|vspace|width';
+
+# attributes: stuff we accept
+my $re_attr_extra = 'family|wrap|/';
+
 # style attributes
 my %ok_attribute = (
 		 text => [qw(body)],
@@ -174,6 +180,17 @@ sub html_tag {
 
   $self->{html}{"inside_$tag"} += $num;
   $self->{html}{"inside_$tag"} = 0 if $self->{html}{"inside_$tag"} < 0;
+
+  # attributes
+  for my $name (keys %$attr) {
+    if ($name !~ /^(?:$re_attr|$re_attr_extra)$/io) {
+      $self->{html}{attr_bad}++;
+      $self->{html}{attr_unique_bad}++ if !exists $self->{"attr_seen_$name"};
+    }
+    $self->{html}{attr_all}++;
+    $self->{html}{attr_unique_all}++ if !exists $self->{"attr_seen_$name"};
+    $self->{"attr_seen_$name"} = 1;
+  }
 
   # TODO: cover other changes
   if ($tag =~ /^(?:body|font|table|tr|th|td|big|small|basefont|marquee)$/) {
@@ -828,7 +845,6 @@ sub html_tests {
 				    ($size =~ /\+(\d+)/ && $1 >= 1));
   }
   if ($tag eq "font" && exists $attr->{face}) {
-    #print STDERR "FONT " . $attr->{face} . "\n";
     if ($attr->{face} =~ /[A-Z]{3}/ && $attr->{face} !~ /M[ST][A-Z]|ITC/) {
       $self->{html}{font_face_caps} = 1;
     }

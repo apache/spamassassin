@@ -374,6 +374,12 @@ sub rendered {
       if (exists $r->{tags} && exists $r->{obfuscation}) {
 	$r->{obfuscation_ratio} = $r->{obfuscation} / $r->{tags};
       }
+      if (exists $r->{attr_bad} && exists $r->{attr_all}) {
+	$r->{attr_bad} = $r->{attr_bad} / $r->{attr_all};
+      }
+      if (exists $r->{attr_unique_bad} && exists $r->{attr_unique_all}) {
+	$r->{attr_unique_bad} = $r->{attr_unique_bad} / $r->{attr_unique_all};
+      }
     }
     else {
       $self->{'rendered_type'} = $self->{'type'};
