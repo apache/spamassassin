@@ -120,17 +120,17 @@ Required Modules
 
 These modules are required for spamassassin to run.
 
-  - File::Spec    (from CPAN, or included in Perl 5.6)
+  - File::Spec >= 0.8    (from CPAN, or included in Perl 5.6 and higher)
 
     The File::Spec module is required in version 0.8 (Mar 2000) or later.
     This is included in Perl versions 5.6 and later.
 
-  - Pod::Usage    (from CPAN, or included in Perl 5.6)
+  - Pod::Usage           (from CPAN, or included in Perl 5.6 and higher)
 
     The Pod::Usage module is required.  This is included in Perl versions
     5.6 and later.
 
-  - HTML::Parser  (from CPAN)
+  - HTML::Parser >= 3.0  (from CPAN)
 
     HTML is used for an ever-increasing amount of email so this dependency
     is unavoidable.  Run "perldoc -q html" for additional information.
