@@ -1328,7 +1328,7 @@ sub check_for_mime_excessive_qp {
       $qp += $line =~ s/\=([0-9A-Fa-f]{2})/$1/g;
   }
   # this seems like a decent cutoff
-  return ($qp > ($length / 20));
+  return ($length != 0 && ($qp > ($length / 20)));
 }
 
 # This test should be a nearly zero cost operation done during MIME
