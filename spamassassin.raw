@@ -76,6 +76,7 @@ eval {
 	     'warning-from|w=s'                  => \$opt{'warning-from'},
 	     'local-only|local|L'                => \$opt{'local'},
 	     'remove-markup|despamassassinify|d' => \$opt{'remove-markup'},
+             'revoke|k'                          => \$opt{'revoke'},
 	     'report|r'                          => \$opt{'report'},
 	     'config-file|config-dir|c|C=s'      => \$opt{'config-file'},
 	     'prefs-file|p=s'                    => \$opt{'prefs-file'},
@@ -194,6 +195,14 @@ eval {
     $mail->ignore();		# will exit
   }
 
+# handle revoke
+  if ($opt{'revoke'}) {
+      if ( $spamtest->revoke_as_spam ($mail) ) {
+          warn "Warning, unable to revoke spam\n";
+      }
+      $mail->ignore();          # will exit
+  }
+
   if ($opt{'auto-whitelist'} || $doing_whitelist_operation) {
     # create a factory for the persistent address list.
     # choose one of these implementations!
@@ -301,6 +310,7 @@ Options:
  -P, --pipe                        Deliver to STDOUT (now default)
  -L, --local                       Local tests only (no online tests)
  -r, --report                      Report message as spam
+ -k, --revoke                      Revoke message as spam
  -w addr, --warning-from=addr      Send a warning mail to sender from addr
  -d, --remove-markup               Remove spam reports from a message
  -C file, --config-file=file       Path to standard configuration dir
@@ -371,6 +381,24 @@ Clearinghouse ( http://www.rhyolite.com/anti-spam/dcc/ ), and Pyzor.
 If the message contains SpamAssassin markup, this will be stripped out
 automatically before submission.  The support modules for DCC, Razor
 and/or Pyzor must be installed for spam to be reported to each service.
+
+The message will also be submitted to SpamAssassin's learning systems;
+currently this is the internal Bayesian statistical-filtering system
+(the BAYES rules).
+
+=item B<-k>, B<--revoke>
+
+Revoke this message.  This will revoke the mail message read
+from STDIN from various spam-blocker databases.  Currently, these are Vipul's
+Razor ( http://razor.sourceforge.net/ ).
+
+Support for the Distributed Checksum Clearinghouse 
+( http://www.rhyolite.com/anti-spam/dcc/ ), and Pyzor is not currently
+available.
+
+If the message contains SpamAssassin markup, this will be stripped out
+automatically before submission.  The support modules for Razor must be
+installed for spam to be revoked from the service.
 
 The message will also be submitted to SpamAssassin's learning systems;
 currently this is the internal Bayesian statistical-filtering system

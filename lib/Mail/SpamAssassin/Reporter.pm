@@ -65,6 +65,30 @@ sub report {
 }
 
 ###########################################################################
+
+sub revoke {
+  my ($self) = @_;
+  my $return = 1;
+
+  my $text = $self->{main}->remove_spamassassin_markup ($self->{msg});
+
+  if (!$self->{main}->{local_tests_only}
+      && !$self->{options}->{dont_report_to_razor}
+      && $self->is_razor_available()) # we only work with Razor2
+  {
+    if ($self->razor_revoke($text)) {
+      dbg ("SpamAssassin: spam revoked from Razor.");
+      $return = 0;
+    }
+  }
+
+  # This is where you would revoke from DCC and Pyzor but I was unable
+  # to find where they supported revoke
+
+  return $return;
+}
+
+###########################################################################
 # non-public methods.
 
 # This is to reset the alarm before dieing - spamd can die of a stray alarm!
@@ -76,9 +100,12 @@ sub adie {
 }
 
 sub razor_report {
-  my ($self, $fulltext) = @_;
+  my ($self, $fulltext, $revoke) = @_;
   my $timeout=$self->{conf}->{razor_timeout};
   my $response;
+
+  # If we passed in a true value for $revoke then we must be revoking
+  my $type = (defined($revoke) && $revoke) ? 'revoke' : 'report';
 
   # razor also debugs to stdout. argh. fix it to stderr...
   if ($Mail::SpamAssassin::DEBUG->{enabled}) {
@@ -99,8 +126,8 @@ sub razor_report {
       alarm $timeout;
 
       my $rc =
-        Razor2::Client::Agent->new('razor-report')
-        ;                 # everything's in the module!
+          Razor2::Client::Agent->new("razor-$type")
+          ;                 # everything's in the module!
 
       if ($rc) {
         my %opt = (
@@ -113,7 +140,7 @@ sub razor_report {
 
         # Razor2 requires authentication for reporting
         my $ident = $rc->get_ident
-          or adie ("Razor2 reporting requires authentication");
+          or adie ("Razor2 $type requires authentication");
 
 	my @msg = (\$fulltext);
         my $objects = $rc->prepare_objects( \@msg )
@@ -139,25 +166,25 @@ sub razor_report {
       }
 
       alarm 0;
-      dbg("Razor2: spam reported, response is \"$response\".");
+      dbg("Razor2: spam $type, response is \"$response\".");
     };
 
     alarm 0;
 
     if ($@) {
       if ( $@ =~ /alarm/ ) {
-        dbg("razor2 report timed out after $timeout secs.");
+        dbg("razor2 $type timed out after $timeout secs.");
       } elsif ($@ =~ /could not connect/) {
-        dbg("razor2 report could not connect to any servers");
+        dbg("razor2 $type could not connect to any servers");
       } elsif ($@ =~ /timeout/i) {
-        dbg("razor2 report timed out connecting to razor servers");
+        dbg("razor2 $type timed out connecting to razor servers");
       } else {
-        warn "razor2 report failed: $! $@";
+        warn "razor2 $type failed: $! $@";
       }
       undef $response;
     }
   }
-  else {
+  elsif ($type eq 'report') { # fall back to Razor1 but only if we are reporting spam
     my @msg = split (/^/m, $fulltext);
     my $config = $self->{conf}->{razor_config};
     $config ||= $self->{main}->sed_path ("~/razor.conf");
@@ -210,6 +237,12 @@ sub razor_report {
   } else {
     return 0;
   }
+}
+
+sub razor_revoke {
+  my ($self, $fulltext) = @_;
+
+  return $self->razor_report($fulltext, 1);
 }
 
 sub dcc_report {
