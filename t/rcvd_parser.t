@@ -18,7 +18,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("rcvd_parser");
-use Test; BEGIN { plan tests => 34 };
+use Test; BEGIN { plan tests => 35 };
 
 
 use strict;
@@ -427,6 +427,18 @@ Received: from localhost (wwwwww@localhost)
   
 [ ip=128.200.80.6 rdns=smtp3.es.uci.edu helo=smtp3.es.uci.edu by=amgod.boxhost.net ident= envfrom= id=87D0A310091 ] [ ip=128.200.80.22 rdns=rigel.oac.uci.edu helo=rigel.oac.uci.edu by=smtp3.es.uci.edu ident= envfrom= id=i2907ZaF008726 ]
   
+},
+q{
+
+Received: from list.brainbuzz.com (63.146.189.86:23198)
+    by mx1.yourtech.net with [XMail 1.20 ESMTP Server]
+    id <S72E> for <jjjjjjjjjj@obfuscatedellingson.org> from <bounce-cscommunity-11965901@list.obfuscatedzzzzzzz.com>; Sat, 18 Sep 2004 23:17:54 -0500
+
+},
+q{
+
+[ ip=63.146.189.86 rdns= helo=list.brainbuzz.com by=mx1.yourtech.net ident= envfrom=bounce-cscommunity-11965901@list.obfuscatedzzzzzzz.com id=S72E ]
+
 },
 q{
 
