@@ -95,19 +95,40 @@ body WEB_BUGS			eval:html_test('web_bugs')
 describe WEB_BUGS		Image tag with an ID code to identify you
 
 body HTML_FONT_COLOR_NOHASH	eval:html_test('font_color_nohash')
-describe HTML_FONT_COLOR_NOHASH	HTML font color is missing # character
+describe HTML_FONT_COLOR_NOHASH	HTML font color is missing hash (#) character
 
-body HTML_FONT_COLOR_GRAY	eval:html_test('font_color_gray')
-describe HTML_FONT_COLOR_GRAY	HTML font color has gray hexadecimal code
-
-body HTML_FONT_COLOR_ODD	eval:html_test('font_color_odd')
-describe HTML_FONT_COLOR_ODD	HTML font color has odd hexadecimal code
+body HTML_FONT_COLOR_UNSAFE	eval:html_test('font_color_unsafe')
+describe HTML_FONT_COLOR_UNSAFE	HTML font color not within safe 6x6x6 palette
 
 body HTML_FONT_COLOR_NAME	eval:html_test('font_color_name')
 describe HTML_FONT_COLOR_NAME	HTML font color has unusual name
 
 body HTML_FONT_INVISIBLE	eval:html_test('font_invisible')
 describe HTML_FONT_INVISIBLE	HTML font color is same as background
+
+body HTML_FONT_COLOR_GRAY	eval:html_test('font_gray')
+describe HTML_FONT_COLOR_GRAY	HTML font color is gray
+
+body HTML_FONT_COLOR_RED	eval:html_test('font_red')
+describe HTML_FONT_COLOR_RED	HTML font color is red
+
+body HTML_FONT_COLOR_YELLOW	eval:html_test('font_yellow')
+describe HTML_FONT_COLOR_YELLOW	HTML font color is yellow
+
+body HTML_FONT_COLOR_GREEN	eval:html_test('font_green')
+describe HTML_FONT_COLOR_GREEN	HTML font color is green
+
+body HTML_FONT_COLOR_CYAN	eval:html_test('font_cyan')
+describe HTML_FONT_COLOR_CYAN	HTML font color is cyan
+
+body HTML_FONT_COLOR_BLUE	eval:html_test('font_blue')
+describe HTML_FONT_COLOR_BLUE	HTML font color is blue
+
+body HTML_FONT_COLOR_MAGENTA	eval:html_test('font_magenta')
+describe HTML_FONT_COLOR_MAGENTA	HTML font color is magenta
+
+body HTML_FONT_COLOR_UNKNOWN	eval:html_test('font_color_unknown')
+describe HTML_FONT_COLOR_UNKNOWN	HTML font color is unknown to us
 
 body HTML_FONT_FACE_BAD		eval:html_test('font_face_bad')
 describe HTML_FONT_FACE_BAD	HTML font face is not a word
@@ -1406,19 +1427,6 @@ describe GET_IT_NOW     Contains 'Get it now' with capitals
 # http://www.hughes-family.org/bugzilla/show_bug.cgi?id=678
 body DOMAIN_4U2         /[\@\.]\S{0,20}(?:[42](?:yo)?u|foryou|you2)\S{1,20}\.(?:net|com|org)\b/
 describe DOMAIN_4U2     Domain name containing "4u", "u2" or variants.
-
-# Thanks, Paul Graham! ;)
-rawbody HTML_TEXT_FF0000   /<font[^>]* color=['"]?(?:.ff0000|red)/i
-describe HTML_TEXT_FF0000  Contains HTML text in eye-scorching red
-# these are the next top colors after bright red, as far as I can see:
-rawbody HTML_TEXT_007236   /<font[^>]* color=['"]?007236/i
-describe HTML_TEXT_007236  Contains HTML text in green
-rawbody HTML_TEXT_000066   /<font[^>]* color=['"]?000066/i
-describe HTML_TEXT_000066  Contains HTML text in dark blue
-rawbody HTML_TEXT_FFFF00   /<font[^>]* color=['"]?ffff00/i
-describe HTML_TEXT_FFFF00  Contains HTML text in bright yellow
-rawbody HTML_TEXT_0000FF   /<font[^>]* color=['"]?0000ff/i
-describe HTML_TEXT_0000FF  Contains HTML text in blue
 
 rawbody HIDE_WIN_STATUS    /<[^>]+onMouseOver=[^>]+window\.status=/i
 describe HIDE_WIN_STATUS   Javascript to hide URLs in browser

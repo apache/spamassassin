@@ -659,6 +659,67 @@ sub html_uri {
   }
 }
 
+# input values from 0 to 255
+sub rgb_to_hsv {
+  my ($r, $g, $b) = @_;
+  my ($h, $s, $v, $max, $min);
+
+  if ($r > $g) {
+    $max = $r; $min = $g;
+  }
+  else {
+    $min = $r; $max = $g;
+  }
+  $max = $b if $b > $max;
+  $min = $b if $b < $min;
+  $v = $max;
+  $s = $max ? ($max - $min) / $max : 0;
+  if ($s == 0) {
+    $h = undef;
+  }
+  else {
+    my $cr = ($max - $r) / ($max - $min);
+    my $cg = ($max - $g) / ($max - $min);
+    my $cb = ($max - $b) / ($max - $min);
+    if ($r == $max) {
+      $h = $cb - $cg;
+    }
+    elsif ($g == $max) {
+      $h = 2 + $cr - $cb;
+    }
+    elsif ($b == $max) {
+      $h = 4 + $cg - $cr;
+    }
+    $h *= 60;
+    $h += 360 if $h < 0;
+  }
+  return ($h, $s, $v);
+}
+
+# the most common HTML colors
+sub name_to_rgb {
+  $_ = $_[0];
+
+  s/^red$/#ff0000/;
+  s/^black$/#000000/;
+  s/^blue$/#0000ff/;
+  s/^white$/#ffffff/;
+  s/^navy$/#000080/;
+  s/^green$/#008000/;
+  s/^orange$/#ffa500/;
+  s/^yellow$/#ffff00/;
+  s/^fuchsia$/#ff00ff/;
+  s/^lime$/#00ff00/;
+  s/^maroon$/#800000/;
+  s/^darkblue$/#00008b/;
+  s/^gray$/#808080/;
+  s/^purple$/#800080/;
+  s/^magenta$/#ff00ff/;
+  s/^pink$/#ffc0cb/;
+
+  return $_;
+}
+
 sub html_tests {
   my ($tag, $attr, $num) = @_;
 
@@ -679,9 +740,8 @@ sub html_tests {
   }
   if ($tag eq "body" && exists $attr->{bgcolor}) {
     $html{bgcolor} = lc($attr->{bgcolor});
-    $html{bgcolor} =~ s/^white$/#ffffff/;
-    $html{bgcolor} =~ s/^black$/#000000/;
-    $html{bgcolor_nonwhite} = 1 if $html{bgcolor} !~ /^\#ffffff$/;
+    $html{bgcolor} = name_to_rgb($html{bgcolor});
+    $html{bgcolor_nonwhite} = 1 if $html{bgcolor} !~ /^\#?ffffff$/;
   }
   if ($tag eq "font" && exists $attr->{size}) {
     $html{big_font} = 1 if (($attr->{size} =~ /^\s*(\d+)/ && $1 >= 3) ||
@@ -690,16 +750,40 @@ sub html_tests {
   if ($tag eq "font" && exists $attr->{color}) {
     my $c = lc($attr->{color});
     $html{font_color_nohash} = 1 if $c =~ /^[0-9a-f]{6}$/;
-    $html{font_color_gray} = 1 if ($c =~ /^\#?([0-9a-f]{2})\1{2}$/ &&
-				   $1 !~ /^(?:00|ff)$/);
-    $html{font_color_odd} = 1 if ($c =~ /^\#?[0-9a-f]{6}$/ &&
-				  $c !~ /^\#?(?:00|33|66|80|99|cc|ff){3}$/);
+    $html{font_color_unsafe} = 1 if ($c =~ /^\#?[0-9a-f]{6}$/ &&
+				     $c !~ /^\#?(?:00|33|66|80|99|cc|ff){3}$/);
     $html{font_color_name} = 1 if ($c !~ /^\#?[0-9a-f]{6}$/ &&
 				   $c !~ /^(?:navy|gray|red|white)$/);
-    $c =~ s/^white$/#ffffff/;
-    $c =~ s/^black$/#000000/;
+    $c = name_to_rgb($c);
     $html{font_invisible} = 1 if (exists $html{bgcolor} &&
 				  substr($c,-6) eq substr($html{bgcolor},-6));
+    if ($c =~ /^\#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/) {
+      my ($h, $s, $v) = rgb_to_hsv(hex($1), hex($2), hex($3));
+      if (!defined($h)) {
+	$html{font_gray} = 1 unless ($v == 0 || $v == 255);
+      }
+      elsif ($h < 30 || $h >= 330) {
+	$html{font_red} = 1;
+      }
+      elsif ($h < 90) {
+	$html{font_yellow} = 1;
+      }
+      elsif ($h < 150) {
+	$html{font_green} = 1;
+      }
+      elsif ($h < 210) {
+	$html{font_cyan} = 1;
+      }
+      elsif ($h < 270) {
+	$html{font_blue} = 1;
+      }
+      elsif ($h < 330) {
+	$html{font_magenta} = 1;
+      }
+    }
+    else {
+      $html{font_color_unknown} = 1;
+    }
   }
   if ($tag eq "font" && exists $attr->{face}) {
     $html{font_face_caps} = 1 if $attr->{face} =~ /[A-Z]{3}/;
