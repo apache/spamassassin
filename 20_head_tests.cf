@@ -27,6 +27,9 @@ describe TO_NO_USER		To: has no local-part before @ sign
 header TO_MALFORMED		To !~ /(?:(?:\"[^\"]+\"|\S+)\@\S+\.\S+|undisclosed-recipients:|<\S+(\!\S+){1,}>|^\s*$)/ [if-unset: unset@unset.unset]
 describe TO_MALFORMED		To: has a malformed address
 
+header TO_HAS_SPACES            To:addr =~ /\s/
+describe TO_HAS_SPACES          To: address contains spaces
+
 header TO_EMPTY			To =~ /^\s*$/ [if-unset: UNSET]
 describe TO_EMPTY		To: is empty
 
