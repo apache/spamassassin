@@ -460,9 +460,11 @@ e.g.
 
 =item whitelist_to add@ress.com
 
-If the given address appears in the C<To:> or C<Cc:> headers, mail will be
-whitelisted.  Useful if you're deploying SpamAssassin system-wide, and don't
-want some users to have their mail filtered.  Same format as C<whitelist_from>.
+If the given address appears as a recipient in the message headers
+(Resent-To, To, Cc, obvious envelope receipient, etc,) the mail will
+be whitelisted.  Useful if you're deploying SpamAssassin system-wide,
+and don't want some users to have their mail filtered.  Same format
+as C<whitelist_from>.
 
 There are three levels of To-whitelisting, C<whitelist_to>, C<more_spam_to>
 and C<all_spam_to>.  Users in the first level may still get some spammish
