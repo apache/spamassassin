@@ -745,12 +745,15 @@ describe FORGED_RCVD_NET_HELO	Host HELO'd using the wrong IP network
 header NO_RDNS_DOTCOM_HELO	eval:check_for_no_rdns_dotcom_helo()
 describe NO_RDNS_DOTCOM_HELO	Host HELO'd as a big ISP, but had no rDNS
 
-header __HAS_MSN_RCVD_DAV       Received =~ / by \S+\.(?:hotmail|msn)\.com with (?:HTTP|DAV)\;/
-header __HAS_MSN_ORIG_EMAIL     X-Originating-Email =~ /(?:hotmail|msn)\.com\b/
-header __HAS_MSN_FROM           From =~ /(?:hotmail|msn)\.com\b/
-meta FAKED_HOTMAIL_DAV		(__HAS_MSN_RCVD_DAV && __HAS_MSN_ORIG_EMAIL && !__HAS_MSN_FROM)
-describe FAKED_HOTMAIL_DAV	'X-Originating-Email' header does not match 'From'
+header X_ORIG_HOST		X-Originating-Host =~ /^\[/
+describe X_ORIG_HOST		Message has X-Originating-Host header
 
-header HAS_X_ORIG_HOST		X-Originating-Host =~ /^\[/
-describe HAS_X_ORIG_HOST	Has an 'X-Originating-Host' header
+# Hotmail's DAV interface uses this and it's heavily exploited right now.  As
+# far as I can tell, it requires an msn.com or hotmail.com X-Originating-Email:
+# but allows anything for From: so use that as a spamsign.
+header __HAS_MSN_RCVD_DAV	Received =~ / by \S+\.(?:hotmail|msn)\.com with (?:HTTP|DAV)\;/
+header __HAS_MSN_ORIG_EMAIL	X-Originating-Email =~ /(?:hotmail|msn)\.com\b/
+header __HAS_MSN_FROM		From =~ /(?:hotmail|msn)\.com\b/
+meta FAKED_HOTMAIL_DAV		(__HAS_MSN_RCVD_DAV && __HAS_MSN_ORIG_EMAIL && !__HAS_MSN_FROM)
+describe FAKED_HOTMAIL_DAV	X-Originating-Email header does not match From
 
