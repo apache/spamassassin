@@ -1,3 +1,230 @@
+2002-06-20 10:20  hughescr
+
+	* lib/Mail/SpamAssassin.pm: Tick version number for release
+
+2002-06-20 10:02  hughescr
+
+	* lib/Mail/SpamAssassin.pm: Ticked devel version
+
+2002-06-20 04:58  matt_sergeant
+
+	* rules/20_body_tests.cf: Numeric comment test (as seen in the
+	lovely bestiality spams I just got)
+
+2002-06-20 02:51  matt_sergeant
+
+	* lib/Mail/SpamAssassin/EvalTests.pm, rules/20_head_tests.cf,
+	rules/50_scores.cf, rules/60_whitelist.cf: EBAY whitelisting fixed.
+
+2002-06-19 22:02  duncf
+
+	* spamd/debian-rc-script.sh: Re-adding /usr/local/bin to path.
+	Seems people might actually use this script?
+
+2002-06-19 19:19  duncf
+
+	* Makefile.PL: migrate_cfs is no longer needed.  migrate_cfs is a
+	bashism.  migrate_cfs impedes a corner case of packageability. 
+	Makefiles should never touch ANYTHING outside the build directory. 
+	I'd remove migrate_cfs entirely, but we might find some clueless
+	user that hasn't upgraded yet.
+
+2002-06-19 18:55  duncf
+
+	* spamd/: debian-rc-script.sh, debian-rc-spamd.conf: Update Debian
+	scripts for spamd. PRobably not necessary - people ought to use my
+	packages\!
+
+2002-06-18 01:35  quinlan
+
+	* rules/50_scores.cf: new scores and missing scores
+
+2002-06-18 01:35  quinlan
+
+	* rules/20_head_tests.cf: Bug #456: FROM_AND_TO_SAME is not worthy
+	Bug #462: double scoring on empty To: new rules: REFERENCES,
+	MISSING_MIMEOLE, PRIORITY_NO_NAME, PARTIAL_RFC_2369
+
+2002-06-18 01:33  quinlan
+
+	* rules/20_body_tests.cf: fix spelling error
+
+2002-06-18 01:32  quinlan
+
+	* lib/Mail/SpamAssassin/EvalTests.pm: Bug #456: FROM_AND_TO_SAME is
+	not worthy functions for new rules: MISSING_MIMEOLE,
+	PRIORITY_NO_NAME, PARTIAL_RFC_2369
+
+2002-06-18 00:52  climent
+
+	* rules/25_body_tests_es.cf: New rule
+
+2002-06-17 20:46  duncf
+
+	* spamd/spamd.raw: Fixed exit code on spamd with usage error
+
+2002-06-17 19:15  quinlan
+
+	* lib/Mail/SpamAssassin/EvalTests.pm, rules/20_head_tests.cf,
+	rules/50_scores.cf: add back FROM_AND_TO_SAME
+
+2002-06-17 18:53  hughescr
+
+	* t/data/nice/002: Make test message more -ve scoring
+
+2002-06-17 18:24  hughescr
+
+	* lib/Mail/SpamAssassin/: Dns.pm, Reporter.pm: Bugzilla #446:
+	Razor2 support -- hope it works!
+
+2002-06-17 18:23  hughescr
+
+	* lib/Mail/SpamAssassin.pm: Optional Time::HiRes
+
+2002-06-17 17:40  duncf
+
+	* spamassassin.raw, lib/Mail/SpamAssassin.pm,
+	lib/Mail/SpamAssassin/AutoWhitelist.pm: Bugzilla #376: spamassassin
+	--add-to-blacklist
+
+2002-06-17 16:30  duncf
+
+	* spamassassin.raw: Bugzilla #289: Specify error-code in
+	spamassassin
+
+2002-06-17 01:39  quinlan
+
+	* rules/30_text_fr.cf: remove X_NOT_PRESENT
+
+2002-06-17 00:14  quinlan
+
+	* lib/Mail/SpamAssassin/EvalTests.pm, rules/20_head_tests.cf,
+	rules/50_scores.cf: bug #461: expand KOREAN_UCE_SUBJECT remove
+	MAILING_LIST (used by some non-spam mailing lists) remove
+	X_MSMAIL_ODD_CASE (matches some non-spam) add MISSING_OUTLOOK_NAME
+	(better test than X_MSMAIL_ODD_CASE)
+
+2002-06-16 23:04  climent
+
+	* rules/25_body_tests_es.cf: New Spanish entries
+
+2002-06-16 12:45  hughescr
+
+	* lib/Mail/: SpamAssassin.pm, SpamAssassin.pm: Fix path expansion
+	under windows
+
+2002-06-16 02:27  climent
+
+	* rules/25_body_tests_es.cf: New modifier in spanish mails.
+
+2002-06-15 22:24  duncf
+
+	* lib/Mail/SpamAssassin.pm: Added
+	/etc/spamassassin/user_prefs.template to search path (Its been
+	bugging me for a bit)
+
+2002-06-15 22:15  duncf
+
+	* spamd/spamd.raw: Fixed exit code on spamd with usage error
+
+2002-06-15 14:35  quinlan
+
+	* rules/50_scores.cf: remove FROM_AND_TO_SAME since I removed it
+	elsewhere as well (bug 456)
+
+2002-06-15 14:27  quinlan
+
+	* lib/Mail/SpamAssassin/EvalTests.pm, rules/20_head_tests.cf,
+	rules/50_scores.cf: Bug #455: MSGID_CHARS_WEIRD and X_NOT_PRESENT
+	must go Bug #456: FROM_AND_TO_SAME is not worthy add back scores
+	that got deleted revise BUGZILLA_BUG add some new header existence
+	tests (both good and bad) add X_MSMAIL_ODD_CASE rule
+
+2002-06-15 13:58  quinlan
+
+	* rules/: 20_head_tests.cf, 50_scores.cf: add back a modified
+	version of MSGID_CHARS_WEIRD with a low score
+
+2002-06-15 13:10  hughescr
+
+	* rules/50_scores.cf: Forward port score changes from 2_3_0 branch
+
+2002-06-15 13:08  hughescr
+
+	* rules/50_scores.cf: Fix rogue GA scores
+
+2002-06-15 13:07  quinlan
+
+	* lib/Mail/SpamAssassin/EvalTests.pm, rules/20_head_tests.cf,
+	rules/50_scores.cf: Bug #456: FROM_AND_TO_SAME is not worthy
+
+2002-06-15 12:45  hughescr
+
+	* spamassassin.raw: Fix Pod::Usage import
+
+2002-06-15 12:41  quinlan
+
+	* rules/: 20_head_tests.cf, 50_scores.cf: Bug #455:
+	MSGID_CHARS_WEIRD and X_NOT_PRESENT must go
+
+2002-06-15 12:34  hughescr
+
+	* rules/20_body_tests.cf: Obfuscating Javascript detection
+
+2002-06-15 11:26  hughescr
+
+	* lib/Mail/SpamAssassin/EvalTests.pm: Oops -- double celeb in porn
+	words
+
+2002-06-14 23:18  duncf
+
+	* spamassassin.raw: Changed the pod slightly to try to fix #453
+	(part 2).  Also, achieve consistency between spamassassin and
+	spamd.
+
+2002-06-14 22:56  duncf
+
+	* spamd/spamd.raw: Fixed double-fix of default options for spamd
+
+2002-06-14 22:46  duncf
+
+	* spamassassin.raw: Bugzilla #453: Forgot to "use Pod::Usage"
+
+2002-06-14 18:20  hughescr
+
+	* MANIFEST: Forward port MANIFEST fixes
+
+2002-06-14 18:17  hughescr
+
+	* MANIFEST: Ok, looks like all MANIFEST fixes now
+
+2002-06-14 17:55  hughescr
+
+	* MANIFEST: Updated manifest on trunk
+
+2002-06-14 17:27  hughescr
+
+	* MANIFEST: MANIFEST fix
+
+2002-06-14 17:25  quinlan
+
+	* lib/Mail/SpamAssassin/EvalTests.pm, rules/20_head_tests.cf,
+	rules/50_scores.cf: Bug #358: New header rule for To:
+	"john@doe.com" <john@doe.com> Bug #414: Detect faked Received:
+	trail
+
+2002-06-14 17:09  hughescr
+
+	* MANIFEST: Odd, someone removed makefile from the manifest
+
+2002-06-14 16:41  hughescr
+
+	* lib/Mail/SpamAssassin.pm: Ticked version number
+
+2002-06-14 16:17  hughescr
+
+	* Changes, lib/Mail/SpamAssassin.pm: Ok, here comes 2.30
+
 2002-06-14 15:28  hughescr
 
 	* lib/Mail/SpamAssassin.pm, lib/Mail/SpamAssassin/PerMsgStatus.pm,
