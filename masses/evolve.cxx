@@ -36,7 +36,7 @@ float float_num_nonspam;
 
 // ---------------------------------------------------------------------------
 
-void printhits (FILE *fout) {
+void printhits (FILE *fout, float convergence, int gens) {
   if (num_tests == 0) { num_tests = 1; }
 
   fprintf (fout, "# SUMMARY:            %6d / %6d\n#\n",
@@ -62,8 +62,11 @@ void printhits (FILE *fout) {
         yn, (yn / (float) num_spam) * 100.0,
 	(yn / (float) num_tests) * 100.0, ynscore);
 
-  fprintf (fout, "# TOTAL:              %6d  %3.2f%%\n#\n",
+  fprintf (fout, "# TOTAL:              %6d  %3.2f%%\n",
         num_tests, 100.0);
+
+  fprintf (fout, "# convergence / generations: %3.4f %d\n#\n",
+      	convergence, gens);
 }
 
 // ---------------------------------------------------------------------------
@@ -223,7 +226,7 @@ write_to_file (GARealGenome &genome, const char *fname) {
   fullcounthitsfromgenome (genome);
   snprintf (namebuf, 255, "%s", fname);
   fout = fopen (namebuf, "w");
-  printhits (fout);
+  printhits (fout, 0.0, 0);
   writescores (fout);
   fclose (fout);
 }
@@ -337,7 +340,7 @@ main (int argc, char **argv) {
     }
 
     fullcounthitsfromscores();
-    printhits (stdout);
+    printhits (stdout, 0.0, 0);
     exit (0);
   }
 
@@ -406,7 +409,8 @@ main (int argc, char **argv) {
       }
 
       genome = ga.statistics().bestIndividual();
-      fullcounthitsfromgenome (genome); printhits (stdout);
+      fullcounthitsfromgenome (genome);
+      printhits (stdout, ga.statistics().convergence(), gens);
       write_to_file (genome, "results.evolved");
     }
   }
@@ -414,7 +418,8 @@ main (int argc, char **argv) {
 
   cout << "Best genome found:" << endl;
   genome = ga.statistics().bestIndividual();
-  fullcounthitsfromgenome (genome); printhits (stdout);
+  fullcounthitsfromgenome (genome);
+  printhits (stdout, ga.statistics().convergence(), gens);
   write_to_file (genome, "results.evolved");
 
   cout << "Scores for this genome written to \"results.evolved\"." << endl;

@@ -122,22 +122,11 @@ sub readscores {
 }
 
 sub writescores_c {
-  my $size = (scalar keys %{$scores});
+  my $size = (scalar keys %{$scores}) + 100; # allow expansion without recompile
 
-  open (OUT, ">tmp/scores.h");
-  print OUT "
+  open (DAT, ">tmp/scores.data");
+  print DAT "N$size\n";
 
-int num_scores = $size;
-unsigned char is_mutatable[$size]; 	/* er, is_mutable I think ;) */
-double range_lo[$size];
-double range_hi[$size];
-double bestscores[$size];
-double scores[$size];
-char *score_names[$size];
-
-void loadscores (void) {
-
-";
   my $count = 0;
   foreach my $name (sort keys %{$scores}) {
     if (!defined $is_mutatable{$name}) { $is_mutatable{$name} = 1; } else { $range_lo{$name} = $range_hi{$name} = $scores->{$name}; }
@@ -145,18 +134,33 @@ void loadscores (void) {
     $range_lo{$name} ||= 0.1;
     $range_hi{$name} ||= 1.5;
 
-    print OUT 
-    " bestscores[$count] = ".$scores->{$name}.";", "\t",
-    " is_mutatable[$count] = ".$is_mutatable{$name}.";", "\t",
-    " range_lo[$count] = ".$range_lo{$name}.";", "\t",
-    " range_hi[$count] = ".$range_hi{$name}.";", "\t",
-    " score_names[$count] = \"".$name."\";\n";
+    print DAT ".".$count."\n";
+    print DAT "n".$name."\n";
+    print DAT "b".$scores->{$name}."\n";
+    print DAT "m".$is_mutatable{$name}."\n";
+    print DAT "l".$range_lo{$name}."\n";
+    print DAT "h".$range_hi{$name}."\n";
 
     $score_c_index{$name} = $count;
     $count++;
   }
 
-  print OUT "\n}\n";
+  close DAT;
+
+  open (OUT, ">tmp/scores.h");
+  print OUT "
+
+int num_scores;
+unsigned char is_mutatable[$size]; 	/* er, is_mutable I think ;) */
+double range_lo[$size];
+double range_hi[$size];
+double bestscores[$size];
+double scores[$size];
+char *score_names[$size];
+
+/* readscores() is defined in tests.h */
+
+";
   close OUT;
 }
 
@@ -270,5 +274,52 @@ void loadtests (void) {
   fclose(fin);
 
   printf ("Read test results for %d messages.\n", file+1);
+}
+
+void loadscores (void) {
+  FILE *fin = fopen ("tmp/scores.data", "r");
+  char buf[256];
+  int snum = 0;
+
+  while (fgets (buf, 255, fin) != NULL) {
+    char cmd;
+    long arg;
+    float argf;
+    char *str, *white;
+
+    cmd = (char) *buf;
+    arg = strtol (buf+1, NULL, 10);
+    argf = strtod (buf+1, NULL);
+    str = buf+1;
+
+    while ((white = strchr (str, '\n')) != NULL) {
+      *white = '\0';
+    }
+
+    if (cmd == '.') {
+      snum = arg;
+
+    } else if (cmd == 'N') {
+      num_scores = arg;
+
+    } else if (cmd == 'b') {
+      bestscores[snum] = argf;
+
+    } else if (cmd == 'l') {
+      range_lo[snum] = argf;
+
+    } else if (cmd == 'h') {
+      range_hi[snum] = argf;
+
+    } else if (cmd == 'n') {
+      score_names[snum] = strdup (str);	/* leaky leak ;) */
+
+    } else if (cmd == 'm') {
+      is_mutatable[snum] = arg;
+    }
+  }
+  fclose(fin);
+
+  printf ("Read scores for %d tests.\n", num_scores);
 }
 
