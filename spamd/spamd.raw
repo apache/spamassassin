@@ -427,8 +427,18 @@ die "fatal: internal error while setting up logging: values don't match:\n"
 # duplicating log messages.
 # TVD: isn't this already done up above?
 
-# support setuid() to user unless -u, we're not root, or doing --vpopmail
-my $setuid_to_user = ($opt{'username'} || $> != 0 || $opt{'vpopmail'}) ? 0 : 1;
+# support setuid() to user unless:
+# run with -u
+# we're not root
+# doing --vpopmail
+# we disable user-config
+my $setuid_to_user = (
+	$opt{'username'} ||
+	$> != 0 ||
+	$opt{'vpopmail'} ||
+	(!$opt{'user-config'} && !($opt{'setuid-with-sql'}||$opt{'setuid-with-ldap'}))
+	) ? 0 : 1;
+
 my $current_user;
 
 my $client;               # used for the client connection ...
@@ -642,7 +652,12 @@ $spamtest->finish_learner();
 # fresh configuration now for later restoring ...  MUST be placed after
 # the M::SA creation.
 my %conf_backup = ();
+my %msa_backup = ();
 if ($setuid_to_user) {
+  foreach( 'username', 'user_dir', 'userstate_dir' ) {
+    $msa_backup{$_} = $spamtest->{$_} if (exists $spamtest->{$_});
+  }
+
   $spamtest->copy_config(undef, \%conf_backup) ||
     die "error returned from copy_config, no Storable module?\n";
 }
@@ -748,6 +763,10 @@ sub spawn {
         if ( $> != $< and $> != ( $< - 2**32 ) ) {
           logmsg("fatal: return setuid failed");
           die;           # make it fatal to avoid security breaches
+        }
+
+        while(my($k,$v) = each %msa_backup) {
+          $spamtest->{$k} = $v;
         }
 
         # if we changed user, we would have also loaded up new configs
