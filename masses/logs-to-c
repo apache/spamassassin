@@ -191,6 +191,9 @@ sub writescores_c {
 
   open (OUT, ">tmp/scores.h");
   print OUT "
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
 int num_scores = $size;
 int num_mutable = $mutable;
@@ -247,6 +250,9 @@ sub writetests_c {
 
   open (TOP, ">tmp/tests.h");
   print TOP "
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
 int num_tests = $num_tests;
 int num_nondup = $num_nondup;
