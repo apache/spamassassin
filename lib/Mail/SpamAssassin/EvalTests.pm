@@ -449,6 +449,9 @@ sub check_razor {
   my ($self, $fulltext) = @_;
 
   return 0 unless ($self->is_razor_available());
+  return 0 if ($self->{already_checked_razor});
+
+  $self->{already_checked_razor} = 1;
   return $self->razor_lookup ($fulltext);
 }
 

@@ -77,6 +77,8 @@ sub check {
   # Also, if parts of the message contain encoded bits (quoted-printable
   # or base64), we test *both*.
 
+  $self->remove_unwanted_headers();
+
   {
     $self->do_head_tests();
 
@@ -169,7 +171,7 @@ of the tests which were trigged by the mail.
 sub get_names_of_tests_hit {
   my ($self) = @_;
 
-  $self->{test_names_hit} =~ s/,$//;
+  $self->{test_names_hit} =~ s/,\s*$//;
   return $self->{test_names_hit};
 }
 
@@ -337,7 +339,8 @@ sub rewrite_as_spam {
   # add some headers...
 
   $_ = sprintf ("Yes, hits=%d required=%d tests=%s",
-	$self->{hits}, $self->{conf}->{required_hits}, $self->get_names_of_tests_hit());
+	$self->{hits}, $self->{conf}->{required_hits},
+	$self->get_names_of_tests_hit());
 
   $self->{msg}->put_header ("X-Spam-Status", $_);
   $self->{msg}->put_header ("X-Spam-Flag", 'YES');
@@ -377,7 +380,9 @@ sub rewrite_as_non_spam {
   $self->{test_names_hit} =~ s/,$//;
 
   $_ = sprintf ("No, hits=%d required=%d tests=%s",
-	$self->{hits}, $self->{conf}->{required_hits}, $self->{test_names_hit});
+	$self->{hits}, $self->{conf}->{required_hits},
+	$self->get_names_of_tests_hit());
+
   $self->{msg}->put_header ("X-Spam-Status", $_);
   $self->{msg}->get_mail_object;
 }
@@ -1054,6 +1059,14 @@ sub work_out_local_domain {
 
 sub dbg { Mail::SpamAssassin::dbg (@_); }
 sub sa_die { Mail::SpamAssassin::sa_die (@_); }
+
+###########################################################################
+
+sub remove_unwanted_headers {
+  my ($self) = @_;
+  $self->{msg}->delete_header ("X-Spam-Status");
+  $self->{msg}->delete_header ("X-Spam-Flag");
+}
 
 ###########################################################################
 
