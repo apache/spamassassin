@@ -1,3 +1,46 @@
+2003-09-21 22:34  quinlan
+
+	* lib/Mail/SpamAssassin/EvalTests.pm: bug 2489: check_num_received
+	checks one less than it should
+
+2003-09-21 22:17  quinlan
+
+	* lib/Mail/SpamAssassin/Conf.pm: move check_num_received to
+	DEPRECATED OPTIONS section
+
+2003-09-21 02:15  quinlan
+
+	* lib/Mail/: SpamAssassin.pm, SpamAssassin/Conf.pm,
+	SpamAssassin/EvalTests.pm: documentation/comment fix:
+	UNDESIRED_LANGUAGE_BODY wasn't renamed to UNWANTED_LANGUAGE_BODY
+	everywhere
+
+2003-09-21 02:13  quinlan
+
+	* rules/: 30_text_fr.cf, 30_text_it.cf, 30_text_sk.cf: just fixing
+	a few rule names
+
+2003-09-19 22:09  felicity
+
+	* lib/Mail/SpamAssassin.pm: return to dev mode
+
+2003-09-19 22:08  felicity
+
+	* build/2.60_change_summary: updated for rc6 release
+
+2003-09-19 21:03  felicity
+
+	* lib/Mail/SpamAssassin/BayesStore.pm: added a debug statement for
+	bayes expiry if estimation is available
+
+2003-09-19 05:42  felicity
+
+	* build/update_devel: tardist does minivers, not vers ... :(
+
+2003-09-19 05:36  felicity
+
+	* Changes, lib/Mail/SpamAssassin.pm: ready for 2.60-rc6 release
+
 2003-09-19 04:02  quinlan
 
 	* lib/Mail/: SpamAssassin.pm, SpamAssassin/Bayes.pm,
@@ -6411,11 +6454,7 @@
 	* BUGS, MANIFEST, MANIFEST.SKIP, MailAudit.patch,
 	masses/RUNME.TWOSTEP, masses/craig-evolve.c.ALTIVEC,
 	rules/40_spam_phrases.cf, t/reportheader.t, t/spamd_report.t,
-	t/data/nice/001, wordfreqs/.cvsignore, wordfreqs/README,
-	wordfreqs/RUNME, wordfreqs/RUNME.DOGMA, wordfreqs/RUNME.SONIC,
-	wordfreqs/join-and-settle-phrases, wordfreqs/mass-phrase-freq,
-	wordfreqs/mass-phrase-freq-for-jm, wordfreqs/settle-phrases:
-	removed more obsolete code from CVS and MANIFEST
+	t/data/nice/001: removed more obsolete code from CVS and MANIFEST
 
 2003-02-20 12:23  jmason
 
@@ -7374,10 +7413,6 @@
 
 	* lib/Mail/SpamAssassin/Conf.pm: removed obsolete unnamed-rule
 	support, which was never used
-
-2003-01-27 21:32  jmason
-
-	* wordfreqs/README: note for wordfreqs README
 
 2003-01-27 21:31  jmason
 
@@ -8370,8 +8405,7 @@
 2003-01-03 17:48  jmason
 
 	* sa-learn-nonspam.raw, lib/Mail/SpamAssassin/ArchiveIterator.pm,
-	masses/mass-check, masses/lib/Mail/ArchiveIterator.pm: integrated 2
-	ArchiveIterator implementations.
+	masses/mass-check: integrated 2 ArchiveIterator implementations.
 
 2003-01-03 17:34  jmason
 
@@ -8401,10 +8435,6 @@
 2003-01-03 04:40  felicity
 
 	* tools/translation_prep.pl: fixed pathing issue
-
-2003-01-03 02:42  quinlan
-
-	* masses/lib/Mail/ArchiveIterator.pm: minor change
 
 2003-01-02 19:19  jmason
 
@@ -8884,12 +8914,6 @@
 2002-12-25 02:12  quinlan
 
 	* masses/mass-check: fix warnings in logkilled()
-
-2002-12-25 02:11  quinlan
-
-	* masses/lib/Mail/ArchiveIterator.pm: allow mail files to be named
-	after their md5sum checksum (does not work with --sort option to
-	mass-check, though)
 
 2002-12-25 01:52  quinlan
 
@@ -10961,11 +10985,6 @@
 
 	* lib/Mail/SpamAssassin/EvalTests.pm: Bug #1133: Fixes to recuce
 	FPs.
-
-2002-10-26 21:49  quinlan
-
-	* masses/lib/Mail/ArchiveIterator.pm: abstract opening of mail
-	files and folders fix handling of unreadable mail files and folders
 
 2002-10-26 21:46  quinlan
 
@@ -13897,9 +13916,7 @@
 	spamd/README.spamd, spamd/libspamc.c, spamd/libspamc.h,
 	spamd/spamc.c, spamd/spamc.pod, spamd/spamd.raw, spamd/utils.c,
 	spamd/utils.h, t/SATest.pm, t/basic_lint.t, t/rule_tests.t,
-	tools/check_whitelist, wordfreqs/RUNME, wordfreqs/RUNME.SONIC,
-	wordfreqs/join-and-settle-phrases: merged code back from 2.4.0
-	release branch
+	tools/check_whitelist: merged code back from 2.4.0 release branch
 
 2002-08-28 17:13  jmason
 
@@ -14316,8 +14333,7 @@
 2002-08-23 11:22  jmason
 
 	* MANIFEST, MANIFEST.SKIP, masses/CORPUS_POLICY,
-	masses/mass-check-results-to-mbox,
-	wordfreqs/join-and-settle-phrases: s/opt-in/verified opt-in/, and
+	masses/mass-check-results-to-mbox: s/opt-in/verified opt-in/, and
 	removed whitelist test mails from distro, they're too big
 
 2002-08-23 11:05  msquadrat
@@ -14481,9 +14497,8 @@
 
 2002-08-22 17:20  jmason
 
-	* MANIFEST, Makefile.PL, wordfreqs/RUNME,
-	wordfreqs/join-and-settle-phrases: spamproxyd now removed from
-	distro; problems reported, better as a separate download
+	* MANIFEST, Makefile.PL: spamproxyd now removed from distro;
+	problems reported, better as a separate download
 
 2002-08-22 16:54  hughescr
 
@@ -14519,14 +14534,10 @@
 	speed-up by using tr/// instead of s// for body-wide character
 	replacement
 
-2002-08-21 16:40  jmason
-
-	* wordfreqs/RUNME.SONIC: updated for current corpus layout
-
 2002-08-21 16:32  jmason
 
-	* lib/Mail/SpamAssassin/Conf.pm, wordfreqs/RUNME: added a warning
-	for ISPs in required_hits manual entry
+	* lib/Mail/SpamAssassin/Conf.pm: added a warning for ISPs in
+	required_hits manual entry
 
 2002-08-21 16:27  msquadrat
 
@@ -14849,9 +14860,8 @@
 
 2002-08-18 17:33  msquadrat
 
-	* masses/: mass-check-results-to-mbox, lib/Mail/ArchiveIterator.pm:
-	fixed the mbox msgid detection code; it caught msgids from
-	forwarded messages
+	* masses/mass-check-results-to-mbox: fixed the mbox msgid detection
+	code; it caught msgids from forwarded messages
 
 2002-08-18 08:33  quinlan
 
@@ -14895,11 +14905,6 @@
 
 	* lib/Mail/SpamAssassin/PerMsgStatus.pm, rules/20_body_tests.cf:
 	add new color hue tests, remove old font color tests
-
-2002-08-18 00:15  msquadrat
-
-	* masses/lib/Mail/ArchiveIterator.pm: "empty" (From ...\nFrom ...)
-	messages are now skipped; fixed small gotchas with Message-Id
 
 2002-08-17 21:56  quinlan
 
@@ -15205,8 +15210,8 @@
 
 2002-08-15 21:46  jmason
 
-	* masses/: mass-check, score-ranges-from-freqs,
-	lib/Mail/ArchiveIterator.pm: oops, checked in debug code
+	* masses/: mass-check, score-ranges-from-freqs: oops, checked in
+	debug code
 
 2002-08-15 21:26  jmason
 
@@ -15287,8 +15292,8 @@
 
 2002-08-15 16:05  jmason
 
-	* masses/mass-check, masses/lib/Mail/ArchiveIterator.pm,
-	rules/50_scores.cf: more common FPs in spamtraps
+	* masses/mass-check, rules/50_scores.cf: more common FPs in
+	spamtraps
 
 2002-08-15 15:37  msquadrat
 
@@ -15470,10 +15475,9 @@
 
 2002-08-14 16:59  jmason
 
-	* masses/: mass-check, lib/Mail/ArchiveIterator.pm: refactored
-	archive-iteration code into an object, Mail::ArchiveIterator, since
-	we now use it in mass-check, spam-phrases, and somewhere else I've
-	forgotten.
+	* masses/mass-check: refactored archive-iteration code into an
+	object, Mail::ArchiveIterator, since we now use it in mass-check,
+	spam-phrases, and somewhere else I've forgotten.
 
 2002-08-14 16:55  msquadrat
 
