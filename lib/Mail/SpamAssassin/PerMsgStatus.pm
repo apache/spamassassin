@@ -1152,7 +1152,7 @@ my $uricCheat = $uricSet;
 $uricCheat =~ tr/://d;
 
 my $schemelessRE = qr/(?<!\.)(?:www\.|ftp\.)/;
-my $uriRe = qr/(?:\b$schemeRE:[$uricCheat]|\b$schemelessRE)[$uricSet#]*/o;
+my $uriRe = qr/\b(?:$schemeRE:[$uricCheat]|$schemelessRE)[$uricSet#]*/o;
 
 # Taken from Email::Find (thanks Tatso!)
 # This is the BNF from RFC 822
