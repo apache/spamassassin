@@ -49,7 +49,7 @@ sub extract_metadata {
   my $countries = '';
   foreach my $relay (@{$msg->{metadata}->{relays_untrusted}}) {
     my $ip = $relay->{ip};
-    my $cc = $reg->inet_atocc($ip);
+    my $cc = $reg->inet_atocc($ip) || "XX";
     $countries .= $cc." ";
   }
 
