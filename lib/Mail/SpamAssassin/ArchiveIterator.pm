@@ -30,8 +30,6 @@ use Mail::SpamAssassin::Constants qw(:sa);
 use constant BIG_BYTES => 256*1024;	# 256k is a big email
 use constant BIG_LINES => BIG_BYTES/65;	# 65 bytes/line is a good approximation
 
-my $no = 1;
-
 use vars qw {
   $MESSAGES
 };
@@ -450,10 +448,14 @@ sub message_array {
 
   my @messages;
   if ($self->{opt_n}) {
-    my %both = (%{ $self->{s} }, %{$self->{h}});
+    # do two small sorts, one for each class of message
+    # the sort is only useful for mbox/mbx files so that we go through the
+    # files completely (in order?) before moving onto another one
+    @messages = ( sort keys(%{$self->{s}}), sort keys(%{$self->{h}}) );
     undef $self->{s};
     undef $self->{h};
-    @messages = sort({ $both{$a} <=> $both{$b} } keys %both);
+
+    # head and tail are really non-deterministic with opt_n
     splice(@messages, $self->{opt_head}) if $self->{opt_head};
     splice(@messages, 0, -$self->{opt_tail}) if $self->{opt_tail};
   }
@@ -462,15 +464,23 @@ sub message_array {
     undef $self->{s};
     my @h = sort({ $self->{h}->{$a} <=> $self->{h}->{$b} } keys %{$self->{h}});
     undef $self->{h};
-    splice(@s, $self->{opt_head}) if $self->{opt_head};
-    splice(@s, 0, -$self->{opt_tail}) if $self->{opt_tail};
-    splice(@h, $self->{opt_head}) if $self->{opt_head};
-    splice(@h, 0, -$self->{opt_tail}) if $self->{opt_tail};
-    while (@s && @h) {
-      push @messages, (shift @s);
-      push @messages, (shift @h);
+
+    if ($self->{opt_head}) {
+      splice(@s, $self->{opt_head});
+      splice(@h, $self->{opt_head});
     }
-    push @messages, (splice @s), (splice @h);
+    if ($self->{opt_tail}) {
+      splice(@s, 0, -$self->{opt_tail});
+      splice(@h, 0, -$self->{opt_tail});
+    }
+
+    # interleave ordered spam and ham
+    while (@s && @h) {
+      push @messages, (shift @s), (shift @h);
+    }
+
+    # push the rest onto the end
+    push @messages, @s, @h;
   }
 
   if (defined $fh) {
@@ -636,20 +646,7 @@ sub scan_directory {
   @files = grep { -f } map { "$folder/$_" } @files;
 
   foreach my $mail (@files) {
-    if ($self->{opt_n}) {
-      $self->{$class}->{index_pack($class, "f", AI_TIME_UNKNOWN, $mail)} = $no++;
-      next;
-    }
-    my $header;
-    mail_open($mail) or next;
-    while (<INPUT>) {
-      last if /^$/;
-      $header .= $_;
-    }
-    close(INPUT);
-    my $date = Mail::SpamAssassin::Util::receive_date($header);
-    next if !$self->message_is_useful_by_date($date);
-    $self->{$class}->{index_pack($class, "f", $date, $mail)} = $date;
+    $self->scan_file($class, $mail);
   }
 }
 
@@ -657,7 +654,7 @@ sub scan_file {
   my ($self, $class, $mail) = @_;
 
   if ($self->{opt_n}) {
-    $self->{$class}->{index_pack($class, "f", AI_TIME_UNKNOWN, $mail)} = $no++;
+    $self->{$class}->{index_pack($class, "f", AI_TIME_UNKNOWN, $mail)} = AI_TIME_UNKNOWN;
     return;
   }
   my $header;
@@ -725,15 +722,13 @@ sub scan_mailbox {
 	$where = tell INPUT;
       }
       if ($header) {
-	my $t;
-	if ($self->{opt_n}) {
-	  $self->{$class}->{index_pack($class, "m", AI_TIME_UNKNOWN, "$file.$offset")} = $no++;
+	my $date = Mail::SpamAssassin::Util::receive_date($header);
+
+	if (!$self->{opt_n}) {
+	  next if !$self->message_is_useful_by_date($date);
 	}
-	else {
-	  $t = Mail::SpamAssassin::Util::receive_date($header);
-	  next if !$self->message_is_useful_by_date($t);
-	  $self->{$class}->{index_pack($class, "m", $t, "$file.$offset")} = $t;
-	}
+
+	$self->{$class}->{index_pack($class, "m", $date, "$file.$offset")} = $date;
       }
     }
     close INPUT;
@@ -787,14 +782,14 @@ sub scan_mbx {
 		    $header .= $_;
 		}
 
-		my $t;
-		if ($self->{opt_n}) {
-		  $self->{$class}->{index_pack($class, "b", AI_TIME_UNKNOWN, "$file.$offset")} = $no++;
-		} else {
-		  $t = Mail::SpamAssassin::Util::receive_date($header);
-		  next if !$self->message_is_useful_by_date($t);
-		  $self->{$class}->{index_pack($class, "b", $t, "$file.$offset")} = $t;
+		my $date = Mail::SpamAssassin::Util::receive_date($header);
+
+		if (!$self->{opt_n}) {
+		  next if !$self->message_is_useful_by_date($date);
 		}
+
+		$self->{$class}->{index_pack($class, "b", $date, "$file.$offset")} = $date;
+
 		seek(INPUT, $offset + $size, 0);
 	    } else {
 		die "archive-iterator: error: failure to read message body!\n";
