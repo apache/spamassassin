@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.570 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.571 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -358,72 +358,6 @@ meta T_MIME_HTML_ONLY_MULTI_MIXED	(__CTYPE_MULTIPART_MIXED && __MIME_HTML_ONLY)
 #
 header __CTYPE_MULTIPART_OTHER	Content-Type =~ /multipart\/(?!mixed)(?!alternative)/i
 meta T_MIME_HTML_ONLY_MULTI_OTHER	(__CTYPE_MULTIPART_OTHER && __MIME_HTML_ONLY)
-
-# compare against SUBJ_FULL_OF_8BITS.  MSOE produces 8-bit subject lines
-# (bug 1918)
-header __MIMEOLE		X-MIMEOLE =~ /Produced By Microsoft MimeOLE/
-meta T_SUBJ_FULL_OF_8BITS	(SUBJ_FULL_OF_8BITS && !__MIMEOLE)
-
-######################################################################
-# new 8BIT rules - brute force!
-
-# T_SUBJ_ILLEGAL_00_02 looks best
-header T_SUBJ_ILLEGAL_00_02	eval:check_illegal_chars('Subject','0.00','2')
-header T_SUBJ_ILLEGAL_01_02	eval:check_illegal_chars('Subject','0.01','2')
-header T_SUBJ_ILLEGAL_02_02	eval:check_illegal_chars('Subject','0.02','2')
-header T_SUBJ_ILLEGAL_03_02	eval:check_illegal_chars('Subject','0.03','2')
-header T_SUBJ_ILLEGAL_04_02	eval:check_illegal_chars('Subject','0.04','2')
-header T_SUBJ_ILLEGAL_05_02	eval:check_illegal_chars('Subject','0.05','2')
-
-# T_FROM_ILLEGAL_18_02 looks best
-header T_FROM_ILLEGAL_10_02	eval:check_illegal_chars('From','0.10','2')
-header T_FROM_ILLEGAL_11_02	eval:check_illegal_chars('From','0.11','2')
-header T_FROM_ILLEGAL_12_02	eval:check_illegal_chars('From','0.12','2')
-header T_FROM_ILLEGAL_13_02	eval:check_illegal_chars('From','0.13','2')
-header T_FROM_ILLEGAL_14_02	eval:check_illegal_chars('From','0.14','2')
-header T_FROM_ILLEGAL_15_02	eval:check_illegal_chars('From','0.15','2')
-header T_FROM_ILLEGAL_16_02	eval:check_illegal_chars('From','0.16','2')
-header T_FROM_ILLEGAL_17_02	eval:check_illegal_chars('From','0.17','2')
-header T_FROM_ILLEGAL_18_02	eval:check_illegal_chars('From','0.18','2')
-header T_FROM_ILLEGAL_19_02	eval:check_illegal_chars('From','0.19','2')
-header T_FROM_ILLEGAL_20_02	eval:check_illegal_chars('From','0.20','2')
-header T_FROM_ILLEGAL_21_02	eval:check_illegal_chars('From','0.21','2')
-header T_FROM_ILLEGAL_22_02	eval:check_illegal_chars('From','0.22','2')
-header T_FROM_ILLEGAL_23_02	eval:check_illegal_chars('From','0.23','2')
-header T_FROM_ILLEGAL_24_02	eval:check_illegal_chars('From','0.24','2')
-header T_FROM_ILLEGAL_25_02	eval:check_illegal_chars('From','0.25','2')
-
-# T_HEAD_ILLEGAL_005_02 looks best
-header T_HEAD_ILLEGAL_000_02	eval:check_illegal_chars('ALL','0.000','2')
-header T_HEAD_ILLEGAL_001_02	eval:check_illegal_chars('ALL','0.001','2')
-header T_HEAD_ILLEGAL_002_02	eval:check_illegal_chars('ALL','0.002','2')
-header T_HEAD_ILLEGAL_003_02	eval:check_illegal_chars('ALL','0.003','2')
-header T_HEAD_ILLEGAL_004_02	eval:check_illegal_chars('ALL','0.004','2')
-header T_HEAD_ILLEGAL_005_02	eval:check_illegal_chars('ALL','0.005','2')
-header T_HEAD_ILLEGAL_006_02	eval:check_illegal_chars('ALL','0.006','2')
-header T_HEAD_ILLEGAL_007_02	eval:check_illegal_chars('ALL','0.007','2')
-header T_HEAD_ILLEGAL_008_02	eval:check_illegal_chars('ALL','0.008','2')
-header T_HEAD_ILLEGAL_009_02	eval:check_illegal_chars('ALL','0.009','2')
-header T_HEAD_ILLEGAL_010_02	eval:check_illegal_chars('ALL','0.010','2')
-header T_HEAD_ILLEGAL_011_02	eval:check_illegal_chars('ALL','0.011','2')
-header T_HEAD_ILLEGAL_012_02	eval:check_illegal_chars('ALL','0.012','2')
-header T_HEAD_ILLEGAL_013_02	eval:check_illegal_chars('ALL','0.013','2')
-header T_HEAD_ILLEGAL_014_02	eval:check_illegal_chars('ALL','0.014','2')
-header T_HEAD_ILLEGAL_015_02	eval:check_illegal_chars('ALL','0.015','2')
-header T_HEAD_ILLEGAL_016_02	eval:check_illegal_chars('ALL','0.016','2')
-header T_HEAD_ILLEGAL_017_02	eval:check_illegal_chars('ALL','0.017','2')
-header T_HEAD_ILLEGAL_018_02	eval:check_illegal_chars('ALL','0.018','2')
-header T_HEAD_ILLEGAL_019_02	eval:check_illegal_chars('ALL','0.019','2')
-header T_HEAD_ILLEGAL_020_02	eval:check_illegal_chars('ALL','0.020','2')
-header T_HEAD_ILLEGAL_021_02	eval:check_illegal_chars('ALL','0.021','2')
-header T_HEAD_ILLEGAL_022_02	eval:check_illegal_chars('ALL','0.022','2')
-header T_HEAD_ILLEGAL_023_02	eval:check_illegal_chars('ALL','0.023','2')
-header T_HEAD_ILLEGAL_024_02	eval:check_illegal_chars('ALL','0.024','2')
-header T_HEAD_ILLEGAL_025_02	eval:check_illegal_chars('ALL','0.025','2')
-header T_HEAD_ILLEGAL_026_02	eval:check_illegal_chars('ALL','0.026','2')
-header T_HEAD_ILLEGAL_027_02	eval:check_illegal_chars('ALL','0.027','2')
-header T_HEAD_ILLEGAL_028_02	eval:check_illegal_chars('ALL','0.028','2')
-header T_HEAD_ILLEGAL_029_02	eval:check_illegal_chars('ALL','0.029','2')
 
 ######################################################################
 
