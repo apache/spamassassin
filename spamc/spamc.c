@@ -104,7 +104,7 @@ print_usage(void)
     usg("Usage: spamc [options] [-e command [args]] < message\n");
     usg("Options:\n");
 
-    usg("  -d host             Specify host to connect to."
+    usg("  -d host             Specify host to connect to.\n"
         "                      [default: localhost]\n");
     usg("  -H                  Randomize IP addresses for the looked-up\n"
         "                      hostname.\n");
@@ -139,6 +139,7 @@ print_usage(void)
     usg("  -e command [args]   Pipe the output to the given command instead\n"
         "                      of stdout. This must be the last option.\n");
     usg("  -h                  Print this help message and exit.\n");
+    usg("\n");
 }
 
 int
@@ -152,6 +153,7 @@ read_args(int argc, char **argv,
     const char *opts = "-BcrRd:fhyp:t:s:u:xSHEl";
 #endif
     int opt;
+    int ret = EX_OK;
 
     while ((opt = getopt(argc, argv, opts)) != -1)
     {
@@ -265,19 +267,20 @@ read_args(int argc, char **argv,
             }
             
             case '?':
+            case ':':
             {
                 libspamc_log (flags, LOG_ERR, "invalid usage");
+                ret = EX_USAGE;
                 /* FALLTHROUGH */
             }
             case 'h':
-            case 1:
             {
                 print_usage();
-                exit(EX_USAGE);
+                exit(ret);
             }
         }
     }
-    return EX_OK;
+    return ret;
 }
 
 void get_output_fd(int *fd)
@@ -354,7 +357,8 @@ int main(int argc, char **argv)
     signal(SIGPIPE, SIG_IGN);
 #endif
 
-    read_args(argc, argv, &max_size, &username, &trans);
+   if ((ret = read_args(argc, argv, &max_size, &username, &trans)) != EX_OK)
+       return ret;
 
   /*--------------------------------------------------------------------
    * DETERMINE USER
