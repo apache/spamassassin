@@ -1,0 +1,15 @@
+Upgrading to 2.50:
+
+SpamAssassin now has a Bayesian Learner component to it. It is by
+default set to automatically learn from your incoming mail. (Messages
+that score less than -2 or above 15 will be learned as nonspam or spam
+repsectively.) You can also feed it with the sa-learn command (man
+sa-learn for info).
+
+The report format for SpamAssassin has changed. Spam messages are now
+attached as an rfc822 attachment. If you do not want this, set
+report_safe 0. (See man Mail::SpamAssassin::Conf for more info.)
+
+Support for different score sets has been added. This means that each
+test will get a different score depending on whether Bayes or Network
+tests are being used.

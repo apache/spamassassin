@@ -1,16 +1,14 @@
-AC_INIT(Makefile.PL)
-
+AC_INIT
+AC_CONFIG_SRCDIR([Makefile.PL])
 AC_CONFIG_HEADER(config.h)
 
+dnl ensure Makefile.PL has been run too
 if test -f Makefile.PL -a ! -f Makefile ; then
   perl Makefile.PL || exit 1
 fi
 
 AC_PROG_CC
 
-dnl TODO: do we want these, too?
-AC_CYGWIN
-AC_MINGW32
 AC_EXEEXT
 
 dnl ----------------------------------------------------------------------
@@ -43,8 +41,8 @@ fi
 dnl ----------------------------------------------------------------------
 
 AC_CHECK_LIB(socket, socket)
-AC_CHECK_LIB(ssl, SSL_CTX_free)
 AC_CHECK_LIB(crypto, CRYPTO_lock)
+AC_CHECK_LIB(ssl, SSL_CTX_free,,,-lcrypto)
 AC_CHECK_LIB(inet, connect)
 AC_CHECK_LIB(nsl, t_accept)
 AC_CHECK_LIB(dl, dlopen)
@@ -131,4 +129,5 @@ AC_SUBST(CCDLFLAGS)
 AC_SUBST(LDDLFLAGS)
 AC_SUBST(HAVE_SHUT_RD)
 
-AC_OUTPUT(binaries.mk)
+AC_CONFIG_FILES([binaries.mk])
+AC_OUTPUT

@@ -359,6 +359,7 @@ sub razor2_lookup {
     return 0;
   }
   if (!$self->{conf}->{use_razor2}) { return 0; }
+  if (!$self->is_razor2_available()) { return 0; }
 
   timelog("Razor2 -> Starting razor test ($timeout secs max)", "razor", 1);
   
@@ -372,7 +373,6 @@ sub razor2_lookup {
 
     eval {
       local ($^W) = 0;    # argh, warnings in Razor
-      local %ENV;
 
       require Razor2::Client::Agent;
 
@@ -911,7 +911,7 @@ sub enter_helper_run_mode {
 
   dbg ("entering helper-app run mode");
   $self->{old_slash} = $/;              # Razor pollutes this
-  $self->{old_env_home} = $ENV{'HOME'}; # can be 'undef', e.g. spamd has no HOME
+  %{$self->{old_env}} = %ENV;
 
   Mail::SpamAssassin::Util::clean_path_in_taint_mode();
 
@@ -933,10 +933,11 @@ sub leave_helper_run_mode {
 
   dbg ("leaving helper-app run mode");
   $/ = $self->{old_slash};
-  if (defined $self->{old_env_home}) {
-    $ENV{'HOME'} = $self->{old_env_home};
-  } else {
-    delete $ENV{'HOME'};        # make sure it's unset
+  if ( defined $self->{old_env} ) {
+    %ENV = %{$self->{old_env}};
+  }
+  else {
+    undef %ENV;
   }
 }
 

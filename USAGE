@@ -23,8 +23,8 @@ Steps to take for every installation:
     Verify (using a text viewer, ie. "less" or "notepad") that nonspam.out
     has not been tagged as spam, and that spam.out has.  The files should
     contain the full text and headers of the messages, the "spam.out"
-    message should be annotated with "****SPAM****" in the subject line
-    and a report from SpamAssassin, and there should be no errors when you
+    message should contain the header "X-Spam-Flag: YES" and be annotated
+    with a report from SpamAssassin, and there should be no errors when you
     run the commands.
 
     Even though sample-nonspam.txt is not spam, nonspam.out will contain a

@@ -107,9 +107,21 @@ sub am_running_on_windows {
 #
 sub untaint_file_path {
   my ($path) = @_;
+
   return unless defined($path);
-  $path =~ /^([-_A-Za-z\xA0-\xFF 0-9\.\@\=\+\,\/\\\:]+)$/;
-  return $1;
+  return '' if ($path eq '');
+
+  # Barry Jaspan: allow ~ and spaces, good for Windows.  Also return ''
+  # if input is '', as it is a safe path.
+  my $chars = '-_A-Za-z\xA0-\xFF0-9\.\@\=\+\,\/\\\:';
+  my $re = qr/^\s*([$chars][${chars}~ ]*)$/o;
+
+  if ($path =~ $re) {
+    return $1;
+  } else {
+    warn "security: cannot untaint path: \"$path\"\n";
+    return $path;
+  }
 }
 
 ###########################################################################
@@ -251,10 +263,10 @@ sub portable_getpwuid {
   }
 
   if (!RUNNING_ON_WINDOWS) {
-    eval ' sub _getpwuid_wrapper { getpwuid(@_); } ';
+    eval ' sub _getpwuid_wrapper { getpwuid($_[0]); } ';
   } else {
     dbg ("defining getpwuid() wrapper using 'unknown' as username");
-    eval ' sub _getpwuid_wrapper { fake_getpwuid(@_); } ';
+    eval ' sub _getpwuid_wrapper { fake_getpwuid($_[0]); } ';
   }
 
   if ($@) {

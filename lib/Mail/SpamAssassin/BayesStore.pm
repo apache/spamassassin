@@ -19,7 +19,7 @@ use vars qw{
   @DBNAMES @DB_EXTENSIONS
   $NSPAM_MAGIC_TOKEN $NHAM_MAGIC_TOKEN $LAST_EXPIRE_MAGIC_TOKEN
   $NTOKENS_MAGIC_TOKEN $OLDEST_TOKEN_AGE_MAGIC_TOKEN
-  $SCANCOUNT_BASE_MAGIC_TOKEN 
+  $SCANCOUNT_BASE_MAGIC_TOKEN $RUNNING_EXPIRE_MAGIC_TOKEN
 };
 
 @ISA = qw();
@@ -60,12 +60,15 @@ use vars qw{
 # it into place.
 @DB_EXTENSIONS = ('', '.db', '.dir', '.pag', '.dbm', '.cdb');
 
+# These are the magic tokens we use to track stuff in the DB.
+# The format MUST be '**' followed by a capital letter ([A-Z]).
 $NSPAM_MAGIC_TOKEN = '**NSPAM';
 $NHAM_MAGIC_TOKEN = '**NHAM';
 $OLDEST_TOKEN_AGE_MAGIC_TOKEN = '**OLDESTAGE';
 $LAST_EXPIRE_MAGIC_TOKEN = '**LASTEXPIRE';
 $NTOKENS_MAGIC_TOKEN = '**NTOKENS';
 $SCANCOUNT_BASE_MAGIC_TOKEN = '**SCANBASE';
+$RUNNING_EXPIRE_MAGIC_TOKEN = '**RUNNINGEXPIRE';
 
 use constant MAX_SIZE_FOR_SCAN_COUNT_FILE => 5000;
 
@@ -143,7 +146,7 @@ sub tie_db_readonly {
   foreach my $dbname (@DBNAMES) {
     my $name = $path.'_'.$dbname;
     my $db_var = 'db_'.$dbname;
-    dbg("bayes: tie-ing to DB file R/O $name");
+    dbg("bayes: $$ tie-ing to DB file R/O $name");
     # untie %{$self->{$db_var}} if (tied %{$self->{$db_var}});
     tie %{$self->{$db_var}},"AnyDBM_File",$name, O_RDONLY,
 		 (oct ($main->{conf}->{bayes_file_mode}) & 0666)
@@ -186,7 +189,13 @@ sub tie_db_writable {
     };
   }
 
-  if ($main->{locker}->safe_lock ($path)) {
+  my $tout;
+  if ($main->{learn_wait_for_lock}) {
+    $tout = 300;	# TODO: Dan to write better lock code
+  } else {
+    $tout = 10;
+  }
+  if ($main->{locker}->safe_lock ($path, $tout)) {
     $self->{locked_file} = $path;
     $self->{is_locked} = 1;
   } else {
@@ -198,7 +207,7 @@ sub tie_db_writable {
   foreach my $dbname (@DBNAMES) {
     my $name = $path.'_'.$dbname;
     my $db_var = 'db_'.$dbname;
-    dbg("bayes: tie-ing to DB file R/W $name");
+    dbg("bayes: $$ tie-ing to DB file R/W $name");
     # not convinced this is needed, or is efficient!
     # untie %{$self->{$db_var}} if (tied %{$self->{$db_var}});
     tie %{$self->{$db_var}},"AnyDBM_File",$name, O_RDWR|O_CREAT,
@@ -228,12 +237,16 @@ failed_to_tie:
 
 sub untie_db {
   my $self = shift;
-  dbg("bayes: untie-ing");
+  dbg("bayes: $$ untie-ing");
 
   foreach my $dbname (@DBNAMES) {
     my $db_var = 'db_'.$dbname;
-    dbg ("bayes: untie-ing $db_var");
-    untie %{$self->{$db_var}};
+
+    if (exists $self->{$db_var}) {
+      dbg ("bayes: $$ untie-ing $db_var");
+      untie %{$self->{$db_var}};
+      delete $self->{$db_var};
+    }
   }
 
   if ($self->{is_locked}) {
@@ -254,14 +267,16 @@ sub expire_old_tokens {
 
   eval {
     local $SIG{'__DIE__'};	# do not run user die() traps in here
-    $self->tie_db_writable();
-    $ret = $self->expire_old_tokens_trapped ($opts);
+    if ($self->tie_db_writable()) {
+      $ret = $self->expire_old_tokens_trapped ($opts);
+    }
   };
   my $err = $@;
 
   $self->untie_db();
   if ($err) {		# if we died, untie the dbs.
-    die $err;
+    warn "bayes expire_old_tokens: $err\n";
+    return 0;
   }
   $ret;
 }
@@ -269,8 +284,13 @@ sub expire_old_tokens {
 sub expire_old_tokens_trapped {
   my ($self, $opts) = @_;
 
-  if (!$self->expiry_due() && !$self->{bayes}->{main}->{learn_force_expire})
-				{ return 0; }
+  # Flag that we're doing work
+  $self->set_running_expire_tok();
+
+  if (!$self->expiry_due() && !$self->{bayes}->{main}->{learn_force_expire}) {
+    $self->remove_running_expire_tok();
+    return 0;
+  }
 
   my $too_old = $self->scan_count_get();
   $too_old = ($too_old < $self->{expiry_count} ? 
@@ -281,6 +301,15 @@ sub expire_old_tokens_trapped {
   my $num_lowfreq = 0;
   my $num_hapaxes = 0;
   my $started = time();
+  my $last = $self->{db_toks}->{$LAST_EXPIRE_MAGIC_TOKEN};
+  if (!$last || $last =~ /\D/) { $last = 0; }
+  my $current = $self->scan_count_get();
+
+  # if $current is > 65535, we need to reset the atimes to 0
+  if ( $current > 65535 ) {
+    dbg("bayes: Current scan count $current > 65535, resetting atimes to 0");
+    $too_old = $last = 0;
+  }
 
   # since DB_File will not shrink a database (!!), we need to *create*
   # a new one instead.
@@ -302,13 +331,20 @@ sub expire_old_tokens_trapped {
   if ($showdots) { print STDERR "\n"; }
 
   foreach my $tok (keys %{$self->{db_toks}}) {
-    next if ($tok eq $NSPAM_MAGIC_TOKEN
-	  || $tok eq $NHAM_MAGIC_TOKEN
-	  || $tok eq $LAST_EXPIRE_MAGIC_TOKEN
-	  || $tok eq $NTOKENS_MAGIC_TOKEN
-	  || $tok eq $OLDEST_TOKEN_AGE_MAGIC_TOKEN);
+    next if ($tok =~ /^\*\*[A-Z]+$/); # skip magic tokens
 
     my ($ts, $th, $atime) = $self->tok_get ($tok);
+
+    # If the current token atime is > than the current scan count,
+    # there was likely a DB expiry error.  Let's reset the atime to the
+    # last expire time.
+    if ($atime > $current) {
+      $atime = $last;
+    }
+    elsif ( $current > 65535 ) { # reset atime to 0
+      $atime = 0;
+    }
+
     if ($atime < $too_old) {
       push (@deleted_toks, [ $tok, $ts, $th, $atime ]);
       $deleted++;
@@ -323,27 +359,56 @@ sub expire_old_tokens_trapped {
       }
     }
 
-    if ($showdots && (($kept + $deleted) % 1000) == 0) {
-      print STDERR ".";
+    if ((($kept + $deleted) % 1000) == 0) {
+      if ($showdots) { print STDERR "."; }
+      $self->set_running_expire_tok();
     }
   }
 
   # ok, we've expired: now, is the db too small?  If so, add back in
   # some of the toks we deleted.
   my $reprieved = 0;
-  while ($kept+$reprieved < $self->{expiry_min_db_size} && $deleted > 0) {
-    my $deld = shift @deleted_toks;
-    $new_toks{$deld->[0]} = tok_pack ($deld->[1], $deld->[2], $deld->[3]);
-    if (defined($deld->[3]) && (!defined($oldest) || $deld->[3] < $oldest)) {
-      $oldest = $deld->[3];
+
+  # do we need to reprieve any tokens?
+  if ( $kept < $self->{expiry_min_db_size} ) {
+    # sort the deleted tokens so the most recent ones are at the end of the array
+    @deleted_toks = sort { $a->[3] <=> $b->[3] } @deleted_toks;
+  
+    # Go through until the DB is at least min_db_size, and there are still tokens to reprieve
+    while ($kept+$reprieved < $self->{expiry_min_db_size} && $#deleted_toks > -1) {
+      my $oatime;
+
+      # reprieve all tokens with a given atime at once
+      while ( $#deleted_toks > -1 && (!defined $oatime || $deleted_toks[$#deleted_toks]->[3] == $oatime) ) {
+        my $deld = pop @deleted_toks; # pull the token off the backside
+        last unless defined $deld; # this shouldn't happen, but just in case ...
+
+        my ($tok, $ts, $th, $atime) = @{$deld};
+        next unless (defined $tok && defined $ts && defined $th);
+        $oatime = $atime;
+
+        $new_toks{$tok} = tok_pack ($ts, $th, $atime);
+        if (defined($atime) && (!defined($oldest) || $atime < $oldest)) {
+          $oldest = $atime;
+        }
+        $reprieved++;
+      }
     }
-    $reprieved++;
   }
+
   @deleted_toks = ();		# free 'em up
   $deleted -= $reprieved;
 
-  # and add the magic tokens
-  $new_toks{$LAST_EXPIRE_MAGIC_TOKEN} = $self->scan_count_get();
+  # and add the magic tokens.  don't add the expire_running token.
+  if ( $current > 65535 ) {
+    $new_toks{$SCANCOUNT_BASE_MAGIC_TOKEN} = 0;
+    $new_toks{$LAST_EXPIRE_MAGIC_TOKEN} = 0;
+  }
+  else {
+    $new_toks{$SCANCOUNT_BASE_MAGIC_TOKEN} = $self->{db_toks}->{$SCANCOUNT_BASE_MAGIC_TOKEN};
+    $new_toks{$LAST_EXPIRE_MAGIC_TOKEN} = $self->scan_count_get();
+  }
+
   $new_toks{$OLDEST_TOKEN_AGE_MAGIC_TOKEN} = $oldest;
   $new_toks{$NSPAM_MAGIC_TOKEN} = $self->{db_toks}->{$NSPAM_MAGIC_TOKEN};
   $new_toks{$NHAM_MAGIC_TOKEN} = $self->{db_toks}->{$NHAM_MAGIC_TOKEN};
@@ -363,10 +428,8 @@ sub expire_old_tokens_trapped {
     }
   }
 
-  # ok, once that's done we can re-tie.  Call untie_db() first so
-  # we unlock correctly etc. first
+  # Call untie_db() first so we unlock correctly etc. first
   $self->untie_db();
-  $self->tie_db_writable();
 
   my $done = time();
 
@@ -412,7 +475,7 @@ sub expiry_due {
 
   my $limit = $self->{expiry_count};
   my $now = $self->scan_count_get();
-  if ($now - $last > $limit/2 && $now - $oldest > $limit) {
+  if (($now - $last > $limit/2 && $now - $oldest > $limit) || ($now < $last)) {
     return 1;
   }
 
@@ -449,8 +512,27 @@ sub tok_get {
 sub nspam_nham_get {
   my ($self) = @_;
   my $ns = $self->{db_toks}->{$NSPAM_MAGIC_TOKEN};
+  if (!$ns || $ns =~ /\D/) { $ns = 0; }
   my $nn = $self->{db_toks}->{$NHAM_MAGIC_TOKEN};
-  ($ns || 0, $nn || 0);
+  if (!$nn || $nn =~ /\D/) { $nn = 0; }
+  ($ns, $nn);
+}
+
+sub get_running_expire_tok {
+  my ($self) = @_;
+  my $running = $self->{db_toks}->{$RUNNING_EXPIRE_MAGIC_TOKEN};
+  if (!$running || $running =~ /\D/) { return undef; }
+  return $running;
+}
+
+sub set_running_expire_tok {
+  my ($self) = @_;
+  $self->{db_toks}->{$RUNNING_EXPIRE_MAGIC_TOKEN} = time();
+}
+
+sub remove_running_expire_tok {
+  my ($self) = @_;
+  delete $self->{db_toks}->{$RUNNING_EXPIRE_MAGIC_TOKEN};
 }
 
 ###########################################################################
@@ -494,18 +576,42 @@ sub add_touches_to_journal {
 
   # use append mode, write atomically, then close, so simultaneous updates are
   # not lost
+  my $conf = $self->{bayes}->{main}->{conf};
+  my $umask = umask(0777 - (oct ($conf->{bayes_file_mode}) & 0666));
   if (!open (OUT, ">>".$path)) {
     warn "cannot write to $path, Bayes db update ignored\n";
+    umask $umask; # reset umask
     return;
   }
 
-  my $conf = $self->{bayes}->{main}->{conf};
-  chmod(oct ($conf->{bayes_file_mode}) & 0666, $path) || warn "cannot set permissions on $path\n";
+  # do not use print() here, it will break up the buffer if it's >8192 bytes,
+  # which could result in two sets of tokens getting mixed up and their
+  # touches missed.
 
-  print OUT $self->{string_to_journal};
+  my $nbytes = length ($self->{string_to_journal});
+  my $writ = 0;
+  while ($writ < $nbytes) {
+    my $len = syswrite (OUT, $self->{string_to_journal});
+
+    if ($len < 0) {
+      # argh, write failure, give up
+      warn "write failed to Bayes journal $path ($len of $nbytes)!\n";
+      last;
+    }
+
+    $writ += $len;
+    if ($len < $nbytes) {
+      # this should not happen on filesystem writes!  Still, try to recover
+      # anyway, but be noisy about it so the admin knows
+      warn "partial write to Bayes journal $path ($len of $nbytes), recovering.\n";
+      $self->{string_to_journal} = substr ($self->{string_to_journal}, $len);
+    }
+  }
+
   if (!close OUT) {
     warn "cannot write to $path, Bayes db update ignored\n";
   }
+  umask $umask; # reset umask
 
   $self->{string_to_journal} = '';
 }
@@ -521,59 +627,107 @@ sub expiry_now {
 
 sub sync_journal {
   my ($self, $opts) = @_;
+  my $ret = 0;
 
   my $path = $self->get_journal_filename();
 
-  if (!-f $path) { return 0; }
+  # if $path doesn't exist, or it's not a file, or is 0 bytes in length, return
+  if ( !stat($path) || !-f _ || -z _ ) { return 0; }
 
-  # retire the journal, so we can update the db files from it in peace.
-  # TODO: use locking here
-  my $retirepath = $path.".old";
-  rename ($path, $retirepath) or warn "rename failed $path to $retirepath\n";
-
-  my $started = time();
-  my $count = 0;
-
-  my $showdots = $opts->{showdots};
-
-  # now read the retired journal
-  open (JOURNAL, "<".$retirepath) or warn "cannot read $retirepath";
   eval {
     local $SIG{'__DIE__'};	# do not run user die() traps in here
-
-    $self->tie_db_writable();
-    while (<JOURNAL>) {
-      $count++;
-      if (/^c (-?\d+) (-?\d+) (\d+) (.*)$/) {
-	$self->tok_sync_counters ($1+0, $2+0, $3+0, $4);
-      } elsif (/^t (\d+) (.*)$/) {
-	$self->tok_touch_token ($1+0, $2);
-      } elsif (/^n (-?\d+) (-?\d+)$/) {
-	$self->tok_sync_nspam_nham ($1+0, $2+0);
-      } else {
-	warn "Bayes journal: gibberish: $_";
-      }
-
-      if ($showdots && ($count % 1000) == 0) {
-	print STDERR ".";
-      }
+    if ($self->tie_db_writable()) {
+      $ret = $self->sync_journal_trapped($opts, $path);
     }
   };
   my $err = $@;
 
-  # ok, untie from write-mode, delete the retired journal
+  # ok, untie from write-mode
   $self->untie_db();
+
+  # handle any errors that may have occurred
+  if ($err) {
+    warn "bayes: $err\n";
+    return 0;
+  }
+
+  $ret;
+}
+
+sub sync_journal_trapped {
+  my ($self, $opts, $path) = @_;
+
+  # Flag that we're doing work
+  $self->set_running_expire_tok();
+
+  my $started = time();
+  my $count = 0;
+  my $total_count = 0;
+  my %tokens = ();
+  my $showdots = $opts->{showdots};
+  my $retirepath = $path.".old";
+
+  if (!-r $path) { # will we be able to read the file?
+    warn "bayes: bad permissions on journal, can't read: $path\n";
+    return 0;
+  }
+
+  # retire the journal, so we can update the db files from it in peace.
+  # TODO: use locking here
+  if (!rename ($path, $retirepath)) {
+    warn "bayes: failed rename $path to $retirepath\n";
+    return 0;
+  }
+
+  # now read the retired journal
+  if (!open (JOURNAL, "<$retirepath")) {
+    warn "bayes: cannot open for reading $retirepath\n";
+    return 0;
+  }
+
+
+  # Read the journal
+  while (<JOURNAL>) {
+    $total_count++;
+
+    if (/^t (\d+) (.*)$/) { # Token timestamp update, cache resultant entries
+      $tokens{$2} = $1+0;
+#   elsif (/^c (-?\d+) (-?\d+) (\d+) (.*)$/) { # Add/full token update
+#     $self->tok_sync_counters ($1+0, $2+0, $3+0, $4);
+#     $count++;
+#   } elsif (/^n (-?\d+) (-?\d+)$/) { # update ham/spam count
+#     $self->tok_sync_nspam_nham ($1+0, $2+0);
+#     $count++;
+    } else {
+      warn "Bayes journal: gibberish entry found: $_";
+    }
+
+#    if ($showdots && ($count % 1000) == 0) {
+#      print STDERR ".";
+#    }
+  }
   close JOURNAL;
-  unlink ($retirepath);
+
+  # Now that we've determined what tokens we need to update and their
+  # final values, update the DB.  Should be much smaller than the full
+  # journal entries.
+  while( my($k,$v) = each %tokens ) {
+    $self->tok_touch_token ($v, $k);
+
+    if ((++$count % 1000) == 0) {
+      if ($showdots) { print STDERR "."; }
+      $self->set_running_expire_tok();
+    }
+  }
 
   if ($showdots) { print STDERR "\n"; }
 
-  # handle any errors that may have occurred
-  if ($err) { die $err; }
+  # we're all done, so unlink the old journal file
+  unlink ($retirepath) || warn "bayes: can't unlink $retirepath: $!\n";
 
   my $done = time();
   my $msg = ("synced Bayes databases from journal in ".($done - $started).
-	" seconds: $count entries");
+	" seconds: $count unique entries ($total_count total entries)");
 
   if ($opts->{verbose}) {
     print $msg,"\n";
@@ -588,6 +742,12 @@ sub sync_journal {
 sub tok_touch_token {
   my ($self, $atime, $tok) = @_;
   my ($ts, $th, $oldatime) = $self->tok_get ($tok);
+
+  # If the new atime is < the old atime, ignore the update
+  # We figure that we'll never want to lower a token atime, so abort if
+  # we try.  (journal out of sync, etc.)
+  return if ( $oldatime >= $atime );
+
   $self->tok_put ($tok, $ts, $th, $atime);
 }
 
@@ -603,9 +763,27 @@ sub tok_put {
   my ($self, $tok, $ts, $th, $atime) = @_;
   $ts ||= 0;
   $th ||= 0;
+
+  if ( $tok =~ /^\*\*[A-Z]+$/ ) { # magic token?  Ignore it!
+    return;
+  }
+
+  # use defined() rather than exists(); the latter is not supported
+  # by NDBM_File, believe it or not.  Using defined() did not
+  # indicate any noticeable speed hit in my testing. (Mar 31 2003 jm)
+  my $exists_already = defined $self->{db_toks}->{$tok};
+
   if ($ts == 0 && $th == 0) {
+    if ($exists_already) { # If the token exists, lower the token count
+      $self->{db_toks}->{$NTOKENS_MAGIC_TOKEN}--;
+    }
+
     delete $self->{db_toks}->{$tok};
   } else {
+    if (!$exists_already) { # If the token doesn't exist, raise the token count
+      $self->{db_toks}->{$NTOKENS_MAGIC_TOKEN}++;
+    }
+
     $self->{db_toks}->{$tok} = tok_pack ($ts, $th, $atime);
   }
 }
@@ -647,7 +825,7 @@ sub scan_count_get {
   # avoid a wierd warning: non-numeric data in there
   if (!$count || $count =~ /\D/) { $count = 0; }
   my $path = $self->{scan_count_little_file};
-  $count += (-e $path ? -s _ : 0);
+  $count += (defined $path && -e $path ? -s _ : 0);
   $count;
 }
 
@@ -655,6 +833,7 @@ sub scan_count_increment {
   my ($self) = @_;
 
   my $path = $self->{scan_count_little_file};
+  return unless defined($path);
 
   # Use filesystem-level append operations.  These are very fast, and
   # on a local disk on UNIX at least, guaranteed not to overwrite another
@@ -663,19 +842,24 @@ sub scan_count_increment {
   # perform an expiry.  Not a serious failure mode, so don't worry about
   # it ;)
 
-  open (OUT, ">>".$path) or warn "cannot append to $path\n";
-
-  # The file should have the same file mode as the other bayes files...
   my $conf = $self->{bayes}->{main}->{conf};
-  chmod(oct ($conf->{bayes_file_mode}) & 0666, $path) || warn "cannot set permissions on $path\n";
+  my $umask = umask(0777 - (oct ($conf->{bayes_file_mode}) & 0666));
+  if (!open (OUT, ">>".$path)) {
+    warn "cannot write to $path, Bayes db update ignored\n";
+    umask $umask; # reset umask
+    return;
+  }
 
+  # note we don't have to use syswrite() here, since we're only writing 1 byte.
+  # Anything bigger in the future, and we should, however, since print() will
+  # go thru stdio and the buffer may be split across 2 write() ops.
   print OUT "."; close OUT or warn "cannot append to $path\n";
+  umask $umask; # reset umask
 
   # note the tiny race cond between close above, and this -s.  Again, if we
   # miss a . or two, it won't make much of a difference.
   if (-s $path > MAX_SIZE_FOR_SCAN_COUNT_FILE) {
-    unlink ($path);
-    $self->scan_count_increment_big_counter();
+    $self->scan_count_increment_big_counter() && unlink ($path);
   }
 
   1;
@@ -699,27 +883,27 @@ sub scan_count_increment_big_counter {
   eval {
     local $SIG{'__DIE__'};      # do not run user die() traps in here
 
-    $self->tie_db_writable();
-
-    my $count = $self->{db_toks}->{$SCANCOUNT_BASE_MAGIC_TOKEN};
-    $count ||= 0;
-    $count += MAX_SIZE_FOR_SCAN_COUNT_FILE;
-    $self->{db_toks}->{$SCANCOUNT_BASE_MAGIC_TOKEN} = $count;
+    if ($self->tie_db_writable()) {
+      my $count = $self->{db_toks}->{$SCANCOUNT_BASE_MAGIC_TOKEN};
+      if (!$count || $count =~ /\D/) { $count = 0; }
+      $count += MAX_SIZE_FOR_SCAN_COUNT_FILE;
+      $self->{db_toks}->{$SCANCOUNT_BASE_MAGIC_TOKEN} = $count;
+    }
   };
 
-  my $failure;
-  if ($@) {             # if we died, untie the dbs.
-    my $failure = $@;
-  }
+  my $failure = $@;
 
   if ($need_to_untie || $need_to_retie_ro) {
-    $self->{store}->untie_db();
+    $self->untie_db();
   }
   if ($need_to_retie_ro) {
-    $self->{store}->tie_db_readonly();
+    $self->tie_db_readonly();
   }
 
-  if ($failure) { die $failure; }
+  if ($failure) {
+    warn "bayes scan_count_increment_big_counter: $failure\n";
+    return 0;
+  }
 
   1;
 }
