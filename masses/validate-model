@@ -111,7 +111,7 @@ for PASS in $PASSES; do
 	./rewrite-cf-with-new-scores $SCORESET ../rules/50_scores.cf $LOGDIR/scores.$PASS > /tmp/runGA.$$
 	mv /tmp/runGA.$$ ../rules/50_scores.cf
 	echo "[evaluating performance]" | tee -a $LOGDIR/log
-	./fp-fn-statistics --ham ham-validate.log --spam spam-validate.log --scoreset $SCORESET --fnlog $LOGDIR/false_negatives.$PASS --fplog $LOGDIR/false_positives.$PASS > $LOGDIR/validate.$PASS
+	./fp-fn-statistics --ham ham-validate.log --spam spam-validate.log --scoreset $SCORESET --fnlog $LOGDIR/false_negatives.$PASS --fplog $LOGDIR/false_positives.$PASS > $LOGDIR/validate.$PASS 2> /dev/null
 
 	if [ ! -d $CACHEDIR/$PASS ]; then
 		echo "[Saving object files in $CACHEDIR/$PASS for faster runs]"
