@@ -30,25 +30,25 @@ tflags PYZOR_CHECK	net
 # distribution and magnitude of scores and to avoid any sharp cut-offs.
 
 body SPAM_PHRASE_00_01		eval:check_for_spam_phrases('00', '01')
-describe SPAM_PHRASE_00_01	Contains phrases frequently found in spam
+describe SPAM_PHRASE_00_01	Spam phrases score is 00 to 01 (low)
 body SPAM_PHRASE_01_02		eval:check_for_spam_phrases('01', '02')
-describe SPAM_PHRASE_01_02	Contains phrases frequently found in spam
+describe SPAM_PHRASE_01_02	Spam phrases score is 01 to 02 (low)
 body SPAM_PHRASE_02_03		eval:check_for_spam_phrases('02', '03')
-describe SPAM_PHRASE_02_03	Contains phrases frequently found in spam
+describe SPAM_PHRASE_02_03	Spam phrases score is 02 to 03 (medium)
 body SPAM_PHRASE_03_05		eval:check_for_spam_phrases('03', '05')
-describe SPAM_PHRASE_03_05	Contains phrases frequently found in spam
+describe SPAM_PHRASE_03_05	Spam phrases score is 03 to 05 (medium)
 body SPAM_PHRASE_05_08		eval:check_for_spam_phrases('05', '08')
-describe SPAM_PHRASE_05_08	Contains phrases frequently found in spam
+describe SPAM_PHRASE_05_08	Spam phrases score is 05 to 08 (medium)
 body SPAM_PHRASE_08_13		eval:check_for_spam_phrases('08', '13')
-describe SPAM_PHRASE_08_13	Contains phrases frequently found in spam
+describe SPAM_PHRASE_08_13	Spam phrases score is 08 to 13 (medium)
 body SPAM_PHRASE_13_21		eval:check_for_spam_phrases('13', '21')
-describe SPAM_PHRASE_13_21	Contains phrases frequently found in spam
+describe SPAM_PHRASE_13_21	Spam phrases score is 13 to 21 (high)
 body SPAM_PHRASE_21_34		eval:check_for_spam_phrases('21', '34')
-describe SPAM_PHRASE_21_34	Contains phrases frequently found in spam
+describe SPAM_PHRASE_21_34	Spam phrases score is 21 to 34 (high)
 body SPAM_PHRASE_34_55		eval:check_for_spam_phrases('34', '55')
-describe SPAM_PHRASE_34_55	Contains phrases frequently found in spam
+describe SPAM_PHRASE_34_55	Spam phrases score is 34 to 55 (high)
 body SPAM_PHRASE_55_XX		eval:check_for_spam_phrases('55', 'undef')
-describe SPAM_PHRASE_55_XX	Contains phrases frequently found in spam
+describe SPAM_PHRASE_55_XX	Spam phrases score 55 or higher (high)
 
 ###########################################################################
 
@@ -274,8 +274,6 @@ body DEAR_SOMETHING		/\bDear (?:IT\W|Internet|candidate|sirs?|madam|investor|tra
 describe DEAR_SOMETHING		Contains 'Dear (something)'
 body DEAR_SOMEBODY              /Dear [A-Z][a-z]+/
 describe DEAR_SOMEBODY          Contains 'Dear Somebody'
-body CASHCASHCASH		/\${3,}/
-describe CASHCASHCASH		Contains at least 3 dollar signs in a row
 body CALL_NOW			/CALL NOW/i
 describe CALL_NOW		Urges you to call now
 body CALL_FREE			/\b(?:call|dial|toll free|order).{1,15}8(?:00|88|77|66|55|44|33|22)[\)\s-]*[\dA-Z]+[\s-]?[\dA-Z]+/i
@@ -1437,3 +1435,13 @@ describe MEMBER_2       Being a Member
 
 body GET_IT_NOW         /get it (?-i:N)ow/i
 describe GET_IT_NOW     Contains 'Get it now' with capitals
+
+###########################################################################
+# meta body tests
+###########################################################################
+
+body __THREE_DOLLARS		/\${3,}/
+body __ISO_2022_JP_DELIM	/\e\$B/
+
+meta CASHCASHCASH		(!__ISO_2022_JP_DELIM && __THREE_DOLLARS)
+describe CASHCASHCASH		Contains at least 3 dollar signs in a row
