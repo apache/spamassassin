@@ -886,7 +886,7 @@ sub rewrite_no_report_safe {
     splice @pristine_headers, $line, 1 while ($pristine_headers[$line] =~ /^(?:X-Spam-(?!Prev-)|\s+\S)/i);
     $line--;
   }
-  my $separator;
+  my $separator = '';
   if ($pristine_headers[$#pristine_headers] =~ /^\s*$/) {
     $separator = pop @pristine_headers;
   }
