@@ -11,7 +11,7 @@ if ($command eq 'start') {
     # sleep until it disappears, or times out
     while (-f $syncfile && mtime_age_secs($syncfile) < 60*60) {
       print "$syncfile exists with age ".mtime_age_secs($syncfile).", sleeping\n";
-      sleep 60*5;
+      sleep 60*3 + rand(60*5);
     }
 
     open (TOUCH, ">$syncfile"); close TOUCH;
