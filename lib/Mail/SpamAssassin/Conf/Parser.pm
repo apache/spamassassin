@@ -44,16 +44,16 @@ as the default for 'command' (below). THIS IS REQUIRED.
 
 =item command
 
-the command string used in the config file for this setting. optional;
+The command string used in the config file for this setting.  Optional;
 'setting' will be used for the command if this is omitted.
 
 =item aliases
 
-an [aryref] of other aliases for the same command.  optional.
+An [aryref] of other aliases for the same command.  optional.
 
 =item type
 
-the type of this setting:
+The type of this setting:
 
            - $CONF_TYPE_STRING: string
            - $CONF_TYPE_NUMERIC: numeric value (float or int)
@@ -63,18 +63,33 @@ the type of this setting:
            - $CONF_TYPE_HASH_KEY_VALUE: hash key/value pair,
              like "describe" or tflags
 
-if this is set, a 'code' block is assigned based on the type.
+If this is set, a 'code' block is assigned based on the type.
+
+Note that C<$CONF_TYPE_HASH_KEY_VALUE>-type settings require that the
+value be non-empty, otherwise they'll produce a warning message.
 
 =item code
 
-a subroutine to deal with the setting.  only used if 'type' is not set.  ONE OF
-'code' OR 'type' IS REQUIRED.  The arguments passed to the function are ($self,
-$key, $value, $line), where $key is the setting (*not* the command), $value is
-the value string, and $line is the entire line.
+A subroutine to deal with the setting.  Only used if B<type> is not set.  ONE OF
+B<code> OR B<type> IS REQUIRED.  The arguments passed to the function are
+C<($self, $key, $value, $line)>, where $key is the setting (*not* the command),
+$value is the value string, and $line is the entire line.
+
+There are two special return values that the B<code> subroutine may return
+to signal that there is an error in the configuration:
+
+C<$Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE> -- this setting requires
+that a value be set, but one was not provided.
+
+C<$Mail::SpamAssassin::Conf::INVALID_VALUE> -- this setting requires a value
+from a set of 'valid' values, but the user provided an invalid one.
+
+Any other values -- including C<undef> -- returned from the subroutine are
+considered to mean 'success'.
 
 =item default
 
-the default value for the setting.  may be omitted if the default value is a
+The default value for the setting.  may be omitted if the default value is a
 non-scalar type, which should be set in the Conf ctor.  note for path types:
 using "__userstate__" is recommended for defaults, as it allows
 Mail::SpamAssassin module users who set that configuration setting, to receive
@@ -82,16 +97,16 @@ the correct values.
 
 =item is_priv
 
-set to 1 if this setting requires 'allow_user_rules' when run from spamd.
+Set to 1 if this setting requires 'allow_user_rules' when run from spamd.
 
 =item is_admin
 
-set to 1 if this setting can only be set in the system-wide config when run
+Set to 1 if this setting can only be set in the system-wide config when run
 from spamd.
 
 =item is_frequent
 
-set to 1 if this value occurs frequently in the config. this means it's looked
+Set to 1 if this value occurs frequently in the config. this means it's looked
 up first for speed.
 
 =back
@@ -232,6 +247,8 @@ sub parse {
     $value =~ /^(.*)$/;
     $value = $1;
 
+    my $parse_error;       # undef by default, may be overridden
+
     # File/line number assertions
     if ($key eq 'file') {
       if ($value =~ /^start\s+(.+)$/) {
@@ -348,15 +365,24 @@ sub parse {
 
       my $ret = &{$cmd->{code}} ($conf, $cmd->{setting}, $value, $line);
 
-      if ($ret && $ret eq $Mail::SpamAssassin::Conf::INVALID_VALUE) {
-        warn "invalid value for \"$key\": $value\n";
-        $conf->{errors}++;
-      } else {
+      if ($ret && $ret eq $Mail::SpamAssassin::Conf::INVALID_VALUE)
+      {
+        $parse_error = "config: SpamAssassin failed to parse line, ".
+                        "\"$value\" is not valid for \"$key\", ".
+                        "skipping: $line";
+        goto failed_line;
+      }
+      elsif ($ret && $ret eq $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE)
+      {
+        $parse_error = "config: SpamAssassin failed to parse line, ".
+                        "no value provided for \"$key\", ".
+                        "skipping: $line";
+        goto failed_line;
+      }
+      else {
         next;
       }
     }
-
-failed_line:
 
     # last ditch: try to see if the plugins know what to do with it
     if ($conf->{main}->call_plugins ("parse_config", {
@@ -371,8 +397,13 @@ failed_line:
       next;
     }
 
-    my $msg = "Failed to parse line in SpamAssassin configuration, ".
+failed_line:
+    my $msg = $parse_error;
+    if (!$msg) {
+      # the default warning, if a more specific one isn't output
+      $msg = "config: SpamAssassin failed to parse line, ".
                         "skipping: $line";
+    }
 
     if ($conf->{lint_rules}) {
       warn $msg."\n";
@@ -549,6 +580,11 @@ sub set_string_value {
 sub set_hash_key_value {
   my ($conf, $key, $value, $line) = @_;
   my($k,$v) = split(/\s+/, $value, 2);
+
+  unless (defined $v && $v ne '') {
+    return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+  }
+
   $conf->{$key}->{$k} = $v;
 }
 
