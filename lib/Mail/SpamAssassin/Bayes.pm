@@ -581,6 +581,7 @@ sub learn_trapped {
   }
 
   $self->{store}->seen_put ($msgid, ($isspam ? 's' : 'h'));
+  1;
 }
 
 ###########################################################################
@@ -651,6 +652,7 @@ sub forget_trapped {
   }
 
   $self->{store}->seen_delete ($msgid);
+  1;
 }
 
 ###########################################################################
@@ -819,11 +821,11 @@ sub scan {
   }
 
   if ($ns < $MIN_SPAM_CORPUS_SIZE_FOR_BAYES) {
-    dbg ("corpus too small ($ns < $MIN_SPAM_CORPUS_SIZE_FOR_BAYES), skipping");
+    dbg ("spam corpus too small ($ns < $MIN_SPAM_CORPUS_SIZE_FOR_BAYES), skipping");
     goto skip;
   }
   if ($nn < $MIN_HAM_CORPUS_SIZE_FOR_BAYES) {
-    dbg ("corpus too small ($nn < $MIN_HAM_CORPUS_SIZE_FOR_BAYES), skipping");
+    dbg ("ham corpus too small ($nn < $MIN_HAM_CORPUS_SIZE_FOR_BAYES), skipping");
     goto skip;
   }
 

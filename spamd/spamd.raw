@@ -264,8 +264,8 @@ $opt{'auto-whitelist'} and eval
     $spamtest->set_persistent_address_list_factory ($addrlistfactory);
 };
 
-preload_modules_with_tmp_homedir();
 Mail::SpamAssassin::Util::clean_path_in_taint_mode();
+preload_modules_with_tmp_homedir();
 
 # Note: we now use a set of fds to track children, as using SIGCHLD
 # is unreliable on many versions of perl (sadly).  Thanks to
@@ -975,14 +975,19 @@ sub preload_modules_with_tmp_homedir {
   $spamtest->compile_now(0);	# ensure all modules etc. are loaded
   $/ = "\n";			# argh, Razor resets this!  Bad Razor!
 
-  # first do some brute-force perl globbing, then fall back to File::Path
-  # (instead of system("rm -rf")) if we miss something.
-  unlink <$tmpsadir/*>, <$tmphome/*>;
-  rmdir $tmpsadir;
-  rmdir $tmphome or rmtree $tmphome;
-
   # now clean up the stuff we just created, and make us taint-safe
   delete $ENV{HOME};
+
+  # try to use File::Path.  However, it's NOT taint-safe (!!) so will
+  # fail sometimes, it seems.
+  eval { rmtree $tmphome; };
+
+  # if the dir still exists, use system().  We've already called 
+  # Mail::SpamAssassin::Util::untaint_file_path(), which cleans metachars,
+  # so this is safe (if a little absurd).
+  if (-d $tmphome) {
+    system ("rm -rf '".$tmphome."'");
+  }
 }
 
 sub cleanupchildren {

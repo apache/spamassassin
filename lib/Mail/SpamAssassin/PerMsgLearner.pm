@@ -52,6 +52,7 @@ sub new {
   my $self = {
     'main'              => $main,
     'msg'               => $msg,
+    'learned'		=> 0,
   };
 
   $self->{conf} = $self->{main}->{conf};
@@ -71,6 +72,12 @@ sub new {
 
 ###########################################################################
 
+=item $status->learn_spam()
+
+Learn the message as spam.
+
+=cut
+
 sub learn_spam {
   my ($self) = @_;
 
@@ -81,10 +88,16 @@ sub learn_spam {
   # use the real message-id here instead of mass-check's idea of an "id",
   # as we may deliver the msg into another mbox format but later need
   # to forget it's training.
-  $self->{bayes_scanner}->learn (1, $self->{msg});
+  $self->{learned} = $self->{bayes_scanner}->learn (1, $self->{msg});
 }
 
 ###########################################################################
+
+=item $status->learn_ham()
+
+Learn the message as ham.
+
+=cut
 
 sub learn_ham {
   my ($self) = @_;
@@ -93,10 +106,16 @@ sub learn_ham {
     $self->{main}->add_all_addresses_to_whitelist ($self->{msg});
   }
 
-  $self->{bayes_scanner}->learn (0, $self->{msg});
+  $self->{learned} = $self->{bayes_scanner}->learn (0, $self->{msg});
 }
 
 ###########################################################################
+
+=item $status->forget()
+
+Forget about a previously-learned message.
+
+=cut
 
 sub forget {
   my ($self) = @_;
@@ -105,10 +124,29 @@ sub forget {
     $self->{main}->remove_all_addresses_from_whitelist ($self->{msg});
   }
 
-  $self->{bayes_scanner}->forget ($self->{msg});
+  $self->{learned} = $self->{bayes_scanner}->forget ($self->{msg});
 }
 
 ###########################################################################
+
+=item $didlearn = $status->did_learn()
+
+Returns C<1> if the message was learned from or forgotten succesfully.
+
+=cut
+
+sub did_learn {
+  my ($self) = @_;
+  return ($self->{learned});
+}
+
+###########################################################################
+
+=item $status->finish()
+
+Finish with the object.
+
+=cut
 
 sub finish {
   my $self = shift;
@@ -116,6 +154,8 @@ sub finish {
   delete $self->{msg};
   delete $self->{conf};
 }
+
+###########################################################################
 
 sub dbg { Mail::SpamAssassin::dbg (@_); }
 sub timelog { Mail::SpamAssassin::timelog (@_); }
