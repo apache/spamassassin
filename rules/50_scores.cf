@@ -28,7 +28,6 @@ score ADVERT_CODE                    4.725
 score ALL_CAPS_HEADER                1.624
 score ALL_NATURAL                    2.291
 score AMAZING                        2.764
-score AMAZING_2			     1.0
 score AOL_USERS_LINK                 0.626
 score APPROVED_BY                    -1
 score ASCII_FORM_ENTRY               0.500
@@ -42,7 +41,6 @@ score BANKRUPTCY		     1.0
 score BASE64_ENC_TEXT                2.062
 score BCC                            0.500
 score BEEN_TURNED_DOWN		     1.0
-score BEST_PRICE		     1.0
 score BE_AMAZED                      4.202
 score BE_BOSS			     1.0
 score BIG_BUCKS			     1.0
@@ -140,7 +138,6 @@ score EXTRA_CASH		     1.0
 score FAKED_IP_IN_RCVD               3.647
 score FAKED_UNDISC_RECIPS            3.461
 score FANTASTIC			     1.0
-score FARM_SEX			     1.0
 score FILTERED_BY_WORLDREMOVE        2.626
 score FINANCIAL			     1.0
 score FIND_ANYTHING		     1.0
@@ -159,7 +156,6 @@ score FOR_FREE                       1.127
 score FOR_INSTANT_ACCESS             2.996
 score FOR_JUST_SOME_AMT              1.916
 score FREE_ACCESS		     1.0
-score FREE_CAP			     1.0
 score FREE_CELL_PHONE		     1.0
 score FREE_CONSULTATION              4.184
 score FREE_DVD			     1.0
@@ -178,7 +174,6 @@ score FREE_TRIAL		     1.0
 score FREE_WEBSITE		     1.0
 score FREQ_SPAM_PHRASE               2.417
 score FRIEND_AT_PUBLIC               0.999
-score FROM_ADDRESS_EQ_REAL           1.000
 score FROM_AND_TO_SAME_1             0.5
 score FROM_AND_TO_SAME_2             -2.5
 score FROM_AND_TO_SAME_3             1.6
@@ -190,8 +185,6 @@ score FROM_ENDS_IN_NUMS              0.382
 score FROM_HAS_MIXED_NUMS            2.578
 score FROM_MALFORMED                 3.667
 score FROM_MISSING                   4.257
-score FROM_NAME_EQ_FROM_ADDR         2.592
-score FROM_NAME_NO_SPACES            -0.114
 score FROM_NO_USER                   1.471
 score FROM_STARTS_WITH_NUMS          4.388
 score FRONTPAGE                      4.429
@@ -352,21 +345,11 @@ score PGP_SIGNATURE                  -3.135
 score PGP_SIGNATURE_2                -3.135
 score PHONE_CANCER		     1.0
 score PLEASE_READ                    1.756
-score PLING                          0.094
 score PLING_PLING                    0.763
 score POPLAUNCH                      2.069
-score PORN_1                         3.092
-score PORN_10                        0.636
-score PORN_11                        1.164
-score PORN_12                        0.727
-score PORN_13                        4.241
-score PORN_14                        0.215
 score PORN_3                         0.522
 score PORN_4                         1.391
 score PORN_6                         1.933
-score PORN_7                         2.631
-score PORN_8                         0.547
-score PORN_9                         1.890
 score POST_IN_RCVD                   2.661
 score PREST_NON_ACCREDITED           3.500
 score PRICES_WONT_LAST		     1.0
@@ -376,7 +359,6 @@ score PRIZE			     1.0
 score PRODUCED_AND_SENT_OUT          4.460
 score PROFITS                        1.809
 score PROMOTION			     1.0
-score PROTECT_ASSETS		     1.0
 score PSYCHIC			     1.0
 score PURE_PROFIT                    4.129
 score RATWARE                        4.563
@@ -431,9 +413,7 @@ score STOCK_PICK                     3.781
 score STRONG_BUY                     4.052
 score SUBJ_2_CREDIT                  4.198
 score SUBJ_ALL_CAPS                  -0.054
-score SUBJ_ENDS_IN_Q_MARK            -0.135
 score SUBJ_FULL_OF_8BITS             4.298
-score SUBJ_HAS_Q_MARK                0.663
 score SUBJ_HAS_SPACES                4.043
 score SUBJ_HAS_UNIQ_ID               2.542
 score SUBJ_MISSING                   1.399
@@ -454,7 +434,6 @@ score TO_EMPTY                       1.446
 score TO_LOCALPART_EQ_REAL           0.483
 score TO_MALFORMED                   1.115
 score TO_NO_USER                     4.528
-score TO_UNSUB_REPLY                 3.366
 score TRACE_BY_SSN                   0.545
 score TRACKER_ID                     4.332
 score UCE_MAIL_ACT                   2.623
@@ -496,8 +475,6 @@ score WWW_CLIK4YOU_COM               2.093
 score WWW_REMOVEYOU_COM              2.356
 score X_ANTIABUSE                    2.370
 score X_AUTH_WARNING                 -0.703
-score X_EM_REGISTRATION              1.191
-score X_EM_VER_PRESENT               1.331
 score X_ENC_PRESENT                  4.140
 score X_ESMTP                        -1.662
 score X_LIBRARY                      1.000
@@ -517,7 +494,6 @@ score X_SMTPEXP_REGISTRATION         1.622
 score X_SMTPEXP_VERSION              1.622
 score X_STORMPOST_TO                 2.272
 score X_X_PRESENT                    1.508
-score YELLOWSUN                      2.810
 score YOUR_INCOME                    4.414
 score YOU_HAVE_BEEN_SELECTED         4.221
 
@@ -530,7 +506,6 @@ score BUGGY_CGI_PT                   4.0
 score BUGGY_CGI_DE                   4.0
 score BUGGY_CGI_DE_2                 4.0
 score BUGGY_CGI_DE_3                 4.0
-score FROM_FORGED_HOTMAIL            0.0
 
 score NO_MX_FOR_FROM                 1.8
 score RAZOR_CHECK		     3.0
@@ -545,7 +520,6 @@ score RCVD_IN_RFCI		     0.5
 score RCVD_IN_ORBS                   1.0
 score RCVD_IN_DSBL                   3.0
 score RCVD_IN_MULTIHOP_DSBL          1.0
-score RCVD_IN_UNCONFIRMED_DSBL       0.5
 score RCVD_IN_SBL                    3.0
 
 # The fudge scores below expect that you use the following scores for MAPS
@@ -556,7 +530,6 @@ score RCVD_IN_SBL                    3.0
 
 score FUDGE_DUL_MAPS_OSIRU          -2.0
 score FUDGE_RELAY_OSIRU		    -2.0
-score FUDGE_OSIRU_FH		     1.5
 score FUDGE_MULTIHOP_RELAY	    -1.0
 
 score ROUND_THE_WORLD		     3.0
@@ -612,7 +585,6 @@ score USER_IN_ALL_SPAM_TO      -100.0  # they want all spam, go figure :)
 # Missed scores:
 
 score ANOTHER_NET_AD                 3.0
-score A_HREF_TO_IP                   2.5
 score BRAND_NEW_PAGER                4.9
 score BUGGY_CGI_ES                   1.0
 score BUGGY_CGI_PT_2                 1.0
@@ -637,11 +609,9 @@ score LONG_NUMERIC_HTTP_ADDR         2.1
 score MAIL_IN_ORDER_FORM             4.8
 score MURKOWSKI_CRUFT                1.4
 score NIGERIAN_SCAM                  1.0
-score NIGERIAN_SCAM_3                4.3
 score NIGERIAN_SCAM_8                1.0
 score OE_PI                          3.0
 score ONLINE_BIZ_OPS                 1.0
-score PORN_2                         2.2
 score PRINT_OUT_AND_FAX              1.0
 score RCVD_IN_VISI                   1.0
 score REMOVE_ES_01                   1.0
@@ -649,14 +619,12 @@ score REMOVE_ES_02                   1.0
 score REMOVE_ES_03                   1.0
 score REMOVE_ES_04                   1.0
 score REMOVE_ES_05                   1.0
-score SEXY_PICS                      0.0
 score SHOES_GUY                      6.8
 score SPAM_FORM_INPUT                1.0
 score SPAM_PHRASES_100               1.0
 score STAINLESS_STEEL                4.0
 score THIS_AINT_JUNK                 1.0
 score TO_INVESTORS                   0.0
-score WWW_AUTOREMOVE_COM             1.9
 score X_FIX_PRESENT                  1.0
 score X_UIDL_SPAMSIGN                1.0
 score YR_MEMBERSHIP_EXCH             4.2
@@ -681,4 +649,4 @@ score MSN_FOOTER2               -1.0
 score MAILBITS_EMAIL            -1.0
 score GROUPS_YAHOO_1            -1.0
 score GROUPS_MSN                -1.0
-
+score DISCLAIMER_LEGALESE       -1.0

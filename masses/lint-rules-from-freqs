@@ -2,6 +2,9 @@
 # usage:
 # ./lint-rules-from-freqs < freqs > badtests
 
+readrules();
+lintrules();
+
 open (OUT, "|sort -g --key=4");
 while (<>) {
   if (!/^\s*([\d\.]+)/) {
@@ -42,3 +45,52 @@ while (<>) {
   }
 }
 close OUT;
+
+sub readrules {
+  my @files = <../rules/[0-9]*.cf>;
+  my $file;
+  @rulesfound = ();
+  foreach $file (@files) {
+    open (IN, "<$file");
+    while (<IN>) {
+      s/#.*$//g; s/^\s+//; s/\s+$//; next if /^$/;
+      s/^lang\s+\S+\s+//;
+
+      if (/^(header|rawbody|body|full|uri)\s+(\S+)\s+/) {
+        push (@rulesfound, $2);
+        $rulefile{$2} ||= $file;
+        $scorefile{$1} = $file;
+        $score{$2} ||= 1.0;
+        $descfile{$2} ||= $file;       # a rule with no score or desc is OK
+      } elsif (/^describe\s+(\S+)\s+/) {
+        push (@rulesfound, $1);
+        $descfile{$1} = $file;
+      } elsif (/^score\s+(\S+)\s+(.+)$/) {
+        push (@rulesfound, $1);
+        $scorefile{$1} = $file;
+        $score{$1} = $2;
+      } elsif (/^(clear-report-template|clear-spamtrap-template|report|spamtrap|
+                clear-terse-report-template|terse-report|
+                required_hits|ok_locales|ok_languages|test|lang|
+                spamphrase|whitelist_from
+                )/x) {
+        next;
+      } else {
+        print "warning: unknown rule in $file: $_\n";
+      }
+    }
+    close IN;
+  }
+}
+
+sub lintrules {
+  foreach my $rule (@rulesfound) {
+    if (defined $descfile{$rule} && !defined ($rulefile{$rule})) {
+      print "warning: $rule has description, but no rule: $descfile{$rule}\n";
+    }
+    if (defined $score{$rule} && !defined ($rulefile{$rule})) {
+      print "warning: $rule has score, but no rule: $scorefile{$rule}\n";
+    }
+  }
+}
+
