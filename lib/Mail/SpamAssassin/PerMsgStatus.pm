@@ -1730,18 +1730,19 @@ sub do_meta_tests {
     foreach $rulename (@tests) {
         $rule = $self->{conf}->{meta_tests}->{$rulename};
 
-        my @tokens = $rule =~ m/(\w+|\!|[\(\)]|\&\&|\|\|)/g;
+        my @tokens = $rule =~ m/(\w+|[^\w\s]+)/g;
 
         my ($token, $expr);
 
         $expr = "";
         foreach $token (@tokens) {
-            if ($token =~ /^\w+$/) {
-                $expr .= "\$self->{tests_already_hit}->{$token} ";
-            } else {
+            # Numbers can't be rule names
+            if ($token =~ /^(?:\W+|\d+)$/) {
                 $expr .= "$token ";
+            } else {
+                $expr .= "\$self->{tests_already_hit}->{$token} ";
             }
-        }
+        } # foreach $token (@tokens)
 
         #dbg ("meta expression: $expr");
 
@@ -1758,6 +1759,11 @@ sub do_meta_tests {
     package Mail::SpamAssassin::PerMsgStatus;
 
     sub _meta_tests {
+        # Don't warn about undefined variables, since
+        # $self->{tests_already_hit} will be unitinialized for
+        # tests which weren't hit
+        no warnings qw(uninitialized);
+
         my (\$self) = \@_;
 
         $evalstr;
