@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.96 2003/09/12 00:04:27 quinlan Exp $
+# $Id: HTML.pm,v 1.97 2003/10/02 23:01:01 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -10,11 +10,15 @@ use strict;
 use bytes;
 
 use vars qw{
-  $re_loose $re_strict $events
+  $re_start $re_loose $re_strict $events
 };
 
 # HTML decoding TODOs
 # - add URIs to list for faster URI testing
+
+# elements that trigger HTML rendering in text/plain in some mail clients
+# (repeats ones listed in $re_strict)
+$re_start = 'body|head|html|img|pre|table|title';
 
 # elements defined by the HTML 4.01 and XHTML 1.0 DTDs (do not change them!)
 $re_loose = 'applet|basefont|center|dir|font|frame|frameset|iframe|isindex|menu|noframes|s|strike|u';
