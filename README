@@ -1,10 +1,16 @@
+2.64 Upgrade Notes
+------------------
+
+Note: "make test" will produce some warnings if the account you are
+using has SpamAssassin 3.0 Bayes database files under ~/.spamassassin/
+so in that case, you should move them out of the way temporarily.
 
 Upgrade Notes
 -------------
 
 The SpamAssassin 2.6x release series will be the last set of releases to
 officially support perl versions earlier than perl 5.6.0.  If you are
-using an earlier release, you will need to upgrade when SpamAssassin 2.70
+using an earlier release, you will need to upgrade when SpamAssassin 3.0
 is eventually released.
 
 Users of SpamAssassin versions earlier than 2.50 should note that the
