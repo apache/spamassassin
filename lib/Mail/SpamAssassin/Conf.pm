@@ -1426,9 +1426,12 @@ learning system supported currently is a naive-Bayesian-style classifier.
 
 Note that certain tests are ignored when determining whether a message
 should be trained upon:
-- auto-whitelist (AWL)
-- rules with tflags set to 'learn' (the Bayesian rules)
-- rules with tflags set to 'userconf' (user white/black-listing rules, etc)
+
+ - rules with tflags set to 'learn' (the Bayesian rules)
+
+ - rules with tflags set to 'userconf' (user white/black-listing rules, etc)
+
+ - rules with tflags set to 'noautolearn'
 
 Also note that auto-training occurs using scores from either scoreset
 0 or 1, depending on what scoreset is used during message check.  It is
@@ -2376,7 +2379,8 @@ The test requires training before it can be used.
 
 =item noautolearn
 
-The test will be ignored when calculating the score for learning systems.
+The test will explicitly be ignored when calculating the score for
+learning systems.
 
 =back
 
