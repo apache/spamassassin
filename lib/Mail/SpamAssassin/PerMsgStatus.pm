@@ -2385,10 +2385,8 @@ sub get_envelope_from {
   # We assume this is correct, *even* if the fetchmail/X-Sender screwup
   # appears.
   $envf = $self->{conf}->{envelope_sender_header};
-  if (defined $envf) {
-    if ($self->get ($envf) =~ /\@/) {
-      goto ok;
-    }
+  if ((defined $envf) && ($envf = $self->get($envf)) && ($envf =~ /\@/)) {
+    goto ok;
   }
 
   # WARNING: a lot of list software adds an X-Sender for the original env-from
