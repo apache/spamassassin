@@ -444,12 +444,21 @@ sub parse_received_line {
       # else it's probably forged. fall through
     }
 
+    # Received: from 217.137.58.28 ([217.137.58.28])
+    # by webmail.ukonline.net (IMP) with HTTP
+    # for <anarchyintheuk@localhost>; Sun, 11 Apr 2004 00:31:07 +0100
+    if (/^from (${IP_ADDRESS}) \(\[${IP_ADDRESS}\]\) by (\S+).*\bwith HTTP/) {
+      # some smarty-pants decided to fake a numeric HELO for HTTP
+      # no rDNS for this format?
+      $ip = $1; $by = $2; goto enough;
+    }
+
     # Received: from ns.elcanto.co.kr (66.161.246.58 [66.161.246.58]) by
     # mail.ssccbelen.edu.pe with SMTP (Microsoft Exchange Internet Mail Service
     # Version 5.5.1960.3) id G69TW478; Thu, 13 Mar 2003 14:01:10 -0500
     if (/^from (\S+) \((\S+) \[(${IP_ADDRESS})\]\) by (\S+) with \S+ \(/) {
       $mta_looked_up_dns = 1;
-      $rdns= $2; $ip = $3; $helo = $1; $by = $4; goto enough;
+      $rdns = $2; $ip = $3; $helo = $1; $by = $4; goto enough;
     }
 
     # from mail2.detr.gsi.gov.uk ([51.64.35.18] helo=ahvfw.dtlr.gsi.gov.uk) by mail4.gsi.gov.uk with smtp id 190K1R-0000me-00 for spamassassin-talk-admin@lists.sourceforge.net; Tue, 01 Apr 2003 12:33:46 +0100
