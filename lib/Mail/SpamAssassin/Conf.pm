@@ -682,7 +682,7 @@ Examples (these were all default prior to 2.60):
 
 =cut
 
-    if (/^add_header\s+([A-Za-z_-]+)\s+(ham|spam|all)\s+(.*?)\s*$/) {
+    if (/^add_header\s+([A-Za-z0-9_-]+)\s+(ham|spam|all)\s+(.*?)\s*$/) {
       my ($name, $type, $line) = ($1, $2, $3);
       if ($line =~ /^"(.*)"$/) {
 	$line = $1;
