@@ -33,6 +33,7 @@ sub new {
 
 sub report {
   my ($self) = @_;
+  my $return = 1;
 
   my $text = $self->{main}->remove_spamassassin_markup ($self->{msg});
 
@@ -43,6 +44,7 @@ sub report {
   {
     if ($self->razor_report($text)) {
       dbg ("SpamAssassin: spam reported to Razor.");
+      $return = 0;
     }
   }
   if (!$self->{main}->{local_tests_only}
@@ -52,6 +54,7 @@ sub report {
   {
     if ($self->dcc_report($text)) {
       dbg ("SpamAssassin: spam reported to DCC.");
+      $return = 0;
     }
   }
   if (!$self->{main}->{local_tests_only}
@@ -61,9 +64,11 @@ sub report {
   {
     if ($self->pyzor_report($text)) {
       dbg ("SpamAssassin: spam reported to Pyzor.");
+      $return = 0;
     }
   }
 
+  return $return;
 }
 
 ###########################################################################
