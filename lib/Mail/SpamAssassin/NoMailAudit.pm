@@ -29,11 +29,6 @@ sub new {
 
   my $self = $class->SUPER::new();
 
-  # satisfy some assumptions that callers may make about our
-  # internals...
-  $self->{mail_object} = $self;		# ooh confusing
-  $self->{obj} = $self;			# yuck
-
   $self->{has_spamassassin_methods} = 1;
   $self->{headers} = { };
   $self->{header_order} = [ ];
@@ -174,12 +169,13 @@ sub get_all_headers {
   my ($self) = @_;
 
   my @lines = ();
+  # warn "JMD".join (' ', caller);
 
   my $from = $self->{from_line};
   if (!defined $from) {
-    my $f = $self->get_header("From");
-    $f ||= "spamassassin\@localhost\n";
+    my $f = $self->get_header("From"); $f ||= "spamassassin\@localhost\n";
     chomp ($f);
+
     $f =~ s/^.*?<(.+)>\s*$/$1/g               # Foo Blah <jm@foo>
         or $f =~ s/^(.+)\s\(.*?\)\s*$/$1/g;   # jm@foo (Foo Blah)
     $from = "From $f  ".(scalar localtime(time))."\n";
@@ -268,7 +264,8 @@ sub body {
 }
 
 sub ignore {
-  exit (0);
+  my ($self) = @_;
+  exit (0) unless $self->{noexit};
 }
 
 sub print {
@@ -332,10 +329,16 @@ sub _proxy_to_mail_audit {
 
 # ---------------------------------------------------------------------------
 
-sub DESTROY {
+# does not need to be called it seems.  still, keep it here in case of
+# emergency.
+sub finish {
   my $self = shift;
   delete $self->{textarray};
+  foreach my $key (keys %{$self->{headers}}) {
+    delete $self->{headers}->{$key};
+  }
   delete $self->{headers};
+  delete $self->{mail_object};
 }
 
 1;
