@@ -445,7 +445,7 @@ describe MISSING_HEADERS	Missing To: header
 
 # (contrib: skod)
 # modified by jm to remove bulk_mailer, matches on a mailing list I'm on
-header RATWARE ALL =~ /(?:4\.\.72\.1712\.3|ACE Contact Manager|Aristotle Mail|Avalanche|Calypso|clansoft|Cognigen|Cyber-Bomber|Crescent|DiffondiCool|Dynamic Mail Server|CTMailer|E-Broadcaster|E-mail Magnet|Ellipse Bulk Emailer|EmailBlaster|Emailer.Platinum|eMerge|Extractor|Floodgate|FlashSend|Goldrush|Group Mail|Internet Marketing|Mailcast|MailKing|MassE-Mail|massmail\.pl|Matchmaker|NetMailer|News Breaker|pop3.report|RamoMail|Ready Aim|Shopping.Planet|Stalker.s|TBBS\/TIGER|TOO BAD|TotalMailTURBO Mail|V3,1,6,1|V3,1,2,0|V3,2,2,0|V.null.\.1712\.3|WindoZ|WinNT.s.Blat|WorldMerge|YMR)/
+header RATWARE ALL =~ /(?:4\.\.72\.1712\.3|ACE Contact Manager|Aristotle Mail|Avalanche|clansoft|Cognigen|Cyber-Bomber|Crescent|DiffondiCool|Dynamic Mail Server|CTMailer|E-Broadcaster|E-mail Magnet|Ellipse Bulk Emailer|EmailBlaster|Emailer.Platinum|eMerge|Extractor|Floodgate|FlashSend|Goldrush|Group Mail|Internet Marketing|Mailcast|MailKing|MassE-Mail|massmail\.pl|Matchmaker|NetMailer|News Breaker|pop3.report|RamoMail|Ready Aim|Shopping.Planet|Stalker.s|TBBS\/TIGER|TOO BAD|TotalMailTURBO Mail|V3,1,6,1|V3,1,2,0|V3,2,2,0|V.null.\.1712\.3|WindoZ|WinNT.s.Blat|WorldMerge|YMR)/
 describe RATWARE 		Bulk email software fingerprints found in headers
 
 # contrib: Craig (total regexp wizardry here ;)
@@ -510,8 +510,9 @@ header BCC			exists:Bcc
 header COMMENT			exists:Comment
 header DATE_WARNING		exists:Date-warning
 header X_ANTIABUSE		exists:X-AntiAbuse
-header X_EM_REGISTRATION	exists:X-EM-Registration
-header X_EM_VER_PRESENT		exists:X-EM-Version
+# causes FPs
+#header X_EM_REGISTRATION	exists:X-EM-Registration
+#header X_EM_VER_PRESENT	exists:X-EM-Version
 header X_ENC_PRESENT		exists:X-Encoding
 header X_ESMTP			exists:x-esmtp
 header X_FIX_PRESENT		exists:X-Fix
@@ -527,6 +528,8 @@ header X_SMTPEXP_REGISTRATION	exists:X-SMTPExp-Registration
 header X_SMTPEXP_VERSION	exists:X-SMTPExp-Version
 header X_STORMPOST_TO		exists:X-Stormpost-To
 header X_X_PRESENT		exists:X-x
+header COMPLAIN_TO		exists:Complain-To
+
 # these headers have very low correlation with spam
 header CRON_ENV			exists:X-Cron-Env
 header IN_REP_TO		exists:In-Reply-To
