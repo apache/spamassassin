@@ -122,54 +122,6 @@ tflags T_RCVD_IN_BOGUSMX	net
 body            T_GEVALIACOFFEE           /\bGevalia (?:Coffee|Kaffe)\b/i
 describe        T_GEVALIACOFFEE           Selling Gevalia Coffee
 
-# bug 2970: Bob Menschel's "longwords" rules
-# describe LONGWORDS Long string of long words
-body T_LONGWORDS_A	/\b(?:[a-z]{8,}\s+){6}/
-body T_LONGWORDS_B	/\b(?:[a-z]{7,}\s+){8}/
-body T_LONGWORDS_C	/\b(?:[a-z]{6,}\s+){9}/
-body T_LONGWORDS_D	/\b(?:[a-z]{5,}\s+){10}/
-# just a thought...
-meta T_LONGWORDS_1 T_LONGWORDS_A + T_LONGWORDS_B + T_LONGWORDS_C + T_LONGWORDS_D == 1
-meta T_LONGWORDS_2 T_LONGWORDS_A + T_LONGWORDS_B + T_LONGWORDS_C + T_LONGWORDS_D == 2
-meta T_LONGWORDS_3 T_LONGWORDS_A + T_LONGWORDS_B + T_LONGWORDS_C + T_LONGWORDS_D == 3
-meta T_LONGWORDS_4 T_LONGWORDS_A + T_LONGWORDS_B + T_LONGWORDS_C + T_LONGWORDS_D == 4
-
-# second way
-body T_LONGWORDS2_A	/\b(?:[a-z]{8,}\s+){6}/
-body T_LONGWORDS2_B	/\b(?:[a-z]{7,}\s+){7}/
-body T_LONGWORDS2_C	/\b(?:[a-z]{6,}\s+){8}/
-body T_LONGWORDS2_D	/\b(?:[a-z]{5,}\s+){9}/
-# just a thought...
-meta T_LONGWORDS2_1 T_LONGWORDS2_A + T_LONGWORDS2_B + T_LONGWORDS2_C + T_LONGWORDS2_D == 1
-meta T_LONGWORDS2_2 T_LONGWORDS2_A + T_LONGWORDS2_B + T_LONGWORDS2_C + T_LONGWORDS2_D == 2
-meta T_LONGWORDS2_3 T_LONGWORDS2_A + T_LONGWORDS2_B + T_LONGWORDS2_C + T_LONGWORDS2_D == 3
-meta T_LONGWORDS2_4 T_LONGWORDS2_A + T_LONGWORDS2_B + T_LONGWORDS2_C + T_LONGWORDS2_D == 4
-
-# third way
-body T_LONGWORDS3_A	/\b(?:[a-z]{8,}\s+){7}/
-body T_LONGWORDS3_B	/\b(?:[a-z]{7,}\s+){8}/
-body T_LONGWORDS3_C	/\b(?:[a-z]{6,}\s+){9}/
-body T_LONGWORDS3_D	/\b(?:[a-z]{5,}\s+){10}/
-# just a thought...
-meta T_LONGWORDS3_1 T_LONGWORDS3_A + T_LONGWORDS3_B + T_LONGWORDS3_C + T_LONGWORDS3_D == 1
-meta T_LONGWORDS3_2 T_LONGWORDS3_A + T_LONGWORDS3_B + T_LONGWORDS3_C + T_LONGWORDS3_D == 2
-meta T_LONGWORDS3_3 T_LONGWORDS3_A + T_LONGWORDS3_B + T_LONGWORDS3_C + T_LONGWORDS3_D == 3
-meta T_LONGWORDS3_4 T_LONGWORDS3_A + T_LONGWORDS3_B + T_LONGWORDS3_C + T_LONGWORDS3_D == 4
-
-# some tests to catch long lines of random dictionary words
-# this could be slow, being a rawbody rule, but if it works well maybe
-# we should consider a way to spot these kinds of auto-generated
-# text patterns efficiently...
-# quinlan: I think the unique word tests might do a better job of this,
-#          this seems very specific to one spamware program.
-# it also seems to overlap a lot with LONGWORDS
-rawbody T_BAYESBUSTER_LINE_12	/^([a-z]{3,} ){12,}<[Bb][Rr]>$/
-rawbody T_BAYESBUSTER_LINE_15	/^([a-z]{3,} ){15,}<[Bb][Rr]>$/
-rawbody T_BAYESBUSTER_LINE_12I	/^([a-z]{3,} ){12,}<br>$/i
-rawbody T_BAYESBUSTER_LINE_15I	/^([a-z]{3,} ){15,}<br>$/i
-rawbody T_BAYESBUSTER_LINE_12S	/^(\S{3,} ){12,}<br>$/i
-rawbody T_BAYESBUSTER_LINE_15S	/^(\S{3,} ){15,}<br>$/i
-
 # partial messages; currently-theoretical attack
 # unsurprisingly this hits 0/0 right now.  But should we promote it anyway
 # to protect against the possibility?
