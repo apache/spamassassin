@@ -128,16 +128,19 @@ BEGIN {
 
 ###########################################################################
 
-# TODO: $server will be used for tracking per-server failures
+# DNS query array constants
+use constant BGSOCK => 0;
+use constant RULES => 1;
+use constant SETS => 2;
+
+# TODO: $server is currently unused
 sub do_rbl_lookup {
   my ($self, $rule, $set, $type, $server, $host) = @_;
 
-  $self->{rbl_launch} = time if !defined $self->{rbl_launch};
-
-  if (defined $self->{dnscache}->{$type}->{$host}->{bgsock}) {
+  if (defined $self->{dnscache}->{$type}->{$host}->[BGSOCK]) {
     # additional query for host, we have one pending
-    push @{$self->{dnscache}->{$type}->{$host}->{rules}}, $rule;
-    push @{$self->{dnscache}->{$type}->{$host}->{sets}}, $set;
+    push @{$self->{dnscache}->{$type}->{$host}->[RULES]}, $rule;
+    push @{$self->{dnscache}->{$type}->{$host}->[SETS]}, $set;
   }
   else {
     # first query for host
@@ -158,12 +161,14 @@ sub launch_dnsbl_query {
 
   dbg("rbl: launching DNS $type query for $host in background", "rbl", -1);
 
+  # update last launch time
+  $self->{rbl_launch} = time;
+
   my $query = $self->{dnscache}->{$type}->{$host};
 
-  $query->{bgsock} = $self->{res}->bgsend($host, $type);
-  $query->{launch} = time;
-  push @{$self->{dnscache}->{$type}->{$host}->{rules}}, $rule;
-  push @{$self->{dnscache}->{$type}->{$host}->{sets}}, $set;
+  $query->[BGSOCK] = $self->{res}->bgsend($host, $type);
+  push @{$query->[RULES]}, $rule;
+  push @{$query->[SETS]}, $set;
 }
 
 ###########################################################################
@@ -171,7 +176,8 @@ sub launch_dnsbl_query {
 sub process_dnsbl_result {
   my ($self, $query) = @_;
 
-  my $packet = $self->{res}->bgread($query->{bgsock});
+  my $packet = $self->{res}->bgread($query->[BGSOCK]);
+  undef $query->[BGSOCK];
 
   return if !defined $packet;
 
@@ -179,13 +185,15 @@ sub process_dnsbl_result {
     # TODO: there are some CNAME returns, not sure what they represent
     # nor whether they should be counted
     next if ($ansitem->type ne 'A' && $ansitem->type ne 'TXT');
-    for my $rule (@{$query->{rules}}) {
+    for my $rule (@{$query->[RULES]}) {
       if (!defined $self->{tests_already_hit}->{$rule}) {
 	$self->got_hit($rule, "RBL: ");
       }
     }
-    for my $set (@{$query->{sets}}) {
-      $self->process_dnsbl_set($set, $ansitem->rdatastr);
+    for my $set (@{$query->[SETS]}) {
+      if ($self->{dnspost}->{$set}) {
+	$self->process_dnsbl_set($set, $ansitem->rdatastr);
+      }
     }
   }
 }
@@ -226,18 +234,17 @@ sub harvest_dnsbl_queries {
 		 values %{ $self->{dnscache}->{TXT} });
   my @left;
 
-  @waiting = grep { defined $_->{bgsock} } @waiting;
+  @waiting = grep { defined $_->[BGSOCK] } @waiting;
 
   while ($ready && @waiting) {
     my $rin = '';
     @left = ();
     for my $query (@waiting) {
-      if ($self->{res}->bgisready($query->{bgsock})) {
-	$query->{finish} = time;
+      if ($self->{res}->bgisready($query->[BGSOCK])) {
 	$self->process_dnsbl_result($query);
       }
       else {
-	vec($rin, fileno($query->{bgsock}), 1) = 1 unless @left;
+	vec($rin, fileno($query->[BGSOCK]), 1) = 1 unless @left;
 	push(@left, $query);
       }
     }
@@ -254,7 +261,7 @@ sub harvest_dnsbl_queries {
   }
   # TODO: add real timeout code
   for my $query (@left) {
-    undef $query->{bgsock};
+    undef $query->[BGSOCK];
   }
 }
 
@@ -264,8 +271,6 @@ sub rbl_finish {
   my ($self) = @_;
 
   delete $self->{rbl_launch};
-  delete $self->{dnscache}->{A};
-  delete $self->{dnscache}->{TXT};
   delete $self->{dnscache};
   # TODO: do not remove this since it can be retained!
   delete $self->{dnspost};
