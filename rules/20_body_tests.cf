@@ -101,8 +101,9 @@ describe POPLAUNCH		SPAM software
 body CHECK_OR_MONEY_ORDER	/check or money order/i
 describe CHECK_OR_MONEY_ORDER	Talk about a check or money order
 
+# Jul 26 2002 jm: offline, too many FPs
 rawbody SUPERLONG_LINE		/^[^<\&]{199,}$/m
-describe SUPERLONG_LINE		Contains a line >=199 characters long
+describe SUPERLONG_LINE	        Contains a line >=199 characters long
 
 # fixed by ms to not allow entry field onto next line
 rawbody ASCII_FORM_ENTRY	/[^<][A-Za-z][A-Za-z]+.{1,15}?[\x09\x20]*_{30,}/
@@ -428,8 +429,9 @@ body CLICK_TO_REMOVE_3		/http:.{0,50}action=remove/is
 describe CLICK_TO_REMOVE_3	Click-to-remove with PHP/ASP action found
 
 # (contrib: WW, mod by David Hull)
-body TO_BE_REMOVED_REPLY        /\bto\b.{0,20}\b(?:remove|unsubscribe|opt[ -]?out).{0,20}\b(?:reply|send)\b/is
-describe TO_BE_REMOVED_REPLY    Says: "to be removed, reply via email" or similar
+# offline, massive FP rate
+#body TO_BE_REMOVED_REPLY        /\bto\b.{0,20}\b(?:remove|unsubscribe|opt[ -]?out).{0,20}\b(?:reply|send)\b/is
+#describe TO_BE_REMOVED_REPLY    Says: "to be removed, reply via email" or similar
 
 body REMOVAL_INSTRUCTIONS	/\b(?:REMOVAL|UNSUBSCRIBE) INSTRUCTIONS/i
 describe REMOVAL_INSTRUCTIONS	Gives instructions for removal from list

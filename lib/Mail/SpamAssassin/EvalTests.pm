@@ -15,14 +15,10 @@ use Time::Local;
 use strict;
 
 use vars qw{
-	$KNOWN_BAD_DIALUP_RANGES
 	$CCTLDS_WITH_LOTS_OF_OPEN_RELAYS
 	$ROUND_THE_WORLD_RELAYERS
 	@PORN_WORDS
 };
-
-# persistent spam sources.
-$KNOWN_BAD_DIALUP_RANGES = q( .da.uu.net );
 
 # sad but true. sort it out, sysadmins!
 $CCTLDS_WITH_LOTS_OF_OPEN_RELAYS = qr{(?:kr|cn|cl|ar|hk|il|th|tw|sg|za|tr|ma|ua|in|pe)};
@@ -108,22 +104,6 @@ sub check_for_from_mx {
   }
 
   return 1;
-}
-
-###########################################################################
-
-sub check_for_bad_dialup_ips {
-  my ($self) = @_;
-  local ($_);
-
-  my $knownbad = $KNOWN_BAD_DIALUP_RANGES;
-  $knownbad =~ s/^\s+//g;
-  $knownbad =~ s/\s+$//g;
-  $knownbad =~ s/\./\\./g;
-  $knownbad =~ s/\s+/\|/g;
-
-  $_ = $self->get ('Received');
-  /${knownbad}/o;
 }
 
 ###########################################################################
