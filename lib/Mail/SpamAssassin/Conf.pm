@@ -829,11 +829,14 @@ if you want to allow any language.  The default setting is C<all>.
 =item zh	chinese
 
 =back
-example:
 
-  ok_languages all		(allow all languages)
-  ok_languages en		(only allow English)
-  ok_languages en ja zh		(English, Japanese and Chinese)
+examples:
+
+  ok_languages all         (allow all languages)
+  ok_languages en          (only allow English)
+  ok_languages en ja zh    (allow English, Japanese, and Chinese)
+
+Note: if there are multiple ok_languages lines, only the last one is used.
 
 =cut
 
@@ -886,10 +889,13 @@ Chinese (both simplified and traditional)
 
 =back
 
-example:
+examples:
 
-  ok_locales all		(allow all character sets)
-  ok_locales ja ru th zh	(penalise Chinese messages)
+  ok_locales all         (allow all locales)
+  ok_locales en          (only allow English)
+  ok_locales en ja zh    (allow English, Japanese, and Chinese)
+
+Note: if there are multiple ok_locales lines, only the last one is used.
 
 =cut
 
