@@ -26,7 +26,7 @@ my $sa = Mail::SpamAssassin->new({
     rules_filename => "$prefix/rules",
 });
 
-plan tests => 66;
+plan tests => 67;
 
 sub tryone {
   my ($pat, $testip) = @_;
@@ -95,7 +95,7 @@ ok (!tryone (Mail::SpamAssassin::Constants::LOCALHOST, "notlocalhost"));
 sub tsttrim {
   my $dom = shift;
   my $want = shift;
-  my $got = Mail::SpamAssassin::Util::trim_domain_to_registrar_boundary ($dom);
+  my $got = Mail::SpamAssassin::Util::RegistrarBoundaries::trim_domain ($dom);
   if ($got eq $want) {
     return 1;
   } else {
@@ -111,5 +111,6 @@ ok (tsttrim ("de", "de"));
 ok (tsttrim ("jmason.org", "jmason.org"));
 ok (tsttrim ("localhost.jmason.org", "jmason.org"));
 ok (tsttrim ("localhost.jmason.edu.au", "jmason.edu.au"));
+ok (tsttrim ("localhost.jmason.hacked.au", "hacked.au"));
 ok (tsttrim ("localhost.jmason.edu.net", "edu.net"));
 

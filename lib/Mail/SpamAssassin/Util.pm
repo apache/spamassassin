@@ -34,6 +34,7 @@ require Exporter;
 @EXPORT = qw(local_tz base64_decode);
 
 use Mail::SpamAssassin;
+use Mail::SpamAssassin::Util::RegistrarBoundaries;
 
 use Config;
 use File::Spec;
@@ -749,29 +750,11 @@ sub uri_to_domain {
   # keep IPs intact
   if ($uri !~ /^\d+\.\d+\.\d+\.\d+$/) { 
     # get rid of hostname part of domain, understanding delegation
-    if (Mail::SpamAssassin::Util::is_in_subdelegated_cctld($uri)) {
-      $uri = $1 if $uri =~ /\.([^\.]+\.[^\.]+\.[^\.]+)$/;
-    }
-    else {
-      $uri = $1 if $uri =~ /\.([^\.]+\.[^\.]+)$/;
-    }
+    $uri = Mail::SpamAssassin::Util::RegistrarBoundaries::trim_domain ($uri);
   }
   
   # $uri is now the domain only
   return $uri;
-}
-
-sub is_in_subdelegated_cctld {
-  my ($domain) = @_;
-
-  # http://www.bestregistrar.com/help/ccTLD.htm lists these
-  return ($domain =~ /\.
-	  (?:ac| ae| ar| at| au| az| bb| bm| br| bs| ca| cn| co|
-	  cr| cu| cy| do| ec| eg| fj| ge| gg| gu| hk| hu| id| il| im|
-	  in| je| jo| jp| kh| kr| la| lb| lc| lv| ly| mm| mo| mt| mx| my|
-	  na| nc| ni| np| nz| pa| pe| ph| pl| py| ru| sg| sh| sv| sy| th|
-	  tn| tr| tw| ua| ug| uk| uy| ve| vi| yu| za)
-	$/ixo);
 }
 
 sub uri_list_canonify {
@@ -817,41 +800,6 @@ sub uri_list_canonify {
   my %uris = map { $_ => 1 } @uris, @nuris;
 
   return keys %uris;
-}
-
-###########################################################################
-
-sub trim_domain_to_registrar_boundary {
-  my ($domain) = @_;
-
-  # drop any hostname parts, if we can.
-  my @domparts = split (/\./, $domain);
-  my $numparts = scalar @domparts;
-
-  # for the HELO variant, drop the first bit of the HELO (ie. turn
-  # "host.dom.ain" into "dom.ain".)
-  if ($numparts > 0) {
-    my $partsreqd = 2;
-
-    # the "Demon case"; Demon Internet registers domains for
-    # its customers, ie. "foo.demon.co.uk".
-    if ($domain =~ /\. (?:
-		      demon\.co\.uk
-		      )$/ix)
-    {
-      $partsreqd = 4;
-    }
-    # Subdelegated CCTLD
-    elsif (is_in_subdelegated_cctld ($domain)) {
-      $partsreqd = 3;
-    }
-
-    while ($numparts > $partsreqd) {
-      $domain =~ s/^[^\.]+\.//;
-      $numparts--;
-    }
-  }
-  $domain;
 }
 
 ###########################################################################

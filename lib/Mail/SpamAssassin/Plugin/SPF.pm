@@ -143,7 +143,12 @@ sub _check_spf {
 
   if ($ishelo) {
     dbg ("SPF: checking HELO (helo=$helo, ip=$ip)");
-    $helo = Mail::SpamAssassin::Util::trim_domain_to_registrar_boundary ($helo);
+
+    if ($helo !~ /^\d+\.\d+\.\d+\.\d+$/) {
+      # get rid of hostname part of domain, understanding delegation
+      $helo = Mail::SpamAssassin::Util::RegistrarBoundaries::trim_domain ($helo);
+    }
+
     dbg ("SPF: trimmed HELO down to '$helo'");
 
   } else {

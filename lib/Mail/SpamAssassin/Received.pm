@@ -47,6 +47,7 @@ use bytes;
 
 use Mail::SpamAssassin::Dns;
 use Mail::SpamAssassin::PerMsgStatus;
+use Mail::SpamAssassin::Util::RegistrarBoundaries;
 use Mail::SpamAssassin::Constants qw(:ip);
 
 use vars qw{
@@ -325,22 +326,17 @@ sub lookup_all_ips {
 sub mx_of_helo_near_ip {
   my ($self, $helo, $ip) = @_;
 
-  my $helodomain = $helo;
+  my $helodom = $helo;
 
   # TODO: should we just traverse down the chain instead of this;
   # e.g. "foo.bar.baz.co.uk" would be "bar.baz.co.uk", "baz.co.uk",
   # instead of just "baz.co.uk" straight away?
-  if (Mail::SpamAssassin::Util::is_in_subdelegated_cctld ($helo)) {
-    if ($helo =~ /\.([^\.]+\.[^\.]+\.[^\.]+)$/) {
-      $helodomain = $1;
-    }
-  } else {
-    if ($helo =~ /\.([^\.]+\.[^\.]+)$/) {
-      $helodomain = $1;
-    }
+  
+  if ($helo !~ /^\d+\.\d+\.\d+\.\d+$/) {
+    $helodom = Mail::SpamAssassin::Util::RegistrarBoundaries::trim_domain ($helo);
   }
 
-  my $mxes = $self->lookup_mx ($helodomain);
+  my $mxes = $self->lookup_mx ($helodom);
   my @mxips = ();
   foreach my $mx (@$mxes) {
     push (@mxips, $self->lookup_all_ips ($mx));
@@ -348,7 +344,7 @@ sub mx_of_helo_near_ip {
   if ($mxes && Mail::SpamAssassin::Util::ips_match_in_24_mask ([ $ip ], [ @mxips ]))
   {
     dbg ("IP address $ip is near to an MX (".join (', ', @mxips).
-					") for ".$helodomain);
+					") for ".$helodom);
     return 1;
   }
   return 0;
