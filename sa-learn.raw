@@ -509,7 +509,8 @@ Options:
  --no-sync                         Skip syncronizing the journal and
                                    databases after scan
  -L, --local			   Operate locally, no network accesses
- --import                          Migrate data from non DB_File based databases
+ --import                          Migrate data from older version/non DB_File
+                                   based databases
  --clear                           Wipe out existing database
  --backup                          Backup, to STDOUT, existing database
  --restore <filename>              Restore a database from filename
