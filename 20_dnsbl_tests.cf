@@ -159,7 +159,7 @@ tflags RCVD_IN_SBL		net
 
 # XBL is the Exploits Block List: http://www.spamhaus.org/xbl/
 # contains data from the CBL, probably supercedes that.
-header RCVD_IN_XBL		eval:check_rbl_sub('sblxbl', '(?i)/xbl')
+header RCVD_IN_XBL		eval:check_rbl_sub('sblxbl-notfirsthop', '(?i)/xbl')
 describe RCVD_IN_XBL		Received via a relay in Spamhaus XBL
 tflags RCVD_IN_XBL		net
 
