@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.527 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.528 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -360,22 +360,6 @@ describe T_HREF_3D		Uses href=3D Trick
 rawbody		T_PUSHHERELINK		/<a[^>]*>[^<]*((push|go)\s(here|this) |cease.{1,10}mail)[^<]*<\/a>/i
 describe	T_PUSHHERELINK		Link asks you to "push here" or "go here" or "cease mail" or the like
 
-# idea from Robert Menschel <RMSA@Menschel.net>
-header T_FROM_MIXED_ALPHANUM_01	From:addr =~ /[a-z]+\d+[a-z]+\d+[a-z]+\@/i
-header T_FROM_MIXED_ALPHANUM_02	From:addr =~ /\d+[a-z]+\d+[a-z]+\d+\@/i
-header T_FROM_MIXED_ALPHANUM_03	From:addr =~ /^[a-z]+\d+[a-z]+\d+[a-z]+\@/i
-header T_FROM_MIXED_ALPHANUM_04	From:addr =~ /\d+\D+\d+\D+\d+\@/i
-header T_FROM_MIXED_ALPHANUM_05	From:addr =~ /^[a-z]+\d+[a-z]+\d+[a-z]+.*\@/i
-header T_FROM_MIXED_ALPHANUM_06	From:addr =~ /[a-z]+\d+[a-z]+\d+[a-z]+\w*\@/i
-header T_FROM_MIXED_ALPHANUM_07	From:addr =~ /\d+[a-z]+\d+[a-z]+\d+\w*\@/i
-header T_FROM_MIXED_ALPHANUM_08	From:addr =~ /^[a-z]+\d+[a-z]+\d+[a-z]+\w*\@/i
-header T_FROM_MIXED_ALPHANUM_09	From:addr =~ /\d+\D+\d+\D+\d+\w*\@/i
-header T_FROM_MIXED_ALPHANUM_10	From:addr =~ /[a-z]+\d+[a-z]+\d+[a-z]+\S*\@/i
-header T_FROM_MIXED_ALPHANUM_11	From:addr =~ /\d+[a-z]+\d+[a-z]+\d+\S*\@/i
-header T_FROM_MIXED_ALPHANUM_12	From:addr =~ /\d+\D+\d+\D+\d+\S*\@/i
-header T_FROM_MIXED_ALPHANUM_13	From:addr =~ /^[a-z]+\d+[a-z]+\d+[a-z]+S*\@/i
-header T_FROM_MIXED_ALPHANUM_14	From:addr =~ /^[a-z]+\d+[a-z]+\d+[a-z]+\S*\@/i
-
 # uri case changes
 uri T_URI_CASE_CHANGE	/(?:[a-z][A-Z]+){3}/
 
@@ -383,11 +367,11 @@ uri T_URI_CASE_CHANGE	/(?:[a-z][A-Z]+){3}/
 uri T_HTTP_ESCAPED_DIRECTORY	/^https?\:\/\/.*?\/.*%[0-9a-f]{2}.*\//i
 
 # bug 1734: replacement rules
-header T_FROM_OFFERS_1		From:addr =~ /^From:.*\@\S*offer(?!sen)/i
-header T_FROM_OFFERS_2		From:addr =~ /^From:.*\@\S*offer(?!sen\b)/i
-header T_FROM_OFFERS_3		From:addr =~ /^From:.*\@\S*offer(?!s[eo]n)/i
-header T_FROM_OFFERS_4		From:addr =~ /^From:.*\@\S*offer(?!s[eo]n\b)/i
-header T_FROM_OFFERS_5		From:addr =~ /^From:.*\@\S*offers?(?:\b|[^a-z])/i
+header T_FROM_OFFERS_1		From:addr =~ /\@\S*offer(?!sen)/i
+header T_FROM_OFFERS_2		From:addr =~ /\@\S*offer(?!sen\b)/i
+header T_FROM_OFFERS_3		From:addr =~ /\@\S*offer(?!s[eo]n)/i
+header T_FROM_OFFERS_4		From:addr =~ /\@\S*offer(?!s[eo]n\b)/i
+header T_FROM_OFFERS_5		From:addr =~ /\@\S*offers?(?:\b|[^a-z])/i
 
 # bug 1914:
 # tvd - t_see_for_yourself gets the same hit rate, t_try_for_yourself
