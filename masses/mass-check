@@ -10,6 +10,7 @@
 # --ms          find_missed('spam.log')
 # --single      folder is a single mail message
 # --loghits     log the text hit for patterns (useful for debugging)
+# --nokillfile  don't use the "QUICK HACK"
 #
 # options for maildir and mh-style folders
 # --head=N      only check first N messages
@@ -36,7 +37,7 @@ my $killfile_receiveds = qr{(?:
 ###########################################################################
 
 use vars qw($opt_c $opt_fork $opt_all $opt_head $opt_mh $opt_ms $opt_mn
-	    $opt_single $opt_sort $opt_tail);
+	    $opt_single $opt_sort $opt_tail $opt_nokillfile);
 
 use FindBin;
 use lib "$FindBin::Bin/lib";
@@ -50,7 +51,7 @@ use Getopt::Long;
 $|++;
 
 GetOptions("c=s", "fork", "all", "head=i", "mh", "ms", "mn", "single", "sort",
-	   "tail=i", "loghits");
+	   "tail=i", "loghits", "nokillfile");
 
 #use Devel::Peek;
 
@@ -100,14 +101,17 @@ sub wanted {
   # my $ma = Mail::Audit->new('data' => \@msg);
   my $ma = Mail::SpamAssassin::NoMailAudit->new ('data' => $dataref);
 
-  # killfile for mass-checks
-  $_ = $ma->get_header("Message-Id");
-  if (defined($_) && /${killfile_message_ids}/os)
-                { logkilled($ma,$id, "skipped killfiled message"); return; }
+  unless ($opt_nokillfile) {
+  print STDERR 'kill';
+    # killfile for mass-checks
+    $_ = $ma->get_header("Message-Id");
+    if (defined($_) && /${killfile_message_ids}/os)
+                { logkilled($ma,$id, "unwanted Message-Id"); return; }
 
-  $_ = join ('', $ma->get_header("Received"));
-  if (defined($_) && /${killfile_receiveds}/os)
-                { logkilled($ma,$id, "skipped killfiled message"); return; }
+    $_ = join ('', $ma->get_header("Received"));
+    if (defined($_) && /${killfile_receiveds}/os)
+                { logkilled($ma,$id, "unwanted Received chain"); return; }
+  }
 
   $ma->{noexit} = 1;
   $spamtest->remove_spamassassin_markup($ma);
@@ -163,7 +167,7 @@ sub logkilled {
   chop ($to);
   chop ($subj);
   chop ($msgid);
-  warn "# skipped killfiled message: from=$from to=$to subj=$subj msgid=$msgid id=$id\n";
+  warn "# skipped killfiled message ($reason): from=$from to=$to subj=$subj msgid=$msgid id=$id\n";
 }
 
 ###########################################################################
