@@ -134,6 +134,7 @@ sub process {
   print $remote "$EOL";
 
   my $line = <$remote>;
+
   my ($version, $resp_code, $resp_msg) = $self->_parse_response_line($line);
 
   $self->{resp_code} = $resp_code;
@@ -156,7 +157,6 @@ sub process {
     }
     elsif ($line =~ /$EOL/) {
       $found_blank_line_p = 1;
-      print STDERR "Found the blank line\n";
     }
   }
 
@@ -250,7 +250,6 @@ sub learn {
     }
     elsif ($line =~ /$EOL/) {
       $found_blank_line_p = 1;
-      print STDERR "Found the blank line\n";
     }
   }
 
