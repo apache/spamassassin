@@ -1756,32 +1756,9 @@ sub html_table_thick_border {
   return ($Mail::SpamAssassin::PerMsgStatus::html{border} > 1);
 }
 
-sub html_javascript {
-  return $Mail::SpamAssassin::PerMsgStatus::html{javascript};
-}
-
-sub html_javascript_very_unsafe {
-  return $Mail::SpamAssassin::PerMsgStatus::html{javascript_very_unsafe};
-}
-
-sub html_bgcolor {
-  return $Mail::SpamAssassin::PerMsgStatus::html{bgcolor};
-}
-
-sub html_big_font {
-  return $Mail::SpamAssassin::PerMsgStatus::html{big_font};
-}
-
-sub html_web_bugs {
-  return $Mail::SpamAssassin::PerMsgStatus::html{web_bugs};
-}
-
-sub html_relaying_frame {
-  return $Mail::SpamAssassin::PerMsgStatus::html{relaying_frame};
-}
-
-sub html_embeds {
-  return $Mail::SpamAssassin::PerMsgStatus::html{embeds};
+sub html_test {
+  my (undef, undef, $test) = @_;
+  return $Mail::SpamAssassin::PerMsgStatus::html{$test};
 }
 
 ###########################################################################
