@@ -482,30 +482,36 @@ body T_REDIRECTOR       eval:check_for_http_redirector()
 describe T_REDIRECTOR	Message has HTTP redirector URI
 
 # bug 2539
-rawbody  T_SARE_RAND_1   /(?:\#|\[|\$)RANDOM/i
-rawbody  T_SARE_RAND_2  /\$RND/i
-rawbody  T_SARE_RAND_3  /%CUSTOM/i
-rawbody  T_SARE_RAND_4  /%HEADER/
-rawbody  T_SARE_RAND_6  /%TO/
-rawbody  T_SARE_RAND_7  /%FROM/
-rawbody  T_SARE_RAND_OTHER_1  /%FEM_NAME/
-rawbody  T_SARE_RAND_OTHER_2  /%MULTI_NAME/
-rawbody  T_SARE_RAND_OTHER_3  /%NEW_HEADER_RDM_DIGITS/
-rawbody  T_SARE_RAND_OTHER_4  /%THE2_HEADER_RND_DIGITS_2/
-rawbody  T_SARE_RAND_OTEHR_5  /\@RND_FROM_DOMAIN/
-rawbody  T_SARE_RAND_OTHER_6  /\#\#randomword\#\#/
-rawbody  T_SARE_RAND_OTHER_7  /rndlt\[/
-rawbody  T_SARE_RAND_OTHER_8  /%SUBJECT/
-rawbody  T_SARE_RAND_OTHER_9  /%BOUNDARY/
-rawbody  T_SARE_RAND_OTHER_A  /%PRIORITY_NUMBER/
-rawbody  T_SARE_RAND_OTHER_B  /%STRING_CONST/
-rawbody  T_SARE_RAND_OTHER_C  /%CONTENT_TYPE/
-rawbody  T_SARE_RAND_OTHER_D  /%PROXY/
-rawbody  T_SARE_RAND_OTHER_E  /%X_MAILER/
-rawbody  T_SARE_RAND_OTHER_F  /%PRIORITY_STRING/
-rawbody  T_SARE_RAND_OTHER_G  /\[RANDOMIZE\]/i
-rawbody  T_SARE_RAND_OTHER_H  /\$(?:FIRST|LAST)NAME/
-rawbody  T_SARE_RAND_OTHER_I  /\$STRIPPEDUSER/
+header  __RANDH_1   ALL =~ /[%\#\[\$]RANDOM/i
+header  __RANDH_1B  ALL =~ /[%\#\[\$]RANDOM_CHAR/i
+header  __RANDH_1C  ALL =~ /[%\#\[\$]RANDOM_DATE/i
+header  __RANDH_1D  ALL =~ /[%\#\[\$]RANDOM_LETTER/i
+header  __RANDH_1E  ALL =~ /[%\#\[\$]RANDOM_NUMBER/i
+header  __RANDH_1F  ALL =~ /[%\#\[\$]RANDOM_TEXT/
+header  __RANDH_1G  ALL =~ /[%\#\[\$]RANDOM_TIME/
+header  __RANDH_1H  ALL =~ /[%\#\[\$]RANDOM_WORD/
+header  __RANDH_1I  ALL =~ /[%\#\[\$]RANDOMIZE/
+
+rawbody __RANDR_1   /[%\#\[\$]RANDOM/i
+rawbody __RANDR_1B  /[%\#\[\$]RANDOM_CHAR/i
+rawbody __RANDR_1C  /[%\#\[\$]RANDOM_DATE/i
+rawbody __RANDR_1D  /[%\#\[\$]RANDOM_LETTER/i
+rawbody __RANDR_1E  /[%\#\[\$]RANDOM_NUMBER/i
+rawbody __RANDR_1F  /[%\#\[\$]RANDOM_TEXT/
+rawbody __RANDR_1G  /[%\#\[\$]RANDOM_TIME/
+rawbody __RANDR_1H  /[%\#\[\$]RANDOM_WORD/
+rawbody __RANDR_1I  /[%\#\[\$]RANDOMIZE/
+
+meta  T_SARE_RAND_1   (__RANDH_1  || __RANDR_1)
+meta  T_SARE_RAND_1B  (__RANDH_1B || __RANDR_1B)
+meta  T_SARE_RAND_1C  (__RANDH_1C || __RANDR_1C)
+meta  T_SARE_RAND_1D  (__RANDH_1D || __RANDR_1D)
+meta  T_SARE_RAND_1E  (__RANDH_1E || __RANDR_1E)
+meta  T_SARE_RAND_1F  (__RANDH_1F || __RANDR_1F)
+meta  T_SARE_RAND_1G  (__RANDH_1G || __RANDR_1G)
+meta  T_SARE_RAND_1H  (__RANDH_1H || __RANDR_1H)
+meta  T_SARE_RAND_1I  (__RANDH_1I || __RANDR_1I)
+
 
 # obviously a URI rule, replaces LOTS_OF_STUFF
 # rawbody seems to do better than uri which is somewhat troubling
