@@ -184,7 +184,7 @@ GetOptions(
   'pipe|P'                => sub { warn "The -P option is deprecated as 'pipe mode' is now the default behavior, ignoring.\n" },
   'F:i'                   => sub { warn "The -F option has been removed from spamassassin, please remove from your commandline and re-run.\n"; exit 2; },
   'add-from!'             => sub { warn "The --add-from option has been removed from spamassassin, please remove from your commandline and re-run.\n"; exit 2; },
-  
+
   # last in 2.4
   'stop-at-threshold|S'   => sub { warn "The -S option has been deprecated and is no longer supported, ignoring.\n" },
 

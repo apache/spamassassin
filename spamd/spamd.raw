@@ -198,7 +198,7 @@ GetOptions(
   'add-from!'             => sub { warn "The --add-from option has been removed from spamd, please remove from your commandline and re-run.\n"; exit 2; },
 
   # last in 2.4
-  'stop-at-threshold|S!' => sub { warn "The -S option has been deprecated and is no longer supported, ignoring.\n" },
+  'stop-at-threshold|S' => sub { warn "The -S option has been deprecated and is no longer supported, ignoring.\n" },
 
   # last in 2.6
   'auto-whitelist|whitelist|a'      => sub { warn "The -a option has been removed.  Please look at the use_auto_whitelist config option instead.\n"; exit 2; },
