@@ -360,36 +360,6 @@ header T_HELO_OPTONLINE X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S+\.dyn\.opton
 # pool-151-203-32-68.bos.east.verizon.net [151.203.32.68]
 # 12-218-225-223.client.mchsi.com [12.218.225.223]
 
-# bug 2992: Proposed new rules, Martin Radford
-header T_RCVD_DOUBLE_IP_SPAM	Received =~ /from \[\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\] by \d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3} with/
-describe T_RCVD_DOUBLE_IP_SPAM	Bulk email fingerprint (double IP) found
-
-# some looser variants
-header __DOUBLE_IP_LOOSE_A	Received =~ /\b(?:from|by)\b.{1,4}\b\d{1,3}[._-]\d{1,3}[._-]\d{1,3}[._-]\d{1,3}(?<!127\.0\.0\.1)\b.{1,4}\b(?:by|from)\b.{1,4}\b\d{1,3}[._-]\d{1,3}[._-]\d{1,3}[._-]\d{1,3}(?<!127\.0\.0\.1)\b/i
-meta T_RCVD_DOUBLE_IP_LOOSE_A	(!T_RCVD_DOUBLE_IP_SPAM && __DOUBLE_IP_LOOSE_A)
-describe T_RCVD_DOUBLE_IP_LOOSE_A	Received: by and from are both IP addresses
-
-# should be the same as A except shorter
-header __DOUBLE_IP_LOOSE_B	Received =~ /(?:\b(?:from|by)\b.{1,4}\b\d{1,3}[._-]\d{1,3}[._-]\d{1,3}[._-]\d{1,3}(?<!127\.0\.0\.1)\b.{0,4}){2}/i
-meta T_RCVD_DOUBLE_IP_LOOSE_B	(!T_RCVD_DOUBLE_IP_SPAM && __DOUBLE_IP_LOOSE_B)
-describe T_RCVD_DOUBLE_IP_LOOSE_B	Received: by and from are both IP addresses
-
-# longer distances between from and by
-header __DOUBLE_IP_LOOSE_C	Received =~ /(?:\b(?:from|by)\b.{1,4}\b\d{1,3}[._-]\d{1,3}[._-]\d{1,3}[._-]\d{1,3}(?<!127\.0\.0\.1)\b.{0,32}){2}/i
-meta T_RCVD_DOUBLE_IP_LOOSE_C	(!T_RCVD_DOUBLE_IP_SPAM && __DOUBLE_IP_LOOSE_C)
-describe T_RCVD_DOUBLE_IP_LOOSE_C	Received: by and from are both IP addresses
-
-header __DOUBLE_IP_LOOSE_D	Received =~ /(?:\b(?:from|by)\b.{1,4}\b\d{1,3}[._-]\d{1,3}[._-]\d{1,3}[._-]\d{1,3}(?<!127\.0\.0\.1)\b.{0,64}){2}/i
-meta T_RCVD_DOUBLE_IP_LOOSE_D	(!T_RCVD_DOUBLE_IP_SPAM && __DOUBLE_IP_LOOSE_D)
-describe T_RCVD_DOUBLE_IP_LOOSE_D	Received: by and from are both IP addresses
-
-header __DOUBLE_IP_LOOSE_E	Received =~ /(?:\b(?:from|by)\b.{1,4}\b\d{1,3}[._-]\d{1,3}[._-]\d{1,3}[._-]\d{1,3}(?<!127\.0\.0\.1)\b.*){2}/i
-meta T_RCVD_DOUBLE_IP_LOOSE_E	(!T_RCVD_DOUBLE_IP_SPAM && __DOUBLE_IP_LOOSE_E)
-describe T_RCVD_DOUBLE_IP_LOOSE_E	Received: by and from are both IP addresses
-
-header T_MIME_BOUND_DIGITS15	Content-Type =~ /boundary=\"\d{15,}\"/
-describe T_MIME_BOUND_DIGITS15	MIME boundary contains all digits
-
 # some simple subject rules to catch a persistent spammer
 header T_SUBJ_XANAX		Subject =~ /x.{0,2}a.{0,2}n.{0,2}a.{0,2}x/i
 header T_SUBJ_VALIUM		Subject =~ /v.{0,2}a.{0,2}l.{0,2}i.{0,2}u.{0,2}m/i
@@ -576,5 +546,28 @@ describe T_FAKED_AUTHWARN    'X-Authentication-Warning' looks faked
 
 header T_FAKED_AUTHWARN_2	X-Authentication-Warning !~ /^(\S+\.\S+): / [if-unset: host.example.net: foo owned process doing -bs]
 
-body T_HTML_COMMENT_TAG		eval:html_eval('comment_text', '=~ /<.*?>/')
+body T_HTML_COMMENT_TAG		eval:html_text('comment', '=~ /<.*?>/')
 describe T_HTML_COMMENT_TAG	HTML comment probably contains HTML tag
+
+# back to the drawing board (demoted for development or deletion)
+header T_FAKED_IP_IN_RCVD		Received =~ /from [-0-9a-z\._]+_\[\d+\.\d+\.\d+\.\d+\] /i
+describe T_FAKED_IP_IN_RCVD	Received: contains a name with a faked IP-address
+
+# back to the drawing board (demoted for development or deletion)
+# no legit mailer claims that their mailserver has no name
+header T_RCVD_BY_IP	Received =~ /from \S+ \[\S+\] by [0-9\.]+ with ESMTP id/
+describe T_RCVD_BY_IP	Received by mail server with no name
+
+header T_RCVD_BY_IP_2	Received =~ /from \S+ \[\S+\] by [0-9\.]+ with/
+header T_RCVD_BY_IP_3	Received =~ /\bby [0-9\.]+ with/
+header T_RCVD_BY_IP_4	Received =~ /\bby\s+\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s+with/
+header T_RCVD_BY_IP_5	Received =~ /\bby\s+\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s+with/
+header T_RCVD_BY_IP_6	Received =~ /\bby\s+\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s+with/
+header T_RCVD_BY_IP_7	Received =~ /\bby\b.{1,4}\b\d{1,3}[._-]\d{1,3}[._-]\d{1,3}[._-]\d{1,3}(?<!127\.0\.0\.1)\b/i
+header T_RCVD_BY_IP_8	Received =~ /\bby\b.{1,4}\b\d{1,3}[._-]\d{1,3}[._-]\d{1,3}[._-]\d{1,3}\b/i
+header T_RCVD_BY_IP_9	Received =~ /\bby\b.{1,4}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b/i
+header T_RCVD_BY_IP_A	Received =~ /\bby\b.{1,4}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/i
+header T_RCVD_BY_IP_B	Received =~ /\bby\b\s*.{0,2}\s*\b\d{1,3}[._-]\d{1,3}[._-]\d{1,3}[._-]\d{1,3}(?<!127\.0\.0\.1)\b/i
+header T_RCVD_BY_IP_C	Received =~ /\bby\b\s*.{0,2}\s*\b\d{1,3}[._-]\d{1,3}[._-]\d{1,3}[._-]\d{1,3}\b/i
+header T_RCVD_BY_IP_D	Received =~ /\bby\b\s*.{0,2}\s*\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b/i
+header T_RCVD_BY_IP_E	Received =~ /\bby\b\s*.{0,2}\s*\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/i

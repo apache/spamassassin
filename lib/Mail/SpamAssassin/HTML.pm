@@ -995,7 +995,7 @@ sub html_text {
 sub html_comment {
   my ($self, $text) = @_;
 
-  $self->{html}{comment_text} .= "$text\n";
+  push @{ $self->{html}{comment} }, $text;
   $self->{html}{total_comment_length} += length($text) + 7; # "<!--" + "-->"
 
   if ($self->{html_last_tag} eq "div" &&

@@ -3312,10 +3312,10 @@ sub html_eval {
   return exists $self->{html}{$test} && eval "qq{\Q$self->{html}{$test}\E} $expr";
 }
 
-sub html_title {
-  my ($self, undef, $expr) = @_;
-  for my $title (@{ $self->{html}{title} }) {
-    if (defined $title && eval "qq{\Q$title\E} $expr") {
+sub html_text {
+  my ($self, undef, $text, $expr) = @_;
+  for my $string (@{ $self->{html}{$text} }) {
+    if (defined $string && eval "qq{\Q$string\E} $expr") {
       return 1;
     }
   }
