@@ -21,6 +21,11 @@ exit unless HAS_SPFQUERY;
     q{ SPF_PASS }, 'pass',
 );
 
+tstprefs("
+meta SPF_HELO_PASS __SPF_HELO_PASS
+meta SPF_PASS __SPF_PASS
+");
+
 sarun ("-t < data/nice/spf1", \&patterns_run_cb);
 ok_all_patterns();
 
