@@ -139,3 +139,13 @@ describe MORTGAGE_LINKS		Message has link to mortgage URI
 
 uri URI_OFFERS			m/offer([sz]|-\S+)?\.(?:com|bi?z)/i
 describe URI_OFFERS		Message has link to company offers
+
+uri URI_BANNEDCD		m@^(?:https?://|mailto:)[^\/]*bannedcd@i
+describe URI_BANNEDCD		Message has URI for bannedcd
+
+uri URI_FREEHT			m@^(?:https?://|mailto:)[^\/]*freeht@i
+describe URI_FREEHT		Message has URI for freeht
+
+uri URI_4YOU			m@^(?:https?://|mailto:)[^\/]*4you@i
+describe URI_4YOU		Message has URI 4you
+
