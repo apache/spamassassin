@@ -146,17 +146,8 @@ describe RCVD_IN_ORBZ		Received via a relay in inputs.orbz.org
 header RCVD_IN_VISI		eval:check_rbl('relay', 'relays.visi.com.')
 describe RCVD_IN_VISI		Received via a relay in relays.visi.com
 
-header RCVD_IN_SPAMBAG		eval:check_rbl('relay', 'blacklist.spambag.org.')
-describe RCVD_IN_SPAMBAG	Received via a relay in blacklist.spambag.org
-
-header RCVD_IN_INTERSIL		eval:check_rbl('relay', 'blackholes.intersil.net.')
-describe RCVD_IN_INTERSIL	Received via a relay in blackholes.intersil.net
-
 header RCVD_IN_5_10		eval:check_rbl('relay', 'blackholes.five-ten-sg.com.')
 describe RCVD_IN_5_10		Received via a relay in blackholes.five-ten-sg.com
-
-header RCVD_IN_ZTL		eval:check_rbl('relay', 'ztl.dorkslayers.com.')
-describe RCVD_IN_ZTL		Received via a relay in ztl.dorkslayers.com
 
 header RCVD_IN_ORBS		eval:check_rbl('relay', 'orbs.dorkslayers.com.')
 describe RCVD_IN_ORBS		Received via a relay in orbs.dorkslayers.com
