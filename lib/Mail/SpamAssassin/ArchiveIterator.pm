@@ -236,7 +236,7 @@ sub message_array {
     my @locations = $self->fix_globs($rawloc);
 
     foreach my $location (@locations) {
-      $class = substr($class, 0, 1);
+      $class = substr($class, 0, 1) || 'h'; # use ham by default
 
       my $method;
 
