@@ -13,7 +13,7 @@
 use strict;
 use POSIX qw(nice);
 
-nice(10);
+nice(15);
 
 my $configuration = "$ENV{HOME}/.corpus";
 my %opt;
@@ -70,7 +70,7 @@ sub init {
 
 sub update {
     chdir $opt{corpus};
-    system "rsync -CPcvuzbt --timeout=60 $opt{username}" . '@belphegore.hughes-family.org::corpus/* .';
+    system "rsync -CPcvuzbt --timeout=60 $opt{username}" . '@rsync.kluge.net::corpus/* .';
 }
 
 sub locate {
@@ -143,7 +143,7 @@ sub current {
 
 	    chdir $opt{corpus};
 
-	    next if ($class eq "NET" && $age !~ /^(?:new|all)$/);
+	    next if ($class eq "NET" && $age !~ /^(?:new|all|7day)$/);
 
 	    # net vs. local
 	    my @ham_net = grep { /-net-/ } @ham;
@@ -163,17 +163,16 @@ sub current {
 	    }
 	    
 	    # age
-	    if ($class eq "NET") {
+	    if ($class eq "NET" && $age ne "7day") {
 		@ham = grep { -M "$_" < 10 } @ham;
 		@spam = grep { -M "$_" < 10 } @spam;
-		# find most common CVS revision
-		my %count;
+		# find most recent CVS revision
+		my $wanted = 0.0;
 		for (@spam, @ham) {
-		    $count{$revision{$_}}++;
+		    $wanted = $revision{$_} if ($revision{$_} > $wanted);
 		}
-		my @mode = sort { $count{$b} <=> $count{$a} } keys %count;
-		@spam = grep { $revision{$_} eq $mode[0] } @spam;
-		@ham = grep { $revision{$_} eq $mode[0] } @ham;
+		@spam = grep { $revision{$_} eq $wanted } @spam;
+		@ham = grep { $revision{$_} eq $wanted } @ham;
 	    }
 	    elsif ($age =~ /^(?:new|all)$/) {
 		@ham = grep { -M "$_" < -M $opt{tagtime} } @ham;
