@@ -51,6 +51,11 @@ describe T_BODY_8BITS		Body includes 8 consecutive 8-bit characters
 
 # Mozilla
 # Dec 10 2002 jm: dan, you have fps for this, could you check 'em?
+#
+# 12/26 quinlan: my FPs are fixed now, all three versions of the rule
+# have zero FPs for me now, only easmith benefits a very small amount
+# from versions 2 and 3.
+#
 header __MOZILLA_MUA		X-Mailer =~ /\bMozilla\b/
 header __MOZILLA_MSGID		MESSAGEID =~ /^<[A-F\d]{8}\.[A-F\d]{4,8}\@\S+>$/
 meta T_FORGED_MUA_MOZILLA	(__MOZILLA_MUA && !__UNUSABLE_MSGID && !__MOZILLA_MSGID)
@@ -60,12 +65,13 @@ score T_FORGED_MUA_MOZILLA	1.0
 # Hmm... maybe possible to use a variant on the check_outlook_timestamp_token
 # test for the time component of the MOZILLA rules. - Allen
 # Dec 24 2002 jm: probably worth a try.
-
+# 12/26 quinlan: see above
 header __MOZILLA_MSGID2         MESSAGEID =~ /^<[A-F\d]{8}\.[A-F\d]{4,8}\@\S+>$/m
 meta T_FORGED_MUA_MOZILLA2      (__MOZILLA_MUA && !__UNUSABLE_MSGID && !__MOZILLA_MSGID2)
 describe T_FORGED_MUA_MOZILLA2  Forged mail pretending to be from Mozilla (2)
 score T_FORGED_MUA_MOZILLA2     1.0
 
+# 12/26 quinlan: see above
 header __MOZILLA_MSGID3         MESSAGEID =~ /^<[A-F\d]{8}\.[A-F1-9][A-F\d]{0,7}\@\S+>$/m
 meta T_FORGED_MUA_MOZILLA3      (__MOZILLA_MUA && !__UNUSABLE_MSGID && !__MOZILLA_MSGID3)
 describe T_FORGED_MUA_MOZILLA3  Forged mail pretending to be from Mozilla (3)
@@ -85,20 +91,11 @@ describe T_SENDER_NO_REVERSE    No reverse lookup for sender's IP
 
 # test for weird double quoting in the body
 body T_BODY_QUOTES_A1	/[\042\222\223\224\262\263\271]{2}\S{0,16}[\042\222\223\224\262\263\271]{2}/
-body T_BODY_QUOTES_B1	/[\042\047\222\223\224\262\263\271]{2}\S{0,16}[\042\047\222\223\224\262\263\271]{2}/
-body T_BODY_QUOTES_C1	/[\047\222\223\224\262\263\271]{2}\S{0,16}[\047\222\223\224\262\263\271]{2}/
-body T_BODY_QUOTES_A2	/(?:[\042\222\223\224\262\263\271]){2}\S{0,16}(?:[\042\222\223\224\262\263\271]){2}/
-body T_BODY_QUOTES_B2	/(?:[\042\047\222\223\224\262\263\271]){2}\S{0,16}(?:[\042\047\222\223\224\262\263\271]){2}/
-body T_BODY_QUOTES_C2	/(?:[\047\222\223\224\262\263\271]){2}\S{0,16}(?:[\047\222\223\224\262\263\271]){2}/
+describe T_BODY_QUOTES_A1	Weird repeated quotation marks in body
 
-# small improvement on NORMAL_HTTP_TO_IP
-# adds "http://foo@210.192.111.79/" which is used in spam sometimes
-uri T_NORMAL_HTTP_TO_IP_1	/^https?\:\/\/(?:\S*\@)?\d+\.\d+\.\d+\.\d+/i
-describe T_NORMAL_HTTP_TO_IP_1	Uses a dotted-decimal IP address in URL
-uri T_NORMAL_HTTP_TO_IP_2	/^https?\:\/\/(?:[^\/]*\@)?\d+\.\d+\.\d+\.\d+/i
-describe T_NORMAL_HTTP_TO_IP_2	Uses a dotted-decimal IP address in URL
-uri T_NORMAL_HTTP_TO_IP_3	/^https?\:\/\/[^\/]*\d+\.\d+\.\d+\.\d+/i
-describe T_NORMAL_HTTP_TO_IP_3	Uses a dotted-decimal IP address in URL
+# test for weird double quoting in the body (no single quotes)
+body T_BODY_QUOTES_Z1	/[\042\223\224\262\263\271]{2}\S{0,16}[\042\223\224\262\263\271]{2}/
+describe T_BODY_QUOTES_Z1	Weird repeated double-quotation marks in body
 
 #bug 1010
 body T_CHECK_EMAIL_ISFREE	eval:check_email_isfree()
@@ -125,18 +122,6 @@ header T_LISTPROC1		X-Listprocessor-version =~ /^\s*(?:\d\.)+\w*\s+--\s+List[Pp]
 score T_LISTPROC1		-0.01
 tflags T_LISTPROC1		nice
 
-# bug 1010
-# tvd - 12/25 - part of me says to promote these with strong spam signs, but
-# another part says that since it's only 1 person who gets any hits,
-# we shouldn't promote and just let them have local rules.  Thoughts?
-#
-# 12/22 - 2.59% for quinlan, 0 for others - tvd
-uri T_SUPER_BARGAINS_MAILTO	/mailto:\S+[.@]super-bargains\.com/
-uri T_SUPER_BARGAINS_URL	/\bsuper-bargains\.com/
-# 12/23 - 4.83% for allen, 0 for others - tvd
-uri T_KAVKAZCENTER_MAILTO	/mailto:\S+[.@]kavkazcenter\.com/
-uri T_KAVKAZCENTER_URL		/\bkavkazcenter\.com/
-
 ########################################################################
 
 # bug 1308
@@ -159,12 +144,17 @@ header __FROM_CARTALK			From =~ /\@cartalk\.com$/
 meta T_X_BULKMAIL_2			( __X_BULKMAIL && !__FROM_CARTALK )
 
 # possible additions to NIGERIA rules
+# 12/26 quinlan: 2 and 3 look promotable to me, 1 seems like the hit
+# rate is too low (0.0210% for a 4 person check).  Need to be renamed
+# and integrated with other NIGERIA rules (or whatever we want to call
+# them)
 body T_SCAM_419_1		/MOHAMMED(?:\.|=2e)?\s?ABACHA/i
 body T_SCAM_419_2		/(?:government|bank) of nigeria/i
 body T_SCAM_419_3		/nigerian? (?:national|government)/i
 
 # Dec 24 2002 jm: random check
 # 12/25 - tvd - great for quinlan (2.69%), hits under .05% for everyone else, no fps
+# quinlan: just a note that I didn't write the rule :-)
 uri T_BARGAIN_URL		/bargains?\.(?:com|biz)/
 # 12/25 - tvd - fps a bit for rod, my fp is homestead.com redirect to:
 #http://professional.homestead.com/splash.ffhtml?ref=3564&target=www.homestead.com/splash.html%3F3564%26target%3Dwww.hspromos.com/webring.html
