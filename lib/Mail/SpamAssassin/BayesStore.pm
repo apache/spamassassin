@@ -430,7 +430,7 @@ sub expiry_due {
 
   dbg("Bayes DB expiry: Now: $now, Last: $last, Limit: $limit, Oldest: $oldest",'bayes','-1');
 
-  if ($now - $last > $limit/2 && $now - $oldest > $limit) {
+  if (($now - $last > $limit/2 && $now - $oldest > $limit) || ($now < $last)) {
     return 1;
   }
 
