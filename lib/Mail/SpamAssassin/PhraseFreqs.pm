@@ -11,44 +11,30 @@ sub _check_phrase_freqs {
   $self->{phrase_hits_hash} = { };
   $self->{conf}->{spamphrase_highest_score} ||= 1;
 
-  my $text = join ("\n", @{$body});
+  $$body[0] =~ s/^Subject://i;
 
-  # remove "Subject:"
-  $text =~ s/^Subject://i;
-
-  # remove signature
-  my $maxsig = scalar(grep(/\S\s+\S/, @{$body})) / 3 + 1;
-  $maxsig = 15 if $maxsig > 15;
-  $text =~ s/(\S)\s*\n-- \n((.*\n){1,$maxsig}?)\s*\Z/$1/m;
-
-  # just the words
-  $text =~ s/[^A-Za-z]+/ /gs;
-  $text =~ s/\s+/ /gs;
-  $text =~ tr/A-Z/a-z/;
-
-  # kill ignored stopwords -- too small for us to match
-  $text =~ s/ (?:to|of|in|a|an|and|the|on|if|or) / /gs;
-
-  # print "words found: $text\n";
-
+  my $last;
   my $word;
   my $wc = 0;
-  my $lastword = "000";		# avoid defined() test in loop
   my $phrase;
   my $freq;
 
-  # don't forget to increase the maximum match length if longer words
-  # appear in 40_spam_phrases.cf
-  while ($text =~ /\b([a-z]{3,15})\b/g) {
-    $word = $1;
-    $wc++;
-    $phrase = "$lastword $word";
-    $freq = $self->{conf}->{spamphrase}->{$phrase};
-    if (defined $freq) {
-      $self->{phrase_score} += $freq;
-      $self->{phrase_hits_hash}->{$phrase} = $freq;
-    }
-    $lastword = $word;
+  for (@{$body}) {
+      $last = "";		# avoid defined() test in loop
+      tr/A-Za-z/ /cs;
+      tr/A-Z/a-z/;
+      foreach my $word (split) {
+	  # kill ignored stopwords -- too small for us to match
+	  next if length($word) < 3 || $word eq "and" || $word eq "the";
+	  $wc++;
+	  $phrase = "$last $word";
+	  $freq = $self->{conf}->{spamphrase}->{$phrase};
+	  if (defined $freq) {
+	      $self->{phrase_score} += $freq;
+	      $self->{phrase_hits_hash}->{$phrase} = $freq;
+	  }
+	  $last = $word;
+      }
   }
 
   # bring the score down to an absolute value (not based on the size
