@@ -59,6 +59,15 @@ Received: from 24.8.231.233 by by1fd.bay1.hotmail.msn.com with HTTP;
 },
 q{
 
+Received: from hotmail.com (something.com [65.54.245.95]) at just after 10pm by Daffy.timing.com on a Friday (CrazyMTA) (envelope-from <foo@example.com>) with TFTP
+
+} => q{
+
+  [ ip=65.54.245.95 rdns=something.com helo=hotmail.com by=Daffy.timing.com ident= envfrom=foo@example.com ]
+
+},
+q{
+
 Received: from postfix3-2.free.fr (foobar@213.228.0.139) 
   by totor.example.net with SMTP; 14 Nov 2003 08:05:50 -0000 
 Received: from asterix.laurier.org (lns-p19-8-82-65-66-244.adsl.proxad.net [82.65.66.244]) 
