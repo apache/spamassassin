@@ -297,7 +297,12 @@ to use this.
 
 Remove SpamAssassin markup (the "SpamAssassin results" report, X-Spam-Status
 headers, etc.) from the mail message.  The resulting message, which will be
-identical to the original, pre-SpamAssassin input, will be output to stdout.
+more or less identical to the original, pre-SpamAssassin input, will be output
+to stdout.
+
+(Note: the message will not be exactly identical; some headers will be
+reformatted due to some features of the Mail::Internet package, but the body
+text will be.)
 
 =item B<-c> I<config>
 
@@ -309,7 +314,7 @@ Read user score preferences from I<prefs>.
 
 =item B<-D>
 
-Product diagnostic output.
+Produce diagnostic output.
 
 =back
 
