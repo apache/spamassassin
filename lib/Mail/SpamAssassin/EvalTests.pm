@@ -1922,16 +1922,17 @@ sub message_is_habeas_swe {
 
   $self->{habeas_swe} = 0;
 
-  my $all = $self->get('ALL');
-  if ($all =~ /\n(X-Habeas-SWE-1:.{0,512}X-Habeas-SWE-9:[^\n]{0,64}\n)/si) {
-    my $text = $1;
-    $text =~ tr/A-Z/a-z/;
-    $text =~ tr/ / /s;
-    $text =~ s/\/?>/\/>/;
-    if (sha1($text) eq "42ab3d716380503f66c4d44017c7f37b04458a9a") {
-      $self->{habeas_swe} = 1;
-    }
+  my $text = '';
+  for (my $i = 1; $i <= 9; $i++) {
+    $text .= lc($self->get("X-Habeas-SWE-$i"));
   }
+  if ($text) {
+    $text =~ s,\s+, ,g;
+    $text =~ s,^\s|\s$,,g;
+    $text =~ s,/?>,/>,;
+    $self->{habeas_swe} = sha1($text) eq q(76c65d9eb65e572166a08b50fd197b29af09d43a);
+  }
+
   return $self->{habeas_swe};
 }
 
