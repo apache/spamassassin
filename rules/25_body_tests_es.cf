@@ -4,63 +4,90 @@
 # Leaving some of these without "lang es" because they show up in english language
 # inboxes
 
-body REMOVE_ES_01             /Si no (?:desea(?:s|) |quer(?:é|e)s )(?:seguir |)recibi(?:r|endo) (?:m(?:á|a|=E1)s |estos |)(?:correo(?:s|)|mensaje(?:s|)|publicidad|informaci(?:ó|o)n|ofertas|emails promocionales)/
+body REMOVE_ES_01             /Si no (?:desea(?:s|) |quer(?:é|e)s )(?:seguir |)recibi(?:r|endo) (?:m.s |estos )?(?:correo(?:s)?|mensaje(?:s)?|publicidad|informaci.n|ofertas|emails promocionales)/
 describe REMOVE_ES_01         Claims you can be removed in Spanish
 
-body REMOVE_ES_02             /(Para ser removido|Si quiere(?:s|) salir) de esta lista (responda el mail|solo tiene(?:s|) que marcar)/i
+body REMOVE_ES_02             /(Para ser (?:eliminado|removido)|Si quiere(?:s|) salir) de (?:nuestra|esta) lista(,?) (?:sera removido|responda el mail|solo tiene(?:s)? que marcar)/i
 describe REMOVE_ES_02           Claims you can be removed in Spanish
 
-body REMOVE_ES_03             /(?:Si |)(usted |)desea(?:s|) ser (?:borrado|removido|eliminado) (?:de nuestra (lista de correo|base de datos) |)(?:env(i|í)(?:ar|e|a) (?:un |)e-mail|haga)/i
+body REMOVE_ES_03             /(?:Si )(Ud\.|usted)? desea(?:s)? ser (?:borrado|removido|eliminado) (?:por favor |de (?:cualquier listado futuro,|nuestra (lista de correo|base de datos)) )?(s.lo )?(?:responda|env.(?:ar|e|a) (?:un |)e(-)?mail|haga)/i
 describe REMOVE_ES_03           Claims you can be removed in Spanish
 
-body REMOVE_ES_04             /para no recibir mas mensajes/i
+body REMOVE_ES_04             /(?:si desea|para) no recibir mas (?:nuestras promociones|mensajes)/i
 describe REMOVE_ES_04           Claims you can be removed in Spanish
 
 body REMOVE_ES_05		/un email.{1,10}y procedo a eliminarle de mi base de datos/i
 describe REMOVE_ES_05		If you send an email you will be OptOut
 
-body REMOVE_ES_05		/Si no desea ser incluido en futuros envíos/
-describe REMOVE_ES_05		Claims you can opt-out
+body REMOVE_ES_06		/Si no desea ser incluido en futuros envíos/
+describe REMOVE_ES_06		Claims you can opt-out
 
 body EXCUSE_ES_01             /(?:este e-mail|esta carta) no (?:puede ser|se) considera(?:d(?:o|a)) (?:\(|)SPAM(?:\)|) (?:ya que|mientras)/i
 describe EXCUSE_ES_01         Claims not to be spam in Spanish
+
 body EXCUSE_ES_02             /Me he tomado la libertad de enviarle este mail por/
 describe EXCUSE_ES_02         Someone fell free to send you a message in Spanish
+
 body EXCUSE_ES_03             /Este e-mail ha sido enviado por solicitud de/
 describe EXCUSE_ES_03         Someone requested an spammer to spam you in Spanish
+
 body EXCUSE_ES_04             /Este es un correo no solicitado enviado a petici.n de/
 describe EXCUSE_ES_04         Someone requested an spammer to spam you in Spanish
 
 lang es body EXCUSE_ES_05             /Enviamos este mail por considerar la difusión del correo electrónico una alternativa económica/
 lang es describe EXCUSE_ES_05         El correo como alternativa comercial
 
+lang es body DEJAR_DE_FUMAR_ES		/(?:pastillas|dispositivo|terapia) para dejar de fumar/i
+lang es describe DEJAR_DE_FUMAR_ES	Para dejar de fumar
+
 ## This ones most likelly will appear only in spanish mails
 #
-lang es body ES_ES_GRATIS	/ES.{1,14}GRATIS/
-lang es describe ES_ES_GRATIS	NOS CHILLAN PARA DECIR QUE ES GRATIS
-lang es score ES_ES_GRATIS	1.4
+lang es body GRATIS_ES	/(?:TOTALMENTE|ABSOLUTAMENTE|ES).{1,14}GRATIS/
+lang es describe GRATIS_ES	NOS CHILLAN PARA DECIR QUE ES GRATIS
+lang es score GRATIS_ES	1.4
 
-lang es body INTERESADO		/Si le interesa el tema contesteme (solamente )?a este email/i
-lang es describe INTERESADO	Nos animan a contestar si estamos interesados
+lang es body INTERESADO_ES		/Si le interesa el tema contesteme (solamente )?a este email/i
+lang es describe INTERESADO_ES	Nos animan a contestar si estamos interesados
 
 ## Recursos generales de spammers
 #
-lang es body ES_LEY_ORGANICA		/En cumplimiento de lo dispuesto en la Ley Org(?:a|á)nica 15\/1999 de 13 de Diciembre/i
-lang es describe ES_LEY_ORGANICA	Dice cumplir con la ley
-lang es score ES_LEY_ORGANICA		2.0
+lang es body LEY_ORGANICA_ES		/(?:nos adherimos a|En cumplimiento de lo dispuesto en) la Ley Org.nica 15\/1999 de 13 de Diciembre/i
+lang es describe LEY_ORGANICA_ES	Dice cumplir con la ley
+lang es score LEY_ORGANICA_ES		2.0
 
-lang es body ES_NORMATIVA_SPAM		/105 congreso base de las normativas internacionales sobre SPAM/i
-lang es describe ES_NORMATIVA_SPAM	Clama cumplir con la normativa SPAM
-lang es score ES_NORMATIVA_SPAM		2.0
+lang es body NORMATIVA_SPAM_ES		/(?:Bajo el Decreto S\.1618 titulo III aprobado por el 105 congreso|105 congreso base de las normativas internacionales sobre SPAM)/i
+lang es describe NORMATIVA_SPAM_ES	Clama cumplir con la normativa SPAM
+lang es score NORMATIVA_SPAM_ES	2.0
 
-lang es body TARJETA_VERDE		/Consiga un permiso de residencia.{0,30}Tarjeta Verde/is
-lang es describe TARJETA_VERDE		Inmigración legal (?) a los Estados Unidos
+lang es body TARJETA_VERDE_ES		/Consiga un permiso de residencia.{0,30}Tarjeta Verde/is
+lang es describe TARJETA_VERDE_ES		Inmigración legal (?) a los Estados Unidos
 
-lang es body PROMOCION		/promocion especial/i
-lang es describe PROMOCION	Promocion especial.
+lang es body PROMOCION_ES		/promocion especial/i
+lang es describe PROMOCION_ES	Promocion especial.
 
-lang es body ALTA_BUSCADORES	/alta en (mas de )?\d{2,4} buscadores hispanos/i
-lang es describe ALTA_BUSCADORES	Alta en buscadores hispanos.
+lang es body ALTA_BUSCADORES_ES	/alta en (mas de )?\d{2,4} buscadores hispanos/i
+lang es describe ALTA_BUSCADORES_ES	Alta en buscadores hispanos.
 
-lang es body EXCLAMACION	/INFORMESE|LLAME(NOS)?|RESPOND(A|E)|ENVI(A|E)/
-lang es describe EXCLAMACION		IMPERATIVOS EN MAYUSCULAS.
+lang es body EXCLAMACION_ES		/INFORMESE|LLAME(NOS)?|RESPOND(?:A|E)|ENVI(?:A|E)|PID(?:A|E)|COMPRE|SOLICITE|CONSULTE|ESCRIBA|VISIT(?:A|E)NOS/
+lang es describe EXCLAMACION_ES		IMPERATIVOS EN MAYUSCULAS.
+
+lang es body PRESENTAMOS_ES	/(?:te|le) (?:ofrecemos|presentamos|informamos que|informaremos)/i
+lang es describe PRESENTAMOS_ES	Presentación de un nuevo producto.
+
+lang es body CONTRA_REEMBOLSO_ES	/pago contra reembolso/i
+lang es describe CONTRA_REEMBOLSO_ES	Pago contra reembolso.
+
+lang es body CLICK_ES		/(?:haga|haz) click aqu. para/
+lang es describe CLICK_ES	Haga click aqui.
+
+lang es body REGALO_ES		/(?:le|te) (?:regalamos|obsequiamos)/
+lang es desbribe REGALO_ES	Los regalos no existen, salvo de nuestros amigos.
+
+lang es body GANADORES_ES	/Usted y su familia podr.an tener suerte y ser los ganadores/
+lang es describe GANADORES_ES	Pueden ser ganadores.
+
+lang es body PORNO_GRATIS_ES		/porno .{3,5} gratis/i
+lang es describe PORNO_GRATIS_ES	Porno gratis.
+
+# vim: set ai! tw=255:
+
