@@ -1,8 +1,8 @@
 # SpamAssassin rules file: tests.
-# $Id: 20_head_tests.cf,v 1.175 2002/09/04 18:36:49 jmason Exp $
+# $Id: 20_head_tests.cf,v 1.176 2002/09/04 18:52:50 jmason Exp $
 ###########################################################################
 
-require_version 2.41
+require_version 2.50
 
 header NO_REAL_NAME		From =~ /^["\s]*\<?\S+\@\S+\>?\s*$/
 describe NO_REAL_NAME		From: does not include a real name

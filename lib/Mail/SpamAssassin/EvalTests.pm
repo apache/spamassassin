@@ -1540,20 +1540,6 @@ sub message_is_habeas_swe {
   return 0;
 }
 
-sub message_is_habeas_swe {
-  my ($self) = @_;
-
-  my $all = $self->get('ALL');
-  if ($all =~ /\n(X-Habeas-SWE-1:.{0,512}X-Habeas-SWE-9:[^\n]{0,64}\n)/si) {
-    my $text = $1;
-    $text =~ tr/A-Z/a-z/;
-    $text =~ tr/ / /s;
-    $text =~ s/\/?>/\/>/;
-    return sha1($text) eq "42ab3d716380503f66c4d44017c7f37b04458a9a";
-  }
-  return 0;
-}
-
 ###########################################################################
 
 # This test was originally based on RFC 2369 compliance.  However, the

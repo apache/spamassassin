@@ -1,12 +1,12 @@
 # SpamAssassin rules file: tests.
-# $Id: 20_body_tests.cf,v 1.246 2002/09/04 18:36:49 jmason Exp $
+# $Id: 20_body_tests.cf,v 1.247 2002/09/04 18:52:50 jmason Exp $
 # 
 # note: body tests are run with long lines, so be sure to limit the
 # size of searches; use ".{0,30}" instead of ".*" to avoid huge
 # search times.
 ###########################################################################
 
-require_version 2.41
+require_version 2.50
 
 ###########################################################################
 # Message digest tests
