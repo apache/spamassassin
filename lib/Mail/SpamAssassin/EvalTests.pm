@@ -355,9 +355,15 @@ sub check_for_forged_juno_received_headers {
   my $xmailer = $self->get('X-Mailer');
   my $xorig = $self->get('X-Originating-IP');
   my $rcvd = $self->get('Received');
-  if($rcvd !~ /from.*mail\.com.*\[[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\].*by/) { return 1; }
-  if($xorig !~ /[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/) { return 1; }
-  if($xmailer !~ /mail\.com/) { return 1; }
+
+  if (!$xorig) {  # New style Juno has no X-Originating-IP header, and other changes
+    if($rcvd !~ /from.*juno\.com.*\[[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\].*by/) { return 1; }
+    if($xmailer !~ /Juno /) { return 1; }
+  } else {
+    if($rcvd !~ /from.*mail\.com.*\[[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\].*by/) { return 1; }
+    if($xorig !~ /[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/) { return 1; }
+    if($xmailer !~ /mail\.com/) { return 1; }
+  }
 
   return 0;   
 }
