@@ -435,8 +435,15 @@ long message_write(int fd, struct message *m){
     off_t jlimit;
     char buffer[1024];
 
+    /* if we're to output a message, m->is_spam will be EX_OUTPUTMESSAGE */
     if(m->is_spam==EX_ISSPAM || m->is_spam==EX_NOTSPAM){
-        return full_write(fd, (unsigned char *) m->out, m->out_len);
+	return full_write(fd, (unsigned char *) m->out, m->out_len);
+    }
+
+    if (m->is_spam != EX_OUTPUTMESSAGE && m->is_spam != EX_TOOBIG) {
+      syslog(LOG_ERR,
+	    "Cannot write this message, is_spam = %d!\n", m->is_spam);
+      return -1;
     }
 
     switch(m->type){
@@ -682,7 +689,9 @@ static int _message_filter(const struct sockaddr *addr,
 	    failureval = EX_PROTOCOL; goto failure;
       }
       return EX_OK;
-    } else {
+    }
+    else {
+	m->is_spam=EX_OUTPUTMESSAGE;
 	if (m->content_length < 0) {
 	    /* should have got a length too. */
 	    failureval = EX_PROTOCOL; goto failure;
@@ -702,7 +711,6 @@ static int _message_filter(const struct sockaddr *addr,
 	    failureval = EX_TOOBIG; goto failure;
 	}
 	m->out_len+=len;
-
 
 	shutdown(sock, SHUT_RD);
 	close(sock);

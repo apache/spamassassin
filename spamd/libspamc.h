@@ -14,9 +14,10 @@
 #include <netdb.h>
 #include <stdio.h>
 
-#define EX_ISSPAM       1
-#define EX_NOTSPAM      0
-#define EX_TOOBIG     866
+#define EX_NOTSPAM		  0
+#define EX_ISSPAM		  1
+#define EX_TOOBIG		866
+#define EX_OUTPUTMESSAGE	867
 
 /* Aug 14, 2002 bj: Bitflags instead of lots of bool parameters */
 #define SPAMC_MODE_MASK      1
@@ -59,8 +60,8 @@ struct message {
 
     /* Filled in by filter_message */
     int is_spam;              /* EX_ISSPAM if the message is spam, EX_NOTSPAM
-                                 if not, EX_TOOBIG if a filtered message is
-                                 returned in out below. */
+                                 if not, EX_OUTPUTMESSAGE if a filtered message
+				 is returned in "out" below. */
     float score, threshold;   /* score and threshold */
     char *out; int out_len;   /* Output from spamd. Either the filtered
                                  message, or the check-only response. Or else,
