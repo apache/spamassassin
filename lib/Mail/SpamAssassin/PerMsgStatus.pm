@@ -1263,7 +1263,7 @@ my $mark       = q(-_.!~*'());                                    #'; emacs
 my $unreserved = "A-Za-z0-9\Q$mark\E\x00-\x08\x0b\x0c\x0e-\x1f";
 my $uricSet = quotemeta($reserved) . $unreserved . "%";
 
-my $schemeRE = qr/[a-zA-Z][a-zA-Z0-9.+\-]{3,9}/;
+my $schemeRE = qr/(?:https?|ftp|mailto|javascript|file)/;
 
 my $uricCheat = $uricSet;
 $uricCheat =~ tr/://d;
@@ -1345,9 +1345,9 @@ sub do_body_uri_tests {
       $uri =~ s/^URI://i;
 
       # Does the uri start with "http://", "mailto:", "javascript:" or
-      # such?  If not, we probaly need to put the base URI in front
+      # such?  If not, we probably need to put the base URI in front
       # of it.
-      if ($uri !~ /^[a-z]+:/i) {
+      if ($uri !~ /^${schemeRE}:/io) {
         # If it's a hostname that was just sitting out in the
         # open, without a protocol, and not inside of an HTML tag,
         # the we should add the proper protocol in front, rather
