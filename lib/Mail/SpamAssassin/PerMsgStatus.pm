@@ -768,11 +768,15 @@ sub rewrite_no_report_safe {
 
   if($self->{is_spam}) {
       # Deal with header rewriting
-      while ( my($header, $value) = each %{$self->{conf}->{rewrite_header}}) {
-	unless ( $header =~ /^(?:Subject|From|To)$/ ) {
-	  dbg("rewrite: ignoring $header = $value");
-	  next;
-	}
+      foreach ( @pristine_headers ) {
+        # if we're not going to do a rewrite, skip this header!
+        next if (!/^(?:From|Subject|To):/i || !exists $self->{conf}->{rewrite_header}->{$1});
+
+	# pop the original version onto the end of the header array
+	push(@pristine_headers, "X-Spam-Prev-$_");
+
+	# prep the rewrite of the original
+        my($header, $value) = %{$self->{conf}->{rewrite_header}};
 
 	# Figure out the rewrite piece
         my $tag = $self->_replace_tags($value);
@@ -781,12 +785,7 @@ sub rewrite_no_report_safe {
 	# The tag should be a comment for this header ...
 	$tag = "($tag)" if ( $header =~ /^(?:From|To)$/ );
 
-	# Go ahead and markup the headers
-	foreach ( @pristine_headers ) {
-	  # skip non-correct-header or headers that are already tagged
-	  next if ( !/^${header}:/i );
-          s/^([^:]+:[ ]*)(?:\Q${tag}\E )?/$1${tag} /i;
-	}
+        s/^([^:]+:[ ]*)(?:\Q${tag}\E )?/$1${tag} /i;
       }
 
       $addition = 'headers_spam';

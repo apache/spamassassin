@@ -817,13 +817,18 @@ STRING. (They will be converted to square brackets.)
 =cut
 
     if ( $key eq 'rewrite_header' ) {
-      # could check $hdr to be /subject|from|to/, but rest of the
-      # code already handles that ...
       my($hdr, $string) = split(/\s+/, $value, 2);
       $hdr = ucfirst(lc($hdr));
-      $string =~ tr/()/[]/;
-      $self->{rewrite_header}->{$hdr} = $string;
-      next;
+
+      # We only deal with From, Subject, and To ...
+      if ($hdr =~ /^(?:From|Subject|To)$/) {
+        $string =~ tr/()/[]/;
+        $self->{rewrite_header}->{$hdr} = $string;
+        next;
+      }
+
+      # if we get here, note the issue, then we'll fail through for an error.
+      dbg("rewrite_header: ignoring $hdr, not From, Subject, or To");
     }
 
 =item fold_headers { 0 | 1 }        (default: 1)

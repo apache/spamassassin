@@ -846,28 +846,28 @@ sub remove_spamassassin_markup {
   my $mbox = $mail_obj->get_mbox_seperator() || '';
 
   dbg("Removing Markup");
-  $self->init(1);
+
+  # Go looking for a "report_safe" encapsulated message.  Abort out ASAP
+  # if we have definitive proof it's not an encapsulated message.
   my $ct = $mail_obj->get_header("Content-Type") || '';
-  if ( $ct
-    && $ct =~ m!^\s*multipart/mixed;\s+boundary\s*=\s*["']?(.+?)["']?(?:;|$)!i )
-  {
+  if ( $ct =~ m!^\s*multipart/mixed;\s+boundary\s*=\s*["']?(.+?)["']?(?:;|$)!i ) {
 
     # Ok, this is a possible encapsulated message, search for the
     # appropriate mime part and deal with it if necessary.
     my $boundary = "\Q$1\E";
-    my @msg = split(/^/,$mail_obj->get_pristine());
+    my @msg = split(/^/,$mail_obj->get_pristine_body());
 
     my $flag = 0;
     $ct   = '';
     my $cd = '';
     for ( my $i = 0 ; $i <= $#msg ; $i++ ) {
-      # only look at mime headers
+      # only look at mime part headers
       next unless ( $msg[$i] =~ /^--$boundary$/ || $flag );
 
       if ( $msg[$i] =~ /^\s*$/ ) {    # end of mime header
 
         # Ok, we found the encapsulated piece ...
-	if ($ct =~ m@(?:message/rfc822|text/plain);\s+x-spam-type=original@ ||
+	if ($ct =~ m@^(?:message/rfc822|text/plain);\s+x-spam-type=original@ ||
 	    ($ct eq "message/rfc822" &&
 	     $cd eq $self->{'encapsulated_content_description'}))
         {
@@ -883,7 +883,7 @@ sub remove_spamassassin_markup {
             }
           }
 
-	  # Ok, we're done.  Return the message.
+	  # Ok, we're done.  Return the rewritten message.
 	  return join('', $mbox, @msg);
         }
 
@@ -904,38 +904,23 @@ sub remove_spamassassin_markup {
     }
   }
 
+  # Ok, if we got here, the message wasn't a report_safe encapsulated message.
+  # So treat it like a "report_safe 0" message.
   my $hdrs = $mail_obj->get_pristine_header();
+  my $body = $mail_obj->get_pristine_body();
 
   # remove DOS line endings
   $hdrs =~ s/\r//gs;
 
-  # de-break lines on SpamAssassin-modified headers.
-  1 while $hdrs =~ s/(\n(?:X-Spam|Subject)[^\n]+?)\n[ \t]+/$1 /gs;
+  # unfold SA added headers, but not X-Spam-Prev headers ...
+  1 while $hdrs =~ s/(\nX-Spam-(?!Prev).+?)\n[ \t]+/$1 /g;
 
-  # reinstate the old content type
-  if ($hdrs =~ /^X-Spam-Prev-Content-Type: /m) {
-    $hdrs =~ s/\nContent-Type: [^\n]*?\n/\n/gs;
-    $hdrs =~ s/\nX-Spam-Prev-(Content-Type: [^\n]*\n)/\n$1/gs;
+###########################################################################
+  # Backward Compatibilty, pre 3.0.x.
 
-    # remove embedded spaces where they shouldn't be; a common problem
-    $hdrs =~ s/(Content-Type: .*?boundary=\".*?) (.*?\".*?\n)/$1$2/gs;
-  }
-
-  # reinstate the old content transfer encoding
-  if ($hdrs =~ /^X-Spam-Prev-Content-Transfer-Encoding: /m) {
-    $hdrs =~ s/\nContent-Transfer-Encoding: [^\n]*?\n/\n/gs;
-    $hdrs =~ s/\nX-Spam-Prev-(Content-Transfer-Encoding: [^\n]*\n)/\n$1/gs;
-  }
-
-  # reinstate the return-receipt-to header
-  if ($hdrs =~ /^X-Spam-Prev-Return-Receipt-To: /m) {
-    $hdrs =~ s/\nX-Spam-Prev-(Return-Receipt-To: [^\n]*\n)/\n$1/gs;
-  }
-
-  # remove the headers we added
-  1 while $hdrs =~ s/\nX-Spam-[^\n]*?\n/\n/gs;
-
-  foreach my $header ( keys  %{$self->{conf}->{rewrite_header}} ) {
+  # deal with rewritten headers w/out X-Spam-Prev- versions ...
+  $self->init(1);
+  foreach my $header ( keys %{$self->{conf}->{rewrite_header}} ) {
     dbg ("Removing markup in $header");
     if ($header eq 'Subject') {
       my $tag = $self->{conf}->{rewrite_header}->{'Subject'};
@@ -949,40 +934,27 @@ sub remove_spamassassin_markup {
     }
   }
 
-  # ok, next, the report.
-  # This is a little tricky since we can have either 0, 1 or 2 reports;
-  # 0 for the non-spam case, 1 for normal filtering, and 2 for -t (where
-  # an extra report is appended at the end of the mail).
+  # Now deal with report cleansing from 2.4x and previous.
+  # possibly a blank line, "SPAM: ----.+", followed by "SPAM: stuff" lines,
+  # followed by another "SPAM: ----.+" line, followed by a blank line.
+  1 while ($body =~ s/^\n?SPAM: ----.+\n(?:SPAM:.*\n)*SPAM: ----.+\n\n//);
+###########################################################################
 
-  my @newbody = ();
-  my $inreport = 0;
-  foreach $_ (@{$mail_obj->get_body()})
-  {
-    s/\r?$//;	# DOS line endings
+  # 3.0 version -- revert from X-Spam-Prev to original ...
+  while ($hdrs =~ s/^X-Spam-Prev-(([^:]+:)\s*(?:.*\n(?:\s+\S.*\n)*))//mg) {
+    my($hdr, $name) = ($1,$2);
 
-    if (/^SPAM: ----/ && $inreport == 0) {
-      # we've just entered a report.  If there's a blank line before the
-      # report, get rid of it...
-      if ($#newbody > 0 && $newbody[$#newbody-1] =~ /^$/) {
-	pop (@newbody);
-      }
-      # and skip on to the next line...
-      $inreport = 1; next;
-    }
-
-    if ($inreport && /^$/) {
-      # blank line at end of report; skip it.  Also note that we're
-      # now out of the report.
-      $inreport = 0; next;
-    }
-
-    # finally, if we're not in the report, add it to the body array
-    if (!$inreport) {
-      push (@newbody, $_);
+    # If the rewritten version doesn't exist, we should deal with it anyway...
+    unless ($hdrs =~ s/^$name\s*(?:.*\n(?:\s+\S.*\n)*)$/$hdr\n/m) {
+      $hdrs =~ s/\n\n/\n$hdr\n\n/;
     }
   }
 
-  return join ('', $mbox, $hdrs, @newbody);
+  # remove any other X-Spam headers we added, will be unfolded
+  1 while $hdrs =~ s/\nX-Spam-.*\n/\n/g;
+
+  # Put the whole thing back together ...
+  return join ('', $mbox, $hdrs, $body);
 }
 
 ###########################################################################

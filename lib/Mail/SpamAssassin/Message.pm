@@ -232,10 +232,11 @@ sub find_parts {
 =item get_pristine_header()
 
 Returns pristine headers of the message.  If no specific header name
-is given as a parameter (case-insensitive), then all headers will
-be returned.  If called in an array context, an array will be returned
-with each header (specific or all) in a different element.  In a scalar
-context, either all of the headers are returned as a scalar, or the last
+is given as a parameter (case-insensitive), then all headers will be
+returned as a scalar, including the blank line at the end of the headers.
+
+If called in an array context, an array will be returned with each
+specific header in a different element.  In a scalar context, the last
 specific header is returned.
 
 ie: If 'Subject' is specified as the header, and there are 2 Subject

@@ -11,6 +11,7 @@ use Test; BEGIN { plan tests => 4 };
 q{ Content-Type: text/html }, 'contenttype',
 q{ 
   Sender: pertand@email.mondolink.com
+  Content-Type: text/html
 
   <HTML></P>
   }, 'startofbody',
