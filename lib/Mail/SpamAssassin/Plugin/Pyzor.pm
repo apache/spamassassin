@@ -364,6 +364,7 @@ sub pyzor_report {
 
   if ($err) {
     alarm $oldalarm;
+    chomp $err;
     if ($err eq '__alarm__') {
       dbg("reporter: pyzor report timed out after $timeout seconds");
     } elsif ($err eq '__brokenpipe__') {
