@@ -6,12 +6,16 @@
 
 body REMOVE_ES_01             /Si no (?:desea(?:s|) |quer(?:é|e)s )(?:seguir |)recibi(?:r|endo) (?:m(?:á|a|=E1)s |estos |)(?:correo(?:s|)|mensaje(?:s|)|publicidad|informaci(?:ó|o)n|ofertas|emails promocionales)/
 describe REMOVE_ES_01         Claims you can be removed in Spanish
-body REMOVE_ES_02             /Si quiere(?:s|) salir de esta lista solo tiene(?:s|) que marcar/
+
+body REMOVE_ES_02             /(Para ser removido|Si quiere(?:s|) salir) de esta lista (responda el mail|solo tiene(?:s|) que marcar)/i
 describe REMOVE_ES_02           Claims you can be removed in Spanish
+
 body REMOVE_ES_03             /(?:Si |)(usted |)desea(?:s|) ser (?:borrado|removido|eliminado) (?:de nuestra (lista de correo|base de datos) |)(?:env(i|í)(?:ar|e|a) (?:un |)e-mail|haga)/i
 describe REMOVE_ES_03           Claims you can be removed in Spanish
+
 body REMOVE_ES_04             /para no recibir mas mensajes/i
 describe REMOVE_ES_04           Claims you can be removed in Spanish
+
 body REMOVE_ES_05		/un email.{1,10}y procedo a eliminarle de mi base de datos/i
 describe REMOVE_ES_05		If you send an email you will be OptOut
 
@@ -52,3 +56,11 @@ lang es score ES_NORMATIVA_SPAM		2.0
 lang es body TARJETA_VERDE		/Consiga un permiso de residencia.{0,30}Tarjeta Verde/is
 lang es describe TARJETA_VERDE		Inmigración legal (?) a los Estados Unidos
 
+lang es body PROMOCION		/promocion especial/i
+lang es describe PROMOCION	Promocion especial.
+
+lang es body ALTA_BUSCADORES	/alta en (mas de )?\d{2,4} buscadores hispanos/i
+lang es describe ALTA_BUSCADORES	Alta en buscadores hispanos.
+
+lang es body EXCLAMACION	/INFORMESE|LLAME(NOS)?|RESPOND(A|E)|ENVI(A|E)/
+lang es describe EXCLAMACION		IMPERATIVOS EN MAYUSCULAS.
