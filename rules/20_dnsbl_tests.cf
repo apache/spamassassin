@@ -221,6 +221,7 @@ tflags __SENDERBASE net
 # S25 = date of first message from this domain
 header SENDERBASE_NEW_BULK	eval:check_rbl_sub('senderbase', 'S23 > 6.2 && (time - S25 < 120*86400)')
 describe SENDERBASE_NEW_BULK	Sender domain is new and very high volume
+tflags SENDERBASE_NEW_BULK	net
 
 # ---------------------------------------------------------------------------
 # NOTE: donation tests, see README file for details
