@@ -699,7 +699,7 @@ sub url_encode {
 Return the first module that can be successfully loaded with C<require>
 from the list.  Returns C<undef> if none are available.
 
-Used to replace C<AnyDBM_File>, like so:
+This is used instead of C<AnyDBM_File> as follows:
 
   my $module = Mail::SpamAssassin::Util::first_available_module
                         (qw(DB_File GDBM_File NDBM_File SDBM_File));
