@@ -18,21 +18,17 @@
 
 use Getopt::Long;
 use vars qw($opt_cffile $opt_count $opt_lambda $opt_threshold
-		$opt_spam $opt_ham $opt_fplog $opt_fnlog);
+	    $opt_spam $opt_ham $opt_fplog $opt_fnlog);
 
-GetOptions("cffile=s", "count", "lambda=f", "threshold=f", "spam=s", "ham=s", "scoreset=i", "fplog=s", "fnlog=s");
+GetOptions("cffile=s", "count", "lambda=f", "threshold=f", "spam=s",
+	   "ham=s", "scoreset=i", "fplog=s", "fnlog=s");
 
-my $argcffile = $opt_cffile;
-
-my $justcount = 0;
-if ($opt_count) { $justcount = 1; }
-
-my $threshold = 5;
-if (defined $opt_threshold) { $threshold = $opt_threshold; }
-
+$opt_cffile ||= "../rules";
+$opt_count ||= 0;
+$opt_threshold ||= 5;
 $opt_spam ||= 'spam.log';
 $opt_ham ||= 'ham.log';
-$opt_scoreset = 0 if ( !defined $opt_scoreset );
+$opt_scoreset = 0 if (!defined $opt_scoreset);
 
 # If desired, report false positives and false negatives for analysis
 if (defined $opt_fnlog) { open (FNLOG, ">$opt_fnlog"); }
@@ -49,8 +45,8 @@ my $nybias = 10;
 my $lambda = 50;
 if ($opt_lambda) { $lambda = $opt_lambda; }
 
-my %is_spam = ();
-my %tests_hit = ();
+my $is_spam = '';		# vec aligned with @tests_hit
+my @tests_hit = ();
 my %mutable_tests = ();
 
 use vars qw(%rules %allrules);
@@ -64,89 +60,135 @@ my ($ga_yy, $ga_ny, $ga_yn, $ga_nn, $yyscore, $ynscore, $nyscore, $nnscore);
 read_ranges();
 readlogs();
 
-if ($justcount) {
+if ($opt_count) {
   $nybias = $nybias*($num_spam / $num_ham);
   evaluate();
-} else {
+}
+else {
   print "Writing logs and current scores as C code...\n";
   writescores_c();
 }
+
+# show memory usage before we exit
+print "Running \"ps aux\"...\n";
+open(PS, "ps aux|");
+while(<PS>) {
+    print if $. == 1 || /\b$$\b/;
+}
+close(PS);
+
 exit 0;
 
+# code to freeze/thaw test lines in as little space as possible
+# this could be faster, but improves memory usage by a phenomenal
+# amount over arrayrefs or strings of comma-separated-values
+my $short_index = 1;
+my %long_to_short;
+my @short_to_long;
+
+sub new_short {
+  $short_index++;
+  $long_to_short{$_[0]} = $short_index;
+  $short_to_long[$short_index] = $_[0];
+  return $short_index;
+}
+
+# uses less than half the memory of join on ',' and even better
+# compared to Storable::freeze
+sub freeze_tests {
+  return pack("w*", map
+	      {
+		$long_to_short{$_} || new_short($_);
+	      } @{$_[0]})
+}
+
+sub thaw_tests {
+  return map { $short_to_long[$_] } unpack("w*", $_[0]);
+}
+
+# arguments are $isspam, $count, \@tests
+sub log_line_count {
+  my $score = 0;
+  $score += $scores{$_} for @{$_[2]};
+
+  if ($_[0]) {
+    $num_spam++;
+    if ($score >= $opt_threshold) {
+      $ga_yy++;
+      $yyscore += $score;
+    }
+    else {
+      $ga_yn++;
+      $ynscore += $score;
+      if (defined $opt_fnlog) {
+	print FNLOG $msgline;
+      }
+    }
+  }
+  else {
+    $num_ham++;
+    if ($score >= $opt_threshold) {
+      #print STDERR "FP: $id\n";
+      $ga_ny++;
+      $nyscore += $score;
+      if (defined $opt_fplog) {
+	print FPLOG $msgline;
+      }
+    }
+    else {
+      $ga_nn++;
+      $nnscore += $score;
+    }
+  }
+}
+
+# arguments are $isspam, $count, \@tests;
+sub log_line_code {
+  $tests_hit[$_[1]] = freeze_tests($_[2]);
+
+  if ($_[0]) {
+    $num_spam++;
+    vec($is_spam, $_[1], 1) = 1;
+  }
+  else {
+    $num_ham++;
+    vec($is_spam, $_[1], 1) = 0;
+  }
+}
 
 sub readlogs {
   my $count = 0;
   $num_spam = $num_ham = 0;
 
-  if ($justcount) {
+  if ($opt_count) {
     $ga_yy = $ga_ny = $ga_yn = $ga_nn = 0;
     $yyscore = $ynscore = $nyscore = $nnscore = 0.0;
   }
 
+  # set handler for log lines
+  my $log_line = $opt_count ? \&log_line_count : \&log_line_code;
+
   foreach my $file ($opt_spam, $opt_ham) {
-    open (IN, "<$file");
+    open (IN, "<$file") || die "Could not open file '$file': $!";
+
+    my $isspam = ($file eq $opt_spam);
+    my $caught;			# 1st parameter of log line
+    my $rules;			# 4th parameter of log line
 
     while (<IN>) {
-      next unless /^[^#]/;
-      if($_ !~ /^.\s+([-\d]+)\s+(\S+)\s*/) { warn "bad line: $_"; next; }
-      my $msgline = $_;
-      my $hits = $1;
-      #my $id = $2;
-      $_ = $'; s/(?:bayes|time)=\S+//; s/,,+/,/g; s/^\s+//; s/\s+$//;
+      ($caught, undef, undef, $rules) = split;
 
-      my $score = 0;
-      my @tests = ();
-      foreach my $tst (split (/,/, $_)) {
-	next unless $tst;
-	if (!defined $scores{$tst}) {
-          #warn "unknown test in $file, ignored: $tst\n";
-	  next;
-	}
+      # only take lines starting with Y or .
+      next unless ($caught eq 'Y' || $caught eq '.') && $rules;
 
-	# Make sure to skip any subrules!
-	next if ( $allrules{$tst}->{issubrule} );
+      # get tests, but ignore unknown tests and subrules
+      my @tests = grep { defined $scores{$_} && !$allrules{$_}->{issubrule} }
+	split(/,/, $rules);
 
-        if ($justcount) {
-          $score += $scores{$tst};
-        } else {
-          push (@tests, $tst);
-        }
-      }
+      # run handler
+      $log_line->($isspam, $count, \@tests);
 
-      if (!$justcount) { 
-        $tests_hit{$count} = \@tests;
-      }
-
-      if ($file eq $opt_spam) {
-	$num_spam++;
-        if ($justcount) {
-          if ($score >= $threshold) {
-            $ga_yy++; $yyscore += $score;
-          } else {
-            $ga_yn++; $ynscore += $score;
-	    if (defined $opt_fnlog) {
-	    	print FNLOG $msgline;
-	    }
-          }
-        } else {
-          $is_spam{$count} = 1;
-        }
-      } else {
-	$num_ham++;
-        if ($justcount) {
-          if ($score >= $threshold) {
-	    #print STDERR "FP: $id\n";
-            $ga_ny++; $nyscore += $score;
-	    if (defined $opt_fplog) {
-	    	print FPLOG $msgline;
-	    }
-          } else {
-            $ga_nn++; $nnscore += $score;
-          }
-        } else {
-          $is_spam{$count} = 0;
-        }
-      }
+      # increment line
       $count++;
     }
     close IN;
@@ -154,11 +196,9 @@ sub readlogs {
   $num_tests = $count;
 }
 
-
 sub readscores {
-  if (!defined $argcffile) { $argcffile = "../rules"; }
-  print "Reading scores from \"$argcffile\"...\n";
-  system ("./parse-rules-for-masses -d \"$argcffile\" -s $opt_scoreset") and die;
+  print "Reading scores from \"$opt_cffile\"...\n";
+  system ("./parse-rules-for-masses -d \"$opt_cffile\" -s $opt_scoreset") and die;
   require "./tmp/rules.pl";
   %allrules = %rules;           # ensure it stays global
 }
@@ -178,7 +218,7 @@ sub writescores_c {
   my $max_hits_per_msg = 0;
   for ($file = 0; $file < $num_tests; $file++) {
     my(@hits) =
-     grep {(! $ignored_rule{$_}) && $mutable_tests{$_}} (@{$tests_hit{$file}});
+     grep {(! $ignored_rule{$_}) && $mutable_tests{$_}} (thaw_tests($tests_hit[$file]));
     if ((scalar(@hits)+1) > $max_hits_per_msg) {
       $max_hits_per_msg = scalar(@hits)+1;
     }
@@ -255,11 +295,11 @@ sub writetests_c {
 
   for ($file = 0; $file < $num_tests; $file++)
   {
-    my $uniq_key = $is_spam{$file} . " ";
+    my $uniq_key = vec($is_spam, $file, 1) . " ";
 
-    my(@good_tests) =
+    my (@good_tests) =
      grep {length($_) && (! $ignored_rule{$_}) &&
-	    (defined($rule_to_index{$_}))} (@{ $tests_hit{$file} });
+	    (defined($rule_to_index{$_}))} (thaw_tests($tests_hit[$file]));
 
     @good_tests = sort {$a <=> $b} (map {$rule_to_index{$_}} (@good_tests));
 
@@ -305,11 +345,11 @@ int tests_count[$num_nondup];
     print DAT ".".$uniq_files{$file}."\n";
 
     my $out = '';
-    $out .= "s".$is_spam{$file}."\n";
+    $out .= "s".vec($is_spam, $file, 1)."\n";
 
     my $base_score = 0;
     my $num_tests_hit = 0;
-    foreach my $test (@{$tests_hit{$file}}) {
+    foreach my $test (thaw_tests($tests_hit[$file])) {
       if ($test eq '') { next; }
 
       if ($ignored_rule{$test}) {
@@ -454,7 +494,7 @@ sub read_ranges {
 }
 
 sub evaluate {
-   printf ("\n# SUMMARY for threshold %3.1f:\n", $threshold);
+   printf ("\n# SUMMARY for threshold %3.1f:\n", $opt_threshold);
    printf "# Correctly non-spam: %6d  %4.2f%%\n",
        $ga_nn, ($ga_nn /  $num_ham) * 100.0;
    printf "# Correctly spam:     %6d  %4.2f%%\n",
