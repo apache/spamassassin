@@ -38,20 +38,29 @@ header		URIBL_SBL	eval:check_uridnsbl('URIBL_SBL')
 describe	URIBL_SBL	Contains a URL listed in the SBL blocklist
 tflags		URIBL_SBL	net
 
-urirhssub       URIBL_SC_SURBL	multi.surbl.org.	A   2
+urirhssub	URIBL_SC_SURBL	multi.surbl.org.	A   2
 header		URIBL_SC_SURBL	eval:check_uridnsbl('URIBL_SC_SURBL')
 describe	URIBL_SC_SURBL	Contains a URL listed in the SC SURBL blocklist
 tflags		URIBL_SC_SURBL	net
 
-urirhssub       URIBL_WS_SURBL	multi.surbl.org.	A   4
+urirhssub	URIBL_WS_SURBL	multi.surbl.org.	A   4
 header		URIBL_WS_SURBL	eval:check_uridnsbl('URIBL_WS_SURBL')
 describe	URIBL_WS_SURBL	Contains a URL listed in the WS SURBL blocklist
 tflags		URIBL_WS_SURBL	net
 
-urirhssub       URIBL_PH_SURBL	multi.surbl.org.	A   8
+urirhssub	URIBL_PH_SURBL	multi.surbl.org.	A   8
 header		URIBL_PH_SURBL	eval:check_uridnsbl('URIBL_PH_SURBL')
 describe	URIBL_PH_SURBL	Contains a URL listed in the PH SURBL blocklist
 tflags		URIBL_PH_SURBL	net
 
-endif   # Mail::SpamAssassin::Plugin::URIDNSBL
+urirhssub	URIBL_OB_SURBL	multi.surbl.org.	A   16
+header		URIBL_OB_SURBL	eval:check_uridnsbl('URIBL_OB_SURBL')
+describe	URIBL_OB_SURBL	Contains a URL listed in the OB SURBL blocklist
+tflags		URIBL_OB_SURBL	net
 
+urirhssub	URIBL_AB_SURBL	multi.surbl.org.	A   32
+header		URIBL_AB_SURBL	eval:check_uridnsbl('URIBL_AB_SURBL')
+describe	URIBL_AB_SURBL	Contains a URL listed in the AB SURBL blocklist
+tflags		URIBL_AB_SURBL	net
+
+endif	# Mail::SpamAssassin::Plugin::URIDNSBL
