@@ -435,24 +435,29 @@ sub razor2_lookup {
 	  # ->{p} is for each part of the message
 	  # so go through each part, taking the highest cf we find
 	  # of any part that isn't contested (ct).  This helps avoid false
-	  # positives.
+	  # positives.  equals logic_method 4.
+	  #
 	  # razor-agents < 2.14 have a different object format, so we now support both.
 	  # $objects->[0]->{resp} vs $objects->[0]->{p}->[part #]->{resp}
 	  my $part = 0;
 	  my $arrayref = $objects->[0]->{p} || $objects;
-	  if ( defined $arrayref && exists $arrayref->[0]->{resp} ) {
+	  if ( defined $arrayref ) {
 	    foreach my $cf ( @{$arrayref} ) {
 	      if ( exists $cf->{resp} ) {
 	        for (my $response=0;$response<@{$cf->{resp}};$response++) {
 	          my $tmp = $cf->{resp}->[$response];
-	      	  my $tmpcf = $tmp->{cf}; # Part confidence
-	      	  my $tmpct = $tmp->{ct}; # Part contested?
-		  $tmpcf = 0 unless ( defined $tmpcf );
-		  $tmpct = 0 unless ( defined $tmpct );
+	      	  my $tmpcf = $tmp->{cf} || 0; # Part confidence
+	      	  my $tmpct = $tmp->{ct} || 0; # Part contested?
+		  my $tmpsk = $tmp->{skipme} || 0; # skip?
 		  my $engine = $cf->{sent}->[$response]->{e};
-	          dbg("Found Razor2 response: part=$part, engine=$engine, ct=$tmpct, cf=$tmpcf");
+	          dbg("Found Razor2 part: part=$part engine=$engine ct=$tmpct cf=$tmpcf skipme=$tmpsk");
 	          $self->{razor2_cf_score} = $tmpcf if ( !$tmpct && $tmpcf > $self->{razor2_cf_score} );
 	        }
+	      }
+	      else {
+		my $text = "part=$part noresponse";
+		$text .= " skipme=1" if ( $cf->{skipme} );
+	        dbg("Found Razor2 part: $text");
 	      }
 	      $part++;
 	    }
