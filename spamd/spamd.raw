@@ -241,9 +241,10 @@ for ( ; ($paddr = accept(Client,Server)) ; close Client)
 	# It might be a CHECK message, meaning that we should just check
 	# if it's spam or not, then return the appropriate response.
 
-	elsif (/CHECK SPAMC\/(.*)/)
+	elsif (/(CHECK|SYMBOLS) SPAMC\/(.*)/)
 	{
-	    my $version = $1;
+	    my $method = $1;
+	    my $version = $2;
 	    my $expected_length;
 
             # Protocol version 1.0 and greater may have "User:" and
@@ -340,6 +341,7 @@ for ( ; ($paddr = accept(Client,Server)) ; close Client)
 		print "SPAMD/1.1 $resphash{$resp} $resp\r\nSpam: False ; $msg_score / $msg_threshold\r\n\r\n";
 		$was_it_spam = 'clean message';
 	    }
+	    print $status->get_names_of_tests_hit if ($method eq "SYMBOLS");
 	    $current_user ||= '(unknown)';
 	    logmsg "$was_it_spam ($msg_score/$msg_threshold) for $current_user:$> in ".
 		sprintf("%3d", time - $start) ." seconds.\n";
