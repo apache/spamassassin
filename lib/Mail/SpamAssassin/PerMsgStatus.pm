@@ -361,7 +361,7 @@ sub rewrite_as_spam {
 
   # add some headers...
 
-  $_ = sprintf ("Yes, hits=%d required=%d tests=%s version=%s",
+  $_ = sprintf ("Yes, hits=%2.1f required=%2.1f tests=%s version=%s",
 	$self->{hits}, $self->{conf}->{required_hits},
 	$self->get_names_of_tests_hit(),
 	$Mail::SpamAssassin::VERSION);
@@ -418,7 +418,7 @@ sub rewrite_as_non_spam {
 
   $self->{test_names_hit} =~ s/,$//;
 
-  $_ = sprintf ("No, hits=%d required=%d tests=%s version=%s",
+  $_ = sprintf ("No, hits=%2.1f required=%2.1f tests=%s version=%s",
 	$self->{hits}, $self->{conf}->{required_hits},
 	$self->get_names_of_tests_hit(),
 	$Mail::SpamAssassin::VERSION);
