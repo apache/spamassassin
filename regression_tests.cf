@@ -1,4 +1,4 @@
-# $Id: regression_tests.cf,v 1.22 2002/09/09 04:16:55 zelgadis Exp $
+# $Id: regression_tests.cf,v 1.23 2002/09/09 04:42:46 zelgadis Exp $
 #
 test BIG_FONT      fail    <font size=3D2>
 test BIG_FONT      ok      <font size=3D+2>
@@ -266,3 +266,10 @@ test BAD_CREDIT ok   reestablish credit
 test BAD_CREDIT ok   establish good credit
 test BAD_CREDIT ok   repair your credit
 test BAD_CREDIT fail NOTICE: Your credit card company may place the words "San Antonio"
+
+test NEW_DOMAIN_EXTENSIONS ok   new domain extension
+test NEW_DOMAIN_EXTENSIONS ok   new .NAME domain extension
+test NEW_DOMAIN_EXTENSIONS ok   New TLD Extension
+test NEW_DOMAIN_EXTENSIONS ok   new extension
+test NEW_DOMAIN_EXTENSIONS fail newt extension
+test NEW_DOMAIN_EXTENSIONS fail renex extension
