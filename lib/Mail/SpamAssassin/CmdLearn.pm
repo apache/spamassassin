@@ -49,10 +49,10 @@ sub cmdline_run {
              'help|h|?'                         => \$opt{'help'},
 	     'dump:s'			=> \$opt{'dump'},
 
-	     'dir'			=> sub { $opt{'format'} = 'dir'; },
-	     'file'			=> sub { $opt{'format'} = 'file'; },
+	     'dir'			=> sub { $opt{'old_format'} = 'dir'; },
+	     'file'			=> sub { $opt{'old_format'} = 'file'; },
 	     'mbox'			=> sub { $opt{'format'} = 'mbox'; },
-	     'single'			=> sub { $opt{'format'} = 'single'; },
+	     'single'			=> sub { $opt{'old_format'} = 'single'; },
 
 	     'db|dbpath=s'		=> \$bayes_override_path,
 	     're|regexp=s'		=> \$opt{'regexp'},
@@ -79,9 +79,12 @@ sub cmdline_run {
     warn "sa-learn warning: --forget requires read/write access to the database, and is incompatible with --no-rebuild\n";
   }
 
-  if (defined $opt{'format'} && $opt{'format'} eq 'single') {
-    $opt{'format'} = 'file';
-    push (@ARGV, '-');
+  if (defined $opt{'old_format'}) {
+    #Format specified in the 2.5x form of --dir, --file, --mbox or --single.
+    #Convert it to the new behavior:
+    if($opt{'old_format'} eq 'single') {
+      push (@ARGV, '-');
+    }
   }
 
   # create the tester factory
@@ -180,6 +183,11 @@ sub cmdline_run {
     # add leftover args as targets
     foreach (@ARGV) { target($_); }
 
+    #No arguments means they want stdin:
+    if($#targets < 0) {
+      target('-');
+    }
+
     my $iter = new Mail::SpamAssassin::ArchiveIterator ({
 	'opt_j' => 1,
 	'opt_n' => 1,
@@ -215,13 +223,11 @@ sub killed {
 
 sub target  {
   my ($target) = @_;
-  if (!defined($opt{'format'})) {
-    warn "please specify target type with --dir, --file, or --mbox: $target\n";
-  }
-  else {
-    my $class = ($isspam ? "spam" : "ham");
-    push (@targets, "$class:" . $opt{'format'} . ":$target");
-  }
+
+  my $class = ($isspam ? "spam" : "ham");
+  my $format = (defined($opt{'format'}) ? $opt{'format'} : "detect");
+
+  push (@targets, "$class:$format:$target");
 }
 
 ###########################################################################

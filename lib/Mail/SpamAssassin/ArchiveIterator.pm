@@ -185,14 +185,39 @@ sub message_array {
 
     foreach my $location (@locations) {
       $class = substr($class, 0, 1);
-      if ($format eq "dir") {
-	$self->scan_directory($class, $location);
+
+      my $method;
+
+      if ($format eq 'detect') {
+	#We need to detect what the format is.
+
+	if ($location eq '-' ||
+	    !(-d $location)) {
+	  #stdin is considered a file if not passed as mbox
+	  $method = \&scan_file;
+	}
+	else {
+	  #It's a directory
+	  $method = \&scan_directory;
+	}
       }
-      elsif ($format eq "file") {
-	$self->scan_file($class, $location);
+      else {
+	if ($format eq "dir") {
+	  $method = \&scan_directory;
+	}
+	elsif ($format eq "file") {
+	  $method = \&scan_file;
+	}
+	elsif ($format eq "mbox") {
+	  $method = \&scan_mailbox;
+	}
       }
-      elsif ($format eq "mbox") {
-	$self->scan_mailbox($class, $location);
+
+      if(defined($method)) {
+	&{$method}($self, $class, $location);
+      }
+      else {
+	warn "Format $format unknown!";
       }
     }
   }
@@ -441,44 +466,61 @@ sub scan_file {
 
 sub scan_mailbox {
   my ($self, $class, $folder) = @_;
+  my @files;
 
-  if ($folder =~ /\.(?:gz|bz2)$/) {
-    die "compressed mbox folders are not supported at this time\n";
-  }
-  mail_open($folder) or return;
-
-  my $start = 0;		# start of a message
-  my $where = 0;		# current byte offset
-  my $first = '';		# first line of message
-  my $header = '';		# header text
-  my $in_header = 0;		# are in we a header?
-  while (!eof INPUT) {
-    my $offset = $start;	# byte offset of this message
-    my $header = $first;	# remember first line
-    while (<INPUT>) {
-      if ($in_header) {
-	if (/^$/) {
-	  $in_header = 0;
-	}
-	else {
-	  $header .= $_;
-	}
+  if ($folder ne '-' && -d $folder) {
+    #Got passed a directory of mboxen.
+    $folder =~ s/\/\s*$//; #Remove trailing slash, if there
+    opendir(DIR, $folder) || die "Can't open '$folder' dir: $!";
+    while($_ = readdir(DIR)) {
+      if(/^[^\.]\S*$/ && ! -d "$folder/$_") {
+	push(@files, "$folder/$_");
       }
-      if (substr($_,0,5) eq "From ") {
-	$in_header = 1;
-	$first = $_;
-	$start = $where;
+    }
+    closedir(DIR);
+  } else {
+    push(@files, $folder);
+  }
+
+  foreach my $file (@files) {
+    if ($folder =~ /\.(?:gz|bz2)$/) {
+      die "compressed mbox folders are not supported at this time\n";
+    }
+    mail_open($file) or return;
+    
+    my $start = 0;		# start of a message
+    my $where = 0;		# current byte offset
+    my $first = '';		# first line of message
+    my $header = '';		# header text
+    my $in_header = 0;		# are in we a header?
+    while (!eof INPUT) {
+      my $offset = $start;	# byte offset of this message
+      my $header = $first;	# remember first line
+      while (<INPUT>) {
+	if ($in_header) {
+	  if (/^$/) {
+	    $in_header = 0;
+	  }
+	  else {
+	    $header .= $_;
+	  }
+	}
+	if (substr($_,0,5) eq "From ") {
+	  $in_header = 1;
+	  $first = $_;
+	  $start = $where;
+	  $where = tell INPUT;
+	  last;
+	}
 	$where = tell INPUT;
-	last;
       }
-      $where = tell INPUT;
+      if ($header) {
+	my $t = ($self->{opt_n} ? $no++ : $self->receive_date($header));
+	$self->{$class}->{index_pack($class, "m", $t, "$file.$offset")} = $t;
+      }
     }
-    if ($header) {
-      my $t = ($self->{opt_n} ? $no++ : $self->receive_date($header));
-      $self->{$class}->{index_pack($class, "m", $t, "$folder.$offset")} = $t;
-    }
+    close INPUT;
   }
-  close INPUT;
 }
 
 ############################################################################
