@@ -195,10 +195,12 @@ tflags T_VIA_GRADFINDER	nice
 
 # bug 1171
 # Listproc - Allen (example: nonspam:<199811090515.AAA28259@chem.harvard.edu>)
+# 12/22 - hits a lot for allen (4.3%), a tiny amount for theo (0.05%), and that's it. - tvd
 header T_LISTPROC1		X-Listprocessor-version =~ /^\s*(?:\d\.)+\w*\s+--\s+List[Pp]roc(?:essor)?\b/
 score T_LISTPROC1		-0.01
 tflags T_LISTPROC1		nice
 
+# 12/22 - hits some for allen (0.42%), a tiny amount for theo (0.01%), and that's it. - tvd
 header __FROM_LISTPROC		From =~ /\blistproc\@/i
 header __REPLY_LISTPROC		Reply-To =~ /\blistproc\@/i
 header __SENDER_LISTPROC	Sender =~ /\blistproc\@/i
@@ -207,28 +209,43 @@ score T_LISTPROC2		-0.01
 tflags T_LISTPROC2		nice
 
 # bug 1010
+# 12/22 - 2.59% hits for quinlan, 0 for others - tvd
 uri T_SUPER_BARGAINS_URL	/\bsuper-bargains\.com/
+# 12/22 - 0 hits for anyone - tvd
 uri T_FANTASTIC_BARGAIN_URL	/\bfantastic-bargain\.com/
+# 12/22 - 4.83% for Allen, 0 for others - tvd
 uri T_KAVKAZCENTER_URL		/\bkavkazcenter\.com/
+# 12/22 - 0 hits for anyone - tvd
 uri T_FINESTOFFERS_URL		/\bfinestoffers\.com/
+# 12/22 - 0 hits for anyone - tvd
 uri T_AEOPUBLISHING_URL		/\baeopublishing\.com/
+# 12/22 - 0.47% for quinlan, 0 for others - tvd
 uri T_SKY08_URL			/\bsky08\.com/
+# 12/22 - 2.07% for allen, 0.11% for rod, 0.06% for theo - tvd
 uri T_E_MAILPROMO_URL		/\be-mailpromo\.net/
+# 12/22 - 0.06% for quinlan, 0 for others - tvd
 uri T_MARINEDIGITAL_URL		/\bmarinedigital\.com/
+# 12/22 - 0 hits for anyone - tvd
 uri T_ITSREMARKABLE_URL		/\bitsremarkable\.com/
 #
+# 12/22 - 2.59% for quinlan, 0 for others - tvd
 uri T_SUPER_BARGAINS_MAILTO	/mailto:\S+[.@]super-bargains\.com/
+# 12/22 - 0 hits for anyone - tvd
 uri T_FANTASTIC_BARGAIN_MAILTO	/mailto:\S+[.@]fantastic-bargain\.com/
+# 12/23 - 4.83% for allen, 0 for others - tvd
 uri T_KAVKAZCENTER_MAILTO	/mailto:\S+[.@]kavkazcenter\.com/
+# 12/22 - 0 hits for anyone - tvd
 uri T_FINESTOFFERS_MAILTO	/mailto:\S+[.@]finestoffers\.com/
+# 12/22 - 0 hits for anyone - tvd
 uri T_AEOPUBLISHING_MAILTO	/mailto:\S+[.@]aeopublishing\.com/
+# 12/22 - 0.47% for quinlan, 0 for others - tvd
 uri T_SKY08_MAILTO		/mailto:\S+[.@]sky08\.com/
+# 12/22 - 2.07% for allen, 0.10% for rod, 0.05% for theo - tvd
 uri T_E_MAILPROMO_MAILTO	/mailto:\S+[.@]e-mailpromo\.net/
+# 12/22 - 0.06% for quinlan, 0 for others - tvd
 uri T_MARINEDIGITAL_MAILTO	/mailto:\S+[.@]marinedigital\.com/
+# 12/22 - 0 hits for anyone - tvd
 uri T_ITSREMARKABLE_MAILTO	/mailto:\S+[.@]itsremarkable\.com/
-
-header T_WITH_LC_SMTP		Received =~ /\swith\ssmtp;\s/
-describe T_WITH_LC_SMTP		Received line contains spam-sign (lowercase smtp)
 
 # bug 1211
 body     __BILL_1618    /\D301\D+a\W*2\W*c\D+1618\D/i
