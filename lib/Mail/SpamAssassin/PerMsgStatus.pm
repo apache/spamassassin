@@ -973,6 +973,7 @@ sub get {
     s/\s*\(.*?\)//g;            # strip out the (comments)
     s/^[^<]*?<(.*?)>.*$/$1/;    # "Foo Blah" <jm@foo> or <jm@foo>
     s/, .*$//gs;                # multiple addrs on one line: return 1st
+    s/ ;$//gs;                  # 'undisclosed-recipients: ;'
 
   } elsif ($getname) {
     chomp; s/\r?\n//gs;
