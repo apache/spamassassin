@@ -3175,7 +3175,7 @@ sub new {
 
   # after parsing, tests are refiled into these hashes for each test type.
   # this allows e.g. a full-text test to be rewritten as a body test in
-  # the user's ~/.spamassassin.cf file.
+  # the user's user_prefs file.
   $self->{body_tests} = { };
   $self->{uri_tests}  = { };
   $self->{uri_evals}  = { }; # not used/implemented yet
