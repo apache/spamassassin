@@ -119,6 +119,7 @@ sub html_render {
 
   $self->{html_text} = [];
   $self->{html_visible_text} = [];
+  $self->{html_invisible_text} = [];
   $self->{html_last_tag} = 0;
 
   # NOTE: We *only* need to fix the rendering when we verify that it
@@ -232,14 +233,17 @@ sub html_format {
   # ordered by frequency of tag groups
   if ($tag eq "br" || $tag eq "div") {
     push @{$self->{html_visible_text}}, "\n";
+    push @{$self->{html_invisible_text}}, "\n";
     push @{$self->{html_text}}, "\n";
   }
   elsif ($tag eq "li" || $tag eq "td" || $tag eq "dd") {
     push @{$self->{html_visible_text}}, " ";
+    push @{$self->{html_invisible_text}}, " ";
     push @{$self->{html_text}}, " ";
   }
   elsif ($tag =~ /^(?:p|hr|blockquote|pre)$/) {
     push @{$self->{html_visible_text}}, "\n\n";
+    push @{$self->{html_invisible_text}}, "\n\n";
     push @{$self->{html_text}}, "\n\n";
   }
 }
@@ -1045,6 +1049,8 @@ sub html_text {
 
   if ($visible_for_bayes) {
     push @{$self->{html_visible_text}}, $text;
+  } else {
+    push @{$self->{html_invisible_text}}, $text;
   }
   push @{$self->{html_text}}, $text;
 }
