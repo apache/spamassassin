@@ -4,7 +4,7 @@ use Getopt::Long;
 use vars qw($opt_cffile $opt_count $opt_lambda $opt_threshold
 		$opt_spam $opt_nonspam);
 
-GetOptions("cffile=s", "count", "lambda=f", "threshold=f", "spam=s", "nonspam=s");
+GetOptions("cffile=s", "count", "lambda=f", "threshold=f", "spam=s", "nonspam=s", "scoreset=i");
 my $argcffile = $opt_cffile;
 
 my $justcount = 0;
@@ -15,6 +15,7 @@ if ($opt_threshold) { $threshold = $opt_threshold; }
 
 $opt_spam ||= 'spam.log';
 $opt_nonspam ||= 'nonspam.log';
+$opt_scoreset = 0 if ( !defined $opt_scoreset );
 
 my $nybias = 10;
 
@@ -129,7 +130,7 @@ sub readlogs {
 sub readscores {
   if (!defined $argcffile) { $argcffile = "../rules"; }
   print "Reading scores from \"$argcffile\"...\n";
-  system ("./parse-rules-for-masses -d \"$argcffile\"") and die;
+  system ("./parse-rules-for-masses -d \"$argcffile\" -s $opt_scoreset") and die;
   require "./tmp/rules.pl";
   %allrules = %rules;           # ensure it stays global
 }

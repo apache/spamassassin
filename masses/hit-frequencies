@@ -2,16 +2,16 @@
 
 use FindBin;
 use Getopt::Std;
-getopts("fm:M:X:l:L:pxhc:at:");
+getopts("fm:M:X:l:L:pxhc:at:s:");
 
 use vars qw {
   $opt_f $opt_m $opt_M $opt_X $opt_p $opt_x $opt_h $opt_l $opt_L $opt_c
-  $opt_a $opt_t
+  $opt_a $opt_t $opt_s
 };
 
 sub usage {
   die "hit-frequencies [-c rules dir] [-f] [-m RE] [-M RE] [-X RE] [-l LC]
-                [-a] [-p] [-x] [spam log] [ham log]
+                [-s SC] [-a] [-p] [-x] [spam log] [ham log]
 
     -c p   use p as the rules directory
     -f     falses. count only false-negative or false-positive matches
@@ -24,6 +24,7 @@ sub usage {
     -a     display all tests
     -p     percentages. implies -x
     -x     extended output, with S/O ratio and scores
+    -s SC  which scoreset to use
 
     options -l and -L are mutually exclusive.
 
@@ -40,6 +41,8 @@ usage() if($opt_h || ($opt_l && $opt_L));
 if ($opt_p) {
   $opt_x = 1;
 }
+
+$opt_s = 0 if ( !defined $opt_s );
 
 my $cffile = $opt_c || "$FindBin::Bin/../rules";
 
@@ -189,11 +192,11 @@ foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
 
   if ($opt_p) {
     printf "%7.3f  %7.4f  %7.4f  %7.3f %6.2f  %6.2f  %s\n",
-  	$fa, $fs, $fn, $soratio, $ranking{$test}, (split(/\s+/,$scores{$test}))[0], $test;
+  	$fa, $fs, $fn, $soratio, $ranking{$test}, $scores{$test}, $test;
 
   } elsif ($opt_x) {
     printf "%7d  %7d  %7d  %7.3f %6.2f %6.2f  %s\n",
-  	$fa, $fs, $fn, $soratio, $ranking{$test}, (split(/\s+/,$scores{$test}))[0], $test;
+  	$fa, $fs, $fn, $soratio, $ranking{$test}, $scores{$test}, $test;
 
   } else {
     printf "%10d  %10d  %10d  %s\n", $fa, $fs, $fn, $test;
@@ -261,7 +264,7 @@ sub readlogs {
 
 sub readscores {
   my($cffile) = @_;
-  system ("$FindBin::Bin/parse-rules-for-masses -d \"$cffile\"") and die;
+  system ("$FindBin::Bin/parse-rules-for-masses -d \"$cffile\" -s $opt_s") and die;
   require "./tmp/rules.pl";
 }
 
