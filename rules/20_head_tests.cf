@@ -20,6 +20,12 @@ describe FROM_STARTS_WITH_NUMS	From: starts with nums
 header FROM_HAS_MIXED_NUMS	From =~ /\d+[a-z]+\d+\S*\@/i
 describe FROM_HAS_MIXED_NUMS	From: contains numbers mixed in with letters
 
+# Faked addresses tend to come from big public sites.  Stats show that
+# 5 digits is enough to get a 1.0 s/o ratio; 4 is too low (probably due
+# to folks called "jmason2002@yahoo.com" for example).
+header ADDR_NUMS_AT_BIGSITE	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@(?:aol|bigfoot|compuserve|excite|hotmail|juno|prodigy|yahoo)\.(?:com|net|org)/mi
+describe ADDR_NUMS_AT_BIGSITE	Uses an address with lots of numbers, at a big ISP
+
 # (contrib: David Hull - fixed to support "foo @ foo . com" <foo@foo.com>)
 header FROM_NO_USER		From =~ /(?:^\@|<\@| \@[^<]*$|<>)/ [if-unset: unset@unset.unset]
 describe FROM_NO_USER		From: has no local-part before @ sign
@@ -90,6 +96,13 @@ describe MSGID_CHARS_SPAM	Message-Id has characters indicating spam
 
 header MSGID_CHARS_WEIRD	MESSAGEID =~ /["=\\~]/
 describe MSGID_CHARS_WEIRD	Message-Id has characters often found in spam
+
+header MSGID_NO_HOST            MESSAGEID =~ /\@>(?:$|\s)/m
+describe MSGID_NO_HOST 		Message-Id has no hostname
+
+# killer test, this one!
+header MSGID_OUTLOOK_TIME	eval:check_outlook_timestamp_token()
+describe MSGID_OUTLOOK_TIME 	Message-Id is fake (in Outlook Express format)
 
 header INVALID_DATE		Date !~ /^\s*(?:(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun), )?[0-3 ]?[0-9] (?:Jan|Feb|Ma[ry]|Apr|Ju[nl]|Aug|Sep|Oct|Nov|Dec) (?:[12][901])?[0-9]{2} [0-2][0-9](?:\:[0-5][0-9]){1,2} (?:[+-][0-9]{4}|UT|[A-Z]{2,3}T)(?:\s+\(.*\))?\s*$/ [if-unset: Wed, 31 Jul 2002 16:41:57 +0200]
 describe INVALID_DATE		Invalid Date: header (not RFC 2822)
@@ -701,4 +714,8 @@ describe FROM_NUM_AT_WEBMAIL  From address is webmail, but starts with a number
 # sending mail.
 header RECEIVED_IDENT_SQUID      Received =~ /ident[:=]squid\b/i
 describe RECEIVED_IDENT_SQUID    Message was sent by a Squid HTTP proxy
+
+# common spam-dropping: To: C:\VICTIMS.txt@yourmx.org
+header TO_TXT			To =~ /\.txt[\'\"]?\@/i
+describe TO_TXT			Sent to a text file
 
