@@ -102,7 +102,7 @@ else
   my %env = (
     CC             => 'cl',
 
-    WINCFLAGS      => '/DWIN32',
+    WINCFLAGS      => '/DWIN32 /W4',
     SSLCFLAGS      => '/DSPAMC_SSL',
 
     SRCDIR         =>  $srcdir,
