@@ -355,9 +355,17 @@ spamd [options]
 
 =over
 
+=item B<-c>
+
+Create user preferences files if they don't exist (default: don't)
+
 =item B<-d>
 
-Detach from starting process and run in background (daemonize).
+Detach from starting process and run in background (daemonize)
+
+=item B<-D>
+
+Print debugging messages
 
 =item B<-h>
 
@@ -371,16 +379,28 @@ network tests.  Works the same as the C<-L> flag to C<spamassassin(1)>
 =item B<-A> I<host,...>
 
 Specify a list of authorized hosts which can connect to this spamd instance.
-The list is one of valid IP addresses, separated by commas.
+The list is one of valid IP addresses, separated by commas.  By default, connections are only accepted from localhost
 
 =item B<-p> I<port>
 
 Optionally specifies the port number for the server to listen on.
 
+=item B<-P>
+
+Die on user errors (for the user passed from spamc) instead of falling back to user I<nobody> and using the default configuration
+
+=item B<-s> I<facility>
+
+Specify the syslog facility to use (default: mail)
+
 =item B<-u> I<username>
 
 Run as the named user.  The alternative, default behaviour is to setuid() to
-the user running C<spamc>, if C<spamd> is running as root.
+the user running C<spamc>, if C<spamd> is running as root
+
+=item B<-x>
+
+Turn off per-user config files.  All users will just get the default configuration
 
 =back
 
