@@ -755,7 +755,7 @@ sub _process_header {
       $hdr_data =~ s/\s*\n\s*/\n\t/g;
       return $hdr_data;
     } else {
-      my $hdr = "$hdr_name!!$hdr_data";
+      my $hdr = "X-Spam-$hdr_name!!$hdr_data";
       # use '!!' instead of ': ' so it doesn't wrap on the space
       $Text::Wrap::columns = 79;
       $Text::Wrap::huge = 'wrap';
