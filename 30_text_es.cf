@@ -1,0 +1,126 @@
+# Spanish translation by David Barroso. thanks!
+
+lang es clear-report-template
+lang es report ------------- Comienzo de los resultados de SpamAssassin ---------------
+lang es report Este correo probablemente es spam. El mensaje original ha sido alterado
+lang es report para que pueda reconocer o bloquear en el futuro correo no solicitado, 
+lang es report usando las capacidades de filtrado que incorpora su lector de correo.
+lang es report 
+lang es report Detalles del análisis:   (_HITS_ puntos, _REQD_ requeridos)
+lang es report _SUMMARY_
+lang es report ---------------- Fin de los resultados de SpamAssassin -----------------
+
+lang es clear-terse-report-template
+lang es terse-report ---- Comienzo de los resultados de SpamAssassin
+lang es terse-report _HITS_ puntos, _REQD_ requeridos;
+lang es terse-report _SUMMARY_
+lang es terse-report ---- Fin de los resultados de SpamAssassin
+
+lang es describe NO_REAL_NAME		From: no incluye un nombre real
+lang es describe FROM_ENDS_IN_NUMS	From: finaliza en números
+lang es describe FROM_NO_USER		From: no tiene parte local antes de la @
+lang es describe TO_NO_USER		To: no tiene parte local antes de la @
+lang es describe PLING			El Subject tiene un signo de exclamación
+lang es describe PLING_PLING		El Subject tiene muchos signos de exclamación
+lang es describe SUBJ_HAS_UNIQ_ID	El Subject contiene un número ID único
+lang es describe UNDISC_RECIPS		Enviado a "undisclosed-recipients"
+lang es describe FAKED_UNDISC_RECIPS	Camuflado a "Undisclosed-Recipients"
+lang es describe SUBJ_ALL_CAPS		El Subject está en mayúsculas
+lang es describe MSGID_HAS_NO_AT	El Message-Id no tiene la @
+lang es describe MSGID_SPAMSIGN_1	El Message-Id ha sido generado por una herramienta de spam
+lang es describe INVALID_MSGID		Message-Id no válido, de acuerdo al RFC-2822
+lang es describe INVALID_DATE		Cabecera Date: inválida (tiene AM/PM)
+lang es describe INVALID_DATE_NO_TZ	Cabecera Date: inválida (no timezone)
+lang es describe SUBJ_HAS_Q_MARK	Subject: contiene un signo de interrogación
+lang es describe SUBJ_ENDS_IN_Q_MARK	Subject: finaliza en un signo de interrogación
+lang es describe ADVERT_CODE		Subject: contiene signos de publicidad
+lang es describe FRIEND_AT_PUBLIC	enviado a you@you.com o similar
+lang es describe TO_EMPTY		To: está vacío
+lang es describe REPLY_TO_EMPTY		Reply-To: está vacío
+lang es describe ALL_CAPS_SUBJECT	Encontrada cabecera SUBJECT:
+lang es describe X_EM_VER_PRESENT	Encontrada cabecera X-Em-Version:
+lang es describe NO_MX_FOR_FROM		No existe regristo MX para el dominio del From:
+lang es describe KNOWN_BAD_DIALUPS	Recibido desde conocidas fuentes de spam
+lang es describe FROM_AND_TO_SAME	From y To son la misma dirección
+lang es describe BAD_HELO_WARNING	Nombre incorrecto usado en el comando SMTP HELO
+lang es describe SUBJ_FULL_OF_8BITS	Subject está lleno de caracteres de 8-bit
+lang es describe MDAEMON_2_7_4		Received de un problemático SMTP server (MDaemon 2.7.4SP4R)
+lang es describe SMTPD_IN_RCVD		Received del servidor SMTPD32 (SMTPD32-n.n)
+lang es describe POST_IN_RCVD		Received contene el nombre falso 'Post.cz'
+lang es describe RCVD_IN_RELAYS_ORDB_ORG Recibido de un relay en relays.ordb.org
+lang es describe RCVD_IN_OSIRUSOFT_COM	Recibido de un relay en relays.osirusoft.com
+lang es describe X_OSIRU_SPAM_SRC	Osirusoft.com: el remitente es Confirmada Fuente de Spam
+lang es describe X_OSIRU_SPAMWARE_SITE	Osirusoft.com: el remitente es un sitio afin al Spame o vendedor
+lang es describe RCVD_IN_RBL		Recibido desde un RBLed relay, visite http://www.mail-abuse.org/rbl/
+lang es describe RCVD_IN_RSS		Recibido desde RSSed relay, visite http://www.mail-abuse.org/rss/
+lang es describe RCVD_IN_DUL		Recibido desde dialup, visite http://www.mail-abuse.org/dul/
+lang es describe RCVD_IN_BL_SPAMCOP_NET	Recibido desde un relay en bl.spamcop.net
+lang es describe FORGED_RCVD_FOUND	Encontrada posible cabecera forzada 'Received:'
+lang es describe YR_MEMBERSHIP_EXCH	Subject contiene 'Your Membership Exchange'
+lang es describe FROM_FORGED_HOTMAIL	Forzado From: simula ser de hotmail.com
+lang es describe DIFFERENT_REPLY_TO	Reply-To: muy diferente del From: o del To:
+lang es describe LOTS_OF_CC_LINES	Montones y montones de cabeceras Cc:
+lang es describe FROM_NAME_EQ_FROM_ADDR	'From:' también usado como el nombre real del remitente
+lang es describe FORGED_HOTMAIL_RCVD	Encontrada cabecera forzada 'Received:' de hotmail.com
+lang es describe FORGED_GW05_RCVD	Encontrada cabecera forzada 'by gw05' 'Received:'
+lang es describe CHARSET_FARAWAY	El conjunto de caracteres indica un lenguaje extranjero
+lang es describe NONEXISTENT_CHARSET	El conjunto de caracteres no existe
+lang es describe X_MAILER_GIBBERISH	'X-Mailer' contiene basura
+lang es describe X_PRIORITY_HIGH	Enviado con 'X-Priority' alta
+lang es describe X_MSMAIL_PRIORITY_HIGH Enviado con 'X-Msmail-Priority' alta
+lang es describe MAY_BE_FORGED          'Received:' tiene el aviso 'may be forged'
+lang es describe SHORT_RECEIVED_LINE	'Received:' contiene un nombre muy grande
+lang es describe CORRUPT_MSGID		'Message-Id' contiene pedazos de la cabecera Received
+lang es describe MSG_ID_ADDED_BY_MTA	'Message-Id' fue añadido por un relay
+lang es describe MANY_FROMS		'From' contiene más de una dirección
+lang es describe FROM_BTAMAIL		De una dirección @btamail.net.cn
+lang es describe USER_IN_BLACKLIST	From: la dirección está en la lista negra del usuario
+lang es describe MISSING_HEADERS	No existe alguna de las cabeceras From:, To: o Date:
+lang es describe RATWARE 		Señales de software de envío masivo encontrado en las cabeceras
+lang es describe SUSPICIOUS_RECIPS      To: contiene el mismo dominio al menos 10 veces
+lang es describe SUSPICIOUS_CC_RECIPS	Cc: contiene el mismo dominio al menos 10 veces
+lang es describe VERY_SUSP_RECIPS       To: contiene direcciones similares 10 veces
+lang es describe VERY_SUSP_CC_RECIPS	Cc: contiene direcciones similares 10 veces
+lang es describe RAZOR_CHECK		Incluido en Razor, visita http://razor.sourceforge.net/
+lang es describe HTML_WITH_BGCOLOR	Correo HTML con un fondo no blanco
+lang es describe EXCUSE_10		"if you do not wish to receive any more"
+lang es describe PORN_3			Cuida tu idioma!
+lang es describe PORN_4			URL sospechosa de pornografía
+lang es describe PORN_5			Ninfómanos?? Claro!!
+lang es describe PORN_6			Mencionadas imágenes XXX
+lang es describe WANTS_CREDIT_CARD      Pide detalles de la tarjeta de crédito
+lang es describe ASKS_BILLING_ADDRESS   Pide cuenta del banco
+lang es describe CYBER_FIRE_POWER       menciona Cyber FirePower!, una herramienta de spam
+lang es describe LINE_OF_YELLING        A WHOLE LINE OF YELLING DETECTED
+lang es describe HALF_PRICE_OFFER	"Half price offer" suena bastante a spam...
+lang es describe MURKOWSKI_CRUFT	Old Murkowski disclaimer
+lang es describe MAIL_IN_ORDER_FORM	Contains mail-in order form
+lang es describe FOR_INSTANT_ACCESS	Botón de acceso instantáneo
+lang es describe UNIVERSITY_DIPLOMAS	University Diplomas
+lang es describe NEW_DOMAIN_EXTENSIONS	Possible registry spammer
+lang es describe MONSTERHUT		mentions monsterhut.com
+lang es describe CLICK_TO_REMOVE_MAILTO Click-to-remove with mailto: found
+lang es describe CLICK_TO_REMOVE_2      Click-to-remove with mailto: found beforehand
+lang es describe TO_BE_REMOVED_REPLY    Says: "to be removed, reply via email" or similar
+lang es describe THIS_AINT_SPAM         Claims "This is not spam"
+lang es describe WE_HATE_SPAM           Says "We strongly oppose the use of SPAM email"
+lang es describe IN_ACCORDANCE_WITH_LAWS Claims to be in accordance with some Spam law
+lang es describe HR_3113                Mentions Spam law "H.R. 3113"
+lang es describe UCE_MAIL_ACT           Mentions Spam Law "UCE-Mail Act"
+lang es describe A_HREF_TO_IP		Link to an IP-address instead of a named host
+lang es describe A_HREF_TO_REMOVE	Link to a URL containing "remove"
+lang es describe REMOVE_SCRIPT		URL of CGI script called "remove"
+lang es describe REMOVE_PAGE		URL of page called "remove"
+lang es describe WEB_BUGS		Image tag with an ID code to identify you
+lang es describe RELAYING_FRAME		Frame wanted to load outside URL
+lang es describe INTERNET_TERROR_RANT   Cyber FirePower! rant about losing dropboxes
+lang es describe BASE64_ENC_TEXT	Message text disguised using base-64 encoding
+lang es describe CHARSET_FARAWAY_BODY	Character set indicates foreign language body
+lang es describe NIGERIAN_SCAM		Nigerian scam, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
+lang es describe NIGERIAN_SCAM_2	Mutated Nigerian scams
+lang es describe UNNEEDED_HTML_ENCODING	Unneeded encoding of HTML tags
+lang es describe BALANCE_FOR_LONG	Message text is over 500 lines long
+lang es describe USER_IN_WHITELIST	From: address is in the user's white-list
+lang es describe SIRCAM_SIGNATURE	SECURITY: The Sircam worm
+lang es describe BADTRANS_WORM          SECURITY: The BadTrans worm, see http://securityresponse.symantec.com/avcenter/venc/data/w32.badtrans.b@mm.html
+
