@@ -2488,4 +2488,29 @@ sub check_razor2_range {
   return 0;
 }
 
+
+sub check_email_isfree {
+
+# I don't know if we should simply copy Email::IsFree or source it
+# It's hopefully going to get updated often.
+
+  my ($self, $body) = @_;
+
+  eval { require Email::IsFree; };
+  return 0 if $@; # Email::IsFree not available
+
+  foreach (@{$body}) {
+    my @domains = /\@[.A-Za-z_-]+/g;
+    foreach my $domain (@domains) {
+      $domain =~ s/\@//;
+      $domain = lc $domain;
+      return 1 if Email::IsFree::by_domain($domain);
+    }
+  }
+
+  return 0;
+
+}
+
+
 1;
