@@ -1,5 +1,5 @@
 # SpamAssassin rules file: tests.
-# $Id: 20_head_tests.cf,v 1.162.2.6 2002/08/26 17:10:54 jmason Exp $
+# $Id: 20_head_tests.cf,v 1.162.2.7 2002/08/26 22:55:18 jmason Exp $
 ###########################################################################
 
 require_version 2.40
@@ -621,5 +621,4 @@ header FROM_UGETMORE            From =~ /\@ugetmore4less.net/i
 describe FROM_UGETMORE          From an address @ugetmore4less.net
 header FROM_TOPICA              From =~ /\@(?:\w\.)*email-publisher.com/i
 describe FROM_TOPICA            From an address @email-publisher.com
-
 

@@ -162,7 +162,7 @@ sub wanted {
   undef $ma;		# clean 'em up
   undef $status;
 
-# system ("ps alxww | grep mass-check | grep perl | grep -v grep");#JMD
+  system ("ps alxww | grep mass-check | grep perl | grep -v grep");#JMD
 }
 
 sub logkilled {

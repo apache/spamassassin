@@ -5,14 +5,9 @@
 # after a mass-check or two, then fold them into the distributed
 # rules files.
 #
-# I suggest adding a prefix to rules in this file, "" -- this
+# I suggest adding a prefix to rules in this file, "T_" -- this
 # helps identify probationary rules in test output.
-# $Id: 70_cvs_rules_under_test.cf,v 1.25.2.1 2002/08/22 23:11:15 jmason Exp $
+# $Id: 70_cvs_rules_under_test.cf,v 1.25.2.2 2002/08/26 22:55:19 jmason Exp $
 
 ######################################################################
 
-# was removed, but rule has been improved since then
-header MAILER_DAEMON		From =~ /^(?:Mail Delivery \w+ )?<?mailer.?daemon\@\S+>?(?: \(Mail Delivery \w+\))?$/i
-describe MAILER_DAEMON		From the Mailer-Daemon
-tflags MAILER_DAEMON		nice
-score MAILER_DAEMON		-1.0
