@@ -537,7 +537,9 @@ body T_HTML_P2_90_100		eval:html_percentage('90','100')
 
 body T_HTML_MAIL_ONLY             /HTML only email, sorry/i
 
-# catches stuff like "http://www.yahoo.com@0xD5.0xEF.0x8F.0x9D"
+# catches stuff like "http://www.yahoo.com@0xD5.0xEF.0x8F.0x9D" - tvd
+# matches hardly any, but should never occur in non-spam.
+# 0.023   0.0596   0.0000    1.00    0.93    0.01  T_HEX_HOST
 uri T_HEX_HOST	/^https?:\/\/[^\/]*0x[0-9a-fA-F]{2}/
 describe T_HEX_HOST	Looks like an URL with obfuscated hex IP address
 
@@ -563,7 +565,7 @@ score T_CLICK_HERE_LINK                0.317
 tflags T_QUOTED_EMAIL_TEXT nice
 
 # Potentially FP-prone, especially if you talk about optics. but it
-# matches a few messages that don't get properly marked otherwise.
+# matches a few messages that don't get properly marked otherwise. - tvd
 #
 # quinlan results (my FPs were all of the form "foo-opt" where "foo-opt"
 # was a project to optimize "foo")
@@ -607,6 +609,8 @@ body     T_HTML_LINK_UNSUB      eval:html_eval('anchor_text', '=~/unsubscribe/i'
 header T_MANY_X_MAILER		ALL =~ /(?:\nX-Mailer:.*){2}/si
 header T_MANY_USER_AGENT	ALL =~ /(?:\nUser-Agent:.*){2}/si
 
+# This works fairly well for me - tvd
+# 2.279   5.8206   0.1234    0.98    0.89    0.01  T_EARN_MONEY
 body T_EARN_MONEY /\b(?:earn|make|making|made|received?|discounted)\s+(?:up\s+to|as\s+much\s+as|over|at\s+least|a\s+full)?\s*\$\s*[0-9,]{2}/i
 describe T_EARN_MONEY        Message talks about earning money
 
@@ -622,11 +626,14 @@ header T_IDENT_NOBODY		Received =~ /ident[:=]nobody\b/i
 describe T_IDENT_NOBODY		Message was sent by nobody
 score T_IDENT_NOBODY		1.0
 
+# Doesn't work terrifically for me, but... -tvd
+# 0.041   0.1073   0.0000    1.00    0.93    0.01  T_EXCUSE_25
+# 0.036   0.0954   0.0000    1.00    0.93    0.01  T_LEAVE_ADDR
 body T_EXCUSE_25		/you have been included (?:mistakenly|by mistake)/i
 body T_LEAVE_ADDR		/leave your address/i
 
 # This doesn't do terrifically on my corpus, but it's not bad, want to
-# see how it works in a larger arena:
+# see how it works in a larger arena: - tvd
 #  0.249    0.586    0.037    0.94    0.54    1.00  T_TURN
 body __T_TURN /\bturn\s+your\s+.{1,15}\s+into\b/i
 body __T_TURN_INVEST /\bturn\s+.{1,15}\s+investment\s+into\b/i
@@ -636,7 +643,7 @@ meta T_TURN ( __T_TURN || __T_TURN_INVEST || __T_TURN_HOBBY || __T_TURN_MONEY)
 
 # I spent the better part of a day hacking around with the Message-Id
 # stuff.  I found a few new regexps that works fairly well on my corpus
-# with no overlap of the current MSGID_* rules.
+# with no overlap of the current MSGID_* rules. - tvd
 #  1.222    3.058    0.066    0.98    0.63    1.00  T_MSGID_S_1
 header __T_MSGID_17	Message-Id =~ /^<?DGTBAD\S+\@/
 header __T_MSGID_10	Message-Id =~ /^<?(?:\d+\$){3}\d+\@/
@@ -651,7 +658,7 @@ header __T_MSGID_16	Message-Id =~ /^<?[A-Z]\d{10}\@/
 header __T_MSGID_32	Message-Id =~ /^<?auto-00000\d+\@/
 meta T_MSGID_S_1	( __T_MSGID_17 || __T_MSGID_10 || __T_MSGID_8 || __T_MSGID_20 || __T_MSGID_19 || __T_MSGID_11 || __T_MSGID_24 || __T_MSGID_26 || __T_MSGID_37 || __T_MSGID_16 || __T_MSGID_32 )
 
-# Another Message-Id off-shoot, this time it's a lyris comp rule:
+# Another Message-Id off-shoot, this time it's a lyris comp rule: - tvd
 #  0.466    0.000    0.760    0.00    0.85   -1.00  T_MSGID_LYRIS
 header T_MSGID_LYRIS	Message-Id =~ /^<LYRIS-\d+-\d+-\d{4}(?:\.\d{2}){2}-\d{2}(?:\.\d{2}){2}--\S+\@lyris\.net>/
 score T_MSGID_LYRIS -0.5
@@ -721,8 +728,12 @@ header T_X_RMD_TEXT		exists:X-RMD-Text
 header T_X_GCMULTI		exists:X-GCMulti
 
 
-# potential replacement for USER_AGENT
+# potential replacement for USER_AGENT - tvd
 # it will get less hits, but should avoid hitting when USER_AGENT rules are also hit.
 header __USER_AGENT               exists:User-Agent
-meta T_USER_AGENT		( __USER_AGENT && (USER_AGENT.+ +) < 1 )
+meta T_USER_AGENT		( __USER_AGENT && ((USER_AGENT.+ +) < 1) )
 tflags T_USER_AGENT               nice
+
+# This looks for those "-approved-!" type subjects.  works ok for me. - tvd
+#  0.334   0.8801   0.0000    1.00    0.99    1.00  T_SUBJECT_APPROVED
+header T_SUBJECT_APPROVED	Subject =~ /approved.?[.!*]/i
