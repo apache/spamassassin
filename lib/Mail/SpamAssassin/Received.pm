@@ -1,4 +1,4 @@
-# $Id: Received.pm,v 1.32 2003/09/29 19:42:00 felicity Exp $
+# $Id: Received.pm,v 1.33 2003/09/30 05:00:54 jmason Exp $
 
 # ---------------------------------------------------------------------------
 
@@ -470,6 +470,14 @@ sub parse_received_line {
       $helo = $1; $rdns = $2; $ip = $3; $by = $4;
       $rdns =~ s/^IDENT:([^\@]+)\@// and $ident = $1; # remove IDENT lookups
       $rdns =~ s/^([^\@]+)\@// and $ident = $1;	# remove IDENT lookups
+      goto enough;
+    }
+
+    # Received: from 4wtgRl (kgbxn@[211.244.147.115]) by dogma.slashnull.org (8.11.6/8.11.6) with SMTP id h8BBsUJ18848; Thu, 11 Sep 2003 12:54:31 +0100
+    if (/^from (\S+) \((\S+)\@\[(${IP_ADDRESS})\].*\) by (\S+) \(/) {
+      $mta_looked_up_dns = 1;	# this one does.  there just wasn't one
+      $helo = $1; $ip = $3; $by = $4;
+      $ident = $2;
       goto enough;
     }
 
