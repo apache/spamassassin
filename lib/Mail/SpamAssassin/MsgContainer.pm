@@ -187,7 +187,7 @@ Return a reference to the the raw array.
 =cut
 
 sub raw {
-  return $self->{'raw'};
+  return $_[0]->{'raw'};
 }
 
 =item decode()
