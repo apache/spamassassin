@@ -80,37 +80,35 @@ void writescores (FILE *fout) {
 
 // ---------------------------------------------------------------------------
 
-void counthitsfromscores (void) {
+void counthitsfromscores () {
   int file;
   float hits;
   int i;
+  int overthresh;
 
   nn = ny = yn = yy = 0;
   nyscore = ynscore = 0.0;
-
   for (file = 0; file < num_tests; file++) {
-    float score;
-
     hits = 0.0;
     for (i = num_tests_hit[file]-1; i >= 0; i--) {
-      score = scores[tests_hit[file][i]];
-      hits += score;
+      hits += scores[tests_hit[file][i]];
     }
+    overthresh = (hits >= threshold);
 
     // we use the xxscore vars as a weighted "crapness" score; ie.
     // higher is worse.  incorrect diagnoses add (1 + incorrectness)
     // to them, where "incorrectness" is (num_points_over_threshold) / 5.0.
     //
     // This way, massively-incorrect scores are massively penalised.
-    // 
+
     if (is_spam[file]) {
-      if (hits > threshold) {
+      if (overthresh) {
 	yy++;
       } else {
 	yn++; ynscore += ((threshold - hits) / 5.0) + 1.0;
       }
     } else {
-      if (hits > threshold) {
+      if (overthresh) {
 	ny++; nyscore += ((hits - threshold) / 5.0) + 1.0;
       } else {
 	nn++;
@@ -119,30 +117,58 @@ void counthitsfromscores (void) {
   }
 }
 
-// ---------------------------------------------------------------------------
+void counthitsfromgenome (GARealGenome &genome) {
+  int file;
+  float hits;
+  int i;
+  int overthresh;
+  int nyint = 0;
+  int ynint = 0;
 
-void counthits (GARealGenome &genome) {
-  int i, len;
+  for (file = 0; file < num_tests; file++) {
+    hits = 0.0;
+    
+    for (i = num_tests_hit[file]-1; i >= 0; i--) {
+      hits += genome[tests_hit[file][i]];
+    }
 
-  len = genome.length();
-  if (len != num_scores) {
-    cerr << "len != numscores: "<<len<<"  "<<num_scores<<endl;
-    exit(1);
-  }
-
-  // copy the new scores to the "scores" array
-  for (i = 0; i < len; i++) {
-    if (is_mutatable[i]) {
-      scores[i] = genome[i];
-      if (scores[i] == 0.0) { scores[i] = 0.1; }
-
+    // Craig: good tips, this should be faster
+    overthresh = (hits >= threshold);
+    if (is_spam[file]) {
+      if (!overthresh) {
+	ynint += (int) (threshold - hits) + 5;
+      }
     } else {
-      scores[i] = bestscores[i];	// use the standard one
+      if (overthresh) {
+	nyint += (int) (hits - threshold) + 5;
+      }
     }
   }
 
-  counthitsfromscores();
+  nyscore = ((float) nyint);		// / 5.0;
+  ynscore = ((float) ynint);		// / 5.0;
 }
+
+// ---------------------------------------------------------------------------
+
+  /*
+void counthits (GARealGenome &genome) {
+  int i;
+
+  if (genome.length() != num_scores) {
+    cerr << "len != numscores: "<<len<<"  "<<num_scores<<endl;
+    exit(1);
+  }
+  // good point Craig, no need to do this. commented copying code
+  if (is_mutatable[i]) {
+    scores[i] = genome[i];
+    if (scores[i] == 0.0) { scores[i] = 0.1; }
+  } else {
+    scores[i] = bestscores[i];	// use the standard one
+  }
+  counthitsfromgenome(genome);
+}
+  */
 
 // ---------------------------------------------------------------------------
 
@@ -154,7 +180,7 @@ float
 objective(GAGenome & c)
 {
   GARealGenome &genome = (GARealGenome &) c;
-  counthits(genome);
+  counthitsfromgenome(genome);
 
   if (sleepTime) { usleep(sleepTime); }
 
@@ -179,7 +205,7 @@ write_to_file (GARealGenome &genome, const char *fname) {
   FILE *fout;
   char namebuf[255];
 
-  counthits(genome);
+  counthitsfromgenome(genome);
   snprintf (namebuf, 255, "%s", fname);
   fout = fopen (namebuf, "w");
   printhits (fout);
@@ -362,7 +388,7 @@ main (int argc, char **argv) {
 	  	<< ":\n";
 
 	genome = ga.statistics().bestIndividual();
-	counthits(genome); printhits (stdout);
+	counthitsfromgenome(genome); printhits (stdout);
 	write_to_file (genome, "tmp/results.in_progress");
       }
     }
@@ -372,7 +398,7 @@ main (int argc, char **argv) {
   genome = ga.statistics().bestIndividual();
 
   cout << "Best genome found:" << endl;
-  counthits(genome);
+  counthitsfromgenome(genome);
   printhits (stdout);
   //cout << "Stats:\n" << ga.statistics() << endl;
 

@@ -25,8 +25,9 @@ for f in /local2/mail-archives/crackmice-old/* ; do
   ./mass-check $f >> nonspam.local
 done
 
-rsync -vrze ssh dogma.slashnull.org:ftp/spamassassin/masses/spam.log spam.dogma
-rsync -vrze ssh dogma.slashnull.org:ftp/spamassassin/masses/nonspam.log nonspam.dogma
+dog=dogma.slashnull.org
+rsync -vrze ssh $dog:ftp/spamassassin/masses/spam.log spam.dogma
+rsync -vrze ssh $dog:ftp/spamassassin/masses/nonspam.log nonspam.dogma
 
 cat nonspam.local nonspam.dogma logs/contrib/nonspam.log* > nonspam.log
 cat spam.local spam.dogma logs/contrib/spam.log* > spam.log
@@ -35,8 +36,8 @@ cat spam.local spam.dogma logs/contrib/spam.log* > spam.log
 ./hit-frequencies > freqs
 
 make clean
-make
+make evolve
 date
-./continual_evolve.sh -s 100 -b 10.0 -c 1.001
+./continual_evolve.sh -s 100 -b 20.0 -c 1.001
 
 
