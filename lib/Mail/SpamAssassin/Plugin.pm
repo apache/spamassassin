@@ -61,6 +61,9 @@ C<$plugin->inhibit_further_callbacks()> to block delivery of that event to
 later plugins in the chain.  This is useful if the plugin has handled the
 event, and there will be no need for later plugins to handle it as well.
 
+If you're looking to write a simple eval rule, skip straight to 
+C<register_eval_rule()>, below.
+
 =head1 INTERFACE
 
 In all the plugin APIs below, C<options> refers to a reference to a hash
@@ -131,6 +134,11 @@ sub new {
 }
 
 # ---------------------------------------------------------------------------
+# now list the supported methods we will call into.  NOTE: we don't have
+# to implement them here, since the plugin can use "can()" to introspect
+# the object and determine if it's capable of calling the method anyway.
+# Nifty!
+
 =item $plugin->parse_config ( { options ... } )
 
 Parse a configuration line that hasn't already been handled.  C<options>
@@ -162,14 +170,6 @@ Note that it is suggested that configuration be stored on the
 C<Mail::SpamAssassin::Conf> object in use, instead of the plugin object itself.
 That can be found as C<$plugin->{main}->{conf}>.
 
-=cut
-
-sub parse_config {
-  my ($self, $opts) = @_;
-  return 0;	# implemented by subclasses, no-op by default
-}
-
-# ---------------------------------------------------------------------------
 =item $plugin->signal_user_changed ( { options ... } )
 
 Signals that the current user has changed for a new one.
@@ -186,14 +186,6 @@ The new user's storage directory.
 
 =back
 
-=cut
-
-sub signal_user_changed {
-  my ($self, $opts) = @_;
-  return 0;	# implemented by subclasses, no-op by default
-}
-
-# ---------------------------------------------------------------------------
 =item $plugin->check_start ( { options ... } )
 
 Signals that a message check operation is starting.
@@ -206,14 +198,6 @@ The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
 
 =back
 
-=cut
-
-sub check_start {
-  my ($self, $opts) = @_;
-  return 0;	# implemented by subclasses, no-op by default
-}
-
-# ---------------------------------------------------------------------------
 =item $plugin->extract_metadata ( { options ... } )
 
 Signals that a message is being mined for metadata.  Some plugins may wish
@@ -227,14 +211,6 @@ The C<Mail::SpamAssassin::Message> object for this message.
 
 =back
 
-=cut
-
-sub extract_metadata {
-  my ($self, $opts) = @_;
-  return 0;	# implemented by subclasses, no-op by default
-}
-
-# ---------------------------------------------------------------------------
 =item $plugin->parsed_metadata ( { options ... } )
 
 Signals that a message's metadata has been parsed, and can now be
@@ -250,14 +226,33 @@ C<$permsgstatus->get_message()> API.)
 
 =back
 
-=cut
+=item $plugin->check_tick ( { options ... } )
 
-sub parsed_metadata {
-  my ($self, $opts) = @_;
-  return 0;	# implemented by subclasses, no-op by default
-}
+Called periodically during a message check operation.  A callback set for
+this method is a good place to run through an event loop dealing with
+network events triggered in a C<parse_metadata> method, for example.
 
-# ---------------------------------------------------------------------------
+=over 4
+
+=item permsgstatus
+
+The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
+
+=back
+
+=item $plugin->check_post_dnsbl ( { options ... } )
+
+Called after the DNSBL results have been harvested.  This is a good
+place to harvest your own asynchronously-started network lookups.
+
+=over 4
+
+=item permsgstatus
+
+The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
+
+=back
+
 =item $plugin->check_end ( { options ... } )
 
 Signals that a message check operation has just finished, and the
@@ -273,14 +268,6 @@ using the APIs on this object.
 
 =back
 
-=cut
-
-sub check_end {
-  my ($self, $opts) = @_;
-  return 0;	# implemented by subclasses, no-op by default
-}
-
-# ---------------------------------------------------------------------------
 =item $plugin->autolearn ( { options ... } )
 
 Signals that a message is about to be auto-learned as either ham or spam.
@@ -297,14 +284,6 @@ C<1> if the message is spam, C<0> if ham.
 
 =back
 
-=cut
-
-sub autolearn {
-  my ($self, $opts) = @_;
-  return 0;	# implemented by subclasses, no-op by default
-}
-
-# ---------------------------------------------------------------------------
 =item $plugin->per_msg_finish ( { options ... } )
 
 Signals that a C<Mail::SpamAssassin::PerMsgStatus> object is being
@@ -319,26 +298,9 @@ The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
 
 =back
 
-=cut
-
-sub per_msg_finish {
-  my ($self, $opts) = @_;
-  return 0;	# implemented by subclasses, no-op by default
-}
-
-# ---------------------------------------------------------------------------
 =item $plugin->finish ()
 
 Called when the C<Mail::SpamAssassin> object is destroyed.
-
-=cut
-
-sub finish {
-  my ($self) = @_;
-  # implemented by subclasses, no-op by default
-}
-
-###########################################################################
 
 =back
 
