@@ -452,9 +452,9 @@ int process_message(const char *hostname, int port, char *username, int max_size
       case HOST_NOT_FOUND:
       case NO_ADDRESS:
       case NO_RECOVERY:
-	return EX_NOHOST;
+	return (CHECK_ONLY?EX_NOTSPAM:EX_NOHOST);
       case TRY_AGAIN:
-	return EX_TEMPFAIL;
+	return (CHECK_ONLY?EX_NOTSPAM:EX_TEMPFAIL);
       }
     }
 
@@ -464,7 +464,7 @@ int process_message(const char *hostname, int port, char *username, int max_size
   exstatus = try_to_connect ((const struct sockaddr *) &addr, &mysock);
   if (EX_OK == exstatus)
   {
-    if(NULL == (msg_buf = malloc(max_size+1024))) return EX_OSERR;
+    if(NULL == (msg_buf = malloc(max_size+1024))) return (CHECK_ONLY?EX_NOTSPAM:EX_OSERR);
 
     exstatus = send_message(STDIN_FILENO,mysock,username,max_size);
     if (EX_OK == exstatus)
@@ -477,9 +477,13 @@ int process_message(const char *hostname, int port, char *username, int max_size
       /* Message was too big or corrupted, so dump the buffer then bail */
       full_write (STDOUT_FILENO,msg_buf,amount_read);
       dump_message(STDIN_FILENO,STDOUT_FILENO);
-      exstatus = 0;
+      exstatus = EX_OK;
     }
     free(msg_buf);
+  }
+  else if(CHECK_ONLY) /* If connect failed, but CHECK_ONLY then return 0 */
+  {
+    exstatus = EX_NOTSPAM;
   }
   else if(SAFE_FALLBACK) /* If connection failed but SAFE_FALLBACK set then dump original message */
   {
@@ -562,7 +566,7 @@ int main(int argc,char **argv)
     curr_user = getpwuid(getuid());
     if (curr_user == NULL) {
       perror ("getpwuid failed");
-      return EX_OSERR;
+      return (CHECK_ONLY?EX_NOTSPAM:EX_OSERR);
     }
     username = curr_user->pw_name;
   }
