@@ -482,3 +482,12 @@ header T_MSGID_LONG_D_150	MESSAGEID =~ /\@.{150,}>/m
 body T_BODY_ENHANCEMENT		/\b(?:enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b|\binches\b).{0,50}\b(?:penis|male organ|pee[ -]?pee|dick|sc?hlong|wh?anger|breast(?!\s+cancer))/i
 body T_BODY_ENHANCEMENT2		/\b(?:penis|male organ|pee[ -]?pee|dick|sc?hlong|wh?anger|breast(?!\s+cancer)).{0,50}\b(?:enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b|\binches\b)/i
 
+
+header T_UNPARSEABLE_RELAY  eval:check_relays_unparseable()
+
+header T_NO_RELAYS      eval:check_no_relays()
+tflags T_NO_RELAYS      nice
+
+header __NO_RCVD        exists:Received
+tflags T_NO_RCVD        (!__NO_RCVD)
+
