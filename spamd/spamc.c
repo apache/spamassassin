@@ -1,7 +1,8 @@
 /*
  * This code is copyright 2001 by Craig Hughes
- * It is licensed for use with SpamAssassin according to the terms of the Perl Artistic License
- * The text of this license is included in the SpamAssassin distribution in the file named "License"
+ * It is licensed under the same license as Perl itself.  The text of this
+ * license is included in the SpamAssassin distribution in the file named
+ * "License".
  */
 
 #include "../config.h"
