@@ -212,3 +212,7 @@ body T_Q_USE_IDENTITY		/Using Your Identity/i
 body T_Q_YOU_CAN_SEARCH		/You Can Search For Anyone/i
 body T_Q_YOUR_SIZE		/Your Penis Size/i
 ###########################################################################
+
+header FORGED_TELESP_RCVD       Received =~ /\.(?!br).. \(\d+-\d+-\d+-\d+\.dsl\.telesp\.net\.br /
+describe FORGED_TELESP_RCVD     Contains forged hostname for a DSL IP in Brazil
+
