@@ -5,7 +5,7 @@ open (IN, "<freqs");
 while (<IN>) {
   next if /^\s+OVERALL\s/;
   @s = split;
-  if ($s[1] < 5) { $skipped_scores{$s[3]} = 1; }
+  if ($s[0] < 0) { $skipped_scores{$s[3]} = 1; }
 }
 close IN;
 
@@ -19,15 +19,21 @@ while (<>) {
 }
 
 open (IN, "<../spamassassin.cf");
+my $out = '';
+my $pre = '';
 while (<IN>) {
-  print;
+  if (/^\s*score\s+(\S+)\s/) {
+    $gascores =~ s/^score\s+$1\s.*?\n//gm;
+  }
+  $pre .= $_;
   /^# Start of GA-evolved scores/ and last;
 }
 
 while (<IN>) {
   /^# End of GA-evolved scores/ and last;
 }
-my $out = $_;
+$out .= $_;
+
 while (<IN>) {
   if (/^\s*score\s+(\S+)\s/) {
     $gascores =~ s/^score\s+$1\s.*?\n//gm;
@@ -36,4 +42,4 @@ while (<IN>) {
 }
 close IN;
 
-print "\n", $gascores, "\n", $out;
+print $pre, "\n", $gascores, "\n", $out;

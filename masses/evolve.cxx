@@ -35,15 +35,18 @@ float nybias = 5.0;
 void printhits (FILE *fout) {
   if (num_tests == 0) { num_tests = 1; }
 
-  fprintf (fout, "Correctly non-spam: %6d  %3.2f%%\n",
+  fprintf (fout, "# SUMMARY:            %6d / %6d\n#\n",
+      	ny, yn);
+
+  fprintf (fout, "# Correctly non-spam: %6d  %3.2f%%\n",
         nn, (nn / (float) num_tests) * 100.0);
-  fprintf (fout, "Correctly spam:     %6d  %3.2f%%\n",
+  fprintf (fout, "# Correctly spam:     %6d  %3.2f%%\n",
         yy, (yy / (float) num_tests) * 100.0);
-  fprintf (fout, "False positives:    %6d  %3.2f%%\n",
+  fprintf (fout, "# False positives:    %6d  %3.2f%%\n",
         ny, (ny / (float) num_tests) * 100.0);
-  fprintf (fout, "False negatives:    %6d  %3.2f%%\n",
+  fprintf (fout, "# False negatives:    %6d  %3.2f%%\n",
         yn, (yn / (float) num_tests) * 100.0);
-  fprintf (fout, "TOTAL:              %6d  %3.2f%%\n",
+  fprintf (fout, "# TOTAL:              %6d  %3.2f%%\n#\n",
         num_tests, 100.0);
 }
 

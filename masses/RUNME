@@ -10,6 +10,7 @@ mv spam.log nonspam.log logs/old
 cat logs/contrib/nonspam.log* > nonspam.log
 cat logs/contrib/spam.log* > spam.log
 
+./download-trapped-spam
 ./mass-check /local2/mail-archives/spamtrap/mbox >> spam.log
 ./mass-check /local2/mail-archives/crackmice >> nonspam.log
 ./mass-check /local2/mail-archives/scoop.1999 >> nonspam.log
