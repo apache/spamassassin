@@ -3,14 +3,28 @@ require 5.005;
 # RPM builders, or people building in their home dirs:
 # set PREFIX (default = /usr)
 # set SYSCONFDIR (default = /etc)
-# e.g. "perl Makefile.PL PREFIX=/home/jm/sausr SYSCONFDIR=/home/jm/saetc"
+# set INST_PREFIX (default = [same as PREFIX])
+# set INST_SYSCONFDIR (default = [same as SYSCONFDIR])
+#
+# For example, to install in your home dir:
+#
+#   perl Makefile.PL PREFIX=/home/jm/sausr SYSCONFDIR=/home/jm/saetc
+#
+# Or to build a package in /tmp/build, but with its internal paths
+# referring to /usr and /etc:
+#
+#   perl Makefile.PL PREFIX=/tmp/build/usr SYSCONFDIR=/tmp/build/etc \
+#                       INST_PREFIX=/usr INST_SYSCONFDIR=/etc
 #
 # You can also override the automatic ./configure step by just
-# running that yourself first.
+# running that yourself first.  But the plan is that this should not
+# be necessary.
 
 ###########################################################################
 
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'SYSCONFDIR'} = 1;
+$ExtUtils::MakeMaker::Recognized_Att_Keys{'INST_SYSCONFDIR'} = 1;
+$ExtUtils::MakeMaker::Recognized_Att_Keys{'INST_PREFIX'} = 1;
 
 use Config;
 use ExtUtils::MakeMaker;
@@ -99,6 +113,12 @@ sub MY::postamble {
   my $sysconfdir = $self->{SYSCONFDIR};
   $sysconfdir ||= '/etc';
 
+  my $instsysconfdir = $self->{INST_SYSCONFDIR};
+  $instsysconfdir ||= $sysconfdir;
+
+  my $instprefix = $self->{INST_PREFIX};
+  $instprefix ||= $self->{PREFIX};
+
   my $gotpods = keys(%{$self->{MAN1PODS}}) || keys(%{$self->{MAN3PODS}}) || keys(%{$self->{EXTRAPODS}}) || 0;
 
 
@@ -106,15 +126,20 @@ qq#
 
 RULES		= $rulesfiles
 SYSCONFDIR      = $sysconfdir
+INST_SYSCONFDIR = $instsysconfdir
+INST_PREFIX     = $instprefix
 
 #. q#
 
-DEF_RULES_DIR	= $(PREFIX)/share/spamassassin
-LOCAL_RULES_DIR	= $(SYSCONFDIR)/mail/spamassassin
+DEF_RULES_DIR           = $(INST_PREFIX)/share/spamassassin
+PKG_DEF_RULES_DIR	= $(PREFIX)/share/spamassassin
+
+LOCAL_RULES_DIR         = $(INST_SYSCONFDIR)/mail/spamassassin
+PKG_LOCAL_RULES_DIR	= $(SYSCONFDIR)/mail/spamassassin
 
 FIXVARS		= -Mvars \
 		  -DVERSION="$(VERSION)" \
-		  -DPREFIX="$(PREFIX)" \
+		  -DPREFIX="$(INST_PREFIX)" \
 		  -DDEF_RULES_DIR="$(DEF_RULES_DIR)" \
 		  -DLOCAL_RULES_DIR="$(LOCAL_RULES_DIR)" \
 		  -DINSTALLSITELIB="$(INSTALLSITELIB)"
@@ -138,20 +163,20 @@ spamd/spamc$(EXE_EXT): binaries.mk
 binaries.mk: configure
 	./configure
 
-inst_cfs: $(DEF_RULES_DIR) $(LOCAL_RULES_DIR) $(LOCAL_RULES_DIR)/local.cf
-	$(RM_F) $(DEF_RULES_DIR)/*; \
+inst_cfs: $(PKG_DEF_RULES_DIR) $(PKG_LOCAL_RULES_DIR) $(PKG_LOCAL_RULES_DIR)/local.cf
+	$(RM_F) $(PKG_DEF_RULES_DIR)/*; \
 	for file in $(RULES) ; do \
-	  $(PERL) build/preprocessor $(FIXVARS) <rules/$$file >$(DEF_RULES_DIR)/$$file; \
+	  $(PERL) build/preprocessor $(FIXVARS) <rules/$$file >$(PKG_DEF_RULES_DIR)/$$file; \
 	done
-	$(CHMOD) $(PERM_RW) $(DEF_RULES_DIR)/*
+	$(CHMOD) $(PERM_RW) $(PKG_DEF_RULES_DIR)/*
 
-$(DEF_RULES_DIR):
+$(PKG_DEF_RULES_DIR):
 	$(MKPATH) $@
 
-$(LOCAL_RULES_DIR):
+$(PKG_LOCAL_RULES_DIR):
 	$(MKPATH) $@
 
-$(LOCAL_RULES_DIR)/local.cf: rules/local.cf
+$(PKG_LOCAL_RULES_DIR)/local.cf: rules/local.cf
 	test -f $@ || \
 	  $(CP) rules/local.cf $@
 

@@ -16,8 +16,8 @@ Summary:        a spam filter for email which can be invoked from mail delivery 
 Summary(pl):    Filtr antyspamowy, przeznaczony dla programów dostarczaj±cych pocztê (MDA)
 
 Group:          Applications/Mail
-%define version 2.42
-%define real_version 2.42
+%define version 2.43
+%define real_version 2.43
 %define release 1
 
 %define name    spamassassin
@@ -105,16 +105,13 @@ aplikacji do czytania poczty.
 %setup -q -n %{pdir}-%{pnam}-%{real_version}
 
 %build
-%{__perl} Makefile.PL PREFIX=%{_prefix} SYSCONFDIR=%{_sysconfdir}
+%{__perl} Makefile.PL PREFIX=$RPM_BUILD_ROOT/%{_prefix} SYSCONFDIR=$RPM_BUILD_ROOT/%{_sysconfdir} INST_PREFIX=%{_prefix} INST_SYSCONFDIR=%{_sysconfdir}
 %{__make} 
 # make test
 
 %install
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
-%makeinstall PREFIX=%buildroot/%{_prefix} \
-        INSTALLMAN1DIR=%buildroot/%{_mandir}/man1 \
-        INSTALLMAN3DIR=%buildroot/%{_mandir}/man3 \
-	LOCAL_RULES_DIR=%buildroot/%{_sysconfdir}/mail/spamassassin
+%makeinstall 
 install -d %buildroot/%{initdir}
 install -m 0755 spamd/redhat-rc-script.sh %buildroot/%{initdir}/spamassassin
 
