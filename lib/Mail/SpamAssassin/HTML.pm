@@ -730,26 +730,16 @@ sub color_hue {
   if ($color =~ /^\#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i) {
     my ($h, $s, $v) = rgb_to_hsv(hex($1), hex($2), hex($3));
     if (!defined $h) {
-      return "gray" unless ($v == 0 || $v == 255);
+      return "black" if $v == 0;
+      return "white" if $v == 255;
+      return "gray";
     }
-    elsif ($h < 30 || $h >= 330) {
-      return "red";
-    }
-    elsif ($h < 90) {
-      return "yellow";
-    }
-    elsif ($h < 150) {
-      return "green";
-    }
-    elsif ($h < 210) {
-      return "cyan";
-    }
-    elsif ($h < 270) {
-      return "blue";
-    }
-    elsif ($h < 330) {
-      return "magenta";
-    }
+    return "red" if ($h < 30 || $h >= 330);
+    return "yellow" if $h < 90;
+    return "green" if $h < 150;
+    return "cyan" if $h < 210;
+    return "blue" if $h < 270;
+    return "magenta" if $h < 330;
   }
   return "hue_unknown";
 }
