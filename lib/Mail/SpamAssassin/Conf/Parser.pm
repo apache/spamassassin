@@ -564,16 +564,31 @@ sub setup_default_code_cb {
 
 sub set_numeric_value {
   my ($conf, $key, $value, $line) = @_;
+
+  unless (defined $value && $value =~ /^-?\d+(?:\.\d+)?$/) {
+    return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+  }
+
   $conf->{$key} = $value+0.0;
 }
 
 sub set_bool_value {
   my ($conf, $key, $value, $line) = @_;
+
+  unless (defined $value && ($value == 1 || $value == 0) ) {
+    return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+  }
+
   $conf->{$key} = $value+0;
 }
 
 sub set_string_value {
   my ($conf, $key, $value, $line) = @_;
+
+  unless (defined $value) {
+    return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+  }
+
   $conf->{$key} = $value;
 }
 
