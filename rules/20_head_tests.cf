@@ -227,6 +227,9 @@ describe FORGED_EUDORAMAIL_RCVD	Forged eudoramail.com 'Received:' header found
 header FORGED_YAHOO_RCVD	eval:check_for_forged_yahoo_received_headers()
 describe FORGED_YAHOO_RCVD	Forged yahoo.com 'Received:' header found
 
+header FORGED_JUNO_RCVD		eval:check_for_forged_juno_received_headers()
+describe FORGED_JUNO_RCVD	Forged juno.com 'Received:' header found
+
 header FORGED_GW05_RCVD		eval:check_for_forged_gw05_received_headers()
 describe FORGED_GW05_RCVD	Forged 'by gw05' 'Received:' header found
 
