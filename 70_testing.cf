@@ -201,7 +201,7 @@ body T_HTML_FONT_LARGE_SIZE_4	eval:html_eval('max_size', '> 8')
 ########################################################################
 
 # bug 1985
-body T_URGENT_BIZ /urgent.{0,16}(?:assistance|business|buy|confidential|notice|proposal|reply|request|response)/i
+body T_BIZ_URGENT /urgent.{0,16}(?:assistance|business|buy|confidential|notice|proposal|reply|request|response)/i
 
 # bug 2950
 # both look promotable
