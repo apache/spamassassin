@@ -54,7 +54,8 @@ sub classify {
   my $maxp = $opt_t;
 
   # create ngrams for input
-  my @unknown = create_lm($input);
+  # limit to 10000 characters, enough for accuracy and still fast enough
+  my @unknown = create_lm(substr($input, 0, 10000));
 
   # load language models once
   if (! @nm) {
