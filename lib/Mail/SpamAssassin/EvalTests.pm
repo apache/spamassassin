@@ -24,7 +24,7 @@ use vars qw{
 };
 
 # sad but true. sort it out, sysadmins!
-$CCTLDS_WITH_LOTS_OF_OPEN_RELAYS = qr{(?:kr|cn|cl|ar|hk|il|th|tw|sg|za|tr|ma|ua|in|pe)};
+$CCTLDS_WITH_LOTS_OF_OPEN_RELAYS = qr{(?:kr|cn|cl|ar|hk|il|th|tw|sg|za|tr|ma|ua|in|pe|br)};
 $ROUND_THE_WORLD_RELAYERS = qr{(?:net|com|ca)};
 
 # Here's how that RE was determined... relay rape by country (as of my
@@ -257,29 +257,37 @@ sub _check_mta_message_id {
 
 ###########################################################################
 
-# yet another test for faked Received: headers (FORGED_RCVD_TRAIL)
+# yet another test for faked Received: headers (FORGED_RCVD_TRAIL).
+
 sub check_for_forged_received_trail {
   my ($self) = @_;
 
   my @received = grep(/\S/, split(/\n/, $self->get ('Received')));
   my @by;
   my @from;
+  my @fromip;
   my $mismatch = 0;
-  my $local;
 
   for (my $i = 0; $i < $#received; $i++) {
-    if ($received[$i] =~ s/\bby[\t ]+(\w+([\w.-]+\.)+\w+)//i) {
+    if ($received[$i] =~ s/\bby[\t ]+(\w+(?:[\w.-]+\.)+\w+)//i) {
       $by[$i] = lc($1);
       $by[$i] =~ s/.*\.(\S+\.\S+)$/$1/;
     }
-    if ($received[$i] =~ s/\bfrom[\t ]+(\w+([\w.-]+\.)+\w+)//i) {
+    if ($received[$i] =~ s/\bfrom[\t ]+(\w+(?:[\w.-]+\.)+\w+)//i) {
       $from[$i] = lc($1);
       $from[$i] =~ s/.*\.(\S+\.\S+)$/$1/;
+    }
+    if ($received[$i] =~ s/^ \((?:\S+ |)\[(${IP_ADDRESS})\]\)//i) {
+      $fromip[$i] = $1;
+    }
 
-      # valid: bouncing around inside 1 machine, via the localhost interface.
-      # freshmeat newsletter does this.
-      if (defined ($from[$i]) && $from[$i] eq 'localhost.localdomain') {
-        $from[$i] = undef;
+    if (defined ($from[$i]) && defined($fromip[$i])) {
+      if ($from[$i] =~ /^localhost(?:\.localdomain|)$/) {
+        if ($fromip[$i] eq '127.0.0.1') {
+          # valid: bouncing around inside 1 machine, via the localhost interface.
+          # freshmeat newsletter does this.
+          $from[$i] = undef;
+        }
       }
     }
 
@@ -294,6 +302,7 @@ sub check_for_forged_received_trail {
         ." from=".(defined $from[$i] ? $from[$i] : "(undef)")
         ." mismatches=$mismatch");
   }
+
   return ($mismatch > 1);
 }
 
