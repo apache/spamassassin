@@ -91,7 +91,7 @@ $IS_DEVEL_BUILD = 1;            # change for release versions
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.209 2003/09/19 22:09:01 felicity Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.210 2003/09/21 02:15:14 quinlan Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -183,7 +183,7 @@ and C<userprefs_filename>.
 =item languages_filename
 
 If you want to be able to use the language-guessing rule
-C<UNDESIRED_LANGUAGE_BODY>, and are using C<config_text> instead of
+C<UNWANTED_LANGUAGE_BODY>, and are using C<config_text> instead of
 C<rules_filename>, C<site_rules_filename>, and C<userprefs_filename>, you will
 need to set this.  It should be the path to the B<languages> file normally
 found in the SpamAssassin B<rules> directory.

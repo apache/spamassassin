@@ -1013,7 +1013,7 @@ message text.
 Note that the language cannot always be recognized with sufficient
 confidence.  In that case, no points will be assigned.
 
-The rule C<UNDESIRED_LANGUAGE_BODY> is triggered based on how this is set.
+The rule C<UNWANTED_LANGUAGE_BODY> is triggered based on how this is set.
 
 In your configuration, you must use the two or three letter language
 specifier in lowercase, not the English name for the language.  You may

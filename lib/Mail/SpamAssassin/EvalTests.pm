@@ -2077,13 +2077,13 @@ sub check_for_num_yelling_lines {
   return ($self->{num_yelling_lines} >= $threshold);
 }
 
-sub check_language {            # UNDESIRED_LANGUAGE_BODY
+sub check_language {            # UNWANTED_LANGUAGE_BODY
   my ($self, $body) = @_;
   $self->_check_language();
   return $self->{undesired_language_body};
 }
 
-sub _check_language {            # UNDESIRED_LANGUAGE_BODY
+sub _check_language {            # UNWANTED_LANGUAGE_BODY
   my ($self, $body) = @_;
 
   if (defined $self->{undesired_language_body}) {
