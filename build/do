@@ -24,19 +24,21 @@ use warnings;
 
 use File::Copy;
 
+# Check whether symlink is supported.
+use constant SYMLINK => eval { symlink("",""); 1 };
+
 if (scalar (@ARGV) != 3) {
   die "Usage: $0 command source target\n\twhere command can be copy move or link\n\tand source and target must be single files.\n"
 }
 
-my($cmd, $src, $tgt, $lnk) = @ARGV;
+my ($cmd, $src, $tgt, $lnk) = @ARGV;
 
 # Check if the source is a symlink and read the target.  On systems which do
 # not support symlinks, readlink will bail out which is catched by the eval,
 # similar to what 'perldoc -f symlink' suggests.  It will fall back to copy
 # then.
-$lnk = eval { readlink($src) };
-if ($@) {
-  $cmd = 'copy' if ($cmd eq 'symlink');
+if ($cmd eq 'symlink' && !SYMLINK) {
+  $cmd = 'copy';
 }
 
 # If we're supposed to link, do so.
