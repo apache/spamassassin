@@ -1037,12 +1037,9 @@ sub check {
   # Now read in message
   my @msglines;
   my $actual_length = 0;
-  my $final_length  = defined $expected_length ?  # shortcut the check
-                             \$expected_length :  # if expected_length
-                             \$actual_length;     # is set or not.
   while ( $_ = $client->getline() ) {
     $actual_length += length($_);
-    last if $actual_length > ${$final_length};
+    last if (defined $expected_length && $actual_length >= $expected_length);
 
     push(@msglines, $_);    
   }
@@ -1078,9 +1075,9 @@ sub check {
       . "." );
 
   # Check length if we're supposed to.
-  if ( $actual_length != ${$final_length} ) {
+  if ( defined $expected_length && $actual_length != $expected_length ) {
     protocol_error(
-      "(Content-Length mismatch: Expected ${$final_length} bytes, got $actual_length bytes)"
+      "(Content-Length mismatch: Expected $expected_length bytes, got $actual_length bytes)"
     );
     $mail->finish();
     return 1;
