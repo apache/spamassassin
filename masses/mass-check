@@ -8,6 +8,7 @@
 # --mh          use mh-style folder (directory of messages named with numbers)
 # --mn          find_missed('nonspam.log')
 # --ms          find_missed('spam.log')
+# --sort        sort contents of folders that are directories
 #
 # all following arguments are used as the name of mail folders
 
@@ -17,7 +18,7 @@ use Mail::SpamAssassin;
 use Mail::SpamAssassin::NoMailAudit;
 use Getopt::Long;
 
-GetOptions("c=s", "f", "mh", "ms", "mn", "all");
+GetOptions("c=s", "f", "all", "mh", "ms", "mn", "sort");
 
 #use Devel::Peek;
 
@@ -92,7 +93,7 @@ sub mass_check_all_folders {
 	mass_check_tar_file($sub, $folder);
     }
     elsif (-d $folder &&
-	  ($opt_mh || -f "$folder/1" || -f "$folder/1.gz" || -f "$folder/cyrus.index"))
+	   ($opt_mh || -f "$folder/1" || -f "$folder/1.gz" || -f "$folder/cyrus.index"))
     {
       # it's an MH folder or a Cyrus mailbox
       mass_check_mh_folder($sub, $folder);
@@ -101,7 +102,6 @@ sub mass_check_all_folders {
     {
       # Maildir!
       mass_check_maildir($sub, $folder);
-   
     } elsif (-f $folder) {
       mass_check_mailbox($sub, $folder);
     }
@@ -127,7 +127,9 @@ sub mass_check_mh_folder {
   my $sub = shift;
   my $folder = shift;
   my @files = <$folder/[0-9]*>;
-  foreach my $mail (sort sortbynum @files)
+
+  @files = sortbynum(@files) if $opt_sort;
+  foreach my $mail (@files)
   {
     if ($mail =~ /\.gz$/) {
       open (STDIN, "gunzip -cd $mail |") or warn "gunzip $mail failed: $@";
@@ -150,7 +152,9 @@ sub mass_check_maildir {
   my $sub = shift;
   my $folder = shift;
   my @files = <$folder/{cur,new}/*>;
-  foreach my $mail (sort sortbynum @files)
+
+  @files = sortbynum(@files) if $opt_sort;
+  foreach my $mail (@files)
   {
     if ($mail =~ /\.gz$/) {
       open (STDIN, "gunzip -cd $mail |") or warn "gunzip $mail failed: $@";
@@ -209,7 +213,7 @@ sub mass_check_mailbox {
     # switch to a fork-based model to save RAM
     if ($FORK && fork()) { wait; next; }
 
-    $msgid = "$folder:$msgid";		# so we can find it again
+    $msgid = "$folder:$msgid";	# so we can find it again
     $msgid =~ s/\s/_/gs;	# make safe
 
     &$sub ($msgid, \@msg);
@@ -219,9 +223,8 @@ sub mass_check_mailbox {
 }
 
 sub sortbynum {
-  $a =~ m,\/(\d+).*$,; my $anum = $1;
-  $b =~ m,\/(\d+).*$,; my $bnum = $1;
-  ($anum <=> $bnum);
+    return map { $_->[0] }
+	sort { $a->[1] <=> $b->[1] } map { [$_, /\/(\d+).*$/] } @_;
 }
 
 ############################################################################
@@ -257,7 +260,7 @@ sub find_missed {
     } elsif (!$shouldbespam && $score > $threshold) {
       found_missed ($score, $id, $_);
     }
-  } 
+  }
   close IN;
 }
 
@@ -291,5 +294,3 @@ sub found_missed {
 
   print "$score $id $tests\n";
 }
-
-
