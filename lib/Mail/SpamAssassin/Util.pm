@@ -20,6 +20,9 @@
 
 package Mail::SpamAssassin::Util;
 
+# Make the main dbg() accessible in our package w/o an extra function
+*dbg=\&Mail::SpamAssassin::dbg;
+
 use strict;
 use warnings;
 use bytes;
@@ -1105,7 +1108,5 @@ sub helper_app_pipe_open_unix {
 }
 
 ###########################################################################
-
-sub dbg { Mail::SpamAssassin::dbg(@_); }
 
 1;

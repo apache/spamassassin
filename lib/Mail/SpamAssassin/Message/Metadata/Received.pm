@@ -1154,8 +1154,6 @@ sub found_pop_fetcher_sig {
   $self->{relays} = [ ];
 }
 
-sub dbg { Mail::SpamAssassin::dbg(@_); }
-
 # ---------------------------------------------------------------------------
 
 1;

@@ -16,6 +16,9 @@
 
 package Mail::SpamAssassin::Locker::Flock;
 
+# Make the main dbg() accessible in our package w/o an extra function
+*dbg=\&Mail::SpamAssassin::dbg;
+
 use strict;
 use warnings;
 use bytes;
@@ -157,7 +160,5 @@ sub refresh_lock {
 }
 
 ###########################################################################
-
-sub dbg { Mail::SpamAssassin::dbg(@_); }
 
 1;

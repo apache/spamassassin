@@ -21,6 +21,10 @@ Mail::SpamAssassin::PluginHandler - SpamAssassin plugin handler
 =cut
 
 package Mail::SpamAssassin::PluginHandler;
+
+# Make the main dbg() accessible in our package w/o an extra function
+*dbg=\&Mail::SpamAssassin::dbg;
+
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Util;
@@ -191,7 +195,5 @@ sub finish {
 }
 
 ###########################################################################
-
-sub dbg { Mail::SpamAssassin::dbg(@_); }
 
 1;

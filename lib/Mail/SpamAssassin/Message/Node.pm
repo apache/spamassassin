@@ -34,6 +34,10 @@ the various MIME message parts.
 =cut
 
 package Mail::SpamAssassin::Message::Node;
+
+# Make the main dbg() accessible in our package w/o an extra function
+*dbg=\&Mail::SpamAssassin::dbg;
+
 use strict;
 use warnings;
 use bytes;
@@ -640,8 +644,6 @@ sub finish {
 }
 
 # ---------------------------------------------------------------------------
-
-sub dbg { Mail::SpamAssassin::dbg(@_); }
 
 1;
 __END__

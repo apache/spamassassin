@@ -42,6 +42,10 @@ the various MIME message parts and message metadata.
 #    +---> Message::Metadata object to hold metadata
 
 package Mail::SpamAssassin::Message;
+
+# Make the main dbg() accessible in our package w/o an extra function
+*dbg=\&Mail::SpamAssassin::dbg;
+
 use strict;
 use warnings;
 use bytes;
@@ -941,7 +945,5 @@ sub receive_date {
 }
 
 # ---------------------------------------------------------------------------
-
-sub dbg { Mail::SpamAssassin::dbg(@_); }
 
 1;

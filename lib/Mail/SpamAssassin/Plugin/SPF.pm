@@ -25,6 +25,9 @@ Mail::SpamAssassin::Plugin::SPF - perform SPF verification tests
 
 package Mail::SpamAssassin::Plugin::SPF;
 
+# Make the main dbg() accessible in our package w/o an extra function
+*dbg=\&Mail::SpamAssassin::Plugin::dbg;
+
 use Mail::SpamAssassin::Plugin;
 use strict;
 use warnings;
@@ -264,7 +267,5 @@ sub _check_spf {
 }
 
 ###########################################################################
-
-sub dbg { Mail::SpamAssassin::dbg(@_); }
 
 1;

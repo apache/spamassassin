@@ -18,6 +18,9 @@
 
 package Mail::SpamAssassin::Reporter;
 
+# Make the main dbg() accessible in our package w/o an extra function
+*dbg=\&Mail::SpamAssassin::dbg;
+
 use strict;
 use warnings;
 use bytes;
@@ -357,7 +360,6 @@ EOM
 
 ###########################################################################
 
-sub dbg { Mail::SpamAssassin::dbg(@_); }
 sub create_fulltext_tmpfile { Mail::SpamAssassin::PerMsgStatus::create_fulltext_tmpfile(@_) }
 sub delete_fulltext_tmpfile { Mail::SpamAssassin::PerMsgStatus::delete_fulltext_tmpfile(@_) }
 

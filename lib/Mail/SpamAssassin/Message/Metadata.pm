@@ -48,6 +48,10 @@ It is held in two forms:
 =cut
 
 package Mail::SpamAssassin::Message::Metadata;
+
+# Make the main dbg() accessible in our package w/o an extra function
+*dbg=\&Mail::SpamAssassin::dbg;
+
 use strict;
 use warnings;
 use bytes;
@@ -145,7 +149,5 @@ sub check_language {
 }
 
 # ---------------------------------------------------------------------------
-
-#sub dbg { Mail::SpamAssassin::dbg(@_); }
 
 1;

@@ -45,6 +45,9 @@ the learning process.
 
 package Mail::SpamAssassin::PerMsgLearner;
 
+# Make the main dbg() accessible in our package w/o an extra function
+*dbg=\&Mail::SpamAssassin::dbg;
+
 use strict;
 use warnings;
 use bytes;
@@ -181,10 +184,6 @@ sub finish {
   delete $self->{conf};
   delete $self->{bayes_scanner};
 }
-
-###########################################################################
-
-sub dbg { Mail::SpamAssassin::dbg(@_); }
 
 ###########################################################################
 
