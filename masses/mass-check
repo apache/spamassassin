@@ -129,11 +129,6 @@ sub wanted {
   my $hits = $status->get_hits();
   my $tests = $status->get_names_of_tests_hit();
 
-  my $bscore;
-  if ($opt_bayes) {
-    $bscore = $status->{bayes_score};
-  }
-
   $tests = join(',', sort(split(/,/, $tests)));
 
   $id =~ s/\s/_/g;
@@ -141,7 +136,7 @@ sub wanted {
   printf "%s %2d %s %s%s\n",
 		    ($yorn ? 'Y' : '.'),
 		    $hits, $id, $tests,
-                    ($opt_bayes ? " bayes=".$bscore : "");
+                    ($opt_bayes && defined $status->{bayes_score} ? " bayes=".$status->{bayes_score} : "");
 
   if ($tests =~ /MICROSOFT_EXECUTABLE|MIME_SUSPECT_NAME/) {
     logkilled($ma,$id, "possible virus");
