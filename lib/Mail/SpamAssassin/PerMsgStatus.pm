@@ -73,6 +73,7 @@ sub new {
     'headers_to_add'	=> { },
     'rule_errors'       => 0,
     'disable_auto_learning' => 0,
+    'auto_learn_status' => undef,
   };
 
   if (defined $opts && $opts->{disable_auto_learning}) {
@@ -324,6 +325,7 @@ sub learn {
   }
 
   dbg ("auto-learn? yes, ".($isspam?"spam ($hits > $max)":"ham ($hits < $min)"));
+  $self->{auto_learn_status} = $isspam;
   eval {
     my $learnstatus = $self->{main}->learn ($self->{msg},
 			  $self->get("Message-Id"), $isspam, 0);
@@ -737,10 +739,15 @@ sub _build_status_line {
       $line .= Text::Wrap::wrap("\ttests=", "\t      ", $_) . "\n";
     }
     else {
-      $line .= " tests=$_";
+      $line .= "\ttests=$_";
     }
   } else {
     $line .= "\ttests=none\n";
+  }
+
+  if ( defined $self->{auto_learn_status} ) {
+    $line .= "\tautolearn=";
+    $line .= $self->{auto_learn_status} ? "spam" : "ham";
   }
 
   $line .= "\tversion=" . Mail::SpamAssassin::Version();
