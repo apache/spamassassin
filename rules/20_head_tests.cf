@@ -1,5 +1,5 @@
 # SpamAssassin rules file: tests.
-# $Id: 20_head_tests.cf,v 1.163 2002/08/23 04:45:04 hughescr Exp $
+# $Id: 20_head_tests.cf,v 1.164 2002/08/23 09:40:10 hughescr Exp $
 ###########################################################################
 
 require_version 2.40
@@ -210,6 +210,10 @@ tflags RCVD_IN_OSIRUSOFT_COM    net
 
 # X prefix was used to insure that it was run at the end, but it's not needed
 # anymore since we run the rule with rblreseval -- Marc
+header X_OSIRU_OPEN_RELAY		rbleval:check_rbl_results_for('osirusoft', '127.0.0.2')
+describe X_OSIRU_OPEN_RELAY	DNSBL: sender is Confirmed Open Relay
+tflags X_OSIRU_OPEN_RELAY         net
+
 header X_OSIRU_SPAM_SRC		rbleval:check_rbl_results_for('osirusoft', '127.0.0.4')
 describe X_OSIRU_SPAM_SRC	DNSBL: sender is Confirmed Spam Source
 tflags X_OSIRU_SPAM_SRC         net
