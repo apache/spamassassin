@@ -1,0 +1,41 @@
+#!/usr/bin/perl
+# usage:
+# ./lint-rules-from-freqs < freqs > badtests
+
+open (OUT, "|sort -g --key=4");
+while (<>) {
+  if (!/^\s*([\d\.]+)/) {
+    print OUT;
+    next;
+  }
+  my ($overall, $spam, $nons, $sn, $score, $name) = split (' ');
+  next unless ($name =~ /\S/);
+
+  next if ($overall == 0.0);   # nothing matched. TODO, another report for this?
+
+  my $badrule;
+
+  if ($score < 0.0) {
+    # negative score with more spams than nonspams? bad rule.
+    if ($sn > 0.5 && $score < 0.5) { $badrule = 'fn'; }
+
+    # low number of matches overall
+    if ($nons < 0.05) { $badrule ||= ''; $badrule .= ', low matches'; }
+
+  } elsif ($score > 0.0) {
+    # positive score with more nonspams than spams? bad.
+    if ($sn < 0.5 && $score > 0.5) { $badrule = 'fp'; }
+
+    # low number of matches overall
+    if ($spam < 0.05) { $badrule ||= ''; $badrule .= ', low matches'; }
+
+  } elsif ($score == 0.0) {
+    $badrule = 'score is 0';
+  }
+
+  if (defined $badrule) {
+    $badrule =~ s/^, //;
+    chomp; print OUT $_ . " ($badrule)\n";
+  }
+}
+close OUT;
