@@ -20,6 +20,8 @@ use bytes;
 use Fcntl qw(:DEFAULT :flock);
 
 use Mail::SpamAssassin::Message;
+use Mail::SpamAssassin::MIME;
+use Mail::SpamAssassin::MIME::Parser;
 
 @Mail::SpamAssassin::NoMailAudit::ISA = (
   'Mail::SpamAssassin::Message'
@@ -52,6 +54,10 @@ sub new {
     }
   }
 
+  # Parse the message for MIME parts
+  $self->{mime_parts} = Mail::SpamAssassin::MIME::Parser->parse(join("", @{$self->{textarray}}));
+
+  # Parse the message to get header information
   $self->parse_headers();
   return $self;
 }
