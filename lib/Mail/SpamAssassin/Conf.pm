@@ -233,7 +233,7 @@ sub new {
   $self->{user_scores_sql_field_scope} = 'spamassassin'; # probably shouldn't change this
 
   # for backwards compatibility, we need to set the default headers
-  # remove this for 2.70 (?)
+  # remove this except for X-Spam-Checker-Version for 2.70 (?)
 
   # unfortunately this backwards compatibility isn't 100% functional.
   # For example, if a user has the following config (consider user and
@@ -245,7 +245,7 @@ sub new {
   $self->{headers_spam}->{"Flag"} = "_YESNOCAPS_";
   $self->{headers_spam}->{"Status"} = "_YESNO_, hits=_HITS_ required=_REQD_ tests=_TESTS_ autolearn=_AUTOLEARN_ version=_VERSION_";
   $self->{headers_spam}->{"Level"} = "_STARS(*)_";
-  $self->{headers_spam}->{"Checker-Version"} = "SpamAssassin _VERSION_ (_SUBVERSION_)";
+  $self->{headers_spam}->{"Checker-Version"} = "SpamAssassin _VERSION_ (_SUBVERSION_) on _HOSTNAME_";
 
   $self->{headers_ham}->{"Status"} = $self->{headers_spam}->{"Status"};
   $self->{headers_ham}->{"Level"} = $self->{headers_spam}->{"Level"};
@@ -661,30 +661,32 @@ one very long one. This can be disabled here.
      $self->{fold_headers} = $1+0; next;
    }
 
-=item add_header header_name { ham | spam | all } string
+=item add_header { spam | ham | all } header_name string
 
-Customized headers can be added to ham, spam or both, giving various
-bits of information. All headers added will begin with X-Spam- (so
-C<header_name> will be appended to X-Spam-).
+Customized headers can be added to the specified type of messages
+(spam, ham, or "all" to add to either).  All headers begin with
+C<X-Spam-> (so C<header_name> will be appended to C<X-Spam->).
 
-C<string> can contain tags as explained above. Headers will be folded
-if fold_headers is set to C<1>.
+C<string> can contain tags as explained above in the TAGS section.
+Headers will be folded if fold_headers is set to C<1>.
 
-For backwards compatibility, some headers are (still) added by
-default. Please use the clear_headers option before adding headers of
-your own.
+For backwards compatibility, some headers are (still) added by default.
+You can customize existing headers with add_header (only the specified
+subset of messages will be changed).
 
-Examples (these were all default prior to 2.60):
- add_header Flag spam _YESNOCAPS_
- add_header Status all _YESNO_, hits=_HITS_ required=_REQD_ tests=_TESTS_ autolearn=_AUTOLEARN_ version=_VERSION_
- add_header Level all _STARS(*)_
- add_header Checker-Version all SpamAssassin _VERSION_ (_SUBVERSION_)
+See also C<clear_headers> for removing headers.
 
+Here are some examples (these are the defaults in 2.60):
+
+ add_header spam Flag _YESNOCAPS_
+ add_header all Status _YESNO_, hits=_HITS_ required=_REQD_ tests=_TESTS_ autolearn=_AUTOLEARN_ version=_VERSION_
+ add_header all Level _STARS(*)_
+ add_header all Checker-Version SpamAssassin _VERSION_ (_SUBVERSION_) on _HOSTNAME_
 
 =cut
 
-    if (/^add_header\s+([A-Za-z0-9_-]+)\s+(ham|spam|all)\s+(.*?)\s*$/) {
-      my ($name, $type, $line) = ($1, $2, $3);
+    if (/^add_header\s+(ham|spam|all)\s+([A-Za-z0-9_-]+)\s+(.*?)\s*$/) {
+      my ($type, $name, $line) = ($1, $2, $3);
       if ($line =~ /^"(.*)"$/) {
 	$line = $1;
       }
@@ -701,15 +703,24 @@ Examples (these were all default prior to 2.60):
 
 =item clear_headers
 
-Clear list of headers to be added to mail. You should use this before
-any add_header options to prevent all the default headers from being
-added to mail.
+Clear the list of headers to be added to messages.  You may use this
+before any add_header options to prevent the default headers from being
+added to the message.
+
+Note that B<X-Spam-Checker-Version> is not removable because the version
+information is needed by mail administrators and developers to debug
+problems.  Without at least one header, it might not even be possible to
+determine that SpamAssassin is running.
 
 =cut
 
     if (/^clear_headers\s*$/) {
-      $self->{headers_ham} = { };
-      $self->{headers_spam} = { };
+      for my $name (keys %{ $self->{headers_ham} }) {
+	delete $self->{headers_ham}->{$name} if $name ne "Checker-Version";
+      }
+      for my $name (keys %{ $self->{headers_spam} }) {
+	delete $self->{headers_spam}->{$name} if $name ne "Checker-Version";
+      }
       next;
     }
 
@@ -1577,24 +1588,24 @@ this option to 0.
 
 =item always_add_headers { 0 | 1 }      (default: 1)
 
-By default, B<X-Spam-Status>, B<X-Spam-Checker-Version>, (and optionally
-B<X-Spam-Level>) will be added to all messages scanned by SpamAssassin.  If you
-don't want to add the headers to non-spam, set this value to 0.  See also
-B<always_add_report>.
+By default, B<X-Spam-Status> and B<X-Spam-Level>) will be added to all
+messages scanned by SpamAssassin.  If you don't want to add the headers
+to non-spam, set this value to 0.  See also B<always_add_report>.
 
-As of version 2.60 this is deprecated. It will be removed in a future
-version. (Use the add_header option to customize headers.)
+This option is deprecated in version 2.60 and later.  It will be removed
+in a future version.  Instead, use the B<clear_headers> and
+B<add_header> options to customize headers.
 
 =cut
 
-   if (/^always_add_headers\s+(\d+)$/) {
-     if ($1 == 0){
-       delete $self->{headers_ham}->{"Status"};
-       delete $self->{headers_ham}->{"Checker-Version"};
-       delete $self->{headers_ham}->{"Level"};
-     }
-     next;
-   }
+    if (/^always_add_headers\s+(\d+)$/) {
+      if ($1 == 0) {
+	for my $name (keys %{ $self->{headers_ham} }) {
+	  delete $self->{headers_ham}->{$name} if $name ne "Checker-Version";
+	}
+      }
+      next;
+    }
 
 
 =item always_add_report { 0 | 1 }	(default: 0)
@@ -1604,10 +1615,10 @@ headers or in an attachment (report_safe). If you set this to option
 to C<1>, the report will be included in the B<X-Spam-Report> header,
 even if the message is not tagged as spam.
 
-This option is deprecated as of version 2.60. Please use the
-add_header option instead:
+This option is deprecated in version 2.60 and later.  It will be removed
+in a future version.  Please use the add_header option instead:
 
-add_header Report ham _REPORT_
+add_header ham Report _REPORT_
 
 =cut
 
@@ -1628,10 +1639,10 @@ X-Spam-Level: *******
 
 This can be useful for MUA rule creation.
 
-This is deprecated as of version 2.60. Please use the add_header
-option instead:
+This option is deprecated in version 2.60 and later.  It will be removed
+in a future version.  Please use the add_header option instead:
 
-add_header Level all _STARS(*)_
+add_header all Level _STARS(*)_
 
 =cut
 
@@ -1653,10 +1664,10 @@ In other words, for a message scoring 7.2 points with this option set to .
 
 X-Spam-Level: .......
 
-This is deprecated as of version 2.60. Please use the add_header
-option instead:
+This option is deprecated in version 2.60 and later.  It will be removed
+in a future version.  Please use the add_header option instead:
 
-add_header Level all _STARS(.)_
+add_header all Level _STARS(.)_
 
 =cut
 
@@ -1673,8 +1684,10 @@ messages it processes.
 
 The default is to not add the header.
 
-This is deprecated as of 2.60. Use the add_header option instead. For example:
-add_header DCC all _DCCB_: _DCCR_
+This option is deprecated in version 2.60 and later.  It will be removed
+in a future version.  Please use the add_header option instead:
+
+add_header all DCC _DCCB_: _DCCR_
 
 =cut
 
@@ -1694,9 +1707,10 @@ messages it processes.
 
 The default is to not add the header.
 
-This option is deprecated. Please use the add_header option instead:
+This option is deprecated in version 2.60 and later.  It will be removed
+in a future version.  Please use the add_header option instead:
 
-add_header Pyzor all _PYZOR_
+add_header all Pyzor _PYZOR_
 
 =cut
 
@@ -1714,11 +1728,12 @@ By default, SpamAssassin uses a long report format, explaining what
 happened to the mail message, for newbie users.   If you would prefer
 shorter reports, set this to C<1>.
 
-This option is deprecated. Longer reports are used by default, with
-the report_safe option. If you wish to use a shorter report in the
-headers of spam messages, use the following option:
+This option is deprecated in version 2.60 and later.  It will be removed
+in a future version.  Longer reports are used by default, with the
+report_safe option.  If you wish to use a shorter report in the headers
+of spam messages, use the following option:
 
-add_header Report spam _REPORT_
+add_header spam Report _REPORT_
 
 =cut
 
@@ -1736,7 +1751,8 @@ Set the report template which is attached to spam mail messages, for the
 terse-report format.  See the C<10_misc.cf> configuration file in
 C</usr/share/spamassassin> for an example.
 
-This option is deprecated and does nothing.
+This option is deprecated and does nothing.  It will be removed in a
+future version.
 
 =cut
 
@@ -1746,7 +1762,10 @@ This option is deprecated and does nothing.
 
 =item clear_terse_report_template
 
-Clear the terse-report template. Deprecated.
+Clear the terse-report template.
+
+This option is deprecated and does nothing.  It will be removed in a
+future version.
 
 =cut
 
