@@ -102,7 +102,7 @@ describe FORGED_MUA_IMS         Forged mail pretending to be from IMS
 
 # Outlook
 # Note: this uses __IMS_MSGID from above
-header __OUTLOOK_MUA            X-Mailer =~ /\bOutlook\b(?! IMO| Express Mac)/
+header __OUTLOOK_MUA            X-Mailer =~ /\bOutlook\b(?! IMO| Express (?:for )?Mac)/
 header __OUTLOOK_MSGID_1        MESSAGEID =~ /^<[0-9a-f]{12}\$[0-9a-f]{8}\$[0-9a-f]{8}\@\S+>$/m
 # See bug 1488 for details
 header __OUTLOOK_MSGID_2        MESSAGEID =~ /^<[A-Za-z0-9-]{7}[A-Za-z0-9]{20}\@hotmail\.com>$/m
