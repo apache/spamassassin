@@ -101,7 +101,6 @@ describe POPLAUNCH		SPAM software
 body CHECK_OR_MONEY_ORDER	/check or money order/i
 describe CHECK_OR_MONEY_ORDER	Talk about a check or money order
 
-# Jul 26 2002 jm: offline, too many FPs
 rawbody SUPERLONG_LINE		/^[^<\&]{199,}$/m
 describe SUPERLONG_LINE	        Contains a line >=199 characters long
 
