@@ -1065,6 +1065,21 @@ sub check_razor {
   return $self->razor_lookup (\$full);
 }
 
+sub check_dcc {
+  my ($self, $fulltext) = @_;
+
+  return 0 unless ($self->is_dcc_available());
+  return 0 if ($self->{already_checked_dcc});
+
+   $self->{already_checked_dcc} = 1;
+
+  # note: we don't use $fulltext. instead we get the raw message,
+  # unfiltered, for DCC to check.  ($fulltext removes MIME
+  # parts etc.)
+  my $full = $self->get_full_message_as_text();
+  return $self->dcc_lookup (\$full);
+}
+
 sub check_for_base64_enc_text {
   my ($self, $fulltext) = @_;
 

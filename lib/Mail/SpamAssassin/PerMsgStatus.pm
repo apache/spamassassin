@@ -996,6 +996,7 @@ sub do_head_tests {
 
   my ($rulename, $rule);
   my $evalstr = '';
+  my $evalstr2 = '';
 
   my @tests = keys %{$self->{conf}{head_tests}};
   my @negative_tests;
@@ -1026,17 +1027,25 @@ sub do_head_tests {
     $evalstr .= '
       return if $self->{stop_at_threshold} && $self->{is_spam};
       if ($self->{conf}->{scores}->{q#'.$rulename.'#}) {
-        # warn("testing: ", $self->get(q#'.$hdrname.'#,q#'.$def.'#), " vs '.$rulename.' ($self->{conf}->{scores}->{q{'.$rulename.'}})\n");
-        if ($self->get(q#'.$hdrname.'#, q#'.$def.'#) '.$testtype.'~ '.$pat.') {
-          $self->got_hit (q#'.$rulename.'#, q{});
-        }
+         $self->'.$rulename.'_head_test($_);
       }
+    ';
+    $evalstr2 .= '
+    sub '.$rulename.'_head_test {
+        my $self = shift;
+        $_ = shift;
+        if ($self->get(q#'.$hdrname.'#, q#'.$def.'#) '.$testtype.'~ '.$pat.') {
+           $self->got_hit (q#'.$rulename.'#, q{});
+        }
+    }
     ';
   }
 
   $evalstr = <<"EOT";
 {
     package Mail::SpamAssassin::PerMsgStatus;
+
+    $evalstr2
 
     sub _head_tests {
         my (\$self) = \@_;
@@ -1260,6 +1269,7 @@ sub do_body_uri_tests {
 
   # otherwise build up the eval string...
   my $evalstr = '';
+  my $evalstr2 = '';
   my @tests = keys %{$self->{conf}{uri_tests}};
   my @negative_tests;
   my @positive_tests;
@@ -1280,8 +1290,15 @@ sub do_body_uri_tests {
     $evalstr .= '
       return if $self->{stop_at_threshold} && $self->{is_spam};
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
-        if ('.$pat.') { $self->got_uri_pattern_hit (q{'.$rulename.'}); }
+        $self->'.$rulename.'_uri_test($_);
       }
+    ';
+    $evalstr2 .= '
+    sub '.$rulename.'_uri_test {
+       my $self = shift;
+       $_ = shift;
+       if ('.$pat.') { $self->got_uri_pattern_hit (q{'.$rulename.'}); }
+    }
     ';
   }
 
@@ -1289,6 +1306,8 @@ sub do_body_uri_tests {
   $evalstr = <<"EOT";
 {
   package Mail::SpamAssassin::PerMsgStatus;
+
+  $evalstr2
 
   sub _body_uri_tests {
     my \$self = shift;
@@ -1329,6 +1348,7 @@ sub do_rawbody_tests {
 
   # build up the eval string...
   my $evalstr = '';
+  my $evalstr2 = '';
   my @tests = keys %{$self->{conf}{rawbody_tests}};
   my @negative_tests;
   my @positive_tests;
@@ -1349,8 +1369,15 @@ sub do_rawbody_tests {
     $evalstr .= '
       return if $self->{stop_at_threshold} && $self->{is_spam};
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
-        if ('.$pat.') { $self->got_body_pattern_hit (q{'.$rulename.'}); }
+         $self->'.$rulename.'_rawbody_test($_);
       }
+    ';
+    $evalstr2 .= '
+    sub '.$rulename.'_rawbody_test {
+       my $self = shift;
+       $_ = shift;
+       if ('.$pat.') { $self->got_body_pattern_hit (q{'.$rulename.'}); }
+    }
     ';
   }
 
@@ -1358,6 +1385,8 @@ sub do_rawbody_tests {
   $evalstr = <<"EOT";
 {
   package Mail::SpamAssassin::PerMsgStatus;
+
+  $evalstr2
 
   sub _rawbody_tests {
     my \$self = shift;
