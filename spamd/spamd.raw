@@ -11,7 +11,15 @@ my $DEF_RULES_DIR = '@@DEF_RULES_DIR@@';  # substituted at 'make' time
 my $LOCAL_RULES_DIR = '@@LOCAL_RULES_DIR@@';  # substituted at 'make' time
 use lib '@@INSTALLSITELIB@@'; # substituted at 'make' time
 
-use lib '../lib';	# added by jm for use inside the distro
+BEGIN {			# added by jm for use inside the distro
+  if ( -e '../blib/lib/Mail/SpamAssassin.pm' ) {
+    unshift(@INC, '../blib/lib');
+  }
+  else {
+    unshift(@INC, '../lib');
+  }
+}
+
 use strict;
 
 use IO::Socket;
