@@ -408,3 +408,7 @@ describe T_PROMOTE_YOUR_BUSINESS  Wants to help promote your business
 # from bug 1173
 header T_X_BEENTHERE		exists:X-BeenThere
 describe T_X_BEENTHERE	X-BeenThere header exists
+
+# from bug 1206
+body		T_INTL_DRIVERS_LICENSE 	/international driver'?s license/i
+describe	T_INTL_DRIVERS_LICENSE 	International driving license
