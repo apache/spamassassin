@@ -473,6 +473,8 @@ reflect the filter status.  The keys in this string are as follows:
 
 =item version=... The version of SpamAssassin which made the change
 
+=back
+
 =item X-Spam-Status: header for non-spam mails
 
 A string, C<No, hits=nn required=nn tests=...> is set in this header to reflect
