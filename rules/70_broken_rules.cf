@@ -538,7 +538,7 @@ score DCC_CHECK 0.001 3.126 0.001 2.756
 score PYZOR_CHECK 0.001 4.400 0.001 1.248
 score RCVD_IN_RELAYS_ORDB_ORG 0.001 0.001 0.001 0.178
 score RCVD_IN_OSIRU 0.001 0.562 0.001 0.509
-score RCVD_IN_OSIRU_DUL 0.001
+score RCVD_IN_OSIRU_DIALUP 0.001
 score X_OSIRU_DUL_FH 0.001
 score RCVD_IN_OSIRU_OPEN_RELAY 0.001 2.900 0.001 0.001
 score RCVD_IN_OSIRU_SPAMWARE_SITE 0.001 1.101 0.001 0.001
@@ -1174,6 +1174,13 @@ score BAYES_99 0.001 0.001 4.300 2.791
 #tflags T_RCVD_IN_DNSRBL_OPTIN	net
 #tflags T_RCVD_IN_DNSRBL_CGI	net
 #tflags T_RCVD_IN_DNSRBL_PROXY	net
+
+# quinlan - 2003-06-20 - unresponsive to email, other blacklist of theirs
+# has no hits, makes me nervous about using this, but still seems like a good
+# list
+# test again later?
+#header T_RCVD_IN_DUN_DNSRBL rbleval:check_rbl('dun-notfirsthop', 'dun.dnsrbl.net.')
+#tflags T_RCVD_IN_DUN_DNSRBL net
 
 # quinlan - 2003-06-18 - too much stuff in one result
 # might revisit later if they split it up a bit
