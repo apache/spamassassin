@@ -510,9 +510,11 @@ By default, message(s) are read in from STDIN (< I<mailmessage>), or
 from specified files and maildir-formatted directories (I<path> ...)
 STDIN and files are assumed to be in I<file> format, with a single
 message per file.  Directories are assumed to be in I<maildir> format
-(http://en.wikipedia.org/wiki/Maildir), with the directories' files
-being a single message per file.  The options I<--mbox> and I<--mbx> can
-override the assumed format, see the appropriate OPTION information below.
+where each file in each directory contains only one message
+(directories are not recursed and filenames containing whitespace or
+beginning with "." or "," are skipped).  The options I<--mbox> and
+I<--mbx> can override the assumed format, see the appropriate OPTION
+information below.
 
 =head1 OPTIONS
 
@@ -681,13 +683,13 @@ Disable creation of user preferences file.
 =item B<--mbox>
 
 Specify that the input message(s) are in mbox format.  mbox is a standard
-UNIX message folder format; see http://en.wikipedia.org/wiki/Mbox .
+Unix message folder format.
 
 =item B<--mbx>
 
 Specify that the input message(s) are in UW .mbx format.  mbx is
 the mailbox format used within the University of Washington's IMAP
-implementation; see http://www.washington.edu/imap/ .
+implementation; see C<http://www.washington.edu/imap/>.
 
 =back
 
