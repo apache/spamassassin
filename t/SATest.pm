@@ -279,8 +279,8 @@ sub start_spamd {
   my $spamd_stdlog = "log/$testname-spamd.log";
   my $spamd_forker = $ENV{'SPAMD_FORKER'}   ?
                        $ENV{'SPAMD_FORKER'} :
-		     $RUNNING_ON_WINDOWS    ?
-		       "start $perl_path"   :
+                     $RUNNING_ON_WINDOWS    ?
+                       "start $perl_path"   :
                        $perl_path;
   my $spamd_cmd    = join(' ',
                        $spamd_forker,
