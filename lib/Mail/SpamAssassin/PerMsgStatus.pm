@@ -1640,6 +1640,8 @@ sub do_full_eval_tests {
 sub do_awl_tests {
     my($self) = @_;
 
+    return unless (defined $self->{main}->{pers_addr_list_factory});
+
     local $_ = lc $self->get('From:addr');
     return 0 unless /\S/;
 
