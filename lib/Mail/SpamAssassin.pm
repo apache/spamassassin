@@ -1165,6 +1165,30 @@ sub lint_rules {
 }
 
 ###########################################################################
+
+=item $f->finish()
+
+Destroy this object, so that it will be garbage-collected once it
+goes out of scope.  The object will no longer be usable after this
+method is called.
+
+=cut
+
+sub finish {
+  my ($self) = @_;
+
+  $self->{conf}->finish(); delete $self->{conf};
+  $self->{plugins}->finish(); delete $self->{plugins};
+
+  if ($self->{bayes_scanner}) {
+    $self->{bayes_scanner}->finish();
+    delete $self->{bayes_scanner};
+  }
+
+  $self = { };
+}
+
+###########################################################################
 # non-public methods.
 
 sub init {

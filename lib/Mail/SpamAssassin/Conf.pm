@@ -131,7 +131,9 @@ $VERSION = 'bogus';     # avoid CPAN.pm picking up version strings later
 sub new {
   my $class = shift;
   $class = ref($class) || $class;
-  my $self = { }; bless ($self, $class);
+  my $self = {
+    main => shift
+  }; bless ($self, $class);
 
   $self->{errors} = 0;
   $self->{tests} = { };
@@ -2834,6 +2836,11 @@ sub load_plugin {
 sub register_eval_rule {
   my ($self, $pluginobj, $nameofsub) = @_;
   $self->{eval_plugins}->{$nameofsub} = $pluginobj;
+}
+
+sub finish {
+  my ($self) = @_;
+  delete $self->{main};
 }
 
 ###########################################################################
