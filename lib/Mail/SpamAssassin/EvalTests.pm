@@ -2353,6 +2353,12 @@ sub _check_mime_header {
     $self->{mime_base64_no_name} = 1;
   }
 
+  if ($charset =~ /iso-\S+-\S+\b/i &&
+      $charset !~ /iso-(?:8859-\d{1,2}|2022-(?:jp|kr))\b/)
+  {
+    $self->{mime_bad_iso_charset} = 1;
+  }
+
   # MIME_BASE64_LATIN: now a zero-hitter
   # if (!$name &&
   # $cte =~ /base64/ &&
@@ -2414,7 +2420,7 @@ sub _check_mime_header {
 	|| ($name eq "xls" && $ctype !~ m@^application/.*excel$@)
        )
     {
-       $self->{mime_suspect_name} = 1;
+      $self->{mime_suspect_name} = 1;
     }
   }
 }
