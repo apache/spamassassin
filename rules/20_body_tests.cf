@@ -440,7 +440,7 @@ describe PENIS_ENLARGE		Information on getting a larger penis
 body PENIS_ENLARGE2		/(?:(?:\bpenis\b|\bincrease).{0,50}){2,}/is
 describe PENIS_ENLARGE2		Information on getting a larger penis
 
-body WORK_AT_HOME		/(?:WORK (?:AT|FROM) HOME|HOME.?WORKER)/
+body WORK_AT_HOME		/(?:(?:WORK|MAKE (?:MONEY|\${1,})) (?:AT|FROM) HOME|HOME.?WORKER)/
 describe WORK_AT_HOME		Information on how to work at home
 
 body HOME_EMPLOYMENT		/HOME EMPLOYMENT/i
