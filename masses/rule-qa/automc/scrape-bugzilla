@@ -228,7 +228,7 @@ sub fixup_rule_code {
       }
     }
 
-    $outputs{rule_renames}{$n} = "rule $newname bug $bug cmt $cmtnum";
+    $outputs{rule_renames}{$newname} = "rule $n bug $bug cmt $cmtnum";
     $cf =~ s/\b${n}\b/${newname}/gs;
     push (@newnames, $newname);
     push (@oldnames, $n);
