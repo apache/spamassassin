@@ -3,141 +3,141 @@ STATISTICS REPORT FOR SPAMASSASSIN RULESET
 Classification success on test corpora, at default threshold:
 
 # SUMMARY for threshold 5.0:
-# Correctly non-spam: 145069  56.16%  (99.84% of non-spam corpus)
-# Correctly spam:     105143  40.71%  (93.05% of spam corpus)
-# False positives:       239  0.09%  (0.16% of nonspam,  11025 weighted)
-# False negatives:      7853  3.04%  (6.95% of spam,  23760 weighted)
-# Average score for spam:  17.8    nonspam: -12.4
-# Average for false-pos:   5.9  false-neg: 3.0
-# TOTAL:              258304  100.00%
+# Correctly non-spam: 130678  56.21%  (99.92% of non-spam corpus)
+# Correctly spam:      90057  38.74%  (88.55% of spam corpus)
+# False positives:       100  0.04%  (0.08% of nonspam,   4551 weighted)
+# False negatives:     11640  5.01%  (11.45% of spam,  39435 weighted)
+# Average score for spam:  16.4    nonspam: -1.3
+# Average for false-pos:   5.9  false-neg: 3.4
+# TOTAL:              232475  100.00%
 
 Results on test corpora at various alternative thresholds:
 
 # SUMMARY for threshold -4.0:
-# Correctly non-spam:  93767  36.30%  (64.53% of non-spam corpus)
-# Correctly spam:     112949  43.73%  (99.96% of spam corpus)
-# False positives:     51541  19.95%  (35.47% of nonspam, 112410 weighted)
-# False negatives:        47  0.02%  (0.04% of spam,   -344 weighted)
+# Correctly non-spam:  16543  7.12%  (12.65% of non-spam corpus)
+# Correctly spam:     101697  43.75%  (100.00% of spam corpus)
+# False positives:    114235  49.14%  (87.35% of nonspam, -603620 weighted)
+# False negatives:         0  0.00%  (0.00% of spam,      0 weighted)
 
 # SUMMARY for threshold -3.0:
-# Correctly non-spam:  98319  38.06%  (67.66% of non-spam corpus)
-# Correctly spam:     112928  43.72%  (99.94% of spam corpus)
-# False positives:     46989  18.19%  (32.34% of nonspam, 232333 weighted)
-# False negatives:        68  0.03%  (0.06% of spam,   -417 weighted)
+# Correctly non-spam:  25145  10.82%  (19.23% of non-spam corpus)
+# Correctly spam:     101697  43.75%  (100.00% of spam corpus)
+# False positives:    105633  45.44%  (80.77% of nonspam, -374698 weighted)
+# False negatives:         0  0.00%  (0.00% of spam,      0 weighted)
 
 # SUMMARY for threshold -2.0:
-# Correctly non-spam: 100044  38.73%  (68.85% of non-spam corpus)
-# Correctly spam:     112912  43.71%  (99.93% of spam corpus)
-# False positives:     45264  17.52%  (31.15% of nonspam, 265334 weighted)
-# False negatives:        84  0.03%  (0.07% of spam,   -459 weighted)
+# Correctly non-spam:  38487  16.56%  (29.43% of non-spam corpus)
+# Correctly spam:     101697  43.75%  (100.00% of spam corpus)
+# False positives:     92291  39.70%  (70.57% of nonspam, -107672 weighted)
+# False negatives:         0  0.00%  (0.00% of spam,      0 weighted)
 
 # SUMMARY for threshold -1.0:
-# Correctly non-spam: 102659  39.74%  (70.65% of non-spam corpus)
-# Correctly spam:     112891  43.70%  (99.91% of spam corpus)
-# False positives:     42649  16.51%  (29.35% of nonspam, 292496 weighted)
-# False negatives:       105  0.04%  (0.09% of spam,   -487 weighted)
+# Correctly non-spam:  58851  25.31%  (45.00% of non-spam corpus)
+# Correctly spam:     101694  43.74%  (100.00% of spam corpus)
+# False positives:     71927  30.94%  (55.00% of nonspam, 155175 weighted)
+# False negatives:         3  0.00%  (0.00% of spam,     -4 weighted)
 
 # SUMMARY for threshold 0.0:
-# Correctly non-spam: 108702  42.08%  (74.81% of non-spam corpus)
-# Correctly spam:     112808  43.67%  (99.83% of spam corpus)
-# False positives:     36606  14.17%  (25.19% of nonspam, 313680 weighted)
-# False negatives:       188  0.07%  (0.17% of spam,   -508 weighted)
+# Correctly non-spam:  91924  39.54%  (70.29% of non-spam corpus)
+# Correctly spam:     101592  43.70%  (99.90% of spam corpus)
+# False positives:     38854  16.71%  (29.71% of nonspam, 301633 weighted)
+# False negatives:       105  0.05%  (0.10% of spam,    -28 weighted)
 
 # SUMMARY for threshold 1.0:
-# Correctly non-spam: 131605  50.95%  (90.57% of non-spam corpus)
-# Correctly spam:     111929  43.33%  (99.06% of spam corpus)
-# False positives:     13703  5.30%  (9.43% of nonspam, 242424 weighted)
-# False negatives:      1067  0.41%  (0.94% of spam,    -98 weighted)
+# Correctly non-spam: 117279  50.45%  (89.68% of non-spam corpus)
+# Correctly spam:     100664  43.30%  (98.98% of spam corpus)
+# False positives:     13499  5.81%  (10.32% of nonspam, 212861 weighted)
+# False negatives:      1033  0.44%  (1.02% of spam,    393 weighted)
 
 # SUMMARY for threshold 2.0:
-# Correctly non-spam: 138083  53.46%  (95.03% of non-spam corpus)
-# Correctly spam:     111114  43.02%  (98.33% of spam corpus)
-# False positives:      7225  2.80%  (4.97% of nonspam, 169561 weighted)
-# False negatives:      1882  0.73%  (1.67% of spam,   1171 weighted)
+# Correctly non-spam: 125107  53.82%  (95.66% of non-spam corpus)
+# Correctly spam:      99536  42.82%  (97.88% of spam corpus)
+# False positives:      5671  2.44%  (4.34% of nonspam, 125519 weighted)
+# False negatives:      2161  0.93%  (2.12% of spam,   2112 weighted)
 
 # SUMMARY for threshold 3.0:
-# Correctly non-spam: 142602  55.21%  (98.14% of non-spam corpus)
-# Correctly spam:     109703  42.47%  (97.09% of spam corpus)
-# False positives:      2706  1.05%  (1.86% of nonspam,  85340 weighted)
-# False negatives:      3293  1.27%  (2.91% of spam,   4771 weighted)
+# Correctly non-spam: 129090  55.53%  (98.71% of non-spam corpus)
+# Correctly spam:      97720  42.03%  (96.09% of spam corpus)
+# False positives:      1688  0.73%  (1.29% of nonspam,  50764 weighted)
+# False negatives:      3977  1.71%  (3.91% of spam,   6712 weighted)
 
 # SUMMARY for threshold 4.0:
-# Correctly non-spam: 144125  55.80%  (99.19% of non-spam corpus)
-# Correctly spam:     107901  41.77%  (95.49% of spam corpus)
-# False positives:      1183  0.46%  (0.81% of nonspam,  44559 weighted)
-# False negatives:      5095  1.97%  (4.51% of spam,  11127 weighted)
+# Correctly non-spam: 130202  56.01%  (99.56% of non-spam corpus)
+# Correctly spam:      95061  40.89%  (93.47% of spam corpus)
+# False positives:       576  0.25%  (0.44% of nonspam,  20990 weighted)
+# False negatives:      6636  2.85%  (6.53% of spam,  16202 weighted)
 
 # SUMMARY for threshold 4.5:
-# Correctly non-spam: 144509  55.95%  (99.45% of non-spam corpus)
-# Correctly spam:     106764  41.33%  (94.48% of spam corpus)
-# False positives:       799  0.31%  (0.55% of nonspam,  31904 weighted)
-# False negatives:      6232  2.41%  (5.52% of spam,  15972 weighted)
+# Correctly non-spam: 130487  56.13%  (99.78% of non-spam corpus)
+# Correctly spam:      93384  40.17%  (91.83% of spam corpus)
+# False positives:       291  0.13%  (0.22% of nonspam,  11576 weighted)
+# False negatives:      8313  3.58%  (8.17% of spam,  23372 weighted)
 
 # SUMMARY for threshold 5.5:
-# Correctly non-spam: 145176  56.20%  (99.91% of non-spam corpus)
-# Correctly spam:     102960  39.86%  (91.12% of spam corpus)
-# False positives:       132  0.05%  (0.09% of nonspam,   6697 weighted)
-# False negatives:     10036  3.89%  (8.88% of spam,  35253 weighted)
+# Correctly non-spam: 130720  56.23%  (99.96% of non-spam corpus)
+# Correctly spam:      87604  37.68%  (86.14% of spam corpus)
+# False positives:        58  0.02%  (0.04% of nonspam,   2860 weighted)
+# False negatives:     14093  6.06%  (13.86% of spam,  52286 weighted)
 
 # SUMMARY for threshold 6.0:
-# Correctly non-spam: 145229  56.22%  (99.95% of non-spam corpus)
-# Correctly spam:     100760  39.01%  (89.17% of spam corpus)
-# False positives:        79  0.03%  (0.05% of nonspam,   4341 weighted)
-# False negatives:     12236  4.74%  (10.83% of spam,  47909 weighted)
+# Correctly non-spam: 130746  56.24%  (99.98% of non-spam corpus)
+# Correctly spam:      85225  36.66%  (83.80% of spam corpus)
+# False positives:        32  0.01%  (0.02% of nonspam,   1704 weighted)
+# False negatives:     16472  7.09%  (16.20% of spam,  65946 weighted)
 
 # SUMMARY for threshold 6.5:
-# Correctly non-spam: 145264  56.24%  (99.97% of non-spam corpus)
-# Correctly spam:      96698  37.44%  (85.58% of spam corpus)
-# False positives:        44  0.02%  (0.03% of nonspam,   2643 weighted)
-# False negatives:     16298  6.31%  (14.42% of spam,  73230 weighted)
+# Correctly non-spam: 130760  56.25%  (99.99% of non-spam corpus)
+# Correctly spam:      82948  35.68%  (81.56% of spam corpus)
+# False positives:        18  0.01%  (0.01% of nonspam,   1026 weighted)
+# False negatives:     18749  8.06%  (18.44% of spam,  80196 weighted)
 
 # SUMMARY for threshold 7.0:
-# Correctly non-spam: 145280  56.24%  (99.98% of non-spam corpus)
-# Correctly spam:      94596  36.62%  (83.72% of spam corpus)
-# False positives:        28  0.01%  (0.02% of nonspam,   1814 weighted)
-# False negatives:     18400  7.12%  (16.28% of spam,  87412 weighted)
+# Correctly non-spam: 130769  56.25%  (99.99% of non-spam corpus)
+# Correctly spam:      80388  34.58%  (79.05% of spam corpus)
+# False positives:         9  0.00%  (0.01% of nonspam,    556 weighted)
+# False negatives:     21309  9.17%  (20.95% of spam,  97509 weighted)
 
 # SUMMARY for threshold 8.0:
-# Correctly non-spam: 145295  56.25%  (99.99% of non-spam corpus)
-# Correctly spam:      88937  34.43%  (78.71% of spam corpus)
-# False positives:        13  0.01%  (0.01% of nonspam,    956 weighted)
-# False negatives:     24059  9.31%  (21.29% of spam, 129981 weighted)
+# Correctly non-spam: 130776  56.25%  (100.00% of non-spam corpus)
+# Correctly spam:      75056  32.29%  (73.80% of spam corpus)
+# False positives:         2  0.00%  (0.00% of nonspam,    146 weighted)
+# False negatives:     26641  11.46%  (26.20% of spam, 137442 weighted)
 
 # SUMMARY for threshold 9.0:
-# Correctly non-spam: 145303  56.25%  (100.00% of non-spam corpus)
-# Correctly spam:      84057  32.54%  (74.39% of spam corpus)
-# False positives:         5  0.00%  (0.00% of nonspam,    431 weighted)
-# False negatives:     28939  11.20%  (25.61% of spam, 171534 weighted)
+# Correctly non-spam: 130776  56.25%  (100.00% of non-spam corpus)
+# Correctly spam:      70244  30.22%  (69.07% of spam corpus)
+# False positives:         2  0.00%  (0.00% of nonspam,    146 weighted)
+# False negatives:     31453  13.53%  (30.93% of spam, 178376 weighted)
 
 # SUMMARY for threshold 10.0:
-# Correctly non-spam: 145305  56.25%  (100.00% of non-spam corpus)
-# Correctly spam:      79022  30.59%  (69.93% of spam corpus)
-# False positives:         3  0.00%  (0.00% of nonspam,    282 weighted)
-# False negatives:     33974  13.15%  (30.07% of spam, 219405 weighted)
+# Correctly non-spam: 130778  56.25%  (100.00% of non-spam corpus)
+# Correctly spam:      65150  28.02%  (64.06% of spam corpus)
+# False positives:         0  0.00%  (0.00% of nonspam,      0 weighted)
+# False negatives:     36547  15.72%  (35.94% of spam, 226735 weighted)
 
 # SUMMARY for threshold 12.0:
-# Correctly non-spam: 145307  56.25%  (100.00% of non-spam corpus)
-# Correctly spam:      69495  26.90%  (61.50% of spam corpus)
-# False positives:         1  0.00%  (0.00% of nonspam,    107 weighted)
-# False negatives:     43501  16.84%  (38.50% of spam, 324088 weighted)
+# Correctly non-spam: 130778  56.25%  (100.00% of non-spam corpus)
+# Correctly spam:      57097  24.56%  (56.14% of spam corpus)
+# False positives:         0  0.00%  (0.00% of nonspam,      0 weighted)
+# False negatives:     44600  19.18%  (43.86% of spam, 315048 weighted)
 
 # SUMMARY for threshold 15.0:
-# Correctly non-spam: 145308  56.25%  (100.00% of non-spam corpus)
-# Correctly spam:      57569  22.29%  (50.95% of spam corpus)
+# Correctly non-spam: 130778  56.25%  (100.00% of non-spam corpus)
+# Correctly spam:      47128  20.27%  (46.34% of spam corpus)
 # False positives:         0  0.00%  (0.00% of nonspam,      0 weighted)
-# False negatives:     55427  21.46%  (49.05% of spam, 484608 weighted)
+# False negatives:     54569  23.47%  (53.66% of spam, 449200 weighted)
 
 # SUMMARY for threshold 17.0:
-# Correctly non-spam: 145308  56.25%  (100.00% of non-spam corpus)
-# Correctly spam:      50203  19.44%  (44.43% of spam corpus)
+# Correctly non-spam: 130778  56.25%  (100.00% of non-spam corpus)
+# Correctly spam:      40622  17.47%  (39.94% of spam corpus)
 # False positives:         0  0.00%  (0.00% of nonspam,      0 weighted)
-# False negatives:     62793  24.31%  (55.57% of spam, 602519 weighted)
+# False negatives:     61075  26.27%  (60.06% of spam, 553445 weighted)
 
 # SUMMARY for threshold 20.0:
-# Correctly non-spam: 145308  56.25%  (100.00% of non-spam corpus)
-# Correctly spam:      39745  15.39%  (35.17% of spam corpus)
+# Correctly non-spam: 130778  56.25%  (100.00% of non-spam corpus)
+# Correctly spam:      31865  13.71%  (31.33% of spam corpus)
 # False positives:         0  0.00%  (0.00% of nonspam,      0 weighted)
-# False negatives:     73251  28.36%  (64.83% of spam, 795708 weighted)
+# False negatives:     69832  30.04%  (68.67% of spam, 714974 weighted)
 
 
 Test hit frequencies, for spam and nonspam corpora:
@@ -146,820 +146,824 @@ each test, where 0.0 = hits only non-spam and 1.0 = hits only spam,
 and the 'score' field should be ignored.)
 
 OVERALL%   SPAM%     HAM%     S/O    RANK   SCORE  NAME
- 258304   112996   145308    0.437   0.00    0.00  (all messages)
-100.000  43.7454  56.2546    0.437   0.00    0.00  (all messages as %)
- 19.415   0.0071  34.5067    0.000   1.00   -6.60  REFERENCES
- 17.226   0.0124  30.6115    0.000   0.99   -6.60  EMAIL_ATTRIBUTION
- 16.724   0.0018  29.7286    0.000   0.99   -6.60  REPLY_WITH_QUOTES
- 22.805   0.2717  40.3268    0.007   0.99   -3.30  IN_REP_TO
- 10.462  23.9141   0.0014    1.000   0.98    4.40  MSGID_OUTLOOK_TIME
- 20.893   0.2912  36.9140    0.008   0.98   -3.30  QUOTED_EMAIL_TEXT
-  5.721  13.0783   0.0000    1.000   0.97    4.40  MSGID_SPAMSIGN_6LETTER
-  4.941  11.2960   0.0000    1.000   0.96    4.40  MIME_ODD_CASE
-  4.475  10.2305   0.0000    1.000   0.96    4.40  MSGID_SPAMSIGN_ZEROES
-  5.227   0.0000   9.2913    0.000   0.96   -6.40  USER_AGENT_MUTT
-  4.016   9.1791   0.0007    1.000   0.96    4.40  SUBJ_FULL_OF_8BITS
-  4.479  10.2313   0.0062    0.999   0.96    1.56  MSGID_OE_SPAM_4ZERO
-  3.860   8.8207   0.0021    1.000   0.96    4.40  INVALID_DATE_TZ_ABSURD
-  6.353  14.4545   0.0530    0.996   0.96    2.69  BASE64_ENC_TEXT
-  3.068   7.0109   0.0021    1.000   0.96    4.40  HEADER_8BITS
-  2.825   6.4542   0.0021    1.000   0.95    4.30  FORGED_AOL_RCVD
-  4.445   0.0124   7.8922    0.002   0.95   -5.80  USER_AGENT_KMAIL
-  4.116   9.3791   0.0227    0.998   0.95    1.10  HTML_LINK_CLICK_CAPS
-  3.250   0.0035   5.7746    0.001   0.95   -5.80  USER_AGENT_PINE
-  1.868   4.2701   0.0000    1.000   0.95    4.30  KOREAN_UCE_SUBJECT
-  2.235   0.0009   3.9716    0.000   0.95   -6.40  PGP_SIGNATURE
-  2.210   5.0471   0.0041    0.999   0.95    2.38  FORGED_HOTMAIL_RCVD
-  1.475   3.3718   0.0000    1.000   0.95    4.30  WITH_LC_SMTP
-  1.566   3.5780   0.0007    1.000   0.95    4.30  X_LIST_UNSUBSCRIBE
-  1.826   4.1701   0.0028    0.999   0.95    1.10  FROM_HAS_MIXED_NUMS2
-  1.542   0.0000   2.7411    0.000   0.95   -6.40  PGP_SIGNATURE_2
-  1.181   2.6992   0.0000    1.000   0.95    4.30  CONFIRMED_FORGED
-  2.794   0.0062   4.9612    0.001   0.95   -5.80  GROUPS_YAHOO_1
-  1.028   2.3496   0.0000    1.000   0.95    4.30  REMOVE_RESPECT
-  1.403   3.2054   0.0014    1.000   0.95    4.30  FROM_OFFERS
-  3.482   7.9295   0.0227    0.997   0.95    2.26  MARKETING_PARTNERS
-  0.977   2.2328   0.0000    1.000   0.95    4.30  MULTI_FORGED
-  0.837   1.9133   0.0000    1.000   0.95    4.30  EXCUSE_24
-  0.833   1.9045   0.0000    1.000   0.95    4.30  FAKED_UNDISC_RECIPS
-  2.275   5.1887   0.0089    0.998   0.95    1.98  HTML_IMAGE_ONLY_02
-  0.750   1.7151   0.0000    1.000   0.95    4.30  X_X_PRESENT
-  0.696   1.5903   0.0000    1.000   0.95    4.30  FINANCIAL
-  1.295   0.0009   2.3020    0.000   0.95   -6.40  BUGZILLA_BUG
-  0.576   1.3160   0.0000    1.000   0.95    4.30  UNDER_BILL_1618
-  0.542   1.2399   0.0000    1.000   0.95    4.30  BANG_OPRAH
-  0.646   0.0000   1.1486    0.000   0.95   -6.40  USER_AGENT_GNUS_UA
-  0.495   1.1310   0.0000    1.000   0.95    4.30  DATE_YEAR_ZERO_FIRST
-  0.470   1.0744   0.0000    1.000   0.95    4.30  UCE_MAIL_ACT
-  0.458   1.0478   0.0000    1.000   0.95    4.30  HR_3113
-  0.456   1.0434   0.0000    1.000   0.95    4.30  LOSE_POUNDS
-  0.442   1.0098   0.0000    1.000   0.95    4.30  WRINKLES
-  0.430   0.9823   0.0000    1.000   0.95    2.90  X_VMP_TEXT
-  0.418   0.9558   0.0000    1.000   0.95    2.90  FORGED_MX_HOTMAIL
-  1.469   3.3532   0.0041    0.999   0.95    1.19  MORTGAGE_BEST
-  2.842   0.0106   5.0431    0.002   0.95   -5.80  SIGNATURE_LONG_SPARSE
-  0.370   0.8469   0.0000    1.000   0.95    2.90  COPY_ACCURATELY
-  0.360   0.8239   0.0000    1.000   0.95    2.90  INVALUABLE_MARKETING
-  0.360   0.8222   0.0000    1.000   0.95    2.90  ORDER_REPORT
-  0.461   0.0000   0.8190    0.000   0.95   -6.40  CRON_ENV
-  0.350   0.8009   0.0000    1.000   0.95    2.90  X_PRECEDENCE_REF
-  0.714   1.6301   0.0007    1.000   0.95    4.30  FORGED_MUA_AOL
-  0.321   0.7328   0.0000    1.000   0.95    2.90  JODY
-  0.321   0.7328   0.0000    1.000   0.95    2.90  EXCUSE_23
-  0.319   0.7292   0.0000    1.000   0.95    2.90  EXCUSE_22
-  0.394   0.0000   0.6999    0.000   0.95   -6.40  HABEAS_SWE
-  0.882   2.0133   0.0014    0.999   0.95    2.81  BILL_1618
-  0.276   0.6310   0.0000    1.000   0.95    2.90  RATWARE_OE_PI
-  0.252   0.5752   0.0000    1.000   0.95    2.90  RECEIVE_EMAIL
-  8.782  19.8255   0.1948    0.990   0.95    0.50  MISSING_MIMEOLE
-  0.309   0.0000   0.5485    0.000   0.95   -6.40  SIGNATURE_LONG_DENSE
-  1.482   3.3815   0.0048    0.999   0.95    3.76  REMOVE_POSTAL
-  0.229   0.5230   0.0000    1.000   0.95    2.90  FROM_NUM_AT_WEBMAIL
-  0.289   0.0000   0.5141    0.000   0.95   -6.40  USER_AGENT_XIMIAN
-  0.222   0.5080   0.0000    1.000   0.95    2.90  NOT_INTENDED
-  0.218   0.4991   0.0000    1.000   0.95    2.90  X_ENC_PRESENT
-  0.196   0.4487   0.0000    1.000   0.95    2.90  HIDDEN_ASSETS
-  0.195   0.4460   0.0000    1.000   0.95    2.90  RATWARE_FLOAT
-  0.180   0.4124   0.0000    1.000   0.95    2.90  NOT_MLM
-  0.179   0.4089   0.0000    1.000   0.95    2.90  TO_TXT
-  0.170   0.3885   0.0000    1.000   0.95    2.90  X_STORMPOST_TO
-  0.170   0.3885   0.0000    1.000   0.95    2.90  RATWARE_STORM
-  0.170   0.3876   0.0000    1.000   0.95    2.90  HTML_COMMENT_8BITS
-  0.170   0.3876   0.0000    1.000   0.95    2.90  NONEXISTENT_CHARSET
-  0.165   0.3779   0.0000    1.000   0.95    2.90  MIME_BOUND_OPTIN
-  0.163   0.3735   0.0000    1.000   0.95    2.90  X_MIME_KEY
-  0.163   0.3726   0.0000    1.000   0.95    2.90  NOT_ADVISOR
-  0.812   1.8540   0.0014    0.999   0.95    1.10  ADVERT_CODE
-  0.153   0.3496   0.0000    1.000   0.95    2.90  USERNAME_IN_SUBJECT
-  1.103   2.5178   0.0028    0.999   0.95    2.09  DAILY_PXE
-  0.142   0.3257   0.0000    1.000   0.95    2.90  RCVD_BY_QVES_COM
-  0.138   0.3151   0.0000    1.000   0.95    2.90  SUBJ_GUARANTEED
-  0.137   0.3124   0.0000    1.000   0.95    2.90  MIME_BOUND_MANY_HEX
-  0.131   0.2991   0.0000    1.000   0.95    2.90  OUR_AFFILIATE_PARTNERS
-  0.131   0.2991   0.0000    1.000   0.95    2.90  COMPLAIN_TO
-  0.131   0.2991   0.0000    1.000   0.95    2.90  RATWARE_GROUPMAIL
-  0.131   0.2991   0.0000    1.000   0.95    2.90  RATWARE_JPFREE
-  0.131   0.2991   0.0000    1.000   0.95    2.90  PORN_MEMBERSHIP
-  0.128   0.2929   0.0000    1.000   0.95    2.90  DIG_UP_INFO
-  0.127   0.2894   0.0000    1.000   0.95    2.90  YOU_CAN_SEARCH
-  0.126   0.2885   0.0000    1.000   0.95    2.90  USE_IDENTITY
-  0.578   1.3195   0.0007    0.999   0.95    1.10  HTML_FORM_ACTION_MAILTO
-  0.121   0.2770   0.0000    1.000   0.95    2.90  RATWARE_OE_MALFORMED
-  0.111   0.2540   0.0000    1.000   0.95    2.90  OUR_PRIVACY_POLICY
-  0.109   0.2487   0.0000    1.000   0.95    2.90  PORN_15
-  0.107   0.2451   0.0000    1.000   0.95    2.90  BTAMAIL_HEADER
-  0.105   0.2389   0.0000    1.000   0.95    2.90  RECEIVED_IDENT_SQUID
-  0.101   0.2319   0.0000    1.000   0.95    2.90  RATWARE_IMKTG
-  0.098   0.2230   0.0000    1.000   0.95    2.90  PREST_NON_ACCREDITED
-  0.096   0.2204   0.0000    1.000   0.95    2.90  NO_CREDIT_CHECK
-  0.094   0.2142   0.0000    1.000   0.95    2.90  PENNIES_A_DAY
-  0.093   0.2124   0.0000    1.000   0.95    2.90  MSGID_SPAMSIGN_1
-  0.087   0.1991   0.0000    1.000   0.95    2.90  MIME_BOUND_TEP
-  0.084   0.1920   0.0000    1.000   0.95    2.90  FORGED_TELESP_RCVD
-  0.084   0.1920   0.0000    1.000   0.95    2.90  MIME_BOUND_HASHES
-  0.081   0.1850   0.0000    1.000   0.95    2.90  RATWARE_SCREWUP_1
-  0.081   0.1841   0.0000    1.000   0.95    2.90  RATWARE_VC_IPA
-  0.081   0.1841   0.0000    1.000   0.95    2.90  MSGID_3_DOLLARS
-  0.080   0.1823   0.0000    1.000   0.95    2.90  FRIEND_AT_PUBLIC
-  0.079   0.1805   0.0000    1.000   0.95    2.90  RATWARE_MMAILER
-  0.073   0.1664   0.0000    1.000   0.95    2.90  RATWARE_EVAMAIL
-  0.549   1.2549   0.0007    0.999   0.95    1.75  HTML_COMMENT_SKY
-  0.070   0.1593   0.0000    1.000   0.95    2.90  CHINA_URL
-  0.069   0.1584   0.0000    1.000   0.95    2.90  MEGA_SITE
-  0.069   0.1575   0.0000    1.000   0.95    2.90  VIAGRA_COMBO
-  0.067   0.1522   0.0000    1.000   0.95    2.90  FAKED_IP_IN_RCVD
-  0.085   0.0000   0.1507    0.000   0.95   -2.90  USER_AGENT_FORTE
-  0.065   0.1487   0.0000    1.000   0.95    2.90  GENTLE_FEROCITY
-  0.064   0.1460   0.0000    1.000   0.95    2.90  HTML_SHOUTING8
-  0.062   0.1425   0.0000    1.000   0.95    2.90  MORTGAGE_WAITING
-  0.062   0.1416   0.0000    1.000   0.95    2.90  SUBJ_HAS_TIME_ID
-  0.062   0.1407   0.0000    1.000   0.95    2.90  VJESTIKA
-  0.061   0.1398   0.0000    1.000   0.95    2.90  FORGED_GW05_RCVD
-  0.061   0.1389   0.0000    1.000   0.95    2.90  TAKE_ACTION_NOW
-  0.058   0.1336   0.0000    1.000   0.94    2.90  EXCUSE_20
-  1.056   2.4098   0.0028    0.999   0.94    1.10  WE_HONOR_ALL
-  0.057   0.1292   0.0000    1.000   0.94    2.90  RATWARE_POWERC
-  0.056   0.1283   0.0000    1.000   0.94    2.90  MORTGAGE_NETWORK
-  0.055   0.1266   0.0000    1.000   0.94    2.90  EASY_TERMS
-  0.054   0.1239   0.0000    1.000   0.94    2.90  AZOOGLE
-  0.054   0.1230   0.0000    1.000   0.94    2.90  CABLE_CONVERTER
-  0.053   0.1212   0.0000    1.000   0.94    2.90  SUBJ_YOUR_FAMILY
-  0.751   1.7160   0.0014    0.999   0.94    1.54  CANNOT_BE_SPAM
-  0.050   0.1142   0.0000    1.000   0.94    2.90  OUR_STRICT_ANTI
-  0.050   0.1142   0.0000    1.000   0.94    2.90  CHINA_HEADER
-  0.049   0.1115   0.0000    1.000   0.94    2.90  MARKUP_RAND
-  0.049   0.1115   0.0000    1.000   0.94    2.90  KIFF
-  0.048   0.1089   0.0000    1.000   0.94    2.90  RATWARE_JIXING
-  0.047   0.1071   0.0000    1.000   0.94    2.90  HTML_IMAGE_AREA_09
-  0.046   0.1044   0.0000    1.000   0.94    2.90  OUR_OVERWHELMING_GROWTH
-  0.045   0.1027   0.0000    1.000   0.94    2.90  E_MAILPROMO_URL
-  0.043   0.0991   0.0000    1.000   0.94    2.90  HR_4176
-  0.042   0.0965   0.0000    1.000   0.94    2.90  LOTS_OF_CC_LINES
-  0.039   0.0894   0.0000    1.000   0.94    2.90  FALLING_INTEREST
-  0.039   0.0894   0.0000    1.000   0.94    2.90  FREE_INSTALL
-  0.038   0.0876   0.0000    1.000   0.94    2.90  SUBJ_NOW_ONLY
-  0.038   0.0858   0.0000    1.000   0.94    2.90  NEVER_ANOTHER
-  0.037   0.0850   0.0000    1.000   0.94    2.90  MIME_BOUND_DIGITS_7
-  0.035   0.0796   0.0000    1.000   0.94    2.90  ONLINE_BIZ_OPS
-  0.035   0.0796   0.0000    1.000   0.94    2.90  FRIEND_PUBLIC
-  0.034   0.0788   0.0000    1.000   0.94    2.90  SUBJ_FREE_INSTANT
-  0.034   0.0770   0.0000    1.000   0.94    2.90  DOMAINS_CHEAP
-  0.034   0.0770   0.0000    1.000   0.94    2.90  MDAEMON_2_7_4
-  0.032   0.0735   0.0000    1.000   0.94    2.90  ADDRESSES_ON_CD
-  2.134   4.8621   0.0117    0.998   0.94    2.09  HTML_IMAGE_ONLY_04
-  0.031   0.0699   0.0000    1.000   0.94    2.90  STOP_SNORING
-  0.030   0.0681   0.0000    1.000   0.94    2.90  START_NOW_CAPS
-  0.027   0.0619   0.0000    1.000   0.94    2.90  FREE_LEADS
-  0.025   0.0566   0.0000    1.000   0.94    2.90  PORN_PASSWORD
-  0.024   0.0558   0.0000    1.000   0.94    2.90  HTML_ALL_CAPS
-  0.024   0.0540   0.0000    1.000   0.94    2.90  TO_RECIP_MARKER
-  0.023   0.0522   0.0000    1.000   0.94    2.90  RATWARE_XMAILER
-  0.525   1.1983   0.0007    0.999   0.94    2.41  EXCUSE_21
-  0.029   0.0000   0.0509    0.000   0.94   -2.90  PATCH_CONTEXT_DIFF
-  0.022   0.0496   0.0000    1.000   0.94    2.90  MSGID_4NUMS_DOLLAR
-  0.026   0.0000   0.0461    0.000   0.94   -2.90  HOTMAIL_FOOTER4
-  0.019   0.0442   0.0000    1.000   0.94    2.90  MIME_BOUND_MAIL_BOUND
-  0.017   0.0398   0.0000    1.000   0.94    2.90  NIGERIAN_SUBJECT1
-  0.017   0.0389   0.0000    1.000   0.94    2.90  HELPED_FINANCE
-  0.017   0.0381   0.0000    1.000   0.94    2.90  NO_MEDICAL
-  0.015   0.0354   0.0000    1.000   0.94    2.90  CENTS_ON_DOLLAR
-  0.015   0.0345   0.0000    1.000   0.94    2.90  SAFEGUARD_NOTICE
-  0.019   0.0000   0.0337    0.000   0.94   -2.90  USER_AGENT_TONLINE
-  0.014   0.0310   0.0000    1.000   0.94    2.90  RATWARE_DIRECT_EMAIL
-  0.014   0.0310   0.0000    1.000   0.94    2.90  RATWARE_GR
-  0.017   0.0000   0.0296    0.000   0.94   -2.90  USER_AGENT_MSN
-  0.012   0.0274   0.0000    1.000   0.94    2.90  HTML_IMAGE_AREA_08
-  0.015   0.0000   0.0268    0.000   0.94   -2.90  MAJORDOMO
-  0.012   0.0265   0.0000    1.000   0.94    2.90  NIGERIAN_SUBJECT6
-  0.011   0.0257   0.0000    1.000   0.94    2.90  MAILTO_TO_B2BMAIL
-  0.011   0.0248   0.0000    1.000   0.94    2.90  S_1618
-  0.010   0.0239   0.0000    1.000   0.94    2.90  MICRO_CAP_WARNING
-  0.010   0.0239   0.0000    1.000   0.94    2.90  RATWARE_CHARSET_V2
-  0.010   0.0221   0.0000    1.000   0.94    0.00  CREDIT_BUREAU
-  0.009   0.0212   0.0000    1.000   0.94    2.90  X_MAILER_GIBBERISH
-  0.009   0.0195   0.0000    1.000   0.94    0.00  PRODUCED_AND_SENT_OUT
-  0.008   0.0186   0.0000    1.000   0.94    0.00  SUBJ_RIPPED
-  0.008   0.0186   0.0000    1.000   0.94    0.00  CHILD_SUPPORT
-  0.007   0.0168   0.0000    1.000   0.94    0.00  RATWARE_CARETOP
-  0.006   0.0142   0.0000    1.000   0.94    0.00  SPAM_FORM
-  0.006   0.0133   0.0000    1.000   0.94    0.00  VAR_REF_IN_RECEIVED
-  0.006   0.0133   0.0000    1.000   0.94    0.00  SPAM_FORM_INPUT
-  0.006   0.0133   0.0000    1.000   0.94    0.00  FORGED_MUA_MSN
-  0.006   0.0133   0.0000    1.000   0.94    0.00  INTL_EXEC_GUILD
-  0.006   0.0133   0.0000    1.000   0.94    0.00  CREDITORS_CALLING
-  0.007   0.0000   0.0131    0.000   0.94    0.00  MAILMAN_CONFIRM
-  0.005   0.0124   0.0000    1.000   0.94    0.00  WWW_CLIK4YOU_COM
-  0.005   0.0124   0.0000    1.000   0.94    0.00  RATWARE_CHARSET
-  0.004   0.0097   0.0000    1.000   0.94    0.00  NO_SELLING
-  0.004   0.0097   0.0000    1.000   0.94    0.00  RATWARE_LC_OUTLOOK
-  0.004   0.0097   0.0000    1.000   0.94    0.00  MARKUP_SSPL
+ 232475   101697   130778    0.437   0.00    0.00  (all messages)
+100.000  43.7453  56.2547    0.437   0.00    0.00  (all messages as %)
+ 19.399   0.0059  34.4798    0.000   1.00   -0.50  REFERENCES
+ 17.224   0.0128  30.6076    0.000   0.99   -0.50  EMAIL_ATTRIBUTION
+ 16.717   0.0010  29.7152    0.000   0.99   -0.50  REPLY_WITH_QUOTES
+ 22.786   0.2665  40.2973    0.007   0.99   -0.50  IN_REP_TO
+ 10.473  23.9378   0.0015    1.000   0.98    4.50  MSGID_OUTLOOK_TIME
+ 20.881   0.2940  36.8908    0.008   0.98   -0.50  QUOTED_EMAIL_TEXT
+  5.722  13.0800   0.0000    1.000   0.97    4.40  MSGID_SPAMSIGN_6LETTER
+  4.944  11.3012   0.0000    1.000   0.96    4.40  MIME_ODD_CASE
+  4.485  10.2530   0.0000    1.000   0.96    4.40  MSGID_SPAMSIGN_ZEROES
+  5.212   0.0000   9.2653    0.000   0.96   -2.90  USER_AGENT_MUTT
+  4.012   9.1714   0.0008    1.000   0.96    4.40  SUBJ_FULL_OF_8BITS
+  4.490  10.2540   0.0069    0.999   0.96    2.13  MSGID_OE_SPAM_4ZERO
+  3.861   8.8233   0.0023    1.000   0.96    4.40  INVALID_DATE_TZ_ABSURD
+  6.378  14.5127   0.0528    0.996   0.96    2.35  BASE64_ENC_TEXT
+  3.071   7.0169   0.0023    1.000   0.96    4.40  HEADER_8BITS
+  2.819   6.4417   0.0023    1.000   0.95    4.40  FORGED_AOL_RCVD
+  4.106   9.3582   0.0214    0.998   0.95    1.10  HTML_LINK_CLICK_CAPS
+  3.251   0.0029   5.7762    0.001   0.95    0.00  USER_AGENT_PINE
+  4.429   0.0138   7.8629    0.002   0.95   -0.40  USER_AGENT_KMAIL
+  1.866   4.2646   0.0000    1.000   0.95    4.40  KOREAN_UCE_SUBJECT
+  2.216   5.0611   0.0038    0.999   0.95    2.33  FORGED_HOTMAIL_RCVD
+  2.235   0.0010   3.9724    0.000   0.95   -2.90  PGP_SIGNATURE
+  1.484   3.3914   0.0000    1.000   0.95    4.40  WITH_LC_SMTP
+  1.577   3.6029   0.0008    1.000   0.95    4.40  X_LIST_UNSUBSCRIBE
+  1.835   4.1909   0.0023    0.999   0.95    1.40  FROM_HAS_MIXED_NUMS2
+  1.543   0.0000   2.7428    0.000   0.95   -2.60  PGP_SIGNATURE_2
+  1.176   2.6874   0.0000    1.000   0.95    4.40  CONFIRMED_FORGED
+  2.796   0.0059   4.9649    0.001   0.95   -0.50  GROUPS_YAHOO_1
+  1.029   2.3531   0.0000    1.000   0.95    4.30  REMOVE_RESPECT
+  1.411   3.2233   0.0015    1.000   0.95    4.30  FROM_OFFERS
+  0.973   2.2233   0.0000    1.000   0.95    4.30  MULTI_FORGED
+  3.480   7.9235   0.0237    0.997   0.95    2.08  MARKETING_PARTNERS
+  0.838   1.9155   0.0000    1.000   0.95    4.30  EXCUSE_24
+  0.830   1.8978   0.0000    1.000   0.95    4.30  FAKED_UNDISC_RECIPS
+  0.759   1.7355   0.0000    1.000   0.95    4.30  X_X_PRESENT
+  2.273   5.1830   0.0092    0.998   0.95    2.00  HTML_IMAGE_ONLY_02
+  0.695   1.5890   0.0000    1.000   0.95    4.30  FINANCIAL
+  1.296   0.0010   2.3031    0.000   0.95   -1.40  BUGZILLA_BUG
+  0.583   1.3324   0.0000    1.000   0.95    4.30  UNDER_BILL_1618
+  0.541   1.2370   0.0000    1.000   0.95    4.30  BANG_OPRAH
+  0.652   0.0000   1.1585    0.000   0.95   -0.48  USER_AGENT_GNUS_UA
+  0.504   1.1524   0.0000    1.000   0.95    4.30  DATE_YEAR_ZERO_FIRST
+  0.473   1.0807   0.0000    1.000   0.95    4.30  UCE_MAIL_ACT
+  0.462   1.0551   0.0000    1.000   0.95    4.30  HR_3113
+  0.453   1.0354   0.0000    1.000   0.95    4.30  LOSE_POUNDS
+  0.442   1.0108   0.0000    1.000   0.95    4.30  WRINKLES
+  0.433   0.9892   0.0000    1.000   0.95    2.90  X_VMP_TEXT
+  0.421   0.9617   0.0000    1.000   0.95    2.90  FORGED_MX_HOTMAIL
+  8.775  19.8138   0.1912    0.990   0.95    0.50  MISSING_MIMEOLE
+  0.372   0.8506   0.0000    1.000   0.95    2.90  COPY_ACCURATELY
+  0.362   0.8270   0.0000    1.000   0.95    2.90  INVALUABLE_MARKETING
+  0.361   0.8260   0.0000    1.000   0.95    2.90  ORDER_REPORT
+  0.459   0.0000   0.8151    0.000   0.95   -0.38  CRON_ENV
+  0.349   0.7975   0.0000    1.000   0.95    2.90  X_PRECEDENCE_REF
+  2.837   0.0108   5.0345    0.002   0.95   -0.50  SIGNATURE_LONG_SPARSE
+  0.323   0.7375   0.0000    1.000   0.95    2.90  JODY
+  0.316   0.7218   0.0000    1.000   0.95    2.90  EXCUSE_23
+  0.314   0.7168   0.0000    1.000   0.95    2.90  EXCUSE_22
+  0.394   0.0000   0.6997    0.000   0.95   -4.60  HABEAS_SWE
+  0.306   0.6991   0.0000    1.000   0.95    2.90  FREE_CONSULTATION
+  1.487   3.3924   0.0046    0.999   0.95    3.45  REMOVE_POSTAL
+  0.714   1.6313   0.0008    1.000   0.95    4.30  FORGED_MUA_AOL
+  0.705   1.6117   0.0008    1.000   0.95    4.30  THE_BEST_RATE
+  0.277   0.6333   0.0000    1.000   0.95    2.90  RATWARE_OE_PI
+  1.471   3.3560   0.0046    0.999   0.95    1.10  MORTGAGE_BEST
+  0.250   0.5713   0.0000    1.000   0.95    2.90  RECEIVE_EMAIL
+  0.306   0.0000   0.5437    0.000   0.95   -0.50  SIGNATURE_LONG_DENSE
+  0.225   0.5153   0.0000    1.000   0.95    2.90  FROM_NUM_AT_WEBMAIL
+  0.224   0.5123   0.0000    1.000   0.95    2.90  NOT_INTENDED
+  0.288   0.0000   0.5116    0.000   0.95   -2.90  USER_AGENT_XIMIAN
+  0.885   2.0207   0.0015    0.999   0.95    2.04  BILL_1618
+  0.214   0.4897   0.0000    1.000   0.95    2.90  X_ENC_PRESENT
+  0.194   0.4425   0.0000    1.000   0.95    2.90  RATWARE_FLOAT
+  0.193   0.4415   0.0000    1.000   0.95    2.90  HIDDEN_ASSETS
+  0.180   0.4110   0.0000    1.000   0.95    2.90  TO_TXT
+  0.179   0.4100   0.0000    1.000   0.95    2.90  NOT_MLM
+  0.173   0.3953   0.0000    1.000   0.95    2.90  X_STORMPOST_TO
+  0.173   0.3953   0.0000    1.000   0.95    2.90  RATWARE_STORM
+  0.172   0.3933   0.0000    1.000   0.95    2.90  NONEXISTENT_CHARSET
+  0.169   0.3874   0.0000    1.000   0.95    2.90  HTML_COMMENT_8BITS
+  0.166   0.3786   0.0000    1.000   0.95    2.90  MIME_BOUND_OPTIN
+  0.163   0.3727   0.0000    1.000   0.95    2.90  X_MIME_KEY
+  0.163   0.3717   0.0000    1.000   0.95    2.90  NOT_ADVISOR
+  0.149   0.3412   0.0000    1.000   0.95    2.90  USERNAME_IN_SUBJECT
+  0.143   0.3274   0.0000    1.000   0.95    2.90  RCVD_BY_QVES_COM
+  0.138   0.3156   0.0000    1.000   0.95    2.90  SUBJ_GUARANTEED
+  0.137   0.3127   0.0000    1.000   0.95    2.90  MIME_BOUND_MANY_HEX
+  0.133   0.3038   0.0000    1.000   0.95    2.90  COMPLAIN_TO
+  0.132   0.3029   0.0000    1.000   0.95    2.90  RATWARE_GROUPMAIL
+  0.132   0.3029   0.0000    1.000   0.95    2.90  RATWARE_JPFREE
+  0.131   0.2989   0.0000    1.000   0.95    2.90  OUR_AFFILIATE_PARTNERS
+  0.129   0.2940   0.0000    1.000   0.95    2.90  PORN_MEMBERSHIP
+  0.126   0.2891   0.0000    1.000   0.95    2.90  DIG_UP_INFO
+  0.125   0.2861   0.0000    1.000   0.95    2.90  YOU_CAN_SEARCH
+  0.125   0.2852   0.0000    1.000   0.95    2.90  USE_IDENTITY
+  0.123   0.2812   0.0000    1.000   0.95    2.90  RATWARE_OE_MALFORMED
+  0.111   0.2547   0.0000    1.000   0.95    2.90  OUR_PRIVACY_POLICY
+  0.107   0.2439   0.0000    1.000   0.95    2.90  PORN_15
+  0.107   0.2439   0.0000    1.000   0.95    2.90  BTAMAIL_HEADER
+  0.820   1.8732   0.0015    0.999   0.95    1.10  ADVERT_CODE
+  0.105   0.2409   0.0000    1.000   0.95    2.90  RECEIVED_IDENT_SQUID
+  0.100   0.2291   0.0000    1.000   0.95    2.90  RATWARE_IMKTG
+  0.100   0.2281   0.0000    1.000   0.95    2.90  NO_CREDIT_CHECK
+  0.095   0.2173   0.0000    1.000   0.95    2.90  PREST_NON_ACCREDITED
+  0.093   0.2124   0.0000    1.000   0.95    2.90  PENNIES_A_DAY
+  0.092   0.2114   0.0000    1.000   0.95    2.90  MSGID_SPAMSIGN_1
+  0.087   0.1996   0.0000    1.000   0.95    2.90  FORGED_TELESP_RCVD
+  0.086   0.1957   0.0000    1.000   0.95    2.90  MIME_BOUND_TEP
+  0.083   0.1908   0.0000    1.000   0.95    2.90  MIME_BOUND_HASHES
+  0.083   0.1898   0.0000    1.000   0.95    2.90  INTL_DRIVERS_LICENSE
+  0.081   0.1858   0.0000    1.000   0.95    2.90  FRIEND_AT_PUBLIC
+  0.080   0.1839   0.0000    1.000   0.95    2.90  RATWARE_MMAILER
+  0.079   0.1799   0.0000    1.000   0.95    2.90  RATWARE_SCREWUP_1
+  0.078   0.1790   0.0000    1.000   0.95    2.90  MSGID_3_DOLLARS
+  0.078   0.1790   0.0000    1.000   0.95    2.90  RATWARE_VC_IPA
+  0.582   1.3285   0.0008    0.999   0.95    1.10  HTML_FORM_ACTION_MAILTO
+  0.076   0.1740   0.0000    1.000   0.94    2.90  READ_TO_END
+  0.072   0.1652   0.0000    1.000   0.94    2.90  RATWARE_EVAMAIL
+  0.071   0.1613   0.0000    1.000   0.94    2.90  MEGA_SITE
+  0.070   0.1593   0.0000    1.000   0.94    2.90  VIAGRA_COMBO
+  0.069   0.1583   0.0000    1.000   0.94    2.90  CHINA_URL
+  0.066   0.1514   0.0000    1.000   0.94    2.90  FAKED_IP_IN_RCVD
+  0.085   0.0000   0.1506    0.000   0.94   -0.44  USER_AGENT_FORTE
+  0.065   0.1485   0.0000    1.000   0.94    2.90  GENTLE_FEROCITY
+  0.062   0.1426   0.0000    1.000   0.94    2.90  NO_CATCH
+  0.062   0.1426   0.0000    1.000   0.94    2.90  HTML_SHOUTING8
+  0.062   0.1416   0.0000    1.000   0.94    2.90  FORGED_GW05_RCVD
+  0.062   0.1406   0.0000    1.000   0.94    2.90  SUBJ_HAS_TIME_ID
+  0.062   0.1406   0.0000    1.000   0.94    2.90  VJESTIKA
+  0.060   0.1367   0.0000    1.000   0.94    2.90  RATWARE_POWERC
+  0.060   0.1367   0.0000    1.000   0.94    2.90  MORTGAGE_WAITING
+  0.057   0.1308   0.0000    1.000   0.94    2.90  TAKE_ACTION_NOW
+  0.057   0.1298   0.0000    1.000   0.94    2.90  EXCUSE_20
+  2.125   4.8418   0.0115    0.998   0.94    1.98  HTML_IMAGE_ONLY_04
+  0.055   0.1249   0.0000    1.000   0.94    2.90  MORTGAGE_NETWORK
+  0.055   0.1249   0.0000    1.000   0.94    2.90  AZOOGLE
+  0.053   0.1209   0.0000    1.000   0.94    2.90  CABLE_CONVERTER
+  0.052   0.1200   0.0000    1.000   0.94    2.90  SUBJ_YOUR_FAMILY
+  0.052   0.1180   0.0000    1.000   0.94    2.90  EASY_TERMS
+  0.050   0.1150   0.0000    1.000   0.94    2.90  OUR_STRICT_ANTI
+  0.050   0.1150   0.0000    1.000   0.94    2.90  CHINA_HEADER
+  0.049   0.1111   0.0000    1.000   0.94    2.90  MARKUP_RAND
+  0.048   0.1101   0.0000    1.000   0.94    2.90  KIFF
+  0.046   0.1052   0.0000    1.000   0.94    2.90  RATWARE_JIXING
+  0.045   0.1032   0.0000    1.000   0.94    2.90  OUR_OVERWHELMING_GROWTH
+  0.044   0.1003   0.0000    1.000   0.94    2.90  HR_4176
+  0.043   0.0993   0.0000    1.000   0.94    2.90  E_MAILPROMO_URL
+  0.043   0.0993   0.0000    1.000   0.94    2.90  LOTS_OF_CC_LINES
+  0.041   0.0944   0.0000    1.000   0.94    2.90  HARDCORE_PORN
+  0.040   0.0905   0.0000    1.000   0.94    2.90  FALLING_INTEREST
+  0.038   0.0875   0.0000    1.000   0.94    2.90  FREE_INSTALL
+  0.037   0.0846   0.0000    1.000   0.94    2.90  SUBJ_NOW_ONLY
+  0.037   0.0836   0.0000    1.000   0.94    2.90  NEVER_ANOTHER
+  0.036   0.0826   0.0000    1.000   0.94    2.90  FRIEND_PUBLIC
+  0.035   0.0806   0.0000    1.000   0.94    2.90  ONLINE_BIZ_OPS
+  0.035   0.0796   0.0000    1.000   0.94    2.90  MIME_BOUND_DIGITS_7
+  1.099   2.5094   0.0031    0.999   0.94    2.03  DAILY_PXE
+  0.034   0.0767   0.0000    1.000   0.94    2.90  SUBJ_FREE_INSTANT
+  0.034   0.0767   0.0000    1.000   0.94    2.90  ADDRESSES_ON_CD
+  0.032   0.0737   0.0000    1.000   0.94    2.90  DOMAINS_CHEAP
+  0.032   0.0728   0.0000    1.000   0.94    2.90  MDAEMON_2_7_4
+  0.030   0.0688   0.0000    1.000   0.94    2.90  STOP_SNORING
+  0.029   0.0659   0.0000    1.000   0.94    2.90  START_NOW_CAPS
+  0.028   0.0629   0.0000    1.000   0.94    2.90  FREE_LEADS
+  0.027   0.0610   0.0000    1.000   0.94    2.90  PORN_PASSWORD
+  0.023   0.0531   0.0000    1.000   0.94    2.90  TO_RECIP_MARKER
+  0.553   1.2626   0.0008    0.999   0.94    1.10  HTML_COMMENT_SKY
+  0.023   0.0521   0.0000    1.000   0.94    2.90  HTML_ALL_CAPS
+  0.022   0.0511   0.0000    1.000   0.94    2.90  MSGID_4NUMS_DOLLAR
+  0.022   0.0501   0.0000    1.000   0.94    2.90  RATWARE_XMAILER
+  0.028   0.0000   0.0497    0.000   0.94    0.00  PATCH_CONTEXT_DIFF
+  0.026   0.0000   0.0466    0.000   0.94    0.00  HOTMAIL_FOOTER4
+  0.018   0.0423   0.0000    1.000   0.94    0.00  MIME_BOUND_MAIL_BOUND
+  0.024   0.0000   0.0421    0.000   0.94   -4.60  EVITE
+  0.017   0.0393   0.0000    1.000   0.94    0.00  HELPED_FINANCE
+  0.016   0.0374   0.0000    1.000   0.94    2.90  NIGERIAN_SUBJECT1
+  0.016   0.0364   0.0000    1.000   0.94    0.00  NO_MEDICAL
+  0.015   0.0344   0.0000    1.000   0.94    2.90  CENTS_ON_DOLLAR
+  0.019   0.0000   0.0344    0.000   0.94   -0.42  USER_AGENT_TONLINE
+  0.015   0.0334   0.0000    1.000   0.94    0.00  RATWARE_GR
+  0.014   0.0324   0.0000    1.000   0.94    2.90  SAFEGUARD_NOTICE
+  0.017   0.0000   0.0298    0.000   0.94   -2.44  USER_AGENT_MSN
+  0.013   0.0295   0.0000    1.000   0.94    0.00  RATWARE_DIRECT_EMAIL
+  0.012   0.0265   0.0000    1.000   0.94    0.00  S_1618
+  0.012   0.0265   0.0000    1.000   0.94    0.00  HTML_IMAGE_AREA_08
+  0.012   0.0265   0.0000    1.000   0.94    0.00  NIGERIAN_SUBJECT6
+  0.011   0.0256   0.0000    1.000   0.94    0.00  MAILTO_TO_B2BMAIL
+  0.014   0.0000   0.0252    0.000   0.94    0.00  MAJORDOMO
+  0.010   0.0236   0.0000    1.000   0.94    0.00  RATWARE_CHARSET_V2
+  0.010   0.0236   0.0000    1.000   0.94    0.00  MICRO_CAP_WARNING
+  0.010   0.0226   0.0000    1.000   0.94    0.00  X_MAILER_GIBBERISH
+  0.009   0.0206   0.0000    1.000   0.94    0.00  CREDIT_BUREAU
+  0.009   0.0197   0.0000    1.000   0.94    0.00  SUBJ_RIPPED
+  0.008   0.0187   0.0000    1.000   0.94    0.00  PRODUCED_AND_SENT_OUT
+  0.008   0.0177   0.0000    1.000   0.94    0.00  CHILD_SUPPORT
+  0.007   0.0157   0.0000    1.000   0.94    0.00  RATWARE_CARETOP
+  0.006   0.0147   0.0000    1.000   0.94    0.00  VAR_REF_IN_RECEIVED
+  0.006   0.0138   0.0000    1.000   0.94    0.00  SPAM_FORM
+  0.006   0.0138   0.0000    1.000   0.94    0.00  FORGED_MUA_MSN
+  0.006   0.0138   0.0000    1.000   0.94    0.00  WWW_CLIK4YOU_COM
+  0.007   0.0000   0.0130    0.000   0.94    0.00  MAILMAN_CONFIRM
+  0.006   0.0128   0.0000    1.000   0.94    0.00  NO_GIMMICK
+  0.006   0.0128   0.0000    1.000   0.94    0.00  RATWARE_CHARSET
+  0.006   0.0128   0.0000    1.000   0.94    0.00  INTL_EXEC_GUILD
+  0.006   0.0128   0.0000    1.000   0.94    0.00  CREDITORS_CALLING
+  0.006   0.0128   0.0000    1.000   0.94    0.00  SPAM_FORM_INPUT
+  0.005   0.0108   0.0000    1.000   0.94    0.00  RATWARE_LC_OUTLOOK
+  0.004   0.0098   0.0000    1.000   0.94    0.00  TRACE_BY_SSN
+  0.004   0.0088   0.0000    1.000   0.94    0.00  RATWARE_DIFFOND
   0.004   0.0088   0.0000    1.000   0.94    0.00  EXCUSE_2
-  0.004   0.0088   0.0000    1.000   0.94    0.00  EXPERTS_SHOW_HOW
-  0.004   0.0088   0.0000    1.000   0.94    0.00  TRACE_BY_SSN
-  0.003   0.0080   0.0000    1.000   0.94    0.00  TO_INVESTORS
-  0.003   0.0080   0.0000    1.000   0.94    0.00  ENHANCE_WEBSITE
-  0.003   0.0080   0.0000    1.000   0.94    0.00  RATWARE_DIFFOND
-  0.003   0.0080   0.0000    1.000   0.94    0.00  WWW_AUTOREMOVE_COM
-  0.003   0.0071   0.0000    1.000   0.94    0.00  PSYCHIC
-  0.003   0.0071   0.0000    1.000   0.94    0.00  PRIORITY_MAIL
-  0.003   0.0071   0.0000    1.000   0.94    0.00  EXCUSE_18
-  0.003   0.0071   0.0000    1.000   0.94    0.00  WEALTH
-  0.003   0.0062   0.0000    1.000   0.94    0.00  EJACULATION
-  0.002   0.0053   0.0000    1.000   0.94    0.00  SPAM_FORM_RETURN
-  0.002   0.0053   0.0000    1.000   0.94    0.00  SPAM_FORM_ACTION
-  0.002   0.0053   0.0000    1.000   0.94    0.00  NO_MIDDLEMAN
-  0.002   0.0044   0.0000    1.000   0.94    0.00  INCREDIBLE
-  0.002   0.0035   0.0000    1.000   0.94    0.00  CHANGE_TERMS
-  0.002   0.0035   0.0000    1.000   0.94    0.00  MORE_TRAFFIC
-  0.002   0.0000   0.0034    0.000   0.94    0.00  HOTMAIL_FOOTER3
-  0.002   0.0000   0.0028    0.000   0.94    0.00  MSN_GROUPS
-  0.001   0.0027   0.0000    1.000   0.94    0.00  PORN_GALLERIES
-  0.001   0.0027   0.0000    1.000   0.94    0.00  RATWARE_BANG_HASH
-  0.001   0.0018   0.0000    1.000   0.94    0.00  POST_IN_RCVD
-  0.000   0.0009   0.0000    1.000   0.94    0.00  OUR_PUBLICATIONS
-  0.000   0.0009   0.0000    1.000   0.94    0.00  DISCONTINUE
-  0.000   0.0009   0.0000    1.000   0.94  1000.00  GTUBE
-  0.000   0.0009   0.0000    1.000   0.94    0.00  X_FIX_PRESENT
-  1.025   2.3390   0.0028    0.999   0.94    2.18  BTAMAIL_URL
-  0.705   1.6098   0.0014    0.999   0.94    4.30  THE_BEST_RATE
- 26.382  57.9976   1.7976    0.970   0.94    0.10  MIME_HTML_ONLY
-  0.372   0.8487   0.0007    0.999   0.94    2.90  OBSCURED_EMAIL
-  0.863   1.9700   0.0028    0.999   0.94    1.25  DAILY_PL
-  2.682   6.1038   0.0213    0.997   0.94    2.56  TRACKER_ID
-  0.351   0.8018   0.0007    0.999   0.94    2.80  HIDE_WIN_STATUS
-  7.652  17.2865   0.1603    0.991   0.94    0.94  NORMAL_HTTP_TO_IP
-  2.245   5.1117   0.0158    0.997   0.94    4.13  RCVD_FAKE_HELO_DOTCOM
-  1.232   2.8098   0.0055    0.998   0.94    1.45  CONSOLIDATE_DEBT
-  0.304   0.6947   0.0007    0.999   0.94    2.90  FREE_CONSULTATION
-  0.300   0.6841   0.0007    0.999   0.94    2.90  EXCUSE_4
-  0.288   0.6584   0.0007    0.999   0.94    1.26  BARGAIN_URL
-  0.264   0.6036   0.0007    0.999   0.94    1.82  REFINANCE_NOW
-  0.261   0.5965   0.0007    0.999   0.94    1.95  SUBJ_LIFE_INSURANCE
-  0.261   0.5965   0.0007    0.999   0.94    2.17  FREE_CELL_PHONE
-  0.413   0.9434   0.0014    0.999   0.94    2.90  FREE_QUOTE_INSTANT
-  0.239   0.5452   0.0007    0.999   0.94    2.90  COMPETE
-  1.353   0.0053   2.4004    0.002   0.94   -5.80  USER_AGENT_MOZILLA_UA
-  0.640   1.4585   0.0028    0.998   0.94    1.10  SENT_IN_COMPLIANCE
-  1.025   2.3355   0.0055    0.998   0.94    1.10  CLICK_TO_REMOVE_1
-  1.928   4.3869   0.0151    0.997   0.94    1.10  MAILTO_WITH_SUBJ_REMOVE
-  0.356   0.8124   0.0014    0.998   0.94    0.70  SUBJ_YOUR_DEBT
-  0.199   0.4540   0.0007    0.998   0.94    2.90  HTML_SHOUTING6
-  0.352   0.8027   0.0014    0.998   0.94    0.98  RESISTANCE_IS_FUTILE
-  0.163   0.3717   0.0007    0.998   0.94    1.17  THIS_IS_AN_AD
-  0.418   0.9540   0.0021    0.998   0.94    2.90  SUBJ_VIAGRA
-  0.282   0.6434   0.0014    0.998   0.94    2.46  BANG_QUOTE
-  0.146   0.3328   0.0007    0.998   0.94    2.42  VERY_SUSP_RECIPS
-  0.269   0.6133   0.0014    0.998   0.94    2.38  IMPOTENCE
-  0.484   1.1036   0.0028    0.998   0.94    3.48  WHILE_YOU_SLEEP
-  2.299   5.2241   0.0241    0.995   0.94    1.10  HTML_TABLE_THICK_BORDER
-  0.263   0.6000   0.0014    0.998   0.94    0.70  VIAGRA_ONLINE
-  0.894   2.0346   0.0062    0.997   0.94    1.20  FREE_QUOTE
-  0.134   0.3062   0.0007    0.998   0.94    2.89  BE_BOSS
-  0.441   1.0036   0.0028    0.997   0.94    1.10  FURTHER_TRANSMISSIONS
- 15.990   0.4726  28.0563    0.017   0.94   -0.60  KNOWN_MAILING_LIST
-  3.323   7.5365   0.0468    0.994   0.94    3.87  FORGED_MUA_OUTLOOK
-  2.039   4.6329   0.0220    0.995   0.94    2.70  RCVD_FAKE_HELO_DOTCOM_2
-  1.181   2.6859   0.0103    0.996   0.94    1.99  AS_SEEN_ON
-  1.743   3.9603   0.0179    0.996   0.94    1.10  HTML_IMAGE_RATIO_02
-  2.168   4.9241   0.0248    0.995   0.94    1.10  SUBJ_REMOVE
-  0.893   0.0053   1.5835    0.003   0.94   -5.80  USER_AGENT_VM
-  0.400   0.9107   0.0028    0.997   0.94    0.80  CLICK_TO_REMOVE_2
-  4.509  10.2048   0.0798    0.992   0.94    2.42  SUBJ_HAS_SPACES
-  0.393   0.8956   0.0028    0.997   0.94    2.90  INITIAL_INVEST
-  0.194   0.4407   0.0014    0.997   0.94    0.70  HTTP_CTRL_CHARS_HOST
-  0.099   0.2248   0.0007    0.997   0.94    1.68  CUM_SHOT
-  0.273   0.6213   0.0021    0.997   0.94    2.90  RATWARE_EMWAC
-  0.709   1.6124   0.0062    0.996   0.94    1.10  SECTION_301
-  0.096   0.2186   0.0007    0.997   0.93    1.37  UNCLAIMED_MONEY
-  1.468   3.3355   0.0158    0.995   0.93    1.42  HTML_COMMENT_SAVED_URL
-  0.182   0.4133   0.0014    0.997   0.93    0.70  X_MAIL_ID_PRESENT
-  0.180   0.4106   0.0014    0.997   0.93    0.70  X_SERV_HOST_PRESENT
-  1.919   4.3559   0.0234    0.995   0.93    1.71  EXCUSE_15
-  0.178   0.4062   0.0014    0.997   0.93    2.90  ONLINE_PHARMACY
-  0.621   1.4116   0.0055    0.996   0.93    1.10  HTTP_EXCESSIVE_ESCAPES
-  0.149   0.0009   0.2643    0.003   0.93   -2.60  GENUINE_EBAY_RCVD
-  4.904  11.0836   0.0991    0.991   0.93    0.50  CLICK_BELOW_CAPS
-  0.396   0.9009   0.0034    0.996   0.93    1.16  WE_HATE_SPAM2
-  0.087   0.1974   0.0007    0.997   0.93    1.71  HTML_SHOUTING7
-  2.081   4.7214   0.0275    0.994   0.93    1.64  EXCUSE_19
-  1.633   0.0142   2.8911    0.005   0.93   -5.80  MSGID_GOOD_EXCHANGE
-  0.269   0.0018   0.4769    0.004   0.93   -6.03  PATCH_UNIFIED_DIFF
-  0.240   0.5452   0.0021    0.996   0.93    2.90  UNSECURED_CREDIT
-  0.084   0.1903   0.0007    0.996   0.93    1.96  EARNINGS
-  0.908   0.0071   1.6083    0.004   0.93   -5.70  DEBIAN_BTS_BUG
-  0.681   1.5487   0.0069    0.996   0.93    4.27  FORGED_MUA_THEBAT
-  0.157   0.3575   0.0014    0.996   0.93    2.90  PORN_16
-  0.078   0.1779   0.0007    0.996   0.93    2.41  MIME_BOUND_HEX_24
-  0.153   0.3469   0.0014    0.996   0.93    1.06  MAIL_IN_ORDER_FORM
-  1.342   3.0470   0.0165    0.995   0.93    0.50  RECEIVE_OFFER
-  0.076   0.1726   0.0007    0.996   0.93    2.90  READ_TO_END
-  0.407   0.9257   0.0041    0.996   0.93    1.44  INCREASE_SEX
-  0.071   0.1611   0.0007    0.996   0.93    1.80  MIME_BOUND_RKFINDY
-  2.290   5.1887   0.0358    0.993   0.93    1.23  HTML_IMAGE_ONLY_06
-  0.069   0.1558   0.0007    0.996   0.93    2.17  APPLY_FREE
-  0.756   1.7160   0.0089    0.995   0.93    1.10  GUARANTEED_100_PERCENT
-  0.491   1.1142   0.0055    0.995   0.93    2.97  FREE_PORN
-  0.065   0.1478   0.0007    0.995   0.93    2.90  NO_CATCH
-  0.412   0.9363   0.0048    0.995   0.93    0.70  FREE_MEMBERSHIP
-  0.358   0.8124   0.0041    0.995   0.93    2.30  LOW_PAYMENT
-  0.125   0.2832   0.0014    0.995   0.93    0.70  FREE_GRANT
-  0.508   1.1523   0.0062    0.995   0.93    2.24  EXCUSE_12
-  0.062   0.1416   0.0007    0.995   0.93    1.23  STRONG_BUY
-  0.399   0.9053   0.0048    0.995   0.93    2.90  MILLION_EMAIL
-  2.586   5.8515   0.0461    0.992   0.93    0.70  BANG_GUARANTEE
-  0.438   0.9938   0.0055    0.994   0.93    1.75  LOW_INTEREST
-  2.148   4.8621   0.0372    0.992   0.93    0.95  COMPLETELY_FREE
-  0.057   0.1292   0.0007    0.995   0.93    1.77  NO_INVENTORY
-  0.786   1.7815   0.0110    0.994   0.93    0.90  MONEY_BACK
-  0.738   1.6744   0.0103    0.994   0.93    3.18  REVERSE_AGING
-  0.984   2.2311   0.0145    0.994   0.93    2.14  ADVERT_CODE2
-  0.595   1.3487   0.0083    0.994   0.93    3.85  OBFUSCATING_COMMENT
-  0.842   1.9098   0.0124    0.994   0.93    0.50  MORTGAGE_RATES
-  0.089   0.0009   0.1569    0.006   0.93   -1.50  MAILMAN_REMINDER
-  0.053   0.1195   0.0007    0.994   0.93    0.63  RECEIVED_IDENT_CACHEFLOW
-  2.442   0.0345   4.3150    0.008   0.93   -3.10  ORIGINAL_MESSAGE
-  0.103   0.2328   0.0014    0.994   0.93    0.97  SUBJ_AS_SEEN
-  1.221   2.7656   0.0200    0.993   0.93    0.50  HTML_SHOUTING4
-  0.388   0.8788   0.0055    0.994   0.93    2.90  NIGERIAN_BODY
-  0.516   1.1700   0.0076    0.994   0.93    0.74  REPLY_TO_HAS_UNDERLINE_NUMS
-  7.021  15.7616   0.2244    0.986   0.93    0.32  REMOVE_PAGE
-  2.225   5.0303   0.0434    0.991   0.93    0.50  FRONTPAGE
-  0.746   1.6894   0.0117    0.993   0.93    1.01  HGH
-  0.239   0.5425   0.0034    0.994   0.93    2.80  FORGED_EUDORAMAIL_RCVD
-  2.539   5.7365   0.0523    0.991   0.93    0.50  MIME_MISSING_BOUNDARY
-  0.184   0.4177   0.0028    0.993   0.92    1.45  MILLION_USD
-  0.674   1.5257   0.0110    0.993   0.92    2.27  BANG_EXERCISE
-  0.182   0.4124   0.0028    0.993   0.92    0.64  HTML_SHOUTING9
-  0.182   0.4115   0.0028    0.993   0.92    0.00  ONE_TIME
- 14.213  31.5489   0.7322    0.977   0.92    0.29  HTML_FONT_BIG
-  0.391   0.8859   0.0062    0.993   0.92    2.80  BUGGY_CGI
-  0.541   1.2248   0.0089    0.993   0.92    3.02  SORTED_RECIPS
-  0.174   0.3947   0.0028    0.993   0.92    2.90  NASTY_GIRLS
-  0.928   2.1001   0.0165    0.992   0.92    2.22  EXCUSE_REMOVE
-  0.530   1.2009   0.0089    0.993   0.92    3.04  ALL_NATURAL
-  0.087   0.1974   0.0014    0.993   0.92    2.90  INTL_DRIVERS_LICENSE
-  7.039  15.7829   0.2388    0.985   0.92    0.45  OFFERS_ETC
-  1.347   3.0461   0.0262    0.991   0.92    0.50  HTML_FONT_BIG_B
-  0.932   2.1080   0.0172    0.992   0.92    0.89  MLM
-  0.042   0.0956   0.0007    0.993   0.92    2.80  X_PMFLAGS_PRESENT
-  1.498   3.3851   0.0303    0.991   0.92    0.61  MORTGAGE_PITCH
-  1.016   2.2983   0.0193    0.992   0.92    2.05  SUSPICIOUS_RECIPS
-  0.681   1.5399   0.0124    0.992   0.92    4.29  FORGED_MUA_OIMO
-  0.387   0.8761   0.0069    0.992   0.92    1.49  ONE_TIME_MAILING
-  0.041   0.0920   0.0007    0.993   0.92    2.80  STOCK_ALERT
-  0.987   2.2319   0.0193    0.991   0.92    2.69  OPT_HEADER
-  0.040   0.0912   0.0007    0.993   0.92    2.90  HARDCORE_PORN
-  0.586   1.3248   0.0110    0.992   0.92    0.99  RATWARE_HASH_2_V2
-  0.585   1.3231   0.0110    0.992   0.92    0.50  EXCUSE_13
-  0.647   1.4638   0.0124    0.992   0.92    4.29  FORGED_MUA_IMS
-  2.497   5.6312   0.0599    0.989   0.92    1.64  DATE_IN_FUTURE_12_24
-  0.228   0.5159   0.0041    0.992   0.92    0.16  REFINANCE_YOUR_HOME
-  0.737   1.6664   0.0145    0.991   0.92    0.50  HTML_WIN_OPEN
-  2.904   0.0540   5.1202    0.010   0.92   -0.61  FROM_EGROUPS
-  0.220   0.4974   0.0041    0.992   0.92    2.80  SUBJECT_APPROVED
-  0.072   0.1637   0.0014    0.992   0.92    0.00  WHY_PAY_MORE
-  2.387   0.0442   4.2090    0.010   0.92   -0.60  QUOTE_TWICE_1
-  0.659   1.4877   0.0138    0.991   0.92    0.50  HTML_90_100
-  0.276   0.6248   0.0055    0.991   0.92    1.75  LIVE_PORN
-  0.276   0.6239   0.0055    0.991   0.92    0.39  CREDIT_CARD
-  0.036   0.0805   0.0007    0.992   0.92    1.56  PORN_6
-  0.034   0.0770   0.0007    0.991   0.92    2.38  INCOME
-  0.197   0.4443   0.0041    0.991   0.92    2.80  TARGETED
-  0.066   0.1496   0.0014    0.991   0.92    2.80  WE_HATE_SPAM
-  2.933   6.5976   0.0840    0.987   0.92    0.72  HTML_FONT_COLOR_GREEN
-  4.119   9.2463   0.1314    0.986   0.91    1.52  DATE_IN_FUTURE_06_12
-  0.095   0.2142   0.0021    0.990   0.91    0.24  AMAZING_STUFF
-  0.094   0.2133   0.0021    0.990   0.91    2.06  COMPARE_RATES
-  0.477   1.0770   0.0110    0.990   0.91    1.37  RATWARE_HASH_2
-  1.058   2.3850   0.0262    0.989   0.91    1.77  OPT_OUT_CAPS
-  0.123   0.2779   0.0028    0.990   0.91    0.19  MIME_BOUND_MA
-  0.152   0.3425   0.0034    0.990   0.91    1.77  SAVE_ON_INSURANCE
-  1.943   4.3736   0.0537    0.988   0.91    0.33  LIMITED_TIME_ONLY
-  0.120   0.2699   0.0028    0.990   0.91    2.79  MSGID_NO_HOST
-  0.291   0.0053   0.5127    0.010   0.91   -3.10  USER_AGENT_MACOE
-  0.699   1.5762   0.0172    0.989   0.91    2.80  FORGED_MUA_EUDORA
-  0.119   0.2682   0.0028    0.990   0.91    2.68  PAY_SITE
-  0.088   0.1991   0.0021    0.990   0.91    1.00  BUY_DIRECT
-  0.602   1.3567   0.0151    0.989   0.91    0.00  HTTP_ESCAPED_HOST
-  4.193   9.3950   0.1473    0.985   0.91    0.68  HTML_FONT_COLOR_NAME
-  0.221   0.4974   0.0055    0.989   0.91    0.00  GUARANTEED_STUFF
-  1.201   2.7019   0.0330    0.988   0.91    1.24  USERPASS
-  5.054  11.3092   0.1899    0.983   0.91    1.49  SUBJ_HAS_UNIQ_ID
-  0.634   1.4275   0.0165    0.989   0.91    2.34  PENIS_ENLARGE
-  0.138   0.3115   0.0034    0.989   0.91    1.01  FREE_PASSWORD
-  0.298   0.6717   0.0076    0.989   0.91    1.41  AOL_USERS_LINK
-  0.082   0.1841   0.0021    0.989   0.91    1.76  COMMUNIGATE
-  0.108   0.2443   0.0028    0.989   0.91    0.00  HTML_IMAGE_AREA_05
-  0.291   0.6558   0.0076    0.989   0.91    2.80  GET_PAID
-  0.906   2.0390   0.0255    0.988   0.91    0.38  OPT_IN_CAPS
-  0.426   0.9593   0.0117    0.988   0.91    1.80  CALL_NOW
-  1.370   3.0789   0.0413    0.987   0.91    0.59  HTML_TITLE_UNTITLED
-  1.701   3.8196   0.0530    0.986   0.91    0.84  HTML_IMAGE_ONLY_10
-  0.101   0.2283   0.0028    0.988   0.91    1.11  AMATEUR_PORN
-  0.176   0.3956   0.0048    0.988   0.91    2.39  ROUND_THE_WORLD_LOCAL
-  0.101   0.2274   0.0028    0.988   0.91    0.12  STOCK_PICK
-  0.413   0.9284   0.0117    0.988   0.91    0.00  HTML_WIN_FOCUS
-  2.325   5.2143   0.0778    0.985   0.91    0.43  EXCUSE_10
-  0.336   0.7567   0.0096    0.987   0.91    0.71  SOME_BREAKTHROUGH
-  0.240   0.0053   0.4219    0.012   0.91    0.00  USER_AGENT_ENTOURAGE
- 17.014  37.3190   1.2243    0.968   0.91    0.10  HTML_LINK_CLICK_HERE
-  1.527   3.4284   0.0489    0.986   0.91    1.68  MIME_BOUND_DASH_DIGIT
-  1.016   2.2824   0.0317    0.986   0.90    0.94  HTTP_USERNAME_USED
-  0.418   0.9407   0.0124    0.987   0.90    2.80  HAIR_LOSS
-  0.143   0.3213   0.0041    0.987   0.90    0.75  UP_TO_OR_MORES
-  0.072   0.1611   0.0021    0.987   0.90    2.80  FORWARD_LOOKING
-  3.236   7.2436   0.1204    0.984   0.90    0.19  HTML_SHOUTING3
-  0.048   0.1071   0.0014    0.987   0.90    1.00  IDENT_NOBODY
-  0.047   0.1062   0.0014    0.987   0.90    0.64  FREE_PREVIEW
-  0.039   0.0009   0.0681    0.013   0.90    0.00  DISCLAIMER_LEGALESE
-  1.189   2.6691   0.0385    0.986   0.90    0.81  BANG_MORE
-  0.069   0.1558   0.0021    0.987   0.90    2.80  MEET_SINGLES
-  0.091   0.2044   0.0028    0.987   0.90    1.58  URI_IS_POUND
-  2.478   5.5471   0.0908    0.984   0.90    1.53  MIME_HEADER_CTYPE_ONLY
-  1.079   2.4213   0.0358    0.985   0.90    0.00  LOTS_OF_STUFF
-  1.487   3.3329   0.0509    0.985   0.90    0.79  BAD_CREDIT
-  0.717   1.6098   0.0234    0.986   0.90    0.00  DO_IT_TODAY
-  0.563   1.2629   0.0186    0.985   0.90    1.23  GUARANTEE
-  0.108   0.2425   0.0034    0.986   0.90    1.28  BEEN_TURNED_DOWN
-  0.108   0.2425   0.0034    0.986   0.90    2.27  NUMERIC_HTTP_ADDR
-  0.581   1.3027   0.0193    0.985   0.90    2.29  PENIS_ENLARGE2
-  0.479   1.0753   0.0158    0.985   0.90    0.22  HTML_FONT_COLOR_UNKNOWN
-  0.043   0.0965   0.0014    0.986   0.90    0.00  VERB_UP_TO_OR_MORES
-  5.380  11.9792   0.2484    0.980   0.90    0.53  HTML_TAG_EXISTS_TBODY
-  2.792   6.2383   0.1115    0.982   0.90    1.64  REMOVE_SUBJ
-  0.244   0.5478   0.0083    0.985   0.90    0.16  FREE_ACCESS
-  0.303   0.6797   0.0103    0.985   0.90    0.71  SAVE_THOUSANDS
-  0.527   1.1797   0.0186    0.984   0.90    2.09  THIS_AINT_SPAM
-  0.562   1.2593   0.0200    0.984   0.90    0.03  HTML_EMBEDS
-  0.020   0.0451   0.0007    0.985   0.90    2.30  UNIVERSITY_DIPLOMAS
-  1.701   3.8037   0.0661    0.983   0.90    0.97  EARN_MONEY
-  3.101   6.9162   0.1342    0.981   0.90    0.47  HTML_TAG_BALANCE_BODY
-  0.173   0.3867   0.0062    0.984   0.90    1.75  FREE_INVESTMENT
-  1.549   3.4630   0.0612    0.983   0.90    0.88  HTML_IMAGE_RATIO_04
-  0.389   0.8708   0.0145    0.984   0.89    0.00  REPLY_REMOVE_SUBJECT
-  0.111   0.2487   0.0041    0.984   0.89    0.90  APPLY_ONLINE
-  0.019   0.0416   0.0007    0.984   0.89    1.62  PURE_PROFIT
-  0.073   0.1628   0.0028    0.983   0.89    2.80  CBYI
-  0.126   0.2814   0.0048    0.983   0.89    1.27  SUBJ_FOR_ONLY
-  0.214   0.4788   0.0083    0.983   0.89    2.13  BANG_BOSS
-  3.173   7.0640   0.1473    0.980   0.89    0.28  HTML_TAG_BALANCE_HTML
-  0.036   0.0805   0.0014    0.983   0.89    2.80  SUBJ_DOUBLE_YOUR
-  0.867   1.9364   0.0351    0.982   0.89    0.26  LOW_PRICE
-  4.304   9.5641   0.2133    0.978   0.89    0.05  EXCUSE_14
-  1.438   3.2090   0.0606    0.981   0.89    1.44  FORGED_RCVD_TRAIL
-  1.103   2.4620   0.0461    0.982   0.89    0.00  HTML_TAG_BALANCE_TABLE
-  0.944   2.1080   0.0392    0.982   0.89    0.64  BANG_MONEY
-  0.343   0.7673   0.0138    0.982   0.89    1.93  CELL_PHONE_BOOST
-  0.122   0.2726   0.0048    0.983   0.89    2.80  TO_NO_USER
-  0.393   0.8770   0.0158    0.982   0.89    0.92  ACT_NOW_CAPS
-  5.029  11.1553   0.2643    0.977   0.89    0.10  HTML_FONT_COLOR_UNSAFE
-  0.138   0.3080   0.0055    0.982   0.89    1.74  WANTS_CREDIT_CARD
-  0.069   0.1531   0.0028    0.982   0.89    0.00  HTML_IMAGE_AREA_06
-  0.112   0.0035   0.1961    0.018   0.89    0.00  MSN_FOOTER1
-  1.352   3.0152   0.0592    0.981   0.89    0.00  HTML_TAG_BALANCE_A
-  2.037   4.5364   0.0929    0.980   0.89    0.00  REMOVE_FROM_LIST
-  4.553  10.1012   0.2388    0.977   0.89    0.33  MISSING_OUTLOOK_NAME
-  0.767   1.7098   0.0330    0.981   0.89    1.43  FROM_WEBMAIL_ENDS_IN_NUMS6
-  0.336   0.7496   0.0145    0.981   0.89    1.25  VIAGRA
-  1.104   0.0389   1.9324    0.020   0.89   -2.44  RESENT_TO
-  0.575   1.2815   0.0255    0.981   0.88    2.05  ADDR_FREE
-  0.110   0.2443   0.0048    0.981   0.88    1.58  FROM_NO_USER
-  0.232   0.5177   0.0103    0.980   0.88    1.70  MONEY_MAKING
-  0.046   0.1035   0.0021    0.980   0.88    1.98  WE_PROMISE_YOU
-  1.031   2.2939   0.0495    0.979   0.88    1.65  HOME_EMPLOYMENT
-  0.015   0.0336   0.0007    0.980   0.88    2.55  SECRET_RECORD
-  0.097   0.0035   0.1700    0.020   0.88    0.00  USER_AGENT_IMP
-  0.177   0.3929   0.0083    0.979   0.88    1.86  SUBJ_2_CREDIT
-  0.175   0.3903   0.0083    0.979   0.88    0.00  SELECTED_YOU
-  0.426   0.9469   0.0206    0.979   0.88    1.57  X_LIBRARY
-  0.101   0.2239   0.0048    0.979   0.88    0.33  FIND_ANYTHING
-  1.038   2.3045   0.0530    0.978   0.88    0.40  X_MSMAIL_PRIORITY_HIGH
-  0.043   0.0947   0.0021    0.979   0.88    0.34  GET_STARTED_NOW
-  0.154   0.3425   0.0076    0.978   0.88    2.27  PRINT_FORM_SIGNATURE
-  0.070   0.1549   0.0034    0.978   0.88    1.23  BILLION_DOLLARS
-  0.023   0.0009   0.0399    0.022   0.88   -2.90  EVITE
-  3.589   7.9313   0.2120    0.974   0.88    0.26  MAILTO_TO_REMOVE
- 14.273   0.8947  24.6772    0.035   0.88   -0.00  X_MAILING_LIST
-  2.417   5.3489   0.1363    0.975   0.87    0.98  HTML_IMAGE_ONLY_08
-  1.432   3.1736   0.0778    0.976   0.87    0.00  HTML_FONT_COLOR_CYAN
-  0.121   0.2690   0.0062    0.977   0.87    0.16  CELEBRITY_PORN
-  0.130   0.0053   0.2264    0.023   0.87   -0.12  HOTMAIL_FOOTER5
-  0.184   0.4089   0.0096    0.977   0.87    2.30  RICH
-  0.079   0.1761   0.0041    0.977   0.87    0.00  GET_IT_NOW
-  1.264   2.8001   0.0702    0.976   0.87    1.37  DATE_MISSING
-  0.522   1.1576   0.0282    0.976   0.87    0.00  BEST_PORN
-  5.287  11.6323   0.3524    0.971   0.87    0.68  HTML_70_80
-  0.051   0.1142   0.0028    0.976   0.87    2.79  NO_INVESTMENT
-  0.379   0.8407   0.0206    0.976   0.87    0.95  HTML_SHOUTING5
-  1.882   4.1603   0.1101    0.974   0.87    0.41  SUBJ_FREE_CAP
-  0.026   0.0566   0.0014    0.976   0.87    2.66  NO_FORMS
-  0.239   0.5301   0.0131    0.976   0.87    0.00  HTML_IMAGE_AREA_04
-  0.590   1.3054   0.0330    0.975   0.87    0.00  HTML_TAG_BALANCE_HEAD
-  0.025   0.0558   0.0014    0.976   0.87    1.10  LYING_EYES
-  0.666   1.4744   0.0379    0.975   0.87    0.20  SAVINGS
-  0.012   0.0274   0.0007    0.976   0.87    2.34  AUTO_EMAIL_REMOVAL
-  0.291   0.6434   0.0165    0.975   0.87    1.72  SUBJ_DOLLARS
-  0.122   0.2690   0.0069    0.975   0.87    2.10  MIME_BOUND_DIGITS_4
-  0.024   0.0540   0.0014    0.975   0.87    1.09  SERIOUS_CASH
-  0.311   0.6885   0.0179    0.975   0.87    0.75  ACCEPT_CREDIT_CARDS
-  0.408   0.0186   0.7109    0.025   0.87    0.00  USER_AGENT_APPLEMAIL
-  0.060   0.1327   0.0034    0.975   0.87    0.00  ANTISPAM_BILL
- 13.072  28.3488   1.1926    0.960   0.87    0.10  HTML_FONT_COLOR_RED
-  1.015   2.2417   0.0612    0.973   0.86    1.20  OPT_OUT
-  1.477   3.2568   0.0929    0.972   0.86    1.47  US_DOLLARS_3
-  4.221   9.2658   0.2973    0.969   0.86    2.58  FORGED_YAHOO_RCVD
-  0.416   0.9186   0.0255    0.973   0.86    0.00  HTML_WIN_BLUR
-  5.321  11.6500   0.3992    0.967   0.86    0.10  EXCUSE_3
-  1.782   3.9214   0.1184    0.971   0.86    0.43  MIME_BOUND_NEXTPART
-  1.474   3.2435   0.0984    0.971   0.86    0.18  REMOVE_IN_QUOTES
-  0.491   1.0815   0.0317    0.972   0.86    0.42  EXTRA_MPART_TYPE
-  1.396   3.0700   0.0936    0.970   0.86    2.37  PORN_4
-  0.401   0.8832   0.0268    0.971   0.85    0.43  WEIRD_QUOTING
-  2.026   4.4453   0.1445    0.969   0.85    1.92  X_PRIORITY_HIGH
-  1.594   3.4992   0.1122    0.969   0.85    0.26  TO_HAS_SPACES
-  0.286   0.6283   0.0193    0.970   0.85    1.51  OPPORTUNITY
-  1.643   3.6037   0.1177    0.968   0.85    0.00  HTML_EVENT
-  3.975   8.6888   0.3097    0.966   0.85    0.00  FROM_HAS_MIXED_NUMS
-  1.282   2.8125   0.0915    0.968   0.85    0.00  HTML_TAG_BALANCE_FONT
-  0.010   0.0221   0.0007    0.970   0.85    2.04  MICROSOFT
-  1.589   3.4833   0.1156    0.968   0.85    0.19  HTML_IMAGE_ONLY_12
-  0.168   0.3690   0.0117    0.969   0.85    2.70  FORGED_JUNO_RCVD
-  5.458  11.8898   0.4556    0.963   0.85    0.10  HTML_FONT_COLOR_GRAY
-  0.069   0.1522   0.0048    0.969   0.85    0.00  SUPPLIES_LIMITED
-  0.127   0.0071   0.2202    0.031   0.85    0.00  HOTMAIL_FOOTER1
-  0.280   0.6151   0.0200    0.969   0.85    0.41  VACATION_SCAM
-  0.460   1.0098   0.0330    0.968   0.85    1.02  WHY_WAIT
-  0.993   2.1771   0.0729    0.968   0.85    0.34  SUB_FREE_OFFER
-  0.829   1.8169   0.0606    0.968   0.85    0.80  HTML_IMAGE_RATIO_08
-  0.039   0.0850   0.0028    0.969   0.85    2.02  PROMOTION
-  0.029   0.0637   0.0021    0.969   0.85    1.98  HERBAL_VIAGRA
-  1.626   3.5585   0.1225    0.967   0.85    0.00  HTML_FONT_COLOR_MAGENTA
- 36.926  76.5195   6.1366    0.926   0.85    0.17  HTML_MESSAGE
-  0.143   0.3133   0.0103    0.968   0.85    1.80  MUST_BE_18
-  0.142   0.3106   0.0103    0.968   0.84    0.00  FREE_SAMPLE
-  0.738   1.6151   0.0551    0.967   0.84    0.58  ADDR_NUMS_AT_BIGSITE
-  3.221   7.0259   0.2622    0.964   0.84    0.00  HTML_FONT_COLOR_YELLOW
-  4.744  10.3234   0.4053    0.962   0.84    0.10  MSGID_HAS_NO_AT
-  0.499   1.0938   0.0372    0.967   0.84    0.35  DEAR_FRIEND
- 11.804  25.4027   1.2284    0.954   0.84    0.10  HTML_FONT_COLOR_BLUE
-  0.047   0.1027   0.0034    0.968   0.84    0.00  BARELY_LEGAL
-  5.665  12.2996   0.5058    0.960   0.84    0.10  OFFER
-  1.197   2.6169   0.0929    0.966   0.84    2.37  DATE_IN_FUTURE_03_06
-  0.144   0.3142   0.0110    0.966   0.84    2.24  NO_STRINGS
-  0.044   0.0027   0.0757    0.034   0.84   -1.12  Q_FOR_SELLER
-  3.453   0.2310   5.9591    0.037   0.84   -1.01  X_AUTH_WARNING
-  2.007   4.3745   0.1665    0.963   0.84    0.79  HTTP_WITH_EMAIL_IN_URL
-  0.062   0.1345   0.0048    0.965   0.84    1.51  BANKRUPTCY
-  2.067   4.5028   0.1734    0.963   0.84    1.08  NO_COST
-  1.098   2.3948   0.0902    0.964   0.84    0.66  REMOVAL_INSTRUCTIONS
-  0.249   0.5425   0.0200    0.965   0.83    0.08  FROM_STARTS_WITH_NUMS
-  0.223   0.4867   0.0179    0.965   0.83    1.25  EXTRA_CASH
-  1.223   2.6647   0.1019    0.963   0.83    0.74  MIME_HTML_NO_CHARSET
-  0.238   0.5195   0.0193    0.964   0.83    1.31  SUBJ_YOUR_OWN
-  0.017   0.0363   0.0014    0.963   0.83    2.18  SERIOUS_ONLY
-  0.252   0.5478   0.0213    0.963   0.83    2.70  DATE_IN_FUTURE_24_48
-  2.200   4.7727   0.1996    0.960   0.83    0.59  PRIORITY_NO_NAME
-  1.345   2.9196   0.1211    0.960   0.83    0.32  UNSUB_SCRIPT
-  0.031   0.0681   0.0028    0.961   0.82    0.51  PHONE_CANCER
-  6.693  14.3934   0.7047    0.953   0.82    0.55  HTML_50_60
-  0.023   0.0504   0.0021    0.961   0.82    2.51  LESBIAN
-  0.686   1.4859   0.0640    0.959   0.82    0.87  ADULT_SITE
-  1.122   2.4275   0.1060    0.958   0.82    0.15  FOR_JUST_SOME_AMT
-  0.231   0.5000   0.0213    0.959   0.82    0.88  LARGE_HEX
-  0.022   0.0487   0.0021    0.959   0.82    0.92  SEX_FEST
-  0.309   0.6699   0.0289    0.959   0.82    0.33  US_DOLLARS
-  0.911   1.9700   0.0867    0.958   0.82    0.00  HTML_EVENT_UNSAFE
-  0.191   0.4133   0.0179    0.959   0.82    1.31  ITS_LEGAL
-  0.088   0.1912   0.0083    0.959   0.82    0.97  X_ESMTP
-  0.218   0.4708   0.0206    0.958   0.82    0.78  FULL_REFUND
-  0.043   0.0938   0.0041    0.958   0.81    0.80  OFFSHORE_SCAM
-  0.885   1.9116   0.0867    0.957   0.81    2.07  BULK_EMAIL
-  0.360   0.7770   0.0351    0.957   0.81    1.79  NO_EXPERIENCE
-  0.177   0.3823   0.0172    0.957   0.81    2.04  NEW_DOMAIN_EXTENSIONS
-  1.146   2.4727   0.1149    0.956   0.81    1.22  WORK_AT_HOME
-  0.035   0.0761   0.0034    0.957   0.81    0.27  HIDDEN_CHARGES
-  0.611   1.3177   0.0606    0.956   0.81    1.54  RATWARE_EGROUPS
- 10.871  23.0486   1.4005    0.943   0.81    0.20  HTML_WEB_BUGS
-  1.900   4.0816   0.2030    0.953   0.81    0.00  NO_OBLIGATION
-  0.151   0.0124   0.2581    0.046   0.80    0.00  FAILURE_NOTICE_2
-  0.052   0.1124   0.0055    0.953   0.80    2.70  USER_4U2
-  0.981   2.1054   0.1074    0.951   0.80    0.68  INVALID_MSGID
-  0.991   2.1266   0.1087    0.951   0.80    0.00  ORDER_NOW
-  0.058   0.1239   0.0062    0.952   0.80    0.00  PRIZE
-  0.268   0.5744   0.0289    0.952   0.80    0.92  GAPPY_SUBJECT
-  0.521   1.1186   0.0571    0.951   0.80    2.60  FORGED_MUA_MOZILLA
-  2.327   0.2115   3.9729    0.051   0.80    0.00  SIGNATURE_SHORT_SPARSE
-  4.635   9.8703   0.5643    0.946   0.79    0.00  HTML_WITH_BGCOLOR
-  0.075   0.1611   0.0083    0.951   0.79    0.48  THE_FOLLOWING_FORM
-  0.230   0.4929   0.0255    0.951   0.79    0.02  HTML_TAG_EXISTS_PARAM
-  0.435   0.9310   0.0489    0.950   0.79    2.28  TO_EMPTY
-  0.276   0.5903   0.0310    0.950   0.79    0.00  BE_AMAZED
-  0.039   0.0035   0.0674    0.050   0.79    0.00  HOTMAIL_FOOTER2
-  1.446   3.0868   0.1700    0.948   0.79    1.10  MANY_EXCLAMATIONS
-  0.466   0.9965   0.0537    0.949   0.79    0.20  HTML_TAG_EXISTS_BASE
- 19.500  40.4413   3.2152    0.926   0.79    0.23  CLICK_BELOW
-  0.173   0.3699   0.0200    0.949   0.79    0.16  FROM_ALL_NUMS
-  7.609  16.0731   1.0268    0.940   0.79    0.52  HTML_60_70
-  0.018   0.0381   0.0021    0.949   0.79    1.49  LUXURY_CAR
-  0.041   0.0885   0.0048    0.948   0.79    0.61  HTML_IMAGE_AREA_07
-  0.071   0.1513   0.0083    0.948   0.79    1.87  REPLY_TO_EMPTY
-  0.422   0.9000   0.0495    0.948   0.79    2.60  DEAR_SOMETHING
-  0.024   0.0504   0.0028    0.948   0.79    2.57  NO_AGE
-  0.058   0.1248   0.0069    0.948   0.78    2.50  JOIN_MILLIONS
-  0.272   0.5797   0.0323    0.947   0.78    1.56  OPPORTUNITY_2
-  0.006   0.0124   0.0007    0.947   0.78    0.00  NO_GIMMICK
-  0.502   1.0699   0.0606    0.946   0.78    0.00  HTML_IMAGE_RATIO_14
-  3.839   0.3938   6.5186    0.057   0.78    0.00  X_ACCEPT_LANG
-  2.076   4.4099   0.2608    0.944   0.78    0.00  HTML_TITLE_EMPTY
-  0.284   0.6044   0.0344    0.946   0.78    1.97  LONG_DISTANCE
-  3.739   7.9109   0.4955    0.941   0.78    0.00  ONLY_COST
-  0.089   0.1885   0.0110    0.945   0.78    2.26  YOUR_INCOME
-  4.464   9.3897   0.6331    0.937   0.77    0.12  HTML_FONT_FACE_ODD
-  0.481   1.0186   0.0633    0.941   0.77    0.48  ALL_CAP_PORN
-  5.320   0.6133   8.9795    0.064   0.77    0.00  HAS_ORGANIZATION
-  0.026   0.0549   0.0034    0.941   0.76    1.36  RAPE
-  1.101   2.3231   0.1514    0.939   0.76    0.22  SAVE_UP_TO
-  2.917   6.1259   0.4226    0.935   0.76    0.00  HTML_FONT_INVISIBLE
-  0.550   1.1584   0.0764    0.938   0.76    0.16  HTML_IMAGE_RATIO_12
-  3.632   7.5994   0.5471    0.933   0.75    0.41  MAILTO_WITH_SUBJ
-  4.554   9.5101   0.7006    0.931   0.75    1.06  HTML_40_50
-  1.264   2.6523   0.1837    0.935   0.75    2.06  SEMIFORGED_HOTMAIL_RCVD
-  2.382   4.9860   0.3565    0.933   0.75    0.00  SAVE_MONEY
-  3.827   7.9914   0.5884    0.931   0.75    0.41  HTML_80_90
-  0.753   1.5797   0.1101    0.935   0.75    0.25  HTML_IMAGE_RATIO_10
-  0.614   1.2885   0.0902    0.935   0.75    0.00  CASHCASHCASH
-  0.125   0.2628   0.0186    0.934   0.75    0.00  FANTASTIC
-  1.374   2.8736   0.2085    0.932   0.74    0.00  HTML_FONT_COLOR_NOHASH
-  0.014   0.0292   0.0021    0.934   0.74    2.01  NEW_CUSTOMER
-  0.005   0.0097   0.0007    0.934   0.74    0.00  MONSTERHUT
-  0.997   2.0833   0.1514    0.932   0.74    0.39  NO_FEE
-  0.037   0.0770   0.0055    0.933   0.74    1.68  DISGUISE_PORN
-  1.160   2.4231   0.1776    0.932   0.74    0.92  HTML_IMAGE_RATIO_06
-  0.118   0.2460   0.0179    0.932   0.74    0.25  NO_QS_ASKED
-  1.091   2.2762   0.1700    0.931   0.74    0.00  EXCUSE_7
-  0.645   1.3461   0.0998    0.931   0.74    1.34  TONER
-  1.267   2.6417   0.1982    0.930   0.74    0.00  HTML_COMMENT_EMAIL
-  0.290   0.6062   0.0447    0.931   0.74    0.71  HTML_RELAYING_FRAME
-  0.063   0.1310   0.0096    0.931   0.74    0.00  NO_DISAPPOINTMENT
-  0.267   0.5567   0.0413    0.931   0.74    2.07  SUB_HELLO
-  0.298   0.6213   0.0468    0.930   0.73    1.68  DOMAIN_4U2
-  0.709   1.4762   0.1129    0.929   0.73    1.27  DATE_IN_PAST_96_XX
-  6.168   0.8576  10.2967    0.077   0.73    0.00  X_LOOP
-  5.608   0.7823   9.3608    0.077   0.73    0.00  SIGNATURE_SHORT_DENSE
-  3.867   7.9870   0.6627    0.923   0.73    0.44  INVALID_DATE
-  2.015   4.1639   0.3434    0.924   0.72    0.00  HTML_JAVASCRIPT
-  2.010   4.1506   0.3448    0.923   0.72    0.11  EXCUSE_1
-  2.268   0.3159   3.7858    0.077   0.72    0.00  USER_AGENT
-  0.028   0.0584   0.0048    0.924   0.72    0.00  RATWARE_SCREWUP_2
-  0.060   0.1239   0.0103    0.923   0.71    0.29  SEDUCTION
-  0.277   0.5708   0.0489    0.921   0.71    0.47  SEE_FOR_YOURSELF
-  3.324   6.8064   0.6152    0.917   0.71    0.71  HTML_30_40
-  0.006   0.0009   0.0103    0.079   0.71    0.00  SUBJECT_IS_IN_REVIEW
-  2.357   4.8329   0.4308    0.918   0.71    1.11  SUBJ_ALL_CAPS
-  0.620   1.2744   0.1108    0.920   0.71    1.68  EXCUSE_11
-  0.046   0.0947   0.0083    0.920   0.71    2.30  FREE_WEBSITE
- 13.522  27.1523   2.9221    0.903   0.70    0.61  FROM_ENDS_IN_NUMS
-  0.665   1.3620   0.1232    0.917   0.70    0.00  MIME_EXCESSIVE_QP
-  0.007   0.0150   0.0014    0.916   0.70    0.00  MANY_FROMS
-  2.020   4.1178   0.3888    0.914   0.70    0.00  EXCUSE_16
-  0.052   0.0080   0.0860    0.085   0.69    0.00  YAHOO_MSGID_ADDED
-  0.317   0.6460   0.0606    0.914   0.69    0.00  FOR_INSTANT_ACCESS
-  0.316   0.6443   0.0606    0.914   0.69    0.00  INSTANT_ACCESS
-  9.399  18.8644   2.0391    0.902   0.69    0.10  MAILTO_LINK
-  0.050   0.1018   0.0096    0.914   0.69    2.40  NIGERIAN_SUBJECT2
-  0.241   0.4903   0.0468    0.913   0.69    2.25  FROM_NO_LOWER
-  0.341   0.6947   0.0668    0.912   0.69    0.00  FROM_HAS_UNDERLINE_NUMS
-  0.172   0.3487   0.0344    0.910   0.68    2.40  URGENT_BIZ
-  1.998   4.0285   0.4184    0.906   0.67    0.00  HTML_FONT_FACE_BAD
-  0.233   0.4708   0.0482    0.907   0.67    0.00  FREE_DVD
-  2.254   4.5329   0.4824    0.904   0.67    0.62  FOR_FREE
-  0.041   0.0071   0.0681    0.094   0.67   -1.43  APPROVED_BY
-  0.129   0.2593   0.0275    0.904   0.66    0.00  JAVASCRIPT_URI
-  2.368   4.7426   0.5217    0.901   0.66    0.00  DIET
-  0.454   0.9115   0.0977    0.903   0.66    0.00  LARGE_COLLECTION
-  0.333   0.6655   0.0736    0.900   0.65    0.22  WHILE_SUPPLIES
-  0.003   0.0062   0.0007    0.900   0.65    0.00  EXCUSE_8
-  0.003   0.0062   0.0007    0.900   0.65    0.00  NATURAL_VIAGRA
-  1.732   3.4453   0.4005    0.896   0.65    0.84  RISK_FREE
-  0.279   0.5558   0.0640    0.897   0.64    0.84  UPPERCASE_50_75
-  0.078   0.1549   0.0179    0.896   0.64    0.00  SHOPPING_SPREE
-  0.180   0.3575   0.0420    0.895   0.64    2.10  MIME_DEFICIENT_QP
-  0.514   1.0195   0.1211    0.894   0.64    0.28  SATISFACTION
-  0.163   0.3221   0.0385    0.893   0.63    0.00  UPPERCASE_75_100
-  2.049   4.0373   0.5024    0.889   0.63    0.00  LINES_OF_YELLING_3
-  0.031   0.0619   0.0076    0.891   0.63    0.46  CASH_BONUS
-  2.511   4.9391   0.6228    0.888   0.63    0.73  DATE_IN_PAST_06_12
-  3.056   5.9914   0.7742    0.886   0.62    0.27  UNSUB_PAGE
-  3.665   7.1604   0.9463    0.883   0.62    0.00  LINES_OF_YELLING_2
-  1.224   2.3974   0.3118    0.885   0.62    1.60  PLING_PLING
-  0.074   0.1443   0.0186    0.886   0.62    1.00  EXCUSE_6
-  0.134   0.2620   0.0351    0.882   0.61    0.70  DONT_DELETE
-  0.084   0.1637   0.0220    0.881   0.60    0.00  DOMAIN_SUBJECT
-  0.190   0.0416   0.3056    0.120   0.60   -0.62  FORGOTTEN_PASSWORD
-  2.421   4.6621   0.6786    0.873   0.59    1.29  HTML_20_30
-  0.144   0.2779   0.0399    0.874   0.59    0.00  DIRECT_EMAIL
-  0.518   0.9938   0.1486    0.870   0.58    0.00  ASCII_FORM_ENTRY
-  0.036   0.0681   0.0103    0.868   0.57    2.20  DATE_IN_FUTURE_48_96
-  0.305   0.5823   0.0902    0.866   0.57    0.00  DOMAIN_BODY
-  0.005   0.0088   0.0014    0.865   0.56    0.00  CONFIDENTIAL_ORDER
-  0.002   0.0044   0.0007    0.865   0.56    0.00  IN_ACCORDANCE_WITH_LAWS
-  0.196   0.3717   0.0592    0.863   0.56    0.91  SUBJ_BUY
-  0.063   0.1204   0.0193    0.862   0.56    1.17  DRASTIC_REDUCED
-  0.183   0.3469   0.0557    0.862   0.56    0.00  CONGRATULATIONS
-  2.900   5.4559   0.9125    0.857   0.55    0.27  DATE_IN_PAST_03_06
-  0.051   0.0973   0.0158    0.860   0.55    0.00  LINK_TO_NO_SCHEME
-  0.221   0.4168   0.0688    0.858   0.55    0.00  YOU_WON
-  8.750  16.2324   2.9310    0.847   0.55    0.00  LINES_OF_YELLING
-  0.007   0.0124   0.0021    0.857   0.55    0.00  WORRY_FREE
-  1.444   2.7089   0.4611    0.855   0.54    0.41  TO_ADDRESS_EQ_REAL
-  0.039   0.0735   0.0124    0.856   0.54    2.10  MARKET_SOLUTION
-  0.122   0.2283   0.0385    0.856   0.54    0.36  NO_PURCHASE
-  0.605   1.1328   0.1954    0.853   0.54    0.00  SAVE_BUCKS
-  0.458   0.8549   0.1486    0.852   0.53    0.00  EARN_PER_WEEK
-  0.182   0.0496   0.2856    0.148   0.53    0.00  HTML_COMMENT_EGP
-  0.488   0.9036   0.1645    0.846   0.52    1.92  UNDISC_RECIPS
-  1.441   2.6558   0.4969    0.842   0.51    0.00  WEIRD_PORT
-  2.082   3.8249   0.7267    0.840   0.51    0.00  DATE_IN_PAST_12_24
-  0.081   0.1496   0.0282    0.841   0.51    0.00  INCREASE_SOMETHING
-  1.640   3.0001   0.5815    0.838   0.50    1.03  MISSING_HEADERS
-  2.564   4.6807   0.9174    0.836   0.50    1.55  UPPERCASE_25_50
-  1.391   2.5443   0.4941    0.837   0.50    0.45  HOT_NASTY
-  0.250   0.4575   0.0881    0.839   0.50    2.00  FROM_AND_TO_SAME
-  1.785   3.2452   0.6503    0.833   0.49    0.00  CALL_FREE
-  0.672   0.2168   1.0254    0.175   0.47    0.00  FWD_MSG
-  0.088   0.1575   0.0337    0.824   0.47    0.00  MASS_EMAIL
-  2.839   5.0550   1.1149    0.819   0.47    1.11  MSG_ID_ADDED_BY_MTA_2
-  0.086   0.0283   0.1308    0.178   0.46   -1.90  USER_AGENT_GNUS_XM
-  0.016   0.0283   0.0062    0.821   0.46    0.00  ONCE_IN_LIFETIME
-  0.050   0.0168   0.0757    0.182   0.46    0.00  FAILURE_NOTICE_1
-  0.745   1.3222   0.2959    0.817   0.46    0.00  GREAT_OFFER
-  0.950   1.6841   0.3799    0.816   0.45    0.00  FREE_TRIAL
-  0.168   0.2965   0.0688    0.812   0.44    0.02  MARKETING
-  0.043   0.0743   0.0179    0.806   0.43    1.80  X_GCMULTI
-  2.844   4.9232   1.2270    0.800   0.43    1.15  TO_MALFORMED
-  0.260   0.4513   0.1108    0.803   0.42    0.24  ASKS_BILLING_ADDRESS
-  0.634   1.0983   0.2725    0.801   0.42    0.25  PLING_QUERY
-  2.036   0.8257   2.9764    0.217   0.39   -0.24  USER_AGENT_MOZILLA_XM
-  3.479   5.8232   1.6558    0.779   0.38    0.61  MAILTO_TO_SPAM_ADDR
-  0.285   0.4788   0.1342    0.781   0.38    0.28  MSGID_CHARS_SPAM
-  2.464   4.0886   1.2009    0.773   0.37    1.32  OPT_IN
-  0.144   0.2407   0.0695    0.776   0.37    1.16  SEARCH_ENGINE_PROMO
-  0.918   1.5001   0.4652    0.763   0.35    0.37  SMTPD_IN_RCVD
-  4.374   7.0843   2.2662    0.758   0.35    0.49  MIME_LONG_LINE_QP
-  0.005   0.0088   0.0028    0.763   0.34    0.00  MURKOWSKI_CRUFT
-  0.637   1.0372   0.3255    0.761   0.34    0.00  DATE_IN_PAST_24_48
-  1.331   2.1390   0.7020    0.753   0.33    1.00  HTML_10_20
-  5.310   8.4286   2.8842    0.745   0.33    0.61  MSG_ID_ADDED_BY_MTA_3
- 22.796  34.4720  13.7171    0.715   0.32    0.89  NO_REAL_NAME
-  0.211   0.3345   0.1149    0.744   0.31    1.60  DATE_IN_FUTURE_96_XX
-  1.890   2.8983   1.1066    0.724   0.28    0.00  EMAIL_MARKETING
-  0.005   0.0071   0.0028    0.720   0.27    0.00  OUR_COMPENSATION
-  0.001   0.0018   0.0007    0.720   0.27    0.00  BUY_JUDGEMENTS
-  0.161   0.0938   0.2133    0.305   0.23   -0.19  MAILER_DAEMON
-  1.286   1.8381   0.8568    0.682   0.21    1.40  HTML_00_10
-  0.671   0.9142   0.4810    0.655   0.17    0.00  HTML_FONT_FACE_CAPS
-  0.622   0.7903   0.4914    0.617   0.12    0.00  US_DOLLARS_2
-  0.305   0.3575   0.2636    0.576   0.07    0.00  DATE_IN_PAST_48_96
+  0.004   0.0088   0.0000    1.000   0.94    0.00  MARKUP_SSPL
+  0.004   0.0088   0.0000    1.000   0.94    0.00  TO_INVESTORS
+  0.004   0.0088   0.0000    1.000   0.94    0.00  NO_SELLING
+  0.004   0.0088   0.0000    1.000   0.94    0.00  WWW_AUTOREMOVE_COM
+  0.003   0.0069   0.0000    1.000   0.94    0.00  PRIORITY_MAIL
+  0.003   0.0069   0.0000    1.000   0.94    0.00  PSYCHIC
+  0.003   0.0069   0.0000    1.000   0.94    0.00  EXCUSE_18
+  0.003   0.0069   0.0000    1.000   0.94    0.00  WEALTH
+  0.003   0.0069   0.0000    1.000   0.94    0.00  HTML_IMAGE_AREA_09
+  0.003   0.0059   0.0000    1.000   0.94    0.00  EXPERTS_SHOW_HOW
+  0.003   0.0059   0.0000    1.000   0.94    0.00  SPAM_FORM_ACTION
+  0.003   0.0059   0.0000    1.000   0.94    0.00  EJACULATION
+  0.002   0.0049   0.0000    1.000   0.94    0.00  IN_ACCORDANCE_WITH_LAWS
+  0.002   0.0049   0.0000    1.000   0.94    0.00  SPAM_FORM_RETURN
+  0.002   0.0049   0.0000    1.000   0.94    0.00  NO_MIDDLEMAN
+  0.002   0.0049   0.0000    1.000   0.94    0.00  ENHANCE_WEBSITE
+  0.002   0.0049   0.0000    1.000   0.94    0.00  INCREDIBLE
+  0.002   0.0039   0.0000    1.000   0.94    0.00  CHANGE_TERMS
+  0.002   0.0000   0.0038    0.000   0.94    0.00  HOTMAIL_FOOTER3
+  0.001   0.0029   0.0000    1.000   0.94    0.00  RATWARE_BANG_HASH
+  0.001   0.0029   0.0000    1.000   0.94    0.00  MORE_TRAFFIC
+  0.001   0.0029   0.0000    1.000   0.94    0.00  PORN_GALLERIES
+  0.001   0.0020   0.0000    1.000   0.94    0.00  POST_IN_RCVD
+  0.001   0.0000   0.0015    0.000   0.94    0.00  MSN_GROUPS
+  0.000   0.0010   0.0000    1.000   0.94  1000.00  GTUBE
+  0.000   0.0010   0.0000    1.000   0.94    0.00  X_FIX_PRESENT
+  0.000   0.0010   0.0000    1.000   0.94    0.00  DISCONTINUE
+  0.757   1.7287   0.0015    0.999   0.94    1.65  CANNOT_BE_SPAM
+  0.527   1.2026   0.0008    0.999   0.94    2.42  EXCUSE_21
+  1.058   2.4140   0.0031    0.999   0.94    1.10  WE_HONOR_ALL
+ 26.390  58.0165   1.7969    0.970   0.94    0.10  MIME_HTML_ONLY
+  1.021   2.3295   0.0031    0.999   0.94    1.40  BTAMAIL_URL
+  2.682   6.1034   0.0206    0.997   0.94    2.57  TRACKER_ID
+  2.244   5.1093   0.0153    0.997   0.94    1.79  RCVD_FAKE_HELO_DOTCOM
+  0.368   0.8397   0.0008    0.999   0.94    2.90  OBSCURED_EMAIL
+  7.648  17.2748   0.1613    0.991   0.94    0.90  NORMAL_HTTP_TO_IP
+  0.348   0.7955   0.0008    0.999   0.94    2.90  HIDE_WIN_STATUS
+  0.861   1.9637   0.0031    0.998   0.94    1.10  DAILY_PL
+  1.235   2.8152   0.0061    0.998   0.94    1.25  CONSOLIDATE_DEBT
+  0.295   0.6726   0.0008    0.999   0.94    1.03  BARGAIN_URL
+  0.294   0.6706   0.0008    0.999   0.94    2.90  EXCUSE_4
+  1.349   0.0049   2.3934    0.002   0.94   -0.50  USER_AGENT_MOZILLA_UA
+  0.262   0.5979   0.0008    0.999   0.94    2.42  SUBJ_LIFE_INSURANCE
+  0.261   0.5959   0.0008    0.999   0.94    2.90  REFINANCE_NOW
+  0.261   0.5959   0.0008    0.999   0.94    1.87  FREE_CELL_PHONE
+  1.031   2.3501   0.0054    0.998   0.94    1.10  CLICK_TO_REMOVE_1
+  0.420   0.9577   0.0015    0.998   0.94    2.90  FREE_QUOTE_INSTANT
+  0.235   0.5369   0.0008    0.999   0.94    2.90  COMPETE
+  0.896   2.0423   0.0046    0.998   0.94    1.32  FREE_QUOTE
+  0.636   1.4504   0.0031    0.998   0.94    1.10  SENT_IN_COMPLIANCE
+  0.203   0.4631   0.0008    0.998   0.94    2.71  HTML_SHOUTING6
+  1.934   4.3993   0.0161    0.996   0.94    1.10  MAILTO_WITH_SUBJ_REMOVE
+  0.360   0.8211   0.0015    0.998   0.94    0.70  SUBJ_YOUR_DEBT
+  0.348   0.7945   0.0015    0.998   0.94    1.23  RESISTANCE_IS_FUTILE
+  0.168   0.3835   0.0008    0.998   0.94    1.18  THIS_IS_AN_AD
+  0.268   0.0010   0.4756    0.002   0.94   -0.50  PATCH_UNIFIED_DIFF
+  2.309   5.2489   0.0237    0.996   0.94    1.10  HTML_TABLE_THICK_BORDER
+  0.422   0.9617   0.0023    0.998   0.94    2.90  SUBJ_VIAGRA
+  0.158   0.3599   0.0008    0.998   0.94    2.90  PORN_16
+  0.283   0.6441   0.0015    0.998   0.94    2.57  BANG_QUOTE
+  1.181   2.6874   0.0092    0.997   0.94    1.95  AS_SEEN_ON
+  0.149   0.3402   0.0008    0.998   0.94    2.54  VERY_SUSP_RECIPS
+ 15.987   0.4681  28.0544    0.016   0.94   -0.54  KNOWN_MAILING_LIST
+  2.028   4.6088   0.0206    0.996   0.94    2.33  RCVD_FAKE_HELO_DOTCOM_2
+  0.270   0.6146   0.0015    0.998   0.94    2.80  IMPOTENCE
+  0.267   0.6087   0.0015    0.997   0.94    0.70  VIAGRA_ONLINE
+  0.484   1.1023   0.0031    0.997   0.94    1.39  WHILE_YOU_SLEEP
+  0.134   0.3058   0.0008    0.998   0.94    2.90  BE_BOSS
+  0.630   1.4347   0.0046    0.997   0.94    1.10  HTTP_EXCESSIVE_ESCAPES
+  4.520  10.2314   0.0788    0.992   0.94    1.39  SUBJ_HAS_SPACES
+  0.708   1.6107   0.0054    0.997   0.94    1.10  SECTION_301
+  0.443   1.0099   0.0031    0.997   0.94    1.10  FURTHER_TRANSMISSIONS
+  0.240   0.5467   0.0015    0.997   0.94    1.82  UNSECURED_CREDIT
+  1.743   3.9608   0.0184    0.995   0.94    1.10  HTML_IMAGE_RATIO_02
+  3.323   7.5341   0.0489    0.994   0.94    3.72  FORGED_MUA_OUTLOOK
+  1.469   3.3383   0.0145    0.996   0.94    1.39  HTML_COMMENT_SAVED_URL
+  0.399   0.9076   0.0031    0.997   0.94    0.96  WE_HATE_SPAM2
+  0.398   0.9066   0.0031    0.997   0.94    0.70  CLICK_TO_REMOVE_2
+  0.892   0.0059   1.5813    0.004   0.94    0.00  USER_AGENT_VM
+  0.397   0.9027   0.0031    0.997   0.94    2.73  INITIAL_INVEST
+  2.168   4.9225   0.0268    0.995   0.94    1.10  SUBJ_REMOVE
+  1.620   0.0128   2.8705    0.004   0.94   -0.50  MSGID_GOOD_EXCHANGE
+  1.920   4.3590   0.0229    0.995   0.93    1.55  EXCUSE_15
+  4.895  11.0642   0.0971    0.991   0.93    0.64  CLICK_BELOW_CAPS
+  0.194   0.4415   0.0015    0.997   0.93    0.70  HTTP_CTRL_CHARS_HOST
+  0.099   0.2262   0.0008    0.997   0.93    1.68  UNCLAIMED_MONEY
+  0.099   0.2242   0.0008    0.997   0.93    1.68  CUM_SHOT
+  0.916   0.0069   1.6226    0.004   0.93    0.00  DEBIAN_BTS_BUG
+  0.270   0.6136   0.0023    0.996   0.93    2.90  RATWARE_EMWAC
+  0.183   0.4169   0.0015    0.996   0.93    2.68  ONLINE_PHARMACY
+  0.180   0.4091   0.0015    0.996   0.93    0.70  X_MAIL_ID_PRESENT
+  0.179   0.4071   0.0015    0.996   0.93    0.70  X_SERV_HOST_PRESENT
+  2.086   4.7317   0.0283    0.994   0.93    1.35  EXCUSE_19
+  0.148   0.0010   0.2630    0.004   0.93   -1.61  GENUINE_EBAY_RCVD
+  0.394   0.8948   0.0038    0.996   0.93    2.90  MILLION_EMAIL
+  0.086   0.1947   0.0008    0.996   0.93    2.15  HTML_SHOUTING7
+  0.082   0.1868   0.0008    0.996   0.93    1.38  EARNINGS
+  0.505   1.1475   0.0054    0.995   0.93    1.88  EXCUSE_12
+  0.080   0.1819   0.0008    0.996   0.93    2.15  MIME_BOUND_HEX_24
+  0.683   1.5507   0.0076    0.995   0.93    4.29  FORGED_MUA_THEBAT
+  1.352   3.0679   0.0176    0.994   0.93    0.50  RECEIVE_OFFER
+  2.295   5.1998   0.0359    0.993   0.93    1.30  HTML_IMAGE_ONLY_06
+  0.149   0.3383   0.0015    0.995   0.93    0.70  MAIL_IN_ORDER_FORM
+  0.412   0.9351   0.0046    0.995   0.93    1.72  INCREASE_SEX
+  0.411   0.9332   0.0046    0.995   0.93    0.70  FREE_MEMBERSHIP
+  2.585   5.8537   0.0436    0.993   0.93    0.00  BANG_GUARANTEE
+  0.525   1.1918   0.0061    0.995   0.93    2.05  ALL_NATURAL
+  0.747   1.6962   0.0092    0.995   0.93    1.10  GUARANTEED_100_PERCENT
+  0.072   0.1642   0.0008    0.995   0.93    2.16  MIME_BOUND_RKFINDY
+  0.388   0.8820   0.0046    0.995   0.93    2.90  NIGERIAN_BODY
+  0.069   0.1563   0.0008    0.995   0.93    1.82  APPLY_FREE
+  0.492   1.1170   0.0061    0.995   0.93    1.10  FREE_PORN
+  2.144   4.8546   0.0359    0.993   0.93    0.77  COMPLETELY_FREE
+  1.219   2.7631   0.0176    0.994   0.93    0.50  HTML_SHOUTING4
+  0.597   1.3540   0.0076    0.994   0.93    3.12  OBFUSCATING_COMMENT
+  0.359   0.8152   0.0046    0.994   0.93    1.98  LOW_PAYMENT
+  0.186   0.4218   0.0023    0.995   0.93    0.00  MILLION_USD
+  0.123   0.2802   0.0015    0.995   0.93    0.70  FREE_GRANT
+  0.841   1.9066   0.0122    0.994   0.93    0.50  MORTGAGE_RATES
+  0.795   1.8024   0.0115    0.994   0.93    0.72  MONEY_BACK
+  0.444   1.0079   0.0061    0.994   0.93    1.52  LOW_INTEREST
+  7.025  15.7802   0.2172    0.986   0.93    0.31  REMOVE_PAGE
+  0.994   2.2518   0.0153    0.993   0.93    2.10  ADVERT_CODE2
+  0.173   0.3923   0.0023    0.994   0.93    2.90  NASTY_GIRLS
+  2.205   4.9864   0.0413    0.992   0.93    0.50  FRONTPAGE
+  0.058   0.1308   0.0008    0.994   0.93    0.17  STRONG_BUY
+  2.432   0.0344   4.2966    0.008   0.93   -0.50  ORIGINAL_MESSAGE
+  0.057   0.1298   0.0008    0.994   0.93    2.90  NO_INVENTORY
+  2.546   5.7534   0.0512    0.991   0.93    0.00  MIME_MISSING_BOUNDARY
+  0.741   1.6795   0.0115    0.993   0.93    2.23  REVERSE_AGING
+  0.089   0.0010   0.1568    0.006   0.92    0.00  MAILMAN_REMINDER
+  0.054   0.1219   0.0008    0.994   0.92    2.40  RECEIVED_IDENT_CACHEFLOW
+  0.539   1.2203   0.0084    0.993   0.92    2.95  SORTED_RECIPS
+ 14.180  31.4837   0.7241    0.978   0.92    0.22  HTML_FONT_BIG
+  0.748   1.6933   0.0122    0.993   0.92    0.50  HGH
+  0.391   0.8869   0.0061    0.993   0.92    2.90  BUGGY_CGI
+  1.017   2.3029   0.0176    0.992   0.92    2.07  SUSPICIOUS_RECIPS
+  1.348   3.0493   0.0245    0.992   0.92    0.00  HTML_FONT_BIG_B
+  0.929   2.1033   0.0161    0.992   0.92    0.82  MLM
+  0.518   1.1741   0.0084    0.993   0.92    0.50  REPLY_TO_HAS_UNDERLINE_NUMS
+  0.099   0.2232   0.0015    0.993   0.92    0.98  SUBJ_AS_SEEN
+  0.672   1.5222   0.0115    0.993   0.92    3.07  BANG_EXERCISE
+  0.238   0.5398   0.0038    0.993   0.92    2.90  FORGED_EUDORAMAIL_RCVD
+  0.095   0.2163   0.0015    0.993   0.92    1.89  COMPARE_RATES
+  7.045  15.7950   0.2409    0.985   0.92    0.34  OFFERS_ETC
+  0.684   1.5468   0.0122    0.992   0.92    4.29  FORGED_MUA_OIMO
+  0.183   0.4150   0.0031    0.993   0.92    0.75  HTML_SHOUTING9
+  0.935   2.1151   0.0176    0.992   0.92    2.21  EXCUSE_REMOVE
+  0.395   0.8938   0.0069    0.992   0.92    1.48  ONE_TIME_MAILING
+  0.181   0.4091   0.0031    0.993   0.92    0.00  ONE_TIME
+  1.499   3.3875   0.0306    0.991   0.92    0.83  MORTGAGE_PITCH
+  0.591   1.3373   0.0107    0.992   0.92    0.99  RATWARE_HASH_2_V2
+  0.985   2.2262   0.0191    0.991   0.92    2.55  OPT_HEADER
+  0.732   1.6559   0.0138    0.992   0.92    0.50  HTML_WIN_OPEN
+  2.496   5.6305   0.0589    0.990   0.92    1.87  DATE_IN_FUTURE_12_24
+  0.589   1.3324   0.0115    0.991   0.92    0.00  EXCUSE_13
+  2.904   0.0551   5.1186    0.011   0.92   -0.50  FROM_EGROUPS
+  0.121   0.2743   0.0023    0.992   0.92    0.00  MIME_BOUND_MA
+  0.277   0.6254   0.0054    0.992   0.92    1.56  LIVE_PORN
+  0.638   1.4415   0.0130    0.991   0.92    4.28  FORGED_MUA_IMS
+  0.198   0.4474   0.0038    0.992   0.92    2.90  TARGETED
+  0.040   0.0914   0.0008    0.992   0.92    2.90  X_PMFLAGS_PRESENT
+  1.057   2.3875   0.0229    0.990   0.92    0.00  OPT_OUT_CAPS
+  0.039   0.0875   0.0008    0.991   0.92    2.86  STOCK_ALERT
+  0.226   0.5103   0.0046    0.991   0.92    0.00  REFINANCE_YOUR_HOME
+  0.224   0.5054   0.0046    0.991   0.92    2.90  SUBJECT_APPROVED
+  2.390   0.0472   4.2117    0.011   0.92   -0.28  QUOTE_TWICE_1
+  1.943   4.3777   0.0497    0.989   0.92    0.32  LIMITED_TIME_ONLY
+  0.073   0.1652   0.0015    0.991   0.92    0.00  WHY_PAY_MORE
+  2.934   6.6000   0.0833    0.988   0.92    0.71  HTML_FONT_COLOR_GREEN
+  0.037   0.0826   0.0008    0.991   0.92    2.77  PORN_6
+  0.293   0.0049   0.5177    0.009   0.92    0.00  USER_AGENT_MACOE
+  0.481   1.0856   0.0107    0.990   0.92    1.31  RATWARE_HASH_2
+  0.279   0.6303   0.0061    0.990   0.91    0.45  CREDIT_CARD
+  0.071   0.1613   0.0015    0.991   0.91    2.80  CBYI
+  0.656   1.4809   0.0153    0.990   0.91    0.00  HTML_90_100
+  4.108   9.2176   0.1346    0.986   0.91    1.53  DATE_IN_FUTURE_06_12
+  0.068   0.1544   0.0015    0.990   0.91    1.94  WE_HATE_SPAM
+  0.034   0.0767   0.0008    0.990   0.91    2.75  INCOME
+  0.707   1.5940   0.0176    0.989   0.91    2.80  FORGED_MUA_EUDORA
+  0.613   1.3806   0.0153    0.989   0.91    0.00  HTTP_ESCAPED_HOST
+  4.167   9.3415   0.1438    0.985   0.91    0.00  HTML_FONT_COLOR_NAME
+  0.634   1.4297   0.0161    0.989   0.91    2.80  PENIS_ENLARGE
+  0.096   0.2163   0.0023    0.990   0.91    0.45  AMAZING_STUFF
+  5.060  11.3278   0.1866    0.984   0.91    1.08  SUBJ_HAS_UNIQ_ID
+  0.155   0.3501   0.0038    0.989   0.91    1.63  SAVE_ON_INSURANCE
+  0.305   0.6864   0.0076    0.989   0.91    1.42  AOL_USERS_LINK
+  1.210   2.7218   0.0336    0.988   0.91    1.49  USERPASS
+  0.904   2.0355   0.0245    0.988   0.91    0.54  OPT_IN_CAPS
+  0.120   0.2694   0.0031    0.989   0.91    2.80  MSGID_NO_HOST
+  0.119   0.2675   0.0031    0.989   0.91    2.80  PAY_SITE
+  0.290   0.6539   0.0076    0.988   0.91    2.80  GET_PAID
+  0.089   0.1996   0.0023    0.989   0.91    0.71  BUY_DIRECT
+  0.562   1.2645   0.0153    0.988   0.91    1.12  GUARANTEE
+  0.145   0.3265   0.0038    0.988   0.91    0.34  UP_TO_OR_MORES
+  0.223   0.5025   0.0061    0.988   0.91    0.00  GUARANTEED_STUFF
+  1.710   3.8398   0.0535    0.986   0.91    0.74  HTML_IMAGE_ONLY_10
+  1.535   3.4475   0.0474    0.986   0.91    1.58  MIME_BOUND_DASH_DIGIT
+  0.140   0.3156   0.0038    0.988   0.91    1.85  FREE_PASSWORD
+  0.410   0.9214   0.0115    0.988   0.91    0.00  HTML_WIN_FOCUS
+  1.364   3.0640   0.0428    0.986   0.91    0.39  HTML_TITLE_UNTITLED
+  0.422   0.9489   0.0122    0.987   0.91    1.60  CALL_NOW
+  2.319   5.1998   0.0788    0.985   0.91    0.00  EXCUSE_10
+  0.081   0.1819   0.0023    0.988   0.91    1.71  COMMUNIGATE
+  0.107   0.2409   0.0031    0.987   0.91    0.00  HTML_IMAGE_AREA_05
+  3.242   7.2588   0.1193    0.984   0.90    0.00  HTML_SHOUTING3
+ 17.010  37.3000   1.2319    0.968   0.90    0.10  HTML_LINK_CLICK_HERE
+  1.188   2.6667   0.0375    0.986   0.90    0.00  BANG_MORE
+  0.044   0.0010   0.0772    0.013   0.90   -0.50  Q_FOR_SELLER
+  1.027   2.3059   0.0321    0.986   0.90    0.66  HTTP_USERNAME_USED
+  0.335   0.7532   0.0099    0.987   0.90    0.71  SOME_BREAKTHROUGH
+  0.105   0.2350   0.0031    0.987   0.90    1.55  AMATEUR_PORN
+  0.480   1.0787   0.0145    0.987   0.90    0.00  HTML_FONT_COLOR_UNKNOWN
+  1.080   2.4249   0.0344    0.986   0.90    0.00  LOTS_OF_STUFF
+  1.496   3.3560   0.0497    0.985   0.90    0.73  BAD_CREDIT
+  0.416   0.9341   0.0130    0.986   0.90    2.80  HAIR_LOSS
+  5.367  11.9610   0.2386    0.980   0.90    0.50  HTML_TAG_EXISTS_TBODY
+  2.784   6.2283   0.1055    0.983   0.90    1.63  REMOVE_SUBJ
+  2.471   5.5311   0.0918    0.984   0.90    1.31  MIME_HEADER_CTYPE_ONLY
+  0.172   0.3855   0.0054    0.986   0.90    2.59  ROUND_THE_WORLD_LOCAL
+  0.099   0.2212   0.0031    0.986   0.90    0.00  STOCK_PICK
+  0.049   0.1101   0.0015    0.986   0.90    0.88  IDENT_NOBODY
+  0.237   0.0059   0.4160    0.014   0.90    0.00  USER_AGENT_ENTOURAGE
+  0.048   0.1072   0.0015    0.986   0.90    0.30  FREE_PREVIEW
+  0.039   0.0010   0.0688    0.014   0.90    0.00  DISCLAIMER_LEGALESE
+  0.095   0.2124   0.0031    0.986   0.90    1.26  URI_IS_POUND
+  0.070   0.1563   0.0023    0.986   0.90    2.80  MEET_SINGLES
+  0.069   0.1554   0.0023    0.985   0.90    2.80  FORWARD_LOOKING
+  0.717   1.6058   0.0252    0.985   0.90    0.00  DO_IT_TODAY
+  0.068   0.1514   0.0023    0.985   0.90    0.00  HTML_IMAGE_AREA_06
+  0.579   1.2970   0.0206    0.984   0.90    2.10  PENIS_ENLARGE2
+  0.558   1.2498   0.0199    0.984   0.90    0.00  HTML_EMBEDS
+  0.241   0.5408   0.0084    0.985   0.90    0.00  FREE_ACCESS
+  0.388   0.8683   0.0138    0.984   0.90    0.00  REPLY_REMOVE_SUBJECT
+  0.173   0.3884   0.0061    0.984   0.90    1.63  FREE_INVESTMENT
+  0.108   0.2419   0.0038    0.984   0.90    1.13  NUMERIC_HTTP_ADDR
+  0.043   0.0964   0.0015    0.984   0.90    0.00  VERB_UP_TO_OR_MORES
+  0.211   0.4730   0.0076    0.984   0.89    0.71  BANG_BOSS
+  3.108   6.9294   0.1361    0.981   0.89    0.00  HTML_TAG_BALANCE_BODY
+  0.043   0.0954   0.0015    0.984   0.89    0.06  GET_STARTED_NOW
+  0.530   1.1849   0.0199    0.983   0.89    1.61  THIS_AINT_SPAM
+  1.705   3.8074   0.0696    0.982   0.89    0.95  EARN_MONEY
+  0.869   1.9420   0.0344    0.983   0.89    0.00  LOW_PRICE
+  0.102   0.2271   0.0038    0.983   0.89    1.26  BEEN_TURNED_DOWN
+  1.557   3.4750   0.0650    0.982   0.89    0.60  HTML_IMAGE_RATIO_04
+  0.298   0.6667   0.0115    0.983   0.89    0.71  SAVE_THOUSANDS
+  0.020   0.0452   0.0008    0.983   0.89    2.51  UNIVERSITY_DIPLOMAS
+  1.364   3.0463   0.0566    0.982   0.89    0.00  HTML_TAG_BALANCE_A
+  5.050  11.2078   0.2615    0.977   0.89    0.10  HTML_FONT_COLOR_UNSAFE
+  0.943   2.1063   0.0390    0.982   0.89    0.52  BANG_MONEY
+  0.136   0.3048   0.0054    0.983   0.89    2.04  WANTS_CREDIT_CARD
+  1.432   3.1948   0.0612    0.981   0.89    1.43  FORGED_RCVD_TRAIL
+  0.344   0.7690   0.0138    0.982   0.89    1.93  CELL_PHONE_BOOST
+  4.296   9.5431   0.2164    0.978   0.89    0.00  EXCUSE_14
+  0.019   0.0433   0.0008    0.983   0.89    1.99  PURE_PROFIT
+  2.029   4.5203   0.0910    0.980   0.89    0.00  REMOVE_FROM_LIST
+  3.178   7.0700   0.1522    0.979   0.89    0.00  HTML_TAG_BALANCE_HTML
+  1.099   2.4514   0.0466    0.981   0.89    0.00  HTML_TAG_BALANCE_TABLE
+  4.562  10.1242   0.2370    0.977   0.89    0.00  MISSING_OUTLOOK_NAME
+  0.336   0.7503   0.0138    0.982   0.89    0.00  VIAGRA
+  0.390   0.8702   0.0161    0.982   0.89    0.79  ACT_NOW_CAPS
+  0.112   0.2498   0.0046    0.982   0.89    0.72  APPLY_ONLINE
+  0.769   1.7149   0.0329    0.981   0.89    0.91  FROM_WEBMAIL_ENDS_IN_NUMS6
+  0.037   0.0836   0.0015    0.982   0.89    1.61  SUBJ_DOUBLE_YOUR
+  0.239   0.5330   0.0099    0.982   0.89    1.56  MONEY_MAKING
+  1.113   0.0383   1.9491    0.019   0.89    0.00  RESENT_TO
+  0.126   0.2812   0.0054    0.981   0.89    0.00  SUBJ_FOR_ONLY
+  0.121   0.2704   0.0054    0.981   0.88    2.80  TO_NO_USER
+  0.069   0.1544   0.0031    0.981   0.88    1.49  BILLION_DOLLARS
+  0.113   0.0039   0.1980    0.019   0.88    0.00  MSN_FOOTER1
+  0.579   1.2891   0.0268    0.980   0.88    2.04  ADDR_FREE
+  0.050   0.1111   0.0023    0.980   0.88    2.80  NO_INVESTMENT
+  0.048   0.1072   0.0023    0.979   0.88    1.75  WE_PROMISE_YOU
+  0.175   0.3884   0.0084    0.979   0.88    0.00  SUBJ_2_CREDIT
+  1.038   2.3049   0.0528    0.978   0.88    1.60  HOME_EMPLOYMENT
+  3.590   7.9393   0.2080    0.974   0.88    0.27  MAILTO_TO_REMOVE
+  1.038   2.3029   0.0535    0.977   0.88    0.00  X_MSMAIL_PRIORITY_HIGH
+  0.423   0.9400   0.0214    0.978   0.88    1.45  X_LIBRARY
+  0.108   0.2389   0.0054    0.978   0.88    1.77  FROM_NO_USER
+ 14.282   0.8928  24.6938    0.035   0.88    0.00  X_MAILING_LIST
+  0.152   0.3383   0.0076    0.978   0.88    2.70  PRINT_FORM_SIGNATURE
+  0.076   0.1691   0.0038    0.978   0.87    0.00  GET_IT_NOW
+  2.429   5.3758   0.1376    0.975   0.87    0.00  HTML_IMAGE_ONLY_08
+  0.120   0.2665   0.0061    0.978   0.87    0.00  CELEBRITY_PORN
+  0.015   0.0334   0.0008    0.978   0.87    0.00  SECRET_RECORD
+  1.879   4.1614   0.1048    0.975   0.87    0.00  SUBJ_FREE_CAP
+  0.382   0.8466   0.0199    0.977   0.87    0.00  HTML_SHOUTING5
+  0.097   0.0039   0.1690    0.023   0.87    0.00  USER_AGENT_IMP
+  0.176   0.3914   0.0092    0.977   0.87    0.00  SELECTED_YOU
+  1.435   3.1781   0.0803    0.975   0.87    0.00  HTML_FONT_COLOR_CYAN
+  1.272   2.8172   0.0711    0.975   0.87    1.47  DATE_MISSING
+  0.285   0.6313   0.0153    0.976   0.87    1.75  SUBJ_DOLLARS
+  0.529   1.1711   0.0291    0.976   0.87    0.00  BEST_PORN
+  0.595   1.3186   0.0329    0.976   0.87    0.00  HTML_TAG_BALANCE_HEAD
+  0.239   0.5300   0.0130    0.976   0.87    0.00  HTML_IMAGE_AREA_04
+  5.278  11.6041   0.3579    0.970   0.87    0.58  HTML_70_80
+  0.671   1.4868   0.0375    0.975   0.87    0.00  SAVINGS
+  0.182   0.4032   0.0099    0.976   0.87    2.07  RICH
+  0.097   0.2153   0.0054    0.976   0.87    0.33  FIND_ANYTHING
+  0.124   0.2753   0.0069    0.976   0.87    2.03  MIME_BOUND_DIGITS_4
+  1.003   2.2174   0.0581    0.974   0.87    0.00  OPT_OUT
+  0.131   0.0059   0.2279    0.025   0.87    0.00  HOTMAIL_FOOTER5
+  0.027   0.0590   0.0015    0.975   0.87    2.53  NO_FORMS
+  0.013   0.0295   0.0008    0.975   0.86    0.00  AUTO_EMAIL_REMOVAL
+ 13.053  28.3076   1.1913    0.960   0.86    0.10  HTML_FONT_COLOR_RED
+  1.486   3.2793   0.0910    0.973   0.86    0.97  US_DOLLARS_3
+  0.026   0.0580   0.0015    0.974   0.86    0.76  LYING_EYES
+  0.039   0.0865   0.0023    0.974   0.86    2.28  PROMOTION
+  4.224   9.2707   0.2997    0.969   0.86    2.40  FORGED_YAHOO_RCVD
+  0.286   0.6313   0.0176    0.973   0.86    1.10  OPPORTUNITY
+  0.408   0.9007   0.0252    0.973   0.86    0.00  HTML_WIN_BLUR
+  5.316  11.6395   0.3984    0.967   0.86    0.10  EXCUSE_3
+  0.403   0.0197   0.7004    0.027   0.86    0.00  USER_AGENT_APPLEMAIL
+  1.469   3.2361   0.0956    0.971   0.86    0.00  REMOVE_IN_QUOTES
+  0.496   1.0944   0.0314    0.972   0.86    0.48  EXTRA_MPART_TYPE
+  1.785   3.9254   0.1201    0.970   0.86    0.43  MIME_BOUND_NEXTPART
+  0.312   0.6883   0.0199    0.972   0.86    0.97  ACCEPT_CREDIT_CARDS
+  0.024   0.0531   0.0015    0.972   0.86    1.49  SERIOUS_CASH
+  1.587   3.4888   0.1078    0.970   0.86    0.00  TO_HAS_SPACES
+  1.390   3.0571   0.0941    0.970   0.86    2.08  PORN_4
+  1.629   3.5773   0.1139    0.969   0.85    0.00  HTML_EVENT
+  1.279   2.8103   0.0887    0.969   0.85    0.00  HTML_TAG_BALANCE_FONT
+  2.020   4.4328   0.1445    0.968   0.85    1.94  X_PRIORITY_HIGH
+  0.250   0.5497   0.0168    0.970   0.85    0.00  FROM_STARTS_WITH_NUMS
+  0.057   0.1249   0.0038    0.970   0.85    0.00  ANTISPAM_BILL
+  0.403   0.8850   0.0275    0.970   0.85    1.07  WEIRD_QUOTING
+  0.985   2.1633   0.0696    0.969   0.85    0.36  SUB_FREE_OFFER
+  0.827   1.8152   0.0581    0.969   0.85    0.53  HTML_IMAGE_RATIO_08
+  3.984   8.7023   0.3150    0.965   0.85    0.00  FROM_HAS_MIXED_NUMS
+  1.594   3.4947   0.1162    0.968   0.85    0.00  HTML_IMAGE_ONLY_12
+  1.638   3.5881   0.1216    0.967   0.85    0.00  HTML_FONT_COLOR_MAGENTA
+  5.449  11.8637   0.4603    0.963   0.85    0.10  HTML_FONT_COLOR_GRAY
+  0.460   1.0099   0.0329    0.968   0.85    1.09  WHY_WAIT
+  0.032   0.0708   0.0023    0.969   0.85    0.00  PHONE_CANCER
+ 36.941  76.5431   6.1455    0.926   0.85    0.00  HTML_MESSAGE
+  0.168   0.3678   0.0122    0.968   0.84    2.70  FORGED_JUNO_RCVD
+  0.739   1.6185   0.0551    0.967   0.84    0.66  ADDR_NUMS_AT_BIGSITE
+  0.063   0.1377   0.0046    0.968   0.84    1.39  BANKRUPTCY
+  3.207   6.9953   0.2607    0.964   0.84    0.00  HTML_FONT_COLOR_YELLOW
+  4.745  10.3238   0.4068    0.962   0.84    0.00  MSGID_HAS_NO_AT
+  0.145   0.3166   0.0107    0.967   0.84    1.71  MUST_BE_18
+  0.052   0.1131   0.0038    0.967   0.84    2.70  USER_4U2
+ 11.808  25.3990   1.2395    0.953   0.84    0.10  HTML_FONT_COLOR_BLUE
+  5.663  12.2973   0.5047    0.961   0.84    0.10  OFFER
+  0.284   0.6215   0.0214    0.967   0.84    0.74  VACATION_SCAM
+  1.200   2.6215   0.0948    0.965   0.84    2.50  DATE_IN_FUTURE_03_06
+  0.495   1.0816   0.0382    0.966   0.84    0.00  DEAR_FRIEND
+  0.030   0.0659   0.0023    0.966   0.84    1.44  HERBAL_VIAGRA
+  3.453   0.2291   5.9597    0.037   0.84   -0.50  X_AUTH_WARNING
+  0.010   0.0216   0.0008    0.966   0.84    0.00  MICROSOFT
+  0.088   0.1927   0.0069    0.966   0.84    0.98  X_ESMTP
+  0.243   0.5320   0.0191    0.965   0.84    0.94  SUBJ_YOUR_OWN
+  0.127   0.0079   0.2195    0.035   0.84    0.00  HOTMAIL_FOOTER1
+  1.221   2.6618   0.1002    0.964   0.84    0.00  MIME_HTML_NO_CHARSET
+  0.068   0.1475   0.0054    0.965   0.84    0.00  SUPPLIES_LIMITED
+  2.065   4.4947   0.1751    0.963   0.84    1.02  NO_COST
+  0.144   0.3137   0.0115    0.965   0.83    0.00  FREE_SAMPLE
+  2.006   4.3659   0.1705    0.962   0.83    0.00  HTTP_WITH_EMAIL_IN_URL
+  0.047   0.1032   0.0038    0.964   0.83    0.00  BARELY_LEGAL
+  1.094   2.3826   0.0918    0.963   0.83    0.00  REMOVAL_INSTRUCTIONS
+  0.056   0.1229   0.0046    0.964   0.83    0.00  PRIZE
+  0.037   0.0816   0.0031    0.964   0.83    0.00  HIDDEN_CHARGES
+  0.221   0.4818   0.0184    0.963   0.83    1.18  EXTRA_CASH
+  0.145   0.3147   0.0122    0.963   0.83    2.09  NO_STRINGS
+  2.182   4.7337   0.1973    0.960   0.83    0.46  PRIORITY_NO_NAME
+  0.256   0.5556   0.0222    0.962   0.83    2.70  DATE_IN_FUTURE_24_48
+  1.329   2.8831   0.1208    0.960   0.82    0.00  UNSUB_SCRIPT
+  6.718  14.4468   0.7081    0.953   0.82    0.55  HTML_50_60
+  0.017   0.0374   0.0015    0.961   0.82    0.00  SERIOUS_ONLY
+  0.904   1.9568   0.0849    0.958   0.82    0.00  HTML_EVENT_UNSAFE
+  0.189   0.4091   0.0176    0.959   0.82    1.68  ITS_LEGAL
+  0.310   0.6716   0.0291    0.959   0.82    0.00  US_DOLLARS
+  1.130   2.4445   0.1086    0.957   0.82    0.00  FOR_JUST_SOME_AMT
+  0.025   0.0531   0.0023    0.959   0.82    1.23  SEX_FEST
+  0.683   1.4760   0.0658    0.957   0.81    0.62  ADULT_SITE
+  0.024   0.0521   0.0023    0.958   0.81    1.96  NO_AGE
+  0.884   1.9076   0.0872    0.956   0.81    1.37  BULK_EMAIL
+  0.024   0.0511   0.0023    0.957   0.81    1.33  LESBIAN
+  0.219   0.4740   0.0214    0.957   0.81    0.52  FULL_REFUND
+  0.170   0.3678   0.0168    0.956   0.81    2.05  NEW_DOMAIN_EXTENSIONS
+  0.150   0.0118   0.2577    0.044   0.81    0.00  FAILURE_NOTICE_2
+  0.353   0.7621   0.0352    0.956   0.81    1.44  NO_EXPERIENCE
+  1.908   4.1073   0.1980    0.954   0.81    0.00  NO_OBLIGATION
+  1.145   2.4671   0.1170    0.955   0.81    0.00  WORK_AT_HOME
+  0.175   0.3776   0.0176    0.955   0.81    0.15  FROM_ALL_NUMS
+  0.228   0.4907   0.0229    0.955   0.81    1.15  LARGE_HEX
+  0.272   0.5861   0.0275    0.955   0.81    0.81  GAPPY_SUBJECT
+ 10.885  23.0705   1.4085    0.942   0.81    0.54  HTML_WEB_BUGS
+  0.615   1.3235   0.0642    0.954   0.80    1.60  RATWARE_EGROUPS
+  0.419   0.9017   0.0443    0.953   0.80    2.60  DEAR_SOMETHING
+  0.453   0.9745   0.0482    0.953   0.80    0.00  HTML_TAG_EXISTS_BASE
+  0.043   0.0924   0.0046    0.953   0.80    1.06  OFFSHORE_SCAM
+  0.982   2.1063   0.1086    0.951   0.80    0.34  INVALID_MSGID
+  2.331   0.2104   3.9793    0.050   0.80    0.00  SIGNATURE_SHORT_SPARSE
+  0.991   2.1230   0.1101    0.951   0.80    0.00  ORDER_NOW
+  0.515   1.1043   0.0573    0.951   0.79    2.60  FORGED_MUA_MOZILLA
+  0.041   0.0885   0.0046    0.951   0.79    0.00  HTML_IMAGE_AREA_07
+  1.437   3.0729   0.1652    0.949   0.79    1.09  MANY_EXCLAMATIONS
+  4.657   9.9059   0.5750    0.945   0.79    0.00  HTML_WITH_BGCOLOR
+  0.434   0.9282   0.0489    0.950   0.79    1.99  TO_EMPTY
+ 19.502  40.4427   3.2177    0.926   0.79    0.00  CLICK_BELOW
+  0.496   1.0600   0.0573    0.949   0.79    0.00  HTML_IMAGE_RATIO_14
+  0.027   0.0570   0.0031    0.949   0.79    1.47  RAPE
+  7.625  16.1096   1.0269    0.940   0.79    0.53  HTML_60_70
+  0.271   0.5802   0.0314    0.949   0.79    1.07  OPPORTUNITY_2
+  0.229   0.4897   0.0268    0.948   0.79    0.00  HTML_TAG_EXISTS_PARAM
+  0.276   0.5880   0.0329    0.947   0.78    0.00  BE_AMAZED
+  0.077   0.1632   0.0092    0.947   0.78    0.00  THE_FOLLOWING_FORM
+  2.083   4.4269   0.2607    0.944   0.78    0.00  HTML_TITLE_EMPTY
+  3.841   0.4002   6.5172    0.058   0.78    0.00  X_ACCEPT_LANG
+  0.040   0.0039   0.0681    0.055   0.78    0.00  HOTMAIL_FOOTER2
+  3.737   7.9009   0.4986    0.941   0.78    0.00  ONLY_COST
+  0.092   0.1967   0.0115    0.945   0.78    2.18  YOUR_INCOME
+  0.281   0.5979   0.0352    0.944   0.78    0.00  LONG_DISTANCE
+  0.055   0.1170   0.0069    0.944   0.77    2.60  JOIN_MILLIONS
+  0.071   0.1514   0.0092    0.943   0.77    1.80  REPLY_TO_EMPTY
+  0.490   1.0374   0.0642    0.942   0.77    0.00  ALL_CAP_PORN
+  0.018   0.0374   0.0023    0.942   0.77    0.00  LUXURY_CAR
+  4.475   9.4113   0.6362    0.937   0.77    0.09  HTML_FONT_FACE_ODD
+  1.109   2.3403   0.1506    0.940   0.76    0.00  SAVE_UP_TO
+  0.549   1.1603   0.0742    0.940   0.76    0.00  HTML_IMAGE_RATIO_12
+  5.328   0.6215   8.9878    0.065   0.76    0.00  HAS_ORGANIZATION
+  2.897   6.0769   0.4236    0.935   0.76    0.00  HTML_FONT_INVISIBLE
+  4.558   9.5273   0.6943    0.932   0.75    1.06  HTML_40_50
+  1.261   2.6471   0.1835    0.935   0.75    1.85  SEMIFORGED_HOTMAIL_RCVD
+  3.632   7.5941   0.5513    0.932   0.75    0.00  MAILTO_WITH_SUBJ
+  0.614   1.2891   0.0887    0.936   0.75    0.00  CASHCASHCASH
+  1.372   2.8762   0.2026    0.934   0.75    0.00  HTML_FONT_COLOR_NOHASH
+  3.831   7.9983   0.5911    0.931   0.75    0.49  HTML_80_90
+  0.127   0.2665   0.0184    0.936   0.75    0.00  FANTASTIC
+  2.393   5.0041   0.3617    0.933   0.75    0.00  SAVE_MONEY
+  1.087   2.2734   0.1636    0.933   0.75    0.00  EXCUSE_7
+  0.746   1.5605   0.1132    0.932   0.74    0.00  HTML_IMAGE_RATIO_10
+  0.997   2.0836   0.1522    0.932   0.74    0.51  NO_FEE
+  0.293   0.6116   0.0443    0.932   0.74    0.00  HTML_RELAYING_FRAME
+  1.165   2.4298   0.1812    0.931   0.74    0.00  HTML_IMAGE_RATIO_06
+  1.273   2.6549   0.1988    0.930   0.74    0.00  HTML_COMMENT_EMAIL
+  0.647   1.3511   0.1002    0.931   0.74    1.29  TONER
+  0.065   0.1347   0.0099    0.931   0.74    0.00  NO_DISAPPOINTMENT
+  0.269   0.5605   0.0421    0.930   0.73    2.15  SUB_HELLO
+  0.297   0.6195   0.0466    0.930   0.73    0.00  DOMAIN_4U2
+  0.015   0.0305   0.0023    0.930   0.73    0.00  NEW_CUSTOMER
+  0.717   1.4937   0.1139    0.929   0.73    1.24  DATE_IN_PAST_96_XX
+  0.058   0.1209   0.0092    0.929   0.73    0.00  SEDUCTION
+  6.172   0.8574  10.3053    0.077   0.73    0.00  X_LOOP
+  3.889   8.0445   0.6576    0.924   0.73    0.59  INVALID_DATE
+  5.620   0.7778   9.3861    0.077   0.73    0.00  SIGNATURE_SHORT_DENSE
+  2.276   0.3048   3.8087    0.074   0.73    0.00  USER_AGENT
+  2.010   4.1565   0.3410    0.924   0.72    0.00  EXCUSE_1
+  0.116   0.2399   0.0191    0.926   0.72    0.00  NO_QS_ASKED
+  2.011   4.1535   0.3449    0.923   0.72    0.00  HTML_JAVASCRIPT
+  0.036   0.0747   0.0061    0.924   0.72    1.73  DISGUISE_PORN
+  0.053   0.1091   0.0092    0.922   0.71    2.50  NIGERIAN_SUBJECT2
+  3.305   6.7750   0.6064    0.918   0.71    0.62  HTML_30_40
+  0.622   1.2803   0.1109    0.920   0.71    1.51  EXCUSE_11
+  0.007   0.0010   0.0115    0.079   0.71    0.00  SUBJECT_IS_IN_REVIEW
+  2.371   4.8586   0.4359    0.918   0.71    1.10  SUBJ_ALL_CAPS
+  0.004   0.0088   0.0008    0.920   0.71    0.00  MONSTERHUT
+ 13.546  27.2122   2.9187    0.903   0.70    0.61  FROM_ENDS_IN_NUMS
+  0.281   0.5772   0.0512    0.918   0.70    0.46  SEE_FOR_YOURSELF
+  0.679   1.3914   0.1246    0.918   0.70    0.00  MIME_EXCESSIVE_QP
+  2.015   4.1181   0.3793    0.916   0.70    0.00  EXCUSE_16
+  0.173   0.3550   0.0321    0.917   0.70    0.56  URGENT_BIZ
+  0.028   0.0570   0.0054    0.914   0.69    0.00  RATWARE_SCREWUP_2
+  9.416  18.8963   2.0447    0.902   0.69    0.00  MAILTO_LINK
+  0.336   0.6854   0.0650    0.913   0.69    0.00  FROM_HAS_UNDERLINE_NUMS
+  0.241   0.4907   0.0466    0.913   0.69    1.87  FROM_NO_LOWER
+  0.008   0.0157   0.0015    0.911   0.68    0.00  MANY_FROMS
+  0.319   0.6470   0.0635    0.911   0.68    0.00  FOR_INSTANT_ACCESS
+  0.318   0.6451   0.0635    0.910   0.68    0.00  INSTANT_ACCESS
+  0.053   0.0088   0.0879    0.091   0.67    0.00  YAHOO_MSGID_ADDED
+  1.995   4.0237   0.4167    0.906   0.67    0.00  HTML_FONT_FACE_BAD
+  0.044   0.0895   0.0092    0.907   0.67    0.93  FREE_WEBSITE
+  2.262   4.5468   0.4856    0.904   0.67    0.52  FOR_FREE
+  0.033   0.0659   0.0069    0.905   0.67    0.15  CASH_BONUS
+  0.333   0.6696   0.0711    0.904   0.66    0.00  WHILE_SUPPLIES
+  0.075   0.1514   0.0161    0.904   0.66    0.00  SHOPPING_SPREE
+  0.235   0.4730   0.0505    0.904   0.66    0.00  FREE_DVD
+  0.176   0.3520   0.0382    0.902   0.66    2.30  MIME_DEFICIENT_QP
+  2.375   4.7455   0.5314    0.899   0.66    0.00  DIET
+  0.450   0.9017   0.0986    0.901   0.66    0.00  LARGE_COLLECTION
+  1.724   3.4347   0.3946    0.897   0.65    0.82  RISK_FREE
+  0.042   0.0079   0.0688    0.103   0.65   -0.40  APPROVED_BY
+  0.130   0.2586   0.0298    0.897   0.64    0.00  JAVASCRIPT_URI
+  0.073   0.1455   0.0168    0.896   0.64    0.81  EXCUSE_6
+  0.280   0.5556   0.0650    0.895   0.64    0.00  UPPERCASE_50_75
+  0.006   0.0128   0.0015    0.893   0.63    0.00  WORRY_FREE
+  2.044   4.0306   0.4993    0.890   0.63    0.00  LINES_OF_YELLING_3
+  2.519   4.9579   0.6217    0.889   0.63    0.76  DATE_IN_PAST_06_12
+  0.519   1.0246   0.1254    0.891   0.63    0.53  SATISFACTION
+  3.046   5.9746   0.7685    0.886   0.63    0.00  UNSUB_PAGE
+  3.667   7.1595   0.9512    0.883   0.62    0.00  LINES_OF_YELLING_2
+  1.222   2.3924   0.3120    0.885   0.62    1.75  PLING_PLING
+  0.166   0.3245   0.0421    0.885   0.61    0.00  UPPERCASE_75_100
+  0.036   0.0708   0.0092    0.885   0.61    2.30  DATE_IN_FUTURE_48_96
+  0.003   0.0059   0.0008    0.885   0.61    0.00  EXCUSE_8
+  0.003   0.0059   0.0008    0.885   0.61    0.00  NATURAL_VIAGRA
+  0.135   0.2635   0.0344    0.885   0.61    0.00  DONT_DELETE
+  0.142   0.2773   0.0375    0.881   0.60    0.00  DIRECT_EMAIL
+  0.190   0.0423   0.3051    0.122   0.60   -0.17  FORGOTTEN_PASSWORD
+  0.083   0.1603   0.0229    0.875   0.59    0.00  DOMAIN_SUBJECT
+  2.411   4.6285   0.6867    0.871   0.59    1.28  HTML_20_30
+  0.516   0.9902   0.1476    0.870   0.58    0.00  ASCII_FORM_ENTRY
+  0.065   0.1239   0.0191    0.866   0.57    2.20  DRASTIC_REDUCED
+  0.202   0.3855   0.0596    0.866   0.57    0.81  SUBJ_BUY
+  0.299   0.5684   0.0895    0.864   0.56    0.00  DOMAIN_BODY
+  0.184   0.3491   0.0551    0.864   0.56    0.00  CONGRATULATIONS
+  0.121   0.2301   0.0367    0.862   0.56    0.27  NO_PURCHASE
+  2.880   5.4328   0.8954    0.859   0.56    0.27  DATE_IN_PAST_03_06
+  0.052   0.0983   0.0161    0.860   0.55    0.00  LINK_TO_NO_SCHEME
+  0.597   1.1249   0.1866    0.858   0.55    0.00  SAVE_BUCKS
+  8.751  16.2316   2.9332    0.847   0.55    0.00  LINES_OF_YELLING
+  0.225   0.4238   0.0703    0.858   0.55    0.00  YOU_WON
+  1.444   2.7080   0.4619    0.854   0.54    0.00  TO_ADDRESS_EQ_REAL
+  0.081   0.1524   0.0260    0.854   0.54    0.00  INCREASE_SOMETHING
+  0.459   0.8584   0.1483    0.853   0.54    0.00  EARN_PER_WEEK
+  0.005   0.0088   0.0015    0.853   0.53    0.00  CONFIDENTIAL_ORDER
+  0.037   0.0688   0.0122    0.849   0.53    2.10  MARKET_SOLUTION
+  0.181   0.0511   0.2814    0.154   0.52    0.00  HTML_COMMENT_EGP
+  1.442   2.6589   0.4963    0.843   0.52    0.00  WEIRD_PORT
+  0.486   0.8968   0.1659    0.844   0.52    0.00  UNDISC_RECIPS
+  2.093   3.8467   0.7295    0.841   0.51    0.00  DATE_IN_PAST_12_24
+  0.244   0.4484   0.0856    0.840   0.50    2.10  FROM_AND_TO_SAME
+  1.629   2.9814   0.5773    0.838   0.50    0.00  MISSING_HEADERS
+  2.560   4.6766   0.9145    0.836   0.50    1.47  UPPERCASE_25_50
+  1.395   2.5487   0.4986    0.836   0.50    0.51  HOT_NASTY
+  0.049   0.0147   0.0757    0.163   0.50    0.00  FAILURE_NOTICE_1
+  1.798   3.2607   0.6599    0.832   0.49    0.00  CALL_FREE
+  0.170   0.3048   0.0658    0.823   0.47    0.00  MARKETING
+  2.854   5.0739   1.1271    0.818   0.46    1.03  MSG_ID_ADDED_BY_MTA_2
+  0.674   0.2232   1.0246    0.179   0.46    0.00  FWD_MSG
+  0.946   1.6844   0.3724    0.819   0.46    0.00  FREE_TRIAL
+  0.745   1.3245   0.2952    0.818   0.46    0.00  GREAT_OFFER
+  0.086   0.1514   0.0352    0.812   0.44    0.00  MASS_EMAIL
+  0.087   0.0315   0.1308    0.194   0.43   -0.30  USER_AGENT_GNUS_XM
+  2.827   4.8930   1.2196    0.800   0.43    1.35  TO_MALFORMED
+  0.255   0.4415   0.1093    0.801   0.42    0.00  ASKS_BILLING_ADDRESS
+  0.636   1.1013   0.2745    0.800   0.42    0.00  PLING_QUERY
+  0.043   0.0737   0.0184    0.801   0.42    2.00  X_GCMULTI
+  0.016   0.0275   0.0069    0.800   0.42    0.00  ONCE_IN_LIFETIME
+  2.019   0.8083   2.9600    0.214   0.39    0.00  USER_AGENT_MOZILLA_XM
+  0.284   0.4799   0.1315    0.785   0.39    0.22  MSGID_CHARS_SPAM
+  3.487   5.8409   1.6562    0.779   0.39    0.61  MAILTO_TO_SPAM_ADDR
+  0.143   0.2399   0.0673    0.781   0.38    1.03  SEARCH_ENGINE_PROMO
+  2.457   4.0916   1.1860    0.775   0.37    1.26  OPT_IN
+  0.640   1.0492   0.3212    0.766   0.35    0.00  DATE_IN_PAST_24_48
+  0.914   1.4976   0.4596    0.765   0.35    0.00  SMTPD_IN_RCVD
+  4.386   7.1241   2.2565    0.759   0.35    0.00  MIME_LONG_LINE_QP
+  1.336   2.1505   0.7027    0.754   0.33    1.11  HTML_10_20
+  5.305   8.4290   2.8759    0.746   0.33    0.50  MSG_ID_ADDED_BY_MTA_3
+ 22.762  34.4405  13.6797    0.716   0.32    0.99  NO_REAL_NAME
+  0.006   0.0088   0.0031    0.743   0.31    0.00  MURKOWSKI_CRUFT
+  0.210   0.3314   0.1162    0.740   0.30    0.00  DATE_IN_FUTURE_96_XX
+  1.879   2.8801   1.1011    0.723   0.28    0.00  EMAIL_MARKETING
+  0.001   0.0020   0.0008    0.720   0.27    0.00  BUY_JUDGEMENTS
+  0.159   0.0885   0.2141    0.292   0.25    0.00  MAILER_DAEMON
+  0.005   0.0069   0.0031    0.692   0.22    0.00  OUR_COMPENSATION
+  1.287   1.8378   0.8595    0.681   0.21    0.00  HTML_00_10
+  0.666   0.9105   0.4764    0.657   0.17    0.00  HTML_FONT_FACE_CAPS
+  0.617   0.7798   0.4901    0.614   0.12    0.00  US_DOLLARS_2
+  0.309   0.3658   0.2646    0.580   0.08    0.00  DATE_IN_PAST_48_96
+  0.000   0.0000   0.0000    0.500   0.00    0.00  SMIME_SIGNATURE
   0.000   0.0000   0.0000    0.500   0.00    0.00  BAYES_56
   0.000   0.0000   0.0000    0.500   0.00    0.00  BAYES_50
   0.000   0.0000   0.0000    0.500   0.00    0.00  BAYES_99
   0.000   0.0000   0.0000    0.500   0.00    0.00  BAYES_44
   0.000   0.0000   0.0000    0.500   0.00    0.00  BAYES_40
   0.000   0.0000   0.0000    0.500   0.00    0.00  BAYES_30
+  0.000   0.0000   0.0000    0.500   0.00    4.50  TOO_MANY_MUA
   0.000   0.0000   0.0000    0.500   0.00    0.00  BAYES_20
   0.000   0.0000   0.0000    0.500   0.00    0.00  BAYES_10
+  0.000   0.0000   0.0000    0.500   0.00    0.00  BAYES_70
   0.000   0.0000   0.0000    0.500   0.00    0.00  BAYES_01
   0.000   0.0000   0.0000    0.500   0.00    0.00  BAYES_00
-  0.000   0.0000   0.0000    0.500   0.00    0.00  BAYES_80
-  0.000   0.0000   0.0000    0.500   0.00    0.00  SMIME_SIGNATURE
-  0.000   0.0000   0.0000    0.500   0.00    0.00  BAYES_70
-  0.000   0.0000   0.0000    0.500   0.00    0.00  BAYES_90
   0.000   0.0000   0.0000    0.500   0.00    0.00  BAYES_60
+  0.000   0.0000   0.0000    0.500   0.00    0.00  BAYES_90
+  0.000   0.0000   0.0000    0.500   0.00    0.00  OUR_PUBLICATIONS
+  0.000   0.0000   0.0000    0.500   0.00    0.00  BAYES_80
 
 Rule file versions for which these results apply:
-(SpamAssassin Version string: 2.50)
+(SpamAssassin Version string: 2.54)
 
--rw-r--r--    1 felicity fame         5847 Feb 11 10:59 10_misc.cf
--rw-r--r--    1 felicity fame         4515 Feb 11 10:59 20_anti_ratware.cf
--rw-r--r--    1 felicity fame         8921 Feb 11 10:59 20_body_tests.cf
--rw-r--r--    1 felicity fame        13147 Feb 11 10:59 20_compensate.cf
--rw-r--r--    1 felicity fame        36548 Feb 15 18:23 20_head_tests.cf
--rw-r--r--    1 felicity fame        12281 Feb 16 19:19 20_html_tests.cf
--rw-r--r--    1 felicity fame         7808 Feb 16 15:03 20_meta_tests.cf
--rw-r--r--    1 felicity fame        42521 Feb 11 10:59 20_phrases.cf
--rw-r--r--    1 felicity fame         5416 Feb 11 10:59 20_porn.cf
--rw-r--r--    1 felicity fame         7660 Feb 17 12:59 20_ratware.cf
--rwxr-xr-x    1 felicity fame         4725 Feb 11 10:59 20_uri_tests.cf
--rw-r--r--    1 felicity fame         2918 Feb 11 10:59 23_bayes.cf
--rw-r--r--    1 felicity fame         8447 Feb 15 09:29 25_body_tests_es.cf
--rw-r--r--    1 felicity fame        10681 Feb 11 10:59 25_body_tests_pl.cf
--rw-r--r--    1 felicity fame          813 Feb 11 10:59 25_head_tests_es.cf
--rw-r--r--    1 felicity fame          682 Feb 11 10:59 25_head_tests_pl.cf
--rw-r--r--    1 felicity fame         9931 Feb 15 18:18 30_text_de.cf
--rw-r--r--    1 felicity fame         6679 Feb 15 18:18 30_text_es.cf
--rw-r--r--    1 felicity fame        36856 Feb 15 18:18 30_text_fr.cf
--rw-r--r--    1 felicity fame         5708 Feb 15 18:18 30_text_pl.cf
--rw-r--r--    1 felicity fame            0 Oct 23 11:34 40_spam_phrases.cf
--rw-r--r--    1 felicity fame        37110 Feb 16 19:19 50_scores.cf
--rw-r--r--    1 felicity fame         4024 Feb 11 10:59 60_whitelist.cf
--rw-r--r--    1 felicity fame          267 Dec 22 14:32 local.cf
+-rw-r--r--    1 felicity fame         6136 Mar 17 18:56 10_misc.cf
+-rw-r--r--    1 felicity fame         4856 Apr 19 01:26 20_anti_ratware.cf
+-rw-r--r--    1 felicity fame         9210 Mar 17 18:56 20_body_tests.cf
+-rw-r--r--    1 felicity fame        13610 Apr 19 01:31 20_compensate.cf
+-rw-r--r--    1 felicity fame        36842 Apr 19 01:27 20_head_tests.cf
+-rw-r--r--    1 felicity fame        12574 Apr 19 01:27 20_html_tests.cf
+-rw-r--r--    1 felicity fame         8510 Apr 19 01:32 20_meta_tests.cf
+-rw-r--r--    1 felicity fame        42814 Mar 17 18:56 20_phrases.cf
+-rw-r--r--    1 felicity fame         5707 Mar 17 18:56 20_porn.cf
+-rw-r--r--    1 felicity fame         7949 Mar 17 18:56 20_ratware.cf
+-rwxr-xr-x    1 felicity fame         5007 Mar 17 18:56 20_uri_tests.cf
+-rw-r--r--    1 felicity fame         3207 Mar 17 18:56 23_bayes.cf
+-rw-r--r--    1 felicity fame         8807 Mar 17 18:56 25_body_tests_es.cf
+-rw-r--r--    1 felicity fame        10974 Mar 17 18:56 25_body_tests_pl.cf
+-rw-r--r--    1 felicity fame         1102 Mar 17 18:56 25_head_tests_es.cf
+-rw-r--r--    1 felicity fame          971 Mar 17 18:56 25_head_tests_pl.cf
+-rw-r--r--    1 felicity fame         9174 Mar 17 18:56 30_text_de.cf
+-rw-r--r--    1 felicity fame         6268 Mar 17 18:56 30_text_es.cf
+-rw-r--r--    1 felicity fame        33705 Mar 17 18:56 30_text_fr.cf
+-rw-r--r--    1 felicity fame        21646 Mar 17 18:56 30_text_it.cf
+-rw-r--r--    1 felicity fame         5458 Mar 17 18:56 30_text_pl.cf
+-rw-r--r--    1 felicity fame        38337 Apr 22 07:44 50_scores.cf
+-rw-r--r--    1 felicity fame         4313 Mar 17 18:56 60_whitelist.cf
+-rw-r--r--    1 felicity fame        19431 Mar 17 18:56 70_broken_rules.cf
+-rw-r--r--    1 felicity fame         5648 Mar 17 18:57 70_cvs_rules_under_test.cf
+-rw-r--r--    1 felicity fame          267 Dec 22 07:18 local.cf
+-rw-r--r--    1 felicity fame         5577 Mar 17 18:57 regression_tests.cf
