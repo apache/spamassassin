@@ -170,6 +170,8 @@ sub result {
   if (!$opt_showdots) {
     progress($time);
   }
+
+  $total_count++;
 }
 
 sub wanted {
@@ -250,7 +252,6 @@ sub wanted {
     print STDERR '.';
   }
 
-  $total_count++;
   return $out;
 }
 
@@ -270,6 +271,8 @@ sub logkilled {
 
 sub progress {
   my ($time) = @_;
+  $time ||= 0;
+
   my $messages = $Mail::SpamAssassin::ArchiveIterator::MESSAGES;
   my $statusevery = int($messages / $updates);
   $statusevery ||= 1; # if $messages < $updates, just give a status line per msg.
