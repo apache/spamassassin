@@ -1107,7 +1107,7 @@ describe SERIOUS_CASH		Serious cash
 #              PORN RULES                 #
 ###########################################
 
-body LARGE_COLLECTION           /\b(?:[0-9,]{5,9}\s|hundreds|thousands|millions|tons)\b.{0,15}\b(?:movies|videos?|xxx|celeb|streaming|live|pics?|photos?|images)\b/i
+body LARGE_COLLECTION           /\b(?:[0-9,]{5,9}|hundreds|thousands|millions|tons)\b.{0,15}(?:movies|videos?|xxx|streaming|pics?|photos?|of live|of images)\b/i
 describe LARGE_COLLECTION       Possible porn - Large Number of movies, pics
 
 body FREE_PORN                  /\bfree (?:porn|xxx|adult)/i
