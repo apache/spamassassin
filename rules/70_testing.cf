@@ -205,24 +205,11 @@ body T_HTML_EXTRA_CLOSE_D	eval:html_range('extra_close_ratio', '0.04', '0.08')
 body T_HTML_EXTRA_CLOSE_E	eval:html_range('extra_close_ratio', '0.08', '0.16')
 body T_HTML_EXTRA_CLOSE_F	eval:html_range('extra_close_ratio', '0.16', '0.32')
 
-# bug 3529 - LONGWORDS false positives
-# fast version, but probably less accurate
-meta T_LONGWORDS_01	(__LONGWORDS_A || __LONGWORDS_B)
-meta T_LONGWORDS_02	(__LONGWORDS_A || __LONGWORDS_C)
-meta T_LONGWORDS_03	(__LONGWORDS_A || __LONGWORDS_D)
-meta T_LONGWORDS_04	(__LONGWORDS_B || __LONGWORDS_C)
-meta T_LONGWORDS_05	(__LONGWORDS_B || __LONGWORDS_D)
-meta T_LONGWORDS_06	(__LONGWORDS_C || __LONGWORDS_D)
-meta T_LONGWORDS_07	(__LONGWORDS_A || __LONGWORDS_B || __LONGWORDS_C)
-meta T_LONGWORDS_08	(__LONGWORDS_A || __LONGWORDS_B || __LONGWORDS_D)
-meta T_LONGWORDS_09	(__LONGWORDS_A || __LONGWORDS_C || __LONGWORDS_D)
-meta T_LONGWORDS_10	(__LONGWORDS_B || __LONGWORDS_C || __LONGWORDS_D)
-meta T_LONGWORDS_11	(__LONGWORDS_A + __LONGWORDS_B + __LONGWORDS_C > 1)
-meta T_LONGWORDS_12	(__LONGWORDS_A + __LONGWORDS_B + __LONGWORDS_D > 1)
-meta T_LONGWORDS_13	(__LONGWORDS_A + __LONGWORDS_C + __LONGWORDS_D > 1)
-meta T_LONGWORDS_14	(__LONGWORDS_B + __LONGWORDS_C + __LONGWORDS_D > 1)
-meta T_LONGWORDS_15	(__LONGWORDS_A + __LONGWORDS_B + __LONGWORDS_C + __LONGWORDS_D > 1)
-meta T_LONGWORDS_16	(__LONGWORDS_A + __LONGWORDS_B + __LONGWORDS_C + __LONGWORDS_D > 2)
+# try allowing uppercase for the first letter
+body __T_LONGWORDS_A	/\b(?:[A-Za-z][a-z]{7,}\s+){6}/
+body __T_LONGWORDS_B	/\b(?:[A-Za-z][a-z]{5,}\s+){9}/
+body __T_LONGWORDS_C	/\b(?:[A-Za-z][a-z]{4,}\s+){10}/
+meta T_LONGWORDS	(__T_LONGWORDS_A + __T_LONGWORDS_B + __T_LONGWORDS_C > 1)
 
 ##########################################################################
 # bug 2843
