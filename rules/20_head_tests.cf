@@ -53,10 +53,9 @@ describe FROM_HAS_MIXED_NUMS3	From: contains numbers mixed in with letters
 header ADDR_NUMS_AT_BIGSITE	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@(?:aol|bigfoot|compuserve|excite|hotmail|juno|prodigy|yahoo)\.(?:com|net|org)/mi
 describe ADDR_NUMS_AT_BIGSITE	Uses an address with lots of numbers, at a big ISP
 
-header __FROM_JUST_NUMBER       From:addr =~ /^\d+\@/
-header __FROM_PHONE             From:addr =~ /^\d{3}(?:[-.]?\d{3}[-.]?\d{4}|\d{7})\@/
-meta FROM_ALL_NUMS              (__FROM_JUST_NUMBER && !__FROM_PHONE)
-describe FROM_ALL_NUMS          From an address that is all numbers (non-phone)
+# don't match US/Canada phone numbers: 10 digits optionally preceded by a "1"
+header FROM_ALL_NUMS		From:addr =~ /^(?:\d{1,9}|[02-9]\d{10}|\d{12,})@/
+describe FROM_ALL_NUMS		From numeric address (except US/Canada phones)
 
 header FROM_OFFERS		From:addr =~ /\@\S*offers(?![eo]n\b)/i
 describe FROM_OFFERS		From address is "at something-offers"
