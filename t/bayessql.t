@@ -100,8 +100,9 @@ ok(scalar(keys %{$toks}) > 0);
 
 my($msgid,$msgid_hdr) = $sa->{bayes_scanner}->get_msgid($mail);
 
-# $msgid is the generated hash messageid, $msgid_hdr is the Message-Id header ...
-ok($msgid eq '502e12b89b9c74074744ffc18a95d80cff2effcd@sa_generated');
+# $msgid is the generated hash messageid
+# $msgid_hdr is the Message-Id header
+ok($msgid eq '6e167ac4780e198af9c13b8708ba9e1b767133c7@sa_generated');
 ok($msgid_hdr eq '9PS291LhupY');
 
 ok($sa->{bayes_scanner}->{store}->tie_db_writable());
