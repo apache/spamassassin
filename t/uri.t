@@ -21,7 +21,7 @@ use Mail::SpamAssassin;
 use Mail::SpamAssassin::HTML;
 use Mail::SpamAssassin::Util;
 
-plan tests => 75;
+plan tests => 76;
 
 ##############################################
 
@@ -92,6 +92,7 @@ ok(try_domains('SPAMASSASSIN.ORG', 'spamassassin.org'));
 ok(try_domains('WWW.SPAMASSASSIN.ORG', 'spamassassin.org'));
 ok(try_domains('spamassassin.txt', undef));
 ok(try_domains('longer.url.but.not.spamassassin.txt', undef));
+ok(try_domains('http://ebg&vosxfov.com.munged-rxspecials.net/b/Tr3f0amG','munged-rxspecials.net'));
 
 ##############################################
 
@@ -151,10 +152,10 @@ ok(try_canon(["http://www.kl\nuge.n\net/"],
   ));
 
 ok(try_canon([
-   'http%3A//ebg&vosxfov.com%2Eget%72xspecials%2Enet/b/Tr3f0amG'
+   'http%3A//ebg&vosxfov.com%2Emunged-%72xspecials%2Enet/b/Tr3f0amG'
    ], [
-   'http%3A//ebg&vosxfov.com%2Eget%72xspecials%2Enet/b/Tr3f0amG',
-   'http://ebg&vosxfov.com.getrxspecials.net/b/Tr3f0amG'
+   'http%3A//ebg&vosxfov.com%2Emunged-%72xspecials%2Enet/b/Tr3f0amG',
+   'http://ebg&vosxfov.com.munged-rxspecials.net/b/Tr3f0amG'
    ]));
 
 ##############################################
