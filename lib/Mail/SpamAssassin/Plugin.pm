@@ -628,6 +628,13 @@ Called when the C<Mail::SpamAssassin> object is destroyed.
 
 =back
 
+=cut
+
+sub finish {
+  my ($self) = @_;
+  delete $self->{main};
+}
+
 =head1 HELPER APIS
 
 These methods provide an API for plugins to register themselves
