@@ -162,7 +162,10 @@ sub razor2_access {
         my @msg = ($fulltext);
         my $objects = $rc->prepare_objects( \@msg )
           or die "$debug: error in prepare_objects";
-        $rc->get_server_info() or die $rc->errprefix("$debug: spamassassin");
+        unless ($rc->get_server_info()) {
+	  my $error = $rc->errprefix("$debug: spamassassin") || "$debug: razor2 had unknown error during get_server_info";
+	  die $error;
+	}
 
 	# let's reset the alarm since get_server_info() calls
 	# nextserver() which calls discover() which very likely will
@@ -183,14 +186,26 @@ sub razor2_access {
 
 	  # Talk to the Razor server and do work
           if ($type eq 'check') {
-            $rc->check($objects) or die $rc->errprefix("$debug: spamassassin");
+            unless ($rc->check($objects)) {
+	      my $error = $rc->errprefix("$debug: spamassassin") || "$debug: razor2 had unknown error during check";
+	      die $error;
+	    }
 	  }
 	  else {
-            $rc->authenticate($ident) or die($rc->errprefix("$debug: spamassassin"));
-            $rc->report($objects) or die($rc->errprefix("$debug: spamassassin"));
+            unless ($rc->authenticate($ident)) {
+	      my $error = $rc->errprefix("$debug: spamassassin") || "$debug: razor2 had unknown error during authenticate";
+	      die $error;
+	    }
+	    unless ($rc->report($objects)) {
+	      my $error = $rc->errprefix("$debug: spamassassin") || "$debug: razor2 had unknown error during report";
+	      die $error;
+	    }
           }
 
-          $rc->disconnect() or die $rc->errprefix("$debug: spamassassin");
+          unless ($rc->disconnect()) {
+	    my $error = $rc->errprefix("$debug: spamassassin") || "$debug: razor2 had unknown error during disconnect";
+	    die $error;
+	  }
 
 	  # if we got here, we're done doing remote stuff, abort the alert
 	  alarm 0;
