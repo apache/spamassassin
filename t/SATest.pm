@@ -264,7 +264,6 @@ sub start_spamd {
   {
     $spamdargs = "$spamd -D $sdargs";
   }
-  $spamdargs =~ tr,/,\\, if $RUNNING_ON_WINDOWS;
 
   if ($set_test_prefs) {
     warn "oops! SATest.pm: a test prefs file was created, but spamd isn't reading it\n";
