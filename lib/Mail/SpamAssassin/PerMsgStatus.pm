@@ -1046,6 +1046,9 @@ sub get_raw_body_text_array {
 
 sub get_decoded_body_text_array {
   my ($self) = @_;
+
+  if (defined $self->{decoded_body_text_array}) { return $self->{decoded_body_text_array}; }
+
   local ($_);
   my $textary = $self->get_raw_body_text_array();
 
@@ -1092,6 +1095,7 @@ sub get_decoded_body_text_array {
       }
     }
     push (@decoded, $self->split_b64_decode ($_));
+    $self->{decoded_body_text_array} = \@decoded;
     return \@decoded;
   }
   elsif ($self->{found_encoding_quoted_printable}) {
@@ -1099,6 +1103,7 @@ sub get_decoded_body_text_array {
     s/\=\r?\n//gs;
     s/\=([0-9A-F]{2})/chr(hex($1))/ge;
     my @ary = $self->split_into_array_of_short_lines ($_);
+    $self->{decoded_body_text_array} = \@ary;
     return \@ary;
   }
   elsif ($self->{found_encoding_uuencode}) {
@@ -1126,9 +1131,11 @@ sub get_decoded_body_text_array {
     }
     s/\r//;
     my @ary = $self->split_into_array_of_short_lines ($_);
+    $self->{decoded_body_text_array} = \@ary;
     return \@ary;
   }
   else {
+    $self->{decoded_body_text_array} = $textary;
     return $textary;
   }
 }
@@ -1157,6 +1164,9 @@ sub split_b64_decode {
 
 sub get_decoded_stripped_body_text_array {
   my ($self) = @_;
+
+  if (defined $self->{decoded_stripped_body_text_array}) { return $self->{decoded_stripped_body_text_array}; }
+
   local ($_);
 
   my $bodytext = $self->get_decoded_body_text_array();
@@ -1283,6 +1293,7 @@ sub get_decoded_stripped_body_text_array {
   $text =~ tr/\f/\n/;			# form feeds => newline
 
   my @textary = $self->split_into_array_of_short_lines ($text);
+  $self->{decoded_stripped_body_text_array} = \@textary;
 
   return \@textary;
 }
