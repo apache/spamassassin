@@ -195,6 +195,11 @@ my $extrapid = 5000;
 undef($opt{'max-children'}) unless defined($opt{'max-children'}) && $opt{'max-children'} > 0;
 $extrapid = $opt{'max-children'} if defined($opt{'max-children'});
 
+# Untaint the pidfile path before we use it
+if (defined $opt{'pidfile'}) {
+  $opt{'pidfile'} = Mail::SpamAssassin::Util::untaint_file_path($opt{'pidfile'});
+}
+
 my $orighome;
 if (defined $ENV{'HOME'}) {
   $orighome = $ENV{'HOME'};   # keep a copy for use by Razor, Pyzor etc.
