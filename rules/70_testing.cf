@@ -555,3 +555,9 @@ describe T_FAKED_IP_IN_RCVD	Received: contains a name with a faked IP-address
 # Cialis needs a leading \b
 body T_DRUG_ED_CAPS	/(?:\bCIALIS|LEVITRA|VIAGRA)/i
 describe T_DRUG_ED_CAPS	Mentions an E.D. drug
+
+# Should catch Atriks, for one
+uri T_LONG_HOSTNAME_20		/^https?:\/\/[a-z0-9]{20,24}\./i
+uri T_LONG_HOSTNAME_25		/^https?:\/\/[a-z0-9]{25,29}\./i
+uri T_LONG_HOSTNAME_30		/^https?:\/\/[a-z0-9]{30,40}\./i
+uri T_LONG_HOSTNAME_40		/^https?:\/\/[a-z0-9]{40,}\./i
