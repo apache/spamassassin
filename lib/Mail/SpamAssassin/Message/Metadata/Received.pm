@@ -427,7 +427,7 @@ sub parse_received_line {
       if (/^from \[(${IP_ADDRESS})\] \((.*?)\) by (\S+) /) {
 	$ip = $1; my $sub = $2; $by = $3;
 	$sub =~ s/helo=(\S+)// and $helo = $1;
-	$sub =~ s/ident=(\S+)// and $ident = $1;
+	$sub =~ s/ident=(\S*)// and $ident = $1;
 	goto enough;
       }
 
@@ -440,7 +440,7 @@ sub parse_received_line {
       if (/^from (\S+) \(\[(${IP_ADDRESS})\](.*?)\) by (\S+) /) {
         $rdns=$1; $ip = $2; my $sub = $3; $by = $4;
         $sub =~ s/helo=(\S+)// and $helo = $1;
-        $sub =~ s/ident=(\S+)// and $ident = $1;
+        $sub =~ s/ident=(\S*)// and $ident = $1;
         goto enough;
       }
 
@@ -551,14 +551,14 @@ sub parse_received_line {
       if (/^from (\S+) \((\S+) \[(${IP_ADDRESS})\].*\) by (\S+) \(/) {
         $mta_looked_up_dns = 1;
         $helo = $1; $rdns = $2; $ip = $3; $by = $4;
-        $rdns =~ s/^IDENT:([^\@]+)\@// and $ident = $1; # remove IDENT lookups
-        $rdns =~ s/^([^\@]+)\@// and $ident = $1;	# remove IDENT lookups
+        $rdns =~ s/^IDENT:([^\@]*)\@// and $ident = $1; # remove IDENT lookups
+        $rdns =~ s/^([^\@]*)\@// and $ident = $1;	# remove IDENT lookups
         goto enough;
       }
     }
 
     # Received: from 4wtgRl (kgbxn@[211.244.147.115]) by dogma.slashnull.org (8.11.6/8.11.6) with SMTP id h8BBsUJ18848; Thu, 11 Sep 2003 12:54:31 +0100
-    if (/^from (\S+) \((\S+)\@\[(${IP_ADDRESS})\].*\) by (\S+) \(/) {
+    if (/^from (\S+) \((\S*)\@\[(${IP_ADDRESS})\].*\) by (\S+) \(/) {
       $mta_looked_up_dns = 1;	# this one does.  there just wasn't one
       $helo = $1; $ip = $3; $by = $4;
       $ident = $2;
@@ -619,13 +619,13 @@ sub parse_received_line {
     # Received: from 211.245.85.228  (EHLO ) (211.245.85.228) by mta232.mail.scd.yahoo.com with SMTP; Sun, 25 Jan 2004 00:24:37 -0800
     if (/^from \S+( \((?:HELO|EHLO) \S*\))? \((\S+\@)?\[?${IP_ADDRESS}\]?\)( \(envelope-sender <\S+>\))? by \S+( \(.+\))* with (.* )?(SMTP|QMQP)/) {
 
-       if (/^from (\S+) \((?:HELO|EHLO) ([^ \(\)]*)\) \((\S+)\@\[?(${IP_ADDRESS})\]?\)( \(envelope-sender <\S+>\))? by (\S+)/) {
+       if (/^from (\S+) \((?:HELO|EHLO) ([^ \(\)]*)\) \((\S*)\@\[?(${IP_ADDRESS})\]?\)( \(envelope-sender <\S+>\))? by (\S+)/) {
          $rdns = $1; $helo = $2; $ident = $3; $ip = $4; $by = $6;
        }
        elsif (/^from (\S+) \((?:HELO|EHLO) ([^ \(\)]*)\) \(\[?(${IP_ADDRESS})\]?\)( \(envelope-sender <\S+>\))? by (\S+)/) {
          $rdns = $1; $helo = $2; $ip = $3; $by = $5;
        }
-       elsif (/^from (\S+) \((\S+)\@\[?(${IP_ADDRESS})\]?\)( \(envelope-sender <\S+>\))? by (\S+)/) {
+       elsif (/^from (\S+) \((\S*)\@\[?(${IP_ADDRESS})\]?\)( \(envelope-sender <\S+>\))? by (\S+)/) {
 	 # note: absence of HELO means that it matched rDNS in qmail-land
          $helo = $rdns = $1; $ident = $2; $ip = $3; $by = $5;
        }
@@ -725,7 +725,7 @@ sub parse_received_line {
     # http://bugzilla.spamassassin.org/show_bug.cgi?id=2744#c14 :
     # Received: from unknown (HELO feux01a-isp) (213.199.4.210) by totor.bouissou.net with SMTP; 1 Nov 2003 07:05:19 -0000 
     # Received: from adsl-207-213-27-129.dsl.lsan03.pacbell.net (HELO merlin.net.au) (Owner50@207.213.27.129) by totor.bouissou.net with SMTP; 10 Nov 2003 06:30:34 -0000 
-    if (/^from (\S+) \((?:HELO|EHLO) ([^\)]*)\) \((\S+@)?\[?(${IP_ADDRESS})\]?\).* by (\S+) /)
+    if (/^from (\S+) \((?:HELO|EHLO) ([^\)]*)\) \((\S*@)?\[?(${IP_ADDRESS})\]?\).* by (\S+) /)
     {
       $mta_looked_up_dns = 1;
       $rdns = $1; $helo = $2; $ident = (defined $3) ? $3 : '';
@@ -735,7 +735,7 @@ sub parse_received_line {
     }
 
     # Received: from x1-6-00-04-bd-d2-e0-a3.k317.webspeed.dk (benelli@80.167.158.170) by totor.bouissou.net with SMTP; 5 Nov 2003 23:18:42 -0000
-    if (/^from (\S+) \((\S+@)?\[?(${IP_ADDRESS})\]?\).* by (\S+) /)
+    if (/^from (\S+) \((\S*@)?\[?(${IP_ADDRESS})\]?\).* by (\S+) /)
     {
       $mta_looked_up_dns = 1;
       # http://bugzilla.spamassassin.org/show_bug.cgi?id=2744 notes that
