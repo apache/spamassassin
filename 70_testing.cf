@@ -184,3 +184,130 @@ meta T_LONGWORDS_3	(__LONGWORDS_B + __LONGWORDS_C + __LONGWORDS_D > 1)
 meta T_LONGWORDS_4	(__LONGWORDS_A + __LONGWORDS_B + __LONGWORDS_C + __LONGWORDS_D > 1)
 
 header T_INVALID_DATE		Date !~ /^\s*(?:(?i:Mon|Tue|Wed|Thu|Fri|Sat|Sun),\s+)?[0-3\s]?[0-9]\s+(?i:Jan|Feb|Ma[ry]|Apr|Ju[nl]|Aug|Sep|Oct|Nov|Dec)\s+(?:[12][901])?[0-9]{2}\s+[0-2]?[0-9](?:\:[0-5][0-9]){1,2}\s+(?:[AP]M\s+)?(?:[+-][0-9]{4}|UT|[A-Z]{2,3}T)(?:\s+\(.*\))?\s*$/ [if-unset: Wed, 31 Jul 2002 16:41:57 +0200]
+
+##########################################################################
+# bug 2843
+
+header   T_LEADINGPREP       From =~ /^(?:A|About|All|An|And|Any|As|At|Be|Best|Bulk|Cash|Earn|Easy|Fast|Find|For|Free|From|Get|Hi|Home|In|Instant|Is|It|Its|Limited|Lose|Love|Make|Need|New|No|Save|Sex|She|Special|Stock|Stop|Take|Test|There|This|To|Try|Want|We|What|Where|Why|You|Your)[_ ]/i
+describe T_LEADINGPREP       From begins with preposition or similar word
+
+header   T_BLANKNAME    From =~ /"" \</i
+describe T_BLANKNAME    Sender has blanked out name
+
+header    T_COPYDVD           Subject =~ /(?:c[o0]py dvd|dvd.{1,15}c[o0]py|dvd magic)/i
+describe  T_COPYDVD           Subject mentions copying DVDs
+
+header    T_FREEPPV           Subject =~ /free ?p[a\@]y[ -]?per[ -]?view/i
+describe  T_FREEPPV           Subject mentions free pay-per-view 
+
+header    T_TONER             Subject =~ /\b(?:printer[-\s]*)?(?:l[a\@]ser[-\s]*)?(?:t[o0]ner|ink(?:[-\s]*jet)?|f[a\@]x|copier)[-\s]+(?:c[a\@]rtridge|supply)/i
+describe  T_TONER             Subject contains Toner or Ink Cartridge
+
+header    T_GETPAID      Subject =~ /[g6][\W_]?[e3\*\xC8-\xCB\xE8-\xEB][\W_]?t p[\W_]?[a4\*\@\xC0-\xC5\xAA\xE0-\xE5][\W_]?[il1:\|\*\xCC-\xCF\xEC-\xEF][\W_]?[d\xD0]/i
+describe  T_GETPAID      Subject mentions getting paid for something
+
+header    T_MAKEMONEY            Subject =~ /(?:(?:save|make)[ -].{0,15}money[ -](?:in|on)|(?:free|grant|saving|with our|(?:claim|keep) your) money|money machine)/i
+describe  T_MAKEMONEY            Subject mentions money in phrase that implies spam
+
+header    T_STOCKMARKET      Subject =~ /STOCK MARKET/i
+describe  T_STOCKMARKET      Subject mentions a/the STOCK MARKET 
+
+header    T_WORTHCASH        Subject =~ /\b(?:Worth|Win|take|extra|earn|dollars|Short|need|claim|free|get|opinions?|surveys?)\b.{0,15}(?:fast)?(?:C[a\@]sh|M[0o]ney)\b/i
+describe  T_WORTHCASH        Subject mentions something is worth cash
+
+header    T_IMPROVE   Subject =~ /improve your/i
+describe  T_IMPROVE   Subject suggests you improve something 
+
+header    T_SUBJBOOST         Subject =~ /[b8\xDF][\W_]?(?:\[\]|\(\)|[o0\*\xD2-\xD6\xF2-\xF6])[\W_]?(?:\[\]|\(\)|[o0\*\xD2-\xD6\xF2-\xF6])[\W_]?[s5\$\xA7][\W_]?t/i
+describe  T_SUBJBOOST         boost in Subject
+
+header    T_FOREVER       Subject =~ /\bf[\W_]?(?:\[\]|\(\)|[o0\*\xD2-\xD6\xF2-\xF6])[\W_]?[r\xAE][\W_]?[e3\*\xC8-\xCB\xE8-\xEB][\W_]?[vu][\W_]?[e3\*\xC8-\xCB\xE8-\xEB][\W_]?[r\xAE]\b/i
+describe  T_FOREVER       Forever in Subject
+
+header    T_SUBJPROVEN        Subject =~ /\bp[\W_]?[r\xAE][\W_]?(?:\[\]|\(\)|[o0\*\xD2-\xD6\xF2-\xF6])[\W_]?[vu][\W_]?[e3\*\xC8-\xCB\xE8-\xEB][\W_]?[n\xD1\xF1]\b/i
+describe  T_SUBJPROVEN        Proven in Subject
+
+header    T_SUBJDEBT         Subject =~ /[d\xD0][\W_]?[e3\*\xC8-\xCB\xE8-\xEB][\W_]?[b8\xDF][\W_]?t/i
+describe  T_SUBJDEBT         Subject mentions debt
+
+header    T_INVESTORS         Subject =~ /investors/i
+describe  T_INVESTORS         Subject mentions investors
+
+header    T_PAYING            Subject =~ /Paying/i
+describe  T_PAYING            Subject mentions Paying for something
+                                          
+header    T_SUBJDRUGS       Subject =~ /[vu][\W_]?[il1:\|\*\xCC-\xCF\xEC-\xEF][\W_]?[a4\*\@\xC0-\xC5\xAA\xE0-\xE5][\W_]?[g6][\W_]?[r\xAE][\W_]?[a4\*\@\xC0-\xC5\xAA\xE0-\xE5]/i
+describe  T_SUBJDRUGS       Subject mentions known spam subject
+
+header    T_MEDICATION   Subject =~ /(?:\/\\\/\\|\/V\\|rn|[m])[\W_]?[e3\*\xC8-\xCB\xE8-\xEB][\W_]?[d\xD0][\W_]?[il1:\|\*\xCC-\xCF\xEC-\xEF][\W_]?[c\xC7\xE7\xA2\xA9][\W_]?[a4\*\@\xC0-\xC5\xAA\xE0-\xE5][\W_]?t[\W_]?[il1:\|\*\xCC-\xCF\xEC-\xEF][\W_]?(?:\[\]|\(\)|[o0\*\xD2-\xD6\xF2-\xF6])[\W_]?[n\xD1\xF1]/i
+describe  T_MEDICATION   Subject mentions medication
+
+header    T_MEDS          Subject =~ /m(e|3)ds/i  
+describe  T_MEDS          Meds in subject
+
+header    T_YOUNGER       Subject =~ /\b[y\xA5\xDD\xFD][\W_]?(?:\[\]|\(\)|[o0\*\xD2-\xD6\xF2-\xF6])[\W_]?[uv\*\xB5\xD9-\xDC\xF9-\xFC][\W_]?[n\xD1\xF1][\W_]?[g6][\W_]?[e3\*\xC8-\xCB\xE8-\xEB][\W_]?[r\xAE]\b/i
+describe  T_YOUNGER       Younger in Subject
+
+header    T_CONSONANTS        Subject =~ /\b[bcghjklmnpqrstvwxz]{6,20}\b/
+describe  T_CONSONANTS        Subject contains consecutive consonants in "word"
+
+header    T_SPAMWORDS      Subject =~ /(?!tion)t[\W_]?[il1:\|\*\xCC-\xCF\xEC-\xEF][\W_]?(?:\[\]|\(\)|[o0\*\xD2-\xD6\xF2-\xF6])[\W_]?[n\xD1\xF1]/i
+describe  T_SPAMWORDS      masked spam word(s) in subject
+                                          
+header    T_SPAMWORDS2      Subject =~ /(?!\bcheap(er)?)\b[c\xC7\xE7\xA2\xA9][\W_]?h[\W_]?[e3\*\xC8-\xCB\xE8-\xEB][\W_]?[a4\*\@\xC0-\xC5\xAA\xE0-\xE5][\W_]?p([e3\*\xC8-\xCB\xE8-\xEB][\W_]?[r\xAE])?/i
+describe  T_SPAMWORDS2      masked spam word(s) in subject
+
+header    T_SPAMWORDS3      Subject =~ /(?!\bFor\b)\bf[\W_]?(?:\[\]|\(\)|[o0\*\xD2-\xD6\xF2-\xF6])[\W_]?[r\xAE]\b/i
+describe  T_SPAMWORDS3      masked spam word(s) in subject
+
+header    T_PENIS          Subject =~ /\bpenis\b/i
+describe  T_PENIS          masked spam word(s) in subject
+ 
+header    T_SPAMWORDS4      Subject =~ /(?!\bpenis\b)\bp[\W_]?[e3\*\xC8-\xCB\xE8-\xEB][\W_]?[n\xD1\xF1][\W_]?[il1:\|\*\xCC-\xCF\xEC-\xEF][\W_]?[s5\$\xA7]\b/i
+describe  T_SPAMWORDS4      masked spam word(s) in subject
+
+header    T_MIXEDCHAR       Subject =~ /[a-z]{1,5}[0-9]{1,5}[a-z]{1,5}[0-9]{1,5}[a-z]{1,5}[0-9]{1,5}/
+describe  T_MIXEDCHAR       Subject has multiple mixed chars in one "word"
+
+header    T_RNDSPM1   Subject =~ /\b[cjnqstuvwxz][bgjqu]\b/i
+describe  T_RNDSPM1   Subject contains random-text spamsign
+                                         
+header    T_RNDSPM2   Subject =~ /\be[bfjkopqv]\b/i
+describe  T_RNDSPM2   Subject contains random-text spamsign
+
+header    T_RNDSPM3   Subject =~ /\b[abehikmpqrsvwxyz]a[bjkquvz]\b/i
+describe  T_RNDSPM3   Subject contains random-text spamsign
+
+header    T_RNDSPM4   Subject =~ /\bx[bfghjklnpqrstwz][bfghjklnpqrstwz]\b/i
+describe  T_RNDSPM4   Subject contains random-text spamsign
+
+header    T_RNDSPM5   Subject =~ / [fghjklnqrtz]{3} /i
+describe  T_RNDSPM5   Subject contains random-text spamsign
+
+header    T_RNDSPM6   Subject =~ /\b[eiou][bfghjklnpqrtwz]{3}\b/i
+describe  T_RNDSPM6   Subject contains random-text spamsign
+
+header    T_RNDSPM7   Subject =~ /\b[bcdfghjklnpqrvwz]{5}\b/i
+describe  T_RNDSPM7   Subject contains random-text spamsign
+
+header    T_RNDSPM8      Subject =~ /\b[bcdghjklmnpqrstvwxz]{6}\b/i
+describe  T_RNDSPM8      Subject contains random-text spamsign
+
+header    T_RNDSPM9      Subject =~ /\b[bcdfghjklmnpqrstvwxz]{7}\b/i
+describe  T_RNDSPM9      Subject contains random-text spamsign
+                                         
+header    T_LONGSUBJ       Subject =~ /.{170,}/
+describe  T_LONGSUBJ       Subject is excessively long -- more than 169 chars
+
+header   T_TELESPRLY            Received =~ /dsl\.telesp\.net\.br/
+describe T_TELESPRLY            Spam passed through known spam relay domain
+	
+header   T_INDYLIB       X-Library=~ /Indy 10.00.14-B/
+describe T_INDYLIB       Uses spam-only version of Indy library
+
+header   T_JLH               exists:X-JLH
+describe T_JLH               X-JLH header found, possible spamsign
+
+header   T_TRACKING           ALL =~ /-tracking/i
+describe T_TRACKING           There is a tracking header in the email
+##########################################################################
