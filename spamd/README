@@ -45,6 +45,88 @@ system to run spamd in the background, and where your mailer invokes
 There's a Red Hat/Mandrake-style startup script called 'spamassassin'
 in this directory, suitable for installation in /etc/rc.d/init.d .
 
+Security
+--------
+
+Since spamd effectively has both read and write access on all of the mail
+which passes through it , you may want to keep security in mind. Depending
+on the nature of your set-up. If you are installing it on a site-wide
+basis at least some caution is advisable. 
+
+System-level security:
+
+By default spamd and spamc use port 22874, on 99% of the systems which spamd 
+runs, this is considered an utrusted port .. any user may bind to that port. 
+This means that if spamd falls over any user may bind to that port and read 
+your mail and return fake mail at their lesiure.
+
+If you are running spamd on a system where users have access to run 
+processes (common examples include: shells,cgi,procmail filters,servlets) 
+or are concerned about potential priveledge escalation if someone did manage 
+to gain shell access (a common feat unfortunately) you may wish to consider 
+running spamd on a port below 1024. 783 is a reasonable choice, unassigned 
+and unlikely to clash with anything you're running,. If it does, use a 
+different port. Spamd must be started as root for this to work, however it 
+neednt run as root.
+
+Using spamd on this port is easy, if you are using the debian-style
+init script, add "-p 783" to OPTIONS in /etc/defaults/spamassin or
+/etc/spamd.conf. If you use other init scripts modify them directly
+to invoke spamd with the "-p 783" option. You must also invoke
+spamc with this option when using it.
+
+In short: if you can run it on a low port, do. Nothing to lose
+          and plenty to gain.
+
+Spamd has the facility to run as a non-root user, this has potential
+security payoffs. If a fault is found in spamd or spamassassin code,
+any third party linked-libraries or imported perl modules there is 
+the potential for abuse of both the running uid of spamd, and the
+uid of the username suppplied by spamc (and this can be any username)
+
+When run as root, spamd will change uid's to the user inoking spamc in 
+order to read and write to their configurations. This functionality
+is not possible if spamd does not run as root and is a disadvantage if
+you rely on this. If you use mysql for per-user configuration there
+is no reason in the world to run as root, and this remains fully
+functional.
+
+Since spamd makes no effort to authenticate the username supplied by
+spamc, it is easily possible for malicious users invoking modified 
+spamc clients to make spamd:
+
+ (1.)  read (and hence determine) the contents of other users configurations
+ (2.)  change the contents of other users configurations (whitelisting)
+ (3.)  grab CPU time as that user -- this is an issue on ulimit'd systems
+
+if users do not have the opportunity to invoke spamc themselves, and
+the network is secure, running spamd as root is the preferred option,
+Be clear that the issues above dont affect you. Note: if you use mysql
+for per-user configuration on systems, you will remain vulnerable to
+(1.) and (2.). 
+
+configuration:              Mysql           .spamassassin.cf
+                             / \                  / \
+                            /   \                /   \               
+can users connect?      yes      no           yes     no
+                         |        |           /        |
+                         |        |          /         |
+                       unsafe     |         /     root prefered
+                                  |        /
+                               safe as non-root
+                                          |
+                                          |
+                                  some depcrecation
+
+Network security:
+
+If you use spamd across a network and spamc connects from other hosts,
+You should ensure (as with all services) the security of your network
+segments. Mail is sent as plaintext, and is prone to packet sniffing and
+spoofing techniques if you are on an insecure network. If you cannot avoid
+this consider using an encrypted transport layer, such as a VPN, ssh
+tunnel or similar. 
+
 Performance
 -----------
 
