@@ -48,7 +48,7 @@ $VALID_TLDS = qr{ (?:
   aero| biz| com| coop| info| museum| name| net| org| pro| gov| edu| mil| int|
   
   # http://www.iana.org/arpa-dom/
-  arpa
+  arpa|
 
   # just in case... futureproofing 
   eu
@@ -79,7 +79,7 @@ $FOUR_LEVEL_DOMAINS = qr( (?:
   # "Fire-Dept.CI.Los-Angeles.CA.US"
   # "<school-name>.PVT.K12.<state>.US"
 
-  pvt\.k12\.${US_STATES}\.us
+  pvt\.k12\.${US_STATES}\.us|
   c[io]\.[^\.]+\.${US_STATES}\.us
 )
 )ix;
