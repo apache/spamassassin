@@ -21,11 +21,11 @@ Mail::SpamAssassin - Spam detector and markup engine
 =head1 SYNOPSIS
 
   my $spamtest = Mail::SpamAssassin->new();
-  my $mail = $spamtest->parse();
-  my $status = $spamtest->check ($mail);
+  my $mail = $spamtest->parse( $message );
+  my $status = $spamtest->check( $mail );
 
-  if ($status->is_spam ()) {
-    $mail = $status->rewrite_mail ();
+  if ($status->is_spam()) {
+    $mail = $status->rewrite_mail();
   } else {
     ...
   }
