@@ -598,3 +598,10 @@ describe ORG_MIME_TOOLS		Organization is MIME-tools
 
 header X_MIME_AUTOCONVERTED	X-MIME-Autoconverted =~ /Yes/
 describe X_MIME_AUTOCONVERTED	Message has X-MIME-Autoconverted "Yes" header
+
+header __HOTMAIL_RCVD		Received =~/\bhotmail\.com\b/
+header __HOTMAIL_SMTPSVC	Received =~ /\bwith Microsoft SMTPSVC;/
+header __HOTMAIL_OIP		X-Originating-IP =~ /\[(\d{1,3}\.){3}\d{1,3}\]/
+header __RECEIVED_DAV		Received =~ /\bwith DAV;/
+meta DAV_NON_HOTMAIL		__RECEIVED_DAV && !(__HOTMAIL_RCVD && __HOTMAIL_SMTPSVC && __HOTMAIL_OIP)
+describe DAV_NON_HOTMAIL	Message sent using DAV, but not via Hotmail
