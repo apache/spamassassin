@@ -312,45 +312,89 @@ body T_NORMAL_HTTP_TO_IP	eval:check_numeric_http()
 # 18 long are my first FPs: <8169476@pamho.net>
 # idea: work towards combined rule that looks vaguely like this:
 # header T_MSGID_SHORT	MESSAGEID =~ /<.{1,5}\@|\@.{1,6}>|^.{1,17}$/
+# missing (seems unlikely)
+header __MSGID_EXISTS_01	exists:MESSAGEID
+header __MSGID_EXISTS_02	exists:Message-ID
+meta T_MSGID_NONE_01		!__MSGID_EXISTS_01
+meta T_MSGID_NONE_02		!__MSGID_EXISTS_02
 # full id #1
-header T_MSGID_SHORT_05	MESSAGEID =~ /^.{1,5}$/
-header T_MSGID_SHORT_06	MESSAGEID =~ /^.{1,6}$/
-header T_MSGID_SHORT_07	MESSAGEID =~ /^.{1,7}$/
-header T_MSGID_SHORT_08	MESSAGEID =~ /^.{1,8}$/
-header T_MSGID_SHORT_09	MESSAGEID =~ /^.{1,9}$/
-header T_MSGID_SHORT_10	MESSAGEID =~ /^.{1,10}$/
-header T_MSGID_SHORT_11	MESSAGEID =~ /^.{1,11}$/
-header T_MSGID_SHORT_12	MESSAGEID =~ /^.{1,12}$/
-header T_MSGID_SHORT_13	MESSAGEID =~ /^.{1,13}$/
-header T_MSGID_SHORT_14	MESSAGEID =~ /^.{1,14}$/
-header T_MSGID_SHORT_15	MESSAGEID =~ /^.{1,15}$/
-header T_MSGID_SHORT_16	MESSAGEID =~ /^.{1,16}$/
-header T_MSGID_SHORT_17	MESSAGEID =~ /^.{1,17}$/
+header T_MSGID_SHORT_A05	MESSAGEID =~ /^.{1,5}$/
+header T_MSGID_SHORT_A06	MESSAGEID =~ /^.{1,6}$/
+header T_MSGID_SHORT_A07	MESSAGEID =~ /^.{1,7}$/
+header T_MSGID_SHORT_A08	MESSAGEID =~ /^.{1,8}$/
+header T_MSGID_SHORT_A09	MESSAGEID =~ /^.{1,9}$/
+header T_MSGID_SHORT_A10	MESSAGEID =~ /^.{1,10}$/
+header T_MSGID_SHORT_A11	MESSAGEID =~ /^.{1,11}$/
+header T_MSGID_SHORT_A12	MESSAGEID =~ /^.{1,12}$/
+header T_MSGID_SHORT_A13	MESSAGEID =~ /^.{1,13}$/
+header T_MSGID_SHORT_A14	MESSAGEID =~ /^.{1,14}$/
+header T_MSGID_SHORT_A15	MESSAGEID =~ /^.{1,15}$/
+header T_MSGID_SHORT_A16	MESSAGEID =~ /^.{1,16}$/
+header T_MSGID_SHORT_A17	MESSAGEID =~ /^.{1,17}$/
 # full id #2
-header T_MSGID_SHORT_X03	MESSAGEID =~ /<.{1,3}>/
-header T_MSGID_SHORT_X04	MESSAGEID =~ /<.{1,4}>/
-header T_MSGID_SHORT_X05	MESSAGEID =~ /<.{1,5}>/
-header T_MSGID_SHORT_X06	MESSAGEID =~ /<.{1,6}>/
-header T_MSGID_SHORT_X07	MESSAGEID =~ /<.{1,7}>/
-header T_MSGID_SHORT_X08	MESSAGEID =~ /<.{1,8}>/
-header T_MSGID_SHORT_X09	MESSAGEID =~ /<.{1,9}>/
-header T_MSGID_SHORT_X10	MESSAGEID =~ /<.{1,10}>/
-header T_MSGID_SHORT_X11	MESSAGEID =~ /<.{1,11}>/
-header T_MSGID_SHORT_X12	MESSAGEID =~ /<.{1,12}>/
-header T_MSGID_SHORT_X13	MESSAGEID =~ /<.{1,13}>/
-header T_MSGID_SHORT_X14	MESSAGEID =~ /<.{1,14}>/
-header T_MSGID_SHORT_X15	MESSAGEID =~ /<.{1,15}>/
-# local part
-header T_MSGID_SHORT_A5	MESSAGEID =~ /<.{1,5}\@/
-header T_MSGID_SHORT_A6	MESSAGEID =~ /<.{1,6}\@/
-header T_MSGID_SHORT_A7	MESSAGEID =~ /<.{1,7}\@/
-header T_MSGID_SHORT_A8	MESSAGEID =~ /<.{1,8}\@/
-# domain
-header T_MSGID_SHORT_B4	MESSAGEID =~ /\@.{1,4}>/
-header T_MSGID_SHORT_B5	MESSAGEID =~ /\@.{1,5}>/
-header T_MSGID_SHORT_B6	MESSAGEID =~ /\@.{1,6}>/
-header T_MSGID_SHORT_B7	MESSAGEID =~ /\@.{1,7}>/
-header T_MSGID_SHORT_B8	MESSAGEID =~ /\@.{1,8}>/
+header T_MSGID_SHORT_B05	MESSAGEID =~ /^.{0,5}$/
+header T_MSGID_SHORT_B06	MESSAGEID =~ /^.{0,6}$/
+header T_MSGID_SHORT_B07	MESSAGEID =~ /^.{0,7}$/
+header T_MSGID_SHORT_B08	MESSAGEID =~ /^.{0,8}$/
+header T_MSGID_SHORT_B09	MESSAGEID =~ /^.{0,9}$/
+header T_MSGID_SHORT_B10	MESSAGEID =~ /^.{0,10}$/
+header T_MSGID_SHORT_B11	MESSAGEID =~ /^.{0,11}$/
+header T_MSGID_SHORT_B12	MESSAGEID =~ /^.{0,12}$/
+header T_MSGID_SHORT_B13	MESSAGEID =~ /^.{0,13}$/
+header T_MSGID_SHORT_B14	MESSAGEID =~ /^.{0,14}$/
+header T_MSGID_SHORT_B15	MESSAGEID =~ /^.{0,15}$/
+header T_MSGID_SHORT_B16	MESSAGEID =~ /^.{0,16}$/
+header T_MSGID_SHORT_B17	MESSAGEID =~ /^.{0,17}$/
+# full id #3
+header T_MSGID_SHORT_C03	MESSAGEID =~ /<.{1,3}>/
+header T_MSGID_SHORT_C04	MESSAGEID =~ /<.{1,4}>/
+header T_MSGID_SHORT_C05	MESSAGEID =~ /<.{1,5}>/
+header T_MSGID_SHORT_C06	MESSAGEID =~ /<.{1,6}>/
+header T_MSGID_SHORT_C07	MESSAGEID =~ /<.{1,7}>/
+header T_MSGID_SHORT_C08	MESSAGEID =~ /<.{1,8}>/
+header T_MSGID_SHORT_C09	MESSAGEID =~ /<.{1,9}>/
+header T_MSGID_SHORT_C10	MESSAGEID =~ /<.{1,10}>/
+header T_MSGID_SHORT_C11	MESSAGEID =~ /<.{1,11}>/
+header T_MSGID_SHORT_C12	MESSAGEID =~ /<.{1,12}>/
+header T_MSGID_SHORT_C13	MESSAGEID =~ /<.{1,13}>/
+header T_MSGID_SHORT_C14	MESSAGEID =~ /<.{1,14}>/
+header T_MSGID_SHORT_C15	MESSAGEID =~ /<.{1,15}>/
+# full id #4
+header T_MSGID_SHORT_D03	MESSAGEID =~ /<.{0,3}>/
+header T_MSGID_SHORT_D04	MESSAGEID =~ /<.{0,4}>/
+header T_MSGID_SHORT_D05	MESSAGEID =~ /<.{0,5}>/
+header T_MSGID_SHORT_D06	MESSAGEID =~ /<.{0,6}>/
+header T_MSGID_SHORT_D07	MESSAGEID =~ /<.{0,7}>/
+header T_MSGID_SHORT_D08	MESSAGEID =~ /<.{0,8}>/
+header T_MSGID_SHORT_D09	MESSAGEID =~ /<.{0,9}>/
+header T_MSGID_SHORT_D10	MESSAGEID =~ /<.{0,10}>/
+header T_MSGID_SHORT_D11	MESSAGEID =~ /<.{0,11}>/
+header T_MSGID_SHORT_D12	MESSAGEID =~ /<.{0,12}>/
+header T_MSGID_SHORT_D13	MESSAGEID =~ /<.{0,13}>/
+header T_MSGID_SHORT_D14	MESSAGEID =~ /<.{0,14}>/
+header T_MSGID_SHORT_D15	MESSAGEID =~ /<.{0,15}>/
+# local part #2
+header T_MSGID_SHORT_LP_1_5	MESSAGEID =~ /<.{1,5}\@/
+header T_MSGID_SHORT_LP_1_6	MESSAGEID =~ /<.{1,6}\@/
+header T_MSGID_SHORT_LP_1_7	MESSAGEID =~ /<.{1,7}\@/
+header T_MSGID_SHORT_LP_1_8	MESSAGEID =~ /<.{1,8}\@/
+# local part #1
+header T_MSGID_SHORT_LP_0_5	MESSAGEID =~ /<.{0,5}\@/
+header T_MSGID_SHORT_LP_0_6	MESSAGEID =~ /<.{0,6}\@/
+header T_MSGID_SHORT_LP_0_7	MESSAGEID =~ /<.{0,7}\@/
+header T_MSGID_SHORT_LP_0_8	MESSAGEID =~ /<.{0,8}\@/
+# domain #1
+header T_MSGID_SHORT_DO_1_4	MESSAGEID =~ /\@.{1,4}>/
+header T_MSGID_SHORT_DO_1_5	MESSAGEID =~ /\@.{1,5}>/
+header T_MSGID_SHORT_DO_1_6	MESSAGEID =~ /\@.{1,6}>/
+header T_MSGID_SHORT_DO_1_7	MESSAGEID =~ /\@.{1,7}>/
+header T_MSGID_SHORT_DO_1_8	MESSAGEID =~ /\@.{1,8}>/
+# domain #2
+header T_MSGID_SHORT_DO_0_4	MESSAGEID =~ /\@.{0,4}>/
+header T_MSGID_SHORT_DO_0_5	MESSAGEID =~ /\@.{0,5}>/
+header T_MSGID_SHORT_DO_0_6	MESSAGEID =~ /\@.{0,6}>/
+header T_MSGID_SHORT_DO_0_7	MESSAGEID =~ /\@.{0,7}>/
+header T_MSGID_SHORT_DO_0_8	MESSAGEID =~ /\@.{0,8}>/
 
 # no To or Cc
 header __CC_UNSET	Cc =~ /^UNSET$/ [if-unset: UNSET]
