@@ -14,7 +14,7 @@
 #
 ###########################################################################
 
-lang es body REMOVE_ES_01             /(?:Para (?:no|dejar de)|[sS]i (?:U(?:ste)?d\. )?no (?:deseas?|qui?er[ée]s)) (?:seguir )?reci[vb]i(?:r|endo) (?:en el futuro |m.s )?(?:ninguna otra|nuestr[ao]s?|est[ao]s?)?\s?(?:correos?|mensajes?|publicidad|informaci.n|ofertas?|(?:promoci.n|bolet.n)(?:es)?|(?:e-?)?mails? promocional(?:es)?|avisos)/i
+lang es body REMOVE_ES_01             /(?:Para (?:no|dejar de)|[sS]i (?:U(?:ste)?d\. )?no (?:deseas?|qui?er[ée]s)) (?:seguir )?reci[vb]i(?:r|endo) (?:en el futuro |m.s )?(?:ninguna otra|nuestr[ao]s?|est[ao]s?)?\s?(?:correos?|mensajes?|publicidad|informaci.n|ofertas?|(?:promoci.n|bolet.n)(?:es)?|(?:e-?)?mails? promocional(?:es)?|avisos|las comunicaciones)/i
 lang es describe REMOVE_ES_01         Claims you can be removed in Spanish
 
 lang es body REMOVE_ES_02             /(?:Para ser (?:elimina|removi)do|Si quieres? salir|Para eliminarse) del? (?:nuestra|esta|mailing) ?lista?,? (?:sera removido|responda el mail|solo tienes? que marcar|enviar un ?e-?mail)/i
@@ -90,7 +90,7 @@ lang es describe LEY_CHILE_ES_02	Clama cumplir con la legislación chilena
 lang es body TARJETA_VERDE_ES		/Consiga un permiso de residencia.{0,30}Tarjeta Verde/i
 lang es describe TARJETA_VERDE_ES	Inmigración legal (?) a los Estados Unidos
 
-lang es body PROMOCION_ES		/precio promocional|promocion especial/i
+lang es body PROMOCION_ES		/precio promocional|promoci.n especial|esta promoci.n/i
 lang es describe PROMOCION_ES		Promocion especial.
 
 lang es body ALTA_BUSCADORES_ES		/alta en (?:mas de )?\d{2,4} buscadores hispanos/i
@@ -108,10 +108,10 @@ lang es describe CONTRA_REEMBOLSO_ES	Pago contra reembolso.
 lang es body PEDIDO_ES			/haga su pedido/i
 lang es describe PEDIDO_ES		Para hacer su pedido.
 
-lang es body CLICK_ES			/(?:ha(?:ga|z|ciendo|cer) click|oprim[ae]) (?:aqu.|en el bot.n)/i
+lang es body CLICK_ES			/(?:ha(?:ga|z|ciendo|cer) click?|oprim[ae]) (?:aqu.|en el bot.n)/i
 lang es describe CLICK_ES		Haga click aqui.
 
-lang es body REGALO_ES			/[lt]e (?:regal|obsequi)amos|ll.vate tu regalo/i
+lang es body REGALO_ES			/[lt]e (?:regal|obsequi)amos|ll.vate tu regalo|para (?:ganar uno de nuestros|recibir este) premios?/i
 lang es describe REGALO_ES		Los regalos no existen, salvo de nuestros amigos.
 
 lang es body GANADORES_ES_01		/Usted y su familia podr.an tener suerte y ser los ganadores/i
