@@ -118,7 +118,9 @@ describe CHINA_URL      Frequent SPAM content
 uri MAILTO_TO_B2BMAIL         /^mailto:[^\s\@]{1,20}\@b2b-?mail\./is
 describe MAILTO_TO_B2BMAIL    Includes a link to a likely spammer email address (b2b-mail)
 
-uri PXE_LOGIC /^http:\/\/(?:pxe|fx)\.[^\/]{1,50}\.com\/logic\/to\.pl\?/i
-test PXE_LOGIC ok http://pxe.highspeed-email.com/logic/to.pl?i=3399923cd33d
-describe PXE_LOGIC Spam URL pattern, usually made up domains
+uri DAILY_PL			/\/logic\/[a-z]{2}\.pl/
+describe DAILY_PL		Spam URL pattern, DailyPromotions redirect link
+
+uri DAILY_PXE			/http:\/\/(?:pxe|fx)\./i
+describe DAILY_PXE		Spam URL pattern, DailyPromotions server link
 
