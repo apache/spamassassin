@@ -743,3 +743,8 @@ describe X_ORIG_HOST		Message has X-Originating-Host header
 header X_ORIG_IP_NOT_IPV4	X-Originating-IP !~ /\[?(?:\d{1,3}\.){3}\d{1,3}\]?/ [if-unset: 0.0.0.0] 
 describe X_ORIG_IP_NOT_IPV4	X-Originating-IP doesn't look like IPv4 address
 
+# match the format of a legit X-Auth-Warning header, and hit on fake ones
+# normal: "e4e.oac.uci.edu: foo owned process doing -bs"
+# fake: "bzgrdag, upaeqehv"
+header X_AUTH_WARN_FAKED	X-Authentication-Warning !~ /^(\S+\.\S+): / [if-unset: host.example.net: foo owned process doing -bs]
+describe X_AUTH_WARN_FAKED	X-Authentication-Warning header looks faked

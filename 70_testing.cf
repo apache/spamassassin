@@ -536,38 +536,15 @@ header __T_OPT_HEADER_ALL    ALL =~ /opt.?(?:in|out|oem|ion-in)(?:\b|\d|\@)/i
 meta T_OPT_HEADER            (__T_OPT_HEADER_ALL && !__T_OPT_HEADER_SUBJ)
 describe T_OPT_HEADER        Headers include an "opt"ed phrase
 
-# match the format of a legit X-Auth-Warning header, and hit on fake ones
-# normal: "e4e.oac.uci.edu: foo owned process doing -bs"
-# fake: "bzgrdag, upaeqehv"
-header __HAS_AUTHWARN	     X-Authentication-Warning =~ /^./
-header __NORMAL_AUTHWARN     X-Authentication-Warning !~ /^(\S+\.\S+): /
-meta T_FAKED_AUTHWARN	     (__HAS_AUTHWARN && !__NORMAL_AUTHWARN)
-describe T_FAKED_AUTHWARN    'X-Authentication-Warning' looks faked
-
-header T_FAKED_AUTHWARN_2	X-Authentication-Warning !~ /^(\S+\.\S+): / [if-unset: host.example.net: foo owned process doing -bs]
-
 body T_HTML_COMMENT_TAG		eval:html_text('comment', '=~ /<.*?>/')
 describe T_HTML_COMMENT_TAG	HTML comment probably contains HTML tag
 
 # back to the drawing board (demoted for development or deletion)
-header T_FAKED_IP_IN_RCVD		Received =~ /from [-0-9a-z\._]+_\[\d+\.\d+\.\d+\.\d+\] /i
+header T_FAKED_IP_IN_RCVD	Received =~ /from [-0-9a-z\._]+_\[\d+\.\d+\.\d+\.\d+\] /i
 describe T_FAKED_IP_IN_RCVD	Received: contains a name with a faked IP-address
 
 # back to the drawing board (demoted for development or deletion)
 # no legit mailer claims that their mailserver has no name
-header T_RCVD_BY_IP	Received =~ /from \S+ \[\S+\] by [0-9\.]+ with ESMTP id/
+header T_RCVD_BY_IP	Received =~ /\bby\s+\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/
 describe T_RCVD_BY_IP	Received by mail server with no name
-
-header T_RCVD_BY_IP_2	Received =~ /from \S+ \[\S+\] by [0-9\.]+ with/
-header T_RCVD_BY_IP_3	Received =~ /\bby [0-9\.]+ with/
-header T_RCVD_BY_IP_4	Received =~ /\bby\s+\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s+with/
-header T_RCVD_BY_IP_5	Received =~ /\bby\s+\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s+with/
-header T_RCVD_BY_IP_6	Received =~ /\bby\s+\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\s+with/
-header T_RCVD_BY_IP_7	Received =~ /\bby\b.{1,4}\b\d{1,3}[._-]\d{1,3}[._-]\d{1,3}[._-]\d{1,3}(?<!127\.0\.0\.1)\b/i
-header T_RCVD_BY_IP_8	Received =~ /\bby\b.{1,4}\b\d{1,3}[._-]\d{1,3}[._-]\d{1,3}[._-]\d{1,3}\b/i
-header T_RCVD_BY_IP_9	Received =~ /\bby\b.{1,4}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b/i
-header T_RCVD_BY_IP_A	Received =~ /\bby\b.{1,4}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/i
-header T_RCVD_BY_IP_B	Received =~ /\bby\b\s*.{0,2}\s*\b\d{1,3}[._-]\d{1,3}[._-]\d{1,3}[._-]\d{1,3}(?<!127\.0\.0\.1)\b/i
-header T_RCVD_BY_IP_C	Received =~ /\bby\b\s*.{0,2}\s*\b\d{1,3}[._-]\d{1,3}[._-]\d{1,3}[._-]\d{1,3}\b/i
-header T_RCVD_BY_IP_D	Received =~ /\bby\b\s*.{0,2}\s*\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b/i
-header T_RCVD_BY_IP_E	Received =~ /\bby\b\s*.{0,2}\s*\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/i
+header T_RCVD_BY_IP_2	Received =~ /\bby\s+\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b/
