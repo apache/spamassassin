@@ -1,0 +1,27 @@
+#!/bin/bash
+
+echo "
+
+NOTE: this is a sample.  You need to customise it to
+fit your corpus of spam and nonspam mails.
+
+"
+cd /home/jm/ftp/spamassassin/masses
+
+set -x
+date
+
+mkdir -p logs/old 2>/dev/null
+mv spam.log nonspam.log logs/old
+
+./mass-check /home/jm/corpus/kelsey.spamtrap.gz > spam.log
+./mass-check /home/jm/corpus/spam.2000-2001.gz >> spam.log
+
+echo "
+
+son=spam.sonic.net
+rsync -vrze ssh \$son:ftp/spamassassin/masses/spam.log spam.sonic
+rsync -vrze ssh \$son:ftp/spamassassin/masses/nonspam.log nonspam.sonic
+
+"
+
