@@ -2425,8 +2425,8 @@ bayes storage mechanism.  It must conform to the published storage specification
 
 =cut
 
-    if (/^bayes_store_module\s+(.*)$/) {
-      my $module = $1;
+    if ( $key eq 'bayes_store_module' ) {
+      my $module = $value;
       $module =~ /^([_A-Za-z0-9:]+)$/;
       $self->{bayes_store_module} = $1;
       next;
@@ -2440,8 +2440,8 @@ This option give the connect string used to connect to the SQL based Bayes stora
 
 =cut
 
-    if (/^bayes_sql_dsn\s+(\S+)$/) {
-      $self->{bayes_sql_dsn} = $1; next;
+    if ( $key eq 'bayes_sql_dsn' ) {
+      $self->{bayes_sql_dsn} = $value; next;
     }
 
 =item bayes_sql_username
@@ -2452,8 +2452,8 @@ This option gives the username used by the above DSN.
 
 =cut
 
-    if (/^bayes_sql_username\s+(\S+)$/) {
-      $self->{bayes_sql_username} = $1; next;
+    if ( $key eq 'bayes_sql_username' ) {
+      $self->{bayes_sql_username} = $value; next;
     }
 
 =item bayes_sql_password
@@ -2464,8 +2464,8 @@ This option gives the password used by the above DSN.
 
 =cut
 
-    if (/^bayes_sql_password\s+(\S+)$/) {
-      $self->{bayes_sql_password} = $1; next;
+    if ( $key eq 'bayes_sql_password' ) {
+      $self->{bayes_sql_password} = $value; next;
     }
 
 =item user_scores_dsn DBI:databasetype:databasename:hostname:port
@@ -2504,6 +2504,43 @@ The password for the database username, for the above DSN.
     # user_scores_sql_table here.  All just take \S+ and set the string of the
     # same name on $self.
 
+=item user_awl_dsn DBI:databasetype:databasename:hostname:port
+
+If you load user auto-whitelists from an SQL database, this will set the DSN
+used to connect.  Example: C<DBI:mysql:spamassassin:localhost>
+
+=cut
+    if ( $key eq 'user_awl_dsn' ) {
+      $self->{user_awl_dsn} = $value; next;
+    }
+
+=item user_awl_sql_username username
+
+The authorized username to connect to the above DSN.
+
+=cut
+    if ( $key eq 'user_awl_sql_username' ) {
+      $self->{user_awl_sql_username} = $value; next;
+    }
+
+=item user_awl_sql_password password
+
+The password for the database username, for the above DSN.
+
+=cut
+    if ( $key eq 'user_awl_sql_password' ) {
+      $self->{user_awl_sql_password} = $value; next;
+    }
+
+=item user_awl_sql_table tablename
+
+The table user auto-whitelists are stored in, for the above DSN.
+
+=cut
+    if ( $key eq 'user_awl_sql_table' ) {
+      $self->{user_awl_sql_table} = $value; next;
+    }
+
 =item loadplugin PluginModuleName /path/to/module.pm
 
 Load a SpamAssassin plugin module.  The C<PluginModuleName> is the perl module
@@ -2517,43 +2554,6 @@ See C<Mail::SpamAssassin::Plugin> for more details on writing plugins.
     # leave as RE right now
     if (/^loadplugin\s+(\S+)\s+(\S+)$/) {
       $self->load_plugin ($1, $2); next;
-    }
-
-=item user_awl_dsn DBI:databasetype:databasename:hostname:port
-
-If you load user auto-whitelists from an SQL database, this will set the DSN
-used to connect.  Example: C<DBI:mysql:spamassassin:localhost>
-
-=cut
-    if (/^user_awl_dsn\s+(\S+)$/) {
-      $self->{user_awl_dsn} = $1; next;
-    }
-
-=item user_awl_sql_username username
-
-The authorized username to connect to the above DSN.
-
-=cut
-    if(/^user_awl_sql_username\s+(\S+)$/) {
-      $self->{user_awl_sql_username} = $1; next;
-    }
-
-=item user_awl_sql_password password
-
-The password for the database username, for the above DSN.
-
-=cut
-    if(/^user_awl_sql_password\s+(\S+)$/) {
-      $self->{user_awl_sql_password} = $1; next;
-    }
-
-=item user_awl_sql_table tablename
-
-The table user auto-whitelists are stored in, for the above DSN.
-
-=cut
-    if(/^user_awl_sql_table\s+(\S+)$/) {
-      $self->{user_awl_sql_table} = $1; next;
     }
 
 ###########################################################################

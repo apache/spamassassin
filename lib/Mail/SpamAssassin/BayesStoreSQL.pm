@@ -1,60 +1,17 @@
 # <@LICENSE>
-# ====================================================================
-# The Apache Software License, Version 1.1
+# Copyright 2004 Apache Software Foundation
 # 
-# Copyright (c) 2000 The Apache Software Foundation.  All rights
-# reserved.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
 # 
-# Redistribution and use in source and binary forms, with or without
-# modification, are permitted provided that the following conditions
-# are met:
+#     http://www.apache.org/licenses/LICENSE-2.0
 # 
-# 1. Redistributions of source code must retain the above copyright
-#    notice, this list of conditions and the following disclaimer.
-# 
-# 2. Redistributions in binary form must reproduce the above copyright
-#    notice, this list of conditions and the following disclaimer in
-#    the documentation and/or other materials provided with the
-#    distribution.
-# 
-# 3. The end-user documentation included with the redistribution,
-#    if any, must include the following acknowledgment:
-#       "This product includes software developed by the
-#        Apache Software Foundation (http://www.apache.org/)."
-#    Alternately, this acknowledgment may appear in the software itself,
-#    if and wherever such third-party acknowledgments normally appear.
-# 
-# 4. The names "Apache" and "Apache Software Foundation" must
-#    not be used to endorse or promote products derived from this
-#    software without prior written permission. For written
-#    permission, please contact apache@apache.org.
-# 
-# 5. Products derived from this software may not be called "Apache",
-#    nor may "Apache" appear in their name, without prior written
-#    permission of the Apache Software Foundation.
-# 
-# THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
-# WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
-# OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-# DISCLAIMED.  IN NO EVENT SHALL THE APACHE SOFTWARE FOUNDATION OR
-# ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF
-# USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-# ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT
-# OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
-# SUCH DAMAGE.
-# ====================================================================
-# 
-# This software consists of voluntary contributions made by many
-# individuals on behalf of the Apache Software Foundation.  For more
-# information on the Apache Software Foundation, please see
-# <http://www.apache.org/>.
-# 
-# Portions of this software are based upon public domain software
-# originally written at the National Center for Supercomputing Applications,
-# University of Illinois, Urbana-Champaign.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 # </@LICENSE>
 
 =head1 NAME
@@ -73,8 +30,6 @@ package Mail::SpamAssassin::BayesStoreSQL;
 
 use strict;
 use bytes;
-
-use DBI;
 
 use Mail::SpamAssassin::BayesStore;
 
@@ -115,20 +70,25 @@ sub new {
   my $dbuser = $self->{bayes}->{conf}->{bayes_sql_username};
   my $dbpass = $self->{bayes}->{conf}->{bayes_sql_password};
 
-  my $dbh = DBI->connect($dsn, $dbuser, $dbpass, {'PrintError' => 1});
+  my $dbh;
+  if (!eval {
+    require DBI;
+    # TODO: not sure about "PrintError" here
+    $dbh = DBI->connect($dsn, $dbuser, $dbpass, {'PrintError' => 1});
 
-  if (!$dbh) {
-    dbg("bayes: Unable to connect to database: ".DBI->errstr());
+    if (!$dbh) {
+      dbg("bayes: Unable to connect to database: ".DBI->errstr());
+    }
+    else {
+      dbg("bayes: Database connection established");
+    }
+    1;
 
-    ## TODO!  This is not appropriate -- $bayes->{store} must alwasy
-    ## be a valid object.  returning undef from a constructor is bad
-    ## news.
-    return undef;
+  }) {
+    dbg("bayes: Unable to connect to database: DBI module not available: $!");
   }
 
   $self->{_dbh} = $dbh;
-
-  dbg("bayes: Database connection established");
 
   if ($self->{bayes}->{conf}->{bayes_sql_override_username}) {
     $self->{_username} = $self->{bayes}->{conf}->{bayes_sql_override_username};
@@ -178,6 +138,9 @@ so that they can begin using the database immediately.
 
 sub tie_db_writable {
   my ($self) = @_;
+
+  return 0 unless (defined($self->{_dbh}));
+
   my $main = $self->{bayes}->{main};
 
   $self->read_db_configs();
@@ -219,7 +182,7 @@ sub untie_db {
 
 =head2 calculate_expire_delta
 
-public instance (\%) calculate_expire_delta (Integer $newest_atime,
+public instance (%) calculate_expire_delta (Integer $newest_atime,
                                              Integer $start,
                                              Integer $max_expire_mult)
 
@@ -233,6 +196,8 @@ sub calculate_expire_delta {
   my ($self, $newest_atime, $start, $max_expire_mult) = @_;
 
   my %delta = (); # use a hash since an array is going to be very sparse
+
+  return %delta unless (defined($self->{_dbh}));
   
   my $sql = "SELECT count(*)
                FROM bayes_token
@@ -339,6 +304,8 @@ found.
 
 sub seen_get {
   my ($self, $msgid) = @_;
+
+  return undef unless (defined($self->{_dbh}));
  
   my $sql = "SELECT flag FROM bayes_seen WHERE username = ? AND msgid = ?";
 
@@ -379,6 +346,8 @@ sub seen_put {
   return 0 if (!$msgid);
   return 0 if (!$flag);
   
+  return 0 unless (defined($self->{_dbh}));
+
   my $sql = "INSERT INTO bayes_seen (username, msgid, flag) VALUES (?,?,?)";
   
   my $sth = $self->{_dbh}->prepare_cached($sql);
@@ -414,6 +383,8 @@ sub seen_delete {
   my ($self, $msgid) = @_;
 
   return 0 if (!$msgid);
+
+  return 0 unless (defined($self->{_dbh}));
 
   my $sql = "DELETE FROM bayes_seen WHERE username = ? AND msgid = ?";
   
@@ -473,6 +444,8 @@ The values returned in the array are in the following order:
 sub get_storage_variables {
   my ($self) = @_;
   my @values;
+
+  return (0,0,0,0,0,0,0,0,0,0,0) unless (defined($self->{_dbh}));
 
   my $sql = "SELECT spam_count, ham_count, last_expire,
                     last_atime_delta, last_expire_reduce
@@ -537,6 +510,8 @@ printing it out according to the passed in token.
 sub dump_db_toks {
   my ($self, $template, $regex, @vars) = @_;
 
+  return unless (defined($self->{_dbh}));
+
   # 0/0 tokens don't count
   # since ordering is check here, order the tokens
   my $sql = "SELECT token, spam_count, ham_count, atime
@@ -587,6 +562,8 @@ sub set_last_expire {
 
   return 0 unless (defined($time));
 
+  return 0 unless (defined($self->{_dbh}));
+
   my $sql = "UPDATE bayes_vars SET last_expire = ? WHERE username = ?";
  
   my $sth = $self->{_dbh}->prepare_cached($sql);
@@ -624,6 +601,8 @@ value.
 sub get_running_expire_tok {
   my ($self) = @_;
 
+  return 0 unless (defined($self->{_dbh}));
+
   my $sql = "SELECT max(runtime) from bayes_expire WHERE username = ?";
 
   my $sth = $self->{_dbh}->prepare_cached($sql);
@@ -659,6 +638,8 @@ This method sets the time that an expire starts running.
 sub set_running_expire_tok {
   my ($self) = @_;
 
+  return 0 unless (defined($self->{_dbh}));
+
   my $sql = "INSERT INTO bayes_expire (username,runtime) VALUES (?,?)";
 
   my $sth = $self->{_dbh}->prepare_cached($sql);
@@ -688,14 +669,9 @@ and expire is currently running.
 sub remove_running_expire_tok {
   my ($self) = @_;
 
+  return 0 unless (defined($self->{_dbh}));
+
   my $sql = "DELETE from bayes_expire WHERE username = ?";
-
-  my $sth = $self->{_dbh}->prepare_cached($sql);
-
-  unless (defined($sth)) {
-    dbg("bayes: remove_running_expire_tok: SQL Error: ".$self->{_dbh}->errstr());
-    return 0;
-  }
 
   my $rows = $self->{_dbh}->do($sql, undef, $self->{_username});
 
@@ -718,6 +694,8 @@ and returns it's spam_count, ham_count and last access time.
 
 sub tok_get {
   my ($self, $token) = @_;
+
+  return (0,0,0) unless (defined($self->{_dbh}));
 
   my $sql = "SELECT spam_count, ham_count, atime
                FROM bayes_token
@@ -783,6 +761,8 @@ ham learned.
 sub nspam_nham_get {
   my ($self) = @_;
 
+  return (0,0) unless (defined($self->{_dbh}));
+
   my $sql = "SELECT ham_count, spam_count FROM bayes_vars WHERE username = ?";
 
   my $sth = $self->{_dbh}->prepare_cached($sql);
@@ -818,6 +798,8 @@ This method updates the number of spam and the number of ham in the database.
 
 sub nspam_nham_change {
   my ($self, $num_spam, $num_ham) = @_;
+
+  return 0 unless (defined($self->{_dbh}));
 
   my $sql = "UPDATE bayes_vars
                 SET spam_count = spam_count + ?,
@@ -857,6 +839,8 @@ The assumption is that the token already exists in the database.
 
 sub tok_touch {
   my ($self, $token, $atime) = @_;
+
+  return 0 unless (defined($self->{_dbh}));
 
   # shortcut, will only update atime for the token if the atime is less than
   # what we are updating to
@@ -984,6 +968,8 @@ tables.
 sub _get_db_version {
   my ($self) = @_;
 
+  return 0 unless (defined($self->{_dbh}));
+
   my $sql = "SELECT value FROM bayes_global_vars WHERE variable = 'VERSION'";
 
   my $sth = $self->{_dbh}->prepare_cached($sql);
@@ -1019,6 +1005,8 @@ initialized. If not then it will perform this initialization.
 
 sub _initialize_db {
   my ($self) = @_;
+
+  return 0 unless (defined($self->{_dbh}));
 
   return 0 if (!$self->{_username});
 
@@ -1082,6 +1070,8 @@ does not exist.
 sub _token_atime {
   my ($self, $token) = @_;
 
+  return 0 unless (defined($self->{_dbh}));
+
   return undef unless (defined($token));
 
   my $sql = "SELECT atime
@@ -1122,6 +1112,8 @@ This method deletes the given token from the database.
 sub _delete_token {
   my ($self, $token) = @_;
 
+  return 0 unless (defined($self->{_dbh}));
+
   return 0 unless (defined($token));
 
   my $sql = "DELETE FROM bayes_token WHERE username = ? AND token = ?";
@@ -1160,6 +1152,8 @@ the database.
 
 sub _put_token {
   my ($self, $token, $spam_count, $ham_count, $atime) = @_;
+
+  return 0 unless (defined($self->{_dbh}));
 
   $spam_count ||= 0;
   $ham_count ||= 0;
@@ -1252,6 +1246,8 @@ for a user.
 sub _get_token_count {
   my ($self) = @_;
 
+  return 0 unless (defined($self->{_dbh}));
+
   my $sql = "SELECT count(*)
                FROM bayes_token
               WHERE username = ?
@@ -1290,6 +1286,8 @@ This method finds the atime of the oldest token in the database.
 sub _get_oldest_token_age {
   my ($self) = @_;
 
+  return 0 unless (defined($self->{_dbh}));
+
   my $sql = "SELECT min(atime) FROM bayes_token WHERE username = ?";
 
   my $sth = $self->{_dbh}->prepare_cached($sql);
@@ -1324,6 +1322,8 @@ This method finds the atime of the newest token in the database.
 
 sub _get_newest_token_age {
   my ($self) = @_;
+
+  return 0 unless (defined($self->{_dbh}));
 
   my $sql = "SELECT max(atime) FROM bayes_token WHERE username = ?";
 
@@ -1360,6 +1360,8 @@ This method sets the last_atime_delta variable in the variable table.
 sub _set_last_atime_delta {
   my ($self, $newdelta) = @_;
 
+  return 0 unless (defined($self->{_dbh}));
+
   return 0 unless (defined($newdelta));
 
   my $sql = "UPDATE bayes_vars SET last_atime_delta = ? WHERE username = ?";
@@ -1394,6 +1396,8 @@ This method sets the last_expire_reduce values in the variable table.
 
 sub _set_last_expire_reduce {
   my ($self, $deleted) = @_;
+
+  return 0 unless (defined($self->{_dbh}));
 
   return 0 unless (defined($deleted));
 
@@ -1430,6 +1434,8 @@ the token database for a user.
 
 sub _get_num_hapaxes {
   my ($self) = @_;
+
+  return 0 unless (defined($self->{_dbh}));
 
   my $sql = "SELECT count(*)
                FROM bayes_token
@@ -1470,6 +1476,8 @@ ham_count < 8) in the token database for a user
 
 sub _get_num_lowfreq {
   my ($self) = @_;
+
+  return 0 unless (defined($self->{_dbh}));
 
   my $sql = "SELECT count(*)
                FROM bayes_token

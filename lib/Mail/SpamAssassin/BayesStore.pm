@@ -154,7 +154,7 @@ sub untie_db {
 
 =head2 calculate_expire_delta
 
-public instance (\%) calculate_expire_delta (Integer $newest_atime,
+public instance (%) calculate_expire_delta (Integer $newest_atime,
                                              Integer $start,
                                              Integer $max_expire_mult)
 
@@ -227,6 +227,7 @@ Description:
 This methods does the actual token expiration.
 
 XXX More docs here about the methodology and what not
+
 =cut
 
 sub expire_old_tokens_trapped {
