@@ -107,7 +107,12 @@ sub writescores_c {
 
   my $count = 0;
   foreach my $name (sort keys %{$scores}) {
-    if (!defined $mutable_tests{$name}) { $mutable_tests{$name} = 1; } else { $range_lo{$name} = $range_hi{$name} = $scores->{$name}; }
+    # jm: now, score-ranges-from-freqs has tflags to work from, so
+    # it will always list all mutable tests.
+    if (!defined $mutable_tests{$name}) {
+      $mutable_tests{$name} = 0;
+      $range_lo{$name} = $range_hi{$name} = $scores->{$name};
+    }
 
     $range_lo{$name} ||= 0.1;
     $range_hi{$name} ||= 1.5;

@@ -86,6 +86,15 @@ foreach my $test (sort { $soratio{$b} <=> $soratio{$a} } keys %freq) {
   # for scores based on this.
   my ($lo, $hi) = ratio_in_0to1_to_range($soratio);
 
+  my $tflags = $tflags->{$test}; $tflags ||= '';
+  if ($tflags =~ /\bnice\b/) {
+    # "nice" scores are negative, for obvious reasons. make
+    # it so, and swap around so lo < hi.
+    my $tmp = $lo;
+    $lo = -$hi;
+    $hi = -$tmp;
+  }
+
   printf OUT ("%3.1f %3.1f 1 $test\n", $lo, $hi);
   #printf "range: %3.1f %3.1f $test ($spam / $nonspam = $soratio)\n",
   #$lo, $hi;
@@ -96,11 +105,11 @@ exit;
 sub ratio_in_0to1_to_range {
   my $ratio = shift;
 
-  # the current algo maps 1.0 to a range between 0.0001 and 5.0,
+  # the current algo maps 1.0 to a range between 0.0001 and 4.0,
   # and 0.01 to a range between 0.0001 and 1.0.
 
   my $hi_lo = 1.0 / 0.0001;
-  my $hi_hi = 1.0 / 5.0;
+  my $hi_hi = 1.0 / 4.0;
   my $lo_lo = 0.1 / 0.0001;
   my $lo_hi = 0.1 / 1.0;
 
@@ -109,6 +118,10 @@ sub ratio_in_0to1_to_range {
 
   my $lo = ($ratio / ($ratio * $lo_diff + $lo_lo));
   my $hi = ($ratio / ($ratio * $hi_diff + $lo_hi));
+  
+  if ($hi == 0) {
+    $hi = 1.0;          # some "wiggle room"
+  }
   ($lo, $hi);
 }
 
