@@ -536,3 +536,7 @@ describe T_LOTS_OF_SPACE         Over XYZ MB/GB of junk
 
 full __CTYPE_HTML_ONLY	eval:check_for_text_html_only()
 meta T_CTYPE_JUST_HTML	( !__RCVD_BY_HOTMAIL && __CTYPE_HTML_ONLY )
+
+# version written using _check_attachments
+body __CTYPE_HTML_ONLY2	eval:check_for_mime_html_text_only()
+meta T_CTYPE_JUST_HTML2	( !__RCVD_BY_HOTMAIL && __CTYPE_HTML_ONLY2 )
