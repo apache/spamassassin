@@ -1282,6 +1282,9 @@ describe PORN_PASSWORD          Possible porn - Porn Password
 body PORN_6			/\b(?:\d+\+? xxx pictures|xxx photos?)\b/i
 describe PORN_6			Possible Porn - XXX Photos
 
+body PORN_MEMBERSHIP            /\b(?:vip|adult|porn|x.rated) membership/i
+describe PORN_MEMBERSHIP        Possible Porn - Porn membership
+
 ##################
 # End Porn Rules #
 ##################
@@ -1331,3 +1334,44 @@ test SAVE_ON_INSURANCE      ok Compare and Save Instantly On Your Auto Insurance
 
 body STOP_SNORING		/\bstop\s+snoring\b/i
 describe STOP_SNORING		Contains "Stop Snoring"
+
+body APPLY_ONLINE               /\bapply (?-i:O)nline/i
+describe APPLY_ONLINE           Apply online (with capital O)
+
+body FREE_INSTALL               /(?-i:F)ree installation/i
+describe FREE_INSTALL           Contains 'free installation' with capitals
+
+body FREE_PREVIEW               /(?-i:F)ree preview/i
+describe FREE_PREVIEW           Contains 'free preview' with capitals
+
+body FREE_HOSTING               /(?-i:F)ree hosting/i
+describe FREE_HOSTING           Contains 'free hosting' with capitals
+
+body USER_4U2           /\b\S{0,20}(?:[42](?:yo)?u|foryou|you2)\S{1,20}\@\S{1,20}\.(?:net|com|org)\b/
+describe USER_4U2       Local part containing "4u", "u2" or variants.
+
+body FREE_ACCESS                /(?-i:F)ree access/i  
+describe FREE_ACCESS            Contains 'free access' with capitals
+
+body FREE_SAMPLE                /(?-i:F)ree sample/i
+describe FREE_SAMPLE            Contains 'free sample' with capitals
+
+# http://www.hughes-family.org/bugzilla/show_bug.cgi?id=629
+body MONTH_TRIAL                /(?:month|day) .{0,9}trial/i 
+describe MONTH_TRIAL            Month Trial Offer
+
+# http://www.hughes-family.org/bugzilla/show_bug.cgi?id=630
+body UNLIMITED                  /UNLIMITED/
+describe UNLIMITED              Unlimited in caps
+
+# bug 680
+body MEMBER_2           /\b(?:free|special|paid|dear|gold|opt.in|valued|because you are an?|be a|becoming a|sent to) .{0,9}members?\b/i
+describe MEMBER_2       Being a Member
+
+body GET_IT_NOW         /get it (?-i:N)ow/i
+describe GET_IT_NOW     Contains 'Get it now' with capitals
+
+# http://www.hughes-family.org/bugzilla/show_bug.cgi?id=678
+body DOMAIN_4U2         /[\@\.]\S{0,20}(?:[42](?:yo)?u|foryou|you2)\S{1,20}\.(?:net|com|org)\b/
+describe DOMAIN_4U2     Domain name containing "4u", "u2" or variants.
+
