@@ -33,20 +33,20 @@ tflags RCVD_IN_OSIRUSOFT_COM    net
 
 # X prefix was used to insure that it was run at the end, but it's not needed
 # anymore since we run the rule with rblreseval -- Marc
-header X_OSIRU_OPEN_RELAY	rbleval:check_rbl_results_for('osirusoft', '127.0.0.2')
+header X_OSIRU_OPEN_RELAY	rblreseval:check_rbl_results_for('osirusoft', '127.0.0.2')
 describe X_OSIRU_OPEN_RELAY	DNSBL: sender is Confirmed Open Relay
 tflags X_OSIRU_OPEN_RELAY	net
 
 # TODO: problem.  cannot use this!
-header X_OSIRU_DUL		rbleval:check_rbl_results_for('osirusoft', '127.0.0.3')
+header X_OSIRU_DUL		rblreseval:check_rbl_results_for('osirusoft', '127.0.0.3')
 describe X_OSIRU_DUL		DNSBL: sender ip address in in a dialup block
 tflags X_OSIRU_DUL		net
 
-header X_OSIRU_SPAM_SRC		rbleval:check_rbl_results_for('osirusoft', '127.0.0.4')
+header X_OSIRU_SPAM_SRC		rblreseval:check_rbl_results_for('osirusoft', '127.0.0.4')
 describe X_OSIRU_SPAM_SRC	DNSBL: sender is Confirmed Spam Source
 tflags X_OSIRU_SPAM_SRC         net
 
-header X_OSIRU_SPAMWARE_SITE	rbleval:check_rbl_results_for('osirusoft', '127.0.0.6')
+header X_OSIRU_SPAMWARE_SITE	rblreseval:check_rbl_results_for('osirusoft', '127.0.0.6')
 describe X_OSIRU_SPAMWARE_SITE	DNSBL: sender is a Spamware site or vendor
 tflags X_OSIRU_SPAMWARE_SITE    net
 
@@ -57,11 +57,11 @@ describe RCVD_IN_NJABL		Received via a relay in dnsbl.njabl.org
 tflags RCVD_IN_NJABL		net
 
 # note: X_ prefix so X_NJABL_OPEN_PROXY happens after RCVD_IN_NJABL.
-header X_NJABL_OPEN_PROXY	rbleval:check_rbl_results_for('njabl', '127.0.0.2')
+header X_NJABL_OPEN_PROXY	rblreseval:check_rbl_results_for('njabl', '127.0.0.2')
 describe X_NJABL_OPEN_PROXY	NJABL: sender is proxy/relay/formmail/spam-source
 tflags X_NJABL_OPEN_PROXY	net
  	
-header X_NJABL_DIALUP		rbleval:check_rbl_results_for('njabl', '127.0.0.3')
+header X_NJABL_DIALUP		rblreseval:check_rbl_results_for('njabl', '127.0.0.3')
 describe X_NJABL_DIALUP		NJABL: sender is on dialup/dynamic IP
 tflags X_NJABL_DIALUP		net
 
