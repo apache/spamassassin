@@ -158,7 +158,11 @@ sub _parse_body {
   # Figure out the simple content-type, or set it to text/plain
   my $type = $_msg->header('Content-Type') || 'text/plain; charset=us-ascii';
 
-  if ( $type =~ /^multipart\//i ) {
+  # multipart sections are required to have a boundary set ...  If this
+  # one doesn't, assume it's malformed and send it to be parsed as a
+  # non-multipart section
+  #
+  if ( $type =~ /^multipart\//i && defined $boundary ) {
     # Treat an initial multipart parse differently.  This will keep the tree:
     # obj(multipart->[ part1, part2 ]) instead of
     # obj(obj(multipart ...))
@@ -187,11 +191,10 @@ to generate the tree.
 sub _parse_multipart {
   my($self, $msg, $_msg, $boundary, $body) = @_;
 
-  $boundary ||= '';
-  dbg("parsing multipart, got boundary: $boundary");
+  dbg("parsing multipart, got boundary: ".(defined $boundary ? $boundary : ''));
 
   # ignore preamble per RFC 1521, unless there's no boundary ...
-  if ( $boundary ) {
+  if ( defined $boundary ) {
     my $line;
     my $tmp_line = @{$body};
     for ($line=0; $line < $tmp_line; $line++) {
@@ -214,7 +217,7 @@ sub _parse_multipart {
   my $line_count = @{$body};
   foreach ( @{$body} ) {
     # if we're on the last body line, or we find a boundary marker, deal with the mime part
-    if ( --$line_count == 0 || ($boundary && /^\-\-\Q$boundary\E/) ) {
+    if ( --$line_count == 0 || (defined $boundary && /^\-\-\Q$boundary\E/) ) {
       my $line = $_; # remember the last line
 
       # per rfc 1521, the CRLF before the boundary is part of the boundary:
@@ -232,11 +235,11 @@ sub _parse_multipart {
         my($p_boundary);
 	($part_msg->{'type'}, $p_boundary) = Mail::SpamAssassin::Util::parse_content_type($part_msg->header('content-type'));
         $p_boundary ||= $boundary;
-	dbg("found part of type ".$part_msg->{'type'}.", boundary: ".$p_boundary);
+	dbg("found part of type ".$part_msg->{'type'}.", boundary: ".(defined $p_boundary ? $p_boundary : ''));
         $self->_parse_body( $msg, $part_msg, $p_boundary, $part_array, 0 );
       }
 
-      last if ($boundary && $line =~ /^\-\-\Q${boundary}\E\-\-$/);
+      last if (defined $boundary && $line =~ /^\-\-\Q${boundary}\E\-\-$/);
 
       # make sure we start with a new clean node
       $in_body  = 0;
@@ -297,6 +300,10 @@ sub _parse_normal {
 
   $part_msg->{'type'} =
     Mail::SpamAssassin::Util::parse_content_type($part_msg->header('content-type'));
+
+  # multipart sections are required to have a boundary set ...  If this
+  # one doesn't, assume it's malformed and revert to text/plain
+  $part_msg->{'type'} = 'text/plain' if ( $part_msg->{'type'} =~ /^multipart\//i && !defined $boundary );
 
   # attempt to figure out a name for this attachment if there is one ...
   my $disp = $part_msg->header('content-disposition') || '';
