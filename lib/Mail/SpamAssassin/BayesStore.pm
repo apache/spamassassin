@@ -567,7 +567,31 @@ sub add_touches_to_journal {
     umask $umask; # reset umask
     return;
   }
-  print OUT $self->{string_to_journal};
+
+  # do not use print() here, it will break up the buffer if it's >8192 bytes,
+  # which could result in two sets of tokens getting mixed up and their
+  # touches missed.
+
+  my $nbytes = length ($self->{string_to_journal});
+  my $writ = 0;
+  while ($writ < $nbytes) {
+    my $len = syswrite (OUT, $self->{string_to_journal});
+
+    if ($len < 0) {
+      # argh, write failure, give up
+      warn "write failed to Bayes journal $path ($len of $nbytes)!\n";
+      last;
+    }
+
+    $writ += $len;
+    if ($len < $nbytes) {
+      # this should not happen on filesystem writes!  Still, try to recover
+      # anyway, but be noisy about it so the admin knows
+      warn "partial write to Bayes journal $path ($len of $nbytes), recovering.\n";
+      $self->{string_to_journal} = substr ($self->{string_to_journal}, $len);
+    }
+  }
+
   if (!close OUT) {
     warn "cannot write to $path, Bayes db update ignored\n";
   }
@@ -809,6 +833,10 @@ sub scan_count_increment {
     umask $umask; # reset umask
     return;
   }
+
+  # note we don't have to use syswrite() here, since we're only writing 1 byte.
+  # Anything bigger in the future, and we should, however, since print() will
+  # go thru stdio and the buffer may be split across 2 write() ops.
   print OUT "."; close OUT or warn "cannot append to $path\n";
   umask $umask; # reset umask
 
