@@ -1270,8 +1270,12 @@ sub get_address_commonality_ratio {
   my %counts1 = ();
   my %counts2 = ();
 
-  map { $counts1{$_}++; } split (//, lc $addr1);
-  map { $counts2{$_}++; } split (//, lc $addr2);
+  foreach ( split(//, lc $addr1) ) {
+    $counts1{$_}++;
+  }
+  foreach ( split(//, lc $addr2) ) {
+    $counts2{$_}++;
+  }
 
   my $different = 0;
   my $same      = 0;
@@ -1895,12 +1899,14 @@ sub check_for_yelling {
   # signs), or a "." which appears to end a sentence.
   @lines = grep(/^\S|!|\$\$|\.(?:\s|$)/, @lines);
 
-  # Get rid of everything but upper AND lower case letters
-  map (tr/A-Za-z \t//cd, @lines);
+  foreach ( @lines ) {
+    # Get rid of everything but upper AND lower case letters
+    tr/A-Za-z \t//cd;
 
-  # Remove leading and trailing whitespace
-  map (s/^\s+//, @lines);
-  map (s/\s+$//, @lines);
+    # Remove leading and trailing whitespace
+    s/^\s+//;
+    s/\s+$//;
+  }
 
   # Now that we have a mixture of upper and lower case, see if it's
   # 1) All upper case
