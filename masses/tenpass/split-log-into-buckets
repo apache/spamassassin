@@ -1,11 +1,17 @@
 #!/usr/bin/perl
 #
+# split-log-into-buckets [n]
+#
 # Split a mass-check log into n identically-sized buckets, evenly
 # taking messages from all checked corpora and preserving comments.
 # It does this evenly by running through all buckets sequentially
-# as each line is read.
+# as each line is read.  n defaults to 10
 
-my $numbuckets = 10;
+my $numbuckets = 0;
+if (defined $ARGV[0]) {
+  $numbuckets = $ARGV[0]+0;
+}
+$numbuckets ||= 10;
 
 my %buckets = ();
 foreach my $i (1 .. $numbuckets) {
@@ -14,7 +20,7 @@ foreach my $i (1 .. $numbuckets) {
 }
 
 my $current = 0;
-while (<>) {
+while (<STDIN>) {
   select $buckets{$current+1}; print $_;
   if (/^#/) { next; }
   $current = ($current+1) % $numbuckets;
