@@ -103,9 +103,6 @@ describe ANTISPAM_BILL  Very likely mention of anti-spam bill
 body CLICK_TO_REMOVE_2		/mailto:.{0,50}click.{0,50}remove/is
 describe CLICK_TO_REMOVE_2	Click-to-remove with mailto: found beforehand
 
-rawbody CARRIAGE_RETURNS	eval:check_carriage_returns()
-describe CARRIAGE_RETURNS	Message contains a lot of ^M characters
-
 # fixed by ms to not allow entry field onto next line
 rawbody ASCII_FORM_ENTRY	/[^<][A-Za-z][A-Za-z]+.{1,15}?[\x09\x20]*_{30,}/
 describe ASCII_FORM_ENTRY	Contains an ASCII-formatted form
