@@ -1633,7 +1633,6 @@ sub do_full_tests {
 
   # build up the eval string...
   my $evalstr = '';
-  my @tests = keys %{$self->{conf}{full_tests}};
 
   while (my($rulename, $pat) = each %{$self->{conf}{full_tests}}) {
     $evalstr .= '
