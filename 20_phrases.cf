@@ -66,8 +66,8 @@ body BILL_1618			/Bill.{0,10}1618.{0,10}TITLE.{0,10}(?:III|\#3)/i
 describe BILL_1618		Claims compliance with Senate Bill 1618
 body UNDER_BILL_1618		/Under Bill s.?1618/i
 describe UNDER_BILL_1618	Claims compliance with Senate Bill 1618
-body SECTION_301		/SECTION.{0,10}301/i
-describe SECTION_301		Claims compliance with spam regulations
+body BILL_SECTION		/SECTION.{0,10}301/i
+describe BILL_SECTION		Claims compliance with spam regulations
 body FURTHER_TRANSMISSIONS      /further transmissions to you by the sender/i
 describe FURTHER_TRANSMISSIONS  Claims compliance with spam regulations
 

@@ -70,8 +70,8 @@ describe NASTY_GIRLS            Possible porn - Nasty Girls
 body AMATEUR_PORN               /\bamateur .{0,9}(?:sex|porn|star|sites?|college|babes|action|pics|trash|gang|rape)|\b(?:real|best) amateur/i
 describe AMATEUR_PORN           Possible porn - Amateur Porn
 
-body CELEBRITY_PORN		/\bceleb(?:rity|rities|s).{0,15}(?=[cenps])(?:sex|porn|pics|caught|nude|exposed|content)|\b(?=[fhns])(?:steamy|hot|nude|shocking|free|h[a\@]rdcore) celeb(?:rity|rities|s)/i
-describe CELEBRITY_PORN		Possible porn - Celebrity Porn
+body PORN_CELEBRITY		/\bceleb(?:rity|rities|s).{0,15}(?=[cenps])(?:sex|porn|pics|caught|nude|exposed|content)|\b(?=[fhns])(?:steamy|hot|nude|shocking|free|h[a\@]rdcore) celeb(?:rity|rities|s)/i
+describe PORN_CELEBRITY		Possible porn - Celebrity Porn
 
 body ADULT_SITE                 /\badult.{0,9}(?:entertainment|sites?|industry|only|business|membership)/i
 describe ADULT_SITE             Possible porn - Adult Web Sites

@@ -524,9 +524,6 @@ describe SUBJ_NOW_ONLY		Subject contains "Now Only"
 header SUBJ_RIPPED		Subject =~ /Ripped & Strong/i
 describe SUBJ_RIPPED		Subject contains "Ripped & Strong"
 
-header SUBJ_VIAGRA		Subject =~ /viagra/i
-describe SUBJ_VIAGRA		Subject includes "viagra"
-
 header SUBJ_YOUR_DEBT		Subject =~ /Your (?:Bills|Debt|Credit)/i
 describe SUBJ_YOUR_DEBT		Subject contains "Your Bills" or similar
 
