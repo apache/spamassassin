@@ -1899,41 +1899,24 @@ EOT
 
 ###########################################################################
 
-# note: this is called once for every eval on every message so
-# performance is important
-sub mk_param {
-  my $param = shift;
-
-  # it would be nice if the quotes were optional for numeric arguments
-  my @ret = ($param =~ m/['"](.*?)['"]\s*(?:,\s*|$)/g);
-  return @ret;
-}
-
 sub run_eval_tests {
   my ($self, $evalhash, $prepend2desc, @extraevalargs) = @_;
-  my ($rulename, $pat, @args);
   local ($_);
   
-  my @tests = keys %{$evalhash};
-
   my $debugenabled = $Mail::SpamAssassin::DEBUG->{enabled};
 
-  foreach my $rulename (@tests) {
+  while (my ($rulename, $test) = each %{$evalhash}) {
     next unless ($self->{conf}->{scores}->{$rulename});
     my $score = $self->{conf}{scores}{$rulename};
-    my $evalsub = $evalhash->{$rulename};
-
     my $result;
+
     $self->{test_log_msgs} = '';	# clear test state
 
-    @args = ();
-    if (scalar @extraevalargs >= 0) { push (@args, @extraevalargs); }
-    
-    $evalsub =~ s/\s*\((.*?)\)\s*$//;
-    if (defined $1 && $1 ne '') { push (@args, mk_param($1)); }
+    my ($function, @args) = @{$test};
+    unshift(@args, @extraevalargs);
 
     eval {
-        $result = $self->$evalsub(@args);
+      $result = $self->$function(@args);
     };
 
     if ($@) {
@@ -1964,23 +1947,19 @@ sub run_rbl_eval_tests {
     return 0;
   }
   
-  my @tests = keys %{$evalhash};
   my $debugenabled = $Mail::SpamAssassin::DEBUG->{enabled};
 
-  foreach my $rulename (sort (@tests)) {
+  while (my ($rulename, $test) = each %{$evalhash}) {
     next unless ($self->{conf}->{scores}->{$rulename});
     my $score = $self->{conf}{scores}{$rulename};
-    my $evalsub = $evalhash->{$rulename};
-
     my $result;
+
     $self->{test_log_msgs} = '';	# clear test state
 
-    @args = ();
-    $evalsub =~ s/\s*\((.*?)\)\s*$//;
-    if (defined $1 && $1 ne '') { push (@args, mk_param($1)); }
+    my ($function, @args) = @{$test};
 
     eval {
-        $result = $self->$evalsub(@args, $needresult);
+       $result = $self->$function(@args, $needresult);
     };
 
     # A run with $job eq 0 is just to start DNS queries
