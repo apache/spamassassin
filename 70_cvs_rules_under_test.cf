@@ -472,3 +472,9 @@ header T_FROM_OFFERS            From:addr =~ /offers\S*\@/
 describe T_FROM_OFFERS          From address is "offers at something"
 score T_FROM_OFFERS             0.01
 
+# These three have had their ' ' (space) with \s+ for slightly better
+# results on my corpus.  If it looks good for everyone, these can replace
+# the non-T_ version.
+rawbody T_CLICK_HERE_LINK               /click\s+here.{0,100}<\/a>/is
+rawbody T_CLICK_HERE_CAPS_LINK  /CLICK\s+HERE.{0,100}<\/[aA]>/s
+rawbody T_QUOTED_EMAIL_TEXT     /^>+\s+.{60,72}$/
