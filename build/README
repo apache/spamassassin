@@ -50,8 +50,9 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 - SVN tag the release files.  This is done using "svn copy", ie:
 
-  svn copy https://svn.apache.org/repos/asf/incubator/spamassassin/branches/b2_6_0 \
-           https://svn.apache.org/repos/asf/incubator/spamassassin/tags/spamassassin_release_2_6_1
+  svn copy -m "creating tag for release 2.62" \
+	https://svn.apache.org/repos/asf/incubator/spamassassin/branches/b2_6_0 \
+	https://svn.apache.org/repos/asf/incubator/spamassassin/tags/spamassassin_release_2_6_2
 
   This will do a completely server-side tagging (which is the same as
   a branch really) of whatever the latest branch revision to be the new

@@ -3,7 +3,8 @@
 # namely, making the tools RPM for masses, sql, and tools, and
 # the perl-Mail-SpamAssassin rpm for the modules only.
 
-#%include        /usr/lib/rpm/macros.perl
+%define real_version 2.70
+%define version %{real_version}
 
 %define _unpackaged_files_terminate_build       0
 %define _missing_doc_files_terminate_build      0
@@ -15,10 +16,7 @@
 
 Summary:        a spam filter for email which can be invoked from mail delivery agents
 Summary(pl):    Filtr antyspamowy, przeznaczony dla programów dostarczaj±cych pocztê (MDA)
-
 Group:          Applications/Mail
-%define version 2.70
-%define real_version 2.70
 
 # Release number can be specified with rpmbuild --define 'release SOMETHING' ...
 # If no such --define is used, the release number is 1.
@@ -64,18 +62,6 @@ they can be filtered by the user's mail reading software.  This distribution
 includes the spamc/spamc components which considerably speeds processing of
 mail.
 
-%description -l pl
-SpamAssassin udostêpnia Ci mo¿liwo¶æ zredukowania, je¶li nie
-kompletnego wyeliminowania Niezamawianej Komercyjnej Poczty
-(Unsolicited Bulk Email, spamu) z Twojej poczty. Mo¿e byæ
-wywo³ywany z MDA, np. Sendmaila czy Postfixa, lub z pliku ~/.forward
-itp. U¿ywa ogólnego algorytmu oceniania w celu identyfikacji
-wiadomo¶ci, które wygl±daj± na spam, po czym dodaje nag³ówki do
-wiadomo¶ci, umo¿liwiaj±c filtrowanie przez oprogramowanie u¿ytkownika.
-Ta dystrybucja zawiera programy spamc/spamc, umo¿liwiaj±ce
-uruchomienie serwera, co znacznie przyspieszy proces przetwarzania
-poczty.
-
 %package tools
 Summary:        Miscellaneous tools and documentation for SpamAssassin
 Summary(pl):    Przeró¿ne narzêdzia zwi±zane z SpamAssassin
@@ -85,10 +71,6 @@ Requires: perl-Mail-SpamAssassin = %{version}-%{release}
 %description tools
 Miscellaneous tools and documentation from various authors, distributed
 with SpamAssassin.  See /usr/share/doc/SpamAssassin-tools-*/.
-
-%description tools -l pl
-Przeró¿ne narzêdzia, dystrybuowane razem z SpamAssassin. Zobacz
-/usr/share/doc/SpamAssassin-tools-*/.
 
 %package -n perl-Mail-SpamAssassin
 Summary:        %{pdir}::%{pnam} -- SpamAssassin e-mail filter Perl modules
@@ -106,16 +88,6 @@ wide range of heuristic tests on mail headers and body text to identify
 ``spam'', also known as unsolicited commercial email. Once identified, the
 mail can then be optionally tagged as spam for later filtering using the
 user's own mail user-agent application.
-
-%description -n perl-Mail-SpamAssassin -l pl
-Mail::SpamAssassin jest pluginem dla Mail::Audit, s³u¿±cym do
-identyfikacji spamu przy u¿yciu analizy zawarto¶ci i/lub internetowych
-czarnych list. Do zidentyfikowania jako ,,spam'' stosuje szeroki
-zakres testów heurystycznych na nag³ówkach i tre¶ci, posi³kuj±c siê
-stworzon± wcze¶niej baz± regu³. Po zidentyfikowaniu, poczta mo¿e byæ
-oznaczona jako spam w celu pó¼niejszego wyfiltrowania, np. przy u¿yciu
-aplikacji do czytania poczty.
-
 
 %prep
 %setup -q -n %{pdir}-%{pnam}-%{real_version}
