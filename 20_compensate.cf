@@ -1,5 +1,5 @@
 # SpamAssassin rules file: compensation for common false positives.
-# $Id: 20_compensate.cf,v 1.50 2002/08/23 04:45:04 hughescr Exp $
+# $Id: 20_compensate.cf,v 1.51 2002/08/23 08:51:58 quinlan Exp $
 ###########################################################################
 # Header compensation tests
 
@@ -61,10 +61,6 @@ tflags X_MAILING_LIST           nice
 tflags X_LOOP                   nice
 tflags X_ACCEPT_LANG            nice
 tflags RESENT_TO                nice
-
-header PGP_SIGNATURE_2          Content-Type =~ /protocol=.?application\/pgp-signature.?;/i
-describe PGP_SIGNATURE_2        Contains a PGP-signed message (signature attached)
-tflags PGP_SIGNATURE_2		nice
 
 # came from a known mailing list system -- but one which does *not* have built-in
 # (or working!) spam filtering.
@@ -195,8 +191,12 @@ body MAILMAN_CONFIRM            /We have received a request .*subscription of yo
 describe MAILMAN_CONFIRM        A MailMan confirm-your-address message
 tflags MAILMAN_CONFIRM		nice
 
-rawbody PGP_SIGNATURE           /-----BEGIN PGP SIGNATURE-----/
-describe PGP_SIGNATURE          Contains a PGP-signed message
+rawbody PGP_MESSAGE		/^-----BEGIN PGP (?:SIGNATURE|MESSAGE)-----$/
+describe PGP_MESSAGE		Contains a PGP signed or encrypted message
+tflags PGP_MESSAGE		nice
+
+header PGP_SIGNATURE		Content-Type =~ /protocol=.?application\/pgp-signature.?;/i
+describe PGP_SIGNATURE		Contains a PGP-signed message (signature attached)
 tflags PGP_SIGNATURE		nice
 
 # too many false matches, see bug #670
