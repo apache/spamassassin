@@ -2165,13 +2165,6 @@ sub check_for_mime_long_line_qp {
   return $self->{mime_long_line_qp};
 }
 
-sub check_for_mime_long_line_qp2 {
-  my ($self) = @_;
-
-  $self->_check_attachments unless exists $self->{mime_long_line_qp2};
-  return $self->{mime_long_line_qp2};
-}
-
 sub check_for_mime_suspect_name { # MIME_SUSPECT_NAME
   my ($self) = @_;
 
@@ -2282,7 +2275,6 @@ sub _check_attachments {
   $self->{mime_faraway_charset} = 0;
   $self->{mime_html_no_charset} = 0;
   $self->{mime_long_line_qp} = 0;
-  $self->{mime_long_line_qp2} = 0;
   $self->{mime_missing_boundary} = 0;
   $self->{mime_qp_ratio} = 0;
   $self->{mime_suspect_name} = 0;
@@ -2291,7 +2283,7 @@ sub _check_attachments {
   $ctype = $self->get('Content-Type');
   $cte = $self->get('Content-Transfer-Encoding');
   chomp($cte = defined($cte) ? lc($cte) : "");
-  if ($ctype =~ /$re_boundary/ && $1 ne '') {
+  if ($ctype =~ /$re_boundary/m && $1 ne '') {
     push (@boundary, "\Q$1\E");
   }
   if ($ctype =~ /^text\//i && $cte =~ /base64/) {
@@ -2299,13 +2291,9 @@ sub _check_attachments {
   }
 
   # Note: We don't use rawbody because it removes MIME parts.  Instead,
-  # we get the raw unfiltered body.  We must not change any lines.
+  # we get the raw unfiltered body.  We must not change any lines and
+  # we might see some SpamAssassin mark-up.
   for (@{$self->{msg}->get_body()}) {
-    # skip SpamAssassin mark-up
-    if ($where == -1) {
-      next if /^SPAM: /;
-      $where = 0 if /\S/;
-    }
     if (/^--/) {
       foreach my $boundary (@boundary) {
 	if (/^--$boundary$/) {
@@ -2342,18 +2330,13 @@ sub _check_attachments {
       elsif (/$re_cte/) { $cte = lc($1); }
       elsif (/$re_cd/) { $cd = lc($1); }
     }
-    if ($self->{found_encoding_quoted_printable} &&
-	length > 77 && /\=[0-9A-F]{2}/)
-    {
-      $self->{mime_long_line_qp} = 1;
-    }
-    if ($where != 1 && $cte eq "quoted-printable" && length > 77) {
-      $self->{mime_long_line_qp2} = 1;
-    }
     if ($previous =~ /^begin [0-7]{3} ./ && /^M35J0``,````\$````/) {
       $self->{microsoft_executable} = 1;
     }
-    if ($where != 1 && $cte eq "quoted-printable") {
+    if ($where != 1 && $cte eq "quoted-printable" && ! /^SPAM: /) {
+      if (length > 77) {
+	$self->{mime_long_line_qp} = 1;
+      }
       $qp_bytes += length;
       if (index($_, '=') != -1) {
 	# whoever wrote this next line is an evil hacker -- jm
@@ -2648,7 +2631,7 @@ sub check_messageid_not_usable {
   return 1 if /\/CWT\/DCE\)/;
 
   # too old; older versions of clients used different formats
-  return 1 unless ($self->received_within_months('6','undef'));
+  return 1 if ($self->received_within_months('6','undef'));
 
   return 0;
 }
