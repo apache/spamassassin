@@ -931,7 +931,7 @@ sub scan {
 
 skip:
   dbg ("bayes: not scoring message, returning 0.5");
-  $self->{store}->untie_db();
+  $self->{store}->untie_db() if ( $self->{store}->{already_tied} );
   return 0.5;           # nice and neutral
 }
 
