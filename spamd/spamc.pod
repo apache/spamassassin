@@ -38,7 +38,7 @@ cannot be connected to.
 
 Instead of writing to stdout, pipe the output to I<command>'s standard input.
 Note that there is a very slight chance mail will be lost here, because if the
-fork-and-exec fails there's no place to put the mail message...
+fork-and-exec fails there's no place to put the mail message.
 
 Note that this must be the LAST command line option, as everything after the
 B<-e> is taken as arguments to the command (it's like I<rxvt> or I<xterm>).
@@ -60,15 +60,15 @@ though for backwards-compatibility.
 
 =item B<-h>
 
-Print this help message and terminate without action
+Print this help message and terminate without action.
 
 =item B<-S>
 
-Encrypt data to and from the spamd server with SSL
+Encrypt data to and from the spamd server with SSL.
 
 =item B<-p> I<port>
 
-Connect to spamd server listening on given port
+Connect to spamd server listening on given port.
 
 =item B<-s> I<max_size>
 
