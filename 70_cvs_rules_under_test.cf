@@ -171,5 +171,5 @@ describe T_OBFUSCATING_COMMENT2 HTML comments which obfuscate text (2)
 uri      T_HTTP_ENTITIES_HOST m{https?://[^\s\">/]*\&\#[\da-f]+}i
 describe T_HTTP_ENTITIES_HOST URI obscured with character entities
 
-uri      T_HTTP_EXCESSIVE_ESCAPES m{^https?://\S*\&\#(?:0?3[0-9]|0?[46][1-9a-f]|0?[57][\da])}i
-describe HTTP_EXCESSIVE_ESCAPES Completely unnecessary %-escapes inside a URL
+uri      T_HTTP_EXCESSIVE_ENTITIES m{^https?://\S*\&\#(?:0?3[0-9]|0?[46][1-9a-f]|0?[57][\da])}i
+describe T_HTTP_EXCESSIVE_ENTITIES Completely unnecessary %-escapes inside a URL
