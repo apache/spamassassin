@@ -36,6 +36,9 @@ $sa->init(0); # parse rules
 # get rule names
 my @tests;
 while (my ($test, $type) = each %{ $sa->{conf}->{test_types} }) {
+
+  next if ($test =~ /^T_MC_/);      # not the nightly mass-check ones either
+
   push @tests, $test;
 }
 
@@ -50,6 +53,9 @@ for my $test (@tests) {
   # and are clearly not hitting due to rules being named poorly
   next if $test eq "UPPERCASE_75_100";
   next if $test eq "UNIQUE_WORDS";
+
+  next if ($test =~ /^T_MC_/);      # not the nightly mass-check ones either
+
   $anti_patterns{"$test,"} = "P_" . $i++;
 }
 
