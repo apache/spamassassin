@@ -30,15 +30,15 @@ $ROUND_THE_WORLD_RELAYERS = qr{(?:net|com|ca)};
 
 # Porn words will each be prefixed with "\b" but not suffixed so as to pick up word ending variations.
 # if you want \b on the end, be sure to add it yourself.
-@PORN_WORDS = ('lolita',  'cum', 'org[iy]', 'wild', 'fuck', 'teen',
-'action', 'spunk', 'puss', 'suck', 'hot',
-'voyeur', 'le[sz]b(?:ian|o)', 'anal\b', 'interr?acial', 'asian',
-'amateur', 'sex+', 'slut', 'explicit', 'xxx(?:\b|[^x])', 'live',
-'celebrity', 'lick', 'suck', 'dorm', 'webcam', 'ass\b', 'schoolgirl',
-'strip', 'horn[yi]', 'erotic', 'oral', 'penis', 'hard.?core',
-'blow.?job', 'nast[yi]', 'porn', 'whore', 'naked',
-'nude', 'virgin', 'naught[yi]', 'girl', 'celeb', 'babe',
-'adult', 'skank', 'tits?', 'titties'
+@PORN_WORDS = (qr('\blolita')i,  qr('\bcum')i, qr('\borg[iy]')i, qr('\bwild')i, qr('\bfuck')i, qr('\bteen')i,
+qr('\baction')i, qr('\bspunk')i, qr('\bpuss')i, qr('\bsuck')i, qr('\bhot')i,
+qr('\bvoyeur')i, qr('\ble[sz]b(?:ian|o)i')i, qr('\banal\b')i, qr('\binterr?acial')i, qr('\basian')i,
+qr('\bamateur')i, qr('\bsex+')i, qr('\bslut')i, qr('\bexplicit')i, qr('\bxxx[^x]')i, qr('\blive')i,
+qr('\bcelebrity')i, qr('\blick')i, qr('\bsuck')i, qr('\bdorm')i, qr('\bwebcam')i, qr('\bass\b')i, qr('\bschoolgirl')i,
+qr('\bstrip')i, qr('\bhorn[yi]')i, qr('\berotic')i, qr('\boral')i, qr('\bpenis')i, qr('\bhard.?core')i,
+qr('\bblow.?job')i, qr('\bnast[yi]')i, qr('\bporn')i, qr('\bwhore')i, qr('\bnaked')i,
+qr('\bnude')i, qr('\bvirgin')i, qr('\bnaught[yi]')i, qr('\bgirl')i, qr('\bceleb')i, qr('\bbabe')i,
+qr('\badult')i, qr('\bskank')i, qr('\btits?')i, qr('\btitties')i
 );
 
 
@@ -1023,9 +1023,9 @@ sub subject_missing {
 sub porn_word_test {
     my ($self, $fulltext) = @_;
     my $hits = 0;
-    my $word;
-    foreach $word (@PORN_WORDS) {
-        $hits++ if $$fulltext =~ /\b$word/i;
+    my $pattern;
+    foreach $pattern (@PORN_WORDS) {
+        $hits++ if $$fulltext =~ $pattern;
         return 1 if $hits == 3;
     }
     return 0;
