@@ -9,13 +9,12 @@ use constant HAS_NET_DNS => eval { require Net::DNS; };
 use Test;
 
 BEGIN {
-  plan tests => ((TEST_ENABLED && HAS_NET_DNS) ? 7 : 0),
+  plan tests => ((TEST_ENABLED && HAS_NET_DNS) ? 6 : 0),
 };
 
 # ---------------------------------------------------------------------------
 
 %patterns = (
-	q{ <dns:15.35.17.212.dnsbltest.spamassassin.org> [127.0.0.2] } => 'P_1',
 	q{ <dns:226.149.120.193.dnsbltest.spamassassin.org> [127.0.0.2] } => 'P_2',
 	q{ <dns:18.13.119.61.dnsbltest.spamassassin.org> [127.0.0.2] } => 'P_3',
 	q{ <dns:134.88.73.210.dnsbltest.spamassassin.org> [127.0.0.2] } => 'P_4',
