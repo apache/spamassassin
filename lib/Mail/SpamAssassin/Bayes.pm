@@ -757,7 +757,7 @@ sub learn_trapped {
   #
   $msgatime = time if ( $msgatime - time > 86400 );
 
-  for (@{$self->tokenize ($msg, $body)}) {
+  for ($self->tokenize ($msg, $body)) {
     if ($isspam) {
       $self->{store}->tok_count_change (1, 0, $_, $msgatime);
     } else {
@@ -861,7 +861,7 @@ sub forget_trapped {
     $self->{store}->nspam_nham_change (0, -1);
   }
 
-  for (@{$self->tokenize ($msg, $body)}) {
+  for ($self->tokenize ($msg, $body)) {
     if ($isspam) {
       $self->{store}->tok_count_change (-1, 0, $_);
     } else {

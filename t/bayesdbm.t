@@ -16,7 +16,7 @@ BEGIN {
     unshift(@INC, '../blib/lib');
   }
 
-  plan tests => (HAS_DB_FILE ? 43 : 0);
+  plan tests => (HAS_DB_FILE ? 42 : 0);
 };
 
 exit unless HAS_DB_FILE;
@@ -55,9 +55,7 @@ my $body = $sa->{bayes_scanner}->get_body_from_msg($mail);
 
 ok($body);
 
-my ($wc, @toks) = $sa->{bayes_scanner}->tokenize($mail, $body);
-
-ok($wc > 0);
+my @toks = $sa->{bayes_scanner}->tokenize($mail, $body);
 
 ok(scalar(@toks) > 0);
 

@@ -16,7 +16,7 @@ BEGIN {
     unshift(@INC, '../blib/lib');
   }
 
-  plan tests => ((TEST_ENABLED && HAS_DBI) ? 39 : 0);
+  plan tests => ((TEST_ENABLED && HAS_DBI) ? 38 : 0);
 
   onfail => sub {
     warn "\n\nNote: Failure may be due to an incorrect config.";
@@ -94,9 +94,7 @@ my $body = $sa->{bayes_scanner}->get_body_from_msg($mail);
 
 ok($body);
 
-my ($wc, @toks) = $sa->{bayes_scanner}->tokenize($mail, $body);
-
-ok($wc > 0);
+my @toks = $sa->{bayes_scanner}->tokenize($mail, $body);
 
 ok(scalar(@toks) > 0);
 
