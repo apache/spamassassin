@@ -2334,13 +2334,6 @@ sub check_dcc {
 
 ###########################################################################
 
-sub check_for_spam_phrases {
-  return 0;
-  #return Mail::SpamAssassin::PhraseFreqs::check_phrase_freqs (@_);
-}
-
-###########################################################################
-
 sub check_for_fake_aol_relay_in_rcvd {
   my ($self) = @_;
   local ($_);

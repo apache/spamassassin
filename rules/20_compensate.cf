@@ -248,12 +248,14 @@ header MAILER_DAEMON            From =~ /^(?:Mail Delivery \w+ )?<?mailer.?daemo
 describe MAILER_DAEMON          From the Mailer-Daemon
 tflags MAILER_DAEMON            nice
 
-#   0.149    0.221    0.105    0.68   -1.00  FAILURE_NOTICE_1
 header   FAILURE_NOTICE_1       Subject =~ /^(?:failure notice|returned mail:|Delivery Status Notification|Undeliverable:)/i
 describe FAILURE_NOTICE_1       Mailer daemon failure notice (1)
 tflags   FAILURE_NOTICE_1       nice
 
-#   0.534    0.593    0.499    0.54   -1.00  FWD_MSG
+body     FAILURE_NOTICE_2       /\b(?:Delivery to the following recipients failed|This Message was undeliverable|The following addresses had permanent fatal errors|did not reach the following recipient)\b/i
+describe FAILURE_NOTICE_2       Mailer daemon failure notice (2)
+tflags   FAILURE_NOTICE_2       nice
+
 header FWD_MSG                  Subject =~ /Fwd:\s/
 describe FWD_MSG                Forwarded email
 tflags FWD_MSG                  nice

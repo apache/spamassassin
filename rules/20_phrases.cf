@@ -1,0 +1,1102 @@
+# SpamAssassin rules file: phrase tests
+#
+# Please don't modify this file as your changes will be overwritten with
+# the next update. Use @@LOCAL_RULES_DIR@@/local.cf instead.
+# See 'perldoc Mail::SpamAssassin::Conf' for details.
+#
+# Note: body tests are run with long lines, so be sure to limit the
+# size of searches; use /.{0,30}/ instead of /.*/ to avoid huge
+# search times.
+#
+###########################################################################
+
+require_version @@VERSION@@
+
+###########################################################################
+
+body REMOVE_SUBJ		/remove.{1,15}subject/i
+describe REMOVE_SUBJ		List removal information
+body SUBJ_REMOVE		/\w.{0,40}subject.{1,15}remove/i
+describe SUBJ_REMOVE		List removal information
+body REPLY_REMOVE_SUBJECT	/reply.{1,15}remove.{1,15}subject/i
+describe REPLY_REMOVE_SUBJECT	List removal information
+body DISCONTINUE		/\"discontinue\".{1,15}no further notices/i
+describe DISCONTINUE		List removal information
+body REMOVE_FROM_LIST		/to be removed from (?:the|my|our) (?:mailing|e.?mail|opt[ -]?in)? ?list/i
+describe REMOVE_FROM_LIST	To be removed from list
+body REMOVE_RESPECT		/(?:respect|honou?r) all removal requests/i
+describe REMOVE_RESPECT		We respect all removal requests
+
+# bug 1022: MGM_POSTCARD #2 original
+body REMOVE_POSTAL		/(?:Send(?:ing|) a (?:postal mail|postcard) to (?:Unsubscribe|Customer ?Service|remove)|unsubscribe by (?:postal mail|postcard))/i
+describe REMOVE_POSTAL		Send real mail to be unsubscribed
+
+###########################################################################
+# CLICK rules
+# note HTML_LINK_CLICK* rules in HTML parser section
+
+body CLICK_BELOW_CAPS		/CLICK\s.{0,30}(?:HERE|BELOW)/s
+describe CLICK_BELOW_CAPS	Asks you to click below (in capital letters)
+
+body __CLICK_BELOW		/click\s.{0,30}(?:here|below)/is
+meta CLICK_BELOW		(__CLICK_BELOW && !CLICK_BELOW_CAPS)
+describe CLICK_BELOW		Asks you to click below
+
+body CLICK_TO_REMOVE_1		/click here to be (?:permanently )?(?:removed|deleted)/i
+describe CLICK_TO_REMOVE_1	Click to be removed
+
+body BUGGY_CGI			/Below is the result of your feedback form/
+describe BUGGY_CGI		Broken CGI script message
+
+body SENT_IN_COMPLIANCE		/(?:e.?mail|message) .{0,10}sen[dt] (?:to you )?in (?:\w{1,10} )?compliance (?:of|with)/i
+describe SENT_IN_COMPLIANCE	Claims compliance with spam regulations
+body PARA_A_2_C_OF_1618		/Paragraph *.a.{0,10}2.{0,10}C\. of S\. 1618/i
+describe PARA_A_2_C_OF_1618	Claims compliance with Senate Bill 1618
+body BILL_1618			/Bill.{0,10}1618.{0,10}TITLE.{0,10}(?:III|\#3)/i
+describe BILL_1618		Claims compliance with Senate Bill 1618
+body S_1618			/S\..{0,10}1618.{0,10}-.{0,10}SECTION.{0,10}301/i
+describe S_1618			Claims compliance with Senate Bill 1618
+body UNDER_BILL_1618		/Under Bill s.?1618/i
+describe UNDER_BILL_1618	Claims compliance with Senate Bill 1618
+body SECTION_301		/SECTION.{0,10}301/i
+describe SECTION_301		Claims compliance with spam regulations
+body HR_4176			/H\.?R\.? *4176.{0,10}SECTION.{0,10}101/i
+describe HR_4176		Claims compliance with House Bill 4176
+body FURTHER_TRANSMISSIONS      /further transmissions to you by the sender/i
+describe FURTHER_TRANSMISSIONS  Claims compliance with spam regulations
+
+body CHECK_OR_MONEY_ORDER	/check or money order/i
+describe CHECK_OR_MONEY_ORDER	Talk about a check or money order
+
+body AMAZING			/\bAMAZING\b/
+describe AMAZING		Contains word 'amazing' in all-caps
+body GUARANTEE			/\bGUARANTEE\b/
+describe GUARANTEE		Contains word 'guarantee' in all-caps
+body PROFITS			/\bPROFITS\b/
+describe PROFITS		Contains word 'profits' in all-caps
+body NO_QS_ASKED		/\bNO QUESTIONS ASKED\b/i
+describe NO_QS_ASKED		Doesn't ask any questions
+body FULL_REFUND		/full refund|refunds? your money in full/i
+describe FULL_REFUND		Offers a full refund
+
+body FOR_FREE			/\bfor (?-i:FREE)\b/i
+describe FOR_FREE		No such thing as a free lunch (1)
+body COMPLETELY_FREE		/\b(?:100%|completely|totally|absolutely) (?-i:F)ree/i
+describe COMPLETELY_FREE	No such thing as a free lunch (2)
+
+body NO_COST                    /\bno (?:cost|charge)\b/i
+describe NO_COST                No such thing as a free lunch (3)
+body GUARANTEED_100_PERCENT	/100% GUARANTEED/i
+describe GUARANTEED_100_PERCENT	One hundred percent guaranteed
+body MONEY_MAKING		/\bmoney mak(?:ing|er)/i
+describe MONEY_MAKING		Discusses money making
+body BULK_EMAIL			/bulk e-*mail/i
+describe BULK_EMAIL		Talks about bulk email
+body DEAR_EMAIL			/\bDear [A-Za-z0-9_-]+\@/
+describe DEAR_EMAIL		Dear you@you.com?
+body DEAR_FRIEND		/^\s*Dear Friend\b/i
+describe DEAR_FRIEND		How dear can you be if you don't know my name?
+body DEAR_SOMETHING		/\bDear (?:IT\W|Internet|candidate|sirs?|madam|investor|travell?er|car shopper|web)\b/i
+describe DEAR_SOMETHING		Contains 'Dear (something)'
+body DEAR_SOMEBODY              /Dear [A-Z][a-z]+/
+describe DEAR_SOMEBODY          Contains 'Dear Somebody'
+body CALL_NOW			/\bCALL NOW/i
+describe CALL_NOW		Urges you to call now
+body CALL_FREE			/\b(?:call|dial|toll free|order).{1,15}8(?:00|88|77|66|55|44|33|22)[\)\s-]*[\dA-Z]+[\s-]?[\dA-Z]+/i
+describe CALL_FREE		Contains a tollfree number
+body ONLINE_BIZ_OPS		/online business opportunities/i
+describe ONLINE_BIZ_OPS		Wants you to do business online
+body BILLION_DOLLARS		/[BM]ILLION DOLLAR/
+describe BILLION_DOLLARS	Talks about lots of money
+body OPT_IN			/\bopt-in\b/
+describe OPT_IN			Talks about opting in (lowercase version)
+body OPT_IN_CAPS		/(?-i:O)pt.?(?-i:I)n/i
+describe OPT_IN_CAPS		Talks about opting in (capitalized version)
+body OPT_OUT			/\bopt-out\b/
+describe OPT_OUT		Talks about opting out (lowercase version)
+body OPT_OUT_CAPS		/(?-i:O)pt.?(?-i:O)ut/i
+describe OPT_OUT_CAPS		Talks about opting out (capitalized version)
+body DIRECT_EMAIL		/direct e-*mail\b/i
+describe DIRECT_EMAIL		Talks about direct email
+body MASS_EMAIL			/mass e-*mail/i
+describe MASS_EMAIL		Talks about mass email
+body EMAIL_MARKETING		/e-*mail marketing/i
+describe EMAIL_MARKETING	Talks about email marketing
+body PRODUCED_AND_SENT_OUT	/This a.?d is produced and sent out by/i
+describe PRODUCED_AND_SENT_OUT	Tells you it's an ad
+body INCREASE_SOMETHING		/\b(?:boost|increase|grow|larger|bigger|higher) (?:traffic|sales)\b/i
+describe INCREASE_SOMETHING	Instructions on how to increase something
+
+body NEVER_ANOTHER		/never receive another mailing/i
+describe NEVER_ANOTHER		"another mailing" will "never" be "received"
+
+# contrib: Duncan
+body ONE_TIME_MAILING		/this\b.{0,20}\b(?:one|1).time\b.{0,20}\b(?:(?:e-?)?mail|offer)/i
+describe ONE_TIME_MAILING	"one time mailing" doesn't mean it isn't spam
+
+# this one gets a few false positives
+body SOCIAL_SEC_NUMBER		/social security (?:number|record)/i
+describe SOCIAL_SEC_NUMBER	Talks about social security numbers
+
+body MILLION_EMAIL		/million (?:\w+ )?(?:e-?mail )?addresses/i
+describe MILLION_EMAIL		Get a million email addresses
+
+body ADDRESSES_ON_CD		/addresses on cd/i
+describe ADDRESSES_ON_CD	Only thing addresses on CD are useful for is spam
+
+body EXCUSE_1			/\b(?:You (?:were sent|have received|are receiving)|You're receiving).{0,15}(?:message|e-?mail)s? because/i
+describe EXCUSE_1		Gives a lame excuse about why you were sent this spam
+body EXCUSE_2			/If you did not opt.in/i
+describe EXCUSE_2		Claims you actually asked for this spam
+body EXCUSE_3			/to (?:be removed|be deleted|no longer receive th(?:is|ese) messages?) (?:from|send|reply|[e-]*mail)/i
+describe EXCUSE_3		Claims you can be removed from the list
+body EXCUSE_4			/To Be Removed,? Please/i
+describe EXCUSE_4		Claims you can be removed from the list
+body EXCUSE_5			/that your email address is removed/i
+describe EXCUSE_5		Claims you can be removed from the list
+
+# strange pattern because otherwise it matches the std. majordomo line
+# pls note the comment above. DO NOT just put "to" in the first group!
+body EXCUSE_6			/\b(?:wish to|click to) remove yourself/i
+describe EXCUSE_6		Claims you can be removed from the list
+
+body EXCUSE_7			/you (?:wish|want|would like|desire) to be removed/i
+describe EXCUSE_7		Claims you can be removed from the list
+
+body EXCUSE_10			/if you (?:(?:want|wish|care|prefer) not to |do ?n[o']t (?:want|wish|care) to )(?:be contacted again|receive (?:any ?)?(?:more|future|further)\b.{1,10}\b(?:e?-?mail|message|offer|solicitation)s?|be included)/i
+describe EXCUSE_10		"if you do not wish to receive any more"
+
+body EXCUSE_11			/you.{0,15}(?:name|mail).{0,15}(?:was|were|our).{0,15}list/i
+describe EXCUSE_11		Claims you were on a list
+body EXCUSE_12			/this (?:e?-?mail|message) (?:(?:has )?reached|was sent to) you in error/i
+describe EXCUSE_12		Nobody's perfect
+body EXCUSE_13			/mail was sent to you because\b/i
+describe EXCUSE_13		Gives an excuse for why message was sent
+body EXCUSE_14			/you (?:do not|no longer) wish to receive/i
+describe EXCUSE_14		Tells you how to stop further spam
+body EXCUSE_15			/this\s*(?:e?-?mail|message)? (?:is|was) (?:not|never) (?:spam|(?:sent )?unsolicited)/i
+describe EXCUSE_15		Claims to be legitimate email
+body EXCUSE_16			/received this.{1,10}in error/i
+describe EXCUSE_16		I wonder how many emails they sent in error...
+body EXCUSE_18			/we do not (?:spam|send unsolicited)/i
+describe EXCUSE_18		Claims not to be spam
+
+body EXCUSE_19			/because (?:you're|you (?:are )?)(?:registered|.{0,20}\bopt.{0,3}in)/i
+describe EXCUSE_19		Claims you opted-in or registered
+body EXCUSE_20			/you registered at one of our/i
+describe EXCUSE_20		Claims you registered at their site
+body EXCUSE_21			/your e.?mail address was obtained/i
+describe EXCUSE_21		Claims your address was obtained legitimately
+body EXCUSE_22			/you are receiving this special offer/i
+describe EXCUSE_22		Claims you're receiving this offer for a reason
+body EXCUSE_23			/you have provided permission/i
+describe EXCUSE_23		Claims you have provided permission
+body EXCUSE_24			/you(?:'ve|'re| have| are)? receiv(?:e|ed|ing) this (?:advertisement|offer|special|recurring|paid).{0,16}\b(?:by either|because)/i
+describe EXCUSE_24		Claims you received an ad because you wanted it
+
+body EXCUSE_REMOVE		/to be removed from.{0,20}(?:mailings|offers)/i
+describe EXCUSE_REMOVE		Talks about how to be removed from mailings
+
+# jm: keep this case-sensitive, otherwise it FP's
+body VIAGRA			/VIAGRA/
+describe VIAGRA			Plugs Viagra
+
+body NATURAL_VIAGRA             /\bnatural viagra\b/i
+describe NATURAL_VIAGRA         Plugs "Natural Viagra"
+
+# NB: Made it also match "Herbal V" - a viagra alternative
+body HERBAL_VIAGRA              /\bherbal v(?:iagra)?\b/i
+describe HERBAL_VIAGRA          Plugs "Herbal Viagra"
+
+body TARGETED                   /\btargeted (?:traffic|e-?mail|internet|leads?)\b/i
+describe TARGETED               Targeted Traffic / Email Addresses
+
+body LIMITED_TIME_ONLY		/LIMITED TIME (?:ONLY|offer)/i
+describe LIMITED_TIME_ONLY	Offers a limited time offer
+body STRONG_BUY			/strong buy/i
+describe STRONG_BUY		Tells you about a strong buy
+
+body WE_HONOR_ALL		/we (?:honou?r|respect)(?: all)? remov(?:e|al) requests/i
+describe WE_HONOR_ALL		Claims to honor removal requests
+
+# Jul  2 2002 jm: note that CommuniGate is *not* spam software, it's totally legit.
+# but beginning spammers often download a trial version and spam with it.
+body COMMUNIGATE		/transferred with a trial version of CommuniGate/
+describe COMMUNIGATE		Sent using a trial version of CommuniGate
+
+body OPPORTUNITY		/OPPORTUNITY/
+describe OPPORTUNITY		Gives information about an opportunity
+body PURE_PROFIT		/PURE PROFIT/i
+# this used to say 'Profit is dirty, not pure', but that's a bit extreme ;)
+describe PURE_PROFIT		Offers "pure" profit
+body STOCK_PICK			/STOCK PICK/i
+describe STOCK_PICK		Offers a picked stock
+body STOCK_ALERT		/stock alert/i
+describe STOCK_ALERT		Offers a alert about a stock
+body MICRO_CAP_WARNING		/Investing in micro-cap securities is highly speculative/i
+describe MICRO_CAP_WARNING	SEC-mandated penny-stock warning -- thanks SEC
+body INVESTOR_SPEC_SHEET	/Investor Spec Sheet/i
+describe INVESTOR_SPEC_SHEET	Standard investment opportunity spam
+body NOT_ADVISOR		/not a registered investment advisor/i
+describe NOT_ADVISOR		Not registered investment advisor
+
+body FREE_CONSULTATION		/FREE CONSULTATION/i
+describe FREE_CONSULTATION	Offers a consultation for nothing
+
+body SOME_BREAKTHROUGH		/(?:science|medical|major|scientific|fundamental|technology|revolutionary)\s+breakthrough/i
+describe SOME_BREAKTHROUGH	Describes some sort of breakthrough
+
+body SELECTED_YOU		/(?:you (?:have been|were) selected|we (?:have )?selected you)/i
+describe SELECTED_YOU		They have selected you for something
+
+# somehow "/name.*\bcredit.?card\b/is" won't match, even if
+# it's there.  *boggle* (contrib: WW)
+body WANTS_CREDIT_CARD          /\bcredit.?card\s+order/i
+describe WANTS_CREDIT_CARD      Asks for credit card details
+
+# (contrib: WW)
+body ASKS_BILLING_ADDRESS       /\bbilling address\b/i
+describe ASKS_BILLING_ADDRESS   Asks for a billing address
+
+# (contrib: skod)
+body PRINT_FORM_SIGNATURE	/Sign(?:ature)?\s*(?:here|please)?:.{0,30}___*/i
+describe PRINT_FORM_SIGNATURE	Asks you for your signature on a form
+
+# (contrib: skod)
+body MAIL_IN_ORDER_FORM		/\b(?:Mail-in|secure|ez|credit.card|fax this) Order Form\b/i
+describe MAIL_IN_ORDER_FORM	Contains mail-in order form
+
+# (contrib: skod)
+body FOR_INSTANT_ACCESS		/INSTANT ACCESS/i
+describe FOR_INSTANT_ACCESS	Instant Access button
+
+# (contrib: skod)
+body UNIVERSITY_DIPLOMAS	/\b(?:college|university)\s+diplomas/i
+describe UNIVERSITY_DIPLOMAS	University Diplomas
+
+body PREST_NON_ACCREDITED	/prestigi?ous\b.{0,20}\bnon-accredited\b.{0,20}\buniversities/i
+describe PREST_NON_ACCREDITED	'Prestigious Non-Accredited Universities'
+
+# (contrib: skod)
+body NEW_DOMAIN_EXTENSIONS	/\bnew .{0,15}\bextension/i
+describe NEW_DOMAIN_EXTENSIONS	Possible registry spammer
+
+body DOMAIN_BODY		/(?:\s|^)(?:\.|dot\s+)(?:info|biz|name)\b|(?:\s|^)\.\w+ domain/mi
+describe DOMAIN_BODY		Domain registration spam body
+
+body REMOVAL_INSTRUCTIONS	/\b(?:REMOVAL|UNSUBSCRIBE) INSTRUCTIONS/i
+describe REMOVAL_INSTRUCTIONS	Gives instructions for removal from list
+
+body CANNOT_BE_SPAM		/cannot be considered spam/i
+describe CANNOT_BE_SPAM		Claims "cannot be considered spam"
+
+# (contrib: WW)
+body THIS_AINT_SPAM             /This.{0,30}is not (?:a )?spam/is
+describe THIS_AINT_SPAM         Claims "This is not spam"
+
+# (contrib: WW)
+body WE_HATE_SPAM               /We .{0,30}oppose the use of SPAM/is
+describe WE_HATE_SPAM           Says "We strongly oppose the use of spam email"
+
+body THIS_IS_AN_AD		/this message is an advertisement/i
+describe THIS_IS_AN_AD		Says "this is an advertisement" (thanks!)
+
+body HR_3113                    /H\.\s*R\.\s*3113/is
+describe HR_3113                Mentions Spam law "H.R. 3113"
+
+body UCE_MAIL_ACT               /Unsolicited Commercial Electronic Mail Act/
+describe UCE_MAIL_ACT           Mentions Spam Law "UCE-Mail Act"
+
+# Jul  3 2002 jm: modified PENIS_ENLARGE patterns: removed "add", replaced with "inches",
+# because that seems to be another typical word in the pattern.
+body PENIS_ENLARGE		/\b(?:enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b|\binches\b).{0,50}\b(?:penis|male organ|P[ -]?P\b|pee[ -]?pee|dick|sc?hlong|wh?anger|breast)/i
+describe PENIS_ENLARGE		Information on getting a larger penis or breasts
+
+body PENIS_ENLARGE2		/\b(?:penis|male organ|P[ -]?P\b|pee[ -]?pee|dick|sc?hlong|wh?anger|breast).{0,50}\b(?:enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b|\binches\b)/i
+describe PENIS_ENLARGE2		Information on getting a larger penis or breasts (2)
+
+body     IMPOTENCE              /\b(?:impotence (?:problem|cure|solution)|Premature Ejaculation|erectile dysfunction)/i
+describe IMPOTENCE              Impotence cure
+
+body WORK_AT_HOME		/\b(?:WORK|(?:MAKE|EARN).{1,10}(?:MONEY|\$+|BUCKS|CASH)).{1,10}(?:AT|FROM) (?:YOUR )?HOME/i
+describe WORK_AT_HOME		Information on how to work at home (1)
+
+body HOME_EMPLOYMENT		/HOME.{0,10}(?: EMPLOYMENT|WORKER|BUSINESS)/i
+describe HOME_EMPLOYMENT	Information on how to work at home (2)
+
+body     NO_EXPERIENCE          /\bNo EXPERIENCE/i
+describe NO_EXPERIENCE          No experience needed!
+
+body MORTGAGE_BEST		/(?:low(?:est|er)?|free|second|rate|best|refinanc(?:e|ing)|online|instant) mortgage/i
+describe MORTGAGE_BEST		Information on mortgages
+
+body MORTGAGE_PITCH		/mortgage (?:rates?|quotes?|approv(?:al|ed)|payment|interest|loans?|app(?:\b|lication))/i
+describe MORTGAGE_PITCH		Looks like mortgage pitch
+
+body MORTGAGE_RATES		/Mortgage rates/i
+describe MORTGAGE_RATES		Information on mortgage rates
+
+body MORTGAGE_WAITING           /mortgage companies make you wait/i
+describe MORTGAGE_WAITING       Something about waiting for mortgages
+
+body MORTGAGE_NETWORK           /will be transmitted to our network of mortgage specialists/i
+describe MORTGAGE_NETWORK       Something about a mortgage network
+
+body HELPED_FINANCE             /you helped me finance a new home and I got a very good deal/i
+describe HELPED_FINANCE         A dodgy mortgage testimonial
+
+body FALLING_INTEREST           /falling interest/i
+describe FALLING_INTEREST	Interest rates
+
+body ORDER_REPORT               /order report .\s?\d from/i
+describe ORDER_REPORT           Order a report from someone
+
+# detect "mort$age", but not "mortgage"
+body MORTGAGE_OBFU	        /mor[tga\$]*\$[ga\$]*e/i
+describe MORTGAGE_OBFU 	        Attempt at obfuscating the word "mortgage"
+
+body TAKE_ACTION_NOW		/take action now!/i
+describe TAKE_ACTION_NOW	Tells you to 'take action now!'
+
+body THE_FOLLOWING_FORM		/the following form\b/i
+describe THE_FOLLOWING_FORM	Asks you to fill out a form
+
+# this works best as rawbody
+# do not add "subscribe", "unsubscribe", or "help"
+rawbody MAILTO_WITH_SUBJ_REMOVE		/mailto:.{0,64}\@.{0,64}\?subject=(?:\"|3D)*(?:remove?|delete|please.?(?:delete|remove|unsubscribe)|abuse|off\b|stop|take.?me.?off)/i
+
+# include the \n\n so we don't match mailto's in the headers!  Some list software
+# uses these to handle auto-subscribe/unsubscribe features
+rawbody MAILTO_LINK		/=[3D=\s"']*mailto:/is
+describe MAILTO_LINK		Includes a URL link to send an email
+body AOL_USERS_LINK		/AOL\s+Users\s+Click/is
+describe AOL_USERS_LINK		Includes a link for AOL users to click
+
+# Cyber FirePower! rants about 'Internet terrorists' aka spam fighters
+# (contrib: WW) (jm: tweaked to match again)
+body INTERNET_TERROR_RANT       /At the time of this mailing.{9,50}legitimate return email address.{100,299}internet terrorists/i
+describe INTERNET_TERROR_RANT   Cyber FirePower! rant about losing dropboxes
+
+body US_DOLLARS               /\b(?:\d{1,3})?Million\b.{0,40}\b(?:(?:United States?|Canadian) Dollar?s?|US(?:D|\$)|U\.? ?S\.? Dollar)/i
+describe US_DOLLARS           Nigerian scam key phrase (million dollars)
+
+# jm: use {2,3} to avoid matching iso-2022-jp charset items. split into US_DOLLARS_4
+# to still match all test cases
+body US_DOLLARS_2               /\s(?:\$|US\$|usd?).?\d{2,3}(?:\.\d)?.?(?:m|millions?)\b/i
+describe US_DOLLARS_2           Nigerian scam key phrase ($NNN.N m/USDNNN.N m/US$NN.N m)
+
+body US_DOLLARS_3               /(?:\$|usd).?\d{1,3}[,.]\d{3}[,.]\d{3}(?:[,.]\d\d)?/i
+describe US_DOLLARS_3           Nigerian scam key phrase ($NN,NNN,NNN.NN)
+
+body US_DOLLARS_4               /\s(?:\$|US\$|usd?).?\d{1,3}\.\d+.?(?:m|millions?)\b/i
+describe US_DOLLARS_4           Nigerian scam key phrase ($NNN.N m/USDNNN.N m/US$NN.N m)
+
+body MILLION_USD              	/Million\b.{0,40}\b(?:United States? Dollars?|USD)/i
+describe MILLION_USD 		Nigerian scam key phrase (millions of dollars)
+
+rawbody FRONTPAGE		/FrontPage.Editor/
+describe FRONTPAGE		Frontpage used to create the message
+
+# some very frequent spam subjects, based on statistical analysis
+body KIFF			/temple kiff/i
+describe KIFF			Contains "Temple Kiff"
+
+body CBYI			/CBYI/
+describe CBYI			Contains "CBYI"
+
+body JODY			/\b(?:My wife|Mi esposa), Jody/
+describe JODY			Contains "My wife, Jody" testimonial
+
+body GENTLE_FEROCITY		/Gentle Ferocity/i
+describe GENTLE_FEROCITY	Contains "Gentle Ferocity"
+
+body VJESTIKA			/Vjestika Aphrodisia/i
+describe VJESTIKA		Contains "Vjestika Aphrodisia"
+
+body TONER			/\b(?:toner|ink(?:[-\s]*jet)?|fax|copier)[-\s]+cartridge/i
+describe TONER			Contains "Toner Cartridge"
+
+body YOUR_INCOME		/\byour income\b/i
+describe YOUR_INCOME		Doing something with my income
+
+body BE_AMAZED			/\bbe amazed\b/i
+describe BE_AMAZED		Apparently, you'll be amazed
+
+body RESISTANCE_IS_FUTILE	/Replying to this email will not unsubscribe you./i
+describe RESISTANCE_IS_FUTILE	Resistance to this spam is futile
+
+# contrib: thelton /at/ donet.com
+body GREAT_OFFER                /\b(?:offer expires|see full offer for details|great offer)/i
+describe GREAT_OFFER            Trying to offer you something
+
+body SUBJ_2_CREDIT              /subject to credit approval/i
+describe SUBJ_2_CREDIT          Contains 'subject to credit approval'
+
+body URGENT_BIZ			/urgent.{0,16}(?:assistance|business|buy|confidential|notice|proposal)/i
+describe URGENT_BIZ		Contains urgent matter
+
+body EARN_PER_WEEK              /\b(?:earn|make).{1,20}\d\d\d+.{1,30}(?:per week|per month|weekly|monthly)/i
+describe EARN_PER_WEEK          Contains 'earn $something per week'
+
+# contrib: Wayne A Tucker
+body PENNIES_A_DAY              /for (?:just|only) pennies a day/i
+describe PENNIES_A_DAY          Contains 'for only pennies a day'
+
+body FOR_JUST_SOME_AMT          /for (?:just|only) \$?\d+\.?\d*[^\.]*!/i
+describe FOR_JUST_SOME_AMT      Contains 'for only' some amount of cash
+
+# suggestion following Jason Haar
+body     READ_TO_END            /read this (?:e-?mail )?to the end/i
+describe READ_TO_END            You'd better read all of this spam!
+
+body     ALL_NATURAL            /\b(?:100%|completely|totally|all) natural/i
+describe ALL_NATURAL            Spam is 100% natural?!
+
+body     MONEY_BACK             /money back guarantee/i
+describe MONEY_BACK             Money back guarantee
+
+body     NO_CATCH               /there is no catch/i
+describe NO_CATCH               There is no catch
+
+body     NO_OBLIGATION          /no obligation/i
+describe NO_OBLIGATION          There is no obligation
+
+body     NO_DISSAPOINTMENT      /You won'?t be diss?app?ointed/i
+describe NO_DISSAPOINTMENT      You won't be "dissapointed"
+
+body     SERIOUS_ONLY           /Serious [IE]nquiries Only/i
+describe SERIOUS_ONLY           Serious Enquiries Only
+
+body     RISK_FREE              /\b(?:risk[ -]free|no[ -]risk)/i
+describe RISK_FREE              Risk free.  Suuurreeee....
+
+# "seen on TV", "seen on ABC/NBC/etc", "seen on XYZ TV", or
+# "seen on:"
+body     AS_SEEN_ON             /seen on\b\s*(?:TV|ABC|NBC|CBS|CNN|Oprah|USA Today|48 Hours|New York Times|\w+\s+TV|:)/i
+describe AS_SEEN_ON             As seen on national TV!
+
+body     NOT_INTENDED           /not intended for residents (?:of|in)\b/i
+describe NOT_INTENDED           Not intended for residents of somewhere or other
+
+# This phrase appears in many pyramid scheme mails in which
+# "My Wife Jody" testimonials are absent
+body     COPY_ACCURATELY        /copy.{1,10}name.{1,10}address.{1,10}ACCURATELY\b/i
+describe COPY_ACCURATELY        Common pyramid scheme phrase (1)
+
+body     SEE_FOR_YOURSELF       /See (?:for|it) yourself\b/i
+describe SEE_FOR_YOURSELF       See for yourself
+
+body ORDER_NOW                  /\border (?:now|soon|fast|quickly|while)\b/i
+describe ORDER_NOW              Encourages you to waste no time in ordering
+
+## Contrib: Marc Perkel
+body OFFSHORE_SCAM		/\boffshore\b.{0,20}(?:credit card|companies|account|financ|websites?)/i
+describe OFFSHORE_SCAM		Off Shore Scams
+
+body VACATION_SCAM		/\b(?:free|mini-?|dream|special).{0,10}vacation|vacation (?:offer|promotion|package|for two|getaway)/i
+describe VACATION_SCAM		Vacation Offers
+
+body WHY_PAY_MORE		/\bwhy pay more\b/i
+describe WHY_PAY_MORE		Why Pay More?
+
+body CONGRATULATIONS		/\bcongratulations! you/i
+describe CONGRATULATIONS	Congratulations - you've been scammed?
+
+body SIGN_UP			/\b(?:free sign up|sign up today)\b/i
+describe SIGN_UP		Sign up Free Today
+
+# do not add "new" since there's non-spam about "new cell phone numbers"
+# separated into two rules since one seems to have a lot of
+# sourceforge list advertisement false positives
+body FREE_CELL_PHONE          	/\b(?-i:F)ree\b.{0,24}(?:cell(?:ular)?|mobile).{0,4}phones?/i
+describe FREE_CELL_PHONE 	Talks about free mobile phones
+
+body FREE_LEADS			/\bfree leads\b/i
+describe FREE_LEADS		Free Leads
+
+body RECEIVE_EMAIL		/receive third party email/i
+describe RECEIVE_EMAIL		Receive third party email
+
+# similar to OFFER, but fewer FPs
+body RECEIVE_OFFER		/receive special offer/i
+describe RECEIVE_OFFER		Receive a special offer
+
+body OFFER			/\b(?:free|special|trial) offer/i
+describe OFFER			Free Offer
+
+body OFFER_EXPIRE	        /\boffer expires\b/i
+describe OFFER_EXPIRE		Offer Expires
+
+body FREE_QUOTE		        /\bfree quote/i
+describe FREE_QUOTE		Free Quote
+
+body FREE_QUOTE_INSTANT		/free.{0,12}(?:(?:instant|express|online|no.?obligation).{0,4})+.{0,32}\bquote/i
+describe FREE_QUOTE_INSTANT	Free express or no-obligation quote
+
+body FREE_DVD		        /\bfree dvd/i
+describe FREE_DVD		Free DVD
+
+body FREE_INVESTMENT	        /\bfree investment/i
+describe FREE_INVESTMENT	Free Investment
+
+body INVESTMENT		        /\binvestment decision/i
+describe INVESTMENT		Investment Decision
+
+body FREE_TRIAL		        /\bfree trial\b/i
+describe FREE_TRIAL		Free Trial
+
+body FREE_MEMBERSHIP	        /\bfree membership/i
+describe FREE_MEMBERSHIP	Free Membership
+
+body FREE_WEBSITE	        /\bfree website/i
+describe FREE_WEBSITE		Free Website
+
+body CREDIT_CARD	        /\bcredit card.{1,10}(?:offer|debt|decision)/i
+describe CREDIT_CARD		Credit Card Offers
+
+body NO_CREDIT_CHECK	        /\bno credit check\b/i
+describe NO_CREDIT_CHECK	No Credit Check
+
+body BANKRUPTCY		        /\b(?:avoid|past) bankruptcy\b/i
+describe BANKRUPTCY		Avoid Bankruptcy
+
+body CREDIT_BUREAU	        /\ball .{0,9}credit bureaus?\b/i
+describe CREDIT_BUREAU		Credit Bureaus
+
+body ACCEPT_CREDIT_CARDS	/\b(?:accept\b|are accepting).{1,15}credit cards?\b/i
+describe ACCEPT_CREDIT_CARDS	Accept Credit Cards
+
+body BAD_CREDIT		        /\b(?:bad|poor|no\b|eliminate|repair|(?:re)?establish|damag).{0,10} (?:credit|debt)\b/i
+describe BAD_CREDIT		Eliminate Bad Credit
+
+body UNSECURED_CREDIT	        /\bunsecured.{0,10}(?:master ?card|visa|credit|loans|debt)\b/i
+describe UNSECURED_CREDIT	Unsecured Credit/Debt
+
+body LOW_INTEREST	        /\blow.{0,20} interest rates?\b/i
+describe LOW_INTEREST		Lower Interest Rates
+
+body COMPARE_RATES              /\bcompare .{0,9}rates?\b/i
+describe COMPARE_RATES          Compare Rates
+
+body SAVE_UP_TO                 /\b(?-i:S)ave up to\b/i
+describe SAVE_UP_TO             Save Up To
+
+body LOW_PAYMENT	        /\b(?:reduce|low).{0,12} payment/i
+describe LOW_PAYMENT		Lower Monthly Payment
+
+body CONSOLIDATE_DEBT		/(?:consolidate .{0,9} (?:debt|credit|bills)|debt[ -]?(?:consolidation|elimination))/i
+describe CONSOLIDATE_DEBT	Consolidate debt, credit, or bills
+
+body CREDITORS_CALLING	        /\bcreditors calling\b/i
+describe CREDITORS_CALLING 	Calling Creditors
+
+body REFINANCE_YOUR_HOME	/\brefinance your(?: current)? (?:home|house)\b/i
+describe REFINANCE_YOUR_HOME	Home refinancing
+
+body REFINANCE_NOW              /time to refinance|refinanc\w{1,3}\b.{0,16}\bnow\b/i
+describe REFINANCE_NOW          Home refinancing
+
+body SEARCH_ENGINE_PROMO        /\b(?:(?:submitt?|list)(?:ed|ing|s)?|place(?:d|ment))\b.{1,30}\b(?:in|to)[\s_-]+.{0,30}\b(?:search(?:ing)?\s*(?:engine|site)|director(?:y|ie))s?\b/is
+describe SEARCH_ENGINE_PROMO    Discusses search engine listings
+
+body OPPORTUNITY_2		/\b(?:opportunity (?:pass|of a lifetime|is knocking|for you)|(?:investment|unique) opportunity)\b/i
+describe OPPORTUNITY_2		Opportunity - What a deal!
+
+body NO_PURCHASE	        /\bno purchase\b/i
+describe NO_PURCHASE		No Purchase Necessary
+
+body NO_STRINGS		        /\bno strings attached\b/i
+describe NO_STRINGS		No Strings Attached
+
+body NO_FEE		        /\bno .{0,12}fees?\b/i
+describe NO_FEE			No Fees
+
+body NO_MEDICAL		        /\bno medical exam/i
+describe NO_MEDICAL		No Medical Exams
+
+body NO_AGE		        /\bno age (?:restriction|limit)/i
+describe NO_AGE			No Age Restrictions
+
+body NO_FORMS		        /\bno .{0,9}forms\b/i
+describe NO_FORMS		No Claim Forms
+
+body NO_GIMMICK		        /\bno gimmick\b/i
+describe NO_GIMMICK		No Gimmick
+
+body NO_INVESTMENT	        /\bno investment/i
+describe NO_INVESTMENT		No Investment
+
+body INITIAL_INVEST	        /\binitial investment\b/i
+describe INITIAL_INVEST		Requires Initial Investment
+
+body NO_INVENTORY	        /\bno inventory\b/i
+describe NO_INVENTORY		No Inventory
+
+body BUY_DIRECT		        /\bbuy direct\b/i
+describe BUY_DIRECT		Buy Direct
+
+body DRASTIC_REDUCED	        /\bdrastic.{0,4} reduc/i
+describe DRASTIC_REDUCED	Drastically Reduced
+
+body DO_IT_TODAY        /\b(?:join|register|order|apply) .{0,10}(?-i:T)oday\b/i
+describe DO_IT_TODAY		Do it Today
+
+body WHY_WAIT		        /\b(?:why wait|what are you waiting for)\b/i
+describe WHY_WAIT		What are you waiting for
+
+body SUPPLIES_LIMITED	        /\bsupplies are limited\b/i
+describe SUPPLIES_LIMITED	Supplies are Limited
+
+body SECRET_RECORD	        /\bsecretly record/i
+describe SECRET_RECORD		Secretly Recorded
+
+body USE_IDENTITY		/someone using your identity/i
+describe USE_IDENTITY		Someone using your identity
+
+body YOU_CAN_SEARCH		/you can search for anyone/i
+describe YOU_CAN_SEARCH		You can search for anyone
+
+body FIND_ANYTHING	        /\bfind out anything\b/i
+describe FIND_ANYTHING		Find out anything
+
+body SEDUCTION		        /\b(?:seduc|attract).{0,8} (?:ebook|opposite sex|women)\b/i
+describe SEDUCTION		Score with babes!
+
+body INVALUABLE_MARKETING	/invaluable marketing information/i
+describe INVALUABLE_MARKETING	Invaluable marketing information
+
+body MARKET_SOLUTION	        /\bmarket.{0,9} solution/i
+describe MARKET_SOLUTION	Marketing Solutions
+
+body MARKETING		        /\bdirect marketing\b/i
+describe MARKETING		Direct Marketing
+
+body SAVE_MONEY		        /\bsave .{0,9}(?:money|thousands|millions|up to)\b/i
+describe SAVE_MONEY		Save big money
+
+body GUARANTEED_STUFF	        /\bguarantee.{0,15}(?:income|money|monthly)\b/i
+describe GUARANTEED_STUFF	Guaranteed Stuff
+
+body INCOME		        /\badditional income\b/i
+describe INCOME			Additional Income
+
+body EARNINGS		        /\b(?:potential (?:earnings|income)|income potential)\b/i
+describe EARNINGS		Potential Earnings
+
+body THE_BEST_RATE	        /\bthe best rate/i
+describe THE_BEST_RATE		The best Rates
+
+body WE_PROMISE_YOU	        /\bwe promise .{0,9}you/i
+describe WE_PROMISE_YOU		Promise you ...!
+
+body AMAZING_STUFF	        /\bamazing (?:product|rates)/i
+describe AMAZING_STUFF		Amazing Stuff
+
+body CASH_BONUS		        /\bcash bonus\b/i
+describe CASH_BONUS		Cash Bonus
+
+body SHOPPING_SPREE	        /\bshopping spree\b/i
+describe SHOPPING_SPREE		Shopping Spree
+
+body FANTASTIC		        /\bfantastic {0,9}(?:price|deal|saving)/i
+describe FANTASTIC		Fantastic Deal
+
+body CENTS_ON_DOLLAR	        /\bcents on the dollar\b/i
+describe CENTS_ON_DOLLAR	Cents on the Dollar
+
+body COUPON		        /\boff coupon/i
+describe COUPON			Offers Coupon
+
+body CANT_LIVE_WITHOUT	        /\bcan.{0,4} live without\b/i
+describe CANT_LIVE_WITHOUT	Can't live without?
+
+body NAME_BRAND		        /\b(?:famous name|major) brand/i
+describe NAME_BRAND		Name Brand
+
+# seems like we vastly reduce FPs on this one with a small change or two
+body DIET			/\b(?:(?:without|no) (?:exercis(?:e|ing)|dieting)|weight.?loss|(?:extra|lose|lost|losing).{0,10}(?:pounds|weight|inches|lbs)|burn.{1,10}fat)\b/i
+describe DIET			Lose Weight Spam
+
+body LONG_DISTANCE	        /\b(?:Unlimited|per minute|free).{1,9}Long Distance/i
+describe LONG_DISTANCE		Long Distance Phone Offer
+
+body REVERSE_AGING	        /\breverses? aging\b/i
+describe REVERSE_AGING		Reverses Aging
+
+body HAIR_LOSS		        /\b(?:thinn?ing|restore|grow|new) hair|hair loss/i
+describe HAIR_LOSS		Cures Baldness
+
+body CABLE_CONVERTER	        /\bcable (?:converter|descrambler)/i
+describe CABLE_CONVERTER	Cable Converter
+
+body LUXURY_CAR		        /\bluxury car\b/i
+describe LUXURY_CAR		Luxury Car
+
+body WRINKLES		        /\bwrinkle reduction\b/i
+describe WRINKLES		Removes Wrinkles
+
+body BUY_JUDGEMENTS	        /\b(?:purchase|collect|divorce)\b.{0,30}\bjudgements\b/i
+describe BUY_JUDGEMENTS		Buying judgements
+
+body LYING_EYES		        /\bbelieve your eyes\b/i
+describe LYING_EYES		Will not Belive your Eyes!
+
+body WHILE_YOU_SLEEP	        /\bwhile you sleep\b/i
+describe WHILE_YOU_SLEEP	While you Sleep
+
+body WHILE_SUPPLIES	        /\bwhile supplies last\b/i
+describe WHILE_SUPPLIES		While Supplies Last
+
+body RICH		        /\b(?:make you rich|get rich quick)\b/i
+describe RICH			If only it were that easy
+
+body WINNING_CAP                /WINNING/
+describe WINNING_CAP            Winning in Caps
+
+body WINNER_CAP                 /WINNER/
+describe WINNER_CAP             Winner in Caps
+
+body WINNER                     /\byou.{0,4} a winner|register to win/i
+describe WINNER                 Claims you are a winner
+
+body YOU_WON                    /\byou(?:\'ve| have)? won[^\'\w]/i
+describe YOU_WON                Who really wins?
+
+body PROMOTION		        /\bspecial promotion\b/i
+describe PROMOTION		Contains 'Special Promotion'
+
+body FREE_PASSWORD              /\bfree .{0,9}passwords?\b/i
+describe FREE_PASSWORD          Offers Free (often stolen) Passwords
+
+body HIDDEN_CHARGES	        /\bhidden charges\b/i
+describe HIDDEN_CHARGES		Talks about Hidden Charges
+
+body GET_STARTED_NOW	        /\bget started (?-i:N)ow\b/i
+describe GET_STARTED_NOW	Get Started Now
+
+body ONLY_COST		        /\bonly .{0,9}\$/i
+describe ONLY_COST		Only $$$
+
+body SAVE_BUCKS		        /\bsave \$/i
+describe SAVE_BUCKS		Save $$$
+
+body FINANCIAL		        /\bfinancial(?:ly)? free/i
+describe FINANCIAL 		Financial Freedom
+
+body FORWARD_LOOKING	        /\bcontains forward-looking statements\b/i
+describe FORWARD_LOOKING	Stock Disclaimer Statement
+
+body DISCLAIMER		        /\bdisclaimer\b/i
+describe DISCLAIMER		Message contains disclaimer
+
+body SATISFACTION	        /\bsatisfaction .{0,9}g(?:ua|au)ranteed|not .{0,9}satisfied\b/i
+describe SATISFACTION		Satisfaction Guaranteed
+
+body PRIZE		        /\bclaim.{0,9} prize/i
+describe PRIZE			Talks about prizes
+
+body GETAWAY		        /\bweekend getaway/i
+describe GETAWAY		Weekend Getaway
+
+body HGH			/\b(?:human growth hormone|(?-i:HGH)|H.G.H)\b/i
+describe HGH			Human Growth Hormone
+
+body GIVING_AWAY	        /\bgiving away\b/i
+describe GIVING_AWAY		They're just giving it away!
+
+body EASY_TERMS		        /\beasy terms\b/i
+describe EASY_TERMS		Easy Terms
+
+body EXTRA_CASH		        /\bextra cash\b/i
+describe EXTRA_CASH		Offers Extra Cash
+
+body GET_PAID		        /\bget (?-i:P)aid\b/i
+describe GET_PAID		Get Paid
+
+body BEEN_TURNED_DOWN	        /\bbeen turned down\b/i
+describe BEEN_TURNED_DOWN	Have you been turned down?
+
+body ONE_TIME			/\bone\W+time (?:charge|investment|offer|promotion)/i
+describe ONE_TIME		One Time Rip Off
+
+body COMPETE		        /\bcompete for your business\b/i
+describe COMPETE		Compete for your business
+
+body CANCEL		        /\bcancel at any time\b/i
+describe CANCEL			Cancel at any time!
+
+body NO_COMBINE		        /\bwith any other offer/i
+describe NO_COMBINE		Can not be combined with any other offer
+
+body NEW_CUSTOMER	        /\bnew customers only\b/i
+describe NEW_CUSTOMER		New Customers Only
+
+body MEET_SINGLES	        /\bmeet .{0,12}singles|thousands of personal/i
+describe MEET_SINGLES		Meet Singles
+
+body JOIN_MILLIONS	        /\bjoin (?:millions|thousands)\b/i
+describe JOIN_MILLIONS		Join Millions of Americans
+
+body BE_BOSS		        /\byour own boss\b/i
+describe BE_BOSS		Be your own boss
+
+body DIG_UP_INFO	        /\bdig up information\b/i
+describe DIG_UP_INFO		Dig up Dirt on Friends
+
+body MLM		        /\b(?:MLM|multi.level.marketing)\b/i
+describe MLM			Multi Level Marketing mentioned
+
+body NOT_MLM                    /\bnot (?:MLM|multi.level.marketing)\b/i
+describe NOT_MLM		Apparently, NOT Multi Level Marketing
+
+body SERIOUS_CASH	        /\bserious cash\b/i
+describe SERIOUS_CASH		Serious cash
+
+body CHILD_SUPPORT              /\buncollected child support\b/i
+describe CHILD_SUPPORT          "Collect Child Support" Scam
+
+body ITS_LEGAL                  /\b(?:perfectly|absolutely|100%|totally) legal\b/i
+describe ITS_LEGAL              Claims to be Legal
+
+body FREE_GRANT                 /\b(?:free|government) (?-i:G)rants?\b/i
+describe FREE_GRANT             Free Grant Money
+
+body VIAGRA_ONLINE              /\bviagra .{0,25}(?:express|online|overnight)/i
+describe VIAGRA_ONLINE          Fast Viagra Delivery
+
+body VIAGRA_COMBO               /\bviagra .{0,15}(?:phentermine|xenical|tenuate|zyban|propecia)\b/i
+describe VIAGRA_COMBO           Viagra and other drugs
+
+body ONLINE_PHARMACY		/online pharmacy|(?:drugs|medications) online/i
+describe ONLINE_PHARMACY	Online Pharmacy
+
+body CONFIDENTIAL_ORDER		/confidential.{0,9} order/i
+describe CONFIDENTIAL_ORDER	Confidentially on all orders
+
+body HIDDEN_ASSETS              /hidden assets/i
+describe HIDDEN_ASSETS          'Hidden' assets
+
+body SAVE_THOUSANDS             /\bsave (?:thousands|millions)\b/i
+describe SAVE_THOUSANDS         Save big money
+
+body MARKETING_PARTNERS         /marketing partner|partner site/i
+describe MARKETING_PARTNERS     Claims you registered with some kind of partner
+
+# note the tense used, hopefully it won't hit FPs this way
+body PRIORITY_MAIL              /\b[Aa]ll\b.{0,20}\b[Oo]rders\b.{1,20}\bPriority Mail\b/
+describe PRIORITY_MAIL          Orders shipped by priority mail
+
+body SAVE_ON_INSURANCE         /\bsave .{0,20}\bon (?:your\s+)?(?:auto|car|life|health|medical)? ?insurance\b/i
+describe SAVE_ON_INSURANCE     Trying to sell insurance online
+
+body STOP_SNORING		/\bstop\s+snoring\b/i
+describe STOP_SNORING		Contains "Stop Snoring"
+
+body APPLY_FREE			/(?-i:F)ree (?-i:A)pplication|free application.{0,32}(?:today|minute|less than)/i
+describe APPLY_FREE		Free Application
+
+body APPLY_ONLINE               /\bapply (?-i:O)nline/i
+describe APPLY_ONLINE           Apply online (with capital O)
+
+body FREE_INSTALL               /(?-i:F)ree installation/i
+describe FREE_INSTALL           Contains 'free installation' with capitals
+
+body FREE_PREVIEW		/\bfree preview\b/i
+describe FREE_PREVIEW		Free Preview
+
+# http://www.hughes-family.org/bugzilla/show_bug.cgi?id=678
+body USER_4U2                   /\b\S{0,20}(?:[^0-9][42](?:yo)?u|for-*you)(?:[.-]\S{1,20})?\@\S{1,20}\.(?:net|com|org|info)\b/
+describe USER_4U2               Local part containing a "4u" variant
+body DOMAIN_4U2                 /[\@\.]\S{0,20}(?:[^0-9][42](?:yo)?u|for-*you)(?:[.-]\S{1,20})?\.(?:net|com|org|info)\b/
+describe DOMAIN_4U2             Domain name containing a "4u" variant
+
+body FREE_ACCESS                /(?-i:F)ree access/i
+describe FREE_ACCESS            Contains 'free access' with capitals
+
+body FREE_SAMPLE                /(?-i:F)ree sample/i
+describe FREE_SAMPLE            Contains 'free sample' with capitals
+
+# http://www.hughes-family.org/bugzilla/show_bug.cgi?id=629
+body MONTH_TRIAL                /(?:month|day) .{0,9}trial/i
+describe MONTH_TRIAL            Month Trial Offer
+
+# http://www.hughes-family.org/bugzilla/show_bug.cgi?id=630
+body UNLIMITED                  /UNLIMITED/
+describe UNLIMITED              Unlimited in caps
+
+# bug 680
+body MEMBER_2           /\b(?:free|special|paid|dear|gold|opt.in|valued|because you are an?|be a|becoming a|sent to) .{0,9}members?\b/i
+describe MEMBER_2       Being a Member
+
+body GET_IT_NOW         /get it (?-i:N)ow/i
+describe GET_IT_NOW     Contains 'Get it now' with capitals
+
+body LOW_PRICE                  /\blow.{0,4} (?-i:P)rice/i
+describe LOW_PRICE              Lowest Price
+
+body SALE                       /\bsales? (?:price|system|department|technology|ends|today)|\b(?:on|summer|movie|clearance|for|your|increase|super|losing|return|business|airfare) (?-i:S)ales?/i
+describe SALE                   Stuff on Sale
+
+body MEMBER                 /\bmember (?:number|reward|value|benefit|rate|report|card|information)s?\b/i
+describe MEMBER             Member Stuff
+
+body     EJACULATION            /\b(?:increase|improve|greater).{0,10}ejaculation/i
+describe EJACULATION            Increase your ejaculation!
+
+body TRACE_BY_SSN               /Trace anyone by social security number/i
+describe TRACE_BY_SSN           Talks about tracing by SSN
+body AUTO_EMAIL_REMOVAL         /Auto Email Removal/
+describe AUTO_EMAIL_REMOVAL     Claims auto-email removal
+body CYBER_FIRE_POWER           /\b(?:by|for) Cyber FirePower\!/
+describe CYBER_FIRE_POWER       mentions Cyber FirePower!, a spam-tool
+body ONCE_IN_LIFETIME           /once in a lifetime opportunity/i
+describe ONCE_IN_LIFETIME       Once in a lifetime, apparently
+rawbody SAFEGUARD_NOTICE        /This safeguard is not inserted when using the registered version/s
+describe SAFEGUARD_NOTICE       Contains signature of unregistered spam tool
+body MORE_TRAFFIC               /\bmore (?:internet|web) traffic\b/i
+describe MORE_TRAFFIC           More Internet Traffic
+body NO_MIDDLEMAN               /\bno middleman\b/i
+describe NO_MIDDLEMAN           No Middleman
+body PHONE_CANCER               /\bphone.{0,15}cancer\b/i
+describe PHONE_CANCER           Cell Phone Cancer Scam
+body UNCLAIMED_MONEY            /\bunclaimed (?:funds|money|prizes?|rewards?)\b/i
+describe UNCLAIMED_MONEY        People just leave money laying around
+rawbody SPAM_FORM_INPUT         /<input name=.{0,5}submit.{0,99} Submit By E-Mail /i
+describe SPAM_FORM_INPUT        Form for verifying email address
+body INTL_EXEC_GUILD            /International Executive Guild/
+describe INTL_EXEC_GUILD        Well known spam senders
+body IN_ACCORDANCE_WITH_LAWS    /has been sent in accordance with/
+describe IN_ACCORDANCE_WITH_LAWS Claims to be in accordance with some Spam law
+
+
+body ANOTHER_NET_AD             /Another Internet Ad campaign produced/
+describe ANOTHER_NET_AD         Tells you it's an ad
+
+body CHANGE_TERMS               /\bstrictly based on the following terms and conditions\b/i
+describe CHANGE_TERMS           Terms and conditions
+
+body     DONT_DELETE            /\b(?:don'?t delete this|do not delete)/i
+describe DONT_DELETE            Don't delete me!  Nooooo!!!!
+lang fr describe DONT_DELETE            Contient une formule incitant é ne pas détruire ce message
+
+lang fr describe EU_200_32_CE   Revendique la conformité avec l'arrêt européen 200.32.CE
+body EU_200_32_CE               /Directive 200.32.CE/i
+describe EU_200_32_CE           Claims compliance with spam regulations
+
+lang fr describe EU_EMAIL_OPTOUT        Revendique la conformité avec l'arrêt européen sur le spam
+body EU_EMAIL_OPTOUT            /EU (?:e-?mail opt.?out|e.?commerce) directive/i
+describe EU_EMAIL_OPTOUT        Claims compliance with spam regulations
+
+body EXCUSE_8                   /requests to be taken off our mailing list/i
+describe EXCUSE_8               Claims you can be removed from the list
+
+body FILTERED_BY_WORLDREMOVE    /filtered by WorldRemove/
+describe FILTERED_BY_WORLDREMOVE Claims to listen to some removal request list
+
+body FREE_HOSTING               /\bfree hosting\b/i
+describe FREE_HOSTING           Free Hosting
+
+lang fr describe GREEN_EXCUSE_1 Prétend que le spam est bon pour l'environement
+body GREEN_EXCUSE_1             /using email instead can significantly reduce this/i
+describe GREEN_EXCUSE_1         Claims spam helps the environment
+
+lang fr describe GREEN_EXCUSE_2 Prétend que le spam est bon pour l'environement
+body GREEN_EXCUSE_2             /the trees, save the planet, use email!/i
+describe GREEN_EXCUSE_2         Claims spam helps the environment
+
+body INCREDIBLE                 /\bincredible secrets\b/i
+describe INCREDIBLE             Things incredible
+
+body NO_SELLING                 /absolutely NO selling/i
+describe NO_SELLING             Claims not to be selling anything
+
+body POPLAUNCH                  /StealthLaunch PopLaunch\b/
+describe POPLAUNCH              spam software: PopLaunch
+
+body PSYCHIC                    /\b(?:caring|gifted|experienced) psychic/i
+describe PSYCHIC                Psychics Scam
+
+body SIGNIFICANT                /\bsignificant savings\b/i
+describe SIGNIFICANT            Significant Savings
+
+body SLASH_PRICE                /\bslash.{0,2} price/i
+describe SLASH_PRICE            Slashed Price
+
+body THIS_AINT_JUNK             /This.{0,30}is not (?:a )?junk(?: email)?/is
+describe THIS_AINT_JUNK         Claims "This is not junk email"
+
+body WEALTH                     /\bachieve .{0,15}wealth\b/i
+describe WEALTH                 Achieve Wealth
+
+rawbody MONSTERHUT              /monsterhut.com/
+describe MONSTERHUT             Mentions monsterhut.com
+
+rawbody MURKOWSKI_CRUFT         /www\.senate\.gov\/~?murkowski/
+describe MURKOWSKI_CRUFT        Old Murkowski disclaimer
+
+body EARN_MONEY			/\b(?:earn|make|making|made|received?|discounted)\s+(?:up\s+to|as\s+much\s+as|over|at\s+least|a\s+full)?\s*\$\s*[0-9,]{2}/i
+describe EARN_MONEY		Message talks about earning money
+
+body OBSCURED_EMAIL             /^\w+\^\S+\(\w{2,3}\b/m
+describe OBSCURED_EMAIL         Message seems to contain obscured email address (rot13)
+
+body OUR_AFFILIATE_PARTNERS     /our affiliate partners/i
+describe OUR_AFFILIATE_PARTNERS Mentions their affiliate partners
+
+body OUR_COMPENSATION           /our (?:full )?compensation/i
+describe OUR_COMPENSATION	Mentions their full compensation
+
+body OUR_OVERWHELMING_GROWTH	/our overwhelming growth/i
+describe OUR_OVERWHELMING_GROWTH Mentions their overwhelming growth
+
+body OUR_POLICY_ON_SELLING	/our policy on selling/i
+describe OUR_POLICY_ON_SELLING	Mentions their policy on selling
+
+body OUR_STRICT_ANTI		/our strict anti/i
+describe OUR_STRICT_ANTI	Mentions their strict antipathy on something
+
+body OUR_PUBLICATIONS		/our website (?:and|or) publications/i
+describe OUR_PUBLICATIONS	Mentions their website and/or publications
+
+body OUR_PRIVACY_POLICY         /our privacy policy can be found/i
+describe OUR_PRIVACY_POLICY 	Mentions where their privacy policy is
+
+body CELL_PHONE_BOOST		/(?:(?:boost|antenna|reception).{0,32}(?:cell|mobile|phone|cord.?less)|(?:cell|mobile|phone|cord.?less).{0,32}(?:boost|antenna|reception))/i
+describe CELL_PHONE_BOOST	Talks about cell-phone signal improvement
+
+body OFFERS_ETC			/(?:(?:wish|want|unsub|reward|receive|recurring|remove|permission|partner|further|future|e.?mail|continue|click).{0,64}){2}.{0,8}(?:specials?|offers?|coupons?|discounts?)\b/i
+describe OFFERS_ETC		Stop with the offers, coupons, discounts etc!
+
+body BANG_BOSS        		/\bboss!/i
+describe BANG_BOSS        	Talks about your boss with an exclamation!
+body BANG_CARTOONS    		/\bcartoons!/i
+describe BANG_CARTOONS    	Talks about cartoons with an exclamation!
+body BANG_CYBERANALYSTS		/\bcyberanalysts!/i
+describe BANG_CYBERANALYSTS	Talks about cyberanalysts with an exclamation!
+body BANG_EXERCISE    		/\bexercis(?:e|er|es)!/i
+describe BANG_EXERCISE    	Talks about exercise with an exclamation!
+body BANG_MONEY      		/\bmoney!/i
+describe BANG_MONEY      	Talks about money with an exclamation!
+body BANG_MORE       		/\b(?-i:M)ore!/i
+describe BANG_MORE       	Talks about more with an exclamation!
+body BANG_OPRAH      		/\boprah!/i
+describe BANG_OPRAH      	Talks about Oprah with an exclamation!
+body BANG_QUOTE               	/\b(?-i:Q)uotes?\!/i
+describe BANG_QUOTE            	Talks about quotes with an exclamation!
+
+body INTL_DRIVERS_LICENSE	/international driver'?s license/i
+describe INTL_DRIVERS_LICENSE	International driving license
+
+body ACT_NOW_CAPS               /A(?i:ct) N(?i:ow)/
+describe ACT_NOW_CAPS		Talks about 'acting now' with capitals
+body START_NOW_CAPS             /S(?i:tart now)/
+describe START_NOW_CAPS 	Talks about 'starting now' with capitals
+body WORRY_FREE                 /worry free/i
+describe WORRY_FREE             No Worries, Mate
+body EXPERTS_SHOW_HOW           /experts show you how/i
+describe EXPERTS_SHOW_HOW       Talks about 'experts' showing you how
+body ENHANCE_WEBSITE            /E(?i:nhance any) W(?i:ebsite)/
+describe ENHANCE_WEBSITE        Talks about 'enhancing any website'
+body INCREASE_SEX               /increased?.{0,9}(?:sex|stamina)/i
+describe INCREASE_SEX 		Talks about a bigger drive for sex
+
