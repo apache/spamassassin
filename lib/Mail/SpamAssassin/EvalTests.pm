@@ -975,6 +975,9 @@ sub subject_is_all_caps {
    return 0 if subject_missing($self);
 
    $subject =~ s/[^a-zA-Z]//;
+
+   return 0 if $subject !~ / /; # Don't match one word subjects!
+
    return length($subject) && ($subject eq uc($subject));
 }
 
