@@ -719,7 +719,7 @@ sub check {
         }
         push(@msglines, $_);
         $actual_length += length;
-        last if ($actual_length == $expected_length);
+        last if (defined($expected_length) && ($actual_length == $expected_length));
     }
 
     $msgid        ||= "(unknown)";
