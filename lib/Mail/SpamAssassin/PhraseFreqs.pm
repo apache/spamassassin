@@ -11,7 +11,8 @@ sub _check_phrase_freqs {
   $self->{phrase_hits_hash} = { };
   $self->{conf}->{spamphrase_highest_score} ||= 1;
 
-  $$body[0] =~ s/^Subject://i;
+  my @local = @{$body};
+  $local[0] =~ s/^Subject://i;
 
   my $last;
   my $word;
@@ -19,7 +20,7 @@ sub _check_phrase_freqs {
   my $phrase;
   my $freq;
 
-  for (@{$body}) {
+  for (@local) {
       $last = "";		# avoid defined() test in loop
       tr/A-Za-z/ /cs;
       tr/A-Z/a-z/;
