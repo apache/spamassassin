@@ -15,18 +15,21 @@ MAILDIRS="$HOME/Mail $HOME/Mail.old"
 # consistent!
 ARE_SPAM="Sapm Spam MissedSpam"
 
-:> spam.log nonspam.log
+echo ":> spam.log nonspam.log" > commands.sh
 for maildir in $MAILDIRS ; do
   for folder in $MAILDIRS/* ; do
     [ -d "$folder" ] || continue
     [ -f "$folder/1" ] || continue
 
+    echo "echo Checking $folder:" >> commands.sh
     if perl -e '@pats = qw('"$ARE_SPAM"'); $_ = q('"$folder"');
 		foreach $pat (@pats) { exit 0 if /\/$pat$/; } exit 1;'
     then
-      ./mass-check $folder | tee -a spam.log
+      echo "./mass-check $folder | tee -a spam.log" >> commands.sh
     else
-      ./mass-check $folder | tee -a nonspam.log
+      echo "./mass-check $folder | tee -a nonspam.log" >> commands.sh
     fi
   done
 done
+
+echo "Now run commands.sh to check all folders."
