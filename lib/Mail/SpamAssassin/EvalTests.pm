@@ -1179,10 +1179,23 @@ sub check_unique_words {
   if (!defined $self->{unique_words_repeat}) {
     $self->_check_unique_words($body);
   }
-  my $unique = $self->{unique_words_repeat};
-  my $repeat = $self->{unique_words_unique};
+  my $unique = $self->{unique_words_unique};
+  my $repeat = $self->{unique_words_repeat};
   return ((($unique + $repeat) > $total) &&
 	  ($unique / ($unique + $repeat) > $ratio));
+}
+
+sub many_unique_words {
+  my ($self, $body, $m, $b) = @_;
+
+  if (!defined $self->{unique_words_repeat}) {
+    $self->_check_unique_words($body);
+  }
+  # y = mx+b where y is number of unique words needed
+  my $unique = $self->{unique_words_unique};
+  my $repeat = $self->{unique_words_repeat};
+  my $y = ($unique + $repeat) * $m + $b;
+  return ($unique > $y);
 }
 
 sub _check_unique_words {
@@ -1191,13 +1204,16 @@ sub _check_unique_words {
   $self->{unique_words_repeat} = 0;
   $self->{unique_words_unique} = 0;
   my %count;
-#  for my $line (@$body) {
-#    for my $w (grep(/\w/, split(/\s+/, $line))) {
   for (@$body) {
-    my $line = $_;		# copy to avoid mucking
-    tr/A-Za-z0-9/ /cs;
-    for my $w (split(' ', lc $_)) {
-      $count{$w}++;
+    # copy to avoid changing @$body
+    my $line = $_;
+    # from tokenize_line in Bayes.pm
+    tr/-A-Za-z0-9,\@\*\!_'"\$.\241-\377 / /cs;
+    s/(\w)(\.{3,6})(\w)/$1 $2 $3/gs;
+    s/(\w)(\-{2,6})(\w)/$1 $2 $3/gs;
+    s/(?:^|\.\s+)([A-Z])([^A-Z]+)(?:\s|$)/ ' '. (lc $1) . $2 . ' ' /ge;
+    for my $token (split) {
+      $count{$token}++;
     }
   }
   my $unique = 0;
@@ -1205,8 +1221,8 @@ sub _check_unique_words {
   for my $count (values %count) {
     $count == 1 ? $unique++ : $repeat++;
   }
-  $self->{unique_words_repeat} = $unique;
-  $self->{unique_words_unique} = $repeat;
+  $self->{unique_words_repeat} = $repeat;
+  $self->{unique_words_unique} = $unique;
 }
 
 ###########################################################################
