@@ -138,7 +138,7 @@ tflags RCVD_IN_SORBS_ZOMBIE	net
 
 header RCVD_IN_OPM		rbleval:check_rbl('opm', 'opm.blitzed.org.')
 describe RCVD_IN_OPM		Received via a relay in opm.blitzed.org
-tflags RCVD_IN_OPM              net
+tflags RCVD_IN_OPM		net
 
 header RCVD_IN_OPM_WINGATE	rbleval:check_rbl_sub('opm', '1')
 describe RCVD_IN_OPM_WINGATE	OPM: sender is open WinGate proxy
@@ -166,7 +166,7 @@ tflags RCVD_IN_OPM_HTTP_POST	net
 # SBL is the Spamhaus Block List: http://www.spamhaus.org/sbl/
 header RCVD_IN_SBL		rbleval:check_rbl_txt('sbl', 'sbl.spamhaus.org.')
 describe RCVD_IN_SBL		Received via a relay in Spamhaus Block List
-tflags RCVD_IN_SBL              net
+tflags RCVD_IN_SBL		net
 
 # DSBL catches open relays, badly-installed CGI scripts and open SOCKS and
 # HTTP proxies.  list.dsbl.org lists servers tested by "trusted" users,
@@ -176,14 +176,14 @@ tflags RCVD_IN_SBL              net
 # transfers: yes - rsync and http, see http://dsbl.org/usage
 # pay-to-use: no
 # delist: automated/distributed
-header RCVD_IN_DSBL            rbleval:check_rbl_txt('dsbl', 'list.dsbl.org.')
-describe RCVD_IN_DSBL          Received via a relay in list.dsbl.org
-tflags RCVD_IN_DSBL            net
+header RCVD_IN_DSBL		rbleval:check_rbl_txt('dsbl', 'list.dsbl.org.')
+describe RCVD_IN_DSBL		Received via a relay in list.dsbl.org
+tflags RCVD_IN_DSBL		net
 
 # Other miscellaneous RBLs are listed here:
 header RCVD_IN_RFCI		rbleval:check_rbl_txt('rfci', 'ipwhois.rfc-ignorant.org.')
 describe RCVD_IN_RFCI		Sent via a relay in ipwhois.rfc-ignorant.org
-tflags RCVD_IN_RFCI             net
+tflags RCVD_IN_RFCI		net
 
 # DSN is a domain-based blacklist
 header DNS_FROM_RFCI_DSN	rbleval:check_rbl_from_host('rfci-dsn', 'dsn.rfc-ignorant.org.')
@@ -210,7 +210,7 @@ tflags RCVD_IN_DYNABLOCK	net
 
 header RCVD_IN_BL_SPAMCOP_NET	rbleval:check_rbl_txt('spamcop', 'bl.spamcop.net.')
 describe RCVD_IN_BL_SPAMCOP_NET	Received via a relay in bl.spamcop.net
-tflags RCVD_IN_BL_SPAMCOP_NET   net
+tflags RCVD_IN_BL_SPAMCOP_NET	net
 
 # ---------------------------------------------------------------------------
 # NOTE: commercial tests, see README file for details
