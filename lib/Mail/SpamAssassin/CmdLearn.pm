@@ -187,7 +187,7 @@ sub cmdline_run {
   if ($rebuildonly) {
     $spamtest->rebuild_learner_caches({
 		verbose => 1,
-		showdots => \$opt{'showdots'}
+		showdots => $opt{'showdots'}
     });
     $spamtest->finish_learner();
     return 0;
