@@ -55,16 +55,11 @@ use vars qw(
 require Exporter;
 
 @ISA = qw(Exporter);
-@EXPORT = qw(sha1 sha1bin);
+@EXPORT = qw(sha1 sha1_hex);
 
 use constant HAS_DIGEST_SHA1 => eval { require Digest::SHA1; };
 
 sub sha1 {
-  my ($data) = @_;
-  return unpack("H40", sha1bin($data));
-}
-
-sub sha1bin {
   my ($data) = @_;
 
   if (HAS_DIGEST_SHA1) {
@@ -72,11 +67,16 @@ sub sha1bin {
     return Digest::SHA1::sha1($data);
   }
   else {
-    return SHA1($data);
+    return perl_sha1($data);
   }
 }
 
-sub SHA1($) {
+sub sha1_hex {
+  my ($data) = @_;
+  return unpack("H40", sha1($data));
+}
+
+sub perl_sha1($) {
 
 local $^W = 0;
 local $_;

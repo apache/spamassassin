@@ -27,7 +27,7 @@ use Mail::SpamAssassin::Dns;
 use Mail::SpamAssassin::Locales;
 use Mail::SpamAssassin::MailingList;
 use Mail::SpamAssassin::PerMsgStatus;
-use Mail::SpamAssassin::SHA1 qw(sha1);
+use Mail::SpamAssassin::SHA1 qw(sha1_hex);
 use Mail::SpamAssassin::TextCat;
 use Mail::SpamAssassin::Constants qw(:ip);
 
@@ -2089,7 +2089,7 @@ sub message_is_habeas_swe {
     $text =~ s/\s+/ /g;
     $text =~ s/^\s|\s$//g;
     $text =~ s@/?>@/>@;
-    $self->{habeas_swe} = (sha1($text) eq '76c65d9eb65e572166a08b50fd197b29af09d43a');
+    $self->{habeas_swe} = (sha1_hex($text) eq '76c65d9eb65e572166a08b50fd197b29af09d43a');
   }
 
   return $self->{habeas_swe};

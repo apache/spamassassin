@@ -52,7 +52,7 @@ use bytes;
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::PerMsgStatus;
-use Mail::SpamAssassin::SHA1 qw(sha1);
+use Mail::SpamAssassin::SHA1 qw(sha1_hex);
 
 use vars qw{
   @ISA
@@ -938,7 +938,7 @@ sub get_msgid {
     push(@msgid, $msgid);
   }
 
-  # Use sha1(Date:, last received: and top N bytes of body)
+  # Use sha1_hex(Date:, last received: and top N bytes of body)
   # where N is MIN(1024 bytes, 1/2 of body length)
   #
   my $date = $msg->get_header("Date");
@@ -955,7 +955,7 @@ sub get_msgid {
     substr($body, $keep) = '';
   }
 
-  unshift(@msgid, sha1($date."\000".$rcvd."\000".$body).'@sa_generated');
+  unshift(@msgid, sha1_hex($date."\000".$rcvd."\000".$body).'@sa_generated');
 
   return wantarray ? @msgid : $msgid[0];
 }
