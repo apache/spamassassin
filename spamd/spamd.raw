@@ -17,6 +17,17 @@ use Sys::Syslog qw(:DEFAULT setlogsock);
 use POSIX qw(setsid);
 use Getopt::Std;
 
+# load these now before we do any forks
+eval '
+  use Net::DNS;
+  use Net::DNS::Resolver;
+';
+
+eval '
+  use Rxzor::Client;
+  use Razor::Signature; 
+  use Razor::String;
+';
 
 my %resphash = (
     EX_OK => 0,
