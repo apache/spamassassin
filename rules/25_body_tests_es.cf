@@ -1,0 +1,19 @@
+
+# Leaving some of these without "lang es" because they show up in english language
+# inboxes
+
+body REMOVE_ES_01             /Si no (?:desea(?:s|) |quer(?:é|e)s )(?:seguir |)recibi(?:r|endo) (?:m(?:á|a)s |estos |)(?:correo(?:s|)|mensaje(?:s|)|publicidad|informaci(?:ó|o)n|ofertas)/
+describe REMOVE_ES_01         Claims you can be removed in Spanish
+body REMOVE_ES_02             /Si quiere(?:s|) salir de esta lista solo tiene(?:s|) que marcar/
+describe REMOVE_ES_02           Claims you can be removed in Spanish
+body REMOVE_ES_03             /(?:Si |)desea(?:s|) ser (?:borrado|removido) (?:de nuestra base de datos |)(?:envi(?:ar|e|a) (?:un |)e-mail|)/i
+describe REMOVE_ES_03           Claims you can be removed in Spanish
+body REMOVE_ES_04             /para no recibir mas mensajes/i
+describe REMOVE_ES_04           Claims you can be removed in Spanish
+
+body EXCUSE_ES_01             /(?:este e-mail|esta carta) no (?:puede ser|se) considera(?:d(?:o|a)) (?:\(|)SPAM(?:\)|) (?:ya que|mientras)/i
+describe EXCUSE_ES_01         Claims not to be spam in Spanish
+body EXCUSE_ES_02             /Me he tomado la libertad de enviarle este mail por/
+describe EXCUSE_ES_02         Someone fell free to send you a message in Spanish
+body EXCUSE_ES_03             /Este e-mail ha sido enviado por solicitud de/
+describe EXCUSE_ES_03         Someone requested an spammer to spam you in Spanish
