@@ -63,7 +63,7 @@ Options:
   -P              Die upon user errors (does not exist or user = root) instead of
                   running as 'nobody' with defaults.
   -F 0|1          remove/add 'From ' line at start of output (default: 1)
-
+  -m num          allow maximum num children
 
 EOUSAGE
     exit $resphash{EX_USAGE};
@@ -71,10 +71,10 @@ EOUSAGE
 
 use vars qw{
     $opt_d $opt_h $opt_L $opt_p $opt_A $opt_x $opt_s $opt_D $opt_u
-    $opt_P $opt_c $opt_a $opt_i $opt_q $opt_F $opt_S
+    $opt_P $opt_c $opt_a $opt_i $opt_q $opt_F $opt_S $opt_m
 };
 
-getopts('acdhi:p:qs:u:xA:DLSPF:') or usage();
+getopts('acdhi:p:qs:u:xA:DLSPF:m:') or usage();
 
 $opt_h and usage();
 
@@ -103,6 +103,13 @@ else
 my $dontcopy = 1;
 if ($opt_c) { $dontcopy = 0; }
 
+
+my $extrapid = 5000;
+if ($opt_m) {	# Duncan
+    $opt_m =~ /(\d+)/; # Make sure it is numeric!
+	$extrapid = $1;
+}
+
 if (defined $ENV{'HOME'}) {
     delete $ENV{'HOME'}; # we do not want to use this when running spamd
 }
@@ -127,6 +134,7 @@ $opt_a and eval
 
 sub spawn;  # forward declaration
 sub logmsg; # forward declaration
+sub cleanupchildren;
 
 setlogsock('unix');
 
@@ -164,11 +172,19 @@ $/ = "\n";			# argh, Razor resets this!  Bad Razor!
 
 $opt_d and daemonize();
 
-my $waitedpid = 0;
 my $current_user;
 my $paddr;
 
-$SIG{CHLD} = 'IGNORE';		# important: avoids perl sighandling bug on BSD
+sub REAPER { # Adapted from the perlipc manpage
+	cleanupchildren;
+	$SIG{CHLD} = \&REAPER;
+}
+if ($opt_m) {
+    $SIG{CHLD} = \&REAPER;
+} else {
+    $SIG{CHLD} = 'IGNORE';
+}
+
 $SIG{INT} = \&kill_handler;
 $SIG{TERM} = \&kill_handler;
 
@@ -180,11 +196,8 @@ if ($opt_D) {
 }
 logmsg "server started on port $port";
 
-for ( $waitedpid = 0;
-      ($paddr = accept(Client,Server)) || $waitedpid;
-      $waitedpid = 0, close Client)
+for ( ; ($paddr = accept(Client,Server)) ; close Client)
 {
-    next if $waitedpid and not $paddr;
 
     my $start = time;
 
@@ -456,10 +469,11 @@ for ( $waitedpid = 0;
     # Clean up any defunct processes.  (Not perfect, as usually leaves at
     # least one around until next connection, but avoids handling SIGCHLD.)
     # Needed on SunOS, where SIGCHLD=IGNORE doesn't make it automatic.
-    my $kid;
-    do {
-        $kid = waitpid(-1,&WNOHANG);
-    } until ($kid <= 0);
+	# Not sure if this is still needed with SIGCHLD=\&REAPER which
+    # essentially does this!
+
+    cleanupchildren;
+
 }
 
 sub protocol_error {
@@ -478,11 +492,18 @@ sub spawn {
     }
 
     my $pid;
+
+    cleanupchildren;
+    wait if ($opt_m && $extrapid <= 0);
+	
+    $extrapid--;
+
     if (!defined($pid = fork)) {
-	logmsg "cannot fork: $!";
-	return;
+       logmsg "cannot fork: $!";
+       $extrapid++;
+       return;
     } elsif ($pid) {
-	return; # I'm the parent
+       return; # I'm the parent
     }
     # else I'm the child -- go spawn
 
@@ -559,6 +580,12 @@ sub kill_handler
     logmsg "server killed by SIG$sig, shutting down";
     close Server;
     exit 0;
+}
+
+sub cleanupchildren {
+	while ( my $kid = waitpid(-1, &WNOHANG) > 0 ) {
+		$extrapid++;
+	}
 }
 
 use POSIX 'setsid';
@@ -666,6 +693,14 @@ user I<nobody> and using the default configuration.
 Ensure that the output email message either always starts with a 'From ' line
 (I<1>) for UNIX mbox format, or ensure that this line is stripped from the
 output (I<0>).  (default: 1)
+
+=item B<-m> I<number>
+
+Specify a maximum number of children to spawn. Spamd will wait until another
+child finishes before forking again. Meanwhile, incoming connections will be
+queued. Please note that there is a OS specific maximum of connections that
+can be queued. (Try C<perl -MSocket -e'print SOMAXCONN'> to find this
+maximum)
 
 =back
 
