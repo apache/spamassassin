@@ -107,6 +107,7 @@ sub new {
 
   $self->{rewrite_subject} = 1;
   $self->{spam_level_stars} = 1;
+  $self->{spam_level_char} = '*';
   $self->{subject_tag} = '*****SPAM*****';
   $self->{report_header} = 0;
   $self->{use_terse_report} = 0;
@@ -295,6 +296,22 @@ This can be useful for MUA rule creation.
 
    if(/^spam[-_]level[-_]stars\s+(\d+)$/) {
       $self->{spam_level_stars} = $1+0; next;
+   }
+
+=item spam_level_char { x (some character, unquoted) }        (default: *)
+
+By default, the "X-Spam-Level" header will use a '*' character
+with its length equal to the score of the message.
+In other words, for a message scoring 7.2 points with this option set to .
+
+X-Spam-Level: .......
+
+Some people don't like escaping *'s though, so you can set the character to anything with this option.
+
+=cut
+
+   if(/^spam[-_]level[-_]char\s+(.)$/) {
+      $self->{spam_level_char} = $1; next;
    }
 
 =item subject_tag STRING ... 		(default: *****SPAM*****)
