@@ -1,5 +1,12 @@
 #!/usr/bin/perl -w
 
+my $oldscores = $ARGV[0];
+my $newscores = $ARGV[1];
+
+if (!defined $newscores) {
+  die "usage: rewrite-cf-with-new-scores oldscores.cf newscores.cf\n";
+}
+
 # read the skipped scores and their previous values
 %skipped_scores = ();
 my ($name, $base, $muta);
@@ -19,14 +26,15 @@ close IN;
 
 # now read the evolved scores
 my $gascores = '';
-while (<>) {
+open (STDIN, "<$newscores") or die "cannot open $newscores";
+while (<STDIN>) {
   /^score\s+(\S+)\s/ or next;
   next if (defined $skipped_scores{$1});
   next if ($1 eq '(null)');	# er, oops ;)
   $gascores .= $_;
 }
 
-open (IN, "<../rules/50_scores.cf");
+open (IN, "<$oldscores") or die "cannot open $oldscores";
 my $out = '';
 my $pre = '';
 
