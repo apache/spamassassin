@@ -764,3 +764,6 @@ header T_BAD_TIMEZONE_UTC_B	ALL =~ /[+-]\d\d[30]0(?<![+-]0000) \(?UTC\)?\b/
 header T_BAD_TIMEZONE_CDT_A	ALL =~ /[+-]\d\d[30]0(?<!-0500) \(?CDT\)?\b/
 header T_BAD_TIMEZONE_CDT_B	ALL =~ /[+-]\d\d[30]0(?<!-0500|\+1030) \(?CDT\)?\b/
 header T_BAD_TIMEZONE_MST	ALL =~ /[+-]\d\d[30]0(?<!-0700) \(?MST\)?\b/
+
+header T_INVALID_RCVD_TZ_ABSURD_A	Received =~ /[-+](?:1[4-9]\d\d|[2-9]\d\d\d)\b/
+header T_INVALID_RCVD_TZ_ABSURD_B	Received =~ /\d\d:\d\d\s+[-+](?:1[4-9]\d\d|[2-9]\d\d\d)\b/
