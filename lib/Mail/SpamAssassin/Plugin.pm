@@ -223,7 +223,7 @@ to add their own metadata as well.
 
 =item msg
 
-The C<Mail::SpamAssassin::MsgContainer> object for this message.
+The C<Mail::SpamAssassin::Message> object for this message.
 
 =back
 

@@ -59,7 +59,6 @@ bayes_sql_override_username $testuser
 ");
 
 use Mail::SpamAssassin;
-use Mail::SpamAssassin::MsgContainer;
 
 my $sa = create_saobj();
 

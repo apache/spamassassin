@@ -77,7 +77,6 @@ use lib "$FindBin::Bin/../lib";
 eval "use bytes";
 use Mail::SpamAssassin::ArchiveIterator;
 use Mail::SpamAssassin;
-use Mail::SpamAssassin::MsgContainer;
 use Getopt::Long;
 use POSIX qw(strftime);
 use constant HAS_TIME_PARSEDATE => eval { require Time::ParseDate; };

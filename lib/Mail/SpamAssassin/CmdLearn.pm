@@ -21,7 +21,7 @@ use bytes;
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::ArchiveIterator;
-use Mail::SpamAssassin::MsgContainer;
+use Mail::SpamAssassin::Message;
 use Mail::SpamAssassin::PerMsgLearner;
 
 use Getopt::Long;

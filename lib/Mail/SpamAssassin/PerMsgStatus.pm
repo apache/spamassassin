@@ -56,7 +56,6 @@ use Mail::SpamAssassin::EvalTests;
 use Mail::SpamAssassin::AutoWhitelist;
 use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Util;
-use Mail::SpamAssassin::MsgContainer;
 
 use vars qw{
   @ISA

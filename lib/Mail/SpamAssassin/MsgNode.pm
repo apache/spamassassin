@@ -18,7 +18,7 @@
 
 =head1 NAME
 
-Mail::SpamAssassin::MsgContainer - decode, render, and make available MIME message parts
+Mail::SpamAssassin::MsgNode - decode, render, and make available MIME message parts
 
 =head1 SYNOPSIS
 
@@ -33,12 +33,10 @@ the various MIME message parts.
 
 =cut
 
-package Mail::SpamAssassin::MsgContainer;
+package Mail::SpamAssassin::MsgNode;
 use strict;
-use MIME::Base64;
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::HTML;
-use Mail::SpamAssassin::MsgMetadata;
 use MIME::Base64;
 use MIME::QuotedPrint;
 
@@ -46,79 +44,20 @@ use MIME::QuotedPrint;
 
 =cut
 
-# M::SA::MIME is an object method used to encapsulate a message's MIME part
-#
 sub new {
   my $class = shift;
   $class = ref($class) || $class;
-  my %opts = @_;
+  my %opts = @_;	# unused currently in MsgNode, used in Message
 
   my $self = {
     headers		=> {},
     raw_headers		=> {},
     body_parts		=> [],
-    header_order	=> [],
-    already_parsed	=> 1,
-    };
-
-  # allow callers to set certain options ...
-  foreach ( 'already_parsed' ) {
-    $self->{$_} = $opts{$_} if ( exists $opts{$_} );
-  }
+    header_order	=> []
+  };
 
   bless($self,$class);
-
   $self;
-}
-
-=item _set_is_root()
-
-Non-Public function to inform this node that it's the root, and
-can hold stuff that only a root should do.
-
-(TODO: IMO, we should just have a subclass of MsgContainer for
-root nodes.)
-
-=cut
-
-sub _set_is_root {
-  my($self) = @_;
-
-  # create the metadata holder class
-  $self->{metadata} = Mail::SpamAssassin::MsgMetadata->new($self);
-}
-
-=item _do_parse()
-
-Non-Public function which will initiate a MIME part part (generates
-a tree) of the current message.  Typically called by find_parts()
-as necessary.
-
-=cut
-
-sub _do_parse {
-  my($self) = @_;
-
-  # If we're called when we don't need to be, then just go ahead and return.
-  return if ($self->{'already_parsed'});
-
-  my $toparse = $self->{'toparse'};
-  delete $self->{'toparse'};
-
-  dbg("---- MIME PARSER START ----");
-
-  # Figure out the boundary
-  my ($boundary);
-  ($self->{'type'}, $boundary) = Mail::SpamAssassin::Util::parse_content_type($self->header('content-type'));
-  dbg("main message type: ".$self->{'type'});
-
-  # Make the tree
-  Mail::SpamAssassin::MsgParser->parse_body( $self, $self, $boundary, $toparse, 1 );
-  $self->{'already_parsed'} = 1;
-
-  dbg("---- MIME PARSER END ----");
-
-  return;
 }
 
 =item find_parts()
@@ -137,15 +76,12 @@ sub find_parts {
 
   $onlyleaves = 0 unless defined $onlyleaves;
   $recursive = 1 unless defined $recursive;
-
-  # ok, we need to do the parsing now...
-  $self->_do_parse() if (!$self->{'already_parsed'});
   
   return $self->_find_parts($re, $onlyleaves, $recursive);
 }
 
 # We have 2 functions in find_parts() to optimize out the penalty of
-# 'already_parsed'...  It also lets us avoid checking $onlyleaves, $re,
+# 'already_parsed' (in Message), $onlyleaves, $re,
 # and $recursive over and over again.
 #
 sub _find_parts {
@@ -496,24 +432,6 @@ sub _decode_header {
   return $header;
 }
 
-=item get_pristine_header()
-
-=cut
-
-
-sub get_pristine_header {
-  my ($self, $hdr) = @_;
-  
-  return $self->{pristine_headers} unless $hdr;
-  my(@ret) = $self->{pristine_headers} =~ /^(?:$hdr:[ ]+(.*\n(?:\s+\S.*\n)*))/mig;
-  if (@ret) {
-    return wantarray ? @ret : $ret[-1];
-  }
-  else {
-    return $self->get_header($hdr);
-  }
-}
-
 =item get_header()
 
 =cut
@@ -566,134 +484,17 @@ sub get_all_headers {
   }
 }
 
-sub get_mbox_seperator {
-  return $_[0]->{mbox_sep};
-}
-
-=item get_body()
-
-=cut
-
-sub get_body {
-  my ($self) = @_;
-  my @ret = split(/^/m, $self->{pristine_body});
-  return \@ret;
-}
-
 # ---------------------------------------------------------------------------
-
-=item get_pristine()
-
-=cut
-
-sub get_pristine {
-  my ($self) = @_;
-  return $self->{pristine_headers} . $self->{pristine_body};
-}
-
-=item get_pristine_body()
-
-=cut
-
-sub get_pristine_body {
-  my ($self) = @_;
-  return $self->{pristine_body};
-}
-
-# ---------------------------------------------------------------------------
-
-sub extract_message_metadata {
-  my ($self, $main) = @_;
-
-  # do this only once per message, it can be expensive
-  if ($self->{already_extracted_metadata}) { return; }
-  $self->{already_extracted_metadata} = 1;
-
-  $self->{metadata}->extract ($self, $main);
-}
-
-# ---------------------------------------------------------------------------
-
-=item $str = get_metadata($hdr)
-
-=cut
-
-sub get_metadata {
-  my ($self, $hdr) = @_;
-  if (!$self->{metadata}) {
-    warn "oops! get_metadata() called after finish_metadata()"; return;
-  }
-  $self->{metadata}->{strings}->{$hdr};
-}
-
-=item put_metadata($hdr, $text)
-
-=cut
-
-sub put_metadata {
-  my ($self, $hdr, $text) = @_;
-  if (!$self->{metadata}) {
-    warn "oops! put_metadata() called after finish_metadata()"; return;
-  }
-  $self->{metadata}->{strings}->{$hdr} = $text;
-}
-
-=item delete_metadata($hdr)
-
-=cut
-
-sub delete_metadata {
-  my ($self, $hdr) = @_;
-  if (!$self->{metadata}) {
-    warn "oops! delete_metadata() called after finish_metadata()"; return;
-  }
-  delete $self->{metadata}->{strings}->{$hdr};
-}
-
-=item $str = get_all_metadata()
-
-=cut
-
-sub get_all_metadata {
-  my ($self) = @_;
-
-  if (!$self->{metadata}) {
-    warn "oops! get_all_metadata() called after finish_metadata()"; return;
-  }
-  my @ret = ();
-  foreach my $key (sort keys %{$self->{metadata}->{strings}}) {
-    push (@ret, $key, ": ", $self->{metadata}->{strings}->{$key}, "\n");
-  }
-  return join ("", @ret);
-}
-
-# ---------------------------------------------------------------------------
-
-=item finish_metadata()
-
-Destroys the metadata for this message.  Once a message has been
-scanned fully, the metadata is no longer required.   Destroying
-this will free up some memory.
-
-=cut
-
-sub finish_metadata {
-  my ($self) = @_;
-  if (defined ($self->{metadata})) {
-    $self->{metadata}->finish();
-    delete $self->{metadata};
-  }
-}
 
 =item finish()
 
-Clean up an object so that it can be destroyed.
+Clean up an object so that it can be destroyed.   no-op for MIME parts
+currently.
 
 =cut
 
 sub finish {
   my ($self) = @_;
-  $self->finish_metadata();
 }
 
 # ---------------------------------------------------------------------------

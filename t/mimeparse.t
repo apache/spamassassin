@@ -17,7 +17,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use strict;
 use Test;
-use Mail::SpamAssassin::MsgContainer;
+use Mail::SpamAssassin;
 use Mail::SpamAssassin::SHA1;
 
 my %files = (

@@ -80,7 +80,6 @@ my %opt = ( 'create-prefs' => 1);
 
 eval {
   require Mail::SpamAssassin;
-  require Mail::SpamAssassin::MsgContainer;
 
   # gnu_getopt is not available in Getopt::Long 2.24, see bug 732
   # gnu_compat neither.

@@ -39,7 +39,7 @@ package Mail::SpamAssassin::MsgParser;
 use strict;
 
 use Mail::SpamAssassin;
-use Mail::SpamAssassin::MsgContainer;
+use Mail::SpamAssassin::MsgNode;
 
 use constant MAX_BODY_LINE_LENGTH =>        2048;
 
@@ -117,7 +117,7 @@ sub _parse_multipart {
     # Else, there's no boundary, so leave the whole part...
   }
 
-  my $part_msg = Mail::SpamAssassin::MsgContainer->new();    # prepare a new tree node
+  my $part_msg = Mail::SpamAssassin::MsgNode->new();    # prepare a new tree node
   my $in_body = 0;
   my $header;
   my $part_array;
@@ -151,7 +151,7 @@ sub _parse_multipart {
 
       # make sure we start with a new clean node
       $in_body  = 0;
-      $part_msg = Mail::SpamAssassin::MsgContainer->new();
+      $part_msg = Mail::SpamAssassin::MsgNode->new();
       undef $part_array;
       undef $header;
 
@@ -242,6 +242,7 @@ __END__
 =head1 SEE ALSO
 
 C<Mail::SpamAssassin>
-C<Mail::SpamAssassin::MsgContainer>
+C<Mail::SpamAssassin::Message>
+C<Mail::SpamAssassin::MsgNode>
 C<spamassassin>
 

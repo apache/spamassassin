@@ -26,7 +26,6 @@ tstlocalrules ("
 ");
 
 use Mail::SpamAssassin;
-use Mail::SpamAssassin::MsgContainer;
 
 my $sa = create_saobj();
 

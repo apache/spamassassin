@@ -18,7 +18,6 @@ if (-e 'test_dir') {            # running from test directory, not ..
 use strict;
 use Test;
 use Mail::SpamAssassin;
-use Mail::SpamAssassin::MsgContainer;
 use vars qw($num_tests);
 
 $num_tests = 1;

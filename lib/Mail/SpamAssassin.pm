@@ -69,6 +69,7 @@ use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::ConfSourceSQL;
 use Mail::SpamAssassin::ConfSourceLDAP;
 use Mail::SpamAssassin::PerMsgStatus;
+use Mail::SpamAssassin::Message;
 use Mail::SpamAssassin::MsgParser;
 use Mail::SpamAssassin::Bayes;
 use Mail::SpamAssassin::PluginHandler;
@@ -303,16 +304,16 @@ sub new {
 
 =item parse()
 
-Parse will return a Mail::SpamAssassin::MsgContainer object.  To use it,
+Parse will return a Mail::SpamAssassin::Message object.  To use it,
 simply call C<Mail::SpamAssassin->parse($msg)>, where $msg is either undef
 (will use STDIN), a scalar of the entire message, an array reference
 of the message with 1 line per array element, or a file glob with the
 entire contents of the message.
 
-This function will return a base MsgContainer object with just the headers
-being parsed.  M::SA::MsgContainer->find_parts() will end up doing a
+This function will return a base Message object with just the headers
+being parsed.  M::SA::Message->find_parts() will end up doing a
 full recursive mime parse of the message as necessary.  That procedure is
-recursive and ends up generating a tree of M::SA::MsgContainer objects.
+recursive and ends up generating a tree of M::SA::MsgNode objects.
 parse() will generate the parent node of the tree, then pass the body of
 the message to M::SA::MsgParser->parse_body() which begins the recursive
 process.
@@ -320,7 +321,7 @@ process.
 =cut
 
 # NOTE: This function is allowed (in bad OO form) to modify the
-# MsgContainer object directly as MsgContainer doesn't really have a
+# Message object directly as Message doesn't really have a
 # constructor in the traditional OO way of things.
 
 sub parse {
@@ -345,14 +346,8 @@ sub parse {
   }
 
   # Generate the main object and parse the appropriate MIME-related headers into it.
-  my $msg = Mail::SpamAssassin::MsgContainer->new(already_parsed => 0);
+  my $msg = Mail::SpamAssassin::Message->new(already_parsed => 0);
   my $header = '';
-  $msg->{'pristine_headers'} = '';
-
-  # inform the node that it's a message root, so that it knows that
-  # it can have stuff that only root nodes have.  TODO: IMO, we should
-  # probably just have a subclass of MsgContainer for root nodes!
-  $msg->_set_is_root();
 
   # Go through all the headers of the message
   while ( my $last = shift @message ) {
