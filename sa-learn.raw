@@ -224,6 +224,11 @@ discussions of spam-catching rules, etc., this will cause trouble.  You
 should avoid scanning those messages if possible.  (An easy way to do this
 is to move them aside, into a folder which is not scanned.)
 
+If the messages you are learning from have already been filtered through
+SpamAssassin, the learner will compensate for this.  In effect, it learns what
+each message would look like if you had run C<spamassassin -d> over it in
+advance.
+
 Another thing to be aware of, is that typically you should aim to train
 with at least 1000 messages of spam, and 1000 ham messages, if
 possible.  More is better, but anything over about 5000 messages does not
@@ -294,17 +299,21 @@ takes longer to get it right than a full training session would.
 
 =item B<--ham>
 
-Learn the input message(s) as ham.   If you have previously learnt
-any of the messages as spam, SpamAssassin will forget them first, then
-re-learn them as ham.  Alternatively, if you have previously learnt
-them as ham, it'll skip them this time around.
+Learn the input message(s) as ham.   If you have previously learnt any of the
+messages as spam, SpamAssassin will forget them first, then re-learn them as
+ham.  Alternatively, if you have previously learnt them as ham, it'll skip them
+this time around.  If the messages have already been filtered through
+SpamAssassin, the learner will ignore any modifications SpamAssassin may have
+made.
 
 =item B<--spam>
 
-Learn the input message(s) as spam.   If you have previously learnt
-any of the messages as ham, SpamAssassin will forget them first, then
-re-learn them as spam.  Alternatively, if you have previously learnt
-them as spam, it'll skip them this time around.
+Learn the input message(s) as spam.   If you have previously learnt any of the
+messages as ham, SpamAssassin will forget them first, then re-learn them as
+spam.  Alternatively, if you have previously learnt them as spam, it'll skip
+them this time around.  If the messages have already been filtered through
+SpamAssassin, the learner will ignore any modifications SpamAssassin may have
+made.
 
 =item B<--rebuild>
 
