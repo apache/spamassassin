@@ -18,9 +18,6 @@
 #
 ###########################################################################
 
-header T_DATE_SPAMWARE_Y2K		Date =~ /^[A-Z][a-z]{2}, \d\d [A-Z][a-z]{2} [0-6]\d \d\d:\d\d:\d\d [A-Z]{3}$/
-describe T_DATE_SPAMWARE_Y2K		Date header uses unusual Y2K formatting
-
 # quinlan: I worked at a company that used CorporateTime which very annoyingly
 # always used an ISO-8859-1 encoded header even when the Subject: did not have
 # a non-ASCII character.  I think other false positives are likely due to
@@ -108,16 +105,6 @@ header T_CONSTANTCONTACT		ALL =~ /\bconstantcontact\.com\b/i
 header T_ROVING_COM			ALL =~ /\broving\.com\b/i
 uri T_RS6_NET_URL			/\brs6\.net\b/i
 
-# bug 1394, possible replacement for ORDER_NOW
-body T_ORDER_NOW                  /\border (?:now|soon|fast|quickly|while|today)\b/i
-# Apr  1 2003 jm: not so good... more hits, but lower accuracy
-#  1.268   3.8907   0.0761    0.981   0.92    0.00  ORDER_NOW
-#  1.549   4.7343   0.1009    0.979   0.91    0.01  T_ORDER_NOW
-# May  8 2003 tvd: I get the opposite actually on the total results:
-#  1.148   3.2493   0.0987    0.971   0.88    0.01  T_ORDER_NOW
-#  0.882   2.4935   0.0766    0.970   0.88    0.00  ORDER_NOW
-
-
 uri      T_HTTP_EXCESSIVE_ENTITIES m{^https?://\S*\&\#(?:0?3[0-9]|0?[46][1-9a-f]|0?[57][\da])}i
 describe T_HTTP_EXCESSIVE_ENTITIES Completely unnecessary %-escapes inside a URL
 
@@ -151,84 +138,6 @@ body T_BLANK_LINE_RATIO_04_98_100	eval:check_blank_line_ratio('98','100','4')
 body T_BLANK_LINE_RATIO_04_70_100	eval:check_blank_line_ratio('70','100','4')
 
 ###########################################################################
-
-# tvd - 2003.02.26, trying to strengthen the anti-ratware rules
-
-meta T_FORGED_USER_AGENT	( __USER_AGENT_PINE + __T_USER_AGENT_MUTT + __T_USER_AGENT_MOZILLA_UA + __T_USER_AGENT_MOZILLA_XM + __T_USER_AGENT_MACOE + __T_USER_AGENT_ENTOURAGE + __T_USER_AGENT_KMAIL + __T_USER_AGENT_IMP + __USER_AGENT_TONLINE + __USER_AGENT_APPLEMAIL + __USER_AGENT_GNUS_UA + __USER_AGENT_GNUS_XM + __USER_AGENT_VM + __T_USER_AGENT_MSN + __T_USER_AGENT_FORTE + __USER_AGENT_XIMIAN > 1 )
-
-meta T_USER_AGENT                        ( __USER_AGENT && !T_FORGED_USER_AGENT && !__USER_AGENT_PINE && !__T_USER_AGENT_MUTT && !__T_USER_AGENT_MOZILLA_UA && !__T_USER_AGENT_MOZILLA_XM && !__T_USER_AGENT_MACOE && !__T_USER_AGENT_ENTOURAGE && !__T_USER_AGENT_KMAIL && !__T_USER_AGENT_IMP && !__USER_AGENT_TONLINE && !__USER_AGENT_APPLEMAIL && !__USER_AGENT_GNUS_UA && !__USER_AGENT_GNUS_XM && !__USER_AGENT_VM && !__T_USER_AGENT_MSN && !__T_USER_AGENT_FORTE && !__USER_AGENT_XIMIAN )
-
-header __MSGID_PINE	Message-Id =~ /^<Pine\.[A-Z]{3}\.\d\.[0-9A-Z]+\./
-meta __USER_AGENT_PINE	__MSGID_PINE && !MIME_HTML_ONLY
-meta T_USER_AGENT_PINE		__USER_AGENT_PINE && !T_FORGED_USER_AGENT
-meta T_FORGED_MUA_PINE	__MSGID_PINE && !__USER_AGENT_PINE
-
-# From 0.93.2 - 1.2.5.1, message-id is:
-#  snprintf (buf, sizeof (buf), "<%d%02d%02d%02d%02d%02d.%c%d@%s>",
-#            tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour,
-#            tm->tm_min, tm->tm_sec, MsgIdPfx, getpid (), fqdn);
-#  MsgIdPfx = (MsgIdPfx == 'Z') ? 'A' : MsgIdPfx + 1;
-# The code from mutt 1.4 is adds a 'G' for some reason:
-#  snprintf (buf, sizeof (buf), "<%d%02d%02d%02d%02d%02d.G%c%d@%s>",
-meta __T_USER_AGENT_MUTT	__USER_AGENT_MUTT && __VALID_MUTT_MSGID && !MIME_HTML_ONLY
-meta T_USER_AGENT_MUTT		__T_USER_AGENT_MUTT && !T_FORGED_USER_AGENT
-meta T_FORGED_MUA_MUTT		__USER_AGENT_MUTT && !__UNUSABLE_MSGID && !__T_USER_AGENT_MUTT
-
-header __USER_AGENT_MOZILLA_UA	User-Agent =~ /^Mozilla\/5\.\d+ \(.*\) Gecko\/\d{8}(?: |$)/
-header __MSGID_MOZILLA_UA	Message-Id =~ /^<[0-9A-F]{8}\.\d+\@\S+>$/
-meta __T_USER_AGENT_MOZILLA_UA	__USER_AGENT_MOZILLA_UA && __MSGID_MOZILLA_UA
-meta T_USER_AGENT_MOZILLA_UA	__T_USER_AGENT_MOZILLA_UA && !T_FORGED_USER_AGENT
-
-header __USER_AGENT_MOZILLA_XM	X-Mailer   =~ /^Mozilla 4\.\d{2} \[[a-z]{2}\]/
-header __MSGID_MOZILLA_XM	Message-Id =~ /^<[0-9A-F]{8}\.[0-9A-F]{8}\@\S+>$/
-meta __T_USER_AGENT_MOZILLA_XM	__USER_AGENT_MOZILLA_XM && __MSGID_MOZILLA_XM
-meta T_USER_AGENT_MOZILLA_XM	__T_USER_AGENT_MOZILLA_XM && !T_FORGED_USER_AGENT
-
-header __USER_AGENT_MACOE	User-Agent =~ /^Microsoft[ -]Outlook[ -]Express[ -]Macintosh[ -]Edition/
-meta __T_USER_AGENT_MACOE	__USER_AGENT_MACOE && __MSGID_ENTOURAGE
-meta T_USER_AGENT_MACOE		__T_USER_AGENT_MACOE && !T_FORGED_USER_AGENT
-
-header __USER_AGENT_ENTOURAGE	User-Agent =~ /^Microsoft-Entourage\/\d{1,2}(?:\.\d){1,2}\.\d{4}$/
-header __MSGID_ENTOURAGE	Message-ID =~ /^<[0-9A-F]{8}\.[0-9A-F]+\%\S+\@\S+>$/
-meta __T_USER_AGENT_ENTOURAGE	__USER_AGENT_ENTOURAGE && __MSGID_ENTOURAGE && !MIME_HTML_ONLY
-meta T_USER_AGENT_ENTOURAGE	__T_USER_AGENT_ENTOURAGE && !T_FORGED_USER_AGENT
-
-header __USER_AGENT_KMAIL	User-Agent =~ /^KMail\/1\.\d\.\d+$/
-header __MSGID_KMAIL		Message-Id =~ /^<[12]\d{3}[01]\d[0-3]\d[0-2]\d[0-5]\d\.\d+\.\S+@\S+>$/
-meta __T_USER_AGENT_KMAIL	__USER_AGENT_KMAIL && __MSGID_KMAIL
-meta T_USER_AGENT_KMAIL		__T_USER_AGENT_KMAIL && !T_FORGED_USER_AGENT
-
-header __USER_AGENT_IMP		User-Agent =~ /^Internet Messaging Program \(IMP\) [34]\.\d/
-header __MSGID_IMP		Message-Id =~ /^<\d{9,10}\.[0-9a-f]{13}\@\S+>$/
-meta __T_USER_AGENT_IMP		__USER_AGENT_IMP && __MSGID_IMP
-meta T_USER_AGENT_IMP		__T_USER_AGENT_IMP && !T_FORGED_USER_AGENT
-meta T_FORGED_MUA_IMP		__USER_AGENT_IMP && !__UNUSABLE_MSGID && !__T_USER_AGENT_IMP
-
-header __USER_AGENT_TONLINE	X-Mailer   =~ /^T-Online (?:e|Web)Mail \d\.\d+$/
-meta T_USER_AGENT_TONLINE	__USER_AGENT_TONLINE && !T_FORGED_USER_AGENT
-
-header __USER_AGENT_GNUS_UA	User-Agent =~ /^Gnus\/\d\.\d+ /
-meta T_USER_AGENT_GNUS_UA	__USER_AGENT_GNUS_UA && !T_FORGED_USER_AGENT
-
-header __USER_AGENT_GNUS_XM	X-Mailer   =~ /^Gnus v\d(?:\.\d+){1,2}\/X?Emacs \d+\.\d+/
-meta T_USER_AGENT_GNUS_XM	__USER_AGENT_GNUS_XM && !T_FORGED_USER_AGENT
-
-header __USER_AGENT_VM		X-Mailer =~ /^\s*VM\s+\d+\.\d+\s+under\s+.{0,30}?[Ee]macs\b/
-meta T_USER_AGENT_VM		__USER_AGENT_VM && !T_FORGED_USER_AGENT
-
-# frequently forged, needs some correlation meta checks with other headers.
-meta __T_USER_AGENT_MSN		(__USER_AGENT_MSN && __HAS_XOAT && __HAS_XOIP)
-meta T_USER_AGENT_MSN		__T_USER_AGENT_MSN && !T_FORGED_USER_AGENT
-meta T_FORGED_MUA_MSN		__USER_AGENT_MSN && !T_USER_AGENT_MSN
-
-header __USER_AGENT_FORTE	X-Mailer =~ /^Forte Agent \d\.\d+\/\d+\.\d+$/
-header __MSGID_FORTE		Message-Id =~ /^<[0-9a-f]{8}\.\d+\@\S+>$/
-meta __T_USER_AGENT_FORTE	__USER_AGENT_FORTE && __MSGID_FORTE
-meta T_USER_AGENT_FORTE		__T_USER_AGENT_FORTE && !T_FORGED_USER_AGENT
-
-meta __USER_AGENT_XIMIAN	(__XIMIAN_MSGID && __XIMIAN_MUA)
-meta T_USER_AGENT_XIMIAN	__USER_AGENT_XIMIAN && !T_FORGED_USER_AGENT
-meta T_FORGED_MUA_XIMIAN	__XIMIAN_MUA && !__UNUSABLE_MSGID && !__USER_AGENT_XIMIAN
 
 # per bug 1373
 body __HTML_COMMENT_RATIO_70_80		eval:html_range('total_comment_ratio','0.70','0.80')
