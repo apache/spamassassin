@@ -1,8 +1,8 @@
 
-#CC = mpiCC
-#USE_MPI = -DUSE_MPI
-CC = g++
-USE_MPI =
+CC = mpicc
+USE_MPI = -DUSE_MPI
+#CC = gcc
+#USE_MPI =
 
 OPT = -O9 -march=athlon
 PGALIB = pgapack
@@ -17,8 +17,8 @@ all: evolve tmp/scores.data
 ## cp evolve evolve.unstripped
 #strip evolve
 
-evolve: tmp/tests.h craig-evolve.cxx
-	$(CC) -Wall $(OPT) -Dlinux -DWL=2 -DOPTIMIZE -L$(PGALIB)/lib/linux -I$(PGALIB)/include craig-evolve.cxx -o evolve -lpgaO -lm
+evolve: tmp/tests.h craig-evolve.c
+	$(CC) -Wall $(OPT) $(USE_MPI) -Dlinux -DWL=2 -DOPTIMIZE -L$(PGALIB)/lib/linux -I$(PGALIB)/include craig-evolve.c -o evolve -lpgaO -lm
 	strip evolve
 
 tmp/scores.data tmp/tests.h: spam.log nonspam.log tmp/ranges.data logs-to-c
