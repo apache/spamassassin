@@ -274,11 +274,11 @@ sub read_db_configs {
 
   # use of hapaxes.  Set on bayes object, since it controls prob
   # computation.
-  $self->{bayes}->{use_hapaxes} = $self->{conf}->{bayes_use_hapaxes};
+  $self->{use_hapaxes} = $self->{conf}->{bayes_use_hapaxes};
 
   # Use chi-squared combining instead of Gary-combining (Robinson/Graham-style
   # naive-Bayesian)?
-  $self->{bayes}->{use_chi_sq_combining} = $self->{conf}->{bayes_use_chi2_combining};
+  $self->{use_chi_sq_combining} = $self->{conf}->{bayes_use_chi2_combining};
 
   # Use the appropriate set of constants; the different systems have different
   # optimum settings for these.  (TODO: should these be exposed through Conf?)
