@@ -31,13 +31,29 @@ command="@PREFIX@/bin/spamd"
 pidfile="/var/run/${name}.pid"
 sig_stop="TERM"
 command_args="-d -r ${pidfile}"
+extra_commands="reload"
+sig_reload="HUP"
 
 # default values, may be overridden on NetBSD by setting them in /etc/rc.conf
 spamd_flags=${spamd_flags-"-H -c -a"}
 spamd=${spamd:-NO}
+spamd_fdlimit=${spamd_fdlimit-"128"}
 
 OPSYS=@OPSYS@ # set during package build
 INTERPRETER_SUPPORT=@INTERPRETER_SUPPORT@ # set during package build
+
+# A default limit of 64 (at least on NetBSD) may be too low for many
+# people (eg with addional RBL rules)
+SOFT_FDLIMIT=`ulimit -S -n`
+HARD_FDLIMIT=`ulimit -H -n`
+
+if [ ${spamd_fdlimit} -gt ${SOFT_FDLIMIT} ]; then
+  if [ ${spamd_fdlimit} -le ${HARD_FDLIMIT} ]; then 
+    ulimit -S -n ${spamd_fdlimit}
+  else
+    ulimit -S -n ${HARD_FDLIMIT}
+  fi
+fi
 
 spamd_start()
 {
@@ -70,6 +86,16 @@ spamd_status()
 	
 }
 
+spamd_reload()
+{
+	if [ -z "${the_spamd_pid}" ]; then
+		echo "${command} not running? (check ${pidfile})."
+		return 1
+	fi
+	echo "Reloading spamd"
+	kill -${sig_reload} ${the_spamd_pid}
+}
+
 if [ "${OPSYS}" = "NetBSD" ]; then
 	if checkyesno INTERPRETER_SUPPORT; then
 	  : # support for 'command_interpreter' was added in NetBSD 1.6
@@ -77,6 +103,7 @@ if [ "${OPSYS}" = "NetBSD" ]; then
 	  start_cmd="spamd_start"
 	  stop_cmd="spamd_stop"
 	  status_cmd="spamd_status"
+	  reload_cmd="spamd_reload"
 	  the_spamd_pid=`check_pidfile ${pidfile} ${command_interpreter}`
 	fi
 
@@ -106,8 +133,11 @@ else # not NetBSD
 	status)
 		spamd_status
 		;;
+	reload)
+		spamd_reload
+		;;
 	*) 
-		echo "Usage: ${0} (start|stop|restart|status)"
+		echo "Usage: ${0} (start|stop|restart|status|reload)"
 		;;
 
 	esac
