@@ -23,9 +23,17 @@
 #define SPAMC_RAW_MODE       0
 #define SPAMC_BSMTP_MODE     1
 
-#define SPAMC_USE_SSL	     1<<27
-#define SPAMC_SAFE_FALLBACK  1<<28
-#define SPAMC_CHECK_ONLY     1<<29
+#define SPAMC_USE_SSL	     (1<<27)
+#define SPAMC_SAFE_FALLBACK  (1<<28)
+#define SPAMC_CHECK_ONLY     (1<<29)
+
+/* Jan 30, 2003 ym: added reporting options */
+#define SPAMC_REPORT         (1<<26)
+#define SPAMC_REPORT_IFSPAM  (1<<25)
+
+/* Feb  1 2003 jm: might as well fix bug 191 as well */
+#define SPAMC_SYMBOLS        (1<<24)
+
 
 /* Aug 14, 2002 bj: A struct for storing a message-in-progress */
 typedef enum {
