@@ -48,8 +48,14 @@ describe T_FROM_ALL_NUMS	From an address that is all numbers (non-phone)
 score T_FROM_ALL_NUMS		0.5
 
 # results for quinlan
+#  0.482    1.454    0.013    0.99    0.61    0.50  T_SOME_BREAKTHROUGH
 body T_SOME_BREAKTHROUGH	/(?:science|medical|major|scientific|fundamental|technology|revolutionary)\s+breakthrough/i
 score T_SOME_BREAKTHROUGH	0.5
+
+# results for quinlan
+#  0.193    0.592    0.000    1.00    0.74    0.50  T_SELECTED_YOU
+body T_SELECTED_YOU		/(?:you (?:have been|were) selected|we (?:have )?selected you)/i
+score T_SELECTED_YOU		0.5
 
 # jm: somehow these guys keep slipping through, and they're very persistent.
 # they use both azoogle.com and azogle.com, but this header is always
