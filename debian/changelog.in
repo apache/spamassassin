@@ -1,3 +1,21 @@
+spamassassin (2.60-1) experimental; urgency=low
+
+  * New upstream release
+
+ -- Jesus Climent <jesus.climent@hispalinux.es>  Thu, 21 Aug 2003 08:59:03 +0000
+
+spamassassin (2.59pre2.60pre3-1) experimental; urgency=low
+
+  * New upstream pre-release, before mass-check verification. Use at your own
+    risk.
+  * This version solves:
+    + French typo (Closes: #200468)
+  * Added README.postfix which explains how to integrate spamassassin with
+    postfix for incoming tagging.
+  * Spamd supports unix sockets (Closes: #204853)
+
+ -- Jesus Climent <jesus.climent@hispalinux.es>  Thu,  7 Aug 2003 22:39:30 +0000
+
 spamassassin (2.59pre2.60cvs20030619-1) experimental; urgency=low
 
   * Pre-release 2.60 packages. Use at own risk! :-) (Hence, experimental)
