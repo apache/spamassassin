@@ -160,17 +160,17 @@ use constant USE_ROBINSON_FX_EQUATION_FOR_LOW_FREQS => 1;
 
 # Value for 'x' in the f(w) equation.
 # "Let x = the number used when n [hits] is 0."
-use constant ROBINSON_X_CONSTANT => 0.32;
+use constant ROBINSON_X_CONSTANT => 0.538;
 
 # Value for 's' in the f(w) equation.  "We can see s as the "strength" (hence
 # the use of "s") of an original assumed expectation ... relative to how
 # strongly we want to consider our actual collected data."  Low 's' means
 # trust collected data more strongly.
-use constant ROBINSON_S_CONSTANT => 0.35;
+use constant ROBINSON_S_CONSTANT => 0.373;
 
 # Should we ignore tokens with probs very close to the middle ground (.5)?
 # tokens need to be outside the [ .5-MPS, .5+MPS ] range to be used.
-use constant ROBINSON_MIN_PROB_STRENGTH => 0.3;
+use constant ROBINSON_MIN_PROB_STRENGTH => 0.346;
 
 # note: these seem to work well for Gary-combining.
 #use constant ROBINSON_X_CONSTANT => 0.6;
@@ -451,8 +451,8 @@ sub tokenize_line {
 
   # include quotes, .'s and -'s for URIs, and [$,]'s for Nigerian-scam strings,
   # and ISO-8859-15 alphas.  Do not split on @'s; better results keeping it.
-  # Some useful tokens: "$31,000,000" "www.clock-speed.net"
-  tr/-A-Za-z0-9,\@_'"\$.\241-\377 / /cs;
+  # Some useful tokens: "$31,000,000" "www.clock-speed.net" "f*ck" "Hits!"
+  tr/-A-Za-z0-9,\@\*\!_'"\$.\241-\377 / /cs;
 
   # DO split on "..." or "--" or "---"; common formatting error resulting in
   # hapaxes.  Keep the separator itself as a token, though, as long ones can
@@ -485,7 +485,7 @@ sub tokenize_line {
 	# but I'm doing tuples to keep the dbs small(er)."  Sounds like a plan
 	# to me! (jm)
 	while ($token =~ s/^(..?)//) {
-	  push (@{$self->{tokens}}, "8bit:$1"); $wc++;
+	  push (@{$self->{tokens}}, "8:$1"); $wc++;
 	}
 	next;
       }
