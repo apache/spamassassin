@@ -28,6 +28,7 @@ use File::Spec;
 use File::Path;
 
 use constant HAS_DB_FILE => eval { require DB_File; };
+use constant MAGIC_RE    => qr/^\015\001\007\011\003/;
 
 use vars qw{
   @ISA
@@ -154,14 +155,10 @@ sub tie_db_readonly {
   dbg("bayes: found bayes db version ".$self->{db_version});
 
   # If the DB version is one we don't understand, abort!
-  if ( !$self->_check_db_version() ) {
-    dbg("bayes: bayes db version ".$self->{db_version}." is newer than we understand, aborting!");
+  if ( $self->_check_db_version() != 0 ) {
+    dbg("bayes: bayes db version ".$self->{db_version}." is not able to be used, aborting!");
     $self->untie_db();
     return 0;
-  }
-
-  if ( $self->{db_version} < 2 ) { # older versions use scancount
-    $self->{scan_count_little_file} = $path.'_msgcount';
   }
 
   $self->{already_tied} = 1;
@@ -268,28 +265,29 @@ failed_to_tie:
 # Do we understand how to deal with this DB version?
 sub _check_db_version {
   my ($self) = @_;
-  my $db_ver = ($self->get_storage_variables())[6];
 
-  if ( $db_ver > $self->DB_VERSION ) { # current DB is newer, ignore the DB!
-    warn "bayes: Found DB Version $db_ver, but can only handle up to version ".$self->DB_VERSION."\n";
-    return;
-  }
-
-  return 1;
+  # return -1 if older, 0 if current, 1 if newer
+  return $self->{db_version} <=> $self->DB_VERSION;
 }
 
 # Check to see if we need to upgrade the DB, and do so if necessary
 sub _upgrade_db {
   my ($self) = @_;
 
-  return 1 if ( $self->{db_version} == $self->DB_VERSION );
-  if ( $self->_check_db_version() ) {
+  my $verschk = $self->_check_db_version();
+
+  # If the DB is the latest version, no problem.
+  return 1 if ( $verschk == 0 );
+
+  # If the DB is a newer version that we know what to do with ... abort!
+  if ( $verschk == 1 ) {
     dbg("bayes: bayes db version ".$self->{db_version}." is newer than we understand, aborting!");
     return 0;
   }
 
   # If the current DB version is lower than the new version, upgrade!
-  # Do conversions in order so we can go 1 -> 3, make sure to update $self->{db_version}
+  # Do conversions in order so we can go 1 -> 3, make sure to update
+  #   $self->{db_version} along the way
 
   dbg("bayes: detected bayes db format ".$self->{db_version}.", upgrading");
 
@@ -356,12 +354,10 @@ sub _upgrade_db {
     $new_toks{$LAST_ATIME_DELTA_MAGIC_TOKEN} = 0;
     $new_toks{$LAST_EXPIRE_REDUCE_MAGIC_TOKEN} = 0;
 
-    my $magic_re = $self->get_magic_re();
-
     # deal with the data tokens
     my ($tok, $packed);
     while (($tok, $packed) = each %{$self->{db_toks}}) {
-      next if ($tok =~ /$magic_re/); # skip magic tokens
+      next if ($tok =~ /^(?:\*\*[A-Z]+$|\015\001\007\011\003)/; # skip magic tokens
 
       my ($ts, $th, $atime) = $self->tok_unpack ($packed);
       $new_toks{$tok} = $self->tok_pack ($ts, $th, $newatime);
@@ -453,12 +449,10 @@ sub calculate_expire_delta {
 
   my %delta = (); # use a hash since an array is going to be very sparse
 
-  my $magic_re = $self->get_magic_re();
-
   # do the first pass, figure out atime delta
   my ($tok, $packed);
   while (($tok, $packed) = each %{$self->{db_toks}}) {
-    next if ($tok =~ /$magic_re/); # skip magic tokens
+    next if ($tok =~ /MAGIC_RE/); # skip magic tokens
     
     my ($ts, $th, $atime) = $self->tok_unpack ($packed);
 
@@ -519,12 +513,10 @@ sub token_expiration {
   # Figure out how old is too old...
   my $too_old = $vars[10] - $newdelta; # tooold = newest - delta
 
-  my $magic_re = $self->get_magic_re();
-
   # Go ahead and do the move to new db/expire run now ...
   my ($tok, $packed);
   while (($tok, $packed) = each %{$self->{db_toks}}) {
-    next if ($tok =~ /$magic_re/); # skip magic tokens
+    next if ($tok =~ /MAGIC_RE/); # skip magic tokens
 
     my ($ts, $th, $atime) = $self->tok_unpack ($packed);
 
@@ -677,7 +669,33 @@ sub get_storage_variables {
   my $db_ver = $self->{db_toks}->{$DB_VERSION_MAGIC_TOKEN};
   if ( !$db_ver || $db_ver =~ /\D/ ) { $db_ver = 0; }
 
-  if ( $db_ver == 0 ) {
+  if ( $db_ver == 2 ) {
+    my $DB2_LAST_ATIME_DELTA_MAGIC_TOKEN	= "\015\001\007\011\003LASTATIMEDELTA";
+    my $DB2_LAST_EXPIRE_MAGIC_TOKEN		= "\015\001\007\011\003LASTEXPIRE";
+    my $DB2_LAST_EXPIRE_REDUCE_MAGIC_TOKEN	= "\015\001\007\011\003LASTEXPIREREDUCE";
+    my $DB2_LAST_JOURNAL_SYNC_MAGIC_TOKEN	= "\015\001\007\011\003LASTJOURNALSYNC";
+    my $DB2_NEWEST_TOKEN_AGE_MAGIC_TOKEN	= "\015\001\007\011\003NEWESTAGE";
+    my $DB2_NHAM_MAGIC_TOKEN			= "\015\001\007\011\003NHAM";
+    my $DB2_NSPAM_MAGIC_TOKEN			= "\015\001\007\011\003NSPAM";
+    my $DB2_NTOKENS_MAGIC_TOKEN			= "\015\001\007\011\003NTOKENS";
+    my $DB2_OLDEST_TOKEN_AGE_MAGIC_TOKEN	= "\015\001\007\011\003OLDESTAGE";
+    my $DB2_RUNNING_EXPIRE_MAGIC_TOKEN		= "\015\001\007\011\003RUNNINGEXPIRE";
+
+    @values = (
+      0,
+      $self->{db_toks}->{$DB2_NSPAM_MAGIC_TOKEN},
+      $self->{db_toks}->{$DB2_NHAM_MAGIC_TOKEN},
+      $self->{db_toks}->{$DB2_NTOKENS_MAGIC_TOKEN},
+      $self->{db_toks}->{$DB2_LAST_EXPIRE_MAGIC_TOKEN},
+      $self->{db_toks}->{$DB2_OLDEST_TOKEN_AGE_MAGIC_TOKEN},
+      2,
+      $self->{db_toks}->{$DB2_LAST_JOURNAL_SYNC_MAGIC_TOKEN},
+      $self->{db_toks}->{$DB2_LAST_ATIME_DELTA_MAGIC_TOKEN},
+      $self->{db_toks}->{$DB2_LAST_EXPIRE_REDUCE_MAGIC_TOKEN},
+      $self->{db_toks}->{$DB2_NEWEST_TOKEN_AGE_MAGIC_TOKEN},
+    );
+  }
+  elsif ( $db_ver == 0 ) {
     my $DB0_NSPAM_MAGIC_TOKEN = '**NSPAM';
     my $DB0_NHAM_MAGIC_TOKEN = '**NHAM';
     my $DB0_OLDEST_TOKEN_AGE_MAGIC_TOKEN = '**OLDESTAGE';
@@ -721,33 +739,6 @@ sub get_storage_variables {
       0,
     );
   }
-  elsif ( $db_ver == 2 ) {
-    my $DB2_LAST_ATIME_DELTA_MAGIC_TOKEN	= "\015\001\007\011\003LASTATIMEDELTA";
-    my $DB2_LAST_EXPIRE_MAGIC_TOKEN		= "\015\001\007\011\003LASTEXPIRE";
-    my $DB2_LAST_EXPIRE_REDUCE_MAGIC_TOKEN	= "\015\001\007\011\003LASTEXPIREREDUCE";
-    my $DB2_LAST_JOURNAL_SYNC_MAGIC_TOKEN	= "\015\001\007\011\003LASTJOURNALSYNC";
-    my $DB2_NEWEST_TOKEN_AGE_MAGIC_TOKEN	= "\015\001\007\011\003NEWESTAGE";
-    my $DB2_NHAM_MAGIC_TOKEN			= "\015\001\007\011\003NHAM";
-    my $DB2_NSPAM_MAGIC_TOKEN			= "\015\001\007\011\003NSPAM";
-    my $DB2_NTOKENS_MAGIC_TOKEN			= "\015\001\007\011\003NTOKENS";
-    my $DB2_OLDEST_TOKEN_AGE_MAGIC_TOKEN	= "\015\001\007\011\003OLDESTAGE";
-    my $DB2_RUNNING_EXPIRE_MAGIC_TOKEN		= "\015\001\007\011\003RUNNINGEXPIRE";
-
-    @values = (
-      0,
-      $self->{db_toks}->{$DB2_NSPAM_MAGIC_TOKEN},
-      $self->{db_toks}->{$DB2_NHAM_MAGIC_TOKEN},
-      $self->{db_toks}->{$DB2_NTOKENS_MAGIC_TOKEN},
-      $self->{db_toks}->{$DB2_LAST_EXPIRE_MAGIC_TOKEN},
-      $self->{db_toks}->{$DB2_OLDEST_TOKEN_AGE_MAGIC_TOKEN},
-      2,
-      $self->{db_toks}->{$DB2_LAST_JOURNAL_SYNC_MAGIC_TOKEN},
-      $self->{db_toks}->{$DB2_LAST_ATIME_DELTA_MAGIC_TOKEN},
-      $self->{db_toks}->{$DB2_LAST_EXPIRE_REDUCE_MAGIC_TOKEN},
-      $self->{db_toks}->{$DB2_NEWEST_TOKEN_AGE_MAGIC_TOKEN},
-    );
-  }
-
 
   foreach ( @values ) {
     if ( !$_ || $_ =~ /\D/ ) { $_ = 0; }
@@ -759,10 +750,8 @@ sub get_storage_variables {
 sub dump_db_toks {
   my ($self, $template, $regex, @vars) = @_;
 
-  my $magic_re = $self->get_magic_re();
-
   while( my($tok, $tokvalue) = each %{$self->{db_toks}}) {
-    next if ($tok =~ /$magic_re/); # skip magic tokens
+    next if ($tok =~ /MAGIC_RE/); # skip magic tokens
     next if (defined $regex && ($tok !~ /$regex/o));
 
     # We have the value already, so just unpack it.
@@ -910,7 +899,7 @@ sub get_magic_re {
   my ($self) = @_;
 
   if ( !defined $self->{db_version} || $self->{db_version} >= 1 ) {
-    return qr/^\015\001\007\011\003/;
+    return MAGIC_RE;
   }
 
   # When in doubt, assume v0
@@ -1092,12 +1081,8 @@ sub tok_put {
   $ts ||= 0;
   $th ||= 0;
 
-  # get_magic_re could be used here, but:
-  # 1) it'll be overkill for this function
-  # 2) we're in write mode, so there's only ever 1 RE here.
-  if ( $tok =~ /^\015\001\007\011\003/ ) { # magic token?  Ignore it!
-    return;
-  }
+  # Ignore magic tokens, the don't go in this way ...
+  return if ($tok =~ /MAGIC_RE/);
 
   # use defined() rather than exists(); the latter is not supported
   # by NDBM_File, believe it or not.  Using defined() did not
@@ -1152,21 +1137,6 @@ sub _get_journal_filename {
 
   $self->{journal_live_path} = $fname;
   return $self->{journal_live_path};
-}
-
-###########################################################################
-
-sub scan_count_get {
-  my ($self) = @_;
-
-  if ( $self->{db_version} < 2 ) {
-    my ($count) = $self->get_storage_variables();
-    my $path = $self->{scan_count_little_file};
-    $count += (defined $path && -e $path ? -s _ : 0);
-    return $count;
-  }
-
-  return 0;
 }
 
 ###########################################################################

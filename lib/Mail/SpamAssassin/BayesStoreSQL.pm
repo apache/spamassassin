@@ -918,23 +918,6 @@ sub sync {
   return 1;
 }
 
-=head2 scan_count_get
-
-public instance (Integer) scan_count_get ()
-
-Description:
-Return the current scan count.
-
-Unused for SQL implementation.
-
-=cut
-
-sub scan_count_get {
-  my ($self) = @_;
-
-  return 0;
-}
-
 =head2 perform_upgrade
 
 public instance (Boolean) perform_upgrade (\% $opts);

@@ -1255,8 +1255,6 @@ sub dump_bayes_db {
 
   my($sb,$ns,$nh,$nt,$le,$oa,$bv,$js,$ad,$er,$na) = @vars;
 
-  $sb = $self->{store}->scan_count_get() if ( $bv < 1 ); # we want current scan count, not scan base count
-
   my $template = '%3.3f %10d %10d %10d  %s'."\n";
 
   if ( $magic ) {

@@ -713,20 +713,6 @@ sub sync {
   die "sync: not implemented\n";
 }
 
-=head2 scan_count_get
-
-public instance (Integer) scan_count_get ()
-
-Description:
-This method gets the current scan count, if used by the implementation.
-
-=cut
-
-sub scan_count_get {
-  my ($self) = @_;
-  die "scan_count_get: not implemented\n";
-}
-
 =head2 perform_upgrade
 
 public instance (Boolean) perform_upgrade (\% $opts)
