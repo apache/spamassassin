@@ -91,7 +91,7 @@ describe MIME_QP_LONG_LINE	Quoted-printable line longer than 76 chars
 
 # note: __HIGHBITS is used by HTML_CHARSET_FARAWAY
 rawbody __MIME_CHARSET_FARAWAY	eval:check_for_mime('mime_faraway_charset')
-body __HIGHBITS			/(?:[\x80-\xff].?){4,}/
+body __HIGHBITS			/(?:[\x80-\xff].?){4}/
 meta MIME_CHARSET_FARAWAY	(__MIME_CHARSET_FARAWAY && __HIGHBITS)
 describe MIME_CHARSET_FARAWAY	MIME character set indicates foreign language
 tflags MIME_CHARSET_FARAWAY	userconf
