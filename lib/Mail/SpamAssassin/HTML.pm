@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.6 2002/08/28 17:18:01 jmason Exp $
+# $Id: HTML.pm,v 1.7 2002/08/29 12:29:37 jmason Exp $
 
 package Mail::SpamAssassin::HTML;
 1;

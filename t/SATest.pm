@@ -15,7 +15,7 @@ sub sa_t_init {
   my $tname = shift;
 
   $scr = $ENV{'SCRIPT'};
-  $scr ||= "../spamassassin";
+  $scr ||= "perl -w ../spamassassin";
 
   $spamd = $ENV{'SPAMD_SCRIPT'};
   $spamd ||= "../spamd/spamd -x";

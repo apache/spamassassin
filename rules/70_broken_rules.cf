@@ -405,8 +405,7 @@ score OUTLOOK_FW_MSG            -0.3
 #
 #
 #   0.008    0.003    0.011    0.23    0.50  OUTLOOK_UNDISC_RECIPS
-header __OUTLOOK_UNDISC_RECIPS	To =~ /<Undisclosed-Recipient:;>/
-meta OUTLOOK_UNDISC_RECIPS      (__OUTLOOK_UNDISC_RECIPS && __HAS_OUTLOOK_IN_MAILER)
+header OUTLOOK_UNDISC_RECIPS	To =~ /<Undisclosed-Recipient:;>/
 describe OUTLOOK_UNDISC_RECIPS	MS-Outlook-style To "<Undisclosed-Recipient:;>"
 score OUTLOOK_UNDISC_RECIPS          0.5
 #
@@ -780,19 +779,6 @@ score TRACK_NUMBER           -1.0
 #   0.215    0.136    0.262    0.34    1.00  T_FREE_WEBSITE
 body T_FREE_WEBSITE               /(?-i:F)ree web/i  
 describe T_FREE_WEBSITE           Contains 'free website' with capitals
-#
-#
-#   0.004    0.000    0.006    0.00    1.00  T_MEMBER_2
-#
-#
-#   0.002    0.000    0.003    0.00    1.00  T_MONTH_TRIAL
-#
-#
-#   0.031    0.041    0.024    0.63   -1.00  T_NASD_FINANCIAL
-body T_NASD_FINANCIAL           /\b(?:member\s+(?-i:NASD\/SIPC)|not\s+insured\s+.{0,10}(?-i:FDIC)|(?-i:FDIC)\s+insured)/i
-describe T_NASD_FINANCIAL       Message indicates a financial institute
-tflags   T_NASD_FINANCIAL           nice
-score T_NASD_FINANCIAL -1.0
 #
 #
 #
