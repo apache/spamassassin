@@ -1,3 +1,66 @@
+2001-05-22 14:48  jmason
+
+	* spamassassin.cf, lib/Mail/SpamAssassin/Conf.pm,
+	lib/Mail/SpamAssassin/EvalTests.pm,
+	lib/Mail/SpamAssassin/PerMsgStatus.pm: changed razor to list
+	hostname in config file arg
+
+2001-05-22 14:31  jmason
+
+	* lib/Mail/SpamAssassin/: EncappedMessage.pm, ExposedMessage.pm,
+	Message.pm, Reporter.pm: took out pod, it was confusing installer
+
+2001-05-22 14:28  jmason
+
+	* README, spamassassin, lib/Mail/SpamAssassin.pm,
+	lib/Mail/SpamAssassin/EncappedMessage.pm,
+	lib/Mail/SpamAssassin/ExposedMessage.pm,
+	lib/Mail/SpamAssassin/Message.pm,
+	lib/Mail/SpamAssassin/Reporter.pm: some doco changes
+
+2001-05-17 16:36  jmason
+
+	* README, spamassassin.prefs: added README notes
+
+2001-05-17 16:28  jmason
+
+	* spamassassin, lib/Mail/SpamAssassin/Reporter.pm: added Razor
+	support
+
+2001-05-17 16:24  jmason
+
+	* MANIFEST, spamassassin, spamassassin.cf,
+	lib/Mail/SpamAssassin.pm, lib/Mail/SpamAssassin/Conf.pm,
+	lib/Mail/SpamAssassin/EncappedMessage.pm,
+	lib/Mail/SpamAssassin/EvalTests.pm,
+	lib/Mail/SpamAssassin/ExposedMessage.pm,
+	lib/Mail/SpamAssassin/Message.pm,
+	lib/Mail/SpamAssassin/PerMsgStatus.pm,
+	lib/Mail/SpamAssassin/Reporter.pm, t/SATest.pm, t/nonspam.t,
+	t/spam.t, t/test_dir, t/data/nice/001, t/data/spam/001: added Razor
+	support
+
+2001-05-17 00:12  jmason
+
+	* MANIFEST, spamassassin, lib/Mail/SpamAssassin/EncappedMessage.pm,
+	lib/Mail/SpamAssassin/EvalTests.pm,
+	lib/Mail/SpamAssassin/ExposedMessage.pm,
+	lib/Mail/SpamAssassin/Message.pm,
+	lib/Mail/SpamAssassin/PerMsgStatus.pm: added Mail::Internet encap
+	code
+
+2001-05-16 23:31  jmason
+
+	* spamassassin.cf, spamassassin.prefs,
+	lib/Mail/SpamAssassin/Conf.pm, lib/Mail/SpamAssassin/EvalTests.pm,
+	lib/Mail/SpamAssassin/PerMsgStatus.pm: mods to isolate Mail::Audit
+	support
+
+2001-05-08 14:25  jmason
+
+	* Changes, spamassassin, spamassassin.cf, spamassassin.prefs: added
+	extra testing paths
+
 2001-05-02 17:55  jmason
 
 	* Changes, MANIFEST, spamassassin.cf, windows_install.pl,

@@ -48,7 +48,7 @@ sub report {
   $self->{msgtext} = $hdrs."\n".$body;
 
   if ($self->is_razor_available()) {
-    $self->razor_report($self->{msgtext})
+    $self->razor_report('razor.vipul.net:2702', $self->{msgtext})
     	and print "SpamAssassin: spam reported to Razor.\n";
   }
 }
@@ -73,13 +73,13 @@ sub is_razor_available {
 }
 
 sub razor_report {
-  my ($self, $fulltext) = @_;
+  my ($self, $site, $fulltext) = @_;
 
   my @msg = split (/\n/, $fulltext);
 
-  my $Rserver = $self->{main}->{conf}->{razor_host};
-  my $Rport   = $self->{main}->{conf}->{razor_port};
-
+  $site =~ /^(\S+):(\d+)$/;
+  my $Rserver = $1;
+  my $Rport   = $2;
   my $sock = new IO::Socket::INET PeerAddr => $Rserver,
                                   PeerPort => $Rport,
                                   Proto    => 'tcp';
