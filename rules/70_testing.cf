@@ -301,25 +301,25 @@ body T_GREAT_OFFER_B		/see full offer for details/i
 body T_GREAT_OFFER_C		/great offer/i
 body T_SAVE_BUCKS		/\bsave \$/i
 
-# this should be separated into a few more sensible rules
-body T_OFFERS_ETC		/\b(?:(?=[cefmpruw])(?:wish|want|unsub|reward|receive|recurring|remove|permission|partner|further|future|e.?mail|continue|click).{0,64}){2}.{0,8}(?=[cdos])(?:special|offer|coupon|discount)s?\b/i
-
-uri T_UNSUB_PAGE_1		/^https?:\/\/.*?(?!cgi).*?unsubscribe/i
-uri T_UNSUB_PAGE_2		/^https?:\/\/.*?(?!cgi).*?unsub/i
-uri T_UNSUB_PAGE_3		/^https?:\/\/.*?(?!cgi).*?unsub(?:scribe)?\b/i
-
-header T_MSGID_CHARS_COMMA	MESSAGEID =~ /\,/
-header T_MSGID_CHARS_QUOTE	MESSAGEID =~ /\"/
-header T_MSGID_CHARS_SEMI	MESSAGEID =~ /\;/
-header T_MSGID_CHARS_CARAT	MESSAGEID =~ /\^/
-header T_MSGID_CHARS_POUND	MESSAGEID =~ /\#/
-header T_MSGID_CHARS_SLASH	MESSAGEID =~ /\//
-header T_MSGID_CHARS_BRACE1	MESSAGEID =~ /\{/
-header T_MSGID_CHARS_BRACE2	MESSAGEID =~ /\}/
-header T_MSGID_CHARS_COLON	MESSAGEID =~ /\:/
-header T_MSGID_CHARS_BANG	MESSAGEID =~ /\!/
-header T_MSGID_CLOSE_TWICE_1	MESSAGEID =~ />.*>/
-header T_MSGID_CLOSE_TWICE_2	MESSAGEID =~ />>/
+# concept: you have a choice + something great
+body T_OFFER_BY_CHOICE_1	/\b(?:wish|want|question|unsubscrib\w+|discontinue|remove).{0,64}\b(?:gift|offer|special|promotion)/i
+body T_OFFER_BY_CHOICE_2	/\b(?:wish|want|question|unsub\w+|discontinue|remove).{0,64}\b(?:gift|offer|special|promotion)/i
+body T_OFFER_BY_CHOICE_3	/\b(?:wish|want|question|unsubscrib\w+|discontinue|remove|permission).{0,64}\b(?:gift|offer|special|promotion)/i
+body T_OFFER_BY_CHOICE_4	/\b(?:wish|want|question|unsub\w+|discontinue|remove|permission).{0,64}\b(?:gift|offer|special|promotion)/i
+body T_OFFER_BY_CHOICE_5	/\b(?:wish|want|question|unsubscrib\w+|(?:dis)?continue|remove|permission).{0,64}\b(?:gift|offer|special|promotion)/i
+body T_OFFER_BY_CHOICE_6	/\b(?:wish|want|question|unsub\w+|(?:dis)?continue|remove|permission).{0,64}\b(?:gift|offer|special|promotion)/i
+body T_OFFER_BY_CHOICE_7	/\b(?:wish|want|question|unsubscrib\w+|discontinue|remove).{0,64}\b(?:gift|offer|special|promotion|coupon|discount)/i
+body T_OFFER_BY_CHOICE_8	/\b(?:wish|want|question|unsub\w+|discontinue|remove).{0,64}\b(?:gift|offer|special|promotion|coupon|discount)/i
+body T_OFFER_BY_CHOICE_9	/\b(?:wish|want|question|unsubscrib\w+|discontinue|remove|permission).{0,64}\b(?:gift|offer|special|promotion|coupon|discount)/i
+body T_OFFER_BY_CHOICE_10	/\b(?:wish|want|question|unsub\w+|discontinue|remove|permission).{0,64}\b(?:gift|offer|special|promotion|coupon|discount)/i
+body T_OFFER_BY_CHOICE_11	/\b(?:wish|want|question|unsubscrib\w+|(?:dis)?continue|remove|permission).{0,64}\b(?:gift|offer|special|promotion|coupon|discount)/i
+body T_OFFER_BY_CHOICE_12	/\b(?:wish|want|question|unsub\w+|(?:dis)?continue|remove|permission).{0,64}\b(?:gift|offer|special|promotion|coupon|discount)/i
+body T_OFFER_BY_CHOICE_13	/\b(?:wish|want|question|unsubscrib\w+|discontinue|remove).{0,64}\b(?:gift|offer|special|promotion|coupon|discount|reward)/i
+body T_OFFER_BY_CHOICE_14	/\b(?:wish|want|question|unsub\w+|discontinue|remove).{0,64}\b(?:gift|offer|special|promotion|coupon|discount|reward)/i
+body T_OFFER_BY_CHOICE_15	/\b(?:wish|want|question|unsubscrib\w+|discontinue|remove|permission).{0,64}\b(?:gift|offer|special|promotion|coupon|discount|reward)/i
+body T_OFFER_BY_CHOICE_16	/\b(?:wish|want|question|unsub\w+|discontinue|remove|permission).{0,64}\b(?:gift|offer|special|promotion|coupon|discount|reward)/i
+body T_OFFER_BY_CHOICE_17	/\b(?:wish|want|question|unsubscrib\w+|(?:dis)?continue|remove|permission).{0,64}\b(?:gift|offer|special|promotion|coupon|discount|reward)/i
+body T_OFFER_BY_CHOICE_18	/\b(?:wish|want|question|unsub\w+|(?:dis)?continue|remove|permission).{0,64}\b(?:gift|offer|special|promotion|coupon|discount|reward)/i
 
 # Added a few more versions and removed some old ones
 header T_MANY_MX_4 From:addr =~ /\@mx\d{2,4}\..{1,30}\./i
@@ -327,6 +327,40 @@ header T_MANY_MX_5 From:addr =~ /\@mx\d{2,4}\..{1,20}\./i
 header T_MANY_MX_6 From:addr =~ /\@mx\d+\..{1,30}\./i
 header T_MANY_MX_7 From:addr =~ /\@\w\d+\..{1,30}\./i
 header T_MANY_MX_8 From:addr =~ /\@\w\d+/i
+
+# fix malformed rules "broken" by change in HTML whitespace processing
+body T_DEAR_FRIEND_1	/^\s*Dear Friend\b/i
+body T_DEAR_FRIEND_2	/^\s?Dear Friend\b/i
+rawbody T_DEAR_FRIEND_3	/^Dear Friend\b/i
+rawbody T_DEAR_FRIEND_4	/^\s*Dear Friend\b/i
+rawbody T_DEAR_FRIEND_5	/^\s?Dear Friend\b/i
+
+body T_OBSCURED_EMAIL_1		/^\s*\w+\^\S+\(\w{2,3}\b/m
+body T_OBSCURED_EMAIL_2		/^\s?\w+\^\S+\(\w{2,3}\b/m
+rawbody T_OBSCURED_EMAIL_3	/^\w+\^\S+\(\w{2,3}\b/m
+rawbody T_OBSCURED_EMAIL_4	/^\s*\w+\^\S+\(\w{2,3}\b/m
+rawbody T_OBSCURED_EMAIL_5	/^\s?\w+\^\S+\(\w{2,3}\b/m
+
+body T_TRACKER_ID_1	/^\s*[a-z0-9]{6,24}[-_a-z0-9]{12,36}[a-z0-9]{6,24}\s*\z/is
+body T_TRACKER_ID_2	/^\s?[a-z0-9]{6,24}[-_a-z0-9]{12,36}[a-z0-9]{6,24}\s*\z/is
+rawbody T_TRACKER_ID_3	/^[a-z0-9]{6,24}[-_a-z0-9]{12,36}[a-z0-9]{6,24}\s*\z/is
+rawbody T_TRACKER_ID_4	/^\s*[a-z0-9]{6,24}[-_a-z0-9]{12,36}[a-z0-9]{6,24}\s*\z/is
+rawbody T_TRACKER_ID_5	/^\s?[a-z0-9]{6,24}[-_a-z0-9]{12,36}[a-z0-9]{6,24}\s*\z/is
+
+# tweak rule to potentially improve RANK
+body T_DOMAIN_RATIO_20	eval:check_domain_ratio('0.020')
+body T_DOMAIN_RATIO_21	eval:check_domain_ratio('0.021')
+body T_DOMAIN_RATIO_22	eval:check_domain_ratio('0.022')
+body T_DOMAIN_RATIO_23	eval:check_domain_ratio('0.023')
+body T_DOMAIN_RATIO_24	eval:check_domain_ratio('0.024')
+body T_DOMAIN_RATIO_25	eval:check_domain_ratio('0.025')
+#
+body T_DOMAIN_RATIO_27	eval:check_domain_ratio('0.027')
+body T_DOMAIN_RATIO_28	eval:check_domain_ratio('0.028')
+body T_DOMAIN_RATIO_29	eval:check_domain_ratio('0.029')
+body T_DOMAIN_RATIO_30	eval:check_domain_ratio('0.030')
+body T_DOMAIN_RATIO_31	eval:check_domain_ratio('0.031')
+body T_DOMAIN_RATIO_32	eval:check_domain_ratio('0.032')
 
 # Bug 3374
 body             T_DRUG_DOLLAR_DOSE    m{\$?\s*(?:\d|\.)+\s*\$?\s*(?:\\|/|per)\s*d.?o.?s.?e}i
@@ -339,4 +373,5 @@ meta T_DRUG_DOLLAR_DOSE_C     T__DRUG_DOLLAR_DOSE_A || T__DRUG_DOLLAR_DOSE_B
 
 # Bug 3349, rule written by yackley
 header T_FAKE_MS_XMIME X-MimeOLE =~ /mircosoft/i
+
 
