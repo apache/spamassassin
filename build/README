@@ -46,9 +46,6 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 - take a copy of the MD5sum line output.
 
-- sign the released files with the 'release' private key (SpamAssassin
-  Signing Key)
-
 - test the tar.gz and zip files!  redo until they work!! ;)
 
 - CVS commit the release files, including 'Changes':
@@ -81,7 +78,7 @@ SPAMASSASSIN RELEASE PROCEDURE
   at top of file to be X.YZ, then run "webmake" or hit "Build Fully"
   in the Web interface
 
-- wait for mirrors to update ;)  Or, if you're jm, run
+- run this to update the mirrors:
 
   ~/lib/html_spamassassin_put.rsync
 
