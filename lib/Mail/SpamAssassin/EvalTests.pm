@@ -23,8 +23,6 @@ use vars qw{
 	$WORD_OBFUSCATION_CHARS 
 };
 
-use constant HAS_EMAIL_ISFREE => eval { require Email::IsFree; };
-
 # sad but true. sort it out, sysadmins!
 $CCTLDS_WITH_LOTS_OF_OPEN_RELAYS = qr{(?:kr|cn|cl|ar|hk|il|th|tw|sg|za|tr|ma|ua|in|pe|br)};
 $ROUND_THE_WORLD_RELAYERS = qr{(?:net|com|ca)};
@@ -2615,26 +2613,6 @@ sub check_razor2_range {
     $self->test_log(sprintf ("cf: %3d", $self->{razor2_cf_score}));
     return 1;
   }
-  return 0;
-}
-
-# I don't know if we should simply copy Email::IsFree or source it.
-# It was first released on 2002-09-18 and hasn't been updated since then.
-sub check_email_isfree {
-  my ($self, $body) = @_;
-
-#  return 0 unless HAS_EMAIL_ISFREE;
-
-  foreach (@{$body}) {
-    my @domains = /\@[.\w-]{2,}/g;
-    foreach my $domain (@domains) {
-      #$domain =~ s/\@//;
-      #$domain = lc $domain;
-      #print STDERR "EMAIL $domain\n";
-#      return 1 if Email::IsFree::by_domain($domain);
-    }
-  }
-
   return 0;
 }
 
