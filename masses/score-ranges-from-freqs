@@ -155,7 +155,7 @@ foreach my $test (sort { $ranking{$b} <=> $ranking{$a} } keys %freq) {
   # tvd
   my $tflags = $rules{$test}->{tflags}; $tflags ||= '';
   if ( $is_nice{$test} && ( $ranking < .5 ) ) { # proper nice rule
-    $lo *= 2.2 if ( $soratio <= 0.05 && $nonspam > 0.4 ); # let good rules be larger if they want to
+    $lo *= 1.5 if ( $soratio <= 0.05 && $nonspam > 0.5 ); # let good rules be larger if they want to
     $hi =	($soratio == 0) ? $lo :
     		($soratio <= 0.005 ) ? $lo/1.1 :
     		($soratio <= 0.010 && $nonspam > 0.2) ? $lo/2.0 :
