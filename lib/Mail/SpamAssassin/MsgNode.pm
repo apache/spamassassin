@@ -494,6 +494,24 @@ currently.
 
 sub finish {
   my ($self) = @_;
+
+  # Clean up ourself
+  undef $self->{'headers'};
+  undef $self->{'raw_headers'};
+  undef $self->{'header_order'};
+  undef $self->{'raw'};
+  undef $self->{'decoded'};
+  undef $self->{'rendered'};
+  undef $self->{'type'};
+  undef $self->{'rendered_type'};
+
+  # Clean up our kids
+  if (exists $self->{'body_parts'}) {
+    while ( my $part = shift @{$self->{'body_parts'}} ) {
+      $part->finish();
+    }
+    undef $self->{'body_parts'};
+  }
 }
 
 # ---------------------------------------------------------------------------

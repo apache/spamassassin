@@ -309,6 +309,7 @@ sub wanted {
   }
 
   $status->finish();
+  $ma->finish();
   undef $ma;		# clean 'em up
   undef $status;
 

@@ -66,7 +66,6 @@ sub new {
 
   $self->{pristine_headers} =	'';
   $self->{pristine_body} =	'';
-  $self->{already_parsed} =	0;
 
 #  # allow callers to set certain options ...
 #  foreach ( 'already_parsed' ) {
@@ -95,8 +94,7 @@ sub _do_parse {
   my($self) = @_;
 
   # If we're called when we don't need to be, then just go ahead and return.
-  return if ($self->{'already_parsed'});
-
+  return if (!exists $self->{'toparse'});
   my $toparse = $self->{'toparse'};
   delete $self->{'toparse'};
 
@@ -109,7 +107,6 @@ sub _do_parse {
 
   # Make the tree
   Mail::SpamAssassin::MsgParser->parse_body( $self, $self, $boundary, $toparse, 1 );
-  $self->{'already_parsed'} = 1;
 
   dbg("---- MIME PARSER END ----");
 }
@@ -126,7 +123,7 @@ sub find_parts {
   my ($self, $re, $onlyleaves, $recursive) = @_;
 
   # ok, we need to do the parsing now...
-  $self->_do_parse() if (!$self->{'already_parsed'});
+  $self->_do_parse() if (exists $self->{'toparse'});
 
   # and pass through to the MsgNode version of the method
   return $self->SUPER::find_parts($re, $onlyleaves, $recursive);
@@ -278,7 +275,14 @@ Clean up an object so that it can be destroyed.
 
 sub finish {
   my ($self) = @_;
+
+  # Clean ourself up
   $self->finish_metadata();
+  delete $self->{pristine_headers};
+  delete $self->{pristine_body};
+
+  # Destroy the tree ...
+  $self->SUPER::finish();
 }
 
 # ---------------------------------------------------------------------------

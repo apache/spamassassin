@@ -916,6 +916,7 @@ sub check {
         sprintf("%.1f", time - $start) ." seconds, $actual_length bytes.";
 
     $status->finish();        # added by jm to allow GC'ing
+    $mail->finish();
 }
 
 ###########################################################################
