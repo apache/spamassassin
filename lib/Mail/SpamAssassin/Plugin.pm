@@ -61,11 +61,9 @@ of these stubs to perform its actions.
 
 SpamAssassin implements a plugin chain; each callback event is passed to each
 of the registered plugin objects in turn.  Any plugin can call
-C<$plugin->inhibit_further_callbacks()> to block delivery of that event to
+C<$self-E<gt>inhibit_further_callbacks()> to block delivery of that event to
 later plugins in the chain.  This is useful if the plugin has handled the
 event, and there will be no need for later plugins to handle it as well.
-Some methods can also return C<$Mail::SpamAssassin::Plugin::INHIBIT_CALLBACKS>
-to do this, too; this will be noted in the method description below.
 
 If you're looking to write a simple eval rule, skip straight to 
 C<register_eval_rule()>, below.
@@ -101,12 +99,11 @@ use strict;
 use bytes;
 
 use vars qw{
-  @ISA $VERSION $INHIBIT_CALLBACKS
+  @ISA $VERSION
 };
 
 @ISA =                  qw();
 $VERSION =              'bogus';
-$INHIBIT_CALLBACKS =    -1;
 
 ###########################################################################
 
@@ -185,8 +182,7 @@ system-wide configuration files.
 =back
 
 If the configuration line was a setting that is handled by this plugin, the
-method implementation should return
-C<$Mail::SpamAssassin::Plugin::INHIBIT_CALLBACKS>.
+method implementation should call C<$self-E<gt>inhibit_further_callbacks()>.
 
 If the setting is not handled by this plugin, the method should return C<0> so
 that a later plugin may handle it, or so that SpamAssassin can output a warning
@@ -194,7 +190,7 @@ message to the user if no plugin understands it.
 
 Lifecycle note: it is suggested that configuration be stored on the
 C<Mail::SpamAssassin::Conf> object in use, instead of the plugin object itself.
-That can be found as C<$plugin->{main}->{conf}>.   This allows per-user and
+That can be found as C<$plugin-E<gt>{main}-E<gt>{conf}>.   This allows per-user and
 system-wide configuration to be dealt with correctly, with per-user overriding
 system-wide.
 
@@ -233,7 +229,7 @@ per-scan basis should store that state on this object, not on the plugin object
 itself, since the plugin object will be shared between all active scanners.
 
 The message being scanned is accessible through the
-C<$permsgstatus->get_message()> API; there are a number of other public
+C<$permsgstatus-E<gt>get_message()> API; there are a number of other public
 APIs on that object, too.  See C<Mail::SpamAssassin::PerMsgStatus> perldoc.
 
 =back
@@ -454,7 +450,7 @@ For example,
 
   $plugin->register_eval_rule ('check_for_foo')
 
-will cause C<$plugin->check_for_foo()> to be called for this
+will cause C<$plugin-E<gt>check_for_foo()> to be called for this
 SpamAssassin rule:
 
   header   FOO_RULE	eval:check_for_foo()
@@ -482,7 +478,7 @@ Note that the headers can be accessed using the C<get()> method on the
 C<Mail::SpamAssassin::PerMsgStatus> object, and the body by
 C<get_decoded_stripped_body_text_array()> and other similar methods.
 Similarly, the C<Mail::SpamAssassin::Conf> object holding the current
-configuration may be accessed through C<$permsgstatus->{main}->{conf}>.
+configuration may be accessed through C<$permsgstatus-E<gt>{main}-E<gt>{conf}>.
 
 The eval rule should return C<1> for a hit, or C<0> if the rule
 is not hit.

@@ -30,12 +30,27 @@ use bytes;
 use File::Spec;
 
 use vars qw{
-  @ISA $VERSION
+  @ISA $VERSION @CONFIG_TIME_HOOKS
 };
 
 @ISA = qw();
 
 $VERSION = 'bogus';     # avoid CPAN.pm picking up version strings later
+
+# Normally, the list of active plugins that should be called for a given hook
+# method name is compiled and cached at runtime.  This means that later calls
+# will not have to traverse the entire plugin list more than once, since the
+# list of plugins that implement that hook is already cached.
+#
+# However, some hooks should not receive this treatment. One of these is
+# parse_config, which may be compiled before all config files have been read;
+# if a plugin is loaded from a config file after this has been compiled, it
+# will not get callbacks.
+#
+# Any other such hooks that may be compiled at config-parse-time should be
+# listed here.
+
+@CONFIG_TIME_HOOKS = qw( parse_config );
 
 ###########################################################################
 
@@ -103,6 +118,12 @@ sub register_plugin {
   $plugin->{main} = $self->{main};
   push (@{$self->{plugins}}, $plugin);
   dbg ("plugin: registered $plugin");
+
+  # invalidate cache entries for any configuration-time hooks, in case
+  # one has already been built; this plugin may implement that hook!
+  foreach my $subname (@CONFIG_TIME_HOOKS) {
+    delete $self->{cbs}->{$subname};
+  }
 }
 
 ###########################################################################
@@ -117,7 +138,7 @@ sub callback {
     # nope.  run through all registered plugins and see which ones
     # implement this type of callback
     my @subs = ();
-    foreach my $plugin (sort @{$self->{plugins}}) {
+    foreach my $plugin (@{$self->{plugins}}) {
       my $methodref = $plugin->can ($subname);
       if (defined $methodref) {
         push (@subs, [ $plugin, $methodref ]);
@@ -138,11 +159,6 @@ sub callback {
     if ($ret) {
       #dbg ("plugin: ${plugin}->${methodref} => $ret");
       $overallret = $ret;
-
-      if ($ret == $Mail::SpamAssassin::Plugin::INHIBIT_CALLBACKS) {
-        $plugin->{_inhibit_further_callbacks} = 1;
-        $ret = 1;
-      }
     }
 
     if ($plugin->{_inhibit_further_callbacks}) {
