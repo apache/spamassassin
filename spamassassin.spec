@@ -3,7 +3,7 @@
 # namely, making the tools RPM for masses, sql, and tools, and
 # the perl-Mail-SpamAssassin rpm for the modules only.
 
-%define real_version 2.70
+%define real_version 3.0.0
 %define version %{real_version}
 
 %define _unpackaged_files_terminate_build       0
@@ -169,8 +169,8 @@ if [ "$1" -ge "1" ]; then
 fi
 
 %changelog
-* Sun Sep 28 2003 Theo Van Dinter <felicity@kluge.net> 2.70-1
-- updated to 2.70
+* Sun Feb 15 2004 Theo Van Dinter <felicity@kluge.net> 3.0.0-1
+- updated to 3.0.0
 
 * Sun Sep 28 2003 Theo Van Dinter <felicity@kluge.net> 2.61-1
 - updated to 2.61

@@ -6,10 +6,10 @@ Upgrade Notes
 scanner processes will be run in parallel.  Previously, there was no
 default limit unless you specified the "-m" switch when starting spamd.
 
-The SpamAssassin 2.6x release series will be the last set of releases to
-officially support perl versions earlier than perl 5.6.0.  If you are
-using an earlier release, you will need to upgrade when SpamAssassin 2.70
-is eventually released.
+The SpamAssassin 2.6x release series was the last set of releases to
+officially support perl versions earlier than perl 5.6.1.  If you are
+using an earlier version of perl, you will need to upgrade before you
+can use the 3.0.0 version of SpamAssassin.
 
 Users of SpamAssassin versions earlier than 2.50 should note that
 the default tagging behavior has changed.  If an incoming message is

@@ -95,7 +95,7 @@ use vars qw{
   @site_rules_path
 };
 
-$VERSION = "2.70";              # update after release
+$VERSION = "3.0.0";              # update after release
 $IS_DEVEL_BUILD = 1;            # change for release versions
 
 @ISA = qw();
