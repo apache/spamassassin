@@ -5,6 +5,7 @@ package Mail::SpamAssassin::Reporter;
 use strict;
 use bytes;
 use Carp;
+use POSIX ":sys_wait_h";
 
 use vars qw{
   @ISA $VERSION
@@ -117,6 +118,25 @@ sub adie {
   my $msg = shift;
   alarm 0;
   die $msg;
+}
+
+# Close an fh piped to a process, possibly exiting if the process returned nonzero.
+# thanks to nix /at/ esperi.demon.co.uk for this.
+sub close_pipe_fh {
+  my ($self, $fh) = @_;
+
+  return if close ($fh);
+
+  my $exitstatus = $?;
+  dbg ("raw exit code: $exitstatus");
+
+  if (WIFEXITED ($exitstatus) && (WEXITSTATUS ($exitstatus))) {
+    die "Exited with non-zero exit code " . WEXITSTATUS ($exitstatus) . "\n";
+  }
+
+  if (WIFSIGNALED ($exitstatus)) {
+    die "Exited due to signal " . WTERMSIG ($exitstatus) . "\n";
+  }
 }
 
 sub razor_report {
@@ -250,7 +270,7 @@ sub dcc_report {
     }
 
     my $pid = open(DCC, join(' ', $path, "-t many", $opts, "< '$tmpf'", ">/dev/null 2>&1", '|')) || die "$!\n";
-    close(DCC) || die "Received error code $?";
+    $self->close_pipe_fh (\*DCC);
 
     alarm(0);
     waitpid ($pid, 0);
@@ -302,8 +322,8 @@ sub pyzor_report {
       $opts = $1;
     }
 
-    my $pid = open(PYZ, join(' ', $path, $opts, "report", "< '$tmpf'", ">/dev/null 2>&1", '|')) || die "$!\n";
-    close(PYZ) || die "Received error code $?";
+    my $pid = open(PYZOR, join(' ', $path, $opts, "report", "< '$tmpf'", ">/dev/null 2>&1", '|')) || die "$!\n";
+    $self->close_pipe_fh (\*PYZOR);
 
     alarm(0);
     waitpid ($pid, 0);
