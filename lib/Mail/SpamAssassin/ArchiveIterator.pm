@@ -252,7 +252,6 @@ sub run {
     ($MESSAGES, $messages) = $self->message_array(\@targets);
 
     while (my $message = shift @{$messages}) {
-#      my ($class, undef, $date) = index_unpack($message);
       my($class, undef, $date, undef, $result) = $self->run_message($message);
       &{$self->{result_sub}}($class, $result, $date) if $result;
     }
