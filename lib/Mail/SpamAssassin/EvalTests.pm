@@ -988,8 +988,14 @@ sub check_rbl {
   dbg ("checking RBL $rbl_domain, set $set", "rbl", -1);
 
   my $rcv = $self->get ('Received');
-  my @ips = ($rcv =~ /[\[\(]($IP_ADDRESS)[\]\)]/g);
-  return 0 unless ($#ips >= 0);
+  my @fullips = ($rcv =~ /[\[\(]($IP_ADDRESS)[\]\)]/g);
+  return 0 unless ($#fullips >= 0);
+
+  # Let's go ahead and trim away all Reserved ips (KLC)
+  my @ips = ();
+  foreach my $ip (@fullips) {
+    if (!($ip =~ /${IP_IN_RESERVED_RANGE}/o)) { push(@ips,$ip); }
+  }
 
   # First check that DNS is available, if not do not perform this check
   return 0 if $self->{conf}->{skip_rbl_checks};
@@ -1031,7 +1037,6 @@ sub check_rbl {
     my $dialupreturn;
     foreach my $ip (@ips) {
       $i++;
-      next if ($ip =~ /${IP_IN_RESERVED_RANGE}/o);
       # Some of the matches in other zones, like a DUL match on a first hop 
       # may be negated by another rule, so preventing a match in two zones
       # is better done with a Z_FUDGE_foo rule that users check_both_rbl_results
