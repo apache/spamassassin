@@ -684,3 +684,76 @@ body T_HTML_ATTR_UNIQUE_80	eval:html_range('attr_unique_bad','0.8','1.0')
 body     T_SILDENAFIL          /\bsildenafil\b/i
 describe T_SILDENAFIL          Talks about viagra using its chemical name
 
+# http://www.ahbl.org/using/spamassassin.txt :
+# SpamAssassin local.cf for AHBL BlackList / BlockList
+# "Old blackholes.2mbit.com resurrected as AHBL (dnsbl.ahbl.org)"
+# URL: http://www.ahbl.org
+header T_RCVD_IN_AHBL eval:check_rbl('ahbl', 'dnsbl.ahbl.org.')
+describe T_RCVD_IN_AHBL AHBL: sender is listed in BlackList / BlockList dnsbl.ahbl.org
+tflags T_RCVD_IN_AHBL net
+
+header T_RCVD_IN_AHBL_UNKNOWN_1 eval:check_rbl_sub('ahbl', '127.0.0.1')
+describe T_RCVD_IN_AHBL_UNKNOWN_1 AHBL: Unknown Category 1 in BlackList / BlockList dnsbl.ahbl.org
+tflags T_RCVD_IN_AHBL_UNKNOWN_1 net
+
+header T_RCVD_IN_AHBL_SMTP eval:check_rbl_sub('ahbl', '127.0.0.2')
+describe T_RCVD_IN_AHBL_SMTP AHBL: Open SMTP relay in BlackList / BlockList dnsbl.ahbl.org
+tflags T_RCVD_IN_AHBL_SMTP net
+
+header T_RCVD_IN_AHBL_PROXY eval:check_rbl_sub('ahbl', '127.0.0.3')
+describe T_RCVD_IN_AHBL_PROXY AHBL: Open Proxy server in BlackList / BlockList dnsbl.ahbl.org
+
+tflags T_RCVD_IN_AHBL_PROXY net
+
+header T_RCVD_IN_AHBL_SPAM eval:check_rbl_sub('ahbl', '127.0.0.4')
+describe T_RCVD_IN_AHBL_SPAM AHBL: Spam Source in BlackList / BlockList dnsbl.ahbl.org
+tflags T_RCVD_IN_AHBL_SPAM net
+
+header T_RCVD_IN_AHBL_RTB eval:check_rbl_sub('ahbl', '127.0.0.5')
+describe T_RCVD_IN_AHBL_RTB AHBL: Real-Time Blocked in BlackList / BlockList dnsbl.ahbl.org
+tflags T_RCVD_IN_AHBL_RTB net
+
+header T_RCVD_IN_AHBL_FORMMAIL eval:check_rbl_sub('ahbl', '127.0.0.6')
+describe T_RCVD_IN_AHBL_FORMMAIL AHBL: Abuseable Form Mail in BlackList / BlockList dnsbl.ahbl.org
+tflags T_RCVD_IN_AHBL_FORMMAIL net
+
+header T_RCVD_IN_AHBL_SPAM_SUPPORT eval:check_rbl_sub('ahbl', '127.0.0.7')
+describe T_RCVD_IN_AHBL_SPAM_SUPPORT AHBL: Spam Supporter in BlackList / BlockList dnsbl.ahbl.org
+tflags T_RCVD_IN_AHBL_SPAM_SUPPORT net
+
+header T_RCVD_IN_AHBL_I_SPAM_SUPPORT eval:check_rbl_sub('ahbl', '127.0.0.8')
+describe T_RCVD_IN_AHBL_I_SPAM_SUPPORT AHBL: Indirect Spam supporter in BlackList / BlockList dnsbl.ahbl.org
+tflags T_RCVD_IN_AHBL_I_SPAM_SUPPORT net
+
+header T_RCVD_IN_AHBL_ENDUSER eval:check_rbl_sub('ahbl', '127.0.0.9')
+describe T_RCVD_IN_AHBL_ENDUSER AHBL: End User (non mail system) in BlackList / BlockList dnsbl.ahbl.org
+tflags T_RCVD_IN_AHBL_ENDUSER net
+
+header T_RCVD_IN_AHBL_SOS eval:check_rbl_sub('AHBL-notfirsthop', '127.0.0.10')
+describe T_RCVD_IN_AHBL_SOS AHBL: Shoot On Sight in BlackList / BlockList dnsbl.ahbl.org
+tflags T_RCVD_IN_AHBL_SOS net
+
+header T_RCVD_IN_AHBL_RFCI_PA eval:check_rbl_sub('ahbl', '127.0.0.11')
+describe T_RCVD_IN_AHBL_RFCI_PA AHBL: Missing Postmaster or Abuse Address in BlackList / BlockList dnsbl.ahbl.org
+tflags T_RCVD_IN_AHBL_RFCI_PA net
+
+header T_RCVD_IN_AHBL_5XXI eval:check_rbl_sub('ahbl', '127.0.0.12')
+describe T_RCVD_IN_AHBL_5XXI AHBL: Does not properly handle 5xx errors in BlackList / BlockList dnsbl.ahbl.org
+tflags T_RCVD_IN_AHBL_5XXI net
+
+header T_RCVD_IN_AHBL_RFCI_MISC eval:check_rbl_sub('ahbl', '127.0.0.13')
+describe T_RCVD_IN_AHBL_RFCI_MISC AHBL: Other Non-RFC Compliant in BlackList / BlockList dnsbl.ahbl.org
+tflags T_RCVD_IN_AHBL_RFCI_MISC net
+
+header T_RCVD_IN_AHBL_EXEMPT_T	eval:check_rbl('ahbl-ex-firsttrusted', 'exemptions.ahbl.org.')
+describe T_RCVD_IN_AHBL_EXEMPT_T Sender is in AHBL Exempt zone (trusted)
+tflags T_RCVD_IN_AHBL_EXEMPT_T	net nice
+
+header T_RCVD_IN_AHBL_EXEMPT_O	eval:check_rbl('ahbl-ex-untrusted', 'exemptions.ahbl.org.')
+describe T_RCVD_IN_AHBL_EXEMPT_O Sender is in AHBL Exempt zone (other)
+tflags T_RCVD_IN_AHBL_EXEMPT_O	net nice
+
+header T_RCVD_IN_AHBL_RHSBL	eval:check_rbl_from_host('ahbl-rhs', 'rhsbl.ahbl.org.')
+describe T_RCVD_IN_AHBL_RHSBL	AHBL: From sender listed in AHBL (http://www.ahbl.org/)
+tflags T_RCVD_IN_AHBL_RHSBL	net
+

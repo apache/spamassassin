@@ -2863,7 +2863,7 @@ sub finish_parsing {
       }
       else {
 	$self->{errors}++;
-	sa_die(70, "syntax error for $name: $text");
+	sa_die(70, "syntax error for eval function $name: $text");
       }
     }
     # non-eval tests
