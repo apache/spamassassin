@@ -149,12 +149,17 @@ use constant TOKENIZE_LONG_TOKENS_AS_SKIPS => 1;
 
 # tweaks of May 12 2003, see SpamAssassin-devel archives again.
 use constant PRE_CHEW_ADDR_HEADERS => 1;
-use constant NO_NUMERIC_IN_HEADERS => 0;
-use constant IGNORE_MSGID_TOKENS => 0;
 use constant CHEW_BODY_URIS => 1;
 use constant CHEW_BODY_MAILADDRS => 1;
 use constant HDRS_TOKENIZE_LONG_TOKENS_AS_SKIPS => 1;
 use constant BODY_TOKENIZE_LONG_TOKENS_AS_SKIPS => 1;
+use constant IGNORE_MSGID_TOKENS => 0;
+
+# tweaks of 12 March 2004, see bug 2129.
+use constant DECOMPOSE_BODY_TOKENS => 1;
+use constant MAP_HEADERS_MID => 1;
+use constant MAP_HEADERS_FROMTOCC => 1;
+use constant MAP_HEADERS_USERAGENT => 1;
 
 # We store header-mined tokens in the db with a "HHeaderName:val" format.
 # some headers may contain lots of gibberish tokens, so allow a little basic
@@ -407,6 +412,16 @@ sub tokenize_line {
 	  push (@rettokens, "UD:".$1); # UD = URL domain
 	}
       }
+
+        if (DECOMPOSE_BODY_TOKENS) {
+          my $decompd = $token;               # "Foo!"
+          $decompd =~ s/[^\w:\*]//gs;
+          push (@rettokens, $decompd);        # "Foo"
+          $decompd = $token; $decompd = lc $decompd;
+          push (@rettokens, $decompd);        # "foo!"
+          $decompd =~ s/[^\w:\*]//gs;
+          push (@rettokens, $decompd);        # "foo"
+        }
     }
 
     # note: do not trim down overlong tokens if they contain '*'.  This is
@@ -436,24 +451,6 @@ sub tokenize_line {
     }
 
     push (@rettokens, $tokprefix.$token);
-
-    # now do some token abstraction; in other words, make them act like
-    # patterns instead of text copies.
-
-    # replace digits with 'N'...
-    if ($token =~ /\d/ && (!$in_headers || !NO_NUMERIC_IN_HEADERS))
-    {
-      $token =~ s/\d/N/gs;
-
-      # stop-list for numeric tokens.  These are squarely in the gray
-      # area, and it just slows us down to record them.
-      if ($token !~ /^(?:
-		  H\*r:ip\* | \QNNNN\E
-		)/x)
-      {
-	push (@rettokens, 'N:'.$tokprefix.$token);
-      }
-    }
   }
 
   return @rettokens;
@@ -513,6 +510,23 @@ sub tokenize_headers {
     }
     elsif ($hdr =~ /^${MARK_PRESENCE_ONLY_HDRS}$/i) {
       $val = "1"; # just mark the presence, they create lots of hapaxen
+    }
+
+    if (MAP_HEADERS_MID) {
+      if ($hdr eq 'In-Reply-To' || $hdr eq 'References' || $hdr =~ /^Message-Id/i)
+      {
+        $parsed{"*MI"} = $val;
+      }
+    }
+    if (MAP_HEADERS_FROMTOCC) {
+      if ($hdr =~ /^(?:From|To|Cc)$/i) {
+        $parsed{"*Ad"} = $val;
+      }
+    }
+    if (MAP_HEADERS_USERAGENT) {
+      if ($hdr =~ /^(?:X-Mailer|User-Agent)$/) {
+        $parsed{"*UA"} = $val;
+      }
     }
 
     # replace hdr name with "compressed" version if possible
@@ -1114,7 +1128,7 @@ sub scan {
   }
 
   if ($self->{use_chi_sq_combining}) {
-    $score = chi_squared_probs_combine (@sorted);
+    $score = chi_squared_probs_combine ($ns, $nn, @sorted);
   } else {
     $score = robinson_naive_bayes_probs_combine (@sorted);
   }
@@ -1205,15 +1219,20 @@ sub chi2q {
 # Chi-Squared method. Produces mostly boolean $result,
 # but with a grey area.
 sub chi_squared_probs_combine  {
-  my (@sorted) = @_;
+  my ($ns, $nn, @sorted) = @_;
   # @sorted contains an array of the probabilities
   my $wc = scalar @sorted;
   return unless $wc;
 
   my ($H, $S);
   my ($Hexp, $Sexp);
-  $H = $S = 1.0;
   $Hexp = $Sexp = 0;
+
+  # see bug 3118
+  my $totmsgs = ($ns + $nn);
+  if ($totmsgs == 0) { return; }
+  $S = ($ns / $totmsgs);
+  $H = ($nn / $totmsgs);
 
   use POSIX qw(frexp);
 

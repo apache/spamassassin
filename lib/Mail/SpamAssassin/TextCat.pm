@@ -62,6 +62,11 @@ sub classify {
     my $ngram = {};
     my $rang = 1;
     dbg("Loading languages file...");
+
+    if (!defined $self->{main}->{languages_filename}) {
+      return;
+    }
+
     open(LM, $self->{main}->{languages_filename})
 	|| die "cannot open languages: $!\n";
     local $/ = undef;
