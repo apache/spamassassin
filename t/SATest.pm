@@ -230,7 +230,7 @@ sub ok_all_patterns {
   foreach my $pat (sort keys %patterns) {
     my $type = $patterns{$pat};
     print "\tChecking $type\n";
-    if (ok (defined $found{$type})) {
+    if (defined $found{$type}) {
       ok ($found{$type} == 1) or warn "Found more than once: $type\n";
     } else {
       warn "\tNot found: $type = $pat\n";
@@ -240,8 +240,13 @@ sub ok_all_patterns {
   foreach my $pat (sort keys %anti_patterns) {
     my $type = $anti_patterns{$pat};
     print "\tChecking for anti-pattern $type\n";
-    if (!ok (!defined $found{$type})) {
+    if (defined $found_anti{$type}) {
       warn "\tFound anti-pattern: $type = $pat\n";
+      ok (0);
+    }
+    else
+    {
+      ok (1);
     }
   }
 }

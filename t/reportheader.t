@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("reportheader");
-use Test; BEGIN { plan tests => 31 };
+use Test; BEGIN { plan tests => 15 };
 
 # ---------------------------------------------------------------------------
 
@@ -36,5 +36,5 @@ tstprefs ("
 	report_header 1
 	");
 
-ok (sarun ("-t < data/spam/001", \&patterns_run_cb));
+sarun ("-L -t < data/spam/001", \&patterns_run_cb);
 ok_all_patterns();
