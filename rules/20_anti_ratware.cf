@@ -1,5 +1,5 @@
 # Non-spam mailers
-# $Id: 20_anti_ratware.cf,v 1.9 2002/08/23 04:45:04 hughescr Exp $
+# $Id: 20_anti_ratware.cf,v 1.10 2002/08/26 22:06:31 msquadrat Exp $
 
 header USER_AGENT_PINE		Message-Id =~ /^<Pine\.[A-Z]{3}\.\d\.[0-9A-Z]+\./
 describe USER_AGENT_PINE	Message-Id indicates a non-spam MUA (Pine)
@@ -26,6 +26,11 @@ describe USER_AGENT_KMAIL	User-Agent header indicates a non-spam MUA (KMail)
 header USER_AGENT_IMP		User-Agent =~ /^Internet Messaging Program \(IMP\) [34]\.\d/
 describe USER_AGENT_IMP		User-Agent header indicates a non-spam MUA (IMP)
 
+header USER_AGENT_GNUS_UA	User-Agent =~ /^Gnus\/\d\.\d+ /
+describe USER_AGENT_GNUS_UA	User-Agent header indicates a non-spam MUA (Gnus)
+# This one doesn't get many hits, it might be a good candidate to be dumped with the next GA run.
+header USER_AGENT_GNUS_XM	X-Mailer   =~ /^Gnus v\d(?:\.\d+){1,2}\/X?Emacs \d+\.\d+/
+describe USER_AGENT_GNUS_XM	X-Mailer header indicates a non-spam MUA (Gnus)
 
 header USER_AGENT_TONLINE	X-Mailer   =~ /^T-Online (?:e|Web)Mail \d\.\d+$/
 describe USER_AGENT_TONLINE	X-Mailer header indicates a non-spam MUA (T-Offline)
@@ -45,3 +50,5 @@ tflags USER_AGENT_KMAIL      nice
 tflags USER_AGENT_IMP        nice
 tflags USER_AGENT_TONLINE    nice
 tflags USER_AGENT_APPLEMAIL  nice
+tflags USER_AGENT_GNUS_UA    nice
+tflags USER_AGENT_GNUS_XM    nice

@@ -1,5 +1,5 @@
 # SpamAssassin rules file: compensation for common false positives.
-# $Id: 20_compensate.cf,v 1.53 2002/08/24 18:39:51 msquadrat Exp $
+# $Id: 20_compensate.cf,v 1.54 2002/08/26 22:06:31 msquadrat Exp $
 ###########################################################################
 # Header compensation tests
 
@@ -36,6 +36,10 @@ tflags BUGZILLA_BUG		nice
 header DEBIAN_BTS_BUG           eval:message_from_debian_bts()
 describe DEBIAN_BTS_BUG         Looks like a Debian BTS bug
 tflags DEBIAN_BTS_BUG		nice
+
+header SOURCEFORGE_BUG		eval:message_from_sf_bts()
+describe SOURCEFORGE_BUG	Looks like a SourceForge bug
+tflags SOURCEFORGE_BUG		nice
 
 # give a negative score to Majordomo results.
 header   MAJORDOMO              Subject =~ /Majordomo (?:request )?results/
