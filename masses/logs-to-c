@@ -214,7 +214,7 @@ sub writescores_c {
 
 int num_scores = $size;
 int num_mutable = $mutable;
-unsigned char is_mutatable[$size]; 	/* er, is_mutable I think ;) */
+unsigned char is_mutable[$size];
 double range_lo[$size];
 double range_hi[$size];
 double bestscores[$size];
@@ -550,7 +550,7 @@ void loadscores (void) {
       score_names[snum] = strdup (str);	/* leaky leak ;) */
 
     } else if (cmd == 'm') {
-      is_mutatable[snum] = arg;
+      is_mutable[snum] = arg;
     }
   }
   fclose(fin);

@@ -229,7 +229,7 @@ void write_weights (FILE * fp) {
 
 
 	for (i = 0; i < num_scores; i++) {
-		if ( is_mutatable[i] )  {
+		if ( is_mutable[i] )  {
 			fprintf(fp, "score %-30s %2.3f\n", score_names[i], weight_to_score(weights[i]));
 		} else {
 			fprintf(fp, "score %-30s %2.3f # not mutable\n", score_names[i], range_lo[i]);
@@ -261,7 +261,7 @@ double evaluate_test_nogain (int test) {
 		sum += weights[tests_hit[test][i]];
 	}
 
-	/* Translate the 'unmutatable' scores to weight space. */
+	/* Translate the 'unmutable' scores to weight space. */
 	sum += score_to_weight(scores[test]);
 
 	return sum;
