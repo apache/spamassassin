@@ -486,6 +486,9 @@ describe A_HREF_TO_REMOVE	Link to a URL containing "remove"
 body REMOVE_SCRIPT		/http:\/\/.*cgi.*\/(?:unsubscribe|remove)\./
 describe REMOVE_SCRIPT		URL of CGI script called "remove"
 
+body REMOVE_PAGE		/http:\/\/[^\/]+\/(?:unsubscribe|remove)/
+describe REMOVE_PAGE		URL of page called "remove"
+
 # include the \n\n so we don't match mailto's in the headers!  Some list software
 # uses these to handle auto-subscribe/unsubscribe features
 full MAILTO_LINK		/\n\n.*=[3D=\s"']*mailto:/is
