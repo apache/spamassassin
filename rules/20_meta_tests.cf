@@ -115,7 +115,9 @@ header __IDENT_NOBODY		Received =~ /ident[:=]nobody\b/i
 header __REGSITE_COM		Received =~ /\.registeredsite\.com\s/
 header __X_BEENTHERE		exists:X-BeenThere
 header __IDENT_NOBODY_LOCALHOST Received =~ /\bident[:=]nobody\@localhost\b/i
-meta IDENT_NOBODY		(__IDENT_NOBODY && !__IDENT_NOBODY_LOCALHOST && !__REGSITE_COM && !((FORGOTTEN_PASSWORD + __X_BEENTHERE + KNOWN_MAILING_LIST) > 1))
+body   __FORGOTTEN_PASSWORD     /[fF]org[oe]t.{0,25}[pP]assword/
+header __KNOWN_MAILING_LIST     eval:detect_mailing_list()
+meta IDENT_NOBODY		(__IDENT_NOBODY && !__IDENT_NOBODY_LOCALHOST && !__REGSITE_COM && !((__FORGOTTEN_PASSWORD + __X_BEENTHERE + __KNOWN_MAILING_LIST) > 1))
 describe IDENT_NOBODY		Received lines include an 'ident:nobody' string
 
 header __SANE_MSGID		MESSAGEID =~ /^<[^<>\\ \t\n\r\x0b\x80-\xff]+\@[^<>\\ \t\n\r\x0b\x80-\xff]+>\s*$/m
