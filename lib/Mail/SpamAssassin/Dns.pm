@@ -99,6 +99,7 @@ sub is_razor_available {
   my $razor_avail = 0;
 
   eval '
+    use Razor::Client;
     use Razor::Signature; 
     use Razor::String;
     $razor_avail = 1;
@@ -111,7 +112,7 @@ sub is_razor_available {
 }
 
 sub razor_lookup {
-  my ($self, $site, $fulltext) = @_;
+  my ($self, $fulltext) = @_;
 
   if ($self->{main}->{local_tests_only}) {
     dbg ("local tests only, ignoring Razor");
@@ -120,52 +121,25 @@ sub razor_lookup {
 
   my @msg = split (/^/m, $$fulltext);
 
-  $site =~ /^(\S+):(\d+)$/;
-  my $Rserver = $1;
-  my $Rport   = $2;
-  my $sock = new IO::Socket::INET PeerAddr => $Rserver,
-				  PeerPort => $Rport, 
-				  Proto    => 'tcp';
-  if (!$sock) {
-    dbg ("failed to connect to Razor server $Rserver:$Rport, ignoring Razor");
-    return 0;
-  }
-
-  my $sig = 'x';
-  my $response = '';
   my $timeout = 10;		# seconds
+  my $response = undef;
+  my $config = $self->{conf}->{razor_config};
+  my %options = (
+    # 'debug'	=> 1
+  );
 
   if (!eval q{
-    use Razor::String;
+    use Razor::Client;
     use Razor::Signature; 
-
-    $sig = Razor::Signature->hash (\@msg);
-    undef @msg;		# no longer needed
-
-    dbg ("Razor signature: $sig");
-
-    my %message;
-    $message{'key'} = $sig;
-    $message{'action'} = "lookup";
-    my $str = Razor::String::hash2str ( {%message} );
-
-    local $SIG{'ALRM'} = sub { die "timeout\n" }; # NB: \n required
-
-    alarm $timeout; {
-      $sock->autoflush;
-      print $sock "$str\n.\n";
-      $response = join ('', <$sock>);
-    } alarm 0;
-
-    undef $sock;
-
+    my $rc = new Razor::Client ($config, %options);
+    $response = $rc->check (\@msg);
   1;})
   {
     warn ("$! $@") unless ($@ eq "timeout\n");
     warn "razor check timed out after $timeout secs.\n";
   }
 
-  if ($response =~ /Positive $sig/) { return 1; }
+  if ($response) { return 1; }
   return 0;
 }
 
@@ -200,7 +174,9 @@ sub lookup_mx {
   eval '
     if (mx ($self->{res}, $dom)) { $ret = 1; }
     1;
-  ' or die "MX lookup died: $@ $!\n";
+  ' or sa_die (71, "MX lookup died: $@ $!\n");
+  # 71 == EX_OSERR.  MX lookups are not supposed to crash and burn!
+
   dbg ("MX for '$dom' exists? $ret");
 
   return $ret;

@@ -50,6 +50,7 @@ sub new {
   $self->{auto_report_threshold} = 20;
   $self->{report_template} = '';
   $self->{spamtrap_template} = '';
+  $self->{razor_config} = $ENV{'HOME'}."/razor.conf";
 
   $self->{whitelist_from} = [ ];
 
@@ -107,6 +108,10 @@ sub parse_rules {
       $self->{spamtrap_template} .= $1."\n"; next;
     }
 
+    if (/^razor-config\s*(.*)\s*$/) {
+      $self->{razor_config} = $1; next;
+    }
+
     if (/^whitelist_from\s+(\S+)\s*$/) {
       push (@{$self->{whitelist_from}}, $1); next;
     }
@@ -141,13 +146,17 @@ sub finish_parsing {
     elsif ($type == $type_body_evals) { $self->{body_evals}->{$name} = $text; }
     elsif ($type == $type_full_tests) { $self->{full_tests}->{$name} = $text; }
     elsif ($type == $type_full_evals) { $self->{full_evals}->{$name} = $text; }
-    else { die "unknown type $type for $name: $text"; }
+    else {
+      # 70 == SA_SOFTWARE
+      sa_die (70, "unknown type $type for $name: $text");
+    }
   }
 
   $self->{tests} = { };		# free it up
 }
 
 sub dbg { Mail::SpamAssassin::dbg (@_); }
+sub sa_die { Mail::SpamAssassin::sa_die (@_); }
 
 ###########################################################################
 

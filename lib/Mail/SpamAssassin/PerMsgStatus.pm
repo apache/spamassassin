@@ -833,6 +833,7 @@ sub work_out_local_domain {
 }
 
 sub dbg { Mail::SpamAssassin::dbg (@_); }
+sub sa_die { Mail::SpamAssassin::sa_die (@_); }
 
 ###########################################################################
 

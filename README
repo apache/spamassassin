@@ -5,18 +5,19 @@ Welcome to SpamAssassin!
 SpamAssassin is a mail filter which attempts to identify spam using text
 analysis and several internet-based realtime blacklists.
 
-Using its rule base, it uses a wide range of heuristic tests on mail headers
-and body text to identify "spam", also known as unsolicited commercial email.
+Using its rule base, it uses a wide range of heuristic tests on mail
+headers and body text to identify "spam", also known as unsolicited
+commercial email.
 
 Once identified, the mail can then be optionally tagged as spam for later
 filtering using the user's own mail user-agent application.
 
-In its most recent test, SpamAssassin differentiated between spam and non-spam
-mail correctly in 99.94% of cases.
+In its most recent test, SpamAssassin differentiated between spam and
+non-spam mail correctly in 99.94% of cases.
 
-SpamAssassin also includes support for reporting spam messages automatically,
-and/or manually, to collaborative filtering databases such as Vipul's Razor
-[1].
+SpamAssassin also includes support for reporting spam messages
+automatically, and/or manually, to collaborative filtering databases such
+as Vipul's Razor [1].
 
 	[1]: http://razor.sourceforge.net/
 
@@ -29,11 +30,11 @@ POP/IMAP server.
 SpamAssassin lives at http://spamassassin.taint.org/ or in CPAN, and is
 distributed under Perl's Artistic license.
 
-This module owes a lot of inspiration to Mark Jeftovic's filter.plx, which I
-contributed some code to (and used, of course).  However, SpamAssassin is a
-ground-up rewrite with a new, improved ruleset, and a different code model and
-installation system, and hopefully will be easy to adapt for a multitude of
-applications.
+This module owes a lot of inspiration to Mark Jeftovic's filter.plx, which
+I contributed some code to (and used, of course).  However, SpamAssassin
+is a ground-up rewrite with a new, improved ruleset, and a different code
+model and installation system, and hopefully will be easy to adapt for a
+multitude of applications.
 
 	[2]: http://AntiSpam.shmOOze.net/filter/
 
@@ -57,19 +58,19 @@ http://spamassassin.taint.org/ and install that like so:
 	make
 	make install				[as root]
 
-You will require the Mail::Audit module, and any modules it requires.  Here's
-how to install this using CPAN.pm:
+You will require the Mail::Audit module, and any modules it requires.
+Here's how to install this using CPAN.pm:
 
 	perl -MCPAN -e shell
 	o conf prerequisites_policy ask
 	install Mail::Audit
 	quit
 
-There is a problem with Mail::Audit versions up to and including 1.9, which
-will cause mail to be rewritten as it passes through Mail::Audit.  SpamAssassin
-will still work OK, although some aspects (Razor matching in particular) may
-not provide any hits as a result, and the "strip2" test in the SpamAssassin
-test suite will fail.
+There is a problem with Mail::Audit versions up to and including 1.9,
+which will cause mail to be rewritten as it passes through Mail::Audit.
+SpamAssassin will still work OK, although some aspects (Razor matching in
+particular) may not provide any hits as a result, and the "strip2" test in
+the SpamAssassin test suite will fail.
 
 A patch has been submitted to the author of Mail::Audit, so hopefully the
 next version will work OK.  In the meantime, you may wish to apply the
@@ -81,14 +82,16 @@ case.
 Optional Additional Modules
 ---------------------------
 
-In addition, the following modules will be used for some checks, if available.
-If they are not available, SpamAssassin will still work, just not as
-effectively -- some of the spam-detection tests will have to be skipped.
+In addition, the following modules will be used for some checks, if
+available.  If they are not available, SpamAssassin will still work, just
+not as effectively -- some of the spam-detection tests will have to be
+skipped.
 
 
   - Net::DNS	(from CPAN)
 
     Used to check the RBL, RSS, DUL etc. and perform MX checks.
+    Recommended.
 
 	perl -MCPAN -e shell
 	o conf prerequisites_policy ask
@@ -102,13 +105,14 @@ effectively -- some of the spam-detection tests will have to be skipped.
     available from CPAN -- you have to download it from the URL above.
 
     Note that Razor itself requires several perl modules; at the time of
-    writing, these are Persistence::Object::Simple, Net::Daemon, Digest::SHA1,
-    and Mail::Internet:
+    writing, these are Persistence::Object::Simple, Digest::SHA1,
+    Time::HiRes, Net::Ping, and Mail::Internet:
 
 	perl -MCPAN -e shell
 	o conf prerequisites_policy ask
 	install Persistence::Object::Simple
-	install Net::Daemon
+	install Net::Ping
+	install Time::HiRes
 	install Digest::SHA1
 	install Mail::Internet			[this may already be installed]
 	quit
@@ -121,7 +125,8 @@ Using SpamAssassin
 
 Steps to take for every installation:
 
-  - Install Mail::Audit and Mail::SpamAssassin on your mail server, as above.
+  - Install Mail::Audit and Mail::SpamAssassin on your mail server, as
+    above.
 
   - Test it:
 
@@ -130,19 +135,19 @@ Steps to take for every installation:
 
     Verify (using a text viewer, ie. "less" or "notepad") that nonspam.out
     has not been tagged as spam, and that spam.out has.  The files should
-    contain the full text and headers of the messages, the "spam.out" message
-    should be annotated with "****SPAM****" in the subject line and a report
-    from SpamAssassin, and there should be no errors when you run the
-    commands.
+    contain the full text and headers of the messages, the "spam.out"
+    message should be annotated with "****SPAM****" in the subject line
+    and a report from SpamAssassin, and there should be no errors when you
+    run the commands.
 
     Even though sample-nonspam.txt is not spam, nonspam.out will contain a
     SpamAssassin report anyway.  This is a side-effect of the "-t" (test)
-    switch.  However, there should be less than 5 hits accumulated; when the
-    "-t" switch is not in use, the report text would not be added.
+    switch.  However, there should be less than 5 hits accumulated; when
+    the "-t" switch is not in use, the report text would not be added.
 
-    (Also, if you use Perl 5.6, there may be a warning from Perl's -w switch
-    about a deprecated usage in Net::DNS; this is totally harmless, but ugly.
-    Until Net::DNS is fixed this is unavoidable. :( )
+    (Also, if you use Perl 5.6, there may be a warning from Perl's -w
+    switch about a deprecated usage in Net::DNS; this is totally harmless,
+    but ugly.  Until Net::DNS is fixed this is unavoidable. :( )
 
     If the commands do not work, DO NOT PROCEED TO THE NEXT STEP, as you
     will lose mail!
@@ -179,9 +184,9 @@ If you're using procmail:
     That'll process all mail through SA, and refile spam messages to
     a folder called "caughtspam" in your home directory.
 
-  - Send yourself a mail message, and ensure it gets to you.  If it does not,
-    copy your old backed-up .procmailrc file back into place and ask your
-    sysadmin for help!  Here's commands to do that:
+  - Send yourself a mail message, and ensure it gets to you.  If it does
+    not, copy your old backed-up .procmailrc file back into place and ask
+    your sysadmin for help!  Here's commands to do that:
 
       cp ~/.procmailrc.bak ~/.procmailrc
       echo "Help!" | mail root
@@ -198,9 +203,9 @@ If you don't use any mail filter just yet:
 
       "| spamassassin || exit 75"
 
-  - Send yourself a mail message, and ensure it gets to you.  If it does not,
-    copy your old backed-up .forward file back into place and ask your
-    sysadmin for help!  Here's commands to do that:
+  - Send yourself a mail message, and ensure it gets to you.  If it does
+    not, copy your old backed-up .forward file back into place and ask
+    your sysadmin for help!  Here's commands to do that:
 
       cp ~/.forward.bak ~/.forward
       echo "Help!" | mail root
@@ -212,22 +217,32 @@ Other installation notes:
   - If you get spammed, it is helpful to everyone else if you re-run
     spamassassin with the "-r" option to report the message in question as
     "verified spam".  This will add it to Vipul's Razor
-    (http://razor.sourceforge.net/), a collaborative spam filtering network.
+    (http://razor.sourceforge.net/), a collaborative spam filtering
+    network.
 
       spamassassin -r < spam-message
 
-    If you use mutt as your mail reader, this macro will bind the X key
-    to report a spam message.
+    If you use mutt as your mail reader, this macro will bind the X key to
+    report a spam message.
 
       macro index X "| spamassassin -r"
 
     This is, of course, optional -- but you'll get lots of good-netizen
     karma. ;)
 
+
   - Quite often, if you've been on the internet for a while, you'll have
-    accumulated a few old email accounts that nowadays get nothing but spam.
-    You can set these up as spam traps using SpamAssassin; see the ''SPAM
-    TRAPPING'' section of the spamassassin manual page for details.
+    accumulated a few old email accounts that nowadays get nothing but
+    spam.  You can set these up as spam traps using SpamAssassin; see the
+    ''SPAM TRAPPING'' section of the spamassassin manual page for details.
+
+    If you don't want to go to the bother of setting up a system yourself
+    to do this, feel free to set up a simple alias to forward any mails to
+    <someaddress@spamtraps.taint.org> -- replace "someaddress" with
+    something to identify you, such as your email addr or website with
+    non-alphanumeric chars replaced by underscores, or similar.   This
+    will feed it into my spam-trapping system running on taint.org, where
+    it will be fed into Razor.
 
 
 Customising
@@ -237,24 +252,25 @@ When installing SpamAssassin, the configuration files defining the list of
 rules and the default user preferences are written to INSTALLSITELIB, or
 /usr/lib/perl5/site_perl/5.005 (or similar) on a typical UNIX system.
 
-Users who run "spamassassin" will receive a copy of the user preferences in
-their home directories as the file "~/.spamassassin.cf".  This allows them to
-edit their preferences and reweight the rules, or to increase or decrease the
-"line in the sand" at which point a mail is judged spam (or not).
+Users who run "spamassassin" will receive a copy of the user preferences
+in their home directories as the file "~/.spamassassin.cf".  This allows
+them to edit their preferences and reweight the rules, or to increase or
+decrease the "line in the sand" at which point a mail is judged spam (or
+not).
 
 Systems administrators can edit the
-"/usr/lib/perl5/site_perl/5.005/spamfilter.cf" file to add new rules for all
-users on the system, or they can edit
-"/usr/lib/perl5/site_perl/5.005/spamfilter.prefs" to set default preferences
-for the users.  Note that the "/usr/lib/perl5/site_perl/5.005" path changes,
-depending on your OS and the version of perl you have installed
-(unfortunately).
+"/usr/lib/perl5/site_perl/5.005/spamfilter.cf" file to add new rules for
+all users on the system, or they can edit
+"/usr/lib/perl5/site_perl/5.005/spamfilter.prefs" to set default
+preferences for the users.  Note that the "/usr/lib/perl5/site_perl/5.005"
+path changes, depending on your OS and the version of perl you have
+installed (unfortunately).
 
 These paths are pretty ugly, but since SpamAssassin uses Perl's
-Makefile-building system for portability and compatibility with CPAN, they're
-currently unavoidable.  However, if you prefer, you can move these files into
-/etc after installation, and SpamAssassin will pick them up from there
-instead.
+Makefile-building system for portability and compatibility with CPAN,
+they're currently unavoidable.  However, if you prefer, you can move these
+files into /etc after installation, and SpamAssassin will pick them up
+from there instead.
 
 There is no difference in interpretation between the rules file and the
 preferences file, so users can add new rules for their own use in the
@@ -264,44 +280,44 @@ preferences file, so users can add new rules for their own use in the
 Locali[sz]ation
 ---------------
 
-All text displayed to users is taken from the configuration files.  This means
-that you can translate messages, test descriptions, and templates into other
-languages.
+All text displayed to users is taken from the configuration files.  This
+means that you can translate messages, test descriptions, and templates
+into other languages.
 
-If you do so, I would *really* appreciate if you could send a copy back of the
-updated messages; mail them to <spamassassin-talk@lists.sourceforge.net> .
-Hopefully if it takes off, I can add them to the distribution as "official"
-translations and build in support for this.  You will, of course, get credited
-for this work ;)
+If you do so, I would *really* appreciate if you could send a copy back of
+the updated messages; mail them to
+<spamassassin-talk@lists.sourceforge.net> .  Hopefully if it takes off, I
+can add them to the distribution as "official" translations and build in
+support for this.  You will, of course, get credited for this work ;)
 
 
 Help With SpamAssassin
 ----------------------
 
-There's a mailing list for support or discussion of SpamAssassin.  It lives at
-<spamassassin-talk@lists.sourceforge.net>.  See
-http://spamassassin.taint.org/lists.html for the sign-up address and a link to
-the archive of past messages.
+There's a mailing list for support or discussion of SpamAssassin.  It
+lives at <spamassassin-talk@lists.sourceforge.net>.  See
+http://spamassassin.taint.org/lists.html for the sign-up address and a
+link to the archive of past messages.
 
 
 Commercial Tests
 ----------------
 
-There are several tests in the spamassassin configuration file which are turned
-off by default, namely the mail-abuse.org and bl.spamcop.net tests.  The
-mail-abuse.org tests are RCVD_IN_RBL, RCVD_IN_RSS, and RCVD_IN_DUL; the
-bl.spamcop.net test is called RCVD_IN_BL_SPAMCOP_NET.
+There are several tests in the spamassassin configuration file which are
+turned off by default, namely the mail-abuse.org and bl.spamcop.net tests.
+The mail-abuse.org tests are RCVD_IN_RBL, RCVD_IN_RSS, and RCVD_IN_DUL;
+the bl.spamcop.net test is called RCVD_IN_BL_SPAMCOP_NET.
 
 These are both commercial services, so you need to pay money to use them.
-Having said that, the bl.spamcop.net service gets my vote as the most useful
-blacklisting DNS service I've found -- consider this a recommendation!  More
-information on the spamcop blacklisting service can be found at
-http://spamcop.net/bl.shtml .
+Having said that, the bl.spamcop.net service gets my recommendation as the
+most useful blacklisting DNS service I've found.  More information on it
+can be found at http://spamcop.net/bl.shtml .
 
-The mail-abuse.org tests are free for personal use -- at the moment, so if
-you're using SpamAssassin as a personal mail filter you may turn them on.  More
-information on the mail-abuse.org services can be found here:
-http://mail-abuse.org/rbl+/ and http://www.mail-abuse.org/feestructure.html .
+The mail-abuse.org tests are free for personal use, for now -- so if
+you're using SpamAssassin as a personal mail filter you may turn them on.
+More information on the mail-abuse.org services can be found here:
+http://mail-abuse.org/rbl+/ and
+http://www.mail-abuse.org/feestructure.html .
 
 To turn on the tests, simply assign them a non-zero score, e.g. by adding
 these lines to your ~/.spamassassin.cf file:
@@ -312,3 +328,7 @@ these lines to your ~/.spamassassin.cf file:
     score RCVD_IN_BL_SPAMCOP_NET    4
 
 
+
+(end of README)
+
+// vim:tw=74:
