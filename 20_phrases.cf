@@ -285,11 +285,13 @@ describe THIS_IS_AN_AD		Says "this is an advertisement" (thanks!)
 # "inches", because that seems to be another typical word in the pattern.
 # Feb 11 2003 jm: removed "PP" from pattern, since "pp. 234-237" is std usage
 # in academic circles.  I don't think the hit-rate will be affected. ;)
-body PENIS_ENLARGE		/\b(?:enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b|\binches\b).{0,50}\b(?:penis|male organ|pee[ -]?pee|dick|sc?hlong|wh?anger|breast)/i
-describe PENIS_ENLARGE		Information on getting larger penis/breasts
+# Feb 18 2004 rap: Changed rule name PENIS_ENLARGE to BODY_ENHANCEMENT. Some found the
+# old rule name offensive.
+body BODY_ENHANCEMENT		/\b(?:enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b|\binches\b).{0,50}\b(?:penis|male organ|pee[ -]?pee|dick|sc?hlong|wh?anger|breast)/i
+describe BODY_ENHANCEMENT		Information on growing body parts
 
-body PENIS_ENLARGE2		/\b(?:penis|male organ|pee[ -]?pee|dick|sc?hlong|wh?anger|breast).{0,50}\b(?:enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b|\binches\b)/i
-describe PENIS_ENLARGE2		Information on getting larger penis/breasts
+body BODY_ENHANCEMENT2		/\b(?:penis|male organ|pee[ -]?pee|dick|sc?hlong|wh?anger|breast).{0,50}\b(?:enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b|\binches\b)/i
+describe BODY_ENHANCEMENT2		Information on getting larger body parts
 
 body     IMPOTENCE              /\b(?:impotence (?:problem|cure|solution)|Premature Ejaculation|erectile dysfunction)/i
 describe IMPOTENCE              Impotence cure
