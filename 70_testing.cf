@@ -245,10 +245,6 @@ header T_RCVD_IN_SBL		eval:check_rbl_sub('xsblxbl-firsttrusted', '127.0.0.2')
 describe T_RCVD_IN_SBL		Received via a relay in Spamhaus SBL
 tflags T_RCVD_IN_SBL		net
 
-header T_RCVD_IN_RFC_IPWHOIS		eval:check_rbl_txt('xrfci-firsttrusted', 'ipwhois.rfc-ignorant.org.')
-describe T_RCVD_IN_RFC_IPWHOIS		Sent via a relay in ipwhois.rfc-ignorant.org
-tflags T_RCVD_IN_RFC_IPWHOIS		net
-
 header T_RCVD_IN_BL_SPAMCOP_NET	eval:check_rbl_txt('xspamcop-firsttrusted', 'bl.spamcop.net.')
 describe T_RCVD_IN_BL_SPAMCOP_NET	Received via a relay in bl.spamcop.net
 tflags T_RCVD_IN_BL_SPAMCOP_NET	net
