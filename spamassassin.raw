@@ -453,10 +453,11 @@ This may not be what you want to do.  If it is not, then don't use B<-a -t>.
 
 =item B<-r>, B<--report>
 
-Report this message as verified spam.  This will submit the mail message read
-from STDIN to various spam-blocker databases.  Currently, these are Vipul's
-Razor ( http://razor.sourceforge.net/ ), the Distributed Checksum
-Clearinghouse ( http://www.rhyolite.com/anti-spam/dcc/ ), and Pyzor.
+Report this message as verified spam.  This will submit the mail message
+read from STDIN to various spam-blocker databases.  Currently, these are
+Vipul's Razor ( http://razor.sourceforge.net/ ), the Distributed Checksum
+Clearinghouse ( http://www.rhyolite.com/anti-spam/dcc/ ), and Pyzor (
+http://pyzor.sourceforge.net/ ).
 
 If the message contains SpamAssassin markup, this will be stripped out
 automatically before submission.  The support modules for DCC, Razor
@@ -471,11 +472,10 @@ C<sa-learn> command directly instead.)
 =item B<-k>, B<--revoke>
 
 Revoke this message.  This will revoke the mail message read from STDIN from
-various spam-blocker databases.  Currently, these are Vipul's Razor (
-http://razor.sourceforge.net/ ).
+various spam-blocker databases.  Currently, these are Vipul's Razor.
 
-Revocation support for the Distributed Checksum Clearinghouse (
-http://www.rhyolite.com/anti-spam/dcc/ ), and Pyzor is not currently available.
+Revocation support for the Distributed Checksum Clearinghouse, and Pyzor
+is not currently available.
 
 If the message contains SpamAssassin markup, this will be stripped out
 automatically before submission.  The support modules for Razor must be
