@@ -33,7 +33,7 @@ describe WWW_CLIK4YOU_COM       Frequent SPAM content
 uri STAINLESS_STEEL             /www.BuyStainlessOnline.com/i
 describe STAINLESS_STEEL        Stainless Steel Network Spam
 
-uri UNSUB_SCRIPT        /^https?:\/\/.*?cgi.*?(unsubscribe|remove)/i
+uri UNSUB_SCRIPT        /^https?:\/\/.*?cgi.*?(?:unsubscribe|remove)/i
 describe UNSUB_SCRIPT       URL of CGI script called "unsubscribe" or "remove"
 
 uri UNSUB_PAGE      /^https?:\/\/.*?(?!cgi).*?unsubscribe/i

@@ -24,7 +24,7 @@ describe FROM_NO_USER		From: has no local-part before @ sign
 header TO_NO_USER		To =~ /(?:^\@|<\@| \@[^<]*$|<>)/ [if-unset: unset@unset.unset]
 describe TO_NO_USER		To: has no local-part before @ sign
 
-header TO_MALFORMED		To !~ /(?:(?:\"[^\"]+\"|\S+)\@\S+\.\S+|undisclosed-recipients:|<\S+(\!\S+){1,}>|^\s*$)/ [if-unset: unset@unset.unset]
+header TO_MALFORMED		To !~ /(?:(?:\"[^\"]+\"|\S+)\@\S+\.\S+|undisclosed-recipients:|<\S+(?:\!\S+){1,}>|^\s*$)/ [if-unset: unset@unset.unset]
 describe TO_MALFORMED		To: has a malformed address
 
 header TO_HAS_SPACES            To:addr =~ /\s/
@@ -48,13 +48,13 @@ describe TO_ADDRESS_EQ_REAL	To: repeats address as real name
 header UNDISC_RECIPS		To =~ /^undisclosed-recipients?:\s*;$/
 describe UNDISC_RECIPS		Valid-looking To "undisclosed-recipients"
 
-header FAKED_UNDISC_RECIPS	To =~ /Undisclosed.*Recipient(s[^:]|[^s])/i
+header FAKED_UNDISC_RECIPS	To =~ /undisclosed[-_ ]*recipient(?:s[^:]|[^s])/i
 describe FAKED_UNDISC_RECIPS	Faked To "Undisclosed-Recipients"
 
 header TO_INVESTORS		To =~ /\bInvestors\@/
 describe TO_INVESTORS		To: non-existent 'Investors' address
 
-header FROM_MALFORMED		From !~ /(?:\"[^\"]+\"|\S+)\@\S+\.\S+|<\S+(\!\S+){1,}>/ [if-unset: unset@unset.unset]
+header FROM_MALFORMED		From !~ /(?:\"[^\"]+\"|\S+)\@\S+\.\S+|<\S+(?:\!\S+){1,}>/ [if-unset: unset@unset.unset]
 describe FROM_MALFORMED		From: has a malformed address
 
 header PLING_PLING		Subject =~ /!!!/
@@ -105,7 +105,7 @@ describe INVALID_DATE		Invalid Date: header (not RFC 2822)
 header INVALID_DATE_TZ_ABSURD	Date =~ /[-+](?:1[4-9]\d\d|[2-9]\d\d\d)$/
 describe INVALID_DATE_TZ_ABSURD	Invalid Date: header (timezone does not exist)
 
-header DATE_YEAR_ZERO_FIRST	Date =~ /[a-z]\s+0\d\d\d(\s|$)/
+header DATE_YEAR_ZERO_FIRST	Date =~ /[nbrylgptvc]\s+0\d\d\d(?:\s|$)/
 describe DATE_YEAR_ZERO_FIRST	Invalid Date: year begins with zero
 
 header DATE_IN_PAST_03_06	eval:check_for_shifted_date('-6', '-3')
@@ -144,7 +144,7 @@ describe DATE_IN_FUTURE_48_96	Date: is 48 to 96 hours after Received: date
 header DATE_IN_FUTURE_96_XX	eval:check_for_shifted_date('96', 'undef')
 describe DATE_IN_FUTURE_96_XX	Date: is 96 hours or more after Received: date
 
-header ADVERT_CODE		Subject =~ /(^\s*|\s+)ADV([\s:-]|$)/i
+header ADVERT_CODE		Subject =~ /(?:^\s*|\s+)ADV(?:[\s:-]|$)/i
 describe ADVERT_CODE		Subject: contains advertising tag
 
 # Korean UCE Subject: lines are usually 8-bit, but are occasionally encoded
@@ -162,10 +162,10 @@ describe ADVERT_CODE		Subject: contains advertising tag
 header KOREAN_UCE_SUBJECT	Subject =~ /[({[<][. ]*(?:\xbc\xba[. ]*\xc0\xce[. ]*)?(?:\xb1\xa4(?:[. ]*|[\x00-\x7f]{0,3})\xb0\xed|\xc1\xa4[. ]*\xba\xb8|\xc8\xab[. ]*\xba\xb8)[. ]*[)}\]>]/
 describe KOREAN_UCE_SUBJECT	Subject: contains Korean unsolicited email tag
 
-header FRIEND_AT_PUBLIC         To =~ /(yourdomain|you|your|public).(com|org|net)/i
+header FRIEND_AT_PUBLIC         To =~ /(?:yourdomain|you|your|public)\.(?:com|org|net)/i
 describe FRIEND_AT_PUBLIC	sent to you@you.com or similar
 
-header DOMAIN_SUBJECT		Subject =~ /(\s(\.|dot\s+)(info|biz|name)|domain)\b.*(extension|info|regist(ry|ration|er)|submission)/i
+header DOMAIN_SUBJECT		Subject =~ /(?:\s(?:\.|dot\s+)(?:info|biz|name)|domain)\b.*\b(?:extension|info|regist(?:ry|ration|er)|submission)/i
 describe DOMAIN_SUBJECT		Subject: domain registration spam subject
 
 header ALL_CAPS_HEADER		ALL =~ /\n(?:TO|FROM|SUBJECT|DATE):/s
