@@ -16,7 +16,9 @@ mv spam.sonic nonspam.sonic logs/old
 
 ./mass-check /home/jm/corpus/kelsey.spamtrap.gz > spam.sonic
 ./mass-check /home/jm/corpus/spam.2000-2001.gz >> spam.sonic
-: > nonspam.sonic
+./mass-check /home/jm/corpus/spamtrap.200108-200201.gz >> spam.sonic
+
+> nonspam.sonic
 
 echo "
 
