@@ -122,6 +122,7 @@ sub cmdline_run {
     die $failure;
   }
 
+  $spamtest->finish_learner();
   return 0;
 }
 

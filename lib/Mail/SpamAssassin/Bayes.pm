@@ -146,17 +146,18 @@ use constant ROBINSON_X_CONSTANT => 0.43;
 # trust collected data more strongly.
 use constant ROBINSON_S_CONSTANT => 0.53;
 
+# Should we ignore tokens with probs very close to the middle ground (.5)?
+# tokens need to be outside the [ .5-MPS, .5+MPS ] range to be used.
+use constant ROBINSON_MIN_PROB_STRENGTH => 0.36;
+
 # note: these seem to work well for Gary-combining.
 #use constant ROBINSON_X_CONSTANT => 0.6;
-#use constant ROBINSON_S_CONSTANT => 0.1;
+#use constant ROBINSON_S_CONSTANT => 0.16;
+#use constant ROBINSON_MIN_PROB_STRENGTH => 0.43;
 
 # How many of the most significant tokens should we use for the p(w)
 # calculation?
 use constant N_SIGNIFICANT_TOKENS => 150;
-
-# Should we ignore tokens with probs very close to the middle ground (.5)?
-# tokens need to be outside the [ .5-MPS, .5+MPS ] range to be used.
-use constant ROBINSON_MIN_PROB_STRENGTH => 0.27;
 
 # How long a token should we hold onto?  (note: German speakers typically
 # will require a longer token than English ones.)
@@ -212,6 +213,12 @@ sub new {
     'already_tied'      => 0,
     'is_locked'         => 0,
     'log_raw_counts'	=> 0,
+
+    # Off. See comment above cached_probs_get().
+    #'cached_probs'	=> { },
+    #'cached_probs_ns'	=> 0,
+    #'cached_probs_nn'	=> 0,
+
   };
   bless ($self, $class);
 
@@ -290,6 +297,7 @@ sub tie_db_writable {
   my $lock_tries = 30;
 
   open(LTMP, ">$lock_tmp") || die "Cannot create tmp lockfile $lock_file : $!\n";
+  dbg ("bayes: created $lock_tmp");
   my $old_fh = select(LTMP);
   $|=1;
   select($old_fh);
@@ -298,12 +306,14 @@ sub tie_db_writable {
     dbg("bayes: $$ trying to get lock on $path pass $i");
     print LTMP $self->{hostname}.".$$\n";
     if ( link ($lock_tmp,$lock_file) ) {
+      dbg ("bayes: link to $lock_file ok");
       $self->{is_locked} = 1;
       last;
 
     } else {
       #link _may_ return false even if the link _is_ created
       if ( (stat($lock_tmp))[3] > 1 ) {
+	dbg ("bayes: link to $lock_file: stat ok");
 	$self->{is_locked} = 1;
 	last;
       }
@@ -313,7 +323,7 @@ sub tie_db_writable {
       my $now = (stat($lock_tmp))[10];
       if (!defined($lock_age) || $lock_age < $now - $max_lock_age) {
 	#we got a stale lock, break it
-	dbg("bayes: $$ breaking stale lockfile!");
+	dbg("bayes: breaking stale lockfile: age=$lock_age now=$now");
 	unlink "$lock_file";
       }
       sleep(1);
@@ -321,6 +331,7 @@ sub tie_db_writable {
   }
   close(LTMP);
   unlink($lock_tmp);
+  dbg ("bayes: unlinked $lock_tmp");
 
   foreach my $dbname (@DBNAMES) {
     my $name = $path.'_'.$dbname;
@@ -816,9 +827,17 @@ sub compute_prob_for_token {
     return if ($s + $n < 2);
   }
 
+  my $prob;
+
+  # Off. See comment above cached_probs_get().
+  #use constant CACHE_S_N_TO_PROBS_MAPPING => 1;
+  #if (CACHE_S_N_TO_PROBS_MAPPING) {
+  #$prob = $self->cached_probs_get ($ns, $nn, $s, $n);
+  #if (defined $prob) { return $prob; }
+  #}
+
   my $ratios = ($s / $ns);
   my $ration = ($n / $nn);
-  my $prob;
 
   if ($ratios == 0 && $ration == 0) {
     warn "oops? ratios == ration == 0";
@@ -839,7 +858,11 @@ sub compute_prob_for_token {
     $self->{raw_counts} .= " s=$s,n=$n ";
   }
 
-  #$self->{db_probs}->{"$s:$n"} = pack ('f', $prob);
+  # Off. See comment above cached_probs_get().
+  #if (CACHE_S_N_TO_PROBS_MAPPING) {
+  #$self->cached_probs_put ($ns, $nn, $s, $n, $prob);
+  #}
+
   return $prob;
 }
 
@@ -854,6 +877,41 @@ sub precompute_robinson_constants {
   # and then use the average."
 
   $self->{robinson_s_dot_x} = (ROBINSON_X_CONSTANT * ROBINSON_S_CONSTANT);
+}
+
+###########################################################################
+# An in-memory cache of { nspam, nham } => probability.
+# Off for now: this actually slows things down by about 7%, while
+# increasing memory usage!
+
+sub cached_probs_get {
+  my ($self, $ns, $nn, $s, $n) = @_;
+
+  my $prob;
+  my $shash = $self->{cached_probs}->{$s}; if (!defined $shash) { return undef; }
+  $prob = $shash->{$n}; if (!defined $prob) { return undef; }
+  return $prob;
+}
+
+sub cached_probs_put {
+  my ($self, $ns, $nn, $s, $n, $prob) = @_;
+
+  if (exists $self->{cached_probs}->{$s}) {
+    $self->{cached_probs}->{$s}->{$n} = $prob;
+  } else {
+    $self->{cached_probs}->{$s} = { $n => $prob };
+  }
+}
+
+sub check_for_cached_probs_invalidated {
+  my ($self, $ns, $nn) = @_;
+  if ($self->{cached_probs_ns} != $ns || $self->{cached_probs_nn} != $nn) {
+    $self->{cached_probs} = { };	# blow away the old one
+    $self->{cached_probs_ns} = $ns;
+    $self->{cached_probs_nn} = $nn;
+    return 1;
+  }
+  return 0;
 }
 
 ###########################################################################
@@ -887,6 +945,11 @@ sub scan {
   my ($wc, @tokens) = $self->tokenize ($msg, $body);
   my %seen = ();
   my $pw;
+
+  # Off. See comment above cached_probs_get().
+  #if (CACHE_S_N_TO_PROBS_MAPPING) {
+  #$self->check_for_cached_probs_invalidated($ns, $nn);
+  #}
 
   my %pw = map {
     if ($seen{$_}) {
