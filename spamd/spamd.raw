@@ -2000,7 +2000,7 @@ sub daemonize {
   # Now we can redirect the errors, too.
   open STDERR, '>&STDOUT' or die "Can't duplicate stdout: $!\n";
 
-  dbg('daemon: daemonized.');
+  dbg("daemon: successfully daemonized");
 }
 
 sub set_allowed_ip {
