@@ -137,8 +137,12 @@ meta T_HTML_FAKED_QUALCOMM	(__ANY_QUALCOMM_MUA && __MIME_HTML && !__TAG_EXISTS_H
 rawbody T_BASE64_ENC_TEXT		eval:check_for_mime('t_mime_base64_encoded_text')
 
 # 2003-03-06: quinlan
-rawbody T_MIME_BASE64_WITHOUT_NAME	eval:check_for_mime('t_mime_base64_without_name')
+rawbody T_MIME_BASE64_BLANKS		eval:check_for_mime('t_mime_base64_blanks')
+rawbody T_MIME_BASE64_ILLEGAL		eval:check_for_mime('t_mime_base64_illegal')
 rawbody T_MIME_BASE64_ISO_8859		eval:check_for_mime('t_mime_base64_iso_8859')
+rawbody T_MIME_BASE64_NO_BLANK		eval:check_for_mime('t_mime_base64_no_blank')
+rawbody T_MIME_BASE64_SHORT_LINES	eval:check_for_mime('t_mime_base64_short_lines')
+rawbody T_MIME_BASE64_WITHOUT_NAME	eval:check_for_mime('t_mime_base64_without_name')
 
 # 2003-02-28: quinlan
 # Note: I'll probably rename these later if they get added.
@@ -259,14 +263,18 @@ header T_HEADER_COUNT_BAD_DATE		eval:check_header_count_range('Date','2','999')
 header T_HEADER_COUNT_BAD_FROM		eval:check_header_count_range('From','2','999')
 header T_HEADER_COUNT_BAD_SENDER	eval:check_header_count_range('Sender','2','999')
 header T_HEADER_COUNT_BAD_REPLYTO	eval:check_header_count_range('Reply-To','2','999')
-header T_HEADER_COUNT_BAD_TO		eval:check_header_count_range('To','2','999')
-header T_HEADER_COUNT_BAD_CC		eval:check_header_count_range('Cc','2','999')
-header T_HEADER_COUNT_BAD_BCC		eval:check_header_count_range('Bcc','2','999')
 header T_HEADER_COUNT_BAD_MESSAGEID	eval:check_header_count_range('Message-Id','2','999')
 header T_HEADER_COUNT_BAD_INREPLYTO	eval:check_header_count_range('In-Reply-To','2','999')
 header T_HEADER_COUNT_BAD_REFERENCES	eval:check_header_count_range('References','2','999')
 header T_HEADER_COUNT_BAD_SUBJECT	eval:check_header_count_range('Subject','2','999')
-# There doesn't seem to be a RFC restriction, but these should only show up once in ham
+# multiple To/Cc/Bcc headers are obsolete in RFC 2822, but they are still
+# frequently used and RFC 2822 says they should still be supported.  Cc:
+# generates many false positives.
+header T_HEADER_COUNT_BAD_TO		eval:check_header_count_range('To','2','999')
+header T_HEADER_COUNT_BAD_CC		eval:check_header_count_range('Cc','2','999')
+header T_HEADER_COUNT_BAD_BCC		eval:check_header_count_range('Bcc','2','999')
+# There doesn't seem to be a RFC restriction, but these should only show up
+# once in ham
 header T_HEADER_COUNT_BAD_CTYPE		eval:check_header_count_range('Content-Type','2','999')
 header T_HEADER_COUNT_BAD_CTE		eval:check_header_count_range('Content-Transfer-Encoding','2','999')
 
