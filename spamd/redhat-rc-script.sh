@@ -32,7 +32,7 @@ case "$1" in
   start)
 	# Start daemon.
 	echo -n "Starting spamd: "
-	daemon spamd $SPAMDOPTIONS
+	daemon $NICELEVEL spamd $SPAMDOPTIONS
 	RETVAL=$?
         echo
         [ $RETVAL = 0 ] && touch /var/lock/subsys/spamassassin
