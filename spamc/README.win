@@ -62,7 +62,7 @@ panel. The variable is named
 
 and set it to
 
-SPAMD_SCRIPT=start \cygwin\bin\perl -w -T /bin/spamd -x -s stderr --syslog-socket none
+SPAMD_SCRIPT=\cygwin\bin\perl -w -T /bin/spamd
 
 where "\cygwin\bin\perl" is the path of the Cygwin perl executable
 file in the Windows directory system, and "/bin/spamd" is the path of

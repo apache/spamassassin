@@ -277,9 +277,11 @@ sub start_spamd {
   my $spamd_stdout = "log/$testname-spamd.out";
   my $spamd_stderr = "log/$testname-spamd.err";
   my $spamd_stdlog = "log/$testname-spamd.log";
-  my $spamd_forker = $ENV{'SPAMD_FORKER'} ?
-                     $ENV{'SPAMD_FORKER'} :
-                     $perl_path;
+  my $spamd_forker = $ENV{'SPAMD_FORKER'}   ?
+                       $ENV{'SPAMD_FORKER'} :
+		     $RUNNING_ON_WINDOWS    ?
+		       "start $perl_path"   :
+                       $perl_path;
   my $spamd_cmd    = join(' ',
                        $spamd_forker,
                        qq{SATest.pl},
