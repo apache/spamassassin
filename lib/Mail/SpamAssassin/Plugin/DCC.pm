@@ -352,7 +352,8 @@ sub dccifd_lookup {
 
     my @null = $sock->getlines();
     if (!@null) {
-      die("dcc: failed read header");
+      # no facility prefix on this
+      die("failed to read header\n");
     }
 
     # the first line will be the header we want to look at
@@ -376,6 +377,7 @@ sub dccifd_lookup {
 
   if ($err) {
     alarm $oldalarm;
+    chomp $err;
     $response = undef;
     if ($err =~ /__alarm__/) {
       dbg("dcc: dccifd check timed out after $timeout secs.");
@@ -462,8 +464,8 @@ sub dccproc_lookup {
     close DCC;
 
     if (!@null) {
-      dbg("dcc: failed read header");
-      die;
+      # no facility prefix on this
+      die("failed to read header\n");
     }
 
     # the first line will be the header we want to look at
@@ -476,7 +478,8 @@ sub dccproc_lookup {
     }
 
     unless (defined($response)) {
-      die("dcc: no response\n");	# yes, this is possible
+      # no facility prefix on this
+      die("no response\n");	# yes, this is possible
     }
 
     dbg("dcc: got response: $response");
@@ -498,7 +501,7 @@ sub dccproc_lookup {
       dbg("dcc: check timed out after $timeout seconds");
     } elsif ($err =~ /^__brokenpipe__$/) {
       dbg("dcc: check failed: broken pipe");
-    } elsif ($err eq "no response\n") {
+    } elsif ($err eq "no response") {
       dbg("dcc: check failed: no response");
     } else {
       warn("dcc: check failed: $err\n");
