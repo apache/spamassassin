@@ -153,6 +153,7 @@ use constant CHEW_BODY_URIS => 1;
 use constant CHEW_BODY_MAILADDRS => 1;
 use constant HDRS_TOKENIZE_LONG_TOKENS_AS_SKIPS => 1;
 use constant BODY_TOKENIZE_LONG_TOKENS_AS_SKIPS => 1;
+use constant URIS_TOKENIZE_LONG_TOKENS_AS_SKIPS => 0;
 use constant IGNORE_MSGID_TOKENS => 0;
 
 # tweaks of 12 March 2004, see bug 2129.
@@ -160,6 +161,10 @@ use constant DECOMPOSE_BODY_TOKENS => 1;
 use constant MAP_HEADERS_MID => 1;
 use constant MAP_HEADERS_FROMTOCC => 1;
 use constant MAP_HEADERS_USERAGENT => 1;
+
+# tweaks under test right now
+use constant ADD_INVIZ_TOKENS_I_PREFIX => 0;
+use constant ADD_INVIZ_TOKENS_NO_PREFIX => 0;
 
 # We store header-mined tokens in the db with a "HHeaderName:val" format.
 # some headers may contain lots of gibberish tokens, so allow a little basic
@@ -321,10 +326,28 @@ sub read_db_configs {
 
 # The calling functions expect a uniq'ed array of tokens ...
 sub tokenize {
-  my ($self, $msg, $body) = @_;
+  my ($self, $msg, $msgdata) = @_;
 
-  # Tokenize the body and put everything together
-  my @tokens = map { $self->tokenize_line ($_, '', 1) } @{$body};
+  # cache the magic token regexp...
+  $self->{magic_re} = $self->{store}->get_magic_re();
+
+  # the body
+  my @tokens = map { $self->tokenize_line ($_, '', 1) }
+                                    @{$msgdata->{bayes_token_body}};
+
+  # the URI list
+  push (@tokens, map { $self->tokenize_line ($_, '', 2) }
+                                    @{$msgdata->{bayes_token_uris}});
+
+  # add invisible tokens
+  if (ADD_INVIZ_TOKENS_I_PREFIX) {
+    push (@tokens, map { $self->tokenize_line ($_, "I*:", 1) }
+                                    @{$msgdata->{bayes_token_inviz}});
+  }
+  if (ADD_INVIZ_TOKENS_NO_PREFIX) {
+    push (@tokens, map { $self->tokenize_line ($_, "", 1) }
+                                    @{$msgdata->{bayes_token_inviz}});
+  }
 
   # Tokenize the headers
   my %hdrs = $self->tokenize_headers ($msg);
@@ -342,12 +365,10 @@ sub tokenize {
 sub tokenize_line {
   my $self = $_[0];
   my $tokprefix = $_[2];
-  my $isbody = $_[3];
+  my $region = $_[3];
   local ($_) = $_[1];
 
   my @rettokens = ();
-
-  my $in_headers = ($tokprefix ne '');
 
   # include quotes, .'s and -'s for URIs, and [$,]'s for Nigerian-scam strings,
   # and ISO-8859-15 alphas.  Do not split on @'s; better results keeping it.
@@ -361,15 +382,14 @@ sub tokenize_line {
   s/(\w)(\-{2,6})(\w)/$1 $2 $3/gs;
 
   if (IGNORE_TITLE_CASE) {
-    if ($isbody) {
+    if ($region == 1 || $region == 2) {
       # lower-case Title Case at start of a full-stop-delimited line (as would
       # be seen in a Western language).
       s/(?:^|\.\s+)([A-Z])([^A-Z]+)(?:\s|$)/ ' '. (lc $1) . $2 . ' ' /ge;
     }
   }
 
-  # cache the magic token regexp...
-  my $magic_re = $self->{store}->get_magic_re();
+  my $magic_re = $self->{magic_re};
 
   foreach my $token (split) {
     $token =~ s/^[-'"\.,]+//;        # trim non-alphanum chars at start or end
@@ -402,7 +422,7 @@ sub tokenize_line {
 		And|give|year|information|can)$/x);
 
     # are we in the body?  If so, apply some body-specific breakouts
-    if (!$in_headers) {
+    if ($region == 1 || $region == 2) {
       if (CHEW_BODY_MAILADDRS && $token =~ /\S\@\S/i) {
 	push (@rettokens, $self->tokenize_mail_addrs ($token));
       }
@@ -412,16 +432,6 @@ sub tokenize_line {
 	  push (@rettokens, "UD:".$1); # UD = URL domain
 	}
       }
-
-        if (DECOMPOSE_BODY_TOKENS) {
-          my $decompd = $token;               # "Foo!"
-          $decompd =~ s/[^\w:\*]//gs;
-          push (@rettokens, $decompd);        # "Foo"
-          $decompd = $token; $decompd = lc $decompd;
-          push (@rettokens, $decompd);        # "foo!"
-          $decompd =~ s/[^\w:\*]//gs;
-          push (@rettokens, $decompd);        # "foo"
-        }
     }
 
     # note: do not trim down overlong tokens if they contain '*'.  This is
@@ -439,14 +449,36 @@ sub tokenize_line {
 	next;
       }
 
-    if (($in_headers && HDRS_TOKENIZE_LONG_TOKENS_AS_SKIPS)
-		|| (!$in_headers && BODY_TOKENIZE_LONG_TOKENS_AS_SKIPS))
-    {
-	# if (TOKENIZE_LONG_TOKENS_AS_SKIPS) {
+      if (($region == 0 && HDRS_TOKENIZE_LONG_TOKENS_AS_SKIPS)
+            || ($region == 1 && BODY_TOKENIZE_LONG_TOKENS_AS_SKIPS)
+            || ($region == 2 && URIS_TOKENIZE_LONG_TOKENS_AS_SKIPS))
+      {
+	# if (TOKENIZE_LONG_TOKENS_AS_SKIPS)
 	# Spambayes trick via Matt: Just retain 7 chars.  Do not retain
 	# the length, it does not help; see my mail to -devel of Nov 20 2002.
 	# "sk:" stands for "skip".
 	$token = "sk:".substr($token, 0, 7);
+      }
+    }
+
+    # decompose tokens?  do this after shortening long tokens
+    if ($region == 1 || $region == 2) {
+      if (DECOMPOSE_BODY_TOKENS) {
+        if ($token =~ /[^\w:\*]/) {
+          my $decompd = $token;                        # "Foo!"
+          $decompd =~ s/[^\w:\*]//gs;
+          push (@rettokens, $tokprefix.$decompd);      # "Foo"
+        }
+
+        if ($token =~ /[A-Z]/) {
+          my $decompd = $token; $decompd = lc $decompd;
+          push (@rettokens, $tokprefix.$decompd);      # "foo!"
+
+          if ($token =~ /[^\w:\*]/) {
+            $decompd =~ s/[^\w:\*]//gs;
+            push (@rettokens, $tokprefix.$decompd);    # "foo"
+          }
+        }
       }
     }
 
@@ -684,8 +716,7 @@ sub learn {
     return if $ignore;
   }
 
-  $msg->extract_message_metadata ($self->{main});
-  my $body = $self->get_body_from_msg ($msg);
+  my $msgdata = $self->get_body_from_msg ($msg);
   my $ret;
 
   eval {
@@ -702,7 +733,7 @@ sub learn {
     }
 
     if ($ok) {
-      $ret = $self->learn_trapped ($isspam, $msg, $body, $id);
+      $ret = $self->learn_trapped ($isspam, $msg, $msgdata, $id);
 
       if (!$self->{main}->{learn_caller_will_untie}) {
         $self->{store}->untie_db();
@@ -721,7 +752,7 @@ sub learn {
 
 # this function is trapped by the wrapper above
 sub learn_trapped {
-  my ($self, $isspam, $msg, $body, $msgid) = @_;
+  my ($self, $isspam, $msg, $msgdata, $msgid) = @_;
   my @msgid = ( $msgid );
 
   if (!defined $msgid) {
@@ -779,7 +810,7 @@ sub learn_trapped {
   #
   $msgatime = time if ( $msgatime - time > 86400 );
 
-  for ($self->tokenize ($msg, $body)) {
+  for ($self->tokenize ($msg, $msgdata)) {
     if ($isspam) {
       $self->{store}->tok_count_change (1, 0, $_, $msgatime);
     } else {
@@ -802,8 +833,7 @@ sub forget {
   if (!$self->{conf}->{use_bayes}) { return; }
   if (!defined $msg) { return; }
 
-  $msg->extract_message_metadata ($self->{main});
-  my $body = $self->get_body_from_msg ($msg);
+  my $msgdata = $self->get_body_from_msg ($msg);
   my $ret;
 
   # we still tie for writing here, since we write to the seen db
@@ -822,7 +852,7 @@ sub forget {
     }
 
     if ($ok) {
-      $ret = $self->forget_trapped ($msg, $body, $id);
+      $ret = $self->forget_trapped ($msg, $msgdata, $id);
 
       if (!$self->{main}->{learn_caller_will_untie}) {
         $self->{store}->untie_db();
@@ -841,7 +871,7 @@ sub forget {
 
 # this function is trapped by the wrapper above
 sub forget_trapped {
-  my ($self, $msg, $body, $msgid) = @_;
+  my ($self, $msg, $msgdata, $msgid) = @_;
   my @msgid = ( $msgid );
   my $isspam;
 
@@ -883,7 +913,7 @@ sub forget_trapped {
     $self->{store}->nspam_nham_change (0, -1);
   }
 
-  for ($self->tokenize ($msg, $body)) {
+  for ($self->tokenize ($msg, $msgdata)) {
     if ($isspam) {
       $self->{store}->tok_count_change (-1, 0, $_);
     } else {
@@ -933,35 +963,38 @@ sub get_msgid {
   return wantarray ? @msgid : $msgid[0];
 }
 
-sub add_uris_for_permsgstatus {
-  my ($self, $permsgstatus) = @_;
-  return $permsgstatus->get_uri_list();
-}
-
 sub get_body_from_msg {
   my ($self, $msg) = @_;
 
   if (!ref $msg) {
     # I have no idea why this seems to happen. TODO
     warn "msg not a ref: '$msg'";
-    return [ ];
+    return { };
   }
+
   $msg->extract_message_metadata ($self->{main});
   my $permsgstatus =
         Mail::SpamAssassin::PerMsgStatus->new($self->{main}, $msg);
-
-  my $body = $msg->get_visible_rendered_body_text_array();
-  # TODO! also add URI extraction to {metadata}
-  push (@{$body}, $self->add_uris_for_permsgstatus($permsgstatus));
+  my $msgdata = $self->get_msgdata_from_permsgstatus ($permsgstatus);
   $permsgstatus->finish();
 
-  if (!defined $body) {
+  if (!defined $msgdata) {
     # why?!
     warn "failed to get body for ".scalar($self->get_msgid($self->{msg}))."\n";
-    return [ ];
+    return { };
   }
 
-  return $body;
+  return $msgdata;
+}
+
+sub get_msgdata_from_permsgstatus {
+  my ($self, $msg) = @_;
+
+  my $msgdata = { };
+  $msgdata->{bayes_token_body} = $msg->{msg}->get_visible_rendered_body_text_array();
+  $msgdata->{bayes_token_inviz} = $msg->{msg}->get_invisible_rendered_body_text_array();
+  @{$msgdata->{bayes_token_uris}} = $msg->get_uri_list();
+  return $msgdata;
 }
 
 ###########################################################################
@@ -1056,7 +1089,7 @@ sub is_scan_available {
 # Finally, the scoring function for testing mail.
 
 sub scan {
-  my ($self, $permsgstatus, $msg, $body) = @_;
+  my ($self, $permsgstatus, $msg) = @_;
   my $score;
 
   if( $self->ignore_message($permsgstatus) ) {
@@ -1073,8 +1106,7 @@ sub scan {
 
   dbg ("bayes corpus size: nspam = $ns, nham = $nn");
 
-  # Add URIs to the body ...
-  push (@{$body}, $self->add_uris_for_permsgstatus ($permsgstatus));
+  my $msgdata = $self->get_msgdata_from_permsgstatus ($permsgstatus);
 
   # Figure out our probabilities for the message tokens
   my %pw = map {
@@ -1084,7 +1116,7 @@ sub scan {
       } else {
 	($_ => $pw);
       }
-  } $self->tokenize ($msg, $body);
+  } $self->tokenize ($msg, $msgdata);
 
   # If none of the tokens were found in the DB, we're going to skip
   # this message...

@@ -341,7 +341,7 @@ sub rendered {
   # We don't render anything except text
   return(undef,undef) unless ( $self->{'type'} =~ /^text\b/i );
 
-  if ( !exists $self->{'rendered'} ) {
+  if ( !exists $self->{rendered} ) {
     my $text = $self->decode();
     my $raw = length($text);
 
@@ -353,7 +353,8 @@ sub rendered {
 	  $text =~ m/^(.{0,18}?<(?:$Mail::SpamAssassin::HTML::re_start)(?:\s.{0,18}?)?>)/ois &&
 	  _html_near_start($1))
         )
-       ) {
+       ) 
+    {
       $self->{'rendered_type'} = 'text/html';
       my $html = Mail::SpamAssassin::HTML->new(); # object
       my @lines = @{$html->html_render($text)};
@@ -363,6 +364,8 @@ sub rendered {
       # the visible text parts of the message; all invisible or low-contrast
       # text removed.  TODO: wonder if we should just replace 
       # $self->{rendered} with this?
+      $self->{invisible_rendered} = join('',
+                                @{$html->{html_invisible_text}});
       $self->{visible_rendered} = join('',
                                 @{$html->{html_visible_text}});
 
@@ -412,12 +415,14 @@ sub rendered {
       }
     }
     else {
-      $self->{'rendered_type'} = $self->{'type'};
-      $self->{'rendered'} = $text;
+      $self->{rendered_type} = $self->{type};
+      $self->{rendered} = $text;
+      $self->{invisible_rendered} = '';
+      $self->{visible_rendered} = $text;
     }
   }
 
-  return ($self->{'rendered_type'}, $self->{'rendered'});
+  return ($self->{rendered_type}, $self->{rendered});
 }
 
 =item visible_rendered()
@@ -429,7 +434,19 @@ Render and return the visible text in this part.
 sub visible_rendered {
   my ($self) = @_;
   $self->rendered();  # ignore return, we want just this:
-  return $self->{visible_rendered};
+  return ($self->{rendered_type}, $self->{visible_rendered});
+}
+
+=item invisible_rendered()
+
+Render and return the invisible text in this part.
+
+=cut
+
+sub invisible_rendered {
+  my ($self) = @_;
+  $self->rendered();  # ignore return, we want just this:
+  return ($self->{rendered_type}, $self->{invisible_rendered});
 }
 
 =item content_summary()
@@ -616,6 +633,7 @@ sub finish {
   undef $self->{'decoded'};
   undef $self->{'rendered'};
   undef $self->{'visible_rendered'};
+  undef $self->{'invisible_rendered'};
   undef $self->{'type'};
   undef $self->{'rendered_type'};
 
