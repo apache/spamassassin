@@ -3,8 +3,10 @@
 # namely, making the tools RPM for masses, sql, and tools, and
 # the perl-Mail-SpamAssassin rpm for the modules only.
 
-%define real_version 3.000000
-%define version 3.0.0
+# the version in the tar name
+%define real_version 3.0.0
+# the display version number
+%define version %{real_version}
 
 %define _unpackaged_files_terminate_build       0
 %define _missing_doc_files_terminate_build      0
