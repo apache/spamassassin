@@ -1160,8 +1160,8 @@ sub chi_squared_probs_combine  {
 
   use constant LN2 => log(2);
 
-  $S = log($S) + $Sexp + LN2;
-  $H = log($H) + $Hexp + LN2;
+  $S = log($S) + $Sexp * LN2;
+  $H = log($H) + $Hexp * LN2;
 
   my $result;
   if ($num_clues) {
