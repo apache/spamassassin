@@ -783,6 +783,7 @@ sub check {
 	}
 	elsif($method eq "SYMBOLS") {
           $msg_resp = $status->get_names_of_tests_hit;
+	  $msg_resp .= "\r\n" if ($version < 1.3);
         }
         else {
           die "unknown method $method";
