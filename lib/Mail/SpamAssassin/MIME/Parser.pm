@@ -436,7 +436,10 @@ sub _render_text {
   if ($text =~ m/^(.{0,18}?<(?:$Mail::SpamAssassin::HTML::re_start)(?:\s.{0,18}?)?>)/ois &&
       html_near_start($1))
   {
-    return "I would have rendered thee: $text";
+    my $html = Mail::SpamAssassin::HTML->new();		# object
+    my $html_rendered = $html->html_render($text);	# rendered text
+    my $html_results = $html->get_results();		# needed in eval tests
+    return join('', @{ $html_rendered });
   }
   else {
     return $text;
