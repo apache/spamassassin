@@ -1020,7 +1020,7 @@ describe CANT_LIVE_WITHOUT	Can't live without?
 body NAME_BRAND			/(?:famous name|major) brand|brand[ -]name/i
 describe NAME_BRAND		Name Brand
 
-body DIET			/no diet|weight loss (?:program|offer)|(?:extra|lose).{0,9} (?:pounds|weight)|burn fat/i
+body DIET			/\b(?:(?:without|no) (?:excercis|diet))|weight loss|\b(?:extra|lose|lost|losing).{0,9} (?:pounds|weight|inches)|burn.{1,10}fat/i
 describe DIET			Lose Weight Spam
 
 
