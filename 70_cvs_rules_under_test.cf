@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.639 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.640 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -224,3 +224,5 @@ body T_HTML_TITLE_UNTITLED_1	eval:html_title('=~ /untitled/i')
 body T_HTML_TITLE_UNTITLED_2	eval:html_title('=~ /new page \d+/i')
 body T_HTML_TITLE_UNTITLED_3	eval:html_title('=~ /untitled|new page \d+/i')
 
+# according to the postmaster at qualcomm, no mail is sent from eudora.com, but it's heavily joe-jobbed ...
+header T_FROM_EUDORA            From =~ /\@eudora\.com/i
