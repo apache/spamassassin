@@ -123,6 +123,6 @@ meta INVALID_MSGID		__HAS_MSGID && !(__SANE_MSGID || __MSGID_COMMENT)
 describe INVALID_MSGID		Message-Id is not valid, according to RFC 2822
 
 header __MOZILLA_MUA		X-Mailer =~ /\bMozilla\b/
-header __MOZILLA_MSGID3         MESSAGEID =~ /^<[A-F\d]{8}\.[A-F1-9][A-F\d]{0,7}\@\S+>$/m
-meta FORGED_MUA_MOZILLA      (__MOZILLA_MUA && !__UNUSABLE_MSGID && !__MOZILLA_MSGID3)
-describe FORGED_MUA_MOZILLA  Forged mail pretending to be from Mozilla (3)
+header __MOZILLA_MSGID		MESSAGEID =~ /^<[A-F\d]{8}\.[A-F1-9][A-F\d]{0,7}\@\S+>$/m
+meta FORGED_MUA_MOZILLA		(__MOZILLA_MUA && !__UNUSABLE_MSGID && !__MOZILLA_MSGID)
+describe FORGED_MUA_MOZILLA	Forged mail pretending to be from Mozilla
