@@ -751,8 +751,16 @@ describe SATISFACTION		Satisfaction Guaranteed
 body PRIZE		        /\bclaim.{0,9} prize/i
 describe PRIZE			Talks about prizes
 
-body HGH			/\b(?:human growth hormone|(?-i:HGH)|H.G.H)\b/i
-describe HGH			Human Growth Hormone
+# Avoid an FP noted by NISHIJIMA Takanori: 'Japanese string sequence:
+# "Su" "Ku" "Na"  "I" "Ko" "Su" "To" "De" "Yo" "Ri" ...
+# (This string means, "More ...(ex. "productive" or "effective")
+# with less cost", and is a popular phrase but have no relations
+# with human growth hormone, of course. :-)
+# Encoded byte sequence: "$9" "$/" "$J" "$$" "%3" "%9" "%H" "$G" "$h" "$j"'
+# note FP:                                              ^^^^^^^^^^^^
+body __HG_HORMONE		/\b(?:human growth hormone|(?-i:HGH)|H.G.H)\b/i
+meta HG_HORMONE			(!__ISO_2022_JP_DELIM && __HG_HORMONE)
+describe HG_HORMONE		Talks about hormones for human growth
 
 body EASY_TERMS		        /\beasy terms\b/i
 describe EASY_TERMS		Easy Terms
