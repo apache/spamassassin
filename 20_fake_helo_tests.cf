@@ -131,3 +131,59 @@ describe HELO_DYNAMIC_YAHOOBB Relay HELO'd using suspicious hostname (YahooBB)
 header HELO_DYNAMIC_OOL X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S+\.dyn\.optonline\.net/
 describe HELO_DYNAMIC_OOL Relay HELO'd using suspicious hostname (OptOnline)
 
+header HELO_DYNAMIC_IPADDR2 X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\d+[^\d\s]\d+[^\d\s]\d+[^\d\s]\d+[^\d\s][^\.]*\.\S+\.\S+/i
+describe HELO_DYNAMIC_IPADDR2 Relay HELO'd using suspicious hostname (IP addr 2)
+
+# wiley-170-10231.roadrunner.nf.net [205.251.210.249]
+header HELO_DYNAMIC_RR2   X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[a-z]+-\d{1,3}-\d{1,5}\.roadrunner/i
+describe HELO_DYNAMIC_RR2 Relay HELO'd using suspicious hostname (Roadrunner 2)
+
+# pcp04024417pcs.toresd01.pa.comcast.net [68.86.206.126]
+# bgp542174bgs.ewndsr01.nj.comcast.net[68.38.144.91]
+# Computer-udp135632uds.union01.nj.comcast.net [68.39.99.32]
+header HELO_DYNAMIC_COMCAST X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[a-z-]+\d+[a-z]{3}\.[a-z0-9]+\...\.comcast/i
+describe HELO_DYNAMIC_COMCAST Relay HELO'd using suspicious hostname (Comcast)
+
+# h234n2fls32o895.telia.com [217.208.73.234]
+# h53n2fls32o828.telia.com
+# h116n2fls32o1111.telia.com
+# h29n1fls306o1003.telia.com
+header HELO_DYNAMIC_TELIA X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=h\d+n\d+fls\S+\.telia\.com/i
+describe HELO_DYNAMIC_TELIA Relay HELO'd using suspicious hostname (Telia)
+
+# CM-vina5-168-207.cm.vtr.net [200.104.168.207]
+# CM-anto1-98-153.cm.vtr.net [200.104.98.153]
+header HELO_DYNAMIC_VTR X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=cm-[a-z]+\d+-\d+-\d+\.cm\.vtr/i
+describe HELO_DYNAMIC_VTR Relay HELO'd using suspicious hostname (VTR)
+
+# nwblwi-nrp3-l10-a671.nwblwi.tds.net
+header HELO_DYNAMIC_TDS X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S+-[a-z]\d+\.[a-z]{6}\.tds\.net/i
+describe HELO_DYNAMIC_TDS Relay HELO'd using suspicious hostname (TDS)
+
+# ec9z5l.cm.chello.no
+header HELO_DYNAMIC_CHELLO_NO  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S+\.cm\.chello\.no/i
+describe HELO_DYNAMIC_CHELLO_NO Relay HELO'd using suspicious hostname (Chello.no)
+
+# g225174.upc-g.chello.nl
+# a151145.upc-a.chello.nl
+# a96134.upc-a.chello.nl
+header HELO_DYNAMIC_CHELLO_NL  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[a-z]\d+\.upc-[a-z]\.chello\.nl/i
+describe HELO_DYNAMIC_CHELLO_NL Relay HELO'd using suspicious hostname (Chello.nl)
+
+# MG001182.user.veloxzone.com.br
+# ba199058073.user.veloxzone.com.br
+header HELO_DYNAMIC_VELOX  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[a-z]{2}\d+\.user\.veloxzone\./i
+describe HELO_DYNAMIC_VELOX Relay HELO'd using suspicious hostname (Veloxzone)
+
+header HELO_DYNAMIC_VIRTUA  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\d+\.cps\./i
+# public4-seve6-5-cust173.lond.broadband.ntl.com
+# spr1-bolt5-5-0-cust9.manc.broadband.ntl.com
+# spc1-lewi4-6-0-cust190.lond.broadband.ntl.com
+header HELO_DYNAMIC_NTL  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S+\d+-\d+-cust\d+\.[a-z]{4,6}\.broadband\.ntl\.com/i
+describe HELO_DYNAMIC_NTL Relay HELO'd using suspicious hostname (NTL)
+
+# cp160000-a.mill1.nb.home.nl
+# cp341468-b.venra1.lb.home.nl
+header HELO_DYNAMIC_HOME_NL  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[a-z]{2}\d+-\S\.\S+\d\.[a-z]{2}\.home\.nl/i
+describe HELO_DYNAMIC_HOME_NL Relay HELO'd using suspicious hostname (Home.nl)
+
