@@ -1649,7 +1649,7 @@ sub _parse_rfc822_date {
   }
 
   # hh:mm:ss
-  if (s/ ([\d\s]\d):(\d\d)(:(\d\d))? / /) {
+  if (s/ (\d?\d):(\d\d)(:(\d\d))? / /) {
     $hh = $1; $mm = $2; $ss = $4 || 0;
   }
 
