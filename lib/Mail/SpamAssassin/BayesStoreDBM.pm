@@ -861,25 +861,35 @@ sub cleanup {
   # do not use print() here, it will break up the buffer if it's >8192 bytes,
   # which could result in two sets of tokens getting mixed up and their
   # touches missed.
-  my $writ = 0;
-  while ($writ < $nbytes) {
-    my $len = syswrite (OUT, $self->{string_to_journal}, $nbytes-$writ);
+  my $write_failure = 0;
+  my $original_point = tell OUT;
+  my $len;
+  do {
+    $len = syswrite (OUT, $self->{string_to_journal}, $nbytes);
 
+    # argh, write failure, give up
     if (!defined $len || $len < 0) {
-      # argh, write failure, give up
       $len = 0 unless ( defined $len );
       warn "write failed to Bayes journal $path ($len of $nbytes)!\n";
       last;
     }
 
-    $writ += $len;
-    if ($len < $nbytes) {
-      # this should not happen on filesystem writes!  Still, try to recover
-      # anyway, but be noisy about it so the admin knows
+    # This shouldn't happen, but could if the fs is full...
+    if ($len != $nbytes) {
       warn "partial write to Bayes journal $path ($len of $nbytes), recovering.\n";
-      $self->{string_to_journal} = substr ($self->{string_to_journal}, $len);
+
+      # we want to be atomic, so revert the journal file back to where
+      # we know it's "good".  if we can't truncate the journal, or we've
+      # tried 5 times to do the write, abort!
+      if (!truncate(OUT, $original_point) || ($write_failure++ > 4)) {
+        warn "cannot write to Bayes journal $path, aborting!\n";
+	last;
+      }
+
+      # if the fs is full, let's give the system a break
+      sleep 1;
     }
-  }
+  } while ($len != $nbytes);
 
   if (!close OUT) {
     warn "cannot write to $path, Bayes db update ignored\n";
