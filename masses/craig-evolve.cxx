@@ -18,7 +18,7 @@ void WriteString(PGAContext *ctx, FILE *fp, int p, int pop);
 void showSummary(PGAContext *ctx);
 
 const double threshold = 5.0;
-const double nybias = 20.0;
+double nybias = 20.0;
 const int exhaustive_eval = 1;
 
 const double mutation_rate = 0.01;
@@ -27,8 +27,8 @@ const double regression_coefficient = 0.5;
 
 const double crossover_rate = 0.65;
 
-const int pop_size = 500;
-const int replace_num = 250;
+const int pop_size = 100;
+const int replace_num = 25;
 
 const int maxiter = 50000;
 
@@ -41,7 +41,9 @@ void init_data()
     loadtests();
     loadscores();
   }
+
   MPI_Bcast(num_tests_hit, num_tests, MPI_CHAR, 0, MPI_COMM_WORLD);
+  MPI_Bcast(&nybias, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Bcast(is_spam, num_tests, MPI_CHAR, 0, MPI_COMM_WORLD);
   MPI_Bcast(tests_hit, num_tests*max_hits_per_msg, MPI_SHORT, 0, MPI_COMM_WORLD);
   MPI_Bcast(&num_scores, 1, MPI_INT, 0, MPI_COMM_WORLD);
