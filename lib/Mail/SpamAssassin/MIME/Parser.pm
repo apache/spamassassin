@@ -102,28 +102,28 @@ sub _parse_body {
   #    warn "Parsing message of type: $type\n";
 
   if ( $type =~ /^text\/plain/i ) {
-    dbg("Parse text/plain\n");
+    dbg("Parse text/plain");
     $self->_parse_normal( $msg, $_msg, $boundary, $body );
   }
   elsif ( $type =~ /^text\/html/i ) {
-    dbg("Parse text/html\n");
+    dbg("Parse text/html");
     $self->_parse_normal( $msg, $_msg, $boundary, $body );
   }
   elsif ( $type =~ /^multipart\/alternative/i ) {
-    dbg("Parse multipart/alternative\n");
+    dbg("Parse multipart/alternative");
     $self->_parse_multipart_alternate( $msg, $_msg, $boundary, $body );
   }
   elsif ( $type =~ /^multipart\//i ) {
-    dbg("Parse $type\n");
+    dbg("Parse $type");
     $self->_parse_multipart_mixed( $msg, $_msg, $boundary, $body );
   }
   else {
-    dbg("Regular attachment\n");
+    dbg("Regular attachment");
     $self->_decode_body( $msg, $_msg, $boundary, $body );
   }
 
   if ( !$msg->body() ) {
-    dbg("No message body found. Reparsing as blank.\n");
+    dbg("No message body found. Reparsing as blank.");
     my $part_msg = Mail::SpamAssassin::MIME->new();
     $self->_decode_body( $msg, $part_msg, $boundary, [] );
   }
@@ -133,7 +133,7 @@ sub _parse_multipart_alternate {
   my($self, $msg, $_msg, $boundary, $body ) = @_;
 
   $boundary ||= '';
-  dbg("m/a got boundary: $boundary\n");
+  dbg("m/a got boundary: $boundary");
 
   # ignore preamble per RFC 1521, unless there's no boundary ...
   if ( $boundary ) {
@@ -160,7 +160,7 @@ sub _parse_multipart_alternate {
   my $line_count = @{$body};
   foreach ( @{$body} ) {
     if ( --$line_count == 0 || ($boundary && /^\-\-\Q$boundary\E/) ) {
-      dbg("m/a got end of section\n");
+      dbg("m/a got end of section");
 
       # end of part
       my $line = $_;
@@ -222,7 +222,7 @@ sub _parse_multipart_mixed {
   my($self, $msg, $_msg, $boundary, $body) = @_;
 
   $boundary ||= '';
-  dbg("m/m got boundary: $boundary\n");
+  dbg("m/m got boundary: $boundary");
 
   # ignore preamble per RFC 1521, unless there's no boundary ...
   if ( $boundary ) {
@@ -252,7 +252,7 @@ sub _parse_multipart_mixed {
     if ( --$line_count == 0 || ($boundary && /^\-\-\Q$boundary\E/) ) {
 
       # end of part
-      dbg("Got end of MIME section: $_\n");
+      dbg("Got end of MIME section: $_");
       my $line = $_;
 
       # per rfc 1521, the CRLF before the boundary is part of the boundary ...
@@ -348,7 +348,7 @@ sub _decode_header {
 sub _decode_body {
   my ($self, $msg, $part_msg, $boundary, $body) = @_;
 
-  dbg("decoding attachment\n");
+  dbg("decoding attachment");
 
   my ($type, $decoded, $name) = $self->_decode($part_msg, $body);
 
@@ -369,7 +369,7 @@ sub _decode {
   my($self, $msg, $body ) = @_;
 
   if ( lc( $msg->header('content-transfer-encoding') ) eq 'quoted-printable' ) {
-    dbg("decoding QP file\n");
+    dbg("decoding QP file");
     my @output =
       map { s/\r\n/\n/; $_; } split ( /^/m, Mail::SpamAssassin::Util::qp_decode( join ( "", @{$body} ) ) );
 
@@ -383,7 +383,7 @@ sub _decode {
     return $type, \@output, $filename;
   }
   elsif ( lc( $msg->header('content-transfer-encoding') ) eq 'base64' ) {
-    dbg("decoding B64 file\n");
+    dbg("decoding B64 file");
 
     # Generate the decoded output
     my $output = [ Mail::SpamAssassin::Util::base64_decode(join("", @{$body})) ];
@@ -403,7 +403,7 @@ sub _decode {
   }
   else {
     # Encoding is one of 7bit, 8bit, binary or x-something
-    dbg("decoding other encoding\n");
+    dbg("decoding other encoding");
 
     my $type = $msg->header('content-type');
     my ($filename) =
@@ -435,9 +435,8 @@ sub _render_text {
 
   # render text/html always, or any other text part as text/html based
   # on a heuristic which simulates a certain common mail client
-  if ( $type =~ m@^text/html$@i ||
-      ($type =~ m@^text/@i &&
-        $text =~ m/^(.{0,18}?<(?:$Mail::SpamAssassin::HTML::re_start)(?:\s.{0,18}?)?>)/ois &&
+  if ( $type =~ m@^text/html\b@i ||
+      ($text =~ m/^(.{0,18}?<(?:$Mail::SpamAssassin::HTML::re_start)(?:\s.{0,18}?)?>)/ois &&
 	html_near_start($1)
       )
      ) {
