@@ -338,6 +338,12 @@ describe T_DRUGS_MANY 	Refers to many different kinds of drugs
 # I'm curious, may help explain more ALL_TRUSTED fps
 body T_SA_MARKED_UP     /Spam detection software, running on the system /
 
+# bug 3351
+# possible replacements for FROM_NO_LOWER
+header T_FROM_NO_LOWER_1	From !~ /[a-z]/ [if-unset: x@example.com]
+header T_FROM_NO_LOWER_2	From:raw !~ /[a-z]/ [if-unset: x@example.com]
+header T_FROM_NO_LOWER_3	From:addr !~ /[a-z]/ [if-unset: x@example.com]
+
 ########################################################################
 
 # high daily volume for organization
@@ -753,3 +759,5 @@ tflags T_S41_S9_GT_5_2 net
 tflags T_S41_S9_GT_5_3 net
 tflags T_S41_S9_GT_5_4 net
 tflags T_S41_S9_GT_5_5 net
+
+########################################################################
