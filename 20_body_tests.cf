@@ -123,6 +123,8 @@ rawbody SPAM_FORM		/CHANGE EMAIL ADDRESS IN ACTION OF FORM/
 describe SPAM_FORM		Form for changing email address
 rawbody SPAM_FORM_RETURN	/return validate_form/
 describe SPAM_FORM_RETURN	Form for checking email address
+rawbody SPAM_FORM_ACTION	/action="\&\#\d+;\&\#\d+;\&\#\d+;\&\#\d+;/i
+describe SPAM_FORM_ACTION       Obfuscated action attribute in HTML form
 rawbody SPAM_FORM_INPUT		/<input name=.{0,5}submit.{0,99} Submit By E-Mail /i
 describe SPAM_FORM_INPUT	Form for verifying email address
 
@@ -1390,4 +1392,17 @@ describe GET_IT_NOW     Contains 'Get it now' with capitals
 # http://www.hughes-family.org/bugzilla/show_bug.cgi?id=678
 body DOMAIN_4U2         /[\@\.]\S{0,20}(?:[42](?:yo)?u|foryou|you2)\S{1,20}\.(?:net|com|org)\b/
 describe DOMAIN_4U2     Domain name containing "4u", "u2" or variants.
+
+# Thanks, Paul Graham! ;)
+rawbody HTML_TEXT_FF0000   /<font[^>]* color=['"](?:.ff0000|red)/i
+describe HTML_TEXT_FF0000  Contains HTML text in eye-scorching red
+# these are the next top colors after bright red, as far as I can see:
+rawbody HTML_TEXT_007236   /<font[^>]* color=['"]007236/i
+describe HTML_TEXT_007236  Contains HTML text in green
+rawbody HTML_TEXT_000066   /<font[^>]* color=['"]000066/i
+describe HTML_TEXT_000066  Contains HTML text in dark blue
+rawbody HTML_TEXT_FFFF00   /<font[^>]* color=['"]ffff00/i
+describe HTML_TEXT_FFFF00  Contains HTML text in bright yellow
+rawbody HTML_TEXT_0000FF   /<font[^>]* color=['"]0000ff/i
+describe HTML_TEXT_0000FF  Contains HTML text in blue
 
