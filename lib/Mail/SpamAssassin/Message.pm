@@ -285,6 +285,9 @@ ie: If 'Subject' is specified as the header, and there are 2 Subject
 headers in a message, the last/bottom one in the message is returned in
 scalar context or both are returned in array context.
 
+Note: the returned header will include the ending newline and any embedded
+whitespace folding.
+
 =cut
 
 sub get_pristine_header {
