@@ -546,6 +546,148 @@ versa, simply rerun this command with the correct classification, and the
 mistake will be corrected.  SpamAssassin will automatically 'forget' the
 previous indications.
 
+=head1 OPTIONS
+
+=over 4
+
+=item B<--ham>
+
+Learn the input message(s) as ham.   If you have previously learnt any of the
+messages as spam, SpamAssassin will forget them first, then re-learn them as
+ham.  Alternatively, if you have previously learnt them as ham, it'll skip them
+this time around.  If the messages have already been filtered through
+SpamAssassin, the learner will ignore any modifications SpamAssassin may have
+made.
+
+=item B<--spam>
+
+Learn the input message(s) as spam.   If you have previously learnt any of the
+messages as ham, SpamAssassin will forget them first, then re-learn them as
+spam.  Alternatively, if you have previously learnt them as spam, it'll skip
+them this time around.  If the messages have already been filtered through
+SpamAssassin, the learner will ignore any modifications SpamAssassin may have
+made.
+
+=item B<--use-ignore>
+
+Don't learn the message if a from address matches configuration file
+item C<bayes_ignore_from> or a to address matches C<bayes_ignore_to>.
+The option might be used when learning from a large file of messages
+from which the hammy spam messages or spammy ham messages have not
+been removed.
+
+=item B<--sync>
+
+Syncronize the journal and databases.  Upon successfully syncing the
+database with the entries in the journal, the journal file is removed.
+
+=item B<--force-expire>
+
+Forces an expiry attempt, regardless of whether it may be necessary
+or not.  Note: This doesn't mean any tokens will actually expire.
+Please see the EXPIRATION section below.
+
+Note: C<--force-expire> also causes the journal data to be syncronized
+into the Bayes databases.
+
+=item B<--forget>
+
+Forget a given message previously learnt.
+
+=item B<--dbpath>
+
+Allows a commandline override of the I<bayes_path> configuration option.
+
+=item B<--dump> I<option>
+
+Display the contents of the Bayes database.  Without an option or with
+the I<all> option, all magic tokens and data tokens will be displayed.
+I<magic> will only display magic tokens, and I<data> will only display
+the data tokens.
+
+Can also use the B<--regexp> I<RE> option to specify which tokens to
+display based on a regular expression.
+
+=item B<--clear>
+
+Clear an existing Bayes database by removing all traces of the database.
+
+WARNING: This is destructive and should be used with care.
+
+=item B<--backup>
+
+Performs a dump of the Bayes database in machine/human readable format.
+
+The dump will include token and seen data.  It is suitable for input back
+into the --restore command.
+
+=item B<--restore>=I<filename>
+
+Performs a restore of the Bayes database defined by I<filename>.
+
+WARNING: This is a destructive operation, previous Bayes data will be wiped out.
+
+=item B<-h>, B<--help>
+
+Print help message and exit.
+
+=item B<-C> I<path>, B<--configpath>=I<path>, B<--config-file>=I<path>
+
+Use the specified path for locating the distributed configuration files.
+Ignore the default directories (usually C</usr/share/spamassassin> or similar).
+
+=item B<--siteconfigpath>=I<path>
+
+Use the specified path for locating site-specific configuration files.  Ignore
+the default directories (usually C</etc/mail/spamassassin> or similar).
+
+=item B<-p> I<prefs>, B<--prefspath>=I<prefs>, B<--prefs-file>=I<prefs>
+
+Read user score preferences from I<prefs> (usually C<$HOME/.spamassassin/user_prefs>).
+
+ =item B<-D>, B<--debug-level>
+
+Produce diagnostic output.
+
+=item B<--no-sync>
+
+Skip the slow syncronization step which normally takes place after
+changing database entries.  If you plan to learn from many folders in
+a batch, or to learn many individual messages one-by-one, it is faster
+to use this switch and run C<sa-learn --sync> once all the folders have
+been scanned.
+
+Clarification: The state of I<--no-sync> overrides the
+I<bayes_learn_to_journal> configuration option.  If not specified,
+sa-learn will learn to the database directly.  If specified, sa-learn
+will learn to the journal file.
+
+Note: I<--sync> and I<--no-sync> can be specified on the same commandline,
+which is slightly confusing.  In this case, the I<--no-sync> option is
+ignored since there is no learn operation.
+
+=item B<-L>, B<--local>
+
+Do not perform any network accesses while learning details about the mail
+messages.  This will speed up the learning process, but may result in a
+slightly lower accuracy.
+
+Note that this is currently ignored, as current versions of SpamAssassin will
+not perform network access while learning; but future versions may.
+
+=item B<--import>
+
+If you previously used SpamAssassin's Bayesian learner without the C<DB_File>
+module installed, it will have created files in other formats, such as
+C<GDBM_File>, C<NDBM_File>, or C<SDBM_File>.  This switch allows you to migrate
+that old data into the C<DB_File> format.  It will overwrite any data currently
+in the C<DB_File>.
+
+Can also be used with the B<--dbpath> I<path> option to specify the location of
+the Bayes files to use.
+
+=back
+
 =head1 INTRODUCTION TO BAYESIAN FILTERING
 
 (Thanks to Michael Bell for this section!)
@@ -734,148 +876,6 @@ configuration parameter C<bayes_auto_learn> to 0.
 This means training on a small number of mails, then only training on
 messages that SpamAssassin classifies incorrectly.  This works, but it
 takes longer to get it right than a full training session would.
-
-=back
-
-=head1 OPTIONS
-
-=over 4
-
-=item B<--ham>
-
-Learn the input message(s) as ham.   If you have previously learnt any of the
-messages as spam, SpamAssassin will forget them first, then re-learn them as
-ham.  Alternatively, if you have previously learnt them as ham, it'll skip them
-this time around.  If the messages have already been filtered through
-SpamAssassin, the learner will ignore any modifications SpamAssassin may have
-made.
-
-=item B<--spam>
-
-Learn the input message(s) as spam.   If you have previously learnt any of the
-messages as ham, SpamAssassin will forget them first, then re-learn them as
-spam.  Alternatively, if you have previously learnt them as spam, it'll skip
-them this time around.  If the messages have already been filtered through
-SpamAssassin, the learner will ignore any modifications SpamAssassin may have
-made.
-
-=item B<--use-ignore>
-
-Don't learn the message if a from address matches configuration file
-item C<bayes_ignore_from> or a to address matches C<bayes_ignore_to>.
-The option might be used when learning from a large file of messages
-from which the hammy spam messages or spammy ham messages have not
-been removed.
-
-=item B<--sync>
-
-Syncronize the journal and databases.  Upon successfully syncing the
-database with the entries in the journal, the journal file is removed.
-
-=item B<--force-expire>
-
-Forces an expiry attempt, regardless of whether it may be necessary
-or not.  Note: This doesn't mean any tokens will actually expire.
-Please see the EXPIRATION section below.
-
-Note: C<--force-expire> also causes the journal data to be syncronized
-into the Bayes databases.
-
-=item B<--forget>
-
-Forget a given message previously learnt.
-
-=item B<--dbpath>
-
-Allows a commandline override of the I<bayes_path> configuration option.
-
-=item B<--dump> I<option>
-
-Display the contents of the Bayes database.  Without an option or with
-the I<all> option, all magic tokens and data tokens will be displayed.
-I<magic> will only display magic tokens, and I<data> will only display
-the data tokens.
-
-Can also use the B<--regexp> I<RE> option to specify which tokens to
-display based on a regular expression.
-
-=item B<--clear>
-
-Clear an existing Bayes database by removing all traces of the database.
-
-WARNING: This is destructive and should be used with care.
-
-=item B<--backup>
-
-Performs a dump of the Bayes database in machine/human readable format.
-
-The dump will include token and seen data.  It is suitable for input back
-into the --restore command.
-
-=item B<--restore>=I<filename>
-
-Performs a restore of the Bayes database defined by I<filename>.
-
-WARNING: This is a destructive operation, previous Bayes data will be wiped out.
-
-=item B<-h>, B<--help>
-
-Print help message and exit.
-
-=item B<-C> I<path>, B<--configpath>=I<path>, B<--config-file>=I<path>
-
-Use the specified path for locating the distributed configuration files.
-Ignore the default directories (usually C</usr/share/spamassassin> or similar).
-
-=item B<--siteconfigpath>=I<path>
-
-Use the specified path for locating site-specific configuration files.  Ignore
-the default directories (usually C</etc/mail/spamassassin> or similar).
-
-=item B<-p> I<prefs>, B<--prefspath>=I<prefs>, B<--prefs-file>=I<prefs>
-
-Read user score preferences from I<prefs> (usually C<$HOME/.spamassassin/user_prefs>).
-
- =item B<-D>, B<--debug-level>
-
-Produce diagnostic output.
-
-=item B<--no-sync>
-
-Skip the slow syncronization step which normally takes place after
-changing database entries.  If you plan to learn from many folders in
-a batch, or to learn many individual messages one-by-one, it is faster
-to use this switch and run C<sa-learn --sync> once all the folders have
-been scanned.
-
-Clarification: The state of I<--no-sync> overrides the
-I<bayes_learn_to_journal> configuration option.  If not specified,
-sa-learn will learn to the database directly.  If specified, sa-learn
-will learn to the journal file.
-
-Note: I<--sync> and I<--no-sync> can be specified on the same commandline,
-which is slightly confusing.  In this case, the I<--no-sync> option is
-ignored since there is no learn operation.
-
-=item B<-L>, B<--local>
-
-Do not perform any network accesses while learning details about the mail
-messages.  This will speed up the learning process, but may result in a
-slightly lower accuracy.
-
-Note that this is currently ignored, as current versions of SpamAssassin will
-not perform network access while learning; but future versions may.
-
-=item B<--import>
-
-If you previously used SpamAssassin's Bayesian learner without the C<DB_File>
-module installed, it will have created files in other formats, such as
-C<GDBM_File>, C<NDBM_File>, or C<SDBM_File>.  This switch allows you to migrate
-that old data into the C<DB_File> format.  It will overwrite any data currently
-in the C<DB_File>.
-
-Can also be used with the B<--dbpath> I<path> option to specify the location of
-the Bayes files to use.
 
 =back
 
