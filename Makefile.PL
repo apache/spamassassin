@@ -1,84 +1,153 @@
 require 5.005;
 
-# RPM builders, or people building in their home dirs:
-#
-# VARIABLE                DEFAULT
-# -------------           -----------------
-# PREFIX               *  /usr
-# INST_PREFIX          +  $PREFIX
-# SYSCONFDIR           *  /etc
-#                         or $(PREFIX)/etc if $(INST_PREFIX) is not "/usr"
-# INST_SYSCONFDIR      +  $SYSCONFDIR
-#                         or $(INST_PREFIX)/etc if $(INST_PREFIX) is not "/usr"
-# PKG_DEF_RULES_DIR    *  $DEF_RULES_DIR or $(PREFIX)/share/spamassassin
-# DEF_RULES_DIR        +  $(INST_PREFIX)/share/spamassassin
-# PKG_LOCAL_RULES_DIR  *  $LOCAL_RULES_DIR
-#                         or $(SYSCONFDIR)/mail/spamassassin
-# LOCAL_RULES_DIR      +  $(INST_SYSCONFDIR)/mail/spamassassin
-# INST_SITELIB	       +  $(INSTALLSITELIB)
-#
-# RUN_RAZOR2_TESTS        (prompt if Razor 2 found)
-# CONTACT_ADDRESS         (prompt: default="the administrator of that system")
-# ENABLE_SSL           *  'no'
-#
-# PERL_BIN             *  current path to Perl
-# PERL_VERSION         *  current Perl version
-# PERL_WARN            *  'yes' for CVS builds; else 'no'
-#
-# * means the variable is used for build time
-# + means the variable is used for run time
-#
-# For example, to install in your home dir:
-#
-#   perl Makefile.PL PREFIX=/home/jm/sausr SYSCONFDIR=/home/jm/saetc
-#
-# Or to build a package in /tmp/build, but with its internal paths
-# referring to /usr and /etc:
-#
-#   perl Makefile.PL PREFIX=/tmp/build/usr SYSCONFDIR=/tmp/build/etc \
-#                       INST_PREFIX=/usr INST_SYSCONFDIR=/etc
-#
-# The Razor prompt ("run Razor 2 tests?") can be overridden by setting
-# RUN_RAZOR2_TESTS to "y" or "n".
-#
-# Set ENABLE_SSL to "yes" if you want the ability to use encrypted
-# connections between spamc and spamd.
-#
-###########################################################################
-
 use strict;
 use Config;
+
 use ExtUtils::MakeMaker;
-
-$ExtUtils::MakeMaker::Recognized_Att_Keys{'INST_PREFIX'} = 1;
-$ExtUtils::MakeMaker::Recognized_Att_Keys{'SYSCONFDIR'} = 1;
-$ExtUtils::MakeMaker::Recognized_Att_Keys{'INST_SYSCONFDIR'} = 1;
-$ExtUtils::MakeMaker::Recognized_Att_Keys{'DEF_RULES_DIR'} = 1;
-$ExtUtils::MakeMaker::Recognized_Att_Keys{'PKG_DEF_RULES_DIR'} = 1;
-$ExtUtils::MakeMaker::Recognized_Att_Keys{'LOCAL_RULES_DIR'} = 1;
-$ExtUtils::MakeMaker::Recognized_Att_Keys{'PKG_LOCAL_RULES_DIR'} = 1;
-$ExtUtils::MakeMaker::Recognized_Att_Keys{'INST_SITELIB'} = 1;
-
-$ExtUtils::MakeMaker::Recognized_Att_Keys{'RUN_RAZOR2_TESTS'} = 1;
-$ExtUtils::MakeMaker::Recognized_Att_Keys{'ENABLE_SSL'} = 1;
-$ExtUtils::MakeMaker::Recognized_Att_Keys{'CONTACT_ADDRESS'} = 1;
-
-$ExtUtils::MakeMaker::Recognized_Att_Keys{'PERL_BIN'} = 1;
-$ExtUtils::MakeMaker::Recognized_Att_Keys{'PERL_WARN'} = 1;
-$ExtUtils::MakeMaker::Recognized_Att_Keys{'PERL_TAINT'} = 1;
-$ExtUtils::MakeMaker::Recognized_Att_Keys{'PERL_VERSION'} = 1;
 
 use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/oi);
 
 
-# See lib/ExtUtils/MakeMaker.pm for details of how to influence
-# the contents of the Makefile that is written.
+my @ATT_KEYS = (
+  # PLEASE READ THE FILE 'PACKAGING' FOR INFORMATION ON THESE VARIABLES.
+  #
+  # (Current) EU::MMs make a difference between these three possible general
+  # install destinations. One can set INSTALLDIRS to 'perl', 'site' or
+  # 'vendor' to choose one explicitly (the default is 'site'). They have the
+  # following meaning:
+  #  * PERL:    Only essential modules shipped with Perl should be installed
+  #             there. Don't put SpamAssassin there.
+  #  * SITE:    The default. Normal installations via CPAN or from the sources
+  #             should use these dirs.
+  #  * VENDOR:  A special set of paths for packaged (RPM, deb, portage, ...)
+  #             Perl modules. Not always (correctly) used but the intention
+  #             is to keep the system from overwriting the modules installed
+  #             by the user.
+  #
+  # See also
+  # <http://search.cpan.org/author/MSCHWERN/ExtUtils-MakeMaker-6.16/lib/ExtUtils/MakeMaker.pm#Default_Makefile_Behaviour>
+  # <http://www.debian.org/doc/packaging-manuals/perl-policy/ch-module_packages.html#s-vendor_dirs>
+  # <http://archive.develooper.com/perl5-porters@perl.org/msg94113.html>
+  # <https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=78053>
+  # <http://www.mail-archive.com/makemaker@perl.org/msg00779.html>
+  #
+  # The options SYSCONFDIR, DATADIR and CONFDIR all support those three
+  # possibilities. The '*' in the following comments refers to those.
 
-my $mm_version = $ExtUtils::MakeMaker::VERSION;
+  'SYSCONFDIR',       # Overwrite all $*SYSCONFDIRs; normally determined
+  'PERLSYSCONFDIR',   # based on $*PREFIX.
+  'SITESYSCONFDIR',   #
+  'VENDORSYSCONFDIR', #
+
+  'DATADIR',          # Overwrite all INSTALL*DATAs; normally determined
+  'INSTALLDATA',      # based on $*PREFIX.
+  'INSTALLSITEDATA',  #
+  'INSTALLVENDORDATA',#
+
+  'CONFDIR',          # Overwrite all INSTALL*CONFs; normally determined
+  'INSTALLCONF',      # based on $*SYSCONFDIR.
+  'INSTALLSITECONF',  #
+  'INSTALLVENDORCONF',#
+
+  'DEFRULESDIR',      # A synonyme for 'DATADIR'.
+  'LOCALRULESDIR',    # " "        "   'CONFDIR'.
+
+  'PERL_BIN',         # Sets the Perl interpreter used by the scripts.
+  'PERL_VERSION',     # Some parts in SpamAssassin are dependant on the version
+  'PERL_WARN',        # Can be used to disable warnings in the scripts
+  'PERL_TAINT',       # "   "  "    "  "    taint mode for the scripts (DON'T)
+
+
+  'ENABLE_SSL',       # Set to 'yes' to build spamc with SSL support.
+  'CONTACT_ADDRESS',  # Don't ask for the contact address, use this string.
+  'RUN_RAZOR_TESTS',  # Don't ask wether the Razor tests should be run, use
+    'RUN_RAZOR2_TESTS'# this setting.
+);
+
+
+sub parse_arg {
+  my($val, $name) = (@_);
+
+  if ($val =~ /^($name)=["']?(.*?)["']?$/) {
+    return $2;
+  } else {
+    return undef;
+  }
+}
+
+sub bool {
+  my($val, $def) = (@_, undef, undef);
+  $def = 0          unless defined $def;
+  return bool($def) unless defined $val;
+
+  $val =~ s/^\s+|\s+$//g;
+  return 0 if $val =~ /^(0|N(o)?|Off)$/i;
+  return 1 if $val =~ /^(1|Y(es)?|On)$/i;
+  return bool($def);
+}
+sub yesno {
+  my($val, $def) = (@_, undef, undef);
+  return 'yes' if bool($val, $def);
+  return 'no';
+}
+
+
+
+my %opt = (
+  'enable_ssl'      => undef,
+  'contact_address' => undef,
+  'run_razor_tests' => undef,
+  'destdir'         => undef,
+  '__cruft'         => undef,
+  'ignore_cruft'    => undef,
+);
+ARGV: foreach (@ARGV) {
+  foreach my $key (keys %opt) {
+    my $val;
+
+    $val = parse_arg($_, uc($key));
+    if (defined $val) {
+      $opt{$key} = $val;
+      next ARGV;
+    }
+
+    if (defined parse_arg($_, qr/INST_(?:PREFIX|SITELIB|SYSCONFDIR)|[A-Z_]+_RULES_DIR/)) {
+      $opt{'__cruft'} = 1;
+    }
+  }
+}
+
+
+# Gather some information about what EU::MM offers and/or needs
+my($mm_version, $mm_has_destdir, $mm_has_good_destdir, $mm_needs_destdir, $mm_has_pm_filter);
+
+# Store the version for later use
+$mm_version          = $ExtUtils::MakeMaker::VERSION;
+
+# MakeMaker prior to 6.11 doesn't support DESTDIR which is needed for
+# packaging with builddir!=destdir. See bug 2388.
+$mm_has_destdir      = $ExtUtils::MakeMaker::Recognized_Att_Keys{DESTDIR};
+$mm_has_good_destdir = $mm_version >= 6.11;
+# Add DESTDIR hack only if it's requested (and necessary)
+$mm_needs_destdir    = $opt{'destdir'} && !$mm_has_destdir;
+$mm_has_destdir    ||= $mm_needs_destdir;
+push(@ATT_KEYS, 'DESTDIR') if $mm_has_destdir;
+
+# MakeMaker prior to 5.46 doesn't support PM_FILTER, so we have to
+# implement it ourselves. Also bear in mind that MakeMaker (5.45) from
+# Perl 5.6.1 supports that option while the one from 5.6.0 doesn't; they
+# do have the same version though! See bug 1652.
+$mm_has_pm_filter    = $mm_version >  5.45 || ($mm_version == 5.45 && $] > 5.006);
+
+# Now make EU::MM understand our extended vars
+foreach my $key (@ATT_KEYS) {
+  $ExtUtils::MakeMaker::Recognized_Att_Keys{$key} = 1;
+}
+
 
 # Gather the rules files in the range 00-69; we do this in perl because it's more portable
 my @rulesfiles = map { s,^rules/,,; $_ } (<rules/*.cf>);
-my $rulesfiles = join(' ', (grep { /^[0-6][0-9]_/ } @rulesfiles), qw(user_prefs.template triplets.txt languages)); 
+my $rulesfiles = join(' ', (grep { /^[0-6][0-9]_/ } @rulesfiles), qw(user_prefs.template triplets.txt languages));
 
 # Only build spamd and spamc on non-Windows platforms
 my @SPAMD_EXE_FILES = ();
@@ -86,6 +155,8 @@ if (!RUNNING_ON_WINDOWS) {
   @SPAMD_EXE_FILES = ('spamd/spamc$(EXE_EXT)', 'spamd/spamd');
 }
 
+# See lib/ExtUtils/MakeMaker.pm for details of how to influence
+# the contents of the Makefile that is written.
 my %makefile = (
     'NAME'         => 'Mail::SpamAssassin',
     'VERSION_FROM' => 'lib/Mail/SpamAssassin.pm', # finds $VERSION
@@ -95,7 +166,7 @@ my %makefile = (
 			@SPAMD_EXE_FILES
 		],
 
-    'MAN1PODS' => { 
+    'MAN1PODS' => {
 	'spamassassin'    => '$(INST_MAN1DIR)/spamassassin.$(MAN1EXT)',
 	'sa-learn'        => '$(INST_MAN1DIR)/sa-learn.$(MAN1EXT)',
 	'spamd/spamc.pod' => '$(INST_MAN1DIR)/spamc.$(MAN1EXT)',
@@ -106,7 +177,7 @@ my %makefile = (
 
     'PMLIBDIRS' => [ 'lib' ],
 
-    'PM_FILTER' => '$(PERL) build/preprocessor -Mconditional $(FIXBYTES) -Mvars -DVERSION="$(VERSION)" -DPREFIX="$(INST_PREFIX)"',
+    'PM_FILTER' => '$(PERL) build/preprocessor -Mconditional $(FIXBYTES) -Mvars -DVERSION="$(VERSION)" -DPREFIX="$(I_PREFIX)"',
 
     'macro' => {
 	RULES => $rulesfiles,
@@ -146,64 +217,123 @@ my %makefile = (
     # We have only this Makefile.PL and this option keeps MakeMaker from
     # asking all questions twice after a 'make dist*'.
     'NORECURS' => 1,
+
+    # Don't add META.yml to the MANIFEST for god's sake!
+    'NO_META' => 1,
 );
+delete $makefile{'NO_META'} if $mm_version < 6.0;
 
-# MakeMaker prior to 5.46 doesn't support PM_FILTER, so we have to
-# implement it ourselves. Also bear in mind that MakeMaker (5.45) from
-# Perl 5.6.1 supports that option while the one from 5.6.0 doesn't; they
-# do have the same version though! See bug 1652.
-my $pm_filter = $mm_version > 5.45 || ($mm_version == 5.45 && $] > 5.006);
 
-if(!$pm_filter) {
-warn <<ITSALLSOSTUPID;
+if (bool($opt{'__cruft'}, 0) and not bool($opt{'ignore_cruft'}, 0)) {
+  ($_=<<"  OLDCRUFT") =~ s/^ {4}//gm;
 
-***********************************************************************
-Your version of ExtUtils::MakeMaker does not support PM_FILTER.
-We need to include a nasty workaround to make it work with our make
-routines. You will get loads of warnings and it is very likely to break
-at various places.
+    ***********************************************************************
+    You tried to use one of the variables
+      INST_PREFIX
+      INST_SITELIB
+      INST_SYSCONFDIR
+      DEF_RULES_DIR
+      LOCAL_RULES_DIR
+    Those are not supported anymore. Please read the documents INSTALL and
+    PACKAGING to find out about the new way of changing these values.
 
-*Please* consider updating to a version later than 5.45. It's available
-on CPAN <http://search.cpan.org/search?module=ExtUtils::MakeMaker>.
+    Thanks and sorry for the inconvenience.
+    ***********************************************************************
 
-Hint: Perl 5.6.1 and later ship good versions of ExtUtils::MakeMaker
-by default.
+  OLDCRUFT
+  die $_;
+}
 
-If anything breaks while building Mail::SpamAssassin, please file a bug
-at <http://bugzilla.spamassassin.org>.
-***********************************************************************
 
-ITSALLSOSTUPID
+if ($mm_needs_destdir) {
+  ($_=<<"  DESTDIRHACK") =~ s/^ {4}//gm;
+
+    ***********************************************************************
+    You used the variable
+      DESTDIR
+    but your installation of ExtUtils::MakeMaker ${mm_version} doesn't support
+    that directive natively.
+
+    This script includes a kludge to make it work with older versions, too.
+    If something does not work as expected, please report a bug to
+      <http://bugzilla.spamassassin.org>
+    including your version of ExtUtils::MakeMaker. We might also ask you to
+    attach the generated Makefile to that bug.
+
+    If you want to be on the safe side, you might want to upgrade your
+    ExtUtils::MakeMaker to at least version 6.11. It is available via CPAN.
+    You can use either the CPAN shell or go to
+      <http://search.cpan.org/search?module=ExtUtils::MakeMaker>
+    to get an up-to-date version.
+
+    This is needed only for packaging, the end-users will not need to have
+    to upgrade to use SpamAssassin.
+    ***********************************************************************
+
+  DESTDIRHACK
+  warn $_;
+} elsif ($opt{'destdir'} and !$mm_has_good_destdir) {
+  ($_=<<"  DESTDIRBUG") =~ s/^ {4}//gm;
+
+    ***********************************************************************
+    You used the variable
+      DESTDIR
+    but the implementation in your version of ExtUtils::MakeMaker ${mm_version}
+    is said to be buggy.
+
+    If you want to be on the safe side, you might want to upgrade your
+    ExtUtils::MakeMaker to at least version 6.11. It is available via CPAN.
+    You can use either the CPAN shell or go to
+      <http://search.cpan.org/search?module=ExtUtils::MakeMaker>
+    to get an up-to-date version.
+
+    This is needed only for packaging, the end-users will not need to have
+    to upgrade to use SpamAssassin.
+    ***********************************************************************
+
+  DESTDIRBUG
+  warn $_;
+}
+
+
+if(!$mm_has_pm_filter) {
+  ($_=<<"  ITSALLSOSTUPID") =~ s/^ {4}//gm;
+
+    ***********************************************************************
+    Your version of ExtUtils::MakeMaker does not support PM_FILTER.
+    We need to include a nasty workaround to make it work with our make
+    routines. You will get loads of warnings and it is very likely to break
+    at various places.
+
+    *Please* consider updating to a version later than 5.45. Its available
+    on CPAN <http://search.cpan.org/search?module=ExtUtils::MakeMaker>.
+
+    Hint: Perl 5.6.1 and later ship good versions of ExtUtils::MakeMaker
+    by default.
+
+    If anything breaks while building Mail::SpamAssassin, please file a bug
+    at <http://bugzilla.spamassassin.org>.
+    ***********************************************************************
+
+  ITSALLSOSTUPID
+  warn $_;
 
   $makefile{SKIP} = [ 'pm_to_blib' ];
   $makefile{macro}{PM_FILTER} = $makefile{PM_FILTER};
   delete $makefile{PM_FILTER};
 }
 
+
 # All the $(*MAN1*) stuff is empty/zero if Perl was Configured with -Dman1dir=none
 unless($Config{installman1dir}) {
   delete $makefile{MAN1PODS};
 }
 
-#######################################################################
 
-# what a PITA.  we can't get at MakeMaker's parsed args. do it ourselves,
-# again....
+$makefile{'macro'}{'ENABLE_SSL'} = yesno($opt{'enable_ssl'});
 
-my $contactaddr;
-my $runrazor;
-
-for my $arg (@ARGV) {
-  if ($arg =~ /^CONTACT_ADDRESS=(.*)/) {
-    $contactaddr = $1;
-  }
-  elsif ($arg =~ /^RUN_RAZOR2?_TESTS?=(.)/) {
-    $runrazor = $1;
-  }
-}
-
-if (!defined $contactaddr) {
-  $contactaddr = prompt(
+if (!defined $opt{'contact_address'}) {
+  $opt{'contact_address'} = prompt(
     "What email address or URL should be used in the suspected-spam report\n".
     "text for users who want more information on your filter installation?\n".
     "(In particular, ISPs should change this to a local Postmaster contact)\n".
@@ -211,158 +341,617 @@ if (!defined $contactaddr) {
   );
   print "\n";
 }
+$makefile{'macro'}{'CONTACT_ADDRESS'} = $opt{'contact_address'};
 
-if (!defined $runrazor) {
-  $runrazor = eval { require Razor2::Client::Agent };
+if (!defined $opt{'run_razor_tests'}) {
+  my $got_razor2 = eval { require Razor2::Client::Agent };
 
-  if ($runrazor) {
-    $runrazor = prompt(
+  if ($got_razor2) {
+    $opt{'run_razor_tests'} = prompt(
       "Run Razor v2 tests (these may fail due to network problems)? (y/n)",
       'n'
     );
     print "\n";
   }
-}  
-$runrazor = substr($runrazor, 0, 1);
-$runrazor =~ tr/y1/0/c;
-if ($runrazor) {
+}
+$opt{'run_razor_tests'} = bool($opt{'run_razor_tests'});
+if ($opt{'run_razor_tests'}) {
   open(FLAG, "> t/do_razor2");
   close(FLAG);
 }
 else {
-  unlink("t/do_razor2"); 
+  unlink("t/do_razor2");
 }
+$makefile{'macro'}{'TEST_RUN_RAZOR'} = yesno($opt{'run_razor_tests'});
+
 
 # Now dump the Makefile
 WriteMakefile(%makefile);
+print "Makefile written by ExtUtils::MakeMaker ${mm_version}\n";
 
 #######################################################################
 
 package MY;
 
-sub MY::libscan {
-  my($self,$path) = @_;
 
-  return '' if ($path =~ /windows_install/ || $path =~ /\.(orig|diff|patch|bak|backup|my)$/i);
-  return $path;
+use vars qw(
+  $MY_GLOBALS_ARE_SANE
+
+  @REPOSITORIES
+
+  $MACRO_RE
+  $EQ_RE
+  $EQ
+
+  $SELF
+);
+
+# For some reason initializing the vars on the global scope doesn't work;
+# guess its some weird Perl behaviour in combination with bless().
+sub init_MY_globals {
+  my $self = shift;
+
+  # Keep a reference to ourselves so we don't have to feed it to the helper
+  # scripts.
+  $SELF = $self;
+
+  return if $MY_GLOBALS_ARE_SANE;
+  $MY_GLOBALS_ARE_SANE = 1;
+
+  # (Current) EU::MMs make a difference between these three possible general
+  # install destinations. See also
+  # <http://archive.develooper.com/perl5-porters@perl.org/msg94113.html>
+  # <https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=78053>
+  # <http://www.mail-archive.com/makemaker@perl.org/msg00779.html>
+  # <http://www.debian.org/doc/packaging-manuals/perl-policy/ch-module_packages.html#s-vendor_dirs>
+  @REPOSITORIES = qw(
+    PERL
+    SITE
+    VENDOR
+  );
+
+  # Macro names follow this RE -- at least stricly enough for our purposes.
+  $MACRO_RE = qr/[A-Z0-9_]+/;
+  # Normally macros are assigned via FOO = bar. But the part with the equal
+  # sign might differ from platform to platform. So we use this RE:
+  $EQ_RE = qr/\s*:?=\s*/;
+  # To assign or own macros we'll follow the first assignment string we find;
+  # normally " = ".
+  $EQ = undef;
 }
 
+# Unset $SELF to avoid any leaking memory.
+sub clean_MY_globals {
+  my $self = shift;
+
+  $SELF = undef;
+}
+
+sub set_EQ_from_line {
+  my($line) = (@_);
+
+  return if defined($EQ);
+
+  $line =~ /\S(${EQ_RE})/;
+  $EQ = $1;
+}
+
+
+# Converts a version represented as a float to a real three-part version,
+# eg.:
+#  5.006001 -> 5.6.1
+#  5.005_03 -> 5.5.30
+#
+# The first parameter should be a version, in what format ever.
+sub float_to_version {
+  my($ver) = (@_);
+
+  if ($ver =~ /^\d\.\d+$/) {
+    $ver   =  sprintf("%1.6f", $ver);
+    $ver   =~ s/[.0]+([1-9]+)/.$1/g;
+  }
+
+  return $ver;
+}
+
+
+# Generates a Makefile-reference to another macro; something like $(FOO).
+#
+# The first and only parameter should be the name of the referred macro,
+# eg. 'FOO' (will return '$(FOO)').
+sub macro_ref {
+  my($name) = (@_);
+
+  return sprintf('$(%s)', $name);
+}
+
+# Generates a line which defines a Makefile macro. Something like FOO = bar.
+# The line is *not* followed by a newline!
+#
+# The first parameter must be the name of the macro. The second is optional.
+# If it is omitted, the value set in the current EU::MM instance is used.
+sub macro_def {
+  my($name, $val) = (@_, undef);
+  $val = $SELF->{$name} unless defined $val;
+  die unless defined $EQ;
+
+  return $name . $EQ . $val;
+}
+
+# Returns true if the given line defines a macro.
+#
+# The first parameter must be the line to inspect. With the second optional
+# parameter the name of a specific macro might be given. If its omitted, any
+# macro matching the MACRO_RE pattern will fit.
+sub line_has_macro_def {
+  my($line, $name) = (@_, undef);
+  $name = $MACRO_RE unless defined $name;
+
+  return $line =~ /^($name)${EQ_RE}/;
+}
+
+# Reads the name of the macro defined on the given line.
+#
+# The first parameter must be the line to be expected. If the line doesn't
+# contain a macro definition, weird things may happen. So check with
+# line_has_macro_def() before!
+sub get_macro_name_from_line {
+  my($line) = (@_);
+
+  $line =~ /^(${MACRO_RE})${EQ_RE}/;
+  return $1;
+}
+
+# Reads the value of the given macro from the current instance of EU::MM.
+#
+# The first parameter must be the name of a macro.
+sub get_macro {
+  my($name) = (@_);
+
+  return $SELF->{$name};
+}
+
+# Reads the value of the given macro from the current instance of EU::MM and
+# expands all contained macros. So reading BAZ with these declarations
+#   FOO = blah
+#   BAR = $(FOO)
+#   BAZ = $(BAR)
+# gives 'blah'.
+#
+# The first parameter must be the name of a macro.
+sub get_expanded_macro {
+  my($name) = (@_);
+
+  my($val);
+  $val = get_macro($name);
+  # Now expand all macros...
+  while ($val =~ s/\Q$(\E(${MACRO_RE})\Q)\E/$SELF->{$1} || ''/ge) {};
+
+  return $val;
+}
+
+# Sets the value of the macro with the given name to the given value in the
+# current instance of EU::MM. Just sets, doesn't write to the Makefile!
+#
+# The first parameter must be the macro's name, the second the value.
+sub set_macro {
+  my($name, $val) = (@_);
+
+  $SELF->{$name} = $val;
+}
+
+
+# Returns the actual "repository" name used in macro names; the point is that
+# EU::MM leaves out the name if the repository is 'PERL'. But only for macros
+# which don't start with the repository name (like the INSTALL* ones). So the
+# following mapping should be made:
+#   PERLPREFIX      -> PERLPREFIX
+#   PERLSYSCONFDIR  -> PERLSYSCONFDIR
+#   INSTALLSITECONF -> INSTALLSITECONF
+#   INSTALLPERLCONF -> INSTALLCONF
+# Actually, its a bit more complex than that but we follow that simple mapping
+# for our vars; one also has to know when to call this function and when not.
+sub repository {
+  my($repository) = (@_);
+
+  return '' if $repository eq 'PERL';
+  return $repository;
+}
+
+
+# This routine determines the correct SYSCONFDIR to use for the given
+# repository.
+#
+# The first parameter must be one value from @REPOSITORIES.
+#
+# *SYSCONFDIR can be overwritten with:
+#   *SYSCONFDIR
+#   SYSCONFDIR
+# If none of those is specified, it will chose an FHS-compliant dir
+# based on the corresponding *PREFIX:
+#   *PREFIX     *SYSCONFDIR
+#   /usr        /etc
+#   /usr/local  /etc
+#   /opt/*      /etc/opt
+#   /foo/*      /foo/*/etc
+sub _set_macro_SYSCONFDIR {
+  my($repository) = (@_);
+
+  my($macro);
+  $macro = $repository . "SYSCONFDIR";
+
+  # Is this macro already set?
+  return if defined get_macro($macro);
+
+  # Is this macro supposed to be overwritten?
+  if (defined get_macro('SYSCONFDIR')) {
+    set_macro($macro, macro_ref('SYSCONFDIR'));
+    return;
+  }
+
+  my($rprefix);
+  $rprefix = get_expanded_macro("${repository}PREFIX");
+
+  # Set the default, depending on the corresponding full PREFIX
+  set_macro($macro,
+    ($rprefix =~ m{^$})                ? ''         :
+    ($rprefix =~ m{^/usr(/local)?/?$}) ? '/etc'     :
+    ($rprefix =~ m{^/opt(/|$)})        ? '/etc/opt' :
+    macro_ref("${repository}PREFIX") . '/etc'
+  );
+}
+
+# This routine determines the correct INSTALLDATADIR (aka DEFRULESDIR)
+# to use for the given repository.
+#
+# The first parameter must be one value from @REPOSITORIES.
+#
+# INSTALL*DATADIR can be overwritten with:
+#   INSTALL*DATADIR
+#   DATADIR
+#   DEFRULESDIR
+# If none of those is specified, it will chose an FHS-compliant dir,
+# namely *PREFIX/share/spamassassin.
+sub _set_macro_DATADIR {
+  my($repository) = (@_);
+
+  my($macro);
+  $macro = "INSTALL" . repository($repository) . "DATA";
+
+  # Is this macro already set?
+  return if defined get_macro($macro);
+
+  # Is this macro supposed to be overwritten?
+  foreach my $omacro (qw(DATADIR DEFRULESDIR)) {
+    if (defined get_macro($omacro)) {
+      set_macro($macro, get_macro($omacro));
+      return;
+    }
+  }
+
+  # Set the default value based on the corresponding PREFIX
+  set_macro($macro,
+    macro_ref("${repository}PREFIX") . '/share/spamassassin'
+  );
+}
+
+# This routine determines the correct INSTALLCONFDIR (aka LOCALRULESDIR)
+# to use for the given repository.
+#
+# The first parameter must be one value from @REPOSITORIES.
+#
+# INSTALL*CONFDIR can be overwritten with:
+#   INSTALL*CONFDIR
+#   CONFDIR
+#   LOCALRULESDIR
+# If none of those is specified, it will chose an FHS-compliant dir,
+# namely *SYSCONFDIR/mail/spamassassin.
+sub _set_macro_CONFDIR {
+  my($repository) = (@_);
+
+  my($macro);
+  $macro = "INSTALL" . repository($repository) . "CONF";
+
+  # Is this macro already set?
+  return if defined get_macro($macro);
+
+  # Is this macro supposed to be overwritten?
+  foreach my $omacro (qw(CONFDIR LOCALRULESDIR)) {
+    if (defined get_macro($omacro)) {
+      set_macro($macro, get_macro($omacro));
+      return;
+    }
+  }
+
+  # Set the default value based on the corresponding SYSCONFDIR
+  set_macro($macro,
+    macro_ref("${repository}SYSCONFDIR") . '/mail/spamassassin'
+  );
+}
+
+# This routine determines the correct value for PERL_BIN.
+#
+# There are no parameters.
+#
+# If PERL_BIN wasn't set at the command line, it will fall back to
+# $(FULLPERL) which should refer to the current Perl interpreter.
+sub _set_macro_PERL_BIN {
+
+  return if get_macro('PERL_BIN');
+  set_macro('PERL_BIN', macro_ref('FULLPERL'));
+}
+
+# This routine determines the value of the app given in PERL_BIN.
+#
+# There are no parameters.
+#
+# If PERL_VERSION wasn't set at the command line, it will try to call
+# the app given in PERL_BIN and ask it for its version. If that doesn't
+# work for some reason, it will use the version of the current Perl
+# interpreter.
+sub _set_macro_PERL_VERSION {
+
+  return if get_macro('PERL_VERSION');
+
+  my($perl, $ver);
+
+  #
+  $perl = get_expanded_macro('PERL_BIN');
+  if (-x $perl) {
+    $ver = qx{$perl -V:version};
+    $ver =~ s/^version='([0-9.]+).*$/$1/s;
+  }
+
+  $ver = $] unless $ver;
+
+  set_macro('PERL_VERSION', float_to_version($ver));
+}
+
+# This is a helper routine for PERL_WARN and PERL_TAINT.
+#
+# The first parameter must be either 'WARN' or 'TAINT'.
+sub _set_macro_PERL_yesno {
+  my($macro) = (@_);
+
+  my($val);
+  $macro = 'PERL_' . $macro;
+  $val   = "";
+  if (get_macro($macro)) {
+    $val = yesno(get_macro($macro));
+  }
+
+  set_macro($macro, $val);
+}
+
+# This routine sets the value for PERL_WARN.
+#
+# There are no parameters.
+#
+# If PERL_WARN wasn't set at the command line, PERL_WARN will be left
+# empty (ie: the default is used). If it was set, the value is fed to
+# yesno().
+sub _set_macro_PERL_WARN {
+  _set_macro_PERL_yesno('WARN');
+}
+
+# This routine sets the value for PERL_TAINT.
+#
+# There are no parameters.
+#
+# If PERL_TAINT wasn't set at the command line, PERL_TAINT will be left
+# empty (ie: the default is used). If it was set, the value is fed to
+# yesno().
+sub _set_macro_PERL_TAINT {
+  _set_macro_PERL_yesno('TAINT');
+}
+
+
+# Override the libscan routine so it skips CVS stuff and some common
+# patch/backup extensions.
+sub MY::libscan {
+  my $self = shift;
+  my($path) = @_;
+  init_MY_globals($self);
+
+  return q{} if $path =~ m{
+                  windows_install|
+                  (^|/)CVS(/|$)|
+                  [/.](orig|old|rej|diff|patch|bak|backup|my)$
+                }ix;
+
+  clean_MY_globals($self);
+  return $path; #/
+}
+
+# Override the install routine to add our additional install dirs and
+# hack DESTDIR support into old EU::MMs.
 sub MY::install {
   my $self = shift;
-  my $inherited = $self->SUPER::install (@_);
+  my @code = split(/\n/, $self->SUPER::install(@_));
+  init_MY_globals($self);
 
-  $inherited =~ s/^(install :: .*)$/$1 inst_cfs/gm;
-  $inherited;
+  foreach (@code) {
+    # Add our install targets as a dependency to all top-level install targets
+    s/^(install(?:_[a-z]+)?\s*::?\s*.*)$/$1 conf__install data__install/;
+
+    # Now do the DESTDIR hack, if necessary.
+    next if !$mm_needs_destdir;
+    # Write the correct path to perllocal.pod
+    next if /installed into/;
+
+    # Replace all other $(INSTALL*) vars (except $(INSTALLDIRS) of course)
+    # with their $(DESTINSTALL*) counterparts
+    s/\Q$(\E(INSTALL[^D][^I][^R][^S][A-Z]+)\Q)\E/\$(DEST$1)/g;
+  }
+
+  clean_MY_globals($self);
+  return join("\n", @code);
+}
+
+
+
+
+# Now override the constants routine to add our own macros.
+sub MY::constants {
+  my $self = shift;
+  my @code = split(/\n/, $self->SUPER::constants(@_));
+  init_MY_globals($self);
+
+  foreach my $line (@code) {
+    # Skip comments
+    next if $line =~ /^\s*#/;
+     # Skip everything which isn't a var assignment.
+    next unless line_has_macro_def($line);
+
+    # Store the assignment string if necessary.
+    set_EQ_from_line($line);
+
+    # Add some "dummy" (PERL|SITE|VENDOR)PREFIX macros for later use (only if
+    # necessary for old EU::MMs of course)
+    if (line_has_macro_def($line, 'PREFIX')) {
+      foreach my $r (@REPOSITORIES) {
+        my $rprefix = "${r}PREFIX";
+
+        if (!defined(get_macro($rprefix))) {
+          set_macro($rprefix, macro_ref('PREFIX'));
+          $line .= "\n" . macro_def($rprefix);
+        }
+      }
+    }
+
+    # Add DESTDIR support if necessary
+    if ($mm_needs_destdir) {
+      if (line_has_macro_def($line, 'INSTALLDIRS')) {
+        $line .= "\n" . macro_def('DESTDIR');
+      }
+      elsif (line_has_macro_def($_, qr/INSTALL[A-Z]+/)) {
+        my $macro = get_macro_name_from_line($line);
+        $line .= "\n" . macro_def('DEST' . $macro,
+                          macro_ref('DESTDIR') . macro_ref($macro));
+      }
+    }
+  }
+
+  # Add some additional target dirs
+  {
+    set_macro('SYSCONFDIR', "") unless get_macro('SYSCONFDIR');
+
+    # Determine the correct settings for each repository...
+    foreach my $r (@REPOSITORIES) {
+      _set_macro_SYSCONFDIR($r);
+      _set_macro_DATADIR($r);
+      _set_macro_CONFDIR($r);
+    }
+
+    # ... and add it to the Makefile.
+    push(@code, qq{});
+    push(@code, macro_def('SYSCONFDIR'));
+    foreach my $r (@REPOSITORIES) {
+      push(@code, macro_def($r . 'SYSCONFDIR'));
+    }
+
+    foreach my $m (qw(DATA CONF)) {
+      foreach my $r (@REPOSITORIES) {
+        my $macro = 'INSTALL' . repository($r) . $m;
+        # The INSTALL* macros.
+        push(@code, macro_def($macro));
+        # The DESTINSTALL* macros.
+        push(@code, macro_def('DEST' . $macro,
+                      macro_ref('DESTDIR') . macro_ref($macro)))
+          if $mm_has_destdir;
+      }
+    }
+  }
+
+  # Set the PERL_* stuff
+  {
+    _set_macro_PERL_BIN;
+    _set_macro_PERL_VERSION;
+    _set_macro_PERL_WARN;
+    _set_macro_PERL_TAINT;
+
+    # Add it to the Makefile.
+    push(@code, qq{});
+    foreach my $m (qw(BIN VERSION WARN TAINT)) {
+      push(@code, macro_def('PERL_' . $m));
+    }
+  }
+
+  clean_MY_globals($self);
+  return join("\n", @code);
 }
 
 sub MY::postamble {
-  # import some C-linkage stuff from %Config.  We can't seem to
-  # do this with MakeMaker without it trying to build the perl
-  # modules as .so's :(
-
   my $self = shift;
+  my @code = ();
+  init_MY_globals($self);
 
-  my $prefix             = $self->{PREFIX}
-                        || '';
-  my $instprefix         = $self->{INST_PREFIX}
-                        || $prefix;
+  my($repository);
+  $repository = uc($SELF->{INSTALLDIRS}) || 'SITE';
 
-  my $is_sys_build       = ($prefix     =~ m{^(/usr/?)?$});
-  my $is_sys_inst        = ($instprefix =~ m{^(/usr/?)?$});
+  foreach my $macro (qw(PREFIX SYSCONFDIR)) {
+    push(@code, macro_def('I_' . $macro,
+                    macro_ref($repository . $macro)));
+  }
+  foreach my $macro (qw(DATA CONF LIB)) {
+    push(@code, macro_def('I_' . $macro . 'DIR',
+                    macro_ref('INSTALL' . repository($repository) . $macro)));
 
-  my $sysconfdir         = $self->{SYSCONFDIR}
-                        || '';
-  my $instsysconfdir     = $self->{INST_SYSCONFDIR}
-                        || $sysconfdir
-                        || ($is_sys_inst  ? '' : '$(INST_PREFIX)') . '/etc';
-     $sysconfdir       ||= ($is_sys_build ? '' : '$(PREFIX)')      . '/etc';
+    if ($mm_has_destdir) {
+      push(@code, macro_def('B_' . $macro . 'DIR',
+                    macro_ref('DESTINSTALL' . repository($repository) . $macro)));
+    } else {
+      push(@code, macro_def('B_' . $macro . 'DIR',
+                    macro_ref('I_' . $macro . 'DIR')));
+    }
+  }
 
-  my $pkgdefrulesdir     = $self->{PKG_DEF_RULES_DIR}
-                        || $self->{DEF_RULES_DIR}
-                        || '$(PREFIX)/share/spamassassin';
-  my $defrulesdir        = $self->{DEF_RULES_DIR}
-                        || '$(INST_PREFIX)/share/spamassassin';
-  my $pkglocalrulesdir   = $self->{PKG_LOCAL_RULES_DIR}
-                        || $self->{LOCAL_RULES_DIR}
-                        || '$(SYSCONFDIR)/mail/spamassassin';
-  my $localrulesdir      = $self->{LOCAL_RULES_DIR}
-                        || '$(INST_SYSCONFDIR)/mail/spamassassin';
-  my $instsitelib        = $self->{INST_SITELIB}
-                        || '$(INSTALLSITELIB)';
+  my $code = join("\n", @code);
+  @code = (); # free mem
 
-  my $enablessl          = $self->{ENABLE_SSL}
-                        || 'no';
+  $code .= <<'  EOD';
 
-  my $perl_bin           = $self->{PERL_BIN}
-                        || 'this';
-  my $perl_warn          = $self->{PERL_WARN}
-                        || 'auto';
-  my $perl_taint         = $self->{PERL_TAINT}
-                        || 'auto';
-  my $perl_version       = $self->{PERL_VERSION}
-                        || 'this';
-
-
-  my $gotpods            = keys(%{$self->{MAN1PODS}})
-                        || keys(%{$self->{MAN3PODS}})
-                        || keys(%{$self->{EXTRAPODS}})
-                        || 0;
-
-qq(
-#PREFIX			= $prefix	# just for reference
-INST_PREFIX     	= $instprefix
-SYSCONFDIR      	= $sysconfdir
-INST_SYSCONFDIR 	= $instsysconfdir
-PKG_DEF_RULES_DIR 	= $pkgdefrulesdir
-DEF_RULES_DIR		= $defrulesdir
-PKG_LOCAL_RULES_DIR	= $pkglocalrulesdir
-LOCAL_RULES_DIR		= $localrulesdir
-INST_SITELIB		= $instsitelib
-ENABLE_SSL		= $enablessl
-CONTACT_ADDRESS		= $contactaddr
-
-PERL_BIN		= $perl_bin
-PERL_WARN		= $perl_warn
-PERL_TAINT		= $perl_taint
-PERL_VERSION 		= $perl_version
-
-) . q#
+PREPROCESS    = $(PERL) build/preprocessor
 
 FIXVARS		= -Mvars \
 		  -DVERSION="$(VERSION)" \
-		  -DPREFIX="$(INST_PREFIX)" \
-		  -DDEF_RULES_DIR="$(DEF_RULES_DIR)" \
-		  -DLOCAL_RULES_DIR="$(LOCAL_RULES_DIR)" \
-		  -DINSTALLSITELIB="$(INST_SITELIB)" \
+		  -DPREFIX="$(I_PREFIX)" \
+		  -DDEF_RULES_DIR="$(I_DATADIR)" \
+		  -DLOCAL_RULES_DIR="$(I_CONFDIR)" \
+		  -DINSTALLSITELIB="$(I_LIBDIR)" \
 		  -DCONTACT_ADDRESS="$(CONTACT_ADDRESS)"
 
 FIXBYTES	= -Mbytes \
 		  -DPERL_VERSION="$(PERL_VERSION)"
-                  
+
 FIXBANG		= -Msharpbang \
 		  -DPERL_BIN="$(PERL_BIN)" \
 		  -DPERL_WARN="$(PERL_WARN)"
 
-SPAMC_SOURCES = spamd/spamc.c qmail/qmail-spamc.c spamd/libspamc.c spamd/utils.c
+SPAMC_SOURCES	= spamd/spamc.c spamd/libspamc.c spamd/utils.c qmail/qmail-spamc.c
 
-# . (!$pm_filter ? q#
+  EOD
+
+  if (!$mm_has_pm_filter) {
+    $code .= <<'    EOD';
 pm_to_blib: $(TO_INST_PM)
 	@ $(PERL) "-I$(INST_ARCHLIB)" "-I$(INST_LIB)" \
 	"-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" -Ibuild \
 	-MExtUtils::Install -Mpreprocessor \
-	-e "ExtUtils::Install::Post545::pm_to_blib({qw{$(PM_TO_BLIB)}}, '$(INST_LIB)/auto', '$(PM_FILTER)')"# : '') . q#
+	-e "ExtUtils::Install::Post545::pm_to_blib({qw{$(PM_TO_BLIB)}}, '$(INST_LIB)/auto', '$(PM_FILTER)')"
+    EOD
+  }
+
+  $code .= <<'  EOD';
 
 spamassassin: spamassassin.raw
-	$(PERL) build/preprocessor $(FIXBYTES) $(FIXVARS) $(FIXBANG) -i$? -o$@
-	$(CHMOD) $(PERM_RWX) $@
+	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -i$? -o$@
 
 sa-learn: sa-learn.raw
-	$(PERL) build/preprocessor $(FIXBYTES) $(FIXVARS) $(FIXBANG) -i$? -o$@
-	$(CHMOD) $(PERM_RWX) $@
+	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -i$? -o$@
 
 spamd/spamd: spamd/spamd.raw
-	$(PERL) build/preprocessor $(FIXBYTES) $(FIXVARS) $(FIXBANG) -i$? -o$@
-	$(CHMOD) $(PERM_RWX) $@
+	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -i$? -o$@
 
 spamd/libspamc.so: spamd/binaries.mk $(SPAMC_SOURCES)
 	$(MAKE) -f spamd/binaries.mk $@
@@ -383,15 +972,18 @@ qmail/qmail-spamc: spamd/binaries.mk $(SPAMC_SOURCES)
 	$(MAKE) -f spamd/binaries.mk $@
 
 spamd/binaries.mk: spamd/configure
-	cd spamd; ./configure --enable-ssl=$(ENABLE_SSL)
+	cd spamd; ./configure --prefix="$(I_PREFIX)" --sysconfdir="$(I_SYSCONFDIR)" --datadir="$(I_DATADIR)" --enable-ssl="$(ENABLE_SSL)"
 
-inst_cfs:
-	-$(MKPATH) $(PKG_LOCAL_RULES_DIR)
-	$(PERL) -e "use File::Copy; (-f '$(PKG_LOCAL_RULES_DIR)/local.cf') or copy ('rules/local.cf', '$(PKG_LOCAL_RULES_DIR)/local.cf');"
-	$(MKPATH) $(PKG_DEF_RULES_DIR)
-	$(RM_RF) $(PKG_DEF_RULES_DIR)/*
-	$(PERL) build/preprocessor $(FIXVARS) -m$(PERM_RW) -Irules -O$(PKG_DEF_RULES_DIR) $(RULES)
-	$(CHMOD) $(PERM_RWX) $(PKG_DEF_RULES_DIR)
+conf__install:
+	-$(MKPATH) $(B_CONFDIR)
+	$(PERL) -MFile::Spec -MFile::Copy \
+	  -e "copy(qw{rules/local.cf}, qw{$(B_CONFDIR)/local.cf}) unless -f qw{$(B_CONFDIR)/local.cf};"
+
+data__install:
+	-$(MKPATH) $(B_DATADIR)
+	$(PERL) -e "map unlink, <$(B_DATADIR)/*>"
+	$(PREPROCESS) $(FIXVARS) -m$(PERM_RW) -Irules -O$(B_DATADIR) $(RULES)
+	$(CHMOD) $(PERM_RWX) $(B_DATADIR)
 
 text_html_doc: made-doc-stamp
 	$(NOOP)
@@ -399,12 +991,12 @@ text_html_doc: made-doc-stamp
 doc:
 	$(MKPATH) $@
 
-made-doc-stamp: doc#. ($gotpods ? q# $(MAN1PODS) $(MAN3PODS) $(EXTRAPODS)
+made-doc-stamp: doc $(MAN1PODS) $(MAN3PODS) $(EXTRAPODS)
 	$(PERL) build/convert_pods_to_doc $(MAN1PODS) $(MAN3PODS) $(EXTRAPODS)
-	# : '') . q#
 	$(TOUCH) made-doc-stamp
 	$(RM_F) pod2htm*
+  EOD
 
-#;
-
+  clean_MY_globals($self);
+  return $code;
 }

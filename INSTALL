@@ -54,7 +54,7 @@ http://spamassassin.org/ , and install that, like so:
 	perl Makefile.PL
 	[option: add -DSPAMC_SSL to $CFLAGS to build an SSL-enabled spamc]
 	make
-	make install				[as root]
+	make install                            [as root]
 
 To install as non-root, do something like this:
 
@@ -68,8 +68,11 @@ To install as non-root, do something like this:
 If you are running AFS, you may also need to specify INSTALLSITELIB and
 SITELIBEXP.
 
-This will install the SpamAssassin modules and rules into the ~/sausr
-and ~/saetc directories off your home directory.
+This will install the SpamAssassin modules and rules below the ~/sausr
+and ~/saetc directories off your home directory. Please see the file
+PACKAGING, sections "Changing paths in the Makefile" and "Setting further
+options on the command line" for more informations on available command
+line variables.
 
 Note that you can upgrade SpamAssassin using these instructions, as long
 as you take care to read the caveats at the top of this file.   Upgrading
@@ -142,6 +145,10 @@ target:
 	make
 	make install
 
+Please see the file PACKAGING, sections "Changing paths in the Makefile"
+and "Setting further options on the command line" for more informations
+on available command line variables.
+
 4. If you already use procmail, skip to step 6.  If not, ensure procmail
 is installed using "which procmail" or install it from www.procmail.org.
 
@@ -189,6 +196,8 @@ These modules are required for spamassassin to build:
     Without the proper version the build will fail to create the Makefile.
     This is included in Perl versions 5.6 and later.
 
+    Version 6.16 or later is recommended.
+
 
 These modules are required for spamassassin to run:
 
@@ -224,6 +233,7 @@ These modules are required for spamassassin to run:
 
     If it generates an error, you need to install the module.  If the
     command just returns, you should be ok.
+
 
 Optional Additional Modules
 ---------------------------
@@ -273,9 +283,9 @@ skipped.
     You (and any users who use Razor) will need to register an account
     to do so, like this:
 
-	# razor-client		[creates symbolic links]
-	# razor-admin -create	[creates the razor home]
-	# razor-admin -register	[registers an account]
+	# razor-client          [creates symbolic links]
+	# razor-admin -create   [creates the razor home]
+	# razor-admin -register [registers an account]
     
 
   - DCC    http://www.rhyolite.com/anti-spam/dcc/
@@ -296,7 +306,7 @@ skipped.
     The last command will give some output. One line of it should contain
     something like:
 
-        dcc.rhyolite.com,-         RTT+0 ms    anon
+	dcc.rhyolite.com,-         RTT+0 ms    anon
 
     Note that MIMEDefang users may need to set the 'dcc_path'
     configuration setting, since MIMEDefang does not set a PATH by
@@ -357,6 +367,7 @@ skipped.
 	install Mail::Audit
 	quit
 
+
   - Digest::SHA1  (from CPAN)
 
     The Digest::SHA1 module will speed up some cryptographic hash tests,
@@ -364,6 +375,7 @@ skipped.
 
     If you use Debian, you can get Digest::SHA1 from the libdigest-sha1-perl
     package.
+
 
   - Net::Ident   (from CPAN)
 

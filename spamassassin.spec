@@ -103,21 +103,13 @@ aplikacji do czytania poczty.
 %setup -q -n %{pdir}-%{pnam}-%{real_version}
 
 %build
-%{__perl} Makefile.PL INST_PREFIX=%{_prefix} INST_SYSCONFDIR=%{_sysconfdir} PREFIX=$RPM_BUILD_ROOT/%{_prefix} SYSCONFDIR=$RPM_BUILD_ROOT/%{_sysconfdir} < /dev/null
-# now override the PREFIX setting to not use %buildroot%. MakeMaker
-# does not have a better way to do this, it seems...
-%{__make} PREFIX=%{_prefix}
+%{__perl} Makefile.PL PREFIX=%{_prefix} SYSCONFDIR=%{_sysconfdir} DESTDIR=$RPM_BUILD_ROOT < /dev/null
+%{__make}
 %{__make} spamd/libspamc.so
 
 %install
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
-%makeinstall PREFIX=%buildroot/%{_prefix} \
-        INSTALLMAN1DIR=%buildroot/%{_mandir}/man1 \
-	INSTALLMAN3DIR=%buildroot/%{_mandir}/man3 \
-	INSTALLSITEMAN1DIR=%buildroot/%{_mandir}/man1 \
-	INSTALLSITEMAN3DIR=%buildroot/%{_mandir}/man3 \
-	INSTALLVENDORMAN1DIR=%buildroot/%{_mandir}/man1 \
-	INSTALLVENDORMAN3DIR=%buildroot/%{_mandir}/man3
+%makeinstall
 install -d %buildroot/%{initdir}
 install -d %buildroot/%{_includedir}
 install -m 0755 spamd/redhat-rc-script.sh %buildroot/%{initdir}/spamassassin
@@ -178,6 +170,9 @@ if [ "$1" -ge "1" ]; then
 fi
 
 %changelog
+* Thu Sep 09 2003 Malte S. Stretz <spamassassin-contrib@msquadrat.de>
+- take advantage of the new simplified build system
+
 * Wed May 28 2003 Theo Van Dinter <felicity@kluge.net> 2.60-1
 - updated to 2.60
 

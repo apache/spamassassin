@@ -29,6 +29,9 @@ endif
 
 PERL = /usr/bin/perl
 
+PREFIX     = /usr
+SYSCONFDIR = /etc
+
 packagea = spamc
 packagei = spamassassin
 
@@ -40,13 +43,9 @@ configure-stamp:
 	dh_testdir
 
 	perl Makefile.PL INSTALLDIRS=vendor \
-	 PREFIX=$(CURDIR)/debian/$(packagei)/usr \
-	 VENDORPREFIX=$(CURDIR)/debian/$(packagei)/usr \
-	 SYSCONFDIR=$(CURDIR)/debian/$(packagei)/etc \
-	 INST_PREFIX=/usr INST_SYSCONFDIR=/etc \
-	 PKG_LOCAL_RULES_DIR=$(CURDIR)/debian/$(packagei)/etc/spamassassin \
-	 LOCAL_RULES_DIR=/etc/spamassassin RUN_RAZOR2_TESTS=n \
-	 CONTACT_ADDRESS="the administrator of that system"
+	  PREFIX=$(PREFIX) SYSCONFDIR=$(SYSCONFDIR) \
+	  CONFDIR=$(SYSCONFDIR)/spamassassin \
+	  DESTDIR=$(CURDIR)/debian/$(packagei) < /dev/null
 
 	touch configure-stamp
 

@@ -6,10 +6,28 @@
 # which is included as the file named "License"             #
 #############################################################
 
-my $PREFIX = '@@PREFIX@@';  # substituted at 'make' time
-my $DEF_RULES_DIR = '@@DEF_RULES_DIR@@';  # substituted at 'make' time
-my $LOCAL_RULES_DIR = '@@LOCAL_RULES_DIR@@';  # substituted at 'make' time
-use lib '@@INSTALLSITELIB@@'; # substituted at 'make' time
+use vars qw(
+  $PREFIX
+  $DEF_RULES_DIR $LOCAL_RULES_DIR
+  $LIB_DIR
+);
+
+BEGIN {
+  # The values of the following vars are substituted at 'make' time
+  $PREFIX          = q{@@PREFIX@@};
+  $DEF_RULES_DIR   = q{@@DEF_RULES_DIR@@};
+  $LOCAL_RULES_DIR = q{@@LOCAL_RULES_DIR@@};
+  $LIB_DIR         = q{@@INSTALLSITELIB@@};
+
+#  foreach (qw(
+#    PREFIX
+#    DEF_RULES_DIR LOCAL_RULES_DIR
+#    LIB_DIR
+#  )) {
+#    ${$_} = '' if ${$_} =~ /^\@\@/;
+#  }
+}
+use lib $LIB_DIR;
 
 BEGIN {			# added by jm for use inside the distro
   if ( -e '../blib/lib/Mail/SpamAssassin.pm' ) {
@@ -108,7 +126,6 @@ GetOptions(
     'c'                         => \$opt{'create-prefs'},
   'daemonize!'                  => \$opt{'daemonize'},
     'd'                         => \$opt{'daemonize'},
-  'help|h'                      => \$opt{'help'},
   'listen-ip|ip-address|i=s'    => \$opt{'listen-ip'},
   'max-children|m=i'            => \$opt{'max-children'},
   'port|p=i'                    => \$opt{'port'},
@@ -141,6 +158,8 @@ GetOptions(
   'ssl'                         => \$opt{'ssl'},
   'server-key=s'                => \$opt{'server-key'},
   'server-cert=s'               => \$opt{'server-cert'},
+  'help|h'                      => \$opt{'__help'},
+  'version'                     => \$opt{'__version'},
 
   # will be stripped in future release
   'add-from!'          => sub { warn "The --add-from option has been removed\n" },
@@ -148,9 +167,30 @@ GetOptions(
   'S'                  => sub { warn "The -S option has been removed\n" },
   'stop-at-threshold!' => sub { warn "The --stop-at-threshold option has been removed\n" },
 
-) or pod2usage(-exitval => $resphash{'EX_USAGE'}, -verbose => 0);
+) or $opt{'__help'} = ($resphash{'EX_USAGE'} << 1);
 
-$opt{'help'} and pod2usage(-exitval => $resphash{'EX_USAGE'}, -verbose => 0, -message => 'For more details, use "man spamd"');
+if ($opt{'__version'}) {
+  print join("\n",
+    "SpamAssassin version " . Mail::SpamAssassin::Version() . " (daemon style)",
+    "",
+    "Perl version:",
+    map({ "  $_" } sprintf("%1.6f", $])),
+    "Library locations:",
+    map({ "  $_" } @INC),
+    "Rule locations:",
+    map({ "  $_" } ($LOCAL_RULES_DIR, $DEF_RULES_DIR)),
+    "System language:",
+    map({ "  $_" } map({ "$_=" . ($ENV{$_} || 'C') } (sort(grep {/^LC_[A-Z]+$/} keys %ENV), 'LANG'))),
+  ) . "\n";
+  exit $resphash{'EX_OK'};
+}
+if ($opt{'__help'}) {
+  pod2usage(
+    -exitval => ($opt{'__help'} >> 1) || $resphash{'EX_OK'},
+    -verbose => 0,
+    -message => 'For more details, see `man spamd`.'
+  );
+}
 
 # bug 2228: make the values of (almost) all parameters which accept file paths
 # absolute, so they are still valid after daemonize()
@@ -399,7 +439,7 @@ if ($opt{'username'}) {
     chown $uuid, -1, $opt{'socketpath'}
       || die "fatal: could not chown '$opt{'socketpath'}' to uid $uuid\n";
   }
-  
+
   # Change GID
   $) = "$ugid $ugid"; # effective gid
   $( = $ugid; # real gid
@@ -479,7 +519,7 @@ while (1) {
 
     if ($got_sighup) {
       defined($opt{'pidfile'}) and unlink($opt{'pidfile'});
-  
+
       # leave Client fds active, and do not kill children; they can still
       # service clients until they exit.  But restart the listener anyway.
       chdir($ORIG_CWD) || die "spamd restart failed: chdir failed: ${ORIG_CWD}: $!\n";
@@ -1069,7 +1109,7 @@ sub handle_user_setuid_with_sql
           logmsg "info: failed to create $spam_conf_dir for $username.";
        }
     }
-	  
+
     $spamtest->load_scoreonly_sql ($username);
 
     $spamtest->signal_user_changed ({ username => $username });
@@ -1118,7 +1158,7 @@ sub fill_qmailu_cache {
    # rather than parsing the qmail users/assign file every time a message
    # arrives, we run this once when spamd is loaded and check the files
    # modified time each query to know when to reload it.
-        
+
    my ($READ, $WRITE) = (stat($_[0]))[8,9];
    if ( $WRITE > $qu_load ) {       
       undef %qmailu;
