@@ -135,7 +135,7 @@ sub do_bug {
       if ($i == 0) {
         $i = $ctx->{default_needsmc_start};
       }
-      for (; $i < $cmt->{needsmc_end}; $i++) {
+      for (; $i <= $cmt->{needsmc_end}; $i++) {
         my $mccmt = $ctx->{cmts_by_num}->{$i};
         if ($mccmt) {
           $mccmt->{needsmc} = 1;
