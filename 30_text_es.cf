@@ -20,7 +20,6 @@ lang es describe NO_REAL_NAME		From: no incluye un nombre real
 lang es describe FROM_ENDS_IN_NUMS	From: finaliza en números
 lang es describe FROM_NO_USER		From: no tiene parte local antes de la @
 lang es describe TO_NO_USER		To: no tiene parte local antes de la @
-lang es describe PLING			El Subject tiene un signo de exclamación
 lang es describe PLING_PLING		El Subject tiene muchos signos de exclamación
 lang es describe SUBJ_HAS_UNIQ_ID	El Subject contiene un número ID único
 lang es describe UNDISC_RECIPS		Enviado a "undisclosed-recipients"
@@ -30,17 +29,12 @@ lang es describe MSGID_HAS_NO_AT	El Message-Id no tiene la @
 lang es describe MSGID_SPAMSIGN_1	El Message-Id ha sido generado por una herramienta de spam
 lang es describe INVALID_MSGID		Message-Id no válido, de acuerdo al RFC-2822
 lang es describe INVALID_DATE		Cabecera Date: inválida (tiene AM/PM)
-lang es describe SUBJ_HAS_Q_MARK	Subject: contiene un signo de interrogación
-lang es describe SUBJ_ENDS_IN_Q_MARK	Subject: finaliza en un signo de interrogación
 lang es describe ADVERT_CODE		Subject: contiene signos de publicidad
 lang es describe FRIEND_AT_PUBLIC	enviado a you@you.com o similar
 lang es describe TO_EMPTY		To: está vacío
 lang es describe REPLY_TO_EMPTY		Reply-To: está vacío
-lang es describe ALL_CAPS_SUBJECT	Encontrada cabecera SUBJECT:
-lang es describe X_EM_VER_PRESENT	Encontrada cabecera X-Em-Version:
 lang es describe NO_MX_FOR_FROM		No existe regristo MX para el dominio del From:
 lang es describe KNOWN_BAD_DIALUPS	Recibido desde conocidas fuentes de spam
-lang es describe FROM_AND_TO_SAME	From y To son la misma dirección
 lang es describe BAD_HELO_WARNING	Nombre incorrecto usado en el comando SMTP HELO
 lang es describe SUBJ_FULL_OF_8BITS	Subject está lleno de caracteres de 8-bit
 lang es describe MDAEMON_2_7_4		Received de un problemático SMTP server (MDaemon 2.7.4SP4R)
@@ -56,9 +50,7 @@ lang es describe RCVD_IN_DUL		Recibido desde dialup, visite http://www.mail-abus
 lang es describe RCVD_IN_BL_SPAMCOP_NET	Recibido desde un relay en bl.spamcop.net
 lang es describe FORGED_RCVD_FOUND	Encontrada posible cabecera forzada 'Received:'
 lang es describe YR_MEMBERSHIP_EXCH	Subject contiene 'Your Membership Exchange'
-lang es describe FROM_FORGED_HOTMAIL	Forzado From: simula ser de hotmail.com
 lang es describe LOTS_OF_CC_LINES	Montones y montones de cabeceras Cc:
-lang es describe FROM_NAME_EQ_FROM_ADDR	'From:' también usado como el nombre real del remitente
 lang es describe FORGED_HOTMAIL_RCVD	Encontrada cabecera forzada 'Received:' de hotmail.com
 lang es describe FORGED_GW05_RCVD	Encontrada cabecera forzada 'by gw05' 'Received:'
 lang es describe CHARSET_FARAWAY	El conjunto de caracteres indica un lenguaje extranjero
@@ -88,7 +80,6 @@ lang es describe PORN_6			Mencionadas imágenes XXX
 lang es describe WANTS_CREDIT_CARD      Pide detalles de la tarjeta de crédito
 lang es describe ASKS_BILLING_ADDRESS   Pide cuenta del banco
 lang es describe CYBER_FIRE_POWER       menciona Cyber FirePower!, una herramienta de spam
-lang es describe LINE_OF_YELLING        A WHOLE LINE OF YELLING DETECTED
 lang es describe MURKOWSKI_CRUFT	Old Murkowski disclaimer
 lang es describe MAIL_IN_ORDER_FORM	Contains mail-in order form
 lang es describe FOR_INSTANT_ACCESS	Botón de acceso instantáneo
@@ -103,8 +94,6 @@ lang es describe WE_HATE_SPAM           Says "We strongly oppose the use of SPAM
 lang es describe IN_ACCORDANCE_WITH_LAWS Claims to be in accordance with some Spam law
 lang es describe HR_3113                Mentions Spam law "H.R. 3113"
 lang es describe UCE_MAIL_ACT           Mentions Spam Law "UCE-Mail Act"
-lang es describe A_HREF_TO_REMOVE	Link to a URL containing "remove"
-lang es describe REMOVE_SCRIPT		URL of CGI script called "remove"
 lang es describe REMOVE_PAGE		URL of page called "remove"
 lang es describe WEB_BUGS		Image tag with an ID code to identify you
 lang es describe RELAYING_FRAME		Frame wanted to load outside URL

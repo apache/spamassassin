@@ -137,3 +137,6 @@ describe UNIFIED_PATCH          Contains what looks like a patch from diff -u
 rawbody DIFF_C_PATCH            /^[*]{3} \S+    \S{3} \S{3} .\d \d{2}:\d{2}:\d{2} \d+$/
 describe DIFF_C_PATCH           Contains what looks like a patch from diff -c
 
+body DISCLAIMER_LEGALESE        /This e?-?mail.{1,20}confidential.{1,20}legally privileged/
+describe DISCLAIMER_LEGALESE    Contains what looks like an 'E-Mail Disclaimer'
+
