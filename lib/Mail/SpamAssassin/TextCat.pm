@@ -47,44 +47,42 @@ sub classify {
   my %results;
   my $maxp = $opt_t;
   my %ngram;
-  my $rang;
+  my $rang = 1;
 
-  # create ngrams for input.
+  # create ngrams for input
   my @unknown = create_lm($input);
-  my $language = 0;
+
+  # load language models once
   if (! @lm) {
-    # load model for each language
     dbg("Loading languages file...");
     open(LM, $self->{main}->{languages_filename})
 	|| die "cannot open languages: $!\n";
-    while (<LM>) {
-      chomp;
-      push(@lm, $_);
-    }
+    local $/ = undef;
+    @lm = split(/\n/, <LM>);
     close(LM);
   }
-  # count for each language
+
+  # test each language
   for (@lm) {
+    # look for end delimiter
     if (/^0 (.+)/) {
-      my $new = $1;
+      my $language = $1;
+      my $i = 0;
+      my $p = 0;
 
-      if ($language) {
-	my ($i, $p) = (0, 0);
-	foreach my $u (@unknown) {
-	  if ($ngram{$u}) {
-	    $p = $p + abs($ngram{$u} - $i);
-	  }
-	  else {
-	    $p = $p + $maxp;
-	  }
-	  $i++;
+      # compute result for language
+      foreach my $u (@unknown) {
+	if (exists($ngram{$u})) {
+	  $p = $p + abs($ngram{$u} - $i);
 	}
-
-	$results{$language} = $p;
+	else {
+	  $p = $p + $maxp;
+	}
+	$i++;
       }
+      $results{$language} = $p;
+      # reset for next language
       %ngram = ();
-      last if $new eq "end";
-      $language = $new;
       $rang = 1;
     }
     else {
