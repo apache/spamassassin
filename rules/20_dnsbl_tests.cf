@@ -55,13 +55,13 @@ header RCVD_IN_NJABL		rbleval:check_rbl('njabl', 'dnsbl.njabl.org.')
 describe RCVD_IN_NJABL		Received via a relay in dnsbl.njabl.org
 tflags RCVD_IN_NJABL		net
 
-header RCVD_IN_NJABL_OPEN_PROXY	rbleval:check_rbl_sub('njabl', '127.0.0.2')
-describe RCVD_IN_NJABL_OPEN_PROXY	NJABL: sender is proxy/relay/formmail/spam-source
-tflags RCVD_IN_NJABL_OPEN_PROXY	net
+header RCVD_IN_NJABL_RELAY	rbleval:check_rbl_sub('njabl', '127.0.0.2')
+describe RCVD_IN_NJABL_RELAY	NJABL: sender is confirmed open relay
+tflags RCVD_IN_NJABL_RELAY	net
  	
-header RCVD_IN_NJABL_DIALUP		rbleval:check_rbl('njabl-notfirsthop', 'dnsbl.njabl.org.', '127.0.0.3')
-describe RCVD_IN_NJABL_DIALUP		NJABL: sender is on dialup/dynamic IP
-tflags RCVD_IN_NJABL_DIALUP		net
+header RCVD_IN_NJABL_DIALUP	rbleval:check_rbl('njabl-notfirsthop', 'dnsbl.njabl.org.', '127.0.0.3')
+describe RCVD_IN_NJABL_DIALUP	NJABL: sender is dialup that did non-local SMTP
+tflags RCVD_IN_NJABL_DIALUP	net
 
 # ---------------------------------------------------------------------------
 # Now, single zone BLs follow:

@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.510 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.511 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -171,6 +171,20 @@ header T_RCVD_IN_EASYNET_BLACKHOLES	rbleval:check_rbl('easynet', 'blackholes.eas
 tflags T_RCVD_IN_EASYNET_BLACKHOLES net
 header T_RCVD_IN_EASYNET_PROXIES	rbleval:check_rbl('pben', 'proxies.blackholes.easynet.nl.')
 tflags T_RCVD_IN_EASYNET_PROXIES net
+
+# NJABL sub-tests
+header T_RCVD_IN_NJABL_SPAM_SRC	rbleval:check_rbl_sub('njabl', '127.0.0.4')
+describe T_RCVD_IN_NJABL_SPAM_SRC	DNSBL: sender is confirmed spam source
+tflags T_RCVD_IN_NJABL_SPAM_SRC	net
+header T_RCVD_IN_NJABL_MULTI_STAGE	rbleval:check_rbl_sub('njabl', '127.0.0.5')
+describe T_RCVD_IN_NJABL_MULTI_STAGE	DNSBL: sent through multi-stage open relay
+tflags T_RCVD_IN_NJABL_MULTI_STAGE	net 
+header T_RCVD_IN_NJABL_CGI	rbleval:check_rbl_sub('njabl', '127.0.0.8')
+describe T_RCVD_IN_NJABL_CGI	DNSBL: sender is an open formmail
+tflags T_RCVD_IN_NJABL_CGI	net
+header T_RCVD_IN_NJABL_PROXY	rbleval:check_rbl_sub('njabl', '127.0.0.9')
+describe T_RCVD_IN_NJABL_PROXY	DNSBL: sender is an open proxy
+tflags T_RCVD_IN_NJABL_PROXY	net
 
 # OPM sub-tests
 # transfers: axfr/ixfr for trusted sites
