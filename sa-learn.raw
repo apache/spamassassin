@@ -434,7 +434,7 @@ periodically when certain criteria (listed below) are met.
 
 SpamAssassin can sync the journal and expire the DB tokens either
 manually or opportunistically.  A journal sync is due if I<--rebuild>
-is passed to sa-learn (manual), or if all of the following are true
+is passed to sa-learn (manual), or if the following is true
 (opportunistic):
 
 =over 4
@@ -443,7 +443,19 @@ is passed to sa-learn (manual), or if all of the following are true
 
 =item - the journal file exists
 
+=back
+
+and either:
+
+=over 4
+
 =item - the journal file has a size greater than bayes_journal_max_size
+
+=back
+
+or
+
+=over 4
 
 =item - at least 1 day has passed since the last journal sync
 
@@ -462,7 +474,7 @@ or if all of the following are true (opportunistic):
 
 =item - the number of tokens in the DB is > bayes_expiry_max_db_size
 
-=item - at least a 12 hr difference between the oldest and newest token atimes
+=item - there is at least a 12 hr difference between the oldest and newest token atimes
 
 =back
 
