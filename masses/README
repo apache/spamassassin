@@ -1,17 +1,139 @@
 
-This directory provides a script used to perform "mass checks" of an MH mail
-spool (mine in particular ;).   It generates summary lines like this:
+RESCORING SURVEY README
+-----------------------
 
-Y  7 /home/jm/Mail/Sapm/1382 SUBJ_ALL_CAPS,SUPERLONG_LINE,SUBJ_FULL_OF_8BITS
+The tools in this directory are used to optimise the scoring system used for
+incoming mails, using a genetic algorithm to search for optimal values.
 
-listing the path to the message, its score, and the tests that triggered on
-that mail.
+Since this works best with a very large dataset, it would be *great* if you
+(as a user) could run this and mail the results back to me.
 
-Using this info I can figure out which tests get good hits with few false
-positives, etc., and re-score the tests to optimise the ratio.
+The analysis script will not include text from the mails themselves, so
+it will not give away private details from your mail spool.  The only
+details you'll give away will be your email address (and I promise *NEVER*
+to give that out or use it for spammy stuff) -- and how many mails you
+have sitting around in folders!
 
-It's generally only interesting if you *really* want to tweak your score
-settings, and at the moment it's MH or Maildir-only for now.  But it's
-here if you want it ;)
 
---j.
+CONDITIONS
+----------
+
+    1. First of all, you must be running it on a UNIX system; it's not
+    portable to other OSes yet.  Also currently it only reads UNIX
+    mailbox format files, or MH spool directories.
+
+    2. This will not work unless you have separated the mail messages
+    you'll be analysing into separate "spam" and "non-spam" piles.  It
+    doesn't matter how many mailboxes contain spam, or how many mailboxes
+    contain non-spam; you just need to be sure you know which set is which!
+
+
+#2 is the important one there.  If you have occasional spams scattered through
+your mailboxes, the analysis will be useless.
+
+(Note: even if you have a very small number of spams so far, this is not a bad
+thing, and it's worth analysing them.  I've kept every spam I've got for the
+last 2 years, but I'm low on guaranteed-non-spam mails to analyse with.)
+
+
+HOW TO PARTICIPATE
+------------------
+
+Here's what to do:
+
+  - let's say you have 4 mailboxes, "incoming", "work", "foo" and "spam",
+    all in the ~/Mail directory.  "spam" is (obviously) the one where you
+    keep all the spam!
+
+  - run the mass-check script for the non-spam folders:
+
+	: > nonspam.log
+	./mass-check ~/Mail/incoming >> nonspam.log
+	./mass-check ~/Mail/work >> nonspam.log
+	./mass-check ~/Mail/foo >> nonspam.log
+
+  - and run it for the spam folders:
+
+	: > spam.log
+	./mass-check ~/Mail/spam >> spam.log
+
+  - Take a quick look.  You should see lines like this:
+
+.  3 /home/jm/Mail/MissedSpam/36 SUBJ_HAS_Q_MARK,WANTS_CREDIT_CARD,SUPERLONG_LINE
+
+    Each line basically lists the path to the message (or its message ID),
+    the number of hits it got, and the tests it triggered. The latter
+    is the most important info, because the GA can then tweak those tests,
+    optimising the test scores until the maximum correct diagnoses
+    are made.
+
+    As you can see, there's no indication what the mail is about -- so I
+    can't infringe your privacy!
+
+  - gzip them:
+  
+  	gzip spam.log nonspam.log
+
+  - and mail them to me. This command will mail them as attachments:
+
+        metasend -b -s "RESCORE DATA" -t rescore@jmason.org -c '' \
+		-m application/octet-stream -f spam.log.gz -f nonspam.log.gz
+
+
+That's it.  I can then take that data and run it through the evolver.
+Thanks for contributing!!
+
+
+HOW IT WORKS
+------------
+
+If you're interested, here's a quick description of the rest of the stuff
+in this directory and what they do:
+
+mass-check :
+
+  This script is used to perform "mass checks" of a set of mailboxes and/or MH
+  mail spools.  It generates summary lines like this:
+
+  Y  7 /home/jm/Mail/Sapm/1382 SUBJ_ALL_CAPS,SUPERLONG_LINE,SUBJ_FULL_OF_8BITS
+
+  or for mailboxes,
+
+  .  1 <5.1.0.14.2.20011004073932.05f4fd28@localhost> TRACKER_ID,BALANCE_FOR_LONG
+
+  listing the path to the message or its message ID, its score, and the tests
+  that triggered on that mail.
+
+  Using this info, and the genetic algorithm in evolve.cxx, I can figure out
+  which tests get good hits with few false positives, etc., and re-score the
+  tests to optimise the ratio.
+
+  This script relies on the spamassassin distribution directory living in "..".
+
+
+mass-check-for-jm :
+
+  a wrapper script for mass-check to run it over my mail archive; mostly it's a
+  large set of MH mail spools.  Only really useful if you use MH, and use the
+  same folder setup as I do ;)
+
+
+logs-to-c :
+
+  Takes the "spam.log" and "nonspam.log" files and converts them into C
+  source files and simplified data files for use by the "evolve" genetic
+  algorithm.  Called by "make" when you build the evolver.
+
+
+evolve.cxx :
+
+  Source for "evolve".  To build this, use "make".  Note that it requires
+  GAlib ( ftp://lancet.mit.edu/pub/ga/ ) unpacked in a dir called "galib245"
+  to build.  Alternatively just mail the data files to me and I'll run
+  evolve for all of us ;)
+
+continual_evolve.sh :
+
+  Continually runs the evolver, saving its results into separate files.
+  Handy for running overnight.
+

@@ -1,0 +1,214 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <iostream.h>
+#include <fstream.h>
+
+/**
+ *  Requires GAlib from http://lancet.mit.edu/ga/ to run.
+ */
+
+#include <ga/ga.h>
+#include <ga/GARealGenome.h>
+#include <ga/GARealGenome.C>
+
+extern "C" {
+#include "tmp/scores.h"
+#include "tmp/tests.h"
+}
+
+// Objective function and initializer declarations.
+float objective(GAGenome &);
+void initializer(GAGenome &);
+
+// ---------------------------------------------------------------------------
+
+int popsize = 300;		// population size
+int generations = 1500;		// generations to run
+int threshold = 5;		// threshold of spam vs. non-spam
+
+int nn, ny, yn, yy;
+int bestnn, bestny, bestyn, bestyy;
+int progiter = 0;
+
+// ---------------------------------------------------------------------------
+
+void printhits (FILE *fout) {
+  if (num_tests == 0) {
+    num_tests = 1;
+  }
+
+  fprintf (fout, "Correctly non-spam: %6d  %3.2f%%\n",
+        nn, (nn / (float) num_tests) * 100.0);
+  fprintf (fout, "Correctly spam:     %6d  %3.2f%%\n",
+        yy, (yy / (float) num_tests) * 100.0);
+  fprintf (fout, "False positives:    %6d  %3.2f%%\n",
+        ny, (ny / (float) num_tests) * 100.0);
+  fprintf (fout, "False negatives:    %6d  %3.2f%%\n",
+        yn, (yn / (float) num_tests) * 100.0);
+  fprintf (fout, "TOTAL:              %6d  %3.2f%%\n",
+        num_tests, 100.0);
+}
+
+// ---------------------------------------------------------------------------
+
+void writescores (FILE *fout) {
+  int i;
+
+  for (i = 0; i < num_scores; i++) {
+    fprintf (fout, "score %s %3.2f\n",
+		score_names[i], scores[i]);
+  }
+}
+
+// ---------------------------------------------------------------------------
+
+void counthits (GARealGenome &genome) {
+  int file, i, len;
+  float hits;
+
+  len = genome.length();
+  if (len != num_scores) {
+    cerr << "len != numscores: "<<len<<"  "<<num_scores<<endl;
+    exit(1);
+  }
+
+  // copy the new scores to the "scores" array
+  for (i = 0; i < len; i++) {
+    if (is_mutatable[i]) {
+      scores[i] = genome[i];
+    } else {
+      scores[i] = bestscores[i];	// use the standard one
+    }
+  }
+
+  nn = ny = yn = yy = 0;
+
+  for (file = 0; file < num_tests; file++) {
+    hits = 0.0;
+    for (i = num_tests_hit[file]-1; i >= 0; i--) {
+      hits += scores[tests_hit[file][i]];
+    }
+
+    if (is_spam[file]) {
+      if (hits > threshold) {
+	yy++;
+      } else {
+	yn++;
+      }
+    } else {
+      if (hits > threshold) {
+	ny++;
+      } else {
+	nn++;
+      }
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+
+void
+write_to_file (GARealGenome &genome, const char *fname) {
+  FILE *fout;
+  char namebuf[255];
+
+  counthits(genome);
+  snprintf (namebuf, 255, "%s", fname);
+  fout = fopen (namebuf, "w");
+  printhits (fout);
+  writescores (fout);
+  fclose (fout);
+}
+
+// ---------------------------------------------------------------------------
+
+int
+main (int argc, char **argv) {
+  loadscores ();
+  loadtests ();
+
+  GARandomSeed();	// use time ^ $$
+
+  // allow scores from 0.0 to 5.0 inclusive, in jumps of 0.1
+  GARealAlleleSet alleles (0.0, 5.0, 0.1,
+      		GAAllele::INCLUSIVE, GAAllele::INCLUSIVE);
+
+  GARealGenome genome(num_scores, alleles, objective);
+
+  // use the default random initialiser, the default
+  // gaussian mutator, and crossover.
+
+  // don't let the genome change its length
+  genome.resizeBehaviour (num_scores, num_scores);
+
+  // steady-state seems to give best results
+  //GASteadyStateGA ga(genome);
+  //ga.set(gaNpopulationSize, popsize);   // population size
+
+  GADemeGA ga(genome);
+  ga.nPopulations(5);
+  ga.populationSize(100);
+
+  ga.minimize();		// we want to minimize the objective
+
+  // terminate once the scores converge enough
+  //float pconv  = 0.8;          // threshhold for when we have converged
+  //int nconv    = 50;            // how many generations back to look
+  //ga.pConvergence(pconv);
+  //ga.nConvergence(nconv);
+  //ga.terminator(GAGeneticAlgorithm::TerminateUponConvergence);
+
+  ga.set(gaNpCrossover, 0.6);           // probability of crossover
+  ga.set(gaNpMutation, 0.05);           // probability of mutation
+  ga.set(gaNnGenerations, generations);        // number of generations
+  ga.set(gaNscoreFrequency, 1);         // how often to record scores
+  ga.set(gaNflushFrequency, 20);        // how often to dump scores to file
+  ga.set(gaNselectScores,               // which scores should we track?
+         GAStatistics::Maximum|GAStatistics::Minimum|GAStatistics::Mean);
+  ga.set(gaNscoreFilename, "evolve.scores");
+  ga.parameters(argc, argv);
+
+  cout << "Run this to watch progress scores:" << endl
+    	<< "\ttail -f evolve.scores" << endl;
+  cout << "evolving...\n";
+
+  int gens = 0;
+  while(!ga.done()) {
+    ga.step();
+    gens++;
+    if (gens % 20 == 0) {
+      cout << "."; cout.flush();
+
+      if (gens % 400 == 0) {
+	genome = ga.statistics().bestIndividual();
+	cout << "\nProgress: current best genome at gen " << gens << ":\n";
+	counthits(genome); printhits (stdout);
+      }
+    }
+  }
+  cout << endl;
+
+  genome = ga.statistics().bestIndividual();
+
+  cout << "Best genome found:" << endl;
+  counthits(genome);
+  printhits (stdout);
+  //cout << "Stats:\n" << ga.statistics() << endl;
+
+  write_to_file (genome, "results.evolved");
+  cout << "Scores for this genome written to \"results.evolved\"." << endl;
+  return 0;
+}
+
+// add up all the incorrect diagnoses, and use that as the fitness
+// score.  Since we're trying to minimise the objective this should
+// work OK.
+//
+float
+objective(GAGenome & c)
+{
+  GARealGenome &genome = (GARealGenome &) c;
+  counthits(genome);
+  return ((float) (yn * 1.0) + (ny * 6.0));
+}
+
