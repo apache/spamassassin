@@ -2922,25 +2922,59 @@ See C<Mail::SpamAssassin::Plugin> for more details on writing plugins.
 Include configuration lines from C<filename>.   Relative paths are considered
 relative to the current configuration file or user preferences file.
 
-=item ifplugin PluginModuleName
+=item if (conditional perl expression)
 
-Used to support conditional interpretation, based on whether a plugin module
-has been loaded successfully or not.  Lines between this and a corresponding
-C<endif> line, will be ignored unless the named plugin module has been loaded
-using C<loadplugin>.
+Used to support conditional interpretation of the configuration file. Lines
+between this and a corresponding C<endif> line, will be ignored unless the
+conditional expression evaluates as true (in the perl sense; that is, defined
+and non-0).
 
-Note that if the end of a configuration file is reached while still inside a
-C<ifplugin> scope, a warning will be issued, but parsing will restart on
+The conditional accepts a limited subset of perl for security -- just enough to
+perform basic arithmetic comparisons.  The following input is accepted:
+
+=over 4
+
+=item numbers, whitespace, arithmetic operations and grouping
+
+Namely these characters and ranges:
+
+  ( ) - + * / _ . , < = > ! ~ 0-9 whitespace
+
+=item version
+
+This will be replaced with the version number of the currently-running
+SpamAssassin engine.  Note: The version used is in the internal SpamAssassin
+version format which is C<x.yyyzzz>, where x is major version, y is minor
+version, and z is maintenance version.  So 3.0.0 is C<3.000000>, and 3.4.80 is
+C<3.004080>.
+
+=item plugin(Name::Of::Plugin)
+
+This is a function call that returns C<1> if the plugin named
+C<Name::Of::Plugin> is loaded, or C<undef> otherwise.
+
+=back
+
+If the end of a configuration file is reached while still inside a
+C<if> scope, a warning will be issued, but parsing will restart on
 the next file.
 
 For example:
 
+	if (version > 3.000000)
+	  header MY_FOO	...
+	endif
+
 	loadplugin MyPlugin plugintest.pm
 
-	ifplugin MyPlugin
+	if plugin (MyPlugin)
 	  header MY_PLUGIN_FOO	eval:check_for_foo()
 	  score  MY_PLUGIN_FOO	0.1
 	endif
+
+=item ifplugin PluginModuleName
+
+An alias for C<if plugin(PluginModuleName)>.
 
 =item require_version n.n.n
 
@@ -2949,9 +2983,9 @@ version of SpamAssassin to run.  If a different (older or newer) version
 of SpamAssassin tries to read the configuration from this file, it will
 output a warning instead, and ignore it.
 
-Note: The version must be in the internal SpamAssassin version format
-which is: x.yyyzzz.  x is major version, y is minor version, and z is
-maintenance version.  So 3.0.0 is 3.000000, and 3.4.80 is 3.004080.
+Note: The version used is in the internal SpamAssassin version format which is
+C<x.yyyzzz>, where x is major version, y is minor version, and z is maintenance
+version.  So 3.0.0 is C<3.000000>, and 3.4.80 is C<3.004080>.
 
 =cut
 

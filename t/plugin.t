@@ -26,7 +26,7 @@ tstlocalrules ("
 	ifplugin FooPlugin
 	  header SHOULD_NOT_BE_CALLED	eval:doesnt_exist()
 	endif
-	ifplugin Mail::SpamAssassin::Plugin::Test
+	if plugin(Mail::SpamAssassin::Plugin::Test)
 	  header MY_TEST_PLUGIN		eval:check_test_plugin()
 	endif
 ");
