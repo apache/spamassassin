@@ -50,7 +50,7 @@ use MIME::QuotedPrint;
 sub new {
   my $class = shift;
   $class = ref($class) || $class;
-  my %opts = @_;
+#  my %opts = @_;
 
   my $self = {
     headers		=> {},
@@ -60,9 +60,10 @@ sub new {
     header_order	=> [],
     };
 
-  foreach ( 'noexit' ) {
-    $self->{$_} = $opts{$_} if ( exists $opts{$_} );
-  }
+#  # allow callers to set certain options ...
+#  foreach ( 'noexit' ) {
+#    $self->{$_} = $opts{$_} if ( exists $opts{$_} );
+#  }
 
   bless($self,$class);
 
@@ -518,15 +519,6 @@ sub get_pristine {
 sub get_pristine_body {
   my ($self) = @_;
   return $self->{pristine_body};
-}
-
-=item ignore()
-
-=cut
-
-sub ignore {
-  my ($self) = @_;
-  exit (0) unless $self->{noexit};
 }
 
 # ---------------------------------------------------------------------------

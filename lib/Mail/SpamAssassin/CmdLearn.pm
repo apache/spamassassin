@@ -326,7 +326,6 @@ sub wanted {
     $ma = Mail::SpamAssassin::MsgParser->parse ($dataref);
   }
 
-  $ma->{noexit} = 1;
   my $status = $spamtest->learn ($ma, undef, $isspam, $forget);
   my $learned = $status->did_learn();
 
