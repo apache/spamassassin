@@ -88,5 +88,5 @@ meta FORGED_MUA_THEBAT          (__THEBAT_MUA && !__THEBAT_MSGID)
 describe FORGED_MUA_THEBAT      Forged mail pretending to be from The Bat!
 
 # forgeries of MSN Explorer.  See "20_anti_ratware.cf" for the meta subrules
-meta FORGED_USER_AGENT_MSN   (__USER_AGENT_MSN && (!__HAS_XOAT || !__HAS_XOIP))
+meta FORGED_MUA_MSN		(__USER_AGENT_MSN && (!__HAS_XOAT || !__HAS_XOIP))
 
