@@ -3017,9 +3017,21 @@ sub helo_ip_mismatch {
 
 sub check_all_trusted {
   my ($self) = @_;
-  return $self->{num_relays_trusted} 
+  return $self->{num_relays_trusted}
         && !$self->{num_relays_untrusted}
         && !$self->{num_relays_unparseable};
+}
+
+sub check_no_relays {
+  my ($self) = @_;
+  return !$self->{num_relays_trusted}
+        && !$self->{num_relays_untrusted}
+        && !$self->{num_relays_unparseable};
+}
+
+sub check_relays_unparseable {
+  my ($self) = @_;
+  return $self->{num_relays_unparseable};
 }
 
 ###########################################################################
