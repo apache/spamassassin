@@ -179,7 +179,7 @@ sub _run_hashcash {
   # the start of the SHA1 hash, according to the draft at
   # http://www.hashcash.org/draft-hashcash.txt .
   my $value = 0;
-  my $bitstring = unpack ("B*", pack ("H*", sha1_hex($hc)));
+  my $bitstring = unpack ("B*", sha1($hc));
   $bitstring =~ /^(0+)/ and $value = length $1;
 
   dbg ("hashcash token value: $value");
