@@ -1,0 +1,102 @@
+# SpamAssassin rules file: porn tests
+#
+# Please don't modify this file as your changes will be overwritten with
+# the next update. Use @@LOCAL_RULES_DIR@@/local.cf instead.
+# See 'perldoc Mail::SpamAssassin::Conf' for details.
+#
+# Note: body tests are run with long lines, so be sure to limit the
+# size of searches; use /.{0,30}/ instead of /.*/ to avoid huge
+# search times.
+#
+###########################################################################
+
+require_version @@VERSION@@
+
+###########################################################################
+
+body LARGE_COLLECTION           /\b(?:[0-9,]{5,9}|hundreds|thousands|millions|tons)\b.{0,15}(?:movies|videos?|xxx|streaming|pics?|photos?|of live|of images)\b/i
+describe LARGE_COLLECTION       Possible porn - Large Number of movies, pics
+
+body FREE_PORN                  /\bfree (?:porn|xxx|adult)/i
+describe FREE_PORN              Possible porn - Free Porn
+
+body BARELY_LEGAL               /\b(?:barely|just) legal\b/i
+describe BARELY_LEGAL           Possible porn - Barely Legal
+
+body MEGA_SITE                  /\bmega[ -]?sites?\b/i
+describe MEGA_SITE              Possible porn - Mega Porn
+
+body CUM_SHOT                   /\bcum[ -]?shots?\b/i
+describe CUM_SHOT               Possible porn - Cum Shot
+
+body ALL_CAP_PORN               /\b(?:ORGY|FUCKING|FETISH|WEBCAM|VOYEUR|ANAL|CUM|SNATCH|COCK|CUNT|PORN)\b/
+describe ALL_CAP_PORN           Possible porn - in ALL CAPS
+
+body PAY_SITE                   /\bpay[ -]?sites?\b/i
+describe PAY_SITE               Possible porn - Pay Site
+
+body SEX_FEST                   /\b(?:sex|gay|slut|whore|cum|f[\.\*u][\.\*c]k|suck|adult|xxx|teen)[ -]?fest\b/i
+describe SEX_FEST               Possible porn - Porn Fest
+
+# "live cam" is a very common nonspam phrase, removed
+body LIVE_PORN                  /\blive .{0,9}(?:fuck(?:ing)?|sex|naked|girls?|virgins?|teens?|porno?)\b/i
+describe LIVE_PORN              Possible porn - Live Porn
+
+body HARDCORE_PORN              /\bh[a\@]rd[ -]?core .{0,9}(?:teen|virgin|cheerleader|amat(?:eu|ue)r)|\bextreme h[a\@]rdcore/i
+describe HARDCORE_PORN          Possible porn - Hardcore Porn
+
+body HOT_NASTY          /\b(?:horny|nasty|hot|wild|young|horniest|nastiest|hottest|wildest|youngest|naughty|dirtiest|slutty|kinky|lusty|extreme|xxx+)\b.{0,9}\b(?:virgin|asian|cheerleader|sex|selection|fuck|fucking|anal\b|lesb(?:ian|o)|incest|chicks?|pics|movies|video|gay\b|porn|h[a\@]rdcore|schoolgirls|amateur|slut|adult|cum|xxx|sites?|hotties|shit)/i
+describe HOT_NASTY              Possible porn - Hot, Nasty, Wild, Young
+
+body BEST_PORN			/\b(?:best|biggest|largest|most|free|ultimate)\b.{0,9}\b(?:virgins?|anal\b|lesbians?|incest|porno?|h[a\@]rdcore|sluts?|xxx+)/i
+describe BEST_PORN		Possible porn - Best, Largest Porn Collections
+
+body NASTY_GIRLS                /\b(?:horniest|nasty|nastiest|hottest|wildest|slutty|xxx+)\b.{0,9}\b(?:girl|women|teen|babe)/i
+describe NASTY_GIRLS            Possible porn - Nasty Girls
+
+body AMATEUR_PORN               /\bamateur .{0,9}(?:sex|porn|star|sites?|college|babes|action|pics|trash|gang|rape)|(?:real|best) amateur/i
+describe AMATEUR_PORN           Possible porn - Amateur Porn
+
+body CELEBRITY_PORN             /\b(?:celebrity|celebrities|celebs).{0,15}(?:sex|porn|pics|caught|nude|exposed|content)|(?:steamy|hot|nude|shocking|free|h[a\@]rdcore) (?:celebrity|celebrities|celebs)\b/i
+describe CELEBRITY_PORN         Possible porn - Celebrity Porn
+
+body ADULT_SITE                 /\badult.{0,9}(?:entertainment|sites?|industry|only|business|membership)/i
+describe ADULT_SITE             Possible porn - Adult Web Sites
+
+body MUST_BE_18                 /\bmust be (?:at least|over) 18\b/i
+describe MUST_BE_18             Possible porn - Must be 18
+
+body INSTANT_ACCESS             /\binstant access\b/i
+describe INSTANT_ACCESS         Possible porn - Offers Instant Access
+
+body RAPE                       /\b(?:virgin|gang|teen|amateur) rape|rape (?:sites?|sex)\b/i
+describe RAPE                   Possible porn - Rape
+
+body LESBIAN                    /\b(?:xxx|horny|hot|young) lesbian|lesbian (?:sites?|action|bitch)/i
+describe LESBIAN                Possible porn - Lesbian Site
+
+body  PORN_PASSWORD             /\bporn password/i
+describe PORN_PASSWORD          Possible porn - Porn Password
+
+# (contrib: skod)
+body PORN_6			/\b(?:\d+\+? xxx pictures|xxx photos?)\b/i
+describe PORN_6			Possible Porn - XXX Photos
+
+body PORN_MEMBERSHIP            /\b(?:vip|adult|porn|x.rated) membership/i
+describe PORN_MEMBERSHIP        Possible Porn - Porn membership
+
+body PORN_GALLERIES             /\bhuge galleries\b/i
+describe PORN_GALLERIES         Possible porn - Galleries of Pictures
+
+body PORN_15                    /(?:college|eating|licking|spears|tight|wet|shaved|voyeur|young|teen(?:age)?).{0,16}pussy/i
+describe PORN_15 		Possible porn - various types of feline
+
+body PORN_16                    /(?:nasty|teen|dir(?:ty|iest)?|little).{0,16}\bsluts?/i 
+describe PORN_16 		Possible porn - nasty, dirty, little etc.
+
+body LOTS_OF_STUFF              /\b(?:\d{1,3}[,\.])+\d{3}.{0,20}\b(?:pics|pictures|images|photos|movies)/i         
+describe LOTS_OF_STUFF          Thousands or millions of pics/movies/etc
+
+body DISGUISE_PORN              /\b(c[*0]cks?|d[1*]cks?|h[0*]rny|b[1*]tch(?:es)|f[*0]ckk?ed|p[*]ssy|p[*]ssies)\b/i
+describe DISGUISE_PORN          Attempts to disguise porn words
+
