@@ -73,12 +73,15 @@ sub mass_check_mh_tar_file {
 sub mass_check_mh_folder {
   my $folder = shift;
   my @files = <$folder/[0-9]*>;
-  foreach my $mail (sort sortbynum @files) {
+  foreach my $mail (@files) {
     if ($mail =~ /\.gz$/) {
+      next if `gunzip -c $mail|wc -c` > 250_000; #skip messages bigger than 250k
       open (STDIN, "gunzip -cd $mail |") or warn "gunzip $mail failed: $@";
     } elsif ($mail =~ /\.bz2$/) {
+      next if `bzip2 -dc $mail|wc -c` > 250_000; #skip messages bigger than 250k
       open (STDIN, "bzip2 -cd $mail |") or warn "bunzip2 $mail failed: $@";
     } else {
+      next if `wc -c $mail` > 250_000; #skip messages bigger than 250k
       open (STDIN, "<$mail") or warn "open $mail failed: $@";
     }
     my $ma = Mail::Audit->new();
