@@ -3,7 +3,7 @@ package Mail::SpamAssassin::DirBasedAddrList;
 
 use strict;
 
-use Mail::SpamAssassin;
+use Mail::SpamAssassin::PersistentAddrList;
 use File::Basename;
 use File::Path;
 
@@ -35,6 +35,7 @@ sub new_checker {
   };
 
   $self->{dir} = $main->{conf}->{auto_whitelist_dir};
+  $self->{mode} = oct ($main->{conf}->{auto_whitelist_file_mode});
 
   bless ($self, $class);
   $self;
@@ -63,9 +64,11 @@ sub get_addr_entry {
   my $permfile = $self->{dir}."/permanent/$sub1/$sub2/$sub3";
   my $accumfile = $self->{dir}."/accumulator/$sub1/$sub2/$sub3/$safe";
 
+  dbg ("auto-whitelist (dir-based): permanent=$permfile, accumulator=$accumfile");
+
   my $entry = {
-	addr			=> $addr
-	permanent_path		=> $permfile
+	addr			=> $addr,
+	permanent_path		=> $permfile,
 	accumulator_path	=> $accumfile
   };
 
@@ -86,6 +89,7 @@ sub get_addr_entry {
   }
 
 gotit:
+  dbg ("auto-whitelist (dir-based): $addr scores $count");
   $entry->{count} = $count;
   return $entry;
 }
@@ -99,12 +103,17 @@ sub increment_accumulator_for_entry {
   my $dir = dirname ($path);
 
   if (!-d $dir) {
-    mkpath ($dir, 0, 0700) or warn "mkpath $dir failed";
+    if (!mkpath ($dir, 0, $self->{mode})) {
+      warn "auto-whitelist: mkpath $dir failed\n";
+      return;
+    }
   }
 
+  my $oldmask = umask ($self->{mode} ^ 0777);
   open (OUT, ">>$path") or warn "cannot append to $path failed";
-  print OUT time()."\n";
+  print OUT "x\n";
   close OUT or warn "close append to $path failed";
+  umask $oldmask;
 }
 
 ###########################################################################
@@ -116,17 +125,24 @@ sub add_permanent_entry {
   my $dir = dirname ($path);
 
   if (!-d $dir) {
-    mkpath ($dir, 0, 0700) or warn "mkpath $dir failed";
+    if (!mkpath ($dir, 0, $self->{mode})) {
+      warn "auto-whitelist: mkpath $dir failed\n";
+      return;
+    }
   }
 
+  my $oldmask = umask ($self->{mode} ^ 0777);
   open (OUT, ">>$path") or warn "cannot append to $path failed";
-  print OUT $entry->{addr};
+  print OUT $entry->{addr}."\n";
   close OUT or warn "close append to $path failed";
+  umask $oldmask;
 
-  unlink ($entry->{accumulator_path})
-  		or warn "unlink $entry->{accumulator_path} failed";
+  my $old = $entry->{accumulator_path};
+  if (-f $old) { unlink ($old) or warn "unlink $old failed"; }
 }
 
 ###########################################################################
+
+sub dbg { Mail::SpamAssassin::dbg (@_); }
 
 1;

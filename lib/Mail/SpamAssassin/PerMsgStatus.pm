@@ -76,6 +76,8 @@ sub check {
   # we can then immediately submit to spamblocking services.
   # Also, if parts of the message contain encoded bits (quoted-printable
   # or base64), we test *both*.
+  #
+  # TODO: change this to do whitelist/blacklists first? probably a plan
 
   $self->remove_unwanted_headers();
 
@@ -130,8 +132,13 @@ sub check {
   			" required=".$self->{conf}->{required_hits});
   $self->{is_spam} = ($self->{hits} >= $self->{conf}->{required_hits});
 
-  if ($self->{conf}->{use_terse_report})
-  {
+  # add it to the auto-whitelist if it's not spam
+  if (!$self->{is_spam} && defined $self->{auto_whitelist}) {
+    $self->{auto_whitelist}->increment_pass_accumulator();
+  }
+  $self->{auto_whitelist}->finish();		# done with this now
+
+  if ($self->{conf}->{use_terse_report}) {
     $_ = $self->{conf}->{terse_report_template};
   } else {
     $_ = $self->{conf}->{report_template};

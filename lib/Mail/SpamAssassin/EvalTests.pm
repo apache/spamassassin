@@ -8,6 +8,7 @@ package Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Dns;
 use Mail::SpamAssassin::Locales;
+use Mail::SpamAssassin::AutoWhitelist;
 use IO::Socket;
 use Carp;
 use strict;
@@ -300,6 +301,7 @@ sub word_is_in_dictionary {
   $word =~ s/\s+$//;
   return 0 if ($word =~ /[^a-z]/);
 
+  # handle a few common "blah blah blah (comment)" styles
   return 0 if ($word =~ /ing$/);	# amusing
   return 0 if ($word =~ /nny$/);	# funny
 
@@ -360,6 +362,24 @@ sub check_for_spam_reply_to {
   if ($ratio1 > 2.0 && $ratio2 > 2.0) { return 1; }
 
   return 0;
+}
+
+###########################################################################
+
+sub check_for_auto_whitelist {
+  my ($self) = @_;
+
+  my $addr = lc $self->get ('From:addr');
+  if ($addr !~ /\S/) { return 0; }
+
+  my $list = Mail::SpamAssassin::AutoWhitelist->new ($self->{main});
+  $self->{auto_whitelist} = $list;
+
+  if ($list->check_address ($addr)) {
+    return 1;
+  }
+
+  0;
 }
 
 ###########################################################################

@@ -20,7 +20,15 @@ sub new {
 
   my $self = {
     'main'		=> $main,
+    'threshold'		=> 3
   };
+
+  if (!defined $self->{main}->{pers_addr_list_factory}) {
+    $self->{checker} = undef;
+  } else {
+    $self->{checker} =
+  	$self->{main}->{pers_addr_list_factory}->new_checker ($self->{main});
+  }
 
   bless ($self, $class);
   $self;
@@ -28,22 +36,67 @@ sub new {
 
 ###########################################################################
 
-sub check_and_inc_addr {
+sub check_address {
   my ($self, $addr) = @_;
 
-  my $checker =
-  	$self->{main}->{pers_addr_list_factory}->new_checker ($self->{main});
-
-  my $entry = $checker->get_addr_entry ($addr);
-  my $ok = 0;
-  if ($entry->{count} >= 3) {
-    $ok = 1; $checker->add_permanent_entry ($entry);
-  } else {
-    $checker->increment_accumulator_for_entry ($entry);
+  if (!defined $self->{checker}) {
+    return 0;		# no factory defined; we can't check
   }
 
-  $checker->finish();
-  return $ok;
+  $self->{entry} = $self->{checker}->get_addr_entry ($addr);
+
+  if ($self->{entry}->{count} >= $self->{threshold}) {
+    $self->{already_in_whitelist} = 1;
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+###########################################################################
+
+sub increment_pass_accumulator {
+  my ($self) = @_;
+
+  if (!defined $self->{checker}) {
+    return 0;		# no factory defined; we can't check
+  }
+
+  if (!$self->{already_in_whitelist}) {
+    if ($self->{entry}->{count} >= $self->{threshold}) {
+      $self->{checker}->add_permanent_entry ($self->{entry});
+    } else {
+      $self->{checker}->increment_accumulator_for_entry ($self->{entry});
+    }
+  }
+}
+
+###########################################################################
+
+sub add_known_good_address {
+  my ($self, $addr) = @_;
+
+  if (!defined $self->{checker}) {
+    return 0;		# no factory defined; we can't check
+  }
+
+  # this could be short-circuited, but for now I can't see a need.
+  # other backend implementors can have a go, if they do.
+
+  my $entry = $self->{checker}->get_addr_entry ($addr);
+  if ($entry->{count} < $self->{threshold}) {
+    $self->{checker}->add_permanent_entry ($entry);
+  }
+  return 1;
+}
+
+###########################################################################
+
+sub finish {
+  my $self = shift;
+
+  if (!defined $self->{checker}) { return; }
+  $self->{checker}->finish();
 }
 
 ###########################################################################
