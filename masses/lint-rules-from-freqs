@@ -163,6 +163,10 @@ sub readrules {
     while (<IN>) {
       s/#.*$//g; s/^\s+//; s/\s+$//; next if /^$/;
 
+      # make all the foo-bar stuff foo_bar
+      1 while s/^(\S+)-/\1_/g;
+      1 while s/^(lang\s+\S+\s+\S+)-/\1_/g;
+
       my $lang = '';
       if (s/^lang\s+(\S+)\s+//) {
         $lang = $1; $langs{$1} = 1;
@@ -175,19 +179,20 @@ sub readrules {
         $score{$2} ||= 1.0;
         $tflags{$2} ||= '';
         $descfile{$2} ||= $file;       # a rule with no score or desc is OK
+	$description{$2}->{$lang} = undef;
 
         if (/^body\s+\S+\s+eval:/) {
           # ignored
         } elsif (/^body\s+\S+\s+(.*)$/) {
           my $re = $1;
 
-          if ($re =~ /[^\\]\([^\?]/) { 
+	  # If there's a ( in a rule where it should be (?:, flag it.
+	  # but ignore [abc(] ...
+          if ($re =~ /[^\\]\([^\?]/ && $re !~ /\[[^\]]*[^\\]\(/) { 
             print "warning: non-(?:...) capture in regexp in $file: $_\n";
           }
-          if ($re =~ /([^\\])[\*\+]/) { 
-            if ($1 eq '.') {
-              print "warning: .* in regexp in $file: $_\n";
-            }
+          if ($re =~ /\.[\*\+]/) { 
+            print "warning: .* in regexp in $file: $_\n";
           }
           if ($re =~ /[^\\]\{(\d*),?(\d*?)\}/) {
             if ($1 > 120 || $2 > 120) {
@@ -196,10 +201,11 @@ sub readrules {
           }
         }
 
-      } elsif (/^describe\s+(\S+)\s+/) {
+      } elsif (/^describe\s+(\S+)\s+(.*?)\s*$/) {
         $rulesfound{$1} = 1;
         $descfile{concat_rule_lang ($1, $lang)} ||= $file;
         $descfile{$1} ||= $file;
+	$description{$1}->{$lang} = $2;
       } elsif (/^tflags\s+(\S+)\s+(.+)$/) {
         $rulesfound{$1} = 1;
         $tflags{$1} = $2;
@@ -210,10 +216,13 @@ sub readrules {
         $scorefile{concat_rule_lang ($1, $lang)} = $file;
         $scorefile{$1} = $file;
         $score{$1} = $2;
-      } elsif (/^(clear-report-template|clear-spamtrap-template|report|spamtrap|
-                clear-terse-report-template|terse-report|
+      } elsif (/^(clear_report_template|clear_spamtrap_template|report|spamtrap|
+                clear_terse_report_template|terse_report|
                 required_hits|ok_locales|ok_languages|test|lang|
-                spamphrase|whitelist_from|require_version
+                spamphrase|whitelist_from|require_version|
+		clear_unsafe_report_template|unsafe_report|
+		auto_learn_threshold_nonspam|auto_learn_threshold_spam|
+		auto_learn
                 )/x) {
         next;
       } else {
@@ -240,8 +249,10 @@ sub lintrules {
     $possible_rename_matches{$rule} = $match;
   }
 
-  foreach my $lang (undef, @langsfound) {
+  foreach my $lang ('', @langsfound) {
     foreach my $baserule (@rulesfound) {
+      next if ( $baserule =~ /^__/ || $baserule =~ /^T_/ );
+
       my $rule = concat_rule_lang ($baserule, $lang);
       my $f = $descfile{$rule};
       my $warned = '';
@@ -253,7 +264,26 @@ sub lintrules {
         $warned .= ' lamedesc';
       }
 
-      my $f = $scorefile{$rule};
+	# Check our convention for rule length
+	if ( (($lang ne '' && defined($rulefile{$rule})) || ($lang eq '' && defined ($rulefile{$baserule}))) && length $baserule > 22 ) {
+	  print "warning: $baserule has a name longer than 22 chars: $f\n";
+	}
+ 	# Check our convention for rule length
+	if ( (($lang ne '' && defined($rulefile{$rule})) || ($lang eq '' && defined ($rulefile{$baserule}))) && defined $description{$baserule}->{$lang} && length $description{$baserule}->{$lang} > 50 ) {
+	  print "warning: $baserule has a description longer than 50 chars: $f\n";
+	}
+
+      # lang rule trumps normal rule
+      $f = $rulefile{$rule} || $rulefile{$baserule};
+      # if the rule exists, and the language/rule description doesn't exist ...
+      if ( defined $f && !defined $description{$baserule}->{$lang} )
+      {
+        print "warning: $baserule exists, ",( $lang ne '' ? "lang $lang, " : "" ),"but has no description: $f\n";
+        $warned .= ' lamedesc';
+      }
+
+
+      $f = $scorefile{$rule};
       if (defined $f && !defined ($rulefile{$rule})
                 && !defined ($rulefile{$baserule}))
       {

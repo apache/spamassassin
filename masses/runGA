@@ -1,0 +1,64 @@
+#!/bin/sh
+
+SCORESET="3"
+NAME="set$SCORESET"
+
+if [ ! -f "ORIG/ham-$NAME.log" -o ! -f "ORIG/spam-$NAME.log" ]; then
+	echo "Couldn't find logs for $NAME" >&2
+	exit 1
+fi
+
+if [ "x$1" = "x" ]; then
+echo "[Doing a scoreset $SCORESET GA run]"
+
+# Clean out old runs
+echo "[Cleaning up]"
+rm -rf ../rules/99_tvd.cf spam.log nonspam.log ham.log NSBASE SPBASE tmp make.output freqs craig-evolve.scores \
+	GA-$NAME.out GA-$NAME.scores GA-$NAME.validate
+make clean >/dev/null
+
+# Generate 90/10 split logs
+echo "[Generating 90/10 split ham]"
+mkdir NSBASE SPBASE
+cd NSBASE
+../tenpass/split-log-into-buckets 10 < ../ORIG/ham-$NAME.log > /dev/null
+cat split-[1-9].log > nonspam.log
+rm -f split-[1-9].log
+mv split-10.log nonspam-validate.log
+
+echo "[Generating 90/10 split spam]"
+cd ../SPBASE
+../tenpass/split-log-into-buckets 10 < ../ORIG/spam-$NAME.log > /dev/null
+cat split-[1-9].log > spam.log
+rm -f split-[1-9].log
+mv split-10.log spam-validate.log
+cd ..
+
+echo "[Setting up for GA run]"
+# Ok, setup for a run
+ln -s SPBASE/spam.log .
+ln -s NSBASE/nonspam.log .
+ln -s NSBASE/nonspam.log ham.log
+
+echo "[Generating evolve]"
+# Generate evolve with full logs
+make -j `cpucount` SCORESET=$SCORESET > make.output 2>&1
+
+( echo "[GA run start]" ; pwd ; date ; \
+./evolve -b 20; \
+mv craig-evolve.scores GA-$NAME.scores ; \
+echo "[GA run end]" ; pwd ; date ) | tee GA-$NAME.out
+
+else
+
+# This needs to have 50_scores.cf in place first ...
+echo "[GA validation results]"
+./logs-to-c --spam=SPBASE/spam-validate.log \
+	--nonspam=NSBASE/nonspam-validate.log \
+	--count --cffile=../rules --scoreset=$SCORESET | tee GA-$NAME.validate
+
+echo "[STATISTICS file generation]"
+./mk-baseline-results $SCORESET | tee GA-$NAME.statistics
+fi
+
+exit 0
