@@ -150,6 +150,7 @@ sub new {
   $self->{allow_user_rules} = 0;
   $self->{user_rules_to_compile} = 0;
   $self->{fold_headers} = 1;
+  $self->{always_add_headers} = 1;
 
   $self->{dcc_path} = undef; # Browse PATH
   $self->{dcc_body_max} = 999999;
@@ -507,6 +508,18 @@ This can be disabled here.
 
    if (/^fold[-_]headers\s+(\d+)$/) {
      $self->{fold_headers} = $1+0; next;
+   }
+
+=item always_add_headers { 0 | 1 }      (default: 1)
+
+By default, X-Spam-Status (and optionally X-Spam-Level) will be added
+to all messages scanned by SpamAssassin.  If you don't want to add the
+headers to non-spam, set this value to 0.
+
+=cut
+
+   if (/^always[-_]add[-_]headers\s+(\d+)$/) {
+     $self->{always_add_headers} = $1+0; next;
    }
 
 =item spam_level_stars { 0 | 1 }        (default: 1)
