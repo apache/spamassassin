@@ -201,23 +201,44 @@ body     T_RM_BPT_LONGWORDS_10_10_A /\b(?:[a-z]{10,}\s+){10}/
 # NNN-NNN-NNN-NNN.fibertel.com.ar
 # NN.NN.NNN.NNN.ap.yournet.ne.jp
 # NN.NNN.NN-NN.rev.gaoland.net
+# vaise-1-82-67-44-166.fbx.proxad.net [82.67.44.166]
+# lns-vlq-11-62-147-186-141.adsl.proxad.net [62.147.186.141]
+# dsl-200-95-109-107.prod-infinitum.com.mx [200.95.109.107]
+# port-212-202-77-203.reverse.qsc.de [212.202.77.203]
+# pool-151-203-32-68.bos.east.verizon.net [151.203.32.68]
+# c-67-164-133-216.client.comcast.net [67.164.133.216]
+# 200-171-228-6.customer.telesp.net.br [200.171.228.6]
+# modemcable090.28-201-24.mc.videotron.ca [24.201.28.90]
+# 80-218-47-160.dclient.hispeed.ch [80.218.47.160]
+# cdm-68-226-239-16.laft.cox-internet.com [68.226.239.16]
+# d53-64-35-171.nap.wideopenwest.com [64.53.171.35]
+# 74.67-201-80.adsl.skynet.be [80.201.67.74]
+# 12-218-225-223.client.mchsi.com [12.218.225.223]
 # (require an alpha first, as legit HELO'ing-as-IP-address is hit otherwise)
-header T_HELO_DYNAMIC_IPADDR X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[a-z]\S*\d+\D\d+\D\d+\D\d+\D[^\.]*\.\S+\.\S+/i
-header T_HELO_DYNAMIC_IPADDR2 X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\d+\D\d+\D\d+\D\d+\D[^\.]*\.\S+\.\S+/i
+header T_HELO_DYNAMIC_IPADDR X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[a-z]\S*\d+[^\d\s]\d+[^\d\s]\d+[^\d\s]\d+[^\d\s][^\.]*\.\S+\.\S+/i
+header T_HELO_DYNAMIC_IPADDR2 X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\d+[^\d\s]\d+[^\d\s]\d+[^\d\s]\d+[^\d\s][^\.]*\.\S+\.\S+/i
 # dhcp024-210-034-053.columbus.rr.com [24.210.34.53]
-header T_HELO_DYNAMIC_RR   X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S*(?:docsis|cable|dsl|dhcp|cpe)\S*\d+\D+\d+/i
+# catv-506237d8.miskcatv.broadband.hu [80.98.55.216]
+# node-c-8b22.a2000.nl
+# cm89.omega139.maxonline.com.sg
+# cm114.gamma208.maxonline.com.sg
+header T_HELO_DYNAMIC_DHCP X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S*(?:cm|catv|docsis|cable|dsl|dhcp|cpe|node)\S*\d+[^\d\s]+\d+/i
+# wiley-170-10231.roadrunner.nf.net [205.251.210.249]
+header T_HELO_DYNAMIC_RR2   X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[a-z]+-\d{1,3}-\d{1,5}\.roadrunner/i
 # fia83-8.dsl.hccnet.nl [62.251.8.83]
 # fia160-115-100.dsl.hccnet.nl [80.100.115.160]
-header T_HELO_DYNAMIC_HCC   X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S*\d+\D+\d+\S*\.(?:docsis|cable|dsl|adsl|dhcp|cpe)\./i
+header T_HELO_DYNAMIC_HCC   X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S*\d+[^\d\s]+\d+\S*\.(?:docsis|cable|dsl|adsl|dhcp|cpe)\./i
 # f88114.upc-f.chello.nl [80.56.88.114]
 header T_HELO_DYNAMIC_CHELLO X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S+upc-f\.chello\.nl/i
 # h0002a5d76857.ne.client2.attbi.com [65.96.12.59]
 header T_HELO_DYNAMIC_ATTBI  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S+\d+\S+\.client2\.attbi\.com/i
-# pcp04024417pcs.toresd01.pa.comcast.net [68.86.206.126]
-# bgp542174bgs.ewndsr01.nj.comcast.net[68.38.144.91]
 # CPE0004e2372711-CM000a73666706.cpe.net.cable.rogers.com
 # CPE00e0184f0eba-CM014490118324.cpe.net.cable.rogers.com [24.43.109.140]
 header T_HELO_DYNAMIC_ROGERS X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=CPE\d+\S+\.rogers\.com/i
+# pcp04024417pcs.toresd01.pa.comcast.net [68.86.206.126]
+# bgp542174bgs.ewndsr01.nj.comcast.net[68.38.144.91]
+# Computer-udp135632uds.union01.nj.comcast.net [68.39.99.32]
+header T_HELO_DYNAMIC_COMCAST X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[a-z-]+\d+[a-z]{3}\.[a-z0-9]+\...\.comcast/i
 # ca-morpark-cuda1-zone7-b-159.vnnyca.adelphia.net[67.23.129.159]
 # tn-greenvillecuda1cable7a-36.atlaga.adelphia.net [68.171.113.36]
 # ky-richmond2a-123.rhmdky.adelphia.net [68.71.36.123]
@@ -230,40 +251,44 @@ header T_HELO_DYNAMIC_DIALIN X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[a-z][A-F0
 # 0x50a46949.virnxx11.adsl-dhcp.tele.dk
 header T_HELO_DYNAMIC_HEXIP X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=0x[a-f0-9]{8}\./
 # 118.Red-80-35-201.pooles.rima-tde.net
-header T_HELO_DYNAMIC_SPLIT_IP X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\d+\.\S+\d+\D\d+\D\d+\D/
+header T_HELO_DYNAMIC_SPLIT_IP X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\d+\.\S+\d+[^\d\s]\d+[^\d\s]\d+[^\d\s]/
 # YahooBB219173000034.bbtec.net [219.173.0.34]
 header T_HELO_DYNAMIC_YAHOOBB X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=YahooBB/i
 # ool-18be1aaf.dyn.optonline.net [24.190.26.175]
 header T_HELO_OPTONLINE X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S+\.dyn\.optonline\.net/
-
-# TODO:
-# port-212-202-77-203.reverse.qsc.de [212.202.77.203]
-# Computer-udp135632uds.union01.nj.comcast.net [68.39.99.32]
-# lns-vlq-11-62-147-186-141.adsl.proxad.net [62.147.186.141]
-# pD9E62653.dip.t-dialin.net [217.230.38.83]
-# g1u3v7.cpe.net.cable.rogers.com [24.230.206.35]
-# h00096b2fb5ff.ne.client2.attbi.com [24.34.132.193]
-# c-67-164-133-216.client.comcast.net [67.164.133.216]
-# d53-64-35-171.nap.wideopenwest.com [64.53.171.35]
-# CM-vina5-168-207.cm.vtr.net [200.104.168.207]
 # h234n2fls32o895.telia.com [217.208.73.234]
-# vaise-1-82-67-44-166.fbx.proxad.net [82.67.44.166]
-# cpe-069-132-010-017.carolina.rr.com [69.132.10.17]
-# 200-171-228-6.customer.telesp.net.br [200.171.228.6]
-# wiley-170-10231.roadrunner.nf.net [205.251.210.249]
-# modemcable090.28-201-24.mc.videotron.ca [24.201.28.90]
+# h53n2fls32o828.telia.com
+# h116n2fls32o1111.telia.com
+# h29n1fls306o1003.telia.com
+header T_HELO_DYNAMIC_TELIA X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=h\d+n\d+fls\S+\.telia\.com/i
+# CM-vina5-168-207.cm.vtr.net [200.104.168.207]
 # CM-anto1-98-153.cm.vtr.net [200.104.98.153]
-# 80-218-47-160.dclient.hispeed.ch [80.218.47.160]
-# adsl-64-170-53-19.dsl.lsan03.pacbell.net [64.170.53.19]
-# catv-506237d8.miskcatv.broadband.hu [80.98.55.216]
-# dsl-200-95-109-107.prod-infinitum.com.mx [200.95.109.107]
-# user-0can22v.cable.mindspring.com [24.171.136.95]
-# fgwcq@74.67-201-80.adsl.skynet.be [80.201.67.74]
+header T_HELO_DYNAMIC_VTR X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=cm-[a-z]+\d+-\d+-\d+\.cm\.vtr/i
 # lnngmi06edg01-xdata2-a3.lnngmi.tds.net [134.215.229.67]
-# cdm-68-226-239-16.laft.cox-internet.com [68.226.239.16]
-# adsl-68-248-121-117.dsl.applwi.ameritech.net [68.248.121.117]
-# pool-151-203-32-68.bos.east.verizon.net [151.203.32.68]
-# 12-218-225-223.client.mchsi.com [12.218.225.223]
+# nwblwi-nrp3-l10-a671.nwblwi.tds.net
+header T_HELO_DYNAMIC_TDS X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S+-[a-z]\d+\.[a-z]{6}\.tds\.net/i
+# q2l5s51.cm.chello.no
+# ec9z5l.cm.chello.no
+header T_HELO_DYNAMIC_CHELLO_NO  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S+\.cm\.chello\.no/i
+# g225174.upc-g.chello.nl
+# a151145.upc-a.chello.nl
+# a96134.upc-a.chello.nl
+header T_HELO_DYNAMIC_CHELLO_NL  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[a-z]\d+\.upc-[a-z]\.chello\.nl/i
+# MG036162.user.veloxzone.com.br
+# MG001182.user.veloxzone.com.br
+# ba199058073.user.veloxzone.com.br
+header T_HELO_DYNAMIC_VELOX  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[a-z]{2}\d+\.user\.veloxzone\./i
+# 14824.cps.virtua.com.br
+header T_HELO_DYNAMIC_VIRTUA  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\d+\.cps\./i
+# public4-seve6-5-cust173.lond.broadband.ntl.com
+# spr1-bolt5-5-0-cust9.manc.broadband.ntl.com
+# spc1-lewi4-6-0-cust190.lond.broadband.ntl.com
+header T_HELO_DYNAMIC_NTL  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S+\d+-\d+-cust\d+\.[a-z]{4,6}\.broadband\.ntl\.com/i
+# cc27194-a.deven1.ov.home.nl
+# cp160000-a.mill1.nb.home.nl
+# cp341468-b.venra1.lb.home.nl
+header T_HELO_DYNAMIC_HOME_NL  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[a-z]{2}\d+-\S\.\S+\d\.[a-z]{2}\.home\.nl/i
+
 
 # partial messages; currently-theoretical attack
 # unsurprisingly this hits 0/0 right now.  But should we promote it anyway
@@ -750,6 +775,6 @@ body T_HTML_OBFUSCATE5_70_80 eval:html_range('t_obfuscation5_ratio','.7','.8')
 body T_HTML_OBFUSCATE5_80_90 eval:html_range('t_obfuscation5_ratio','.8','.9')
 body T_HTML_OBFUSCATE5_90_100 eval:html_range('t_obfuscation5_ratio','.9','1.0')
 
-header T_RCVD_ILLEGAL_IP    Received =~ /\b(?:(?:[01257]|22[3-9]|23[0-9]|24[0-9]|25[0-5])\.\d+\.\d+\.\d+|127\.[1-9]\.\d+\.\d+|127\.0\.[1-9]\.\d+|127\.0\.0\.(?:\d\d+|[2-9]))\b/
+header T_RCVD_ILLEGAL_IP    Received =~ /[\s\(\[\:\=](?:(?:[01257]|22[3-9]|23[0-9]|24[0-9]|25[0-5])\.\d+\.\d+\.\d+|127\.[1-9]\.\d+\.\d+|127\.0\.[1-9]\.\d+|127\.0\.0\.(?:\d\d+|[2-9]))\b/
 describe T_RCVD_ILLEGAL_IP  Received contains illegal IP address
 
