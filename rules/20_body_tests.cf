@@ -72,6 +72,8 @@ body LONG_NUMERIC_HTTP_ADDR	/http\:\/\/000\d+/is
 describe LONG_NUMERIC_HTTP_ADDR	Uses a long numeric IP address in URL
 body HTTP_USERNAME_USED		/http\:\/\/[^\s\/]+\@/is
 describe HTTP_USERNAME_USED	Uses a username in a URL
+body HTTP_WITH_EMAIL_IN_URL	/http\:\/\/\S+=[-_\+a-z0-9\.]+\@[-_\+a-z0-9\.]+\.[-_\+a-z0-9]{2,3}(?:\&|\s)/
+describe HTTP_WITH_EMAIL_IN_URL	'remove' URL contains an email address
 
 body SUPERLONG_LINE		/^[^<]{199,}$/m
 describe SUPERLONG_LINE		Contains a line >=199 characters long
@@ -187,7 +189,7 @@ body EXCUSE_13			/mail was sent to you because /i
 describe EXCUSE_13		Gives an excuse for why message was sent
 body EXCUSE_14			/you do not wish to receive further /i
 describe EXCUSE_14		Tells you how to stop further SPAM
-body EXCUSE_15			/this is not (?:spam|unsolicited)/i
+body EXCUSE_15			/this (?:|e?-?mail )is not (?:spam|unsolicited)/i
 describe EXCUSE_15		Claims to be legitimate email
 body EXCUSE_16			/have received this (?:e?-?mail|message) in error[, ]* or/
 describe EXCUSE_16		I wonder how many emails they sent in error...
