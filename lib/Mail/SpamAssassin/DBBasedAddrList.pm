@@ -45,6 +45,7 @@ sub new_checker {
 
   my $path;
 
+  my $umask = 0;
   if(defined($main->{conf}->{auto_whitelist_path})) # if undef then don't worry -- empty hash!
   {
     $path = $main->sed_path ($main->{conf}->{auto_whitelist_path});
@@ -67,11 +68,13 @@ sub new_checker {
 	 or goto failed_to_tie;
     }
   }
+  umask $umask;
 
   bless ($self, $class);
   return $self;
 
 failed_to_tie:
+  umask $umask;
   if ($self->{is_locked}) {
     Mail::SpamAssassin::Util::safe_unlock($self->{locked_file});
     $self->{is_locked} = 0;

@@ -368,9 +368,12 @@ sub accept {
     local $SIG{INT} = sub { $self->dotlock_unlock (); die "killed"; };
 
     if ($gotlock || $nodotlocking) {
+      my $umask = umask 077;
       if (!open (MBOX, ">>$file")) {
+	umask $umask;
         die "Couldn't open $file: $!";
       }
+      umask $umask;
 
       flock(MBOX, LOCK_EX) or warn "failed to lock $file: $!";
       print MBOX $self->as_string()."\n";
@@ -398,11 +401,14 @@ sub dotlock_lock {
   my $gotlock = 0;
   my $retrylimit = 30;
 
+  my $umask = 0;
   if (!sysopen (LOCK, $locktmp, O_WRONLY | O_CREAT | O_EXCL, 0644)) {
+    umask $umask;
     #die "lock $file failed: create $locktmp: $!";
     $self->{dotlock_not_supported} = 1;
     return;
   }
+  umask $umask;
 
   print LOCK "$$\n";
   close LOCK or die "lock $file failed: write to $locktmp: $!";

@@ -131,7 +131,7 @@ sub new {
   # to receive the correct values.
 
   $self->{auto_whitelist_path} = "__userstate__/auto-whitelist";
-  $self->{auto_whitelist_file_mode} = '0600';	# as string, with --x bits
+  $self->{auto_whitelist_file_mode} = '0600';
   $self->{auto_whitelist_factor} = 0.5;
 
   $self->{auto_learn} = 1;
@@ -172,7 +172,7 @@ sub new {
 
   $self->{use_bayes} = 1;
   $self->{bayes_path} = "__userstate__/bayes";
-  $self->{bayes_file_mode} = "0700";	# as string, with --x bits
+  $self->{bayes_file_mode} = "0600";
   $self->{bayes_use_hapaxes} = 1;
   $self->{bayes_use_chi2_combining} = 0;
   $self->{bayes_expiry_min_db_size} = 100000;
@@ -1788,22 +1788,22 @@ needed, chmod the log directory to 1777, and adjust later.
       $Mail::SpamAssassin::TIMELOG->{logpath}=$1; next;
     }
 
-=item auto_whitelist_file_mode		(default: 0700)
+=item auto_whitelist_file_mode		(default: 0600)
 
 The file mode bits used for the automatic-whitelist directory or file.
-Make sure this has the relevant execute-bits set (--x), otherwise
-things will go wrong.
+The resulting file will not have any execute bits set (the umask is set
+to 111).
 
 =cut
     if (/^auto[-_]whitelist[-_]file[-_]mode\s+(.*)$/) {
       $self->{auto_whitelist_file_mode} = $1; next;
     }
 
-=item bayes_file_mode		(default: 0700)
+=item bayes_file_mode		(default: 0600)
 
 The file mode bits used for the Bayesian filtering database files.
-Make sure this has the relevant execute-bits set (--x), otherwise
-things will go wrong.
+The resulting file will not have any execute bits set (the umask is set
+to 111).
 
 =cut
     if (/^bayes[-_]file[-_]mode\s+(.*)$/) {
