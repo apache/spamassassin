@@ -53,6 +53,7 @@ sub is_charset_ok_for_locales {
   return 1 if ($cs eq 'IBM852');
   return 1 if ($cs =~ /^UNICODE11UTF[78]/);	# wtf? never heard of it
   return 1 if ($cs eq 'XUNKNOWN'); # added by sendmail when converting to 8bit
+  return 1 if ($cs eq 'ISO');	# Magellan, sending as 'charset=iso 8859-15'. grr
 
   foreach my $locale (@locales) {
     if (!defined($locale) || $locale eq 'C') { $locale = 'en'; }
