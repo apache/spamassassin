@@ -298,6 +298,9 @@ sub expire_old_tokens_trapped {
   my @deleted_toks;
   my $oldest;
 
+  my $showdots = $opts->{showdots};
+  if ($showdots) { print STDERR "\n"; }
+
   foreach my $tok (keys %{$self->{db_toks}}) {
     next if ($tok eq $NSPAM_MAGIC_TOKEN
 	  || $tok eq $NHAM_MAGIC_TOKEN
@@ -318,6 +321,10 @@ sub expire_old_tokens_trapped {
       } elsif ($ts < 8 && $th < 8) {
 	$num_lowfreq++;
       }
+    }
+
+    if ($showdots && (($kept + $deleted) % 1000) == 0) {
+      print STDERR ".";
     }
   }
 
@@ -538,6 +545,8 @@ sub sync_journal {
   my $started = time();
   my $count = 0;
 
+  my $showdots = $opts->{showdots};
+
   # now read the retired journal
   open (JOURNAL, "<".$retirepath) or warn "cannot read $retirepath";
   eval {
@@ -555,6 +564,10 @@ sub sync_journal {
       } else {
 	warn "Bayes journal: gibberish: $_";
       }
+
+      if ($showdots && ($count % 1000) == 0) {
+	print STDERR ".";
+      }
     }
   };
   my $err = $@;
@@ -563,6 +576,8 @@ sub sync_journal {
   $self->untie_db();
   close JOURNAL;
   unlink ($retirepath);
+
+  if ($showdots) { print STDERR "\n"; }
 
   # handle any errors that may have occurred
   if ($err) { die $err; }
