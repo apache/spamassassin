@@ -91,7 +91,7 @@ $IS_DEVEL_BUILD = 1;            # change for release versions
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.206 2003/09/19 01:51:27 quinlan Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.207 2003/09/19 04:02:40 quinlan Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -425,16 +425,16 @@ sub learn {
   require Mail::SpamAssassin::PerMsgLearner;
   $self->init(1);
   my $mail = $self->encapsulate_mail_object ($mail_obj);
-  my $msg = Mail::SpamAssassin::PerMsgLearner->new($self, $mail, $id);
+  my $msg = Mail::SpamAssassin::PerMsgLearner->new($self, $mail);
 
   if ($forget) {
-    $msg->forget();
+    $msg->forget($id);
   } elsif ($isspam) {
     dbg("Learning Spam");
-    $msg->learn_spam();
+    $msg->learn_spam($id);
   } else {
     dbg("Learning Ham");
-    $msg->learn_ham();
+    $msg->learn_ham($id);
   }
 
   $msg;
@@ -637,7 +637,7 @@ sub report_as_spam {
 
   # learn as spam if enabled
   if ( $self->{conf}->{bayes_learn_during_report} ) {
-    $self->learn ($mail, scalar($mail->get_header("Message-Id")), 1, 0);
+    $self->learn ($mail, undef, 1, 0);
   }
 
   require Mail::SpamAssassin::Reporter;
@@ -678,7 +678,7 @@ sub revoke_as_spam {
   $mail = $self->encapsulate_mail_object ($mail);
 
   # learn as nonspam
-  $self->learn ($mail, scalar($mail->get_header("Message-Id")), 0, 0);
+  $self->learn ($mail, undef, 0, 0);
 
   require Mail::SpamAssassin::Reporter;
   $mail = Mail::SpamAssassin::Reporter->new($self, $mail, $options);

@@ -255,6 +255,7 @@ sub tie_db_writable {
   elsif ( !$found ) { # new DB, make sure we know that ...
     $self->{db_version} = $self->{db_toks}->{$DB_VERSION_MAGIC_TOKEN} = DB_VERSION;
     $self->{db_toks}->{$NTOKENS_MAGIC_TOKEN} = 0; # no tokens in the db ...
+    dbg("bayes: new db, set db version ".$self->{db_version}." and 0 tokens");
   }
 
   return 1;

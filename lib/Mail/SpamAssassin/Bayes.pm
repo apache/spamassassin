@@ -611,7 +611,7 @@ sub tokenize_mail_addrs {
 ###########################################################################
 
 sub learn {
-  my ($self, $isspam, $msg) = @_;
+  my ($self, $isspam, $msg, $id) = @_;
 
   if (!$self->{conf}->{use_bayes}) { return; }
   if (!defined $msg) { return; }
@@ -629,7 +629,7 @@ sub learn {
     }
 
     if ($ok) {
-      $ret = $self->learn_trapped ($isspam, $msg, $body);
+      $ret = $self->learn_trapped ($isspam, $msg, $body, $id);
 
       if (!$self->{main}->{learn_caller_will_untie}) {
         $self->{store}->untie_db();
@@ -648,9 +648,9 @@ sub learn {
 
 # this function is trapped by the wrapper above
 sub learn_trapped {
-  my ($self, $isspam, $msg, $body) = @_;
+  my ($self, $isspam, $msg, $body, $msgid) = @_;
 
-  my $msgid = $self->get_msgid ($msg);
+  $msgid ||= $self->get_msgid ($msg);
   my $seen = $self->{store}->seen_get ($msgid);
   if (defined ($seen)) {
     if (($seen eq 's' && $isspam) || ($seen eq 'h' && !$isspam)) {
@@ -687,13 +687,15 @@ sub learn_trapped {
 
   $self->{store}->seen_put ($msgid, ($isspam ? 's' : 'h'));
   $self->{store}->add_touches_to_journal();
+
+  dbg("bayes: Learned '$msgid'");
   1;
 }
 
 ###########################################################################
 
 sub forget {
-  my ($self, $msg) = @_;
+  my ($self, $msg, $id) = @_;
 
   if (!$self->{conf}->{use_bayes}) { return; }
   if (!defined $msg) { return; }
@@ -706,7 +708,7 @@ sub forget {
     local $SIG{'__DIE__'};	# do not run user die() traps in here
 
     if ($self->{store}->tie_db_writable()) {
-      $ret = $self->forget_trapped ($msg, $body);
+      $ret = $self->forget_trapped ($msg, $body, $id);
 
       if (!$self->{main}->{learn_caller_will_untie}) {
         $self->{store}->untie_db();
@@ -725,9 +727,9 @@ sub forget {
 
 # this function is trapped by the wrapper above
 sub forget_trapped {
-  my ($self, $msg, $body) = @_;
+  my ($self, $msg, $body, $msgid) = @_;
 
-  my $msgid = $self->get_msgid ($msg);
+  $msgid ||= $self->get_msgid ($msg);
   my $seen = $self->{store}->seen_get ($msgid);
   my $isspam;
   if (defined ($seen)) {
@@ -773,19 +775,19 @@ sub get_msgid {
   my ($self, $msg) = @_;
 
   my $msgid = $msg->get_header("Message-Id");
-  if ( !defined $msgid || $msgid eq '' ) { # generate a best effort unique id
+  if (!defined $msgid || $msgid eq '' || $msgid =~ /^\s*<\s*>.*$/) { # generate a best effort unique id
     # Use sha1(Date:, last received: and top N bytes of body)
     # where N is MIN(1024 bytes, 1/2 of body length)
     #
     my $date = $msg->get_header("Date");
-    $date = "None" if ( !defined $date || $date eq '' ); # No Date?
+    $date = "None" if (!defined $date || $date eq ''); # No Date?
 
     my @rcvd = $msg->get_header("Received");
     my $rcvd = $rcvd[$#rcvd];
-    $rcvd = "None" if ( !defined $rcvd || $rcvd eq '' ); # No Received?
+    $rcvd = "None" if (!defined $rcvd || $rcvd eq ''); # No Received?
 
     my $body = $msg->get_pristine_body();
-    if ( length($body) > 64 ) { # Small Body?
+    if (length($body) > 64) { # Small Body?
       my $keep = ( length $body > 2048 ? 1024 : int(length($body) / 2) );
       substr($body, $keep) = '';
     }
@@ -822,7 +824,7 @@ sub get_body_from_msg {
 
   if (!defined $body) {
     # why?!
-    warn "failed to get body for ".$self->{msg}->get_header("Message-Id")."\n";
+    warn "failed to get body for ".$self->get_msgid($self->{msg})."\n";
     return [ ];
   }
 

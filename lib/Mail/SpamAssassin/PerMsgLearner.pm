@@ -47,7 +47,7 @@ use vars qw{
 sub new {
   my $class = shift;
   $class = ref($class) || $class;
-  my ($main, $msg, $id) = @_;
+  my ($main, $msg) = @_;
 
   my $self = {
     'main'              => $main,
@@ -59,27 +59,24 @@ sub new {
 
   $self->{bayes_scanner} = $self->{main}->{bayes_scanner};
 
-  $id ||= $self->{msg}->get_header ("Message-Id");
-  $id ||= $self->{msg}->get_header ("Message-ID");
-  $id ||= 'no_id.$$.'.rand();
-  $id =~ s/[-\0\s\;\:]/_/gs;
-
-  $self->{id} = $id;
-
   bless ($self, $class);
   $self;
 }
 
 ###########################################################################
 
-=item $status->learn_spam()
+=item $status->learn_spam($id)
 
 Learn the message as spam.
+
+C<$id> is an optional message-identification string, used internally
+to tag the message.  If it is C<undef>, the Message-Id of the message
+will be used.  It should be unique to that message.
 
 =cut
 
 sub learn_spam {
-  my ($self) = @_;
+  my ($self, $id) = @_;
 
   if ($self->{main}->{learn_with_whitelist}) {
     $self->{main}->add_all_addresses_to_blacklist ($self->{msg});
@@ -88,43 +85,51 @@ sub learn_spam {
   # use the real message-id here instead of mass-check's idea of an "id",
   # as we may deliver the msg into another mbox format but later need
   # to forget it's training.
-  $self->{learned} = $self->{bayes_scanner}->learn (1, $self->{msg});
+  $self->{learned} = $self->{bayes_scanner}->learn (1, $self->{msg}, $id);
 }
 
 ###########################################################################
 
-=item $status->learn_ham()
+=item $status->learn_ham($id)
 
 Learn the message as ham.
+
+C<$id> is an optional message-identification string, used internally
+to tag the message.  If it is C<undef>, the Message-Id of the message
+will be used.  It should be unique to that message.
 
 =cut
 
 sub learn_ham {
-  my ($self) = @_;
+  my ($self, $id) = @_;
 
   if ($self->{main}->{learn_with_whitelist}) {
     $self->{main}->add_all_addresses_to_whitelist ($self->{msg});
   }
 
-  $self->{learned} = $self->{bayes_scanner}->learn (0, $self->{msg});
+  $self->{learned} = $self->{bayes_scanner}->learn (0, $self->{msg}, $id);
 }
 
 ###########################################################################
 
-=item $status->forget()
+=item $status->forget($id)
 
 Forget about a previously-learned message.
+
+C<$id> is an optional message-identification string, used internally
+to tag the message.  If it is C<undef>, the Message-Id of the message
+will be used.  It should be unique to that message.
 
 =cut
 
 sub forget {
-  my ($self) = @_;
+  my ($self, $id) = @_;
 
   if ($self->{main}->{learn_with_whitelist}) {
     $self->{main}->remove_all_addresses_from_whitelist ($self->{msg});
   }
 
-  $self->{learned} = $self->{bayes_scanner}->forget ($self->{msg});
+  $self->{learned} = $self->{bayes_scanner}->forget ($self->{msg}, $id);
 }
 
 ###########################################################################

@@ -284,7 +284,7 @@ sub wanted {
   }
 
   $ma->{noexit} = 1;
-  my $status = $spamtest->learn ($ma, $id, $isspam, $forget);
+  my $status = $spamtest->learn ($ma, undef, $isspam, $forget);
 
   if ($status->did_learn()) {
     $learnedcount++;
