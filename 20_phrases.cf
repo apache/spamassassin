@@ -760,8 +760,8 @@ describe OUR_COMPENSATION	Mentions their full compensation
 body OUR_STRICT_ANTI		/our strict anti/i
 describe OUR_STRICT_ANTI	Mentions their strict antipathy on something
 
-body OFFERS_ETC			/\b(?:(?=[cefmpruw])(?:wish|want|unsub|reward|receive|recurring|remove|permission|partner|further|future|e.?mail|continue|click).{0,64}){2}.{0,8}(?=[cdos])(?:special|offer|coupon|discount)s?\b/i
-describe OFFERS_ETC		Stop the offers, coupons, discounts etc!
+body SPECIAL_OFFERS		/\b(?:(?=[cefmpruw])(?:wish|want|unsub|reward|receive|recurring|remove|permission|partner|further|future|e.?mail|continue|click).{0,64}){2}.{0,8}(?=[cdos])(?:special|offer|coupon|discount)s?\b/i
+describe SPECIAL_OFFERS		Stop the offers, coupons, discounts etc!
 
 body BANG_BOSS        		/\bboss!/i
 describe BANG_BOSS        	Talks about your boss with an exclamation!
