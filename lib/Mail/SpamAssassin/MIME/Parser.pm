@@ -89,8 +89,9 @@ sub parse {
   unless ( $msg->{'type'} ) {
     $msg->{'type'} = $msg->header('content-type');
     $msg->{'type'} ||= 'text/plain';
-    $msg->{'type'} =~ s/;.*$//;            # strip everything after first semi-colon
-    $msg->{'type'} =~ s/[^a-zA-Z\/]//g;    # strip inappropriate chars
+    $msg->{'type'} =~ s/;.*$//;                    # strip everything after first semi-colon
+    $msg->{'type'} =~ s@^([^/]+/[^/]+).*$@$1@;     # only something/something ...
+    $msg->{'type'} =~ tr!\000-\040\177-\377\042\050\051\054\056\072-\077\100\133-\135!!d;    # strip inappropriate chars
   }
 
   return $msg;
@@ -116,23 +117,13 @@ sub _parse_body {
     dbg("Parse text/html");
     $self->_parse_normal( $msg, $_msg, $boundary, $body );
   }
-  elsif ( $type =~ /^multipart\/alternative/i ) {
-    dbg("Parse multipart/alternative");
-    if ( $initial ) {
-      $self->_parse_multipart_alternate( $msg, $_msg, $boundary, $body );
-    }
-    else {
-      $self->_parse_multipart_alternate( $_msg, $_msg, $boundary, $body );
-      $msg->add_body_part( $type, $_msg );
-    }
-  }
   elsif ( $type =~ /^multipart\//i ) {
     dbg("Parse $type");
     if ( $initial ) {
-      $self->_parse_multipart_mixed( $msg, $_msg, $boundary, $body );
+      $self->_parse_multipart( $msg, $_msg, $boundary, $body );
     }
     else {
-      $self->_parse_multipart_mixed( $_msg, $_msg, $boundary, $body );
+      $self->_parse_multipart( $_msg, $_msg, $boundary, $body );
       $msg->add_body_part( $type, $_msg );
     }
   }
@@ -148,97 +139,7 @@ sub _parse_body {
   }
 }
 
-sub _parse_multipart_alternate {
-  my($self, $msg, $_msg, $boundary, $body ) = @_;
-
-  $boundary ||= '';
-  dbg("m/a got boundary: $boundary");
-
-  # ignore preamble per RFC 1521, unless there's no boundary ...
-  if ( $boundary ) {
-    my $line;
-    my $tmp_line = @{$body};
-    for ($line=0; $line < $tmp_line; $line++) {
-      last if $body->[$line] =~ /^\-\-\Q$boundary\E$/;
-    }
-
-    # Found a boundary, ignore the preamble
-    if ( $line < $tmp_line ) {
-      splice @{$body}, 0, $line+1;
-    }
-
-    # Else, there's no boundary, so leave the whole part...
-  }
-
-  my $in_body = 0;
-
-  my $header;
-  my $part_array;
-  my $part_msg = Mail::SpamAssassin::MIME->new();
-
-  my $line_count = @{$body};
-  foreach ( @{$body} ) {
-    if ( --$line_count == 0 || ($boundary && /^\-\-\Q$boundary\E/) ) {
-      dbg("m/a got end of section");
-
-      # end of part
-      my $line = $_;
-
-      # per rfc 1521, the CRLF before the boundary is part of the boundary ...
-      # NOTE: The CRLF preceding the encapsulation line is conceptually
-      # attached to the boundary so that it is possible to have a part
-      # that does not end with a CRLF (line break). Body parts that must
-      # be considered to end with line breaks, therefore, must have two
-      # CRLFs preceding the encapsulation line, the first of which is part
-      # of the preceding body part, and the second of which is part of the
-      # encapsulation boundary.
-      if ($part_array) {
-        chomp( $part_array->[ scalar @{$part_array} - 1 ] );
-        splice @{$part_array}, -1
-          if ( $part_array->[ scalar @{$part_array} - 1 ] eq '' );
-
-        $self->_decode_body( $msg, $part_msg, $boundary, $part_array );
-      }
-
-      last if ($boundary && $line =~ /^\-\-\Q$boundary\E\-\-$/);
-      $in_body  = 0;
-      $part_msg = Mail::SpamAssassin::MIME->new();
-      undef $part_array;
-      undef $header;
-      next;
-    }
-
-    if ($in_body) {
-      push ( @{$part_array}, $_ );
-    }
-    else {
-
-      # chomp($_);
-      s/\s+$//;
-      if (m/^\S/) {
-        if ($header) {
-          my ( $key, $value ) = split ( /:\s*/, $header, 2 );
-          $part_msg->header( $key, $value );
-        }
-        $header = $_;
-      }
-      elsif (/^$/) {
-        if ($header) {
-          my ( $key, $value ) = split ( /:\s*/, $header, 2 );
-          $part_msg->header( $key, $value );
-        }
-        $in_body = 1;
-      }
-      else {
-        $_ =~ s/^\s*//;
-        $header .= $_;
-      }
-    }
-  }
-
-}
-
-sub _parse_multipart_mixed {
+sub _parse_multipart {
   my($self, $msg, $_msg, $boundary, $body) = @_;
 
   $boundary ||= '';

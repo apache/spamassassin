@@ -138,8 +138,9 @@ sub add_body_part {
 
   my $type = $raw_type;
   $type     ||= 'text/plain';
-  $type =~ s/;.*$//;            # strip everything after first semi-colon
-  $type =~ s/[^a-zA-Z\/]//g;    # strip inappropriate chars
+  $type =~ s/;.*$//;            	# strip everything after first semi-colon
+  $type =~ s@^([^/]+/[^/]+).*$@$1@;	# only something/something ...
+  $type =~ tr!\000-\040\177-\377\042\050\051\054\056\072-\077\100\133-\135!!d;    # strip inappropriate chars
 
   my $part = {
     type     => $type,
