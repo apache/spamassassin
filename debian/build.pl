@@ -10,8 +10,6 @@ getopts('d'); # d = do it!
 
 our $opt_d;
 
-system('/usr/bin/cvs', 'update') == 0 or die "Can't run cvs: error $?";
-
 # Checking that everything is where we need it.
 warn 'You might want to set $EMAIL or $DEBEMAIL'
     if !$ENV{EMAIL} && !$ENV{DEBEMAIL};
@@ -70,6 +68,10 @@ die "Can't determine old version\n" if !$oldversion;
 $debianversion = "${oldversion}pre${cvsversion}cvs${datecode}-${revisioncode}"; # Not pretty but informative
 
 print "Building debian version $debianversion\n";
+
+unlink "debian/changelog"; # We don't need accumulating changelogs!
+system ("/bin/cp", "debian/changelog.in", "debian/changelog") == 0
+  or die "Couldn't copy, error $?";
 
 system('/usr/bin/dch', "--newversion=$debianversion", 'Packaging from CVS') == 0 or die "system() error: $?";
 
