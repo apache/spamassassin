@@ -17,10 +17,9 @@ if ($@) {
 }
 
 
-
 %patterns = (
 
-q{ Listed in Razor1 }, 'spam',
+q{ Listed in Razor v1 }, 'spam',
 
 );
 
@@ -30,7 +29,7 @@ skip_all_patterns($razor_not_available);
 %patterns = ();
 %anti_patterns = (
 
-q{ Listed in Razor1 }, 'nonspam',
+q{ Listed in Razor v1 }, 'nonspam',
 
 );
 
