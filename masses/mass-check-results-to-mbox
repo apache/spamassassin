@@ -37,9 +37,14 @@ while (<>) {
       open (IN, "<$mail") or mywarn ("open $mail failed: $@");
     }
     my @msg = (<IN>); close IN;
-    $annotate and unshift (@msg,
-	"From nobody\@example.com  Wed Sep 18 00:00:00 1972\n",
-	"X-Mass-Check-Id: $mail\n");
+
+    while (scalar @msg > 0 &&
+	$msg[0] =~ /^(?:From|X-Mass-Check-Id:) /)
+    {
+      shift @msg;
+    }
+    $annotate and unshift (@msg, "X-Mass-Check-Id: $mail\n");
+
     handle (\@msg);
   }
 }
