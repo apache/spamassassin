@@ -220,6 +220,7 @@ sub check_rbl {
 
   # First check that DNS is available, if not do not perform this check
   return 0 unless $self->is_dns_available();
+  $self->load_resolver();
 
   if ($#ips > 1) {
     @ips = @ips[$#ips-1 .. $#ips];        # only check the originating 2

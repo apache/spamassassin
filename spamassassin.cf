@@ -89,10 +89,10 @@ header FROM_ENDS_IN_NUMS	From =~ /\d+\@/
 describe FROM_ENDS_IN_NUMS	From: ends in numbers
 
 # (contrib: David Hull)
-header FROM_NO_USER		From =~ /(?:^|<| )\@/
+header FROM_NO_USER		From =~ /(?:^\@|<\@| \@|<>)/
 describe FROM_NO_USER		From: has no local-part before @ sign
 
-header TO_NO_USER		To =~ /(?:^|<| )\@/
+header TO_NO_USER		To =~ /(?:^\@|<\@| \@|<>)/
 describe TO_NO_USER		To: has no local-part before @ sign
 
 header PLING			Subject =~ /\!/
@@ -482,6 +482,10 @@ body UCE_MAIL_ACT               /Unsolicited Commercial Electronic Mail Act/
 describe UCE_MAIL_ACT           Mentions Spam Law "UCE-Mail Act"
 
 full PENIS_ENLARGE		/(?:(?:\bpenis\b|\benlarge).{0,50}){2,}/is
+
+body WORK_AT_HOME		/WORK AT HOME/
+
+body HOME_EMPLOYMENT		/HOME EMPLOYMENT/
 
 full A_HREF_TO_IP		/href[3D=\s\"\']*http:\/\/\d+\.\d+\.\d+\.\d+\:?\d*\//is
 describe A_HREF_TO_IP		Link to an IP-address instead of a named host

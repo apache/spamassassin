@@ -51,6 +51,8 @@ Options:
     -u username   Run as named user, instead of running setuid to spamc user
     -d		  Daemonize, detach from parent process
     -x            Disable user config files
+    -P            Die upon user errors (does not exist or user = root) instead of
+                  running as 'nobody' with defaults.
     -s            Specify the syslog facility (default: mail)
     -D            Print debugging messages
 
@@ -72,9 +74,10 @@ sub daemonize
 
 use vars qw{
   	$opt_d $opt_h $opt_L $opt_p $opt_A $opt_x $opt_s $opt_D $opt_u
+	$opt_P
 };
 
-getopts('hdLxp:A:s:Du:') or usage();
+getopts('hdLxp:A:s:Du:P') or usage();
 
 $opt_h and usage();
 
@@ -105,7 +108,8 @@ else
 my $spamtest = Mail::SpamAssassin->new({
   dont_copy_prefs => 1,
   local_tests_only => $opt_L,
-  debug => $opt_D
+  debug => $opt_D,
+  paranoid => ($opt_P || 0),
 });
 
 $spamtest->compile_now();	# ensure all modules etc. are loaded
@@ -160,6 +164,7 @@ if ($opt_D) {
 }
 
 my $waitedpid = 0;
+my $current_user;
 my $paddr;
 
 $SIG{CHLD} = 'IGNORE';		# important: avoids perl sighandling bug on BSD
@@ -169,6 +174,8 @@ for ( $waitedpid = 0;
       $waitedpid = 0, close Client)
 {
     next if $waitedpid and not $paddr;
+
+    my $start = time;
 
     my($port,$iaddr) = sockaddr_in($paddr);
     my $name = gethostbyaddr($iaddr,AF_INET);
@@ -201,16 +208,22 @@ for ( $waitedpid = 0;
                     }
                     if (/^\r\n/s) { last; }
                     if((/^User: (.*)\r\n/) && (! $opt_x)) {
-		        # jm: refactored again ;)
 		        handle_user ($1);
                     }
                 }	
 	    }
 
-	    if ($setuid_to_user && $> == 0) {
-		logmsg "running as root, but no User: header was found";
-		die;		# avoid processing mail as root
+            if ($spamtest->{paranoid} && $setuid_to_user && $> == 0)
+            {
+                logmsg "PARANOID: Still running as root, closing connection.";
 	    }
+            elsif ( $setuid_to_user && $> == 0 )
+            {
+                logmsg "Still running as root: user not specified, not found, or set to root.  Fall back to nobody.";
+		my $uid = getpwnam('nobody');
+		if (!defined $uid) { die "no UID for nobody"; }
+                $> = $uid;
+            }
 
 	    my $resp = "EX_OK";
 	    # Now read in message
@@ -224,7 +237,8 @@ for ( $waitedpid = 0;
 	    		$mail->header, "\n",
 			(join '',@{$mail->body});
 
-	    logmsg "processed successfully";
+	    logmsg "processed successfully for $current_user:$> in ".
+			 sprintf("%3d", time - $start) ." seconds.\n";
 
 	    $status->finish();	# added by jm to allow GC'ing
 	}
@@ -279,8 +293,18 @@ sub spawn {
 
 sub handle_user {
     my $username = shift;
+
+    $current_user = $username;
     my ($name,$pwd,$uid,$gid,$quota,$comment,$gcos,$dir,$etc) =
     				getpwnam($username);
+
+    if ( !$spamtest->{paranoid} && !defined($uid) ) {
+       #if we are given a username, but can't look it up,
+       #Maybe NIS is down? lets break out here to allow
+       #them to get 'defaults' when we are not running paranoid.
+       logmsg "handle_user() -> unable to find user [$username]!\n";
+       return 0;
+    }
 
     if ($setuid_to_user) {
       $> = $uid;
@@ -295,6 +319,7 @@ sub handle_user {
     create_default_cf_if_needed ($cf_file, $username);
     $spamtest->read_scoreonly_config ($cf_file);
     $spamtest->load_scoreonly_sql ($username);
+    return 1;
 }
 
 sub create_default_cf_if_needed {
