@@ -58,8 +58,8 @@ sub new {
 
   $self->{bayes_scanner} = $self->{main}->{bayes_scanner};
 
-  $id ||= $self->{msg}->get ("Message-Id");
-  $id ||= $self->{msg}->get ("Message-ID");
+  $id ||= $self->{msg}->get_header ("Message-Id");
+  $id ||= $self->{msg}->get_header ("Message-ID");
   $id ||= 'no_id.$$.'.rand();
   $id =~ s/[-\0\s\;\:]/_/gs;
 
