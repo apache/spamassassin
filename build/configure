@@ -6,8 +6,8 @@ use strict;
 use warnings;
 use Config;
 
-use File::Spec;
 use File::Copy;
+use File::Spec::Functions;
 
 use Cwd qw(chdir);
 
@@ -43,7 +43,7 @@ if ($args{srcdir}) {
 
 
 # On everything but native Windows (!= cygwin) we use autoconf.
-unless (RUNNING_ON_NATIVE_WINDOWS)
+unless (!RUNNING_ON_NATIVE_WINDOWS)
 {
   print join(' ', @args) . "\n";
   exec @args;
@@ -58,11 +58,14 @@ else
     CFLAGS         => '/DWIN32',
     SSLCFLAGS      => '/DSPAMC_SSL',
 
+    MAKEFILE       => 'binaries.mk',
+    SRCDIR         => $args{srcdir},
+
     LIBS           => 'ws32.lib',
     SSLLIBS        => 'ssleay32.lib libeay32.lib',
 
-    SPAMC_FILES    => 'spamd/spamc.c spamd/getopt.c',
-    LIBSPAMC_FILES => 'spamd/libspamc.c spamd/utils.c',
+    SPAMC_FILES    => 'spamc.c getopt.c',
+    LIBSPAMC_FILES => 'libspamc.c utils.c',
   );
 
   # Enable SSL only if requested.
@@ -84,7 +87,7 @@ else
   # Note that variables are enclosed by *two* @s while autoconf uses only
   # one.
   @args = (
-    File::Spec->catfile(File::Spec->updir(), 'build', 'preprocessor'),
+    catfile(updir(), 'build', 'preprocessor'),
     q{-Mvars},
     q{-ibinaries.mk.win},
     q{-obinaries.mk}
