@@ -571,7 +571,7 @@ sub dcc_lookup {
     my $opts = $1; $opts ||= '';
 
     my $pid = open(DCC, join(' ', $path, "-H", $opts, "< '$tmpf'", "2>&1", '|')) || die "$!\n";
-    $response = <DCC>;
+    chomp($response = <DCC>);
     close DCC;
 
     unless (defined($response)) { # yes, this is possible
@@ -696,7 +696,7 @@ sub pyzor_lookup {
     my $opts = $1; $opts ||= '';
  
     my $pid = open(PYZOR, join(' ', $path, $opts, "check", "< '$tmpf'", "2>&1", '|')) || die "$!\n";
-    $response = <PYZOR>;
+    chomp($response = <PYZOR>);
     close PYZOR;
 
     unless (defined($response)) { # this is possible for DCC, let's be on the safe side
