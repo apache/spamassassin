@@ -117,7 +117,7 @@ describe PLING_PLING		Subject has lots of exclamation marks
 header SUBJ_HAS_UNIQ_ID		eval:check_for_unique_subject_id()
 describe SUBJ_HAS_UNIQ_ID	Subject contains a unique ID number
 
-header SUBJ_HAS_SPACES		Subject =~ /(?:\s{8,}|\t)/
+header SUBJ_HAS_SPACES		Subject =~ /(?:\s{5,}|\t)/
 describe SUBJ_HAS_SPACES	Subject contains lots of white space
 
 header UNDISC_RECIPS		To =~ /^undisclosed-recipients?:\s*;$/
@@ -250,6 +250,9 @@ describe FROM_NAME_EQ_FROM_ADDR	'From:' address also used as sender's real name
 
 header FORGED_HOTMAIL_RCVD	eval:check_for_forged_hotmail_received_headers()
 describe FORGED_HOTMAIL_RCVD	Forged hotmail.com 'Received:' header found
+
+header FORGED_YAHOO_RCVD	eval:check_for_forged_yahoo_received_headers()
+describe FORGED_YAHOO_RCVD	Forged yahoo.com 'Received:' header found
 
 header FORGED_GW05_RCVD		eval:check_for_forged_gw05_received_headers()
 describe FORGED_GW05_RCVD	Forged 'by gw05' 'Received:' header found
