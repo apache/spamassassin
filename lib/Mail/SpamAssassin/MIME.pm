@@ -174,6 +174,147 @@ sub add_body_part {
   push @{ $self->{'body_parts'} }, $part;
 }
 
+=item _decode()
+
+Decode base64 and quoted-printable parts.
+
+=cut
+
+# TODO: accept a length param
+sub decode {
+  my($self, $bytes) = @_;
+
+  if ( !exists $self->{'decoded'} ) {
+    my $encoding = lc $self->header('content-transfer-encoding') || '';
+
+    if ( $encoding eq 'quoted-printable' ) {
+      dbg("decoding: quoted-printable");
+      $self->{'decoded'} = [
+        map { s/\r\n/\n/; $_; } split ( /^/m, Mail::SpamAssassin::Util::qp_decode( join ( "", @{$self->{'raw'}} ) ) )
+	];
+    }
+    elsif ( $encoding eq 'base64' ) {
+      dbg("decoding: base64");
+
+      # Generate the decoded output
+      $self->{'decoded'} = [ Mail::SpamAssassin::Util::base64_decode(join("", @{$self->{'raw'}})) ];
+
+      # If it's a type text or message, split it into an array of lines
+      if ( $self->{'type'} =~ m@^(?:text|message)\b/@i ) {
+        $self->{'decoded'} = [ map { s/\r\n/\n/; $_; } split(/^/m, $self->{'decoded'}->[0]) ];
+      }
+    }
+    else {
+      # Encoding is one of 7bit, 8bit, binary or x-something
+      if ( $encoding ) {
+        dbg("decoding: other encoding type ($encoding), ignoring");
+      }
+      else {
+        dbg("decoding: no encoding detected");
+      }
+      $self->{'decoded'} = $self->{'raw'};
+    }
+  }
+
+  if ( !defined $bytes || $bytes ) {
+    my $tmp = join("", @{$self->{'decoded'}});
+    if ( !defined $bytes ) {
+      return $tmp;
+    }
+    else {
+      return substr($tmp, 0, $bytes);
+    }
+  }
+}
+
+=item _html_near_start()
+
+Look at a text scalar and determine whether it should be rendered
+as text/html.  Based on a heuristic which simulates a certain common
+mail client.
+
+=cut
+
+sub _html_near_start {
+  my ($pad) = @_;
+
+  my $count = 0;
+  $count += ($pad =~ tr/\n//d) * 2;
+  $count += ($pad =~ tr/\n//cd);
+  return ($count < 24);
+}
+
+=item rendered()
+
+render_text() takes the given text/* type MIME part, and attempt
+to render it into a text scalar.  It will always render text/html,
+and will use a heuristic to determine if other text/* parts should be
+considered text/html.
+
+=cut
+
+sub rendered {
+  my ($self) = @_;
+
+  # We don't render anything except text
+  return(undef,undef) unless ( $self->{'type'} =~ /^text\b/i );
+
+  if ( !exists $self->{'rendered'} ) {
+    my $text = $self->decode();
+
+    # render text/html always, or any other text part as text/html based
+    # on a heuristic which simulates a certain common mail client
+    if ( $self->{'type'} =~ m@^text/html\b@i ||
+        ($text =~ m/^(.{0,18}?<(?:$Mail::SpamAssassin::HTML::re_start)(?:\s.{0,18}?)?>)/ois &&
+	  _html_near_start($1)
+        )
+       ) {
+      my $html = Mail::SpamAssassin::HTML->new();		# object
+      my $html_rendered = $html->html_render($text);	# rendered text
+      my $html_results = $html->get_results();		# needed in eval tests
+    
+      $self->{'rendered_type'} = 'text/html';
+      $self->{'rendered'} = join('', @{ $html_rendered });
+    }
+    else {
+      $self->{'rendered_type'} = $self->{'type'};
+      $self->{'rendered'} = $text;
+    }
+  }
+
+  return ($self->{'rendered_type'}, $self->{'rendered'});
+}
+
+# return an array with scalars describing mime parts
+sub content_summary {
+  my($self, $recurse) = @_;
+
+  # go recursive the first time through
+  $recurse = 1 unless ( defined $recurse );
+
+  # If this object matches, mark it for return.
+  if ( exists $self->{'body_parts'} ) {
+    my @ret = ();
+
+    # This object is a subtree root.  Search all children.
+    foreach my $parts ( @{$self->{'body_parts'}} ) {
+      # Add the recursive results to our results
+      my @p = $parts->content_summary(0);
+      if ( $recurse ) {
+        push(@ret, join(",", @p));
+      }
+      else {
+        push(@ret, @p);
+      }
+    }
+
+    return($self->{'type'}, @ret);
+  }
+  else {
+    return $self->{'type'};
+  }
+}
+
 sub dbg { Mail::SpamAssassin::dbg (@_); }
 
 1;

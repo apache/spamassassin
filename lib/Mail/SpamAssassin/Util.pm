@@ -608,20 +608,28 @@ sub parse_content_type {
   my $ct = $_[-1] || 'text/plain; charset=us-ascii';
 
   # This could be made a bit more rigid ...
-  # the actual ABNF, BTW:
+  # the actual ABNF, BTW (RFC 1521, section 7.2.1):
   # boundary := 0*69<bchars> bcharsnospace
   # bchars := bcharsnospace / " "
   # bcharsnospace :=    DIGIT / ALPHA / "'" / "(" / ")" / "+" /"_"
   #               / "," / "-" / "." / "/" / ":" / "=" / "?"
   #
-  my ($boundary) = $ct =~ /boundary\s*=\s*["']?([^"';]+)["']?/i;
+  # The boundary may be surrounded by double quotes.
+  # "the boundary parameter, which consists of 1 to 70 characters from
+  # a set of characters known to be very robust through email gateways,
+  # and NOT ending with white space.  (If a boundary appears to end with
+  # white space, the white space must be presumed to have been added by
+  # a gateway, and must be deleted.)"
+  #
+  my ($boundary) = $ct =~ m!boundary\s*=\s*("[^"]*[^"\s]"|[^";\s]+)!i;
+  $boundary =~ tr/"//d if ( defined $boundary ); # remove the double quotes ...
 
   # Get the type out ...
   $ct =~ s/;.*$//;                    # strip everything after first semi-colon
   $ct =~ s@^([^/]+(?:/[^/]*)?).*$@$1@;	# only something/something ...
   $ct =~ tr!\000-\040\177-\377\042\050\051\054\056\072-\077\100\133-\135!!d;    # strip inappropriate chars
 
-  return ($ct,$boundary);
+  return wantarray ? ($ct,$boundary) : $ct;
 }
 
 ###########################################################################

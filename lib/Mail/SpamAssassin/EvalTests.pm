@@ -3557,14 +3557,15 @@ sub _multipart_alternative_difference {
   my($self) = @_;
 
   my @ma = $self->{msg}->{mime_parts}->find_parts(qr@^multipart/alternative\b@i);
+  my @content = $self->{msg}->{mime_parts}->content_summary();
 
   $self->{madiff} = 0;
 
   # Exchange meeting requests come in as m/a text/html text/calendar ...
   # Ignore any messages without a multipart/alternative section as well ...
-  if ( !@ma || (@ma == 1 && @{$ma[0]->{body_parts}} == 2 &&
-  		$ma[0]->{body_parts}->[0]->{type} =~ m@^text/html\b@i && 
-		$ma[0]->{body_parts}->[1]->{type} =~ m@^text/calendar\b@i) ) {
+  if ( !@ma || (@content == 3 && $content[2] eq 'text/calendar' &&
+  		$content[1] eq 'text/html' &&
+  		$content[0] eq 'multipart/alternative') ) {
     return;
   }
 
@@ -3575,9 +3576,9 @@ sub _multipart_alternative_difference {
 
     my @txt = $part->find_parts(qr@^text\b@i);
     foreach my $text ( @txt ) {
-      my $rnd = $text->{'rendered'};
+      my($type, $rnd) = $text->rendered();
 
-      if ( $text->{'rendered_type'} =~ m@^text/html\b@i ) {
+      if ( $type eq 'text/html' ) {
         foreach my $w ( grep(/\w/,split(/\s+/,$rnd)) ) {
           next if ( $w =~ /^URI:/ );
           $html{$w}++;

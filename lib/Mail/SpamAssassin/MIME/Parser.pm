@@ -72,9 +72,7 @@ sub parse {
 
     if ($header) {
       my ( $key, $value ) = split ( /:\s*/, $header, 2 );
-      if ( $key =~ /^(?:MIME-Version|Lines|X-MIME|Content-)/i ) {
-        $msg->header( $key, $self->_decode_header($value), $value );
-      }
+      $msg->header( $key, $self->_decode_header($value), $value );
     }
 
     # not a continuation...
@@ -246,19 +244,18 @@ Generate a leaf node and add it to the parent.
 sub _parse_normal {
   my ($self, $msg, $part_msg, $boundary, $body) = @_;
 
-  dbg("parsing normal, decoding attachment");
-  my ($type, $decoded, $name) = $self->_decode($part_msg, $body);
+  dbg("parsing normal part");
 
-  $part_msg->{'type'} = $type;
-  $part_msg->{'decoded'} = $decoded;
+  $part_msg->{'type'} =
+    Mail::SpamAssassin::Util::parse_content_type($part_msg->header('content-type'));
+
+  # attempt to figure out a name for this attachment if there is one ...
+  my $disp = $part_msg->header('content-disposition') || '';
+  my($filename) = $disp =~ /name="?([^\";]+)"?/i || $part_msg->{'type'} =~ /name="?([^\";]+)"?/i;
+
   $part_msg->{'raw'} = $body;
   $part_msg->{'boundary'} = $boundary;
-  $part_msg->{'name'} = $name if $name;
-
-  # If the message is a text/* type, then try rendering it...
-  if ( $type =~ /^text\b/i ) {
-    ($part_msg->{'rendered'}, $part_msg->{'rendered_type'}) = _render_text($type, $decoded);
-  }
+  $part_msg->{'name'} = $filename if $filename;
 
   $msg->add_body_part($part_msg);
 
@@ -302,108 +299,6 @@ sub _decode_header {
   $header =~
     s/=\?([\w_-]+)\?([bqBQ])\?(.*?)\?=/__decode_header($1, uc($2), $3)/ge;
   return $header;
-}
-
-=item _decode()
-
-Decode base64 and quoted-printable parts.
-
-=cut
-
-sub _decode {
-  my($self, $msg, $body ) = @_;
-
-  my($type) = Mail::SpamAssassin::Util::parse_content_type($msg->header('content-type'));
-  my ($filename) =
-    ( $msg->header('content-disposition') =~ /name="?([^\";]+)"?/i );
-  if ( !$filename ) {
-    ($filename) = ( $type =~ /name="?([^\";]+)"?/i );
-  }
-
-  my $encoding = lc $msg->header('content-transfer-encoding') || '';
-
-  if ( $encoding eq 'quoted-printable' ) {
-    dbg("decoding: quoted-printable");
-    my @output =
-      map { s/\r\n/\n/; $_; } split ( /^/m, Mail::SpamAssassin::Util::qp_decode( join ( "", @{$body} ) ) );
-
-    return $type, \@output, $filename;
-  }
-  elsif ( $encoding eq 'base64' ) {
-    dbg("decoding: base64");
-
-    # Generate the decoded output
-    my $output = [ Mail::SpamAssassin::Util::base64_decode(join("", @{$body})) ];
-
-    # If it's a type text or message, split it into an array of lines
-    $output = [ map { s/\r\n/\n/; $_; } split(/^/m, $output->[0]) ] if ( $type =~ m@^(?:text|message)/@ );
-
-    return $type, $output, $filename;
-  }
-  else {
-    # Encoding is one of 7bit, 8bit, binary or x-something
-    if ( $encoding ) {
-      dbg("decoding: other encoding type ($encoding), ignoring");
-    }
-    else {
-      dbg("decoding: no encoding detected");
-    }
-
-    # No encoding, so just point to the raw data ...
-    return $type, $body, $filename;
-  }
-}
-
-=item _html_near_start()
-
-Look at a text scalar and determine whether it should be rendered
-as text/html.  Based on a heuristic which simulates a certain common
-mail client.
-
-=cut
-
-sub _html_near_start {
-  my ($pad) = @_;
-
-  my $count = 0;
-  $count += ($pad =~ tr/\n//d) * 2;
-  $count += ($pad =~ tr/\n//cd);
-  return ($count < 24);
-}
-
-=item _render_text()
-
-_render_text() takes the given text/* type MIME part, and attempt
-to render it into a text scalar.  It will always render text/html,
-and will use a heuristic to determine if other text/* parts should be
-considered text/html.
-
-Pass in the content-type and the decoded part array.  Returns a scalar
-with the rendered data and the "rendered_as" content-type (same as passed
-in for no rendering, "text/html" for HTML).
-
-=cut
-
-sub _render_text {
-  my ($type, $decoded) = @_;
-
-  my $text = join('', @{ $decoded });
-
-  # render text/html always, or any other text part as text/html based
-  # on a heuristic which simulates a certain common mail client
-  if ( $type =~ m@^text/html\b@i ||
-      ($text =~ m/^(.{0,18}?<(?:$Mail::SpamAssassin::HTML::re_start)(?:\s.{0,18}?)?>)/ois &&
-	_html_near_start($1)
-      )
-     ) {
-    my $html = Mail::SpamAssassin::HTML->new();		# object
-    my $html_rendered = $html->html_render($text);	# rendered text
-    my $html_results = $html->get_results();		# needed in eval tests
-    return ( join('', @{ $html_rendered }), 'text/html' );
-  }
-  else {
-    return ( $text, $type );
-  }
 }
 
 sub dbg { Mail::SpamAssassin::dbg (@_); }
