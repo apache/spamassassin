@@ -380,7 +380,7 @@ describe MIME_SUSPECT_NAME	MIME filename does not match content
 # match some gibberish produced by quoted-printable encoding of HTML, often
 # in the middle of a HTML "attribute=value" pair.
 
-rawbody JUST_MAILED_PAGE	/\n\n.{0,160}<!-- saved from url=/s
+full JUST_MAILED_PAGE           /\n\n\Q<!-- saved from url=(0022)http:\/\/internet.e-mail -->\E\n/
 describe JUST_MAILED_PAGE	Saved web page
 rawbody CLICK_HERE_LINK		/click here.{0,100}<\/a>/is
 describe CLICK_HERE_LINK	Tells you to click on a URL
