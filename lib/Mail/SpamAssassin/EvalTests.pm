@@ -1043,7 +1043,17 @@ sub word_is_in_dictionary {
   return 1 if ($word_len < 3);
 
   if (!$triplets_loaded) {
-    my $filename = $self->{main}->{rules_filename} . "/triplets.txt";
+    my $filename;
+    foreach my $tr_path ( $self->{main}->{DEF_RULES_DIR}, $self->{main}->{LOCAL_RULES_DIR} ) {
+        next unless -f "$tr_path/triplets.txt";
+        $filename = "$tr_path/triplets.txt";
+        last;
+    }
+
+    unless ( defined $filename ) {
+      dbg("failed to locate the triplets.txt file");
+      return 1;
+    }
 
     if (!open (TRIPLETS, "<$filename")) {
       dbg ("failed to open '$filename', cannot check dictionary");
