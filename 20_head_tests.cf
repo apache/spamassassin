@@ -340,3 +340,6 @@ describe BUGZILLA_BUG		Looks like a Bugzilla bug
 # give a negative score to Majordomo results.
 header   MAJORDOMO              Subject =~ /Majordomo (?:request )?results/
 describe MAJORDOMO              From Majordomo
+
+header   PLEASE_READ            Subject =~ /please read/i
+describe PLEASE_READ            Please read this!  Please oh please oh please!
