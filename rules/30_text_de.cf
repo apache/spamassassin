@@ -34,8 +34,8 @@ lang de report
 lang de report "    _HOSTNAME_"
 lang de report 
 lang de report hat die eingegangene E-mail als mögliche "Spam"-Nachricht identifiziert.
-lang de report Die ursprüngliche Nachricht wurde an diesen Report angehängt, so dass
-lang de report Sie sie anschauen können (falls es doch eine legitime E-mail ist) oder
+lang de report Die ursprüngliche Nachricht wurde an diesen Bericht angehängt, so dass
+lang de report Sie sie anschauen können (falls es doch eine legitime E-Mail ist) oder
 lang de report ähnliche unerwünschte Nachrichten in Zukunft markieren können.
 lang de report Bei Fragen zu diesem Vorgang wenden Sie sich bitte an
 lang de report 
@@ -45,7 +45,7 @@ lang de report Vorschau: _PREVIEW_
 lang de report
 lang de report Inhaltsanalyse im Detail:   (_SCORE_ Punkte, _REQD_ benötigt)
 lang de report
-lang de report "Pnkt Regelname              Beschreibung"
+lang de report "Pkte Regelname              Beschreibung"
 lang de report  ---- ---------------------- --------------------------------------------------
 lang de report _SUMMARY_
 #              ........................................................................
@@ -53,19 +53,19 @@ lang de report _SUMMARY_
 #                     ........................................................................
 lang de clear_unsafe_report_template
 lang de unsafe_report Die ursprüngliche Nachricht enthielt nicht ausschließlich Klartext
-lang de unsafe_report (plain text) und kann eventuell eine Gefahr für einige E-mail-Programme
-lang de unsafe_report darstellen falls sie z.B. einen Computervirus enthält.
-lang de unsafe_report Möchten Sie die Nachricht dennoch ansehen ist es wahrscheinlich
+lang de unsafe_report (plain text) und kann eventuell eine Gefahr für einige E-Mail-Programme
+lang de unsafe_report darstellen (falls sie z.B. einen Computervirus enthält).
+lang de unsafe_report Möchten Sie die Nachricht dennoch ansehen, ist es wahrscheinlich
 lang de unsafe_report sicherer, sie zuerst in einer Datei zu speichern und diese Datei danach
-lang de unsafe_report mit einem Editorprogramm zu öffnen.
+lang de unsafe_report mit einem Texteditor zu öffnen.
 #                     ........................................................................
 
 lang de describe GTUBE Test zur Prüfung von Anti-Spam-Software
-lang de describe RAZOR2_CHECK Aufgelistet im "Razor2"-System (http://razor.sf.net/)
+lang de describe RAZOR2_CHECK Gelistet im "Razor2"-System (http://razor.sf.net/)
 lang de describe RAZOR2_CF_RANGE_11_50 Razor2 Spam-Bewertung liegt zwischen 11 und 50
 lang de describe RAZOR2_CF_RANGE_51_100 Razor2 Spam-Bewertung liegt zwischen 51 und 100
-lang de describe DCC_CHECK Aufgelistet im DCC-System (http://rhyolite.com/anti-spam/dcc/)
-lang de describe PYZOR_CHECK Aufgelistet im Pyzor-System (http://pyzor.sf.net/)
+lang de describe DCC_CHECK Gelistet im DCC-System (http://rhyolite.com/anti-spam/dcc/)
+lang de describe PYZOR_CHECK Gelistet im Pyzor-System (http://pyzor.sf.net/)
 lang de describe DIGEST_MULTIPLE Mehrere Internettests (Razor, DCC, Pyzor, etc.) treffen zu
 lang de describe TRACKER_ID Beinhaltet eine Identitätsnummer zur Nutzerbeobachtung
 lang de describe LINES_OF_YELLING EINE ZEILE MIT GESCHREI GEFUNDEN
@@ -85,16 +85,16 @@ lang de describe MIME_HTML_MOSTLY Mehrteilige MIME-Nachricht überwiegend in HTML
 lang de describe MIME_HTML_ONLY MIME-Nachricht besteht nur aus HTML
 lang de describe MIME_HTML_ONLY_MULTI Mehrteilige MIME-Nachricht besteht nur aus HTML
 lang de describe MIME_QP_DEFICIENT "quoted-printable"-Kodierung des Nachrichtentexts mangelhaft
-lang de describe MIME_QP_EXCESSIVE übertriebene "quoted-printable"-Kodierung des Nachrichtentexts
+lang de describe MIME_QP_EXCESSIVE Übertriebene "quoted-printable"-Kodierung des Nachrichtentexts
 lang de describe MIME_QP_LONG_LINE "quoted-printable"-kodierte Zeile länger als 76 Zeichen
-lang de describe MIME_QP_NO_CHARSET trotz "quoted-printable"-Kodierung keine Zeichensatzdeklaration
+lang de describe MIME_QP_NO_CHARSET Trotz "quoted-printable"-Kodierung keine Zeichensatzdeklaration
 lang de describe MIME_SUSPECT_NAME MIME-Dateiname entspricht nicht dem MIME-Typ
 lang de describe MIME_CHARSET_FARAWAY MIME-Zeichensatz deutet auf fremde Sprache hin
 lang de describe MPART_ALT_DIFF Nachrichtentext im Text- und HTML-Format unterscheiden sich
 lang de describe CHARSET_FARAWAY Zeichensatz deutet auf fremde Sprache hin
 lang de describe UNWANTED_LANGUAGE_BODY Nachrichtentext in unerwünschter Sprache
 lang de describe BODY_8BITS Nachrichtentext enthält Folge von 8 oder mehr 8-Bit-Zeichen
-lang de describe EMAIL_ROT13 Eventuell ROT13-kodierte E-mail-Adresse im Text
+lang de describe EMAIL_ROT13 Eventuell ROT13-kodierte E-Mail-Adresse im Text
 lang de describe BLANK_LINES_70_80 Nachrichtentext besteht zu 70-80% aus Leerzeilen
 lang de describe BLANK_LINES_80_90 Nachrichtentext besteht zu 80-90% aus Leerzeilen
 lang de describe BLANK_LINES_90_100 Nachrichtentext besteht zu 90-100% aus Leerzeilen
@@ -106,8 +106,8 @@ lang de describe __RCVD_IN_NJABL Transportiert via Rechner in Liste von combined
 lang de describe RCVD_IN_NJABL_RELAY NJABL: Senderechner als "Open Relay" bestätigt
 lang de describe RCVD_IN_NJABL_DUL NJABL: Senderechner nur temporär mit Internet verbunden
 lang de describe RCVD_IN_NJABL_SPAM NJABL: Senderechner ist bestätigter Spam-Versender
-lang de describe RCVD_IN_NJABL_MULTI NJABL: mehrfach über "open relay"-Rechner weitergeleitet
-lang de describe RCVD_IN_NJABL_CGI NJABL: gesendet über ein veraltetes und ungesichertes Webformular
+lang de describe RCVD_IN_NJABL_MULTI NJABL: Mehrfach über "open relay"-Rechner weitergeleitet
+lang de describe RCVD_IN_NJABL_CGI NJABL: Gesendet über ein veraltetes und ungesichertes Webformular
 lang de describe RCVD_IN_NJABL_PROXY NJABL: Senderechner als "open proxy" gemeldet
 lang de describe __RCVD_IN_SORBS SORBS: Senderechner in Liste von dnsbl.sorbs.net
 lang de describe RCVD_IN_SORBS_HTTP SORBS: Senderechner als "open HTTP proxy" gemeldet
@@ -115,9 +115,9 @@ lang de describe RCVD_IN_SORBS_MISC SORBS: Senderechner als "open proxy" gemelde
 lang de describe RCVD_IN_SORBS_SMTP SORBS: Senderechner ist ein ungesicherter Mail-Server
 lang de describe RCVD_IN_SORBS_SOCKS SORBS: Senderechner als "open SOCKS proxy" gemeldet
 lang de describe RCVD_IN_SORBS_WEB SORBS: Senderechner ist ein ungesicherter WWW-Server
-lang de describe RCVD_IN_SORBS_BLOCK Senderechner verweigert Tests durch SORBS
+lang de describe RCVD_IN_SORBS_BLOCK SORBS: Senderechner verweigert Tests
 lang de describe RCVD_IN_SORBS_ZOMBIE SORBS: Senderechner in Liste "entführter" Adressblöcke
-lang de describe RCVD_IN_SORBS_DUL Senderechner nur temporär mit Internet verbunden
+lang de describe RCVD_IN_SORBS_DUL SORBS: Senderechner nur temporär mit Internet verbunden
 lang de describe __RCVD_IN_SBL_XBL Transportiert via Rechner in SBL+XBL-Liste (http://www.spamhaus.org/)
 lang de describe RCVD_IN_SBL Transportiert via Rechner in SBL-Liste (http://www.spamhaus.org/sbl/)
 lang de describe RCVD_IN_XBL Transportiert via Rechner in XBL-Liste (http://www.spamhaus.org/xbl/)
@@ -134,7 +134,7 @@ lang de describe HABEAS_USER Offizieller Nutzer des Warenzeichens der Firma Habe
 lang de describe RCVD_IN_BSP_TRUSTED Senderechner in Liste von http://www.bondedsender.org/
 lang de describe RCVD_IN_BSP_OTHER Senderechner in Liste von http://www.bondedsender.org/
 lang de describe SB_NEW_BULK Domain des Senderechners ist neu und verschickt viele E-mails
-lang de describe SB_NSP_VOLUME_SPIKE Senderechner eines Providers mit kurzfristig hohem E-mailvolumen
+lang de describe SB_NSP_VOLUME_SPIKE Senderechner eines Providers mit kurzfristig hohem E-Mail-Aufkommen
 lang de describe RCVD_IN_BL_SPAMCOP_NET Transportiert via Rechner in Liste von www.spamcop.net
 lang de describe RCVD_IN_RSL Transportiert via Rechner in Liste http://relays.visi.com/
 lang de describe RCVD_IN_MAPS_RBL Transportiert via Rechner in Liste von http://www.mail-abuse.org/rbl/
@@ -221,8 +221,8 @@ lang de describe FROM_ALL_NUMS Adresse enthält nur Ziffern im Benutzernamen
 lang de describe FROM_OFFERS Absenderadresse enthält "@...offers"
 lang de describe FROM_NO_USER Adressteil vor dem @-Zeichen fehlt im Absender
 lang de describe TO_NO_USER Adressteil vor dem @-Zeichen fehlt in Empfangsadresse
-lang de describe TO_EMPTY Zieladresse ist vorhanden und leer
-lang de describe REPLY_TO_EMPTY Kopfzeile "Reply-To" ist vorhanden und leer
+lang de describe TO_EMPTY Zieladresse ist vorhanden aber leer
+lang de describe REPLY_TO_EMPTY Kopfzeile "Reply-To" ist vorhanden aber leer
 lang de describe REPLY_TO_ULINE_NUMS Kopfzeile "Reply-To" enthält Unterstrich + Ziffern/Buchstaben
 lang de describe TO_ADDRESS_EQ_REAL Zieladresse wiederholt die Adresse als Empfängernamen
 lang de describe UNDISC_RECIPS "undisclosed-recipients" sieht korrekt aus
@@ -268,7 +268,7 @@ lang de describe DATE_IN_FUTURE_12_24 Absendezeit 12 bis 24 Stunden nach Datum i
 lang de describe DATE_IN_FUTURE_24_48 Absendezeit 24 bis 48 Stunden nach Datum in "Received"-Kopfzeilen
 lang de describe DATE_IN_FUTURE_48_96 Absendezeit 48 bis 96 Stunden nach Datum in "Received"-Kopfzeilen
 lang de describe DATE_IN_FUTURE_96_XX Absendezeit mehr als 96 Stunden nach Datum in "Received"-Kopfzeilen
-lang de describe UNRESOLVED_TEMPLATE Kopfzeilen enthalten nicht ersetzte Variable
+lang de describe UNRESOLVED_TEMPLATE Kopfzeilen enthalten nicht ersetzte Variablen
 lang de describe SUBJ_ILLEGAL_CHARS Betreff enthält zu viele ungültige Zeichen
 lang de describe FROM_ILLEGAL_CHARS Absendeadresse enthält zu viele ungültige Zeichen
 lang de describe HEAD_ILLEGAL_CHARS Kopfzeilen enthalten zu viele ungültige Zeichen
@@ -288,7 +288,7 @@ lang de describe RCVD_ILLEGAL_IP "Received"-Kopfzeilen enthalten ungültige IP-Ad
 lang de describe RCVD_BY_IP Transportiert durch Rechner ohne Namen
 lang de describe RCVD_DOUBLE_IP_SPAM Kennzeichen von Spam-Software (doppelte IP-Adresse)
 lang de describe RCVD_DOUBLE_IP_LOOSE Empfänger/Sender in Kopfzeilen sehen aus wie IP-Adressen
-lang de describe LOTS_OF_CC_LINES Sehr viele "Cc:"-Kopfzeilen
+lang de describe LOTS_OF_CC_LINES Sehr viele "Cc"-Kopfzeilen
 lang de describe FORGED_AOL_RCVD Gefälschte "Received"-Kopfzeile (falsche Mailrechner von AOL)
 lang de describe FORGED_TELESP_RCVD Gefälschte Rechnernamen eines brasilianischen DSL-Providers
 lang de describe FORGED_HOTMAIL_RCVD Gefälschte "Received"-Kopfzeile von Hotmail gefunden
@@ -305,7 +305,7 @@ lang de describe NONEXISTENT_CHARSET Den angegebenen Zeichensatz gibt es nicht
 lang de describe CHARSET_FARAWAY_HEADER Fremdsprachlicher Zeichensatz in Kopfzeilen benutzt
 lang de describe X_MAILER_GIBBERISH Kopfzeile "X-Mailer" völlig unverständlich
 lang de describe X_PRIORITY_HIGH Kopfzeile "X-Priority" hat einen zu hohen Wert
-lang de describe X_MSMAIL_PRIORITY_HIGH Kopfzeile "X-Msmail-Priority" hat einen zu hohen Wert
+lang de describe X_MSMAIL_PRIORITY_HIGH Kopfzeile "X-MSMail-Priority" hat einen zu hohen Wert
 lang de describe BTAMAIL_HEADER Kopfzeile enthält Adresse von btamail.net.cn
 lang de describe HTML_ALL_CAPS MIME-Typ in Großbuchstaben ("TEXT/HTML")
 lang de describe ROUND_THE_WORLD_LOCAL "Received"-Kopfzeilen belegen Versand rund um die Welt (HELO)
@@ -326,7 +326,7 @@ lang de describe X_PRECEDENCE_REF Enthält Kopfzeile "X-Precedence-Ref"
 lang de describe X_SERV_HOST_PRESENT Enthält Kopfzeile "X-ServerHost"
 lang de describe X_STORMPOST_TO Enthält Kopfzeile "X-Stormpost-To"
 lang de describe MISSING_MIMEOLE Kopfzeile "X-MSMail-Priority" aber kein "X-MimeOLE"
-lang de describe MISSING_OUTLOOK_NAME Sieht aus wie von MS Outlook erzeugt, ist es aber nicht
+lang de describe MISSING_OUTLOOK_NAME Sieht aus wie von Outlook erzeugt, ist es aber nicht
 lang de describe PRIORITY_NO_NAME Enthält Kopfzeile "X-Priority" aber kein "X-Mailer"
 lang de describe SUBJ_AS_SEEN Betreff enthält "as seen"
 lang de describe SUBJ_DOLLARS Betreff beginnt mit einem Dollar-Betrag
@@ -398,16 +398,16 @@ lang de describe FAKE_OUTBLAZE_RCVD "mr.outblaze.com" in "Received"-Kopfzeile is
 lang de describe FROM_NONSENDING_DOMAIN Nachricht aus Domäne, die nie E-mail verschickt
 lang de describe SUBJ_2_NUM_PARENS Betreff mit typischen Kennzeichen von Spam (2 Zahlen)
 lang de describe HTML_MESSAGE Nachricht enthält HTML
-lang de describe HTML_00_10 Nachricht enthält zwischen 0 und 10% HTML
-lang de describe HTML_10_20 Nachricht enthält zwischen 10 und 20% HTML
-lang de describe HTML_20_30 Nachricht enthält zwischen 20 und 30% HTML
-lang de describe HTML_30_40 Nachricht enthält zwischen 30 und 40% HTML
-lang de describe HTML_40_50 Nachricht enthält zwischen 40 und 50% HTML
-lang de describe HTML_50_60 Nachricht enthält zwischen 50 und 60% HTML
-lang de describe HTML_60_70 Nachricht enthält zwischen 60 und 70% HTML
-lang de describe HTML_70_80 Nachricht enthält zwischen 70 und 80% HTML
-lang de describe HTML_80_90 Nachricht enthält zwischen 80 und 90% HTML
-lang de describe HTML_90_100 Nachricht enthält zwischen 90 und 100% HTML
+lang de describe HTML_00_10 Nachricht besteht zu 0 und 10% aus HTML
+lang de describe HTML_10_20 Nachricht besteht zu 10-20% aus HTML
+lang de describe HTML_20_30 Nachricht besteht zu 20-30% aus HTML
+lang de describe HTML_30_40 Nachricht besteht zu 30-40% aus HTML
+lang de describe HTML_40_50 Nachricht besteht zu 40-50% aus HTML
+lang de describe HTML_50_60 Nachricht besteht zu 50-60% aus HTML
+lang de describe HTML_60_70 Nachricht besteht zu 60-70% aus HTML
+lang de describe HTML_70_80 Nachricht besteht zu 70-80% aus HTML
+lang de describe HTML_80_90 Nachricht besteht zu 80-90% aus HTML
+lang de describe HTML_90_100 Nachricht besteht zu 90-100% aus HTML
 lang de describe HTML_SHOUTING3 Viele visuell auffällige ("schreiende") HTML-Elementn
 lang de describe HTML_SHOUTING4 Viele visuell auffällige ("schreiende") HTML-Elemente
 lang de describe HTML_SHOUTING5 Viele visuell auffällige ("schreiende") HTML-Elemente
@@ -431,7 +431,7 @@ lang de describe HTML_FONT_SIZE_LARGE HTML-Schriftgröße ist sehr groß
 lang de describe HTML_FONT_SIZE_HUGE HTML-Schriftgröße ist riesig
 lang de describe HTML_FONT_BIG HTML-Markierung für große Schriftart
 lang de describe HTML_FONT_TINY HTML-Markierung für winzige Schriftgröße
-lang de describe HTML_FONT_INVISIBLE gleiche HTML-Schriftfarbe wie der Hintergrund
+lang de describe HTML_FONT_INVISIBLE Gleiche HTML-Schriftfarbe wie der Hintergrund
 lang de describe HTML_FONT_LOW_CONTRAST HTML-Schriftfarbe ähnlich der Hintergrundfarbe
 lang de describe HTML_FONT_FACE_BAD HTML-Schriftart inkorrekt angegeben
 lang de describe HTML_FONT_FACE_CAPS Name der HTML-Schriftart mit zusätzlichen Großbuchstaben
@@ -449,7 +449,7 @@ lang de describe HTML_IMAGE_RATIO_08 Verhältnis Bilderfläche zu Text ist klein
 lang de describe HTML_IMAGE_RATIO_10 Verhältnis Bilderfläche zu Text ist klein
 lang de describe HTML_IMAGE_RATIO_12 Verhältnis Bilderfläche zu Text ist klein
 lang de describe HTML_IMAGE_RATIO_14 Verhältnis Bilderfläche zu Text ist klein
-lang de describe HTML_JAVASCRIPT Nachricht mit Javascript-Anweisungen
+lang de describe HTML_JAVASCRIPT Nachricht mit JavaScript-Anweisungen
 lang de describe HTML_LINK_PUSH_HERE Hyperlink sagt "push here"
 lang de describe HTML_LINK_CLICK_HERE Hyperlink sagt "click here"
 lang de describe HTML_LINK_CLICK_CAPS Hyperlink sagt "CLICK"
@@ -463,20 +463,20 @@ lang de describe HTML_OBFUSCATE_60_70 Nachrichtentext enthält 60-70% wirres HTML
 lang de describe HTML_OBFUSCATE_70_80 Nachrichtentext enthält 70-80% wirres HTML
 lang de describe HTML_OBFUSCATE_80_90 Nachrichtentext enthält 80-90% wirres HTML
 lang de describe HTML_OBFUSCATE_90_100 Nachrichtentext enthält 90-100% wirres HTML
-lang de describe HTML_BACKHAIR_1 HTML-Markierungen sollen Wörter tarnen (1)
-lang de describe HTML_BACKHAIR_2 HTML-Markierungen sollen Wörter tarnen (2)
-lang de describe HTML_BACKHAIR_4 HTML-Markierungen sollen Wörter tarnen (4)
-lang de describe HTML_BACKHAIR_8 HTML-Markierungen sollen Wörter tarnen (8)
+lang de describe HTML_BACKHAIR_1 HTML-Markierungen sollen Wörter tarnen
+lang de describe HTML_BACKHAIR_2 HTML-Markierungen sollen Wörter tarnen
+lang de describe HTML_BACKHAIR_4 HTML-Markierungen sollen Wörter tarnen
+lang de describe HTML_BACKHAIR_8 HTML-Markierungen sollen Wörter tarnen
 lang de describe HTML_ATTR_BAD HTML-Markierungen mit vielen ungültigen Attributen
 lang de describe HTML_ATTR_UNIQUE HTML-Markierungen mit zufälligen Attributen
 lang de describe HTML_WEB_BUGS Bildhyperlink mit Identifizierungsnummer
-lang de describe HTML_WIN_OPEN Javascript-Anweisungen öffnen neue Fenster
-lang de describe HTML_TAG_BALANCE_HTML Anzahl "html"-Markierungen nicht ausgeglichen
-lang de describe HTML_TAG_BALANCE_BODY Anzahl "body"-Markierungen nicht ausgeglichen
-lang de describe HTML_TAG_BALANCE_HEAD Anzahl "head"-Markierungen nicht ausgeglichen
-lang de describe HTML_TAG_EXIST_MARQUEE HTML-Markierung "marquee" gefunden
-lang de describe HTML_TAG_EXIST_PARAM HTML-Markierung "param" gefunden
-lang de describe HTML_TAG_EXIST_TBODY HTML-Markierung "tbody" gefunden
+lang de describe HTML_WIN_OPEN JavaScript-Anweisungen öffnen neue Fenster
+lang de describe HTML_TAG_BALANCE_HTML Anzahl "html"-Tags nicht ausgeglichen
+lang de describe HTML_TAG_BALANCE_BODY Anzahl "body"-Tags nicht ausgeglichen
+lang de describe HTML_TAG_BALANCE_HEAD Anzahl "head"-Tags nicht ausgeglichen
+lang de describe HTML_TAG_EXIST_MARQUEE HTML-Element "marquee" gefunden
+lang de describe HTML_TAG_EXIST_PARAM HTML-Element "param" gefunden
+lang de describe HTML_TAG_EXIST_TBODY HTML-Element "tbody" gefunden
 lang de describe HTML_BADTAG_00_10 Nachricht enthält 0-10% inkorrekte HTML-Syntax
 lang de describe HTML_BADTAG_10_20 Nachricht enthält 10-20% inkorrekte HTML-Syntax
 lang de describe HTML_BADTAG_20_30 Nachricht enthält 20-30% inkorrekte HTML-Syntax
@@ -497,62 +497,62 @@ lang de describe HTML_NONELEMENT_60_70 60-70% der HTML-Elemente entsprechen nich
 lang de describe HTML_NONELEMENT_70_80 70-80% der HTML-Elemente entsprechen nicht dem Standard
 lang de describe HTML_NONELEMENT_80_90 80-90% der HTML-Elemente entsprechen nicht dem Standard
 lang de describe HTML_NONELEMENT_90_100 90-100% der HTML-Elemente entsprechen nicht dem Standard
-lang de describe HTML_SHORT_LENGTH sher sehr kleiner HTML-Teil
-lang de describe HTML_SHORT_COMMENT wenig HTML und dann noch Kommentare
-lang de describe HTML_SHORT_CENTER wenig HTML mit "CENTER"-Markierung
+lang de describe HTML_SHORT_LENGTH Sehr, sehr kleiner HTML-Teil
+lang de describe HTML_SHORT_COMMENT Wenig HTML und dann noch Kommentare
+lang de describe HTML_SHORT_CENTER Wenig HTML mit "center"-Element
 lang de describe HTML_TITLE_EMPTY HTML-Nachricht mit leerem Titel
-lang de describe HTML_TITLE_EXTRA Mehr als eine "title"-Markierung im HTML-Teil
+lang de describe HTML_TITLE_EXTRA Mehr als ein "title"-Element im HTML-Teil
 lang de describe HTML_TITLE_UNTITLED HTML-Nachricht mit Titel "Untitled"
 lang de describe HTML_CHARSET_FARAWAY Fremdsprachlicher Zeichensatz für HTML benutzt
-lang de describe HTML_MIME_NO_HTML_TAG Nachricht besteht nur aus HTML, hat aber kein "<html>"-Element
+lang de describe HTML_MIME_NO_HTML_TAG Nachricht besteht nur aus HTML, hat aber kein "html"-Element
 lang de describe HTML_MISSING_CTYPE HTML-Nachricht ohne passende Kopfzeile "Content-Type"
-lang de describe HIDE_WIN_STATUS Javascript-Anweisungen verstecken Hyperlinks
+lang de describe HIDE_WIN_STATUS JavaScript-Anweisungen verstecken Hyperlinks
 lang de describe LINK_TO_NO_SCHEME Hyperlink ohne "http://"
 lang de describe OBFUSCATING_COMMENT HTML-Kommentar versucht Text zu verschleiern
-lang de describe JS_FROMCHARCODE Dokument wird aus Javascriptprogramm erzeugt
+lang de describe JS_FROMCHARCODE Dokument wird aus JavaScript-Programm erzeugt
 lang de describe ENTITY_DEC_SPACE HTML enthält unnötig kodierte Leerzeichen
 lang de describe ENTITY_DEC_ALPHANUM HTML enthält unnötig kodierte Zeichen
 lang de describe ENTITY_DEC_OTHER HTML enthält unnötig kodierte Satzzeichen
-lang de describe CASHCASHCASH Entält mindestens 3 $-Zeichen hintereinander
+lang de describe CASHCASHCASH Enthält mindestens 3 Dollarzeichen hintereinander
 lang de describe MANY_EXCLAMATIONS Betreff enthält viele Ausrufezeichen
 lang de describe UPPERCASE_25_50 Nachrichtentext besteht zu 25-50% aus Großbuchstaben
 lang de describe UPPERCASE_50_75 Nachrichtentext besteht zu 50-75% aus Großbuchstaben
 lang de describe UPPERCASE_75_100 Nachrichtentext besteht zu 75-100% aus Großbuchstaben
 lang de describe PLING_PLING Ungewöhnlich viele Ausrufezeichen im Betreff
-lang de describe NIGERIAN_BODY1 Nachrichtentext sieht nach nigerianischem Spam aus 1+
-lang de describe NIGERIAN_BODY2 Nachrichtentext sieht nach nigerianischem Spam aus 2+
-lang de describe NIGERIAN_BODY3 Nachrichtentext sieht nach nigerianischem Spam aus 3+
-lang de describe NIGERIAN_BODY4 Nachrichtentext sieht nach nigerianischem Spam aus 4+
+lang de describe NIGERIAN_BODY1 Nachrichtentext sieht nach nigerianischem Spam aus
+lang de describe NIGERIAN_BODY2 Nachrichtentext sieht nach nigerianischem Spam aus
+lang de describe NIGERIAN_BODY3 Nachrichtentext sieht nach nigerianischem Spam aus
+lang de describe NIGERIAN_BODY4 Nachrichtentext sieht nach nigerianischem Spam aus
 lang de describe IDENT_NOBODY "Received"-Kopfzeilen enthalten die Zeichenkette "ident:nobody"
 lang de describe INVALID_MSGID "Message-ID"-Zeile ist ungültig gemäß RFC-2822
-lang de describe FORGED_MUA_MOZILLA Gefälschte E-mail gibt vor vom Mailprogramm Mozilla zu kommen
+lang de describe FORGED_MUA_MOZILLA Gefälschte E-Mail gibt vor vom Mailprogramm Mozilla zu kommen
 lang de describe BUGGY_CGI Nachricht durch unsicheres CGI-Programm verschickt
 lang de describe REMOVE_FROM_LIST Anleitung zur Entfernung aus der Adressliste
 lang de describe MULTI_REMOVAL_1WORD Anleitung zur Entfernung aus der Adressliste
 lang de describe REMOVE_POSTAL Senden Sie Brief/Postkarte um aus der Liste entfernt zu werden...
 lang de describe CLICK_BELOW_CAPS Aufforderung zum Mausklick in Großbuchstaben
 lang de describe CLICK_BELOW Aufforderung zum Mausklick
-lang de describe CLICK_TO_REMOVE_1 Entfernung aus der Adresslist nur ein Mausklick entfernt
+lang de describe CLICK_TO_REMOVE_1 "Entfernung aus der Adressliste nur ein Mausklick entfernt"
 lang de describe SENT_IN_COMPLIANCE Behauptet, den Vorschriften über Spam zu entsprechen
 lang de describe BILL_1618 Behauptet, dem US-Gesetzentwurf 1618 zu entsprechen
 lang de describe BILL_SECTION Behauptet, den Vorschriften über Spam zu entsprechen
 lang de describe FURTHER_TRANSMISSIONS Behauptet, den Vorschriften über Spam zu entsprechen
-lang de describe ALL_CAPS_GUAR Enthält das Wort 'guarantee' in Großbuchstaben
-lang de describe NO_QS_ASKED Stellt keine weiteren Fragen...
+lang de describe ALL_CAPS_GUAR Enthält das Wort "GUARANTEE" in Großbuchstaben
+lang de describe NO_QS_ASKED "Keinerlei Fragen zu benatworten..."
 lang de describe FULL_REFUND Bietet vollständige Geldrückerstattung an
-lang de describe FOR_FREE Bietet etwas völlig kostenlos an... (1)
-lang de describe COMPLETELY_FREE Bietet etwas völlig kostenlos an... (2)
-lang de describe NO_COST Bietet etwas völlig kostenlos an... (3)
+lang de describe FOR_FREE Bietet etwas völlig kostenlos an...
+lang de describe COMPLETELY_FREE Bietet etwas völlig kostenlos an...
+lang de describe NO_COST Bietet etwas völlig kostenlos an...
 lang de describe GUARANTEED_100_PERCENT Zu 100% garantiert...
 lang de describe DEAR_FRIEND Anonyme Anrede ("dear friend")
-lang de describe DEAR_SOMETHING Anonyme Anrede ("Dear ...")
+lang de describe DEAR_SOMETHING Anonyme Anrede ("dear ...")
 lang de describe BILLION_DOLLARS Erwähnt sehr große Geldbeträge
-lang de describe OPTING_OUT Falls Sie nicht mitmachen wollen ...(opt-out)
-lang de describe OPTING_OUT_CAPS Falls Sie nicht mitmachen wollen ...(Opt-Out)
-lang de describe DIRECT_EMAIL Erwähnt direkte E-mail
+lang de describe OPTING_OUT "Falls Sie nicht mitmachen wollen..." (Opt-out)
+lang de describe OPTING_OUT_CAPS "Falls Sie nicht mitmachen wollen..." (Opt-Out)
+lang de describe DIRECT_EMAIL Erwähnt direkte E-Mail
 lang de describe NEVER_ANOTHER Man wird Ihnen niemals wieder etwas schicken
 lang de describe ONE_TIME_MAILING "Einmalige Nachricht" sagt nicht, dass es kein Spam ist...
-lang de describe MILLION_EMAIL Besorgen Sie sich eine Million E-mail-Adressen
+lang de describe MILLION_EMAIL Besorgen Sie sich eine Million E-Mail-Adressen
 lang de describe EXCUSE_1 Gibt eine dumme Entschuldigung für Spam an
 lang de describe EXCUSE_3 Behauptet, man könne sich von der Adressliste entfernen lassen
 lang de describe EXCUSE_4 Behauptet, man könne sich von der Adressliste entfernen lassen
@@ -560,17 +560,17 @@ lang de describe EXCUSE_6 Behauptet, man könne sich von der Adressliste entferne
 lang de describe EXCUSE_7 Behauptet, man könne sich von der Adressliste entfernen lassen
 lang de describe EXCUSE_10 Was zu tun ist, wenn Sie das nicht mehr empfangen wollen...
 lang de describe EXCUSE_11 Behauptet, man sei auf einer Adressliste gewesen
-lang de describe EXCUSE_12 Vielleicht ist diese E-mail ja ein Irrtum...
-lang de describe EXCUSE_15 Behauptet, normale E-mail zu sein
+lang de describe EXCUSE_12 Vielleicht ist diese E-Mail ja ein Irrtum...
+lang de describe EXCUSE_15 Behauptet, normale E-Mail zu sein
 lang de describe EXCUSE_19 Sie haben angeblich zugestimmt oder sich irgendwo registrieren lassen
 lang de describe EXCUSE_21 Angeblich wurde die Adresse legal erworben
 lang de describe EXCUSE_22 Es gibt einen Grund warum Sie dieses Angebot bekommen...
 lang de describe EXCUSE_23 Sie haben sich angeblich eine Erlaubnis erteilt
 lang de describe EXCUSE_24 Angeblich haben möchten Sie diese Werbung bekommen
 lang de describe EXCUSE_REMOVE Beschreibt, wie Sie diese Nachrichten wieder loswerden
-lang de describe TARGETED Gezielte Werbung per E-mail
+lang de describe TARGETED Gezielte Werbung per E-Mail
 lang de describe LIMITED_TIME_ONLY Das Angebot ist zeitlich begrenzt
-lang de describe STRONG_BUY Erwähnt eine starke Kaufempfehlung (von Aktien ?)
+lang de describe STRONG_BUY Erwähnt eine starke Kaufempfehlung (von Aktien?)
 lang de describe WE_HONOR_ALL Behauptet, Aufforderungen zur Entfernung von der Liste zu folgen
 lang de describe STOCK_PICK Bietet eine Aktienempfehlung an
 lang de describe STOCK_ALERT Bietet eine Benachrichtigung über Aktienwerte an
@@ -579,14 +579,14 @@ lang de describe NOT_ADVISOR Dreht sich um einen nicht registrierten Investmentb
 lang de describe SOME_BREAKTHROUGH Jemand hat den großen Durchbruch geschafft
 lang de describe SELECTED_YOU Sie wurden auserwählt
 lang de describe MAIL_IN_ORDER_FORM Enthält ein Formular zur schriftlichen Bestellung
-lang de describe UNIVERSITY_DIPLOMAS Universitätsdiplome schnell und einfach...
+lang de describe UNIVERSITY_DIPLOMAS Universitätsdiplome, schnell und einfach...
 lang de describe PREST_NON_ACCREDITED Kaufen Sie Studienabschlüsse obskurer Universitäten
 lang de describe CANNOT_BE_SPAM Angeblich kann dies auf keinen Fall Spam sein...
 lang de describe THIS_IS_AN_AD Nachricht sagt selbst, dass es sich um Werbung handelt.
-lang de describe BODY_ENHANCEMENT Informationen zur Penis-/Brustvergrößerung (1)
-lang de describe BODY_ENHANCEMENT2 Informationen zur Penis-/Brustvergrößerung (2)
+lang de describe BODY_ENHANCEMENT Informationen zur Penis-/Brustvergrößerung
+lang de describe BODY_ENHANCEMENT2 Informationen zur Penis-/Brustvergrößerung
 lang de describe IMPOTENCE Beseitigt Impotenz
-lang de describe WORK_AT_HOME Informationen über Heimarbeit (1)
+lang de describe WORK_AT_HOME Informationen über Heimarbeit
 lang de describe NO_EXPERIENCE Man braucht keinerlei Erfahrung
 lang de describe MORTGAGE_BEST Informationen über Hypothekendarlehen
 lang de describe MORTGAGE_PITCH Preist Hypothekendarlehen an
@@ -617,7 +617,7 @@ lang de describe SERIOUS_ONLY Nur ernstgemeinte Nachfragen...
 lang de describe RISK_FREE Ganz ohne Risiko
 lang de describe AS_SEEN_ON Aus der Fernsehwerbung
 lang de describe NOT_INTENDED Nicht gedacht für bestimmte Regionen/Länder
-lang de describe COPY_ACCURATELY Übliche Phrase von Schneeballsystemen (1)
+lang de describe COPY_ACCURATELY Übliche Phrase von Schneeballsystemen
 lang de describe ORDER_NOW Verlieren Sie keine Zeit, bestellen Sie jetzt
 lang de describe OFFSHORE_SCAM Dubiose Finanztransaktionen im Ausland ("offshore")
 lang de describe WHY_PAY_MORE Warum mehr bezahlen als nötig?
@@ -635,7 +635,7 @@ lang de describe BANKRUPTCY Vermeiden Sie den Bankrott
 lang de describe ACCEPT_CREDIT_CARDS Kreditkarten werden akzeptiert
 lang de describe BAD_CREDIT Erwähnt geplatzte Kredite oder Kreditwürdigkeit
 lang de describe NONSECURED_CREDIT Erwähnt ungesicherte Kredite
-lang de describe LOW_INTEREST niedrige Zinssätze
+lang de describe LOW_INTEREST Erwähnt niedrige Zinssätze
 lang de describe SAVE_UP_TO Sparen Sie bis zu...
 lang de describe LOW_PAYMENT Geringe monatliche Kosten
 lang de describe CONSOLIDATE_DEBT Schulden/Kredite/Rechnungen zusammenlegen
@@ -674,8 +674,8 @@ lang de describe CABLE_CONVERTER Konverter für Kabelfernsehen
 lang de describe WRINKLES Mittel gegen Falten
 lang de describe BUY_JUDGEMENTS Wir kaufen gerichtlich erlassene Zahlungsaufforderungen
 lang de describe LYING_EYES Sie werden Ihren Augen nicht trauen
-lang de describe WHILE_YOU_SLEEP Während Sie schlafen
-lang de describe WHILE_SUPPLIES Solange der Vorrat reicht
+lang de describe WHILE_YOU_SLEEP Während Sie schlafen...
+lang de describe WHILE_SUPPLIES Nur solange der Vorrat reicht
 lang de describe RICH Werden Sie schnell reich
 lang de describe YOU_WON Sie haben gewonnen
 lang de describe FREE_PASSWORD Bietet kostenloses (oftmals gestohlenes) Kennwort an
@@ -683,7 +683,7 @@ lang de describe HIDDEN_CHARGES Erwähnt versteckte Kosten
 lang de describe GET_STARTED_NOW Fangen Sie jetzt an
 lang de describe FIN_FREE Finanzielle Unabhängigkeit
 lang de describe FORWARD_LOOKING Enthält Formulierungen aus Aktienprospekten
-lang de describe SATIS_GUAR Garantierte Zufriedenheit
+lang de describe SATIS_GUAR Zufriedenheit ist garantiert
 lang de describe HG_HORMONE Erwähnt menschliche Wachstumshormone
 lang de describe EXTRA_CASH Zusätzliches Geld
 lang de describe GET_PAID Lassen Sie sich bezahlen
@@ -714,7 +714,7 @@ lang de describe FREE_ACCESS Enthält "free access" mit Großbuchstaben
 lang de describe FREE_SAMPLE Enthält "free sample" mit Großbuchstaben
 lang de describe LOW_PRICE Niedrigste Preise
 lang de describe ONCE_IN_LIFETIME Eine solche Gelegenheit hat man nur einmal im Leben
-lang de describe SAFEGUARD_NOTICE Enthält Hinweis auf nicht registrierte Spam-Software
+lang de describe SAFEGUARD_NOTICE Enthält Hinweis auf nicht-registrierte Spam-Software
 lang de describe NO_MIDDLEMAN Kein Mittelsmann nötig
 lang de describe UNCLAIMED_MONEY Geld oder Gewinne ohne Besitzer
 lang de describe CHANGE_TERMS Strikte Vertragsbedingungen
@@ -739,10 +739,10 @@ lang de describe WE_HATE_SPAM2 Wir lehnen doch alle Spam ab...
 lang de describe UP_TO_OR_MORES Bis zu ... und mehr
 lang de describe NIGERIAN_SCAM_VIRTUE Möglicherweise Text mit nigerianischem Spam
 lang de describe NIGERIAN_BODY_GOVT_3 Nachrichtentext deutet auf nigerianischen Spam hin
-lang de describe WALAA "Voila", inkorrekt geschrieben
+lang de describe WALAA "Voilá", falsch geschrieben
 lang de describe SEE_FOR_YOURSELF Sehen Sie selbst
 lang de describe FREE_PORN Eventuell Pornowerbung: Kostenlose Pornos
-lang de describe BARELY_LEGAL Eventuell Pornowerbung: knapp im erlaubten Alter
+lang de describe BARELY_LEGAL Eventuell Pornowerbung: Knapp im erlaubten Alter
 lang de describe MEGA_SITE Eventuell Pornowerbung: Mega-Pornos
 lang de describe CUM_SHOT Eventuell Pornowerbung: "cum shot"
 lang de describe ALL_CAP_FOR_ADULTS Eventuell Pornowerbung: Alles in Großbuchstaben
@@ -750,11 +750,11 @@ lang de describe PAY_SITE Eventuell Pornowerbung: Bezahlen Sie dafür
 lang de describe SEX_FEST Eventuell Pornowerbung: Sexorgien
 lang de describe LIVE_PORN Eventuell Pornowerbung: Seien Sie live dabei
 lang de describe HARDCORE_PORN Eventuell Pornowerbung: "hard core"
-lang de describe HOT_NASTY Eventuell Pornowerbung: heiß, unartig , wild und jung
+lang de describe HOT_NASTY Eventuell Pornowerbung: heiß, unartig, wild und jung
 lang de describe BEST_PORN Eventuell Pornowerbung: Beste und größte Sammlung
 lang de describe NASTY_GIRLS Eventuell Pornowerbung: Ungezogene Mädchen
 lang de describe AMATEUR_PORN Eventuell Pornowerbung: Amateurpornos
-lang de describe PORN_CELEBRITY Eventuell Pornowerbung: neugierig auf Prominente?
+lang de describe PORN_CELEBRITY Eventuell Pornowerbung: Neugierig auf Prominente?
 lang de describe SOMETHING_FOR_ADULTS Eventuell Pornowerbung: Webseiten nur für Erwachsene
 lang de describe LESBIAN Eventuell Pornowerbung: Lesbischer Sex
 lang de describe PORN_15 Worte und Phrasen weisen auf Pornographie hin
@@ -766,79 +766,79 @@ lang de describe PORN_URL_SLUT Worte/Phrasen in URL weisen auf Pornographie hin 
 lang de describe PORN_URL_PANT Worte/Phrasen in URL weisen auf Pornographie hin (pant)
 lang de describe PORN_URL_MISC Worte/Phrasen in URL weisen auf Pornographie hin (diverse)
 lang de describe SUBJECT_SEXUAL Betreff weist auf sexuellen Nachrichtentext hin
-lang de describe RATWARE_EGROUPS Hinweis auf Spam durch eGroups gefunden
-lang de describe RATWARE_HASH_2 Spamhinweise gefunden (Identifizierungsnummer)
-lang de describe RATWARE_HASH_2_V2 Spamhinweise gefunden (Identifizierungsnummer 2)
-lang de describe RATWARE_JPFREE Spamhinweise gefunden ("jpfree")
-lang de describe RATWARE_VC_IPA Spamhinweise gefunden ("VC_IPA")
-lang de describe RATWARE_OE_PI Spamhinweise gefunden ("OutLook Express 3.14159")
-lang de describe RATWARE_STORM_URI Spamhinweise gefunden ("StormPost")
-lang de describe RATWARE_SCREWUP_1 Spamhinweise gefunden (Spammerfehler)
-lang de describe RATWARE_MMAILER Spamhinweise gefunden ("MMailer")
-lang de describe RATWARE_OE_MALFORMED Kopfzeile enthält gefälschte Hinweise auf Outlook Express
-lang de describe RATWARE_EVAMAIL Spamhinweise gefunden ("EVAMAIL")
-lang de describe RATWARE_IMKTG Spamhinweise gefunden ("Internet Marketing")
-lang de describe RATWARE_XMAILER Spamhinweise gefunden (xmailer Markierung)
-lang de describe RATWARE_DIFFOND Spamhinweise gefunden ("DiffondiCool")
-lang de describe RATWARE_RCVD_LC_ESMTP Spamhinweise gefunden ("esmtp" in Kleinbuchstaben)
-lang de describe RATWARE_MOZ_MALFORMED Spamhinweis: "User-Agent"-Zeile inkorrekt (Mozilla)
-lang de describe FORGED_MUA_MSN Gefälschte E-mail gibt vor, von MSN zukommen
-lang de describe FORGED_MUA_IMS E-mail täuscht E-Mail-Programm "Internet Mail Service" vor
-lang de describe FORGED_MUA_OUTLOOK E-mail täuscht E-Mail-Programm "MS Outlook" vor
-lang de describe FORGED_MUA_OIMO E-mail täuscht E-Mail-Programm "MS Outlook IMO" vor
-lang de describe FORGED_MUA_EUDORA E-mail täuscht E-Mail-Programm "Eudora" vor
-lang de describe FORGED_MUA_AOL_FROM E-mail täuscht E-Mail-Programm von AOL vor
-lang de describe FORGED_MUA_THEBAT_CS E-mail täuscht E-Mail-Programm "The Bat!" vor (2)
-lang de describe FORGED_MUA_THEBAT_BOUN E-mail täuscht E-Mail-Programm "The Bat!" vor (3)
-lang de describe FORGED_OUTLOOK_HTML "MS Outlook" verschickt keine reinen HTML-Nachrichten
+lang de describe RATWARE_EGROUPS Nachrichtenstruktur weist auf Spam-Software hin (eGroups)
+lang de describe RATWARE_HASH_2 Nachrichtenstruktur weist auf Spam-Software hin  (Identifizierungsnummer)
+lang de describe RATWARE_HASH_2_V2 Nachrichtenstruktur weist auf Spam-Software hin (Identifizierungsnummer)
+lang de describe RATWARE_JPFREE Nachrichtenstruktur weist auf Spam-Software hin ("jpfree")
+lang de describe RATWARE_VC_IPA Nachrichtenstruktur weist auf Spam-Software hin ("VC_IPA")
+lang de describe RATWARE_OE_PI Nachrichtenstruktur weist auf Spam-Software hin ("OutLook Express 3.14159")
+lang de describe RATWARE_STORM_URI Nachrichtenstruktur weist auf Spam-Software hin ("StormPost")
+lang de describe RATWARE_SCREWUP_1 Nachrichtenstruktur weist auf Spam-Software hin (Spammerfehler)
+lang de describe RATWARE_MMAILER Nachrichtenstruktur weist auf Spam-Software hin ("MMailer")
+lang de describe RATWARE_EVAMAIL Nachrichtenstruktur weist auf Spam-Software hin ("EVAMAIL")
+lang de describe RATWARE_IMKTG Nachrichtenstruktur weist auf Spam-Software hin ("Internet Marketing")
+lang de describe RATWARE_XMAILER Nachrichtenstruktur weist auf Spam-Software hin (xmailer Markierung)
+lang de describe RATWARE_DIFFOND Nachrichtenstruktur weist auf Spam-Software hin ("DiffondiCool")
+lang de describe RATWARE_RCVD_LC_ESMTP Nachrichtenstruktur weist auf Spam-Software hin ("esmtp" in Kleinbuchstaben)
+lang de describe RATWARE_OE_MALFORMED Kopfzeilen enthalten gefälschte Hinweise auf Outlook Express
+lang de describe RATWARE_MOZ_MALFORMED Kopfzeilen enthalten gefälschte Hinweise auf Mozilla
+lang de describe FORGED_MUA_MSN Gefälschte E-Mail gibt vor, von MSN zukommen
+lang de describe FORGED_MUA_IMS E-Mail täuscht E-Mail-Software Exchange vor
+lang de describe FORGED_MUA_OUTLOOK E-Mail täuscht E-Mail-Software Outlook vor
+lang de describe FORGED_MUA_OIMO E-Mail täuscht E-Mail-Software Outlook vor
+lang de describe FORGED_MUA_EUDORA E-Mail täuscht E-Mail-Software Eudora vor
+lang de describe FORGED_MUA_AOL_FROM E-Mail täuscht E-Mail-Software von AOL vor
+lang de describe FORGED_MUA_THEBAT_CS E-Mail täuscht E-Mail-Software The Bat! vor
+lang de describe FORGED_MUA_THEBAT_BOUN E-Mail täuscht E-Mail-Software The Bat! vor
+lang de describe FORGED_OUTLOOK_HTML Outlook verschickt keine reinen HTML-Nachrichten
 lang de describe FORGED_AOL_HTML E-Mail-Programm von AOL verschickt keine reinen HTML-Nachrichten
-lang de describe FORGED_IMS_HTML "Internet Mail Service" verschickt keine reinen HTML-Nachrichten
-lang de describe FORGED_THEBAT_HTML "The Bat!" verschickt keine reinen HTML-Nachrichten
-lang de describe FORGED_MUA_APPLEMAIL "AppleMail" verschickt keine reinen HTML- Nachrichten
-lang de describe FORGED_QUALCOMM_TAGS E-Mail-Programm von QUALCOMM verwendet diese Art HTML nicht
+lang de describe FORGED_IMS_HTML Exchange verschickt keine reinen HTML-Nachrichten
+lang de describe FORGED_THEBAT_HTML The Bat! v1 verschickt keine reinen HTML-Nachrichten
+lang de describe FORGED_MUA_APPLEMAIL AppleMail verschickt keine reinen HTML- Nachrichten
+lang de describe FORGED_QUALCOMM_TAGS E-Mail-Programm von Qualcomm verwendet diese Art HTML nicht
 lang de describe FORGED_AOL_TAGS E-Mail-Programm von AOL verwendet diese Art HTML nicht
-lang de describe FORGED_IMS_TAGS "Internet Mail Service" verwendet diese Art HTML nicht
-lang de describe FORGED_OUTLOOK_TAGS "MS Outlook" verwendet diese HTML-Markierung nicht
-lang de describe RATWARE_BAD_REFS Inkorrektes Format der Kopfzeile "References: "
+lang de describe FORGED_IMS_TAGS Exchange verwendet diese Art HTML nicht
+lang de describe FORGED_OUTLOOK_TAGS Outlook verwendet diese HTML-Markierung nicht
+lang de describe RATWARE_BAD_REFS Inkorrektes Format der Kopfzeile "References"
 lang de describe RATWARE_HASH_DASH Enthält Abwehrmaßnahme gegen Anti-Spam-Software ("hashbuster")
 lang de describe RATWARE_NETIP Spamhinweise gefunden (netIP)
-lang de describe RATWARE_GECKO_BUILD Spamhinweis: "User-Agent"-Zeile inkorrekt (Gecko)
+lang de describe RATWARE_GECKO_BUILD Kopfzeilen enthalten gefälschte Hinweise auf Mozilla/Gecko
 lang de describe HDR_ORDER_MTSRIX Reihenfolge von Kopfzeilen deutet auf Spam (MTSRIX)
 lang de describe HDR_ORDER_TRIMRS Reihenfolge von Kopfzeilen deutet auf Spam (TRIMRS)
-lang de describe RATWARE_ZERO_TZ Spamhinweis: seltsame Zeitzone (+0000)
-lang de describe RCVD_BONUS_SPC_DATE Spamhinweis: zusätzliche Leerzeichen
-lang de describe X_MESSAGE_INFO Spamhinweis: Kopfzeile "X-Message-Info"
-lang de describe RATWARE_RCVD_PF Spamhinweis: angeblich "Received"-Kopfzeile von Postfix
-lang de describe RATWARE_RCVD_AT Spamhinweis: "Received"-Kopfzeile mit @-Zeichen
+lang de describe RATWARE_ZERO_TZ Seltsame Zeitzone (+0000)
+lang de describe RCVD_BONUS_SPC_DATE Zusätzliche Leerzeichen im Datum
+lang de describe X_MESSAGE_INFO Kopfzeile "X-Message-Info"
+lang de describe RATWARE_RCVD_PF Gefälschte "Received"-Kopfzeile von Postfix
+lang de describe RATWARE_RCVD_AT "Received"-Kopfzeile mit @-Zeichen
 lang de describe NUMERIC_HTTP_ADDR Benutzt eine einzige Zahl als IP-Adresse in einem Hyperlink
 lang de describe NORMAL_HTTP_TO_IP Benutzt eine IP-Adresse (a.b.c.d) in einem Hyperlink
 lang de describe HTTP_WITH_EMAIL_IN_URL "remove" Hyperlink enthält eine E-mail-Adresse
 lang de describe HTTP_ESCAPED_HOST Benutzt %-Kodierung innerhalb des Hyperlinks
-lang de describe HTTP_CTRL_CHARS_HOST Benutzt CTRL/STRG-Sequenzen innerhalb des URL-Rechnernamens
+lang de describe HTTP_CTRL_CHARS_HOST Benutzt Steuerzeichen innerhalb des URL-Rechnernamens
 lang de describe HTTP_EXCESSIVE_ESCAPES Überflüssige %-Kodierung in Webadresse
 lang de describe IP_LINK_PLUS IP-Adresse (a.b.c.d) gefolgt von CGI-Programm
 lang de describe REMOVE_PAGE Hyperlink einer Seite, die "remove" heißt
 lang de describe MAILTO_WITH_SUBJ Hyperlink verschickt Nachricht mit vorgegebenen Betreff
-lang de describe MAILTO_TO_SPAM_ADDR Hyperlink mit E-mail-Adresse eines verdächtigten Spam-Versenders
-lang de describe MAILTO_TO_REMOVE Enthält eine E-mail-Adresse mit "remove"
+lang de describe MAILTO_TO_SPAM_ADDR Hyperlink mit E-Mail-Adresse eines verdächtigten Spam-Versenders
+lang de describe MAILTO_TO_REMOVE Enthält eine E-Mail-Adresse mit "remove"
 lang de describe JAVASCRIPT_URI "javascript:" in Hyperlink
 lang de describe WEIRD_PORT Ungewöhnliche Portnummer in HTTP-Hyperlink
 lang de describe USERPASS Hyperlink enthält Benutzername und (eventuell) ein Kennwort
-lang de describe URI_IS_POUND Dateiname besteht nur aus "#"; vielleicht ein Javascript-Trick
+lang de describe URI_IS_POUND Dateiname besteht nur aus "#"; vielleicht ein JavaScript-Trick
 lang de describe BTAMAIL_URL Webadresse wird oft in Spam verwendet
 lang de describe BARGAIN_URL Spamverdächtiger Hyperlink
-lang de describe BZ_TLD Hyperlink mit ".bz" am Ende
-lang de describe BIZ_TLD Hyperlink mit ".biz" am Ende
-lang de describe INFO_TLD Enthält eine WWW-Adresse mit ".info"
+lang de describe BZ_TLD Hyperlink mit ".bz"-Domain
+lang de describe BIZ_TLD Hyperlink mit ".biz"-Domain
+lang de describe INFO_TLD Hyperlink mit ".info"-Domain
 lang de describe HTTP_ENTITIES_HOST Hyperlink verschleiert durch unnötige Kodierung
-lang de describe YAHOO_RD_REDIR URL mit Umleitung über Yahoo (rd)
-lang de describe YAHOO_SRD_REDIR URL mit Umleitung über Yahoo (srd)
-lang de describe YAHOO_DRS_REDIR URL mit Umleitung über Yahoo (drs)
+lang de describe YAHOO_RD_REDIR URL mit Umleitung über Yahoo
+lang de describe YAHOO_SRD_REDIR URL mit Umleitung über Yahoo
+lang de describe YAHOO_DRS_REDIR URL mit Umleitung über Yahoo
 lang de describe MORTGAGE_LINKS Hyperlink mit Bezug zu Hypotheken
 lang de describe URI_OFFERS Hyperlink zu Firmenangebot
 lang de describe URI_4YOU Hyperlink enthält "4you"
-lang de describe TERRA_ES Enthält WWW-Adress mit 'terra.es'
-lang de describe HTTP_77 Enthält URL mit kodiertem Rechnernamen (HTTP77)
+lang de describe TERRA_ES Enthält Hyperlink mit "terra.es"
+lang de describe HTTP_77 Enthält URL mit kodiertem Rechnernamen
 lang de describe URI_AFFILIATE Enthält URL mit Werbepartnerkennzeichnung
 lang de describe URI_LONG_HOSTNAME Enthält URL mit langem Rechnernamen
 lang de describe URI_REDIRECTOR Nachricht enthält HTTP-URL mit Umleitung
@@ -875,10 +875,10 @@ lang de describe AWL Absenderadresse in der automatischen weißen Liste
 lang de describe USER_IN_BLACKLIST Absenderadresse steht in Ihrer persönlichen schwarzen Liste
 lang de describe USER_IN_WHITELIST Absenderadresse steht in Ihrer persönlichen weißen Liste
 lang de describe USER_IN_DEF_WHITELIST Absenderadresse steht in der allgemeinen weißen Liste
-lang de describe USER_IN_BLACKLIST_TO Empfängeradresse ist in Parameter "blacklist_to" aufgelistet
-lang de describe USER_IN_WHITELIST_TO Empfängeradresse ist in Parameter "whitelist_to" aufgelistet
-lang de describe USER_IN_MORE_SPAM_TO Empfängeradresse ist in Parameter "more_spam_to" aufgelistet
-lang de describe USER_IN_ALL_SPAM_TO Empfängeradresse ist in Parameter "all_spam_to" aufgelistet
+lang de describe USER_IN_BLACKLIST_TO Empfängeradresse steht in Ihrer persönlichen schwarzen Liste
+lang de describe USER_IN_WHITELIST_TO Empfängeradresse steht in Ihrer persönlichen weißen Liste
+lang de describe USER_IN_MORE_SPAM_TO Empfängeradresse soll fast alle (Spam-) Nachrichten erhalten
+lang de describe USER_IN_ALL_SPAM_TO Empfängeradresse soll alle (Spam-) Nachrichten erhalten
 lang de describe T_RCVD_IN_IADB_LIST Senderechner in IADB-Liste (www.isipp.com)
 lang de describe T_RCVD_IN_IADB_LIST_T Senderechner in IADB-Liste (www.isipp.com)
 lang de describe T_RCVD_IN_CSMA_BL Transportiert via Rechner in Liste von bl.csma.biz
