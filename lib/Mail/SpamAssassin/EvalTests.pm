@@ -1889,6 +1889,97 @@ sub check_for_mime_excessive_qp {
   return ($len && ($qp > ($len / 100)));
 }
 
+sub check_for_mime_excessive_qp_v1 {
+  my ($self, undef, $min) = @_;
+
+  if (exists $self->{mime_qp_ratio_v1}) {
+    return $self->{mime_qp_ratio_v1} >= $min;
+  }
+
+  $self->{mime_qp_ratio_v1} = 0;
+
+  if ($self->{found_encoding_quoted_printable}) {
+    # Note: We don't use rawbody because it removes MIME parts.  Instead,
+    # we get the raw unfiltered body.  We must not change any lines.
+    my $body = join('', @{$self->{msg}->get_body()});
+
+    my $len = length($body);
+
+    my $qp;
+    # count characters that should be literal (RFC 2045), hexadecimal values
+    # 21-3C and 3E-7E plus tabs (hexadecimal 09) and spaces (hexadecimal 20)
+    $qp = () = ($body =~ m/=(?:09|3[0-9ABCEF]|[2456][0-9A-F]|7[0-9A-E])/g);
+    # tabs and spaces at end of encoded line are okay
+    $qp-- while ($body =~ m/(?:=09|=20)\s*$/gm);
+
+    if ($len) {
+      $self->{mime_qp_ratio_v1} = $qp / $len;  
+    }
+  }
+
+  return $self->{mime_qp_ratio_v1} >= $min;
+}
+
+sub check_for_mime_excessive_qp_v2 {
+  my ($self, undef, $min) = @_;
+
+  if (exists $self->{mime_qp_ratio_v2}) {
+    return $self->{mime_qp_ratio_v2} >= $min;
+  }
+
+  $self->{mime_qp_ratio_v2} = 0;
+
+  my $cte = $self->get('Content-Transfer-Encoding');
+  chomp($cte = defined($cte) ? lc($cte) : "");
+
+  # Note: We don't use rawbody because it removes MIME parts.  Instead,
+  # we get the raw unfiltered body.  We must not change any lines.
+  my $len = 0;
+  my $qp = 0;
+  my $line;
+  for (@{$self->{msg}->get_body()}) {
+    $line = $_;
+
+    if ($line =~ /^Content-Transfer-Encoding:\s+(\S+)/i) {
+      $cte = lc($1);
+    }
+    elsif ($cte eq "quoted-printable") {
+      $len += length($line);
+      $qp += () = ($line =~ m/=(?:09|3[0-9ABCEF]|[2456][0-9A-F]|7[0-9A-E])/g);
+      # tabs and spaces at end of encoded line are okay
+      $qp-- while ($line =~ m/(?:=09|=20)\s*$/gm);
+    }
+  }
+
+  if ($len) {
+    $self->{mime_qp_ratio_v2} = $qp / $len;  
+  }
+
+  return $self->{mime_qp_ratio_v2} >= $min;
+}
+
+# this test should probably be rolled into _check_attachments()
+sub check_for_mime_excessive_base64 {
+  my ($self) = @_;
+
+  my $count = 0;
+  my $cte = $self->get('Content-Transfer-Encoding');
+  chomp($cte = defined($cte) ? lc($cte) : "");
+  for (@{$self->{msg}->get_body()}) {
+    if (/^Content-Transfer-Encoding:\s+(\S+)/i) {
+      $cte = lc($1);
+    }
+    if ($cte ne "base64" && /^[A-Za-z0-9\/+]{60,77}\s*$/) {
+      $count++;
+      return 1 if $count > 5;
+    }
+    else {
+      $count = 0;
+    }
+  }
+  return 0;
+}
+
 sub check_language {            # UNDESIRED_LANGUAGE_BODY
   my ($self, $body) = @_;
 
