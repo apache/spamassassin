@@ -1128,7 +1128,7 @@ EOT
 }
 
 # Taken from URI and URI::Find
-my $reserved   = q(;/?:@&=+$,[]);
+my $reserved   = q(;/?:@&=+$,[]\#);
 my $mark       = q(-_.!~*'());                                    #'; emacs
 my $unreserved = "A-Za-z0-9\Q$mark\E";
 my $uricSet = quotemeta($reserved) . $unreserved . "%";
