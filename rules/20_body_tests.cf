@@ -753,7 +753,7 @@ test NUMERIC_COMMENT     fail  Something <!-- A comment --> and more
 
 ## Contrib: Mark Perkel
 
-body OFFSHORE_SCAM		/offshore .{0,20}(?:credit card|companies|accounts?|financ|website)/i
+body OFFSHORE_SCAM		/offshore .{0,20}(?:credit card|companies|account|financ|website)/i
 describe OFFSHORE_SCAM		Off Shore Scams
 
 body VACATION_SCAM		/(?:free|mini-?|dream|special).{0,10}vacation|vacation (?:offer|promotion|package|for two|getaway)/i
@@ -831,7 +831,7 @@ describe NO_CREDIT_CHECK	No Credit Check
 body BANKRUPTCY			/(?:avoid|past) bankruptcy/i
 describe BANKRUPTCY		Avoid Bankruptcy
 
-body CREDIT_BUREAU		/all .{0,9} credit bureau/i
+body CREDIT_BUREAU		/all .{0,9}credit bureau/i
 describe CREDIT_BUREAU		Credit Bureaus
 
 body ACCEPT_CREDIT_CARDS	/accept.{1,15}credit card/i
@@ -840,7 +840,7 @@ describe ACCEPT_CREDIT_CARDS	Accept Credit Cards
 body BAD_CREDIT			/(?:bad|poor|no|eliminate|repair|(?:re)establish|damag).{0,10} (?:credit|debt)/i
 describe BAD_CREDIT		Eliminate Bad Credit
 
-body UNSECURED_CREDIT		/unsecured.{0,10}(?:master card|visa|credit|loans|debt)/i
+body UNSECURED_CREDIT		/unsecured.{0,10}(?:master ?card|visa|credit|loans|debt)/i
 describe UNSECURED_CREDIT	Unsecured Credit/Debt
 
 body LOW_INTEREST		/low.{0,20} interest rate/i
@@ -858,7 +858,7 @@ describe CREDITORS_CALLINGS	Creditors Calling
 body REFINANCE			/refinance.{0,6} home|home loan/i
 describe REFINANCE		Refinance Home
 
-body LIFE_INSURANCE		/life insurance .{0,30} no .{0,15}exam/i
+body LIFE_INSURANCE		/life insurance.{1,30}no.{1,15}exam/i
 describe LIFE_INSURANCE		No Examination life Insurance
 
 body SEARCH_ENGINE		/(?:submit|traffic|top).{0.10} search engines?|site ranking/i
@@ -867,8 +867,8 @@ describe SEARCH_ENGINE		Search Engine Site Ranking
 body SEARCH_ENGINE_PROMO        /\b(?:(?:submitt?|list)(?:ed|ing|s)?|place(?:d|ment))\s+.{0,15}\b(?:in|to)\b.{0,15}\b(?:(?:top|best|major|largest|biggest).{0,15}\b)?(?:search(?:ing)?\s*(?:engine|site)|director(?:y|ies))/is
 describe SEARCH_ENGINE_PROMO    Discusses search engine listings
 
-body OPPORTUNITY		/opportunity (?:pass|of a lifetime|is knocking|for you)|(?:investment|unique) opportunity/i
-describe OPPOPTUNITY		What a deal!
+body OPPORTUNITY_2		/opportunity (?:pass|of a lifetime|is knocking|for you)|(?:investment|unique) opportunity/i
+describe OPPORTUNITY_2		What a deal!
 
 body MORE_TRAFFIC		/more (?:internet|web) traffic/i
 describe MORE_TRAFFIC		More Internet Traffic
@@ -885,7 +885,7 @@ describe NO_SPENDING		No Spending Limits
 body NO_STRINGS			/no strings attached/i
 describe NO_STRINGS		No Strings Attached
 
-body NO_FEE			/no .{0,12} fee\B/i
+body NO_FEE			/no .{0,12}fee/i
 describe NO_FEE			No Fees
 
 body NO_MEDICAL			/no medical exam/i
@@ -943,7 +943,7 @@ body INCREDIBLE			/incredible secrets/i
 describe INCREDIBLE		Things incredible
 
 body FIND_ANYTHING		/find out anything/i
-describe FIND_ANYTHING		Find out Anything abou Anyone
+describe FIND_ANYTHING		Find out Anything
 
 body FARM_SEX			/(?:farm|animal) (?:sex|fucking|action)/i
 describe FARM_SEX		Sex with Animals
@@ -963,7 +963,7 @@ describe SAVE_MONEY		Save big money
 body BREAKTHROUGH		/breakthrough price/i
 describe BREAKTHROUGH		Breakthrough Pricing
 
-body GUARANTEED_STUFF		/guarantee.{0,15}(?:income|money|monthly|you)/i
+body GUARANTEED_STUFF		/guarantee.{0,15}(?:income|money|monthly)/i
 describe GUARANTEED_STUFF	Guaranteed Stuff
 
 body INCOME			/additional income/i
@@ -1085,10 +1085,10 @@ body GET_IT_NOW			/get it now/i
 describe GET_IT_NOW		Get it now!
 
 body ONLY_COST			/only .{0,9}\$/i
-describe ONLY_COST		Only Costs $0.00
+describe ONLY_COST		Only $$$
 
 body SAVE_BUCKS			/save \$/i
-describe SAVE_BUCKS		Save $0.00
+describe SAVE_BUCKS		Save $$$
 
 body FINANCIAL			/financial(?:ly|) free/i
 describe FINANCIAL 		Financial Freedom
@@ -1102,7 +1102,7 @@ describe DISCLAIMER		Message contains disclaimer
 body SATISFACTION		/satisfaction .{0,9}gauranteed|not .{0,9}satisfied/i
 describe SATISFACTION		Satisfaction Guaranteed
 
-body PRIZE			/claim .{0,9} prize/i
+body PRIZE			/claim.{0,9} prize/i
 describe PRIZE			Talks about prizes
 
 body GETAWAY			/weekend getaway/i
@@ -1130,7 +1130,7 @@ body BEEN_TURNED_DOWN		/been turned down/i
 describe BEEN_TURNED_DOWN	Have you been turned down?
 
 body ONE_TIME			/one time (?:charge|investment)/i
-describe ONE_TIME		Only rip you once
+describe ONE_TIME		One time charge/investment
 
 body COMPETE			/compete for your business/i
 describe COMPETE		Compete for your business
@@ -1142,10 +1142,10 @@ body SELECTED			/you.{0.9} been selected/i
 describe SELECTED		You've been selected! Lucky You!
 
 body CHANGE_TERMS		/terms and conditions/i
-describe CHANGE_TERMS		They can change the terms and conditions
+describe CHANGE_TERMS		Terms and conditions
 
 body RESERVES_RIGHT		/reserves the right/i
-describe RESERVES_RIGHT		Reserves the right (to screw you?)
+describe RESERVES_RIGHT		Reserves the right
 
 body NO_COMBINE			/with any other offer/i
 describe NO_COMBINE		Can not be combined with any other offer
@@ -1169,7 +1169,7 @@ body BACKED_BY			/backed by (?:millions|billions)/i
 describe BACKED_BY		Backed by Billions
 
 body EXPECT_TO_EARN		/expect to earn|earn up to/i
-describe EXPECT_TO_EARN		Expect to get ripped
+describe EXPECT_TO_EARN		Expect to earn
 
 body BE_BOSS			/your own boss/i
 describe BE_BOSS		Be your own boss
@@ -1189,3 +1189,5 @@ describe UNCLAIMED_MONEY	People just leave money laying around
 body FREE_CAP			/FREE/
 describe FREE_CAP		FREE in Uppercase
 
+body SERIOUS_CASH		/serious cash/i
+describe SERIOUS_CASH		Serious cash
