@@ -119,6 +119,12 @@ score FREE_PRIORITY_MAIL             0.718
 score FREQ_SPAM_PHRASE               2.417
 score FRIEND_AT_PUBLIC               0.999
 score FROM_ADDRESS_EQ_REAL           1.000
+score FROM_AND_TO_SAME_1             0.5
+score FROM_AND_TO_SAME_2             -2.5
+score FROM_AND_TO_SAME_3             1.6
+score FROM_AND_TO_SAME_4             -2.5
+score FROM_AND_TO_SAME_5             0.5
+score FROM_AND_TO_SAME_6             1.4
 score FROM_BTAMAIL                   3.516
 score FROM_ENDS_IN_NUMS              0.382
 score FROM_HAS_MIXED_NUMS            2.578
@@ -184,7 +190,8 @@ score MIME_MISSING_BOUNDARY          3.887
 score MIME_NULL_BLOCK                -0.975
 score MIME_ODD_CASE                  4.339
 score MISSING_HEADERS                1.073
-score MISSING_OUTLOOK_NAME           1.500
+score MISSING_MIMEOLE                1.0
+score MISSING_OUTLOOK_NAME           1.0
 score MONEY_BACK                     1.500
 score MONEY_MAKING                   2.500
 score MONSTERHUT                     1.295
@@ -215,6 +222,7 @@ score NO_QS_ASKED                    2.413
 score NO_REAL_NAME                   0.500
 score NO_SELLING                     1.489
 score NUMERIC_HTTP_ADDR              1.754
+score OBFUSCATING_JAVASCRIPT         1.0
 score ONCE_IN_LIFETIME               1.802
 score ONE_HUNDRED_PC_FREE            3.422
 score ONE_HUNDRED_PC_GUAR            0.587
@@ -223,6 +231,7 @@ score OPPORTUNITY                    1.072
 score OPT_IN                         2.085
 score ORDER_NOW                      1.791
 score PARA_A_2_C_OF_1618             2.187
+score PARTIAL_RFC_2369               1.0
 score PENIS_ENLARGE                  1.283
 score PENIS_ENLARGE2                 4.319
 score PENNIES_A_DAY                  2.943
@@ -247,6 +256,7 @@ score PORN_9                         1.890
 score POST_IN_RCVD                   2.661
 score PREST_NON_ACCREDITED           3.500
 score PRINT_FORM_SIGNATURE           4.558
+score PRIORITY_NO_NAME               1.0
 score PRODUCED_AND_SENT_OUT          4.460
 score PROFITS                        1.809
 score PURE_PROFIT                    4.129
@@ -254,6 +264,7 @@ score RATWARE                        4.563
 score READ_TO_END                    1.998
 score REALLY_UNSAFE_JAVASCRIPT       3.338
 score REAL_THING                     2.074
+score REFERENCES                     -0.1
 score RELAYING_FRAME                 0.031
 score REMOVAL_INSTRUCTIONS           4.210
 score REMOVE_IN_QUOTES               2.602
@@ -493,6 +504,7 @@ score REMOVE_ES_01                   1.0
 score REMOVE_ES_02                   1.0
 score REMOVE_ES_03                   1.0
 score REMOVE_ES_04                   1.0
+score REMOVE_ES_05                   1.0
 score SEXY_PICS                      0.0
 score SHOES_GUY                      6.8
 score SPAM_FORM_INPUT                1.0
