@@ -5,9 +5,7 @@
 
 #%include        /usr/lib/rpm/macros.perl
 
-%define perl_archlib %(eval "`%{__perl} -V:installarchlib`"; echo "$installarchlib")
 %define perl_sitelib %(eval "`%{__perl} -V:installsitelib`"; echo "$installsitelib")
-%define perl_sitearch %(eval "`%{__perl} -V:installsitearch`"; echo "$installsitearch")
 
 %define pdir    Mail
 %define pnam    SpamAssassin
@@ -110,7 +108,6 @@ aplikacji do czytania poczty.
 # does not have a better way to do this, it seems...
 %{__make} PREFIX=%{_prefix}
 %{__make} spamd/libspamc.so
-# make test
 
 %install
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
@@ -155,15 +152,22 @@ mkdir -p %{buildroot}/etc/mail/spamassassin
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
 
 %post
-if [ $1 = 1 ]; then
-        /sbin/chkconfig --add spamassassin
+/sbin/chkconfig --add spamassassin
+if [ -f /etc/sysconfig/spamd ]; then
+  %{__sed} -e 's/^OPTIONS=/SPAMDOPTIONS=/' /etc/sysconfig/spamassassin > /etc/sysconfig/spamassassin
+  %{__mv} /etc/sysconfig/spamd /etc/sysconfig/spamassassin.rpmold
 fi
 /sbin/service spamassassin condrestart
 
 %preun
 if [ $1 = 0 ]; then
-	/sbin/service spamassassin stop
-        /sbin/chkconfig --del spamassassin
+    /sbin/service spamassassin stop >/dev/null 2>&1
+    /sbin/chkconfig --del spamassassin
+fi
+
+%postun
+if [ "$1" -ge "1" ]; then
+    /sbin/service spamassassin condrestart > /dev/null 2>&1
 fi
 
 %changelog
