@@ -20,6 +20,13 @@
 #include <netinet/tcp.h>
 #include <arpa/inet.h>
 
+#ifdef SPAMC_SSL
+#include <openssl/crypto.h>
+#include <openssl/pem.h>
+#include <openssl/ssl.h>
+#include <openssl/err.h>
+#endif
+
 #ifdef HAVE_SYSEXITS_H
 #include <sysexits.h>
 #endif
@@ -383,6 +390,19 @@ static int _message_filter(const struct sockaddr *addr,
     int sock;
     float version;
     int response;
+    int failureval;
+#ifdef SPAMC_SSL
+    SSL_CTX* ctx;
+    SSL* ssl;
+    SSL_METHOD *meth;
+
+    if(flags&SPAMC_USE_SSL){	
+      SSLeay_add_ssl_algorithms();
+      meth = SSLv2_client_method();
+      SSL_load_error_strings();
+      ctx = SSL_CTX_new(meth);
+    }    
+#endif
 
     m->is_spam=EX_TOOBIG;
     if((buf=malloc(8192))==NULL) return EX_OSERR;
@@ -410,28 +430,46 @@ static int _message_filter(const struct sockaddr *addr,
         return i;
     }
 
+    if(flags&SPAMC_USE_SSL) {
+#ifdef SPAMC_SSL
+      ssl = SSL_new(ctx);
+      SSL_set_fd(ssl, sock);
+      SSL_connect(ssl);
+#endif    
+    }
+
     /* Send to spamd */
-    full_write(sock, (unsigned char *) buf, len);
-    full_write(sock, (unsigned char *) m->msg, m->msg_len);
-    shutdown(sock, SHUT_WR);
+    if(flags&SPAMC_USE_SSL) {
+#ifdef SPAMC_SSL
+      SSL_write(ssl, buf, len);
+      SSL_write(ssl, m->msg, m->msg_len);
+#endif
+    } else {
+      full_write(sock, (unsigned char *) buf, len);
+      full_write(sock, (unsigned char *) m->msg, m->msg_len);
+      shutdown(sock, SHUT_WR);
+    }
 
     /* Now, read from spamd */
-    for(len=0; len<8192; len++){
-        i=read(sock, buf+len, 1);
+    for(len=1; len<8192; len++){
+	if(flags&SPAMC_USE_SSL) {
+#ifdef SPAMC_SSL
+	  i=SSL_read(ssl, buf+len, 1);
+#endif
+	} else {
+	  i=read(sock, buf+len, 1);
+	}
+
         if(i<0){
             free(buf);
-            free(m->out); m->out=m->msg; m->out_len=m->msg_len;
-            close(sock);
-            return EX_IOERR;
+	    failureval = EX_IOERR; goto failure;
         }
         if(i==0){
             /* Read to end of message! Must be a version <1.0 server */
             if(len<100){
                 /* Nope, communication error */
                 free(buf);
-                free(m->out); m->out=m->msg; m->out_len=m->msg_len;
-                close(sock);
-                return EX_IOERR;
+		failureval = EX_IOERR; goto failure;
             }
             break;
         }
@@ -440,9 +478,7 @@ static int _message_filter(const struct sockaddr *addr,
             if(sscanf(buf, "SPAMD/%f %d %*s", &version, &response)!=2){
                 syslog(LOG_ERR, "spamd responded with bad string '%s'", buf);
                 free(buf);
-                free(m->out); m->out=m->msg; m->out_len=m->msg_len;
-                close(sock);
-                return EX_PROTOCOL;
+		failureval = EX_PROTOCOL; goto failure;
             }
             header_read=-1;
             break;
@@ -456,12 +492,18 @@ static int _message_filter(const struct sockaddr *addr,
         /* Handle different versioned headers */
         if(version-1.0>0.01){
             for(len=0; len<8192; len++){
-                i=read(sock, buf+len, 1);
+#ifdef SPAMC_SSL
+	      if(flags&SPAMC_USE_SSL){
+		i=SSL_read(ssl, buf+len, 1);
+	      } else{
+#endif
+		i=read(sock, buf+len, 1);
+#ifdef SPAMC_SSL
+	      }
+#endif
                 if(i<=0){
                     free(buf);
-                    free(m->out); m->out=m->msg; m->out_len=m->msg_len;
-                    close(sock);
-                    return (i<0)?EX_IOERR:EX_PROTOCOL;
+		    failureval = (i<0)?EX_IOERR:EX_PROTOCOL; goto failure;
                 }
                 if(buf[len]=='\n'){
                     buf[len]='\0';
@@ -481,19 +523,24 @@ static int _message_filter(const struct sockaddr *addr,
                         /* Not check-only, better be Content-length */
                         if(sscanf(buf, "Content-length: %d", &expected_len)!=1){
                             free(buf);
-                            free(m->out); m->out=m->msg; m->out_len=m->msg_len;
-                            close(sock);
-                            return EX_PROTOCOL;
+			    failureval = EX_PROTOCOL;
+			    goto failure;
                         }
                     }
 
                     /* Should be end of headers now */
-                    if(full_read(sock, (unsigned char *) buf, 2, 2)!=2 || buf[0]!='\r' || buf[1]!='\n'){
+		    if(flags&SPAMC_USE_SSL){
+#ifdef SPAMC_SSL
+		      i=SSL_read(ssl, buf, 2);
+#endif
+		    } else{
+		      i=full_read (sock, (unsigned char *) buf, 2, 2);
+		    }
+
+                    if(i!=2 || buf[0]!='\r' || buf[1]!='\n'){
                         /* Nope, bail. */
                         free(buf);
-                        free(m->out); m->out=m->msg; m->out_len=m->msg_len;
-                        close(sock);
-                        return EX_PROTOCOL;
+			failureval = EX_PROTOCOL; goto failure;
                     }
 
                     break;
@@ -505,16 +552,23 @@ static int _message_filter(const struct sockaddr *addr,
 
     if(flags&SPAMC_CHECK_ONLY){
         /* We should have gotten headers back... Damnit. */
-        free(m->out); m->out=m->msg; m->out_len=m->msg_len;
-        close(sock);
-        return EX_PROTOCOL;
+	failureval = EX_PROTOCOL; goto failure;
     }
 
-    len=full_read(sock, (unsigned char *) m->out+m->out_len, m->max_len+EXPANSION_ALLOWANCE+1-m->out_len, m->max_len+EXPANSION_ALLOWANCE+1-m->out_len);
+    if(flags&SPAMC_USE_SSL){
+#ifdef SPAMC_SSL
+      len=SSL_read(ssl, m->out+m->out_len,
+		 m->max_len+EXPANSION_ALLOWANCE+1-m->out_len,
+		 m->max_len+EXPANSION_ALLOWANCE+1-m->out_len);
+#endif
+    } else{
+      len=full_read(sock, (unsigned char *) m->out+m->out_len,
+		 m->max_len+EXPANSION_ALLOWANCE+1-m->out_len,
+		 m->max_len+EXPANSION_ALLOWANCE+1-m->out_len);
+    }
+
     if(len+m->out_len>m->max_len+EXPANSION_ALLOWANCE){
-        free(m->out); m->out=m->msg; m->out_len=m->msg_len;
-        close(sock);
-        return EX_TOOBIG;
+	failureval = EX_TOOBIG; goto failure;
     }
     m->out_len+=len;
 
@@ -523,12 +577,21 @@ static int _message_filter(const struct sockaddr *addr,
 
     if(m->out_len!=expected_len){
         syslog(LOG_ERR, "failed sanity check, %d bytes claimed, %d bytes seen", expected_len, m->out_len);
-        free(m->out); m->out=m->msg; m->out_len=m->msg_len;
-        close(sock);
-        return EX_PROTOCOL;
+	failureval = EX_PROTOCOL; goto failure;
     }
 
     return EX_OK;
+
+failure:
+    free(m->out); m->out=m->msg; m->out_len=m->msg_len;
+    close(sock);
+#ifdef SPAMC_SSL
+    if(flags&SPAMC_USE_SSL){
+      SSL_free(ssl);
+      SSL_CTX_free(ctx);
+    }
+#endif
+    return failureval;
 }
 
 static int _lookup_host(const char *hostname, struct hostent *out_hent)

@@ -383,6 +383,21 @@ meta T_HTML_CHARSET_FARAWAY	(__HTML_CHARSET_FARAWAY && __HIGHBITS)
 header T_ADDR_FREE		From =~ /\b(?-i:F)ree(?-i:[ A-Z]).*</i
 describe T_ADDR_FREE		From Address contains FREE
 
+# from bug 1287 (already resolved)
+header __SMIME_SIGNED_HDR	Content-Type =~ /multipart\/signed;.*protocol=/i
+full __SMIME_SIGNED_BODY	/\nContent-Type: application\/x-pkcs7-signature;/
+meta T_SMIME_SIGNATURE		(__SMIME_SIGNED_HDR && __SMIME_SIGNED_BODY)
+describe T_SMIME_SIGNATURE	Contains an S/MIME-signed message
+tflags T_SMIME_SIGNATURE	nice
+
+# bug 766: modified by jm to avoid matching email addrs
+header T_SUBJ_AT_OBFUSCATED	Subject =~ /\w+\@[^\W\.]+\s/
+describe T_SUBJ_AT_OBFUSCATED	Uses "@" for "a" to obfuscate
+
+# bug 766: (jm) noticed in passing; email addr in subject may be good spamsign
+header T_SUBJ_CONTAINS_EMAIL	Subject =~ /\w+\@[\w\.]+\.\w{2,3}\s/
+describe T_SUBJ_CONTAINS_EMAIL	Contains an email address in the Subject
+
 # 663
 header T_ADDR_OFFER		ALL =~ /(?:to|from|reply-to):.*offer.*\n/i
 describe T_ADDR_OFFER		From address contains OFFER

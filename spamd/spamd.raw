@@ -15,7 +15,8 @@ use lib '../lib';	# added by jm for use inside the distro
 use strict;
 eval "use bytes";	# turn off UTF-8
 
-use Socket;
+use IO::Socket;
+use IO::Handle;
 use IO::Pipe;
 use Config;
 use Mail::SpamAssassin;
@@ -91,6 +92,10 @@ GetOptions(
 	'auth-ident' => \$opt{'auth-ident'},
 	'ident-timeout=f' => \$opt{'ident-timeout'},
 
+        'server-key=s' => \$opt{'server-key'},
+        'server-cert=s' => \$opt{'server-cert'},
+        'ssl' => \$opt{'ssl'},
+
         # will be stripped in future release
 	'add-from!' => sub { warn "The --add-from option has been removed\n" },
         'F=i' => sub { warn "The -F option has been removed\n" }
@@ -119,6 +124,23 @@ if ($opt{'auth-ident'}) {
     } else {
 	$opt{'ident-timeout'} = undef if $opt{'ident-timeout'} >= 0.0;
 	import Net::Ident qw(ident_lookup);
+    }
+}
+
+# Check for server certs
+$opt{'server-key'} ||= "$LOCAL_RULES_DIR/certs/server-key.pem";
+$opt{'server-cert'} ||= "$LOCAL_RULES_DIR/certs/server-cert.pem";
+if ($opt{'ssl'})
+{
+    require IO::Socket::SSL;
+
+    if (!-e $opt{'server-key'})
+    {
+       die "The server key file $opt{'server-key'} does not exist";
+    }
+    if (!-e $opt{'server-cert'})
+    {
+       die "The server certificate file $opt{'server-cert'} does not exist";
     }
 }
 
@@ -176,16 +198,36 @@ if ($log_facility ne 'stderr') {
 }
 
 my $port = $opt{'port'} || 783;
-my $addr = gethostbyname($opt{'listen-ip'} || '127.0.0.1');
+my $addr = (gethostbyname($opt{'listen-ip'} || '127.0.0.1'))[0];
 my $proto = getprotobyname('tcp');
 
 ($port) = $port =~ /^(\d+)$/ or die "invalid port";
 
 # Be a well-behaved daemon
-socket(Server, PF_INET, SOCK_STREAM, $proto)            || die "socket: $!";
-setsockopt(Server,SOL_SOCKET,SO_REUSEADDR,pack("l",1))  || die "setsockopt: $!";
-bind(Server, sockaddr_in($port, $addr))                 || die "bind: $!";
-listen(Server,SOMAXCONN)                                || die "listen: $!";
+my $server;
+if ($opt{'ssl'})
+{
+    $server = new IO::Socket::SSL(LocalAddr => $addr,
+                                 LocalPort => $port,
+                                 Proto => $proto,
+                                 Type => SOCK_STREAM,
+                                 ReuseAddr => 1,
+                                 Listen => SOMAXCONN,
+                                 SSL_verify_mode => 0x00,
+                                 SSL_key_file => $opt{'server-key'},
+                                 SSL_cert_file => $opt{'server-cert'})
+       || die "new IO::Socket::SSL: $! $@";
+}
+else
+{
+    $server = new IO::Socket::INET(LocalAddr => $addr,
+                                  LocalPort => $port,
+                                  Proto => $proto,
+                                  Type => SOCK_STREAM,
+                                  ReuseAddr => 1,
+                                  Listen => SOMAXCONN)
+       || die "new IO::Socket::INET: $! $@";
+}
 
 $opt{'daemonize'} and daemonize();
 
@@ -244,14 +286,15 @@ logmsg ("server started on port $port (running version ".
 				Mail::SpamAssassin::Version().")");
 
 my $current_user;
-my $paddr;
+my $client;
 
 my $readvec = "";
 my %pipes = ();
-vec($readvec, fileno(Server), 1) = 1;
+vec($readvec, $server->fileno, 1) = 1;
 
-for ( ; 1; close Client)
-{
+while (1) {
+    if (defined $client) { $client->close; }	# paranoia vs fd leaks
+
     my $n = select(my $rd=$readvec, undef, undef, undef);
     next if ($n == -1 && $! == &Errno::EINTR);
     die "select failed: $!" if ($n <= 0);
@@ -272,52 +315,52 @@ for ( ; 1; close Client)
         Mail::SpamAssassin::dbg("cleaned up kid $kid, pool=$extrapid");
 
         # We reaped a kid, so listen for connects again
-        vec($readvec, fileno(Server), 1) = 1;
+        vec($readvec, $server->fileno, 1) = 1;
       }
     }
 
-    if (vec($rd, fileno(Server), 1)) {
+    if (vec($rd, $server->fileno, 1)) {
       if ($opt{'max-children'} && $extrapid <= 0) {
         # Since we can't accept any connects until we reap a kid, don't bother
         # selecting on Server until we do so. We have to do this test here
         # instead of in &spawn because we need the select loop to watch for
         # kids.
-        vec($readvec, fileno(Server), 1) = 0;
+        vec($readvec, $server->fileno, 1) = 0;
         logmsg "hit max-children limit (".$opt{'max-children'}."): waiting for some to exit";
         next;
       }
 
-    $paddr = accept(Client,Server);
+    $client = $server->accept;
 
-    if (!$paddr) {
+    if (!$client) {
       # this can happen when interrupted by SIGCHLD on Solaris,
       # perl 5.8.0, and some other platforms with -m.
       if ($! == &Errno::EINTR) {
         next;
       } else {
-          die "accept failed: $!";
+	die "accept failed: $!";
       }
     }
 
     my $start = time;
 
-    my($port,$iaddr) = sockaddr_in($paddr);
+    my($port,$iaddr) = sockaddr_in($client->peername);
     my $name = gethostbyaddr($iaddr,AF_INET);
 
     if (ip_is_allowed(inet_ntoa($iaddr))) {
 	logmsg "connection from $name [",
-	inet_ntoa($iaddr),"] at port $port";
+			inet_ntoa($iaddr),"] at port $port";
     } else {
 	logmsg "unauthorized connection from $name [",
-	inet_ntoa($iaddr),"] at port $port";
+			inet_ntoa($iaddr),"] at port $port";
+	$client->close;
 	next;
     }
 
     spawn sub {
-	$|=1; # always immediately flush output
+	$client->autoflush(1);
 
-	# First request line off stream
-        local $_ = <STDIN>;
+	local ($_) = $client->getline;
 
 	if (!defined $_) {
 	    protocol_error ("(closed before headers)");
@@ -370,7 +413,7 @@ sub check {
     {
 	while(1)
 	{
-	    $_ = <STDIN>;
+	    $_ = $client->getline;
 	    if(!defined $_)
 	    {
 		protocol_error ("(EOF during headers)");
@@ -435,7 +478,7 @@ sub check {
     my $actual_length;
     my $in_header = 1;
     my $msgid;
-    for (<STDIN>) {
+    while ($_ = $client->getline()) {
 	if ($in_header) {
 	    if (/^$/) {
 		$in_header = 0;
@@ -450,6 +493,7 @@ sub check {
 	}
 	push(@msglines, $_);
 	$actual_length += length;
+	last if ($actual_length == $expected_length);
     }
 
     $current_user ||= '(unknown)';
@@ -492,13 +536,13 @@ sub check {
         my $msg_resp_length = length($msg_resp);
         if($version >= 1.2) # Spamc protocol 1.2 means it accepts content-length
 	{
-	    print STDOUT "SPAMD/1.1 $resphash{$resp} $resp\r\n",
+	    print $client "SPAMD/1.1 $resphash{$resp} $resp\r\n",
 	   		 "Content-length: $msg_resp_length\r\n\r\n",
 	    $msg_resp;
         }
         else # Earlier than 1.2 didn't accept content-length
         {
-	    print STDOUT "SPAMD/1.0 $resphash{$resp} $resp\r\n", $msg_resp;
+	    print $client "SPAMD/1.0 $resphash{$resp} $resp\r\n", $msg_resp;
 	}
     }
     else		# $method eq 'CHECK' et al
@@ -515,9 +559,9 @@ sub check {
 	    $response_header .= "Spam: $response_spam_status ; $msg_score / $msg_threshold";
 	}
 
-	print STDOUT $response_header, "\r\n\r\n";
-	print STDOUT $status->get_names_of_tests_hit,"\r\n" if ($method eq "SYMBOLS");
-	print STDOUT $status->get_report,"\r\n" if ($method eq "REPORT" or ($method eq "REPORT_IFSPAM" and $status->is_spam));
+	print $client $response_header, "\r\n\r\n";
+	print $client $status->get_names_of_tests_hit,"\r\n" if ($method eq "SYMBOLS");
+	print $client $status->get_report,"\r\n" if ($method eq "REPORT" or ($method eq "REPORT_IFSPAM" and $status->is_spam));
     }
 
     logmsg "$was_it_spam ($msg_score/$msg_threshold) for $current_user:$> in ".
@@ -530,7 +574,7 @@ sub protocol_error {
     local $_ = shift;
 
     my $resp = "EX_PROTOCOL";
-    print STDOUT "SPAMD/1.0 $resphash{$resp} Bad header line: $_\r\n";
+    print $client "SPAMD/1.0 $resphash{$resp} Bad header line: $_\r\n";
     logmsg "bad protocol: header error: $_";
 }
 
@@ -573,9 +617,7 @@ sub spawn {
       %pipes = ();  # No point in keeping the other kid pipes, close them all
     }
 
-    close Server;
-    open(STDIN,  "<&Client")   || die "can't dup client to stdin";
-    open(STDOUT, ">&Client")   || die "can't dup client to stdout";
+    $server->close;
 
     # redirect default output to STDERR (/dev/null), so that noise from
     # Razor etc. will not be output as headers and
@@ -588,7 +630,7 @@ sub spawn {
 sub auth_ident
 {
     my $username = shift;
-    my $ident_username = ident_lookup(\*STDIN, $opt{'ident-timeout'});
+    my $ident_username = ident_lookup($client, $opt{'ident-timeout'});
     my $dn = $ident_username || 'NONE'; # display name
     warn "ident_username = $dn, spamc_username = $username\n" if $opt{'debug'};
     if ($username ne $ident_username) {
@@ -805,7 +847,7 @@ sub kill_handler
 {
     my ($sig) = @_;
     logmsg "server killed by SIG$sig, shutting down";
-    close Server;
+    $server->close;
     defined($opt{'pidfile'}) and unlink($opt{'pidfile'});
     exit 0;
 }
@@ -925,7 +967,9 @@ Options:
  -L, --local                        Use local tests only (no DNS)
  -P, --paranoid                     Die upon user errors
  -H dir				    Specify a different HOME directory, path optional
-
+  --ssl                             Run an SSL server
+  --server-key keyfile              Specify an SSL keyfile
+  --server-cert certfile            Specify an SSL certificate
 
 =head1 DESCRIPTION
 
@@ -1119,6 +1163,19 @@ a HOME environment variable set to a specific directory.  The default
 is to use the HOME environment variable setting from the shell running
 spamd.  By specifying no argument, spamd will use the spamc caller's
 home directory instead.
+
+=item B<--ssl>
+
+Accept only SSL connections.  The B<IO::Socket::SSL> perl module must be
+installed.
+
+=item B<--server-key> I<keyfile>
+
+Specify the SSL key file to use for SSL connections.
+
+=item B<--server-cert> I<certfile>
+
+Specify the SSL certificate file to use for SSL connections.
 
 =back
 

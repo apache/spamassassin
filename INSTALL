@@ -35,6 +35,7 @@ http://spamassassin.org/ , and install that, like so:
 To install as non-root, do something like this:
 
 	[unzip/untar the archive]
+	[add -DSPAMC_SSL to $CFLAGS to build an SSL enabled spamc]
 	cd Mail-SpamAssassin-*
 	perl Makefile.PL PREFIX=~/sausr SYSCONFDIR=~/saetc
 	make

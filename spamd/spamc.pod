@@ -7,7 +7,7 @@ spamc - client for spamd
 
 =over
 
-=item spamc [-c] [-d host] [-f] [-h] [-p port] [-s max_size] [-u username] [-e command [args]]
+=item spamc [-c] [-d host] [-f] [-h] [-S] [-p port] [-s max_size] [-u username] [-e command [args]]
 
 =back
 
@@ -61,6 +61,10 @@ though for backwards-compatibility.
 =item B<-h>
 
 Print this help message and terminate without action
+
+=item B<-S>
+
+Encrypt data to and from the spamd server with SSL
 
 =item B<-p> I<port>
 
