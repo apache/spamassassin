@@ -21,3 +21,14 @@
 ##freqs: 11.817  22.1680   5.3554    0.805   0.53    0.01  T_SENDER_NO_REVERSE
 #header   T_SENDER_NO_REVERSE    eval:check_for_sender_no_reverse()
 #describe T_SENDER_NO_REVERSE    No reverse lookup for sender's IP
+
+# bug 1310: these four rules are pretty slow and not that great
+# they need to work better  before being added back into SA proper
+#body SALE			/\bsales? (?:price|system|department|technology|ends|today)|\b(?:on|summer|movie|clearance|for|your|increase|super|losing|return|business|airfare) (?-i:S)ales?/i
+#describe SALE			Stuff on Sale
+#body WINNER			/\byou.{0,4} a winner|\bregister to win/i
+#describe WINNER		Claims you are a winner
+#body MONTH_TRIAL		/(?:month|day) .{0,9}trial/i
+#describe MONTH_TRIAL		Month Trial Offer
+#body MEMBER_2			/\b(?:free|special|paid|dear|gold|opt.in|valued|because you are an?|be a|becoming a|sent to) .{0,9}members?\b/i
+#describe MEMBER_2		Being a Member
