@@ -492,46 +492,24 @@ Rewrite the mail message.  This will at minimum add headers, and at
 maximum MIME-encapsulate the message text, to reflect its spam or
 not-spam status.
 
+The actual modifications depend on the configuration (see
+C<Mail::SpamAssassin::Conf> for more information).
+
 The possible modifications are as follows:
 
 =over 4
 
-=item Subject: header for spam mails
+=item To:, From: and Subject: modification on spam mails
 
-The string C<*****SPAM*****> (changeable with C<subject_tag> config option) is
-prepended to the subject, unless the C<rewrite_subject 0> configuration option
-is given.
+Depending on the configuration, the To: and From: lines can have a
+user-defined RFC 2822 comment appended for spam mail. The subject line
+may have a user-defined string prepended to it for spam mail.
 
-=item X-Spam-Status: header for spam mails
+=item X-Spam-* headers for all mails
 
-A string, C<Yes, hits=nn required=nn tests=...> is set in this header to
-reflect the filter status.  The keys in this string are as follows:
-
-=over 4
-
-=item hits=nn The number of hits the message triggered.
-
-=item required=nn The threshold at which a mail is marked as spam.
-
-=item tests=... The symbolic names of tests which were triggered.
-
-=item version=... The version of SpamAssassin which made the change
-
-=back
-
-=item X-Spam-Status: header for non-spam mails
-
-A string, C<No, hits=nn required=nn tests=...> is set in this header to reflect
-the filter status.  The keys in this string are the same as for spam mails (see
-above).
-
-=item X-Spam-Flag: header for spam mails
-
-Set to C<YES>.
-
-=item X-Spam-Checker-Version: header for all mails
-
-Set to the version number of the SpamAssassin checker which tested the mail.
+Depending on the configuration, zero or more headers with names
+beginning with C<X-Spam-> will be added to mail depending on whether
+it is spam or ham.
 
 =item spam message with report_safe
 
@@ -578,7 +556,7 @@ sub rewrite_as_spam {
     #$newmsg .= $1;
   }
 
-  # the report charset
+    # the report charset
   my $report_charset = "";
   if ($self->{conf}->{report_charset}) {
     $report_charset = "; charset=" . $self->{conf}->{report_charset};
@@ -595,13 +573,28 @@ sub rewrite_as_spam {
   my $msgid = $self->{msg}->get_pristine_header('Message-Id');
   my $date = $self->{msg}->get_pristine_header("Date");
 
-  if ($self->{conf}->{rewrite_subject}) {
+  # It'd be nice to do this with a foreach loop, but with only three
+  # possibilities right now, it's easier not to...
+
+  if ($self->{conf}->{rewrite_header}->{Subject}) {
     $subject ||= '';
-    my $tag = $self->{conf}->{subject_tag};
-    $tag =~ s/_HITS_/sprintf("%05.2f", $self->{hits})/e;
-    $tag =~ s/_REQD_/sprintf("%05.2f", $self->{conf}->{required_hits})/e;
-    $subject =~ s/^(?:\Q${tag}\E |)/${tag} /g;
-    $subject =~ s/\n*$/\n/s;
+    my $tag = $self->_replace_tags($self->{conf}->{rewrite_header}->{Subject});
+    $tag =~ s/\n/ /gs; # strip tag's newlines
+    $subject =~ s/^(?:\Q${tag}\E |)/${tag} /g; # For some reason the tag may already be there!?
+  }
+
+  if ($self->{conf}->{rewrite_header}->{To}) {
+    $to ||= '';
+    my $tag = $self->_replace_tags($self->{conf}->{rewrite_header}->{To});
+    $tag =~ s/\n/ /gs; # strip tag's newlines
+    $to =~ s/(?:\t\Q(${tag})\E|)$/\t(${tag})/
+  }
+
+  if ($self->{conf}->{rewrite_header}->{From}) {
+    $from ||= '';
+    my $tag = $self->_replace_tags($self->{conf}->{rewrite_header}->{From});
+    $tag =~ s/\n+//gs; # strip tag's newlines
+    $from =~ s/(?:\t\Q(${tag})\E|)$/\t(${tag})/
   }
 
   # add report headers to message
@@ -710,36 +703,38 @@ sub rewrite_headers {
 
   if($self->{is_spam}) {
 
-    if ($self->{conf}->{rewrite_subject}) {
-      my $subject = $self->{msg}->get_header("Subject") || '';
-      my $tag = $self->{conf}->{subject_tag};
-      $tag =~ s/_HITS_/sprintf("%05.2f", $self->{hits})/e;
-      $tag =~ s/_REQD_/sprintf("%05.2f", $self->{conf}->{required_hits})/e;
-      $subject =~ s/^(?:\Q${tag}\E |)/${tag} /g;
-      $subject =~ s/\n*$/\n/s;
-      $self->{msg}->replace_header("Subject", $subject);
-    }
+      # Deal with header rewriting
+      foreach my $header (keys %{$self->{conf}->{rewrite_header}}) {
+	$_ = $self->{msg}->get_header($header);
+	my $tag = $self->_replace_tags($self->{conf}->{rewrite_header}->{$header});
+	$tag =~ s/\n/ /gs;
+	if ($header eq 'Subject') {
+	  s/^(?:\Q${tag}\E |)/${tag} /;
+	}
+	elsif ($header =~ /From|To/) {
+	  s/(?:\t\Q(${tag})\E|)$/\t(${tag})/;
+	}
+	$self->{msg}->replace_header($header,$_);
+      }
 
-    foreach my $header (keys %{$self->{conf}->{headers_spam}} ) {
-      my $data = $self->{conf}->{headers_spam}->{$header};
-      my $line = $self->_process_header($header,$data) || "";
-      $self->{msg}->put_header ("X-Spam-$header", $line);
-    }
-
+      # Deal with header adding
+      foreach my $header (keys %{$self->{conf}->{headers_spam}} ) {
+	  my $data = $self->{conf}->{headers_spam}->{$header};
+	  my $line = $self->_process_header($header,$data) || "";
+	  $self->{msg}->put_header ("X-Spam-$header", $line);
+      }
 
   } else {
 
-    foreach my $header (keys %{$self->{conf}->{headers_ham}} ) {
-      my $data = $self->{conf}->{headers_ham}->{$header};
-      my $line = $self->_process_header($header,$data) || "";
-      $self->{msg}->put_header ("X-Spam-$header", $line);
-    }
-
+      foreach my $header (keys %{$self->{conf}->{headers_ham}} ) {
+	  my $data = $self->{conf}->{headers_ham}->{$header};
+	  my $line = $self->_process_header($header,$data) || "";
+	  $self->{msg}->put_header ("X-Spam-$header", $line);
+      }
 
   }
   $self->{msg}->get_mail_object;
 }
-
 
 sub _process_header {
 

@@ -19,5 +19,9 @@ q{
 
 );
 
+tstprefs ( "
+rewrite_header subject *****SPAM*****
+" );
+
 ok (sarun ("-d < data/spam/003", \&patterns_run_cb));
 ok_all_patterns();

@@ -170,8 +170,9 @@ sub new {
   $self->{auto_whitelist_file_mode} = '0700';
   $self->{auto_whitelist_factor} = 0.5;
 
-  $self->{rewrite_subject} = 0;
   $self->{subject_tag} = '*****SPAM*****';
+  $self->{rewrite_header} = { };
+  $self->{to_tag} = 'SPAM';
   $self->{report_safe} = 1;
   $self->{report_contact} = 'the administrator of that system';
   $self->{skip_rbl_checks} = 0;
@@ -677,15 +678,27 @@ more than 22 characters.
 
 =over 4
 
-=item rewrite_subject { 0 | 1 }        (default: 0)
+=item rewrite_header { subject | from | to } STRING
 
-By default, the subject lines of suspected spam will not be tagged.  This can
-be enabled here.
+By default, suspected tag will not have the C<Subject>, C<From> or
+C<To> lines tagged to indicate spam. By setting this option, the
+header will be tagged with C<STRING> to indicate that a message is
+spam. For the From or To headers, this will take the form of an RFC
+2822 comment following the address in parantheses. For the Subject
+header, this will be prepended to the original subject. Note that you
+should only use the _REQD_ and _HITS_ tags when rewriting the Subject
+header unless C<report_safe> is 0. Otherwise, you will not be able to
+remove the SpamAssassin markup. Parentheses are not permitted in
+STRING. (They will be converted to square brackets.)
 
 =cut
 
-    if (/^rewrite_subject\s+(\d+)$/) {
-      $self->{rewrite_subject} = $1+0; next;
+    if (/^rewrite_header\s+(subject|from|to)\s+(.+)$/i) {
+      my $hdr = ucfirst(lc($1));
+      my $string = $2;
+      $string =~ tr/()/[]/;
+      $self->{rewrite_header}->{$hdr} = $string;
+      next;
     }
 
 =item fold_headers { 0 | 1 }        (default: 1)
@@ -827,20 +840,6 @@ separated by spaces, or you can just use multiple lines.
      push(@{$self->{report_safe_copy_headers}}, split(/\s+/, $1));
      next;
    }
-
-=item subject_tag STRING ... 		(default: *****SPAM*****)
-
-Text added to the C<Subject:> line of mails that are considered spam,
-if C<rewrite_subject> is 1. Tags can be used here as with the
-add_header option. If report_safe is not used (see below), you may
-only use the _HITS_ and _REQD_ tags, or SpamAssassin will not be able
-to remove this markup from your message.
-
-=cut
-
-    if (/^subject_tag\s+(.+)$/) {
-      $self->{subject_tag} = $1; next;
-    }
 
 =item report_safe { 0 | 1 | 2 }	(default: 1)
 
@@ -1730,6 +1729,38 @@ this option to 0.
 =head2 DEPRECATED OPTIONS
 
 =over 4
+=item rewrite_subject { 0 | 1 }        (default: 0)
+
+By default, the subject lines of suspected spam will not be tagged.
+This can be enabled here, but should instead be done with the
+C<rewrite_header> option described above.
+
+=cut
+
+    if (/^rewrite_subject\s+(\d+)$/) {
+      $self->{rewrite_header}->{Subject} = $self->{subject_tag};
+      next;
+    }
+
+=item subject_tag STRING ... 	       (default: *****SPAM*****)
+
+Text added to the C<Subject:> line of mails that are considered spam,
+if C<rewrite_subject> is 1. Tags can be used here as with the
+add_header option. If report_safe is not used (see below), you may
+only use the _HITS_ and _REQD_ tags, if report_safe is 0, or
+SpamAssassin will not be able to remove this markup from your message.
+
+The use of this option is deprecated. Use the rewrite_header option above.
+
+=cut
+
+    if (/^subject_tag\s+(.+)$/) {
+      $self->{subject_tag} = $1;
+      if (exists ($self->{rewrite_header}->{Subject})) {
+	$self->{rewrite_header}->{Subject} = $1;
+      }
+      next;
+    }
 
 =item always_add_headers { 0 | 1 }      (default: 1)
 

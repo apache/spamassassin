@@ -925,14 +925,18 @@ sub remove_spamassassin_markup {
   # remove the headers we added
   1 while $hdrs =~ s/\nX-Spam-[^\n]*?\n/\n/gs;
 
-  my $tag = $self->{conf}->{subject_tag};
-
-  while ( $tag =~ /(_HITS_|_REQD_)/g ) {
-       my $typeoftag = $1;
-       $hdrs =~ s/^Subject: (\D*)\d\d\.\d\d/Subject: $1$typeoftag/m;
-  } # Wow. Very Hackish.
-
-  1 while $hdrs =~ s/^Subject: \Q${tag}\E /Subject: /gm;
+  foreach my $header ( keys  %{$self->{conf}->{rewrite_header}} ) {
+    dbg ("Removing markup in $header");
+    if ($header eq 'Subject') {
+      my $tag = $self->{conf}->{rewrite_header}->{'Subject'};
+      $tag = quotemeta($tag);
+      $tag =~ s/_HITS_/\\d{2}\\.\\d{2}/g;
+      $tag =~ s/_REQD_/\\d{2}\\.\\d{2}/g;
+      1 while $hdrs =~ s/^Subject: ${tag} /Subject: /gm;
+    } else {
+      $hdrs =~ s/^(${header}: .*?)\t\([^)]\)$/$1/gm;
+    }
+  }
 
   # ok, next, the report.
   # This is a little tricky since we can have either 0, 1 or 2 reports;
