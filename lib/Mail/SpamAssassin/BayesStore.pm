@@ -317,7 +317,7 @@ sub upgrade_db {
       # add the magic tokens to the new db.
       my $sb = $new_toks{$SCANCOUNT_BASE_MAGIC_TOKEN} = $self->{db_toks}->{$DB0_SCANCOUNT_BASE_MAGIC_TOKEN};
       my $le = $new_toks{$LAST_EXPIRE_MAGIC_TOKEN} = $self->{db_toks}->{$DB0_LAST_EXPIRE_MAGIC_TOKEN};
-      $new_toks{$OLDEST_TOKEN_AGE_MAGIC_TOKEN} = $self->{db_toks}->{$DB0_OLDEST_TOKEN_AGE_MAGIC_TOKEN};
+      $new_toks{$OLDEST_TOKEN_AGE_MAGIC_TOKEN} = $sb>65535 ? $le : $self->{db_toks}->{$DB0_OLDEST_TOKEN_AGE_MAGIC_TOKEN};
       $new_toks{$NSPAM_MAGIC_TOKEN} = $self->{db_toks}->{$DB0_NSPAM_MAGIC_TOKEN};
       $new_toks{$NHAM_MAGIC_TOKEN} = $self->{db_toks}->{$DB0_NHAM_MAGIC_TOKEN};
       $new_toks{$NTOKENS_MAGIC_TOKEN} = $self->{db_toks}->{$DB0_NTOKENS_MAGIC_TOKEN};
