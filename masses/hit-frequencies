@@ -142,7 +142,7 @@ sub readlogs {
   my $nonspam = $ARGV[1] || (-f "good.log" ? "good.log" : "nonspam.log");
 
   foreach my $file ($spam, $nonspam) {
-    open (IN, "<$file");
+    open (IN, "<$file") || die "Could not open file '$file': $!";
 
     my $isspam = 0; ($file eq $spam) and $isspam = 1;
 
