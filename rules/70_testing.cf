@@ -291,3 +291,14 @@ tflags T_DNS_FROM_AHBL_RHSBL	net
 
 # bug 2127
 body T_AS_SEEN_ON		/seen on\s*(?:T\.?V|A\.?B\.?C|N\.?B\.?C|C\.?B\.?S|C\.?N\.?N|Oprah|U\.?S\.?A\.? Today|48 Hours|New York Times|\w+\s+T\.?V|:)/i
+
+##########################################################################
+
+# bug 2397 - CLA requested
+body T_DISGUISE_PORN		/\b(?:c[0*]cks?|d[1*]cks?|c[v*]nts?|h[0*]rny|p[3*]rverts?|perv[3*]rts?|b[1*]tch(?:es|s)?|[sf][0v*]ckk?(?:ed|ing)?|[sf]uckk(?:ed|ing)?|p[v*]ss(?:y|ies|ys|yes))\b/i
+describe T_DISGUISE_PORN	Attempts to disguise porn words
+#
+body T_DISGUISE_PORN_MUNDANE	/\b(?:h[0*]t|y[0*][uv]ng|b[0*]ys?|g[1*]r[1l]s?|g[1l]rls?|w[1*]ves|w[1*]fe|s3xy?|p[0*]rn[o0*]?)\b/i
+describe T_DISGUISE_PORN_MUNDANE	Attempts to disguise mundane words used in porn
+
+##########################################################################
