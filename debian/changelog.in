@@ -1,3 +1,39 @@
+spamassassin (2.54-3) unstable; urgency=low
+
+  * Handle the possibility of debconf not being installed when
+    spamassassin.preinst is run. (Why didn't lintian catch this?)
+
+ -- Duncan Findlay <duncf@debian.org>  Sat, 17 May 2003 18:38:58 -0400
+
+spamassassin (2.54-2) unstable; urgency=low
+
+  * Improves debconf handling of upgrade from previous versions (like
+      woody). (Closes: #191872, #192721)
+  * Rewritten spamassassin.config in perl
+  * This no longer bends over backwards to fix stuff I broke in 2.11
+    (which was never in a stable release, and is over a year old)
+
+ -- Duncan Findlay <duncf@debian.org>  Wed, 14 May 2003 18:39:53 -0400
+
+spamassassin (2.54-1) unstable; urgency=low
+
+  * New upstream release
+      Include improved Bayes documentation (Closes: #185221)
+      Updates documentation in USAGE.gz (Closes: #185763)
+      Better scores (Closes: #191280)
+      Added rule TOO_MANY_MUA (Closes: #190380)
+      Fixed pyzor reporting (Closes: #184574)
+  * Tightened up logcheck messages, for use in
+    /etc/logcheck/ignore.d.paranoid (Closes: #187742)
+  * Applied patch from Andre Luis Lopes to fix pt_BR tranlations.
+      (Closes: #187745)
+  * Added french debconf translation (From Christian Perrier
+      <bubulle@debian.org>) (Closes: #190113)
+  * Added automatic call to debconf-updatepo in debian/rules
+  * Added example .muttrc snippet (Closes: #192713)
+
+ -- Duncan Findlay <duncf@debian.org>  Wed, 14 May 2003 00:24:42 -0400
+
 spamassassin (2.53-1) unstable; urgency=low
 
   * New upstream release (Closes: #185887)
