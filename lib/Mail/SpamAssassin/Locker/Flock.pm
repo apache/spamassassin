@@ -72,7 +72,7 @@ sub safe_lock {
     alarm($max_retries);
 
     # HELLO!?! IO::File doesn't have a flock() method?!
-    if (flock ($fh, LOCK_EX|LOCK_NB)) {
+    if (flock ($fh, LOCK_EX)) {
       alarm(0) and $unalarmed = 1; # avoid calling alarm(0) twice
 
       dbg("lock: $$ link to $lock_file: link ok");
