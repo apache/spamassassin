@@ -1,19 +1,19 @@
 Welcome to SpamAssassin!
 ------------------------
 
-SpamAssassin is a mail filter which attempts to identify spam using text
-analysis and several internet-based realtime blacklists.
+SpamAssassin is a mail filter which attempts to identify spam using
+text analysis and several internet-based realtime blacklists.
 
 Using its rule base, it uses a wide range of heuristic tests on mail
 headers and body text to identify "spam", also known as unsolicited
 commercial email.
 
-Once identified, the mail can then be optionally tagged as spam for later
-filtering using the user's own mail user-agent application.
+Once identified, the mail can then be optionally tagged as spam for
+later filtering using the user's own mail user-agent application.
 
 SpamAssassin typically differentiates successfully between spam and
-non-spam in between 95% and 99% of cases, depending on what kind
-of mail you get.
+non-spam in between 95% and 100% of cases, depending on what kind of
+mail you get.
 
 SpamAssassin also includes support for reporting spam messages
 automatically, and/or manually, to collaborative filtering databases such
@@ -21,46 +21,45 @@ as Vipul's Razor [1].
 
 	[1]: http://razor.sourceforge.net/
 
-The distribution provides "spamassassin", a command line tool to perform
-filtering, along with the "Mail::SpamAssassin" module set which allows
-SpamAssassin to be used in spam-protection proxy SMTP or POP/IMAP server,
-or a variety of different spam-blocking scenarios.
+The distribution provides "spamassassin", a command line tool to
+perform filtering, along with the "Mail::SpamAssassin" module set
+which allows SpamAssassin to be used in spam-protection proxy SMTP or
+POP/IMAP server, or a variety of different spam-blocking scenarios.
 
-In addition, Craig Hughes has contributed "spamd", a daemonized version of
-SpamAssassin, which runs persistently.  Using "spamc", a lightweight C
-client, this allows an MTA to process large volumes of mail through
-SpamAssassin without having to fork/exec a perl interpreter for each one.
+In addition, Craig Hughes has contributed "spamd", a daemonized
+version of SpamAssassin, which runs persistently.  Using "spamc", a
+lightweight C client, this allows an MTA to process large volumes of
+mail through SpamAssassin without having to fork/exec a perl
+interpreter for each one.
 
-For those sites running qmail as your MTA, the "qmail" directory contains
-two ways to integrate spamc with your system.  Kobe Lenjou has contributed
-a patch to qmail-scanner, and John Peacock has contributed a QMAILQUEUE
-enabled qmail-spamc.  See the README*'s for more details.
+If you have questions about SpamAssassin, please check the Wiki[2] to
+see if someone has already posted an answer to your question. (The
+Wiki doubles as a FAQ.) Failing that, post a message to the
+spamassassin-users mailing list[3]. If you've found a bug (and you're
+sure it's a bug after checking the Wiki), please file a report in our
+Bugzilla[4].
 
-Ian R. Justman has contributed "spamproxy", a spam-filtering SMTP proxy
-server.  This lives in the "released" directory on the web site.
+	[2]: http://wiki.spamassassin.org/
+	[3]: http://www.spamassassin.org/lists.html
+	[4]: http://bugzilla.spamassassin.org/
 
-SpamAssassin lives at http://spamassassin.org/ or in CPAN, and is
-distributed under the Apache License, version 1.1, as described in the
-file named "LICENSE".  Use of the SpamAssassin name is restricted as
-documented in the file named "TRADEMARK".
+Please also be sure to read the man pages.
 
-This module owes a lot of inspiration to Mark Jeftovic's filter.plx [2],
-which I used for a long time, and contributed some code to.  However,
-SpamAssassin is a ground-up rewrite with a new, greatly improved ruleset,
-a different code model and installation system, and hopefully will be easy
-to adapt for a multitude of applications.
-
-	[2]: http://AntiSpam.shmOOze.net/filter/
-
-Questions regarding SpamAssassin should be sent to the mailing list:
-<spamassassin-talk /at/ lists /dot/ sourceforge /dot/ net>.
+SpamAssassin is an effort undergoing incubation at the Apache Software
+Foundation (ASF), sponsored by the Apache Board of
+Directors. Incubation is required of all newly accepted projects until
+a further review indicates that the infrastructure, communications,
+and decision making process have stabilized in a manner consistent
+with other successful ASF projects. While incubation status is not
+necessarily a reflection of the completeness or stability of the code,
+it does indicate that the project has yet to be fully endorsed by the
+ASF.
 
 
 Installing SpamAssassin
 -----------------------
 
 See the INSTALL file.
-
 
 
 Customising SpamAssassin
@@ -216,7 +215,6 @@ can add them to the distribution as "official" translations and build in
 support for this.  You will, of course, get credited for this work ;)
 
 
-
 Help With SpamAssassin
 ----------------------
 
@@ -226,7 +224,6 @@ http://spamassassin.org/lists.html for the sign-up address and a
 link to the archive of past messages.
 
 The FAQ is here: http://wiki.spamassassin.org/w/FrequentlyAskedQuestions
-
 
 
 Commercial Tests
