@@ -214,3 +214,7 @@ test EMAIL_ROT13 ok  qhabs^ebtref(pbz
 test EMAIL_ROT13 ok  zxrggyre^riv-vap(pbz
 test EMAIL_ROT13 fail	duncf-nospam@rogers.com
 
+body BLANK_LINE_RATIO_04_70_80	eval:check_blank_line_ratio('70','80','4')
+body BLANK_LINE_RATIO_04_80_90	eval:check_blank_line_ratio('80','90','4')
+body BLANK_LINE_RATIO_04_90_100	eval:check_blank_line_ratio('90','100','4')
+
