@@ -10,7 +10,7 @@ describe REMOVE_ES_01         Claims you can be removed in Spanish
 body REMOVE_ES_02             /(Para ser (?:eliminado|removido)|Si quiere(?:s|) salir) de (?:nuestra|esta) lista(,?) (?:sera removido|responda el mail|solo tiene(?:s)? que marcar)/i
 describe REMOVE_ES_02           Claims you can be removed in Spanish
 
-body REMOVE_ES_03             /(?:Si )(Ud\.|usted)? desea(?:s)? ser (?:borrado|removido|eliminado) (?:por favor |de (?:la lista de email|cualquier listado futuro,|nuestra (lista de correo|base de datos)) )?(s.lo )?(?:por favor|responda|env.(?:ar|e|a) (?:un |)e(-)?mail|haga)/i
+body REMOVE_ES_03             /(?:Si )(Ud\.|usted)? desea(?:s)? ser (?:borrado|removido|eliminado) (?:por favor |de (?:la lista de email|cualquier listado futuro,|nuestra (?:lista(?: de correo)?|base de datos)) )?(s.lo )?(?:por favor|responda|env.(?:ar|e(?:nos)?|a) (?:un |)(?:e(?:-)?)?mail|haga)/i
 describe REMOVE_ES_03           Claims you can be removed in Spanish
 
 body REMOVE_ES_04             /(?:si desea|para) no recibir mas (?:nuestras promociones|mensajes)/i
