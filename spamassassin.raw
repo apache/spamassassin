@@ -88,7 +88,7 @@ use vars qw{
 
 eval {
   require Mail::SpamAssassin;
-  require Mail::Audit;
+  require Mail::SpamAssassin::MyMailAudit;
 
   getopts ('tc:p:hVDrPw:l:dL') or usage();
 
@@ -102,7 +102,7 @@ EOVERSION
   }
 
 # standard Mail::Audit start
-  my $mail = Mail::Audit->new();
+  my $mail = Mail::SpamAssassin::MyMailAudit->new();
 
 # For Mail::Audit users -- this is the magic. Just create a Mail::SpamAssassin
 # object like this, then run the check() method as below; if it returns a

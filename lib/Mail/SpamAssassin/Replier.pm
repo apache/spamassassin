@@ -7,8 +7,6 @@ use strict;
 
 use Mail::SpamAssassin::ExposedMessage;
 use Mail::SpamAssassin::EncappedMessage;
-use Mail::Audit;
-# use Mail::Internet;
 
 use vars	qw{
   	@ISA

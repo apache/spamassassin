@@ -1,11 +1,9 @@
-# Mail::SpamAssassin::Message - interface to Mail::Audit message text
+# Mail::SpamAssassin::Message - interface to any mail message text/headers
 
 package Mail::SpamAssassin::Message;
 
 use Carp;
 use strict;
-
-use Mail::Audit;
 
 use vars	qw{
   	@ISA
@@ -17,12 +15,11 @@ use vars	qw{
 
 sub new {
   my $class = shift;
-  $class = ref($class) || $class;
+  my ($mail_object) = @_;
 
   my $self = {
-    'main'	=> shift,
-    'audit'	=> shift,
-    'is_spamassassin_wrapper_object'	=> 1
+    'mail_object'  => $mail_object,
+    'is_spamassassin_wrapper_object' => 1
   };
   bless ($self, $class);
   $self;
@@ -30,42 +27,51 @@ sub new {
 
 ###########################################################################
 
-sub get_mail_audit {
+sub get_mail_object {
   my ($self) = @_;
-  return $self->{audit};
+  return $self->{mail_object};
 }
 
 ###########################################################################
 
+sub create_new {
+  my ($self, @args) = @_;
+  die "unimplemented base method";
+}
+
 sub get_header {
   my ($self, $hdr) = @_;
-  $self->{audit}->get ($hdr);
+  die "unimplemented base method";
 }
 
 sub put_header {
   my ($self, $hdr, $text) = @_;
-  $self->{audit}->put_header ($hdr, $text);
+  die "unimplemented base method";
 }
 
 sub get_all_headers {
   my ($self) = @_;
-  $self->{audit}->header();
+  die "unimplemented base method";
 }
 
 sub replace_header {
-  die "unimpled base method";
+  my ($self, $hdr, $text) = @_;
+  die "unimplemented base method";
 }
 
 sub delete_header {
-  die "unimpled base method";
+  my ($self, $hdr) = @_;
+  die "unimplemented base method";
 }
 
 sub get_body {
-  die "unimpled base method";
+  my ($self) = @_;
+  die "unimplemented base method";
 }
 
 sub replace_body {
-  die "unimpled base method";
+  my ($self, $aryref) = @_;
+  die "unimplemented base method";
 }
 
 1;

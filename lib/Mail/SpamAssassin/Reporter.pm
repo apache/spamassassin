@@ -5,10 +5,6 @@ package Mail::SpamAssassin::Reporter;
 use Carp;
 use strict;
 
-use Mail::SpamAssassin::ExposedMessage;
-use Mail::SpamAssassin::EncappedMessage;
-use Mail::Audit;
-
 use vars	qw{
   	@ISA
 };
@@ -52,18 +48,18 @@ sub report {
 
 sub is_razor_available {
   my ($self) = @_;
-  my $razor_avail = 0;
+  
+  eval {
+    require Razor::Signature; 
+    require Razor::Client;
+  };
+  if ($@) {
+    dbg ( "Razor is not available" );
+    return;
+  }
 
-  eval '
-    use Razor::Signature; 
-    use Razor::Client;
-    $razor_avail = 1;
-    1;
-  ';
-
-  dbg ("is Razor available? $razor_avail");
-
-  return $razor_avail;
+  dbg ("Razor is available");
+  return 1;
 }
 
 sub razor_report {

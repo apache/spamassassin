@@ -8,7 +8,7 @@ Mail::SpamAssassin::PerMsgStatus - per-message status (spam or not-spam)
     'rules_filename'      => '/etc/spamassassin.rules',
     'userprefs_filename'  => $ENV{HOME}.'/.spamassassin.cf'
   });
-  my $mail = Mail::Audit->new();
+  my $mail = Mail::SpamAssassin::MyMailAudit->new();
 
   my $status = $spamtest->check ($mail);
   if ($status->is_spam()) {
@@ -35,9 +35,6 @@ use Carp;
 use strict;
 
 use Mail::SpamAssassin::EvalTests;
-use Mail::SpamAssassin::ExposedMessage;
-use Mail::SpamAssassin::EncappedMessage;
-use Mail::Audit;
 
 use vars	qw{
   	@ISA $base64alphabet
@@ -295,20 +292,23 @@ sub rewrite_as_spam {
     # the mail already has spamassassin markup. Remove it!
     # bit messy this; we need to get the mail as a string,
     # remove the spamassassin markup in it, then re-create
-    # a Mail::Audit object using a reference to the text 
+    # a Mail object using a reference to the text 
     # array (why not a string, ghod only knows).
 
     my $text = $self->{main}->remove_spamassassin_markup ($self->{msg});
     my @textary = split (/^/m, $text);
     my %opts = ( 'data', \@textary );
-    my $audit = Mail::Audit->new (%opts);
+    
+    # this used to be Mail::Audit->new(), but create_new() abstracts
+    # that away, so that we always get the right type of object. Wheee!
+    my $new_msg = $srcmsg->create_new(%opts);
 
     # agh, we have to do this ourself?! why won't M::A do it right?
     # for some reason it puts headers in the body
     # while ($_ = shift @textary) { /^$/ and last; }
     # $self->{msg}->replace_body (\@textary);
 
-    $srcmsg = $self->{main}->encapsulate_audit ($audit);
+    $srcmsg = $self->{main}->encapsulate_mail_object($new_msg);
 
     # delete the SpamAssassin-added headers in the target message.
     $self->{msg}->delete_header ("X-Spam-Status");
@@ -344,7 +344,7 @@ sub rewrite_as_spam {
   ${$lines}[0] =~ s/\n//;
   $self->{msg}->replace_body ($lines);
 
-  $self->{msg}->{audit};
+  $self->{msg}->get_mail_object;
 }
 
 sub rewrite_as_non_spam {
@@ -355,7 +355,7 @@ sub rewrite_as_non_spam {
   $_ = sprintf ("No, hits=%d required=%d tests=%s",
 	$self->{hits}, $self->{required_hits}, $self->{test_names_hit});
   $self->{msg}->put_header ("X-Spam-Status", $_);
-  $self->{msg}->{audit};
+  $self->{msg}->get_mail_object;
 }
 
 =item $status->handle_auto_report ()
@@ -375,7 +375,7 @@ sub handle_auto_report {
 
   if ($self->{hits} >= $self->{conf}->{auto_report_threshold}) {
     dbg ("score is high enough to automatically report this as spam");
-    $self->{main}->report_as_spam ($self->{msg}->{audit});
+    $self->{main}->report_as_spam ($self->{msg}->get_mail_object);
   }
 }
 
