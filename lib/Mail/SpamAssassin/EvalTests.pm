@@ -1687,15 +1687,22 @@ sub check_for_num_yelling_lines {
 sub check_for_mime_excessive_qp {
   my ($self) = @_;
 
+  return 0 unless $self->{found_encoding_quoted_printable};
+
   # Note: We don't use rawbody because it removes MIME parts.  Instead,
   # we get the raw unfiltered body.  We must not change any lines.
   my $body = join('', @{$self->{msg}->get_body()});
 
-  my $length = length($body);
-  my $qp = $body =~ s/\=([0-9A-Fa-f]{2,2})/$1/g;
+  my $len = length($body);
 
-  # this seems like a decent cutoff
-  return ($length != 0 && ($qp > ($length / 20)));
+  my $qp;
+  # count characters that should be literal (RFC 2045), hexadecimal values
+  # 21-3C and 3E-7E plus tabs (hexadecimal 09) and spaces (hexadecimal 20)
+  $qp = () = ($body =~ m/=(?:09|3[0-9ABCEF]|[2456][0-9A-F]|7[0-9A-E])/g);
+  # tabs and spaces at end of encoded line are okay
+  $qp-- while ($body =~ m/(?:=09|=20)\s*$/gm);
+
+  return ($len && ($qp > ($len / 100)));
 }
 
 sub check_for_mixed_case_html {
