@@ -484,3 +484,7 @@ uri T_URL_SHORTEN_3		m{http://tinyurl.com/}i
 uri T_URL_SHORTEN_4		m{http://xrl.us/}i
 uri T_URL_SHORTEN_5		m{http://snipurl.com/}i
 uri T_URL_SHORTEN_6		m{http://lin.kz/}i
+
+# bug 3268
+body T_REDIRECTOR       eval:check_for_http_redirector()
+describe T_REDIRECTOR	Message has HTTP redirector URI
