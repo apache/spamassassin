@@ -267,9 +267,9 @@ sub scan_directory {
 
   # ignore ,234 (deleted or refiled messages) and MH metadata files
   # probably more to go here (TODO)
-  my @files = grep {
-	-f && !/^\,/ && !/^(\.xmhcache|\.mh)/
-      } map { "$folder/$_" } grep { /^\S+$/ } readdir(DIR);
+  my @files = grep { -f } map { "$folder/$_" } grep {
+	/^\S+$/ && !/^(,|\.xmhcache|\.mh|cyrus\.(?:index|header|cache))/
+      } readdir(DIR);
 
   closedir(DIR);
 
