@@ -726,3 +726,7 @@ describe FAKE_OUTBLAZE_RCVD	Received header contains faked 'mr.outblaze.com'
 # domains never longer used for email, confirmed by administrator
 header FROM_NONSENDING_DOMAIN	From:addr =~ /\@(?:altavista\.com|eudora\.com)$/i
 describe FROM_NONSENDING_DOMAIN	Message is from domain that never sends email
+
+header SUBJ_2_NUM_PARENS        Subject =~ /^\(\d+\).*\(\d+\)\s*$/
+describe SUBJ_2_NUM_PARENS      Subject contains common spam sign (2 numbers)
+

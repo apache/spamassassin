@@ -259,7 +259,7 @@ describe RESISTANCE_IS_FUTILE	Resistance to this spam is futile
 body SUBJ_2_CREDIT              /subject to credit approval/i
 describe SUBJ_2_CREDIT          Contains 'subject to credit approval'
 
-body URGENT_BIZ			/urgent.{0,16}(?:assistance|business|buy|confidential|notice|proposal)/i
+body URGENT_BIZ			/urgent.{0,16}(?:assistance|business|buy|confidential|notice|proposal|reply|request|response)/i
 describe URGENT_BIZ		Contains urgent matter
 
 body EARN_PER_WEEK              /\b(?:earn|make).{1,20}\d\d\d+.{1,30}(?:per week|per month|weekly|monthly)/i

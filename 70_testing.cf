@@ -54,11 +54,8 @@ header __YAHOO_MSGID		Message-ID =~ /\@yahoo\.com>/i
 header __YAHOO_BEGINNING	Message-ID =~ /<\S+(?:\.\S+|\.\S+\.\S+\.\S+)\@/
 meta T_FORGED_YAHOO_MSGID	(__YAHOO_MSGID && !__YAHOO_BEGINNING)
 
-header T_ALL_TRUSTED		eval:check_all_trusted()
-describe T_ALL_TRUSTED		Did not pass through any untrusted hosts
-tflags T_ALL_TRUSTED		nice
-
 # reported by Kurtis Rader, bug 2890
+# problem: miniscule hits
 uri T_MSN_REDIR		m{^https?://shopping\.msn\.com/trackurl\.aspx\?}i
 describe T_MSN_REDIR	Has MSN Redirect URI
 
@@ -70,31 +67,35 @@ uri T_AOL_REDIR_3	m{^https?://www\.aol\.com/.*https?://}i
 uri T_AOL_REDIR_4	m{^https?://www\.aol\.com/ams/.*https?://}i
 #describe T_AOL_REDIR	Has AOL Redirect URI
 
+# bug 2950
+# both look promotable
+# really?  low hit rates...
+# suggestion: we combine MSN, AOL and Google redir rules.  All are
+# 1.0 S/Os but low hitrates
+uri T_GOOGLE_IMAGES	m{^http://images\.google(\.\S+)?\.[a-z]{2,3}/imgres\?}i
+uri T_GOOGLE_REDIR	m{^http://www\.google(\.\S+)?\.[a-z]{2,3}/url\?}i
+
 # more portable replacement for RCVD_NUMERIC_HELO that doesn't rely on
-# Received headers using "helo=" prefix
-header T_RCVD_NUMERIC_HELO	X-Spam-Relays-Untrusted =~ / helo=\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3} /
+# Received headers using "helo=" prefix.  exclude squirrelmail, which
+# records a perfectly-ok rcvd header for the HTTP step in this fmt
+header __RCVD_NUMERIC_HELO	X-Spam-Relays-Untrusted =~ / helo=\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3} /
+header __SQUIRREL_AUTH          Received =~ /SquirrelMail authenticated user/
+meta T_RCVD_NUMERIC_HELO        (__RCVD_NUMERIC_HELO && !__SQUIRREL_AUTH)
 describe T_RCVD_NUMERIC_HELO	Received: contains an IP address used for HELO
 # same but not for first line
-header T_RCVD_NUMERIC_HELO_NOTFIRST	X-Spam-Relays-Untrusted =~ / helo=\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3} .+\[/
+header __RCVD_NUMERIC_HELO_NOTFIRST	X-Spam-Relays-Untrusted =~ / helo=\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3} .+\[/
+meta T_RCVD_NUMERIC_HELO_NOTFIRST       (__RCVD_NUMERIC_HELO_NOTFIRST && !__SQUIRREL_AUTH)
 describe T_RCVD_NUMERIC_HELO_NOTFIRST	Received: contains IP for HELO (not first line)
-
-# If the Message-Id claims to be added by one ISP, there should be a Received
-# header which mentions that ISP.
-header __MSGID_HAS_HOTMAIL	MESSAGEID =~ /hotmail\.com/
-header __RCVD_HAS_HOTMAIL	Received =~ /(?:hotmail|msn)\.com/
-meta T_MID_RCVD_DIFF_HOTMAIL	(__MSGID_HAS_HOTMAIL && !__RCVD_HAS_HOTMAIL)
-describe T_MID_RCVD_DIFF_HOTMAIL Message-Id does not match Received (hotmail.com)
-
-header __MSGID_HAS_AOL	MESSAGEID =~ /aol\.com/
-header __RCVD_HAS_AOL	Received =~ /aol\.com/
-meta T_MID_RCVD_DIFF_AOL	(__MSGID_HAS_AOL && !__RCVD_HAS_AOL)
-describe T_MID_RCVD_DIFF_AOL	Message-Id does not match Received (aol.com)
+# same but for the last untrusted host
+header __RCVD_NUMERIC_HELO_LASTUNT	X-Spam-Relays-Untrusted =~ /^[^\]]* helo=\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3} /
+meta T_RCVD_NUMERIC_HELO_LASTUNT        (__RCVD_NUMERIC_HELO_NOTFIRST && !__SQUIRREL_AUTH)
+describe T_RCVD_NUMERIC_HELO_LASTUNT	Received: contains IP for HELO (not first line)
 
 # 0.683   1.3791   0.0134    0.990   0.90    0.01  T_URI_UNPRINTABLE:quinlan
 # 0.956   1.1479   0.5948    0.659   0.26    0.01  T_URI_UNPRINTABLE:rODbegbie
 # 0.734   0.7756   0.0885    0.898   0.66    0.01  T_URI_UNPRINTABLE:theo
 # FPs?  wierd
-uri	T_URI_UNPRINTABLE	/%0/
+uri	T_URI_UNPRINTABLE	/\%0/
 describe T_URI_UNPRINTABLE	URI contains unprintable characters
 
 # bug 2957
@@ -126,15 +127,6 @@ body T_HTML_FONT_SIZE_LARGE	eval:html_range('max_size', '5', '6')
 body T_HTML_FONT_SIZE_HUGE	eval:html_range('max_size', '6', 'inf')
 
 ########################################################################
-
-# bug 1985
-body T_BIZ_URGENT /urgent.{0,16}(?:assistance|business|buy|confidential|notice|proposal|reply|request|response)/i
-
-# bug 2950
-# both look promotable
-# really?  low hit rates...
-uri T_GOOGLE_IMAGES	m{^http://images\.google(\.\S+)?\.[a-z]{2,3}/imgres\?}i
-uri T_GOOGLE_REDIR	m{^http://www\.google(\.\S+)?\.[a-z]{2,3}/url\?}i
 
 # http://www.ahbl.org/using/spamassassin.txt :
 # SpamAssassin local.cf for AHBL BlackList / BlockList
@@ -245,17 +237,13 @@ describe T_RCVD_IN_AHBL_RHSBL	AHBL: From sender in DNSbl dnsbl.ahbl.org
 tflags T_RCVD_IN_AHBL_RHSBL	net
 
 # Should catch Atriks, for one
-uri T_LONG_HOSTNAME_25		/^https?:\/\/[a-z0-9]{25,29}\./i
-uri T_LONG_HOSTNAME_30		/^https?:\/\/[a-z0-9]{30,40}\./i
-uri T_LONG_HOSTNAME_40		/^https?:\/\/[a-z0-9]{40,}\./i
-
-# bug 2220
-meta T_DIGEST_MULTIPLE		RAZOR2_CHECK + DCC_CHECK + PYZOR_CHECK > 1
-describe T_DIGEST_MULTIPLE	Message hits more than one network digest check
-tflags T_DIGEST_MULTIPLE	net
-
-# too easy
-body T_VIA_GAP_GRA		/\bvia.gra\b/i
+uri T_LONG_HOSTNAME_25_A		/^https?:\/\/[a-z0-9]{25,29}\./i
+uri T_LONG_HOSTNAME_30_A		/^https?:\/\/[a-z0-9]{30,40}\./i
+uri T_LONG_HOSTNAME_40_A		/^https?:\/\/[a-z0-9]{40,}\./i
+# in a subdomain (avoids my 1 FP)
+uri T_LONG_HOSTNAME_25_B		/^https?:\/\/[a-z0-9]{25,29}\.[^\.]+\./i
+uri T_LONG_HOSTNAME_30_B		/^https?:\/\/[a-z0-9]{30,40}\.[^\.]+\./i
+uri T_LONG_HOSTNAME_40_B		/^https?:\/\/[a-z0-9]{40,}\.[^\.]+\./i
 
 # backhair - idea from backhair set by Jennifer Wheeler and Adam Lopresto.
 body T_BACKHAIR_1_1		eval:html_test('backhair_1_1')
@@ -308,12 +296,6 @@ body T_BACKHAIR_7_5		eval:html_test('backhair_7_5')
 body T_BACKHAIR_7_6		eval:html_test('backhair_7_6')
 body T_BACKHAIR_7_7		eval:html_test('backhair_7_7')
 
-# spams that are assembled from a Javascript array
-# look for the XOR op
-rawbody __JS_FROMCHARCODE	/String\.fromCharCode\s*\(\s*\S+\s*\[\s*\S+\s*\]\s*\^/
-rawbody __JS_DOCWRITE   	/document\.write/
-meta T_JS_FROMCHARCODE          (__JS_FROMCHARCODE && __JS_DOCWRITE)
-
 # IADB
 header __RCVD_IN_IADB		eval:check_rbl('iadb', 'iadb.isipp.com.')
 tflags __RCVD_IN_IADB		net nice
@@ -336,9 +318,6 @@ describe T_BAD_MOZILLA_VERSION  User-Agent claims to be Mozilla, but is malforme
 
 header T_RCVD_ILLEGAL_IP    Received =~ /[\s\(\[\:\=](?:(?:[01257]|22[3-9]|23[0-9]|24[0-9]|25[0-5])\.\d+\.\d+\.\d+|127\.[1-9]\.\d+\.\d+|127\.0\.[1-9]\.\d+|127\.0\.0\.(?:\d\d+|[2-9]))\b/
 describe T_RCVD_ILLEGAL_IP  Received contains illegal IP address
-
-header T_SUBJ_2_NUM_PARENS      Subject =~ /^\(\d+\).*\(\d+\)\s*$/
-describe T_SUBJ_2_NUM_PARENS    Subject contains common spam sign (2 numbers)
 
 # some SenderBase tests
 header __SENDERBASE		eval:check_rbl_txt('senderbase', 'sa.senderbase.org.')
