@@ -1224,7 +1224,11 @@ Select the languages to allow from the list below:
 
 =item yi	- Yiddish
 
-=item zh	- Chinese
+=item zh	- Chinese (both Traditional and Simplified)
+
+=item zh.big5	- Chinese (Traditional only)
+
+=item zh.gb2312	- Chinese (Simplified only)
 
 =back
 
