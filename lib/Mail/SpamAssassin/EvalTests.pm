@@ -211,6 +211,10 @@ sub check_for_forged_yahoo_received_headers {
       /from \[\d+\.\d+\.\d+\.\d+\] by \S+\.(?:groups|grp\.scd)\.yahoo\.com with NNFMP/) {
     return 0;
   }
+  if ($rcvd =~ /by \w+\.\w+\.yahoo\.com \(\d+\.\d+\.\d+\/\d+\.\d+\.\d+\) id \w+/) {
+      # possibly sent from "mail this story to a friend"
+      return 0;
+  }
 
   return 1;
 }
