@@ -116,8 +116,7 @@ aplikacji do czytania poczty.
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
 %makeinstall PREFIX=%buildroot/%{_prefix} \
         INSTALLMAN1DIR=%buildroot/%{_mandir}/man1 \
-        INSTALLMAN3DIR=%buildroot/%{_mandir}/man3 \
-	LOCAL_RULES_DIR=%buildroot/%{_sysconfdir}/mail/spamassassin
+        INSTALLMAN3DIR=%buildroot/%{_mandir}/man3
 install -d %buildroot/%{initdir}
 install -d %buildroot/%{_includedir}
 install -m 0755 spamd/redhat-rc-script.sh %buildroot/%{initdir}/spamassassin
