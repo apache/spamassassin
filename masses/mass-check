@@ -100,6 +100,7 @@ my $when = `date -u`; chomp $when;
 my $log_header = "# mass-check results from $who\@$where, on $when\n" .
 		 "# M:SA version ".$spamtest->Version()."\n" .
 		 '# CVS tag: $Name:  $' . "\n";
+my $host = $ENV{'HOSTNAME'} || $ENV{'HOST'} || `hostname` || 'localhost';
 
 if ($opt_o) {
   autoflush STDOUT 1;
@@ -171,16 +172,29 @@ sub wanted {
     $out .= "# contains SpamAssassin markup, results may be incorrect: $id\n";
   }
 
+  my @extra;
+  if (defined($time)) {
+    push(@extra, "time=$time");
+  }
+  if ($opt_bayes && defined $status->{bayes_score}) {
+    push(@extra, "bayes=" . $status->{bayes_score});
+  }
+  my $msgid = $ma->get_header("Message-Id") ||
+      "<$id\@$host.masses.spamassasin.org>";
+  $msgid =~ s/^\s*//s;
+  $msgid =~ s/\s*$//s;
+  $msgid =~ s/[\s,]/./gs;
+  push(@extra, "msgid=$msgid");
+
   my $yorn = $status->is_spam() ? 'Y' : '.';
   my $hits = $status->get_hits();
   my $tests = join(",", sort(grep(length,$status->get_names_of_tests_hit(),$status->get_names_of_subtests_hit())));
-  my $bayes = ($opt_bayes && defined $status->{bayes_score} ? ",bayes=".$status->{bayes_score} : "");
+  my $extra = join(",", @extra);
   # print STDERR $status->get_full_message_as_text();
 
   $id =~ s/\s/_/g;
-  $time = "time=$time";
 
-  $out .= sprintf("%s %2d %s %s %s%s\n", $yorn, $hits, $id, $tests, $time, $bayes);
+  $out .= sprintf("%s %2d %s %s %s\n", $yorn, $hits, $id, $tests, $extra);
 
   if ($tests =~ /MICROSOFT_EXECUTABLE|MIME_SUSPECT_NAME/) {
     $out .= logkilled($ma, $id, "possible virus");
