@@ -569,7 +569,6 @@ for ( ; ($paddr = accept(Client,Server)) ; close Client)
     cleanupchildren;
 }
 }
-die "Somehow, we got to line 571!";
 
 sub protocol_error {
     local $_ = shift;
