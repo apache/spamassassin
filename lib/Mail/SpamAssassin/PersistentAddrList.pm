@@ -67,12 +67,15 @@ sub new_checker {
 
 =item $entry = $addrlist->get_addr_entry ($addr);
 
-Given an email address C<$addr>, return an entry object with the details
-of that address.
+Given an email address C<$addr>, return an entry object with the details of
+that address.
 
 The entry object is a reference to a hash, which must contain at least
-one item: C<count>, which is the count of times that address has been
+one key: C<count>, which is the count of times that address has been
 encountered before.  Anything over 3 means the address is whitelisted.
+
+The hash can contain whatever other data your back-end needs to store,
+under other keys.
 
 The method should never return C<undef>, or a hash that does not contain
 a C<count> key.
@@ -93,7 +96,7 @@ sub get_addr_entry {
 If an address is either not found in the whitelist database, or is in the
 accumulator database but has not yet reached the threshold to enter the
 whitelist, this method will be called.  It should increment the counter for
-that address in the accumulator database, creating the persistent entry if it
+that address in the accumulator database, creating the database entry if it
 doesn't already exist.
 
 =cut
@@ -111,7 +114,7 @@ If an address is currently in the accumulator database, but has reached the
 threshold to enter the whitelist database, this method will be called.
 
 It should add the address from the entry to the whitelist database (possibly
-removing it from the accumulator if possible).
+removing it from the accumulator if possible and necessary).
 
 =cut
 
@@ -125,7 +128,7 @@ sub add_permanent_entry {
 =item $entry = $addrlist->finish ();
 
 Clean up, if necessary.  Called by SpamAssassin when it has finished
-checking the auto-whitelist database.
+checking, or adding to, the auto-whitelist database.
 
 =cut
 
