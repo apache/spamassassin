@@ -3086,7 +3086,7 @@ optional, and the default is shown below.
  _SPAMMYTOKENS(N)_ the N most significant spammy tokens (default, 5)
  _AWL_             AWL modifier
  _AWLMEAN_         Mean score on which AWL modification is based
- _AWLCOUNT_        Number of messages on which AWL modicfication is based
+ _AWLCOUNT_        Number of messages on which AWL modification is based
  _AWLPRESCORE_     Score before AWL
  _DATE_            rfc-2822 date of scan
  _STARS(*)_        one * (use any character) for each score point (note: this
