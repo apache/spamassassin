@@ -143,7 +143,7 @@ body INCREASE_TRAFFIC		/increase.{1,15} traffic\b/i
 describe INCREASE_TRAFFIC	Instructions on how to boost traffic
 
 # contrib: Duncan
-body ONE_TIME_MAILING		/is a (?:one|1).time mailing/i
+body ONE_TIME_MAILING		/this\b.{0,20}\b(?:one|1).time\b.{0,20}\bmail/i
 describe ONE_TIME_MAILING	'one time mailing' doesn't mean it isn't spam
 
 # this one gets a few false positives
@@ -573,4 +573,5 @@ describe CASINO			Contains "Casino"
 
 body MYCASINOBUILDER		/MYCASINOBUILDER.COM/i
 describe MYCASINOBUILDER	Contains "mycasinobuilder.com"
+
 
