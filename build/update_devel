@@ -21,12 +21,12 @@ perl Makefile.PL < /dev/null || exit $?
 make version.env || exit $?
 . version.env
 
-DISTDNAME=$DISTNAME-$DIST_VERSION
-DISTVNAME=$DISTNAME-$FULL_VERSION
-
 # $VERSION will be x.y.z for released not marked $IS_DEVEL_BUILD, else
 # x-y-latest while $DIST_VERSION is always the x.y.z variant.
 VERSION=`echo $FULL_VERSION | perl -pe 's/\.\d+(-.*)-r\d+$/-dev/'`
+
+DISTDNAME=$DISTNAME-$DIST_VERSION
+DISTVNAME=$DISTNAME-$VERSION
 
 # delete old CVS files
 find . -name '.#*' -print | xargs rm -f
