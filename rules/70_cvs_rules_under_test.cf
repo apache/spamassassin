@@ -492,3 +492,37 @@ score T_FROM_ENDS_IN_NUMS6       0.01
 meta T_CONFIRMED_FORGED         (FORGED_RCVD_TRAIL && (FORGED_AOL_RCVD || FORGED_HOTMAIL_RCVD || FORGED_EUDORAMAIL_RCVD || FORGED_YAHOO_RCVD || FORGED_JUNO_RCVD || FORGED_GW05_RCVD || FORGED_MX_HOTMAIL))
 
 meta T_MULTI_FORGED             ((FORGED_AOL_RCVD + FORGED_HOTMAIL_RCVD + FORGED_EUDORAMAIL_RCVD + FORGED_YAHOO_RCVD + FORGED_JUNO_RCVD + FORGED_GW05_RCVD) > 1)
+
+###########################################################
+
+body T_HTML_TAG_EXISTS_CENTER    eval:html_tag_exists('center')
+body T_HTML_TAG_EXISTS_HX        eval:html_test('header_tag')
+
+body T_HTML_BIG_FONT_B           eval:html_test('big_font_B')
+body T_HTML_FONT_SIZE_PX         eval:html_test('font_px')
+body T_HTML_STYLE_LINE_HEIGHT    eval:html_test('line_height')
+
+body T_HTML_SHOUTING1            eval:html_max_shouting('0', '1')
+body T_HTML_SHOUTING2            eval:html_max_shouting('1', '2')
+body T_HTML_SHOUTING3            eval:html_max_shouting('2', '3')
+body T_HTML_SHOUTING4            eval:html_max_shouting('3', '4')
+body T_HTML_SHOUTING5            eval:html_max_shouting('4', '5')
+body T_HTML_SHOUTING6            eval:html_max_shouting('5', '6')
+body T_HTML_SHOUTING7            eval:html_max_shouting('6', '7')
+body T_HTML_SHOUTING8            eval:html_max_shouting('7', '8')
+body T_HTML_SHOUTING9            eval:html_max_shouting('8') 
+
+score T_HTML_SHOUTING1            0.01
+score T_HTML_SHOUTING2            0.01
+score T_HTML_SHOUTING3            0.01
+score T_HTML_SHOUTING4            0.01
+score T_HTML_SHOUTING5            0.01
+score T_HTML_SHOUTING6            0.01
+score T_HTML_SHOUTING7            0.01
+score T_HTML_SHOUTING8            0.01
+score T_HTML_SHOUTING9            0.01
+
+
+##################################################################
+
+body T_HTML_MAIL_ONLY             /HTML only email, sorry/i
