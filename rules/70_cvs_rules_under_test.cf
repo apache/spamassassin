@@ -185,10 +185,6 @@ test T_VISIT_OUR_SITE  ok  Visit the sites of our major partners:
 # Dec 19 2002 jm: try out separation of "the", it seems to be FP-prone for me
 body T_VISIT_OUR_SITE_2 /\b(?:visit|enter)\s+(?:my|our|this)\s+(?:web\s*)?site/i
 
-uri T_PXE_LOGIC /^http:\/\/(?:pxe|fx)\.[^\/]{1,50}\.com\/logic\/to\.pl\?/i
-test T_PXE_LOGIC ok http://pxe.highspeed-email.com/logic/to.pl?i=3399923cd33d
-describe T_PXE_LOGIC Spam URL pattern, usually made up domains
-
 # mgm's rules for PXE above
 uri T_DAILY_PL			/\/logic\/[a-z]{2}\.pl/
 describe T_DAILY_PL		Spam URL pattern, DailyPromotions redirect link
