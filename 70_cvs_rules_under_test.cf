@@ -176,6 +176,11 @@ uri T_OFFER_URI			/^https?:\/\/.*?(?:offers?\.\w|[.\/]offer|offer=)/i
 describe T_OFFER_URI		Offer in link address
 
 # bug 726
+# 12/23 - The S/O and ranks for this one make me say no - tvd
+#easmith	1.335   0.3628   1.6158    0.183   0.01    0.01 T_VISIT_OUR_SITE
+#quinlan	1.952   4.8259   0.1170    0.976   0.87    0.01 T_VISIT_OUR_SITE
+#rODbegbie	1.641   3.0787   1.0650    0.743   0.40    0.01 T_VISIT_OUR_SITE
+#theo		2.776   6.4845   0.4147    0.940   0.77    0.01 T_VISIT_OUR_SITE
 body T_VISIT_OUR_SITE /\b(?:visit|enter)\s+(?:my|our|the|this)\s+(?:web\s*)?site/i
 describe T_VISIT_OUR_SITE         Wants you to visit a web site
 test T_VISIT_OUR_SITE  ok  Click below to enter our web site:
@@ -183,11 +188,17 @@ test T_VISIT_OUR_SITE  ok  Visit Our Web Site and Learn The Facts
 test T_VISIT_OUR_SITE  ok  Just visit our site to learn how easy
 test T_VISIT_OUR_SITE  ok  Visit the sites of our major partners:
 # Dec 19 2002 jm: try out separation of "the", it seems to be FP-prone for me
+# 12/23 - S/O and ranks are a little better, but I still say no - tvd
+#easmith	1.180   0.2540   1.4479    0.149   0.00    0.01 T_VISIT_OUR_SITE_2
+#quinlan	1.865   4.6223   0.1040    0.978   0.87    0.01 T_VISIT_OUR_SITE_2
+#rODbegbie	1.478   2.8832   0.9147    0.759   0.42    0.01 T_VISIT_OUR_SITE_2
+#theo		2.704   6.3571   0.3787    0.944   0.78    0.01 T_VISIT_OUR_SITE_2
 body T_VISIT_OUR_SITE_2 /\b(?:visit|enter)\s+(?:my|our|this)\s+(?:web\s*)?site/i
 
 # Specific whitelisting for GradFinder.  They use the sender's own
 # From addr, so whitelist_from_rcvd won't cut it
 # bug 1241
+# 12/23 - 0 hits for anyone - tvd
 header __GRADF_MSGID	Message-ID =~ /\@gradfinder.com>$/
 header __GRADF_RCVD	Received =~ /from \S+ \(\S+.friendfinder.com \[216\.34\./
 meta T_VIA_GRADFINDER	(__GRADF_RCVD && __GRADF_MSGID)
