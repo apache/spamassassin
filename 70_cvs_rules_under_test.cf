@@ -57,3 +57,19 @@ score T_SOME_BREAKTHROUGH	0.5
 body T_SELECTED_YOU		/(?:you (?:have been|were) selected|we (?:have )?selected you)/i
 score T_SELECTED_YOU		0.5
 
+# results for Matt Cline
+#  1.753    5.510    0.000    1.00    0.87    2.50  T_HTML_UNTITLED_TITLE
+# 13.650   42.480    0.200    1.00    0.65    0.50  T_HTML_HAS_TITLE
+#  0.050    0.158    0.000    1.00    0.64    2.50  T_HTML_EMPTY_TITLE
+body     T_HTML_HAS_TITLE         eval:html_test('has_title')
+describe T_HTML_HAS_TITLE         HTML has a TITLE tag
+score    T_HTML_HAS_TITLE         0.5
+
+body     T_HTML_UNTITLED_TITLE    eval:html_test('untitled_title')
+describe T_HTML_UNTITLED_TITLE    HTML title contains "Untitled"
+score    T_HTML_UNTITLED_TITLE    2.5
+
+body     T_HTML_EMPTY_TITLE       eval:html_test('empty_title')
+describe T_HTML_EMPTY_TITLE       HTML title is empty
+score    T_HTML_EMPTY_TITLE       2.5
+
