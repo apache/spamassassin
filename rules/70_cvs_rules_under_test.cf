@@ -16,6 +16,13 @@
 header __VALID_MSGID MESSAGEID =~ /^<(?:[a-zA-Z0-9.,!\#\$%&'*\+\/=?\^_{}|~-]+|\".+\")\@(?:[a-zA-Z0-9_.-]+|\[\d{1,3}(?:\.\d{1,3}){3}\])>(?:\s*\(.*\))?\s*$/m [if-unset: <NO@MSGID>]
 meta T_INVALID_MSGID		!__VALID_MSGID
 describe T_INVALID_MSGID	Message-Id is not valid, according to RFC 2822
+#
+# quinlan: If this has a better S/O for others (all of my FPs are from the
+# same person), it should be an eval so this can be done properly: strip
+# comments on each Message-Id header, then use regular expression.
+#
+header __MSGID_COMMENT		MESSAGEID =~ /\(.*\)/m
+meta T_INVALID_MSGID2		!(__VALID_MSGID || __MSGID_COMMENT)
 
 # results for quinlan
 # 0.160   0.2453   0.1136    0.683   0.31    0.50  T_FROM_TOPICA
@@ -24,6 +31,8 @@ describe T_INVALID_MSGID	Message-Id is not valid, according to RFC 2822
 # 0.145   0.0136   0.2005    0.063   0.00    0.50  T_FROM_TOPICA:rODbegbie
 # Dec  6 2002 jm: my vote: drop it.  Topica claim to be "white hat" nowadays
 # anyway, apparently.
+# Dec 15 2002 quinlan: they aren't very "white hat" in these parts, but
+# yes, the overall stats are not so good
 header T_FROM_TOPICA		From:addr =~ /\@(?:\w+\.)?email-publisher\.com$/
 describe T_FROM_TOPICA		From an address at email-publisher.com
 score T_FROM_TOPICA		0.5
@@ -377,6 +386,12 @@ header __MUTT12_MSGID	Message-Id =~ /20[01]\d[01]\d[0123]\d[012]\d[0-5]\d\d\d\.[
 header __MUTT12_UA	User-Agent =~ /^Mutt\/1\.[234]\.\d+i/
 header __MUTT12_XM	X-Mailer =~ /^Mutt\/1\.[234]\.\d+i/
 
+# quinlan: this does not seem so good, recommend removing it
+# 0.074  0.0535  0.0819  0.395  0.06  0.01  T_FORGED_MUTT_NO_MSGID
+# 0.095  0.0525  0.1023  0.339  0.04  0.01  T_FORGED_MUTT_NO_MSGID:daf
+# 0.064  0.0422  0.0707  0.374  0.05  0.01  T_FORGED_MUTT_NO_MSGID:easmith
+# 0.151  0.0407  0.2210  0.156  0.00  0.01  T_FORGED_MUTT_NO_MSGID:quinlan
+# 0.020  0.0693  0.0000  1.000  0.96  0.01  T_FORGED_MUTT_NO_MSGID:rODbegbie
 meta T_FORGED_MUTT_NO_MSGID	((__MUTT12_UA || __MUTT12_XM) && !__MUTT12_MSGID)
 meta T_MUTT_WITH_MSGID		((__MUTT12_UA || __MUTT12_XM) && __MUTT12_MSGID)
 tflags T_MUTT_WITH_MSGID	nice
