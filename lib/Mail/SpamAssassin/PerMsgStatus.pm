@@ -881,6 +881,9 @@ sub get_decoded_stripped_body_text_array {
   $self->{html}{min_img_ratio}    = "inf";
   $self->{html}{max_img_ratio}    = -1;
 
+  $self->{html}{shouting}         = 0;
+  $self->{html}{max_shouting}     = 0;
+
   # do HTML conversions if necessary
   if ($text =~ m/<\s*[a-z:!][a-z:\d_-]*(?:\s.*?)?\s*>/is) {
     my $raw = length($text);

@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.21 2002/10/04 23:46:46 felicity Exp $
+# $Id: HTML.pm,v 1.22 2002/10/05 09:24:21 zelgadis Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -20,6 +20,14 @@ sub html_tag {
     $self->html_tests($tag, $attr, $num);
 
     $self->{html_last_tag} = $tag;
+  }
+
+  if ($tag =~ /^(?:b|i|u|strong|em|big|center|h\d)$/) {
+    $self->{html}{shouting} += $num;
+
+    if ($self->{html}{shouting} > $self->{html}{max_shouting}) {
+      $self->{html}{max_shouting} = $self->{html}{shouting};
+    }
   }
 }
 
@@ -208,6 +216,18 @@ sub html_tests {
       $self->{html}{font_face_odd} = 1 if ! /^\s*(?:arial|comic sans ms|courier new|geneva|helvetica|ms mincho|sans-serif|serif|tahoma|times new roman|verdana)\s*$/i;
     }
   }
+
+  if (exists($attr->{style})) {
+    if ($attr->{style} =~ /font(?:-size)?:\s*([\d\.]+)(p[tx])/i) {
+      my $size = $1;
+      my $type = $2;
+
+      $self->{html}{big_font_B} = 1 if (lc($type) eq "pt" && $size > 12);
+      $self->{html}{font_px}    = 1 if (lc($type) eq "px");
+    }
+    $self->{html}{line_height} = 1 if ($attr->{style} =~ /line-height/i);
+  }
+
   if (($tag eq "img" && exists $attr->{src} &&
        $attr->{src} =~ /(?:\?|[a-f\d]{12,})/i) ||
       ($tag =~ /^(?:body|table|tr|td)$/ && exists $attr->{background} &&
@@ -251,6 +271,8 @@ sub html_tests {
   {
     $self->{html}{title_text} = "";
   }
+
+  $self->{html}{header_tag} = 1 if ($tag =~ /^h\d$/);
 }
 
 sub html_text {
@@ -267,7 +289,20 @@ sub html_text {
     if ($text =~ /\.blur\s*\(/) { $self->{html}{window_blur} = 1; }
     return;
   }
-  return if (exists $self->{html_inside}{style} && $self->{html_inside}{style} > 0);
+
+  if (exists $self->{html_inside}{style} && $self->{html_inside}{style} > 0) {
+    if ($attr->{style} =~ /font(?:-size)?:\s*([\d\.]+)(p[tx])/i) {
+      my $size = $1;
+      my $type = $2;
+
+      $self->{html}{big_font_B} = 1 if (lc($type) eq "pt" && $size > 12);
+      $self->{html}{font_px}    = 1 if (lc($type) eq "px");
+    }
+    $self->{html}{line_height} = 1 if ($text =~ /line-height/i);
+
+    return;
+  }
+
   if (!(exists $self->{html_inside}{body} && $self->{html_inside}{body} > 0) &&
         exists $self->{html_inside}{title} && $self->{html_inside}{title} > 0)
   {
@@ -285,6 +320,17 @@ sub html_comment {
   $self->{html}{comment_saved_url} = 1 if $text =~ /<!-- saved from url=\(\d{4}\)/;
   $self->{html}{comment_sky} = 1 if $text =~ /SKY-(?:Email-Address|Database|Mailing|List)/;
   $self->{html}{comment_unique_id} = 1 if $text =~ /<!--\s*(?:[\d.]+|[a-f\d]{5,}|\S{10,})\s*-->/i;
+
+  if (exists $self->{html_inside}{style} && $self->{html_inside}{style} > 0) { 
+    if ($attr->{style} =~ /font(?:-size)?:\s*([\d\.]+)(p[tx])/i) {
+      my $size = $1;
+      my $type = $2;
+
+      $self->{html}{big_font_B} = 1 if (lc($type) eq "pt" && $size > 12);
+      $self->{html}{font_px}    = 1 if (lc($type) eq "px");
+    }
+    $self->{html}{line_height} = 1 if ($text =~ /line-height/i);
+  }
 }
 
 ###########################################################################
@@ -366,6 +412,14 @@ sub html_max_img_ratio {
     return ($ratio > $min && $ratio <= $max);
 } # html_max_img_ratio()
 
+sub html_max_shouting {
+    my ($self, undef, $min, $max) = @_;
+
+    $max ||= "inf";
+
+    my $shouting = $self->{html}{max_shouting};
+    return ($shouting > $min && $shouting <= $max);
+} # html_max_shouting()
 
 1;
 __END__
