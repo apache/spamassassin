@@ -38,7 +38,9 @@ sub is_charset_ok_for_locales {
   my ($cs, @locales) = @_;
 
   $cs = uc $cs; $cs =~ s/[^A-Z0-9]//g;
-  $cs =~ s/^3D//gs;		# broken by quoted-printable?
+  $cs =~ s/^3D//gs;		# broken by quoted-printable
+  $cs =~ s/:.*$//gs;            # trim off multiple charsets, just use 1st
+
   study $cs;
   #warn "JMD $cs";
 
