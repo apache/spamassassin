@@ -934,7 +934,6 @@ score RCVD_IN_SORBS_HTTP  0 1.101 0 0.947
 score RCVD_IN_SORBS_MISC  0 0.500 0 0.430
 score RCVD_IN_SORBS_SMTP  0 1.101 0 0.947
 score RCVD_IN_SORBS_SOCKS  0 0.001 0 0.001
-score RCVD_IN_SORBS_SPAM  0 0.139 0 0.120
 score RCVD_IN_SORBS_WEB  0 2.800 0 2.408
 score RCVD_IN_SORBS_ZOMBIE  0 0.877 0 0.754
 
@@ -949,6 +948,13 @@ score RCVD_IN_MAPS_RBL 0
 score RCVD_IN_MAPS_DUL 0
 score RCVD_IN_MAPS_RSS 0
 score RCVD_IN_MAPS_NML 0
+
+# unscored by default -- requires a $50 payment to be delisted.  If you
+# want to use this, give it a score so it will be checked.  Note that
+# in our testing, we found the accuracy to be quite low (hits 5.2%
+# of spam, but 0.6% of non-spam).
+
+score RCVD_IN_SORBS_SPAM 0
 
 #
 # User Configured Tests
