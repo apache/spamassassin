@@ -106,9 +106,16 @@ $spamtest->read_scoreonly_config("$FindBin::Bin/mass-check.cf");
 my $who   = `id -un 2>/dev/null`;   chomp $who;
 my $where = `uname -n 2>/dev/null`; chomp $where;
 my $when  = `date -u`;              chomp $when;
+my $revision = "unknown";
+if (open(TESTING, "$opt_c/70_cvs_rules_under_test.cf")) {
+  chomp($revision = <TESTING>);
+  $revision =~ s/.*Revision:\s*(\S+).*/$1/;
+  close(TESTING);
+}
 my $log_header = "# mass-check results from $who\@$where, on $when\n" .
 		 "# M:SA version ".$spamtest->Version()."\n" .
-		 '# CVS tag: $Name:  $' . "\n";
+		 '# CVS tag: $Name:  $' . "\n" .
+		 "# CVS revision: $revision\n";
 my $host = $ENV{'HOSTNAME'} || $ENV{'HOST'} || `hostname` || 'localhost';
 chomp $host;
 
