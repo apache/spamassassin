@@ -139,7 +139,7 @@ describe DATE_IN_FUTURE_96_XX	Date: is 96 hours or more after Received: date
 header ADVERT_CODE		Subject =~ /^\W*ADV\b/i
 describe ADVERT_CODE		Subject: starts with advertising tag
 
-<header ADVERT_CODE2		Subject =~ /\bA\s*D\s*V\b/i
+header ADVERT_CODE2		Subject =~ /\bA\s*D\s*V\b/i
 describe ADVERT_CODE2		Subject: contains advertising tag
 
 # Korean UCE Subject: lines are usually 8-bit, but are occasionally encoded
