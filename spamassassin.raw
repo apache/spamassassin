@@ -65,6 +65,7 @@ my %opt = ( 'create-prefs' => 1);
 eval {
   require Mail::SpamAssassin;
   require Mail::SpamAssassin::NoMailAudit;
+  require Mail::SpamAssassin::Util;
 
   # gnu_getopt is not available in Getopt::Long 2.24, see bug 732
   # gnu_compat neither.
@@ -107,6 +108,10 @@ eval {
   if (defined $opt{'version'}) {
     print "SpamAssassin version " . Mail::SpamAssassin::Version() . "\n";
     exit 0;
+  }
+
+  if ( defined $opt{'log-to-mbox'} ) {
+    $opt{'log-to-mbox'} = Mail::SpamAssassin::Util::untaint_file_path($opt{'log-to-mbox'});
   }
 
   my $doing_whitelist_operation = 0;
