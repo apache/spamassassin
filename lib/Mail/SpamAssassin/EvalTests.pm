@@ -721,40 +721,8 @@ sub _check_received_helos {
 	$self->{faked_dotcom_helo} = 1;
       }
     }
-
-    # OK, carry on to check for the faked-HELO-as-relay case
-
-    next unless ($from_host eq $by_host);
-    next if ($from_host eq "localhost");
-
-    # If helo host is all numeric, from host probably won't be, so
-    # don't bother
-    next unless ($helo_host =~ /[a-z]/i);
-
-    $from_host =~ /([^.]+\.[^.]+$)/;
-    my $from_domain = $1;
-    $from_domain ||= '';
-
-    $helo_host =~ /([^.]+\.[^.]+$)/;
-    my $helo_domain = $1;
-    $helo_domain ||= '';
-
-    if ($from_domain ne $helo_domain) {
-      dbg("Received: from and by hosts '$from_host' same, but " .
-          "helo host '$helo_host' differs\n");
-      $self->{found_bad_helo_2} = 1;
-      return;
-    }
-  } # for (my $i = 0; $i < @received; $i++)
-
-  $self->{found_bad_helo_2} = 0;
+  }
 } # _check_received_helos()
-
-sub check_for_bad_helo2 {
-  my ($self) = @_;
-  if (!exists $self->{found_bad_helo_2}) { $self->_check_received_helos(@_); }
-  return $self->{found_bad_helo_2};
-}
 
 sub check_for_fake_dotcom_helo {
   my ($self) = @_;
