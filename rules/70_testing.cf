@@ -97,42 +97,8 @@ header __NO_RCVD        exists:Received
 meta T_NO_RCVD        (!__NO_RCVD)
 
 ########################################################################
-# tvd: these are unusable, results from total nightly run:
-#  0.198   0.2394   0.0500    0.827   0.56    0.01  T_HTML_SCRIPT_LONG_120
-#  0.117   0.1412   0.0278    0.836   0.55    0.01  T_HTML_SCRIPT_EXPR_3
-#  0.048   0.0556   0.0204    0.732   0.49    0.01  T_HTML_SCRIPT_EXPR_4
-#  0.761   0.8444   0.4608    0.647   0.48    0.01  T_HTML_SCRIPT_0
-#  0.467   0.5306   0.2350    0.693   0.48    0.01  T_HTML_SCRIPT_LONG_080
-#  0.725   0.7982   0.4590    0.635   0.47    0.01  T_HTML_SCRIPT_EXPR_1
-#  0.725   0.7982   0.4590    0.635   0.47    0.01  T_HTML_SCRIPT_1
-#  0.691   0.7559   0.4571    0.623   0.47    0.01  T_HTML_SCRIPT_LONG_040
-#  0.013   0.0149   0.0083    0.641   0.46    0.01  T_HTML_SCRIPT_EXPR_5
-#  0.050   0.0510   0.0463    0.524   0.44    0.01  T_HTML_SCRIPT_LONG_160
-#  0.028   0.0254   0.0352    0.419   0.43    0.01  T_HTML_SCRIPT_LONG_200
-#  0.285   0.2838   0.2878    0.496   0.40    0.01  T_HTML_SCRIPT_EXPR_2
-body T_HTML_SCRIPT_0		eval:html_text_match('script', '.')
-body T_HTML_SCRIPT_1		eval:html_text_match('script', ';')
 
-body T_HTML_SCRIPT_LONG_040	eval:html_text_match('script', '.{40}')
-body T_HTML_SCRIPT_LONG_080	eval:html_text_match('script', '.{80}')
-body T_HTML_SCRIPT_LONG_120	eval:html_text_match('script', '.{120}')
-body T_HTML_SCRIPT_LONG_160	eval:html_text_match('script', '.{160}')
-body T_HTML_SCRIPT_LONG_200	eval:html_text_match('script', '.{200}')
-
-body T_HTML_SCRIPT_EXPR_1	eval:html_text_match('script', ';')
-body T_HTML_SCRIPT_EXPR_2	eval:html_text_match('script', ';.*;')
-body T_HTML_SCRIPT_EXPR_3	eval:html_text_match('script', ';.*;.*;')
-body T_HTML_SCRIPT_EXPR_4	eval:html_text_match('script', ';.*;.*;.*;')
-body T_HTML_SCRIPT_EXPR_5	eval:html_text_match('script', ';.*;.*;.*;.*;')
-########################################################################
-
-# catch non-RFC2047 compliant messages
-# Apple Mail has a bug where headers will have whitespace around the encoded
-# text, so try to ignore that
-header T_BAD_ENC_HEADER		ALL =~ /=\?[^?\s]+\?[^?\s]\?[^?]*\s/
-header T_BAD_ENC_HEADER2	ALL =~ /=\?[^?\s]+\?[^?\s]\?\s*[^?]+\s(?!\?=)/
-
-# these don't hit a lot, but it's a definite obfuscation technique
+# this doesn't hit a lot, but it's a definite obfuscation technique
 uri T_HTTP_BAD_HOST_CHAR	m@^https?://[^/]*[\000-\037\200-\377]@i
 
 # possible IDN spoofing attack: http://www.shmoo.com/idn/homograph.txt
@@ -795,6 +761,8 @@ replace_rules T_OBFU_XPILL_W3_P3
 
 endif   #ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 
+# TVD: these should just get turned into obfu/int rules ala above
+#
 header    T_FOREVER       Subject =~ /\bf[\W_]?(?:\[\]|\(\)|[o0\*\xD2-\xD6\xF2-\xF6])[\W_]?[r\xAE][\W_]?[e3\*\xC8-\xCB\xE8-\xEB][\W_]?[vu][\W_]?[e3\*\xC8-\xCB\xE8-\xEB][\W_]?[r\xAE]\b/i
 describe  T_FOREVER       Forever in Subject
 
