@@ -3069,7 +3069,7 @@ sub _check_spf {
     return;
   }
 
-  my $sender = $self->get ("EnvelopeFrom");
+  my $sender = ''; #$self->get ("EnvelopeFrom");
   my $ip = $lasthop->{ip};
   my $helo = $lasthop->{helo};
   my $query;
