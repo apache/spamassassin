@@ -32,7 +32,7 @@ use Carp;
 use Net::SMTP::Server;
 use Net::SMTP::Server::Client;
 use Mail::SpamAssassin::SMTP::SmartHost;
-use Mail::SpamAssassin::MyMailAudit;
+use Mail::SpamAssassin::NoMailAudit;
 use Mail::SpamAssassin;
 use Net::DNS;
 use Getopt::Long;
@@ -132,19 +132,19 @@ while($conn = $server->accept()) {
     # the connecting client completes the SMTP transaction.
     $client->process || next;
 
-    # Mail::SpamAssassin::MyMailAudit wants an array of lines, while the
+    # Mail::SpamAssassin::NoMailAudit wants an array of lines, while the
     # server returns a huge string.  Since I am unsure whether it needs to
     # have the CR/LF pair for each line for use with Razor, after splitting
     # it, using the CR/LF pairs as delimiters, I walk over the message again
     # to re-add them.  Once the array is populated and tweaked, it is then
-    # handed to a new Mail::SpamAssassin::MyMailAudit object.
+    # handed to a new Mail::SpamAssassin::NoMailAudit object.
     # --irj
 
     $message = $client->{MSG};
     @msg = split ("\r\n", $message);
     $arraycont = @msg; for(0..$arraycont) { $msg[$_] .= "\r\n"; }
     %args = (data => \@msg);
-    $mail = Mail::SpamAssassin::MyMailAudit->new(%args);
+    $mail = Mail::SpamAssassin::NoMailAudit->new(%args);
 
     # At some point, I may also put some other code so I can go grab
     # preferences, e.g. via MySQL, e.g. scoring parameters, or even whether to
