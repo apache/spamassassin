@@ -873,7 +873,12 @@ sub uri_to_domain {
   $uri =~ s,#.*$,,gs;			# drop fragment
   $uri =~ s#^[a-z]+:/{0,2}##gsi;	# drop the protocol
   $uri =~ s,^[^/]*\@,,gs;		# username/passwd
-  $uri =~ s,[/\?\&].*$,,gs;		# path/cgi params
+
+  # strip path and CGI params.  note: bug 4213 shows that "&" should
+  # *not* be likewise stripped here -- it's permitted in hostnames by
+  # some common MUAs!
+  $uri =~ s,[/\?].*$,,gs;              
+
   $uri =~ s,:\d*$,,gs;			# port, bug 4191: sometimes the # is missing
 
   return if $uri =~ /\%/;         # skip undecoded URIs.
@@ -915,6 +920,20 @@ sub uri_list_canonify {
     # http:www.foo.biz -> http://www.foo.biz
     $nuri =~ s#^(https?:)/{0,2}#$1//#i;
 
+    # *always* make a dup with all %-encoding decoded, since
+    # important parts of the URL may be encoded (such as the
+    # scheme). (bug 4213)
+    if ($nuri =~ /\%[0-9a-fA-F]{2}/) {
+      $nuri = Mail::SpamAssassin::Util::url_encode($nuri);
+    }
+
+    # www.foo.biz -> http://www.foo.biz
+    # unschemed URI?  assume a default of "http://" as most 
+    # HTML-displaying MUAs would
+    if ($nuri !~ /^[-_a-z0-9]+:/) {
+      $nuri =~ s/^/http:\/\//g;
+    }
+
     # http://www.foo.biz?id=3 -> http://www.foo.biz/?id=3
     $nuri =~ s@^(https?://[^/?]+)\?@$1/?@i;
 
@@ -939,15 +958,6 @@ sub uri_list_canonify {
       # of the URI according to RFC 1738 that's invalid, and the tested
       # browsers (Firefox, IE) remove them before usage...
       if ($host =~ tr/\000-\040\200-\377//d) {
-        push(@nuris, join ('', $proto, $host, $rest));
-      }
-
-      # deal with the %## encoding if necessary
-      # only worry about decoding stuff as an obfuscation technique?
-      # encoding isn't allowed in anything but $rest, so just deal with it
-      # there.
-      if ($rest =~ /\%[0-9a-fA-F]{2}/) {
-        $rest = Mail::SpamAssassin::Util::url_encode($rest);
         push(@nuris, join ('', $proto, $host, $rest));
       }
 
