@@ -3,6 +3,7 @@
 
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <netdb.h>
 
 /*
  * This code is copyright 2001 by Craig Hughes
@@ -80,6 +81,22 @@ int message_filter(const struct sockaddr *addr, char *username, int flags, struc
 /* Convert the host/port into a struct sockaddr. Returns EX_OK on success, or
  * else an error EX. */
 int lookup_host(const char *hostname, int port, struct sockaddr *a);
+
+/* Pass the message through one of a set of spamd's. This variant will handle
+ * multiple spamd machines; if a connect failure occurs, it will fail-over to
+ * the next one in the struct hostent. Otherwise identical to message_filter().
+ */
+int message_filter_with_failover (const struct hostent *hent, int port, char
+    *username, int flags, struct message *m);
+
+/* Convert the host into a struct hostent, for use with
+ * message_filter_with_failover() above. Returns EX_OK on success, or else an
+ * error EX.  Note that the data filled into hent is from gethostbyname()'s
+ * static storage, so any call to gethostbyname() between
+ * lookup_host_for_failover() and message_filter_with_failover() will overwrite
+ * this.  Take a copy, and use that instead, if you think a call may occur in
+ * your code, or library code that you use (such as syslog()). */
+int lookup_host_for_failover(const char *hostname, struct hostent *hent);
 
 /* Dump the message. If there is any data in the message (typically, m->type
  * will be MESSAGE_ERROR) it will be message_writed. Then, fd_in will be piped

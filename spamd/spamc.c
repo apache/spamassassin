@@ -185,7 +185,7 @@ int main(int argc, char **argv){
   char *hostname = "127.0.0.1";
   char *username = NULL;
   struct passwd *curr_user;
-  struct sockaddr addr;
+  struct hostent hent;
   int ret;
   struct message m;
   int out_fd;
@@ -208,13 +208,13 @@ int main(int argc, char **argv){
     out_fd=-1;
     m.type=MESSAGE_NONE;
 
-    ret=lookup_host(hostname, port, &addr);
+    ret=lookup_host_for_failover (hostname, &hent);
     if(ret!=EX_OK) goto FAIL;
 
     m.max_len=max_size;
     ret=message_read(STDIN_FILENO, flags, &m);
     if(ret!=EX_OK) goto FAIL;
-    ret=message_filter(&addr, username, flags, &m);
+    ret=message_filter_with_failover(&hent, port, username, flags, &m);
     if(ret!=EX_OK) goto FAIL;
     get_output_fd(&out_fd);
     if(message_write(out_fd, &m)<0) goto FAIL;

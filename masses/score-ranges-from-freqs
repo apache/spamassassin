@@ -1,10 +1,5 @@
 #!/usr/bin/perl -w
 
-# use this to  debug the ranking -> score-range mapping:
-#for $rat (0.1, 0.3, 0.5, 0.7, 1.0) {
-#my ($lo, $hi) = ratio_in_0to1_to_range($rat); warn "JMD $rat $lo $hi";
-#} die;
-
 # (rough) graphic demo of this algorithm:
 # 0.0  = -limit [......] 0 ........ limit
 # 0.25 = -limit ..[..... 0 .]...... limit
@@ -22,11 +17,23 @@ my $sliding_window_size =   5.0; # scores have this range within limits
 my $shrinking_window_lower_base =  -0.50; 
 my $shrinking_window_lower_range =  1.50; # *ratio, added to above
 my $shrinking_window_size_base =    1.00;
-my $shrinking_window_size_range =   2.75; # *ratio, added to above
+my $shrinking_window_size_range =   2.00; # *ratio, added to above
 
-my $use_sliding_window = 1;
+my $use_sliding_window = 0;
 
 my $argcffile = shift @ARGV;
+
+if (defined ($argcffile) && $argcffile eq '-test') {
+  # use this to debug the ranking -> score-range mapping:
+  for $rat (0.0, 0.25, 0.5, 0.75, 1.0) {
+    my ($lo, $hi); if ($use_sliding_window) {
+      ($lo, $hi) = sliding_window_ratio_to_range($rat);
+    } else {
+      ($lo, $hi) = shrinking_window_ratio_to_range($rat);
+    }
+    warn "test: $rat => [ $lo $hi ]\n";
+  } exit;
+}
 
 my %freq_spam = ();
 my %freq_nonspam = ();
