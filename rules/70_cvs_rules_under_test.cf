@@ -163,10 +163,6 @@ describe T_FROM_HAS_UNDERLINE_NUMS	From: contains an underline and numbers/lette
 #header T_X_BEENTHERE		exists:X-BeenThere
 #describe T_X_BEENTHERE	X-BeenThere header exists
 
-# HTML charset tests
-body __HTML_CHARSET_FARAWAY	eval:html_charset_faraway()
-meta T_HTML_CHARSET_FARAWAY	(__HTML_CHARSET_FARAWAY && __HIGHBITS)
-
 # 708
 body T_OFFER_1			/\b(?:free|trial|full|phone|points?|hottest|internet|great|of this|about this|dealer|responded|not an|pay|are able to|future|valuable|partner|receiv(?:e|ed|ing)|introductory|exclusive|promotional|coupon|bonus|further|following|product|proud to|additional|website|amazing|discounts?)\b.{0,9}(?:this|these|)\boffer(?:s|ings?|ed|)\b/i
 describe OFFER			Offers you Something

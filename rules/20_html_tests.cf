@@ -59,6 +59,10 @@ describe HTML_SHOUTING9		HTML has very strong "shouting" markup
 body HTML_TABLE_THICK_BORDER		eval:html_test('thick_border')
 describe HTML_TABLE_THICK_BORDER	HTML table has thick border
 
+body __HTML_CHARSET_FARAWAY	eval:html_charset_faraway()
+meta HTML_CHARSET_FARAWAY	(__HTML_CHARSET_FARAWAY && __HIGHBITS)
+tflags HTML_CHARSET_FARAWAY	userconf
+
 body HTML_COMMENT_EMAIL		eval:html_test('comment_email')
 describe HTML_COMMENT_EMAIL	HTML comment contains email address
 
