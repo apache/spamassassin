@@ -542,5 +542,5 @@ describe T_HTML_ALL_CAPS	Content type is "TEXT/HTML" in all caps
 # looks for messages with either text/html ctype or all mime parts that
 # are just text/html
 body __CTYPE_HTML_ONLY	eval:check_for_mime_html_text_only()
-meta T_CTYPE_JUST_HTML	( !__RCVD_BY_HOTMAIL && __CTYPE_HTML_ONLY2 )
+meta T_CTYPE_JUST_HTML	( !__RCVD_BY_HOTMAIL && __CTYPE_HTML_ONLY )
 
