@@ -788,7 +788,6 @@ score ROUND_THE_WORLD                2.80
 
 # message digest tests
 
-score RAZOR_CHECK                    2.64
 score RAZOR2_CHECK                   3.91
 score RAZOR2_CF_RANGE_01_10          0.01
 score RAZOR2_CF_RANGE_11_20          0.01
@@ -802,6 +801,9 @@ score RAZOR2_CF_RANGE_81_90          0.01
 score RAZOR2_CF_RANGE_91_100         0.01
 score DCC_CHECK                      2.66
 score PYZOR_CHECK                    2.50
+
+# Razor v1 is no longer used by default
+score RAZOR_CHECK                    0
 
 # DNS blacklists
 
