@@ -28,8 +28,7 @@ header HEAD_LONG		eval:check_for_long_header()
 describe HEAD_LONG		Message headers are very long
 
 # partial messages; currently-theoretical attack
-# unsurprisingly this hits 0/0 right now.  But should we promote it anyway
-# to protect against the possibility?
+# unsurprisingly this hits 0/0 right now.
 header FRAGMENTED_MESSAGE	Content-Type =~ /\bmessage\/partial/i
 describe FRAGMENTED_MESSAGE	Partial message
 
