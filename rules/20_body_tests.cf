@@ -373,7 +373,7 @@ body MAIL_IN_ORDER_FORM		/Mail-in Order Form/i
 describe MAIL_IN_ORDER_FORM	Contains mail-in order form
 
 # (contrib: skod)
-body FOR_INSTANT_ACCESS		/(?:CLICK HERE|).{0,20}\s+INSTANT\s+ACCESS.{0,20}\s+(?:|CLICK HERE)/i
+body FOR_INSTANT_ACCESS		/INSTANT ACCESS/i
 describe FOR_INSTANT_ACCESS	Instant Access button
 
 # (contrib: skod)
