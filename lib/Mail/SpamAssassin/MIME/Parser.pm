@@ -1,4 +1,4 @@
-# $Id: Parser.pm,v 1.10 2003/09/29 04:37:05 felicity Exp $
+# $Id: Parser.pm,v 1.11 2003/09/30 16:12:28 felicity Exp $
 
 package Mail::SpamAssassin::MIME::Parser;
 use strict;
@@ -179,9 +179,10 @@ sub parse_multipart_alternate {
         chomp( $part_array->[ scalar @{$part_array} - 1 ] );
         splice @{$part_array}, -1
           if ( $part_array->[ scalar @{$part_array} - 1 ] eq '' );
+
+        $self->decode_body( $msg, $part_msg, $boundary, $part_array );
       }
 
-      $self->decode_body( $msg, $part_msg, $boundary, $part_array );
       last if $line =~ /^\-\-\Q$boundary\E\-\-$/;
       $in_body  = 0;
       $part_msg = Mail::SpamAssassin::MIME->new();
@@ -249,13 +250,13 @@ sub parse_multipart_mixed {
         chomp( $part_array->[ scalar @{$part_array} - 1 ] );
         splice @{$part_array}, -1
           if ( $part_array->[ scalar @{$part_array} - 1 ] eq '' );
-      }
 
-      my ($p_boundary) =
-        $part_msg->header('content-type') =~
-        /boundary\s*=\s*["']?([^"';]+)["']?/i;
-      $p_boundary ||= $boundary;
-      $self->parse_body( $msg, $part_msg, $p_boundary, $part_array );
+        my ($p_boundary) =
+          $part_msg->header('content-type') =~
+          /boundary\s*=\s*["']?([^"';]+)["']?/i;
+        $p_boundary ||= $boundary;
+        $self->parse_body( $msg, $part_msg, $p_boundary, $part_array );
+      }
 
       last if $line =~ /^\-\-\Q${boundary}\E\-\-$/;
       $in_body  = 0;
