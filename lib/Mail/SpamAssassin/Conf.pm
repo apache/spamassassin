@@ -574,7 +574,7 @@ See also C<clear_headers> for removing headers.
 Here are some examples (these are the defaults):
 
   add_header spam Flag _YESNOCAPS_
-  add_header all Status _YESNO_, score=_SCORE__ required=_REQD_ tests=_TESTS_ autolearn=_AUTOLEARN_ version=_VERSION_
+  add_header all Status _YESNO_, score=_SCORE_ required=_REQD_ tests=_TESTS_ autolearn=_AUTOLEARN_ version=_VERSION_
   add_header all Level _STARS(*)_
   add_header all Checker-Version SpamAssassin _VERSION_ (_SUBVERSION_) on _HOSTNAME_
 
