@@ -907,10 +907,6 @@ describe FREE_SAMPLE            Contains 'free sample' with capitals
 body MONTH_TRIAL                /(?:month|day) .{0,9}trial/i
 describe MONTH_TRIAL            Month Trial Offer
 
-# http://www.hughes-family.org/bugzilla/show_bug.cgi?id=630
-body UNLIMITED                  /UNLIMITED/
-describe UNLIMITED              Unlimited in caps
-
 # bug 680
 body MEMBER_2           /\b(?:free|special|paid|dear|gold|opt.in|valued|because you are an?|be a|becoming a|sent to) .{0,9}members?\b/i
 describe MEMBER_2       Being a Member
