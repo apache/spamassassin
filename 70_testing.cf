@@ -490,3 +490,16 @@ tflags T_SPF_PASS_NO_SBL_45D net nice
 tflags T_SPF_PASS_NO_SBL_90D net nice
 tflags T_SPF_PASS_NO_SBL_180D net nice
 tflags T_SPF_PASS_NO_SBL_360D net nice
+
+# Carl Hutzler of AOL says: "block on sight" (mail sent 07 May 2004 to discuss
+# at lists.surbl.org).  not much hits for me, but let's see for everyone else
+uri T_REDIR_AOL_CLICKTHRU     /www\.aol\.com\/ams\/clickThruRedirect\.adp/i
+
+# Suresh says: these will never be used as HELOs from real mail.com relays.
+# Just check the most recent handover; the connection to a trusted host.
+# This way a legit sender can send to their MSA using that HELO (quite a few
+# MUAs will do that), but a spammer gets caught.  (List of domains comes from
+# the drop-down list on the Mail.com signup page.)
+header T_FAKE_HELO_MAIL_COM_DOM  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=(?:\S+\.|)(?:(?:mail|email|iname|cheerful|consultant|europe|mindless|myself|post|techie|usa|writeme|2die4|artlover|bikerider|catlover|cliffhanger|cutey|doglover|gardener|hot-shot|inorbit|loveable|mad\.scientist|playful|poetic|popstar|saintly|seductive|soon|whoever|winning|witty|yours|africamail|arcticmail|asia|australiamail|europe|japan|samerica|usa|berlin|dublin|london|madrid|moscowmail|munich|nycmail|paris|rome|sanfranmail|singapore|tokyo|accountant|adexec|allergist|alumnidirector|archaeologist|chemist|clerk|columnist|comic|consultant|counsellor|deliveryman|diplomats|doctor|dr|engineer|execs|financier|geologist|graphic-designer|insurer|journalist|lawyer|legislator|lobbyist|minister|optician|pediatrician|presidency|priest|publicist|realtyagent|registerednurses|repairman|representative|rescueteam|scientist|sociologist|teacher|techietechnologist|umpire)\.com|(?:programmer|earthling|hairdresser)\.net|musician\.org) /i
+header T_FAKE_HELO_MAIL_COM_DOM2  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=(?:(?:mail|email|iname|cheerful|consultant|europe|mindless|myself|post|techie|usa|writeme|2die4|artlover|bikerider|catlover|cliffhanger|cutey|doglover|gardener|hot-shot|inorbit|loveable|mad\.scientist|playful|poetic|popstar|saintly|seductive|soon|whoever|winning|witty|yours|africamail|arcticmail|asia|australiamail|europe|japan|samerica|usa|berlin|dublin|london|madrid|moscowmail|munich|nycmail|paris|rome|sanfranmail|singapore|tokyo|accountant|adexec|allergist|alumnidirector|archaeologist|chemist|clerk|columnist|comic|consultant|counsellor|deliveryman|diplomats|doctor|dr|engineer|execs|financier|geologist|graphic-designer|insurer|journalist|lawyer|legislator|lobbyist|minister|optician|pediatrician|presidency|priest|publicist|realtyagent|registerednurses|repairman|representative|rescueteam|scientist|sociologist|teacher|techietechnologist|umpire)\.com|(?:programmer|earthling|hairdresser)\.net|musician\.org) /i
+
