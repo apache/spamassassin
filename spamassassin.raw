@@ -48,7 +48,7 @@ BEGIN {
 
     # Firstly, are we running "make test" in the "t" dir?  the test files
     # *need* to use 'blib', so that 'use bytes' is removed for pre-5.6 perls
-    # beforehand by the preproc.  However, ./sa-filter does not, as the
+    # beforehand by the preproc.  However, ./spamassassin does not, as the
     # preproc will have stripped out the "use rule files from cwd" code from
     # Mail::SpamAssassin.  So we want to use blib just for the t scripts.
     if ( $bin eq '../' && -e '../blib/lib/Mail/SpamAssassin.pm' ) {
@@ -187,21 +187,21 @@ GetOptions(
 
   # last in 2.3
   'pipe|P'                => sub { warn "The -P option is deprecated as 'pipe mode' is now the default behavior, ignoring.\n" },
-  'F:i'                   => sub { warn "The -F option has been removed from sa-filter, please remove from your commandline and re-run.\n"; exit 2; },
-  'add-from!'             => sub { warn "The --add-from option has been removed from sa-filter, please remove from your commandline and re-run.\n"; exit 2; },
+  'F:i'                   => sub { warn "The -F option has been removed from spamassassin, please remove from your commandline and re-run.\n"; exit 2; },
+  'add-from!'             => sub { warn "The --add-from option has been removed from spamassassin, please remove from your commandline and re-run.\n"; exit 2; },
 
   # last in 2.4
   'stop-at-threshold|S'   => sub { warn "The -S option has been deprecated and is no longer supported, ignoring.\n" },
 
   # last in 2.6
   'log-to-mbox|l:s'       => sub { warn "The -l option has been deprecated and is no longer supported, ignoring.\n" },
-  'warning-from|w:s'      => sub { warn "The -w option has been removed from sa-filter, please remove from your commandline and re-run.\n"; exit 2; }, 
-  'whitelist-factory|M:s' => sub { warn "The -M option has been removed from sa-filter, please remove from your commandline and re-run.\n"; exit 2; },
+  'warning-from|w:s'      => sub { warn "The -w option has been removed from spamassassin, please remove from your commandline and re-run.\n"; exit 2; }, 
+  'whitelist-factory|M:s' => sub { warn "The -M option has been removed from spamassassin, please remove from your commandline and re-run.\n"; exit 2; },
 
 ) or print_usage_and_exit();
 
 if ( defined $opt{'help'} ) {
-  print_usage_and_exit("For more information read the sa-filter man page.\n", 'EX_OK');
+  print_usage_and_exit("For more information read the spamassassin man page.\n", 'EX_OK');
 }
 if ( defined $opt{'version'} ) {
   print_version();
@@ -439,19 +439,19 @@ sub wanted {
 
 =head1 NAME
 
-sa-filter - mail filter to identify spam using SpamAssassin
+spamassassin - mail filter to identify spam using SpamAssassin
 
 =head1 SYNOPSIS
 
-B<sa-filter> [options] [ < I<mailmessage> | I<path> ... ]
+B<spamassassin> [options] [ < I<mailmessage> | I<path> ... ]
 
-B<sa-filter> B<-d> [ < I<mailmessage> | I<path> ... ]
+B<spamassassin> B<-d> [ < I<mailmessage> | I<path> ... ]
 
-B<sa-filter> B<-r> [B<-w> I<addr>] [ < I<mailmessage> | I<path> ... ]
+B<spamassassin> B<-r> [B<-w> I<addr>] [ < I<mailmessage> | I<path> ... ]
 
-B<sa-filter> B<-k> [B<-w> I<addr>] [ < I<mailmessage> | I<path> ... ]
+B<spamassassin> B<-k> [B<-w> I<addr>] [ < I<mailmessage> | I<path> ... ]
 
-B<sa-filter> B<-W>|B<-R> [ < I<mailmessage> | I<path> ... ]
+B<spamassassin> B<-W>|B<-R> [ < I<mailmessage> | I<path> ... ]
 
 Options:
 
@@ -486,7 +486,7 @@ Options:
 
 =head1 DESCRIPTION
 
-sa-filter is a simple front-end filter for SpamAssassin.
+spamassassin is a simple front-end filter for SpamAssassin.
 
 Using the SpamAssassin rule base, it uses a wide range of heuristic
 tests on mail headers and body text to identify "spam", also known as
@@ -580,14 +580,14 @@ are no errors, or greater than 0 if any errors are found.
 
 Add all email addresses, in the headers and body of the mail message read
 from STDIN, to a persistent address whitelist.  Note that you must be running
-C<sa-filter> or C<spamd> with a persistent address list plugin enabled for
+C<spamassassin> or C<spamd> with a persistent address list plugin enabled for
 this to work.
 
 =item B<--add-to-blacklist>
 
 Add all email addresses, in the headers and body of the mail message read
 from STDIN, to the persistent address blacklist.  Note that you must be
-running C<sa-filter> or C<spamd> with a persistent address list plugin
+running C<spamassassin> or C<spamd> with a persistent address list plugin
 enabled for this to work.
 
 =item B<-R>, B<--remove-from-whitelist>
@@ -597,25 +597,25 @@ from STDIN, from a persistent address list. STDIN must contain a full email
 message, so to remove a single address you should use
 B<--remove-addr-from-whitelist> instead.
 
-Note that you must be running C<sa-filter> or C<spamd> with a persistent
+Note that you must be running C<spamassassin> or C<spamd> with a persistent
 address list plugin enabled for this to work.
 
 =item B<--add-addr-to-whitelist>
 
 Add the named email address to a persistent address whitelist.  Note that you
-must be running C<sa-filter> or C<spamd> with a persistent address list
+must be running C<spamassassin> or C<spamd> with a persistent address list
 plugin enabled for this to work.
 
 =item B<--add-addr-to-blacklist>
 
 Add the named email address to a persistent address blacklist.  Note that you
-must be running C<sa-filter> or C<spamd> with a persistent address list
+must be running C<spamassassin> or C<spamd> with a persistent address list
 plugin enabled for this to work.
 
 =item B<--remove-addr-from-whitelist>
 
 Remove the named email address from a persistent address whitelist.  Note that
-you must be running C<sa-filter> or C<spamd> with a persistent address
+you must be running C<spamassassin> or C<spamd> with a persistent address
 list plugin enabled for this to work.
 
 =item B<-L>, B<--local>
@@ -662,7 +662,7 @@ printed. Diagnostic output can also be enabled for each area individually;
 I<area> is the area of the code to instrument. For example, to produce
 diagnostic output on bayes, learn, and dns, use:
 
-        sa-filter -D bayes,learn,dns
+        spamassassin -D bayes,learn,dns
 
 Higher priority informational messages that are suitable for logging in normal
 circumstances are available with an area of "info".
@@ -710,4 +710,3 @@ SpamAssassin is distributed under the Apache License, Version 2.0, as
 described in the file C<LICENSE> included with the distribution.
 
 =cut
-
