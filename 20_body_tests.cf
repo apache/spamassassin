@@ -116,7 +116,8 @@ describe ASCII_FORM_ENTRY	Contains an ASCII-formatted form
 body TRACKER_ID		/^[a-z0-9]{6,24}[-_a-z0-9]{12,36}[a-z0-9]{6,24}\s*\z/is
 describe TRACKER_ID	Incorporates a tracking ID number
 
-# heh heh heh... tags used to (presumably) generate those anti-Razor random IDs
+# heh heh heh... tags used to (presumably) generate those anti-Razor random
+# IDs.  Used by Send-Safe ratware, http://www.send-safe.com/
 body MARKUP_RAND                /\{%RAND%\}/
 describe MARKUP_RAND            RAND found, spammer forgot to run the random-ID generator
 body MARKUP_SSPL                /SSPLTM/
