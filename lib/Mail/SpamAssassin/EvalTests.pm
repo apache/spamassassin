@@ -2581,7 +2581,7 @@ sub _check_attachments {
 	$text = $part_bytes[$i];
       }
     }
-    if (defined($text) && defined($html)) {
+    if (defined($text) && defined($html) && $html > 0) {
       $self->{mime_multipart_ratio} = ($text / $html);
     }
   }
