@@ -2169,7 +2169,7 @@ sub check_dcc {
   # First check if there's already a X-DCC header with value of "bulk"
   # and short-circuit if there is -- someone upstream might already have
   # checked DCC for us.
-  $_ = $self->get('X-DCC[-A-Z]*');
+  $_ = $self->get('X-DCC-[^:]*-Metrics');
   return 1 if /bulk/;
   
   # note: we don't use $fulltext. instead we get the raw message,
