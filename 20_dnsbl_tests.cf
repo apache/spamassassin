@@ -93,9 +93,9 @@ header RCVD_IN_SORBS_SOCKS	eval:check_rbl_sub('sorbs', '127.0.0.5')
 describe RCVD_IN_SORBS_SOCKS	SORBS: sender is open SOCKS proxy server
 tflags RCVD_IN_SORBS_SOCKS	net
 
-#header RCVD_IN_SORBS_SPAM     eval:check_rbl_sub('sorbs', '127.0.0.6')
-#describe RCVD_IN_SORBS_SPAM   SORBS: sender is a spam source
-#tflags RCVD_IN_SORBS_SPAM     net
+#header RCVD_IN_SORBS_SPAM	eval:check_rbl_sub('sorbs', '127.0.0.6')
+#describe RCVD_IN_SORBS_SPAM	SORBS: sender is a spam source
+#tflags RCVD_IN_SORBS_SPAM	net
 
 header RCVD_IN_SORBS_WEB	eval:check_rbl_sub('sorbs', '127.0.0.7')
 describe RCVD_IN_SORBS_WEB	SORBS: sender is a abuseable web server
