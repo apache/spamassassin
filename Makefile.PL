@@ -101,8 +101,6 @@ my %opt = (
   'contact_address' => undef,
   'run_net_tests'   => undef,
   'destdir'         => undef,
-  '__cruft'         => undef,
-  'ignore_cruft'    => undef,
 );
 ARGV: foreach (@ARGV) {
   foreach my $key (keys %opt) {
@@ -112,10 +110,6 @@ ARGV: foreach (@ARGV) {
     if (defined $val) {
       $opt{$key} = $val;
       next ARGV;
-    }
-
-    if (defined parse_arg($_, qr/INST_(?:PREFIX|SITELIB|SYSCONFDIR)|[A-Z_]+_RULES_DIR/)) {
-      $opt{'__cruft'} = 1;
     }
   }
 }
@@ -257,26 +251,6 @@ my %CURRENT_PM = (
     'Net::DNS' => (RUNNING_ON_WINDOWS ? 0.46 : 0.34),
     'Razor2::Client::Agent' => 2.40,
 );
-
-if (bool($opt{'__cruft'}, 0) and not bool($opt{'ignore_cruft'}, 0)) {
-  my $error = <<OLD_CRUFT;
-
-    ***********************************************************************
-    You attempted to use one of the following unsupported variables:
-      INST_PREFIX
-      INST_SITELIB
-      INST_SYSCONFDIR
-      DEF_RULES_DIR
-      LOCAL_RULES_DIR
-    Please read INSTALL and PACKAGING for new usage instructions.
-
-    Thanks and sorry for any inconvenience.
-    ***********************************************************************
-
-OLD_CRUFT
-  $error =~ s/^ {4}//gm;
-  die $error;
-}
 
 if ($mm_needs_destdir) {
   my $error = <<DESTDIR_HACK;
