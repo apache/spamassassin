@@ -122,6 +122,42 @@ sub check_for_from_to_same {
   }
 }
 
+sub check_for_suspect_recipients {
+  my ($self, $min, $max) = @_;
+
+  if (!exists $self->{suspect_recipients}) {
+    $self->_check_suspect_recipients();
+  }
+  return (($min eq 'undef' || $self->{suspect_recipients} >= $min) &&
+	  ($max eq 'undef' || $self->{suspect_recipients} < $max));
+}
+
+sub _check_suspect_recipients {
+  my ($self) = @_;
+
+  $self->{suspect_recipients} = 0;
+
+  my $to = $self->get('ToCc');
+  $to =~ s/\(.*?\)//g;            # strip out the (comments)
+
+  my @address = sort ($to =~ m/([\w.=-]+\@\w+(?:[\w.-]+\.)+\w+)/g);
+  my @host = sort map { m/\@(.*)/ } @address;
+
+  @address = map { substr($_, 0, 2) } @address;
+  @host = map { substr($_, 0, 2) } @host;
+
+  if ($#address > 6) {
+    my $count = 0;
+    for (my $i = 0; $i < $#address; $i++) {
+      for (my $j = $i+1; $j < $#address; $j++) {
+	$count++ if $address[$i] eq $address[$j];
+	$count++ if $host[$i] eq $host[$j];
+      }
+    }
+    $self->{suspect_recipients} = $count / ($#address + 1);
+  }
+}
+
 ###########################################################################
 
 # The MTA probably added the Message-ID if either of the following is true:
