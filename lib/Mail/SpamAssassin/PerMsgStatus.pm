@@ -1109,7 +1109,9 @@ sub got_hit {
 
 sub test_log {
   my ($self, $msg) = @_;
-  while ($msg =~ s/^(.{38,48})\s//) { $self->_test_log_line ($1); }
+  while ($msg =~ s/^(.{30,48})\s//) {
+    $self->_test_log_line ($1);
+  }
   $self->_test_log_line ($msg);
 }
 
