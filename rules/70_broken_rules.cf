@@ -405,7 +405,6 @@
 #
 # Removed on Tue Aug 20 17:02:25 IST 2002: IRS
 #
-#   2.872    7.619    0.002    1.00    1.14  DATE_YEAR_ZERO_FIRST
 #   0.000    0.000    0.000    0.00    1.00  IRS
 # rules/20_body_tests.cf:#  0.00     0.00     0.00    0.00    1.00  IRS (no matches)
 # rules/20_body_tests.cf:#body IRS		        /\bIRS .{0,15}secrets\b/i
@@ -466,14 +465,6 @@
 # rules/20_compensate.cf:describe MAILBITS_EMAIL         recommended page from MailBits.com
 # rules/20_compensate.cf:tflags MAILBITS_EMAIL		nice
 # rules/50_scores.cf:score MAILBITS_EMAIL            -1.0
-#
-# Removed on Tue Aug 20 17:02:25 IST 2002: MAILER_DAEMON
-#
-#   0.341    0.681    0.136    0.83   -1.00  MAILER_DAEMON
-# rules/20_compensate.cf:header   MAILER_DAEMON          From =~ /^(?:Mail Delivery \w+ )?<?mailer.?daemon\@\S+>?(?: \(Mail Delivery \w+\))?$/i
-# rules/20_compensate.cf:describe MAILER_DAEMON          From the Mailer-Daemon
-# rules/20_compensate.cf:tflags   MAILER_DAEMON          nice
-# rules/50_scores.cf:score MAILER_DAEMON             -1.0
 #
 # Removed on Tue Aug 20 17:02:25 IST 2002: MIME_BOUND_DIGITS_6
 #
