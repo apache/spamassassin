@@ -93,7 +93,7 @@ sub cmdline_run {
       caller_will_untie	=> 1
   });
 
-  if ($opts->{rebuildonly}) {
+  if ($rebuildonly) {
     $spamtest->rebuild_learner_caches({
 		verbose => 1,
 		showdots => \$opt{'showdots'}
