@@ -179,13 +179,16 @@ Commands
 The following commands are defined as of protocol 1.2:
 
 CHECK         --  Just check if the passed message is spam or not and reply as described below
+
 SKIP          --  Ignore this message -- client opened connection then changed its mind
+
 PROCESS       --  Process this message as described above and return modified message
 
-CHECK command returns just a header (terminated by "\r\n\r\n") with the first line as for PROCESS
-(ie a response code and message), and then a header called "Spam:" with value of either "True" or "False",
-then a semi-colon, and then the score for this message, " / " then the threshold.
-So the entire response looks like either:
+CHECK command returns just a header (terminated by "\r\n\r\n") with the first
+line as for PROCESS (ie a response code and message), and then a header called
+"Spam:" with value of either "True" or "False", then a semi-colon, and then the
+score for this message, " / " then the threshold.  So the entire response looks
+like either:
 
 SPAMD/1.1 0 EX_OK
 Spam: True ; 15 / 5

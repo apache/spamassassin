@@ -297,6 +297,11 @@ Other installation notes:
     database; see the 'sql' subdirectory for more details.
 
 
+  - Edward Fang <edfang /at/ visi.net> has contributed the
+    'communigate.sh' script for CommunigatePro (see the 'contrib'
+    directory).
+
+
 
 Customising
 -----------
@@ -360,6 +365,11 @@ directory to see what can be set.  Common first-time tweaks include:
   - rewrite_subject
 
   	Turn off Subject-line rewriting with this.
+
+  - subject_tag
+
+        When rewrite_subject is on, the subject stamp is *****SPAM*****.
+        This can be used to change it.
 
   - ok_locales
 

@@ -397,7 +397,7 @@ Chinese (both simplified and traditional)
 
 =back
 
-So to simply allow all character sets through, use
+So to simply allow all character sets through without giving them points, use
 
 	ok_locales	ja ko ru th zh
 
