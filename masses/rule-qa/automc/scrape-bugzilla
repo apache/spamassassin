@@ -19,6 +19,11 @@ use Digest::SHA1 qw(sha1_base64);
 use strict;
 use bytes;
 
+my $grep_re;
+if (defined $ARGV[0]) {
+  $grep_re = $ARGV[0];
+}
+
 open (CF, "<config");
 my %conf; while(<CF>) { /^(\S+)=(\S+)/ and $conf{$1} = $2; }
 close CF;
@@ -66,6 +71,12 @@ $BZ_URI.'/buglist.cgi?long_desc_type=allwordssubstr&long_desc=NEEDSMC&bug_file_l
 
   foreach my $bugurl (@buglinks) {
     my $url = $bugurl->url_abs;
+
+    if (defined $grep_re) {
+      print "testing '$url' against grep regexp\n";
+      next unless $url =~ /${grep_re}/o;
+    }
+
     $url =~ s/show_bug\.cgi/xml\.cgi/;  # use XML output
 
     my $bugnum = 0;
@@ -145,7 +156,7 @@ sub do_bug {
     }
   }
 
-# use Data::Dumper; warn "JMD ".Dumper($ctx);
+  # use Data::Dumper; warn "JMD ".Dumper($ctx);
   my $bug = $ctx->{bugnum};
 
   # and extract the code
@@ -313,7 +324,8 @@ sub process_comment_for_needsmc {
 
     print "bug $ctx->{bugnum} cmt $cmt->{cmtnum}: needs-mc on $done already done\n";
   }
-  elsif ($text =~ /^Created an attachment \(id=(\d+)\)/)
+
+  if ($text =~ /^Created an attachment \(id=(\d+)\)/)
   {
     my $att = get_rules_from_attachment($ctx, $cmt, $1);
     read_cmt_rules_from_text($ctx, $cmt, $att);
