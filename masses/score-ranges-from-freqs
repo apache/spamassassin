@@ -18,10 +18,6 @@ my $shrinking_window_lower_base =   0.00;
 my $shrinking_window_lower_range =  1.00; # *ratio, added to above
 my $shrinking_window_size_base =    1.00;
 my $shrinking_window_size_range =   1.00; # *ratio, added to above
-#my $shrinking_window_lower_base =  -0.50; 
-#my $shrinking_window_lower_range =  1.30; # *ratio, added to above
-#my $shrinking_window_size_base =    1.00;
-#my $shrinking_window_size_range =   3.00; # *ratio, added to above
 
 my $use_sliding_window = 0;
 
@@ -115,7 +111,10 @@ while (<>) {
   }
 }
 
-system ("mkdir tmp >/dev/null 2>&1");
+if ( ! mkdir "tmp", 0755 ) {
+  warn "Couldn't create tmp directory!: $!\n";
+}
+
 open (OUT, ">tmp/ranges.data");
 foreach my $test (sort { $ranking{$b} <=> $ranking{$a} } keys %freq) {
   if (!defined ($rules{$test})) {
@@ -155,7 +154,13 @@ foreach my $test (sort { $ranking{$b} <=> $ranking{$a} } keys %freq) {
   # tvd
   my $tflags = $rules{$test}->{tflags}; $tflags ||= '';
   if ( $is_nice{$test} && ( $ranking < .5 ) ) { # proper nice rule
-    $lo *= 1.5 if ( $soratio <= 0.05 && $nonspam > 0.5 ); # let good rules be larger if they want to
+    if ( $tflags =~ /\blearn\b/ ) { # learn rules should get a higher score # -5.4
+      $lo *=1.8;
+    }
+    elsif ($soratio <= 0.05 && $nonspam > 0.5) { # let good rules be larger if they want to, -4.5
+      $lo *= 1.5;
+    }
+
     $hi =	($soratio == 0) ? $lo :
     		($soratio <= 0.005 ) ? $lo/1.1 :
     		($soratio <= 0.010 && $nonspam > 0.2) ? $lo/2.0 :
@@ -167,7 +172,13 @@ foreach my $test (sort { $ranking{$b} <=> $ranking{$a} } keys %freq) {
     }
   }
   elsif ( !$is_nice{$test} && ( $ranking >= .5 ) ) { # proper spam rule
-    $hi *= 1.5 if ( $soratio >= 0.99 && $spam > 1.0 ); # let good rules be larger if they want to
+    if ( $tflags =~ /\blearn\b/ ) { # learn rules should get a higher score
+      $hi *=1.8;
+    }
+    elsif ( $soratio >= 0.99 && $spam > 1.0 ) {
+      $hi *= 1.5; # let good rules be larger if they want to
+    }
+
     $lo =	($soratio == 1) ? $hi:
     		($soratio >= 0.995 ) ? $hi/4.0 :
     		($soratio >= 0.990 && $spam > 1.0) ? $hi/8.0 :
