@@ -189,6 +189,36 @@ tflags T_MAILMAN_REMINDER nice
 
 ########################################################
 
+# quinlan: I added HTML.current results for these tests on 2002-12-08
+# included in HTML.current are results from: daf, easmith, quinlan,
+# rODbegbie, and theo.  HTML.current only considers HTML_MESSAGE emails.
+
+# quinlan: this is not very good except for 14 and above, compare with
+# updated IMAGE_ONLY results later.
+#
+#OVERALL%   SPAM% NONSPAM%     S/O    RANK   SCORE  NAME
+#  24928    19300     5628    0.774   0.00    0.00  (all messages)
+#100.000  77.4230  22.5770    0.774   0.00    0.00  (all messages as %)
+#  6.029   5.6269   7.4094    0.432   0.08    0.01  T_HTML_IMAGE_AREA01
+#  0.638   0.5078   1.0839    0.319   0.03    0.01  T_HTML_IMAGE_AREA02
+#  1.095   1.1295   0.9773    0.536   0.15    0.01  T_HTML_IMAGE_AREA03
+#  3.193   2.6010   5.2239    0.332   0.04    0.01  T_HTML_IMAGE_AREA04
+#  1.697   1.6839   1.7413    0.492   0.12    0.01  T_HTML_IMAGE_AREA05
+#  1.163   1.3420   0.5508    0.709   0.34    0.01  T_HTML_IMAGE_AREA06
+#  1.328   1.3420   1.2793    0.512   0.13    0.01  T_HTML_IMAGE_AREA07
+#  2.250   1.5596   4.6198    0.252   0.02    0.01  T_HTML_IMAGE_AREA08
+#  2.138   0.7306   6.9652    0.095   0.00    0.01  T_HTML_IMAGE_AREA09
+#  0.907   1.0000   0.5864    0.630   0.24    0.01  T_HTML_IMAGE_AREA10
+#  7.714   7.1451   9.6660    0.425   0.08    0.01  T_HTML_IMAGE_AREA11
+#  4.160   3.8135   5.3483    0.416   0.07    0.01  T_HTML_IMAGE_AREA12
+#  1.448   1.3368   1.8301    0.422   0.07    0.01  T_HTML_IMAGE_AREA13
+#  0.702   0.8601   0.1599    0.843   0.57    0.01  T_HTML_IMAGE_AREA14
+#  0.345   0.4352   0.0355    0.925   0.75    0.01  T_HTML_IMAGE_AREA15
+#  0.209   0.2591   0.0355    0.879   0.65    0.01  T_HTML_IMAGE_AREA16
+#  0.108   0.1347   0.0178    0.883   0.65    0.01  T_HTML_IMAGE_AREA17
+#  0.032   0.0415   0.0000    1.000   0.95    0.01  T_HTML_IMAGE_AREA18
+#  0.116   0.1503   0.0000    1.000   0.95    0.01  T_HTML_IMAGE_AREA19
+#
 body T_HTML_IMAGE_AREA01	eval:html_range('total_image_area','0','1000')
 body T_HTML_IMAGE_AREA02	eval:html_range('total_image_area','1000','5000')
 body T_HTML_IMAGE_AREA03	eval:html_range('total_image_area','10000','20000')
@@ -209,6 +239,32 @@ body T_HTML_IMAGE_AREA17	eval:html_range('total_image_area','700000','800000')
 body T_HTML_IMAGE_AREA18	eval:html_range('total_image_area','800000','900000')
 body T_HTML_IMAGE_AREA19	eval:html_range('total_image_area','1000000')
 
+# quinlan: this is not very good
+#
+#OVERALL%   SPAM% NONSPAM%     S/O    RANK   SCORE  NAME
+#  24928    19300     5628    0.774   0.00    0.00  (all messages)
+#100.000  77.4230  22.5770    0.774   0.00    0.00  (all messages as %)
+# 12.247  13.6166   7.5515    0.643   0.27    0.01  T_HTML_NUM_IMGS01
+#  6.154   6.4922   4.9929    0.565   0.18    0.01  T_HTML_NUM_IMGS02
+#  3.947   4.7358   1.2438    0.792   0.48    0.01  T_HTML_NUM_IMGS03
+#  2.880   3.3886   1.1372    0.749   0.40    0.01  T_HTML_NUM_IMGS04
+#  2.138   2.5544   0.7107    0.782   0.46    0.01  T_HTML_NUM_IMGS05
+#  2.531   2.8912   1.2971    0.690   0.32    0.01  T_HTML_NUM_IMGS06
+#  2.503   2.5181   2.4520    0.507   0.13    0.01  T_HTML_NUM_IMGS07
+#  1.516   1.6062   1.2082    0.571   0.18    0.01  T_HTML_NUM_IMGS08
+#  1.183   1.1917   1.1549    0.508   0.13    0.01  T_HTML_NUM_IMGS09
+#  1.544   1.5648   1.4748    0.515   0.13    0.01  T_HTML_NUM_IMGS10
+#  6.451   6.4456   6.4677    0.499   0.13    0.01  T_HTML_NUM_IMGS11
+#  3.546   1.6995   9.8792    0.147   0.01    0.01  T_HTML_NUM_IMGS12
+#  1.773   0.7047   5.4371    0.115   0.00    0.01  T_HTML_NUM_IMGS13
+#  0.842   0.2591   2.8429    0.084   0.00    0.01  T_HTML_NUM_IMGS14
+#  0.505   0.2953   1.2260    0.194   0.01    0.01  T_HTML_NUM_IMGS15
+#  1.107   0.0777   4.6375    0.016   0.00    0.01  T_HTML_NUM_IMGS16
+#  0.742   0.0311   3.1805    0.010   0.00    0.01  T_HTML_NUM_IMGS17
+#  0.116   0.0155   0.4620    0.033   0.00    0.01  T_HTML_NUM_IMGS18
+#  0.036   0.0155   0.1066    0.127   0.00    0.01  T_HTML_NUM_IMGS19
+#  0.285   0.1865   0.6219    0.231   0.01    0.01  T_HTML_NUM_IMGS20
+#
 body T_HTML_NUM_IMGS01          eval:html_range('num_imgs','0','1')
 body T_HTML_NUM_IMGS02          eval:html_range('num_imgs','1','2')
 body T_HTML_NUM_IMGS03          eval:html_range('num_imgs','2','3')
@@ -230,6 +286,31 @@ body T_HTML_NUM_IMGS18          eval:html_range('num_imgs','80','90')
 body T_HTML_NUM_IMGS19          eval:html_range('num_imgs','90','100')
 body T_HTML_NUM_IMGS20          eval:html_range('num_imgs','100')
 
+# quinlan: this is not very good
+#
+#OVERALL%   SPAM% NONSPAM%     S/O    RANK   SCORE  NAME
+#  24928    19300     5628    0.774   0.00    0.00  (all messages)
+#100.000  77.4230  22.5770    0.774   0.00    0.00  (all messages as %)
+#  7.562   7.6062   7.4094    0.507   0.13    0.01  T_HTML_CONSEC_IMGS01
+#  6.326   6.0933   7.1251    0.461   0.10    0.01  T_HTML_CONSEC_IMGS02
+#  3.410   3.4456   3.2871    0.512   0.13    0.01  T_HTML_CONSEC_IMGS03
+#  1.926   1.9223   1.9367    0.498   0.12    0.01  T_HTML_CONSEC_IMGS04
+#  1.801   1.6943   2.1677    0.439   0.08    0.01  T_HTML_CONSEC_IMGS05
+#  2.852   1.2435   8.3689    0.129   0.00    0.01  T_HTML_CONSEC_IMGS06
+#  2.162   0.8342   6.7164    0.110   0.00    0.01  T_HTML_CONSEC_IMGS07
+#  0.810   0.7979   0.8529    0.483   0.11    0.01  T_HTML_CONSEC_IMGS08
+#  1.199   0.9275   2.1322    0.303   0.03    0.01  T_HTML_CONSEC_IMGS09
+#  3.747   3.1710   5.7214    0.357   0.05    0.01  T_HTML_CONSEC_IMGS10
+#  0.618   0.4974   1.0306    0.326   0.03    0.01  T_HTML_CONSEC_IMGS11
+#  0.289   0.3005   0.2488    0.547   0.16    0.01  T_HTML_CONSEC_IMGS12
+#  0.092   0.1036   0.0533    0.660   0.27    0.01  T_HTML_CONSEC_IMGS13
+#  0.056   0.0466   0.0888    0.344   0.04    0.01  T_HTML_CONSEC_IMGS14
+#  0.004   0.0000   0.0178    0.000   0.00    0.01  T_HTML_CONSEC_IMGS15
+#  0.008   0.0052   0.0178    0.226   0.01    0.01  T_HTML_CONSEC_IMGS16
+#  0.012   0.0104   0.0178    0.368   0.05    0.01  T_HTML_CONSEC_IMGS17
+#  0.004   0.0052   0.0000    1.000   0.95    0.01  T_HTML_CONSEC_IMGS18
+#  0.000   0.0000   0.0000    0.500   0.12    0.01  T_HTML_CONSEC_IMGS19
+#
 body T_HTML_CONSEC_IMGS01       eval:html_range('max_consec_imgs','1','2')
 body T_HTML_CONSEC_IMGS02       eval:html_range('max_consec_imgs','2','3')
 body T_HTML_CONSEC_IMGS03       eval:html_range('max_consec_imgs','3','4')
@@ -250,8 +331,24 @@ body T_HTML_CONSEC_IMGS17       eval:html_range('max_consec_imgs','80','90')
 body T_HTML_CONSEC_IMGS18       eval:html_range('max_consec_imgs','90','100')
 body T_HTML_CONSEC_IMGS19       eval:html_range('max_consec_imgs','100')
 
-
-
+# quinlan: very questionable
+#
+#OVERALL%   SPAM% NONSPAM%     S/O    RANK   SCORE  NAME
+#  24928    19300     5628    0.774   0.00    0.00  (all messages)
+#100.000  77.4230  22.5770    0.774   0.00    0.00  (all messages as %)
+#  0.357   0.4197   0.1421    0.747   0.40    0.01  T_HTML_MAX_IMG_RATIO01
+#  1.705   1.8187   1.3149    0.580   0.19    0.01  T_HTML_MAX_IMG_RATIO02
+#  1.705   1.8187   1.3149    0.580   0.19    0.01  T_HTML_MAX_IMG_RATIO02B
+#  7.032   6.9896   7.1784    0.493   0.12    0.01  T_HTML_MAX_IMG_RATIO03
+#  6.780   6.9896   6.0590    0.536   0.16    0.01  T_HTML_MAX_IMG_RATIO03B
+#  4.272   3.2642   7.7292    0.297   0.03    0.01  T_HTML_MAX_IMG_RATIO04
+#  0.959   1.1451   0.3198    0.782   0.45    0.01  T_HTML_MAX_IMG_RATIO05
+#  0.369   0.3938   0.2843    0.581   0.19    0.01  T_HTML_MAX_IMG_RATIO06
+#  0.325   0.2850   0.4620    0.382   0.05    0.01  T_HTML_MAX_IMG_RATIO07
+#  1.079   0.3212   3.6780    0.080   0.00    0.01  T_HTML_MAX_IMG_RATIO08
+#  0.361   0.1606   1.0483    0.133   0.00    0.01  T_HTML_MAX_IMG_RATIO09
+#  5.355   1.6891  17.9282    0.086   0.00    0.01  T_HTML_MAX_IMG_RATIO10
+#
 body T_HTML_MAX_IMG_RATIO01     eval:html_range('max_img_ratio','0.0','0.5')
 body T_HTML_MAX_IMG_RATIO02     eval:html_range('max_img_ratio','0.5','0.999')
 meta T_HTML_MAX_IMG_RATIO02B    (T_HTML_MAX_IMG_RATIO02 && !FROM_EGROUPS)
@@ -265,6 +362,18 @@ body T_HTML_MAX_IMG_RATIO08     eval:html_range('max_img_ratio','50','75')
 body T_HTML_MAX_IMG_RATIO09     eval:html_range('max_img_ratio','75','100')
 body T_HTML_MAX_IMG_RATIO10     eval:html_range('max_img_ratio','100')
 
+# quinlan: very questionable
+#
+#OVERALL%   SPAM% NONSPAM%     S/O    RANK   SCORE  NAME
+#  24928    19300     5628    0.774   0.00    0.00  (all messages)
+#100.000  77.4230  22.5770    0.774   0.00    0.00  (all messages as %)
+#  0.911   0.6736   1.7235    0.281   0.02    0.01  T_HTML_MIN_IMG_RATIO1
+#  4.316   1.2073  14.9787    0.075   0.00    0.01  T_HTML_MIN_IMG_RATIO2
+#  2.764   1.5233   7.0185    0.178   0.01    0.01  T_HTML_MIN_IMG_RATIO3
+#  2.062   2.1969   1.5991    0.579   0.19    0.01  T_HTML_MIN_IMG_RATIO4
+#  2.664   3.1192   1.1016    0.739   0.39    0.01  T_HTML_MIN_IMG_RATIO5
+#  3.919   3.8238   4.2466    0.474   0.11    0.01  T_HTML_MIN_IMG_RATIO6
+#
 body T_HTML_MIN_IMG_RATIO1      eval:html_range('min_img_ratio','0.0','0.01')
 body T_HTML_MIN_IMG_RATIO2      eval:html_range('min_img_ratio','0.01','0.1')
 body T_HTML_MIN_IMG_RATIO3      eval:html_range('min_img_ratio','0.1','0.25')
@@ -274,28 +383,99 @@ body T_HTML_MIN_IMG_RATIO6      eval:html_range('min_img_ratio','0.75','0.999')
 
 #---------------------------------------------------------
 
+# quinlan: better, but still questionable
+#
+#OVERALL%   SPAM% NONSPAM%     S/O    RANK   SCORE  NAME
+#  24928    19300     5628    0.774   0.00    0.00  (all messages)
+#100.000  77.4230  22.5770    0.774   0.00    0.00  (all messages as %)
+# [above version]
+# 12.247  13.6166   7.5515    0.643   0.27    0.01  T_HTML_NUM_IMGS01
+#  6.154   6.4922   4.9929    0.565   0.18    0.01  T_HTML_NUM_IMGS02
+# [B version]
+# 11.461  13.6166   4.0689    0.770   0.45    0.01  T_HTML_NUM_IMGS01B
+#  5.568   6.4922   2.3987    0.730   0.38    0.01  T_HTML_NUM_IMGS02B
+#
 meta T_HTML_NUM_IMGS01B         (T_HTML_NUM_IMGS01 && !FROM_EGROUPS)
 meta T_HTML_NUM_IMGS02B         (T_HTML_NUM_IMGS02 && !FROM_EGROUPS)
 
+# quinlan: better, but still questionable
+#
+#OVERALL%   SPAM% NONSPAM%     S/O    RANK   SCORE  NAME
+#  24928    19300     5628    0.774   0.00    0.00  (all messages)
+#100.000  77.4230  22.5770    0.774   0.00    0.00  (all messages as %)
+# [above version]
+#  7.562   7.6062   7.4094    0.507   0.13    0.01  T_HTML_CONSEC_IMGS01
+# [B version]
+#  6.912   7.6062   4.5309    0.627   0.24    0.01  T_HTML_CONSEC_IMGS01B
+#
 meta T_HTML_CONSEC_IMGS01B      (T_HTML_CONSEC_IMGS01 && !FROM_EGROUPS)
 
+# quinlan: not much better than above version
+#
+#OVERALL%   SPAM% NONSPAM%     S/O    RANK   SCORE  NAME
+#  24928    19300     5628    0.774   0.00    0.00  (all messages)
+#100.000  77.4230  22.5770    0.774   0.00    0.00  (all messages as %)
+# [above version]
+#  1.095   1.1295   0.9773    0.536   0.15    0.01  T_HTML_IMAGE_AREA03
+#  3.193   2.6010   5.2239    0.332   0.04    0.01  T_HTML_IMAGE_AREA04
+#  1.697   1.6839   1.7413    0.492   0.12    0.01  T_HTML_IMAGE_AREA05
+#  1.163   1.3420   0.5508    0.709   0.34    0.01  T_HTML_IMAGE_AREA06
+# [B version]
+#  1.075   1.1295   0.8884    0.560   0.17    0.01  T_HTML_IMAGE_AREA03B
+#  3.105   2.6010   4.8330    0.350   0.04    0.01  T_HTML_IMAGE_AREA04B
+#  1.685   1.6839   1.6880    0.499   0.12    0.01  T_HTML_IMAGE_AREA05B
+#  1.139   1.3420   0.4442    0.751   0.40    0.01  T_HTML_IMAGE_AREA06B
+#
 meta T_HTML_IMAGE_AREA03B       (T_HTML_IMAGE_AREA03 && !FROM_EGROUPS)
 meta T_HTML_IMAGE_AREA04B       (T_HTML_IMAGE_AREA04 && !FROM_EGROUPS)
 meta T_HTML_IMAGE_AREA05B       (T_HTML_IMAGE_AREA05 && !FROM_EGROUPS)
 meta T_HTML_IMAGE_AREA06B       (T_HTML_IMAGE_AREA06 && !FROM_EGROUPS)
 
+# quinlan: this is not very good
+#
+#OVERALL%   SPAM% NONSPAM%     S/O    RANK   SCORE  NAME
+#  24928    19300     5628    0.774   0.00    0.00  (all messages)
+#100.000  77.4230  22.5770    0.774   0.00    0.00  (all messages as %)
+# 12.263  10.3420  18.8522    0.354   0.06    0.01  T_HTML_50_70_IMGS3
+#
 # HTML_50_70 with at least 3 IMG tags
 body __T_HTML_NUM_IMGS_3        eval:html_range('num_imgs','3')
-meta T_HTML_50_70_IMGS3         (HTML_50_70 && __T_HTML_NUM_IMGS_3)
+meta T_HTML_50_70_IMGS3         ((HTML_50_60 || HTML_60_70) && __T_HTML_NUM_IMGS_3)
 
 ####################################################################
 
+# quinlan: I think we should promote T_HTML_BIG_FONT_B.  Not the others.
+#
+#OVERALL%   SPAM% NONSPAM%     S/O    RANK   SCORE  NAME
+#  24928    19300     5628    0.774   0.00    0.00  (all messages)
+#100.000  77.4230  22.5770    0.774   0.00    0.00  (all messages as %)
+# 33.950  36.8797  23.8806    0.607   0.26    0.01  T_HTML_TAG_EXISTS_CENTER
+#  3.868   4.9111   0.2843    0.945   0.81    0.01  T_HTML_BIG_FONT_B
+#  8.425   6.9892  13.3618    0.343   0.05    0.01  T_HTML_FONT_SIZE_PX
+#  5.562   6.1673   3.4826    0.639   0.26    0.01  T_HTML_STYLE_LINE_HEIGHT
+#
 body T_HTML_TAG_EXISTS_CENTER	eval:html_tag_exists('center')
-
 body T_HTML_BIG_FONT_B		eval:html_test('big_font_B')
 body T_HTML_FONT_SIZE_PX	eval:html_test('font_px')
 body T_HTML_STYLE_LINE_HEIGHT	eval:html_test('line_height')
 
+# quinlan: I think we could promote 3 and above.  A numeric function
+# test might work well too.  Also worth some further experimentation:
+# maybe also try adding colors and other attributes into the count.
+#
+#OVERALL%   SPAM% NONSPAM%     S/O    RANK   SCORE  NAME
+#  24928    19300     5628    0.774   0.00    0.00  (all messages)
+#100.000  77.4230  22.5770    0.774   0.00    0.00  (all messages as %)
+# 37.626  34.0364  49.9645    0.405   0.11    0.01  T_HTML_SHOUTING1
+# 24.287  26.3337  17.2530    0.604   0.25    0.01  T_HTML_SHOUTING2
+#  8.205  10.1117   1.6525    0.860   0.62    0.01  T_HTML_SHOUTING3
+#  3.035   3.8151   0.3554    0.915   0.73    0.01  T_HTML_SHOUTING4
+#  1.350   1.6129   0.4442    0.784   0.46    0.01  T_HTML_SHOUTING5
+#  0.392   0.4911   0.0533    0.902   0.70    0.01  T_HTML_SHOUTING6
+#  0.224   0.2843   0.0178    0.941   0.79    0.01  T_HTML_SHOUTING7
+#  0.140   0.1809   0.0000    1.000   0.95    0.01  T_HTML_SHOUTING8
+#  0.356   0.4446   0.0533    0.893   0.68    0.01  T_HTML_SHOUTING9
+#
 body T_HTML_SHOUTING1            eval:html_range('max_shouting','0','1')
 body T_HTML_SHOUTING2            eval:html_range('max_shouting','1','2')
 body T_HTML_SHOUTING3            eval:html_range('max_shouting','2','3')
