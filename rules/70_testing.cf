@@ -357,26 +357,8 @@ body T_INT_PRICES	eval:check_obfu_word('prices')
 # these don't hit a lot, but it's a definite obfuscation technique
 uri T_HTTP_BAD_HOST_CHAR	m@^https?://[^/]*[\000-\037\200-\377]@i
 
-# rule trying to find people punctuating the name "rolex", ala:
-# *Rolex*, !!Rolex!!, etc.
-# 2005/02/23
-#  0.415   0.5278   0.0009    0.998   0.74    0.01  T_CHAR_ROLEX
-# results from last night's run.  FP is "www.rolex.tm" as text in a message.
-# added in a few extra rules to see if we can't reduce the FP to 0.
-body T_CHAR_ROLEX /[^\s\w]rolex/i
-body T_CHAR_ROLEX2 /[^\s\w.]rolex/i
-body T_CHAR_ROLEX3 /[^\s\w."]rolex/i
-
 #  0.091   0.1027   0.0000    1.000   0.10    0.01  T_RATWARE_HASH_3
 header T_RATWARE_HASH_3 Message-ID =~ /^<\d{8}[a-zA-Z0-9]{14}@/
-
-#  7.011   7.9353   0.0000    1.000   1.00    0.01  T_RATWARE_MS_HASH_1
-#  4.390   4.9684   0.0000    1.000   0.80    0.01  T_RATWARE_MS_HASH_2
-header __MSGID_MS_HASH Message-ID =~ /^<[a-f0-9]{12}\$[a-f0-9]{8}\$[a-f0-9]{8}@/
-header __MSGID_MS_HASH_HOST Message-ID =~ /^<[a-f0-9]{12}\$[a-f0-9]{8}\$[a-f0-9]{8}@[^>.]+>/
-header __MIMEOLE_MS X-MIMEOLE =~ /^Produced By Microsoft MimeOLE/
-meta T_RATWARE_MS_HASH_1 __MSGID_MS_HASH && !__MIMEOLE_MS
-meta T_RATWARE_MS_HASH_2 __MSGID_MS_HASH_HOST && !__MIMEOLE_MS
 
 # use ReplaceTags
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
@@ -473,10 +455,10 @@ replace_rules T_OBFU_VISIT
 endif   #ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 
 # catch non-RFC2047 compliant messages
+# Apple Mail has a bug where headers will have whitespace around the encoded
+# text, so try to ignore that
 header T_BAD_ENC_HEADER		ALL =~ /=\?[^?\s]+\?[^?\s]\?[^?]*\s/
-
-# 0.112   0.1282   0.0000    1.000   1.00    0.01  T_PHISH_MISMATCH
-body T_PHISH_MISMATCH	eval:check_phish_mismatch()
+header T_BAD_ENC_HEADER2	ALL =~ /=\?[^?\s]+\?[^?\s]\?\s*[^?]*\s(?!\?=)/
 
 # 1.886   2.1553   0.0000    1.000   1.00    0.01  T_RATWARE_EFROM
 header T_RATWARE_EFROM	eval:check_ratware_envelope_from()
