@@ -321,6 +321,8 @@ score FROM_FORGED_HOTMAIL            0.0
 
 score NO_MX_FOR_FROM                 1.8
 score RAZOR_CHECK		     3.0
+score DCC_CHECK              2.0
+
 score RCVD_IN_RELAYS_ORDB_ORG	     2.0
 score RCVD_IN_OSIRUSOFT_COM	     2.0
 score X_OSIRU_SPAM_SRC		     3.0
@@ -365,7 +367,7 @@ score USER_IN_ALL_SPAM_TO      -100.0  # they want all spam, go figure :)
 
 # Missed scores:
 
-score 25FREEMEGS_URL                 2.7
+score FREEMEGS_URL                   2.7
 score ANOTHER_NET_AD                 3.0
 score A_HREF_TO_IP                   2.5
 score BRAND_NEW_PAGER                4.9

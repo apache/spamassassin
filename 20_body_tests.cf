@@ -8,6 +8,9 @@
 full RAZOR_CHECK		eval:check_razor()
 describe RAZOR_CHECK		Listed in Razor, see http://razor.sourceforge.net/
 
+full DCC_CHECK          eval:check_dcc()
+describe DCC_CHECK          Listed in DCC, see http://www.rhyolite.com/anti-spam/dcc/dcc-tree/dcc.html
+
 full FREQ_SPAM_PHRASE		eval:check_for_spam_phrases("10")
 describe FREQ_SPAM_PHRASE	Contains phrases frequently found in spam
 
