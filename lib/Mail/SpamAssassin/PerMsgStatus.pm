@@ -800,12 +800,11 @@ sub do_head_tests {
     $hdrname =~ s/#/[HASH]/g;		# avoid probs with eval below
     $def =~ s/#/[HASH]/g;
 
-      # dbg ("header regexp test '.$rulename.'");
-
+    # dbg ("header regexp test '.$rulename.'");
     $evalstr .= '
-      if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
+      if ($self->{conf}->{scores}->{q#'.$rulename.'#}) {
 	if ($self->get(q#'.$hdrname.'#, q#'.$def.'#) '.$testtype.'~ '.$pat.') {
-	  $self->got_hit (q{'.$rulename.'}, q{});
+	  $self->got_hit (q#'.$rulename.'#, q{});
 	}
       }
     ';
