@@ -46,7 +46,7 @@ if ($opt_p) {
   $hdr_spam = ($num_spam / $hdr_all) * 100.0;
   $hdr_nonspam = ($num_nonspam / $hdr_all) * 100.0;
   $hdr_all = 100.0;             # this is obvious
-  printf "%7.2f  %7.2f  %7.2f  %6.2f  %6.2f  (all messages as %%)\n",
+  printf "%7.3f  %7.3f  %7.3f  %6.2f  %6.2f  (all messages as %%)\n",
   	$hdr_all, $hdr_spam, $hdr_nonspam, snratio ($num_spam,$num_nonspam), 0;
 
 } elsif ($opt_x) {
@@ -92,7 +92,7 @@ foreach my $test (sort {
   my $snratio = snratio ($fsadj, $fnadj);
 
   if ($opt_p) {
-    printf "%7.2f  %7.2f  %7.2f  %6.2f  %6.2f  %s\n",
+    printf "%7.3f  %7.3f  %7.3f  %6.2f  %6.2f  %s\n",
   	$fa, $fs, $fn, $snratio, $score{$test}, $test;
 
   } elsif ($opt_x) {
