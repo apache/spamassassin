@@ -8,6 +8,9 @@ build/update_devel
 
 # build/mkrpm
 
+rm -rf $WEBDIR/doc
+tar cf - --exclude=CVS --exclude='.#*' doc | ( cd $WEBDIR ; tar xf - )
+
 for ext in tar.gz zip tar.gz.md5 zip.md5 ; do
   cp $WEBDIR/devel/Mail-SpamAssassin-$vers.$ext \
 	$WEBDIR/released/Mail-SpamAssassin-$vers.$ext
