@@ -652,6 +652,12 @@ describe T_HTML_TAG_EXISTS_MARQUEE	HTML has "marquee" tag
 # bug 1985
 body T_URGENT_BIZ /urgent.{0,16}(?:assistance|business|buy|confidential|notice|proposal|reply|request|response)/i
 
+# bug 2950
+uri T_GOOGLE_IMAGES	m{^http://images\.google(\.\S+)?\.[a-z]{2,3}/imgres\?}i
+uri T_GOOGLE_REDIR	m{^http://www\.google(\.\S+)?\.[a-z]{2,3}/url\?}i
+uri T_REDIRECTOR_1	m{^https?://.*https?://}i
+uri T_REDIRECTOR_2	m{^(?:[^:/?\#]+)://.*(?:[^:/?\#]+)://}
+
 header T_RATWARE_FAKED_AOL_UA	User-Agent =~ /^AOL /
 describe T_RATWARE_FAKED_AOL_UA	AOL clients don't use the User-Agent header
 
