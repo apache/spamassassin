@@ -483,8 +483,8 @@ sub receive_date {
 sub message_is_useful_by_date  {
   my ($self, $date) = @_;
 
-  return 1 if !$self->{opt_after};	# not using that feature
-  return 0 if !$date;			# undef or 0 date = unusable
+  return 1 unless $self->{opt_after};	# not using that feature
+  return 0 unless $date;		# undef or 0 date = unusable
 
   return $date > $self->{opt_after};
 }
