@@ -115,13 +115,16 @@ install -m 0755 spamd/redhat-rc-script.sh %buildroot/%{initdir}/spamassassin
 install -m 0644 spamc/libspamc.so %buildroot/%{_libdir}
 install -m 0644 spamc/libspamc.h %buildroot/%{_includedir}/libspamc.h
 
+# Do this so that the spamd README file has a different name ...
+%{__mv} spamd/README spamd/README.spamd
+
 mkdir -p %{buildroot}/etc/mail/spamassassin
 
 [ -x /usr/lib/rpm/brp-compress ] && /usr/lib/rpm/brp-compress
 
 %files 
 %defattr(-,root,root)
-%doc README Changes sample-nonspam.txt sample-spam.txt spamd/README INSTALL BUGS COPYRIGHT LICENSE TRADEMARK USAGE Razor2.patch
+%doc README Changes sample-nonspam.txt sample-spam.txt spamd/README.spamd INSTALL BUGS COPYRIGHT LICENSE TRADEMARK USAGE
 %attr(755,root,root) %{_bindir}/*
 %attr(644,root,root) %{_includedir}/*
 %attr(644,root,root) %{_libdir}/*.so
