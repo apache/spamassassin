@@ -1205,25 +1205,25 @@ sub check_rbl_swe {
   return 0;
 }
 
-sub check_rbl_from {
+# this only checks the address host name and not the domain name because
+# using the domain name had much worse results for dsn.rfc-ignorant.org
+sub check_rbl_from_host {
   my ($self, $rule, $set, $rbl_server) = @_;
 
   return 0 if $self->{conf}->{skip_rbl_checks};
   return 0 unless $self->is_dns_available();
 
-  my %domains;
+  my %hosts;
   for my $from ($self->all_from_addrs()) {
-    if ($from =~ m/\@([^\@\s>]+)/) {
-      $from = lc($1);
-      $domains{$from} = 1;
-      $domains{hostname_to_domain2($from)} = 1;
+    if ($from =~ m/\@(\S+\.\S+)/) {
+      $hosts{lc($1)} = 1;
     }
   }
-  return unless scalar keys %domains;
+  return unless scalar keys %hosts;
 
   $self->load_resolver();
-  for my $domain (keys %domains) {
-    $self->do_rbl_lookup($rule, $set, 'A', $rbl_server, "$domain.$rbl_server");
+  for my $host (keys %hosts) {
+    $self->do_rbl_lookup($rule, $set, 'A', $rbl_server, "$host.$rbl_server");
   }
 }
 

@@ -312,7 +312,7 @@ tflags T_RCVD_IN_SORBS_WEB net
 
 # bug 1017: domain-based blacklists, experimental
 # dsn.rfc-ignorant.org
-header T_FROM_IN_RFCI_DSN	rbleval:check_rbl_from('rfci-dsn', 'dsn.rfc-ignorant.org.')
+header T_FROM_IN_RFCI_DSN	rbleval:check_rbl_from_host('rfci-dsn', 'dsn.rfc-ignorant.org.')
 tflags T_FROM_IN_RFCI_DSN net
 
 # OK, a whole batch of faked-HELO detection rules.  These work by checking
