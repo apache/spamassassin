@@ -848,6 +848,7 @@ int message_filter(struct transport *tp, const char *username,
     float version;
     int response;
     int failureval;
+    int throwaway;
     SSL_CTX *ctx = NULL;
     SSL *ssl = NULL;
     SSL_METHOD *meth;
@@ -981,7 +982,7 @@ int message_filter(struct transport *tp, const char *username,
 	if (len == 0 && buf[0] == '\0') {
 	    break;		/* end of headers */
 	}
-	int throwaway;
+
 	if (_handle_spamd_header(m, flags, buf, len, &throwaway) < 0) {
 	    failureval = EX_PROTOCOL;
 	    goto failure;
