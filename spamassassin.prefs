@@ -25,12 +25,22 @@
 required_hits		5
 auto_report_threshold	30
 
-# Monty Solomon: he posts from an ISP that has often been the source
-# of spam (no fault of his own ;), and sometimes uses Bcc: when mailing.
+# Whitelist and blacklist addresses are *not* patterns; they're just normal
+# strings.  one exception is that "*@isp.com" is allowed.  They should be
+# in lower-case.
+#
+# Monty Solomon: he posts from an ISP that has often been the source of spam
+# (no fault of his own ;), and sometimes uses Bcc: when mailing.
+#
 whitelist_from		monty@roscom.com
+
+# Add your blacklist entries in the format below...
+#
+# blacklist_from	friend@public.com
 
 # Mail using languages used in these country codes will not be marked
 # as being possibly spam in a foreign language.
+#
 ok_locales		en
 
 # By default, the subject lines of suspected spam will be tagged.
