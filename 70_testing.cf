@@ -555,9 +555,16 @@ describe T_APOSTROPHE_OBFU Words dis'guised with an apos'trophe
 # bug 2525: FORGED_IMS_HTML fp'ing because new IMS *DOES* use text/html
 # ctype.  ARGH.  This was noted in build 5.5.2656.59, so permit builds
 # after that to get away with it.
-
+# compare against FORGED_IMS_HTML
 header __IMS_HTML_BUILDS     X-Mailer =~ /^Internet Mail Service .(?:[6789]\.|5\.[6789]|5\.5\.(?:[3456789]|2[789]|26[6789]|265[6789]))/
 header __IMS_HTML_RCVD	     Received =~ /\bby \S+ with Internet Mail Service .(?:[6789]\.|5\.[6789]|5\.5\.(?:[3456789]|2[789]|26[6789]|265[6789]))/
 meta T_FORGED_IMS_HTML       (__IMS_MUA && MIME_HTML_ONLY && !(__IMS_HTML_BUILDS && __IMS_HTML_RCVD))
 describe T_FORGED_IMS_HTML   IMS can't send HTML message only
+
+# bug 2973: "opt2.com" is net a spammy domain.
+# compare against OPT_HEADER
+header __T_OPT_HEADER_SUBJ   ALL =~ /^(?:Resent-)?Subject:.*opt.?(in|out|oem|ion-in)(?:\b|\d|\@)/im
+header __T_OPT_HEADER_ALL    ALL =~ /opt.?(?:in|out|oem|ion-in)(?:\b|\d|\@)/i
+meta T_OPT_HEADER            (__T_OPT_HEADER_ALL && !__T_OPT_HEADER_SUBJ)
+describe T_OPT_HEADER        Headers include an "opt"ed phrase
 
