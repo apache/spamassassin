@@ -198,6 +198,7 @@ sub new {
   $self->{pyzor_path} = undef; # Browse PATH
   $self->{pyzor_max} = 5;
   $self->{pyzor_timeout} = 10;
+  $self->{pyzor_options} = '';
 
   $self->{use_bayes} = 1;
   $self->{bayes_auto_learn} = 1;
@@ -1783,6 +1784,18 @@ add_header all Pyzor _PYZOR_
 	$self->{headers_spam}->{"Pyzor"} = "_PYZOR_";
 	$self->{headers_ham}->{"Pyzor"} = "_PYZOR_";
       }
+      next;
+    }
+
+=item pyzor_options [option ...]
+
+Additional options for the pyzor(1) command line.   Note that for security,
+only characters in the ranges A-Z, a-z, 0-9, -, _ and / are permitted.
+
+=cut
+
+    if (/^pyzor_options\s+([-A-Za-z0-9_\/ ]+)$/) {
+      $self->{pyzor_options} = $1;
       next;
     }
 
