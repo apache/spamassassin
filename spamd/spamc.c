@@ -18,6 +18,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
+#include <sys/un.h>
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <pwd.h>
@@ -76,9 +77,10 @@ void print_usage(void)
 {
   printf("Usage: spamc [-d host] [-p port] [-c] [-f] [-h]\n");
   printf("-c: check only - print score/threshold and exit code set to 0 if message is not spam, 1 if spam\n");
-  printf("-d host: specify host to connect to  [default: localhost]\n");
+  printf("-d host: specify host to connect to  [default: localhost] or UNIX socket [no default]\n");
   printf("-f: fallback safely - in case of comms error, dump original message unchanges instead of setting exitcode\n");
   printf("-h: print this help message\n");
+  printf("-o: use UNIX socket\n");
   printf("-p port: specify port for connection [default: 783]\n");
   printf("-s size: specify max message size, any bigger and it will be returned w/out processing [default: 250k]\n");
   printf("-u username: specify the username for spamd to process this message under\n");
@@ -349,7 +351,7 @@ int read_message(int in, int out, int max_size)
 }
 
 int
-try_to_connect (const struct sockaddr *addr, int *sockptr)
+try_to_connect (const struct sockaddr *addr, int *sockptr, int un)
 {
 #ifdef USE_TCP_NODELAY
   int value;
@@ -357,6 +359,31 @@ try_to_connect (const struct sockaddr *addr, int *sockptr)
   int mysock;
   int origerr;
 
+  if (un)
+  {
+    if(-1 == (mysock = socket(PF_UNIX,SOCK_STREAM,0)))
+    {
+      origerr = errno;	/* take a copy before syslog() */
+      syslog (LOG_ERR, "socket() to spamd failed: %m");
+      switch(origerr)
+      {
+      case EPROTONOSUPPORT:
+      case EINVAL:
+        return EX_SOFTWARE;
+      case EACCES:
+        return EX_NOPERM;
+      case ENFILE:
+      case EMFILE:
+      case ENOBUFS:
+      case ENOMEM:
+        return EX_OSERR;
+      default:
+        return EX_SOFTWARE;
+      }
+    }
+  }
+  else
+  {
   if(-1 == (mysock = socket(PF_INET,SOCK_STREAM,0)))
   {
     origerr = errno;	/* take a copy before syslog() */
@@ -396,6 +423,7 @@ try_to_connect (const struct sockaddr *addr, int *sockptr)
     }
   }
 #endif
+  }
 
   if(connect(mysock,(const struct sockaddr *) addr, sizeof(*addr)) < 0)
   {
@@ -428,14 +456,23 @@ try_to_connect (const struct sockaddr *addr, int *sockptr)
   return EX_OK;
 }
 
-int process_message(const char *hostname, int port, char *username, int max_size)
+int process_message(const char *hostname, int port, char *username, int max_size, int un)
 {
   int exstatus;
   int mysock;
-  struct sockaddr_in addr;
   struct hostent *hent;
   int origherr;
 
+  if (un)
+  {
+    struct sockaddr_un addr;
+    addr.sun_family = AF_UNIX;
+    strncpy (addr.sun_path, hostname, 100);
+    exstatus = try_to_connect ((const struct sockaddr *) &addr, &mysock, 1);
+  }
+  else
+  {
+    struct sockaddr_in addr;
   memset (&addr, 0, sizeof(addr));
   addr.sin_family = AF_INET;
   addr.sin_port = htons(port);
@@ -465,7 +502,9 @@ int process_message(const char *hostname, int port, char *username, int max_size
     memcpy (&addr.sin_addr, hent->h_addr, sizeof(addr.sin_addr));
   }
 
-  exstatus = try_to_connect ((const struct sockaddr *) &addr, &mysock);
+    exstatus = try_to_connect ((const struct sockaddr *) &addr, &mysock, 0);
+  }
+
   if (EX_OK == exstatus)
   {
     if(NULL == (msg_buf = malloc(max_size+1024)))
@@ -481,7 +520,6 @@ int process_message(const char *hostname, int port, char *username, int max_size
 
     if(CHECK_ONLY && ESC_PASSTHROUGHRAW == exstatus)
     {
-	printf("0/0\n");
 	exstatus = EX_OK;
     }
 
@@ -511,11 +549,11 @@ int process_message(const char *hostname, int port, char *username, int max_size
   return exstatus;	/* return the last failure code */
 }
 
-void read_args(int argc, char **argv, char **hostname, int *port, int *max_size, char **username)
+void read_args(int argc, char **argv, char **hostname, int *port, int *max_size, char **username, int *un)
 {
   int opt;
 
-  while(-1 != (opt = getopt(argc,argv,"cd:fhp:s:u:")))
+  while(-1 != (opt = getopt(argc,argv,"cd:fhop:s:u:")))
   {
     switch(opt)
     {
@@ -532,6 +570,11 @@ void read_args(int argc, char **argv, char **hostname, int *port, int *max_size,
     case 'p':
       {
 	*port = atoi(optarg);
+	break;
+      }
+    case 'o':
+      {
+	*un = 1;
 	break;
       }
     case 'f':
@@ -568,12 +611,13 @@ int main(int argc,char **argv)
   int max_size = 250*1024;
   char *hostname = "127.0.0.1";
   char *username = NULL;
+  int un = 0;
   struct passwd *curr_user;
 
   openlog ("spamc", LOG_CONS|LOG_PID, LOG_MAIL);
   signal (SIGPIPE, SIG_IGN);
 
-  read_args(argc,argv,&hostname,&port,&max_size,&username);
+  read_args(argc,argv,&hostname,&port,&max_size,&username,&un);
 
   if(NULL == username)
   {
@@ -585,5 +629,5 @@ int main(int argc,char **argv)
     username = curr_user->pw_name;
   }
 
-  return process_message(hostname,port,username,max_size);
+  return process_message(hostname,port,username,max_size,un);
 }
