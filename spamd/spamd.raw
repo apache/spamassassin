@@ -596,12 +596,14 @@ if ( $opt{'socketpath'} ) {
     }
   }
 
-  $server = new IO::Socket::UNIX(
+  my %socket = (
     Local  => $path,
     Type   => SOCK_STREAM,
-    Listen => SOMAXCONN
-    )
-    || die "Could not create UNIX socket on $path: $! ($@)\n";
+    Listen => SOMAXCONN,
+  );
+  warn("creating UNIX socket:\n" . join("\n", map { "\t$_: " . (defined $socket{$_} ? $socket{$_} : "(undef)") } sort keys %socket) . "\n") if $opt{'debug'};
+  $server = new IO::Socket::UNIX(%socket)
+         || die "Could not create UNIX socket on $path: $! ($@)\n";
 
   my $mode = $opt{socketmode};
   if ($mode) {
@@ -635,7 +637,7 @@ if ( $opt{'socketpath'} ) {
   }
 }
 elsif ( $opt{'ssl'} ) {
-  $server = new IO::Socket::SSL(
+  my %socket = (
     LocalAddr       => $addr,
     LocalPort       => $port,
     Proto           => $proto,
@@ -645,19 +647,23 @@ elsif ( $opt{'ssl'} ) {
     SSL_verify_mode => 0x00,
     SSL_key_file    => $opt{'server-key'},
     SSL_cert_file   => $opt{'server-cert'}
-    )
-    || die "Could not create SSL socket: $! ($@)\n";
+  );
+  warn("creating SSL socket:\n" . join("\n", map { "\t$_:  " . (defined $socket{$_} ? $socket{$_} : "(undef)") } sort keys %socket) . "\n") if $opt{'debug'};
+  $server = new IO::Socket::SSL(%socket)
+         || die "Could not create SSL socket on $addr:$port: $! ($@)\n";
 }
 else {
-  $server = new IO::Socket::INET(
+  my %socket = (
     LocalAddr => $addr,
     LocalPort => $port,
     Proto     => $proto,
     Type      => SOCK_STREAM,
     ReuseAddr => 1,
     Listen    => SOMAXCONN
-    )
-    || die "Could not create INET socket: $! ($@)\n";
+  );
+  warn("creating INET socket:\n" . join("\n", map { "\t$_: " . (defined $socket{$_} ? $socket{$_} : "(undef)") } sort keys %socket) . "\n") if $opt{'debug'};
+  $server = new IO::Socket::INET(%socket)
+         || die "Could not create INET socket on $addr:$port: $! ($@)\n";
 }
 
 if ( defined $opt{'pidfile'} ) {
