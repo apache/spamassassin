@@ -634,3 +634,35 @@ body T_EXCUSE_10			/if you (?:(?:want|wish|care|prefer) not to |do ?n[o']t (?:wa
 
 body T_EXCUSE_25		/you have been included (?:mistakenly|by mistake)/i
 body T_LEAVE_ADDR		/leave your address/i
+
+# This doesn't do terrifically on my corpus, but it's not bad, want to
+# see how it works in a larger arena:
+#  0.249    0.586    0.037    0.94    0.54    1.00  T_TURN
+body __T_TURN /\bturn\s+your\s+.{1,15}\s+into\b/i
+body __T_TURN_INVEST /\bturn\s+.{1,15}\s+investment\s+into\b/i
+body __T_TURN_HOBBY /\bturn\s+(?:\w+)\s+hobby\s+into\b/i
+body __T_TURN_MONEY /\bturn\s+.{0,15}(?:\$\s*\d+|dollars?|euros?|pennies|pounds?).{1,15}\binto\b/i
+meta T_TURN ( __T_TURN || __T_TURN_INVEST || __T_TURN_HOBBY || __T_TURN_MONEY)
+
+# I spent the better part of a day hacking around with the Message-Id
+# stuff.  I found a few new regexps that works fairly well on my corpus
+# with no overlap of the current MSGID_* rules.
+#  1.222    3.058    0.066    0.98    0.63    1.00  T_MSGID_S_1
+header __T_MSGID_17	Message-Id =~ /^<?DGTBAD\S+\@/
+header __T_MSGID_10	Message-Id =~ /^<?(?:\d+\$){3}\d+\@/
+header __T_MSGID_8	Message-Id =~ /^<?\d{4}\$\w+\@/
+header __T_MSGID_20	Message-Id =~ /^<?EXCH\S+\@/
+header __T_MSGID_19	Message-Id =~ /^<?\w{7}-\w{6}-\w{2}\.\d{4}(?:-\d{2}){5}\@/
+header __T_MSGID_11	Message-Id =~ /^<?\d\w+\$\w{4,}\@/
+header __T_MSGID_24	Message-Id =~ /^<?.*SERV\D.*\@/
+header __T_MSGID_26	Message-Id =~ /^<?.*MAIL.*0000[0-9a-f]{4}\@/
+header __T_MSGID_37	Message-Id =~ /^<?\d{13,}\.SM\d+\@[^>]/
+header __T_MSGID_16	Message-Id =~ /^<?[A-Z]\d{10}\@/
+header __T_MSGID_32	Message-Id =~ /^<?auto-00000\d+\@/
+meta T_MSGID_S_1	( __T_MSGID_17 || __T_MSGID_10 || __T_MSGID_8 || __T_MSGID_20 || __T_MSGID_19 || __T_MSGID_11 || __T_MSGID_24 || __T_MSGID_26 || __T_MSGID_37 || __T_MSGID_16 || __T_MSGID_32 )
+
+# Another Message-Id off-shoot, this time it's a lyris comp rule:
+#  0.466    0.000    0.760    0.00    0.85   -1.00  T_MSGID_LYRIS
+header T_MSGID_LYRIS	Message-Id =~ /^<LYRIS-\d+-\d+-\d{4}(?:\.\d{2}){2}-\d{2}(?:\.\d{2}){2}--\S+\@lyris\.net>/
+score T_MSGID_LYRIS -0.5
+tflags T_MSGID_LYRIS nice
