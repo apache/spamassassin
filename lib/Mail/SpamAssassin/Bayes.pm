@@ -603,13 +603,13 @@ sub pre_chew_received {
   # (on both sides)
   # also make a dup with the full IP, as fodder for
   # bayes_dump_to_trusted_networks: "H*r:ip*aaa.bbb.ccc.ddd"
-  $val =~ s{(\b|[^\d])(\d{1,3}\.)(\d{1,3}\.)(\d{1,3})(\.\d{1,3})(\b|[^\d])}{
+  $val =~ s{\b(\d{1,3}\.)(\d{1,3}\.)(\d{1,3})(\.\d{1,3})\b}{
            if ($2 eq '10' || ($2 eq '192' && $3 eq '168')) {
-             $1.$2.$3.$4.$5.$6.
-		" ip*".$2.$3.$4.$5." ";
+             $1.$2.$3.$4.
+		" ip*".$1.$2.$3.$4." ";
            } else {
-             $1.$2.$3.$4.$6.
-		" ip*".$2.$3.$4.$5." ";
+             $1.$2.$3.$4.
+		" ip*".$1.$2.$3.$4." ";
            }
          }gex;
 
