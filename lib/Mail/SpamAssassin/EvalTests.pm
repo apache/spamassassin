@@ -1962,8 +1962,16 @@ sub check_for_mime_excessive_qp_v1 {
     # count characters that should be literal (RFC 2045), hexadecimal values
     # 21-3C and 3E-7E plus tabs (hexadecimal 09) and spaces (hexadecimal 20)
     $qp = () = ($body =~ m/=(?:09|3[0-9ABCEF]|[2456][0-9A-F]|7[0-9A-E])/g);
-    # tabs and spaces at end of encoded line are okay
-    $qp-- while ($body =~ m/(?:=09|=20)\s*$/gm);
+    # tabs and spaces at end of encoded line are okay.  Also, multiple
+    # whitespace at the end of a line are OK, like
+    # ">=20=20=20=20=20=20=20".  Capture all of the trailing QP text,
+    # then split up each trailing sequence into individual hex values,
+    # *then* exclude the null strings caused by the null string before
+    # the first "=" in a string
+    my @trailing =  ($body =~ m/((?:=09|=20)+)\s*$/gm);
+    @trailing = map {split/=/} @trailing;
+    @trailing = grep (!/^$/, @trailing);
+    $qp -= scalar(@trailing);
 
     if ($len) {
       $self->{mime_qp_ratio_v1} = $qp / $len;  
@@ -1999,8 +2007,17 @@ sub check_for_mime_excessive_qp_v2 {
     elsif ($cte eq "quoted-printable") {
       $len += length($line);
       $qp += () = ($line =~ m/=(?:09|3[0-9ABCEF]|[2456][0-9A-F]|7[0-9A-E])/g);
-      # tabs and spaces at end of encoded line are okay
-      $qp-- while ($line =~ m/(?:=09|=20)\s*$/gm);
+      # tabs and spaces at end of encoded line are okay.  Also, multiple
+      # whitespace at the end of a line are OK, like
+      # ">=20=20=20=20=20=20=20".  Capture all of the trailing QP text,
+      # then split up each trailing sequence into individual hex values;
+      # subtract one for the null string before the first "=" at the
+      # begining of the string
+      my ($trailing) =  ($line =~ m/((?:=09|=20)+)\s*$/gm);
+      next unless ($trailing);
+
+      my @QPs = split(/=/, $trailing);
+      $qp -= scalar(@QPs) - 1;
     }
   }
 
