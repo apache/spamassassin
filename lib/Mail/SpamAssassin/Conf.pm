@@ -811,9 +811,10 @@ example.
 If you change this, try to keep it under 76 columns (inside the the dots
 below).  Bear in mind that EVERY line will be prefixed with "SPAM: " in order
 to make it clear what's been added, and allow other filters to B<remove>
-spamfilter modifications, so you lose 6 columns right there.  Each C<report>
-line appends to the existing template, so use C<clear-report-template> to
-restart.
+spamfilter modifications, so you lose 6 columns right there. Also note that the
+first line of the report must start with 4 dashes, for the same reason. Each
+C<report> line appends to the existing template, so use
+C<clear-report-template> to restart.
 
 The following template items are supported, and will be filled out by
 SpamAssassin:
