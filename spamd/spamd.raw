@@ -209,6 +209,7 @@ my $error_before_reaper;
 
 sub REAPER {
     $error_before_reaper = $!;  # take a copy before cleanupchildren()
+    cleanupchildren;
     $SIG{CHLD} = \&REAPER;
 }
 
