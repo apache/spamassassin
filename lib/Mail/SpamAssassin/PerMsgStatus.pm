@@ -734,7 +734,7 @@ sub get_decoded_body_text_array {
 # "=3D" obfuscation trick, since many email clients will decode
 # QP escape codes regardless of where and when they occur.
 #
-my $URI_in_tag = qr/\s*=(?:3[Dd])?\s*["']?\s*([^'">\s]*)\s*["']?[^>]*/;
+my $URI_in_tag = qr/\s*=\s*["']?\s*([^'">\s]*)\s*["']?[^>]*/;
 
 sub get_decoded_stripped_body_text_array {
   my ($self) = @_;
@@ -768,12 +768,12 @@ sub get_decoded_stripped_body_text_array {
     $text .= $_;
   }
 
-  # Get rid of comments.  Isn't the non-greedy ".*?" awful expensive?
+  # Get rid of comments.
   #
   # There might be things in comments we'd want to look at, like
   # SCRIPT and STYLE content, but that can be taken care of with
   # rawbody tests.
-  $text =~ s/<!--.*?-->//gs;
+  $text =~ s/<!--[^\-]*-->//gs;
 
   # Try to put paragraph breaks where'd they'd be in HTML.  There's
   # an optional "/" before the ends of some tags in case it's XML style.
@@ -808,6 +808,13 @@ sub get_decoded_stripped_body_text_array {
   
   # Strip all remaining HTML entities
   $text =~ s/\&[-_a-zA-Z0-9]+;/ /gs;
+
+  # turn off utf8-ness to fix a warn "bug" on 5.6.1
+  $text = pack("C0A*", $text);
+
+  # Convert =xx and =\n into chars
+  $text =~ s/=([a-fA-F0-9]{2})/chr(hex($1))/g;
+  $text =~ s/=\n//g;
   
   # join all consecutive whitespace into a single space
   $text =~ s/\s+/ /sg;
