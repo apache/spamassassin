@@ -237,14 +237,30 @@ header T_FROM_DELPHI_BASIC	From:addr =~ /\@delphi\.com/i
 
 body T_RANDO_MIZE		/\$RAN[DOMI]*\s+[DOMI]*ZE/
 
-# yet another open Yahoo! redirector
-uri T_YAHOO_REDIR_1		m{^http://srd\.yahoo\.com/}i
-uri T_YAHOO_REDIR_2		m{^http://srd\.yahoo\.com/.*(?:[^:/?\#]+)://}i
-# these are decent, maybe figure out the FPs to improve
-uri T_YAHOO_REDIR_3		m{^http://(?:srd|drs|rd)\.yahoo\.com/}i
-uri T_YAHOO_REDIR_4		m{^http://(?:srd|drs|rd)\.yahoo\.com/.*(?:[^:/?\#]+)://}i
-uri T_YAHOO_REDIR_5		m{^http://(\S+\.)*(?:srd|drs|rd)\.yahoo\.com/}i
-uri T_YAHOO_REDIR_6		m{^http://(\S+\.)*(?:srd|drs|rd)\.yahoo\.com/.*(?:[^:/?\#]+)://}i
+# more open Yahoo! redirectors
+uri T_YAHOO_SRD_REDIR_1		m{^http://srd\.yahoo\.com/}i
+uri T_YAHOO_SRD_REDIR_2		m{^http://srd\.yahoo\.com/.*(?:[^:/?\#]+)://}i
+uri T_YAHOO_SRD_REDIR_3		m{^http://(\S+\.)*srd\.yahoo\.com/}i
+uri T_YAHOO_SRD_REDIR_4		m{^http://(\S+\.)*srd\.yahoo\.com/.*(?:[^:/?\#]+)://}i
+uri T_YAHOO_SRD_REDIR_5		m{^http://.*\bsrd\.yahoo\.com/}i
+uri T_YAHOO_SRD_REDIR_6		m{^http://.*\bsrd\.yahoo\.com/.*(?:[^:/?\#]+)://}i
+uri T_YAHOO_DRS_REDIR_1		m{^http://drs\.yahoo\.com/}i
+uri T_YAHOO_DRS_REDIR_2		m{^http://drs\.yahoo\.com/.*(?:[^:/?\#]+)://}i
+uri T_YAHOO_DRS_REDIR_3		m{^http://(\S+\.)*drs\.yahoo\.com/}i
+uri T_YAHOO_DRS_REDIR_4		m{^http://(\S+\.)*drs\.yahoo\.com/.*(?:[^:/?\#]+)://}i
+uri T_YAHOO_DRS_REDIR_5		m{^http://.*\bdrs\.yahoo\.com/}i
+uri T_YAHOO_DRS_REDIR_6		m{^http://.*\bdrs\.yahoo\.com/.*(?:[^:/?\#]+)://}i
+uri T_YAHOO_RD_REDIR_1		m{^http://rd\.yahoo\.com/}i
+uri T_YAHOO_RD_REDIR_2		m{^http://rd\.yahoo\.com/.*(?:[^:/?\#]+)://}i
+uri T_YAHOO_RD_REDIR_3		m{^http://(\S+\.)*rd\.yahoo\.com/}i
+uri T_YAHOO_RD_REDIR_4		m{^http://(\S+\.)*rd\.yahoo\.com/.*(?:[^:/?\#]+)://}i
+uri T_YAHOO_RD_REDIR_5		m{^http://.*\brd\.yahoo\.com/}i
+uri T_YAHOO_RD_REDIR_6		m{^http://.*\brd\.yahoo\.com/.*(?:[^:/?\#]+)://}i
+
+# good Yahoo! forgery rule, but is it going to be stable?
+header __YAHOO_MSGID		Message-ID =~ /\@yahoo\.com>/i
+header __YAHOO_BEGINNING	Message-ID =~ /<\S+(?:\.\S+|\.\S+\.\S+\.\S+)\@/
+meta T_FORGED_YAHOO_MSGID	(__YAHOO_MSGID && !__YAHOO_BEGINNING)
 
 header T_HASHCASH_20		eval:check_hashcash_value('20', '21')
 header T_HASHCASH_21		eval:check_hashcash_value('21', '22')
@@ -666,58 +682,6 @@ tflags T_RCVD_IN_AHBL_EXEMPT_O	net nice
 header T_RCVD_IN_AHBL_RHSBL	eval:check_rbl_from_host('ahbl-rhs', 'rhsbl.ahbl.org.')
 describe T_RCVD_IN_AHBL_RHSBL	AHBL: From sender listed in AHBL (http://www.ahbl.org/)
 tflags T_RCVD_IN_AHBL_RHSBL	net
-
-# some yahoo forgery rules
-header T_FORGED_YAHOO_MSGID_1	Message-ID =~ /[A-Z]{6,}\@yahoo\.com>/
-header T_FORGED_YAHOO_MSGID_2	Message-ID =~ /[A-Z]{6,}\@yahoo\.com>/i
-header T_FORGED_YAHOO_MSGID_3	Message-ID =~ /[A-Z]{6,}\@yahoo(\.\S+)?\.[a-z]{2,3}>/i
-header T_FORGED_YAHOO_MSGID_4	Message-ID =~ /[A-Z]{6,}\@yahoo(?:groups)?\.com>/
-header T_FORGED_YAHOO_MSGID_5	Message-ID =~ /[A-Z]{6,}\@yahoo(?:groups)?\.com>/i
-header T_FORGED_YAHOO_MSGID_6	Message-ID =~ /[A-Z]{6,}\@yahoo(?:groups)?(\.\S+)?\.[a-z]{2,3}>/i
-header T_FORGED_YAHOO_MSGID_7	Message-ID =~ /[A-Z]{7,}\@yahoo\.com>/
-header T_FORGED_YAHOO_MSGID_8	Message-ID =~ /[A-Z]{7,}\@yahoo\.com>/i
-header T_FORGED_YAHOO_MSGID_9	Message-ID =~ /[A-Z]{7,}\@yahoo(\.\S+)?\.[a-z]{2,3}>/i
-header T_FORGED_YAHOO_MSGID_10	Message-ID =~ /[A-Z]{7,}\@yahoo(?:groups)?\.com>/
-header T_FORGED_YAHOO_MSGID_11	Message-ID =~ /[A-Z]{7,}\@yahoo(?:groups)?\.com>/i
-header T_FORGED_YAHOO_MSGID_12	Message-ID =~ /[A-Z]{7,}\@yahoo(?:groups)?(\.\S+)?\.[a-z]{2,3}>/i
-header T_FORGED_YAHOO_MSGID_13	Message-ID =~ /[A-Z]{8,}\@yahoo\.com>/
-header T_FORGED_YAHOO_MSGID_14	Message-ID =~ /[A-Z]{8,}\@yahoo\.com>/i
-header T_FORGED_YAHOO_MSGID_15	Message-ID =~ /[A-Z]{8,}\@yahoo(\.\S+)?\.[a-z]{2,3}>/i
-header T_FORGED_YAHOO_MSGID_16	Message-ID =~ /[A-Z]{8,}\@yahoo(?:groups)?\.com>/
-header T_FORGED_YAHOO_MSGID_17	Message-ID =~ /[A-Z]{8,}\@yahoo(?:groups)?\.com>/i
-header T_FORGED_YAHOO_MSGID_18	Message-ID =~ /[A-Z]{8,}\@yahoo(?:groups)?(\.\S+)?\.[a-z]{2,3}>/i
-header T_FORGED_YAHOO_MSGID_19	Message-ID =~ /<[^.]+\@yahoo\.com>/
-header T_FORGED_YAHOO_MSGID_20	Message-ID =~ /<[^.]+\@yahoo\.com>/i
-header T_FORGED_YAHOO_MSGID_21	Message-ID =~ /<[^.]+\@yahoo(\.\S+)?\.[a-z]{2,3}>/i
-header T_FORGED_YAHOO_MSGID_22	Message-ID =~ /<[^.]+\@yahoo(?:groups)?\.com>/
-header T_FORGED_YAHOO_MSGID_23	Message-ID =~ /<[^.]+\@yahoo(?:groups)?\.com>/i
-header T_FORGED_YAHOO_MSGID_24	Message-ID =~ /<[^.]+\@yahoo(?:groups)?(\.\S+)?\.[a-z]{2,3}>/i
-header __YAHOO_BEGINNING	Message-ID =~ /<\S+(?:\.\S+|\.\S+\.\S+\.\S+)\@/
-header __YAHOO_MSGID_1		Message-ID =~ /\@yahoo\.com>/
-header __YAHOO_MSGID_2		Message-ID =~ /\@yahoo\.com>/i
-header __YAHOO_MSGID_3		Message-ID =~ /\@yahoo(\.\S+)?\.[a-z]{2,3}>/i
-header __YAHOO_MSGID_4		Message-ID =~ /\@yahoo(?:groups)?\.com>/
-header __YAHOO_MSGID_5		Message-ID =~ /\@yahoo(?:groups)?\.com>/i
-header __YAHOO_MSGID_6		Message-ID =~ /\@yahoo(?:groups)?(\.\S+)?\.[a-z]{2,3}>/i
-meta T_FORGED_YAHOO_MSGID_25	!__YAHOO_BEGINNING && __YAHOO_MSGID_1
-meta T_FORGED_YAHOO_MSGID_26	!__YAHOO_BEGINNING && __YAHOO_MSGID_2
-meta T_FORGED_YAHOO_MSGID_27	!__YAHOO_BEGINNING && __YAHOO_MSGID_3
-meta T_FORGED_YAHOO_MSGID_28	!__YAHOO_BEGINNING && __YAHOO_MSGID_4
-meta T_FORGED_YAHOO_MSGID_29	!__YAHOO_BEGINNING && __YAHOO_MSGID_5
-meta T_FORGED_YAHOO_MSGID_30	!__YAHOO_BEGINNING && __YAHOO_MSGID_6
-header __YAHOO_BEGINNING_B	Message-ID =~ /<(?:\S+\.\S+|\d+(?:\.\d+){3})\@/
-header __YAHOO_MSGID_1_B	Message-ID =~ /\@yahoo\.com>/
-header __YAHOO_MSGID_2_B	Message-ID =~ /\@yahoo\.com>/i
-header __YAHOO_MSGID_3_B	Message-ID =~ /\@yahoo(\.\S+)?\.[a-z]{2,3}>/i
-header __YAHOO_MSGID_4_B	Message-ID =~ /\@yahoo(?:groups)?\.com>/
-header __YAHOO_MSGID_5_B	Message-ID =~ /\@yahoo(?:groups)?\.com>/i
-header __YAHOO_MSGID_6_B	Message-ID =~ /\@yahoo(?:groups)?(\.\S+)?\.[a-z]{2,3}>/i
-meta T_FORGED_YAHOO_MSGID_25_B	!__YAHOO_BEGINNING && __YAHOO_MSGID_1_B
-meta T_FORGED_YAHOO_MSGID_26_B	!__YAHOO_BEGINNING && __YAHOO_MSGID_2_B
-meta T_FORGED_YAHOO_MSGID_27_B	!__YAHOO_BEGINNING && __YAHOO_MSGID_3_B
-meta T_FORGED_YAHOO_MSGID_28_B	!__YAHOO_BEGINNING && __YAHOO_MSGID_4_B
-meta T_FORGED_YAHOO_MSGID_29_B	!__YAHOO_BEGINNING && __YAHOO_MSGID_5_B
-meta T_FORGED_YAHOO_MSGID_30_B	!__YAHOO_BEGINNING && __YAHOO_MSGID_6_B
 
 body T_HTML_TEXT_CONTRAST_14	eval:html_test('text_contrast_14')
 body T_HTML_TEXT_CONTRAST_16	eval:html_test('text_contrast_16')
