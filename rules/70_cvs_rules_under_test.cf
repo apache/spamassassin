@@ -221,6 +221,7 @@ uri T_ITSREMARKABLE_MAILTO	/mailto:\S+[.@]itsremarkable\.com/
 
 # bug 1308
 # somewhat less-expensive version
+# 12/24 - works well for allen and justin, horrible for me (S/O 0.7) - tvd
 header T_SUSPICIOUS_RECIPS	ToCc =~ /(@[-a-z0-9_.]{2,}).{0,64}(?:\1.{0,64}){8,}/is
 
 # fast replacement for SUSPICIOUS_RECIPS and VERY_SUSP_RECIPS
