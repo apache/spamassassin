@@ -404,6 +404,7 @@ sub parse_received_line {
     if (/Exim/) {
       # one of the HUGE number of Exim formats :(
       # This must be scriptable.
+      # mss 2004-09-27: See <http://www.exim.org/exim-html-4.40/doc/html/spec_14.html#IX1315>
 
       # Received: from [61.174.163.26] (helo=host) by sc8-sf-list1.sourceforge.net with smtp (Exim 3.31-VA-mm2 #1 (Debian)) id 18t2z0-0001NX-00 for <razor-users@lists.sourceforge.net>; Wed, 12 Mar 2003 01:57:10 -0800
       # Received: from [218.19.142.229] (helo=hotmail.com ident=yiuhyotp) by yzordderrex with smtp (Exim 3.35 #1 (Debian)) id 194BE5-0005Zh-00; Sat, 12 Apr 2003 03:58:53 +0100
