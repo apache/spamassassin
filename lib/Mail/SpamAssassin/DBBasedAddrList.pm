@@ -5,7 +5,7 @@ use strict;
 
 use Mail::SpamAssassin::PersistentAddrList;
 use AnyDBM_File;
-use Fcntl;
+use Fcntl ':DEFAULT',':flock';
 
 use vars	qw{
   	@ISA
@@ -38,9 +38,13 @@ sub new_checker {
   if(defined($main->{conf}->{auto_whitelist_path})) # if undef then don't worry -- empty hash!
   {
       my $path = $main->sed_path ($main->{conf}->{auto_whitelist_path});
+      my $lock_file = $path.'.lock';
+
+      open(LOCKFILE,">>$lock_file") or die "Can't open lockfile $lock_file: $!\n";
+      flock(LOCKFILE, LOCK_EX) or die "Can't acquire lock: $!\n";
 
       dbg("Tie-ing to DB file in ",$path);
-      tie %{$self->{accum}},"AnyDBM_File",$path, O_RDWR|O_CREAT|O_EXCL,
+      tie %{$self->{accum}},"AnyDBM_File",$path, O_RDWR|O_CREAT,
 		    (oct ($main->{conf}->{auto_whitelist_file_mode}) & 0666)
 	  or die "Cannot open auto_whitelist_path $path: $!\n";
   }
@@ -54,6 +58,8 @@ sub new_checker {
 sub finish {
     my $self = shift;
     untie %{$self->{accum}};
+    flock(LOCKFILE, LOCK_UN);
+    close(LOCKFILE);
 }
 
 ###########################################################################
