@@ -30,6 +30,11 @@ cp Mail-SpamAssassin-$vers.tar.gz $WEBDIR/devel
 make zipdist
 cp Mail-SpamAssassin-$vers.zip $WEBDIR/devel
 
+md5sum Mail-SpamAssassin-$vers.tar.gz \
+	> $WEBDIR/devel/Mail-SpamAssassin-$vers.tar.gz.md5
+md5sum Mail-SpamAssassin-$vers.zip \
+	> $WEBDIR/devel/Mail-SpamAssassin-$vers.zip.md5
+
 ( cd $WEBDIR/dist ;
   make clean distclean;
   rm -rf masses/*.log masses/logs
