@@ -120,126 +120,129 @@ void print_usage(void)
 }
 
 int
-read_args(int argc, char **argv, int *max_size, const char **username,
-	  struct transport *ptrn)
+read_args(int argc, char **argv,
+          int *max_size, const char **username,
+          struct transport *ptrn)
 {
+#ifndef _WIN32
+    const char *opts = "-BcrRd:e:fhyp:t:s:u:xSHU:";
+#else
+    const char *opts = "-BcrRd:fhyp:t:s:u:xSH";
+#endif
     int opt;
 
-    while (-1 != (opt = getopt(argc, argv,
+    while ((opt = getopt(argc, argv, opts)) != -1)
+    {
+        switch (opt)
+        {
+            case 'B':
+            {
+                flags = (flags & ~SPAMC_MODE_MASK) | SPAMC_BSMTP_MODE;
+                break;
+            }
+            case 'c':
+            {
+                flags |= SPAMC_CHECK_ONLY;
+                break;
+            }
+            case 'd':
+            {
+                ptrn->type = TRANSPORT_TCP;
+                ptrn->hostname = optarg;        /* fix the ptr to point to this string */
+                break;
+            }
 #ifndef _WIN32
-			       "-BcrRd:e:fhyp:t:s:u:xSHU:"
-#else
-			       "-BcrRd:fhyp:t:s:u:xSH"
+            case 'e':
+            {
+                int i, j;
+                
+                if ((exec_argv = malloc(sizeof(*exec_argv) * (argc - optind + 2))) == NULL)
+                    return EX_OSERR;
+                
+                for (i = 0, j = optind - 1; j < argc; i++, j++)
+                    exec_argv[i] = argv[j];
+                exec_argv[i] = NULL;
+                
+                return EX_OK;
+            }
 #endif
-		  ))) {
-	switch (opt) {
-	case 'H':
-	    {
-		flags |= SPAMC_RANDOMIZE_HOSTS;
-		break;
-	    }
-#ifndef _WIN32
-	case 'U':
-	    {
-		ptrn->type = TRANSPORT_UNIX;
-		ptrn->socketpath = optarg;
-		break;
-	    }
-#endif
-	case 'B':
-	    {
-		flags = (flags & ~SPAMC_MODE_MASK) | SPAMC_BSMTP_MODE;
-		break;
-	    }
-	case 'c':
-	    {
-		flags |= SPAMC_CHECK_ONLY;
-		break;
-	    }
-	case 'r':
-	    {
-		flags |= SPAMC_REPORT_IFSPAM;
-		break;
-	    }
-	case 'R':
-	    {
-		flags |= SPAMC_REPORT;
-		break;
-	    }
-	case 'y':
-	    {
-		flags |= SPAMC_SYMBOLS;
-		break;
-	    }
-	case 'd':
-	    {
-		ptrn->type = TRANSPORT_TCP;
-		ptrn->hostname = optarg;	/* fix the ptr to point to this string */
-		break;
-	    }
-#ifndef _WIN32
-	case 'e':
-	    {
-		int i, j;
-		if ((exec_argv =
-		     malloc(sizeof(*exec_argv) * (argc - optind + 2))) ==
-		    NULL)
-		    return EX_OSERR;
-		for (i = 0, j = optind - 1; j < argc; i++, j++) {
-		    exec_argv[i] = argv[j];
-		}
-		exec_argv[i] = NULL;
-		return EX_OK;
-	    }
-#endif
-	case 'p':
-	    {
-		ptrn->port = atoi(optarg);
-		break;
-	    }
-	case 'f':
-	    {
-		flags |= SPAMC_SAFE_FALLBACK;
-		break;
-	    }
-	case 'x':
-	    {
-		flags &= (~SPAMC_SAFE_FALLBACK);
-		break;
-	    }
-	case 'u':
-	    {
-		*username = optarg;
-		break;
-	    }
-	case 's':
-	    {
-		*max_size = atoi(optarg);
-		break;
-	    }
+            case 'f':
+            {
+                flags |= SPAMC_SAFE_FALLBACK;
+                break;
+            }
+            case 'H':
+            {
+                flags |= SPAMC_RANDOMIZE_HOSTS;
+                break;
+            }
+            case 'p':
+            {
+                ptrn->port = atoi(optarg);
+                break;
+            }
+            case 'r':
+            {
+                flags |= SPAMC_REPORT_IFSPAM;
+                break;
+            }
+            case 'R':
+            {
+                flags |= SPAMC_REPORT;
+                break;
+            }
+            case 's':
+            {
+                *max_size = atoi(optarg);
+                break;
+            }
 #ifdef SPAMC_SSL
-	case 'S':
-	    {
-		flags |= SPAMC_USE_SSL;
-		break;
-	    }
+            case 'S':
+            {
+                flags |= SPAMC_USE_SSL;
+                break;
+            }
 #endif
-	case 't':
-	    {
-		timeout = atoi(optarg);
-		break;
-	    }
-	case '?':{
-		syslog(LOG_ERR, "invalid usage");
-		/* NOTE: falls through to usage case below... */
-	    }
-	case 'h':
-	case 1:
-	    {
-		print_usage();
-		exit(EX_USAGE);
-	    }
-	}
+            case 't':
+            {
+                timeout = atoi(optarg);
+                break;
+            }
+            case 'u':
+            {
+                *username = optarg;
+                break;
+            }
+#ifndef _WIN32
+            case 'U':
+            {
+                ptrn->type = TRANSPORT_UNIX;
+                ptrn->socketpath = optarg;
+                break;
+            }
+#endif
+            case 'x':
+            {
+                flags &= (~SPAMC_SAFE_FALLBACK);
+                break;
+            }
+            case 'y':
+            {
+                flags |= SPAMC_SYMBOLS;
+                break;
+            }
+            
+            case '?':{
+                syslog(LOG_ERR, "invalid usage");
+                /* NOTE: falls through to usage case below... */
+            }
+            case 'h':
+            case 1:
+            {
+                print_usage();
+                exit(EX_USAGE);
+            }
+        }
     }
     return EX_OK;
 }
