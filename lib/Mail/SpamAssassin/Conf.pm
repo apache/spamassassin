@@ -198,9 +198,15 @@ score of 0 to an indirect rule will disable it.
       my ($self, $key, $value, $line) = @_;
       my($rule, @scores) = split(/\s+/, $value);
 
-      my $relative = (@scores > 0 && $scores[0] =~ /^\(\d+(\.\d+)?\)$/) ? 1 : 0;
-      if ($relative && !exists $self->{scoreset}->[0]->{$rule})
-      {
+      # Figure out if we're doing relative scores, remove the parens if we are
+      my $relative = 0;
+      foreach (@scores) {
+        if (s/^\((-?\d+(?:\.\d+)?)\)$/$1/) {
+	  $relative = 1;
+	}
+      }
+
+      if ($relative && !exists $self->{scoreset}->[0]->{$rule}) {
         my $msg = "Relative score without previous setting in SpamAssassin ".
                     "configuration, skipping: $_";
 
