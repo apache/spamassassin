@@ -474,3 +474,6 @@ body T_PC_RND_BODY              /%RA?ND_[A-Z]/
 header T_X_MESSAGE_INFO         X-Message-Info =~ /\+/
 describe T_X_MESSAGE_INFO       Ratware signature (X-Message-Info)
 
+# looser
+uri T_BIZ_TLD_1			/^(?:https?:\/\/|mailto:)\S+\.biz(?:\/|$)/i
+uri T_BIZ_TLD_2			/\.biz(?:\/|$)/i
