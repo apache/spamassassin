@@ -204,6 +204,17 @@ sub check {
       $self->do_full_eval_tests($priority, \$fulltext);
     }
 
+    # sanity check, it is possible that no rules >= HARVEST_DNSBL_PRIORITY ran so the harvest
+    # may not have run yet.  Check, and if so, go ahead and harvest here.
+    if ($needs_dnsbl_harvest_p) {
+      # harvest the DNS results
+      $self->harvest_dnsbl_queries();
+
+      # finish the DNS results
+      $self->rbl_finish();
+      $self->{main}->call_plugins ("check_post_dnsbl", { permsgstatus => $self });
+    }
+
     # finished running rules
     delete $self->{current_rule_name};
     undef $decoded;
