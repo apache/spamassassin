@@ -383,6 +383,21 @@ sub hostname_to_domain {
   }
 }
 
+sub hostname_to_domain2 {
+  my ($hostname) = @_;
+
+  my @parts = split(/\./, $hostname);
+  if (@parts > 1 && $parts[-1] =~ /\S{3,}/) {
+    return join('.', @parts[-2..-1]);
+  }
+  elsif (@parts > 2) {
+    return join('.', @parts[-3..-1]);
+  }
+  else {
+    return $hostname;
+  }
+}
+
 # FORGED_HOTMAIL_RCVD
 sub _check_for_forged_hotmail_received_headers {
   my ($self) = @_;
@@ -1175,6 +1190,28 @@ sub check_rbl_sub {
   return 0 unless $self->is_dns_available();
 
   $self->register_rbl_subtest($rule, $set, $subtest);
+}
+
+sub check_rbl_from {
+  my ($self, $rule, $set, $rbl_server) = @_;
+
+  return 0 if $self->{conf}->{skip_rbl_checks};
+  return 0 unless $self->is_dns_available();
+
+  my %domains;
+  for my $from ($self->all_from_addrs()) {
+    if ($from =~ m/\@([^\@\s>]+)/) {
+      $from = lc($1);
+      $domains{$from} = 1;
+      $domains{hostname_to_domain2($from)} = 1;
+    }
+  }
+  return unless scalar keys %domains;
+
+  $self->load_resolver();
+  for my $domain (keys %domains) {
+    $self->do_rbl_lookup($rule, $set, 'A', $rbl_server, "$domain.$rbl_server");
+  }
 }
 
 ###########################################################################
