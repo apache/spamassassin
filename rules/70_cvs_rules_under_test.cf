@@ -222,7 +222,7 @@ score T_FORGED_MUA_OUTLOOK	1.0
 
 # Outlook IMO (Internet Mail Only)
 header __OIMO_MUA		X-Mailer =~ /Outlook IMO/
-header __OIMO_MSGID		Message-Id =~ /^<[A-P]{28}\.[A-Za-z._]+\@\S+>$/
+header __OIMO_MSGID		Message-Id =~ /^<[A-P]{26}AA\.[\w.-]+\@\S+>$/
 meta T_FORGED_MUA_OIMO		(__OIMO_MUA && !__OIMO_MSGID)
 describe T_FORGED_MUA_OIMO	Forged mail pretending to be from Outlook IMO
 score T_FORGED_MUA_OIMO		1.0
