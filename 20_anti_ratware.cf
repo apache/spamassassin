@@ -9,28 +9,17 @@ describe USER_AGENT_MUTT	User-Agent header indicates a non-spam MUA (Mutt)
 header USER_AGENT_GNUS_UA	User-Agent =~ /^Gnus v\d(?:\.\d+){1,2}\/X?Emacs \d+\.\d+/
 describe USER_AGENT_GNUS_UA	User-Agent header indicates a non-spam MUA (Gnus)
 
-# forged by spammers, a little:   0.060    0.124    0.000    1.00   -1.00  USER_AGENT_GNUS_XM (fn, low matches)
-#header USER_AGENT_GNUS_XM	X-Mailer   =~ /^Gnus\/\d\.\d+ /
-#describe USER_AGENT_GNUS_XM	X-Mailer header indicates a non-spam MUA (Gnus)
-
 header USER_AGENT_MOZILLA_UA	User-Agent =~ /^Mozilla\/5\.\d+ \(.*\) Gecko\/\d{8}(?: |$)/
 describe USER_AGENT_MOZILLA_UA	User-Agent header indicates a non-spam MUA (Mozilla)
 header USER_AGENT_MOZILLA_XM	X-Mailer   =~ /^Mozilla 4\.\d{2} \[[a-z]{2}\]/
 describe USER_AGENT_MOZILLA_XM	X-Mailer header indicates a non-spam MUA (Netscape)
 
-# massively forged by spammers:  10.253   14.664    6.111    0.71   -0.50  USER_AGENT_OE (fn)
-#header USER_AGENT_OE		X-Mailer   =~ /^Microsoft Outlook Express [4-6]\.\d{2}\.\d{4}\.\d{1,4}$/
-#describe USER_AGENT_OE		X-Mailer header indicates a non-spam MUA (Outlook Express)
 header USER_AGENT_MACOE		User-Agent =~ /^Microsoft Outlook Express Macintosh Edition/
 describe USER_AGENT_MACOE	User-Agent header indicates a non-spam MUA (Outlook Express)
 header USER_AGENT_OUTLOOK	X-Mailer   =~ /^Microsoft Outlook [A-Z]{3}, Build [89]\.0\.[1-3]\d{3} \([89]\.0\.[1-3]\d{3}\.0\)$/
 describe USER_AGENT_OUTLOOK	X-Mailer header indicates a non-spam MUA (Outlook)
 header USER_AGENT_ENTOURAGE	User-Agent =~ /^Microsoft-Entourage\/\d{1,2}(?:\.\d){1,2}\.\d{4}$/
 describe USER_AGENT_ENTOURAGE	User-Agent header indicates a non-spam MUA (Entourage)
-
-# massively forged by spammers:   0.816    1.328    0.335    0.80   -0.50  USER_AGENT_THEBAT (fn)
-#header USER_AGENT_THEBAT	X-Mailer   =~ /^The Bat! \(v1\.\d{2}[a-z )]/
-#describe USER_AGENT_THEBAT	X-Mailer header indicates a non-spam MUA (The Bat!)
 
 header USER_AGENT_KMAIL		User-Agent =~ /^KMail\/1\.\d\.\d+$/
 describe USER_AGENT_KMAIL	User-Agent header indicates a non-spam MUA (KMail)
@@ -51,14 +40,11 @@ describe USER_AGENT_APPLEMAIL	X-Mailer header indicates a non-spam MUA (Apple Ma
 tflags USER_AGENT_PINE       nice
 tflags USER_AGENT_MUTT       nice
 tflags USER_AGENT_GNUS_UA    nice
-tflags USER_AGENT_GNUS_XM    nice
 tflags USER_AGENT_MOZILLA_UA nice
 tflags USER_AGENT_MOZILLA_XM nice
-tflags USER_AGENT_OE         nice
 tflags USER_AGENT_MACOE      nice
 tflags USER_AGENT_OUTLOOK    nice
 tflags USER_AGENT_ENTOURAGE  nice
-tflags USER_AGENT_THEBAT     nice
 tflags USER_AGENT_KMAIL      nice
 tflags USER_AGENT_IMP        nice
 tflags USER_AGENT_AOL        nice
