@@ -5,28 +5,44 @@
 # search times.
 ###########################################################################
 
-full RAZOR_CHECK		eval:check_razor()
-describe RAZOR_CHECK		Listed in Razor, see http://razor.sourceforge.net/
-tflags RAZOR_CHECK              net
+full RAZOR_CHECK	eval:check_razor()
+describe RAZOR_CHECK	Listed in Razor, see http://razor.sourceforge.net/
+tflags RAZOR_CHECK	net
 
-full DCC_CHECK                  eval:check_dcc()
-describe DCC_CHECK              Listed in DCC, see http://www.rhyolite.com/anti-spam/dcc/dcc-tree/dcc.html
-tflags DCC_CHECK                net
+full DCC_CHECK		eval:check_dcc()
+describe DCC_CHECK	Listed in DCC, see http://www.rhyolite.com/anti-spam/dcc/dcc-tree/dcc.html
+tflags DCC_CHECK	net
 
-full PYZOR_CHECK                  eval:check_pyzor()
-describe PYZOR_CHECK              Listed in Pyzor, see http://pyzor.sourceforge.net/
-tflags PYZOR_CHECK                net
+full PYZOR_CHECK	eval:check_pyzor()
+describe PYZOR_CHECK	Listed in Pyzor, see http://pyzor.sourceforge.net/
+tflags PYZOR_CHECK	net
 
-full FREQ_SPAM_PHRASE		eval:check_for_spam_phrases("10")
-describe FREQ_SPAM_PHRASE	Contains phrases frequently found in spam
+###########################################################################
+# Spam phrase scores are absolute numbers, not percentages.
+#
+# The Fibonacci sequence was used to reduce the dependence on the
+# distribution and magnitude of scores and to avoid any sharp cut-offs.
 
-full SPAM_PHRASES_020		eval:check_for_spam_phrases_scoring("20")
-describe SPAM_PHRASES_020	spam-phrase score is over 20
-full SPAM_PHRASES_040		eval:check_for_spam_phrases_scoring("40")
-describe SPAM_PHRASES_040	spam-phrase score is over 40
-full SPAM_PHRASES_100		eval:check_for_spam_phrases_scoring("100")
-describe SPAM_PHRASES_100	spam-phrase score is over 100
-
+body SPAM_PHRASE_00_01		eval:check_for_spam_phrases('00', '01')
+describe SPAM_PHRASE_00_01	Contains phrases frequently found in spam
+body SPAM_PHRASE_01_02		eval:check_for_spam_phrases('01', '02')
+describe SPAM_PHRASE_01_02	Contains phrases frequently found in spam
+body SPAM_PHRASE_02_03		eval:check_for_spam_phrases('02', '03')
+describe SPAM_PHRASE_02_03	Contains phrases frequently found in spam
+body SPAM_PHRASE_03_05		eval:check_for_spam_phrases('03', '05')
+describe SPAM_PHRASE_03_05	Contains phrases frequently found in spam
+body SPAM_PHRASE_05_08		eval:check_for_spam_phrases('05', '08')
+describe SPAM_PHRASE_05_08	Contains phrases frequently found in spam
+body SPAM_PHRASE_08_13		eval:check_for_spam_phrases('08', '13')
+describe SPAM_PHRASE_08_13	Contains phrases frequently found in spam
+body SPAM_PHRASE_13_21		eval:check_for_spam_phrases('13', '21')
+describe SPAM_PHRASE_13_21	Contains phrases frequently found in spam
+body SPAM_PHRASE_21_34		eval:check_for_spam_phrases('21', '34')
+describe SPAM_PHRASE_21_34	Contains phrases frequently found in spam
+body SPAM_PHRASE_34_55		eval:check_for_spam_phrases('34', '55')
+describe SPAM_PHRASE_34_55	Contains phrases frequently found in spam
+body SPAM_PHRASE_55_XX		eval:check_for_spam_phrases('55', 'undef')
+describe SPAM_PHRASE_55_XX	Contains phrases frequently found in spam
 
 ###########################################################################
 
@@ -51,6 +67,9 @@ describe SLIGHTLY_UNSAFE_JAVASCRIPT	JavaScript code which can easily be executed
 
 rawbody HTML_WITH_BGCOLOR	/<body [^>]*bgcolor[=3d\"\'\#]+[0-9a-e][0-9a-f]{5,5}/is
 describe HTML_WITH_BGCOLOR	HTML mail with non-white background
+
+body HTML_TABLE_BORDER_THICK		eval:check_html_table_border_thick()
+describe HTML_TABLE_BORDER_THICK	HTML table has thick border
 
 rawbody  BIG_FONT               /<\s*FONT\s[^>]*size\s*=(?:3D(?:\d{2,}|\+[2-9]|[3-9])|\s*["'](?:\d{2,}|\+[2-9]|[3-9]))/is
 describe BIG_FONT               FONT Size +2 and up or 3 and up
