@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.69 2003/03/03 00:43:44 felicity Exp $
+# $Id: HTML.pm,v 1.70 2003/03/17 20:34:59 jmason Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -250,10 +250,8 @@ sub html_tests {
   }
   if (exists($attr->{style})) {
     if ($attr->{style} =~ /font(?:-size)?:\s*([\d\.]+)(p[tx])/i) {
-      my $size = $1;
+      my $size = int ($1) + 0.5;
       my $type = $2;
-      if ($size =~ /(\d+)/) { $size = $1; }	# catch decimal bits
-
       $self->{html}{big_font_B} = 1 if (lc($type) eq "pt" && $size > 12);
     }
   }
