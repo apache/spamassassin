@@ -17,7 +17,7 @@ CREATE TABLE bayes_seen (
   id int(11) NOT NULL default '0',
   msgid varchar(200) binary NOT NULL default '',
   flag char(1) NOT NULL default '',
-  PRIMARY KEY  (id,msgid),
+  PRIMARY KEY  (id,msgid)
 ) TYPE=MyISAM;
 
 CREATE TABLE bayes_token (
