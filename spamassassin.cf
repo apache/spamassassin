@@ -88,7 +88,10 @@ describe NO_REAL_NAME		From: does not include a real name
 header FROM_ENDS_IN_NUMS	From =~ /\d+\@/
 describe FROM_ENDS_IN_NUMS	From: ends in numbers
 
-header PLING_PLING		Subject =~ /\!+/
+header PLING			Subject =~ /\!/
+describe PLING			Subject has an exclamation mark
+
+header PLING_PLING		Subject =~ /\!\!+/
 describe PLING_PLING		Subject has lots of exclamation marks
 
 header SUBJ_HAS_UNIQ_ID		Subject =~ /(?:[-_\s]{7,}[-a-z0-9]{4,}|\s+[-:\#\(\[]+[-a-zA-Z0-9]{4,}[\]\)]+|\s+[-:\#][-a-zA-Z0-9]{4,})$/
@@ -334,7 +337,11 @@ score NO_REAL_NAME		1
 #
 score FROM_ENDS_IN_NUMS		1
 
-# "What an incredible offer!!" yeah right.
+# "What an incredible offer!" yeah right.
+#
+score PLING			1
+
+# "What an incredible offer!!" I still don't believe you.
 #
 score PLING_PLING		1
 
@@ -410,7 +417,7 @@ score FORGED_RCVD_FOUND		1
 
 # From: address claims to be sent from hotmail.com, but does not use
 # their formatting
-score FROM_FORGED_HOTMAIL	2
+score FROM_FORGED_HOTMAIL	1
 
 # spam-tool gibberish in the X-Mailer line
 score X_MAILER_GIBBERISH	4
