@@ -197,8 +197,8 @@ sub new {
 
   $self->{use_bayes} = 1;
   $self->{bayes_auto_learn} = 1;
-  $self->{bayes_auto_learn_threshold_nonspam} = -2.0;
-  $self->{bayes_auto_learn_threshold_spam} = 15.0;
+  $self->{bayes_auto_learn_threshold_nonspam} = 0.1;
+  $self->{bayes_auto_learn_threshold_spam} = 12.0;
   $self->{bayes_learn_to_journal} = 0;
   $self->{bayes_path} = "__userstate__/bayes";
   $self->{bayes_file_mode} = "0700";
@@ -1565,7 +1565,7 @@ likely that the message check and auto-train scores will be different.
       $self->{bayes_auto_learn} = $1+0; next;
     }
 
-=item bayes_auto_learn_threshold_nonspam n.nn	(default -2.0)
+=item bayes_auto_learn_threshold_nonspam n.nn	(default 0.1)
 
 The score threshold below which a mail has to score, to be fed into
 SpamAssassin's learning systems automatically as a non-spam message.
@@ -1576,7 +1576,7 @@ SpamAssassin's learning systems automatically as a non-spam message.
       $self->{bayes_auto_learn_threshold_nonspam} = $1+0; next;
     }
 
-=item bayes_auto_learn_threshold_spam n.nn	(default 15.0)
+=item bayes_auto_learn_threshold_spam n.nn	(default 12.0)
 
 The score threshold above which a mail has to score, to be fed into
 SpamAssassin's learning systems automatically as a spam message.
