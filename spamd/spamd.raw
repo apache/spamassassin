@@ -13,6 +13,8 @@ use lib '@@INSTALLSITELIB@@'; # substituted at 'make' time
 
 use lib '../lib';	# added by jm for use inside the distro
 use strict;
+eval "use bytes";	# turn off UTF-8
+
 use Socket;
 use IO::Pipe;
 use Config;
@@ -31,7 +33,6 @@ BEGIN {
   eval { require Time::HiRes };
   Time::HiRes->import( qw(time) ) unless $@;
 }
-eval "use bytes";	# turn off UTF-8
 
 sub spawn;  # forward declaration
 sub logmsg; # forward declaration
