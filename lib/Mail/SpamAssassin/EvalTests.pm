@@ -1085,7 +1085,8 @@ sub check_for_base64_enc_text {
 
   # If the message itself is base64-encoded, return positive
   my $cte = $self->get('Content-Transfer-Encoding');
-  if ( defined $cte && $cte =~ /^\s*base64/i ) {
+  if ( defined $cte && $cte =~ /^\s*base64/i && 
+        ($self->get('content-type') =~ /text\//i) ) {
   	return 1;
   }
 
