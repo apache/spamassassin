@@ -875,6 +875,7 @@ sub _process_header {
       $Text::Wrap::huge = 'wrap';
       $Text::Wrap::break = '(?<=[\s,])';
       $hdr = Text::Wrap::wrap('',"\t",$hdr);
+      $hdr =~ s/^\t\n//gm;
       return (split (/!!/, $hdr, 2))[1]; # just return the data part
     }
   }
