@@ -25,7 +25,7 @@ case "$1" in
   start)
 	# Start daemon.
 	echo -n "Starting spamd: "
-	daemon spamd -d -c
+	daemon spamd -d -c -a
 	RETVAL=$?
 	touch /var/lock/spamd
 	echo
