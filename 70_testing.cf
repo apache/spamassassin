@@ -357,11 +357,6 @@ body T_INT_PRICES	eval:check_obfu_word('prices')
 # these don't hit a lot, but it's a definite obfuscation technique
 uri T_HTTP_BAD_HOST_CHAR	m@^https?://[^/]*[\000-\037\200-\377]@i
 
-#  0.129   0.1461   0.0000    1.000   0.50    0.01  T_DOLLARS_US
-body T_DOLLARS_US /\d+,\d+US/i
-#  0.157   0.1780   0.0000    1.000   1.00    0.01  T_DOLLARS_US_2
-body T_DOLLARS_US_2 /\s\d[\d.,]+US/
-
 # rule trying to find people punctuating the name "rolex", ala:
 # *Rolex*, !!Rolex!!, etc.
 # 2005/02/23
