@@ -12,6 +12,7 @@
 #
 #   header SYMBOLIC_TEST_NAME	header op pattern
 #	(The operations allowed (so far) are: =~  and: !~)
+#       (header can be 'ALL', which returns the text of all headers)
 #
 #   header SYMBOLIC_TEST_NAME	eval:name_of_eval_method([args])
 #
@@ -124,6 +125,9 @@ describe RCVD_IN_DUL		Received from a dialup IP, see http://www.mail-abuse.org/d
 header RCVD_IN_RELAYS_ORBS_ORG	eval:check_rbl('relays.orbs.org.')
 describe RCVD_IN_RELAYS_ORBS_ORG Received via a relay in relays.orbs.org
 
+header FORGED_RCVD_FOUND	ALL =~ /(?:Date|Subject|Reply-To|Message-Id):.*Received:/s
+describe FORGED_RCVD_FOUND	Forged 'Received:' header found
+
 ###########################################################################
 
 full RAZOR_CHECK		eval:check_razor('razor.vipul.net:2702')
@@ -209,7 +213,7 @@ body PURE_PROFIT		/PURE PROFIT/
 # match some gibberish produced by quoted-printable encoding of HTML, often
 # in the middle of a HTML "attribute=value" pair.
 
-full CLICK_HERE_LINK		/click here.{0,20}<\/a>/is
+full CLICK_HERE_LINK		/click here.{0,100}<\/a>/is
 full A_HREF_TO_IP		/href[3D=\s\"\']*http:\/\/\d+\.\d+\.\d+\.\d+\:?\d*\//is
 full MAILTO_LINK		/=[3D=\s"']*mailto:/is
 full MAILTO_WITH_SUBJ_REMOVE	/mailto:\S+\?subject=[3D=\s"']*remove/is

@@ -72,9 +72,12 @@ sub usage {
   my $prefs = join ("\n\t\t\t\t", @default_userprefs_path);
   die <<EOUSAGE;
 
-Usage: spamassassin [option ...] < mailmessage > output
+Usage: spamassassin [option ...] < mailmessage
+       spamassassin -P [option ...] < mailmessage > output
 
 Options:
+ 
+  -P               pipe message through, instead of delivering to mail spool
  
   -t               only testing
 
@@ -98,10 +101,10 @@ require Mail::SpamAssassin;
 require Mail::Audit;
 
 use vars qw{
-  $opt_t $opt_c $opt_p $opt_h $opt_V $opt_D $opt_r
+  $opt_t $opt_c $opt_p $opt_h $opt_V $opt_D $opt_r $opt_P
 };
 
-getopts ('tc:p:hVDr') or usage();
+getopts ('tc:p:hVDrP') or usage();
 
 if (defined $opt_h) { usage(); }
 if (defined $opt_V) {
@@ -144,6 +147,7 @@ if (!defined $opt_p) {
   }
 }
 
+# finally, now that we've found the configuration, start testing the message...
 my $spamtest = new Mail::SpamAssassin ({
   'rules_filename'	=> $opt_c,
   'userprefs_filename'	=> $opt_p,
@@ -158,18 +162,27 @@ if ($opt_r) {
 my $status = $spamtest->check ($mail);
 $status->rewrite_mail ();
 
-if ($opt_t) {				# support -t
+if ($opt_t) {
   # add the spam report to the end of the body as well, if testing.
   my $lines = $mail->{obj}->body();
   push (@{$lines}, split (/$/, $status->get_report()));
   $mail->{obj}->body ($lines);
+}
+
+# if we're piping it, deliver it to stdout.
+if ($opt_t || $opt_P) {
   $mail->{obj}->print (\*STDOUT);
   exit;
 }
 
+# else, store it to the mail spool (thx to Mail::Audit)
+# $MAIL: std on unix
+# $DEFAULT: set by procmail
 my $where = $ENV{'MAIL'} || $ENV{'DEFAULT'} || undef;
 $mail->accept($where);
 exit;
+
+# ---------------------------------------------------------------------------
 
 sub sed_path {
   my $path = shift;
@@ -195,8 +208,10 @@ spamassassin - mail filter to identify spam using text analysis
 
 =head1 SYNOPSIS
 
-  spamassassin [option ...] < mailmessage > output
+  spamassassin [option ...] < mailmessage
+  spamassassin -P [option ...] < mailmessage > output
 
+  -P               pipe message through, instead of delivering to mail spool
   -t               only testing
   -r               report this message as verified spam
   -c config        configuration file
@@ -222,6 +237,12 @@ section below.
 =head1 OPTIONS
 
 =over 4
+
+=item -P
+
+Normally SpamAssassin will write the rewritten message to the mail spool by
+default.  The C<-P> parameter will cause it to pipe the output to STDOUT
+instead.
 
 =item -t
 

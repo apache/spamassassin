@@ -276,6 +276,8 @@ sub get {
   my ($self, $hdrname) = @_;
   local ($_);
 
+  if ($hdrname eq 'ALL') { return $self->{msg}->get_all_headers(); }
+
   my $getaddr = 0;
   if ($hdrname =~ s/:addr$//) { $getaddr = 1; }
 
