@@ -469,7 +469,10 @@ tflags T_URIBL_SC_SURBL		net
 endif   # Mail::SpamAssassin::Plugin::URIDNSBL
 
 # a couple to try out
-header PC_CUR_DATE_TIME       ALL =~ /%CURRENT_DATE_TIME/
-header PC_RND_HEADER          ALL =~ /%RA?ND_[A-Z]/
-body PC_RND_BODY              /%RA?ND_[A-Z]/
+header T_PC_CUR_DATE_TIME       ALL =~ /%CURRENT_DATE_TIME/
+header T_PC_RND_HEADER          ALL =~ /%RA?ND_[A-Z]/
+body T_PC_RND_BODY              /%RA?ND_[A-Z]/
+
+header T_X_MESSAGE_INFO         X-Message-Info =~ /\+/
+describe T_X_MESSAGE_INFO       Ratware signature (X-Message-Info)
 
