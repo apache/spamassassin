@@ -464,6 +464,11 @@ header T_JAPANESE_UCE_SUBJECT_1	Subject =~ /\e\$B.*L\$>5Bz9-9p/
 # "email announcement"
 header T_JAPANESE_UCE_SUBJECT_2	Subject =~ /\e\$B.*EE;R%a!<%k9-9p/
 
+# according to Peter Evans, this should be sufficient to catch the UCE tag
+# and a common attempt at evasion (using the "sue" instead of "mi" Chinese
+# character).  Let's see!
+header T_JAPANESE_UCE_SUBJECT_4	Subject:raw =~ /NUJ6OS05cCIoGyhC/
+
 # quinlan: "advertisement" in Russian KOI8-R
 header T_RUSSIAN_UCE_SUBJECT	Subject =~ /\xf0\xe5\xea\xeb\xe0\xec\xf3/
 
@@ -657,6 +662,10 @@ tflags T_RCVD_IN_SORBS_WEB net
 # OK, a whole batch of faked-HELO detection rules.  These work by checking
 # for hosts HELOing in a certain domain, but without rDNS matching that.
 # these are the most frequently-impersonated headers in my recent corpora...
+#
+# NOTE: these cannot simply be inverted for a "nice" rule; to do this would
+# require checking only the last untrusted line, rather than all of them.
+#
 header T_FAKE_HELO_YAHOO	eval:check_for_rdns_helo_mismatch("yahoo\.com","yahoo\.com")
 header T_FAKE_HELO_HOTMAIL	eval:check_for_rdns_helo_mismatch("hotmail(?:\.msn|)\.com","hotmail\.com")
 header T_FAKE_HELO_AOL		eval:check_for_rdns_helo_mismatch("aol\.com","aol\.com")
