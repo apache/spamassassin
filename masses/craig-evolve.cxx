@@ -22,13 +22,13 @@ double nybias = 15.0;
 const int exhaustive_eval = 1;
 
 const double mutation_rate = 0.01;
-const double mutation_noise = 3.0;
+const double mutation_noise = 1.0;
 const double regression_coefficient = 0.5;
 
 const double crossover_rate = 0.65;
 
-const int pop_size = 20;
-const int replace_num = 5;
+const int pop_size = 200;
+const int replace_num = 50;
 
 const int maxiter = 50000;
 
@@ -89,8 +89,7 @@ int main(int argc, char **argv) {
 
      PGASetUp(ctx);
 
-     // Now fix the alleles for the imutable tests
-     /*
+     // Now initialize the scores
      for(int i=0; i<num_scores; i++)
      {
        for(int p=0; p<pop_size; p++)
@@ -98,7 +97,6 @@ int main(int argc, char **argv) {
 	 PGASetRealAllele(ctx, p, PGA_NEWPOP, i, bestscores[i]);
        }
      }
-     */
 
      PGARun(ctx, evaluate);
 
@@ -199,7 +197,7 @@ int myMutation(PGAContext *ctx, int p, int pop, double mr) {
 	// Regress towards it...
 	gene_sum = (1.0-regression_coefficient)*gene_sum+regression_coefficient*PGAGetRealAllele(ctx, p, pop, i);
 	// Set this gene in this allele to be the average, plus some gaussian noise
-	//if(gene_sum > 15.0) gene_sum = 15.0; else if(gene_sum < -15.0) gene_sum = -15.0;
+	//if(gene_sum > 4.0) gene_sum = 4.0; else if(gene_sum < -4.0) gene_sum = -4.0;
 	PGASetRealAllele(ctx, p, pop, i, PGARandomGaussian(ctx, gene_sum, mutation_noise));
 	count++;
       }
