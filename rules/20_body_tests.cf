@@ -510,7 +510,7 @@ describe LINES_OF_YELLING_3     3 WHOLE LINES OF YELLING DETECTED
 rawbody BASE64_ENC_TEXT		eval:check_for_mime_base64_encoded_text()
 describe BASE64_ENC_TEXT	Message text disguised using base-64 encoding
 
-rawbody  MIME_EXCESSIVE_QP	eval:check_for_mime_excessive_qp()
+rawbody MIME_EXCESSIVE_QP	eval:check_for_mime_excessive_qp('0.011')
 describe MIME_EXCESSIVE_QP	Excessive quoted-printable encoding in body
 
 rawbody MIME_HTML_NO_CHARSET	eval:check_for_mime_html_no_charset()
