@@ -31,7 +31,6 @@ sub cmdline_run {
 	     'ham|nonspam'			=> sub { $isspam = 0; },
 	     'rebuild'				=> \$rebuildonly,
 	     'forget'				=> \$forget,
-             'whitelist-factory=s'              => \$opt{'whitelist-factory'},
              'config-file|C=s'                  => \$opt{'config-file'},
              'prefs-file|p=s'                   => \$opt{'prefs-file'},
 
@@ -44,9 +43,6 @@ sub cmdline_run {
              'stopafter'                        => \$opt{'stopafter'},
 	     'learnprob=f'			=> \$opt{'learnprob'},
 	     'randseed=i'			=> \$opt{'randseed'},
-
-             'auto-whitelist|a'                 => \$opt{'auto-whitelist'},
-             'bias-scores|b'                    => \$opt{'bias-scores'},
 
              'debug-level|D'                    => \$opt{'debug-level'},
              'version|V'                        => \$opt{'version'},
@@ -93,8 +89,6 @@ sub cmdline_run {
   $spamtest->init (1);
 
   $spamtest->init_learner({
-      use_whitelist     => $opt{'auto-whitelist'},
-      bias_scores       => $opt{'bias-scores'},
       force_expire	=> $opt{'force-expire'},
       caller_will_untie	=> 1
   });
