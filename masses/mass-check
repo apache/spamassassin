@@ -60,9 +60,12 @@ usage: mass-check [options] target ...
   --file        subsequent targets are files in RFC 822 format
   --mbox        subsequent targets are mbox files
   --mbx         subsequent targets are mbx files
- 
+
   Just left over functions we should remove at some point:
   --bayes       report score from Bayesian classifier
+
+  sample-based learning
+  --learn=N     learn N% of messages as spam or ham
  
   non-option arguments are used as target names (mail files and folders),
   the target format is: <class>:<format>:<location>
@@ -79,7 +82,8 @@ use vars qw($opt_c $opt_p $opt_f $opt_j $opt_n $opt_o $opt_all $opt_bayes
 	    $opt_debug $opt_format $opt_hamlog $opt_head $opt_loghits
 	    $opt_mid $opt_net $opt_nosort $opt_progress $opt_showdots
 	    $opt_spamlog $opt_tail $opt_rules $opt_restart $opt_loguris
-            $opt_logmem $opt_after $opt_before $opt_rewrite $opt_deencap
+	    $opt_logmem $opt_after $opt_before $opt_rewrite $opt_deencap
+	    $opt_learn
 	    $total_messages $statusevery);
 
 use FindBin;
@@ -103,8 +107,8 @@ $opt_spamlog = "spam.log";
 GetOptions("c=s", "p=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug:s",
 	   "hamlog=s", "head=i", "loghits", "mh", "mid", "ms", "net",
 	   "progress", "rewrite:s", "showdots", "spamlog=s", "tail=i",
-	   "rules=s", "restart=i", "after=s", "before=s", "loguris", "deencap=s",
-           "logmem",
+	   "rules=s", "restart=i", "after=s", "before=s", "loguris",
+	   "deencap=s", "logmem", "learn=i",
 	   "dir" => sub { $opt_format = "dir"; },
 	   "file" => sub { $opt_format = "file"; },
 	   "mbox" => sub { $opt_format = "mbox"; },
@@ -283,7 +287,7 @@ sub result {
 }
 
 sub wanted {
-  my (undef, $id, $time, $dataref, $format) = @_;
+  my ($class, $id, $time, $dataref, $format) = @_;
   my $out;
 
   memory_track_start() if ($opt_logmem);
@@ -317,6 +321,32 @@ sub wanted {
   }
 
   my @extra;
+
+  # sample-based learning
+  if ($opt_learn > 0) {
+    # should be changed to be deterministic
+    if (rand(100) < $opt_learn) {
+      my $spam;
+      if ($class eq 's') {
+	$spam = 1;
+      }
+      elsif ($class eq 'h') {
+	$spam = 0;
+      }
+      else {
+	die "unknown class, learning failed";
+      }
+      my $result = ($spam ? "spam" : "ham");
+      my $status = $spamtest->learn($ma, undef, $spam, 0);
+      $learned = $status->did_learn();
+      $result = "undef" if !defined $learned;
+      push(@extra, "learn=".$result);
+    }
+  }
+
+  if (defined($time)) {
+    push(@extra, "time=".$time);
+  }
   if (defined($time)) {
     push(@extra, "time=".$time);
   }
