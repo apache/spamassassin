@@ -150,7 +150,7 @@ sub read_argv {
 	next if ($opt_l && $line > $opt_l);
 	$last = $type;
 	# "sort | uniq -c" format
-	if (/^\s*(-?\d+|\d+\.\d+)\s+(.*)/) {
+	if (/^\s*(-?\d+|-?\d+\.\d+)\s+(.*)/) {
 	    $type = 1;
 	    $freq{$2} = $1;
 	}
@@ -173,7 +173,7 @@ sub read_argv {
 	    $freq{$_} = $line;
 	}
 	if ($last && $last != $type) {
-	    die "$prog: inconsistent format in $ARGV[$input]\n";
+	    die "$prog: inconsistent format in $ARGV[$input] (format $last then format $type)\n";
 	}
     }
     close(FILE);
