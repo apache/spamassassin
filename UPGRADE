@@ -80,6 +80,10 @@ Note for Users Upgrading to SpamAssassin 3.0.0
 - The following flags are deprecated and will be removed in a future release:
   --whitelist-factory, -M, --warning-from, -w, --log-to-mbox, -l
 
+- user_scores_sql_table is no longer supported.  If you need to use a table
+  name, other than the default, create a custom query using the
+  user_scores_sql_custom_query config option.
+
 - SpamAssassin runs in "taint mode" by default for improved security.
   Certain third-party modules, such as Razor v2, may be incompatible with
   taint mode. For Razor v2, you will need to be using v2.40 of
