@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.509 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.510 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -305,10 +305,8 @@ describe T_YAHOO_REDIR		Yahoo Redirect
 # Justin says Yahoo stopped using this hostname entirely (which makes me
 # wonder if spammers will still use it and whether it will work on our
 # older corpus mail)
-uri T_YAHOO_REDIRECTOR_1	/^http:\/\/rd\.yahoo\.com/i
-describe T_YAHOO_REDIRECTOR_1	Uses commonly-spammed redirector URL
-uri T_YAHOO_REDIRECTOR_2	/^https?:\/\/rd\.yahoo\.com/i
-describe T_YAHOO_REDIRECTOR_2	Uses commonly-spammed redirector URL
+uri T_YAHOO_REDIRECTOR		/^https?:\/\/rd\.yahoo\.com/i
+describe T_YAHOO_REDIRECTOR	Uses commonly-spammed redirector URL
 
 uri T_BIZ_LINKS			/(?:^https?\:\/\/|^mailto\:).{0,20}\.bi?z/i
 describe T_BIZ_LINKS		Links to .biz .bz
