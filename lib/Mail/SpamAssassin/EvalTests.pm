@@ -1251,7 +1251,7 @@ sub check_for_uppercase {
   my @lines = grep(/\S\s+\S/, @{$body});
 
   # strip out lingering base64 (currently possible for forwarded messages)
-  my @lines = grep(!/^([A-Za-z0-9+\/=]{60,76} ){2}/, @lines);
+  @lines = grep(!/^([A-Za-z0-9+\/=]{60,76} ){2}/, @lines);
 
   # join lines together
   $body = join('', @lines);
