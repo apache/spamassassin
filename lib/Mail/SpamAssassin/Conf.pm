@@ -1576,7 +1576,7 @@ spam, but you can tune these up or down with these two settings.
 =item bayes_learn_during_report         (Default: 1)
 
 The Bayes system will, by default, learn any reported messages
-(spamassassin -r) as spam.  If you do not want this to happen, set
+(C<spamassassin -r>) as spam.  If you do not want this to happen, set
 this option to 0.
 
 =cut
