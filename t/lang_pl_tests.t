@@ -12,6 +12,7 @@ q{ Analiza zawarto¶ci: }, 'didnt_hang_at_least',
 
 );
 
+$ENV{'PERL_BADLANG'} = 0; # Sweep problems under the rug
 $ENV{'LANG'} = 'pl';
 sarun ("-L -t < data/nice/004", \&patterns_run_cb);
 ok_all_patterns();
