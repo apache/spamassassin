@@ -246,10 +246,31 @@ Note: one possible cause for this is the use of smrsh on the MTA system;
 see http://wiki.spamassassin.org/w/ProcmailVsSmrsh for details.
 
 
+CPAN
+----
+
+Most of the modules listed below are available via the Comprehensive
+Perl Archive Network (CPAN, http://www.cpan.org/).  While each module
+is different, most can be installed via a few simple commands such as:
+
+	$ perl -MCPAN -e shell
+	cpan> o conf prerequisites_policy ask
+	cpan> install Module::Name
+	cpan> quit
+
+If there are problems or questions regarding the installation any of
+the modules, please see the module's documentation for more information.
+We can't provide documentation or installation support for third party
+modules.
+
+Also, more information about the CPAN module is available via "perldoc
+CPAN".
+
+
 Required Modules
 ----------------
 
-These modules are required for SpamAssassin to build:
+These modules are required for SpamAssassin to build and run:
 
   - ExtUtils::MakeMaker >= 5.45 (included in Perl 5.6.1 and later)
 
@@ -305,11 +326,6 @@ skipped.
     auto-whitelist.  *Much* more efficient than the other standard Perl
     database packages.  Strongly recommended.
 
-	perl -MCPAN -e shell
-	o conf prerequisites_policy ask
-	install DB_File
-	quit
-
     There seems to be a bug in libdb 4.1.25, which is distributed by
     default on some versions of Linux.  See
     http://wiki.apache.org/spamassassin/DbFileSleepBug for details.
@@ -331,11 +347,6 @@ skipped.
 
     Used to check the RBL, RSS, DUL etc. and perform MX checks.
     Recommended.
-
-	perl -MCPAN -e shell
-	o conf prerequisites_policy ask
-	install Net::DNS
-	quit
 
 
   - Mail::SPF::Query     (from CPAN)
