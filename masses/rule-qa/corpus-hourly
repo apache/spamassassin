@@ -1,0 +1,227 @@
+#!/usr/bin/perl -w
+
+# $HOME/.corpus should contain settings for these values:
+#
+# corpus=/home/corpus/corpus
+# tree=/home/corpus/cvs/spamassassin
+# tmp=/home/corpus/tmp
+# tagtime=/home/corpus/log/tagtime
+# html=/home/html/root/users/corpus
+# username=joe
+# password=xyzzy
+
+use strict;
+use POSIX qw(nice);
+
+nice(10);
+
+my $configuration = "$ENV{HOME}/.corpus";
+my %opt;
+my @files;
+my $skip = '';
+
+&configure;
+&init;
+&update;
+&locate;
+&rename;
+&current;
+&clean_up;
+
+sub configure {
+    # does rough equivalent of source
+    open(C, $configuration) || die "open failed: $configuration: $!\n";
+    while(<C>) {
+	chomp;
+	s/#.*//;
+	if (/^(.*?)\s*=\s*(.*)/) {
+	    $opt{$1} = $2;
+	}
+    }
+    close(C);
+}
+
+sub clean_up {
+    system "rm -f $opt{tmp}/*.$$";
+}
+
+sub init {
+    $SIG{INT} = \&clean_up;
+    $SIG{TERM} = \&clean_up;
+
+    $ENV{RSYNC_PASSWORD} = $opt{password};
+    $ENV{TIME} = '%e,%U,%S';
+    $ENV{TZ} = 'UTC';
+}
+
+sub update {
+    chdir $opt{corpus};
+    system "rsync -CPcvuzbt --timeout=60 $opt{username}" . '@belphegore.hughes-family.org::corpus/* .';
+}
+
+sub locate {
+    chdir "$opt{tree}/masses";
+    opendir(CORPUS, $opt{corpus});
+    @files = sort readdir(CORPUS);
+    closedir(CORPUS);
+
+    @files = grep { /^(?:spam|nonspam|ham)-(?:net-)?\w+\.log$/ && -f "$opt{corpus}/$_" && -M _ < 10 } @files;
+    @files = grep {
+	my $time = 0;
+	my $version = 0;
+	open(FILE, "$opt{corpus}/$_");
+	while (my $line = <FILE>) {
+	    last if $line !~ /^#/;
+	    $time++ if $line =~ /\b(?!08)\d\d:\d\d:\d\d\b/;
+	    $version++ if $line =~ /CURRENT_CORPORA_SUBMIT_VERSION/;
+	}
+	close(FILE);
+	if (!$time) {
+	    $skip .= "# skipped $_: time is between 0800 UTC and 0900 UTC\n";
+	}
+	if (!$version) {
+	    $skip .= "# skipped $_: tag not CURRENT_CORPORA_SUBMIT_VERSION\n";
+	}
+	($time && $version);
+    } @files;
+}
+
+sub rename {
+    use File::Copy qw(move);
+
+    my $hour = (gmtime(time))[2];
+    if ($hour == 9) {
+	chdir $opt{html};
+	opendir(HTML, $opt{html});
+	my @html = readdir(HTML);
+	closedir(HTML);
+	@html = grep { -f } @html;
+	for (@html) {
+	    move($_, "last/$_");
+	}
+    }
+}
+
+sub sort_all {
+    my ($a1, $a2) = ($a =~ m/(\(.*?\)|\S+)(?::(\S+))?$/);
+    my ($b1, $b2) = ($b =~ m/(\(.*?\)|\S+)(?::(\S+))?$/);
+
+    $a2 ||= '';
+    $b2 ||= '';
+    my $n = ($a1 cmp $b1) || ($a2 cmp $b2);
+    $n -= 1000 if $a =~ /^OVERALL/;
+    $n += 1000 if $b =~ /^OVERALL/;
+    $n -= 100 if $a1 =~ /^\(all messages\)/;
+    $n += 100 if $b1 =~ /^\(all messages\)/;
+    $n -= 10 if $a1 =~ /^\(all messages as \%\)/;
+    $n += 10 if $b1 =~ /^\(all messages as \%\)/;
+    return $n;
+}
+
+sub current {
+    for my $class ("DETAILS", "HTML", "NET", "ALL") {
+	my @ham = grep { /^(?:nonspam|ham)/ } @files;
+	my @spam = grep { /^spam/ } @files;
+	
+	for my $age ("new", "1day", "2day", "7day", "10day") {
+	    chdir $opt{corpus};
+
+	    next if ($class eq "NET" && $age ne "10day");
+	    next if ($class ne "NET" && $age eq "10day");
+	    next if ($class eq "ALL" && $age ne "new");
+
+	    # net vs. local
+	    my @ham_net = grep { /-net-/ } @ham;
+	    my @spam_net = grep { /-net-/ } @spam;
+	    if ($class eq "NET") {
+		@ham = @ham_net;
+		@spam = @spam_net;
+	    }
+	    else {
+		# remove duplicates
+		for my $net (@ham_net) {
+		    @ham = grep { $_ ne $net } @ham;
+		}
+		for my $net (@spam_net) {
+		    @spam = grep { $_ ne $net } @spam;
+		}
+	    }
+	    
+	    # age
+	    if ($age eq "new") {
+		@ham = grep { -M "$_" < -M $opt{tagtime} } @ham;
+		@spam = grep { -M "$_" < -M $opt{tagtime} } @spam;
+	    }
+	    elsif ($age =~ /(\d+)day/) {
+		my $mtime = $1;
+		@ham = grep { -M "$_" < $mtime } @ham;
+		@spam = grep { -M "$_" < $mtime } @spam;
+	    }
+	    
+	    open(OUT, "> $opt{html}/$class.$age");
+	    print OUT "# ham results used: " . join(" ", @ham) . "\n";
+	    print OUT "# spam results used: " . join(" ", @spam) . "\n";
+	    print OUT $skip if $skip;
+	    print OUT "\n";
+
+	    if ($class eq "ALL") {
+		my %spam;
+		my %ham;
+		my @output;
+		
+		for my $file (@spam) {
+		    $spam{$1} = $file if ($file =~ m/-(\w+)\.log$/);
+		}
+		for my $file (@ham) {
+		    $ham{$1} = $file if ($file =~ m/-(\w+)\.log$/);
+		}
+		unlink "$opt{tmp}/ham.log.$$";
+		unlink "$opt{tmp}/spam.log.$$";
+		for my $user (sort keys %spam) {
+		    next unless defined $ham{$user};
+		    chdir "$opt{tree}/masses";
+		    system("cat $opt{corpus}/$ham{$user} >> $opt{tmp}/ham.log.$$");
+		    system("cat $opt{corpus}/$spam{$user} >> $opt{tmp}/spam.log.$$");
+		    open(IN, "./hit-frequencies -p -x $opt{corpus}/$spam{$user} $opt{corpus}/$ham{$user} |");
+		    while(<IN>) {
+			chomp;
+			push @output, "$_:$user\n";
+		    }
+		    close(IN);
+		}
+		open(IN, "./hit-frequencies -p -x $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$ |");
+		while(<IN>) {
+		    push @output, $_;
+		}
+		close(IN);
+		for (sort sort_all @output) {
+		    print OUT $_;
+		}
+	    }
+	    else {
+		# get logs
+		system("cat " . join(" ", @ham) . " > $opt{tmp}/ham.log.$$");
+		system("cat " . join(" ", @spam) . " > $opt{tmp}/spam.log.$$");
+	
+		chdir "$opt{tree}/masses";
+		# open hit-frequencies
+		if ($class eq "NET") {
+		    open(IN, "./hit-frequencies -s 1 -p -x -t net $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$ |");
+		}
+		elsif ($class eq "HTML") {
+		    open(IN, "./hit-frequencies -p -x -M HTML_MESSAGE $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$ |");
+		}
+		else {
+		    open(IN, "./hit-frequencies -p -x $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$ |");
+		}
+
+		# do hit-frequencies
+		while(<IN>) {
+		    print(OUT);
+		}
+		close(IN);
+	    }
+	    close(OUT);
+	}
+    }
+}
