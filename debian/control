@@ -2,14 +2,14 @@ Source: spamassassin
 Section: mail
 Priority: optional
 Maintainer: Duncan Findlay <duncf@debian.org>
-Build-Depends: debhelper (>> 4.0.0), perl (>=5.6.0-16)
-Standards-Version: 3.5.2
+Build-Depends: debhelper (>> 4.0.0), perl (>= 5.6.0-16)
+Standards-Version: 3.5.7
 
 Package: spamassassin
 Architecture: all
-Depends: ${perl:Depends}, ${misc:Depends}, libnet-smtp-server-perl, libtime-hires-perl
-Recommends: libnet-dns-perl, libmailtools-perl, spamc (= ${Source-Version})
-Suggests: librazor-perl
+Depends: ${perl:Depends}, ${misc:Depends}, libnet-smtp-server-perl, libhtml-parser-perl, spamc (>= 2.30)
+Recommends: libnet-dns-perl, libmailtools-perl
+Suggests: razor
 Provides: libmail-spamassassin-perl
 Description: Perl-based spam filter using text analysis
  spamassassin is a very powerful and fully configurable spam filter

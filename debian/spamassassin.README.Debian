@@ -2,8 +2,9 @@ Please read README for instructions on setting up your .procmailrc file.  If
 you wish to use spamd (the Daemon version of spamassassin), please edit
 /etc/default/spamassassin.
 
-'spamc' is equivalent to 'spamassassin' and you should use it instead if
-(and only if) you enabled 'spamd' (and you've installed the spamc package)
+spamc functions very similarly to spamassassin. The difference between
+the two is that spamassassin does its own processing, while spamc
+passes the mail off to the spamd daemon, to reduce the overhead of loading.
 
 To add rules, change scores, edit the template, edit
 /etc/spamassassin/local.cf. Please don't touch the other files in
@@ -18,13 +19,10 @@ spamassassin is called, or when spamc is used with 'spamd -c'.
 
 SpamAssassin is compatible with Razor, an online spam database.  Get the
 package razor, maintained by Robert van der Meulen. Razor version 2 is
-not (yet) supported.
+supported, but Debian packages don't exist yet.
 
-By default, spamassassin checks the RBLs relays.osirusoft.com,
-relays.ordb.org, relays.visi.com, orbs.dorkslayers.com, list.dsbl.org,
-multihop.dsbl.org. Spamassassin does not check the commercial RBLs
-blackholes.mail-abuse.org, relays.mail-abuse.org, dialups.mail-abuse.org and
-bl.spamcop.net.  See the README to enable these.
+By default, spamassassin checks certain free RBLs. Other, commercial
+RBLs can easily be enabled. See the README for more information.
 
 Spamassassin has the character set tests turned off in
 /etc/spamassassin/65_debian.cf, since this causes problems for foreign
@@ -34,8 +32,21 @@ appropriately.
 Spamd may not be entirely secure!  Read README.spamd before running
 spamd.
 
-spamd and spamproxyd are in /usr/sbin, not /usr/bin. (This differs
-from upstream)
+spamd is in /usr/sbin, not /usr/bin. (This differs from upstream)
+
+As of 2.40, spamproxyd is no longer included in the Debian or upstream
+packages. This is due to the fact that spamproxyd is essentially
+unmaintained and is (in upstream's opinion) best as a separate
+download.
+
+As of 2.40, spamassassin's -P flag is enabled by default (and can't be
+turned off). If you rely on spamassassin to perform delivery, you have
+been lucky until now (delivery was not very lock-safe) and you really
+should use procmail to deliver your mail (after filtering through
+spamassassin).
+
+For information on integrating spamassassin and exim, see
+http://dman.ddts.net/~dman/config_docs/exim3_spamassassin.html
 
 Duncan Findlay
 duncf@debian.org

@@ -39,7 +39,14 @@ configure-stamp:
 
 	dh_testdir
 
-	perl Makefile.PL INSTALLDIRS=vendor
+	perl Makefile.PL INSTALLDIRS=vendor \
+	 PREFIX=$(CURDIR)/debian/$(packagei)/usr \
+	 VENDORPREFIX=$(CURDIR)/debian/$(packagei)/usr \
+	 SYSCONFDIR=$(CURDIR)/debian/$(packagei)/etc \
+	 INST_PREFIX=/usr INST_SYSCONFDIR=/etc \
+	 PKG_LOCAL_RULES_DIR=$(CURDIR)/debian/$(packagei)/etc/spamassassin \
+	 LOCAL_RULES_DIR=/etc/spamassassin \
+	 RUN_RAZOR1_TESTS=n RUN_RAZOR2_TESTS=n
 
 	touch configure-stamp
 
@@ -57,7 +64,7 @@ clean:
 	-$(MAKE) veryclean
 
 	rm -f spamd/spamc.1p
-	rm -f t/log/stripmarkup.1
+	-rm -Rf t/log/*
 
 	dh_clean
 
@@ -70,7 +77,6 @@ build-indep-stamp: configure
 
 	$(MAKE) CFOPTIMIZE=$(CFLAGS) CFCCFLAGS="" CFLIBS="" CFLDFLAGS=""
 
-# This strikes me as kludgy. Too bad.
 	touch build-arch-stamp
 
 	touch build-indep-stamp
@@ -82,18 +88,23 @@ install-indep: build-indep
 	dh_clean -k
 	dh_installdirs -i
 
-	$(MAKE) install PREFIX=$(CURDIR)/debian/$(packagei)/usr LOCAL_RULES_DIR="debian/$(packagei)/etc/spamassassin" DEF_RULES_DIR="debian/$(packagei)/etc/spamassassin"
+	$(MAKE) install
+
 
 # Get rid of SPAMC stuff.
 
 	rm debian/$(packagei)/usr/bin/spamc debian/$(packagei)/usr/share/man/man1/spamc.1p
 
-	#cp spamproxy/README debian/$(packagei)/usr/share/doc/$(packagei)/README.spamproxy
+#	cp spamproxy/README debian/$(packagei)/usr/share/doc/$(packagei)/README.spamproxy
 	cp sql/README debian/$(packagei)/usr/share/doc/$(packagei)/README.sql
 
 	cp debian/logcheck debian/$(packagei)/etc/logcheck/ignore.d.server/spamassassin
+	cp debian/logcheck debian/$(packagei)/etc/logcheck/ignore.d.workstation/spamassassin
+	cp debian/logcheck debian/$(packagei)/etc/logcheck/ignore.d.paranoid/spamassassin
 
-	cp debian/65_debian.cf debian/$(packagei)/etc/spamassassin/65_debian.cf
+	cp debian/65_debian.cf debian/$(packagei)/usr/share/spamassassin/65_debian.cf
+
+	cp INSTALL debian/$(packagei)/usr/share/doc/spamassassin/SETUP
 
 	sed 's#SPAMD 1#SPAMD 8#' \
 	 debian/$(packagei)/usr/share/man/man1/spamd.1p \
@@ -106,19 +117,19 @@ install-indep: build-indep
 #	rm debian/$(packagei)/usr/share/man/man1/spamproxyd.1p
 
 	mv debian/$(packagei)/usr/bin/spamd debian/$(packagei)/usr/sbin/
-	#mv debian/$(packagei)/usr/bin/spamproxyd debian/$(packagei)/usr/sbin/
+#	mv debian/$(packagei)/usr/bin/spamproxyd debian/$(packagei)/usr/sbin/
 
 	-rmdir -p debian/$(packagei)/usr/lib/perl5
 
 binary-indep: build-indep install-indep
 	dh_testdir -i
 	dh_testroot -i
-#	dh_installdebconf -i
+	dh_installdebconf -i
 	dh_installdocs -i
 	dh_installexamples -i
 	dh_installinit -i -- defaults 19
 	dh_installchangelogs Changes -i
-	dh_link -i
+#	dh_link -i
 	dh_compress -i
 	dh_fixperms -i
 	dh_installdeb -i

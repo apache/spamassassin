@@ -31,22 +31,23 @@ case "$1" in
   start)
 	echo -n "Starting $DESC: "
 	start-stop-daemon --start --pidfile $PIDFILE --name $PNAME \
-	    --startas $DAEMON -- $OPTIONS $DOPTIONS
+	    --oknodo --startas $DAEMON -- $OPTIONS $DOPTIONS
 
 	echo "$NAME."
 	;;
   stop)
 	echo -n "Stopping $DESC: "
 
-	start-stop-daemon --stop --pidfile $PIDFILE --name $PNAME
+	start-stop-daemon --stop --pidfile $PIDFILE --name $PNAME --oknodo
 
 	echo "$NAME."
 	;;
   restart|force-reload)
 	echo -n "Restarting $DESC: "
-	start-stop-daemon --stop --pidfile $PIDFILE --name $PNAME --retry 5
+	start-stop-daemon --stop --pidfile $PIDFILE --name $PNAME \
+	    --retry 5 --oknodo
 	start-stop-daemon --start --pidfile $PIDFILE --name $PNAME \
-	    --startas $DAEMON -- $OPTIONS $DOPTIONS
+	    --oknodo --startas $DAEMON -- $OPTIONS $DOPTIONS
 
 	echo "$NAME."
 	;;
