@@ -73,20 +73,20 @@ header RCVD_IN_SORBS_HTTP	eval:check_rbl_sub('sorbs', '127.0.0.2')
 describe RCVD_IN_SORBS_HTTP	SORBS: sender is open HTTP proxy server
 tflags RCVD_IN_SORBS_HTTP	net
 
-header RCVD_IN_SORBS_MISC	eval:check_rbl_sub('sorbs', '127.0.0.3')
-describe RCVD_IN_SORBS_MISC	SORBS: sender is open proxy server
-tflags RCVD_IN_SORBS_MISC	net
-
-header RCVD_IN_SORBS_SMTP	eval:check_rbl_sub('sorbs', '127.0.0.4')
-describe RCVD_IN_SORBS_SMTP	SORBS: sender is open SMTP relay
-tflags RCVD_IN_SORBS_SMTP	net
-
-header RCVD_IN_SORBS_SOCKS	eval:check_rbl_sub('sorbs', '127.0.0.5')
+header RCVD_IN_SORBS_SOCKS	eval:check_rbl_sub('sorbs', '127.0.0.3')
 describe RCVD_IN_SORBS_SOCKS	SORBS: sender is open SOCKS proxy server
 tflags RCVD_IN_SORBS_SOCKS	net
 
+header RCVD_IN_SORBS_MISC	eval:check_rbl_sub('sorbs', '127.0.0.4')
+describe RCVD_IN_SORBS_MISC	SORBS: sender is open proxy server
+tflags RCVD_IN_SORBS_MISC	net
+
+header RCVD_IN_SORBS_SMTP	eval:check_rbl_sub('sorbs', '127.0.0.5')
+describe RCVD_IN_SORBS_SMTP	SORBS: sender is open SMTP relay
+tflags RCVD_IN_SORBS_SMTP	net
+
 header RCVD_IN_SORBS_SPAM	eval:check_rbl_sub('sorbs', '127.0.0.6')
-describe RCVD_IN_SORBS_SPAM	SORBS: sender is a spam source
+describe RCVD_IN_SORBS_SPAM	SORBS: spam source or spam-supporting ISP
 tflags RCVD_IN_SORBS_SPAM	net
 
 header RCVD_IN_SORBS_WEB	eval:check_rbl_sub('sorbs', '127.0.0.7')
