@@ -342,13 +342,15 @@ sub rewrite_as_spam {
   $self->{msg}->put_header ("X-Spam-Flag", 'YES');
 
   # defang HTML mail; change it to text-only.
-  my $ct = $srcmsg->get_header ("Content-Type");
-  $ct ||= $srcmsg->get_header ("Content-type");
+  if ($self->{conf}->{defang_mime}) {
+    my $ct = $srcmsg->get_header ("Content-Type");
+    $ct ||= $srcmsg->get_header ("Content-type");
 
-  if (defined $ct && $ct ne '' && $ct ne 'text/plain') {
-    $self->{msg}->replace_header ("Content-Type", "text/plain");
-    $self->{msg}->delete_header ("Content-type"); 	# just in case
-    $self->{msg}->replace_header ("X-Spam-Prev-Content-Type", $ct);
+    if (defined $ct && $ct ne '' && $ct ne 'text/plain') {
+      $self->{msg}->replace_header ("Content-Type", "text/plain");
+      $self->{msg}->delete_header ("Content-type"); 	# just in case
+      $self->{msg}->replace_header ("X-Spam-Prev-Content-Type", $ct);
+    }
   }
 
   if ($self->{conf}->{report_header}) {
