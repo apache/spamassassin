@@ -698,7 +698,7 @@ sub journal_sync_due {
   ## Ok, should we do a sync?
 
   # Not if the journal file doesn't exist, it's not a file, or it's 0 bytes long.
-  return 0 unless (stat($self->get_journal_filename()) && -f _ && -s _);
+  return 0 unless (stat($self->get_journal_filename()) && -f _);
 
   # Yes if the file size is larger than the specified maximum size.
   return 1 if (-s _ > $conf->{bayes_journal_max_size});

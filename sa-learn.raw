@@ -329,7 +329,9 @@ a busy server.
 
 =item B<--force-expire>
 
-Forces an expiry run, regardless of whether it may be necessary or not.
+Forces an expiry attempt, regardless of whether it may be necessary
+or not.  Note: This doesn't mean any tokens will actually expire.
+Please see the EXPIRATION section below.
 
 =item B<--forget>
 
@@ -432,32 +434,126 @@ updated in the C<bayes_toks> database.
 
 Since SpamAssassin auto-learns, the Bayes database files could increase
 perpetually until they fill your disk or you run out of memory.  To control
-this, SpamAssassin performs expiration.
+this, SpamAssassin performs journal syncronization and bayes expiration.
 
-Every C<bayes_expiry_scan_count> / 2 messages, or when C<sa-learn --rebuild
---force-expire> is run, SpamAssassin will attempt an expiry run, as follows.
-
-SpamAssassin runs through every token in the database.  If that token has not
-been used during the scanning of the last C<bayes_expiry_scan_count> messages,
-it is marked for deletion.
-
-Next, if that operation would bring the number of tokens below the
-C<bayes_expiry_min_db_size> threshold, it removes tokens from the for-deletion
-list until the resulting database would contain C<bayes_expiry_min_db_size>
-token entries.
-
-It then removes the listed tokens and updates the 'last expiry' setting.
-
-The SpamAssassin configuration settings which control this operation are:
+SpamAssassin can sync the journal and expire the DB tokens either
+manually or opportunistically.  A journal sync is due if I<--rebuild>
+is passed to sa-learn (manual), or if all of the following are true
+(opportunistic):
 
 =over 4
 
-=item C<bayes_expiry_min_db_size> is part of the SpamAssassin configuration.
-The default value is 100000, which is roughly equivalent to a 5Mb database file
-if you're using DB_File.
+=item - bayes_journal_max_size does not equal 0 (means don't sync)
 
-=item C<bayes_expiry_scan_count> is also part of the SpamAssassin
-configuration.  The default value is 5000.
+=item - the journal file exists
+
+=item - the journal file has a size greater than bayes_journal_max_size
+
+=item - at least 1 day has passed since the last journal sync
+
+=back
+
+Expiry is due if I<--force-expire> is passed to sa-learn (manual),
+or if all of the following are true (opportunistic):
+
+=over 4
+
+=item - the last expire was attempted at least 12hrs ago
+
+=item - bayes_expiry_max_db_size does not equal 0 (means don't expire)
+
+=item - number of tokens in the DB is > bayes_expiry_max_db_size
+
+=item - number of tokens in the DB is > 100,000
+
+=item - at least a 12 hr difference between the oldest and newest token atimes
+
+=back
+
+=head2 EXPIRE LOGIC
+
+If either the manual or opportunistic method causes an expire run
+to start, here is the logic that is used:
+
+=over 4
+
+=item - figure out how many tokens to keep.  take the larger of
+either bayes_expiry_max_db_size * 75% or 100,000 tokens.  therefore, the goal
+reduction is number of tokens - number of tokens to keep.
+
+=item - if the reduction number if < 1000 tokens, abort (not worth the effort).
+
+=item - if an expire has been done before, guesstimate the new
+atime delta based on the old atime delta.  (new_atime_delta =
+old_atime_delta * goal / old_reduction_count)
+
+=item - if no expire has been done before, or the last expire looks
+"wierd", do an estimation pass.  The definition of "wierd" is:
+
+=over 8
+
+=item - last expire over 30 days ago
+
+=item - last atime delta was < 12 hrs
+
+=item - last reduction count was < 1000 tokens
+
+=item - estimated new atime delta is < 12 hrs
+
+=item - the difference between the last reduction count and the goal reduction count is > 50%
+
+=back
+
+=back
+
+=head2 ESTIMATION PASS LOGIC
+
+Go through each of the DB's tokens.  Starting at 12hrs, calculate
+whether or not the token would be expired (based on the difference
+between the token's atime and the db's newest token atime) and keep
+the count.  Work out from 12hrs exponentially by powers of 2.  ie:
+12hrs * 1, 12hrs * 2, 12hrs * 4, 12hrs * 8, and so on, up to 12hrs
+* 512 (6144hrs, or 256 days).
+
+The larger the delta, the smaller the number of tokens that will
+be expired.  Conversely, the number of tokens goes up as the delta
+gets smaller.  So starting at the largest atime delta, figure out
+which delta will expire the most tokens without going above the
+goal expiration count.  Use this to choose the atime delta to use,
+unless one of the following occurs:
+
+=over 8
+
+=item - the largest atime (smallest reduction count) would expire
+too many tokens.  this means the learned tokens are mostly old and
+there needs to be new tokens learned before an expire can
+occur.
+
+=item - all of the atime choices result in 0 tokens being removed.
+this means the tokens are all newer than 12 hours and there needs
+to be new tokens learned before an expire can occur.
+
+=item - the number of tokens that would be removed is < 1000.  the
+benefit isn't worth the effort.  more tokens need to be learned.
+
+=back
+
+If the expire run gets past this point, we'll do the expire.  A
+new DB is created since the DB modules don't shrink the DB file
+when tokens are removed.  So we do the "create new, migrate old to
+new, remove old, rename new" shuffle.
+
+=head2 EXPIRY RELATED CONFIGURATION SETTINGS
+
+=over 4
+
+=item C<bayes_expiry_max_db_size> is part of the SpamAssassin
+configuration.  The default value is 150,000, which is roughly
+equivalent to a 8Mb database file if you're using DB_File.
+
+=item C<bayes_journal_max_size> specifies how large the Bayes
+journal will grow before it is opportunistically synced.  The
+default value is 102400.
 
 =back
 
