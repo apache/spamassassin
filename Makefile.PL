@@ -20,11 +20,9 @@ use Config;
 use ExtUtils::MakeMaker;
 
 # do this in perl, it's more portable
-my $rulesfiles = join (' ', map { s/rules.//; $_ } (<rules/*.cf>));
-$rulesfiles =~ s/local\.cf//;
-$rulesfiles =~ s/regression_tests\.cf//; # Don't include regression tests
-
-$rulesfiles .= " triplets.txt languages";
+my @rulesfiles = map { substr($_, 6) } (<rules/*.cf>);
+my $rulesfiles = join(' ', grep { /^[0-6][0-9]_/ } @rulesfiles); # Include only .cfs in the range 00-69
+$rulesfiles   .= " triplets.txt languages";
 
 sub MY::libscan {
   my($self,$path) = @_;
@@ -144,9 +142,11 @@ spamd/spamc: spamd/spamc.c spamd/libspamc.c
 			-o $@ $(CFLDFLAGS) $(CFLIBS)
 
 inst_cfs: $(LOCAL_RULES_DIR) $(DEF_RULES_DIR) $(DEF_RULES_DIR)/user_prefs.template $(LOCAL_RULES_DIR)/local.cf
+	$(RM_F) $(DEF_RULES_DIR)/*; \
 	for file in $(RULES) ; do \
 	  $(CP) rules/$$file $(DEF_RULES_DIR)/$$file; \
-	done
+	done; \
+	chmod 644 $(DEF_RULES_DIR)/*
 
 $(DEF_RULES_DIR)/user_prefs.template: rules/user_prefs.template
 	$(CP) rules/user_prefs.template $(DEF_RULES_DIR)/user_prefs.template
