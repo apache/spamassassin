@@ -47,7 +47,7 @@ use vars	qw{
 	$type_body_evals $type_full_tests $type_full_evals
 	$type_rawbody_tests $type_rawbody_evals 
 	$type_uri_tests $type_uri_evals
-	$type_rbl_evals $type_rbl_res_evals
+	$type_rbl_evals $type_rbl_res_evals $type_meta_tests
 };
 
 @ISA = qw();
@@ -64,6 +64,7 @@ $type_uri_tests  = 109;
 $type_uri_evals  = 110;
 $type_rbl_evals  = 120;
 $type_rbl_res_evals  = 121;
+$type_meta_tests = 122;
 
 ###########################################################################
 
@@ -90,6 +91,7 @@ sub new {
   $self->{full_evals} = { };
   $self->{rawbody_tests} = { };
   $self->{rawbody_evals} = { };
+  $self->{meta_tests} = { };
 
   # testing stuff
   $self->{regression_tests} = { };
@@ -381,6 +383,9 @@ be an integer or a real number.
 Assign a score to a given test.  Scores can be positive or negative real
 numbers or integers.  C<SYMBOLIC_TEST_NAME> is the symbolic name used by
 SpamAssassin as a handle for that test; for example, 'FROM_ENDS_IN_NUMS'.
+
+Note that test names which begin with '__' are reserved for meta-match
+sub-rules, and are not scored or listed in the 'tests hit' reports.
 
 =cut
 
@@ -790,6 +795,9 @@ C<factor> = 1 means just use the long-term mean; C<factor> = 0 mean just use the
 
 Used to describe a test.  This text is shown to users in the detailed report.
 
+Note that test names which begin with '__' are reserved for meta-match
+sub-rules, and are not scored or listed in the 'tests hit' reports.
+
 =cut
 
     if (/^describe\s+(\S+)\s+(.*)$/) {
@@ -1169,6 +1177,10 @@ C<modifiers> as regexp modifiers in the usual style.
 If the C<[if-unset: STRING]> tag is present, then C<STRING> will
 be used if the header is not found in the mail message.
 
+Note that test names which begin with '__' are reserved for meta-match
+sub-rules, and are not scored or listed in the 'tests hit' reports.
+
+
 =item header SYMBOLIC_TEST_NAME exists:name_of_header
 
 Define a header existence test.  C<name_of_header> is the name of a
@@ -1302,6 +1314,29 @@ Define a full-body eval test.  See above.
     }
     if (/^full\s+(\S+)\s+(.*)$/) {
       $self->add_test ($1, $2, $type_full_tests);
+      $self->{user_rules_to_compile} = 1 if $scoresonly;
+      next;
+    }
+
+=item meta SYMBOLIC_TEST_NAME boolean expression
+
+Define a boolean expression test in terms of other tests that have
+been hit or not hit.  For example:
+
+meta META1        TEST1 && !(TEST2 || TEST3)
+
+Note that English language operators ("and", "or") will be treated as
+rule names, and that there is no XOR operator.
+
+If you want to define a meta-rule, but do not want its individual sub-rules to
+count towards the final score unless the entire meta-rule matches, give the
+sub-rules names that start with '__' (two underscores).  SpamAssassin will
+ignore these for scoring.
+
+=cut
+
+    if (/^meta\s+(\S+)\s+(.*)$/) {
+      $self->add_test ($1, $2, $type_meta_tests);
       $self->{user_rules_to_compile} = 1 if $scoresonly;
       next;
     }
@@ -1515,6 +1550,7 @@ sub finish_parsing {
     elsif ($type == $type_full_evals) { $self->{full_evals}->{$name} = $text; }
     elsif ($type == $type_uri_tests)  { $self->{uri_tests}->{$name} = $text; }
     # elsif ($type == $type_uri_evals)  { $self->{uri_evals}->{$name} = $text; }
+    elsif ($type == $type_meta_tests) { $self->{meta_tests}->{$name} = $text; }
     else {
       # 70 == SA_SOFTWARE
       sa_die (70, "unknown type $type for $name: $text");

@@ -161,6 +161,13 @@ sub check {
     $self->do_rbl_res_eval_tests();
     timelog("Finished all RBL tests", "rblblock", 2);
 
+    # Do meta rules second-to-last, but don't do them if the "-S" option
+    # is used, because then not all rules will have been run, so some
+    # of the rules that meta-rules depend on will be falsely false
+    if (!$self->{stop_at_threshold}) {
+        $self->do_meta_tests();
+    }
+
     # Do AWL tests last, since these need the score to have already been calculated
     $self->do_awl_tests();
   }
@@ -1795,6 +1802,74 @@ sub do_awl_tests {
 
 ###########################################################################
 
+sub do_meta_tests {
+    my ($self) = @_;
+    local ($_);
+
+    dbg ("running meta tests; score so far=".$self->{hits});
+
+    # speedup code provided by Matt Sergeant
+    if (defined &Mail::SpamAssassin::PerMsgStatus::_meta_tests) {
+        Mail::SpamAssassin::PerMsgStatus::_meta_tests($self);
+        return;
+    }
+
+    my ($rulename, $rule);
+    my $evalstr = '';
+
+    my @tests = keys %{$self->{conf}{meta_tests}};
+
+    foreach $rulename (@tests) {
+        $rule = $self->{conf}->{meta_tests}->{$rulename};
+
+        my @tokens = $rule =~ m/(\w+|\!|[\(\)]|\&\&|\|\|)/g;
+
+        my ($token, $expr);
+
+        $expr = "";
+        foreach $token (@tokens) {
+            if ($token =~ /^\w+$/) {
+                $expr .= "\$self->{tests_already_hit}->{$token} ";
+            } else {
+                $expr .= "$token ";
+            }
+        }
+
+        #dbg ("meta expression: $expr");
+
+        $evalstr .= '
+        if (' . $expr . ') {
+            $self->got_hit (q#'.$rulename.'#);
+        }
+    ';
+    }
+
+    $evalstr = <<"EOT";
+{
+    package Mail::SpamAssassin::PerMsgStatus;
+
+    sub _meta_tests {
+        my (\$self) = \@_;
+
+        $evalstr;
+    }
+
+    1;
+}
+EOT
+
+    eval $evalstr;
+
+    if ($@) {
+        warn "Failed to run header SpamAssassin tests, skipping some: $@\n";
+    } else {
+        Mail::SpamAssassin::PerMsgStatus::_meta_tests($self);
+    }
+} # do_meta_tests()
+
+###########################################################################
+
+
 sub mk_param {
   my $param = shift;
 
@@ -1918,7 +1993,6 @@ sub got_body_pattern_hit {
 
   # only allow each test to hit once per mail
   return if (defined $self->{tests_already_hit}->{$rulename});
-  $self->{tests_already_hit}->{$rulename} = 1;
 
   $self->got_hit ($rulename, 'BODY: ');
 }
@@ -1929,7 +2003,6 @@ sub got_uri_pattern_hit {
   # only allow each test to hit once per mail
   # TODO: Move this into the rule matcher
   return if (defined $self->{tests_already_hit}->{$rulename});
-  $self->{tests_already_hit}->{$rulename} = 1;
 
   $self->got_hit ($rulename, 'URI: ');
 }
@@ -1945,6 +2018,9 @@ sub clear_test_state {
 
 sub _handle_hit {
     my ($self, $rule, $score, $area, $desc) = @_;
+
+    # ignore meta-match sub-rules.
+    if ($rule =~ /^__/) { return; }
 
     $score = sprintf("%2.1f",$score);
     $self->{hits} += $score;
@@ -1975,6 +2051,8 @@ sub handle_hit {
 
 sub got_hit {
   my ($self, $rule, $prepend2desc) = @_;
+
+  $self->{tests_already_hit}->{$rule} = 1;
 
   my $txt = $self->{conf}->{full_tests}->{$rule};
   $txt ||= $self->{conf}->{full_evals}->{$rule};
