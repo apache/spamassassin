@@ -58,6 +58,7 @@ Usage: spamassassin [option ...] < mailmessage
 
 Options:
 
+  -a               Use auto-whitelists
   -h		   print this help and terminate without further action
   -P               pipe message through, instead of delivering to mail spool
   -e               Exit with a non-zero exit code for spam messages
@@ -87,14 +88,14 @@ EOUSAGE
 
 use vars qw{
   $opt_t $opt_c $opt_p $opt_h $opt_V $opt_D $opt_r $opt_P $opt_w $opt_l
-  $opt_d $opt_L $opt_e $opt_W $opt_M $opt_R $opt_F
+  $opt_d $opt_L $opt_e $opt_W $opt_M $opt_R $opt_F $opt_a
 };
 
 eval {
   require Mail::SpamAssassin;
   require Mail::SpamAssassin::NoMailAudit;
 
-  getopts ('tc:p:ehVDrPw:l:dLWRM:F:') or usage();
+  getopts ('atc:p:ehVDrPw:l:dLWRM:F:') or usage();
 
   if (defined $opt_h) { usage(); }
   if (defined $opt_V) {
@@ -169,6 +170,8 @@ my $mail = Mail::SpamAssassin::NoMailAudit->new ( add_From_line => $opt_F );
     $mail->ignore();		# will exit
   }
 
+$opt_a and eval
+{
   # create a factory for the persistent address list.
   # choose one of these implementations!
   # The -M "Mail::SpamAssassin::ImplClassAddrList" flag can be used
@@ -196,6 +199,7 @@ my $mail = Mail::SpamAssassin::NoMailAudit->new ( add_From_line => $opt_F );
   }
 
   $spamtest->set_persistent_address_list_factory ($addrlistfactory);
+};
 
   if ($opt_W) {
     $spamtest->add_all_addresses_to_whitelist ($mail);
@@ -290,6 +294,15 @@ spamassassin - mail filter to identify spam using text analysis
 Normally SpamAssassin will write the rewritten message to the mail spool by
 default.  The B<-P> parameter will cause it to pipe the output to STDOUT
 instead.
+
+=item B<-a>
+
+Use auto-whitelists.  These will automatically create a list of
+senders whose messages are to be considered non-spam by monitoring the total
+number of received messages which weren't tagged as spam from that sender.
+Once a threshold is exceeded, further messages from that sender will be given a
+non-spam bonus (in case you correspond with people who occasionally swear in
+their emails).
 
 =item B<-e>
 

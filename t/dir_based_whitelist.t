@@ -17,11 +17,11 @@ q{Subject: 4000           Your Vacation Winning !}, 'subj',
 $scr_test_args = "-M Mail::SpamAssassin::DirBasedAddrList";
 
 # 3 times, to get into the whitelist:
-ok (sarun ("-L -t < data/nice/002", \&patterns_run_cb)); ok_all_patterns();
-ok (sarun ("-L -t < data/nice/002", \&patterns_run_cb)); ok_all_patterns();
-ok (sarun ("-L -t < data/nice/002", \&patterns_run_cb)); ok_all_patterns();
-ok (sarun ("-L -t < data/nice/002", \&patterns_run_cb)); ok_all_patterns();
+ok (sarun ("-L -a -t < data/nice/002", \&patterns_run_cb)); ok_all_patterns();
+ok (sarun ("-L -a -t < data/nice/002", \&patterns_run_cb)); ok_all_patterns();
+ok (sarun ("-L -a -t < data/nice/002", \&patterns_run_cb)); ok_all_patterns();
+ok (sarun ("-L -a -t < data/nice/002", \&patterns_run_cb)); ok_all_patterns();
 
 %patterns = %is_spam_patterns;
-ok (sarun ("-L -t < data/spam/004", \&patterns_run_cb)); ok_all_patterns();
+ok (sarun ("-L -a -t < data/spam/004", \&patterns_run_cb)); ok_all_patterns();
 
