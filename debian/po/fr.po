@@ -13,13 +13,14 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: spamassassin-2.50-1\n"
+"Project-Id-Version: spamassassin 2.53-1\n"
 "POT-Creation-Date: 2003-05-17 16:49-0400\n"
-"PO-Revision-Date: 2003-03-09 21:35+0300\n"
-"Last-Translator: André Luís Lopes <andrelop@ig.com.br>\n"
-"Language-Team: Debian-BR Project <debian-l10n-portuguese@lists.debian.org>\n"
+"PO-Revision-Date: 2003-04-19 16:51+0200\n"
+"Last-Translator: Christian Perrier <bubulle@debian.org>\n"
+"Language-Team: Debian french translation team <debian-l10n-french@lists."
+"debian.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=ISO-8859-1\n"
+"Content-Type: text/plain; charset=iso-8859-15\n"
 "Content-Transfer-Encoding: 8bit\n"
 
 #. Description
@@ -31,10 +32,10 @@ msgid ""
 "this check may not be totally accurate. If you do use spamproxyd, you will "
 "need to find an alternative, or download it from SpamAssassin CVS."
 msgstr ""
-"Desde a versão 2.40-1, o spamproxyd foi removido do pacote spamassassin "
-"(esta foi uma opção do desenvolvedor do spamassassin). Caso você esteja "
-"usando o spamproxyd você pode não desejar continuar com esta instalação. "
-"Logo você terá uma chance de abortar a instalação."
+"Depuis la version 2.40-1, spamproxyd a été retiré du paquet spamassassin "
+"(sur décision du mainteneur amont). Si vous utilisiez spamproxyd, vous "
+"souhaitez peut-être ne pas poursuivre l'installation. Vous allez donc avoir "
+"bientôt une occasion de l'interrompre."
 
 #. Description
 #: ../spamassassin.templates:20
@@ -61,11 +62,11 @@ msgid ""
 "manually. (If you are calling spamassassin via procmail, you can probably "
 "ignore this.)"
 msgstr ""
-"Adicionalmente, o spamssassin agora usa o argumento -P por padrão. Caso você "
-"esteja usando o spamassassin sem o argumento -P para fazer entrega local "
-"você precisará reconfigurar seu fluxo de mensagens manualmente. (Caso você "
-"esteja usando o spamassassin através do procmail você pode ignorar esse "
-"aviso com segurança.)"
+"Par ailleurs, spamassassin utilise désormais le commutateur -P par défaut. "
+"Si, pour la distribution locale, vous utilisiez spamassassin sans le "
+"commutateur -P, vous aurez à reconfigurer votre flux de courrier "
+"manuellement. Si vous utilisez spamassassin depuis procmail, vous pouvez "
+"sans risque ignorer cet avertissement."
 
 #. Description
 #: ../spamassassin.templates:20
@@ -76,7 +77,7 @@ msgstr ""
 #: ../spamassassin.templates:39
 #, fuzzy
 msgid "Delete config files in /etc/spamassassin?"
-msgstr "Apagar arquivos de configuração de datas em /etc/spamassassin ?"
+msgstr "Supprimer les fichiers périmés dans /etc/spamassassin ?"
 
 #. Description
 #: ../spamassassin.templates:39
@@ -89,22 +90,23 @@ msgid ""
 "be deleted? If you don't, you will probably need to do this yourself, or you "
 "will get many warnings. If you do, you may lose some local changes."
 msgstr ""
-"Desde a versão 2.42-1, os arquivos de regras para o spamassassin são "
-"colocados em /usr/share/spamassassin devido a um relacionamento mais "
-"estreito entre os arquivos de regras e a versão do spamassassin. Você "
-"gostaria que todos os arquivos de configuração incluídos fossem apagados ? "
-"Caso você não queira que isso aconteça você provavelmente precisará fazer "
-"isso manualmente e irá receber avisos chatos !"
+"Depuis la version 2.42-1, les fichiers de règles pour spamassassin sont "
+"placés dans /usr/share/spamassassin car ces fichiers sont plus directement "
+"dépendants de la version de spamassassin. Vos fichiers de règles sont "
+"actuellement dans /etc/spamassassin. Voulez-vous effacer tous les fichiers "
+"de configuration précédemment inclus ? Si vous n'acceptez pas, vous aurez "
+"probablement à le faire vous-même sous peine de voir s'afficher des "
+"avertissements irritants !"
 
 #. Choices
 #: ../spamassassin.templates:50
 msgid "Yes, No"
-msgstr "Sim, Não"
+msgstr "Oui, Non"
 
 #. Description
 #: ../spamassassin.templates:52
 msgid "Delete out of date config files in /etc/spamassassin?"
-msgstr "Apagar arquivos de configuração de datas em /etc/spamassassin ?"
+msgstr "Supprimer les fichiers périmés dans /etc/spamassassin ?"
 
 #. Description
 #: ../spamassassin.templates:52
@@ -117,22 +119,23 @@ msgid ""
 "deleted? If you don't, you will probably need to do this yourself, or you "
 "will get many warnings."
 msgstr ""
-"Desde a versão 2.42-1, os arquivos de regras para o spamassassin são "
-"colocados em /usr/share/spamassassin devido a um relacionamento mais "
-"estreito entre os arquivos de regras e a versão do spamassassin. Você "
-"gostaria que todos os arquivos de configuração incluídos fossem apagados ? "
-"Caso você não queira que isso aconteça você provavelmente precisará fazer "
-"isso manualmente e irá receber avisos chatos !"
+"Depuis la version 2.42-1, les fichiers de règles pour spamassassin sont "
+"placés dans /usr/share/spamassassin car ces fichiers sont plus directement "
+"dépendants de la version de spamassassin. Vos fichiers de règles sont "
+"actuellement dans /etc/spamassassin. Voulez-vous effacer tous les fichiers "
+"de configuration précédemment inclus ? Si vous n'acceptez pas, vous aurez "
+"probablement à le faire vous-même sous peine de voir s'afficher des "
+"avertissements irritants !"
 
 #. Choices
 #: ../spamassassin.templates:62
 msgid "Continue, Cancel"
-msgstr "Continuar, Cancelar"
+msgstr "Continuer, Abandonner"
 
 #. Description
 #: ../spamassassin.templates:64
 msgid "There may be errors on the upgrade."
-msgstr "Podem existir erros na atualização."
+msgstr "Des erreurs sont possibles pendant la mise à jour."
 
 #. Description
 #: ../spamassassin.templates:64
@@ -140,9 +143,9 @@ msgid ""
 "As previously indicated, you may experience errors after this upgrade. You "
 "may cancel now, and fix the problem, or you may continue."
 msgstr ""
-"Como indicado anteriormente, você pode encontrar erros depois desta "
-"atualização. Você pode cancelá-la agora e corrigir o problema ou pode "
-"continuar."
+"Comme cela a été signalé auparavant, vous pourriez être confronté à des "
+"erreurs lors de la mise à jour. Vous pouvez abandonner maintenant et "
+"corriger le problème ou continuer la mise à jour."
 
 #, fuzzy
 #~ msgid ""
@@ -150,10 +153,12 @@ msgstr ""
 #~ "an upstream decision) It appears that spamproxyd is running, therefore, "
 #~ "it is likely that this will cause problems."
 #~ msgstr ""
-#~ "Desde a versão 2.40-1, o spamproxyd foi removido do pacote spamassassin "
-#~ "(esta foi uma opção do desenvolvedor do spamassassin). Caso você esteja "
-#~ "usando o spamproxyd você pode não desejar continuar com esta instalação. "
-#~ "Logo você terá uma chance de abortar a instalação."
+#~ "Depuis la version 2.40-1, spamproxyd a été retiré du paquet spamassassin "
+#~ "(sur décision du mainteneur amont). Si vous utilisiez spamproxyd, vous "
+#~ "souhaitez peut-être ne pas poursuivre l'installation. Vous allez donc "
+#~ "avoir bientôt une occasion de l'interrompre."
 
 #~ msgid "spamassassin local delivery and spamproxyd deleted!"
-#~ msgstr "Entrega local do spamassassin e do spamproxyd apagadas !"
+#~ msgstr ""
+#~ "La distribution locale par spamassassin et le démon spamproxyd n'existent "
+#~ "plus !"

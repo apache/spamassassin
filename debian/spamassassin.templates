@@ -1,32 +1,80 @@
 Template: spamassassin/upgrade/2.40
 Type: note
-_Description: spamassassin local delivery and spamproxyd deleted!
- As of 2.40-1, spamproxyd has been removed from the spamassassin package.
- (This was an upstream decision) If you have been using spamproxyd, you may
- not wish to continue the installation. You will be given a chance to abort
- shortly.
+Description: Major changes to SpamAssassin mail stream integration
+ spamassassin now takes the -P argument by default to act as a pipe
+ instead of doing local delivery. If you have been using spamassassin
+ (without the -P argument) to do local delivery, you will need to fix
+ your mail stream manually. (If you are calling spamassassin via
+ procmail, you can probably ignore this.)
  .
- Furthermore, spamassassin now has the -P argument by default. If you have
- been using spamassassin without the -P argument to do local delivery, you
- will need to reconfigure your mail stream manually. (If you are using
- spamassassin through procmail, you can safely ignore this.)
+ As of 2.40-1, spamproxyd is no longer available. (This was an
+ upstream decision.) It appears that spamproxyd is not currently
+ running; however, this check may not be totally accurate. If you do
+ use spamproxyd, you will need to find an alternative, or download it
+ from SpamAssassin CVS.
+ .
+ You will be given an option to abort the installation.
 
-Template: spamassassin/upgrade/2.42
+Template: spamassassin/upgrade/2.40w
+Type: note
+Description: Major changes to SpamAssassin mail stream integration
+ As of version 2.40-1, spamproxyd is no longer available. (This was an
+ upstream decision) It appears that spamproxyd is running, therefore,
+ it is likely that this will cause problems. You will need to find
+ another way of calling spamassassin, or download spamproxyd from
+ SpamAssassin CVS. (http://www.spamassassin.org for more information)
+ .
+ spamassassin now takes the -P argument by default to act as a pipe
+ instead of doing local delivery. If you have been using spamassassin
+ (without the -P argument) to do local delivery, you will need to fix
+ your mail stream manually. (If you are calling spamassassin via
+ procmail, you can probably ignore this.)
+ .
+ You will be given an option to abort the installation.
+
+Template: spamassassin/upgrade/2.42m
 Type: select
-_Choices: Yes, No
+Choices: Yes, No
+Choices-fr.ISO-8859-15: Oui, Non
+Choices-pt_BR.ISO-8859-1: Sim, Não
 Default: No
-_Description: Delete out of date config files in /etc/spamassassin?
+Description: Delete config files in /etc/spamassassin?
  As of 2.42-1, rules files for spamassassin will be placed in
- /usr/share/spamassassin because of a tighter relationship between rule
- files and the version of spamassassin. You currently have rules files in
- /etc/spamassassin. Would you like all previously included configuration
- files deleted? If you don't, you will probably need to do this yourself,
- or you will get annoying warnings!
+ /usr/share/spamassassin because of a tighter relationship between
+ rule files and the version of spamassassin. You currently have
+ configuration files in /etc/spamassassin. Would you like all of these
+ out of date configuration files to be deleted? If you don't, you will
+ probably need to do this yourself, or you will get many warnings. If
+ you do, you may lose some local changes.
+
+Template: spamassassin/upgrade/2.42u
+Type: select
+Choices: Yes, No
+Choices-fr.ISO-8859-15: Oui, Non
+Choices-pt_BR.ISO-8859-1: Sim, Não
+Default: No
+Description: Delete out of date config files in /etc/spamassassin?
+ As of 2.42-1, rules files for spamassassin will be placed in
+ /usr/share/spamassassin because of a tighter relationship between
+ rule files and the version of spamassassin. You have not modified
+ these files, so you will not lose any local changes. Would you like
+ all out of date configuration files deleted? If you don't, you will
+ probably need to do this yourself, or you will get many warnings.
 
 Template: spamassassin/upgrade/cancel
 Type: select
-_Choices: Continue, Cancel
+Choices: Continue, Cancel
+Choices-fr.ISO-8859-15: Continuer, Abandonner
+Choices-pt_BR.ISO-8859-1: Continuar, Cancelar
 Default: Continue
-_Description: There may be errors on the upgrade.
+Description: There may be errors on the upgrade.
  As previously indicated, you may experience errors after this upgrade. You
  may cancel now, and fix the problem, or you may continue.
+Description-fr.ISO-8859-15: Des erreurs sont possibles pendant la mise à jour.
+ Comme cela a été signalé auparavant, vous pourriez être confronté à des
+ erreurs lors de la mise à jour. Vous pouvez abandonner maintenant et
+ corriger le problème ou continuer la mise à jour.
+Description-pt_BR.ISO-8859-1: Podem existir erros na atualização.
+ Como indicado anteriormente, você pode encontrar erros depois desta
+ atualização. Você pode cancelá-la agora e corrigir o problema ou pode
+ continuar.
