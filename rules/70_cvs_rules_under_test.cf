@@ -605,14 +605,14 @@ tflags T_USER_AGENT_AOL8	nice
 
 # From private mail with developers.  Some top tips here!
 header __BAT_MSGID		MESSAGEID =~ /^<\d{2,12}\.\d{14}\@\S+>$/
-header __BAT_CTYPE_1		Content-Type =~ /\n/
-header __BAT_CTYPE_2		Content-Type =~ /charset=\"/i
-header __BAT_CTYPE_3A		Content-Type =~ /boundary/i
-header __BAT_CTYPE_3B		Content-Type =~ /boundary=\"?-{10}/
+header __CTYPE_IS_FOLDED	Content-Type =~ /\n/
+header __CTYPE_CHARSET_QUOTED	Content-Type =~ /charset=\"/i
+header __CTYPE_HAS_BOUNDARY	Content-Type =~ /boundary/i
+header __BAT_BOUNDARY		Content-Type =~ /boundary=\"?-{10}/
 meta T_FORGED_BAT_MSGID		(__THEBAT_MUA && !__UNUSABLE_MSGID && !__BAT_MSGID)
-meta T_FORGED_BAT_CTYPE_NL	(__THEBAT_MUA && __BAT_CTYPE_1)
-meta T_FORGED_BAT_CHARSET	(__THEBAT_MUA && __BAT_CTYPE_2)
-meta T_FORGED_BAT_BOUNDARY	(__THEBAT_MUA && __BAT_CTYPE_3A && !__BAT_CTYPE_3B)
+meta T_FORGED_BAT_CTYPE_NL	(__THEBAT_MUA && __CTYPE_IS_FOLDED)
+meta T_FORGED_BAT_CHARSET	(__THEBAT_MUA && __CTYPE_CHARSET_QUOTED)
+meta T_FORGED_BAT_BOUNDARY	(__THEBAT_MUA && __CTYPE_HAS_BOUNDARY && !__BAT_BOUNDARY)
 describe T_FORGED_BAT_MSGID	Forged mail pretending to be from The Bat! (1)
 describe T_FORGED_BAT_CTYPE_NL	Forged mail pretending to be from The Bat! (2)
 describe T_FORGED_BAT_CHARSET	Forged mail pretending to be from The Bat! (3)
