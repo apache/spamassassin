@@ -46,10 +46,15 @@ sub new {
 
   bless ($self, $class);
 
-  if (defined $opts{'data'}) {
-    $self->{textarray} = $opts{data};
-  } else {
-    $self->{textarray} = [ <STDIN> ];
+  # data may be filehandle (default stdin) or arrayref
+  my $data = $opts{data} || \*STDIN;
+
+  if (ref $data eq 'ARRAY') {
+    $self->{textarray} = $data;
+  } elsif (ref $data eq 'GLOB') {
+    if (defined fileno $data) {
+      $self->{textarray} = [ <$data> ];
+    }
   }
 
   $self->parse_headers();
