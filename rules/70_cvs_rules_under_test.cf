@@ -31,56 +31,19 @@ describe T_INVALID_MSGID	Message-Id is not valid, according to RFC 2822
 header __MSGID_COMMENT		MESSAGEID =~ /\(.*\)/m
 meta T_INVALID_MSGID2		__HAS_MSGID && !(__VALID_MSGID || __MSGID_COMMENT)
 
-# this rule may need to factor in ok_languages or ok_locales
-# Dec 18 2002 jm: ignore ^H
+
+# these rules may need to factor in ok_languages or ok_locales
+# Dec 18 2002 jm: but how? ;)  They are ready to be promoted otherwise
+#freqs:  0.084   0.2047   0.0095    0.956   0.84    0.01  T_BODY_UNPRINTABLE
 body T_BODY_UNPRINTABLE		/[\x00-\x07\x0b\x0c\x0e-\x1f\x7f]{3,}/
 describe T_BODY_UNPRINTABLE	Body includes 3 consecutive unprintable characters
-
-# this rule may need to factor in ok_languages or ok_locales
-# Dec 18 2002 jm: but how? ;)  I reckon it's ready to be promoted otherwise
-# 3.467   9.5776   0.0357    0.996   0.97    0.01  T_BODY_8BITS
+#freqs:  3.660   9.4529   0.0442    0.995   0.96    0.01  T_BODY_8BITS
 body T_BODY_8BITS		/[\x80-\xff]{8,}/
 describe T_BODY_8BITS		Body includes 8 consecutive 8-bit characters
-
-# some body tests.  Dec 18 2002 jm: promoted 6, suggest dropping the remainder for
-# low hitrate.
-#   0.053   0.0953   0.0297    0.762   0.43    0.01  T_BROADCAST_EMAIL (drop)
-body T_BROADCAST_EMAIL		/broadcast e.?mail/i
-#   0.022   0.0529   0.0040    0.930   0.78    0.01  T_OUR_BROADCAST_EMAIL (too low)
-body T_OUR_BROADCAST_EMAIL	/our broadcast e.?mail/i
-# 0.058   0.1588   0.0020    0.988   0.93    0.01  T_OUR_PRIVACY_POLICY
-body T_OUR_PRIVACY_POLICY	/our privacy policy can be found/i
-# 0.133   0.3529   0.0099    0.973   0.89    0.01  T_OUR_READERS
-body T_OUR_READERS		/our readers (?:to|with)/i
-
-# dear user
-#   0.161   0.2894   0.0892    0.764   0.43    0.01  T_DEAR_USER
-body T_DEAR_USER		/dear(?: \w+)? user/i
-
-########################################################################
-
-header __CD			exists:Content-Disposition
-header __CT			exists:Content-Type
-header __CTE			exists:Content-Transfer-Encoding
-header __MIME_VERSION		exists:MIME-Version
-header __CT_TEXT_PLAIN		Content-Type =~ /^text\/plain\b/
-meta T_MIME_HEADER_CTYPE_ONLY	(!__CD && !__CTE && __CT && !__MIME_VERSION && !__CT_TEXT_PLAIN)
 
 ########################################################################
 # bug 1106: forged MUAs
 # only needed a \b around the shortest X-Mailer regular expressions
-
-# Dec 17 2002 jm: this means "message ID is either too old or has been
-# rewritten by a gateway".  Made into an eval test since meta tests cannot
-# (yet) chain from other meta tests.
-header __UNUSABLE_MSGID		eval:check_messageid_not_usable()
-
-# AOL
-header __AOL_MUA		X-Mailer =~ /\bAOL\b/
-header __AOL_MSGID		MESSAGEID =~ /^<[0-9a-f]{1,3}\.[0-9a-f]{6,8}\.[0-9a-f]{8}\@aol.com>$/m
-meta T_FORGED_MUA_AOL		(__AOL_MUA && !__UNUSABLE_MSGID && !__AOL_MSGID)
-describe T_FORGED_MUA_AOL	Forged mail pretending to be from AOL
-score T_FORGED_MUA_AOL		1.0
 
 # Mozilla
 # Dec 10 2002 jm: dan, you have fps for this, could you check 'em?
@@ -106,78 +69,20 @@ score T_FORGED_MUA_MOZILLA3     1.0
 # note: T_FORGED_MUA_MOZILLA4 now obsolete since I put the CWT/DCE thing into
 # check_messageid_not_usable()
 
-
-# Internet Mail Service
-# Dec 10 2002 jm: dan, ditto here
-header __IMS_MUA		X-Mailer =~ /Internet Mail Service/
-header __IMS_MSGID		MESSAGEID =~ /^<[A-F\d]{36,40}\@\S+>$/m
-meta T_FORGED_MUA_IMS		(__IMS_MUA && !__UNUSABLE_MSGID && !__IMS_MSGID)
-describe T_FORGED_MUA_IMS	Forged mail pretending to be from IMS
-score T_FORGED_MUA_IMS		1.0
-
-# Outlook
-# Note: this uses __IMS_MSGID from above
-# Dec 10 2002 jm: ready to go, once IMS fps are fixed and we can move
-# the dependency
-header __OUTLOOK_MUA		X-Mailer =~ /\bOutlook\b(?! IMO| Express Mac)/
-header __OUTLOOK_MSGID_1	MESSAGEID =~ /^<[0-9a-f]{12}\$[0-9a-f]{8}\$[0-9a-f]{8}\@\S+>$/m
-header __OUTLOOK_MSGID_2	MESSAGEID =~ /^<(?:OE[0-9A-Za-z]{25}|DAV[0-9A-Za-z]{24})\@hotmail\.com>$/m
-meta T_FORGED_MUA_OUTLOOK	(__OUTLOOK_MUA && !__UNUSABLE_MSGID && !(__OUTLOOK_MSGID_1 || __OUTLOOK_MSGID_2 || __IMS_MSGID))
-describe T_FORGED_MUA_OUTLOOK	Forged mail pretending to be from Outlook
-score T_FORGED_MUA_OUTLOOK	1.0
-
-# Outlook IMO (Internet Mail Only)
-header __OIMO_MUA		X-Mailer =~ /Outlook IMO/
-header __OIMO_MSGID		MESSAGEID =~ /^<[A-P]{26}A[AB]\.[-_\w.]+\@\S+>$/m
-meta T_FORGED_MUA_OIMO		(__OIMO_MUA && !__OIMO_MSGID && !__UNUSABLE_MSGID)
-describe T_FORGED_MUA_OIMO	Forged mail pretending to be from Outlook IMO
-score T_FORGED_MUA_OIMO		1.0
-
-# QUALCOMM Eudora
-header __EUDORA_MUA		X-Mailer =~ /\b(?:QUALCOMM|Eudora)\b/
-header __MAC_EUDORA_MUA		X-Mailer =~ /Eudora for Macintosh/
-header __EUDORA_MSGID		MESSAGEID =~ /^<(?:\d\d?\.){4,5}\d{14}\.[a-f0-9]{8}\@\S+>$/m
-meta T_FORGED_MUA_EUDORA	(__EUDORA_MUA && !__EUDORA_MSGID && !__UNUSABLE_MSGID && !__MAC_EUDORA_MUA)
-describe T_FORGED_MUA_EUDORA	Forged mail pretending to be from Eudora
-score T_FORGED_MUA_EUDORA	1.0
-
-
-
-meta T_FORGED_MUA_EUDORA2       (__EUDORA_MUA && !__EUDORA_MSGID && !__UNUSABLE_MSGID && !__MAC_EUDORA_MUA && !X_LOOP && !X_MAILING_LIST)
-describe T_FORGED_MUA_EUDORA2   Forged mail pretending to be from Eudora (2)
-score T_FORGED_MUA_EUDORA2      1.0
-
-header __OLD_EUDORA1            X-Mailer =~ /Eudora\s+Pro\s+Version\s+[1-4]\.\b/
-header __OLD_EUDORA2            X-Mailer =~ /\bEudora\s+(?:(?:Pro|Light)\s+)?Version\s+[1-4]\.\b/
-header __QUALCOMM               X-Mailer =~ /\bQUALCOMM\b/
-
-meta T_FORGED_MUA_EUDORA3       (__EUDORA_MUA && !__EUDORA_MSGID && !__UNUSABLE_MSGID && !__MAC_EUDORA_MUA && !__OLD_EUDORA1 && !(__OLD_EUDORA2 && !__QUALCOMM))
-describe T_FORGED_MUA_EUDORA3   Forged mail pretending to be from Eudora (3)
-score T_FORGED_MUA_EUDORA3      1.0
-
-meta T_FORGED_MUA_EUDORA4       (__EUDORA_MUA && !__EUDORA_MSGID && !__UNUSABLE_MSGID && !X_LOOP && !_X_MAILING_LIST && !__MAC_EUDORA_MUA && !__OLD_EUDORA1 && !(__OLD_EUDORA2 && !__QUALCOMM))
-describe T_FORGED_MUA_EUDORA4   Forged mail pretending to be from Eudora (4)
-score T_FORGED_MUA_EUDORA4      1.0
-
-
-
 ########################################################################
 
 # this is the only To/Cc/From "no lower" version of this idea with a
 # somewhat reasonable S/O ratio
 # Dec 18 2002 jm: not bothered with this
-#   0.141   0.3423   0.0277    0.925   0.76    0.01  T_FROM_NO_LOWER
 header T_FROM_NO_LOWER		From !~ /[a-z]/
 
 ###########################################################################
 
-#   2.067   4.7994   0.5331    0.900   0.71    0.01  T_BANG_GUARANTEE (iffy)
 body T_BANG_GUARANTEE		/\bguaranteed?\!/i
 
 ##################################################################
 
 # Dec 18 2002 jm:
-# 0.114   0.3105   0.0040    0.987   0.93    1.00  T_IDENT_NOBODY
 # pretty good, will promote it tomorrow once Allen's had a look at
 # excluding his FPs
 header __IDENT_NOBODY		Received =~ /ident[:=]nobody\b/i
@@ -188,16 +93,6 @@ score T_IDENT_NOBODY		1.0
 # Allen's version
 meta T_IDENT_NOBODY2		(__IDENT_NOBODY && !__REGSITE_COM && !((FORGOTTEN_PASSWORD + SUBJECT_IS_LIST + T_X_BEENTHERE + KNOWN_MAILING_LIST) > 1))
 
-# I spent the better part of a day hacking around with the Message-Id
-# stuff.  I found a few new regexps that works fairly well on my corpus
-# with no overlap of the current MSGID_* rules. - tvd
-
-# Dec  6 2002 jm: needs more work:
-# 0.378   0.9069   0.0852    0.914   0.74    0.01  T_MSGID_S_1
-# 0.508   1.1217   0.0153    0.987   0.92    0.01  T_MSGID_S_1:jm
-# 0.341   0.8349   0.0260    0.970   0.85    0.01  T_MSGID_S_1:quinlan
-# 0.334   0.8014   0.1375    0.854   0.60    0.01  T_MSGID_S_1:rODbegbie
-# I suggest breaking out the meta rule and see which ones are FPing
 
 # jm: commented, this hits slist mail traffic, e.g.
 # the <mozilla-general@mozilla.org> list.   Note that the moz lists have a
@@ -220,10 +115,6 @@ meta T_IDENT_NOBODY2		(__IDENT_NOBODY && !__REGSITE_COM && !((FORGOTTEN_PASSWORD
 # only tvd
 #header T_BAD_MSGID_17	MESSAGEID =~ /^<?DGTBAD\S+\@/m
 
-# no fp
-header T_SPAM_MSGID_10	MESSAGEID =~ /^<?(?:\d+\$){3}\d+\@/m
-# no fp
-header T_SPAM_MSGID_8	MESSAGEID =~ /^<?\d{4}\$\w+\@/m
 # 10% justin, 16% for rod
 # jm: definite FPs: redhat-list ML, Palmgear.com monthly download stats
 header T_SPAM_MSGID_32	MESSAGEID =~ /^<?auto-00000\d+\@/m
@@ -231,15 +122,13 @@ header T_SPAM_MSGID_32	MESSAGEID =~ /^<?auto-00000\d+\@/m
 # Matt Cline: New ratware and user-agent tests
 header T_RATWARE_BIXON       X-Mailer =~ /Bixon ThunderMail/
 header T_RATWARE_BULK_MAILER X-Mailer =~ /BulkMailer/
-header T_RATWARE_BANG_HASH   X-Mailer =~ /!.*\#.*\*/
-header T_RATWARE_HASH_2_V2   X-Mailer =~ /^[A-Za-z0-9\._]{14,}$/
-header T_RATWARE_FLOAT       X-Mailer =~ /^\d\.\d\d/
-header T_RATWARE_CHARSET_V2  X-Mailer =~ /^normal \W \W\s*charset.*=\"/
 
-# bug 1285
-header T_RATWARE_SMTPIT		X-Mailer =~ /SMTPit - FileMaker Pro Email Plugin/
 
-header T_USER_AGENT_XIMIAN   X-Mailer =~ /^Ximian Evolution \d+\.\d+\.\d+(?:\.\d+)?\s$/
+# Dec 20 2002 jm: let's try and catch these spammers out
+header __XIMIAN_MUA	     X-Mailer =~ /^(?:Ximian Evolution|Evolution\/\d+\.)/
+# interestingly the last word (\S+) always seems to be 'camel' ;)
+header __XIMIAN_MSGID	     MESSAGEID =~ /^<\d{10}\.\d+\.\d+\.\S+\@/
+meta T_USER_AGENT_XIMIAN     (__XIMIAN_MSGID && __XIMIAN_MUA && !__UNUSABLE_MSGID)
 score  T_USER_AGENT_XIMIAN   -0.5
 tflags T_USER_AGENT_XIMIAN   nice
 
@@ -249,48 +138,21 @@ tflags T_USER_AGENT_XIMIAN   nice
 # days as policy. stupid policy, but there we are. and SpamAssassin policy
 # is not to punish users with stupid ISPs...
 #
-# Dec 07 2002 quinlan: I agree, the ratio is not good enough anyway, here
-# are everyone's results from ALL.current:
+# Dec 20 2002 jm: should make fantastic meta-fodder though. ;)
 #
-# 13.006  14.0534   5.1948    0.730   0.37   0.01 T_SENDER_NO_REVERSE:daf
-#  7.908  29.7468   3.0721    0.906   0.73   0.01 T_SENDER_NO_REVERSE:easmith
-# 11.913  17.9848   7.0371    0.719   0.38   0.01 T_SENDER_NO_REVERSE:jm
-# 17.448  39.3810   3.4451    0.920   0.78   0.01 T_SENDER_NO_REVERSE:quinlan
-#  4.988  10.5000   2.6515    0.798   0.51   0.01 T_SENDER_NO_REVERSE:rODbegbie
-# 11.997  23.7109   5.5591    0.810   0.50   0.01 T_SENDER_NO_REVERSE:theo
-#
+#freqs: 11.817  22.1680   5.3554    0.805   0.53    0.01  T_SENDER_NO_REVERSE
 header   T_SENDER_NO_REVERSE    eval:check_for_sender_no_reverse()
 describe T_SENDER_NO_REVERSE    No reverse lookup for sender's IP
 
-# Matt Cline, Bug #1220
-body T_FOR_FREE                   /\bfor FREE\b/i
-body T_COMPLETELY_FREE            /\b(?:100%|completely|totally|absolutely) Free/i
-body T_SAVE_UP_TO                 /\bSave up to\b/i
-body T_DO_IT_TODAY        /\b(?:join|register|order|apply) .{0,10}Today\b/i
-body T_GET_STARTED_NOW            /\bget started Now\b/i
-body T_GET_PAID                   /\bget Paid\b/i
-body T_FREE_GRANT                 /\b(?:free|government) Grants?\b/i
-body T_APPLY_FREE                 /Free Application|free application.{0,32}(?:today|minute|less than)/i
-body T_APPLY_ONLINE               /\bapply Online/i
-body T_FREE_INSTALL               /Free installation/i
-body T_FREE_PREVIEW               /Free preview/i
-body T_FREE_ACCESS                /Free access/i
-body T_FREE_SAMPLE                /Free sample/i
-body T_GET_IT_NOW         /get it Now/i
-body T_LOW_PRICE                  /\blow.{0,4} Price/i
-
-######
-
-body     T_LOTS_OF_STUFF         /\b(?:\d{1,3}[,\.])+\d{3}.{0,20}\b(?:pics|pictures|images|photos|movies)/i
-describe T_LOTS_OF_STUFF         Thousands or millions of pics/movies/etc
+# Matt Cline, Bug #1220 (all already in)
 
 # bug 1207:
 #
 # these do not work so well (daf+easmith+quinlan+rODbegbie+theo)
-#
-#  0.037   0.0720   0.0217    0.768   0.43    0.01  T_DOUBLE_SQUOTES_1
-#  0.044   0.0720   0.0326    0.688   0.31    0.01  T_DOUBLE_SQUOTES_3
-#  0.055   0.0792   0.0450    0.638   0.25    0.01  T_DOUBLE_SQUOTES_2
+# jm: agreed. :(
+#freqs:  0.039   0.0632   0.0237    0.728   0.37    0.01  T_DOUBLE_SQUOTES_1
+#freqs:  0.055   0.0682   0.0473    0.590   0.20    0.01  T_DOUBLE_SQUOTES_2
+#freqs:  0.046   0.0632   0.0347    0.645   0.26    0.01  T_DOUBLE_SQUOTES_3
 #
 header T_DOUBLE_SQUOTES_1 Subject =~ /''\w+''/
 describe T_DOUBLE_SQUOTES_1 Evading word tests with two single quotes
@@ -326,35 +188,11 @@ body T_BODY_QUOTES_10	/(["'\222\223\224\262\263\271])\1.{0,15}(["'\222\223\224\2
 body T_CHECK_EMAIL_ISFREE	eval:check_email_isfree()
 describe T_CHECK_EMAIL_ISFREE Body contains an e-mail address listed by Email::IsFree
 
-#bug 1129
-body T_DISGUISE_PORN         /\b(c[*0]cks?|d[1*]cks?|h[0*]rny|b[1*]tch(?:es)|f[*0]ckk?ed|p[*]ssy|p[*]ssies)\b/i
-describe T_DISGUISE_PORN     Attempts to disguise porn words
-
-#bug 495: potential replacements for ACT_NOW
-body T_ACT_NOW_1	/A(?i:ct) N(?i:ow)/
-body T_ACT_NOW_2	/D[Oo].{0.5} H(?i:esitate)/
-body T_ACT_NOW_3	/S(?i:tart now)/
-body T_ACT_NOW_4	/act now/i
-body T_ACT_NOW_5	/do.{0.6}\bhesitate/i
-body T_ACT_NOW_6	/start now/i
-
-# bug 509
-body T_BEST_DEAL			/best deal/i
-describe T_BEST_DEAL		Best Deals
-body T_WORRY_FREE			/worry free/i
-describe T_WORRY_FREE		No Worries Mate
-body T_NO_HASSLE			/no[ -]hassle/i
-describe T_NO_HASSLE		No Hassle
-body T_EXPERTS_SHOW_HOW		/experts show you how/i
-describe T_EXPERTS_SHOW_HOW	Experts show you how
-body T_ENHANCE_WEBSITE		/E(?i:nhance any) W(?i:ebsite)/
-describe T_ENHANCE_WEBSITE	Enhance any Website
-
 # numeric mailto
-uri T_NUMERIC_MAILTO_ADDR	/mailto:\S+\@\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/i
-
-#bug 631
-body T_INCREASE_SEX	/increased?.{0,9}(?:sex|stamina)/i
+# Dec 20 2002 jm: my FPs *do not* contain this pattern! does.. not.. compute...
+# ok, it's the implicit addition of "mailto:" for mail-addr lookalikes, which
+# also includes user@host CVSroot specs etc.  Let's try using a rawbody pattern.
+rawbody T_NUMERIC_MAILTO_ADDR	/\bmailto:[^\s\@]{1,20}\@\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/is
 
 #bug 652
 header T_SUBJ_BUY			Subject =~ /^buy/i
@@ -362,69 +200,20 @@ describe T_SUBJ_BUY		Subject starts with Buy, Buying
 
 # bug 1014
 # from Allen
-uri T_MAILTO_TO_B2BMAIL		/^mailto:[^\s\@]{1,20}\@b2b-?mail\./is
-describe T_MAILTO_TO_B2BMAIL	Includes a link to a likely spammer email address (@b2b-mail)
 
 header __FROM_HAS_UNDERLINE_NUMS	From =~ /_\S?(?:[a-z]+\w*?\d+|\d+\w*?[a-z]+)\w*\@/i
 meta T_FROM_HAS_UNDERLINE_NUMS		(!T_REPLY_TO_HAS_UNDERLINE_NUMS && __FROM_HAS_UNDERLINE_NUMS)
 describe T_FROM_HAS_UNDERLINE_NUMS	From: contains an underline and numbers/letters
 
-header T_REPLY_TO_HAS_UNDERLINE_NUMS	Reply-To =~ /_\S?(?:[a-z]+\w*?\d+|\d+\w*?[a-z]+)\w*\@/i [if-unset: UNSET]
-describe T_REPLY_TO_HAS_UNDERLINE_NUMS	Reply-To: contains an underline and numbers/letters
-
-# from bug 725
-body T_PROMOTE_YOUR_BUSINESS     /\b(?:(?:advert|public)i[sz]e|promote|increase|grow|expand|boost)\s+.{0,15}\b(?:(?:web)?site|business|offer(?:ing)?|(?:down|power)line|exposure)/is
-describe T_PROMOTE_YOUR_BUSINESS  Wants to help promote your business
-
 # from bug 1173
-header T_X_BEENTHERE		exists:X-BeenThere
-describe T_X_BEENTHERE	X-BeenThere header exists
+# drop it; lots of spam comes via MM lists, esp. since I've seen spammers using
+# MM-specific web crawlers, so this is not a good rule
+#header T_X_BEENTHERE		exists:X-BeenThere
+#describe T_X_BEENTHERE	X-BeenThere header exists
 
 # HTML charset tests
 body __HTML_CHARSET_FARAWAY	eval:html_charset_faraway()
 meta T_HTML_CHARSET_FARAWAY	(__HTML_CHARSET_FARAWAY && __HIGHBITS)
-
-# from bug 662
-header T_ADDR_FREE		From =~ /\b(?-i:F)ree(?-i:[ A-Z]).*</i
-describe T_ADDR_FREE		From Address contains FREE
-
-# from bug 1287 (already resolved)
-header __SMIME_SIGNED_HDR	Content-Type =~ /multipart\/signed;.*protocol=/i
-full __SMIME_SIGNED_BODY	/\nContent-Type: application\/x-pkcs7-signature;/
-meta T_SMIME_SIGNATURE		(__SMIME_SIGNED_HDR && __SMIME_SIGNED_BODY)
-describe T_SMIME_SIGNATURE	Contains an S/MIME-signed message
-tflags T_SMIME_SIGNATURE	nice
-
-# bug 766: modified by jm to avoid matching email addrs
-header T_SUBJ_AT_OBFUSCATED	Subject =~ /\w+\@[^\W\.]+\s/
-describe T_SUBJ_AT_OBFUSCATED	Uses "@" for "a" to obfuscate
-
-# bug 766: (jm) noticed in passing; email addr in subject may be good spamsign
-header T_SUBJ_CONTAINS_EMAIL	Subject =~ /\w+\@[\w\.]+\.\w{2,3}\s/
-describe T_SUBJ_CONTAINS_EMAIL	Contains an email address in the Subject
-
-# 663
-header T_ADDR_OFFER		ALL =~ /(?:to|from|reply-to):.*offer.*\n/i
-describe T_ADDR_OFFER		From address contains OFFER
-
-# 684
-body T_PRIZE_2	/\b(?:claim|grand|cash|money|guaranteed?|win|free).{0,9}\bprizes?\b|\bprizes?.{0,9}(?:notification|winnings|winner|payment|paid|drawing)\b/i
-describe T_PRIZE_2			Talks about prizes
-
-# 706
-body T_APPLY	/\bapply(?:ing|) (?:for|for a|)\b.{0,9}\b(?:now|today|online|credit|loans?|free|credit|car|visa|grants?)|(?:restrictions|credit|conditions|terms|coupons|first people to)\b.{0,10}\bapply\b/i
-describe T_APPLY		 Apply for Something
-
-# 707
-body T_JOIN_NOW			/\b(?:join|sign.?up|register|subscribe) (?:now|today)\b/i
-describe T_JOIN_NOW		Join Now
-
-# 708
-body T_MEMBERSHIP			/\b(?:trail|paid|pay|no.obligation|instant|lifetime|special|gold|silver|day)\b.{0,10}memberships?\b|\bmembership (?:confirmation|based website|privileges?|sites?|rewards?|today)\b/i
-describe T_MEMBERSHIP		Membership in something
-
-body T_YOUR_MEMBERSHIP		/\byour .{0,9}memberships?\b/i
-describe T_YOUR_MEMBERSHIP	Your Membership
 
 # bug 1300: rule speed-ups, these are purely for speeding up SLOW rules,
 # although the hit rates are expected to change a tiny bit.  (You do not
