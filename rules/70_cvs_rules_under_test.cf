@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.615 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.616 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -33,14 +33,4 @@ tflags T_RCVD_IN_FABEL net
 # test.senderbase.org for everything else (until SenderBase is in production)
 header __SENDERBASE rbleval:check_rbl_txt('senderbase', 'sa.senderbase.org.')
 tflags __SENDERBASE net
-
-# SenderBase test rule, should have same results as RCVD_IN_BONDEDSENDER
-header T_RCVD_IN_BONDEDSENDER rbleval:check_rbl_sub('senderbase', 'defined(S45) && S45 eq "Y"')
-tflags T_RCVD_IN_BONDEDSENDER net
-
-# Justin says Yahoo stopped using this hostname entirely (which makes me
-# wonder if spammers will still use it and whether it will work on our
-# older corpus mail)
-uri T_YAHOO_REDIRECTOR		/^https?:\/\/rd\.yahoo\.com/i
-describe T_YAHOO_REDIRECTOR	Uses commonly-spammed redirector URL
 
