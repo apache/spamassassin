@@ -454,7 +454,13 @@ ignore it.
     if ( $key eq 'require_version' ) {
       my $req_version = $value;
       $req_version =~ s/^\@\@VERSION\@\@$/$Mail::SpamAssassin::VERSION/;
-      if ($Mail::SpamAssassin::VERSION != $req_version) {
+
+      # earlier versions used !=
+      # starting with 3.0.0, perl doesn't like != so it was switched to ne
+      # we should probably allow "require_version 3.0" be good for all
+      # "3.0.x" versions - tvd
+      #
+      if ($Mail::SpamAssassin::VERSION ne $req_version) {
         warn "configuration file \"$self->{currentfile}\" requires version ".
                 "$req_version of SpamAssassin, but this is code version ".
                 "$Mail::SpamAssassin::VERSION. Maybe you need to use ".
