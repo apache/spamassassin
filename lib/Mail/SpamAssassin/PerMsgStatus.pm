@@ -1814,7 +1814,7 @@ sub do_meta_tests {
     # Lex the rule into tokens using a rather simple RE method ...
     my @tokens =
       $rule =~ m/(
-      	[\w\.\[][\w\.\*\?\+\[\^\]]+|		# Rule Name
+	\w+|	        	                # Rule Name
 	[\(\)]|					# Parens
 	\|\||					# Boolean OR
 	\&\&|					# Boolean AND
@@ -1825,6 +1825,7 @@ sub do_meta_tests {
 	==|					# EQ
 	!=|					# NEQ
 	[\+\-\*\/]|				# Mathematical Operator
+	[\?:]|                                  # ? : Operator
 	\d+					# A Number
       )/gx;
 
