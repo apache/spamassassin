@@ -182,6 +182,27 @@ GetOptions(
   'virtual-config-dir=s'     => \$opt{'virtual-config-dir'},
   'v'                        => \$opt{'vpopmail'},
   'vpopmail!'                => \$opt{'vpopmail'},
+
+  #
+  # NOTE: These are old options.  We should ignore (but warn about)
+  # the ones that are now defaults.  Everything else gets a die (see note2)
+  # so the user doesn't get us doing something they didn't expect.
+  #
+  # NOTE2: 'die' doesn't actually stop the process, GetOptions() catches
+  # it, then passes the error on, so we'll end up doing a Usage statement.
+  # You can avoid that by doing an explicit exit in the sub.
+  #
+  
+  # last in 2.3
+  'F:i'                   => sub { warn "The -F option has been removed from spamd, please remove from your commandline and re-run.\n"; exit 2; },
+  'add-from!'             => sub { warn "The --add-from option has been removed from spamd, please remove from your commandline and re-run.\n"; exit 2; },
+
+  # last in 2.4
+  'stop-at-threshold|S!' => sub { warn "The -S option has been deprecated and is no longer supported, ignoring.\n" },
+
+  # last in 2.6
+  'auto-whitelist|whitelist|a'      => sub { warn "The -a option has been removed.  Please look at the use_auto_whitelist config option instead.\n"; exit 2; },
+
 ) or print_usage_and_exit();
 	
 if ($opt{'help'}) {

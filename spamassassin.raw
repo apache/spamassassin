@@ -169,6 +169,31 @@ GetOptions(
   'test-mode|test|t'                        => \$opt{'test-mode'},
   'version|V'                               => \$opt{'version'},
   'x'                                       => sub { $opt{'create-prefs'} = 0 },
+
+  #
+  # NOTE: These are old options.  We should ignore (but warn about)
+  # the ones that are now defaults.  Everything else gets a die (see note2)
+  # so the user doesn't get us doing something they didn't expect.
+  #
+  # NOTE2: 'die' doesn't actually stop the process, GetOptions() catches
+  # it, then passes the error on, so we'll end up doing a Usage statement.
+  # You can avoid that by doing an explicit exit in the sub.
+  #
+
+  # last in 2.3
+  'pipe|P'                => sub { warn "The -P option is deprecated as 'pipe mode' is now the default behavior, ignoring.\n" },
+  'F:i'                   => sub { warn "The -F option has been removed from spamassassin, please remove from your commandline and re-run.\n"; exit 2; },
+  'add-from!'             => sub { warn "The --add-from option has been removed from spamassassin, please remove from your commandline and re-run.\n"; exit 2; },
+  
+  # last in 2.4
+  'stop-at-threshold|S'   => sub { warn "The -S option has been deprecated and is no longer supported, ignoring.\n" },
+
+  # last in 2.6
+  'log-to-mbox|l:s'       => sub { warn "The -l option has been deprecated and is no longer supported, ignoring.\n" },
+  'auto-whitelist|a'      => sub { warn "The -a option has been removed.  Please look at the use_auto_whitelist config option instead.\n"; exit 2; },
+  'warning-from|w:s'      => sub { warn "The -w option has been removed from spamassassin, please remove from your commandline and re-run.\n"; exit 2; }, 
+  'whitelist-factory|M:s' => sub { warn "The -M option has been removed from spamassassin, please remove from your commandline and re-run.\n"; exit 2; },
+
 ) or print_usage_and_exit();
 
 if ( defined $opt{'help'} ) {
