@@ -1153,7 +1153,7 @@ sub debug_diagnostics {
   foreach my $module (sort qw(
         Net::DNS Razor2::Client::Agent MIME::Base64
         IO::Socket::UNIX DB_File Digest::SHA1
-        MIME::Base64 DBI URI Net::LDAP Storable
+        DBI URI Net::LDAP Storable
         ))
   {
     my $modver;
