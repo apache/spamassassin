@@ -21,12 +21,12 @@ those IP addresses.  This is quite effective.
 Specify a lookup.  C<NAME_OF_RULE> is the name of the rule to be
 used, C<dnsbl_zone> is the zone to look up IPs in, and C<lookuptype>
 is the type of lookup (B<TXT> or B<A>).   Note that you must also
-define a header-eval rule calling C<check_uridnsbl()> to use this.
+define a body-eval rule calling C<check_uridnsbl()> to use this.
 
 Example:
 
  uridnsbl        URIBL_SBLXBL    sbl-xbl.spamhaus.org.   TXT
- header          URIBL_SBLXBL    eval:check_uridnsbl('URIBL_SBLXBL')
+ body            URIBL_SBLXBL    eval:check_uridnsbl('URIBL_SBLXBL')
  describe        URIBL_SBLXBL    Contains a URL listed in the SBL/XBL blocklist
 
 =item urirhsbl NAME_OF_RULE rhsbl_zone lookuptype
@@ -34,7 +34,7 @@ Example:
 Specify a RHSBL-style domain lookup.  C<NAME_OF_RULE> is the name of the rule
 to be used, C<rhsbl_zone> is the zone to look up domain names in, and
 C<lookuptype> is the type of lookup (B<TXT> or B<A>).   Note that you must also
-define a header-eval rule calling C<check_uridnsbl()> to use this.
+define a body-eval rule calling C<check_uridnsbl()> to use this.
 
 An RHSBL zone is one where the domain name is looked up, as a string; e.g. a
 URI using the domain C<foo.com> will cause a lookup of C<foo.com.uriblzone.net>.
@@ -58,7 +58,7 @@ non-negative decimal number to specify a bitmask for RHSBLs that return a
 single A record containing a bitmask of results, or (if none of the preceding
 options seem to fit) a regular expression.
 
-Note that, as with C<urirhsbl>, you must also define a header-eval rule calling
+Note that, as with C<urirhsbl>, you must also define a body-eval rule calling
 C<check_uridnsbl()> to use this.
 
 Example:
