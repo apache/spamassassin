@@ -14,8 +14,6 @@ use strict;
 use bytes;
 use Carp;
 
-use constant HAS_RAZOR2_CLIENT_AGENT => eval { require Razor2::Client::Agent; };
-
 use vars qw{
   $KNOWN_BAD_DIALUP_RANGES $IP_IN_RESERVED_RANGE
   @EXISTING_DOMAINS $IS_DNS_AVAILABLE $VERSION
@@ -349,8 +347,8 @@ sub is_razor2_available {
   }
   if (!$self->{conf}->{use_razor2}) { return 0; }
 
-  # Use Razor2 if it's available, Razor1 otherwise
-  if (HAS_RAZOR2_CLIENT_AGENT) {
+  # Use Razor2 if it's available
+  if (eval { require Razor2::Client::Agent; }) {
     dbg("Razor2 is available", "razor", -1);
     return 1;
   }
