@@ -46,6 +46,7 @@
 # modifications, so you lose 6 columns right there.
 #
 #      ......................................................................
+clear-report-template
 report -------------------- Start SpamAssassin results ----------------------
 report This mail is probably spam.  The original message has been altered
 report so you can recognise or block similar unwanted mail in future, using
@@ -61,6 +62,7 @@ report -------------------- End of SpamAssassin results ---------------------
 # begin with "Xxxxxx: " where Xxxxxx is a header, they'll be used as
 # headers.
 
+clear-spamtrap-template
 spamtrap Subject: this address is no longer available
 
 spamtrap [this message has been automatically generated]
