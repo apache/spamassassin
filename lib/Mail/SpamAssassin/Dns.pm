@@ -926,6 +926,7 @@ sub lookup_mx {
   my ($self, $dom) = @_;
 
   return unless $self->load_resolver();
+  return if ($self->server_failed_to_respond_for_domain ($dom));
 
   my $mxrecords;
   dbg ("looking up MX for '$dom'");
@@ -977,6 +978,8 @@ sub lookup_ptr {
     return undef;
   }
 
+  return if ($self->server_failed_to_respond_for_domain ($dom));
+
   dbg ("looking up PTR record for '$dom'");
   my $name = '';
 
@@ -1016,6 +1019,8 @@ sub lookup_a {
     dbg ("local tests only, not looking up A records");
     return undef;
   }
+
+  return if ($self->server_failed_to_respond_for_domain ($name));
 
   dbg ("looking up A records for '$name'");
   my @addrs = ();
@@ -1108,6 +1113,23 @@ done:
   # jm: leaving this in!
   dbg ("is DNS available? $IS_DNS_AVAILABLE");
   return $IS_DNS_AVAILABLE;
+}
+
+###########################################################################
+
+sub server_failed_to_respond_for_domain {
+  my ($self, $dom) = @_;
+  if ($self->{dns_server_too_slow}->{$dom}) {
+    dbg ("DNS: server for '$dom' failed to reply previously, not asking again");
+    return 1;
+  }
+  return 0;
+}
+
+sub set_server_failed_to_respond_for_domain {
+  my ($self, $dom) = @_;
+  dbg ("DNS: server for '$dom' failed to reply, marking as bad");
+  $self->{dns_server_too_slow}->{$dom} = 1;
 }
 
 ###########################################################################

@@ -78,6 +78,16 @@ $CHARSETS_LIKELY_TO_FP_AS_CAPS = qr{[-_a-z0-9]*(?:
 sub check_for_from_dns {
   my ($self) = @_;
 
+  if (!defined ($self->{checked_for_from_dns})) {
+    $self->{checked_for_from_dns} = $self->_check_for_from_dns();
+  }
+
+  return $self->{checked_for_from_dns};
+}
+
+sub _check_for_from_dns {
+  my ($self) = @_;
+
   my $from = $self->get ('Reply-To:addr');
   if (!defined $from || $from !~ /\@\S+/) {
     $from = $self->get ('From:addr');
@@ -100,23 +110,15 @@ sub check_for_from_dns {
 
   # Try check_mx_attempts times to protect against temporary outages.
   # sleep between checks to give the DNS a chance to recover.
-  for my $i (1..$self->{conf}->{check_mx_attempts}) {
-    my @mx = Net::DNS::mx($self->{res}, $from);
-    dbg ("DNS MX records found: " . scalar(@mx));
-    return 0 if (scalar @mx > 0);
-
-    my $query = $self->{res}->search($from);
-    if ($query) {
-      my $count = 0;
-      foreach my $rr ($query->answer) {
-	$count++ if ($rr->type eq "A");
-      }
-      dbg ("DNS A records found: $count");
-      return 0 if ($count > 0);
+  for my $i (1 .. $self->{conf}->{check_mx_attempts}) {
+    return 0 if ($self->lookup_mx_exists ($from));
+    return 0 if ($self->lookup_a ($from));
+    if ($i < $self->{conf}->{check_mx_attempts}) {
+      sleep $self->{conf}->{check_mx_delay};
     }
-    if ($i < $self->{conf}->{check_mx_attempts}) {sleep $self->{conf}->{check_mx_delay}; };
   }
 
+  $self->set_server_failed_to_respond_for_domain($from);
   return 1;
 }
 
@@ -3111,6 +3113,11 @@ sub _check_spf {
 
   return unless $self->is_dns_available();
 
+  # skip SPF checks if the A/MX records are nonexistent for the From
+  # domain, anyway, to avoid crappy messages from slowing us down
+  # (bug 3016)
+  return if $self->check_for_from_dns();
+
   if ($ishelo) {
     # SPF HELO-checking variant.  This isn't really SPF at all ;)
     $self->{spf_helo_checked} = 1;
@@ -3177,6 +3184,11 @@ sub _check_spf {
 
   if (!$ip || !$helo) {
     dbg ("SPF: cannot get IP or HELO, cannot use SPF");
+    return;
+  }
+
+  if ($self->server_failed_to_respond_for_domain($helo)) {
+    dbg ("SPF: we had a previous timeout on '$helo', skipping");
     return;
   }
 
