@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.52 2002/12/15 01:48:17 quinlan Exp $
+# $Id: HTML.pm,v 1.53 2002/12/17 08:45:56 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -378,15 +378,6 @@ sub html_comment {
 ###########################################################################
 # HTML parser tests
 ###########################################################################
-
-# A possibility for spotting heavy HTML spam and image-only spam
-# Submitted by Michael Moncur 7/26/2002, see bug #608
-sub html_percentage {
-  my ($self, undef, $min, $max) = @_;
-
-  my $html_percent = $self->{html}{ratio} * 100;
-  return ($html_percent > $min && $html_percent <= $max);
-}
 
 sub html_tag_balance {
   my ($self, undef, $rawtag, $rawexpr) = @_;

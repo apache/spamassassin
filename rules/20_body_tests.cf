@@ -97,34 +97,38 @@ describe REMOVE_POSTAL		Send real mail to be unsubscribed
 body HTML_MESSAGE		eval:html_message()
 describe HTML_MESSAGE		HTML included in message
 
-body HTML_TITLE_UNTITLED	eval:html_eval('title_text', '=~ /Untitled/i')
-describe HTML_TITLE_UNTITLED	HTML title contains "Untitled"
-
-body HTML_TITLE_EMPTY		eval:html_eval('title_text', '!~ /\S/s')
-describe HTML_TITLE_EMPTY	HTML title contains no text
-
 # the HTML percentage range
 # should really be converted into a numeric function test
-body HTML_00_10			eval:html_percentage('00','10')
+body HTML_00_10			eval:html_range('ratio','0.00','0.10')
 describe HTML_00_10		Message is 00% to 10% HTML
-body HTML_10_20			eval:html_percentage('10','20')
+body HTML_10_20			eval:html_range('ratio','0.10','0.20')
 describe HTML_10_20		Message is 10% to 20% HTML
-body HTML_20_30			eval:html_percentage('20','30')
+body HTML_20_30			eval:html_range('ratio','0.20','0.30')
 describe HTML_20_30		Message is 20% to 30% HTML
-body HTML_30_40			eval:html_percentage('30','40')
+body HTML_30_40			eval:html_range('ratio','0.30','0.40')
 describe HTML_30_40		Message is 30% to 40% HTML
-body HTML_40_50			eval:html_percentage('40','50')
+body HTML_40_50			eval:html_range('ratio','0.40','0.50')
 describe HTML_40_50		Message is 40% to 50% HTML
-body HTML_50_60			eval:html_percentage('50','60')
+body HTML_50_60			eval:html_range('ratio','0.50','0.60')
 describe HTML_50_60		Message is 50% to 60% HTML
-body HTML_60_70			eval:html_percentage('60','70')
+body HTML_60_70			eval:html_range('ratio','0.60','0.70')
 describe HTML_60_70		Message is 60% to 70% HTML
-body HTML_70_80			eval:html_percentage('70','80')
+body HTML_70_80			eval:html_range('ratio','0.70','0.80')
 describe HTML_70_80		Message is 70% to 80% HTML
-body HTML_80_90			eval:html_percentage('80','90')
+body HTML_80_90			eval:html_range('ratio','0.80','0.90')
 describe HTML_80_90		Message is 80% to 90% HTML
-body HTML_90_100		eval:html_percentage('90','100')
+body HTML_90_100		eval:html_range('ratio','0.90','1.00')
 describe HTML_90_100		Message is 90% to 100% HTML
+
+# HTML shouting range
+# should really be converted into a numeric function test
+body HTML_SHOUTING3            eval:html_range('max_shouting','2','3')
+body HTML_SHOUTING4            eval:html_range('max_shouting','3','4')
+body HTML_SHOUTING5            eval:html_range('max_shouting','4','5')
+body HTML_SHOUTING6            eval:html_range('max_shouting','5','6')
+body HTML_SHOUTING7            eval:html_range('max_shouting','6','7')
+body HTML_SHOUTING8            eval:html_range('max_shouting','7','8')
+body HTML_SHOUTING9            eval:html_range('max_shouting','8')
 
 body HTML_TABLE_THICK_BORDER		eval:html_test('thick_border')
 describe HTML_TABLE_THICK_BORDER	HTML table has thick border
@@ -155,6 +159,9 @@ describe HTML_EVENT_UNSAFE	HTML contains unsafe auto-executing code
 
 body HTML_FONT_BIG		eval:html_test('big_font')
 describe HTML_FONT_BIG		FONT Size +2 and up or 3 and up
+
+body HTML_FONT_BIG_B		eval:html_test('big_font_B')
+describe HTML_FONT_BIG_B	HTML has a big "font" and "B" tag combo
 
 body HTML_FONT_COLOR_NOHASH	eval:html_test('font_color_nohash')
 describe HTML_FONT_COLOR_NOHASH	HTML font color is missing hash (#) character
@@ -254,8 +261,11 @@ describe HTML_TAG_EXISTS_PARAM	HTML has "param" tag
 body HTML_TAG_EXISTS_TBODY	eval:html_tag_exists('tbody')
 describe HTML_TAG_EXISTS_TBODY	HTML has "tbody" tag
 
-body HTML_BIG_FONT_B		eval:html_test('big_font_B')
-describe HTML_BIG_FONT_B        HTML has a big "font" and "B" tag combo
+body HTML_TITLE_EMPTY		eval:html_eval('title_text', '!~ /\S/s')
+describe HTML_TITLE_EMPTY	HTML title contains no text
+
+body HTML_TITLE_UNTITLED	eval:html_eval('title_text', '=~ /Untitled/i')
+describe HTML_TITLE_UNTITLED	HTML title contains "Untitled"
 
 ###########################################################################
 # rawbody HTML tests
