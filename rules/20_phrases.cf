@@ -36,14 +36,14 @@ body REMOVE_RESPECT		/(?:respect|honou?r) all removal requests/i
 describe REMOVE_RESPECT		We respect all removal requests
 
 body REMOVE_REMOVAL_1WORD	/remov\S{0,64}remov/i
-description REMOVE_REMOVAL_1WORD	List removal information
+describe REMOVE_REMOVAL_1WORD	List removal information
 
 body REMOVE_REMOVAL_2WORD	/remov\S{0,16}\s+\S{0,16}remov/i
-description REMOVE_REMOVAL_2WORD	List removal information
+describe REMOVE_REMOVAL_2WORD	List removal information
 
 body __REMOVE_REMOVAL_NEAR	/remov(?:e|al).{0,16}remov(?:e|al)/i
 meta REMOVE_REMOVAL_NEAR	(__REMOVE_REMOVAL_NEAR && !REMOVE_REMOVAL_1WORD && !REMOVE_REMOVAL_2WORD)
-description REMOVE_REMOVAL_NEAR	List removal information
+describe REMOVE_REMOVAL_NEAR	List removal information
 
 # bug 1022: MGM_POSTCARD #2 original
 body REMOVE_POSTAL		/(?:Send(?:ing|) a (?:postal mail|postcard) to (?:Unsubscribe|Customer ?Service|remove)|unsubscribe by (?:postal mail|postcard))/i
