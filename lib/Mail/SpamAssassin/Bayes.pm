@@ -866,6 +866,12 @@ sub scan {
   dbg ("bayes corpus size: nspam = $ns, nham = $nn");
 
   my ($wc, @tokens) = $self->tokenize ($msg, $body);
+
+  if ($wc <= 0) {
+    dbg ("cannot use bayes on this message; no tokens found");
+    goto skip;
+  }
+
   my %seen = ();
   my $pw;
 
@@ -887,11 +893,6 @@ sub scan {
       }
     }
   } @tokens;
-
-  if ($wc <= 0) {
-    dbg ("cannot use bayes on this message; no tokens found");
-    goto skip;
-  }
 
   # now take the $count most significant tokens and calculate probs using
   # Robinson's formula.
