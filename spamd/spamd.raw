@@ -265,7 +265,6 @@ for ( ; 1; close Client)
       # this can happen when interrupted by SIGCHLD on Solaris,
       # perl 5.8.0, and some other platforms with -m.
       if ($! == &Errno::EINTR || $error_before_reaper == &Errno::EINTR) {
-        warn "accept interrupted: $! $error_before_reaper";
         cleanupchildren;
         next;
 
