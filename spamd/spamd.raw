@@ -47,6 +47,8 @@ Options:
     -L            Use local tests only (no DNS or other network lookups)
     -A host,...   Set list of authorized ip addresses which can connect to this server
                     (defaults to 127.0.0.1 only)
+    -i ipaddr     Listen on the specified IP address (defaults to 127.0.0.1,
+                  use 0.0.0.0 to listen on all available addresses)
     -p port       Listen on the specific port (otherwise default is port 22874)
     -u username   Run as named user, instead of running setuid to spamc user
     -d		  Daemonize, detach from parent process
@@ -76,11 +78,11 @@ sub daemonize
 
 use vars qw{
   	$opt_d $opt_h $opt_L $opt_p $opt_A $opt_x $opt_s $opt_D $opt_u
-	$opt_P $opt_c $opt_a
+	$opt_P $opt_c $opt_a $opt_i
 };
 
 
-getopts('hdLxp:A:s:Du:Pca') or usage();
+getopts('hdLxp:A:s:Du:Pcai:') or usage();
 
 $opt_h and usage();
 
@@ -138,6 +140,15 @@ sub logmsg {
 }
 
 my $port = $opt_p || 22874;
+my $addr;
+if ($opt_i)
+{
+    $addr = gethostbyname($opt_i);
+}
+else
+{
+    $addr = INADDR_ANY;
+}
 my $proto = getprotobyname('tcp');
 
 ($port) = $port =~ /^(\d+)$/ or die "invalid port";
@@ -150,7 +161,7 @@ open STDOUT, '>/dev/null' or die "Can't write to /dev/null: $!";
 
 socket(Server, PF_INET, SOCK_STREAM, $proto)        || die "socket: $!";
 setsockopt(Server,SOL_SOCKET,SO_REUSEADDR,pack("l", 1)) || die "setsockopt: $!";
-bind(Server, sockaddr_in($port, INADDR_ANY))        || die "bind: $!";
+bind(Server, sockaddr_in($port, $addr))        || die "bind: $!";
 listen(Server,SOMAXCONN)                            || die "listen: $!";
 
 $opt_d and daemonize();
