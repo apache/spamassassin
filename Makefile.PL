@@ -199,8 +199,8 @@ sub MY::postamble {
   my $defrulesdir = $self->{DEF_RULES_DIR}
     || '$(INST_PREFIX)/share/spamassassin';
   my $pkglocalrulesdir = $self->{PKG_LOCAL_RULES_DIR}
-    || $self->{LOCAL_RULES_DIR} || '$(INST_SYSCONFDIR)/mail/spamassassin';
-  my $localrulesdir = $self->{LOCAL_RULES_DIR} || '$(SYSCONFDIR)/mail/spamassassin';
+    || $self->{LOCAL_RULES_DIR} || '$(SYSCONFDIR)/mail/spamassassin';
+  my $localrulesdir = $self->{LOCAL_RULES_DIR} || '$(INST_SYSCONFDIR)/mail/spamassassin';
 
 
 
