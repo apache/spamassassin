@@ -152,7 +152,10 @@ describe HTML_IMAGE_RATIO_04	HTML has a low ratio of text to image area
 describe HTML_IMAGE_RATIO_06	HTML has a low ratio of text to image area
 describe HTML_IMAGE_RATIO_08	HTML has a low ratio of text to image area
 
-body HTML_LINK_PUSH_HERE	eval:html_text_match('anchor', '(?i)(?:push|go)\s*(?:here|this)')
+body HTML_LINK_IMAGE_BUG	eval:html_test('anchor_image_bug')
+describe HTML_LINK_IMAGE_BUG	HTML link plus image plus web bug
+
+body HTML_LINK_PUSH_HERE	eval:html_text_match('anchor', '(?i)(?:push|go|cl[1l]ck)\s*(?:here|this)')
 describe HTML_LINK_PUSH_HERE	HTML link text says "push here" or similar
 
 # HTML obfuscation

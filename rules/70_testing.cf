@@ -120,12 +120,6 @@ meta T_NIGERIAN_BODY_4	( __NIGERIAN_BODY_1 + __NIGERIAN_BODY_2 + __NIGERIAN_BODY
 # thanks to David Ritz for passing this on; ready for post-3.0.0
 header T_UNCLOSED_BRACKET   ALL =~ /\[\d+\r?\n/s
 
-# bug 2554, bug 2619
-body T_HOT_NASTY          /\b(?=[dehklnswxy])(?:horny|nasty|hot|wild|young(?!\s+adult)|horniest|nastiest|hottest|wildest|youngest|naughty|dirtiest|slutty|kinky|lusty|extreme|xxx+)\b.{0,9}\b(?=[acfghilmpsvx])(?:virgins?\b|asian|cheerleader|sex|selection|fuck|fucking|anal\b|lesb(?:ian|o)|incest|chicks?|pics|movies|video|gay\b|porn|h[a\@]rdcore|schoolgirls|amateur|slut|adult\b|cum\b|xxx|sites?|hotties|shit)/i
-
-# bug 2554
-body T_BEST_PORN           /\b(?:best|biggest|largest|most|free|ultimate)\b.{0,9}\b(?:virgins?\b|anal\b|lesbians?|incest|porno?|h[a\@]rdcore|sluts?|xxx+)/i
-
 # testing for Jeff, do not use!!!
 ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
 urirhsbl T_URIBL_MP fraud.rhs.mailpolice.com.   A
@@ -134,30 +128,20 @@ describe T_URIBL_MP URI's domain appears in MailPolice fraud list
 tflags   T_URIBL_MP net
 endif	# Mail::SpamAssassin::Plugin::URIDNSBL
 
-# bug 3680: empty anchor, some others
-body T_HTML_LINK_PUSH_HERE	eval:html_text_match('anchor', '(?i)(?:push|go|cl[1l]ck)\s*(?:here|this)')
+# bug 3680: anchor tests
 body T_HTML_LINK_OPT		eval:html_text_match('anchor', '(?i)opt.?(?:out|in)')
+body T_HTML_LINK_OPT_IN		eval:html_text_match('anchor', '(?i)opt.?in')
 body T_HTML_LINK_OPT_OUT	eval:html_text_match('anchor', '(?i)opt.?out')
 
-body T_HTML_LINK_IMAGE		eval:html_text_match('anchor', '<img>')
-body T_HTML_LINK_IMAGE2		eval:html_text_match('anchor', '^<img>$')
-
-# this seems to improve results... more work needed here
-meta T_HTML_LINK_IMAGE_ONLY_04	(T_HTML_LINK_IMAGE && HTML_IMAGE_ONLY_04)
-meta T_HTML_LINK_IMAGE_ONLY_08	(T_HTML_LINK_IMAGE && HTML_IMAGE_ONLY_08)
-meta T_HTML_LINK_IMAGE_ONLY_12	(T_HTML_LINK_IMAGE && HTML_IMAGE_ONLY_12)
-meta T_HTML_LINK_IMAGE_ONLY_16	(T_HTML_LINK_IMAGE && HTML_IMAGE_ONLY_16)
-meta T_HTML_LINK_IMAGE_ONLY_20	(T_HTML_LINK_IMAGE && HTML_IMAGE_ONLY_20)
-meta T_HTML_LINK_IMAGE_ONLY_24	(T_HTML_LINK_IMAGE && HTML_IMAGE_ONLY_24)
-meta T_LINK_HTML_IMAGE_ONLY_28	(T_HTML_LINK_IMAGE && HTML_IMAGE_ONLY_28)
-meta T_LINK_HTML_IMAGE_ONLY_32	(T_HTML_LINK_IMAGE && HTML_IMAGE_ONLY_32)
-
-body T_HTML_LINK_IMAGE_BUG_1	eval:html_test('t_anchor_image_bug_1')
-body T_HTML_LINK_IMAGE_BUG_2	eval:html_test('t_anchor_image_bug_2')
-body T_HTML_LINK_IMAGE_BUG_3	eval:html_test('t_anchor_image_bug_3')
-meta T_HTML_LINK_IMAGE_BUG_4	T_HTML_LINK_IMAGE_BUG_1 && T_HTML_LINK_IMAGE2
-meta T_HTML_LINK_IMAGE_BUG_5	T_HTML_LINK_IMAGE_BUG_2 && T_HTML_LINK_IMAGE2
-meta T_HTML_LINK_IMAGE_BUG_6	T_HTML_LINK_IMAGE_BUG_3 && T_HTML_LINK_IMAGE2
+# linked image in a short document
+body __HTML_LINK_IMAGE		eval:html_text_match('anchor', '<img>')
+body __HTML_LENGTH_1024		eval:html_eval('length', '< 1024')
+body __HTML_LENGTH_2048		eval:html_eval('length', '< 2048')
+body __HTML_LENGTH_4096		eval:html_eval('length', '< 4096')
+meta HTML_LINK_IMAGE_512	__HTML_LENGTH_512 && __HTML_LINK_IMAGE
+meta HTML_LINK_IMAGE_1024	__HTML_LENGTH_1024 && __HTML_LINK_IMAGE
+meta HTML_LINK_IMAGE_2048	__HTML_LENGTH_2048 && __HTML_LINK_IMAGE
+meta HTML_LINK_IMAGE_4096	__HTML_LENGTH_4096 && __HTML_LINK_IMAGE
 
 body T_HTML_EXTRA_CLOSE_06	eval:html_range('closed_extra_ratio', '0.06', 'inf')
 body T_HTML_EXTRA_CLOSE_07	eval:html_range('closed_extra_ratio', '0.07', 'inf')
@@ -370,9 +354,8 @@ header    T_SARE_SUB_DOLLARS    Subject =~ /^\s*(?:\w+ )?(?:\w+: )?\$\d+\s*$/
 describe  T_SARE_SUB_DOLLARS    Subject is dollar sign and numerics only
 
 # http://bugzilla.spamassassin.org/show_bug.cgi?id=2016
-rawbody __INTERRUPTUS           /(?:[a-zA-Z0-9]<[\/ ]{0,2}?(?!br)(?!p)(?!sup)(?!li)(?!b)(?!i)(?!option)(?!a (?:href|name))(?:\b|!--)[^>]{0,64}?>[a-zA-Z0-9].{0,64}){3}/i
-meta T_INTERRUPTUS              MIME_HTML_ONLY && __INTERRUPTUS
-describe T_INTERRUPTUS          Hypertextus Interruptus - HTML-obfuscated text
+rawbody INTERRUPTUS           /(?:[a-zA-Z0-9]<[\/ ]{0,2}?(?!br)(?!p)(?!sup)(?!li)(?!b)(?!i)(?!option)(?!a (?:href|name))(?:\b|!--)[^>]{0,64}?>[a-zA-Z0-9].{0,64}){3}/i
+describe INTERRUPTUS          Hypertextus Interruptus - HTML-obfuscated text
 
 ##########################################################################
 

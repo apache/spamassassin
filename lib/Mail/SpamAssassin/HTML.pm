@@ -592,13 +592,7 @@ sub html_tests {
     $self->{anchor}->[$self->{anchor_index}] .= "<img>\n";
     if (exists $self->{anchor_last}) {
       if ($self->{anchor_last} =~ /\.(?:pl|cgi|php|asp|jsp|cfm)\b/i) {
-	$self->put_results(t_anchor_image_bug_1 => 1);
-      }
-      if ($self->{anchor_last} =~ /\?/) {
-	$self->put_results(t_anchor_image_bug_2 => 1);
-      }
-      if ($self->{anchor_last} =~ /\=/) {
-	$self->put_results(t_anchor_image_bug_3 => 1);
+	$self->put_results(anchor_image_bug => 1);
       }
     }
   }
