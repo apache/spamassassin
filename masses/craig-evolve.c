@@ -144,12 +144,12 @@ int main(int argc, char **argv) {
      //PGASetMutationOrCrossoverFlag(ctx, PGA_TRUE);
 
      // jm: try out using ranges instead of our own mutator
-     //PGASetMutationBoundedFlag(ctx, PGA_FALSE);
-     //PGASetUserFunction(ctx, PGA_USERFUNCTION_MUTATION, (void *)myMutation);
-
      PGASetMutationBoundedFlag(ctx, PGA_FALSE);
-     PGASetMutationType(ctx, PGA_MUTATION_RANGE);
-     PGASetRealInitRange (ctx, range_lo, range_hi);
+     PGASetUserFunction(ctx, PGA_USERFUNCTION_MUTATION, (void *)myMutation);
+
+     //PGASetMutationBoundedFlag(ctx, PGA_FALSE);
+     //PGASetMutationType(ctx, PGA_MUTATION_RANGE);
+     //PGASetRealInitRange (ctx, range_lo, range_hi);
 
      //PGASetCrossoverType(ctx, PGA_CROSSOVER_ONEPT);
      PGASetCrossoverProb(ctx, crossover_rate);
