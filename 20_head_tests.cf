@@ -68,13 +68,15 @@ describe REPLY_TO_EMPTY		Reply-To: is empty
 header REPLY_TO_ULINE_NUMS    Reply-To =~ /_\S?(?:[a-z]+\w*?\d+|\d+\w*?[a-z]+)\w*\@/i [if-unset: UNSET]
 describe REPLY_TO_ULINE_NUMS  Reply-To: has an underline and numbers/letters
 
+header TO_ADDRESS_EQ_REAL	To =~ /^\s*"([^"@]+\@[^"@]+)"\s+<\1>\s*$/i
+describe TO_ADDRESS_EQ_REAL	To: repeats address as real name
+
 # NOTE: this is what 100% valid undisclosed-recipients mails look like.
 # If this gets a high score, that's a bug!
 header UNDISC_RECIPS		To =~ /^undisclosed-recipients?:\s*;$/
 describe UNDISC_RECIPS		Valid-looking To "undisclosed-recipients"
 
 # also 100% valid
-
 header FAKED_UNDISC_RECIPS	To =~ /undisclosed[_ ]*recipient(?:s[^:]|[^s])/i
 describe FAKED_UNDISC_RECIPS	Faked To "Undisclosed-Recipients"
 
