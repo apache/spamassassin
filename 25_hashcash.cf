@@ -47,6 +47,6 @@ tflags HASHCASH_HIGH          nice userconf
 #
 header HASHCASH_2SPEND        eval:check_hashcash_double_spend()
 describe HASHCASH_2SPEND      HashCash token already spent in another mail
-score HASHCASH_2SPEND         0.1
+tflags HASHCASH_2SPEND        userconf
 
 endif   # Mail::SpamAssassin::Plugins::Hashcash
