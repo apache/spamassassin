@@ -518,12 +518,15 @@ sub check_for_unique_subject_id {
   }
 }
 
-# IMO, ideally the check-for-dict code should *not* actually use a dict, it
-# should just use an algorithm which can recognise english-like
-# consonant-vowel strings and pass them.
-# 
-# Really, we just want to distinguish between (solved) (amusing) (funny)
-# (bug) (attn) (urgent) and (kdsjf) (ofdiax) (zkdwo) ID-type strings.
+# word_is_in_dictionary()
+#
+# See if the word looks like an English word, by checking if each triplet
+# of letters it contains is one that can be found in the English lanugage.
+# Does not include triplets only found in proper names, or in the Latin
+# and Greek terms that might be found in a larger dictionary
+
+my %triplets = ();
+my $triplets_loaded = 0;
 
 sub word_is_in_dictionary {
   my ($self, $word) = @_;
@@ -533,46 +536,51 @@ sub word_is_in_dictionary {
   # $word =~ tr/A-Z/a-z/;	# already done by this stage
   $word =~ s/^\s+//;
   $word =~ s/\s+$//;
-  return 0 if ($word =~ /[^a-z]/);
 
-  study $word;
+  # If it contains a digit, dash, etc, it's not a valid word.
+  # Don't reject words like "can't" and "I'll"
+  return 0 if ($word =~ /[^a-z\']/);
 
   # handle a few common "blah blah blah (comment)" styles
-  return 1 if ($word =~ /^ot$/);	# off-topic
+  return 1 if ($word eq "ot");	# off-topic
+  return 1 if ($word =~ /(?:linux|nix|bsd)/); # not in most dicts
+  return 1 if ($word =~ /(?:whew|phew|attn|tha?nx)/);  # not in most dicts
 
-  # handle some common word bits that may not be in the dict.
-  return 1 if ($word =~ /(?:ness$|ion|ity$|ing$|ish|ed$|en$|est|ier)/);
-  return 1 if ($word =~ /(?:age|ify|ize|ise|ful|less|lly|like|nny$)/);
-  return 1 if ($word =~ /(?:bug|fixed|solve|ette|ble|ism|nce)/);
-  return 1 if ($word =~ /(?:ome|ent|ies|ain|end|ire|ong|arg)/);
+  my $word_len = length($word);
 
-  return 1 if ($word =~ /(?:spam|linux|nix|bsd|win)/); # not in most dicts
-  return 1 if ($word =~ /(?:post|mail|topic|whew|phew)/);
+  # Unique IDs probably aren't going to be only one or two letters long
+  return 1 if ($word_len < 3);
 
-  if (!open (DICT, "</usr/dict/words") &&
-  	!open (DICT, "</usr/share/dict/words"))
-  {
-    dbg ("failed to open /usr/dict/words, cannot check dictionary");
-    return 1;		# fail safe
-  }
+  if (!$triplets_loaded) {
+    my $filename = $self->{main}->{rules_filename} . "/triplets.txt";
 
-  my $sword = substr $word, 0, 4;  # Perhaps 5 is better than 4.
+    if (!open (TRIPLETS, "<$filename")) {
+      dbg ("failed to open '$filename', cannot check dictionary");
+      return 1;
+    }
 
-  dbg ("checking dictionary for \"$sword\", (was $word)");
+    while(<TRIPLETS>) {
+      chomp;
+      $triplets{$_} = 1;
+    }
+    close(TRIPLETS);
 
-  # make a search pattern that will match anywhere in the dict-line.
-  # we just want to see if the word is english-like...
-  my $wordre = qr/${sword}/i;
+    $triplets_loaded = 1;
+  } # if (!$triplets_loaded)
 
-  # use DICT as a file, rather than making a hash; keeps memory
-  # usage down, and the OS should cache the file contents anyway
-  # if the system has enough memory.
-  #
-  while (<DICT>) {
-    if (/${wordre}/) { close DICT; return 1; }
-  }
 
-  close DICT; return 0;
+  my $i;
+
+  for ($i = 0; $i < ($word_len - 2); $i++) {
+    my $triplet = substr($word, $i, 3);
+    if (!$triplets{$triplet}) {
+      dbg ("Unique ID: Letter triplet '$triplet' from word '$word' not valid");
+      return 0;
+    }
+  } # for ($i = 0; $i < ($word_len - 2); $i++)
+
+  # All letter triplets in word were found to be valid
+  return 1;
 }
 
 ###########################################################################
