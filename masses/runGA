@@ -43,7 +43,8 @@ ln -s SPBASE/spam-validate.log .
 ln -s NSBASE/nonspam-validate.log .
 ln -s NSBASE/nonspam-validate.log ham-validate.log
 
-numcpus=`cpucount || echo 1`	# cpucount isn't available everywhere
+# try to find number of processors
+numcpus=`cpucount 2>/dev/null || egrep -c '^processor\b' /proc/cpuinfo 2>/dev/null || echo 1`
 
 echo "[Generating perceptron]"
 # Generate perceptron with full logs
