@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.610 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.611 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -204,16 +204,28 @@ uri T_URI_4YOU		m@^(?:https?://|mailto:)[^\/]*4you@i
 
 # Hotmail's DAV interface uses this. heavily exploited right now, looks like.
 # as far as I can tell, it requires an msn.com or hotmail.com X-Originating-Email,
-# but allows anything for From -- so use that as a spamsign
+# but allows anything for From -- so use that as a spamsign.
+# results as of Jun 16 2003:
+# 1.316   2.4340   0.0035    0.999   0.96    0.01  T_FAKED_HOTMAIL_DAV
+# 0.034   0.0632   0.0000    1.000   0.95    0.01  T_FAKED_HOTMAIL_DAV:lan
+# 0.000   0.0000   0.0000    0.500   0.12    0.01  T_FAKED_HOTMAIL_DAV:quinlan
+# 0.211   0.4422   0.0074    0.984   0.92    0.01  T_FAKED_HOTMAIL_DAV:rODbegbie
+# 2.384   3.7952   0.0040    0.999   0.90    0.01  T_FAKED_HOTMAIL_DAV:theo
+# pretty good IMO, but we're frozen, so it'll have to wait for 2.70cvs ;) --jm
 header __HAS_MSN_RCVD_DAV	Received =~ / by \S+\.(?:hotmail|msn)\.com with (?:HTTP|DAV)\;/
 header __HAS_MSN_ORIG_EMAIL	X-Originating-Email =~ /(?:hotmail|msn)\.com\b/
 header __HAS_MSN_FROM		From =~ /(?:hotmail|msn)\.com\b/
 meta T_FAKED_HOTMAIL_DAV	(__HAS_MSN_RCVD_DAV && __HAS_MSN_ORIG_EMAIL && !__HAS_MSN_FROM)
 describe T_FAKED_HOTMAIL_DAV	'X-Originating-Email' header does not match 'From'
 
+# Jun 16 2003 jm:
+# 0.202   0.3738   0.0000    1.000   0.96    0.01  T_HAS_X_ORIG_HOST
+# 0.102   0.1895   0.0000    1.000   0.95    0.01  T_HAS_X_ORIG_HOST:lan
+# 0.020   0.0499   0.0000    1.000   0.93    0.01  T_HAS_X_ORIG_HOST:quinlan
+# 0.321   0.6841   0.0000    1.000   0.97    0.01  T_HAS_X_ORIG_HOST:rODbegbie
+# 0.242   0.3850   0.0000    1.000   0.90    0.01  T_HAS_X_ORIG_HOST:theo
 header T_HAS_X_ORIG_HOST	X-Originating-Host =~ /^\[/
 describe T_HAS_X_ORIG_HOST	Has an 'X-Originating-Host' header
-
 
 ######################################################################
 
