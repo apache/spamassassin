@@ -1189,6 +1189,10 @@ sub preload_modules_with_tmp_homedir {
     die "cannot find writable tmp dir! set TMP or TMPDIR in env";
   }
 
+  # If TMPDIR isn't set, File::Spec->tmpdir() will set it to undefined.
+  # that then breaks other things ...
+  delete $ENV{'TMPDIR'} if ( !defined $ENV{'TMPDIR'} );
+
   my $tmphome = File::Spec->catdir ($tmpdir, "spamassassin-$$");
   $tmphome = Mail::SpamAssassin::Util::untaint_file_path ($tmphome);
 
