@@ -34,8 +34,8 @@ use vars	qw{ %charsets_for_locale };
 
 ###########################################################################
 
-sub is_charset_ok_for_locale {
-  my ($cs, $locale) = @_;
+sub is_charset_ok_for_locales {
+  my ($cs, @locales) = @_;
 
   $cs = uc $cs; $cs =~ s/[^A-Z0-9]//g; study $cs;
 
@@ -49,14 +49,16 @@ sub is_charset_ok_for_locale {
   return 1 if ($cs =~ /^WINDOWS125/);
   return 1 if ($cs eq 'IBM852');
 
-  if (!defined($locale) || $locale eq 'C') { $locale = 'en'; }
-  $locale =~ s/^([a-z][a-z]).*$/$1/;	# zh_TW... => zh
+  foreach my $locale (@locales) {
+    if (!defined($locale) || $locale eq 'C') { $locale = 'en'; }
+    $locale =~ s/^([a-z][a-z]).*$/$1/;	# zh_TW... => zh
 
-  my $ok_for_loc = $charsets_for_locale{$locale};
-  return 0 if (!defined $ok_for_loc);
+    my $ok_for_loc = $charsets_for_locale{$locale};
+    return 0 if (!defined $ok_for_loc);
 
-  if ($ok_for_loc =~ /(?:^| )\Q${cs}\E(?:$| )/) {
-    return 1;
+    if ($ok_for_loc =~ /(?:^| )\Q${cs}\E(?:$| )/) {
+      return 1;
+    }
   }
 
   return 0;

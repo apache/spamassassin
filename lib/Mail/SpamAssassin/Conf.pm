@@ -51,6 +51,7 @@ sub new {
   $self->{razor_config} = $ENV{'HOME'}."/razor.conf";
   $self->{rewrite_subject} = 1;
   $self->{report_header} = 0;
+  $self->{ok_locales} = '';
 
   $self->{whitelist_from} = [ ];
 
@@ -126,6 +127,10 @@ sub _parse {
 
     if (/^report_header\s+(\d+)$/) {
       $self->{report_header} = $1+0; next;
+    }
+
+    if (/^ok_locales\s+(.+)$/) {
+      $self->{ok_locales} = $1; next;
     }
 
     # SECURITY: no eval'd code should be loaded before this line.

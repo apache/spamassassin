@@ -29,6 +29,10 @@ auto_report_threshold	15
 # of spam (no fault of his own ;), and sometimes uses Bcc: when mailing.
 whitelist_from		monty@roscom.com
 
+# Mail using languages used in these country codes will not be marked
+# as being possibly spam in a foreign language.
+ok_locales		en
+
 ###########################################################################
 # Add your own customised scores for some tests below.  The default scores are
 # read from the installed "spamassassin.cf" file, but you can override them
