@@ -729,3 +729,11 @@ header MSGID_THREESIXSIX	Message-Id =~ /<\d{1,3}\.\d{3,6}\.\d{3,6}\@\S+>/
 describe MSGID_THREESIXSIX	Message-Id header indicates message is spam
 
 header __USER_AGENT_MSN             X-Mailer =~ /^MSN Explorer /
+
+# hmm, interesting.   Ensure the MUA is using consistent priorities.
+# http://www3.cds.ne.jp/~marimo/oka/research/em/data0002.html
+header __X_PRI_HI               X-Priority =~ /^[12]/
+header __X_MSPRI_HI             X-Msmail-Priority =~ /^High/
+meta X_PRI_MISMATCH_HI        	(__X_PRI_HI && __HAS_MSMAIL_PRI && !__X_MSPRI_HI)
+describe X_PRI_MISMATCH_HI	'X-Priority' does not match 'X-MSMail-Priority'
+

@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.578 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.579 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -231,19 +231,6 @@ tflags T_RCVD_IN_BONDEDSENDER net
 #
 header T_FAKE_HELO_YAHOO	eval:check_for_rdns_helo_mismatch("yahoo\.com","yahoo\.com")
 header T_FAKE_HELO_NETSCAPE_COM	eval:check_for_rdns_helo_mismatch("(?:netscape|netcenter|aol)\.(?:com|net)","netscape\.com")
-
-# hmm, interesting.   Ensure the MUA is using consistent priorities.
-# http://www3.cds.ne.jp/~marimo/oka/research/em/data0002.html
-# tvd, 2003.05.25 - HI works well for me, MD isn't good, and LO hits 0.
-header __X_PRI_HI		X-Priority =~ /^[12]/
-header __X_PRI_MD		X-Priority =~ /^3/
-header __X_PRI_LO		X-Priority =~ /^[456789]/
-header __X_MSPRI_HI		X-Msmail-Priority =~ /^High/
-header __X_MSPRI_MD		X-Msmail-Priority =~ /^Normal/
-header __X_MSPRI_LO		X-Msmail-Priority =~ /^Low/
-meta T_X_PRI_MISMATCH_HI	(__X_PRI_HI && __HAS_MSMAIL_PRI && !__X_MSPRI_HI)
-meta T_X_PRI_MISMATCH_MD	(__X_PRI_MD && __HAS_MSMAIL_PRI && !__X_MSPRI_MD)
-meta T_X_PRI_MISMATCH_LO	(__X_PRI_LO && __HAS_MSMAIL_PRI && !__X_MSPRI_LO)
 
 # Justin says Yahoo stopped using this hostname entirely (which makes me
 # wonder if spammers will still use it and whether it will work on our
