@@ -139,45 +139,45 @@ describe WEIRD_QUOTING	Weird repeated double-quotation marks in body
 # these tests doesn't actually use rawbody since rawbody isn't raw enough;
 # they must be written very carefully to avoid modifying the original content
 
-rawbody BASE64_ENC_TEXT		eval:check_for_mime_base64_encoded_text()
+rawbody BASE64_ENC_TEXT		eval:check_for_mime('mime_base64_encoded_text')
 describe BASE64_ENC_TEXT	Message text disguised using base-64 encoding
 
 rawbody MIME_EXCESSIVE_QP	eval:check_for_mime_excessive_qp('0.011')
 describe MIME_EXCESSIVE_QP	Excessive quoted-printable encoding in body
 
-rawbody MIME_HTML_NO_CHARSET	eval:check_for_mime_html_no_charset()
+rawbody MIME_HTML_NO_CHARSET	eval:check_for_mime('mime_html_no_charset')
 describe MIME_HTML_NO_CHARSET	Message text in HTML without specified charset
 
-rawbody  MIME_LONG_LINE_QP	eval:check_for_mime_long_line_qp()
+rawbody  MIME_LONG_LINE_QP	eval:check_for_mime('mime_long_line_qp')
 describe MIME_LONG_LINE_QP	Quoted-printable line longer than 76 characters
 
-rawbody  MIME_MISSING_BOUNDARY	eval:check_for_mime_missing_boundary()
+rawbody  MIME_MISSING_BOUNDARY	eval:check_for_mime('mime_missing_boundary')
 describe MIME_MISSING_BOUNDARY	MIME section missing boundary
 
-###########################################################################
-# Actually indicates viruses, typically; just used here to clean corpora.
-
-rawbody  MICROSOFT_EXECUTABLE	eval:check_for_microsoft_executable()
+# actually indicates viruses, typically; just used here to clean corpora.
+rawbody  MICROSOFT_EXECUTABLE	eval:check_for_mime('microsoft_executable')
 describe MICROSOFT_EXECUTABLE	Message includes Microsoft executable program
 # todo: better tflags category for these tests
 tflags MICROSOFT_EXECUTABLE userconf
 
-rawbody  MIME_SUSPECT_NAME	eval:check_for_mime_suspect_name()
+# actually indicates viruses, typically; just used here to clean corpora.
+rawbody  MIME_SUSPECT_NAME	eval:check_for_mime('mime_suspect_name')
 describe MIME_SUSPECT_NAME	MIME filename does not match content
+# todo: better tflags category for these tests
 tflags MIME_SUSPECT_NAME userconf
+
+# note: __HIGHBITS is used by HTML_CHARSET_FARAWAY
+rawbody __MIME_CHARSET_FARAWAY	eval:check_for_mime('mime_faraway_charset')
+body __HIGHBITS			/(?:[\x80-\xff].?){4,}/
+meta MIME_CHARSET_FARAWAY	(__MIME_CHARSET_FARAWAY && __HIGHBITS)
+describe MIME_CHARSET_FARAWAY	MIME character set indicates foreign language
+tflags MIME_CHARSET_FARAWAY	userconf
 
 ###########################################################################
 
 body CHARSET_FARAWAY		eval:check_for_faraway_charset()
 describe CHARSET_FARAWAY	Character set indicates a foreign language
 tflags CHARSET_FARAWAY          userconf
-
-# note: __HIGHBITS is used by HTML_CHARSET_FARAWAY
-rawbody __MIME_CHARSET_FARAWAY	eval:check_for_mime_faraway_charset()
-body __HIGHBITS			/(?:[\x80-\xff].?){4,}/
-meta MIME_CHARSET_FARAWAY	(__MIME_CHARSET_FARAWAY && __HIGHBITS)
-describe MIME_CHARSET_FARAWAY	MIME character set indicates foreign language
-tflags MIME_CHARSET_FARAWAY	userconf
 
 body UNDESIRED_LANGUAGE_BODY		eval:check_language()
 describe UNDESIRED_LANGUAGE_BODY	Written in an undesired language

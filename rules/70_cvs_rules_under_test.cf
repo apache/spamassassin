@@ -141,6 +141,11 @@ meta T_MISSING_OUTLOOK_NAME	((__HAS_MIMEOLE || __HAS_MSMAIL_PRI) && __HAS_X_MAIL
 
 ########################################################################
 
+rawbody T_MIME_DEFICIENT_QP	eval:check_for_mime('mime_qp_illegal')
+describe T_MIME_DEFICIENT_QP	Deficient quoted-printable encoding in body
+
+########################################################################
+
 # bug 1316
 # 12/28 - tvd - The goal is to catch when spammers use multiple user agents
 # we had a similar rule before for preemption, but now there's actually a report of this in the wild,

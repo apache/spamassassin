@@ -2166,25 +2166,12 @@ sub check_carriage_returns {
 # MIME/uuencode attachment tests
 ###########################################################################
 
-sub check_for_mime_base64_encoded_text {
-  my ($self) = @_;
+# generic test version
+sub check_for_mime {
+  my ($self, undef, $test) = @_;
 
-  $self->_check_attachments unless exists $self->{mime_base64_encoded_text};
-  return $self->{mime_base64_encoded_text};
-}
-
-sub check_for_mime_faraway_charset {
-  my ($self) = @_;
-
-  $self->_check_attachments unless exists $self->{mime_faraway_charset};
-  return $self->{mime_faraway_charset};
-}
-
-sub check_for_mime_html_no_charset {
-  my ($self) = @_;
-
-  $self->_check_attachments unless exists $self->{mime_html_no_charset};
-  return $self->{mime_html_no_charset};
+  $self->_check_attachments unless exists $self->{$test};
+  return $self->{$test};
 }
 
 # HTML without some other type of MIME text part
@@ -2199,40 +2186,12 @@ sub check_for_mime_html_only {
 	  $self->{mime_body_text_count} == 0);
 }
 
-sub check_for_mime_missing_boundary {
-  my ($self) = @_;
-
-  $self->_check_attachments unless exists $self->{mime_missing_boundary};
-  return $self->{mime_missing_boundary};
-}
-
 sub check_for_mime_excessive_qp {
   my ($self, undef, $min) = @_;
 
   $self->_check_attachments unless exists $self->{mime_qp_ratio};
 
   return $self->{mime_qp_ratio} >= $min;
-}
-
-sub check_for_mime_long_line_qp {
-  my ($self) = @_;
-
-  $self->_check_attachments unless exists $self->{mime_long_line_qp};
-  return $self->{mime_long_line_qp};
-}
-
-sub check_for_mime_suspect_name { # MIME_SUSPECT_NAME
-  my ($self) = @_;
-
-  $self->_check_attachments unless exists $self->{mime_suspect_name};
-  return $self->{mime_suspect_name};
-}
-
-sub check_for_microsoft_executable {
-  my ($self) = @_;
-
-  $self->_check_attachments unless exists $self->{microsoft_executable};
-  return $self->{microsoft_executable};
 }
 
 sub _check_mime_header {
@@ -2332,6 +2291,7 @@ sub _check_attachments {
   $self->{mime_html_no_charset} = 0;
   $self->{mime_long_line_qp} = 0;
   $self->{mime_missing_boundary} = 0;
+  $self->{mime_qp_illegal} = 0;
   $self->{mime_qp_ratio} = 0;
   $self->{mime_suspect_name} = 0;
 
@@ -2394,6 +2354,13 @@ sub _check_attachments {
 	$self->{mime_long_line_qp} = 1;
       }
       $qp_bytes += length;
+      # check for illegal substrings (RFC 2045), hexadecimal values 7F-FF and
+      # control characters other than TAB, or CR and LF as parts of CRLF pairs
+      if (!$self->{mime_qp_illegal} && /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\xff]/)
+      {
+	$self->{mime_qp_illegal} = 1;
+      }
+      # count excessive QP bytes
       if (index($_, '=') != -1) {
 	# whoever wrote this next line is an evil hacker -- jm
 	my $qp = () = m/=(?:09|3[0-9ABCEF]|[2456][0-9A-F]|7[0-9A-E])/g;
