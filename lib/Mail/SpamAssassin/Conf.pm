@@ -2779,8 +2779,9 @@ variables are:
 
 =item _TABLE_
 
-The name of the table where user scores and preferences are stored, default
-is userpref.
+The name of the table where user scores and preferences are stored. Currently
+hardcoded to userpref, to change this value you need to create a new custom
+query with the new table name.
 
 =item _USERNAME_
 
