@@ -95,7 +95,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.145 2002/12/20 16:54:42 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.146 2002/12/20 18:30:55 jmason Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -355,12 +355,6 @@ method.
 Whether or not to add addresses to the automatic whitelist while learning.
 (optional, default 0)
 
-=item bayes_on_the_fly_recalc
-
-Whether to recalculate Bayes probabilities on-the-fly when learning.  By
-default, SpamAssassin will require the caller to call C<rebuild_learner_caches>
-eventually instead.  (optional, default 0)
-
 =back
 
 =cut
@@ -370,7 +364,6 @@ sub init_learner {
   my $opts = shift;
   dbg ("Initialising learner");
   if ($opts->{use_whitelist}) { $self->{learn_with_whitelist} = 1; }
-  if ($opts->{bayes_on_the_fly_recalc}) { $self->{bayes_on_the_fly_recalc} = 1; }
   1;
 }
 
@@ -469,6 +462,8 @@ Report a mail, encapsulated in a C<Mail::Audit> object, as human-verified spam.
 This will submit the mail message to live, collaborative, spam-blocker
 databases, allowing other users to block this message.
 
+It will also submit the mail to SpamAssassin's Bayesian learner.
+
 Options is an optional reference to a hash of options.  Currently these
 can be:
 
@@ -489,6 +484,9 @@ sub report_as_spam {
 
   $self->init(1);
   $mail = $self->encapsulate_mail_object ($mail);
+
+  # learn as spam
+  $self->learn ($mail, $mail->get_header("Message-Id"), 1, 0);
 
   require Mail::SpamAssassin::Reporter;
   $mail = Mail::SpamAssassin::Reporter->new($self, $mail, $options);

@@ -103,6 +103,8 @@ sub check {
   # NOTE: definitely need AWL stuff last, for regression-to-mean of score
 
   $self->clean_spamassassin_headers();
+  $self->{learned_hits} = 0;
+  $self->{hits} = 0;
 
   {
     # If you run timelog from within specified rules, prefix the message with
@@ -171,7 +173,13 @@ sub check {
         $self->do_meta_tests();
     }
 
-    # Do AWL tests last, since these need the score to have already been calculated
+    # TODO: call learn() here, before adding Bayes points
+
+    # add points from Bayes, before adjusting the AWL
+    $self->{hits} += $self->{learned_hits};
+
+    # Do AWL tests last, since these need the score to have already been
+    # calculated
     $self->do_awl_tests();
   }
 
@@ -762,7 +770,6 @@ sub get_raw_body_text_array {
       my $starting_line = $line;
       for ($line++; defined($_ = $bodyref->[$line]); $line++) {
         s/\r//;
-	push (@{$self->{body_text_array}}, $_);
 
 	if (/^$/) { last; }
 
@@ -812,14 +819,20 @@ sub get_decoded_body_text_array {
     my $foundb64 = 0;
     my $lastlinelength = 0;
     my $b64lines = 0;
+    my @decoded = ();
     foreach my $line (@{$textary}) {
       if ($line =~ /[ \t]/ or $line =~ /^--/) {  # base64 can't have whitespace on the line or start --
-        $_ = "";
+
+	# decode what we have so far
+	push (@decoded, $self->split_b64_decode ($_), $line);
+	$_ = '';
         $foundb64 = 0;
         next;
       }
 
       if (length($line) != $lastlinelength && !$foundb64) { # This line is a different length from the last one
+
+	push (@decoded, $self->split_b64_decode ($_));
         $_ = $line;                                         # Could be the first line of a base 64 part
         $lastlinelength = length($line);
         next;
@@ -839,10 +852,8 @@ sub get_decoded_body_text_array {
       }
     }
 
-    s/\r//;
-    $_ = $self->generic_base64_decode ($_);
-    my @ary = $self->split_into_array_of_short_lines ($_);
-    return \@ary;
+    push (@decoded, $self->split_b64_decode ($_));
+    return \@decoded;
 
   } elsif ($self->{found_encoding_quoted_printable}) {
     $_ = join ('', @{$textary});
@@ -894,6 +905,12 @@ sub split_into_array_of_short_lines {
     push (@result, $line);
   }
   @result;
+}
+
+sub split_b64_decode {
+  my ($self) = shift;
+  return $self->split_into_array_of_short_lines
+		  ($self->generic_base64_decode ($_[0]));
 }
 
 ###########################################################################
@@ -2122,7 +2139,14 @@ sub _handle_hit {
     if ($rule =~ /^__/) { push(@{$self->{subtest_names_hit}}, $rule); return; }
 
     $score = sprintf("%2.1f",$score);
-    $self->{hits} += $score;
+
+    my $tflags = $self->{conf}->{tflags}->{$rule}; $tflags ||= '';
+    if ($tflags =~ /\blearn\b/i) {
+      $self->{learned_hits} += $score;
+    } else {
+      $self->{hits} += $score;
+    }
+
     push(@{$self->{test_names_hit}}, $rule);
     $area ||= '';
 
@@ -2234,6 +2258,7 @@ sub b64decodesub
 sub generic_base64_decode {
     my ($self, $to_decode) = @_;
     
+    $to_decode =~ s/\r//;
     if (HAS_MIME_BASE64) {
 	my $retval;
         # base64 decoding can produce cruddy warnings we don't care

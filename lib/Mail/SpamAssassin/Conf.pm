@@ -84,6 +84,7 @@ sub new {
   $self->{descriptions} = { };
   $self->{test_types} = { };
   $self->{scores} = { };
+  $self->{tflags} = { };
 
   # after parsing, tests are refiled into these hashes for each test type.
   # this allows e.g. a full-text test to be rewritten as a body test in
@@ -888,10 +889,11 @@ sub-rules, and are not scored or listed in the 'tests hit' reports.
       $self->{descriptions}->{$1} = $2; next;
     }
 
-=item tflags SYMBOLIC_TEST_NAME [ { net | nice } ... ]
+=item tflags SYMBOLIC_TEST_NAME [ { net | nice | learn | userconf } ... ]
 
-Used to set flags on a test.  These flags are used in the score-determination back
-end system for details of the test's behaviour.  The following flags can be set:
+Used to set flags on a test.  These flags are used in the score-determination
+back end system for details of the test's behaviour.  The following flags can
+be set:
 
 =over 4
 
@@ -905,11 +907,21 @@ or if B<-L> is used, therefore its score should not be modified.
 The test is intended to compensate for common false positives, and should be
 assigned a negative score.
 
+=item  userconf
+
+The test requires user configuration before it can be used (like language-
+specific tests).
+
+=item  learn
+
+The test requires training before it can be used.
+
 =back
 
 =cut
 
-    if (/^tflags\s/) {
+    if (/^tflags\s+(\S+)\s+(.+)$/) {
+      $self->{tflags}->{$1} = $2; next;
       next;     # ignored in SpamAssassin modules
     }
 
@@ -1764,6 +1776,7 @@ sub add_test {
   if ($name eq '.') { $name = ($self->{_unnamed_counter}++); }
   $self->{tests}->{$name} = $text;
   $self->{test_types}->{$name} = $type;
+  $self->{tflags}->{$name} ||= '';
 
   # T_ rules (in a testing probationary period) get low, low scores
   if ($name =~ /^T_/) {
