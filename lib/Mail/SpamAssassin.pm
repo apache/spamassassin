@@ -244,7 +244,7 @@ sub remove_spamassassin_markup {
   my $inreport = 0;
   foreach $_ (@{$mail->get_body()})
   {
-    if (/^SPAM: / && $inreport == 0) {
+    if (/^SPAM: ----/ && $inreport == 0) {
       # we've just entered a report.  If there's a blank line before the
       # report, get rid of it...
       if ($#newbody > 0 && $newbody[$#newbody-1] =~ /^$/) {
