@@ -609,3 +609,8 @@ header T_ACCESSDB	eval:check_access_database('/etc/mail/access-full.db')
 describe T_ACCESSDB Would have been caught by accessdb
 tflags T_ACCESSDB userconf
 score T_ACCESSDB 0
+
+# I get these enough that I think a rule may be good for them. :)
+#   0.722   1.2360   0.0000    1.000   1.00    0.01  T_URI_PXLG
+uri T_URI_PXLG		m{http://(?:www\.)?pxlg\.com}i
+describe T_URI_PXLG	URL references pxlg.com
