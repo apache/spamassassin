@@ -72,15 +72,19 @@ sub load_with_dbi {
    my $main = $self->{main};
    my $dbuser = $main->{conf}->{user_scores_sql_username};
    my $dbpass = $main->{conf}->{user_scores_sql_password};
-   my $table = $main->{conf}->{user_scores_sql_table};
+
+   my $f_preference = $main->{conf}->{user_scores_sql_field_preference};
+   my $f_value = $main->{conf}->{user_scores_sql_field_value};
+   my $f_username = $main->{conf}->{user_scores_sql_field_username};
+   my $f_table = $main->{conf}->{user_scores_sql_table};
 
    my $dbh = DBI->connect($dsn, $dbuser, $dbpass, {'PrintError' => 0});
 
    if($dbh) {
-      my $sql = "select preference, value  from $table where ". 
-        "username = ".$dbh->quote($username).
-        " or username = 'GLOBAL'".
-        " or username = '\@GLOBAL' order by username asc";
+      my $sql = "select $f_preference, $f_value  from $f_table where ". 
+        "$f_username = ".$dbh->quote($username).
+        " or $f_username = 'GLOBAL'".
+        " or $f_username = '\@GLOBAL' order by $f_username asc";
 
       my $sth = $dbh->prepare($sql);
       if($sth) {
@@ -101,6 +105,8 @@ sub load_with_dbi {
    $dbh->disconnect();
    } else { warn "SQL Error: " . DBI->errstr . "\n"; }
 }
+
+###########################################################################
 
 sub dbg { Mail::SpamAssassin::dbg (@_); }
 sub sa_die { Mail::SpamAssassin::sa_die (@_); }
