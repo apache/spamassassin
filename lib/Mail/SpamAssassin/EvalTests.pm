@@ -3397,6 +3397,55 @@ sub html_range {
   }
 }
 
+sub html_order {
+  my ($self, undef, $type, $one, $two) = @_;
+
+  return 0 unless defined @{ $self->{html}{order} };
+
+  my $last = 'undef';
+
+  # type test on outside of loop should be faster
+  if ($type eq "any") {
+    for my $tag (@{ $self->{html}{order} }) {
+      return 1 if $last eq $one && $tag eq $two;
+      $last = $tag;
+    }
+  }
+  elsif ($type eq "ignore") {
+    for (@{ $self->{html}{order} }) {
+      my $tag = $_;
+      $tag =~ s@^/@@;
+      return 1 if $last eq $one && $tag eq $two;
+      $last = $tag;
+    }
+  }
+  elsif ($type eq "open") {
+    for my $tag (@{ $self->{html}{order} }) {
+      next if substr($tag, 0, 1) eq "/";
+      return 1 if $last eq $one && $tag eq $two;
+      $last = $tag;
+    }
+  }
+  elsif ($type eq "close") {
+    for my $tag (@{ $self->{html}{order} }) {
+      next if substr($tag, 0, 1) ne "/";
+      return 1 if $last eq $one && $tag eq $two;
+      $last = $tag;
+    }
+  }
+  elsif ($type eq "range") {
+    my %seen;
+    my $count = 0;
+    for my $tag (@{ $self->{html}{order} }) {
+      $count++ unless $seen{"$last $tag"}++;
+      $last = $tag;
+    }
+    return (($one eq 'undef' || $count >= $one) &&
+	    ($two eq 'undef' || $count < $two));
+  }
+  return 0;
+}
+
 ###########################################################################
 
 sub check_hashcash_value {

@@ -159,6 +159,8 @@ sub html_tag {
   $self->{html}{"inside_$tag"} += $num;
   $self->{html}{"inside_$tag"} = 0 if $self->{html}{"inside_$tag"} < 0;
 
+  push @{$self->{html}{order}}, ($num > 0 ? "" : "/") . $tag;
+
   if ($tag =~ /^(?:body|table|tr|th|td)$/) {
     $self->html_bgcolor($tag, $attr, $num);
   }
