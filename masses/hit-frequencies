@@ -148,7 +148,7 @@ foreach my $test (keys %freq_spam, keys %freq_nonspam) {
 # now normalise the rankings to [0, 1]
 $rank_hi -= $rank_lo;
 foreach $test (@tests) {
-  $ranking{$test} = ($ranking{$test} - $rank_lo) / $rank_hi;
+  $ranking{$test} = $rank_hi == 0 ? 0.001 : ($ranking{$test} - $rank_lo) / $rank_hi;
 }
 
 foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
