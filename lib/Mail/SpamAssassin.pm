@@ -69,7 +69,7 @@ use vars	qw{
 @ISA = qw();
 
 $VERSION = "2.20";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.73 2002/03/17 11:51:31 hughescr Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.74 2002/03/19 22:28:20 hughescr Exp $';
 
 sub Version { $VERSION; }
 
@@ -80,7 +80,8 @@ $DEBUG = 0;
 #__installsitelib__/spamassassin.cf
 #__installvendorlib__/spamassassin.cf
 @default_rules_path = qw(
-  	/usr/local/share/spamassassin
+        __prefix__/share/spamassassin
+        /usr/local/share/spamassassin
   	/usr/share/spamassassin
 	./rules
 	../rules
@@ -88,6 +89,8 @@ $DEBUG = 0;
 
 # first 3 are BSDish, latter 2 Linuxish
 @site_rules_path = qw(
+        __prefix__/etc/mail/spamassassin
+        __prefix__/etc/spamassassin
         /usr/local/etc/spamassassin
 	/usr/pkg/etc/spamassassin
         /usr/etc/spamassassin
@@ -101,6 +104,8 @@ $DEBUG = 0;
 );
     
 @default_prefs_path = qw(
+        __prefix__/etc/mail/spamassassin/user_prefs.template
+        __prefix__/share/spamassassin/user_prefs.template
         /etc/mail/spamassassin/user_prefs.template
         /usr/local/share/spamassassin/user_prefs.template
         /usr/share/spamassassin/user_prefs.template
@@ -651,6 +656,9 @@ sub expand_name ($) {
 sub sed_path {
   my ($self, $path) = @_;
   return undef if (!defined $path);
+  $path =~ s/__prefix__/$Config{prefix}/gs;
+  $path =~ s/__sitelib__/$Config{sitelib}/gs;
+  $path =~ s/__vendorlib__/$Config{vendorlib}/gs;
   $path =~ s/__installsitelib__/$Config{installsitelib}/gs;
   $path =~ s/__installvendorlib__/$Config{installvendorlib}/gs;
   $path =~ s/^\~([^\/]*)/$self->expand_name($1)/es;
