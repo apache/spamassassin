@@ -63,7 +63,8 @@ describe INVALID_DATE		Invalid Date: header (has AM/PM)
 header INVALID_DATE_NO_TZ	Date =~ /^..., \d+ ... .... ..:..:..$/
 describe INVALID_DATE_NO_TZ	Invalid Date: header (no timezone)
 
-header INVALID_DATE_TZ_ABSURD	Date =~ /[-+](?:1[3-9]\d\d|[2-9]\d\d\d)$/
+# allow +1300, NZ timezone
+header INVALID_DATE_TZ_ABSURD	Date =~ /[-+](?:1[4-9]\d\d|[2-9]\d\d\d)$/
 describe INVALID_DATE_TZ_ABSURD	Invalid Date: header (timezone does not exist)
 
 header DATE_IN_FUTURE		eval:check_for_forward_date()
@@ -142,20 +143,17 @@ describe RCVD_IN_OSIRUSOFT_COM	Received via a relay in relays.osirusoft.com
 header RCVD_IN_ORBZ		eval:check_rbl('relay', 'inputs.orbz.org.')
 describe RCVD_IN_ORBZ		Received via a relay in inputs.orbz.org
 
-# These zones are in testing for now. we'll see how effective they are...
-header RCVD_IN_VISI		eval:check_rbl('relay', 'relays.visi.com.')
-describe RCVD_IN_VISI		Received via a relay in relays.visi.com
-
-header RCVD_IN_5_10		eval:check_rbl('relay', 'blackholes.five-ten-sg.com.')
-describe RCVD_IN_5_10		Received via a relay in blackholes.five-ten-sg.com
+# Overzealous, blocking sparklist.com and yahoogroups with Confirmed Spam
+# Source records.  not recommended.
+#header RCVD_IN_5_10	 eval:check_rbl('relay', 'blackholes.five-ten-sg.com.')
+#describe RCVD_IN_5_10	 Received via a relay in blackholes.five-ten-sg.com
 
 header RCVD_IN_ORBS		eval:check_rbl('relay', 'orbs.dorkslayers.com.')
 describe RCVD_IN_ORBS		Received via a relay in orbs.dorkslayers.com
 
-# X prefix is so that these are run after RCVD_IN_OSIRUSOFT_COM. tests
-# are run in alphanumerically-sorted order.  (These used to be
-# Osirusoft.com-specific, but now, other DNSBLs are using the same
-# convention.)
+# X prefix is so that these are run after RCVD_IN_*. tests are run in
+# alphanumerically-sorted order.  (These used to be Osirusoft.com-specific, but
+# now, other DNSBLs are using the same convention.)
 header X_OSIRU_SPAM_SRC		eval:check_rbl_results_for('relay', '127.0.0.4')
 describe X_OSIRU_SPAM_SRC	DNSBL: sender is Confirmed Spam Source
 

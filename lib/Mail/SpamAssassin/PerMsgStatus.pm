@@ -348,6 +348,7 @@ sub rewrite_as_spam {
     $self->{msg}->delete_header ("X-Spam-Flag");
     $self->{msg}->delete_header ("X-Spam-Checker-Version");
     $self->{msg}->delete_header ("X-Spam-Prev-Content-Type");
+    $self->{msg}->delete_header ("X-Spam-Report");
   }
 
   # First, rewrite the subject line.
@@ -1138,6 +1139,7 @@ sub remove_unwanted_headers {
   $self->{msg}->delete_header ("X-Spam-Status");
   $self->{msg}->delete_header ("X-Spam-Checker-Version");
   $self->{msg}->delete_header ("X-Spam-Flag");
+  $self->{msg}->delete_header ("X-Spam-Report");
 }
 
 ###########################################################################
