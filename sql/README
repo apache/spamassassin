@@ -55,7 +55,7 @@ use the default table, you must first create a database, and a username/password
 that can access that database.  To install the table, use the following 
 command:
 
-mysql -p <password> -u <username> -p<password> databasename < spamassasin.sql
+mysql -h <hostname> -u <username> -p <password> databasename < spamassasin.sql
 
 This will create the following table:
 
