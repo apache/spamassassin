@@ -20,7 +20,7 @@ use Time::Local;
 use constant HAS_DB_FILE => eval { require DB_File; };
 
 use vars qw{
-  $IP_ADDRESS
+  $IP_ADDRESS $IPV4_ADDRESS
   $CCTLDS_WITH_LOTS_OF_OPEN_RELAYS
   $ROUND_THE_WORLD_RELAYERS
   $WORD_OBFUSCATION_CHARS 
@@ -47,13 +47,26 @@ $ROUND_THE_WORLD_RELAYERS = qr{(?:net|com|ca)};
 # for figuring this. any ccTLD with > about 40000 domains is left out of this
 # regexp.  Then I threw in some unscientific seasoning to taste. ;)
 
-# an IP address. TODO: ipv6
-$IP_ADDRESS = qr/\b
-		  (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
-		  (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
-		  (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
-		  (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)
+# an IP address, in IPv4 format only.
+$IPV4_ADDRESS = qr/\b(?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
+		    (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
+		    (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
+		    (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)
 		  \b/x;
+
+# an IP address, in IPv4, IPv4-mapped-in-IPv6, or IPv6 format.  NOTE: cannot
+# just refer to $IPV4_ADDRESS, due to perl bug reported in nesting qr//s. :(
+#
+$IP_ADDRESS = qr/\b (?:IPv6:|) (?: (?:0*:0*:ffff:(?:0*:|)|) # IPv4-mapped-in-IPv6
+		    (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
+                    (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
+                    (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
+                    (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)
+		  | # an IPv6 address, seems to always be at least 6 words
+		    [a-f0-9]{0,4} \:[a-f0-9]{0,4}
+		    \:[a-f0-9]{0,4} \:[a-f0-9]{0,4}
+		    \:[a-f0-9]{0,4} \:[a-f0-9]{0,4} (?:\:[a-f0-9]{0,4})*
+		  )\b/ix;
 
 $WORD_OBFUSCATION_CHARS = '*_.,/|-+=';
 
@@ -355,7 +368,7 @@ sub _check_for_forged_received {
       $helo[$i] = lc($1);
       $helo[$i] =~ s/.*\.(\S+\.\S+)$/$1/;
     }
-    if ($received[$i] =~ s/^ \((?:\S+ |)\[(${IP_ADDRESS})\]\)//i) {
+    if ($received[$i] =~ s/^ \((?:\S+ |)\[(${IPV4_ADDRESS})\]\)//i) {
       $fromip[$i] = $1;
     }
 
@@ -1505,7 +1518,7 @@ sub _check_for_round_the_world_received {
   #     Fri, 30 Nov 2001 08:57:47 +1000
   if ($rcvd =~ /
   	\nfrom\b.{0,20}\s(\S+\.${CCTLDS_WITH_LOTS_OF_OPEN_RELAYS})\s\(.{0,200}
-  	\nfrom\b.{0,20}\s([-_A-Za-z0-9.]+)\s.{0,30}\[($IP_ADDRESS)\]
+  	\nfrom\b.{0,20}\s([-_A-Za-z0-9.]+)\s.{0,30}\[($IPV4_ADDRESS)\]
   /osix) { $relay = $1; $relayer = $2; $relayerip = $3; goto gotone; }
 
   return 0;
@@ -2669,7 +2682,7 @@ sub check_access_database {
       }
     }
 
-    if ( defined $rcvd && $rcvd =~ /($IP_ADDRESS)/o ) {
+    if ( defined $rcvd && $rcvd =~ /($IPV4_ADDRESS)/o ) {
       # IP
       # net (rotate over IP)
       my($ip) = $1;

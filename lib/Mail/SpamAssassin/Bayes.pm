@@ -186,6 +186,10 @@ use constant GARY_ROBINSON_MIN_PROB_STRENGTH => 0.430;
 # calculation?
 use constant N_SIGNIFICANT_TOKENS => 150;
 
+# How many significant tokens are required for a classifier score to
+# be considered usable?
+use constant REQUIRE_SIGNIFICANT_TOKENS_TO_SCORE => -1;
+
 # How long a token should we hold onto?  (note: German speakers typically
 # will require a longer token than English ones.)
 use constant MAX_TOKEN_LENGTH => 15;
@@ -1001,6 +1005,13 @@ sub scan {
 
   if ($#sorted < 0) {
     dbg ("cannot use bayes on this message; db not initialised yet");
+    goto skip;
+  }
+
+  if (REQUIRE_SIGNIFICANT_TOKENS_TO_SCORE > 0 && 
+	$#sorted <= REQUIRE_SIGNIFICANT_TOKENS_TO_SCORE)
+  {
+    dbg ("cannot use bayes on this message; not enough usable tokens found");
     goto skip;
   }
 

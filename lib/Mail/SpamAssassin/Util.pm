@@ -294,6 +294,33 @@ sub fake_getpwuid {
 
 ###########################################################################
 
+# Given a string, extract an IPv4 address from it.  Required, since
+# we currently have no way to portably unmarshal an IPv4 address from
+# an IPv6 one without kludging elsewhere.
+#
+sub extract_ipv4_addr_from_string {
+  my ($str) = @_;
+
+  return unless defined($str);
+
+  if ($str =~ /\b(
+			(?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
+			(?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
+			(?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
+			(?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)
+		      )\b/ix)
+  {
+    if (defined $1) { return $1; }
+  }
+
+  # ignore native IPv6 addresses; currently we have no way to deal with
+  # these if we could extract them, as the DNSBLs don't provide a way
+  # to query them!  TODO, eventually, once IPv6 spam starts to appear ;)
+  return;
+}
+
+###########################################################################
+
 sub my_inet_aton { unpack("N", pack("C4", split(/\./, $_[0]))) }
 
 ###########################################################################

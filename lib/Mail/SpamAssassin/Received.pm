@@ -1,4 +1,4 @@
-# $Id: Received.pm,v 1.14 2003/05/29 07:18:14 jmason Exp $
+# $Id: Received.pm,v 1.15 2003/05/29 20:39:21 jmason Exp $
 
 # ---------------------------------------------------------------------------
 
@@ -645,10 +645,12 @@ sub parse_received_line {
 
 enough:
 
-  # IPv6 may contain uppercase hex digits; lc it.
-  $ip = lc $ip;
+  $ip = Mail::SpamAssassin::Util::extract_ipv4_addr_from_string ($ip);
+  if (!defined $ip) {
+    return;	# ignore IPv6 handovers
+  }
 
-  if ($ip eq '127.0.0.1' || $ip eq '::ffff:127.0.0.1') {
+  if ($ip eq '127.0.0.1') {
     return;	# ignore localhost handovers
   }
 
