@@ -110,13 +110,32 @@ use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/oi);
   }
 }
 
-# taint mode: are we running in taint mode? 1 for yes, undef for no.
+# taint mode: are we running in taint mode? 1 for yes, 0 for no.
 sub am_running_in_taint_mode {
-  if (defined $AM_TAINTED) { return $AM_TAINTED; }
-  
-  my $blank = substr ($ENV{PATH}, 0, 0);
-  $AM_TAINTED = not eval { eval "1 || $blank" || 1 };
-  dbg ("running in taint mode? ".($AM_TAINTED?"yes":"no"));
+  return $AM_TAINTED if defined $AM_TAINTED;
+
+  if ($] >= 5.008) {
+    # perl 5.8 and above, ${^TAINT} is a syntax violation in 5.005
+    $AM_TAINTED = eval q(no warnings q(syntax); ${^TAINT});
+  }
+  else {
+    # older versions
+    my $blank;
+    for my $d ((File::Spec->curdir, File::Spec->rootdir, File::Spec->tmpdir)) {
+      opendir(TAINT, $d) || next;
+      $blank = readdir(TAINT);
+      closedir(TAINT);
+      last;
+    }
+    if (!(defined $blank && $blank)) {
+      # these are sometimes untainted, so this is less preferable than readdir
+      $blank = join('', values %ENV, $0, @ARGV);
+    }
+    $blank = substr($blank, 0, 0);
+    # seriously mind-bending perl
+    $AM_TAINTED = not eval { eval "1 || $blank" || 1 };
+  }
+  dbg ("running in taint mode? ". ($AM_TAINTED ? "yes" : "no"));
   return $AM_TAINTED;
 }
 
