@@ -6,13 +6,9 @@ describe NO_REAL_NAME		From: does not include a real name
 
 header FROM_ENDS_IN_NUMS	From =~ /\d\d\@/
 describe FROM_ENDS_IN_NUMS	From: ends in numbers
-test FROM_ENDS_IN_NUMS     ok   matt1234@sergeant.org
-test FROM_ENDS_IN_NUMS     fail matt@sergeant.org
 
 header FROM_STARTS_WITH_NUMS	From =~ /^\d\d/
 describe FROM_STARTS_WITH_NUMS	From: starts with nums
-test FROM_STARTS_WITH_NUMS     ok   1234matt@sergeant.org
-test FROM_STARTS_WITH_NUMS     fail matt@sergeant.org
 
 header FROM_HAS_MIXED_NUMS	From =~ /\d+[a-z]+\d+\S*@/i
 describe FROM_HAS_MIXED_NUMS	From: contains numbers mixed in with letters
@@ -270,7 +266,6 @@ describe FORGED_EUDORAMAIL_RCVD	Forged eudoramail.com 'Received:' header found
 
 header FORGED_YAHOO_RCVD	eval:check_for_forged_yahoo_received_headers()
 describe FORGED_YAHOO_RCVD	Forged yahoo.com 'Received:' header found
-test FORGED_YAHOO_RCVD fail by mf1.lng.yahoo.com (8.11.1/8.11.1) id g3SDfPH19426
 
 header FORGED_JUNO_RCVD		eval:check_for_forged_juno_received_headers()
 describe FORGED_JUNO_RCVD	Forged juno.com 'Received:' header found

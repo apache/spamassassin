@@ -1,0 +1,56 @@
+test BIG_FONT      fail    <font size=3D2>
+test BIG_FONT      ok      <font size=3D+2>
+test BIG_FONT      ok      <font size=3D3>
+test BIG_FONT      ok      <font size=3D+3>
+test BIG_FONT      fail    <font size="2">
+test BIG_FONT      ok      <font size="+2">
+test BIG_FONT      ok      <font size="3">
+test BIG_FONT      ok      <font size="+3">
+test BIG_FONT      fail    <font size="small">
+test BIG_FONT      fail    <font face="serif">
+test DEAR_EMAIL ok Dear duncf@rogers.com,
+test DEAR_EMAIL fail Dear Duncan!
+test DEAR_FRIEND ok Dear IT professional,
+test DEAR_FRIEND ok Dear Internet Investor:
+test DEAR_FRIEND ok Dear friend,
+test DEAR_FRIEND fail Dear Mr. Ithacus,
+test     PORN_3      ok         Wild Asian hot peppers
+test     PORN_3      fail       Wild Asian cucumbers
+test     PORN_3      ok         Hot lesbo xxx
+test     PORN_3      fail       Hot lesbo xxxx
+test     PORN_3      fail       Hot lesbians
+test     PORN_9       ok        sex-fest
+test     PORN_9       ok        cum-dumpster
+test     PORN_9       fail      talcum-dumpster
+test     PORN_10      ok        Lolita
+test     PORN_10      ok        whores
+test     PORN_10      ok        xxx
+test     PORN_10      fail      xxxx
+test     PORN_11      ok        hard-core
+test     PORN_11      ok        web cam
+test     PORN_11      ok        amateur
+test     PORN_11      fail      amateurish
+test     PORN_11      fail      proamateur
+test     PORN_12      ok        sluts and whores
+test     PORN_12      ok        hardcore sex
+test     PORN_12      fail      lolita
+test     PORN_13      ok        must be at least 18
+test     PORN_13      ok        must be over 18
+test     PORN_13      fail      must be at least 13
+test     PORN_14     ok         I am 18 years old
+test     PORN_14     ok         My name is matt
+test     PORN_14     fail       I am 18 years older than
+test     PORN_14     ok         pics
+test     PORN_14     fail       microscopics
+test DOUBLE_CAPSWORD ok		FREE hello FREE
+test DOUBLE_CAPSWORD ok		EXTRA EXTRA EXTRA
+test DOUBLE_CAPSWORD fail	BONUS bonus
+test DOUBLE_CAPSWORD fail	I think therefore I am
+test FROM_ENDS_IN_NUMS     ok   matt1234@sergeant.org
+test FROM_ENDS_IN_NUMS     fail matt@sergeant.org
+test FROM_STARTS_WITH_NUMS     ok   1234matt@sergeant.org
+test FROM_STARTS_WITH_NUMS     fail matt@sergeant.org
+test FORGED_YAHOO_RCVD fail by mf1.lng.yahoo.com (8.11.1/8.11.1) id g3SDfPH19426
+test NUMERIC_HTTP_ADDR ok http://123456789/foo/bar
+test			SPAM_REDIRECTOR ok http://rd.yahoo.com/?http://somesite.com/
+test			SPAM_REDIRECTOR ok http://wwp.icq.com/?http://anothersite.com/

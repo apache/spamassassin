@@ -45,16 +45,6 @@ describe HTML_WITH_BGCOLOR	HTML mail with non-white background
 
 rawbody  BIG_FONT               /<\s*FONT\s[^>]*size\s*=(?:3D(?:\d{2,}|\+[2-9]|[3-9])|\s*["'](?:\d{2,}|\+[2-9]|[3-9]))/is
 describe BIG_FONT               FONT Size +2 and up or 3 and up
-test BIG_FONT      fail    <font size=3D2>
-test BIG_FONT      ok      <font size=3D+2>
-test BIG_FONT      ok      <font size=3D3>
-test BIG_FONT      ok      <font size=3D+3>
-test BIG_FONT      fail    <font size="2">
-test BIG_FONT      ok      <font size="+2">
-test BIG_FONT      ok      <font size="3">
-test BIG_FONT      ok      <font size="+3">
-test BIG_FONT      fail    <font size="small">
-test BIG_FONT      fail    <font face="serif">
 
 rawbody SPAM_FORM		/CHANGE EMAIL ADDRESS IN ACTION OF FORM/
 describe SPAM_FORM		Form for changing email address
@@ -134,13 +124,7 @@ body BULK_EMAIL			/bulk e-*mail/i
 describe BULK_EMAIL		Talks about bulk email
 body DEAR_EMAIL			/Dear [A-Za-z0-9_-]+\@/
 describe DEAR_EMAIL		Dear you@you.com?
-test DEAR_EMAIL ok Dear duncf@rogers.com,
-test DEAR_EMAIL fail Dear Duncan!
 body DEAR_FRIEND		/Dear (?:Friend|IT\W|Internet)/i
-test DEAR_FRIEND ok Dear IT professional,
-test DEAR_FRIEND ok Dear Internet Investor:
-test DEAR_FRIEND ok Dear friend,
-test DEAR_FRIEND fail Dear Mr. Ithacus,
 describe DEAR_FRIEND		How dear can you be if you don't know my name?
 body CASHCASHCASH		/\${3,}/
 describe CASHCASHCASH		Contains at least 3 dollar signs in a row
@@ -271,11 +255,6 @@ describe PORN_2			Uses words and phrases which indicate porn (2)
 full PORN_3			eval:porn_word_test()
 describe PORN_3			Uses words and phrases which indicate porn (3)
 
-test     PORN_3      ok         Wild Asian hot peppers
-test     PORN_3      fail       Wild Asian cucumbers
-test     PORN_3      ok         Hot lesbo xxx
-test     PORN_3      fail       Hot lesbo xxxx
-test     PORN_3      fail       Hot lesbians
 
 # (contrib: skod)
 body PORN_6			/\b(?:\d+\+? xxx pictures|xxx photos?)/i
@@ -291,29 +270,17 @@ describe PORN_8			Uses words and phrases which indicate porn (8)
 body     PORN_9                 /\b(?:sex|gay|slut|whore|\bcum|f.ck|adult|xxx)[ -]?fest|\bcum[ -]?shot|\bcum[ -]?dumpster/i
 describe PORN_9                 Uses words and phrases which indicate porn (9)
 
-test     PORN_9       ok        sex-fest
-test     PORN_9       ok        cum-dumpster
-test     PORN_9       fail      talcum-dumpster
 
 # Words which mainly show up in porn spam
 body     PORN_10                /\b(?:lolita|slut|whore|porn|skank|(?:babes|tit(?:tie)?s|puss(?:y|ies)|bi(?!-)|(?:Asian|Japanese|oriental)\s+(?:girls|schoolgirls))\b)|(?:[^x]|\b)xxx(?:[^x]|\b)|gang[ -]?bang|free pics/i
 describe PORN_10                Uses words and phrases which indicate porn (10)
 
-test     PORN_10      ok        Lolita
-test     PORN_10      ok        whores
-test     PORN_10      ok        xxx
-test     PORN_10      fail      xxxx
 
 # Words which often show up in spam, but also show up somewhat often in
 # non-spam
 body     PORN_11                /\b(?:hard[ -]?core|web[ -]?cam|amateur\b)/i
 describe PORN_11                Uses words and phrases which indicate porn (11)
 
-test     PORN_11      ok        hard-core
-test     PORN_11      ok        web cam
-test     PORN_11      ok        amateur
-test     PORN_11      fail      amateurish
-test     PORN_11      fail      proamateur
 
 # Like PORN_3, but it only needs to match two terms intead of three. To
 # compensate for only matching two terms, so as to not generate too many
@@ -322,26 +289,15 @@ test     PORN_11      fail      proamateur
 body     PORN_12                /\b(?:lolita|xxx|sex|slut|whore|hottest|hard-?core|horn|virgin|naught|web.?cam|le[sz]|skank|tit|puss|adult|fuck)/i and /(?:(?:\blolita|(?:[^x]|\b)xxx(?:[^x]|\b)|\bsex|\bslut|\bwhore|\bhottest\b|hard-?core|\bhorny\b|\bhorniest\b|\bvirgin|\bnaughty\b|\bnaughtiest\b|\bweb.?cam|\ble[sz]b(?:ian|o)|\bskank|\btits\b|\btitties\b|\bpussy\b|\bpussies\b|\badult\b|\bfuck).{0,7}){2,}/i
 describe PORN_12                Uses words and phrases which indicate porn (12)
 
-test     PORN_12      ok        sluts and whores
-test     PORN_12      ok        hardcore sex
-test     PORN_12      fail      lolita
 
 body     PORN_13                /must be (?:at least|over) 18/i
 describe PORN_13                Uses words and phrases which indicate porn (13)
 
-test     PORN_13      ok        must be at least 18
-test     PORN_13      ok        must be over 18
-test     PORN_13      fail      must be at least 13
 
 # Like PORN_11, but phrases which are *really* likely to show up in non-porn
 body     PORN_14                /\b(?:pics\b|years? old\b|my name'?s\b|my name is\b)/i
 describe PORN_14                Uses words and phrases which indicate porn (14)
 
-test     PORN_14     ok         I am 18 years old
-test     PORN_14     ok         My name is matt
-test     PORN_14     fail       I am 18 years older than
-test     PORN_14     ok         pics
-test     PORN_14     fail       microscopics
 
 body SEXY_PICS                  /sexy pictures/i
 describe SEXY_PICS              Sexy pictures
@@ -755,7 +711,3 @@ describe SEE_FOR_YOURSELF       See for yourself
 
 body DOUBLE_CAPSWORD		/(\b[A-Z]{3,}\b).*\1/
 describe DOUBLE_CAPSWORD	A word in all caps repeated on the line
-test DOUBLE_CAPSWORD ok		FREE hello FREE
-test DOUBLE_CAPSWORD ok		EXTRA EXTRA EXTRA
-test DOUBLE_CAPSWORD fail	BONUS bonus
-test DOUBLE_CAPSWORD fail	I think therefore I am
