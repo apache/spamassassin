@@ -1032,6 +1032,7 @@ sub remove_spamassassin_markup {
       my $tag = $self->{conf}->{rewrite_header}->{'Subject'};
       $tag = quotemeta($tag);
       $tag =~ s/_HITS_/\\d{2}\\.\\d{2}/g;
+      $tag =~ s/_SCORE_/\\d{2}\\.\\d{2}/g;
       $tag =~ s/_REQD_/\\d{2}\\.\\d{2}/g;
       1 while $hdrs =~ s/^Subject: ${tag} /Subject: /gm;
     } else {
