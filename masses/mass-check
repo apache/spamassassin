@@ -64,7 +64,7 @@ elsif ($opt_mn) {
 $spamtest = new Mail::SpamAssassin ({
   'debug'               => $opt_debug,
   'rules_filename'      => $cffile,
-  'userprefs_filename'  => "$FindBin::Bin/spamassassin.prefs",
+  'userprefs_filename'  => "$FindBin::Bin/spamassassin/user_prefs",
   'userstate_dir'       => "$FindBin::Bin/spamassassin",
   'save_pattern_hits'   => $opt_loghits,
   'dont_copy_prefs'     => 1,
