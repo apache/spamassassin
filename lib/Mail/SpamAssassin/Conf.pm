@@ -116,6 +116,7 @@ sub new {
   $self->{check_mx_attempts} = 2;
   $self->{check_mx_delay} = 5;
   $self->{ok_locales} = '';
+  $self->{allow_user_rules} = 0;
 
   $self->{whitelist_from} = { };
   $self->{blacklist_from} = { };
@@ -555,7 +556,7 @@ Clear the spamtrap template.
 ###########################################################################
     # SECURITY: no eval'd code should be loaded before this line.
     #
-    if ($scoresonly) { goto failed_line; }
+    if ($scoresonly && !$self->{allow_user_rules}) { goto failed_line; }
 
 =back
 
@@ -565,9 +566,28 @@ These settings differ from the ones above, in that they are considered
 'privileged'.  Only users running C<spamassassin> from their procmailrc's or
 forward files, or sysadmins editing a file in C</etc/mail/spamassassin>, can
 use them.   C<spamd> users cannot use them in their C<user_prefs> files, for
-security and efficiency reasons.
+security and efficiency reasons, unless allow_user_rules is enabled (and
+then, they may only add rules from below).
 
 =over 4
+
+=item allow_user_rules { 0 | 1 }		(default: 0)
+
+This setting allows users to create rules (and only rules) in their C<user_prefs> files for
+use with C<spamd>. It defaults to off, because this could be a
+severe security hole. It may be possible for users to gain root level access
+if C<spamd> is run as root. It is NOT a good idea, unless you have some
+other way of ensuring that users' tests are safe. Don't use this unless you
+are certain you know what you are doing.
+
+=cut
+
+
+    if (/^allow[-_]user[-_]rules\s+(\d+)$/) {
+      $self->{allow_user_rules} = $1+0; next;
+    }
+
+
 
 =item header SYMBOLIC_TEST_NAME header op /pattern/modifiers	[if-unset: STRING]
 
@@ -676,6 +696,12 @@ Define a full-body eval test.  See above.
     if (/^full\s+(\S+)\s+(.*)$/) {
       $self->add_test ($1, $2, $type_full_tests); next;
     }
+
+###########################################################################
+    # SECURITY: allow_user_prefs is only in affect until here.
+    #
+    if ($scoresonly) { goto failed_line; }
+
 
 =item test SYMBOLIC_TEST_NAME (ok|fail) Some string to test against
 
