@@ -334,13 +334,6 @@ score USER_IN_MORE_SPAM_TO      -20.0  # they want more spam
 score USER_IN_ALL_SPAM_TO      -100.0  # they want all spam, go figure :)
 
 ###########################################################################
-# Some not-quite-spam scores; block common virii with these.  (it's feature
-# creep, but it's easy to implement ;)
-
-score SIRCAM_SIGNATURE		    10.0
-score BADTRANS_WORM                 10.0
-
-
 # Missed scores:
 
 score A_HREF_TO_IP                   2.5
