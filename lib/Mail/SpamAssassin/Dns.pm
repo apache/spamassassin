@@ -556,8 +556,8 @@ sub dcc_lookup {
   my $tmpf = $self->create_fulltext_tmpfile($fulltext);
 
   eval {
-    local $SIG{ALRM} = sub { die "alarm\n" };
-    local $SIG{PIPE} = sub { die "brokenpipe\n" };
+    local $SIG{ALRM} = sub { die "__alarm__\n" };
+    local $SIG{PIPE} = sub { die "__brokenpipe__\n" };
 
     alarm($timeout);
 
@@ -570,6 +570,10 @@ sub dcc_lookup {
     $response = <DCC>;
     close DCC;
 
+    unless (defined($response)) { # yes, this is possible
+      die ("no response\n");
+    }
+
     dbg("DCC: got response: $response");
 
     alarm(0);
@@ -579,10 +583,10 @@ sub dcc_lookup {
   $self->leave_helper_run_mode();
 
   if ($@) {
-    if ($@ =~ /^alarm$/) {
+    if ($@ =~ /^__alarm__$/) {
       dbg ("DCC -> check timed out after $timeout secs.");
       timelog("DCC interrupted after $timeout secs", "dcc", 2);
-   } elsif ($@ =~ /^brokenpipe$/) {
+   } elsif ($@ =~ /^__brokenpipe__$/) {
       dbg ("DCC -> check failed: Broken pipe.");
       timelog("DCC check failed, broken pipe", "dcc", 2);
     } else {
@@ -676,8 +680,8 @@ sub pyzor_lookup {
   my $tmpf = $self->create_fulltext_tmpfile($fulltext);
 
   eval {
-    local $SIG{ALRM} = sub { die "alarm\n" };
-    local $SIG{PIPE} = sub { die "brokenpipe\n" };
+    local $SIG{ALRM} = sub { die "__alarm__\n" };
+    local $SIG{PIPE} = sub { die "__brokenpipe__\n" };
 
     alarm($timeout);
 
@@ -687,6 +691,11 @@ sub pyzor_lookup {
     my $pid = open(PYZOR, join(' ', $path, "check", "< '$tmpf'", "2>&1", '|')) || die "$!\n";
     $response = <PYZOR>;
     close PYZOR;
+    
+    unless (defined($response)) { # this is possible for DCC, let's be on the safe side
+      die ("no response\n");
+    }
+
     dbg("Pyzor: got response: $response");
 
     alarm(0);
@@ -696,10 +705,10 @@ sub pyzor_lookup {
   $self->leave_helper_run_mode();
 
   if ($@) {
-    if ($@ =~ /^alarm$/) {
+    if ($@ =~ /^__alarm__$/) {
       dbg ("Pyzor -> check timed out after $timeout secs.");
       timelog("Pyzor interrupted after $timeout secs", "pyzor", 2);
-    } elsif ($@ =~ /^brokenpipe$/) {
+    } elsif ($@ =~ /^__brokenpipe__$/) {
       dbg ("Pyzor -> check failed: Broken pipe.");
       timelog("Pyzor check failed, broken pipe", "pyzor", 2);
     } else {
