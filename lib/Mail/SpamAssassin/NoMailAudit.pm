@@ -19,7 +19,7 @@ use Mail::SpamAssassin::Message;
 use Fcntl qw(:DEFAULT :flock);
 
 @Mail::SpamAssassin::NoMailAudit::ISA = (
-  	'Mail::SpamAssassin::Message'
+        'Mail::SpamAssassin::Message'
 );
 
 # ---------------------------------------------------------------------------
@@ -136,9 +136,8 @@ sub parse_headers {
 sub _add_header_to_entry {
   my ($self, $entry, $hdr, $line) = @_;
 
-  if ($line !~ /\n$/) {
-    $line .= "\n";	# ensure we have line endings
-  }
+  # ensure we have line endings
+  $line .= "\n" unless $line =~ /\n$/;
 
   $entry->{$entry->{count}} = $line;
   push (@{$self->{header_order}}, $hdr.":".$entry->{count});
@@ -150,9 +149,9 @@ sub _get_or_create_header_object {
 
   if (!defined $self->{headers}->{$hdr}) {
     $self->{headers}->{$hdr} = {
-	      'count' => 0,
-	      'added' => 0,
-	      'original' => 0
+              'count' => 0,
+              'added' => 0,
+              'original' => 0
     };
   }
   return $self->{headers}->{$hdr};
@@ -265,7 +264,7 @@ sub replace_body {
 sub as_string {
   my ($self) = @_;
   return join ('', $self->get_all_headers()) . "\n" .
-  		join ('', @{$self->get_body()});
+                join ('', @{$self->get_body()});
 }
 
 # ---------------------------------------------------------------------------
@@ -301,8 +300,18 @@ sub accept {
   my $self = shift;
   my $file = shift;
 
+  # determine location of mailspool
+  if ($ENV{'MAIL'}) {
+    $file = $ENV{'MAIL'};
+  } elsif (-d "/var/spool/mail/") {
+    $file = "/var/spool/mail/" . getpwuid($>);
+  } elsif (-d "/var/mail/") {
+    $file = "/var/mail/" . getpwuid($>);
+  } else {
+    die('Could not determine mailspool location for your system.  Try setting $MAIL in the environment.');
+  }
+
   # some bits of code from Mail::Audit here:
-  $file ||= $ENV{'MAIL'} || "/var/spool/mail/".getpwuid($>);
 
   if (exists $self->{accept}) {
     return $self->{accept}->();
@@ -321,7 +330,7 @@ sub accept {
 
     if (!defined $gotlock) {
       # dot-locking not supported here (probably due to file permissions
-      # on the /var/spool/mail dir).  just use flock().
+      # on the mailspool dir).  just use flock().
       $nodotlocking = 1;
     }
 
@@ -330,7 +339,7 @@ sub accept {
 
     if ($gotlock || $nodotlocking) {
       if (!open (MBOX, ">>$file")) {
-	die "Couldn't open $file: $!";
+        die "Couldn't open $file: $!";
       }
 
       flock(MBOX, LOCK_EX) or warn "failed to lock $file: $!";
@@ -339,7 +348,7 @@ sub accept {
       close MBOX;
 
       if (!$nodotlocking) {
-	$self->dotlock_unlock ();
+        $self->dotlock_unlock ();
       }
 
       if (!$self->{noexit}) { exit 0; }
@@ -447,7 +456,7 @@ sub _proxy_to_mail_audit {
 
   if ($@) {
     warn "spamassassin: $method() failed, Mail::Audit ".
-    		"module could not be loaded: $@";
+            "module could not be loaded: $@";
     return undef;
   }
 
