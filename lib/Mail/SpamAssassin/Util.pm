@@ -143,7 +143,7 @@ sub untaint_var {
   return undef unless defined;
 
   unless (ref) {
-    /^(.*)$/;
+    /^(.*)$/s;
     return $1;
   }
   elsif (ref eq 'ARRAY') {
@@ -152,7 +152,7 @@ sub untaint_var {
   }
   elsif (ref eq 'HASH') {
     foreach my $k (keys %{$_}) {
-      ${$_}{untaint_var($k)} = defined($k) ? untaint_var(${$_}{$k}) : undef;
+      ${$_}{untaint_var($k)} = untaint_var(${$_}{$k});
     }
     return %{$_} if wantarray;
   }
