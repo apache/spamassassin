@@ -460,9 +460,6 @@ describe VERY_SUSP_RECIPS       To: contains similar usernames at least 5 times
 header VERY_SUSP_CC_RECIPS	Cc =~ /\b([a-z][a-z])[^@,]{0,20}(@[-a-z0-9_\.]{0,3}).{0,40}?(?:\1[^@]*\2.{0,20}?){4,}/is
 describe VERY_SUSP_CC_RECIPS	Cc: contains similar usernames at least 5 times
 
-header Q_FOR_SELLER		Subject =~ /Question.*(for|to|from eBay).*(seller|Member)/
-describe Q_FOR_SELLER		Subject is an eBay question
-
 header USER_IN_WHITELIST_TO     eval:check_to_in_whitelist()
 describe USER_IN_WHITELIST_TO   User is listed in 'whitelist_to'
 
@@ -576,4 +573,63 @@ describe SUBJ_FREE_CAP		Subject contains the word 'FREE'
 header NMS_CGI_NOT_BUGGY        X-Mailer =~ /^NMS FormMail.pl.*v\d/
 describe NMS_CGI_NOT_BUGGY      Not Matt's Scripts formmail.pl
 
+# some non-spam rules from http://www.darkmere.gen.nz/2002/0628.html
+header Q_FOR_SELLER		Subject =~ /Question.*(for|to|from eBay).*(seller|Member)/
+describe Q_FOR_SELLER		Subject is an eBay question
+
+header SUBJECT_HAS_DATE         Subject =~ /1?\d[-\/][1-3]?\d[-\/](20)?02/
+describe SUBJECT_HAS_DATE       Subject contains a date
+
+header FROM_NEWS_LIST           From =~ /(\@news|\@list)/i
+describe FROM_NEWS_LIST         From: has a news or list hostname in FQDN
+
+header FROM_US_PHONE            From =~ /^[2-9]\d{9}\@/
+describe FROM_US_PHONE          From: looks like US Telephone Number
+
+header SUBJECT_IS_NEWS          Subject =~ /(in review|news|list)/i
+describe SUBJECT_IS_NEWS        Subject contains news newsletter list daily, weekly or monthly
+
+header SUBJECT_FREQ             Subject =~ /(monday|daily|week|monthly)/i
+describe SUBJECT_FREQ           Subject contains monday daily week or monthly
+
+header SUBJECT_MONTH            Subject =~ /(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)/i
+describe SUBJECT_MONTH          Subject has month in it probable newsletter
+
+header FROM_EGROUPS     X-eGroups-Return =~ /^sentto-.*\@returns.groups.yahoo.com$/
+describe FROM_EGROUPS   Appears to be from yahoo groups
+test FROM_EGROUPS  ok   sentto-2537484-52529-1020428367-Sxm=olswang.com@returns.groups.yahoo.com
+test FROM_EGROUPS  fail spammer@returns.groups.yahoo.com
+
+header FWD_MSG                  Subject =~ /\[?Fwd?:?\s*/
+describe FWD_MSG                Forwarded email
+
+body HOTMAIL_FOOTER1             /Send and receive Hotmail on your mobile device: /
+describe HOTMAIL_FOOTER1        Common footer for Hotmail
+
+body HOTMAIL_FOOTER2            /Get your FREE download of MSN Explorer at /
+describe HOTMAIL_FOOTER2        Common footer for Hotmail
+
+body HOTMAIL_FOOTER3            /Get Your Private, Free E-mail from MSN Hotmail at http:\/\/www\.hotmail\.com\./
+describe HOTMAIL_FOOTER3        Common footer for Hotmail
+
+body HOTMAIL_FOOTER4            /Join the world's largest e-mail service with MSN Hotmail\./
+describe HOTMAIL_FOOTER4        Common footer for Hotmail
+
+body HOTMAIL_FOOTER5            /Chat with friends online, try MSN Messenger: /
+describe HOTMAIL_FOOTER5        Common footer for Hotmail
+
+body MSN_FOOTER1                /MSN Photos is the easiest way to share and print your photos: /
+describe MSN_FOOTER1            Common footer for MSN
+
+body MSN_FOOTER2                /Remove my e-mail address from Gaming Zone /
+describe MSN_FOOTER2            Common footer for MSN
+
+body MAILBITS_EMAIL             /This is a free service provided by MailBits\.com\./
+describe MAILBITS_EMAIL         recommended page from MailBits.com
+
+body GROUPS_YAHOO_1             /Your use of Yahoo! Groups is subject to the/
+describe GROUPS_YAHOO_1         Modified Yahoo! Groups test
+
+body GROUPS_MSN                 /http:\/\/communities\.msn\.com\/contact/
+describe GROUPS_MSN             MSN Communities
 
