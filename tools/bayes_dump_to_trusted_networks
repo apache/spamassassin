@@ -50,7 +50,18 @@ but easier to read.
 
 =back
 
+=head1 PREREQUISITES
+
+C<Net::CIDR::Lite>
+
 =cut
+
+eval {
+  require Net::CIDR::Lite;	# used to consolidate into CIDR ranges
+};
+
+die "Net::CIDR::Lite module is required to use this script.  Aborting.\n".
+      "(error was: $@)\n" if $@;
 
 use strict;
 
@@ -137,7 +148,6 @@ while (<>) {
   }
 }
 
-use Net::CIDR::Lite;	# used to consolidate into CIDR ranges
 foreach my $class_c (sort {
 	classc2long($a) <=> classc2long($b)
       } keys %class_cs)
