@@ -114,6 +114,12 @@ describe MSGID_SPAM_99X9XX99	Spam tool Message-Id: (99x9xx99 variant)
 header MSGID_SPAM_ZEROES	MESSAGEID =~ /<0000[0-9a-f]{8}\$0000[0-9a-f]{4}\$0000[0-9a-f]{4}\@/
 describe MSGID_SPAM_ZEROES	Spam tool Message-Id: (12-zeroes variant)
 
+header MSGID_SPAM_ALPHA_NUM	MESSAGEID =~ /<[A-Z]{7}-000[0-9]{10}\@[a-z]*>/
+describe MSGID_SPAM_ALPHA_NUM	Spam tool Message-Id: (alpha-numeric variant)
+
+header MSGID_SPAM_LETTERS	Message-Id =~ /<[a-z]{5,}\@(\S+\.)+\S+>/
+describe MSGID_SPAM_LETTERS	Spam tool Message-Id: (letters variant)
+
 header MSGID_3_DOLLARS		MESSAGEID =~ /^<?(?:\d+\$){3}\d+\@/m
 describe MSGID_3_DOLLARS	Spam tool Message-Id: (3-dollars variant)
 header MSGID_4NUMS_DOLLAR	MESSAGEID =~ /^<?\d{4}\$\w+\@/m
