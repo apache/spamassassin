@@ -1114,8 +1114,10 @@ sub word_is_in_dictionary {
   return 1 if ($word_len < 3);
 
   if (!$triplets_loaded) {
-    my @default_triplets_path = map { s,$,/triplets.txt,; $_; }
-                                @Mail::SpamAssassin::default_rules_path;
+    # take a copy to avoid modifying the real one
+    my @default_triplets_path = @Mail::SpamAssassin::default_rules_path;
+    @default_triplets_path = map { s,$,/triplets.txt,; $_; }
+				    @default_triplets_path;
     my $filename = $self->{main}->first_existing_path (@default_triplets_path);
 
     unless ( defined $filename ) {
@@ -1165,10 +1167,11 @@ sub nonsense_from_percent {
     }
 
     if (!$names_triplets_loaded) {
-        my @default_triplets_path = map { s,$,/name-triplets.txt,; $_; }
-                                    @Mail::SpamAssassin::default_rules_path;
-        my $filename = $self->{main}->first_existing_path (@default_triplets_path
-);
+        # take a copy to avoid modifying the real one
+        my @default_triplets_path = @Mail::SpamAssassin::default_rules_path;
+        @default_triplets_path = map { s,$,/name-triplets.txt,; $_; }
+					@default_triplets_path;
+        my $filename = $self->{main}->first_existing_path (@default_triplets_path);
 
         if (!open (TRIPLETS, "<$filename")) {
             dbg ("failed to open '$filename', cannot check dictionary");
