@@ -64,6 +64,7 @@ sub wanted {
   my $ma = Mail::SpamAssassin::NoMailAudit->new ('data' => $dataref);
 
   $ma->{noexit} = 1;
+  $spamtest->remove_spamassassin_markup($ma);
   my $status = $spamtest->check ($ma);
   $status->rewrite_mail ();
 
