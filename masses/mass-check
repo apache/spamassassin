@@ -105,13 +105,10 @@ my $log_header = "# mass-check results from $who\@$where, on $when\n" .
 my $host = $ENV{'HOSTNAME'} || $ENV{'HOST'} || `hostname` || 'localhost';
 chomp $host;
 
-my $num_progresses = 10;
-my $spamcount = 0;
-my $hamcount = 0;
-my $time_lastmsg = 0;
-
-my $progdist = (1.0 / $num_progresses);
-my $nextprog = 0.0;
+my $updates = 10;
+my $total_count = 0;
+my $spam_count = 0;
+my $ham_count = 0;
 
 if ($opt_o) {
   autoflush STDOUT 1;
@@ -135,7 +132,7 @@ my $iter = new Mail::SpamAssassin::ArchiveIterator({
 });
 
 if (!$opt_showdots) {
-  my $now = localtime(time);
+  my $now = strftime("%Y-%m-%d %X", localtime(time));
   printf STDERR "status: pre-scanning and sorting. now: %s\n", $now;
 }
 $iter->set_functions(\&wanted, \&result);
@@ -159,19 +156,19 @@ sub target  {
 ###########################################################################
 
 sub result {
-  my ($class, $result) = @_;
+  my ($class, $result, $time) = @_;
 
   if ($class eq "s") {
     if ($opt_o) { print STDOUT $result; } else { print SPAM $result; }
-    $spamcount++;
+    $spam_count++;
   }
   elsif ($class eq "h") {
     if ($opt_o) { print STDOUT $result; } else { print HAM $result; }
-    $hamcount++;
+    $ham_count++;
   }
 
   if (!$opt_showdots) {
-    progress();
+    progress($time);
   }
 }
 
@@ -202,14 +199,17 @@ sub wanted {
   }
   if ($opt_mid) {
     my $mid = $ma->get_header("Message-Id");
-    unless ($mid) {           # no Message-Id in mail...
-      $mid = $id;             # ... so build one from the id
-      $mid =~ s,^.*/,,;       # remove the path
-      $mid .= "." . time;     # add time
+    if (!$mid) {
+      $mid = $id;
+      if (defined($time)) {
+	$mid =~ s@^.*/@@;
+	$mid .= "." . $time;	# message time is more stable than real time
+      }
       $mid = "<$mid\@$host.masses.spamassassin.org>";
     }
-    $mid =~ s/^\s+|\s+$//sg;  # trim leading and trailing whitespaces
-    $mid =~ s/[\s:,\\]/_/sg;  # replace dangerous characters
+    $mid =~ s/^\s+//g;
+    $mid =~ s/\s+$//g;
+    $mid =~ s/[\s:,\\]/./sg;	# replace with . so regexp search just works
     push(@extra, "mid=$mid");
   }
 
@@ -250,7 +250,7 @@ sub wanted {
     print STDERR '.';
   }
 
-  $time_lastmsg = $time;
+  $total_count++;
   return $out;
 }
 
@@ -269,17 +269,14 @@ sub logkilled {
 }
 
 sub progress {
-  my $progress = ($spamcount + $hamcount) /
-	($Mail::SpamAssassin::ArchiveIterator::NUM_MESSAGES || 0.001);
+  my ($time) = @_;
+  my $messages = $Mail::SpamAssassin::ArchiveIterator::MESSAGES;
 
-  if ($progress >= $nextprog) {
-    $nextprog += $progdist;
-
-    my $time = strftime "%Y-%m-%d", localtime($time_lastmsg);
-    my $now = localtime(time);
-
-    printf STDERR "status: %3.0f%% ham: %4d spam: %4d msgtime: %s now: %s\n",
-	$progress * 100, $hamcount, $spamcount, $time, $now;
+  if (!int($total_count % ($messages / $updates))) {
+    my $time = strftime("%Y-%m-%d", localtime($time));
+    my $now = strftime("%Y-%m-%d %X", localtime(time));
+    printf STDERR "status: %3.0f%% ham: %-6d spam: %-6d date: %s now: %s\n",
+	($total_count / $messages) * 100, $ham_count, $spam_count, $time, $now;
   }
 }
 
