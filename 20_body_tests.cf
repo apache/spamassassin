@@ -229,7 +229,7 @@ describe LIMITED_TIME_ONLY	Offers a limited time offer
 body STRONG_BUY			/strong buy/i
 describe STRONG_BUY		Tells you about a strong buy
 
-body WE_HONOR_ALL		/we (?:honou?r|respect)(?: all|) remov[eal] requests/i
+body WE_HONOR_ALL		/we (?:honou?r|respect)(?: all)? remov(?:e|al) requests/i
 describe WE_HONOR_ALL		Claims to honor removal requests
 body FILTERED_BY_WORLDREMOVE	/filtered by WorldRemove/
 describe FILTERED_BY_WORLDREMOVE Claims to listen to some removal request list
