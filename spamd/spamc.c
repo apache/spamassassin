@@ -477,6 +477,11 @@ int process_message(const char *hostname, int port, char *username, int max_size
       exstatus = read_message(mysock,STDOUT_FILENO,max_size);
     }
 
+    if(CHECKONLY && ESC_PASSTHROUGHRAW == exstatus)
+    {
+	exstatus = EX_OK;
+    }
+
     if(!CHECK_ONLY && (ESC_PASSTHROUGHRAW == exstatus || (SAFE_FALLBACK && EX_OK != exstatus)))
     {
       /* Message was too big or corrupted, so dump the buffer then bail */
