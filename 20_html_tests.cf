@@ -274,3 +274,6 @@ describe HIDE_WIN_STATUS	Javascript to hide URLs in browser
 rawbody LINK_TO_NO_SCHEME	/\s+href=['"]?www\./i
 describe LINK_TO_NO_SCHEME	Contains link without http:// prefix
 
+# Large percentage of HTML comments in the message
+body __HTML_COMMENT_RATIO_70_100	eval:html_range('total_comment_ratio','0.70','1.00')
+meta HTML_COMMENT_RATIO		__HTML_COMMENT_RATIO_70_100 && MIME_HTML_ONLY

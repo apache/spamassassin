@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.491 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.492 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -120,18 +120,9 @@ body T_BLANK_LINE_RATIO_04_94_96	eval:check_blank_line_ratio('94','96','4')
 body T_BLANK_LINE_RATIO_04_96_98	eval:check_blank_line_ratio('96','98','4')
 body T_BLANK_LINE_RATIO_04_98_100	eval:check_blank_line_ratio('98','100','4')
 body T_BLANK_LINE_RATIO_04_70_100	eval:check_blank_line_ratio('70','100','4')
+body T_BLANK_LINE_RATIO_04_80_100	eval:check_blank_line_ratio('80','100','4')
 
 ###########################################################################
-
-# per bug 1373
-body __HTML_COMMENT_RATIO_70_80		eval:html_range('total_comment_ratio','0.70','0.80')
-body __HTML_COMMENT_RATIO_80_90		eval:html_range('total_comment_ratio','0.80','0.90')
-body __HTML_COMMENT_RATIO_90_100	eval:html_range('total_comment_ratio','0.90','0.100')
-body __HTML_COMMENT_RATIO_70_100	eval:html_range('total_comment_ratio','0.70','0.100')
-meta T_HTML_COMMENT_RATIO_70_80_MIME_HTML_ONLY		__HTML_COMMENT_RATIO_70_80 && MIME_HTML_ONLY
-meta T_HTML_COMMENT_RATIO_80_90_MIME_HTML_ONLY		__HTML_COMMENT_RATIO_80_90 && MIME_HTML_ONLY
-meta T_HTML_COMMENT_RATIO_90_100_MIME_HTML_ONLY		__HTML_COMMENT_RATIO_90_100 && MIME_HTML_ONLY
-meta T_HTML_COMMENT_RATIO_70_100_MIME_HTML_ONLY		__HTML_COMMENT_RATIO_70_100 && MIME_HTML_ONLY
 
 header T_RATWARE_RCVD_BONUS_SPC	Received =~ /\) by  [a-zA-Z0-9]/
 describe T_RATWARE_RCVD_BONUS_SPC Received headers forged (extra spaces)
@@ -401,42 +392,17 @@ rawbody T_HREF_3D			/(?:href|src)=3D\"/i
 describe T_HREF_3D		Uses href=3D Trick
 
 # bug 1803
+# These two get bad S/Os.  tvd - 2003/05/17
+# 0.174   0.4024   0.0461    0.897   0.69    0.01  T_GAPPY_PORN_01
+# 0.075   0.1651   0.0238    0.874   0.64    0.01  T_GAPPY_PORN_02
 body T_GAPPY_PORN_01                       /\b(?:s\We\Wx|p\Wo\Wr\Wn|x\Wx\Wx|f\Wu\Wc\Wk|p\Wa\Wr\Wt\Wy|t\We\We\Wn|f\Wu\Wn|h\Wo\Wt)/i
 describe T_GAPPY_PORN_01           G.a.p.p.y - P.o.r.n
-
 body T_GAPPY_PORN_02                       /\b(?:s\.e\.x|p\.o\.r\.n|x\.x\.x|f\.u\.c\.k|p\.a\.r\.t\.y|t\.e\.e\.n|f\.u\.n|h\.o\.t)/i
 describe T_GAPPY_PORN_02           G.a.p.p.y - P.o.r.n
 
-# bug 1743
-header T_WS_PHRASE                To =~ /\s*\"\s\"\s/
-describe T_WS_PHRASE              Phrase part of address is a space
-
 # bug 1876
-body 		T_GREATGIFT		/Makes a great.{1,20}gift/i
-describe	T_GREATGIFT		This spam makes a great gift!
-
-body 		T_WEHAVEASOLUTION		/We have a solution/i
-describe	T_WEHAVEASOLUTION		Claims to have a solution
-
 rawbody		T_PUSHHERELINK		/<a[^>]*>[^<]*((push|go)\s(here|this) |cease.{1,10}mail)[^<]*<\/a>/i
 describe	T_PUSHHERELINK		Link asks you to "push here" or "go here" or "cease mail" or the like
 
-uri 		T_OFFER888 		/Offer888/i
-uri 		T_PERMISSIONPASS 		/PermissionPass/i
-uri 		T_EQUALAMAIL 		/EqualaMAIL/i
 uri 		T_DOLLARMACHINE 		/dollar.?machine/i
 uri 		T_HITBOX 			/hitbox\.com/i
-
-# trying to modify the razor range rules ... - tvd
-body	T_RAZOR2_CF_RANGE_11_50	eval:check_razor2_range('11','50')
-body	T_RAZOR2_CF_RANGE_51_100	eval:check_razor2_range('51','100')
-body	T_RAZOR2_CF_RANGE_01_25	eval:check_razor2_range('01','25')
-body	T_RAZOR2_CF_RANGE_26_50	eval:check_razor2_range('26','50')
-body	T_RAZOR2_CF_RANGE_51_75	eval:check_razor2_range('51','75')
-body	T_RAZOR2_CF_RANGE_76_100	eval:check_razor2_range('76','100')
-tflags T_RAZOR2_CF_RANGE_11_50 net
-tflags T_RAZOR2_CF_RANGE_51_100 net
-tflags T_RAZOR2_CF_RANGE_01_25 net
-tflags T_RAZOR2_CF_RANGE_26_50 net
-tflags T_RAZOR2_CF_RANGE_51_75 net
-tflags T_RAZOR2_CF_RANGE_76_100 net
