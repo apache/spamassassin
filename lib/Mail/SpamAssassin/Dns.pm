@@ -1106,11 +1106,13 @@ sub enter_helper_run_mode {
 
   dbg ("entering helper-app run mode");
   $self->{old_slash} = $/;              # Razor pollutes this
+  %{$self->{old_env}} = ();
   if ( defined %ENV ) {
-    %{$self->{old_env}} = %ENV;
-  }
-  else {
-    %{$self->{old_env}} = ();
+    # undefined values in %ENV can result due to autovivification elsewhere,
+    # this prevents later possible warnings when we restore %ENV
+    while (my ($key, $value) = each %ENV) {
+      $self->{old_env}->{$key} = $value if defined $value;
+    }
   }
 
   Mail::SpamAssassin::Util::clean_path_in_taint_mode();
