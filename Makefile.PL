@@ -108,13 +108,13 @@ qq#
 
 RULES		= $rulesfiles
 
-CFCC		= $Config{cc}
-CFCCFLAGS	= $Config{ccflags} $MYCFLAGS
-CFCCDLFLAGS	= $Config{ccdlflags} $MYCFLAGS
-CFOPTIMIZE	= $Config{optimize}
-CFLIBS		= $Config{libs}
-CFLDFLAGS	= $Config{ldflags}
-CFLDDLFLAGS	= $Config{lddlflags}
+CFCC		= $Config::Config{cc}
+CFCCFLAGS	= $Config::Config{ccflags} $MYCFLAGS
+CFCCDLFLAGS	= $Config::Config{ccdlflags} $MYCFLAGS
+CFOPTIMIZE	= $Config::Config{optimize}
+CFLIBS		= $Config::Config{libs}
+CFLDFLAGS	= $Config::Config{ldflags}
+CFLDDLFLAGS	= $Config::Config{lddlflags}
 
 SYSCONFDIR      = $sysconfdir
 
