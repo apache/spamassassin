@@ -571,11 +571,9 @@ main(int argc, char *argv[])
 		if (flags & SPAMC_LEARN) {
 		    if (m.is_learned == 1) {
   		        printf("Message successfully un/learned\n");
-			ret = EX_LEARNED;
 		    }
 		    else {
 		        printf("Message was already un/learned\n");
-			ret = EX_NOTLEARNED;
 		    }
 		    message_cleanup(&m);
 		    goto finish;
@@ -616,7 +614,6 @@ main(int argc, char *argv[])
     }
     else if (flags & SPAMC_LEARN ) {
         message_cleanup(&m);
-	ret = EX_UNAVAILABLE;
     }
     else {
 	message_dump(STDIN_FILENO, out_fd, &m);
