@@ -996,9 +996,9 @@ sub _sync_journal_trapped {
     while (<JOURNAL>) {
       $total_count++;
 
-      if (/^t (\d+) (.*)$/) { # Token timestamp update, cache resultant entries
+      if (/^t (\d+) (.+)$/) { # Token timestamp update, cache resultant entries
 	$tokens{$2} = $1+0 if ( !exists $tokens{$2} || $1+0 > $tokens{$2} );
-      } elsif (/^c (-?\d+) (-?\d+) (\d+) (.*)$/) { # Add/full token update
+      } elsif (/^c (-?\d+) (-?\d+) (\d+) (.+)$/) { # Add/full token update
 	$self->tok_sync_counters ($1+0, $2+0, $3+0, $4);
 	$count++;
       } elsif (/^n (-?\d+) (-?\d+)$/) { # update ham/spam count
