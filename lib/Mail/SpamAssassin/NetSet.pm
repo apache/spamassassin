@@ -1,4 +1,6 @@
 # Mail::SpamAssassin::NetSet - object to manipulate CIDR net IP addrs
+# @LICENSE
+
 package Mail::SpamAssassin::NetSet;
 
 use strict;

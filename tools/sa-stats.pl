@@ -3,9 +3,8 @@
 #Authors      : Brad Rathbun <brad@computechnv.com> http://www.computechnv.com/
 #             : Bob Apthorpe <apthorpe+sa@cynistar.net> http://www.cynistar.net/~apthorpe/
 #             : Duncan Findlay <duncf@debian.org>
-
-# Licensed under the terms of the SpamAssassin distribution (GPL/PAL).
-
+#
+# @LICENSE
 
 use strict;
 

@@ -1,3 +1,5 @@
+# @LICENSE
+
 =head1 NAME
 
 Mail::SpamAssassin::ConfSourceSQL - load SpamAssassin scores from SQL database

@@ -1,3 +1,5 @@
+# @LICENSE
+
 =head1 NAME
 
 Mail::SpamAssassin::Conf - SpamAssassin configuration file

@@ -1,5 +1,7 @@
 # Mail::SpamAssassin::Message - interface to any mail message text/headers
 
+# @LICENSE
+
 package Mail::SpamAssassin::Message;
 
 use strict;

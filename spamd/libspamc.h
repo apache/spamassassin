@@ -2,9 +2,8 @@
  * This code is copyright 2001 by Craig Hughes
  * Conversion to a thread-safe shared library copyright 2002 Liam Widdowson
  * Portions copyright 2002 by Brad Jorsch
- * It is licensed under the same license as Perl itself.  The text of this
- * license is included in the SpamAssassin distribution in the file named
- * "License".
+ *
+ * @LICENSE
  */
 #ifndef LIBSPAMC_H
 #define LIBSPAMC_H 1

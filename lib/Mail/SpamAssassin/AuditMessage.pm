@@ -1,4 +1,6 @@
 # Mail::SpamAssassin::AuditMessage - interface to Mail::Audit message text
+#
+# @LICENSE
 package Mail::SpamAssassin::AuditMessage;
 
 use strict;

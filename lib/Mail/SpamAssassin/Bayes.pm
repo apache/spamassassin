@@ -1,3 +1,5 @@
+# @LICENSE
+
 =head1 NAME
 
 Mail::SpamAssassin::Bayes - determine spammishness using a Bayesian classifier

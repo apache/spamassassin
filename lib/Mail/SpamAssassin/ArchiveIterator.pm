@@ -1,6 +1,6 @@
-#!/usr/bin/perl -w
-#
 # iterate over mail archives, calling a function on each message.
+#
+# @LICENSE
 
 package Mail::SpamAssassin::ArchiveIterator;
 

@@ -1,3 +1,4 @@
+/* @COPYRIGHT */
 /*
  *  This program uses PGAPack to do its GA stuff.
  *  ftp://ftp.mcs.anl.gov/pub/pgapack/pgapack.tar.Z

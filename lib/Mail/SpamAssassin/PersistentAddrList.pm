@@ -1,3 +1,5 @@
+# @LICENSE
+
 =head1 NAME
 
 Mail::SpamAssassin::PersistentAddrList - persistent address list base class

@@ -1,9 +1,8 @@
 /*
  * This code is copyright 2001 by Craig Hughes
  * Portions copyright 2002 by Brad Jorsch
- * It is licensed under the same license as Perl itself.  The text of this
- * license is included in the SpamAssassin distribution in the file named
- * "License".
+ *
+ * @LICENSE
  */
 
 #ifndef _WIN32

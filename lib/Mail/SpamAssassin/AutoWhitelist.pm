@@ -1,3 +1,5 @@
+# @LICENSE
+
 =head1 NAME
 
 Mail::SpamAssassin::AutoWhitelist - auto-whitelist handler for SpamAssassin

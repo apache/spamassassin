@@ -1,3 +1,5 @@
+# @LICENSE
+
 package Mail::SpamAssassin::Locker;
 
 use strict;

@@ -2,6 +2,8 @@
 # for versions of Mail::Audit with methods to encapsulate the message text
 # itself (ie. not exposing a Mail::Internet object).
 
+# @LICENSE
+
 package Mail::SpamAssassin::EncappedMessage;
 
 use strict;

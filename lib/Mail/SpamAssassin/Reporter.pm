@@ -1,5 +1,7 @@
 # Mail::SpamAssassin::Reporter - report a message as spam
 
+# @LICENSE
+
 package Mail::SpamAssassin::Reporter;
 
 use strict;

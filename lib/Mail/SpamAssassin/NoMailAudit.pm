@@ -1,3 +1,5 @@
+# @LICENSE
+
 # Mail message object, used by SpamAssassin.  This was written to eliminate, as
 # much as possible, SpamAssassin's dependency on Mail::Audit and the
 # Mail::Internet, Net::SMTP, etc. module set it requires.

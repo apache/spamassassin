@@ -1,4 +1,6 @@
 #!/usr/bin/perl -w
+#
+# @LICENSE
 
 use strict;
 use warnings;

@@ -1,5 +1,7 @@
 # $Id: MailingList.pm,v 1.12 2003/01/09 23:51:56 msquadrat Exp $
 
+# @LICENSE
+
 # Eval Tests to detect genuine mailing lists.
 
 package Mail::SpamAssassin::MailingList;

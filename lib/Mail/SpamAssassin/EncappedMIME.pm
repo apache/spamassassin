@@ -1,6 +1,8 @@
 # Mail::SpamAssassin::EncappedMIME - interface to Mail::Audit message text,
 # for MIME::Entity-based Mail::Audit objects.
 
+# @LICENSE
+
 package Mail::SpamAssassin::EncappedMIME;
 
 use Carp;

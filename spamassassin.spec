@@ -42,7 +42,7 @@ Group:          Applications/Mail
 Name: %{name}
 Version: %{version}
 Release: %{release}
-License: Artistic
+License: Apache Software License
 URL: http://spamassassin.org/
 Source: http://spamassassin.org/released/Mail-SpamAssassin-%{real_version}.tar%{srcext}
 Buildroot: %{_tmppath}/%{name}-root
@@ -149,7 +149,7 @@ mkdir -p %{buildroot}/etc/mail/spamassassin
 
 %files 
 %defattr(-,root,root)
-%doc README Changes sample-nonspam.txt sample-spam.txt spamd/README.spamd INSTALL BUGS COPYRIGHT License TRADEMARK USAGE Razor2.patch
+%doc README Changes sample-nonspam.txt sample-spam.txt spamd/README.spamd INSTALL BUGS COPYRIGHT LICENSE TRADEMARK USAGE Razor2.patch
 %attr(755,root,root) %{_bindir}/*
 %attr(644,root,root) %{_includedir}/*
 %attr(644,root,root) %{_libdir}/*.so

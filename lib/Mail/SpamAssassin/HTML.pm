@@ -1,5 +1,7 @@
 # $Id: HTML.pm,v 1.101 2003/10/15 08:08:05 quinlan Exp $
 
+# @LICENSE
+
 # HTML decoding TODOs
 # - add URIs to list for faster URI testing
 

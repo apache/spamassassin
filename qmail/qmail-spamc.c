@@ -1,10 +1,7 @@
 /*
  * This code is copyright (c) 2002-2003 by John Peacock
  *
- * It is licensed under the same license as SpamAssassin itself.
- * The text of this license is included in the SpamAssassin
- * distribution in the file named "License".
- *
+ * @LICENSE
  */
 
 #include <stdio.h>

@@ -1,3 +1,5 @@
+# @LICENSE
+
 =head1 NAME
 
 Mail::SpamAssassin - Mail::Audit spam detector plugin
@@ -1573,7 +1575,8 @@ Justin Mason E<lt>jm /at/ jmason.orgE<gt>
 
 =head1 COPYRIGHT
 
-SpamAssassin is distributed under Perl's Artistic license.
+SpamAssassin is distributed under the Apache Software License, as described
+in the file C<LICENSE> included with the distribution.
 
 =head1 AVAILABILITY
 

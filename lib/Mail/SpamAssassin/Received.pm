@@ -1,5 +1,7 @@
 # $Id: Received.pm,v 1.40 2003/12/17 07:08:44 jmason Exp $
 
+# @LICENSE
+
 # ---------------------------------------------------------------------------
 
 # So, what's the difference between a trusted and untrusted Received header?

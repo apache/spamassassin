@@ -1,3 +1,5 @@
+# @LICENSE
+
 =head1 NAME
 
 Mail::SpamAssassin::PerMsgStatus - per-message status (spam or not-spam)
