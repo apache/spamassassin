@@ -35,6 +35,9 @@ sub new {
   $self->{required_hits} = 5;
   $self->{auto_report_threshold} = 20;
   $self->{report_template} = '';
+  $self->{spamtrap_template} = '';
+
+  $self->{whitelist_from} = [ ];
 
   $self;
 }
@@ -108,8 +111,18 @@ sub parse_rules {
       next;
     }
 
-    if (/^report\s*(.*)$/) {
+    if (/^report\s+(.*)$/) {
       $self->{report_template} .= $1."\n";
+      next;
+    }
+
+    if (/^spamtrap\s+(.*)$/) {
+      $self->{spamtrap_template} .= $1."\n";
+      next;
+    }
+
+    if (/^whitelist_from\s+(\S+)\s*$/) {
+      push (@{$self->{whitelist_from}}, $1);
       next;
     }
 

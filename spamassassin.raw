@@ -83,6 +83,12 @@ Options:
 
   -r               mail message is verified as spam, report it
 
+  -w fromaddr	   send a warning mail back to the sender of the message,
+                   notifying them that their message has been marked as spam
+		   (only useful if -r is used)
+
+  -l filename      Log all mail messages to a mbox-format file
+
   -c config        configuration file
                    (default:	$rules )
 
@@ -101,10 +107,10 @@ require Mail::SpamAssassin;
 require Mail::Audit;
 
 use vars qw{
-  $opt_t $opt_c $opt_p $opt_h $opt_V $opt_D $opt_r $opt_P
+  $opt_t $opt_c $opt_p $opt_h $opt_V $opt_D $opt_r $opt_P $opt_w $opt_l
 };
 
-getopts ('tc:p:hVDrP') or usage();
+getopts ('tc:p:hVDrPw:l:') or usage();
 
 if (defined $opt_h) { usage(); }
 if (defined $opt_V) {
@@ -156,11 +162,24 @@ my $spamtest = new Mail::SpamAssassin ({
   'debug'		=> $opt_D
 });
 
-if ($opt_r) {
-  $spamtest->report_as_spam ($mail);
-  exit;
+# handle logging of received mails
+if ($opt_l) {
+  $mail->{noexit} = 1;
+  $mail->accept ($opt_l);
+  $mail->{noexit} = 0;
 }
 
+# handle unconditional reportage
+if ($opt_r) {
+  $spamtest->report_as_spam ($mail);
+  if ($opt_w) {
+    $spamtest->reply_with_warning ($mail, $opt_w);
+  }
+  $mail->ignore();		# will exit
+}
+
+# not reporting? OK, do checks instead.  Create a status object which
+# holds details of the message's spam/not-spam status.
 my $status = $spamtest->check ($mail);
 $status->rewrite_mail ();
 $status->handle_auto_report ();
@@ -224,13 +243,18 @@ spamassassin - mail filter to identify spam using text analysis
   -P               pipe message through, instead of delivering to mail spool
   -t               only testing
   -r               report this message as verified spam
+  -w fromaddr	   send a warning mail back to the sender of the message,
+                   notifying them that their message has been marked as spam
+		   (only useful if -r is used)
+  -l filename      Log all mail messages to a mbox-format file
   -c config        configuration file
   -p prefs         user preferences file
   -D               produce diagnostic output
 
 =head1 DESCRIPTION
 
-SpamAssassin is a mail filter to identify spam using text analysis.
+SpamAssassin is a mail filter to identify spam using text analysis and several
+internet-based realtime blacklists.
 
 Using its rule base, it uses a wide range of heuristic tests on mail headers
 and body text to identify "spam", also known as unsolicited commercial email.
@@ -243,6 +267,17 @@ filtering databases, such as Vipul's Razor ( http://razor.sourceforge.net/ ).
 
 The default tagging operations that take place are detailed in the L<TAGGING>
 section below.
+
+=head1 CONFIGURATION FILES
+
+The rule base, text templates, and rule description text are loaded from the
+configuration file.  The default configuration file, if C<-c> is not specified,
+is C<$Config{installsitelib}/spamassassin.cf>.
+
+The user preferences (such as scores to attach to each rule), are loaded from
+the file specified in the C<-p> argument.  If this is not specified,
+C<~/.spamassassin.cf> is used if it exists, otherwise
+C<$Config{installsitelib}/spamassassin.prefs> is used.
 
 =head1 OPTIONS
 
@@ -267,15 +302,25 @@ http://razor.sourceforge.net/ ).
 If the message contains SpamAssassin markup, this will be stripped out
 automatically before submission.
 
+=item -w fromaddr
+
+This flag is only useful in conjunction with C<-r>.  It will send a reply mail
+to the sender of the tested mail, notifying them that their message has been
+trapped as spam, from the address supplied in C<fromaddr>.  See the L<SPAM
+TRAPPING> section below for more details.
+
+=item -l filename
+
+Log all mail messages that pass through the filter, to an mbox-format file
+named by C<filename>.  Handy for use with C<-r> and C<-w>.
+
 =item -c config
 
-Read configuration from C<config>.  The default configuration file, if this is
-not specified, is C<$Config{installsitelib}/spamassassin.cf>.
+Read configuration from C<config>.
 
 =item -p prefs
 
-Read user score preferences from C<prefs>.  The default preferences file,  if
-this is not specified, is C<~/.spamassassin.cf>.
+Read user score preferences from C<prefs>.
 
 =back
 
@@ -319,6 +364,40 @@ A string, C<No, hits=nn required=nn> is set in this header to reflect
 the filter status.
 
 =back
+
+=head1 SPAM TRAPPING
+
+Quite often, if you've been on the internet for a while, you'll have
+accumulated a few old email accounts that nowadays get nothing but
+spam.
+
+SpamAssassin lets you set them up as aliases, as follows:
+
+=over 4
+
+=item spamtrap1: "| /path/to/spamassassin -r -w spamtrap1"
+
+=back
+
+This will add any incoming mail messages straight into spam-tracking databases,
+such as Vipul's Razor; send an explanatory reply message to the sender, from
+the C<spamtrap1> address; then drop the mail into the bit-bucket.
+
+The explanatory reply text is taken from the SpamAssassin configuration file,
+where it is stored in the C<spamtrap> lines.
+
+If you want to keep a copy of the mails, use something like this:
+
+=over 4
+
+=item spamtrap1: "| /path/to/spamassassin -r -w spamtrap1 -l /var/spam/caught"
+
+=back
+
+It is suggested you familiarise yourself with how MTAs run programs specified
+in aliases, if you plan to do this; for one thing, C<spamassassin> will not run
+under your user id in this case.  If you are nervous about this, create a user
+for spamtrapping, and set up spamassassin in it's C<.forward> file.
 
 =head1 INSTALLATION
 

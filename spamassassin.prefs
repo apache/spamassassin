@@ -17,8 +17,17 @@
 #
 ###########################################################################
 
+###########################################################################
+# First of all, the generally useful stuff; thresholds and the whitelist
+# of addresses which, for some reason or another, often trigger false
+# positives.
+
 required_hits		5
 auto_report_threshold	15
+
+# Monty Solomon: he posts from an ISP that has often been the source
+# of spam (no fault of his own ;), and sometimes uses Bcc: when mailing.
+whitelist_from		monty@roscom.com
 
 ###########################################################################
 # Scores for header tests.
@@ -163,5 +172,11 @@ score FILTERED_BY_WORLDREMOVE	3
 # Compensation for common false positives.
 
 score BALANCE_FOR_LONG		-2
+score USER_IN_WHITELIST		-5
+
+###########################################################################
+# Some not-quite-spam scores; block common virii with these.  (it's feature
+# creep, but it's easy to implement ;)
 
 score SIRCAM_SIGNATURE		10
+
