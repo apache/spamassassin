@@ -256,7 +256,7 @@ sub remove_spamassassin_markup {
   $hdrs =~ s/\r//gs;
 
   # de-break lines on SpamAssassin-modified headers.
-  $hdrs =~ s/(\n(?:X-Spam|Subject)[^\n]+?)\n[ \t]+/$1 /gs;
+  1 while $hdrs =~ s/(\n(?:X-Spam|Subject)[^\n]+?)\n[ \t]+/$1 /gs;
 
   # reinstate the old content type
   if ($hdrs =~ /^X-Spam-Prev-Content-Type: /m) {
