@@ -6,22 +6,25 @@ my @tests = @ARGV;
 
 my $sub = '
         while (<STDIN>) {
-	  if ( /\#/ ) { # comment
-	    print;
-	    next;
-	  }
-
-	  # anything else ought to be a rule
+';
+if ( defined $opt_t ) {
+	  $sub .= '
 	  /\btime=(\d+)/;
 	  # strip out the tests up to a given timestamp
-	  if ( !defined $opt{t} || !defined $1 || $opt_t > $1 ) {
+	  if ( !defined $1 || '.$opt_t.' > $1 ) {
 ';
+}
+
 foreach my $test (@tests) {
           $sub .= q{ s/\b\Q}.$test.q{\E\b//g; };
 }
 $sub .= '
             s/,,+/,/g; s/,+$//; s/ ,/ /;
-	  }
+';
+
+$sub .= '}' if ( defined $opt_t );
+
+$sub .= '
 	  print;
         }
 ';
