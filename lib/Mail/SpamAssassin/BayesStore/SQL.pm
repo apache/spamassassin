@@ -32,6 +32,7 @@ use strict;
 use bytes;
 
 use Mail::SpamAssassin::BayesStore;
+use Mail::SpamAssassin::SHA1 qw(sha1);
 
 use vars qw( @ISA );
 
@@ -61,7 +62,7 @@ sub new {
 
   my $self = $class->SUPER::new(@_);
 
-  $self->{supported_db_version} = 2;
+  $self->{supported_db_version} = 3;
 
   if (!$self->{bayes}->{conf}->{bayes_sql_dsn}) {
     dbg("bayes: invalid config, must set bayes_sql_dsn config variable.\n");
@@ -91,6 +92,7 @@ sub new {
     }
   }
   dbg("bayes: Using username: ".$self->{_username});
+
   return $self;
 }
 
@@ -206,16 +208,16 @@ sub calculate_expire_delta {
   my %delta = (); # use a hash since an array is going to be very sparse
 
   return %delta unless (defined($self->{_dbh}));
-  
+
   my $sql = "SELECT count(*)
                FROM bayes_token
-              WHERE username = ?
+              WHERE id = ?
                 AND (? - atime) > ?";
 
   my $sth = $self->{_dbh}->prepare_cached($sql);
     
   for (my $i = 1; $i <= $max_expire_mult; $i<<=1) {
-    my $rc = $sth->execute($self->{_username}, $newest_atime, $start * $i);
+    my $rc = $sth->execute($self->{_userid}, $newest_atime, $start * $i);
 
     unless ($rc) {
       dbg("bayes: calculate_expire_delta: SQL Error: ".$self->{_dbh}->errstr());
@@ -254,33 +256,61 @@ sub token_expiration {
   my $too_old = $vars[10] - $newdelta; # tooold = newest - delta
 
   # if token atime > newest, reset to newest ...
-  my $sql = "UPDATE bayes_token SET atime=? WHERE username = ? and atime > ?";
-  my $rows = $self->{_dbh}->do($sql, undef, $vars[10], $self->{_username}, $vars[10]);
+  my $sql = "UPDATE bayes_token SET atime = ?
+              WHERE id  = ?
+                AND atime > ?";
+
+  my $rows = $self->{_dbh}->do($sql, undef, $vars[10], $self->{_userid}, $vars[10]);
+
   unless (defined($rows)) {
-    dbg("bayes: reset tokens in future: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: token_expiration: SQL Error: ".$self->{_dbh}->errstr());
     return 0;
   }
 
-  # Do the expire
-  $sql = "DELETE from bayes_token WHERE username = ? and atime < ?";
+  $sql = "DELETE from bayes_token
+           WHERE id = ?
+             AND atime < ?";
 
-  $rows = $self->{_dbh}->do($sql, undef, $self->{_username}, $too_old);
+  # Do the expire
+  $sql = "DELETE from bayes_token WHERE id = ? and atime < ?";
+
+  $rows = $self->{_dbh}->do($sql, undef, $self->{_userid}, $too_old);
 
   unless (defined($rows)) {
-    dbg("bayes: actual_expire: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: token_expiration: SQL Error: ".$self->{_dbh}->errstr());
     return 0;
   }
 
   my $deleted = $rows;
 
-  # We've chosen a new atime delta if we've gotten here, so record it for posterity.
-  $self->_set_last_atime_delta($newdelta);
+  $sql = "UPDATE bayes_vars SET token_count = token_count - ?,
+                                last_expire = ?,
+                                last_atime_delta = ?,
+                                last_expire_reduce = ?
+           WHERE id = ?";
 
-  # The rest of these have been modified, so replace as necessary.
-  $self->set_last_expire(time());
-  $self->_set_last_expire_reduce($deleted);
+  $rows = $self->{_dbh}->do($sql, undef, $deleted, time(), $newdelta, $deleted, $self->{_userid});
 
-  my $kept = $self->_get_token_count();
+  unless (defined($rows)) {
+    dbg("bayes: token_expiration: SQL Error: ".$self->{_dbh}->errstr());
+    return 0;
+  }
+
+  # Now lets update the oldest_token_age value, shouldn't need to worry about newest_token_age
+  # slight race condition here, but the chance is small that we'll insert a new token with
+  # such an old atime
+  my $oldest_token_age = $self->_get_oldest_token_age();
+
+  $sql = "UPDATE bayes_vars SET oldest_token_age = ? WHERE id = ?";
+
+  $rows = $self->{_dbh}->do($sql, undef, $oldest_token_age, $self->{_userid});
+
+  unless (defined($rows)) {
+    dbg("bayes: token_expiration: SQL Error: ".$self->{_dbh}->errstr());
+    return 0;
+  }
+
+  my $kept = $vars[3] - $deleted;
 
   $num_hapaxes = $self->_get_num_hapaxes() if ($opts->{verbose});
   $num_lowfreq = $self->_get_num_lowfreq() if ($opts->{verbose});
@@ -324,7 +354,9 @@ sub seen_get {
 
   return undef unless (defined($self->{_dbh}));
  
-  my $sql = "SELECT flag FROM bayes_seen WHERE username = ? AND msgid = ?";
+  my $sql = "SELECT flag FROM bayes_seen
+              WHERE id = ?
+                AND msgid = ?";
 
   my $sth = $self->{_dbh}->prepare_cached($sql);
 
@@ -333,7 +365,7 @@ sub seen_get {
     return undef;
   }
 
-  my $rc = $sth->execute($self->{_username}, $msgid);
+  my $rc = $sth->execute($self->{_userid}, $msgid);
   
   unless ($rc) {
     dbg("bayes: seen_get: SQL Error: ".$self->{_dbh}->errstr());
@@ -365,23 +397,17 @@ sub seen_put {
   
   return 0 unless (defined($self->{_dbh}));
 
-  my $sql = "INSERT INTO bayes_seen (username, msgid, flag) VALUES (?,?,?)";
+  my $sql = "INSERT INTO bayes_seen (id, msgid, flag)
+             VALUES (?,?,?)";
   
-  my $sth = $self->{_dbh}->prepare_cached($sql);
+  my $rows = $self->{_dbh}->do($sql,
+			       undef,
+			       $self->{_userid}, $msgid, $flag);
   
-  unless (defined($sth)) {
-      dbg("bayes: seen_put: SQL Error: ".$self->{_dbh}->errstr());
-      return 0;
+  unless (defined($rows)) {
+    dbg("bayes: seen_put: SQL Error: ".$self->{_dbh}->errstr());
+    return 0;
   }
-
-  my $rc = $sth->execute($self->{_username}, $msgid, $flag);
-  
-  unless ($rc) {
-      dbg("bayes: seen_put: SQL Error: ".$self->{_dbh}->errstr());
-      return 0;
-  }
-  
-  $sth->finish();
 
   dbg("bayes: seen ($msgid) put");
   return 1;
@@ -403,23 +429,18 @@ sub seen_delete {
 
   return 0 unless (defined($self->{_dbh}));
 
-  my $sql = "DELETE FROM bayes_seen WHERE username = ? AND msgid = ?";
+  my $sql = "DELETE FROM bayes_seen
+              WHERE id = ?
+                AND msgid = ?";
   
-  my $sth = $self->{_dbh}->prepare_cached($sql);
+  my $rows = $self->{_dbh}->do($sql,
+			       undef,
+			       $self->{_userid}, $msgid);
 
-  unless (defined($sth)) {
-      dbg("bayes: seen_delete: SQL Error: ".$self->{_dbh}->errstr());
-      return 0;
+  unless (defined($rows)) {
+    dbg("bayes: seen_delete: SQL Error: ".$self->{_dbh}->errstr());
+    return 0;
   }
-
-  my $rc = $sth->execute($self->{_username}, $msgid);
-
-  unless ($rc) {
-      dbg("bayes: seen_delete: SQL Error: ".$self->{_dbh}->errstr());
-      return 0;
-  }
-
-  $sth->finish();
 
   return 1;
 }
@@ -464,10 +485,11 @@ sub get_storage_variables {
 
   return (0,0,0,0,0,0,0,0,0,0,0) unless (defined($self->{_dbh}));
 
-  my $sql = "SELECT spam_count, ham_count, last_expire,
-                    last_atime_delta, last_expire_reduce
+  my $sql = "SELECT spam_count, ham_count, token_count, last_expire,
+                    last_atime_delta, last_expire_reduce, oldest_token_age,
+                    newest_token_age
                FROM bayes_vars
-              WHERE username = ?";
+              WHERE id = ?";
 
   my $sth = $self->{_dbh}->prepare_cached($sql);
 
@@ -476,21 +498,19 @@ sub get_storage_variables {
     return (0,0,0,0,0,0,0,0,0,0,0);
   }
 
-  my $rc = $sth->execute($self->{_username});
+  my $rc = $sth->execute($self->{_userid});
 
   unless ($rc) {
     dbg("bayes: get_storage_variables: SQL Error: ".$self->{_dbh}->errstr());
     return (0,0,0,0,0,0,0,0,0,0,0);
   }
 
-  my ($spam_count, $ham_count, $last_expire,
-      $last_atime_delta, $last_expire_reduce) = $sth->fetchrow_array();
+  my ($spam_count, $ham_count, $token_count,
+      $last_expire, $last_atime_delta, $last_expire_reduce,
+      $oldest_token_age, $newest_token_age) = $sth->fetchrow_array();
 
   $sth->finish();
 
-  my $token_count = $self->_get_token_count();
-  my $oldest_token_age = $self->_get_oldest_token_age();
-  my $newest_token_age = $self->_get_newest_token_age();
   my $db_ver = $self->DB_VERSION;
 
   @values = (
@@ -506,10 +526,6 @@ sub get_storage_variables {
              $last_expire_reduce,
              $newest_token_age
              );
-
-  foreach ( @values ) {
-    if ( !$_ || $_ =~ /\D/ ) { $_ = 0; }
-  }
 
   return @values;
 }
@@ -529,13 +545,12 @@ sub dump_db_toks {
 
   return unless (defined($self->{_dbh}));
 
-  # 0/0 tokens don't count
-  # since ordering is check here, order the tokens
-  my $sql = "SELECT token, spam_count, ham_count, atime
+  # 0/0 tokens don't count, but in theory we shouldn't have any
+  # use RPAD to make sure we get trailing spaces in the token value
+  my $sql = "SELECT RPAD(token,5,' '), spam_count, ham_count, atime
                FROM bayes_token
-              WHERE username = ?
-                AND (spam_count > 0 OR ham_count > 0)
-             ORDER BY token";
+              WHERE id = ?
+                AND (spam_count > 0 OR ham_count > 0)";
 
   my $sth = $self->{_dbh}->prepare($sql);
 
@@ -544,7 +559,7 @@ sub dump_db_toks {
     return;
   }
 
-  my $rc = $sth->execute($self->{_username});
+  my $rc = $sth->execute($self->{_userid});
 
   unless ($rc) {
     dbg("bayes: dump_db_toks: SQL Error: ".$self->{_dbh}->errstr());
@@ -553,11 +568,12 @@ sub dump_db_toks {
 
   while (my ($token, $spam_count, $ham_count, $atime) = $sth->fetchrow_array()) {
     my $prob = $self->{bayes}->compute_prob_for_token($token, $vars[1], $vars[2],
-						      $spam_count, $ham_count,
-						      $atime);
+						      $spam_count, $ham_count);
     $prob ||= 0.5;
+
+    my $encoded_token = unpack("H*", $token);
     
-    printf $template,$prob,$spam_count,$ham_count,$atime,$token;
+    printf $template,$prob,$spam_count,$ham_count,$atime,$encoded_token;
   }
 
   $sth->finish();
@@ -581,23 +597,17 @@ sub set_last_expire {
 
   return 0 unless (defined($self->{_dbh}));
 
-  my $sql = "UPDATE bayes_vars SET last_expire = ? WHERE username = ?";
+  my $sql = "UPDATE bayes_vars SET last_expire = ? WHERE id = ?";
  
-  my $sth = $self->{_dbh}->prepare_cached($sql);
+  my $rows = $self->{_dbh}->do($sql,
+			       undef,
+			       $time,
+			       $self->{_userid});
 
-  unless (defined($sth)) {
+  unless (defined($rows)) {
     dbg("bayes: set_last_expire: SQL Error: ".$self->{_dbh}->errstr());
     return 0;
   }
-
-  my $rc = $sth->execute($time, $self->{_username});
-
-  unless ($rc) {
-    dbg("bayes: set_last_expire: SQL Error: ".$self->{_dbh}->errstr());
-    return 0;
-  }
-
-  $sth->finish();
 
   return 1;
 }
@@ -620,7 +630,7 @@ sub get_running_expire_tok {
 
   return 0 unless (defined($self->{_dbh}));
 
-  my $sql = "SELECT max(runtime) from bayes_expire WHERE username = ?";
+  my $sql = "SELECT max(runtime) from bayes_expire WHERE id = ?";
 
   my $sth = $self->{_dbh}->prepare_cached($sql);
 
@@ -629,7 +639,7 @@ sub get_running_expire_tok {
     return 0;
   }
 
-  my $rc = $sth->execute($self->{_username});
+  my $rc = $sth->execute($self->{_userid});
 
   unless ($rc) {
     dbg("bayes: get_running_expire_tok: SQL Error: ".$self->{_dbh}->errstr());
@@ -657,19 +667,18 @@ sub set_running_expire_tok {
 
   return 0 unless (defined($self->{_dbh}));
 
-  my $sql = "INSERT INTO bayes_expire (username,runtime) VALUES (?,?)";
-
-  my $sth = $self->{_dbh}->prepare_cached($sql);
+  my $sql = "INSERT INTO bayes_expire (id,runtime) VALUES (?,?)";
 
   my $time = time();
 
-  my $rc = $sth->execute($self->{_username}, $time);
-
-  unless ($rc) {
-      dbg("bayes: set_running_expire_tok: SQL Error: ".$self->{_dbh}->errstr());
-      return undef;
+  my $rows = $self->{_dbh}->do($sql,
+			       undef,
+			       $self->{_userid}, $time);
+  unless (defined($rows)) {
+    dbg("bayes: set_running_expire_tok: SQL Error: ".$self->{_dbh}->errstr());
+    return undef;
   }
-  $sth->finish();
+
   return $time;
 }
 
@@ -688,17 +697,19 @@ sub remove_running_expire_tok {
 
   return 0 unless (defined($self->{_dbh}));
 
-  my $sql = "DELETE from bayes_expire WHERE username = ?";
+  my $sql = "DELETE from bayes_expire
+              WHERE id = ?";
 
-  my $rows = $self->{_dbh}->do($sql, undef, $self->{_username});
+  my $rows = $self->{_dbh}->do($sql, undef, $self->{_userid});
 
-  if (!defined($rows)) {
+  unless (defined($rows)) {
     dbg("bayes: remove_running_expire_tok: SQL Error: ".$self->{_dbh}->errstr());
     return 0;
   }
 
   return 1;
 }
+
 =head2 tok_get
 
 public instance (Integer, Integer, Integer) tok_get (String $token)
@@ -716,7 +727,7 @@ sub tok_get {
 
   my $sql = "SELECT spam_count, ham_count, atime
                FROM bayes_token
-              WHERE username = ?
+              WHERE id = ?
                 AND token = ?";
 
   my $sth = $self->{_dbh}->prepare_cached($sql);
@@ -726,7 +737,7 @@ sub tok_get {
     return (0,0,0);
   }
 
-  my $rc = $sth->execute($self->{_username}, $token);
+  my $rc = $sth->execute($self->{_userid}, $token);
 
   unless ($rc) {
     dbg("bayes: tok_get: SQL Error: ".$self->{_dbh}->errstr());
@@ -742,6 +753,117 @@ sub tok_get {
   $atime = 0 if (!$atime);
 
   return ($spam_count, $ham_count, $atime)
+}
+
+=head2 tok_get_all
+
+public instance (\@) tok_get (@ $tokens)
+
+Description:
+This method retrieves the specified tokens (C<$tokens>) from storage and returns
+an array ref of arrays spam count, ham acount and last access time.
+
+=cut
+
+sub tok_get_all {
+  my ($self, @tokens) = @_;
+
+  return [] unless (defined($self->{_dbh}));
+
+  my $token_list_size = scalar(@tokens);
+  dbg("bayes: tok_get_all: Token Count: $token_list_size");
+  my @tok_results;
+
+  my @bunch_sizes = (100, 50, 25, 5); # XXX - need to benchmark to tweak
+  my $search_index = 0;
+  my $results_index = 0;
+  my $bunch_end;
+
+  my $multi_sql = "SELECT token, spam_count, ham_count, atime
+                     FROM bayes_token
+                    WHERE id = ?
+                      AND token IN ";
+
+  my $single_sql = "SELECT token, spam_count, ham_count, atime
+                      FROM bayes_token
+                     WHERE id = ?
+                       AND token = ?";
+
+  foreach my $bunch_size (@bunch_sizes) {
+    while ($token_list_size - $search_index >= $bunch_size) {
+      my @bindings;
+      my $bindcount;
+      my $in_str = '(';
+
+      $bunch_end = $search_index + $bunch_size;
+      for ( ; $search_index < $bunch_end; $search_index++) {
+	$in_str .= '?,';
+	push(@bindings, $tokens[$search_index]);
+      }
+      chop $in_str;
+      $in_str .= ')';
+
+      my $dynamic_sql = $multi_sql . $in_str;
+
+      my $sth = $self->{_dbh}->prepare($dynamic_sql);
+
+      unless (defined($sth)) {
+	dbg("bayes: tok_get_all: SQL Error: ".$self->{_dbh}->errstr());
+	return [];
+      }
+
+      my $rc = $sth->execute($self->{_userid}, @bindings);
+
+      unless ($rc) {
+	dbg("bayes: tok_get_all: SQL Error: ".$self->{_dbh}->errstr());
+	return [];
+      }
+
+      my $results = $sth->fetchall_arrayref();
+
+      $sth->finish();
+
+      foreach my $result (@{$results}) {
+	# Make sure that spam_count and ham_count are not negative
+	$result->[1] = 0 if (!$result->[1] || $result->[1] < 0);
+	$result->[2] = 0 if (!$result->[2] || $result->[2] < 0);
+	# Make sure that atime has a value
+	$result->[3] = 0 if (!$result->[3]);
+	$tok_results[$results_index++] = $result;
+      }
+    }
+  }
+
+  while ($search_index < $token_list_size) {
+    my $sth = $self->{_dbh}->prepare($single_sql);
+
+    unless (defined($sth)) {
+      dbg("bayes: tok_get_all: SQL Error: ".$self->{_dbh}->errstr());
+      return [];
+    }
+
+    my $rc = $sth->execute($self->{_userid}, $tokens[$search_index++]);
+
+    unless ($rc) {
+      dbg("bayes: tok_get_all: SQL Error: ".$self->{_dbh}->errstr());
+      return [];
+    }
+
+    my $result = $sth->fetchrow_arrayref();
+
+    $sth->finish();
+
+    if (defined($result)) {
+      # Make sure that spam_count and ham_count are not negative
+      $result->[1] = 0 if (!$result->[1] || $result->[1] < 0);
+      $result->[2] = 0 if (!$result->[2] || $result->[2] < 0);
+      # Make sure that atime has a value
+      $result->[3] = 0 if (!$result->[3]);
+      $tok_results[$results_index++] = $result 
+    }
+  }
+
+  return \@tok_results;
 }
 
 =head2 tok_count_change
@@ -780,27 +902,9 @@ sub nspam_nham_get {
 
   return (0,0) unless (defined($self->{_dbh}));
 
-  my $sql = "SELECT ham_count, spam_count FROM bayes_vars WHERE username = ?";
+  my @vars = $self->get_storage_variables();
 
-  my $sth = $self->{_dbh}->prepare_cached($sql);
-
-  unless (defined($sth)) {
-    dbg("bayes: nspam_nham_get: SQL Error: ".$self->{_dbh}->errstr());
-    return (0,0);
-  }
-
-  my $rc = $sth->execute($self->{_username});
-
-  unless ($rc) {
-    dbg("bayes: nspam_nham_get: SQL Error: ".$self->{_dbh}->errstr());
-    return (0,0);
-  }
-
-  my ($ham_count, $spam_count) = $sth->fetchrow_array();
-
-  $sth->finish();
-  
-  return ($spam_count || 0, $ham_count || 0);
+  return ($vars[1] || 0, $vars[2] || 0);
 }
 
 =head2 nspam_nham_change
@@ -821,23 +925,16 @@ sub nspam_nham_change {
   my $sql = "UPDATE bayes_vars
                 SET spam_count = spam_count + ?,
                     ham_count = ham_count + ?
-              WHERE username = ?";
+              WHERE id = ?";
 
-  my $sth = $self->{_dbh}->prepare_cached($sql);
+  my $rows = $self->{_dbh}->do($sql,
+			       undef,
+			       $num_spam, $num_ham, $self->{_userid});
 
-  unless (defined($sth)) {
+  unless (defined($rows)) {
     dbg("bayes: nspam_nham_change: SQL Error: ".$self->{_dbh}->errstr());
     return 0;
   }
-
-  my $rc = $sth->execute($num_spam, $num_ham, $self->{_username});
-
-  unless ($rc) {
-    dbg("bayes: nspam_nham_change: SQL Error: ".$self->{_dbh}->errstr());
-    return 0;
-  }
-
-  $sth->finish();
 
   return 1;
 }
@@ -863,28 +960,40 @@ sub tok_touch {
   # what we are updating to
   my $sql = "UPDATE bayes_token
                 SET atime = ?
-              WHERE username = ?
+              WHERE id = ?
                 AND token = ?
                 AND atime < ?";
 
-  my $sth = $self->{_dbh}->prepare_cached($sql);
+  my $rows = $self->{_dbh}->do($sql, undef, $atime, $self->{_userid},
+			       $token, $atime);
 
-  unless (defined($sth)) {
+  unless (defined($rows)) {
     dbg("bayes: tok_touch: SQL Error: ".$self->{_dbh}->errstr());
     return 0;
   }
 
-  my $rc = $sth->execute($atime, $self->{_username}, $token, $atime);
+  # if we didn't update a row then no need to update newest_token_age
+  return 1 if ($rows eq '0E0');
 
-  unless ($rc) {
+  # need to check newest_token_age
+  # no need to check oldest_token_age since we would only update if the
+  # atime was newer than what is in the database
+  $sql = "UPDATE bayes_vars
+             SET newest_token_age = ?
+           WHERE id = ?
+             AND newest_token_age < ?";
+
+  $rows = $self->{_dbh}->do($sql, undef, $atime, $self->{_userid}, $atime);
+
+  unless (defined($rows)) {
     dbg("bayes: tok_touch: SQL Error: ".$self->{_dbh}->errstr());
     return 0;
   }
-
-  $sth->finish();
 
   return 1;
 }
+
+=cut
 
 =head2 cleanup
 
@@ -899,8 +1008,37 @@ operation.
 sub cleanup {
   my ($self) = @_;
 
-  # Not used for this implementation
-	       
+
+  return 1 unless ($self->{needs_cleanup});
+
+  # cleanup was needed, go ahead and clear the cleanup flag
+  $self->{needs_cleanup} = 0;
+
+  my $sql = "DELETE from bayes_token
+              WHERE id = ?
+                AND spam_count = 0
+                AND ham_count = 0";
+
+  my $toks_deleted = $self->{_dbh}->do($sql, undef, $self->{_userid});
+
+  unless (defined($toks_deleted)) {
+    dbg("bayes: cleanup: SQL Error: ".$self->{_dbh}->errstr());
+    return 0;
+  }       
+
+  # check to see if any tokens where deleted
+  return 1 if ($toks_deleted eq '0E0');
+
+  $sql = "UPDATE bayes_vars SET token_count = token_count - $toks_deleted
+           WHERE id = ?";
+
+  my $rows = $self->{_dbh}->do($sql, undef, $self->{_userid});
+
+  unless (defined($rows)) {
+    dbg("bayes: cleanup: SQL Error: ".$self->{_dbh}->errstr());
+    return 0;
+  }       
+
   return 1;
 }
 
@@ -965,25 +1103,25 @@ sub clear_database {
 
   return 0 unless (defined($self->{_dbh}));
 
-  my $rows = $self->{_dbh}->do("DELETE FROM bayes_vars WHERE username = ?",
+  my $rows = $self->{_dbh}->do("DELETE FROM bayes_vars WHERE id = ?",
 			       undef,
-			       $self->{_username});
+			       $self->{_userid});
   unless (defined($rows)) {
     dbg("SQL Error removing user (bayes_vars) data: ".$self->{_dbh}->errstr());
     return 0;
   }
 
-  $rows = $self->{_dbh}->do("DELETE FROM bayes_seen WHERE username = ?",
+  $rows = $self->{_dbh}->do("DELETE FROM bayes_seen WHERE id = ?",
 			    undef,
-			    $self->{_username});
+			    $self->{_userid});
   unless (defined($rows)) {
     dbg("SQL Error removing seen data: ".$self->{_dbh}->errstr());
     return 0;
   }
 
-  $rows = $self->{_dbh}->do("DELETE FROM bayes_token WHERE username = ?",
+  $rows = $self->{_dbh}->do("DELETE FROM bayes_token WHERE id = ?",
 			    undef,
-			    $self->{_username});
+			    $self->{_userid});
   unless (defined($rows)) {
     dbg("SQL Error removing token data: ".$self->{_dbh}->errstr());
     return 0;
@@ -1016,13 +1154,12 @@ sub backup_database {
 
   my $token_sql = "SELECT spam_count, ham_count, atime, token
                      FROM bayes_token
-                    WHERE username = ?
-                      AND (spam_count > 0 OR ham_count > 0)
-                    ORDER BY token";
+                    WHERE id = ?
+                      AND (spam_count > 0 OR ham_count > 0)";
 
   my $seen_sql = "SELECT flag, msgid
                     FROM bayes_seen
-                   WHERE username = ?";
+                   WHERE id = ?";
 
   my $sth = $self->{_dbh}->prepare($token_sql);
 
@@ -1038,8 +1175,9 @@ sub backup_database {
     return 0;
   }
 
-  while (my @values = $sth->fetchrow_array()) {
-    print "t\t" . join("\t",@values) . "\n";
+  while (my ($token, $spam_count, $ham_count, $atime) = $sth->fetchrow_array()) {
+    $token = pack("H*", $token);
+    print "t\t$spam_count, $ham_count, $atime, $token\n";
   }
 
   $sth->finish();
@@ -1104,6 +1242,11 @@ sub restore_database {
     return 0;
   }
 
+  unless ($self->_initialize_db()) {
+    dbg("bayes: Unable to re-initialize database for ".$self->{_username});
+    return 0;
+  }
+
   my $token_count = 0;
   my $db_version;
   my $num_spam = 0;
@@ -1113,8 +1256,9 @@ sub restore_database {
 
   my $line = <DUMPFILE>;
   $line_count++;
-  # We require the database version line to be the first in the file so we can figure out how
-  # to properly deal with the file.  If it is not the first line then fail
+  # We require the database version line to be the first in the file so we can
+  # figure out how to properly deal with the file.  If it is not the first
+  # line then fail
   if ($line =~ m/^v\s+(\d+)\s+db_version/) {
     $db_version = $1;
   }
@@ -1123,20 +1267,8 @@ sub restore_database {
     return 0;
   }
 
-  my $tokensql = "INSERT INTO bayes_token
-                    (username, token, spam_count, ham_count, atime)
-                  VALUES (?,?,?,?,?)";
-
-  my $tokensth = $self->{_dbh}->prepare_cached($tokensql);
-
-  my $seensql = "INSERT INTO bayes_seen (username, msgid, flag)
-                   VALUES (?, ?, ?)";
-
-  my $seensth = $self->{_dbh}->prepare_cached($seensql);
-
-  unless (defined($seensth)) {
-    dbg("SQL Error: ".$self->{_dbh}->errstr());
-    dbg("bayes: Database now in inconsistent state for ".$self->{_username});
+  unless ($db_version == 2 || $db_version == 3) {
+    dbg("bayes: Database Version $db_version is unsupported, must be version 2 or 3.");
     return 0;
   }
 
@@ -1197,13 +1329,17 @@ sub restore_database {
 	dbg("bayes: Token ($token) has the following warnings:\n".join("\n",@warnings));
       }
 
-      my $rc = $tokensth->execute($self->{_username},
-				  $token,
-				  $spam_count,
-				  $ham_count,
-				  $atime);
-      unless ($rc) {
-	dbg("bayes: Error inserting token for line: $line\nSQL Error: ".$self->errstr());
+      if ($db_version < 3) {
+	# versions < 3 use plain text tokens, so we need to convert to hash
+	$token = substr(sha1($token), -5);
+      }
+      else {
+	# turn unpacked binary token back into binary value
+	$token = pack("H*",$token);
+      }
+
+      unless ($self->_put_token($token, $spam_count, $ham_count, $atime)) {
+	dbg("bayes: Error inserting token for line: $line");
 	$error_p = 1;
       }
       $token_count++;
@@ -1223,11 +1359,8 @@ sub restore_database {
 	next;
       }
 
-      my $rc = $seensth->execute($self->{_username},
-				 $msgid,
-				 $flag);
-      unless ($rc) {
-	dbg("bayes: Error inserting msgid in seen table for line: $line\nSQL Error: ".$self->errstr());
+      unless ($self->seen_put($msgid, $flag)) {
+	dbg("bayes: Error inserting msgid in seen table for line: $line");
 	$error_p = 1;
       }
     }
@@ -1259,21 +1392,8 @@ sub restore_database {
     return 0;
   }
 
-  # There is a race condition here which is why we suggest that the user
-  # turn off SA for the duration of a restore operation.  If something comes
-  # along and calls initialize_db() before this little bit of code runs then
-  # this insert will fail, but at least we'll now wipe out the bayes_token
-  # entries for this user so that we are in a somewhat ok state.
-  my $varsupdatesql = "INSERT INTO bayes_vars (username, spam_count, ham_count)
-                       VALUES(?,?,?)";
-  
-  my $rows = $self->{_dbh}->do($varsupdatesql,
-			       undef,
-			       $self->{_username}, $num_spam, $num_ham);
-  
-  unless (defined($rows)) {
-    dbg("bayes: Error inserting user variables (bayes_vars).");
-    dbg("bayes: SQL Error:".$self->{_dbh}->errstr());
+  unless ($self->nspam_nham_change($num_spam, $num_ham)) {
+    dbg("bayes: Error updating num spam and num ham.");
     $self->clear_database();
     dbg("bayes; Database now in inconsistent state for ".$self->{_username});
     return 0;
@@ -1305,6 +1425,8 @@ sub _get_db_version {
 
   return 0 unless (defined($self->{_dbh}));
 
+  return ($self->{_db_version_cache}) if (defined($self->{_db_version_cache}));
+
   my $sql = "SELECT value FROM bayes_global_vars WHERE variable = 'VERSION'";
 
   my $sth = $self->{_dbh}->prepare_cached($sql);
@@ -1324,6 +1446,8 @@ sub _get_db_version {
   my ($version) = $sth->fetchrow_array();
 
   $sth->finish();
+
+  $self->{_db_version_cache} = $version;
 
   return $version;
 }
@@ -1345,129 +1469,62 @@ sub _initialize_db {
 
   return 0 if (!$self->{_username});
 
-  my $sql = "SELECT count(*) FROM bayes_vars WHERE username = ?";
+  my $sqlselect = "SELECT id FROM bayes_vars WHERE username = ?";
 
-  my $sth = $self->{_dbh}->prepare_cached($sql);
+  my $sthselect = $self->{_dbh}->prepare_cached($sqlselect);
 
-  unless (defined($sth)) {
+  unless (defined($sthselect)) {
     dbg("bayes: _initialize_db: SQL Error: ".$self->{_dbh}->errstr());
     return 0;
   }
 
-  my $rc = $sth->execute($self->{_username});
+  my $rc = $sthselect->execute($self->{_username});
 
   unless ($rc) {
     dbg("bayes: _initialize_db: SQL Error: ".$self->{_dbh}->errstr());
     return 0;
   }
 
-  my ($count) = $sth->fetchrow_array();
+  my ($id) = $sthselect->fetchrow_array();
 
-  $sth->finish();
-
-  if ($count) {
+  if ($id) {
+    $self->{_userid} = $id;
+    dbg("bayes: Using userid: ".$self->{_userid});
+    $sthselect->finish();
     return 1;
   }
 
   # For now let the database setup the other variables as defaults
-  $sql = "INSERT INTO bayes_vars (username) VALUES (?)";
+  my $sqlinsert = "INSERT INTO bayes_vars (username) VALUES (?)";
 
-  $sth = $self->{_dbh}->prepare_cached($sql);
-
-  unless (defined($sth)) {
+  my $rows = $self->{_dbh}->do($sqlinsert,
+			       undef,
+			       $self->{_username});
+  unless (defined($rows)) {
     dbg("bayes: _initialize_db: SQL Error: ".$self->{_dbh}->errstr());
     return 0;
   }
 
-  $rc = $sth->execute($self->{_username});
+  # Now we need to figure out what id we inserted them at, in a perfect
+  # world the database driver would handle this for us (ie mysql_insert_id)
+  # but this is far from a perfect world, however since in theory we only
+  # ever do this once it's ok to take the hit
+  $rc = $sthselect->execute($self->{_username});
 
   unless ($rc) {
     dbg("bayes: _initialize_db: SQL Error: ".$self->{_dbh}->errstr());
     return 0;
   }
 
-  $sth->finish();
+  ($id) = $sthselect->fetchrow_array();
 
-  return 1;
-}
+  $sthselect->finish();
 
-=head2 _token_atime
-
-private instance (Boolean) _token_atime (String $token)
-
-Description:
-This method returns a given tokens atime, it also serves to tell us
-if the token exists or not since the atime will be undefined if it
-does not exist.
-
-=cut
-
-sub _token_atime {
-  my ($self, $token) = @_;
-
-  return 0 unless (defined($self->{_dbh}));
-
-  return undef unless (defined($token));
-
-  my $sql = "SELECT atime
-               FROM bayes_token
-              WHERE username = ?
-                AND token = ?";
-
-  my $sth = $self->{_dbh}->prepare_cached($sql);
-
-  unless (defined($sth)) {
-    dbg("bayes: _token_atime: SQL Error: ".$self->{_dbh}->errstr());
-    return undef;
+  if ($id) {
+    $self->{_userid} = $id;
+    dbg("bayes: Using userid: ".$self->{_userid});
+    return 1;
   }
-
-  my $rc = $sth->execute($self->{_username}, $token);
-
-  unless ($rc) {
-    dbg("bayes: _token_atime: SQL Error: ".$self->{_dbh}->errstr());
-    return undef;
-  }
-
-  my ($token_atime) = $sth->fetchrow_array();
-
-  $sth->finish();
-
-  return $token_atime;
-}
-
-=head2 _delete_token
-
-private instance (Boolean) _delete_token (String $token)
-
-Description:
-This method deletes the given token from the database.
-
-=cut
-
-sub _delete_token {
-  my ($self, $token) = @_;
-
-  return 0 unless (defined($self->{_dbh}));
-
-  return 0 unless (defined($token));
-
-  my $sql = "DELETE FROM bayes_token WHERE username = ? AND token = ?";
-
-  my $sth = $self->{_dbh}->prepare_cached($sql);
-
-  unless (defined($sth)) {
-    dbg("bayes: _delete_token: SQL Error: ".$self->{_dbh}->errstr());
-    return 0;
-  }
-
-  my $rc = $sth->execute($self->{_username}, $token);
-
-  unless ($rc) {
-    dbg("bayes: _delete_token: SQL Error: ".$self->{_dbh}->errstr());
-    return 0;
-  }
-
-  $sth->finish();
 
   return 1;
 }
@@ -1493,20 +1550,22 @@ sub _put_token {
   $spam_count ||= 0;
   $ham_count ||= 0;
 
-  my $existing_atime = $self->_token_atime($token);
+  my ($existing_spam_count,
+      $existing_ham_count,
+      $existing_atime) = $self->tok_get($token);
 
   if ($spam_count == 0 && $ham_count == 0) {
     return 1;
   }
 
-  if (!defined($existing_atime)) {
+  if (!$existing_atime) {
 
     # You can't create a new entry for a token with a negative count, so just return
     # if we are unable to find an entry.
     return 1 if ($spam_count < 0 || $ham_count < 0);
 
     my $sql = "INSERT INTO bayes_token
-               (username, token, spam_count, ham_count, atime)
+               (id, token, spam_count, ham_count, atime)
                VALUES (?,?,?,?,?)";
 
     my $sth = $self->{_dbh}->prepare_cached($sql);
@@ -1516,7 +1575,7 @@ sub _put_token {
       return 0;
     }
 
-    my $rc = $sth->execute($self->{_username},
+    my $rc = $sth->execute($self->{_userid},
 			   $token,
 			   $spam_count,
 			   $ham_count,
@@ -1528,13 +1587,65 @@ sub _put_token {
     }
 
     $sth->finish();
-    dbg("bayes: new token ($token) inserted");
+
+    $sql = "UPDATE bayes_vars SET token_count = token_count + 1
+             WHERE id = ?";
+
+    my $rows = $self->{_dbh}->do($sql, undef, $self->{_userid});
+    
+    unless (defined($rows)) {
+      dbg("bayes: _put_token: SQL Error: ".$self->{_dbh}->errstr());
+      return 0;
+    }
+
+    $sql = "UPDATE bayes_vars SET newest_token_age = ?
+             WHERE id = ? AND newest_token_age < ?";
+
+    $rows = $self->{_dbh}->do($sql, undef, $atime, $self->{_userid}, $atime);
+
+    unless (defined($rows)) {
+      dbg("bayes: _put_token: SQL Error: ".$self->{_dbh}->errstr());
+      return 0;
+    }
+
+    if ($rows eq '0E0') {
+      # no need to update oldest_token_age if we updated newest_token_age
+      
+      $sql = "UPDATE bayes_vars SET oldest_token_age = ?
+               WHERE id = ? AND oldest_token_age > ?";
+
+      $rows = $self->{_dbh}->do($sql, undef, $atime, $self->{_userid}, $atime);
+      
+      unless (defined($rows)) {
+	dbg("bayes: _put_token: SQL Error: ".$self->{_dbh}->errstr());
+	return 0;
+      }
+    }
   }
   else {
-    my $update_atime_p = 1;
 
-    # if the existing atime is already >= the one we are going to set, then don't bother
+    if ($spam_count < 0 || $ham_count < 0) {
+      # we only need to cleanup when we subtract counts for a token and the
+      # counts may have both reached 0
+      # XXX - future optimization, since we have the existing spam/ham counts
+      # we can make an educated guess on if the count would reach 0, for
+      # instance, if we are decreasing spam_count but spam_count is currently
+      # > 1000, then there is no possible why this update or any others that
+      # might currently be happening could reduce that value to 0, so there
+      # would be no need to set the needs_cleanup flag
+      $self->{needs_cleanup} = 1;
+    }
+
+    my $update_atime_p = 1;
+    my $updated_atime_p = 0;
+
+    # if the existing atime is already >= the one we are going to set, then
+    # don't bother
     $update_atime_p = 0 if ($existing_atime >= $atime);
+
+    # These SQL statements include as part of the WHERE clause something like
+    # "AND spam_count + ? >= 0" or "AND ham_count + ? >= 0".  This is to keep
+    # the count from going negative.
 
     if ($spam_count) {
       my $sql;
@@ -1543,19 +1654,19 @@ sub _put_token {
 	$sql = "UPDATE bayes_token
                    SET spam_count = spam_count + ?,
                        atime = ?
-                 WHERE username = ?
+                 WHERE id = ?
                    AND token = ?
                    AND spam_count + ? >= 0";
-	@args = ($spam_count, $atime, $self->{_username}, $token, $spam_count);
-	$update_atime_p = 0;
+	@args = ($spam_count, $atime, $self->{_userid}, $token, $spam_count);
+	$updated_atime_p = 1; # note the fact that we did do it
       }
       else {
 	$sql = "UPDATE bayes_token
                    SET spam_count = spam_count + ?
-                 WHERE username = ?
+                 WHERE id = ?
                    AND token = ?
                    AND spam_count + ? >= 0";
-	@args = ($spam_count, $self->{_username}, $token, $spam_count);
+	@args = ($spam_count, $self->{_userid}, $token, $spam_count);
       }
 
       my $rows = $self->{_dbh}->do($sql, undef, @args);
@@ -1569,22 +1680,22 @@ sub _put_token {
     if ($ham_count) {
       my $sql;
       my @args;
-      if ($update_atime_p) {
+      if ($update_atime_p && !$updated_atime_p) {
 	$sql = "UPDATE bayes_token
                    SET ham_count = ham_count + ?,
                        atime = ?
-                 WHERE username = ?
+                 WHERE id = ?
                    AND token = ?
                    AND ham_count + ? >= 0";
-	@args = ($ham_count, $atime, $self->{_username}, $token, $ham_count);
+	@args = ($ham_count, $atime, $self->{_userid}, $token, $ham_count);
       }
       else {
 	$sql = "UPDATE bayes_token
                    SET ham_count = ham_count + ?
-                 WHERE username = ?
+                 WHERE id = ?
                    AND token = ?
                    AND ham_count + ? >= 0";
-	@args = ($ham_count, $self->{_username}, $token, $ham_count);
+	@args = ($ham_count, $self->{_userid}, $token, $ham_count);
       }
 
       my $rows = $self->{_dbh}->do($sql, undef, @args);
@@ -1595,50 +1706,23 @@ sub _put_token {
       }
     }
 
-    dbg("bayes: token ($token) updated");
+    if ($updated_atime_p) {
+      # we updated the atime, so we need to check and update bayes_vars
+      # we only need to worry about newest_token_age since we would have
+      # only updated the atime if it was > the previous value
+      my $sql = "UPDATE bayes_vars SET newest_token_age = ?
+                  WHERE id = ? AND newest_token_age < ?";
+
+      my $rows = $self->{_dbh}->do($sql, undef, $atime, $self->{_userid}, $atime);
+
+      unless (defined($rows)) {
+	dbg("bayes: _put_token: SQL Error: ".$self->{_dbh}->errstr());
+	return 0;
+      }
+    }
   }
+
   return 1;
-}
-
-=head2 _get_token_count
-
-private instance (Integer) _get_token_count ()
-
-Description:
-This method returns the total number of tokens present in the token database
-for a user.
-
-=cut
-
-sub _get_token_count {
-  my ($self) = @_;
-
-  return 0 unless (defined($self->{_dbh}));
-
-  my $sql = "SELECT count(*)
-               FROM bayes_token
-              WHERE username = ?
-                AND (spam_count > 0 OR ham_count > 0)";
-
-  my $sth = $self->{_dbh}->prepare_cached($sql);
-
-  unless (defined($sth)) {
-    dbg("bayes: _get_token_count: SQL Error: ".$self->{_dbh}->errstr());
-    return 0;
-  }
-
-  my $rc = $sth->execute($self->{_username});
-
-  unless (defined($sth)) {
-    dbg("bayes: _get_token_count: SQL Error: ".$self->{_dbh}->errstr());
-    return 0;
-  }
-
-  my ($token_count) = $sth->fetchrow_array();
-
-  $sth->finish();
-
-  return $token_count
 }
 
 =head2 _get_oldest_token_age
@@ -1648,6 +1732,10 @@ private instance (Integer) _get_oldest_token_age ()
 Description:
 This method finds the atime of the oldest token in the database.
 
+The use of min(atime) in the SQL is ugly and but really the most efficient
+way of getting the oldest_token_age after we've done a mass expire.  It should
+only be called at expire time.
+
 =cut
 
 sub _get_oldest_token_age {
@@ -1655,7 +1743,8 @@ sub _get_oldest_token_age {
 
   return 0 unless (defined($self->{_dbh}));
 
-  my $sql = "SELECT min(atime) FROM bayes_token WHERE username = ?";
+  my $sql = "SELECT min(atime) FROM bayes_token
+              WHERE id = ?";
 
   my $sth = $self->{_dbh}->prepare_cached($sql);
 
@@ -1664,7 +1753,7 @@ sub _get_oldest_token_age {
     return 0;
   }
 
-  my $rc = $sth->execute($self->{_username});
+  my $rc = $sth->execute($self->{_userid});
 
   unless ($rc) {
     dbg("bayes: _get_oldest_token_age: SQL Error: ".$self->{_dbh}->errstr());
@@ -1678,116 +1767,6 @@ sub _get_oldest_token_age {
   return $atime;
 }
 
-=head2 _get_newest_token_age
-
-private instance (Integer) _get_newest_token_age ()
-
-Description:
-This method finds the atime of the newest token in the database.
-
-=cut
-
-sub _get_newest_token_age {
-  my ($self) = @_;
-
-  return 0 unless (defined($self->{_dbh}));
-
-  my $sql = "SELECT max(atime) FROM bayes_token WHERE username = ?";
-
-  my $sth = $self->{_dbh}->prepare_cached($sql);
-
-  unless (defined($sth)) {
-    dbg("bayes: _get_newest_token_age: SQL Error: ".$self->{_dbh}->errstr());
-    return 0;
-  }
-
-  my $rc = $sth->execute($self->{_username});
-
-  unless ($rc) {
-    dbg("bayes: _get_newest_token_age: SQL Error: ".$self->{_dbh}->errstr());
-    return 0;
-  }
-
-  my ($atime) = $sth->fetchrow_array();
-
-  $sth->finish();
-
-  return $atime;
-}
-
-=head2 _set_last_atime_delta
-
-private instance (Boolean) _set_last_atime_delta (Integer $newdelta)
-
-Description:
-This method sets the last_atime_delta variable in the variable table.
-
-=cut
-
-sub _set_last_atime_delta {
-  my ($self, $newdelta) = @_;
-
-  return 0 unless (defined($self->{_dbh}));
-
-  return 0 unless (defined($newdelta));
-
-  my $sql = "UPDATE bayes_vars SET last_atime_delta = ? WHERE username = ?";
-
-  my $sth = $self->{_dbh}->prepare_cached($sql);
-
-  unless (defined($sth)) {
-    dbg("bayes: _set_last_atime_delta: SQL Error: ".$self->{_dbh}->errstr());
-    return 0;
-  }
-
-  my $rc = $sth->execute($newdelta, $self->{_username});
-
-  unless ($rc) {
-    dbg("bayes: _set_last_atime_delta: SQL Error: ".$self->{_dbh}->errstr());
-    return 0;
-  }
-
-  $sth->finish();
-
-  return 1;
-}
-
-=head2 _set_last_expire_reduce
-
-private instance (Boolean) _set_last_expire_reduce (Integer $deleted)
-
-Description:
-This method sets the last_expire_reduce values in the variable table.
-
-=cut
-
-sub _set_last_expire_reduce {
-  my ($self, $deleted) = @_;
-
-  return 0 unless (defined($self->{_dbh}));
-
-  return 0 unless (defined($deleted));
-
-  my $sql = "UPDATE bayes_vars SET last_expire_reduce = ? WHERE username = ?";
-
-  my $sth = $self->{_dbh}->prepare_cached($sql);
-
-  unless (defined($sth)) {
-    dbg("bayes: _set_last_expire_reduce: SQL Error: ".$self->{_dbh}->errstr());
-    return 0;
-  }
-
-  my $rc = $sth->execute($deleted, $self->{_username});
-
-  unless ($rc) {
-    dbg("bayes: _set_last_expire_reduce: SQL Error: ".$self->{_dbh}->errstr());
-    return 0;
-  }
-
-  $sth->finish();
-
-  return 1;
-}
 
 =head2 _get_num_hapaxes
 
@@ -1806,7 +1785,7 @@ sub _get_num_hapaxes {
 
   my $sql = "SELECT count(*)
                FROM bayes_token
-              WHERE username = ?
+              WHERE id = ?
                 AND spam_count + ham_count = 1";
 
   my $sth = $self->{_dbh}->prepare_cached($sql);
@@ -1816,7 +1795,7 @@ sub _get_num_hapaxes {
     return 0;
   }
 
-  my $rc = $sth->execute($self->{_username});
+  my $rc = $sth->execute($self->{_userid});
 
   unless ($rc) {
     dbg("bayes: _get_num_hapaxes: SQL Error: ".$self->{_dbh}->errstr());
@@ -1848,7 +1827,7 @@ sub _get_num_lowfreq {
 
   my $sql = "SELECT count(*)
                FROM bayes_token
-              WHERE username = ? 
+              WHERE id = ?
                 AND (spam_count >= 0 AND spam_count < 8)
                 AND (ham_count >= 0 AND ham_count < 8)
                 AND spam_count + ham_count != 1";
@@ -1860,7 +1839,7 @@ sub _get_num_lowfreq {
     return 0;
   }
 
-  my $rc = $sth->execute($self->{_username});
+  my $rc = $sth->execute($self->{_userid});
 
   unless ($rc) {
     dbg("bayes: _get_num_lowfreq: SQL Error: ".$self->{_dbh}->errstr());

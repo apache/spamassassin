@@ -52,7 +52,7 @@ use bytes;
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::PerMsgStatus;
-use Mail::SpamAssassin::SHA1 qw(sha1_hex);
+use Mail::SpamAssassin::SHA1 qw(sha1 sha1_hex);
 
 use vars qw{
   @ISA
@@ -354,10 +354,11 @@ sub tokenize {
   }
 
   # Go ahead and uniq the array, skip null tokens (can happen sometimes)
-  my %tokens = map { $_ => 1 } grep(length, @tokens);
+  # generate an SHA1 hash and take the lower 40 bits as our token
+  my %tokens = map { substr(sha1($_), -5) => { 'raw_token' => $_ } } grep(length, @tokens);
 
   # return the keys == tokens ...
-  keys %tokens;
+  return \%tokens;
 }
 
 sub tokenize_line {
@@ -684,9 +685,9 @@ sub tokenize_mail_addrs {
 ###########################################################################
 
 sub ignore_message {
-  my ($Bayes,$PMS) = @_;
+  my ($self,$PMS) = @_;
 
-  return 0 unless $Bayes->{use_ignores};
+  return 0 unless $self->{use_ignores};
 
   my $ignore = $PMS->check_from_in_list('bayes_ignore_from')
     		|| $PMS->check_to_in_list('bayes_ignore_to');
@@ -808,11 +809,13 @@ sub learn_trapped {
   #
   $msgatime = time if ( $msgatime - time > 86400 );
 
-  for ($self->tokenize ($msg, $msgdata)) {
+  my $tokens = $self->tokenize($msg, $msgdata);
+
+  for my $token (keys %{$tokens}) {
     if ($isspam) {
-      $self->{store}->tok_count_change (1, 0, $_, $msgatime);
+      $self->{store}->tok_count_change (1, 0, $token, $msgatime);
     } else {
-      $self->{store}->tok_count_change (0, 1, $_, $msgatime);
+      $self->{store}->tok_count_change (0, 1, $token, $msgatime);
     }
   }
 
@@ -911,11 +914,13 @@ sub forget_trapped {
     $self->{store}->nspam_nham_change (0, -1);
   }
 
-  for ($self->tokenize ($msg, $msgdata)) {
+  my $tokens = $self->tokenize($msg, $msgdata);
+
+  for my $token (keys %{$tokens}) {
     if ($isspam) {
-      $self->{store}->tok_count_change (-1, 0, $_);
+      $self->{store}->tok_count_change (-1, 0, $token);
     } else {
-      $self->{store}->tok_count_change (0, -1, $_);
+      $self->{store}->tok_count_change (0, -1, $token);
     }
   }
 
@@ -1013,16 +1018,13 @@ sub sync {
 
 # compute the probability that that token is spammish
 sub compute_prob_for_token {
-  my ($self, $token, $ns, $nn, $s, $n, $atime) = @_;
+  my ($self, $token, $ns, $nn, $s, $n) = @_;
 
   # we allow the caller to give us the token information, just
   # to save a potentially expensive lookup
-  if (!defined($s) || !defined($n) || !defined($atime)) {
-    ($s, $n, $atime) = $self->{store}->tok_get ($token);
+  if (!defined($s) || !defined($n)) {
+    ($s, $n, undef) = $self->{store}->tok_get ($token);
   }
-
-  # store for use by header tags which list Bayes info
-  $self->{tok_raw_data}->{$token} = { s=>$s, n=>$n, atime=>$atime };
 
   return if ($s == 0 && $n == 0);
 
@@ -1133,9 +1135,7 @@ sub scan {
   my ($self, $permsgstatus, $msg) = @_;
   my $score;
 
-  if( $self->ignore_message($permsgstatus) ) {
-    goto skip;
-  }
+  goto skip if ($self->ignore_message($permsgstatus));
 
   goto skip unless $self->is_scan_available();
 
@@ -1149,22 +1149,22 @@ sub scan {
 
   my $msgdata = $self->get_msgdata_from_permsgstatus ($permsgstatus);
 
-  my $pw;
-  my @tokens = $self->tokenize ($msg, $msgdata);
+  my $msgtokens = $self->tokenize($msg, $msgdata);
+  my $tokensdata = $self->{store}->tok_get_all(keys %{$msgtokens});
 
-  # keep a temporary cache for tok_get() values, in case it's used
-  # for tokens; this is populated in compute_prob_for_token()
-  $self->{tok_raw_data} = { };
+  my %pw;
 
-  # Figure out our probabilities for the message tokens
-  my %pw = map {
-      $pw = $self->compute_prob_for_token ($_, $ns, $nn);
-      if (!defined $pw) {
-	();		# exit map()
-      } else {
-	($_ => $pw);
-      }
-  } @tokens;
+  foreach my $tokendata (@{$tokensdata}) {
+    my ($token, $tok_spam, $tok_ham, $atime) = @{$tokendata};
+    my $prob = $self->compute_prob_for_token($token, $ns, $nn, $tok_spam, $tok_ham);
+    if (defined($prob)) {
+      $pw{$token} = $prob;
+      $msgtokens->{$token}->{pw} = $prob;
+      $msgtokens->{$token}->{spam_count} = $tok_spam;
+      $msgtokens->{$token}->{ham_count} = $tok_ham;
+      $msgtokens->{$token}->{atime} = $atime;
+    }
+  }
 
   # If none of the tokens were found in the DB, we're going to skip
   # this message...
@@ -1173,7 +1173,7 @@ sub scan {
     goto skip;
   }
 
-  my $tcount_total = @tokens;
+  my $tcount_total = keys %{$msgtokens};
   my $tcount_learned = keys %pw;
 
   # Figure out the message receive time (used as atime below)
@@ -1205,22 +1205,20 @@ sub scan {
     # SPAMMYTOKENS tags that aren't there or collecting data that
     # won't be used?  Just collecting the data is certainly simpler.
     #
-    my $tokgot = $self->{tok_raw_data}->{$_} || { };
-    my $s = $tokgot->{s};
-    my $n = $tokgot->{n};
-    my $a = $tokgot->{atime};
-    push @$tinfo_spammy, [$_,$pw,$s,$n,$a] if $pw >= 0.5 && ++$tcount_spammy;
-    push @$tinfo_hammy,  [$_,$pw,$s,$n,$a] if $pw <  0.5 && ++$tcount_hammy;
+    my $raw_token = $msgtokens->{$_}->{raw_token} || "(unknown)";
+    my $s = $msgtokens->{$_}->{spam_count};
+    my $n = $msgtokens->{$_}->{ham_count};
+    my $a = $msgtokens->{$_}->{atime};
+    push @$tinfo_spammy, [$raw_token,$pw,$s,$n,$a] if $pw >= 0.5 && ++$tcount_spammy;
+    push @$tinfo_hammy,  [$raw_token,$pw,$s,$n,$a] if $pw <  0.5 && ++$tcount_hammy;
 
     push (@sorted, $pw);
 
     # update the atime on this token, it proved useful
     $self->{store}->tok_touch ($_, $msgatime);
 
-    dbg ("bayes token '$_' => $pw");
+    dbg ("bayes token '$raw_token' => $pw");
   }
-
-  delete $self->{tok_raw_data};         # don't need this anymore
 
   if (!@sorted || (REQUIRE_SIGNIFICANT_TOKENS_TO_SCORE > 0 && 
 	$#sorted <= REQUIRE_SIGNIFICANT_TOKENS_TO_SCORE))

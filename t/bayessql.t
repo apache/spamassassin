@@ -16,7 +16,7 @@ BEGIN {
     unshift(@INC, '../blib/lib');
   }
 
-  plan tests => ((TEST_ENABLED && HAS_DBI) ? 38 : 0);
+  plan tests => ((TEST_ENABLED && HAS_DBI) ? 40 : 0);
 
   onfail => sub {
     warn "\n\nNote: Failure may be due to an incorrect config.";
@@ -94,9 +94,9 @@ my $body = $sa->{bayes_scanner}->get_body_from_msg($mail);
 
 ok($body);
 
-my @toks = $sa->{bayes_scanner}->tokenize($mail, $body);
+my $toks = $sa->{bayes_scanner}->tokenize($mail, $body);
 
-ok(scalar(@toks) > 0);
+ok(scalar(keys %{$toks}) > 0);
 
 my($msgid,$msgid_hdr) = $sa->{bayes_scanner}->get_msgid($mail);
 
@@ -123,12 +123,26 @@ $sa->{bayes_scanner}->{store}->untie_db();
 ok($sa->{bayes_scanner}->{store}->tie_db_writable());
 
 my $tokerror = 0;
-foreach my $tok (@toks) {
+foreach my $tok (keys %{$toks}) {
   my ($spam, $ham, $atime) = $sa->{bayes_scanner}->{store}->tok_get($tok);
   if ($spam == 0 || $ham > 0) {
     $tokerror = 1;
   }
 }
+ok(!$tokerror);
+
+my $tokens = $sa->{bayes_scanner}->{store}->tok_get_all(keys %{$toks});
+
+ok($tokens);
+
+$tokerror = 0;
+foreach my $tok (@{$tokens}) {
+  my ($token, $tok_spam, $tok_ham, $atime) = @{$tok};
+  if ($tok_spam == 0 || $tok_ham > 0) {
+    $tokerror = 1;
+  }
+}
+
 ok(!$tokerror);
 
 $sa->{bayes_scanner}->{store}->untie_db();
@@ -144,7 +158,7 @@ $sa->{bayes_scanner}->{store}->untie_db();
 ok($sa->{bayes_scanner}->{store}->tie_db_writable());
 
 $tokerror = 0;
-foreach my $tok (@toks) {
+foreach my $tok (keys %{$toks}) {
   my ($spam, $ham, $atime) = $sa->{bayes_scanner}->{store}->tok_get($tok);
   if ($spam  > 0 || $ham == 0) {
     $tokerror = 1;
@@ -292,18 +306,24 @@ sub cleanupdb {
     return 0;
   }
 
+  $rv = $dbh->do("DELETE FROM bayes_seen WHERE id = (SELECT id FROM bayes_vars WHERE username = ?)", undef, $testuser);
+  if (!defined($rv)) {
+    $error = 1;
+  }
+
+  $rv = $dbh->do("DELETE FROM bayes_token WHERE id = (SELECT id FROM bayes_vars WHERE username = ?)", undef, $testuser);
+  if (!defined($rv)) {
+    $error = 1;
+  }
+
+  $rv = $dbh->do("DELETE FROM bayes_expire WHERE id = (SELECT id FROM bayes_vars WHERE username = ?)", undef, $testuser);
+  if (!defined($rv)) {
+    $error = 1;
+  }
+
   $rv = $dbh->do("DELETE FROM bayes_vars WHERE username = ?", undef, $testuser);
   if (!defined($rv)) {
     $error = 1;
   }
-  $rv = $dbh->do("DELETE FROM bayes_seen WHERE username = ?", undef, $testuser);
-  if (!defined($rv)) {
-    $error = 1;
-  }
-  $rv = $dbh->do("DELETE FROM bayes_token WHERE username = ?", undef, $testuser);
-  if (!defined($rv)) {
-    $error = 1;
-  }
-  $rv = $dbh->do("DELETE FROM bayes_expire WHERE username = ?", undef, $testuser);
   return !$error;
 }

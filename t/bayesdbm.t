@@ -16,7 +16,7 @@ BEGIN {
     unshift(@INC, '../blib/lib');
   }
 
-  plan tests => (HAS_DB_FILE ? 42 : 0);
+  plan tests => (HAS_DB_FILE ? 44 : 0);
 };
 
 exit unless HAS_DB_FILE;
@@ -55,9 +55,9 @@ my $body = $sa->{bayes_scanner}->get_body_from_msg($mail);
 
 ok($body);
 
-my @toks = $sa->{bayes_scanner}->tokenize($mail, $body);
+my $toks = $sa->{bayes_scanner}->tokenize($mail, $body);
 
-ok(scalar(@toks) > 0);
+ok(scalar(keys %{$toks}) > 0);
 
 my($msgid,$msgid_hdr) = $sa->{bayes_scanner}->get_msgid($mail);
 
@@ -84,9 +84,22 @@ $sa->{bayes_scanner}->{store}->untie_db();
 ok($sa->{bayes_scanner}->{store}->tie_db_writable());
 
 my $tokerror = 0;
-foreach my $tok (@toks) {
+foreach my $tok (keys %{$toks}) {
   my ($spam, $ham, $atime) = $sa->{bayes_scanner}->{store}->tok_get($tok);
   if ($spam == 0 || $ham > 0) {
+    $tokerror = 1;
+  }
+}
+ok(!$tokerror);
+
+my $tokens = $sa->{bayes_scanner}->{store}->tok_get_all(keys %{$toks});
+
+ok($tokens);
+
+$tokerror = 0;
+foreach my $tok (@{$tokens}) {
+  my ($token, $tok_spam, $tok_ham, $atime) = @{$tok};
+  if ($tok_spam == 0 || $tok_ham > 0) {
     $tokerror = 1;
   }
 }
@@ -105,7 +118,7 @@ $sa->{bayes_scanner}->{store}->untie_db();
 ok($sa->{bayes_scanner}->{store}->tie_db_writable());
 
 $tokerror = 0;
-foreach my $tok (@toks) {
+foreach my $tok (keys %{$toks}) {
   my ($spam, $ham, $atime) = $sa->{bayes_scanner}->{store}->tok_get($tok);
   if ($spam  > 0 || $ham == 0) {
     $tokerror = 1;

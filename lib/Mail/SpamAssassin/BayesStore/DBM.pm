@@ -23,6 +23,7 @@ use Fcntl;
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::BayesStore;
+use Mail::SpamAssassin::SHA1 qw(sha1);
 use File::Basename;
 use File::Spec;
 use File::Path;
@@ -100,7 +101,7 @@ sub new {
 
   my $self = $class->SUPER::new(@_);
 
-  $self->{supported_db_version} = 2;
+  $self->{supported_db_version} = 3;
 
   $self->{already_tied} = 0;
   $self->{is_locked} = 0;
@@ -422,9 +423,82 @@ sub _upgrade_db {
     $self->{db_version} = 2; # need this for other functions which check
   }
 
-  # if ( $self->{db_version} == 2 ) {
+  # Version 3 of the database converts all existing tokens to SHA1 hashes
+  if ( $self->{db_version} == 2 ) {
+    dbg ("bayes: upgrading database format from v".$self->{db_version}." to v3");
+    my $DB_NSPAM_MAGIC_TOKEN		  = "\015\001\007\011\003NSPAM";
+    my $DB_NHAM_MAGIC_TOKEN		  = "\015\001\007\011\003NHAM";
+    my $DB_NTOKENS_MAGIC_TOKEN		  = "\015\001\007\011\003NTOKENS";
+    my $DB_OLDEST_TOKEN_AGE_MAGIC_TOKEN	  = "\015\001\007\011\003OLDESTAGE";
+    my $DB_LAST_EXPIRE_MAGIC_TOKEN	  = "\015\001\007\011\003LASTEXPIRE";
+    my $DB_NEWEST_TOKEN_AGE_MAGIC_TOKEN	  = "\015\001\007\011\003NEWESTAGE";
+    my $DB_LAST_JOURNAL_SYNC_MAGIC_TOKEN  = "\015\001\007\011\003LASTJOURNALSYNC";
+    my $DB_LAST_ATIME_DELTA_MAGIC_TOKEN	  = "\015\001\007\011\003LASTATIMEDELTA";
+    my $DB_LAST_EXPIRE_REDUCE_MAGIC_TOKEN = "\015\001\007\011\003LASTEXPIREREDUCE";
+
+    # remember when we started ...
+    my $started = time;
+
+    # use O_EXCL to avoid races (bonus paranoia, since we should be locked
+    # anyway)
+    my %new_toks;
+    my $umask = umask 0;
+    tie %new_toks, "DB_File", "${name}.new", O_RDWR|O_CREAT|O_EXCL,
+          (oct ($main->{conf}->{bayes_file_mode}) & 0666) or return 0;
+    umask $umask;
+
+    # add the magic tokens to the new db.
+    $new_toks{$NSPAM_MAGIC_TOKEN} = $self->{db_toks}->{$DB_NSPAM_MAGIC_TOKEN};
+    $new_toks{$NHAM_MAGIC_TOKEN} = $self->{db_toks}->{$DB_NHAM_MAGIC_TOKEN};
+    $new_toks{$NTOKENS_MAGIC_TOKEN} = $self->{db_toks}->{$DB_NTOKENS_MAGIC_TOKEN};
+    $new_toks{$DB_VERSION_MAGIC_TOKEN} = 3; # we're now a DB version 3 file
+    $new_toks{$OLDEST_TOKEN_AGE_MAGIC_TOKEN} = $self->{db_toks}->{$DB_OLDEST_TOKEN_AGE_MAGIC_TOKEN};
+    $new_toks{$LAST_EXPIRE_MAGIC_TOKEN} = $self->{db_toks}->{$DB_LAST_EXPIRE_MAGIC_TOKEN};
+    $new_toks{$NEWEST_TOKEN_AGE_MAGIC_TOKEN} = $self->{db_toks}->{$DB_NEWEST_TOKEN_AGE_MAGIC_TOKEN};
+    $new_toks{$LAST_JOURNAL_SYNC_MAGIC_TOKEN} = $self->{db_toks}->{$DB_LAST_JOURNAL_SYNC_MAGIC_TOKEN};
+    $new_toks{$LAST_ATIME_DELTA_MAGIC_TOKEN} = $self->{db_toks}->{$DB_LAST_ATIME_DELTA_MAGIC_TOKEN};
+    $new_toks{$LAST_EXPIRE_REDUCE_MAGIC_TOKEN} =$self->{db_toks}->{$DB_LAST_EXPIRE_REDUCE_MAGIC_TOKEN};
+
+    # deal with the data tokens
+    while (my ($tok, $packed) = each %{$self->{db_toks}}) {
+      next if ($tok =~ /^\015\001\007\011\003/); # skip magic tokens
+      my $tok_hash = substr(sha1($tok), -5);
+      $new_toks{$tok_hash} = $packed;
+    }
+
+    # now untie so we can do renames
+    untie %{$self->{db_toks}};
+    untie %new_toks;
+
+    # This is the critical phase (moving files around), so don't allow
+    # it to be interrupted.
+    local $SIG{'INT'} = 'IGNORE';
+    local $SIG{'TERM'} = 'IGNORE';
+    local $SIG{'HUP'} = 'IGNORE' if (!Mail::SpamAssassin::Util::am_running_on_windows());
+
+    # now rename in the new one.  Try several extensions
+    for my $ext (@DB_EXTENSIONS) {
+      my $newf = $name.'.new'.$ext;
+      my $oldf = $name.$ext;
+      next unless (-f $newf);
+      if (!rename ($newf, $oldf)) {
+        warn "rename $newf to $oldf failed: $!\n";
+        return 0;
+      }
+    }
+
+    # re-tie to the new db in read-write mode ...
+    tie %{$self->{db_toks}},"DB_File", $name, O_RDWR|O_CREAT,
+	 (oct ($main->{conf}->{bayes_file_mode}) & 0666) or return 0;
+
+    dbg ("bayes: upgraded database format from v".$self->{db_version}." to v3 in ".(time - $started)." seconds");
+
+    $self->{db_version} = 3; # need this for other functions which check
+  }
+
+  # if ( $self->{db_version} == 3 ) {
   #   ...
-  #   $self->{db_version} = 3; # need this for other functions which check
+  #   $self->{db_version} = 4; # need this for other functions which check
   # }
   # ... and so on.
 
@@ -672,6 +746,17 @@ sub tok_get {
   $self->tok_unpack ($self->{db_toks}->{$tok});
 }
  
+sub tok_get_all {
+  my ($self, @tokens) = @_;
+
+  my @tokensdata;
+  foreach my $token (@tokens) {
+    my ($tok_spam, $tok_ham, $atime) = $self->tok_unpack($self->{db_toks}->{$token});
+    push(@tokensdata, [$token, $tok_spam, $tok_ham, $atime]);
+  }
+  return \@tokensdata;
+}
+
 # return the magic tokens in a specific order:
 # 0: scan count base
 # 1: number of spam
@@ -690,9 +775,10 @@ sub get_storage_variables {
   my @values;
 
   my $db_ver = $self->{db_toks}->{$DB_VERSION_MAGIC_TOKEN};
+
   if ( !$db_ver || $db_ver =~ /\D/ ) { $db_ver = 0; }
 
-  if ( $db_ver == 2 ) {
+  if ( $db_ver >= 2 ) {
     my $DB2_LAST_ATIME_DELTA_MAGIC_TOKEN	= "\015\001\007\011\003LASTATIMEDELTA";
     my $DB2_LAST_EXPIRE_MAGIC_TOKEN		= "\015\001\007\011\003LASTEXPIRE";
     my $DB2_LAST_EXPIRE_REDUCE_MAGIC_TOKEN	= "\015\001\007\011\003LASTEXPIREREDUCE";
@@ -711,7 +797,7 @@ sub get_storage_variables {
       $self->{db_toks}->{$DB2_NTOKENS_MAGIC_TOKEN},
       $self->{db_toks}->{$DB2_LAST_EXPIRE_MAGIC_TOKEN},
       $self->{db_toks}->{$DB2_OLDEST_TOKEN_AGE_MAGIC_TOKEN},
-      2,
+      $db_ver,
       $self->{db_toks}->{$DB2_LAST_JOURNAL_SYNC_MAGIC_TOKEN},
       $self->{db_toks}->{$DB2_LAST_ATIME_DELTA_MAGIC_TOKEN},
       $self->{db_toks}->{$DB2_LAST_EXPIRE_REDUCE_MAGIC_TOKEN},
@@ -780,11 +866,11 @@ sub dump_db_toks {
     # We have the value already, so just unpack it.
     my ($ts, $th, $atime) = $self->tok_unpack ($tokvalue);
     
-    my $prob = $self->{bayes}->compute_prob_for_token($tok, $vars[1], $vars[2],
-						      $ts, $th, $atime);
+    my $prob = $self->{bayes}->compute_prob_for_token($tok, $vars[1], $vars[2], $ts, $th);
     $prob ||= 0.5;
     
-    printf $template,$prob,$ts,$th,$atime,$tok;
+    my $encoded_tok = unpack("H*",$tok);
+    printf $template,$prob,$ts,$th,$atime,$encoded_tok;
   }
 }
 
@@ -827,7 +913,10 @@ sub tok_count_change {
   $atime = 0 unless defined $atime;
 
   if ($self->{bayes}->{main}->{learn_to_journal}) {
-    $self->defer_update ("c $ds $dh $atime $tok");
+    # we can't store the SHA1 binary value in the journal to convert it
+    # to a printable value that can be converted back later
+    my $encoded_tok = unpack("H*",$tok);
+    $self->defer_update ("c $ds $dh $atime $encoded_tok");
   } else {
     $self->tok_sync_counters ($ds, $dh, $atime, $tok);
   }
@@ -851,7 +940,10 @@ sub nspam_nham_change {
 
 sub tok_touch {
   my ($self, $tok, $atime) = @_;
-  $self->defer_update ("t $atime $tok");
+  # we can't store the SHA1 binary value in the journal to convert it
+  # to a printable value that can be converted back later
+  my $encoded_tok = unpack("H*", $tok);
+  $self->defer_update ("t $atime $encoded_tok");
 }
 
 sub defer_update {
@@ -1026,9 +1118,11 @@ sub _sync_journal_trapped {
       $total_count++;
 
       if (/^t (\d+) (.+)$/) { # Token timestamp update, cache resultant entries
-	$tokens{$2} = $1+0 if ( !exists $tokens{$2} || $1+0 > $tokens{$2} );
+	my $tok = pack("H*",$2);
+	$tokens{$tok} = $1+0 if ( !exists $tokens{$tok} || $1+0 > $tokens{$tok} );
       } elsif (/^c (-?\d+) (-?\d+) (\d+) (.+)$/) { # Add/full token update
-	$self->tok_sync_counters ($1+0, $2+0, $3+0, $4);
+	my $tok = pack("H*",$4);
+	$self->tok_sync_counters ($1+0, $2+0, $3+0, $tok);
 	$count++;
       } elsif (/^n (-?\d+) (-?\d+)$/) { # update ham/spam count
 	$self->tok_sync_nspam_nham ($1+0, $2+0);
@@ -1304,8 +1398,8 @@ sub backup_database {
     next if ($tok =~ MAGIC_RE); # skip magic tokens
 
     my ($ts, $th, $atime) = $self->tok_unpack($packed);
-
-    print "t\t$ts\t$th\t$atime\t$tok\n";
+    my $encoded_token = unpack("H*",$tok);
+    print "t\t$ts\t$th\t$atime\t$encoded_token\n";
   }
 
   while (my ($msgid, $flag) = each %{$self->{db_seen}}) {
@@ -1391,6 +1485,16 @@ sub restore_database {
     return 0;
   }
 
+  unless ($db_version == 2 || $db_version == 3) {
+    dbg("bayes: Database Version $db_version is unsupported, must be version 2 or 3.");
+    untie %new_toks;
+    untie %new_seen;
+    unlink $tmptoksdbname;
+    unlink $tmpseendbname;
+    $self->untie_db();
+    return 0;
+  }
+
   while (my $line = <DUMPFILE>) {
     chomp($line);
     $line_count++;
@@ -1447,6 +1551,16 @@ sub restore_database {
       if ($token_warn_p) {
 	dbg("bayes: Token ($token) has the following warnings:\n".join("\n",@warnings));
       }
+
+      # database versions < 3 did not encode their token values
+      if ($db_version < 3) {
+	$token = substr(sha1($token), -5);
+      }
+      else {
+	# turn unpacked binary token back into binary value
+	$token = pack("H*",$token);
+      }
+
       $new_toks{$token} = $self->tok_pack($spam_count, $ham_count, $atime);
       if ($atime < $oldest_token_age) {
 	$oldest_token_age = $atime;
@@ -1576,7 +1690,7 @@ sub tok_unpack {
   $value ||= 0;
 
   my ($packed, $atime);
-  if ( $self->{db_version} == 2 || $self->{db_version} == 1 ) {
+  if ( $self->{db_version} >= 1 ) {
     ($packed, $atime) = unpack("CV", $value);
   }
   elsif ( $self->{db_version} == 0 ) {
@@ -1590,10 +1704,7 @@ sub tok_unpack {
   }
   elsif (($packed & FORMAT_FLAG) == TWO_LONGS_FORMAT) {
     my ($packed, $ts, $th, $atime);
-    if ( $self->{db_version} == 2 ) {
-      ($packed, $ts, $th, $atime) = unpack("CVVV", $value);
-    }
-    elsif ( $self->{db_version} == 1 ) {
+    if ( $self->{db_version} >= 1 ) {
       ($packed, $ts, $th, $atime) = unpack("CVVV", $value);
     }
     elsif ( $self->{db_version} == 0 ) {

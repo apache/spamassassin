@@ -414,6 +414,9 @@ sub expiry_due {
   # If force expire was called, do the expire no matter what.
   return 1 if ($self->{bayes}->{main}->{learn_force_expire});
 
+  # if config says not to auto expire then no need to continue
+  return 0 if ($self->{bayes}->{main}->{conf}->{bayes_auto_expire} == 0);
+
   # is the database too small for expiry?  (Do *not* use "scalar keys",
   # as this will iterate through the entire db counting them!)
   my @vars = $self->get_storage_variables();
@@ -435,7 +438,6 @@ sub expiry_due {
 
   my $conf = $self->{bayes}->{main}->{conf};
   if ($ntoks <= 100000 ||			# keep at least 100k tokens
-      $conf->{bayes_auto_expire} == 0 ||	# config says don't expire
       $self->{expiry_max_db_size} > $ntoks ||	# not enough tokens to cause an expire
       $vars[10]-$vars[5] < 43200 ||		# delta between oldest and newest < 12h
       $self->{db_version} < $self->DB_VERSION # ignore old db formats
@@ -615,6 +617,21 @@ it's spam count, ham acount and last access time.
 sub tok_get {
   my ($self, $token) = @_;
   die "tok_get: not implemented\n";
+}
+
+=head2 tok_get_all
+
+public instance (\@) tok_get_all (@ @tokens)
+
+Description:
+This method retrieves the specified tokens (C<@tokens>) from storage and returns
+an array ref of arrays spam count, ham acount and last access time.
+
+=cut
+
+sub tok_get_all {
+  my ($self, $tokens) = @_;
+  die "tok_get_all: not implemented\n";
 }
 
 =head2 tok_count_change

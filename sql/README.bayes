@@ -28,11 +28,11 @@ The bayes_sql_dsn directive describes the data source name that will
 be used to create the connection to your SQL server.  It MUST be in
 the format as listed above.  <driver> should be the DBD driver that
 you have installed to access your database (initially tested with
-MySQL, PostgreSQL, SQLite, and DBD::CSV).  <database> must be the name
-of the database that you created to store the bayes data
-tables. <hostname> is the name of the host that contains the SQL
-database  server.  <port> is the optional port number where your
-database server is listening.
+MySQL, PostgreSQL, and SQLite).  <database> must be the name of the
+database that you created to store the bayes data tables. <hostname>
+is the name of the host that contains the SQL database  server.
+<port> is the optional port number where your database server is
+listening.
 
 For an example of connection to PostgreSQL, see the main README file.
 

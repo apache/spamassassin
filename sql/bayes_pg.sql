@@ -1,10 +1,10 @@
 
 CREATE TABLE bayes_expire (
-  username varchar(200) NOT NULL default '',
+  id int(11) NOT NULL default '0',
   runtime integer NOT NULL default '0'
 );
 
-CREATE INDEX bayes_expire_idx1 ON bayes_expire (username);
+CREATE INDEX bayes_expire_idx1 ON bayes_expire (id);
 
 CREATE TABLE bayes_global_vars (
   variable varchar(30) NOT NULL default '',
@@ -12,32 +12,36 @@ CREATE TABLE bayes_global_vars (
   PRIMARY KEY  (variable)
 );
 
-INSERT INTO bayes_global_vars VALUES ('VERSION','2');
+INSERT INTO bayes_global_vars VALUES ('VERSION','3');
 
 CREATE TABLE bayes_seen (
-  username varchar(200) NOT NULL default '',
+  id int(11) NOT NULL default '0',
   msgid varchar(200) NOT NULL default '',
   flag character(1) NOT NULL default '',
-  PRIMARY KEY  (username,msgid)
+  PRIMARY KEY  (id,msgid)
 );
 
-CREATE INDEX bayes_seen_idx1 ON bayes_seen (username, flag);
-
 CREATE TABLE bayes_token (
-  username varchar(200) NOT NULL default '',
-  token varchar(200) NOT NULL default '',
+  id int(11) NOT NULL default '0',
+  token char(200) NOT NULL default '',
   spam_count integer NOT NULL default '0',
   ham_count integer NOT NULL default '0',
   atime integer NOT NULL default '0',
-  PRIMARY KEY  (username,token)
+  PRIMARY KEY  (id,token)
 );
 
 CREATE TABLE bayes_vars (
+  id serial NOT NULL,
   username varchar(200) NOT NULL default '',
   spam_count integer NOT NULL default '0',
   ham_count integer NOT NULL default '0',
+  token_count integer NOT NULL default '0',
   last_expire integer NOT NULL default '0',
   last_atime_delta integer NOT NULL default '0',
   last_expire_reduce integer NOT NULL default '0',
-  PRIMARY KEY  (username)
+  oldest_token_age integer NOT NULL default '2147483647',
+  newest_token_age integer NOT NULL default '0',
+  PRIMARY KEY  (id)
 );
+
+CREATE INDEX bayes_vars_idx1 ON bayes_vars (username);
