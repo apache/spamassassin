@@ -1762,7 +1762,7 @@ sub do_meta_tests {
         # Don't warn about undefined variables, since
         # $self->{tests_already_hit} will be unitinialized for
         # tests which weren't hit
-        no warnings qw(uninitialized);
+        local $^W; # perl 5.005 compatible!
 
         my (\$self) = \@_;
 
