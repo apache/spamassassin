@@ -2502,7 +2502,7 @@ sub check_for_text_html_only {
 
   my $content_type = $self->get('Content-Type');
   $content_type = '' unless defined $content_type;
-  return 1 if ( $content_type =~ m@text/html@ ); # true if message is all text/html
+  return 1 if ( $content_type =~ m@text/html@i ); # true if message is all text/html
 
   $content_type =~ /\bboundary\s*=\s*["']?(.*?)["']?(?:;|$)/i
     or return 0; # No message sections to check
