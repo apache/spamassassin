@@ -816,3 +816,63 @@ header T_HELO_DYNAMIC_VELOX  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[a-z]{2}\d
 header T_HELO_DYNAMIC_NTL  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S+\d+-\d+-cust\d+\.[a-z]{4,6}\.broadband\.ntl\.com[^\]]+ auth= /i
 header T_HELO_DYNAMIC_HOME_NL  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[a-z]{2}\d+-\S\.\S+\d\.[a-z]{2}\.home\.nl[^]]+ auth= /i
 
+########################################################################
+
+# bug 1839: possible additions to advance fee fraud rules
+body __FRAUD_TXN	/\b(?:[1-5][0-9](?:\.[0-9])? ?(?:[%]|percent)|percentage (?:of the total|for your?|you wish|you want)|your comm?iss?ion for|comm?iss?ion for your|your share,? as (?:a |the )?(?:compensation|commiss?ion|remunerr?ation)|y?our share of the (?:funds?|monies)|owner of the account ?,? will be compensated|you\b[^.]{0,99}\bentitled\b[^.]{0,99}\b(?:share|part)\b[^.]{0,99}\b(?:money|monies|funds)|tell(?:ing)? (?:us|me)\b[^.]{0,99}\byou (?:would )?(?:want|wish|require)\b|remunerr?ation for your (?:services?|assistance)\b)/i
+body __FRAUD_PMJ	/\bfrom the\b[^.]{0,99}\bsecurity company\b/i
+body __FRAUD_DBI	/(?:\bdollars?\b|\busd(?:ollars)?(?:[0-9]|\b)|\bus\$|\$[0-9,.]{6,}|\$[0-9].{0,8}[mb]illion|\$[0-9.,]{2,10} ?m|\beuros?\b|u[.]?s[.]? [0-9.]+ m)/i
+body __FRAUD_KLM	/\b(?:bank|securit(?:y|ies)|funds?|monies|inherr?itt?(?:ed|ance))\b/i
+body __FRAUD_JOW	/\b(?:INVESTMENT|CONFIDENTIAL|PROPOSITION|PARTNERSHIP|URGENT(?:LY)?|TRANSACTION|BUSS?INESS|ASSISTANCE)\b/
+body __FRAUD_BEP	/\b(?:bank of nigeria|central bank of|trust bank|apex bank|amalgamated bank)\b/i
+body __FRAUD_SRS	/\b(?:god|(?:our|the) lord|jesus|allah)\b/i
+body __FRAUD_KPV	/\b(?:health|sickness|illness|heart attack)\b/i
+body __FRAUD_LTQ	/\b(?:charit(?:y|ies)|orphanages?|widows?|church(?:es)?)\b/i
+body __FRAUD_NRF	/\b(?:family|father|husband|relatives?)\b/i
+body __FRAUD_DPR	/\b(?:(?:respond|reply) (?:urgently|immediately)|(?:urgent|immediate|earliest) (?:reply|response))\b/i
+body __FRAUD_QXX	/\b(?:my name is|i am) (?:mrs?|engr|barrister|dr|prince(?:ss)?)[. ]/i
+body __FRAUD_QFY	/\bover-? *(?:invoiced?|cost(?:s|ing)?)\b/i
+body __FRAUD_OEJ	/\b(?:MRS?|MISS)\.? [A-Z]+\b/
+body __FRAUD_CHN	/\b(?:ministry|departe?ment) of\b/i
+body __FRAUD_PTS	/\b(?:ass?ass?inat(?:ed|ion)|murder(?:e?d)?|kill(?:ed|ing)\b[^.]{0,99}\b(?:war veterans|rebels?))\b/i
+body __FRAUD_WOM	/\b(?:(?:of|the) late mrs?|(?:son|daughter|wife) of late|late (?:father|husband)s?)\b/i
+body __FRAUD_NMV	/\b(?:ass?ylum|exiled?|refugee|imprison(?:ed)?)\b/i
+body __FRAUD_LVH	/\b(?:(?:former|ex-? ?)president|(?:former|formal|past|was (?:also )?the) (?:[a-z]+ )?(?:president|royal|chairman|finance minister|minister|director|chief of|head of)|ex-military head of state)\b/i
+body __FRAUD_WYF	/\bforeign(?:er?)\b/i
+body __FRAUD_MFI	/\b(?:nigerian?|liberian?|south african?|ivory coast|c[oô]te d['´]? ?ivoire|kuwaiti?|sierra[- ]leone|zimbabwe(?:an)?|angolan?|congo|benin|cotonou|west african?|zambian?|u\.a\.e)\b/i
+body __FRAUD_KKR	/\b(?:next of kin|beneficiar(?:y|ies))\b/i
+body __FRAUD_HOA	/\bdeceased\b/i
+body __FRAUD_RQV	/\bunclaimed\b/i
+body __FRAUD_YTM	/\b(?:(?:funds|money|monies) moved|transfer(?:r?ing)?)\b[^.]{0,99}\b(?:abroad|out of (?:(?:the|our) )?country)\b/i
+body __FRAUD_CQY	/\bmutual (?:cooperation|benefi(?:ts|cial)|(?:golden )?opportunity)\b/i
+body __FRAUD_TDP	/\b(?:business partner(?:s|ship)?|silent partner(?:s|ship)?)\b/i
+body __FRAUD_GAN	/\b(?:charles taylor|serena|abacha|gu[eéè]i|sese[- ]?seko|kabila)\b/i
+body __FRAUD_EDA	/\b(?:into|in|to) your account\b/i
+body __FRAUD_GTV	/\bbarrister/i     # No ending \b to catch e.g. "barristerpeter@foo"
+body __FRAUD_LBO	/\b(?:absolute(?:ly)?|strictest|stric[tk]ly|urgent(?:ly)?|utterly|utmost|highly|very|extremely|extraordinarily)\b[^.]{0,99}\b(?:private|privacy|confidence|secre(?:cy|t)|confidential(?:l?y|ity)?)\b/i
+body __FRAUD_QQS	/\bbefore (?:his|the) death\b/i
+body __FRAUD_ULR	/\bben[ei]ficiary\b/i
+body __FRAUD_UWU	/\b(?:transparent honesty|your transparency|confidence in you|(?:reliable|reputable|trust-? *worthy) (?:person|individual)|you are (?:reliable|reputable|trust-? *worthy))/i
+body __FRAUD_IPK	/\b(?:in|to|visit) your country\b/i
+body __FRAUD_AON	/\b(?:confidential|private|alternate|alternative) (?:(?:e-? *)?mail)\b/i
+body __FRAUD_WNY	/\b(?:disburse?(?:ment)?|incurr?(?:ed)?|remunerr?at(?:ed?|ion)|remm?itt?(?:ed|ance|ing)?)\b/i
+body __FRAUD_ICM	/\bexecution of (?:this |the )transaction\b/i
+body __FRAUD_CUC	/\b(?:confiscat(?:ed?|ing)|(?:funds?|accounts?|assets)\b[^.]{0,99}\b(?:frozen|seized))\b/i
+body __FRAUD_VEH	/\burgent\b[^.]{0,99}\b(?:business|assistance|proposal)/i
+body __FRAUD_LYJ	/\bsolicit(?:ing)? (?:for )?(?:your )?(?:confiden|assist)/i
+body __FRAUD_AUM	/\bthe desk of\b/i
+body __FRAUD_WFC	/\bsecur(?:e|ing) (?:the )?(?:funds?|monies)\b/i
+body __FRAUD_YWW	/\bfurnish you with\b/i
+body __FRAUD_ULK	/\baffidavits?\b/i
+body __FRAUD_IOU	/\b(?:no risks?|risk-? *free|free of risks?|100% safe)\b/i
+body __FRAUD_NHU	/\b(?:over-? *seas?|off-? *shore)\b/i
+body __FRAUD_GIV	/\bmodalit(?:ies|y)\b/i
+body __FRAUD_OQY	/\bassistance (?:in|with) (?:this |the )?(?:transaction|transfer(?:r?ing)?)\b/i
+body __FRAUD_JNB	/\boperat(?:e|ing)\b[^.]{0,99}\b(?:for(?:ei|ie)gn|off-? ?shore|over-? ?seas?) (?:bank )?accounts?\b/i
+body __FRAUD_TJT	/\b(?:united states dollars|u\.? ?s\.? dollars|north american dollars)\b/i
+body __FRAUD_IRT	/\b(?:compliments? of the|dear friend|dear sir|yours faithfully|season'?s greetings)\b/i
+body __FRAUD_ETX	/\byour\b[^.]{0,99}\b(?:contact (?:details|information)|private (?:e?[- ]?mail|telephone|tel|phone|fax))\b/i
+body __FRAUD_DSY	/\b(?:huge|enormous) (?:cash deposit|amount of money\b[^.]{0,99}\bdeposit(?:ed)?)\b/i
+body __FRAUD_WDR	/\bprivate lawyer\b/i
+body __FRAUD_UUY	/\blegitimate business(?:es)?\b/i
+body __FRAUD_MLY	/\b(?:reply|respond)\b[^.]{0,50}\b(?:to|through)\b[^.]{0,50}\@\b/i
