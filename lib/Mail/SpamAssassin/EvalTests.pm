@@ -1327,6 +1327,21 @@ sub message_from_bugzilla {
   return ($score > 1);
 }
 
+sub message_from_debian_bts {
+  my ($self)    = @_;
+
+  my $all       = $self->get('ALL');
+  if ($all      =~ /^X-[[:alnum:]]+-PR-[[:alnum:]]+:\s+/m) {
+    return 1 if $all =~ /^Subject:\s+Bug#\d+: /m;
+  }
+  elsif ($all   =~ /^From:\s+owner\@/mi and
+	($all =~ /^Subject:\s+Bug#\d+: /m or
+	 $all =~ /^Subject:\s+Processed \(.*?\):/m)) {
+      return 1;
+  }
+  return 0;
+}
+
 ###########################################################################
 
 sub missing_mimeole {
