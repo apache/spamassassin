@@ -870,16 +870,31 @@ sub uri_list_canonify {
     }
 
     # deal with wierd hostname parts, remove user/pass, etc.
-    if ($nuri =~ m{^(https?://)([^/]+)(\.?/.*)?$}i) {
+    if ($nuri =~ m{^(https?://)([^/]+)(\/.*)?$}i) {
       my ($proto, $host, $rest) = ($1,$2,$3);
 
       # not required
       $rest ||= '';
 
+      ########################
+      ## TVD: known issue, if host has multiple combinations of the following,
+      ## all permutations will be put onto @nuris.  shouldn't be an issue.
+
+      # Get rid of cruft that could cause confusion for rules...
+
       # remove "www.fakehostname.com@" username part
       if ($host =~ s/^[^\@]+\@//gs) {
         push(@nuris, join ('', $proto, $host, $rest));
       }
+
+      # bug 3186: If in a sentence, we might pick up odd characters ...
+      # ie: "visit http://example.biz." or "visit http://example.biz!!!"
+      # the host portion should end in some form of alpha-numeric, strip off
+      # the rest.
+      if ($host =~ s/[^0-9A-Za-z]+$//) {
+        push(@nuris, join ('', $proto, $host, $rest));
+      }
+      ########################
 
       # deal with 'http://213.172.0x1f.13/', decode encoded octets
       if ($host =~ /^([0-9a-fx]*\.)([0-9a-fx]*\.)([0-9a-fx]*\.)([0-9a-fx]*)$/ix) {
