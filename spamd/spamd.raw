@@ -636,8 +636,11 @@ if ( $opt{'socketpath'} ) {
   # certainly a better way, but we don't know it. Yet.
 
   if ( -e $path ) {
+    unless ( -S $path ) {
+      die "file $path exists but is no socket, exiting\n";
+    }
+  
     if ( new IO::Socket::UNIX( Peer => $path, Type => SOCK_STREAM ) ) {
-
       # we connected successfully: must alreadybe running
 
       undef $opt{'socketpath'};    # so exit handlers won't unlink it!
@@ -645,6 +648,7 @@ if ( $opt{'socketpath'} ) {
       die "spamd already running on $path, exiting\n";
     }
     else {
+      dbg("spamd: removing stale socket file $path");
       unlink $path;
     }
   }
@@ -1595,7 +1599,7 @@ sub handle_user_sql {
 
 sub handle_user_ldap {
   my $username = shift;
-  dbg("handle_user_ldap($username)");
+  dbg("spamd: enetring handle_user_ldap($username)");
   $spamtest->load_scoreonly_ldap($username);
   $spamtest->signal_user_changed(
     {
@@ -1929,7 +1933,7 @@ sub daemonize {
   # Now we can redirect the errors, too.
   open STDERR, '>&STDOUT' or die "Can't duplicate stdout: $!\n";
 
-  Mail::SpamAssassin::dbg('daemonized.');
+  dbg('spamd: daemonized.');
 }
 
 sub set_allowed_ip {
@@ -1960,7 +1964,7 @@ sub preload_modules_with_tmp_homedir {
 
   my $tmpsadir = File::Spec->catdir( $tmphome, ".spamassassin" );
 
-  Mail::SpamAssassin::dbg("Preloading modules with HOME=$tmphome");
+  dbg("spamd: Preloading modules with HOME=$tmphome");
 
   mkdir( $tmphome,  0700 ) or die "fatal: Can't create $tmphome: $!";
   mkdir( $tmpsadir, 0700 ) or die "fatal: Can't create $tmpsadir: $!";
