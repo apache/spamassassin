@@ -2516,7 +2516,7 @@ sub check_outlook_timestamp_token {
 sub check_razor2_range {
   my ($self,$fulltext,$min,$max) = @_;
 
-  unless ( defined $self->{razor2_cf_score} ) {
+  unless ( defined $self->{razor2_result} ) {
     # note: we don't use $fulltext. instead we get the raw message,
     # unfiltered, for razor2 to check.  ($fulltext removes MIME
     # parts etc.)
@@ -2524,7 +2524,7 @@ sub check_razor2_range {
     $self->razor2_lookup (\$full);
   }
 
-  return 1 if ( $self->{razor2_cf_score} >= $min && $self->{razor2_cf_score} <= $max );
+  return 1 if ( defined $self->{razor2_cf_score} && $self->{razor2_cf_score} >= $min && $self->{razor2_cf_score} <= $max );
   return 0;
 }
 
