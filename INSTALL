@@ -8,17 +8,19 @@ have been made since previous versions.
 Installing or Upgrading SpamAssassin
 ------------------------------------
 
-The easiest way to do this is using CPAN.pm, like so:
+Using CPAN via CPAN.pm:
 
 	perl -MCPAN -e shell                    [as root]
 	o conf prerequisites_policy ask
 	install Mail::SpamAssassin
 	quit
 
-On Debian, you can apt-get it from unstable, thanks to Duncan Findlay.
+Using Debian unstable:
 
-Alternatively download the tarfile, zipfile or Fedora Core RPM from
-http://spamassassin.apache.org/ , and install that, like so:
+        apt-get install spamassassin
+
+Alternatively download the tarfile, zipfile, or Fedora Core RPM from
+http://spamassassin.apache.org/ and install that, like so:
 
 	[unzip/untar the archive]
 	cd Mail-SpamAssassin-*
@@ -174,8 +176,7 @@ SpamAssassin to run:
     The Digest::SHA1 module is used as a cryptographic hash for some
     tests and the Bayes subsystem.  It is also used by Razor2.
 
-    If you use Debian, you can get Digest::SHA1 from the libdigest-sha1-perl
-    package.
+    Debian: apt-get install libdigest-sha1-perl
 
   - HTML::Parser >= 3.24 (from CPAN)
 
@@ -184,8 +185,7 @@ SpamAssassin to run:
     HTML is used for an ever-increasing amount of email so this dependency
     is unavoidable.  Run "perldoc -q html" for additional information.
 
-    If you use Debian, you can get HTML::Parser from the libhtml-parser-perl
-    package.
+    Debian: apt-get install libhtml-parser-perl
 
   - Storable             (from CPAN)
 
@@ -196,8 +196,7 @@ SpamAssassin to run:
     functionality.  Storable is used to shift configuration when a spamd
     process switches between users.
 
-    If you use Debian, you can get Storable from the libstorable-perl
-    package.
+    Debian: apt-get install libstorable-perl
 
 Optional Additional Modules
 ---------------------------
