@@ -150,3 +150,10 @@ body T_ORDER_NOW                  /\border (?:now|soon|fast|quickly|while|today)
 rawbody  __OBFUSCATING_COMMENT2 /[^\s>]<![^-].{0,64}?[^-]>[^\s<]/
 meta     T_OBFUSCATING_COMMENT2 __OBFUSCATING_COMMENT2 && MIME_HTML_ONLY
 describe T_OBFUSCATING_COMMENT2 HTML comments which obfuscate text (2)
+
+# Matt Cline
+uri      T_HTTP_ENTITIES_HOST m{https?://[^\s\">/]*\&\#[\da-f]+}i
+describe T_HTTP_ENTITIES_HOST URI obscured with character entities
+
+uri      T_HTTP_EXCESSIVE_ESCAPES m{^https?://\S*\&\#(?:0?3[0-9]|0?[46][1-9a-f]|0?[57][\da])}i
+describe HTTP_EXCESSIVE_ESCAPES Completely unnecessary %-escapes inside a URL
