@@ -561,8 +561,6 @@ describe SAVINGS		Subject talks about savings
 # MIME boundary tests; spam tools use distinctive patterns.
 header MIME_BOUND_DASH_DIGIT	Content-Type =~ /boundary="_-{10}=_\d{19,22}"/
 describe MIME_BOUND_DASH_DIGIT	Spam tool pattern in MIME boundary
-header MIME_BOUND_HASHES	Content-type =~ /boundary=\"\#{10}\"/
-describe MIME_BOUND_HASHES	Spam tool pattern in MIME boundary
 header MIME_BOUND_DIGITS_4	Content-Type =~ /boundary=\"_----------=_\d{18}\"/
 describe MIME_BOUND_DIGITS_4	Spam tool pattern in MIME boundary
 header MIME_BOUND_DIGITS_7	Content-Type =~ /boundary=\d{9}\.\d{13}/
@@ -579,12 +577,6 @@ header __NEXTPART_ALL		Content-Type =~ /NextPart/
 header __NEXTPART_NORMAL	Content-Type =~ /="(?:----_?=_)?NextPart_[\dA-F]{3}(_[\dA-F]{3,8})?_[\dA-F]{8}\.[\dA-F]{8}"/
 meta MIME_BOUND_NEXTPART	(__NEXTPART_ALL && !__NEXTPART_NORMAL)
 describe MIME_BOUND_NEXTPART	Spam tool pattern in MIME boundary
-header MIME_BOUND_OPTIN		Content-Type =~ /boundary=\"[A-F\d]{8}-[A-F\d]{4}-[A-F\d]{4}-[A-F\d]{4}-[A-F\d]{12}OPTIN\"/
-describe MIME_BOUND_OPTIN	Spam tool pattern in MIME boundary
-header MIME_BOUND_MAIL_BOUND	Content-Type =~ /boundary=\"____MAIL_BOUNDARY____\"/
-describe MIME_BOUND_MAIL_BOUND	Spam tool pattern in MIME boundary
-header MIME_BOUND_TEP		Content-Type =~ /boundary="TEP-\d{9,10}\.\d{10}\.\d{10}"/
-describe MIME_BOUND_TEP		Spam tool pattern in MIME boundary
 header MIME_BOUND_RKFINDY       Content-Type =~ /boundary=\"=_NextPart_2rfkindysadvnqw3nerasdf\"/
 describe MIME_BOUND_RKFINDY     Spam tool pattern in MIME boundary (rfkindy)
 
