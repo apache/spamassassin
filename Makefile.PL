@@ -1152,8 +1152,13 @@ version.env: lib/Mail/SpamAssassin.pm Makefile
 	$(PERL) -e 'print "CPAN_VERSION=$(VERSION)\n"' >> $@
 
 
+manifest_skip:
+	sort -f < MANIFEST.SKIP > MANIFEST.SKIP.tmp
+	mv MANIFEST.SKIP.tmp MANIFEST.SKIP
+
+
 sysreport:
-	$(NOECHO) $(PERL) build/sysreport CC=$(CC) PERL=$(PERL) PERL_BIN=$(PERL_BIN) PERL_VERSION=$(PERL_VERSION)
+	$(NOECHO) $(PERL) tools/sysreport CC=$(CC) PERL=$(PERL) PERL_BIN=$(PERL_BIN) PERL_VERSION=$(PERL_VERSION)
 
   EOD
 
