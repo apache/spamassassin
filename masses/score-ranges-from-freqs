@@ -80,7 +80,7 @@ while (<>) {
   $freq_nonspam{$test} = $nonspam;
 
   my $tflags = $rules{$test}->{tflags}; $tflags ||= '';
-  if ($tflags =~ /\b(?:net|userconf)\b/) {
+  if ($tflags =~ /\buserconf\b/ || ( ($scoreset % 2) == 0 && $tflags =~ /\bnet\b/ )) {
     $mutable_tests{$test} = 0;
   } else {
     $mutable_tests{$test} = 1;
