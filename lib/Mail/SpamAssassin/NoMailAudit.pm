@@ -215,7 +215,7 @@ sub get_all_headers {
   if (!defined ($self->{add_From_line}) || $self->{add_From_line} == 1) {
     my $from = $self->{from_line};
     if (!defined $from) {
-      my $f = $self->get_header("From");
+      my $f = $self->get_header("From"); $f ||= "spamassassin\@localhost\n";
       chomp ($f);
 
       #warn "$f";
