@@ -8,8 +8,8 @@ minivers=`echo $vers | sed -e 's/-[a-z0-9A-Z]*$//'`	# 2.60
 # delete old CVS files
 find . -name '.#*' -print | xargs rm -f
 
-make clean ; perl Makefile.PL < /dev/null
-make; make; make                # third time lucky!
+make distclean ; perl Makefile.PL < /dev/null
+make
 make text_html_doc
 make distcheck
 
@@ -37,7 +37,11 @@ for ext in tar.bz2 tar.gz zip ; do
   rm -f Mail-SpamAssassin-$vers.$ext.asc
   $gpgsign Mail-SpamAssassin-$vers.$ext
   mv Mail-SpamAssassin-$vers.$ext.asc $WEBDIR/devel/Mail-SpamAssassin-$vers.$ext.asc
+
+  rm -f Mail-SpamAssassin-$vers.$ext
 done
+
+test -f Makefile && make distclean
 
 # ( cd $WEBDIR/devel && cvs add -kb *SpamAssassin* )
 
