@@ -133,8 +133,9 @@ sub razor_lookup {
 
   my $sig = 'x';
   my $response = '';
+  my $timeout = 10;		# seconds
 
-  eval q{
+  if (!eval q{
     use Razor::String;
     use Razor::Signature; 
 
@@ -148,12 +149,21 @@ sub razor_lookup {
     $message{'action'} = "lookup";
     my $str = Razor::String::hash2str ( {%message} );
 
-    $sock->autoflush;
-    print $sock "$str\n.\n";
-    $response = join ('', <$sock>);
+    local $SIG{'ALRM'} = sub { die "timeout\n" }; # NB: \n required
+
+    alarm $timeout; {
+      $sock->autoflush;
+      print $sock "$str\n.\n";
+      $response = join ('', <$sock>);
+    } alarm 0;
+
     undef $sock;
 
-  1;} or warn "razor check failed: $! $@";
+  1;})
+  {
+    warn ("$! $@") unless ($@ eq "timeout\n");
+    warn "razor check timed out after $timeout secs.\n";
+  }
 
   if ($response =~ /Positive $sig/) { return 1; }
   return 0;
