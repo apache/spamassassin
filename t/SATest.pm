@@ -28,10 +28,10 @@ sub sa_t_init {
     $perl_path =~ s|/[^/]*$|/$^X|;
   }
   $scr = $ENV{'SCRIPT'};
-  $scr ||= "$perl_path -T -w ../spamassassin";
+  $scr ||= "$perl_path -I../blib -T -w ../spamassassin";
 
   $spamd = $ENV{'SPAMD_SCRIPT'};
-  $spamd ||= "$perl_path -T -w ../spamd/spamd -x";
+  $spamd ||= "$perl_path -I../blib -T -w ../spamd/spamd -x";
 
   $spamc = $ENV{'SPAMC_SCRIPT'};
   $spamc ||= "../spamd/spamc";
