@@ -3121,6 +3121,9 @@ sub _check_spf {
     # OK, we can use this and trust current Received headers and EnvFrom
     $lasthop = $self->{relays_untrusted}->[0];
   }
+  
+  # TODO: use HELOs to verify SPF_FAIL results; many .forwards break
+  # in this situation
 
   if (!defined $lasthop) {
     dbg ("SPF: message was delivered locally, not required");
