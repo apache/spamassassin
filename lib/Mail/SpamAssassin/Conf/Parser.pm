@@ -215,7 +215,8 @@ sub parse {
 
   while (defined ($line = shift @conf_lines)) {
     $line =~ s/(?<!\\)#.*$//; # remove comments
-    $line =~ s/^\s+|\s+$//g;  # remove leading and trailing spaces (including newlines)
+    $line =~ s/^\s+//;  # remove leading whitespace
+    $line =~ s/\s+$//;  # remove tailing whitespace
     next unless($line); # skip empty lines
 
     # handle i18n
