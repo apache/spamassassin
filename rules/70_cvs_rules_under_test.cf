@@ -672,9 +672,13 @@ body T_RAZOR2_RANGE_91_100	eval:check_razor2_range('91','100')
 
 
 # bug 1207:
-header DOUBLE_SQUOTES_1 Subject =~ /''\w+''/
-describe DOUBLE_SQUOTES_1 Evading word tests with two single quotes
-header DOUBLE_SQUOTES_2 Subject =~ /''/
-describe DOUBLE_SQUOTES_2 Evading word tests with two single quotes
-header DOUBLE_SQUOTES_3 Subject =~ /''.{0,15}''/
-describe DOUBLE_SQUOTES_3 Evading word tests with two single quotes
+header T_DOUBLE_SQUOTES_1 Subject =~ /''\w+''/
+describe T_DOUBLE_SQUOTES_1 Evading word tests with two single quotes
+header T_DOUBLE_SQUOTES_2 Subject =~ /''/
+describe T_DOUBLE_SQUOTES_2 Evading word tests with two single quotes
+header T_DOUBLE_SQUOTES_3 Subject =~ /''.{0,15}''/
+describe T_DOUBLE_SQUOTES_3 Evading word tests with two single quotes
+
+#bug 1010
+body T_CHECK_EMAIL_ISFREE	eval:check_email_isfree()
+describe T_CHECK_EMAIL_ISFREE Body contains an e-mail address listed by Email::IsFree
