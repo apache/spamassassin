@@ -85,6 +85,7 @@ $DEBUG = 0;
 @site_rules_path = qw(
         /etc/spamassassin.cf
         /etc/mail/spamassassin.cf
+        /usr/local/etc/spamassassin.cf
 );
     
 @default_prefs_path = qw(

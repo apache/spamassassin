@@ -44,6 +44,11 @@ sub check_for_from_mx {
   return 0 unless $self->is_dns_available();
   $self->load_resolver();
 
+  if ($from eq 'compiling.spamassassin.taint.org') {
+    # only used when compiling
+    return 0;
+  }
+
   # Try 3 times to protect against temporary outages.  sleep between checks
   # to give the DNS a chance to recover.
   for my $i (1..3) {
