@@ -1442,7 +1442,7 @@ sub do_body_uri_tests {
       my $uri = $1;
       $uri =~ s/^URI://i;
       $uri = "mailto:$uri";
-      warn("Got URI: $uri\n");
+      #warn("Got URI: $uri\n");
       push @uris, $uri;
   }
 
