@@ -96,9 +96,6 @@ describe FORGED_MUA_MSN		Forged mail pretending to be from MSN
 
 # AOL
 header __AOL_MUA		X-Mailer =~ /\bAOL\b/
-header __AOL_MSGID		MESSAGEID =~ /^<[0-9a-f]{1,3}\.[0-9a-f]{6,8}\.[0-9a-f]{8}\@aol.com>$/m
-meta FORGED_MUA_AOL		(__AOL_MUA && !__UNUSABLE_MSGID && !__AOL_MSGID)
-describe FORGED_MUA_AOL		Forged mail pretending to be from AOL
 
 # Internet Mail Service
 header __IMS_MUA		X-Mailer =~ /Internet Mail Service/
