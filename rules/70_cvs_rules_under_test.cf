@@ -843,6 +843,12 @@ header T_MSGID_OUTLOOK_TIME 	eval:check_outlook_timestamp_token()
 header T_RCVD_FAKE_HELO_DOTCOM_2	eval:check_for_fake_dotcom_helo()
 describe T_RCVD_FAKE_HELO_DOTCOM_2	Faked HELO-as-dotcom found
 
+header T_IDENT_CACHEFLOW	Received =~ /CacheFlowServer/
+describe T_IDENT_CACHEFLOW	Received contains 'CacheFlowServer' IDENT name
+
+header T_TO_TXT			To =~ /\.txt[\'\"]?\@/i
+describe T_TO_TXT		Sent to a text file
+
 # Matt Cline, Bug #1220
 body T_FOR_FREE                   /\bfor FREE\b/i
 body T_COMPLETELY_FREE            /\b(?:100%|completely|totally|absolutely) Free/i

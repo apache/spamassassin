@@ -53,7 +53,7 @@ my $messagecount = 0;
 eval {
   $iter->run(@IN_FILES);
 };
-die $@ unless ($@ =~ /HITLIMIT/);
+if ($@) { die $@ unless ($@ =~ /HITLIMIT/); }
 
 foreach my $fh (@bucket_fhs) {
   $fh->close();

@@ -31,6 +31,11 @@ SADIR=/home/jm/ftp/spamassassin
 
 testdir=`pwd`
 
+learnprob=
+if [ "$#" -gt 0 ] ; then
+  learnprob="--learnprob $1 --showdots"
+fi
+
 cd $SADIR/masses
 PATH=$PATH:$SADIR:$SADIR/masses
 
@@ -52,10 +57,10 @@ mkdir $tmpdir/dbs
 # faster than learning from scratch for each fold
 
 echo "Learning from all ham buckets..."
-sa-learn-nonspam --config-file=$tmpdir/rules $testdir/cor/ham/*
+sa-learn-nonspam $learnprob --config-file=$tmpdir/rules $testdir/cor/ham/*
 
 echo "Learning from all spam buckets..."
-sa-learn-spam --config-file=$tmpdir/rules $testdir/cor/spam/*
+sa-learn-spam $learnprob --config-file=$tmpdir/rules $testdir/cor/spam/*
 
 backup_dbs () {
   echo "Backing up full learned DBs..."

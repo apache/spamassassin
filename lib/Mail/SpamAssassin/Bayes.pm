@@ -79,7 +79,8 @@ $IGNORED_HDRS = qr{(?: Sender			# misc noise
 
 		  # some noisy Outlook headers that add no good clues:
 		  |Content-Class |Thread-Index
-		  |X-OriginalArrivalTime
+		  |X-OriginalArrivalTime |X-Originalarrivaltime
+		  |X-Face |X-Filtered-BY
 
 		  # Annotations from IMAP, POP, and MH:
 		  |Status |Content-Length
@@ -755,6 +756,10 @@ sub recompute_all_probs_trapped {
     goto done;
   }
 
+  # TODO: allow this to be turned off -- would be a big win for
+  # large sites using spamd with bayes db per-user
+  $self->{use_hapaxes} = 1;
+
   my $probstotal = 0;
   my $count = 0;
 
@@ -789,8 +794,9 @@ sub compute_prob_for_token {
     return if ($s + $n < 10);      # ignore low-freq tokens
   }
 
-  # to *not* use hapaxes: return if ($s + $n < 2);
-  # but this does not seem to be a win at all.
+  if (!$self->{use_hapaxes}) {
+    return if ($s + $n < 2);
+  }
 
   my $ratios = ($s / $ns);
   my $ration = ($n / $nn);
