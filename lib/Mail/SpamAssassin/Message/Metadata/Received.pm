@@ -51,13 +51,6 @@ use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::Util::RegistrarBoundaries;
 use Mail::SpamAssassin::Constants qw(:ip);
 
-use vars qw{
-};
-
-# Should trust be computed based on the MX records of hostnames used in
-# HELO?  Disabled; too slow.
-use constant SLOW_TRUST_BASED_ON_HELO_MXES => 0;
-
 # ---------------------------------------------------------------------------
 
 sub parse_received_headers {
@@ -222,20 +215,6 @@ sub parse_received_headers {
 	}
       }
 
-      # if the IP address used is close to an MX for the hostname used in
-      # the HELO, then it's likely to be incoming traffic.  Trust it.
-      # (TODO: not 100% sure about this yet)
-      # Disabled: way too slow.  Seems to be 3 times slower with this on!
-
-      if (!$inferred_as_trusted) {
-	if (SLOW_TRUST_BASED_ON_HELO_MXES) {
-	  if ($self->mx_of_helo_near_ip ($relay->{helo}, $relay->{ip})) {
-	    dbg("received-header: helo $relay->{helo} is near $relay->{ip}");
-	    $inferred_as_trusted = 1;
-	  }
-	}
-      }
-
       if (!$inferred_as_trusted) { $in_trusted = 0; }
     }
 
@@ -320,34 +299,6 @@ sub lookup_all_ips {
     push (@ips, $addr);
   }
   return @ips;
-}
-
-sub mx_of_helo_near_ip {
-  my ($self, $helo, $ip) = @_;
-
-  my $helodom = $helo;
-
-  # TODO: should we just traverse down the chain instead of this;
-  # e.g. "foo.bar.baz.co.uk" would be "bar.baz.co.uk", "baz.co.uk",
-  # instead of just "baz.co.uk" straight away?
-  
-  if ($helo !~ /^\d+\.\d+\.\d+\.\d+$/) {
-    $helodom = Mail::SpamAssassin::Util::RegistrarBoundaries::trim_domain ($helo);
-  }
-
-  my $mxes = $self->lookup_mx ($helodom);
-  my @mxips = ();
-  foreach my $mx (@$mxes) {
-    push (@mxips, $self->lookup_all_ips ($mx));
-  }
-  if ($mxes && Mail::SpamAssassin::Util::ips_match_in_24_mask ([ $ip ], [ @mxips ]))
-  {
-    dbg("received-header: IP address $ip is near an MX (" .
-	join (", ", @mxips) .
-	") for ".$helodom);
-    return 1;
-  }
-  return 0;
 }
 
 # ---------------------------------------------------------------------------
