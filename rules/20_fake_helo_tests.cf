@@ -34,14 +34,10 @@ header FAKE_HELO_MAIL_COM	eval:check_for_rdns_helo_mismatch("mail\.com","mail\.c
 describe FAKE_HELO_MAIL_COM	Host HELO did not match rDNS: mail.com
 header FAKE_HELO_EMAIL_COM	eval:check_for_rdns_helo_mismatch("email\.com","email\.com")
 describe FAKE_HELO_EMAIL_COM	Host HELO did not match rDNS: email.com
-header FAKE_HELO_CARAMAIL	eval:check_for_rdns_helo_mismatch("caramail\.com","caramail\.com")
-describe FAKE_HELO_CARAMAIL	Host HELO did not match rDNS: caramail.com
 header FAKE_HELO_EUDORAMAIL	eval:check_for_rdns_helo_mismatch("eudoramail\.com","eudoramail\.com")
 describe FAKE_HELO_EUDORAMAIL	Host HELO did not match rDNS: eudoramail.com
 header FAKE_HELO_EXCITE		eval:check_for_rdns_helo_mismatch("excite\S*","excite\.com")
 describe FAKE_HELO_EXCITE	Host HELO did not match rDNS: excite.com
-header FAKE_HELO_MAILCITY	eval:check_for_rdns_helo_mismatch("(?:mailcity|lycos)\.com","mailcity\.com")
-describe FAKE_HELO_MAILCITY	Host HELO did not match rDNS: mailcity.com
 header FAKE_HELO_LYCOS		eval:check_for_rdns_helo_mismatch("lycos\S*","lycos\.com")
 describe FAKE_HELO_LYCOS	Host HELO did not match rDNS: lycos.com
 header FAKE_HELO_YAHOO_CA	eval:check_for_rdns_helo_mismatch("yahoo\.ca","yahoo\.ca")
@@ -166,10 +162,6 @@ describe HELO_DYNAMIC_TELIA Relay HELO'd using suspicious hostname (Telia)
 header HELO_DYNAMIC_VTR X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=cm-[a-z]+\d+-\d+-\d+\.cm\.vtr/i
 describe HELO_DYNAMIC_VTR Relay HELO'd using suspicious hostname (VTR)
 
-# nwblwi-nrp3-l10-a671.nwblwi.tds.net
-header HELO_DYNAMIC_TDS X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S+-[a-z]\d+\.[a-z]{6}\.tds\.net/i
-describe HELO_DYNAMIC_TDS Relay HELO'd using suspicious hostname (TDS)
-
 # ec9z5l.cm.chello.no
 header HELO_DYNAMIC_CHELLO_NO  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S+\.cm\.chello\.no/i
 describe HELO_DYNAMIC_CHELLO_NO Relay HELO'd using suspicious hostname (Chello.no)
@@ -185,7 +177,6 @@ describe HELO_DYNAMIC_CHELLO_NL Relay HELO'd using suspicious hostname (Chello.n
 header HELO_DYNAMIC_VELOX  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[a-z]{2}\d+\.user\.veloxzone\./i
 describe HELO_DYNAMIC_VELOX Relay HELO'd using suspicious hostname (Veloxzone)
 
-header HELO_DYNAMIC_VIRTUA  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\d+\.cps\./i
 # public4-seve6-5-cust173.lond.broadband.ntl.com
 # spr1-bolt5-5-0-cust9.manc.broadband.ntl.com
 # spc1-lewi4-6-0-cust190.lond.broadband.ntl.com
@@ -197,4 +188,9 @@ describe HELO_DYNAMIC_NTL Relay HELO'd using suspicious hostname (NTL)
 header HELO_DYNAMIC_HOME_NL  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[a-z]{2}\d+-\S\.\S+\d\.[a-z]{2}\.home\.nl/i
 describe HELO_DYNAMIC_HOME_NL Relay HELO'd using suspicious hostname (Home.nl)
 
+
+# (I'm quite sure these may be a good spamsign in future)
+# nwblwi-nrp3-l10-a671.nwblwi.tds.net
+#header HELO_DYNAMIC_TDS X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S+-[a-z]\d+\.[a-z]{6}\.tds\.net/i
+#header HELO_DYNAMIC_VIRTUA  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\d+\.cps\./i
 

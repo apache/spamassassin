@@ -34,7 +34,6 @@ require_version @@VERSION@@
 
 body __ISO_2022_JP_DELIM	/\e\$B/
 
-body __THREE_DOLLARS		/\${3,}/
 header __MANY_EXCLS             Subject =~ /![^!]+!/
 header __PLING_PLING            Subject =~ /!!!/
 
@@ -42,8 +41,6 @@ body __UPPERCASE_25_50          eval:check_for_uppercase('25', '50')
 body __UPPERCASE_50_75          eval:check_for_uppercase('50', '75')
 body __UPPERCASE_75_100         eval:check_for_uppercase('75', '100')
 
-meta CASHCASHCASH		(!__ISO_2022_JP_DELIM && __THREE_DOLLARS)
-describe CASHCASHCASH		Contains at least 3 dollar signs in a row
 meta MANY_EXCLAMATIONS          (!__ISO_2022_JP_DELIM && __MANY_EXCLS)
 describe MANY_EXCLAMATIONS      Subject has many exclamations
 meta UPPERCASE_25_50            (!__ISO_2022_JP_DELIM && __UPPERCASE_25_50)
@@ -119,14 +116,6 @@ body __NIGERIAN_BODY_46         /\bgive\s+you .{0,15}(?:fund|money|total|sum|con
 
 ##############################################################################
 
-header __IDENT_NOBODY		Received =~ /ident[:=]nobody\b/i
-header __REGSITE_COM		Received =~ /\.registeredsite\.com\s/
-header __X_BEENTHERE		exists:X-BeenThere
-header __IDENT_NOBODY_LOCALHOST Received =~ /\bident[:=]nobody\@localhost\b/i
-header __KNOWN_MAILING_LIST     eval:detect_mailing_list()
-meta IDENT_NOBODY		(__IDENT_NOBODY && !__IDENT_NOBODY_LOCALHOST && !__REGSITE_COM && !((__X_BEENTHERE + __KNOWN_MAILING_LIST) > 1))
-describe IDENT_NOBODY		Received lines include an 'ident:nobody' string
-
 header __SANE_MSGID		MESSAGEID =~ /^<[^<>\\ \t\n\r\x0b\x80-\xff]+\@[^<>\\ \t\n\r\x0b\x80-\xff]+>\s*$/m
 header __HAS_MSGID		MESSAGEID =~ /\S/
 header __MSGID_COMMENT		MESSAGEID =~ /\(.*\)/m
@@ -137,11 +126,6 @@ header __MOZILLA_MUA		X-Mailer =~ /\bMozilla\b/
 header __MOZILLA_MSGID		MESSAGEID =~ /^<[A-F\d]{8}\.[A-F1-9][A-F\d]{0,7}\@\S+>$/m
 meta FORGED_MUA_MOZILLA		(__MOZILLA_MUA && !__UNUSABLE_MSGID && !__MOZILLA_MSGID)
 describe FORGED_MUA_MOZILLA	Forged mail pretending to be from Mozilla
-
-header __NMS_CGI_NOT_BUGGY      X-Mailer =~ /^NMS FormMail/
-body __BUGGY_CGI		/Below is the result of your feedback form/
-meta BUGGY_CGI			(__BUGGY_CGI && !__NMS_CGI_NOT_BUGGY)
-describe BUGGY_CGI		Broken CGI script message
 
 header __PC_RND_HEADER		ALL =~ /%RA?ND(?:OM)?_[A-Z]/i
 body __PC_RND_BODY		/%RA?ND(?:OM)?_[A-Z]/i

@@ -33,23 +33,11 @@ require_version @@VERSION@@
 body FREE_PORN                  /\bfree (?:porn|xxx|adult)/i
 describe FREE_PORN              Possible porn - Free Porn
 
-body BARELY_LEGAL               /\b(?:barely|just) legal\b/i
-describe BARELY_LEGAL           Possible porn - Barely Legal
-
-body MEGA_SITE                  /\bmega[ -]?sites?\b/i
-describe MEGA_SITE              Possible porn - Mega Porn
-
 body CUM_SHOT                   /\bcum[ -]?shots?\b/i
 describe CUM_SHOT               Possible porn - Cum Shot
 
-body ALL_CAP_FOR_ADULTS         /\b(?:ORGY|FUCKING|FETISH|WEBCAM|VOYEUR|ANAL|CUM|SNATCH|COCK|CUNT|PORN)\b/
-describe ALL_CAP_FOR_ADULTS     Possible porn - in ALL CAPS
-
 body PAY_SITE                   /\bpay[ -]?sites?\b/i
 describe PAY_SITE               Possible porn - Pay Site
-
-body SEX_FEST                   /\b(?:sex|gay|slut|whore|cum|f[\.\*u][\.\*c]k|suck|adult|xxx|teen)[ -]?fest\b/i
-describe SEX_FEST               Possible porn - Porn Fest
 
 # "live cam" is a very common nonspam phrase, removed
 body LIVE_PORN                  /\blive .{0,9}(?:fuck(?:ing)?|sex|naked|girls?|virgins?|teens?|porno?)\b/i
@@ -76,9 +64,6 @@ describe PORN_CELEBRITY		Possible porn - Celebrity Porn
 body SOMETHING_FOR_ADULTS       /\badult.{0,9}(?:entertainment|sites?|industry|only|business|membership)/i
 describe SOMETHING_FOR_ADULTS   Possible porn - Adult Web Sites
 
-body LESBIAN                    /\b(?:xxx|horny|hot|young) lesbian|lesbian (?:sites?|action|bitch)/i
-describe LESBIAN                Possible porn - Lesbian Site
-
 body PORN_15			/(?=[celstwvy])(?:college|eating|licking|spears|tight|wet|shaved|voyeur|young|teen(?:age)?).{0,16}pussy/i
 describe PORN_15		Possible porn - various types of feline
 
@@ -97,8 +82,6 @@ uri PORN_URL_SEX                /^https?:\/\/[\w\.-]*(?<!es|ba)(?<!dle|sus)sex(?
 describe PORN_URL_SEX           URL uses words/phrases which indicate porn (sex)
 uri PORN_URL_SLUT               /^https?:\/\/[\w\.-]*slut[\w-]*\./i
 describe PORN_URL_SLUT          URL uses words/phrases which indicate porn (slut)
-uri PORN_URL_PANT               /^https?:\/\/[\w\.-]*pant(?:y|ies)[\w-]*\./i
-describe PORN_URL_PANT          URL uses words/phrases which indicate porn (pant)
 uri PORN_URL_MISC               /^https?:\/\/[\w\.-]*(?:porn|hard-?core|taboo|lesbian|naughty)[\w-]*\./i
 describe PORN_URL_MISC          URL uses words/phrases which indicate porn (misc)
 

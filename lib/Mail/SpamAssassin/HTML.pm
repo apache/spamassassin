@@ -801,9 +801,9 @@ sub html_tests {
   {
     $self->{html}{thick_border} = 1 if $1 > 1;
   }
-  if ($tag eq "script") {
-    $self->{html}{javascript} = 1;
-  }
+  # if ($tag eq "script") {
+  # $self->{html}{javascript} = 1;
+  # }
   if ($tag =~ /^(?:a|body|div|input|form|td|layer|area|img)$/i) {
     for (keys %$attr) {
       if (/\b(?:$events)\b/io)
@@ -814,7 +814,7 @@ sub html_tests {
 	  $attr->{$_})
       {
 	$self->{html}{html_event_unsafe} = 1;
-        if ($attr->{$_} =~ /\.open\s*\(/) { $self->{html}{window_open} = 1; }
+        # if ($attr->{$_} =~ /\.open\s*\(/) { $self->{html}{window_open} = 1; }
       }
     }
   }
@@ -885,7 +885,7 @@ sub html_tests {
     $self->{html}{title_index}++;
     $self->{html}{title}->[$self->{html}{title_index}] = "";
 
-    $self->{html}{title_extra}++ if $self->{html}{title_index} > 0;
+    # $self->{html}{title_extra}++ if $self->{html}{title_index} > 0;
   }
 
   if ($tag eq "meta" &&
@@ -936,7 +936,7 @@ sub html_text {
       $self->{html}{html_event_unsafe} = 1;
     }
     if ($text =~ /\b(?:$events)\b/io) { $self->{html}{html_event} = 1; }
-    if ($text =~ /\.open\s*\(/) { $self->{html}{window_open} = 1; }
+    # if ($text =~ /\.open\s*\(/) { $self->{html}{window_open} = 1; }
     return;
   }
   if (exists $self->{html}{inside_style} && $self->{html}{inside_style} > 0) {
@@ -1012,7 +1012,7 @@ sub html_comment {
     {
       $self->{html}{html_event_unsafe} = 1;
     }
-    if ($text =~ /\.open\s*\(/) { $self->{html}{window_open} = 1; }
+    # if ($text =~ /\.open\s*\(/) { $self->{html}{window_open} = 1; }
     return;
   }
 

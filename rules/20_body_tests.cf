@@ -59,12 +59,9 @@ tflags RAZOR2_CHECK	net
 # Note: The scores are set to 0 on these tests right now until they get
 # better integrated with SA overall.
 #
-body	RAZOR2_CF_RANGE_11_50	eval:check_razor2_range('11','50')
 body	RAZOR2_CF_RANGE_51_100	eval:check_razor2_range('51','100')
-tflags  RAZOR2_CF_RANGE_11_50	net
 tflags  RAZOR2_CF_RANGE_51_100	net
-describe RAZOR2_CF_RANGE_11_50	Razor2 gives confidence between 11 and 50
-describe RAZOR2_CF_RANGE_51_100	Razor2 gives confidence between 51 and 100
+describe RAZOR2_CF_RANGE_51_100	Razor2 gives confidence level above 50%
 
 full DCC_CHECK		eval:check_dcc()
 describe DCC_CHECK	Listed in DCC (http://rhyolite.com/anti-spam/dcc/)
@@ -84,16 +81,6 @@ tflags DIGEST_MULTIPLE     net
 body TRACKER_ID		/^[a-z0-9]{6,24}[-_a-z0-9]{12,36}[a-z0-9]{6,24}\s*\z/is
 describe TRACKER_ID	Incorporates a tracking ID number
 
-# converted to use eval method by Matthew Cline
-body LINES_OF_YELLING		eval:check_for_yelling()
-describe LINES_OF_YELLING       A WHOLE LINE OF YELLING DETECTED
-
-body     LINES_OF_YELLING_2     eval:check_for_num_yelling_lines("2")
-describe LINES_OF_YELLING_2     2 WHOLE LINES OF YELLING DETECTED
-
-body     LINES_OF_YELLING_3     eval:check_for_num_yelling_lines("3")
-describe LINES_OF_YELLING_3     3 WHOLE LINES OF YELLING DETECTED
-
 body WEIRD_QUOTING	/[\042\223\224\262\263\271]{2}\S{0,16}[\042\223\224\262\263\271]{2}/
 describe WEIRD_QUOTING	Weird repeated double-quotation marks
 
@@ -111,20 +98,11 @@ describe __MIME_QP		Includes a quoted-printable attachment
 rawbody MIME_BASE64_BLANKS	eval:check_for_mime('mime_base64_blanks')
 describe MIME_BASE64_BLANKS	Extra blank lines in base64 encoding
 
-rawbody MIME_BASE64_ILLEGAL	eval:check_for_mime('mime_base64_illegal')
-describe MIME_BASE64_ILLEGAL	base64 attachment uses illegal characters
-
-rawbody MIME_BASE64_LATIN	eval:check_for_mime('mime_base64_latin')
-describe MIME_BASE64_LATIN	Latin alphabet text using base64 encoding
-
 rawbody MIME_BASE64_NO_NAME	eval:check_for_mime('mime_base64_no_name')
 describe MIME_BASE64_NO_NAME	base64 attachment does not have a file name
 
 rawbody MIME_BASE64_TEXT	eval:check_for_mime('mime_base64_encoded_text')
 describe MIME_BASE64_TEXT	Message text disguised using base64 encoding
-
-rawbody MIME_HTML_NO_CHARSET	eval:check_for_mime('mime_html_no_charset')
-describe MIME_HTML_NO_CHARSET	Message text in HTML without charset
 
 rawbody  MIME_MISSING_BOUNDARY	eval:check_for_mime('mime_missing_boundary')
 describe MIME_MISSING_BOUNDARY	MIME section missing boundary
@@ -142,17 +120,8 @@ header __CTYPE_MULTIPART_ALT	Content-Type =~ /multipart\/alternative/i
 meta MIME_HTML_ONLY_MULTI	(__CTYPE_MULTIPART_ALT && MIME_HTML_ONLY)
 describe MIME_HTML_ONLY_MULTI	Multipart message only has text/html MIME parts
 
-rawbody MIME_QP_DEFICIENT	eval:check_for_mime('mime_qp_illegal')
-describe MIME_QP_DEFICIENT	Deficient quoted-printable encoding in body
-
-rawbody MIME_QP_EXCESSIVE	eval:check_for_mime_excessive_qp('0.011')
-describe MIME_QP_EXCESSIVE	Excessive quoted-printable encoding in body
-
 rawbody  MIME_QP_LONG_LINE	eval:check_for_mime('mime_qp_long_line')
 describe MIME_QP_LONG_LINE	Quoted-printable line longer than 76 chars
-
-rawbody MIME_QP_NO_CHARSET	eval:check_for_mime('mime_qp_inline_no_charset')
-describe MIME_QP_NO_CHARSET	Quoted-printable inline text with no charset
 
 # actually indicates viruses, typically; just used here to clean corpora.
 rawbody  MIME_SUSPECT_NAME	eval:check_for_mime('mime_suspect_name')
