@@ -91,7 +91,7 @@ describe POPLAUNCH		SPAM software
 body CHECK_OR_MONEY_ORDER	/check or money order/i
 describe CHECK_OR_MONEY_ORDER	Talk about a check or money order
 
-rawbody SUPERLONG_LINE		/^[^<]{199,}$/m
+rawbody SUPERLONG_LINE		/^[^<\&]{199,}$/m
 describe SUPERLONG_LINE		Contains a line >=199 characters long
 
 # fixed by ms to not allow entry field onto next line
@@ -318,6 +318,12 @@ describe TRACKER_ID		Incorporates a tracking ID number
 test TRACKER_ID     ok          2174Hzdm0-105YUqT8863DiDg0-616mqbE4931HEBc0-732qBHd6314l52
 test TRACKER_ID     ok          ofsknxxdqgtgqvsoiytkivajvtj
 test TRACKER_ID     fail        <!-- ADMINISTRIVIA -->
+
+# heh heh heh... tags used to (presumably) generate those anti-Razor random IDs
+body MARKUP_RAND                /{%RAND%}/
+describe MARKUP_RAND            RAND found, spammer forgot to run the random-ID generator
+body MARKUP_SSPL                /SSPLTM/
+describe MARKUP_SSPL            SSPL found, spammer forgot to run the random-ID generator
 
 body OPPORTUNITY		/OPPORTUNITY/
 describe OPPORTUNITY		Gives information about an opportunity
@@ -769,11 +775,10 @@ describe ORDER_NOW              Encourages you to waste no time in ordering
 rawbody OBFUSCATING_JAVASCRIPT   /charCodeAt|fromCharCode/i
 describe OBFUSCATING_JAVASCRIPT   An attempt to hide spam inside obfuscating Javascript code
 
-rawbody NUMERIC_COMMENT     /<!--\d{3,}-->/
-describe NUMERIC_COMMENT    Contains a comment with nothing but a number in it
-test NUMERIC_COMMENT     ok    Some text <!--34555--> followed by more
-test NUMERIC_COMMENT     fail  Something <!-- A comment --> and more
-
+rawbody NUMERIC_COMMENT         /<!--\d{3,}-->/
+describe NUMERIC_COMMENT        Contains a comment with nothing but a number in it
+test NUMERIC_COMMENT     ok     Some text <!--34555--> followed by more
+test NUMERIC_COMMENT     fail   Something <!-- A comment --> and more
 
 ## Contrib: Mark Perkel
 
