@@ -1478,7 +1478,7 @@ sub do_head_tests {
 
   # note: we do this only once for all head pattern tests.  Only
   # eval tests need to use stuff in here.
-  $self->{test_log_msgs} = '';	# clear test state
+  $self->{test_log_msgs} = ();	# clear test state
 
   dbg ("running header regexp tests; score so far=".$self->{hits});
 
@@ -1560,7 +1560,7 @@ sub do_body_tests {
 
   dbg ("running body-text per-line regexp tests; score so far=".$self->{hits});
 
-  $self->{test_log_msgs} = '';	# clear test state
+  $self->{test_log_msgs} = ();	# clear test state
   if ( defined &Mail::SpamAssassin::PerMsgStatus::_body_tests
        && !$self->{conf}->{user_rules_to_compile} ) {
     # ok, we've compiled this before. Or have we?
@@ -1752,7 +1752,7 @@ sub do_body_uri_tests {
   dbg ("running uri tests; score so far=".$self->{hits});
   my @uris = $self->get_uri_list();
 
-  $self->{test_log_msgs} = '';	# clear test state
+  $self->{test_log_msgs} = ();	# clear test state
   if ( defined &Mail::SpamAssassin::PerMsgStatus::_body_uri_tests
        && !$self->{conf}->{user_rules_to_compile} ) {
     # ok, we've compiled this before.
@@ -1820,7 +1820,7 @@ sub do_rawbody_tests {
 
   dbg ("running raw-body-text per-line regexp tests; score so far=".$self->{hits});
 
-  $self->{test_log_msgs} = '';	# clear test state
+  $self->{test_log_msgs} = ();	# clear test state
   if ( defined &Mail::SpamAssassin::PerMsgStatus::_rawbody_tests
        && !$self->{conf}->{user_rules_to_compile} ) {
     # ok, we've compiled this before.
@@ -1887,7 +1887,7 @@ sub do_full_tests {
   
   dbg ("running full-text regexp tests; score so far=".$self->{hits});
 
-  $self->{test_log_msgs} = '';	# clear test state
+  $self->{test_log_msgs} = ();	# clear test state
 
   if (defined &Mail::SpamAssassin::PerMsgStatus::_full_tests
        && !$self->{conf}->{user_rules_to_compile} ) {
@@ -2159,7 +2159,7 @@ sub run_eval_tests {
     my $score = $self->{conf}{scores}{$rulename};
     my $result;
 
-    $self->{test_log_msgs} = '';	# clear test state
+    $self->{test_log_msgs} = ();	# clear test state
 
     my ($function, @args) = @{$test};
     unshift(@args, @extraevalargs);
@@ -2202,7 +2202,7 @@ sub run_rbl_eval_tests {
     my $score = $self->{conf}->{scores}->{$rulename};
     next unless $score;
 
-    $self->{test_log_msgs} = '';	# clear test state
+    $self->{test_log_msgs} = ();	# clear test state
 
     my ($function, @args) = @{$test};
 
@@ -2248,7 +2248,7 @@ sub got_uri_pattern_hit {
 #
 # the clearing of the test state is now inlined as:
 #
-# $self->{test_log_msgs} = '';	# clear test state
+# $self->{test_log_msgs} = ();	# clear test state
 
 sub _handle_hit {
     my ($self, $rule, $score, $area, $desc) = @_;
@@ -2284,11 +2284,11 @@ sub _handle_hit {
 
     # save both summaries
     $self->{tag_data}->{SUMMARYT} .= sprintf ("* %s -- %s%s\n%s",
-				       $score, $area, $desc, $self->{test_log_msgs});
+				       $score, $area, $desc, ($self->{test_log_msgs}->{TERSE} || ''));
     $self->{tag_data}->{SUMMARYL} .= sprintf ("%s %-22s %s%s\n%s",
 				       $score, $rule, $area, $desc,
-				       $self->{test_log_msgs});
-    $self->{test_log_msgs} = '';	# clear test logs
+				       ($self->{test_log_msgs}->{LONG} || ''));
+    $self->{test_log_msgs} = ();	# clear test logs
 }
 
 sub handle_hit {
@@ -2328,11 +2328,11 @@ sub _test_log_line {
 
 # save for both SUMMARYT and SUMMARYL
 
-  $self->{tag_data}->{SUMMARYT} .= sprintf ("%9s [%s]\n", "", $msg);
+  $self->{test_log_msgs}->{TERSE} .= sprintf ("%9s [%s]\n", "", $msg);
   if (length($msg) > 49) {
-    $self->{tag_data}->{SUMMARYL} .= sprintf ("%78s\n", "[$msg]");
+    $self->{test_log_msgs}->{LONG} .= sprintf ("%78s\n", "[$msg]");
   } else {
-    $self->{tag_data}->{SUMMARYL} .= sprintf ("%26s [%s]\n", "", $msg);
+    $self->{test_log_msgs}->{LONG} .= sprintf ("%27s [%s]\n", "", $msg);
   }
 }
 
