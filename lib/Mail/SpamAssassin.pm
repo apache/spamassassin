@@ -50,12 +50,10 @@ filtering databases, such as Vipul's Razor ( http://razor.sourceforge.net/ ).
 
 package Mail::SpamAssassin;
 use strict;
+use warnings;
 use bytes;
 
-# We do our best to make SA run with any Perl downto 5.005. You might want to
-# read <http://www.perldoc.com/perl5.8.0/pod/perl56delta.html> if you plan to
-# hack SA and are used to Perl 5.6+.
-use 5.005;
+use 5.6.1;
 
 use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::ConfSourceSQL;
@@ -91,7 +89,7 @@ $IS_DEVEL_BUILD = 1;            # change for release versions
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.214 2003/09/25 03:11:23 quinlan Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.215 2003/09/29 21:58:46 msquadrat Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -110,42 +108,42 @@ $HOME_URL = "http://spamassassin.org/";
 # version installed.  Unless you can come up with a fix for this that
 # allows "make test" to work, don't change this.
 @default_rules_path = (
-	'./rules',		# REMOVEFORINST
-	'../rules',		# REMOVEFORINST
-        '__def_rules_dir__',
-        '__prefix__/share/spamassassin',
-        '/usr/local/share/spamassassin',
-  	'/usr/share/spamassassin',
+  './rules',              # REMOVEFORINST
+  '../rules',             # REMOVEFORINST
+  '__def_rules_dir__',
+  '__prefix__/share/spamassassin',
+  '/usr/local/share/spamassassin',
+  '/usr/share/spamassassin',
 );
 
 # first 3 are BSDish, latter 2 Linuxish
 @site_rules_path = (
-        '__local_rules_dir__',
-        '__prefix__/etc/mail/spamassassin',
-        '__prefix__/etc/spamassassin',
-        '/usr/local/etc/spamassassin',
-	'/usr/pkg/etc/spamassassin',
-        '/usr/etc/spamassassin',
-  	'/etc/mail/spamassassin',
-  	'/etc/spamassassin',
+  '__local_rules_dir__',
+  '__prefix__/etc/mail/spamassassin',
+  '__prefix__/etc/spamassassin',
+  '/usr/local/etc/spamassassin',
+  '/usr/pkg/etc/spamassassin',
+  '/usr/etc/spamassassin',
+  '/etc/mail/spamassassin',
+  '/etc/spamassassin',
 );
 
 @default_prefs_path = (
-        '__local_rules_dir__/user_prefs.template',
-        '__prefix__/etc/mail/spamassassin/user_prefs.template',
-        '__prefix__/share/spamassassin/user_prefs.template',
-	'/etc/spamassassin/user_prefs.template',
-        '/etc/mail/spamassassin/user_prefs.template',
-        '/usr/local/share/spamassassin/user_prefs.template',
-        '/usr/share/spamassassin/user_prefs.template',
+  '__local_rules_dir__/user_prefs.template',
+  '__prefix__/etc/mail/spamassassin/user_prefs.template',
+  '__prefix__/share/spamassassin/user_prefs.template',
+  '/etc/spamassassin/user_prefs.template',
+  '/etc/mail/spamassassin/user_prefs.template',
+  '/usr/local/share/spamassassin/user_prefs.template',
+  '/usr/share/spamassassin/user_prefs.template',
 );
 
 @default_userprefs_path = (
-        '~/.spamassassin/user_prefs',
+  '~/.spamassassin/user_prefs',
 );
 
 @default_userstate_dir = (
-        '~/.spamassassin',
+  '~/.spamassassin',
 );
 
 ###########################################################################
