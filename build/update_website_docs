@@ -3,10 +3,18 @@
 WEBDIR=/www/spamassassin.apache.org
 vers=3.0.x
 
+if [ -z "$PERL" ]; then
+  if [ -x /home/jm/perl584/bin/perl ]; then
+    PERL=/home/jm/perl584/bin/perl
+  else
+    PERL=perl
+  fi
+fi
+
 find . -name '.#*' -print | xargs rm -f # delete old CVS files
 
 [ -d $WEBDIR/full/$vers ] || mkdir -p $WEBDIR/full/$vers
-perl Makefile.PL < /dev/null
+$PERL Makefile.PL PERL=$PERL < /dev/null
 make; make text_html_doc 
 
 rm -rf $WEBDIR/full/dist
