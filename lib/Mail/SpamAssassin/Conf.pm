@@ -656,9 +656,13 @@ be enabled here.
 
 =item fold_headers { 0 | 1 }        (default: 1)
 
-By default, headers added by SpamAssassin will be whitespace folded,
-in other words, they will be broken up into multiple lines instead of
-one very long one. This can be disabled here.
+By default,  headers added by SpamAssassin will be whitespace folded.
+In other words, they will be broken up into multiple lines instead of
+one very long one and each other line will have a tabulator prepended
+to mark it as a continuation of the preceding one.
+
+The automatic wrapping can be disabled here  (which can generate very
+long lines).
 
 =cut
 
@@ -668,12 +672,19 @@ one very long one. This can be disabled here.
 
 =item add_header { spam | ham | all } header_name string
 
-Customized headers can be added to the specified type of messages
-(spam, ham, or "all" to add to either).  All headers begin with
-C<X-Spam-> (so C<header_name> will be appended to C<X-Spam->).
+Customized headers can be added to the specified type of messages (spam,
+ham, or "all" to add to either).  All headers begin with C<X-Spam-> (so
+a C<header_name> Foo will generate a header called X-Spam-Foo).
 
-C<string> can contain tags as explained above in the TAGS section.
-Headers will be folded if fold_headers is set to C<1>.
+C<string> can contain tags as explained above in the TAGS section.  You
+can also use C<\n> and C<\t> in the header to add newlines and tabulators
+as desired.  A backslash has to be written as \\, any other escaped chars
+will be silently removed.
+
+All headers will be folded if fold_headers is set to C<1>. Note: Manually
+adding newlines via C<\n> disables any further automatic wrapping (ie:
+long header lines are possible). The lines will still be properly folded
+(marked as continuing) though.
 
 For backwards compatibility, some headers are (still) added by default.
 You can customize existing headers with add_header (only the specified
@@ -695,8 +706,10 @@ Here are some examples (these are the defaults in 2.60):
       if ($line =~ /^"(.*)"$/) {
 	$line = $1;
       }
-      $line =~ s/\\t/\t/;
-      $line =~ s/\\n/\n/;
+      $line =~ s/\\t/\t/g;
+      $line =~ s/\\n/\n/g;
+      $line =~ s/\\[a-z0-9]//gi;
+      $line =~ s/\\\\/\\/g;
       if (($type eq "ham") || ($type eq "all")) {
 	$self->{headers_ham}->{$name} = $line;
       }
