@@ -307,7 +307,7 @@ my $opt_u = 1.05;
 #         values are 1.05 or 1.1.
 
 sub classify {
-  my ($inputptr, $languages_filename, @skip) = @_;
+  my ($inputptr, $languages_filename, %skip) = @_;
   my %results;
   my $maxp = $opt_t;
 
@@ -350,7 +350,9 @@ sub classify {
   # test each language
   foreach my $ngram (@nm) {
     my $language = $ngram->{"language"};
-    next if grep { $_ eq $language } @skip;
+    my $short = $language;
+    $short =~ s/\..*//;
+    next if defined $skip{$short};
     my $i = 0;
     my $p = 0;
 
@@ -440,11 +442,10 @@ sub extract_metadata {
   if ($len >= 256) {
     # generate list of languages to skip
     my %skip;
-    $skip{$_}++ for split(' ', $opts->{conf}->{inactive_languages});
-    $skip{$_}-- for split(' ', $opts->{conf}->{ok_languages});
-    my @skip = grep { $skip{$_} == 1 } keys %skip;
-    dbg("textcat: classifying, skipping: " . join(" ", @skip));
-    @matches = classify(\$body, $self->{main}->{languages_filename}, @skip);
+    $skip{$_} = 1 for split(' ', $opts->{conf}->{inactive_languages});
+    delete $skip{$_} for split(' ', $opts->{conf}->{ok_languages});
+    dbg("textcat: classifying, skipping: " . join(" ", keys %skip));
+    @matches = classify(\$body, $self->{main}->{languages_filename}, %skip);
   }
   else {
     dbg("textcat: message too short for language analysis");
@@ -515,7 +516,7 @@ sub check_body_8bits {
   }
 
   foreach my $line (@$body) {
-    return 1 if $line =~ /[\x80-\xff]{8,}/;
+    return 1 if $line =~ /[\x80-\xff]{8}/;
   }
   return 0;
 }
