@@ -1049,7 +1049,7 @@ sub chi2q {
   my $m = $x2 / 2.0;
   my ($sum, $term);
   $sum = $term = exp(0 - $m);
-  for my $i (1 .. ($v >> 2)) {
+  for my $i (1 .. (($v/2)-1)) {
     $term *= $m / $i;
     $sum += $term;
   }
