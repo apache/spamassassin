@@ -169,8 +169,8 @@ sub _get_header_list {
 
 sub get_pristine_header {
   my ($self, $hdr) = @_;
-  $self->{headers_pristine} =~ /^$hdr:\s+(.*\n(?:\s+.*\n)*)/mi;
-  return ( $1 || $self->get_header($hdr) );
+  my($ret) = $self->{headers_pristine} =~ /^(?:$hdr:\s+(.*\n(?:\s+.*\n)*))/mi;
+  return ( $ret || $self->get_header($hdr) );
 }
 
 sub get_header {
