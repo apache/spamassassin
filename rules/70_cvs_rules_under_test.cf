@@ -185,13 +185,6 @@ test T_VISIT_OUR_SITE  ok  Visit the sites of our major partners:
 # Dec 19 2002 jm: try out separation of "the", it seems to be FP-prone for me
 body T_VISIT_OUR_SITE_2 /\b(?:visit|enter)\s+(?:my|our|this)\s+(?:web\s*)?site/i
 
-# mgm's rules for PXE above
-uri T_DAILY_PL			/\/logic\/[a-z]{2}\.pl/
-describe T_DAILY_PL		Spam URL pattern, DailyPromotions redirect link
-
-uri T_DAILY_PXE			/http:\/\/(?:pxe|fx)\./i
-describe T_DAILY_PXE		Spam URL pattern, DailyPromotions server link
-
 # Specific whitelisting for GradFinder.  They use the sender's own
 # From addr, so whitelist_from_rcvd won't cut it
 # bug 1241
