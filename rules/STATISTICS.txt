@@ -3,160 +3,160 @@ STATISTICS REPORT FOR SPAMASSASSIN RULESET
 Classification success on test corpora, at default threshold:
 
 # SUMMARY for threshold 5.0:
-# Correctly non-spam: 188895  34.76%  (99.85% of non-spam corpus)
-# Correctly spam:     333216  61.31%  (94.05% of spam corpus)
-# False positives:       279  0.05%  (0.15% of nonspam,  30711 weighted)
-# False negatives:     21083  3.88%  (5.95% of spam,  69854 weighted)
-# TCR: 15.762034  SpamRecall: 94.049%  SpamPrec: 99.916%  FP: 0.05%  FN: 3.88%
+# Correctly non-spam:  20976  34.74%  (99.80% of non-spam corpus)
+# Correctly spam:      37062  61.38%  (94.15% of spam corpus)
+# False positives:        43  0.07%  (0.20% of nonspam,   5039 weighted)
+# False negatives:      2304  3.82%  (5.85% of spam,   7612 weighted)
+# TCR: 15.627630  SpamRecall: 94.147%  SpamPrec: 99.884%  FP: 0.07%  FN: 3.82%
 
 Results on test corpora at various alternative thresholds:
 
 # SUMMARY for threshold -4.0:
-# Correctly non-spam:   2593  0.48%  (1.37% of non-spam corpus)
-# Correctly spam:     354299  65.19%  (100.00% of spam corpus)
-# False positives:    186581  34.33%  (98.63% of nonspam, 1309298 weighted)
+# Correctly non-spam:    302  0.50%  (1.44% of non-spam corpus)
+# Correctly spam:      39366  65.19%  (100.00% of spam corpus)
+# False positives:     20717  34.31%  (98.56% of nonspam, 146072 weighted)
 # False negatives:         0  0.00%  (0.00% of spam,      0 weighted)
-# TCR: 0.379780  SpamRecall: 100.000%  SpamPrec: 65.504%  FP: 34.33%  FN: 0.00%
+# TCR: 0.380036  SpamRecall: 100.000%  SpamPrec: 65.519%  FP: 34.31%  FN: 0.00%
 
 # SUMMARY for threshold -3.0:
-# Correctly non-spam:   2693  0.50%  (1.42% of non-spam corpus)
-# Correctly spam:     354299  65.19%  (100.00% of spam corpus)
-# False positives:    186481  34.31%  (98.58% of nonspam, 1316147 weighted)
+# Correctly non-spam:    319  0.53%  (1.52% of non-spam corpus)
+# Correctly spam:      39366  65.19%  (100.00% of spam corpus)
+# False positives:     20700  34.28%  (98.48% of nonspam, 147216 weighted)
 # False negatives:         0  0.00%  (0.00% of spam,      0 weighted)
-# TCR: 0.379984  SpamRecall: 100.000%  SpamPrec: 65.516%  FP: 34.31%  FN: 0.00%
+# TCR: 0.380348  SpamRecall: 100.000%  SpamPrec: 65.538%  FP: 34.28%  FN: 0.00%
 
 # SUMMARY for threshold -2.0:
-# Correctly non-spam:   2722  0.50%  (1.44% of non-spam corpus)
-# Correctly spam:     354299  65.19%  (100.00% of spam corpus)
-# False positives:    186452  34.31%  (98.56% of nonspam, 1317531 weighted)
+# Correctly non-spam:    323  0.53%  (1.54% of non-spam corpus)
+# Correctly spam:      39366  65.19%  (100.00% of spam corpus)
+# False positives:     20696  34.27%  (98.46% of nonspam, 147424 weighted)
 # False negatives:         0  0.00%  (0.00% of spam,      0 weighted)
-# TCR: 0.380043  SpamRecall: 100.000%  SpamPrec: 65.520%  FP: 34.31%  FN: 0.00%
+# TCR: 0.380421  SpamRecall: 100.000%  SpamPrec: 65.542%  FP: 34.27%  FN: 0.00%
 
 # SUMMARY for threshold -1.0:
-# Correctly non-spam:   2772  0.51%  (1.47% of non-spam corpus)
-# Correctly spam:     354299  65.19%  (100.00% of spam corpus)
-# False positives:    186402  34.30%  (98.53% of nonspam, 1319026 weighted)
+# Correctly non-spam:    327  0.54%  (1.56% of non-spam corpus)
+# Correctly spam:      39366  65.19%  (100.00% of spam corpus)
+# False positives:     20692  34.27%  (98.44% of nonspam, 147553 weighted)
 # False negatives:         0  0.00%  (0.00% of spam,      0 weighted)
-# TCR: 0.380145  SpamRecall: 100.000%  SpamPrec: 65.526%  FP: 34.30%  FN: 0.00%
+# TCR: 0.380495  SpamRecall: 100.000%  SpamPrec: 65.547%  FP: 34.27%  FN: 0.00%
 
 # SUMMARY for threshold 0.0:
-# Correctly non-spam:   2794  0.51%  (1.48% of non-spam corpus)
-# Correctly spam:     354299  65.19%  (100.00% of spam corpus)
-# False positives:    186380  34.29%  (98.52% of nonspam, 1319228 weighted)
+# Correctly non-spam:    328  0.54%  (1.56% of non-spam corpus)
+# Correctly spam:      39366  65.19%  (100.00% of spam corpus)
+# False positives:     20691  34.27%  (98.44% of nonspam, 147563 weighted)
 # False negatives:         0  0.00%  (0.00% of spam,      0 weighted)
-# TCR: 0.380190  SpamRecall: 100.000%  SpamPrec: 65.529%  FP: 34.29%  FN: 0.00%
+# TCR: 0.380513  SpamRecall: 100.000%  SpamPrec: 65.548%  FP: 34.27%  FN: 0.00%
 
 # SUMMARY for threshold 1.0:
-# Correctly non-spam: 164406  30.25%  (86.91% of non-spam corpus)
-# Correctly spam:     352624  64.88%  (99.53% of spam corpus)
-# False positives:     24768  4.56%  (13.09% of nonspam, 992759 weighted)
-# False negatives:      1675  0.31%  (0.47% of spam,    638 weighted)
-# TCR: 2.822762  SpamRecall: 99.527%  SpamPrec: 93.437%  FP: 4.56%  FN: 0.31%
+# Correctly non-spam:  18256  30.23%  (86.85% of non-spam corpus)
+# Correctly spam:      39160  64.85%  (99.48% of spam corpus)
+# False positives:      2763  4.58%  (13.15% of nonspam, 111421 weighted)
+# False negatives:       206  0.34%  (0.52% of spam,     78 weighted)
+# TCR: 2.807646  SpamRecall: 99.477%  SpamPrec: 93.409%  FP: 4.58%  FN: 0.34%
 
 # SUMMARY for threshold 2.0:
-# Correctly non-spam: 178462  32.84%  (94.34% of non-spam corpus)
-# Correctly spam:     350761  64.54%  (99.00% of spam corpus)
-# False positives:     10712  1.97%  (5.66% of nonspam, 616419 weighted)
-# False negatives:      3538  0.65%  (1.00% of spam,   3535 weighted)
-# TCR: 6.205104  SpamRecall: 99.001%  SpamPrec: 97.037%  FP: 1.97%  FN: 0.65%
+# Correctly non-spam:  19816  32.82%  (94.28% of non-spam corpus)
+# Correctly spam:      38971  64.54%  (99.00% of spam corpus)
+# False positives:      1203  1.99%  (5.72% of nonspam,  69276 weighted)
+# False negatives:       395  0.65%  (1.00% of spam,    374 weighted)
+# TCR: 6.141342  SpamRecall: 98.997%  SpamPrec: 97.006%  FP: 1.99%  FN: 0.65%
 
 # SUMMARY for threshold 3.0:
-# Correctly non-spam: 184240  33.90%  (97.39% of non-spam corpus)
-# Correctly spam:     347194  63.88%  (97.99% of spam corpus)
-# False positives:      4934  0.91%  (2.61% of nonspam, 352939 weighted)
-# False negatives:      7105  1.31%  (2.01% of spam,  12718 weighted)
-# TCR: 11.150244  SpamRecall: 97.995%  SpamPrec: 98.599%  FP: 0.91%  FN: 1.31%
+# Correctly non-spam:  20473  33.90%  (97.40% of non-spam corpus)
+# Correctly spam:      38592  63.91%  (98.03% of spam corpus)
+# False positives:       546  0.90%  (2.60% of nonspam,  39426 weighted)
+# False negatives:       774  1.28%  (1.97% of spam,   1351 weighted)
+# TCR: 11.234589  SpamRecall: 98.034%  SpamPrec: 98.605%  FP: 0.90%  FN: 1.28%
 
 # SUMMARY for threshold 4.0:
-# Correctly non-spam: 187495  34.50%  (99.11% of non-spam corpus)
-# Correctly spam:     341198  62.78%  (96.30% of spam corpus)
-# False positives:      1679  0.31%  (0.89% of nonspam, 149240 weighted)
-# False negatives:     13101  2.41%  (3.70% of spam,  33787 weighted)
-# TCR: 16.482090  SpamRecall: 96.302%  SpamPrec: 99.510%  FP: 0.31%  FN: 2.41%
+# Correctly non-spam:  20840  34.51%  (99.15% of non-spam corpus)
+# Correctly spam:      37929  62.81%  (96.35% of spam corpus)
+# False positives:       179  0.30%  (0.85% of nonspam,  16432 weighted)
+# False negatives:      1437  2.38%  (3.65% of spam,   3678 weighted)
+# TCR: 16.880789  SpamRecall: 96.350%  SpamPrec: 99.530%  FP: 0.30%  FN: 2.38%
 
 # SUMMARY for threshold 4.5:
-# Correctly non-spam: 188205  34.63%  (99.49% of non-spam corpus)
-# Correctly spam:     337385  62.08%  (95.23% of spam corpus)
-# False positives:       969  0.18%  (0.51% of nonspam,  93056 weighted)
-# False negatives:     16914  3.11%  (4.77% of spam,  49985 weighted)
-# TCR: 16.282871  SpamRecall: 95.226%  SpamPrec: 99.714%  FP: 0.18%  FN: 3.11%
+# Correctly non-spam:  20918  34.64%  (99.52% of non-spam corpus)
+# Correctly spam:      37540  62.17%  (95.36% of spam corpus)
+# False positives:       101  0.17%  (0.48% of nonspam,  10257 weighted)
+# False negatives:      1826  3.02%  (4.64% of spam,   5330 weighted)
+# TCR: 16.888031  SpamRecall: 95.361%  SpamPrec: 99.732%  FP: 0.17%  FN: 3.02%
 
 # SUMMARY for threshold 5.5:
-# Correctly non-spam: 189025  34.78%  (99.92% of non-spam corpus)
-# Correctly spam:     327295  60.22%  (92.38% of spam corpus)
-# False positives:       149  0.03%  (0.08% of nonspam,  18162 weighted)
-# False negatives:     27004  4.97%  (7.62% of spam, 100817 weighted)
-# TCR: 12.767992  SpamRecall: 92.378%  SpamPrec: 99.954%  FP: 0.03%  FN: 4.97%
+# Correctly non-spam:  20999  34.78%  (99.90% of non-spam corpus)
+# Correctly spam:      36399  60.28%  (92.46% of spam corpus)
+# False positives:        20  0.03%  (0.10% of nonspam,   2762 weighted)
+# False negatives:      2967  4.91%  (7.54% of spam,  11080 weighted)
+# TCR: 12.835344  SpamRecall: 92.463%  SpamPrec: 99.945%  FP: 0.03%  FN: 4.91%
 
 # SUMMARY for threshold 6.0:
-# Correctly non-spam: 189091  34.79%  (99.96% of non-spam corpus)
-# Correctly spam:     322380  59.32%  (90.99% of spam corpus)
-# False positives:        83  0.02%  (0.04% of nonspam,  11015 weighted)
-# False negatives:     31919  5.87%  (9.01% of spam, 129053 weighted)
-# TCR: 10.957475  SpamRecall: 90.991%  SpamPrec: 99.974%  FP: 0.02%  FN: 5.87%
+# Correctly non-spam:  21009  34.79%  (99.95% of non-spam corpus)
+# Correctly spam:      35865  59.39%  (91.11% of spam corpus)
+# False positives:        10  0.02%  (0.05% of nonspam,   1684 weighted)
+# False negatives:      3501  5.80%  (8.89% of spam,  14139 weighted)
+# TCR: 11.085891  SpamRecall: 91.107%  SpamPrec: 99.972%  FP: 0.02%  FN: 5.80%
 
 # SUMMARY for threshold 6.5:
-# Correctly non-spam: 189121  34.80%  (99.97% of non-spam corpus)
-# Correctly spam:     317293  58.38%  (89.56% of spam corpus)
-# False positives:        53  0.01%  (0.03% of nonspam,   7520 weighted)
-# False negatives:     37006  6.81%  (10.44% of spam, 160821 weighted)
-# TCR: 9.506023  SpamRecall: 89.555%  SpamPrec: 99.983%  FP: 0.01%  FN: 6.81%
+# Correctly non-spam:  21012  34.80%  (99.97% of non-spam corpus)
+# Correctly spam:      35278  58.42%  (89.62% of spam corpus)
+# False positives:         7  0.01%  (0.03% of nonspam,   1337 weighted)
+# False negatives:      4088  6.77%  (10.38% of spam,  17797 weighted)
+# TCR: 9.547902  SpamRecall: 89.615%  SpamPrec: 99.980%  FP: 0.01%  FN: 6.77%
 
 # SUMMARY for threshold 7.0:
-# Correctly non-spam: 189145  34.80%  (99.98% of non-spam corpus)
-# Correctly spam:     311308  57.28%  (87.87% of spam corpus)
-# False positives:        29  0.01%  (0.02% of nonspam,   4477 weighted)
-# False negatives:     42991  7.91%  (12.13% of spam, 201151 weighted)
-# TCR: 8.213534  SpamRecall: 87.866%  SpamPrec: 99.991%  FP: 0.01%  FN: 7.91%
+# Correctly non-spam:  21012  34.80%  (99.97% of non-spam corpus)
+# Correctly spam:      34586  57.28%  (87.86% of spam corpus)
+# False positives:         7  0.01%  (0.03% of nonspam,   1337 weighted)
+# False negatives:      4780  7.92%  (12.14% of spam,  22452 weighted)
+# TCR: 8.175701  SpamRecall: 87.858%  SpamPrec: 99.980%  FP: 0.01%  FN: 7.92%
 
 # SUMMARY for threshold 8.0:
-# Correctly non-spam: 189163  34.81%  (99.99% of non-spam corpus)
-# Correctly spam:     299226  55.06%  (84.46% of spam corpus)
-# False positives:        11  0.00%  (0.01% of nonspam,   2022 weighted)
-# False negatives:     55073  10.13%  (15.54% of spam, 292155 weighted)
-# TCR: 6.426843  SpamRecall: 84.456%  SpamPrec: 99.996%  FP: 0.00%  FN: 10.13%
+# Correctly non-spam:  21016  34.80%  (99.99% of non-spam corpus)
+# Correctly spam:      33245  55.06%  (84.45% of spam corpus)
+# False positives:         3  0.00%  (0.01% of nonspam,    774 weighted)
+# False negatives:      6121  10.14%  (15.55% of spam,  32566 weighted)
+# TCR: 6.415580  SpamRecall: 84.451%  SpamPrec: 99.991%  FP: 0.00%  FN: 10.14%
 
 # SUMMARY for threshold 9.0:
-# Correctly non-spam: 189167  34.81%  (100.00% of non-spam corpus)
-# Correctly spam:     284354  52.32%  (80.26% of spam corpus)
-# False positives:         7  0.00%  (0.00% of nonspam,   1397 weighted)
-# False negatives:     69945  12.87%  (19.74% of spam, 418653 weighted)
-# TCR: 5.062861  SpamRecall: 80.258%  SpamPrec: 99.998%  FP: 0.00%  FN: 12.87%
+# Correctly non-spam:  21016  34.80%  (99.99% of non-spam corpus)
+# Correctly spam:      31534  52.22%  (80.10% of spam corpus)
+# False positives:         3  0.00%  (0.01% of nonspam,    774 weighted)
+# False negatives:      7832  12.97%  (19.90% of spam,  47129 weighted)
+# TCR: 5.016694  SpamRecall: 80.105%  SpamPrec: 99.990%  FP: 0.00%  FN: 12.97%
 
 # SUMMARY for threshold 10.0:
-# Correctly non-spam: 189171  34.81%  (100.00% of non-spam corpus)
-# Correctly spam:     270215  49.72%  (76.27% of spam corpus)
-# False positives:         3  0.00%  (0.00% of nonspam,    675 weighted)
-# False negatives:     84084  15.47%  (23.73% of spam, 553004 weighted)
-# TCR: 4.212880  SpamRecall: 76.268%  SpamPrec: 99.999%  FP: 0.00%  FN: 15.47%
+# Correctly non-spam:  21017  34.81%  (99.99% of non-spam corpus)
+# Correctly spam:      29982  49.65%  (76.16% of spam corpus)
+# False positives:         2  0.00%  (0.01% of nonspam,    598 weighted)
+# False negatives:      9384  15.54%  (23.84% of spam,  61894 weighted)
+# TCR: 4.190547  SpamRecall: 76.162%  SpamPrec: 99.993%  FP: 0.00%  FN: 15.54%
 
 # SUMMARY for threshold 12.0:
-# Correctly non-spam: 189172  34.81%  (100.00% of non-spam corpus)
-# Correctly spam:     242455  44.61%  (68.43% of spam corpus)
-# False positives:         2  0.00%  (0.00% of nonspam,    477 weighted)
-# False negatives:    111844  20.58%  (31.57% of spam, 859033 weighted)
-# TCR: 3.167513  SpamRecall: 68.432%  SpamPrec: 99.999%  FP: 0.00%  FN: 20.58%
+# Correctly non-spam:  21018  34.81%  (100.00% of non-spam corpus)
+# Correctly spam:      26933  44.60%  (68.42% of spam corpus)
+# False positives:         1  0.00%  (0.00% of nonspam,    380 weighted)
+# False negatives:     12433  20.59%  (31.58% of spam,  95486 weighted)
+# TCR: 3.164978  SpamRecall: 68.417%  SpamPrec: 99.996%  FP: 0.00%  FN: 20.59%
 
 # SUMMARY for threshold 15.0:
-# Correctly non-spam: 189174  34.81%  (100.00% of non-spam corpus)
-# Correctly spam:     204386  37.61%  (57.69% of spam corpus)
-# False positives:         0  0.00%  (0.00% of nonspam,      0 weighted)
-# False negatives:    149913  27.58%  (42.31% of spam, 1372262 weighted)
-# TCR: 2.363364  SpamRecall: 57.687%  SpamPrec: 100.000%  FP: 0.00%  FN: 27.58%
+# Correctly non-spam:  21018  34.81%  (100.00% of non-spam corpus)
+# Correctly spam:      22696  37.59%  (57.65% of spam corpus)
+# False positives:         1  0.00%  (0.00% of nonspam,    380 weighted)
+# False negatives:     16670  27.61%  (42.35% of spam, 152654 weighted)
+# TCR: 2.360780  SpamRecall: 57.654%  SpamPrec: 99.996%  FP: 0.00%  FN: 27.61%
 
 # SUMMARY for threshold 17.0:
-# Correctly non-spam: 189174  34.81%  (100.00% of non-spam corpus)
-# Correctly spam:     176572  32.49%  (49.84% of spam corpus)
-# False positives:         0  0.00%  (0.00% of nonspam,      0 weighted)
-# False negatives:    177727  32.70%  (50.16% of spam, 1817202 weighted)
-# TCR: 1.993501  SpamRecall: 49.837%  SpamPrec: 100.000%  FP: 0.00%  FN: 32.70%
+# Correctly non-spam:  21018  34.81%  (100.00% of non-spam corpus)
+# Correctly spam:      19602  32.46%  (49.79% of spam corpus)
+# False positives:         1  0.00%  (0.00% of nonspam,    380 weighted)
+# False negatives:     19764  32.73%  (50.21% of spam, 202113 weighted)
+# TCR: 1.991300  SpamRecall: 49.794%  SpamPrec: 99.995%  FP: 0.00%  FN: 32.73%
 
 # SUMMARY for threshold 20.0:
-# Correctly non-spam: 189174  34.81%  (100.00% of non-spam corpus)
-# Correctly spam:     133820  24.62%  (37.77% of spam corpus)
-# False positives:         0  0.00%  (0.00% of nonspam,      0 weighted)
-# False negatives:    220479  40.57%  (62.23% of spam, 2607069 weighted)
-# TCR: 1.606951  SpamRecall: 37.770%  SpamPrec: 100.000%  FP: 0.00%  FN: 40.57%
+# Correctly non-spam:  21018  34.81%  (100.00% of non-spam corpus)
+# Correctly spam:      14916  24.70%  (37.89% of spam corpus)
+# False positives:         1  0.00%  (0.00% of nonspam,    380 weighted)
+# False negatives:     24450  40.49%  (62.11% of spam, 288731 weighted)
+# TCR: 1.609732  SpamRecall: 37.891%  SpamPrec: 99.993%  FP: 0.00%  FN: 40.49%
 
 
 Test hit frequencies, for spam and nonspam corpora:

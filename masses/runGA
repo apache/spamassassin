@@ -1,6 +1,6 @@
 #!/bin/sh
 
-SCORESET="3"
+SCORESET="1"
 NAME="set$SCORESET"
 
 if [ ! -f "ORIG/ham-$NAME.log" -o ! -f "ORIG/spam-$NAME.log" ]; then
@@ -13,7 +13,7 @@ echo "[Doing a scoreset $SCORESET GA run]"
 
 # Clean out old runs
 echo "[Cleaning up]"
-rm -rf ../rules/99_tvd.cf spam.log nonspam.log ham.log NSBASE SPBASE tmp make.output freqs craig-evolve.scores \
+rm -rf spam-validate.log nonspam-validate.log ham-validate.log spam.log nonspam.log ham.log NSBASE SPBASE tmp make.output freqs craig-evolve.scores \
 	GA-$NAME.out GA-$NAME.scores GA-$NAME.validate
 make clean >/dev/null
 
@@ -39,6 +39,9 @@ echo "[Setting up for GA run]"
 ln -s SPBASE/spam.log .
 ln -s NSBASE/nonspam.log .
 ln -s NSBASE/nonspam.log ham.log
+ln -s SPBASE/spam-validate.log .
+ln -s NSBASE/nonspam-validate.log .
+ln -s NSBASE/nonspam-validate.log ham-validate.log
 
 echo "[Generating evolve]"
 # Generate evolve with full logs
