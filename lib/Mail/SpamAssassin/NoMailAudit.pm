@@ -14,6 +14,8 @@
 # Perl itself.
 #
 package Mail::SpamAssassin::NoMailAudit;
+use strict;
+eval "use bytes";
 
 use Mail::SpamAssassin::Message;
 use Fcntl qw(:DEFAULT :flock);
@@ -371,7 +373,7 @@ sub dotlock_lock {
   print LOCK "$$\n";
   close LOCK or die "lock $file failed: write to $locktmp: $!";
 
-  for ($retries = 0; $retries < $retrylimit; $retries++) {
+  for (my $retries = 0; $retries < $retrylimit; $retries++) {
     if ($retries > 0) {
       my $sleeptime = 2*$retries;
       if ($sleeptime > 60) { $sleeptime = 60; }         # max 1 min
@@ -385,7 +387,7 @@ sub dotlock_lock {
     if (!defined $tmpstat[3]) { die "lstat $locktmp failed"; }
 
     # sanity: see if the link() succeeded
-    @lkstat = lstat ($lockfile);
+    my @lkstat = lstat ($lockfile);
     if (!defined $lkstat[3]) { next; }	# link() failed
 
     # sanity: if the lock succeeded, the dev/ino numbers will match

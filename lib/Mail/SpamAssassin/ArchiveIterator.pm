@@ -3,6 +3,8 @@
 # iterate over mail archives, calling a function on each message.
 
 package Mail::SpamAssassin::ArchiveIterator;
+use strict;
+eval "use bytes";
 
 @ISA = qw();
 

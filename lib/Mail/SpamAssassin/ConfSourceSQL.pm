@@ -4,6 +4,7 @@ package Mail::SpamAssassin::ConfSourceSQL;
 
 use Carp;
 use strict;
+eval "use bytes";
 
 use vars        qw{
         @ISA

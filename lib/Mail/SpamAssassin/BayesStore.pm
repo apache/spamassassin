@@ -7,6 +7,7 @@ Mail::SpamAssassin::BayesStore - storage database for Bayesian probabilities
 package Mail::SpamAssassin::BayesStore;
 
 use strict;
+eval "use bytes";
 use Fcntl ':DEFAULT',':flock';
 
 BEGIN { @AnyDBM_File::ISA = qw(DB_File GDBM_File NDBM_File SDBM_File); }

@@ -29,6 +29,7 @@ the learning process.
 package Mail::SpamAssassin::PerMsgLearner;
 
 use strict;
+eval "use bytes";
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::AutoWhitelist;

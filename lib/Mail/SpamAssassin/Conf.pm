@@ -43,6 +43,7 @@ Where appropriate, default values are listed in parentheses.
 package Mail::SpamAssassin::Conf;
 
 use strict;
+eval "use bytes";
 
 use vars	qw{
   	@ISA $type_body_tests $type_head_tests $type_head_evals

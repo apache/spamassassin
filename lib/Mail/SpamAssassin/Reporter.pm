@@ -4,6 +4,7 @@ package Mail::SpamAssassin::Reporter;
 
 use Carp;
 use strict;
+eval "use bytes";
 
 use vars	qw{
   	@ISA $VERSION

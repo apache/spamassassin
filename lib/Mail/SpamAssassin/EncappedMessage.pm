@@ -6,6 +6,7 @@ package Mail::SpamAssassin::EncappedMessage;
 
 use Carp;
 use strict;
+eval "use bytes";
 
 use Mail::SpamAssassin::AuditMessage;
 

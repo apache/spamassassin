@@ -4,6 +4,7 @@ package Mail::SpamAssassin::AuditMessage;
 
 use Carp;
 use strict;
+eval "use bytes";
 
 use Mail::SpamAssassin::NoMailAudit;
 use Mail::SpamAssassin::Message;

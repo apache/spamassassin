@@ -33,6 +33,7 @@ package Mail::SpamAssassin::PerMsgStatus;
 
 use Carp;
 use strict;
+eval "use bytes";
 
 use Text::Wrap qw();
 

@@ -1,4 +1,4 @@
-# $Id: MailingList.pm,v 1.10 2002/09/17 16:54:04 jmason Exp $
+# $Id: MailingList.pm,v 1.11 2002/12/13 11:04:14 matt_sergeant Exp $
 
 # Eval Tests to detect genuine mailing lists.
 
@@ -6,6 +6,8 @@ package Mail::SpamAssassin::MailingList;
 1;
 
 package Mail::SpamAssassin::PerMsgStatus;
+use strict;
+eval "use bytes";
 
 sub detect_mailing_list {
     my ($self) = @_;

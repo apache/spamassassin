@@ -13,6 +13,7 @@ use POSIX ":sys_wait_h";        # sorry Craig ;)
 
 use Carp;
 use strict;
+eval "use bytes";
 
 use vars qw{
 	$KNOWN_BAD_DIALUP_RANGES $IP_IN_RESERVED_RANGE
