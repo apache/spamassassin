@@ -188,6 +188,50 @@ sub reply_with_warning {
 }
 
 ###########################################################################
+
+=item $text = $f->remove_spamassassin_markup ($mail)
+
+Returns the text of the message, with any SpamAssassin-added text (such
+as the report, or X-Spam-Status headers) stripped.
+
+=cut
+
+sub remove_spamassassin_markup {
+  my ($self, $audit) = @_;
+  local ($_);
+
+  $self->init();
+  my $mail = $self->encapsulate_audit ($audit);
+
+  my $hdrs = $mail->get_all_headers();
+
+  # reinstate the old content type
+  if ($hdrs =~ /^X-Spam-Prev-Content-Type: /m) {
+    $hdrs =~ s/\nContent-Type: [^\n]*?\n/\n/gs;
+    $hdrs =~ s/\nX-Spam-Prev-(Content-Type: [^\n]*?\n)/\n$1/gs;
+  }
+
+  # remove the headers we added
+  1 while $hdrs =~ s/\nX-Spam-[^\n]*?\n/\n/gs;
+  1 while $hdrs =~ s/^Subject: \*+SPAM\*+ /Subject: /gm;
+
+  # ok, next, the report.
+  my $body = join ('', @{$mail->get_body()});
+
+  while ($body =~ /^SPAM: /m)
+  {
+    # strip off all the SPAM: lines
+    1 while $body =~ s/\n*SPAM: [^\n]*?\n//gs;
+
+    # and finally, strip off an extra blank line at the start of the
+    # mail; the template is always added with an NL before and after it
+    $body =~ s/^\n//gs;
+  }
+
+  return $hdrs."\n".$body;
+}
+
+###########################################################################
 # non-public methods.
 
 sub init {
@@ -221,6 +265,13 @@ sub init {
 
 sub encapsulate_audit {
   my ($self, $audit) = @_;
+
+  # first, check to see if this is not actually a Mail::Audit object;
+  # it could also be an already-encapsulated Mail::Audit wrapped inside
+  # a Mail::SpamAssassin::Message.
+  if ($audit->{is_spamassassin_wrapper_object}) {
+    return $audit;
+  }
 
   if (!defined $self->{mail_audit_supports_encapsulation}) {
     # test Mail::Audit for new-style encapsulation of the Mail::Internet

@@ -89,6 +89,8 @@ Options:
 
   -l filename      Log all mail messages to a mbox-format file
 
+  -d		   Remove SpamAssassin reports from a mail message
+
   -c config        configuration file
                    (default:	$rules )
 
@@ -108,9 +110,10 @@ require Mail::Audit;
 
 use vars qw{
   $opt_t $opt_c $opt_p $opt_h $opt_V $opt_D $opt_r $opt_P $opt_w $opt_l
+  $opt_d
 };
 
-getopts ('tc:p:hVDrPw:l:') or usage();
+getopts ('tc:p:hVDrPw:l:d') or usage();
 
 if (defined $opt_h) { usage(); }
 if (defined $opt_V) {
@@ -167,6 +170,12 @@ if ($opt_l) {
   $mail->{noexit} = 1;
   $mail->accept ($opt_l);
   $mail->{noexit} = 0;
+}
+
+# handle removing reports
+if ($opt_d) {
+  print $spamtest->remove_spamassassin_markup ($mail);
+  $mail->ignore();		# will exit
 }
 
 # handle unconditional reportage
@@ -247,6 +256,7 @@ spamassassin - mail filter to identify spam using text analysis
                    notifying them that their message has been marked as spam
 		   (only useful if -r is used)
   -l filename      Log all mail messages to a mbox-format file
+  -d		   Remove SpamAssassin reports from a mail message
   -c config        configuration file
   -p prefs         user preferences file
   -D               produce diagnostic output
@@ -313,6 +323,12 @@ TRAPPING> section below for more details.
 
 Log all mail messages that pass through the filter, to an mbox-format file
 named by C<filename>.  Handy for use with C<-r> and C<-w>.
+
+=item -d
+
+Remove SpamAssassin markup (the "SpamAssassin results" report, X-Spam-Status
+headers, etc.) from the mail message.  The resulting message, which will be
+identical to the original, pre-SpamAssassin input, will be output to stdout.
 
 =item -c config
 

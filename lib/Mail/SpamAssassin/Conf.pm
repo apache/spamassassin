@@ -111,12 +111,12 @@ sub parse_rules {
       next;
     }
 
-    if (/^report\s+(.*)$/) {
+    if (/^report\s*(.*)$/) {
       $self->{report_template} .= $1."\n";
       next;
     }
 
-    if (/^spamtrap\s+(.*)$/) {
+    if (/^spamtrap\s*(.*)$/) {
       $self->{spamtrap_template} .= $1."\n";
       next;
     }

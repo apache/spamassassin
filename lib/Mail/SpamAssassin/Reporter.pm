@@ -38,17 +38,10 @@ sub new {
 sub report {
   my ($self) = @_;
 
-  my $hdrs = $self->{msg}->get_all_headers();
-  $hdrs =~ s/^X-Spam-.*?$//gm;
-  $hdrs =~ s/^Subject: \*+SPAM\*+/Subject: /gm;
-
-  my $body = join ('', @{$self->{msg}->get_body()});
-  $body =~ s/^SPAM: .*?$//gm;
-
-  $self->{msgtext} = $hdrs."\n".$body;
+  my $text = $self->{main}->remove_spamassassin_markup ($self->{msg});
 
   if ($self->is_razor_available()) {
-    $self->razor_report('razor.vipul.net:2702', $self->{msgtext})
+    $self->razor_report('razor.vipul.net:2702', $text)
     	and print "SpamAssassin: spam reported to Razor.\n";
   }
 }

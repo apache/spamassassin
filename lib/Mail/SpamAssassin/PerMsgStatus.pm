@@ -208,8 +208,14 @@ sub rewrite_as_spam {
   $self->{msg}->put_header ("X-Spam-Flag", 'YES');
 
   # defang HTML mail; change it to text-only.
-  $self->{msg}->replace_header ("Content-Type", "text/plain");
-  $self->{msg}->delete_header ("Content-type"); 	# just in case
+  my $ct = $self->{msg}->get_header ("Content-Type");
+  $ct ||= $self->{msg}->get_header ("Content-type");
+
+  if (defined $ct && $ct ne '' && $ct ne 'text/plain') {
+    $self->{msg}->replace_header ("Content-Type", "text/plain");
+    $self->{msg}->delete_header ("Content-type"); 	# just in case
+    $self->{msg}->replace_header ("X-Spam-Prev-Content-Type", $ct);
+  }
 
   my $lines = $self->{msg}->get_body();
   unshift (@{$lines}, split (/$/, $self->{report}));
