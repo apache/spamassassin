@@ -94,7 +94,7 @@ describe PLING			Subject has an exclamation mark
 header PLING_PLING		Subject =~ /\!\!+/
 describe PLING_PLING		Subject has lots of exclamation marks
 
-header SUBJ_HAS_UNIQ_ID		Subject =~ /(?:[-_\s]{7,}[-a-z0-9]{4,}|\s+[-:\#\(\[]+[-a-zA-Z0-9]{4,}[\]\)]+|\s+[-:\#][-a-zA-Z0-9]{4,})$/
+header SUBJ_HAS_UNIQ_ID		eval:check_for_unique_subject_id()
 describe SUBJ_HAS_UNIQ_ID	Subject contains a unique ID number
 
 header UNDISC_RECIPS		To =~ /Undisclosed.*Recipients/i

@@ -180,9 +180,55 @@ sub check_rbl_results_for {
   my ($self, $addr) = @_;
 
   return 0 unless $self->is_dns_available();
+  return 0 unless defined ($self->{rbl_IN_As_found});
 
   my $inas = ' '.$self->{rbl_IN_As_found}.' ';
   if ($inas =~ / ${addr} /) { return 1; }
+
+  return 0;
+}
+
+###########################################################################
+
+sub check_for_unique_subject_id {
+  my ($self) = @_;
+  local ($_);
+  $_ = $self->get ('Subject');
+
+  my $id = undef;
+  if (/[-_\s]{7,}([-a-z0-9]{4,})$/
+	|| /\s+[-:\#\(\[]+([-a-zA-Z0-9]{4,})[\]\)]+$/
+	|| /\s+[-:\#]([-a-zA-Z0-9]{4,})$/)
+  {
+    $id = $1;
+  }
+
+  if (!defined($id) || $self->word_is_in_dictionary ($id)) {
+    return 0;
+  } else {
+    return 1;
+  }
+}
+
+sub word_is_in_dictionary {
+  my ($self, $word) = @_;
+  local ($_);
+
+  $word =~ tr/A-Z/a-z/;
+  if (!open (DICT, "</usr/dict/words") &&
+  	!open (DICT, "</usr/share/dict/words"))
+  {
+    dbg ("failed to open /usr/dict/words, cannot check dictionary");
+    return 1;		# fail safe
+  }
+
+  while (<DICT>) {
+    chop;
+    if ($word eq $_) {
+      close DICT;
+      return 1;
+    }
+  }
 
   return 0;
 }
