@@ -175,6 +175,9 @@ failed_to_tie:
   return 0;
 }
 
+# tie() to the databases, read-write and locked.  Any callers of
+# this should ensure they call untie_db() afterwards!
+#
 sub tie_db_writable {
   my ($self) = @_;
   my $main = $self->{main};
@@ -359,7 +362,27 @@ sub learn {
 
   if (!defined $msg) { return; }
   my $body = $self->get_body_from_msg ($msg);
-  $self->tie_db_writable();
+  my $ret;
+
+  eval {
+    local $SIG{'__DIE__'};	# do not run user die() traps in here
+
+    $self->tie_db_writable();
+    $ret = $self->learn_trapped ($isspam, $msg, $body);
+  };
+
+  if ($@) {		# if we died, untie the dbs.
+    my $failure = $@;
+    $self->untie_db();
+    die $failure;
+  }
+
+  return $ret;
+}
+
+# this function is trapped by the wrapper above
+sub learn_trapped {
+  my ($self, $isspam, $msg, $body) = @_;
 
   my $msgid = $self->get_msgid ($msg);
   my $seen = $self->{db_seen}->{$msgid};
@@ -418,7 +441,27 @@ sub forget {
 
   if (!defined $msg) { return; }
   my $body = $self->get_body_from_msg ($msg);
-  $self->tie_db_writable();
+  my $ret;
+
+  eval {
+    local $SIG{'__DIE__'};	# do not run user die() traps in here
+
+    $self->tie_db_writable();
+    $ret = $self->forget_trapped ($msg, $body);
+  };
+
+  if ($@) {		# if we died, untie the dbs.
+    my $failure = $@;
+    $self->untie_db();
+    die $failure;
+  }
+
+  return $ret;
+}
+
+# this function is trapped by the wrapper above
+sub forget_trapped {
+  my ($self, $msg, $body) = @_;
 
   my $msgid = $self->get_msgid ($msg);
   my $seen = $self->{db_seen}->{$msgid};
@@ -531,12 +574,33 @@ sub get_body_from_msg {
 # now and again, this can be run to rebuild the probabilities cache.
 # This cache will be unusable if one of the corpora has not been scanned yet.
 # This operation can take a while...
+
 sub recompute_all_probs {
+  my ($self) = @_;
+  my $ret;
+
+  eval {
+    local $SIG{'__DIE__'};	# do not run user die() traps in here
+
+    $self->tie_db_writable();
+    $ret = $self->recompute_all_probs_trapped ();
+  };
+
+  if ($@) {		# if we died, untie the dbs.
+    my $failure = $@;
+    $self->untie_db();
+    die $failure;
+  }
+
+  return $ret;
+}
+
+# this function is trapped by the wrapper above
+sub recompute_all_probs_trapped {
   my ($self) = @_;
 
   my $start = time;
 
-  $self->tie_db_writable();
   my $ns = $self->{db_count}->{'nspam'};
   my $nn = $self->{db_count}->{'nham'};
   $ns ||= 0;
@@ -568,6 +632,8 @@ done:
   my $now = time;
   dbg ("bayes: recomputed all probabilities for ".(scalar keys %done).
         " tokens in ".($now - $start)." seconds");
+  $self->untie_db();
+  1;
 }
 
 sub compute_prob_for_token {

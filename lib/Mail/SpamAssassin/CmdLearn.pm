@@ -67,29 +67,40 @@ sub cmdline_run {
       use_whitelist     => $opt{'auto-whitelist'},
       bias_scores       => $opt{'bias-scores'},
   });
-  $spamtest->compile_now(1);
 
-  $SIG{INT} = \&killed;
-  $SIG{TERM} = \&killed;
+  # run this lot in an eval block, so we can catch die's and clear
+  # up the dbs.
+  eval {
+    $spamtest->compile_now(1);
 
-  my $iter = new Mail::SpamAssassin::ArchiveIterator ({
-          'opt_mh' => $opt{mh},
-          'opt_single' => $opt{single},
-    });
+    $SIG{INT} = \&killed;
+    $SIG{TERM} = \&killed;
 
-  my @targets = @ARGV;
-  if ($opt{folders}) {
-    open (F, $opt{folders}) || die $!;
-    push (@targets, map { chomp; $_ } <F>);
-    close (F);
+    my $iter = new Mail::SpamAssassin::ArchiveIterator ({
+	    'opt_mh' => $opt{mh},
+	    'opt_single' => $opt{single},
+      });
+
+    my @targets = @ARGV;
+    if ($opt{folders}) {
+      open (F, $opt{folders}) || die $!;
+      push (@targets, map { chomp; $_ } <F>);
+      close (F);
+    }
+
+    $iter->set_function (\&wanted);
+    $iter->run (@targets);
+    print STDERR "\n" if ($opt{showdots});
+
+    $spamtest->rebuild_learner_caches();
+  };
+
+  if ($@) {
+    my $failure = $@;
+    $spamtest->finish_learner();
+    die $failure;
   }
 
-  $iter->set_function (\&wanted);
-  $iter->run (@targets);
-  print STDERR "\n" if ($opt{showdots});
-
-  $spamtest->rebuild_learner_caches();
-  $spamtest->finish_learner();
   return 0;
 }
 
