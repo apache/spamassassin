@@ -217,10 +217,13 @@ sub cmdline_run {
       open (F, $opt{folders}) || die $!;
       while (<F>) {
 	chomp;
+	next unless ($_);
 	if (/^(?:ham|spam):/) {
 	  push(@targets, $_);
 	}
-	target($_);
+	else {
+	  target($_);
+	}
       }
       close (F);
     }
