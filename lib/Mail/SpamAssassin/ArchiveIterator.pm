@@ -264,7 +264,13 @@ sub scan_directory {
   my ($self, $class, $folder) = @_;
 
   opendir(DIR, $folder) || die "Can't open $folder dir: $!";
-  my @files = grep { -f } map { "$folder/$_" } grep { /^\S+$/ } readdir(DIR);
+
+  # ignore ,234 (deleted or refiled messages) and MH metadata files
+  # probably more to go here (TODO)
+  my @files = grep {
+	-f && !/^\,/ && !/^(\.xmhcache|\.mh)/
+      } map { "$folder/$_" } grep { /^\S+$/ } readdir(DIR);
+
   closedir(DIR);
 
   foreach my $mail (@files) {
