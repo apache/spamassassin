@@ -98,8 +98,8 @@ use vars qw{
   @site_rules_path
 };
 
-$VERSION = "3.000002";      # update after release (same format as perl $])
-$IS_DEVEL_BUILD = 0;        # change for release versions
+$VERSION = "3.000003";      # update after release (same format as perl $])
+$IS_DEVEL_BUILD = 1;        # change for release versions
 
 @ISA = qw();
 
