@@ -64,7 +64,8 @@ CREATE TABLE userpref (
   preference varchar(30) default NOT NULL,
   value varchar(100) default NOT NULL,
   prefid int(11) NOT NULL auto_increment,
-  PRIMARY KEY (prefid)
+  PRIMARY KEY (prefid),
+  INDEX (username)
 ) TYPE=MyISAM;
 
 Once you have created the database and added the table, just add the required
