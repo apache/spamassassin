@@ -331,6 +331,7 @@ sub rewrite_as_spam {
     $self->{msg}->delete_header ("X-Spam-Flag");
     $self->{msg}->delete_header ("X-Spam-Checker-Version");
     $self->{msg}->delete_header ("X-Spam-Prev-Content-Type");
+    $self->{msg}->delete_header ("X-Spam-Prev-Content-Transfer-Encoding");
     $self->{msg}->delete_header ("X-Spam-Report");
   }
 
@@ -377,6 +378,14 @@ sub rewrite_as_spam {
     if (defined $ct && $ct ne '' && $ct ne 'text/plain') {
       $self->{msg}->replace_header ("Content-Type", "text/plain");
       $self->{msg}->replace_header ("X-Spam-Prev-Content-Type", $ct);
+
+    }
+
+    my $cte = $srcmsg->get_header ("Content-Transfer-Encoding");
+
+    if (defined $cte && $cte ne '' && $ct ne '7bit') {
+      $self->{msg}->replace_header ("Content-Transfer-Encoding", "7bit");
+      $self->{msg}->replace_header ("X-Spam-Prev-Content-Transfer-Encoding", $cte);
     }
   }
 
