@@ -384,6 +384,8 @@ sub rendered {
       $r->{ratio} = ($raw - $r->{html_length}) / $raw;
       if (exists $r->{elements} && exists $r->{tags}) {
 	$r->{bad_tag_ratio} = ($r->{tags} - $r->{elements}) / $r->{tags};
+      }
+      if (exists $r->{elements_seen} && exists $r->{tags_seen}) {
 	$r->{non_element_ratio} =
 	    ($r->{tags_seen} - $r->{elements_seen}) / $r->{tags_seen};
       }
