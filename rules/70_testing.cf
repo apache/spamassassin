@@ -939,3 +939,6 @@ tflags T_S3_86_S41_60 net
 
 body T_HTML_TEXT_AFTER_HTML	eval:html_test('text_after_html')
 body T_HTML_TEXT_AFTER_BODY	eval:html_test('text_after_body')
+
+# might be better than X_MESSAGE_INFO
+header T_X_MESSAGE_INFO		exists:X-Message-Info
