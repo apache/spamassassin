@@ -472,8 +472,6 @@ sub tokenize_headers {
   my @rcvdlines = ($hdrs =~ /^Received: [^\n]*$/gim);
 
   # and now delete lines for headers we don't want (incl all Receiveds)
-  $hdrs =~ s/^From \S+[^\n]+$//gim;
-
   $hdrs =~ s/^${IGNORED_HDRS}: [^\n]*$//gim;
 
   if (IGNORE_MSGID_TOKENS) { $hdrs =~ s/^Message-I[dD]: [^\n]*$//gim;}

@@ -351,13 +351,13 @@ sub parse {
 
   # Go through all the headers of the message
   while ( my $last = shift @message ) {
-    # Store the non-modified headers in a scalar
-    $msg->{'pristine_headers'} .= $last;
-
     if ( $last =~ /^From\s/ ) {
       $msg->{'mbox_sep'} = $last;
       next;
     }
+
+    # Store the non-modified headers in a scalar
+    $msg->{'pristine_headers'} .= $last;
 
     # NB: Really need to figure out special folding rules here!
     if ( $last =~ /^[ \t]+/ ) {                    # if its a continuation
@@ -930,6 +930,8 @@ sub remove_spamassassin_markup {
   my ($self, $mail_obj) = @_;
   local ($_);
 
+  my $mbox = $mail_obj->get_mbox_seperator() || '';
+
   dbg("Removing Markup");
   $self->init(1);
   my $ct = $mail_obj->get_header("Content-Type") || '';
@@ -946,9 +948,9 @@ sub remove_spamassassin_markup {
     $ct   = '';
     my $cd = '';
     for ( my $i = 0 ; $i <= $#msg ; $i++ ) {
-      next
-        unless ( $msg[$i] =~ /^--$boundary$/ || $flag )
-        ;    # only look at mime headers
+      # only look at mime headers
+      next unless ( $msg[$i] =~ /^--$boundary$/ || $flag );
+
       if ( $msg[$i] =~ /^\s*$/ ) {    # end of mime header
 
         # Ok, we found the encapsulated piece ...
@@ -956,9 +958,8 @@ sub remove_spamassassin_markup {
 	    ($ct eq "message/rfc822" &&
 	     $cd eq $self->{'encapsulated_content_description'}))
         {
-          splice @msg, 1, $i;
-            ;    # remove the front part, leave the 'From ' header.
-	  splice @msg, 0, 1 if ( $msg[0] !~ /^From / ); # not From?  remove it.
+          splice @msg, 0, $i+1;  # remove the front part, including the blank line
+
           # find the end and chop it off
           for ( $i = 0 ; $i <= $#msg ; $i++ ) {
             if ( $msg[$i] =~ /^--$boundary/ ) {
@@ -970,7 +971,7 @@ sub remove_spamassassin_markup {
           }
 
 	  # Ok, we're done.  Return the message.
-	  return join('',@msg);
+	  return join('', $mbox, @msg);
         }
 
         $flag = 0;
@@ -1068,7 +1069,7 @@ sub remove_spamassassin_markup {
     }
   }
 
-  return join ('', $hdrs, @newbody);
+  return join ('', $mbox, $hdrs, @newbody);
 }
 
 ###########################################################################

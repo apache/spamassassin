@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("strip2");
-use Test; BEGIN { plan tests => 3 };
+use Test; BEGIN { plan tests => 4 };
 
 # ---------------------------------------------------------------------------
 
@@ -17,7 +17,12 @@ sub diff {
 my $INPUT = 'data/spam/002';
 my $MUNGED = 'log/strip2.munged';
 
-# create the -t output
+tstprefs ("
+        $default_cf_lines
+        report_safe 1
+	");
+
+# create report_safe 1 and -t output
 sarun ("-L -t < $INPUT");
 if (move("log/$testname.${Test::ntest}", $MUNGED)) {
   sarun ("-d < $MUNGED");
@@ -28,7 +33,28 @@ else {
   ok(0);
 }
 
-# create the normal output
+tstprefs ("
+        $default_cf_lines
+        report_safe 2
+	");
+
+# create report_safe 2 output
+sarun ("-L < $INPUT");
+if (move("log/$testname.${Test::ntest}", $MUNGED)) {
+  sarun ("-d < $MUNGED");
+  ok(diff($INPUT,"log/$testname.${Test::ntest}"));
+}
+else {
+  warn "move failed: $!\n";
+  ok(0);
+}
+
+tstprefs ("
+        $default_cf_lines
+        report_safe 0
+	");
+
+# create report_safe 0 output
 sarun ("-L < $INPUT");
 if (move("log/$testname.${Test::ntest}", $MUNGED)) {
   sarun ("-d < $MUNGED");

@@ -587,16 +587,17 @@ above headers added/modified.
 sub rewrite_mail {
   my ($self) = @_;
 
+  my $mbox = $self->{msg}->get_mbox_seperator() || '';
   if ($self->{is_spam} && $self->{conf}->{report_safe}) {
-    return $self->rewrite_as_spam();
+    return $mbox.$self->rewrite_report_safe();
   }
   else {
-    return $self->rewrite_headers();
+    return $mbox.$self->rewrite_no_report_safe();
   }
 }
 
 # rewrite the entire message as spam (headers and body)
-sub rewrite_as_spam {
+sub rewrite_report_safe {
   my ($self) = @_;
 
   # This is the original message.  We do not want to make any modifications so
@@ -606,9 +607,6 @@ sub rewrite_as_spam {
 
   # This is the new message.
   my $newmsg = '';
-
-  # remove first line if it is "From "
-  $original =~ s/^From .*\n//;
 
   # the report charset
   my $report_charset = "";
@@ -752,11 +750,10 @@ $original
 
 EOM
   
-  my $mbox = $self->{msg}->get_mbox_seperator() || '';
-  return $mbox . $newmsg;
+  return $newmsg;
 }
 
-sub rewrite_headers {
+sub rewrite_no_report_safe {
   my ($self) = @_;
 
   # put the pristine headers into an array
@@ -795,8 +792,7 @@ sub rewrite_headers {
     push(@pristine_headers, "X-Spam-$header: $line\n");
   }
 
-  my $mbox = $self->{msg}->get_mbox_seperator() || '';
-  return join('', $mbox, @pristine_headers, "\n", $self->{msg}->get_pristine_body());
+  return join('', @pristine_headers, "\n", $self->{msg}->get_pristine_body());
 }
 
 sub qp_encode_header {
