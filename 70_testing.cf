@@ -133,3 +133,11 @@
 ### header T_FORGED_DEF_WHITELIST     eval:check_forged_in_default_whitelist()
 ### describe T_FORGED_DEF_WHITELIST   Forged From: is in default white-list
 ### tflags T_FORGED_DEF_WHITELIST     userconf
+
+# thanks to David Ritz for passing this on; ready for post-3.0.0
+header T_UNCLOSED_BRACKET   ALL =~ /\[\d+\r?\n/s
+
+# A particularly persistent .tw spammer sending broken messages; gets past
+# my installation :( .  Happily, they always HELO with "0".
+header HELO_0     X-Spam-Relays-Untrusted =~ / helo=0 /
+
