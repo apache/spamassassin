@@ -593,6 +593,12 @@ sub rewrite_as_spam {
     #$newmsg .= $1;
   }
 
+  # the report charset
+  my $report_charset = "";
+  if ($self->{conf}->{report_charset}) {
+    $report_charset = "; charset=" . $self->{conf}->{report_charset};
+  }
+
   # the SpamAssassin report
   my $report = $self->{report};
 
@@ -676,7 +682,7 @@ Content-Type: multipart/mixed; boundary="$boundary"
 This is a multi-part message in MIME format.
 
 --$boundary
-Content-Type: text/plain
+Content-Type: text/plain$report_charset
 Content-Disposition: inline
 Content-Transfer-Encoding: 8bit
 
