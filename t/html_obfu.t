@@ -8,10 +8,10 @@ use Test; BEGIN { plan tests => 6 };
 
 %patterns = (
 q{ EXCUSE_13 } => 'EXCUSE_13',
-q{ HERBAL_VIAGRA } => 'HERBAL_VIAGRA',
+q{ NATURAL_VIAGRA } => 'NATURAL_VIAGRA',
 q{ GUARANTEE } => 'GUARANTEE',
 q{ ALL_NATURAL } => 'ALL_NATURAL',
-q{ PENNIES_A_DAY } => 'PENNIES_A_DAY',
+q{ OUR_AFFILIATE_PARTNERS } => 'OUR_AFFILIATE_PARTNERS',
 );
 
 %anti_patterns = (

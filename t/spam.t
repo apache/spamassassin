@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spam");
-use Test; BEGIN { plan tests => 10 };
+use Test; BEGIN { plan tests => 9 };
 
 # ---------------------------------------------------------------------------
 
@@ -12,7 +12,6 @@ q{ Subject: There yours for FREE!}, 'subj',
 q{ X-Spam-Status: Yes, hits=}, 'status',
 q{ X-Spam-Flag: YES}, 'flag',
 q{ X-Spam-Level: **********}, 'stars',
-q{ UNDISC_RECIPS }, 'undisc',
 q{ FROM_ENDS_IN_NUMS }, 'endsinnums',
 q{ NO_REAL_NAME }, 'noreal',
 q{ REMOVE_SUBJ }, 'removesubject',
