@@ -1211,7 +1211,25 @@ sub is_dns_available {
     dbg ("dns_available set to yes in config file, skipping test", "dnsavailable", -1);
     return $IS_DNS_AVAILABLE;
   }
-  
+
+  # Check version numbers - runtime check only
+  if (defined $Net::DNS::VERSION) {
+    if (Mail::SpamAssassin::Util::am_running_on_windows()) {
+      if ($Net::DNS::VERSION < 0.46) {
+	dbg("Net::DNS version is $Net::DNS::VERSION, but need 0.46 for Win32",
+	    "dnsavailable", -1);
+	return $IS_DNS_AVAILABLE;
+      }
+    }
+    else {
+      if ($Net::DNS::VERSION < 0.34) {
+	dbg("Net::DNS version is $Net::DNS::VERSION, but need 0.34",
+	    "dnsavailable", -1);
+	return $IS_DNS_AVAILABLE;
+      }
+    }
+  }
+
   goto done unless $self->load_resolver();
 
   if ($dnsopt =~ /test:\s+(.+)$/) {
