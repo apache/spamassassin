@@ -19,35 +19,42 @@ describe HTML_MESSAGE		HTML included in message
 # the HTML percentage range
 # should really be converted into a numeric function test
 body HTML_00_10			eval:html_range('ratio','0.00','0.10')
-describe HTML_00_10		Message is 00% to 10% HTML
 body HTML_10_20			eval:html_range('ratio','0.10','0.20')
-describe HTML_10_20		Message is 10% to 20% HTML
 body HTML_20_30			eval:html_range('ratio','0.20','0.30')
-describe HTML_20_30		Message is 20% to 30% HTML
 body HTML_30_40			eval:html_range('ratio','0.30','0.40')
-describe HTML_30_40		Message is 30% to 40% HTML
 body HTML_40_50			eval:html_range('ratio','0.40','0.50')
-describe HTML_40_50		Message is 40% to 50% HTML
 body HTML_50_60			eval:html_range('ratio','0.50','0.60')
-describe HTML_50_60		Message is 50% to 60% HTML
 body HTML_60_70			eval:html_range('ratio','0.60','0.70')
-describe HTML_60_70		Message is 60% to 70% HTML
 body HTML_70_80			eval:html_range('ratio','0.70','0.80')
-describe HTML_70_80		Message is 70% to 80% HTML
 body HTML_80_90			eval:html_range('ratio','0.80','0.90')
-describe HTML_80_90		Message is 80% to 90% HTML
 body HTML_90_100		eval:html_range('ratio','0.90','1.00')
+describe HTML_00_10		Message is 0% to 10% HTML
+describe HTML_10_20		Message is 10% to 20% HTML
+describe HTML_20_30		Message is 20% to 30% HTML
+describe HTML_30_40		Message is 30% to 40% HTML
+describe HTML_40_50		Message is 40% to 50% HTML
+describe HTML_50_60		Message is 50% to 60% HTML
+describe HTML_60_70		Message is 60% to 70% HTML
+describe HTML_70_80		Message is 70% to 80% HTML
+describe HTML_80_90		Message is 80% to 90% HTML
 describe HTML_90_100		Message is 90% to 100% HTML
 
 # HTML shouting range
 # should really be converted into a numeric function test
-body HTML_SHOUTING3            eval:html_range('max_shouting','2','3')
-body HTML_SHOUTING4            eval:html_range('max_shouting','3','4')
-body HTML_SHOUTING5            eval:html_range('max_shouting','4','5')
-body HTML_SHOUTING6            eval:html_range('max_shouting','5','6')
-body HTML_SHOUTING7            eval:html_range('max_shouting','6','7')
-body HTML_SHOUTING8            eval:html_range('max_shouting','7','8')
-body HTML_SHOUTING9            eval:html_range('max_shouting','8')
+body HTML_SHOUTING3		eval:html_range('max_shouting','2','3')
+body HTML_SHOUTING4		eval:html_range('max_shouting','3','4')
+body HTML_SHOUTING5		eval:html_range('max_shouting','4','5')
+body HTML_SHOUTING6		eval:html_range('max_shouting','5','6')
+body HTML_SHOUTING7		eval:html_range('max_shouting','6','7')
+body HTML_SHOUTING8		eval:html_range('max_shouting','7','8')
+body HTML_SHOUTING9		eval:html_range('max_shouting','8')
+describe HTML_SHOUTING3		HTML has very strong "shouting" markup
+describe HTML_SHOUTING4		HTML has very strong "shouting" markup
+describe HTML_SHOUTING5		HTML has very strong "shouting" markup
+describe HTML_SHOUTING6		HTML has very strong "shouting" markup
+describe HTML_SHOUTING7		HTML has very strong "shouting" markup
+describe HTML_SHOUTING8		HTML has very strong "shouting" markup
+describe HTML_SHOUTING9		HTML has very strong "shouting" markup
 
 body HTML_TABLE_THICK_BORDER		eval:html_test('thick_border')
 describe HTML_TABLE_THICK_BORDER	HTML table has thick border
@@ -251,7 +258,7 @@ rawbody SPAM_FORM_RETURN	/return validate_form/
 describe SPAM_FORM_RETURN	Form for checking email address
 rawbody SPAM_FORM_ACTION	/action="\&\#\d+;\&\#\d+;\&\#\d+;\&\#\d+;/i
 describe SPAM_FORM_ACTION	Obfuscated action attribute in HTML form
-rawbody  OBFUSCATING_COMMENT	/[^\s>]<!--.{0,12}?-->[^\s<]/
+rawbody OBFUSCATING_COMMENT	/[^\s>]<!--.{0,12}?-->[^\s<]/
 describe OBFUSCATING_COMMENT	HTML comments which obfuscate text
 
 rawbody HIDE_WIN_STATUS		/<[^>]+onMouseOver=[^>]+window\.status=/i
