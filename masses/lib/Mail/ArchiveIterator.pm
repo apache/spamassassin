@@ -121,7 +121,7 @@ sub mass_check_mh_folder {
   my $self = shift;
   my $folder = shift;
   opendir(DIR, $folder) || die "Can't open $folder dir: $!";
-  my @files = grep { -f } map { "$folder/$_" } grep { /^[0-9]/ } readdir(DIR);
+  my @files = grep { -f } map { "$folder/$_" } grep { /^(?:[0-9]|[\da-f]{32}$)/ } readdir(DIR);
   closedir(DIR);
 
   @files = sortbynum(@files) if $self->{opt_sort};
