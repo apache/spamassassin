@@ -8,6 +8,7 @@
 # I suggest adding a prefix to rules in this file, "T_" -- this
 # helps identify probationary rules in test output.
 
+# http://www.hughes-family.org/bugzilla/show_bug.cgi?id=678
 body T_DOMAIN_4U2         /[\@\.]\S*(?:4u|u2|2u|you2|4you|2you|foryou)\S*\.(?:net|com|org)\b/
 describe T_DOMAIN_4U2     Domain name containing "4u", "u2" or variants.
 
@@ -110,3 +111,6 @@ describe T_MEMBER             Member Stuff
 body T_UNLIMITED                  /UNLIMITED/
 describe T_UNLIMITED              Unlimited in caps
 
+# http://www.hughes-family.org/bugzilla/show_bug.cgi?id=699
+header T_MICROSOFT		exists:microsoft
+describe T_MICROSOFT		A "microsoft" header was found
