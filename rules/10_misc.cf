@@ -12,7 +12,7 @@
 # modifications, so you lose 6 columns right there.
 #
 #      ......................................................................
-clear-report-template
+clear_report_template
 report This mail is probably spam.  The original message has been attached
 report along with this report, so you can recognize or block similar unwanted
 report mail in future.  See http://spamassassin.org/tag/ for more details.
@@ -28,11 +28,11 @@ report _SUMMARY_
 # Terse report template.
 #
 #            ......................................................................
-clear-terse-report-template
-terse-report ---- Start SpamAssassin results
-terse-report _HITS_ hits, _REQD_ required;
-terse-report _SUMMARY_
-terse-report ---- End of SpamAssassin results
+clear_terse_report_template
+terse_report ---- Start SpamAssassin results
+terse_report _HITS_ hits, _REQD_ required;
+terse_report _SUMMARY_
+terse_report ---- End of SpamAssassin results
 #            ......................................................................
 
 ###########################################################################
@@ -40,7 +40,7 @@ terse-report ---- End of SpamAssassin results
 # begin with "Xxxxxx: " where Xxxxxx is a header, they'll be used as
 # headers.
 
-clear-spamtrap-template
+clear_spamtrap_template
 spamtrap Subject: this address is no longer available
 
 spamtrap [this message has been automatically generated]
@@ -65,11 +65,11 @@ spamtrap
 # Unsafe-for-viewing message report template.
 #
 #             ......................................................................
-clear-unsafe-report-template
-unsafe-report The original message did not contain plain text, and may be unsafe to
-unsafe-report open with some email clients; in particular, it may contain a virus,
-unsafe-report or confirm that your address can receive spam.  If you wish to view
-unsafe-report it, it may be safer to save it to a file and open it with an editor.
+clear_unsafe_report_template
+unsafe_report The original message did not contain plain text, and may be unsafe to
+unsafe_report open with some email clients; in particular, it may contain a virus,
+unsafe_report or confirm that your address can receive spam.  If you wish to view
+unsafe_report it, it may be safer to save it to a file and open it with an editor.
 #             ......................................................................
 
 ###########################################################################
