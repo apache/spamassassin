@@ -166,7 +166,7 @@ sub check {
   my ($self, $mail_obj) = @_;
   local ($_);
 
-  $self->init();
+  $self->init(1);
   my $mail = $self->encapsulate_mail_object ($mail_obj);
   my $msg = Mail::SpamAssassin::PerMsgStatus->new($self, $mail);
   $msg->check();
@@ -199,7 +199,7 @@ sub report_as_spam {
   my ($self, $mail_obj, $options) = @_;
   local ($_);
 
-  $self->init();
+  $self->init(1);
   my $mail = $self->encapsulate_mail_object ($mail_obj);
   my $msg = Mail::SpamAssassin::Reporter->new($self, $mail, $options);
   $msg->report ();
@@ -221,7 +221,7 @@ sub reply_with_warning {
   my ($self, $mail_obj, $replysender) = @_;
   local ($_);
 
-  $self->init();
+  $self->init(1);
   my $mail = $self->encapsulate_mail_object ($mail_obj);
   my $msg = new Mail::SpamAssassin::Replier ($self, $mail);
   $msg->reply ($replysender);
@@ -240,7 +240,7 @@ sub remove_spamassassin_markup {
   my ($self, $mail_obj) = @_;
   local ($_);
 
-  $self->init();
+  $self->init(1);
   my $mail = $self->encapsulate_mail_object ($mail_obj);
   my $hdrs = $mail->get_all_headers();
 
@@ -336,6 +336,10 @@ this is suboptimal, as each process/thread will have to perform these actions.
 Call this function in the master thread or process to perform the actions
 straightaway, so that the sub-processes will not have to.
 
+Note that this will initialise the SpamAssassin configuration without reading
+the per-user configuration file; it assumes that you will call
+C<read_scoreonly_config> at a later point.
+
 =cut
 
 sub compile_now {
@@ -347,7 +351,7 @@ sub compile_now {
   			"\n", "x\n");
 
   dbg ("ignore: test message to precompile patterns and load modules");
-  $self->init();
+  $self->init(0);
   my $mail = Mail::SpamAssassin::MyMailAudit->new(data => \@testmsg);
   $self->check($mail)->finish();
 
@@ -358,10 +362,15 @@ sub compile_now {
 # non-public methods.
 
 sub init {
-  my ($self) = @_;
+  my ($self, $use_user_pref) = @_;
 
   if ($self->{_initted}) { return; }
   $self->{_initted} = 1;
+
+  #fix spamd reading root prefs file
+  unless (defined $use_user_pref) {
+    $use_user_pref = 1;
+  }
 
   if (!defined $self->{config_text}) {
     $self->{config_text} = '';
@@ -379,31 +388,23 @@ sub init {
       close IN;
     }
 
-    $fname = $self->{userprefs_filename};
-    if (!defined $fname) {
-      $fname = $self->first_existing_path (@default_userprefs_path);
-      dbg ("using \"$fname\" for user prefs file");
+    if ( $use_user_pref != 0 ) {
+      $fname = $self->{userprefs_filename};
+      if (!defined $fname) {
+	$fname = $self->first_existing_path (@default_userprefs_path);
+	dbg ("using \"$fname\" for user prefs file");
 
-      if (!$self->{dont_copy_prefs} && !-f $fname) {
-	# copy in the default one for later editing
-
-	my $defprefs = $self->first_existing_path
-				 (@Mail::SpamAssassin::default_prefs_path);
-	use File::Copy;
-	if (copy ($defprefs, $fname)) {
-	  warn "Created user preferences file: $fname\n";
-	} else {
-	  warn "Failed to create user preferences file\n".
-		    "\"$fname\" from default \"$defprefs\".\n";
-	}
+        if (!-f $fname && !$self->create_default_prefs($fname)) {
+          warn "Failed to create default prefs file $fname\n";
+        }
       }
-    }
 
-    if (defined $fname && -f $fname && -s _) {
-      open (IN, "<".$fname) or
-		  warn "cannot open \"$fname\"\n";
-      $self->{config_text} .= join ('', <IN>);
-      close IN;
+      if (defined $fname && -f $fname && -s _) {
+	open (IN, "<".$fname) or
+		    warn "cannot open \"$fname\"\n";
+	$self->{config_text} .= join ('', <IN>);
+	close IN;
+      }
     }
   }
 
@@ -413,6 +414,42 @@ sub init {
   delete $self->{config_text};
 
   # TODO -- open DNS cache etc. if necessary
+}
+
+=item $f->create_default_prefs ()
+
+Copy default prefs file into home directory for later use and modification.
+
+=cut
+
+sub create_default_prefs {
+  my ($self,$fname,$user) = @_;
+
+  if (!$self->{dont_copy_prefs} && !-f $fname)
+  {
+    # copy in the default one for later editing
+    my $defprefs = $self->first_existing_path
+			(@Mail::SpamAssassin::default_prefs_path);
+    use File::Copy;
+
+    if (copy ($defprefs, $fname)) {
+      if ( $< == 0 && $> == 0 && defined $user) {
+	# chown it
+	my ($uid,$gid) = (getpwnam($user))[2,3];
+	unless (chown $uid, $gid, $fname) {
+	   warn "Couldn't chown $fname to $uid:$gid for $user\n";
+	}
+      }
+     warn "Created user preferences file: $fname\n";
+     return(1);
+
+   } else {
+     warn "Failed to create user preferences file\n".
+			 "\"$fname\" from default \"$defprefs\".\n";
+   }
+ }
+
+ return(0);
 }
 
 ###########################################################################
