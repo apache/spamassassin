@@ -50,6 +50,8 @@ Prefix: %{_prefix}
 Prereq: /sbin/chkconfig
 Requires: perl-Mail-SpamAssassin = %{version}-%{release}
 Distribution: SpamAssassin
+Requires: perl(Pod::Usage)
+BuildRequires: perl >= 5.6.1 perl(Digest::SHA1)
 
 %define __find_provides /usr/lib/rpm/find-provides.perl
 %define __find_requires /usr/lib/rpm/find-requires.perl
@@ -77,10 +79,8 @@ with SpamAssassin.  See /usr/share/doc/SpamAssassin-tools-*/.
 %package -n perl-Mail-SpamAssassin
 Summary:        %{pdir}::%{pnam} -- SpamAssassin e-mail filter Perl modules
 Summary(pl):    %{pdir}::%{pnam} -- modu³y Perla filtru poczty SpamAssassin
-Requires: perl >= 5.004 perl(Pod::Usage) perl(HTML::Parser)
-# PLD version:
-#Group:          Development/Languages/Perl
-# Red Hat version:
+Requires: perl >= 5.6.1 perl(HTML::Parser) perl(Digest::SHA1)
+BuildRequires: perl >= 5.6.1 perl(HTML::Parser) perl(Digest::SHA1)
 Group:          Development/Libraries
 
 %description -n perl-Mail-SpamAssassin
