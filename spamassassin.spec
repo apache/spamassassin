@@ -54,7 +54,7 @@ kompletnego wyeliminowania Niezamawianej Komercyjnej Poczty
 (Unsolicited Commercial Email, spamu) z Twojej poczty. Mo¿e byæ
 wywo³ywany z MDA, np. Sendmaila czy Postfixa, lub z pliku ~/.forward
 itp. U¿ywa ogólnego algorytmu oceniania w celu identyfikacji
-wiadomo¶ci, które wygl±daj± na SPAM, po czym dodaje nag³ówki do
+wiadomo¶ci, które wygl±daj± na spam, po czym dodaje nag³ówki do
 wiadomo¶ci, umo¿liwiaj±c filtrowanie przez oprogramowanie u¿ytkownika.
 Ta dystrybucja zawiera programy spamd/spamc, umo¿liwiaj±ce
 uruchomienie serwera, co znacznie przyspieszy proces przetwarzania
@@ -67,7 +67,7 @@ Group:          Applications/Mail
 Requires: perl-Mail-SpamAssassin = %{version}-%{release}
 
 %description tools
-Miscleanous tools and documentation from various authors, distributed
+Miscellaneous tools and documentation from various authors, distributed
 with SpamAssassin.  See /usr/share/doc/SpamAssassin-tools-*/.
 
 %description tools -l pl
