@@ -27,7 +27,7 @@ use vars qw (
 use base qw( Exporter );
 
 @IP_VARS = qw(
-	IP_IN_RESERVED_RANGE LOCALHOST IPV4_ADDRESS IP_ADDRESS
+	IP_IN_RESERVED_RANGE IP_PRIVATE LOCALHOST IPV4_ADDRESS IP_ADDRESS
 );
 @BAYES_VARS = qw(
 	DUMP_MAGIC DUMP_TOKEN DUMP_BACKUP 
@@ -109,6 +109,15 @@ use constant IP_IN_RESERVED_RANGE => qr{^(?:
   23[0-9]|			   # 230-239/8:        IANA Multicast
   24[0-9]|			   # 240-249/8:        IANA Reserved
   25[0-5]			   # 255/8:            IANA Reserved
+)\.}ox;
+
+use constant IP_PRIVATE => qr{^(?:
+# private use ranges
+  192\.168|			   # 192.168/16:       Private Use (3330)
+  10|				   # 10/8:             Private Use (3330)
+  172\.(?:1[6-9]|2[0-9]|3[01])|	   # 172.16-172.31/16: Private Use (3330)
+  169\.254|			   # 169.254/16:       Private Use (APIPA)
+  127				   # 127/8:            Private Use (localhost)
 )\.}ox;
 
 # ---------------------------------------------------------------------------

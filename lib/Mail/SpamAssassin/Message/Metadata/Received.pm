@@ -100,7 +100,7 @@ sub parse_received_headers {
   my $did_user_specify_trust = ($trusted->get_num_nets() > 0);
   my $did_user_specify_internal = ($internal->get_num_nets() > 0);
 
-  my $IP_IN_RESERVED_RANGE = IP_IN_RESERVED_RANGE;
+  my $IP_PRIVATE = IP_PRIVATE;
   my $LOCALHOST = LOCALHOST;
 
   foreach my $line ( $msg->get_header('Received') ) {
@@ -165,8 +165,8 @@ sub parse_received_headers {
 
       # if the 'from' IP addr is in a reserved net range, it's not on
       # the public internet.
-      if ($relay->{ip_is_reserved}) {
-	dbg("received-header: 'from' ".$relay->{ip}." has reserved IP");
+      if ($relay->{ip_private}) {
+	dbg("received-header: 'from' ".$relay->{ip}." has private IP");
 	$inferred_as_trusted = 1;
       }
 
@@ -207,11 +207,11 @@ sub parse_received_headers {
 	foreach my $ip (@ips) {
 	  next if ($ip =~ /^${LOCALHOST}$/o);
 
-	  if ($ip !~ /${IP_IN_RESERVED_RANGE}/o) {
+	  if ($ip !~ /${IP_PRIVATE}/o) {
 	    dbg("received-header: 'by' ".$relay->{by}." has public IP $ip");
 	    $found_non_rsvd = 1;
 	  } else {
-	    dbg("received-header: 'by' ".$relay->{by}." has reserved IP $ip");
+	    dbg("received-header: 'by' ".$relay->{by}." has private IP $ip");
 	    $found_rsvd = 1;
 	  }
 	}
@@ -366,7 +366,7 @@ sub parse_received_line {
   my $envfrom = '';
   my $mta_looked_up_dns = 0;
   my $IP_ADDRESS = IP_ADDRESS;
-  my $IP_IN_RESERVED_RANGE = IP_IN_RESERVED_RANGE;
+  my $IP_PRIVATE = IP_PRIVATE;
   my $LOCALHOST = LOCALHOST;
   my $auth = '';
 
@@ -1140,8 +1140,8 @@ enough:
   dbg("received-header: parsed as $asstr");
   $relay->{as_string} = $asstr;
 
-  my $isrsvd = ($ip =~ /${IP_IN_RESERVED_RANGE}/o);
-  $relay->{ip_is_reserved} = $isrsvd;
+  my $is_private = ($ip =~ /${IP_PRIVATE}/o);
+  $relay->{ip_private} = $is_private;
 
   # add it to an internal array so Eval tests can use it
   return $relay;

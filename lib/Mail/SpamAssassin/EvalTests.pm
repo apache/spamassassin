@@ -218,7 +218,7 @@ sub _check_for_forged_received {
   $self->{mismatch_helo} = 0;
   $self->{mismatch_ip_helo} = 0;
 
-  my $IP_IN_RESERVED_RANGE = IP_IN_RESERVED_RANGE;
+  my $IP_PRIVATE = IP_PRIVATE;
 
   my @fromip = map { $_->{ip} } @{$self->{relays_untrusted}};
   # just pick up domains for these
@@ -281,7 +281,7 @@ sub _check_for_forged_received {
 	# allow private IP addrs here, could be a legit screwup
 	if ($hclassb && $fclassb && 
 		$hclassb ne $fclassb &&
-		!($hlo =~ /$IP_IN_RESERVED_RANGE/o))
+		!($hlo =~ /$IP_PRIVATE/o))
 	{
 	  dbg("eval: forged-HELO: massive mismatch on IP-addr HELO: '$hlo' != '$fip'");
 	  $self->{mismatch_ip_helo}++;
@@ -647,8 +647,8 @@ sub _check_received_helos {
   for (my $i = 0; $i < $self->{num_relays_untrusted}; $i++) {
     my $rcvd = $self->{relays_untrusted}->[$i];
 
-    # Ignore where IP is in reserved IP space
-    next if ($rcvd->{ip_is_reserved});
+    # Ignore where IP is in private IP space
+    next if ($rcvd->{ip_private});
 
     my $from_host = $rcvd->{rdns};
     my $helo_host = $rcvd->{helo};
@@ -763,8 +763,8 @@ sub check_for_sender_no_reverse {
   # Ignore if the from host is domainless (has no dot)
   return 0 unless ($srcvd->{rdns} =~ /\./);
 
-  # Ignore if the from host is from a reserved IP range
-  return 0 if ($srcvd->{ip_is_reserved});
+  # Ignore if the from host is from a private IP range
+  return 0 if ($srcvd->{ip_private});
 
   return 1;
 } # check_for_sender_no_reverse()
@@ -882,11 +882,11 @@ sub check_from_in_auto_whitelist {
     local $_ = lc $self->get('From:addr');
     return 0 unless /\S/;
 
-    # find the earliest usable "originating IP".  ignore reserved nets
+    # find the earliest usable "originating IP".  ignore private nets
     my $origip;
     foreach my $rly (reverse (@{$self->{relays_trusted}}, @{$self->{relays_untrusted}}))
     {
-      next if ($rly->{ip_is_reserved});
+      next if ($rly->{ip_private});
       if ($rly->{ip}) {
 	$origip = $rly->{ip}; last;
       }
@@ -1256,9 +1256,9 @@ sub check_rbl_backend {
     push (@originating, ($str =~ m/($IP_ADDRESS)/g));
   }
 
-  # Let's go ahead and trim away all Reserved ips (KLC)
+  # Let's go ahead and trim away all private ips (KLC)
   # also uniq the list and strip dups. (jm)
-  my @ips = $self->ip_list_uniq_and_strip_reserved (@fullips);
+  my @ips = $self->ip_list_uniq_and_strip_private(@fullips);
 
   # if there's no untrusted IPs, it means we trust all the open-internet
   # relays, so we can return right now.
@@ -1280,7 +1280,7 @@ sub check_rbl_backend {
       # specified some third-party relays as trusted.  Also, don't use
       # @originating; those headers are added by a phase of relaying through
       # a server like Hotmail, which is not going to be in dialup lists anyway.
-      @ips = $self->ip_list_uniq_and_strip_reserved(@fullexternal);
+      @ips = $self->ip_list_uniq_and_strip_private(@fullexternal);
       if (scalar @ips > 1) { pop @ips; }
     }
     # If name is foo-firsttrusted, check only the Received header just
@@ -1300,7 +1300,7 @@ sub check_rbl_backend {
     else
     {
       # add originating IPs as untrusted IPs
-      @ips = reverse $self->ip_list_uniq_and_strip_reserved (@ips, @originating);
+      @ips = reverse $self->ip_list_uniq_and_strip_private(@ips, @originating);
 
       # How many IPs max you check in the received lines
       my $checklast=$self->{conf}->{num_check_received};
@@ -1440,15 +1440,15 @@ sub check_for_from_dns {
   }
 }
 
-sub ip_list_uniq_and_strip_reserved {
+sub ip_list_uniq_and_strip_private {
   my ($self, @origips) = @_;
   my @ips = ();
   my %seen = ();
-  my $IP_IN_RESERVED_RANGE = IP_IN_RESERVED_RANGE;
+  my $IP_PRIVATE = IP_PRIVATE;
   foreach my $ip (@origips) {
     next unless $ip;
     next if (exists ($seen{$ip})); $seen{$ip} = 1;
-    next if ($ip =~ /$IP_IN_RESERVED_RANGE/o);
+    next if ($ip =~ /$IP_PRIVATE/o);
     push(@ips, $ip);
   }
   return @ips;
@@ -2959,15 +2959,15 @@ sub check_for_rdns_helo_mismatch {	# T_FAKE_HELO_*
 sub helo_ip_mismatch {
   my ($self) = @_;
   my $IP_ADDRESS = IPV4_ADDRESS;
-  my $IP_IN_RESERVED_RANGE = IP_IN_RESERVED_RANGE;
+  my $IP_PRIVATE = IP_PRIVATE;
 
   for my $relay (@{$self->{relays_untrusted}}) {
     # is HELO usable?
     next unless ($relay->{helo} =~ m/^$IP_ADDRESS$/ &&
-		 $relay->{helo} !~ /^$IP_IN_RESERVED_RANGE/);
+		 $relay->{helo} !~ /^$IP_PRIVATE/);
     # compare HELO with IP
     return 1 if ($relay->{ip} =~ m/^$IP_ADDRESS$/ &&
-		 $relay->{ip} !~ m/^$IP_IN_RESERVED_RANGE/ &&
+		 $relay->{ip} !~ m/^$IP_PRIVATE/ &&
 		 $relay->{helo} ne $relay->{ip} &&
 		 # different IP is okay if in same /24
 		 $relay->{helo} =~ /^(\d+\.\d+\.\d+\.)/ &&
@@ -3276,8 +3276,8 @@ sub check_for_numeric_helo {
 
   if ($rcvd) {
     my $IP_ADDRESS = IPV4_ADDRESS;
-    my $IP_IN_RESERVED_RANGE = IP_IN_RESERVED_RANGE;
-    if ($rcvd =~ /helo=($IP_ADDRESS)\b/i && $1 !~ /^$IP_IN_RESERVED_RANGE/) {
+    my $IP_PRIVATE = IP_PRIVATE;
+    if ($rcvd =~ /helo=($IP_ADDRESS)\b/i && $1 !~ /^$IP_PRIVATE/) {
       return 1;
     }
   }
@@ -3338,10 +3338,10 @@ sub check_numeric_http {
   my ($self) = @_;
 
   my $IP_ADDRESS = IPV4_ADDRESS;
-  my $IP_IN_RESERVED_RANGE = IP_IN_RESERVED_RANGE;
+  my $IP_PRIVATE = IP_PRIVATE;
   for my $uri ($self->get_uri_list()) {
     if ($uri =~ m{^https?://[^/?]*\b($IP_ADDRESS)\b}i &&
-	$1 !~ /^$IP_IN_RESERVED_RANGE/)
+	$1 !~ /^$IP_PRIVATE/)
     {
       return 1;
     }
