@@ -1,4 +1,4 @@
-# SpamAssassin - MSExec rules
+# SpamAssassin - anti-virus rules
 #
 # Please don't modify this file as your changes will be overwritten with
 # the next update. Use @@LOCAL_RULES_DIR@@/local.cf instead.
@@ -22,12 +22,14 @@
 #
 ###########################################################################
 
-# Requires the Mail::SpamAssassin::Plugin::MSExec plugin be loaded.
+# Requires the Mail::SpamAssassin::Plugin::AntiVirus plugin be loaded.
 
-ifplugin Mail::SpamAssassin::Plugin::MSExec
+ifplugin Mail::SpamAssassin::Plugin::AntiVirus
 
-body		MICROSOFT_EXECUTABLE	eval:check_microsoft_executable()
-describe	MICROSOFT_EXECUTABLE	Message includes Microsoft executable program
-score		MICROSOFT_EXECUTABLE	0.100
+body MICROSOFT_EXECUTABLE	eval:check_microsoft_executable()
+describe MICROSOFT_EXECUTABLE	Message includes Microsoft executable program
 
-endif   # Mail::SpamAssassin::Plugin::MSExec
+body MIME_SUSPECT_NAME		eval:check_suspect_name()
+describe MIME_SUSPECT_NAME	MIME filename does not match content
+
+endif   # Mail::SpamAssassin::Plugin::AntiVirus

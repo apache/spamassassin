@@ -55,10 +55,10 @@ loadplugin Mail::SpamAssassin::Plugin::SpamCop
 #
 #loadplugin Mail::SpamAssassin::Plugin::DomainKeys
 
-# MSExec - do simple checks to see if the message includes a Microsoft
-# executable file
+# AntiVirus - some simple anti-virus checks, this is not a replacement
+# for an anti-virus filter like Clam AntiVirus
 #
-#loadplugin Mail::SpamAssassin::Plugin::MSExec
+#loadplugin Mail::SpamAssassin::Plugin::AntiVirus
 
 # AWL - do auto-whitelist checks
 #
