@@ -1054,13 +1054,13 @@ sub is_dns_available {
   if (defined $Net::DNS::VERSION) {
     if (Mail::SpamAssassin::Util::am_running_on_windows()) {
       if ($Net::DNS::VERSION < 0.46) {
-	dbg("dns: Net::DNS version is $Net::DNS::VERSION, but need 0.46 for Win32");
+	warn("dns: Net::DNS version is $Net::DNS::VERSION, but need 0.46 for Win32");
 	return $IS_DNS_AVAILABLE;
       }
     }
     else {
       if ($Net::DNS::VERSION < 0.34) {
-	dbg("dns: Net::DNS version is $Net::DNS::VERSION, but need 0.34");
+	warn("dns: Net::DNS version is $Net::DNS::VERSION, but need 0.34");
 	return $IS_DNS_AVAILABLE;
       }
     }
