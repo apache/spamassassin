@@ -29,8 +29,8 @@ const double SCORE_CAP = 3.0;
 
 const double crossover_rate = 0.65;
 
-const int pop_size = 200;
-const int replace_num = 50;
+const int pop_size = 50;
+const int replace_num = 20;
 
 const int maxiter = 50000;
 
