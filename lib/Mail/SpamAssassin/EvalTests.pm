@@ -939,7 +939,7 @@ sub check_for_unique_subject_id {
     $id = $1;
     # exempt online purchases
     if ($id =~ /\d{5,}/
-	&& /(?:item|invoice|order|number|confirmation).{1,6}$id\s*$/)
+	&& /(?:item|invoice|order|number|confirmation).{1,6}\Q$id\E\s*$/)
     {
       $id = 0;
     }
