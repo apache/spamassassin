@@ -239,8 +239,12 @@ describe CORRUPT_MSGID		'Message-Id' contains bits of Received header
 header MSG_ID_ADDED_BY_MTA	Message-Id =~ / \(added by /
 describe MSG_ID_ADDED_BY_MTA	'Message-Id' was added by a relay
 
-header MSG_ID_ADDED_BY_MTA_2	ALL =~ /Message-Id: .*\nReceived: /s
+header MSG_ID_ADDED_BY_MTA_2	ALL =~ /Message-Id: .*(?!yahoo).*\nReceived: /s
 describe MSG_ID_ADDED_BY_MTA_2	'Message-Id' was added by a relay (2)
+
+# compensate for common false pos on above rule: Yahoo! webmail
+header YAHOO_MSGID_ADDED	ALL =~ /Message-Id: <\S+\.mail.yahoo.com>\nReceived: .*by \S+mail.yahoo.com via HTTP;/s
+describe YAHOO_MSGID_ADDED	'Message-Id' was added by yahoo.com, that's OK
 
 header MANY_FROMS		From =~ /^[^\"\<\(]+, [^\"\<\(]+$/
 describe MANY_FROMS		'From' contains more than one address
@@ -309,4 +313,7 @@ describe ORDER_STATUS           Subject looks like order info
 
 header IN_REP_TO		In-Reply-To =~ /\S/
 describe IN_REP_TO		'In-Reply-To' line found
+
+header GAPPY_SUBJECT            Subject =~ /(?:[a-z][^a-z]+){4,}/i
+describe GAPPY_SUBJECT          'Subject' contains G.a.p.p.y-T.e.x.t
 

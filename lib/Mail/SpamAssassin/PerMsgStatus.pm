@@ -85,6 +85,7 @@ sub check {
     # do body tests with decoded portions
     {
       my $decoded = $self->get_decoded_stripped_body_text_array();
+      # warn "JMD ". join ("", @{$decoded}). "\n";
       $self->do_body_tests($decoded);
       $self->do_body_eval_tests($decoded);
       undef $decoded;
@@ -580,7 +581,7 @@ sub get_raw_body_text_array {
 
 	if (/^Content-[Tt]ype: (\S+?\/\S+?)(?:\;|\s|$)/) {
 	  $ctype = $1;
-	  if ($ctype =~ /^(text\/\S+|multipart\/alternative)/) {
+	  if ($ctype =~ /^(text\/\S+|message\/\S+|multipart\/alternative)/) {
 	    $ctypeistext = 1; next;
 	  } else {
 	    $ctypeistext = 0; next;
@@ -657,10 +658,17 @@ sub get_decoded_stripped_body_text_array {
   my $bodytext = $self->get_decoded_body_text_array();
 
   my $text = '';
+  my $lastwasmime = 0;
   foreach $_ (@{$bodytext}) {
     /^SPAM: / and next;         # SpamAssassin markup
-    /^--/ and next;		# MIME bits
-    /Content-.*: / and next;	# MIME bits
+
+    /^--/ and $lastwasmime=1 and next;		# MIME bits
+    if ($lastwasmime) {
+      /^$/ and $lastwasmime=0;
+      /Content-.*: / and next;
+      /^\s/ and next;
+    }
+
     $text .= $_;
   }
   $text =~ s/=\r?\n//gis;	# QP line endings

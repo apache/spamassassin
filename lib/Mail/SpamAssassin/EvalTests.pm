@@ -105,6 +105,7 @@ sub check_for_from_to_equivalence {
 
 ###########################################################################
 
+# FORGED_HOTMAIL_RCVD
 sub check_for_forged_hotmail_received_headers {
   my ($self) = @_;
 
@@ -114,7 +115,7 @@ sub check_for_forged_hotmail_received_headers {
   my $rcvd = $self->get ('Received');
   $rcvd =~ s/\s+/ /gs;		# just spaces, simplify the regexp
 
-  my $ip = $self->get ('X-Originating-IP');
+  my $ip = $self->get ('X-Originating-Ip');
   if ($ip =~ /\d+\.\d+\.\d+\.\d+/) { $ip = 1; } else { $ip = 0; }
 
   # Hotmail formats its received headers like this:
