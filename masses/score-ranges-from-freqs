@@ -40,7 +40,7 @@ while (<>) {
   $freq_nonspam{$test} = $nonspam;
 
   my $tflags = $tflags->{$test}; $tflags ||= '';
-  if ($tflags =~ /\bnet\b/) {
+  if ($tflags =~ /\b(?:net|userconf)\b/) {
     $mutable_tests{$test} = 0;
   } else {
     $mutable_tests{$test} = 1;
