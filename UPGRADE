@@ -20,7 +20,7 @@ Note for Users Upgrading to SpamAssassin 3.0.0
   issues.  It is replaced by the --virtual-config-dir switch.
 
 - The "rewrite_subject" configuration setting was deprecated and is now
-  removed. Instead, using "rewrite_header Subject [your desired setting]".
+  removed. Instead, use "rewrite_header Subject [your desired setting]".
   e.g.
 
     rewrite_subject ****SPAM(_SCORE_)****
@@ -29,18 +29,34 @@ Note for Users Upgrading to SpamAssassin 3.0.0
 
     rewrite_header Subject ****SPAM(_SCORE_)****
 
-- The Bayesian storage modules have been completely re-written and now
-  include Berkeley DB (DBM) storage as well as SQL based storage (see
-  sql/README.bayes for more information).  In addition, a new format has
-  been introduced for the bayes database that stores tokens in fixed
-  length hashes.  All DBM databases should be automatically converted to
-  this new format the first time they are opened for write.  You can
-  manually perform the upgrade by running "sa-learn --sync" from the
-  command line.
-
-  The "sa-learn --rebuild" command has been deprecated; please use
+- The "sa-learn --rebuild" command has been deprecated; please use
   "sa-learn --sync" instead.  The --rebuild option will remain temporarily
   for backwards compatability.
+
+- The Bayesian storage modules have been completely re-written and now
+  include Berkeley DB (DBM) storage as well as SQL based storage (see
+  sql/README.bayes for more information).  In addition, a new format
+  has been introduced for the bayes database that stores tokens in fixed
+  length hashes (Bayes v3).  All DBM databases should be automatically
+  converted to this new format the first time they are opened for write.
+  You can manually perform the upgrade by running "sa-learn --sync"
+  from the command line.
+
+  Due to the database format change, you will want to do something like
+  this when upgrading:
+
+  - stop running spamassassin/spamd (ie: you don't want it to be running
+    during the upgrade)
+  - run "sa-learn --rebuild", this will sync your journal.  if you skip
+    this step, any data from the journal will be lost when the DB is
+    upgraded.
+  - upgrade SA to 3.0.0
+  - run "sa-learn --sync", which will cause the db format to be upgraded.
+    if you want to see what is going on, you can add the "-D" option.
+  - test the new database by running some sample mails through
+    SpamAssassin, and/or at least running "sa-learn --dump" to make sure
+    the data looks valid.
+  - start running spamassassin/spamd again
 
 - "spamd" now has a default max-children setting of 5; no more than 5
   child scanner processes will be run in parallel.  Previously, there was
@@ -61,8 +77,8 @@ Note for Users Upgrading to SpamAssassin 3.0.0
     in the 2.6x series: --add-from, --pipe, -F, -P, --stop-at-threshold, -S
     in the 3.0.x series: --auto-whitelist, -a
 
-- The following flags are deprecated and will be removed in a future major
-  release: --whitelist-factory, -M, --warning-from, -w, --log-to-mbox, -l.
+- The following flags are deprecated and will be removed in a future release:
+  --whitelist-factory, -M, --warning-from, -w, --log-to-mbox, -l
 
 - SpamAssassin runs in "taint mode" by default for improved security.
   Certain third-party modules, such as Razor v2, may be incompatible with
@@ -71,7 +87,7 @@ Note for Users Upgrading to SpamAssassin 3.0.0
   versions which are patched to allow taint mode may be used as well.
 
 - Finally, 2.6x deprecated the use of the "check_bayes_db" script, and it
-  is now no longer available.  Please see the sa-learn man/pod
+  has been removed in 3.0.0.  Please see the sa-learn man/pod
   documentation for more info.
 
 Note for Users Upgrading from SpamAssassin 2.5x
@@ -100,9 +116,8 @@ Note for Users Upgrading from SpamAssassin 2.5x
   - upgrade SA to 3.0.0
   - if you were using another database module previously, run "sa-learn
     --import" to migrate the data into new DB_File files
-  - run "sa-learn --sync", this will cause the db format to be upgraded.
-    if you want to make sure everything runs correctly, you can add the
-      "-D" option.
+  - run "sa-learn --sync", which will cause the db format to be upgraded.
+    if you want to see what is going on, you can add the "-D" option.
   - test the new database by running some sample mails through
     SpamAssassin, and/or at least running "sa-learn --dump" to make sure
     the data looks valid.
