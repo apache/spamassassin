@@ -534,7 +534,13 @@ sub get_charset_from_ct_line {
 
 sub check_for_very_long_text {
   my ($self, $body) = @_;
-  (scalar @{$body} > 500);
+
+  my $count = 0;
+  foreach my $line (@{$body}) {
+    if (length($line) > 40) { $count++; }
+  }
+  if ($count > 500) { return 1; }
+  return 0;
 }
 
 ###########################################################################
