@@ -3,7 +3,7 @@
 use Getopt::Long;
 use vars qw($opt_cffile $opt_count $opt_lambda $opt_threshold);
 
-GetOptions("cffile=s", "count", "lambda=s", "threshold=s");
+GetOptions("cffile=s", "count", "lambda=f", "threshold=f");
 my $argcffile = $opt_cffile;
 
 my $justcount = 0;
