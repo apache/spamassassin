@@ -47,10 +47,12 @@ sub new {
   $self->{required_hits} = 5;
   $self->{auto_report_threshold} = 20;
   $self->{report_template} = '';
+  $self->{terse_report_template} = '';
   $self->{spamtrap_template} = '';
   $self->{razor_config} = $ENV{'HOME'}."/razor.conf";
   $self->{rewrite_subject} = 1;
   $self->{report_header} = 0;
+  $self->{use_terse_report} = 0;
   $self->{defang_mime} = 1;
   $self->{skip_rbl_checks} = 0;
   $self->{ok_locales} = '';
@@ -130,6 +132,14 @@ sub _parse {
       $self->{report_template} .= $1."\n"; next;
     }
 
+    if (/^clear-terse-report-template$/) {
+      $self->{terse_report_template} = ''; next;
+    }
+
+    if (/^terse-report\b\s*(.*?)$/) {
+      $self->{terse_report_template} .= $1."\n"; next;
+    }
+
     if (/^clear-spamtrap-template$/) {
       $self->{spamtrap_template} = ''; next;
     }
@@ -148,6 +158,10 @@ sub _parse {
 
     if (/^report_header\s+(\d+)$/) {
       $self->{report_header} = $1+0; next;
+    }
+
+    if (/^use_terse_report\s+(\d+)$/) {
+      $self->{use_terse_report} = $1+0; next;
     }
 
     if (/^defang_mime\s+(\d+)$/) {

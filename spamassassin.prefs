@@ -55,6 +55,13 @@ ok_locales		en
 #
 # report_header 1
 
+# By default, SpamAssassin uses a fairly long report format.
+# Enabling this uses a shorter format which includes all the
+# information in the normal one, but without the superfluous
+# explanations.
+#
+# use_terse_report 0
+
 # By default, spamassassin will change the Content-type: header of
 # suspected spam to "text/plain". This is a safety feature. If you
 # prefer to leave the Content-type header alone, set this to 0.

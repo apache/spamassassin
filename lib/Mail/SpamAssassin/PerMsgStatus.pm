@@ -130,7 +130,12 @@ sub check {
   			" required=".$self->{conf}->{required_hits});
   $self->{is_spam} = ($self->{hits} >= $self->{conf}->{required_hits});
 
-  $_ = $self->{conf}->{report_template};
+  if ($self->{conf}->{use_terse_report})
+  {
+    $_ = $self->{conf}->{terse_report_template};
+  } else {
+    $_ = $self->{conf}->{report_template};
+  }
   $_ ||= '(no report template found)';
 
   s/_HITS_/$self->{hits}/gs;
@@ -361,7 +366,15 @@ sub rewrite_as_spam {
     my $report = $self->{report};
     $report =~ s/^\s*\n//gm;	# Empty lines not allowed in header.
     $report =~ s/^\s*/  /gm;	# Ensure each line begins with whitespace.
-    $report = "Detailed Report\n" . $report;
+
+    if ($self->{conf}->{use_terse_report}) {
+      # Strip the superfluous SPAM: messages if we're being terse.
+      # The header can still be stripped without them.
+      $report =~ s/^  SPAM: /  /gm;
+    } else {
+      $report = "Detailed Report\n" . $report;
+    }
+    
     $self->{msg}->put_header ("X-Spam-Report", $report);
 
   } else {
@@ -948,9 +961,14 @@ sub handle_hit {
 
   $self->{test_names_hit} .= $rule.",";
 
-  $self->{test_logs} .= sprintf ("%-18s %s%s\n%s",
-		"Hit! (".$score." point".($score == 1 ? "":"s").")",
-		$area, $desc, $self->{test_log_msgs});
+  if ($self->{conf}->{use_terse_report}) {
+    $self->{test_logs} .= sprintf ("* % 2.1f -- %s%s\n%s",
+                          $score, $area, $desc, $self->{test_log_msgs});
+  } else {
+    $self->{test_logs} .= sprintf ("%-18s %s%s\n%s",
+                          "Hit! (".$score." point".($score == 1 ? "":"s").")",
+                          $area, $desc, $self->{test_log_msgs});
+  }
 }
 
 sub got_hit {
@@ -965,7 +983,11 @@ sub got_hit {
 
 sub test_log {
   my ($self, $msg) = @_;
-  $self->{test_log_msgs} .= sprintf ("%18s [%s]\n", "", $msg);
+  if ($self->{conf}->{use_terse_report}) {
+    $self->{test_log_msgs} .= sprintf ("%9s [%s]\n", "", $msg);
+  } else {
+    $self->{test_log_msgs} .= sprintf ("%18s [%s]\n", "", $msg);
+  }
 }
 
 ###########################################################################
