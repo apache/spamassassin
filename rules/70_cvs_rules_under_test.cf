@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.505 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.506 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -208,8 +208,8 @@ tflags T_RCVD_IN_OPM_HTTP_POST net
 # url: http://blackholes.five-ten-sg.com/
 # pay-to-use: no
 # delist: email address contact provided
-header RCVD_IN_FIVETEN	rbleval:check_rbl('fiveten', 'blackholes.five-ten-sg.com.')
-tflags RCVD_IN_FIVETEN net
+header T_RCVD_IN_FIVETEN	rbleval:check_rbl('fiveten', 'blackholes.five-ten-sg.com.')
+tflags T_RCVD_IN_FIVETEN net
 # bulk mailers that don't require confirmed opt-in from their customers,
 # or that have have allowed known spammers to become clients.
 header T_RCVD_IN_FIVETEN_BULK	rbleval:check_rbl_sub('fiveten', '127.0.0.4')
@@ -405,6 +405,39 @@ body __NIGERIAN_BODY_44             /\b(?:of|the) late president\b/i
 body __NIGERIAN_BODY_45                 /\bsum of {0,20}(?:million|US|\$)|(?:deposit|left|huge|discovered|abandoned).{0,15} sum of/i
 body __NIGERIAN_BODY_46                 /\bmy name is\b/i
 body __NIGERIAN_BODY_47             /\bgive\s+you .{0,15}(?:fund|money|total|sum|contact|percent)\b/i
+
+# uri case changes
+uri T_URI_CASE_REVERSE_9	/(?:[a-z][A-Z].*|(?<!\b)[A-Z][a-z].*){9}/
+uri T_URI_CASE_REVERSE_10	/(?:[a-z][A-Z].*|(?<!\b)[A-Z][a-z].*){10}/
+uri T_URI_CASE_REVERSE_11	/(?:[a-z][A-Z].*|(?<!\b)[A-Z][a-z].*){11}/
+uri T_URI_CASE_REVERSE_12	/(?:[a-z][A-Z].*|(?<!\b)[A-Z][a-z].*){12}/
+uri T_URI_CASE_CHANGE2_5	/(?:[a-z][A-Z].?|[A-Z][a-z].?){5}/
+uri T_URI_CASE_CHANGE2_6	/(?:[a-z][A-Z].?|[A-Z][a-z].?){6}/
+uri T_URI_CASE_CHANGE2_7	/(?:[a-z][A-Z].?|[A-Z][a-z].?){7}/
+uri T_URI_CASE_REVERSE2_5	/(?:[a-z][A-Z].?|(?<!\b)[A-Z][a-z].?){5}/
+uri T_URI_CASE_REVERSE2_6	/(?:[a-z][A-Z].?|(?<!\b)[A-Z][a-z].?){6}/
+uri T_URI_CASE_REVERSE2_7	/(?:[a-z][A-Z].?|(?<!\b)[A-Z][a-z].?){7}/
+uri T_URI_CASE_SWITCH3_4	/(?:[a-z][A-Z].{0,2}){4}/
+uri T_URI_CASE_SWITCH3_5	/(?:[a-z][A-Z].{0,2}){5}/
+uri T_URI_CASE_SWITCH3_6	/(?:[a-z][A-Z].{0,2}){6}/
+uri T_URI_2CASE_CHANGE_9	/(?:[a-z][A-Z]\w*|[A-Z][a-z]\w*){9}/
+uri T_URI_2CASE_CHANGE_10	/(?:[a-z][A-Z]\w*|[A-Z][a-z]\w*){10}/
+uri T_URI_2CASE_CHANGE_11	/(?:[a-z][A-Z]\w*|[A-Z][a-z]\w*){11}/
+uri T_URI_2CASE_CHANGE2_5	/(?:[a-z][A-Z]\w?|[A-Z][a-z]\w?){5}/
+uri T_URI_2CASE_CHANGE2_6	/(?:[a-z][A-Z]\w?|[A-Z][a-z]\w?){6}/
+uri T_URI_2CASE_CHANGE2_7	/(?:[a-z][A-Z]\w?|[A-Z][a-z]\w?){7}/
+uri T_URI_2CASE_REVERSE2_5	/(?:[a-z][A-Z]\w?|(?<!\b)[A-Z][a-z]\w?){5}/
+uri T_URI_2CASE_REVERSE2_6	/(?:[a-z][A-Z]\w?|(?<!\b)[A-Z][a-z]\w?){6}/
+uri T_URI_2CASE_REVERSE2_7	/(?:[a-z][A-Z]\w?|(?<!\b)[A-Z][a-z]\w?){7}/
+uri T_URI_2CASE_SWITCH3_4	/(?:[a-z][A-Z]\w{0,2}){4}/
+uri T_URI_2CASE_SWITCH3_5	/(?:[a-z][A-Z]\w{0,2}){5}/
+uri T_URI_2CASE_SWITCH3_6	/(?:[a-z][A-Z]\w{0,2}){6}/
+uri T_URI_3CASE_SWITCH_2	/(?:[a-z][A-Z]+){2}/
+uri T_URI_3CASE_SWITCH_3	/(?:[a-z][A-Z]+){3}/
+uri T_URI_3CASE_SWITCH_4	/(?:[a-z][A-Z]+){4}/
+
+# hex escape in a directory name
+uri T_HTTP_ESCAPED_DIRECTORY	/^https?\:\/\/.*?\/.*%[0-9a-f]{2}.*\//i
 
 meta T_NIGERIAN_BODY	( __NIGERIAN_BODY_1 + __NIGERIAN_BODY_2 + __NIGERIAN_BODY_3 + __NIGERIAN_BODY_5 + __NIGERIAN_BODY_6 + __NIGERIAN_BODY_7 + __NIGERIAN_BODY_8 + __NIGERIAN_BODY_9 + __NIGERIAN_BODY_10 + __NIGERIAN_BODY_11 + __NIGERIAN_BODY_12 + __NIGERIAN_BODY_13 + __NIGERIAN_BODY_14 + __NIGERIAN_BODY_15 + __NIGERIAN_BODY_16 + __NIGERIAN_BODY_17 + __NIGERIAN_BODY_18 + __NIGERIAN_BODY_19 + __NIGERIAN_BODY_20 + __NIGERIAN_BODY_21 + __NIGERIAN_BODY_22 + __NIGERIAN_BODY_25 + __NIGERIAN_BODY_26 + __NIGERIAN_BODY_27 + __NIGERIAN_BODY_28 + __NIGERIAN_BODY_29 + __NIGERIAN_BODY_30 + __NIGERIAN_BODY_31 + __NIGERIAN_BODY_32 + __NIGERIAN_BODY_33 + __NIGERIAN_BODY_34 + __NIGERIAN_BODY_35 + __NIGERIAN_BODY_36 + __NIGERIAN_BODY_37 + __NIGERIAN_BODY_38 + __NIGERIAN_BODY_39 + __NIGERIAN_BODY_40 + __NIGERIAN_BODY_41 + __NIGERIAN_BODY_42 + __NIGERIAN_BODY_43 + __NIGERIAN_BODY_44 + __NIGERIAN_BODY_45 + __NIGERIAN_BODY_46 + __NIGERIAN_BODY_47 ) > 1
 
