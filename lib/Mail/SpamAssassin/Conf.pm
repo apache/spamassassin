@@ -60,7 +60,7 @@ optional, and the default is shown below.
                    is limited to 50 'stars' to stay on the right side of the RFCs)
  _RELAYSTRUSTED_   relays used and deemed to be trusted
  _RELAYSUNTRUSTED_ relays used that can not be trusted
- _AUTOLEARN_       autolearn status ("ham", "no", "spam")
+ _AUTOLEARN_       autolearn status ("ham", "no", "spam", "unavailable", "failed")
  _TESTS(,)_        tests hit separated by , (or other separator)
  _TESTSSCORES(,)_  as above, except with scores appended (eg. AWL=-3.0,...)
  _DCCB_            DCC's "Brand"

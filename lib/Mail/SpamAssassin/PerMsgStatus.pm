@@ -275,6 +275,7 @@ sub learn {
     $isspam = 1;
   } else {
     dbg ("auto-learn? no: inside auto-learn thresholds");
+    $self->{auto_learn_status} = "no";
     return;
   }
 
@@ -286,16 +287,19 @@ sub learn {
     my $required_head_hits = 3;
 
     if ($self->{body_only_hits} < $required_body_hits) {
+      $self->{auto_learn_status} = "no";
       dbg ("auto-learn? no: too few body hits (".
 		  $self->{body_only_hits}." < ".$required_body_hits.")");
       return;
     }
     if ($self->{head_only_hits} < $required_head_hits) {
+      $self->{auto_learn_status} = "no";
       dbg ("auto-learn? no: too few head hits (".
 		  $self->{head_only_hits}." < ".$required_head_hits.")");
       return;
     }
     if ($self->{learned_hits} < $learner_said_ham_hits) {
+      $self->{auto_learn_status} = "no";
       dbg ("auto-learn? no: learner indicated ham (".
 		  $self->{learned_hits}." < ".$learner_said_ham_hits.")");
       return;
@@ -303,6 +307,7 @@ sub learn {
 
   } else {
     if ($self->{learned_hits} > $learner_said_spam_hits) {
+      $self->{auto_learn_status} = "no";
       dbg ("auto-learn? no: learner indicated spam (".
 		  $self->{learned_hits}." > ".$learner_said_spam_hits.")");
       return;
@@ -314,7 +319,7 @@ sub learn {
     my $learnstatus = $self->{main}->learn ($self->{msg}, undef, $isspam, 0);
     $learnstatus->finish();
     if ( $learnstatus->did_learn() ) {
-      $self->{auto_learn_status} = $isspam;
+      $self->{auto_learn_status} = $isspam ? "spam" : "ham";
     }
     $self->{main}->finish_learner();	# for now
 
@@ -325,6 +330,7 @@ sub learn {
 
   if ($@) {
     dbg ("auto-learning failed: $@");
+    $self->{auto_learn_status} = "failed";
   }
 }
 
@@ -809,9 +815,7 @@ sub _get_tag {
 	    },
 
 	    AUTOLEARN => sub {
-	      return "no" if !defined $self->{auto_learn_status};
-	      return "spam" if $self->{auto_learn_status};
-	      return "ham";
+	      return($self->{auto_learn_status} || "unavailable");
 	    },
 
 	    TESTS => sub {

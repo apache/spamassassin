@@ -587,8 +587,8 @@ And (by default) these headers are added:
 =item X-Spam-Status: header
 
 A string, C<Yes, hits=nn required=nn tests=xxx,xxx
-autolearn=(ham|spam|no)> is set in this header to reflect the filter
-status.
+autolearn=(ham|spam|no|unavailable|failed)> is set in this header to
+reflect the filter status.
 
 =item X-Spam-Flag: header
 
@@ -618,8 +618,8 @@ if the message is marked as spam.
 =item X-Spam-Status: header
 
 A string, C<No, hits=nn required=nn tests=xxx,xxx
-autolearn=(ham|spam|no)> is set in this header to reflect the filter
-status.
+autolearn=(ham|spam|no|unavailable|failed)> is set in this header to
+reflect the filter status.
 
 =back
 
