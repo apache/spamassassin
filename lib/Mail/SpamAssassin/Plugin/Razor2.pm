@@ -1,6 +1,6 @@
 =head1 NAME
 
-Mail::SpamAssassin::Plugin::Razor2 - perform Razor2 check of messages
+Mail::SpamAssassin::Plugin::Razor2 - perform Razor check of messages
 
 Vipul's Razor is a distributed, collaborative, spam detection and
 filtering network based on user submissions of spam.  Detection is done
@@ -83,9 +83,7 @@ sub set_config {
 
 =item use_razor2 (0|1)		(default: 1)
 
-Whether to use Razor2, if it is available.  Razor2 is used to check
-message signatures over the network against Vipul's Razor collaborative
-filtering network.
+Whether to use Razor2, if it is available.
 
 =cut
 
@@ -97,7 +95,7 @@ filtering network.
 
 =item razor_timeout n		(default: 5)
 
-How many seconds you wait for razor to complete before you go on without
+How many seconds you wait for Razor to complete before you go on without
 the results
 
 =cut
