@@ -875,7 +875,7 @@ sub _get_tag_value_for_score {
   
   # Do some rounding tricks to avoid the 5.0!=5.0-phenomenon,
   # see <http://bugzilla.spamassassin.org/show_bug.cgi?id=2607>
-  return $score if $self->{is_spam} or $score <= $rscore;
+  return $score if $self->{is_spam} or $score < $rscore;
   return $rscore - 0.1;
 }
 
