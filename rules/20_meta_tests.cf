@@ -143,3 +143,7 @@ body __BUGGY_CGI		/Below is the result of your feedback form/
 meta BUGGY_CGI			(__BUGGY_CGI && !__NMS_CGI_NOT_BUGGY)
 describe BUGGY_CGI		Broken CGI script message
 
+header __PC_RND_HEADER		ALL =~ /%RA?ND(?:OM)?_[A-Z]/i
+body __PC_RND_BODY		/%RA?ND(?:OM)?_[A-Z]/i
+rawbody __PC_RND_RAWBODY	/%RA?ND(?:OM)?_[A-Z]/i
+meta PERCENT_RANDOM	(__PC_RND_HEADER || __PC_RND_BODY || __PC_RND_RAWBODY)
