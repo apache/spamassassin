@@ -45,30 +45,27 @@ package Mail::SpamAssassin::Conf;
 use strict;
 eval "use bytes";
 
-use vars	qw{
-  	@ISA $type_body_tests $type_head_tests $type_head_evals
-	$type_body_evals $type_full_tests $type_full_evals
-	$type_rawbody_tests $type_rawbody_evals 
-	$type_uri_tests $type_uri_evals
-	$type_rbl_evals $type_rbl_res_evals $type_meta_tests
-        $VERSION
+use vars qw{
+  @ISA $VERSION
 };
 
 @ISA = qw();
 
-$type_head_tests = 101;
-$type_head_evals = 102;
-$type_body_tests = 103;
-$type_body_evals = 104;
-$type_full_tests = 105;
-$type_full_evals = 106;
-$type_rawbody_tests = 107;
-$type_rawbody_evals = 108;
-$type_uri_tests  = 109;
-$type_uri_evals  = 110;
-$type_rbl_evals  = 120;
-$type_rbl_res_evals  = 121;
-$type_meta_tests = 122;
+# odd => eval test
+use constant TYPE_HEAD_TESTS    => 0x0008;
+use constant TYPE_HEAD_EVALS    => 0x0009;
+use constant TYPE_BODY_TESTS    => 0x000a;
+use constant TYPE_BODY_EVALS    => 0x000b;
+use constant TYPE_FULL_TESTS    => 0x000c;
+use constant TYPE_FULL_EVALS    => 0x000d;
+use constant TYPE_RAWBODY_TESTS => 0x000e;
+use constant TYPE_RAWBODY_EVALS => 0x000f;
+use constant TYPE_URI_TESTS     => 0x0010;
+use constant TYPE_URI_EVALS     => 0x0011;
+use constant TYPE_META_TESTS    => 0x0012;
+use constant TYPE_RBL_EVALS     => 0x0013;
+# UNUSED => 0x0014
+use constant TYPE_RBL_RES_EVALS => 0x0015;
 
 $VERSION = 'bogus';     # avoid CPAN.pm picking up version strings later
 
@@ -979,7 +976,7 @@ Clear the report template.
       $self->{report_template} = ''; next;
     }
 
-=item unsafe-report ...some text for a report...
+=item unsafe_report ...some text for a report...
 
 Set the report template which is attached to spam mail messages which contain a
 non-text/plain part.  See the C<10_misc.cf> configuration file in
@@ -1016,7 +1013,7 @@ C</usr/share/spamassassin> for an example.
       $self->{terse_report_template} .= $1."\n"; next;
     }
 
-=item clear-terse-report-template
+=item clear_terse_report_template
 
 Clear the terse-report template.
 
@@ -1365,29 +1362,29 @@ are optional arguments to the function call.
 
 =cut
     if (/^header\s+(\S+)\s+rbleval:(.*)$/) {
-      $self->add_test ($1, $2, $type_rbl_evals); next;
+      $self->add_test ($1, $2, TYPE_RBL_EVALS); next;
     }
     if (/^header\s+(\S+)\s+rblreseval:(.*)$/) {
-      $self->add_test ($1, $2, $type_rbl_res_evals); next;
+      $self->add_test ($1, $2, TYPE_RBL_RES_EVALS); next;
     }
     if (/^header\s+(\S+)\s+eval:(.*)$/) {
       my ($name,$rule) = ($1, $2);
       # Backward compatibility with old rule names -- Marc
       if ($name =~ /^RCVD_IN/) {
-        $self->add_test ($name, $rule, $type_rbl_evals); next;
+        $self->add_test ($name, $rule, TYPE_RBL_EVALS); next;
       } else {
-       $self->add_test ($name, $rule, $type_head_evals); next;
+        $self->add_test ($name, $rule, TYPE_HEAD_EVALS); next;
       }
       $self->{user_rules_to_compile} = 1 if $scoresonly;
       next;
     }
     if (/^header\s+(\S+)\s+exists:(.*)$/) {
-      $self->add_test ($1, "$2 =~ /./", $type_head_tests);
+      $self->add_test ($1, "$2 =~ /./", TYPE_HEAD_TESTS);
       $self->{descriptions}->{$1} = "Found a $2 header";
       next;
     }
     if (/^header\s+(\S+)\s+(.*)$/) {
-      $self->add_test ($1, $2, $type_head_tests);
+      $self->add_test ($1, $2, TYPE_HEAD_TESTS);
       $self->{user_rules_to_compile} = 1 if $scoresonly;
       next;
     }
@@ -1407,12 +1404,12 @@ Define a body eval test.  See above.
 
 =cut
     if (/^body\s+(\S+)\s+eval:(.*)$/) {
-      $self->add_test ($1, $2, $type_body_evals);
+      $self->add_test ($1, $2, TYPE_BODY_EVALS);
       $self->{user_rules_to_compile} = 1 if $scoresonly;
       next;
     }
     if (/^body\s+(\S+)\s+(.*)$/) {
-      $self->add_test ($1, $2, $type_body_tests);
+      $self->add_test ($1, $2, TYPE_BODY_TESTS);
       $self->{user_rules_to_compile} = 1 if $scoresonly;
       next;
     }
@@ -1430,12 +1427,12 @@ points of the URI, and will also be faster.
 =cut
 # we don't do URI evals yet - maybe later
 #    if (/^uri\s+(\S+)\s+eval:(.*)$/) {
-#      $self->add_test ($1, $2, $type_uri_evals);
+#      $self->add_test ($1, $2, TYPE_URI_EVALS);
 #      $self->{user_rules_to_compile} = 1 if $scoresonly;
 #      next;
 #    }
     if (/^uri\s+(\S+)\s+(.*)$/) {
-      $self->add_test ($1, $2, $type_uri_tests);
+      $self->add_test ($1, $2, TYPE_URI_TESTS);
       $self->{user_rules_to_compile} = 1 if $scoresonly;
       next;
     }
@@ -1454,12 +1451,12 @@ Define a raw-body eval test.  See above.
 
 =cut
     if (/^rawbody\s+(\S+)\s+eval:(.*)$/) {
-      $self->add_test ($1, $2, $type_rawbody_evals);
+      $self->add_test ($1, $2, TYPE_RAWBODY_EVALS);
       $self->{user_rules_to_compile} = 1 if $scoresonly;
       next;
     }
     if (/^rawbody\s+(\S+)\s+(.*)$/) {
-      $self->add_test ($1, $2, $type_rawbody_tests);
+      $self->add_test ($1, $2, TYPE_RAWBODY_TESTS);
       $self->{user_rules_to_compile} = 1 if $scoresonly;
       next;
     }
@@ -1478,12 +1475,12 @@ Define a full-body eval test.  See above.
 
 =cut
     if (/^full\s+(\S+)\s+eval:(.*)$/) {
-      $self->add_test ($1, $2, $type_full_evals);
+      $self->add_test ($1, $2, TYPE_FULL_EVALS);
       $self->{user_rules_to_compile} = 1 if $scoresonly;
       next;
     }
     if (/^full\s+(\S+)\s+(.*)$/) {
-      $self->add_test ($1, $2, $type_full_tests);
+      $self->add_test ($1, $2, TYPE_FULL_TESTS);
       $self->{user_rules_to_compile} = 1 if $scoresonly;
       next;
     }
@@ -1536,7 +1533,7 @@ Meta rules cannot use other meta rules as sub-rules in this release.
 =cut
 
     if (/^meta\s+(\S+)\s+(.*)$/) {
-      $self->add_test ($1, $2, $type_meta_tests);
+      $self->add_test ($1, $2, TYPE_META_TESTS);
       $self->{user_rules_to_compile} = 1 if $scoresonly;
       next;
     }
@@ -1750,7 +1747,7 @@ shrink the database below the C<bayes_expiry_min_db_size> size).
       $self->{bayes_expiry_scan_count} = $1; next;
     }
 
-=item user-scores-dsn DBI:databasetype:databasename:hostname:port
+=item user_scores_dsn DBI:databasetype:databasename:hostname:port
 
 If you load user scores from an SQL database, this will set the DSN
 used to connect.  Example: C<DBI:mysql:spamassassin:localhost>
@@ -1843,30 +1840,76 @@ sub regression_tests {
   }
 }
 
+# note: error 70 == SA_SOFTWARE
 sub finish_parsing {
   my ($self) = @_;
 
-  foreach my $name (keys %{$self->{tests}}) {
+  while (my ($name, $text) = each %{$self->{tests}}) {
     my $type = $self->{test_types}->{$name};
-    my $text = $self->{tests}->{$name};
 
-    if ($type == $type_body_tests) { $self->{body_tests}->{$name} = $text; }
-    elsif ($type == $type_rbl_evals) { $self->{rbl_evals}->{$name} = $text; }
-    elsif ($type == $type_rbl_res_evals) { $self->{rbl_res_evals}->{$name} = $text; }
-    elsif ($type == $type_head_tests) { $self->{head_tests}->{$name} = $text; }
-    elsif ($type == $type_head_evals) { $self->{head_evals}->{$name} = $text; }
-    elsif ($type == $type_body_evals) { $self->{body_evals}->{$name} = $text; }
-    elsif ($type == $type_rawbody_tests) { $self->{rawbody_tests}->{$name} = $text; }
-    elsif ($type == $type_rawbody_evals) { $self->{rawbody_evals}->{$name} = $text; }
-    elsif ($type == $type_full_tests) { $self->{full_tests}->{$name} = $text; }
-    elsif ($type == $type_full_evals) { $self->{full_evals}->{$name} = $text; }
-    elsif ($type == $type_uri_tests)  { $self->{uri_tests}->{$name} = $text; }
-    # elsif ($type == $type_uri_evals)  { $self->{uri_evals}->{$name} = $text; }
-    elsif ($type == $type_meta_tests) { $self->{meta_tests}->{$name} = $text; }
+    # eval type handling
+    if (($type & 1) == 1) {
+      my @args;
+      if (my ($function, $args) = ($text =~ m/(.*?)\s*\((.*?)\)\s*$/)) {
+	if ($args) {
+	  @args = ($args =~ m/['"](.*?)['"]\s*(?:,\s*|$)/g);
+        }
+	unshift(@args, $function);
+	if ($type == TYPE_BODY_EVALS) {
+	  $self->{body_evals}->{$name} = \@args;
+	}
+	elsif ($type == TYPE_HEAD_EVALS) {
+	  $self->{head_evals}->{$name} = \@args;
+	}
+	elsif ($type == TYPE_RBL_EVALS) {
+	  $self->{rbl_evals}->{$name} = \@args;
+	}
+	elsif ($type == TYPE_RBL_RES_EVALS) {
+	  $self->{rbl_res_evals}->{$name} = \@args;
+	}
+	elsif ($type == TYPE_RAWBODY_EVALS) {
+	  $self->{rawbody_evals}->{$name} = \@args;
+	}
+	elsif ($type == TYPE_FULL_EVALS) {
+	  $self->{full_evals}->{$name} = \@args;
+	}
+	#elsif ($type == TYPE_URI_EVALS) {
+	#  $self->{uri_evals}->{$name} = \@args;
+	#}
+	else {
+	  $self->{errors}++;
+	  sa_die(70, "unknown type $type for $name: $text");
+	}
+      }
+      else {
+	$self->{errors}++;
+	sa_die(70, "syntax error for $name: $text");
+      }
+    }
+    # non-eval tests
     else {
-      # 70 == SA_SOFTWARE
-      $self->{errors}++;
-      sa_die (70, "unknown type $type for $name: $text");
+      if ($type == TYPE_BODY_TESTS) {
+	$self->{body_tests}->{$name} = $text;
+      }
+      elsif ($type == TYPE_HEAD_TESTS) {
+	$self->{head_tests}->{$name} = $text;
+      }
+      elsif ($type == TYPE_META_TESTS) {
+	$self->{meta_tests}->{$name} = $text;
+      }
+      elsif ($type == TYPE_URI_TESTS) {
+	$self->{uri_tests}->{$name} = $text;
+      }
+      elsif ($type == TYPE_RAWBODY_TESTS) {
+	$self->{rawbody_tests}->{$name} = $text;
+      }
+      elsif ($type == TYPE_FULL_TESTS) {
+	$self->{full_tests}->{$name} = $text;
+      }
+      else {
+	$self->{errors}++;
+	sa_die(70, "unknown type $type for $name: $text");
+      }
     }
   }
 
@@ -1880,7 +1923,7 @@ sub add_to_addrlist {
     my $re = lc $addr;
     $re =~ s/[\000\\\(]/_/gs;			# paranoia
     $re =~ s/([^\*\?_a-zA-Z0-9])/\\$1/g;	# escape any possible metachars
-    $re =~ s/\?/\./g;                           # "?" -> "."
+    $re =~ tr/?/./;				# "?" -> "."
     $re =~ s/\*/\.\*/g;				# "*" -> "any string"
     $self->{$singlelist}->{$addr} = qr/^${re}$/;
   }
@@ -1892,7 +1935,7 @@ sub add_to_addrlist_rcvd {
   my $re = lc $addr;
   $re =~ s/[\000\\\(]/_/gs;			# paranoia
   $re =~ s/([^\*\?_a-zA-Z0-9])/\\$1/g;		# escape any possible metachars
-  $re =~ s/\?/\./g;                             # "?" -> "."
+  $re =~ tr/?/./;				# "?" -> "."
   $re =~ s/\*/\.\*/g;				# "*" -> "any string"
   $self->{$listname}->{$addr}{re} = qr/^${re}$/;
   $self->{$listname}->{$addr}{domain} = $domain;
