@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.51 2002/12/13 11:04:14 matt_sergeant Exp $
+# $Id: HTML.pm,v 1.52 2002/12/15 01:48:17 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -262,10 +262,6 @@ sub html_tests {
     }
   }
 
-  if ($tag eq "img") {
-      $self->{html}{num_imgs}++;
-  }
-
   if ($tag eq "img" && exists $attr->{width} && exists $attr->{height}) {
     my $width = 0;
     my $height = 0;
@@ -281,14 +277,7 @@ sub html_tests {
     }
     if ($width > 0 && $height > 0) {
       my $area = $width * $height;
-      $self->{html}{total_image_area} += $area;
-
-      my $ratio = ($width + 0.0) / ($height + 0.0);
-
-      $self->{html}{min_img_ratio} = $ratio
-	  if ($self->{html}{min_img_ratio} eq "inf" || $ratio < $self->{html}{min_img_ratio});
-      $self->{html}{max_img_ratio} = $ratio
-	  if ($ratio > $self->{html}{max_img_ratio});
+      $self->{html}{image_area} += $area;
     }
   }
   if ($tag eq "form" && exists $attr->{action}) {
@@ -409,6 +398,26 @@ sub html_tag_balance {
   $self->{html_inside}{$tag} =~ /^([\<\>\=\!\-\+ 0-9]+)$/;
   my $val = $1;
   return eval "$val $expr";
+}
+
+sub html_image_only {
+  my ($self, undef, $min, $max) = @_;
+
+  return (exists $self->{html_inside}{'img'} &&
+	  exists $self->{html}{non_space_len} &&
+	  $self->{html}{non_space_len} > $min &&
+	  $self->{html}{non_space_len} <= $max &&
+	  $self->get('X-eGroups-Return') !~ /^sentto-.*\@returns\.groups\.yahoo\.com$/);
+}
+
+sub html_image_ratio {
+  my ($self, undef, $min, $max) = @_;
+
+  return 0 unless (exists $self->{html}{non_space_len} &&
+		   exists $self->{html}{image_area} &&
+		   $self->{html}{image_area} > 0);
+  my $ratio = $self->{html}{non_space_len} / $self->{html}{image_area};
+  return ($ratio > $min && $ratio <= $max);
 }
 
 sub html_tag_exists {
