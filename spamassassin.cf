@@ -199,7 +199,7 @@ body SUBJ_REMOVE		/subject.*remove/i
 body REPLY_REMOVE_SUBJECT	/reply.*remove.*subject/i
 body REMOVE_IN_QUOTES		/\"remove\"/i
 
-body JAVASCRIPT			/<SCRIPT LANGUAGE=[^ ]*"JavaScript">/i
+body JAVASCRIPT			/<SCRIPT.*LANGUAGE.*JavaScript/i
 body REALLY_UNSAFE_JAVASCRIPT	/<body .*onLoad/i
 body SLIGHTLY_UNSAFE_JAVASCRIPT	/on(?:Blur|Error|KeyDown|KeyUp|Load|MouseOver|Resize|Unload)/i
 body HTML_WITH_BGCOLOR		/<body .*bgcolor=\S+/i
