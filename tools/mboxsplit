@@ -1,0 +1,66 @@
+#!/usr/bin/perl -w
+
+# mboxsplit - split a mailbox into separate files
+#
+# Copyright (C) 2002  Daniel Quinlan
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of either the Artistic License or the GNU General
+# Public License as published by the Free Software Foundation; either
+# version 2 of the License, or (at your option) any later version.
+
+my $prog = $0;
+$prog =~ s@.*/@@;
+
+use vars qw($opt_h $opt_f $opt_n);
+use Getopt::Std;
+getopts("hf:n:");
+
+sub usage {
+    my $status = shift;
+
+    my $out = $status ? STDERR : STDOUT;
+    print $out <<EOF;
+usage: $prog [options] [mbox folders]
+
+ -h         print this help
+ -f format  set printf string to format
+ -n n       set initial sequence number to n
+
+mboxsplit splits mbox folders into separate files.  If no mbox folders
+are specified, standard input is used.
+
+"format" is a string formatted using the sprintf format used by Perl.
+It should include a "%d" or other integer directive which will be
+replaced by a sequence number (starting with 1 and counting upwards).
+The default is "%d".
+
+EOF
+    exit($status);
+}
+
+usage(0) if $opt_h;
+
+if (! $opt_f) {
+    $opt_f = "%d";
+}
+
+my $file_no = defined($opt_n) ? $opt_n : 1;
+my $file_open = 0;
+
+while ($line = <>) {
+    if ($file_open == 1 && $line =~ /^From /) {
+	close(OUTFILE);
+	$file_no = $file_no + 1;
+	$file_open = 0;
+    }
+    if ($file_open == 0) {
+	open(OUTFILE, '>' . sprintf($opt_f, $file_no));
+	$file_open = 1;
+    }
+    print OUTFILE $line;
+}
+
+if ($file_open == 1) {
+    close(OUTFILE);
+}
