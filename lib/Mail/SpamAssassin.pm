@@ -116,6 +116,10 @@ If none of rules_filename, userprefs_filename, or config_text is set,
 the C<Mail::SpamAssassin> module will search for the configuration files
 in the usual installed locations.
 
+=item local_tests_only
+
+If set to 1, no tests that require internet access will be performed.
+
 =back
 
 =cut
@@ -319,6 +323,7 @@ sub init {
   }
 
   $self->{conf}->parse_rules ($self->{config_text});
+  $self->{conf}->finish_parsing ();
 
   # TODO -- open DNS cache etc.
 }

@@ -66,6 +66,7 @@ Options:
                    notifying them that their message has been marked as spam
 		   (only useful if -r is used)
   -l filename      Log all mail messages to a mbox-format file
+  -L               Local tests only, do not do internet-based checks
   -d		   Remove SpamAssassin reports from a mail message and print
   -c config        configuration file
                    (default:	$rules )
@@ -84,10 +85,10 @@ require Mail::Audit;
 
 use vars qw{
   $opt_t $opt_c $opt_p $opt_h $opt_V $opt_D $opt_r $opt_P $opt_w $opt_l
-  $opt_d
+  $opt_d $opt_L
 };
 
-getopts ('tc:p:hVDrPw:l:d') or usage();
+getopts ('tc:p:hVDrPw:l:dL') or usage();
 
 if (defined $opt_h) { usage(); }
 if (defined $opt_V) {
@@ -115,6 +116,7 @@ my $mail = Mail::Audit->new();
 my $spamtest = new Mail::SpamAssassin ({
   'rules_filename'	=> $opt_c,
   'userprefs_filename'	=> $opt_p,
+  'local_tests_only'	=> $opt_L,
   'debug'		=> $opt_D
 });
 
@@ -193,6 +195,7 @@ spamassassin - mail filter to identify spam using text analysis
                    notifying them that their message has been marked as spam
 		   (only useful if -r is used)
   -l filename      Log all mail messages to a mbox-format file
+  -L               Local tests only, do not do internet-based checks
   -d		   Remove SpamAssassin reports from a mail message and print
   -c config        configuration file
   -p prefs         user preferences file
@@ -260,6 +263,13 @@ TRAPPING> section below for more details.
 
 Log all mail messages that pass through the filter, to an mbox-format file
 named by C<filename>.  Handy for use with C<-r> and C<-w>.
+
+=item -L
+
+Do only the ''local'' tests, ones that do not require an internet connection to
+operate.  Normally, SpamAssassin will try to detect whether you are connected
+to the net before doing these tests anyway, but for faster checks you may wish
+to use this.
 
 =item -d
 
