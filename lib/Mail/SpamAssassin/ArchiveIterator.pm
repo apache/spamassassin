@@ -523,41 +523,33 @@ sub scan_mailbox {
     }
     mail_open($file) or return;
     
-    my $start = 0;		# start of a message
-    my $where = 0;		# current byte offset
-    my $first = '';		# first line of message
     my $header = '';		# header text
-    my $in_header = 0;		# are in we a header?
-    while (!eof INPUT) {
-      my $offset = $start;	# byte offset of this message
-      my $header = $first;	# remember first line
-      while (<INPUT>) {
-	if ($in_header) {
-	  if (/^$/) {
-	    $in_header = 0;
+    my $offset = undef;	# byte offset of this message
+    while (defined($_=<INPUT>)) {
+      # Note: This will give the start of the message as the start of
+      # the line _following_ the mbox seperator.
+      #
+      if ( /^From / .. /^\r?$/ ) {
+        if ( $_ eq "\n" || $_ eq "\r\n" ) {
+	  my $t;
+	  if ($self->{opt_n}) {
+	    $t = $no++;
+	  } else {
+	    $t = $self->receive_date($header);
+	    $header = '';
+	    if ( !$self->message_is_useful_by_date($t)) {
+	      undef $offset;
+	      next;
+	    }
 	  }
-	  else {
-	    $header .= $_;
-	  }
+	  $self->{$class}->{index_pack($class, "m", $t, "$file.$offset")} = $t;
+	  undef $offset;
+        }
+	elsif ( !defined $offset ) {
+	  $offset = tell INPUT;
 	}
-	if (substr($_,0,5) eq "From ") {
-	  $in_header = 1;
-	  $first = $_;
-	  $start = $where;
-	  $where = tell INPUT;
-	  last;
-	}
-	$where = tell INPUT;
-      }
-      if ($header) {
-	my $t;
-	if ($self->{opt_n}) {
-	  $t = $no++;
-	} else {
-	  $t = $self->receive_date($header);
-	  next if !$self->message_is_useful_by_date($t);
-	}
-	$self->{$class}->{index_pack($class, "m", $t, "$file.$offset")} = $t;
+
+        $header .= $_;
       }
     }
     close INPUT;
