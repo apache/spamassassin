@@ -218,7 +218,7 @@ sub html_format {
   my ($self, $tag, $attr, $num) = @_;
 
   # ordered by frequency of tag groups
-  if ($tag eq "br") {
+  if ($tag eq "br" || $tag eq "div") {
     push @{$self->{html_text}}, "\n";
   }
   elsif ($tag eq "li" || $tag eq "td" || $tag eq "dd") {
@@ -459,7 +459,7 @@ my %html_color = (
   teal => 0x008080,
   white => 0xffffff,
   yellow => 0xffff00,
-  # X11 colors specified in CSS3 color module
+  # colors specified in CSS3 color module
   aliceblue => 0xf0f8ff,
   antiquewhite => 0xfaebd7,
   aqua => 0x00ffff,
