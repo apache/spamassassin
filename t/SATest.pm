@@ -298,9 +298,15 @@ sub start_spamd {
   my @spamd_args = (
       $spamd,
       qq{-D},
-      qq{-s}, qq{stderr},
-      qq{-x},
+      qq{-x}
     );
+
+  if (!$spamd_inhibit_log_to_err) {
+    push (@spamd_args, 
+      qq{-s}, qq{stderr},
+    );
+  }
+
   if ($spamd_extra_args !~ /(?:-C\s*[^-]\S+)/) {
     push(@spamd_args, 
       $spamd_cf_args,
