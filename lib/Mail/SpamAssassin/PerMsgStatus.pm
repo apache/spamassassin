@@ -1226,7 +1226,7 @@ sub extract_message_metadata {
 
   $self->{tag_data}->{RELAYSTRUSTED} = $self->{relays_trusted_str};
   $self->{tag_data}->{RELAYSUNTRUSTED} = $self->{relays_untrusted_str};
-  $self->{tag_data}->{LANGUAGES} = $self->{msg}->{metadata}->{"X-Languages"};
+  $self->{tag_data}->{LANGUAGES} = $self->{msg}->get_metadata("X-Languages");
 
   # allow plugins to add more metadata, read the stuff that's there, etc.
   $self->{main}->call_plugins ("parsed_metadata", { permsgstatus => $self });
