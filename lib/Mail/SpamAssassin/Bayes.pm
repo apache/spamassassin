@@ -113,6 +113,10 @@ use constant TRY_DUP_TOKENS_AS_LOWERCASE => 0;
 use constant TRY_DUP_TOKENS_WITH_CASEI_PREFIX => 0;
 use constant TRY_KEEP_AT_SIGNS => 1;
 use constant TRY_KEEP_THIRD_RECEIVED => 0;
+use constant TOKENIZE_LONG_8BIT_SEQS_AS_TUPLES => 0;
+use constant TOKENIZE_LONG_8BIT_SEQS_AS_TUPLES_2 => 0;
+use constant TOKENIZE_LONG_8BIT_SEQS_AS_TUPLES_3 => 1;
+use constant TOKENIZE_LONG_TOKENS_AS_SKIPS => 1;
 
 # We store header-mined tokens in the db with a "HHeaderName:val" format.
 # some headers may contain lots of gibberish tokens, so allow a little basic
@@ -155,7 +159,7 @@ use constant ROBINSON_MIN_PROB_STRENGTH => 0.27;
 
 # How long a token should we hold onto?  (note: German speakers typically
 # will require a longer token than English ones.)
-use constant MAX_TOKEN_LENGTH => 20;
+use constant MAX_TOKEN_LENGTH => 15;
 
 # lower and upper bounds for probabilities; we lock probs into these
 # so one high-strength token can't overwhelm a set of slightly lower-strength
@@ -293,7 +297,7 @@ sub tie_db_writable {
       #check to see how old the lockfile is
       my $lock_age = (stat($lock_file))[10];
       my $now = (stat($lock_tmp))[10];
-      if ($lock_age < $now - $max_lock_age) {
+      if (!defined($lock_age) || $lock_age < $now - $max_lock_age) {
 	#we got a stale lock, break it
 	dbg("bayes: $$ breaking stale lockfile!");
 	unlink "$lock_file";
@@ -401,8 +405,56 @@ sub tokenize_line {
     $token =~ s/^[-'"\.,]+//;        # trim non-alphanum chars at start or end
     $token =~ s/[-'"\.,]+$//;        # so we don't get loads of '"foo' tokens
 
-    next if length($token) < 3 || $token eq "and" || $token eq "the";
-    next if length($token) > MAX_TOKEN_LENGTH;
+    # *do* keep 3-byte tokens; there's some solid signs in there
+    my $len = length($token);
+    next if $len < 3 ||
+	$token =~ /^(?:and|the|not|any|for|from|one|The|has|have)$/;
+
+    my $replacedigits = 1;
+
+    if ($len > MAX_TOKEN_LENGTH) {
+      if (TOKENIZE_LONG_8BIT_SEQS_AS_TUPLES) {
+	if ($token =~ /[\xa0-\xff]/) {
+	  # Matt sez: "Could be asian? Autrijus suggested doing character ngrams,
+	  # but I'm doing tuples to keep the dbs small(er)."  Sounds like a plan
+	  # to me! (jm)
+	  while ($token =~ s/^(..?)//) {
+	    push (@{$self->{tokens}}, "8bit:$1"); $wc++;
+	  }
+	  next;
+	}
+      }
+      if (TOKENIZE_LONG_8BIT_SEQS_AS_TUPLES_2) {
+	if ($token =~ /[\xa0-\xff]{2}/) {
+	  # Matt sez: "Could be asian? Autrijus suggested doing character ngrams,
+	  # but I'm doing tuples to keep the dbs small(er)."  Sounds like a plan
+	  # to me! (jm)
+	  while ($token =~ s/^(..?)//) {
+	    push (@{$self->{tokens}}, "8bit:$1"); $wc++;
+	  }
+	  next;
+	}
+      }
+      if (TOKENIZE_LONG_8BIT_SEQS_AS_TUPLES_3) {
+	if ($token =~ /^[\xa0-\xff]{2}/) {
+	  # Matt sez: "Could be asian? Autrijus suggested doing character ngrams,
+	  # but I'm doing tuples to keep the dbs small(er)."  Sounds like a plan
+	  # to me! (jm)
+	  while ($token =~ s/^(..?)//) {
+	    push (@{$self->{tokens}}, "8bit:$1"); $wc++;
+	  }
+	  next;
+	}
+      }
+
+      if (TOKENIZE_LONG_TOKENS_AS_SKIPS) {
+	# Spambayes trick via Matt: Just retain 7 chars and the length
+	# sk: stands for "skip".
+	$token = "sk:".substr($token, 0, 7)." ".$len;
+	$replacedigits = 0;
+      }
+    }
+
     $wc++;
 
     if (TRY_IGNORE_TITLE_CASE_EVERYWHERE) {
@@ -431,7 +483,7 @@ sub tokenize_line {
     }
 
     # replace digits with 'N'...
-    if ($token =~ /\d/) {
+    if ($replacedigits && $token =~ /\d/) {
       $token =~ s/\d/N/gs; push (@{$self->{tokens}}, 'N:'.$tokprefix.$token);
     }
   }
@@ -505,6 +557,10 @@ sub tokenize_headers {
 		[0-2][0-9](?:\:[0-5][0-9]){1,2}\s
 		(?:\s*\(|\)|\s*(?:[+-][0-9]{4})|\s*(?:UT|[A-Z]{2,3}T))*
 		//gx;
+
+      # also these: they turn out as the most common tokens, but with a
+      # prob of about .5.  waste of space!
+      $val =~ s/\s(?:with|from|for|SMTP|ESMTP)\s/ /g;
     }
 
     # replace hdr name with "compressed" version if possible

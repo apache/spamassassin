@@ -2,11 +2,33 @@
 #
 # Given a spam.log and nonspam.log from a "mass-check --bayes" run,
 # draw a histogram of the score ranges.
+#
+# This now draws a detailed "zoom" view as well as the overall histogram,
+# so the low-frequency FPs and FNs around the middle ground can be viewed.
+# In addition, it does not show ham lines or spam lines, if those buckets
+# got no hits.
+#
+# usage: draw-bayes-histogram [--spam=spam.log] [--nonspam=nonspam.log]
+#		[--nocollapse] [--nozoom] [--buckets=20]
+#
+# or: draw-bayes-histogram spam.log nonspam.log   (backwards compatible)
 
-my $spam = $ARGV[0] || "spam.log";
-my $nonspam = $ARGV[1] || (-f "good.log" ? "good.log" : "nonspam.log");
+use Getopt::Long;
+use vars qw($opt_spam $opt_nonspam $opt_nocollapse $opt_nozoom
+	$opt_buckets);
 
-my $buckets = 25;
+GetOptions("spam=s", "nonspam=s", "nocollapse", "nozoom", "buckets=i");
+
+my $spam = $opt_spam;
+if (!$spam && $ARGV[0] !~ /^\-/) { $spam = $ARGV[0]; }
+if (!$spam) { $spam = "spam.log"; }
+
+my $nonspam = $opt_nonspam;
+if (!$nonspam && $ARGV[1] !~ /^\-/) { $nonspam = $ARGV[1]; }
+if (!$nonspam) { $nonspam = "nonspam.log"; }
+
+my $buckets = $opt_buckets || 25;
+my $zoomfactor = 20;
 my $range_lo = 0.0;
 my $range_hi = 1.0;
 
@@ -57,21 +79,48 @@ foreach my $bucket (@buckets) {
                         { $max_ns = $bux_ns{$bucket}; }
 }
 
-my $chars_in_line = 65;
+my $chars_in_line = 55;
+if ($opt_nozoom) {
+  $chars_in_line += 10;
+}
 my $scale_sp = ($max_sp / $chars_in_line);
 my $scale_ns = ($max_ns / $chars_in_line);
 $scale_sp ||= 0.000001; $scale_ns ||= 0.000001;
 $tot_sp ||= 0.000001; $tot_ns ||= 0.000001;
+
+print STDOUT 
+ "SCORE  NUMHIT   DETAIL     OVERALL HISTOGRAM  (. = ham, # = spam)\n";
+# 0.000 (19.217%) ..........|....................
+
 foreach my $bucket (@buckets) {
-  my $numdots = $bux_ns{$bucket} / $scale_ns;
+  my $numdots;
+
+  $numdots = int (($bux_ns{$bucket} / $scale_ns) + .5);
   my $line_ns = ('.' x $numdots);
 
-  $numdots = $bux_sp{$bucket} / $scale_sp;
+  $numdots = int ((($bux_ns{$bucket}*$zoomfactor) / $scale_ns) + .5);
+  my $zoomline_ns = ('.' x $numdots);
+  $zoomline_ns = sprintf ("%-10s", substr ($zoomline_ns, 0, 10));
+
+  $numdots = int (($bux_sp{$bucket} / $scale_sp) + .5);
   my $line_sp = ('#' x $numdots);
 
-  printf STDOUT "%3.3f (%6.3f%%) %s\n", $bucket,
+  $numdots = int ((($bux_sp{$bucket}*$zoomfactor) / $scale_sp) + .5);
+  my $zoomline_sp = ('#' x $numdots);
+  $zoomline_sp = sprintf ("%-10s", substr ($zoomline_sp, 0, 10));
+
+  if (!$opt_nozoom) {
+    $line_ns = $zoomline_ns.'|'.$line_ns;
+    $line_sp = $zoomline_sp.'|'.$line_sp;
+  }
+
+  if ($bux_ns{$bucket} != 0 && !$opt_nocollapse) {
+    printf STDOUT "%3.3f (%6.3f%%) %s\n", $bucket,
 		(($bux_ns{$bucket} / $tot_ns) * 100.0), $line_ns;
-  printf STDOUT "      (%6.3f%%) %s\n",
+  }
+  if ($bux_sp{$bucket} != 0 && !$opt_nocollapse) {
+    printf STDOUT "%3.3f (%6.3f%%) %s\n", $bucket,
 		(($bux_sp{$bucket} / $tot_sp) * 100.0), $line_sp;
+  }
 }
 
