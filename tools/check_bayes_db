@@ -8,11 +8,11 @@ use AnyDBM_File;
 
 use vars qw{
     %h $k $v @DBNAMES
-    $opt_dbpath
+    $opt_dbpath $opt_min_hits
   };
 
 use Getopt::Long;
-GetOptions("dbpath=s");
+GetOptions("dbpath=s", "min-hits=i");
 
 @DBNAMES = qw(toks probs);
 
@@ -46,6 +46,8 @@ for my $key ( keys(%{$h{db_toks}}) ) {
   my ($ts, $th) = tok_unpack ($h{db_toks}->{$key});
   $ts ||= 0;
   $th ||= 0;
+
+  next if ($opt_min_hits && (($ts + $th) < $opt_min_hits));
   printf ("%3.3f %8d %8d   %s\n", $prob, $ts, $th, $key);
 }
 
