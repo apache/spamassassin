@@ -5,8 +5,8 @@ use Mail::Internet;
 use Mail::SpamAssassin;
 
 sub sortbynum {
-  $a =~ m,\/(\d+)$,; my $anum = $1;
-  $b =~ m,\/(\d+)$,; my $bnum = $1;
+  $a =~ m,\/(\d+).*$,; my $anum = $1;
+  $b =~ m,\/(\d+).*$,; my $bnum = $1;
   ($anum <=> $bnum);
 }
 
@@ -17,7 +17,8 @@ my $spamtest = new Mail::SpamAssassin ({
 });
 
 foreach my $folder (@ARGV) {
-  if (-d $folder && -f "$folder/1") {		# it's an MH folder
+  if (-d $folder && (-f "$folder/1" || -f "$folder/cyrus.index")) {
+    # it's an MH folder or a Cyrus mailbox
     mass_check_mh_folder($folder);
   } elsif (-f $folder) {
     mass_check_mailbox($folder);
