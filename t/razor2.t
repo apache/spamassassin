@@ -18,7 +18,7 @@ eval {
 };
 
 if ($@) {
-	$razor_not_available = "Razor 2 is not installed.";
+	$razor_not_available = "Razor2 is not installed.";
 }
 
 
