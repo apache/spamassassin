@@ -15,10 +15,10 @@ RDBMS system.
 SpamAssassin will check the global configuration file (ie. any file matching
 /etc/mail/spamassassin/*.cf) for the following settings:
 
-user_scores_dsn			DBI:driver:database:hostname[:port]
-user_scores_sql_username	dbusername
-user_scores_sql_password	dbpassword
-user_scores_sql_table           tablename
+  user_scores_dsn		DBI:driver:database:hostname[:port]
+  user_scores_sql_username	dbusername
+  user_scores_sql_password	dbpassword
+  user_scores_sql_table         tablename
 
 The first option, user_scores_dsn, describes the data source name that will be
 used to create the connection to your SQL server.  It MUST be in the format
@@ -28,7 +28,7 @@ created to store the user preference table. <hostname> is the name of the host
 that contains the SQL database server. <port> is the optional port number where
 your database server is listening.
 
-user_scores_dsn			DBI:mysql:spamassassin:localhost
+  user_scores_dsn		DBI:mysql:spamassassin:localhost
 
 Would tell SpamAssassin to connect to the database named spamassassin using
 MySQL on the local server, and since <port> is omitted, the driver will use the
@@ -51,12 +51,12 @@ and your database driver/module.
 
 We are currently using:
 
-DBI-1.20
-Msql-Mysql-modules-1.2219
-perl v5.6.1
+  DBI-1.20
+  Msql-Mysql-modules-1.2219
+  perl v5.6.1
 
-But older versions should work fine as the SQL code in SpamAssassin is as 
-simple as could be.
+But older and newer versions should work fine as the SQL code in SpamAssassin
+is as simple as could be.
 
 
 Database Schema
@@ -101,17 +101,20 @@ running spamc/spamd in order for this to work, and the current username must
 be passed to spamd.  This can be done from spamc using the following
 .procmailrc recipe:
 
-:0wf
-| /usr/local/bin/spamc -f
+  :0fw
+  | /usr/local/bin/spamc -f
 
 (watch out; spamc could be installed as /usr/bin/spamc instead.)
 If you are using this from /etc/procmailrc, you must include DROPPRIVS=yes 
 before spamc.  An example /etc/procmailrc:
 
-DROPPRIVS=yes
+  DROPPRIVS=yes
 
-:0fw
-| /usr/local/bin/spamc -f
+  :0fw
+  | /usr/local/bin/spamc -f
+
+Also note that spamd may need the "-q" switch so it knows to look up users in
+the SQL table instead of /etc/passwd.  See "man spamd".
 
 
 Testing SpamAssassin/SQL
@@ -123,11 +126,11 @@ output debug message to the terminal. You should then test spamd with a
 message by calling spamc.  You can use the sample-spam.txt file with the
 following command:
 
-cat sample-spam.txt | spamc
+  cat sample-spam.txt | spamc
 
 Watch the debug output from spamd and look for the following debug line:
 
-retrieving prefs for <username> from SQL server
+  retrieving prefs for <username> from SQL server
 
 If you do not see the above text, then the SQL query was not successful, and
 you should see any error messages reported. <username> should be the user
@@ -157,3 +160,4 @@ This can be downloaded from http://spamassassin.org/devel/ , called
 Please send any comments to jengland /at/ enetis.net .
 
 Justin England
+
