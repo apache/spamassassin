@@ -8,7 +8,7 @@
 
 use lib '../lib';	# added by jm for use inside the distro
 use strict;
-use Socket;
+use IO::Socket;
 use Carp;
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::NoMailAudit;
@@ -50,8 +50,9 @@ Options:
   -c              Create user preferences files if they do not already exist
   -d		  Daemonize, detach from parent process
   -h              Print this usage message and exit
-  -i ipaddr       Listen on the specified IP address (default: 127.0.0.1,
-                  use 0.0.0.0 to listen on all available addresses)
+  -i addr         Listen on the specified IP address (default: 127.0.0.1,
+                  use 0.0.0.0 to listen on all available addresses) or UNIX socket.
+  -o              Use UNIX socket.
   -p port         Listen on the specific port (default: 783)
   -q              Enable SQL config (only useful with -x)
   -v              Enable vpopmail config  (only useful with -u set to vpopmail user)
@@ -74,10 +75,10 @@ EOUSAGE
 
 use vars qw{
     $opt_d $opt_h $opt_L $opt_p $opt_A $opt_x $opt_s $opt_D $opt_u
-    $opt_P $opt_c $opt_a $opt_i $opt_q $opt_F $opt_S $opt_m $opt_v
+    $opt_P $opt_c $opt_a $opt_i $opt_q $opt_F $opt_S $opt_m $opt_v $opt_o
 };
 
-getopts('acdhi:p:qvs:u:xA:DLSPF:m:') or usage();
+getopts('acdhi:op:qvs:u:xA:DLPSF:m:') or usage();
 
 $opt_h and usage();
 
@@ -135,23 +136,29 @@ $opt_a and eval
 };
 
 
-sub spawn;  # forward declaration
 sub logmsg; # forward declaration
 sub cleanupchildren;
 
 setlogsock('unix');
 
-my $port = $opt_p || 783;
-my $addr = gethostbyname($opt_i || '127.0.0.1');
-my $proto = getprotobyname('tcp');
+my $port;
+my $addr;
+my $listensocket;
 
-($port) = $port =~ /^(\d+)$/ or die "invalid port";
+if ($opt_o) {
+    $addr = $opt_i || './socket';
+    unlink ($addr);
+    $listensocket = IO::Socket::UNIX -> new ( Local => $addr, Type => SOCK_STREAM, Listen => SOMAXCONN );
+}
+else {
+    $port = $opt_p || 783;
+    $addr = $opt_i || '127.0.0.1';
 
-# Be a well-behaved daemon
-socket(Server, PF_INET, SOCK_STREAM, $proto)            || die "socket: $!";
-setsockopt(Server,SOL_SOCKET,SO_REUSEADDR,pack("l",1))  || die "setsockopt: $!";
-bind(Server, sockaddr_in($port, $addr))                 || die "bind: $!";
-listen(Server,SOMAXCONN)                                || die "listen: $!";
+    ($port) = $port =~ /^(\d+)$/ or die "invalid port";
+
+    # Be a well-behaved daemon
+    $listensocket = IO::Socket::INET -> new ( LocalAddr => $addr, LocalPort => $port, Proto => 'tcp', Type => SOCK_STREAM, Listen => SOMAXCONN, ReuseAddr => 1 );
+}
 
 # support non-root use (after we bind to the port)
 my $setuid_to_user = 0;
@@ -194,36 +201,56 @@ $SIG{TERM} = \&kill_handler;
 # now allow waiting processes to connect, if they're watching the log.
 # The test suite does this!
 if ($opt_D) {
-    warn "server started on port $port\n";
+    if ($opt_o) {
+	warn "server started on $addr\n";
+    }
+    else {
+	warn "server started on ", $addr, ":", $port, "\n";
+    }
     warn "server pid: $$\n";
 }
-logmsg "server started on port $port";
+if ($opt_o) {
+    logmsg "server started on $addr\n";
+}
+else {
+    logmsg "server started on ", $addr, ":", $port, "\n";
+}
 
-for ( ; ($paddr = accept(Client,Server)) ; close Client)
+while ( my $socket = $listensocket -> accept () )
 {
-
     my $start = time;
+    my $user;
 
-    my($port,$iaddr) = sockaddr_in($paddr);
-    my $name = gethostbyaddr($iaddr,AF_INET);
+    if ($opt_o)
+    {
+	$_ = $socket -> sockopt ( 17 );
+	@_ = unpack ( 'LLL', $_ );
+	@_ = getpwuid ( $_[1] );
+	$user = $_[0];
+	logmsg "connection from", $user;
+    }
+    else
+    {
+	my $iaddr = $socket -> peeraddr ();
 
     if ($allowed{inet_ntoa($iaddr)} ) {
-	logmsg "connection from $name [",
-	inet_ntoa($iaddr),"] at port $port";
+	    logmsg "connection from $iaddr at port $port";
     } else {
-	logmsg "unauthorized connection from $name [",
-	inet_ntoa($iaddr),"] at port $port";
+	    logmsg "unauthorized connection from $iaddr at port $port";
 	next;
     }
+    }
 
-    spawn sub {
-	$|=1; # always immediately flush output
-
+    my $pid;
+    if (!defined($pid = fork)) {
+	logmsg "cannot fork: $!";
+	return;
+    } elsif ($pid == 0) {
 	# First request line off stream
-        local $_ = <STDIN>;
+        local $_ = <$socket>;
 
 	if (!defined $_) {
-	    protocol_error ("(closed before headers)");
+	    protocol_error ($socket, "(closed before headers)");
 	    return 1;
 	}
 
@@ -255,16 +282,18 @@ for ( ; ($paddr = accept(Client,Server)) ; close Client)
 
 	    if($version > 1.0)
 	    {
-		while(1)
+		while(<$socket>)
                 {
-                    $_ = <STDIN>;
                     if(!defined $_)
                     {
-                        protocol_error ("(EOF during headers)");
+                        protocol_error ($socket, "(EOF during headers)");
                         return 1;
                     }
 
-                    if (/^\r\n/s) { last; }
+                    local $/ = "\r\n";
+		    chomp;
+
+		    if(/^\s*$/) { last };
 
                     # We'll run handle user unless we've been told not
                     # to process per-user config files.  Otherwise
@@ -275,8 +304,9 @@ for ( ; ($paddr = accept(Client,Server)) ; close Client)
                     # only need to do the SQL lookup if $opt_q IS
                     # true.  (I got that wrong the first time.)
 
-                    if (/^User: (.*)\r\n/)
+                    if (/^User: (\S*)$/)
                     {
+			if ($user and $1 ne $user) { protocol_error ($socket, "(User mismatch: $_ vs. $user)"); return 1; }
                         if ($opt_x)
                         {
 			    if ($opt_q) {
@@ -288,7 +318,7 @@ for ( ; ($paddr = accept(Client,Server)) ; close Client)
                             handle_user($1);
                         }
                     }
-		    if (/^Content-length: ([0-9]*)\r\n/i) {
+		    if (/^Content-length: ([0-9]*)/i) {
 			$expected_length = $1;
 		    }
                 }
@@ -313,7 +343,7 @@ for ( ; ($paddr = accept(Client,Server)) ; close Client)
 	    my $resp = "EX_OK";
 
 	    # Now read in message
-	    my @msglines = (<STDIN>);
+	    my @msglines = (<$socket>);
 	    my $actual_length;
 	    for (@msglines) {
 		$actual_length += length;
@@ -326,7 +356,7 @@ for ( ; ($paddr = accept(Client,Server)) ; close Client)
 	    # Check length if we're supposed to
 	    if($expected_length)
 	    {
-		if($actual_length != $expected_length) { protocol_error ("(Content-length mismatch: $expected_length vs. $actual_length)"); return 1; }
+		if($actual_length != $expected_length) { protocol_error ($socket, "(Content-length mismatch: $expected_length vs. $actual_length)"); return 1; }
 	    }
 
 	    # Now use copy-on-writed (hopefully) SA object
@@ -367,16 +397,18 @@ for ( ; ($paddr = accept(Client,Server)) ; close Client)
 
 	    if($version > 1.0)
 	    {
-		while(1)
+		while(<$socket>)
                 {
-                    $_ = <STDIN>;
                     if(!defined $_)
                     {
-                        protocol_error ("(EOF during headers)");
+                        protocol_error ($socket, "(EOF during headers)");
                         return 1;
                     }
 
-                    if (/^\r\n/s) { last; }
+                    local $/ = "\r\n";
+		    chomp;
+
+		    if(/^\s*$/) { last };
 
                     # We'll run handle user unless we've been told not
                     # to process per-user config files.  Otherwise
@@ -387,8 +419,9 @@ for ( ; ($paddr = accept(Client,Server)) ; close Client)
                     # only need to do the SQL lookup if $opt_q IS
                     # true.  (I got that wrong the first time.)
 
-                    if (/^User: (.*)\r\n/)
+                    if (/^User: (\S*)$/)
                     {
+			if ($user and $1 ne $user) { protocol_error ($socket, "(User mismatch: $_ vs. $user)"); exit (1); }
                         if ($opt_x)
                         {
 			    if ($opt_q) {
@@ -425,7 +458,7 @@ for ( ; ($paddr = accept(Client,Server)) ; close Client)
 	    my $resp = "EX_OK";
 
 	    # Now read in message
-	    my @msglines = (<STDIN>);
+	    my @msglines = (<$socket>);
 	    my $actual_length;
 	    for (@msglines) {
 		$actual_length += length;
@@ -438,7 +471,7 @@ for ( ; ($paddr = accept(Client,Server)) ; close Client)
 	    # Check length if we're supposed to
 	    if($expected_length)
 	    {
-		if($actual_length != $expected_length) { protocol_error ("(Content-length mismatch: $expected_length vs. $actual_length)"); return 1; }
+		if($actual_length != $expected_length) { protocol_error ($socket, "(Content-length mismatch: $expected_length vs. $actual_length)"); return 1; }
 	    }
 
 	    # Now use copy-on-writed (hopefully) SA object
@@ -450,13 +483,13 @@ for ( ; ($paddr = accept(Client,Server)) ; close Client)
 	    my $msg_resp_length = length($msg_resp);
 	    if($version >= 1.2) # Spamc protocol 1.2 means it accepts content-length
 	    {
-		print "SPAMD/1.1 $resphash{$resp} $resp\r\n",
+		print $socket "SPAMD/1.1 $resphash{$resp} $resp\r\n",
 		"Content-length: $msg_resp_length\r\n\r\n",
 		$msg_resp;
 	    }
 	    else # Earlier than 1.2 didn't accept content-length
 	    {
-		print "SPAMD/1.0 $resphash{$resp} $resp\r\n",
+		print $socket "SPAMD/1.0 $resphash{$resp} $resp\r\n",
 		$msg_resp;
 	    }
 	    my $was_it_spam;
@@ -474,7 +507,7 @@ for ( ; ($paddr = accept(Client,Server)) ; close Client)
 
 	else
 	{
-	    protocol_error ($_);
+	    protocol_error ($socket, $_);
 	}
     };
 
@@ -489,40 +522,12 @@ for ( ; ($paddr = accept(Client,Server)) ; close Client)
 }
 
 sub protocol_error {
+    my $socket = shift;
     local $_ = shift;
 
     my $resp = "EX_PROTOCOL";
-    print "SPAMD/1.0 $resphash{$resp} Bad header line: $_\r\n";
+    print $socket "SPAMD/1.0 $resphash{$resp} Bad header line: $_\r\n";
     logmsg "bad protocol: header error: $_";
-}
-
-sub spawn {
-    my $coderef = shift;
-
-    unless (@_ == 0 && $coderef && ref($coderef) eq 'CODE') {
-	confess "usage: spawn CODEREF";
-    }
-
-    my $pid;
-
-    cleanupchildren;
-    wait if ($opt_m && $extrapid <= 0);
-	
-    $extrapid--;
-
-    if (!defined($pid = fork)) {
-       logmsg "cannot fork: $!";
-       $extrapid++;
-       return;
-    } elsif ($pid) {
-       return; # I'm the parent
-    }
-    # else I'm the child -- go spawn
-
-    close Server;
-    open(STDIN,  "<&Client")   || die "can't dup client to stdin";
-    open(STDOUT, ">&Client")   || die "can't dup client to stdout";
-    exit &$coderef();
 }
 
 sub handle_user
@@ -619,7 +624,6 @@ sub kill_handler
 {
     my ($sig) = @_;
     logmsg "server killed by SIG$sig, shutting down";
-    close Server;
     exit 0;
 }
 
@@ -678,6 +682,10 @@ Print a brief help message, then exit without further action.
 
 Tells spamd to listen on the specified IP address [defaults to 127.0.0.1].  Use
 0.0.0.0 to listen on all interfaces.
+
+=item B<-o>
+
+Use UNIX socket.
 
 =item B<-p> I<port>
 
