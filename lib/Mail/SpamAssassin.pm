@@ -244,7 +244,7 @@ sub new {
   bless ($self, $class);
 
   # enable or disable debugging
-  Mail::SpamAssassin::_init_debugger(ref $self->{debug} eq 'ARRAY' ? @{ $self->{debug} } : ());
+  Mail::SpamAssassin::_init_debugger($self->{debug});
 
   # first debugging information possibly printed should be the version
   info("generic: SpamAssassin version ".Version());
@@ -280,14 +280,33 @@ sub new {
 # affect ALL SpamAssassin objects!
 sub _init_debugger {
   # define debugging facilities first
-  $INFO = 0;
-  $DEBUG = 0;
-  if (@_) {
-    $facilities{$_} = 1 for @_;
+  $Mail::SpamAssassin::INFO = 0;
+  $Mail::SpamAssassin::DEBUG = 0;
+
+  my $facilities = $_[0];
+  my @facilities = ();
+  if (ref ($facilities) eq '') {
+    return if not defined $facilities or $facilities eq '0';
+    @facilities = split(/,/, $facilities);
+  }
+  elsif (ref ($facilities) eq 'ARRAY') {
+    @facilities = @{ $facilities };
+  }
+  elsif (ref ($facilities) eq 'HASH') {
+    @facilities = grep { $facilities{$_} } keys %{ $facilities };
+  }
+  else {
+    return;
+  }
+  @facilities = grep(/^\S+$/, @facilities);
+  
+  if (@facilities) {
+    $Mail::SpamAssassin::facilities{$_} = 1 for @facilities;
     # turn on informational notices
-    $INFO = 1 if keys %facilities;
+    $Mail::SpamAssassin::INFO = 1;
     # turn on debugging if facilities other than "info" are enabled
-    $DEBUG = keys %facilities && !(keys %facilities == 1 && $facilities{info});
+    $Mail::SpamAssassin::DEBUG = keys %Mail::SpamAssassin::facilities > 1
+                              || !$Mail::SpamAssassin::facilities{info};
   }
 }
 
