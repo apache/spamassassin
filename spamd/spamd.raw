@@ -992,7 +992,7 @@ sub cleanupchildren {
   my $kid;
   do {
     $kid = waitpid(-1,&WNOHANG);
-  } until $kid == -1;
+  } while ($kid > 0);
 }
 
 __DATA__
