@@ -492,10 +492,22 @@ sub expire_old_tokens_trapped {
 
   # How many tokens do we want to keep?
   my $goal_reduction = int($self->{expiry_max_db_size} * 0.75); # expire to 75% of max_db
+  dbg("bayes: expiry check keep size, 75% of max: $goal_reduction");
   # Make sure we keep at least 100000 tokens in the DB
-  $goal_reduction = 100000 if ( $goal_reduction < 100000 );
+  if ( $goal_reduction < 100000 ) {
+    $goal_reduction = 100000;
+    dbg("bayes: expiry keep size too small, resetting to 100,000 tokens");
+  }
   # Now turn goal_reduction into how many to expire.
   $goal_reduction = $magic[3] - $goal_reduction;
+  dbg("bayes: token count: ".$magic[3].", final goal reduction size: $goal_reduction");
+
+  if ( $goal_reduction < 1000 ) { # too few tokens to expire, abort.
+    dbg("bayes: reduction goal of $goal_reduction is under 1,000 tokens.  skipping expire.");
+    $self->{db_toks}->{$LAST_EXPIRE_MAGIC_TOKEN} = time();
+    $self->remove_running_expire_tok(); # this won't be cleaned up, so do it now.
+    return 1; # we want to indicate things ran as expected
+  }
 
   # assume the old atime is ok ...
   my $newdelta = 0;
@@ -515,8 +527,12 @@ sub expire_old_tokens_trapped {
   # - difference of last reduction to current goal reduction is > 50%
   #   if the two values are out of balance, estimating atime is going to be funky, recompute
   #
-  my $ratio = ($magic[9] > 0 && $magic[9] > $goal_reduction) ? $magic[9]/$goal_reduction : $goal_reduction/$magic[9];
+  my $ratio = ($magic[9] == 0 || $magic[9] > $goal_reduction) ? $magic[9]/$goal_reduction : $goal_reduction/$magic[9];
+
+  dbg("bayes: First pass?  Current: ".time().", Last: ".$magic[4].", atime: ".$magic[8].", count: ".$magic[9].", newdelta: $newdelta, ratio: $ratio");
+
   if ( (time() - $magic[4] > 86400*30) || ($magic[8] < 43200) || ($magic[9] < 1000) || ($newdelta < 43200) || ($ratio > 1.5) ) {
+    dbg("bayes: something fishy, calculating atime (first pass)");
     my $start = 43200; # exponential search starting at ...?  1/2 day, 1, 2, 4, 8, 16, ...
     my %delta = (); # use a hash since an array is going to be very sparse
 
@@ -528,6 +544,7 @@ sub expire_old_tokens_trapped {
 
       # Go through from $start * 1 to $start * 512, mark how many tokens we would expire
       for( my $i = 1; $i <= 2**9; $i<<=1 ) {
+	warn ">".($magic[10] - $atime)." ".($start * $i)."\n";
         if ( $magic[10] - $atime > $start * $i ) {
           $delta{$i}++;
 	}
@@ -540,12 +557,13 @@ sub expire_old_tokens_trapped {
 
     # $i is now equal to the exponent we should use ...
     if ( $i == 0 ) { # couldn't find a good atime.  abort!
+      dbg("bayes: couldn't find a good delta atime, need more token difference, skipping expire.");
       $self->{db_toks}->{$LAST_EXPIRE_MAGIC_TOKEN} = time();
       $self->remove_running_expire_tok(); # this won't be cleaned up, so do it now.
       return 1; # we want to indicate things ran as expected
     }
 
-    $newdelta = $start * 1 << ($i-1);
+    $newdelta = $start * (1 << ($i-1));
   }
 
   # use O_EXCL to avoid races (bonus paranoia, since we should be locked
