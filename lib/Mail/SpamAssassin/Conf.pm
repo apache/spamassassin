@@ -758,7 +758,7 @@ determine that SpamAssassin is running.
       next;
     }
 
-=item report_safe_copy_headers { header_name }
+=item report_safe_copy_headers header_name
 
 If using report_safe, a few of the headers from the original message
 are copied into the wrapper header (From, To, Cc, Subject, Date, etc.)
@@ -804,6 +804,9 @@ original message.
 
 If this option is set to 0, incoming spam is only modified by adding
 some headers and no changes will be made to the body.
+
+Note: If report_safe is set to 0, X-Spam-Report will not be added by
+default unless use_terse_report is also set.
 
 =cut
 
