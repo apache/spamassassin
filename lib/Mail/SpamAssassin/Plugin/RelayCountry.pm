@@ -59,7 +59,6 @@ sub new {
   return $self;
 }
 
-# and the eval rule itself
 sub extract_metadata {
   my ($self, $opts) = @_;
 
@@ -84,7 +83,7 @@ sub extract_metadata {
   }
 
   chop $countries;
-  $msg->put_metadata ("X-Relay-Countries", $countries);
+  $msg->put_metadata("X-Relay-Countries", $countries);
   dbg("metadata: X-Relay-Countries: $countries");
 
   return 1;

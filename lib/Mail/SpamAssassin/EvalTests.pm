@@ -28,7 +28,6 @@ use Mail::SpamAssassin::Dns;
 use Mail::SpamAssassin::Locales;
 use Mail::SpamAssassin::MailingList;
 use Mail::SpamAssassin::PerMsgStatus;
-use Mail::SpamAssassin::TextCat;
 use Mail::SpamAssassin::Constants qw(:ip);
 
 use Digest::SHA1 qw(sha1_hex);
@@ -2154,82 +2153,6 @@ sub check_for_uppercase {
   }
 
   return ($self->{uppercase} > $min && $self->{uppercase} <= $max);
-}
-
-# UNWANTED_LANGUAGE_BODY
-sub check_language {
-  my ($self) = @_;
-  $self->_check_language();
-  return $self->{undesired_language_body};
-}
-
-# UNWANTED_LANGUAGE_BODY
-sub _check_language {
-  my ($self) = @_;
-
-  if (defined $self->{undesired_language_body}) {
-    return $self->{undesired_language_body};
-  }
-
-  $self->{undesired_language_body} = 0;
-  my @languages = split(' ', $self->{conf}->{ok_languages});
-
-  if (grep { $_ eq "all" } @languages) {
-    return $self->{undesired_language_body};
-  }
-
-  my @matches = @{$self->{msg}->{metadata}->{textcat_matches}};
-
-  # not able to get a match, assume it's okay
-  if (! @matches) {
-    $self->{undesired_language_body} = 0;
-    return $self->{undesired_language_body};
-  }
-
-  # map of languages that are very often mistaken for another, perhaps with
-  # more than 0.02% false positives.  This is used when we're less certain
-  # about the result.
-  my $len = $self->{msg}->{metadata}->{languages_body_len};
-  my %mistakable;
-  if ($len < 1024 * (scalar @matches)) {
-    $mistakable{sco} = 'en';
-  }
-
-  # see if any matches are okay
-  foreach my $match (@matches) {
-    $match =~ s/\..*//;
-    $match = $mistakable{$match} if exists $mistakable{$match};
-    foreach my $language (@languages) {
-      $language = $mistakable{$language} if exists $mistakable{$language};
-      if ($match eq $language) {
-	$self->{undesired_language_body} = 0;
-	return $self->{undesired_language_body};
-      }
-    }
-  }
-  $self->{undesired_language_body} = 1;
-  return $self->{undesired_language_body};
-}
-
-sub check_for_body_8bits {
-  my ($self, $body) = @_;
-
-  my @languages = split(' ', $self->{conf}->{ok_languages});
-
-  for (@languages) {
-    return 0 if $_ eq "all";
-    # this list is initially conservative, it includes any language with
-    # a common n-gram sequence of 2+ consecutive bytes matching [\x80-\xff]
-    # here are the one more likely to be removed: cs=czech, et=estonian,
-    # fi=finnish, hi=hindi, is=icelandic, pt=portuguese, tr=turkish,
-    # uk=ukrainian, vi=vietnamese
-    return 0 if /^(?:am|ar|be|bg|cs|el|et|fa|fi|he|hi|hy|is|ja|ka|ko|mr|pt|ru|ta|th|tr|uk|vi|yi|zh)$/;
-  }
-
-  foreach my $line (@$body) {
-    return 1 if $line =~ /[\x80-\xff]{8,}/;
-  }
-  return 0;
 }
 
 ###########################################################################
