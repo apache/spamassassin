@@ -1175,7 +1175,7 @@ describe MEET_SINGLES		Meet Singles
 body JOIN_MILLIONS	        /\bjoin (?:millions|thousands)\b/i
 describe JOIN_MILLIONS		Join Millions of Americans
 
-body BACKED_BY		        /\bbacked by (?:millions|billions)\b/i
+body BACKED_BY		        /\bbacked by [mb]illions\b/i
 describe BACKED_BY		Backed by Billions
 
 body EXPECT_TO_EARN	        /\bexpect to earn|earn up to\b/i
