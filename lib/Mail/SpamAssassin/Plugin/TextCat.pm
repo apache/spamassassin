@@ -467,7 +467,7 @@ sub check_language {
   my @languages = split(' ', $scan->{conf}->{ok_languages});
 
   if (grep { $_ eq "all" } @languages) {
-    return $self->{undesired_language_body};
+    return 0;
   }
 
   my $len = $msg->get_metadata("X-Languages-Length");
