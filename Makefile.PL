@@ -1150,8 +1150,8 @@ made-doc-stamp: doc $(MAN1PODS) $(MAN3PODS) $(EXTRAPODS)
 version.env: lib/Mail/SpamAssassin.pm Makefile
 	$(RM_F) $@
 	$(PERL) -Ilib -MMail::SpamAssassin -e 'printf("FULL_VERSION=%s\n", Mail::SpamAssassin::Version())' >> $@
-	$(ECHO) DIST_VERSION=$(VERSION_COOL) >> $@
-	$(ECHO) CPAN_VERSION=$(VERSION) >> $@
+	$(PERL) -e 'print "DIST_VERSION=$(VERSION_COOL)\n"' >> $@
+	$(PERL) -e 'print "CPAN_VERSION=$(VERSION)\n"' >> $@
 
   EOD
 
