@@ -511,9 +511,6 @@ header COMPLAIN_TO		exists:Complain-To
 header   MIME_ODD_CASE		ALL =~ /\nMiME-Version: /s
 describe MIME_ODD_CASE		MiME-Version header (oddly capitalized)
 
-header   OE_PI			X-Mailer =~ /OutLook Express 3\.14159/
-describe OE_PI			X-Mailer contains 'OutLook Express 3.14159'
-
 header   MISSING_MIMEOLE	eval:missing_mimeole()
 describe MISSING_MIMEOLE	Message has X-MSMail-Priority, but no X-MimeOLE
 
