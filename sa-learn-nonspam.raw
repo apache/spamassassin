@@ -186,6 +186,10 @@ been processed before).
 
 	cat mailmessage | sa-learn-nonspam --single
 
+This is handy for binding to a key in your mail user agent.  It's very fast, as
+all the time-consuming stuff is deferred until you run the C<sa-learn-rebuild>
+command.
+
 =head1 EFFECTIVE TRAINING
 
 Learning filters require training to be effective.  If you don't train
