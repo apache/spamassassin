@@ -1,4 +1,6 @@
-# $Id: rule_tests.t,v 1.3 2002/04/08 09:22:07 matt_sergeant Rel $
+#!/usr/bin/perl
+
+# $Id: rule_tests.t,v 1.4 2002/07/05 14:40:47 jmason Exp $
 use strict;
 use Test;
 use Mail::SpamAssassin;
@@ -118,3 +120,4 @@ sub set_body {
     my @lines = @_;
     $self->{body} = \@lines;
 }
+
