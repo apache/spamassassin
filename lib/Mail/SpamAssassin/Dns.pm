@@ -198,7 +198,7 @@ sub razor_lookup {
       }
     }
     else {
-        warn "undefined Razor::Client\n";
+        warn "Problem while trying to load Razor: $!";
     }
     
     alarm 0;
