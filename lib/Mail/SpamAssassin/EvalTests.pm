@@ -179,6 +179,8 @@ sub check_rbl {
 sub check_rbl_results_for {
   my ($self, $addr) = @_;
 
+  return 0 unless $self->is_dns_available();
+
   my $inas = ' '.$self->{rbl_IN_As_found}.' ';
   if ($inas =~ / ${addr} /) { return 1; }
 
