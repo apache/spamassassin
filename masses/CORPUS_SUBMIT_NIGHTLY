@@ -36,9 +36,9 @@ Craig gave you (ask him for one!), ditto for the password.
 
   RSYNC_PASSWORD="[whatever_craig_told_you_it_was]"
   export RSYNC_PASSWORD
-  rsync -CPcvuzb ham.log \
+  rsync -CPcvzb ham.log \
         you@belphegore.hughes-family.org::corpus/ham-you.log
-  rsync -CPcvuzb spam.log \
+  rsync -CPcvzb spam.log \
         you@belphegore.hughes-family.org::corpus/spam-you.log
 
 
