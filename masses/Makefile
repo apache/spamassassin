@@ -1,6 +1,6 @@
 
-OPT = -g -O2
-GALIB =	./galib245
+OPT = -O9 -march=athlon
+GALIB =	galib245
 PGALIB = pgapack
 
 all:

@@ -18,19 +18,19 @@ void WriteString(PGAContext *ctx, FILE *fp, int p, int pop);
 void showSummary(PGAContext *ctx);
 
 const double threshold = 5.0;
-const double nybias = 10.0;
+const double nybias = 20.0;
 const int exhaustive_eval = 1;
 
-const double mutation_rate = 0.2;
-const double mutation_noise = 2.0;
+const double mutation_rate = 0.01;
+const double mutation_noise = 3.0;
 const double regression_coefficient = 0.5;
 
-const double crossover_rate = 0.0;
+const double crossover_rate = 0.65;
 
 const int pop_size = 500;
-const int replace_num = 100;
+const int replace_num = 250;
 
-const int maxiter = 20000;
+const int maxiter = 50000;
 
 void init_data()
 {
@@ -67,14 +67,14 @@ int main(int argc, char **argv) {
 
      PGASetPopSize(ctx, pop_size);
 
-     PGASetNumReplaceValue(ctx, replace_num);
+     //PGASetNumReplaceValue(ctx, replace_num);
 
-     PGASetMutationOrCrossoverFlag(ctx, PGA_TRUE);
+     //PGASetMutationOrCrossoverFlag(ctx, PGA_TRUE);
 
      PGASetMutationBoundedFlag(ctx, PGA_FALSE);
      PGASetUserFunction(ctx, PGA_USERFUNCTION_MUTATION, (void *)myMutation);
 
-     PGASetCrossoverType(ctx, PGA_CROSSOVER_ONEPT);
+     //PGASetCrossoverType(ctx, PGA_CROSSOVER_ONEPT);
      PGASetCrossoverProb(ctx, crossover_rate);
 
      PGASetPrintFrequencyValue(ctx,300);
@@ -171,7 +171,7 @@ double evaluate(PGAContext *ctx, int p, int pop)
 //   nyscore = log(nyscore);
 //   nnscore = log(nnscore);
 
-  return (double) ((double)ga_yn + (double)ga_ny*nybias) + (ynscore + nyscore*nybias - (ynscore+nnscore))/tot_score;
+  return (double) ((double)ga_yn + (double)ga_ny*nybias) + (nyscore*nybias - ynscore)/(nyscore+ynscore);
 }
 
 /*
@@ -193,6 +193,7 @@ int myMutation(PGAContext *ctx, int p, int pop, double mr) {
 	// Regress towards it...
 	gene_sum = (1.0-regression_coefficient)*gene_sum+regression_coefficient*PGAGetRealAllele(ctx, p, pop, i);
 	// Set this gene in this allele to be the average, plus some gaussian noise
+	//if(gene_sum > 15.0) gene_sum = 15.0; else if(gene_sum < -15.0) gene_sum = -15.0;
 	PGASetRealAllele(ctx, p, pop, i, PGARandomGaussian(ctx, gene_sum, mutation_noise));
 	count++;
       }
@@ -201,15 +202,16 @@ int myMutation(PGAContext *ctx, int p, int pop, double mr) {
 }
 
 
-void dump()
+void dump(FILE *fp)
 {
-    printf ("\n# SUMMARY:            %6d / %6d\n#\n", ga_ny, ga_yn);
-    printf ("# Correctly non-spam: %6d  %3.2f%%  (%3.2f%% overall)\n", ga_nn, (ga_nn / (float) num_nonspam) * 100.0, (ga_nn / (float) num_tests) * 100.0);
-    printf ("# Correctly spam:     %6d  %3.2f%%  (%3.2f%% overall)\n", ga_yy, (ga_yy / (float) num_spam) * 100.0, (ga_yy / (float) num_tests) * 100.0);
-    printf ("# False positives:    %6d  %3.2f%%  (%3.2f%% overall, %6.0f adjusted)\n", ga_ny, (ga_ny / (float) num_nonspam) * 100.0, (ga_ny / (float) num_tests) * 100.0, nyscore*nybias);
-    printf ("# False negatives:    %6d  %3.2f%%  (%3.2f%% overall, %6.0f adjusted)\n", ga_yn, (ga_yn / (float) num_spam) * 100.0, (ga_yn / (float) num_tests) * 100.0, ynscore);
-    printf ("# Average score for spam:  %3.1f    nonspam: %3.1f\n",(ynscore+yyscore)/((double)(ga_yn+ga_yy)),(nyscore+nnscore)/((double)(ga_nn+ga_ny)));
-    printf ("# TOTAL:              %6d  %3.2f%%\n#\n", num_tests, 100.0);
+    fprintf (fp,"\n# SUMMARY:            %6d / %6d\n#\n", ga_ny, ga_yn);
+    fprintf (fp,"# Correctly non-spam: %6d  %3.2f%%  (%3.2f%% overall)\n", ga_nn, (ga_nn / (float) num_nonspam) * 100.0, (ga_nn / (float) num_tests) * 100.0);
+    fprintf (fp,"# Correctly spam:     %6d  %3.2f%%  (%3.2f%% overall)\n", ga_yy, (ga_yy / (float) num_spam) * 100.0, (ga_yy / (float) num_tests) * 100.0);
+    fprintf (fp,"# False positives:    %6d  %3.2f%%  (%3.2f%% overall, %6.0f adjusted)\n", ga_ny, (ga_ny / (float) num_nonspam) * 100.0, (ga_ny / (float) num_tests) * 100.0, nyscore*nybias);
+    fprintf (fp,"# False negatives:    %6d  %3.2f%%  (%3.2f%% overall, %6.0f adjusted)\n", ga_yn, (ga_yn / (float) num_spam) * 100.0, (ga_yn / (float) num_tests) * 100.0, ynscore);
+    fprintf (fp,"# Average score for spam:  %3.1f    nonspam: %3.1f\n",(ynscore+yyscore)/((double)(ga_yn+ga_yy)),(nyscore+nnscore)/((double)(ga_nn+ga_ny)));
+    fprintf (fp,"# Average for false-pos:   %3.1f  false-neg: %3.1f\n",(nyscore/(double)ga_ny),(ynscore/(double)ga_yn));
+    fprintf (fp,"# TOTAL:              %6d  %3.2f%%\n#\n", num_tests, 100.0);
 }
 
 /*****************************************************************************
@@ -222,7 +224,7 @@ void WriteString(PGAContext *ctx, FILE *fp, int p, int pop)
   if(0 == rank)
   {
     evaluate(ctx,p,pop);
-    dump();
+    dump(fp);
     for(int i=0; i<num_scores; i++)
     {
       fprintf(fp,"score %-30s %2.3f\n",score_names[i],PGAGetRealAllele(ctx, p, pop, i));
@@ -241,7 +243,10 @@ void showSummary(PGAContext *ctx)
     {
       int genome = PGAGetBestIndex(ctx,PGA_OLDPOP);
       PGAGetEvaluation(ctx, genome, PGA_OLDPOP);
-      dump();
+      FILE *scores_file = fopen("craig-evolve.scores","w");
+      WriteString(ctx, scores_file, genome, PGA_OLDPOP);
+      fclose(scores_file);
+      dump(stdout);
     }
     else if(0 == PGAGetGAIterValue(ctx) % 5)
     {
