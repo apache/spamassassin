@@ -20,19 +20,6 @@ use Getopt::Std;
 # TODO: cmdline args?
 my @allowed_clients = qw (127.0.0.1);
 
-# load these now before we do any forks; saves perl interpreter
-# from looking for them in each subprocess.
-eval {
-  require Net::DNS;
-  require Net::DNS::Resolver;
-};
-
-eval {
-  require Razor::Client;
-  require Razor::Signature; 
-  require Razor::String;
-};
-
 my %resphash = (
     EX_OK => 0,
     EX_USAGE => 64, # command line usage error
@@ -151,7 +138,10 @@ for ( $waitedpid = 0;
 			my $dir = $pw[7];
 
 			# Parse user scores:
-			$spamtest->read_scoresonly_config ("$dir/.spamassassin.cf");
+			if(-r "$dir/.spamassassin.cf")
+			{
+			    $spamtest->read_scoresonly_config ("$dir/.spamassassin.cf");
+			}
 		    }
 		}
 	    }
