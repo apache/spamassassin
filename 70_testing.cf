@@ -649,25 +649,3 @@ describe T_RCVD_ILLEGAL_IP  Received contains illegal IP address
 
 # bug 2017
 body T_HTML_WEB_BUGS		eval:html_test('t_web_bugs')
-
-# revisit comment ratio
-body __HTML_COMMENT_RATIO_75	eval:html_range('total_comment_ratio','0.75','1.00')
-meta HTML_COMMENT_RATIO_75	__HTML_COMMENT_RATIO_75 && MIME_HTML_ONLY
-describe HTML_COMMENT_RATIO_75	HTML comments are large percentage of message
-
-body __HTML_COMMENT_RATIO_80	eval:html_range('total_comment_ratio','0.80','1.00')
-meta HTML_COMMENT_RATIO_80	__HTML_COMMENT_RATIO_80 && MIME_HTML_ONLY
-describe HTML_COMMENT_RATIO_80	HTML comments are large percentage of message
-
-body __HTML_COMMENT_RATIO_85	eval:html_range('total_comment_ratio','0.85','1.00')
-meta HTML_COMMENT_RATIO_85	__HTML_COMMENT_RATIO_85 && MIME_HTML_ONLY
-describe HTML_COMMENT_RATIO_85	HTML comments are large percentage of message
-
-body __HTML_COMMENT_RATIO_90	eval:html_range('total_comment_ratio','0.90','1.00')
-meta HTML_COMMENT_RATIO_90	__HTML_COMMENT_RATIO_90 && MIME_HTML_ONLY
-describe HTML_COMMENT_RATIO_90	HTML comments are large percentage of message
-
-body __HTML_COMMENT_RATIO_95	eval:html_range('total_comment_ratio','0.95','1.00')
-meta HTML_COMMENT_RATIO_95	__HTML_COMMENT_RATIO_95 && MIME_HTML_ONLY
-describe HTML_COMMENT_RATIO_95	HTML comments are large percentage of message
-
