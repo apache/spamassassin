@@ -30,6 +30,7 @@ probably-spam
 
 # Work around procmail bug: any output on stderr will cause the "F" in "From"
 # to be dropped.  This will re-add it.
+# NOTE: This is probably NOT needed in recent versions of procmail
 :0
 * ^^rom[ ]
 {
