@@ -782,6 +782,34 @@ sub check_for_fake_dotcom_helo {
 
 ###########################################################################
 
+# replacement rule for 8bit header tests
+sub check_illegal_chars {
+  my ($self, $header, $ratio, $count) = @_;
+
+  $header .= ":raw" unless ($header eq "ALL" || $header =~ /:raw$/);
+  my $str = $self->get($header);
+  return 0 unless $str;
+
+  # avoid overlap between tests
+  if ($header eq "ALL") {
+    # fix continuation lines, then remove Subject and From
+    $str =~ s/\n[ \t]+/  /gs;
+    $str =~ s/^(?:Subject|From):.*$//gm;
+  }
+
+  # count illegal substrings (RFC 2045)
+  my $illegal = () = ($str =~ /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\xff]/g);
+
+  # minor exemptions for Subject
+  if ($header eq "Subject:raw") {
+    # only exempt a single cent sign, pound sign, or registered sign
+    my $exempt = () = ($str =~ /[\xa2\xa3\xae]/g);
+    $illegal-- if $exempt == 1;
+  }
+
+  return (($illegal / length($str)) >= $ratio && $illegal >= $count);
+}
+
 sub check_subject_for_lotsa_8bit_chars {
   my ($self) = @_;
   local ($_);
