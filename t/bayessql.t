@@ -325,20 +325,22 @@ sub database_clear_p {
     return 0;
   }
 
+  my @row_ary;
+
   my $sql = "SELECT count(*) from bayes_vars where username = ?";
-  my @row_ary = $dbh->selectrow_array($sql, undef, $username);
+  @row_ary = $dbh->selectrow_array($sql, undef, $username);
   return 0 if ($row_ary[0] != 0);
 
   $sql = "SELECT count(*) from bayes_token where id = ?";
-  my @row_ary = $dbh->selectrow_array($sql, undef, $userid);
+  @row_ary = $dbh->selectrow_array($sql, undef, $userid);
   return 0 if ($row_ary[0] != 0);
 
   $sql = "SELECT count(*) from bayes_seen where id = ?";
-  my @row_ary = $dbh->selectrow_array($sql, undef, $userid);
+  @row_ary = $dbh->selectrow_array($sql, undef, $userid);
   return 0 if ($row_ary[0] != 0);
 
   $sql = "SELECT count(*) from bayes_expire where id = ?";
-  my @row_ary = $dbh->selectrow_array($sql, undef, $userid);
+  @row_ary = $dbh->selectrow_array($sql, undef, $userid);
   return 0 if ($row_ary[0] != 0);
 
   $dbh->disconnect();
