@@ -40,6 +40,7 @@ use Text::Wrap qw();
 use Mail::SpamAssassin::EvalTests;
 use Mail::SpamAssassin::AutoWhitelist;
 use Mail::SpamAssassin::HTML;
+use Mail::SpamAssassin::Util;
 
 use constant HAS_MIME_BASE64 => eval { require MIME::Base64; };
 
@@ -211,13 +212,13 @@ sub check {
   s/_SUMMARY_/$self->{test_logs}/gs;
   s/_VER_/$ver/gs;
   s/_HOME_/$Mail::SpamAssassin::HOME_URL/gs;
-  s/^/SPAM: /gm;
 
   # now that we've finished checking the mail, clear out this cache
   # to avoid unforeseen side-effects.
   $self->{hdr_cache} = { };
 
-  $self->{report} = "\n".$_."\n";
+  s/\n*$/\n\n/s;
+  $self->{report} = $_;
 }
 
 ###########################################################################
@@ -358,11 +359,6 @@ is given.
 A string, C<Yes, hits=nn required=nn tests=...> is set in this header to
 reflect the filter status.  The keys in this string are as follows:
 
-=item X-Spam-Report: header for spam mails
-
-The SpamAssassin report is added to the mail header if
-the C<report_header 1> configuration option is given.
-
 =over 4
 
 =item hits=nn The number of hits the message triggered.
@@ -388,8 +384,8 @@ Set to the version number of the SpamAssassin checker which tested the mail.
 
 =item spam mail body text
 
-The SpamAssassin report is added to top of the mail message body,
-unless the C<report_header 1> configuration option is given.
+The SpamAssassin report is added to top of the mail message body
+if the message is marked as spam.
 
 =item X-Spam-Status: header for non-spam mails
 
@@ -404,187 +400,139 @@ above).
 sub rewrite_mail {
   my ($self) = @_;
 
-  if ($self->{is_spam}) {
+  if ($self->{is_spam} && $self->{report_safe}) {
     $self->rewrite_as_spam();
-  } else {
-    $self->rewrite_as_non_spam();
+  }
+  else {
+    $self->rewrite_headers();
   }
 
   # invalidate the header cache, we've changed some of them.
   $self->{hdr_cache} = { };
 }
 
+# rewrite the entire message as spam (headers and body)
 sub rewrite_as_spam {
   my ($self) = @_;
 
-  # message we'll be reading original values from. Normally the
-  # same as $self->{msg} (the target message for the rewritten
-  # mail), but if it already had spamassassin markup, we'll need
-  # to create a new $srcmsg to hold a 'cleaned-up' version.
-  my $srcmsg = $self->{msg};
+  # This is the original message.  We do not want to make any modifications so
+  # we may recover it if necessary.  It will be put into the new message as a
+  # message/rfc822 MIME part.
+  my $original = $self->{msg}->get_pristine();
 
-  if ($self->{msg}->get_header ("X-Spam-Status")) {
-    # the mail already has spamassassin markup. Remove it!
-    # bit messy this; we need to get the mail as a string,
-    # remove the spamassassin markup in it, then re-create
-    # a Mail object using a reference to the text 
-    # array (why not a string, ghod only knows).
+  # This is the new message.
+  my $newmsg = "";
 
-    my $text = $self->{main}->remove_spamassassin_markup ($self->{msg});
-    my @textary = split (/^/m, $text);
-    my %opts = ( 'data', \@textary );
-    
-    # this used to be Mail::Audit->new(), but create_new() abstracts
-    # that away, so that we always get the right type of object. Wheee!
-    my $new_msg = $srcmsg->create_new(%opts);
-
-    # agh, we have to do this ourself?! why won't M::A do it right?
-    # for some reason it puts headers in the body
-    # while ($_ = shift @textary) { /^$/ and last; }
-    # $self->{msg}->replace_body (\@textary);
-
-    undef @textary;		# please perl, GC this properly
-
-    $srcmsg = $self->{main}->encapsulate_mail_object($new_msg);
-
-    # delete the SpamAssassin-added headers in the target message.
-    $self->{msg}->delete_header ("X-Spam-Status");
-    $self->{msg}->delete_header ("X-Spam-Flag");
-    $self->{msg}->delete_header ("X-Spam-Checker-Version");
-    $self->{msg}->delete_header ("X-Spam-Prev-Content-Type");
-    $self->{msg}->delete_header ("X-Spam-Prev-Content-Transfer-Encoding");
-    $self->{msg}->delete_header ("X-Spam-Report");
-    $self->{msg}->delete_header ("X-Spam-Level");
+  # remove first line if it is "From "
+  if ($original =~ s/^(From (.*?)\n)//s) {
+    $newmsg .= $1;
   }
 
-  # First, rewrite the subject line.
+  # the SpamAssassin report
+  my $report = $self->{report};
+
+  # get original headers
+  my $from = $self->{msg}->get_header("From");
+  my $to = $self->{msg}->get_header("To");
+  my $cc = $self->{msg}->get_header("Cc");
+  my $subject = $self->{msg}->get_header("Subject");
   if ($self->{conf}->{rewrite_subject}) {
-    $_ = $srcmsg->get_header ("Subject");
-    $_ ||= '';
-
+    $subject ||= '';
     my $tag = $self->{conf}->{subject_tag};
+    $tag =~ s/_HITS_/sprintf("%05.2f", $self->{hits})/e;
+    $tag =~ s/_REQD_/sprintf("%05.2f", $self->{conf}->{required_hits})/e;
+    $subject =~ s/^(?:\Q${tag}\E |)/${tag} /g;
+    $subject =~ s/\n*$/\n/s;
+  }
+  my $date = $self->{msg}->get_header("Date");
 
-    my $hit = sprintf ("%05.2f", $self->{hits});
-    $tag =~ s/_HITS_/$hit/;
+  # add report headers to message
+  $newmsg .= "From: $from" if $from;
+  $newmsg .= "To: $to" if $to;
+  $newmsg .= "Cc: $cc" if $cc;
+  $newmsg .= "Subject: $subject" if $subject;
+  $newmsg .= "Date: $date" if $date;
+  $newmsg .= "X-Spam-Flag: YES\n";
+  $newmsg .= "X-Spam-Status: " . $self->_build_status_line() . "\n";
+  if ($self->{main}->{conf}->{spam_level_stars} == 1) {
+    $newmsg .= "X-Spam-Level: " .
+      $self->{main}->{conf}->{spam_level_char} x int($self->{hits}) . "\n";
+  }
+  $newmsg .= "X-Spam-Checker-Version: SpamAssassin " .
+    Mail::SpamAssassin::Version() . " " .
+    $Mail::SpamAssassin::SUB_VERSION . "\n";
 
-    my $reqd = sprintf ("%05.2f", $self->{conf}->{required_hits});
-    $tag =~ s/_REQD_/$reqd/;
-    
-    s/^(?:\Q${tag}\E |)/${tag} /g;
+  # MIME boundary
+  my $boundary = "----------=_" . sprintf("%08X.%08X",time,int(rand(2 ** 32)));
 
-    $self->{msg}->replace_header ("Subject", $_);
+  # determine whether Content-Disposition should be "attachment" or "inline"
+  my $disposition;
+  my $ct = $self->{msg}->get_header("Content-Type");
+  if (defined $ct && $ct ne '' && $ct !~ m{text/plain}i) {
+    $disposition = "attachment";
+    # if we wanted to defang the attachment, this would be the place
+    $report .= <<"EOM";
+The original message did not contain plain text and may be unsafe to
+open with some email clients.  If you wish to view it, it may be safer
+to save it to a file and open it with an editor.
+
+EOM
+  }
+  else {
+    $disposition = "inline";
   }
 
-  # add some headers...
+  $newmsg .= <<"EOM";
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="$boundary"
 
-  $self->{msg}->put_header ("X-Spam-Status", $self->_build_status_line());
-  $self->{msg}->put_header ("X-Spam-Flag", 'YES');
-  if($self->{main}->{conf}->{spam_level_stars} == 1) {
-    $self->{msg}->put_header("X-Spam-Level", $self->{main}->{conf}->{spam_level_char} x int($self->{hits}));
-  }
+This is a multi-part message in MIME format.
 
-  $self->{msg}->put_header ("X-Spam-Checker-Version",
-    "SpamAssassin " .
-    Mail::SpamAssassin::Version() .
-    " ($Mail::SpamAssassin::SUB_VERSION)"
-  );
+--$boundary
+Content-Type: text/plain
+Content-Disposition: inline
+Content-Transfer-Encoding: 7bit
 
-  # defang spam messages to be less dangerous (html -> text, etc.)
-  if ($self->{conf}->{defang_mime}) {
-    my $ct = $srcmsg->get_header ("Content-Type");
+$report
+--$boundary
+Content-Type: message/rfc822
+Content-Description: original message
+Content-Disposition: $disposition
+Content-Transfer-Encoding: 8bit
 
-    if (defined $ct && $ct ne '' && $ct !~ m{text/plain}i) {
-      $self->{msg}->replace_header ("Content-Type", "text/plain");
-      $self->{msg}->replace_header ("X-Spam-Prev-Content-Type", $ct);
-
-    }
-
-    my $cte = $srcmsg->get_header ("Content-Transfer-Encoding");
-
-    if (defined $cte && $cte ne '' && $cte !~ /7bit/i) {
-      $self->{msg}->replace_header ("Content-Transfer-Encoding", "7bit");
-      $self->{msg}->replace_header ("X-Spam-Prev-Content-Transfer-Encoding", $cte);
-    }
-
-    my $rrt = $srcmsg->get_header ("Return-Receipt-To");
-
-    if (defined $rrt && $rrt ne '') {
-      $self->{msg}->delete_header ("Return-Receipt-To");
-      $self->{msg}->replace_header ("X-Spam-Prev-Return-Receipt-To", $rrt);
-    }
-  }
-
-  if ($self->{conf}->{report_header}) {
-    my $report = $self->{report};
-    $report =~ s/^\s*\n//gm;	# Empty lines not allowed in header.
-    $report =~ s/^\s*/  /gm;	# Ensure each line begins with whitespace.
-
-    if ($self->{conf}->{use_terse_report}) {
-      # Strip the superfluous SPAM: messages if we're being terse.
-      # The header can still be stripped without them.
-      $report =~ s/^\s*SPAM: /  /gm;
-      # strip start and end lines
-      $report =~ s/^\s*----[^\n]+\n//gs;
-      $report =~ s/\s*\n  ----[^\n]+\s*$//gs;
-    } else {
-      $report = "Detailed Report\n" . $report;
-    }
-    
-    $self->{msg}->put_header ("X-Spam-Report", $report);
-
-  } else {
-    my $lines = $srcmsg->get_body();
-
-    my $rep = $self->{report};
-    my $cte = $self->{msg}->get_header ('Content-Transfer-Encoding');
-    if (defined $cte && $cte =~ /quoted-printable/i) {
-      $rep =~ s/=/=3D/gs;               # quote the = chars
-    }
-
-    my $content_type = $self->{msg}->get_header('Content-Type');
-    if (defined($content_type) and $content_type =~ /\bboundary\s*=\s*["']?(.*?)["']?(?:;|$)/i) {
-      # Deal with MIME "null block".  If this is a multipart MIME mail,
-      # peel off the MIME header for the main part of the message,
-      # stick in the report, then put the MIME header back in front,
-      # so that the report is *after* the MIME header.
-      my $boundary = "--" . quotemeta($1);
-      my @main_part;
-
-      if (grep(/^$boundary/i, @{$lines})) {
-        # If, for some reason, the boundry marker doesn't appear in the
-        # body of the text, don't bother with the following three lines,
-        # because otherwise @{$lines} will go down to zero size, so
-        # $lines->[0] will be undefined, and Perl (or at least some versions
-        # of it) will go into an infinite loop of throwing warnings.
-        push(@main_part, shift(@{$lines})) while ($lines->[0] !~ /^$boundary/i);
-        push(@main_part, shift(@{$lines})) while ($lines->[0] !~ /^$/);
-        push(@main_part, shift(@{$lines}));
-      }
-
-      unshift (@{$lines}, split (/$/, $rep));
-      $lines->[0] =~ s/\n//;
-      unshift (@{$lines}, @main_part);
-    }
-    else {
-      unshift (@{$lines}, split (/$/, $rep));
-      $lines->[0] =~ s/\n//;
-    }
-
-    $self->{msg}->replace_body ($lines);
-  }
+$original
+--$boundary--
+EOM
+  
+  my @lines = split (/^/m,  $newmsg);
+  $self->{msg}->replace_original_message(\@lines);
 
   $self->{msg}->get_mail_object;
 }
 
-sub rewrite_as_non_spam {
+sub rewrite_headers {
   my ($self) = @_;
 
-  # Add some headers...
-
+  # add headers
   $self->{msg}->put_header ("X-Spam-Status", $self->_build_status_line());
   if($self->{main}->{conf}->{spam_level_stars} == 1) {
     $self->{msg}->put_header("X-Spam-Level", $self->{main}->{conf}->{spam_level_char} x int($self->{hits}));
   }
+
+  # add spam headers if spam
+  if ($self->{is_spam}) {
+    $self->{msg}->put_header ("X-Spam-Flag", 'YES');
+    $self->{msg}->put_header ("X-Spam-Checker-Version",
+			      "SpamAssassin " . Mail::SpamAssassin::Version() .
+			      " ($Mail::SpamAssassin::SUB_VERSION)");
+    if ($self->{conf}->{report_header}) {
+      my $report = $self->{report};
+      $report =~ s/^\s*\n//gm;	# Empty lines not allowed in header.
+      $report =~ s/^\s*/  /gm;	# Ensure each line begins with whitespace.
+      $self->{msg}->put_header ("X-Spam-Report", $report);
+    }
+  }
+
   $self->{msg}->get_mail_object;
 }
 

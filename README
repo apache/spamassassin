@@ -3,8 +3,12 @@ Upgrade Notes
 -------------
 
 Users of SpamAssassin versions earlier than 2.50 should note that the
-default tagging behaviour has changed.  See the "defang_mime" note below,
-in the 'Customising SpamAssassin' section.
+default tagging behavior has changed.  If an incoming message is tagged as
+spam, instead of modifying the original message, SpamAssassin will create a
+new report message and attach the original message as a message/rfc822 MIME
+part (ensuring the original message is completely preserved and easier to
+recover).  If you do not want to modify the body of incoming spam, use the
+"report_safe" option.
 
 
 Welcome to SpamAssassin!
@@ -143,18 +147,6 @@ can be set. Common first-time tweaks include:
         Statistics on how many false positives to expect at various
         different thresholds are available in the "STATISTICS.txt" file in
         the "rules" directory.
-
-  - defang_mime, rewrite_subject, report_header, use_terse_report
-
-  	Users of versions of SpamAssassin before 2.50 will find that
-        the default behaviour has changed; now, it does not modify
-        the messages heavily unless customised to do so.  The old
-        behaviour can be recovered using these settings:
-
-                defang_mime             1
-                rewrite_subject         1
-                report_header           0
-                use_terse_report        0
 
   - subject_tag
 

@@ -34,6 +34,7 @@ sub new {
 
   $self->{is_spamassassin_wrapper_object} = 1;
   $self->{has_spamassassin_methods} = 1;
+  $self->{headers_pristine} = '';
   $self->{headers} = { };
   $self->{header_order} = [ ];
 
@@ -74,11 +75,15 @@ sub parse_headers {
   my ($self) = @_;
   local ($_);
 
+  $self->{headers_pristine} = '';
   $self->{headers} = { };
   $self->{header_order} = [ ];
   my ($prevhdr, $hdr, $val, $entry);
 
   while (defined ($_ = shift @{$self->{textarray}})) {
+    # absolutely unmodified!
+    $self->{headers_pristine} .= $_;
+
     # warn "parse_headers $_";
     if (/^\r*$/) { last; }
 
@@ -157,6 +162,20 @@ sub _get_header_list {
   my @entries = map($self->{headers}->{$_},@cap_hdrs);
 
   return @entries;
+}
+
+sub replace_original_message {
+  my ($self, $data) = @_;
+
+  if (ref $data eq 'ARRAY') {
+    $self->{textarray} = $data;
+  } elsif (ref $data eq 'GLOB') {
+    if (defined fileno $data) {
+      $self->{textarray} = [ <$data> ];
+    }
+  }
+
+  $self->parse_headers();
 }
 
 sub get_header {
@@ -274,6 +293,11 @@ sub replace_body {
 
 # ---------------------------------------------------------------------------
 # bonus, not-provided-in-Mail::Audit methods.
+
+sub get_pristine {
+  my ($self) = @_;
+  return join ('', $self->{headers_pristine}, @{ $self->{textarray} });
+}
 
 sub as_string {
   my ($self) = @_;
@@ -467,6 +491,7 @@ sub _proxy_to_mail_audit {
 # emergency.
 sub finish {
   my $self = shift;
+  delete $self->{headers_pristine};
   delete $self->{textarray};
   foreach my $key (keys %{$self->{headers}}) {
     delete $self->{headers}->{$key};
