@@ -52,6 +52,11 @@ sub cmdline_run {
 	     'dir'			=> sub { $opt{'format'} = 'dir'; },
 	     'file'			=> sub { $opt{'format'} = 'file'; },
 	     'mbox'			=> sub { $opt{'format'} = 'mbox'; },
+
+	     'single'			=> sub {
+		  $opt{'format'} = 'file'; push (@ARGV, '-');
+	      },
+
 	     '<>'			=> \&target,
   ) or usage(0, "Unknown option!");
 
@@ -82,7 +87,7 @@ sub cmdline_run {
 
   if ($opts->{rebuildonly}) {
     $spamtest->init (1);
-    $spamtest->rebuild_learner_caches();
+    $spamtest->rebuild_learner_caches({ verbose => 1 });
     $spamtest->finish_learner();
     return 0;
   }
@@ -110,6 +115,9 @@ sub cmdline_run {
       }
       close (F);
     }
+
+    # add leftover args as targets
+    foreach (@ARGV) { target($_); }
 
     my $iter = new Mail::SpamAssassin::ArchiveIterator ({
 	'opt_j' => 1,
@@ -151,7 +159,7 @@ sub killed {
 sub target  {
   my ($target) = @_;
   if (!defined($opt{'format'})) {
-    warn "please specify target type with --dir, --file, or --mbox\n";
+    warn "please specify target type with --dir, --file, or --mbox: $target\n";
   }
   else {
     my $class = ($isspam ? "spam" : "ham");

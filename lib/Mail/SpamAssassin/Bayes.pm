@@ -693,9 +693,9 @@ sub get_body_from_msg {
 ###########################################################################
 
 sub sync {
-  my ($self) = @_;
-  $self->{store}->sync_journal();
-  $self->{store}->expire_old_tokens();
+  my ($self, $opts) = @_;
+  $self->{store}->sync_journal($opts);
+  $self->{store}->expire_old_tokens($opts);
   return 0;
 }
 

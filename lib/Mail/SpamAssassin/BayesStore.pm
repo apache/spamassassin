@@ -240,13 +240,13 @@ sub untie_db {
 
 # Do an expiry run.
 sub expire_old_tokens {
-  my ($self) = @_;
+  my ($self, $opts) = @_;
   my $ret;
 
   eval {
     local $SIG{'__DIE__'};	# do not run user die() traps in here
     $self->tie_db_writable();
-    $ret = $self->expire_old_tokens_trapped ();
+    $ret = $self->expire_old_tokens_trapped ($opts);
   };
   my $err = $@;
 
@@ -258,7 +258,7 @@ sub expire_old_tokens {
 }
 
 sub expire_old_tokens_trapped {
-  my ($self) = @_;
+  my ($self, $opts) = @_;
 
   if (!$self->expiry_due() && !$self->{bayes}->{main}->{learn_force_expire})
 				{ return 0; }
@@ -276,6 +276,8 @@ sub expire_old_tokens_trapped {
 
   my $deleted = 0;
   my $kept = 0;
+  my $num_lowfreq = 0;
+  my $num_hapaxes = 0;
   my $started = time();
 
   # since DB_File will not shrink a database (!!), we need to *create*
@@ -307,6 +309,11 @@ sub expire_old_tokens_trapped {
     } else {
       $new_toks{$tok} = tok_pack ($ts, $th, $atime); $kept++;
       if (!defined($oldest) || $atime < $oldest) { $oldest = $atime; }
+      if ($ts + $th == 1) {
+	$num_hapaxes++;
+      } elsif ($ts < 8 && $th < 8) {
+	$num_lowfreq++;
+      }
     }
   }
 
@@ -356,8 +363,18 @@ sub expire_old_tokens_trapped {
 
   my $done = time();
 
-  dbg ("expired old Bayes database entries in ".($done - $started).
-	" seconds: $kept entries kept, $reprieved reprieved, $deleted deleted");
+  my $msg = "expired old Bayes database entries in ".($done - $started)." seconds";
+  my $msg2 = "$kept entries kept, $reprieved reprieved, $deleted deleted";
+
+  if ($opts->{verbose}) {
+    my $hapax_pc = ($num_hapaxes * 100) / ($kept+$reprieved || 0.001);
+    my $lowfreq_pc = ($num_lowfreq * 100) / ($kept+$reprieved || 0.001);
+    print "$msg\n$msg2\n";
+    printf "token frequency: 1-occurence tokens: %3.2f%%\n", $hapax_pc;
+    printf "token frequency: less than 8 occurrences: %3.2f%%\n", $lowfreq_pc;
+  } else {
+    dbg ("$msg: $msg2");
+  }
 
   1;
 }
@@ -500,7 +517,7 @@ sub expiry_now {
 # (locked) transaction.
 
 sub sync_journal {
-  my ($self) = @_;
+  my ($self, $opts) = @_;
 
   my $path = $self->get_journal_filename();
 
@@ -508,7 +525,7 @@ sub sync_journal {
 
   # retire the journal, so we can update the db files from it in peace.
   # TODO: use locking here
-  my $retirepath = "$path.old";
+  my $retirepath = $path.".old";
   rename ($path, $retirepath) or warn "rename failed $path to $retirepath\n";
 
   my $started = time();
@@ -544,8 +561,14 @@ sub sync_journal {
   if ($err) { die $err; }
 
   my $done = time();
-  dbg ("synced Bayes databases from journal in ".($done - $started).
+  my $msg = ("synced Bayes databases from journal in ".($done - $started).
 	" seconds: $count entries");
+
+  if ($opts->{verbose}) {
+    print $msg,"\n";
+  } else {
+    dbg ($msg);
+  }
 
   # else, that's the lot, we're synced.  return
   1;

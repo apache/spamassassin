@@ -95,7 +95,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.158 2003/01/08 19:44:00 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.159 2003/01/09 12:38:44 jmason Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -380,15 +380,18 @@ sub init_learner {
 
 ###########################################################################
 
-=item $f->rebuild_learner_caches ()
+=item $f->rebuild_learner_caches ({ opt => val })
 
 Rebuild any cache databases; should be called after the learning process.
+Options include: C<verbose>, which will output diagnostics to C<stdout>
+if set to 1.
 
 =cut
 
 sub rebuild_learner_caches {
   my $self = shift;
-  $self->{bayes_scanner}->sync();
+  my $opts = shift;
+  $self->{bayes_scanner}->sync($opts);
   1;
 }
 
