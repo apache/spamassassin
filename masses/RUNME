@@ -1,5 +1,11 @@
 #!/bin/bash
 
+echo "
+
+NOTE: this is a sample.  You need to customise it to
+fit your corpus of spam and nonspam mails.
+
+"
 cd /home/jm/ftp/spamassassin/masses
 
 set -x
@@ -13,6 +19,7 @@ cat logs/contrib/spam.log* > spam.log
 ./download-trapped-spam
 ./mass-check /local2/mail-archives/spamtrap/mbox >> spam.log
 ./mass-check /local2/mail-archives/kelsey.spamtrap.gz >> spam.log
+./mass-check /local2/mail-archives/spam.2000-2001.gz >> spam.log
 
 ./mass-check /local2/mail-archives/crackmice >> nonspam.log
 ./mass-check /local2/mail-archives/scoop.1999 >> nonspam.log
