@@ -278,3 +278,9 @@ describe RCVD_BONUS_SPC_DATE	Bulk email fingerprint (bonus space) found
 
 header X_MESSAGE_INFO		exists:X-Message-Info
 describe X_MESSAGE_INFO		Bulk email fingerprint (X-Message-Info) found
+
+header RATWARE_RCVD_PF		Received =~ / \(Postfix\) with ESMTP id [^;]+\; \S+ \d+ \S+ \d+ \d+:\d+:\d+ \S+$/s
+describe RATWARE_RCVD_PF	Bulk email fingerprint (Received PF) found
+
+header RATWARE_RCVD_AT		Received =~ / by \S+\@\S+ with Microsoft SMTPSVC/
+describe RATWARE_RCVD_AT	Bulk email fingerprint (Received @) found
