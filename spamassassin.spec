@@ -2,7 +2,7 @@
 %define real_name Mail-SpamAssassin
 %define version 1.5
 %define real_version 1.5
-%define release 1
+%define release 2
 %define initdir %{_initrddir}
 
 Summary: This is SpamAssassin, a spam filter for email which can be invoked from mail delivery agents.
@@ -14,7 +14,6 @@ Group: Networking/Mail
 URL: http://spamassassin.taint.org/
 Source: http://spamassassin.taint.org/devel/Mail-SpamAssassin-%{real_version}.tar.gz
 Requires: perl >= 5.004
-# BuildRequires:	perl-devel
 Buildroot: %{_tmppath}/%{name}-root
 Prefix: %{_prefix}
 Prereq: /sbin/chkconfig
@@ -61,6 +60,9 @@ rm -rf %buildroot
 
 
 %changelog
+* Wed Dec 05 2001 Craig Hughes <craig@hughes-family.org>
+- Updated for final 1.5 distribution.
+
 * Sun Nov 18 2001 Craig Hughes <craig@hughes-family.org>
 - first version of rpm.
 

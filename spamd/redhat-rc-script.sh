@@ -24,7 +24,7 @@ case "$1" in
   start)
 	# Start daemon.
 	echo -n "Starting spamd: "
-	daemon /usr/bin/spamd -d
+	daemon /usr/bin/spamd -d -a -c
 	touch /var/lock/spamd
 	;;
   stop)
