@@ -160,6 +160,10 @@ if [ -f /etc/sysconfig/spamd ]; then
   %{__sed} -e 's/^OPTIONS=/SPAMDOPTIONS=/' /etc/sysconfig/spamd > /etc/sysconfig/spamassassin
   %{__mv} /etc/sysconfig/spamd /etc/sysconfig/spamassassin.rpmold
 fi
+# If spamd is running, let's be sure to change the lock file as well ...
+if [ -f /var/lock/subsys/spamd ]; then
+  %{__mv} /var/lock/subsys/spamd /var/lock/subsys/spamassassin
+fi
 /sbin/service spamassassin condrestart
 
 %preun
