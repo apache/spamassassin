@@ -764,7 +764,7 @@ sub dcc_lookup {
     dbg("DCC: got response: $response");
 
     alarm(0);
-    waitpid ($pid, 0);
+    $self->cleanup_kids($pid);
   };
 
   alarm 0;
@@ -895,7 +895,7 @@ sub pyzor_lookup {
     dbg("Pyzor: got response: $response");
 
     alarm(0);
-    waitpid ($pid, 0);
+    $self->cleanup_kids($pid);
   };
 
   alarm 0;
@@ -1128,6 +1128,14 @@ sub leave_helper_run_mode {
   dbg ("leaving helper-app run mode");
   $/ = $self->{old_slash};
   %ENV = %{$self->{old_env}};
+}
+
+sub cleanup_kids {
+  my ($self, $pid) = @_;
+
+  if ($SIG{CHLD} && $SIG{CHLD} ne 'IGNORE') {	# running from spamd
+    waitpid ($pid, 0);
+  }
 }
 
 ###########################################################################

@@ -438,7 +438,12 @@ preload_modules_with_tmp_homedir();
 # Note: we now use a set of fds to track children, as using SIGCHLD
 # is unreliable on many versions of perl (sadly).  Thanks to
 # anomie /at/ users sourceforge net for the patch!
-$SIG{CHLD} = 'IGNORE';
+#
+# We now use SIGCHLD == SIG_DFL for most of the time, and only set
+# it to SIG_IGN (so we can use the patch) during the fork/accept
+# while loop in the parent.
+#
+$SIG{CHLD} = 'DEFAULT';
 $SIG{INT}  = \&kill_handler;
 $SIG{TERM} = \&kill_handler;
 
@@ -462,6 +467,9 @@ my (%qmailu, $qu_load);
 my $readvec = "";
 my %pipes = ();
 vec($readvec, $server->fileno, 1) = 1;
+
+# now set SIGCHLD so we don't leave zombies when we fork from the parent process
+$SIG{CHLD} = 'IGNORE';
 
 while (1) {
     if (defined $client) { $client->close; }	# paranoia vs fd leaks
@@ -851,6 +859,12 @@ sub spawn {
     # Razor etc. will not be output as headers and
     # thereby cause protocol failures.
     select STDERR;
+
+    # reset SIGCHLD to SIG_DFL, so that we can use system(), open ("foo|"),
+    # etc. etc. and get their exit statuses correctly.  This is the child
+    # process now, so this won't affect SIGCHLD in the parent, which still
+    # needs SIG_IGN to avoid leaving zombies.
+    $SIG{CHLD} = 'DEFAULT';
 
     exit &$coderef();
 }
