@@ -1805,21 +1805,21 @@ C<Sys::Syslog>
 
 =head1 MORE DOCUMENTATION
 
-See also http://spamassassin.org/ for more information.
+See also E<lt>http://spamassassin.org/E<gt> for more information.
 
 =head1 SEE ALSO
 
-C<Mail::SpamAssassin::Conf>
-C<Mail::SpamAssassin::PerMsgStatus>
-C<spamassassin>
+Mail::SpamAssassin::Conf(3)
+Mail::SpamAssassin::PerMsgStatus(3)
+spamassassin(1)
 
 =head1 BUGS
 
-http://bugzilla.spamassassin.org/
+See E<lt>http://bugzilla.spamassassin.org/E<gt>
 
-=head1 AUTHOR
+=head1 AUTHORS
 
-Justin Mason E<lt>jm /at/ jmason.orgE<gt>
+The SpamAssassin(tm) Project E<lt>http://spamassassin.apache.org/E<gt>
 
 =head1 COPYRIGHT
 
@@ -1834,6 +1834,3 @@ as well as:
   http://spamassassin.org/
 
 =cut
-
-
-
