@@ -31,7 +31,7 @@ my $killfile_message_ids = qr{(?:
 my $killfile_receiveds = qr{(?:
     from\s\S+\s\S+\sby\s(?:anclsmtp\d\d|myfamlsmtp\d\d)\.myfamily\.com
     |for :include:\S+/MapQuest/
-    |from bounce.winxpnews.com
+    |from bounce\.winxpnews\.com
 )}x;
 
 ###########################################################################
@@ -103,11 +103,11 @@ sub wanted {
   # killfile for mass-checks
   $_ = $ma->get_header("Message-Id");
   if (defined($_) && /${killfile_message_ids}/os)
-                { logkilled($ma, "skipped killfiled message"); return; }
+                { logkilled($ma,$id, "skipped killfiled message"); return; }
 
   $_ = join ('', $ma->get_header("Received"));
   if (defined($_) && /${killfile_receiveds}/os)
-                { logkilled($ma, "skipped killfiled message"); return; }
+                { logkilled($ma,$id, "skipped killfiled message"); return; }
 
   $ma->{noexit} = 1;
   $spamtest->remove_spamassassin_markup($ma);
@@ -128,7 +128,7 @@ sub wanted {
 		    $hits, $id, $tests;
 
   if ($tests =~ /MICROSOFT_EXECUTABLE|MIME_SUSPECT_NAME/) {
-    logkilled($ma, "possible virus");
+    logkilled($ma,$id, "possible virus");
   }
 
   if ($opt_loghits) {
@@ -153,8 +153,7 @@ sub wanted {
 }
 
 sub logkilled {
-  my ($ma) = shift;
-  my $reason = shift;
+  my ($ma, $id, $reason) = @_;
 
   my $from = $ma->get_header ("From");
   my $to = $ma->get_header ("To");
@@ -164,7 +163,7 @@ sub logkilled {
   chop ($to);
   chop ($subj);
   chop ($msgid);
-  warn "# skipped killfiled message: from=$from to=$to subj=$subj id=$msgid\n";
+  warn "# skipped killfiled message: from=$from to=$to subj=$subj msgid=$msgid id=$id\n";
 }
 
 ###########################################################################

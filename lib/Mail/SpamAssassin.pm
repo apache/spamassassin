@@ -81,7 +81,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 $VERSION = "2.40";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.111 2002/08/15 16:50:27 jmason Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.112 2002/08/16 12:15:58 jmason Exp $';
 
 sub Version { $VERSION; }
 
@@ -906,11 +906,15 @@ sub find_all_addrs_in_line {
   my ($self, $line) = @_;
 
   my @addrs = ();
+  my %seen = ();
   while ($line =~ s/([-a-z0-9_\+\:\.\/]+
 	      \@[-a-z0-9_\+\:\.\/]+
 	      \.[-a-z0-9_\+\:\.\/]+)//ix)
   {
-    push (@addrs, $1);
+    my $addr = $1;
+    $addr =~ s/^mailto://;
+    next if (defined ($seen{$addr})); $seen{$addr} = 1;
+    push (@addrs, $addr);
   }
 
   return @addrs;

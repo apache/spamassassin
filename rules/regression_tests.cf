@@ -185,3 +185,19 @@ test US_DOLLARS_4 fail JP charset test: this should not match: $1$
 test US_DOLLARS_4 fail $-$NFbMF$K!"A49q$+$iLd$$9g$o$;$,;&E~$7$F$$$^$9!#
 test US_DOLLARS_4 ok of US$8.5 million (Eight
 test US_DOLLARS_4 ok of US8.5 millions (Eight
+
+test OUTLOOK_FW_MSG ok Subject: FW: White Stripes Tour!
+test OUTLOOK_FW_MSG ok Subject: Fw: Thank you yourself
+test OUTLOOK_FW_MSG fail Subject: Fwd: Dracula
+test OUTLOOK_FW_MSG fail Subject: fw:                                       . qBQyzOWqKYggZT0oDJzp41nd
+test OUTLOOK_FW_MSG fail Subject: FW:>Re: Spruce up your life!DGKJWI
+
+test FWD_MSG ok Subject: Fwd: Dracula
+test FWD_MSG ok Subject: [landho] Fwd: tell rod
+test FWD_MSG fail Subject: Fwd:Pure Opt-In for half the price
+test FWD_MSG fail Subject: Re: RE: FWD: search results        .       .       .
+
+test FWD_MSG_2 ok Subject: Thanks, Lucky, for helping to kill gnutella (fwd)
+test FWD_MSG_2 ok Subject: Version 1.1.8 of the DCC (fwd)
+test FWD_MSG_2 fail Subject: this is not (fwd) valid
+
