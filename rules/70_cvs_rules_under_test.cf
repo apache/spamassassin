@@ -321,7 +321,36 @@ header T_FAKE_HELO_NETSCAPE_COM	eval:check_for_rdns_helo_mismatch("(?:netscape|n
 # 2003-05-03, bugs 1769, 1844: single replacement rule for OBFUSCATING_COMMENT*
 rawbody __OBFUSCATING_COMMENT_A	/\w<![^>]*>\w/
 rawbody __OBFUSCATING_COMMENT_B	/[^\s>]<![^>]*>[^\s<]/
-meta T_OBFUSCATING_COMMENT	((__OBFUSCATING_COMMENT_A && HTML_MESSAGE) || (__OBFUSCATING_COMMENT_B && HTML_MIME_ONLY))
+#
+meta T_OBFUSCATING_COMMENT_00	((__OBFUSCATING_COMMENT_A && HTML_MESSAGE) || (__OBFUSCATING_COMMENT_B && MIME_HTML_ONLY))
+meta T_OBFUSCATING_COMMENT_01	((__OBFUSCATING_COMMENT_A && __MIME_HTML) || (__OBFUSCATING_COMMENT_B && MIME_HTML_ONLY))
+meta T_OBFUSCATING_COMMENT_02	((__OBFUSCATING_COMMENT_A && MIME_HTML_ONLY) || (__OBFUSCATING_COMMENT_B && MIME_HTML_ONLY))
+meta T_OBFUSCATING_COMMENT_03	((__OBFUSCATING_COMMENT_A && __MIME_HTML_ONLY) || (__OBFUSCATING_COMMENT_B && MIME_HTML_ONLY))
+meta T_OBFUSCATING_COMMENT_04	((__OBFUSCATING_COMMENT_A && (HTML_MESSAGE || __MIME_HTML_ONLY)) || (__OBFUSCATING_COMMENT_B && MIME_HTML_ONLY))
+#
+meta T_OBFUSCATING_COMMENT_05	((__OBFUSCATING_COMMENT_A && HTML_MESSAGE) || (__OBFUSCATING_COMMENT_B && __MIME_HTML_ONLY))
+meta T_OBFUSCATING_COMMENT_06	((__OBFUSCATING_COMMENT_A && __MIME_HTML) || (__OBFUSCATING_COMMENT_B && __MIME_HTML_ONLY))
+meta T_OBFUSCATING_COMMENT_07	((__OBFUSCATING_COMMENT_A && MIME_HTML_ONLY) || (__OBFUSCATING_COMMENT_B && __MIME_HTML_ONLY))
+meta T_OBFUSCATING_COMMENT_08	((__OBFUSCATING_COMMENT_A && __MIME_HTML_ONLY) || (__OBFUSCATING_COMMENT_B && __MIME_HTML_ONLY))
+meta T_OBFUSCATING_COMMENT_09	((__OBFUSCATING_COMMENT_A && (HTML_MESSAGE || __MIME_HTML_ONLY)) || (__OBFUSCATING_COMMENT_B && __MIME_HTML_ONLY))
+#
+meta T_OBFUSCATING_COMMENT_10	((__OBFUSCATING_COMMENT_A && HTML_MESSAGE) || (__OBFUSCATING_COMMENT_B && __MIME_HTML))
+meta T_OBFUSCATING_COMMENT_11	((__OBFUSCATING_COMMENT_A && __MIME_HTML) || (__OBFUSCATING_COMMENT_B && __MIME_HTML))
+meta T_OBFUSCATING_COMMENT_12	((__OBFUSCATING_COMMENT_A && MIME_HTML_ONLY) || (__OBFUSCATING_COMMENT_B && __MIME_HTML))
+meta T_OBFUSCATING_COMMENT_13	((__OBFUSCATING_COMMENT_A && __MIME_HTML_ONLY) || (__OBFUSCATING_COMMENT_B && __MIME_HTML))
+meta T_OBFUSCATING_COMMENT_14	((__OBFUSCATING_COMMENT_A && (HTML_MESSAGE || __MIME_HTML_ONLY)) || (__OBFUSCATING_COMMENT_B && __MIME_HTML))
+#
+meta T_OBFUSCATING_COMMENT_15	((__OBFUSCATING_COMMENT_A && HTML_MESSAGE) || (__OBFUSCATING_COMMENT_B && HTML_MESSAGE))
+meta T_OBFUSCATING_COMMENT_16	((__OBFUSCATING_COMMENT_A && __MIME_HTML) || (__OBFUSCATING_COMMENT_B && HTML_MESSAGE))
+meta T_OBFUSCATING_COMMENT_17	((__OBFUSCATING_COMMENT_A && MIME_HTML_ONLY) || (__OBFUSCATING_COMMENT_B && HTML_MESSAGE))
+meta T_OBFUSCATING_COMMENT_18	((__OBFUSCATING_COMMENT_A && __MIME_HTML_ONLY) || (__OBFUSCATING_COMMENT_B && HTML_MESSAGE))
+meta T_OBFUSCATING_COMMENT_19	((__OBFUSCATING_COMMENT_A && (HTML_MESSAGE || __MIME_HTML_ONLY)) || (__OBFUSCATING_COMMENT_B && HTML_MESSAGE))
+#
+meta T_OBFUSCATING_COMMENT_20	((__OBFUSCATING_COMMENT_A && HTML_MESSAGE) || (__OBFUSCATING_COMMENT_B && (HTML_MESSAGE || __MIME_HTML_ONLY)))
+meta T_OBFUSCATING_COMMENT_21	((__OBFUSCATING_COMMENT_A && __MIME_HTML) || (__OBFUSCATING_COMMENT_B && (HTML_MESSAGE || __MIME_HTML_ONLY)))
+meta T_OBFUSCATING_COMMENT_22	((__OBFUSCATING_COMMENT_A && MIME_HTML_ONLY) || (__OBFUSCATING_COMMENT_B && (HTML_MESSAGE || __MIME_HTML_ONLY)))
+meta T_OBFUSCATING_COMMENT_23	((__OBFUSCATING_COMMENT_A && __MIME_HTML_ONLY) || (__OBFUSCATING_COMMENT_B && (HTML_MESSAGE || __MIME_HTML_ONLY)))
+meta T_OBFUSCATING_COMMENT_24	((__OBFUSCATING_COMMENT_A && (HTML_MESSAGE || __MIME_HTML_ONLY)) || (__OBFUSCATING_COMMENT_B && (HTML_MESSAGE || __MIME_HTML_ONLY)))
 
 # more for bug 1769
 header T_GAPPY_SUBJECT_01	Subject =~ /\b(?:[a-z][\W]{1,3}){4,}/i
@@ -336,6 +365,32 @@ header T_GAPPY_SUBJECT_09	Subject =~ /\b(?:[a-z][\W]{1,3}){3,}/i
 header T_GAPPY_SUBJECT_10	Subject =~ /\b(?:[a-z][\W]{1,4}){3,}/i
 header T_GAPPY_SUBJECT_11	Subject =~ /\b(?:[a-z][\W]{1,5}){3,}/i
 header T_GAPPY_SUBJECT_12	Subject =~ /\b(?:[a-z][\W]{1,6}){3,}/i
+# anything not a number or letter in Latin 1
+header T_GAPPY_SUBJECT_01B	Subject =~ /\b(?:[a-z][^0-9A-Za-z\xc0-\xd6\xd8-\xf6\xf8-\xff]{1,3}){4,}/i
+header T_GAPPY_SUBJECT_02B	Subject =~ /\b(?:[a-z][^0-9A-Za-z\xc0-\xd6\xd8-\xf6\xf8-\xff]{1,3}){5,}/i
+header T_GAPPY_SUBJECT_03B	Subject =~ /\b(?:[a-z][^0-9A-Za-z\xc0-\xd6\xd8-\xf6\xf8-\xff]{1,4}){4,}/i
+header T_GAPPY_SUBJECT_04B	Subject =~ /\b(?:[a-z][^0-9A-Za-z\xc0-\xd6\xd8-\xf6\xf8-\xff]{1,4}){5,}/i
+header T_GAPPY_SUBJECT_05B	Subject =~ /\b(?:[a-z][^0-9A-Za-z\xc0-\xd6\xd8-\xf6\xf8-\xff]{1,5}){4,}/i
+header T_GAPPY_SUBJECT_06B	Subject =~ /\b(?:[a-z][^0-9A-Za-z\xc0-\xd6\xd8-\xf6\xf8-\xff]{1,5}){5,}/i
+header T_GAPPY_SUBJECT_07B	Subject =~ /\b(?:[a-z][^0-9A-Za-z\xc0-\xd6\xd8-\xf6\xf8-\xff]{1,6}){4,}/i
+header T_GAPPY_SUBJECT_08B	Subject =~ /\b(?:[a-z][^0-9A-Za-z\xc0-\xd6\xd8-\xf6\xf8-\xff]{1,6}){5,}/i
+header T_GAPPY_SUBJECT_09B	Subject =~ /\b(?:[a-z][^0-9A-Za-z\xc0-\xd6\xd8-\xf6\xf8-\xff]{1,3}){3,}/i
+header T_GAPPY_SUBJECT_10B	Subject =~ /\b(?:[a-z][^0-9A-Za-z\xc0-\xd6\xd8-\xf6\xf8-\xff]{1,4}){3,}/i
+header T_GAPPY_SUBJECT_11B	Subject =~ /\b(?:[a-z][^0-9A-Za-z\xc0-\xd6\xd8-\xf6\xf8-\xff]{1,5}){3,}/i
+header T_GAPPY_SUBJECT_12B	Subject =~ /\b(?:[a-z][^0-9A-Za-z\xc0-\xd6\xd8-\xf6\xf8-\xff]{1,6}){3,}/i
+# same except looking for \w as text
+header T_GAPPY_SUBJECT_01C	Subject =~ /\b(?:\w[^0-9A-Za-z\xc0-\xd6\xd8-\xf6\xf8-\xff]{1,3}){4,}/i
+header T_GAPPY_SUBJECT_02C	Subject =~ /\b(?:\w[^0-9A-Za-z\xc0-\xd6\xd8-\xf6\xf8-\xff]{1,3}){5,}/i
+header T_GAPPY_SUBJECT_03C	Subject =~ /\b(?:\w[^0-9A-Za-z\xc0-\xd6\xd8-\xf6\xf8-\xff]{1,4}){4,}/i
+header T_GAPPY_SUBJECT_04C	Subject =~ /\b(?:\w[^0-9A-Za-z\xc0-\xd6\xd8-\xf6\xf8-\xff]{1,4}){5,}/i
+header T_GAPPY_SUBJECT_05C	Subject =~ /\b(?:\w[^0-9A-Za-z\xc0-\xd6\xd8-\xf6\xf8-\xff]{1,5}){4,}/i
+header T_GAPPY_SUBJECT_06C	Subject =~ /\b(?:\w[^0-9A-Za-z\xc0-\xd6\xd8-\xf6\xf8-\xff]{1,5}){5,}/i
+header T_GAPPY_SUBJECT_07C	Subject =~ /\b(?:\w[^0-9A-Za-z\xc0-\xd6\xd8-\xf6\xf8-\xff]{1,6}){4,}/i
+header T_GAPPY_SUBJECT_08C	Subject =~ /\b(?:\w[^0-9A-Za-z\xc0-\xd6\xd8-\xf6\xf8-\xff]{1,6}){5,}/i
+header T_GAPPY_SUBJECT_09C	Subject =~ /\b(?:\w[^0-9A-Za-z\xc0-\xd6\xd8-\xf6\xf8-\xff]{1,3}){3,}/i
+header T_GAPPY_SUBJECT_10C	Subject =~ /\b(?:\w[^0-9A-Za-z\xc0-\xd6\xd8-\xf6\xf8-\xff]{1,4}){3,}/i
+header T_GAPPY_SUBJECT_11C	Subject =~ /\b(?:\w[^0-9A-Za-z\xc0-\xd6\xd8-\xf6\xf8-\xff]{1,5}){3,}/i
+header T_GAPPY_SUBJECT_12C	Subject =~ /\b(?:\w[^0-9A-Za-z\xc0-\xd6\xd8-\xf6\xf8-\xff]{1,6}){3,}/i
 
 uri T_YAHOO_REDIRECTOR		/^http:\/\/rd\.yahoo\.com/i
 describe T_YAHOO_REDIRECTOR	Uses commonly-spammed redirector URL
