@@ -222,9 +222,6 @@ sub check {
 
     # auto-learning
     $self->learn();
-
-    # add points from learning systems (Bayes and AWL)
-    $self->{score} += $self->{learned_points};
   }
 
   # delete temporary storage and memory allocation used during checking
@@ -278,30 +275,15 @@ sub learn {
   my $min = $self->{conf}->{bayes_auto_learn_threshold_nonspam};
   my $max = $self->{conf}->{bayes_auto_learn_threshold_spam};
 
+  # Find out what score we should consider this message to have ...
+  my $score = $self->_get_autolearn_points();
+
   dbg ("auto-learn? ham=$min, spam=$max, ".
                 "body-points=".$self->{body_only_points}.", ".
                 "head-points=".$self->{head_only_points}.", ".
 		"learned-points=".$self->{learned_points});
 
   my $isspam;
-
-  # This section should use sum($score[scoreset % 2]) not just {score}.  otherwise we shift what we
-  # autolearn on and it gets really wierd.  - tvd
-  my $score = 0;
-  my $orig_scoreset = $self->{conf}->get_score_set();
-  if (($orig_scoreset & 2) == 0) { # we don't need to recompute
-    dbg ("auto-learn: currently using scoreset $orig_scoreset.  no need to recompute.");
-    $score = $self->{score};
-  }
-  else {
-    my $new_scoreset = $orig_scoreset & ~2;
-    dbg ("auto-learn: currently using scoreset $orig_scoreset.  recomputing score based on scoreset $new_scoreset.");
-    $self->{conf}->set_score_set($new_scoreset); # reduce to autolearning scores
-    $score = $self->get_nonlearn_nonuserconf_points();
-    dbg ("auto-learn: original score: ".$self->{score}.", recomputed score: $score");
-    $self->{conf}->set_score_set($orig_scoreset); # return to appropriate scoreset
-  }
-
   if ($score < $min) {
     $isspam = 0;
   } elsif ($score >= $max) {
@@ -373,7 +355,9 @@ sub learn {
   }
 }
 
-sub get_nonlearn_nonuserconf_points {
+# This function is for exclusive use by the autowhitelist function to
+# figure out the score to be used for inclusion in the AWL.
+sub _get_autowhitelist_points {
   my ($self) = @_;
 
   my $scores = $self->{conf}->{scores};
@@ -391,6 +375,72 @@ sub get_nonlearn_nonuserconf_points {
   }
 
   return (sprintf "%0.3f", $points) + 0;
+}
+
+# This function is for exclusive use by the autolearn function to figure
+# out the various score values related to autolearning.
+sub _get_autolearn_points {
+  my ($self) = @_;
+
+  # This function needs to use use sum($score[scoreset % 2]) not just {score}.
+  # otherwise we shift what we autolearn on and it gets really wierd.  - tvd
+  my $orig_scoreset = $self->{conf}->get_score_set();
+  my $new_scoreset = $orig_scoreset;
+  my $scores = $self->{conf}->{scores};
+
+  if (($orig_scoreset & 2) == 0) { # we don't need to recompute
+    dbg ("auto-learn: currently using scoreset $orig_scoreset.");
+  }
+  else {
+    $new_scoreset = $orig_scoreset & ~2;
+    dbg ("auto-learn: currently using scoreset $orig_scoreset, recomputing score based on scoreset $new_scoreset.");
+    $scores = $self->{conf}->{scoreset}->[$new_scoreset];
+  }
+
+  my $tflags = $self->{conf}->{tflags};
+  my $points = 0;
+
+  # Just in case this function is called multiple times, clear out the
+  # previous calculated values
+  $self->{learned_points} = 0;
+  $self->{body_only_points} = 0;
+  $self->{head_only_points} = 0;
+
+  foreach my $test (@{$self->{test_names_hit}}) {
+    # According to the documentation, noautolearn, userconf, and learn
+    # rules are ignored for autolearning.
+    if (exists $tflags->{$test}) {
+      next if $tflags->{$test} =~ /\bnoautolearn\b/;
+      next if $tflags->{$test} =~ /\buserconf\b/;
+
+      # Keep track of the learn points for an additional autolearn check.
+      # Use the original scoreset since it'll be 0 in sets 0 and 1.
+      if ($tflags->{$test} =~ /\blearn\b/) {
+	# we're guaranteed that the score will be defined
+        $self->{learned_points} += $self->{conf}->{scoreset}->[$orig_scoreset]->{$test};
+	next;
+      }
+    }
+
+    # ignore tests with 0 score in this scoreset
+    next if ($scores->{$test} == 0);
+
+    # Go ahead and add points to the proper locations
+    if (!$self->{conf}->maybe_header_only ($test)) {
+      $self->{body_only_points} += $scores->{$test};
+    }
+    if (!$self->{conf}->maybe_body_only ($test)) {
+      $self->{head_only_points} += $scores->{$test};
+    }
+
+    $points += $scores->{$test};
+  }
+
+  # Figure out the final value we'll use for autolearning
+  $points = (sprintf "%0.3f", $points) + 0;
+  dbg ("auto-learn: message score: ".$self->{score}.", computed score for autolearn: $points");
+
+  return $points;
 }
 
 ###########################################################################
@@ -2275,21 +2325,8 @@ sub _handle_hit {
     # ignore meta-match sub-rules.
     if ($rule =~ /^__/) { push(@{$self->{subtest_names_hit}}, $rule); return; }
 
-    my $tflags = $self->{conf}->{tflags}->{$rule}; $tflags ||= '';
-
-    # ignore 'noautolearn' rules when considering score for Bayes auto-learning
-    if ($tflags =~ /\bnoautolearn\b/i) {
-      $self->{learned_points} += $score;
-    }
-    else {
-      $self->{score} += $score;
-      if (!$self->{conf}->maybe_header_only ($rule)) {
-        $self->{body_only_points} += $score;
-      }
-      if (!$self->{conf}->maybe_body_only ($rule)) {
-        $self->{head_only_points} += $score;
-      }
-    }
+    # Add the rule hit to the score
+    $self->{score} += $score;
 
     push(@{$self->{test_names_hit}}, $rule);
     $area ||= '';

@@ -884,7 +884,7 @@ sub check_from_in_auto_whitelist {
       }
     }
 
-    my $awlpoints = $self->get_nonlearn_nonuserconf_points();
+    my $awlpoints = $self->_get_autowhitelist_points();
 
     # Create the AWL object, catching 'die's
     my $whitelist;
