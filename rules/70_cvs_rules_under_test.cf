@@ -106,3 +106,7 @@ score T_NASD_FINANCIAL -1.0
 body T_MEMBER                 /\bmember (?:number|reward|value|benefit|rate|report|card|information)s?\b/i
 describe T_MEMBER             Member Stuff
 
+# http://www.hughes-family.org/bugzilla/show_bug.cgi?id=630
+body T_UNLIMITED                  /UNLIMITED/
+describe T_UNLIMITED              Unlimited in caps
+
