@@ -55,7 +55,7 @@ sub load {
 
    eval {
      require DBI;
-     load_with_dbi($username, $dsn);
+     load_with_dbi($self, $username, $dsn);
    };
 
    if ($@) {
@@ -82,12 +82,13 @@ sub load_with_dbi {
          if($rv) {
             dbg("retreiving prefs from SQL server");
             my @row;
-            my $text;
+            my $text = '';
             while(@row = $sth->fetchrow_array()) {
                $text .= "$row[0]\t$row[1]\n";
             }
-	    # dbg($text);
-            $main->{conf}->parse_scores_only(join('',$text));
+            if($text ne '') {
+            	$main->{conf}->parse_scores_only(join('',$text));
+            }
             $sth->finish();
          } else { warn "SQL Error: $sql\n".$sth->errstr."\n"; }
       } else { warn "SQL Error: " . $dbh->errstr . "\n"; }

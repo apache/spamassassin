@@ -120,7 +120,7 @@ sub _parse {
       $self->{descriptions}->{$1} = $2; next;
     }
 
-    if (/^required_hits\s+(\d+)$/) {
+    if (/^required_hits\s+(\S+)$/) {
       $self->{required_hits} = $1+0; next;
     }
 
