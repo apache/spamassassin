@@ -547,7 +547,11 @@ header T_RUSSIAN_UCE_SUBJECT	Subject =~ /\xf0\xe5\xea\xeb\xe0\xec\xf3/
 # 2003-02-23: quinlan
 # Message-Id: format tests
 # hotmail
-header T_MSGID_ADDED_BY_HOTMAIL	Message-Id =~ /<MC\d{1,2}-F{1,2}\w{21,22}\@\S*hotmail\.com>/
+header __FROM_HOTMAIL			From:addr =~ /\@hotmail\.com/
+header T_MSGID_ADDED_BY_HOTMAIL_1	Message-Id =~ /<MC\d{1,2}-F{1,2}\w{21,22}\@\S*hotmail\.com>/
+header T_MSGID_ADDED_BY_HOTMAIL_2	Message-Id =~ /<[A-Z]{2}\d{1,2}-F{1,2}\w{21,22}\@\S*hotmail\.com>/
+meta T_MSGID_ADDED_BY_HOTMAIL_1B	(T_MSGID_ADDED_BY_HOTMAIL_1 && !__FROM_HOTMAIL)
+meta T_MSGID_ADDED_BY_HOTMAIL_2B	(T_MSGID_ADDED_BY_HOTMAIL_2 && !__FROM_HOTMAIL)
 # 13 hexadecimal digits instead of 12
 header T_MSGID_OUTLOOK_HEX_1	Message-Id =~ /<[a-f0-9]{13}\$[a-f0-9]{8}\$[a-f0-9]{8}\@\S+>/
 header T_MSGID_OUTLOOK_HEX_2	Message-Id =~ /<[a-f0-9]{13}\$[a-f0-9]{8}\$[a-f0-9]{8}\@/
