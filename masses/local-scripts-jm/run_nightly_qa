@@ -18,28 +18,37 @@ export RSYNC_PASSWORD
 mkdir all-results >/dev/null 2>&1
 rsync -vrz $RSYNC_USERNAME@belphegore.hughes-family.org::corpus/. all-results
 
-# now grep out the ones built today, and put copies into "usable-results"
+# now grep out the ones built today, and put copies into "uptodate"
 today=`date +"%b %e"`   # "Oct 17"
-rm -rf usable-results
-mkdir usable-results >/dev/null 2>&1
+rm -rf uptodate; mkdir uptodate >/dev/null 2>&1
+rm -rf timestamps; mkdir timestamps >/dev/null 2>&1
 for f in all-results/*.log ; do
-  if grep "mass-check results from" $f | grep "$today" > /dev/null ; then
-    cp $f usable-results
+  if grep "mass-check results from" $f | grep "$today" > dates ; then
+    cp $f uptodate
+    sort dates | tail -1 > timestamps/`basename $f`
   fi
 done
 
-cat usable-results/nonspam-*.log > nonspam.log
-cat usable-results/spam-*.log > spam.log
+cat uptodate/nonspam-*.log > nonspam.log
+cat uptodate/spam-*.log > spam.log
 make clean ; make freqs
 
-nowdir=$outdir/`date +%Y%m%d`
-mkdir -p $nowdir > /dev/null 2>&1
+echo "
+Last update: `date`
+Nonspam results used: `echo uptodate/nonspam*`
+Spam results used: `echo uptodate/spam*`
 
-cp freqs $nowdir
-date > $nowdir/LAST_UPDATE
+`cat freqs`
 
-echo $nowdir
-ls -l $nowdir
+Timestamps from mass-check output used:
+
+`egrep . timestamps/*`
+" > $outdir/DETAILS
+
+cp freqs $outdir
+
+echo $outdir
+ls -l $outdir
 
 echo "FINISHED AT"; date
 
