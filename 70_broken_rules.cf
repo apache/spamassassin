@@ -1115,3 +1115,11 @@ score BAYES_99 0.001 0.001 4.300 2.791
 #header T_RCVD_IN_RELAYS_ORDB_ORG	rbleval:check_rbl('ordb', 'relays.ordb.org.')
 #describe T_RCVD_IN_RELAYS_ORDB_ORG	Received via a relay in relays.ordb.org
 #tflags T_RCVD_IN_RELAYS_ORDB_ORG net
+
+# \# is used by quite a few legit mailers; lockergnome for one
+#header MSGID_CHARS_SPAM		MESSAGEID =~ /[:}{,!\/]/
+#describe MSGID_CHARS_SPAM	Message-Id has characters indicating spam
+#score MSGID_CHARS_SPAM 0.275 0.439 0.691 0.399
+#lang sk describe MSGID_CHARS_SPAM	Pole "Message-Id" obsahuje znaky indikujúce spam
+#lang it describe MSGID_CHARS_SPAM	L'header Message-Id: contiene caratteri che indicano spam
+#lang fr describe MSGID_CHARS_SPAM	L'entête Message-Id: contient des caractères qui indiquent un spam
