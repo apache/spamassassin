@@ -906,7 +906,7 @@ sub _get_tag {
 
             REQD  => sub { $self->_get_tag_value_for_required_score() },
 
-            VERSION => sub { Mail::SpamAssassin::Version() },
+            VERSION => \&Mail::SpamAssassin::Version,
 
             SUBVERSION => sub { $Mail::SpamAssassin::SUB_VERSION },
 
@@ -922,9 +922,7 @@ sub _get_tag {
                         sprintf("%3.4f", $self->{bayes_score}) : "0.5"
             },
 
-            DATE => sub {
-              Mail::SpamAssassin::Util::time_to_rfc822_date();
-            },
+            DATE => \&Mail::SpamAssassin::Util::time_to_rfc822_date,
 
             STARS => sub {
               my $arg = (shift || "*");
