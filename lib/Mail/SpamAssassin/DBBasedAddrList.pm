@@ -165,9 +165,9 @@ sub remove_entry {
     my $mailaddr = $1;
 
     while (my ($key, $value) = each %{$self->{accum}}) {
-      if ($key =~ /^\Q${mailaddr}\E\|ip=\d+\.\d+$/) {
+      # regex will catch both key and key|totscore entries and delete them
+      if ($key =~ /^\Q${mailaddr}\E\|/) {
         delete $self->{accum}->{$key};
-        delete $self->{accum}->{$key.'|totscore'};
       }
     }
   }
