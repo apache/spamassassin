@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.638 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.639 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -137,6 +137,54 @@ header T_RCVD_IN_RSL	 	rbleval:check_rbl_txt('rsl', 'relays.visi.com.')
 describe T_RCVD_IN_RSL		Received via a relay in RSL
 tflags T_RCVD_IN_RSL		net
 
+rawbody T_RNDMX			/<rndmx\b/
+describe T_RNDMX		Contains 'rndmx' hashbuster code
+
+########################################################################
+# This ratware always uses a +0000 TZ in the Date header, and has a multiplicity
+# of From: header formats. ("From" header samples from Steven Champeon
+# <schampeo.hesketh.com> via the spamtools.lists.abuse.net and SPAM-L lists).
+#
+# Note that this ratware is also quite buggy -- it regularly sends out spam
+# mails with no subject line or body text!
+#
+# "First Last" <firstlast_[a-z][a-z]@somedomain>	1
+# "First Last" <firstlast[a-z][a-z]@somedomain>		1
+# "First Last" <first.last[a-z][a-z]@somedomain>	1
+# "First Last" <first_last[a-z][a-z]@somedomain>	1
+# "First Last" <first_last_[a-z][a-z]@somedomain>	1
+# "First Last" <flast_[a-z][a-z]@somedomain>		2
+# "First Last" <flast[a-z][a-z]@somedomain>		2
+# "First Last" <f.last_[a-z][a-z]@somedomain>		2
+# "First Last" <f.last[a-z][a-z]@somedomain>		2
+# "First Last" <f_last[a-z][a-z]@somedomain>		2
+# "First Last" <last[a-z][a-z]@somedomain>		3
+# "First M. Last" <firstlast_[a-z][a-z]@somedomain>	4
+# "First M. Last" <firstlast[a-z][a-z]@somedomain>	4
+# "First M. Last" <first.m.last[a-z][a-z]@somedomain>	5
+# "First M. Last" <firstmlast[a-z][a-z]@somedomain>	5
+# "First M. Last" <firstmlast_[a-z][a-z]@somedomain>	5
+# "First M. Last" <fmlast_[a-z][a-z]@somedomain>	6
+# "First M. Last" <mlast[a-z][a-z]@somedomain>		7
+# "First M. Last" <m.last[a-z][a-z]@somedomain>		7
+header __T_0_TZ_1	    From =~ /^\"(\w)(\w+) (\w+)\" <\1\2[\._]?\3_?[a-z][a-z]\@/i
+header __T_0_TZ_2	    From =~ /^\"(\w)(\w+) (\w+)\" <\1[\._]?\3_?[a-z][a-z]\@/i
+header __T_0_TZ_3	    From =~ /^\"(\w)(\w+) (\w+)\" <\3_?[a-z][a-z]\@/i
+header __T_0_TZ_4	    From =~ /^\"(\w)(\w+) (\w)\. (\w+)\" <\1\2[\._]?\4_?[a-z][a-z]\@/i
+header __T_0_TZ_5	    From =~ /^\"(\w)(\w+) (\w)\. (\w+)\" <\1\2[\._]?\3[\._]?\4_?[a-z][a-z]\@/i
+header __T_0_TZ_6	    From =~ /^\"(\w)(\w+) (\w)\. (\w+)\" <\1\3\4_?[a-z][a-z]\@/i
+header __T_0_TZ_7	    From =~ /^\"(\w)(\w+) (\w)\. (\w+)\" <\3[\._]?\4_?[a-z][a-z]\@/i
+
+header __T_RATWARE_0_TZ_DATE		Date =~ / \+0000$/
+
+meta T_RATWARE_0_TZ_1	(__T_RATWARE_0_TZ_DATE && __CTYPE_HTML && __T_0_TZ_1)
+meta T_RATWARE_0_TZ_2	(__T_RATWARE_0_TZ_DATE && __CTYPE_HTML && __T_0_TZ_2)
+meta T_RATWARE_0_TZ_3	(__T_RATWARE_0_TZ_DATE && __CTYPE_HTML && __T_0_TZ_3)
+meta T_RATWARE_0_TZ_4	(__T_RATWARE_0_TZ_DATE && __CTYPE_HTML && __T_0_TZ_4)
+meta T_RATWARE_0_TZ_5	(__T_RATWARE_0_TZ_DATE && __CTYPE_HTML && __T_0_TZ_5)
+meta T_RATWARE_0_TZ_6	(__T_RATWARE_0_TZ_DATE && __CTYPE_HTML && __T_0_TZ_6)
+meta T_RATWARE_0_TZ_7	(__T_RATWARE_0_TZ_DATE && __CTYPE_HTML && __T_0_TZ_7)
+
 ########################################################################
 # rules to detect certain generally unnecessary encodings in HTML
 
@@ -175,3 +223,4 @@ body T_HTML_TITLE_EMPTY		eval:html_title('!~ /\S/s')
 body T_HTML_TITLE_UNTITLED_1	eval:html_title('=~ /untitled/i')
 body T_HTML_TITLE_UNTITLED_2	eval:html_title('=~ /new page \d+/i')
 body T_HTML_TITLE_UNTITLED_3	eval:html_title('=~ /untitled|new page \d+/i')
+
