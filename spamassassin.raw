@@ -467,10 +467,10 @@ sections:
 
     spamassassin              SpamAssassin overview (this section)
     Mail::SpamAssassin::Conf  SpamAssassin configuration files
-    spamassassin-script       "spamassassin" front-end filtering script
+    spamassassin-run          "spamassassin" front-end filtering script
     sa-learn                  train SpamAssassin's Bayesian classifier
-    spamc                     client for "spamd" (faster than "spamassassin")
-    spamd                     spamassassin server (faster than "spamassassin")
+    spamc                     client for spamd (faster than spamassassin)
+    spamd                     spamassassin server (needed by spamc)
 
 (If you're intending to read these straight through for the first time,
 the suggested order will tend to reduce the number of forward references.)
