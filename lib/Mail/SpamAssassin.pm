@@ -95,7 +95,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.142 2002/12/18 14:47:28 felicity Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.143 2002/12/18 15:15:50 jmason Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -1092,9 +1092,7 @@ sub sed_path {
   $path =~ s{__userstate__}{$self->get_and_create_userstate_dir()}ges;
   $path =~ s/^\~([^\/]*)/$self->expand_name($1)/es;
 
-  $path =~ /^([-_\/\\\:A-Za-z0-9 \.]+)$/; $path = $1;
-
-  $path;
+  return Mail::SpamAssassin::Util::untaint_file_path ($path);
 }
 
 sub first_existing_path {
