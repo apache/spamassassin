@@ -97,6 +97,7 @@ $spamtest = new Mail::SpamAssassin ({
   'debug'              			=> $opt_debug,
   'rules_filename'     			=> $opt_c,
   'userprefs_filename' 			=> "$FindBin::Bin/spamassassin/user_prefs",
+  'site_rules_filename'			=> "$FindBin::Bin/spamassassin/local.cf",
   'userstate_dir'     			=> "$FindBin::Bin/spamassassin",
   'save_pattern_hits'  			=> $opt_loghits,
   'dont_copy_prefs'   			=> 1,
