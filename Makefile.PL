@@ -5,6 +5,16 @@ use ExtUtils::MakeMaker;
 
 my $mycflags = '';		# this is a good place to put -g etc.
 
+if (-d 'CVS' && !-f 'doc/spamassassin.html') {
+  print <<EOWARN;
+
+Note: I see you have a 'CVS' directory.  SpamAssassin's MANIFEST file is set up
+to deal with the distribution-tarball case, not the CVS case, so you may see a
+warning about missing files, particularly in the 'doc' subdirectory.  This can
+be safely ignored.
+
+EOWARN
+}
 
 sub MY::libscan {
   my($self,$path) = @_;
