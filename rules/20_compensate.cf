@@ -232,10 +232,10 @@ tflags REPLY_WITH_QUOTES	nice
 
 # Till now no spammer told me where he's working at :o)
 #   -- Malte
-# freqs:  2.273    0.383    3.416    0.10    1.00  NOSPAM_INC
-header NOSPAM_INC             exists:Organization
-describe NOSPAM_INC           Where are you working at?
-tflags NOSPAM_INC             nice
+# freqs:  2.273    0.383    3.416    0.10    1.00  HAS_ORGANIZATION
+header HAS_ORGANIZATION         exists:Organization
+describe HAS_ORGANIZATION       Where are you working at?
+tflags HAS_ORGANIZATION         nice
 
 body HOTMAIL_FOOTER4            /Join the world's largest e-mail service with MSN Hotmail\./
 describe HOTMAIL_FOOTER4        Common footer for Hotmail
