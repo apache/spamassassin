@@ -764,8 +764,8 @@ sub logmsg
     }
     
     openlog('spamd','cons,pid',$log_facility);
-    my $str = join ('', @_); $str =~ s/%/%%/gs; # protect against %s etc.
-    syslog('info',$str);
+    my $str = join ('', @_);
+    syslog('info', '%s', $str);
     if ($opt{'debug'}) { warn "logmsg: $str\n"; }
 
     if ($main::SIGPIPE_RECEIVED) {
@@ -775,12 +775,12 @@ sub logmsg
 
        closelog();
        openlog('spamd','cons,pid',$log_facility);
-       syslog('info',"@_");
+       syslog('info', '%s', $str);
 
        # now report what happend
        my $msg = "SIGPIPE received - reopening log socket";
        if ($opt{'debug'}) { warn "logmsg: $msg\n"; }
-       syslog('warning', $msg);
+       syslog('warning', '%s', $msg);
 
        # if we've received multiple sigpipes, logging is probably
        # still broken.
