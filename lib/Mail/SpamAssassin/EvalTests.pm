@@ -1252,7 +1252,7 @@ sub check_rbl_backend {
   my @originating = ();
   for my $header ('X-Originating-IP', 'X-Apparently-From') {
     my $str = $self->get($header);
-    next unless defined $str;
+    next unless $str;
     push (@originating, ($str =~ m/($IP_ADDRESS)/g));
   }
 
