@@ -129,6 +129,22 @@ the SpamCop system.
     },
   });
 
+=over 4
+
+=item spamcop_max_report_size   (default: 50)
+
+Messages larger than this size (in kilobytes) will be truncated in
+report messages sent to SpamCop.  The default setting is the maximum
+size that SpamCop will accept at the time of release.
+
+=cut
+
+  push (@cmds, {
+    setting => 'spamcop_max_report_size',
+    default => 50,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
+  });
+
   $conf->{parser}->register_commands(\@cmds);
 }
 
@@ -203,8 +219,9 @@ sub spamcop_report {
 	      );
 
   # truncate message
-  if (length($original) > $self->{conf}->{spamcop_max_report_size}*1024) {
-    substr($original,($self->{conf}->{spamcop_max_report_size}*1024)) = "\n[truncated by SpamAssassin]\n";
+  if (length($original) > $self->{conf}->{spamcop_max_report_size} * 1024) {
+    substr($original, ($self->{conf}->{spamcop_max_report_size} * 1024)) =
+      "\n[truncated by SpamAssassin]\n";
   }
 
   my $body = <<"EOM";
