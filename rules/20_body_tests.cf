@@ -168,11 +168,11 @@ describe MIME_QP_DEFICIENT	Deficient quoted-printable encoding in body
 rawbody MIME_QP_EXCESSIVE	eval:check_for_mime_excessive_qp('0.011')
 describe MIME_QP_EXCESSIVE	Excessive quoted-printable encoding in body
 
-rawbody MIME_QP_INLINE_NO_CHARSET	eval:check_for_mime('mime_qp_inline_no_charset')
-describe MIME_QP_INLINE_NO_CHARSET	Quoted-printable inline text with no charset
-
 rawbody  MIME_QP_LONG_LINE	eval:check_for_mime('mime_qp_long_line')
 describe MIME_QP_LONG_LINE	Quoted-printable line longer than 76 characters
+
+rawbody MIME_QP_NO_CHARSET	eval:check_for_mime('mime_qp_inline_no_charset')
+describe MIME_QP_NO_CHARSET	Quoted-printable inline text with no charset
 
 # actually indicates viruses, typically; just used here to clean corpora.
 rawbody  MICROSOFT_EXECUTABLE	eval:check_for_mime('microsoft_executable')
