@@ -143,6 +143,33 @@ describe MSGID_YAHOO_CAPS	Message-ID has ALLCAPS@yahoo.com
 
 ###########################################################################
 
+header   __AT_AOL_MSGID		MESSAGEID =~ /\@aol\.com\b/i
+header   __FROM_AOL_COM		From =~ /\@aol\.com\b/i
+meta     FORGED_MSGID_AOL	(__AT_AOL_MSGID && !__FROM_AOL_COM)
+describe FORGED_MSGID_AOL	Message-ID is forged, (aol.com)
+
+header   __AT_EXCITE_MSGID	MESSAGEID =~ /\@excite\.com\b/i
+header   __MY_RCVD_EXCITE	Received =~ /\.excite\.com\b/i
+meta     FORGED_MSGID_EXCITE	(__AT_EXCITE_MSGID && !__MY_RCVD_EXCITE)
+describe FORGED_MSGID_EXCITE	Message-ID is forged, (excite.com)
+
+header   __AT_HOTMAIL_MSGID	MESSAGEID =~ /\@hotmail\.com\b/i
+header   __FROM_HOTMAIL_COM	From =~ /\@hotmail\.com\b/i
+meta     FORGED_MSGID_HOTMAIL	(__AT_HOTMAIL_MSGID && (!__FROM_HOTMAIL_COM && !__FROM_MSN_COM && !__FROM_YAHOO_COM))
+describe FORGED_MSGID_HOTMAIL	Message-ID is forged, (hotmail.com)
+
+header   __AT_MSN_MSGID		MESSAGEID =~ /\@msn\.com\b/i
+header   __FROM_MSN_COM		From =~ /\@msn\.com\b/i
+meta     FORGED_MSGID_MSN	(__AT_MSN_MSGID && (!__FROM_MSN_COM && !__FROM_HOTMAIL_COM && !__FROM_YAHOO_COM))
+describe FORGED_MSGID_MSN	Message-ID is forged, (msn.com)
+
+header   __AT_YAHOO_MSGID	MESSAGEID =~ /\@yahoo\.com\b/i
+header   __FROM_YAHOO_COM	From =~ /\@yahoo\.com\b/i
+meta     FORGED_MSGID_YAHOO	(__AT_YAHOO_MSGID && !__FROM_YAHOO_COM)
+describe FORGED_MSGID_YAHOO	Message-ID is forged, (yahoo.com)
+
+###########################################################################
+
 header __MSGID_BEFORE_RECEIVED	ALL =~ /\nMessage-Id:.*\nReceived:/si
 header __MSGID_BEFORE_OKAY	Message-Id =~ /\@[a-z0-9.-]+\.(?:yahoo|wanadoo)(?:\.[a-z]{2,3}){1,2}>/
 meta MSGID_FROM_MTA_HEADER	(__MSGID_BEFORE_RECEIVED && !__MSGID_BEFORE_OKAY)
