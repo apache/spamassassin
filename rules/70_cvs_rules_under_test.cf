@@ -52,3 +52,12 @@
 # header T_SEZ_HTML_BUT_NOT	(MIME_HTML_ONLY && !HTML_MESSAGE)
 # describe T_SEZ_HTML_BUT_NOT	Claims to be HTML, but is actually plain text
 
+# Jul  3 2002 jm: modified PENIS_ENLARGE patterns: removed "add", replaced with "inches",
+# because that seems to be another typical word in the pattern.
+# Feb 11 2003 jm: removed "PP" from pattern, since "pp. 234-237" is std usage
+# in academic circles.  I don't think the hit-rate will be affected. ;)
+# body T_PENIS_ENLARGE		/\b(?:enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b|\binches\b).{0,50}\b(?:penis|male organ|pee[ -]?pee|dick|sc?hlong|wh?anger|breast)/i
+# describe T_PENIS_ENLARGE		Information on getting a larger penis or breasts
+# body T_PENIS_ENLARGE2		/\b(?:penis|male organ|pee[ -]?pee|dick|sc?hlong|wh?anger|breast).{0,50}\b(?:enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b|\binches\b)/i
+# describe T_PENIS_ENLARGE2		Information on getting a larger penis or breasts (2)
+
