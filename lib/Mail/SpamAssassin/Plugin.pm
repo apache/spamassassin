@@ -219,6 +219,39 @@ The new user's storage directory. (equivalent to C<~/.spamassassin>.)
 
 =back
 
+=item $plugin->services_authorized_for_username ( { options ... } )
+
+Validates that a given username is authorized to use certain services.
+
+In order to authorize a user, the plugin should first check that it can
+handle any of the services passed into the method and then set the value
+for each allowed service to true (or any non-negative value).
+
+The current supported services are: bayessql
+
+=over 4
+
+=item username
+
+A username
+
+=item services
+
+Reference to a hash containing the services you want to check.
+
+{
+
+  'bayessql' => 0
+
+}
+
+=item conf
+
+The C<Mail::SpamAssassin::Conf> object on which the configuration
+data should be stored.
+
+=back
+
 =item $plugin->check_start ( { options ... } )
 
 Signals that a message check operation is starting.

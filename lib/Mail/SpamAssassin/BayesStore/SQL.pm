@@ -140,7 +140,7 @@ sub tie_db_readonly {
   }
 
   unless ($self->_initialize_db()) {
-    dbg("bayes: database entry for ".$self->{_username}." not found");
+    dbg("bayes: unable to initialize database for ".$self->{_username}." user, aborting!");
     $self->untie_db();
     return 0;
   }
@@ -1732,6 +1732,23 @@ sub _initialize_db {
   return 0 unless (defined($self->{_dbh}));
 
   return 0 if (!$self->{_username});
+
+  # Check to see if we should call the services_authorized_for_username plugin
+  # hook to see if this user is allowed/able to use bayes.  If not, do nothing
+  # and return 0.
+  if ($self->{bayes}->{conf}->{bayes_sql_username_authorized}) {
+    my $services = { 'bayessql' => 0 };
+    $self->{bayes}->{main}->call_plugins("services_allowed_for_username",
+					 { services => $services,
+					   username => $self->{_username},
+					   conf => $self->{bayes}->{conf},
+					 });
+    
+    unless ($services->{bayessql}) {
+      dbg("bayes: username not allowed by services_allowed_for_username plugin call");
+      return 0;
+    }
+  }
 
   my $sqlselect = "SELECT id FROM bayes_vars WHERE username = ?";
 

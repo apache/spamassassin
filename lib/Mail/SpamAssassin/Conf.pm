@@ -2746,6 +2746,28 @@ This option gives the password used by the above DSN.
     type => $CONF_TYPE_STRING
   });
 
+=item bayes_sql_username_authorized (0 | 1)  (default: 0)
+
+Whether to call the services_authorized_for_username plugin hook in BayesSQL.
+If the hook does not determine that the user is allowed to use bayes or is
+invalid then then database will not be initialized.
+
+NOTE: By default the user is considered invalid until a plugin returns
+a true value.  If you enable this, but do not have a proper plugin
+loaded, all users will turn up as invalid.
+
+The username passed into the plugin can be affected by the
+bayes_sql_override_username config option.
+
+=cut
+
+  push (@cmds, {
+    setting => 'bayes_sql_username_authorized',
+    is_admin => 1,
+    default => 0,
+    type => $CONF_TYPE_BOOL
+  });
+
 =item user_scores_dsn DBI:databasetype:databasename:hostname:port
 
 If you load user scores from an SQL database, this will set the DSN
