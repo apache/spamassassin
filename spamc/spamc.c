@@ -94,18 +94,7 @@ static int timeout = 600;
 void
 print_version(void)
 {
-    char *maj = VERSION_MAJOR;
-    char *min = VERSION_MINOR;
-    char *rev = VERSION_REVISION;
-
-#ifndef VERSION_EXACT
-    rev = strdup(rev);
-    rev += strlen("LastChangedRevision");
-    strncpy(rev, "x-r", 3);
-    rev[strlen(rev) - 2] = '\0';
-#endif
-
-    fprintf(stderr, "%s version %s.%s.%s\n", "SpamAssassin Client", maj, min, rev);
+    fprintf(stderr, "%s version %s\n", "SpamAssassin Client", VERSION_STRING);
 }
 
 static void
