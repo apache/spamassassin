@@ -3352,10 +3352,18 @@ sub check_for_numeric_helo {
 sub check_for_illegal_ip {
   my ($self) = @_;
 
-  my $rcvd = $self->{relays_trusted_str}."\n".$self->{relays_untrusted_str};
-
-  # (note this might miss some hits if the Received.pm skips any invalid IPs)
-  return ($rcvd && $rcvd =~ /=(?:(?:[01257]|22[3-9]|23[0-9]|24[0-9]|25[0-5])\.\d+\.\d+\.\d+|127\.[1-9]\.\d+\.\d+|127\.0\.[1-9]\.\d+|127\.0\.0\.(?:\d\d+|[2-9]))\b/);
+  foreach my $rcvd ( @{$self->{relays_untrusted}} ) {
+    # (note this might miss some hits if the Received.pm skips any invalid IPs)
+    foreach my $check ( $rcvd->{ip}, $rcvd->{by} ) {
+      return 1 if ($check =~ /^(?:
+    	(?:[01257]|22[3-9]|23[0-9]|24[0-9]|25[0-5])\.\d+\.\d+\.\d+|
+	127\.[1-9]\.\d+\.\d+|
+	127\.0\.[1-9]\.\d+|
+	127\.0\.0\.(?:\d\d+|[2-9])
+	)$/x);
+    }
+  }
+  return 0;
 }
 
 ###########################################################################
