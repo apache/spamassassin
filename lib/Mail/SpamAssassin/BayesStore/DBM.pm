@@ -1384,9 +1384,8 @@ sub restore_database {
       print STDERR "." if ($showdots);
     }
 
-    my @parsed_line = split(/\s+/, $line, 5);
-
-    if ($parsed_line[0] eq 'v') { # variable line
+    if ($line =~ /^v\s+/) { # variable line
+      my @parsed_line = split(/\s+/, $line, 3);
       my $value = $parsed_line[1] + 0;
       if ($parsed_line[2] eq 'num_spam') {
 	$num_spam = $value;
@@ -1398,7 +1397,8 @@ sub restore_database {
 	dbg("bayes: restore_database: Skipping unknown line: $line");
       }
     }
-    elsif ($parsed_line[0] eq 't') { # token line
+    elsif ($line =~ /^t\s+/) { # token line
+      my @parsed_line = split(/\s+/, $line, 5);
       my $spam_count = $parsed_line[1] + 0;
       my $ham_count = $parsed_line[2] + 0;
       my $atime = $parsed_line[3] + 0;
@@ -1441,7 +1441,8 @@ sub restore_database {
       }
       $token_count++;
     }
-    elsif ($parsed_line[0] eq 's') { # seen line
+    elsif ($line =~ /^s\s+/) { # seen line
+      my @parsed_line = split(/\s+/, $line, 3);
       my $flag = $parsed_line[1];
       my $msgid = $parsed_line[2];
 
@@ -1449,6 +1450,12 @@ sub restore_database {
 	dbg("bayes: Unknown seen flag ($flag) for line: $line, skipping");
 	next;
       }
+
+      unless ($msgid) {
+	dbg("bayes: Blank msgid for line: $line, skipping");
+	next;
+      }
+
       $new_seen{$msgid} = $flag;
     }
     else {
@@ -1482,7 +1489,7 @@ sub restore_database {
   }
 
   # set the calculated magic tokens
-  $new_toks{$DB_VERSION_MAGIC_TOKEN} = 2;
+  $new_toks{$DB_VERSION_MAGIC_TOKEN} = $self->DB_VERSION();
   $new_toks{$NTOKENS_MAGIC_TOKEN} = $token_count;
   $new_toks{$NSPAM_MAGIC_TOKEN} = $num_spam;
   $new_toks{$NHAM_MAGIC_TOKEN} = $num_ham;
