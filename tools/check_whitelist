@@ -22,8 +22,12 @@ tie %h, "AnyDBM_File",$db, O_RDONLY,0600
 my @k = grep(!/totscore$/,keys(%h));
 for my $key (@k)
 {
-	my $t = $h{"$key|totscore"};
-	my $v = $h{$key};
-	if(defined($t)) { printf "% 8.1f %15s  --  %s\n",$t/$v,"($t/$v)",$key; };
+  my $t = $h{"$key|totscore"};
+  my $v = $h{$key};
+  if(defined($t)) {
+    printf "% 8.1f %15s  --  %s\n",
+		  $t/$v, (sprintf "(%.1f/%d)",$t/$v,$v),
+		  $key;
+  }
 }
 untie %h;

@@ -484,4 +484,16 @@ header __GRADF_RCVD	Received =~ /from \S+ \(\S+.friendfinder.com \[216\.34\./
 meta T_VIA_GRADFINDER	(__GRADF_RCVD && __GRADF_MSGID)
 tflags T_VIA_GRADFINDER	nice
 
+# bug 1171
+# Listproc - Allen (example: nonspam:<199811090515.AAA28259@chem.harvard.edu>)
+header T_LISTPROC1		X-Listprocessor-version =~ /^\s*(?:\d\.)+\w*\s+--\s+List[Pp]roc(?:essor)?\b/
+score T_LISTPROC1		-0.01
+tflags T_LISTPROC1		nice
+
+header __FROM_LISTPROC		From =~ /\blistproc\@/i
+header __REPLY_LISTPROC		Reply-To =~ /\blistproc\@/i
+header __SENDER_LISTPROC	Sender =~ /\blistproc\@/i
+meta T_LISTPROC2		T_LISTPROC1 && __FROM_LISTPROC && (__REPLY_LISTPROC || __SENDER_LISTPROC)
+score T_LISTPROC2		-0.01
+tflags T_LISTPROC2		nice
 

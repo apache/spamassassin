@@ -49,9 +49,15 @@ sub sa_t_init {
 
   copy ("../rules/user_prefs.template", "log/test_default.cf")
 	or die "user prefs copy failed";
+
   open (PREFS, ">>log/test_default.cf");
-  print PREFS "bayes_path ./log/user_state/bayes\n";
+  print PREFS "
+    bayes_path ./log/user_state/bayes
+    auto_whitelist_path ./log/user_state/auto-whitelist
+    ";
   close PREFS;
+
+  mkdir "log/user_state";
 
   $home = $ENV{'HOME'};
   $home ||= $ENV{'WINDIR'} if (defined $ENV{'WINDIR'});

@@ -157,6 +157,15 @@ In processing the 115855 byte message 10 times in parrallel, spamd uses just
 22M of heap, with a peak of only 2.5M spamassassin would have used 150M
 total, and a peak of up to 35M to do this same job.
 
+Regarding how much resources to allocate for spamd, Francesco Potorti reports
+'On a Sun Ultra60 with 512MB memory, I found that 20 is a reasonable number
+(for --max-children), and maybe it could be increased. In fact, the memory
+footprint of a single Perl interpreter for spamd is about 20MB, but the total
+memory occupied by several concurrent spamd processes is not much higher. In
+peak activity periods, with load average around 15, more than 13 spamd
+processes running or sleeping, and many other amavis and sendmail processes
+active, the total memory used was around 350MB, plus about 200MB on swap.'
+
 Bugs
 ----
 

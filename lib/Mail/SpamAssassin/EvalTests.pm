@@ -281,18 +281,19 @@ sub check_for_forged_received_trail {
 }
 
 # FORGED_HOTMAIL_RCVD
-sub check_for_forged_hotmail_received_headers {
+sub _check_for_forged_hotmail_received_headers {
   my ($self) = @_;
 
-  my $from = $self->get ('From:addr');
-  if ($from !~ /hotmail.com/) { return 0; }
+  if (defined $self->{hotmail_addr_but_no_hotmail_received}) { return; }
+
+  $self->{hotmail_addr_with_forged_hotmail_received} = 0;
+  $self->{hotmail_addr_but_no_hotmail_received} = 0;
 
   my $rcvd = $self->get ('Received');
   $rcvd =~ s/\s+/ /gs;		# just spaces, simplify the regexp
 
-  return 0
-    if ($rcvd =~
-        /from mail pickup service by hotmail.com with Microsoft SMTPSVC;/);
+  return if ($rcvd =~
+        /from mail pickup service by hotmail\.com with Microsoft SMTPSVC;/);
 
   my $ip = $self->get ('X-Originating-Ip');
   if ($ip =~ /$IP_ADDRESS/) { $ip = 1; } else { $ip = 0; }
@@ -301,14 +302,38 @@ sub check_for_forged_hotmail_received_headers {
   # Received: from hotmail.com (f135.law8.hotmail.com [216.33.241.135])
   # spammers do not ;)
 
-  if ($self->gated_through_received_hdr_remover()) { return 0; }
+  if ($self->gated_through_received_hdr_remover()) { return; }
 
   if ($rcvd =~ /from \S*hotmail.com \(\S+\.hotmail(?:\.msn|)\.com[ \)]/ && $ip)
-                { return 0; }
+                { return; }
   if ($rcvd =~ /from \S+ by \S+\.hotmail(?:\.msn|)\.com with HTTP\;/ && $ip)
-                { return 0; }
+                { return; }
+  if ($rcvd =~ /from \[66\.218.\S+\] by \S+\.yahoo\.com/ && $ip)
+                { return; }
 
-  return 1;
+  if ($rcvd =~ /(?:from |HELO |helo=)\S*hotmail\.com\b/) {
+    # HELO'd as hotmail.com, despite not being hotmail
+    $self->{hotmail_addr_with_forged_hotmail_received} = 1;
+  } else {
+    # check to see if From claimed to be @hotmail.com
+    my $from = $self->get ('From:addr');
+    if ($from !~ /hotmail.com/) { return; }
+    $self->{hotmail_addr_but_no_hotmail_received} = 1;
+  }
+}
+
+# FORGED_HOTMAIL_RCVD
+sub check_for_forged_hotmail_received_headers {
+  my ($self) = @_;
+  $self->_check_for_forged_hotmail_received_headers();
+  return $self->{hotmail_addr_with_forged_hotmail_received};
+}
+
+# FORGED_HOTMAIL_RCVD
+sub check_for_no_hotmail_received_headers {
+  my ($self) = @_;
+  $self->_check_for_forged_hotmail_received_headers();
+  return $self->{hotmail_addr_but_no_hotmail_received};
 }
 
 # MSN_GROUPS
@@ -519,11 +544,24 @@ sub gated_through_received_hdr_remover {
 
     # ensure we have other indicative headers too
     if ($dlto =~ /^mailing list \S+\@\S+/ &&
-      	$rcvd =~ /qmail \d+ invoked from network\); \d+ ... \d+/ &&
       	$rcvd =~ /qmail \d+ invoked by .{3,20}\); \d+ ... \d+/)
     {
       return 1;
     }
+    # jm: this line *was* included:
+    #   $rcvd =~ /qmail \d+ invoked from network\); \d+ ... \d+/ &&
+    # but I've found FPs where it did not appear in the mail; it's
+    # not required.
+  }
+
+  if ($self->get ("Received") !~ /\S/) {
+    # we have no Received headers!  These tests cannot run in that case
+    return 1;
+  }
+
+  # MSN groups removes Received lines. thanks MSN
+  if ($self->get ("Received") =~ /from groups\.msn\.com \(\S+\.msn\.com /) {
+    return 1;
   }
 
   return 0;
@@ -2441,14 +2479,15 @@ sub check_razor2_range {
 sub check_email_isfree {
   my ($self, $body) = @_;
 
-  return 0 unless HAS_EMAIL_ISFREE;
+#  return 0 unless HAS_EMAIL_ISFREE;
 
   foreach (@{$body}) {
-    my @domains = /\@[.A-Za-z_-]+/g;
+    my @domains = /\@[.\w-]{2,}/g;
     foreach my $domain (@domains) {
-      $domain =~ s/\@//;
-      $domain = lc $domain;
-      return 1 if Email::IsFree::by_domain($domain);
+      #$domain =~ s/\@//;
+      #$domain = lc $domain;
+      #print STDERR "EMAIL $domain\n";
+#      return 1 if Email::IsFree::by_domain($domain);
     }
   }
 
@@ -2462,6 +2501,9 @@ sub check_messageid_not_usable {
   # Lyris eats message-ids.  also some ezmlm, I think :(
   $_ = $self->get ("List-Unsubscribe");
   return 1 if (/<mailto:(?:leave-\S+|\S+-unsubscribe)\@\S+>$/);
+
+  # ezmlm again
+  if($self->gated_through_received_hdr_remover()) { return 1; }
 
   # Allen notes this as 'Wacky sendmail version?'
   $_ = $self->get ("Received");
