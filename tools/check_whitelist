@@ -6,7 +6,7 @@ use AnyDBM_File ;
 use vars qw( %h $k $v ) ;
 
 my $dirbased = $ENV{HOME}."/.spamassassin/auto-whitelist";
-my $db = $ENV{HOME}."/.spamassassin/auto_whitelist";	# is this right?
+my $db = $ENV{HOME}."/.spamassassin/auto-whitelist";	# is this right?
 
 if (-f "$db.db") {
   tie %h, "AnyDBM_File",$db, O_RDWR|O_CREAT|O_EXCL,0600
