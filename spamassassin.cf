@@ -224,7 +224,7 @@ body POPLAUNCH			/StealthLaunch PopLaunch.\s/
 
 body NUMERIC_HTTP_ADDR		/http\:\/\/\d+\//i
 body SUPERLONG_LINE		/.{199,}/
-body ASCII_FORM_ENTRY		/[A-Za-z].* _{30,}/
+body ASCII_FORM_ENTRY		/[A-Za-z][A-Za-z]+.*\s+_{30,}/
 
 body AMAZING			/AMAZING/
 body GUARANTEE			/GUARANTEE/
@@ -287,10 +287,6 @@ body PURE_PROFIT		/PURE PROFIT/
 
 body FREE_CONSULTATION		/FREE CONSULTATION/i
 body INCREASE_SALES		/INCREASE SALES/i
-
-# oftentimes spammers have paper drop boxes (contrib: WW)
-body FILL_OUT_HERE              /\w+[ :\#]_{25,}\s*$/
-describe FILL_OUT_HERE          Looks like something to fill out
 
 # somehow "/name.*\bcredit.?card\b/is" won't match, even if
 # it's there.  *boggle* (contrib: WW)
