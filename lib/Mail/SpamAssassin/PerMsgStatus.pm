@@ -1201,7 +1201,6 @@ sub do_head_tests {
 
   foreach $rulename (@negative_tests, @positive_tests) {
     $rule = $self->{conf}->{head_tests}->{$rulename};
-    my $score = $self->{conf}{scores}{$rulename};
     my $def = '';
     my ($hdrname, $testtype, $pat) =
         $rule =~ /^\s*(\S+)\s*(\=|\!)\~\s*(\S.*?\S)\s*$/;
@@ -1210,8 +1209,12 @@ sub do_head_tests {
     $hdrname =~ s/#/[HASH]/g;		# avoid probs with eval below
     $def =~ s/#/[HASH]/g;
 
+    if ( $self->{stop_at_threshold} && $self->{conf}{scores}{$rulename} > 0 ) {
+    	$evalstr .= 'return if $self->is_spam();
+	';
+    }
+    
     $evalstr .= '
-      return if ('.$score.' > 0) && $self->{stop_at_threshold} && $self->is_spam();
       if ($self->{conf}->{scores}->{q#'.$rulename.'#}) {
          '.$rulename.'_head_test($self, $_); # no need for OO calling here (its faster this way)
       }
@@ -1291,9 +1294,13 @@ sub do_body_tests {
 
   foreach $rulename (@negative_tests, @positive_tests) {
     $pat = $self->{conf}->{body_tests}->{$rulename};
-    my $score = $self->{conf}{scores}{$rulename};
+
+    if ( $self->{stop_at_threshold} && $self->{conf}{scores}{$rulename} > 0 ) {
+    	$evalstr .= 'return if $self->is_spam();
+	';
+    }
+    
     $evalstr .= '
-      return if ('.$score.' > 0) && $self->{stop_at_threshold} && $self->is_spam();
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
         # call procedurally as it is faster.
         '.$rulename.'_body_test($self,@_);
@@ -1489,9 +1496,13 @@ sub do_body_uri_tests {
 
   foreach $rulename (@negative_tests, @positive_tests) {
     $pat = $self->{conf}->{uri_tests}->{$rulename};
-    my $score = $self->{conf}{scores}{$rulename};
+
+    if ( $self->{stop_at_threshold} && $self->{conf}{scores}{$rulename} > 0 ) {
+    	$evalstr .= 'return if $self->is_spam();
+	';
+    }
+
     $evalstr .= '
-      return if ('.$score.' > 0) && $self->{stop_at_threshold} && $self->is_spam();
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
         '.$rulename.'_uri_test($self, @_); # call procedurally for speed
       }
@@ -1570,9 +1581,13 @@ sub do_rawbody_tests {
 
   foreach $rulename (@negative_tests, @positive_tests) {
     $pat = $self->{conf}->{rawbody_tests}->{$rulename};
-    my $score = $self->{conf}{scores}{$rulename};
+
+    if ( $self->{stop_at_threshold} && $self->{conf}{scores}{$rulename} > 0 ) {
+    	$evalstr .= 'return if $self->is_spam();
+	';
+    }
+    
     $evalstr .= '
-      return if ('.$score.' > 0) && $self->{stop_at_threshold} && $self->is_spam();
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
          '.$rulename.'_rawbody_test($self, @_); # call procedurally for speed
       }
@@ -1650,9 +1665,13 @@ sub do_full_tests {
 
   foreach $rulename (@negative_tests, @positive_tests) {
     $pat = $self->{conf}->{full_tests}->{$rulename};
-    my $score = $self->{conf}{scores}{$rulename};
+
+    if ( $self->{stop_at_threshold} && $self->{conf}{scores}{$rulename} > 0 ) {
+    	$evalstr .= 'return if $self->is_spam();
+	';
+    }
+    
     $evalstr .= '
-      return if ('.$score.' > 0) && $self->{stop_at_threshold} && $self->is_spam();
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
 	if ($$fullmsgref =~ '.$pat.') {
 	  $self->got_body_pattern_hit (q{'.$rulename.'});
