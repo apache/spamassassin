@@ -608,10 +608,12 @@ sub tok_put {
 
 sub tok_sync_nspam_nham {
   my ($self, $ds, $dh) = @_;
-  my $ns = $self->{db_toks}->{$NSPAM_MAGIC_TOKEN} || 0;
-  my $nh = $self->{db_toks}->{$NHAM_MAGIC_TOKEN} || 0;
-  $ns += $ds; if ($ns < 0) { $ns = 0; }
-  $nh += $dh; if ($nh < 0) { $nh = 0; }
+  my $ns = $self->{db_toks}->{$NSPAM_MAGIC_TOKEN};
+  my $nh = $self->{db_toks}->{$NHAM_MAGIC_TOKEN};
+  $ns ||= 0;
+  $nh ||= 0;
+  if ($ds) { $ns += $ds; } if ($ns < 0) { $ns = 0; }
+  if ($dh) { $nh += $dh; } if ($nh < 0) { $nh = 0; }
   $self->{db_toks}->{$NSPAM_MAGIC_TOKEN} = $ns;
   $self->{db_toks}->{$NHAM_MAGIC_TOKEN} = $nh;
 }
