@@ -29,8 +29,10 @@ sub new {
 use constant LOCK_MAX_AGE => 600;       # seconds 
 
 sub safe_lock {
-  my ($self, $max_retries, $path) = @_;
+  my ($self, $path, $max_retries) = @_;
   my @stat;
+
+  $max_retries ||= 30;
 
   my $lock_file = "$path.lock";
 

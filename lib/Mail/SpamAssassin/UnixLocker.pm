@@ -36,9 +36,11 @@ sub new {
 use constant LOCK_MAX_AGE => 600;	# seconds 
 
 sub safe_lock {
-  my ($self, $max_retries, $path) = @_;
+  my ($self, $path, $max_retries) = @_;
   my $is_locked = 0;
   my @stat;
+
+  $max_retries ||= 30;
 
   my $lock_file = "$path.lock";
   my $lock_tmp = Mail::SpamAssassin::Util::untaint_file_path
