@@ -18,7 +18,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("rcvd_parser");
-use Test; BEGIN { plan tests => 23 };
+use Test; BEGIN { plan tests => 24 };
 
 
 use strict;
@@ -99,6 +99,29 @@ Received: from Dwsf@aol.com
 } => q{
 
 [ ip=64.12.136.4 rdns= helo=imo-m01.mx.aol.com by=xxx.com ident= envfrom= ]
+
+},
+q{
+
+Received: from bigass1.example.com ([66.199.2.3])
+  by slim1.example.com with esmtp; Tue, 06 Jan 2004 23:56:09 +0000
+Received: from a1200 ([24.83.2.4])
+  (AUTH: LOGIN mitch@example.com)
+  by bigass1.example.com with esmtp; Tue, 06 Jan 2004 23:56:09 +0000
+Received: from bigass1.example.com (ns1.example.com [66.199.2.5])
+        by fiat.example.edu (8.12.10/8.12.10) with ESMTP id
+    i06MBJ6U020255
+        for <broot@example.edu>; Tue, 6 Jan 2004 16:11:19 -0600
+Received: from a1200 ([24.83.2.6])
+  (AUTH: LOGIN mitch@example.com)
+  by bigass1.example.com with esmtp; Tue, 06 Jan 2004 22:09:53 +0000
+Received: from a1200 ([24.83.2.7])
+  (AUTH: LOGIN mitch@example.com)
+  by bigass1.example.com with esmtp; Tue, 06 Jan 2004 23:56:09 +0000
+
+} => q{
+
+[ ip=66.199.2.3 rdns=bigass1.example.com helo= by=slim1.example.com ident= envfrom= ] [ ip=24.83.2.4 rdns=a1200 helo= by=bigass1.example.com ident= envfrom= ] [ ip=66.199.2.5 rdns=ns1.example.com helo=bigass1.example.com by=fiat.example.edu ident= envfrom= ] [ ip=24.83.2.6 rdns=a1200 helo= by=bigass1.example.com ident= envfrom= ] [ ip=24.83.2.7 rdns=a1200 helo= by=bigass1.example.com ident= envfrom= ]
 
 },
 q{
