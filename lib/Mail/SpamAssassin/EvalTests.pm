@@ -748,14 +748,21 @@ sub check_for_faraway_charset {
 sub check_for_faraway_charset_in_body {
   my ($self, $fulltext) = @_;
 
-  if ($$fulltext =~ /\n\n.*\n
-  		Content-Type:\s(.{0,100}charset=[^\n]+)\n
-                (.*)\n
-                Content-Type:\s
-		/isx)
-  {
+  my $content_type = $self->{msg}->get_header('Content-Type');
+  $content_type = '' unless defined $content_type;
+  $content_type =~ /\bboundary\s*=\s*["']?(.*?)["']?(?:;|$)/i;
+  my $boundary = "\Q$1\E";
+
+  # No message sections to check
+  return 0 unless ( defined $boundary );
+
+  while ( $$fulltext =~ /^--$boundary\n((?:[^\n]+\n)+)(.+?)
+                      ^--$boundary(?:--)?\n/smxg ) {
+              my($header,$sampleofbody) = ($1,$2);
+
+              if ( $header =~ /^Content-Type:\s(.{0,100}charset=[^\n]+)/msi ) {
     my $type = $1;
-    my $sampleofbody = $2;
+
     my @locales = $self->get_my_locales();
     $type = get_charset_from_ct_line ($type);
     if (defined $type &&
@@ -766,6 +773,7 @@ sub check_for_faraway_charset_in_body {
         return 1;
       }
     }
+  }
   }
 
   0;
