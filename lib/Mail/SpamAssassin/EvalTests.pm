@@ -384,7 +384,7 @@ sub check_for_forged_hotmail_received_headers {
   return $self->{hotmail_addr_with_forged_hotmail_received};
 }
 
-# FORGED_HOTMAIL_RCVD
+# SEMIFORGED_HOTMAIL_RCVD
 sub check_for_no_hotmail_received_headers {
   my ($self) = @_;
   $self->_check_for_forged_hotmail_received_headers();

@@ -362,8 +362,6 @@ sub razor2_lookup {
 
   timelog("Razor2 -> Starting razor test ($timeout secs max)", "razor", 1);
   
-  my $response = undef;
-
   # razor also debugs to stdout. argh. fix it to stderr...
   if ($Mail::SpamAssassin::DEBUG->{enabled}) {
     open (OLDOUT, ">&STDOUT");
@@ -411,12 +409,9 @@ sub razor2_lookup {
           or die "error in compute_sigs";
 
         # 
-        # if mail is whitelisted, its not spam, so abort.
+        # if mail isn't whitelisted, check it out
         #   
-        if ( $rc->local_check( $objects->[0] ) ) {
-          $response = 0;
-        }
-        else {
+        if ( ! $rc->local_check( $objects->[0] ) ) {
           if (!$rc->connect()) {
             # provide a better error message when servers are unavailable,
             # than "Bad file descriptor Died".
@@ -428,9 +423,12 @@ sub razor2_lookup {
 	  # if we got here, we're done doing remote stuff, abort the alert
 	  alarm 0;
 
+	  dbg("Using results from Razor v".$Razor2::Client::Version::VERSION);
+
 	  # so $objects->[0] is the first (only) message, and ->{spam} is a general yes/no
-          $self->{razor2_result} = $response = $objects->[0]->{spam} || 0;
-	  # good for debugging, but leave this off!
+          $self->{razor2_result} = $objects->[0]->{spam} || 0;
+
+	  # great for debugging, but leave this off!
 	  #use Data::Dumper;
 	  #print Dumper($objects),"\n";
 
@@ -438,21 +436,26 @@ sub razor2_lookup {
 	  # so go through each part, taking the highest cf we find
 	  # of any part that isn't contested (ct).  This helps avoid false
 	  # positives.
+	  # razor-agents < 2.14 have a different object format, so we now support both.
+	  # $objects->[0]->{resp} vs $objects->[0]->{p}->[part #]->{resp}
 	  my $part = 0;
-	  foreach my $cf ( @{$objects->[0]->{p}} ) {
-	    if ( exists $cf->{resp} ) {
-	      for (my $response=0;$response<@{$cf->{resp}};$response++) {
-	        my $tmp = $cf->{resp}->[$response];
-	      	my $tmpcf = $tmp->{cf}; # Part confidence
-	      	my $tmpct = $tmp->{ct}; # Part contested?
-		$tmpcf = 0 unless ( defined $tmpcf );
-		$tmpct = 0 unless ( defined $tmpct );
-		my $engine = $cf->{sent}->[$response]->{e};
-	        dbg("Found Razor2 response: part=$part, engine=$engine, ct=$tmpct, cf=$tmpcf");
-	        $self->{razor2_cf_score} = $tmpcf if ( !$tmpct && $tmpcf > $self->{razor2_cf_score} );
+	  my $arrayref = $objects->[0]->{p} || $objects;
+	  if ( defined $arrayref && exists $arrayref->[0]->{resp} ) {
+	    foreach my $cf ( @{$arrayref} ) {
+	      if ( exists $cf->{resp} ) {
+	        for (my $response=0;$response<@{$cf->{resp}};$response++) {
+	          my $tmp = $cf->{resp}->[$response];
+	      	  my $tmpcf = $tmp->{cf}; # Part confidence
+	      	  my $tmpct = $tmp->{ct}; # Part contested?
+		  $tmpcf = 0 unless ( defined $tmpcf );
+		  $tmpct = 0 unless ( defined $tmpct );
+		  my $engine = $cf->{sent}->[$response]->{e};
+	          dbg("Found Razor2 response: part=$part, engine=$engine, ct=$tmpct, cf=$tmpcf");
+	          $self->{razor2_cf_score} = $tmpcf if ( !$tmpct && $tmpcf > $self->{razor2_cf_score} );
+	        }
 	      }
+	      $part++;
 	    }
-	    $part++;
 	  }
         }
       }
@@ -466,7 +469,6 @@ sub razor2_lookup {
     alarm 0;    # just in case
   
     if ($@) {
-      $response = undef;
       if ( $@ =~ /alarm/ ) {
           dbg("razor2 check timed out after $timeout secs.");
         } elsif ($@ =~ /(?:could not connect|network is unreachable)/) {
@@ -489,7 +491,7 @@ sub razor2_lookup {
 
   dbg("Razor2 results: spam? ".$self->{razor2_result}."  highest cf score: ".$self->{razor2_cf_score});
 
-  if (defined $response && $response) {
+  if ($self->{razor2_result} > 0) {
       timelog("Razor2 -> Finished razor test: confirmed spam", "razor", 2);
       return 1;
   }
