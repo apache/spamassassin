@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.492 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.493 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -49,11 +49,8 @@ meta T_INVALID_DATE_2		(__INVALID_DATE && !__XM_BAD_DATE_MUAS)
 describe T_INVALID_DATE_2	Invalid Date: header (not RFC 2822)
 
 # Wierd.  Can only assume this is caused by PEBKAC on the sending side...
-meta T_HTML_WITHOUT_HTML_1	(MIME_HTML_ONLY && !HTML_MESSAGE)
-describe T_HTML_WITHOUT_HTML_1	Claims to be HTML, but there is no HTML text
-# uses __MIME_HTML test from below and eval in EvalTests.pm (at least for now)
-meta T_HTML_WITHOUT_HTML_2	(__MIME_HTML && !HTML_MESSAGE)
-describe T_HTML_WITHOUT_HTML_2	Claims to be HTML, but there is no HTML text
+meta T_HTML_WITHOUT_HTML	(__MIME_HTML && !HTML_MESSAGE)
+describe T_HTML_WITHOUT_HTML	Claims to be HTML, but there is no HTML text
 
 # 2003-02-23: quinlan
 # bug 1376: HTML without <!DOCTYPE> from mailers that always use <!DOCTYPE>
@@ -73,6 +70,17 @@ body T_HTML_IMAGE_WEB_BUGS_2	eval:html_test('t_image_web_bugs2')
 body T_HTML_IMAGE_WEB_BUGS_3	eval:html_test('t_image_web_bugs3')
 body T_HTML_IMAGE_WEB_BUGS_4	eval:html_test('t_image_web_bugs4')
 body T_HTML_IMAGE_WEB_BUGS_5	eval:html_test('t_image_web_bugs5')
+body T_HTML_IMAGE_WEB_BUGS_ANY_0	eval:html_test('t_image_web_bugs_any0')
+body T_HTML_IMAGE_WEB_BUGS_ANY_1	eval:html_test('t_image_web_bugs_any1')
+body T_HTML_IMAGE_WEB_BUGS_ANY_2	eval:html_test('t_image_web_bugs_any2')
+body T_HTML_IMAGE_WEB_BUGS_ANY_3	eval:html_test('t_image_web_bugs_any3')
+# replacement for current HTML_WEB_BUGS
+body T_HTML_WEB_BUGS_0		eval:html_test('t_web_bugs0')
+body T_HTML_WEB_BUGS_1		eval:html_test('t_web_bugs1')
+body T_HTML_WEB_BUGS_2		eval:html_test('t_web_bugs2')
+body T_HTML_WEB_BUGS_3		eval:html_test('t_web_bugs3')
+body T_HTML_WEB_BUGS_4		eval:html_test('t_web_bugs4')
+body T_HTML_WEB_BUGS_5		eval:html_test('t_web_bugs5')
 
 # 2003-02-25: quinlan
 # Whee... more HTML tests!
