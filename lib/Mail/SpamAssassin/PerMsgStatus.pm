@@ -1349,6 +1349,13 @@ sub ran_rule_debug_code {
   #      $bit.');
 }
 
+sub hash_line_for_rule {
+  my ($self, $rulename) = @_;
+  return "\n".'#line 1 "'.
+	$self->{conf}->{source_file}->{$rulename}.
+	', rule '.$rulename.',"';
+}
+
 ###########################################################################
 
 sub do_head_tests {
@@ -1397,7 +1404,7 @@ sub do_head_tests {
       sub '.$rulename.'_head_test {
         my $self = shift;
         $_ = shift;
-
+	'.$self->hash_line_for_rule($rulename).'
         if ($self->get(q#'.$hdrname.'#, q#'.$def.'#) '.$testtype.'~ '.$pat.') {
           $self->got_hit (q#'.$rulename.'#, q{});
           '. $self->ran_rule_debug_code ($rulename,"header regex", 1) . '
@@ -1462,6 +1469,7 @@ sub do_body_tests {
     sub '.$rulename.'_body_test {
            my $self = shift;
            foreach ( @_ ) {
+	     '.$self->hash_line_for_rule($rulename).'
              if ('.$pat.') { 
 	        $self->got_body_pattern_hit (q{'.$rulename.'}); 
                 '. $self->ran_rule_debug_code ($rulename,"body-text regex", 2) . '
@@ -1653,6 +1661,7 @@ sub do_body_uri_tests {
     sub '.$rulename.'_uri_test {
        my $self = shift;
        foreach ( @_ ) {
+	 '.$self->hash_line_for_rule($rulename).'
          if ('.$pat.') { 
             $self->got_uri_pattern_hit (q{'.$rulename.'});
             '. $self->ran_rule_debug_code ($rulename,"uri test", 4) . '
@@ -1719,6 +1728,7 @@ sub do_rawbody_tests {
     sub '.$rulename.'_rawbody_test {
        my $self = shift;
        foreach ( @_ ) {
+	 '.$self->hash_line_for_rule($rulename).'
          if ('.$pat.') { 
             $self->got_body_pattern_hit (q{'.$rulename.'});
             '. $self->ran_rule_debug_code ($rulename,"body_pattern_hit", 8) . '
@@ -1776,6 +1786,7 @@ sub do_full_tests {
   while (my($rulename, $pat) = each %{$self->{conf}{full_tests}}) {
     $evalstr .= '
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
+	'.$self->hash_line_for_rule($rulename).'
 	if ($$fullmsgref =~ '.$pat.') {
 	  $self->got_body_pattern_hit (q{'.$rulename.'});
           '. $self->ran_rule_debug_code ($rulename,"full-text regex", 16) . '
