@@ -13,10 +13,23 @@ use strict;
 
 use vars qw{
 	$KNOWN_BAD_DIALUP_RANGES $IP_IN_RESERVED_RANGE
-	$EXISTING_DOMAIN $IS_DNS_AVAILABLE $VERSION
+	@EXISTING_DOMAINS $IS_DNS_AVAILABLE $VERSION
 };
 
-$EXISTING_DOMAIN = 'microsoft.com.';
+@EXISTING_DOMAINS = qw{spamassassin.org
+                       kernel.org
+                       slashdot.org
+                       google.com
+                       google.de
+                       microsoft.com
+                       yahoo.com
+                       yahoo.de
+                       amazon.com
+                       amazon.de
+                       nytimes.com
+                       leo.org
+                       gwdg.de
+                    };
 
 $IP_IN_RESERVED_RANGE = undef;
 
@@ -588,21 +601,51 @@ sub lookup_ptr {
 
 sub is_dns_available {
   my ($self) = @_;
+  my $dnsopt = $self->{conf}->{dns_available};
+  my @domains;
 
   return $IS_DNS_AVAILABLE if (defined $IS_DNS_AVAILABLE);
 
   $IS_DNS_AVAILABLE = 0;
+  if ($dnsopt eq "no") {
+    dbg ("dns_available set to no in config file, skipping test", "dnsavailable", -1);
+    return $IS_DNS_AVAILABLE;
+  }
+  if ($dnsopt eq "yes") {
+    $IS_DNS_AVAILABLE = 1;
+    dbg ("dns_available set to yes in config file, skipping test", "dnsavailable", -1);
+    return $IS_DNS_AVAILABLE;
+  }
+  
   goto done if ($self->{main}->{local_tests_only});
   goto done unless $self->load_resolver();
+
+  if ($dnsopt =~ /test:\s+(.+)$/) {
+    my $servers=$1;
+    dbg("servers: $servers");
+    @domains = split (/\s+/, $servers);
+    dbg("Looking up MX records for user specified servers: ".join(", ", @domains), "dnsavailable", -1);
+  } else {
+    @domains = @EXISTING_DOMAINS;
+  }
 
   # TODO: retry every now and again if we get this far, but the
   # next test fails?  could be because the ethernet cable has
   # simply fallen out ;)
-  goto done unless $self->lookup_mx ($EXISTING_DOMAIN);
+  for(my $retry = 3; $retry > 0 and $#domains>-1; $retry--) {
+    my $domain = splice(@domains, rand(@domains), 1);
+    dbg ("trying ($retry) $domain...", "dnsavailable", -2);
+    if($self->lookup_mx($domain)) {
+      dbg ("MX lookup of $domain succeeded => Dns available (set dns_available to hardcode)", "dnsavailable", -1);
+      $IS_DNS_AVAILABLE = 1;
+      last;
+    }
+  }
 
-  $IS_DNS_AVAILABLE = 1;
+  dbg ("All MX queries failed => DNS unavailable (set dns_available to override)", "dnsavailable", -1) if ($IS_DNS_AVAILABLE == 0);
 
 done:
+  # jm: leaving this in!
   dbg ("is DNS available? $IS_DNS_AVAILABLE");
   return $IS_DNS_AVAILABLE;
 }

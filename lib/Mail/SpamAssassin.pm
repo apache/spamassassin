@@ -59,10 +59,10 @@ use File::Copy;
 use Cwd;
 use Config;
 
-# Load Time::HiRes is it's available
-BEGIN {                                                                                                                                                                
-  eval { require Time::HiRes };                                                                                                                                        
-  Time::HiRes->import( qw(time) ) unless $@;                                                                                                                           
+# Load Time::HiRes if it's available
+BEGIN {
+  eval { require Time::HiRes };
+  Time::HiRes->import( qw(time) ) unless $@;
 }  
 
 use vars	qw{
@@ -78,7 +78,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 $VERSION = "2.40";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.100 2002/06/20 17:02:41 hughescr Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.101 2002/07/15 12:38:27 jmason Exp $';
 
 sub Version { $VERSION; }
 
@@ -196,6 +196,7 @@ sub new {
   $DEBUG->{razor}=-3;
   $DEBUG->{rbl}=0;
   $DEBUG->{timelog}=0;
+  $DEBUG->{dnsavailable}=-2;
   # Bitfield:
   # header regex: 1 | body-text: 2 | uri tests: 4 | raw-body-text: 8
   # full-text regexp: 16 | run_eval_tests: 32 | run_rbl_eval_tests: 64

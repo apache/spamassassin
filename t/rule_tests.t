@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# $Id: rule_tests.t,v 1.4 2002/07/05 14:40:47 jmason Exp $
+# $Id: rule_tests.t,v 1.5 2002/07/15 12:38:28 jmason Exp $
 use strict;
 use Test;
 use Mail::SpamAssassin;
@@ -42,6 +42,7 @@ foreach my $symbol ($sa->{conf}->regression_tests()) {
         }
 
         my $test_type = $conf->{test_types}->{$symbol};
+        next unless defined($test_type);        # score, but no test
 
         if ($test_type == $Mail::SpamAssassin::Conf::type_head_tests ||
             $test_type == $Mail::SpamAssassin::Conf::type_head_evals)
