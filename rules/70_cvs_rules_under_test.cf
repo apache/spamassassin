@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.583 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.584 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -279,16 +279,21 @@ meta T_HTML_DECLARATION_WRONG7	(T_HTML_DECLARATION_HTML + T_HTML_DECLARATION_BOD
 # bug 1426
 # AOL users' From never includes a real name
 # duncf
+# quinlan: this looks risky from an FP point of view, it just requires
+# AOL to upgrade their software a bit, also third-party AOL mail like
+# evite and photo places can FP on this
+meta T_AOL_FAKE_NAME		(__AOL_MUA && !NO_REAL_NAME)
+describe T_AOL_FAKE_NAME	From: includes real name, but AOL software can't do it
 
-meta T_NO_REAL_NAME_2            (NO_REAL_NAME && !__AOL_MUA)
-describe T_NO_REAL_NAME           From: does not include a real name
-
-meta T_AOL_FAKE_NAME              (__AOL_MUA && ! NO_REAL_NAME)
-describe T_AOL_FAKE_NAME          From: includes a real name, but AOL software can't do it
-
-header __T_AOL_MAIL               From =~ /.*\@aol\.com/
-meta T_AOL_FAKE_MAIL              (__AOL_MUA && !__T_AOL_MAIL)
-describe T_AOL_FAKE_MAIL          From: does not show an aol.com address, but email send using AOL software
+# quinlan: this looks very good, but I want to try a second version before
+# committing
+header __T_AOL_MAIL		From =~ /.*\@aol\.com/
+meta T_AOL_FAKE_MAIL		(__AOL_MUA && !__T_AOL_MAIL)
+describe T_AOL_FAKE_MAIL	From: does not show an aol.com address, but email send using AOL software
+#
+header __AOL_FROM		From:addr =~ /\@aol\.com$/i
+meta T_AOL_FAKE_MAIL2		(__AOL_MUA && !__AOL_FROM)
+describe T_AOL_FAKE_MAIL2	From: does not show an aol.com address, but email send using AOL software
 
 # tvd - US_DOLLARS and MILLION_USD overlap completely, remove the MILLION_USD part
 body T_NA_DOLLARS		/\b(?:\d{1,3})?Million\b.{0,40}\b(?:Canadian Dollar?s?|US\$|U\.? ?S\.? Dollar)/i
