@@ -1158,6 +1158,10 @@ sub check_for_very_long_text {
 
 sub check_for_yelling {
     my ($self, $body) = @_;
+    
+    if (exists $self->{num_yelling_lines}) {
+        return $self->{num_yelling_lines} > 0;
+    }
 
   # Make local copy of lines in the body that have some non-letters
     my @lines = grep(/[^A-Za-z]/, @{$body});
@@ -1183,7 +1187,9 @@ sub check_for_yelling {
 
 sub check_for_num_yelling_lines {
     my ($self, $body, $threshold) = @_;
-
+    
+    $self->check_for_yelling($body);
+    
     return ($self->{num_yelling_lines} >= $threshold);
 }
 
