@@ -453,7 +453,8 @@ sub lookup_mx {
   dbg ("looking up MX for '$dom'");
 
   eval {
-    if (Net::DNS::mx ($self->{res}, $dom)) { $ret = 1; }
+    my @mxrecords = Net::DNS::mx($self->{res}, $dom);
+    $ret = 1 if @mxrecords;
   };
   if ($@) {
     # 71 == EX_OSERR.  MX lookups are not supposed to crash and burn!
