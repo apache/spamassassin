@@ -17,6 +17,8 @@ header USER_AGENT_KMAIL      User-Agent =~ /^kmail\b/i
 describe USER_AGENT_KMAIL    User-Agent header indicates a non-spam MUA
 header USER_AGENT_IMP        User-Agent =~ /^Internet Messaging Program\b/i
 describe USER_AGENT_IMP      User-Agent header indicates a non-spam MUA
+header USER_AGENT_AOL        User-Agent =~ /^AOL \d.\d for Windows/
+describe USER_AGENT_AOL      User-Agent header indicates a non-spam MUA
 
 tflags USER_AGENT_PINE       nice
 tflags USER_AGENT_MUTT       nice
@@ -26,4 +28,5 @@ tflags USER_AGENT_OE         nice
 tflags USER_AGENT_ENTOURAGE  nice
 tflags USER_AGENT_KMAIL      nice
 tflags USER_AGENT_IMP        nice
+tflags USER_AGENT_AOL6       nice
 
