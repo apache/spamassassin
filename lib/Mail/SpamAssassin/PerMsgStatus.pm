@@ -1553,6 +1553,9 @@ sub get_uri_list {
     # http://www.foo.biz?id=3 -> http://www.foo.biz/?id=3
     $nuri =~ s/^(https?:\/\/[^\/\?]+)\?/$1\/?/;
 
+    # http:/www.foo.biz -> http://www.foo.biz
+    $nuri =~ s/^(https?:\/)([^\/])/$1\/$2/;
+
     # deal with encoding of chars, this is just the set of printable
     # chars minus ' ' (that is, dec 33-126, hex 21-7e)
     $nuri =~ s/\&\#0*(3[3-9]|[4-9]\d|1[01]\d|12[0-6]);/sprintf "%c",$1/ge;
@@ -1566,7 +1569,8 @@ sub get_uri_list {
     # deal with http redirectors.  strip off one level of redirector
     # and add back to the array.  the foreach loop will go over those
     # and deal appropriately.
-    if ($nuri =~ m{^https?://.+?(https?://.+)$}) {
+    # bug 3308: redirectors like yahoo only need one '/' ... <grrr>
+    if ($nuri =~ m{^https?://.+?(https?:/.+)$}) {
       push(@uris, $1);
     }
   }
@@ -1585,7 +1589,13 @@ sub get_uri_list {
   $self->{uri_domain_count} = keys %domains;
   $self->{uri_list} = \@uris;
 
-  dbg("uri tests: Done uriRE");
+  # list out the URLs for debugging ...
+  if ($Mail::SpamAssassin::DEBUG->{enabled}) {
+    foreach my $nuri (@uris) {
+      dbg("uri found: $nuri");
+    }
+  }
+
   return @uris;
 }
 
