@@ -8,7 +8,7 @@ Mail::SpamAssassin::PerMsgStatus - per-message status (spam or not-spam)
     'rules_filename'      => '/etc/spamassassin.rules',
     'userprefs_filename'  => $ENV{HOME}.'/.spamassassin.cf'
   });
-  my $mail = Mail::SpamAssassin::MyMailAudit->new();
+  my $mail = Mail::SpamAssassin::NoMailAudit->new();
 
   my $status = $spamtest->check ($mail);
   if ($status->is_spam()) {
