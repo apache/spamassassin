@@ -307,6 +307,8 @@ if ( $log_facility eq 'stderr' ) {
   $log_socket = 'file';
 }
 
+my $already_done_syslog_failure_warning;
+
 # Logging via syslog is requested. Falling back to INET and then STDERR
 # if opening a UNIX socket fails.
 if ( $log_socket ne 'file' and $log_facility ne 'null' ) {
@@ -315,8 +317,7 @@ if ( $log_socket ne 'file' and $log_facility ne 'null' ) {
     defined( setlogsock($log_socket) ) || die $!;
 
     # The next call is required to actually open the socket.
-    # FIXME: mss: wouldn't a openlog('spamd', 'cons,pid,ndelay', $log_facility); be better?
-    # jm: no, it's unportable.  if I recall correctly some perls will die
+    openlog_for_spamd();
     syslog( 'debug', "%s", "spamd starting" );
   };
   my $err = $@;
@@ -1457,7 +1458,7 @@ sub create_default_cf_if_needed {
 sub logmsg {
   my $msg = join ( " ", @_ );
   $msg =~ s/[\r\n]+$//;       # remove any trailing newlines
-  $msg =~ s/[[:cntrl:]]/_/g;  # replace all other control chars with underscores
+  $msg =~ s/[\x00-\x1f]/_/g;  # replace all other control chars with underscores
 
   warn "logmsg: $msg\n" if $opt{'debug'};
 
@@ -1468,57 +1469,74 @@ sub logmsg {
   #   bug 605  <http://bugzilla.spamassassin.org/show_bug.cgi?id=605>
   #   more efficient for daemontools if --syslog=stderr is used
   if ( $log_socket eq 'file' ) {
-    my @date = reverse( ( gmtime(time) )[ 0 .. 5 ] );
-    $date[0] += 1900;
-    $date[1] += 1;
-    syswrite(
-      STDLOG,
-      sprintf(
-        "%04d-%02d-%02d %02d:%02d:%02d [%s] %s: %s\n",
-        @date, $$, 'i', $msg
-      )
-    );
+    logmsg_file ($msg);
   }
 
   # log to syslog (if logging isn't disabled completely via 'null')
   elsif ( $log_socket ne 'none' ) {
+    logmsg_syslog ($msg);
+  }
+}
 
-    # install a new handler for SIGPIPE -- this signal has been
-    # found to occur with syslog-ng after syslog-ng restarts.
-    local $SIG{'PIPE'} = sub { $main::SIGPIPE_RECEIVED++ };
+sub logmsg_file {
+  my $msg = shift;
+  my @date = reverse( ( gmtime(time) )[ 0 .. 5 ] );
+  $date[0] += 1900;
+  $date[1] += 1;
+  syswrite(
+    STDLOG,
+    sprintf(
+      "%04d-%02d-%02d %02d:%02d:%02d [%s] %s: %s\n",
+      @date, $$, 'i', $msg
+    )
+  );
+}
 
-    openlog( 'spamd', 'cons,pid', $log_facility );
+sub logmsg_syslog {
+  my $msg = shift;
 
-    eval { syslog( 'info', "%s", $msg ); };
+  # install a new handler for SIGPIPE -- this signal has been
+  # found to occur with syslog-ng after syslog-ng restarts.
+  local $SIG{'PIPE'} = sub { $main::SIGPIPE_RECEIVED++ };
 
-    if ($@) {
-      if ($main::SIGPIPE_RECEIVED) {
+  eval { syslog( 'info', "%s", $msg ); };
 
-        # SIGPIPE received when writing to syslog -- close and reopen
-        # the log handle, then try again.
-        closelog();
-        openlog( 'spamd', 'cons,pid', $log_facility );
-        syslog( 'info',   "%s",       $msg );
+  if ($@) {
+    if ($main::SIGPIPE_RECEIVED) {
 
-        # now report what happend
-        $msg = "SIGPIPE received - reopening log socket";
-        warn "logmsg: $msg\n" if $opt{'debug'};
-        syslog( 'warning', "%s", $msg );
+      # SIGPIPE received when writing to syslog -- close and reopen
+      # the log handle, then try again.
+      closelog();
+      openlog_for_spamd();
+      syslog( 'info', "%s", $msg );
 
-        # if we've received multiple sigpipes, logging is probably
-        # still broken.
-        if ( $main::SIGPIPE_RECEIVED > 1 ) {
-          warn "logging failure: multiple SIGPIPEs received\n";
-        }
+      # now report what happend
+      $msg = "SIGPIPE received, reopening log socket";
+      warn "logmsg: $msg\n" if $opt{'debug'};
+      syslog( 'warning', "%s", $msg );
 
-        $main::SIGPIPE_RECEIVED = 0;
+      # if we've received multiple sigpipes, logging is probably
+      # still broken.
+      if ( $main::SIGPIPE_RECEIVED > 1 ) {
+        warn "logging failure: multiple SIGPIPEs received\n";
       }
-      else {
-        warn "syslog() failed: $@\n"
-          . "try using --syslog-socket={unix,inet} or --syslog=file\n";
+
+      $main::SIGPIPE_RECEIVED = 0;
+    }
+    else {
+      warn "syslog() failed: $@"; # includes a \n
+
+      # only write this warning once.  it gets annoying fast
+      if (!$already_done_syslog_failure_warning) {
+        warn "try using --syslog-socket={unix,inet} or --syslog=file\n";
+        $already_done_syslog_failure_warning = 1;
       }
     }
   }
+}
+
+sub openlog_for_spamd {
+  openlog( 'spamd', 'cons,pid,ndelay', $log_facility );
 }
 
 sub kill_handler {
