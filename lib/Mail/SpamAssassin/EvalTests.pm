@@ -1167,7 +1167,7 @@ sub check_rbl_backend {
 
   dbg("Got the following IPs: ".join(", ", @ips), "rbl", -3);
 
-  if (scalar @fullips + scalar @originating > 0) {
+  if (scalar @ips + scalar @originating > 0) {
     # If name is foo-notfirsthop, check all addresses except for
     # the originating one.  Suitable for use with dialup lists, like the PDL.
     # note that if there's only 1 IP in the untrusted set, do NOT pop the
@@ -1180,7 +1180,12 @@ sub check_rbl_backend {
     # before it enters our trusted networks; that's the only one we can
     # trust the IP address from (since our relay added that hdr).
     elsif ($set =~ /-lastuntrusted$/) {
-      @ips = ( $ips[0] );
+      if (@ips) {
+	@ips = ( $ips[0] );
+      }
+      else {
+	@ips = ( $originating[0] );
+      }
     }
     else {
       # create a new list to avoid undef errors
