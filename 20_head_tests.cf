@@ -527,8 +527,14 @@ describe PRIORITY_NO_NAME	Message has priority setting, but no X-Mailer
 #header   SUSPECT_LIST_HEADERS	eval:suspect_list_headers()
 #describe SUSPECT_LIST_HEADERS	Mailing list headers are suspicious
 
-header SUBJ_FREE_CAP		Subject =~ /\bFRE{2,}\b/
-describe SUBJ_FREE_CAP		Subject contains the word 'FREE'
+header SUBJ_FREE_CAP		Subject =~ /FRE{2,}|F.R.E.E\b/
+describe SUBJ_FREE_CAP		Subject contains "FREE" in CAPS
+
+header SUBJ_DOLLARS             Subject =~ /^\$[0-9.,]+\b/
+describe SUBJ_DOLLARS           Subject starts with dollar amount
+
+header SUBJ_GUARANTEED          Subject =~ /^guaranteed|(?-i:GUARANTEE)/i
+describe SUBJ_GUARANTEED        Subject GUARANTEED
 
 header SUB_FREE_OFFER           Subject =~ /^fre{2,}\b/i
 describe SUB_FREE_OFFER         Subject starts with "Free"
@@ -589,3 +595,12 @@ header MIME_BOUND_HEX14      Content-Type =~ /boundary=\"==[0-9a-f]{14}\"/
 header MIME_BOUND_EQS_DASHES Content-Type =~ /boundary=\"==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==\"/
 header MIME_BOUND_MIME_BOUND Content-Type =~ /boundary=\"MIME_BOUNDARY-\d\d\d\d\d-\d-\d\d\d\d\d\d\d\d\d\d\"/
 header MIME_BOUND_MAIL_BOUND Content-Type =~ /boundary=\"___MAIL_BOUNDARY____\"/
+
+# http://www.hughes-family.org/bugzilla/show_bug.cgi?id=699
+header MICROSOFT             exists:microsoft
+describe MICROSOFT           A "microsoft" header was found
+
+header SAVINGS               Subject =~ /\bsave\s+(?:on\s+your|up\s+to|big|over|at\s+least|\d+\%|you)\b/i
+describe SAVINGS             Subject talks about savings
+
+

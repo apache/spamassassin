@@ -8,21 +8,6 @@
 # I suggest adding a prefix to rules in this file, "T_" -- this
 # helps identify probationary rules in test output.
 
-# http://www.hughes-family.org/bugzilla/show_bug.cgi?id=678
-body T_DOMAIN_4U2         /[\@\.]\S{0,20}(?:[42](?:yo)?u|foryou|you2)\S{1,20}\.(?:net|com|org)\b/
-describe T_DOMAIN_4U2     Domain name containing "4u", "u2" or variants.
-
-body T_USER_4U2           /\b\S{0,20}(?:[42](?:yo)?u|foryou|you2)\S{1,20}\@\S{1,20}\.(?:net|com|org)\b/
-describe T_USER_4U2       Local part containing "4u", "u2" or variants.
-
-#  0.00     0.00     0.00    0.00    1.00  T_FROM_4U2 (no matches)
-#header T_FROM_4U2         From =~ /[42](?:yo)?u|foryou|you2/i
-#describe T_FROM_4U2       From contains "4u", "u2" or variants.
-
-# bug 680
-body T_MEMBER_2           /\b(?:free|special|paid|dear|gold|opt.in|valued|because you are an?|be a|becoming a|sent to) .{0,9}members?\b/i
-describe T_MEMBER_2       Being a Member
-
 # bug 637
 # more specific FROM_HAS_MIXED_NUMS, less FPs
 header FROM_HAS_MIXED_NUMS2        From =~ /\w{2,}\d{4,}[a-z]{1,2}\d{2,}\@/i
@@ -32,60 +17,15 @@ describe FROM_HAS_MIXED_NUMS2 From address matches known spammer format
 body T_GET_PAID                   /get (?-i:P)aid/i  
 describe T_GET_PAID               Contains 'get paid' with capitals
 
-body T_GET_STARTED_NOW            /get started (?-i:N)ow/i  
-describe T_GET_STARTED_NOW        Contains 'Get started now' with capitals
-
-body T_GET_IT_NOW                 /get it (?-i:N)ow/i  
-describe T_GET_IT_NOW             Contains 'Get it now' with capitals
-
-body T_FREE_ACCESS                /(?-i:F)ree access/i  
-describe T_FREE_ACCESS            Contains 'free access' with capitals
-
-body T_FREE_PREVIEW               /(?-i:F)ree preview/i  
-describe T_FREE_PREVIEW           Contains 'free preview' with capitals
-
 body T_FREE_TICKETS               /(?-i:F)ree ticket/i  
 describe T_FREE_TICKETS           Contains 'free tickets' with capitals
-
-body T_FREE_INSTALL               /(?-i:F)ree installation/i  
-describe T_FREE_INSTALL           Contains 'free installation' with capitals
-
-body T_FREE_SAMPLE                /(?-i:F)ree sample/i  
-describe T_FREE_SAMPLE            Contains 'free sample' with capitals
-
-body T_FREE_HOSTING               /(?-i:F)ree hosting/i  
-describe T_FREE_HOSTING           Contains 'free hosting' with capitals
 
 body T_FREE_WEBSITE               /(?-i:F)ree web/i  
 describe T_FREE_WEBSITE           Contains 'free website' with capitals
 
-header T_SUBJ_GUARANTEED          Subject =~ /^guaranteed|(?-i:GUARANTEE)/i
-describe T_SUBJ_GUARANTEED        Subject GUARANTEED
-
-header T_SUBJ_DOLLARS             Subject =~ /^\$[0-9.,]+\b/
-describe T_SUBJ_DOLLARS           Subject starts with dollar amount
-
-header T_SUBJ_FREE_CAP            Subject =~ /FRE{2,}|F.R.E.E\b/
-describe T_SUBJ_FREE_CAP          Subject contains FREE in CAPS
-
-body T_PORN_MEMBERSHIP            /\b(?:vip|adult|porn|x.rated) membership/i
-describe T_PORN_MEMBERSHIP        Possible Porn - Porn Membership
-
-# http://www.hughes-family.org/bugzilla/show_bug.cgi?id=640
-header T_SAVINGS             Subject =~ /\bsave\s+(?:on\s+your|up\s+to|big|over|at\s+least|\d+\%|you)\b/i
-describe T_SAVINGS        Subject talks about savings
-
-# http://www.hughes-family.org/bugzilla/show_bug.cgi?id=629
-body T_MONTH_TRIAL                /(?:month|day) .{0,9}trial/i
-describe T_MONTH_TRIAL            Month Trial Offer
-
 # http://www.hughes-family.org/bugzilla/show_bug.cgi?id=632
 body T_LOW_PRICE                  /\blow.{0,4} (?-i:P)rice/i
 describe T_LOW_PRICE              Lowest Price
-
-# http://www.hughes-family.org/bugzilla/show_bug.cgi?id=586
-body T_APPLY_ONLINE               /\bapply (?-i:O)nline/i
-describe T_APPLY_ONLINE           Apply Online
 
 # http://www.hughes-family.org/bugzilla/show_bug.cgi?id=610
 body T_SALE                       /\bsales? (?:price|system|department|technology|ends|today)|\b(?:on|summer|movie|clearance|for|your|increase|super|losing|return|business|airfare) (?-i:S)ales?/i
@@ -100,14 +40,6 @@ describe T_SALE                   Stuff on Sale
 # http://www.hughes-family.org/bugzilla/show_bug.cgi?id=679
 body T_MEMBER                 /\bmember (?:number|reward|value|benefit|rate|report|card|information)s?\b/i
 describe T_MEMBER             Member Stuff
-
-# http://www.hughes-family.org/bugzilla/show_bug.cgi?id=630
-body T_UNLIMITED                  /UNLIMITED/
-describe T_UNLIMITED              Unlimited in caps
-
-# http://www.hughes-family.org/bugzilla/show_bug.cgi?id=699
-header T_MICROSOFT		exists:microsoft
-describe T_MICROSOFT		A "microsoft" header was found
 
 # I (yet) haven't seen any spam with accents, umlauts etc. in the From or Subject
 #   -- Malte
