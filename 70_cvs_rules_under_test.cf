@@ -13,3 +13,14 @@ describe USER_4U2       Local part containing "4u", "u2" or variants.
 
 header FROM_4U2         From =~ /4u|u2|2u|you2|4you|2you|foryou/i
 describe FROM_4U2       From contains "4u", "u2" or variants.
+
+# bug 680
+body MEMBER_2           /\b(?:free|special|paid|dear|gold|opt.in|valued|because you are an?|be a|becoming a|sent to) .{0,9}members?\b/i
+describe MEMBER_2       Being a Member
+
+# bug 637
+# more specific FROM_HAS_MIXED_NUMS, less FPs
+header FROM_HAS_MIXED_NUMS2        From =~ /\w{2,}\d{4,}[a-z]{1,2}\d{2,}\@/i
+description FROM_HAS_MIXED_NUMS2 From address matches known spammer format
+
+
