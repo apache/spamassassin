@@ -658,7 +658,10 @@ sub learn {
 
     my $ok;
     if ($self->{main}->{learn_to_journal}) {
-      $ok = $self->{store}->tie_db_readonly();
+      # If we're going to learn to journal, we'll try going r/o first...
+      # If that fails for some reason, let's try going r/w.  This happens
+      # if the DB doesn't exist yet.
+      $ok = $self->{store}->tie_db_readonly() || $self->{store}->tie_db_writable();
     } else {
       $ok = $self->{store}->tie_db_writable();
     }
@@ -778,7 +781,10 @@ sub forget {
 
     my $ok;
     if ($self->{main}->{learn_to_journal}) {
-      $ok = $self->{store}->tie_db_readonly();
+      # If we're going to learn to journal, we'll try going r/o first...
+      # If that fails for some reason, let's try going r/w.  This happens
+      # if the DB doesn't exist yet.
+      $ok = $self->{store}->tie_db_readonly() || $self->{store}->tie_db_writable();
     } else {
       $ok = $self->{store}->tie_db_writable();
     }

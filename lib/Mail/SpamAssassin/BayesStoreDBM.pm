@@ -136,7 +136,7 @@ sub tie_db_readonly {
   for my $ext (@DB_EXTENSIONS) { if (-f $path.'_toks'.$ext) { $found=1; last; } }
 
   if (!$found) {
-    dbg ("bayes: no dbs present, cannot scan: ${path}_toks");
+    dbg ("bayes: no dbs present, cannot tie DB R/O: ${path}_toks");
     return 0;
   }
 

@@ -16,7 +16,7 @@ BEGIN {
     unshift(@INC, '../blib/lib');
   }
 
-  plan tests => (HAS_DB_FILE ? 44 : 0);
+  plan tests => (HAS_DB_FILE ? 43 : 0);
 };
 
 exit unless HAS_DB_FILE;
@@ -48,13 +48,7 @@ my $raw_message = do {
 close(MAIL);
 ok($raw_message);
 
-my @msg;
-foreach my $line (split(/^/m,$raw_message)) {
-  $line =~ s/\r$//;
-  push(@msg, $line);
-}
-
-my $mail = $sa->parse( \@msg );
+my $mail = $sa->parse( $raw_message );
 
 ok($mail);
 
@@ -145,12 +139,6 @@ $sa = create_saobj();
 
 $sa->init();
 
-# Slight cheat here, because when you learn only to journal it fails
-# to actually create the bayes_toks and bayes_seen files because we
-# are tieing read only, this will create the files for us and allow
-# things to continue
-ok($sa->{bayes_scanner}->{store}->tie_db_writable());
-
 ok(!-e 'log/user_state/bayes_journal');
 
 ok($sa->{bayes_scanner}->learn(1, $mail));
@@ -211,13 +199,7 @@ $raw_message = do {
 
 close(MAIL);
 
-@msg = ();
-foreach my $line (split(/^/m,$raw_message)) {
-  $line =~ s/\r$//;
-  push(@msg, $line);
-}
-
-$mail = $sa->parse( \@msg );
+$mail = $sa->parse( $raw_message );
 
 $body = $sa->{bayes_scanner}->get_body_from_msg($mail);
 
@@ -242,13 +224,7 @@ $raw_message = do {
 
 close(MAIL);
 
-@msg = ();
-foreach my $line (split(/^/m,$raw_message)) {
-  $line =~ s/\r$//;
-  push(@msg, $line);
-}
-
-$mail = $sa->parse( \@msg );
+$mail = $sa->parse( $raw_message );
 
 $body = $sa->{bayes_scanner}->get_body_from_msg($mail);
 
