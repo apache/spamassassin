@@ -548,3 +548,6 @@ describe LOSE_POUNDS            Subject talks about losing pounds
 header LOSE_POUNDS2             Subject =~ /^Lose .*(?:pounds|lbs|weight)/i
 describe LOSE_POUNDS2           Subject talks about losing pounds or lbs
 
+header EXTRA_MPART_TYPE         Content-Type =~ /(?:\s*multipart\/)?.* type=/i
+description EXTRA_MPART_TYPE    Message with extraneous Content-type:...type= header
+
