@@ -311,8 +311,8 @@ for ( $waitedpid = 0;
 
 	    # Now use copy-on-writed (hopefully) SA object
 	    my $status = $spamtest->check($mail);
-	    my $msg_score = int($status->get_hits);
-	    my $msg_threshold = int($status->get_required_hits);
+	    my $msg_score = sprintf("%.1f",$status->get_hits);
+	    my $msg_threshold = sprintf("%.1f",$status->get_required_hits);
 	    my $was_it_spam;
 	    if ($status->is_spam)
 	    {
@@ -436,8 +436,8 @@ for ( $waitedpid = 0;
 	    }
 	    my $was_it_spam;
 	    if($status->is_spam) { $was_it_spam = 'identified spam'; } else { $was_it_spam = 'clean message'; }
-            my $msg_score = int($status->get_hits);
-            my $msg_threshold = int($status->get_required_hits);
+            my $msg_score = sprintf("%.1f",$status->get_hits);
+            my $msg_threshold = sprintf("%.1f",$status->get_required_hits);
 	    $current_user ||= '(unknown)';
 	    logmsg "$was_it_spam ($msg_score/$msg_threshold) for $current_user:$> in ".
 		sprintf("%3d", time - $start) ." seconds.\n";

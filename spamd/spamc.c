@@ -208,7 +208,7 @@ int read_message(int in, int out, int max_size)
   int header_read=0;
   char buf[8192];
   char is_spam[5];
-  int score,threshold;
+  float score,threshold;
   float version;
   int response=EX_OK;
   char* out_buf;
@@ -268,12 +268,12 @@ int read_message(int in, int out, int max_size)
 	  if(CHECK_ONLY)
 	  {
 	    /* Ok, found a header line, it better be "Spam: x; y / x" */
-	    if(3 != sscanf(buf,"Spam: %5s ; %d / %d",is_spam,&score,&threshold))
+	    if(3 != sscanf(buf,"Spam: %5s ; %f / %f",is_spam,&score,&threshold))
 	    {
 	      response = EX_PROTOCOL; break;
 	    }
 
-	    printf("%d/%d\n",score,threshold);
+	    printf("%.1f/%.1f\n",score,threshold);
 
 	    if(!strcasecmp("true",is_spam)) /* If message is indeed spam */
 	    {
