@@ -604,6 +604,9 @@ sub check {
 	  # $msg_resp = $status->get_report();
           $msg_resp = "$msg_score/$msg_threshold\r\n" . $status->get_report();
         }
+	elsif ($method eq "REPORT_IFSPAM") {
+	  # message is ham, $msg_resp remains empty
+	}
         elsif($method eq "SYMBOLS") {
           $msg_resp = $status->get_names_of_tests_hit;
         }
