@@ -78,6 +78,10 @@ sub check_for_from_mx {
     return 0;
   }
 
+  if ($self->{conf}->{check_mx_attempts) < 1) {
+    return 0;
+  }
+
   # Try 3 times to protect against temporary outages.  sleep between checks
   # to give the DNS a chance to recover.
   for my $i (1..$self->{conf}->{check_mx_attempts}) {
