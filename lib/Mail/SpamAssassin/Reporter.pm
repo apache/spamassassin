@@ -93,7 +93,6 @@ sub razor_report {
     require Razor::Client;
     require Razor::Agent;
     local ($^W) = 0;            # argh, warnings in Razor
-    local ($/);                 # argh, bugs in Razor
 
     local $SIG{ALRM} = sub { die "alarm\n" };
     alarm 10;
