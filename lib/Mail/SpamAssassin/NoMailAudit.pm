@@ -164,20 +164,6 @@ sub _get_header_list {
   return @entries;
 }
 
-sub replace_original_message {
-  my ($self, $data) = @_;
-
-  if (ref $data eq 'ARRAY') {
-    $self->{textarray} = $data;
-  } elsif (ref $data eq 'GLOB') {
-    if (defined fileno $data) {
-      $self->{textarray} = [ <$data> ];
-    }
-  }
-
-  $self->parse_headers();
-}
-
 sub get_header {
   my ($self, $hdr) = @_;
 
@@ -303,6 +289,20 @@ sub as_string {
   my ($self) = @_;
   return join ('', $self->get_all_headers(), "\n",
                 @{$self->get_body()});
+}
+
+sub replace_original_message {
+  my ($self, $data) = @_;
+
+  if (ref $data eq 'ARRAY') {
+    $self->{textarray} = $data;
+  } elsif (ref $data eq 'GLOB') {
+    if (defined fileno $data) {
+      $self->{textarray} = [ <$data> ];
+    }
+  }
+
+  $self->parse_headers();
 }
 
 # ---------------------------------------------------------------------------

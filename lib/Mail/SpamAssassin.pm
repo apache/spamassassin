@@ -95,7 +95,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.152 2002/12/23 04:52:47 felicity Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.153 2002/12/23 13:40:47 jmason Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -1202,26 +1202,14 @@ sub encapsulate_mail_object {
   # MIME::Entity contributed by Andrew Wilson <andrew@rivendale.net>.
   #
   my $ismime = 0;
-
-  $self->{mail_audit_supports_encapsulation} = 0;
-
-  if ($mail_obj->can ("is_mime")) {
-    $self->{mail_audit_supports_encapsulation} = 1;
-    $ismime = $mail_obj->is_mime();
-
-  } elsif ($mail_obj->can ("replace_header")) {
-    $self->{mail_audit_supports_encapsulation} = 1;
-  }
+  if ($mail_obj->can ("is_mime")) { $ismime = $mail_obj->is_mime(); }
 
   if ($ismime) {
     require Mail::SpamAssassin::EncappedMIME;
     return  Mail::SpamAssassin::EncappedMIME->new($mail_obj);
-  } elsif ($self->{mail_audit_supports_encapsulation}) {
+  } else {
     require Mail::SpamAssassin::EncappedMessage;
     return  Mail::SpamAssassin::EncappedMessage->new($mail_obj);
-  } else {
-    require Mail::SpamAssassin::ExposedMessage;
-    return  Mail::SpamAssassin::ExposedMessage->new($mail_obj);
   }
 }
 
@@ -1398,6 +1386,10 @@ See also http://spamassassin.org/ for more information.
 C<Mail::SpamAssassin::Conf>
 C<Mail::SpamAssassin::PerMsgStatus>
 C<spamassassin>
+
+=head1 BUGS
+
+http://bugzilla.spamassassin.org/
 
 =head1 AUTHOR
 
