@@ -32,12 +32,11 @@ use File::Basename;
 use File::Spec;
 use File::Path;
 
-use constant HAS_DB_FILE => eval { require DB_File; };
 use constant MAGIC_RE    => qr/^\015\001\007\011\003/;
 
 use vars qw{
   @ISA
-  @DBNAMES @DB_EXTENSIONS
+  @DBNAMES
   $NSPAM_MAGIC_TOKEN $NHAM_MAGIC_TOKEN $LAST_EXPIRE_MAGIC_TOKEN $LAST_JOURNAL_SYNC_MAGIC_TOKEN
   $NTOKENS_MAGIC_TOKEN $OLDEST_TOKEN_AGE_MAGIC_TOKEN $LAST_EXPIRE_REDUCE_MAGIC_TOKEN
   $RUNNING_EXPIRE_MAGIC_TOKEN $DB_VERSION_MAGIC_TOKEN $LAST_ATIME_DELTA_MAGIC_TOKEN
@@ -77,11 +76,6 @@ use vars qw{
 
 @DBNAMES = qw(toks seen);
 
-# Possible file extensions used by the kinds of database files DB_File
-# might create.  We need these so we can create a new file and rename
-# it into place.
-@DB_EXTENSIONS = ('', '.db');
-
 # These are the magic tokens we use to track stuff in the DB.
 # The format is '^M^A^G^I^C' followed by any string you want.
 # None of the control chars will be in a real token.
@@ -96,6 +90,25 @@ $NSPAM_MAGIC_TOKEN		= "\015\001\007\011\003NSPAM";
 $NTOKENS_MAGIC_TOKEN		= "\015\001\007\011\003NTOKENS";
 $OLDEST_TOKEN_AGE_MAGIC_TOKEN	= "\015\001\007\011\003OLDESTAGE";
 $RUNNING_EXPIRE_MAGIC_TOKEN	= "\015\001\007\011\003RUNNINGEXPIRE";
+
+sub HAS_DBM_MODULE {
+  my ($self) = @_;
+  if (exists($self->{has_dbm_module})) {
+    return $self->{has_dbm_module};
+  }
+  $self->{has_dbm_module} = eval { require DB_File; };
+}
+
+sub DBM_MODULE {
+  return "DB_File";
+}
+
+# Possible file extensions used by the kinds of database files DB_File
+# might create.  We need these so we can create a new file and rename
+# it into place.
+sub DB_EXTENSIONS {
+  return ('', '.db');
+}
 
 ###########################################################################
 
@@ -119,8 +132,8 @@ sub new {
 sub tie_db_readonly {
   my ($self) = @_;
 
-  if (!HAS_DB_FILE) {
-    dbg("bayes: DB_File module not installed, cannot use bayes");
+  if (!$self->HAS_DBM_MODULE) {
+    dbg("bayes: " . $self->DBM_MODULE . " module not installed, cannot use bayes");
     return 0;
   }
 
@@ -139,7 +152,7 @@ sub tie_db_readonly {
   my $path = $main->sed_path($main->{conf}->{bayes_path});
 
   my $found = 0;
-  for my $ext (@DB_EXTENSIONS) {
+  for my $ext ($self->DB_EXTENSIONS) {
     if (-f $path.'_toks'.$ext) {
       $found = 1;
       last;
@@ -156,7 +169,7 @@ sub tie_db_readonly {
     my $db_var = 'db_'.$dbname;
     dbg("bayes: $$ tie-ing to DB file R/O $name");
     # untie %{$self->{$db_var}} if (tied %{$self->{$db_var}});
-    tie %{$self->{$db_var}},"DB_File",$name, O_RDONLY,
+    tie %{$self->{$db_var}},$self->DBM_MODULE,$name, O_RDONLY,
 		 (oct($main->{conf}->{bayes_file_mode}) & 0666)
        or goto failed_to_tie;
   }
@@ -192,8 +205,8 @@ failed_to_tie:
 sub tie_db_writable {
   my ($self) = @_;
 
-  if (!HAS_DB_FILE) {
-    dbg("bayes: DB_File module not installed, cannot use bayes");
+  if (!$self->HAS_DBM_MODULE) {
+    dbg("bayes: " . $self->DBM_MODULE . " module not installed, cannot use bayes");
     return 0;
   }
 
@@ -217,7 +230,7 @@ sub tie_db_writable {
   my $path = $main->sed_path($main->{conf}->{bayes_path});
 
   my $found = 0;
-  for my $ext (@DB_EXTENSIONS) {
+  for my $ext ($self->DB_EXTENSIONS) {
     if (-f $path.'_toks'.$ext) {
       $found = 1;
       last;
@@ -251,7 +264,7 @@ sub tie_db_writable {
     my $name = $path.'_'.$dbname;
     my $db_var = 'db_'.$dbname;
     dbg("bayes: $$ tie-ing to DB file R/W $name");
-    tie %{$self->{$db_var}},"DB_File",$name, O_RDWR|O_CREAT,
+    tie %{$self->{$db_var}},$self->DBM_MODULE,$name, O_RDWR|O_CREAT,
 		 (oct($main->{conf}->{bayes_file_mode}) & 0666)
        or goto failed_to_tie;
   }
@@ -376,7 +389,7 @@ sub _upgrade_db {
     # anyway)
     my %new_toks;
     $umask = umask 0;
-    $res = tie %new_toks, "DB_File", "${name}.new", O_RDWR|O_CREAT|O_EXCL,
+    $res = tie %new_toks, $self->DBM_MODULE, "${name}.new", O_RDWR|O_CREAT|O_EXCL,
           (oct($main->{conf}->{bayes_file_mode}) & 0666);
     umask $umask;
     return 0 unless $res;
@@ -430,7 +443,7 @@ sub _upgrade_db {
     }
 
     # now rename in the new one.  Try several extensions
-    for my $ext (@DB_EXTENSIONS) {
+    for my $ext ($self->DB_EXTENSIONS) {
       my $newf = $name.'.new'.$ext;
       my $oldf = $name.$ext;
       next unless (-f $newf);
@@ -442,7 +455,7 @@ sub _upgrade_db {
 
     # re-tie to the new db in read-write mode ...
     $umask = umask 0;
-    $res = tie %{$self->{db_toks}},"DB_File", $name, O_RDWR|O_CREAT,
+    $res = tie %{$self->{db_toks}},$self->DBM_MODULE, $name, O_RDWR|O_CREAT,
 	 (oct($main->{conf}->{bayes_file_mode}) & 0666);
     umask $umask;
     return 0 unless $res;
@@ -474,7 +487,7 @@ sub _upgrade_db {
     # anyway)
     my %new_toks;
     $umask = umask 0;
-    $res = tie %new_toks, "DB_File", "${name}.new", O_RDWR|O_CREAT|O_EXCL,
+    $res = tie %new_toks, $self->DBM_MODULE, "${name}.new", O_RDWR|O_CREAT|O_EXCL,
           (oct($main->{conf}->{bayes_file_mode}) & 0666);
     umask $umask;
     return 0 unless $res;
@@ -516,7 +529,7 @@ sub _upgrade_db {
     local $SIG{'HUP'} = 'IGNORE' if (!Mail::SpamAssassin::Util::am_running_on_windows());
 
     # now rename in the new one.  Try several extensions
-    for my $ext (@DB_EXTENSIONS) {
+    for my $ext ($self->DB_EXTENSIONS) {
       my $newf = $name.'.new'.$ext;
       my $oldf = $name.$ext;
       next unless (-f $newf);
@@ -528,7 +541,7 @@ sub _upgrade_db {
 
     # re-tie to the new db in read-write mode ...
     $umask = umask 0;
-    $res = tie %{$self->{db_toks}},"DB_File", $name, O_RDWR|O_CREAT,
+    $res = tie %{$self->{db_toks}},$self->DBM_MODULE, $name, O_RDWR|O_CREAT,
 	 (oct ($main->{conf}->{bayes_file_mode}) & 0666);
     umask $umask;
     return 0 unless $res;
@@ -629,13 +642,13 @@ sub token_expiration {
   my $tmpdbname = $path.'_toks.'.$tmpsuffix;
 
   # clean out any leftover db copies from previous runs
-  for my $ext (@DB_EXTENSIONS) { unlink ($tmpdbname.$ext); }
+  for my $ext ($self->DB_EXTENSIONS) { unlink ($tmpdbname.$ext); }
 
   # use O_EXCL to avoid races (bonus paranoia, since we should be locked
   # anyway)
   my %new_toks;
   my $umask = umask 0;
-  tie %new_toks, "DB_File", $tmpdbname, O_RDWR|O_CREAT|O_EXCL,
+  tie %new_toks, $self->DBM_MODULE, $tmpdbname, O_RDWR|O_CREAT|O_EXCL,
               (oct ($main->{conf}->{bayes_file_mode}) & 0666);
   umask $umask;
   my $oldest;
@@ -708,7 +721,7 @@ sub token_expiration {
 
     # remove the new DB
     untie %new_toks;
-    for my $ext (@DB_EXTENSIONS) { unlink ($tmpdbname.$ext); }
+    for my $ext ($self->DB_EXTENSIONS) { unlink ($tmpdbname.$ext); }
 
     # reset the results for the return
     $kept = $vars[3];
@@ -729,9 +742,10 @@ sub token_expiration {
       local $SIG{'HUP'} = 'IGNORE' if (!Mail::SpamAssassin::Util::am_running_on_windows());
 
       # now rename in the new one.  Try several extensions
-      for my $ext (@DB_EXTENSIONS) {
+      for my $ext ($self->DB_EXTENSIONS) {
         my $newf = $tmpdbname.$ext;
         my $oldf = $path.'_toks'.$ext;
+	print "--> $newf -- $oldf\n";
         next unless (-f $newf);
         if (!rename ($newf, $oldf)) {
 	  warn "bayes: rename $newf to $oldf failed: $!\n";
@@ -1462,6 +1476,15 @@ sub clear_database {
   my $path = $self->{bayes}->{main}->sed_path($self->{bayes}->{main}->{conf}->{bayes_path});
 
   foreach my $dbname (@DBNAMES, 'journal') {
+    foreach my $ext ($self->DB_EXTENSIONS) {
+      my $name = $path.'_'.$dbname.$ext;
+      unlink $name;
+      dbg("bayes: clear_database: removing $dbname");
+    }
+  }
+
+  # the journal file needs to be done separately since it has no extension
+  foreach my $dbname ('journal') {
     my $name = $path.'_'.$dbname;
     unlink $name;
     dbg("bayes: clear_database: removing $dbname");
@@ -1528,14 +1551,14 @@ sub restore_database {
   my %new_toks;
   my %new_seen;
   my $umask = umask 0;
-  unless (tie %new_toks, "DB_File", $tmptoksdbname, O_RDWR|O_CREAT|O_EXCL,
+  unless (tie %new_toks, $self->DBM_MODULE, $tmptoksdbname, O_RDWR|O_CREAT|O_EXCL,
 	  (oct ($main->{conf}->{bayes_file_mode}) & 0666)) {
     dbg("bayes: failed to tie temp toks db: $!");
     $self->untie_db();
     umask $umask;
     return 0;
   }
-  unless (tie %new_seen, "DB_File", $tmpseendbname, O_RDWR|O_CREAT|O_EXCL,
+  unless (tie %new_seen, $self->DBM_MODULE, $tmpseendbname, O_RDWR|O_CREAT|O_EXCL,
 	  (oct ($main->{conf}->{bayes_file_mode}) & 0666)) {
     dbg("bayes: failed to tie temp seen db: $!");
     untie %new_toks;
