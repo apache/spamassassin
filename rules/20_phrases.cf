@@ -109,17 +109,11 @@ describe SOME_BREAKTHROUGH	Describes some sort of breakthrough
 body PREST_NON_ACCREDITED	/prestigi?ous\b.{0,20}\bnon-accredited\b.{0,20}\buniversities/i
 describe PREST_NON_ACCREDITED	'Prestigious Non-Accredited Universities'
 
-# Jul 3 2002 jm: modified PENIS_ENLARGE patterns: removed "add", replaced with
-# "inches", because that seems to be another typical word in the pattern.
-# Feb 11 2003 jm: removed "PP" from pattern, since "pp. 234-237" is std usage
-# in academic circles.  I don't think the hit-rate will be affected. ;)
-# Feb 18 2004 rap: Changed rule name PENIS_ENLARGE to BODY_ENHANCEMENT. Some found the
-# old rule name offensive.
-body BODY_ENHANCEMENT		/\b(?:enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b|\binches\b).{0,50}\b(?:penis|male organ|pee[ -]?pee|dick|sc?hlong|wh?anger|breast)/i
-describe BODY_ENHANCEMENT		Information on growing body parts
+body BODY_ENHANCEMENT		/\b(?:enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b|\binches\b).{0,50}\b(?:penis|male organ|pee[ -]?pee|dick|sc?hlong|wh?anger|breast(?!\s+cancer))/i
+describe BODY_ENHANCEMENT	Information on growing body parts
 
-body BODY_ENHANCEMENT2		/\b(?:penis|male organ|pee[ -]?pee|dick|sc?hlong|wh?anger|breast).{0,50}\b(?:enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b|\binches\b)/i
-describe BODY_ENHANCEMENT2		Information on getting larger body parts
+body BODY_ENHANCEMENT2		/\b(?:penis|male organ|pee[ -]?pee|dick|sc?hlong|wh?anger|breast(?!\s+cancer)).{0,50}\b(?:enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b|\binches\b)/i
+describe BODY_ENHANCEMENT2	Information on getting larger body parts
 
 body     IMPOTENCE              /\b(?:impotence (?:problem|cure|solution)|Premature Ejaculation|erectile dysfunction)/i
 describe IMPOTENCE              Impotence cure
