@@ -8,12 +8,14 @@
 
 require_version @@VERSION@@
 
-uri NUMERIC_HTTP_ADDR   /^https?\:\/\/\d{7,}/is
-describe NUMERIC_HTTP_ADDR  Uses a numeric IP address in URL
+uri NUMERIC_HTTP_ADDR		/^https?\:\/\/\d{7,}/is
+describe NUMERIC_HTTP_ADDR	Uses a numeric IP address in URL
 
-uri NORMAL_HTTP_TO_IP   /^https?\:\/\/\d+\.\d+\.\d+\.\d+/is
-describe NORMAL_HTTP_TO_IP  Uses a dotted-decimal IP address in URL
+uri LONG_NUMERIC_HTTP_ADDR	/^https?\:\/\/000\d+/is
+describe LONG_NUMERIC_HTTP_ADDR	Uses a long numeric IP address in URL
 
+uri NORMAL_HTTP_TO_IP		/^https?\:\/\/\d+\.\d+\.\d+\.\d+/is
+describe NORMAL_HTTP_TO_IP	Uses a dotted-decimal IP address in URL
 
 uri HTTP_USERNAME_USED  /^https?\:\/\/[^\s\/]+\@/is
 describe HTTP_USERNAME_USED Uses a username in a URL
@@ -90,9 +92,6 @@ describe FREEWEBCO_NET_URL      Frequent SPAM content
 
 uri FREEWEBHOSTINGCENTRAL       /freewebhostingcentral/i   
 describe FREEWEBHOSTINGCENTRAL      Frequent SPAM content  
-
-uri LONG_NUMERIC_HTTP_ADDR  /^https?\:\/\/000\d+/is
-describe LONG_NUMERIC_HTTP_ADDR Uses a long numeric IP address in URL
 
 uri URI_IS_POUND        m{\#$}
 describe URI_IS_POUND   Filename is just a '\#'; probably a JS trick
