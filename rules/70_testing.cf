@@ -105,17 +105,8 @@ uri T_HTTP_BAD_HOST_CHAR	m@^https?://[^/]*[\000-\037\200-\377]@i
 # not expecting any hits on this (yet)
 uri T_HIGH_CODEPAGE_URI         /^https?:\/\/[^\/]*\&\#(?:\d{4,}|[3456789]\d\d);/i
 
-body T_MISSING_MIME_HB_SEP	eval:check_msg_parse_flags('missing_mime_head_body_separator')
-describe T_MISSING_MIME_HB_SEP	Missing blank line between MIME header and body
-
 header T_OBSOLETE_WS_FOLDING	eval:check_msg_parse_flags('obsolete_folding_whitespace')
 describe T_OBSOLETE_WS_FOLDING	Header uses obsolete whitespace folding method
-
-# tvd: I noticed these MSGID deps are basically the same, so I'm wondering
-# which is better.  the real rules use the opposites deps.
-meta T_RATWARE_OUTLOOK_NONAME       __MSGID_MS_HASH && !__HAS_X_MAILER
-meta T_RATWARE_MS_HASH __MSGID_DOLLARS_OK && !__MIMEOLE_MS
-
 
 ########################################################################
 
