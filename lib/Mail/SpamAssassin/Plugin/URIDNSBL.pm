@@ -205,9 +205,8 @@ sub parsed_metadata {
   }
 
   # and query
-  my @doms = keys %domlist;
-  dbg ("URIDNSBL: domains to query: ".join(' ',@doms));
-  foreach my $dom (@doms) {
+  dbg ("URIDNSBL: domains to query: ".join(' ',@shortlist));
+  foreach my $dom (@shortlist) {
     $self->query_domain ($scanstate, $dom);
   }
 
@@ -266,6 +265,10 @@ sub parse_config {
   }
   elsif ($key eq 'uridnsbl_timeout') {
     $opts->{conf}->{uridnsbl_timeout} = $opts->{value};
+    $self->inhibit_further_callbacks(); return 1;
+  }
+  elsif ($key eq 'uridnsbl_max_domains') {
+    $opts->{conf}->{uridnsbl_max_domains} = $opts->{value};
     $self->inhibit_further_callbacks(); return 1;
   }
   elsif ($key eq 'uridnsbl_skip_domain') {
