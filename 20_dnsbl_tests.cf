@@ -137,7 +137,7 @@ header __RFC_IGNORANT_ENVFROM	eval:check_rbl_envfrom('rfci_envfrom', 'fulldom.rf
 tflags __RFC_IGNORANT_ENVFROM	net
 
 header DNS_FROM_RFC_DSN		eval:check_rbl_sub('rfci_envfrom', '127.0.0.2')
-describe DNS_FROM_RFC_DSN	Envelope sender listed in dsn.rfc-ignorant.org
+describe DNS_FROM_RFC_DSN	Envelope sender in dsn.rfc-ignorant.org
 tflags DNS_FROM_RFC_DSN		net
 
 header DNS_FROM_RFC_POST	eval:check_rbl_sub('rfci_envfrom', '127.0.0.3')
@@ -163,7 +163,7 @@ describe DNS_FROM_RFC_WHOIS_B	Envelope sender TLD in whois.rfc-ignorant.org
 tflags DNS_FROM_RFC_WHOIS_B	net
 
 header DNS_FROM_RFC_BOGUSMX	eval:check_rbl_sub('rfci_envfrom', '127.0.0.8')
-describe DNS_FROM_RFC_BOGUSMX	Envelope sender listed in bogusmx.rfc-ignorant.org
+describe DNS_FROM_RFC_BOGUSMX	Envelope sender in bogusmx.rfc-ignorant.org
 tflags DNS_FROM_RFC_BOGUSMX	net
 
 # ---------------------------------------------------------------------------
