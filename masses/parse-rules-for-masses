@@ -95,10 +95,13 @@ sub readrules {
     }
 
     if (!defined $rules->{$rule}->{score}) {
+      my $def = 1.0;
+      if ($rule =~ /^T_/) { $def = 0.01; }
+
       if ($rules->{$rule}->{tflags} =~ /nice/) {
-        $rules->{$rule}->{score} = -1.0;
+        $rules->{$rule}->{score} = -$def;
       } else {
-        $rules->{$rule}->{score} = 1.0;
+        $rules->{$rule}->{score} = $def;
       }
     }
   }

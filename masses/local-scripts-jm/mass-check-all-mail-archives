@@ -10,7 +10,7 @@ date
 
 date
 for f in /local/cor/recent/nonspam/* ; do
-  echo Checking $f: ; ./mass-check --nokillfile --bayes -c ./jm-mass-check-rules $f >> nonspam.local
+  echo Checking $f: ; ./mass-check --bayes -c ./jm-mass-check-rules $f >> nonspam.local
 done
 
 # ---------------------------------------------------------------------------

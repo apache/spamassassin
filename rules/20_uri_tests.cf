@@ -70,8 +70,10 @@ describe HTTP_NUMBER_WORD   URL contains spamhaus signature: numbered servers
 uri JAVASCRIPT_URI	/^javascript:/i
 describe JAVASCRIPT_URI	Javascript protocol in a URI
 
-uri      WEIRD_PORT             m{https?:\/\/[^/:\s]+:\d+}
-describe WEIRD_PORT             Uses non-standard port number for HTTP
+# allow port 80, that's the HTTP port after all, so not wierd ;)
+# Dilbert does this for some reason.
+uri      WEIRD_PORT     m{https?:\/\/[^/:\s]+:(?:[^8][^0]|\d|\d\d\d+)(?:\D|$)}
+describe WEIRD_PORT     Uses non-standard port number for HTTP
 
 # freqs:  0.003    0.008    0.000    1.00    1.00  WWW_AUTOREMOVE_COM
 uri WWW_AUTOREMOVE_COM      /autoremove\.com/i   
