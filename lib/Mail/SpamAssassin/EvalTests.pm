@@ -1805,7 +1805,7 @@ sub _check_mime_header {
   if ($name && $ctype ne "application/octet-stream") {
     $name =~ s/.*\.//;
     $ctype =~ s@/(x-|vnd\.)@/@;
-    if (   ($name =~ /^html?$/ && $ctype ne "text/html")
+    if (   ($name =~ /^html?$/ && $ctype !~ m@^text/@)
 	|| ($name =~ /^jpe?g$/ && $ctype !~ m@^image/p?jpeg@)
 	|| ($name eq "pdf" && $ctype ne "application/pdf")
 	|| ($name eq "gif" && $ctype ne "image/gif")

@@ -12,7 +12,7 @@ date
 
 date
 for f in /local/mail-archives/recent/nonspam/* ; do
-  echo Checking $f: ; ./mass-check --loghits -c ../rules $f >> nonspam.local
+  echo Checking $f: ; ./mass-check --loghits --nokillfile -c ../rules $f >> nonspam.local
 done
 
 # ---------------------------------------------------------------------------
