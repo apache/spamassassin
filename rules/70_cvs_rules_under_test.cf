@@ -618,3 +618,8 @@ describe T_FORGED_BAT_CTYPE_NL	Forged mail pretending to be from The Bat! (2)
 describe T_FORGED_BAT_CHARSET	Forged mail pretending to be from The Bat! (3)
 describe T_FORGED_BAT_BOUNDARY	Forged mail pretending to be from The Bat! (4)
 
+# NOTE: uses __ANY_IMS_MUA from above
+header __IMS_BOUNDARY		Content-Type =~ /\n\s+boundary=\"----_=_NextPart_[\dA-F]+_[\dA-F]+.[\dA-F]+\"/s
+meta T_FORGED_IMS_CTYPE		(__ANY_IMS_MUA && !__IMS_BOUNDARY)
+describe T_FORGED_IMS_CTYPE	Forged mail pretending to be from IMS (boundary)
+
