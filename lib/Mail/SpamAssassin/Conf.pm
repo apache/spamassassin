@@ -56,7 +56,8 @@ optional, and the default is shown below.
  _BAYES_           bayes score
  _AWL_             AWL modifier
  _DATE_            rfc-2822 date of scan
- _STARS(*)_        one * (use any character) for each score point (50 at most)
+ _STARS(*)_        one * (use any character) for each score point (note: this
+                   is limited to 50 'stars' to stay on the right side of the RFCs)
  _RELAYSTRUSTED_   relays used and deemed to be trusted
  _RELAYSUNTRUSTED_ relays used that can not be trusted
  _AUTOLEARN_       autolearn status ("ham", "no", "spam")
@@ -1692,14 +1693,17 @@ By default, a header field called "X-Spam-Level" will be added to the message,
 with its value set to a number of asterisks equal to the score of the message.
 In other words, for a message scoring 7.2 points:
 
-X-Spam-Level: *******
+ X-Spam-Level: *******
 
 This can be useful for MUA rule creation.
+
+Note that a maximum of 50 'stars' will be added, to keep under RFC-822's
+message header line length limit.
 
 This option is deprecated in version 2.60 and later.  It will be removed
 in a future version.  Please use the add_header option instead:
 
-add_header all Level _STARS(*)_
+ add_header all Level _STARS(*)_
 
 =cut
 
@@ -1720,12 +1724,12 @@ option.
 
 In other words, for a message scoring 7.2 points with this option set to .
 
-X-Spam-Level: .......
+ X-Spam-Level: .......
 
 This option is deprecated in version 2.60 and later.  It will be removed
 in a future version.  Please use the add_header option instead:
 
-add_header all Level _STARS(.)_
+ add_header all Level _STARS(.)_
 
 =cut
 
