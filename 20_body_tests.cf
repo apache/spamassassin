@@ -1151,7 +1151,7 @@ describe SERIOUS_CASH		Serious cash
 #              PORN RULES                 #
 ###########################################
 
-body LARGE_COLLECTION           /\b(?:[0-9,]{5,9}\s|hundreds|thousands|millions|tons)\b.{0,15}\b(?:movies|video|xxx|celeb|streaming|live|pic|photo|images)/i
+body LARGE_COLLECTION           /\b(?:[0-9,]{5,9}\s|hundreds|thousands|millions|tons)\b.{0,15}\b(?:movies|video|xxx|celeb|streaming|live|pic|photo|images)\b/i
 describe LARGE_COLLECTION       Possible porn - Large Number of movies, pics
 
 body FREE_PORN                  /\bfree (?:porn|xxx|adult)/i
@@ -1184,16 +1184,20 @@ describe FARM_PORN              Possible porn - Sex with Animals
 body SEX_FEST                   /\b(?:sex|gay|slut|whore|cum|f[\.\*u][\.\*c]k|suck|adult|xxx|teen)[ -]?fest\b/i
 describe SEX_FEST               Possible porn - Porn Fest
 
-body LIVE_PORN                  /\blive .{0,9}(?:fuck|sex|naked|girl|virgin|teen|cam|porn)/i
+# "live cam" is a very common nonspam phrase, removed
+body LIVE_PORN                  /\blive .{0,9}(?:fuck(?:ing)?|sex|naked|girls?|virgins?|teens?|porno?)\b/i
 describe LIVE_PORN              Possible porn - Live Porn
+
+body LIVE_PORN_2                /\b(?:fuck(?:ing)|porno?)\b.{0,9}\blive\b/i
+describe LIVE_PORN_2            Possible porn - Live Porn (2)
 
 body HARDCORE_PORN              /\bhard[ -]?core .{0,9}(?:teen|virgin|cheerleader|amat[eu][eu]r)|\bextreme hardcore/i
 describe HARDCORE_PORN          Possible porn - Hardcore Porn
 
-body HOT_NASTY          /\b(?:horny|nasty|hot|wild|young|horniest|nasiest|hottest|wildest|youngest|best|biggest|largest|naughty)\b.{0,9}\b(?:virgin|asian|cheerleader|sex|selection|fuck|fucking|anal|lesbian|incest|chick|pics|movies|video|gay|porn|hardcore|schoolgirls|amat[eu][eu]r|slut|adult|cum|xxx|sites?)\b/i
+body HOT_NASTY          /\b(?:horny|nasty|hot|wild|young|horniest|nastiest|hottest|wildest|youngest|best|biggest|largest|naughty)\b.{0,9}\b(?:virgin|asian|cheerleader|sex|selection|fuck|fucking|anal|lesbian|incest|chick|pics|movies|video|gay|porn|hardcore|schoolgirls|amat[eu][eu]r|slut|adult|cum|xxx|sites?)\b/i
 describe HOT_NASTY              Possible porn - Hot, Nasty, Wild, Young
 
-body BEST_PORN			/\b(?:best|biggest|largest) .{0,9}(?:virgin|anal|lesbian|incest|porn|hardcore|slut|xxx)/i
+body BEST_PORN			/\b(?:best|biggest|largest) .{0,9}(?:virgins?|anal|lesbians?|incest|porno?|hardcore|sluts?|xxx+)\b/i
 describe BEST_PORN		Possible porn - Best, Largest Porn Collections
 
 body NASTY_GIRLS                /\b(?:horniest|nasiest|hottest|wildest) .{0,9}(?:girls|women|teen)/i
