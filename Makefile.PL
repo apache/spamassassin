@@ -1,4 +1,6 @@
 require 5.005;
+
+use Config;
 use ExtUtils::MakeMaker;
 
 sub MY::libscan {
@@ -35,7 +37,6 @@ WriteMakefile(
                         'Net::DNS' => 0,
                   },
 
-
     'dist' => {
       		COMPRESS => 'gzip -9f', SUFFIX => 'gz',
 	      	DIST_DEFAULT => 'tardist'
@@ -52,22 +53,29 @@ WriteMakefile(
 
 );
 
-sub MY::tools_other {
-	package MY;
-	my $inherited = shift->SUPER::tools_other (@_);
-	$inherited."\nCFLAGS=-g\n";
-}
-
 sub MY::install {
   package MY;
-  my $inherited = shift->SUPER::install (@_);
+  my $self = shift;
+  my $inherited = $self->SUPER::install (@_);
 
   $inherited =~ s/^(install :: .*)$/$1 inst_cfs/gm;
   $inherited;
 }
 
 sub MY::postamble {
-q{
+    # import some C-linkage stuff from %Config.  We can't seem to
+    # do this with MakeMaker without it trying to build the perl
+    # modules as .so's :(
+
+qq{
+
+CFCC		= $Config{cc}
+CFCCFLAGS	= $Config{ccflags}
+CFOPTIMIZE	= $Config{optimize}
+CFLIBS		= $Config{libs}
+CFLDFLAGS	= $Config{ldflags}
+
+}. q{
 
 pm_to_blib: spamassassin
 
@@ -78,6 +86,10 @@ spamassassin: spamassassin.raw
 spamd/spamd: spamd/spamd.raw
 	$(PERL) fixpath.pl spamd/spamd.raw $@
 	$(CHMOD) $(PERM_RWX) $@
+
+spamd/spamc: spamd/spamc.c
+	$(CFCC) $(CFCCFLAGS) $(CFOPTIMIZE) spamd/spamc.c \
+			-o $@ $(CFLDFLAGS) $(CFLIBS)
 
 inst_cfs: spamassassin.cf spamassassin.prefs
 	$(CP) spamassassin.cf $(INSTALLSITELIB)/spamassassin.cf
