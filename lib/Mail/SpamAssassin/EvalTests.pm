@@ -21,10 +21,8 @@ use vars qw{
 	@PORN_WORDS
 };
 
-# persistent spam sources. These are not in the RBL though :(
-$KNOWN_BAD_DIALUP_RANGES = q(
-    .da.uu.net .prod.itd.earthlink.net .pub-ip.psi.net .prserv.net
-);
+# persistent spam sources.
+$KNOWN_BAD_DIALUP_RANGES = q( .da.uu.net );
 
 # sad but true. sort it out, sysadmins!
 $CCTLDS_WITH_LOTS_OF_OPEN_RELAYS = qr{(?:kr|cn|cl|ar|hk|il|th|tw|sg|za|tr|ma|ua|in|pe)};
