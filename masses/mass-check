@@ -4,7 +4,6 @@ use lib "../lib";
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::NoMailAudit;
 
-#use Mail::Audit;
 #use Devel::Peek;
 
 $cffile = '../rules';
@@ -23,12 +22,6 @@ if (defined $ARGV[0] && $ARGV[0] eq '-mn') {
 
 my $FORK = 0;
 if (defined $ARGV[0] && $ARGV[0] eq '-f') { $FORK = 1; }
-
-sub sortbynum {
-  $a =~ m,\/(\d+).*$,; my $anum = $1;
-  $b =~ m,\/(\d+).*$,; my $bnum = $1;
-  ($anum <=> $bnum);
-}
 
 $spamtest = new Mail::SpamAssassin ({
   'rules_filename'      => $cffile,
@@ -185,6 +178,12 @@ sub mass_check_mailbox {
   }
 
   close MBOX;
+}
+
+sub sortbynum {
+  $a =~ m,\/(\d+).*$,; my $anum = $1;
+  $b =~ m,\/(\d+).*$,; my $bnum = $1;
+  ($anum <=> $bnum);
 }
 
 ############################################################################
