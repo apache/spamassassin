@@ -29,8 +29,8 @@ my @inputs;
 push @inputs, @ARGV;
 
 if (!@inputs) {
-  while (<>) {
-    if (/^[Y.]\s+-?\d+\s+(\S+)\s+\S+$/) {
+  while (<STDIN>) {
+    if (/^[Y.]\s+-?\d+\s+(\S+)\s+\S+/) {
       # mass-check format
       push @inputs, $1;
     }
