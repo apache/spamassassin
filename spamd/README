@@ -81,21 +81,24 @@ Network Protocol
 The protocol for communication between spamc/spamd is somewhat HTTP like.  The
 conversation looks like:
 
-spamc --> PROCESS SPAMC/1.0
-spamc --> --message sent here--
+               spamc --> PROCESS SPAMC/1.2
+               spamc --> Content-length: <size>
+  (optional)   spamc --> User: <username>
+               spamc --> \r\n [blank line]
+               spamc --> --message sent here--
 
-spamd --> SPAMD/1.0 0 EX_OK
-spamd --> --processed message sent here--
+               spamd --> SPAMD/1.1 0 EX_OK
+               spamd --> Content-length: <size>
+               spamd --> \r\n [blank line]
+               spamd --> --processed message sent here--
 
 After each side is done writing, it shuts down its side of the connection.
 
 The first line from spamc is the command for spamd to execute (PROCESS a
-message is the command in 1.0) followed by the protocol version
+message is the command in protocol<=1.2) followed by the protocol version
 
 The first line of the response from spamd is the protocol version (note this is
 SPAMD here, where it was SPAMC on the other side) followed by a response code
 from sysexits.h followed by a response message string which describes the error
 if there was one.  If the response code is not 0, then the processed message
 will not be sent, and the socket will be closed after the first line is sent.
-
-
