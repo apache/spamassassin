@@ -87,6 +87,14 @@ default locations that SpamAssassin will look at the end.
 	add local rules and scores to.  Modifications here will be
 	appended to the config loaded from the above directory.
 
+  - /etc/mail/spamassassin/init.pre:
+
+        Plugin control file, installed from the distribution. This is used
+        to control what plugins are loaded.  Modifications here will be
+        *prepended*, NOT appended, to the config loaded from the above
+        directory.   You may wish to modify this if you want to inhibit
+        use of a plugin that is enabled by default.
+
   - /usr/share/spamassassin/user_prefs.template:
 
 	Distributed default user preferences. Do not modify this, as it is
