@@ -44,12 +44,6 @@ describe DK_POLICY_SIGNSOME	Domain Keys: policy says domain signs some mails
 describe DK_POLICY_SIGNALL	Domain Keys: policy says domain signs all mails
 describe DK_POLICY_TESTING	Domain Keys: policy says domain is testing DK
 
-score DK_SIGNED 	        0.001
-score DK_VERIFIED		-0.1
-score DK_POLICY_SIGNSOME	0.001
-score DK_POLICY_TESTING		0.001
-score DK_POLICY_SIGNALL		0.001
-
 # TODO: whitelist based on DK_VERIFIED results
 
 endif   # Mail::SpamAssassin::Plugin::DomainKeys

@@ -609,10 +609,16 @@ score HABEAS_USER 0 -8.0 0 -8.0
 # CompleteWhois: http://www.completewhois.com/
 score RCVD_IN_WHOIS_HIJACKED 0 1.0 0 1.0
 
-# SenderBase -- experimental
-score __SENDERBASE 0
-score SB_NEW_BULK 0
-score SB_NSP_VOLUME_SPIKE 0
+# DomainKeys
+ifplugin Mail::SpamAssassin::Plugin::DomainKeys
+score DK_VERIFIED -0.001
+# <gen:mutable>
+score DK_SIGNED 0.001
+score DK_POLICY_SIGNSOME 0.001
+score DK_POLICY_TESTING 0.001
+score DK_POLICY_SIGNALL 0.001
+# </gen:mutable>
+endif # Mail::SpamAssassin::Plugin::DomainKeys
 
 # Hashcash
 ifplugin Mail::SpamAssassin::Plugin::Hashcash
