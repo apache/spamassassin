@@ -658,10 +658,10 @@ body GAPPY_TEXT                 /\b(?:[a-z][-_\.\,\:\;\'\~\s]{1,3}){5,}/i
 describe GAPPY_TEXT             Contains 'G.a.p.p.y-T.e.x.t'
 
 body COPY_DVDS                  /copy.{1,20}dvd/i
-describe COPY_DVDS              Containts 'Copy DVDs'
+describe COPY_DVDS              Contains 'Copy DVDs'
 
 body URGENT_BIZ                 /URGENT BUSINESS/i
-describe URGENT_BIZ             Containts 'URGENT BUSINESS'
+describe URGENT_BIZ             Contains 'URGENT BUSINESS'
 
 body EARN_PER_WEEK              /\b(?:earn|make).{1,20}\d\d\d+.{1,30}(?:per week|per month|weekly|monthly)/i
 describe EARN_PER_WEEK          Contains 'earn $something per week'
