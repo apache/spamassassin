@@ -3286,34 +3286,54 @@ sub multipart_alternative_difference {
 
 sub _multipart_alternative_difference {
   my($self) = @_;
-
-  my @ma = $self->{msg}->find_parts(qr@^multipart/alternative\b@i);
-  my @content = $self->{msg}->content_summary();
-
   $self->{madiff} = 0;
 
-  # Exchange meeting requests come in as m/a text/html text/calendar ...
-  # Ignore any messages without a multipart/alternative section as well ...
-  if ( !@ma || (@content == 3 && $content[2] eq 'text/calendar' &&
-  		$content[1] eq 'text/html' &&
-  		$content[0] eq 'multipart/alternative') ) {
+  # Find all multipart/alternative parts in the message
+  my @ma = $self->{msg}->find_parts(qr@^multipart/alternative\b@i);
+
+  # If there are no multipart/alternative sections, skip this test.
+  return if (!@ma);
+
+  # Figure out what the MIME content of the message looks like
+  my @content = $self->{msg}->content_summary();
+
+  # Exchange meeting requests come in as m/a text/html text/calendar,
+  # which we want to ignore because of the high FP rate it would cause.
+  # 
+  if (@content == 3 && $content[2] eq 'text/calendar' &&
+  	$content[1] eq 'text/html' &&
+  	$content[0] eq 'multipart/alternative') {
     return;
   }
 
-  # Only deal with text/plain and text/html ...
+  # Go through each of the multipart parts
   foreach my $part ( @ma ) {
     my %html = ();
     my %text = ();
 
+    # limit our search to text-based parts
     my @txt = $part->find_parts(qr@^text\b@i);
     foreach my $text ( @txt ) {
+      # we only care about the rendered version of the part
       my($type, $rnd) = $text->rendered();
 
+      # parse the rendered text into tokens.  assume they are whitespace
+      # separated, and ignore anything that doesn't have a word-character
+      # in it (0-9a-zA-Z_) since those are probably things like bullet
+      # points, horizontal lines, etc.  this assumes that punctuation
+      # in one part will be the same in other parts.
+      #
       if ( $type eq 'text/html' ) {
         foreach my $w ( grep(/\w/,split(/\s+/,$rnd)) ) {
 	  #dbg("HTML: $w");
           $html{$w}++;
         }
+
+	# If there are no words, mark if there's at least 1 image ...
+	if (keys %html == 0 && exists $self->{html}{"inside_img"}) {
+	  # Use "\n" as the mark since it can't ever occur normally
+	  $html{"\n"}=1;
+	}
       }
       else {
         foreach my $w ( grep(/\w/,split(/\s+/,$rnd)) ) {
@@ -3323,15 +3343,22 @@ sub _multipart_alternative_difference {
       }
     }
 
+    # How many HTML tokens do we have at the start?
     my $orig = keys %html;
     next if ( $orig == 0 );
 
+    # If the token appears at least as many times in the text part as
+    # in the html part, remove it from the list of html tokens.
     while( my($k,$v) = each %text ) {
       delete $html{$k} if ( exists $html{$k} && $html{$k}-$text{$k} < 1 );
     }
 
     #map { dbg("LEFT: $_") } keys %html;
 
+    # In theory, the tokens should be the same in both text and html
+    # parts, so there would be 0 tokens left in the html token list, for
+    # a 0% difference rate.  Calculate it here, and record the difference
+    # if it's been the highest so far in this message.
     my $diff = scalar(keys %html)/$orig*100;
     $self->{madiff} = $diff if ( $diff > $self->{madiff} );
 
