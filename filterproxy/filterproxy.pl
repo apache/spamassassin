@@ -26,6 +26,9 @@ use Net::DNS;
 
 $smarthost="localhost:10026";
 
+$spamtest->compile_now();       # ensure all modules etc. are preloaded
+$/ = "\n";                      # argh, Razor resets this!  Bad Razor!
+
 # Set up the server.  Right now, this is in accordance to Postfix's
 # filtering documentation.
 #
@@ -35,6 +38,8 @@ $smarthost="localhost:10026";
 
 $server = new Net::SMTP::Server('localhost', 10025) ||
   croak("Unable to handle client connection: $!\n");
+
+print "server started on port 10025";
 
 while($conn = $server->accept()) {
     my $client = new Net::SMTP::Server::Client($conn) ||
