@@ -454,19 +454,6 @@ describe T_RCVD_ILLEGAL_IP  Received contains illegal IP address
 header T_SUBJ_2_NUM_PARENS      Subject =~ /^\(\d+\).*\(\d+\)\s*$/
 describe T_SUBJ_2_NUM_PARENS    Subject contains common spam sign (2 numbers)
 
-rawbody T_HTML_TINY_COMMENTS    /<![a-z0-9]>/i
-# these are here to make your life easier
-body T_HTML_COMMENT_TINY0	eval:html_text('comment', '=~ /<!>/i')
-body T_HTML_COMMENT_TINY1	eval:html_text('comment', '=~ /<!.?>/i')
-body T_HTML_COMMENT_TINY2	eval:html_text('comment', '=~ /<!.{0,2}>/i')
-body T_HTML_COMMENT_TINY3	eval:html_text('comment', '=~ /<!.{0,3}>/i')
-body T_HTML_COMMENT_TINY4	eval:html_text('comment', '=~ /<!(?!-).{0,4}>/i')
-body T_HTML_COMMENT_TINY5	eval:html_text('comment', '=~ /<!(?!-).{0,5}>/i')
-body T_HTML_COMMENT_TINY6	eval:html_text('comment', '=~ /<!(?!-).{0,6}>/i')
-body T_HTML_COMMENT_TINY7	eval:html_text('comment', '=~ /<!(?!-).{0,7}>/i')
-body T_HTML_COMMENT_TINY8	eval:html_text('comment', '=~ /<!(?!-).{0,8}>/i')
-body T_HTML_COMMENT_TINY9	eval:html_text('comment', '=~ /<!(?!-).{0,9}>/i')
-
 # some SenderBase tests
 header __SENDERBASE		eval:check_rbl_txt('senderbase', 'sa.senderbase.org.')
 
