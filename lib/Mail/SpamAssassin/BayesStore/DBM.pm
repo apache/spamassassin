@@ -296,6 +296,8 @@ sub _upgrade_db {
   my ($self) = @_;
 
   my $verschk = $self->_check_db_version();
+  my $res = 0; # used later on for tie() checks
+  my $umask; # used later for umask modifications
 
   # If the DB is the latest version, no problem.
   return 1 if ( $verschk == 0 );
@@ -359,10 +361,11 @@ sub _upgrade_db {
     # use O_EXCL to avoid races (bonus paranoia, since we should be locked
     # anyway)
     my %new_toks;
-    my $umask = umask 0;
-    tie %new_toks, "DB_File", "${name}.new", O_RDWR|O_CREAT|O_EXCL,
-          (oct ($main->{conf}->{bayes_file_mode}) & 0666) or return 0;
+    $umask = umask 0;
+    $res = tie %new_toks, "DB_File", "${name}.new", O_RDWR|O_CREAT|O_EXCL,
+          (oct ($main->{conf}->{bayes_file_mode}) & 0666);
     umask $umask;
+    return 0 unless $res;
 
     # add the magic tokens to the new db.
     $new_toks{$NSPAM_MAGIC_TOKEN} = $self->{db_toks}->{$DB_NSPAM_MAGIC_TOKEN};
@@ -423,8 +426,11 @@ sub _upgrade_db {
     }
 
     # re-tie to the new db in read-write mode ...
-    tie %{$self->{db_toks}},"DB_File", $name, O_RDWR|O_CREAT,
-	 (oct ($main->{conf}->{bayes_file_mode}) & 0666) or return 0;
+    $umask = umask 0;
+    $res = tie %{$self->{db_toks}},"DB_File", $name, O_RDWR|O_CREAT,
+	 (oct ($main->{conf}->{bayes_file_mode}) & 0666);
+    umask $umask;
+    return 0 unless $res;
 
     dbg ("bayes: upgraded database format from v".$self->{db_version}." to v2 in ".(time - $started)." seconds");
     $self->{db_version} = 2; # need this for other functions which check
@@ -451,10 +457,11 @@ sub _upgrade_db {
     # use O_EXCL to avoid races (bonus paranoia, since we should be locked
     # anyway)
     my %new_toks;
-    my $umask = umask 0;
-    tie %new_toks, "DB_File", "${name}.new", O_RDWR|O_CREAT|O_EXCL,
-          (oct ($main->{conf}->{bayes_file_mode}) & 0666) or return 0;
+    $umask = umask 0;
+    $res = tie %new_toks, "DB_File", "${name}.new", O_RDWR|O_CREAT|O_EXCL,
+          (oct ($main->{conf}->{bayes_file_mode}) & 0666);
     umask $umask;
+    return 0 unless $res;
 
     # add the magic tokens to the new db.
     $new_toks{$NSPAM_MAGIC_TOKEN} = $self->{db_toks}->{$DB_NSPAM_MAGIC_TOKEN};
@@ -503,8 +510,11 @@ sub _upgrade_db {
     }
 
     # re-tie to the new db in read-write mode ...
-    tie %{$self->{db_toks}},"DB_File", $name, O_RDWR|O_CREAT,
-	 (oct ($main->{conf}->{bayes_file_mode}) & 0666) or return 0;
+    $umask = umask 0;
+    $res = tie %{$self->{db_toks}},"DB_File", $name, O_RDWR|O_CREAT,
+	 (oct ($main->{conf}->{bayes_file_mode}) & 0666);
+    umask $umask;
+    return 0 unless $res;
 
     dbg ("bayes: upgraded database format from v".$self->{db_version}." to v3 in ".(time - $started)." seconds");
 
@@ -1483,6 +1493,7 @@ sub restore_database {
 	  (oct ($main->{conf}->{bayes_file_mode}) & 0666)) {
     dbg("bayes: Failed to tie temp toks db: $!");
     $self->untie_db();
+    umask $umask;
     return 0;
   }
   unless (tie %new_seen, "DB_File", $tmpseendbname, O_RDWR|O_CREAT|O_EXCL,
@@ -1491,6 +1502,7 @@ sub restore_database {
     untie %new_toks;
     unlink $tmptoksdbname;
     $self->untie_db();
+    umask $umask;
     return 0;
   }
   umask $umask;
