@@ -44,7 +44,7 @@ sub new {
   my $self = $class->SUPER::new($mailsaobject);
   bless ($self, $class);
 
-  $self->{razor2_available} = 0;
+  $mailsaobject->{conf}->{use_razor2} = 0;
   $mailsaobject->{conf}->{razor_timeout} = 10;
 
   if ($mailsaobject->{local_tests_only}) {
@@ -53,7 +53,7 @@ sub new {
   else {
     if (eval { require Razor2::Client::Agent; }) {
       dbg("razor2: razor2 is available");
-      $self->{razor2_available} = 1;
+      $mailsaobject->{conf}->{use_razor2} = 1;
     }
     else {
       dbg("razor2: razor2 is not available");
@@ -76,6 +76,9 @@ sub parse_config {
 
   # Backward compatibility ...  use_razor2 is implicit if the plugin is loaded
   if ($key eq 'use_razor2') {
+    $self->handle_parser_error($opts,
+      Mail::SpamAssassin::Conf::Parser::set_numeric_value($conf, $key, $value, $line)
+    );
     $self->inhibit_further_callbacks();
     return 1;
   }
@@ -156,7 +159,7 @@ sub razor2_lookup {
   $self->{razor2_result} = 0;
 
   # this test covers all aspects of availability
-  if (!$self->{razor2_available}) { return 0; }
+  if (!$self->{main}->{conf}->{use_razor2}) { return 0; }
   
   # razor also debugs to stdout. argh. fix it to stderr...
   if ($Mail::SpamAssassin::DEBUG) {
@@ -323,7 +326,7 @@ sub razor2_lookup {
 sub check_razor2 {
   my ($self, $permsgstatus) = @_;
 
-  return 0 unless ($self->{razor2_available});
+  return unless $self->{main}->{conf}->{use_razor2};
   return $self->{razor2_result} if (defined $self->{razor2_result});
 
   my $full = $permsgstatus->{msg}->get_pristine();
@@ -337,7 +340,7 @@ sub check_razor2_range {
 
   # If Razor2 isn't available, or the general test is disabled, don't
   # continue.
-  return 0 unless $self->{razor2_available};
+  return 0 unless $self->{main}->{conf}->{use_razor2};
   return 0 unless $self->{main}->{conf}->{scores}->{'RAZOR2_CHECK'};
 
   # If Razor2 hasn't been checked yet, go ahead and run it.
