@@ -864,8 +864,11 @@ describe LIFE_INSURANCE		No Examination life Insurance
 body SEARCH_ENGINE		/(?:submit|traffic|top).{0.10} search engines?|site ranking/i
 describe SEARCH_ENGINE		Search Engine Site Ranking
 
-body OPPORTUNITY_2		/opportunity (?:pass|of a lifetime|is knocking|for you)|(?:investment|unique) opportunity/i
-describe OPPOPTUNITY_2		Oppurtunity of a lifetime?!
+body SEARCH_ENGINE_PROMO        /\b(?:(?:submitt?|list)(?:ed|ing|s)?|place(?:d|ment))\s+.{0,15}\b(?:in|to)\b.{0,15}\b(?:(?:top|best|major|largest|biggest).{0,15}\b)?(?:search(?:ing)?\s*(?:engine|site)|director(?:y|ies))/is
+describe SEARCH_ENGINE_PROMO    Discusses search engine listings
+
+body OPPORTUNITY		/opportunity (?:pass|of a lifetime|is knocking|for you)|(?:investment|unique) opportunity/i
+describe OPPOPTUNITY		What a deal!
 
 body MORE_TRAFFIC		/more (?:internet|web) traffic/i
 describe MORE_TRAFFIC		More Internet Traffic
