@@ -308,5 +308,14 @@ body T_HTML_CLOSED_TWICE	eval:html_eval('closed_html', '> 1')
 body T_BODY_CLOSED_TWICE	eval:html_eval('closed_body', '> 1')
 
 # possible IDN spoofing attack: http://www.shmoo.com/idn/homograph.txt
+# not expecting any hits on this (yet)
 uri T_HIGH_CODEPAGE_URI         /^https?:\/\/[^\/]*\&\#(?:\d{4,}|[3456789]\d\d);/i
+
+# bug 3013: poss replacements for RATWARE_HASH_2 and _2_V2
+header T_RATWARE_HASH_2_A       X-Mailer =~ /^(?!com)(?!OpenGroupware)[A-Za-z0-9_\.]{16,}$/
+header T_RATWARE_HASH_2_V2_A    X-Mailer =~ /^(?!com)(?!OpenGroupware)[A-Za-z0-9_\.]{14,}$/
+header T_RATWARE_HASH_2_B       X-Mailer =~ /^[A-Za-z0-9_]{16,}$/
+header T_RATWARE_HASH_2_V2_B    X-Mailer =~ /^[A-Za-z0-9_]{14,}$/
+header T_RATWARE_HASH_2_C       X-Mailer =~ /^[A-Za-z0-9]{16,}$/
+header T_RATWARE_HASH_2_V2_C    X-Mailer =~ /^[A-Za-z0-9]{14,}$/
 
