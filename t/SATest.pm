@@ -59,7 +59,7 @@ sub sa_t_init {
   $spamdhost = $ENV{'SPAMD_HOST'};
   $spamdhost ||= "localhost";
   $spamdport = $ENV{'SPAMD_PORT'};
-  $spamdport ||= gen_random_spamd_port();
+  $spamdport ||= probably_unused_spamd_port();
 
   $spamd_cf_args = "-C log/test_rules_copy";
   $spamd_localrules_args = " --siteconfigpath log/localrules.tmp";
@@ -129,10 +129,17 @@ sub sa_t_init {
   $testname = $tname;
 }
 
-# a random port number between 48373 and 58372; used to allow
-# multiple test suite runs on the same machine simultaneously
-sub gen_random_spamd_port {
-  srand; return (48373 + int rand 10000);
+# a port number between 32768 and 65535; used to allow multiple test
+# suite runs on the same machine simultaneously
+sub probably_unused_spamd_port {
+  my $port;
+  my $delta = ($$ % 32768) || int(rand(32768));
+  for (1..10) {
+    $port = 32768 + $delta;
+    last unless getservbyport($port, "tcp");
+    $delta = int(rand(32768));
+  }
+  return $port;
 }
 
 sub sa_t_finish {
