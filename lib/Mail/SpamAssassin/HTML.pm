@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.70 2003/03/17 20:34:59 jmason Exp $
+# $Id: HTML.pm,v 1.71 2003/03/18 03:24:40 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -249,9 +249,10 @@ sub html_tests {
     }
   }
   if (exists($attr->{style})) {
-    if ($attr->{style} =~ /font(?:-size)?:\s*([\d\.]+)(p[tx])/i) {
-      my $size = int ($1) + 0.5;
+    if ($attr->{style} =~ /font(?:-size)?:\s*(\d+(?:\.\d*)?|\.\d+)(p[tx])/i) {
+      my $size = $1;
       my $type = $2;
+
       $self->{html}{big_font_B} = 1 if (lc($type) eq "pt" && $size > 12);
     }
   }
@@ -333,7 +334,7 @@ sub html_text {
   }
 
   if (exists $self->{html_inside}{style} && $self->{html_inside}{style} > 0) {
-    if ($text =~ /font(?:-size)?:\s*([\d\.]+)(p[tx])/i) {
+    if ($text =~ /font(?:-size)?:\s*(\d+(?:\.\d*)?|\.\d+)(p[tx])/i) {
       my $size = $1;
       my $type = $2;
 
@@ -382,7 +383,7 @@ sub html_comment {
   }
 
   if (exists $self->{html_inside}{style} && $self->{html_inside}{style} > 0) { 
-    if ($text =~ /font(?:-size)?:\s*([\d\.]+)(p[tx])/i) {
+    if ($text =~ /font(?:-size)?:\s*(\d+(?:\.\d*)?|\.\d+)(p[tx])/i) {
       my $size = $1;
       my $type = $2;
 
