@@ -3,9 +3,9 @@
 use lib '.'; use lib 't';
 use SATest;
 use Test;
-use DBI; # for our cleanup stuff
 
 use constant TEST_ENABLED => (-e 'bayessql.cf' || -e 't/bayessql.cf');
+use constant HAS_DBI => eval { require DBI; }; # for our cleanup stuff
 
 BEGIN { 
   if (-e 't/test_dir') {
@@ -16,7 +16,7 @@ BEGIN {
     unshift(@INC, '../blib/lib');
   }
 
-  plan tests => (TEST_ENABLED ? 38 : 0);
+  plan tests => ((TEST_ENABLED && HAS_DBI) ? 38 : 0);
 
   onfail => sub {
     warn "\n\nNote: Failure may be due to an incorrect config.";

@@ -5,6 +5,8 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("bayes");
 use Test;
 
+use constant HAS_DB_FILE => eval { require DB_File; };
+
 BEGIN { 
   if (-e 't/test_dir') {
     chdir 't';
@@ -14,8 +16,10 @@ BEGIN {
     unshift(@INC, '../blib/lib');
   }
 
-  plan tests => 43
+  plan tests => (HAS_DB_FILE ? 43 : 0);
 };
+
+exit unless HAS_DB_FILE;
 
 tstlocalrules ("
         bayes_learn_to_journal 0
