@@ -65,6 +65,7 @@ Options:
   -r               mail message is verified as spam, report it
   -W               add all addresses in mail (from stdin) to whitelist
   -R               remove all addresses in mail (from stdin) from whitelist
+  -F 0|1           remove/add 'From ' line at start of output (default: 1)
   -w fromaddr	   send a warning mail back to the sender of the message,
                    notifying them that their message has been marked as spam
 		   (only useful if -r is used)
@@ -86,14 +87,14 @@ EOUSAGE
 
 use vars qw{
   $opt_t $opt_c $opt_p $opt_h $opt_V $opt_D $opt_r $opt_P $opt_w $opt_l
-  $opt_d $opt_L $opt_e $opt_W $opt_M $opt_R
+  $opt_d $opt_L $opt_e $opt_W $opt_M $opt_R $opt_F
 };
 
 eval {
   require Mail::SpamAssassin;
   require Mail::SpamAssassin::NoMailAudit;
 
-  getopts ('tc:p:ehVDrPw:l:dLWRM:') or usage();
+  getopts ('tc:p:ehVDrPw:l:dLWRM:F:') or usage();
 
   if (defined $opt_h) { usage(); }
   if (defined $opt_V) {
@@ -126,10 +127,7 @@ EOVERSION
 # resend() methods (which are proxied transparently).  Lovely.
 #
 use Mail::SpamAssassin::NoMailAudit;
-my $mail = Mail::SpamAssassin::NoMailAudit->new ();
-
-# our version allows us to turn on and off the 'From ' line at the top.
-if ($opt_P || $opt_t || $opt_d) { $mail->{add_From_line} = 0; }
+my $mail = Mail::SpamAssassin::NoMailAudit->new ( add_From_line => $opt_F );
 
 # For Mail::Audit users -- this is the magic. Just create a Mail::SpamAssassin
 # object like this, then run the check() method as below; if it returns a
@@ -324,6 +322,12 @@ STDIN, to the automatic whitelist.
 
 Remove all email addresses, in the headers and body of the mail message read
 from STDIN, from the automatic whitelist.
+
+=item B<-F> I<0 | 1>
+
+Ensure that the output email message either always starts with a 'From ' line
+(I<1>) for UNIX mbox format, or ensure that this line is stripped from
+the output (I<0>).  (default: 1)
 
 =item B<-w> I<fromaddr>
 
