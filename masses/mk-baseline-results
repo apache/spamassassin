@@ -5,14 +5,11 @@ if [ "x$1" != "x" ]; then
  SCORESET=$1
 fi
 
-#make evolve SCORESET=$SCORESET || exit 1
-
 echo "STATISTICS REPORT FOR SPAMASSASSIN RULESET"
 echo 
 echo "Classification success on test corpora, at default threshold:"
 echo
 
-#./evolve -C -t 5 | egrep '^#'
 ./logs-to-c --spam=spam-validate.log --nonspam=nonspam-validate.log --threshold 5 --count --scoreset=$SCORESET | sed -e 's/^Reading.*//' -e '/^$/d'
 
 echo
@@ -21,7 +18,6 @@ echo
 
 # list a wide range of thresholds, so that we can make graphs later ;)
 for thresh in -4 -3 -2 -1 0 1 2 3 4 4.5 5.5 6 6.5 7 8 9 10 12 15 17 20 ; do
-  #./evolve -C -t $thresh | egrep '^#' | egrep -v '^# (Average|TOTAL)'
   ./logs-to-c --spam=spam-validate.log --nonspam=nonspam-validate.log --threshold $thresh --count --scoreset=$SCORESET | sed -e 's/^Reading.*//' -e '/^$/d'
   echo
 done

@@ -9,12 +9,12 @@ if [ ! -f "ORIG/ham-$NAME.log" -o ! -f "ORIG/spam-$NAME.log" ]; then
 fi
 
 if [ "x$1" = "x" ]; then
-echo "[Doing a scoreset $SCORESET GA run]"
+echo "[Doing a scoreset $SCORESET score-generation run]"
 
 # Clean out old runs
 echo "[Cleaning up]"
-rm -rf spam-validate.log nonspam-validate.log ham-validate.log spam.log nonspam.log ham.log NSBASE SPBASE tmp make.output freqs craig-evolve.scores \
-	GA-$NAME.out GA-$NAME.scores GA-$NAME.validate
+rm -rf spam-validate.log nonspam-validate.log ham-validate.log spam.log nonspam.log ham.log NSBASE SPBASE tmp make.output freqs perceptron.scores \
+	gen-$NAME.out gen-$NAME.scores gen-$NAME.validate
 make clean >/dev/null
 
 # Generate 90/10 split logs
@@ -34,7 +34,7 @@ rm -f split-[1-9].log
 mv split-10.log spam-validate.log
 cd ..
 
-echo "[Setting up for GA run]"
+echo "[Setting up for gen run]"
 # Ok, setup for a run
 ln -s SPBASE/spam.log .
 ln -s NSBASE/nonspam.log .
@@ -43,25 +43,27 @@ ln -s SPBASE/spam-validate.log .
 ln -s NSBASE/nonspam-validate.log .
 ln -s NSBASE/nonspam-validate.log ham-validate.log
 
-echo "[Generating evolve]"
-# Generate evolve with full logs
-make -j `cpucount` SCORESET=$SCORESET > make.output 2>&1
+numcpus=`cpucount || echo 1`	# cpucount isn't available everywhere
 
-( echo "[GA run start]" ; pwd ; date ; \
-./evolve -b 20; \
-mv craig-evolve.scores GA-$NAME.scores ; \
-echo "[GA run end]" ; pwd ; date ) | tee GA-$NAME.out
+echo "[Generating perceptron]"
+# Generate perceptron with full logs
+make -j $numcpus SCORESET=$SCORESET > make.output 2>&1
+
+( echo "[gen run start]" ; pwd ; date ; \
+./perceptron -p 2.0 -e 100; \
+mv perceptron.scores gen-$NAME.scores ; \
+echo "[gen run end]" ; pwd ; date ) | tee gen-$NAME.out
 
 else
 
 # This needs to have 50_scores.cf in place first ...
-echo "[GA validation results]"
+echo "[gen validation results]"
 ./logs-to-c --spam=SPBASE/spam-validate.log \
 	--nonspam=NSBASE/nonspam-validate.log \
-	--count --cffile=../rules --scoreset=$SCORESET | tee GA-$NAME.validate
+	--count --cffile=../rules --scoreset=$SCORESET | tee gen-$NAME.validate
 
 echo "[STATISTICS file generation]"
-./mk-baseline-results $SCORESET | tee GA-$NAME.statistics
+./mk-baseline-results $SCORESET | tee gen-$NAME.statistics
 fi
 
 exit 0

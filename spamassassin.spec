@@ -56,7 +56,7 @@ Distribution: SpamAssassin
 SpamAssassin provides you with a way to reduce, if not completely eliminate,
 Unsolicited Bulk Email (or "spam") from your incoming email.  It can be
 invoked by a MDA such as sendmail or postfix, or can be called from a procmail
-script, .forward file, etc.  It uses a genetic-algorithm-evolved scoring system
+script, .forward file, etc.  It uses a perceptron-optimized scoring system
 to identify messages which look spammy, then adds headers to the message so
 they can be filtered by the user's mail reading software.  This distribution
 includes the spamc/spamc components which considerably speeds processing of

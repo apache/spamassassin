@@ -61,9 +61,9 @@ mass-check :
   listing the path to the message or its message ID, its score, and the tests
   that triggered on that mail.
 
-  Using this info, and the genetic algorithm in evolve.cxx, I can figure out
-  which tests get good hits with few false positives, etc., and re-score the
-  tests to optimise the ratio.
+  Using this info, and a score optimization tool, I can figure out which tests
+  get good hits with few false positives, etc., and re-score the tests to
+  optimise the ratio.
 
   This script relies on the spamassassin distribution directory living in "..".
 
@@ -71,17 +71,9 @@ mass-check :
 logs-to-c :
 
   Takes the "spam.log" and "nonspam.log" files and converts them into C
-  source files and simplified data files for use by the "evolve" genetic
-  algorithm.  (Called by "make" when you build the evolver, so generally
+  source files and simplified data files for use by the C score optimization
+  algorithm.  (Called by "make" when you build the perceptron, so generally
   you won't need to run it yourself.)
-
-
-evolve.cxx :
-
-  Source for "evolve".  To build this, use "make".  Note that it requires
-  GAlib ( ftp://lancet.mit.edu/pub/ga/ ) unpacked in a dir called "galib245"
-  to build.  Alternatively just mail the data files to me and I'll run
-  evolve for all of us ;)
 
 
 hit-frequencies :
@@ -100,11 +92,9 @@ mk-baseline-results :
   suitable for a release build of SpamAssassin.
 
 
-continual_evolve.sh :
+perceptron.c :
 
-  Continually runs the evolver, saving each run's best genome (and its results)
-  into separate files named "result.n" where n starts at 1 and counts up.
-  Handy for running overnight.
+  Perceptron learner by Henry Stern.  See "README.perceptron" for details.
 
 
--- EOF -- lastmod: Aug 23 2002 jm
+-- EOF

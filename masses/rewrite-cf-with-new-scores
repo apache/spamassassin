@@ -34,7 +34,7 @@ else {
   die "parse-rules-for-masses had no error but no tmp/rules.pl!?!";
 }
 
-# now read the evolved scores
+# now read the generated scores
 my @gascoreorder = ();
 my %gascorelines = ();
 open (STDIN, "<$newscores") or die "cannot open $newscores";
@@ -53,7 +53,7 @@ open (IN, "<$oldscores") or die "cannot open $oldscores";
 my $out = '';
 my $pre = '';
 
-# read until '# Start of GA-evolved scores', removing scores from our
+# read until '# Start of generated scores', removing scores from our
 # new list if we come across them.
 while (<IN>) {
   if (/^\s*score\s+(\S+)\s/) {
@@ -61,17 +61,17 @@ while (<IN>) {
     next unless (exists ($rules{$name}) && $rules{$name}->{issubrule} == 0);
   }
   $pre .= $_;
-  /^# Start of GA-evolved scores/ and last;
+  /^# Start of generated scores/ and last;
 }
 
-# now skip until '# End of GA-evolved scores'
+# now skip until '# End of generated scores'
 while (<IN>) {
   if (/^\s*score\s+\S+/) {
     my($score,$name,@scores) = split;
     @{$oldscores{$name}} = @scores;
   }
 
-  /^# End of GA-evolved scores/ and last;
+  /^# End of generated scores/ and last;
 }
 if (defined $_) {
   $out .= $_;

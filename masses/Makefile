@@ -1,60 +1,42 @@
-# Pick whether or not to use MPI here
-# Allowed values are yes, no
-MPI = no
-
-# Pick a platform to build for - currently support linux, macosx
-PLATFORM = linux
-
-# Pick where you have PGApack installed
-PGAPATH = pgapack
+# portions Copyright (c)2003  Henry Stern
+CC=		gcc
+CFLAGS=		-g -O2 -Wall 
+LDFLAGS=	-lm
 
 # What rule scoreset are we using?
-SCORESET = 0
+SCORESET =	0
 
 #### Should be no need to modify below this line
 
-ifeq ($(MPI),yes)
-  CC = mpicc
-  USE_MPI = -DUSE_MPI
-else
-  CC = gcc
-  USE_MPI =
-endif
+all: badrules perceptron
 
-PGAINC = $(PGAPATH)/include
+perceptron: perceptron.o
+	$(CC) -o perceptron perceptron.o $(LDFLAGS)
 
-ifeq ($(PLATFORM),macosx)
-  OPT = -O3 -mcpu=750 -faltivec
-  PGALIB = $(PGAPATH)/lib/freebsd
-  EXTRALIBS =
-else
-  OPT = -O9 #-mcpu=athlon
-  PGALIB = $(PGAPATH)/lib/linux
-  EXTRALIBS = -lm
-endif
+perceptron.o: tmp/rules.pl tmp/tests.h tmp/scores.h
+	$(CC) $(CFLAGS) -c -o perceptron.o perceptron.c
 
-all: badrules evolve
-
-evolve: tmp/tests.h craig-evolve.c
-	$(CC) -Wall $(OPT) $(USE_MPI) -DWL=2 -DOPTIMIZE -L$(PGALIB) -I$(PGAINC) craig-evolve.c -o evolve -lpgaO $(EXTRALIBS)
-	strip evolve
+tmp/rules.pl: tmp/.created parse-rules-for-masses
+	perl parse-rules-for-masses -d ../rules -s $(SCORESET)
 
 tmp/tests.h: tmp/.created tmp/ranges.data logs-to-c
-	./logs-to-c --scoreset=$(SCORESET)
+	perl logs-to-c --scoreset=$(SCORESET)
+
+tmp/scores.h: tmp/tests.h
 
 tmp/ranges.data: tmp/.created freqs score-ranges-from-freqs
-	./score-ranges-from-freqs ../rules $(SCORESET) < freqs
+	perl score-ranges-from-freqs ../rules $(SCORESET) < freqs
 
 freqs: spam.log ham.log
-	./hit-frequencies -x -p -s $(SCORESET) > freqs
+	perl hit-frequencies -x -p -s $(SCORESET) > freqs
 
 badrules: freqs
-	./lint-rules-from-freqs < freqs > badrules
+	perl lint-rules-from-freqs < freqs > badrules
 
 tmp/.created:
 	-mkdir tmp
 	touch tmp/.created
 
 clean:
-	rm -rf *.o evolve tmp freqs
+	rm -rf *.o perceptron tmp freqs
 
