@@ -244,12 +244,11 @@ sub message_array {
 
   foreach my $target (@${targets}) {
     my ($class, $format, $rawloc) = split(/:/, $target, 3);
+    $class = substr($class, 0, 1) || 'h'; # use ham by default
 
     my @locations = $self->fix_globs($rawloc);
 
     foreach my $location (@locations) {
-      $class = substr($class, 0, 1) || 'h'; # use ham by default
-
       my $method;
 
       if ($format eq 'detect') {
@@ -693,14 +692,8 @@ sub fix_globs {
 
   my @paths;
 
-  if ($] < 5.006 && Mail::SpamAssassin::Util::am_running_in_taint_mode()) {
-    # glob is not allowed in taint-mode on 5.005
-    push(@paths, $path);
-  }
-  else {
-    # apply csh-style globs: ./corpus/*.mbox => er, you know what it does ;)
-    @paths = glob $path;
-  }
+  # apply csh-style globs: ./corpus/*.mbox => er, you know what it does ;)
+  @paths = glob $path;
   return @paths;
 }
 
