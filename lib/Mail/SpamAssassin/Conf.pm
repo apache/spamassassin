@@ -2203,7 +2203,11 @@ including selections like '-notfirsthop' appearing at the end of the set name.
         $self->{descriptions}->{$1} = "Found a $2 header";
       }
       else {
-        $self->{parser}->add_test (split(/\s+/,$value,2), $TYPE_HEAD_TESTS);
+	my @values = split(/\s+/, $value, 2);
+	if (@values != 2) {
+	  return $MISSING_REQUIRED_VALUE;
+	}
+        $self->{parser}->add_test (@values, $TYPE_HEAD_TESTS);
       }
     }
   });
@@ -2237,7 +2241,11 @@ Define a body eval test.  See above.
         $self->{parser}->add_test ($1, $2, $TYPE_BODY_EVALS);
       }
       else {
-        $self->{parser}->add_test (split(/\s+/,$value,2), $TYPE_BODY_TESTS);
+	my @values = split(/\s+/, $value, 2);
+	if (@values != 2) {
+	  return $MISSING_REQUIRED_VALUE;
+	}
+        $self->{parser}->add_test (@values, $TYPE_BODY_TESTS);
       }
     }
   });
@@ -2266,7 +2274,11 @@ points of the URI, and will also be faster.
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      $self->{parser}->add_test (split(/\s+/,$value,2), $TYPE_URI_TESTS);
+      my @values = split(/\s+/, $value, 2);
+      if (@values != 2) {
+        return $MISSING_REQUIRED_VALUE;
+      }
+      $self->{parser}->add_test (@values, $TYPE_URI_TESTS);
     }
   });
 
@@ -2296,7 +2308,11 @@ Define a raw-body eval test.  See above.
       if ($value =~ /^(\S+)\s+eval:(.*)$/) {
         $self->{parser}->add_test ($1, $2, $TYPE_RAWBODY_EVALS);
       } else {
-        $self->{parser}->add_test (split(/\s+/,$value,2), $TYPE_RAWBODY_TESTS);
+	my @values = split(/\s+/, $value, 2);
+	if (@values != 2) {
+	  return $MISSING_REQUIRED_VALUE;
+	}
+        $self->{parser}->add_test (@values, $TYPE_RAWBODY_TESTS);
       }
     }
   });
@@ -2325,7 +2341,11 @@ Define a full message eval test.  See above.
       if ($value =~ /^(\S+)\s+eval:(.*)$/) {
         $self->{parser}->add_test ($1, $2, $TYPE_FULL_EVALS);
       } else {
-        $self->{parser}->add_test (split(/\s+/,$value,2), $TYPE_FULL_TESTS);
+	my @values = split(/\s+/, $value, 2);
+	if (@values != 2) {
+	  return $MISSING_REQUIRED_VALUE;
+	}
+        $self->{parser}->add_test (@values, $TYPE_FULL_TESTS);
       }
     }
   });
@@ -2364,7 +2384,11 @@ ignore these for scoring.
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      $self->{parser}->add_test (split(/\s+/,$value,2), $TYPE_META_TESTS);
+      my @values = split(/\s+/, $value, 2);
+      if (@values != 2) {
+        return $MISSING_REQUIRED_VALUE;
+      }
+      $self->{parser}->add_test (@values, $TYPE_META_TESTS);
     }
   });
 
