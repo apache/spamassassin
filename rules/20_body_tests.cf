@@ -28,6 +28,32 @@ full RAZOR2_CHECK	eval:check_razor2()
 describe RAZOR2_CHECK	Listed in Razor2, see http://razor.sf.net/
 tflags RAZOR2_CHECK	net
 
+# cf (confidence level) is how likely the message is spam.  RAZOR2_CHECK
+# returns true if cf>=min_cf (as defined by user/config).  These return
+# true depending on what cf value the message has.  The algorithm goes:
+# check the message via razor, then go through each mime part and check
+# how razor scored it.  If the part is contested (ie: it's been reported
+# as both ham and spam) it's ignored.  SA takes the highest non-contested
+# part cf score and returns it for the range rules.  ie: This is essentially
+# Razor 2's logic_method 4.
+#
+# Note: Disabling RAZOR2_CHECK (score RAZOR2_CHECK 0) will also disable
+# these checks.
+#
+# Note: The scores are set to 0 on these tests right now until they get
+# better integrated with SA overall.
+#
+body	RAZOR2_CF_RANGE_01_10	eval:check_razor2_range('01','10')
+body	RAZOR2_CF_RANGE_11_20	eval:check_razor2_range('11','20')
+body	RAZOR2_CF_RANGE_21_30	eval:check_razor2_range('21','30')
+body	RAZOR2_CF_RANGE_31_40	eval:check_razor2_range('31','40')
+body	RAZOR2_CF_RANGE_41_50	eval:check_razor2_range('41','50')
+body	RAZOR2_CF_RANGE_51_60	eval:check_razor2_range('51','60')
+body	RAZOR2_CF_RANGE_61_70	eval:check_razor2_range('61','70')
+body	RAZOR2_CF_RANGE_71_80	eval:check_razor2_range('71','80')
+body	RAZOR2_CF_RANGE_81_90	eval:check_razor2_range('81','90')
+body	RAZOR2_CF_RANGE_91_100	eval:check_razor2_range('91','100')
+
 full DCC_CHECK		eval:check_dcc()
 describe DCC_CHECK	Listed in DCC, see http://rhyolite.com/anti-spam/dcc/
 tflags DCC_CHECK	net
