@@ -1514,7 +1514,7 @@ sub auth_ident {
   my $ident_username = ident_lookup( $client, $opt{'ident-timeout'} );
   my $dn = $ident_username || 'NONE';    # display name
   dbg("ident: ident_username = $dn, spamc_username = $username\n");
-  if ( $username ne $ident_username ) {
+  if ( !defined($ident_username) || $username ne $ident_username ) {
     logmsg( "fatal: ident username ($dn) does not match "
         . "spamc username ($username)" );
     return 0;
