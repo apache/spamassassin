@@ -44,7 +44,6 @@ lang de describe FAKED_UNDISC_RECIPS      Gefaelschtes "Undisclosed-Recipients"
 lang de describe SUBJ_ALL_CAPS            Subject: komplett in Grossbuchstaben
 lang de describe MSGID_HAS_NO_AT          Message-Id enthaelt kein @-Zeichen
 lang de describe MSGID_SPAMSIGN_1         Message-Id wuerde von einem Spam-Tool generiert
-lang de describe INVALID_MSGID            Message-Id ist laut RFC-2822 nicht gueltig
 lang de describe INVALID_DATE             Ungueltiges Datum: Header enthaelt AM/PM-Angabe
 lang de describe INVALID_DATE_TZ_ABSURD   Ungueltiges Datum: Header enthaelt ungueltige Zeitzone
 lang de describe ADVERT_CODE              Subject: enthaelt Werbespruch
@@ -70,7 +69,6 @@ lang de describe RCVD_IN_RBL              Empfangen von einem RBL-Relais, siehe 
 lang de describe RCVD_IN_RSS              Empfangen von einem RSS-Relais, siehe http://www.mail-abuse.org/rss/
 lang de describe RCVD_IN_DUL              Empfangen von einem Spam-Dialup, siehe http://www.mail-abuse.org/dul/
 lang de describe RCVD_IN_BL_SPAMCOP_NET   Empfangen von einem Relais in der bl.spamcop.net Liste
-lang de describe FORGED_RCVD_FOUND        Moeglicherweise gefaelschten 'Received:' Header gefunden
 lang de describe LOTS_OF_CC_LINES         Unmengen an Cc: Headern
 lang de describe FORGED_HOTMAIL_RCVD      Gefaelschten Hotmail 'Received:' Header gefunden
 lang de describe FORGED_EUDORAMAIL_RCVD   Gefaelschter eudoramail.com 'Received:' Header gefunden
@@ -118,7 +116,6 @@ lang de describe NEW_DOMAIN_EXTENSIONS    Moeglicherweise Registry Spammer
 lang de describe CLICK_TO_REMOVE_2        Click-to-remove mit mailto: zuvor gefunden
 lang de describe THIS_AINT_SPAM           Behauptet: "This is not spam"
 lang de describe WE_HATE_SPAM             Behauptet: "We strongly oppose the use of SPAM email"
-#lang de describe IN_ACCORDANCE_WITH_LAWS  Behauptet im Einklang mit gaengigen Anti-Spam-Gesetzen zu sein.
 lang de describe HR_3113                  Erwaehnt Anti-Spam-Gesetz "H.R. 3113"
 lang de describe UCE_MAIL_ACT             Erwaehnt Anti-Spam-Gesetz "UCE-Mail Act"
 lang de describe REMOVE_PAGE              URL der Seite heisst "remove"
@@ -127,24 +124,12 @@ lang de describe RELAYING_FRAME           Frame will URL ausserhalb der momentan
 lang de describe INTERNET_TERROR_RANT     Cyber FirePower! rant about losing dropboxes
 lang de describe BASE64_ENC_TEXT          Mittels Base-64 Kodierung versteckter Nachrichtentext
 lang de describe CHARSET_FARAWAY_BODY     Zeichensatz deutet einen auslaendischen Nachrichtentext an
+lang de describe FROM_MALFORMED           From: ist eine ungueltige Adresse
+lang de describe NIGERIAN_SCAM            Nigerianischer Betrugsversuch, siehe http://www.snopes2.com/inboxer/scams/nigeria.htm
+lang de describe SHORT_RECEIVED_LINE      'Received:' enthaelt sehr langen Hostnamen
+lang de describe TO_INVESTORS             To: nichtexistierende 'Investors' Adresse
+lang de describe TO_MALFORMED             To: ist eine ungueltige Adresse
 lang de describe UNNEEDED_HTML_ENCODING   Unnoetige Kodierung der HTML-Tags
 lang de describe USER_IN_WHITELIST        From: Adresse ist in der White-List des Anwenders
-lang de describe TO_BE_REMOVED_REPLY      Behauptet: "to be removed, reply via email" oder aehnliches
-lang de describe NIGERIAN_SCAM            Nigerianischer Betrugsversuch, siehe http://www.snopes2.com/inboxer/scams/nigeria.htm
-
-lang de describe FROM_MALFORMED           From: ist eine ungueltige Adresse
-lang de describe FROM_MISSING             Fehlender From: Header
-lang de describe SHORT_RECEIVED_LINE      'Received:' enthaelt sehr langen Hostnamen
-lang de describe TO_INVESTORS             To: nichtexistierende 'Investors' Adresse
-lang de describe TO_LOCALPART_EQ_REAL     To: wiederholt den lokalen Anteil als echten Namen
-lang de describe TO_MALFORMED             To: ist eine ungueltige Adresse
-lang de describe YR_MEMBERSHIP_EXCH       Betreff enthaelt 'Your Membership Exchange'
-
-lang de describe FROM_MALFORMED           From: ist eine ungueltige Adresse
-lang de describe FROM_MISSING             Fehlender From: Header
-lang de describe SHORT_RECEIVED_LINE      'Received:' enthaelt sehr langen Hostnamen
-lang de describe TO_INVESTORS             To: nichtexistierende 'Investors' Adresse
-lang de describe TO_LOCALPART_EQ_REAL     To: wiederholt den lokalen Anteil als echten Namen
-lang de describe TO_MALFORMED             To: ist eine ungueltige Adresse
 lang de describe YR_MEMBERSHIP_EXCH       Betreff enthaelt 'Your Membership Exchange'
 

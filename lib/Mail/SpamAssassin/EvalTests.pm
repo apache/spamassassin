@@ -1550,36 +1550,37 @@ sub message_is_habeas_swe {
 
 # This test was originally based on RFC 2369 compliance.  However, the
 # Mailing-List header was added so that Yahoo!Groups mails would not be
-# matched.
-sub suspect_list_headers {
-  my ($self) = @_;
+# matched.  (Turned off as test gets bad S/O ratio -  Sep 17 2002 jm)
 
-  my $all = $self->get('ALL');
-  my @headers = ('List-Help', 'List-Subscribe', 'List-Unsubscribe',
-		 'List-Post', 'List-Owner', 'List-Archive',
-		 'Mailing-List');
-  my %count;
-
-  foreach my $header (@headers) {
-    while ($all =~ s/^$header://im) {
-      $count{$header}++;
-    }
-  }
-
-  # without RFC 2369 fields
-  return 0 unless %count;
-
-  # header appears more than once (violates RFC 2369)
-  foreach my $count (values %count) {
-    return 1 if $count > 1;
-  }
-
-  # List-Help field is used (good RFC 2369 practice)
-  return 0 if exists $count{'List-Help'};
-
-  # List-Unsubscribe without much else (spammer mind trick)
-  return (exists $count{'List-Unsubscribe'} && scalar keys %count < 2);
-}
+# sub suspect_list_headers {
+#   my ($self) = @_;
+# 
+#   my $all = $self->get('ALL');
+#   my @headers = ('List-Help', 'List-Subscribe', 'List-Unsubscribe',
+# 		 'List-Post', 'List-Owner', 'List-Archive',
+# 		 'Mailing-List');
+#   my %count;
+# 
+#   foreach my $header (@headers) {
+#     while ($all =~ s/^$header://im) {
+#       $count{$header}++;
+#     }
+#   }
+# 
+#   # without RFC 2369 fields
+#   return 0 unless %count;
+# 
+#   # header appears more than once (violates RFC 2369)
+#   foreach my $count (values %count) {
+#     return 1 if $count > 1;
+#   }
+# 
+#   # List-Help field is used (good RFC 2369 practice)
+#   return 0 if exists $count{'List-Help'};
+# 
+#   # List-Unsubscribe without much else (spammer mind trick)
+#   return (exists $count{'List-Unsubscribe'} && scalar keys %count < 2);
+# }
   
 ###########################################################################
 # BODY TESTS:
@@ -1596,15 +1597,6 @@ sub porn_word_test {
         return 1 if ($hits == 3);
     }
     return 0;
-}
-
-sub check_for_very_long_text {
-  my ($self, $body, $len) = (@_, 0);
-  my $count = 0;
-  foreach my $line (@{$body}) { $count += length($line); }
-  dbg ("check_for_very_long_text: found $count bytes");
-  if ($count > $len+0) { return 1; }
-  return 0;
 }
 
 sub check_for_uppercase {

@@ -37,16 +37,16 @@ tflags PYZOR_CHECK	net
 # The Fibonacci sequence was used to reduce the dependence on the
 # distribution and magnitude of scores and to avoid any sharp cut-offs.
 
-body SPAM_PHRASE_00_01		eval:check_for_spam_phrases('00', '01')
-describe SPAM_PHRASE_00_01	Spam phrases score is 00 to 01 (low)
-body SPAM_PHRASE_01_02		eval:check_for_spam_phrases('01', '02')
-describe SPAM_PHRASE_01_02	Spam phrases score is 01 to 02 (low)
-body SPAM_PHRASE_02_03		eval:check_for_spam_phrases('02', '03')
-describe SPAM_PHRASE_02_03	Spam phrases score is 02 to 03 (medium)
-body SPAM_PHRASE_03_05		eval:check_for_spam_phrases('03', '05')
-describe SPAM_PHRASE_03_05	Spam phrases score is 03 to 05 (medium)
-body SPAM_PHRASE_05_08		eval:check_for_spam_phrases('05', '08')
-describe SPAM_PHRASE_05_08	Spam phrases score is 05 to 08 (medium)
+#body SPAM_PHRASE_00_01		eval:check_for_spam_phrases('00', '01')
+#describe SPAM_PHRASE_00_01	Spam phrases score is 00 to 01 (low)
+#body SPAM_PHRASE_01_02		eval:check_for_spam_phrases('01', '02')
+#describe SPAM_PHRASE_01_02	Spam phrases score is 01 to 02 (low)
+#body SPAM_PHRASE_02_03		eval:check_for_spam_phrases('02', '03')
+#describe SPAM_PHRASE_02_03	Spam phrases score is 02 to 03 (medium)
+#body SPAM_PHRASE_03_05		eval:check_for_spam_phrases('03', '05')
+#describe SPAM_PHRASE_03_05	Spam phrases score is 03 to 05 (medium)
+#body SPAM_PHRASE_05_08		eval:check_for_spam_phrases('05', '08')
+#describe SPAM_PHRASE_05_08	Spam phrases score is 05 to 08 (medium)
 body SPAM_PHRASE_08_13		eval:check_for_spam_phrases('08', '13')
 describe SPAM_PHRASE_08_13	Spam phrases score is 08 to 13 (medium)
 body SPAM_PHRASE_13_21		eval:check_for_spam_phrases('13', '21')
@@ -353,8 +353,6 @@ body EXCUSE_15			/this\s*(?:e?-?mail|message)? (?:is|was) (?:not|never) (?:spam|
 describe EXCUSE_15		Claims to be legitimate email
 body EXCUSE_16			/received this.{1,10}in error/i
 describe EXCUSE_16		I wonder how many emails they sent in error...
-body EXCUSE_17			/received.{0,15} by mistake/i
-describe EXCUSE_17		Suspect you might have received the message by mistake
 body EXCUSE_18			/we do not (?:spam|send unsolicited)/i
 describe EXCUSE_18		Claims not to be SPAM
 
@@ -567,9 +565,6 @@ describe HOME_EMPLOYMENT	Information on how to work at home (2)
 body     NO_EXPERIENCE          /\bNo EXPERIENCE/i
 describe NO_EXPERIENCE          No experience needed!
 
-body     FREE_MONEY             /\b(?:fast|free|easy|big)\s*(?:money|\$+|bucks|cash|(?-i:E)uros?)\b/i
-describe FREE_MONEY             Free money!
-
 body MORTGAGE_RATES		/Mortgage rates/i
 describe MORTGAGE_RATES		Information on mortgage rates
 
@@ -689,9 +684,6 @@ describe GREAT_OFFER            Trying to offer you something
 
 body SUBJ_2_CREDIT              /subject to credit approval/i
 describe SUBJ_2_CREDIT          Contains 'subject to credit approval'
-
-body GAPPY_TEXT                 /\b(?:[a-z][-_\.\,\:\;\'\~\s]{1,3}){5,}/i
-describe GAPPY_TEXT             Contains 'G.a.p.p.y-T.e.x.t'
 
 body URGENT_BIZ                 /URGENT BUSINESS/i
 describe URGENT_BIZ             Contains 'URGENT BUSINESS'
@@ -894,9 +886,6 @@ describe NO_AGE			No Age Restrictions
 body NO_FORMS		        /\bno .{0,9}forms\b/i
 describe NO_FORMS		No Claim Forms
 
-body NO_REFUND		        /\bno refund/i
-describe NO_REFUND		They keep your money -- No Refund!
-
 body NO_GIMMICK		        /\bno gimmick\b/i
 describe NO_GIMMICK		No Gimmick
 
@@ -963,21 +952,14 @@ describe THE_BEST_RATE		The best Rates
 body WE_PROMISE_YOU	        /\bwe promise .{0,9}you/i
 describe WE_PROMISE_YOU		Promise you ...!
 
-body OUTSTANDING_VALUE	        /\boutstanding value/i
-describe OUTSTANDING_VALUE	Outstanding Values
-
 body AMAZING_STUFF	        /\bamazing (?:product|rates)/i
 describe AMAZING_STUFF		Amazing Stuff
 
 body CASH_BONUS		        /\bcash bonus\b/i
 describe CASH_BONUS		Cash Bonus
 
-
 body SHOPPING_SPREE	        /\bshopping spree\b/i
 describe SHOPPING_SPREE		Shopping Spree
-
-body GIFT_CERTIFICATE	        /\bgift certificates?/i
-describe GIFT_CERTIFICATE	Gift Certificate
 
 body FANTASTIC		        /\bfantastic {0,9}(?:price|deal|saving)/i
 describe FANTASTIC		Fantastic Deal
@@ -1116,30 +1098,17 @@ describe COMPETE		Compete for your business
 body CANCEL		        /\bcancel at any time\b/i
 describe CANCEL			Cancel at any time!
 
-
-body RESERVES_RIGHT	        /\breserves the right\b/i
-describe RESERVES_RIGHT		Reserves the right
-
 body NO_COMBINE		        /\bwith any other offer/i
 describe NO_COMBINE		Can not be combined with any other offer
 
 body NEW_CUSTOMER	        /\bnew customers only\b/i
 describe NEW_CUSTOMER		New Customers Only
 
-
-#  0.00     0.01     0.00    1.00    1.00  PHONE_CANCER (low matches)
-#body PHONE_CANCER	        /\bphone.{0,15}cancer\b/i
-#describe PHONE_CANCER		Cell Phone Cancer Scam
-
 body MEET_SINGLES	        /\bmeet .{0,12}singles|thousands of personal/i
 describe MEET_SINGLES		Meet Singles
 
 body JOIN_MILLIONS	        /\bjoin (?:millions|thousands)\b/i
 describe JOIN_MILLIONS		Join Millions of Americans
-
-
-body EXPECT_TO_EARN	        /\bexpect to earn|earn up to\b/i
-describe EXPECT_TO_EARN		Expect to earn
 
 body BE_BOSS		        /\byour own boss\b/i
 describe BE_BOSS		Be your own boss
@@ -1396,22 +1365,6 @@ describe IN_ACCORDANCE_WITH_LAWS Claims to be in accordance with some Spam law
 body ANOTHER_NET_AD             /Another Internet Ad campaign produced/
 describe ANOTHER_NET_AD         Tells you it's an ad
 
-#   0.553    0.713    0.457    0.61   -1.00  BALANCE_FOR_LONG_20K
-describe BALANCE_FOR_LONG_20K   Message text is over 20K in size
-body BALANCE_FOR_LONG_20K       eval:check_for_very_long_text('20000')
-describe BALANCE_FOR_LONG_20K   Message text is over 20K in size  
-tflags BALANCE_FOR_LONG_20K     nice  
-#
-#   0.111    0.099    0.118    0.46   -1.00  BALANCE_FOR_LONG_40K
-describe BALANCE_FOR_LONG_40K   Message text is over 40K in size
-body BALANCE_FOR_LONG_40K       eval:check_for_very_long_text('40000')
-describe BALANCE_FOR_LONG_40K   Message text is over 40K in size  
-tflags BALANCE_FOR_LONG_40K     nice
-
-#   0.038    0.048    0.031    0.61    1.00  BIG_BUCKS
-body BIG_BUCKS                  /\bbig bucks\b/i 
-describe BIG_BUCKS Big Bucks
-
 #  0.01     0.01     0.00    0.77    1.00  CHANGE_TERMS (low matches)
 body CHANGE_TERMS               /\bstrictly based on the following terms and conditions\b/i
 describe CHANGE_TERMS           Terms and conditions
@@ -1491,9 +1444,6 @@ describe NO_SELLING             Claims not to be selling anything
 body POPLAUNCH                  /StealthLaunch PopLaunch.\s/
 describe POPLAUNCH              SPAM software
 
-body PRICES_WONT_LAST           /\bprices.{0,11} last\b/i
-describe PRICES_WONT_LAST       Prices won't Last
-
 body PSYCHIC                    /\b(?:caring|gifted|experienced) psychic/i
 describe PSYCHIC                Psychics Scam
 
@@ -1506,17 +1456,8 @@ describe SLASH_PRICE            Slashed Price
 body THIS_AINT_JUNK             /This.{0,30}is not (?:a )?junk (?:email)?/is
 describe THIS_AINT_JUNK         Claims "This is not junk email"
 
-body TO_BE_REMOVED_REPLY        /\bto\b.{0,20}\b(?:remove|unsubscribe|opt[ -]?out).{0,20}\b(?:reply|send)\b/is
-describe TO_BE_REMOVED_REPLY    Says: "to be removed, reply via email" or similar
-lang de describe TO_BE_REMOVED_REPLY      Behauptet: "to be removed, reply via email" oder aehnliches
-lang es describe TO_BE_REMOVED_REPLY    Says: "to be removed, reply via email" or similar
-
 body WEALTH                     /\bachieve .{0,15}wealth\b/i
 describe WEALTH                 Achieve Wealth
-
-#   9.272   11.011    8.222    0.57    0.38  SUPERLONG_LINE
-rawbody SUPERLONG_LINE          /^[^<\&]{199,}$/m
-describe SUPERLONG_LINE         Contains a line >=199 characters long
 
 #   0.004    0.006    0.003    0.70    1.00  MONSTERHUT
 rawbody MONSTERHUT              /monsterhut.com/
