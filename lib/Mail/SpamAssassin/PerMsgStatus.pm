@@ -440,7 +440,7 @@ sub rewrite_as_spam {
     }
 
     my $content_type = $self->{msg}->get_header('Content-Type');
-    if (defined($content_type) and $content_type =~ /boundary\s*=\s*["']?(.*)["']?(?:;|$)/i) {
+    if (defined($content_type) and $content_type =~ /\bboundary\s*=\s*["']?(.*?)["']?(?:;|$)/i) {
       # Deal with MIME "null block".  If this is a multipart MIME mail,
       # peel off the MIME header for the main part of the message,
       # stick in the report, then put the MIME header back in front,
@@ -580,7 +580,7 @@ sub get_raw_body_text_array {
   }
 
   my $ctype = $self->{msg}->get_header ('Content-Type');
-  $ctype ||=  '';
+  $ctype = '' unless ( defined $ctype );
 
   # if it's non-text, just return an empty body rather than the base64-encoded
   # data.  If spammers start using images to spam, we'll block 'em then!
@@ -593,7 +593,7 @@ sub get_raw_body_text_array {
   # just assemble the body array from the text bits.
   my $multipart_boundary;
   my $end_boundary;
-  if ($ctype =~ /boundary\s*=\s*"(.*)"/) {
+  if ( $ctype =~ /\bboundary\s*=\s*["']?(.*?)["']?(?:;|$)/i ) {
     $multipart_boundary = "--$1\n";
     $end_boundary = "--$1--\n";
   }
@@ -756,11 +756,11 @@ sub get_decoded_stripped_body_text_array {
   my $bodytext = $self->get_decoded_body_text_array();
 
    my $ctype = $self->{msg}->get_header ('Content-Type');
-   $ctype ||=  '';
+   $ctype = '' unless ( defined $ctype );
  
    # if it's a multipart MIME message, skip the MIME-definition stuff
    my $boundary;
-   if ($ctype =~ /boundary="(.*)"/) {
+   if ( $ctype =~ /\bboundary\s*=\s*["']?(.*?)["']?(?:;|$)/i ) {
      $boundary = $1;
    }
  
