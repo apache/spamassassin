@@ -24,7 +24,7 @@
 
 require_version @@VERSION@@
 
-header HEAD_LONG		eval:check_for_long_header()
+header HEAD_LONG		eval:check_msg_parse_flags('truncated_header')
 describe HEAD_LONG		Message headers are very long
 
 # partial messages; currently-theoretical attack
@@ -32,7 +32,7 @@ describe HEAD_LONG		Message headers are very long
 header FRAGMENTED_MESSAGE	Content-Type =~ /\bmessage\/partial/i
 describe FRAGMENTED_MESSAGE	Partial message
 
-header MISSING_HB_SEP		eval:check_for_missing_hb_separator()
+header MISSING_HB_SEP		eval:check_msg_parse_flags('missing_head_body_separator')
 describe MISSING_HB_SEP		Missing blank line between message header and body
 
 header NO_REAL_NAME		From =~ /^["\s]*\<?\S+\@\S+\>?\s*$/
