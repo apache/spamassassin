@@ -391,16 +391,20 @@ sub is_dcc_available {
 # http://www.hughes-family.org/bugzilla/show_bug.cgi?id=507 )
 #
   if (!system("dccproc -V >/dev/null 2>&1")) {
-    dbg ("DCC is not available");
+    dbg ("DCC is not available: system failed");
     return 0;
-  } 
-  else {
-    open(DCCHDL, "dccproc -V 2>&1 |");
-    @resp = <DCCHDL>;
-    close DCCHDL;
-    dbg ("DCC is available: ".join(" ", @resp));
-    return 1;
   }
+
+  # jm: this could still fail
+  if (!open(DCCHDL, "dccproc -V 2>&1 |")) {
+    dbg ("DCC is not available: open failed");
+    return 0;
+  }
+  
+  @resp = <DCCHDL>;
+  close DCCHDL;
+  dbg ("DCC is available: ".join(" ", @resp));
+  return 1;
 }
 
 use Symbol qw(gensym);
