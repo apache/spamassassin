@@ -699,6 +699,11 @@ sub get {
     if ($_ eq '') { undef $_; }
   }
 
+  if ($hdrname eq 'Cc' && (!defined($_) || $_ eq '')) {
+    $_ = join ("\n", $self->{msg}->get_header ('CC'));		# common enough
+    if ($_ eq '') { undef $_; }
+  }
+
   if (!defined $_) {
     $defval ||= '';
     $_ = $defval;
