@@ -216,7 +216,7 @@ sub _check_spf {
   };
 
   if ($@) {
-    dbg("spf: cannot load or create Mail::SPF::Query module");
+    dbg("spf: cannot load or create Mail::SPF::Query module: $@");
     return;
   }
 
