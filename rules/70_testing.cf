@@ -160,8 +160,23 @@ body T_OFFER_BY_CHOICE_17	/\b(?:wish|want|question|unsubscrib\w+|(?:dis)?continu
 body T_OFFER_BY_CHOICE_18	/\b(?:wish|want|question|unsub\w+|(?:dis)?continue|remove|permission).{0,64}\b(?:gift|offer|special|promotion|coupon|discount|reward)/i
 
 # emoved some old ones
-header T_MANY_MX_5 From:addr =~ /\@mx\d{2,4}\..{1,20}\./i
-header T_MANY_MX_9 ALL =~ /\@mx\d{2,4}\..{1,20}\./i
+header T_MANY_MX_5	From:addr =~ /\@mx\d{2,4}\..{1,20}\./i
+header T_MANY_MX_7	From:addr =~ /\@\w\d+\..{1,30}\./i
+header T_MANY_MX_9	ALL =~ /\@mx\d{2,4}\..{1,20}\./i
+# try to beat T_MANY_MX_7
+header T_MANY_MX_10	From:addr =~ /\@\w\d+\..*\./i
+header T_MANY_MX_11	From:addr =~ /\@\w*\d+\..*\./i
+header T_MANY_MX_12	From:addr =~ /\@\w+\d+\..*\./i
+header T_MANY_MX_13	From:addr =~ /\@\w?\d+\..*\./i
+header T_MANY_MX_14	From:addr =~ /\@\w{0,2}\d+\..*\./i
+header T_MANY_MX_15	From:addr =~ /\@\w{1,2}\d+\..*\./i
+header T_MANY_MX_16	From:addr =~ /\@\w{0,3}\d+\..*\./i
+header T_MANY_MX_17	From:addr =~ /\@\w{1,3}\d+\..*\./i
+header T_MANY_MX_18	From:addr =~ /\@\w{0,4}\d+\..*\./i
+header T_MANY_MX_19	From:addr =~ /\@\w{1,4}\d+\..*\./i
+header T_MANY_MX_20	From:addr =~ /\@\w{0,5}\d+\..*\./i
+header T_MANY_MX_21	From:addr =~ /\@\w{1,5}\d+\..*\./i
+# dip at length of 5, so stop here
 
 # another spin
 body T_TRACKER_ID_6	/[a-z0-9]{6,24}[-_a-z0-9]{12,36}[a-z0-9]{6,24}\s*\z/is
