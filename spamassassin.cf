@@ -522,7 +522,7 @@ describe MONSTERHUT		mentions monsterhut.com
 body EMAIL_HARVEST		/email harvest/
 
 # (contrib: WW)
-full CLICK_TO_REMOVE_MAILTO     /\bclick to remove\b.{0,50}mailto:.{0,20}\@.+\..+/is
+full CLICK_TO_REMOVE_MAILTO     /\bclick to remove.{0,50}mailto:/is
 describe CLICK_TO_REMOVE_MAILTO Click-to-remove with mailto: found
 
 # (contrib: WW, mod by David Hull)
@@ -538,7 +538,7 @@ full WE_HATE_SPAM               /We .{0,60}oppose the use of SPAM/is
 describe WE_HATE_SPAM           Says "We strongly oppose the use of SPAM email"
 
 # (contrib: WW)
-body IN_ACCORDANCE_WITH_LAWS    /this e?-?mail is in accordance with .* law/
+body IN_ACCORDANCE_WITH_LAWS    /this e?-?mail.*in accordance with.*law/
 describe IN_ACCORDANCE_WITH_LAWS Claims to be in accordance with some Spam law
 
 body HR_3113                    /H\.\s*R\.\s*3113/is
@@ -549,9 +549,9 @@ describe UCE_MAIL_ACT           Mentions Spam Law "UCE-Mail Act"
 
 full PENIS_ENLARGE		/(?:(?:\bpenis\b|\benlarge).{0,50}){2,}/is
 
-body WORK_AT_HOME		/WORK AT HOME/
+body WORK_AT_HOME		/WORK (?:AT|FROM) HOME/
 
-body HOME_EMPLOYMENT		/HOME EMPLOYMENT/
+body HOME_EMPLOYMENT		/HOME EMPLOYMENT/i
 
 # suggested by Nick Rothwell
 body HUNZA_DIET_BREAD		/HUNZA DIET BREAD/
@@ -634,215 +634,210 @@ describe SIRCAM_SIGNATURE	SECURITY: message contains the Sircam worm
 # scripts, and a genetic algorithm, to determine the optimum scores which
 # resulted in minimum false positives or negatives.  Summary of this set:
 
-# Correctly non-spam:  40675  99.81%  (56.18% overall,  44521 adjusted)
-# Correctly spam:      30556  96.53%  (42.20% overall,  37846 adjusted)
-# False positives:        77  0.19%  (0.11% overall,     81 adjusted)
-# False negatives:      1099  3.47%  (1.52% overall,   1149 adjusted)
-# TOTAL:               72407  100.00%
+# SUMMARY:                62 /   1784
+#
+# Correctly non-spam:  40861  99.85%  (48.85% overall,  44750 adjusted)
+# Correctly spam:      40939  95.82%  (48.94% overall,  51349 adjusted)
+# False positives:        62  0.15%  (0.07% overall,     65 adjusted)
+# False negatives:      1784  4.18%  (2.13% overall,   1858 adjusted)
+# TOTAL:               83646  100.00%
 
 # Start of GA-evolved scores...
 
-score 25FREEMEGS_URL                 0.4
-score ADDRESSES_ON_CD                3.8
-score ADVERT_CODE                    1.3
-score ALL_CAPS_SUBJECT               2.3
-score AMAZING                        2.3
-score ANOTHER_NET_AD                 2.1
-score AOL_USERS_LINK                 2.5
-score ASCII_FORM_ENTRY               1.3
-score ASKS_BILLING_ADDRESS           0.7
-score A_HREF_TO_IP                   1.3
-score A_HREF_TO_REMOVE               2.2
-score BAD_HELO_WARNING               0.5
-score BASE64_ENC_TEXT                1.9
-score BILLION_DOLLARS                0.7
-score BILL_1618                      2.9
-score BRAND_NEW_PAGER                1.5
-score BUGGY_CGI                      3.8
-score BUGGY_CGI_DE                   2.2
-score BUGGY_CGI_DE_2                 0.3
-score BULK_EMAIL                     2.7
-score CALL_1_800                     0.5
-score CALL_888                       1.5
-score CALL_NOW                       1.3
-score CASHCASHCASH                   0.5
-score CHARSET_FARAWAY                1.9
-score CHARSET_FARAWAY_BODY           1.8
-score CHECK_OR_MONEY_ORDER           1.5
-score CLICKSFORMONEY_NET             2.4
-score CLICK_BELOW                    1.4
-score CLICK_HERE_LINK                1.5
+score 25FREEMEGS_URL                 3.2
+score ADDRESSES_ON_CD                3.5
+score ADVERT_CODE                    4.0
+score ALL_CAPS_SUBJECT               2.0
+score AMAZING                        3.0
+score ANOTHER_NET_AD                 2.0
+score AOL_USERS_LINK                 0.9
+score ASCII_FORM_ENTRY               2.7
+score ASKS_BILLING_ADDRESS           0.1
+score AUTO_EMAIL_REMOVAL             2.7
+score A_HREF_TO_IP                   2.0
+score A_HREF_TO_REMOVE               2.5
+score BAD_HELO_WARNING               1.1
+score BASE64_ENC_TEXT                0.7
+score BILLION_DOLLARS                1.4
+score BILL_1618                      2.0
+score BRAND_NEW_PAGER                2.9
+score BUGGY_CGI                      3.3
+score BUGGY_CGI_DE                   2.9
+score BUGGY_CGI_DE_2                 2.6
+score BULK_EMAIL                     2.1
+score CALL_1_800                     1.7
+score CALL_888                       3.3
+score CALL_NOW                       3.1
+score CASHCASHCASH                   1.1
+score CHARSET_FARAWAY                4.0
+score CHARSET_FARAWAY_BODY           1.2
+score CHECK_OR_MONEY_ORDER           1.8
+score CLICKSFORMONEY_NET             3.4
+score CLICK_BELOW                    4.0
+score CLICK_HERE_LINK                3.3
 score CLICK_TO_REMOVE_MAILTO         2.1
-score COMMUNIGATE                    3.4
-score CORRUPT_MSGID                  2.1
-score CYBER_FIRE_POWER               1.1
-score DEAR_FRIEND                    0.6
-score DIFFERENT_REPLY_TO             1.5
-score DIGITAL_FX1                    1.7
-score DIRECT_EMAIL                   1.2
-score EMAIL_MARKETING                3.1
-score EXCUSE_1                       2.5
-score EXCUSE_10                      2.0
-score EXCUSE_11                      1.5
-score EXCUSE_12                      1.2
-score EXCUSE_13                      2.3
-score EXCUSE_14                      2.2
-score EXCUSE_15                      1.1
-score EXCUSE_16                      0.8
-score EXCUSE_17                      0.2
-score EXCUSE_2                       1.1
-score EXCUSE_4                       2.4
-score EXCUSE_5                       3.1
-score EXCUSE_6                       1.4
+score COMMUNIGATE                    3.6
+score CORRUPT_MSGID                  2.7
+score CYBER_FIRE_POWER               2.0
+score DEAR_FRIEND                    0.1
+score DIFFERENT_REPLY_TO             2.3
+score DIGITAL_FX1                    2.8
+score DIRECT_EMAIL                   1.3
+score EMAIL_HARVEST                  3.6
+score EMAIL_MARKETING                4.0
+score EXCUSE_1                       2.0
+score EXCUSE_10                      1.1
+score EXCUSE_11                      1.1
+score EXCUSE_12                      4.0
+score EXCUSE_13                      4.0
+score EXCUSE_14                      2.0
+score EXCUSE_15                      2.1
+score EXCUSE_16                      1.1
+score EXCUSE_17                      2.0
+score EXCUSE_18                      3.4
+score EXCUSE_2                       2.0
+score EXCUSE_3                       3.8
+score EXCUSE_4                       3.8
+score EXCUSE_5                       2.4
+score EXCUSE_6                       2.0
 score EXCUSE_7                       2.6
-score EXCUSE_8                       1.5
-score EXCUSE_9                       3.3
-score E_WEBHOSTCENTRAL_URL           3.0
-score FAKED_UNDISC_RECIPS            3.9
-score FILTERED_BY_WORLDREMOVE        3.4
-score FORGED_GW05_RCVD               2.6
-score FORGED_HOTMAIL_RCVD            0.9
-score FORM_W_MAILTO_ACTION           3.1
-score FOR_FREE                       1.9
-score FREEWEBCO_NET_URL              2.3
-score FREEWEBHOSTINGCENTRAL          2.5
-score FREE_CONSULTATION              3.1
-score FREE_PRIORITY_MAIL             3.6
-score FRIEND_AT_PUBLIC               3.7
-score FROM_AND_TO_SAME               1.3
-score FROM_BTAMAIL                   2.7
-score FROM_ENDS_IN_NUMS              2.6
-score FROM_FORGED_HOTMAIL            3.5
-score FROM_NAME_EQ_FROM_ADDR         3.8
-score FULL_REFUND                    0.9
-score GREEN_EXCUSE_1                 0.3
-score GREEN_EXCUSE_2                 3.6
-score GUARANTEE                      1.5
-score HTTP_USERNAME_USED             2.2
-score INCREASE_SALES                 1.6
-score INTERNET_TERROR_RANT           3.3
-score INTL_EXEC_GUILD                2.2
-score INVALID_DATE                   1.7
-score IN_ACCORDANCE_WITH_LAWS        2.3
-score JAVASCRIPT                     2.5
-score JUST_MAILED_PAGE               1.3
-score KNOWN_BAD_DIALUPS              1.5
-score LASER_PRINTER                  2.9
-score LIMITED_TIME_ONLY              2.3
-score LINE_OF_YELLING                1.3
-score LONG_NUMERIC_HTTP_ADDR         1.1
-score LOTS_OF_CC_LINES               3.6
-score MAILTO_LINK                    0.1
-score MAILTO_TO_SPAM_ADDR            0.9
-score MAILTO_WITH_SUBJ               2.6
-score MAILTO_WITH_SUBJ_REMOVE        0.3
-score MANY_FROMS                     0.4
-score MASS_EMAIL                     2.0
-score MDAEMON_2_7_4                  2.3
-score MONEY_MAKING                   3.4
-score MSGID_HAS_NO_AT                2.9
-score MSG_ID_ADDED_BY_MTA            2.8
-score NIGERIAN_SCAM                  1.3
-score NONEXISTENT_CHARSET            3.4
-score NORMAL_HTTP_TO_IP              2.5
-score NO_MX_FOR_FROM                 2.6
-score NO_QS_ASKED                    3.0
-score NUMERIC_HTTP_ADDR              3.8
-score OFFICE_OF_MD                   3.4
-score ONLINE_BIZ_OPS                 0.3
-score OPPORTUNITY                    3.5
-score OPT_IN                         3.1
-score PARA_A_2_C_OF_1618             0.6
-score PENIS_ENLARGE                  2.8
-score POPLAUNCH                      3.7
-score PORN_1                         3.4
-score PORN_2                         1.3
-score PORN_3                    2.3
-score POST_IN_RCVD                   1.3
-score PRINT_FORM_SIGNATURE           1.1
-score PRODUCED_AND_SENT_OUT          3.2
-score PROFITS                        0.5
-score PURE_PROFIT                    2.8
-score REALLY_UNSAFE_JAVASCRIPT       0.5
-score RELAYING_FRAME                 3.9
-score REMOVAL_INSTRUCTIONS           2.8
-score REMOVE_IN_QUOTES               2.9
-score REMOVE_SUBJ                    3.4
-score REPLY_REMOVE_SUBJECT           1.5
-score REPLY_TO_EMPTY                 2.1
-score SECTION_301                    0.4
-score SENT_IN_COMPLIANCE             3.8
+score EXCUSE_8                       2.4
+score EXCUSE_9                       1.2
+score E_WEBHOSTCENTRAL_URL           2.4
+score FAKED_UNDISC_RECIPS            4.0
+score FILTERED_BY_WORLDREMOVE        3.2
+score FORGED_GW05_RCVD               4.0
+score FORGED_HOTMAIL_RCVD            0.1
+score FORM_W_MAILTO_ACTION           2.9
+score FOR_FREE                       1.8
+score FOR_INSTANT_ACCESS             2.2
+score FREEWEBCO_NET_URL              2.0
+score FREEWEBHOSTINGCENTRAL          3.6
+score FREE_CONSULTATION              4.0
+score FREE_PRIORITY_MAIL             1.4
+score FRIEND_AT_PUBLIC               4.0
+score FROM_AND_TO_SAME               1.8
+score FROM_BTAMAIL                   3.0
+score FROM_ENDS_IN_NUMS              2.0
+score FROM_FORGED_HOTMAIL            3.0
+score FROM_NAME_EQ_FROM_ADDR         4.0
+score FROM_NO_USER                   3.2
+score FULL_REFUND                    4.0
+score GREEN_EXCUSE_1                 3.8
+score GREEN_EXCUSE_2                 3.4
+score GUARANTEE                      2.0
+score HALF_PRICE_OFFER               1.1
+score HOME_EMPLOYMENT                1.8
+score HR_3113                        3.4
+score HTTP_USERNAME_USED             1.9
+score HUNZA_DIET_BREAD               2.8
+score INCREASE_SALES                 2.9
+score INTERNET_TERROR_RANT           2.0
+score INTL_EXEC_GUILD                2.3
+score INVALID_DATE                   3.2
+score INVALID_MSGID                  2.0
+score IN_ACCORDANCE_WITH_LAWS        2.4
+score JAVASCRIPT                     1.5
+score JUST_MAILED_PAGE               2.0
+score KNOWN_BAD_DIALUPS              2.7
+score LASER_PRINTER                  3.0
+score LIMITED_TIME_ONLY              2.4
+score LINE_OF_YELLING                1.1
+score LONG_NUMERIC_HTTP_ADDR         2.0
+score LOTS_OF_CC_LINES               4.0
+score MAILTO_LINK                    1.0
+score MAILTO_TO_SPAM_ADDR            2.0
+score MAILTO_WITH_SUBJ               2.0
+score MAILTO_WITH_SUBJ_REMOVE        2.0
+score MAIL_IN_ORDER_FORM             4.0
+score MANY_FROMS                     2.4
+score MASS_EMAIL                     1.8
+score MDAEMON_2_7_4                  1.3
+score MISSING_HEADERS                2.3
+score MONEY_MAKING                   2.2
+score MONSTERHUT                     2.0
+score MSGID_HAS_NO_AT                0.1
+score MSGID_SPAMSIGN_1               2.5
+score MSG_ID_ADDED_BY_MTA            2.1
+score MURKOWSKI_CRUFT                2.7
+score NEW_DOMAIN_EXTENSIONS          4.0
+score NIGERIAN_SCAM                  2.6
+score NIGERIAN_SCAM_2                2.7
+score NONEXISTENT_CHARSET            2.0
+score NORMAL_HTTP_TO_IP              2.1
+score NO_QS_ASKED                    4.0
+score NO_SELLING                     1.8
+score NUMERIC_HTTP_ADDR              4.0
+score OFFICE_OF_MD                   1.1
+score ONLINE_BIZ_OPS                 2.0
+score OPPORTUNITY                    3.1
+score OPT_IN                         1.9
+score PARA_A_2_C_OF_1618             3.9
+score PENIS_ENLARGE                  2.3
+score POPLAUNCH                      3.2
+score PORN_1                         3.1
+score PORN_2                         2.8
+score PORN_3                         2.2
+score PORN_4                         1.9
+score PORN_5                         2.2
+score PORN_6                         2.0
+score POST_IN_RCVD                   2.2
+score PRINT_FORM_SIGNATURE           2.0
+score PRODUCED_AND_SENT_OUT          4.0
+score PROFITS                        0.6
+score PURE_PROFIT                    4.0
+score REALLY_UNSAFE_JAVASCRIPT       0.1
+score RELAYING_FRAME                 3.8
+score REMOVAL_INSTRUCTIONS           4.0
+score REMOVE_IN_QUOTES               2.5
+score REMOVE_PAGE                    2.7
+score REMOVE_SCRIPT                  2.0
+score REMOVE_SUBJ                    2.1
+score REPLY_REMOVE_SUBJECT           2.0
+score REPLY_TO_EMPTY                 2.2
+score SECTION_301                    3.5
+score SENT_IN_COMPLIANCE             4.0
 score SHOES_GUY                      3.9
-score SHORT_RECEIVED_LINE            2.1
-score SLIGHTLY_UNSAFE_JAVASCRIPT     0.1
-score SMTPD_IN_RCVD                  0.7
-score SOCIAL_SEC_NUMBER              1.5
-score SPAM_FORM                      3.5
-score SPAM_FORM_INPUT                1.1
-score SPAM_FORM_RETURN               0.1
-score STOCK_ALERT                    3.9
+score SHORT_RECEIVED_LINE            2.0
+score SLIGHTLY_UNSAFE_JAVASCRIPT     1.6
+score SMTPD_IN_RCVD                  2.9
+score SOCIAL_SEC_NUMBER              2.4
+score SPAM_FORM                      2.0
+score SPAM_FORM_INPUT                3.9
+score SPAM_FORM_RETURN               2.0
+score STOCK_ALERT                    4.0
 score STOCK_PICK                     2.2
-score SUBJ_ALL_CAPS                  1.5
-score SUBJ_FULL_OF_8BITS             3.4
-score SUBJ_HAS_UNIQ_ID               3.4
-score SUBJ_REMOVE                    0.9
-score SUPERLONG_LINE                 0.6
-score S_1618                         1.1
-score THIS_AINT_SPAM                 0.6
-score TO_BE_REMOVED_REPLY            3.4
-score TO_EMPTY                       2.8
-score TRACE_BY_SSN                   2.3
-score TRACKER_ID                     2.3
-score UCE_MAIL_ACT                   0.6
-score UNNEEDED_HTML_ENCODING         1.8
-score WANTS_CREDIT_CARD              0.4
-score WEB4PORNO_URL                  0.1
-score WEB_BUGS                       1.0
-score WE_HATE_SPAM                   0.1
-score WE_HONOR_ALL                   2.4
-score WWW_DIRECTFORCEMARKETING_COM   2.6
-score WWW_NETSITESFORFREE_NET        3.0
-score WWW_REMOVEYOU_COM              1.0
-score X_EM_VER_PRESENT               2.8
-score X_MAILER_GIBBERISH             3.7
-score X_PRIORITY_HIGH                1.1
-score YR_MEMBERSHIP_EXCH             2.4
-score EMAIL_HARVEST		2.0
-score MONSTERHUT		2.0
-score NEW_DOMAIN_EXTENSIONS  	1.0
-score UNIVERSITY_DIPLOMAS	2.0
-score NO_SELLING		2.0
-score FOR_INSTANT_ACCESS	1.0
-score PORN_5			3.0
-score MAIL_IN_ORDER_FORM	2.0
-score PRINT_FORM_SIGNATURE      1.1
-score MURKOWSKI_CRUFT		3
-score HUNZA_DIET_BREAD		2
-score HALF_PRICE_OFFER		1
-score NIGERIAN_SCAM_2		2.0
-
-# some manually-tweaked scores
-score X_MSMAIL_PRIORITY_HIGH         1.0
-score EXCUSE_3                       2.8
-score HR_3113                        2.8
-score MAILTO_TO_SPAM_ADDR            1.9
-score MANY_FROMS                     3.4
-score MAILTO_WITH_SUBJ_REMOVE        3.3
-score ONLINE_BIZ_OPS                 3.3
-score PORN_1                         2.9
-score PORN_3                         2.3
-score PARA_A_2_C_OF_1618             4.0
-score SECTION_301                    4.0
-score SMTPD_IN_RCVD                  1.4
-score SPAM_FORM_RETURN               4.1
-score THIS_AINT_SPAM                 3.6
-score UCE_MAIL_ACT                   2.6
-score WEB4PORNO_URL                  3.1
-score WE_HATE_SPAM                   3.0
-score INVALID_MSGID		     3.0
-score MSGID_HAS_NO_HOST		     4.0
-score MISSING_HEADERS		     2.0
-score MSGID_SPAMSIGN_1               4.0
+score STRONG_BUY                     3.7
+score SUBJ_ALL_CAPS                  1.0
+score SUBJ_FULL_OF_8BITS             4.0
+score SUBJ_HAS_UNIQ_ID               3.7
+score SUBJ_REMOVE                    3.9
+score SUPERLONG_LINE                 0.8
+score S_1618                         2.0
+score THIS_AINT_SPAM                 2.0
+score TO_BE_REMOVED_REPLY            2.2
+score TO_EMPTY                       2.5
+score TO_NO_USER                     3.7
+score TRACE_BY_SSN                   4.0
+score TRACKER_ID                     1.7
+score UCE_MAIL_ACT                   2.4
+score UNIVERSITY_DIPLOMAS            2.2
+score UNNEEDED_HTML_ENCODING         2.5
+score VIAGRA                         3.9
+score WANTS_CREDIT_CARD              1.4
+score WEB4PORNO_URL                  3.3
+score WEB_BUGS                       2.0
+score WE_HATE_SPAM                   2.4
+score WE_HONOR_ALL                   3.0
+score WORK_AT_HOME                   3.3
+score WWW_DIRECTFORCEMARKETING_COM   3.7
+score WWW_NETSITESFORFREE_NET        3.2
+score WWW_REMOVEYOU_COM              4.0
+score X_EM_VER_PRESENT               0.4
+score X_MAILER_GIBBERISH             3.2
+score X_MSMAIL_PRIORITY_HIGH         1.4
+score X_PRIORITY_HIGH                1.4
+score YR_MEMBERSHIP_EXCH             4.0
 
 # End of GA-evolved scores.
 
@@ -861,10 +856,11 @@ score USER_IN_BLACKLIST		     10.0
 
 score SUBJ_ENDS_IN_Q_MARK            0.1
 score SUBJ_HAS_Q_MARK                0.1
+score NO_MX_FOR_FROM                 1.8
 score RAZOR_CHECK		     3.0
 score RCVD_IN_RELAYS_ORDB_ORG	     2.0
 score RCVD_IN_OSIRUSOFT_COM	     2.0
-score X_OSIRU_SPAM_SRC		    3.0
+score X_OSIRU_SPAM_SRC		     3.0
 score X_OSIRU_SPAMWARE_SITE	     5.0
 
 # unscored by default -- commercial services.  If you pay for these,

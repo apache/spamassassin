@@ -9,6 +9,7 @@ BALANCE_FOR_LONG
 COPYRIGHT_CLAIMED
 SIRCAM_SIGNATURE
 USER_IN_WHITELIST
+NO_MX_FOR_FROM
 
 INVALID_DATE_NO_TZ
 UNDISC_RECIPS
@@ -26,6 +27,8 @@ RCVD_IN_RELAYS_ORDB_ORG
 RCVD_IN_OSIRUSOFT_COM
 X_OSIRU_SPAM_SRC
 X_OSIRU_SPAMWARE_SITE
+
+PORN_5
 
   );
 
@@ -112,8 +115,13 @@ sub writescores_c {
   foreach my $t (@unmutated_tests) { $is_mutatable{$t} = 0; }
   my $size = (scalar keys %{$scores}) + 1;
 
+  if (!-f 'tmp/ranges.data') {
+    system ("make tmp/ranges.data");
+  }
+
   open (IN, "<tmp/ranges.data")
   	or die "need to run score-ranges-from-freqs first!";
+
   while (<IN>) {
     /^(\S+) (\S+) (\S+)$/ or next;
     $range_lo{$3} = $1+0;
