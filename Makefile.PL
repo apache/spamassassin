@@ -60,6 +60,7 @@ WriteMakefile(
     'PMLIBDIRS' => [ 'lib' ],
 
     'PREREQ_PM' => {
+                        'File::Spec' => 0,
                         'File::Copy' => 0,
                         'Pod::Usage' => 0,
                         'HTML::Parser' => 0,
