@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.557 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.558 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -341,6 +341,9 @@ header T_TOCC_ILLEGAL	ToCc:raw =~ /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\xff]/
 
 # bug 1835
 uri T_PORN_4			/^https?:\/\/[\w\.-]*(?:xxx|(?<!es|ba)(?<!dle|sus)sex|anal(?!og|y[sz])|slut|pussy|(?<!cir)(?<!\bdo)cum(?!ul|be?r|b?en)|nympho|suck|porn|hard-?core|taboo|whore|voyeur|lesbian|gurlpages|naughty|lolita|(?<!thir|four|eigh|nine)(?<!fif|six)(?<!seven)teen|schoolgirl|kooloffer|erotic|lust(?!(?<=illust)(?:rat|rious)|(?<=clust)er)|pant(?:y|ies))[\w-]*\./
+
+# bug 274
+header T_FRIEND_AT_PUBLIC	To =~ /(?:yourdomain|you|your|(?<!re)public)\.(?:com|org|net)/i
 
 # a new ratware-forgery format
 header T_LC_ESMTP_RCVD    Received =~ /^from (?:unknown|\d+\.\d+\.\d+\.\d+) \(\S+\) by \S+ with esmtp; /
