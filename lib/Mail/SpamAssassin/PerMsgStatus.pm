@@ -1925,7 +1925,14 @@ sub generic_base64_decode {
     my $retval;
     eval {
         require MIME::Base64;
+
+        # base64 decoding can produce cruddy warnings we don't care
+        # about.  suppress them here.
+        my $prevwarn = $SIG{__WARN__}; local $SIG{__WARN__} = sub { };
+
         $retval = MIME::Base64::decode_base64($to_decode);
+
+        $SIG{__WARN__} = $prevwarn;
     };
     if ($@) {
         return $self->slow_base64_decode($to_decode);
