@@ -412,3 +412,7 @@ describe T_X_BEENTHERE	X-BeenThere header exists
 # from bug 1206
 body		T_INTL_DRIVERS_LICENSE 	/international driver'?s license/i
 describe	T_INTL_DRIVERS_LICENSE 	International driving license
+
+# from bug 662
+header T_ADDR_FREE		From =~ /\b(?-i:F)ree(?-i:[ A-Z]).*</i
+describe T_ADDR_FREE		From Address contains FREE
