@@ -151,9 +151,7 @@ sub razor_report {
         my $ident = $rc->get_ident
           or adie ("Razor2 reporting requires authentication");
 
-	my $tmptext = $$fulltext;
-	my @msg = (\$tmptext);
-
+	my @msg = (\$fulltext);
         my $objects = $rc->prepare_objects( \@msg )
           or adie ("error in prepare_objects");
         $rc->get_server_info() or adie $rc->errprefix("reportit");
