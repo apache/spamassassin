@@ -1710,7 +1710,7 @@ sub copy_config {
     # we know the main value doesn't need to get copied.
     # also ignore anything plugin related, since users can't change that,
     # and there are usually code references.
-    next if ($k eq 'main' || $k =~ /plugin/);
+    next if ($k eq 'main' || $k =~ /plugin/ || $k eq 'registered_commands');
 
 
     my $i = ref($v);
