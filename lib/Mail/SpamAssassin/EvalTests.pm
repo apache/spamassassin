@@ -19,7 +19,7 @@ use strict;
 use vars qw{
 	$CCTLDS_WITH_LOTS_OF_OPEN_RELAYS
 	$ROUND_THE_WORLD_RELAYERS
-	@PORN_WORDS $WORD_OBFUSCATION_CHARS 
+	$WORD_OBFUSCATION_CHARS 
 };
 
 # sad but true. sort it out, sysadmins!
@@ -41,30 +41,6 @@ $ROUND_THE_WORLD_RELAYERS = qr{(?:net|com|ca)};
 # http://www.isc.org/ds/WWW-200107/. I used both hostcount and domain counts
 # for figuring this. any ccTLD with > about 40000 domains is left out of this
 # regexp.  Then I threw in some unscientific seasoning to taste. ;)
-
-
-# Porn words will each be prefixed with "\b" but not suffixed so as to pick up
-# word ending variations.  if you want \b on the end, be sure to add it
-# yourself.
-@PORN_WORDS = (qr(\blolita\b)i,  qr(\bcum\b)i, qr(\borg[iy])i, qr(\bwild\b)i, qr(\bfuck)i,
-qr(\bspunk\b)i, qr(\bpuss[iy])i, qr(\bhot\b)i, qr(\bteen\b)i,
-qr(\bhottest\b)i, qr(\bhott[iy])i,
-qr(\bvoyeur)i, qr(\ble[sz]b(?:ian|o))i, qr(\banal\b)i, qr(\binterr?acial)i, qr(\basian)i,
-qr(\bamateur)i, qr(\bsexx+\b)i, qr(\bslut)i, qr(\bexplicit\b)i, qr(\bxxx(?:[^x]|\b))i,
-qr(\blick)i, qr(\bsucking\b)i, qr(\bdorm\b)i, qr(\bwebcam\b)i, qr(\bass\b)i,
-qr(\bschoolgirl\b)i, qr(\bstripper\b)i, qr(\bstripping\b)i, qr(\bhorn[yi])i, qr(\berotic)i,
-qr(\boral\b)i, qr(\bpenis\b)i, qr(\bhard.?core\b)i, qr(\bblow.?job)i,
-qr(\bnasty\b)i, qr(\bnastiest\b)i, qr(\bporn\b)i, qr(\bwhore\b)i, qr(\bnaked\b)i,
-qr(\bnude\b)i, qr(\bvirgin\b)i, qr(\bnaught[yi])i, qr(\bgirl)i, qr(\bcelebrity\b)i,
-qr(\bcelebrities\b)i, qr(\bceleb\b)i, qr(\bbabes?\b)i,
-qr(\badult\b)i, qr(\bskank\b)i, qr(\btits?\b)i, qr(\btitties\b)i,
-# jm: catch "s*x", "f*ck" etc.
-qr(\bs[\*\.\-\?]ck)i, qr(\bf[\*\.\-\?]ck)i, qr(\bs[\*\.\-\?]x\b)i
-
-# words to avoid, since they cause FPs: girl, teen, hot, suck, and "sex", believe
-# it or not!
-
-);
 
 $WORD_OBFUSCATION_CHARS = '*_.,/|-+=';
 
@@ -1586,19 +1562,6 @@ sub message_is_habeas_swe {
 # BODY TESTS:
 ###########################################################################
 
-sub porn_word_test {
-    my ($self, $fulltext) = @_;
-    my $hits = 0;
-    foreach my $pat (@PORN_WORDS) {
-        if ($$fulltext =~ /$pat/) {
-          $hits++;
-          dbg ("porn word test: found $pat");
-        }
-        return 1 if ($hits == 3);
-    }
-    return 0;
-}
-
 sub check_for_uppercase {
   my ($self, $body, $min, $max) = @_;
 
@@ -1885,9 +1848,11 @@ sub _check_mime_header {
     $name =~ s/.*\.//;
     $ctype =~ s@/(x-|vnd\.)@/@;
     if (   ($name =~ /^html?$/ && $ctype !~ m@^text/(?:html|xml|plain)@)
-	|| ($name =~ /^jpe?g$/ && $ctype !~ m@^image/p?jpeg@)
+	|| ($name =~ /^jpe?g$/ && $ctype !~ m@^image/p?jpeg@
+                               && $ctype !~ m@^application/mac-binhex@)
 	|| ($name eq "pdf" && $ctype ne "application/pdf")
-	|| ($name eq "gif" && $ctype ne "image/gif")
+	|| ($name eq "gif" && $ctype ne "image/gif"
+                               && $ctype !~ m@^application/mac-binhex@)
 	|| ($name eq "txt" && $ctype !~ m@^text/@)      # text/english is OK, it seems
 	|| ($name eq "vcf" && $ctype ne "text/vcard")
 	|| ($name =~ /^(?:bat|com|exe|pif|scr|swf|vbs)$/ && $ctype !~ m@^application/@)
