@@ -260,7 +260,9 @@ int main(int argc, char **argv){
     if(ret!=EX_OK) goto FAIL;
     get_output_fd(&out_fd);
     if(message_write(out_fd, &m)<0) goto FAIL;
-    if(m.is_spam!=EX_TOOBIG) return m.is_spam;
+
+    if((flags&SPAMC_CHECK_ONLY) && m.is_spam!=EX_TOOBIG) return m.is_spam;
+
     return ret;
 
 FAIL:
