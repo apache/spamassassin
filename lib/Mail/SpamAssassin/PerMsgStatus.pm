@@ -683,13 +683,16 @@ sub get_decoded_stripped_body_text_array {
   # strip HTML tags and entities
   $text =~ s/(?:\&\#0147;|\&\#0148;|\&quot;)/"/gs;
   $text =~ s/\&\#0146;/'/gs;
+  $text =~ s/\&\#82(?:16|17|20|11);//gs;
   $text =~ s/\&[-_a-zA-Z0-9]+;/ /gs;
   $text =~ s/\s+/ /gs;
 
   $text =~ s/<p>/\n\n/gis;	# reinsert para breaks
 
-  $text =~ s/<[a-z0-9]+\b[^>]*>//gis;
-  $text =~ s/<\/[a-z0-9]+>//gis;
+  $text =~ s/<[?!\s]*[:a-z0-9]+\b[^>]*>//gis;
+  $text =~ s/<\/[:a-z0-9]+>//gis;
+
+  #print "JMD $text";
 
   my @textary = split (/^/, $text);
   return \@textary;
