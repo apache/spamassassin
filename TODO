@@ -9,10 +9,6 @@ TODO (ALTERNATIVE UI'S)
   MTA.  This should be easy enough, if the overhead of forking a perl
   interpreter per-message is acceptable.
 
-- For systems with a high mail volume, this overhead may be too high.  In this
-  case, provide a POE-based daemon which processes messages, and a low-overhead
-  C client which provides the interface to that daemon.
-
 - For POP users, write a POE-based daemon which allows POP users to connect and
   retrieve their mail from their ISP, with spam filtering provided by
   SpamAssassin.  In effect, this is a spam-filtering POP proxy.
