@@ -549,3 +549,7 @@ score T_HTML_SHOUTING9            0.01
 
 body T_HTML_MAIL_ONLY             /HTML only email, sorry/i
 
+# catches stuff like "http://www.yahoo.com@0xD5.0xEF.0x8F.0x9D"
+uri T_HEX_HOST	/^https?:\/\/[^\/]*0x[0-9a-fA-F]{2}/
+describe T_HEX_HOST	Looks like an URL with obfuscated hex IP address
+score T_HEX_HOST	0.01
