@@ -261,55 +261,6 @@ tflags T_MAILMAN_REMINDER nice
 
 ########################################################
 
-header   T_NONSENSE_FROM_1      From:addr =~ /[^\W\daeiouy_-]{5}\S*\@/i
-describe T_NONSENSE_FROM_1      From user name appears to be nonsense (1)
-
-header   T_NONSENSE_FROM_2      From:addr =~ /[^\W\daeiouy_-]{6,}\S*\@/i
-describe T_NONSENSE_FROM_2      From user name appears to be nonsense (2)
-
-header   T_NONSENSE_FROM_00_10  eval:nonsense_from_percent('00', '10')
-describe T_NONSENSE_FROM_00_10  0%-10% weird trigraphs in From
-
-header   T_NONSENSE_FROM_10_20  eval:nonsense_from_percent('10', '20')
-describe T_NONSENSE_FROM_10_20  10%-20% weird trigraphs in From
-
-header   T_NONSENSE_FROM_20_30  eval:nonsense_from_percent('20', '30')
-describe T_NONSENSE_FROM_20_30  20%-30% weird trigraphs in From
-
-header   T_NONSENSE_FROM_30_40  eval:nonsense_from_percent('30', '40')
-describe T_NONSENSE_FROM_30_40  30%-40% weird trigraphs in From
-
-header   T_NONSENSE_FROM_40_50  eval:nonsense_from_percent('40', '50')
-describe T_NONSENSE_FROM_40_50  40%-50% weird trigraphs in From
-
-header   T_NONSENSE_FROM_50_60  eval:nonsense_from_percent('50', '60')
-describe T_NONSENSE_FROM_50_60  50%-60% weird trigraphs in From
-
-header   T_NONSENSE_FROM_60_70  eval:nonsense_from_percent('60', '70')
-describe T_NONSENSE_FROM_60_70  60%-70% weird trigraphs in From
-
-header   T_NONSENSE_FROM_70_80  eval:nonsense_from_percent('70', '80')
-describe T_NONSENSE_FROM_70_80  70%-80% weird trigraphs in From
-
-header   T_NONSENSE_FROM_80_90  eval:nonsense_from_percent('80', '90')
-describe T_NONSENSE_FROM_80_90  80%-90% weird trigraphs in From
-
-#header   T_NONSENSE_FROM_90_100 eval:nonsense_from_percent('90', '100')
-#describe T_NONSENSE_FROM_90_100 90%-100% weird trigraphs in From
-
-header   T_NONSENSE_FROM_90_91 eval:nonsense_from_percent('90', '91')
-header   T_NONSENSE_FROM_91_92 eval:nonsense_from_percent('91', '92')
-header   T_NONSENSE_FROM_92_93 eval:nonsense_from_percent('92', '93')
-header   T_NONSENSE_FROM_93_94 eval:nonsense_from_percent('93', '94')
-header   T_NONSENSE_FROM_94_95 eval:nonsense_from_percent('94', '95')
-header   T_NONSENSE_FROM_95_96 eval:nonsense_from_percent('95', '96')
-header   T_NONSENSE_FROM_96_97 eval:nonsense_from_percent('96', '97')
-header   T_NONSENSE_FROM_97_98 eval:nonsense_from_percent('97', '98')
-header   T_NONSENSE_FROM_98_99 eval:nonsense_from_percent('98', '99')
-header   T_NONSENSE_FROM_99_100 eval:nonsense_from_percent('99', '100')
-
-############################################################
-
 body T_HTML_IMAGE_AREA01	eval:html_range('total_image_area','0','1000')
 body T_HTML_IMAGE_AREA02	eval:html_range('total_image_area','1000','5000')
 body T_HTML_IMAGE_AREA03	eval:html_range('total_image_area','10000','20000')
