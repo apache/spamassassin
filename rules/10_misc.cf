@@ -1,0 +1,174 @@
+# SpamAssassin rules file.
+#
+# The format is easy to grok:
+#
+#   report line-of-spam-report-text
+#       (some template items supported are:)
+#       _HITS_: the number of hits the message triggered
+#       _REQD_: the required hits to be considered spam
+#       _SUMMARY_: the full details of what hits were triggered
+#       _VER_: SpamAssassin version
+#       _HOME_: SpamAssassin home URL
+#
+#   header SYMBOLIC_TEST_NAME	header op pattern
+#	(The operations allowed (so far) are: =~  and: !~)
+#       (header can be 'ALL', which returns the text of all headers)
+#       (note that non-appearing headers are returned as the string 'undef')
+#
+#   header SYMBOLIC_TEST_NAME	eval:name_of_eval_method([args])
+#
+#   body SYMBOLIC_TEST_NAME	/pattern/modifiers
+#	(Evaluated for each text or HTML line in the message body.
+#       If you plan to use the default weight (1), you can omit the
+#       SYMBOLIC_TEST_NAME and just use "." instead.
+#
+#   body SYMBOLIC_TEST_NAME	eval:name_of_eval_method([args])
+#	(this is evaluated for the entire message body, not for each line)
+#
+#   full SYMBOLIC_TEST_NAME	/pattern/modifiers
+#	(Evaluated for the entire message body as one string.
+#       If you plan to use the default weight (1), you can omit the
+#       SYMBOLIC_TEST_NAME and just use "." instead.
+#
+#   full SYMBOLIC_TEST_NAME	eval:name_of_eval_method([args])
+#	(this is evaluated for the entire message, headers and all)
+#
+#   describe SYMBOLIC_TEST_NAME Textual description of test
+#       (body pattern tests don't require a description.)
+#
+# # starts a comment, whitespace is not significant.
+#
+###########################################################################
+
+# Default template. Try to keep it under 76 columns (inside the the dots below).
+# Bear in mind that EVERY line will be prefixed with "SPAM: " in order to make
+# it clear what's been added, and allow other filters to *remove* spamfilter
+# modifications, so you lose 6 columns right there.
+#
+#      ......................................................................
+clear-report-template
+report -------------------- Start SpamAssassin results ----------------------
+report This mail is probably spam.  The original message has been altered
+report so you can recognise or block similar unwanted mail in future, using
+report the built-in mail filtering support in your mail reader.
+report 
+report Content analysis details:   (_HITS_ hits, _REQD_ required)
+report _SUMMARY_
+report -------------------- End of SpamAssassin results ---------------------
+#      ......................................................................
+
+###########################################################################
+# and now, a template for spam-trap responses.  If the first few lines
+# begin with "Xxxxxx: " where Xxxxxx is a header, they'll be used as
+# headers.
+
+clear-spamtrap-template
+spamtrap Subject: this address is no longer available
+
+spamtrap [this message has been automatically generated]
+spamtrap 
+spamtrap Please note that this address is no longer in use, and nowadays
+spamtrap receives nothing but unsolicited commercial mail.  Accordingly,
+spamtrap any mail sent to it is added to several spam-tracking databases,
+spamtrap then automatically deleted.
+spamtrap
+spamtrap If you genuinely want to contact the owner of the address, please
+spamtrap re-check your contact lists, or search the web, to find their
+spamtrap current e-mail address.
+spamtrap 
+spamtrap The mail you sent is reproduced in full below, for resending to
+spamtrap the correct address.  Sorry for the inconvenience!
+spamtrap 
+spamtrap [-- Signed: the SpamAssassin mail filter]
+spamtrap 
+
+###########################################################################
+
+# Terse report template.
+#
+#            ......................................................................
+clear-terse-report-template
+terse-report ---- Start SpamAssassin results
+terse-report _HITS_ hits, _REQD_ required;
+terse-report _SUMMARY_
+terse-report ---- End of SpamAssassin results
+#            ......................................................................
+
+###########################################################################
+# Database configuration options.
+#
+# user_scores_dsn MUST be in the form:
+# DBI:databasetype:databasename:hostname:port
+# ex. DBI:mysql:spamassassin:localhost
+#
+# user_scores_sql_username is the authorized username to connect to DSN
+# user_scores_sql_password is the password for the database username
+
+#user_scores_dsn		DBI:mysql:spamassassin:localhost
+#user_scores_sql_username	spam
+#user_scores_sql_password	spamfilter
+
+###########################################################################
+# Default whitelists.  These should be addresses which send mail that
+# is often tagged (incorrectly) as spam; it also helps that they be
+# addresses of big companies with lots of lawyers, so if spammers
+# impersonate them, they'll get into big trouble, so it doesn't provide
+# a shortcut around SpamAssassin.
+
+whitelist_from	billing@networksolutions.com
+whitelist_from  *@fatbrain.com
+whitelist_from  *@email.fatbrain.com
+whitelist_from  *@amazon.com
+whitelist_from  *@amazon.co.uk
+whitelist_from  *@ebay.com
+whitelist_from	*@ora-info.ora.com		# O'Reilly
+whitelist_from  *@walmart.com
+whitelist_from  *@bn.com
+whitelist_from  *@yahoo-inc.com
+whitelist_from  monty@roscom.com
+
+###########################################################################
+# Automatic-whitelist directory, for the default directory-based whitelist
+# backend.  By default, each user has their own, in their ~/.spamassassin
+# directory with mode 0700, but for system-wide SpamAssassin use, you may
+# want to share this across all users; uncomment and customise the below
+# lines.  (Make sure the mode has --x bits set.)
+
+# auto_whitelist_threshold   3
+
+# default: per-user whitelist.  (~ will be replaced by user's home dir.)
+# auto_whitelist_path        ~/.spamassassin/auto-whitelist
+# auto_whitelist_file_mode   0700
+
+# use this for a system-wide whitelist:
+# auto_whitelist_path        /var/spool/spamassassin/auto-whitelist
+# auto_whitelist_file_mode   0777
+
+###########################################################################
+# Default prefs values: users can override these in their 
+# ~/.spamassassin.prefs files.
+
+# How many hits before a mail is considered spam.
+required_hits           5
+
+# How many hits before a mail is automatically reported to blacklisting
+# services like Razor.  Be very careful with this; you really should manually
+# verify the spamminess of a mail before reporting it.
+auto_report_threshold   30
+
+# Mail using languages used in these country codes will not be marked
+# as being possibly spam in a foreign language.
+#
+ok_locales              en
+
+# Some common prefs settings can be set here, to take effect site-wide
+# unless the user override them. See the .prefs file for explanations.
+
+# rewrite_subject       1
+# report_header         0
+# use_terse_report      0
+# defang_mime           1
+# skip_rbl_checks       0
+# check_mx_attempts     3
+# check_mx_delay        5
+
