@@ -309,14 +309,48 @@ body T_NORMAL_HTTP_TO_IP	eval:check_numeric_http()
 ########################################################################
 
 # short message-ids
-header T_MSGID_SHORT_5	MESSAGEID =~ /^.{1,5}$/
-header T_MSGID_SHORT_6	MESSAGEID =~ /^.{1,6}$/
-header T_MSGID_SHORT_7	MESSAGEID =~ /^.{1,7}$/
-header T_MSGID_SHORT_8	MESSAGEID =~ /^.{1,8}$/
-header T_MSGID_SHORT_9	MESSAGEID =~ /^.{1,9}$/
+# 18 long are my first FPs: <8169476@pamho.net>
+# idea: work towards combined rule that looks vaguely like this:
+# header T_MSGID_SHORT	MESSAGEID =~ /<.{1,5}\@|\@.{1,6}>|^.{1,17}$/
+# full id #1
+header T_MSGID_SHORT_05	MESSAGEID =~ /^.{1,5}$/
+header T_MSGID_SHORT_06	MESSAGEID =~ /^.{1,6}$/
+header T_MSGID_SHORT_07	MESSAGEID =~ /^.{1,7}$/
+header T_MSGID_SHORT_08	MESSAGEID =~ /^.{1,8}$/
+header T_MSGID_SHORT_09	MESSAGEID =~ /^.{1,9}$/
 header T_MSGID_SHORT_10	MESSAGEID =~ /^.{1,10}$/
 header T_MSGID_SHORT_11	MESSAGEID =~ /^.{1,11}$/
 header T_MSGID_SHORT_12	MESSAGEID =~ /^.{1,12}$/
+header T_MSGID_SHORT_13	MESSAGEID =~ /^.{1,13}$/
+header T_MSGID_SHORT_14	MESSAGEID =~ /^.{1,14}$/
+header T_MSGID_SHORT_15	MESSAGEID =~ /^.{1,15}$/
+header T_MSGID_SHORT_16	MESSAGEID =~ /^.{1,16}$/
+header T_MSGID_SHORT_17	MESSAGEID =~ /^.{1,17}$/
+# full id #2
+header T_MSGID_SHORT_X03	MESSAGEID =~ /<.{1,3}>/
+header T_MSGID_SHORT_X04	MESSAGEID =~ /<.{1,4}>/
+header T_MSGID_SHORT_X05	MESSAGEID =~ /<.{1,5}>/
+header T_MSGID_SHORT_X06	MESSAGEID =~ /<.{1,6}>/
+header T_MSGID_SHORT_X07	MESSAGEID =~ /<.{1,7}>/
+header T_MSGID_SHORT_X08	MESSAGEID =~ /<.{1,8}>/
+header T_MSGID_SHORT_X09	MESSAGEID =~ /<.{1,9}>/
+header T_MSGID_SHORT_X10	MESSAGEID =~ /<.{1,10}>/
+header T_MSGID_SHORT_X11	MESSAGEID =~ /<.{1,11}>/
+header T_MSGID_SHORT_X12	MESSAGEID =~ /<.{1,12}>/
+header T_MSGID_SHORT_X13	MESSAGEID =~ /<.{1,13}>/
+header T_MSGID_SHORT_X14	MESSAGEID =~ /<.{1,14}>/
+header T_MSGID_SHORT_X15	MESSAGEID =~ /<.{1,15}>/
+# local part
+header T_MSGID_SHORT_A5	MESSAGEID =~ /<.{1,5}\@/
+header T_MSGID_SHORT_A6	MESSAGEID =~ /<.{1,6}\@/
+header T_MSGID_SHORT_A7	MESSAGEID =~ /<.{1,7}\@/
+header T_MSGID_SHORT_A8	MESSAGEID =~ /<.{1,8}\@/
+# domain
+header T_MSGID_SHORT_B4	MESSAGEID =~ /\@.{1,4}>/
+header T_MSGID_SHORT_B5	MESSAGEID =~ /\@.{1,5}>/
+header T_MSGID_SHORT_B6	MESSAGEID =~ /\@.{1,6}>/
+header T_MSGID_SHORT_B7	MESSAGEID =~ /\@.{1,7}>/
+header T_MSGID_SHORT_B8	MESSAGEID =~ /\@.{1,8}>/
 
 # no To or Cc
 header __CC_UNSET	Cc =~ /^UNSET$/ [if-unset: UNSET]
@@ -450,3 +484,25 @@ tflags T_RCVD_IN_WHOIS_HIJACKED_NFH	net
 header T_RCVD_IN_WHOIS_INVALID_NFH	eval:check_rbl('whois-notfirsthop', 'combined-HIB.dnsiplists.completewhois.com.', '127.0.0.4')
 describe T_RCVD_IN_WHOIS_INVALID_NFH	CompleteWhois: sender on invalid whois IP block
 tflags T_RCVD_IN_WHOIS_INVALID_NFH	net
+
+########################################################################
+
+# case matters for this one
+uri T_URI_UPPER_LOWER_01	m{(?i:https?)://([A-Z][a-z]+\.)+\S+\.(?:com|biz|info)}
+uri T_URI_UPPER_LOWER_02	m{(?i:https?)://([A-Z][a-z]+\.){2,}\S+\.(?:com|biz|info)}
+uri T_URI_UPPER_LOWER_03	m{(?i:https?)://([A-Z][a-z]+\.){1,2}\S+\.(?:com|biz|info)}
+uri T_URI_UPPER_LOWER_04	m{(?i:https?)://([A-Z][a-z]+\.)+\S+\.com}
+uri T_URI_UPPER_LOWER_05	m{(?i:https?)://([A-Z][a-z]+\.){2,}\S+\.com}
+uri T_URI_UPPER_LOWER_06	m{(?i:https?)://([A-Z][a-z]+\.){1,2}\S+\.com}
+uri T_URI_UPPER_LOWER_07	m{(?i:https?)://([A-Z][a-z]+\.)+\S+\.[a-z]{2,4}\b}
+uri T_URI_UPPER_LOWER_08	m{(?i:https?)://([A-Z][a-z]+\.){2,}\S+\.[a-z]{2,4}\b}
+uri T_URI_UPPER_LOWER_09	m{(?i:https?)://([A-Z][a-z]+\.){1,2}\S+\.[a-z]{2,4}\b}
+uri T_URI_UPPER_LOWER_10	m{(?i:https?)://([A-Z][a-z]+\.)+[A-Za-z\d-]+\.(?:com|biz|info)}
+uri T_URI_UPPER_LOWER_11	m{(?i:https?)://([A-Z][a-z]+\.){2,}[A-Za-z\d-]+\.(?:com|biz|info)}
+uri T_URI_UPPER_LOWER_12	m{(?i:https?)://([A-Z][a-z]+\.){1,2}[A-Za-z\d-]+\.(?:com|biz|info)}
+uri T_URI_UPPER_LOWER_13	m{(?i:https?)://([A-Z][a-z]+\.)+[A-Za-z\d-]+\.com}
+uri T_URI_UPPER_LOWER_14	m{(?i:https?)://([A-Z][a-z]+\.){2,}[A-Za-z\d-]+\.com}
+uri T_URI_UPPER_LOWER_15	m{(?i:https?)://([A-Z][a-z]+\.){1,2}[A-Za-z\d-]+\.com}
+uri T_URI_UPPER_LOWER_16	m{(?i:https?)://([A-Z][a-z]+\.)+[A-Za-z\d-]+\.[a-z]{2,4}\b}
+uri T_URI_UPPER_LOWER_17	m{(?i:https?)://([A-Z][a-z]+\.){2,}[A-Za-z\d-]+\.[a-z]{2,4}\b}
+uri T_URI_UPPER_LOWER_18	m{(?i:https?)://([A-Z][a-z]+\.){1,2}[A-Za-z\d-]+\.[a-z]{2,4}\b}
