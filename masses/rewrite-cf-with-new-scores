@@ -9,8 +9,13 @@ if (!defined $newscores || $scoreset < 0 || $scoreset >= $NUM_SCORESETS ) {
   die "usage: rewrite-cf-with-new-scores scoreset oldscores.cf newscores.cf\n";
 }
 
-system ("./parse-rules-for-masses") and die;
-require "./tmp/rules.pl";
+system ("./parse-rules-for-masses -s $scoreset") and die;
+if (-e "tmp/rules.pl") {
+  require "./tmp/rules.pl";
+}
+else {
+  die "parse-rules-for-masses had no error but no tmp/rules.pl!?!";
+}
 
 # now read the evolved scores
 my @gascoreorder = ();
