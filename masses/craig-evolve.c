@@ -220,7 +220,7 @@ double evaluate(PGAContext *ctx, int p, int pop)
    myscores = (float *)PGAGetIndividual(ctx, p, pop)->chrom;
    // Process messages 4 at a time
    for(i=0; i<num_tests/4-1; i++)
-  {
+   {
       k = i*4;
       y = zero;
       num_hit = 0;
@@ -228,9 +228,9 @@ double evaluate(PGAContext *ctx, int p, int pop)
       {
          if(num_tests_hit[k+j] > num_hit)
             num_hit = num_tests_hit[k+j];
-  }
+      }
       for(j=0; j<num_hit; j++)
-  {
+      {
          // Get the score for each of the 4 messages
          for(h=0; h<4; h++)
          {
@@ -250,33 +250,33 @@ double evaluate(PGAContext *ctx, int p, int pop)
          if(is_spam[k+j])
          {
             if(xfer[j] >= threshold)
-    {
-      // Good positive
-      ga_yy++;
+            {
+               // Good positive
+               ga_yy++;
                yyscore += xfer[j];
-    }
-    else
-    {
-      // False negative
-      ga_yn++;
+            }
+            else
+            {
+               // False negative
+               ga_yn++;
                ynscore += xfer[j];
-    }
-  }
-  else
-  {
+            }
+         }
+         else
+         {
             if(xfer[j] >= threshold)
-    {
-      // False positive
-      ga_ny++;
+            {
+               // False positive
+               ga_ny++;
                nyscore += xfer[j];
-    }
-    else
-    {
-      // Good negative
-      ga_nn++;
+            }
+            else
+            {
+               // Good negative
+               ga_nn++;
                nnscore += xfer[j];
-    }
-  }
+            }
+         }
       }
    }
    if(justCount)
@@ -394,7 +394,7 @@ float score_msg(float *myscores, int i)
       ga_nn++;
       nnscore += msg_score; // Each good negative means nnscore += less than 5
     }
-}
+  }
 
   return msg_score;
 }

@@ -42,7 +42,6 @@ Where appropriate, default values are listed in parentheses.
 
 package Mail::SpamAssassin::Conf;
 
-use Carp;
 use strict;
 
 use vars	qw{
@@ -51,6 +50,7 @@ use vars	qw{
 	$type_rawbody_tests $type_rawbody_evals 
 	$type_uri_tests $type_uri_evals
 	$type_rbl_evals $type_rbl_res_evals $type_meta_tests
+        $VERSION
 };
 
 @ISA = qw();
@@ -68,6 +68,8 @@ $type_uri_evals  = 110;
 $type_rbl_evals  = 120;
 $type_rbl_res_evals  = 121;
 $type_meta_tests = 122;
+
+$VERSION = 'bogus';     # avoid CPAN.pm picking up version strings later
 
 ###########################################################################
 
@@ -574,10 +576,10 @@ for you, set this to 1.
       $self->{skip_rbl_checks} = $1+0; next;
     }
 
-=item check_mx_attempts n	(default: 3)
+=item check_mx_attempts n       (default: 2)
 
-By default, SpamAssassin checks the From: address for a valid MX three times,
-waiting 5 seconds each time.
+By default, SpamAssassin checks the From: address for a valid MX this many
+times, waiting 5 seconds each time.
 
 =cut
 
@@ -1130,14 +1132,14 @@ Default:
   "relays.osirusoft.com." => "127.0.0.3" };
 
 WARNING!!! When passing a reference to a hash, you need to put the whole hash in
-one line for the parser to read it correctly (you can check with spamassassin -D
-< mesg)
+one line for the parser to read it correctly (you can check with 
+C<< spamassassin -D < mesg >>)
 
 Set this to what your RBLs return for dialup IPs
 It is used by dialup-firsthop and relay-firsthop rules so that you can match
 DUL codes and compensate DUL checks with a negative score if the IP is a dialup
 IP the mail originated from and it was properly relayed by a hop before reaching
-you (hopefully not your secondary MX :-D)
+you (hopefully not your secondary MX :-)
 The trailing "-firsthop" is magic, it's what triggers the RBL to only be run
 on the originating hop
 The idea is to not penalize (or penalize less) people who properly relayed
@@ -1417,7 +1419,7 @@ Currently this is the same value Razor itself uses: C<~/razor.conf>.
 Specify additional options to the dccproc(8) command. Please note that only
 [A-Z -] is allowed (security).
 
-The default is '-R'
+The default is C<-R>
 
 =cut
 

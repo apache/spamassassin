@@ -363,7 +363,8 @@ typos and rules that do not compile correctly.  Exits immediately with
 =item B<-W>, B<--add-to-whitelist>
 
 Add all email addresses, in the headers and body of the mail message read from
-STDIN, to the automatic whitelist.
+STDIN, to the automatic whitelist.  Note that you must be running C<spamassassin>
+or C<spamd> with the B<-a> switch for this to work.
 
 =item B<-R>, B<--remove-from-whitelist>
 
@@ -373,6 +374,8 @@ to remove a single address you have to get creative, eg:
 
 C<echo 'From: email@address.domain' | spamassassin -R> or
 C<echo -e '\r\nemail@address.domain' | spamassassin -R>
+
+Note that you must be running C<spamassassin> or C<spamd> with the B<-a> switch.
 
 =item B<-w> I<fromaddr>, B<--warning-from>=I<fromaddr>
 

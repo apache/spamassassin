@@ -91,10 +91,11 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.120 2002/09/04 18:41:34 jmason Exp $'))[2 .. 5, 8]));
-# If you hacked up your SA, add a token to identify it here. Eg.: I use "mss<number>",
-# <number> increasing with every hack. Deersoft might want to use "pro" :o)
-# "cvs" is added automatically if this file is tagged as 'Exp'erimental.
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.121 2002/09/10 14:31:26 jmason Exp $'))[2 .. 5, 8]));
+
+# If you hacked up your SA, add a token to identify it here. Eg.: I use
+# "mss<number>", <number> increasing with every hack.
+# Deersoft might want to use "pro" :o)
 @EXTRA_VERSION = qw();
 
 if (defined $IS_DEVEL_BUILD) {
@@ -732,7 +733,8 @@ sub read_cf {
       open (IN, "<".$file) or warn "cannot open \"$file\": $!\n", next;
       $txt .= "file start $file\n";     # let Conf know
       $txt .= join ('', <IN>);
-      $txt .= "file end $file\n";
+      # add an extra \n in case file did not end in one.
+      $txt .= "\nfile end $file\n";     
       close IN;
     }
 

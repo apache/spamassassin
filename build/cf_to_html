@@ -3,15 +3,25 @@
 # This is purely used to generate a page on the website; it's not intended
 # to be distributed or installed.
 
-my $tmpl = q{<tr __BGCOLOR__><td><strong>__TYPE__</strong></td><td><font size=-1>__DESCRIPTION__</font></td><td><font size=-1>__NAME__</font></td><td>__SCORE__</td></tr>};
+use HTML::Entities;
+
+my $tmpl = q{<tr __BGCOLOR__><td><strong>__TYPE__</strong></td>
+<td><font size=-1>__LANG__</font></td>
+<td><font size=-1>__DESCRIPTION__</font></td>
+<td><font size=-1>__NAME__</font></td><td>__SCORE__</td></tr>};
 
 while (<>) {
-  s/#.*$//g; s/^\s+//; s/\s+$//;
+  s/(?<!\\)#.*$//; # remove comments
+  s/^\s+//; s/\s+$//;
+
+  my $lang ='';
+  if (s/^lang\s+(\S+)\s+//) { $lang = $1; }
 
   if (/^(header|body|rawbody|uri|full|describe)\s+(\S+)\s+(.+)$/) {
     if (!defined $test{$2}) {
       push (@testnames, $2);
       $type{$2} = $1;
+      $lang{$2} = $lang;
     }
     $test{$2} = $3;
   }
@@ -26,11 +36,9 @@ foreach my $t (@testnames) {
   $_ = $tmpl;
   $test = $test{$t};
 
-  $test =~ s,&,&amp;,gs;	# protect HTML
-  $test =~ s,<,&lt;,gs;
-  $test =~ s,>,&gt;,gs;
   $test =~ s,\|,| ,gs;		# allow line breaks on pipes
   $test =~ s,\$,(dollar) ,gs;
+  $test = HTML::Entities::encode ($test);
 
   my $bgcolor = '';
   if ($n % 2 == 0) { $bgcolor = ' bgcolor=#ccffcc'; }
@@ -39,6 +47,7 @@ foreach my $t (@testnames) {
   s/__NAME__/$t/gs;
   s/__DESCRIPTION__/$test/gs;
   s/__TYPE__/$type{$t}/gs;
+  s/__LANG__/$lang{$t}/gs;
   s/__SCORE__/$score{$t} or 1/ges;
   print;
 }

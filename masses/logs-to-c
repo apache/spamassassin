@@ -1,21 +1,24 @@
 #!/usr/bin/perl -w
 
 use Getopt::Long;
-use vars qw($opt_cffile $opt_count);
+use vars qw($opt_cffile $opt_count $opt_lambda $opt_threshold);
 
-GetOptions("cffile=s", "count");
+GetOptions("cffile=s", "count", "lambda=s", "threshold=s");
 my $argcffile = $opt_cffile;
 
 my $justcount = 0;
 if ($opt_count) { $justcount = 1; }
 
 my $threshold = 5;
+if ($opt_threshold) { $threshold = $opt_threshold; }
+
 my $nybias = 10;
 
 # lambda value for TCR equation, indicating the "cost" of recovering
 # from an FP.  The values are: 1 = tagged only, 9 = mailed back to
 # sender asking for token (TMDA style), 999 = deleted outright
 my $lambda = 9;
+if ($opt_lambda) { $lambda = $opt_lambda; }
 
 my %is_spam = ();
 my %tests_hit = ();

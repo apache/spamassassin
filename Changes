@@ -1,3 +1,66 @@
+2002-09-05 18:58  jmason
+
+        * configure, configure.in: make configure call perl Makefile.PL, if
+        that has not happened yet
+
+2002-09-05 18:53  jmason
+
+        * MANIFEST, old/Changes.before-2002-06-18.gz: moved old changelog
+        to 'old' subdir, added 2 tests
+
+2002-09-05 18:53  jmason
+
+        * old/Changes.before-2002-06-18.gz: file
+        Changes.before-2002-06-18.gz was initially added on branch b2_4_0.
+
+2002-09-05 17:53  jmason
+
+        * Changes, build/update_devel: updated build
+
+2002-09-05 17:52  jmason
+
+        * spamassassin.spec: updated spec file so rules files do not appear
+        as .rpmsave/.rpmnew
+
+2002-09-05 17:17  jmason
+
+        * lib/Mail/SpamAssassin/Conf.pm, spamd/spamd.raw, t/SATest.pm,
+        t/spamd_maxchildren.t, t/spamd_parallel.t: fixed spamd -m argument
+
+2002-09-05 17:17  jmason
+
+        * t/spamd_maxchildren.t: file spamd_maxchildren.t was initially
+        added on branch b2_4_0.
+
+2002-09-05 17:17  jmason
+
+        * t/spamd_parallel.t: file spamd_parallel.t was initially added on
+        branch b2_4_0.
+
+2002-09-05 14:05  matt_sergeant
+
+        * lib/Mail/SpamAssassin/Conf.pm: pod fixes to make it pass on
+        5.00503
+
+2002-09-05 13:52  jmason
+
+        * masses/mass-find-nonspam: [no log message]
+
+2002-09-05 13:45  jmason
+
+        * masses/mass-find-nonspam: added mass-find-nonspam script
+
+2002-09-05 13:13  jmason
+
+        * lib/Mail/SpamAssassin.pm, rules/50_scores.cf: score for
+        MAILER_DAEMON forced to -0.5; bug reading config files with missing
+        newline at end fixed
+
+2002-09-05 10:26  zelgadis
+
+        * rules/: 20_compensate.cf, regression_tests.cf: Bug #831: Improve
+        EMAIL_ATTRIBUTION
+
 2002-09-04 22:58  quinlan
 
 	* rules/: 20_compensate.cf, 20_compensate.cf: bug 823: improve

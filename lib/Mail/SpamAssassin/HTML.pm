@@ -1,4 +1,4 @@
-#
+# $Id: HTML.pm,v 1.10 2002/09/10 14:31:27 jmason Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -11,9 +11,9 @@ use HTML::Parser 3.00 ();
 
 sub html_tag {
   my ($self, $tag, $attr, $num) = @_;
-
+  
   $self->{html_inside}{$tag} += $num;
-
+  
   if ($num == 1) {
     $self->html_format($tag, $attr, $num);
     $self->html_uri($tag, $attr, $num);

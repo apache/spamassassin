@@ -2,6 +2,10 @@ AC_INIT(Makefile.PL)
 
 AC_CONFIG_HEADER(config.h)
 
+if test -f Makefile.PL -a ! -f Makefile ; then
+  perl Makefile.PL || exit 1
+fi
+
 AC_PROG_CC
 
 dnl TODO: do we want these, too?
