@@ -658,10 +658,31 @@ sub _check_whitelist {
   my ($self, $list, $addr) = @_;
   $addr = lc $addr;
   if (defined ($list->{$addr})) { return 1; }
-
   study $addr;
   foreach my $regexp (values %{$list}) {
-    if ($addr =~ /$regexp/i) { return 1; }
+    if ($addr =~ /$regexp/i) {
+        # Address in the whitelist, but lets just check the last two parts of the domain is in the received headers...
+        my $domain = $regexp;
+        $domain =~ s/.*\@//;
+        $domain =~ s/^\.\*//g;
+        $domain =~ s/\$\)$//;
+        $domain =~ s/\\//g;
+        if ($domain =~ /.*\..*\./ && $domain =~ /(\w{4,}\.\w+)$/) {
+            # more than 4 chars at end, probably not a country code
+            # and more the 1 dots
+            $domain = $1;
+        }
+        # warn("Looking for $domain\n");
+        if ($domain) {
+            my $rcvd = $self->get('Received');
+            if ($rcvd =~ /from.*\b\Q$domain\E.*[\[\(][0-9]+\.[0-9]+\.[0-9]+\.[0-9]+[\]\)].*\bby\b/) {
+                # warn("Found it.\n");
+                return 1;
+            }
+            return 0;
+        }
+        return 1;
+    }
   }
 
   return 0;
