@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.579 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.580 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -285,10 +285,10 @@ meta T_FORGED_MUA_EUDORA          (__EUDORA_MUA && !__EUDORA_MSGID && !__UNUSABL
 # rule to compare against MIME_HTML_ONLY
 # (note similar rule: MIME_HTML_ONLY_MULTI)
 header __CTYPE_MULTIPART_MIXED	Content-Type =~ /multipart\/mixed/i
-meta T_MIME_HTML_ONLY_MULTI_MIXED	(__CTYPE_MULTIPART_MIXED && __MIME_HTML_ONLY)
+meta T_MIME_HTML_ONLY_MULTI_MIXED	(__CTYPE_MULTIPART_MIXED && MIME_HTML_ONLY)
 #
 header __CTYPE_MULTIPART_OTHER	Content-Type =~ /multipart\/(?!mixed)(?!alternative)/i
-meta T_MIME_HTML_ONLY_MULTI_OTHER	(__CTYPE_MULTIPART_OTHER && __MIME_HTML_ONLY)
+meta T_MIME_HTML_ONLY_MULTI_OTHER	(__CTYPE_MULTIPART_OTHER && MIME_HTML_ONLY)
 
 ######################################################################
 
