@@ -2506,6 +2506,23 @@ sub get_envelope_from {
 
   my $envf;
 
+  # use the "envelope-sender" string found in the Received headers,
+  # if possible... use the last untrusted header, in case there's
+  # trusted headers.
+  my $lasthop = $self->{relays_untrusted}->[0];
+  if (!defined $lasthop) {
+    # no untrusted headers?  in that case, the message is ALL_TRUSTED.
+    # use the first trusted header (ie. the oldest, originating one).
+    $lasthop = $self->{relays_trusted}->[-1];
+  }
+
+  if (defined $lasthop) {
+    $envf = $lasthop->{envfrom};
+    if ($envf && ($envf =~ /\@/)) {
+      goto ok;
+    }
+  }
+
   # Use the 'envelope-sender-header' header that the user has specified.
   # We assume this is correct, *even* if the fetchmail/X-Sender screwup
   # appears.
