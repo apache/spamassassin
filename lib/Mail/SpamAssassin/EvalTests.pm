@@ -2670,7 +2670,7 @@ sub check_for_mizspeeling_ratware {
   my($self) = @_;
 
   my $id = $self->get ('MESSAGEID');
-  return 0 unless ($id =~ /^<[0-9]{14}\.[0-9a-zA-Z]{12}\@([a-z]+\.[a-z]+)>/);
+  return 0 unless ($id =~ /^<[0-9]{14}\.[0-9a-zA-Z]{12}\@([a-z\.]+\.[a-z]+)>/);
 
   my $fakehost = $1;
 
