@@ -202,6 +202,15 @@ if (defined $opt{'pidfile'}) {
 
 my $orighome;
 if (defined $ENV{'HOME'}) {
+  if ( exists $opt{'username'} ) {  # spamd is going to run as another user, so reset $HOME
+    if ( my $nh = (getpwnam($opt{'username'}))[7] ) {
+      $ENV{'HOME'} = $nh;
+    }
+    else {
+      die "Can't determine home directory for user '".$opt{'username'}."'!\n";
+    }
+  }
+
   $orighome = $ENV{'HOME'};   # keep a copy for use by Razor, Pyzor etc.
   delete $ENV{'HOME'};        # we do not want to use this when running spamd
 }
