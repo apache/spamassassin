@@ -24,66 +24,67 @@
 # Please do not add unmoderated public mailing lists here.  They are
 # too easily abused by spammers.
 
-whitelist_from_rcvd  billing@networksolutions.com           networksolutions.com
-whitelist_from_rcvd  outbound-response@networksolutions.com networksolutions.com
-whitelist_from_rcvd  hostmaster@internic.net                internic.net
-whitelist_from_rcvd  support@register.com                   register.com
-whitelist_from_rcvd  nytdirect@nytimes.com                  nytimes.com
-whitelist_from_rcvd  petitions@petitiononline.com           petitiononline.com
+def_whitelist_from_rcvd  billing@networksolutions.com           networksolutions.com
+def_whitelist_from_rcvd  outbound-response@networksolutions.com networksolutions.com
+def_whitelist_from_rcvd  hostmaster@internic.net                internic.net
+def_whitelist_from_rcvd  support@register.com                   register.com
+def_whitelist_from_rcvd  nytdirect@nytimes.com                  nytimes.com
+def_whitelist_from_rcvd  petitions@petitiononline.com           petitiononline.com
 
-whitelist_from_rcvd  *@amazon.com                           amazon.com
-whitelist_from_rcvd  *@*.amazon.com                         amazon.com
-whitelist_from_rcvd  *@amazon.co.uk                         amazon.com
-whitelist_from_rcvd  *@*.amazon.co.uk                       amazon.com
-whitelist_from_rcvd  *@ora.com		                    oreilly.com
-whitelist_from_rcvd  *@*.ora.com                            oreilly.com
-whitelist_from_rcvd  *@walmart.com                          walmart.com
-whitelist_from_rcvd  *@bn.com                               bn.com
-whitelist_from_rcvd  *@online.telstra.com.au                telstra.com.au
+def_whitelist_from_rcvd  *@amazon.com                           amazon.com
+def_whitelist_from_rcvd  *@*.amazon.com                         amazon.com
+def_whitelist_from_rcvd  *@amazon.co.uk                         amazon.com
+def_whitelist_from_rcvd  *@*.amazon.co.uk                       amazon.com
+def_whitelist_from_rcvd  *@ora.com		                    oreilly.com
+def_whitelist_from_rcvd  *@*.ora.com                            oreilly.com
+def_whitelist_from_rcvd  *@walmart.com                          walmart.com
+def_whitelist_from_rcvd  *@bn.com                               bn.com
+def_whitelist_from_rcvd  *@online.telstra.com.au                telstra.com.au
 
-whitelist_from_rcvd  *@yahoo-inc.com                        yahoo-inc.com
-whitelist_from_rcvd  *@mypoints.com                         mypoints.com
-whitelist_from_rcvd  *@*.mypoints.com                       mypoints.com
-whitelist_from_rcvd  *@orbitz.com                           wm.orbitz.com
-whitelist_from_rcvd  *@paypal.com                           paypal.com
+def_whitelist_from_rcvd  *@yahoo-inc.com                        yahoo-inc.com
+def_whitelist_from_rcvd  *@mypoints.com                         mypoints.com
+def_whitelist_from_rcvd  *@*.mypoints.com                       mypoints.com
+def_whitelist_from_rcvd  *@orbitz.com                           wm.orbitz.com
+def_whitelist_from_rcvd  *@paypal.com                           paypal.com
 
 # bugtraq: can contain malicious Javascript etc.
-whitelist_from_rcvd  *@securityfocus.com                    securityfocus.com
-whitelist_from_rcvd  *@LISTSERV.NTBUGTRAQ.COM		    lsoft.com
+def_whitelist_from_rcvd  *@securityfocus.com                    securityfocus.com
+def_whitelist_from_rcvd  *@LISTSERV.NTBUGTRAQ.COM		    lsoft.com
 
-whitelist_from_rcvd  freshmeat-news-admin@lists.freshmeat.net  freshmeat.net
-whitelist_from_rcvd  *@mailer.whitehat.com                     whitehat.com
-whitelist_from_rcvd  *@mediaunspun.imakenews.net               imakenews.com
-whitelist_from_rcvd  *@spamex.com                              spamex.com
+def_whitelist_from_rcvd  freshmeat-news-admin@lists.freshmeat.net  freshmeat.net
+def_whitelist_from_rcvd  *@mailer.whitehat.com                     whitehat.com
+def_whitelist_from_rcvd  *@mediaunspun.imakenews.net               imakenews.com
+def_whitelist_from_rcvd  *@spamex.com                              spamex.com
 
-whitelist_from_rcvd  *enotify@usenix.org                    voyager.usenix.org
+def_whitelist_from_rcvd  *enotify@usenix.org                    voyager.usenix.org
 
 # sender of Cringley newsletter
-whitelist_from_rcvd *@bdcimail.com                          mailcontrol.bellevuedata.com
+def_whitelist_from_rcvd *@bdcimail.com                          mailcontrol.bellevuedata.com
 # internet.com lists
-whitelist_from_rcvd listsupport@internet.com                lyris.net
+def_whitelist_from_rcvd listsupport@internet.com                lyris.net
 
 # Silicon.com newslettters - we see thousands of these
-whitelist_from_rcvd *@silicon.com                           lists.nmtv.net
+def_whitelist_from_rcvd *@silicon.com                           lists.nmtv.net
 
 # FT.com newsletters
-whitelist_from_rcvd *@newsbyemail.ft.com                    lodo.exactis.com
+def_whitelist_from_rcvd *@newsbyemail.ft.com                    lodo.exactis.com
 
 # C|Net news.com newsletters
-whitelist_from_rcvd *@newsletter.online.com                 cnet.com
+def_whitelist_from_rcvd *@newsletter.online.com                 cnet.com
 
 # Friends re-united (popular UK old-school-network)
-whitelist_from_rcvd *@friendsreunited.co.uk                 friendsreunited.co.uk
+def_whitelist_from_rcvd *@friendsreunited.co.uk                 friendsreunited.co.uk
 
 # RFC Editor mails
-whitelist_from_rcvd rfc-editor@rfc-editor.org		    isi.edu
+def_whitelist_from_rcvd rfc-editor@rfc-editor.org		    isi.edu
 
 # Verisign: bug 1056
-whitelist_from_rcvd *@*.nsi-direct.com		 	    e-dialog.com
+def_whitelist_from_rcvd *@*.nsi-direct.com		 	    e-dialog.com
 
 # bug 1348
-whitelist_from_rcvd *@warehouse.com			    warehouse.com
-whitelist_from_rcvd *@enews.buy.com			    enews.buy.com
-whitelist_from_rcvd *@palm.m0.net			    palm.m0.net
-whitelist_from_rcvd *@handspring.4at1.com		    handspring.4at1.com
-whitelist_from_rcvd *@*.efax.com			    efax.com
+def_whitelist_from_rcvd *@warehouse.com			    warehouse.com
+def_whitelist_from_rcvd *@enews.buy.com			    enews.buy.com
+def_whitelist_from_rcvd *@palm.m0.net			    palm.m0.net
+def_whitelist_from_rcvd *@handspring.4at1.com		    handspring.4at1.com
+def_whitelist_from_rcvd *@*.efax.com			    efax.com
+

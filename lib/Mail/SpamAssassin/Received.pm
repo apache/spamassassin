@@ -1,4 +1,4 @@
-# $Id: Received.pm,v 1.21 2003/06/10 01:41:28 jmason Exp $
+# $Id: Received.pm,v 1.22 2003/06/10 05:06:35 jmason Exp $
 
 # ---------------------------------------------------------------------------
 
@@ -175,16 +175,6 @@ sub parse_received_headers {
 
   chop ($self->{relays_trusted_str});	# remove trailing ws
   chop ($self->{relays_untrusted_str});	# remove trailing ws
-
-  # now pick out the first untrusted relay for use as the semi-trusted
-  # relay string.  TODO: commented, since I think we can do this in
-  # regexps easily enough.
-  # if (scalar @{$self->{relays_untrusted}} > 0) {
-  # $self->{relays_semitrusted_str} =
-  # $self->{relays_untrusted}->[0]->{as_string};
-  # } else {
-  # $self->{relays_semitrusted_str} = '';
-  # }
 
   # OK, we've now split the relay list into trusted and untrusted.
 

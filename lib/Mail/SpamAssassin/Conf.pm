@@ -443,19 +443,38 @@ e.g.
 
 Use this to supplement the whitelist_from addresses with a check against the
 Received headers. The first parameter is the address to whitelist, and the
-second is a domain to match in the Received headers.  This domain does not
-allow globbing, and must be followed by a numeric IP address in brackets
-in the Received headers.
+second is a string to match the relay's rDNS.
+
+This string is matched against the reverse DNS lookup used during the handover
+from the untrusted internet to your trusted network's mail exchangers.  It can
+either be the full hostname, or the domain component of that hostname.  In
+other words, if the host that connected to your MX had an IP address that
+mapped to 'sendinghost.spamassassin.org', you should specify
+C<sendinghost.spamassassin.org> or just C<spamassassin.org> here.
+
+Note that this requires that C<trusted_networks> be correct.  For simple
+cases, it will be, but for a complex network, you may get better results
+by setting that parameter.
 
 e.g.
 
   whitelist_from_rcvd joe@example.com  example.com
   whitelist_from_rcvd *@axkit.org      sergeant.org
 
+=item def_whitelist_from_rcvd addr@lists.sourceforge.net sourceforge.net
+
+Same as C<whitelist_from_rcvd>, but used for the default whitelist entries
+in the SpamAssassin distribution.  The whitelist score is lower, because
+these are often targets for spammer spoofing.
+
 =cut
 
     if (/^whitelist_from_rcvd\s+(\S+)\s+(\S+)$/) {
       $self->add_to_addrlist_rcvd ('whitelist_from_rcvd', $1, $2);
+      next;
+    }
+    if (/^def_whitelist_from_rcvd\s+(\S+)\s+(\S+)$/) {
+      $self->add_to_addrlist_rcvd ('def_whitelist_from_rcvd', $1, $2);
       next;
     }
 
@@ -465,6 +484,7 @@ Used to override a default whitelist_from_rcvd entry, so for example a
 distribution whitelist_from_rcvd can be overriden in a local.cf file,
 or an individual user can override a whitelist_from_rcvd entry in
 their own C<user_prefs> file.
+
 The specified email address has to match exactly the address previously
 used in a whitelist_from_rcvd line.
 
@@ -477,6 +497,7 @@ e.g.
 
     if (/^unwhitelist_from_rcvd\s+(.+)$/) {
       $self->remove_from_addrlist_rcvd('whitelist_from_rcvd', split (' ', $1));
+      $self->remove_from_addrlist_rcvd('def_whitelist_from_rcvd', split (' ', $1));
       next;
     }
 
@@ -1318,6 +1339,25 @@ Examples:
 This operates additively, so a C<trusted_networks> line after another one
 will result in all those networks becoming trusted.  To clear out the
 existing entries, use C<clear_trusted_networks>.
+
+SpamAssassin includes code to infer your trusted networks on the fly, so
+this may not be necessary.  This inference works as follows:
+
+=over 4
+
+=item if the 'from' IP address is on the same /16 network as the top Received
+line's, it's trusted
+
+=item if the address of the 'from' host is in a reserved network range,
+then it's trusted
+
+=item if any addresses of the 'by' host is in a reserved network range,
+then it's trusted
+
+=back
+
+(Thanks to Scott Banister and Andrew Flury for the inspiration for this
+algorithm.)
 
 =cut
 

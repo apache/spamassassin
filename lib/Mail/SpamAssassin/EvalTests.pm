@@ -889,21 +889,34 @@ sub check_from_in_whitelist {
 
 ###########################################################################
 
+sub check_from_in_default_whitelist {
+  my ($self) = @_;
+  local ($_);
+  foreach $_ ($self->all_from_addrs()) {
+    if ($self->_check_whitelist_rcvd ($self->{conf}->{def_whitelist_from_rcvd}, $_)) {
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
+###########################################################################
+
 sub _check_whitelist_rcvd {
   my ($self, $list, $addr) = @_;
+
+  # we can only match this if we have at least 1 untrusted header
+  return unless ($self->{num_relays_untrusted} > 0);
+  my $lastunt = $self->{relays_untrusted}->[0];
+  my $rdns = $lastunt->{lc_rdns};
+
   $addr = lc $addr;
-  # study $addr; # study isn't worth it for strings this size.
   foreach my $white_addr (keys %{$list}) {
     my $regexp = $list->{$white_addr}{re};
     my $domain = $list->{$white_addr}{domain};
-    # warn("checking $addr against $regexp + $domain\n");
-    if ($addr =~ /$regexp/i) {
-      # warn("Looking for $domain\n");
-      my $rcvd = $self->get('Received');
-      if ($rcvd =~ /from.*\b\Q$domain\E.*[\[\(][0-9]+\.[0-9]+\.[0-9]+\.[0-9]+[\]\)].*\bby\b/) {
-        # warn("Found it.\n");
-        return 1;
-      }
+    if ($addr =~ /${regexp}/i && $rdns =~ /(?:^|\.)\Q${domain}\E$/) {
+      return 1;
     }
   }
 
