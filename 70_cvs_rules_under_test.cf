@@ -422,12 +422,36 @@ body T_HTML_IMAGE_WEB_BUGS_2	eval:html_test('t_image_web_bugs_2')
 body T_HTML_IMAGE_WEB_BUGS_3	eval:html_test('t_image_web_bugs_3')
 body T_HTML_IMAGE_WEB_BUGS_4	eval:html_test('t_image_web_bugs_4')
 body T_HTML_IMAGE_WEB_BUGS_5	eval:html_test('t_image_web_bugs_5')
+body T_HTML_IMAGE_WEB_BUGS_6	eval:html_test('t_image_web_bugs_6')
+body T_HTML_IMAGE_WEB_BUGS_7	eval:html_test('t_image_web_bugs_7')
+body T_HTML_IMAGE_WEB_BUGS_8	eval:html_test('t_image_web_bugs_8')
+body T_HTML_IMAGE_WEB_BUGS_9	eval:html_test('t_image_web_bugs_9')
+body T_HTML_IMAGE_WEB_BUGS_10	eval:html_test('t_image_web_bugs_10')
+body T_HTML_IMAGE_WEB_BUGS_11	eval:html_test('t_image_web_bugs_11')
+body T_HTML_IMAGE_WEB_BUGS_6B	eval:html_test('t_image_web_bugs_6b')
+body T_HTML_IMAGE_WEB_BUGS_7B	eval:html_test('t_image_web_bugs_7b')
+body T_HTML_IMAGE_WEB_BUGS_8B	eval:html_test('t_image_web_bugs_8b')
+body T_HTML_IMAGE_WEB_BUGS_9B	eval:html_test('t_image_web_bugs_9b')
+body T_HTML_IMAGE_WEB_BUGS_10B	eval:html_test('t_image_web_bugs_10b')
+body T_HTML_IMAGE_WEB_BUGS_11B	eval:html_test('t_image_web_bugs_11b')
 # both web bugs rules
 meta T_HTML_WEB_BUGS_PLUS_1	(T_HTML_IMAGE_WEB_BUGS_1 && HTML_WEB_BUGS)
 meta T_HTML_WEB_BUGS_PLUS_2	(T_HTML_IMAGE_WEB_BUGS_2 && HTML_WEB_BUGS)
 meta T_HTML_WEB_BUGS_PLUS_3	(T_HTML_IMAGE_WEB_BUGS_3 && HTML_WEB_BUGS)
 meta T_HTML_WEB_BUGS_PLUS_4	(T_HTML_IMAGE_WEB_BUGS_4 && HTML_WEB_BUGS)
 meta T_HTML_WEB_BUGS_PLUS_5	(T_HTML_IMAGE_WEB_BUGS_5 && HTML_WEB_BUGS)
+meta T_HTML_WEB_BUGS_PLUS_6	(T_HTML_IMAGE_WEB_BUGS_6 && HTML_WEB_BUGS)
+meta T_HTML_WEB_BUGS_PLUS_7	(T_HTML_IMAGE_WEB_BUGS_7 && HTML_WEB_BUGS)
+meta T_HTML_WEB_BUGS_PLUS_8	(T_HTML_IMAGE_WEB_BUGS_8 && HTML_WEB_BUGS)
+meta T_HTML_WEB_BUGS_PLUS_9	(T_HTML_IMAGE_WEB_BUGS_9 && HTML_WEB_BUGS)
+meta T_HTML_WEB_BUGS_PLUS_10	(T_HTML_IMAGE_WEB_BUGS_10 && HTML_WEB_BUGS)
+meta T_HTML_WEB_BUGS_PLUS_11	(T_HTML_IMAGE_WEB_BUGS_11 && HTML_WEB_BUGS)
+meta T_HTML_WEB_BUGS_PLUS_6B	(T_HTML_IMAGE_WEB_BUGS_6B && HTML_WEB_BUGS)
+meta T_HTML_WEB_BUGS_PLUS_7B	(T_HTML_IMAGE_WEB_BUGS_7B && HTML_WEB_BUGS)
+meta T_HTML_WEB_BUGS_PLUS_8B	(T_HTML_IMAGE_WEB_BUGS_8B && HTML_WEB_BUGS)
+meta T_HTML_WEB_BUGS_PLUS_9B	(T_HTML_IMAGE_WEB_BUGS_9B && HTML_WEB_BUGS)
+meta T_HTML_WEB_BUGS_PLUS_10B	(T_HTML_IMAGE_WEB_BUGS_10B && HTML_WEB_BUGS)
+meta T_HTML_WEB_BUGS_PLUS_11B	(T_HTML_IMAGE_WEB_BUGS_11B && HTML_WEB_BUGS)
 
 # alan premselaar <alien@12inch.com>, see SpamAssassin-talk list
 header T_JAPANESE_UCE_SUBJECT_3	Subject =~ /L\$\>5Bz9\-9p\"\(/
@@ -598,6 +622,11 @@ tflags T_RCVD_IN_FIVETEN_DIALUP_NFH net
 
 # some additional osirusoft tests, needs more work
 # all osirusoft tests maybe a bad idea, osirusoft web site seems defunct
+header T_X_OSIRU_OPT_IN		rblreseval:check_rbl_results_for('osirusoft', '127.0.0.7')
+header T_X_OSIRU_OPEN_PROXY	rblreseval:check_rbl_results_for('osirusoft', '127.0.0.9')
+tflags T_X_OSIRU_OPT_IN net
+tflags T_X_OSIRU_OPEN_PROXY net
+# repeats?
 header T_RCVD_IN_OSRELAY	rbleval:check_rbl('osrelay', 'inputs.relays.osirusoft.com.')
 tflags T_RCVD_IN_OSRELAY net
 header T_RCVD_IN_OSSRC	rbleval:check_rbl('ossrc', 'spamsources.relays.osirusoft.com.')
