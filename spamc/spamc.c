@@ -412,9 +412,7 @@ get_current_user(char **username)
 	return EX_OK;
     }
 
-#ifdef _WIN32
-    return EX_OK;
-#else
+#ifndef _WIN32
     
     /* Get the passwd information for the effective uid spamc is running
      * under. Setting errno to zero is recommended in the manpage.
@@ -435,6 +433,9 @@ get_current_user(char **username)
         goto fail;
     }
 
+#endif
+
+pass:
     return EX_OK;
     
 fail:
@@ -446,8 +447,6 @@ fail:
         return EX_NOTSPAM;
     }
     return EX_OSERR;
-    
-#endif
 }
 
 
