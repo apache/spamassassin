@@ -178,7 +178,7 @@ sub dcc_report {
 
     alarm 10;
 
-    $pid = open2($dccout, $dccin, 'dccproc -t many '.$self->{conf}->{dcc_options}.' >/dev/null 2>&1');
+    $pid = open2($dccout, $dccin, 'dccproc -t many '.$self->{main}->{conf}->{dcc_options}.' >/dev/null 2>&1');
 
     print $dccin $fulltext;
 
