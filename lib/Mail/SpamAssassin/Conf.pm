@@ -71,6 +71,7 @@ use Mail::SpamAssassin::Conf::Parser;
 use File::Spec;
 
 use strict;
+use warnings;
 use bytes;
 
 use vars qw{

@@ -20,6 +20,7 @@ package Mail::SpamAssassin::EvalTests;
 package Mail::SpamAssassin::PerMsgStatus;
 
 use strict;
+use warnings;
 use bytes;
 
 use Mail::SpamAssassin::Conf;

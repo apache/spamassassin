@@ -24,6 +24,7 @@ package Mail::SpamAssassin::MailingList;
 package Mail::SpamAssassin::PerMsgStatus;
 
 use strict;
+use warnings;
 use bytes;
 
 

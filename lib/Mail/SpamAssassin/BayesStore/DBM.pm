@@ -17,6 +17,7 @@
 package Mail::SpamAssassin::BayesStore::DBM;
 
 use strict;
+use warnings;
 use bytes;
 use Fcntl;
 

@@ -70,6 +70,7 @@ see C<Mail::SpamAssassin::Conf> for more information.
 package Mail::SpamAssassin::SQLBasedAddrList;
 
 use strict;
+use warnings;
 use bytes;
 
 use DBI;

@@ -18,6 +18,7 @@
 package Mail::SpamAssassin::NetSet;
 
 use strict;
+use warnings;
 use bytes;
 
 use Mail::SpamAssassin::Util;

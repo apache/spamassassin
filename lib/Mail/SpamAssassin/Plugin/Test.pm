@@ -11,6 +11,7 @@ package Mail::SpamAssassin::Plugin::Test;
 
 use Mail::SpamAssassin::Plugin;
 use strict;
+use warnings;
 use bytes;
 
 use vars qw(@ISA);

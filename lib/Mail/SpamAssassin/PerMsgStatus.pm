@@ -47,6 +47,7 @@ class.  This object encapsulates all the per-message state.
 package Mail::SpamAssassin::PerMsgStatus;
 
 use strict;
+use warnings;
 use bytes;
 use Carp;
 

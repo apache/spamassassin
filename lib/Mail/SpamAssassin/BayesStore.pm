@@ -30,6 +30,7 @@ the storage module must implement these methods.
 package Mail::SpamAssassin::BayesStore;
 
 use strict;
+use warnings;
 use bytes;
 
 =head1 METHODS

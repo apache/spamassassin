@@ -19,6 +19,7 @@
 package Mail::SpamAssassin::ArchiveIterator;
 
 use strict;
+use warnings;
 use bytes;
 
 use IO::Select;

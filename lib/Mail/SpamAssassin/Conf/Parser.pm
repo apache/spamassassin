@@ -125,6 +125,7 @@ use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Constants qw(:sa);
 
 use strict;
+use warnings;
 use bytes;
 use Carp;
 

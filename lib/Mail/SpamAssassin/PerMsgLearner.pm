@@ -46,6 +46,7 @@ the learning process.
 package Mail::SpamAssassin::PerMsgLearner;
 
 use strict;
+use warnings;
 use bytes;
 
 use Mail::SpamAssassin;

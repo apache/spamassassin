@@ -91,6 +91,7 @@ package Mail::SpamAssassin::Plugin::URIDNSBL;
 use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Util;
 use strict;
+use warnings;
 use bytes;
 
 use vars qw(@ISA);

@@ -17,6 +17,7 @@
 package Mail::SpamAssassin::Locker::Win32;
 
 use strict;
+use warnings;
 use bytes;
 use Fcntl;
 
