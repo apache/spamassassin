@@ -8,40 +8,11 @@
 #
 ###########################################################################
 
-test BIG_FONT      fail    <font size=3D2>
-test BIG_FONT      ok      <font size=3D+2>
-test BIG_FONT      ok      <font size=3D3>
-test BIG_FONT      ok      <font size=3D+3>
-test BIG_FONT      fail    <font size="2">
-test BIG_FONT      ok      <font size="+2">
-test BIG_FONT      ok      <font size="3">
-test BIG_FONT      ok      <font size="+3">
-test BIG_FONT      fail    <font size="small">
-test BIG_FONT      fail    <font face="serif">
-test BIG_FONT ok                <font size="5"> foo </font>
-test BIG_FONT ok                <font size="+2"> foo </font>
-test BIG_FONT ok                <font size="3"> foo </font>
-test BIG_FONT fail              <font size="2"> foo </font>
-test BIG_FONT fail              <font size="+1"> foo </font>
-test BIG_FONT fail              <font size="-1"> foo </font>
-test BIG_FONT fail              <font size="1"> foo </font>
-
-test DEAR_EMAIL ok Dear duncf@rogers.com,
-test DEAR_EMAIL fail Dear Duncan!
 test DEAR_SOMETHING ok Dear IT professional,
 test DEAR_SOMETHING ok Dear Internet Investor:
 test DEAR_FRIEND ok Dear friend,
 test DEAR_FRIEND fail Dear Mr. Ithacus,
-#
-test     PORN_9       ok        sex-fest
-test     PORN_9       ok        cum-dumpster
-test     PORN_9       fail      talcum-dumpster
-test     PORN_12      ok        sluts and whores
-test     PORN_12      ok        hardcore sex
-test     PORN_12      fail      lolita
-test     PORN_13      ok        must be at least 18
-test     PORN_13      ok        must be over 18
-test     PORN_13      fail      must be at least 13
+
 test FROM_ENDS_IN_NUMS     ok   matt1234@sergeant.org
 test FROM_ENDS_IN_NUMS     fail matt@sergeant.org
 test FROM_STARTS_WITH_NUMS     ok   1234matt@sergeant.org
@@ -51,7 +22,7 @@ test NUMERIC_HTTP_ADDR ok http://123456789/foo/bar
 test PGP_SIGNATURE_2 ok Content-Type: multipart/signed; micalg=pgp-sha1;protocol="application/pgp-signature"; boundary="n8g4imXOkfNTN/H1"
 test PGP_SIGNATURE_2 fail Content-Type: text/plain; charset=us-ascii
 #test SEARCH_ENGINE_PROMO ok	evaluated for FREE for its keyword placement in the top twenty major search engines
-#
+
 test US_DOLLARS fail $-$NFbMF$K!"A49q$+$iLd$$9g$o$;$,;&E~$7$F$$$^$9!#
 test US_DOLLARS ok Twenty Million Five Hundred Thousand United States Dollars
 test US_DOLLARS ok Eight million, Five Hundred United States dollars
@@ -60,7 +31,7 @@ test US_DOLLARS ok EIHGTEEN MILLION UNITED STATE DOLLARS
 test US_DOLLARS ok 24million U.S dollars cash
 test US_DOLLARS ok 47 million US DOLLARS
 test US_DOLLARS ok FIVE MILLION FIVE HOUNDRED THOUSAND CANADIAN DOLLAS)
-#
+
 test US_DOLLARS_2 fail JP charset test: this should not match: $1 $
 test US_DOLLARS_2 fail JP charset test: this should not match: $1$
 test US_DOLLARS_2 fail $-$NFbMF$K!"A49q$+$iLd$$9g$o$;$,;&E~$7$F$$$^$9!#
@@ -68,28 +39,14 @@ test US_DOLLARS_2 ok of USD$17.4M only
 test US_DOLLARS_2 ok amount $21.5m represents
 test US_DOLLARS_2 ok of US$26.4 million
 test US_DOLLARS_2 ok the $21.5 million,
-#
+
 test US_DOLLARS_3 fail $-$NFbMF$K!"A49q$+$iLd$$9g$o$;$,;&E~$7$F$$$^$9!#
 test US_DOLLARS_3 ok OF US$75,000,000.00 ( SEVENTYFIVE
 test US_DOLLARS_3 ok DOLLAR(USD$30,000,000,00.)
 test US_DOLLARS_3 ok ($21,500,000.)
 test US_DOLLARS_3 ok ($ 152,000.000.00)
-#
-test US_DOLLARS_4 fail JP charset test: this should not match: $1 $
-test US_DOLLARS_4 fail JP charset test: this should not match: $1$
-test US_DOLLARS_4 fail $-$NFbMF$K!"A49q$+$iLd$$9g$o$;$,;&E~$7$F$$$^$9!#
-test US_DOLLARS_4 ok of US$8.5 million (Eight
-test US_DOLLARS_4 ok of US8.5 millions (Eight
-
-
-
 
 # note: have to use "." instead of "#", as it's the comment char
-test HTML_TEXT_FF0000 fail <body bgcolor=.ff0000>foo</body>
-test HTML_TEXT_FF0000 ok <font face="Verdana" color=.ff0000>foo</font>
-test HTML_TEXT_FF0000 ok <font face="Verdana" color='.ff0000'>foo</font>
-test HTML_TEXT_FF0000 ok <font face="Verdana" color=".ff0000">foo</font>
-test HTML_TEXT_FF0000 ok <font color=".ff0000" size="+4">foo</font>
 
 test SAVE_ON_INSURANCE      ok Compare and Save Instantly On Your Auto Insurance
 
@@ -102,9 +59,6 @@ test __OBFUSCATING_COMMENT ok     This is a te<!--foo-->st
 test __OBFUSCATING_COMMENT fail   Not a <!-- problem --> here
 test __OBFUSCATING_COMMENT fail   or<!--problem--> here
 test __OBFUSCATING_COMMENT fail   This <tag><!-- neither --></tag> I hope
-
-test NUMERIC_COMMENT     ok     Some text <!--34555--> followed by more
-test NUMERIC_COMMENT     fail   Something <!-- A comment --> and more
 
 test FROM_EGROUPS  ok           sentto-2537484-52529-1020428367-Sxm=olswang.com@returns.groups.yahoo.com
 test FROM_EGROUPS  fail         spammer@returns.groups.yahoo.com
@@ -128,35 +82,6 @@ test HTML_WIN_OPEN fail The window.open() function
 test HTML_WIN_BLUR ok <script> win=window.open("http://foo/") win.blur() window.focus() </script>
 test HTML_WIN_BLUR ok <body onload='win=window.open("http://foo/"); win.blur()'>
 test HTML_WIN_BLUR fail The win.blur() function
-
-
-test NIGERIAN_SCAM_11 ok I work in a bank at
-test NIGERIAN_SCAM_11 ok HAVE WORKED FOR A BANK
-
-test NIGERIAN_SCAM_12 ok the first son of
-test NIGERIAN_SCAM_12 ok the only son of
-test NIGERIAN_SCAM_12 ok AM THE ONLY MALE CHILD OF
-test NIGERIAN_SCAM_12 ok THE FIRST MALE CHILD OF
-test NIGERIAN_SCAM_12 ok the second son of
-test NIGERIAN_SCAM_12 ok As the eldest son of
-
-test NIGERIAN_SCAM_8 ok VLAJKO STOJILJKOVIC, one of the people indicted at the Hague War Crimes Tribunal in Hague
-
-
-
-test NIGERIAN_SCAM_11 ok I work in a bank at
-test NIGERIAN_SCAM_11 ok HAVE WORKED FOR A BANK
-
-test NIGERIAN_SCAM_12 ok the first son of
-test NIGERIAN_SCAM_12 ok the only son of
-test NIGERIAN_SCAM_12 ok AM THE ONLY MALE CHILD OF
-test NIGERIAN_SCAM_12 ok THE FIRST MALE CHILD OF
-test NIGERIAN_SCAM_12 ok the second son of
-test NIGERIAN_SCAM_12 ok As the eldest son of
-
-test NIGERIAN_SCAM_8 ok VLAJKO STOJILJKOVIC, one of the people indicted at the Hague War Crimes Tribunal in Hague
-
-
 
 test EMAIL_ATTRIBUTION ok At 15:43 2/26/2002 +0000, Rich Webster wrote:
 test EMAIL_ATTRIBUTION ok On Tue, 2001-12-04 at 04:45, Matthew Cline wrote:
@@ -182,15 +107,3 @@ test DOMAIN_BODY ok   Get .BIZ while it's hot!
 test DOMAIN_BODY ok   .info
 test DOMAIN_BODY ok   Get new .us domains
 test DOMAIN_BODY fail www.fobar.biz
-
-test MORTGAGE_OBFU ok  Mort$a$e
-test MORTGAGE_OBFU ok  Mor$gage
-test MORTGAGE_OBFU ok  Mort$age
-test MORTGAGE_OBFU ok  Mortga$e
-test MORTGAGE_OBFU fail Mortsa$e
-test MORTGAGE_OBFU fail Morlage
-test MORTGAGE_OBFU fail mortgage
-test MORTGAGE_OBFU fail mortgage$
-test MORTGAGE_OBFU fail mortgage$
-
-
