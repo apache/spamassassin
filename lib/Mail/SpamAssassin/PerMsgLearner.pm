@@ -99,7 +99,7 @@ sub new {
 sub learn_spam {
   my ($self, $id) = @_;
 
-  if ($self->{main}->{learn_with_whitelist}) {
+  if ($self->{conf}->{learn_with_whitelist}) {
     $self->{main}->add_all_addresses_to_blacklist ($self->{msg});
   }
 
@@ -125,7 +125,7 @@ sub learn_spam {
 sub learn_ham {
   my ($self, $id) = @_;
 
-  if ($self->{main}->{learn_with_whitelist}) {
+  if ($self->{conf}->{learn_with_whitelist}) {
     $self->{main}->add_all_addresses_to_whitelist ($self->{msg});
   }
 
@@ -148,7 +148,7 @@ sub learn_ham {
 sub forget {
   my ($self, $id) = @_;
 
-  if ($self->{main}->{learn_with_whitelist}) {
+  if ($self->{conf}->{learn_with_whitelist}) {
     $self->{main}->remove_all_addresses_from_whitelist ($self->{msg});
   }
 
