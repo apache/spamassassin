@@ -105,7 +105,6 @@ sub print_usage_and_exit {
   );
 }
 
-
 # defaults
 my %opt = (
   'user-config'   => 1,
@@ -672,41 +671,6 @@ if ( defined $opt{'pidfile'} ) {
     Mail::SpamAssassin::Util::untaint_file_path( $opt{'pidfile'} );
 }
 
-# support non-root use (after we bind to the port)
-if ( $opt{'username'} ) {
-  my ( $uuid, $ugid ) = ( getpwnam( $opt{'username'} ) )[ 2, 3 ];
-  if ( !defined $uuid || $uuid == 0 ) {
-    die "fatal: cannot run as nonexistent user or root with -u option\n";
-  }
-
-  $uuid =~ /^(\d+)$/ and $uuid = $1;    # de-taint
-  $ugid =~ /^(\d+)$/ and $ugid = $1;    # de-taint
-
-  # remove the pidfile if it exists.  we'll create it anew later.
-  if ( defined $opt{'pidfile'} && -f $opt{'pidfile'} ) {
-    unlink $opt{'pidfile'}
-      || die "fatal: could not unlink '$opt{'pidfile'}'\n";
-  }
-
-  # ditto with the socket file
-  if ( defined $opt{'socketpath'} && !$opt{'socketowner'}) {
-    chown $uuid, -1, $opt{'socketpath'}
-      || die "fatal: could not chown '$opt{'socketpath'}' to uid $uuid\n";
-  }
-
-  # Change GID
-  $) = "$ugid $ugid";    # effective gid
-  $( = $ugid;            # real gid
-
-  # Change UID
-  $> = $uuid;            # effective uid
-  $< = $uuid;            # real uid. we now cannot setuid anymore
-  if ( $> != $uuid and $> != ( $uuid - 2**32 ) ) {
-    die "fatal: setuid to uid $uuid failed\n";
-  }
-
-}
-
 # set debug areas, if any specified (only useful for command-line tools)
 my @debug;
 if (defined $opt{'debug'}) {
@@ -866,6 +830,28 @@ sub spawn {
   }
   else {
     ## CHILD
+
+    # support non-root use
+    if ( $opt{'username'} ) {
+      my ( $uuid, $ugid ) = ( getpwnam( $opt{'username'} ) )[ 2, 3 ];
+      if ( !defined $uuid || $uuid == 0 ) {
+        die "fatal: cannot run as nonexistent user or root with -u option\n";
+      }
+
+      $uuid =~ /^(\d+)$/ and $uuid = $1;    # de-taint
+      $ugid =~ /^(\d+)$/ and $ugid = $1;    # de-taint
+
+      # Change GID
+      $) = "$ugid $ugid";    # effective gid
+      $( = $ugid;            # real gid
+
+      # Change UID
+      $> = $uuid;            # effective uid
+      $< = $uuid;            # real uid. we now cannot setuid anymore
+      if ( $> != $uuid and $> != ( $uuid - 2**32 ) ) {
+        die "fatal: setuid to uid $uuid failed\n";
+      }
+    }
 
     # Reset signal handling to default settings.
     setup_child_sig_handlers();
