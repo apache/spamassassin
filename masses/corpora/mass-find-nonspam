@@ -102,7 +102,6 @@ use lib "lib";
 use lib "../lib";
 use lib "../../lib";
 use Mail::SpamAssassin::ArchiveIterator;
-use Mail::SpamAssassin::NoMailAudit;
 
 # flush buffer immediately so if mass-check fails or stops we don't get a corrupt line
 $|++;
@@ -149,9 +148,12 @@ sub get_or_empty {
 sub wanted {
   my (undef, $id, $time, $dataref) = @_;
 
-  my $ma = Mail::SpamAssassin::NoMailAudit->new ('data' => $dataref);
+  my $ma = Mail::SpamAssassin->parse ($dataref);
   my $from = $ma->get_header ("From");
-  return unless defined($from);
+  unless (defined $from) {
+    $ma->finish();
+    return;
+  }
 
   if ($from =~ /${killfile_froms}/o
     || get_or_empty($ma,"Message-Id") =~ /${killfile_message_ids}/o
@@ -163,6 +165,8 @@ sub wanted {
       print "$id\n";
     }
   }
+
+  $ma->finish();
 
   #chomp $from;
   #$count{$from}++;
