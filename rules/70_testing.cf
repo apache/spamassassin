@@ -507,18 +507,43 @@ describe T_DRUGS_MANYKINDS 	contains refs to four different kinds of drugs
 body T_SA_MARKED_UP     /Spam detection software, running on the system /
 
 # No, you can't make up those funny numbers.
-header T_BAD_TIMEZONE_EST	ALL =~ /[+-]\d\d[30]0(?<!-0500|-0300|\+1000|\+1100) \(?EST\)?\b/
-header T_BAD_TIMEZONE_CST_A	ALL =~ /[+-]\d\d[30]0(?<!-0600|-0400|\+0800|\+0930) \(?CST\)?\b/
-header T_BAD_TIMEZONE_CST_B	ALL =~ /[+-]\d\d[30]0(?<!-0600|-0400|\+0800|\+0930|\+1030) \(?CST\)?\b/
-header T_BAD_TIMEZONE_CST_C	ALL =~ /[+-]\d\d[30]0(?<!-0600|-0500|\+0800|\+0930|\+1030) \(?CST\)?\b/
-header T_BAD_TIMEZONE_CST_D	ALL =~ /[+-]\d\d[30]0(?<!-0600|-0500|-0400|\+0800|\+0930|\+1030) \(?CST\)?\b/
-header T_BAD_TIMEZONE_GMT_A	ALL =~ /[+-]\d\d[30]0(?<!\+0000) \(?GMT\)?\b/
-header T_BAD_TIMEZONE_GMT_B	ALL =~ /[+-]\d\d[30]0(?<![+-]0000) \(?GMT\)?\b/
-header T_BAD_TIMEZONE_UTC_A	ALL =~ /[+-]\d\d[30]0(?<!\+0000) \(?UTC\)?\b/
-header T_BAD_TIMEZONE_UTC_B	ALL =~ /[+-]\d\d[30]0(?<![+-]0000) \(?UTC\)?\b/
-header T_BAD_TIMEZONE_CDT_A	ALL =~ /[+-]\d\d[30]0(?<!-0500) \(?CDT\)?\b/
-header T_BAD_TIMEZONE_CDT_B	ALL =~ /[+-]\d\d[30]0(?<!-0500|\+1030) \(?CDT\)?\b/
-header T_BAD_TIMEZONE_MST	ALL =~ /[+-]\d\d[30]0(?<!-0700) \(?MST\)?\b/
+header T_BAD_TIMEZONE_EST_0	ALL =~ /[+-]\d\d[30]0(?<!-0500|-0300|\+1000|\+1100) \(?EST\)?\b/
+header T_BAD_TIMEZONE_CST_0	ALL =~ /[+-]\d\d[30]0(?<!-0600|-0500|\+0800|\+0930|\+1030) \(?CST\)?\b/
 
-header T_INVALID_RCVD_TZ_ABSURD_A	Received =~ /\s[-+](?:1[4-9]\d\d|[2-9]\d\d\d)\b/
-header T_INVALID_RCVD_TZ_ABSURD_B	Received =~ /\d\d:\d\d\s+[-+](?:1[4-9]\d\d|[2-9]\d\d\d)\b/
+header T_BAD_TIMEZONE_EST_1	ALL =~ /[+-]\d\d[30]0(?<!-0500|-0300|\+1000|\+1100) \(?EST\b/
+header T_BAD_TIMEZONE_CST_1	ALL =~ /[+-]\d\d[30]0(?<!-0600|-0500|\+0800|\+0930|\+1030) \(?CST\b/
+
+header T_BAD_TIMEZONE_EST_2	ALL =~ /[+-]\d\d[30]0(?<!-0500|-0300|\+1000|\+1100) \(?EST(?![\w+-])/
+header T_BAD_TIMEZONE_CST_2	ALL =~ /[+-]\d\d[30]0(?<!-0600|-0500|\+0800|\+0930|\+1030) \(?CST(?![\w+-])/
+
+header T_BAD_TIMEZONE_EST_3	ALL =~ /[+-]\d\d[30]0(?<!-0500|-0300|\+1000|\+1100)\s+\(?EST(?![\w+-])/
+header T_BAD_TIMEZONE_CST_3	ALL =~ /[+-]\d\d[30]0(?<!-0600|-0500|\+0800|\+0930|\+1030)\s+\(?CST(?![\w+-])/
+
+header T_BAD_TIMEZONE_EST_4	ALL =~ /[+-]\d\d[30]0(?<!-0500|-0300|\+1000|\+1100)\s+(?:\bEST\b|\(EST\))/
+header T_BAD_TIMEZONE_CST_4	ALL =~ /[+-]\d\d[30]0(?<!-0600|-0500|\+0800|\+0930|\+1030)\s+(?:\bCST\b|\(CST\))/
+
+header T_BAD_TIMEZONE_EST_5	ALL =~ /[+-]\d\d[30]0(?<!-0500|-0300|\+1000|\+1100)\s+(?:\bEST\b(?![\w+-])|\(EST\))/
+header T_BAD_TIMEZONE_CST_5	ALL =~ /[+-]\d\d[30]0(?<!-0600|-0500|\+0800|\+0930|\+1030)\s+(?:\bCST\b(?![\w+-])|\(CST\))/
+
+header T_BAD_TIMEZONE_GMT_A_0	ALL =~ /[+-]\d\d[30]0(?<!\+0000) \(?GMT(?![\w+-])/
+header T_BAD_TIMEZONE_GMT_B_0	ALL =~ /[+-]\d\d[30]0(?<![+-]0000) \(?GMT(?!\w+-])/
+header T_BAD_TIMEZONE_GMT_A_1	ALL =~ /[+-]\d\d[30]0(?<!\+0000)\s+\(?GMT(?![\w+-])/
+header T_BAD_TIMEZONE_GMT_B_1	ALL =~ /[+-]\d\d[30]0(?<![+-]0000)\s+\(?GMT(?!\w+-])/
+header T_BAD_TIMEZONE_GMT_A_2	ALL =~ /[+-]\d\d[30]0(?<!\+0000)\s+(?:\bGMT\b|\(GMT\))/
+header T_BAD_TIMEZONE_GMT_B_2	ALL =~ /[+-]\d\d[30]0(?<![+-]0000)\s+(?:\bGMT\b|\(GMT\))/
+header T_BAD_TIMEZONE_GMT_A_3	ALL =~ /[+-]\d\d[30]0(?<!\+0000)\s+(?:\bGMT\b(?![\w+-])|\(GMT\))/
+header T_BAD_TIMEZONE_GMT_B_3	ALL =~ /[+-]\d\d[30]0(?<![+-]0000)\s+(?:\bGMT\b(?![\w+-])|\(GMT\))/
+
+header T_BAD_TIMEZONE_UTC_A_0	ALL =~ /[+-]\d\d[30]0(?<!\+0000) \(?UTC(?![\w+-])/
+header T_BAD_TIMEZONE_UTC_B_0	ALL =~ /[+-]\d\d[30]0(?<![+-]0000) \(?UTC(?!\w+-])/
+header T_BAD_TIMEZONE_UTC_A_1	ALL =~ /[+-]\d\d[30]0(?<!\+0000)\s+\(?UTC(?![\w+-])/
+header T_BAD_TIMEZONE_UTC_B_1	ALL =~ /[+-]\d\d[30]0(?<![+-]0000)\s+\(?UTC(?!\w+-])/
+header T_BAD_TIMEZONE_UTC_A_2	ALL =~ /[+-]\d\d[30]0(?<!\+0000)\s+(?:\bUTC\b|\(UTC\))/
+header T_BAD_TIMEZONE_UTC_B_2	ALL =~ /[+-]\d\d[30]0(?<![+-]0000)\s+(?:\bUTC\b|\(UTC\))/
+header T_BAD_TIMEZONE_UTC_A_3	ALL =~ /[+-]\d\d[30]0(?<!\+0000)\s+(?:\bUTC\b(?![\w+-])|\(UTC\))/
+header T_BAD_TIMEZONE_UTC_B_3	ALL =~ /[+-]\d\d[30]0(?<![+-]0000)\s+(?:\bUTC\b(?![\w+-])|\(UTC\))/
+
+########################################################################
+
+header T_RCVD_IN_BSP_TRUSTED	eval:check_rbl_sub('senderbase-firsttrusted', 'S45 =~ /Y/')
+header T_RCVD_IN_BSP_OTHER	eval:check_rbl_sub('senderbase-untrusted', 'S45 =~ /Y/')
