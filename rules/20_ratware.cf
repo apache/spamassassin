@@ -127,7 +127,7 @@ header __PALM_EUDORA_MUA	X-Mailer =~ /^Eudora \d+.\d+ for PalmOS\b/
 header __OLD_EUDORA1		X-Mailer =~ /Eudora\s+Pro\s+Version\s+[1-4]\.\b/
 header __OLD_EUDORA2		X-Mailer =~ /\bEudora\s+(?:(?:Pro|Light)\s+)?Version\s+[1-4]\.\b/
 header __ANY_QUALCOMM_MUA	X-Mailer =~ /\bQUALCOMM\b/
-header __EUDORA_MSGID		MESSAGEID =~ /^<(?:\d\d?\.){4,5}\d{14}\.[a-f0-9]{8}\@\S+>$/m
+header __EUDORA_MSGID		MESSAGEID =~ /^<(?:\d\d?\.){3,5}\d{14}\.[a-f0-9]{8}\@\S+(?:\sport\s\d+)?>$/m
 header __HAS_X_LOOP		exists:X-Loop
 header __HAS_X_MAILING_LIST	exists:X-Mailing-List
 meta FORGED_MUA_EUDORA		(__EUDORA_MUA && !__EUDORA_MSGID && !__UNUSABLE_MSGID && !__HAS_X_LOOP && !__HAS_X_MAILING_LIST && !__MAC_EUDORA_MUA && !__PALM_EUDORA_MUA && !__OLD_EUDORA1 && !(__OLD_EUDORA2 && !__ANY_QUALCOMM_MUA))
