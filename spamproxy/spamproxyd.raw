@@ -1,4 +1,5 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
+
 
 eval 'exec /usr/bin/perl  -S $0 ${1+"$@"}'
     if 0; # not running under some shell
@@ -13,6 +14,8 @@ eval 'exec /usr/bin/perl  -S $0 ${1+"$@"}'
 my $children = 4;
 my $minperchild = 5;
 my $maxperchild = 10;
+my $shared=0;
+my $debug=0;
 
 # This file is based largely on example code bundled with MacGyver's
 # Net::SMTP::Server kit, but with some additional stuff to use
@@ -38,6 +41,7 @@ use Mail::SpamAssassin::NoMailAudit;
 use Mail::SpamAssassin;
 use Net::DNS;
 use Getopt::Long;
+use strict;
 
 my $spamtest = Mail::SpamAssassin->new();
 $spamtest->compile_now();       # ensure all modules etc. are preloaded
@@ -56,10 +60,12 @@ $/ = "\n";                      # argh, Razor resets this!  Bad Razor!
 # --irj
 
 my $syntax = "syntax: $0 [--children=$children] [--minperchild=$minperchild] ".
-             "[--maxperchild=$maxperchild] ".
+             "[--maxperchild=$maxperchild] [--shared] [--debug]".
              "listen.addr:port talk.addr:port spamaddr\@example.com\n";
 
 GetOptions("children=n" => \$children,
+	   "shared" => \$shared,
+	   "debug" => \$debug,
            "minperchild=n" => \$minperchild,
            "maxperchild=n" => \$maxperchild) or die $syntax;
 
@@ -76,11 +82,13 @@ if(@ARGV == 3) {
 print "Trying to start using source $srcaddr port $srcport, " .
       "destination $dstaddr port $dstport, " . 
       "reporting e-mail address $spamaddr.\n";
+print "shared : $shared\n";
+print "debug : $debug\n";
 
 die $syntax unless defined($srcport) and defined($dstport)
   and defined($spamaddr);
 
-$smarthost=$dstaddr . ":" . $dstport;
+my $smarthost=$dstaddr . ":" . $dstport;
 
 # Set up the server using the IP address and port specified on the command
 # line by the user.
@@ -89,11 +97,11 @@ $smarthost=$dstaddr . ":" . $dstport;
 # I'll spare everyone those details here as that info is in his code. 
 # Instead,  I'll be concentrating on the message-handling portion. --irj
 
-$server = new Net::SMTP::Server($srcaddr, $srcport) ||
+my $server = new Net::SMTP::Server($srcaddr, $srcport) ||
   croak("Unable to create server: $!\n");
 
 print "Server started on address $srcaddr port $srcport " .
-      "with destination address $dstaddr port $dstport";
+      "with destination address $dstaddr port $dstport\n";
 
 # [MSDW]
 # This should allow a kill on the parent to also blow away the
@@ -130,7 +138,7 @@ PARENT: while (1) {
 my $lives = $minperchild + (rand($maxperchild - $minperchild));
 my %opts;
 
-while($conn = $server->accept()) {
+while(my $conn = $server->accept()) {
     my $client = new Net::SMTP::Server::Client($conn) ||
       croak("Unable to handle client connection: $!\n");
 
@@ -147,11 +155,19 @@ while($conn = $server->accept()) {
     # handed to a new Mail::SpamAssassin::NoMailAudit object.
     # --irj
 
-    $message = $client->{MSG};
-    @msg = split ("\r\n", $message);
-    $arraycont = @msg; for(0..$arraycont) { $msg[$_] .= "\r\n"; }
-    %args = (data => \@msg);
-    $mail = Mail::SpamAssassin::NoMailAudit->new(%args);
+    # perldoc -f split
+    #split   Splits a string into a list of strings and returns
+    #           that list.  By default, empty leading fields are
+    #           preserved, and empty trailing ones are deleted.
+    #
+    # so, it removes last empty lines !!! -> hence the last argument, -1
+    
+
+    my $message = $client->{MSG};
+    my @msg = split ("\r\n", $message,'-1');
+    my $arraycont = @msg; for(0..$arraycont) { $msg[$_] .= "\r\n"; }
+    my %args = (data => \@msg);
+    my $mail = Mail::SpamAssassin::NoMailAudit->new(%args);
 
     # At some point, I may also put some other code so I can go grab
     # preferences, e.g. via MySQL, e.g. scoring parameters, or even whether to
@@ -167,25 +183,55 @@ while($conn = $server->accept()) {
     # instead, pass the original message to the smarthost code below.
     # --irj
 
+    my $recips;
+    my $msg;
     my $status = $spamtest->check($mail);
+    my ($msg_debug1,$msg_debug2);
+
     if ($status->is_spam ()) {
         $msg = sprintf("    SPAM[%6.1f]: %s", $status->get_hits(), $status->get_names_of_tests_hit());
+	# add headers
         $status->rewrite_mail ();
         $message = join ("",$mail->header(),@{$mail->body()});
+
+	# check if the mail goes to one address
         if($spamaddr ne "recipient") {
-          @recipients = ("$spamaddr");
+          my @recipients = ("$spamaddr");
           $recips = \@recipients;
         } else {
-          $recips = $client->{TO};
+	    $recips = $client->{TO};
+	  
+
+	    foreach (@{$client->{TO}})
+	    {
+		$msg_debug1="msg going to be delivered in      : -$_- ";
+		 if ($shared)
+		 {
+
+		     # rewrite in case of imap delivery
+		     # shared+user.$user.spam
+		     s/<(.*?)(\@.*)/<shared+user.$1.spam$2/g;
+		     $msg_debug2="msg going to be delivered in spam : -$_- ";
+		 }
+	    }
         }
     } else {
         $msg = sprintf("NOT_SPAM[%6.1f]: %s", $status->get_hits(), $status->get_names_of_tests_hit());
+
+	# added the next 2 lines so that even if it's not spam we got statistics (xavier renaut)
+
+	$status->rewrite_mail ();
+        $message = join ("",$mail->header(),@{$mail->body()}); #original
+	
+	# end of addition
+
         $recips = $client->{TO};
     }
 
     setlogsock 'unix';
     openlog('spamassassin', 'nowait', 'local3');
     syslog('notice', $msg);
+    if ($debug && $msg_debug1 ){print $msg_debug1,"\n";print $msg_debug2,"\n" if $msg_debug2; syslog('notice', $msg_debug1); syslog('notice', $msg_debug2) if $msg_debug2;}
     closelog();
 
     $status->finish();
