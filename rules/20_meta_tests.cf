@@ -127,7 +127,7 @@ header __MOZILLA_MSGID		MESSAGEID =~ /^<[A-F\d]{8}\.[A-F1-9][A-F\d]{0,7}\@\S+>$/
 meta FORGED_MUA_MOZILLA		(__MOZILLA_MUA && !__UNUSABLE_MSGID && !__MOZILLA_MSGID)
 describe FORGED_MUA_MOZILLA	Forged mail pretending to be from Mozilla
 
-header __PC_RND_HEADER		ALL =~ /%RA?ND(?:OM)?_[A-Z]/i
-body __PC_RND_BODY		/%RA?ND(?:OM)?_[A-Z]/i
-rawbody __PC_RND_RAWBODY	/%RA?ND(?:OM)?_[A-Z]/i
+header __PC_RND_HEADER		ALL =~ /%RA?ND(?:OM)?(?:_|\b)/i
+body __PC_RND_BODY		/%RA?ND(?:OM)?(?:_|\b)/i
+rawbody __PC_RND_RAWBODY	/%RA?ND(?:OM)?(?:_|\b)/i
 meta PERCENT_RANDOM	(__PC_RND_HEADER || __PC_RND_BODY || __PC_RND_RAWBODY)
