@@ -88,6 +88,7 @@ sub usage {
 
 my %opt = ( 'create-prefs' => 1, 'format' => 'detect' );
 my $doing_whitelist_operation = 0;
+my $count                     = 0;
 my @targets                   = ();
 my $exitvalue;
 
@@ -241,6 +242,12 @@ if ( defined $tempfile ) {
   unlink $tempfile;
 }
 
+# Let folks know how many messages were handled, as long as the handling
+# didn't produce output (ala: check, test, or remove_markup ...)
+if ( $opt{'report'} || $opt{'revoke'} || $doing_whitelist_operation ) {
+  print "$count message(s) examined.\n";
+}
+
 # if the eval died from something, report it here and return an error.
 if ($@) { die $@; }
 
@@ -260,6 +267,7 @@ sub NEVERCALLED {
 sub wanted {
   my $dataref = $_[3];
   my $mail    = $spamtest->parse($dataref);
+  $count++;
 
   # This is a short cut -- doing white/black-list?  Do it and return quickly.
   if ($doing_whitelist_operation) {
