@@ -111,10 +111,10 @@ sub writescores_c {
 
 int num_scores;
 unsigned char is_mutatable[$size]; 	/* er, is_mutable I think ;) */
-double range_lo[$size];
-double range_hi[$size];
-double bestscores[$size];
-double scores[$size];
+float range_lo[$size];
+float range_hi[$size];
+float bestscores[$size];
+float scores[$size];
 char *score_names[$size];
 
 /* readscores() is defined in tests.h */

@@ -1,17 +1,38 @@
+# Pick whether or not to use MPI here
+# Allowed values are yes, no
+MPI = yes
 
-CC = mpicc
-USE_MPI = -DUSE_MPI
-#CC = gcc
-#USE_MPI =
+# Pick a platform to build for - currently support linux, macosx
+PLATFORM = macosx
 
-OPT = -O9 -march=athlon
-PGALIB = pgapack
+# Pick where you have PGApack installed
+PGAPATH = pgapack
 
+
+#### Should be no need to modify below this line
+
+ifeq ($(MPI),yes)
+  CC = mpicc
+  USE_MPI = -DUSE_MPI
+else
+  CC = gcc
+  USE_MPI =
+endif
+
+PGAINC = $(PGAPATH)/include
+
+ifeq ($(PLATFORM),macosx)
+  OPT = -O3 -mcpu=750 -faltivec
+  PGALIB = $(PGAPATH)/lib/freebsd
+else
+  OPT = -O9 -mcpu=athlon
+  PGALIB = $(PGAPATH)/lib/linux
+endif
 
 all: evolve
 
 evolve: tmp/tests.h craig-evolve.c
-	$(CC) -Wall $(OPT) $(USE_MPI) -Dlinux -DWL=2 -DOPTIMIZE -L$(PGALIB)/lib/linux -I$(PGALIB)/include craig-evolve.c -o evolve -lpgaO -lm
+	$(CC) -Wall $(OPT) $(USE_MPI) -DWL=2 -DOPTIMIZE -L$(PGALIB) -I$(PGAINC) craig-evolve.c -o evolve -lpgaO
 	strip evolve
 
 tmp/tests.h: tmp/.created tmp/ranges.data logs-to-c
