@@ -793,3 +793,7 @@ body T_HTML_OBFUSCATE5_60_70 eval:html_range('t_obfuscation5_ratio','.6','.7')
 body T_HTML_OBFUSCATE5_70_80 eval:html_range('t_obfuscation5_ratio','.7','.8')
 body T_HTML_OBFUSCATE5_80_90 eval:html_range('t_obfuscation5_ratio','.8','.9')
 body T_HTML_OBFUSCATE5_90_100 eval:html_range('t_obfuscation5_ratio','.9','1.0')
+
+header T_RCVD_ILLEGAL_IP    Received =~ /\b(?:(?:[01257]|22[3-9]|23[0-9]|24[0-9]|25[0-5])\.\d+\.\d+\.\d+|127\.[1-9]\.\d+\.\d+|127\.0\.[1-9]\.\d+|127\.0\.0\.(?:\d\d+|[2-9]))\b/
+describe T_RCVD_ILLEGAL_IP  Received contains illegal IP address
+
