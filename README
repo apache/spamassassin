@@ -224,7 +224,8 @@ handle local mail delivery:
 
   - **BEFORE YOU DO THIS** consider using procmail instead (see above),
     it's recommended for this situation, and less bugs have been reported
-    with it.
+    with it.  Notably, use of SpamAssassin with an NFS-mounted mail spool
+    is **NOT SAFE**.  Please use procmail!
 
   - Make a backup of your .forward (if it exists).
 
