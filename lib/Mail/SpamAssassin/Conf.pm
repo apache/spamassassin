@@ -32,8 +32,6 @@ sub new {
 
   $self->{scores} = { };
   $self->{required_hits} = 5;
-  $self->{razor_host} = 'razor.vipul.net';
-  $self->{razor_port} = 2702;
   $self->{report_template} = '';
 
   $self;
@@ -93,18 +91,6 @@ sub parse_rules {
 
     if (/^required_hits\s+(\d+)$/) {
       $self->{required_hits} = $1+0;
-      next;
-    }
-
-    if (/^razor_server\s+(\S+)$/) {
-      $self->{razor_host} = $1;
-
-      if ($self->{razor_host} =~ s/:(\d+)$//) {
-	$self->{razor_port} = $1+0;
-	if ($self->{razor_port} == 0) { goto failed_line; }
-      } else {
-	$self->{razor_port} = 2702;		# default port
-      }
       next;
     }
 

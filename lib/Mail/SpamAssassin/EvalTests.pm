@@ -204,10 +204,10 @@ sub check_for_very_long_text {
 ###########################################################################
 
 sub check_razor {
-  my ($self, $fulltext) = @_;
+  my ($self, $fulltext, $site) = @_;
 
   return 0 unless ($self->is_razor_available());
-  return $self->razor_lookup ($fulltext);
+  return $self->razor_lookup ($site, $fulltext);
 }
 
 ###########################################################################
@@ -230,13 +230,13 @@ sub is_razor_available {
 }
 
 sub razor_lookup {
-  my ($self, $fulltext) = @_;
+  my ($self, $site, $fulltext) = @_;
 
   my @msg = split (/\n/, $fulltext);
 
-  my $Rserver = $self->{main}->{conf}->{razor_host};
-  my $Rport   = $self->{main}->{conf}->{razor_port};
-
+  $site =~ /^(\S+):(\d+)$/;
+  my $Rserver = $1;
+  my $Rport   = $2;
   my $sock = new IO::Socket::INET PeerAddr => $Rserver,
 				  PeerPort => $Rport, 
 				  Proto    => 'tcp';
