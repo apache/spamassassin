@@ -1764,13 +1764,22 @@ sub kill_handler {
 # takes care of dead children
 sub child_handler {
   my ($sig) = @_;
-  $SIG{CHLD} = \&child_handler;    # reset as necessary
-  my $pid = wait;                  # reap the child
-  delete $children{$pid};          # remove the child out of the pool
 
   unless ($main::INHIBIT_LOGGING_IN_SIGCHLD_HANDLER) {
-    logmsg("server hit by SIG$sig, pid $pid");
+    logmsg("server hit by SIG$sig");
   }
+
+  # clean up any children which have exited
+  while((my $pid = waitpid(-1, WNOHANG)) > 0) {
+    # remove them from our child listing
+    delete $children{$pid};
+
+    unless ($main::INHIBIT_LOGGING_IN_SIGCHLD_HANDLER) {
+      logmsg("handled cleanup of child pid $pid");
+    }
+  }
+
+  $SIG{CHLD} = \&child_handler;    # reset as necessary, should be at end
 }
 
 sub restart_handler {
@@ -1780,7 +1789,7 @@ sub restart_handler {
   $SIG{CHLD} = 'DEFAULT';    # we're going to kill our children
   foreach (keys %children) {
     kill 'INT' => $_;
-    my $pid = wait;
+    my $pid = waitpid($_, 0);
     logmsg("child $pid killed successfully");
   }
   %children = ();
