@@ -30,6 +30,7 @@ while(<SPAM>)
     my $score = 0.0;
     foreach $rule (@rules)
     {
+        next unless (defined ($scores{$rule}));
 	$score += $scores{$rule};
 	$rulehit{$rule}++;
     }
@@ -38,6 +39,7 @@ while(<SPAM>)
     {
 	foreach $rule (@rules)
 	{
+            next unless (defined ($scores{$rule}));
 	    $falseneg{$rule}++;
 	}
 	$nfn++;
@@ -48,11 +50,15 @@ close(SPAM);
 
 while(<NONSPAM>)
 {
+    next if /^#/;
     /.\s+[-0-9]*\s+[^\s]+\s+([^\s]*)\s*$/;
+    next unless defined($1);
+
     my @rules=split /,/,$1;
     my $score = 0.0;
     foreach $rule (@rules)
     {
+        next unless (defined ($scores{$rule}));
 	$score += $scores{$rule};
 	$rulehit{$rule}++;
     }
@@ -61,13 +67,14 @@ while(<NONSPAM>)
     {
 	foreach $rule (@rules)
 	{
+            next unless (defined ($scores{$rule}));
 	    $falsepos{$rule}++;
 	}
 	$nfp++;
     }
 }
 
-@fpk = sort { $falsepos{$b}/$rulehit{$b} <=> $falsepos{$a}/$rulehit{$a} } keys %falsepos;
+@fpk = sort { $falsepos{$b}/($rulehit{$b}||0.0001) <=> $falsepos{$a}/($rulehit{$a}||0.00001) } keys %falsepos;
 
 print "COMMON FALSE POSITIVES: ($nfp total)\n-----------------------\n\n";
 foreach $key (@fpk)
@@ -75,7 +82,7 @@ foreach $key (@fpk)
     print sprintf("%0.3f %5d % 0.4f %s\n",$falsepos{$key}/($rulehit{$key}-1),$falsepos{$key},$scores{$key},$key) if $falsepos{$key}>0;
 }
 
-@fnk = sort { $falseneg{$b}/$rulehit{$b} <=> $falseneg{$a}/$rulehit{$a} } keys %falseneg;
+@fnk = sort { $falseneg{$b}/($rulehit{$b}||0.0001) <=> $falseneg{$a}/($rulehit{$a}||0.00001) } keys %falseneg;
 
 print "\n\n\nCOMMON FALSE NEGATIVES: ($nfn total)\n-----------------------\n\n";
 foreach $key (@fnk)

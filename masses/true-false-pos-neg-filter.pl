@@ -2,12 +2,12 @@
 
 use strict;
 use warnings;
+use vars qw(%scores);
 
 my $threshold = 5;
 my %is_spam = ();
 my %id_spam = ();
 my %lines = ();
-my %scores = ();
 my $cffile = "craig-evolve.scores";
 
 print "Reading scores...";
@@ -108,20 +108,8 @@ sub readlogs {
 }
 
 sub readscores {
-    open (IN, "<$cffile") or warn "cannot read $cffile\n";
-    while (<IN>) {
-	s/#.*$//g;
-	s/^\s+//;
-	s/\s+$//;
-	
-	if (/^(header|body|full)\s+(\S+)\s+/) {
-	    $scores{$2} ||= 1;
-	} elsif (/^score\s+(\S+)\s+(.+)$/) {
-	    $scores{$1} = $2;
-	}
-    }
-    close IN;
-
+    system ("./parse-rules-for-masses -d ../rules -d \"$cffile\"") and die;
+    require "./tmp/rules.pl";
     print scalar(keys %scores),"\n";
 }
 

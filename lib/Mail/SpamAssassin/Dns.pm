@@ -36,7 +36,45 @@ use vars qw{
                        gwdg.de
                     };
 
-$IP_IN_RESERVED_RANGE = undef;
+# Initialize a regexp for reserved IPs, i.e. ones that could be
+# used inside a company and be the first or second relay hit by
+# a message. Some companies use these internally and translate
+# them using a NAT firewall. These are listed in the RBL as invalid
+# originators -- which is true, if you receive the mail directly
+# from them; however we do not, so we should ignore them.
+# cf. <http://www.iana.org/assignments/ipv4-address-space>,
+#     <http://duxcw.com/faq/network/privip.htm>,
+#     <http://duxcw.com/faq/network/autoip.htm>
+#
+# Last update
+#   2002-08-24 Malte S. Stretz - added 172.16/12, 169.254/16
+#   2002-08-23 Justin Mason - added 192.168/16
+#   2002-08-12 Matt Kettler - mail to SpamAssassin-devel
+#              msgid:<5.1.0.14.0.20020812211512.00a33cc0@192.168.50.2>
+#
+$IP_IN_RESERVED_RANGE = qr{^(?:
+  192\.168|                        # 192.168/16:              Private Use
+  10|                              # 10/8:                    Private Use
+  172\.(?:1[6-9]|2[0-9]|3[01])|    # 172.16-172.31/16:        Private Use
+  169\.254|                        # 169.254/16:              Private Use (APIPA)
+  127|                             # 127/8:                   Private Use (localhost)
+
+  [01257]|                         # 000-002/8, 005/8, 007/8: Reserved
+  2[37]|                           # 023/8, 027/8:            Reserved
+  3[179]|                          # 031/8, 037/8, 039/8:     Reserved
+  4[12]|                           # 041/8, 042/8:            Reserved
+  5[89]|                           # 058/8, 059/8:            Reserved
+  60|                              # 060/8:                   Reserved
+  7[0-9]|                          # 070-079/8:               Reserved
+  8[2-9]|                          # 082
+  9[0-9]|                          #  -
+  1[01][0-9]|                      #  -
+  12[0-6]|                         # 126/8:                   Reserved
+  197|                             # 197/8:                   Reserved
+  22[23]|                          # 222/8, 223/8:            Reserved
+  24[0-9]|                         # 240-
+  25[0-5]|                         # 255/8:                   Reserved
+)\.}x;
 
 $IS_DNS_AVAILABLE = undef;
 
@@ -170,52 +208,6 @@ sub do_rbl_lookup {
   return 0;
 }
 
-# Initialize a regexp for reserved IPs, i.e. ones that could be
-# used inside a company and be the first or second relay hit by
-# a message. Some companies use these internally and translate
-# them using a NAT firewall. These are listed in the RBL as invalid
-# originators -- which is true, if you receive the mail directly
-# from them; however we do not, so we should ignore them.
-# cf. http://www.iana.org/assignments/ipv4-address-space .
-#
-# Last update by Matt Kettler - mail to SpamAssassin-devel, Mon 12 Aug
-# 2002, msgid <5.1.0.14.0.20020812211512.00a33cc0@192.168.50.2>.
-#
-sub init_rbl_check_reserved_ips {
-  return if defined ($IP_IN_RESERVED_RANGE);
-
-  $IP_IN_RESERVED_RANGE = '^(?:';
-  foreach my $top8bits (qw(
-                    [012]
-                    5
-                    7
-                    10
-                    23
-                    27
-                    31
-                    37
-                    39
-                    41
-                    42
-                    58
-                    59
-                    60
-                    7[0-9]
-                    8[2-9]
-                    9[0-9]
-                    1[01][0-9]
-                    12[0-7]
-                    197
-                    22[23]
-                    24[0-9]
-                    25[0-5]
-                  ))
-  {
-    $IP_IN_RESERVED_RANGE .= $top8bits . '\.|';
-  }
-  $IP_IN_RESERVED_RANGE =~ s/\|$/\)/;
-}
-
 ###########################################################################
 
 sub is_razor1_available {
@@ -252,12 +244,12 @@ sub razor1_lookup {
   my $response = undef;
 
   # razor also debugs to stdout. argh. fix it to stderr...
-  if ($Mail::SpamAssassin::DEBUG) {
+  if ($Mail::SpamAssassin::DEBUG->{enabled}) {
     open (OLDOUT, ">&STDOUT");
     open (STDOUT, ">&STDERR");
   }
 
-  my $oldslash = $/;
+  $self->enter_helper_run_mode();
 
   {
     eval {
@@ -312,10 +304,10 @@ sub razor1_lookup {
     }
   }
 
-  $/ = $oldslash;		# argh! pollution!
+  $self->leave_helper_run_mode();
 
   # razor also debugs to stdout. argh. fix it to stderr...
-  if ($Mail::SpamAssassin::DEBUG) {
+  if ($Mail::SpamAssassin::DEBUG->{enabled}) {
     open (STDOUT, ">&OLDOUT");
     close OLDOUT;
   }
@@ -364,16 +356,16 @@ sub razor2_lookup {
   my $response = undef;
 
   # razor also debugs to stdout. argh. fix it to stderr...
-  if ($Mail::SpamAssassin::DEBUG) {
+  if ($Mail::SpamAssassin::DEBUG->{enabled}) {
     open (OLDOUT, ">&STDOUT");
     open (STDOUT, ">&STDERR");
   }
 
-  my $oldslash = $/;
+  $self->enter_helper_run_mode();
 
-  {
     eval {
       local ($^W) = 0;    # argh, warnings in Razor
+      local %ENV;
 
       require Razor2::Client::Agent;
 
@@ -408,7 +400,11 @@ sub razor2_lookup {
           $response = 0;
         }
         else {
-          $rc->connect() or die $rc->errprefix("checkit");
+          if (!$rc->connect()) {
+            # provide a better error message when servers are unavailable,
+            # than "Bad file descriptor Died".
+            die "could not connect to any servers\n";
+          }
           $rc->check($objects) or die $rc->errprefix("checkit");
           $rc->disconnect() or die $rc->errprefix("checkit");
           $response = $objects->[0]->{spam};
@@ -432,12 +428,11 @@ sub razor2_lookup {
         warn("razor2 check skipped: $! $@");
         }
       }
-  }
 
-  $/ = $oldslash;		# argh! pollution!
+  $self->leave_helper_run_mode();
 
   # razor also debugs to stdout. argh. fix it to stderr...
-  if ($Mail::SpamAssassin::DEBUG) {
+  if ($Mail::SpamAssassin::DEBUG->{enabled}) {
     open (STDOUT, ">&OLDOUT");
     close OLDOUT;
   }
@@ -454,7 +449,6 @@ sub razor2_lookup {
 
 sub is_dcc_available {
   my ($self) = @_;
-  my (@resp);
 
   if ($self->{main}->{local_tests_only}) {
     dbg ("local tests only, ignoring DCC");
@@ -477,11 +471,9 @@ sub is_dcc_available {
     return 0;
   }
 
-  dbg ("DCC is available: ".join(" ", @resp));
+  dbg ("DCC is available: ".$self->{conf}->{dcc_path});
   return 1;
 }
-
-use Symbol qw(gensym);
 
 sub dcc_lookup {
   my ($self, $fulltext) = @_;
@@ -501,32 +493,31 @@ sub dcc_lookup {
   }
 
   timelog("DCC -> Starting test ($timeout secs max)", "dcc", 1);
+  $self->enter_helper_run_mode();
+
+  # use a temp file here -- open2() is unreliable, buffering-wise,
+  # under spamd. :(
+  my $tmpf = $self->create_fulltext_tmpfile($fulltext);
 
   eval {
-    my ($dccin, $dccout, $pid);
-
     local $SIG{ALRM} = sub { die "alarm\n" };
     local $SIG{PIPE} = sub { die "brokenpipe\n" };
 
     alarm($timeout);
 
-    $dccin = gensym();
-    $dccout = gensym();
+    my $pid = open(DCC, join(' ',
+                        $self->{conf}->{dcc_path}, '-H', 
+                        $self->{conf}->{dcc_options}, '< \''.$tmpf.'\' 2>&1 |'));
+    $response = <DCC>;
+    close DCC;
 
-    $pid = open2($dccout, $dccin, join(' ', $self->{conf}->{dcc_path}, '-H', $self->{conf}->{dcc_options}, '2>&1'));
-
-    print $dccin $$fulltext;
-    
-    close ($dccin);
-
-    $response = <$dccout>;
-        
     dbg("DCC: got response: $response");
 
-    waitpid ($pid, 0);
-
     alarm(0);
+    waitpid ($pid, 0);
   };
+
+  $self->leave_helper_run_mode();
 
   if ($@) {
     $response = undef;
@@ -545,7 +536,7 @@ sub dcc_lookup {
     }
   }
 
-  if ($response !~ /^X-DCC/) {
+  if (!defined $response || $response !~ /^X-DCC/) {
     dbg ("DCC -> check failed - no X-DCC returned (did you create a map file?): $response");
     timelog("dcc check failed", "dcc", 2);
     return 0;
@@ -584,7 +575,6 @@ sub dcc_lookup {
 
 sub is_pyzor_available {
   my ($self) = @_;
-  my (@resp);
 
   if ($self->{main}->{local_tests_only}) {
     dbg ("local tests only, ignoring Pyzor");
@@ -607,11 +597,9 @@ sub is_pyzor_available {
     return 0;
   }
 
-  dbg ("Pyzor is available: ".join(" ", @resp));
+  dbg ("Pyzor is available: ".$self->{conf}->{pyzor_path});
   return 1;
 }
-
-use Symbol qw(gensym);
 
 sub pyzor_lookup {
   my ($self, $fulltext) = @_;
@@ -629,32 +617,29 @@ sub pyzor_lookup {
   }
 
   timelog("Pyzor -> Starting test ($timeout secs max)", "pyzor", 1);
+  $self->enter_helper_run_mode();
+
+  # use a temp file here -- open2() is unreliable, buffering-wise,
+  # under spamd. :(
+  my $tmpf = $self->create_fulltext_tmpfile($fulltext);
 
   eval {
-    my ($pyzorin, $pyzorout, $pid);
-
     local $SIG{ALRM} = sub { die "alarm\n" };
     local $SIG{PIPE} = sub { die "brokenpipe\n" };
 
     alarm($timeout);
 
-    $pyzorin = gensym();
-    $pyzorout = gensym();
-
-    $pid = open2($pyzorout, $pyzorin, join(' ', $self->{conf}->{pyzor_path}, 'check', '2>&1'));
-
-    print $pyzorin $$fulltext;
-    
-    close ($pyzorin);
-
-    $response = <$pyzorout>;
-        
+    my $pid = open(PYZOR, join(' ',
+                    $self->{conf}->{pyzor_path}, 'check < \''.$tmpf.'\' 2>&1 |'));
+    $response = <PYZOR>;
+    close PYZOR;
     dbg("Pyzor: got response: $response");
 
-    waitpid ($pid, 0);
-
     alarm(0);
+    waitpid ($pid, 0);
   };
+
+  $self->leave_helper_run_mode();
 
   if ($@) {
     $response = undef;
@@ -832,6 +817,39 @@ done:
   # jm: leaving this in!
   dbg ("is DNS available? $IS_DNS_AVAILABLE");
   return $IS_DNS_AVAILABLE;
+}
+
+###########################################################################
+
+sub enter_helper_run_mode {
+  my ($self) = @_;
+
+  dbg ("entering helper-app run mode");
+  $self->{old_slash} = $/;              # Razor pollutes this
+  $self->{old_env_home} = $ENV{'HOME'}; # can be 'undef', e.g. spamd has no HOME
+
+  if (defined $self->{main}->{home_dir_for_helpers}
+             && $self->{main}->{home_dir_for_helpers})
+  {
+    $ENV{'HOME'} = $self->{main}->{home_dir_for_helpers};
+  }
+  else {
+    # use spamd -u user's home dir
+    my $hd = (getpwuid($>))[7];
+    $ENV{'HOME'} = $hd if defined $hd;
+  }
+}
+
+sub leave_helper_run_mode {
+  my ($self) = @_;
+
+  dbg ("leaving helper-app run mode");
+  $/ = $self->{old_slash};
+  if (defined $self->{old_env_home}) {
+    $ENV{'HOME'} = $self->{old_env_home};
+  } else {
+    delete $ENV{'HOME'};        # make sure it's unset
+  }
 }
 
 ###########################################################################
