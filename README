@@ -263,9 +263,11 @@ them to edit their preferences and reweight the rules, or to increase or
 decrease the "line in the sand" at which point a mail is judged spam (or
 not).
 
-Systems administrators can create the "/etc/spamassassin.cf" file to add new
-rules for all users on the system, or they can create
+Systems administrators can create the "/etc/spamassassin.cf" file to add
+new rules for all users on the system, or they can create
 "/etc/spamassassin.prefs" to set default preferences for their users.
+Note that the latter file is never read by SpamAssassin, just copied.  If
+you want to set site-wide preferences, use "/etc/spamassassin.cf".
 
 The default config files installed by SpamAssassin are generally written
 into the site_perl directory; this may be
@@ -307,7 +309,8 @@ So, to summarise:
 	set defaults for users preferences files.  Takes precedence over
 	the above prefs file, if it exists.   Do not put system-wide
 	settings in here; put them in /etc/spamassassin.cf instead.
-	This file is just a template for users to change.
+	This file is just a template, which will be copied to a user's
+	home directory for them to change.
 
   - $USER_HOME/.spamassassin.cf:
 
