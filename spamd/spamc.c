@@ -16,6 +16,12 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <netinet/in.h>
+#include <netinet/tcp.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+#include <pwd.h>
+
 /* RedHat 5.2 doesn't define Shutdown 2nd Parameter Constants */
 /* KAM 12-4-01 */
 #ifndef SHUT_RD
@@ -27,18 +33,14 @@
 #ifndef SHUT_RDWR
 #define SHUT_RDWR (2) /* No more receptions or transmissions.  */
 #endif
-#include <netinet/in.h>
-#include <netinet/tcp.h>
-#include <netdb.h>
-#include <arpa/inet.h>
-#include <pwd.h>
 
 /* SunOS 4.1.4 patch from Tom Lipkis <tal@pss.com> */
-#ifndef EX__MAX
-/* SunOS lacks these */
-#define EX__MAX 77
+#if defined(__sun__) && defined(__sparc__) && !defined(__svr4__)
+# ifndef EX__MAX
+# define EX__MAX 77
 extern char *optarg;
 typedef unsigned long	in_addr_t;	/* base type for internet address */
+# endif
 #endif
 
 #ifndef INADDR_NONE
