@@ -207,3 +207,7 @@
 #
 #uri YELLOWSUN			/yellowsun01\.com/i   
 #describe YELLOWSUN		Frequent SPAM content
+#
+#rawbody CARRIAGE_RETURNS	eval:check_carriage_returns()
+#describe CARRIAGE_RETURNS	Message contains a lot of ^M characters
+#lang fr describe CARRIAGE_RETURNS       Message contennant plein de caractères ^M (retour chariot)
