@@ -43,7 +43,7 @@ case "$1" in
         killproc spamd
         RETVAL=$?
         echo
-        [ $RETVAL = 0 ] && rm -f /var/lock/subsys/spand
+        [ $RETVAL = 0 ] && rm -f /var/lock/subsys/spamd
         ;;
   restart)
         $0 stop
