@@ -1062,7 +1062,6 @@ sub html_comment {
   my ($self, $text) = @_;
 
   push @{ $self->{html}{comment} }, $text;
-  $self->{html}{total_comment_length} += length($text);
 
   if ($self->{html_last_tag} eq "div" &&
       $text =~ /Converted from text\/plain format/)
@@ -1087,6 +1086,10 @@ sub html_comment {
     if ($text =~ /font(?:-size)?:\s*(\d+(?:\.\d*)?|\.\d+)(p[tx])/i) {
       $self->examine_text_style ($1, $2);
     }
+  }
+  else {
+    # one last try before we bail on HTML_COMMENT_RATIO
+    $self->{html}{total_comment_length} += length($text);
   }
 
   if (exists $self->{html}{shouting} && $self->{html}{shouting} > 1) {
