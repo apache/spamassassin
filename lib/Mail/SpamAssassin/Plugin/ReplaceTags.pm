@@ -22,6 +22,9 @@ The plugin allows rules to contain regular expression tags to be used in
 regular expression rules.  The tags make it much easier to maintain
 complicated rules.
 
+Warning: This plugin replies on data structures specific to this version of
+SpamAssasin; it is not guaranteed to work with other versions of SpamAssassin.
+
 =head1 SYNOPSIS
 
   loadplugin	Mail::SpamAssassin::Plugin::ReplaceTags
@@ -80,6 +83,7 @@ sub finish_parsing_end {
   my $start = $opts->{conf}->{replace_start};
   my $end = $opts->{conf}->{replace_end};
 
+  # this is the version-specific code
   for my $type (qw|body_tests rawbody_tests head_tests full_tests uri_tests|) {
     for my $priority (keys %{$opts->{conf}->{$type}}) {
       while (my ($rule, $re) = each %{$opts->{conf}->{$type}->{$priority}}) {
