@@ -643,7 +643,8 @@ sub dcc_lookup {
 
     dbg("dcc: got response: $response");
 
-    $self->cleanup_kids($pid);
+    # note: this must be called BEFORE leave_helper_run_mode()
+    # $self->cleanup_kids($pid);
     alarm $oldalarm;
   };
 
@@ -777,7 +778,8 @@ sub pyzor_lookup {
       die("pyzor: internal error\n");
     }
 
-    $self->cleanup_kids($pid);
+    # note: this must be called BEFORE leave_helper_run_mode()
+    # $self->cleanup_kids($pid);
     alarm $oldalarm;
   };
 
@@ -1152,6 +1154,13 @@ sub enter_helper_run_mode {
   if ($newhome) {
     $ENV{'HOME'} = Mail::SpamAssassin::Util::untaint_file_path ($newhome);
   }
+
+  # enforce SIGCHLD as DEFAULT; IGNORE causes spurious kernel warnings
+  # on Red Hat NPTL kernels (bug 1536), and some users of the
+  # Mail::SpamAssassin modules set SIGCHLD to be a fatal signal
+  # for some reason! (bug 3507)
+  $self->{old_sigchld_handler} = $SIG{CHLD};
+  $SIG{CHLD} = 'DEFAULT';
 }
 
 sub leave_helper_run_mode {
@@ -1160,11 +1169,14 @@ sub leave_helper_run_mode {
   dbg("info: leaving helper-app run mode");
   $/ = $self->{old_slash};
   %ENV = %{$self->{old_env}};
+  $SIG{CHLD} = $self->{old_sigchld_handler};
 }
 
+# note: this must be called before leave_helper_run_mode() is called,
+# as the SIGCHLD signal must be set to DEFAULT for it to work.
 sub cleanup_kids {
   my ($self, $pid) = @_;
-
+  
   if ($SIG{CHLD} && $SIG{CHLD} ne 'IGNORE') {	# running from spamd
     waitpid ($pid, 0);
   }
