@@ -527,3 +527,23 @@ header T_HEAD_NUM_END_7_MAILEXCITE	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}
 header T_HEAD_NUM_END_7_MSN	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@msn\.(?:com|net|org)/im
 header T_HEAD_NUM_END_7_PRODIGY	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@prodigy\.(?:com|net|org)/im
 header T_HEAD_NUM_END_7_YAHOO	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@yahoo\.(?:com|net|org)/im
+
+########################################################################
+
+# bug 3999
+header __HAS_REFERENCES		exists:References
+header __HAS_X_NEWSREADER	exists:X-Newsreader
+
+# don't really like this one
+meta T_PRIORITY_NO_NAME_1		((__HAS_X_PRIORITY || __HAS_MSMAIL_PRI) && !__HAS_X_MAILER && !__IS_EXCH && !__USER_AGENT && !__HAS_REFERENCES)
+# a bit better, but doesn't look to be as helpful
+meta T_PRIORITY_NO_NAME_2		((__HAS_X_PRIORITY || __HAS_MSMAIL_PRI) && !__HAS_X_MAILER && !__IS_EXCH && !__USER_AGENT && !__HAS_X_NEWSREADER)
+
+# maybe split into two rules... one for X-Priority
+meta T_PRIORITY_NO_NAME_XP		(__HAS_X_PRIORITY && !__HAS_X_MAILER && !__IS_EXCH && !__USER_AGENT)
+meta T_PRIORITY_NO_NAME_XP_1		(__HAS_X_PRIORITY && !__HAS_X_MAILER && !__IS_EXCH && !__USER_AGENT && !__HAS_REFERENCES)
+meta T_PRIORITY_NO_NAME_XP_2		(__HAS_X_PRIORITY && !__HAS_X_MAILER && !__IS_EXCH && !__USER_AGENT && !__HAS_X_NEWSREADER)
+# and one for the Microsoft version
+meta T_PRIORITY_NO_NAME_MS		(__HAS_MSMAIL_PRI && !__HAS_X_MAILER && !__IS_EXCH && !__USER_AGENT)
+meta T_PRIORITY_NO_NAME_MS_1		(__HAS_MSMAIL_PRI && !__HAS_X_MAILER && !__IS_EXCH && !__USER_AGENT && !__HAS_X_NEWSREADER)
+meta T_PRIORITY_NO_NAME_MS_2		(__HAS_MSMAIL_PRI && !__HAS_X_MAILER && !__IS_EXCH && !__USER_AGENT && !__HAS_REFERENCES)
