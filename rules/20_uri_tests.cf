@@ -125,12 +125,6 @@ describe BIZ_TLD		Contains a URL in the BIZ top-level domain
 uri      HTTP_ENTITIES_HOST	m{https?://[^\s\">/]*\&\#[\da-f]+}i
 describe HTTP_ENTITIES_HOST	URI obscured with character entities
 
-uri 	URI_DOLLARMACHINE 	/dollar.?machine/i
-describe URI_DOLLARMACHINE	Message has URI for dollarmachine
-
-uri 	URI_HITBOX 		/hitbox\.com/i
-describe URI_HITBOX		Message has URI for hitbox.com
-
 uri	YAHOO_REDIR		/^https?\:\/\/rd\.yahoo\.com\/(?:[0-9]{4,}|partner\b|dir\b)/i
 describe YAHOO_REDIR		Has Yahoo Redirect URI
 
