@@ -19,7 +19,7 @@ use vars qw{
   @DBNAMES @DB_EXTENSIONS
   $NSPAM_MAGIC_TOKEN $NHAM_MAGIC_TOKEN $LAST_EXPIRE_MAGIC_TOKEN
   $NTOKENS_MAGIC_TOKEN $OLDEST_TOKEN_AGE_MAGIC_TOKEN
-  $SCANCOUNT_BASE_MAGIC_TOKEN 
+  $SCANCOUNT_BASE_MAGIC_TOKEN $RUNNING_EXPIRE_MAGIC_TOKEN
 };
 
 @ISA = qw();
@@ -66,6 +66,7 @@ $OLDEST_TOKEN_AGE_MAGIC_TOKEN = '**OLDESTAGE';
 $LAST_EXPIRE_MAGIC_TOKEN = '**LASTEXPIRE';
 $NTOKENS_MAGIC_TOKEN = '**NTOKENS';
 $SCANCOUNT_BASE_MAGIC_TOKEN = '**SCANBASE';
+$RUNNING_EXPIRE_MAGIC_TOKEN = '**RUNNINGEXPIRE';
 
 use constant MAX_SIZE_FOR_SCAN_COUNT_FILE => 5000;
 
@@ -275,8 +276,13 @@ sub expire_old_tokens {
 sub expire_old_tokens_trapped {
   my ($self, $opts) = @_;
 
-  if (!$self->expiry_due() && !$self->{bayes}->{main}->{learn_force_expire})
-				{ return 0; }
+  # Flag that we're doing work
+  $self->set_running_expire_tok();
+
+  if (!$self->expiry_due() && !$self->{bayes}->{main}->{learn_force_expire}) {
+    $self->remove_running_expire_tok();
+    return 0;
+  }
 
   my $too_old = $self->scan_count_get();
   $too_old = ($too_old < $self->{expiry_count} ? 
@@ -316,7 +322,8 @@ sub expire_old_tokens_trapped {
 	  || $tok eq $LAST_EXPIRE_MAGIC_TOKEN
 	  || $tok eq $NTOKENS_MAGIC_TOKEN
 	  || $tok eq $OLDEST_TOKEN_AGE_MAGIC_TOKEN
-	  || $tok eq $SCANCOUNT_BASE_MAGIC_TOKEN);
+	  || $tok eq $SCANCOUNT_BASE_MAGIC_TOKEN
+	  || $tok eq $RUNNING_EXPIRE_MAGIC_TOKEN);
 
     my ($ts, $th, $atime) = $self->tok_get ($tok);
 
@@ -341,8 +348,9 @@ sub expire_old_tokens_trapped {
       }
     }
 
-    if ($showdots && (($kept + $deleted) % 1000) == 0) {
-      print STDERR ".";
+    if ((($kept + $deleted) % 1000) == 0) {
+      if ($showdots) { print STDERR "."; }
+      $self->set_running_expire_tok();
     }
   }
 
@@ -366,7 +374,7 @@ sub expire_old_tokens_trapped {
   @deleted_toks = ();		# free 'em up
   $deleted -= $reprieved;
 
-  # and add the magic tokens
+  # and add the magic tokens.  don't add the expire_running token.
   $new_toks{$SCANCOUNT_BASE_MAGIC_TOKEN} = $self->{db_toks}->{$SCANCOUNT_BASE_MAGIC_TOKEN};
   $new_toks{$LAST_EXPIRE_MAGIC_TOKEN} = $self->scan_count_get();
   $new_toks{$OLDEST_TOKEN_AGE_MAGIC_TOKEN} = $oldest;
@@ -388,10 +396,8 @@ sub expire_old_tokens_trapped {
     }
   }
 
-  # ok, once that's done we can re-tie.  Call untie_db() first so
-  # we unlock correctly etc. first
+  # Call untie_db() first so we unlock correctly etc. first
   $self->untie_db();
-  $self->tie_db_writable();
 
   my $done = time();
 
@@ -478,6 +484,21 @@ sub nspam_nham_get {
   ($ns || 0, $nn || 0);
 }
 
+sub get_running_expire_tok {
+  my ($self) = @_;
+  return $self->{db_toks}->{$RUNNING_EXPIRE_MAGIC_TOKEN};
+}
+
+sub set_running_expire_tok {
+  my ($self) = @_;
+  $self->{db_toks}->{$RUNNING_EXPIRE_MAGIC_TOKEN} = time();
+}
+
+sub remove_running_expire_tok {
+  my ($self) = @_;
+  delete $self->{db_toks}->{$RUNNING_EXPIRE_MAGIC_TOKEN};
+}
+
 ###########################################################################
 
 # db abstraction: allow deferred writes, since we will be frequently
@@ -546,79 +567,102 @@ sub expiry_now {
 
 sub sync_journal {
   my ($self, $opts) = @_;
+  my $ret = 0;
 
   my $path = $self->get_journal_filename();
 
-  if (!-f $path) { return 0; }
+  # if $path doesn't exist, or it's not a file, or is 0 bytes in length, return
+  if ( !stat($path) || !-f _ || -z _ ) { return 0; }
 
-  # retire the journal, so we can update the db files from it in peace.
-  # TODO: use locking here
-  my $retirepath = $path.".old";
-  if (!rename ($path, $retirepath)) {
-    warn "bayes: failed rename $path to $retirepath\n";
-    return 0;
-  }
-
-  my $started = time();
-  my $count = 0;
-
-  my $showdots = $opts->{showdots};
-
-  # now read the retired journal
-  if (!open (JOURNAL, "<".$retirepath)) {
-    warn "bayes: cannot open read $retirepath\n";
-    rename($retirepath,$path); # try to put it back if we can...
-    return 0;
-  }
-
-  my $ok_to_remove = 0;
   eval {
     local $SIG{'__DIE__'};	# do not run user die() traps in here
-
     if ($self->tie_db_writable()) {
-      while (<JOURNAL>) {
-        $count++;
-        if (/^c (-?\d+) (-?\d+) (\d+) (.*)$/) {
-          $self->tok_sync_counters ($1+0, $2+0, $3+0, $4);
-        } elsif (/^t (\d+) (.*)$/) {
-          $self->tok_touch_token ($1+0, $2);
-        } elsif (/^n (-?\d+) (-?\d+)$/) {
-          $self->tok_sync_nspam_nham ($1+0, $2+0);
-        } else {
-          warn "Bayes journal: gibberish: $_";
-        }
-
-        if ($showdots && ($count % 1000) == 0) {
-          print STDERR ".";
-        }
-      }
-      $ok_to_remove = 1;
+      $ret = $self->sync_journal_trapped($opts, $path);
     }
   };
   my $err = $@;
 
-  if ($showdots) { print STDERR "\n"; }
-
-  # ok, untie from write-mode, delete the retired journal
+  # ok, untie from write-mode
   $self->untie_db();
-  close JOURNAL;
-  if ($ok_to_remove) {
-    unlink ($retirepath);
-  }
-  else {
-    warn "bayes: Detected problem syncing journal, trying to rename $retirepath to $path\n";
-    rename($retirepath,$path) or warn "bayes: rename failed"; # try to put it back if we can...
 
-    # handle any errors that may have occurred
-    if ($err) {
-      warn "bayes: $err\n";
-      return 0;
+  # handle any errors that may have occurred
+  if ($err) {
+    warn "bayes: $err\n";
+    return 0;
+  }
+
+  $ret;
+}
+
+sub sync_journal_trapped {
+  my ($self, $opts, $path) = @_;
+
+  # Flag that we're doing work
+  $self->set_running_expire_tok();
+
+  my $started = time();
+  my $count = 0;
+  my $total_count = 0;
+  my %tokens = ();
+  my $showdots = $opts->{showdots};
+  my $retirepath = $path.".old";
+
+  # now read the retired journal
+  if (!open (JOURNAL, "<$path")) {
+    warn "bayes: cannot open read $path\n";
+    return 0;
+  }
+
+  # retire the journal, so we can update the db files from it in peace.
+  # TODO: use locking here
+  if (!rename ($path, $retirepath)) {
+    warn "bayes: failed rename $path to $retirepath\n";
+    close(JOURNAL);
+    return 0;
+  }
+
+  # Read the journal
+  while (<JOURNAL>) {
+    $total_count++;
+
+    if (/^t (\d+) (.*)$/) { # Token timestamp update, cache resultant entries
+      $tokens{$2} = $1+0;
+#   elsif (/^c (-?\d+) (-?\d+) (\d+) (.*)$/) { # Add/full token update
+#     $self->tok_sync_counters ($1+0, $2+0, $3+0, $4);
+#     $count++;
+#   } elsif (/^n (-?\d+) (-?\d+)$/) { # update ham/spam count
+#     $self->tok_sync_nspam_nham ($1+0, $2+0);
+#     $count++;
+    } else {
+      warn "Bayes journal: gibberish entry found: $_";
+    }
+
+#    if ($showdots && ($count % 1000) == 0) {
+#      print STDERR ".";
+#    }
+  }
+  close JOURNAL;
+
+  # Now that we've determined what tokens we need to update and their
+  # final values, update the DB.  Should be much smaller than the full
+  # journal entries.
+  while( my($k,$v) = each %tokens ) {
+    $self->tok_touch_token ($v, $k);
+
+    if ((++$count % 1000) == 0) {
+      if ($showdots) { print STDERR "."; }
+      $self->set_running_expire_tok();
     }
   }
 
+  if ($showdots) { print STDERR "\n"; }
+
+  # we're all done, so unlink the old journal file
+  unlink ($retirepath) || warn "bayes: can't unlink $retirepath: $!\n";
+
   my $done = time();
   my $msg = ("synced Bayes databases from journal in ".($done - $started).
-	" seconds: $count entries");
+	" seconds: $count unique entries ($total_count total entries)");
 
   if ($opts->{verbose}) {
     print $msg,"\n";
