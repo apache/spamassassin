@@ -36,7 +36,45 @@ use vars qw{
                        gwdg.de
                     };
 
-$IP_IN_RESERVED_RANGE = undef;
+# Initialize a regexp for reserved IPs, i.e. ones that could be
+# used inside a company and be the first or second relay hit by
+# a message. Some companies use these internally and translate
+# them using a NAT firewall. These are listed in the RBL as invalid
+# originators -- which is true, if you receive the mail directly
+# from them; however we do not, so we should ignore them.
+# cf. <http://www.iana.org/assignments/ipv4-address-space>,
+#     <http://duxcw.com/faq/network/privip.htm>,
+#     <http://duxcw.com/faq/network/autoip.htm>
+#
+# Last update
+#   2002-08-24 Malte S. Stretz - added 172.16/12, 169.254/16
+#   2002-08-23 Justin Mason - added 192.168/16
+#   2002-08-12 Matt Kettler - mail to SpamAssassin-devel
+#              msgid:<5.1.0.14.0.20020812211512.00a33cc0@192.168.50.2>
+#
+$IP_IN_RESERVED_RANGE = qr{^(?:
+  192\.168|                        # 192.168/16:              Private Use
+  10|                              # 10/8:                    Private Use
+  172\.(?:1[6-9]|2[0-9]|3[01])|    # 172.16-172.31/16:        Private Use
+  169\.254|                        # 169.254/16:              Private Use (APIPA)
+  127|                             # 127/8:                   Private Use (localhost)
+
+  [01257]|                         # 000-002/8, 005/8, 007/8: Reserved
+  2[37]|                           # 023/8, 027/8:            Reserved
+  3[179]|                          # 031/8, 037/8, 039/8:     Reserved
+  4[12]|                           # 041/8, 042/8:            Reserved
+  5[89]|                           # 058/8, 059/8:            Reserved
+  60|                              # 060/8:                   Reserved
+  7[0-9]|                          # 070-079/8:               Reserved
+  8[2-9]|                          # 082
+  9[0-9]|                          #  -
+  1[01][0-9]|                      #  -
+  12[0-6]|                         # 126/8:                   Reserved
+  197|                             # 197/8:                   Reserved
+  22[23]|                          # 222/8, 223/8:            Reserved
+  24[0-9]|                         # 240-
+  25[0-5]|                         # 255/8:                   Reserved
+)\.}x;
 
 $IS_DNS_AVAILABLE = undef;
 
@@ -168,53 +206,6 @@ sub do_rbl_lookup {
   }
   timelog("RBL -> No match on $dom", "rbl", 2);
   return 0;
-}
-
-# Initialize a regexp for reserved IPs, i.e. ones that could be
-# used inside a company and be the first or second relay hit by
-# a message. Some companies use these internally and translate
-# them using a NAT firewall. These are listed in the RBL as invalid
-# originators -- which is true, if you receive the mail directly
-# from them; however we do not, so we should ignore them.
-# cf. http://www.iana.org/assignments/ipv4-address-space .
-#
-# Last update by Matt Kettler - mail to SpamAssassin-devel, Mon 12 Aug
-# 2002, msgid <5.1.0.14.0.20020812211512.00a33cc0@192.168.50.2>.
-#
-sub init_rbl_check_reserved_ips {
-  return if defined ($IP_IN_RESERVED_RANGE);
-
-  $IP_IN_RESERVED_RANGE = '^(?:';
-  foreach my $top8bits (qw(
-                    [012]
-                    5
-                    7
-                    10
-                    23
-                    27
-                    31
-                    37
-                    39
-                    41
-                    42
-                    58
-                    59
-                    60
-                    7[0-9]
-                    8[2-9]
-                    9[0-9]
-                    1[01][0-9]
-                    12[0-7]
-                    192\.168
-                    197
-                    22[23]
-                    24[0-9]
-                    25[0-5]
-                  ))
-  {
-    $IP_IN_RESERVED_RANGE .= $top8bits . '\.|';
-  }
-  $IP_IN_RESERVED_RANGE =~ s/\|$/\)/;
 }
 
 ###########################################################################

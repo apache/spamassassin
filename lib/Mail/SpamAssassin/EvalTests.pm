@@ -859,7 +859,6 @@ sub check_rbl {
     $self->{$set}->{rbl_matches_found} = ' ';
   }
 
-  init_rbl_check_reserved_ips();
   my $already_matched_in_other_zones = ' '.$self->{$set}->{rbl_matches_found}.' ';
   my $found = 0;
 
