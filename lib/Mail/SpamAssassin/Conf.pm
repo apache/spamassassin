@@ -282,7 +282,8 @@ disabled here.
 =item subject_tag STRING ... 		(default: *****SPAM*****)
 
 Text added to the C<Subject:> line of mails that are considered spam,
-if C<rewrite_subject> is 1.
+if C<rewrite_subject> is 1.  _HITS_ in the tag will be replace with the calculated
+score for this message. _REQD_ will be replaced with the threshold.
 
 =cut
 
