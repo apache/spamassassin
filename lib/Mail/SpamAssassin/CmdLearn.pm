@@ -21,16 +21,16 @@ use vars qw(
 sub cmdline_run {
   my ($opts) = shift;
 
-  $isspam = $opts->{isspam};
-  $forget = $opts->{forget};
-  $rebuildonly = $opts->{rebuildonly};
-
   %opt = ();
 
   Getopt::Long::Configure(qw(bundling no_getopt_compat
                          no_auto_abbrev no_ignore_case));
 
   GetOptions(
+	     'spam'				=> sub { $isspam = 1; },
+	     'ham|nonspam'			=> sub { $isspam = 0; },
+	     'rebuild'				=> \$rebuildonly,
+	     'forget'				=> \$forget,
              'whitelist-factory=s'              => \$opt{'whitelist-factory'},
              'config-file|C=s'                  => \$opt{'config-file'},
              'prefs-file|p=s'                   => \$opt{'prefs-file'},
@@ -67,6 +67,9 @@ sub cmdline_run {
   if (defined $opt{'version'}) {
     print "SpamAssassin version " . Mail::SpamAssassin::Version() . "\n";
     exit 0;
+  }
+  if ( !defined $isspam && !defined $rebuildonly && !defined $forget ) {
+    usage(0, "Please select either --spam, --ham, --forget, or --rebuild");
   }
 
   # create the tester factory
