@@ -219,6 +219,17 @@ header	__LIST_ARCHIVE		exists:List-Archive
 meta T_GOOD_LIST_HEADERS	(__LIST_UNSUBSCRIBE && __LIST_SUBSCRIBE && ((__LIST_HELP && __LIST_POST && !(__LIST_OWNER && __LIST_ARCHIVE)) || (!__LIST_HELP && !__LIST_POST && __LIST_OWNER && __LIST_ARCHIVE)))
 tflags T_GOOD_LIST_HEADERS	nice
 
+# more ratware
+header T_RATWARE_POWERMTA	Received =~ /PowerMTA\(TM\)/
+describe T_RATWARE_POWERMTA	Bulk email software fingerprint (PowerMTA) found in headers
+# seems to be ratware
+header T_RECEIVED_AM_PM_1	Received =~ /\b[AP]M\b/
+header T_RECEIVED_AM_PM_2	Received =~ /; [A-Z][a-z][a-z], \d{1,2} \d{4} \d{1,2}:\d\d:\d\d [AP]M [+-]\d{4}/
+# more crap
+header T_REPLY_TO_REPLY_1	Reply-To:addr =~ /reply.*\d{4}.*\@/i
+header T_REPLY_TO_REPLY_2	Reply-To:addr =~ /(?<!no.)(?<!no)reply.*\@/i
+header T_REPLY_TO_REPLY_3	Reply-To:addr =~ /(?<!no.)(?<!no)reply.*\d{4}.*\@/i
+
 # bug 1438, possible replacement for the current HOTMAIL_FOOTER* rules
 # rename current HOTMAIL_FOOTER# to __HOTMAIL_FOOTER#, and change these too.
 meta T_ABUSED_HOTMAIL_FOOTER	HOTMAIL_FOOTER1 + HOTMAIL_FOOTER2 + HOTMAIL_FOOTER3 + HOTMAIL_FOOTER4 + HOTMAIL_FOOTER5 > 1
