@@ -709,6 +709,9 @@ describe OPT_HEADER		Headers include an "opt"ed phrase
 header FROM_NUM_AT_WEBMAIL    From:addr =~ /^\d\S+\@(?:msn\.com|flashmail\.com|mailexcite\.com|prodigy\.net|yahoo\.\S+|hotmail\.com|eudoramail\.com|aol\.com|excite\.com|email\.com|earthlink\.net|geocities\.com|hknetmail\.com|angelfire\.com)/i
 describe FROM_NUM_AT_WEBMAIL  From address is webmail, but starts with a number
 
+header FROM_WEBMAIL_ENDS_IN_NUMS6  From:addr =~ /\d\d\d\d\d\d\@(?:aol|msn|bigfoot|compuserve|excite|hotmail|juno|prodigy|yahoo)\.(?:com|net|org)/i
+describe FROM_WEBMAIL_ENDS_IN_NUMS6  From address is webmail, and ends in lots of numbers
+
 # thanks to Jason Staples for this suggestion. Sendmail and other MTAs
 # will often query the ident server on a relay; Squid proxies should not be
 # sending mail.
@@ -720,4 +723,8 @@ describe RECEIVED_IDENT_CACHEFLOW Received contains 'CacheFlowServer' IDENT name
 # common spam-dropping: To: C:\VICTIMS.txt@yourmx.org
 header TO_TXT			To =~ /\.txt[\'\"]?\@/i
 describe TO_TXT			Sent to a text file
+
+header CHINA_HEADER             ALL =~ /\@china\.com/i
+describe CHINA_HEADER           Involves 'china.com'
+
 

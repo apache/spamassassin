@@ -18,9 +18,9 @@ use File::Spec;
 use File::Path;
 
 use vars qw{
-  @ISA @DBNAMES
+  @ISA @DBNAMES @DB_EXTENSIONS
   $NSPAM_MAGIC_TOKEN $NHAM_MAGIC_TOKEN $LAST_EXPIRE_MAGIC_TOKEN
-  $OLDEST_TOKEN_AGE_MAGIC_TOKEN @DB_EXTENSIONS
+  $NTOKENS_MAGIC_TOKEN $OLDEST_TOKEN_AGE_MAGIC_TOKEN
 };
 
 @ISA = qw();
@@ -61,6 +61,7 @@ $NSPAM_MAGIC_TOKEN = '**NSPAM';
 $NHAM_MAGIC_TOKEN = '**NHAM';
 $OLDEST_TOKEN_AGE_MAGIC_TOKEN = '**OLDESTAGE';
 $LAST_EXPIRE_MAGIC_TOKEN = '**LASTEXPIRE';
+$NTOKENS_MAGIC_TOKEN = '**NTOKENS';
 
 ###########################################################################
 
@@ -349,6 +350,7 @@ sub expire_old_tokens_trapped {
     next if ($tok eq $NSPAM_MAGIC_TOKEN
 	  || $tok eq $NHAM_MAGIC_TOKEN
 	  || $tok eq $LAST_EXPIRE_MAGIC_TOKEN
+	  || $tok eq $NTOKENS_MAGIC_TOKEN
 	  || $tok eq $OLDEST_TOKEN_AGE_MAGIC_TOKEN);
 
     my ($ts, $th, $atime) = $self->tok_get ($tok);
@@ -383,6 +385,7 @@ sub expire_old_tokens_trapped {
   $new_toks{$OLDEST_TOKEN_AGE_MAGIC_TOKEN} = $oldest;
   $new_toks{$NSPAM_MAGIC_TOKEN} = $self->{db_toks}->{$NSPAM_MAGIC_TOKEN};
   $new_toks{$NHAM_MAGIC_TOKEN} = $self->{db_toks}->{$NHAM_MAGIC_TOKEN};
+  $new_toks{$NTOKENS_MAGIC_TOKEN} = $kept + $reprieved;
 
   # now untie so we can do renames
   untie %{$self->{db_toks}};
@@ -419,8 +422,11 @@ sub expiry_due {
 
   $self->read_db_configs();	# make sure this has happened here
 
-  # is the database too small for expiry?
-  if (scalar keys (%{$self->{db_toks}}) <= $self->{expiry_min_db_size}) {
+  # is the database too small for expiry?  (Do *not* use "scalar keys",
+  # as this will iterate through the entire db counting them!)
+  my $ntoks = $self->{db_toks}->{$NTOKENS_MAGIC_TOKEN};
+  $ntoks ||= $self->{expiry_min_db_size} + 1;
+  if ($ntoks <= $self->{expiry_min_db_size}) {
     return 0;
   }
 
