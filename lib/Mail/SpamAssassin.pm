@@ -34,6 +34,11 @@ This module implements a Mail::Audit plugin, allowing SpamAssassin to be used
 in a Mail::Audit filter.  If you wish to use a command-line filter tool,
 try the C<spamassassin> or C<spamd> tools provided.
 
+Note that, if you're using Mail::Audit, the constructor for the Mail::Audit
+object must use the C<nomime> option, like so:
+
+        my $ma = new Mail::Audit ( nomime => 1 );
+
 SpamAssassin also includes support for reporting spam messages to collaborative
 filtering databases, such as Vipul's Razor ( http://razor.sourceforge.net/ ).
 
@@ -76,7 +81,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 $VERSION = "2.40";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.110 2002/08/15 12:17:34 jmason Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.111 2002/08/15 16:50:27 jmason Exp $';
 
 sub Version { $VERSION; }
 
