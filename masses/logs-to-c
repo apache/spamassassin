@@ -122,17 +122,17 @@ sub readscores {
 }
 
 sub writescores_c {
-  my $size = (scalar keys %{$scores}) + 1;
+  my $size = (scalar keys %{$scores});
 
   open (OUT, ">tmp/scores.h");
   print OUT "
 
 int num_scores = $size;
 unsigned char is_mutatable[$size]; 	/* er, is_mutable I think ;) */
-float range_lo[$size];
-float range_hi[$size];
-float bestscores[$size];
-float scores[$size];
+double range_lo[$size];
+double range_hi[$size];
+double bestscores[$size];
+double scores[$size];
 char *score_names[$size];
 
 void loadscores (void) {
@@ -140,7 +140,7 @@ void loadscores (void) {
 ";
   my $count = 0;
   foreach my $name (sort keys %{$scores}) {
-    if (!defined $is_mutatable{$name}) { $is_mutatable{$name} = 1; }
+    if (!defined $is_mutatable{$name}) { $is_mutatable{$name} = 1; } else { $range_lo{$name} = $range_hi{$name} = $scores->{$name}; }
 
     $range_lo{$name} ||= 0.1;
     $range_hi{$name} ||= 1.5;
