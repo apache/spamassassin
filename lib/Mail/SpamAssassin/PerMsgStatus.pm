@@ -890,78 +890,64 @@ sub get_decoded_stripped_body_text_array {
 ###########################################################################
 
 sub get {
-  my ($self, $hdrname, $defval) = @_;
+  my ($self, $request, $defval) = @_;
   local ($_);
 
-  if ($hdrname eq 'ALL') {
-    if (!defined $self->{hdr_cache}->{'ALL'}) {
-      $self->{hdr_cache}->{'ALL'} = $self->{msg}->get_all_headers();
-    }
-    return $self->{hdr_cache}->{'ALL'};
+  if (exists $self->{hdr_cache}->{$request}) {
+    $_ = $self->{hdr_cache}->{$request};
   }
+  else {
+    my $hdrname = $request;
+    my $getaddr = ($hdrname =~ s/:addr$//);
+    my $getname = ($hdrname =~ s/:name$//);
+    my $getraw = ($hdrname eq 'ALL' || $hdrname =~ s/:raw$//);
 
-  my $getaddr = 0;
-  if ($hdrname =~ s/:addr$//) { $getaddr = 1; }
-
-  my $getname = 0;
-  if ($hdrname =~ s/:name$//) { $getname = 1; }
-
-  # ToCc: the combined recipients list
-  if ($hdrname eq 'ToCc') {
-    $_ = join ("\n", $self->{msg}->get_header ('To'));
-    if ($_ ne '') {
-      chop $_; if ($_ =~ /\S/) { $_ .= ", "; }
+    if ($hdrname eq 'ALL') {
+      $_ = $self->{msg}->get_all_headers();
     }
-    $_ .= join ("\n", $self->{msg}->get_header ('Cc'));
-    if ($_ eq '') { undef $_; }
-
-  } else {              # a conventional header
-    if (!exists $self->{hdr_cache}->{$hdrname}) {
+    # ToCc: the combined recipients list
+    elsif ($hdrname eq 'ToCc') {
+      $_ = join ("\n", $self->{msg}->get_header ('To'));
+      if ($_ ne '') {
+	chop $_;
+	$_ .= ", " if /\S/;
+      }
+      $_ .= join ("\n", $self->{msg}->get_header ('Cc'));
+      undef $_ if $_ eq '';
+    }
+    # a conventional header
+    else {
       my @hdrs = $self->{msg}->get_header ($hdrname);
       if ($#hdrs >= 0) {
-        $_ = join ("\n", @hdrs);
-      } else {
-        $_ = undef;
+	$_ = join ("\n", @hdrs);
       }
-
-      # try some fallbacks:
-      if ($hdrname eq 'Message-Id' && (!defined($_) || $_ eq '')) {
-        $_ = join ("\n", $self->{msg}->get_header ('Message-ID'));	# news-ish
-        if ($_ eq '') { undef $_; }
+      else {
+	$_ = undef;
       }
-
-      if ($hdrname eq 'Cc' && (!defined($_) || $_ eq '')) {
-        $_ = join ("\n", $self->{msg}->get_header ('CC'));		# common enough
-        if ($_ eq '') { undef $_; }
-      }
-
-      # cache the results
-      $self->{hdr_cache}->{$hdrname} = $_;
-
-    } else {
-      $_ = $self->{hdr_cache}->{$hdrname};
     }
+    if (defined) {
+      if ($getaddr) {
+	chomp; s/\r?\n//gs;
+	s/\s*\(.*?\)//g;            # strip out the (comments)
+	s/^[^<]*?<(.*?)>.*$/$1/;    # "Foo Blah" <jm@foo> or <jm@foo>
+	s/, .*$//gs;                # multiple addrs on one line: return 1st
+	s/ ;$//gs;                  # 'undisclosed-recipients: ;'
+      }
+      elsif ($getname) {
+	chomp; s/\r?\n//gs;
+	s/^[\'\"]*(.*?)[\'\"]*\s*<.+>\s*$/$1/g # Foo Blah <jm@foo>
+	    or s/^.+\s\((.*?)\)\s*$/$1/g;	   # jm@foo (Foo Blah)
+      }
+      elsif (!$getraw) {
+	$_ = $self->mime_decode_header ($_);
+      }
+    }
+    $self->{hdr_cache}->{$request} = $_;
   }
 
-  if (!defined $_) {
+  if (!defined) {
     $defval ||= '';
     $_ = $defval;
-  }
-
-  if ($getaddr) {
-    chomp; s/\r?\n//gs;
-    s/\s*\(.*?\)//g;            # strip out the (comments)
-    s/^[^<]*?<(.*?)>.*$/$1/;    # "Foo Blah" <jm@foo> or <jm@foo>
-    s/, .*$//gs;                # multiple addrs on one line: return 1st
-    s/ ;$//gs;                  # 'undisclosed-recipients: ;'
-
-  } elsif ($getname) {
-    chomp; s/\r?\n//gs;
-    s/^[\'\"]*(.*?)[\'\"]*\s*<.+>\s*$/$1/g # Foo Blah <jm@foo>
-    	or s/^.+\s\((.*?)\)\s*$/$1/g;	   # jm@foo (Foo Blah)
-
-  } else {
-    $_ = $self->mime_decode_header ($_);
   }
 
   $_;
@@ -1376,9 +1362,9 @@ sub do_body_uri_tests {
 
   dbg("uri tests: Done uriRE");
   
-  for (@uris) {
-    print STDERR "uri $_\n";
-  }
+#  for (@uris) {
+#    print STDERR "uri $_\n";
+#  }
 
   $self->clear_test_state();
   if ( defined &Mail::SpamAssassin::PerMsgStatus::_body_uri_tests ) {
