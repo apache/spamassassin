@@ -313,7 +313,8 @@ sub expire_old_tokens_trapped {
 	  || $tok eq $NHAM_MAGIC_TOKEN
 	  || $tok eq $LAST_EXPIRE_MAGIC_TOKEN
 	  || $tok eq $NTOKENS_MAGIC_TOKEN
-	  || $tok eq $OLDEST_TOKEN_AGE_MAGIC_TOKEN);
+	  || $tok eq $OLDEST_TOKEN_AGE_MAGIC_TOKEN
+	  || $tok eq $SCANCOUNT_BASE_MAGIC_TOKEN);
 
     my ($ts, $th, $atime) = $self->tok_get ($tok);
     if ($atime < $too_old) {
@@ -353,6 +354,7 @@ sub expire_old_tokens_trapped {
   $deleted -= $reprieved;
 
   # and add the magic tokens
+  $new_toks{$SCANCOUNT_BASE_MAGIC_TOKEN} = $self->{db_toks}->{$SCANCOUNT_BASE_MAGIC_TOKEN};
   $new_toks{$LAST_EXPIRE_MAGIC_TOKEN} = $self->scan_count_get();
   $new_toks{$OLDEST_TOKEN_AGE_MAGIC_TOKEN} = $oldest;
   $new_toks{$NSPAM_MAGIC_TOKEN} = $self->{db_toks}->{$NSPAM_MAGIC_TOKEN};
