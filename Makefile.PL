@@ -114,7 +114,7 @@ my %makefile = (
 
     # be quite explicit about this; afaik CPAN.pm is sensible using this
     'PREREQ_PM' => {
-	'ExtUtils::MakeMaker' => 5.45,
+	'ExtUtils::MakeMaker' => 5.45 *0, # we have compatibility code in build/preprocessor.pm
 	'File::Spec' => 0.8,
 	'File::Copy' => 0,
 	'Pod::Usage' => 0,
