@@ -90,6 +90,9 @@ sub new {
   $self->{rawbody_tests} = { };
   $self->{rawbody_evals} = { };
 
+  # testing stuff
+  $self->{regression_tests} = { };
+
   $self->{required_hits} = 5.0;
   $self->{auto_report_threshold} = 25.0;
   $self->{report_template} = '';
@@ -674,6 +677,20 @@ Define a full-body eval test.  See above.
       $self->add_test ($1, $2, $type_full_tests); next;
     }
 
+=item test SYMBOLIC_TEST_NAME (ok|fail) Some string to test against
+
+Define a regression testing string. You can have more than one regression test string
+per symbolic test name. Simply specify a string that you wish the test to match.
+
+These tests are only run as part of the test suite - they should not affect the general
+running of SpamAssassin.
+
+=cut
+
+    if (/^test\s+(\S+)\s+(ok|fail)\s+(.*)$/) {
+      $self->add_regression_test($1, $2, $3); next;
+    }
+
 =item razor_config filename
 
 Define the filename used to store Razor's configuration settings.
@@ -768,6 +785,31 @@ sub add_test {
   $self->{tests}->{$name} = $text;
   $self->{test_types}->{$name} = $type;
   $self->{scores}->{$name} ||= 1.0;
+}
+
+sub add_regression_test {
+  my ($self, $name, $ok_or_fail, $string) = @_;
+  if ($self->{regression_tests}->{$name}) {
+    push @{$self->{regression_tests}->{$name}}, [$ok_or_fail, $string];
+  }
+  else {
+    # initialize the array, and create one element
+    $self->{regression_tests}->{$name} = [ [$ok_or_fail, $string] ];
+  }
+}
+
+sub regression_tests {
+  my $self = shift;
+  if (@_ == 1) {
+    # we specified a symbolic name, return the strings
+    my $name = shift;
+    my $tests = $self->{regression_tests}->{$name};
+    return @$tests;
+  }
+  else {
+    # no name asked for, just return the symbolic names we have tests for
+    return keys %{$self->{regression_tests}};
+  }
 }
 
 sub finish_parsing {
