@@ -338,7 +338,7 @@ describe ORDER_STATUS           Subject looks like order info
 header IN_REP_TO		In-Reply-To =~ /\S/
 describe IN_REP_TO		'In-Reply-To' line found
 
-header GAPPY_SUBJECT            Subject =~ /(?:[a-z][-_\.\,\:\;\'\~]{1,3}){5,}/i
+header GAPPY_SUBJECT            Subject =~ /\b(?:[a-z][-_\.\,\:\;\'\~\s]{1,3}){4,}/i
 describe GAPPY_SUBJECT          'Subject' contains G.a.p.p.y-T.e.x.t
 
 # This is a Bugzilla bug status report e-mail and probably OK
