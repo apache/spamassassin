@@ -341,7 +341,7 @@ eval {
     while (<F>) {
       chomp;
       next unless ($_);
-      if (/^(?:ham|spam):/) {
+      if (/^(?:ham|spam):\w*:/) {
         push ( @targets, $_ );
       }
       else {
@@ -579,9 +579,13 @@ made.
 =item B<--folders>=I<filename>, B<-f> I<filename>
 
 sa-learn will read in the list of folders from the specified file, one folder
-per line in the file.  If the folder is prefixed with C<ham:> or C<spam:>,
+per line in the file.  If the folder is prefixed with C<ham:type:> or C<spam:type:>,
 sa-learn will learn that folder appropriately, otherwise the folders will be
 assumed to be of the type specified by B<--ham> or B<--spam>.
+
+C<type> above is optional, but is the same as the standard for
+ArchiveIterator: mbox, mbx, dir, file, or detect (the default if not
+specified).
 
 =item B<--use-ignore>
 
@@ -1107,6 +1111,7 @@ or by hand.
 spamassassin(1)
 spamc(1)
 Mail::SpamAssassin(3)
+Mail::SpamAssassin::ArchiveIterator(3)
 
 E<lt>http://www.paulgraham.com/E<gt>
 Paul Graham's "A Plan For Spam" paper
