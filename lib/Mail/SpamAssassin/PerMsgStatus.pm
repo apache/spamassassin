@@ -1301,7 +1301,6 @@ sub get {
       $_ = join ("\n", grep { defined($_) && length($_) > 0 }
 		$self->{msg}->get_header ('X-Message-Id'),
 		$self->{msg}->get_header ('Resent-Message-Id'),
-		$self->{msg}->get_header ('X-Original-Message-ID'), # bug 2122
 		$self->{msg}->get_header ('Message-Id'));
     }
     # a conventional header
