@@ -223,8 +223,8 @@ sub init_results {
     print STDOUT $log_header;
   }
   else {
-    open(HAM, "> $opt_hamlog");
-    open(SPAM, "> $opt_spamlog");
+    open(HAM, "> $opt_hamlog") || die "open of $opt_hamlog failed: $!";
+    open(SPAM, "> $opt_spamlog") || die "open of $opt_spamlog failed: $!";
     autoflush HAM 1;
     autoflush SPAM 1;
     print HAM $log_header;
