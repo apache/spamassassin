@@ -242,8 +242,10 @@ my %TZ = (
 	'UT'   => '+0000',
 	'UTC'  => '+0000',
 	# US and Canada
+	'NDT'  => '-0230',
 	'AST'  => '-0400',
 	'ADT'  => '-0300',
+	'NST'  => '-0330',
 	'EST'  => '-0500',
 	'EDT'  => '-0400',
 	'CST'  => '-0600',
@@ -255,7 +257,9 @@ my %TZ = (
 	'HST'  => '-1000',
 	'AKST' => '-0900',
 	'AKDT' => '-0800',
-	# European
+	'HADT' => '-0900',
+	'HAST' => '-1000',
+	# Europe
 	'GMT'  => '+0000',
 	'BST'  => '+0100',
 	'IST'  => '+0100',
@@ -267,12 +271,30 @@ my %TZ = (
 	'EEST' => '+0300',
 	'MSK'  => '+0300',
 	'MSD'  => '+0400',
-	# Australian
+	'MET'  => '+0100',
+	'MEZ'  => '+0100',
+	'MEST' => '+0200',
+	'MESZ' => '+0200',
+	# South America
+	'BRST' => '-0200',
+	'BRT'  => '-0300',
+	# Australia
 	'AEST' => '+1000',
 	'AEDT' => '+1100',
 	'ACST' => '+0930',
 	'ACDT' => '+1030',
 	'AWST' => '+0800',
+	# New Zealand
+	'NZST' => '+1200',
+	'NZDT' => '+1300',
+	# Asia
+	'JST'  => '+0900',
+	'KST'  => '+0900',
+	'HKT'  => '+0800',
+	'SGT'  => '+0800',
+	'PHT'  => '+0800',
+	# Middle East
+	'IDT'  => '+0300',
 	);
 
 # month mappings
@@ -328,8 +350,8 @@ sub parse_rfc822_date {
   if (s/ ([-+]\d{4}) / /) {
     $tzoff = $1;
   }
-  # UT, GMT, and North American timezones
-  elsif (s/\b([A-Z]{2,4})\b/ / && exists $TZ{$1}) {
+  # common timezones
+  elsif (s/\b([A-Z]{2,4}(?:-DST)?)\b/ / && exists $TZ{$1}) {
     $tzoff = $TZ{$1};
   }
   # all other timezones are considered equivalent to "-0000"
@@ -344,7 +366,7 @@ sub parse_rfc822_date {
 
   my $time;
   eval {		# could croak
-    $time = timegm ($ss, $mm, $hh, $dd, $mmm-1, $yyyy);
+    $time = timegm($ss, $mm, $hh, $dd, $mmm-1, $yyyy);
   };
 
   if ($@) {
