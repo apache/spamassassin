@@ -796,7 +796,7 @@ sub get_decoded_stripped_body_text_array {
   $text = pack("C0A*", $text);
 
   # Convert =xx and =\n into chars
-  $text =~ s/=([a-fA-F0-9]{2})/chr(hex($1))/g;
+  $text =~ s/=([a-fA-F0-9]{2})/chr(hex($1))/ge;
   $text =~ s/=\n//g;
   
   # join all consecutive whitespace into a single space
