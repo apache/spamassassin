@@ -143,177 +143,175 @@ sub razor2_access {
   # note: adie() is obsolete as a result of $oldalarm; alarms will always
   # be reset this way
 
-    eval {
-      local ($^W) = 0;    # argh, warnings in Razor
+  eval {
+    local ($^W) = 0;    # argh, warnings in Razor
 
-      local $SIG{ALRM} = sub { die "alarm\n" };
-      $oldalarm = alarm $timeout;
+    local $SIG{ALRM} = sub { die "alarm\n" };
+    $oldalarm = alarm $timeout;
 
-      # everything's in the module!
-      my $rc = Razor2::Client::Agent->new("razor-$type");
+    # everything's in the module!
+    my $rc = Razor2::Client::Agent->new("razor-$type");
 
-      if ($rc) {
-        $rc->{opt} = {
-		   debug      => Mail::SpamAssassin::dbg_check('+razor2'),
-		   foreground => 1,
-		   config     => $self->{main}->{conf}->{razor_config}
-        };
-        $rc->do_conf() or die "$debug: " . $rc->errstr;
+    if ($rc) {
+      $rc->{opt} = {
+	debug => Mail::SpamAssassin::dbg_check('+razor2'),
+	foreground => 1,
+	config => $self->{main}->{conf}->{razor_config}
+      };
+      $rc->do_conf() or die "$debug: " . $rc->errstr;
 
-        # Razor2 requires authentication for reporting
-        my $ident;
-	if ($type ne 'check') {
-	  $ident = $rc->get_ident
-            or die("reporter: razor2: $type requires authentication");
-        }
+      # Razor2 requires authentication for reporting
+      my $ident;
+      if ($type ne 'check') {
+	$ident = $rc->get_ident
+	    or die("reporter: razor2: $type requires authentication");
+      }
 
-        my @msg = ($fulltext);
-        my $objects = $rc->prepare_objects(\@msg)
-          or die "$debug: error in prepare_objects";
-        unless ($rc->get_server_info()) {
-	  my $error = $rc->errprefix("$debug: spamassassin") || "$debug: razor2 had unknown error during get_server_info";
+      my @msg = ($fulltext);
+      my $objects = $rc->prepare_objects(\@msg)
+	  or die "$debug: error in prepare_objects";
+      unless ($rc->get_server_info()) {
+	my $error = $rc->errprefix("$debug: spamassassin") || "$debug: razor2 had unknown error during get_server_info";
+	die $error;
+      }
+
+      # let's reset the alarm since get_server_info() calls
+      # nextserver() which calls discover() which very likely will
+      # reset the alarm for us ... how polite.  :(
+      alarm $timeout;
+
+      my $sigs = $rc->compute_sigs($objects)
+	  or die "$debug: error in compute_sigs";
+
+      # if mail isn't whitelisted, check it out
+      # see 'man razor-whitelist'
+      if ($type ne 'check' || ! $rc->local_check($objects->[0])) {
+	# provide a better error message when servers are unavailable,
+	# than "Bad file descriptor Died".
+	$rc->connect() or die "$debug: could not connect to any servers\n";
+
+	# Talk to the Razor server and do work
+	if ($type eq 'check') {
+	  unless ($rc->check($objects)) {
+	    my $error = $rc->errprefix("$debug: spamassassin") || "$debug: razor2 had unknown error during check";
+	    die $error;
+	  }
+	}
+	else {
+	  unless ($rc->authenticate($ident)) {
+	    my $error = $rc->errprefix("$debug: spamassassin") || "$debug: razor2 had unknown error during authenticate";
+	    die $error;
+	    }
+	  unless ($rc->report($objects)) {
+	    my $error = $rc->errprefix("$debug: spamassassin") || "$debug: razor2 had unknown error during report";
+	    die $error;
+	  }
+	}
+
+	unless ($rc->disconnect()) {
+	  my $error = $rc->errprefix("$debug: spamassassin") || "$debug: razor2 had unknown error during disconnect";
 	  die $error;
 	}
 
-	# let's reset the alarm since get_server_info() calls
-	# nextserver() which calls discover() which very likely will
-	# reset the alarm for us ... how polite.  :(
-	alarm $timeout;
+	# if we got here, we're done doing remote stuff, abort the alert
+	alarm 0;
 
-        my $sigs = $rc->compute_sigs($objects)
-          or die "$debug: error in compute_sigs";
+	# Razor 2.14 says that if we get here, we did ok.
+	$return = 1;
 
-        # 
-        # if mail isn't whitelisted, check it out
-	# see 'man razor-whitelist'
-        #   
-        if ($type ne 'check' || ! $rc->local_check($objects->[0])) {
-          # provide a better error message when servers are unavailable,
-          # than "Bad file descriptor Died".
-          $rc->connect() or die "$debug: could not connect to any servers\n";
+	# figure out if we have a log file we need to close...
+	if (ref($rc->{logref}) && exists $rc->{logref}->{fd}) {
+	  # the fd can be stdout or stderr, so we need to find out if it is
+	  # so we don't close them by accident.  Note: we can't just
+	  # undef the fd here (like the IO::Handle manpage says we can)
+	  # because it won't actually close, unfortunately. :(
+	  my $untie = 1;
+	  foreach my $log (*STDOUT{IO}, *STDERR{IO}) {
+	    if ($log == $rc->{logref}->{fd}) {
+	      $untie = 0;
+	      last;
+	    }
+	  }
+	  close $rc->{logref}->{fd} if ($untie);
+	}
 
-	  # Talk to the Razor server and do work
-          if ($type eq 'check') {
-            unless ($rc->check($objects)) {
-	      my $error = $rc->errprefix("$debug: spamassassin") || "$debug: razor2 had unknown error during check";
-	      die $error;
+	if ($type eq 'check') {
+	  # so $objects->[0] is the first (only) message, and ->{spam} is a general yes/no
+	  push(@results, { result => $objects->[0]->{spam} });
+
+	  # great for debugging, but leave this off!
+	  #use Data::Dumper;
+	  #print Dumper($objects),"\n";
+
+	  # ->{p} is for each part of the message
+	  # so go through each part, taking the highest cf we find
+	  # of any part that isn't contested (ct).  This helps avoid false
+	  # positives.  equals logic_method 4.
+	  #
+	  # razor-agents < 2.14 have a different object format, so we now support both.
+	  # $objects->[0]->{resp} vs $objects->[0]->{p}->[part #]->{resp}
+	  my $part = 0;
+	  my $arrayref = $objects->[0]->{p} || $objects;
+	  if (defined $arrayref) {
+	    foreach my $cf (@{$arrayref}) {
+	      if (exists $cf->{resp}) {
+		for (my $response=0; $response<@{$cf->{resp}}; $response++) {
+		  my $tmp = $cf->{resp}->[$response];
+		  my $tmpcf = $tmp->{cf}; # Part confidence
+		  my $tmpct = $tmp->{ct}; # Part contested?
+		  my $engine = $cf->{sent}->[$response]->{e};
+
+		  # These should always be set, but just in case ...
+		  $tmpcf = 0 unless defined $tmpcf;
+		  $tmpct = 0 unless defined $tmpct;
+		  $engine = 0 unless defined $engine;
+
+		  push(@results,
+		       { part => $part, engine => $engine, contested => $tmpct, confidence => $tmpcf });
+		}
+	      }
+	      else {
+		push(@results, { part => $part, noresponse => 1 });
+	      }
+	      $part++;
 	    }
 	  }
 	  else {
-            unless ($rc->authenticate($ident)) {
-	      my $error = $rc->errprefix("$debug: spamassassin") || "$debug: razor2 had unknown error during authenticate";
-	      die $error;
-	    }
-	    unless ($rc->report($objects)) {
-	      my $error = $rc->errprefix("$debug: spamassassin") || "$debug: razor2 had unknown error during report";
-	      die $error;
-	    }
-          }
-
-          unless ($rc->disconnect()) {
-	    my $error = $rc->errprefix("$debug: spamassassin") || "$debug: razor2 had unknown error during disconnect";
-	    die $error;
+	    # If we have some new $objects format that isn't close to
+	    # the current razor-agents 2.x version, we won't FP but we
+	    # should alert in debug.
+	    dbg("$debug: it looks like the internal Razor object has changed format!");
 	  }
-
-	  # if we got here, we're done doing remote stuff, abort the alert
-	  alarm 0;
-
-          # Razor 2.14 says that if we get here, we did ok.
-          $return = 1;
-
-          # figure out if we have a log file we need to close...
-          if (ref($rc->{logref}) && exists $rc->{logref}->{fd}) {
-            # the fd can be stdout or stderr, so we need to find out if it is
-	    # so we don't close them by accident.  Note: we can't just
-	    # undef the fd here (like the IO::Handle manpage says we can)
-	    # because it won't actually close, unfortunately. :(
-            my $untie = 1;
-            foreach my $log (*STDOUT{IO}, *STDERR{IO}) {
-              if ($log == $rc->{logref}->{fd}) {
-                $untie = 0;
-                last;
-              }
-            }
-            close $rc->{logref}->{fd} if ($untie);
-          }
-
-          if ($type eq 'check') {
-	    # so $objects->[0] is the first (only) message, and ->{spam} is a general yes/no
-	    push(@results, { result => $objects->[0]->{spam} });
-
-	    # great for debugging, but leave this off!
-	    #use Data::Dumper;
-	    #print Dumper($objects),"\n";
-
-	    # ->{p} is for each part of the message
-	    # so go through each part, taking the highest cf we find
-	    # of any part that isn't contested (ct).  This helps avoid false
-	    # positives.  equals logic_method 4.
-	    #
-	    # razor-agents < 2.14 have a different object format, so we now support both.
-	    # $objects->[0]->{resp} vs $objects->[0]->{p}->[part #]->{resp}
-	    my $part = 0;
-	    my $arrayref = $objects->[0]->{p} || $objects;
-	    if (defined $arrayref) {
-	      foreach my $cf (@{$arrayref}) {
-	        if (exists $cf->{resp}) {
-	          for (my $response=0; $response<@{$cf->{resp}}; $response++) {
-	            my $tmp = $cf->{resp}->[$response];
-	      	    my $tmpcf = $tmp->{cf}; # Part confidence
-	      	    my $tmpct = $tmp->{ct}; # Part contested?
-		    my $engine = $cf->{sent}->[$response]->{e};
-
-		    # These should always be set, but just in case ...
-                    $tmpcf = 0 unless defined $tmpcf;
-                    $tmpct = 0 unless defined $tmpct;
-                    $engine = 0 unless defined $engine;
-
-		    push(@results,
-		      { part => $part, engine => $engine, contested => $tmpct, confidence => $tmpcf });
-	          }
-	        }
-	        else {
-		  push(@results, { part => $part, noresponse => 1 });
-	        }
-	        $part++;
-	      }
-	    }
-	    else {
-	      # If we have some new $objects format that isn't close to
-	      # the current razor-agents 2.x version, we won't FP but we
-	      # should alert in debug.
-	      dbg("$debug: it looks like the internal Razor object has changed format!");
-	    }
-          }
 	}
       }
-      else {
-        warn "$debug: undefined Razor2::Client::Agent\n";
-      }
-  
-      # note: this may be a double-reset.  not a big deal though; the
-      # result should only be the extension of a preexisting timeout
-      # by < 1 sec.
-      alarm $oldalarm;
-    };
-
-    my $err = $@;
-
-    if ($err) {
-      alarm $oldalarm;    # just in case
-      if ($err =~ /alarm/) {
-        dbg("$debug: razor2 $type timed out after $timeout seconds");
-      } elsif ($err =~ /(?:could not connect|network is unreachable)/) {
-        # make this a dbg(); SpamAssassin will still continue,
-        # but without Razor checking.  otherwise there may be
-        # DSNs and errors in syslog etc., yuck
-        dbg("$debug: razor2 $type could not connect to any servers");
-      } elsif ($err =~ /timeout/i) {
-        dbg("$debug: razor2 $type timed out connecting to razor servers");
-      } else {
-        warn("$debug: razor2 $type failed: $! $err");
-      }
     }
+    else {
+      warn "$debug: undefined Razor2::Client::Agent\n";
+    }
+  
+    # note: this may be a double-reset.  not a big deal though; the
+    # result should only be the extension of a preexisting timeout
+    # by < 1 sec.
+    alarm $oldalarm;
+  };
+
+  my $err = $@;
+
+  if ($err) {
+    alarm $oldalarm;    # just in case
+    if ($err =~ /alarm/) {
+      dbg("$debug: razor2 $type timed out after $timeout seconds");
+    } elsif ($err =~ /(?:could not connect|network is unreachable)/) {
+      # make this a dbg(); SpamAssassin will still continue,
+      # but without Razor checking.  otherwise there may be
+      # DSNs and errors in syslog etc., yuck
+      dbg("$debug: razor2 $type could not connect to any servers");
+    } elsif ($err =~ /timeout/i) {
+      dbg("$debug: razor2 $type timed out connecting to razor servers");
+    } else {
+      warn("$debug: razor2 $type failed: $! $err");
+    }
+  }
 
   # work around serious brain damage in Razor2 (constant seed)
   srand;
