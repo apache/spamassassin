@@ -96,9 +96,14 @@ If you want to use SpamAssassin site-wide:
     http://spamassassin.org/sitewide.html .  You will probably want to use
     'spamd' (see below).
 
-  - PLEASE let your users know how to turn it off!   This is our #1 tech
-    support query, and the users are usually pretty frustrated once it
-    reaches that stage.
+  - *PLEASE* let your users know you've installed it, and how to turn it
+    off!   This is our #1 tech support query, and the users are usually
+    pretty frustrated once it reaches that stage.
+
+  - *PLEASE* consider setting it up as "off by default" for most accounts,
+    and let users opt-in to using it.  Quite a few folks prefer not to
+    have their mail filtered, presumably because they don't use their
+    email address publically and do not get much spam.
 
   - Note that procmail users adding spamc to /etc/procmailrc should 
     add the line 'DROPPRIVS=yes' at the top of the file.
@@ -151,9 +156,15 @@ Other Installation Notes
     configuration or user-preference file.
 
 
-  - Speakers of Chinese, Japanese and Korean should turn off the 8-bit
-    rules listed in the "user_prefs.template" file; we've found out that
-    these rules are still triggering on non-spam CJK mails.
+  - Speakers of Chinese, Japanese, Korean or Arabic should turn off the
+    8-bit rules listed in the "user_prefs.template" file; we've found out
+    that these rules are still triggering on non-spam CJK mails.
+
+
+  - If you have an unusual network configuration, you should probably
+    set 'trusted_networks'.  This allows SpamAssassin to determine where
+    your internal network ends and the internet begins, and allows DNS
+    checks to be more accurate.
 
 
   - The distribution includes 'spamd', a daemonized version of the
@@ -230,6 +241,9 @@ Other Installation Notes
     server (designed for Cyrus, but probably will work fine with others),
     again it's in the contrib directory.
 
+
+  - Lots more ways to integrate SpamAssassin can be read at
+    http://news.SpamAssassin.org/ .
 
 
 (end of USAGE)
