@@ -132,6 +132,9 @@ describe LINES_OF_YELLING_2     2 WHOLE LINES OF YELLING DETECTED
 body     LINES_OF_YELLING_3     eval:check_for_num_yelling_lines("3")
 describe LINES_OF_YELLING_3     3 WHOLE LINES OF YELLING DETECTED
 
+body WEIRD_QUOTING	/[\042\223\224\262\263\271]{2}\S{0,16}[\042\223\224\262\263\271]{2}/
+describe WEIRD_QUOTING	Weird repeated double-quotation marks in body
+
 ###########################################################################
 # these tests doesn't actually use rawbody since rawbody isn't raw enough;
 # they must be written very carefully to avoid modifying the original content
