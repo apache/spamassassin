@@ -244,111 +244,7 @@ sub _check_recipients {
 }
 
 ###########################################################################
-
-# The MTA probably added the Message-ID if either of the following is true:
-#
-# (1) The Message-ID: comes before a Received: header.
-#
-# (2) The Message-ID is the first header after all Received headers and
-#     the From address domain is not the same as the Message-ID domain and
-#     the Message-ID domain matches the last Received "by" domain.
-#
-# These two tests could be combined into a single rule, but they are
-# separated because the first test is more accurate than the second test.
-# However, we only run the primary function once for better performance.
-
-sub check_for_mta_message_id_first {
-  my ($self) = @_;
-
-  if (! exists $self->{mta_first}) {
-    $self->_check_mta_message_id();
-  }
-  return $self->{mta_first};
-}
-
-sub check_for_mta_message_id_later {
-  my ($self) = @_;
-
-  if (! exists $self->{mta_later}) {
-    $self->_check_mta_message_id();
-  }
-  return $self->{mta_later};
-}
-
-sub _check_mta_message_id {
-  my ($self) = @_;
-
-  $self->{mta_first} = 0;
-  $self->{mta_later} = 0;
-
-  my $all = $self->get ('ALL');
-  my $later_mta;
-
-  if ($all =~ /\nMessage-(?:ID|Id|id):.*\nReceived:/s) {
-    # Message-ID is before a Received
-    $later_mta = 1;
-  }
-  elsif ($all =~ /\nReceived:[^\n]*\n(?:[\t ][^\n]*\n)*Message-(?:ID|Id|id):/s) {
-    # Message-ID is not before a Received but is directly after a Received
-    $later_mta = 0;
-  }
-  else {
-    # go fish
-    return;
-  }
-
-  my $id = $self->get ('Message-Id');
-
-  # Yahoo! and Wanadoo.fr do add their Message-Id on transport time:
-  # Yahoo! MIDs can depend on the country: yahoo.com, yahoo.fr, yahoo.co.uk, etc.
-  # Wanadoo MIDs end always in wanadoo.fr
-  return if $id =~ /\@[a-z0-9.-]+\.(?:yahoo|wanadoo)(?:\.[a-z]{2,3}){1,2}>/;
-
-  # no further checks in simple case
-  if ($later_mta) {
-    $self->{mta_later} = 1;
-    return;
-  }
-
-  # further checks required
-  my $from = $self->get ('From:addr');
-  my $received = $self->get ('Received');
-  my @relay;
-  my $first;
-
-  # BUG: From:addr sometimes contains whitespace
-  $from =~ s/\s+//g;
-
-  # strip down to the host name
-  $id =~ s/.*\@//;
-  $id =~ s/[>\s]+$//;
-  $id = lc($id);
-  $from =~ s/.*\@//;
-  $from = lc($from);
-  while ($received =~ s/[\t ]+by[\t ]+(\w+([\w.-]+\.)+\w+)//i) {
-    push (@relay, $1);
-  }
-  $first = lc(pop(@relay));
-
-  # need to have a dot (test for addr-spec validity should be in another test)
-  return if ($id !~ /\./ || $from !~ /\./);
-
-  # strip down to last two parts of hostname
-  $id =~ s/.*\.(\S+\.\S+)$/$1/;
-  $from =~ s/.*\.(\S+\.\S+)$/$1/;
-
-  # if $from equals $id, then message is much less likely to be spam
-  return if $from eq $id;
-
-  # strip down the first relay now
-  $first =~ s/.*\.(\S+\.\S+)$/$1/;
-
-  # finally, the test
-  if ($first eq $id) {
-    $self->{mta_first} = 1;
-    return;
-  }
-}
+# tests to detect when the MTA added the Message-ID
 
 sub mta_added_message_id {
   my ($self, $test) = @_;
@@ -396,23 +292,24 @@ sub backup_mx_host {
   return 0;
 }
 
+# Please make sure you understand how this test works before changing
+# it, especially to add exemptions which are very unlikely be needed.
 sub _mta_added_message_id {
   my ($self) = @_;
 
+  $self->{mta_added_message_id_short} = 0;
+  $self->{mta_added_message_id_later} = 0;
+  $self->{mta_added_message_id_backup} = 0;
+
   my @received = grep(/\S/, split(/\n/, $self->get('Received')));
   my $id = $self->get('Resent-Message-ID') || $self->get('Message-ID');
-  return 0 unless defined($id) && $id;
+  return unless defined($id) && $id;
   my $local = 1;
 
   # general method to detect local messages
   my $from = $self->get('From:addr');
   $from =~ s/.*\@//;
   $from = ($from =~ m/(\S+\.\S+)\s*$/) ? lc($1) : '';
-
-  # add any variant names here
-  $self->{mta_added_message_id_short} = 0;
-  $self->{mta_added_message_id_later} = 0;
-  $self->{mta_added_message_id_backup} = 0;
 
   # Postfix adds the Message-ID on the second local hop.  Note: this is not
   # an exemption, this is a special case to classify these hits correctly.
@@ -424,7 +321,7 @@ sub _mta_added_message_id {
   }
 
   # Message-ID headers added by qmail generally include the current local
-  # date and time instead of an ID, so no exemption is needed for qmail.
+  # date and time instead of an ID, so no exemption is necessary for qmail.
 
   # Note: these tests intentionally do not exempt localhost!
   for (my $i = 0; $i <= $#received; $i++) {
