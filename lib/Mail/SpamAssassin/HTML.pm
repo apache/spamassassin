@@ -832,9 +832,6 @@ sub html_font_invisible {
 	$self->{html}{"font_near_invisible"} = 1;
         $visible_for_bayes = 0;
       }
-      for (my $contrast = 14; $contrast <= 64; $contrast += 2) {
-	$self->{html}{"text_contrast_$contrast"} = 1 if $distance < $contrast;
-      }
     }
   }
 
@@ -1008,18 +1005,16 @@ sub html_text {
     {
       $self->{html}{obfuscation}++;
     }
-    if ($last =~ /\b(\w{1,7})$/s) {
+    if ($last =~ /\b([^\s\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]{1,7})\z/s) {
       my $start = length($1);
-      if ($text =~ /^(\w{1,7})\b/s) {
-	my $backhair = "backhair_" . $start . "_" . length($1);
+      if ($text =~ /^([^\s\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]{1,7})\b/s) {
+	my $end = length($1);
+	my $backhair = "backhair_" . $start . "_" . $end;
 	$self->{html}{$backhair}++;
-      }
-    }
-    if ($last =~ /\b(\S{1,7})$/s) {
-      my $start = length($1);
-      if ($text =~ /^(\S{1,7})\b/s) {
-	my $backhair = "backhair2_" . $start . "_" . length($1);
-	$self->{html}{$backhair}++;
+	$self->{html}{backhair_a} += 1;
+	$self->{html}{backhair_b} += ($start + $end) / 12;
+	$self->{html}{backhair_c} += 1 - abs($start - $end) / ($start + $end);
+	$self->{html}{backhair_d} += ($start + $end) ** (-0.09 * abs($start - $end) - 0.05);
       }
     }
   }
