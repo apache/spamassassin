@@ -290,17 +290,20 @@ for ( ; ($paddr = accept(Client,Server)) ; close Client)
                 }
 	    }
 
-            if ($spamtest->{paranoid} && $setuid_to_user && $> == 0)
-            {
-                logmsg "PARANOID: Still running as root, close connection.";
-	    }
-            elsif ( $setuid_to_user && $> == 0 )
-            {
+           if ( $setuid_to_user && $> == 0 )
+           {
+               if ($spamtest->{paranoid}) {
+                   logmsg "PARANOID: still running as root, closing connection.";
+                   die;
+               }
                 logmsg "Still running as root: user not specified, ".
 		    "not found, or set to root.  Fall back to nobody.";
 		my $uid = getpwnam('nobody');
-		if (!defined $uid) { die "no UID for nobody"; }
-                $> = $uid;
+               $> = $uid;
+               if ( !defined($uid) || $> != $uid ) {
+                   logmsg "fatal: setuid to nobody failed";
+                   die;
+               }
             }
 
 	    my $resp = "EX_OK";
@@ -397,17 +400,20 @@ for ( ; ($paddr = accept(Client,Server)) ; close Client)
                 }
 	    }
 
-            if ($spamtest->{paranoid} && $setuid_to_user && $> == 0)
+            if ( $setuid_to_user && $> == 0 )
             {
-                logmsg "PARANOID: Still running as root, close connection.";
-	    }
-            elsif ( $setuid_to_user && $> == 0 )
-            {
+               if ($spamtest->{paranoid}) {
+                   logmsg "PARANOID: still running as root, closing connection.";
+                   die;
+               }
                 logmsg "Still running as root: user not specified, ".
 		    "not found, or set to root.  Fall back to nobody.";
 		my $uid = getpwnam('nobody');
-		if (!defined $uid) { die "no UID for nobody"; }
-                $> = $uid;
+               $> = $uid;
+               if ( !defined($uid) || $> != $uid ) {
+                   logmsg "fatal: setuid to nobody failed";
+                   die;
+               }
             }
 
 	    my $resp = "EX_OK";
@@ -530,8 +536,8 @@ sub handle_user
 
     if ($setuid_to_user) {
 	$> = $uid;
-	if ($> != $uid) {
-	    logmsg "setuid to $uid failed";
+       if ( !defined($uid) || $> != $uid ) {
+           logmsg "fatal: setuid to $username failed";
 	    die;		# make it fatal to avoid security breaches
 	}
     }
