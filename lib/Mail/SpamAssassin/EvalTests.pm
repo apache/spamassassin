@@ -1090,27 +1090,28 @@ sub check_for_faraway_charset_in_body {
   # No message sections to check
   return 0 unless ( defined $boundary );
 
-  while ( $$fulltext =~ /^--$boundary\n((?:[^\n]+\n)+)(.+?)
-                      ^--$boundary(?:--)?\n/smxg ) {
-              my($header,$sampleofbody) = ($1,$2);
+  # Grab the whole mime body part
+  my($mimebody) = ($$fulltext =~ /^(--$boundary\n.*
+                                  ^--$boundary--\n)/smx);
 
-              if ( $header =~ /^Content-Type:\s(.{0,100}charset=[^\n]+)/msi ) {
-    my $type = $1;
+  if (defined $mimebody) {
+    foreach my $section ( split(/^--${boundary}\n/m, $mimebody) ) {
+      my($header,$sampleofbody) = split(/\n\s*\n/, $section, 2);
+      next unless defined $header;
 
-    my @locales = $self->get_my_locales();
+      if ( $header =~ /^Content-Type:\s(.{0,100}charset=[^\n]+)/msi ) {
+        my $type = $1;
 
-    return 0 if grep { $_ eq "all" } @locales;
+        my @locales = $self->get_my_locales();
 
-    $type = get_charset_from_ct_line ($type);
-    if (defined $type &&
-      !Mail::SpamAssassin::Locales::is_charset_ok_for_locales
-		      ($type, @locales))
-    {
-      if ($self->are_more_high_bits_set ($sampleofbody)) {
-        return 1;
+        return 0 if grep { $_ eq "all" } @locales;
+
+        $type = get_charset_from_ct_line ($type);
+        return 1 if (defined $type &&
+          !Mail::SpamAssassin::Locales::is_charset_ok_for_locales($type, @locales) &&
+          $self->are_more_high_bits_set ($sampleofbody));
       }
     }
-  }
   }
 
   0;
