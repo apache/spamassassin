@@ -1,11 +1,48 @@
 #!/usr/bin/perl
-# usage:
-# ./lint-rules-from-freqs < freqs > badtests
+
+sub usage {
+  die "
+lint-rules-from-freqs: perform 'lint' testing on SpamAssassin rules and scores
+
+usage: ./lint-rules-from-freqs [-f falsefreqs] < freqs > badtests
+
+This analyzes SpamAssassin tests, based on the hit frequencies and S/O ratios
+from a mass-check logfile pair.
+
+The 'freqs' argument is the frequency of hits in all messages ('hit-frequencies
+-x -p' output).
+
+The 'falsefreqs' argument is frequencies of hits in false-positives and
+false-negatives only ('hit-frequencies -x -p -f' output).
+
+";
+}
+
+my $opt_falsefreqs;
+while ($#ARGV >= 0) {
+  $_ = shift @ARGV;
+  if (/^-f/) { $_ = shift @ARGV; $opt_falsefreqs = $_; }
+  else { usage(); }
+}
 
 print "BAD TESTS REPORT\n";
 print "\nRule file syntax issues:\n\n";
 readrules();
 lintrules();
+
+if ($opt_falsefreqs) {
+  open (FALSE, "<$opt_falsefreqs");
+  while (<FALSE>) {
+    if (!/^\s*([\d\.]+)/) {
+      my ($overall, $spam, $nons, $so, $score, $name) = split (' ');
+      next unless ($name =~ /\S/);
+      $falsefreqs_spam{$name} = $spam;
+      $falsefreqs_nons{$name} = $nons;
+      $falsefreqs_so{$name} = $so;
+    }
+  }
+  close FALSE;
+}
 
 while (<>) {
   if (!/^\s*([\d\.]+)/) {
@@ -13,8 +50,12 @@ while (<>) {
   }
 
   my $badrule;
-  my ($overall, $spam, $nons, $sn, $score, $name) = split (' ');
+  my ($overall, $spam, $nons, $so, $score, $name) = split (' ');
   next unless ($name =~ /\S/);
+
+  my $ffspam = $falsefreqs_spam{$name};
+  my $ffnons = $falsefreqs_nons{$name};
+  my $ffso = $falsefreqs_so{$name};
 
   my $tf = $tflags{$name};
   next if ($tf =~ /net/);
@@ -25,18 +66,36 @@ while (<>) {
   } else {
     if ($score < 0.0) {
       # negative score with more spams than nonspams? bad rule.
-      if ($tf !~ /nice/ && $sn > 0.5 && $score < 0.5) { $badrule = 'non-nice but -ve score'; }
+      if ($tf !~ /nice/ && $so > 0.5 && $score < 0.5) {
+        $badrule = 'non-nice but -ve score';
+      }
 
-      if ($tf =~ /nice/ && $sn > 0.5 && $score < 0.5) { $badrule = 'fn'; }
+      if ($tf =~ /nice/ && $so > 0.5 && $score < 0.5) {
+        if ($ffso < 0.5) {
+          $badrule = 'fn';
+        } else {
+          # ignore, the FNs are overridden by other tests so it doesn't
+          # affect the overall results.
+        }
+      }
 
       # low number of matches overall
       if ($nons < 0.05) { $badrule ||= ''; $badrule .= ', low matches'; }
 
     } elsif ($score > 0.0) {
       # positive score with more nonspams than spams? bad.
-      if ($tf =~ /nice/ && $sn < 0.5 && $score > 0.5) { $badrule = 'nice but +ve score'; }
+      if ($tf =~ /nice/ && $so < 0.5 && $score > 0.5) {
+        $badrule = 'nice but +ve score';
+      }
 
-      if ($tf !~ /nice/ && $sn < 0.5 && $score > 0.5) { $badrule = 'fp'; }
+      if ($tf !~ /nice/ && $so < 0.5 && $score > 0.5) {
+        if ($ffso > 0.5) {
+          $badrule = 'fp';
+        } else {
+          # ignore, the FPs are overridden by other tests so it doesn't
+          # affect the overall results.
+        }
+      }
 
       # low number of matches overall
       if ($spam < 0.05) { $badrule ||= ''; $badrule .= ', low matches'; }
@@ -113,12 +172,17 @@ sub readrules {
 }
 
 sub lintrules {
+  my %warned = ();
   foreach my $rule (@rulesfound) {
     if (defined $descfile{$rule} && !defined ($rulefile{$rule})) {
+      next if $warned{"desc_no_rule_".$descfile{$rule}};
       print "warning: $rule has description, but no rule: $descfile{$rule}\n";
+      $warned{"desc_no_rule_".$descfile{$rule}} = 1;
     }
     if (defined $score{$rule} && !defined ($rulefile{$rule})) {
+      next if $warned{"score_no_rule_".$descfile{$rule}};
       print "warning: $rule has score, but no rule: $scorefile{$rule}\n";
+      $warned{"score_no_rule_".$descfile{$rule}} = 1;
     }
   }
 }
