@@ -73,7 +73,6 @@
 /* 2003/04/16 SJF: randomize hostname order (quasi load balancing) */
 #define SPAMC_RANDOMIZE_HOSTS (1<<23)
 
-
 /* Aug 14, 2002 bj: A struct for storing a message-in-progress */
 typedef enum
 {

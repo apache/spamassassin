@@ -82,6 +82,9 @@ char *__progname = "spamc";
 /* safe fallback defaults to on now - CRH */
 int flags = SPAMC_RAW_MODE | SPAMC_SAFE_FALLBACK;
 
+/* global to control whether we should exit(0)/exit(1) on ham/spam */
+int use_exit_code = 0;
+
 /* Aug 14, 2002 bj: global to hold -e command */
 char **exec_argv;
 
@@ -99,6 +102,7 @@ void print_usage(void)
     usg("Options:\n");
     usg("  -B                  Assume input is a single BSMTP-formatted message.\n");
     usg("  -c                  Just print the summary line and set an exit code.\n");
+    usg("  -E                  Filter as normal, and set an exit code.\n");
     usg("  -d host             Specify host to connect to.\n"
            "                      [default: localhost]\n");
     usg("  -e command [args]   Pipe the output to the given command instead of stdout.\n"
@@ -131,9 +135,9 @@ read_args(int argc, char **argv,
           struct transport *ptrn)
 {
 #ifndef _WIN32
-    const char *opts = "-BcrRd:e:fhyp:t:s:u:xSHU:";
+    const char *opts = "-BcrRd:e:fhyp:t:s:u:xSHU:E";
 #else
-    const char *opts = "-BcrRd:fhyp:t:s:u:xSH";
+    const char *opts = "-BcrRd:fhyp:t:s:u:xSHE";
 #endif
     int opt;
 
@@ -190,6 +194,11 @@ read_args(int argc, char **argv,
             case 'r':
             {
                 flags |= SPAMC_REPORT_IFSPAM;
+                break;
+            }
+            case 'E':
+            {
+                use_exit_code = 1;
                 break;
             }
             case 'R':
@@ -396,12 +405,15 @@ int main(int argc, char **argv)
 		if (message_write(out_fd, &m) >= 0) {
 
 		    result = m.is_spam;
-		    if ((flags & SPAMC_CHECK_ONLY) && result != EX_TOOBIG) {
+                    if ((flags & SPAMC_CHECK_ONLY) && result != EX_TOOBIG) {
 			message_cleanup(&m);
 			ret = result;
 		    }
 		    else {
 			message_cleanup(&m);
+                        if (use_exit_code && result != EX_TOOBIG) {
+                            ret = result;
+                        }
 		    }
 #ifdef _WIN32
 		    WSACleanup();
@@ -433,6 +445,9 @@ int main(int argc, char **argv)
 	if (ret == EX_TOOBIG) {
 	    ret = 0;
 	}
+        else if (use_exit_code) {
+            ret = result;
+        }
 	else if (flags & SPAMC_SAFE_FALLBACK) {
 	    ret = EX_OK;
 	}
