@@ -7,7 +7,6 @@ INSTALL.VMS
 License
 MANIFEST
 MANIFEST.SKIP
-MailAudit.patch
 Makefile.PL
 README
 TRADEMARK
@@ -56,7 +55,6 @@ lib/Mail/SpamAssassin/PhraseFreqs.pm
 lib/Mail/SpamAssassin/Replier.pm
 lib/Mail/SpamAssassin/Reporter.pm
 lib/Mail/SpamAssassin/SHA1.pm
-lib/Mail/SpamAssassin/SMTP/SmartHost.pm
 lib/Mail/SpamAssassin/TextCat.pm
 lib/Mail/SpamAssassin/UnixLocker.pm
 lib/Mail/SpamAssassin/Util.pm
@@ -66,16 +64,6 @@ masses/CORPUS_SUBMIT
 masses/CORPUS_SUBMIT_NIGHTLY
 masses/Makefile
 masses/README
-masses/RUNME.TWOSTEP
-masses/bayes-testing/README
-masses/bayes-testing/bayes-10pcv-driver
-masses/bayes-testing/bayes-tcr-from-freqs
-masses/bayes-testing/bayes-thresholds
-masses/bayes-testing/draw-bayes-histogram
-masses/bayes-testing/map-s-space/README
-masses/bayes-testing/map-s-space/bayes-analyse-from-raw-counts
-masses/bayes-testing/map-s-space/gnuplot.cmds
-masses/bayes-testing/map-s-space/run-search
 masses/corpora/README
 masses/corpora/fuzzy-hash-maildir
 masses/corpora/mass-find-nonspam
@@ -83,7 +71,6 @@ masses/corpora/remove-tests-from-logs
 masses/corpora/uniq-mailbox
 masses/corpora/uniq-maildirs
 masses/craig-evolve.c
-masses/craig-evolve.c.ALTIVEC
 masses/extract-message-from-mbox
 masses/find-extremes
 masses/fp-fn-statistics
@@ -141,7 +128,6 @@ rules/30_text_es.cf
 rules/30_text_fr.cf
 rules/30_text_it.cf
 rules/30_text_pl.cf
-rules/40_spam_phrases.cf
 rules/50_scores.cf
 rules/60_whitelist.cf
 rules/STATISTICS-set1.txt

@@ -15,5 +15,10 @@ http://bugzilla.spamassassin.org/show_bug.cgi?id=304 :
   -S.
 
 
+  Razor support does not work on the Win32 platform,
+  redirecting stdout and stderr incorrectly.  To work-around,
+  set its score to 0 like so:   "score RAZOR2_CHECK 0"
+
+
 (See http://bugzilla.spamassassin.org/ for the SpamAssassin bug tracking
 database.)
