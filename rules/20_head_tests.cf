@@ -586,3 +586,9 @@ describe TO_MALFORMED           To: has a malformed address
 header YR_MEMBERSHIP_EXCH       Subject =~ /Your Membership Exchange/
 describe YR_MEMBERSHIP_EXCH     Subject contains 'Your Membership Exchange'
 
+# jm: somehow these guys keep slipping through, and they're very persistent.
+# they use both azoogle.com and azogle.com, but this header is always
+# in this format.
+header AZOOGLE                X-Info =~ /service to abuse\@azoogle\.com$/
+describe AZOOGLE              From azoogle.com, azogle.com, etc.
+
