@@ -415,6 +415,20 @@ meta T_MIME_HTML_NO_MAJOR_TAG	MIME_HTML_ONLY && !__TAG_EXISTS_HTML && !__TAG_EXI
 body T_HTML_FONT_COLOR_NAME	eval:html_test('t_font_color_name')
 describe T_HTML_FONT_COLOR_NAME	HTML font color has unusual name
 
+# quinlan: 2003-04-14
+# 1x1 images
+body T_HTML_IMAGE_WEB_BUGS_1	eval:html_test('t_image_web_bugs_1')
+body T_HTML_IMAGE_WEB_BUGS_2	eval:html_test('t_image_web_bugs_2')
+body T_HTML_IMAGE_WEB_BUGS_3	eval:html_test('t_image_web_bugs_3')
+body T_HTML_IMAGE_WEB_BUGS_4	eval:html_test('t_image_web_bugs_4')
+body T_HTML_IMAGE_WEB_BUGS_5	eval:html_test('t_image_web_bugs_5')
+# both web bugs rules
+meta T_HTML_WEB_BUGS_PLUS_1	(T_HTML_IMAGE_WEB_BUGS_1 && HTML_WEB_BUGS)
+meta T_HTML_WEB_BUGS_PLUS_2	(T_HTML_IMAGE_WEB_BUGS_2 && HTML_WEB_BUGS)
+meta T_HTML_WEB_BUGS_PLUS_3	(T_HTML_IMAGE_WEB_BUGS_3 && HTML_WEB_BUGS)
+meta T_HTML_WEB_BUGS_PLUS_4	(T_HTML_IMAGE_WEB_BUGS_4 && HTML_WEB_BUGS)
+meta T_HTML_WEB_BUGS_PLUS_5	(T_HTML_IMAGE_WEB_BUGS_5 && HTML_WEB_BUGS)
+
 # alan premselaar <alien@12inch.com>, see SpamAssassin-talk list
 header T_JAPANESE_UCE_SUBJECT_3	Subject =~ /L\$\>5Bz9\-9p\"\(/
 describe T_JAPANESE_UCE_SUBJECT_3 Subject: contains Japanese mandatory unsolicited mail tag
@@ -525,12 +539,12 @@ tflags T_RCVD_IN_WIREHUB_BH net
 header T_RCVD_IN_WIREHUB_PROXIES	rbleval:check_rbl('pbwn', 'proxies.blackholes.wirehub.net.')
 tflags T_RCVD_IN_WIREHUB_PROXIES net
 
-# OPM with sub-tests
+# OPM sub-tests
 # transfers: axfr/ixfr for trusted sites
 # url: http://opm.blitzed.org/
 # pay-to-use: no
 # delist: automatic expiry, no fee, retested on request (free)
-header __RCVD_IN_OPM		rbleval:check_rbl('opm2', 'opm.blitzed.org.')
+header __RCVD_IN_OPM			rbleval:check_rbl('opm2', 'opm.blitzed.org.')
 tflags __RCVD_IN_OPM net
 header T_RCVD_IN_OPM_WINGATE		rblreseval:check_rbl_results_for('opm2', '1')
 tflags T_RCVD_IN_OPM_WINGATE net
@@ -540,7 +554,7 @@ header T_RCVD_IN_OPM_HTTP_CONNECT	rblreseval:check_rbl_results_for('opm2', '4')
 tflags T_RCVD_IN_OPM_HTTP_CONNECT net
 header T_RCVD_IN_OPM_ROUTER		rblreseval:check_rbl_results_for('opm2', '8')
 tflags T_RCVD_IN_OPM_ROUTER net
-header T_RCVD_IN_OPM_HTTP_POST	rblreseval:check_rbl_results_for('opm2', '16')
+header T_RCVD_IN_OPM_HTTP_POST		rblreseval:check_rbl_results_for('opm2', '16')
 tflags T_RCVD_IN_OPM_HTTP_POST net
 
 # fiveten - many blacklists, but only the bulk one performs well
@@ -610,17 +624,6 @@ header T_RCVD_IN_SORBS_SPAM	rblreseval:check_rbl_results_for('sorbs', '127.0.0.6
 tflags T_RCVD_IN_SORBS_SPAM net
 header T_RCVD_IN_SORBS_WEB	rblreseval:check_rbl_results_for('sorbs', '127.0.0.7')
 tflags T_RCVD_IN_SORBS_WEB net
-
-# some Reynolds RBLs, may be a bad idea since they're in Australia
-# perhaps find a local mirror or maybe figure out what the source data is?
-header T_RCVD_IN_REYNOLDSOSRS	rbleval:check_rbl('reynoldsosrs', 'osrs.bl.reynolds.net.au.')
-tflags T_RCVD_IN_REYNOLDSOSRS net
-header T_RCVD_IN_REYNOLDSOSPS	rbleval:check_rbl('reynoldsosps', 'osps.bl.reynolds.net.au.')
-tflags T_RCVD_IN_REYNOLDSOSPS net
-header T_RCVD_IN_REYNOLDSOHPS	rbleval:check_rbl('reynoldsohps', 'ohps.bl.reynolds.net.au.')
-tflags T_RCVD_IN_REYNOLDSOHPS net
-header T_RCVD_IN_REYNOLDSWPB	rbleval:check_rbl('reynoldswpb', 'wpb.bl.reynolds.net.au.')
-tflags T_RCVD_IN_REYNOLDSWPB net
 
 # OK, a whole batch of faked-HELO detection rules.  These work by checking
 # for hosts HELOing in a certain domain, but without rDNS matching that.
