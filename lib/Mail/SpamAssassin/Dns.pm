@@ -220,8 +220,6 @@ sub process_dnsbl_set {
       # dbg ("$subtest");
       # dbg ("$rdatastr");
 
-      eval $subtest;
-
       $self->got_hit($rule, "SenderBase: ") if !$undef && eval "$subtest";
     }
     # bitmask
