@@ -3,7 +3,7 @@ CFLAGS=		-g -O2 -Wall
 LDFLAGS=	-lm
 
 # What rule scoreset are we using?
-SCORESET =	0
+include config
 
 #### Should be no need to modify below this line
 

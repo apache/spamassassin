@@ -1,6 +1,8 @@
 #!/bin/sh
 
-SCORESET=0
+# set SCORESET
+. config
+
 if [ "x$1" != "x" ]; then
  SCORESET=$1
 fi

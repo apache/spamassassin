@@ -1,6 +1,8 @@
 #!/bin/sh
 
-SCORESET="0"
+# set SCORESET
+. config
+
 NAME="set$SCORESET"
 
 if [ ! -f "ORIG/ham-$NAME.log" -o ! -f "ORIG/spam-$NAME.log" ]; then
@@ -13,7 +15,8 @@ echo "[Doing a scoreset $SCORESET score-generation run]"
 
 # Clean out old runs
 echo "[Cleaning up]"
-rm -rf spam-validate.log ham-validate.log spam.log ham.log ham.log NSBASE SPBASE tmp make.output freqs perceptron.scores \
+rm -rf spam-validate.log ham-validate.log spam.log ham.log \
+	NSBASE SPBASE tmp make.output freqs perceptron.scores \
 	gen-$NAME.out gen-$NAME.scores gen-$NAME.validate
 make clean >/dev/null
 
