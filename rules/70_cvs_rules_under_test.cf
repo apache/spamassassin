@@ -115,10 +115,12 @@ header T_RCVD_NUMERIC_HELO	Received =~ /helo[= ]\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,
 body     T_AS_SEEN_ON             /seen on\b\s*(?:T\.?V\.?|ABC|NBC|CBS|CNN|Oprah|USA Today|48 Hours|New York Times|\w+\s+T\.?V\.?|:)/i
 
 # bug 1380
-meta T_OUTLOOK_FAKED              ( __OUTLOOK_MUA && __MIME_HTML_ONLY )
-#describe OUTLOOK_FAKED          Outlook can't send HTML message only
-#lang fr describe OUTLOOK_FAKED  Outlook ne sait pas envoyer de mail en HTML pur sans texte brut.
-#score OUTLOOK_FAKED             3
+meta T_FAKED_OUTLOOK		(__OUTLOOK_MUA && __MIME_HTML_ONLY)
+#describe FAKED_OUTLOOK		Outlook can't send HTML message only
+#lang fr describe FAKED_OUTLOOK	Outlook ne sait pas envoyer de mail en HTML pur sans texte brut.
+meta T_FAKED_AOL		(__AOL_MUA && __MIME_HTML_ONLY)
+meta T_FAKED_THEBAT		(__THEBAT_MUA && __MIME_HTML_ONLY)
+meta T_FAKED_IMS		(__IMS_MUA && __MIME_HTML_ONLY)
 
 # bug 1421, possible replacement for USERPASS
 uri T_USERPASS                    m{https?://[^/\s]+?(?::[^/\s]+?)?\@}
