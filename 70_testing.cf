@@ -109,6 +109,7 @@ uri T_MSN_REDIR		m{^https?://shopping\.msn\.com/trackurl\.aspx\?}i
 describe T_MSN_REDIR	Has MSN Redirect URI
 
 # reported by Kurtis Rader, bug 2901
+# miniscule hits
 uri T_AOL_REDIR_1	m{^https?://www\.aol\.com/ams/clickThruRedirect.adp\?}i
 uri T_AOL_REDIR_2	m{^https?://www\.aol\.com/ams/}i
 uri T_AOL_REDIR_3	m{^https?://www\.aol\.com/.*https?://}i
@@ -227,6 +228,7 @@ body T_HTML_FONT_LARGE_SIZE_4	eval:html_eval('max_size', '> 8')
 body T_URGENT_BIZ /urgent.{0,16}(?:assistance|business|buy|confidential|notice|proposal|reply|request|response)/i
 
 # bug 2950
+# both look promotable
 uri T_GOOGLE_IMAGES	m{^http://images\.google(\.\S+)?\.[a-z]{2,3}/imgres\?}i
 uri T_GOOGLE_REDIR	m{^http://www\.google(\.\S+)?\.[a-z]{2,3}/url\?}i
 
@@ -360,13 +362,6 @@ tflags T_RCVD_IN_AHBL_RHSBL	net
 body T_HTML_TEXT_CONTRAST_16	eval:html_test('text_contrast_16')
 body T_HTML_TEXT_CONTRAST_24	eval:html_test('text_contrast_24')
 body T_HTML_TEXT_CONTRAST_32	eval:html_test('text_contrast_32')
-
-# bug 2164
-# You must be joking, can you say "unix pipes" and "regular expressions"?
-# 10.263  14.0650   1.1050    0.927   0.77    0.01  T_PIPE_OBFU
-# ;)
-body T_PIPE_OBFU           /[a-z]\|[a-z]/i
-describe T_PIPE_OBFU       Words dis|guised with a pipe sym|bol
 
 # Should catch Atriks, for one
 uri T_LONG_HOSTNAME_25		/^https?:\/\/[a-z0-9]{25,29}\./i
@@ -535,7 +530,7 @@ body T_BACKHAIR2_7_7		eval:html_test('backhair2_7_7')
 
 # spams that are assembled from a Javascript array
 # look for the XOR op
-rawbody __JS_FROMCHARCODE	/String\.fromCharCode\s*(\s*\S+\s*\[\s*\S+\s*\]\s*\^/
+rawbody __JS_FROMCHARCODE	/String\.fromCharCode\s*\(\s*\S+\s*\[\s*\S+\s*\]\s*\^/
 rawbody __JS_DOCWRITE   	/document\.write/
 meta T_JS_FROMCHARCODE          (__JS_FROMCHARCODE && __JS_DOCWRITE)
 
