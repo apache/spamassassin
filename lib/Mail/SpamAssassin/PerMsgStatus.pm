@@ -132,21 +132,13 @@ sub check {
   }
 
   {
-    # If you run timelog from within specified rules, prefix the message with
-    # "Rulename -> " so that it's easy to pick out details from the overview
-    timelog("Launching RBL queries in the background", "rblbg", 1);
-
     # Here, we launch all the DNS RBL queries and let them run while we
     # inspect the message
     $self->run_rbl_eval_tests ($self->{conf}->{rbl_evals});
 
-    timelog("Finished launching RBL queries in the background", "rblbg", 2);
-
-    timelog("Starting head tests", "headtest", 1);
+    # do head tests
     $self->do_head_tests();
-    timelog("Finished head tests", "headtest", 2);
 
-    timelog("Starting body tests", "bodytest", 1);
     # do body tests with decoded portions
     {
       my $decoded = $self->get_decoded_stripped_body_text_array();
@@ -155,9 +147,7 @@ sub check {
       $self->do_body_eval_tests($decoded);
       undef $decoded;
     }
-    timelog("Finished body tests", "bodytest", 2);
 
-    timelog("Starting raw body tests", "rawbodytest", 1);
     # do rawbody tests with raw text portions
     {
       my $bodytext = $self->get_decoded_body_text_array();
@@ -167,9 +157,7 @@ sub check {
       $self->do_body_uri_tests($bodytext);
       undef $bodytext;
     }
-    timelog("Finished raw body tests", "rawbodytest", 2);
 
-    timelog("Starting full message tests", "fullmsgtest", 1);
     # and do full tests: first with entire, full, undecoded message
     # still skip application/image attachments though
     {
@@ -179,22 +167,14 @@ sub check {
       $self->do_full_eval_tests(\$fulltext);
       undef $fulltext;
     }
-    timelog("Finished full message tests", "fullmsgtest", 2);
 
-    timelog("Starting head eval tests", "headevaltest", 1);
     $self->do_head_eval_tests();
-    timelog("Finished head eval tests", "headevaltest", 2);
-
-    timelog("Starting RBL tests (will wait up to ".$self->{conf}->{rbl_timeout}
-		." secs before giving up)", "rblblock", 1);
 
     # harvest the DNS results
     $self->harvest_dnsbl_queries();
 
     # finish the DNS results
     $self->rbl_finish();
-
-    timelog("Finished all RBL tests", "rblblock", 2);
 
     # Do meta rules second-to-last
     $self->do_meta_tests();
@@ -2485,7 +2465,6 @@ sub generic_base64_decode {
 ###########################################################################
 
 sub dbg { Mail::SpamAssassin::dbg (@_); }
-sub timelog { Mail::SpamAssassin::timelog (@_); }
 sub sa_die { Mail::SpamAssassin::sa_die (@_); }
 
 ###########################################################################

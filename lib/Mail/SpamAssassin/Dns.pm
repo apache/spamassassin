@@ -371,8 +371,6 @@ sub razor2_lookup {
 
   # this test covers all aspects of availability
   if (!$self->is_razor2_available()) { return 0; }
-
-  timelog("Razor2 -> Starting razor test ($timeout secs max)", "razor", 1);
   
   # razor also debugs to stdout. argh. fix it to stderr...
   if ($Mail::SpamAssassin::DEBUG->{enabled}) {
@@ -515,10 +513,8 @@ sub razor2_lookup {
   dbg("Razor2 results: spam? ".$self->{razor2_result}."  highest cf score: ".$self->{razor2_cf_score});
 
   if ($self->{razor2_result} > 0) {
-      timelog("Razor2 -> Finished razor test: confirmed spam", "razor", 2);
       return 1;
   }
-  timelog("Razor2 -> Finished razor test: not known spam", "razor", 2);
   return 0;
 }
 
@@ -611,7 +607,6 @@ sub dccifd_lookup {
     return 0;
   }
 
-  timelog("DCCifd -> Starting test ($timeout secs max)", "dcc", 1);
   $self->enter_helper_run_mode();
 
   eval {
@@ -662,18 +657,15 @@ sub dccifd_lookup {
     $response = undef;
     if ($@ =~ /alarm/) {
       dbg ("DCCifd check timed out after $timeout secs.");
-      timelog("DCCifd -> interrupted after $timeout secs", "dcc", 2);
       return 0;
     } else {
       warn ("DCCifd -> check skipped: $! $@");
-      timelog("dcc check skipped", "dcc", 2);
       return 0;
     }
   }
 
   if (!defined $response || $response !~ /^X-DCC/) {
     dbg ("DCCifd -> check failed - no X-DCC returned: $response");
-    timelog("dcc check failed", "dcc", 2);
     return 0;
   }
 
@@ -697,11 +689,9 @@ sub dccifd_lookup {
 
   if ($count{body} >= $self->{conf}->{dcc_body_max} || $count{fuz1} >= $self->{conf}->{dcc_fuz1_max} || $count{fuz2} >= $self->{conf}->{dcc_fuz2_max}) {
     dbg ("DCCifd: Listed! BODY: $count{body} of $self->{conf}->{dcc_body_max} FUZ1: $count{fuz1} of $self->{conf}->{dcc_fuz1_max} FUZ2: $count{fuz2} of $self->{conf}->{dcc_fuz2_max}");
-    timelog("DCCifd -> got hit", "dcc", 2);
     return 1;
   }
   
-  timelog("DCCifd -> no match", "dcc", 2);
   return 0;
 }
 
@@ -721,7 +711,6 @@ sub dcc_lookup {
   }
   if (!$self->{conf}->{use_dcc}) { return 0; }
 
-  timelog("DCC -> Starting check ($timeout secs max)", "dcc", 1);
   $self->enter_helper_run_mode();
 
   # use a temp file here -- open2() is unreliable, buffering-wise,
@@ -777,23 +766,18 @@ sub dcc_lookup {
   if ($@) {
     if ($@ =~ /^__alarm__$/) {
       dbg ("DCC -> check timed out after $timeout secs.");
-      timelog("DCC interrupted after $timeout secs", "dcc", 2);
     } elsif ($@ =~ /^__brokenpipe__$/) {
       dbg ("DCC -> check failed: Broken pipe.");
-      timelog("DCC check failed, broken pipe", "dcc", 2);
     } elsif ($@ eq "no response\n") {
       dbg ("DCC -> check failed: no response");
-      timelog("DCC check failed, no response", "dcc", 2);
     } else {
       warn ("DCC -> check failed: $@\n");
-      timelog("DCC check failed", "dcc", 2);
     }
     return 0;
   }
 
   if (!defined($response) || $response !~ /^X-DCC/) {
     dbg ("DCC -> check failed: no X-DCC returned (did you create a map file?): $response");
-    timelog("DCC check failed", "dcc", 2);
     return 0;
   }
 
@@ -817,11 +801,9 @@ sub dcc_lookup {
 
   if ($count{body} >= $self->{conf}->{dcc_body_max} || $count{fuz1} >= $self->{conf}->{dcc_fuz1_max} || $count{fuz2} >= $self->{conf}->{dcc_fuz2_max}) {
     dbg ("DCC: Listed! BODY: $count{body} of $self->{conf}->{dcc_body_max} FUZ1: $count{fuz1} of $self->{conf}->{dcc_fuz1_max} FUZ2: $count{fuz2} of $self->{conf}->{dcc_fuz2_max}");
-    timelog("DCC -> got hit", "dcc", 2);
     return 1;
   }
   
-  timelog("DCC -> check had no match", "dcc", 2);
   return 0;
 }
 
@@ -864,7 +846,6 @@ sub pyzor_lookup {
   }
   if (!$self->{conf}->{use_pyzor}) { return 0; }
 
-  timelog("Pyzor -> Starting check ($timeout secs max)", "pyzor", 1);
   $self->enter_helper_run_mode();
 
   # use a temp file here -- open2() is unreliable, buffering-wise,
@@ -908,16 +889,12 @@ sub pyzor_lookup {
   if ($@) {
     if ($@ =~ /^__alarm__$/) {
       dbg ("Pyzor -> check timed out after $timeout secs.");
-      timelog("Pyzor interrupted after $timeout secs", "pyzor", 2);
     } elsif ($@ =~ /^__brokenpipe__$/) {
       dbg ("Pyzor -> check failed: Broken pipe.");
-      timelog("Pyzor check failed, broken pipe", "pyzor", 2);
     } elsif ($@ eq "no response\n") {
       dbg ("Pyzor -> check failed: no response");
-      timelog("Pyzor check failed, no response", "pyzor", 2);
     } else {
       warn ("Pyzor -> check failed: $@\n");
-      timelog("Pyzor check failed", "pyzor", 2);
     }
     return 0;
   }
@@ -943,11 +920,9 @@ sub pyzor_lookup {
 
   if ($pyzor_count >= $self->{conf}->{pyzor_max}) {
     dbg ("Pyzor: Listed! $pyzor_count of $self->{conf}->{pyzor_max} and whitelist is $pyzor_whitelisted");
-    timelog("Pyzor -> got hit", "pyzor", 2);
     return 1;
   }
 
-  timelog("Pyzor -> no match", "pyzor", 2);
   return 0;
 }
 

@@ -79,7 +79,7 @@ BEGIN {
 
 use vars qw{
   @ISA $VERSION $SUB_VERSION @EXTRA_VERSION $IS_DEVEL_BUILD $HOME_URL
-  $DEBUG $TIMELOG
+  $DEBUG
   @default_rules_path @default_prefs_path
   @default_userprefs_path @default_userstate_dir
   @site_rules_path
@@ -88,13 +88,10 @@ use vars qw{
 $VERSION = "2.60";              # update after release
 $IS_DEVEL_BUILD = 1;            # change for release versions
 
-# Create the hash so that it really points to something, otherwise we can't
-# get a reference to it -- Marc
-$TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.205 2003/09/16 02:33:19 felicity Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.206 2003/09/19 01:51:27 quinlan Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -255,7 +252,6 @@ sub new {
   $DEBUG->{dcc}=0;
   $DEBUG->{pyzor}=0;
   $DEBUG->{rbl}=0;
-  $DEBUG->{timelog}=0;
   $DEBUG->{dnsavailable}=-2;
   $DEBUG->{bayes}=0;
   # Bitfield:
@@ -384,19 +380,11 @@ sub check {
   my ($self, $mail_obj) = @_;
   local ($_);
 
-  timelog("Starting SpamAssassin Check", "SAfull", 1);
   $self->init(1);
-  timelog("Init completed");
   my $mail = $self->encapsulate_mail_object ($mail_obj);
   my $msg = Mail::SpamAssassin::PerMsgStatus->new($self, $mail);
-  chomp($TIMELOG->{mesgid} = ($mail_obj->get("Message-Id") || 'nomsgid'));
-  $TIMELOG->{mesgid} =~ s#<(.*)>#$1#;
   # Message-Id is used for a filename on disk, so we can't have '/' in it.
-  $TIMELOG->{mesgid} =~ s#/#-#g;
-  timelog("Created message object, checking message", "msgcheck", 1);
   $msg->check();
-  timelog("Done checking message", "msgcheck", 2);
-  timelog("Done running SpamAssassin", "SAfull", 2);
   $msg;
 }
 
@@ -434,15 +422,10 @@ sub learn {
   my ($self, $mail_obj, $id, $isspam, $forget) = @_;
   local ($_);
 
-  timelog("Starting SpamAssassin Learn", "SAfull", 1);
   require Mail::SpamAssassin::PerMsgLearner;
   $self->init(1);
-  timelog("Init completed");
   my $mail = $self->encapsulate_mail_object ($mail_obj);
   my $msg = Mail::SpamAssassin::PerMsgLearner->new($self, $mail, $id);
-  $TIMELOG->{mesgid} = $id;
-  $TIMELOG->{mesgid} =~ s#/#-#g;
-  timelog("Created message object, learning from message", "msglearn", 1);
 
   if ($forget) {
     $msg->forget();
@@ -454,8 +437,6 @@ sub learn {
     $msg->learn_ham();
   }
 
-  timelog("Done learning from message", "msglearn", 2);
-  timelog("Done running SpamAssassin", "SAfull", 2);
   $msg;
 }
 
@@ -1095,8 +1076,6 @@ sub compile_now {
 
   # note: this may incur network access. Good.  We want to make sure
   # as much as possible is preloaded!
-  # Timelog uses the Message-ID for the filename on disk, so let's set that
-  # to a value easy to recognize. It'll show when spamd was restarted -- Marc
   my @testmsg = ("From: ignore\@compiling.spamassassin.taint.org\n", 
     "Message-Id:  <".time."\@spamassassin_spamd_init>\n", "\n",
     "I need to make this message body somewhat long so TextCat preloads\n"x20);
@@ -1504,66 +1483,6 @@ sub find_all_addrs_in_line {
 
   return @addrs;
 }
-
-# First argument is the message you want to log for that time
-# wheredelta is 1 for starting a split on the stopwatch, and 2 for showing the
-# instant delta (used to show how long a specific routine took to run)
-# deltaslot says which stopwatch you are working with (needs to match for begin
-# and end obviously)
-sub timelog {
-  my ($msg, $deltaslot, $wheredelta) = @_;
-  my $now=CORE::time();
-  my $tl=$Mail::SpamAssassin::TIMELOG;
-  my $dbg=$Mail::SpamAssassin::DEBUG;
-
-  if (defined($deltaslot) and ($deltaslot eq "SAfull") and defined($wheredelta) and ($wheredelta eq 1)) {
-    $tl->{'start'}=$now;
-    # Because spamd is long running, we need to close and re-open the log file
-    if ($tl->{flushedlogs}) {
-	$tl->{flushedlogs}=0;
-	$tl->{mesgid}="";
-	@{$tl->{keeplogs}} = ();
-	close(LOG);
-    }
-  } 
-
-  if (defined $wheredelta) {
-    $tl->{stopwatch}->{$deltaslot}=$now if ($wheredelta eq 1);
-    if ($wheredelta eq 2) {
-      if (not defined $tl->{stopwatch}->{$deltaslot}) {
-	warn("Error: got end of time log for $deltaslot but never got the start\n");
-      } else {
-	$msg.=sprintf(" (Delta: %.3fs)", 
-	  $now - $tl->{stopwatch}->{$deltaslot} );
-      }
-    }
-  }
-
-  $msg=sprintf("%.3f: $msg\n", $now - ($tl->{start}||0));
-
-  if (not ($tl->{logpath} and $tl->{mesgid})) {
-    push (@{$tl->{keeplogs}}, $msg);
-    print $msg if ($dbg->{timelog});
-    dbg("Log not yet opened, continuing", "timelog", -2);
-    return;
-  } 
-  if (not $tl->{flushedlogs} and $tl->{logpath} and $tl->{mesgid}) {
-    my $file="$tl->{logpath}/".sprintf("%.4f",time)."_$tl->{mesgid}";
-
-    $tl->{flushedlogs}=1;
-    dbg("Flushing logs to $file", "timelog", -2);
-    open (LOG, ">>$file") or warn("Can't open $file: $!");
-
-    while (defined ($_ = shift(@{$tl->{keeplogs}})))
-    {
-      print LOG $_;
-    }
-    dbg("Done flushing logs", "timelog", -2);
-  }
-  print LOG $msg;
-  print $msg if ($dbg->{timelog});
-}
-
 
 # Only the first argument is needed, and it can be a reference to a list if
 # you want

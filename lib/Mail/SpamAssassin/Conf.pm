@@ -2317,22 +2317,6 @@ database per user.)
       $self->{bayes_path} = $1; next;
     }
 
-=item timelog_path /path/to/dir		(default: NULL)
-
-If you set this value, SpamAssassin will try to create logfiles for each
-message it processes and dump information on how fast it ran, and in which
-parts of the code the time was spent.  The files will be named:
-C<unixdate_messageid> (i.e 1023257504_chuvn31gdu@4ax.com)
-
-Make sure  SA can write the log file; if you're not sure what permissions are
-needed, chmod the log directory to 1777, and adjust later.
-
-=cut
-
-    if (/^timelog_path\s+(.*)$/) {
-      $Mail::SpamAssassin::TIMELOG->{logpath}=$1; next;
-    }
-
 =item auto_whitelist_file_mode		(default: 0700)
 
 The file mode bits used for the automatic-whitelist directory or file.

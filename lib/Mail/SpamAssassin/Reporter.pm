@@ -250,7 +250,6 @@ sub dcc_report {
   my ($self, $fulltext) = @_;
   my $timeout=$self->{conf}->{dcc_timeout};
 
-  timelog("DCC -> Starting report ($timeout secs max)", "dcc", 1);
   $self->enter_helper_run_mode();
 
   # use a temp file here -- open2() is unreliable, buffering-wise,
@@ -284,18 +283,14 @@ sub dcc_report {
   if ($@) {
     if ($@ =~ /^__alarm__$/) {
       dbg ("DCC -> report timed out after $timeout secs.");
-      timelog("DCC interrupted after $timeout secs", "dcc", 2);
    } elsif ($@ =~ /^__brokenpipe__$/) {
       dbg ("DCC -> report failed: Broken pipe.");
-      timelog("DCC report failed, broken pipe", "dcc", 2);
     } else {
       warn ("DCC -> report failed: $@\n");
-      timelog("DCC report failed", "dcc", 2);
     }
     return 0;
   }
 
-  timelog("DCC -> report finished", "dcc", 2);
   return 1;
 }
 
@@ -303,7 +298,6 @@ sub pyzor_report {
   my ($self, $fulltext) = @_;
   my $timeout=$self->{conf}->{pyzor_timeout};
 
-  timelog("Pyzor -> Starting report ($timeout secs max)", "pyzor", 1);
   $self->enter_helper_run_mode();
 
   # use a temp file here -- open2() is unreliable, buffering-wise,
@@ -337,24 +331,19 @@ sub pyzor_report {
   if ($@) {
     if ($@ =~ /^__alarm__$/) {
       dbg ("Pyzor -> report timed out after $timeout secs.");
-      timelog("Pyzor interrupted after $timeout secs", "pyzor", 2);
     } elsif ($@ =~ /^__brokenpipe__$/) {
       dbg ("Pyzor -> report failed: Broken pipe.");
-      timelog("Pyzor report failed, broken pipe", "pyzor", 2);
     } else {
       warn ("Pyzor -> report failed: $@\n");
-      timelog("Pyzor report failed", "pyzor", 2);
     }
     return 0;
   }
 
-  timelog("Pyzor -> report finished", "pyzor", 2);
   return 1;
 }
 ###########################################################################
 
 sub dbg { Mail::SpamAssassin::dbg (@_); }
-sub timelog { Mail::SpamAssassin::timelog (@_); }
 sub create_fulltext_tmpfile { Mail::SpamAssassin::PerMsgStatus::create_fulltext_tmpfile(@_) }
 sub delete_fulltext_tmpfile { Mail::SpamAssassin::PerMsgStatus::delete_fulltext_tmpfile(@_) }
 
