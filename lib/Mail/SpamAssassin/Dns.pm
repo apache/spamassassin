@@ -7,6 +7,7 @@ package Mail::SpamAssassin::PerMsgStatus;
 
 use Mail::SpamAssassin::Conf;
 use IO::Socket;
+use IPC::Open2;
 use Carp;
 use strict;
 
@@ -247,7 +248,7 @@ sub is_dcc_available {
 sub dcc_lookup {
   my ($self, $fulltext) = @_;
   my $response = undef;
-  my %count = { };
+  my %count;
 
   $count{body} = 0;
   $count{fuz1} = 0;
@@ -259,7 +260,6 @@ sub dcc_lookup {
   }
 
   eval {
-    require IPC::Open2;
     my ($dccin, $dccout, $pid);
 
     local $SIG{ALRM} = sub { die "alarm\n" };
