@@ -321,12 +321,12 @@ sub tokenize {
   $self->{tokens} = [ ];
 
   for (@{$body}) {
-    $wc += $self->tokenize_line ($_, '', 0, 1);
+    $wc += $self->tokenize_line ($_, '', 0);
   }
 
   my %hdrs = $self->tokenize_headers ($msg);
   foreach my $prefix (keys %hdrs) {
-    $wc += $self->tokenize_line ($hdrs{$prefix}, "H$prefix:", 1, 0);
+    $wc += $self->tokenize_line ($hdrs{$prefix}, "H$prefix:", 1);
   }
 
   my @toks = @{$self->{tokens}}; delete $self->{tokens};
@@ -338,7 +338,7 @@ sub tokenize_line {
   local ($_) = $_[1];
   my $tokprefix = $_[2];
   my $casesensitive = $_[3];
-  my $killtitlecase = $_[4];
+  #my $killtitlecase = $_[4];
 
   # include quotes, .'s and -'s for URIs, and [$,]'s for Nigerian-scam strings,
   # and ISO-8859-15 alphas.  DO split on @'s, so username and domains in
@@ -360,9 +360,9 @@ sub tokenize_line {
       push (@{$self->{tokens}}, $tokprefix.$token);
     }
 
-    if ($killtitlecase) {
-      $token =~ s/^([A-Z])([^A-Z]+)$/ (lc $1) . $2 /ge;
-    }
+    #if ($killtitlecase) {
+    #$token =~ s/^([A-Z])([^A-Z]+)$/ (lc $1) . $2 /ge;
+    #}
 
     # now do some token abstraction; in other words, make them act like
     # patterns instead of text copies.
