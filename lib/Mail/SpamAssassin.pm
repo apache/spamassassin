@@ -78,7 +78,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 $VERSION = "2.21";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.87 2002/06/10 07:16:34 hughescr Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.88 2002/06/10 09:08:11 hughescr Exp $';
 
 sub Version { $VERSION; }
 
@@ -970,6 +970,7 @@ See also http://spamassassin.org/ for more information.
 
 =head1 SEE ALSO
 
+C<Mail::SpamAssassin::Conf>
 C<Mail::SpamAssassin::PerMsgStatus>
 C<spamassassin>
 
