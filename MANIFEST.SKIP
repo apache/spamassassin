@@ -1,7 +1,5 @@
 .*.swp
-.cvsignore
-.exists
-CVS
+\.exists
 \.svn
 Changes.bak
 Mail-SpamAssassin-.*
@@ -85,8 +83,6 @@ spamd/libspamc.so
 spamd/spamc
 spamd/sslspamc
 spamd/spamd
-spamproxy/spamproxyd
-t/.cvsignore
 t/log/.*
 t/rule_tests.t
 testmails
@@ -96,11 +92,6 @@ wordfreqs/.*
 x
 rules/70_broken_rules.cf
 t/data/whitelists/.*
-binaries.mk
-config.cache
-config.h
-config.log
-config.status
 lib/Mail/SpamAssassin/SMTP/SmartHost.pm
 presentation
 masses/tmon.spam
@@ -108,16 +99,13 @@ masses/tmon.nonspam
 masses/dprof.spam
 masses/dprof.nonspam
 masses/jm-mass-check-rules/.*
-sa-forget
 sa-learn
 o
 todo
-CONTRIB_CERT
 t/data/nice/cjk/.*
 masses/bayes-testing/.*
 stuff/.*
 lm/.*
 tasks/.*
 build/2.60_change_summary
-t/spamd_parallel.t
 build/replace_license_blocks
