@@ -842,7 +842,9 @@ sub _get_tag {
 
 	    PREVIEW => sub { $self->get_content_preview() },
 
-	    REPORT => sub { return "\n" . $self->{tag_data}->{REPORT} },
+	    REPORT => sub {
+	      return "\n" . ($self->{tag_data}->{REPORT} || "");
+	    },
 
 	  );
 
