@@ -957,8 +957,8 @@ Clear the spamtrap template.
 
 =item dcc_path STRING
 
-This option tells SpamAssassin specifically where to find the pyzor client
-instead of relying on SpamAssassin to find it in the current PATH.
+This option tells SpamAssassin specifically where to find the C<dccproc>
+client instead of relying on SpamAssassin to find it in the current PATH.
 
 =cut
 
@@ -1023,7 +1023,7 @@ the results
 
 =item pyzor_path STRING
 
-This option tells SpamAssassin specifically where to find the pyzor client
+This option tells SpamAssassin specifically where to find the C<pyzor> client
 instead of relying on SpamAssassin to find it in the current PATH.
 
 =cut
