@@ -12,6 +12,6 @@ q{ X-Spam-Status: Yes,}, 'status',
 
 );
 
-ok (sdrun ("-L -S", "< data/spam/001", \&patterns_run_cb));
+ok (sdrun ("-L", "< data/spam/001", \&patterns_run_cb));
 ok_all_patterns();
 
