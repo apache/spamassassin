@@ -735,16 +735,17 @@ sub uri_to_domain {
   my ($uri) = @_;
 
   #return if ($uri =~ /^mailto:/i);	# not mailto's, please (TODO?)
+
+  # Javascript is not going to help us, so return.
   return if ($uri =~ /^javascript:/i);
 
-  $uri =~ s,^mailto:\/*,,gsi;	# drop the protocol
-  $uri =~ s,#.*$,,gs;		# drop fragment
-  $uri =~ s,^[a-z]+://,,gsi;	# drop the protocol
-  $uri =~ s,^[^/]*\@,,gs;	# username/passwd
-  $uri =~ s,[/\?\&].*$,,gs;	# path/cgi params
-  $uri =~ s,:\d+$,,gs;		# port
+  $uri =~ s,#.*$,,gs;			# drop fragment
+  $uri =~ s#^[a-z]+:/{0,2}##gsi;	# drop the protocol
+  $uri =~ s,^[^/]*\@,,gs;		# username/passwd
+  $uri =~ s,[/\?\&].*$,,gs;		# path/cgi params
+  $uri =~ s,:\d+$,,gs;			# port
 
-  return if $uri =~ /\%/; # skip undecoded URIs.
+  return if $uri =~ /\%/;         # skip undecoded URIs.
   # we'll see the decoded version as well
 
   # keep IPs intact
@@ -773,6 +774,51 @@ sub is_in_subdelegated_cctld {
 	  na| nc| ni| np| nz| pa| pe| ph| pl| py| ru| sg| sh| sv| sy| th|
 	  tn| tr| tw| ua| ug| uk| uy| ve| vi| yu| za)
 	$/ixo);
+}
+
+sub uri_list_canonify {
+  my(@uris) = @_;
+
+  # make sure we catch bad encoding tricks
+  my @nuris = ();
+  for my $uri (@uris) {
+    next if $uri =~ /^mailto:/i;
+
+    # sometimes we catch URLs on multiple lines
+    $uri =~ s/\n//g;
+
+    # http:/www.foo.biz -> http://www.foo.biz
+    $uri =~ s#^(https?:)/{0,2}#$1//#i;
+
+    # Make a copy so we don't trash the original
+    my $nuri = $uri;
+
+    # http://www.foo.biz?id=3 -> http://www.foo.biz/?id=3
+    $nuri =~ s/^(https?:\/\/[^\/\?]+)\?/$1\/?/;
+
+    # deal with encoding of chars, this is just the set of printable
+    # chars minus ' ' (that is, dec 33-126, hex 21-7e)
+    $nuri =~ s/\&\#0*(3[3-9]|[4-9]\d|1[01]\d|12[0-6]);/sprintf "%c",$1/ge;
+    $nuri =~ s/\&\#x0*(2[1-9]|[3-6][a-f0-9]|7[0-9a-e]);/sprintf "%c",hex($1)/gei;
+
+    ($nuri) = Mail::SpamAssassin::Util::url_encode($nuri);
+    if ($nuri ne $uri) {
+      push(@nuris, $nuri);
+    }
+
+    # deal with http redirectors.  strip off one level of redirector
+    # and add back to the array.  the foreach loop will go over those
+    # and deal appropriately.
+    # bug 3308: redirectors like yahoo only need one '/' ... <grrr>
+    if ($nuri =~ m{^https?://.+?(https?:/{0,2}.+)$}) {
+      push(@uris, $1);
+    }
+  }
+
+  # remove duplicates, merge nuris and uris
+  my %uris = map { $_ => 1 } @uris, @nuris;
+
+  return keys %uris;
 }
 
 ###########################################################################

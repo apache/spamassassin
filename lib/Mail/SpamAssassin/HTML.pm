@@ -418,10 +418,14 @@ sub html_uri {
 
       # a base URI will be ignored by browsers unless it is an absolute
       # URI of a standard protocol
-      if ($uri =~ m@^(?:https?|ftp)://@i) {
+      if ($uri =~ m@^(?:https?|ftp):/{0,2}@i) {
 	# remove trailing filename, if any; base URIs can have the
 	# form of "http://foo.com/index.html"
-	$uri =~ s@^([a-z]+://[^/]+/.*?)[^/\.]+\.[^/\.]{2,4}$@$1@i;
+	$uri =~ s@^([a-z]+:/{0,2}[^/]+/.*?)[^/\.]+\.[^/\.]{2,4}$@$1@i;
+
+	# Make sure the URI has the proper seperator
+	$uri =~ s@^([a-z]+:)/{0,2}@$1//@;
+
 	# Make sure it ends in a slash
 	$uri .= "/" unless $uri =~ m@/$@;
 	$self->{html}{base_href} = $uri;

@@ -18,10 +18,49 @@ if (-e 'test_dir') {            # running from test directory, not ..
 use strict;
 use Test;
 use Mail::SpamAssassin;
-
 use Mail::SpamAssassin::HTML;
+use Mail::SpamAssassin::Util;
 
-plan tests => 42;
+plan tests => 44;
+
+sub array_cmp {
+  my($a, $b) = @_;
+  return 0 if (@{$a} != @{$b});
+  for(my $i = 0; $i<@{$a}; $i++) {
+    return 0 if ($a->[$i] ne $b->[$i]);
+  }
+  return 1;
+}
+
+sub try_canon {
+  my($input, $expect) = @_;
+  my @input = sort { $a cmp $b } Mail::SpamAssassin::Util::uri_list_canonify(@{$input});
+  my @expect = sort { $a cmp $b } @{$expect};
+
+  # output what we want/get for debugging
+  #warn ">> expect: @expect\n>> got: @input\n";
+
+  return array_cmp(\@input, \@expect);
+}
+
+# All of these ought to compress down into a single URL
+ok(try_canon([
+   'http:www.spamassassin.org',
+   'http:/www.spamassassin.org',
+   'http://www.spamassassin.org'
+   ], [
+   'http://www.spamassassin.org',
+   ]));
+
+# Try a simple redirector.  Should return the redirector and the URI
+# that is pointed to.
+ok(try_canon(['http://rd.yahoo.com/?http:/www.spamassassin.org'],
+   [
+   'http://rd.yahoo.com/?http:/www.spamassassin.org',
+   'http://www.spamassassin.org',
+   ]));
+
+##############################################
 
 sub try {
   my ($base, $uri, $want) = @_;

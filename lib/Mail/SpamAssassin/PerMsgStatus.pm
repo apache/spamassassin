@@ -1539,45 +1539,7 @@ sub get_uri_list {
     push @uris, @{ $self->{html}{uri} };
   }
 
-  # make sure we catch bad encoding tricks
-  my @nuris = ();
-  for my $uri (@uris) {
-    next if $uri =~ /^mailto:/i;
-
-    # sometimes we catch URLs on multiple lines
-    $uri =~ s/\n//g;
-
-    # Make a copy so we don't trash the original
-    my $nuri = $uri;
-
-    # http://www.foo.biz?id=3 -> http://www.foo.biz/?id=3
-    $nuri =~ s/^(https?:\/\/[^\/\?]+)\?/$1\/?/;
-
-    # http:/www.foo.biz -> http://www.foo.biz
-    $nuri =~ s/^(https?:\/)([^\/])/$1\/$2/;
-
-    # deal with encoding of chars, this is just the set of printable
-    # chars minus ' ' (that is, dec 33-126, hex 21-7e)
-    $nuri =~ s/\&\#0*(3[3-9]|[4-9]\d|1[01]\d|12[0-6]);/sprintf "%c",$1/ge;
-    $nuri =~ s/\&\#x0*(2[1-9]|[3-6][a-f0-9]|7[0-9a-e]);/sprintf "%c",hex($1)/gei;
-
-    ($nuri) = Mail::SpamAssassin::Util::url_encode($nuri);
-    if ($nuri ne $uri) {
-      push(@nuris, $nuri);
-    }
-
-    # deal with http redirectors.  strip off one level of redirector
-    # and add back to the array.  the foreach loop will go over those
-    # and deal appropriately.
-    # bug 3308: redirectors like yahoo only need one '/' ... <grrr>
-    if ($nuri =~ m{^https?://.+?(https?:/.+)$}) {
-      push(@uris, $1);
-    }
-  }
-
-  # remove duplicates, merge nuris and uris
-  my %uris = map { $_ => 1 } @uris, @nuris;
-  @uris = keys %uris;
+  @uris = Mail::SpamAssassin::Util::uri_list_canonify(@uris);
 
   # get domain list
   my %domains;
