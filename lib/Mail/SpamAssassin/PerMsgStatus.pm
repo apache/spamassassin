@@ -158,11 +158,7 @@ sub check {
     $self->{html} = $self->{msg}->{metadata}->{html};
 
     my $bodytext = $self->get_decoded_body_text_array();
-
     my $fulltext = $self->{msg}->get_pristine();
-
-    # use $bodytext here because $decoded is too stripped
-    # TVD: leave it up to get_uri_list to do the right thing ...
     my @uris = $self->get_uri_list();
 
     foreach my $priority (sort { $a <=> $b } keys %{$self->{conf}->{priorities}}) {
@@ -199,14 +195,15 @@ sub check {
       $self->do_body_uri_tests($priority, @uris);
       $self->do_body_eval_tests($priority, $decoded);
   
-      # XXX - we may need to call this more often than once through the loop
-      $self->{main}->call_plugins ("check_tick", { permsgstatus => $self });
-
       $self->do_rawbody_tests($priority, $bodytext);
       $self->do_rawbody_eval_tests($priority, $bodytext);
   
       $self->do_full_tests($priority, \$fulltext);
       $self->do_full_eval_tests($priority, \$fulltext);
+
+      # we may need to call this more often than once through the loop, but
+      # it needs to be done at least once, either at the beginning or the end.
+      $self->{main}->call_plugins ("check_tick", { permsgstatus => $self });
     }
 
     # sanity check, it is possible that no rules >= HARVEST_DNSBL_PRIORITY ran so the harvest
