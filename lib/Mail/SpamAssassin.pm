@@ -1634,13 +1634,15 @@ sub dbg {
   my $facility = "generic";
   my $message = shift;
 
-  if ($message =~ /^(\S+?):\s*(.*)/) {
+  if ($message =~ /^(\S+?):\s*(.*)/s) {
     $facility = $1;
     $message = $2;
   }
 
   if ($facilities{all} || $facilities{$facility}) {
-    warn "debug: $facility: $message\n";
+    $message =~ s/\n+$//s;
+    $message =~ s/^/debug: ${facility}:\t/mg;
+    warn "$message\n";
   }
 }
 
