@@ -76,7 +76,8 @@ use strict;
 use warnings;
 use bytes;
 
-use DBI;
+# Do this silliness to stop RPM from finding DBI as required
+BEGIN { require DBI;  import DBI; }
 
 use Mail::SpamAssassin::PersistentAddrList;
 
