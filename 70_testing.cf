@@ -358,7 +358,7 @@ describe T_RCVD_IN_AHBL_RHSBL	AHBL: From sender in DNSbl dnsbl.ahbl.org
 tflags T_RCVD_IN_AHBL_RHSBL	net
 
 # these are here for testing and debugging improvements to the HTML
-# rendering code
+# rendering code, delete prior to release
 body T_HTML_TEXT_CONTRAST_16	eval:html_test('text_contrast_16')
 body T_HTML_TEXT_CONTRAST_24	eval:html_test('text_contrast_24')
 body T_HTML_TEXT_CONTRAST_32	eval:html_test('text_contrast_32')
@@ -420,11 +420,12 @@ body T_DOMAIN_RATIO_049		eval:domain_ratio('0.049')
 body T_DOMAIN_RATIO_050		eval:domain_ratio('0.050')
 
 # bug 2220
-meta T_DIGEST_MULTIPLE       RAZOR2_CHECK + DCC_CHECK + PYZOR_CHECK > 1
-describe T_DIGEST_MULTIPLE   Message hits more than one network digest check
+meta T_DIGEST_MULTIPLE		RAZOR2_CHECK + DCC_CHECK + PYZOR_CHECK > 1
+describe T_DIGEST_MULTIPLE	Message hits more than one network digest check
+tflags T_DIGEST_MULTIPLE	net
 
-# too easy.
-body T_SUBJ_VIA_GRA		/\bvia.gra\b/i
+# too easy
+body T_VIA_GAP_GRA		/\bvia.gra\b/i
 
 # backhair - idea from backhair set by Jennifer Wheeler and Adam Lopresto.
 body T_BACKHAIR_1_1		eval:html_test('backhair_1_1')
@@ -567,28 +568,12 @@ describe RCVD_IN_IADB_SPF_TR	Sender is in IADB as a publisher of SPF records
 tflags RCVD_IN_IADB_SPF_TR		net nice
 
 # Bug 3153
-body __MIME_TEXT_ONLY           eval:check_for_mime_text_only()
-
-meta     T_HTML_PLAIN_TEXT      (__MIME_TEXT_ONLY && HTML_MESSAGE)
-describe T_HTML_PLAIN_TEXT      Message is HTML pretending to be plain text
-
-meta     T_TEXT_ONLY            (__MIME_TEXT_ONLY && !HTML_MESSAGE)
-describe T_TEXT_ONLY            Message is plain text only
-
-full __CTYPE_HTML_SOMEWHERE	/Content-Type:\s+text\/html\b/i
-
-meta     T_HTML_PLAIN_TEXT2      (!__CTYPE_HTML_SOMEWHERE && HTML_MESSAGE)
-describe T_HTML_PLAIN_TEXT2      Message is HTML pretending to be plain text
+meta T_HTML_PLAIN_TEXT		(!__MIME_HTML && HTML_MESSAGE)
+describe T_HTML_PLAIN_TEXT	Message is HTML without HTML Content-Type
 
 # Bug 2168
 header T_BAD_MOZILLA_VERSION    User-Agent =~ /Mozilla\/5\.0\d\d/
 describe T_BAD_MOZILLA_VERSION  User-Agent claims to be Mozilla, but is malformed
-
-# bug 1843
-# check against __BILL_1618, ANTISPAM_BILL, BILL_1618, S_1618, UNDER_BILL_1618, SECTION_301
-meta T_ANTISPAM_BILL  REMOVE_IN_QUOTES && T_BILL_1618
-body     T_BILL_1618    /\bs\W{0,4}1618\b/i
-describe T_BILL_1618    Possible mention of bill 1618 (anti-spam bill)
 
 # bug 3163
 body T_HTML_OBFUSCATEX00_05 eval:html_range('obfuscation_ratio','.0','.05')
