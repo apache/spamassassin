@@ -20,9 +20,12 @@ my $spamtest = new Mail::SpamAssassin ({
 });
 
 foreach my $folder (@ARGV) {
-  if (-d $folder && (-f "$folder/1" || -f "$folder/cyrus.index")) {
+  if (-d $folder &&
+  	(-f "$folder/1" || -f "$folder/1.gz" || -f "$folder/cyrus.index"))
+  {
     # it's an MH folder or a Cyrus mailbox
     mass_check_mh_folder($folder);
+
   } elsif (-f $folder) {
     mass_check_mailbox($folder);
   }
@@ -33,7 +36,13 @@ sub mass_check_mh_folder {
   my @files = <$folder/[0-9]*>;
 
   foreach my $mail (sort sortbynum @files) {
-    open (STDIN, "<$mail");
+    if ($mail =~ /\.gz$/) {
+      open (STDIN, "gunzip -cd $mail |") or warn "gunzip $mail failed: $@";
+    } elsif ($mail =~ /\.bz2$/) {
+      open (STDIN, "bzip2 -cd $mail |") or warn "bunzip2 $mail failed: $@";
+    } else {
+      open (STDIN, "<$mail") or warn "open $mail failed: $@";
+    }
     my $ma = Mail::Audit->new();
     docheck ($mail, $ma);
   }
@@ -42,7 +51,13 @@ sub mass_check_mh_folder {
 sub mass_check_mailbox {
   my $folder = shift;
 
-  open (MBOX, "<$folder") or warn "open $folder failed $@";
+  if ($folder =~ /\.gz$/) {
+    open (MBOX, "gunzip -cd $folder |") or warn "gunzip $folder failed: $@";
+  } elsif ($folder =~ /\.bz2$/) {
+    open (MBOX, "bzip2 -cd $folder |") or warn "bunzip2 $folder failed: $@";
+  } else {
+    open (MBOX, "<$folder") or warn "open $folder failed: $@";
+  }
   while (<MBOX>) { /^From \S+ +... ... / and last; }
   $count = 1;
 

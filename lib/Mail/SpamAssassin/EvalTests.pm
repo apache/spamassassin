@@ -270,6 +270,47 @@ sub word_is_in_dictionary {
 }
 
 ###########################################################################
+
+sub get_address_commonality_ratio {
+  my ($self, $addr1, $addr2) = @_;
+
+  my %counts = ();
+  map { $counts{$_}++; } split (//, lc $addr1);
+  map { $counts{$_}++; } split (//, lc $addr2);
+
+  my $foundonce = 0;
+  my $foundtwice = 0;
+  foreach my $char (keys %counts) {
+    if ($counts{$char} == 1) { $foundonce++; next; }
+    if ($counts{$char} == 2) { $foundtwice++; next; }
+  }
+
+  $foundtwice ||= 1.0;
+  my $ratio = ($foundonce / $foundtwice);
+
+  #print "addrcommonality: $foundonce $foundtwice $addr1/$addr2 $ratio\n";
+
+  return $ratio;
+}
+
+sub check_for_spam_reply_to {
+  my ($self) = @_;
+
+  my $rpto = $self->get ('Reply-To:addr');
+  return 0 if ($rpto eq '');
+
+  my $ratio1 = $self->get_address_commonality_ratio
+  				($rpto, $self->get ('From:addr'));
+  my $ratio2 = $self->get_address_commonality_ratio
+  				($rpto, $self->get ('To:addr'));
+
+  # 2.0 means twice as many chars different as the same
+  if ($ratio1 > 2.0 && $ratio2 > 2.0) { return 1; }
+
+  return 0;
+}
+
+###########################################################################
 # BODY TESTS:
 ###########################################################################
 
