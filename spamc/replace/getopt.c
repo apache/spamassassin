@@ -22,6 +22,14 @@
 #include <assert.h>
 #include <stdlib.h>
 
+#ifdef _MSC_VER
+/* ignore MSVC++ warnings that are annoying and hard to remove:
+ 4702 unreachable code
+ (there is an unreachable assert(0) in case somehow it is reached)
+ */
+#pragma warning( disable : 4702 )
+#endif
+
 #define OPTERRCOLON (1)
 #define OPTERRNF (2)
 #define OPTERRARG (3)

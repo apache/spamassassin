@@ -10,23 +10,39 @@ any network accessible computer. The unix sockets option is not
 supported under Windows, so only TCP/IP can be used. As of this
 writing SSL has not been tested with the Windows spamc.
 
-Building spamc for Windows requires a lot more than running it. If all
-you want to do is run spamc without the full SpamAssassin on your
-Windows machine, it is easier if you can get a binary executable from
-someone else who has built it.
+Building spamc for Windows requires a lot more installed on your
+computer than running it does. If all you want to do is run spamc
+without the full SpamAssassin on your Windows machine, it is easier if
+you can get a binary executable from someone else who has built it.
+
+When building SpamAssassin under Windows, building spamc is
+optional. You can specify BUILD_SPAMC=yes or BUILD_SPAMC=no on the
+command line when you run 'perl Makefile.PL'. If you don't, you will
+be asked during the build process if you want to build spamc.
 
 System Requirements
 -------------------
 
-This has only been tested with Microsoft Visual C++ 6.0. There is a
-good chance it will just work with later versions of VC++, but some
-installation files would have to be changed to use with any other
-compiler.
+To build spamc you have to be able to build SpamAssassin and have a
+suitable C compiler.
 
-In addition to VC++ you also have to have installed a Windows version
-of Perl and the modules that are listed as required in the general
+To build SpamAssassin you must have installed a Windows version of
+Perl and the modules that are listed as required in the general
 SpamAssassin documentation. So far the only Windows version of perl
 this has been tested with is ActivePerl.
+
+Building spamc for Windows has been tested with Microsoft Visual C++
+6.0 and with Microsoft Visual C++ Toolkit 2003 with the February 2003
+Platform SDK. It will probably just work with any recent version of
+VC++. Some installation files would have to be changed to use with any
+other C compiler.
+
+Note that Microsoft Visual C++ Toolkit 2003 and the Platform SDK are
+available for download for free from
+http://msdn.microsoft.com/visualc/vctoolkit2003/ and
+http://www.microsoft.com/msdownload/platformsdk/sdkupdate/
+The latter requires Internet Explorer and accepting installation of an
+ActiveX control to access.
 
 To run the spamc executable once it is built you do not need to have
 VC++ or perl installed.
@@ -81,13 +97,17 @@ the environment. In a typical installation that would be found at
 
 "\Program Files\Microsoft Visual Studio\VC98\Bin\VCVARS32.BAT"
 
+Microsoft Visual C++ Toolkit 2003 has a similar batch file which has
+to be changed to include the appropriate paths for the Platform SDK
+installation.
+
 Also make sure that the SPAMD_SCRIPT environment variable is set in
 your command shell as described above.
 
 Then use the commands
 
  cd \spamasassin
- perl Makefile.PL
+ perl Makefile.PL BUILD_SPAMC=yes
  nmake
  nmake test
  nmake install
