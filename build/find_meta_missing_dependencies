@@ -6,7 +6,7 @@ sed -e 's/#.*$//' -e '/^$/d' 2[0-4]*.cf | egrep -v '^(describe|tflags|lang|requi
 cd /tmp
 grep -xFf meta-rules rules > defined
 
-echo "If there are any meta rule dependencies the don't exist, they'll follow:"
+echo "If there are any meta rule dependencies that don't exist, they'll follow:"
 diff meta-rules defined
 
 rm -f rules
