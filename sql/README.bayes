@@ -43,7 +43,8 @@ bayes_sql_override_username	   someusername
 
 This directive, if used, will override the username used for storing
 data in the database.  This could be used to group users together to
-share bayesian filter data.
+share bayesian filter data.  You can also use this config option to
+trick sa-learn to learn data as a specific user.
 
 
 Requirements
@@ -139,4 +140,30 @@ NB:  This should be considered BETA, and the interface, schema, or
 overall operation of SQL support may change at any time with future
 releases of SA.
 ******
+
+Converting Bayes Data From a DBM Database
+-----------------------------------------
+
+Converting your bayes database data from Berkeley (DBM) based storage
+to SQL based storage is as simple as a backup and then restore.
+
+If you are upgrading from a previous version of SpamAssassin you
+should first follow any recommended upgrade instructions for that
+release, in most cases this will be as simple as running an
+sa-learn --sync
+
+Once you have performed this upgrade, for each bayes database follow
+this procedure:
+
+o Run 'sa-learn --backup > backup.txt' which will backup your bayes
+  data into a text file.
+o Optionally you can run 'sa-learn --clear' to remove the DBM based
+  bayes files.
+o Modify your local.cf file according to the directions above.
+o Run 'sa-learn --restore backup.txt' to restore your bayes data to
+  the SQL database.
+
+NOTE: sa-learn must be run as the user who's data you are loading, or
+      you must make use of the bayes_sql_override_username config
+      option.
 
