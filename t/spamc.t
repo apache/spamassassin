@@ -12,6 +12,7 @@ q{ hello world }, 'spamc',
 
 );
 
-ok (scrun ("-p 0 < data/etc/hello.txt", \&patterns_run_cb));
+# connect on port 9 (discard): should always fail
+ok (scrun ("-p 9 < data/etc/hello.txt", \&patterns_run_cb));
 ok_all_patterns();
 
