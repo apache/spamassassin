@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.17 2002/09/27 22:20:17 quinlan Exp $
+# $Id: HTML.pm,v 1.18 2002/10/04 04:40:09 zelgadis Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -215,6 +215,22 @@ sub html_tests {
   {
     $self->{html}{web_bugs} = 1;
   }
+
+  if ($tag eq "img") {
+      $self->{html}{num_imgs}++;
+
+      $self->{html}{consec_imgs}++;
+
+      if ($self->{html}{consec_imgs} > $self->{html}{max_consec_imgs}) {
+          $self->{html}{max_consec_imgs} = $self->{html}{consec_imgs};
+      }
+  }
+
+  if ($tag eq "img" && exists $attr->{width} && exists $attr->{height}) {
+      my $area = $attr->{width} * $attr->{height};
+      $self->{html}{total_image_area} += $area;
+  }
+
   if ($tag =~ /^i?frame$/) {
     $self->{html}{relaying_frame} = 1;
   }
@@ -230,6 +246,11 @@ sub html_tests {
 
 sub html_text {
   my ($self, $text) = @_;
+
+  if ($text =~ /\S/) {
+      # Measuring consecutive image tags with no intervening text
+      $self->{html}{consec_imgs} = 0;
+  }
 
   if (exists $self->{html_inside}{script} && $self->{html_inside}{script} > 0)
   {
@@ -289,6 +310,34 @@ sub html_eval {
   my ($self, undef, $test, $expr) = @_;
   return exists $self->{html}{$test} && eval "qq{\Q$self->{html}{$test}\E} $expr";
 }
+
+sub html_image_area {
+    my ($self, undef, $min, $max) = @_;
+
+    $max ||= "inf";
+
+    my $image_area = $self->{html}{total_image_area};
+    return ($image_area > $min && $image_area <= $max);
+} # html_image_area()
+
+
+sub html_num_imgs {
+    my ($self, undef, $min, $max) = @_;
+
+    $max ||= "inf";
+
+    my $num_imgs = $self->{html}{num_imgs};
+    return ($num_imgs > $min && $num_imgs <= $max);
+} # html_num_imgs()
+
+sub html_max_consec_imgs {
+    my ($self, undef, $min, $max) = @_;
+
+    $max ||= "inf";
+
+    my $consec = $self->{html}{max_consec_imgs};
+    return ($consec > $min && $consec <= $max);
+} # html_max_consec_imgs()
 
 1;
 __END__
