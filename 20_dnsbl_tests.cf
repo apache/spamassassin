@@ -114,7 +114,7 @@ describe RCVD_IN_SORBS_DUL	SORBS: sent directly from dynamic IP address
 tflags RCVD_IN_SORBS_DUL	net
 
 # ---------------------------------------------------------------------------
-# Spamhaus XBL+SBL
+# Spamhaus SBL+XBL
 
 header __RCVD_IN_SBL_XBL	eval:check_rbl('sblxbl', 'sbl-xbl.spamhaus.org.')
 describe __RCVD_IN_SBL_XBL	Received via a relay in Spamhaus SBL+XBL
