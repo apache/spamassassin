@@ -125,13 +125,13 @@ sub razor2_access {
   my $return = 0;
   my @results = ();
 
+  my $debug = $type eq 'check' ? 'razor2' : 'reporter';
+
   # razor also debugs to stdout. argh. fix it to stderr...
-  if ($Mail::SpamAssassin::DEBUG) {
+  if (Mail::SpamAssassin::dbg_check($debug)) {
     open (OLDOUT, ">&STDOUT");
     open (STDOUT, ">&STDERR");
   }
-
-  my $debug = $type eq 'check' ? 'razor2' : 'reporter';
 
   Mail::SpamAssassin::PerMsgStatus::enter_helper_run_mode($self);
 
@@ -146,9 +146,7 @@ sub razor2_access {
 
       if ($rc) {
         $rc->{opt} = {
-		   debug      => ($Mail::SpamAssassin::DEBUG &&
-				  ($Mail::SpamAssassin::facilities{all} ||
-				   $Mail::SpamAssassin::facilities{razor2})),
+		   debug      => Mail::SpamAssassin::dbg_check('+razor2'),
 		   foreground => 1,
 		   config     => $self->{main}->{conf}->{razor_config}
         };
@@ -291,7 +289,7 @@ sub razor2_access {
   Mail::SpamAssassin::PerMsgStatus::leave_helper_run_mode($self);
 
   # razor also debugs to stdout. argh. fix it to stderr...
-  if ($Mail::SpamAssassin::DEBUG) {
+  if (Mail::SpamAssassin::dbg_check($debug)) {
     open (STDOUT, ">&OLDOUT");
     close OLDOUT;
   }
