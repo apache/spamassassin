@@ -14,9 +14,9 @@ STATUS
 TRADEMARK
 UPGRADE
 USAGE
+build/check_dependencies
 build/convert_pods_to_doc
 build/get_version
-build/check_dependencies
 build/preprocessor
 contrib/mbox-to-check
 contrib/run-corpora
@@ -150,6 +150,7 @@ rules/20_ratware.cf
 rules/20_uri_tests.cf
 rules/23_bayes.cf
 rules/25_body_tests_es.cf
+rules/25_dk.cf
 rules/25_hashcash.cf
 rules/25_msexec.cf
 rules/25_razor2.cf
@@ -226,7 +227,6 @@ t/bayesdbm_flock.t
 t/bayessql.t
 t/body_mod.t
 t/cidrs.t
-t/desc_wrap.t
 t/data/etc/hello.txt
 t/data/etc/testhost.cert
 t/data/etc/testhost.key
@@ -311,6 +311,7 @@ t/db_awl_path.t
 t/db_based_whitelist.t
 t/db_based_whitelist_ips.t
 t/debug.t
+t/desc_wrap.t
 t/dnsbl.t
 t/forged_rcvd.t
 t/gtube.t
@@ -385,4 +386,3 @@ tools/split_corpora
 tools/sysreport
 tools/test_extract
 tools/triplets.pl
-rules/25_dk.cf
