@@ -35,15 +35,31 @@ describe T_INVALID_MSGID	Message-Id is not valid, according to RFC 2822
 header __MSGID_COMMENT		MESSAGEID =~ /\(.*\)/m
 meta T_INVALID_MSGID2		__HAS_MSGID && !(__VALID_MSGID || __MSGID_COMMENT)
 
+# 12/28 - tvd - The INVALID_MSGID FPs for me are all of these forms:
+# <01BC978F.2BBAA120@user@wpi.edu>
+# <19990807175443731.AAD379@mail.motherboardx.com@[209.172.141.151]>
+# <20021210_@TLZ99369095_@TLZ>
+# <20010914114843.SM01072@>
+# <110E55CD141679-01@E*Trade_Bank_Mail_Administrator>
+# <libSDtMail.9709191456.9353.mcross@rebound/rebound>
+# <pid10027.1999.April.29.12:15.830789.@egroups.com>
+# In looking at the RFC, the first 3 are invalid (multiple '@' chars).
+# The 4th one is invalid because there's nothing after the '@'.
+# 5 and 6 are valid. (aka: actual fps)
+# 7 is invalid because there is a colon (:) in the id part.
+# the two valid fps are because we need the same character set after the @ as we had before it.  'msg-id' is defined
+# as dot-atom-text '@' dot-atom-text (not including the folded whitespace or obsolete versions).
+
+header __VALID_MSGID2 MESSAGEID =~ /^<(?:[a-zA-Z0-9.,!\#\$%&'*\+\/=?\^_{}|~-]+|\".+\")\@(?:[a-zA-Z0-9.,!\#\$%&'*\+\/=?\^_{}|~-]+|\[\d{1,3}(?:\.\d{1,3}){3}\])>(?:\s*\(.*\))?\s*$/m [if-unset: <NO@MSGID>]
+meta T_INVALID_MSGID3		__HAS_MSGID && !__VALID_MSGID2
+meta T_INVALID_MSGID4		__HAS_MSGID && !(__VALID_MSGID2 || __MSGID_COMMENT)
+
 
 # these rules may need to factor in ok_languages or ok_locales
 # Dec 18 2002 jm: but how? ;)  They are ready to be promoted otherwise
 #freqs:  0.084   0.2047   0.0095    0.956   0.84    0.01  T_BODY_UNPRINTABLE
 body T_BODY_UNPRINTABLE		/[\x00-\x07\x0b\x0c\x0e-\x1f\x7f]{3,}/
 describe T_BODY_UNPRINTABLE	Body includes 3 consecutive unprintable characters
-#freqs:  3.660   9.4529   0.0442    0.995   0.96    0.01  T_BODY_8BITS
-body T_BODY_8BITS		/[\x80-\xff]{8,}/
-describe T_BODY_8BITS		Body includes 8 consecutive 8-bit characters
 
 ########################################################################
 # bug 1106: forged MUAs
@@ -93,36 +109,7 @@ describe T_SENDER_NO_REVERSE    No reverse lookup for sender's IP
 body T_CHECK_EMAIL_ISFREE	eval:check_email_isfree()
 describe T_CHECK_EMAIL_ISFREE Body contains an e-mail address listed by Email::IsFree
 
-# bug 1014
-# from Allen
-# 12/20 - Not great, but looks ok, what say ye?  - tvd
-# sounds like it's worth something.  maybe combined with from_webmail
-# type meta subrule...
-# 12/25 - this was looking for T_REPLY_TO_HAS_UNDERLINE_NUMS which got promoted
-# we need to be more careful about this kind of stuff. :(
-header __FROM_HAS_UNDERLINE_NUMS	From =~ /_\S?(?:[a-z]+\w*?\d+|\d+\w*?[a-z]+)\w*\@/i
-meta T_FROM_HAS_UNDERLINE_NUMS		(!REPLY_TO_HAS_UNDERLINE_NUMS && __FROM_HAS_UNDERLINE_NUMS)
-describe T_FROM_HAS_UNDERLINE_NUMS	From: contains an underline and numbers/letters
-
-# tvd - 12/25 - part of me says to promote this with strong ham sign, but
-# another part says that since it's only 1 person who really gets any hits,
-# we shouldn't promote and just let them have local rules.  Thoughts?
-# bug 1171
-# Listproc - Allen (example: nonspam:<199811090515.AAA28259@chem.harvard.edu>)
-# 12/22 - hits a lot for allen (4.3%), a tiny amount for theo (0.05%), and that's it. - tvd
-header T_LISTPROC1		X-Listprocessor-version =~ /^\s*(?:\d\.)+\w*\s+--\s+List[Pp]roc(?:essor)?\b/
-score T_LISTPROC1		-0.01
-tflags T_LISTPROC1		nice
-
 ########################################################################
-
-# Dec 24 2002 jm: random check
-# 12/25 - tvd - great for quinlan (2.69%), hits under .05% for everyone else, no fps
-# quinlan: just a note that I didn't write the rule :-)
-uri T_BARGAIN_URL		/bargains?\.(?:com|biz)/
-# 12/25 - tvd - fps a bit for rod, my fp is homestead.com redirect to:
-#http://professional.homestead.com/splash.ffhtml?ref=3564&target=www.homestead.com/splash.html%3F3564%26target%3Dwww.hspromos.com/webring.html
-uri T_PROMO_URL			/promo(?:tion)?s?\.(?:com|biz)/
 
 # bug 1316
 # 12/28 - tvd - The goal is to catch when spammers use multiple user agents

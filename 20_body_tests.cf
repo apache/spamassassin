@@ -187,3 +187,5 @@ tflags UNDESIRED_LANGUAGE_BODY          userconf
 # adding a rule which looks for a phrase in the body (as most of them
 # do), please add it to rules/20_phrases.cf instead.
 
+body BODY_8BITS			/[\x80-\xff]{8,}/
+describe BODY_8BITS		Body includes 8 consecutive 8-bit characters
