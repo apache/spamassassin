@@ -14,7 +14,7 @@ describe NUMERIC_HTTP_ADDR	Uses a numeric IP address in URL
 uri LONG_NUMERIC_HTTP_ADDR	/^https?\:\/\/000\d+/is
 describe LONG_NUMERIC_HTTP_ADDR	Uses a long numeric IP address in URL
 
-uri NORMAL_HTTP_TO_IP		/^https?\:\/\/\d+\.\d+\.\d+\.\d+/is
+uri NORMAL_HTTP_TO_IP		/^https?\:\/\/(?:\S*\@)?\d+\.\d+\.\d+\.\d+/i
 describe NORMAL_HTTP_TO_IP	Uses a dotted-decimal IP address in URL
 
 uri HTTP_USERNAME_USED  /^https?\:\/\/[^\s\/]+\@/is
