@@ -1,29 +1,37 @@
-1. Get the latest CVS version of SA following the instructions on the
-sourceforge website.  You don't need to install it, just get it.
-Instructions at:
+ 1. If you don't already have a submission account, send a request to
+    submit@spamassassin.org and ask for a GA mass-check submission account.
+    You will receive your username and password via email, it will only be
+    good for GA mass-check submissions.  If you're interested in the nightly
+    submissions, please see the CORPUS_SUBMIT_NIGHTLY document.
 
-  https://sourceforge.net/cvs/?group_id=25457
+ 2. Get the latest version of SA following the instructions in the GA
+    mass-check announcement email.
+ 3. Now cd to the "masses" directory in the checked-out CVS code tree.
+ 4. Read README to gain understanding of what mass-check does.
+ 5. Run mass-check against your ham mail archive.
+ 6. sort -rn +1 ham.log | head -20
+ 7. Check each of those 20 messages by hand to make sure they're not spam that
+    slipped through, or a forward of a spam message.
+ 8. Repeat #6 until the top 20 are "clean"
+ 9. Repeat steps 4-7 for your spam archive until they are "clean"
+    (except you do sort -n +1 spam.log to look for low scoring spam)
+10. Run a mass-check for ham and spam together (one mass-check run)
+11. rename ham.log and spam.log to the appropriate filenames.  ** see note below **
+12. rsync -CPcvzb ham-yourname.log spam-yourname.log username@rsync.spamassassin.org::submit
 
-2. Now cd to the "masses" directory in the checked-out CVS code tree.
-3. Read README to gain understanding of what mass-check does.
-4. Run mass-check against your ham mail archive.
-5. sort -rn +1 ham.log | head -20
-6. Check each of those 20 messages by hand to make sure they're not spam that
-   slipped through, or a forward of a spam message.
-7. Repeat #6 until the top 20 are "clean"
-8. Repeat steps 4-7 for your spam archive until they are "clean"
-   (except you do sort -n +1 spam.log to look for low scoring spam)
-9. Run a mass-check for ham and spam together (one mass-check run)
-10. rename ham.log and spam.log to ham-yourname.log and spam-yourname.log
-    (ie for Craig Hughes: ham-craig.log and spam-craig.log)
-9. rsync -CPcvzb ham-yourname.log spam-yourname.log rsync.kluge.net::corpus
+Thanks for your help!
 
-That should do it.  In the future when you re-run this procedure
-(starting from the top to get latest CVS rules), the rsync bit should
-make the transmission of the results a lot faster, since it should only
-send diffs (more or less) of the file, which probably won't change much
-from run to run.
 
-Thanks for your help,
+Note: Depending on what type of mass-check you've run, the name of
+the file you need to upload may be different.  The different types of
+mass-check are combinations of with/without Bayes, and with/without
+Net rules.  The resulting filenames are:
 
-C
+Set 0		ham-nobayes-nonet-username.log	spam-nobayes-nonet-username.log
+Set 1		ham-nobayes-net-username.log	spam-nobayes-net-username.log
+Set 2		ham-bayes-nonet-username.log	spam-bayes-nonet-username.log
+Set 3		ham-bayes-net-username.log	spam-bayes-net-username.log
+
+For GA mass-check runs, there will be 3 announcements for people to run
+sets 1-3 (we can get the set 0 results by removing the net results from
+set 1 ...)

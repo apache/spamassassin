@@ -31,13 +31,13 @@ using that tag.
 Run all your mass-check scripts into those logfiles.  This is up to you!
 
 
-Finally submit them to rsync.kluge.net.  Replace "you" with the username
-Craig gave you (ask him for one!), ditto for the password.
+Finally submit them to rsync.spamassassin.org.  Replace "you" with the username
+you received (see CORPUS_SUBMIT for info), ditto for the password.
 
-  RSYNC_PASSWORD="[whatever_craig_told_you_it_was]"
+  RSYNC_PASSWORD="[whatever your password is]"
   export RSYNC_PASSWORD
-  rsync -CPcvzb ham.log you@rsync.kluge.net::corpus/ham-you.log
-  rsync -CPcvzb spam.log you@rsync.kluge.net::corpus/spam-you.log
+  rsync -CPcvzb ham.log you@rsync.spamassassin.org::corpus/ham-you.log
+  rsync -CPcvzb spam.log you@rsync.spamassassin.org::corpus/spam-you.log
 
 
 That's it.
