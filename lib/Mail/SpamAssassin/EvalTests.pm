@@ -35,7 +35,7 @@ $ROUND_THE_WORLD_RELAYERS = qr{(?:net|com|ca)};
 qr(\baction)i, qr(\bspunk)i, qr(\bpuss)i, qr(\bsuck)i, qr(\bhot)i,
 qr(\bvoyeur)i, qr(\ble[sz]b(?:ian|o))i, qr(\banal\b)i, qr(\binterr?acial)i, qr(\basian)i,
 qr(\bamateur)i, qr(\bsex+)i, qr(\bslut)i, qr(\bexplicit)i, qr(\bxxx(?:[^x]|\b))i, qr(\blive)i,
-qr(\bcelebrity)i, qr(\blick)i, qr(\bsuck)i, qr(\bdorm)i, qr(\bwebcam)i, qr(\bass\b)i, qr(\bschoolgirl)i,
+qr(\blick)i, qr(\bsuck)i, qr(\bdorm)i, qr(\bwebcam)i, qr(\bass\b)i, qr(\bschoolgirl)i,
 qr(\bstrip)i, qr(\bhorn[yi])i, qr(\berotic)i, qr(\boral)i, qr(\bpenis)i, qr(\bhard.?core)i,
 qr(\bblow.?job)i, qr(\bnast[yi])i, qr(\bporn)i, qr(\bwhore)i, qr(\bnaked)i,
 qr(\bnude)i, qr(\bvirgin)i, qr(\bnaught[yi])i, qr(\bgirl)i, qr(\bceleb)i, qr(\bbabe)i,
