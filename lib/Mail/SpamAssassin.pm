@@ -69,7 +69,7 @@ use vars	qw{
 @ISA = qw();
 
 $VERSION = "2.21";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.85 2002/06/05 18:11:12 hughescr Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.86 2002/06/08 04:50:53 hughescr Exp $';
 
 sub Version { $VERSION; }
 
@@ -79,44 +79,44 @@ $DEBUG = 0;
 
 #__installsitelib__/spamassassin.cf
 #__installvendorlib__/spamassassin.cf
-@default_rules_path = qw(
-        __prefix__/share/spamassassin
-        /usr/local/share/spamassassin
-  	/usr/share/spamassassin
-	./rules
-	../rules
+@default_rules_path = (
+        '__prefix__/share/spamassassin',
+        '/usr/local/share/spamassassin',
+  	'/usr/share/spamassassin',
+	'./rules',
+	'../rules',
 );
 
 # first 3 are BSDish, latter 2 Linuxish
-@site_rules_path = qw(
-        __prefix__/etc/mail/spamassassin
-        __prefix__/etc/spamassassin
-        /usr/local/etc/spamassassin
-	/usr/pkg/etc/spamassassin
-        /usr/etc/spamassassin
-  	/etc/mail/spamassassin
-  	/etc/spamassassin
+@site_rules_path = (
+        '__prefix__/etc/mail/spamassassin',
+        '__prefix__/etc/spamassassin',
+        '/usr/local/etc/spamassassin',
+	'/usr/pkg/etc/spamassassin',
+        '/usr/etc/spamassassin',
+  	'/etc/mail/spamassassin',
+  	'/etc/spamassassin',
 );
 
-@old_site_rules_path = qw(
-  	/etc/mail/spamassassin.cf
-  	/etc/spamassassin.cf
+@old_site_rules_path = (
+  	'/etc/mail/spamassassin.cf',
+  	'/etc/spamassassin.cf',
 );
     
-@default_prefs_path = qw(
-        __prefix__/etc/mail/spamassassin/user_prefs.template
-        __prefix__/share/spamassassin/user_prefs.template
-        /etc/mail/spamassassin/user_prefs.template
-        /usr/local/share/spamassassin/user_prefs.template
-        /usr/share/spamassassin/user_prefs.template
+@default_prefs_path = (
+        '__prefix__/etc/mail/spamassassin/user_prefs.template',
+        '__prefix__/share/spamassassin/user_prefs.template',
+        '/etc/mail/spamassassin/user_prefs.template',
+        '/usr/local/share/spamassassin/user_prefs.template',
+        '/usr/share/spamassassin/user_prefs.template',
 );
 
-@default_userprefs_path = qw(
-        ~/.spamassassin/user_prefs
+@default_userprefs_path = (
+        '~/.spamassassin/user_prefs',
 );
 
-@default_userstate_dir = qw(
-        ~/.spamassassin
+@default_userstate_dir = (
+        '~/.spamassassin',
 );
 
 ###########################################################################
