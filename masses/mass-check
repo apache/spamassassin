@@ -214,7 +214,7 @@ sub result {
 
 sub wanted {
   my ($id, $time, $dataref) = @_;
-  my ($out, $after, $begin);
+  my ($out, $after, $before);
 
   my $ma = Mail::SpamAssassin::NoMailAudit->new('data' => $dataref);
   $ma->{noexit} = 1;
