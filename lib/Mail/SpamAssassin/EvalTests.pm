@@ -123,25 +123,28 @@ sub check_for_from_to_same {
 }
 
 sub sorted_recipients {
-  my ($self, $length) = @_;
+  my ($self) = @_;
 
-  my $test = "sorted.tocc.$length";
-  if (!exists $self->{$test}) {
+  if (!exists $self->{tocc_sorted}) {
     $self->_check_recipients();
   }
-  return $self->{$test};
+  return $self->{tocc_sorted};
 }
 
-sub check_recipients {
-  my ($self, $min, $max, $length, $count) = @_;
+sub similar_recipients {
+  my ($self, $min, $max) = @_;
 
-  my $test = "similar.tocc.$length.$count";
-  if (!exists $self->{$test}) {
+  if (!exists $self->{tocc_similar}) {
     $self->_check_recipients();
   }
-  return (($min eq 'undef' || $self->{$test} >= $min) &&
-	  ($max eq 'undef' || $self->{$test} < $max));
+  return (($min eq 'undef' || $self->{tocc_similar} >= $min) &&
+	  ($max eq 'undef' || $self->{tocc_similar} < $max));
 }
+
+# best experimentally derived values
+use constant TOCC_SORTED_COUNT => 7;
+use constant TOCC_SIMILAR_COUNT => 5;
+use constant TOCC_SIMILAR_LENGTH => 2;
 
 sub _check_recipients {
   my ($self) = @_;
@@ -150,43 +153,29 @@ sub _check_recipients {
   $to =~ s/\(.*?\)//g;		# strip out the (comments)
   my @address = ($to =~ m/([\w.=-]+\@\w+(?:[\w.-]+\.)+\w+)/g);
 
-  # T_SORTED_RECIPIENTS*
-  # this can be written much more efficiently, but I'm not sure a loop will
-  # even be needed (a single test might do fine), so I'm not bothering yet.
-  #
-  # Note: reverse sorted recipient lists aren't a good spam indicator and
-  # are also quite uncommon.
-  for (my $length = 4; $length <= 16; $length++) {
-    $self->{"sorted.tocc.$length"} = 0;
-    if (scalar(@address) >= $length &&
-	join(',', @address) eq (join(',', sort(@address))))
-    {
-      $self->{"sorted.tocc.$length"} = 1;
-    }
-  }
+  # ideas that had both poor S/O ratios and poor hit rates:
+  # - testing for reverse sorted recipient lists
+  # - testing To: and Cc: headers separately
+  $self->{tocc_sorted} = (scalar(@address) >= TOCC_SORTED_COUNT &&
+			  join(',', @address) eq (join(',', sort @address)));
 
-  # T_SUSPECT_RECIPIENTS*
-  # length of 1 is good, 2 or 3 may be needed
-  for my $length ((1, 2, 3)) {
-    # at least 5 addresses is good, 4 does not seem like enough
-    for my $count ((4, 5, 6)) {
-      $self->{"similar.tocc.$length.$count"} = 0;
-      if (scalar (@address) >= $count) {
-	my @user = map { substr($_,0,$length) } @address;
-	my @fqhn = map { m/\@(.*)/ } @address;
-	my @host = map { substr($_,0,$length) } @fqhn;
-	my $hits = 0;
-	my $combinations = 0;
-	for (my $i = 0; $i <= $#address; $i++) {
-	  for (my $j = $i+1; $j <= $#address; $j++) {
-	    $hits++ if $user[$i] eq $user[$j];
-	    $hits++ if $host[$i] eq $host[$j] && $fqhn[$i] ne $fqhn[$j];
-	    $combinations++;
-	  }
-	}
-	$self->{"similar.tocc.$length.$count"} = $hits / $combinations;
+  # a good S/O ratio and hit rate is achieved by comparing 2-byte
+  # substrings and requiring 5 or more addresses
+  $self->{tocc_similar} = 0;
+  if (scalar (@address) >= TOCC_SIMILAR_COUNT) {
+    my @user = map { substr($_,0,TOCC_SIMILAR_LENGTH) } @address;
+    my @fqhn = map { m/\@(.*)/ } @address;
+    my @host = map { substr($_,0,TOCC_SIMILAR_LENGTH) } @fqhn;
+    my $hits = 0;
+    my $combinations = 0;
+    for (my $i = 0; $i <= $#address; $i++) {
+      for (my $j = $i+1; $j <= $#address; $j++) {
+	$hits++ if $user[$i] eq $user[$j];
+	$hits++ if $host[$i] eq $host[$j] && $fqhn[$i] ne $fqhn[$j];
+	$combinations++;
       }
     }
+    $self->{tocc_similar} = $hits / $combinations;
   }
 }
 
