@@ -3366,10 +3366,9 @@ sub check_ratware_name_id {
 sub check_https_ip_mismatch {
   my ($self) = @_;
 
-  while (my($k,$v) = each %{$self->{html}->{uri_anchor_index}}) {
+  while (my($k,$v) = each %{$self->{html}->{uri_detail}}) {
     next if ($k !~ m%^https?:/*(?:[^\@/]+\@)?\d+\.\d+\.\d+\.\d+%i);
-    foreach (@{$v}) {
-      $_ = $self->{html}->{anchor}->[$_];
+    foreach (@{$v->{anchor_text}}) {
       next if (m%^https:/*(?:[^\@/]+\@)?\d+\.\d+\.\d+\.\d+%i);
       return 1 if (m%https:%i);
     }
