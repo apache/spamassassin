@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.61 2002/12/28 23:07:53 quinlan Exp $
+# $Id: HTML.pm,v 1.62 2002/12/29 21:40:10 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -51,14 +51,15 @@ sub html_tag {
 sub html_format {
   my ($self, $tag, $attr, $num) = @_;
 
-  if ($tag eq "p" || $tag eq "hr") {
-    push @{$self->{html_text}}, "\n\n";
-  }
-  elsif ($tag eq "br") {
+  # ordered by frequency of tag groups
+  if ($tag eq "br") {
     push @{$self->{html_text}}, "\n";
   }
-  if ($tag eq "li" || $tag eq "td") {
+  elsif ($tag eq "li" || $tag eq "td") {
     push @{$self->{html_text}}, " ";
+  }
+  elsif ($tag eq "p" || $tag eq "hr") {
+    push @{$self->{html_text}}, "\n\n";
   }
   elsif ($tag eq "img" && exists $attr->{alt} && $attr->{alt} ne "") {
     push @{$self->{html_text}}, " $attr->{alt} ";
@@ -69,14 +70,15 @@ sub html_uri {
   my ($self, $tag, $attr, $num) = @_;
   my $uri;
 
-  if ($tag =~ /^(?:a|area|link)$/) {
+  # ordered by frequency of tag groups
+  if ($tag =~ /^(?:body|table|tr|td)$/) {
+    push @{$self->{html_text}}, "URI:$uri " if $uri = $attr->{background};
+  }
+  elsif ($tag =~ /^(?:a|area|link)$/) {
     push @{$self->{html_text}}, "URI:$uri " if $uri = $attr->{href};
   }
   elsif ($tag =~ /^(?:img|frame|iframe|embed|script)$/) {
     push @{$self->{html_text}}, "URI:$uri " if $uri = $attr->{src};
-  }
-  elsif ($tag =~ /^(?:body|table|tr|td)$/) {
-    push @{$self->{html_text}}, "URI:$uri " if $uri = $attr->{background};
   }
   elsif ($tag eq "form") {
     push @{$self->{html_text}}, "URI:$uri " if $uri = $attr->{action};
@@ -175,7 +177,7 @@ sub html_tests {
   }
   if ($tag =~ /^(?:a|body|div|input|form|td|layer|area|img)$/i) {
     for (keys %$attr) {
-      if (/\b$events\b/io)
+      if (/\b(?:$events)\b/io)
       {
 	$self->{html}{html_event} = 1;
       }
@@ -247,7 +249,6 @@ sub html_tests {
       $self->{html}{font_face_odd} = 1 if ! /^\s*(?:arial|arial black|courier new|geneva|helvetica|ms sans serif|sans serif|sans-serif|sans-serif;|serif|sunsans-regular|swiss|tahoma|times|times new roman|trebuchet|trebuchet ms|verdana)\s*$/i;
     }
   }
-
   if (exists($attr->{style})) {
     if ($attr->{style} =~ /font(?:-size)?:\s*([\d\.]+)(p[tx])/i) {
       my $size = $1;
@@ -256,7 +257,6 @@ sub html_tests {
       $self->{html}{big_font_B} = 1 if (lc($type) eq "pt" && $size > 12);
     }
   }
-
   if (($tag eq "img" &&
        exists $attr->{src} && ($_ = $attr->{src})) ||
       ($tag =~ /^(?:body|table|tr|td|th)$/ && 
@@ -267,7 +267,6 @@ sub html_tests {
       $self->{html}{web_bugs} = 1;
     }
   }
-
   if ($tag eq "img" && exists $attr->{width} && exists $attr->{height}) {
     my $width = 0;
     my $height = 0;
@@ -321,7 +320,7 @@ sub html_text {
 
   if (exists $self->{html_inside}{script} && $self->{html_inside}{script} > 0)
   {
-    if ($text =~ /\b($events)\b/io)
+    if ($text =~ /\b(?:$events)\b/io)
     {
       $self->{html}{html_event} = 1;
     }
@@ -350,6 +349,7 @@ sub html_text {
   {
     $self->{html}{title_text} .= $text;
   }
+
   $text =~ s/^\n//s if $self->{html_last_tag} eq "br";
   push @{$self->{html_text}}, $text;
 }
@@ -365,7 +365,7 @@ sub html_comment {
 
   if (exists $self->{html_inside}{script} && $self->{html_inside}{script} > 0)
   {
-    if ($text =~ /\b($events)\b/io)
+    if ($text =~ /\b(?:$events)\b/io)
     {
       $self->{html}{html_event} = 1;
     }
