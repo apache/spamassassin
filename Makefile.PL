@@ -1151,6 +1151,10 @@ version.env: lib/Mail/SpamAssassin.pm Makefile
 	$(PERL) -e 'print "DIST_VERSION=$(VERSION_COOL)\n"' >> $@
 	$(PERL) -e 'print "CPAN_VERSION=$(VERSION)\n"' >> $@
 
+
+sysreport:
+	$(NOECHO) $(PERL) build/sysreport CC=$(CC) PERL=$(PERL) PERL_BIN=$(PERL_BIN) PERL_VERSION=$(PERL_VERSION)
+
   EOD
 
   clean_MY_globals($self);
