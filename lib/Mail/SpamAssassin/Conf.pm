@@ -1297,6 +1297,10 @@ You can however specify your own list by specifying
 
 dns_available test: server1.tld server2.tld server3.tld
 
+Please note, the DNS test queries for MX records so if you specify your
+own list of servers, please make sure to choose the one(s) which has an
+associated MX record.
+
 =cut
 
     if (/^dns_available\s+(yes|no|test|test:\s+.+)$/) {
