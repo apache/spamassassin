@@ -16,7 +16,7 @@ BEGIN {
     unshift(@INC, '../blib/lib');
   }
 
-  plan tests => ((TEST_ENABLED && HAS_DBI) ? 40 : 0);
+  plan tests => ((TEST_ENABLED && HAS_DBI) ? 44 : 0);
 
   onfail => sub {
     warn "\n\nNote: Failure may be due to an incorrect config.";
@@ -176,9 +176,19 @@ ok(!$sa->{bayes_scanner}->{store}->seen_get($msgid));
 
 $sa->{bayes_scanner}->{store}->untie_db();
 
-undef $sa;
+# This bit breaks abstraction a bit, the userid is an implementation detail,
+# but is necessary to perform some of the tests.  Perhaps in the future we
+# can add some sort of official API for this sort of thing.
+my $testuserid = $sa->{bayes_scanner}->{store}->{_userid};
+ok(defined($testuserid));
 
-ok(cleanupdb());
+ok($sa->{bayes_scanner}->{store}->clear_database());
+
+ok(database_clear_p($testuser, $testuserid));
+
+$sa->finish_learner();
+
+undef $sa;
 
 sa_t_init('bayes'); # this wipes out what is there and begins anew
 
@@ -277,8 +287,17 @@ $score = $sa->{bayes_scanner}->scan($msgstatus, $mail, $body);
 ok($score != .5);
 }
 
+# This bit breaks abstraction a bit, the userid is an implementation detail,
+# but is necessary to perform some of the tests.  Perhaps in the future we
+# can add some sort of official API for this sort of thing.
+$testuserid = $sa->{bayes_scanner}->{store}->{_userid};
+ok(defined($testuserid));
 
-ok(cleanupdb());
+ok($sa->{bayes_scanner}->{store}->clear_database());
+
+ok(database_clear_p($testuser, $testuserid));
+
+$sa->finish_learner();
 
 sub check_examined {
   local ($_);
@@ -295,10 +314,10 @@ sub check_examined {
   }
 }
 
-
-sub cleanupdb {
-  my $rv;
-  my $error = 0;
+# WARNING! Do not use this as an example, this breaks abstraction and here strictly
+# to help the regression tests.
+sub database_clear_p {
+  my ($username, $userid) = @_;
 
   my $dbh = DBI->connect($dbdsn,$dbusername,$dbpassword);
 
@@ -306,24 +325,25 @@ sub cleanupdb {
     return 0;
   }
 
-  $rv = $dbh->do("DELETE FROM bayes_seen WHERE id = (SELECT id FROM bayes_vars WHERE username = ?)", undef, $testuser);
-  if (!defined($rv)) {
-    $error = 1;
-  }
+  my $sql = "SELECT count(*) from bayes_vars where username = ?";
+  my @row_ary = $dbh->selectrow_array($sql, undef, $username);
+  return 0 if ($row_ary[0] != 0);
 
-  $rv = $dbh->do("DELETE FROM bayes_token WHERE id = (SELECT id FROM bayes_vars WHERE username = ?)", undef, $testuser);
-  if (!defined($rv)) {
-    $error = 1;
-  }
+  $sql = "SELECT count(*) from bayes_token where id = ?";
+  my @row_ary = $dbh->selectrow_array($sql, undef, $userid);
+  return 0 if ($row_ary[0] != 0);
 
-  $rv = $dbh->do("DELETE FROM bayes_expire WHERE id = (SELECT id FROM bayes_vars WHERE username = ?)", undef, $testuser);
-  if (!defined($rv)) {
-    $error = 1;
-  }
+  $sql = "SELECT count(*) from bayes_seen where id = ?";
+  my @row_ary = $dbh->selectrow_array($sql, undef, $userid);
+  return 0 if ($row_ary[0] != 0);
 
-  $rv = $dbh->do("DELETE FROM bayes_vars WHERE username = ?", undef, $testuser);
-  if (!defined($rv)) {
-    $error = 1;
-  }
-  return !$error;
+  $sql = "SELECT count(*) from bayes_expire where id = ?";
+  my @row_ary = $dbh->selectrow_array($sql, undef, $userid);
+  return 0 if ($row_ary[0] != 0);
+
+  $dbh->disconnect();
+
+  return 1;
 }
+
+  
