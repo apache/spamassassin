@@ -1100,17 +1100,42 @@ sub get {
     }
 
     if (defined) {
-      if ($getaddr) {
-        s/\r?\n//gs;
-        s/\s*\(.*?\)//g;            # strip out the (comments)
-        s/^[^<]*?<(.*?)>.*$/$1/;    # "Foo Blah" <jm@foo> or <jm@foo>
-        s/, .*$//gs;                # multiple addrs on one line: return 1st
-        s/ ;$//gs;                  # 'undisclosed-recipients: ;'
-      }
-      elsif ($getname) {
-        chomp; s/\r?\n//gs;
-        s/^[\'\"]*(.*?)[\'\"]*\s*<.+>\s*$/$1/g # Foo Blah <jm@foo>
-            or s/^.+\s\((.*?)\)\s*$/$1/g;           # jm@foo (Foo Blah)
+      if ($getaddr || $getname) {
+        s/^[^:]+:(.*);\s*$/$1/gs;	# 'undisclosed-recipients: ;'
+        s/\s+/ /g;			# reduce whitespace to single space
+        s/^\s+//;			# leading wsp
+        s/\s+$//;			# trailing wsp
+        s/,.*$//;			# multiple addrs on one line? remove all but first
+
+        if ($getaddr) {
+       	  # Get the email address out of the header
+	  # All of these should result in "jm@foo":
+	  #
+	  # jm@foo
+	  # jm@foo (Foo Blah)
+	  # jm@foo, jm@bar
+	  # display: jm@foo (Foo Blah), jm@bar ;
+          # Foo Blah <jm@foo>
+	  # "Foo Blah" <jm@foo>
+	  # "'Foo Blah'" <jm@foo>
+	  #
+          s/\s*\(.*?\)//g;		# strip out the (comments)
+          s/^[^<]*?<(.*?)>.*$/$1/;	# "Foo Blah" <jm@foo> or <jm@foo>
+        }
+        elsif ($getname) {
+	  # Get the real name out of the header
+	  # All of these should result in "Foo Blah":
+	  #
+	  # jm@foo (Foo Blah)
+	  # jm@foo (Foo Blah), jm@bar
+	  # display: jm@foo (Foo Blah), jm@bar ;
+          # Foo Blah <jm@foo>
+	  # "Foo Blah" <jm@foo>
+	  # "'Foo Blah'" <jm@foo>
+	  #
+          s/^[\'\"]*(.*?)[\'\"]*\s*<.+>\s*$/$1/g
+              or s/^.+\s\((.*?)\)\s*$/$1/g;           # jm@foo (Foo Blah)
+        }
       }
     }
     $self->{hdr_cache}->{$request} = $_;
