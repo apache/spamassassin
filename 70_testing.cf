@@ -35,21 +35,16 @@ header T_FRAGMENTED_MESSAGE	Content-Type =~ /message\/partial/i
 body T_SA_MARKED_UP     /Spam detection software, running on the system /
 
 # more general template rule to try
-# this seems to be evolving into two types of exclusions:
-# - freely changeable fields like Subject:, To:, Cc:, and From:
-# - fields that have binary garbage that may match
 header __HEADER_TEMPLATE	ALL =~ /%[A-Z][A-Z_-]+[^%A-Za-z_-]/
-header __UIDL_TEMPLATE_LIKE	X-UIDL =~ /%[A-Z][A-Z_-]+[^%A-Za-z_-]/
-header __XFACE_TEMPLATE_LIKE	X-Face =~ /%[A-Z][A-Z_-]+[^%A-Za-z_-]/
-header __TOCC_TEMPLATE_LIKE	ToCc =~ /%[A-Z][A-Z_-]+[^%A-Za-z_-]/
-header __FROM_TEMPLATE_LIKE	From =~ /%[A-Z][A-Z_-]+[^%A-Za-z_-]/
-header __SUBJECT_TEMPLATE_LIKE	Subject =~ /%[A-Z][A-Z_-]+[^%A-Za-z_-]/
-meta T_HAS_TEMPLATE_0		__HEADER_TEMPLATE
-meta T_HAS_TEMPLATE_1		(__HEADER_TEMPLATE && !__UIDL_TEMPLATE_LIKE && !__XFACE_TEMPLATE_LIKE && !__TOCC_TEMPLATE_LIKE && !__FROM_TEMPLATE_LIKE && !__SUBJECT_TEMPLATE_LIKE)
-# check Message-IDs sure and In-Reply-To for both Message-ID and name
-header __REF_TEMPLATE_LIKE	References =~ /%[A-Z][A-Z_-]+[^%A-Za-z_-]/
-header __REP_TEMPLATE_LIKE	In-Reply-To =~ /%[A-Z][A-Z_-]+[^%A-Za-z_-]/
-header __MID_TEMPLATE_LIKE	MESSAGEID =~ /%[A-Z][A-Z_-]+[^%A-Za-z_-]/
+header __UIDL_TEMPLATE		X-UIDL =~ /%[A-Z][A-Z_-]+[^%A-Za-z_-]/
+header __XFACE_TEMPLATE		X-Face =~ /%[A-Z][A-Z_-]+[^%A-Za-z_-]/
+header __TOCC_TEMPLATE		ToCc =~ /%[A-Z][A-Z_-]+[^%A-Za-z_-]/
+header __FROM_TEMPLATE		From =~ /%[A-Z][A-Z_-]+[^%A-Za-z_-]/
+header __SUBJECT_TEMPLATE	Subject =~ /%[A-Z][A-Z_-]+[^%A-Za-z_-]/
+header __REF_TEMPLATE		References =~ /%[A-Z][A-Z_-]+[^%A-Za-z_-]/
+header __REP_TEMPLATE		In-Reply-To =~ /%[A-Z][A-Z_-]+[^%A-Za-z_-]/
+header __MID_TEMPLATE		MESSAGEID =~ /%[A-Z][A-Z_-]+[^%A-Za-z_-]/
+meta T_INCOMPLETE_TEMPLATE	(__HEADERTEMPLATE && !__UIDL_TEMPLATE && !__XFACE_TEMPLATE && !__TOCC_TEMPLATE && !__FROM_TEMPLATE && !__SUBJECT_TEMPLATE && !__REF_TEMPLATE && !__REP_TEMPLATE && !__MID_TEMPLATE)
 
 ########################################################################
 
@@ -161,11 +156,6 @@ meta T_NIGERIAN_BODY_4	( __NIGERIAN_BODY_1 + __NIGERIAN_BODY_2 + __NIGERIAN_BODY
 header T_RATWARE_RCVD_PF_1  Received =~ / \(Postfix\) with ESMTP id .+\; \S+ \d+ \S+ \d+ \d+:\d+:\d+ \S+$/s
 
 header T_RATWARE_RCVD_AT    Received =~ / by \S+\@\S+ with Microsoft SMTPSVC/
-
-# FTC tag for sexually explicit content
-header T_SUBJECT_SEXUAL_1	Subject =~ /sexual(?:ly)?.{0,2}explicit/i
-header T_SUBJECT_SEXUAL_2	Subject =~ /[s5][e3\xE8-\xEB]x[u\xB5\xF9-\xFC][a4\xE0-\xE6@][l!|1](?:[l!|1]y)?.{0,2}[e3\xE8-\xEB]xp[l!|1][i1!|l\xEC-\xEF]c[i1!|l\xEC-\xEF]t/i
-header T_SUBJECT_SEXUAL_3	Subject =~ /[s5].?[e3\xE8-\xEB].?x.?[u\xB5\xF9-\xFC].?[a4\xE0-\xE6@].?[l!|1].?(?:[l!|1].?y.?)?.{0,2}[e3\xE8-\xEB].?x.?p.?[l!|1].?[i1!|l\xEC-\xEF].?c.?[i1!|l\xEC-\xEF].?t/i
 
 ########################################################################
 # Spamhaus suggested only testing final external IP with XBL, but try
