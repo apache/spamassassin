@@ -1264,9 +1264,23 @@ sub check_rbl_results_for {
   return 0 unless defined ($self->{$set}->{rbl_IN_As_found});
 
   # note: IN_As cannot be !undef without IN_TXTs existing too
-  my $inas = ' '.$self->{$set}->{rbl_IN_As_found}.' '.
-		 $self->{$set}->{rbl_IN_TXTs_found}.' ';
-  if ($inas =~ / ${addr} /) { return 1; }
+  my $inas = $self->{$set}->{rbl_IN_As_found} . ' ' .
+	     $self->{$set}->{rbl_IN_TXTs_found};
+
+  if ($addr =~ /^\d+$/) {
+    # bitmask
+    my @matches = ($inas =~ m/($IP_ADDRESS)/og);
+    return scalar grep { Mail::SpamAssassin::Util::my_inet_aton($_) & $addr } @matches;
+  }
+  elsif ($addr =~ /$IP_ADDRESS/) {
+    # IP address
+    my @matches = ($inas =~ m/($IP_ADDRESS)/og);
+    return scalar grep { $_ eq $addr } @matches;
+  }
+  else {
+    # regular expression
+    return ($inas =~ /$addr/);
+  }
 
   return 0;
 }
