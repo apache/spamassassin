@@ -486,7 +486,8 @@ describe PLEASE_READ            Please read this!  Please oh please oh please!
 # 1. X-MailingID and X-ServerHost
 # 2. X-Stormpost-To and X-List-Unsubscribe
 #
-# not spammish: X-EM-Registration, X-EM-Version, X-Antiabuse, X-List-Host
+# not spammish: X-EM-Registration, X-EM-Version, X-Antiabuse, X-List-Host,
+# X-Message-Id
 
 # these headers have very high correlation with spam
 header BCC			exists:Bcc
@@ -498,7 +499,6 @@ header X_FIX_PRESENT		exists:X-Fix
 header X_LIBRARY		exists:X-Library
 header X_LIST_UNSUBSCRIBE	exists:X-List-Unsubscribe
 header X_MAIL_ID_PRESENT	exists:X-MailingID
-header X_MESSAGE_ID		exists:X-Message-Id
 header X_PMFLAGS_PRESENT	exists:X-PMFLAGS
 header X_PRECEDENCE_REF		exists:X-Precedence-Ref
 header X_SERV_HOST_PRESENT	exists:X-ServerHost
