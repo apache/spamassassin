@@ -38,6 +38,7 @@ use POSIX qw(:sys_wait_h);
 use POSIX qw(setsid);
 use Errno;
 
+use Cwd qw();
 use File::Spec;
 use File::Path;
 
@@ -75,18 +76,30 @@ my %opt = (
   'ident-timeout' => 5.0,
 );
 
-# testing for taintedness only works before detainting @ENV
+
+# Untaint all command-line options and ENV vars, since spamd is launched
+# as a daemon from a known-safe environment. Also store away some of the
+# vars we need for a SIGHUP later on.
+# See also <http://bugzilla.spamassassin.org/show_bug.cgi?id=1725>
+# and      <http://bugzilla.spamassassin.org/show_bug.cgi?id=2192>.
+
+# Testing for taintedness only works before detainting %ENV
 Mail::SpamAssassin::Util::am_running_in_taint_mode();
 
-# untaint all command-line options and ENV vars, since spamd is launched
-# as a daemon from a known-safe environment.
-@ARGV = map { /^(.*)$/ and $_ = $1; } @ARGV;
-foreach (keys %ENV) {
-  /^(.*)$/ and $_ = $1;
-  $ENV{$_} =~ /^(.*)$/ and $ENV{$_} = $1;
-}
+# First untaint the environment -- need to do this before Cwd::cwd(), else
+# it will croak.
+Mail::SpamAssassin::Util::untaint_var(\%ENV);
 
-my @ORIG_ARGV = @ARGV;    # Getopt::Long tends to clear @ARGV  but it's needed in daemonize() later on
+# The zeroth argument will be replaced in daemonize().
+my $ORIG_ARG0 = Mail::SpamAssassin::Util::untaint_var($0);
+# Getopt::Long clears all arguments it processed (untaint both @ARGVs here!)
+my @ORIG_ARGV = Mail::SpamAssassin::Util::untaint_var(\@ARGV);
+# daemonize() switches to the root later on and we need to come back here
+# somehow -- untaint the dir to be on the safe side.
+my $ORIG_CWD  = Mail::SpamAssassin::Util::untaint_var(Cwd::cwd());
+
+
+# Parse the command line
 Getopt::Long::Configure ("bundling");
 GetOptions(
   'socketpath=s'                => \$opt{'socketpath'},
@@ -135,7 +148,6 @@ GetOptions(
   'stop-at-threshold!' => sub { warn "The --stop-at-threshold option has been removed\n" },
 
 ) or pod2usage(-exitval => $resphash{'EX_USAGE'}, -verbose => 0);
-@ARGV = @ORIG_ARGV;
 
 $opt{'help'} and pod2usage(-exitval => $resphash{'EX_USAGE'}, -verbose => 0, -message => 'For more details, use "man spamd"');
 
@@ -444,13 +456,10 @@ while (1) {
   
       # leave Client fds active, and do not kill children; they can still
       # service clients until they exit.  But restart the listener anyway.
-
-      # untaint the path to the binary
-      my $cmd = $0; $cmd =~ /^(.*)$/; $cmd = $1;
-  
-      exec ($cmd, @ARGV);
+      chdir($ORIG_CWD) || die "spamd restart failed: chdir failed: ${ORIG_CWD}: $!\n";
+      exec ($ORIG_ARG0, @ORIG_ARGV);
       # should not get past that...
-      die "spamd restart failed: exec failed: ".join (' ', $cmd, @ARGV).": $!";
+      die "spamd restart failed: exec failed: " . join (' ', $ORIG_ARG0, @ORIG_ARGV) . ": $!\n";
     }
 
     next if ($n == -1 && $! == &Errno::EINTR);
@@ -1170,6 +1179,8 @@ sub restart_handler {
 
       # the UNIX domain socket
       defined($opt{'socketpath'}) and unlink($opt{'socketpath'});
+
+      warn "server socket closed\n" if $opt{'debug'};
     }
     $got_sighup = 1;
 }
@@ -1177,15 +1188,27 @@ sub restart_handler {
 use POSIX 'setsid';
 sub daemonize
 {
-    $0 = join(' ', $0, @ARGV) unless($opt{'debug'});; # pretty command line in ps
-    chdir '/' or die "Can't chdir to '/': $!";
+    # Pretty command line in ps
+    $0 = join(' ', $ORIG_ARG0, @ORIG_ARGV) unless($opt{'debug'});
+
+    # Be a nice daemon and chdir() to the root so we don't block any unmount attempts
+    chdir '/' or die "Can't chdir to /: $!\n";
+
+    # Redirect all warnings to logmsg()
     $SIG{__WARN__} = sub { logmsg($_[0]); };
-    open STDIN,'/dev/null' or die "Can't read '/dev/null': $!";
-    open STDOUT,'>/dev/null' or die "Can't write '/dev/null': $!";
-    defined(my $pid=fork) or die "Can't fork: $!";
+
+    # Redirect in and out to the bit bucket
+    open STDIN,  "</dev/null" or die "Can't read from /dev/null: $!\n";
+    open STDOUT, ">/dev/null" or die "Can't write to /dev/null: $!\n";
+
+    # Here we go...
+    defined(my $pid=fork) or die "Can't fork: $!\n";
     exit if $pid;
-    setsid or die "Can't start new session: $!";
-    open STDERR,'>&STDOUT' or die "Can't duplicate stdout: $!";
+    setsid or die "Can't start new session: $!\n";
+
+    # Now we can redirect the errors, too.
+    open STDERR,'>&STDOUT' or die "Can't duplicate stdout: $!\n";
+
     Mail::SpamAssassin::dbg('daemonized.');
 }
 

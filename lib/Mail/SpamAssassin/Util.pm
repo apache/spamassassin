@@ -127,6 +127,43 @@ sub untaint_file_path {
   }
 }
 
+# This sub takes a scalar or a reference to an array, hash, scalar or another
+# reference and recursively untaints all its values (and keys if it's a
+# reference to a hash). It should be used with caution as blindly untainting
+# values subverts the purpose of working in taint mode. It will return the
+# untainted value if requested but to avoid unnecessary copying, the return
+# value should be ignored when working on lists.
+# Bad:
+#  %ENV = untaint_var(\%ENV);
+# Better:
+#  untaint_var(\%ENV);
+#
+sub untaint_var {
+  local ($_) = @_;
+
+  unless (ref) {
+    /^(.*)$/;
+    return $1;
+  }
+  elsif (ref eq 'ARRAY') {
+    @{$_} = map { $_ = untaint_var($_) } @{$_};
+    return @{$_} if wantarray;
+  }
+  elsif (ref eq 'HASH') {
+    foreach my $k (keys %{$_}) {
+      ${$_}{untaint_var($k)} = untaint_var(${$_}{$k});
+    }
+    return %{$_} if wantarray;
+  }
+  elsif (ref eq 'SCALAR' or ref eq 'REF') {
+    ${$_} = untaint_var(${$_});
+  }
+  else {
+    warn "Can't untaint a " . ref($_) . "!\n";
+  }
+  return $_;
+}
+
 ###########################################################################
 
 # timezone mappings: in case of conflicts, use RFC 2822, then most

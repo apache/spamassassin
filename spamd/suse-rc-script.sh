@@ -137,14 +137,8 @@ case "$1" in
 	## do this on signal 1 (SIGHUP).
 	## If it does not support it, restart.
 
-	echo -n "Reload service spamd"
-	## if it supports it:
-	#killproc -HUP $SPAMD_BIN
-	#touch /var/run/spamd.pid
-	#rc_status -v
+	$0 reload
 
-	## spamd doesn't, so:
-	$0 stop  &&  $0 start
 	rc_status
 	;;
     reload)
@@ -152,14 +146,14 @@ case "$1" in
 	## signalling, do nothing (!)
 
 	# If it supports signalling:
-	#echo -n "Reload service spamd"
-	#killproc -HUP $SPAMD_BIN
-	#touch /var/run/spamd.pid
-	#rc_status -v
-	
-	## Otherwise if it does not support reload (it doesn't):
-	rc_failed 3
+	echo -n "Reload service spamd"
+	killproc -HUP $SPAMD_BIN
+	touch /var/run/spamd.pid
 	rc_status -v
+	
+	## Otherwise if it does not support reload:
+	#rc_failed 3
+	#rc_status -v
 	;;
     status)
 	echo -n "Checking for spamd: "
