@@ -842,7 +842,7 @@ sub leave_helper_run_mode {
 
   dbg ("leaving helper-app run mode");
   $/ = $self->{old_slash};
-  if (exists $self->{old_env_home}) {
+  if (defined $self->{old_env_home}) {
     $ENV{'HOME'} = $self->{old_env_home};
   }
 }
