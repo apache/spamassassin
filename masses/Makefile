@@ -26,4 +26,4 @@ freqs: spam.log nonspam.log
 	./hit-frequencies -x -p > freqs
 
 clean:
-	rm -rf *.o evolve tmp
+	rm -rf *.o evolve tmp freqs

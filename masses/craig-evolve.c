@@ -79,8 +79,8 @@ void init_data()
   if (rank == 0) {
     loadtests();
     loadscores();
-    //nybias = nybias*((double)num_spam)/((double)num_nonspam);
-    printf("nybias normalized to %f\n",nybias);
+    nybias = nybias*((double)num_spam)/((double)num_nonspam);
+    //printf("nybias normalized to %f\n",nybias);
   }
 
 #ifdef USE_MPI
