@@ -1115,12 +1115,14 @@ sub cleanupchildren {
   # causes a warning on recent linux kernels (cf:
   # http://bugzilla.spamassassin.org/show_bug.cgi?id=1536 ), so don't do
   # this if we're on a known-good OS which will *not* leave dead kids.
-  return if ($^O =~ /linux/);
+  if ($^O !~ /linux/) {
+    my $kid;
+    do {
+      $kid = waitpid(-1,&WNOHANG);
+    } while ($kid > 0);
+  }
 
-  my $kid;
-  do {
-    $kid = waitpid(-1,&WNOHANG);
-  } while ($kid > 0);
+  # note: do not do 'return if linux'; for some reason, it doesn't work
 }
 
 __DATA__
