@@ -14,8 +14,8 @@ make distcheck
 
 echo $vers > $WEBDIR/latest_version
 
-# rm -rf $WEBDIR/doc
-# tar cf - --exclude=CVS --exclude='.#*' doc | ( cd $WEBDIR ; tar xf - )
+rm -rf $WEBDIR/doc
+tar cf - --exclude=CVS --exclude='.#*' doc | ( cd $WEBDIR ; tar xf - )
 
 rm -rf $WEBDIR/dist
 mkdir $WEBDIR/dist

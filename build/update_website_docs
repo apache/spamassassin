@@ -1,0 +1,27 @@
+#!/bin/bash
+WEBDIR=$HOME/spamassassin.taint.org
+vers=2.6x
+find . -name '.#*' -print | xargs rm -f # delete old CVS files
+
+[ -d $WEBDIR/full/$vers ] || mkdir -p $WEBDIR/full/$vers
+make; make text_html_doc 
+
+rm -rf $WEBDIR/full/dist
+mkdir $WEBDIR/full/dist
+tar cf - --exclude=CVS --exclude='.#*'  \
+         --exclude='logs' --exclude='*.tar.gz' --exclude='*.zip' \
+         --exclude='*.log' --exclude='*.o' \
+         --exclude='o' --exclude='out' \
+         --exclude='tst' \
+         --exclude='blib' --exclude='Mail-SpamAssassin-*' \
+         . | ( cd $WEBDIR/full/dist ; tar xf - )
+        
+rm -rf $WEBDIR/full/$vers/dist
+mv $WEBDIR/full/dist $WEBDIR/full/$vers/dist
+
+( cd $WEBDIR/full/$vers/dist;
+  tar cf docbak doc;
+  make clean distclean;
+  tar xvf docbak ; rm -f docbak
+)
+
