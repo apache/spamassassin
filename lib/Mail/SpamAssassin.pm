@@ -63,13 +63,13 @@ use vars	qw{
   	@ISA $VERSION $SUB_VERSION $HOME_URL $DEBUG
 	@default_rules_path @default_prefs_path
 	@default_userprefs_path @default_userstate_dir
-	@site_rules_path
+	@site_rules_path @old_site_rules_path
 };
 
 @ISA = qw();
 
 $VERSION = "2.0";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.48 2001/12/17 14:18:56 jmason Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.49 2001/12/18 04:59:17 jmason Exp $';
 
 sub Version { $VERSION; }
 
@@ -84,15 +84,16 @@ $DEBUG = 0;
   	/usr/share/spamassassin
 );
 
-#/etc/spamassassin.cf
-#/etc/mail/spamassassin.cf
-#/usr/local/etc/spamassassin.cf
 @site_rules_path = qw(
         /usr/local/etc/spamassassin
   	/etc/mail/spamassassin
   	/etc/spamassassin
 	./rules
 	../rules
+);
+@old_site_rules_path = qw(
+  	/etc/mail/spamassassin.cf
+  	/etc/spamassassin.cf
 );
     
 @default_prefs_path = qw(
@@ -248,50 +249,44 @@ sub report_as_spam {
 
 ###########################################################################
 
-=item $f->add_all_header_address_to_whitelist ($mail)
+=item $f->add_all_addresses_to_whitelist ($mail)
 
-Given a mail message, find as many addresses in the usual headers (To,
-Cc, From etc.) and add them to the automatic whitelist database.
+Given a mail message, find as many addresses in the usual headers (To, Cc, From
+etc.), and the message body, and add them to the automatic whitelist database.
 
 =cut
 
-sub add_all_header_address_to_whitelist {
+sub add_all_addresses_to_whitelist {
   my ($self, $mail_obj) = @_;
 
-  $self->init(1);
-  my $mail = $self->encapsulate_mail_object ($mail_obj);
   my $list = Mail::SpamAssassin::AutoWhitelist->new($self);
-
-  my $addrlist = ' ';
-  foreach my $header (qw(To From Cc Reply-To Sender
-  				Errors-To Mail-Followup-To))
-  {
-    my @hdrs = $mail->get_header ($header);
-    if ($#hdrs < 0) { next; }
-    $addrlist .= join (" ", @hdrs);
-  }
-
-  $addrlist =~ s/[\r\n]+/ , /gs;
-  $addrlist =~ s/\s\"[^\"]+\"\s/ , /gs;	# remove names
-  $addrlist =~ s/\([^\)]+\)/ , /gs;	# same
-
-  %done = ();
-  foreach $_ (split (/\s*,\s*/, $addrlist)) {
-    next if ($_ !~ /\S/);
-
-    s/^.*?<(.+)>\s*$/$1/g               # Foo Blah <jm@foo>
-        or s/^(.+)\s\(.*?\)\s*$/$1/g;   # jm@foo (Foo Blah)
-
-    if (!/^\S+\@\S+$/) { dbg ("wierd address, ignored: $_"); next; }
-
-    next if defined ($done{$_});
-    $done{$_} = 1;
-
-    if ($list->add_known_good_address ($_)) {
-      print "SpamAssassin auto-whitelist: adding address: $_\n";
+  foreach my $addr ($self->_find_all_addrs_in_mail ($mail_obj)) {
+    if ($list->add_known_good_address ($addr)) {
+      print "SpamAssassin auto-whitelist: adding address: $addr\n";
     }
   }
+  $list->finish();
+}
 
+###########################################################################
+
+=item $f->remove_all_addresses_from_whitelist ($mail)
+
+Given a mail message, find as many addresses in the usual headers (To, Cc, From
+etc.), and the message body, and remove them from the automatic whitelist
+database.
+
+=cut
+
+sub remove_all_addresses_from_whitelist {
+  my ($self, $mail_obj) = @_;
+
+  my $list = Mail::SpamAssassin::AutoWhitelist->new($self);
+  foreach my $addr ($self->_find_all_addrs_in_mail ($mail_obj)) {
+    if ($list->remove_address ($addr)) {
+      print "SpamAssassin auto-whitelist: removing address: $addr\n";
+    }
+  }
   $list->finish();
 }
 
@@ -309,8 +304,6 @@ sender of the reply message.
 
 sub reply_with_warning {
   my ($self, $mail_obj, $replysender) = @_;
-  local ($_);
-
   $self->init(1);
   my $mail = $self->encapsulate_mail_object ($mail_obj);
   my $msg = new Mail::SpamAssassin::Replier ($self, $mail);
@@ -722,6 +715,59 @@ sub encapsulate_mail_object {
     require Mail::SpamAssassin::ExposedMessage;
     return Mail::SpamAssassin::ExposedMessage->new($mail_obj);
   }
+}
+
+sub _find_all_addrs_in_mail {
+  my ($self, $mail_obj) = @_;
+
+  $self->init(1);
+  my $mail = $self->encapsulate_mail_object ($mail_obj);
+
+  my $addrlist = '';
+  foreach my $header (qw(To From Cc Reply-To Sender
+  				Errors-To Mail-Followup-To))
+  {
+    my @hdrs = $mail->get_header ($header);
+    if ($#hdrs < 0) { next; }
+    $_ = join (" ", @hdrs);
+
+    while (s/([-a-z0-9_\+\:\.\/]+
+    		\@[-a-z0-9_\+\:\.\/]+
+		\.[-a-z0-9_\+\:\/]{2,3})//ix)
+    { $addrlist .= "$1,"; }
+  }
+
+  # find addrs in body, too
+  foreach my $line (@{$mail->get_body()}) {
+    $_ = $line;
+
+    while (s/([-a-z0-9_\+\:\.\/]+
+    		\@[-a-z0-9_\+\:\.\/]+
+		\.[-a-z0-9_\+\:\/]{2,3})//ix)
+    { $addrlist .= "$1,"; }
+  }
+
+  $addrlist =~ s/[\r\n]+/ , /gs;
+  $addrlist =~ s/,\s*$//gs;
+  # $addrlist =~ s/\s\"[^\"]+\"\s/ , /gs;	# remove names
+  # $addrlist =~ s/\([^\)]+\)/ , /gs;		# same
+
+  dbg ("found addresses for whitelisting: $addrlist");
+  my @ret = ();
+  my %done = ();
+
+  foreach $_ (split (/\s*,\s*/, $addrlist)) {
+    next if ($_ !~ /\S/);
+
+    #s/^.*?<(.+)>\s*$/$1/g               # Foo Blah <jm@foo>
+    #or s/^(.+)\s\(.*?\)\s*$/$1/g;   # jm@foo (Foo Blah)
+    #if (!/^\S+\@\S+$/) { dbg ("wierd address, ignored: $_"); next; }
+
+    next if defined ($done{$_}); $done{$_} = 1;
+    push (@ret, $_);
+  }
+
+  @ret;
 }
 
 sub dbg {

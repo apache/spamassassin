@@ -1,4 +1,7 @@
-
+# A very safe persistent address list implementation.  Uses filesystem
+# operations that are known to be 100% safe on UNIX systems against
+# concurrency issues and races.
+#
 package Mail::SpamAssassin::DirBasedAddrList;
 
 use strict;
@@ -113,7 +116,7 @@ sub increment_accumulator_for_entry {
 
   my $oldmask = umask ($self->{mode} ^ 0777);
   open (OUT, ">>$path") or warn "cannot append to $path failed";
-  print OUT "x\n";
+  print OUT $entry->{addr}."\n";
   close OUT or warn "close append to $path failed";
   umask $oldmask;
 }
@@ -141,6 +144,40 @@ sub add_permanent_entry {
 
   my $old = $entry->{accumulator_path};
   if (-f $old) { unlink ($old) or warn "unlink $old failed"; }
+}
+
+###########################################################################
+
+sub remove_entry {
+  my ($self, $entry) = @_;
+
+  my $path = $entry->{accumulator_path};
+  if (-f $path) {
+    unlink ($path) or warn "unlink $path failed: $!\n";
+  }
+
+  my $addr = $entry->{addr};
+  $path = $entry->{permanent_path};
+  if (open (IN, "<$path")) {
+    my $new = "$path.new.$$";
+    my $bak = "$path.bak.$$";
+
+    if (!open (OUT, ">$new")) {
+      warn "cannot write to $new: $!\n"; goto failed;
+    }
+    while (<IN>) {
+      chomp; ($_ eq $addr) and next;
+      print OUT;
+    }
+    close IN;
+    if (!close OUT) { warn "write failed to $new: $!\n"; goto failed; }
+
+    if (!rename ($path, $bak)) { warn "rename failed for $path: $!"; goto failed; }
+    if (!rename ($new, $path)) { warn "rename failed for $new: $!"; goto failed; }
+
+failed:
+    unlink ($bak);
+  }
 }
 
 ###########################################################################

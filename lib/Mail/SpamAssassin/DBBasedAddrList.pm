@@ -73,7 +73,7 @@ sub get_addr_entry {
 
   $entry->{count} = $self->{accum}->{$addr} || 0;
 
-  dbg ("auto-whitelist (dir-based): $addr scores ".$entry->{count});
+  dbg ("auto-whitelist (db-based): $addr scores ".$entry->{count});
   return $entry;
 }
 
@@ -91,6 +91,11 @@ sub add_permanent_entry {
   my ($self, $entry) = @_;
 
   $self->{accum}->{$entry->{addr}} = 999;
+}
+
+sub remove_entry {
+  my ($self, $entry) = @_;
+  delete $self->{accum}->{$entry->{addr}};
 }
 
 ###########################################################################

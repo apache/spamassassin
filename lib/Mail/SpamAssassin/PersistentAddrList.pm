@@ -125,6 +125,20 @@ sub add_permanent_entry {
 
 ###########################################################################
 
+=item $entry = $addrlist->remove_entry ($entry);
+
+This method should remove the given entry from the whitelist database,
+both from the accumulator and the permanent db.
+
+=cut
+
+sub remove_entry {
+  my ($self, $entry) = @_;
+  die "unimpled base method";	# override this
+}
+
+###########################################################################
+
 =item $entry = $addrlist->finish ();
 
 Clean up, if necessary.  Called by SpamAssassin when it has finished

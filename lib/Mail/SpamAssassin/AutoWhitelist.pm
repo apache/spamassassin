@@ -66,11 +66,10 @@ sub increment_pass_accumulator {
   }
 
   if (!$self->{already_in_whitelist}) {
-    if ($self->{entry}->{count} >= $self->{threshold}) {
-      $self->{checker}->add_permanent_entry ($self->{entry});
-    } else {
-      $self->{checker}->increment_accumulator_for_entry ($self->{entry});
-    }
+    $self->{checker}->increment_accumulator_for_entry ($self->{entry});
+
+  } elsif ($self->{entry}->{count} == $self->{threshold}) {
+    $self->{checker}->add_permanent_entry ($self->{entry});
   }
 }
 
@@ -92,6 +91,30 @@ sub add_known_good_address {
 
   if ($entry->{count} < $self->{threshold}) {
     $self->{checker}->add_permanent_entry ($entry);
+    return 1;
+  }
+
+  return 0;
+}
+
+###########################################################################
+
+sub remove_address {
+  my ($self, $addr) = @_;
+
+  if (!defined $self->{checker}) {
+    return 0;		# no factory defined; we can't check
+  }
+
+  # this could be short-circuited, but for now I can't see a need.
+  # other backend implementors can have a go, if they do.
+
+  $addr = lc $addr;
+  $addr =~ s/[\000\;\'\"\!]/_/gs;	# paranoia
+  my $entry = $self->{checker}->get_addr_entry ($addr);
+
+  if ($entry->{count} > 0) {
+    $self->{checker}->remove_entry ($entry);
     return 1;
   }
 

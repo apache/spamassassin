@@ -483,6 +483,9 @@ describe NIGERIAN_SCAM		Nigerian scam, cf http://www.snopes2.com/inboxer/scams/n
 body NIGERIAN_SCAM_2		/(?:Government of Nigeria|NIGERIAN? NATIONAL|Nigerian? Government)/
 describe NIGERIAN_SCAM_2	Mutated Nigerian scams
 
+body US_DOLLARS			/Million .*United States Dollars/i
+describe US_DOLLARS		Nigerian scam key phrase
+
 body UNNEEDED_HTML_ENCODING	/font=3E/i
 describe UNNEEDED_HTML_ENCODING	Unneeded encoding of HTML tags
 
