@@ -69,12 +69,11 @@ use vars qw{
 # *less* these well-known headers; that way we can pick up spammers' tracking
 # headers (which are obviously not well-known in advance!).
 
+# Received is handled specially
 $IGNORED_HDRS = qr{(?: (?:X-)?Sender    # misc noise
   |Delivered-To |Delivery-Date
   |(?:X-)?Envelope-To
   |X-MIME-Auto[Cc]onverted |X-Converted-To-Plain-Text
-
-  |Received     # handled specially
 
   |Subject      # not worth a tiny gain vs. to db size increase
 
@@ -490,39 +489,43 @@ sub tokenize_line {
 sub tokenize_headers {
   my ($self, $msg) = @_;
 
-  my $hdrs = $msg->get_all_headers() . $msg->get_all_metadata();
-
   my %parsed = ();
 
-  # we don't care about whitespace; so fix continuation lines to make the next
-  # bit easier
-  $hdrs =~ s/\n[ \t]+/ /gs;
+  my %user_ignore;
+  $user_ignore{$_} = 1 for @{$self->{main}->{conf}->{bayes_ignore_headers}};
 
-  # first, keep a copy of Received hdrs, so we can strip down to last 2
-  my @rcvdlines = ($hdrs =~ /^Received: [^\n]*$/gim);
-
-  # and now delete lines for headers we don't want (incl all Receiveds)
-  $hdrs =~ s/^${IGNORED_HDRS}: [^\n]*$//gim;
-
-  if (IGNORE_MSGID_TOKENS) { $hdrs =~ s/^Message-I[dD]: [^\n]*$//gim;}
+  # get headers in array context
+  my @hdrs;
+  my @rcvdlines;
+  for ($msg->get_all_headers()) {
+    # first, keep a copy of Received headers, so we can strip down to last 2
+    if (/^Received:/i) {
+      push(@rcvdlines, $_);
+      next;
+    }
+    # and now skip lines for headers we don't want (including all Received)
+    next if /^${IGNORED_HDRS}:/i;
+    next if IGNORE_MSGID_TOKENS && /^Message-ID:/i;
+    push(@hdrs, $_);
+  }
+  push(@hdrs, $msg->get_all_metadata());
 
   # and re-add the last 2 received lines: usually a good source of
   # spamware tokens and HELO names.
-  if ($#rcvdlines >= 0) { $hdrs .= "\n".$rcvdlines[$#rcvdlines]; }
-  if ($#rcvdlines >= 1) { $hdrs .= "\n".$rcvdlines[$#rcvdlines-1]; }
+  if ($#rcvdlines >= 0) { push(@hdrs, $rcvdlines[$#rcvdlines]); }
+  if ($#rcvdlines >= 1) { push(@hdrs, $rcvdlines[$#rcvdlines-1]); }
 
-  # remove user-specified headers here, after Received, in case they
-  # want to ignore that too
-  foreach my $conf (@{$self->{main}->{conf}->{bayes_ignore_headers}}) {
-    $hdrs =~ s/^\Q${conf}\E: [^\n]*$//gim;
-  }
+  for (@hdrs) {
+    next unless /\S/;
+    my ($hdr, $val) = split(/:/, $_, 2);
+    $val ||= '';
 
-  while ($hdrs =~ /^(\S+): ([^\n]*)$/gim) {
-    my $hdr = $1;
-    my $val = $2;
+    # remove user-specified headers here, after Received, in case they
+    # want to ignore that too
+    next if exists $user_ignore{$hdr};
 
     # special tokenization for some headers:
-    if ($hdr =~ /^(?:|X-|Resent-)Message-I[dD]$/) {
+    if ($hdr =~ /^(?:|X-|Resent-)Message-Id$/i) {
       $val = $self->pre_chew_message_id ($val);
     }
     elsif (PRE_CHEW_ADDR_HEADERS && $hdr =~ /^(?:|X-|Resent-)
@@ -544,8 +547,7 @@ sub tokenize_headers {
     }
 
     if (MAP_HEADERS_MID) {
-      if ($hdr eq 'In-Reply-To' || $hdr eq 'References' || $hdr =~ /^Message-Id/i)
-      {
+      if ($hdr =~ /^(?:In-Reply-To|References|Message-ID)$/i) {
         $parsed{"*MI"} = $val;
       }
     }
@@ -555,7 +557,7 @@ sub tokenize_headers {
       }
     }
     if (MAP_HEADERS_USERAGENT) {
-      if ($hdr =~ /^(?:X-Mailer|User-Agent)$/) {
+      if ($hdr =~ /^(?:X-Mailer|User-Agent)$/i) {
         $parsed{"*UA"} = $val;
       }
     }

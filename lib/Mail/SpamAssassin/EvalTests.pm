@@ -184,23 +184,22 @@ use constant TOCC_SIMILAR_LENGTH => 2;
 sub _check_recipients {
   my ($self) = @_;
 
-  my @address;
+  my @inputs;
 
   # ToCc: pseudo-header works best, but sometimes Bcc: is better
   for ('ToCc', 'Bcc') {
     my $to = $self->get($_);	# get recipients
     $to =~ s/\(.*?\)//g;	# strip out the (comments)
-    @address = ($to =~ m/([\w.=-]+\@\w+(?:[\w.-]+\.)+\w+)/g);
-    last if scalar(@address) >= TOCC_SIMILAR_COUNT;
+    @inputs = ($to =~ m/([\w.=-]+\@\w+(?:[\w.-]+\.)+\w+)/g);
+    last if scalar(@inputs) >= TOCC_SIMILAR_COUNT;
   }
 
   # remove duplicate addresses only when they appear next to each other
-  my @tmp = @address;
+  my @address;
   my $previous = '';
-  @address = ();
-  foreach my $current (@tmp) {
-    next if (lc($current) eq lc($previous));
-    push(@address, ($previous = $current));
+  while (my $current = shift @inputs) {
+    push(@address, ($previous = $current)) if lc($current) ne lc($previous);
+    last if @address == 256;
   }
 
   # ideas that had both poor S/O ratios and poor hit rates:
@@ -2662,22 +2661,18 @@ sub check_razor2 {
 }
 
 sub check_pyzor {
-  my ($self, $fulltext) = @_;
+  my ($self, $full) = @_;
 
   return 0 unless ($self->is_pyzor_available());
   return 0 if ($self->{already_checked_pyzor});
 
   $self->{already_checked_pyzor} = 1;
 
-  # note: we don't use $fulltext. instead we get the raw message,
-  # unfiltered, for pyzor to check.  ($fulltext removes MIME
-  # parts etc.)
-  my $full = $self->{msg}->get_pristine();
-  return $self->pyzor_lookup (\$full);
+  return $self->pyzor_lookup($full);
 }
 
 sub check_dcc {
-  my ($self, $fulltext) = @_;
+  my ($self, $full) = @_;
   my $have_dccifd = $self->is_dccifd_available();
 
   return 0 unless ($have_dccifd || $self->is_dcc_available() );
@@ -2691,14 +2686,11 @@ sub check_dcc {
   $_ = $self->get('X-DCC-(?:[^:]+-)?Metrics');
   return 1 if /bulk/;
   
-  # note: we don't use $fulltext. instead we get the raw message,
-  # unfiltered, for DCC to check.  ($fulltext removes MIME
-  # parts etc.)
-  my $full = $self->{msg}->get_pristine();
   if ($have_dccifd) {
-    return $self->dccifd_lookup (\$full);
-  } else {
-    return $self->dcc_lookup (\$full);
+    return $self->dccifd_lookup($full);
+  }
+  else {
+    return $self->dcc_lookup($full);
   }
 }
 
@@ -3387,5 +3379,11 @@ sub check_for_illegal_ip {
 }
 
 ###########################################################################
+
+sub check_for_long_header {
+  my ($self) = @_;
+
+  return defined $self->{msg}->{'truncated_header'};
+}
 
 1;
