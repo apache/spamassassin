@@ -1424,12 +1424,12 @@ sub porn_word_test {
 }
 
 sub check_for_very_long_text {
-  my ($self, $body) = @_;
+  my ($self, $body, $len) = @_;
 
   my $count = 0;
   foreach my $line (@{$body}) { $count += length($line); }
   dbg ("check_for_very_long_text: found $count bytes");
-  if ($count > 8000) { return 1; }
+  if ($count > $len+0) { return 1; }
   return 0;
 }
 
