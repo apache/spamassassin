@@ -93,6 +93,10 @@ describe REMOVE_POSTAL		Send real mail to be unsubscribed
 #
 # please sort these by eval type then name
 
+# HTML control test, HTML spam rules should all have better S/O than this
+body HTML_MESSAGE		eval:html_message()
+describe HTML_MESSAGE		HTML included in message
+
 body HTML_TITLE_UNTITLED	eval:html_eval('title_text', '=~ /Untitled/i')
 describe HTML_TITLE_UNTITLED	HTML title contains "Untitled"
 
@@ -128,6 +132,12 @@ describe HTML_COMMENT_SAVED_URL	HTML message is a saved web page
 
 body HTML_EMBEDS		eval:html_test('embeds')
 describe HTML_EMBEDS		HTML with embedded plugin object
+
+body HTML_EVENT			eval:html_test('html_event')
+describe HTML_EVENT		HTML contains auto-executing code
+
+body HTML_EVENT_UNSAFE		eval:html_test('html_event_unsafe')
+describe HTML_EVENT_UNSAFE	HTML contains unsafe auto-executing code
 
 body HTML_FONT_BIG		eval:html_test('big_font')
 describe HTML_FONT_BIG		FONT Size +2 and up or 3 and up
@@ -183,9 +193,6 @@ describe HTML_FORM_ACTION_MAILTO	HTML includes a form which sends mail
 body HTML_JAVASCRIPT		eval:html_test('javascript')
 describe HTML_JAVASCRIPT	JavaScript code
 
-body HTML_JAVASCRIPT_VERY_UNSAFE	eval:html_test('javascript_very_unsafe')
-describe HTML_JAVASCRIPT_VERY_UNSAFE	Auto-executing JavaScript code
-
 # many spammers seem to do this nowadays (and probably track
 # their customers with it).  (contrib: WW)
 body HTML_RELAYING_FRAME	eval:html_test('relaying_frame')
@@ -196,6 +203,9 @@ describe HTML_WEB_BUGS		Image tag with an ID code to identify you
 
 body HTML_WIN_BLUR		eval:html_test('window_blur')
 describe HTML_WIN_BLUR		Javascript to move windows around
+
+body HTML_WIN_FOCUS		eval:html_test('window_focus')
+describe HTML_WIN_FOCUS		Javascript to change window focus
 
 body HTML_WIN_OPEN		eval:html_test('window_open')
 describe HTML_WIN_OPEN		Javascript to open a new window
@@ -232,13 +242,6 @@ describe HTML_TAG_EXISTS_TBODY	HTML has "tbody" tag
 
 ###########################################################################
 # rawbody HTML tests
-
-rawbody JAVASCRIPT_UNSAFE	/\bon(?:Blur|Change|Focus|Error|Key(?:Press|Down|Up)|Mouse(?:Down|Up|Over|Move|Out)|Resize|Move|Scroll|Stop|Click)[\s=3d\"\']*\S+[\"\']?/i
-describe JAVASCRIPT_UNSAFE	Easily-executed JavaScript code
-
-#   0.001    0.000    0.002    0.00    1.00  JAVASCRIPT_OBFUSCATING (low matches)
-#rawbody JAVASCRIPT_OBFUSCATING   /charCodeAt|fromCharCode/i
-#describe JAVASCRIPT_OBFUSCATING   An attempt to hide spam inside obfuscating Javascript code
 
 rawbody SPAM_FORM		/CHANGE EMAIL ADDRESS IN ACTION OF FORM/
 describe SPAM_FORM		Form for changing email address
@@ -881,7 +884,7 @@ body FREE_DVD		        /\bfree dvd/i
 describe FREE_DVD		Free DVD
 
 body FREE_INVESTMENT	        /\bfree investment/i
-describe FREE_INVESTMENT	Free Investment 
+describe FREE_INVESTMENT	Free Investment
 
 body INVESTMENT		        /\binvestment decision/i
 describe INVESTMENT		Investment Decision
@@ -1529,4 +1532,3 @@ describe MURKOWSKI_CRUFT        Old Murkowski disclaimer
 
 body EARN_MONEY			/\b(?:earn|make|making|made|received?|discounted)\s+(?:up\s+to|as\s+much\s+as|over|at\s+least|a\s+full)?\s*\$\s*[0-9,]{2}/i
 describe EARN_MONEY		Message talks about earning money
-
