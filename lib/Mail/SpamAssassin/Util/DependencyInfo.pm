@@ -43,7 +43,7 @@ my @MODULES = (
 },
 {
   'module' => 'Storable',
-  'version' => '0.00',      # 0.00 required, 2.13 is optional (below)
+  'version' => '0.00',      # 0.00 required, 2.12 is optional (below)
   'desc' => 'This is a required module if you use spamd and allow user
   configurations to be used (ie: you don\'t use -x, -u, -q/--sql-config,
   -Q/--setuid-with-sql, --ldap-config, or --setuid-with-ldap).  Third
@@ -83,7 +83,7 @@ my @OPTIONAL_MODULES = (
 },
 {
   'module' => 'Storable',
-  'version' => '2.13',
+  'version' => '2.12',
   'desc' => 'This is a required module if you use spamd and allow user
   configurations to be used (ie: you don\'t use -x, -u, -q/--sql-config,
   -Q/--setuid-with-sql, --ldap-config, or --setuid-with-ldap).  Third
@@ -93,7 +93,7 @@ my @OPTIONAL_MODULES = (
 
   If you plan to run SpamAssassin on a multiprocessor Linux machine, or one
   with a hyperthreaded CPU like a Pentium 4, it is strongly recommended that
-  you ensure version 2.13 (or newer) is installed.  This fixes a bug that
+  you ensure version 2.12 (or newer) is installed.  This fixes a bug that
   causes hangs under heavy load with that hardware configuration.',
 
 },
