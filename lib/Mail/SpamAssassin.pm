@@ -94,7 +94,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.166 2003/02/03 12:37:31 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.167 2003/02/03 12:42:11 jmason Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -178,6 +178,14 @@ The directory user state is stored in. (optional)
 The text of all rules and preferences.  If you prefer not to load the rules
 from files, read them in yourself and set this instead.  As a result, this will
 override the settings for C<rules_filename> and C<userprefs_filename>.
+
+=item languages_filename
+
+If you want to be able to use the language-guessing rule
+C<UNDESIRED_LANGUAGE_BODY>, and are using C<config_text> instead of
+C<rules_filename> and C<userprefs_filename>, you will need to set this.  It
+should be the path to the B<languages> file normally found in the SpamAssassin
+B<rules> directory.
 
 =item local_tests_only
 
@@ -1030,7 +1038,7 @@ sub init {
     $self->{rules_filename} or $self->{config_text} .= $self->read_cf ($fname, 'default rules dir');
 
     if (-f "$fname/languages") {
-	$self->{languages_filename} = "$fname/languages";
+      $self->{languages_filename} = "$fname/languages";
     }
 
     $fname = $self->{rules_filename};
