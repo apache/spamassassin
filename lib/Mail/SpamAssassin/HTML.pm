@@ -726,20 +726,17 @@ sub text_style {
 	# two different names for text color
 	my $color = name_to_rgb(lc($attr->{$name}));
 	$new{fgcolor} = $color;
-	$self->html_font_color_tests($color);
+	$self->html_color_tests($color);
       }
       elsif ($name eq "size" && $attr->{size} =~ /^\s*([+-]\d+)/) {
 	# relative font size
 	$new{size} = $self->{basefont} + $1;
       }
       else {
-	# overwrite
 	if ($name eq "bgcolor") {
+	  # overwrite with hex value
 	  $attr->{bgcolor} = name_to_rgb(lc($attr->{bgcolor}));
-	  # one test (text tests are done elsewhere)
-	  if ($tag eq "body" && $attr->{bgcolor} !~ /^\#?ffffff$/) {
-	    $self->{html}{bgcolor_nonwhite} = 1;
-	  }
+	  $self->html_color_tests($attr->{bgcolor});
 	}
 	if ($name eq "size" && $attr->{size} !~ /^\s*([+-])(\d+)/) {
 	  # attribute is malformed
@@ -787,16 +784,22 @@ sub color_hue {
   return "hue_unknown";
 }
 
-sub html_font_color_tests {
-  my ($self, $c) = @_;
+# test HTML colors
+# Note: input needs to be the result of name_to_rgb()
+sub html_color_tests {
+  my ($self, $color) = @_;
 
-  if ($c =~ /^\#?[0-9a-f]{6}$/ && $c !~ /^\#?(?:00|33|66|80|99|cc|ff){3}$/) {
-    $self->{html}{font_color_unsafe} = 1;
+  if ($color =~ /^\#?[0-9a-f]{6}$/) {
+    # good hex value
+    if ($color !~ /^\#?(?:00|33|66|80|99|cc|ff){3}$/) {
+      $self->{html}{color_unsafe} = 1;
+    }
   }
-  if ($c !~ /^\#?[0-9a-f]{6}$/ && !exists $html_color{$c}) {
-    $self->{html}{font_color_name} = 1;
+  else {
+    # name_to_rgb was unable to resolve name
+    $self->{html}{color_unknown} = 1;
   }
-  $self->{html}{"font_" . color_hue($c)} = 1;
+  $self->{html}{"color_" . color_hue($color)} = 1;
 }
 
 sub html_font_invisible {
@@ -831,7 +834,7 @@ sub html_font_invisible {
       # increases (near-invisible text is at about 0.95% of spam and
       # 1.25% of HTML spam right now), but please test any changes first
       if ($distance < 12) {
-	$self->{html}{"font_near_invisible"} = 1;
+	$self->{html}{"font_low_contrast"} = 1;
         $visible_for_bayes = 0;
       }
     }
