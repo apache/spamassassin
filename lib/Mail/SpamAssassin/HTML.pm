@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.2 2002/08/20 02:08:48 quinlan Exp $
+# $Id: HTML.pm,v 1.3 2002/08/20 10:07:44 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -233,11 +233,6 @@ sub html_percentage {
 
   my $html_percent = $self->{html}{ratio} * 100;
   return ($html_percent > $min && $html_percent <= $max);
-}
-
-sub html_table_thick_border {
-  my $self = shift;
-  return ($self->{html}{border} > 1);
 }
 
 sub html_test {
