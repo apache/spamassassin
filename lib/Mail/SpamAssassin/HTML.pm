@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.14 2002/09/25 09:12:06 quinlan Exp $
+# $Id: HTML.pm,v 1.15 2002/09/26 14:37:48 jmason Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -147,6 +147,8 @@ sub html_tests {
       if (/^on(?:Load|UnLoad|BeforeUnload)$/i)
       {
 	$self->{html}{javascript_very_unsafe} = 1;
+        if ($attr->{$_} =~ /\.open\s*\(/) { $self->{html}{window_open} = 1; }
+        if ($attr->{$_} =~ /\.blur\s*\(/) { $self->{html}{window_blur} = 1; }
       }
     }
   }
@@ -220,16 +222,25 @@ sub html_tests {
     $self->{html}{embeds} = 1;
   }
   if ($tag eq "title") {
-    $self->{html}{title_text} = "";
+    if (!exists $self->{html_inside}{body} || $self->{html_inside}{body} == 0) {
+      $self->{html}{title_text} = "";
+    }
   }
 }
 
 sub html_text {
   my ($self, $text) = @_;
 
-  return if (exists $self->{html_inside}{script} && $self->{html_inside}{script} > 0);
+  if (exists $self->{html_inside}{script} && $self->{html_inside}{script} > 0)
+  {
+    if ($text =~ /\.open\s*\(/) { $self->{html}{window_open} = 1; }
+    if ($text =~ /\.blur\s*\(/) { $self->{html}{window_blur} = 1; }
+    return;
+  }
   return if (exists $self->{html_inside}{style} && $self->{html_inside}{style} > 0);
-  if (exists $self->{html_inside}{title} && $self->{html_inside}{title} > 0) {
+  if ((!exists $self->{html_inside}{body} || $self->{html_inside}{body} == 0) &&
+        exists $self->{html_inside}{title} && $self->{html_inside}{title} > 0)
+  {
     $self->{html}{title_text} .= $text;
   }
   $text =~ s/\n// if $self->{html_last_tag} eq "br";
