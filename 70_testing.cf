@@ -182,3 +182,5 @@ meta T_LONGWORDS_1	(__LONGWORDS_A || __LONGWORDS_D)
 meta T_LONGWORDS_2	(__LONGWORDS_B || __LONGWORDS_C || __LONGWORDS_D)
 meta T_LONGWORDS_3	(__LONGWORDS_B + __LONGWORDS_C + __LONGWORDS_D > 1)
 meta T_LONGWORDS_4	(__LONGWORDS_A + __LONGWORDS_B + __LONGWORDS_C + __LONGWORDS_D > 1)
+
+header T_INVALID_DATE		Date !~ /^\s*(?:(?i:Mon|Tue|Wed|Thu|Fri|Sat|Sun),\s+)?[0-3\s]?[0-9]\s+(?i:Jan|Feb|Ma[ry]|Apr|Ju[nl]|Aug|Sep|Oct|Nov|Dec)\s+(?:[12][901])?[0-9]{2}\s+[0-2]?[0-9](?:\:[0-5][0-9]){1,2}\s+(?:[AP]M\s+)?(?:[+-][0-9]{4}|UT|[A-Z]{2,3}T)(?:\s+\(.*\))?\s*$/ [if-unset: Wed, 31 Jul 2002 16:41:57 +0200]
