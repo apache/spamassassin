@@ -501,3 +501,11 @@ body     T_HTML_LINK_UNSUB      eval:html_eval('anchor_text', '=~/unsubscribe/i'
 score     T_HTML_LINK_CLICK_HERE 0.01
 score     T_HTML_LINK_MONEY      0.01
 score     T_HTML_LINK_UNSUB      0.01
+
+# Some spammers try to get multiple negative scores by adding in different
+# user-agent looking headers.  TOO_MANY_UA adds up all of our USER_AGENT
+# tests and matches if more than 1 hits.  UA_AND_XM actually matches a
+# good amount of non-spam at the moment, the above problem can trigger
+# this rule as well.
+meta T_TOO_MANY_UA	( USER_AGENT_PINE + USER_AGENT_MUTT + USER_AGENT_MOZILLA_UA + USER_AGENT_MOZILLA_XM + USER_AGENT_MACOE + USER_AGENT_ENTOURAGE + USER_AGENT_KMAIL + USER_AGENT_IMP + USER_AGENT_TONLINE + USER_AGENT_APPLEMAIL + USER_AGENT_GNUS_UA + USER_AGENT_GNUS_XM > 1 )
+meta T_UA_AND_XM	( USER_AGENT && __HAS_X_MAILER )
