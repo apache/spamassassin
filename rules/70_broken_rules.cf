@@ -12,9 +12,9 @@ describe ANOTHER_NET_AD         Tells you it's an ad
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  BACKED_BY
-score BACKED_BY			     1.0
-body BACKED_BY                  /\bbacked by [mb]illions\b/i
-describe BACKED_BY              Backed by Billions
+#score BACKED_BY			     1.0
+#body BACKED_BY                  /\bbacked by [mb]illions\b/i
+#describe BACKED_BY              Backed by Billions
 #
 #
 #   0.553    0.713    0.457    0.61   -1.00  BALANCE_FOR_LONG_20K
@@ -39,37 +39,25 @@ describe BIG_BUCKS		Big Bucks
 score BIG_BUCKS			     1.0
 #
 #
-#   0.001    0.000    0.001    0.00    1.00  BONUS_PAYMENT
-score BONUS_PAYMENT		     1.0
-body BONUS_PAYMENT              /\bbonus payment/i
-describe BONUS_PAYMENT          Bonus Payments
+#  0.001    0.000    0.001    0.00    1.00  BONUS_PAYMENT
+#score BONUS_PAYMENT		     1.0
+#body BONUS_PAYMENT              /\bbonus payment/i
+#describe BONUS_PAYMENT          Bonus Payments
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  BRAND_NEW_PAGER
-body BRAND_NEW_PAGER            /BRAND NEW Pager FREE/
-describe BRAND_NEW_PAGER        No such thing as a free lunch
+#body BRAND_NEW_PAGER            /BRAND NEW Pager FREE/
+#describe BRAND_NEW_PAGER        No such thing as a free lunch
 #
 #
-#   0.054    0.141    0.002    0.99    1.00  BREAKTHROUGH_2
 #   0.000    0.000    0.000    0.00    1.00  BREAKTHROUGH
-score BREAKTHROUGH		     1.0
-body BREAKTHROUGH               /\bbreakthrough price/i
-describe BREAKTHROUGH           Breakthrough Pricing
+#score BREAKTHROUGH		     1.0
+#body BREAKTHROUGH               /\bbreakthrough price/i
+#describe BREAKTHROUGH           Breakthrough Pricing
 #
 #
-#   0.000    0.000    0.000    0.00    4.00  BUGGY_CGI_DE
-#   0.000    0.000    0.000    0.00    4.00  BUGGY_CGI_DE_3
-#   0.000    0.000    0.000    0.00    4.00  BUGGY_CGI_DE_2
-body BUGGY_CGI_DE		/Neue Mail aus dem Fitzshop Briefkasten/i
-describe BUGGY_CGI_DE		Broken German CGI script message
-lang fr describe BUGGY_CGI_DE   Réponse a un formulaire jamais rempli (en allemand)
-score BUGGY_CGI_DE                   4.0
-#
-#
-#   0.000    0.000    0.000    0.00    4.00  BUGGY_CGI_DE_2
-#
-#
-#   0.000    0.000    0.000    0.00    4.00  BUGGY_CGI_DE_3
+# note: this is from 1 particular shop! not worth keeping at all.
+#body BUGGY_CGI_DE		/Neue Mail aus dem Fitzshop Briefkasten/i
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  BUGGY_CGI_ES
@@ -86,14 +74,6 @@ describe BUGGY_CGI_PT		Broken Portuguese CGI script message
 lang fr describe BUGGY_CGI_PT   Réponse a un formulaire jamais rempli (en portugais)
 score BUGGY_CGI_PT                   4.0
 #
-#
-#   0.000    0.000    0.000    0.00    1.00  BUGGY_CGI_PT_2
-#
-#
-#   0.060    0.073    0.052    0.58    0.57  CASINO
-#   0.000    0.001    0.000    1.00    1.00  MYCASINOBUILDER
-lang fr describe CASINO         Contient le mot 'casino'
-score CASINO                         0.566
 #
 #
 #   0.002    0.003    0.001    0.71    1.00  CHANGE_TERMS
@@ -183,9 +163,9 @@ score FAILURE_NOTICE_2          -1.0
 #
 #
 #   0.000    0.000    0.000    0.00    3.46  FAKED_UNDISC_RECIPS_AT
-header FAKED_UNDISC_RECIPS_AT	To =~ /undisclosed-recipient: \@[a-z]/i
-describe FAKED_UNDISC_RECIPS_AT	Faked To "Undisclosed-Recipients" @ some address
-score FAKED_UNDISC_RECIPS_AT         3.461
+#header FAKED_UNDISC_RECIPS_AT	To =~ /undisclosed-recipient: \@[a-z]/i
+#describe FAKED_UNDISC_RECIPS_AT	Faked To "Undisclosed-Recipients" @ some address
+#score FAKED_UNDISC_RECIPS_AT         3.461
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  FILTERED_BY_WORLDREMOVE
@@ -238,22 +218,6 @@ score FREE_TICKETS		     1.0
 #   0.023    0.022    0.023    0.49    1.00  FREE_TICKETS
 #
 #
-#   1.057    2.175    0.382    0.85    0.50  FROM_AND_TO_SAME_1
-#   0.176    0.461    0.004    0.99    1.60  FROM_AND_TO_SAME_3
-#   0.413    0.771    0.196    0.80    0.50  FROM_AND_TO_SAME_5
-#   0.391    0.709    0.198    0.78    1.40  FROM_AND_TO_SAME_6
-#   0.191    0.319    0.113    0.74   -2.50  FROM_AND_TO_SAME_2
-#   0.278    0.155    0.352    0.31    1.00  FROM_AND_TO_SAME
-#   0.034    0.015    0.046    0.24   -2.50  FROM_AND_TO_SAME_4
-#
-#
-#   0.034    0.015    0.046    0.24   -2.50  FROM_AND_TO_SAME_4
-header FROM_AND_TO_SAME_4	eval:check_for_from_to_same('rough_from')
-describe FROM_AND_TO_SAME_4	From and To are same (4)
-lang fr describe FROM_AND_TO_SAME_4     Les entêtes From: et To: comportent la même adresse
-score FROM_AND_TO_SAME_4             -2.5
-#
-#
 #   0.537    0.303    0.679    0.31    3.67  FROM_MALFORMED
 header FROM_MALFORMED		From !~ /(?:\"[^\"]+\"|\S+)\@\S+\.\S+|<\S+(?:\!\S+)+>/ [if-unset: unset@unset.unset]
 describe FROM_MALFORMED		From: has a malformed address
@@ -268,10 +232,6 @@ describe FROM_MISSING		Missing From: header
 lang de describe FROM_MISSING             Fehlender From: Header
 lang fr describe FROM_MISSING   L'entête From: est absent
 score FROM_MISSING                   4.257
-#
-#
-#   0.067    0.067    0.066    0.50    1.00  FROM_NAME_EQ_FROM_ADDR
-lang fr describe FROM_NAME_EQ_FROM_ADDR L'adresse de l'entête From: est équivalent au nom de l'expéditeur
 #
 #
 #   1.097    0.513    1.450    0.26    1.00  FROM_NAME_NO_SPACES
@@ -311,10 +271,6 @@ describe HTML_COMMENT_UNIQUE_ID	Contains a comment with nothing but unique ID
 lang fr describe INCREASE_SALES Propose d'augmenter les ventes
 #
 #
-#   0.005    0.009    0.003    0.77    1.00  INCREASE_TRAFFIC
-lang fr describe INCREASE_TRAFFIC       Propose d'augmenter le trafic
-#
-#
 #   0.000    0.001    0.000    1.00    1.00  INCREDIBLE
 body INCREDIBLE		        /\bincredible secrets\b/i
 describe INCREDIBLE		Things incredible
@@ -322,16 +278,16 @@ score INCREDIBLE		     1.0
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  IRS
-score IRS			     1.0
-body IRS                        /\bIRS .{0,15}secrets\b/i
-describe IRS                    IRS Scams
+#score IRS			     1.0
+#body IRS                        /\bIRS .{0,15}secrets\b/i
+#describe IRS                    IRS Scams
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  ITS_EFFECTIVE
-lang fr describe ITS_EFFECTIVE  Le mèl se targue de l'efficacité du service proposé
-score ITS_EFFECTIVE                  1.0
-body ITS_EFFECTIVE              /\bit's effective\b/i
-describe ITS_EFFECTIVE          Something claims to be effective
+#lang fr describe ITS_EFFECTIVE  Le mèl se targue de l'efficacité du service proposé
+#score ITS_EFFECTIVE                  1.0
+#body ITS_EFFECTIVE              /\bit's effective\b/i
+#describe ITS_EFFECTIVE          Something claims to be effective
 #
 #
 #   0.094    0.100    0.090    0.53    1.00  KNOWN_BAD_DIALUPS
@@ -339,10 +295,10 @@ lang fr describe KNOWN_BAD_DIALUPS      Mèl reçu depuis un FAI hébergeant des SP
 #
 #
 #   0.000    0.000    0.000    0.00    3.90  LASER_PRINTER
-lang fr describe LASER_PRINTER  Le mèl offre des fornitures pour imprimantes laser
-score LASER_PRINTER                  3.9
-body LASER_PRINTER              /LASER PRINTER SUPPLIES/ 
-describe LASER_PRINTER          Discusses laser printer supplies
+#lang fr describe LASER_PRINTER  Le mèl offre des fornitures pour imprimantes laser
+#score LASER_PRINTER                  3.9
+#body LASER_PRINTER              /LASER PRINTER SUPPLIES/ 
+#describe LASER_PRINTER          Discusses laser printer supplies
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  LIFE_INSURANCE
@@ -446,9 +402,9 @@ describe NO_SELLING             Claims not to be selling anything
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  NO_SPENDING
-score NO_SPENDING		     1.0
-body NO_SPENDING                /\bno spending limits\b/i
-describe NO_SPENDING            No Spending Limits
+#score NO_SPENDING		     1.0
+#body NO_SPENDING                /\bno spending limits\b/i
+#describe NO_SPENDING            No Spending Limits
 #
 #
 #   1.297    1.989    0.878    0.69   -0.30  OUTLOOK_FW_MSG
@@ -486,10 +442,7 @@ describe POPLAUNCH              SPAM software
 #
 #
 #   0.018    0.044    0.003    0.94    1.00  PORN_13
-#   0.035    0.062    0.018    0.77    1.00  PORN_12
-#   0.119    0.124    0.116    0.52    1.00  PORN_11
 #   0.003    0.004    0.002    0.73    1.00  PORN_1
-#   0.264    0.217    0.292    0.43    1.00  PORN_10
 #   0.119    0.103    0.128    0.44    1.00  PORN_14
 #
 #
@@ -516,17 +469,15 @@ test     PORN_14     fail       microscopics
 #
 #   0.315    0.253    0.352    0.42    1.00  PORN_3
 #full PORN_3			eval:porn_word_test()
-lang de describe PORN_3                   Enthaelt pornographische Begriffe und Phrasen (3)
-lang es describe PORN_3			Cuida tu idioma!
-lang fr describe PORN_3 Utilise des mots ou des phrases à caractère pornographique
-lang pl describe PORN_3			U¿yte przynajmniej 3 angielskie wulgaryzmy.
-test     PORN_3      ok         Wild Asian hot peppers
-test     PORN_3      fail       Wild Asian cucumbers
-test     PORN_3      fail       Hot lesbo xxxx
-test     PORN_3      fail       Hot lesbians
+#lang de describe PORN_3                   Enthaelt pornographische Begriffe und Phrasen (3)
+#lang es describe PORN_3			Cuida tu idioma!
+#lang fr describe PORN_3 Utilise des mots ou des phrases à caractère pornographique
+#lang pl describe PORN_3			U¿yte przynajmniej 3 angielskie wulgaryzmy.
+#test     PORN_3      ok         Wild Asian hot peppers
+#test     PORN_3      fail       Wild Asian cucumbers
+#test     PORN_3      fail       Hot lesbo xxxx
+#test     PORN_3      fail       Hot lesbians
 #
-#
-#   0.001    0.000    0.002    0.00    1.00  PORN_8
 #
 #
 #   0.003    0.003    0.003    0.52    1.00  PRICES_WONT_LAST
@@ -537,10 +488,10 @@ describe PRICES_WONT_LAST       Prices won't Last
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  PRINT_OUT_AND_FAX
-lang fr describe PRINT_OUT_AND_FAX      Demande d'imprimer un formulaire avant de le télécopier
-score PRINT_OUT_AND_FAX              1.0
-body PRINT_OUT_AND_FAX          /print\s+out\s+and\s+fax/i
-describe PRINT_OUT_AND_FAX      Contains words 'print out and fax'
+#lang fr describe PRINT_OUT_AND_FAX      Demande d'imprimer un formulaire avant de le télécopier
+#score PRINT_OUT_AND_FAX              1.0
+#body PRINT_OUT_AND_FAX          /print\s+out\s+and\s+fax/i
+#describe PRINT_OUT_AND_FAX      Contains words 'print out and fax'
 #
 #
 #   0.041    0.057    0.031    0.65   -1.00  PRIVACY_STATEMENT
@@ -712,19 +663,14 @@ score PSYCHIC			     1.0
 #
 #
 #
-#   0.008    0.003    0.011    0.18    1.00  REAL_THING
-#lang fr describe REAL_THING             Contient la formule 'the real thing'
-#
-#
-#   0.004    0.010    0.000    1.00    1.00  YOU_HAVE_BEEN_SELECTED
 #   0.000    0.000    0.000    0.00    1.00  SELECTED
-body SELECTED                   /\byou.{0.9} been selected\b/i
-describe SELECTED               You've been selected! Lucky You!
+#body SELECTED                   /\byou.{0.9} been selected\b/i
+#describe SELECTED               You've been selected! Lucky You!
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  SHOES_GUY
-body SHOES_GUY                  /(?:\b(?:Lingui|Guilin)\b.{1,30}){2,}/i
-describe SHOES_GUY              Want some shoes?
+#body SHOES_GUY                  /(?:\b(?:Lingui|Guilin)\b.{1,30}){2,}/i
+#describe SHOES_GUY              Want some shoes?
 #
 #
 #   0.000    0.000    0.000    0.00    4.25  SHORT_RECEIVED_LINE
@@ -782,13 +728,6 @@ describe SUBJECT_HAS_DATE       Subject contains a date
 tflags SUBJECT_HAS_DATE		nice
 score SUBJECT_HAS_DATE          -1.0
 #
-#
-#   1.061    0.134    1.621    0.08    1.00  SUBJ_ENDS_IN_Q_MARK
-#lang fr describe SUBJ_ENDS_IN_Q_MARK    L'entête Subject: se termine par un point d'interrogation
-#
-#
-#   0.243    0.202    0.268    0.43    1.00  SUBJ_HAS_Q_MARK
-lang fr describe SUBJ_HAS_Q_MARK        L'entête Subject: contient un point d'interrogation
 #
 #
 #   9.272   11.011    8.222    0.57    0.38  SUPERLONG_LINE
@@ -920,11 +859,11 @@ score USER_AGENT_GNUS_UA        -1.0
 #
 #
 #   0.029    0.078    0.000    1.00   -1.00  USER_AGENT_GNUS_XM
-score USER_AGENT_GNUS_XM        -0.1
-header USER_AGENT_GNUS_XM      X-Mailer   =~ /^Gnus\/\d\.\d+ /
-describe USER_AGENT_GNUS_XM    X-Mailer header indicates a non-spam MUA (Gnus)
-tflags USER_AGENT_GNUS_XM nice
-score USER_AGENT_GNUS_XM -1.0
+#score USER_AGENT_GNUS_XM        -0.1
+#header USER_AGENT_GNUS_XM      X-Mailer   =~ /^Gnus\/\d\.\d+ /
+#describe USER_AGENT_GNUS_XM    X-Mailer header indicates a non-spam MUA (Gnus)
+#tflags USER_AGENT_GNUS_XM nice
+#score USER_AGENT_GNUS_XM -1.0
 #
 #
 #   9.021   15.707    4.979    0.76   -1.00  USER_AGENT_OE
@@ -947,8 +886,8 @@ score USER_AGENT_THEBAT -1.0
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  VIGORA
-body VIGORA                     /\bVigora\b/
-describe VIGORA                 Some sort of viagra alternative
+#body VIGORA                     /\bVigora\b/
+#describe VIGORA                 Some sort of viagra alternative
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  WEALTH
@@ -1008,4 +947,12 @@ score PGP_SIGNATURE             -3
 #header RATWARE_UPROAR          X-Mailer =~ /Uproar Mass Mailer/
 #describe RATWARE_UPROAR        Bulk email software fingerprint (Uproar) found in headers
 
+#   0.000    0.000    0.000    0.00    1.00  FROM_UGETMORE
+#header FROM_UGETMORE            From =~ /\@ugetmore4less.net/i
+#describe FROM_UGETMORE          From an address @ugetmore4less.net
+#lang fr describe FROM_UGETMORE  Le mèl est orgininaire d'une adresse @ugetmore4less.net
+
+#  0.000    0.000    0.000    0.00    1.00  WWW_TRAFFICWOW_NET
+#20_uri_tests.cf:uri WWW_TRAFFICWOW_NET      /trafficwow\.net/i
+#20_uri_tests.cf:describe WWW_TRAFFICWOW_NET         Frequent SPAM content
 
