@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.596 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.597 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -175,4 +175,7 @@ describe T_FAKED_HOTMAIL_DAV	'X-Originating-Email' header does not match 'From'
 
 header T_HAS_X_ORIG_HOST	X-Originating-Host =~ /^\[/
 describe T_HAS_X_ORIG_HOST	Has an 'X-Originating-Host' header
+
+header T_FORGED_RCVD_IP_HELO	eval:check_for_forged_received_ip_helo()
+describe T_FORGED_RCVD_IP_HELO	Host HELO'd using the wrong IP address
 

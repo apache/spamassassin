@@ -335,17 +335,25 @@ sub check_for_forged_received_trail {
   return ($self->{mismatch_from} > 1);
 }
 
-# T_FORGED_RCVD_HELO
+# FORGED_RCVD_HELO
 sub check_for_forged_received_helo {
   my ($self) = @_;
   $self->_check_for_forged_received unless exists $self->{mismatch_helo};
   return ($self->{mismatch_helo} > 0);
 }
 
+# FORGED_RCVD_IP_HELO
+sub check_for_forged_received_ip_helo {
+  my ($self) = @_;
+  $self->_check_for_forged_received unless exists $self->{mismatch_ip_helo};
+  return ($self->{mismatch_ip_helo} > 0);
+}
+
 sub _check_for_forged_received {
   my ($self) = @_;
 
   $self->{mismatch_helo} = 0;
+  $self->{mismatch_ip_helo} = 0;
   $self->{mismatch_from} = 0;
 
   my @fromip = map { $_->{ip} } @{$self->{relays_untrusted}};
@@ -379,22 +387,34 @@ sub _check_for_forged_received {
     # a separate rule for that anyway.
 
     my $by = $by[$i];
-    next unless ($by !~ /^\w+(?:[\w.-]+\.)+\w+$/);
+    next unless ($by =~ /^\w+(?:[\w.-]+\.)+\w+$/);
 
-    my $prev = $helo[$i-1];
-    if (defined($prev)
-		&& $prev =~ /^\w+(?:[\w.-]+\.)+\w+$/
-		&& $by ne $prev && !helo_forgery_whitelisted($by, $prev))
+    my $frm = $from[$i];
+    my $hlo = $helo[$i];
+    if (defined($hlo) && defined($frm)
+		&& $hlo =~ /^\w+(?:[\w.-]+\.)+\w+$/
+		&& $frm =~ /^\w+(?:[\w.-]+\.)+\w+$/
+		&& $frm ne $hlo && !helo_forgery_whitelisted($frm, $hlo))
     {
-      dbg ("forged-HELO: mismatch on HELO: '$prev' != '$by[$i]'");
+      dbg ("forged-HELO: mismatch on HELO: '$hlo' != '$frm'");
       $self->{mismatch_helo}++;
     }
 
-    $prev = $from[$i-1];
+    my $fip = $fromip[$i];
+    if (defined($hlo) && defined($fip)
+		&& $hlo =~ /^\d+\.\d+\.\d+\.\d+$/
+		&& $fip =~ /^\d+\.\d+\.\d+\.\d+$/
+		&& $fip ne $hlo)
+    {
+      dbg ("forged-HELO: mismatch on IP-addr HELO: '$hlo' != '$fip'");
+      $self->{mismatch_ip_helo}++;
+    }
+
+    my $prev = $from[$i-1];
     if (defined($prev) && $prev =~ /^\w+(?:[\w.-]+\.)+\w+$/
 		&& $by ne $prev && !helo_forgery_whitelisted($by, $prev))
     {
-      dbg ("forged-HELO: mismatch on from: '$prev' != '$by[$i]'");
+      dbg ("forged-HELO: mismatch on from: '$prev' != '$by'");
       $self->{mismatch_from}++;
     }
   }
@@ -407,23 +427,12 @@ sub helo_forgery_whitelisted {
 }
 
 sub hostname_to_domain {
-  # TODO: deal with the .co.uk case
-  my ($hname) = @_;
-
-  if ($hname !~ /[a-zA-Z]/) { return $hname; }	# IP address
-
-  if ($hname =~ /([^\.]+\.[^\.]+)$/) {
-    $1;
-  } else {
-    $hname;
-  }
-}
-
-sub hostname_to_domain2 {
   my ($hostname) = @_;
 
+  if ($hostname !~ /[a-zA-Z]/) { return $hostname; }	# IP address
+
   my @parts = split(/\./, $hostname);
-  if (@parts > 1 && $parts[-1] =~ /\S{3,}/) {
+  if (@parts > 1 && $parts[-1] =~ /(?:\S{3,}|ie|fr|de)/) {
     return join('.', @parts[-2..-1]);
   }
   elsif (@parts > 2) {
