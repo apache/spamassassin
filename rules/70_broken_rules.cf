@@ -1245,3 +1245,10 @@ score BAYES_99 0.001 0.001 4.300 2.791
 #header T_HAS_NUM_AT_DELPHI	ALL =~ /\d\S+\@delphi\.com\b/
 #describe T_HAS_NUM_AT_DELPHI	Contains a Delphi address with a number
 
+# quinlan - 2003-06-20 - looks excellent, but no response from
+# maintainer about policies, load handling, and cost
+# test again later, probably
+# URL: http://www.fabel.dk/relay/
+#header T_RCVD_IN_FABEL		rbleval:check_rbl('fabel', 'spamsources.fabel.dk.')
+#describe T_RCVD_IN_FABEL	Received via a relay in spamsources.fabel.dk
+#tflags T_RCVD_IN_FABEL net
