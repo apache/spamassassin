@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.572 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.573 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -263,49 +263,20 @@ describe T_STRANGE_CHAR_LINKS	Links with strange characters
 # I actually don't like these rules since once we start looking for them, the spammers will just change
 # domains, but ...
 # tvd - 06/01
-uri T_BANNED_LINKS1_03	m@(?:^https?://|^mailto:).{0,20}jutan@i
-uri T_BANNED_LINKS1_05	m@(?:^https?://|^mailto:).{0,20}youngblue@i
-uri T_BANNED_LINKS1_10	m@(?:^https?://|^mailto:).{0,20}compare-lender@i
 
-uri T_BANNED_LINKS2_01	m@(?:^https?://|^mailto:).{0,20}ientry@i
-uri T_BANNED_LINKS2_02	m@(?:^https?://|^mailto:).{0,20}mybill@i
-uri T_BANNED_LINKS2_04	m@(?:^https?://|^mailto:).{0,20}farmsex@i
-uri T_BANNED_LINKS2_06	m@(?:^https?://|^mailto:).{0,20}unsecured-credit@i
-uri T_BANNED_LINKS2_08	m@(?:^https?://|^mailto:).{0,20}fyi01@i
-uri T_BANNED_LINKS2_09	m@(?:^https?://|^mailto:).{0,20}clicktrack@i
-uri T_BANNED_LINKS2_11	m@(?:^https?://|^mailto:).{0,20}zizi@i
-uri T_BANNED_LINKS2_12	m@(?:^https?://|^mailto:).{0,20}vistaprint@i
 
-uri T_BANNED_LINKS3_02	m@(?:^https?://|^mailto:).{0,20}optilc@i
-uri T_BANNED_LINKS3_05	m@(?:^https?://|^mailto:).{0,20}myobmail@i
 uri T_BANNED_LINKS3_06	m@(?:^https?://|^mailto:).{0,20}yourvling@i
-uri T_BANNED_LINKS3_07	m@(?:^https?://|^mailto:).{0,20}xeemo@i
-uri T_BANNED_LINKS3_08	m@(?:^https?://|^mailto:).{0,20}incestuals@i
-uri T_BANNED_LINKS3_09	m@(?:^https?://|^mailto:).{0,20}mnjmtech@i
 
-uri T_BANNED_LINKS4_01	m@(?:^https?://|^mailto:).{0,20}ltracker@i
-uri T_BANNED_LINKS4_02	m@(?:^https?://|^mailto:).{0,20}premiumsmail@i
 uri T_BANNED_LINKS4_03	m@(?:^https?://|^mailto:).{0,20}rxmedical@i
 uri T_BANNED_LINKS4_04	m@(?:^https?://|^mailto:).{0,20}bannedcd@i
-uri T_BANNED_LINKS4_08	m@(?:^https?://|^mailto:).{0,20}gammae@i
 uri T_BANNED_LINKS4_09	m@(?:^https?://|^mailto:).{0,20}freeht@i
-uri T_BANNED_LINKS4_10	m@(?:^https?://|^mailto:).{0,20}ns-hosting@i
 uri T_BANNED_LINKS4_11	m@(?:^https?://|^mailto:).{0,20}domainsforeveryone@i
 
-uri T_BANNED_LINKS5_01	m@(?:^https?://|^mailto:).{0,20}freedigitalppv@i
-uri T_BANNED_LINKS5_02	m@(?:^https?://|^mailto:).{0,20}fastbustzone@i
-uri T_BANNED_LINKS5_04	m@(?:^https?://|^mailto:).{0,20}zoanmail@i
 uri T_BANNED_LINKS5_05	m@(?:^https?://|^mailto:).{0,20}ew01@i
-uri T_BANNED_LINKS5_06	m@(?:^https?://|^mailto:).{0,20}executive-level@i
-uri T_BANNED_LINKS5_07	m@(?:^https?://|^mailto:).{0,20}cyberforce@i
 uri T_BANNED_LINKS5_10	m@(?:^https?://|^mailto:).{0,20}faqchat@i
 
-uri T_BANNED_LINKS6_02	m@(?:^https?://|^mailto:).{0,20}totemmail@i
 
-uri T_SUSPICIOUS_LINKS_02	m@(?:^https?://|^mailto:).{0,25}poker\.net@i
-uri T_SUSPICIOUS_LINKS_03	m@(?:^https?://|^mailto:).{0,25}get-deal@i
 uri T_SUSPICIOUS_LINKS_04	m@(?:^https?://|^mailto:).{0,25}bargain[zs\-]@i
-uri T_SUSPICIOUS_LINKS_08	m@(?:^https?://|^mailto:).{0,25}lotto@i
 uri T_SUSPICIOUS_LINKS_09	m@(?:^https?://|^mailto:).{0,25}offer[sz]@i
 uri T_SUSPICIOUS_LINKS_10	m@(?:^https?://|^mailto:).{0,25}4you@i
 
