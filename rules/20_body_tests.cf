@@ -678,7 +678,7 @@ body SAFEGUARD_NOTICE		/This safeguard is not inserted when using the registered
 describe SAFEGUARD_NOTICE	Contains signature of unregistered spam tool
 
 # Evites trigger false positives
-body EVITE			/evite.citysearch.com/
+body EVITE			/(?:evite\.citysearch\.com|evite\.com)/
 describe EVITE			Claw back some for evite
 
 # Has a proper .sig - probably clean
