@@ -319,6 +319,12 @@ else {
 
 $opt{'daemonize'} and daemonize();
 
+if(defined($opt{'pidfile'})) {
+  open PIDF,">$opt{'pidfile'}" or warn "Can't write to PID file: $!";
+  print PIDF "$$\n";
+  close PIDF;
+}
+
 # support non-root use (after we bind to the port)
 my $setuid_to_user = 0;
 if ($opt{'username'}) {
@@ -1146,12 +1152,6 @@ sub daemonize
     setsid or die "Can't start new session: $!";
     open STDERR,'>&STDOUT' or die "Can't duplicate stdout: $!";
     Mail::SpamAssassin::dbg('daemonized.');
-
-    if(defined($opt{'pidfile'})) {
-       open PIDF,">$opt{'pidfile'}" or warn "Can't open PID file: $!";
-       print PIDF $$."\n";
-       close PIDF;
-    }
 }
 
 my @allowed_nets;
@@ -1416,8 +1416,7 @@ that user.
 
 Write the process ID of the spamd parent to the file specified by I<pidfile>.
 The file will be unlinked when the parent exits.  Note that when running
-with the B<-u> option, the file must be writable by that user.  Also note
-that this option is used only when running spamd in daemon mode via I<-d>.
+with the B<-u> option, the file must be writable by that user.
 
 =item B<-v>, B<--vpopmail>
 
