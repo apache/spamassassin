@@ -1,11 +1,11 @@
 #!/usr/bin/perl
 
-use Devel::Peek;
 use lib "../lib";
 use Mail::SpamAssassin;
 
 #use Mail::Audit;
 use Mail::SpamAssassin::NoMailAudit;
+#use Devel::Peek;
 
 $cffile = '../rules/50_scores.cf';
 
