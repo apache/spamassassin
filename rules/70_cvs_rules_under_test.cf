@@ -575,7 +575,7 @@ header T_RCVD_IN_FIVETEN_TCPA	rblreseval:check_rbl_results_for('fiveten', '127.0
 header T_RCVD_IN_FIVETEN_FREE	rblreseval:check_rbl_results_for('fiveten', '127.0.0.12')
 # should probably get notfirsthop etc. to work at any stage
 # (how about an optional third argument?)
-header __FIVE10		rblreseval:check_rbl('five10-notfirsthop', 'blackholes.five-ten-sg.com.')
+header __FIVE10		rbleval:check_rbl('five10-notfirsthop', 'blackholes.five-ten-sg.com.')
 header T_RCVD_IN_FIVETEN_DIALUP_NFH	rblreseval:check_rbl_results_for('five10-notfirsthop', '127.0.0.3')
 
 # some additional osirusoft tests, needs more work
