@@ -69,7 +69,7 @@ use vars	qw{
 @ISA = qw();
 
 $VERSION = "2.1";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.63 2002/02/05 03:40:00 hughescr Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.64 2002/02/06 22:05:08 hughescr Exp $';
 
 sub Version { $VERSION; }
 
@@ -214,7 +214,7 @@ Otherwise identical to C<$f->check()> above.
 
 sub check_message_text {
   my ($self, $mailtext) = @_;
-  my @lines = split (/\n/s, $mailtext);
+  my @lines = split (/^/m, $mailtext);
   my $mail_obj = Mail::SpamAssassin::NoMailAudit->new ('data' => \@lines);
   return $self->check ($mail_obj);
 }

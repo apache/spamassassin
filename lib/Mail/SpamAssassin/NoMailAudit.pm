@@ -49,7 +49,7 @@ sub new {
   if (defined $opts{'data'}) {
     $self->{textarray} = $opts{data};
   } else {
-    $self->{textarray} = $self->read_text_array_from_stdin();
+    $self->{textarray} = [ <STDIN> ];
   }
 
   $self->parse_headers();
@@ -61,23 +61,6 @@ sub new {
 sub get_mail_object {
   my ($self) = @_;
   return $self;
-}
-
-# ---------------------------------------------------------------------------
-
-sub read_text_array_from_stdin {
-  my ($self) = @_;
-
-  my @ary = ();
-  while (<STDIN>) {
-    push (@ary, $_);
-    /^\r*$/ and last;
-  }
-
-  push (@ary, (<STDIN>));
-  close STDIN;
-
-  $self->{textarray} = \@ary;
 }
 
 # ---------------------------------------------------------------------------
