@@ -109,7 +109,7 @@ sub do_bug {
     cmts_by_num => { },
     cmts => [ ],
     rulenames => [ ],
-    default_needsmc_start => 1
+    default_needsmc_start => 0
   };
 
   # parse all the comments
@@ -376,6 +376,10 @@ sub read_cmt_rules_from_text {
       my $type = $1;
       my $name = $2;
       my $code = $3;
+
+      # ignore describe lines, they can cause lint failures
+      next if ($type =~ /^describe$/i);
+
       $cmt->{mcrules} .= "$type $name $code\n";
       $lastwasrule = 1;
       if (!$seenrules) {
