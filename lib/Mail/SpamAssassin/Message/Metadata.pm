@@ -110,18 +110,30 @@ sub check_language {
   $body = join ("\n", @{$body});
   $body =~ s/^Subject://i;
 
+  my $len = length($body);
+
+  # truncate after 10k; that should be plenty to classify it
+  if ($len > 10000) {
+    substr ($body, 10000) = '';
+    $len = 10000;
+  }
+
   # note body text length, since the check_languages() eval rule also
   # uses it
-  $self->{languages_body_len} = length($body);
+  $self->{languages_body_len} = $len;
 
   # need about 256 bytes for reasonably accurate match (experimentally derived)
-  if ($self->{languages_body_len} < 256) {
+  if ($len < 256) {
     dbg("metadata: message too short for language analysis");
     $self->{textcat_matches} = [];
     return;
   }
 
-  my @matches = Mail::SpamAssassin::TextCat::classify($self, $body, $main->{languages_filename});
+  my @matches = Mail::SpamAssassin::TextCat::classify($self,
+                                \$body, $main->{languages_filename});
+
+  undef $body;          # free that memory
+
   $self->{textcat_matches} = \@matches;
   my $matches_str = join(' ', @matches);
 
