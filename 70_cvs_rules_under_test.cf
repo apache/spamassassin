@@ -225,10 +225,78 @@ describe T_RATWARE_POWERMTA	Bulk email software fingerprint (PowerMTA) found in 
 # seems to be ratware
 header T_RECEIVED_AM_PM_1	Received =~ /\b[AP]M\b/
 header T_RECEIVED_AM_PM_2	Received =~ /; [A-Z][a-z][a-z], \d{1,2} \d{4} \d{1,2}:\d\d:\d\d [AP]M [+-]\d{4}/
-# more crap
+# some unique ID tests
 header T_REPLY_TO_REPLY_1	Reply-To:addr =~ /reply.*\d{4}.*\@/i
 header T_REPLY_TO_REPLY_2	Reply-To:addr =~ /(?<!no.)(?<!no)reply.*\@/i
 header T_REPLY_TO_REPLY_3	Reply-To:addr =~ /(?<!no.)(?<!no)reply.*\d{4}.*\@/i
+
+# quinlan: 2003-03-10
+# more variations on unique ID tests, a bit more generic
+header T_ID_X_LIST_UNSUBSCRIBE_0	X-List-Unsubscribe:addr =~ /\d{1}.*\@/i
+header T_ID_X_LIST_UNSUBSCRIBE_1	X-List-Unsubscribe:addr =~ /\d{2}.*\@/i
+header T_ID_X_LIST_UNSUBSCRIBE_2	X-List-Unsubscribe:addr =~ /\d{3}.*\@/i
+header T_ID_X_LIST_UNSUBSCRIBE_3	X-List-Unsubscribe:addr =~ /\d{4}.*\@/i
+header T_ID_X_LIST_UNSUBSCRIBE_4	X-List-Unsubscribe:addr =~ /\d{5}.*\@/i
+header T_ID_X_LIST_UNSUBSCRIBE_5	X-List-Unsubscribe:addr =~ /\d{6}.*\@/i
+header T_ID_X_LIST_UNSUBSCRIBE_6	X-List-Unsubscribe:addr =~ /\d{1}.*\d{1}.*\@/i
+header T_ID_X_LIST_UNSUBSCRIBE_7	X-List-Unsubscribe:addr =~ /\d{2}.*\d{2}.*\@/i
+header T_ID_X_LIST_UNSUBSCRIBE_8	X-List-Unsubscribe:addr =~ /\d{3}.*\d{3}.*\@/i
+header T_ID_X_LIST_UNSUBSCRIBE_9	X-List-Unsubscribe:addr =~ /\d{4}.*\d{4}.*\@/i
+header T_ID_X_LIST_UNSUBSCRIBE_10	X-List-Unsubscribe:addr =~ /\d{5}.*\d{5}.*\@/i
+header T_ID_X_LIST_UNSUBSCRIBE_11	X-List-Unsubscribe:addr =~ /\d{6}.*\d{6}.*\@/i
+#
+header T_ID_RETURN_PATH_0		Return-path:addr =~ /\d{1}.*\@/i
+header T_ID_RETURN_PATH_1		Return-path:addr =~ /\d{2}.*\@/i
+header T_ID_RETURN_PATH_2		Return-path:addr =~ /\d{3}.*\@/i
+header T_ID_RETURN_PATH_3		Return-path:addr =~ /\d{4}.*\@/i
+header T_ID_RETURN_PATH_4		Return-path:addr =~ /\d{5}.*\@/i
+header T_ID_RETURN_PATH_5		Return-path:addr =~ /\d{6}.*\@/i
+header T_ID_RETURN_PATH_6		Return-path:addr =~ /\d{1}.*\d{1}.*\@/i
+header T_ID_RETURN_PATH_7		Return-path:addr =~ /\d{2}.*\d{2}.*\@/i
+header T_ID_RETURN_PATH_8		Return-path:addr =~ /\d{3}.*\d{3}.*\@/i
+header T_ID_RETURN_PATH_9		Return-path:addr =~ /\d{4}.*\d{4}.*\@/i
+header T_ID_RETURN_PATH_10		Return-path:addr =~ /\d{5}.*\d{5}.*\@/i
+header T_ID_RETURN_PATH_11		Return-path:addr =~ /\d{6}.*\d{6}.*\@/i
+#
+header T_ID_REPLY_TO_0			Reply-To:addr =~ /\d{1}.*\@/i
+header T_ID_REPLY_TO_1			Reply-To:addr =~ /\d{2}.*\@/i
+header T_ID_REPLY_TO_2			Reply-To:addr =~ /\d{3}.*\@/i
+header T_ID_REPLY_TO_3			Reply-To:addr =~ /\d{4}.*\@/i
+header T_ID_REPLY_TO_4			Reply-To:addr =~ /\d{5}.*\@/i
+header T_ID_REPLY_TO_5			Reply-To:addr =~ /\d{6}.*\@/i
+header T_ID_REPLY_TO_6			Reply-To:addr =~ /\d{1}.*\d{1}.*\@/i
+header T_ID_REPLY_TO_7			Reply-To:addr =~ /\d{2}.*\d{2}.*\@/i
+header T_ID_REPLY_TO_8			Reply-To:addr =~ /\d{3}.*\d{3}.*\@/i
+header T_ID_REPLY_TO_9			Reply-To:addr =~ /\d{4}.*\d{4}.*\@/i
+header T_ID_REPLY_TO_10			Reply-To:addr =~ /\d{5}.*\d{5}.*\@/i
+header T_ID_REPLY_TO_11			Reply-To:addr =~ /\d{6}.*\d{6}.*\@/i
+# now, the meta rules
+meta T_ID_UNIQUE_0_A			(T_ID_X_LIST_UNSUBSCRIBE_0 && T_ID_RETURN_PATH_0 && T_ID_REPLY_TO_0)
+meta T_ID_UNIQUE_0_B			(T_ID_X_LIST_UNSUBSCRIBE_0 + T_ID_RETURN_PATH_0 + T_ID_REPLY_TO_0 > 1)
+meta T_ID_UNIQUE_1_A			(T_ID_X_LIST_UNSUBSCRIBE_1 && T_ID_RETURN_PATH_1 && T_ID_REPLY_TO_1)
+meta T_ID_UNIQUE_1_B			(T_ID_X_LIST_UNSUBSCRIBE_1 + T_ID_RETURN_PATH_1 + T_ID_REPLY_TO_1 > 1)
+meta T_ID_UNIQUE_2_A			(T_ID_X_LIST_UNSUBSCRIBE_2 && T_ID_RETURN_PATH_2 && T_ID_REPLY_TO_2)
+meta T_ID_UNIQUE_2_B			(T_ID_X_LIST_UNSUBSCRIBE_2 + T_ID_RETURN_PATH_2 + T_ID_REPLY_TO_2 > 1)
+meta T_ID_UNIQUE_3_A			(T_ID_X_LIST_UNSUBSCRIBE_3 && T_ID_RETURN_PATH_3 && T_ID_REPLY_TO_3)
+meta T_ID_UNIQUE_3_B			(T_ID_X_LIST_UNSUBSCRIBE_3 + T_ID_RETURN_PATH_3 + T_ID_REPLY_TO_3 > 1)
+meta T_ID_UNIQUE_4_A			(T_ID_X_LIST_UNSUBSCRIBE_4 && T_ID_RETURN_PATH_4 && T_ID_REPLY_TO_4)
+meta T_ID_UNIQUE_4_B			(T_ID_X_LIST_UNSUBSCRIBE_4 + T_ID_RETURN_PATH_4 + T_ID_REPLY_TO_4 > 1)
+meta T_ID_UNIQUE_5_A			(T_ID_X_LIST_UNSUBSCRIBE_5 && T_ID_RETURN_PATH_5 && T_ID_REPLY_TO_5)
+meta T_ID_UNIQUE_5_B			(T_ID_X_LIST_UNSUBSCRIBE_5 + T_ID_RETURN_PATH_5 + T_ID_REPLY_TO_5 > 1)
+meta T_ID_UNIQUE_6_A			(T_ID_X_LIST_UNSUBSCRIBE_6 && T_ID_RETURN_PATH_6 && T_ID_REPLY_TO_6)
+meta T_ID_UNIQUE_6_B			(T_ID_X_LIST_UNSUBSCRIBE_6 + T_ID_RETURN_PATH_6 + T_ID_REPLY_TO_6 > 1)
+meta T_ID_UNIQUE_7_A			(T_ID_X_LIST_UNSUBSCRIBE_7 && T_ID_RETURN_PATH_7 && T_ID_REPLY_TO_7)
+meta T_ID_UNIQUE_7_B			(T_ID_X_LIST_UNSUBSCRIBE_7 + T_ID_RETURN_PATH_7 + T_ID_REPLY_TO_7 > 1)
+meta T_ID_UNIQUE_8_A			(T_ID_X_LIST_UNSUBSCRIBE_8 && T_ID_RETURN_PATH_8 && T_ID_REPLY_TO_8)
+meta T_ID_UNIQUE_8_B			(T_ID_X_LIST_UNSUBSCRIBE_8 + T_ID_RETURN_PATH_8 + T_ID_REPLY_TO_8 > 1)
+meta T_ID_UNIQUE_9_A			(T_ID_X_LIST_UNSUBSCRIBE_9 && T_ID_RETURN_PATH_9 && T_ID_REPLY_TO_9)
+meta T_ID_UNIQUE_9_B			(T_ID_X_LIST_UNSUBSCRIBE_9 + T_ID_RETURN_PATH_9 + T_ID_REPLY_TO_9 > 1)
+meta T_ID_UNIQUE_10_A			(T_ID_X_LIST_UNSUBSCRIBE_10 && T_ID_RETURN_PATH_10 && T_ID_REPLY_TO_10)
+meta T_ID_UNIQUE_10_B			(T_ID_X_LIST_UNSUBSCRIBE_10 + T_ID_RETURN_PATH_10 + T_ID_REPLY_TO_10 > 1)
+meta T_ID_UNIQUE_11_A			(T_ID_X_LIST_UNSUBSCRIBE_11 && T_ID_RETURN_PATH_11 && T_ID_REPLY_TO_11)
+meta T_ID_UNIQUE_11_B			(T_ID_X_LIST_UNSUBSCRIBE_11 + T_ID_RETURN_PATH_11 + T_ID_REPLY_TO_11 > 1)
+# stormpost?
+uri T_RATWARE_STORMPOST_URI		m{http://\S+/sp/t\.pl\?id=\d+:\d+}i
 
 # bug 1438, possible replacement for the current HOTMAIL_FOOTER* rules
 # rename current HOTMAIL_FOOTER# to __HOTMAIL_FOOTER#, and change these too.
