@@ -147,15 +147,14 @@ $IS_DEVEL_BUILD = 1;            # change for release versions
 
 @ISA = qw();
 
-# SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.222 2003/12/17 07:07:59 jmason Exp $'))[2 .. 5, 8]));
+# SUB_VERSION is now just <yyyy>-<mm>-<dd>
+$SUB_VERSION = qw{$LastChangedDate$ updated by SVN}[1];
 
-# If you hacked up your SA, add a token to identify it here. Eg.: I use
-# "mss<number>", <number> increasing with every hack.
+# If you hacked up your SA, you should add a version_tag to you .cf files.
+# This variable should not be modified directly.
 @EXTRA_VERSION = qw();
-
 if (defined $IS_DEVEL_BUILD && $IS_DEVEL_BUILD) {
-  push(@EXTRA_VERSION, 'cvs');
+  @EXTRA_VERSION = ( 'r' . qw{$LastChangedRevision$ updated by SVN}[1] );
 }
 
 sub Version { join('-', $VERSION, @EXTRA_VERSION) }

@@ -109,8 +109,8 @@ optional, and the default is shown below.
  _YESNO_           "Yes"/"No" for is/isn't spam
  _HITS_            message score
  _REQD_            message threshold
- _VERSION_         version (eg. 2.55)
- _SUBVERSION_      sub-version (eg. 1.187-2003-05-15-exp)
+ _VERSION_         version (eg. 2.61 or 2.70-r6142-foo1)
+ _SUBVERSION_      sub-version/code revision date (eg. 2004-01-10)
  _HOSTNAME_        hostname
  _BAYES_           bayes score
  _AWL_             AWL modifier
