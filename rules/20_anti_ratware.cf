@@ -1,5 +1,5 @@
 # Non-spam mailers
-# $Id: 20_anti_ratware.cf,v 1.8.2.2 2002/08/28 15:27:07 msquadrat Exp $
+# $Id: 20_anti_ratware.cf,v 1.8.2.3 2002/08/29 17:07:10 jmason Exp $
 
 header USER_AGENT_PINE		Message-Id =~ /^<Pine\.[A-Z]{3}\.\d\.[0-9A-Z]+\./
 describe USER_AGENT_PINE	Message-Id indicates a non-spam MUA (Pine)
@@ -45,3 +45,20 @@ tflags USER_AGENT_KMAIL      nice
 tflags USER_AGENT_IMP        nice
 tflags USER_AGENT_TONLINE    nice
 tflags USER_AGENT_APPLEMAIL  nice
+
+header USER_AGENT_THEBAT       X-Mailer   =~ /^The Bat! \(v1\.\d{2}[a-z )]/
+describe USER_AGENT_THEBAT     X-Mailer header indicates a non-spam MUA (The Bat!)
+tflags USER_AGENT_THEBAT nice
+
+header USER_AGENT_AOL           X-Mailer   =~ /^AOL (?:[5-7]\.0 )?for (?:Win|Mac).* sub \d+$/
+describe USER_AGENT_AOL         X-Mailer header indicates a non-spam MUA (AOL)
+tflags USER_AGENT_AOL        nice
+
+header USER_AGENT_GNUS_UA       User-Agent =~ /^Gnus v\d(?:\.\d+){1,2}\/X?Emacs \d+\.\d+/
+describe USER_AGENT_GNUS_UA     User-Agent header indicates a non-spam MUA (Gnus)
+tflags USER_AGENT_GNUS_UA    nice
+
+header USER_AGENT_OE           X-Mailer   =~ /^Microsoft Outlook Express [4-6]\.\d{2}\.\d{4}\.\d{1,4}$/
+describe USER_AGENT_OE         X-Mailer header indicates a non-spam MUA (Outlook Express)
+tflags USER_AGENT_OE nice      
+

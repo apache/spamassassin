@@ -1,5 +1,5 @@
 # SpamAssassin rules file: tests.
-# $Id: 20_head_tests.cf,v 1.162.2.8 2002/08/27 10:48:01 jmason Exp $
+# $Id: 20_head_tests.cf,v 1.162.2.9 2002/08/29 17:07:10 jmason Exp $
 ###########################################################################
 
 require_version 2.40
@@ -619,4 +619,37 @@ describe POST_IN_RCVD           Received contains fake 'Post.cz' hostname
 
 header FROM_TOPICA              From =~ /\@(?:\w\.)*email-publisher.com/i
 describe FROM_TOPICA            From an address @email-publisher.com
+
+header FORGED_EBAY_RCVD         eval:check_for_from_domain_in_received_headers('ebay.com', 'false')
+describe FORGED_EBAY_RCVD       'From' ebay.com does not match 'Received' headers
+
+header FROM_MALFORMED           From !~ /(?:\"[^\"]+\"|\S+)\@\S+\.\S+|<\S+(?:\!\S+)+>/ [if-unset: unset@unset.unset]
+describe FROM_MALFORMED         From: has a malformed address
+
+header FROM_MISSING             From =~ /^UNSET$/ [if-unset: UNSET]
+describe FROM_MISSING           Missing From: header
+
+header OUTLOOK_UNDISC_RECIPS    To =~ /<Undisclosed-Recipient:;>/
+describe OUTLOOK_UNDISC_RECIPS  MS-Outlook-style To "<Undisclosed-Recipient:;>"
+
+header   PLEASE_READ            Subject =~ /please read/i
+describe PLEASE_READ            Please read this!  Please oh please oh please!
+
+header SHORT_RECEIVED_LINE      Received =~ /\S{120,}/s
+describe SHORT_RECEIVED_LINE    'Received:' contains huge hostname
+
+header   SUSPECT_LIST_HEADERS   eval:suspect_list_headers()
+describe SUSPECT_LIST_HEADERS   Mailing list headers are suspicious
+
+header TO_INVESTORS             To =~ /\bInvestors\@/
+describe TO_INVESTORS           To: non-existent 'Investors' address
+
+header TO_LOCALPART_EQ_REAL     To =~ /^\s*(\"?)([\w%\+\-=_\.]+)\1\s*<\2\@[\w%\+\-=_\.]+>/i
+describe TO_LOCALPART_EQ_REAL   To: repeats local-part as real name
+
+header TO_MALFORMED             To !~ /(?:(?:\"[^\"]+\"|\S+)\@\S+\.\S+|undisclosed-recipients:|<\S+(?:\!\S+){1,}>|^\s*$)/ [if-unset: unset@unset.unset]
+describe TO_MALFORMED           To: has a malformed address
+
+header YR_MEMBERSHIP_EXCH       Subject =~ /Your Membership Exchange/
+describe YR_MEMBERSHIP_EXCH     Subject contains 'Your Membership Exchange'
 

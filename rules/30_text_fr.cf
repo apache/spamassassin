@@ -1,6 +1,6 @@
 # Traduction française d'Olivier Nicole <on@cs.ait.ac.th>
 # Asian Institute of Technology, Bangkok, Thaïlande
-# $Id: 30_text_fr.cf,v 1.23.2.4 2002/08/27 10:48:01 jmason Exp $
+# $Id: 30_text_fr.cf,v 1.23.2.5 2002/08/29 17:07:10 jmason Exp $
 lang fr clear-report-template
 lang fr report ---------------- Début des résultats de SpamAssassin -----------------
 lang fr report Ce mèl est sans doute du spam. Le message original a été modifié afin
@@ -327,3 +327,15 @@ lang fr describe RCVD_IN_MULTIHOP_DSBL Reçu par l'intermédiaire d'un relai référ
 lang fr describe RCVD_IN_UNCONFIRMED_DSBL      Reçu par l'intermédiaire d'un relai référencé par unconfirmed.dsbl.org
 #lang fr describe OE_PI                 L'entête X-Mailer: contient 'OutLook Express 3.14159'
 lang fr describe PGP_SIGNATURE_2       Contient une signature PGP attachée au message
+lang fr describe FROM_MALFORMED L'entête From: contient une adresse malformée
+lang fr describe FROM_MISSING   L'entête From: est absent
+lang fr describe LONG_NUMERIC_HTTP_ADDR Contient une longue adresse IP numérique dans une URL
+lang fr describe PLEASE_READ            L'entête Subject vous incite à lire ce mèl
+lang fr describe SHORT_RECEIVED_LINE    Un entête Received: contient un très long nom de machine
+lang fr describe SUPERLONG_LINE Contient une ligne de plus de 200 caractères
+lang fr describe TO_INVESTORS   L'entête To: est adressé à Inverstors
+lang fr describe TO_LOCALPART_EQ_REAL   Le nom de l'entête From: et l'adresse du destinataire sont équivalents
+lang fr describe TO_MALFORMED           L'entête To: contient une adresse mal formée
+lang fr describe WWW_REMOVEYOU_COM      Expression fréquement trouvée dans du spam
+lang fr describe YR_MEMBERSHIP_EXCH     L'entête Subject: contient 'your membership exchange'
+

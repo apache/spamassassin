@@ -1,42 +1,10 @@
 #
 #
-#   0.000    0.000    0.000    0.00    1.00  ANOTHER_NET_AD
-body ANOTHER_NET_AD             /Another Internet Ad campaign produced/
-describe ANOTHER_NET_AD         Tells you it's an ad
-#
-#
-#   0.001    0.000    0.002    0.00    1.00  A_HREF_TO_REMOVE
-#
-#
-#   0.001    0.000    0.001    0.00    1.00  A_HREF_TO_UNSUB
-#
-#
 #   0.000    0.000    0.000    0.00    1.00  BACKED_BY
 #score BACKED_BY			     1.0
 #body BACKED_BY                  /\bbacked by [mb]illions\b/i
 #describe BACKED_BY              Backed by Billions
 #
-#
-#   0.553    0.713    0.457    0.61   -1.00  BALANCE_FOR_LONG_20K
-describe BALANCE_FOR_LONG_20K   Message text is over 20K in size
-body BALANCE_FOR_LONG_20K       eval:check_for_very_long_text('20000')
-describe BALANCE_FOR_LONG_20K   Message text is over 20K in size  
-tflags BALANCE_FOR_LONG_20K     nice  
-score BALANCE_FOR_LONG_20K -1.0
-#
-#
-#   0.111    0.099    0.118    0.46   -1.00  BALANCE_FOR_LONG_40K
-describe BALANCE_FOR_LONG_40K   Message text is over 40K in size
-body BALANCE_FOR_LONG_40K       eval:check_for_very_long_text('40000')
-describe BALANCE_FOR_LONG_40K   Message text is over 40K in size  
-tflags BALANCE_FOR_LONG_40K     nice
-score BALANCE_FOR_LONG_40K -1.0
-#
-#
-#   0.038    0.048    0.031    0.61    1.00  BIG_BUCKS
-body BIG_BUCKS		        /\bbig bucks\b/i
-describe BIG_BUCKS		Big Bucks
-score BIG_BUCKS			     1.0
 #
 #
 #  0.001    0.000    0.001    0.00    1.00  BONUS_PAYMENT
@@ -74,22 +42,9 @@ score BIG_BUCKS			     1.0
 #score BUGGY_CGI_PT                   4.0
 #
 #
-#
-#   0.002    0.003    0.001    0.71    1.00  CHANGE_TERMS
-#  0.01     0.01     0.00    0.77    1.00  CHANGE_TERMS (low matches)
-score CHANGE_TERMS		     1.0
-body CHANGE_TERMS               /\bstrictly based on the following terms and conditions\b/i
-describe CHANGE_TERMS           Terms and conditions
-#
-#
 #   0.000    0.000    0.000    0.00    1.00  CLICKSFORMONEY_NET
 #uri CLICKSFORMONEY_NET      /clicksformoney\.net/i   
 #describe CLICKSFORMONEY_NET     Frequent SPAM content   
-#
-#
-#   0.000    0.001    0.000    1.00    1.00  CLICK_TO_REMOVE_3
-body CLICK_TO_REMOVE_3		/http:.{0,50}action=remove/is
-describe CLICK_TO_REMOVE_3	Click-to-remove with PHP/ASP action found
 #
 #
 #  0.000    0.000    0.001    0.00    1.00  CLICK_TO_REMOVE_MAILTO
@@ -110,56 +65,6 @@ describe CLICK_TO_REMOVE_3	Click-to-remove with PHP/ASP action found
 #score CORRUPT_MSGID                  2.665
 #
 #
-#   0.035    0.048    0.027    0.64    1.56  DONT_DELETE
-body     DONT_DELETE            /\b(?:don'?t delete this|do not delete)/i
-describe DONT_DELETE            Don't delete me!  Nooooo!!!!
-lang fr describe DONT_DELETE            Contient une formule incitant é ne pas détruire ce message
-score DONT_DELETE                    1.565
-#
-#
-#   1.422    0.829    1.780    0.32    1.00  DOUBLE_CAPSWORD
-#
-#
-#   1.422    0.829    1.780    0.32    1.00  DOUBLE_CAPSWORD
-#
-#
-#   0.000    0.000    0.000    0.00    1.00  EU_200_32_CE
-lang fr describe EU_200_32_CE   Revendique la conformité avec l'arrêt européen 200.32.CE
-score EU_200_32_CE                   1.0
-body EU_200_32_CE               /Directive 200.32.CE/i
-describe EU_200_32_CE           Claims compliance with SPAM regulations
-#
-#
-#   0.001    0.000    0.001    0.00    1.80  EU_EMAIL_OPTOUT
-lang fr describe EU_EMAIL_OPTOUT        Revendique la conformité avec l'arrêt européen sur le spam
-score EU_EMAIL_OPTOUT                1.8
-body EU_EMAIL_OPTOUT            /EU (?:e-?mail opt.?out|e.?commerce) directive/i
-describe EU_EMAIL_OPTOUT        Claims compliance with SPAM regulations
-#
-#
-#   0.000    0.000    0.000    0.00    1.00  EXCUSE_8
-body EXCUSE_8                   /requests to be taken off our mailing list/i
-describe EXCUSE_8               Claims you can be removed from the list
-#
-#
-#   0.000    0.000    0.000    0.00    1.00  E_WEBHOSTCENTRAL_URL
-uri E_WEBHOSTCENTRAL_URL        /e-webhostcentral\.com/i
-describe E_WEBHOSTCENTRAL_URL       Frequent SPAM content   
-#
-#
-#   0.149    0.221    0.105    0.68   -1.00  FAILURE_NOTICE_1
-header   FAILURE_NOTICE_1       Subject =~ /^(?:failure notice|returned mail:|Delivery Status Notification|Undeliverable:)/i
-describe FAILURE_NOTICE_1       Mailer daemon failure notice (1)
-tflags   FAILURE_NOTICE_1       nice
-score FAILURE_NOTICE_1          -1.0
-#
-#
-#   0.140    0.203    0.102    0.67   -1.00  FAILURE_NOTICE_2
-body     FAILURE_NOTICE_2       /\b(?:Delivery to the following recipients failed|This Message was undeliverable|The following addresses had permanent fatal errors|did not reach the following recipient)\b/i
-describe FAILURE_NOTICE_2       Mailer daemon failure notice (2)
-tflags   FAILURE_NOTICE_2       nice
-score FAILURE_NOTICE_2          -1.0
-#
 #
 #   0.000    0.000    0.000    0.00    3.46  FAKED_UNDISC_RECIPS_AT
 #header FAKED_UNDISC_RECIPS_AT	To =~ /undisclosed-recipient: \@[a-z]/i
@@ -167,106 +72,6 @@ score FAILURE_NOTICE_2          -1.0
 #score FAKED_UNDISC_RECIPS_AT         3.461
 #
 #
-#   0.000    0.000    0.000    0.00    1.00  FILTERED_BY_WORLDREMOVE
-body FILTERED_BY_WORLDREMOVE    /filtered by WorldRemove/
-describe FILTERED_BY_WORLDREMOVE Claims to listen to some removal request list
-#
-#
-#   0.015    0.015    0.015    0.50    5.00  FORGED_EBAY_RCVD
-header FORGED_EBAY_RCVD         eval:check_for_from_domain_in_received_headers('ebay.com', 'false')
-describe FORGED_EBAY_RCVD	'From' ebay.com does not match 'Received' headers
-score FORGED_EBAY_RCVD		     5.0
-#
-#
-#   0.015    0.015    0.015    0.50    5.00  FORGED_EBAY_RCVD
-#
-#
-#   0.000    0.000    0.000    0.00    1.00  FREEMEGS_URL
-uri FREEMEGS_URL          /25freemegs\.com/i   
-describe FREEMEGS_URL         Frequent SPAM content   
-#
-#
-#   0.000    0.000    0.000    0.00    1.00  FREEWEBCO_NET_URL
-uri FREEWEBCO_NET_URL       /freewebco\.net/i
-describe FREEWEBCO_NET_URL      Frequent SPAM content   
-#
-#
-#   0.000    0.000    0.000    0.00    1.00  FREEWEBHOSTINGCENTRAL
-uri FREEWEBHOSTINGCENTRAL       /freewebhostingcentral/i   
-describe FREEWEBHOSTINGCENTRAL      Frequent SPAM content   
-#
-#
-#   0.008    0.014    0.004    0.77    1.00  FREE_HOSTING
-#   0.000    0.000    0.001    0.00    1.00  T_FREE_HOSTING
-# 0.01     0.01     0.01    0.58    1.00  FREE_HOSTING (low matches)
-body FREE_HOSTING               /(?-i:F)ree hosting/i
-describe FREE_HOSTING           Contains 'free hosting' with capitals
-score FREE_HOSTING		     1.0
-body FREE_HOSTING               /\bfree hosting\b/i
-describe FREE_HOSTING           Free Hosting
-#
-#
-#   0.011    0.020    0.006    0.76    1.00  T_FREE_TICKETS
-#   0.023    0.022    0.023    0.49    1.00  FREE_TICKETS
-body FREE_TICKETS		/\bfree ticket/i
-describe FREE_TICKETS		Free Tickets
-score FREE_TICKETS		     1.0
-#
-#
-#   0.011    0.020    0.006    0.76    1.00  T_FREE_TICKETS
-#   0.023    0.022    0.023    0.49    1.00  FREE_TICKETS
-#
-#
-#   0.537    0.303    0.679    0.31    3.67  FROM_MALFORMED
-header FROM_MALFORMED		From !~ /(?:\"[^\"]+\"|\S+)\@\S+\.\S+|<\S+(?:\!\S+)+>/ [if-unset: unset@unset.unset]
-describe FROM_MALFORMED		From: has a malformed address
-lang de describe FROM_MALFORMED           From: ist eine ungueltige Adresse
-lang fr describe FROM_MALFORMED L'entête From: contient une adresse malformée
-score FROM_MALFORMED                 3.667
-#
-#
-#   2.961    0.200    4.630    0.04    4.26  FROM_MISSING
-header FROM_MISSING		From =~ /^UNSET$/ [if-unset: UNSET]
-describe FROM_MISSING		Missing From: header
-lang de describe FROM_MISSING             Fehlender From: Header
-lang fr describe FROM_MISSING   L'entête From: est absent
-score FROM_MISSING                   4.257
-#
-#
-#
-#   0.534    0.593    0.499    0.54   -1.00  FWD_MSG
-header FWD_MSG                  Subject =~ /Fwd:\s/
-describe FWD_MSG                Forwarded email
-tflags FWD_MSG		        nice
-score   FWD_MSG                 -1.0
-test FWD_MSG ok Subject: Fwd: Dracula
-test FWD_MSG ok Subject: [landho] Fwd: tell rod
-test FWD_MSG fail Subject: Fwd:Pure Opt-In for half the price
-test FWD_MSG fail Subject: Re: RE: FWD: search results        .       .       .
-#
-#
-#   0.000    0.001    0.000    1.00    1.00  GREEN_EXCUSE_1
-lang fr describe GREEN_EXCUSE_1 Prétend que le SPAM est bon pour l'environement
-body GREEN_EXCUSE_1             /using email instead can significantly reduce this/i
-describe GREEN_EXCUSE_1         Claims SPAM helps the environment
-#
-#
-#   0.000    0.001    0.000    1.00    1.00  GREEN_EXCUSE_2
-lang fr describe GREEN_EXCUSE_2 Prétend que le SPAM est bon pour l'environement
-body GREEN_EXCUSE_2             /the trees, save the planet, use email!/i
-describe GREEN_EXCUSE_2         Claims SPAM helps the environment
-#
-#
-#   0.275    0.160    0.345    0.32    1.00  HTML_COMMENT_UNIQUE_ID
-body HTML_COMMENT_UNIQUE_ID	eval:html_test('comment_unique_id')
-describe HTML_COMMENT_UNIQUE_ID	Contains a comment with nothing but unique ID
-#
-#
-#
-#   0.000    0.001    0.000    1.00    1.00  INCREDIBLE
-body INCREDIBLE		        /\bincredible secrets\b/i
-describe INCREDIBLE		Things incredible
-score INCREDIBLE		     1.0
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  IRS
@@ -295,161 +100,12 @@ score INCREDIBLE		     1.0
 #describe LIFE_INSURANCE         No Examination life Insurance
 #
 #
-#   0.002    0.003    0.001    0.87    2.10  LONG_NUMERIC_HTTP_ADDR
-uri LONG_NUMERIC_HTTP_ADDR  /^https?\:\/\/000\d+/is
-describe LONG_NUMERIC_HTTP_ADDR Uses a long numeric IP address in URL
-lang fr describe LONG_NUMERIC_HTTP_ADDR Contient une longue adresse IP numérique dans une URL
-score LONG_NUMERIC_HTTP_ADDR         2.1
-#
-#
-#   0.002    0.005    0.000    1.00   -1.00  MAILBITS_EMAIL
-body MAILBITS_EMAIL             /This is a free service provided by MailBits\.com\./
-describe MAILBITS_EMAIL         recommended page from MailBits.com
-tflags MAILBITS_EMAIL		nice
-score MAILBITS_EMAIL            -1.0
-#
-#
-#   0.048    0.056    0.044    0.56    1.00  MIME_BOUND_DIGITS_6
-header MIME_BOUND_DIGITS_6	Content-Type =~ /boundary=\"\d-\d{10}-\d{10}=:\d{5}\"/
-describe MIME_BOUND_DIGITS_6	Spam tool pattern in MIME boundary
-#
-#
-#   0.806    0.429    1.034    0.29   -0.97  MIME_NULL_BLOCK
-body MIME_NULL_BLOCK		/This message is in MIME format/
-describe MIME_NULL_BLOCK	Correct for MIME 'null block'
-lang fr describe MIME_NULL_BLOCK	Bloc vide pour un message au format MIME
-score MIME_NULL_BLOCK                -0.975
-#
-#
-#   0.004    0.006    0.003    0.70    1.00  MONSTERHUT
-rawbody MONSTERHUT              /monsterhut.com/
-describe MONSTERHUT             Mentions monsterhut.com
-#
-#
-#   0.000    0.000    0.000    0.00   -1.00  MSN_FOOTER2
-score MSN_FOOTER2               -1.0
-body MSN_FOOTER2                /Remove my e-mail address from Gaming Zone /
-describe MSN_FOOTER2            Common footer for MSN
-tflags MSN_FOOTER2              nice
-score MSN_FOOTER2           -1.0
-#
-#
-#   0.002    0.004    0.001    0.81    1.00  MURKOWSKI_CRUFT
-rawbody MURKOWSKI_CRUFT         /www\.senate\.gov\/~?murkowski/
-describe MURKOWSKI_CRUFT        Old Murkowski disclaimer
-#
-#
-#   0.000    0.001    0.000    1.00    1.00  MYCASINOBUILDER
-#
-#
-#   0.118    0.311    0.002    0.99    4.23  NIGERIAN_SCAM_7
-#   0.134    0.309    0.028    0.92    3.42  NIGERIAN_SCAM_4
-#   0.102    0.242    0.017    0.94    1.00  NIGERIAN_SCAM_14
-#   0.113    0.248    0.031    0.89    4.27  NIGERIAN_SCAM_2
-#   0.138    0.289    0.046    0.86    2.33  NIGERIAN_SCAM_5
-#   0.028    0.063    0.006    0.91    1.00  NIGERIAN_SCAM_10
-#   0.010    0.027    0.001    0.98    1.00  NIGERIAN_SCAM_9
-#   0.077    0.129    0.046    0.74    3.01  NIGERIAN_SCAM_6
-#   0.574    0.670    0.515    0.57    1.00  NIGERIAN_SCAM_15
-#   0.002    0.004    0.000    1.00    1.00  NIGERIAN_SCAM_3
-#   0.178    0.219    0.153    0.59    1.00  NIGERIAN_SCAM_16
-#   0.003    0.006    0.001    0.92    1.00  NIGERIAN_SCAM_13
-#   0.456    0.247    0.582    0.30    1.00  NIGERIAN_SCAM_12
-#   0.004    0.000    0.006    0.00    1.00  NIGERIAN_SCAM_11
-#   0.000    0.000    0.000    0.00    1.00  NIGERIAN_SCAM
-#   0.000    0.000    0.000    0.00    1.00  NIGERIAN_SCAM_8
-lang de describe NIGERIAN_SCAM            Nigerianischer Betrugsversuch, siehe http://www.snopes2.com/inboxer/scams/nigeria.htm
-lang es describe NIGERIAN_SCAM		Nigerian scam, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
-lang fr describe NIGERIAN_SCAM  Mentionne les combines nigériennes, voir http://www.snopes2.com/inboxer/scams/nigeria.htm
-score NIGERIAN_SCAM                  1.0
-body NIGERIAN_SCAM              /BASED ON INFORMATION GATHERED ABOUT YOU, WE BELIEVE\s*YOU WOULD BE IN A POSITION TO HELP US IN TRANSFER/i
-describe NIGERIAN_SCAM          Nigerian scam, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
-#
-#
-#   0.004    0.000    0.006    0.00    1.00  NIGERIAN_SCAM_11
-test NIGERIAN_SCAM_11 ok I work in a bank at
-test NIGERIAN_SCAM_11 ok HAVE WORKED FOR A BANK
-#
-#
-#   0.456    0.247    0.582    0.30    1.00  NIGERIAN_SCAM_12
-test NIGERIAN_SCAM_12 ok the first son of
-test NIGERIAN_SCAM_12 ok the only son of
-test NIGERIAN_SCAM_12 ok AM THE ONLY MALE CHILD OF
-test NIGERIAN_SCAM_12 ok THE FIRST MALE CHILD OF
-test NIGERIAN_SCAM_12 ok the second son of
-test NIGERIAN_SCAM_12 ok As the eldest son of
-#
-#
-#   0.000    0.000    0.000    0.00    1.00  NIGERIAN_SCAM_8
-test NIGERIAN_SCAM_8 ok VLAJKO STOJILJKOVIC, one of the people indicted at the Hague War Crimes Tribunal in Hague
-#
-#
-#   0.000    0.000    0.000    0.00    1.00  NO_SELLING
-body NO_SELLING                 /absolutely NO selling/i
-describe NO_SELLING             Claims not to be selling anything
-#
 #
 #   0.000    0.000    0.000    0.00    1.00  NO_SPENDING
 #score NO_SPENDING		     1.0
 #body NO_SPENDING                /\bno spending limits\b/i
 #describe NO_SPENDING            No Spending Limits
 #
-#
-#   1.297    1.989    0.878    0.69   -0.30  OUTLOOK_FW_MSG
-header OUTLOOK_FW_MSG         Subject =~ /\[?F[Ww]:\s/
-describe OUTLOOK_FW_MSG         Forwarded email (Outlook style)
-tflags OUTLOOK_FW_MSG		nice
-score   OUTLOOK_FW_MSG          -0.3
-
-test OUTLOOK_FW_MSG ok Subject: FW: White Stripes Tour!
-test OUTLOOK_FW_MSG ok Subject: Fw: Thank you yourself
-test OUTLOOK_FW_MSG fail Subject: Fwd: Dracula
-test OUTLOOK_FW_MSG fail Subject: fw:                                       . qBQyzOWqKYggZT0oDJzp41nd
-test OUTLOOK_FW_MSG fail Subject: FW:>Re: Spruce up your life!DGKJWI
-#
-#
-#   0.008    0.003    0.011    0.23    0.50  OUTLOOK_UNDISC_RECIPS
-header OUTLOOK_UNDISC_RECIPS	To =~ /<Undisclosed-Recipient:;>/
-describe OUTLOOK_UNDISC_RECIPS	MS-Outlook-style To "<Undisclosed-Recipient:;>"
-score OUTLOOK_UNDISC_RECIPS          0.5
-#
-#
-#   0.062    0.078    0.052    0.60    1.76  PLEASE_READ
-header   PLEASE_READ            Subject =~ /please read/i
-describe PLEASE_READ            Please read this!  Please oh please oh please!
-lang fr describe PLEASE_READ            L'entête Subject vous incite à lire ce mèl
-score PLEASE_READ                    1.756
-#
-#
-#   0.000    0.000    0.000    0.00    1.00  POPLAUNCH
-body POPLAUNCH                  /StealthLaunch PopLaunch.\s/
-describe POPLAUNCH              SPAM software
-#
-#
-#   0.018    0.044    0.003    0.94    1.00  PORN_13
-#   0.003    0.004    0.002    0.73    1.00  PORN_1
-#   0.119    0.103    0.128    0.44    1.00  PORN_14
-#
-#
-#   0.264    0.217    0.292    0.43    1.00  PORN_10
-test     PORN_10      ok        Lolita
-test     PORN_10      ok        whores
-test     PORN_10      ok        xxx
-test     PORN_10      fail      xxxx
-#
-#
-#   0.119    0.124    0.116    0.52    1.00  PORN_11
-test     PORN_11      ok        hard-core
-test     PORN_11      fail      amateurish
-test     PORN_11      fail      proamateur
-#
-#
-#   0.119    0.103    0.128    0.44    1.00  PORN_14
-test     PORN_14     ok         I am 18 years old
-test     PORN_14     fail       My name is matt
-test     PORN_14     fail       I am 18 years older than
-test     PORN_14     fail       pics
-test     PORN_14     fail       microscopics
 #
 #
 #   0.315    0.253    0.352    0.42    1.00  PORN_3
@@ -465,13 +121,6 @@ test     PORN_14     fail       microscopics
 #
 #
 #
-#   0.003    0.003    0.003    0.52    1.00  PRICES_WONT_LAST
-#  0.00     0.01     0.00    0.69    1.00  PRICES_WONT_LAST (low matches)
-score PRICES_WONT_LAST		     1.0
-body PRICES_WONT_LAST           /\bprices.{0,11} last\b/i
-describe PRICES_WONT_LAST       Prices won't Last
-#
-#
 #   0.000    0.000    0.000    0.00    1.00  PRINT_OUT_AND_FAX
 #lang fr describe PRINT_OUT_AND_FAX      Demande d'imprimer un formulaire avant de le télécopier
 #score PRINT_OUT_AND_FAX              1.0
@@ -479,17 +128,6 @@ describe PRICES_WONT_LAST       Prices won't Last
 #describe PRINT_OUT_AND_FAX      Contains words 'print out and fax'
 #
 #
-#   0.041    0.057    0.031    0.65   -1.00  PRIVACY_STATEMENT
-body     PRIVACY_STATEMENT      /\bPRIVACY STATEMENT\b/i   
-describe PRIVACY_STATEMENT      Contains a Privacy Statement   
-tflags   PRIVACY_STATEMENT      nice 
-score PRIVACY_STATEMENT           -1.0
-#
-#
-#   0.000    0.001    0.000    1.00    1.00  PSYCHIC
-body PSYCHIC		        /\b(?:caring|gifted|experienced) psychic/i
-describe PSYCHIC		Psychics Scam
-score PSYCHIC			     1.0
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  RATWARE_00
@@ -658,38 +296,6 @@ score PSYCHIC			     1.0
 #describe SHOES_GUY              Want some shoes?
 #
 #
-#   0.000    0.000    0.000    0.00    4.25  SHORT_RECEIVED_LINE
-header SHORT_RECEIVED_LINE	Received =~ /\S{120,}/s
-describe SHORT_RECEIVED_LINE	'Received:' contains huge hostname
-lang de describe SHORT_RECEIVED_LINE      'Received:' enthaelt sehr langen Hostnamen
-lang es describe SHORT_RECEIVED_LINE	'Received:' contiene un nombre muy grande
-lang fr describe SHORT_RECEIVED_LINE    Un entête Received: contient un très long nom de machine
-lang pl describe SHORT_RECEIVED_LINE	'Received:' zawiera zbyt d³ugi adres.
-score SHORT_RECEIVED_LINE            4.251
-#
-#
-#
-#   0.006    0.009    0.004    0.67    1.00  SIGNIFICANT
-body SIGNIFICANT	        /\bsignificant savings\b/i
-describe SIGNIFICANT		Significant Savings
-score SIGNIFICANT		     1.0
-#
-#
-#   0.002    0.003    0.002    0.62    1.00  SLASH_PRICE
-body SLASH_PRICE                /\bslash.{0,2} price/i
-describe SLASH_PRICE            Slashed Price
-#
-#
-#   0.002    0.003    0.002    0.62    1.00  SLASH_PRICE
-#
-#
-#   0.489    0.466    0.503    0.48    1.71  SPAM_REDIRECTOR
-uri             SPAM_REDIRECTOR /https?\:.*(?:rd\.yahoo\.com|wwp\.icq\.com)/is
-describe        SPAM_REDIRECTOR Uses open redirection service
-score SPAM_REDIRECTOR                1.706
-test SPAM_REDIRECTOR ok http://rd.yahoo.com/?http://somesite.com/
-test SPAM_REDIRECTOR ok http://wwp.icq.com/?http://anothersite.com/
-#
 #
 #  0.000    0.000    0.000    0.00    1.00  SPY_ON_FRIENDS
 #score SPY_ON_FRIENDS		     1.0
@@ -704,107 +310,6 @@ test SPAM_REDIRECTOR ok http://wwp.icq.com/?http://anothersite.com/
 #score STAINLESS_STEEL                4.0
 #
 #
-#   0.307    0.301    0.311    0.49   -1.00  SUBJECT_HAS_DATE
-header SUBJECT_HAS_DATE         Subject =~ /1?\d[-\/][1-3]?\d[-\/](?:20)?0\d/
-describe SUBJECT_HAS_DATE       Subject contains a date
-tflags SUBJECT_HAS_DATE		nice
-score SUBJECT_HAS_DATE          -1.0
-#
-#
-#
-#   9.272   11.011    8.222    0.57    0.38  SUPERLONG_LINE
-rawbody SUPERLONG_LINE		/^[^<\&]{199,}$/m
-describe SUPERLONG_LINE	        Contains a line >=199 characters long
-lang fr describe SUPERLONG_LINE Contient une ligne de plus de 200 caractères
-score SUPERLONG_LINE                 0.384
-#
-#
-#   1.497    0.451    2.130    0.17    1.00  SUSPECT_LIST_HEADERS
-header   SUSPECT_LIST_HEADERS   eval:suspect_list_headers()
-describe SUSPECT_LIST_HEADERS   Mailing list headers are suspicious
-#
-#
-#   0.000    0.001    0.000    1.00    1.00  THIS_AINT_JUNK
-body THIS_AINT_JUNK             /This.{0,30}is not (?:a )?junk (?:email)?/is
-describe THIS_AINT_JUNK         Claims "This is not junk email"
-#
-#
-#   4.658    2.188    6.151    0.26    1.00  TO_BE_REMOVED_REPLY
-lang de describe TO_BE_REMOVED_REPLY      Behauptet: "to be removed, reply via email" oder aehnliches
-lang es describe TO_BE_REMOVED_REPLY    Says: "to be removed, reply via email" or similar
-body TO_BE_REMOVED_REPLY        /\bto\b.{0,20}\b(?:remove|unsubscribe|opt[ -]?out).{0,20}\b(?:reply|send)\b/is
-describe TO_BE_REMOVED_REPLY    Says: "to be removed, reply via email" or similar   
-#
-#
-#   0.003    0.009    0.000    1.00    0.00  TO_INVESTORS
-lang de describe TO_INVESTORS             To: nichtexistierende 'Investors' Adresse
-lang fr describe TO_INVESTORS   L'entête To: est adressé à Inverstors
-score TO_INVESTORS                   0.0
-header TO_INVESTORS             To =~ /\bInvestors\@/
-describe TO_INVESTORS           To: non-existent 'Investors' address
-#
-#
-#   1.741    0.606    2.427    0.20    0.48  TO_LOCALPART_EQ_REAL
-header TO_LOCALPART_EQ_REAL     To =~ /^\s*(\"?)([\w%\+\-=_\.]+)\1\s*<\2\@[\w%\+\-=_\.]+>/i
-describe TO_LOCALPART_EQ_REAL   To: repeats local-part as real name
-lang de describe TO_LOCALPART_EQ_REAL     To: wiederholt den lokalen Anteil als echten Namen
-lang fr describe TO_LOCALPART_EQ_REAL   Le nom de l'entête From: et l'adresse du destinataire sont équivalents
-score TO_LOCALPART_EQ_REAL           0.483
-#
-#
-#   3.676    1.786    4.819    0.27    1.11  TO_MALFORMED
-header TO_MALFORMED		To !~ /(?:(?:\"[^\"]+\"|\S+)\@\S+\.\S+|undisclosed-recipients:|<\S+(?:\!\S+){1,}>|^\s*$)/ [if-unset: unset@unset.unset]
-describe TO_MALFORMED		To: has a malformed address
-lang de describe TO_MALFORMED             To: ist eine ungueltige Adresse
-lang fr describe TO_MALFORMED           L'entête To: contient une adresse mal formée
-score TO_MALFORMED                   1.115
-#
-#
-#   0.002    0.001    0.003    0.22   -1.00  TRACK_NUMBER
-score TRACK_NUMBER              -1.0
-body     TRACK_NUMBER           /\bassign.{1,100}\b(?:ticket|tracking) number/i   
-describe TRACK_NUMBER           Talks about tracking numbers   
-tflags   TRACK_NUMBER           nice
-score TRACK_NUMBER           -1.0
-#
-#
-#   0.008    0.000    0.013    0.00    1.00  T_DOMAIN_4U2
-#
-#
-#   0.000    0.000    0.001    0.00    1.00  T_FREE_ACCESS
-#
-#
-#   0.000    0.000    0.001    0.00    1.00  T_FREE_HOSTING
-#
-#
-#   0.000    0.000    0.001    0.00    1.00  T_FREE_INSTALL
-#
-#
-#   0.215    0.136    0.262    0.34    1.00  T_FREE_WEBSITE
-body T_FREE_WEBSITE               /(?-i:F)ree web/i  
-describe T_FREE_WEBSITE           Contains 'free website' with capitals
-#
-#
-#
-#   0.033    0.013    0.045    0.22    1.00  URI_IS_POUND
-score URI_IS_POUND                   2.026
-uri URI_IS_POUND        m{\#$} 
-describe URI_IS_POUND   Filename is just a '\#'; probably a JS trick
-#
-#
-#   1.282    2.342    0.642    0.78   -0.10  USER_AGENT_AOL
-header USER_AGENT_AOL		X-Mailer   =~ /^AOL (?:[5-7]\.0 )?for (?:Win|Mac).* sub \d+$/
-describe USER_AGENT_AOL		X-Mailer header indicates a non-spam MUA (AOL)
-tflags USER_AGENT_AOL        nice
-score USER_AGENT_AOL            -0.1
-#
-#
-#   0.000    0.000    0.000    0.00   -1.00  USER_AGENT_GNUS_UA
-header USER_AGENT_GNUS_UA	User-Agent =~ /^Gnus v\d(?:\.\d+){1,2}\/X?Emacs \d+\.\d+/
-describe USER_AGENT_GNUS_UA	User-Agent header indicates a non-spam MUA (Gnus)
-tflags USER_AGENT_GNUS_UA    nice
-score USER_AGENT_GNUS_UA        -1.0
-#
 #
 #   0.029    0.078    0.000    1.00   -1.00  USER_AGENT_GNUS_XM
 #score USER_AGENT_GNUS_XM        -0.1
@@ -814,38 +319,9 @@ score USER_AGENT_GNUS_UA        -1.0
 #score USER_AGENT_GNUS_XM -1.0
 #
 #
-#   9.021   15.707    4.979    0.76   -1.00  USER_AGENT_OE
-score USER_AGENT_OE             -0.1
-header USER_AGENT_OE           X-Mailer   =~ /^Microsoft Outlook Express [4-6]\.\d{2}\.\d{4}\.\d{1,4}$/
-describe USER_AGENT_OE         X-Mailer header indicates a non-spam MUA (Outlook Express)
-tflags USER_AGENT_OE nice
-score USER_AGENT_OE -1.0
-#
-#
-#   9.021   15.707    4.979    0.76   -1.00  USER_AGENT_OE
-#
-#
-#   0.820    1.744    0.262    0.87   -1.00  USER_AGENT_THEBAT
-score USER_AGENT_THEBAT         -0.5
-header USER_AGENT_THEBAT       X-Mailer   =~ /^The Bat! \(v1\.\d{2}[a-z )]/
-describe USER_AGENT_THEBAT     X-Mailer header indicates a non-spam MUA (The Bat!)
-tflags USER_AGENT_THEBAT nice
-score USER_AGENT_THEBAT -1.0
-#
-#
 #   0.000    0.000    0.000    0.00    1.00  VIGORA
 #body VIGORA                     /\bVigora\b/
 #describe VIGORA                 Some sort of viagra alternative
-#
-#
-#   0.000    0.000    0.000    0.00    1.00  WEALTH
-body WEALTH                     /\bachieve .{0,15}wealth\b/i
-describe WEALTH                 Achieve Wealth
-#
-#
-#   0.000    0.000    0.000    0.00    1.00  WEB4PORNO_URL
-uri WEB4PORNO_URL           /web4porno\.com/i
-describe WEB4PORNO_URL          Frequent SPAM content   
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  WWW_DIRECTFORCEMARKETING_COM
@@ -853,37 +329,6 @@ describe WEB4PORNO_URL          Frequent SPAM content
 #describe WWW_DIRECTFORCEMARKETING_COM   Frequent SPAM content   
 #
 #
-#   0.000    0.000    0.000    0.00    1.00  WWW_NETSITESFORFREE_NET
-uri WWW_NETSITESFORFREE_NET     /netsitesforfree\.net/i   
-describe WWW_NETSITESFORFREE_NET    Frequent SPAM content
-#
-#
-#   0.005    0.010    0.003    0.78    2.36  WWW_REMOVEYOU_COM
-uri WWW_REMOVEYOU_COM       /removeyou\.com/i
-describe WWW_REMOVEYOU_COM      Frequent SPAM content
-lang fr describe WWW_REMOVEYOU_COM      Expression fréquement trouvée dans du spam
-score WWW_REMOVEYOU_COM              2.356
-#
-#
-#   0.002    0.003    0.002    0.69    1.00  X_ANTIABUSE
-#
-#
-#   1.134    0.567    1.476    0.28    1.00  X_NOT_PRESENT
-#
-#
-#   0.000    0.000    0.000    0.00    1.00  YELLOWSUN
-uri YELLOWSUN           /yellowsun01\.com/i   
-describe YELLOWSUN          Frequent SPAM content
-#
-#
-#   0.000    0.001    0.000    1.00    4.20  YR_MEMBERSHIP_EXCH
-header YR_MEMBERSHIP_EXCH	Subject =~ /Your Membership Exchange/
-describe YR_MEMBERSHIP_EXCH	Subject contains 'Your Membership Exchange'
-lang de describe YR_MEMBERSHIP_EXCH       Betreff enthaelt 'Your Membership Exchange'
-lang es describe YR_MEMBERSHIP_EXCH	Subject contiene 'Your Membership Exchange'
-lang fr describe YR_MEMBERSHIP_EXCH     L'entête Subject: contient 'your membership exchange'
-lang pl describe YR_MEMBERSHIP_EXCH	Temat zawiera 'Your Membership Exchange'
-score YR_MEMBERSHIP_EXCH             4.2
 
 #   0.001    0.002    0.000    1.00    2.00  RATWARE_UPROAR
 #header RATWARE_UPROAR          X-Mailer =~ /Uproar Mass Mailer/

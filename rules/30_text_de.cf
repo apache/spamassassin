@@ -1,7 +1,7 @@
 #
 # German translation by HD Stich.
 #
-# $Id: 30_text_de.cf,v 1.15.2.2 2002/08/26 16:55:52 msquadrat Exp $
+# $Id: 30_text_de.cf,v 1.15.2.3 2002/08/29 17:07:10 jmason Exp $
 
 #              ......................................................................
 lang de clear-report-template
@@ -124,4 +124,12 @@ lang de describe BASE64_ENC_TEXT          Mittels Base-64 Kodierung versteckter 
 lang de describe CHARSET_FARAWAY_BODY     Zeichensatz deutet einen auslaendischen Nachrichtentext an
 lang de describe UNNEEDED_HTML_ENCODING   Unnoetige Kodierung der HTML-Tags
 lang de describe USER_IN_WHITELIST        From: Adresse ist in der White-List des Anwenders
+
+lang de describe FROM_MALFORMED           From: ist eine ungueltige Adresse
+lang de describe FROM_MISSING             Fehlender From: Header
+lang de describe SHORT_RECEIVED_LINE      'Received:' enthaelt sehr langen Hostnamen
+lang de describe TO_INVESTORS             To: nichtexistierende 'Investors' Adresse
+lang de describe TO_LOCALPART_EQ_REAL     To: wiederholt den lokalen Anteil als echten Namen
+lang de describe TO_MALFORMED             To: ist eine ungueltige Adresse
+lang de describe YR_MEMBERSHIP_EXCH       Betreff enthaelt 'Your Membership Exchange'
 

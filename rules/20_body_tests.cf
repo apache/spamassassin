@@ -1,5 +1,5 @@
 # SpamAssassin rules file: tests.
-# $Id: 20_body_tests.cf,v 1.237.2.5 2002/08/28 14:02:10 jmason Exp $
+# $Id: 20_body_tests.cf,v 1.237.2.6 2002/08/29 17:07:10 jmason Exp $
 # 
 # note: body tests are run with long lines, so be sure to limit the
 # size of searches; use ".{0,30}" instead of ".*" to avoid huge
@@ -1354,4 +1354,149 @@ body INTL_EXEC_GUILD            /International Executive Guild/
 describe INTL_EXEC_GUILD        Well known SPAM senders
 body IN_ACCORDANCE_WITH_LAWS    /has been sent in accordance with/
 describe IN_ACCORDANCE_WITH_LAWS Claims to be in accordance with some Spam law
+
+
+body ANOTHER_NET_AD             /Another Internet Ad campaign produced/
+describe ANOTHER_NET_AD         Tells you it's an ad
+
+#   0.553    0.713    0.457    0.61   -1.00  BALANCE_FOR_LONG_20K
+describe BALANCE_FOR_LONG_20K   Message text is over 20K in size
+body BALANCE_FOR_LONG_20K       eval:check_for_very_long_text('20000')
+describe BALANCE_FOR_LONG_20K   Message text is over 20K in size  
+tflags BALANCE_FOR_LONG_20K     nice  
+score BALANCE_FOR_LONG_20K -1.0 
+#
+#   0.111    0.099    0.118    0.46   -1.00  BALANCE_FOR_LONG_40K
+describe BALANCE_FOR_LONG_40K   Message text is over 40K in size
+body BALANCE_FOR_LONG_40K       eval:check_for_very_long_text('40000')
+describe BALANCE_FOR_LONG_40K   Message text is over 40K in size  
+tflags BALANCE_FOR_LONG_40K     nice
+score BALANCE_FOR_LONG_40K -1.0 
+
+#   0.038    0.048    0.031    0.61    1.00  BIG_BUCKS
+body BIG_BUCKS                  /\bbig bucks\b/i 
+describe BIG_BUCKS Big Bucks
+score BIG_BUCKS                      1.0
+
+#  0.01     0.01     0.00    0.77    1.00  CHANGE_TERMS (low matches)
+body CHANGE_TERMS               /\bstrictly based on the following terms and conditions\b/i
+describe CHANGE_TERMS           Terms and conditions
+score CHANGE_TERMS                   1.0
+
+#   0.000    0.001    0.000    1.00    1.00  CLICK_TO_REMOVE_3
+body CLICK_TO_REMOVE_3          /http:.{0,50}action=remove/is
+describe CLICK_TO_REMOVE_3      Click-to-remove with PHP/ASP action found
+
+#   0.035    0.048    0.027    0.64    1.56  DONT_DELETE
+body     DONT_DELETE            /\b(?:don'?t delete this|do not delete)/i
+describe DONT_DELETE            Don't delete me!  Nooooo!!!!
+lang fr describe DONT_DELETE            Contient une formule incitant é ne pas détruire ce message
+score DONT_DELETE                    1.565
+
+#   0.000    0.000    0.000    0.00    1.00  EU_200_32_CE
+lang fr describe EU_200_32_CE   Revendique la conformité avec l'arrêt européen 200.32.CE
+score EU_200_32_CE                   1.0
+body EU_200_32_CE               /Directive 200.32.CE/i
+describe EU_200_32_CE           Claims compliance with SPAM regulations
+
+#   0.001    0.000    0.001    0.00    1.80  EU_EMAIL_OPTOUT
+lang fr describe EU_EMAIL_OPTOUT        Revendique la conformité avec l'arrêt européen sur le spam
+score EU_EMAIL_OPTOUT                1.8
+body EU_EMAIL_OPTOUT            /EU (?:e-?mail opt.?out|e.?commerce) directive/i
+describe EU_EMAIL_OPTOUT        Claims compliance with SPAM regulations
+#
+#
+#   0.000    0.000    0.000    0.00    1.00  EXCUSE_8
+body EXCUSE_8                   /requests to be taken off our mailing list/i
+describe EXCUSE_8               Claims you can be removed from the list
+
+#
+#   0.140    0.203    0.102    0.67   -1.00  FAILURE_NOTICE_2
+body     FAILURE_NOTICE_2       /\b(?:Delivery to the following recipients failed|This Message was undeliverable|The following addresses had permanent fatal errors|did not reach the following recipient)\b/i
+describe FAILURE_NOTICE_2       Mailer daemon failure notice (2)
+tflags   FAILURE_NOTICE_2       nice
+score FAILURE_NOTICE_2          -1.0
+#
+
+#   0.000    0.000    0.000    0.00    1.00  FILTERED_BY_WORLDREMOVE
+body FILTERED_BY_WORLDREMOVE    /filtered by WorldRemove/
+describe FILTERED_BY_WORLDREMOVE Claims to listen to some removal request list
+
+# 0.01     0.01     0.01    0.58    1.00  FREE_HOSTING (low matches)
+body FREE_HOSTING               /(?-i:F)ree hosting/i
+describe FREE_HOSTING           Contains 'free hosting' with capitals
+score FREE_HOSTING                   1.0
+body FREE_HOSTING               /\bfree hosting\b/i
+describe FREE_HOSTING           Free Hosting
+
+
+#   0.000    0.001    0.000    1.00    1.00  GREEN_EXCUSE_1
+lang fr describe GREEN_EXCUSE_1 Prétend que le SPAM est bon pour l'environement
+body GREEN_EXCUSE_1             /using email instead can significantly reduce this/i
+describe GREEN_EXCUSE_1         Claims SPAM helps the environment
+#
+#
+#   0.000    0.001    0.000    1.00    1.00  GREEN_EXCUSE_2
+lang fr describe GREEN_EXCUSE_2 Prétend que le SPAM est bon pour l'environement
+body GREEN_EXCUSE_2             /the trees, save the planet, use email!/i
+describe GREEN_EXCUSE_2         Claims SPAM helps the environment
+#
+#
+#   0.275    0.160    0.345    0.32    1.00  HTML_COMMENT_UNIQUE_ID
+body HTML_COMMENT_UNIQUE_ID     eval:html_test('comment_unique_id')
+describe HTML_COMMENT_UNIQUE_ID Contains a comment with nothing but unique ID
+#
+
+#   0.000    0.001    0.000    1.00    1.00  INCREDIBLE
+body INCREDIBLE                 /\bincredible secrets\b/i
+describe INCREDIBLE             Things incredible
+score INCREDIBLE                     1.0
+
+lang de describe NIGERIAN_SCAM            Nigerianischer Betrugsversuch, siehe http://www.snopes2.com/inboxer/scams/nigeria.htm
+lang es describe NIGERIAN_SCAM          Nigerian scam, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
+lang fr describe NIGERIAN_SCAM  Mentionne les combines nigériennes, voir http://www.snopes2.com/inboxer/scams/nigeria.htm
+score NIGERIAN_SCAM                  1.0
+body NIGERIAN_SCAM              /BASED ON INFORMATION GATHERED ABOUT YOU, WE BELIEVE\s*YOU WOULD BE IN A POSITION TO HELP US IN TRANSFER/i
+describe NIGERIAN_SCAM          Nigerian scam, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
+
+body NO_SELLING                 /absolutely NO selling/i
+describe NO_SELLING             Claims not to be selling anything
+
+body POPLAUNCH                  /StealthLaunch PopLaunch.\s/
+describe POPLAUNCH              SPAM software
+
+body PRICES_WONT_LAST           /\bprices.{0,11} last\b/i
+describe PRICES_WONT_LAST       Prices won't Last
+
+body PSYCHIC                    /\b(?:caring|gifted|experienced) psychic/i
+describe PSYCHIC                Psychics Scam
+
+body SIGNIFICANT                /\bsignificant savings\b/i
+describe SIGNIFICANT            Significant Savings
+
+body SLASH_PRICE                /\bslash.{0,2} price/i
+describe SLASH_PRICE            Slashed Price
+
+body THIS_AINT_JUNK             /This.{0,30}is not (?:a )?junk (?:email)?/is
+describe THIS_AINT_JUNK         Claims "This is not junk email"
+
+body TO_BE_REMOVED_REPLY        /\bto\b.{0,20}\b(?:remove|unsubscribe|opt[ -]?out).{0,20}\b(?:reply|send)\b/is
+describe TO_BE_REMOVED_REPLY    Says: "to be removed, reply via email" or similar
+lang de describe TO_BE_REMOVED_REPLY      Behauptet: "to be removed, reply via email" oder aehnliches
+lang es describe TO_BE_REMOVED_REPLY    Says: "to be removed, reply via email" or similar
+
+body WEALTH                     /\bachieve .{0,15}wealth\b/i
+describe WEALTH                 Achieve Wealth
+
+#   9.272   11.011    8.222    0.57    0.38  SUPERLONG_LINE
+rawbody SUPERLONG_LINE          /^[^<\&]{199,}$/m
+describe SUPERLONG_LINE         Contains a line >=199 characters long
+
+#   0.004    0.006    0.003    0.70    1.00  MONSTERHUT
+rawbody MONSTERHUT              /monsterhut.com/
+describe MONSTERHUT             Mentions monsterhut.com
+
+#   0.002    0.004    0.001    0.81    1.00  MURKOWSKI_CRUFT
+rawbody MURKOWSKI_CRUFT         /www\.senate\.gov\/~?murkowski/
+describe MURKOWSKI_CRUFT        Old Murkowski disclaimer
 
