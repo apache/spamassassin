@@ -674,3 +674,29 @@ describe T_AA9_HOSTNAME_IN_FROM  'From' has fake 'letter-letter-number' hostname
 header T_TO_NO_SPACE_AFTER_NAME	To =~ /^[^<@]+[a-zA-Z0-9]</
 describe T_TO_NO_SPACE_AFTER_NAME  No space after real name in 'To'
 
+# These are possible replacements for/additions to RAZOR2_CHECK - tvd
+# cf is how likely the message is spam.  RAZOR2_CHECK returns true if
+# cf>=min_cf (as defined by user/config).  I think we should leave that,
+# but probably lower the RAZOR2_CHECK score and add in more points based
+# on the range.  I dunno, I haven't fully figured out the rule integration
+# for this yet.
+body T_RAZOR2_RANGE_00_09	eval:check_razor2_range('00','09')
+body T_RAZOR2_RANGE_10_19	eval:check_razor2_range('10','19')
+body T_RAZOR2_RANGE_20_29	eval:check_razor2_range('20','29')
+body T_RAZOR2_RANGE_30_39	eval:check_razor2_range('30','39')
+body T_RAZOR2_RANGE_40_49	eval:check_razor2_range('40','49')
+body T_RAZOR2_RANGE_50_59	eval:check_razor2_range('50','59')
+body T_RAZOR2_RANGE_60_69	eval:check_razor2_range('60','69')
+body T_RAZOR2_RANGE_70_79	eval:check_razor2_range('70','79')
+body T_RAZOR2_RANGE_80_89	eval:check_razor2_range('80','89')
+body T_RAZOR2_RANGE_90_100	eval:check_razor2_range('90','100')
+#score T_RAZOR2_RANGE_00_09 0.1
+#score T_RAZOR2_RANGE_10_19 0.2
+#score T_RAZOR2_RANGE_20_29 0.4
+#score T_RAZOR2_RANGE_30_39 0.6
+#score T_RAZOR2_RANGE_40_49 1.0
+#score T_RAZOR2_RANGE_50_59 1.2
+#score T_RAZOR2_RANGE_60_69 1.4
+#score T_RAZOR2_RANGE_70_79 1.6
+#score T_RAZOR2_RANGE_80_89 1.8
+#score T_RAZOR2_RANGE_90_100 2
