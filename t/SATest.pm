@@ -72,13 +72,13 @@ sub sa_t_init {
   for $file (<../rules/*.cf>) {
     $base = basename $file;
     copy ($file, "log/test_rules_copy/$base")
-		or warn "cannot copy $file to log/test_rules_copy/$base";
+      or warn "cannot copy $file to log/test_rules_copy/$base";
   }
 
   mkdir ("log/localrules.tmp", 0755);
 
   copy ("../rules/user_prefs.template", "log/test_rules_copy/99_test_default.cf")
-	or die "user prefs copy failed";
+    or die "user prefs copy failed";
 
   open (PREFS, ">>log/test_rules_copy/99_test_default.cf");
   print PREFS $default_cf_lines;
@@ -269,8 +269,21 @@ sub start_spamd {
     warn "oops! SATest.pm: a test prefs file was created, but spamd isn't reading it\n";
   }
 
-  print ("\t$spamdargs > log/$testname.spamd 2>&1 &\n");
-  system ("$spamdargs > log/$testname.spamd 2>&1 &");
+  my $spamd_stdout = "log/$testname-spamd.out";
+  my $spamd_stderr = "log/$testname-spamd.err";
+  my $spamd_stdlog = "log/$testname-spamd.log";
+  my $spamd_cmd    = join(' ',
+                      $Config{perlpath},
+                      qq{SATest.pl},
+                      qq{-Mredirect},
+                      qq{-o${spamd_stdout}},
+                      qq{-O${spamd_stderr}},
+                      qq{--},
+                      qq{$spamdargs},
+                      qq{&},
+                    );
+  print ("\t${spamd_cmd}\n");
+  system ($spamd_cmd);
 
   # now find the PID
   $spamd_pid = 0;
@@ -281,7 +294,7 @@ sub start_spamd {
   while ($spamd_pid <= 0) {
     my $spamdlog = '';
 
-    if (open (IN, "<log/$testname.spamd")) {
+    if (open (IN, "<${spamd_stderr}")) {
       while (<IN>) {
 	/Address already in use/ and $retries = 0;
 	/server pid: (\d+)/ and $spamd_pid = $1;
