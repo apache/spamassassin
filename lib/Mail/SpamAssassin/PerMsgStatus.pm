@@ -825,10 +825,6 @@ called to ensure Perl's garbage collection will clean up old status objects.
 sub finish {
   my ($self) = @_;
 
-  if (exists $self->{main}->{bayes_scanner}) {
-    $self->{main}->{bayes_scanner}->finish();
-  }
-
   $self->rbl_finish();
 
   delete $self->{body_text_array};

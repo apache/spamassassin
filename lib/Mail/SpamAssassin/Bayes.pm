@@ -216,9 +216,11 @@ sub new {
 sub finish {
   my $self = shift;
   if (!$self->{conf}->{use_bayes}) { return; }
-  if (!$self->{main}->{learn_caller_will_untie}) {
-    $self->{store}->untie_db();
-  }
+
+  # if we're untying too much, uncomment this...
+  # use Carp qw(cluck); cluck "stack trace at untie";
+
+  $self->{store}->untie_db();
 }
 
 ###########################################################################
