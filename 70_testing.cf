@@ -247,10 +247,6 @@ meta T_NIGERIAN_BODY_4	( __NIGERIAN_BODY_1 + __NIGERIAN_BODY_2 + __NIGERIAN_BODY
 header    T_YAHOO_MSGID_CAPS          Message-ID =~ /<[A-Z]+\@yahoo.com>/
 describe  T_YAHOO_MSGID_CAPS          Message-ID has all-caps@yahoo.com
 
-# bug 3396
-header    T_CT_BOUND_DDNUM        Content-Type =~ /boundary="--\d+"/
-describe  T_CT_BOUND_DDNUM	  Content-Type header has boundary in ratware form
-
 # bug 3399
 header T_MSGID_CAPS1	Message-ID =~ /<[A-Z]+\@[a-z]+\.[a-z]{2,4}>/
 header T_MSGID_CAPS2	Message-ID =~ /<[A-Z]+\@(?!(?:mailcity|whowhere)\.com)[a-z]+\.[a-z]{2,4}>/

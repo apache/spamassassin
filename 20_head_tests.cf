@@ -94,6 +94,8 @@ describe SUBJ_HAS_UNIQ_ID	Subject contains a unique ID
 header SUBJ_HAS_SPACES		Subject =~ /(?:\s{6}|\t\s|\s\t)\S/
 describe SUBJ_HAS_SPACES	Subject contains lots of white space
 
+header    CT_BOUND_DDNUM        Content-Type =~ /boundary="--\d+"/
+describe  CT_BOUND_DDNUM	Content-Type header has boundary in ratware form
 
 header SUBJ_ALL_CAPS		eval:subject_is_all_caps()
 describe SUBJ_ALL_CAPS		Subject is all capitals
