@@ -94,7 +94,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.162 2003/01/14 23:03:30 felicity Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.163 2003/01/25 22:55:44 msquadrat Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -1007,7 +1007,7 @@ sub init {
 
       if (defined $fname) {
         if (!-f $fname && !$self->create_default_prefs($fname)) {
-          warn "Failed to create default prefs file $fname: $!\n";
+          warn "Failed to create default user preference file $fname\n";
         }
       }
 
@@ -1096,52 +1096,53 @@ sub create_default_prefs {
   # $userdir will only exist if vpopmail config is enabled thru spamd
   # Its value will be the virtual user's maildir
   #
-  my ($self,$fname,$user,$userdir) = @_;
+  my ($self, $fname, $user, $userdir) = @_;
 
-  if ($userdir && $userdir ne $self->{user_dir}) {
-    warn "oops! user_dirs don't match! '$userdir' vs '$self->{user_dir}'";
+  if ($self->{dont_copy_prefs}) {
+    return(0);
   }
 
-  if (!$self->{dont_copy_prefs} && !-f $fname)
+  if ($userdir && $userdir ne $self->{user_dir}) {
+    warn "Oops! user_dirs don't match! '$userdir' vs '$self->{user_dir}'\n";
+  }
+
+  if (!-f $fname)
   {
     # Pass on the value of $userdir for virtual users in vpopmail
     # otherwise it is empty and the user's normal homedir is used
     $self->get_and_create_userstate_dir();
 
     # copy in the default one for later editing
-    my $defprefs = $self->first_existing_path
-			(@Mail::SpamAssassin::default_prefs_path);
-    
-    if (!open (IN, "<$defprefs")) {
-      warn "cannot open $defprefs: $!";
-    } else {
-      open (OUT, ">$fname") or warn "cannot write to $fname: $!";
-      while (<IN>) {
-        /^\#\* / and next;
-        print OUT;
+    my $defprefs = $self->first_existing_path (@Mail::SpamAssassin::default_prefs_path);
+
+    if (open (IN, "<$defprefs")) {
+      if (open (OUT, ">$fname")) {
+        while (<IN>) {
+          /^\#\* / and next;
+          print OUT;
+        }
+        close OUT;
+        close IN;
+
+        if (($< == 0) && ($> == 0) && defined($user)) { # chown it
+          my ($uid,$gid) = (getpwnam($user))[2,3];
+          unless (chown($uid, $gid, $fname)) {
+            warn "Couldn't chown $fname to $uid:$gid for $user: $!\n";
+          }
+        }
+        warn "Created user preferences file: $fname\n";
+        return(1);
       }
-      close OUT;
-      close IN;
+      else {
+        warn "Cannot write to $fname: $!\n";
+      }
     }
+    else {
+      warn "Cannot open $defprefs: $!\n";
+    }
+  }
 
-    if (copy ($defprefs, $fname)) {
-      if ( $< == 0 && $> == 0 && defined $user) {	# chown it
-	my ($uid,$gid) = (getpwnam($user))[2,3];
-	unless (chown $uid, $gid, $fname) {
-	   warn "Couldn't chown $fname to $uid:$gid for $user: $!\n";
-	}
-      }
-     warn "Created user preferences file: $fname\n";
-     return(1);
-
-   } else {
-     warn "Failed to create user preferences file: $!\n".
-			 "\"$fname\" from default \"$defprefs\".\n";
-   }
- }
- elsif ($self->{dont_copy_prefs}) { return 1; }
- 
- return(0);
+  return(0);
 }
 
 ###########################################################################
