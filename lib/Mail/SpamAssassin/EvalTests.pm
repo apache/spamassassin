@@ -2417,6 +2417,10 @@ sub check_outlook_timestamp_token {
 sub check_razor2_range {
   my ($self,$fulltext,$min,$max) = @_;
 
+  # If the Razor2 general test is disabled, don't continue.
+  return 0 unless ( $self->{conf}{scores}{'RAZOR2_CHECK'} );
+
+  # If Razor2 hasn't been checked yet, go ahead and run it.
   unless ( defined $self->{razor2_result} ) {
     # note: we don't use $fulltext. instead we get the raw message,
     # unfiltered, for razor2 to check.  ($fulltext removes MIME
@@ -2450,6 +2454,5 @@ sub check_email_isfree {
 
   return 0;
 }
-
 
 1;
