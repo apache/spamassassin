@@ -231,3 +231,10 @@ full AOL_USERS_LINK		/AOL\s+Users\s+Click\s+Here/is
 body BALANCE_FOR_LONG		eval:check_for_very_long_text()
 describe BALANCE_FOR_LONG	Message text is over 500 lines long
 
+###########################################################################
+# not quite spam, but dangerous/irritating nonetheless. Sircam worms etc.
+
+full SIRCAM_SIGNATURE		/Content-Disposition: attachment;\s+filename=..+\.\S\S\S\.(bat|com|lnk|pif)./s
+describe SIRCAM_SIGNATURE	SECURITY: message contains the Sircam worm
+
+
