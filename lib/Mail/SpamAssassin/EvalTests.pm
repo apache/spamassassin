@@ -1411,10 +1411,9 @@ sub check_for_very_long_text {
   my ($self, $body) = @_;
 
   my $count = 0;
-  foreach my $line (@{$body}) {
-    if (length($line) > 40) { $count++; }
-  }
-  if ($count > 500) { return 1; }
+  foreach my $line (@{$body}) { $count += length($line); }
+  dbg ("check_for_very_long_text: found $count bytes");
+  if ($count > 8000) { return 1; }
   return 0;
 }
 
