@@ -32,7 +32,7 @@ describe PLING_PLING		Subject has lots of exclamation marks
 header SUBJ_HAS_UNIQ_ID		eval:check_for_unique_subject_id()
 describe SUBJ_HAS_UNIQ_ID	Subject contains a unique ID number
 
-header SUBJ_HAS_SPACES		Subject =~ /(?:\s{5,}|\t)/
+header SUBJ_HAS_SPACES		Subject =~ /(?:\s{6,}|\t)/
 describe SUBJ_HAS_SPACES	Subject contains lots of white space
 
 header UNDISC_RECIPS		To =~ /^undisclosed-recipients?:\s*;$/
