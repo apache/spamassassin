@@ -19,34 +19,61 @@ void showSummary(PGAContext *ctx);
 
 const double threshold = 5.0;
 const double nybias = 5.0;
-const int pop_size = 20;
+const double mutation_rate = 0.21;
+const double crossover_rate = 0.66;
+const int pop_size = 10;
+const int replace_num = 2;
+const int maxiter = 10000;
+
+void init_data()
+{
+  int  rank;
+
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  if (rank == 0) {
+    loadtests();
+    loadscores();
+  }
+  MPI_Bcast(num_tests_hit, num_tests, MPI_CHAR, 0, MPI_COMM_WORLD);
+  MPI_Bcast(is_spam, num_tests, MPI_CHAR, 0, MPI_COMM_WORLD);
+  MPI_Bcast(tests_hit, num_tests*max_hits_per_msg, MPI_SHORT, 0, MPI_COMM_WORLD);
+}
 
 int main(int argc, char **argv) {
      PGAContext *ctx;
-     int         maxiter;
 
-     loadtests();
-     loadscores();
      MPI_Init(&argc, &argv);
-
-     maxiter = GetIntegerParameter("How many iterations?\n");
+     init_data();
 
      ctx = PGACreate(&argc, argv, PGA_DATATYPE_REAL, num_scores, PGA_MINIMIZE);
 
-     PGASetUserFunction(ctx, PGA_USERFUNCTION_MUTATION, (void *)myMutation);
      PGASetUserFunction(ctx, PGA_USERFUNCTION_PRINTSTRING, (void *)WriteString);
      PGASetUserFunction(ctx, PGA_USERFUNCTION_ENDOFGEN, (void *)showSummary);
+
      PGASetRealInitRange(ctx, range_lo, range_hi);
 
      PGASetPopSize(ctx, pop_size);
+
+     PGASetNumReplaceValue(ctx, replace_num);
+
      PGASetMutationAndCrossoverFlag(ctx, PGA_TRUE);
-     PGASetPrintOptions(ctx, PGA_REPORT_AVERAGE);
-     PGASetPrintOptions(ctx, PGA_REPORT_WORST);
-     PGASetPrintFrequencyValue(ctx,100000);
+
+     PGASetMutationBoundedFlag(ctx, PGA_FALSE);
+     PGASetUserFunction(ctx, PGA_USERFUNCTION_MUTATION, (void *)myMutation);
+
+     PGASetCrossoverType(ctx, PGA_CROSSOVER_UNIFORM);
+
+     // Never print builtin stuff
+     PGASetPrintFrequencyValue(ctx,300);
+
+     PGASetStoppingRuleType(ctx, PGA_STOP_NOCHANGE);
+     PGASetMaxNoChangeValue(ctx, 300);
      PGASetMaxGAIterValue(ctx, maxiter);
 
      PGASetUp(ctx);
 
+     // Now fix the alleles for the imutable tests
+     /*
      for(int i=0; i<num_scores; i++)
      {
        for(int p=0; p<pop_size; p++)
@@ -54,10 +81,9 @@ int main(int argc, char **argv) {
 	 PGASetRealAllele(ctx, p, PGA_NEWPOP, i, bestscores[i]);
        }
      }
+     */
 
      PGARun(ctx, evaluate);
-
-     showSummary(ctx);
 
      PGADestroy(ctx);
 
@@ -68,21 +94,24 @@ int main(int argc, char **argv) {
 
 int ga_yy,ga_yn,ga_ny,ga_nn;
 double ynscore,nyscore;
-double evaluate(PGAContext *ctx, int p, int pop) {
-
+double evaluate(PGAContext *ctx, int p, int pop)
+{
+  double tot_score = 0.0;
      ynscore = 0.0; nyscore = 0.0;
      ga_yy=ga_yn=ga_ny=ga_nn=0;
 
      // For every message
-     for (int i=0; i<num_tests; i++)
+     for (int i=num_tests-1; i>=0; i--)
      {
        double msg_score = 0.0;
        // For every test the message hit on
-       for(int j=0; j<num_tests_hit[i]; j++)
+       for(int j=num_tests_hit[i]-1; j>=0; j--)
        {
 	 // Up the message score by the allele for this test in the genome
 	 msg_score += PGAGetRealAllele(ctx, p, pop, tests_hit[i][j]);
        }
+
+       tot_score += msg_score;
 
        // Ok, now we know the score for this message.  Let's see how this genome did...
        
@@ -97,7 +126,7 @@ double evaluate(PGAContext *ctx, int p, int pop) {
 	 {
 	   // False negative
 	   ga_yn++;
-	   ynscore += ((threshold - msg_score) / threshold);
+	   ynscore += threshold - msg_score;
 	 }
        }
        else
@@ -106,7 +135,7 @@ double evaluate(PGAContext *ctx, int p, int pop) {
 	 {
 	   // False positive
 	   ga_ny++;
-	   nyscore += ((msg_score - threshold) / threshold);
+	   nyscore += msg_score - threshold;
 	 }
 	 else
 	 {
@@ -115,43 +144,35 @@ double evaluate(PGAContext *ctx, int p, int pop) {
 	 }
        }
      }
+     //     ynscore /= 5.0;
+     //     nyscore /= 5.0;
 
-     return (double) ynscore + (nyscore * nybias);
+     return (double) ((double)ga_yn)+ynscore + (((double)ga_ny)+nyscore)*nybias;
 }
 
 int myMutation(PGAContext *ctx, int p, int pop, double mr) {
     int         count=0;
 
-    for (int i=0; i<num_scores; i++) {
-      if(is_mutatable[i])
+    for (int i=0; i<num_scores; i++)
+    {
+      if(is_mutatable[i] && PGARandomFlip(ctx, mr))
       {
-	if (PGARandomFlip(ctx, mr)) {
-	  PGASetRealAllele(ctx, p, pop, i, PGARandomGaussian(ctx, 0.0, 1.0));
-	  count++;
-	}
+	PGASetRealAllele(ctx, p, pop, i, PGAGetRealAllele(ctx, p, pop, i)+PGARandomUniform(ctx, -1.0, 1.0));
+	count++;
       }
     }
     return count;
 }
 
 
-/*  Get an integer parameter from the user.  Since this is
- *  typically a parallel program, we must only do I/O on the
- *  "master" process -- process 0.  Once we read the parameter,
- *  we broadcast it to all the other processes, then every 
- *  process returns the correct value.
- */
-int GetIntegerParameter(char *query)
+void dump()
 {
-    int  rank, tmp;
-
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    if (rank == 0) {
-        printf(query);
-        scanf("%d", &tmp);
-    }
-    MPI_Bcast(&tmp, 1, MPI_INT, 0, MPI_COMM_WORLD);
-    return(tmp);
+    printf ("\n# SUMMARY:            %6d / %6d\n#\n", ga_ny, ga_yn);
+    printf ("# Correctly non-spam: %6d  %3.2f%%  (%3.2f%% overall)\n", ga_nn, (ga_nn / (float) num_nonspam) * 100.0, (ga_nn / (float) num_tests) * 100.0);
+    printf ("# Correctly spam:     %6d  %3.2f%%  (%3.2f%% overall)\n", ga_yy, (ga_yy / (float) num_spam) * 100.0, (ga_yy / (float) num_tests) * 100.0);
+    printf ("# False positives:    %6d  %3.2f%%  (%3.2f%% overall, %6.0f adjusted)\n", ga_ny, (ga_ny / (float) num_nonspam) * 100.0, (ga_ny / (float) num_tests) * 100.0, nyscore*nybias);
+    printf ("# False negatives:    %6d  %3.2f%%  (%3.2f%% overall, %6.0f adjusted)\n", ga_yn, (ga_yn / (float) num_spam) * 100.0, (ga_yn / (float) num_tests) * 100.0, ynscore);
+    printf ("# TOTAL:              %6d  %3.2f%%\n#\n", num_tests, 100.0);
 }
 
 /*****************************************************************************
@@ -163,6 +184,8 @@ void WriteString(PGAContext *ctx, FILE *fp, int p, int pop)
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   if(0 == rank)
   {
+    evaluate(ctx,p,pop);
+    dump();
     for(int i=0; i<num_scores; i++)
     {
       fprintf(fp,"score %-30s %2.1f\n",score_names[i],PGAGetRealAllele(ctx, p, pop, i));
@@ -179,14 +202,9 @@ void showSummary(PGAContext *ctx)
   {
     if(0 == PGAGetGAIterValue(ctx) % 300)
     {
-      int genome = PGAGetBestIndex(ctx,PGA_NEWPOP);
-      PGAGetEvaluation(ctx, genome, PGA_NEWPOP);
-      printf ( "\n# SUMMARY:            %6d / %6d\n#\n", ga_ny, ga_yn);
-      printf ("# Correctly non-spam: %6d  %3.2f%%  (%3.2f%% overall)\n", ga_nn, (ga_nn / (float) num_nonspam) * 100.0, (ga_nn / (float) num_tests) * 100.0);
-      printf ("# Correctly spam:     %6d  %3.2f%%  (%3.2f%% overall)\n", ga_yy, (ga_yy / (float) num_spam) * 100.0, (ga_yy / (float) num_tests) * 100.0);
-      printf ("# False positives:    %6d  %3.2f%%  (%3.2f%% overall, %6.0f adjusted)\n", ga_ny, (ga_ny / (float) num_nonspam) * 100.0, (ga_ny / (float) num_tests) * 100.0, nyscore);
-      printf ("# False negatives:    %6d  %3.2f%%  (%3.2f%% overall, %6.0f adjusted)\n", ga_yn, (ga_yn / (float) num_spam) * 100.0, (ga_yn / (float) num_tests) * 100.0, ynscore);
-      printf ( "# TOTAL:              %6d  %3.2f%%\n#\n", num_tests, 100.0);
+      int genome = PGAGetBestIndex(ctx,PGA_OLDPOP);
+      PGAGetEvaluation(ctx, genome, PGA_OLDPOP);
+      dump();
     }
     else if(0 == PGAGetGAIterValue(ctx) % 5)
     {
