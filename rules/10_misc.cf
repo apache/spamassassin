@@ -1,5 +1,5 @@
 # SpamAssassin rules file.  See 'man Mail::SpamAssassin::Conf' for details.
-# $Id: 10_misc.cf,v 1.11.2.1 2002/08/22 23:11:08 jmason Exp $
+# $Id: 10_misc.cf,v 1.11.2.2 2002/09/04 18:53:21 jmason Exp $
 ###########################################################################
 
 # Default template. Try to keep it under 76 columns (inside the the dots below).
@@ -112,6 +112,6 @@ ok_languages            all
 # use_terse_report      0
 # defang_mime           1
 # skip_rbl_checks       0
-# check_mx_attempts     3
+# check_mx_attempts     2
 # check_mx_delay        5
 

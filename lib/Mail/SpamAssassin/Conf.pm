@@ -574,10 +574,10 @@ for you, set this to 1.
       $self->{skip_rbl_checks} = $1+0; next;
     }
 
-=item check_mx_attempts n	(default: 3)
+=item check_mx_attempts n	(default: 2)
 
-By default, SpamAssassin checks the From: address for a valid MX three times,
-waiting 5 seconds each time.
+By default, SpamAssassin checks the From: address for a valid MX this many
+times, waiting 5 seconds each time.
 
 =cut
 
