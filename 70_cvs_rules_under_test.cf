@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.550 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.551 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -44,7 +44,6 @@ describe T_INVALID_DATE_HMS	Date header does not use valid HH:MM:SS formatting
 # NOTE: uses __XM_BAD_DATE_MUAS from above
 # rfc822:                       date-time =          [ day-of-week "," ]         (day / obs-day)                 month                           (year / obs-year)   hour ":" minute [ ":" second ]       (zone / obs-zone)          [ comment ]
 header __INVALID_DATE		Date !~ /^\s*(?:(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun), )?[0-3 ]?[0-9] (?:Jan|Feb|Ma[ry]|Apr|Ju[nl]|Aug|Sep|Oct|Nov|Dec) (?:19|20)?[0-9]{2} [0-2][0-9](?:\:[0-5][0-9]){1,2} (?:[+-][0-9]{4}|UT|[A-Z]{2,3}T)(?:\s+\(.*\))?\s*$/ [if-unset: Mon, 24 Feb 2003 09:30 +0100 (mss)]
-header __XM_FOXMAIL		X-Mailer =~ /FoxMail/
 meta T_INVALID_DATE_2		(__INVALID_DATE && !__XM_BAD_DATE_MUAS)
 describe T_INVALID_DATE_2	Invalid Date: header (not RFC 2822)
 
@@ -58,22 +57,6 @@ describe T_INVALID_DATE_2	Invalid Date: header (not RFC 2822)
 # ... place with brother rule in 20_ratware.cf
 header __ANY_QUALCOMM_MUA	X-Mailer =~ /^QUALCOMM\b/
 meta T_FORGED_QUALCOMM_TAGS	(__ANY_QUALCOMM_MUA && __MIME_HTML && !__TAG_EXISTS_HTML)
-
-# quinlan: 2003-03-15
-# these all appear in the same low-scoring spammer for me, but they
-# might differ for others so I'm trying some different URLs, check
-# overlap in others' results before committing anything
-#
-# quinlan: 2003-03-28: does ANYONE other than me have any hits for these?
-#
-# Apr  1 2003 jm: constantcontact is a spamtool, also used in legit mailouts
-# by a Java company :(
-#
-# 2003-05-05 quinlan: reduced to shorter list of high S/O rules that hit
-# more than just me, not sure if any are worth it
-header T_CONSTANTCONTACT		ALL =~ /\bconstantcontact\.com\b/i
-header T_ROVING_COM			ALL =~ /\broving\.com\b/i
-uri T_RS6_NET_URL			/\brs6\.net\b/i
 
 uri      T_HTTP_EXCESSIVE_ENTITIES m{^https?://\S*\&\#(?:0?3[0-9]|0?[46][1-9a-f]|0?[57][\da])}i
 describe T_HTTP_EXCESSIVE_ENTITIES Completely unnecessary %-escapes inside a URL
