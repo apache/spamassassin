@@ -12,6 +12,7 @@
 
 use strict;
 use POSIX qw(nice);
+use constant MONTH => 60*60*24*30;
 
 nice(15);
 
@@ -71,6 +72,20 @@ sub init {
 sub update {
     chdir $opt{corpus};
     system "rsync -CPcvuzbt --timeout=60 $opt{username}" . '@rsync.spamassassin.org::corpus/* .';
+    if (-f "rsync.last") {
+	open(FIND, "find . -type f -newer rsync.last |");
+	my $files = "";
+	while(<FIND>) {
+	    $files .= $_;
+	}
+	close(FIND);
+	if (! $files) {
+	    print STDERR "no new corpus files\n";
+	    exit 0;
+	}
+    }
+    open(RSYNC, "> rsync.last");
+    close(RSYNC);
 }
 
 sub locate {
@@ -79,7 +94,7 @@ sub locate {
     @files = sort readdir(CORPUS);
     closedir(CORPUS);
 
-    @files = grep { /^(?:spam|nonspam|ham)-(?:net-)?\w+\.log$/ && -f "$opt{corpus}/$_" && -M _ < 10 } @files;
+    @files = grep { /^(?:spam|ham)-(?:net-)?\w+\.log$/ && -f "$opt{corpus}/$_" && -M _ < 10 } @files;
     @files = grep {
 	my $time = 0;
 	my $tag = 0;
@@ -124,27 +139,34 @@ sub sort_all {
     my ($a1, $a2) = ($a =~ m/(\(.*?\)|\S+)(?::(\S+))?$/);
     my ($b1, $b2) = ($b =~ m/(\(.*?\)|\S+)(?::(\S+))?$/);
 
-    $a2 ||= '';
-    $b2 ||= '';
-    my $n = ($a1 cmp $b1) || ($a2 cmp $b2);
-    $n -= 1000 if $a =~ /^OVERALL/;
-    $n += 1000 if $b =~ /^OVERALL/;
-    $n -= 100 if $a1 =~ /^\(all messages\)/;
-    $n += 100 if $b1 =~ /^\(all messages\)/;
-    $n -= 10 if $a1 =~ /^\(all messages as \%\)/;
-    $n += 10 if $b1 =~ /^\(all messages as \%\)/;
+    my $n = ($a1 cmp $b1) || (($a2 || '') cmp ($b2 || ''));
+    if ($a1 =~ /^OVERALL/)			{ $n -= 1000; }
+    elsif ($a1 =~ /^\(all messages\)/)		{ $n -= 100; }
+    elsif ($a1 =~ /^\(all messages as \%\)/)	{ $n -= 10; }
+    if ($b1 =~ /^OVERALL/)			{ $n += 1000; }
+    elsif ($b1 =~ /^\(all messages\)/)		{ $n += 100; }
+    elsif ($b1 =~ /^\(all messages as \%\)/)	{ $n += 10; }
     return $n;
+}
+
+sub time_filter {
+    my ($after, $before) = @_;
+    if (/time=(\d+)/) {
+	return ((time - $1 >= MONTH * $after) &&
+		(time - $1 < MONTH * $before));
+    }
+    return 0;
 }
 
 sub current {
     for my $class ("DETAILS", "HTML", "NET") {
-	for my $age ("new", "all", "1day", "2day", "7day") {
-	    my @ham = grep { /^(?:nonspam|ham)/ } @files;
+	for my $age ("new", "all", "age", "1day", "2day", "7day") {
+	    my @ham = grep { /^ham/ } @files;
 	    my @spam = grep { /^spam/ } @files;
 
 	    chdir $opt{corpus};
 
-	    next if ($class eq "NET" && $age !~ /^(?:new|all|7day)$/);
+	    next if ($class eq "NET" && $age !~ /^(?:new|all|age|7day)$/);
 
 	    # net vs. local
 	    my @ham_net = grep { /-net-/ } @ham;
@@ -175,7 +197,7 @@ sub current {
 		@spam = grep { $revision{$_} eq $wanted } @spam;
 		@ham = grep { $revision{$_} eq $wanted } @ham;
 	    }
-	    elsif ($age =~ /^(?:new|all)$/) {
+	    elsif ($age =~ /^(?:new|all|age)$/) {
 		@ham = grep { -M "$_" < -M $opt{tagtime} } @ham;
 		@spam = grep { -M "$_" < -M $opt{tagtime} } @spam;
 		@ham = grep { $revision{$_} eq $revision } @ham;
@@ -232,6 +254,38 @@ sub current {
 		    push @output, $_;
 		}
 		close(IN);
+		for (sort sort_all @output) {
+		    print OUT $_;
+		}
+	    }
+	    elsif ($age eq "age") {
+		my @output;
+
+		for my $which (("0-1", "1-3", "3-6")) {
+		    my ($after, $before) = split(/-/, $which);
+		    # get and filter logs
+		    chdir $opt{corpus};
+		    for my $type (("ham", "spam")) {
+			open(TMP, "> $opt{tmp}/$type.log.$$");
+			my @array = ($type eq "ham") ? @ham : @spam;
+			for my $file (@array) {
+			    open(IN, $file);
+			    while (<IN>) {
+				print TMP $_ if time_filter($after, $before);
+			    }
+			    close(IN);
+			}
+			close (TMP);
+		    }
+		    # print out by age
+		    chdir "$opt{tree}/masses";
+		    open(IN, "./hit-frequencies -xpa $flags $opt{tmp}/spam.log.$$ $opt{tmp}/ham.log.$$ |");
+		    while(<IN>) {
+			chomp;
+			push @output, "$_:$which\n";
+		    }
+		    close(IN);
+		}
 		for (sort sort_all @output) {
 		    print OUT $_;
 		}
