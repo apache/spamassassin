@@ -926,10 +926,30 @@ sub receive_date {
 
 sub setuid_to_euid {
   return if (RUNNING_ON_WINDOWS);
-  if ($< != $>) {
-    dbg ("setting real uid from $< to match effective uid $>");
-    $< = $>;
-    if ($< != $>) { die "setuid $< to $> failed!"; }
+
+  # remember the target uid, the first number is the important one
+  my($touid) = split(/\s+/, $>);
+
+  if ($< != $touid) {
+    dbg ("changing real uid from $< to match effective uid $touid");
+    $< = $touid; # try the simple method first
+
+    # bug 3586: Some perl versions, typically those on a BSD-based
+    # platform, require RUID==EUID (and presumably == 0) before $<
+    # can be changed.  So this is a kluge for us to get around the
+    # typical spamd-ish behavior of: $< = 0, $> = someuid ...
+    if ( $< != $touid ) {
+      dbg("initial attempt to change real uid failed, trying BSD workaround");
+
+      $> = $<;			# revert euid to ruid
+      $< = $touid;		# change ruid to target
+      $> = "$touid $touid";	# change euid back to target
+    }
+
+    # Check that we have now accomplished the setuid
+    if ($< != $touid) {
+      die "setuid $< to $touid failed!";
+    }
   }
 }
 
