@@ -1,4 +1,12 @@
 
+Upgrade Notes
+-------------
+
+Users of SpamAssassin versions earlier than 2.50 should note that the
+default tagging behaviour has changed.  See the "defang_mime" note below,
+in the 'Customising SpamAssassin' section.
+
+
 Welcome to SpamAssassin!
 ------------------------
 
@@ -126,9 +134,17 @@ can be set. Common first-time tweaks include:
         different thresholds are available in the "STATISTICS.txt" file in
         the "rules" directory.
 
-  - rewrite_subject
+  - defang_mime, rewrite_subject, report_header, use_terse_report
 
-  	Turn off Subject-line rewriting with this.
+  	Users of versions of SpamAssassin before 2.50 will find that
+        the default behaviour has changed; now, it does not modify
+        the messages heavily unless customised to do so.  The old
+        behaviour can be recovered using these settings:
+
+                defang_mime             1
+                rewrite_subject         1
+                report_header           0
+                use_terse_report        0
 
   - subject_tag
 
@@ -139,12 +155,6 @@ can be set. Common first-time tweaks include:
 
 	If you expect to receive mail in non-ISO-8859 character sets (ie.
 	Chinese, Cyrillic, Japanese, Korean, or Thai) then set this.
-
-  - defang_mime
-
-	By default, SpamAssassin will 'de-fang' MIME messages, turning
-	them into content-type text/plain.  This will turn that behaviour
-	off.
 
 
 

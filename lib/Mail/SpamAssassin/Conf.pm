@@ -126,14 +126,14 @@ sub new {
   $self->{auto_whitelist_file_mode} = '0600';	# as string, with --x bits
   $self->{auto_whitelist_factor} = 0.5;
 
-  $self->{rewrite_subject} = 1;
+  $self->{rewrite_subject} = 0;
   $self->{detailed_phrase_score} = 0;
   $self->{spam_level_stars} = 1;
   $self->{spam_level_char} = '*';
   $self->{subject_tag} = '*****SPAM*****';
-  $self->{report_header} = 0;
-  $self->{use_terse_report} = 0;
-  $self->{defang_mime} = 1;
+  $self->{report_header} = 1;
+  $self->{use_terse_report} = 1;
+  $self->{defang_mime} = 0;
   $self->{skip_rbl_checks} = 0;
   $self->{dns_available} = "test";
   $self->{check_mx_attempts} = 2;
@@ -446,10 +446,10 @@ words and more than 8KB in some cases)
       $self->{detailed_phrase_score} = $1+0; next;
     }
 
-=item rewrite_subject { 0 | 1 }        (default: 1)
+=item rewrite_subject { 0 | 1 }        (default: 0)
 
-By default, the subject lines of suspected spam will be tagged.  This can be
-disabled here.
+By default, the subject lines of suspected spam will not be tagged.  This can
+be enabled here.
 
 =cut
 
@@ -513,11 +513,11 @@ score for this message. _REQD_ will be replaced with the threshold.
       $self->{subject_tag} = $1; next;
     }
 
-=item report_header { 0 | 1 }	(default: 0)
+=item report_header { 0 | 1 }	(default: 1)
 
-By default, SpamAssassin will include its report in the body of suspected spam.
-Enabling this causes the report to go in the headers instead. Using
-'use_terse_report' with this is recommended.
+By default, SpamAssassin will include its report in the headers of suspected
+spam.  Disabling this causes the report to go in the body instead. Using
+'use_terse_report' when this is enabled, is recommended.
 
 =cut
 
@@ -525,11 +525,11 @@ Enabling this causes the report to go in the headers instead. Using
       $self->{report_header} = $1+0; next;
     }
 
-=item use_terse_report { 0 | 1 }   (default: 0)
+=item use_terse_report { 0 | 1 }   (default: 1)
 
-By default, SpamAssassin uses a fairly long report format.  Enabling this uses
-a shorter format which includes all the information in the normal one, but
-without the superfluous explanations.
+By default, SpamAssassin uses a short report format.  Disabling this uses
+a longer format which includes all the information in the normal one,
+with the addition of some explanations and formatting.
 
 =cut
 
@@ -537,11 +537,10 @@ without the superfluous explanations.
       $self->{use_terse_report} = $1+0; next;
     }
 
-=item defang_mime { 0 | 1 }   (default: 1)
+=item defang_mime { 0 | 1 }   (default: 0)
 
-By default, SpamAssassin will change the Content-type: header of suspected spam
-to "text/plain". This is a safety feature. If you prefer to leave the
-Content-type header alone, set this to 0.
+If this is enabled, SpamAssassin will change the Content-type: header of
+suspected spam to "text/plain". This is a safety feature.
 
 =cut
 
