@@ -126,9 +126,17 @@ sub cmdline_run {
 
   $spamtest->init (1);
 
-  # Add a default prefix if the path is a directory
-  if (defined $bayes_override_path && -d $bayes_override_path) {
-    $bayes_override_path = File::Spec->catfile($bayes_override_path, 'bayes');
+  # kluge to support old check_bayes_db operation
+  if ( defined $bayes_override_path ) {
+    # Add a default prefix if the path is a directory
+    if (-d $bayes_override_path) {
+      $bayes_override_path = File::Spec->catfile($bayes_override_path, 'bayes');
+    }
+
+    # init() above ties to the db r/o and leaves it that way
+    # so we need to untie before dumping (it'll reopen)
+    $spamtest->finish_learner();
+    $spamtest->{conf}->{bayes_path} = $bayes_override_path;
   }
 
   if (defined $opt{'dump'}) {
@@ -149,27 +157,12 @@ sub cmdline_run {
       return 1;
     }
 
-    # kluge to support old check_bayes_db operation
-    if ( defined $bayes_override_path ) {
-      # init() above ties to the db r/o and leaves it that way
-      # so we need to untie before dumping (it'll reopen)
-      $spamtest->finish_learner();
-      $spamtest->{conf}->{bayes_path} = $bayes_override_path;
-    }
-
     $spamtest->dump_bayes_db($magic, $toks, $opt{'regexp'});
     $spamtest->finish_learner();
     return 0;
   }
 
   if (defined $opt{'import'}) {
-    if ( defined $bayes_override_path ) {
-      # init() above ties to the db r/o and leaves it that way
-      # so we need to untie before dumping (it'll reopen)
-      $spamtest->finish_learner();
-      $spamtest->{conf}->{bayes_path} = $bayes_override_path;
-    }
-
     my $ret = $spamtest->{bayes_scanner}->{store}->perform_upgrade();
     $spamtest->finish_learner();
     return (!$ret);

@@ -78,10 +78,10 @@ Options:
  --forget			   Forget a message
  --rebuild			   Rebuild the database if needed
  --force-expire			   Force an expiry run, rebuild every time
+ --dbpath <path>                   Allows commandline override (in bayes_path form)
+                                   for where to read the Bayes DB from
  --dump [all|data|magic]           Display the contents of the Bayes database
                                    Takes optional argument for what to display
-  --dbpath <path>                  For dump/import only, specifies (in bayes_path form)
-                                   where to read the Bayes DB from
   --regexp <re>                    For dump only, specifies which tokens to
                                    dump based on a regular expression.
  -f file, --folders=file           Read list of files/directories from file
@@ -351,15 +351,16 @@ Please see the EXPIRATION section below.
 
 Forget a given message previously learnt.
 
+=item B<--dbpath>
+
+Allows a commandline override of the I<bayes_path> configuration option.
+
 =item B<--dump> I<option>
 
 Display the contents of the Bayes database.  Without an option or with
 the I<all> option, all magic tokens and data tokens will be displayed.
 I<magic> will only display magic tokens, and I<data> will only display
 the data tokens.
-
-Can also use the B<--dbpath> I<path> option to specify the location of
-the Bayes files to use.
 
 Can also use the B<--regexp> I<RE> option to specify which tokens to
 display based on a regular expression.
