@@ -78,7 +78,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 $VERSION = "2.21";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.89 2002/06/10 11:19:45 hughescr Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.90 2002/06/10 11:28:27 hughescr Exp $';
 
 sub Version { $VERSION; }
 
@@ -921,6 +921,8 @@ sub dbg {
   my ($msg, $codepath, $level) = @_;
   my $dbg=$Mail::SpamAssassin::DEBUG;
 
+  return if (not $dbg->{enabled});
+
   $msg=join('',@{$msg}) if (ref $msg);
 
   if (defined $codepath) {
@@ -931,7 +933,6 @@ sub dbg {
       warn("dbg called with codepath $codepath, but no level threshold (message was \"$msg\"\n");
     }
   }
-  return if (not $dbg->{enabled});
   # Negative levels are just level numbers, the more negative, the more debug
   return if (defined $level and $level<0 and not $dbg->{$codepath} <= $level);
   # Positive levels are bit fields
