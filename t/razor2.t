@@ -51,7 +51,7 @@ skip_all_patterns($razor_not_available);
 %patterns = ();
 %anti_patterns = (
 
-q{ Listed in Razor v2 }, 'nonspam',
+q{ Listed in Razor2 }, 'nonspam',
 
 );
 
