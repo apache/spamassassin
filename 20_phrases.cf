@@ -232,23 +232,11 @@ describe MICRO_CAP_WARNING	SEC-mandated penny-stock warning
 body NOT_ADVISOR		/not a registered investment advisor/i
 describe NOT_ADVISOR		Not registered investment advisor
 
-body FREE_CONSULTATION		/FREE CONSULTATION/i
-describe FREE_CONSULTATION	Offers a consultation for nothing
-
 body SOME_BREAKTHROUGH		/\b(?:science|medical|major|scientific|fundamental|technology|revolutionary)\s+breakthrough/i
 describe SOME_BREAKTHROUGH	Describes some sort of breakthrough
 
 body SELECTED_YOU		/\b(?:you (?:have been|were) selected|\bwe (?:have )?selected you)/i
 describe SELECTED_YOU		They have selected you for something
-
-# somehow "/name.*\bcredit.?card\b/is" won't match, even if
-# it's there.  *boggle* (contrib: WW)
-body WANTS_CREDIT_CARD          /\bcredit.?card\s+order/i
-describe WANTS_CREDIT_CARD      Asks for credit card details
-
-# (contrib: WW)
-body ASKS_BILLING_ADDRESS       /\bbilling address\b/i
-describe ASKS_BILLING_ADDRESS   Asks for a billing address
 
 # (contrib: skod)
 body PRINT_FORM_SIGNATURE	/Sign(?:ature)?\s*(?:here|please)?:.{0,30}___*/i
@@ -282,22 +270,8 @@ describe REMOVAL_INSTRUCTIONS	Gives instructions for removal from list
 body CANNOT_BE_SPAM		/cannot be considered spam/i
 describe CANNOT_BE_SPAM		Claims "cannot be considered spam"
 
-# (contrib: WW)
-body THIS_AINT_SPAM             /This.{0,30}is not (?:a )?spam/is
-describe THIS_AINT_SPAM         Claims "This is not spam"
-
-# (contrib: WW)
-body WE_HATE_SPAM               /We .{0,30}oppose the use of SPAM/is
-describe WE_HATE_SPAM           We strongly oppose the use of spam email too
-
 body THIS_IS_AN_AD		/this message is an advertisement/i
 describe THIS_IS_AN_AD		Says "this is an advertisement" (thanks!)
-
-body HR_3113                    /H\.\s*R\.\s*3113/is
-describe HR_3113                Mentions Spam law "HR 3113"
-
-body UCE_MAIL_ACT               /Unsolicited Commercial Electronic Mail Act/
-describe UCE_MAIL_ACT           Mentions Spam Law "UCE-Mail Act"
 
 # Jul 3 2002 jm: modified PENIS_ENLARGE patterns: removed "add", replaced with
 # "inches", because that seems to be another typical word in the pattern.
@@ -888,8 +862,6 @@ rawbody SPAM_FORM_INPUT         /<input name=.{0,5}submit.{0,99} Submit By E-Mai
 describe SPAM_FORM_INPUT        Form for verifying email address
 body INTL_EXEC_GUILD            /International Executive Guild/
 describe INTL_EXEC_GUILD        Well known spam senders
-body IN_ACCORDANCE_WITH    /has been sent in accordance with/
-describe IN_ACCORDANCE_WITH Claims to be in accordance with some law
 
 body CHANGE_TERMS               /\bstrictly based on the following terms and conditions\b/i
 describe CHANGE_TERMS           Terms and conditions
