@@ -151,19 +151,22 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 - (for rc and prerelease builds) copy the tarballs to the website.
 
-        cp ~/site/released/Mail-SpamAssassin-[VERSION].* \
+        cp -p ~/site/released/Mail-SpamAssassin-[VERSION].* \
             /www/spamassassin.apache.org/released/
 
 - (for full release builds) copy the tarballs to www.apache.org/dist:
 
         version=X.Y.Z
-        cp ~/site/released/Mail-SpamAssassin-$version.* \
+        cp -p ~/site/released/Mail-SpamAssassin-$version.* \
             /www/www.apache.org/dist/spamassassin/source
 
         cd /www/www.apache.org/dist/spamassassin
-        ln -s source/Mail-SpamAssassin-$version.* .
+        cp -p source/Mail-SpamAssassin-$version.* .
 
         chmod -R g+w /www/www.apache.org/dist/spamassassin
+
+  [note: the ASF archives documentation claims that symlinks are
+  supported. This is not the case for some mirrors, so use "cp" instead.]
 
 - (for full release builds) remove release tarballs from now-obsolete
   versions from dist:
