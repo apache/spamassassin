@@ -349,6 +349,27 @@ Mail::SpamAssassin::Conf class (see the 'doc' directory).
 	"~/.spamassassin.cf" file, if they like.  (spamd disables this for
 	security and increased speed.)
 
+Take a look at the "Mail_SpamAssassin_Conf.txt" file in the "doc"
+directory to see what can be set.  Common first-time tweaks include:
+
+  - required_hits
+
+	Set this higher to make SpamAssassin less sensitive.
+
+  - rewrite_subject
+
+  	Turn off Subject-line rewriting with this.
+
+  - ok_locales
+
+	If you expect to receive mail in non-ISO-8859 character sets (ie.
+	Chinese, Cyrillic, Japanese, Korean, or Thai) then set this.
+
+  - defang_mime
+
+	By default, SpamAssassin will 'de-fang' MIME messages, turning
+	them into content-type text/plain.  This will turn that behaviour
+	off.
 
 
 Locali[sz]ation
