@@ -704,8 +704,12 @@ sub get_body_from_msg {
 sub sync {
   my ($self, $opts) = @_;
   if (!$self->{main}->{conf}->{use_bayes}) { return 0; }
+
+  dbg("Syncing Bayes journal and expiring old tokens...");
   $self->{store}->sync_journal($opts);
   $self->{store}->expire_old_tokens($opts);
+  dbg("Syncing complete.");
+
   return 0;
 }
 
@@ -929,10 +933,7 @@ sub scan {
 
   # handle expiry and journal syncing
   if ($self->{store}->expiry_due()) {
-    dbg ("expiration is due: expiring old tokens now...");
-    $self->{store}->sync_journal();
-    $self->{store}->expire_old_tokens();
-    dbg ("expiration done");
+    $self->sync();
   }
 
   $self->{store}->untie_db();

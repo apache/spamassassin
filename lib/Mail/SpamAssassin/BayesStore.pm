@@ -401,6 +401,9 @@ sub expiry_due {
   # grr, wierd warning about non-numeric data. work around it
   if (!$ntoks || $ntoks =~ /\D/) 
 		{ $ntoks = $self->{expiry_min_db_size} + 1; }
+
+  dbg("Bayes DB expiry: Tokens in DB: $ntoks, Expiry min size: ".$self->{expiry_min_db_size},'bayes','-1');
+
   if ($ntoks <= $self->{expiry_min_db_size}) {
     return 0;
   }
@@ -412,6 +415,9 @@ sub expiry_due {
 
   my $limit = $self->{expiry_count};
   my $now = $self->scan_count_get();
+
+  dbg("Bayes DB expiry: Now: $now, Last: $last, Limit: $limit, Oldest: $oldest",'bayes','-1');
+
   if ($now - $last > $limit/2 && $now - $oldest > $limit) {
     return 1;
   }

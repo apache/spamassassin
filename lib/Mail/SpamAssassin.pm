@@ -94,7 +94,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.175 2003/02/22 21:45:41 felicity Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.176 2003/02/23 20:46:32 felicity Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -249,6 +249,7 @@ sub new {
   $DEBUG->{rbl}=0;
   $DEBUG->{timelog}=0;
   $DEBUG->{dnsavailable}=-2;
+  $DEBUG->{bayes}=0;
   # Bitfield:
   # header regex: 1 | body-text: 2 | uri tests: 4 | raw-body-text: 8
   # full-text regexp: 16 | run_eval_tests: 32 | run_rbl_eval_tests: 64
