@@ -245,3 +245,11 @@ test LINK_TO_NO_SCHEME fail <a href="http://www.foo.com">foo</a>
 test LINK_TO_NO_SCHEME fail <a href="nextpage.html">foo</a>
 test LINK_TO_NO_SCHEME fail <a href="../index.html">foo</a>
 
+test HTML_WIN_OPEN ok <script> win=window.open("http://foo/") win.blur() window.focus() </script>
+test HTML_WIN_OPEN ok <body onload='win=window.open("http://foo/")'>
+test HTML_WIN_OPEN fail The window.open() function
+
+test HTML_WIN_BLUR ok <script> win=window.open("http://foo/") win.blur() window.focus() </script>
+test HTML_WIN_BLUR ok <body onload='win=window.open("http://foo/"); win.blur()'>
+test HTML_WIN_BLUR fail The win.blur() function
+
