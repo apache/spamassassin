@@ -319,7 +319,7 @@ sub expire_old_tokens_trapped {
     return 0 unless (%delta);
 
     # This will skip the for loop if debugging isn't enabled ...
-    if ($Mail::SpamAssassin::DEBUG) {
+    if (Mail::SpamAssassin::dbg_check('bayes')) {
       dbg("bayes: atime\ttoken reduction");
       dbg("bayes: ========\t===============");
       for(my $i = 1; $i<=$max_expire_mult; $i <<= 1) {

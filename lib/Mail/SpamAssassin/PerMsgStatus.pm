@@ -1459,13 +1459,14 @@ sub get {
 
 sub ran_rule_debug_code {
   my ($self, $rulename, $ruletype, $bit) = @_;
+  my $dbgcache = Mail::SpamAssassin::dbg_check('rules');
 
-  return '' if (!$Mail::SpamAssassin::DEBUG && !$self->{save_pattern_hits});
+  return '' if (!$dbgcache && !$self->{save_pattern_hits});
 
   my $log_hits_code = '';
   my $save_hits_code = '';
 
-  if ($Mail::SpamAssassin::DEBUG) {
+  if ($dbgcache) {
     # note: keep this in 'single quotes' to avoid the $ & performance hit,
     # unless specifically requested by the caller.
     $log_hits_code = ': match=\'$&\'';
@@ -1833,7 +1834,7 @@ sub get_uri_list {
   $self->{uri_list} = \@uris;
 
   # list out the URLs for debugging ...
-  if ($Mail::SpamAssassin::DEBUG) {
+  if (Mail::SpamAssassin::dbg_check('uri')) {
     foreach my $nuri (@uris) {
       dbg("uri: uri found: $nuri");
     }
@@ -2256,7 +2257,7 @@ sub run_eval_tests {
   my ($self, $evalhash, $prepend2desc, @extraevalargs) = @_;
   local ($_);
   
-  my $debugenabled = $Mail::SpamAssassin::DEBUG;
+  my $debugenabled = Mail::SpamAssassin::dbg_check();
 
   my $scoreset = $self->{conf}->get_score_set();
   while (my ($rulename, $test) = each %{$evalhash}) {
@@ -2354,8 +2355,6 @@ sub run_rbl_eval_tests {
     return 0;
   }
   
-  my $debugenabled = $Mail::SpamAssassin::DEBUG;
-
   while (my ($rulename, $test) = each %{$evalhash}) {
     my $score = $self->{conf}->{scores}->{$rulename};
     next unless $score;

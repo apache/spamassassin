@@ -208,7 +208,7 @@ sub _check_spf {
     $query = Mail::SPF::Query->new (ip => $ip,
 				    sender => $sender,
 				    helo => $helo,
-				    debug => $Mail::SpamAssassin::DEBUG->{rbl},
+				    debug => Mail::SpamAssassin::dbg_check('+rbl'),
 				    trusted => 1);
   };
 

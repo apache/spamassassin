@@ -1656,6 +1656,26 @@ sub dbg {
   }
 }
 
+# returns whether or not debugging is enabled in general or (if specified) for
+# a certain facility
+sub dbg_check {
+  my $facility = shift;
+  my $useall = 1;
+
+  if (defined $facility) {
+    if ($facility =~ /^(\+)(.+)$/) {
+      $facility = $2;
+      $useall = 0;
+    }
+    return($Mail::SpamAssassin::DEBUG && (
+      ($useall && $Mail::SpamAssassin::facilities{all}) ||
+      $Mail::SpamAssassin::facilities{$facility}
+      ));
+  }
+
+  return($Mail::SpamAssassin::DEBUG && $Mail::SpamAssassin::facilities{all});
+}
+
 # usage: info("facility: message")
 # This is used for informational messages indicating a normal, but
 # significant, condition.  This should be very infrequently called.
@@ -1673,6 +1693,31 @@ sub info {
   if ($facilities{all} || $facilities{info} || $facilities{$facility}) {
     warn "info: $facility: $message\n";
   }
+}
+
+# returns whether or not info output is enabled in general or (if specified) for
+# a certain facility
+sub info_check {
+  my $facility = shift;
+  my $useall = 1;
+
+  if (defined $facility) {
+    if ($facility =~ /^(\+)(.+)$/) {
+      $facility = $2;
+      $useall = 0;
+    }
+    return($Mail::SpamAssassin::INFO && (
+      ($useall &&
+       ($Mail::SpamAssassin::facilities{all} ||
+        $Mail::SpamAssassin::facilities{info})) ||
+      $Mail::SpamAssassin::facilities{$facility}
+      ));
+  }
+
+  return($Mail::SpamAssassin::INFO && (
+    $Mail::SpamAssassin::facilities{all} ||
+    $Mail::SpamAssassin::facilities{info}
+  ));
 }
 
 # sa_die -- used to die with a useful exit code.
