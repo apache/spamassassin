@@ -91,7 +91,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.115.2.21 2002/10/16 12:23:45 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.115.2.22 2003/01/30 12:23:00 msquadrat Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -926,7 +926,7 @@ sub first_existing_path {
   my $path;
   foreach my $p (@_) {
     $path = $self->sed_path ($p);
-    if (-e $path) { return $path; }
+    if (defined $path && -e $path) { return $path; }
   }
   $path;
 }
