@@ -213,7 +213,7 @@ first several lines of the "spamassassin" or "spamd" scripts.
 After installation, try "perldoc Mail::SpamAssassin::Conf" to see what
 can be set. Common first-time tweaks include:
 
-  - required_hits
+  - required_score
 
 	Set this higher to make SpamAssassin less sensitive.
         If you are installing SpamAssassin system-wide, this is

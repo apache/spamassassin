@@ -73,7 +73,7 @@ onfail => sub {
 
 tstprefs ("
 	# set super low threshold, so always marked as spam
-	required_hits -10000.0
+	required_score -10000.0
 	# add a fake lexically final test so every other hit will always be
 	# followed by a comma in the X-Spam-Status header
 	body ZZZZZZZZ /./
