@@ -868,9 +868,6 @@ body __FRAUD_WDR	/\bprivate lawyer\b/i
 body __FRAUD_UUY	/\blegitimate business(?:es)?\b/i
 body __FRAUD_MLY	/\b(?:reply|respond)\b[^.]{0,50}\b(?:to|through)\b[^.]{0,50}\@\b/i
 
-# bug 2733
-body T_HTML_WEB_BUGS               eval:html_test('web_bugs_2')
-
 # bug 3661
 body T_HTML_INVIS_SPAN	eval:html_test('span_invisible')
 body T_HTML_INVIS_TEXT	eval:html_test('invisible_text')
