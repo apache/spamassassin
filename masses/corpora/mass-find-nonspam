@@ -109,19 +109,30 @@ $|++;
 
 my $format = "dir";		# for now. TODO
 
+use vars qw( $opt_single 
+);
+use Getopt::Long;
+GetOptions("single");
+
 my $iter = new Mail::SpamAssassin::ArchiveIterator ({
         'opt_j' => 1,
         'opt_n' => 1,
         'opt_all' => 1,
   });
 
-my @targets = ();
-foreach (@ARGV) {
-  push (@targets, "ham:$format:$_");
-}
+if ($opt_single) {
+  my @data = <STDIN>;
+  wanted ("stdin", 0, \@data);
+  exit 1;
 
-$iter->set_functions (\&wanted, sub { });
-$iter->run (@targets);
+} else {
+  my @targets = ();
+  foreach (@ARGV) {
+    push (@targets, "ham:$format:$_");
+  }
+  $iter->set_functions (\&wanted, sub { });
+  $iter->run (@targets);
+}
 
 #foreach my $from (sort {$count{$b} <=> $count{$a}} keys %count) {
 #print "$count{$from}   $from $lastsubject{$from}  $lastid{$from}\n";
@@ -146,7 +157,11 @@ sub wanted {
     || get_or_empty($ma,"Message-Id") =~ /${killfile_message_ids}/o
     || get_or_empty($ma,"Received") =~ /${killfile_receiveds}/o)
   {
-    print "$id\n";
+    if ($opt_single) {
+      exit 0;
+    } else {
+      print "$id\n";
+    }
   }
 
   #chomp $from;
