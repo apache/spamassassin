@@ -96,9 +96,6 @@ sub new {
     $self->{pattern_hits} = { };
   }
 
-  # HTML parser stuff
-  $self->{html} = {};
-
   bless ($self, $class);
   $self;
 }
@@ -150,6 +147,11 @@ sub check {
     # do body tests with decoded portions
     {
       my $decoded = $self->get_decoded_stripped_body_text_array();
+
+      # TODO: this has been put on the metadata object.  should we
+      # use it directly there?
+      $self->{html} = $self->{msg}->{metadata}->{html};
+
       # warn "dbg ". join ("", @{$decoded}). "\n";
       $self->do_body_tests($decoded);
       $self->do_body_eval_tests($decoded);
