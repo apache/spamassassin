@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.648 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.649 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -49,31 +49,6 @@ full T_SPRINTF_5X	/[^-][A-F1-9][A-F0-9]{5,7}-[A-F1-9][A-F0-9]{5,7}-[A-F1-9][A-F0
 # (time_t/4444)
 header T_TIME_OVER_4444	ALL =~ /\D23[67][0-9][0-9][0-9]\D/
 
-# http://www.linux.or.jp/~ukai/l-u-spam/local.cf
-header T_LJ_MISYOUDAKU Subject =~ /L\$>5Bz/
-describe T_LJ_MISYOUDAKU Misyoudaku
-header T_LJ_BANG_BANG Subject =~ /(!\*|\033\$[B@]).*(!\*|\033\([BJ]!)/
-describe T_LJ_BANG_BANG !...!
-header T_LJ_STAR Subject =~ /(\"\(|\*)/
-describe T_LJ_STAR *
-header T_LJ_KOUKOKU Subject =~ /9-9p/
-describe T_LJ_KOUKOKU KOUKOKU
-body T_LJ_HAISHINTEISHI /G\[\?\.(..)*(Dd;_|ITMW)/
-describe T_LJ_HAISHINTEISHI Haishin Teishi
-body T_LJ_KOUDOKUKAIJO /9XFI(..)*2r=\|/
-describe T_LJ_KOUDOKUKAIJO Koudoku Kaijo
-body T_LJ_MURYOU /L5NA/
-describe T_LJ_MURYOU Muryou
-header T_LJ_X_MAILER         X-Mailer =~ /(GpsMailer|SpireMail|IM2000 Version|Pinta Magazine|MultiMail|BSMTP DLL|E-Magazine|Direct Email|Achi-Kochi Mail|MagicalMail|InternetPost for Active Platform|Web Based Pronto)/
-describe T_LJ_X_MAILER       spammer's choice of X-Mailer
-header T_LJ_X_MAILER_U       X-MAILER =~ /Mail Explorer For Internet /
-describe T_LJ_X_MAILER_U     spammer's choice of X-MAILER
-header T_LJ_X_MAIL_AGENT     X-Mail-Agent =~ /(Extra Japan)/
-describe T_LJ_X_MAIL_AGENT   spammer's choice of X-Mail-Agent
-# also http://tlec.linux.or.jp/docs/user_prefs
-meta T_LJ_MISYOUDAKUKOUKOKU T_LJ_MISYOUDAKU && T_LJ_KOUKOKU && T_LJ_STAR
-describe T_LJ_MISYOUDAKUKOUKOKU T_LJ_MISYOUDAKU && T_LJ_KOUKOKU && T_LJ_STAR
-
 # replacements for PORN_4; split out sub-patterns as some are more FP-prone
 # than others.
 uri T_PORN_URL_XXX         /^https?:\/\/[\w\.-]*xxx[\w-]*\./
@@ -90,12 +65,6 @@ uri T_PORN_URL_MISC        /^https?:\/\/[\w\.-]*(pussy|nympho|porn|hard-?core|ta
 header T_KOREAN_UCE_SUBJECT	Subject:raw =~ /\?B\?KLGksO0p/
 
 header T_DATE_DOUBLE_DASH	Date =~ /:\d\d --\d\d\d\d$/
-
-# new blacklist!  very good one!
-header T_RCVD_IN_CBL	eval:check_rbl_txt('cbl', 'cbl.abuseat.org.')
-describe T_RCVD_IN_CBL	Received via a relay in cbl.abuseat.org
-tflags T_RCVD_IN_CBL	net
-score T_RCVD_IN_CBL	0.1
 
 header T_RCVD_IN_SORBS_BADCONF	eval:check_rbl_sub('sorbs', '127.0.0.11')
 describe T_RCVD_IN_SORBS_BADCONF SORBS: sender uses invalid DNS A or MX records
@@ -119,11 +88,13 @@ header T_SPF_SOFTFAIL	eval:check_for_spf_softfail()
 tflags T_SPF_SOFTFAIL	net
 score T_SPF_SOFTFAIL	0.1
 
-
-header T_ALL_RELAYS_NEAR_MXES	eval:check_for_all_relays_near_mxes()
-tflags T_ALL_RELAYS_NEAR_MXES	net nice
-score T_ALL_RELAYS_NEAR_MXES	-0.1
-describe T_ALL_RELAYS_NEAR_MXES	All relays are near to their MXes
+# Not good, esp. considering how *slow* it runs..
+# 17.640   4.1041  29.0741    0.124   0.69   -0.10  T_ALL_RELAYS_NEAR_MXES
+# However, combined with SBL it might work out useful...
+#header T_ALL_RELAYS_NEAR_MXES	eval:check_for_all_relays_near_mxes()
+#tflags T_ALL_RELAYS_NEAR_MXES	net nice
+#score T_ALL_RELAYS_NEAR_MXES	-0.1
+#describe T_ALL_RELAYS_NEAR_MXES	All relays are near to their MXes
 
 # try out new versions of username in subject ...
 # "user@domain.com" in the subject, case insensitive
@@ -142,11 +113,7 @@ header __T_DOLLAR_MUA_2		X-Mailer =~ /^Microsoft (?:CDO|Outlook(?: 8|,Build 10| 
 meta T_MSGID_DOLLARS_3		(__OUTLOOK_DOLLARS_MSGID && !__T_DOLLAR_MUA_1 && !__UNUSABLE_MSGID)
 meta T_MSGID_DOLLARS_4		(__OUTLOOK_DOLLARS_MSGID && !__T_DOLLAR_MUA_2 && !__UNUSABLE_MSGID)
 
-# Visi is back again.
-header T_RCVD_IN_RSL	 	rbleval:check_rbl_txt('rsl', 'relays.visi.com.')
-describe T_RCVD_IN_RSL		Received via a relay in RSL
-tflags T_RCVD_IN_RSL		net
-
+# This is hitting nothing.  Maybe it's gone again...
 header T_RCVD_IN_PDL	 	rbleval:check_rbl_txt('pdl-notfirsthop', 'dialups.visi.com.')
 describe T_RCVD_IN_PDL		Received via a relay in PDL, http://www.pan-am.ca/pdl/
 tflags T_RCVD_IN_PDL		net
