@@ -266,7 +266,7 @@ describe HTML_MIME_NO_HTML_TAG	HTML-only message, but there is HTML tag
 
 body __HTML_COMMENT_RATIO	eval:html_range('total_comment_ratio','0.70','1.00')
 describe HTML_COMMENT_RATIO	HTML comments are large percentage of message
-meta HTML_COMMENT_RATIO		__HTML_COMMENT_RATIO && MIME_HTML_ONLY
+meta HTML_COMMENT_RATIO		__HTML_COMMENT_RATIO && __MIME_HTML_ONLY
 
 ###########################################################################
 # rawbody HTML tests

@@ -689,7 +689,7 @@ describe DIET			Lose Weight Spam
 body LONG_DISTANCE	        /\b(?:Unlimited|per minute|free).{1,9}Long Distance/i
 describe LONG_DISTANCE		Long Distance Phone Offer
 
-body REVERSE_AGING	        /\breverses? aging\b/i
+body REVERSE_AGING 		/\breverse.{1,5}aging\b/i
 describe REVERSE_AGING		Reverses Aging
 
 body HAIR_LOSS			/\b(?=[gnrt])(?:thinn?ing|restore|grow|new) hair|\bhair loss/i
@@ -1018,3 +1018,14 @@ meta NIGERIAN_BODY_GOVT_3	((__NIGERIAN_CODE_CONDUCT + __NIGERIAN_CIV_SERVICE + _
 body WALAA			/instructions and walaa\b/i
 describe WALAA			Illiterate spammer cannot spell 'voila'
 
+body		LOSEWEIGHT	/\blo+se.{1,10}\d+.{1,3}(?:lb|pound|kg|kilo)/i
+describe	LOSEWEIGHT	Describes weight loss
+
+body		LOSEBODYFAT	/(?:Body Fat Loss|Loss of body fat|lose.{1,10}body fat)/i
+describe	LOSEBODYFAT	Describes body fat loss
+
+body		RAVAGESOFAGING	/ravages of aging/i
+describe	RAVAGESOFAGING	Describes the ravages of aging
+
+body GENERIC_VIAGRA		/Generic Viagra/
+describe GENERIC_VIAGRA	Mentions Generic Viagra
