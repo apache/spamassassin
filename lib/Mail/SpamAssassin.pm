@@ -1130,6 +1130,7 @@ sub compile_now {
   $self->{conf}->{use_bayes_rules} = $use_bayes_rules_value;
   $status->finish();
   $mail->finish();
+  $self->finish_learner();
 
   # load SQL modules now as well
   my $dsn = $self->{conf}->{user_scores_dsn};
