@@ -105,7 +105,7 @@ GetOptions(
   'showdots'             => \$opt{'showdots'},
   'no-sync|nosync|no-rebuild|norebuild' => \$opt{'nosync'},
   'local|L'              => \$opt{'local'},
-  'force-expire'         => \$opt{'force-expire'},
+  'force-expire|expire'  => \$opt{'force-expire'},
   'use-ignores'          => \$opt{'use-ignores'},
 
   'stopafter=i' => \$opt{'stopafter'},
