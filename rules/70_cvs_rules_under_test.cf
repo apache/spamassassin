@@ -1,0 +1,15 @@
+# this file is a placeholder for rules "under probation",
+# ie. checked into CVS for testing.
+#
+# It should not be distributed; if the rules have good stats
+# after a mass-check or two, then fold them into the distributed
+# rules files.
+
+body DOMAIN_4U2         /[\@\.]\S*(?:4u|u2|2u|you2|4you|2you|foryou)\S*\.(?:net|com|org)\b/
+describe DOMAIN_4U2     Domain name containing "4u", "u2" or variants.
+
+body USER_4U2           /\b\S*(?:4u|u2|2u|you2|4you|2you|foryou)\S*\@\S*\.(?:net|com|org)\b/
+describe USER_4U2       Local part containing "4u", "u2" or variants.
+
+header FROM_4U2         From =~ /4u|u2|2u|you2|4you|2you|foryou/i
+describe FROM_4U2       From contains "4u", "u2" or variants.
