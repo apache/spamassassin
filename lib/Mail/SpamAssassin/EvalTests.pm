@@ -3353,7 +3353,7 @@ sub check_host_domain_ratio {
       $new =~ s/v/(?:v|\\\/)/g;
 
       # mad skillz yo
-      $new =~ s/s$/\[sz\]/g;
+      $new =~ s/s$/\[sz\]/;
 
       # cache both the word and the new RE
       push(@{$obfu_cache{$word}}, qr/\b$word\b/i, qr/\b$new\b/i);
@@ -3363,7 +3363,7 @@ sub check_host_domain_ratio {
     ($word,$new) = @{$obfu_cache{$word}};
 
     foreach (@{$body}) {
-      if (!/$word/ && /$new/) {
+      if (/$new/ && !/$word/) {
 	#warn ">> $new\n$_\n\n";
         return 1;
       }
