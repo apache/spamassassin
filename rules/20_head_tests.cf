@@ -262,7 +262,7 @@ header HEAD_ILLEGAL_CHARS	eval:check_illegal_chars('ALL','0.010','2')
 describe HEAD_ILLEGAL_CHARS	Headers have too many raw illegal characters
 
 ###########################################################################
-# legal characters that are MIME encoded, but don't need to be
+# MIME encoding with spam characteristics
 
 header __SUBJECT_NEEDS_MIME	Subject =~ /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\xff]/
 header __SUBJECT_ENCODED_QP	Subject:raw =~ /=\?\S+\?Q\?/i
@@ -283,6 +283,9 @@ describe FROM_EXCESS_QP		From: quoted-printable encoded unnecessarily
 
 meta FROM_EXCESS_BASE64		__FROM_ENCODED_B64 && !__FROM_NEEDS_MIME
 describe FROM_EXCESS_BASE64	From: base64 encoded unnecessarily
+
+header SUBJECT_ENCODED_TWICE	Subject:raw =~ /=\?\S+\?[BQ]\?.*=\?\S+\?[BQ]\?/i
+describe SUBJECT_ENCODED_TWICE	Subject: MIME encoded twice
 
 ###########################################################################
 # ADV tags in various languages
