@@ -409,9 +409,6 @@ body T_HTML_TEXT_CONTRAST_32	eval:html_test('text_contrast_32')
 body T_PIPE_OBFU           /[a-z]\|[a-z]/i
 describe T_PIPE_OBFU       Words dis|guised with a pipe sym|bol
 
-body T_HTML_COMMENT_TAG		eval:html_text('comment', '=~ /<.*?>/')
-describe T_HTML_COMMENT_TAG	HTML comment probably contains HTML tag
-
 # Should catch Atriks, for one
 uri T_LONG_HOSTNAME_25		/^https?:\/\/[a-z0-9]{25,29}\./i
 uri T_LONG_HOSTNAME_30		/^https?:\/\/[a-z0-9]{30,40}\./i
@@ -725,3 +722,25 @@ rawbody T_IMG_ENDS_IN_SLASH /<img [^>]*src=[\"\']http:\/\/[^\"\'>]+\/[\"\']/i
 body T_HTML_IMG_ENDS_SLASH	eval:html_text('img_src', '=~ m{/$}')
 body T_HTML_WEB_BUGS		eval:html_text('img_src', '=~ /\.(?:pl|cgi|php|asp|jsp|cfm)\b/i')
 describe T_HTML_WEB_BUGS	Image tag intended to identify you
+
+# revisit comment ratio
+body __HTML_COMMENT_RATIO_75	eval:html_range('total_comment_ratio','0.75','1.00')
+meta HTML_COMMENT_RATIO_75	__HTML_COMMENT_RATIO && MIME_HTML_ONLY
+describe HTML_COMMENT_RATIO_75	HTML comments are large percentage of message
+
+body __HTML_COMMENT_RATIO_80	eval:html_range('total_comment_ratio','0.80','1.00')
+meta HTML_COMMENT_RATIO_80	__HTML_COMMENT_RATIO && MIME_HTML_ONLY
+describe HTML_COMMENT_RATIO_80	HTML comments are large percentage of message
+
+body __HTML_COMMENT_RATIO_85	eval:html_range('total_comment_ratio','0.85','1.00')
+meta HTML_COMMENT_RATIO_85	__HTML_COMMENT_RATIO && MIME_HTML_ONLY
+describe HTML_COMMENT_RATIO_85	HTML comments are large percentage of message
+
+body __HTML_COMMENT_RATIO_90	eval:html_range('total_comment_ratio','0.90','1.00')
+meta HTML_COMMENT_RATIO_90	__HTML_COMMENT_RATIO && MIME_HTML_ONLY
+describe HTML_COMMENT_RATIO_90	HTML comments are large percentage of message
+
+body __HTML_COMMENT_RATIO_95	eval:html_range('total_comment_ratio','0.95','1.00')
+meta HTML_COMMENT_RATIO_95	__HTML_COMMENT_RATIO && MIME_HTML_ONLY
+describe HTML_COMMENT_RATIO_95	HTML comments are large percentage of message
+
