@@ -2310,7 +2310,12 @@ sub _check_mime_header {
     $self->{mime_body_text_count}++;
   }
 
-  $self->{t_mime_base64_count}++ if $cte =~ /base64/;
+  if ($cte =~ /base64/) {
+    $self->{t_mime_base64_count}++;
+  }
+  elsif ($cte =~ /quoted-printable/) {
+    $self->{t_mime_qp_count}++;
+  }
 
   if ($ctype =~ /^text/ &&
       $cte =~ /base64/ &&
@@ -2331,8 +2336,19 @@ sub _check_mime_header {
     $self->{t_mime_base64_without_name} = 1;
   }
 
+  if (!$name &&
+      $cte =~ /base64/ &&
+      $charset =~ /\b(?:us-ascii|iso-8859-(?:[12349]|1[0345])|windows-(?:1250|1252))\b/)
+  {
+    $self->{t_mime_base64_latin} = 1;
+  }
+
   if ($cte =~ /base64/ && $charset =~ /iso-8859/) {
     $self->{t_mime_base64_iso_8859} = 1;
+  }
+
+  if ($cte =~ /quoted-printable/ && $cd =~ /inline/ && !$charset) {
+    $self->{t_mime_qp_inline_no_charset} = 1;
   }
 
   if ($ctype =~ /^text\/html/ &&
@@ -2416,16 +2432,18 @@ sub _check_attachments {
   $self->{mime_long_line_qp} = 0;
   $self->{mime_missing_boundary} = 0;
   $self->{mime_qp_illegal} = 0;
+  $self->{mime_qp_inline_no_charset} = 0;
   $self->{mime_qp_ratio} = 0;
   $self->{mime_suspect_name} = 0;
-  $self->{t_mime_base64_count} = 0;
   $self->{t_mime_base64_blanks} = 0;
+  $self->{t_mime_base64_count} = 0;
   $self->{t_mime_base64_encoded_text} = 0;
   $self->{t_mime_base64_illegal} = 0;
   $self->{t_mime_base64_iso_8859} = 0;
-  $self->{t_mime_base64_no_blank} = 0;
-  $self->{t_mime_base64_without_name} = 0;
+  $self->{t_mime_base64_latin} = 0;
   $self->{t_mime_base64_short_lines} = 0;
+  $self->{t_mime_base64_without_name} = 0;
+  $self->{t_mime_qp_count} = 0;
 
   # message headers
   $ctype = $self->get('Content-Type');
@@ -2497,9 +2515,6 @@ sub _check_attachments {
       if (/$re_ctype/) { $ctype = lc($1); }
       elsif (/$re_cte/) { $cte = lc($1); }
       elsif (/$re_cd/) { $cd = lc($1); }
-      if ($cte =~ /base64/ && m@^[A-Za-z0-9/+=]{60,}@) {
-	$self->{t_mime_base64_no_blank} = 1;
-      }
     }
     if ($previous =~ /^begin [0-7]{3} ./ && /^M35J0``,````\$````/) {
       $self->{microsoft_executable} = 1;

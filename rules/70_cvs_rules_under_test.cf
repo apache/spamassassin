@@ -136,16 +136,18 @@ meta T_HTML_FAKED_QUALCOMM	(__ANY_QUALCOMM_MUA && __MIME_HTML && !__TAG_EXISTS_H
 # bug 1261
 rawbody T_BASE64_ENC_TEXT		eval:check_for_mime('t_mime_base64_encoded_text')
 
-# MIME_BASE64 control rule
+# MIME Content-Transfer-Encoding control rules
 rawbody T_MIME_BASE64			eval:check_for_mime('t_mime_base64_count')
+rawbody T_MIME_QP			eval:check_for_mime('t_mime_qp_count')
 
 # 2003-03-06: quinlan
 rawbody T_MIME_BASE64_BLANKS		eval:check_for_mime('t_mime_base64_blanks')
 rawbody T_MIME_BASE64_ILLEGAL		eval:check_for_mime('t_mime_base64_illegal')
 rawbody T_MIME_BASE64_ISO_8859		eval:check_for_mime('t_mime_base64_iso_8859')
-rawbody T_MIME_BASE64_NO_BLANK		eval:check_for_mime('t_mime_base64_no_blank')
+rawbody T_MIME_BASE64_LATIN		eval:check_for_mime('t_mime_base64_latin')
 rawbody T_MIME_BASE64_SHORT_LINES	eval:check_for_mime('t_mime_base64_short_lines')
 rawbody T_MIME_BASE64_WITHOUT_NAME	eval:check_for_mime('t_mime_base64_without_name')
+rawbody T_MIME_QP_INLINE_NO_CHARSET	eval:check_for_mime('t_mime_qp_inline_no_charset')
 
 # 2003-02-28: quinlan
 # Note: I'll probably rename these later if they get added.
