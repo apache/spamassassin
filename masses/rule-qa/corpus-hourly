@@ -35,7 +35,7 @@ sub version {
     my $line;
     if (open(TESTING, "$opt{tree}/rules/70_cvs_rules_under_test.cf")) {
 	chomp($line = <TESTING>);
-	if ($line =~ m/.*Revision:\s*(\S+).*/) {
+	if ($line =~ m/^#.*Rev(?:ision)?:\s*(\S+).*/) {
 	    $revision = $1;
 	}
 	close(TESTING);
@@ -88,18 +88,19 @@ sub locate {
 	while (my $line = <FILE>) {
 	    last if $line !~ /^#/;
 	    $time++ if $line =~ /\b(?!08)\d\d:\d\d:\d\d\b/;
-	    $tag++ if $line =~ /CURRENT_CORPORA_SUBMIT_VERSION/;
-	    $tag++ if $line =~ /CURRENT_CORPORA_WEEKLY_VERSION/ && /-net-/;
-	    $revision{$_} = $1 if $line =~ m/CVS revision:\s*(\S+)/;
+#	    $tag++ if $line =~ /CURRENT_CORPORA_SUBMIT_VERSION/;
+#	    $tag++ if $line =~ /CURRENT_CORPORA_WEEKLY_VERSION/ && /-net-/;
+	    $revision{$_} = $1 if $line =~ m/(?:CVS|SVN) revision:\s*(\S+)/;
 	}
 	close(FILE);
 	if (!$time) {
 	    $skip .= "# skipped $_: time is between 0800 UTC and 0900 UTC\n";
 	}
-	if (!$tag) {
-	    $skip .= "# skipped $_: tag not CURRENT_CORPORA_SUBMIT_VERSION\n";
-	}
-	($time && $tag);
+#	if (!$tag) {
+#	    $skip .= "# skipped $_: tag not CURRENT_CORPORA_SUBMIT_VERSION\n";
+#	}
+#	($time && $tag);
+	$time;
     } @files;
 }
 

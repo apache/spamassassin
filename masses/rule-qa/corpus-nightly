@@ -32,13 +32,13 @@ fi
 cd $tree
 
 # find current revision
+rm -f weekly-versions.txt
+rm -f nightly-versions.txt
+wget http://rsync.spamassassin.org/weekly-versions.txt
+wget http://rsync.spamassassin.org/nightly-versions.txt
 if [ -n "$net" ]; then
-	rm -f weekly-versions.txt
-	wget http://rsync.spamassassin.org/weekly-versions.txt
 	revision=$(tail -1 weekly-versions.txt|awk '{print $2}')
 else
-	rm -f nightly-versions.txt
-	wget http://rsync.spamassassin.org/nightly-versions.txt
 	revision=$(tail -1 nightly-versions.txt|awk '{print $2}')
 fi
 
