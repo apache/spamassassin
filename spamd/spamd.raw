@@ -151,9 +151,8 @@ GetOptions(
 
 $opt{'help'} and pod2usage(-exitval => $resphash{'EX_USAGE'}, -verbose => 0, -message => 'For more details, use "man spamd"');
 
-
-# make the values of (almost) all parameters which accept file paths absolute, so
-# they are still valid after daemonize()
+# bug 2228: make the values of (almost) all parameters which accept file paths
+# absolute, so they are still valid after daemonize()
 foreach my $opt (qw(
     configpath
     socketpath
@@ -161,8 +160,11 @@ foreach my $opt (qw(
     home_dir_for_helpers
     virtual-config
   )) {
-  $opt{$opt} = File::Spec->rel2abs($opt{$opt}) if($opt{$opt})
+  $opt{$opt} = Mail::SpamAssassin::Util::untaint_file_path (
+                 File::Spec->rel2abs($opt{$opt}) # rel2abs taints the new value!
+               ) if($opt{$opt});
 }
+
 
 # sanity checking on parameters: if --socketpath is used, it means that we're using
 # UNIX domain sockets, none of the IP params are allowed. The code would probably
