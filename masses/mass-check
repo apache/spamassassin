@@ -124,18 +124,12 @@ if ($opt_f) {
 
 if (scalar @targets == 0) { usage(); }
 
-my @debug;
 if (defined $opt_debug) {
-  if ($opt_debug) {
-    @debug = split(/,/, $opt_debug);
-  }
-  else {
-    @debug = ("all");
-  }
+  $opt_debug ||= 'all';
 }
 
 $spamtest = new Mail::SpamAssassin ({
-  'debug'              			=> \@debug,
+  'debug'              			=> $opt_debug,
   'rules_filename'     			=> $opt_c,
   'userprefs_filename' 			=> "$opt_p/user_prefs",
   'site_rules_filename'			=> "$opt_p/local.cf",
