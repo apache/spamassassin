@@ -611,9 +611,8 @@ sub sync_journal_trapped {
   my $showdots = $opts->{showdots};
   my $retirepath = $path.".old";
 
-  # now read the retired journal
-  if (!open (JOURNAL, "<$path")) {
-    warn "bayes: cannot open read $path\n";
+  if (!-r $path) { # will we be able to read the file?
+    warn "bayes: bad permissions on journal, can't read: $path\n";
     return 0;
   }
 
@@ -621,9 +620,15 @@ sub sync_journal_trapped {
   # TODO: use locking here
   if (!rename ($path, $retirepath)) {
     warn "bayes: failed rename $path to $retirepath\n";
-    close(JOURNAL);
     return 0;
   }
+
+  # now read the retired journal
+  if (!open (JOURNAL, "<$retirepath")) {
+    warn "bayes: cannot open for reading $retirepath\n";
+    return 0;
+  }
+
 
   # Read the journal
   while (<JOURNAL>) {
