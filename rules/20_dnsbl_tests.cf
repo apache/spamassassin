@@ -202,28 +202,6 @@ tflags RCVD_IN_WHOIS_INVALID	net
 #reuse RCVD_IN_WHOIS_INVALID	RCVD_IN_RFC_IPWHOIS
 
 # ---------------------------------------------------------------------------
-# Habeas Accredited Senders
-#	 Last octet of the returned A record indicates the Habeas-assigned
-#	"Accreditation Level" of the Sender.
-#		10 to 39	Personal, transactional, and Confirmed Opt In
-#		40 to 59	Secure referrals and Single Opt In
-#		60 to 99	Checked but not accredited by Habeas.
-#
-# sa-accredit.habeas.com is for SpamAssassin use.
-#
-header HABEAS_ACCREDITED_COI	eval:check_rbl_accreditor('accredit-firsttrusted', 'sa-accredit.habeas.com.', '127\.\d+\.\d+\.[123]\d', 'habeas')
-describe HABEAS_ACCREDITED_COI	Habeas Accredited Confirmed Opt-In or Better
-tflags HABEAS_ACCREDITED_COI	net nice
-
-header HABEAS_ACCREDITED_SOI	eval:check_rbl_accreditor('accredit-firsttrusted', 'sa-accredit.habeas.com.', '127\.\d+\.\d+\.[45]\d', 'habeas')
-describe HABEAS_ACCREDITED_SOI	Habeas Accredited Opt-In or Better
-tflags HABEAS_ACCREDITED_SOI	net nice
-
-header HABEAS_CHECKED		eval:check_rbl_accreditor('accredit-firsttrusted', 'sa-accredit.habeas.com.', '127\.\d+\.\d+\.[6789]\d', 'habeas')
-describe HABEAS_CHECKED		Habeas Checked
-tflags HABEAS_CHECKED		net nice
-
-# ---------------------------------------------------------------------------
 # Now, single zone BLs follow:
 
 # DSBL catches open relays, badly-installed CGI scripts and open SOCKS and
@@ -252,33 +230,6 @@ header DNS_FROM_SECURITYSAGE	eval:check_rbl_envfrom('securitysage', 'blackhole.s
 describe DNS_FROM_SECURITYSAGE	Envelope sender in blackholes.securitysage.com
 tflags DNS_FROM_SECURITYSAGE	net
 #reuse DNS_FROM_SECURITYSAGE
-
-# Habeas Legacy support: the Habeas Infringers blocklist.
-# sa-hil.habeas.com for SpamAssassin queries
-# hil.habeas.com for other queries
-header HABEAS_INFRINGER		eval:check_rbl_swe('hil', 'sa-hil.habeas.com.')
-describe HABEAS_INFRINGER	Has Habeas warrant mark and on Infringer List
-tflags HABEAS_INFRINGER		net
-#reuse HABEAS_INFRINGER
-
-# Habeas Legacy support: the Habeas Users whitelist.  This list contains users
-# from accredit.habeas.com at "accreditation level" 10 to 39.
-# sa-hul.habeas.com for SpamAssassin queries
-# hul.habeas.com for other queries
-header HABEAS_USER		eval:check_rbl_swe('hul-firsttrusted', 'sa-hul.habeas.com.')
-describe HABEAS_USER		Has Habeas warrant mark and on User List
-tflags HABEAS_USER		net nice
-#reuse HABEAS_USER
-
-header RCVD_IN_BSP_TRUSTED	eval:check_rbl_txt('bsp-firsttrusted', 'sa-trusted.bondedsender.org.', '(?i:bonded)')
-describe RCVD_IN_BSP_TRUSTED	Sender is in Bonded Sender Program (trusted relay)
-tflags RCVD_IN_BSP_TRUSTED	net nice
-#reuse RCVD_IN_BSP_TRUSTED
-
-header RCVD_IN_BSP_OTHER	eval:check_rbl_txt('bsp-untrusted', 'sa-other.bondedsender.org.', '(?i:bonded)')
-describe RCVD_IN_BSP_OTHER	Sender is in Bonded Sender Program (other relay)
-tflags RCVD_IN_BSP_OTHER	net nice
-#reuse RCVD_IN_BSP_OTHER
 
 # ---------------------------------------------------------------------------
 # NOTE: donation tests, see README file for details
@@ -316,3 +267,70 @@ tflags RCVD_IN_MAPS_NML		net
 #header RCVD_IN_MAPS_OPS	eval:check_rbl_sub('rblplus', '8')
 #describe RCVD_IN_MAPS_OPS	Relay in OPS, http://www.mail-abuse.org/ops/
 #tflags RCVD_IN_MAPS_OPS	net
+
+
+# ---------------------------------------------------------------------------
+
+# Section for DNS WL related lookups below:
+
+header RCVD_IN_BSP_TRUSTED	eval:check_rbl_txt('bsp-firsttrusted', 'sa-trusted.bondedsender.org.', '(?i:bonded)')
+describe RCVD_IN_BSP_TRUSTED	Sender is in Bonded Sender Program (trusted relay)
+tflags RCVD_IN_BSP_TRUSTED	net nice
+#reuse RCVD_IN_BSP_TRUSTED
+
+header RCVD_IN_BSP_OTHER	eval:check_rbl_txt('bsp-untrusted', 'sa-other.bondedsender.org.', '(?i:bonded)')
+describe RCVD_IN_BSP_OTHER	Sender is in Bonded Sender Program (other relay)
+tflags RCVD_IN_BSP_OTHER	net nice
+#reuse RCVD_IN_BSP_OTHER
+
+# ---------------------------------------------------------------------------
+
+# IADB support ...
+header __RCVD_IN_IADB		eval:check_rbl('iadb-firsttrusted', 'iadb.isipp.com.')
+tflags __RCVD_IN_IADB		net nice
+
+header RCVD_IN_IADB_VOUCHED	eval:check_rbl_sub('iadb-firsttrusted', '^127.0.1.255$')
+describe RCVD_IN_IADB_VOUCHED	ISIPP IADB lists as vouched-for sender
+tflags RCVD_IN_IADB_VOUCHED	net nice
+
+# ---------------------------------------------------------------------------
+
+# Habeas Legacy support: the Habeas Infringers blocklist.
+# sa-hil.habeas.com for SpamAssassin queries
+# hil.habeas.com for other queries
+header HABEAS_INFRINGER		eval:check_rbl_swe('hil', 'sa-hil.habeas.com.')
+describe HABEAS_INFRINGER	Has Habeas warrant mark and on Infringer List
+tflags HABEAS_INFRINGER		net
+#reuse HABEAS_INFRINGER
+
+# Habeas Legacy support: the Habeas Users whitelist.  This list contains users
+# from accredit.habeas.com at "accreditation level" 10 to 39.
+# sa-hul.habeas.com for SpamAssassin queries
+# hul.habeas.com for other queries
+header HABEAS_USER		eval:check_rbl_swe('hul-firsttrusted', 'sa-hul.habeas.com.')
+describe HABEAS_USER		Has Habeas warrant mark and on User List
+tflags HABEAS_USER		net nice
+#reuse HABEAS_USER
+
+# Habeas Accredited Senders
+#	 Last octet of the returned A record indicates the Habeas-assigned
+#	"Accreditation Level" of the Sender.
+#		10 to 39	Personal, transactional, and Confirmed Opt In
+#		40 to 59	Secure referrals and Single Opt In
+#		60 to 99	Checked but not accredited by Habeas.
+#
+# sa-accredit.habeas.com is for SpamAssassin use.
+#
+header HABEAS_ACCREDITED_COI	eval:check_rbl_accreditor('accredit-firsttrusted', 'sa-accredit.habeas.com.', '127\.\d+\.\d+\.[123]\d', 'habeas')
+describe HABEAS_ACCREDITED_COI	Habeas Accredited Confirmed Opt-In or Better
+tflags HABEAS_ACCREDITED_COI	net nice
+
+header HABEAS_ACCREDITED_SOI	eval:check_rbl_accreditor('accredit-firsttrusted', 'sa-accredit.habeas.com.', '127\.\d+\.\d+\.[45]\d', 'habeas')
+describe HABEAS_ACCREDITED_SOI	Habeas Accredited Opt-In or Better
+tflags HABEAS_ACCREDITED_SOI	net nice
+
+header HABEAS_CHECKED		eval:check_rbl_accreditor('accredit-firsttrusted', 'sa-accredit.habeas.com.', '127\.\d+\.\d+\.[6789]\d', 'habeas')
+describe HABEAS_CHECKED		Habeas Checked
+tflags HABEAS_CHECKED		net nice
+
+
