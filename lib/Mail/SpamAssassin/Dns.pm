@@ -419,8 +419,16 @@ sub razor2_lookup {
           }
           $rc->check($objects) or die $rc->errprefix("checkit");
           $rc->disconnect() or die $rc->errprefix("checkit");
+	  # so $objects->[0] is the first (only) message, and ->{spam} is a general yes/no
           $self->{razor2_result} = $response = $objects->[0]->{spam};
-          $self->{razor2_cf_score} = $objects->[0]->{p}->[0]->{resp}->[0]->{cf} if ( $response );
+	  # ->{p} is for each part of the message
+	  # so go through each part, taking the highest cf we find
+	  if ( $response ) {
+	    foreach my $cf ( @{$objects->[0]->{p}} ) {
+	      my $tmpcf = $cf->{resp}->[0]->{cf};
+	      $self->{razor2_cf_score} = $tmpcf if ( defined $tmpcf && $tmpcf > $self->{razor2_cf_score} );
+	    }
+	  }
         }
       }
       else {
