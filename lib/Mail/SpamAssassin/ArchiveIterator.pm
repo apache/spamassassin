@@ -222,7 +222,7 @@ sub first_date {
   my (@strings) = @_;
 
   foreach my $string (@strings) {
-    my $time = parse_rfc822_date($string);
+    my $time = Mail::SpamAssassin::Util::parse_rfc822_date($string);
     return $time if defined($time) && $time;
   }
   return undef;
