@@ -222,11 +222,11 @@ sub _check_mta_message_id {
   my $all = $self->get ('ALL');
   my $later_mta;
 
-  if ($all =~ /\nMessage-(ID|Id|id):.*\nReceived:/s) {
+  if ($all =~ /\nMessage-(?:ID|Id|id):.*\nReceived:/s) {
     # Message-ID is before a Received
     $later_mta = 1;
   }
-  elsif ($all =~ /\nReceived:[^\n]*\n([\t ][^\n]*\n)*Message-(ID|Id|id):/s) {
+  elsif ($all =~ /\nReceived:[^\n]*\n(?:[\t ][^\n]*\n)*Message-(?:ID|Id|id):/s) {
     # Message-ID is not before a Received but is directly after a Received
     $later_mta = 0;
   }
@@ -238,7 +238,7 @@ sub _check_mta_message_id {
   my $id = $self->get ('Message-Id');
 
   # exempt certain Message-Id headers (could backfire so be prepared to remove)
-  return if $id =~ /\@.*(localhost\.localdomain|linux\.local|yahoo)/;
+  return if $id =~ /\@.*(?:localhost\.localdomain|linux\.local|yahoo)/;
 
   # no further checks in simple case
   if ($later_mta) {
@@ -1536,62 +1536,84 @@ sub check_for_mime_excessive_qp {
   return ($length != 0 && ($qp > ($length / 20)));
 }
 
+sub check_language {
+  my ($self, $body) = @_;
+
+  my @languages = split (' ', $self->{conf}->{ok_languages});
+
+  return 0 if grep { $_ eq "all" } @languages;
+
+  $body = join ("\n", @{$body});
+  $body =~ s/^Subject://i;
+
+  # need about 256 bytes for reasonably accurate match (experimentally derived)
+  if (length($body) < 256)
+  {
+     dbg("Message too short for language analysis");
+     return 0;
+  }
+
+  my @matches = Mail::SpamAssassin::TextCat::classify($self, $body);
+  # not able to get a match, assume it's okay
+  if (! @matches) {
+    return 0;
+  }
+
+  # see if any matches are okay
+  foreach my $match (@matches) {
+    $match =~ s/\..*//;
+    foreach my $language (@languages) {
+      if ($match eq $language) {
+	return 0;
+      }
+    }
+  }
+  return 1;
+}
+
 ###########################################################################
 # MIME/uuencode attachment tests
-# This should really be done during decoding of MIME and uuencoded files.
 ###########################################################################
 
 sub check_for_mime_base64_encoded_text {
   my ($self) = @_;
 
-  if (!exists $self->{mime_base64_encoded_text}) {
-    $self->_check_attachments;
-  }
+  $self->_check_attachments unless exists $self->{mime_base64_encoded_text};
   return $self->{mime_base64_encoded_text};
 }
 
 sub check_for_mime_html_no_charset {
   my ($self) = @_;
 
-  if (!exists $self->{mime_html_no_charset}) {
-    $self->_check_attachments;
-  }
+  $self->_check_attachments unless exists $self->{mime_html_no_charset};
   return $self->{mime_html_no_charset};
 }
 
 sub check_for_mime_missing_boundary {
   my ($self) = @_;
 
-  if (!exists $self->{mime_missing_boundary}) {
-    $self->_check_attachments;
-  }
+  $self->_check_attachments unless exists $self->{mime_missing_boundary};
   return $self->{mime_missing_boundary};
 }
 
 sub check_for_mime_long_line_qp {
   my ($self) = @_;
 
-  if (!exists $self->{mime_long_line_qp}) {
-    $self->_check_attachments;
-  }
+  $self->_check_attachments unless exists $self->{mime_long_line_qp};
   return $self->{mime_long_line_qp};
 }
 
 sub check_for_mime_suspect_name {
   my ($self) = @_;
 
-  if (!exists $self->{mime_suspect_name}) {
-    $self->_check_attachments;
-  }
+  $self->_check_attachments unless exists $self->{mime_suspect_name};
   return $self->{mime_suspect_name};
 }
 
 sub check_for_microsoft_executable {
   my ($self) = @_;
 
-  if (!exists $self->{microsoft_executable}) {
-    $self->_check_attachments;
-  }
+  $self->_check_attachments unless exists $self->{microsoft_executable};
   return $self->{microsoft_executable};
 }
 
@@ -1731,41 +1753,6 @@ sub _check_attachments {
       last;
     }
   }
-}
-
-sub check_language {
-  my ($self, $body) = @_;
-
-  my @languages = split (' ', $self->{conf}->{ok_languages});
-
-  return 0 if grep { $_ eq "all" } @languages;
-
-  $body = join ("\n", @{$body});
-  $body =~ s/^Subject://i;
-
-  # need about 256 bytes for reasonably accurate match (experimentally derived)
-  if (length($body) < 256)
-  {
-     dbg("Message too short for language analysis");
-     return 0;
-  }
-
-  my @matches = Mail::SpamAssassin::TextCat::classify($self, $body);
-  # not able to get a match, assume it's okay
-  if (! @matches) {
-    return 0;
-  }
-
-  # see if any matches are okay
-  foreach my $match (@matches) {
-    $match =~ s/\..*//;
-    foreach my $language (@languages) {
-      if ($match eq $language) {
-	return 0;
-      }
-    }
-  }
-  return 1;
 }
 
 ###########################################################################
