@@ -21,6 +21,7 @@ use vars qw{
     %h $k $v @DBNAMES
     $NSPAM_MAGIC_TOKEN $NHAM_MAGIC_TOKEN $LAST_EXPIRE_MAGIC_TOKEN
     $NTOKENS_MAGIC_TOKEN $OLDEST_TOKEN_AGE_MAGIC_TOKEN
+    $SCANCOUNT_BASE_MAGIC_TOKEN
     $opt_dbpath $opt_min_hits $opt_max_hits $opt_regexp
     $robinson_x $robinson_s_dot_x 
   };
@@ -35,6 +36,8 @@ $NHAM_MAGIC_TOKEN = '**NHAM';
 $OLDEST_TOKEN_AGE_MAGIC_TOKEN = '**OLDESTAGE';
 $LAST_EXPIRE_MAGIC_TOKEN = '**LASTEXPIRE';
 $NTOKENS_MAGIC_TOKEN = '**NTOKENS';
+$SCANCOUNT_BASE_MAGIC_TOKEN = '**SCANBASE';
+
 
 use constant ROBINSON_S_CONSTANT => 0.53;
 $robinson_x = 0.43;
@@ -51,12 +54,19 @@ foreach my $dbname (@DBNAMES) {
   }
 }
 
-my $dbformat = 'on-the-fly probs, expiry';
+my $dbformat = 'on-the-fly probs, expiry, scan-counting';
 my $ns = $h{db_toks}->{$NSPAM_MAGIC_TOKEN} || 0;
 my $nn = $h{db_toks}->{$NHAM_MAGIC_TOKEN} || 0;
 my $nt = $h{db_toks}->{$NTOKENS_MAGIC_TOKEN} || 0;
 my $le = $h{db_toks}->{$LAST_EXPIRE_MAGIC_TOKEN} || 0;
 my $oa = $h{db_toks}->{$OLDEST_TOKEN_AGE_MAGIC_TOKEN} || 0;
+
+my $sb = $h{db_toks}->{$SCANCOUNT_BASE_MAGIC_TOKEN} || 0;
+if (!defined $sb) {
+  $dbformat = 'on-the-fly probs, expiry, no scan-counting';
+}
+$sb ||= 0;
+$sb += (-s $path."_msgcount");
 
 printf ("%3.3f %8d %8d %8d  %s\n", 0.0, 0, 0, 0,
 			'non-token data: db format = '.$dbformat);
@@ -64,8 +74,11 @@ printf ("%3.3f %8d %8d %8d  %s\n", 0.0, 0, $ns, 0, 'non-token data: nspam');
 printf ("%3.3f %8d %8d %8d  %s\n", 0.0, 0, $nn, 0, 'non-token data: nham');
 printf ("%3.3f %8d %8d %8d  %s\n", 0.0, 0, $nt, 0, 'non-token data: ntokens');
 printf ("%3.3f %8d %8d %8d  %s\n", 0.0, 0, $oa, 0, 'non-token data: oldest age');
-printf ("%3.3f %8d %8d %8d  %s (%s)\n", 0.0, 0, 0, 0,
-			 'non-token data: last expire', scalar(localtime($le)));
+
+printf ("%3.3f %8d %8d %8d  %s\n", 0.0, 0, $sb, 0,
+			'non-token data: current scan-count');
+printf ("%3.3f %8d %8d %8d  %s\n", 0.0, 0, 0, 0,
+			'non-token data: last expiry scan-count');
 
 my %seen = ();
 my $prob;
@@ -76,6 +89,7 @@ for my $key ( keys(%{$h{db_toks}}) ) {
           || $key eq $NHAM_MAGIC_TOKEN
           || $key eq $LAST_EXPIRE_MAGIC_TOKEN
           || $key eq $NTOKENS_MAGIC_TOKEN
+          || $key eq $SCANCOUNT_BASE_MAGIC_TOKEN
           || $key eq $OLDEST_TOKEN_AGE_MAGIC_TOKEN);
 
   next if (exists $seen{$key});

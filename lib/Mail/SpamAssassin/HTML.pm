@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.63 2003/01/09 23:51:56 msquadrat Exp $
+# $Id: HTML.pm,v 1.64 2003/02/14 21:50:14 jmason Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -251,7 +251,7 @@ sub html_tests {
   }
   if (exists($attr->{style})) {
     if ($attr->{style} =~ /font(?:-size)?:\s*([\d\.]+)(p[tx])/i) {
-      my $size = $1;
+      my $size = $1+0;
       my $type = $2;
 
       $self->{html}{big_font_B} = 1 if (lc($type) eq "pt" && $size > 12);

@@ -180,8 +180,6 @@ sub new {
   $self->{bayes_use_hapaxes} = 1;
   $self->{bayes_use_chi2_combining} = 0;
   $self->{bayes_expiry_min_db_size} = 100000;
-  $self->{bayes_expiry_use_scan_count} = 0;
-  $self->{bayes_expiry_days} = 30;
   $self->{bayes_expiry_scan_count} = 5000;
   $self->{bayes_ignore_headers} = [ ];
 
@@ -1898,37 +1896,11 @@ is roughly equivalent to a 5Mb database file.
       $self->{bayes_expiry_min_db_size} = $1; next;
     }
 
-=item bayes_expiry_use_scan_count		(default: 0)
-
-Should we use the number of scans that have occured for expiration, or the
-time elapsed?  Number of scans works better for test runs, but requires
-another file to be used to store the messagecount, which slows things down
-considerably.  Unless you're testing expiration, you do not want to use
-this.
-
-=cut
-    if (/^bayes_expiry_use_scan_count\s+(.*)$/) {
-      $self->{bayes_expiry_use_scan_count} = $1; next;
-    }
-
-=item bayes_expiry_days		(default: 30)
-
-When expiring old entries from the Bayes databases, tokens which have not
-been read in this many days will be removed (unless to do so would shrink
-the database below the C<bayes_expiry_min_db_size> size).  (Requires
-C<bayes_expiry_use_scan_count> be 0.)
-
-=cut
-    if (/^bayes_expiry_days\s+(.*)$/) {
-      $self->{bayes_expiry_days} = $1; next;
-    }
-
 =item bayes_expiry_scan_count		(default: 5000)
 
 When expiring old entries from the Bayes databases, tokens which have not
 been read in this many messages will be removed (unless to do so would
 shrink the database below the C<bayes_expiry_min_db_size> size).
-(Requires C<bayes_expiry_use_scan_count> be 1.)
 
 =cut
     if (/^bayes_expiry_scan_count\s+(.*)$/) {
