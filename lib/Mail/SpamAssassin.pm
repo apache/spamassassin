@@ -94,7 +94,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.165 2003/01/30 17:45:35 felicity Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.166 2003/02/03 12:37:31 jmason Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -200,6 +200,12 @@ If set, the B<HOME> environment variable will be set to this value
 when using test applications that require their configuration data,
 such as Razor, Pyzor and DCC.
 
+=item username
+
+If set, the C<username> attribute will use this as the current user's name.
+Otherwise, the default is taken from the runtime environment (ie. this process'
+effective UID under UNIX).
+
 =back
 
 If none of C<rules_filename>, C<userprefs_filename>, or C<config_text> is set,
@@ -265,6 +271,18 @@ sub new {
   $self->{conf}->set_score_set ($set);
 
   $self->{encapsulated_content_description} = 'original message before SpamAssassin';
+
+  if (!defined $self->{username}) {
+    eval {
+      # use effective uid in case we're setuid
+      $self->{username} = (getpwuid ($>))[0];
+    };
+    if ($@) {
+      # failed to call getpwuid(); platform may not support it!
+      dbg ("getpwuid() failed! using 'unknown' as username");
+      $self->{username} = 'unknown';
+    }
+  }
 
   $self;
 }
@@ -434,7 +452,7 @@ following attribute-value pairs:
 
 =item username
 
-The username of the user.
+The username of the user.  This will be used for the C<username> attribute.
 
 =item user_dir
 
@@ -453,6 +471,9 @@ sub signal_user_changed {
 
   dbg ("user has changed");
 
+  if (defined $opts && $opts->{username}) {
+    $self->{username} = $opts->{username};
+  }
   if (defined $opts && $opts->{user_dir}) {
     $self->{user_dir} = $opts->{user_dir};
   }
@@ -870,12 +891,16 @@ will only take effect if the perl C<DBI> module is installed, and the
 configuration parameters C<user_scores_dsn>, C<user_scores_sql_username>, and
 C<user_scores_sql_password> are set correctly.
 
+The username in C<$username> will also be used for the C<username> attribute of
+the Mail::SpamAssassin object.
+
 =cut
 
 sub load_scoreonly_sql {
   my ($self, $username) = @_;
 
   my $src = Mail::SpamAssassin::ConfSourceSQL->new ($self);
+  $self->{username} = $username;
   $src->load($username);
 }
 
