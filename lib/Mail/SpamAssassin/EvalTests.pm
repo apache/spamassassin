@@ -157,8 +157,11 @@ sub check_rbl {
 
   if (!defined $self->{rbl_IN_As_found}) {
     $self->{rbl_IN_As_found} = ' ';
+    $self->{rbl_matches_found} = ' ';
   }
+
   init_rbl_check_reserved_ips();
+  my $already_matched_in_other_zones = ' '.$self->{rbl_matches_found}.' ';
   my $found = 0;
 
   # First check that DNS is available, if not do not perform this check.
@@ -166,8 +169,9 @@ sub check_rbl {
   eval q{
     foreach my $ip (@ips) {
       next if ($ip =~ /${IP_IN_RESERVED_RANGE}/o);
+      next if ($already_matched_in_other_zones =~ / ${ip} /);
       next unless ($ip =~ /(\d+)\.(\d+)\.(\d+)\.(\d+)/);
-      $found = $self->do_rbl_lookup ("$4.$3.$2.$1.".$rbl_domain, $found);
+      $found = $self->do_rbl_lookup ("$4.$3.$2.$1.".$rbl_domain, $ip, $found);
     }
   };
 
