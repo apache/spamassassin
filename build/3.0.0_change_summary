@@ -78,11 +78,12 @@ Important installation notes
   "use_auto_whitelist" configuration option which is also now turned on by
   default.
 
-- The "rewrite_subject" configuration setting was deprecated and is now
-  removed. Instead, using "rewrite_header Subject [your desired setting]".
-  e.g.
+- The "rewrite_subject" and "subject_tag" configuration options were
+  deprecated and are now removed. Instead, using "rewrite_header Subject
+  [your desired setting]".  e.g.
 
-    rewrite_subject ****SPAM(_SCORE_)****
+    rewrite_subject 1
+    subject_tag ****SPAM(_SCORE_)****
 
   becomes
 
