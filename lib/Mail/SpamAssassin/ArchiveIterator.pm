@@ -244,7 +244,9 @@ sub message_array {
 
   foreach my $target (@${targets}) {
     my ($class, $format, $rawloc) = split(/:/, $target, 3);
-    $class = substr($class, 0, 1) || 'h'; # use ham by default
+
+    # use ham by default, things like "spamassassin" can't specify the type
+    $class = substr($class, 0, 1) || 'h';
 
     my @locations = $self->fix_globs($rawloc);
 
