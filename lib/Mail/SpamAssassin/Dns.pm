@@ -210,8 +210,18 @@ sub process_dnsbl_set {
 	}
 	$subtest =~ s/\bS(\d+)\b/\$sb{$1}/;
       }
-      #print STDERR "$subtest\n";
-      #print STDERR "$rdatastr\n";
+
+      # untaint. doing the usual $subtest=$1 doesn't work! (bug 3325)
+      $subtest =~ /^(.*)$/;
+      my $untainted = $1;
+      $subtest = $untainted;
+
+      # Mail::SpamAssassin::Util::untaint_var (\%sb);
+      # dbg ("$subtest");
+      # dbg ("$rdatastr");
+
+      eval $subtest;
+
       $self->got_hit($rule, "SenderBase: ") if !$undef && eval "$subtest";
     }
     # bitmask
