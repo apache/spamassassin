@@ -2598,11 +2598,11 @@ sub _check_attachments {
       $self->{mime_multipart_alternative} = 1;
     }
 
-    my $cte = $self->get('Content-Transfer-Encoding');
+    my $cte = $p->get_header('Content-Transfer-Encoding') || '';
     if ($cte =~ /$re_cte/) { $cte = lc($1); }
     chomp($cte = defined($cte) ? $cte : "");
 
-    my $cd = $self->get('Content-Disposition');
+    my $cd = $p->get_header('Content-Disposition') || '';
     if ($cd =~ /$re_cd/) { $cd = lc($1); }
     chomp($cd = defined($cd) ? $cd : "");
 
