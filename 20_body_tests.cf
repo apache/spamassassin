@@ -144,7 +144,10 @@ describe WEIRD_QUOTING	Weird repeated double-quotation marks in body
 # they must be written very carefully to avoid modifying the original content
 
 rawbody BASE64_ENC_TEXT		eval:check_for_mime('mime_base64_encoded_text')
-describe BASE64_ENC_TEXT	Message text disguised using base-64 encoding
+describe BASE64_ENC_TEXT	Message text disguised using base64 encoding
+
+rawbody MIME_BASE64_LATIN	eval:check_for_mime('mime_base64_latin')
+describe MIME_BASE64_LATIN	Latin alphabet text disguised using base64 encoding
 
 rawbody MIME_EXCESSIVE_QP	eval:check_for_mime_excessive_qp('0.011')
 describe MIME_EXCESSIVE_QP	Excessive quoted-printable encoding in body
