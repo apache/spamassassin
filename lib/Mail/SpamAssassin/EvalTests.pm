@@ -1007,12 +1007,18 @@ sub check_for_yelling {
     my @lines = grep(/[^A-Za-z]/, @{$body});
 
   # Get rid of everything but upper AND lower case letters
-    map (s/[^A-Za-z]//sg, @lines);
+    map (s/[^A-Za-z \t]//sg, @lines);
+
+  # Remove leading and trailing whitespace
+    map (s/^\s+//, @lines);
+    map (s/\s+$//, @lines);
 
   # Now that we have a mixture of upper and lower case, see if it's
   # 1) All upper case
   # 2) 20 or more characters in length
-    my $num_lines = scalar grep(/^[A-Z]{20,}$/, @lines);
+  # 3) Has at least one whitespace in it; we don't want to catch things
+  #    like lines of genetic data ("...AGTAGC...")
+    my $num_lines = scalar grep(/\s/, grep(/^[A-Z\s]{20,}$/, @lines) );
 
     $self->{num_yelling_lines} = $num_lines;
 
