@@ -131,11 +131,18 @@ sub spawn;  # forward declaration
 sub logmsg; # forward declaration
 sub cleanupchildren;
 
-my $socktype = 'unix';
-if ($Config{'archname'} =~ /solaris/) {
-  $socktype = 'inet';   # doesn't support UNIX-domain syslog sockets apparently
+if ($log_facility ne 'stderr') {
+  eval { setlogsock('unix'); };
+
+  # Solaris sometimes doesn't support UNIX-domain syslog sockets apparently
+  if ($@) { eval { setlogsock('inet'); }; }
+
+  # fall back to stderr if all else fails
+  if ($@) {
+    warn "failed to setlogsock() on this platform; reporting logs to stderr\n";
+    $log_facility = 'stderr';
+  }
 }
-setlogsock($socktype) unless $log_facility eq 'stderr';
 
 my $port = $opt{'port'} || 783;
 my $addr = gethostbyname($opt{'listen-ip'} || '127.0.0.1');
