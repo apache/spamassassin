@@ -307,28 +307,6 @@ body T_HTML_SHOUTING8            eval:html_range('max_shouting','7','8')
 body T_HTML_SHOUTING9            eval:html_range('max_shouting','8')
 
 ##################################################################
-# testing the HTML percentage range
-# this will be necessary if the HTML heuristics test is changed
-# (probably best to go with deciles, replacing HTML_XX_YY rules)
-
-body T_HTML_P1_00_20		eval:html_percentage('00','20')
-body T_HTML_P1_20_40		eval:html_percentage('20','40')
-body T_HTML_P1_40_60		eval:html_percentage('40','60')
-body T_HTML_P1_60_80		eval:html_percentage('60','80')
-body T_HTML_P1_80_100		eval:html_percentage('80','100')
-
-body T_HTML_P2_00_10		eval:html_percentage('00','10')
-body T_HTML_P2_10_20		eval:html_percentage('10','20')
-body T_HTML_P2_20_30		eval:html_percentage('20','30')
-body T_HTML_P2_30_40		eval:html_percentage('30','40')
-body T_HTML_P2_40_50		eval:html_percentage('40','50')
-body T_HTML_P2_50_60		eval:html_percentage('50','60')
-body T_HTML_P2_60_70		eval:html_percentage('60','70')
-body T_HTML_P2_70_80		eval:html_percentage('70','80')
-body T_HTML_P2_80_90		eval:html_percentage('80','90')
-body T_HTML_P2_90_100		eval:html_percentage('90','100')
-
-##################################################################
 
 # Dec  6 2002 jm:
 # 0 hits on all corpora!  Is this in a MIME header or something?
