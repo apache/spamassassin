@@ -263,6 +263,7 @@ eg.
 
     if(/^version[-_]tag\s+(.*)$/) {
       my $tag = lc($1);
+      $tag =~ tr/a-z0-9./_/c;
       foreach (@Mail::SpamAssassin::EXTRA_VERSION) {
         if($_ eq $tag) {
           $tag = undef;
