@@ -43,7 +43,9 @@ sub parse {
 
   # now go generate stuff
   my @message = split ( /^/m, $message );
-  shift @message if ( $message[0] =~ /^From\s/ );    # trim mbox seperator
+  # trim mbox seperator
+  shift @message if ( scalar @message > 0 && $message[0] =~ /^From\s/ );
+
   my $msg = Mail::SpamAssassin::MIME->new();
 
   local $_;                                          # protect from abuse
