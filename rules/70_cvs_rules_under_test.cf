@@ -105,6 +105,15 @@ body T_OUR_PRIVACY_POLICY	/our privacy policy can be found/i
 body T_OUR_READERS		/our readers (?:to|with)/i
 body T_OUR_STRICT_ANTI		/our strict anti/i
 body T_OUR_PUBLICATIONS		/our website (?:and|or) publications/i
+# more body tests
+body T_CELL_PHONE_BOOST		/(?:boost|antenna|reception|signal).{0,32}(?:cell|mobile|phone|cord.?less)|(?:cell|mobile|phone|cord.?less).{0,32}(?:boost|antenna|reception|signal)/i
+body T_OFFERS_ETC_1		/(?:(?:wish|want|unsub|reward|receive|recurring|remove|permission|partner|further|future|e.?mail|continue|click).{0,64}){2}.{0,8}(?:specials?|offers?|coupons?|discounts?)\b/i
+body T_OFFERS_ETC_2		/(?:(?:wish|want|unsub|reward|receive|recurring|remove|permission|partner|further|future|e.?mail|continue|click).{0,48}){2}.{0,32}(?:specials?|offers?|coupons?|discounts?)\b/i
+
+# replacement
+# do not add "new" since there's non-spam about "new cell phone numbers"
+# %%% FREE_CELL_PHONE
+body T_FREE_CELL_PHONE		/\bfree\b.{0,24}(?:cell(?:ular)?|mobile).{0,4}phones?|(?:cell(?:ular)?|mobile).{0,4}phones?.{0,24}\bfree\b/i
 
 # dear user
 body T_DEAR_USER		/dear(?: \w+)? user/i
