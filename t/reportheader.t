@@ -12,7 +12,7 @@ q{ X-Spam-Report: Detailed Report
 SPAM: -------------------- Start SpamAssassin results ----------------------
 SPAM: This mail is probably spam.  The original message has been altered
 SPAM: so you can recognise or block similar unwanted mail in future.
-SPAM: See http://spamassassin.taint.org/tag/ for more details.  },
+SPAM: See http://spamassassin.org/tag/ for more details.  },
 	'x-spam-report-header',
 
 q{ Subject: *****SPAM***** There yours for FREE!}, 'subj',
