@@ -292,8 +292,13 @@ header T_HEADI_10	ALL =~ /\nSubject:[^\n]{0,160}\nReply-To:[^\n]{0,80}\nDate:/si
 header T_HEADI_11	ALL =~ /\nX-MessageOrder:[^\n]{0,80}\nContent-Type:[^\n]{0,80}/si
 
 # I have a feeling these are well-caught already, better tests may exist
-header T_MID_DM_15	Message-ID =~ /<[0-9a-f]{4}01c4[0-9a-f]{4}\$[0-9a-f]{8}\$[0-9a-f]{8}@\S+>/
-meta T_RATWARE_DM_15	T_MID_DM_15 && !__HAS_X_MAILER
+header T_DM15_MID1	Message-ID =~ /<[0-9a-f]{4}01c4[0-9a-f]{4}\$[0-9a-f]{8}\$[0-9a-f]{8}@\S+>/
+header T_DM15_MID2	MESSAGEID =~ /<[0-9a-f]{4}01c4[0-9a-f]{4}\$[0-9a-f]{8}\$[0-9a-f]{8}@\S+>/
+header T_DM15_BOUND	Content-Type =~ /----=_NextPart_000_/
+meta T_RATWARE_DM15_1	T_DM15_MID1 && !__HAS_X_MAILER
+meta T_RATWARE_DM15_2	T_DM15_MID2 && !__HAS_X_MAILER
+meta T_RATWARE_DM15_3	T_DM15_MID1 && T_DM15_BOUND
+meta T_RATWARE_DM15_4	T_DM15_MID2 && T_DM15_BOUND
 
 # simple enough to test
 meta T_RATWARE_SOMETHING	__MSGID_DOLLARS_OK && !__HAS_X_MAILER
