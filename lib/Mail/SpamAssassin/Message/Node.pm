@@ -383,8 +383,14 @@ sub rendered {
       if (exists $r->{tags} && exists $r->{obfuscation}) {
 	$r->{obfuscation_ratio} = $r->{obfuscation} / $r->{tags};
       }
-      if (exists $r->{tags} && exists $r->{t_obfuscation}) {
-	$r->{t_obfuscation_ratio} = $r->{t_obfuscation} / $r->{tags};
+      if (exists $r->{tags} && exists $r->{t_obfuscation1}) {
+	$r->{t_obfuscation1_ratio} = $r->{t_obfuscation1} / $r->{tags};
+      }
+      if (exists $r->{tags} && exists $r->{t_obfuscation2}) {
+	  $r->{t_obfuscation2_ratio} = $r->{t_obfuscation2} / $r->{tags};
+      }
+      if (exists $r->{tags} && exists $r->{t_obfuscation3}) {
+	  $r->{t_obfuscation3_ratio} = $r->{t_obfuscation3} / $r->{tags};
       }
       if (exists $r->{attr_bad} && exists $r->{attr_all}) {
 	$r->{attr_bad} = $r->{attr_bad} / $r->{attr_all};

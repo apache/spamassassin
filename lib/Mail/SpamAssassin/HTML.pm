@@ -987,8 +987,20 @@ sub html_text {
     if ($self->{html_text}[-1] =~ /\S$/s && $text =~ /^\S/s) {
       $self->{html}{obfuscation}++;
     }
-    if ($self->{html_text}[-1] =~ /\S\z/ && $text =~ /^\S/) {
-      $self->{html}{t_obfuscation}++;
+    if ($self->{html_text}[-1] =~ /\S\z/s &&
+	$text =~ /^\S/s)
+    {
+      $self->{html}{t_obfuscation1}++;
+    }
+    if ($self->{html_text}[-1] =~ /\S*[A-Za-z]\S*\z/ &&
+	$text =~ /^\S*[A-Za-z]\S*/)
+    {
+	$self->{html}{t_obfuscation2}++;
+    }
+    if ($self->{html_text}[-1] =~ /\S*\w\S*\z/ &&
+	$text =~ /^\S*\w\S*/)
+    {
+	$self->{html}{t_obfuscation3}++;
     }
     if ($self->{html_text}[-1] =~ /\b(\w{1,7})$/s) {
       my $start = length($1);
