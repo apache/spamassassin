@@ -172,7 +172,7 @@ The filename to load spam-identifying rules from. (optional)
 
 =item site_rules_filename
 
-The filename to load site-specific spam-identifying rules from. (optional)
+The directory to load site-specific spam-identifying rules from. (optional)
 
 =item userprefs_filename
 
@@ -1209,18 +1209,29 @@ sub init {
   if (!defined $self->{config_text}) {
     $self->{config_text} = '';
 
-    my $fname = $self->{rules_filename};
+    my $fname;
+
+    # read a file called "init.pre" in site rules dir *before* all others;
+    # even the system config.
+    my $siterules = $self->{site_rules_filename};
+    $siterules ||= $self->first_existing_path (@site_rules_path);
+    if ($siterules) {
+      $fname = File::Spec->catfile ($siterules, "init.pre");
+      if (-f $fname) {
+        $self->{config_text} .= $self->read_cf ($fname, 'site rules init.pre');
+      }
+    }
+
+    $fname = $self->{rules_filename};
     $fname ||= $self->first_existing_path (@default_rules_path);
     if ($fname) {
       $self->{config_text} .= $self->read_cf ($fname, 'default rules dir');
-
       if (-f "$fname/languages") {
 	$self->{languages_filename} = "$fname/languages";
       }
     }
 
-    $fname = $self->{site_rules_filename};
-    $fname ||= $self->first_existing_path (@site_rules_path);
+    $fname = $siterules;
     if ($fname) {
       $self->{config_text} .= $self->read_cf ($fname, 'site rules dir');
     }
@@ -1465,7 +1476,7 @@ sub get_cf_files_in_dir {
   my ($self, $dir) = @_;
 
   opendir(SA_CF_DIR, $dir) or warn "cannot opendir $dir: $!\n";
-  my @cfs = grep { /\.cf$/ && -f "$dir/$_" } readdir(SA_CF_DIR);
+  my @cfs = grep { /\.cf$/i && -f "$dir/$_" } readdir(SA_CF_DIR);
   closedir SA_CF_DIR;
 
   return map { "$dir/$_" } sort { $a cmp $b } @cfs;	# sort numerically
