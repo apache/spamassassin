@@ -1188,9 +1188,9 @@ sub restart_handler {
     my ($sig) = @_;
     logmsg "server hit by SIG$sig, restarting";
 
-    if (!eof Server) {
-      shutdown (Server, 2);
-      close Server;
+    unless ($server->eof) {
+      $server->shutdown (2);
+      $server->close;
 
       # the UNIX domain socket
       defined($opt{'socketpath'}) and unlink($opt{'socketpath'});
