@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 use Getopt::Std;
-getopt('t');
+getopts('it:');
 
 my @tests = @ARGV;
 
@@ -9,9 +9,8 @@ my $sub = '
 ';
 if ( defined $opt_t ) {
 	  $sub .= '
-	  /\btime=(\d+)/;
-	  # strip out the tests up to a given timestamp
-	  if ( !defined $1 || '.$opt_t.' > $1 ) {
+	  my($time) = /\btime=(\d+)/;
+	  '.(defined $opt_i ? 'next if ( defined $time && '.$opt_t.' > $time );':'').'
 ';
 }
 
@@ -21,8 +20,6 @@ foreach my $test (@tests) {
 $sub .= '
             s/,,+/,/g; s/,+$//; s/ ,/ /;
 ';
-
-$sub .= '}' if ( defined $opt_t );
 
 $sub .= '
 	  print;
