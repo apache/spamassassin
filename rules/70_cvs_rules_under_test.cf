@@ -29,8 +29,8 @@ describe T_FROM_ALL_NUMS	From an address that is all numbers (non-phone)
 score T_FROM_ALL_NUMS		0.5
 
 # seems like the hit rate is a bit too low on this one
-uri ADCLICK_URL		m,\Qhttp://www.adclick.ws/p\E,
-describe ADCLICK_URL	Contains adclick URL
+uri T_ADCLICK_URL		m,\Qhttp://www.adclick.ws/p\E,
+describe T_ADCLICK_URL		Contains adclick URL
 
 # Needs testing
 body T_QUOTE_TWICE_1		/^> >\s/
