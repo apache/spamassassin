@@ -477,3 +477,8 @@ describe T_X_MESSAGE_INFO       Ratware signature (X-Message-Info)
 # looser
 uri T_BIZ_TLD_1			/^(?:https?:\/\/|mailto:)\S+\.biz(?:\/|$)/i
 uri T_BIZ_TLD_2			/\.biz(?:\/|$)/i
+
+# REIMPLEMENT: ADVERT_CODE tests.
+header T_ADVERT_CODE	Subject =~ /^[^0-9a-z]*adv(?:ert)?\b/i
+# may need a negative lookahead between in front of first \b for "ADV."
+header T_ADVERT_CODE2	Subject =~ /\w.*\bA\s*D\s*V\b/
