@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.592 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.593 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -93,13 +93,6 @@ header T_RCVD_IN_FIVETEN_TCPA	rbleval:check_rbl_sub('fiveten', '127.0.0.11')
 tflags T_RCVD_IN_FIVETEN_TCPA net
 header T_RCVD_IN_FIVETEN_FREE	rbleval:check_rbl_sub('fiveten', '127.0.0.12')
 tflags T_RCVD_IN_FIVETEN_FREE net
-
-# some additional osirusoft tests, needs more work
-# all osirusoft tests maybe a bad idea, osirusoft web site seems defunct
-header T_RCVD_IN_OSIRU_OPT_IN		rbleval:check_rbl_sub('osirusoft', '127.0.0.7')
-header T_RCVD_IN_OSIRU_OPEN_PROXY	rbleval:check_rbl_sub('osirusoft', '127.0.0.9')
-tflags T_RCVD_IN_OSIRU_OPT_IN net
-tflags T_RCVD_IN_OSIRU_OPEN_PROXY net
 
 # some dial-up lists that seem decent, worth testing some more
 header T_RCVD_IN_DUL_BOFH rbleval:check_rbl('pdl-notfirsthop', 'pdl.bofh.it.')

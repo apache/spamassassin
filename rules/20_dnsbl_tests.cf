@@ -26,30 +26,37 @@ require_version @@VERSION@@
 # DNSBLs do not return the A type (127.0.0.x) as part of the TXT reply.
 # Well, at least Osirusoft and NJABL don't, it seems, as of Apr 7 2003.
 
-# Osirusoft, like MAPS RBL+ is a multi-meaning BL, so it is treated separately
+# ---------------------------------------------------------------------------
+# Osirusoft
+# URL: http://relays.osirusoft.com/
+
 header RCVD_IN_OSIRU	rbleval:check_rbl('osirusoft', 'relays.osirusoft.com.')
-describe RCVD_IN_OSIRU	Received via a relay in relays.osirusoft.com
-tflags RCVD_IN_OSIRU    net
+describe RCVD_IN_OSIRU	OSIRU: Received via a relay in relays.osirusoft.com
+tflags RCVD_IN_OSIRU	net
 
-# the X prefixes were originally needed to ensure that these rules were
-# run last, but ordering is not necessary now.
-header RCVD_IN_OSIRU_OR	rbleval:check_rbl_sub('osirusoft', '127.0.0.2')
-describe RCVD_IN_OSIRU_OR	DNSBL: sender is Confirmed Open Relay
-tflags RCVD_IN_OSIRU_OR	net
+header RCVD_IN_OSIRU_RELAY	rbleval:check_rbl_sub('osirusoft', '127.0.0.2')
+describe RCVD_IN_OSIRU_RELAY	OSIRU: sender is Confirmed Open Relay
+tflags RCVD_IN_OSIRU_RELAY	net
 
-header RCVD_IN_OSIRU_DUL		rbleval:check_rbl('osirusoft-notfirsthop', 'relays.osirusoft.com.', '127.0.0.3')
-describe RCVD_IN_OSIRU_DUL		DNSBL: sender ip address in in a dialup block
-tflags RCVD_IN_OSIRU_DUL		net
+header RCVD_IN_OSIRU_DUL	rbleval:check_rbl('osirusoft-notfirsthop', 'relays.osirusoft.com.', '127.0.0.3')
+describe RCVD_IN_OSIRU_DUL	OSIRU: sender ip address in in a dialup block
+tflags RCVD_IN_OSIRU_DUL	net
 
-header RCVD_IN_OSIRU_SPAM_SRC		rbleval:check_rbl_sub('osirusoft', '127.0.0.4')
-describe RCVD_IN_OSIRU_SPAM_SRC	DNSBL: sender is Confirmed Spam Source
-tflags RCVD_IN_OSIRU_SPAM_SRC         net
+header RCVD_IN_OSIRU_SPAM_SRC	rbleval:check_rbl_sub('osirusoft', '127.0.0.4')
+describe RCVD_IN_OSIRU_SPAM_SRC	OSIRU: sender is Confirmed Spam Source
+tflags RCVD_IN_OSIRU_SPAM_SRC	net
 
 header RCVD_IN_OSIRU_SPAMWARE	rbleval:check_rbl_sub('osirusoft', '127.0.0.6')
-describe RCVD_IN_OSIRU_SPAMWARE	DNSBL: sender is a Spamware site or vendor
-tflags RCVD_IN_OSIRU_SPAMWARE    net
+describe RCVD_IN_OSIRU_SPAMWARE	OSIRU: sender is a Spamware site or vendor
+tflags RCVD_IN_OSIRU_SPAMWARE	net
+
+header RCVD_IN_OSIRU_PROXY	rbleval:check_rbl_sub('osirusoft', '127.0.0.9')
+describe RCVD_IN_OSIRU_PROXY	OSIRU: sender is open proxy server
+tflags RCVD_IN_OSIRU_PROXY	net
 
 # ---------------------------------------------------------------------------
+# NJABL
+# URL: http://www.dnsbl.njabl.org/
 
 header RCVD_IN_NJABL		rbleval:check_rbl('njabl', 'dnsbl.njabl.org.')
 describe RCVD_IN_NJABL		Received via a relay in dnsbl.njabl.org
@@ -80,12 +87,12 @@ describe RCVD_IN_NJABL_PROXY	NJABL: sender is an open proxy
 tflags RCVD_IN_NJABL_PROXY	net
 
 # ---------------------------------------------------------------------------
-
 # SORBS
 # transfers: both axfr and ixfr available
-# url: http://www.dnsbl.sorbs.net/
+# URL: http://www.dnsbl.sorbs.net/
 # pay-to-use: no
 # delist: $50 fee for RCVD_IN_SORBS_SPAM, others have free retest on request
+
 header RCVD_IN_SORBS		rbleval:check_rbl('sorbs', 'dnsbl.sorbs.net.')
 describe RCVD_IN_SORBS		SORBS: sender is listed in SORBS
 tflags RCVD_IN_SORBS		net
