@@ -1208,13 +1208,13 @@ sub preload_modules_with_tmp_homedir {
   # now clean up the stuff we just created, and make us taint-safe
   delete $ENV{HOME};
 
-  # try to use File::Path.  However, it's NOT taint-safe (!!) so will
-  # fail sometimes, it seems.
-  eval { rmtree $tmphome; };
-
+  unlink "$tmpsadir/user_prefs";
+  rmdir $tmpsadir;
+  rmdir $tmphome;
+    
   # if the dir still exists, throw a warning.
-  if (-d $tmphome) {
-    warn "rmtree couldn't remove $tmphome!: $!\n";
+  if (-d $tmphome) {            
+    warn "could not remove $tmphome!: $!\n";
   }
 }
 
