@@ -148,9 +148,9 @@ header DNS_FROM_RFC_ABUSE	eval:check_rbl_sub('rfci_envfrom', '127.0.0.4')
 describe DNS_FROM_RFC_ABUSE	Envelope sender in abuse.rfc-ignorant.org
 tflags DNS_FROM_RFC_ABUSE	net
 
-header DNS_FROM_RFC_WHOIS_A	eval:check_rbl_sub('rfci_envfrom', '127.0.0.5')
-describe DNS_FROM_RFC_WHOIS_A	Envelope sender in whois.rfc-ignorant.org
-tflags DNS_FROM_RFC_WHOIS_A	net
+header DNS_FROM_RFC_WHOIS	eval:check_rbl_sub('rfci_envfrom', '127.0.0.5')
+describe DNS_FROM_RFC_WHOIS	Envelope sender in whois.rfc-ignorant.org
+tflags DNS_FROM_RFC_WHOIS	net
 
 # this is 127.0.0.6 if querying fullip.rfc-ignorant.org, but since there
 # is only one right now, we might as well get the TXT record version
@@ -158,9 +158,8 @@ header RCVD_IN_RFC_IPWHOIS	eval:check_rbl_txt('ipwhois-notfirsthop', 'ipwhois.rf
 describe RCVD_IN_RFC_IPWHOIS	Sent via a relay in ipwhois.rfc-ignorant.org
 tflags RCVD_IN_RFC_IPWHOIS	net
 
-header DNS_FROM_RFC_WHOIS_B	eval:check_rbl_sub('rfci_envfrom', '127.0.0.7')
-describe DNS_FROM_RFC_WHOIS_B	Envelope sender TLD in whois.rfc-ignorant.org
-tflags DNS_FROM_RFC_WHOIS_B	net
+# 127.0.0.7 is the response for an entire TLD in whois.rfc-ignorant.org,
+# but it has too many false positives.
 
 header DNS_FROM_RFC_BOGUSMX	eval:check_rbl_sub('rfci_envfrom', '127.0.0.8')
 describe DNS_FROM_RFC_BOGUSMX	Envelope sender in bogusmx.rfc-ignorant.org
