@@ -203,7 +203,7 @@ describe BLANK_LINES_90_100 Message body has 90-100% blank lines
 body UNIQUE_WORDS	eval:check_unique_words('0.946', '3.1')
 describe UNIQUE_WORDS	Message body has many words used only once
 
-body DOMAIN_RATIO	eval:check_domain_ratio('0.026')
+body DOMAIN_RATIO	eval:check_domain_ratio('0.022')
 describe DOMAIN_RATIO	Message body mentions many internet domains
 
 # If these are too expensive as a whole, then delete __LONGWORDS_B and
