@@ -228,3 +228,11 @@ describe T_ROT13_EMAIL_2	Message has what looks like a ROT13 encoded email addre
 
 body T_ROT13_EMAIL_3		/^(\w+\^\S+\(\S+)/m
 describe T_ROT13_EMAIL_3	Message has what looks like a ROT13 encoded email address
+
+# mailman list reminder mails are getting tagged in 2.41, adding a rule to check for these
+header __FROM_MAILMAN_OWNER	From:addr =~ /^mailman-owner@/
+header __SUBJECT_MAILMAN_REMIND	Subject =~ /\bmailing list memberships reminder\b/
+meta T_MAILMAN_REMINDER		(__FROM_MAILMAN_OWNER && __SUBJECT_MAILMAN_REMIND)
+describe T_MAILMAN_REMINDER	Mail headers indicate a mailman membership reminder
+score T_MAILMAN_REMINDER		-3
+tflags T_MAILMAN_REMINDER nice
