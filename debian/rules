@@ -17,7 +17,7 @@
 # (i.e. without building the rest). However, buildd's don't seem to do this.
 # Their loss, not mine!
 
-CFLAGS="-O2 -Wall"
+CFLAGS=-O2 -Wall
 
 
 ifneq (,$(findstring debug,$(DEB_BUILD_OPTIONS)))
@@ -75,7 +75,7 @@ build-indep-stamp: configure
 
 	dh_testdir
 
-	$(MAKE) CFOPTIMIZE=$(CFLAGS) CFCCFLAGS="" CFLIBS="" CFLDFLAGS=""
+	$(MAKE) CFOPTIMIZE="$(CFLAGS)" CFCCFLAGS="" CFLIBS="" CFLDFLAGS=""
 
 	touch build-arch-stamp
 
@@ -150,7 +150,7 @@ build-arch-stamp: configure
 
 	-mkdir -p blib/man1
 
-	$(MAKE) CFOPTIMIZE=$(CFLAGS) CFCCFLAGS="" CFLIBS="" CFLDFLAGS="" spamd/spamc
+	$(MAKE) CFOPTIMIZE="$(CFLAGS)" CFCCFLAGS="" CFLIBS="" CFLDFLAGS="" spamd/spamc
 
 	pod2man spamd/spamc.pod blib/man1/spamc.1p
 
