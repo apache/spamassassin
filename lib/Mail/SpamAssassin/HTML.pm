@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.54 2002/12/17 09:00:50 quinlan Exp $
+# $Id: HTML.pm,v 1.55 2002/12/17 09:49:48 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -44,28 +44,6 @@ sub html_tag {
 
     if ($self->{html}{shouting} > $self->{html}{max_shouting}) {
       $self->{html}{max_shouting} = $self->{html}{shouting};
-    }
-  }
-  if ($tag =~ /^(b|i|u|strong|em|big|center|h\d)$/) {
-    if ($num > 0) {
-      my $shouting = 0;
-      my $element;
-
-      $self->{html}{"shouting_$1"} += $num;
-
-      for $element ("b", "i", "u", "strong", "em", "big", "center",
-		    "h1", "h2", "h3", "h4", "h5", "h6")
-      {
-	if (exists $self->{html}{"shouting_$element"}) {
-	  $shouting += $self->{html}{"shouting_$element"};
-	}
-      }
-      if ($shouting > $self->{html}{max_shouting2}) {
-	$self->{html}{max_shouting2} = $shouting;
-      }
-    }
-    else {
-      $self->{html}{"shouting_$1"} = 0;
     }
   }
 }
