@@ -27,7 +27,7 @@ require_version @@VERSION@@
 uri NUMERIC_HTTP_ADDR		/^https?\:\/\/\d{7,}/is
 describe NUMERIC_HTTP_ADDR	Uses a numeric IP address in URL
 
-uri NORMAL_HTTP_TO_IP		/^https?\:\/\/(?:\S*\@)?\d+\.\d+\.\d+\.\d+/i
+uri NORMAL_HTTP_TO_IP		m{^https?://\d+\.\d+\.\d+\.\d+}i
 describe NORMAL_HTTP_TO_IP	Uses a dotted-decimal IP address in URL
  	
 # Theo sez:
@@ -47,7 +47,7 @@ uri HTTP_EXCESSIVE_ESCAPES	/^https?:\/\/\S*%(?:3\d|[46][1-9a-f]|[57][\da])/i
 describe HTTP_EXCESSIVE_ESCAPES	Completely unnecessary %-escapes inside a URL
 
 # bug 1801
-uri IP_LINK_PLUS	/^https?\:\/\/(?:\S*\@)?\d+\.\d+\.\d+\.\d+.{0,20}(?:cgi|click|ads|id\=)/i
+uri IP_LINK_PLUS	m{^https?://\d+\.\d+\.\d+\.\d+.{0,20}(?:cgi|click|ads|id=)}i
 describe IP_LINK_PLUS	Dotted-decimal IP address followed by CGI
 
 uri REMOVE_PAGE			/^https?:\/\/[^\/]+\/.*?remove/
