@@ -198,6 +198,10 @@ sub html_format {
   }
 }
 
+use constant URI_STRICT => 0;
+
+# resolving relative URIs as defined in RFC 2396 (steps from section 5.2)
+# using draft http://www.gbiv.com/protocols/uri/rev-2002/rfc2396bis.html
 sub parse_uri {
   my ($u) = @_;
   my %u;
@@ -206,94 +210,129 @@ sub parse_uri {
   return %u;
 }
 
-# resolving relative URIs as defined in RFC 2396 (steps from section 5.2)
-sub push_uri {
-  my ($self, $uri) = @_;
+sub remove_dot_segments {
+  my ($input) = @_;
+  my $output = "";
 
-  return unless defined $uri;
+  $input =~ s@^(?:\.\.?/)@/@;
 
-  # step 1
-  my %uri = parse_uri($uri);
-
-  # step 2
-  if (!$uri{path} && !$uri{scheme} && !$uri{authority} && !$uri{query}) {
-    return;
+  while ($input) {
+    if ($input =~ s@^/\.(?:$|/)@/@) {
+    }
+    elsif ($input =~ s@^/\.\.(?:$|/)@/@) {
+      $output =~ s@/?[^/]*$@@;
+    }
+    elsif ($input =~ s@(/?[^/]*)@@) {
+      $output .= $1;
+    }
   }
+  return $output;
+}
 
-  my $base = $self->{html}{base_href};
+sub merge_uri {
+  my ($base_authority, $base_path, $r_path) = @_;
 
-  if (!defined $base || !$base) {
-    push @{$self->{html}{uri}}, $uri;
-    return;
-  }
-
-  my %base = parse_uri($base);	# don't need to parse base until here
-
-  # step 3
-  if (!$uri{scheme}) {
-    $uri{scheme} = $base{scheme};
-  }
-
-  # step 4
-  if ($uri{authority}) {
-    goto result;
+  if (defined $base_authority && !$base_path) {
+    return "/" . $r_path;
   }
   else {
-    $uri{authority} = $base{authority};
+    if ($base_path =~ m|/|) {
+      $base_path =~ s|(?<=/)[^/]*$||;
+    }
+    else {
+      $base_path = "";
+    }
+    return $base_path . $r_path;
+  }
+}
+
+sub target_uri {
+  my ($base, $r) = @_;
+
+  my %r = parse_uri($r);	# parsed relative URI
+  my %base = parse_uri($base);	# parsed base URI
+  my %t;			# generated temporary URI
+
+  if ((not URI_STRICT) and
+      (defined $r{scheme} && defined $base{scheme}) and
+      ($r{scheme} eq $base{scheme}))
+  {
+    undef $r{scheme};
   }
 
-  # step 5
-  if ($uri{path} =~ m@^/@) {
-    goto result;
+  if (defined $r{scheme}) {
+    $t{scheme} = $r{scheme};
+    $t{authority} = $r{authority};
+    $t{path} = remove_dot_segments($r{path});
+    $t{query} = $r{query};
   }
+  else {
+    if (defined $r{authority}) {
+      $t{authority} = $r{authority};
+      $t{path} = remove_dot_segments($r{path});
+      $t{query} = $r{query};
+    }
+    else {
+      if ($r{path} eq "") {
+	$t{path} = $base{path};
+	if (defined $r{query}) {
+	  $t{query} = $r{query};
+	}
+	else {
+	  $t{query} = $base{query};
+	}
+      }
+      else {
+	if ($r{path} =~ m|^/|) {
+	  $t{path} = remove_dot_segments($r{path});
+	}
+	else {
+	  $t{path} = merge_uri($base{authority}, $base{path}, $r{path});
+	  $t{path} = remove_dot_segments($t{path});
+	}
+	$t{query} = $r{query};
+      }
+      $t{authority} = $base{authority};
+    }
+    $t{scheme} = $base{scheme};
+  }
+  $t{fragment} = $r{fragment};
 
-  # step 6
-  my $buffer;
-  # a)
-  $buffer = $base{path};
-  $buffer =~ s@(?<=/)[^/]*$@@;
-  # b)
-  $buffer .= $uri{path};
-  # c)
-  $buffer =~ s@^\./@@g;
-  $buffer =~ s@(?<=/)\./@@g;
-  # d)
-  $buffer =~ s@^\.$@@g;
-  $buffer =~ s@(?<=/)\.$@@g;
-  # e) and f)
-  $buffer =~ s@[^/]+/\.\.($|/)@@g;	# maybe wrong
-  # g) - do nothing
-  $uri{path} = $buffer;
-
- result:
-  # step 7
+  # recompose URI
   my $result = "";
-  if ($uri{scheme}) {
-    $result .= $uri{scheme} . ":";
+  if ($t{scheme}) {
+    $result .= $t{scheme} . ":";
   }
-  else {
+  elsif (defined $t{authority}) {
     # this block is not part of the RFC
     # TODO: figure out what MUAs actually do with unschemed URIs
     # maybe look at URI::Heuristic
-    if ($uri{authority} =~ /^www\d*\./i) {
+    if ($t{authority} =~ /^www\d*\./i) {
       # some spammers are using unschemed URIs to escape filters
       $result .= "http:";
     }
-    elsif ($uri{authority} =~ /^ftp\d*\./i) {
+    elsif ($t{authority} =~ /^ftp\d*\./i) {
       $result .= "ftp:";
     }
   }
-  if ($uri{authority}) {
-    $result .= "//" . $uri{authority};
+  if ($t{authority}) {
+    $result .= "//" . $t{authority};
   }
-  $result .= $uri{path};
-  if ($uri{query}) {
-    $result .= "?" . $uri{query};
+  $result .= $t{path};
+  if ($t{query}) {
+    $result .= "?" . $t{query};
   }
-  if ($uri{fragment}) {
-    $result .= "#" . $uri{fragment};
+  if ($t{fragment}) {
+    $result .= "#" . $t{fragment};
   }
-  push @{$self->{html}{uri}}, $result;
+  return $result;
+}
+
+sub push_uri {
+  my ($self, $uri) = @_;
+
+  my $target = target_uri($self->{html}{base_href} || "", $uri || "");
+  push @{$self->{html}{uri}}, $target if $target;
 }
 
 sub html_uri {
@@ -318,7 +357,7 @@ sub html_uri {
       # use <BASE HREF="URI"> to turn relative links into absolute links
 
       # even if it is a base URI, handle like a normal URI as well
-      $self->push_uri($uri);
+      push @{$self->{html}{uri}}, $uri;
 
       # a base URI will be ignored by browsers unless it is an absolute
       # URI of a standard protocol
