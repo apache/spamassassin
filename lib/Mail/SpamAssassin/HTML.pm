@@ -424,43 +424,6 @@ sub html_uri {
   }
 }
 
-# input values from 0 to 255
-sub rgb_to_hsv {
-  my ($r, $g, $b) = @_;
-  my ($h, $s, $v, $max, $min);
-
-  if ($r > $g) {
-    $max = $r; $min = $g;
-  }
-  else {
-    $min = $r; $max = $g;
-  }
-  $max = $b if $b > $max;
-  $min = $b if $b < $min;
-  $v = $max;
-  $s = $max ? ($max - $min) / $max : 0;
-  if ($s == 0) {
-    $h = undef;
-  }
-  else {
-    my $cr = ($max - $r) / ($max - $min);
-    my $cg = ($max - $g) / ($max - $min);
-    my $cb = ($max - $b) / ($max - $min);
-    if ($r == $max) {
-      $h = $cb - $cg;
-    }
-    elsif ($g == $max) {
-      $h = 2 + $cr - $cb;
-    }
-    elsif ($b == $max) {
-      $h = 4 + $cg - $cr;
-    }
-    $h *= 60;
-    $h += 360 if $h < 0;
-  }
-  return ($h, $s, $v);
-}
-
 my %html_color = (
   # HTML 4 defined 16 colors
   aqua => 0x00ffff,
@@ -724,9 +687,7 @@ sub text_style {
       next unless (grep { $_ eq $tag } @{ $ok_attribute{$name} });
       if ($name =~ /^(?:text|color)$/) {
 	# two different names for text color
-	my $color = name_to_rgb(lc($attr->{$name}));
-	$new{fgcolor} = $color;
-	$self->html_color_tests($color);
+	$new{fgcolor} = name_to_rgb(lc($attr->{$name}));
       }
       elsif ($name eq "size" && $attr->{size} =~ /^\s*([+-]\d+)/) {
 	# relative font size
@@ -734,9 +695,8 @@ sub text_style {
       }
       else {
 	if ($name eq "bgcolor") {
-	  # overwrite with hex value
+	  # overwrite with hex value, $new{bgcolor} is set below
 	  $attr->{bgcolor} = name_to_rgb(lc($attr->{bgcolor}));
-	  $self->html_color_tests($attr->{bgcolor});
 	}
 	if ($name eq "size" && $attr->{size} !~ /^\s*([+-])(\d+)/) {
 	  # attribute is malformed
@@ -762,44 +722,6 @@ sub text_style {
       $self->close_tag($tag);
     }
   }
-}
-
-sub color_hue {
-  my ($color) = @_;
-
-  if ($color =~ /^\#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i) {
-    my ($h, $s, $v) = rgb_to_hsv(hex($1), hex($2), hex($3));
-    if (!defined $h) {
-      return "black" if $v == 0;
-      return "white" if $v == 255;
-      return "gray";
-    }
-    return "red" if ($h < 30 || $h >= 330);
-    return "yellow" if $h < 90;
-    return "green" if $h < 150;
-    return "cyan" if $h < 210;
-    return "blue" if $h < 270;
-    return "magenta" if $h < 330;
-  }
-  return "hue_unknown";
-}
-
-# test HTML colors
-# Note: input needs to be the result of name_to_rgb()
-sub html_color_tests {
-  my ($self, $color) = @_;
-
-  if ($color =~ /^\#?[0-9a-f]{6}$/) {
-    # good hex value
-    if ($color !~ /^\#?(?:00|33|66|80|99|cc|ff){3}$/) {
-      $self->{html}{color_unsafe} = 1;
-    }
-  }
-  else {
-    # name_to_rgb was unable to resolve name
-    $self->{html}{color_unknown} = 1;
-  }
-  $self->{html}{"color_" . color_hue($color)} = 1;
 }
 
 sub html_font_invisible {
