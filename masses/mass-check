@@ -26,7 +26,13 @@ $spamtest->compile_now();
 my $count = 0;
 
 foreach my $folder (@ARGV) {
-  if (-d $folder &&
+  if ($folder =~ /.tar$/)
+  {
+      # it's an MH or Cyrus folder in a tar file
+      use Archive::Tar;
+      mass_check_mh_tar_file($folder);
+  }
+  elsif (-d $folder &&
   	(-f "$folder/1" || -f "$folder/1.gz" || -f "$folder/cyrus.index"))
   {
     # it's an MH folder or a Cyrus mailbox
@@ -34,6 +40,21 @@ foreach my $folder (@ARGV) {
 
   } elsif (-f $folder) {
     mass_check_mailbox($folder);
+  }
+}
+
+sub mass_check_mh_tar_file {
+  my $filename = shift;
+  my $tar = Archive::Tar->new();
+  $tar->read($filename);
+  my @files = $tar->list_files(['name']);
+  foreach my $mail (@files) {
+      next if $mail =~ m#/$# or $mail =~ /cyrus\.(index|header|cache)/;
+      my $msg_data = $tar->get_content($mail);
+      my @msg = split("\r\n",$tar->get_content($mail));
+      my $ma = Mail::Audit->new(data => \@msg);
+      $mail =~ s/\s/_/g;
+      docheck ($mail, $ma);
   }
 }
 
