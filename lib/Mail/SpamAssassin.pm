@@ -94,7 +94,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.170 2003/02/14 19:04:05 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.171 2003/02/14 19:48:02 felicity Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -1198,6 +1198,7 @@ sub create_default_prefs {
     my $defprefs = $self->first_existing_path (@Mail::SpamAssassin::default_prefs_path);
 
     if (open (IN, "<$defprefs")) {
+      $fname = Mail::SpamAssassin::Util::untaint_file_path($fname);
       if (open (OUT, ">$fname")) {
         while (<IN>) {
           /^\#\* / and next;
