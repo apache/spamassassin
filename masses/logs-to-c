@@ -70,7 +70,7 @@ sub readlogs {
       if($_ !~ /^.\s+([-\d]+)\s+\S+\s*/) { warn "bad line: $_"; next; }
       my $hits = $1;
 
-      $_ = $'; s/bayes=\S+//; s/,,+/,/g; s/^\s+//; s/\s+$//;
+      $_ = $'; s/(?:bayes|time)=\S+//; s/,,+/,/g; s/^\s+//; s/\s+$//;
 
       my $score = 0;
       my @tests = ();
