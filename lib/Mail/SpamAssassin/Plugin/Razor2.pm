@@ -84,15 +84,19 @@ sub set_config {
   my ($self, $conf) = @_;
   my @cmds = ();
 
-=item use_razor2 (0|1)		(default: 1)
+=item use_razor2 (0|1)		(default: 0)
 
 Whether to use Razor2, if it is available.
+
+Razor2 is disabled by default because it is not available for unlimited
+free use.  It is currently free for personal use, subject to capacity
+constraints.  See the Cloudmark SpamNet Service Policy for more details.
 
 =cut
 
   push(@cmds, {
     setting => 'use_razor2',
-    default => 1,
+    default => 0,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });
 
