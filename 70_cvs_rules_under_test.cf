@@ -529,3 +529,13 @@ header T_FAKE_HELO_HOTPOP	eval:check_for_rdns_helo_mismatch("hotpop\.com","hotpo
 header T_FAKE_HELO_SHAW_CA	eval:check_for_rdns_helo_mismatch("shaw(?:\.ca|cable\.net)","shaw\.ca")
 header T_FAKE_HELO_AMAZON	eval:check_for_rdns_helo_mismatch("amazon\.com","amazon\.com")
 
+# 2003-04-11
+# bug 1769, possible replacement rules
+# replacement for OBFUSCATING_COMMENT (we already have two of these rules,
+# consolidate and rename?)
+rawbody __T_OBFUSCATING_COMMENT	/[a-z]<![^>]*>[a-z]/i
+meta T_OBFUSCATING_COMMENT	__T_OBFUSCATING_COMMENT && MIME_HTML_ONLY
+describe T_OBFUSCATING_COMMENT	HTML comments which obfuscate text (2)
+header T_GAPPY_SUBJECT		Subject =~ /\b(?:[a-z][\W]{1,3}){4,}/i
+body T_AS_SEEN_ON		/seen [oi]n\b\s*(?:TV|ABC|NBC|CBS|CNN|Oprah|USA Today|48 Hours|(The )?New York Times|\w+\s+TV|:)/i
+body T_SEE_FOR_YOURSELF		/See (?:for|it|it for) yourself\b/i
