@@ -129,11 +129,8 @@ sub new {
   }
 
   $self->register_eval_rule ("check_uridnsbl");
+  $self->set_config($samain->{conf});
 
-  # set default config settings
-  $samain->{conf}->{uridnsbl_timeout} =		3;
-  $samain->{conf}->{uridnsbl_max_domains} =	20;
-  $samain->{conf}->{uridnsbl_skip_domains} =	{};
   return $self;
 }
 
@@ -214,118 +211,88 @@ sub parsed_metadata {
   return 1;
 }
 
-sub parse_config {
-  my ($self, $opts) = @_;
+sub set_config {
+  my($self, $conf) = @_;
+  my @cmds = ();
 
-  my $conf = $opts->{conf};
-  my $key = $opts->{key};
-  my $value = $opts->{value};
-  my $line = $opts->{line};
+  push(@cmds, {
+    setting => 'uridnsbl_timeout',
+    default => 3,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+  });
 
-  if ($key eq 'uridnsbl') {
-    if ($value =~ /^(\S+)\s+(\S+)\s+(\S+)$/) {
-      my $rulename = $1;
-      my $zone = $2;
-      my $type = $3;
+  push(@cmds, {
+    setting => 'uridnsbl_max_domains',
+    default => 20,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+  });
 
-      $opts->{conf}->{uridnsbls}->{$rulename} = {
-	zone => $zone, type => $type,
-        is_rhsbl => 0
-      };
-      $self->inhibit_further_callbacks(); return 1;
+  push (@cmds, {
+    setting => 'uridnsbl',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value =~ /^(\S+)\s+(\S+)\s+(\S+)$/) {
+        my $rulename = $1;
+        my $zone = $2;
+        my $type = $3;
+        $self->{uridnsbls}->{$rulename} = {
+	  zone => $zone, type => $type,
+          is_rhsbl => 0
+        };
+      }
     }
-  }
+  });
 
-  if ($key eq 'urirhsbl') {
-    if ($value =~ /^(\S+)\s+(\S+)\s+(\S+)$/) {
-      my $rulename = $1;
-      my $zone = $2;
-      my $type = $3;
-
-      $opts->{conf}->{uridnsbls}->{$rulename} = {
-	zone => $zone, type => $type,
-        is_rhsbl => 1
-      };
-      $self->inhibit_further_callbacks(); return 1;
+  push (@cmds, {
+    setting => 'urirhsbl',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value =~ /^(\S+)\s+(\S+)\s+(\S+)$/) {
+        my $rulename = $1;
+        my $zone = $2;
+        my $type = $3;
+        $self->{uridnsbls}->{$rulename} = {
+	  zone => $zone, type => $type,
+          is_rhsbl => 1
+        };
+      }
     }
-  }
+  });
 
-  if ($key eq 'urirhssub') {
-    if ($value =~ /^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)$/) {
-      my $rulename = $1;
-      my $zone = $2;
-      my $type = $3;
-      my $subrule = $4;
-
-      $opts->{conf}->{uridnsbls}->{$rulename} = {
-	zone => $zone, type => $type,
-        is_rhsbl => 1, is_subrule => 1
-      };
-
-      $opts->{conf}->{uridnsbl_subs}->{$zone} ||= { };
-      $opts->{conf}->{uridnsbl_subs}->{$zone}->{$subrule} = {
-        rulename => $rulename
-      };
-
-      $self->inhibit_further_callbacks(); return 1;
+  push (@cmds, {
+    setting => 'urirhssub',
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      if ($value =~ /^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)$/) {
+        my $rulename = $1;
+        my $zone = $2;
+        my $type = $3;
+        my $subrule = $4;
+        $self->{uridnsbls}->{$rulename} = {
+	  zone => $zone, type => $type,
+          is_rhsbl => 1, is_subrule => 1
+        };
+        $self->{uridnsbl_subs}->{$zone} ||= { };
+        $self->{uridnsbl_subs}->{$zone}->{$subrule} = {
+          rulename => $rulename
+        };
+      }
     }
-  }
+  });
 
-  if ($key eq 'uridnsbl_timeout') {
-    $self->handle_parser_error($opts,
-      Mail::SpamAssassin::Conf::Parser::set_numeric_value($conf, $key, $value, $line)
-    );
-    $self->inhibit_further_callbacks(); return 1;
-  }
-
-  if ($key eq 'uridnsbl_max_domains') {
-    $self->handle_parser_error($opts,
-      Mail::SpamAssassin::Conf::Parser::set_numeric_value($conf, $key, $value, $line)
-    );
-    $self->inhibit_further_callbacks(); return 1;
-  }
-
-  if ($key eq 'uridnsbl_skip_domain') {
-    foreach my $domain (split(/\s+/, $value)) {
-      $opts->{conf}->{uridnsbl_skip_domains}->{lc $domain} = 1;
+  push (@cmds, {
+    setting => 'uridnsbl_skip_domain',
+    default => {},
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      foreach my $domain (split(/\s+/, $value)) {
+        $self->{uridnsbl_skip_domains}->{lc $domain} = 1;
+      }
     }
-    $self->inhibit_further_callbacks(); return 1;
-  }
+  });
 
-  return 0;
+  $conf->{parser}->register_commands(\@cmds);
 }
-
-sub handle_parser_error {
-  my($self, $opts, $ret_value) = @_;
-
-  my $conf = $opts->{conf};
-  my $key = $opts->{key};
-  my $value = $opts->{value};
-  my $line = $opts->{line};
-
-  my $msg = '';
-
-  if ($ret_value && $ret_value eq $Mail::SpamAssassin::Conf::INVALID_VALUE) {
-    $msg = "config: SpamAssassin failed to parse line, ".
-           "\"$value\" is not valid for \"$key\", ".
-           "skipping: $line";
-  }
-  elsif ($ret_value && $ret_value eq $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE) {
-    $msg = "config: SpamAssassin failed to parse line, ".
-           "no value provided for \"$key\", ".
-           "skipping: $line";
-  }
-
-  return unless $msg;
-
-  if ($conf->{lint_rules}) {
-    warn $msg."\n";
-  } else {
-    dbg($msg);
-  } 
-  $conf->{errors}++;
-  return;
-} 
 
 sub check_tick {
   my ($self, $opts) = @_;

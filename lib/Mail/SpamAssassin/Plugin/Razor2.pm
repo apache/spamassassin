@@ -44,16 +44,15 @@ sub new {
   my $self = $class->SUPER::new($mailsaobject);
   bless ($self, $class);
 
-  $mailsaobject->{conf}->{use_razor2} = 0;
-  $mailsaobject->{conf}->{razor_timeout} = 10;
-
+  # figure out if razor is even available or not ...
+  $self->{razor2_available} = 0;
   if ($mailsaobject->{local_tests_only}) {
     dbg("razor2: local tests only, skipping razor2");
   }
   else {
     if (eval { require Razor2::Client::Agent; }) {
       dbg("razor2: razor2 is available");
-      $mailsaobject->{conf}->{use_razor2} = 1;
+      $self->{razor2_available} = 1;
     }
     else {
       dbg("razor2: razor2 is not available");
@@ -63,25 +62,27 @@ sub new {
   $self->register_eval_rule ("check_razor2");
   $self->register_eval_rule ("check_razor2_range");
 
+  $self->set_config($mailsaobject->{conf});
+
   return $self;
 }
 
-sub parse_config {
-  my ($self, $opts) = @_;
+sub set_config {
+  my($self, $conf) = @_;
+  my @cmds = ();
 
-  my $conf = $opts->{conf};
-  my $key = $opts->{key};
-  my $value = $opts->{value};
-  my $line = $opts->{line};
+=item use_razor2 (0|1)		(default: 1)
 
-  # Backward compatibility ...  use_razor2 is implicit if the plugin is loaded
-  if ($key eq 'use_razor2') {
-    $self->handle_parser_error($opts,
-      Mail::SpamAssassin::Conf::Parser::set_numeric_value($conf, $key, $value, $line)
-    );
-    $self->inhibit_further_callbacks();
-    return 1;
-  }
+How many seconds you wait for razor to complete before you go on without
+the results
+
+=cut
+
+  push(@cmds, {
+    setting => 'use_razor2',
+    default => 1,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+  });
 
 =item razor_timeout n		(default: 10)
 
@@ -90,13 +91,11 @@ the results
 
 =cut
 
-  if ($key eq 'razor_timeout') {
-    $self->handle_parser_error($opts,
-      Mail::SpamAssassin::Conf::Parser::set_numeric_value($conf, $key, $value, $line)
-    );
-    $self->inhibit_further_callbacks();
-    return 1;
-  }
+  push(@cmds, {
+    setting => 'razor_timeout',
+    default => 10,
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
+  });
 
 =item razor_config filename
 
@@ -105,49 +104,13 @@ Currently this is left to Razor to decide.
 
 =cut
 
-  if ($key eq 'razor_config') {
-    $self->handle_parser_error($opts,
-      Mail::SpamAssassin::Conf::Parser::set_string_value($conf, $key, $value, $line)
-    );
-    $self->inhibit_further_callbacks();
-    return 1;
-  }
+  push(@cmds, {
+    setting => 'razor_config',
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING,
+  });
 
-  return 0;
+  $conf->{parser}->register_commands(\@cmds);
 }
-
-sub handle_parser_error {
-  my($self, $opts, $ret_value) = @_;
-
-  my $conf = $opts->{conf};
-  my $key = $opts->{key};
-  my $value = $opts->{value};
-  my $line = $opts->{line};
-
-  my $msg = '';
-
-  if ($ret_value && $ret_value eq $Mail::SpamAssassin::Conf::INVALID_VALUE) {
-    $msg = "config: SpamAssassin failed to parse line, ".
-           "\"$value\" is not valid for \"$key\", ".
-           "skipping: $line";
-  }
-  elsif ($ret_value && $ret_value eq $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE) {
-    $msg = "config: SpamAssassin failed to parse line, ".
-           "no value provided for \"$key\", ".
-           "skipping: $line";
-  }
-
-  return unless $msg;
-
-  if ($conf->{lint_rules}) {
-    warn $msg."\n";
-  } else {
-    dbg($msg);
-  } 
-  $conf->{errors}++;
-  return;
-} 
-
 
 sub razor2_lookup {
   my ($self, $permsgstatus, $fulltext) = @_;
@@ -158,8 +121,8 @@ sub razor2_lookup {
   return $self->{razor2_result} if ( defined $self->{razor2_result} );
   $self->{razor2_result} = 0;
 
-  # this test covers all aspects of availability
-  if (!$self->{main}->{conf}->{use_razor2}) { return 0; }
+  return unless $self->{main}->{conf}->{use_razor2};
+  return unless $self->{razor2_available};
   
   # razor also debugs to stdout. argh. fix it to stderr...
   if ($Mail::SpamAssassin::DEBUG) {
@@ -327,6 +290,7 @@ sub check_razor2 {
   my ($self, $permsgstatus) = @_;
 
   return unless $self->{main}->{conf}->{use_razor2};
+  return unless $self->{razor2_available};
   return $self->{razor2_result} if (defined $self->{razor2_result});
 
   my $full = $permsgstatus->{msg}->get_pristine();
@@ -341,6 +305,7 @@ sub check_razor2_range {
   # If Razor2 isn't available, or the general test is disabled, don't
   # continue.
   return 0 unless $self->{main}->{conf}->{use_razor2};
+  return unless $self->{razor2_available};
   return 0 unless $self->{main}->{conf}->{scores}->{'RAZOR2_CHECK'};
 
   # If Razor2 hasn't been checked yet, go ahead and run it.

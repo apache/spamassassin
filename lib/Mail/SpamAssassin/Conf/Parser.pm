@@ -111,9 +111,6 @@ up first for speed.
 
 =back
 
-Note that the registered commands array can be extended by plugins, by adding
-the new config settings to the C<$conf-<gt>{registered_commands}> array ref.
-
 =head1 METHODS
 
 =over 4
@@ -146,16 +143,29 @@ sub new {
     'conf'      => $conf
   };
 
+  $self->{command_luts} = { };
+  $self->{command_luts}->{frequent} = { };
+  $self->{command_luts}->{remaining} = { };
+
   bless ($self, $class);
   $self;
 }
 
 ###########################################################################
 
-sub set_defaults_from_command_list {
-  my ($self) = @_;
+sub register_commands {
+  my($self, $arrref) = @_;
   my $conf = $self->{conf};
-  foreach my $cmd (@{$conf->{registered_commands}}) {
+
+  $self->set_defaults_from_command_list($arrref);
+  $self->build_command_luts($arrref);
+  push(@{$conf->{registered_commands}}, @{$arrref});
+}
+
+sub set_defaults_from_command_list {
+  my ($self, $arrref) = @_;
+  my $conf = $self->{conf};
+  foreach my $cmd (@{$arrref}) {
     # note! exists, not defined -- we want to be able to set
     # "undef" default values.
     if (exists($cmd->{default})) {
@@ -165,19 +175,12 @@ sub set_defaults_from_command_list {
 }
 
 sub build_command_luts {
-  my ($self) = @_;
+  my ($self, $arrref) = @_;
 
-  return if $self->{already_built_config_lookup};
-  $self->{already_built_config_lookup} = 1;
-
-  $self->{command_luts} = { };
-  $self->{command_luts}->{frequent} = { };
-  $self->{command_luts}->{remaining} = { };
   my $conf = $self->{conf};
 
   my $set;
-  foreach my $cmd (@{$conf->{registered_commands}})
-  {
+  foreach my $cmd (@{$arrref}) {
     # first off, decide what set this is in.
     if ($cmd->{is_frequent}) { $set = 'frequent'; }
     else { $set = 'remaining'; }
@@ -217,8 +220,7 @@ sub parse {
     $lang =~ s/[@.+,].*$//;    # Strip codeset, modifier/audience, etc.
   }                            # (eg. .utf8 or @euro)
 
-  # build and get fast-access handles on the command lookup tables
-  $self->build_command_luts();
+  # get fast-access handles on the command lookup tables
   my $lut_frequent = $self->{command_luts}->{frequent};
   my $lut_remaining = $self->{command_luts}->{remaining};
 

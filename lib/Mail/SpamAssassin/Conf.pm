@@ -75,7 +75,7 @@ use warnings;
 use bytes;
 
 use vars qw{
-  @ISA $VERSION $DEFAULT_COMMANDS
+  @ISA $VERSION
   $CONF_TYPE_STRING $CONF_TYPE_BOOL
   $CONF_TYPE_NUMERIC $CONF_TYPE_HASH_KEY_VALUE
   $CONF_TYPE_ADDRLIST $CONF_TYPE_TEMPLATE
@@ -130,7 +130,7 @@ $INVALID_VALUE              = -999;
 ###########################################################################
 
 sub set_default_commands {
-  return if (defined $DEFAULT_COMMANDS);
+  my($self) = @_;
 
   # see "perldoc Mail::SpamAssassin::Conf::Parser" for details on this fmt.
   # push each config item like this, to avoid a POD bug; it can't just accept
@@ -3170,7 +3170,7 @@ distances that are greater than 9.)
 
 =cut
 
-  $DEFAULT_COMMANDS = \@cmds;
+  return \@cmds;
 }
 
 ###########################################################################
@@ -3179,14 +3179,12 @@ sub new {
   my $class = shift;
   $class = ref($class) || $class;
   my $self = {
-    main => shift
+    main => shift,
+    registered_commands => [],
   }; bless ($self, $class);
 
   $self->{parser} = Mail::SpamAssassin::Conf::Parser->new($self);
-
-  set_default_commands();
-  $self->{registered_commands} = $DEFAULT_COMMANDS;
-  $self->{parser}->set_defaults_from_command_list();
+  $self->{parser}->register_commands($self->set_default_commands());
 
   $self->{errors} = 0;
   $self->{plugins_loaded} = { };
