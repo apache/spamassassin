@@ -87,6 +87,7 @@ score T_FURTHER_TRANSMISSIONS	1.0
 
 ########################################################################
 # bug 1106: forged MUAs
+# only needed a \b around the shortest X-Mailer regular expressions
 
 # AOL
 header __AOL_MUA		X-Mailer =~ /\bAOL\b/
@@ -110,7 +111,7 @@ describe T_FORGED_MUA_MOZILLA	Forged mail pretending to be from Mozilla
 score T_FORGED_MUA_MOZILLA	1.0
 
 # Outlook
-header __OUTLOOK_MUA		X-Mailer =~ /Outlook(?! IMO)/
+header __OUTLOOK_MUA		X-Mailer =~ /\bOutlook\b(?! IMO)/
 header __OUTLOOK_MSGID		Message-Id =~ /^<[0-9a-f]{12}\$[0-9a-f]{8}\$[0-9a-f]{8}\@\S+>$/
 meta T_FORGED_MUA_OUTLOOK	(__OUTLOOK_MUA && !__OUTLOOK_MSGID)
 describe T_FORGED_MUA_OUTLOOK	Forged mail pretending to be from Outlook
