@@ -651,3 +651,7 @@ describe T_HTML_TAG_EXISTS_MARQUEE	HTML has "marquee" tag
 
 # bug 1985
 body T_URGENT_BIZ /urgent.{0,16}(?:assistance|business|buy|confidential|notice|proposal|reply|request|response)/i
+
+header T_RATWARE_FAKED_AOL_UA	User-Agent =~ /^AOL /
+describe T_RATWARE_FAKED_AOL_UA	AOL clients don't use the User-Agent header
+
