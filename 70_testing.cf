@@ -482,3 +482,6 @@ uri T_BIZ_TLD_2			/\.biz(?:\/|$)/i
 header T_ADVERT_CODE	Subject =~ /^[^0-9a-z]*adv(?:ert)?\b/i
 # may need a negative lookahead between in front of first \b for "ADV."
 header T_ADVERT_CODE2	Subject =~ /\w.*\bA\s*D\s*V\b/
+
+# bug 3262
+body T_NO_COST                    /\bno (?:(?:extra|hidden) )?(?:cost|charge)\b/i
