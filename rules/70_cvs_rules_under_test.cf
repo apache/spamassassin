@@ -156,8 +156,6 @@ meta T_FAKED_OUTLOOK		(__OUTLOOK_MUA && __MIME_HTML_ONLY)
 meta T_FAKED_AOL		(__AOL_MUA && __MIME_HTML_ONLY)
 meta T_FAKED_THEBAT		(__THEBAT_MUA && __MIME_HTML_ONLY)
 meta T_FAKED_IMS		(__IMS_MUA && __MIME_HTML_ONLY)
-# another rule detected "The Bat!" fakery, courtesy of RITLABS
-meta T_FAKED_THEBAT2		(__THEBAT_MUA && __HAS_MSMAIL_PRI)
 
 # quinlan: 2003-03-02, updated 2003-03-22
 # double REMOVE tests
@@ -243,8 +241,8 @@ meta T_HOTMAIL_FOOTER4		HOTMAIL_FOOTER4 && !T_ABUSED_HOTMAIL_FOOTER
 meta T_HOTMAIL_FOOTER5		HOTMAIL_FOOTER5 && !T_ABUSED_HOTMAIL_FOOTER
 
 # bug 1406, possible replacement for URI_IS_POUND
-uri T_URI_IS_POUND               /^\#$/  
-uri T_URI_ENDS_IN_POUND        /^[^?]+\#$/ 
+uri T_URI_IS_POUND		/^\#$/
+uri T_URI_ENDS_IN_POUND		/^[^?]+\#$/
 
 # bug 1336
 header T_TO_FILENAME           To =~ /^<C:\\/
@@ -546,18 +544,35 @@ header T_JAPANESE_UCE_SUBJECT_2	Subject =~ /\e\$B.*EE;R%a!<%k9-9p/
 # quinlan: "advertisement" in Russian KOI8-R
 header T_RUSSIAN_UCE_SUBJECT	Subject =~ /\xf0\xe5\xea\xeb\xe0\xec\xf3/
 
+# 2003-02-23: quinlan
+# Message-Id: format tests
+# hotmail
+header T_MSGID_ADDED_BY_HOTMAIL	Message-Id =~ /<MC\d{1,2}-F{1,2}\w{21,22}\@\S*hotmail\.com>/
+# 13 hexadecimal digits instead of 12
+header T_MSGID_OUTLOOK_HEX_1	Message-Id =~ /<[a-f0-9]{13}\$[a-f0-9]{8}\$[a-f0-9]{8}\@\S+>/
+header T_MSGID_OUTLOOK_HEX_2	Message-Id =~ /<[a-f0-9]{13}\$[a-f0-9]{8}\$[a-f0-9]{8}\@/
+# this one high correlation with ratware "EMWAC SMTPRS"
+header T_MSGID_B_DIGITS		Message-Id =~ /<B\d{10}\@/
+# speculative version of T_MSGID_B_DIGITS (don't use unless much better)
+header T_MSGID_LETTER_DIGITS	Message-Id =~ /<[A-Z]\d{10}\@/
+# speculative version of T_MSGID_B_DIGITS (don't use unless much better)
+header T_MSGID_HEX_DIGITS	Message-Id =~ /<[A-F0-9]{11}\@/
+# looks like spam
+header T_MSGID_THREESIXSIX	Message-Id =~ /<\d{3}\.\d{6}\.\d{6}\@\S+>/
+
 # via private mail with Mark Delany; thx Mark!
 header T_FORGED_YAHOO_RCVD_SMTP    Received =~ /from smtp(?:\d{1,2}|\d{4,})\.mail(?:\.[^\.]+|)\.yahoo\.com /
 describe T_FORGED_YAHOO_RCVD_SMTP  Received: contains forged Yahoo! SMTP server hostname
 
-# replacement for FORGED_MUA_THEBAT.  http://www.ritlabs.com/the_bat/spammer.html
-# notes: 'There are clues that make it obvious that the spam message didn't come
-# from The Bat!. For one thing, it has an "X-MSMail-Priority: Normal"
-# header. The Bat! doesn't use this.'
-header __BAT_MUA                X-Mailer =~ /The Bat!/
-header __BAT_XMSMP              X-MSMail-Priority =~ /\S/
-meta T_FORGED_MUA_THEBAT        (__BAT_MUA && __BAT_XMSMP)
-describe T_FORGED_MUA_THEBAT    Forged mail pretending to be from The Bat!
+# http://www.ritlabs.com/the_bat/spammer.html notes: 'There are clues that make
+# it obvious that the spam message didn't come from The Bat!. For one thing, it
+# has an "X-MSMail-Priority: Normal" header. The Bat! doesn't use this.'
+#
+# quinlan: this doesn't seem to catch all FORGED_MUA_THEBAT mail, but is a
+# good addition, so I renamed it.
+#
+meta T_RATWARE_NOT_THEBAT	(__THEBAT_MUA && __HAS_MSMAIL_PRI)
+describe T_RATWARE_NOT_THEBAT	Forged mail pretending to be from The Bat!
 
 # NOTE: uses __ANY_OUTLOOK_MUA.  This catches Send-Safe and a few others
 header __OL_STYLE_FROM		From =~ /^\".*\" <\S+>$/
