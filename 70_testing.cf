@@ -239,6 +239,17 @@ header T_DNS_FROM_RFC_WHOIS_A	eval:check_rbl_sub('rfci_envfrom', '127.0.0.5')
 describe T_DNS_FROM_RFC_WHOIS_A	Envelope sender listed in whois.rfc-ignorant.org
 tflags T_DNS_FROM_RFC_WHOIS_A	net
 
+# ratware: forging Postfix Receiveds
+header T_RATWARE_RCVD_PF_1  Received =~ / \(Postfix\) with ESMTP id .+\; \S+ \d+ \S+ \d+ \d+:\d+:\d+ \S+$/s
+
+# faked AOLish headers
+header T_RATWARE_RCVD_98    Received =~ / \(v98\.\d\) with ESMTP id MAIL/
+
+header T_RATWARE_SMTPSVC_1   Received =~ / SMTPSVC\(5.0.2195.6713\);\n/s
+header T_RATWARE_SMTPSVC_2   Received =~ / SMTPSVC\(5.0.2195.6824\);\n/s
+
+header T_RATWARE_RCVD_AT    Received =~ / by \S+\@\S+ with Microsoft SMTPSVC/
+
 header T_DNS_FROM_RFC_WHOIS_B	eval:check_rbl_sub('rfci_envfrom', '127.0.0.7')
 describe T_DNS_FROM_RFC_WHOIS_B	Envelope sender TLD in whois.rfc-ignorant.org
 tflags T_DNS_FROM_RFC_WHOIS_B	net
