@@ -1,3 +1,27 @@
+2003-09-23 00:08  felicity
+
+	* lib/Mail/: SpamAssassin.pm, SpamAssassin/Bayes.pm: bug 2491: 1)
+	the learn_to_journal option was only good for autolearning and
+	using sa-learn, but "spamassassin -r" just went r/w all the time.
+	
+	2) when running from spamassassin, caller_will_untie was false.  so
+	when learn() called forget(), forget() would untie, thereby leaving
+	learn() screwed.  this was generating the undefined warnings since
+	the untie() cleared db_version.  so we kluge around that by
+	saving/setting caller_will_untie, then restoring after the
+	forget().
+	
+	3) forget() didn't know it could "learn to journal", so it always
+	went r/w.
+
+2003-09-22 22:57  quinlan
+
+	* Razor2.patch: revised patch and instructions
+
+2003-09-22 19:32  felicity
+
+	* Changes, lib/Mail/SpamAssassin.pm: prepare for 2.60 release
+
 2003-09-21 22:34  quinlan
 
 	* lib/Mail/SpamAssassin/EvalTests.pm: bug 2489: check_num_received
