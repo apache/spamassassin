@@ -1524,8 +1524,9 @@ sub message_is_habeas_swe {
   if ($all =~ /\n(X-Habeas-SWE-1:.{0,512}X-Habeas-SWE-9:[^\n]{0,64}\n)/si) {
     my $text = $1;
     $text =~ tr/A-Z/a-z/;
-    $text =~ tr/\/ //d;
-    return sha1_hex($text) eq "9224b061a99d3db7fde37cbda4b6b5d0feb50a84";
+    $text =~ tr/ / /s;
+    $text =~ s/\/?>/\/>/;
+    return sha1_hex($text) eq "42ab3d716380503f66c4d44017c7f37b04458a9a";
   }
   return 0;
 }
