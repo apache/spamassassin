@@ -2819,16 +2819,17 @@ sub check_for_rdns_helo_mismatch {	# T_FAKE_HELO_*
     $firstuntrusted = 0;
 
     # did the machine HELO as a \S*something\.com machine?
-    if ($relay->{helo} !~ /${helo}$/) { next; }
+    if ($relay->{helo} !~ /(?:\.|^)${helo}$/) { next; }
 
     my $claimed = $relay->{rdns};
-    if ($claimed =~ /${rdns}$/ && $wasfirst) {
+    my $claimedmatches = ($claimed =~ /(?:\.|^)${rdns}$/);
+    if ($claimedmatches && $wasfirst) {
       # the first untrusted Received: hdr is inserted by a trusted MTA.
       # so if the rDNS pattern matches, we're good, skip it
       next;
     }
 
-    if ($claimed =~ /${rdns}$/ && !$wasfirst) {
+    if ($claimedmatches && !$wasfirst) {
       # it's a possibly-forged rDNS lookup.  Do a verification lookup
       # to ensure the host really does match what the rDNS lookup
       # claims it is.
@@ -2844,7 +2845,7 @@ sub check_for_rdns_helo_mismatch {	# T_FAKE_HELO_*
       }
     }
 
-    if ($claimed !~ /${rdns}$/) {
+    if (!$claimedmatches) {
       if (!$self->is_dns_available()) { 
 	if ($relay->{rdns_not_in_headers}) {
 	  # that's OK then; it's just the MTA which picked it up,
