@@ -165,6 +165,28 @@ sub register_rbl_subtest {
 
 ###########################################################################
 
+# TODO: If a RBL has more than one hit (on different IP addresses), some of
+# the hits will be logged under the wrong rule name.  We need to fix
+# test_log() to be rule-specific or change the DNSBL code to run test_log()
+# and got_hit() after harvesting is done.
+sub dnsbl_hit {
+  my ($self, $rule, $question, $answer) = @_;
+
+  if (substr($rule, 0, 2) ne "__") {
+    if ($answer->type eq 'TXT') {
+      my $rdatastr = $answer->rdatastr;
+      $rdatastr =~ s/^"(.*)"$/$1/;
+      $self->test_log($rdatastr);
+    }
+    elsif ($question->string =~ m/^(\d+)\.(\d+)\.(\d+)\.(\d+)\.(\S+\w)/) {
+      $self->test_log("$4.$3.$2.$1 listed in $5");
+    }
+  }
+  if (!defined $self->{tests_already_hit}->{$rule}) {
+    $self->got_hit($rule, "RBL: ");
+  }
+}
+
 sub process_dnsbl_result {
   my ($self, $query) = @_;
 
@@ -173,44 +195,56 @@ sub process_dnsbl_result {
 
   return if !defined $packet;
 
-  foreach my $ansitem ($packet->answer) {
+  my $question = ($packet->question)[0];
+  foreach my $answer ($packet->answer) {
     # TODO: there are some CNAME returns, not sure what they represent
     # nor whether they should be counted
-    next if ($ansitem->type ne 'A' && $ansitem->type ne 'TXT');
+    next if ($answer->type ne 'A' && $answer->type ne 'TXT');
     for my $rule (@{$query->[RULES]}) {
-      if (!defined $self->{tests_already_hit}->{$rule}) {
-	$self->got_hit($rule, "RBL: ");
-      }
+      $self->dnsbl_hit($rule, $question, $answer);
     }
     for my $set (@{$query->[SETS]}) {
       if ($self->{dnspost}->{$set}) {
-	$self->process_dnsbl_set($set, $ansitem->rdatastr);
+	$self->process_dnsbl_set($set, $question, $answer);
       }
     }
   }
 }
 
 sub process_dnsbl_set {
-  my ($self, $set, $rdatastr) = @_;
+  my ($self, $set, $question, $answer) = @_;
 
+  my $rdatastr = $answer->rdatastr;
   while (my ($subtest, $rule) = each %{ $self->{dnspost}->{$set} }) {
     next if defined $self->{tests_already_hit}->{$rule};
 
     # exact substr (usually IP address)
     if ($subtest eq $rdatastr) {
-      $self->got_hit($rule, "RBL: ");
+      $self->dnsbl_hit($rule, $question, $answer);
+    }
+    # senderbase
+    elsif ($set =~ /^senderbase/) {
+      $rdatastr =~ s/^"?\d+-//;
+      $rdatastr =~ s/"$//;
+      my %sb = ($rdatastr =~ m/(?:^|\|)(\d+)=([^|]+)/g);
+      while ($subtest =~ m/\bS(\d+)\b/g) {
+	$subtest =~ s/\bS(\d+)\b/\$sb{$1}/;
+      }
+      #print STDERR "$subtest\n";
+      #print STDERR "$rdatastr\n";
+      $self->got_hit($rule, "SenderBase: ") if eval "$subtest";
     }
     # bitmask
     elsif ($subtest =~ /^\d+$/) {
       if ($rdatastr =~ m/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/ &&
 	  Mail::SpamAssassin::Util::my_inet_aton($rdatastr) & $subtest)
       {
-	$self->got_hit($rule, "RBL: ");
+	$self->dnsbl_hit($rule, $question, $answer);
       }
     }
     # regular expression
     elsif ($rdatastr =~ /\Q$subtest\E/) {
-      $self->got_hit($rule, "RBL: ");
+      $self->dnsbl_hit($rule, $question, $answer);
     }
   }
 }
