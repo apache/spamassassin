@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.39 2002/11/24 10:06:37 zelgadis Exp $
+# $Id: HTML.pm,v 1.40 2002/11/27 23:42:08 jmason Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -441,8 +441,15 @@ sub html_percentage {
 }
 
 sub html_tag_balance {
-  my ($self, undef, $tag, $expr) = @_;
-  return exists $self->{html_inside}{$tag} && eval "$self->{html_inside}{$tag} $expr";
+  my ($self, undef, $rawtag, $rawexpr) = @_;
+  $rawtag =~ /^([a-zA-Z0-9]+)$/; my $tag = $1;
+  $rawexpr =~ /^([\<\>\=\!\-\+ 0-9]+)$/; my $expr = $1;
+
+  return 0 unless exists $self->{html_inside}{$tag};
+
+  $self->{html_inside}{$tag} =~ /^([\<\>\=\!\-\+ 0-9]+)$/;
+  my $val = $1;
+  return eval "$val $expr";
 }
 
 sub html_tag_exists {

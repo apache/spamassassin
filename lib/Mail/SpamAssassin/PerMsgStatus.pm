@@ -2275,6 +2275,9 @@ use Fcntl;
 sub secure_tmpfile {
   my $tmpdir = '/tmp';
   if (defined $ENV{'TMPDIR'}) { $tmpdir = $ENV{'TMPDIR'}; }
+
+  $tmpdir =~ /^(.*)$/; $tmpdir = $1;	# untaint
+
   my $template = $tmpdir."/sa.$$.";
 
   my $reportfile;

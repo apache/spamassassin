@@ -79,7 +79,7 @@ BEGIN {
 
 use vars qw{
 	@ISA $VERSION $SUB_VERSION @EXTRA_VERSION $HOME_URL $DEBUG $TIMELOG
-        $IS_DEVEL_BUILD
+        $IS_DEVEL_BUILD $AM_TAINTED
 	@default_rules_path @default_prefs_path
 	@default_userprefs_path @default_userstate_dir
 	@site_rules_path
@@ -94,7 +94,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.137 2002/11/13 11:43:00 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.138 2002/11/27 23:42:08 jmason Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -1303,6 +1303,25 @@ sub sa_die {
   my $exitcode = shift;
   warn @_;
   exit $exitcode;
+}
+
+###########################################################################
+
+# taint mode: delete more unsafe vars for exec, as per perlsec
+sub clean_path_in_taint_mode {
+  if (am_running_in_taint_mode()) {
+    delete @ENV{qw(IFS CDPATH ENV BASH_ENV)};
+    $ENV{'PATH'} = '/bin:/usr/bin:/usr/local/bin';
+  }
+}
+
+sub am_running_in_taint_mode {
+  if (defined $AM_TAINTED) { return $AM_TAINTED; }
+
+  my $blank = substr ($ENV{PATH}, 0, 0);
+  $AM_TAINTED = not eval { eval "1 || $blank" || 1 };
+  dbg ("running in taint mode? $AM_TAINTED");
+  return $AM_TAINTED;
 }
 
 1;
