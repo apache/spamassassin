@@ -367,3 +367,6 @@ header __RCVD_HAS_AOL	Received =~ /aol\.com/
 meta T_MID_RCVD_DIFF_AOL	(__MSGID_HAS_AOL && !__RCVD_HAS_AOL)
 describe T_MID_RCVD_DIFF_AOL	Message-Id does not match Received (aol.com)
 
+uri	T_URI_UNPRINTABLE	/%0/
+describe T_URI_UNPRINTABLE	URI contains unprintable characters
+
