@@ -95,7 +95,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.154 2002/12/23 14:08:40 felicity Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.155 2002/12/23 22:36:35 felicity Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -486,12 +486,6 @@ sub report_as_spam {
   local ($_);
 
   $self->init(1);
-
-  # Make sure the message is cleaned before we start, mostly so that
-  # the learner gets the actual message-id -- feel free to make this more
-  # efficient.  Reporter::report() definately already calls rem_sa_markup().
-  my @msg = split(/^/,$self->remove_spamassassin_markup($mail));
-  $mail = Mail::SpamAssassin::NoMailAudit->new('data' => \@msg);
 
   $mail = $self->encapsulate_mail_object ($mail);
 

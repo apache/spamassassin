@@ -445,6 +445,7 @@ sub rewrite_as_spam {
   my $to = $self->{msg}->get_header("To");
   my $cc = $self->{msg}->get_header("Cc");
   my $subject = $self->{msg}->get_header("Subject");
+  my $msgid = $self->{msg}->get_header('Message-Id');
   if ($self->{conf}->{rewrite_subject}) {
     $subject ||= '';
     my $tag = $self->{conf}->{subject_tag};
@@ -461,6 +462,7 @@ sub rewrite_as_spam {
   $newmsg .= "Cc: $cc" if $cc;
   $newmsg .= "Subject: $subject" if $subject;
   $newmsg .= "Date: $date" if $date;
+  $newmsg .= "Message-Id: $msgid" if $msgid;
   $newmsg .= "X-Spam-Flag: YES\n";
   $newmsg .= "X-Spam-Status: " . $self->_build_status_line() . "\n";
   if ($self->{main}->{conf}->{spam_level_stars} == 1) {
