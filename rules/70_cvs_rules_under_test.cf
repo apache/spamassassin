@@ -553,3 +553,9 @@ body T_HTML_MAIL_ONLY             /HTML only email, sorry/i
 uri T_HEX_HOST	/^https?:\/\/[^\/]*0x[0-9a-fA-F]{2}/
 describe T_HEX_HOST	Looks like an URL with obfuscated hex IP address
 score T_HEX_HOST	0.01
+
+# If we see % followed by 21-7e except 2[2356f], 3[a-f], and 40, they don't need escaping, suspicious...
+# This is pretty ugly, but I couldn't think of a better way to do it. :|
+uri T_HTTP_ESCAPED_URI_SUSPICIOUS	m@%(?:2[147-9a-eA-E]|3[0-9]|4[1-9a-fA-F]|[56][0-9a-fA-F]|7[0-9a-eA-E])@
+describe T_HTTP_ESCAPED_URI_SUSPICIOUS      Uses unnecessary %-escapes inside a URL's path
+score T_HTTP_ESCAPED_URI_SUSPICIOUS 0.01
