@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.42 2002/12/08 07:48:50 quinlan Exp $
+# $Id: HTML.pm,v 1.43 2002/12/09 08:42:52 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -273,18 +273,30 @@ sub html_tests {
       }
   }
 
-  if ($tag eq "img" && exists $attr->{width} && $attr->{width} =~ /^\d+$/ && exists $attr->{height} && $attr->{height} =~ /^\d+$/ ) {
+  if ($tag eq "img" && exists $attr->{width} && exists $attr->{height}) {
+    my $width = 0;
+    my $height = 0;
+
+    # assume 800x600 screen for percentage values
+    if ($attr->{width} =~ /^(\d+)(\%)?$/) {
+      $width = $1;
+      $width *= 8 if (defined $2 && $2 eq "%");
+    }
+    if ($attr->{height} =~ /^(\d+)(\%)?$/) {
+      $height = $1;
+      $height *= 6 if (defined $2 && $2 eq "%");
+    }
+    if ($width > 0 && $height > 0) {
       my $area = $attr->{width} * $attr->{height};
       $self->{html}{total_image_area} += $area;
 
-      if (($attr->{width} > 0) && ($attr->{height} > 0)) {
-          my $ratio = ($attr->{width} + 0.0) / ($attr->{height} + 0.0);
+      my $ratio = ($attr->{width} + 0.0) / ($attr->{height} + 0.0);
 
-          $self->{html}{min_img_ratio} = $ratio
-            if ($self->{html}{min_img_ratio} eq "inf" || $ratio < $self->{html}{min_img_ratio});
-          $self->{html}{max_img_ratio} = $ratio
-            if ($ratio > $self->{html}{max_img_ratio});
-      }
+      $self->{html}{min_img_ratio} = $ratio
+	  if ($self->{html}{min_img_ratio} eq "inf" || $ratio < $self->{html}{min_img_ratio});
+      $self->{html}{max_img_ratio} = $ratio
+	  if ($ratio > $self->{html}{max_img_ratio});
+    }
   }
   if ($tag eq "form" && exists $attr->{action}) {
     $self->{html}{form_action_mailto} = 1 if $attr->{action} =~ /mailto:/i
