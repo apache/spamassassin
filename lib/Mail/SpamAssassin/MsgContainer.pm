@@ -265,10 +265,12 @@ sub rendered {
     my $text = $self->decode();
     my $raw = length($text);
 
-    # render text/html always, or any other text part as text/html based
+    # render text/html always, or any other text|text/plain part as text/html based
     # on a heuristic which simulates a certain common mail client
-    if ( $raw > 0 && ($self->{'type'} =~ m@^text/html\b@i ||
-        ($text =~ m/^(.{0,18}?<(?:$Mail::SpamAssassin::HTML::re_start)(?:\s.{0,18}?)?>)/ois &&
+    if ( $raw > 0 && (
+        $self->{'type'} =~ m@^text/html\b@i || (
+        $self->{'type'} =~ m@^text(?:$|/plain)@i &&
+	  $text =~ m/^(.{0,18}?<(?:$Mail::SpamAssassin::HTML::re_start)(?:\s.{0,18}?)?>)/ois &&
 	  _html_near_start($1))
         )
        ) {
@@ -491,15 +493,6 @@ sub get_pristine {
 sub get_pristine_body {
   my ($self) = @_;
   return $self->{pristine_body};
-}
-
-=item as_string()
-
-=cut
-
-sub as_string {
-  my ($self) = @_;
-  return $self->get_all_headers(1) . "\n" . $self->{pristine_body};
 }
 
 =item ignore()

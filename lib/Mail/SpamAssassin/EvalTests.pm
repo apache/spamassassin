@@ -3605,11 +3605,13 @@ sub _multipart_alternative_difference {
       if ( $type eq 'text/html' ) {
         foreach my $w ( grep(/\w/,split(/\s+/,$rnd)) ) {
           next if ( $w =~ /^URI:/ );
+	  #dbg("HTML: $w");
           $html{$w}++;
         }
       }
       else {
         foreach my $w ( grep(/\w/,split(/\s+/,$rnd)) ) {
+	  #dbg("TEXT: $w");
           $text{$w}++;
         }
       }
@@ -3621,6 +3623,8 @@ sub _multipart_alternative_difference {
     while( my($k,$v) = each %text ) {
       delete $html{$k} if ( exists $html{$k} && $html{$k}-$text{$k} < 1 );
     }
+
+    #map { dbg("LEFT: $_") } keys %html;
 
     my $diff = scalar(keys %html)/$orig*100;
     $self->{madiff} = $diff if ( $diff > $self->{madiff} );
