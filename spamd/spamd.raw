@@ -901,6 +901,7 @@ sub spawn {
         $spamtest->copy_config(\%conf_backup, undef) ||
           die "error returned from copy_config, no Storable module?\n";
       }
+      undef $current_user;
 
     }
 
