@@ -236,7 +236,7 @@ body HERBAL_VIAGRA              /\bherbal v(?:iagra)?\b/i
 describe HERBAL_VIAGRA          Plugs "Herbal Viagra"
 
 # NB: Also seems to be a diabetes drug, so don't let it score high
-body VIGORA                     /bVigora\b/
+body VIGORA                     /\bVigora\b/
 describe VIGORA                 Some sort of viagra alternative
 
 body TARGETED                   /\btargeted (?:traffic|e-?mail|internet|leads?)\b/i
