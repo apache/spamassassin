@@ -188,47 +188,6 @@ body     T_RM_BPT_LONGWORDS_10_8_A /\b(?:[a-z]{10,}\s+){8}/
 body     T_RM_BPT_LONGWORDS_10_9_A /\b(?:[a-z]{10,}\s+){9}/
 body     T_RM_BPT_LONGWORDS_10_10_A /\b(?:[a-z]{10,}\s+){10}/
 
-header T_HELO_DYNAMIC_IPADDR2 X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\d+[^\d\s]\d+[^\d\s]\d+[^\d\s]\d+[^\d\s][^\.]*\.\S+\.\S+/i
-# wiley-170-10231.roadrunner.nf.net [205.251.210.249]
-header T_HELO_DYNAMIC_RR2   X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[a-z]+-\d{1,3}-\d{1,5}\.roadrunner/i
-# pcp04024417pcs.toresd01.pa.comcast.net [68.86.206.126]
-# bgp542174bgs.ewndsr01.nj.comcast.net[68.38.144.91]
-# Computer-udp135632uds.union01.nj.comcast.net [68.39.99.32]
-header T_HELO_DYNAMIC_COMCAST X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[a-z-]+\d+[a-z]{3}\.[a-z0-9]+\...\.comcast/i
-# h234n2fls32o895.telia.com [217.208.73.234]
-# h53n2fls32o828.telia.com
-# h116n2fls32o1111.telia.com
-# h29n1fls306o1003.telia.com
-header T_HELO_DYNAMIC_TELIA X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=h\d+n\d+fls\S+\.telia\.com/i
-# CM-vina5-168-207.cm.vtr.net [200.104.168.207]
-# CM-anto1-98-153.cm.vtr.net [200.104.98.153]
-header T_HELO_DYNAMIC_VTR X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=cm-[a-z]+\d+-\d+-\d+\.cm\.vtr/i
-# lnngmi06edg01-xdata2-a3.lnngmi.tds.net [134.215.229.67]
-# nwblwi-nrp3-l10-a671.nwblwi.tds.net
-header T_HELO_DYNAMIC_TDS X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S+-[a-z]\d+\.[a-z]{6}\.tds\.net/i
-# q2l5s51.cm.chello.no
-# ec9z5l.cm.chello.no
-header T_HELO_DYNAMIC_CHELLO_NO  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S+\.cm\.chello\.no/i
-# f88114.upc-f.chello.nl [80.56.88.114]
-# g225174.upc-g.chello.nl
-# a151145.upc-a.chello.nl
-# a96134.upc-a.chello.nl
-header T_HELO_DYNAMIC_CHELLO_NL  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[a-z]\d+\.upc-[a-z]\.chello\.nl/i
-# MG036162.user.veloxzone.com.br
-# MG001182.user.veloxzone.com.br
-# ba199058073.user.veloxzone.com.br
-header T_HELO_DYNAMIC_VELOX  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[a-z]{2}\d+\.user\.veloxzone\./i
-# 14824.cps.virtua.com.br
-header T_HELO_DYNAMIC_VIRTUA  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\d+\.cps\./i
-# public4-seve6-5-cust173.lond.broadband.ntl.com
-# spr1-bolt5-5-0-cust9.manc.broadband.ntl.com
-# spc1-lewi4-6-0-cust190.lond.broadband.ntl.com
-header T_HELO_DYNAMIC_NTL  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S+\d+-\d+-cust\d+\.[a-z]{4,6}\.broadband\.ntl\.com/i
-# cc27194-a.deven1.ov.home.nl
-# cp160000-a.mill1.nb.home.nl
-# cp341468-b.venra1.lb.home.nl
-header T_HELO_DYNAMIC_HOME_NL  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[a-z]{2}\d+-\S\.\S+\d\.[a-z]{2}\.home\.nl/i
-
 
 # partial messages; currently-theoretical attack
 # unsurprisingly this hits 0/0 right now.  But should we promote it anyway
