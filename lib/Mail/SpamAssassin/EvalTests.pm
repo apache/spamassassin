@@ -2054,51 +2054,6 @@ sub check_for_body_8bits {
   return 0;
 }
 
-sub check_signature {
-  my ($self, $full, $min, $max, $blank) = @_;
-
-  if (!exists $self->{signature_lines}) {
-    $self->_check_signature($full);
-  }
-  return (($self->{signature_lines} >= $min) &&
-	  ($self->{signature_lines} <= $max) &&
-	  ($self->{signature_blank} == $blank));
-}
-
-
-sub _check_signature {
-  my ($self, $full) = @_;
-
-  $self->{signature_blank} = 0;
-  $self->{signature_lines} = 0;
-
-  # remove headers
-  my ($body) = ($$full =~ /.*?\n\n(.*)/s);
-
-  # signature must follow one non-whitespace character
-  if (defined($body) && $body =~ /\S\s*\n-- \n((.*\n){1,15}?)\s*\Z/m) {
-    my $signature = $1;
-
-    if ($signature =~ /\n\s*\n\s*\S/m) {
-      $self->{signature_blank} = 1;
-    }
-    if ($signature =~ /\S/m) {
-      $self->{signature_lines} = ($signature =~ tr/\n/\n/);
-    }
-  }
-}
-
-#sub check_carriage_returns {
-#  my ($self, $rawbody) = @_;
-#
-#  $rawbody = join ("\n", @$rawbody);
-#
-#  my $cr = ($rawbody =~ tr/\r/x/);
-#  my $nl = ($rawbody =~ tr/\n/x/);
-#
-#  return ($nl > 0 && ($cr / $nl) > 0.5);
-#}
-
 ###########################################################################
 # MIME/uuencode attachment tests
 ###########################################################################
