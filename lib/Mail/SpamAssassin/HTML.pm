@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.79 2003/04/20 09:12:03 quinlan Exp $
+# $Id: HTML.pm,v 1.80 2003/04/22 01:15:53 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -496,6 +496,9 @@ sub html_tests {
 	$self->{html}{t_image_web_bugs_11} = 1;
 	$self->{html}{t_image_web_bugs_11b} = 1;
       }
+    }
+    if ($width <= 1 && $height <= 1) {
+      $self->{html}{t_image_web_bugs_1} = 1;
     }
     if ($width + $height < 4) {
       $self->{html}{t_image_web_bugs_2} = 1;
