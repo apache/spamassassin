@@ -164,15 +164,18 @@ sub wanted {
   my $out;
 
   my $ma = Mail::SpamAssassin::NoMailAudit->new('data' => $dataref);
-
   $ma->{noexit} = 1;
 
-  my $status = $spamtest->check($ma);
-
-  my $body = $ma->get_body();
-  if (defined $body && defined $body->[0] && $body->[0] =~ /^SPAM:/) {
-    $out .= "# contains SpamAssassin markup, results may be incorrect: $id\n";
+  # remove SpamAssassin markup, if present and the mail was spam
+  $_ = $ma->get ("X-Spam-Status");
+  if (defined($_) && /^Yes, hits=/) {
+    my $newtext = $spamtest->remove_spamassassin_markup($ma);
+    my @newtext = split (/^/m, $newtext);
+    $dataref = \@newtext;
+    $ma = Mail::SpamAssassin::NoMailAudit->new ('data' => $dataref);
   }
+
+  my $status = $spamtest->check($ma);
 
   my @extra;
   if (defined($time)) {
