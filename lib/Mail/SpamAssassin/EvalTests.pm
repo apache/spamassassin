@@ -272,12 +272,12 @@ sub check_rbl_results_for {
 sub check_for_unique_subject_id {
   my ($self) = @_;
   local ($_);
-  $_ = $self->get ('Subject');
+  $_ = lc $self->get ('Subject');
 
   my $id = undef;
   if (/[-_\.\s]{7,}([-a-z0-9]{4,})$/
-	|| /\s+[-:\#\(\[]+([-a-zA-Z0-9]{4,})[\]\)]+$/
-	|| /\s+[-:\#]([-a-zA-Z0-9]{4,})$/)
+	|| /\s+[-:\#\(\[]+([-a-z0-9]{4,})[\]\)]+$/
+	|| /\s+[-:\#]([-a-z0-9]{4,})$/)
   {
     $id = $1;
   }
