@@ -279,14 +279,7 @@ sub learn {
     my $new_scoreset = $orig_scoreset & ~2;
     dbg ("auto-learn: currently using scoreset $orig_scoreset.  recomputing score based on scoreset $new_scoreset.");
     $self->{conf}->set_score_set($new_scoreset); # reduce to autolearning scores
-    foreach my $test ( @{$self->{test_names_hit}} ) {
-      # ignore tests with 0 score in this scoreset or if the test is a learning or userconf test
-      next if ( $self->{conf}->{scores}->{$test} == 0 );
-      next if ( exists $self->{conf}->{tflags}->{$test} && $self->{conf}->{tflags}->{$test} =~ /\bnoautolearn\b/ );
-
-      $hits += $self->{conf}->{scores}->{$test};
-    }
-    $hits = (sprintf "%0.3f", $hits) + 0;
+    my $hits = $self->get_nonlearn_nonuserconf_hits();
     dbg ("auto-learn: original score: ".$self->{hits}.", recomputed score: $hits");
     $self->{conf}->set_score_set($orig_scoreset); # return to appropriate scoreset
   }
@@ -360,6 +353,26 @@ sub learn {
     dbg ("auto-learning failed: $@");
     $self->{auto_learn_status} = "failed";
   }
+}
+
+sub get_nonlearn_nonuserconf_hits {
+  my ($self) = @_;
+
+  my $scores = $self->{conf}->{scores};
+  my $tflags = $self->{conf}->{tflags};
+  my $hits = 0;
+
+  foreach my $test ( @{$self->{test_names_hit}} )
+  {
+    # ignore tests with 0 score in this scoreset,
+    # or if the test is a learning or userconf test
+    next if ($scores->{$test} == 0);
+    next if (exists $tflags->{$test} && $tflags->{$test} =~ /\bnoautolearn\b/);
+
+    $hits += $scores->{$test};
+  }
+
+  return (sprintf "%0.3f", $hits) + 0;
 }
 
 ###########################################################################
