@@ -492,3 +492,10 @@ endif   # Mail::SpamAssassin::Plugin::URIDNSBL
 header __MAILMAN_21             X-Mailman-Version =~ /\d/
 meta T_FORGED_MUA_THEBAT_BOUN   (__THEBAT_MUA && !__THEBAT_MUA_V2 && __CTYPE_HAS_BOUNDARY && !__BAT_BOUNDARY && !__MAILMAN_21)
 
+# some test replacements for meta rule
+meta T_LONGWORDS_1	(__LONGWORDS_D || (__LONGWORDS_A + __LONGWORDS_B + __LONGWORDS_C > 1))
+meta T_LONGWORDS_2	(__LONGWORDS_D || (__LONGWORDS_A && __LONGWORDS_B && __LONGWORDS_C))
+meta T_LONGWORDS_3	(__LONGWORDS_A + __LONGWORDS_B + __LONGWORDS_C + __LONGWORDS_D > 1)
+meta T_LONGWORDS_4	(__LONGWORDS_D || __LONGWORDS_A)
+meta T_LONGWORDS_5	(__LONGWORDS_D || __LONGWORDS_B)
+meta T_LONGWORDS_6	(__LONGWORDS_D || __LONGWORDS_C)
