@@ -2248,9 +2248,7 @@ sub _check_mime_header {
 
   if (!$name &&
       $cte =~ /base64/ &&
-      ($charset =~ /\b(?:us-ascii|iso-8859-(?:[12349]|1[0345])
-						|windows-(?:125[0247]))\b/
-	|| !$charset))
+      ($charset =~ /\b(?:us-ascii|iso-8859-(?:[12349]|1[0345])|windows-(?:125[0247]))\b/ || !$charset))
   {
     $self->{mime_base64_latin} = 1;
   }
