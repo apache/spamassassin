@@ -130,41 +130,39 @@ spamd/spamc: binaries.mk
 binaries.mk: configure
 	./configure
 
-inst_cfs: $(LOCAL_RULES_DIR) $(DEF_RULES_DIR) $(LOCAL_RULES_DIR)/local.cf
-	$(RM_F) $(DEF_RULES_DIR)/*; \
+inst_cfs: $(DEF_RULES_DIR) $(LOCAL_RULES_DIR) $(LOCAL_RULES_DIR)/local.cf
+	$(RM_F) $(DEF_RULES_DIR)/*
 	for file in $(RULES) ; do \
 	  $(CP) rules/$$file $(DEF_RULES_DIR)/$$file; \
-	done; \
+	done
 	$(CHMOD) $(PERM_RW) $(DEF_RULES_DIR)/*
 
-$(LOCAL_RULES_DIR)/local.cf: rules/local.cf
-	if [ ! -f $(LOCAL_RULES_DIR)/local.cf ] ; then \
-	  $(CP) rules/local.cf $(LOCAL_RULES_DIR)/local.cf ; \
-	else true ; fi
-
 $(DEF_RULES_DIR):
-	$(MKPATH) $(DEF_RULES_DIR)
+	$(MKPATH) $@
 
 $(LOCAL_RULES_DIR):
-	if [ ! -d $(LOCAL_RULES_DIR) ] ; then \
-	  $(MKPATH) $(LOCAL_RULES_DIR) ; \
-	else true ; fi
+	$(MKPATH) $@
 
-doc:
-	$(MKPATH) doc
+$(LOCAL_RULES_DIR)/local.cf: rules/local.cf
+	test -e $@ || \
+	  $(CP) rules/local.cf $@
 
 text_html_doc: doc/.made
 	@true
 
+doc:
+	$(MKPATH) $@
+
 doc/.made: doc $(MAN1PODS) $(MAN3PODS)
+	echo $(MAN1PODS) $(MAN3PODS)
 	for f in $(MAN1PODS) $(MAN3PODS) $(EXTRAPODS) ; do \
-	      pod2html $$f > doc/`echo $$f | perl -pe \
-		's/(lib|spamd)\///; s/\//_/g; s/\.(pod|pm)//;'`.html ; \
-	      pod2text $$f > doc/`echo $$f | perl -pe \
-		's/(lib|spamd)\///; s/\//_/g; s/\.(pod|pm)//;'`.txt ; \
+	      pod2html $$f > doc/`echo $$f | $(PERL) -pe \
+	        's/(lib|spamd)\///; tr/\//_/; s/\.(pod|pm)$//;'`.html ; \
+	      pod2text $$f > doc/`echo $$f | $(PERL) -pe \
+	        's/(lib|spamd)\///; tr/\//_/; s/\.(pod|pm)$//;'`.txt ; \
 	done
 	touch doc/.made
-	-rm -f pod2htm*
+	$(RM_F) pod2htm*
 
 #;
 
