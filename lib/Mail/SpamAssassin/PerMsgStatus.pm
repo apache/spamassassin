@@ -658,7 +658,7 @@ sub get_decoded_body_text_array {
       }
 
       if ($lastlinelength == length ($line)) {              # Same length as the last line.  Starting to look like a base64 encoding
-        if ($b64lines++ == 5) {                             # Five lines the same length, with no spaces in them
+        if ($b64lines++ == 3) {                             # Three lines the same length, with no spaces in them
           $foundb64 = 1;                                    # Sounds like base64 to me!
         }
         $_ .= $line;
@@ -671,6 +671,7 @@ sub get_decoded_body_text_array {
       }
     }
 
+    s/\r//;
     $_ = $self->generic_base64_decode ($_);
     # print "decoded: $_\n";
     my @ary = split (/^/, $_);
