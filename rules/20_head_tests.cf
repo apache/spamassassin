@@ -47,7 +47,7 @@ header __FROM_PHONE             From:addr =~ /^\d{3}(?:[-.]?\d{3}[-.]?\d{4}|\d{7
 meta FROM_ALL_NUMS              (__FROM_JUST_NUMBER && !__FROM_PHONE)
 describe FROM_ALL_NUMS          From an address that is all numbers (non-phone)
 
-header FROM_OFFERS		From:addr =~ /\@\S*offers/i
+header FROM_OFFERS		From:addr =~ /\@\S*offers(?![eo]n\b)/i
 describe FROM_OFFERS		From address is "at something-offers"
 
 header FROM_NO_USER		From =~ /(?:^\@|<\@| \@[^\)<]*$|<>)/ [if-unset: unset@unset.unset]
@@ -219,7 +219,7 @@ describe ADVERT_CODE2		Subject: contains advertising tag
 header KOREAN_UCE_SUBJECT	Subject =~ /[({[<][. ]*(?:\xbc\xba[. ]*\xc0\xce[. ]*)?(?:\xb1\xa4(?:[. ]*|[\x00-\x7f]{0,3})\xb0\xed|\xc1\xa4[. ]*\xba\xb8|\xc8\xab[. ]*\xba\xb8)[. ]*[)}\]>]/
 describe KOREAN_UCE_SUBJECT	Subject: contains Korean unsolicited email tag
 
-header FRIEND_AT_PUBLIC         To =~ /(?:yourdomain|you|your|public)\.(?:com|org|net)/i
+header FRIEND_AT_PUBLIC		To =~ /(?:yourdomain|you|your|(?<!re)public)\.(?:com|org|net)/i
 describe FRIEND_AT_PUBLIC	sent to you@you.com or similar
 
 header FRIEND_PUBLIC		ALL =~ /^(?:to|cc|from):.*friend\@public\.com/im
