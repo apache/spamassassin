@@ -269,7 +269,7 @@ sub _check_mta_message_id {
 
 ###########################################################################
 
-# yet another test for faked Received: headers
+# yet another test for faked Received: headers (FORGED_RCVD_TRAIL)
 sub check_for_forged_received_trail {
   my ($self) = @_;
 
@@ -288,11 +288,17 @@ sub check_for_forged_received_trail {
       $from[$i] = lc($1);
       $from[$i] =~ s/.*\.(\S+\.\S+)$/$1/;
     }
+
     if ($i > 0 && defined($by[$i]) && defined($from[$i - 1]) &&
 	($by[$i] ne $from[$i - 1]))
     {
       $mismatch++;
     }
+
+    dbg ("forged_rcvd_trail: entry $i:"
+        ." by=".(defined $by[$i] ? $by[$i] : "(undef)")
+        ." from=".(defined $from[$i] ? $from[$i] : "(undef)")
+        ." mismatches=$mismatch");
   }
   return ($mismatch > 1);
 }
