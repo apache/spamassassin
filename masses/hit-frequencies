@@ -64,6 +64,8 @@ foreach my $test (sort {
   my $fn = $freq_nonspam{$test}; $fn ||= 0;
 
   if (!defined $score{$test}) { $score{$test} ||= 1.0; }
+  if (!defined $tflags{$test}) { $tflags{$test} = ''; }
+  next if ($tflags{$test} =~ /net/);    # ignore net tests
 
   # adjust based on corpora sizes (and cvt to % while we're at it)
   my $fsadj = ($fs / ($num_spam)) * 100.0;
@@ -141,12 +143,11 @@ sub readscores {
       $freq{$2} ||= 0;
       $freq_spam{$2} ||= 0;
       $freq_nonspam{$2} ||= 0;
-      $score{$1} ||= 1.0;
+      $tflags{$2} ||= '';
+      $score{$2} ||= 1.0;
+    } elsif (/^tflags\s+(.+)$/) {
+      $tflags{$1} = $2;
     } elsif (/^score\s+(\S+)\s+(.+)$/) {
-      # ignore tests with no test-type!
-      #$freq{$1} ||= 0;
-      #$freq_spam{$1} ||= 0;
-      #$freq_nonspam{$1} ||= 0;
       $score{$1} = $2;
     }
   }
