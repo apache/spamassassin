@@ -115,7 +115,7 @@ sub parse_headers {
       $self->{from_line} = $_;
       next;
 
-    } elsif (/^([^\x00-\x20\x7f-\xff:]+):(.*)$/) {
+    } elsif (/^([^\x00-\x20\x7f-\xff:]+):\s*(.*)$/) {
       $hdr = $1; $val = $2;
       $val =~ s/\r+//gs;          # trim CRs, we don't want them
       $entry = $self->_get_or_create_header_object ($hdr);
