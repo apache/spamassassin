@@ -772,6 +772,9 @@ describe T_DRUGS_SLEEP_EREC 	Has refs to an E.D. and prescription sleep aid
 meta T_DRUGS_MANYKINDS	(T_DRUGS_ERECTILE + T_DRUGS_DIET + T_DRUGS_PAIN + T_DRUGS_SLEEP + T_DRUGS_MUSCLE + T_DRUGS_ANXIETY + T_DRUGS_DEPRESSION >3)
 describe T_DRUGS_MANYKINDS 	contains refs to four different kinds of drugs
 
+# I'm curious, may help explain more ALL_TRUSTED fps
+body T_SA_MARKED_UP     /Spam detection software, running on the system /
+
 # possible replacements for SUSPICIOUS_RECIPS
 header T_SUSPICIOUS_RECIPS_55	eval:similar_recipients('0.55','undef')
 header T_SUSPICIOUS_RECIPS_60	eval:similar_recipients('0.60','undef')
@@ -779,3 +782,4 @@ header T_SUSPICIOUS_RECIPS_65	eval:similar_recipients('0.65','undef')
 header T_SUSPICIOUS_RECIPS_70	eval:similar_recipients('0.70','undef')
 header T_SUSPICIOUS_RECIPS_75	eval:similar_recipients('0.75','undef')
 header T_SUSPICIOUS_RECIPS_80	eval:similar_recipients('0.80','undef')
+
