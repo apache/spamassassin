@@ -2810,4 +2810,28 @@ sub check_for_mizspeeling_ratware {
   return 1;
 }
 
+sub check_for_rdns_helo_mismatch {
+  my ($self, $rdns, $helo) = @_;
+
+  foreach my $relay (@{$self->{relays_untrusted}}) {
+    if ($relay->{helo} =~ /${helo}$/ && $relay->{rdns} !~ /${rdns}$/)
+    {
+      if (!$self->is_dns_available()) { 
+	if ($relay->{rdns_not_in_headers}) {
+	  # that's OK then; it's just the MTA which picked it up,
+	  # is not configured to perform lookups, and we're offline
+	  # so we couldn't either.
+	  return 0;
+	}
+      }
+
+      # otherwise there *is* a mismatch
+      dbg ("rdns/helo mismatch: helo=$relay->{helo} rdns=$relay->{rdns}");
+      return 1;
+    }
+  }
+
+  0;
+}
+
 1;

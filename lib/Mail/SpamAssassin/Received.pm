@@ -1,4 +1,4 @@
-# $Id: Received.pm,v 1.8 2003/04/08 01:59:27 jmason Exp $
+# $Id: Received.pm,v 1.9 2003/04/08 07:25:51 jmason Exp $
 
 # ---------------------------------------------------------------------------
 
@@ -654,14 +654,29 @@ enough:
   $by =~ s/[\s\0\#\[\]\(\)\<\>\|]/!/gs;
   $ident =~ s/[\s\0\#\[\]\(\)\<\>\|]/!/gs;
 
+  my $relay = {
+    ip => $ip,
+    by => $by,
+    helo => $helo,
+    ident => $ident,
+    lc_by => (lc $by),
+    lc_helo => (lc $helo)
+  };
+
   # perform rDNS check if MTA has not done it for us.
   # TODO: do this for untrusted headers anyway; if it mismatches it
   # could be a spamsign.  Probably better done later after we've
   # moved the "trusted" ones out of the way.  In fact, this op
   # here may be movable too; no need to lookup trusted IPs all the time.
   if ($rdns eq '') {
-    $rdns = $self->lookup_ptr ($ip); $rdns ||= '';
+    if (!$self->is_dns_available()) {
+      $relay->{rdns_not_in_headers} = 1;
+    } else {
+      $rdns = $self->lookup_ptr ($ip); $rdns ||= '';
+    }
   }
+  $relay->{rdns} = $rdns;
+  $relay->{lc_rdns} = lc $rdns;
 
   # as-string rep. use spaces so things like Bayes can tokenize them easily.
   # NOTE: when tokenizing or matching, be sure to note that new
@@ -670,22 +685,13 @@ enough:
   # e.g. "ip" comes before "helo" will still work.
   #
   my $asstr = "[ ip=$ip rdns=$rdns helo=$helo by=$by ident=$ident ]";
+  $relay->{as_string} = $rdns;
 
   my $isrsvd = ($ip =~ /^${IP_IN_RESERVED_RANGE}$/o);
+  $relay->{ip_is_reserved} = $rdns;
 
   # add it to an internal array so Eval tests can use it
-  push (@{$self->{relays}}, {
-	ip => $ip,
-	rdns => $rdns,
-	helo => $helo,
-	by => $by,
-	ident => $ident,
-	lc_by => (lc $by),
-	lc_rdns => (lc $rdns),
-	lc_helo => (lc $helo),
-	ip_is_reserved => $isrsvd,
-	as_string => $asstr
-      });
+  push (@{$self->{relays}}, $relay);
 }
 
 # ---------------------------------------------------------------------------

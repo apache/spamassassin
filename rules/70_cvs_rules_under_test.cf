@@ -545,3 +545,35 @@ header T_RCVD_IN_PDL	rbleval:check_rbl('pdl-notfirsthop', 'dialups.visi.com.')
 tflags T_RCVD_IN_PDL	net
 
 
+# OK, a whole batch of faked-HELO detection rules.  These work by checking
+# for hosts HELOing in a certain domain, but without rDNS matching that.
+# these are the most frequently-impersonated headers in my recent corpora...
+header T_FAKE_HELO_YAHOO	eval:check_for_rdns_helo_mismatch("yahoo\.com","yahoo\.com")
+header T_FAKE_HELO_HOTMAIL	eval:check_for_rdns_helo_mismatch("hotmail(?:\.msn|)\.com","hotmail\.com")
+header T_FAKE_HELO_AOL		eval:check_for_rdns_helo_mismatch("aol\.com","aol\.com")
+header T_FAKE_HELO_MSN		eval:check_for_rdns_helo_mismatch("hotmail(?:\.msn|)\.com","msn\.com")
+header T_FAKE_HELO_EXCITE	eval:check_for_rdns_helo_mismatch("excite\S*","excite\.com")
+header T_FAKE_HELO_LYCOS	eval:check_for_rdns_helo_mismatch("lycos\S*","lycos\.com")
+header T_FAKE_HELO_MAIL_COM	eval:check_for_rdns_helo_mismatch("mail\.com","mail\.com")
+header T_FAKE_HELO_EUDORAMAIL	eval:check_for_rdns_helo_mismatch("eudoramail\.com","eudoramail\.com")
+header T_FAKE_HELO_EMAIL_COM	eval:check_for_rdns_helo_mismatch("email\.com","email\.com")
+header T_FAKE_HELO_NETSCAPE	eval:check_for_rdns_helo_mismatch("netscape\.net","netscape\.net")
+header T_FAKE_HELO_FLASHMAIL	eval:check_for_rdns_helo_mismatch("flashmail\.com","flashmail\.com")
+header T_FAKE_HELO_EARTHLINK	eval:check_for_rdns_helo_mismatch("earthlink\.net","earthlink\.net")
+header T_FAKE_HELO_JUNO		eval:check_for_rdns_helo_mismatch("juno\.com","juno\.com")
+header T_FAKE_HELO_YAHOO_CO_UK	eval:check_for_rdns_helo_mismatch("yahoo\.co\.uk","yahoo\.co\.uk")
+header T_FAKE_HELO_USA_NET	eval:check_for_rdns_helo_mismatch("usa\.net","usa\.net")
+header T_FAKE_HELO_FREEUK	eval:check_for_rdns_helo_mismatch("freeuk\.com","freeuk\.com")
+header T_FAKE_HELO_CARAMAIL	eval:check_for_rdns_helo_mismatch("caramail\.com","caramail\.com")
+header T_FAKE_HELO_NETSCAPE_COM	eval:check_for_rdns_helo_mismatch("netscape\.com","netscape\.com")
+header T_FAKE_HELO_MAIL_RU	eval:check_for_rdns_helo_mismatch("mail\.ru","mail\.ru")
+header T_FAKE_HELO_NETZERO	eval:check_for_rdns_helo_mismatch("netzero\.net","netzero\.net")
+header T_FAKE_HELO_USA_COM	eval:check_for_rdns_helo_mismatch("usa\.com","usa\.com")
+header T_FAKE_HELO_IBM_COM	eval:check_for_rdns_helo_mismatch("ibm\.com","ibm\.com")
+header T_FAKE_HELO_EUROPE	eval:check_for_rdns_helo_mismatch("europe\.com","europe\.com")
+header T_FAKE_HELO_MAILCITY	eval:check_for_rdns_helo_mismatch("mailcity\.com","mailcity\.com")
+header T_FAKE_HELO_BIGFOOT	eval:check_for_rdns_helo_mismatch("bigfoot\.com","bigfoot\.com")
+header T_FAKE_HELO_ATTBI	eval:check_for_rdns_helo_mismatch("attbi\.com","attbi\.com")
+header T_FAKE_HELO_YAHOO_CA	eval:check_for_rdns_helo_mismatch("yahoo\.ca","yahoo\.ca")
+header T_FAKE_HELO_HOTPOP	eval:check_for_rdns_helo_mismatch("hotpop\.com","hotpop\.com")
+
