@@ -260,7 +260,8 @@ sub expire_old_tokens {
 sub expire_old_tokens_trapped {
   my ($self) = @_;
 
-  if (!$self->expiry_due()) { return 0; }
+  if (!$self->expiry_due() && !$self->{bayes}->{main}->{learn_force_expire})
+				{ return 0; }
 
   my $too_old;
   if (!$self->{use_scan_count_for_expiry}) {

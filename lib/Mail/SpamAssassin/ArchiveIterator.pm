@@ -41,7 +41,8 @@ sub set_function {
 
 =item $iterator->run ("folderpath" [, ...] )
 
-Iterate over the named folders.
+Iterate over the named folders.  If no folders are named, B<('-')> is assumed;
+in other words, a single mail message on STDIN.
 
 =cut
 
@@ -51,6 +52,8 @@ sub run {
   if (!defined $self->{wanted_sub}) {
     die "set_function never called";
   }
+
+  if ($#_ < 0) { @_ = ('-'); }
 
   foreach my $folder (@_) {
     if ($folder =~ /\.tar$/)
@@ -72,7 +75,7 @@ sub run {
       #($self->{opt_mh} || -f "$folder/1" || -f "$folder/1.gz" || -f "$folder/cyrus.index"))
       $self->mass_check_mh_folder($folder);
     }
-    elsif (-f $folder && $self->{opt_single})
+    elsif ($folder eq '-' || (-f $folder && $self->{opt_single}))
     {
       # single message (for testing that variables are cleared appropriately)
       $self->mass_check_single($folder);
@@ -169,6 +172,8 @@ sub mass_check_single {
     open (STDIN, "gunzip -cd $folder |") or warn "gunzip $folder failed: $@";
   } elsif ($folder =~ /\.bz2$/) {
     open (STDIN, "bzip2 -cd $folder |") or warn "bunzip2 $folder failed: $@";
+  } elsif ($folder eq '-') {
+    # do nothing; it's on STDIN
   } else {
     open (STDIN, "<$folder") or warn "open $folder failed: $@";
   }

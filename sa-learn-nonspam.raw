@@ -46,6 +46,7 @@ sa-learn-nonspam - train spamassassin with nonspam data
 =head1 SYNOPSIS
 
 B<sa-learn-nonspam> [options] I<mailbox_or_folder>
+B<sa-learn-nonspam> --single < I<message>
 
 Options:
 
@@ -181,7 +182,9 @@ B<sa-learn> processes. It's a bit of a hammer, really, lowering the
 weighting of the specific tokens in that message (only if that message has
 been processed before).
 
-=item Learning from single messages is 
+=item Learning from single messages uses a command like this:
+
+	cat mailmessage | sa-learn-nonspam --single
 
 =head1 EFFECTIVE TRAINING
 

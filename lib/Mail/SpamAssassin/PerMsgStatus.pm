@@ -210,9 +210,12 @@ sub check {
   my $hit = sprintf ("%1.2f", $self->{hits});
   s/_HITS_/$hit/gs;
 
+  my $preview = $self->get_content_preview();
+
   my $ver = Mail::SpamAssassin::Version();
   s/_REQD_/$self->{conf}->{required_hits}/gs;
   s/_SUMMARY_/$self->{test_logs}/gs;
+  s/_PREVIEW_/$preview/gs;
   s/_VER_/$ver/gs;
   s/_HOME_/$Mail::SpamAssassin::HOME_URL/gs;
 
@@ -338,6 +341,45 @@ C<\n> characters.
 sub get_report {
   my ($self) = @_;
   return $self->{report};
+}
+
+###########################################################################
+
+=item $preview = $status->get_content_preview ()
+
+Give a "preview" of the content.
+
+This is returned as a multi-line string, with the lines separated by C<\n>
+characters, containing a fully-decoded, safe, plain-text sample of the first
+few lines of the message body.
+
+=cut
+
+sub get_content_preview {
+  my ($self) = @_;
+
+  $Text::Wrap::columns   = 74;
+  $Text::Wrap::huge      = 'overflow';
+
+  my $str = '';
+  my $ary = $self->get_decoded_stripped_body_text_array();
+  my $numlines = 3;
+  while (length ($str) < 200) {
+    $str .= shift @{$ary};
+    if (--$numlines == 0) {
+      chomp ($str); $str .= " [...]\n"; last;
+    }
+  }
+  undef $ary;
+
+  # in case the last line was huge, trim it back to around 200 chars
+  $str =~ s/^(.{,200}).*$/$1/gs;
+
+  # now, some tidy-ups that make things look a bit prettier
+  $str =~ s/-----Original Message-----.*$//gs;
+  $str =~ s/This is a multi-part message in MIME format\.//gs;
+
+  Text::Wrap::wrap ("", "  ", $str);
 }
 
 ###########################################################################
