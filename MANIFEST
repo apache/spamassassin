@@ -4,10 +4,10 @@ Changes
 INSTALL
 INSTALL.VMS
 LICENSE
-NOTICE
 MANIFEST
 MANIFEST.SKIP
 Makefile.PL
+NOTICE
 PACKAGING
 README
 STATUS
@@ -80,6 +80,9 @@ masses/CORPUS_SUBMIT_NIGHTLY
 masses/Makefile
 masses/README
 masses/README.perceptron
+masses/compare-models
+masses/config.set0
+masses/config.set1
 masses/corpora/README
 masses/corpora/fuzzy-hash-maildir
 masses/corpora/mass-find-nonspam
@@ -88,10 +91,12 @@ masses/corpora/uniq-mailbox
 masses/corpora/uniq-maildirs
 masses/cpucount
 masses/extract-message-from-mbox
+masses/extract-results
 masses/find-extremes
 masses/fp-fn-statistics
 masses/fp-fn-to-tcr
 masses/freqdiff
+masses/generate-corpus
 masses/graphs/gen-score-freqs-gnuplot-table
 masses/graphs/gnuplot-score-graph
 masses/hit-frequencies
@@ -102,6 +107,7 @@ masses/mass-check-results-to-mbox
 masses/mass-check.cf
 masses/mboxget
 masses/mk-baseline-results
+masses/model-statistics
 masses/overlap
 masses/parse-rules-for-masses
 masses/perceptron.c
@@ -123,6 +129,7 @@ masses/tenpass/README
 masses/tenpass/compute-current-tcr
 masses/tenpass/split-log-into-buckets
 masses/uniq-scores
+masses/validate-model
 ninjabutton.png
 ninjabutton.xcf
 procmailrc.example
@@ -189,10 +196,10 @@ spamc/utils.c
 spamc/utils.h
 spamc/version.h.in
 spamc/version.h.pl
+spamd/PROTOCOL
 spamd/README
 spamd/README.SuSE
 spamd/README.vpopmail
-spamd/PROTOCOL
 spamd/netbsd-rc-script.sh
 spamd/redhat-rc-script.sh
 spamd/slackware-rc-script.sh
@@ -268,6 +275,7 @@ t/data/spam/base64.txt
 t/data/spam/bsmtp
 t/data/spam/dnsbl.eml
 t/data/spam/gtube.eml
+t/data/testplugin.pm
 t/data/whitelists/action.eff.org
 t/data/whitelists/amazon_co_uk_ship
 t/data/whitelists/amazon_com_ship
@@ -297,11 +305,13 @@ t/forged_rcvd.t
 t/gtube.t
 t/hashcash.t
 t/html_obfu.t
+t/ifversion.t
 t/ip_addrs.t
 t/lang_pl_tests.t
 t/mimeparse.t
 t/nonspam.t
 t/plugin.t
+t/plugin_file.t
 t/prefs_include.t
 t/razor2.t
 t/rcvd_parser.t
@@ -359,11 +369,3 @@ tools/speedtest
 tools/split_corpora
 tools/test_extract
 tools/triplets.pl
-masses/validate-model
-masses/generate-corpus
-masses/extract-results
-masses/compare-models
-masses/config.set0
-masses/config.set1
-masses/model-statistics
-t/ifversion.t
