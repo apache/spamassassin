@@ -1,4 +1,4 @@
-# $Id: Parser.pm,v 1.8 2003/09/29 03:53:18 felicity Exp $
+# $Id: Parser.pm,v 1.9 2003/09/29 04:03:35 felicity Exp $
 
 package Mail::SpamAssassin::MIME::Parser;
 use strict;
@@ -304,7 +304,7 @@ sub _decode_header {
 
   if ( $cte eq 'B' ) {
     # base 64 encoded
-    return MIME::Base64::decode_base64($data);
+    return Mail::SpamAssassin::Util::base64_decode($data);
   }
   elsif ( $cte eq 'Q' ) {
     # quoted printable
@@ -367,7 +367,7 @@ sub decode {
     dbg("decoding B64 file\n");
 
     # Generate the decoded output
-    my $output = [ MIME::Base64::decode_base64(join("", @{$body})) ];
+    my $output = [ Mail::SpamAssassin::Util::base64_decode(join("", @{$body})) ];
 
     # If it has a filename, figure it out.
     my $type = $msg->header('content-type');
