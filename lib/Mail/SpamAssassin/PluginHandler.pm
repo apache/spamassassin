@@ -108,7 +108,7 @@ sub register_plugin {
 sub callback {
   my $self = shift;
   my $subname = shift;
-  my $ret;
+  my ($ret, $overallret);
 
   foreach my $plugin (@{$self->{plugins}}) {
     $plugin->{_inhibit_further_callbacks} = 0;
@@ -119,7 +119,15 @@ sub callback {
       eval {
 	$ret = &$methodref ($plugin, @_);
       };
-      if ($ret) { dbg ("plugin: ${plugin}->${subname} => $ret"); }
+      if ($ret) {
+        dbg ("plugin: ${plugin}->${subname} => $ret");
+        $overallret = $ret;
+
+        if ($ret == $Mail::SpamAssassin::Plugin::INHIBIT_CALLBACKS) {
+          $plugin->{_inhibit_further_callbacks} = 1;
+          $ret = 1;
+        }
+      }
     }
 
     if ($plugin->{_inhibit_further_callbacks}) {
@@ -128,7 +136,8 @@ sub callback {
     }
   }
 
-  return $ret;
+  $overallret ||= $ret;
+  return $overallret;
 }
 
 ###########################################################################

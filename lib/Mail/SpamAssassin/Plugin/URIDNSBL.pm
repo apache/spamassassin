@@ -177,6 +177,7 @@ sub parse_config {
     $opts->{conf}->{uridnsbl_timeout} = $opts->{value};
     return 1;
   }
+  return 0;
 }
 
 sub check_tick {

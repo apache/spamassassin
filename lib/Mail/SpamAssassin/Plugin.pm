@@ -60,6 +60,8 @@ of the registered plugin objects in turn.  Any plugin can call
 C<$plugin->inhibit_further_callbacks()> to block delivery of that event to
 later plugins in the chain.  This is useful if the plugin has handled the
 event, and there will be no need for later plugins to handle it as well.
+Some methods can also return C<$Mail::SpamAssassin::Plugin::INHIBIT_CALLBACKS>
+to do this, too.
 
 If you're looking to write a simple eval rule, skip straight to 
 C<register_eval_rule()>, below.
@@ -95,11 +97,12 @@ use strict;
 use bytes;
 
 use vars qw{
-  @ISA $VERSION
+  @ISA $VERSION $INHIBIT_CALLBACKS
 };
 
-@ISA = qw();
-$VERSION = 'bogus';
+@ISA =                  qw();
+$VERSION =              'bogus';
+$INHIBIT_CALLBACKS =    -1;
 
 ###########################################################################
 
@@ -173,8 +176,8 @@ system-wide configuration files.
 =back
 
 If the configuration line was a setting that is handled by this plugin, the
-method implementation should call C<$plugin->inhibit_further_callbacks()> and
-return C<1>.
+method implementation should return
+C<$Mail::SpamAssassin::Plugin::INHIBIT_CALLBACKS>.
 
 If the setting is not handled by this plugin, the method should return C<0> so
 that a later plugin may handle it, or so that SpamAssassin can output a warning
