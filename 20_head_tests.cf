@@ -361,6 +361,10 @@ describe VERY_SUSP_RECIPS	Very similar addresses in recipient list
 header SORTED_RECIPS		eval:sorted_recipients()
 describe SORTED_RECIPS		Recipient list is sorted by address
 
+header USER_IN_BLACKLIST_TO     eval:check_to_in_blacklist()
+describe USER_IN_BLACKLIST_TO   User is listed in 'blacklist_to'
+tflags USER_IN_BLACKLIST_TO     userconf nice
+
 header USER_IN_WHITELIST_TO     eval:check_to_in_whitelist()
 describe USER_IN_WHITELIST_TO   User is listed in 'whitelist_to'
 tflags USER_IN_WHITELIST_TO     userconf nice
