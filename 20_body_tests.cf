@@ -223,30 +223,30 @@ body AUTO_EMAIL_REMOVAL		/Auto Email Removal/
 describe AUTO_EMAIL_REMOVAL	Claims auto-email removal
 
 body PORN_1			/\bbarely\b.*\blegal\b/i
-describe PORN_1			Uses words and phrases which indicate porn
+describe PORN_1			Uses words and phrases which indicate porn (1)
 body PORN_2			/\bwild\b.*\bhardcore\b/i
-describe PORN_2			Uses words and phrases which indicate porn
+describe PORN_2			Uses words and phrases which indicate porn (2)
 
 # updated by: skod & Craig & jm
 body PORN_3			/(?:(?:\bcum|\borg[iy]|\bwild|fuck|\bteen|\baction\b|spunk|\bpussy\b|\bpussies\b|suck\b|sucking\b|\bhot\b|\bhottest\b|\bvoyeur|\ble[sz]b(?:ian|o)|\banal\b|\binterracial|\basian\b|\bamateur|\bsex+\b|\bslut|explicit|xxx[^x]|\blive\b|celebrity|\blick|\bsuck|webcam|\bass\b|\bschoolgirl\b|\bstrip|\bhorny\b|\bhorniest\b|\berotic|\boral\b|\bhardcore\b|\bblow[ -]*job|\bnast(?:y|iest)\b).*){3,}/i
-describe PORN_3			Uses words and phrases which indicate porn
+describe PORN_3			Uses words and phrases which indicate porn (3)
 
 body PORN_4 	/http:\/\/[\w\.]*(?:xxx|sex|anal|slut|pussy|cum|nympho|suck|porn|hardcore|taboo|whore|voyeur|lesbian|gurlpages|naughty|lolita|teen|schoolgirl|fetish|kooloffer|erotic)\w*\./
-describe PORN_4			Uses words and phrases which indicate porn
+describe PORN_4			Uses words and phrases which indicate porn (4)
 
 # (contrib: skod)
 body PORN_5			/SEX STARVED NYMPHOMANIAC/i
-describe PORN_5			Uses words and phrases which indicate porn
+describe PORN_5			Uses words and phrases which indicate porn (5)
 
 # (contrib: skod)
 body PORN_6			/(?:\d+\+? xxx pictures|xxx photos?)/i
-describe PORN_6			Uses words and phrases which indicate porn
+describe PORN_6			Uses words and phrases which indicate porn (6)
 
 body PORN_7			/Free XXX/i
-describe PORN_7			Uses words and phrases which indicate porn
+describe PORN_7			Uses words and phrases which indicate porn (7)
 
 body PORN_8			/(?:video|movie|teen|ware|mp3)z/
-describe PORN_8			Uses words and phrases which indicate porn
+describe PORN_8			Uses words and phrases which indicate porn (8)
 
 body TRACKER_ID			/^\W{4,6} (?:[a-z]{10,}|[A-Z]{10,}) \W{4,6}\s*$/
 describe TRACKER_ID		Incorporates a tracking ID number
