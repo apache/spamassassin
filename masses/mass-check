@@ -4,11 +4,15 @@
 #
 # -c=file       set $cffile
 # -f            use fork-based model to save RAM (used for mailbox files)
-# --all         don't skip big messages (used for maildir and mh-style folders)
-# --mh          use mh-style folder (directory of messages named with numbers)
 # --mn          find_missed('nonspam.log')
 # --ms          find_missed('spam.log')
-# --sort        sort contents of folders that are directories
+#
+# options for maildir and mh-style folders
+# --all         don't skip big messages
+# --mh          use mh-style folder (directory of messages named with numbers)
+# --head=N      only check first N messages
+# --sort        sort contents of folders
+# --tail=N      only check last N messages
 #
 # all following arguments are used as the name of mail folders
 
@@ -18,7 +22,7 @@ use Mail::SpamAssassin;
 use Mail::SpamAssassin::NoMailAudit;
 use Getopt::Long;
 
-GetOptions("c=s", "f", "all", "mh", "ms", "mn", "sort");
+GetOptions("c=s", "f", "all", "head=i", "mh", "ms", "mn", "sort", "tail=i");
 
 #use Devel::Peek;
 
@@ -129,6 +133,8 @@ sub mass_check_mh_folder {
   my @files = <$folder/[0-9]*>;
 
   @files = sortbynum(@files) if $opt_sort;
+  splice(@files, $opt_head) if $opt_head;
+  splice(@files, 0, -$opt_tail) if $opt_tail;
   foreach my $mail (@files)
   {
     if ($mail =~ /\.gz$/) {
@@ -154,6 +160,8 @@ sub mass_check_maildir {
   my @files = <$folder/{cur,new}/*>;
 
   @files = sortbynum(@files) if $opt_sort;
+  splice(@files, $opt_head) if $opt_head;
+  splice(@files, 0, -$opt_tail) if $opt_tail;
   foreach my $mail (@files)
   {
     if ($mail =~ /\.gz$/) {
