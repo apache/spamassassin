@@ -400,27 +400,8 @@ sub rewrite_as_spam {
       $rep =~ s/=/=3D/gs;               # quote the = chars
     }
 
-    if ($self->{msg}->get_header ('Content-Type') =~ /boundary="(.*)"/) {
-      # Deal with MIME "null block".  If this is a multipart MIME mail,
-      # peel off the MIME header for the main part of the message,
-      # stick in the report, then put the MIME header back in front,
-      # so that the report is *after* the MIME header.
-      my $boundary = "--$1";
-      my @main_part = ();
-
-      push(@main_part, shift(@{$lines})) while ($lines->[0] !~ /^$boundary/);
-      push(@main_part, shift(@{$lines})) while ($lines->[0] !~ /^$/);
-      push(@main_part, shift(@{$lines}));
-
-      unshift (@{$lines}, split (/$/, $rep));
-      $lines->[0] =~ s/\n//;
-      unshift (@{$lines}, @main_part);
-    }
-    else {
-      unshift (@{$lines}, split (/$/, $rep));
-      $lines->[0] =~ s/\n//;
-    }
-
+    unshift (@{$lines}, split (/$/, $rep));
+    $lines->[0] =~ s/\n//;
     $self->{msg}->replace_body ($lines);
   }
 
