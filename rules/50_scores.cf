@@ -413,7 +413,6 @@ score SUBJ_ENDS_IN_SPACE             2
 score SUBJ_FULL_OF_8BITS             4.298
 score SUBJ_HAS_SPACES                4.043
 score SUBJ_HAS_UNIQ_ID               2.542
-score SUBJ_MISSING                   1.399
 score SUBJ_REMOVE                    -0.823
 score SUPERLONG_LINE                 0.384
 score SUPPLIES_LIMITED		     1.0
@@ -651,4 +650,7 @@ score USERNAME_IN_SUBJECT_3     2.0
 score USERNAME_IN_SUBJECT_4     1.5
 score USERNAME_IN_SUBJECT_5     1.0
 score USERNAME_IN_SUBJECT_6     0.5
+
+# a common FP, believe it or not
+score SUBJ_MISSING                   0.399
 
