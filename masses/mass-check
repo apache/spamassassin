@@ -1,50 +1,52 @@
 #!/usr/bin/perl -w
 
-# options
-#
-# -c=file       set configuration/rules directory
-# -f=file       read list of targets from <file>
-# -j=jobs       specify the number of check jobs to run simultaneously
-# --mh          find_missed('ham.log')
-# --ms          find_missed('spam.log')
-# --net         turn on network checks!
-# --mid         report Message-ID from each message
-# --debug       report debugging information
-# --progress    show progress updates during check
-# --rewrite=OUT save rewritten message to OUT (default is /tmp/out)
-# --showdots    print a dot for each scanned message
-# --rules=RE    Only test rules matching the given regexp RE
-# --restart=N   restart all of the children after processing N messages
-# --after=N     only test mails received after time_t N (negative values
-#               are an offset from current time, e.g. -86400 = last day)
-#               or after date as parsed by Time::ParseDate (e.g. '-6 months')
-#
-# log options
-# -o            write all logs to stdout
-# --loghits     log the text hit for patterns (useful for debugging)
-# --hamlog=log  use <log> as ham log ('ham.log' is default)
-# --spamlog=log use <log> as spam log ('spam.log' is default)
-#
-# message selection options
-# -n            no date sorting or spam/ham interleaving
-# --all         don't skip big messages
-# --head=N      only check first N ham and N spam (N messages if -n used)
-# --tail=N      only check last N ham and N spam (N messages if -n used)
-#
-# simple target options (implies -o and no ham/spam classification)
-# --dir         subsequent targets are directories
-# --file        subsequent targets are files in RFC 822 format
-# --mbox        subsequent targets are mbox files
-#
-#
-# Just left over functions we should remove at some point:
-# --bayes       report score from Bayesian classifier
-#
-# non-option arguments are used as target names (mail files and folders),
-# the target format is: <class>:<format>:<location>
-# <class>       is "spam" or "ham"
-# <format>      is "dir", "file", or "mbox"
-# <location>    is a file or directory name.  globbing of ~ and * is supported
+sub usage {
+  die <<ENDOFUSAGE;
+usage: mass-check [options] target ...
+ 
+  -c=file       set configuration/rules directory
+  -f=file       read list of targets from <file>
+  -j=jobs       specify the number of processes to run simultaneously
+  --net         turn on network checks!
+  --mid         report Message-ID from each message
+  --debug       report debugging information
+  --progress    show progress updates during check
+  --rewrite=OUT save rewritten message to OUT (default is /tmp/out)
+  --showdots    print a dot for each scanned message
+  --rules=RE    Only test rules matching the given regexp RE
+  --restart=N   restart all of the children after processing N messages
+  --after=N     only test mails received after time_t N (negative values
+                are an offset from current time, e.g. -86400 = last day)
+                or after date as parsed by Time::ParseDate (e.g. '-6 months')
+ 
+  log options
+  -o            write all logs to stdout
+  --loghits     log the text hit for patterns (useful for debugging)
+  --hamlog=log  use <log> as ham log ('ham.log' is default)
+  --spamlog=log use <log> as spam log ('spam.log' is default)
+ 
+  message selection options
+  -n            no date sorting or spam/ham interleaving
+  --all         don't skip big messages
+  --head=N      only check first N ham and N spam (N messages if -n used)
+  --tail=N      only check last N ham and N spam (N messages if -n used)
+ 
+  simple target options (implies -o and no ham/spam classification)
+  --dir         subsequent targets are directories
+  --file        subsequent targets are files in RFC 822 format
+  --mbox        subsequent targets are mbox files
+ 
+  Just left over functions we should remove at some point:
+  --bayes       report score from Bayesian classifier
+ 
+  non-option arguments are used as target names (mail files and folders),
+  the target format is: <class>:<format>:<location>
+  <class>       is "spam" or "ham"
+  <format>      is "dir", "file", or "mbox"
+  <location>    is a file or directory name.  globbing of ~ and * is supported
+
+ENDOFUSAGE
+}
 
 ###########################################################################
 
@@ -78,7 +80,7 @@ GetOptions("c=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug",
 	   "dir" => sub { $opt_format = "dir"; },
 	   "file" => sub { $opt_format = "file"; },
 	   "mbox" => sub { $opt_format = "mbox"; },
-	   '<>' => \&target);
+	   '<>' => \&target) or usage();
 
 if ($opt_f) {
   open (F, $opt_f) || die $!;
@@ -86,12 +88,12 @@ if ($opt_f) {
   close (F);
 }
 
-if ($opt_ms) {
-  find_missed($opt_spamlog);
-}
-elsif ($opt_mh) {
-  find_missed($opt_hamlog);
-}
+#if ($opt_ms) {
+#find_missed($opt_spamlog);
+#}
+#elsif ($opt_mh) {
+#find_missed($opt_hamlog);
+#}
 
 $spamtest = new Mail::SpamAssassin ({
   'debug'              			=> $opt_debug,
@@ -339,55 +341,3 @@ sub progress {
 
 ###########################################################################
 
-sub find_missed {
-  my $file = shift;
-
-  my $threshold = 5;
-
-  my $shouldbespam = 1;
-  if ($file =~ /ham/) { $shouldbespam = 0; }
-
-  my $scores = readscores();
-
-  open (IN, "<$file");
-  while (<IN>) {
-    next if /^#/;
-    /^.\s+\d+\s+(\S+)\s*/ or next;
-    my $id = $1;
-    my $score = 0.0;
-
-    $_ = $'; s/bayes=\S+//; s/,,+/,/g; s/^\s+//; s/\s+$//;
-    foreach my $tst (split (/,/, $_)) {
-      next if ($tst eq '');
-      if (!defined $scores->{$tst}) {
-	warn "unknown test in $file, ignored: $tst\n";
-	next;
-      }
-      $score += $scores->{$tst};
-    }
-
-    if ($shouldbespam && $score < $threshold) {
-      found_missed($score, $id, $_);
-    }
-    elsif (!$shouldbespam && $score > $threshold) {
-      found_missed($score, $id, $_);
-    }
-  }
-  close IN;
-}
-
-sub readscores {
-  warn "Reading scores from \"$opt_c\"...\n";
-  system("./parse-rules-for-masses -d \"$opt_c\"") and die;
-  use vars qw(%scores);
-  require "./tmp/rules.pl";
-  return \%scores;
-}
-
-sub found_missed {
-  my $score = shift;
-  my $id = shift;
-  my $tests = shift;
-
-  print "$score $id $tests\n";
-}
