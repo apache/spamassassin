@@ -45,7 +45,6 @@ my %makefile = (
         'spamassassin'    => '$(INST_MAN1DIR)/spamassassin.$(MAN1EXT)',
         'spamd/spamc.pod' => '$(INST_MAN1DIR)/spamc.$(MAN1EXT)',
         'spamd/spamd'     => '$(INST_MAN1DIR)/spamd.$(MAN1EXT)',
-        'sa-forget'       => '$(INST_MAN1DIR)/sa-forget.$(MAN1EXT)',
     },
 
     'PL_FILES' => { },
