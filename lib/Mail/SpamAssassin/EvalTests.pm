@@ -3064,6 +3064,11 @@ sub _check_spf {
   my $helo = $lasthop->{helo};
   my $query;
 
+  if (!$ip || !$helo) {
+    dbg ("SPF: cannot get IP or HELO, cannot use SPF");
+    return;
+  }
+
   # if $sender is undef or "", that's OK; Mail::SPF::Query will use
   # the HELO domain instead, which we can get from the Received headers.
   # nice!
