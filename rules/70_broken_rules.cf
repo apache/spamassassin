@@ -1123,3 +1123,9 @@ score BAYES_99 0.001 0.001 4.300 2.791
 #lang sk describe MSGID_CHARS_SPAM	Pole "Message-Id" obsahuje znaky indikujúce spam
 #lang it describe MSGID_CHARS_SPAM	L'header Message-Id: contiene caratteri che indicano spam
 #lang fr describe MSGID_CHARS_SPAM	L'entête Message-Id: contient des caractères qui indiquent un spam
+
+# tvd - 2003/05/21 - looks like orbs is down permanently :(
+#header RCVD_IN_ORBS		rbleval:check_rbl('orbs', 'orbs.dorkslayers.com.')
+#describe RCVD_IN_ORBS		Received via a relay in orbs.dorkslayers.com
+#tflags RCVD_IN_ORBS             net
+#score RCVD_IN_ORBS 0 0.458 0 0.121
