@@ -2123,6 +2123,9 @@ sub child_handler {
 
     if ($scaling) {
       $scaling->child_exited($pid);
+    } else {
+      my $sock = $backchannel->get_socket_for_child($pid);
+      if ($sock) { $sock->close(); }
     }
 
     unless ($main::INHIBIT_LOGGING_IN_SIGCHLD_HANDLER) {
