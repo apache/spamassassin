@@ -601,7 +601,7 @@ if ( $opt{'socketpath'} ) {
     Type   => SOCK_STREAM,
     Listen => SOMAXCONN
     )
-    || die "Could not create UNIX socket on $path: $! $@\n";
+    || die "Could not create UNIX socket on $path: $! ($@)\n";
 
   my $mode = $opt{socketmode};
   if ($mode) {
@@ -626,12 +626,12 @@ if ( $opt{'socketpath'} ) {
       $gid = $ggid;
     }
     if (!chown $uid, $gid, $path) {
-      die "Could not chown $path to $uid/$gid: $! $@";
+      die "Could not chown $path to $uid/$gid: $! ($@)";
     }
   }
 
   if (!chmod $mode, $path) {    # make sure everybody can talk to it
-    die "Could not chmod $path to $mode: $! $@";
+    die "Could not chmod $path to $mode: $! ($@)";
   }
 }
 elsif ( $opt{'ssl'} ) {
@@ -646,7 +646,7 @@ elsif ( $opt{'ssl'} ) {
     SSL_key_file    => $opt{'server-key'},
     SSL_cert_file   => $opt{'server-cert'}
     )
-    || die "Could not create SSL socket: $! $@\n";
+    || die "Could not create SSL socket: $! ($@)\n";
 }
 else {
   $server = new IO::Socket::INET(
@@ -657,7 +657,7 @@ else {
     ReuseAddr => 1,
     Listen    => SOMAXCONN
     )
-    || die "Could not create INET socket: $! $@\n";
+    || die "Could not create INET socket: $! ($@)\n";
 }
 
 if ( defined $opt{'pidfile'} ) {
