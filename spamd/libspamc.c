@@ -908,7 +908,7 @@ static int
 _handle_spamd_header (struct message *m, int flags, char *buf, int len)
 {
     char is_spam[6];
-    char s_str[20], t_str[20];
+    char s_str[21], t_str[21];
 
     UNUSED_VARIABLE(len);
 
