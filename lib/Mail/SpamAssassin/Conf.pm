@@ -1665,13 +1665,17 @@ The supported locking systems for C<type> are as follows:
 
 =over 4
 
-=item nfssafe - an NFS-safe locking system, UNIX-only, default
+=item I<nfssafe> - an NFS-safe locking system
 
-=item flock - simple UNIX C<flock()> locking.  NFS-unsafe, UNIX only
+=item I<flock> - simple UNIX C<flock()> locking
 
-=item win32 - Win32 locking using C<sysopen (..., O_CREAT|O_EXCL)>.  Windows-only, default
+=item I<win32> - Win32 locking using C<sysopen (..., O_CREAT|O_EXCL)>.
 
 =back
+
+nfssafe and flock are only available on UNIX, and win32 is only available
+on Windows.  By default, SpamAssassin will choose either nfssafe or
+win32 depending on the platform in use.
 
 =cut
 
