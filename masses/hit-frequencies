@@ -153,7 +153,9 @@ foreach my $test (keys %freq) {
   push (@tests, $test);
 
   my $isnice = 0;
-  if ($rules{$test}->{tflags} =~ /nice/) { $isnice = 1; }
+  if ($rules{$test}->{tflags} && $rules{$test}->{tflags} =~ /\bnice\b/) {
+    $isnice = 1;
+  }
 
   my $fs = $freq_spam{$test}; $fs ||= 0;
   my $fn = $freq_ham{$test}; $fn ||= 0;
@@ -274,9 +276,11 @@ foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
   next if ($opt_m && $test !~ m/$opt_m/);	# match certain tests
   next if ($opt_t && $rules{$test}->{tflags} !~ /$opt_t/); # match tflags
 
-  if (!$opt_a && !$opt_t) {
-    next if ($rules{$test}->{tflags} =~ /net/ && ($opt_s % 2 == 0));   # not net tests
-    next if ($rules{$test}->{tflags} =~ /userconf/); # or userconf
+  if (!$opt_a && !$opt_t && $rules{$test}->{tflags}) {
+    # not net tests
+    next if ($rules{$test}->{tflags} =~ /\bnet\b/ && ($opt_s % 2 == 0));
+    # not userconf
+    next if ($rules{$test}->{tflags} =~ /\buserconf\b/);
   }
 
   # adjust based on corpora sizes (and cvt to % while we're at it)
