@@ -28,6 +28,14 @@ describe FROM_STARTS_WITH_NUMS	From: starts with nums
 header FROM_HAS_MIXED_NUMS	From =~ /\d+[a-z]+\d+\S*\@/i
 describe FROM_HAS_MIXED_NUMS	From: contains numbers mixed in with letters
 
+# bug 637, more specific FROM_HAS_MIXED_NUMS, less FPs
+header FROM_HAS_MIXED_NUMS2	From =~ /\w{2,}\d{4,}[a-z]{1,2}\d{2,}\@/i
+describe FROM_HAS_MIXED_NUMS2	From address matches known spammer format
+
+# idea from Robert Menschel <RMSA@Menschel.net>
+header FROM_HAS_MIXED_NUMS3	From:addr =~ /^[a-z]+\d+[a-z]+\d+[a-z]+\w*\@/i
+describe FROM_HAS_MIXED_NUMS3	From: contains numbers mixed in with letters
+
 # Faked addresses tend to come from big public sites.  Stats show that
 # 5 digits is enough to get a 1.0 s/o ratio; 4 is too low (probably due
 # to folks called "jmason2002@yahoo.com" for example).
@@ -554,11 +562,6 @@ header MIME_BOUND_TEP		Content-Type =~ /boundary="TEP-\d{9,10}\.\d{10}\.\d{10}"/
 describe MIME_BOUND_TEP		Spam tool pattern in MIME boundary
 header MIME_BOUND_RKFINDY       Content-Type =~ /boundary=\"=_NextPart_2rfkindysadvnqw3nerasdf\"/
 describe MIME_BOUND_RKFINDY     Spam tool pattern in MIME boundary (rfkindy)
-
-# bug 637
-# more specific FROM_HAS_MIXED_NUMS, less FPs
-header FROM_HAS_MIXED_NUMS2	From =~ /\w{2,}\d{4,}[a-z]{1,2}\d{2,}\@/i
-describe FROM_HAS_MIXED_NUMS2	From address matches known spammer format
 
 header DATE_MISSING             Date =~ /^UNSET$/ [if-unset: UNSET]
 describe DATE_MISSING           Missing Date: header
