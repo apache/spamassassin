@@ -99,16 +99,6 @@ header RCVD_IN_DSBL            rbleval:check_rbl_txt('dsbl', 'list.dsbl.org.')
 describe RCVD_IN_DSBL          Received via a relay in list.dsbl.org
 tflags RCVD_IN_DSBL            net
 
-# We want to count this in the open relay set so that someone doesn't get scored
-# twice (at least by default) for being listed there and in some other relay BL.
-# Users can request a double hit and double score by changing 'relay' with
-# 'unconfirmed_dsbl' or something like that, but I don't think it should be
-# a default  -- Marc
-header RCVD_IN_UNCONFIRMED_DSBL        rbleval:check_rbl_txt('unconfdsbl', 'unconfirmed.dsbl.org.')
-describe RCVD_IN_UNCONFIRMED_DSBL      Received via a relay in unconfirmed.dsbl.org
-tflags RCVD_IN_UNCONFIRMED_DSBL        net
-
-
 # Other miscellaneous RBLs are listed here:
 header RCVD_IN_RFCI		rbleval:check_rbl_txt('rfci', 'ipwhois.rfc-ignorant.org.')
 describe RCVD_IN_RFCI		Received via a relay in ipwhois.rfc-ignorant.org
