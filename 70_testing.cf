@@ -232,23 +232,6 @@ body T_URGENT_BIZ /urgent.{0,16}(?:assistance|business|buy|confidential|notice|p
 uri T_GOOGLE_IMAGES	m{^http://images\.google(\.\S+)?\.[a-z]{2,3}/imgres\?}i
 uri T_GOOGLE_REDIR	m{^http://www\.google(\.\S+)?\.[a-z]{2,3}/url\?}i
 
-# bug 2996: HTML attribute testing
-body T_HTML_ATTR_00_10	eval:html_range('attr_bad','0.0','0.1')
-body T_HTML_ATTR_10_20	eval:html_range('attr_bad','0.1','0.2')
-body T_HTML_ATTR_20_30	eval:html_range('attr_bad','0.2','0.3')
-body T_HTML_ATTR_30_40	eval:html_range('attr_bad','0.3','0.4')
-body T_HTML_ATTR_40_50	eval:html_range('attr_bad','0.4','0.5')
-body T_HTML_ATTR_50_75	eval:html_range('attr_bad','0.5','0.75')
-body T_HTML_ATTR_75_100	eval:html_range('attr_bad','0.75','1.0')
-
-body T_HTML_ATTR_UNIQUE_00_10	eval:html_range('attr_unique_bad','0.0','0.1')
-body T_HTML_ATTR_UNIQUE_10_20	eval:html_range('attr_unique_bad','0.1','0.2')
-body T_HTML_ATTR_UNIQUE_20_30	eval:html_range('attr_unique_bad','0.2','0.3')
-body T_HTML_ATTR_UNIQUE_30_40	eval:html_range('attr_unique_bad','0.3','0.4')
-body T_HTML_ATTR_UNIQUE_40_50	eval:html_range('attr_unique_bad','0.4','0.5')
-body T_HTML_ATTR_UNIQUE_50_75	eval:html_range('attr_unique_bad','0.5','0.75')
-body T_HTML_ATTR_UNIQUE_75_100	eval:html_range('attr_unique_bad','0.75','1.0')
-
 # http://www.ahbl.org/using/spamassassin.txt :
 # SpamAssassin local.cf for AHBL BlackList / BlockList
 # "Old blackholes.2mbit.com resurrected as AHBL (dnsbl.ahbl.org)"
