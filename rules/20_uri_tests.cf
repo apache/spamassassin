@@ -91,8 +91,12 @@ describe BARGAIN_URL		Includes a link to a likely spammer domain
 uri BZ_TLD			/^(?:https?:\/\/|mailto:)[^\/]+\.bz(?:\/|$)/i
 describe BZ_TLD			Contains a URL in the BZ top-level domain    
 
-uri BIZ_TLD			/^(?:https?:\/\/|mailto:)[^\/]+\.biz(?:\/|$)/i
+# this is somewhat loose, but results are good
+uri BIZ_TLD_2			/\.biz(?:\/|$)/i
 describe BIZ_TLD		Contains a URL in the BIZ top-level domain    
+
+uri INFO_TLD			/^(?:https?:\/\/|mailto:)[^\/]+\.info(?:\/|$)/i
+describe INFO_TLD		Contains a URL in the INFO top-level domain    
 
 # Matt Cline
 # Pretty good for most folks, except for jm: I have a really stupid
