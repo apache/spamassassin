@@ -108,14 +108,21 @@ use constant TOKENIZE_LONG_TOKENS_AS_SKIPS => 1;
 # which appear with the most frequency in my db.  note: this doesn't have to
 # be 2-way (ie. LHSes that map to the same RHS are not a problem), but mixing
 # tokens from multiple different headers may impact accuracy, so might as well
-# avoid this if possible.
+# avoid this if possible. These are the top ones from my corpus, BTW (jm).
 %HEADER_NAME_COMPRESSION = (
-  'Message-Id' => '*m',
-  'Message-ID' => '*M',
-  'Received' => '*r',
-  'User-Agent' => '*u',
-  'References' => '*f',
-  'In-Reply-To' => '*i',
+  'Message-Id'		=> '*m',
+  'Message-ID'		=> '*M',
+  'Received'		=> '*r',
+  'User-Agent'		=> '*u',
+  'References'		=> '*f',
+  'In-Reply-To'		=> '*i',
+  'From'		=> '*F',
+  'Reply-To'		=> '*R',
+  'Return-Path'		=> '*p',
+  'X-Mailer'		=> '*x',
+  'X-Authentication-Warning' => '*a',
+  'Organization'	=> '*o',
+  'Content-Type'	=> '*c',
 );
 
 # How big should the corpora be before we allow scoring using Bayesian tests?
