@@ -27,7 +27,8 @@ my %facility = map {; $_ => 1 }
   qw( accessdb auto-whitelist bayes check config daemon dcc dns eval
       generic facility hashcash ident ignore info ldap learn locker log
       logger markup message metadata plugin prefork pyzor razor2
-      received-header reporter rules spf textcat uri uridnsbl util ),
+      received-header replacetags reporter rules spf textcat uri uridnsbl
+      util ),
 ;
 
 # initialize SpamAssassin
