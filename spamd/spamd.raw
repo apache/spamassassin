@@ -17,10 +17,8 @@ use Sys::Syslog qw(:DEFAULT setlogsock);
 use POSIX qw(setsid);
 
 my $spamtest = Mail::SpamAssassin->new({
-
   # maybe turned on by a command-line arg?
   #	local_tests_only=>1
-
 });
 
 my %resphash = (
