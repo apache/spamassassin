@@ -80,8 +80,8 @@ describe REMOVE_IN_QUOTES	List removal information
 body     __BILL_1618    /\D301\D+a\W*2\W*c\D+1618\D/i
 describe __BILL_1618    Possible mention of bill 1618 (anti-spam bill)
 
-meta     T_ANTISPAM_BILL  REMOVE_IN_QUOTES && __BILL_1618
-describe T_ANTISPAM_BILL  Very likely mention of anti-spam bill
+meta     ANTISPAM_BILL  REMOVE_IN_QUOTES && __BILL_1618
+describe ANTISPAM_BILL  Very likely mention of anti-spam bill
 
 ###########################################################################
 # CLICK rules
