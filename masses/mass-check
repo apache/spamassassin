@@ -167,11 +167,11 @@ sub result {
     $ham_count++;
   }
 
+  $total_count++;
+
   if (!$opt_showdots) {
     progress($time);
   }
-
-  $total_count++;
 }
 
 sub wanted {
