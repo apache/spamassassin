@@ -904,7 +904,10 @@ sub _get_tag {
 
             SUBVERSION => sub { $Mail::SpamAssassin::SUB_VERSION },
 
-            HOSTNAME => sub { Mail::SpamAssassin::Util::fq_hostname(); },
+            HOSTNAME => sub {
+	      $self->{conf}->{report_hostname} ||
+	      Mail::SpamAssassin::Util::fq_hostname();
+	    },
 
             CONTACTADDRESS => sub { $self->{conf}->{report_contact}; },
 

@@ -197,6 +197,7 @@ sub new {
   $self->{to_tag} = 'SPAM';
   $self->{report_safe} = 1;
   $self->{report_contact} = 'the administrator of that system';
+  $self->{report_hostname} = '';
   $self->{skip_rbl_checks} = 0;
   $self->{dns_available} = "test";
   $self->{check_mx_attempts} = 2;
@@ -1027,6 +1028,18 @@ of the system the scanner is running on is also included.
 
     if ( $key eq 'report_contact' ) {
       $self->{report_contact} = $value; next;
+    }
+
+=item report_hostname ...hostname to use...
+
+Set what _HOSTNAME_ is replaced with in the above report text.
+By default, this is determined dynamically as whatever the host running
+SpamAssassin calls itself.
+
+=cut
+
+    if ( $key eq 'report_hostname' ) {
+      $self->{report_hostname} = $value; next;
     }
 
 =item unsafe_report ...some text for a report...
