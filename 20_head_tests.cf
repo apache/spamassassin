@@ -460,9 +460,6 @@ describe USER_IN_MORE_SPAM_TO   User is listed in 'more_spam_to'
 header USER_IN_ALL_SPAM_TO      eval:check_to_in_all_spam()
 describe USER_IN_ALL_SPAM_TO    User is listed in 'all_spam_to'
 
-header ORDER_STATUS             Subject =~ / order\b/i
-describe ORDER_STATUS           Subject looks like order info
-
 header GAPPY_SUBJECT            Subject =~ /\b(?:[a-z][-_\.\,\:\;\'\~\s]{1,3}){4,}/i
 describe GAPPY_SUBJECT          'Subject' contains G.a.p.p.y-T.e.x.t
 
