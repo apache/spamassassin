@@ -1,26 +1,21 @@
 #!/usr/bin/perl -w
 
+use Getopt::Std;
+getopts("xp");
+
 sub usage {
-  die "hit-frequencies [-x] [-p]
+  die "hit-frequencies [-x] [-p] [spam log] [nonspam log]
   
     -x: extended output, with S:N ratio and scores
     -p: percentages. implies -x
 
+    if either the spam or and nonspam logs are unspecified, the defaults
+    are \"spam.log\" and \"nonspam.log\"
 ";
 }
 
-my $arg_extended = 0;
-my $arg_pc = 0;
-
-while ($#ARGV >= 0) { 
-  my $arg = shift;
-  if ($arg eq '-x') {
-    $arg_extended = 1;
-  } elsif ($arg eq '-p') {
-    $arg_pc = 1; $arg_extended = 1;
-  } else {
-    usage();
-  }
+if ($opt_p) {
+  $opt_x = 1;
 }
 
 my %freq_spam = ();
@@ -35,9 +30,9 @@ my $hdr_all = $num_spam + $num_nonspam;
 my $hdr_spam = $num_spam;
 my $hdr_nonspam = $num_nonspam;
 
-if ($arg_pc) {
+if ($opt_p) {
   printf "%7s  %7s  %7s  %6s  %6s  %s\n",
-  	"OVERALL%", "SPAM%", "NONSPAM%", "S:N", "SCORE", "NAME";
+  	"OVERALL%", "SPAM%", "NONSPAM%", "S/O", "SCORE", "NAME";
   printf "%7d  %7d  %7d  %6.2f  %6.2f  (all messages)\n",
   	$hdr_all, $hdr_spam, $hdr_nonspam, snratio ($num_spam,$num_nonspam), 0;
 
@@ -47,15 +42,11 @@ if ($arg_pc) {
   printf "%7.2f  %7.2f  %7.2f  %6.2f  %6.2f  (all messages as %%)\n",
   	$hdr_all, $hdr_spam, $hdr_nonspam, snratio ($num_spam,$num_nonspam), 0;
 
-  $num_spam ||= 0.1;            # avoid div by 0 errors in % calculations later
-  $num_nonspam ||= 0.1;
-
-} elsif ($arg_extended) {
+} elsif ($opt_x) {
   printf "%7s  %7s  %7s  %6s  %6s  %s\n",
-  	"OVERALL", "SPAM", "NONSPAM", "S:N", "SCORE", "NAME";
+  	"OVERALL", "SPAM", "NONSPAM", "S/O", "SCORE", "NAME";
   printf "%7d  %7d  %7d  %6.2f  %6.2f  (all messages)\n",
   	$hdr_all, $hdr_spam, $hdr_nonspam, snratio ($num_spam,$num_nonspam), 0;
-
 } else {
   printf "%10s  %10s  %10s  %s\n",
   	"OVERALL", "SPAM", "NONSPAM", "NAME";
@@ -73,7 +64,7 @@ foreach my $test (sort {
   my $fn = $freq_nonspam{$test}; $fn ||= 0;
   $score{$test} ||= 1.0;
 
-  if ($arg_pc) {
+  if ($opt_p) {
     $fa = ($fa / ($num_spam + $num_nonspam)) * 100.0;
     $fs = ($fs / ($num_spam)) * 100.0;
     $fn = ($fn / ($num_nonspam)) * 100.0;
@@ -81,11 +72,11 @@ foreach my $test (sort {
 
   my $snratio = snratio ($freq_spam{$test}, $freq_nonspam{$test});
 
-  if ($arg_pc) {
+  if ($opt_p) {
     printf "%7.2f  %7.2f  %7.2f  %6.2f  %6.2f  %s\n",
   	$fa, $fs, $fn, $snratio, $score{$test}, $test;
 
-  } elsif ($arg_extended) {
+  } elsif ($opt_x) {
     printf "%7d  %7d  %7d  %6.2f  %6.2f  %s\n",
   	$fa, $fs, $fn, $snratio, $score{$test}, $test;
 
@@ -98,10 +89,13 @@ exit;
 
 
 sub readlogs {
-  foreach my $file ("spam.log", "nonspam.log") {
+  my $spam = $ARGV[0] || "spam.log";
+  my $nonspam = $ARGV[1] || "nonspam.log";
+
+  foreach my $file ($spam, $nonspam) {
     open (IN, "<$file");
 
-    my $isspam = 0; ($file eq 'spam.log') and $isspam = 1;
+    my $isspam = 0; ($file eq $spam) and $isspam = 1;
 
     while (<IN>) {
       /^.\s+-?(\d+)\s+(\S+)\s*(\S*)/ or next;
@@ -156,13 +150,11 @@ sub readscores {
 
 sub snratio {
   my ($s, $n) = @_;
-  $s ||= 0;
-  $n ||= 0.01;     #avoid / by 0
-  my $result = ($s / $n);
-  if ($result > 99.99) {
-    return 99.99;
-  } else {
-    return $result;
+  if ($s + $n > 0) {
+      return $s / ($s + $n);
+  }
+  else {
+      return 0;
   }
 }
 
