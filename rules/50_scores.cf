@@ -1,5 +1,5 @@
 # SpamAssassin rules file: scores.
-# $Id: 50_scores.cf,v 1.208 2002/08/29 12:29:44 jmason Exp $
+# $Id: 50_scores.cf,v 1.209 2002/08/30 23:31:45 quinlan Exp $
 ###########################################################################
 # Default scores.   Note that if a test is named in the files, but a score is
 # not assigned here, the default score will be set to 1.
@@ -846,7 +846,8 @@ score RCVD_IN_MULTIHOP_DSBL          1.0
 score RCVD_IN_SBL                    3.0
 score RCVD_IN_UNCONFIRMED_DSBL       0.5
 score RCVD_IN_VISI                   2.0
-score HABEAS_HIL                    30.0
+score HABEAS_HIL                     4.0
+score HABEAS_VIOLATOR                8.0
 score RCVD_IN_BONDEDSENDER         -10.0
 
 # The fudge scores below expect that you use the following scores for MAPS
@@ -875,6 +876,11 @@ score CHARSET_FARAWAY_HEADERS        3.1
 score MICROSOFT_EXECUTABLE           0.1
 score MIME_SUSPECT_NAME              0.1
 
+# speculative score for the Habeas warrant mark (move to GA section once
+# it has sufficiently high frequency)
+
+score HABEAS_SWE                    -4.0
+
 # unscored by default -- commercial services.  If you pay for these,
 # give them a score so they will be checked.
 
@@ -886,7 +892,6 @@ score RCVD_IN_BL_SPAMCOP_NET	     0.0
 ###########################################################################
 # Compensation for common false positives.
 
-score HABEAS_SWE                     -20
 score EVITE			     -10
 score NMS_CGI_NOT_BUGGY              -10
 
