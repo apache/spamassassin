@@ -1,3 +1,621 @@
+2002-04-19 08:24  hughescr
+
+	* rules/50_scores.cf: Evolved scores for 2.20
+
+2002-04-19 08:24  hughescr
+
+	* masses/: craig-evolve.cxx, logs-to-c: Updates to evolver
+
+2002-04-19 08:23  hughescr
+
+	* wordfreqs/mass-phrase-freq: Make phrase freq counter much faster
+	and more efficient
+
+2002-04-14 13:17  hughescr
+
+	* masses/: .cvsignore, corpus_submit.txt: masses updates
+
+2002-04-14 13:07  hughescr
+
+	* lib/Mail/SpamAssassin/Conf.pm: Bugzilla #49: Duncan's
+	allow_user_rules patch
+
+2002-04-14 12:13  hughescr
+
+	* t/: SATest.pm, razor.t: Bugzilla #207: patch for razor testing
+	when razor not there
+
+2002-04-14 04:13  hughescr
+
+	* lib/Mail/SpamAssassin/PerMsgStatus.pm: Exclude line starting with
+	--
+
+2002-04-14 02:05  climent
+
+	* rules/30_text_de.cf: Internationalisation - German translation by
+	Hans-Dieter Stich
+
+2002-04-12 01:30  hughescr
+
+	* MANIFEST, MANIFEST.SKIP: MANIFEST updates
+
+2002-04-12 00:29  climent
+
+	* rules/25_body_tests_es.cf: Spanish spam: Motivación y Coaching
+	RESERVE SU PLAZA
+
+2002-04-11 19:06  hughescr
+
+	* MANIFEST: Remove t/spamd_unix.t from MANIFEST
+
+2002-04-11 18:49  hughescr
+
+	* t/SATest.pm: Bugzilla #68: user_prefs during make test
+
+2002-04-11 18:22  hughescr
+
+	* lib/Mail/SpamAssassin/PerMsgStatus.pm: Bugzilla #152: remove
+	comments from address fields
+
+2002-04-11 18:21  hughescr
+
+	* MANIFEST: razor.t to MANIFEST
+
+2002-04-11 17:22  hughescr
+
+	* t/: SATest.pm, db_based_whitelist.t, forged_rcvd.t, nonspam.t,
+	razor.t, reportheader.t, spam.t, spamd.t, spamd_maxsize.t,
+	spamd_port.t, spamd_stop.t, strip2.t, stripmarkup.t: Test suite
+	rationalization
+
+2002-04-11 16:22  hughescr
+
+	* spamd/: spamc.c, spamc.pod, spamd.raw: Backing out Bastian stuff
+	pending new way to implement which doesnt break other things
+
+2002-04-11 16:17  hughescr
+
+	* t/: SATest.pm, forged_rcvd.t, spamd.t, spamd_maxsize.t,
+	spamd_port.t: Updates to tests
+
+2002-04-11 14:12  hughescr
+
+	* MANIFEST, spamd/spamc.c, spamd/spamc.pod, spamd/spamd.raw: Doc
+	updates for UNIX sockets
+
+2002-04-11 13:56  hughescr
+
+	* spamd/: spamc.c, spamd.raw: Bastian Blank patch to allow
+	spamc/spamd to use UNIX sockets
+
+2002-04-11 09:33  hughescr
+
+	* lib/Mail/SpamAssassin/EvalTests.pm: minor base64 pattern checking
+	changes
+
+2002-04-11 09:30  hughescr
+
+	* lib/Mail/SpamAssassin/EvalTests.pm: Bugzilla #204 - base64
+	encoded single-part messages
+
+2002-04-11 09:15  hughescr
+
+	* rules/20_body_tests.cf: Ejaculation rule was a dupe
+
+2002-04-11 09:12  hughescr
+
+	* MANIFEST, README, contrib/snp.tar.gz: Added snprintf library for
+	SunOS
+
+2002-04-11 08:54  hughescr
+
+	* rules/25_body_tests_es.cf: Some spanish language rules
+
+2002-04-11 00:06  hughescr
+
+	* lib/Mail/SpamAssassin/PerMsgStatus.pm, rules/20_uri_tests.cf:
+	Bugzilla #205: problems in URI_IS_POUND rule
+
+2002-04-10 23:33  hughescr
+
+	* spamd/spamc.c: spamc conditional compile for Digital Unix
+
+2002-04-10 16:34  hughescr
+
+	* rules/30_text_fr.cf: Remove old rules from french text
+
+2002-04-10 14:54  hughescr
+
+	* lib/Mail/SpamAssassin/EvalTests.pm, rules/20_head_tests.cf:
+	Forged juno check
+
+2002-04-10 14:26  hughescr
+
+	* spamd/spamd.raw: Bugzilla #201: spamd children close listening
+	socket
+
+2002-04-10 02:52  hughescr
+
+	* rules/20_uri_tests.cf: Fix file permissions
+
+2002-04-10 02:44  hughescr
+
+	* spamd/spamc.c: Bugzilla #198: IRIX conditional compile
+
+2002-04-10 02:37  hughescr
+
+	* spamd/README.spamd: Bugzilla #189: basic docs for SYMBOLS/REPORT
+
+2002-04-10 02:31  hughescr
+
+	* spamd/spamd.raw: Bugzilla #176: Spamd -h prints version number
+
+2002-04-10 02:21  hughescr
+
+	* rules/20_uri_tests.cf: Bugzilla #164: Trying out nonstandard port
+	URI rule
+
+2002-04-10 02:04  hughescr
+
+	* rules/20_body_tests.cf: Bugzilla #146: possible PORN_XXX false
+	positives
+
+2002-04-10 02:00  hughescr
+
+	* rules/20_body_tests.cf: Bugzilla #200: ejaculation rule
+
+2002-04-10 01:58  hughescr
+
+	* spamassassin.raw: Bugzilla #113: -l flag to spamassassin not
+	working
+
+2002-04-10 01:56  hughescr
+
+	* spamd/spamd.raw: Bugzilla #197: doc update about restarting spamd
+
+2002-04-10 01:55  hughescr
+
+	* lib/Mail/SpamAssassin/EvalTests.pm: Bugzilla #158: Hotmail forge
+	check updated
+
+2002-04-10 01:52  hughescr
+
+	* rules/: 20_body_tests.cf, 50_scores.cf: Bugzilla #156: fix name
+	of spam phrase rule
+
+2002-04-10 01:50  hughescr
+
+	* rules/: 20_body_tests.cf, 50_scores.cf: Bugzilla #138: update
+	href rules now that we have uri tests
+
+2002-04-10 01:48  hughescr
+
+	* rules/20_body_tests.cf: Bugzilla #194: WE_HONOR_ALL rule fix
+
+2002-04-10 01:46  hughescr
+
+	* rules/: 20_head_tests.cf, 50_scores.cf: Bugzilla #166:
+	FROM_STARTS_WITH_NUMS
+
+2002-04-09 18:00  zelgadis
+
+	* rules/: 20_body_tests.cf, 20_head_tests.cf: Bug #159:
+	Miscellaneous new rules
+
+2002-04-09 17:31  zelgadis
+
+	* rules/20_body_tests.cf: Bug #167: EXCUSE_1: "are receiving" and
+	"You're receving" additions.
+
+2002-04-09 17:12  zelgadis
+
+	* rules/20_body_tests.cf: Bug #149: Rule to detect large font
+	sizes.
+
+2002-04-09 17:00  zelgadis
+
+	* rules/20_uri_tests.cf: Bug #153:  PORN_4 regexp needs to deal
+	with dashes in host names
+
+2002-04-09 08:09  hughescr
+
+	* rules/20_body_tests.cf: No such thing
+
+2002-04-08 02:22  matt_sergeant
+
+	* t/rule_tests.t: Fixed for broken Test::Harness in perl 5.6.1
+
+2002-04-06 11:41  hughescr
+
+	* lib/Mail/SpamAssassin/PerMsgStatus.pm: Bugzilla #180 - MIME
+	parsing problem with "--" at start of line
+
+2002-04-06 11:35  hughescr
+
+	* lib/Mail/SpamAssassin/PerMsgStatus.pm: Bugzilla #173 -
+	get_full_message_as_text join bug
+
+2002-04-06 11:31  hughescr
+
+	* spamd/spamd.raw: Bugzilla #189 - implement REPORT method for
+	spamd protocol
+
+2002-04-06 11:28  hughescr
+
+	* MANIFEST, lib/Mail/SpamAssassin.pm, spamd/README.spamd-vpopmail,
+	spamd/spamd.raw: Bugzilla #172 - virtual vpopmail user support
+
+2002-04-06 10:47  hughescr
+
+	* spamproxy/spamproxyd.raw: Bugzilla #168 - blank spamaddress patch
+	for spamproxy
+
+2002-04-06 10:45  hughescr
+
+	* MANIFEST, README, contrib/spamcheck.py: Bugzilla #112 - LMTP
+	proxy
+
+2002-04-06 10:39  hughescr
+
+	* spamd/spamd.raw: Bugzilla #189 - SYMBOLS method for spamd
+	protocol
+
+2002-04-05 02:54  matt_sergeant
+
+	* rules/: 20_uri_tests.cf, 50_scores.cf: And I would want to buy
+	stainless steel why???
+
+2002-04-04 23:46  hughescr
+
+	* rules/20_body_tests.cf: Bugzilla #184: Typo in
+	SLIGHTLY_UNSAFE_JAVASCRIPT
+
+2002-04-03 08:16  hughescr
+
+	* MANIFEST.SKIP: Ignore rule tests in regular distro
+
+2002-04-03 07:10  matt_sergeant
+
+	* t/rule_tests.t: Didn't need the cleanup stuff after all, so now
+	it should be fairly nippy!
+
+2002-04-03 07:03  matt_sergeant
+
+	* rules/: 20_body_tests.cf, 20_head_tests.cf, 20_uri_tests.cf,
+	50_scores.cf: Added SIGNATURE_DELIM and MAJORDOMO tests Added a
+	couple of example regression test rules that others can follow
+
+2002-04-03 06:59  matt_sergeant
+
+	* lib/Mail/SpamAssassin/Conf.pm,
+	lib/Mail/SpamAssassin/PerMsgStatus.pm, t/rule_tests.t: Added rules
+	regression testing features
+
+2002-04-03 06:58  matt_sergeant
+
+	* lib/Mail/SpamAssassin/EvalTests.pm: compare to/from case
+	insensitively in check_for_from_to_equivalence check there is a
+	subject at all before doing subject_all_caps added stub for
+	obfuscated words that I'll implement "later"
+
+2002-04-02 23:15  zelgadis
+
+	* rules/20_body_tests.cf: Bug #155: Improvements/additions to "Work
+	at Home" type rules.
+
+2002-04-02 22:55  zelgadis
+
+	* rules/20_body_tests.cf: Bug #157: Penis rules improvements and
+	additions.
+
+2002-04-02 22:49  zelgadis
+
+	* rules/20_body_tests.cf: Bug #140: Improved and added Nigerian
+	scam rules
+
+2002-04-02 22:41  zelgadis
+
+	* lib/Mail/SpamAssassin/EvalTests.pm: Bug #151: Improvement to
+	get_address_commonality_ratio()
+
+2002-04-02 22:37  zelgadis
+
+	* lib/Mail/SpamAssassin/EvalTests.pm: Bug #161: New ID patterns for
+	check_for_unique_subject_id()
+
+2002-04-02 22:27  zelgadis
+
+	* lib/Mail/SpamAssassin/EvalTests.pm: Bug #150: Yahoo! forgeries:
+	fix for Yahoo! mail through Yahoo! Groups
+
+2002-04-02 22:09  zelgadis
+
+	* lib/Mail/SpamAssassin/PerMsgStatus.pm: Bug #147: Improvments for
+	dealing with BASE hrefs.
+
+2002-04-02 22:01  zelgadis
+
+	* lib/Mail/SpamAssassin/PerMsgStatus.pm: Bug #148: URI extraction
+	regexp needs to deal with =3D obfuscation
+
+2002-04-02 18:23  zelgadis
+
+	* rules/20_body_tests.cf: Bug #139: Rawbody HTML rule improvements
+	Bug #160: Improvements/additions to FOR_FREE and EARN_PER_WEEK
+	rules
+
+2002-04-01 11:36  hughescr
+
+	* masses/mass-check: SpamAssassin 144: maildir for mass-check
+
+2002-04-01 10:37  hughescr
+
+	* build/cf_to_html: Fix up HTML generator for new rule types;
+	compact HTML
+
+2002-03-29 01:06  hughescr
+
+	* rules/30_text_fr.cf: French descriptions for rules
+
+2002-03-27 08:10  matt_sergeant
+
+	* rules/20_uri_tests.cf: All rules now check https in case spammers
+	decide that's a way past our filters Changed some rules to be non
+	greedy (I forget why ;-)
+
+2002-03-27 07:34  matt_sergeant
+
+	* masses/mass-check: Added ability to run mass-check from anywhere
+
+2002-03-26 16:49  hughescr
+
+	* lib/Mail/SpamAssassin/EvalTests.pm: Typo
+
+2002-03-26 16:32  hughescr
+
+	* rules/20_body_tests.cf: Bugzilla #46: lolitas
+
+2002-03-26 16:29  hughescr
+
+	* rules/20_body_tests.cf: Partial bugzilla #46: PORN rules update
+
+2002-03-26 16:24  hughescr
+
+	* lib/Mail/SpamAssassin.pm: Bugzilla #132: -d option doesnt remove
+	subject if it contains _HITS_ or _REQD_
+
+2002-03-26 16:05  hughescr
+
+	* README: Made one line from two
+
+2002-03-26 10:09  hughescr
+
+	* rules/20_body_tests.cf: Bugzilla #135 and 136
+
+2002-03-25 17:43  hughescr
+
+	* masses/logs-to-c, spamd/spamd.raw: Bugzilla #119
+
+2002-03-25 17:28  hughescr
+
+	* lib/Mail/: SpamAssassin.pm, SpamAssassin/PerMsgStatus.pm:
+	Bugzilla #87
+
+2002-03-25 17:23  hughescr
+
+	* lib/Mail/SpamAssassin/PerMsgStatus.pm: Bugzilla #114
+
+2002-03-25 17:22  hughescr
+
+	* rules/20_body_tests.cf: Ooops, typo
+
+2002-03-25 17:20  hughescr
+
+	* spamd/spamd.raw: Bugzilla #78
+
+2002-03-25 16:17  hughescr
+
+	* rules/20_head_tests.cf: Bugzilla #72
+
+2002-03-25 15:54  hughescr
+
+	* rules/20_body_tests.cf: Frame, object and embed rules
+
+2002-03-25 15:41  hughescr
+
+	* rules/20_uri_tests.cf: URI rules from Matt Cline
+
+2002-03-25 15:32  hughescr
+
+	* rules/20_head_tests.cf: Bugzilla #125
+
+2002-03-25 15:01  hughescr
+
+	* lib/Mail/SpamAssassin/EvalTests.pm, rules/20_head_tests.cf,
+	rules/50_scores.cf: SUBJ_ALL_CAPS fix
+
+2002-03-25 02:58  matt_sergeant
+
+	* lib/Mail/SpamAssassin/Dns.pm: Patch from Justin to make sure we
+	don't die() if Razor isn't responding
+
+2002-03-25 02:49  matt_sergeant
+
+	* lib/Mail/SpamAssassin/PerMsgStatus.pm: Applied Matthew Cline's
+	HTML decoding patches
+
+2002-03-22 08:23  hughescr
+
+	* rules/: 20_head_tests.cf, 50_scores.cf: Doh!	ORBZ, not ORBS
+
+2002-03-22 01:20  hughescr
+
+	* rules/: 20_head_tests.cf, 50_scores.cf: ORBS gone
+
+2002-03-19 14:38  hughescr
+
+	* lib/Mail/SpamAssassin/PerMsgStatus.pm: Bugzilla #83
+
+2002-03-19 14:28  hughescr
+
+	* lib/Mail/SpamAssassin.pm: Bugzilla #80
+
+2002-03-17 05:01  hughescr
+
+	* spamassassin.raw: Bugzilla #63
+
+2002-03-17 04:53  hughescr
+
+	* spamd/spamc.c: Bugzilla #84
+
+2002-03-17 04:45  hughescr
+
+	* rules/user_prefs.template: Bugzilla #76
+
+2002-03-17 04:31  hughescr
+
+	* lib/Mail/SpamAssassin/Conf.pm,
+	lib/Mail/SpamAssassin/PerMsgStatus.pm, t/spam.t: Bugzilla #50
+
+2002-03-17 03:51  hughescr
+
+	* lib/Mail/SpamAssassin.pm: Bugzilla #100
+
+2002-03-17 03:39  hughescr
+
+	* spamd/: spamc.c, spamd.raw: Bugzilla #90
+
+2002-03-17 03:32  hughescr
+
+	* rules/20_body_tests.cf: Bugzilla #88
+
+2002-03-17 03:28  hughescr
+
+	* lib/Mail/SpamAssassin/EvalTests.pm, rules/20_head_tests.cf:
+	SUBJ_ALL_CAPS eval
+
+2002-03-17 03:28  hughescr
+
+	* lib/Mail/SpamAssassin/PerMsgStatus.pm: bugfix
+
+2002-03-17 03:01  hughescr
+
+	* rules/20_body_tests.cf: Bugzilla #91
+
+2002-03-08 12:11  hughescr
+
+	* rules/: 20_body_tests.cf, 30_text_es.cf, 50_scores.cf: No more
+	virus checking
+
+2002-03-08 12:06  hughescr
+
+	* README, lib/Mail/SpamAssassin.pm: Changes to user_prefs template
+	location
+
+2002-03-07 09:55  matt_sergeant
+
+	* lib/Mail/SpamAssassin/EvalTests.pm: Make sure yelling lines have
+	some non-letters in them (to avoid binary nonesense and genome
+	sequences!)
+
+2002-03-07 02:51  matt_sergeant
+
+	* lib/Mail/SpamAssassin/PerMsgStatus.pm: Non infinite looping patch
+	for MIME block fix
+
+2002-03-07 02:40  matt_sergeant
+
+	* spamd/spamd.raw: Enable stop_at_threshold
+
+2002-03-07 02:30  matt_sergeant
+
+	* lib/Mail/SpamAssassin/PerMsgStatus.pm: Applied MIME boundary
+	re-write stuff from Matthew Cline
+
+2002-03-06 03:23  matt_sergeant
+
+	* MANIFEST, spamassassin.raw, lib/Mail/SpamAssassin.pm,
+	lib/Mail/SpamAssassin/PerMsgStatus.pm,
+	lib/Mail/SpamAssassin/Reporter.pm, t/spamd_stop.t: Major update to
+	allow -S on the command line to stop processing when spam threshold
+	is hit (works here, needs testing)
+
+2002-03-06 02:21  hughescr
+
+	* rules/20_body_tests.cf: super hunza
+
+2002-03-06 02:10  matt_sergeant
+
+	* rules/20_body_tests.cf: Fixed HUNZA test
+
+2002-03-05 11:38  hughescr
+
+	* rules/: 20_body_tests.cf, 50_scores.cf: Frontpage rule added
+
+2002-03-05 09:44  matt_sergeant
+
+	* MANIFEST, lib/Mail/SpamAssassin/Conf.pm,
+	lib/Mail/SpamAssassin/PerMsgStatus.pm, rules/20_body_tests.cf,
+	rules/20_uri_tests.cf, rules/50_scores.cf, t/reportheader.t: Moved
+	all URI tests to a new test type
+
+2002-03-05 01:03  hughescr
+
+	* build/: update_devel, update_stable: Fixes in case of directory
+	not exist
+
+2002-03-05 01:00  hughescr
+
+	* masses/.cvsignore: Added some CRH files
+
+2002-03-05 00:59  hughescr
+
+	* lib/Mail/SpamAssassin/NoMailAudit.pm: Delivery buglet
+
+2002-03-05 00:59  hughescr
+
+	* rules/: 20_body_tests.cf, 20_head_tests.cf, 50_scores.cf: Rule
+	additions/changes
+
+2002-03-04 10:16  hughescr
+
+	* lib/Mail/SpamAssassin/: Dns.pm, Reporter.pm: Fixed apparent razor
+	change
+
+2002-03-04 09:51  hughescr
+
+	* lib/Mail/SpamAssassin.pm: Make that 2.20
+
+2002-03-04 09:45  hughescr
+
+	* rules/20_head_tests.cf: New SUBJ_ALL_CAPS rule
+
+2002-03-04 09:43  hughescr
+
+	* lib/Mail/SpamAssassin/EvalTests.pm, rules/20_body_tests.cf,
+	rules/50_scores.cf: New LINE_OF_YELLING eval
+
+2002-03-04 09:36  hughescr
+
+	* lib/Mail/SpamAssassin/: EvalTests.pm, PerMsgStatus.pm: Patches
+	from Andrey Chernov
+
+2002-03-04 09:35  hughescr
+
+	* spamassassin.spec: New specfile 2.11
+
+2002-03-03 17:36  hughescr
+
+	* lib/Mail/SpamAssassin.pm: Back to 2.2 line
+
+2002-03-03 17:36  hughescr
+
+	* Changes: Changes for 2.11
+
+2002-03-03 17:29  hughescr
+
+	* MANIFEST, MANIFEST.SKIP: Changes to MANIFEST
+
 2002-03-03 17:23  hughescr
 
 	* Mail-SpamAssassin-2.1.zip: No ZIPfile in CVS
