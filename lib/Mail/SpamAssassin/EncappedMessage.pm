@@ -30,7 +30,8 @@ sub delete_header {
 }
 
 sub get_pristine_header {
-  return $self->get_header(@_);
+  my ($self, $hdr) = @_;
+  return $self->get_header ($hdr);
 }
 
 sub get_header {
