@@ -47,13 +47,9 @@ loadplugin Mail::SpamAssassin::Plugin::Pyzor
 #
 #loadplugin Mail::SpamAssassin::Plugin::Razor2
 
-# SpamCop - perform SpamCop message reporting.
+# SpamCop - perform SpamCop message reporting
 #
 loadplugin Mail::SpamAssassin::Plugin::SpamCop
-
-# DomainKeys - perform DomainKeys verification.
-#
-#loadplugin Mail::SpamAssassin::Plugin::DomainKeys
 
 # AntiVirus - some simple anti-virus checks, this is not a replacement
 # for an anti-virus filter like Clam AntiVirus
@@ -68,6 +64,17 @@ loadplugin Mail::SpamAssassin::Plugin::AWL
 #
 loadplugin Mail::SpamAssassin::Plugin::AutoLearnThreshold
 
+# TextCat - language guesser
+#
+#loadplugin Mail::SpamAssassin::Plugin::TextCat
+
+###########################################################################
+# experimental plugins
+
+# DomainKeys - perform DomainKeys verification
+#
+#loadplugin Mail::SpamAssassin::Plugin::DomainKeys
+
 # MIMEHeader - apply regexp rules against MIME headers in the message
 #
 loadplugin Mail::SpamAssassin::Plugin::MIMEHeader
@@ -75,8 +82,4 @@ loadplugin Mail::SpamAssassin::Plugin::MIMEHeader
 # ReplaceTags
 #
 loadplugin Mail::SpamAssassin::Plugin::ReplaceTags
-
-# TextCat - language guesser
-#
-#loadplugin Mail::SpamAssassin::Plugin::TextCat
 
