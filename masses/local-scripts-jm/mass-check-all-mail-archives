@@ -1,0 +1,65 @@
+#!/bin/sh
+
+cd /home/jm/ftp/spamassassin/masses
+
+mv spam.{local,alltime} nonspam.local logs/old
+
+# ---------------------------------------------------------------------------
+# recent non-spam data
+
+./mass-check-MH-spool ; sh commands.sh
+
+for f in /local/mail-archives/recent/nonspam/* ; do
+  echo Checking $f: ; ./mass-check --loghits -c ../rules $f >> nonspam.local
+done
+
+# ---------------------------------------------------------------------------
+# recent spam data
+
+for f in /local/mail-archives/recent/spam/* ; do
+  echo Checking $f: ; ./mass-check --loghits -c ../rules $f >> spam.local
+done
+
+# trap data, 27 June to 17 July 2002
+# too big. skip it for now!
+#./mass-check --loghits -c ../rules /local/mail-archives/recent/spamtrap/20020717/mbox >> spam.local
+./mass-check --loghits -c ../rules /local/mail-archives/recent/spamtrap/20020717/nonspam.mbox >> nonspam.local
+
+# ---------------------------------------------------------------------------
+# profile a sample non-spam file (don't keep the output though, sometimes
+# profiling will die adn result in corrupt results)
+
+perl -d:DProf ./mass-check -c ../rules \
+        /local/mail-archives/old/nonspam/crackmice.200106.gz > /dev/null
+dprofpp -O 100 > ./dprof.nonspam
+mv tmon.out ./tmon.nonspam
+
+# ---------------------------------------------------------------------------
+# non-spam never changes it's tactics, so we don't have to differentiate between
+# recent and all-time sets.
+
+for f in /local/mail-archives/old/nonspam/* /local/mail-archives/recent/nonspam/*
+do
+  echo Checking $f: ; ./mass-check --loghits -c ../rules $f >> nonspam.local
+done
+
+# ---------------------------------------------------------------------------
+# profile a sample spam file (don't keep the output though, sometimes
+# profiling will die adn result in corrupt results)
+# mbox.1.gz is the latest spamtrap data for the day
+
+perl -d:DProf ./mass-check -c ../rules \
+        /local/mail-archives/recent/spam/mbox.1.gz > /dev/null
+dprofpp -O 100 > ./dprof.spam
+mv tmon.out ./tmon.spam
+
+# ---------------------------------------------------------------------------
+# ok, generate spam.alltime; check old spam archives
+# don't use --loghits, this is *huge* so it'd take forever
+
+cp spam.local spam.alltime
+for f in /local/mail-archives/old/spam/* ; do
+  echo Checking $f: ; ./mass-check -c ../rules $f >> spam.alltime
+done
+
+echo "Done full scan"

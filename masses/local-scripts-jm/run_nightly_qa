@@ -1,0 +1,63 @@
+#!/bin/sh
+
+outdir=/home/jm/spamassassin.taint.org/qa/freqs
+
+cd /home/jm/ftp/spamassassin/masses
+
+(
+echo "STARTING AT"; date
+
+( cd .. ; cvs -z3 update -dP )
+
+mkdir -p tmp/nightly
+tmp="tmp/nightly"
+
+./local-scripts-jm/mass-check-all-mail-archives
+
+mv dprof.spam tmon.spam $tmp
+mv dprof.nonspam tmon.nonspam $tmp
+
+cp spam.{alltime,log}
+cp nonspam.{local,log}
+
+./hit-frequencies -x -p | sort -g --key=4  > $tmp/freqs.alltime
+./hit-frequencies -x -p -f | sort -g --key=4 > $tmp/falsefreqs.alltime
+
+./lint-rules-from-freqs -f $tmp/falsefreqs.alltime \
+                        < $tmp/freqs.alltime > $tmp/badtests.alltime
+
+cp spam.{local,log}
+cp nonspam.{local,log}
+
+./hit-frequencies -x -p | sort -g --key=4  > $tmp/freqs.local
+./hit-frequencies -x -p -f | sort -g --key=4 > $tmp/falsefreqs.local
+
+./lint-rules-from-freqs -f $tmp/falsefreqs.local \
+                        < $tmp/freqs.local > $tmp/badtests.local
+
+./mk-baseline-results
+
+nowdir=$outdir/`date +%Y%m%d`
+mkdir -p $nowdir > /dev/null 2>&1
+cp $tmp/freqs.local $nowdir/freqs.recent
+cp $tmp/freqs.alltime $nowdir/freqs.alltime
+cp $tmp/falsefreqs.local $nowdir/falsefreqs.recent
+cp $tmp/falsefreqs.alltime $nowdir/falsefreqs.alltime
+cp $tmp/badtests.local $nowdir/badtests.recent
+cp $tmp/badtests.alltime $nowdir/badtests.alltime
+cp $tmp/dprof.{spam,nonspam} $nowdir
+
+# don't copy up the logs; save space
+# gzip -1 < nonspam.local > $nowdir/nonspam.log.gz
+# gzip -1 < spam.local > $nowdir/spam.log.gz
+# gzip -1 < spam.alltime > $nowdir/spam.alltime.gz
+
+echo $nowdir
+ls -l $nowdir
+
+./local-scripts-jm/copy-qa-data-to-dogma
+
+echo "FINISHED AT"; date
+
+) > nightly.log 2>&1
+
