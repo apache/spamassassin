@@ -940,6 +940,9 @@ sub load_resolver {
 
   dbg ("is Net::DNS::Resolver available? " .
        ($self->{no_resolver} ? "no" : "yes"));
+  if (!$self->{no_resolver} && defined $Net::DNS::VERSION) {
+    dbg("Net::DNS version: ".$Net::DNS::VERSION);
+  }
 
   return (!$self->{no_resolver});
 }
