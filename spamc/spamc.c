@@ -16,6 +16,7 @@
  */
 
 #include "config.h"
+#include "version.h"
 #include "libspamc.h"
 #include "utils.h"
 
@@ -92,6 +93,24 @@ char **exec_argv;
 
 static int timeout = 600;
 
+
+void
+print_version(void)
+{
+    char *maj = VERSION_MAJOR;
+    char *min = VERSION_MINOR;
+    char *rev = VERSION_REVISION;
+
+#ifndef VERSION_EXACT
+    rev = strdup(rev);
+    rev += strlen("LastChangedRevision");
+    strncpy(rev, "x-r", 3);
+    rev[strlen(rev) - 2] = '\0';
+#endif
+
+    fprintf(stderr, "%s version %s.%s.%s\n", "SpamAssassin Client", maj, min, rev);
+}
+
 static void
 usg(char *str)
 {
@@ -101,7 +120,10 @@ usg(char *str)
 void
 print_usage(void)
 {
+    print_version();
+    usg("\n");
     usg("Usage: spamc [options] [-e command [args]] < message\n");
+    usg("\n");
     usg("Options:\n");
 
     usg("  -d host             Specify host to connect to.\n"
@@ -148,9 +170,9 @@ read_args(int argc, char **argv,
           struct transport *ptrn)
 {
 #ifndef _WIN32
-    const char *opts = "-BcrRd:e:fhyp:t:s:u:xSHU:El";
+    const char *opts = "-BcrRd:e:fyp:t:s:u:xSHU:ElhV";
 #else
-    const char *opts = "-BcrRd:fhyp:t:s:u:xSHEl";
+    const char *opts = "-BcrRd:fyp:t:s:u:xSHElhV";
 #endif
     int opt;
     int ret = EX_OK;
@@ -278,6 +300,11 @@ read_args(int argc, char **argv,
                 print_usage();
                 exit(ret);
             }
+	    case 'V':
+	    {
+	        print_version();
+		exit(ret);
+	    }
         }
     }
     return ret;
