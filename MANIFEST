@@ -9,6 +9,7 @@ spamassassin.prefs
 sample-nonspam.txt
 sample-spam.txt
 Changes
+License
 MailAudit.patch
 build/cf_to_html
 build/get_version
@@ -20,6 +21,10 @@ doc/Mail::SpamAssassin::PerMsgStatus.html
 doc/Mail::SpamAssassin::PerMsgStatus.txt
 doc/spamassassin.html
 doc/spamassassin.txt
+doc/spamc.html
+doc/spamc.txt
+doc/spamd.html
+doc/spamd.txt
 fixpath.pl
 lib/Mail/SpamAssassin.pm
 lib/Mail/SpamAssassin/Conf.pm
@@ -34,8 +39,15 @@ lib/Mail/SpamAssassin/Reporter.pm
 masses/README
 masses/continual_evolve.sh
 masses/evolve.cxx
+masses/hit-frequencies
 masses/logs-to-c
 masses/mass-check
+masses/mk-baseline-results
+masses/rewrite-cf-with-new-scores
+spamd/README
+spamd/spamc.c
+spamd/spamc.pod
+spamd/spamd.raw
 t/SATest.pm
 t/data/mime-subject.txt
 t/data/nice/001
@@ -51,10 +63,3 @@ t/strip2.t
 t/stripmarkup.t
 t/test_dir
 windows_install.pl
-masses/hit-frequencies
-masses/mk-baseline-results
-masses/rewrite-cf-with-new-scores
-License
-spamd/README
-spamd/spamc.c
-spamd/spamd.raw

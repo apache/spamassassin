@@ -1,0 +1,36 @@
+
+=head1 NAME
+
+spamc - client for spamd
+
+=head1 SYNOPSIS
+
+  spamc [port]
+
+=head1 DESCRIPTION
+
+Spamc is the client half of the spamc/spamd pair.  It should be used in place
+of 'spamassassin -P' in scripts to process mail.  It will read the mail from
+stdin, and spool it to its connection to spamd, then read the result back and
+print it to stdout.  Spamc has extremely low overhead in loading, so it should
+be much faster to load than the whole spamassassin program (and a perl VM).
+
+See the README file in the C<spamd> directory of the SpamAssassin distribution
+for more details.
+
+=head1 SEE ALSO
+
+C<spamd>
+C<spamassassin>
+C<Mail::SpamAssassin>
+
+=head1 AUTHOR
+
+Craig R Hughes E<lt>craig@hughes-family.orgE<gt>
+
+=head1 PREREQUISITES
+
+C<Mail::SpamAssassin>
+
+=cut
+
