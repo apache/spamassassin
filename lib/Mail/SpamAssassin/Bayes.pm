@@ -38,8 +38,6 @@ use vars qw{
   @ISA
   $IGNORED_HDRS
   $MARK_PRESENCE_ONLY_HDRS
-  $MIN_SPAM_CORPUS_SIZE_FOR_BAYES
-  $MIN_HAM_CORPUS_SIZE_FOR_BAYES
   %HEADER_NAME_COMPRESSION
 };
 
@@ -148,11 +146,6 @@ use constant TOKENIZE_LONG_TOKENS_AS_SKIPS => 1;
   'Content-Type'	=> '*c',
 );
 
-# How big should the corpora be before we allow scoring using Bayesian tests?
-# Do not use constants here. Also these may be better as conf items. TODO
-$MIN_SPAM_CORPUS_SIZE_FOR_BAYES = 200;
-$MIN_HAM_CORPUS_SIZE_FOR_BAYES = 200;
-
 # Should we use the Robinson f(w) equation from
 # http://radio.weblogs.com/0101454/stories/2002/09/16/spamDetection.html ?
 # It gives better results, in that scores are more likely to distribute
@@ -198,6 +191,7 @@ sub new {
   my ($main) = @_;
   my $self = {
     'main'              => $main,
+    'conf'		=> $main->{conf},
     'log_raw_counts'	=> 0,
 
     # Off. See comment above cached_probs_get().
@@ -226,15 +220,14 @@ sub finish {
 # BayesStore::read_db_configs().
 sub read_db_configs {
   my ($self) = @_;
-  my $conf = $self->{main}->{conf};
 
   # use of hapaxes.  Set on bayes object, since it controls prob
   # computation.
-  $self->{bayes}->{use_hapaxes} = $conf->{bayes_use_hapaxes};
+  $self->{bayes}->{use_hapaxes} = $self->{conf}->{bayes_use_hapaxes};
 
   # Use chi-squared combining instead of Gary-combining (Robinson/Graham-style
   # naive-Bayesian)?
-  $self->{bayes}->{use_chi_sq_combining} = $conf->{bayes_use_chi2_combining};
+  $self->{bayes}->{use_chi_sq_combining} = $self->{conf}->{bayes_use_chi2_combining};
 
   # Use the appropriate set of constants; the different systems have different
   # optimum settings for these.  (TODO: should these be exposed through Conf?)
@@ -522,7 +515,7 @@ sub pre_chew_received {
 sub learn {
   my ($self, $isspam, $msg) = @_;
 
-  if (!$self->{main}->{conf}->{use_bayes}) { return; }
+  if (!$self->{conf}->{use_bayes}) { return; }
   if (!defined $msg) { return; }
   my $body = $self->get_body_from_msg ($msg);
   my $ret;
@@ -595,7 +588,7 @@ sub learn_trapped {
 sub forget {
   my ($self, $msg) = @_;
 
-  if (!$self->{main}->{conf}->{use_bayes}) { return; }
+  if (!$self->{conf}->{use_bayes}) { return; }
   if (!defined $msg) { return; }
   my $body = $self->get_body_from_msg ($msg);
   my $ret;
@@ -703,7 +696,7 @@ sub get_body_from_msg {
 
 sub sync {
   my ($self, $opts) = @_;
-  if (!$self->{main}->{conf}->{use_bayes}) { return 0; }
+  if (!$self->{conf}->{use_bayes}) { return 0; }
 
   dbg("Syncing Bayes journal and expiring old tokens...");
   $self->{store}->sync_journal($opts);
@@ -812,12 +805,12 @@ sub is_available {
 
   my ($ns, $nn) = $self->{store}->nspam_nham_get();
 
-  if ($ns < $MIN_SPAM_CORPUS_SIZE_FOR_BAYES) {
-    dbg("debug: Only $ns spam(s) in Bayes DB < $MIN_SPAM_CORPUS_SIZE_FOR_BAYES");
+  if ($ns < $self->{conf}->{bayes_min_spam_num}) {
+    dbg("debug: Only $ns spam(s) in Bayes DB < ".$self->{conf}->{bayes_min_spam_num});
     return 0;
   }
-  if ($nn < $MIN_HAM_CORPUS_SIZE_FOR_BAYES) {
-    dbg("debug: Only $nn ham(s) in Bayes DB < $MIN_HAM_CORPUS_SIZE_FOR_BAYES");
+  if ($nn < $self->{conf}->{bayes_min_ham_num}) {
+    dbg("debug: Only $nn ham(s) in Bayes DB < ".$self->{conf}->{bayes_min_ham_num});
     return 0;
   }
 
@@ -830,7 +823,7 @@ sub is_available {
 sub scan {
   my ($self, $msg, $body) = @_;
 
-  if (!$self->{main}->{conf}->{use_bayes}) { goto skip; }
+  if (!$self->{conf}->{use_bayes}) { goto skip; }
   if (!$self->{store}->tie_db_readonly()) { goto skip; }
 
   my ($ns, $nn) = $self->{store}->nspam_nham_get();
@@ -839,12 +832,12 @@ sub scan {
     $self->{raw_counts} = " ns=$ns nn=$nn ";
   }
 
-  if ($ns < $MIN_SPAM_CORPUS_SIZE_FOR_BAYES) {
-    dbg ("spam corpus too small ($ns < $MIN_SPAM_CORPUS_SIZE_FOR_BAYES), skipping");
+  if ($ns < $self->{conf}->{bayes_min_spam_num}) {
+    dbg ("spam corpus too small ($ns < ".$self->{conf}->{bayes_min_spam_num}."), skipping");
     goto skip;
   }
-  if ($nn < $MIN_HAM_CORPUS_SIZE_FOR_BAYES) {
-    dbg ("ham corpus too small ($nn < $MIN_HAM_CORPUS_SIZE_FOR_BAYES), skipping");
+  if ($nn < $self->{conf}->{bayes_min_ham_num}) {
+    dbg ("ham corpus too small ($nn < ".$self->{conf}->{bayes_min_ham_num}."), skipping");
     goto skip;
   }
 

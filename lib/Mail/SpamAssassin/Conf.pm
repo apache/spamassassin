@@ -181,6 +181,8 @@ sub new {
   $self->{bayes_expiry_min_db_size} = 100000;
   $self->{bayes_expiry_scan_count} = 5000;
   $self->{bayes_ignore_headers} = [ ];
+  $self->{bayes_min_ham_num} = 200;
+  $self->{bayes_min_spam_num} = 200;
 
   $self->{whitelist_from} = { };
   $self->{blacklist_from} = { };
@@ -1381,6 +1383,23 @@ setting.  Example:
 =cut
     if (/^bayes_ignore_header\s+(.*)$/) {
       push (@{$self->{bayes_ignore_headers}}, $1); next;
+    }
+
+=item bayes_min_ham_num			(Default: 200)
+=item bayes_min_spam_num		(Default: 200)
+
+To be accurate, the Bayes system does not activate until a certain number
+of ham and spam have been learned.  The default is 200 of each ham and
+spam, but you can tune these up or down with these two settings.
+
+=cut
+
+    if (/^bayes_min_ham_num\s+(.*)$/) {
+      $self->{bayes_min_ham_num} = $1+0; next;
+    }
+
+    if (/^bayes_min_spam_num\s+(.*)$/) {
+      $self->{bayes_min_spam_num} = $1+0; next;
     }
 
 
