@@ -115,6 +115,9 @@ tflags RCVD_IN_SORBS_DUL	net
 
 # ---------------------------------------------------------------------------
 # Spamhaus SBL+XBL
+#
+# Spamhaus XBL contains both the Abuseat CBL (cbl.abuseat.org) and Blitzed
+# OPM (opm.blitzed.org) lists so it's not necessary to query those as well.
 
 header __RCVD_IN_SBL_XBL	eval:check_rbl('sblxbl', 'sbl-xbl.spamhaus.org.')
 describe __RCVD_IN_SBL_XBL	Received via a relay in Spamhaus SBL+XBL
