@@ -2181,6 +2181,17 @@ sub _check_mime_header {
   }
 }
 
+sub check_for_mime_multipart_trick {
+  my ($self, undef, $min, $max) = @_;
+
+  $self->_check_attachments unless exists $self->{t_mime_multipart_alternative};
+
+  return (($min eq 'undef' ||
+	   $self->{t_mime_multipart_alternative_ratio} >= $min) &&
+	  ($max eq 'undef' ||
+	   $self->{t_mime_multipart_alternative_ratio} < $max));
+}
+
 sub _check_attachments {
   my ($self) = @_;
 
@@ -2192,6 +2203,8 @@ sub _check_attachments {
   my %state;			# state of each MIME part
   my $qp_bytes = 0;		# total bytes in QP regions
   my $qp_count = 0;		# QP-encoded bytes in QP regions
+  my @part_bytes;		# MIME part total bytes
+  my @part_type;		# MIME part types
 
   # MIME header information
   my $ctype = 0;		# Content-Type
@@ -2199,6 +2212,7 @@ sub _check_attachments {
   my $cd = 0;			# Content-Disposition
   my $charset = 0;		# charset
   my $name = 0;			# name or filename
+  my $part = -1;		# MIME part index
 
   # regular expressions
   my $re_boundary = qr/\bboundary\s*=\s*["']?(.*?)["']?(?:;|$)/i;
@@ -2227,6 +2241,8 @@ sub _check_attachments {
   $self->{mime_qp_long_line} = 0;
   $self->{mime_qp_ratio} = 0;
   $self->{mime_suspect_name} = 0;
+  $self->{t_mime_multipart_alternative} = 0;
+  $self->{t_mime_multipart_alternative_ratio} = 1.0;
 
   # message headers
   $ctype = $self->get('Content-Type');
@@ -2235,6 +2251,9 @@ sub _check_attachments {
   chomp($cte = defined($cte) ? lc($cte) : "");
   if ($ctype =~ /$re_boundary/m && $1 ne '') {
     push (@boundary, "\Q$1\E");
+  }
+  if ($ctype =~ /^multipart\/alternative/i) {
+    $self->{t_mime_multipart_alternative} = 1;
   }
 
   # check MIME headers in message header
@@ -2281,10 +2300,18 @@ sub _check_attachments {
       {
 	$self->{mime_html_no_charset} = 0;
       }
+      if ($self->{t_mime_multipart_alternative} &&
+	  $ctype =~ /^text\/(?:plain|html)/i &&
+	  $cd !~ /attachment/)
+      {
+	$part_bytes[$part] += length;
+      }
     }
     if ($where == 1) {
       if (/^$/) {
 	$where = 2;
+	$part++;
+	$part_type[$part] = $ctype;
 	$self->_check_mime_header($ctype, $cte, $cd, $charset, $name);
       }
       if (/$re_boundary/) { push(@boundary, "\Q$1\E"); }
@@ -2327,6 +2354,22 @@ sub _check_attachments {
   }
   if ($qp_bytes) {
     $self->{mime_qp_ratio} = $qp_count / $qp_bytes;
+  }
+  if ($self->{t_mime_multipart_alternative}) {
+    my $text;
+    my $html;
+    for (my $i = 0; $i <= $part; $i++) {
+      next if !defined $part_bytes[$i];
+      if (!defined($html) && $part_type[$i] =~ /^text\/html/i) {
+	$html = $part_bytes[$i];
+      }
+      if (!defined($text) && $part_type[$i] =~ /^text\/plain/i) {
+	$text = $part_bytes[$i];
+      }
+    }
+    if (defined($text) && defined($html)) {
+      $self->{t_mime_multipart_alternative_ratio} = ($text / $html);
+    }
   }
   foreach my $str (keys %state) {
     if ($state{$str} != 0) {
