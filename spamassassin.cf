@@ -403,7 +403,7 @@ describe ASCII_FORM_ENTRY	Contains an ASCII-formatted form
 body AMAZING			/AMAZING/
 describe AMAZING		Contains word 'AMAZING'
 body GUARANTEE			/GUARANTEE/
-desribe GUARANTEE		Contains word 'GUARANTEE'
+describe GUARANTEE		Contains word 'GUARANTEE'
 body PROFITS			/PROFITS/
 describe PROFITS		Contains word 'PROFITS'
 body NO_QS_ASKED		/NO QUESTIONS ASKED/
@@ -468,7 +468,7 @@ describe DIGITAL_FX1		Well know SPAM contents
 body OFFICE_OF_MD		/The Office of *The Managing Director/
 describe OFFICE_OF_MD		From the office of the managing director
 body BRAND_NEW_PAGER		/BRAND NEW Pager FREE/
-decsribe BRAND_NEW_PAGER	No such thing as a free lunch
+describe BRAND_NEW_PAGER	No such thing as a free lunch
 body ADDRESSES_ON_CD		/addresses on cd/i
 describe ADDRESSES_ON_CD	Only thing addresses on CD are useful for is SPAM
 body SHOES_GUY			/(?:(?:Lingui|Guilin).*){2,}/i
@@ -570,7 +570,7 @@ body PORN_6			/(?:\d+\+? xxx pictures|xxx photos?)/i
 describe PORN_6			Uses words and phrases which indicate porn
 
 body PORN_7			/Free XXX/i
-decsribe PORN_7			Uses words and phrases which indicate porn
+describe PORN_7			Uses words and phrases which indicate porn
 
 body TRACKER_ID			/^\W{4,6} (?:[a-z]{10,}|[A-Z]{10,}) \W{4,6}\s*$/
 describe TRACKER_ID		Incorporates a tracking ID number
@@ -817,12 +817,8 @@ describe USER_IN_ALL_SPAM_TO	User is listed in 'all_spam_to'
 
 # the idea is that most legit newsletters will claim their copyright; spammers
 # do not seem to for some reason.  (Kevin Dangoor)
-<<<<<<< spamassassin.cf
 full COPYRIGHT_CLAIMED		/copyright.{0,100}all rights reserved/is
-=======
-body COPYRIGHT_CLAIMED		/copyright.*all rights reserved./i
 describe COPYRIGHT_CLAIMED	Contains a claim of copyright
->>>>>>> 1.108
 
 ###########################################################################
 # not quite spam, but dangerous/irritating nonetheless, and easy to catch.
