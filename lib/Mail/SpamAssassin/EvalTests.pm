@@ -3326,6 +3326,15 @@ sub check_host_domain_ratio {
 
 {
   my %obfu_cache = ();
+  my %repllist = (
+        'a' => '[a@]',
+        'e' => '[e3]',
+        'o' => '[o0]',
+        'i' => '[i1|]',
+        'l' => '[l1|]',
+        'u' => '[uv]',
+        'v' => '(?:v|\\\/)',
+  );
 
   sub check_obfu_word {
     my($self, $body, $word) = @_;
@@ -3335,25 +3344,26 @@ sub check_host_domain_ratio {
 
     my $new;
     unless ($obfu_cache{$word}) {
-      $new = $word;
+      $new = '';
+      my @list = split(//, $word);
+      while ($_ = shift @list) {
+        if (exists $repllist{$_}) {
+          $_ = $repllist{$_};
+        }
 
-      # turn "foo" into "f\W*o\W*o" to match interuptus
-      # deal with character obfuscation below
-      $new =~ s/(\w)/${1}\\W*/g;
-      $new =~ s/\\W\*$//;
+        # turn "foo" into "f\W*o\W*o" to match interuptus
+        if (@list) {
+          $new .= "$_\\W*";
+        }
+        else {
+          # mad skillz yo
+          if ($_ eq 's') {
+            $_ = '[sz]';
+          }
 
-      # 1337 speak
-      $new =~ s/a/\[a@\]/g;
-      $new =~ s/e/\[e3\]/g;
-      $new =~ s/o/\[o0\]/g;
-      $new =~ s/i/\[i1|\]/g;
-      $new =~ s/l/\[l1|\]/g;
-
-      # v -> \/
-      $new =~ s/v/(?:v|\\\/)/g;
-
-      # mad skillz yo
-      $new =~ s/s$/\[sz\]/;
+          $new .= $_;
+        }
+      }
 
       # cache both the word and the new RE
       push(@{$obfu_cache{$word}}, qr/\b$word\b/i, qr/\b$new\b/i);
