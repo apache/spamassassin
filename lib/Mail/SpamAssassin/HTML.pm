@@ -39,8 +39,16 @@ my %elements = map {; $_ => 1 }
   qw( a abbr acronym address area b base bdo big blockquote body br button caption cite code col colgroup dd del dfn div dl dt em fieldset form h1 h2 h3 h4 h5 h6 head hr html i img input ins kbd label legend li link map meta noscript object ol optgroup option p param pre q samp script select small span strong style sub sup table tbody td textarea tfoot th thead title tr tt ul var ),
   # loose
   qw( applet basefont center dir font frame frameset iframe isindex menu noframes s strike u ),
-  # other non-standard tags
-  qw( x-sigsep x-tab ),
+  # non-standard tags
+  qw( nobr x-sigsep x-tab ),
+;
+
+# elements that we want to render, but not count as valid
+my %tricks = map {; $_ => 1 }
+  # non-standard and non-valid tags
+  qw( bgsound embed listing plaintext xmp ),
+  # other non-standard tags handled in popfile
+  #   blink ilayer multicol noembed nolayer spacer wbr
 ;
 
 # attributes
@@ -58,12 +66,12 @@ my %elements_text_style = map {; $_ => 1 }
 
 # elements that insert whitespace
 my %elements_whitespace = map {; $_ => 1 }
-  qw( br div li th td dt dd p hr blockquote pre ),
+  qw( br div li th td dt dd p hr blockquote pre embed listing plaintext xmp ),
 ;
 
 # elements that push URIs
 my %elements_uri = map {; $_ => 1 }
-  qw( body table tr td a area link img frame iframe embed script form base ),
+  qw( body table tr td a area link img frame iframe embed script form base bgsound ),
 ;
 
 # style attribute not accepted
@@ -126,6 +134,9 @@ sub html_end {
   $self->put_results(length => $self->{length});
   $self->put_results(min_size => $self->{min_size});
   $self->put_results(max_size => $self->{max_size});
+  $self->put_results(flex_hex1 => $self->{flex_hex1});
+  $self->put_results(flex_hex2 => $self->{flex_hex2});
+  $self->put_results(flex_hex3 => $self->{flex_hex3});
   if (exists $self->{tags}) {
     $self->put_results(closed_extra_ratio =>
 		       ($self->{closed_extra} / $self->{tags}));
@@ -218,6 +229,9 @@ sub parse {
   $self->{closed_extra} = 0;
   $self->{text} = [];		# rendered text
   $self->{text_invisible} = '';	# vec of invisibility state in $self->{text}
+  $self->{flex_hex1} = 0;
+  $self->{flex_hex2} = 0;
+  $self->{flex_hex3} = 0;
 
   $self->{length} += $1 if (length($text) =~ m/^(\d+)$/);	# untaint
 
@@ -285,7 +299,7 @@ sub html_tag {
   }
 
   # ignore non-elements
-  if (exists $elements{$tag}) {
+  if (exists $elements{$tag} || exists $tricks{$tag}) {
     text_style(@_) if exists $elements_text_style{$tag};
 
     # start tags
@@ -309,10 +323,10 @@ sub html_whitespace {
   if ($tag eq "br" || $tag eq "div") {
     $self->display_text("\n", whitespace => 1);
   }
-  elsif ($tag =~ /^(?:li|t[hd]|d[td])$/) {
+  elsif ($tag =~ /^(?:li|t[hd]|d[td]|embed)$/) {
     $self->display_text(" ", whitespace => 1);
   }
-  elsif ($tag =~ /^(?:p|hr|blockquote|pre)$/) {
+  elsif ($tag =~ /^(?:p|hr|blockquote|pre|listing|plaintext|xmp)$/) {
     $self->display_text("\n\n", whitespace => 1);
   }
 }
@@ -344,7 +358,7 @@ sub html_uri {
       $self->push_uri($attr->{href});
     }
   }
-  elsif ($tag =~ /^(?:img|frame|iframe|embed|script)$/) {
+  elsif ($tag =~ /^(?:img|frame|iframe|embed|script|bgsound)$/) {
     if (defined $attr->{src}) {
       $self->push_uri($attr->{src});
     }
@@ -457,7 +471,7 @@ sub text_style {
       next unless exists $ok_attributes{$tag}{$name};
       if ($name eq "text" || $name eq "color") {
 	# two different names for text color
-	$new{fgcolor} = _name_to_rgb($attr->{$name});
+	$new{fgcolor} = $self->_name_to_rgb($attr->{$name});
       }
       elsif ($name eq "size" && $attr->{size} =~ /^\s*([+-]\d+)/) {
 	# relative font size
@@ -466,7 +480,7 @@ sub text_style {
       else {
 	if ($name eq "bgcolor") {
 	  # overwrite with hex value, $new{bgcolor} is set below
-	  $attr->{bgcolor} = _name_to_rgb($attr->{bgcolor});
+	  $attr->{bgcolor} = $self->_name_to_rgb($attr->{bgcolor});
 	}
 	if ($name eq "size" && $attr->{size} !~ /^\s*([+-])(\d+)/) {
 	  # attribute is malformed
@@ -952,11 +966,42 @@ my %html_color = (
 );
 
 sub _name_to_rgb {
-  my $color = lc $_[0];
+  my ($self, $color) = @_;
+
+  $color = lc($color);
+
+  # named colors
   if (my $hex = $html_color{$color}) {
-      return sprintf("#%06x", $hex);
+    return sprintf("#%06x", $hex);
   }
-  return $color;
+
+  # Flex Hex: John Graham-Cumming, http://www.jgc.org/pdf/lisa2004.pdf
+  # strip optional # character
+  $color =~ s/^#//;
+  # save off original 
+  my $original = $color;
+  # pad right-hand-side to a multiple of three
+  $color .= "0" x (3 - (length($color) % 3)) if (length($color) % 3);
+  # split into triplets
+  my $length = length($color) / 3;
+  my @colors = ($color =~ /(.{$length})(.{$length})(.{$length})/);
+  # truncate each color to a DWORD, take MSB, left pad nibbles
+  @colors = map { s/.*(.{8})$/$1/; s/(..).*/$1/; s/^(.)$/0$1/; $_; } @colors;
+  # the color
+  $color = join("", @colors);
+  # replace non-hex characters with 0
+  $color =~ tr/0-9a-f/0/c;
+
+  # flex hex test
+  if ($color ne $original) {
+    my $h = ($original =~ /[^0-9a-f]/);
+    my $l = (length($original) != 6);
+    # XXX - three tests to try out
+    $self->{flex_hex1}++ if $h xor $l;
+    $self->{flex_hex2}++ if !$h || !$l;
+    $self->{flex_hex3}++ if !$h && $l;
+  }
+  return "#" . $color;
 }
 
 use constant URI_STRICT => 0;
