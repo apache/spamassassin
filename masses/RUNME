@@ -13,9 +13,6 @@ date
 
 mv spam.local nonspam.local logs/old
 
-# ./download-trapped-spam
-# ./mass-check /local2/mail-archives/spamtrap/mbox >> spam.local
-
 ./mass-check /local2/mail-archives/kelsey.spamtrap.gz >> spam.local
 ./mass-check /local2/mail-archives/spam.2000-2001.gz >> spam.local
 

@@ -37,7 +37,7 @@ install -m 0755 spamd/redhat-rc-script.sh %buildroot/%{initdir}/spamassassin
 
 %files
 %defattr(-,root,root)
-%doc README Changelog TODO sample-nonspam.txt sample-spam.txt spamd/README
+%doc README Changes TODO sample-nonspam.txt sample-spam.txt spamd/README
 %config(noreplace) %initdir/*
 %{prefix}/share/man
 #
