@@ -274,17 +274,6 @@ header T_SUBJECT_NOVOWEL_9Y	Subject =~ /[bcdfghjklmnpqrstvwxyz]{9}/i
 
 ##########################################################################
 
-# retry these with no y
-header T_FROM_DOMAIN_NOVOWEL	From =~ /\@\S*[bcdfghjklmnpqrstvwxz]{7}/i
-header T_FROM_LOCAL_NOVOWEL	From =~ /[bcdfghjklmnpqrstvwxz]{7}\S*\@/i
-uri T_URI_NOVOWEL		m%^https?://[^/?]*[bcdfghjklmnpqrstvwxz]{7}%i
-# and one shorter?
-header T_FROM_DOMAIN_NOVOWEL_6	From =~ /\@\S*[bcdfghjklmnpqrstvwxz]{6}/i
-header T_FROM_LOCAL_NOVOWEL_6	From =~ /[bcdfghjklmnpqrstvwxz]{6}\S*\@/i
-uri T_URI_NOVOWEL_6		m%^https?://[^/?]*[bcdfghjklmnpqrstvwxz]{6}%i
-
-##########################################################################
-
 # bug 3570
 # anti-phishing rules, will probably have a low hit-rate
 #

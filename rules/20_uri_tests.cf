@@ -140,5 +140,5 @@ describe URI_DIGITS	URI hostname has long digit sequence
 uri URI_HEX		m%^https?://[^/?]*\b[0-9a-f]{6,}\b%i
 describe URI_HEX	URI hostname has long hexadecimal sequence
 
-uri URI_NOVOWEL		m%^https?://[^/?]*[bcdfghjklmnpqrstvwxyz]{7}%i
+uri URI_NOVOWEL		m%^https?://[^/?]*[bcdfghjklmnpqrstvwxz]{7}%i
 describe URI_NOVOWEL	URI hostname has long non-vowel sequence
