@@ -1,5 +1,5 @@
 # SpamAssassin rules file: tests.
-# $Id: 20_head_tests.cf,v 1.165 2002/08/23 10:02:27 hughescr Exp $
+# $Id: 20_head_tests.cf,v 1.166 2002/08/23 11:27:19 hughescr Exp $
 ###########################################################################
 
 require_version 2.40
@@ -295,7 +295,7 @@ tflags HABEAS_HIL		net
 # bondedsender.org provides an RBL-style whitelist for trusted relays
 
 header RCVD_IN_BONDEDSENDER	rbleval:check_rbl('relay', 'query.bondedsender.org.')
-describe RCVD_IN_BONDEDSENDER	If this is spam, visit www.bondedsender.com for a reward
+describe RCVD_IN_BONDEDSENDER	Bonded sender, see http://www.bondedsender.org/referred.html
 tflags RCVD_IN_BONDEDSENDER	net
 
 
