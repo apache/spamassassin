@@ -241,6 +241,9 @@ sub new {
   $self->{bayes_use_hapaxes} = 1;
   $self->{bayes_use_chi2_combining} = 1;
   $self->{bayes_expiry_max_db_size} = 150000;
+  $self->{bayes_expiry_pct} = 0.75;
+  $self->{bayes_expiry_period} = 43200;
+  $self->{bayes_expiry_max_exponent} = 9;
   $self->{bayes_auto_expire} = 1;
   $self->{bayes_journal_max_size} = 102400;
   $self->{bayes_ignore_headers} = [ ];

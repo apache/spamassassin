@@ -103,6 +103,9 @@ sub read_db_configs {
   # database below this number of entries.  100k entries is roughly
   # equivalent to a 5Mb database file.
   $self->{expiry_max_db_size} = $conf->{bayes_expiry_max_db_size};
+  $self->{expiry_pct} = $conf->{bayes_expiry_pct};
+  $self->{expiry_period} = $conf->{bayes_expiry_period};
+  $self->{expiry_max_exponent} = $conf->{bayes_expiry_max_exponent};
 
   $self->{bayes}->read_db_configs();
 }
@@ -251,8 +254,8 @@ sub expire_old_tokens_trapped {
   }
 
   # How many tokens do we want to keep?
-  my $goal_reduction = int($self->{expiry_max_db_size} * 0.75); # expire to 75% of max_db
-  dbg("bayes: expiry check keep size, 75% of max: $goal_reduction");
+  my $goal_reduction = int($self->{expiry_max_db_size} * $self->{expiry_pct});
+  dbg("bayes: expiry check keep size, ".$self->{expiry_pct}*100."% of max: $goal_reduction");
   # Make sure we keep at least 100000 tokens in the DB
   if ( $goal_reduction < 100000 ) {
     $goal_reduction = 100000;
@@ -284,7 +287,7 @@ sub expire_old_tokens_trapped {
   # count and the current goal removal count.
   my $ratio = ($vars[9] == 0 || $vars[9] > $goal_reduction) ? $vars[9]/$goal_reduction : $goal_reduction/$vars[9];
 
-  dbg("bayes: First pass?  Current: ".time().", Last: ".$vars[4].", atime: ".$vars[8].", count: ".$vars[9].", newdelta: $newdelta, ratio: $ratio");
+  dbg("bayes: First pass?  Current: ".time().", Last: ".$vars[4].", atime: ".$vars[8].", count: ".$vars[9].", newdelta: $newdelta, ratio: $ratio, period: ".$self->{expiry_period});
 
   ## ESTIMATION PHASE
   #
@@ -292,21 +295,23 @@ sub expire_old_tokens_trapped {
   #
   # - last expire was more than 30 days ago
   #   assume mail flow stays roughly the same month to month, recompute if it's > 1 month
-  # - last atime delta was under 12hrs
+  # - last atime delta was under expiry period
   #   if we're expiring often max_db_size should go up, but let's recompute just to check
   # - last reduction count was < 1000 tokens
   #   ditto
-  # - new estimated atime delta is under 12hrs
+  # - new estimated atime delta is under expiry period
   #   ditto
   # - difference of last reduction to current goal reduction is > 50%
   #   if the two values are out of balance, estimating atime is going to be funky, recompute
   #
-  if ( (time() - $vars[4] > 86400*30) || ($vars[8] < 43200) || ($vars[9] < 1000)
-       || ($newdelta < 43200) || ($ratio > 1.5) ) {
+  if ( (time() - $vars[4] > 86400*30) || ($vars[8] < $self->{expiry_period}) || ($vars[9] < 1000)
+       || ($newdelta < $self->{expiry_period}) || ($ratio > 1.5) ) {
     dbg("bayes: Can't use estimation method for expiry, something fishy, calculating optimal atime delta (first pass)");
 
-    my $start = 43200; # exponential search starting at ...?  1/2 day, 1, 2, 4, 8, 16, ...
-    my $max_expire_mult = 512; # $max_expire_mult * $start = max expire time (256 days), power of 2.
+    my $start = $self->{expiry_period}; # exponential search starting at ...?  1/2 day, 1, 2, 4, 8, 16, ...
+    my $max_expire_mult = 2**$self->{expiry_max_exponent}; # $max_expire_mult * $start = max expire time (256 days), power of 2.
+
+    dbg("bayes: expiry max exponent: ".$self->{expiry_max_exponent});
 
     my %delta = $self->calculate_expire_delta($vars[10], $start, $max_expire_mult);
 
