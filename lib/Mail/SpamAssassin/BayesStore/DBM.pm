@@ -327,6 +327,7 @@ sub _upgrade_db {
 
   if ( $self->{db_version} < 2 ) {
     dbg ("bayes: upgrading database format from v".$self->{db_version}." to v2");
+    $self->set_running_expire_tok();
 
     my($DB_NSPAM_MAGIC_TOKEN, $DB_NHAM_MAGIC_TOKEN, $DB_NTOKENS_MAGIC_TOKEN);
     my($DB_OLDEST_TOKEN_AGE_MAGIC_TOKEN, $DB_LAST_EXPIRE_MAGIC_TOKEN);
@@ -377,11 +378,17 @@ sub _upgrade_db {
 
     # deal with the data tokens
     my ($tok, $packed);
+    my $count = 0;
     while (($tok, $packed) = each %{$self->{db_toks}}) {
       next if ($tok =~ /^(?:\*\*[A-Z]+$|\015\001\007\011\003)/); # skip magic tokens
 
       my ($ts, $th, $atime) = $self->tok_unpack ($packed);
       $new_toks{$tok} = $self->tok_pack ($ts, $th, $newatime);
+
+      # Refresh the lock every so often...
+      if (($count++ % 1000) == 0) {
+        $self->set_running_expire_tok();
+      }
     }
 
 
@@ -426,6 +433,8 @@ sub _upgrade_db {
   # Version 3 of the database converts all existing tokens to SHA1 hashes
   if ( $self->{db_version} == 2 ) {
     dbg ("bayes: upgrading database format from v".$self->{db_version}." to v3");
+    $self->set_running_expire_tok();
+
     my $DB_NSPAM_MAGIC_TOKEN		  = "\015\001\007\011\003NSPAM";
     my $DB_NHAM_MAGIC_TOKEN		  = "\015\001\007\011\003NHAM";
     my $DB_NTOKENS_MAGIC_TOKEN		  = "\015\001\007\011\003NTOKENS";
@@ -460,10 +469,16 @@ sub _upgrade_db {
     $new_toks{$LAST_EXPIRE_REDUCE_MAGIC_TOKEN} =$self->{db_toks}->{$DB_LAST_EXPIRE_REDUCE_MAGIC_TOKEN};
 
     # deal with the data tokens
+    my $count = 0;
     while (my ($tok, $packed) = each %{$self->{db_toks}}) {
       next if ($tok =~ /^\015\001\007\011\003/); # skip magic tokens
       my $tok_hash = substr(sha1($tok), -5);
       $new_toks{$tok_hash} = $packed;
+
+      # Refresh the lock every so often...
+      if (($count++ % 1000) == 0) {
+        $self->set_running_expire_tok();
+      }
     }
 
     # now untie so we can do renames
