@@ -810,12 +810,6 @@ body UNDESIRED_LANGUAGE_BODY		eval:check_language()
 describe UNDESIRED_LANGUAGE_BODY	Written in an undesired language
 tflags UNDESIRED_LANGUAGE_BODY          userconf
 
-body NIGERIAN_TRANSACTION_1   /\b(?:financial|confiden(?:tial|ce)|safe(?:ty)?|mutual|secret|success(?:ful)?|risk-?free|details).{1,30}\btransaction\b/i
-describe NIGERIAN_TRANSACTION_1       illegal Nigerian transactions (1)
-
-body NIGERIAN_TRANSACTION_2   /\btransaction\b.{1,30}\b(?:magnitude|diplomatic|strict|absolute|secret|confiden(?:tial|ce)|guarantee)/i
-describe NIGERIAN_TRANSACTION_2       illegal Nigerian transactions (2)
-
 body US_DOLLARS               /\b(?:\d{1,3})?Million\b.{0,40}\b(?:(?:United States?|Canadian) Dollar?s?|US(?:D|\$)|U\.? ?S\.? Dollar)/i
 describe US_DOLLARS           Nigerian scam key phrase (million dollars)
 
