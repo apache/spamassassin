@@ -9,7 +9,7 @@
 #
 # Please do not add unmoderated public mailing lists here.  They are
 # too easily abused by spammers.
-# $Id: 60_whitelist.cf,v 1.29 2002/09/04 18:36:50 jmason Exp $
+# $Id: 60_whitelist.cf,v 1.30 2002/09/06 14:38:41 matt_sergeant Exp $
 
 whitelist_from_rcvd  billing@networksolutions.com           networksolutions.com
 whitelist_from_rcvd  hostmaster@internic.net                internic.net
@@ -47,3 +47,15 @@ whitelist_from_rcvd  *enotify@usenix.org                    voyager.usenix.org
 whitelist_from_rcvd *@bdcimail.com                          mailcontrol.bellevuedata.com
 # internet.com lists
 whitelist_from_rcvd listsupport@internet.com                lyris.net
+
+# Silicon.com newslettters - we see thousands of these
+whitelist_from_rcvd *@silicon.com                           lists.nmtv.net
+
+# FT.com newsletters
+whitelist_from_rcvd *@newsbyemail.ft.com                    lodo.exactis.com
+
+# C|Net news.com newsletters
+whitelist_from_rcvd *@newsletter.online.com                 cnet.com
+
+# Friends re-united (popular UK old-school-network)
+whitelist_from_rcvd *@friendsreunited.co.uk                 friendsreunited.co.uk
