@@ -60,7 +60,7 @@ describe FAKED_UNDISC_RECIPS	Faked To "Undisclosed-Recipients"
 header TO_INVESTORS		To =~ /\bInvestors\@/
 describe TO_INVESTORS		To: non-existent 'Investors' address
 
-header FROM_MALFORMED		From !~ /(?:\"[^\"]+\"|\S+)\@\S+\.\S+|<\S+(?:\!\S+){1,}>/ [if-unset: unset@unset.unset]
+header FROM_MALFORMED		From !~ /(?:\"[^\"]+\"|\S+)\@\S+\.\S+|<\S+(?:\!\S+)+>/ [if-unset: unset@unset.unset]
 describe FROM_MALFORMED		From: has a malformed address
 
 header PLING_PLING		Subject =~ /!!!/
@@ -69,13 +69,13 @@ describe PLING_PLING		Subject has lots of exclamation marks
 header MANY_EXCLAMATIONS	Subject =~ /![^!]+!/
 describe MANY_EXCLAMATIONS	Subject has many exclamations
 
-header PLING_QUERY		Subject =~ /(?:\?.*!|!.*\?)/
+header PLING_QUERY		Subject =~ /\?.*!|!.*\?/
 describe PLING_QUERY		Subject has exclamation mark and question mark
 
 header SUBJ_HAS_UNIQ_ID		eval:check_for_unique_subject_id()
 describe SUBJ_HAS_UNIQ_ID	Subject contains a unique ID
 
-header SUBJ_HAS_SPACES		Subject =~ /(?:[ ]{6}|\t)\S/
+header SUBJ_HAS_SPACES		Subject =~ /(?: {6}|\t)\S/
 describe SUBJ_HAS_SPACES	Subject contains lots of white space
 
 header SUBJ_ENDS_IN_SPACE	Subject =~ /(?:[ ]{6}|\t)$/
@@ -425,7 +425,7 @@ header MANY_FROMS		From =~ /^[^\"\<\(]+, [^\"\<\(]+$/
 describe MANY_FROMS		'From' contains more than one address
 
 # *so* many spams come from here.
-header FROM_BTAMAIL		From =~ /\@btamail.net.cn/i
+header FROM_BTAMAIL		From =~ /\@btamail\.net\.cn/i
 describe FROM_BTAMAIL		From an address @btamail.net.cn
 
 header USER_IN_BLACKLIST	eval:check_from_in_blacklist()

@@ -15,7 +15,10 @@ describe HTTP_USERNAME_USED Uses a username in a URL
 uri HTTP_WITH_EMAIL_IN_URL  /^https?\:\/\/\S+=[-_\+a-z0-9\.]+\@[-_\+a-z0-9\.]+\.[-_\+a-z0-9]{2,3}(?:\&|\s)/
 describe HTTP_WITH_EMAIL_IN_URL 'remove' URL contains an email address
 
-uri HTTP_ESCAPED_HOST       /^https?\:\/\/[^\/]*%/
+# Theo sez:
+# Have gotten FPs off this, and whitespace can't be in the host, so...
+# %    Visit my homepage: http://i.like.foo.com %
+uri HTTP_ESCAPED_HOST       /^https?\:\/\/[^\/\s]*%/
 describe HTTP_ESCAPED_HOST      Uses %-escapes inside a URL's hostname
 
 # note: do not match \r or \n
