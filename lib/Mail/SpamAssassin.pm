@@ -243,16 +243,8 @@ sub new {
   if (!defined $self) { $self = { }; }
   bless ($self, $class);
 
-  # define debugging facilities first
-  $INFO = 0;
-  $DEBUG = 0;
-  if (defined $self->{debug} && ref($self->{debug}) eq "ARRAY") {
-    $facilities{$_} = 1 for @{ $self->{debug} };
-    # turn on informational notices
-    $INFO = 1 if keys %facilities;
-    # turn on debugging if facilities other than "info" are enabled
-    $DEBUG = keys %facilities && !(keys %facilities == 1 && $facilities{info});
-  }
+  # enable or disable debugging
+  Mail::SpamAssassin::_init_debugger(ref $self->{debug} eq 'ARRAY' ? @{ $self->{debug} } : ());
 
   # first debugging information possibly printed should be the version
   info("generic: SpamAssassin version ".Version());
@@ -280,6 +272,25 @@ sub new {
 
   $self;
 }
+
+# Do not use this routine in any 3rd-party scripts, it's not part of the
+# official public API!  spamd needs it though.
+#
+# Enables or disables debugging based on the facilities given.  This will
+# affect ALL SpamAssassin objects!
+sub _init_debugger {
+  # define debugging facilities first
+  $INFO = 0;
+  $DEBUG = 0;
+  if (@_) {
+    $facilities{$_} = 1 for @_;
+    # turn on informational notices
+    $INFO = 1 if keys %facilities;
+    # turn on debugging if facilities other than "info" are enabled
+    $DEBUG = keys %facilities && !(keys %facilities == 1 && $facilities{info});
+  }
+}
+
 
 sub create_locker {
   my ($self) = @_;
