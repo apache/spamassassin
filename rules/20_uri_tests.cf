@@ -35,10 +35,10 @@ describe HTTP_ESCAPED_HOST	Uses %-escapes inside a URL's hostname
 uri HTTP_CTRL_CHARS_HOST	/^https?\:\/\/[^\/\s]*[\x00-\x08\x0b\x0c\x0e-\x1f]/
 describe HTTP_CTRL_CHARS_HOST	Uses control sequences inside a URL hostname
 
-# look for URI with escaped 0-9, A-Z, or a-z characters (other safe
-# characters are sometimes unnecessarily escaped in nonspam; requiring
-# "http" or "https" reduces false positives)
-uri HTTP_EXCESSIVE_ESCAPES	/^https?:\/\/\S*%(?:3[0-9]|[46][1-9a-f]|[57][\da])/i
+# look for URI with escaped 0-9, A-Z, or a-z characters (all other safe
+# characters have been well-tested, but are sometimes unnecessarily escaped
+# in nonspam; requiring "http" or "https" also reduces false positives).
+uri HTTP_EXCESSIVE_ESCAPES	/^https?:\/\/\S*%(?:3\d|[46][1-9a-f]|[57][\da])/i
 describe HTTP_EXCESSIVE_ESCAPES	Completely unnecessary %-escapes inside a URL
 
 # thx to vince.delvecchio@analog.com for the legwork on the negative
@@ -81,8 +81,8 @@ describe JAVASCRIPT_URI		Javascript protocol in a URI
 uri WEIRD_PORT			m{https?://[^/\s]+?:\d+(?<!:80)(?<!:443)(?<!:8080)(?:/|\s|$)}
 describe WEIRD_PORT		Uses non-standard port number for HTTP
 
-# looks for a username and (optional) password in an url
-uri USERPASS                    m{https?://[^/\s]+?(?::[^/\s]+?)?\@}
+# looks for a (maybe empty) username and (optional) password in an url
+uri USERPASS			m{https?://[^/\s]*?(?::[^/\s]+?)?\@}
 describe USERPASS               URL contains username and (optional) password
 
 uri URI_IS_POUND		m{\#$}
@@ -113,8 +113,11 @@ uri URI_PXLG			m{http://(?:www\.)?pxlg\.com}i
 describe URI_PXLG		Frequent Spam Content
 
 # this is actually effective.  What are they doing over there?
-uri BZ_TLD			/^http:\/\/[^\/]+\.bz(?:\/|$)/i
+uri BZ_TLD			/^(?:https?:\/\/|mailto:)[^\/]+\.bz(?:\/|$)/i
 describe BZ_TLD			Contains a URL in the BZ top-level domain    
+
+uri BIZ_TLD			/^(?:https?:\/\/|mailto:)[^\/]+\.biz(?:\/|$)/i
+describe BIZ_TLD		Contains a URL in the BIZ top-level domain    
 
 # Matt Cline
 # Pretty good for most folks, except for jm: I have a really stupid
@@ -134,3 +137,5 @@ describe YAHOO_REDIR		Has Yahoo Redirect URI
 uri MORTGAGE_LINKS		/(?:^https?\:\/\/|^mailto\:).{0,20}(?:low|about)mortgage/i
 describe MORTGAGE_LINKS		Message has link to mortgage URI
 
+uri URI_OFFERS			m/offer([sz]|-\S+)?\.(?:com|bi?z)/i
+describe URI_OFFERS		Message has link to company offers
