@@ -278,6 +278,17 @@ header T_SUSPECT_RECIPIENTS_3	eval:check_for_suspect_recipients('4','5')
 header T_SUSPECT_RECIPIENTS_4	eval:check_for_suspect_recipients('5','6')
 header T_SUSPECT_RECIPIENTS_5	eval:check_for_suspect_recipients('6','undef')
 
+# a few random rules
+header T_RATWARE_MASS_SENDER		X-Mailer =~ /Advanced Mass Sender/i
+header T_RATWARE_DIRECT_EMAIL		X-Mailer =~ /Direct Email/i
+header T_RATWARE_MAILWORKZ		X-Mailer =~ /\bMailWorkZ\b/i
+header T_X_BULKMAIL			exists:X-Bulkmail
+
+# possible additions to NIGERIA rules
+body T_SCAM_419_1		/MOHAMMED(?:\.|=2e)?\s?ABACHA/i
+body T_SCAM_419_2		/(?:government|bank) of nigeria/i
+body T_SCAM_419_3		/nigerian? (?:national|government)/i
+
 # bug 710
 # 12/23 - tvd - works well for quinlan, not for anyone else
 # quinlan      0.182   0.4683   0.0000    1.000   0.93    0.01  T_WINNER
