@@ -122,8 +122,8 @@ describe RCVD_IN_RSS		Received via RSS-listed relay, see http://www.mail-abuse.o
 header RCVD_IN_DUL		eval:check_rbl('dialups.mail-abuse.org.')
 describe RCVD_IN_DUL		Received from a dialup IP, see http://www.mail-abuse.org/dul/
 
-header RCVD_IN_RELAYS_ORBS_ORG	eval:check_rbl('relays.orbs.org.')
-describe RCVD_IN_RELAYS_ORBS_ORG Received via a relay in relays.orbs.org
+header RCVD_IN_RELAYS_ORDB_ORG	eval:check_rbl('relays.ordb.org.')
+describe RCVD_IN_RELAYS_ORDB_ORG Received via a relay in relays.ordb.org
 
 header FORGED_RCVD_FOUND	ALL =~ /\n(?:Date|Subject|From):.*\nReceived: .*\n\n/s
 describe FORGED_RCVD_FOUND	Possibly-forged 'Received:' header found
@@ -209,6 +209,9 @@ body TRACKER_ID			/^\s*\W{4,} \w{10,} \W{4,}\s*$/
 body OPPORTUNITY		/OPPORTUNITY/
 body PURE_PROFIT		/PURE PROFIT/
 
+body FREE_CONSULTATION		/FREE CONSULTATION/i
+body INCREASE_SALES		/INCREASE SALES/i
+
 ###########################################################################
 # some full-text matches; note the [3D=\s"']* bits of the patterns, which
 # match some gibberish produced by quoted-printable encoding of HTML, often
@@ -217,9 +220,10 @@ body PURE_PROFIT		/PURE PROFIT/
 full CLICK_HERE_LINK		/click here.{0,100}<\/a>/is
 full A_HREF_TO_IP		/href[3D=\s\"\']*http:\/\/\d+\.\d+\.\d+\.\d+\:?\d*\//is
 full MAILTO_LINK		/=[3D=\s"']*mailto:/is
-full MAILTO_WITH_SUBJ_REMOVE	/=mailto:\S+\?subject=[3D=\s"']*remove/is
-full MAILTO_WITH_SUBJ		/=mailto:\S+\?subject=/is
+full MAILTO_WITH_SUBJ_REMOVE	/mailto:\S+\?subject=[3D=\s"']*remove/is
+full MAILTO_WITH_SUBJ		/mailto:\S+\?subject=/is
 full FORM_W_MAILTO_ACTION	/action=[3D=\s"']*mailto:/is
+full AOL_USERS_LINK		/AOL\s+Users\s+Click\s+Here/is
 
 ###########################################################################
 # Compensation for common false positives.
