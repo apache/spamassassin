@@ -17,9 +17,23 @@ report This mail is probably spam.  The original message has been attached
 report along with this report, so you can recognize or block similar unwanted
 report mail in future.  See http://spamassassin.org/tag/ for more details.
 report 
+report Content preview:  _PREVIEW_
+report 
 report Content analysis details:   (_HITS_ hits, _REQD_ required)
 report _SUMMARY_
 #      ......................................................................
+
+###########################################################################
+
+# Terse report template.
+#
+#            ......................................................................
+clear-terse-report-template
+terse-report ---- Start SpamAssassin results
+terse-report _HITS_ hits, _REQD_ required;
+terse-report _SUMMARY_
+terse-report ---- End of SpamAssassin results
+#            ......................................................................
 
 ###########################################################################
 # and now, a template for spam-trap responses.  If the first few lines
@@ -45,18 +59,6 @@ spamtrap the correct address.  Sorry for the inconvenience!
 spamtrap 
 spamtrap [-- Signed: the SpamAssassin mail filter]
 spamtrap 
-
-###########################################################################
-
-# Terse report template.
-#
-#            ......................................................................
-clear-terse-report-template
-terse-report ---- Start SpamAssassin results
-terse-report _HITS_ hits, _REQD_ required;
-terse-report _SUMMARY_
-terse-report ---- End of SpamAssassin results
-#            ......................................................................
 
 ###########################################################################
 
