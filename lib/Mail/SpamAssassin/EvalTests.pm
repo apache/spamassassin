@@ -1188,6 +1188,14 @@ sub check_for_yelling {
   # Make local copy of lines in the body that have some non-letters
     my @lines = grep(/[^A-Za-z]/, @{$body});
 
+  # Try to eliminate lines which might be newsletter section headers,
+  # which are often in all caps; we do this by removing most lines
+  # that start with whitespace.  However, some spam will match
+  # this as well, so keep lines which have "!" or "$$" (spam often
+  # has a yelling line indent with spaces, but surround by dollar
+  # signs), or a "." which appears to end a sentence.
+  @lines = grep(/^\S|!|\$\$|\.(?:\s|$)/, @lines);
+
   # Get rid of everything but upper AND lower case letters
     map (s/[^A-Za-z \t]//sg, @lines);
 
