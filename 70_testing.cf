@@ -416,78 +416,25 @@ uri T_URI_3896_36	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{8,}\.biz\/\S{25,}/i
 
 ########################################################################
 
-# bug 2863
-uri T_URI_PARSE_BUG       /(?:\%0[01]|\0).*\@/
-
-# not too bad
-header T_MSGID_MULTIPLE_AT	MESSAGEID =~ /<[^>]*\@[^>]*\@/
-
-########################################################################
-
 # long message IDs, what else?
-header T_MSGID_LONG_120		MESSAGEID =~ /<.{120,}>/m
-header T_MSGID_LONG_125		MESSAGEID =~ /<.{125,}>/m
-header T_MSGID_LONG_130		MESSAGEID =~ /<.{130,}>/m
-header T_MSGID_LONG_135		MESSAGEID =~ /<.{135,}>/m
-header T_MSGID_LONG_140		MESSAGEID =~ /<.{140,}>/m
-header T_MSGID_LONG_145		MESSAGEID =~ /<.{145,}>/m
-header T_MSGID_LONG_150		MESSAGEID =~ /<.{150,}>/m
-header T_MSGID_LONG_155		MESSAGEID =~ /<.{155,}>/m
-header T_MSGID_LONG_160		MESSAGEID =~ /<.{160,}>/m
-header T_MSGID_LONG_165		MESSAGEID =~ /<.{165,}>/m
-header T_MSGID_LONG_170		MESSAGEID =~ /<.{170,}>/m
-header T_MSGID_LONG_175		MESSAGEID =~ /<.{175,}>/m
-header T_MSGID_LONG_180		MESSAGEID =~ /<.{180,}>/m
-header T_MSGID_LONG_185		MESSAGEID =~ /<.{185,}>/m
-header T_MSGID_LONG_190		MESSAGEID =~ /<.{190,}>/m
-header T_MSGID_LONG_195		MESSAGEID =~ /<.{195,}>/m
-header T_MSGID_LONG_200		MESSAGEID =~ /<.{200,}>/m
-
-header T_MSGID_LONG_LP_100	MESSAGEID =~ /<.{100,}\@/m
-header T_MSGID_LONG_LP_105	MESSAGEID =~ /<.{105,}\@/m
-header T_MSGID_LONG_LP_110	MESSAGEID =~ /<.{110,}\@/m
-header T_MSGID_LONG_LP_115	MESSAGEID =~ /<.{115,}\@/m
-header T_MSGID_LONG_LP_120	MESSAGEID =~ /<.{120,}\@/m
-header T_MSGID_LONG_LP_125	MESSAGEID =~ /<.{125,}\@/m
-header T_MSGID_LONG_LP_130	MESSAGEID =~ /<.{130,}\@/m
-header T_MSGID_LONG_LP_135	MESSAGEID =~ /<.{135,}\@/m
-header T_MSGID_LONG_LP_140	MESSAGEID =~ /<.{140,}\@/m
-header T_MSGID_LONG_LP_145	MESSAGEID =~ /<.{145,}\@/m
-header T_MSGID_LONG_LP_150	MESSAGEID =~ /<.{150,}\@/m
-
-header T_MSGID_LONG_D_45	MESSAGEID =~ /\@.{45,}>/m
-header T_MSGID_LONG_D_50	MESSAGEID =~ /\@.{50,}>/m
-header T_MSGID_LONG_D_55	MESSAGEID =~ /\@.{55,}>/m
-header T_MSGID_LONG_D_60	MESSAGEID =~ /\@.{60,}>/m
-header T_MSGID_LONG_D_65	MESSAGEID =~ /\@.{65,}>/m
-header T_MSGID_LONG_D_70	MESSAGEID =~ /\@.{70,}>/m
-header T_MSGID_LONG_D_75	MESSAGEID =~ /\@.{75,}>/m
-header T_MSGID_LONG_D_80	MESSAGEID =~ /\@.{80,}>/m
-header T_MSGID_LONG_D_85	MESSAGEID =~ /\@.{85,}>/m
-header T_MSGID_LONG_D_90	MESSAGEID =~ /\@.{90,}>/m
-header T_MSGID_LONG_D_95	MESSAGEID =~ /\@.{95,}>/m
-header T_MSGID_LONG_D_100	MESSAGEID =~ /\@.{100,}>/m
-header T_MSGID_LONG_D_105	MESSAGEID =~ /\@.{105,}>/m
-header T_MSGID_LONG_D_110	MESSAGEID =~ /\@.{110,}>/m
-header T_MSGID_LONG_D_115	MESSAGEID =~ /\@.{115,}>/m
-header T_MSGID_LONG_D_120	MESSAGEID =~ /\@.{120,}>/m
-header T_MSGID_LONG_D_125	MESSAGEID =~ /\@.{125,}>/m
-header T_MSGID_LONG_D_130	MESSAGEID =~ /\@.{130,}>/m
-header T_MSGID_LONG_D_135	MESSAGEID =~ /\@.{135,}>/m
-header T_MSGID_LONG_D_140	MESSAGEID =~ /\@.{140,}>/m
-header T_MSGID_LONG_D_145	MESSAGEID =~ /\@.{145,}>/m
-header T_MSGID_LONG_D_150	MESSAGEID =~ /\@.{150,}>/m
+header T_MSGID_LONG_130_110_55	MESSAGEID =~ /<.{130,}>|<.{110,}\@|\@.{55,}>/m
+header T_MSGID_LONG_140_120_55	MESSAGEID =~ /<.{140,}>|<.{120,}\@|\@.{55,}>/m
+header T_MSGID_LONG_150_130_55	MESSAGEID =~ /<.{150,}>|<.{130,}\@|\@.{55,}>/m
+header T_MSGID_LONG_160_140_55	MESSAGEID =~ /<.{160,}>|<.{140,}\@|\@.{55,}>/m
+header T_MSGID_LONG_130_110_60	MESSAGEID =~ /<.{130,}>|<.{110,}\@|\@.{60,}>/m
+header T_MSGID_LONG_140_120_60	MESSAGEID =~ /<.{140,}>|<.{120,}\@|\@.{60,}>/m
+header T_MSGID_LONG_150_130_60	MESSAGEID =~ /<.{150,}>|<.{130,}\@|\@.{60,}>/m
+header T_MSGID_LONG_160_140_60	MESSAGEID =~ /<.{160,}>|<.{140,}\@|\@.{60,}>/m
 
 # bug 2563: false positives
 body T_BODY_ENHANCEMENT		/\b(?:enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b|\binches\b).{0,50}\b(?:penis|male organ|pee[ -]?pee|dick|sc?hlong|wh?anger|breast(?!\s+cancer))/i
 body T_BODY_ENHANCEMENT2		/\b(?:penis|male organ|pee[ -]?pee|dick|sc?hlong|wh?anger|breast(?!\s+cancer)).{0,50}\b(?:enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b|\binches\b)/i
 
-
+# remove evals if these aren't promoted
 header T_UNPARSEABLE_RELAY  eval:check_relays_unparseable()
-
+#
 header T_NO_RELAYS      eval:check_no_relays()
 tflags T_NO_RELAYS      nice
-
+#
 header __NO_RCVD        exists:Received
 tflags T_NO_RCVD        (!__NO_RCVD)
-
