@@ -198,7 +198,7 @@ sub razor_lookup {
 
   if ($@) {
     if ($@ =~ /alarm/) {
-      warn "razor check timed out after $timeout secs.\n";
+      dbg ("razor check timed out after $timeout secs.");
     } else {
       warn ("razor check skipped: $! $@");
     }
