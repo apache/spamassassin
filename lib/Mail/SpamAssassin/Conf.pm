@@ -991,22 +991,6 @@ Select the locales to allow from the list below:
 
 =head2 NETWORK TEST OPTIONS
 
-=over 4
-
-=item spamcop_max_report_size		(default: 50)
-
-The size (in kilobytes) at which SpamAssassin will truncate messages
-reported to SpamCop.  The default is the maximum size SpamCop will
-accept at the time of release.
-
-=cut
-
-  push (@cmds, {
-    setting => 'spamcop_max_report_size',
-    default => 50,
-    type => $CONF_TYPE_NUMERIC
-  });
-
 =item trusted_networks ip.add.re.ss[/mask] ...   (default: none)
 
 What networks or hosts are 'trusted' in your setup.  B<Trusted> in this case
