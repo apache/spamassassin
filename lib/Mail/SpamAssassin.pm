@@ -94,7 +94,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.178 2003/03/03 19:58:52 felicity Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.179 2003/03/17 18:22:33 quinlan Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -849,7 +849,9 @@ sub remove_spamassassin_markup {
       if ( $msg[$i] =~ /^\s*$/ ) {    # end of mime header
 
         # Ok, we found the encapsulated piece ...
-        if ( $ct eq "message/rfc822" && $cd eq $self->{'encapsulated_content_description'} )
+	if ($ct =~ m@(?:message/rfc822|text/plain);\s+x-spam-type=original@ ||
+	    ($ct eq "message/rfc822" &&
+	     $cd eq $self->{'encapsulated_content_description'}))
         {
           splice @msg, 1, $i;
             ;    # remove the front part, leave the 'From ' header.
@@ -876,7 +878,7 @@ sub remove_spamassassin_markup {
 
       # Ok, we're in the mime header ...  Capture the appropriate headers...
       $flag = 1;
-      if ( $msg[$i] =~ /^Content-Type:\s+(\S+)/i ) {
+      if ( $msg[$i] =~ /^Content-Type:\s+(.+?)\s*$/i ) {
         $ct = $1;
       }
       elsif ( $msg[$i] =~ /^Content-Description:\s+(.+?)\s*$/i ) {
