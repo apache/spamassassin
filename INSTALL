@@ -334,13 +334,14 @@ skipped.
 
     You might want to replace the configure call with something like this to
     get an FHS compliant install:
+
 	./configure \
 	    --bindir=$(PREFIX)/bin \
             --libexecdir=$(PREFIX)/lib/dcc \
             --mandir=$(PREFIX)/man \
             --homedir=/var/lib/dcc
 
-    Finally call cdcc::
+    Finally call cdcc:
 
 	cdcc info
 
@@ -351,9 +352,24 @@ skipped.
 	dcc2.dcc-servers.net,-         RTT+0 ms    anon
 	...
 
+    There should be *at least one*, preferably more than half a dozen, of
+    the public DCC servers listed.  If this is not the case, a likely
+    cause is an interfering firewall (see below).
+
     Note that MIMEDefang users may need to set the 'dcc_path'
     configuration setting, since MIMEDefang does not set a PATH by
     default. See also 'perldoc Mail::SpamAssassin::Conf'.
+
+    Also note that DCC requires that you open your firewall for DCC reply
+    packets on UDP port 6277.   Here's sample firewall rules required:
+
+      allow udp local gt 1023 to remote 6277
+      allow udp remote 6277 to local gt 1023
+
+    If you're running a large site, processing upwards of tens of
+    thousands of messages a day, the DCC maintainers have requested that
+    you consider setting up your own DCC server as described in dccd(8),
+    and arrange to peer with the rest of the public servers.
 
 
   - Pyzor           http://pyzor.sourceforge.net/
