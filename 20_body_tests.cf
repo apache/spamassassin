@@ -247,7 +247,7 @@ body PORN_2			/\bwild\b.{0,15}\bhard[ -]?core\b/i
 describe PORN_2			Uses words and phrases which indicate porn (2)
 
 # updated by: skod & Craig & jm
-body PORN_3			/(?:lolita|cum|org[iy]|wild|fuck|teen|action|spunk|puss|suck|hot|voyeur|le[sz]b|anal|interracial|asian|amateur|sex|slut|explicit|xxx|live|celebrity|lick|suck|dorm|webcam|ass|schoolgirl|strip|horn|erotic|oral|penis|hardcore|blow|nast|porn)/i and /(?:(?:\blolita|\bcum|\borg[iy]|\bwild|fuck|\bteen|\baction\b|spunk|\bpussy\b|\bpussies\b|suck\b|sucking\b|\bhot\b|\bhottest\b|\bvoyeur|\ble[sz]b(?:ian|o)|\banal\b|\binterracial|\basian\b|\bamateur|\bsex+\b|\bslut|explicit|(?:[^x]|\b)xxx(?:[^x]|\b)|\blive\b|celebrity|\blick|\bsuck|\bdorm\b|webcam|\bass\b|\bschoolgirl\b|\bstrip|\bhorny\b|\bhorniest\b|\berotic|\boral\b|\bpenis\b|\bhardcore\b|\bblow[ -]*job|\bnast(?:y|iest)\b|\bporn).{0,15}){3,}/i
+body PORN_3			/(?:(?:\blolita|\bcum|\borg[iy]|\bwild|fuck|\bteen|\baction\b|spunk|\bpussy\b|\bpussies\b|suck\b|sucking\b|\bhot\b|\bhottest\b|\bvoyeur|\ble[sz]b(?:ian|o)|\banal\b|\binterracial|\basian\b|\bamateur|\bsex+\b|\bslut|explicit|(?:[^x]|\b)xxx(?:[^x]|\b)|\blive\b|celebrity|\blick|\bsuck|\bdorm\b|webcam|\bass\b|\bschoolgirl\b|\bstrip|\bhorny\b|\bhorniest\b|\berotic|\boral\b|\bpenis\b|\bhardcore\b|\bblow[ -]*job|\bnast(?:y|iest)\b|\bporn|\bwhore|\bsex[ -]?fest|\bnaked|\bnude|\bvirgin|\bnaughty\b|\bnaughtiest\b|\bgirls\b|\bcelebs?\b|\bbabes\b|\badult\b|\bskank|\btits\b|\btitties\b).{0,15}){3,}/i
 describe PORN_3			Uses words and phrases which indicate porn (3)
 
 # (contrib: skod)
@@ -265,12 +265,12 @@ body     PORN_9                 /(?:sex|gay|slut|whore|cum|f.ck|adult|xxx)[ -]?f
 describe PORN_9                 Uses words and phrases which indicate porn (9)
 
 # Words which mainly show up in porn spam
-body     PORN_10                /\blolita|\bslut|\bwhore|(?:[^x]|\b)xxx(?:[^x]|\b)|\bporn|\b(?:Asian|Japanese|oriental)\s+(?:girls|schoolgirls)\b|\bbabes\b|gang[ -]?bang|\bskank|\btits\b|\btitties\b|\bpussy\b|\bpussies\b/i
+body     PORN_10                /\blolita|\bslut|\bwhore|(?:[^x]|\b)xxx(?:[^x]|\b)|\bporn|\b(?:Asian|Japanese|oriental)\s+(?:girls|schoolgirls)\b|\bbabes\b|gang[ -]?bang|\bskank|\btits\b|\btitties\b|\bpussy\b|\bpussies\b|\bbi(?!-)\b|free pics/i
 describe PORN_10                Uses words and phrases which indicate porn (10)
 
 # Words which often show up in spam, but also show up somewhat often in
 # non-spam
-body     PORN_11                /hard[ -]?core|web[ -]?cam/i
+body     PORN_11                /hard[ -]?core|web[ -]?cam|amateur/i
 describe PORN_11                Uses words and phrases which indicate porn (11)
 
 # Like PORN_3, but it only needs to match two terms intead of three. To
@@ -282,6 +282,10 @@ describe PORN_12                Uses words and phrases which indicate porn (12)
 
 body     PORN_13                /must be (?:at least|over) 18/i
 describe PORN_13                Uses words and phrases which indicate porn (13)
+
+# Like PORN_11, but phrases which are *really* likely to show up in non-porn
+body     PORN_14                /\bpics\b|years? old|\bmy name'?s|\bmy name is/i
+describe PORN_14               Uses words and phrases which indicate porn (14)
 
 body SEXY_PICS                  /sexy pictures/i
 describe SEXY_PICS              Sexy pictures
