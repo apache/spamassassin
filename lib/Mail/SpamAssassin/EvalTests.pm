@@ -3285,4 +3285,41 @@ sub check_numeric_http {
 
 ###########################################################################
 
+sub check_host_domain_ratio {
+  my ($self, undef, $min, $totalmin) = @_;
+
+  return 0 unless $min;
+
+  my %hash=();
+  my $total = 0;
+
+  for my $uri ($self->get_uri_list()) {
+    next if ($uri =~ /^mailto:/i);     # not mailto's, please (TODO?)
+
+    # Javascript is not going to help us, so return.
+    next if ($uri =~ /^javascript:/i);
+
+    $uri =~ s,#.*$,,gs;                   # drop fragment
+    $uri =~ s#^[a-z]+:/{0,2}##gsi;        # drop the protocol
+    $uri =~ s,^[^/]*\@,,gs;               # username/passwd
+    $uri =~ s,[/\?\&].*$,,gs;             # path/cgi params
+    $uri =~ s,:\d+$,,gs;                  # port
+
+    next if $uri =~ /\%/;         # skip undecoded URIs.
+
+    $total++;
+    my($host,$domain) = Mail::SpamAssassin::Util::RegistrarBoundaries::split_domain($uri);
+    $hash{$domain}->{$host}++;
+  }
+
+  return 0 unless ($total >= $totalmin);
+
+  for my $domain (keys %hash) {
+    my $dt = values %{$hash{$domain}};
+    return 1 if (100*$dt/$total >= $min);
+  }
+
+  return 0;
+}
+
 1;
