@@ -476,6 +476,8 @@ header T_SB_23_7_6_25_180 eval:check_rbl_sub('senderbase', 'S23 > 7.6 && (time -
 # jm: IMO, we should come up with a new way to test *just* the URIs in RHSBL
 # style, it would be *much* more efficient than doing NS and A lookups, and
 # would be harder for spammers to evade.
+# quinlan: it's practically a requirement for this blacklist:
+#   0.113   0.2091   0.0000    1.000   0.93    0.01  T_URIBL_SC_SURBL
 ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
 
 uridnsbl_timeout 2
