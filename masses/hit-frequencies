@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 
 use Getopt::Std;
-getopts("fm:px");
+getopts("fm:pxh");
 
 sub usage {
   die "hit-frequencies [-f] [-m RE] [-p] [-x] [spam log] [nonspam log]
@@ -16,6 +16,8 @@ sub usage {
 
 ";
 }
+
+usage() if($opt_h);
 
 if ($opt_p) {
   $opt_x = 1;
@@ -94,7 +96,7 @@ foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
   my $fn = $freq_nonspam{$test}; $fn ||= 0;
   my $fa = $fs+$fn;
 
-  next if ($opt_m && $test !~ m/$opt_m/);	# match certain tests
+  next if ($opt_m && $test !~ m/$opt_m/i);	# match certain tests
   next if ($tflags{$test} =~ /net/);		# ignore net tests
 
   # adjust based on corpora sizes (and cvt to % while we're at it)
