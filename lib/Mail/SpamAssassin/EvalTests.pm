@@ -2079,6 +2079,7 @@ sub check_for_fake_aol_relay_in_rcvd {
   # there's another set of spammers who generate fake hostnames to go with
   # it!
   if (/ rly-[a-z][a-z]\d\d\./i) {
+    return 0 if /\/AOL-\d+\.\d+\.\d+\)/;    # via AOL mail relay
     return 0 if /ESMTP id (?:RELAY|MAILRELAY|MAILIN)/; # AOLish
     return 1;
   }
@@ -2089,6 +2090,11 @@ sub check_for_fake_aol_relay_in_rcvd {
 # non: Received: from  rly-xj02.mx.aol.com (rly-xj02.mail.aol.com [172.20.116.39]) by
 #    omr-r05.mx.aol.com (v83.35) with ESMTP id RELAYIN7-0501132011; Wed, 01
 #    May 2002 13:20:11 -0400
+
+# non: Received: from logs-tr.proxy.aol.com (logs-tr.proxy.aol.com [152.163.201.132])
+#    by rly-ip01.mx.aol.com (8.8.8/8.8.8/AOL-5.0.0)
+#    with ESMTP id NAA08955 for <sapient-alumni@yahoogroups.com>;
+#    Thu, 4 Apr 2002 13:11:20 -0500 (EST)
 
   return 0;
 }
