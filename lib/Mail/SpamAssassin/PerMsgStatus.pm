@@ -728,9 +728,13 @@ sub get_decoded_body_text_array {
 #   href = 'foo.htm'
 #   href = ' foo.htm '
 #
-# and such.  Have to deal with all of it
+# and such.  Have to deal with all of it.
 #
-my $URI_in_tag = qr/\s*=\s*["']?\s*([^'">\s]*)\s*["']?[^>]*/;
+# Also, mail with non-Quoted-Printable encoding might still have the
+# "=3D" obfuscation trick, since many email clients will decode
+# QP escape codes regardless of where and when they occur.
+#
+my $URI_in_tag = qr/\s*=(?:3[Dd])?\s*["']?\s*([^'">\s]*)\s*["']?[^>]*/;
 
 sub get_decoded_stripped_body_text_array {
   my ($self) = @_;
