@@ -1,5 +1,13 @@
 # SpamAssassin sample procmailrc
-#
+# ==============================
+
+# The following line is only used if you use a system-wide /etc/procmailrc.
+# See procmailrc(5) for infos on what it exactly does, the short version:
+#  * It ensures that the correct user is passed to spamd if spamc is used
+#  * The folders the mail is filed to later on is owned by the user, not
+#    root.
+DROPPRIVS=yes
+
 # Pipe the mail through spamassassin (replace 'spamassassin' with 'spamc'
 # if you use the spamc/spamd combination)
 #
