@@ -847,9 +847,6 @@ sub html_tests {
   if ($tag eq "form" && exists $attr->{action}) {
     $self->{html}{form_action_mailto} = 1 if $attr->{action} =~ /mailto:/i
   }
-  if ($tag =~ /^i?frame$/) {
-    $self->{html}{relaying_frame} = 1;
-  }
   if ($tag =~ /^(?:object|embed)$/) {
     $self->{html}{embeds} = 1;
   }

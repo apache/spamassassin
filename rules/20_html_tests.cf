@@ -192,11 +192,6 @@ describe HTML_ATTR_BAD		HTML has many bad attributes in tags
 body HTML_ATTR_UNIQUE		eval:html_range('attr_unique_bad','0.5','1.0')
 describe HTML_ATTR_UNIQUE	HTML appears to have random attributes in tags
 
-# many spammers seem to do this nowadays (and probably track
-# their customers with it).  (contrib: WW)
-body HTML_RELAYING_FRAME	eval:html_test('relaying_frame')
-describe HTML_RELAYING_FRAME	Frame wanted to load outside URL
-
 body HTML_WEB_BUGS		eval:html_test('web_bugs')
 describe HTML_WEB_BUGS		Image tag intended to identify you
 
