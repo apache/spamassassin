@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.502 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.503 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -415,6 +415,17 @@ describe	T_RAVAGESOFAGING	Describes the ravages of aging
 
 body		T_BETTERMEMORY		/Better Memory/i
 describe	T_BETTERMEMORY		Describes "better memory"
+
+# idea from Robert Menschel <RMSA@Menschel.net>
+header T_FROM_MIXED_ALPHANUM_01	From:addr =~ /[a-z]+\d+[a-z]+\d+[a-z]+\@/i
+header T_FROM_MIXED_ALPHANUM_02	From:addr =~ /\d+[a-z]+\d+[a-z]+\d+\@/i
+header T_FROM_MIXED_ALPHANUM_03	From:addr =~ /^[a-z]+\d+[a-z]+\d+[a-z]+\@/i
+header T_FROM_MIXED_ALPHANUM_04	From:addr =~ /\d+\D+\d+\D+\d+\@/i
+header T_FROM_MIXED_ALPHANUM_05	From:addr =~ /^[a-z]+\d+[a-z]+\d+[a-z]+.*\@/i
+header T_FROM_MIXED_ALPHANUM_06	From:addr =~ /[a-z]+\d+[a-z]+\d+[a-z]+\w*\@/i
+header T_FROM_MIXED_ALPHANUM_07	From:addr =~ /\d+[a-z]+\d+[a-z]+\d+\w*\@/i
+header T_FROM_MIXED_ALPHANUM_08	From:addr =~ /^[a-z]+\d+[a-z]+\d+[a-z]+\w*\@/i
+header T_FROM_MIXED_ALPHANUM_09	From:addr =~ /\d+\D+\d+\D+\d+\w*\@/i
 
 # bug 1922:
 body __NIGERIAN_BODY_43         /\blate .{0,15}(?:father|wife|husband|general|president|daughter|son|minister).{0,20}(?:wealthy|treasure|deposit|money|left|property|known|\$|US)/i
