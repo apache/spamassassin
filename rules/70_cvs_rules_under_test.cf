@@ -175,20 +175,6 @@ describe T_HTTP_ENTITIES_HOST URI obscured with character entities
 uri      T_HTTP_EXCESSIVE_ENTITIES m{^https?://\S*\&\#(?:0?3[0-9]|0?[46][1-9a-f]|0?[57][\da])}i
 describe T_HTTP_EXCESSIVE_ENTITIES Completely unnecessary %-escapes inside a URL
 
-# bug 1561
-# stronger version of USER_AGENT_APPLEMAIL
-# Apple Mail doesn't send text/html at all (unless it's an attachment)
-# It'll send text/plain, or multipart/alternative with text/plain and text/enriched parts (boundary of
-# "Apple-Mail-\d--\d+").  It can, however, send a multipart/mixed with a single text/html attachment, so
-# don't use MIME_HTML_ONLY.
-# perhaps limit CTYPE to "text/plain", "multipart/alternative" with "text/plain" and "text/enhanced", or
-# "multipart/mixed"?
-header __X_MAILER_APPLEMAIL	X-Mailer	=~ /^Apple Mail \(\d\.\d+\)$/
-header __MSGID_APPLEMAIL	Message-Id	=~ /^<[0-9A-F]{8}-(?:[0-9A-F]{4}-){3}[0-9A-F]{12}\@\S+>$/
-header __MIME_VERSION_APPLEMAIL	Mime-Version	=~ /^1\.0 \(Apple Message framework v\d+\)$/
-meta T_USER_AGENT_APPLEMAIL	!__CTYPE_HTML && __X_MAILER_APPLEMAIL && ( __MSGID_APPLEMAIL || __MIME_VERSION_APPLEMAIL )
-meta T_FORGED_MUA_APPLEMAIL	__X_MAILER_APPLEMAIL && !T_USER_AGENT_APPLEMAIL
-
 ###########################################################################
 
 # tvd - 2003.02.26, trying to strengthen the anti-ratware rules
@@ -209,6 +195,7 @@ meta T_USER_AGENT_PINE		__USER_AGENT_PINE && !T_FORGED_USER_AGENT
 #  snprintf (buf, sizeof (buf), "<%d%02d%02d%02d%02d%02d.G%c%d@%s>",
 meta __T_USER_AGENT_MUTT	__USER_AGENT_MUTT && __VALID_MUTT_MSGID
 meta T_USER_AGENT_MUTT		__T_USER_AGENT_MUTT && !T_FORGED_USER_AGENT
+meta T_FORGED_MUA_MUTT		__USER_AGENT_MUTT && !__T_USER_AGENT_MUTT
 
 header __USER_AGENT_MOZILLA_UA	User-Agent =~ /^Mozilla\/5\.\d+ \(.*\) Gecko\/\d{8}(?: |$)/
 meta T_USER_AGENT_MOZILLA_UA	__USER_AGENT_MOZILLA_UA && !T_FORGED_USER_AGENT
@@ -243,10 +230,26 @@ meta T_USER_AGENT_VM		__USER_AGENT_VM && !T_FORGED_USER_AGENT
 # frequently forged, needs some correlation meta checks with other headers.
 meta __T_USER_AGENT_MSN		(__USER_AGENT_MSN && __HAS_XOAT && __HAS_XOIP)
 meta T_USER_AGENT_MSN		__T_USER_AGENT_MSN && !T_FORGED_USER_AGENT
+meta T_FORGED_MUA_MSN		__USER_AGENT_MSN && !T_USER_AGENT_MSN
 
 header __USER_AGENT_FORTE	X-Mailer =~ /^Forte Agent \d\.\d+\/\d+\.\d+$/
 meta T_USER_AGENT_FORTE		__USER_AGENT_FORTE && !T_FORGED_USER_AGENT
 
 meta __USER_AGENT_XIMIAN	(__XIMIAN_MSGID && __XIMIAN_MUA && !__UNUSABLE_MSGID)
 meta T_USER_AGENT_XIMIAN	__USER_AGENT_XIMIAN && !T_FORGED_USER_AGENT
+meta T_FORGED_MUA_XIMIAN	__XIMIAN_MUA && !__USER_AGENT_XIMIAN
 
+# bug 1561
+# stronger version of USER_AGENT_APPLEMAIL
+# Apple Mail doesn't send text/html at all (unless it's an attachment)
+# It'll send text/plain, or multipart/alternative with text/plain and text/enriched parts (boundary of
+# "Apple-Mail-\d--\d+").  It can, however, send a multipart/mixed with a single text/html attachment, so
+# don't use MIME_HTML_ONLY.
+# perhaps limit CTYPE to "text/plain", "multipart/alternative" with "text/plain" and "text/enhanced", or
+# "multipart/mixed"?
+header __X_MAILER_APPLEMAIL	X-Mailer	=~ /^Apple Mail \(\d\.\d+\)$/
+header __MSGID_APPLEMAIL	Message-Id	=~ /^<[0-9A-F]{8}-(?:[0-9A-F]{4}-){3}[0-9A-F]{12}\@\S+>$/
+header __MIME_VERSION_APPLEMAIL	Mime-Version	=~ /^1\.0 \(Apple Message framework v\d+\)$/
+meta __USER_AGENT_APPLEMAIL	!__HTML_CTYPE_HEADER && __X_MAILER_APPLEMAIL && ( __MSGID_APPLEMAIL || __MIME_VERSION_APPLEMAIL )
+meta T_USER_AGENT_APPLEMAIL	__USER_AGENT_APPLEMAIL && !T_FORGED_USER_AGENT
+meta T_FORGED_MUA_APPLEMAIL	__X_MAILER_APPLEMAIL && !__USER_AGENT_APPLEMAIL
