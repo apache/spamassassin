@@ -700,10 +700,16 @@ sub learn_trapped {
       my $orig = $self->{main}->{learn_caller_will_untie};
       $self->{main}->{learn_caller_will_untie} = 1;
 
-      $self->forget ($msg);
+      my $fatal = !defined $self->forget ($msg);
 
       # reset the value post-forget() ...
       $self->{main}->{learn_caller_will_untie} = $orig;
+
+      # forget() gave us a fatal error, so propagate that up
+      if ($fatal) {
+        dbg("forget() returned a fatal error, so learn() will too");
+	return;
+      }
     }
   }
 
@@ -795,11 +801,11 @@ sub forget_trapped {
       $isspam = 0;
     } else {
       dbg ("forget: message $msgid seen entry is neither ham nor spam, ignored");
-      return;
+      return 0;
     }
   } else {
     dbg ("forget: message $msgid not learnt, ignored");
-    return;
+    return 0;
   }
 
   if ($isspam) {
