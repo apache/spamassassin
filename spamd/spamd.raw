@@ -151,6 +151,19 @@ GetOptions(
 
 $opt{'help'} and pod2usage(-exitval => $resphash{'EX_USAGE'}, -verbose => 0, -message => 'For more details, use "man spamd"');
 
+
+# make the values of (almost) all parameters which accept file paths absolute, so
+# they are still valid after daemonize()
+foreach my $opt (qw(
+    configpath
+    socketpath
+    pidfile
+    home_dir_for_helpers
+    virtual-config
+  )) {
+  $opt{$opt} = File::Spec->rel2abs($opt{$opt}) if($opt{$opt})
+}
+
 # sanity checking on parameters: if --socketpath is used, it means that we're using
 # UNIX domain sockets, none of the IP params are allowed. The code would probably
 # work ok if we didn't check it, but it's better if we detect the error and report
@@ -1300,8 +1313,8 @@ Options:
  -q, --sql-config                   Enable SQL config (only useful with -x)
  -Q, --setuid-with-sql              Enable SQL config (only useful with -x,
                                     enables use of -a and -H)
- --virtual-config-dir=dir           Enable Virtual configs (needs -x)
  -V, --virtual-config=dir           Enable Virtual configs (needs -x)
+ --virtual-config-dir=dir           Enable pattern based Virtual configs (needs -x)
  -r pidfile, --pidfile              Write the process id to pidfile
  -s facility, --syslog=facility     Specify the syslog facility (default: mail)
  --syslog-socket=type               How to connect to syslogd (default: unix)
@@ -1315,10 +1328,10 @@ Options:
  -L, --local                        Use local tests only (no DNS)
  -P, --paranoid                     Die upon user errors
  -H dir				    Specify a different HOME directory, path optional
-  --ssl                             Run an SSL server
-  --server-key keyfile              Specify an SSL keyfile
-  --server-cert certfile            Specify an SSL certificate
-  --socketpath=path                 Listen on given UNIX domain socket
+ --ssl                              Run an SSL server
+ --server-key keyfile               Specify an SSL keyfile
+ --server-cert certfile             Specify an SSL certificate
+ --socketpath=path                  Listen on given UNIX domain socket
 
 =head1 DESCRIPTION
 
@@ -1437,6 +1450,9 @@ databases for that user will be stored in this directory.
 
 Note that this B<requires> that B<-x> is used, and cannot be combined with
 SQL-based configuration.
+
+The pattern B<must> expand to an absolute directory when spamd is running
+daemonized (B<-d>).
 
 =item B<-V>=I<directory>, B<--virtual-config>=I<directory>
 
