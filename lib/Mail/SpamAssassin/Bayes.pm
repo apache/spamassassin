@@ -293,6 +293,8 @@ sub tokenize_line {
   my $isbody = $_[3];
   local ($_) = $_[1];
 
+  my $magic_re = $self->{store}->get_magic_re($bv);
+
   # include quotes, .'s and -'s for URIs, and [$,]'s for Nigerian-scam strings,
   # and ISO-8859-15 alphas.  Do not split on @'s; better results keeping it.
   # Some useful tokens: "$31,000,000" "www.clock-speed.net" "f*ck" "Hits!"
@@ -318,7 +320,7 @@ sub tokenize_line {
     $token =~ s/^[-'"\.,]+//;        # trim non-alphanum chars at start or end
     $token =~ s/[-'"\.,]+$//;        # so we don't get loads of '"foo' tokens
 
-    next if ( $token =~ /^\*\*[A-Z]+$/ ); # skip false magic tokens
+    next if ( $token =~ /$magic_re/ ); # skip false magic tokens
 
     # *do* keep 3-byte tokens; there's some solid signs in there
     my $len = length($token);
