@@ -271,8 +271,11 @@ sub logkilled {
 sub progress {
   my ($time) = @_;
   my $messages = $Mail::SpamAssassin::ArchiveIterator::MESSAGES;
+  my $statusevery = int($messages / $updates);
+  $statusevery ||= 1; # if $messages < $updates, just give a status line per msg.
 
-  if ($messages == $total_count || ($messages >= $updates && !int($total_count % ($messages / $updates)))) {
+  # Are we at the end or otherwise at a point we should print status?  Then do it.
+  if ($messages == $total_count || $total_count % $statusevery == 0) {
     my $time = strftime("%Y-%m-%d", localtime($time));
     my $now = strftime("%Y-%m-%d %X", localtime(time));
     printf STDERR "status: %3.0f%% ham: %-6d spam: %-6d date: %s now: %s\n",
