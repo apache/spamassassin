@@ -97,22 +97,11 @@ sub run {
 	my $result = '';
 	my $line;
 	while ($line = readline $socket) {
-	  if ( !defined $line ) {
-	    # some error happened
-	    $needs_restart = 1;
-	    warn "Got an undef from readline?!?  Killing all children, probably lost some results. :(\n";
-	    foreach $socket ( $select->handles() ) {
-	      $select->remove($socket);
-	    }
-	    last;
-	  }
-	  elsif ($line =~ /^RESULT (.+)$/) {
+	  if ($line =~ /^RESULT (.+)$/) {
 	    my($class,$type,$date) = index_unpack($1);
 	    #warn ">> RESULT: $class, $type, $date\n";
 
-	    if (defined $self->{opt_restart} &&
-		($total_count % $self->{opt_restart}) == 0)
-	    {
+	    if (defined $self->{opt_restart} && ($total_count % $self->{opt_restart}) == 0) {
 	      $needs_restart = 1;
 	    }
 
@@ -156,14 +145,20 @@ sub run {
 	    $result .= $line;
 	  }
 	}
+
+        # some error happened during the read!
+        if ( !defined $line || !$line ) {
+          $needs_restart = 1;
+          warn "Got an undef from readline?!?  Restarting all children, probably lost some results. :(\n";
+          $select->remove($socket);
+        }
       }
 
       #warn ">> out of loop, $MESSAGES $total_count $needs_restart ".$select->count()."\n";
 
       # If there are still messages to process, and we need to restart
-      # the children, let's go ahead.
-      if ($needs_restart && $select->count() == 0 && ($MESSAGES>$total_count))
-      {
+      # the children, and all of the children are idle, let's go ahead.
+      if ($needs_restart && $select->count() == 0 && ($MESSAGES>$total_count)) {
 	$needs_restart = 0;
 
 	#warn "debug: Needs restart, $MESSAGES total, $total_count done.\n";
@@ -278,6 +273,12 @@ sub start_children {
 
 sub reap_children {
   my($self, $count, $socket, $pid) = @_;
+
+  # If the child died, sending it the exit will generate a SIGPIPE
+  # but we don't really care since the readline will go undef which is fine,
+  # then we do the waitpid which will finish it off.  So we end up in the
+  # right state, in theory.
+  local $SIG{'PIPE'} = 'IGNORE';
 
   for (my $i = 0; $i < $count; $i++) {
     #warn "debug: killing child $i (pid ",$pid->[$i],")\n";
