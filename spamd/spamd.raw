@@ -583,6 +583,11 @@ while (1) {
 	    check ($1, $2, $start);
 	}
 
+	elsif (/PING SPAMC\/(.*)/)
+	{
+		print $client "SPAMD/1.2 $resphash{EX_OK} PONG\r\n";
+		return 0;
+	}
         # If it was none of the above, then we don't know what it was.
 
 	else

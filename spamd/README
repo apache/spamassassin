@@ -220,6 +220,8 @@ REPORT_IFSPAM --  Check if message is spam or not, and return score plus report 
 
 SKIP          --  Ignore this message -- client opened connection then changed its mind
 
+PING          --  Return a confirmation that spamd is alive.
+
 PROCESS       --  Process this message as described above and return modified message
 
 CHECK command returns just a header (terminated by "\r\n\r\n") with the first
@@ -266,6 +268,16 @@ the report text, and how many CR-LFs there are.
 
 REPORT_IFSPAM returns the same as REPORT if the message is spam, or nothing at
 all if the message is non-spam.
+
+The PING command does not actually trigger any spam checking, and (as with
+SKIP) no additional input is expected. It returns a simple confirmation
+response, like this:
+
+SPAMD/1.2 0 PONG
+
+This facility may be useful for monitoring programs which wish to check that 
+the daemon is alive and providing at least a basic response within a reasonable
+time frame.
 
 
 Shared Library
