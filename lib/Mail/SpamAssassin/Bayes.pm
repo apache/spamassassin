@@ -726,7 +726,7 @@ sub learn_trapped {
 
   $self->{store}->seen_put ($msgid, ($isspam ? 's' : 'h'));
   $self->{store}->cleanup();
-  dbg("bayes: Learned '$msgid'");
+  dbg("bayes: Learned '$msgid', atime: $msgatime");
 
   1;
 }
