@@ -50,29 +50,29 @@ header __HAS_XOIP		X-Originating-Ip =~ /^\[/
 meta USER_AGENT_MSN		(__USER_AGENT_MSN && __HAS_XOAT && __HAS_XOIP)
 describe USER_AGENT_MSN		Headers indicate valid mail from MSN
 
-header USER_AGENT_FORTE      X-Mailer =~ /^Forte Agent \d\.\d+\/\d+\.\d+$/
+header USER_AGENT_FORTE		X-Mailer =~ /^Forte Agent \d\.\d+\/\d+\.\d+$/
 describe USER_AGENT_FORTE	X-Mailer header indicates a non-spam MUA (Forte)
 
-tflags USER_AGENT_PINE       nice
-tflags USER_AGENT_MUTT       nice
-tflags USER_AGENT_MOZILLA_UA nice
-tflags USER_AGENT_MOZILLA_XM nice
-tflags USER_AGENT_MACOE      nice
-tflags USER_AGENT_ENTOURAGE  nice
-tflags USER_AGENT_KMAIL      nice
-tflags USER_AGENT_IMP        nice
-tflags USER_AGENT_TONLINE    nice
-tflags USER_AGENT_APPLEMAIL  nice
-tflags USER_AGENT_GNUS_UA    nice
-tflags USER_AGENT_GNUS_XM    nice
-tflags USER_AGENT_VM         nice
-tflags USER_AGENT_MSN        nice
-tflags USER_AGENT_FORTE      nice
+tflags USER_AGENT_PINE		nice
+tflags USER_AGENT_MUTT		nice
+tflags USER_AGENT_MOZILLA_UA	nice
+tflags USER_AGENT_MOZILLA_XM	nice
+tflags USER_AGENT_MACOE		nice
+tflags USER_AGENT_ENTOURAGE	nice
+tflags USER_AGENT_KMAIL		nice
+tflags USER_AGENT_IMP		nice
+tflags USER_AGENT_TONLINE	nice
+tflags USER_AGENT_APPLEMAIL	nice
+tflags USER_AGENT_GNUS_UA	nice
+tflags USER_AGENT_GNUS_XM	nice
+tflags USER_AGENT_VM		nice
+tflags USER_AGENT_MSN		nice
+tflags USER_AGENT_FORTE		nice
 
-header __XIMIAN_MUA	     X-Mailer =~ /^(?:Ximian Evolution|Evolution\/\d+\.)/
+header __XIMIAN_MUA		X-Mailer =~ /^(?:Ximian Evolution|Evolution\/\d+\.)/
 # interestingly the last word (\S+) always seems to be 'camel' ;)
-header __XIMIAN_MSGID	     MESSAGEID =~ /^<\d{10}\.\d+\.\d+\.\S+\@/
-meta USER_AGENT_XIMIAN     (__XIMIAN_MSGID && __XIMIAN_MUA && !__UNUSABLE_MSGID)
+header __XIMIAN_MSGID		MESSAGEID =~ /^<\d{10}\.\d+\.\d+\.\S+\@/
+meta USER_AGENT_XIMIAN		(__XIMIAN_MSGID && __XIMIAN_MUA && !__UNUSABLE_MSGID)
 describe USER_AGENT_XIMIAN	Headers indicate a non-spam MUA (Ximian)
-tflags USER_AGENT_XIMIAN   nice
-
+tflags USER_AGENT_XIMIAN	nice
+ 	

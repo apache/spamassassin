@@ -372,8 +372,8 @@ describe AOL_USERS_LINK		Includes a link for AOL users to click
 body INTERNET_TERROR_RANT       /At the time of this mailing.{9,50}legitimate return email address.{100,299}internet terrorists/i
 describe INTERNET_TERROR_RANT   Cyber FirePower! rant about losing dropboxes
 
-body US_DOLLARS               /\b(?:\d{1,3})?Million\b.{0,40}\b(?:(?:United States?|Canadian) Dollar?s?|US(?:D|\$)|U\.? ?S\.? Dollar)/i
-describe US_DOLLARS           Nigerian scam key phrase (million dollars)
+body US_DOLLARS			/\b(?:\d{1,3})?Million\b.{0,40}\b(?:(?:United States?|Canadian) Dollar?s?|US(?:D|\$)|U\.? ?S\.? Dollar)/i
+describe US_DOLLARS		Nigerian scam key phrase (million dollars)
 
 # jm: use {2,3} to avoid matching iso-2022-jp charset items. split into US_DOLLARS_4
 # to still match all test cases
@@ -632,8 +632,8 @@ describe BUY_DIRECT		Buy Direct
 
 body DRASTIC_REDUCED	        /\bdrastic.{0,4} reduc/i
 describe DRASTIC_REDUCED	Drastically Reduced
-
-body DO_IT_TODAY        /\b(?:join|register|order|apply) .{0,10}(?-i:T)oday\b/i
+ 	
+body DO_IT_TODAY		/\b(?:join|register|order|apply) .{0,10}(?-i:T)oday\b/i
 describe DO_IT_TODAY		Do it Today
 
 body WHY_WAIT		        /\b(?:why wait|what are you waiting for)\b/i
@@ -872,8 +872,8 @@ describe MARKETING_PARTNERS     Claims you registered with some kind of partner
 body PRIORITY_MAIL              /\b[Aa]ll\b.{0,20}\b[Oo]rders\b.{1,20}\bPriority Mail\b/
 describe PRIORITY_MAIL          Orders shipped by priority mail
 
-body SAVE_ON_INSURANCE         /\bsave .{0,20}\bon (?:your\s+)?(?:auto|car|life|health|medical)? ?insurance\b/i
-describe SAVE_ON_INSURANCE     Trying to sell insurance online
+body SAVE_ON_INSURANCE		/\bsave .{0,20}\bon (?:your\s+)?(?:auto|car|life|health|medical)? ?insurance\b/i
+describe SAVE_ON_INSURANCE	Trying to sell insurance online
 
 body STOP_SNORING		/\bstop\s+snoring\b/i
 describe STOP_SNORING		Contains "Stop Snoring"
@@ -907,20 +907,20 @@ body MONTH_TRIAL                /(?:month|day) .{0,9}trial/i
 describe MONTH_TRIAL            Month Trial Offer
 
 # bug 680
-body MEMBER_2           /\b(?:free|special|paid|dear|gold|opt.in|valued|because you are an?|be a|becoming a|sent to) .{0,9}members?\b/i
-describe MEMBER_2       Being a Member
+body MEMBER_2			/\b(?:free|special|paid|dear|gold|opt.in|valued|because you are an?|be a|becoming a|sent to) .{0,9}members?\b/i
+describe MEMBER_2		Being a Member
 
-body GET_IT_NOW         /get it (?-i:N)ow/i
-describe GET_IT_NOW     Contains 'Get it now' with capitals
+body GET_IT_NOW			/get it (?-i:N)ow/i
+describe GET_IT_NOW		Contains 'Get it now' with capitals
 
 body LOW_PRICE                  /\blow.{0,4} (?-i:P)rice/i
 describe LOW_PRICE              Lowest Price
 
 body SALE                       /\bsales? (?:price|system|department|technology|ends|today)|\b(?:on|summer|movie|clearance|for|your|increase|super|losing|return|business|airfare) (?-i:S)ales?/i
 describe SALE                   Stuff on Sale
-
-body MEMBER                 /\bmember (?:number|reward|value|benefit|rate|report|card|information)s?\b/i
-describe MEMBER             Member Stuff
+ 	
+body MEMBER			/\bmember (?:number|reward|value|benefit|rate|report|card|information)s?\b/i
+describe MEMBER			Member Stuff
 
 body     EJACULATION            /\b(?:increase|improve|greater).{0,10}ejaculation/i
 describe EJACULATION            Increase your ejaculation!
@@ -959,21 +959,21 @@ describe CHANGE_TERMS           Terms and conditions
 
 body     DONT_DELETE            /\b(?:don'?t delete this|do not delete)/i
 describe DONT_DELETE            Don't delete me!  Nooooo!!!!
-lang fr describe DONT_DELETE            Contient une formule incitant é ne pas détruire ce message
+lang fr describe DONT_DELETE    Contient une formule incitant é ne pas détruire ce message
 
 lang fr describe EU_200_32_CE   Revendique la conformité avec l'arrêt européen 200.32.CE
 body EU_200_32_CE               /Directive 200.32.CE/i
 describe EU_200_32_CE           Claims compliance with spam regulations
 
 lang fr describe EU_EMAIL_OPTOUT        Revendique la conformité avec l'arrêt européen sur le spam
-body EU_EMAIL_OPTOUT            /EU (?:e-?mail opt.?out|e.?commerce) directive/i
-describe EU_EMAIL_OPTOUT        Claims compliance with spam regulations
+body EU_EMAIL_OPTOUT            	/EU (?:e-?mail opt.?out|e.?commerce) directive/i
+describe EU_EMAIL_OPTOUT        	Claims compliance with spam regulations
 
 body EXCUSE_8                   /requests to be taken off our mailing list/i
 describe EXCUSE_8               Claims you can be removed from the list
 
-body FILTERED_BY_WORLDREMOVE    /filtered by WorldRemove/
-describe FILTERED_BY_WORLDREMOVE Claims to listen to some removal request list
+body FILTERED_BY_WORLDREMOVE		/filtered by WorldRemove/
+describe FILTERED_BY_WORLDREMOVE	Claims to listen to some removal request list
 
 body FREE_HOSTING               /\bfree hosting\b/i
 describe FREE_HOSTING           Free Hosting
@@ -1028,8 +1028,8 @@ describe OUR_AFFILIATE_PARTNERS Mentions their affiliate partners
 body OUR_COMPENSATION           /our (?:full )?compensation/i
 describe OUR_COMPENSATION	Mentions their full compensation
 
-body OUR_OVERWHELMING_GROWTH	/our overwhelming growth/i
-describe OUR_OVERWHELMING_GROWTH Mentions their overwhelming growth
+body OUR_OVERWHELMING_GROWTH		/our overwhelming growth/i
+describe OUR_OVERWHELMING_GROWTH	Mentions their overwhelming growth
 
 body OUR_POLICY_ON_SELLING	/our policy on selling/i
 describe OUR_POLICY_ON_SELLING	Mentions their policy on selling

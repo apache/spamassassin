@@ -52,14 +52,14 @@ describe NIGERIAN_BODY	Message body has multiple indications of Nigerian spam
 body __NIGERIAN_BODY_1	/\b(?:financial|confiden(?:tial|ce)|safe(?:ty)?|mutual|secret|success(?:ful)?|risk-?free|details|business).{1,30}\btransaction\b/i
 body __NIGERIAN_BODY_2	/\btransaction\b.{1,30}\b(?:magnitude|diplomatic|strict|absolute|secret|confiden(?:tial|ce)|guarantee)/i
 body __NIGERIAN_BODY_3	/BASED ON INFORMATION GATHERED ABOUT YOU, WE BELIEVE\s*YOU WOULD BE IN A POSITION TO HELP US IN TRANSFER/i
-body __NIGERIAN_BODY_5 /\bpoisoned (?:to death )?by his business associate/i
+body __NIGERIAN_BODY_5	/\bpoisoned (?:to death )?by his business associate/i
 body __NIGERIAN_BODY_6	/\bIt is with trust and confidentiality\b/i
 body __NIGERIAN_BODY_7	/\bU\.?S\.?(?:D\.?)?\s*(?:\$\s*)?(?:\d+,\d+,\d+|\d+\.\d+\.\d+|\d+(?:\.\d+)?\s*milli?on)/i
 body __NIGERIAN_BODY_8	/\b(?:You may be sur?prised to receive this letter from me|this (?:letter|mail) (?:(?:may|will) come to you as|will be) a sur?prise)\b/i
 body __NIGERIAN_BODY_9	/\bthe .{1,10} son of\b/i
 body __NIGERIAN_BODY_10	/\burgent and(?: very)? (?:profitable|confidential) business (?:proposal|proposition)\b/i
 body __NIGERIAN_BODY_11	/\bassistance to relocate\b/i
-body __NIGERIAN_BODY_12 /\bto which will be transferred the sum\b/i
+body __NIGERIAN_BODY_12	/\bto which will be transferred the sum\b/i
 body __NIGERIAN_BODY_13	/\byour(?: private)? (?:tele)?phone (?:and|&) fax Numbers?\b/i
 body __NIGERIAN_BODY_14	/\bthe importance of Secrecy\b/i
 body __NIGERIAN_BODY_15	/\bmodalities\b/i
@@ -68,8 +68,8 @@ body __NIGERIAN_BODY_17	/\bWRITING THIS LETTER TO SOLICIT\b/i
 body __NIGERIAN_BODY_18	/\bSEVERAL ATTEMPTS HAVE BEEN MADE WITH OUT SUCCESS\b/i
 body __NIGERIAN_BODY_19	/\bMY PROPOSAL IS ACCEPTABLE\b/i
 body __NIGERIAN_BODY_20	/\d+%.{0,15}\)? (?:of (?:the total|this|the) (?:amount|sum|money)|for you|for my investment|for (?:us|me)|.{0,15}\bfor your expenses)\b/i
-body __NIGERIAN_BODY_21 /\bforeign account\b/i
-body __NIGERIAN_BODY_22 /\btrust (?:and|&) confidentiality\b/i
+body __NIGERIAN_BODY_21	/\bforeign account\b/i
+body __NIGERIAN_BODY_22	/\btrust (?:and|&) confidentiality\b/i
 body __NIGERIAN_BODY_25	/\bvery beneficial to both of us\b/i
 body __NIGERIAN_BODY_26	/\bmilli?on (?:.{1,25} thousand\s*)?(?:(?:united states|u\.?s\.?) dollars|(?i:U\.?S\.?D?))\b/i
 body __NIGERIAN_BODY_27	/\bcorrespondent branch\b/i
@@ -77,14 +77,14 @@ body __NIGERIAN_BODY_28	/\btransaction is .{1,15} risk free.\b/i
 body __NIGERIAN_BODY_29	/\b(?:percentage|rate) of this money\b/i
 body __NIGERIAN_BODY_30	/\bfavou?rable response\b/i
 body __NIGERIAN_BODY_31	/\btotal acceptance and commitment\b/i
-body __NIGERIAN_BODY_32 /\blocate(?: .{1,20})? extended relative/i
-body __NIGERIAN_BODY_33 /\bhonest cooperation\b/i
-body __NIGERIAN_BODY_34 /\b(?:wife|son|brother|daughter) of the late\b/i
-body __NIGERIAN_BODY_35 /\bintuitive confidence/i
-body __NIGERIAN_BODY_36 /\battached to ticket number\b/i
-body __NIGERIAN_BODY_37 /\ball funds will be returned\b/i
-body __NIGERIAN_BODY_38 /\b(?:International\b.{1,15}\bLottery|lottery\b.{1,15}\binternational)\b/i
-body __NIGERIAN_BODY_39 /\bYOUR FULL NAMES?,?(?:and|&)? FULL CONTACT ADDRESS\b/i
+body __NIGERIAN_BODY_32	/\blocate(?: .{1,20})? extended relative/i
+body __NIGERIAN_BODY_33	/\bhonest cooperation\b/i
+body __NIGERIAN_BODY_34	/\b(?:wife|son|brother|daughter) of the late\b/i
+body __NIGERIAN_BODY_35	/\bintuitive confidence/i
+body __NIGERIAN_BODY_36	/\battached to ticket number\b/i
+body __NIGERIAN_BODY_37	/\ball funds will be returned\b/i
+body __NIGERIAN_BODY_38	/\b(?:International\b.{1,15}\bLottery|lottery\b.{1,15}\binternational)\b/i
+body __NIGERIAN_BODY_39	/\bYOUR FULL NAMES?,?(?:and|&)? FULL CONTACT ADDRESS\b/i
 body __NIGERIAN_BODY_40	/\bsend .{1,30}\byour telefax Numbers?\b/i
 
 header NIGERIAN_SUBJECT1	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*(?:(?:very )?URGENT|ATTENTION)\s*$/i
