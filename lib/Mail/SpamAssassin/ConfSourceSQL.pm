@@ -54,6 +54,8 @@ sub load {
    }
 
    eval {
+     # make sure we can see croak messages from DBI
+     local $SIG{'__DIE__'} = sub { warn "$_[0]"; };
      require DBI;
      load_with_dbi($self, $username, $dsn);
    };
