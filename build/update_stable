@@ -11,12 +11,12 @@ build/update_devel
 rm -rf $WEBDIR/doc
 tar cf - --exclude=CVS --exclude='.#*' doc | ( cd $WEBDIR ; tar xf - )
 
-for ext in tar.bz2.md5 tar.gz.md5 zip.md5 ; do
-  cp $WEBDIR/devel/Mail-SpamAssassin-$vers.$ext \
-	$WEBDIR/released/Mail-SpamAssassin-$vers.$ext
-done
-
 for ext in tar.bz2 tar.gz zip ; do
+  cp $WEBDIR/devel/Mail-SpamAssassin-$vers.$ext.md5 \
+	$WEBDIR/released/Mail-SpamAssassin-$vers.$ext.md5
+  cp $WEBDIR/devel/Mail-SpamAssassin-$vers.$ext.sha1 \
+	$WEBDIR/released/Mail-SpamAssassin-$vers.$ext.sha1
+
   cp $WEBDIR/devel/Mail-SpamAssassin-$vers.$ext \
 	$WEBDIR/released/Mail-SpamAssassin-$vers.$ext
 
@@ -35,4 +35,8 @@ cat $WEBDIR/released/Mail-SpamAssassin-$vers.tar.gz.md5 \
  $WEBDIR/released/Mail-SpamAssassin-$vers.tar.bz2.md5 \
  $WEBDIR/released/Mail-SpamAssassin-$vers.zip.md5
 
+echo "sha1sum of archive files:"
+cat $WEBDIR/released/Mail-SpamAssassin-$vers.tar.gz.sha1 \
+ $WEBDIR/released/Mail-SpamAssassin-$vers.tar.bz2.sha1 \
+ $WEBDIR/released/Mail-SpamAssassin-$vers.zip.sha1
 

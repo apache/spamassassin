@@ -30,6 +30,9 @@ for ext in tar.bz2 tar.gz zip ; do
   md5sum Mail-SpamAssassin-$vers.$ext \
 	  > $WEBDIR/devel/Mail-SpamAssassin-$vers.$ext.md5
 
+  sha1sum Mail-SpamAssassin-$vers.$ext \
+	  > $WEBDIR/devel/Mail-SpamAssassin-$vers.$ext.sha1
+
   gpgsign=$HOME/bin/gpgsign
   rm -f Mail-SpamAssassin-$vers.$ext.asc
   $gpgsign Mail-SpamAssassin-$vers.$ext
