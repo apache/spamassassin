@@ -36,19 +36,19 @@ my $hdr_spam = $num_spam;
 my $hdr_nonspam = $num_nonspam;
 
 if ($arg_pc) {
+  printf "%7s  %7s  %7s  %6s  %6s  %s\n",
+  	"OVERALL%", "SPAM%", "NONSPAM%", "S:N", "SCORE", "NAME";
+  printf "%7d  %7d  %7d  %6.2f  %6.2f  (all messages)\n",
+  	$hdr_all, $hdr_spam, $hdr_nonspam, snratio ($num_spam,$num_nonspam), 0;
+
   $hdr_spam = ($num_spam / $hdr_all) * 100.0;
   $hdr_nonspam = ($num_nonspam / $hdr_all) * 100.0;
   $hdr_all = 100.0;             # this is obvious
+  printf "%7.2f  %7.2f  %7.2f  %6.2f  %6.2f  (all messages as %%)\n",
+  	$hdr_all, $hdr_spam, $hdr_nonspam, snratio ($num_spam,$num_nonspam), 0;
 
   $num_spam ||= 0.1;            # avoid div by 0 errors in % calculations later
   $num_nonspam ||= 0.1;
-}
-
-if ($arg_pc) {
-  printf "%7s  %7s  %7s  %6s  %6s  %s\n",
-  	"OVERALL", "SPAM", "NONSPAM", "S:N", "SCORE", "NAME";
-  printf "%7.2f  %7.2f  %7.2f  %6.2f  %6.2f  (all messages)\n",
-  	$hdr_all, $hdr_spam, $hdr_nonspam, snratio ($num_spam,$num_nonspam), 0;
 
 } elsif ($arg_extended) {
   printf "%7s  %7s  %7s  %6s  %6s  %s\n",
