@@ -420,7 +420,21 @@ sub get_content_preview {
   $str =~ s/-----Original Message-----.*$//gs;
   $str =~ s/This is a multi-part message in MIME format\.//gs;
 
-  Text::Wrap::wrap ("", "  ", $str);
+  # be paranoid -- there's a die() in there
+  my $wrapped;
+  eval {
+    # add "Content preview:" ourselves, so that the text aligns
+    # correctly with the template -- then trim it off.  We don't
+    # have to get this *exactly* right, but it's nicer if we
+    # make a bit of an effort ;)
+    $wrapped = Text::Wrap::wrap ("Content preview:  ", "  ", $str);
+    if (defined $wrapped) {
+      $wrapped =~ s/^Content preview:\s+//gs;
+      $str = $wrapped;
+    }
+  };
+
+  $str;
 }
 
 ###########################################################################
