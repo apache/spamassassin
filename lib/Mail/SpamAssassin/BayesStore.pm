@@ -337,6 +337,7 @@ sub expire_old_tokens_trapped {
   # ok, we've expired: now, is the db too small?  If so, add back in
   # some of the toks we deleted.
   my $reprieved = 0;
+
   while ($kept+$reprieved < $self->{expiry_min_db_size} && $deleted > 0) {
     my $deld = shift @deleted_toks;
     my ($tok, $ts, $th, $atime) = @{$deld};
