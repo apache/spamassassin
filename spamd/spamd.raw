@@ -144,10 +144,10 @@ GetOptions(
   'c'                        => \$opt{'create-prefs'},
   'daemonize!'               => \$opt{'daemonize'},
   'd'                        => \$opt{'daemonize'},
-  'listen-ip|ip-address|i=s' => \$opt{'listen-ip'},
+  'listen-ip|ip-address|i:s' => \$opt{'listen-ip'},
   'max-children|m=i'         => \$opt{'max-children'},
   'max-conn-per-child=i'     => \$opt{'max-conn-per-child'},
-  'port|p=i'                 => \$opt{'port'},
+  'port|p=s'                 => \$opt{'port'},
   'sql-config!'              => \$opt{'sql-config'},
   'ldap-config!'             => \$opt{'ldap-config'},
   'q'                        => \$opt{'sql-config'},
@@ -520,11 +520,28 @@ if ( defined $opt{'socketpath'} ) {
   $listeninfo = "UNIX domain socket " . $opt{'socketpath'};
 }
 else {
-  $port = $opt{'port'} || 783;
-  $addr = ( gethostbyname( $opt{'listen-ip'} || '127.0.0.1' ) )[0];
   $proto = getprotobyname('tcp');
 
-  ($port) = $port =~ /^(\d+)$/ or die "invalid port\n";
+  $addr = $opt{'listen-ip'};
+  if (defined $addr) {
+    if ($addr ne '') {
+      $addr = ( gethostbyname($addr) )[4];
+      die "invalid address: $opt{'listen-ip'}\n" unless $addr;
+      $addr = inet_ntoa($addr);
+    }
+    else {
+      $addr = '0.0.0.0';
+    }
+  }
+  else {
+    $addr = '127.0.0.1';
+  }
+
+  $port = $opt{'port'} || 783;
+  if ($port !~ /^(\d+)$/ ) {
+    $port = ( getservbyname($port, 'tcp') )[2];
+    die "invalid port: $opt{'port'}\n" unless $port;
+  }
 
   $listeninfo = "port $port/tcp";
 }
@@ -1789,7 +1806,7 @@ Options:
  --siteconfigpath=path              Path for site configs (def: /etc/mail/spamassassin)
  -d, --daemonize                    Daemonize
  -h, --help                         Print usage message.
- -i ipaddr, --listen-ip=ipaddr,...  Listen on the IP ipaddr (default: 127.0.0.1)
+ -i [ipaddr], --listen-ip=ipaddr    Listen on the IP ipaddr (default: 127.0.0.1)
  -p port, --port                    Listen on specified port (default: 783)
  -m num, --max-children=num         Allow maximum num children (default: 5)
  --max-conn-per-child=num	    Maximum connections accepted by child before exiting
@@ -1874,10 +1891,12 @@ Detach from starting process and run in background (daemonize).
 
 Print a brief help message, then exit without further action.
 
-=item B<-i> I<ipaddress>, B<--listen-ip>=I<ipaddress>, B<--ip-address>=I<ipaddress>
+=item B<-i> [I<ipaddress>], B<--listen-ip>[=I<ipaddress>], B<--ip-address>[=I<ipaddress>]
 
-Tells spamd to listen on the specified IP address (defaults to 127.0.0.1).  Use
-0.0.0.0 to listen on all interfaces.
+Tells spamd to listen on the specified IP address (defaults to 127.0.0.1).  If
+you specify no IP address after the switch, spamd will listen on all interfaces.
+(This is equal to the address 0.0.0.0).  You can also use a valid hostname which
+will make spamd listen on the first address that name resolves to.
 
 =item B<-p> I<port>, B<--port>=I<port>
 
