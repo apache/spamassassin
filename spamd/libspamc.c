@@ -89,6 +89,8 @@ static const int EXPANSION_ALLOWANCE = 16384;
 /* Set the protocol version that this spamc speaks */
 static const char *PROTOCOL_VERSION="SPAMC/1.2";
 
+int libspamc_timeout = 0;
+
 static int
 try_to_connect (const struct sockaddr *argaddr, struct hostent *hent,
                 int hent_port, int *sockptr)
@@ -344,6 +346,8 @@ static int message_read_bsmtp(int fd, struct message *m){
 }
 
 int message_read(int fd, int flags, struct message *m){
+    libspamc_timeout = 0;
+
     switch(flags&SPAMC_MODE_MASK){
       case SPAMC_RAW_MODE:
         return message_read_raw(fd, m);
@@ -462,6 +466,8 @@ static int _message_filter(const struct sockaddr *addr,
     len+=i=snprintf(buf+len, bufsiz-len, "\r\n");
     if(i<0 || len >= bufsiz){ free(m->out); m->out=m->msg; m->out_len=m->msg_len; return EX_OSERR; }
 
+    libspamc_timeout = m->timeout;
+
     if((i=try_to_connect(addr, (struct hostent *) hent, hent_port, &sock))!=EX_OK){
         free(m->out); m->out=m->msg; m->out_len=m->msg_len;
         return i;
@@ -491,10 +497,10 @@ static int _message_filter(const struct sockaddr *addr,
     for(len=0; len<bufsiz; len++) {
 	if(flags&SPAMC_USE_SSL) {
 #ifdef SPAMC_SSL
-	  i=SSL_read(ssl, buf+len, 1);
+	  i=timeout_read(SSL_read, ssl, buf+len, 1);
 #endif
 	} else {
-	  i=read(sock, buf+len, 1);
+	  i=timeout_read(read, sock, buf+len, 1);
 	}
 
         if(i<0){
@@ -528,10 +534,10 @@ static int _message_filter(const struct sockaddr *addr,
             for(len=0; len<bufsiz; len++){
 #ifdef SPAMC_SSL
 	      if(flags&SPAMC_USE_SSL){
-		i=SSL_read(ssl, buf+len, 1);
+		i=timeout_read(SSL_read, ssl, buf+len, 1);
 	      } else{
 #endif
-		i=read(sock, buf+len, 1);
+		i=timeout_read(read, sock, buf+len, 1);
 #ifdef SPAMC_SSL
 	      }
 #endif
@@ -563,7 +569,7 @@ static int _message_filter(const struct sockaddr *addr,
                     /* Should be end of headers now */
 		    if(flags&SPAMC_USE_SSL){
 #ifdef SPAMC_SSL
-		      i=SSL_read(ssl, buf, 2);
+		      i=timeout_read(SSL_read,ssl, buf, 2);
 #endif
 		    } else{
 		      i=full_read (sock, (unsigned char *) buf, 2, 2);
@@ -587,7 +593,7 @@ static int _message_filter(const struct sockaddr *addr,
 
     if(flags&SPAMC_USE_SSL){
 #ifdef SPAMC_SSL
-      len=SSL_read(ssl, m->out+m->out_len,
+      len=timeout_read(SSL_read,ssl, m->out+m->out_len,
 		 m->max_len+EXPANSION_ALLOWANCE+1-m->out_len);
 #endif
     } else{
@@ -603,6 +609,7 @@ static int _message_filter(const struct sockaddr *addr,
 
     shutdown(sock, SHUT_RD);
     close(sock);
+    libspamc_timeout = 0;
 
     if(m->out_len!=expected_len){
         syslog(LOG_ERR, "failed sanity check, %d bytes claimed, %d bytes seen", expected_len, m->out_len);
@@ -614,6 +621,8 @@ static int _message_filter(const struct sockaddr *addr,
 failure:
     free(m->out); m->out=m->msg; m->out_len=m->msg_len;
     close(sock);
+    libspamc_timeout = 0;
+
 #ifdef SPAMC_SSL
     if(flags&SPAMC_USE_SSL){
       SSL_free(ssl);

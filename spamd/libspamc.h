@@ -42,6 +42,7 @@ typedef enum {
 struct message {
     /* Set before passing the struct on! */
     int max_len;  /* messages larger than this will return EX_TOOBIG */
+    int timeout;  /* timeout for read() system calls */
 
     /* Filled in by message_read */
     message_type_t type;

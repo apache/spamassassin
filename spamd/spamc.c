@@ -58,6 +58,8 @@ int flags = SPAMC_RAW_MODE | SPAMC_SAFE_FALLBACK;
 /* Aug 14, 2002 bj: global to hold -e command */
 char **exec_argv;
 
+static int timeout = 600;
+
 void print_usage(void)
 {
   printf("Usage: spamc [-d host] [-p port] [-B] [-c] [-f] [-h] [-x] [-e command [args]]\n");
@@ -72,6 +74,7 @@ void print_usage(void)
   printf("-S: use SSL to talk to spamd\n");
   printf("-u username: specify the username for spamd to process this message under\n");
   printf("-x: don't fallback safely - in a comms error, exit with an error code\n");
+  printf("-t: timeout in seconds to read from spamd. 0 disables. [default: 600]\n");
 }
 
 int
@@ -136,6 +139,11 @@ read_args(int argc, char **argv, char **hostname, int *port, int *max_size, char
     case 'S':
       {
 	flags |= SPAMC_USE_SSL;
+	break;
+      }
+    case 't':
+      {
+	timeout = atoi(optarg);
 	break;
       }
     case '?': {
@@ -224,7 +232,9 @@ int main(int argc, char **argv){
     ret=lookup_host_for_failover (hostname, &hent);
     if(ret!=EX_OK) goto FAIL;
 
-    m.max_len=max_size;
+    m.max_len = max_size;
+    m.timeout = timeout;
+
     ret=message_read(STDIN_FILENO, flags, &m);
     if(ret!=EX_OK) goto FAIL;
     ret=message_filter_with_failover(&hent, port, username, flags, &m);
