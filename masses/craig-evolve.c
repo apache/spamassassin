@@ -18,8 +18,8 @@
 #define USE_LOG_SCORE_EVALUATION
 
 
-double evaluate(PGAContext *, int, int);
-int    myMutation(PGAContext *, int, int, double);
+double       evaluate(PGAContext *, int, int);
+int          myMutation(PGAContext *, int, int, double);
 void         CreateString     (PGAContext *, int, int, int);
 void         Crossover        (PGAContext *, int, int, int, int, int, int);
 void         CopyString       (PGAContext *, int, int, int, int);
@@ -417,7 +417,7 @@ int myMutation(PGAContext *ctx, int p, int pop, double mr) {
          if(myscores[i] > SCORE_CAP) myscores[i] = SCORE_CAP;
          else if(myscores[i] < (-SCORE_CAP*2.0)) myscores[i] = -SCORE_CAP*2.0;
          myscores[i] += PGARandomGaussian(ctx, myscores[i], mutation_noise);
-	count++;
+         count++;
       }
     }
     return count;

@@ -64,7 +64,6 @@ sub new {
     'tests_already_hit' => { },
     'hdr_cache'         => { },
     'rule_errors'       => 0,
-    'are_subrules_scored' => 0,
   };
 
   $self->{conf} = $self->{main}->{conf};
@@ -1923,7 +1922,7 @@ sub _handle_hit {
     my ($self, $rule, $score, $area, $desc) = @_;
 
     # ignore meta-match sub-rules.
-    if ($rule =~ /^__/ && !$self->{are_subrules_scored}) { return; }
+    if ($rule =~ /^__/) { return; }
 
     $score = sprintf("%2.1f",$score);
     $self->{hits} += $score;

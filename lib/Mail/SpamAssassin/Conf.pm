@@ -24,8 +24,11 @@ SpamAssassin is configured using some traditional UNIX-style configuration
 files, loaded from the /usr/share/spamassassin and /etc/mail/spamassassin
 directories.
 
-The C<#> character starts a comment, which continues until end of line,
-and whitespace in the files is not significant.
+The C<#> character starts a comment, which continues until end of line.
+
+Whitespace in the files is not significant, but please note that starting a
+line with whitespace is deprecated, as we reserve its use for multi-line rule
+definitions, at some point in the future.
 
 Paths can use C<~> to refer to the user's home directory.
 
@@ -255,9 +258,9 @@ include it when modify your ruleset, especially if you plan to distribute it.
 A good choice for I<string> is your last name or your initials followed by a
 number which you increase with each change.
 
-eg.
+e.g.
 
-  version_tag perkel2    # version=2.40-perkel2
+  version_tag myrules1    # version=2.41-myrules1
 
 =cut
 
@@ -291,7 +294,7 @@ Regular expressions are not used for security reasons.
 Multiple addresses per line, separated by spaces, is OK.  Multiple C<whitelist_from> lines is also
 OK.
 
-eg.
+e.g.
 
   whitelist_from joe@example.com fred@example.com
   whitelist_from simon@example.com
@@ -326,9 +329,10 @@ Used to override a default whitelist_from entry, so for example a distribution w
 can be overriden in a local.cf file, or an individual user can override a whitelist_from entry
 in their own .user_prefs file.
 
-eg.
-unwhitelist_from joe@example.com fred@example.com
-unwhitelist_from *@amazon.com
+e.g.
+
+  unwhitelist_from joe@example.com fred@example.com
+  unwhitelist_from *@amazon.com
 
 =cut
 
@@ -353,9 +357,10 @@ Used to override a default blacklist_from entry, so for example a distribution b
 can be overriden in a local.cf file, or an individual user can override a blacklist_from entry
 in their own .user_prefs file.
 
-eg.
-unblacklist_from joe@example.com fred@example.com
-unblacklist_from *@spammer.com
+e.g.
+
+  unblacklist_from joe@example.com fred@example.com
+  unblacklist_from *@spammer.com
 
 =cut
 

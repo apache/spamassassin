@@ -1,5 +1,5 @@
 # SpamAssassin rules file: tests.
-# $Id: 20_head_tests.cf,v 1.174 2002/09/03 20:03:21 quinlan Exp $
+# $Id: 20_head_tests.cf,v 1.175 2002/09/04 18:36:49 jmason Exp $
 ###########################################################################
 
 require_version 2.41
@@ -602,7 +602,6 @@ describe POST_IN_RCVD           Received contains fake 'Post.cz' hostname
 
 header FROM_TOPICA              From =~ /\@(?:\w\.)*email-publisher.com/i
 describe FROM_TOPICA            From an address @email-publisher.com
-
 
 header FORGED_EBAY_RCVD         eval:check_for_from_domain_in_received_headers('ebay.com', 'false')
 describe FORGED_EBAY_RCVD       'From' ebay.com does not match 'Received' headers

@@ -4,7 +4,8 @@ use strict;
 use Fcntl;
 
 # must match line at top of lib/Mail/SpamAssassin/DBBasedAddrList.pm.
-BEGIN { @AnyDBM_File::ISA = qw(DB_File GDBM_File NDBM_File SDBM_File); }
+# now off until 3.0
+# BEGIN { @AnyDBM_File::ISA = qw(DB_File GDBM_File NDBM_File SDBM_File); }
 
 use AnyDBM_File ;
 use vars qw( %h $k $v ) ;

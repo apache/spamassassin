@@ -244,7 +244,7 @@ sub razor1_lookup {
   my $response = undef;
 
   # razor also debugs to stdout. argh. fix it to stderr...
-  if ($Mail::SpamAssassin::DEBUG) {
+  if ($Mail::SpamAssassin::DEBUG->{enabled}) {
     open (OLDOUT, ">&STDOUT");
     open (STDOUT, ">&STDERR");
   }
@@ -307,7 +307,7 @@ sub razor1_lookup {
   $self->leave_helper_run_mode();
 
   # razor also debugs to stdout. argh. fix it to stderr...
-  if ($Mail::SpamAssassin::DEBUG) {
+  if ($Mail::SpamAssassin::DEBUG->{enabled}) {
     open (STDOUT, ">&OLDOUT");
     close OLDOUT;
   }
@@ -356,14 +356,13 @@ sub razor2_lookup {
   my $response = undef;
 
   # razor also debugs to stdout. argh. fix it to stderr...
-  if ($Mail::SpamAssassin::DEBUG) {
+  if ($Mail::SpamAssassin::DEBUG->{enabled}) {
     open (OLDOUT, ">&STDOUT");
     open (STDOUT, ">&STDERR");
   }
 
   $self->enter_helper_run_mode();
 
-  {
     eval {
       local ($^W) = 0;    # argh, warnings in Razor
 
@@ -424,12 +423,11 @@ sub razor2_lookup {
         warn("razor2 check skipped: $! $@");
         }
       }
-  }
 
   $self->leave_helper_run_mode();
 
   # razor also debugs to stdout. argh. fix it to stderr...
-  if ($Mail::SpamAssassin::DEBUG) {
+  if ($Mail::SpamAssassin::DEBUG->{enabled}) {
     open (STDOUT, ">&OLDOUT");
     close OLDOUT;
   }
@@ -825,9 +823,17 @@ sub enter_helper_run_mode {
 
   dbg ("entering helper-app run mode");
   $self->{old_slash} = $/;              # Razor pollutes this
-  $self->{old_env_home} = $ENV{'HOME'};
-  if (defined $self->{main}->{home_dir_for_helpers}) {
+  $self->{old_env_home} = $ENV{'HOME'}; # can be 'undef', e.g. spamd has no HOME
+
+  if (defined $self->{main}->{home_dir_for_helpers}
+             && $self->{main}->{home_dir_for_helpers})
+  {
     $ENV{'HOME'} = $self->{main}->{home_dir_for_helpers};
+  }
+  else {
+    # use spamd -u user's home dir
+    my $hd = (getpwuid($>))[7];
+    $ENV{'HOME'} = $hd if defined $hd;
   }
 }
 
@@ -838,6 +844,8 @@ sub leave_helper_run_mode {
   $/ = $self->{old_slash};
   if (defined $self->{old_env_home}) {
     $ENV{'HOME'} = $self->{old_env_home};
+  } else {
+    delete $ENV{'HOME'};        # make sure it's unset
   }
 }
 

@@ -1,5 +1,5 @@
 # URI tests
-# $Id: 20_uri_tests.cf,v 1.27 2002/09/02 18:24:14 jmason Exp $
+# $Id: 20_uri_tests.cf,v 1.28 2002/09/04 18:36:50 jmason Exp $
 
 require_version 2.41
 
@@ -67,7 +67,6 @@ describe WEIRD_PORT             Uses non-standard port number for HTTP
 # freqs:  0.003    0.008    0.000    1.00    1.00  WWW_AUTOREMOVE_COM
 uri WWW_AUTOREMOVE_COM      /autoremove\.com/i   
 describe WWW_AUTOREMOVE_COM     Frequent SPAM content
-
 
 uri E_WEBHOSTCENTRAL_URL        /e-webhostcentral\.com/i
 describe E_WEBHOSTCENTRAL_URL       Frequent SPAM content

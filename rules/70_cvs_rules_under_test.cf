@@ -7,10 +7,7 @@
 #
 # I suggest adding a prefix to rules in this file, "T_" -- this
 # helps identify probationary rules in test output.
-# $Id: 70_cvs_rules_under_test.cf,v 1.30 2002/08/29 12:29:45 jmason Exp $
+# $Id: 70_cvs_rules_under_test.cf,v 1.31 2002/09/04 18:36:50 jmason Exp $
 
 ######################################################################
 
-header T_TRAFFICMAGNET		From:addr =~ /\@trafficmagnet\.(?:net|com)/i
-describe T_TRAFFICMAGNET	Search engine scam from a well known spamhaus
-score T_TRAFFICMAGNET		3.0
