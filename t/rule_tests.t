@@ -1,6 +1,13 @@
 #!/usr/bin/perl
 
-# $Id: rule_tests.t,v 1.5 2002/07/15 12:38:28 jmason Exp $
+# $Id: rule_tests.t,v 1.6 2002/07/22 12:19:57 jmason Exp $
+
+my $prefix = '.';
+if (-e 'test_dir') {            # running from test directory, not ..
+  use lib '../lib';
+  $prefix = '..';
+}
+
 use strict;
 use Test;
 use Mail::SpamAssassin;
@@ -10,7 +17,7 @@ use vars qw($num_tests);
 $num_tests = 1;
 
 my $sa = Mail::SpamAssassin->new({
-    rules_filename => "rules",
+    rules_filename => "$prefix/rules",
 });
 
 $sa->init(0); # parse rules
@@ -19,6 +26,9 @@ my $mail = SATest::Message->new();
 
 foreach my $symbol ($sa->{conf}->regression_tests()) {
     foreach my $test ($sa->{conf}->regression_tests($symbol)) {
+        my $test_type = $sa->{conf}->{test_types}->{$symbol};
+        next unless defined($test_type);        # score, but no test
+
         $num_tests++;
     }
 }
@@ -59,7 +69,8 @@ foreach my $symbol ($sa->{conf}->regression_tests()) {
 
         $conf->{scores}->{$symbol} = 1;
         $msg->check();
-        ok( $msg->get_hits, ($ok_or_fail eq 'ok' ? 1 : 0), "Test for $symbol against $string" );
+        ok( $msg->get_hits, ($ok_or_fail eq 'ok' ? 1 : 0),
+                "Test for '$symbol' (type: $test_type) against '$string'" );
     }
 }
 
