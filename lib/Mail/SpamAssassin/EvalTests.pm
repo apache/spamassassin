@@ -3361,7 +3361,7 @@ sub check_ratware_name_id {
   return 0;
 }
 
-sub check_phish_mismatch {
+sub check_https_ip_mismatch {
   my ($self) = @_;
 
   while (my($k,$v) = each %{$self->{html}->{uri_anchor_index}}) {
