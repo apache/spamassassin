@@ -1772,7 +1772,25 @@ my $schemeRE = qr/(?:https?|ftp|mailto|javascript|file)/;
 my $uricCheat = $uricSet;
 $uricCheat =~ tr/://d;
 
-my $schemelessRE = qr/(?<![.=])(?:www\.|ftp\.)/;
+# the list from %VALID_TLDS in Util/RegistrarBoundaries.pm, as a
+# Regexp::Optimize optimized regexp ;)  accurate as of 20050318
+my $tldsRE = qr/
+    (?=[a-wyz])
+    (?:a(?:e(?:ro)?|r(?:pa)?|[cdfgilmnoqstuwzx])
+      |b(?:iz?|[abdefghjmnorstvwyz]) |c(?:o(?:m|op)?|[acdfghiklmnrsu])
+      |g(?:[efghilmnpqrstuwy]|ov) |h[kmnrtu] |i(?:n(?:fo|t)?|[delmoqrst])
+      |j[emop]|k[eghimnprwyz]|l[abcikrstuvy]
+      |m(?:u(?:seum)?|[acdghkmnopqrstvwxyz]|i?l)|n(?:a(?:me)?|et?|[cfgilopruz])
+      |o(?:m|rg)|p(?:ro?|[aefghklmnstwy])|r[eouw]|s[abcdeghijklmnortvyzu]
+      |t[cdfghjklmnoprtvwz]|u[agkmsyz]|v[aceginu]|w[fs]|y[etu]|z[amw]|ed?u|qa
+    )/ix;
+
+my $schemelessRE = qr/(?<![.=])(?:
+        www\.
+        |ftp\.
+        |(?<!\@)[-_a-z0-9\.]{3,999}\.${tldsRE}(?![-_a-z0-9\.])
+    )/ix;
+
 my $uriRe = qr/\b(?:$schemeRE:[$uricCheat]|$schemelessRE)[$uricSet#]*/o;
 
 # Taken from Email::Find (thanks Tatso!)
