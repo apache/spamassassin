@@ -98,7 +98,7 @@ rawbody HTTP_ESCAPED_HOST       /http\:\/\/[^\/]*%/
 describe HTTP_ESCAPED_HOST      Uses %-escapes inside a URL's hostname
 
 # note: do not match \r or \n
-rawbody HTTP_CTRL_CHARS_HOST    /http\:\/\/[^\/]*[\x00-\x09\x0b\x0c\x0e-\x1f]/
+rawbody HTTP_CTRL_CHARS_HOST    /http\:\/\/[^\/]*[\x00-\x08\x0b\x0c\x0e-\x1f]/
 describe HTTP_CTRL_CHARS_HOST   Uses control sequences inside a URL's hostname
 
 rawbody SUPERLONG_LINE		/^[^<]{199,}$/m
