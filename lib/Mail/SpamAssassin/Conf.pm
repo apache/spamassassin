@@ -1282,23 +1282,21 @@ How many seconds to wait before retrying an MX check.
 =item dns_available { yes | test[: name1 name2...] | no }   (default: test)
 
 By default, SpamAssassin will query some default hosts on the internet to
-attempt to check if DNS is working on not. The problem is that it can introduce
-some delay if your network connection is down, and in some cases it can wrongly
-guess that DNS is unavailable because the test connections failed.
+attempt to check if DNS is working on not. The problem is that it can
+introduce some delay if your network connection is down, and in some cases it
+can wrongly guess that DNS is unavailable because the test connections failed.
 SpamAssassin includes a default set of 13 servers, among which 3 are picked
 randomly.
 
 You can however specify your own list by specifying
 
-  dns_available test: server1.tld server2.tld server3.tld
+  dns_available test: domain1.tld domain2.tld domain3.tld
 
-Please note, the DNS test queries for MX records so if you specify your
-own list of servers, please make sure to choose the one(s) which has an
-associated MX record.
+Please note, the DNS test queries for NS records.
 
-SpamAssassin's network rules are run in parallel.  This can cause overhead
-in terms of the number of file descriptors required; it is recommended
-that the minimum limit on fds be raised to at least 256 for safety.
+SpamAssassin's network rules are run in parallel.  This can cause overhead in
+terms of the number of file descriptors required; it is recommended that the
+minimum limit on file descriptors be raised to at least 256 for safety.
 
 =cut
 
