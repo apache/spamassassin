@@ -103,14 +103,28 @@ describe HTML_TITLE_UNTITLED	HTML title contains "Untitled"
 body HTML_TITLE_EMPTY		eval:html_eval('title_text', '!~ /\S/s')
 describe HTML_TITLE_EMPTY	HTML title contains no text
 
-body HTML_50_70			eval:html_percentage('50','70')
-describe HTML_50_70		Message is 50-70% HTML tags
-
-body HTML_70_90			eval:html_percentage('70','90')
-describe HTML_70_90		Message is 70-90% HTML tags
-
+# the HTML percentage range
+# should really be converted into a numeric function test
+body HTML_00_10			eval:html_percentage('00','10')
+describe HTML_00_10		Message is 00% to 10% HTML
+body HTML_10_20			eval:html_percentage('10','20')
+describe HTML_10_20		Message is 10% to 20% HTML
+body HTML_20_30			eval:html_percentage('20','30')
+describe HTML_20_30		Message is 20% to 30% HTML
+body HTML_30_40			eval:html_percentage('30','40')
+describe HTML_30_40		Message is 30% to 40% HTML
+body HTML_40_50			eval:html_percentage('40','50')
+describe HTML_40_50		Message is 40% to 50% HTML
+body HTML_50_60			eval:html_percentage('50','60')
+describe HTML_50_60		Message is 50% to 60% HTML
+body HTML_60_70			eval:html_percentage('60','70')
+describe HTML_60_70		Message is 60% to 70% HTML
+body HTML_70_80			eval:html_percentage('70','80')
+describe HTML_70_80		Message is 70% to 80% HTML
+body HTML_80_90			eval:html_percentage('80','90')
+describe HTML_80_90		Message is 80% to 90% HTML
 body HTML_90_100		eval:html_percentage('90','100')
-describe HTML_90_100		Message is 90-100% HTML tags
+describe HTML_90_100		Message is 90% to 100% HTML
 
 body HTML_TABLE_THICK_BORDER		eval:html_test('thick_border')
 describe HTML_TABLE_THICK_BORDER	HTML table has thick border
