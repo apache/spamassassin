@@ -140,7 +140,6 @@ sub spawn;  # forward declaration
 sub logmsg; # forward declaration
 
 setlogsock('unix');
-openlog('spamd','cons,pid',$log_facility);
 
 my $port = $opt_p || 783;
 my $addr = gethostbyname($opt_i || '127.0.0.1');
@@ -446,6 +445,7 @@ sub create_default_cf_if_needed {
 
 sub logmsg
 {
+    openlog('spamd','cons,pid',$log_facility);
     syslog('info',"@_");
     if ($opt_D) { warn "logmsg: @_\n"; }
 }
