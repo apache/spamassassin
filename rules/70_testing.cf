@@ -416,3 +416,6 @@ body T_DISGUISE_PORN_MUNDANE	/\b(?:h[0*]t|y[0*][uv]ng|b[0*]ys?|g[1*]r[1l]s?|g[1l
 describe T_DISGUISE_PORN_MUNDANE	Attempts to disguise mundane words used in porn
 
 ##########################################################################
+
+# bug 4023
+body      T_NO_SCRIP_NEEDED       /no.{1,10}P(?:er|re)scription.{1,10}(?:needed|require|necessary)/i
