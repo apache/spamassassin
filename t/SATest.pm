@@ -262,7 +262,10 @@ sub start_spamd {
 
   # now find the PID
   $spamd_pid = 0;
+  # note that the wait period increases the longer it takes,
+  # 20 retries works out to a total of 60 seconds
   my $retries = 20;
+  my $wait = 0;
   while ($spamd_pid <= 0) {
     my $spamdlog = '';
 
@@ -276,7 +279,7 @@ sub start_spamd {
       last if ($spamd_pid);
     }
 
-    sleep 2;
+    sleep (int($wait++ / 4) + 1) if $retries > 0;
     if ($retries-- <= 0) {
       warn "spamd start failed: log: $spamdlog";
       warn "\n\nMaybe you need to kill a running spamd process?\n\n";
