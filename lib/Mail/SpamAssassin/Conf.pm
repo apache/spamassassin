@@ -770,14 +770,14 @@ Currently this is the same value Razor itself uses: C<~/razor.conf>.
 Specify additional options to the dccproc(8) command. Please note that only
 [A-Z -] is allowed (security).
 
-The default is '-QR' (disables auto-reporting).
+The default is '-R'
 
 =cut
 
     if (/^dcc_options\s+[A-Z -]+/) {
       $self->{dcc_options} = $1; next;
     } else {
-      $self->{dcc_options} = '-QR';
+      $self->{dcc_options} = '-R';
     }
 
 =item auto_whitelist_path /path/to/file	(default: ~/.spamassassin/auto-whitelist)
