@@ -26,6 +26,7 @@
 #define SPAMC_RAW_MODE       0
 #define SPAMC_BSMTP_MODE     1
 
+#define SPAMC_USE_SSL	     1<<27
 #define SPAMC_SAFE_FALLBACK  1<<28
 #define SPAMC_CHECK_ONLY     1<<29
 

@@ -69,6 +69,7 @@ void print_usage(void)
   printf("-h: print this help message\n");
   printf("-p port: specify port for connection [default: 783]\n");
   printf("-s size: specify max message size, any bigger and it will be returned w/out processing [default: 250k]\n");
+  printf("-S: use SSL to talk to spamd\n");
   printf("-u username: specify the username for spamd to process this message under\n");
   printf("-x: don't fallback safely - in a comms error, exit with an error code\n");
 }
@@ -78,7 +79,7 @@ read_args(int argc, char **argv, char **hostname, int *port, int *max_size, char
 {
   int opt, i, j;
 
-  while(-1 != (opt = getopt(argc,argv,"-Bcd:e:fhp:t:s:u:x")))
+  while(-1 != (opt = getopt(argc,argv,"-Bcd:e:fhp:t:s:u:xS")))
   {
     switch(opt)
     {
@@ -130,6 +131,11 @@ read_args(int argc, char **argv, char **hostname, int *port, int *max_size, char
     case 's':
       {
 	*max_size = atoi(optarg);
+	break;
+      }
+    case 'S':
+      {
+	flags |= SPAMC_USE_SSL;
 	break;
       }
     case '?': {
