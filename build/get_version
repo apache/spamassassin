@@ -9,4 +9,4 @@ while (<IN>) {
 }
 close IN;
 
-print join("-",$VERSION,($DEVEL ? ($EXTRA,$DEVEL) : $EXTRA)),"\n";
+print join("-",$VERSION,($DEVEL ? ($EXTRA,"cvs") : $EXTRA)),"\n";
