@@ -385,11 +385,17 @@ sub is_dcc_available {
     return 0;
   }
 
-  if (!open(DCCHDL, "dccproc -V 2>&1 |")) {
+# patch from Ryan Cleary: a pipe open() doesn't allow for you to easily check
+# whether the command succeeded, so my patch first calls system(), then only
+# does an open() if the system() succeeds.  (
+# http://www.hughes-family.org/bugzilla/show_bug.cgi?id=507 )
+#
+  if (!system("dccproc -V >/dev/null 2>&1")) {
     dbg ("DCC is not available");
     return 0;
   } 
   else {
+    open(DCCHDL, "dccproc -V 2>&1 |");
     @resp = <DCCHDL>;
     close DCCHDL;
     dbg ("DCC is available: ".join(" ", @resp));
