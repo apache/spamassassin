@@ -1,4 +1,4 @@
-# $Id: Parser.pm,v 1.15 2003/10/01 04:36:21 felicity Exp $
+# $Id: Parser.pm,v 1.16 2003/10/01 04:39:48 felicity Exp $
 
 package Mail::SpamAssassin::MIME::Parser;
 use strict;
@@ -92,7 +92,7 @@ sub parse {
     if ($header) {
       my ( $key, $value ) = split ( /:\s*/, $header, 2 );
       if ( $key =~ /^(?:MIME-Version|Lines|X-MIME|Content-)/i ) {
-        $msg->header( $key, $self->decode_header($value), $value );
+        $msg->header( $key, $self->_decode_header($value), $value );
       }
     }
 
@@ -105,12 +105,12 @@ sub parse {
   # Parse out the body ...
   my ($boundary) =
     $msg->header('content-type') =~ /boundary\s*=\s*["']?([^"';]+)["']?/i;
-  $self->parse_body( $msg, $msg, $boundary, \@message );
+  $self->_parse_body( $msg, $msg, $boundary, \@message );
 
   return $msg;
 }
 
-sub parse_body {
+sub _parse_body {
   my($self, $msg, $_msg, $boundary, $body) = @_;
 
   # CRLF -> LF
@@ -124,33 +124,33 @@ sub parse_body {
 
   if ( $type =~ /^text\/plain/i ) {
     dbg("Parse text/plain\n");
-    $self->parse_normal( $msg, $_msg, $boundary, $body );
+    $self->_parse_normal( $msg, $_msg, $boundary, $body );
   }
   elsif ( $type =~ /^text\/html/i ) {
     dbg("Parse text/html\n");
-    $self->parse_normal( $msg, $_msg, $boundary, $body );
+    $self->_parse_normal( $msg, $_msg, $boundary, $body );
   }
   elsif ( $type =~ /^multipart\/alternative/i ) {
     dbg("Parse multipart/alternative\n");
-    $self->parse_multipart_alternate( $msg, $_msg, $boundary, $body );
+    $self->_parse_multipart_alternate( $msg, $_msg, $boundary, $body );
   }
   elsif ( $type =~ /^multipart\//i ) {
     dbg("Parse $type\n");
-    $self->parse_multipart_mixed( $msg, $_msg, $boundary, $body );
+    $self->_parse_multipart_mixed( $msg, $_msg, $boundary, $body );
   }
   else {
     dbg("Regular attachment\n");
-    $self->decode_body( $msg, $_msg, $boundary, $body );
+    $self->_decode_body( $msg, $_msg, $boundary, $body );
   }
 
   if ( !$msg->body() ) {
     dbg("No message body found. Reparsing as blank.\n");
     my $part_msg = Mail::SpamAssassin::MIME->new();
-    $self->decode_body( $msg, $part_msg, $boundary, [] );
+    $self->_decode_body( $msg, $part_msg, $boundary, [] );
   }
 }
 
-sub parse_multipart_alternate {
+sub _parse_multipart_alternate {
   my($self, $msg, $_msg, $boundary, $body ) = @_;
 
   dbg("m/a got boundary: $boundary\n");
@@ -180,7 +180,7 @@ sub parse_multipart_alternate {
         splice @{$part_array}, -1
           if ( $part_array->[ scalar @{$part_array} - 1 ] eq '' );
 
-        $self->decode_body( $msg, $part_msg, $boundary, $part_array );
+        $self->_decode_body( $msg, $part_msg, $boundary, $part_array );
       }
 
       last if $line =~ /^\-\-\Q$boundary\E\-\-$/;
@@ -220,7 +220,7 @@ sub parse_multipart_alternate {
 
 }
 
-sub parse_multipart_mixed {
+sub _parse_multipart_mixed {
   my($self, $msg, $_msg, $boundary, $body) = @_;
 
   dbg("m/m Got boundary: $boundary\n");
@@ -255,7 +255,7 @@ sub parse_multipart_mixed {
           $part_msg->header('content-type') =~
           /boundary\s*=\s*["']?([^"';]+)["']?/i;
         $p_boundary ||= $boundary;
-        $self->parse_body( $msg, $part_msg, $p_boundary, $part_array );
+        $self->_parse_body( $msg, $part_msg, $p_boundary, $part_array );
       }
 
       last if $line =~ /^\-\-\Q${boundary}\E\-\-$/;
@@ -293,14 +293,14 @@ sub parse_multipart_mixed {
 
 }
 
-sub parse_normal {
+sub _parse_normal {
   my($self, $msg, $_msg, $boundary, $body) = @_;
 
   # extract body, store it in $msg
-  $self->decode_body( $msg, $_msg, $boundary, $body );
+  $self->_decode_body( $msg, $_msg, $boundary, $body );
 }
 
-sub _decode_header {
+sub __decode_header {
   my ( $encoding, $cte, $data ) = @_;
 
   if ( $cte eq 'B' ) {
@@ -317,23 +317,23 @@ sub _decode_header {
 }
 
 # decode according to RFC2047
-sub decode_header {
+sub _decode_header {
   my($self, $header) = @_;
 
   return '' unless $header;
   return $header unless $header =~ /=\?/;
 
   $header =~
-    s/=\?([\w_-]+)\?([bqBQ])\?(.*?)\?=/_decode_header($1, uc($2), $3)/ge;
+    s/=\?([\w_-]+)\?([bqBQ])\?(.*?)\?=/__decode_header($1, uc($2), $3)/ge;
   return $header;
 }
 
-sub decode_body {
+sub _decode_body {
   my($self, $msg, $part_msg, $boundary, $body ) = @_;
 
   dbg("decoding attachment\n");
 
-  my ( $type, $content, $filename ) = $self->decode( $part_msg, $body );
+  my ( $type, $content, $filename ) = $self->_decode( $part_msg, $body );
 
   my $opts = {
   	decoded => $content,
@@ -347,7 +347,7 @@ sub decode_body {
   $msg->add_body_part( $type, $opts );
 }
 
-sub decode {
+sub _decode {
   my($self, $msg, $body ) = @_;
 
   if ( lc( $msg->header('content-transfer-encoding') ) eq 'quoted-printable' ) {
