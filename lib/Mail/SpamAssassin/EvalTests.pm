@@ -321,6 +321,22 @@ sub check_for_forged_hotmail_received_headers {
   return 1;
 }
 
+# MSN_GROUPS
+sub check_for_msn_groups_headers {
+  my ($self) = @_;
+
+  # from Theo Van Dinter, see
+  # http://www.hughes-family.org/bugzilla/show_bug.cgi?id=591
+  $_ = $self->get ('X-Loop'); return 0 if ! /\@groups\.msn\.com\b/;
+  $_ = $self->get ('From'); return 0 if ! /\@groups\.msn\.com\b/;
+  $_ = $self->get ('To'); return 0 if ! /\@groups\.msn\.com\b/;
+  $_ = $self->get ('Return-Path'); return 0 if ! /-bounce\@groups\.msn\.com\b/;
+
+  $_ = $self->get ('Received');
+  return 0 if ! /^\s+from mail pickup service by groups\.msn\.com\b/;
+  return 1;
+}
+
 ###########################################################################
 
 sub check_for_forged_eudoramail_received_headers {

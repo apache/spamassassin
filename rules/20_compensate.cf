@@ -56,6 +56,11 @@ header   KNOWN_MAILING_LIST     eval:detect_mailing_list()
 describe KNOWN_MAILING_LIST     Email came from some known mailing list software
 tflags KNOWN_MAILING_LIST	nice
 
+# from Theo Van Dinter, see http://www.hughes-family.org/bugzilla/show_bug.cgi?id=591
+body MSN_GROUPS                 eval:check_for_msn_groups_headers()
+describe MSN_GROUPS             Came from MSN Communities
+tflags MSN_GROUPS               nice
+
 header NMS_CGI_NOT_BUGGY        X-Mailer =~ /^NMS FormMail.pl.*v\d/
 describe NMS_CGI_NOT_BUGGY      Not Matt's Scripts formmail.pl
 tflags NMS_CGI_NOT_BUGGY	nice
@@ -149,10 +154,6 @@ tflags MAILBITS_EMAIL		nice
 body GROUPS_YAHOO_1             /Your use of Yahoo! Groups is subject to the/
 describe GROUPS_YAHOO_1         Modified Yahoo! Groups test
 tflags GROUPS_YAHOO_1		nice
-
-body GROUPS_MSN                 /http:\/\/communities\.msn\.com\/contact/
-describe GROUPS_MSN             MSN Communities
-tflags GROUPS_MSN		nice
 
 # Evites trigger false positives
 body EVITE                      /(?:evite\.citysearch\.com|evite\.com)/
