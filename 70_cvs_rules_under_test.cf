@@ -56,7 +56,7 @@ body T_BODY_UNPRINTABLE		/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]{3,}/
 describe T_BODY_UNPRINTABLE	Body includes 3 consecutive unprintable characters
 
 # this rule may need to factor in ok_languages or ok_locales
-body     T_BODY_8BITS		/[\x80-\xff]{8,}/
+body T_BODY_8BITS		/[\x80-\xff]{8,}/
 describe T_BODY_8BITS		Body includes 8 consecutive 8-bit characters
 
 # HTML control -- HTML spam rules should all have better S/O than this
@@ -229,14 +229,14 @@ score T_NO_LOWER_FROM_2 0.01
 
 # bug 1108, To: and Cc: headers
 header __TO_NLA			To !~ /[a-z]/
-header __TO_NLU			To !~ /[a-z][^\s,]*\@/
-header __TO_NLH			To !~ /\@[^\s,]*[a-z]/
+header __TO_NLU			To !~ /(?:[a-z][^\s,]*\@|[a-z].*:\s*;)/
+header __TO_NLH			To !~ /(?:\@[^\s,]*[a-z]|[a-z].*:\s*;)/
 header __CC_NLA			Cc !~ /[a-z]/
-header __CC_NLU			Cc !~ /[a-z][^\s,]*\@/
-header __CC_NLH			Cc !~ /\@[^\s,]*[a-z]/
+header __CC_NLU			Cc !~ /(?:[a-z][^\s,]*\@|[a-z].*:\s*;)/
+header __CC_NLH			Cc !~ /(?:\@[^\s,]*[a-z]|[a-z].*:\s*;)/
 header __TOCC_NLA		ToCc !~ /[a-z]/
-header __TOCC_NLU		ToCc !~ /[a-z][^\s,]*\@/
-header __TOCC_NLH		ToCc !~ /\@[^\s,]*[a-z]/
+header __TOCC_NLU		ToCc !~ /(?:[a-z][^\s,]*\@|[a-z].*:\s*;)/
+header __TOCC_NLH		ToCc !~ /(?:\@[^\s,]*[a-z]|[a-z].*:\s*;)/
 header __CC_E			exists:Cc
 header __TO_E			exists:To
 header __TOCC_E			exists:ToCc
