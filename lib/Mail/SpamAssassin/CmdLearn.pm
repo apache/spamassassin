@@ -9,7 +9,8 @@ use Mail::SpamAssassin::PerMsgLearner;
 use Getopt::Long;
 use Pod::Usage;
 
-use vars qw($spamtest %opt $isspam $forget);
+use vars qw($spamtest %opt $isspam $forget $messagecount $messagelimit
+	$learnprob);
 
 ###########################################################################
 
@@ -35,6 +36,9 @@ sub cmdline_run {
              'mh'                               => \$opt{'mh'},
              'single|s'                         => \$opt{'single'},
              'showdots'                         => \$opt{'showdots'},
+
+             'stopafter'                        => \$opt{'stopafter'},
+	     'learnprob=f'			=> \$opt{'learnprob'},
 
              'auto-whitelist|a'                 => \$opt{'auto-whitelist'},
              'bias-scores|b'                    => \$opt{'bias-scores'},
@@ -68,6 +72,9 @@ sub cmdline_run {
       bias_scores       => $opt{'bias-scores'},
   });
 
+  $messagelimit = $opt{'stopafter'};
+  $learnprob = $opt{'learnprob'};
+
   # run this lot in an eval block, so we can catch die's and clear
   # up the dbs.
   eval {
@@ -89,8 +96,17 @@ sub cmdline_run {
     }
 
     $iter->set_function (\&wanted);
-    $iter->run (@targets);
+    $messagecount = 0;
+
+    eval {
+      $iter->run (@targets);
+    };
+    if ($@) { die $@ unless ($@ =~ /HITLIMIT/); }
+
     print STDERR "\n" if ($opt{showdots});
+    if (defined $learnprob) {
+      warn "Learned from $messagecount messages.\n";
+    }
 
     $spamtest->rebuild_learner_caches();
   };
@@ -113,6 +129,17 @@ sub killed {
 
 sub wanted {
   my ($id, $dataref) = @_;
+
+  if (defined($learnprob)) {
+    if (int (rand (1/$learnprob)) != 0) {
+      print STDERR '_' if ($opt{showdots});
+      return;
+    }
+  }
+
+  if (defined($messagelimit) && $messagecount > $messagelimit)
+					{ die 'HITLIMIT'; }
+  $messagecount++;
 
   my $ma = Mail::SpamAssassin::NoMailAudit->new ('data' => $dataref);
 
