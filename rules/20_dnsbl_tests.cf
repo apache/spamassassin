@@ -126,7 +126,7 @@ describe RCVD_IN_SBL		Received via a relay in Spamhaus SBL
 tflags RCVD_IN_SBL		net
 
 # XBL is the Exploits Block List: http://www.spamhaus.org/xbl/
-header RCVD_IN_XBL		eval:check_rbl('sblxbl-firsttrusted', '127.0.0.[456]')
+header RCVD_IN_XBL		eval:check_rbl('sblxbl-firsttrusted', 'sbl-xbl.spamhaus.org.', '127.0.0.[456]')
 describe RCVD_IN_XBL		Received via a relay in Spamhaus XBL
 tflags RCVD_IN_XBL		net
 
