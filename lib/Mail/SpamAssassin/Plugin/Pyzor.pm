@@ -302,3 +302,77 @@ sub pyzor_lookup {
 
   return 0;
 }
+
+sub plugin_report {
+  my ($self, $options) = @_;
+
+  return unless $self->{pyzor_available};
+  return unless $self->{main}->{conf}->{use_pyzor};
+
+  if (!$self->{options}->{dont_report_to_pyzor} && $self->is_pyzor_available())
+  {
+    # use temporary file: open2() is unreliable due to buffering under spamd
+    my $tmpf = $options->{report}->create_fulltext_tmpfile($options->{text});
+    if ($self->pyzor_report($options, $tmpf)) {
+      $options->{report}->{report_available} = 1;
+      dbg("reporter: spam reported to Pyzor");
+      $options->{report}->{report_return} = 1;
+    }
+    else {
+      dbg("reporter: could not report spam to Pyzor");
+    }
+    $options->{report}->delete_fulltext_tmpfile();
+  }
+}
+
+sub pyzor_report {
+  my ($self, $options, $tmpf) = @_;
+  my $timeout = $self->{main}->{conf}->{pyzor_timeout};
+
+  $options->{report}->enter_helper_run_mode();
+
+  my $oldalarm = 0;
+
+  eval {
+    local $SIG{ALRM} = sub { die "__alarm__\n" };
+    local $SIG{PIPE} = sub { die "__brokenpipe__\n" };
+
+    $oldalarm = alarm $timeout;
+
+    # note: not really tainted, this came from system configuration file
+    my $path = Mail::SpamAssassin::Util::untaint_file_path($options->{report}->{conf}->{pyzor_path});
+
+    my $opts = $options->{report}->{conf}->{pyzor_options} || '';
+
+    my $pid = Mail::SpamAssassin::Util::helper_app_pipe_open(*PYZOR,
+	$tmpf, 1, $path, split(' ', $opts), "report");
+    $pid or die "$!\n";
+
+    my @ignored = <PYZOR>;
+    $options->{report}->close_pipe_fh(\*PYZOR);
+
+    alarm $oldalarm;
+    waitpid ($pid, 0);
+  };
+
+  my $err = $@;
+
+  # do not call alarm $oldalarm here, that *may* have already taken place
+  $options->{report}->leave_helper_run_mode();
+
+  if ($err) {
+    alarm $oldalarm;
+    if ($err eq '__alarm__') {
+      dbg("reporter: pyzor report timed out after $timeout seconds");
+    } elsif ($err eq '__brokenpipe__') {
+      dbg("reporter: pyzor report failed: broken pipe");
+    } else {
+      warn("reporter: pyzor report failed: $err\n");
+    }
+    return 0;
+  }
+
+  return 1;
+}
+
+1;

@@ -71,7 +71,7 @@ sub new {
 }
 
 sub set_config {
-  my($self, $conf) = @_;
+  my ($self, $conf) = @_;
   my @cmds = ();
 
 =item use_razor2 (0|1)		(default: 1)
@@ -323,7 +323,7 @@ sub razor2_access {
 }
 
 sub plugin_report {
-  my($self, $options) = @_;
+  my ($self, $options) = @_;
 
   return unless $self->{razor2_available};
   return if $self->{main}->{local_tests_only};
@@ -332,16 +332,16 @@ sub plugin_report {
 
   if ($self->razor2_access($options->{text}, 'report')) {
     $options->{report}->{report_available} = 1;
-    dbg ('reporter: spam reported to Razor.');
+    dbg('reporter: spam reported to Razor');
     $options->{report}->{report_return} = 1;
   }
   else {
-    dbg ('reporter: could not report spam to Razor.');
+    dbg('reporter: could not report spam to Razor');
   }
 }
 
 sub plugin_revoke {
-  my($self, $options) = @_;
+  my ($self, $options) = @_;
 
   return unless $self->{razor2_available};
   return if $self->{main}->{local_tests_only};
