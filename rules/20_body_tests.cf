@@ -29,14 +29,14 @@ describe REPLY_REMOVE_SUBJECT	List removal information
 body REMOVE_IN_QUOTES		/\"remove\"/i
 describe REMOVE_IN_QUOTES	List removal information
 
-rawbody JAVASCRIPT			/<SCRIPT.*LANGUAGE.*JavaScript/i
+rawbody JAVASCRIPT			/<SCRIPT/i
 describe JAVASCRIPT			JavaScript code
-rawbody REALLY_UNSAFE_JAVASCRIPT	/<body .*onLoad/i
+rawbody REALLY_UNSAFE_JAVASCRIPT	/<(?:body|frame) [^>]*on(?:Load|UnLoad|BeforeUnload)/is
 describe REALLY_UNSAFE_JAVASCRIPT	Auto-executing JavaScript code
-rawbody SLIGHTLY_UNSAFE_JAVASCRIPT	/on(?:Blur|Error|KeyDown|KeyUp|Load|MouseOver|Resize|Unload)/i
+rawbody SLIGHTLY_UNSAFE_JAVASCRIPT	/\bon(?:Blur|Chane|Focus|Error|Key(?:Press|Down|Up)|Mouse(?:Down|Up|Over|Move|Out)|Resize|Move|Scroll|Stop|Click)\b/i
 describe SLIGHTLY_UNSAFE_JAVASCRIPT	JavaScript code which can easily be executed
 
-rawbody HTML_WITH_BGCOLOR	/<body .*bgcolor[=3d\"\'\#]+[0-9a-e][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]/i
+rawbody HTML_WITH_BGCOLOR	/<body [^>]*bgcolor[=3d\"\'\#]+[0-9a-e][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]/is
 describe HTML_WITH_BGCOLOR	HTML mail with non-white background
 
 rawbody SPAM_FORM		/CHANGE EMAIL ADDRESS IN ACTION OF FORM/
@@ -103,10 +103,12 @@ body NO_QS_ASKED		/NO QUESTIONS ASKED/i
 describe NO_QS_ASKED		Doesn't ask any questions
 body FULL_REFUND		/FULL REFUND/i
 describe FULL_REFUND		Offers a full refund
-body FOR_FREE			/for FREE/i
-describe FOR_FREE		No such thing as a free lunch
-body ONE_HUNDRED_PC_FREE	/100% FREE/i
-describe ONE_HUNDRED_PC_FREE	No such thing as a free lunch
+body FOR_FREE			/\bfor FREE\b/i
+describe FOR_FREE		No such thing as a free lunch (1)
+body ONE_HUNDRED_PC_FREE	/(?:100%|completely|totally|absolutely) FREE/i
+describe ONE_HUNDRED_PC_FREE	No such thing as a free lunch (2)
+body NO_COST                    /\bno (?:cost|charge)\b/i
+describe NO_COST                No suck thing as a free lunch (3)
 body ONE_HUNDRED_PC_GUAR	/100% GUARANTEED/i
 describe ONE_HUNDRED_PC_GUAR	One hundred percent guaranteed
 body MONEY_MAKING		/money making/i
@@ -588,7 +590,7 @@ describe COPY_DVDS              Containts 'Copy DVDs'
 body URGENT_BIZ                 /URGENT BUSINESS/i
 describe URGENT_BIZ             Containts 'URGENT BUSINESS'
 
-body EARN_PER_WEEK              /earn.{1,20}\d\d\d+.{1,30}per week/i
+body EARN_PER_WEEK              /(?:earn|make).{1,20}\d\d\d+.{1,30}(?:per week|per month|weekly|monthly)/i
 describe EARN_PER_WEEK          Contains 'earn $something per week'
 
 # contrib: Wayne A Tucker
