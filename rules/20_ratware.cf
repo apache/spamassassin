@@ -6,7 +6,7 @@
 #
 # Note that the tests which look at the "ALL" pseudoheader are quite
 # the specific header, as that's much quicker.
-# $Id: 20_ratware.cf,v 1.12 2002/08/23 04:45:04 hughescr Exp $
+# $Id: 20_ratware.cf,v 1.13 2002/08/26 17:37:12 jmason Exp $
 
 
 # We should not be seeing X-Mailer headers from news gateways, in email messages.
@@ -49,7 +49,6 @@ describe RATWARE_V3161     Bulk email software fingerprint (V3161) found in head
 #   0.003    0.007    0.000    1.00    2.00  RATWARE_MATCHMAKER
 #   0.002    0.006    0.000    1.00    2.00  RATWARE_LC_OUTLOOK
 #   0.001    0.003    0.000    1.00    1.00  RATWARE_39
-#   0.001    0.002    0.000    1.00    2.00  RATWARE_UPROAR
 header RATWARE_EGROUPS		X-Mailer =~ /eGroups Message Poster/
 describe RATWARE_EGROUPS	Bulk email software fingerprint (eGroups) found in headers
 header RATWARE_HASH_2		X-Mailer =~ /^[A-Za-z0-9\._]{16,}$/
@@ -116,6 +115,3 @@ header RATWARE_MATCHMAKER	ALL =~ /Matchmaker/
 describe RATWARE_MATCHMAKER	Bulk email software fingerprint (Matchmaker) found in headers
 header RATWARE_LC_OUTLOOK	X-Mailer =~ /^outlook$/
 describe RATWARE_LC_OUTLOOK	Bulk email software fingerprint ("outlook") found in headers
-header RATWARE_UPROAR		X-Mailer =~ /Uproar Mass Mailer/
-describe RATWARE_UPROAR		Bulk email software fingerprint (Uproar) found in headers
-

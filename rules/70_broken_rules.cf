@@ -104,8 +104,8 @@ describe CHANGE_TERMS           Terms and conditions
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  CLICKSFORMONEY_NET
-uri CLICKSFORMONEY_NET      /clicksformoney\.net/i   
-describe CLICKSFORMONEY_NET     Frequent SPAM content   
+#uri CLICKSFORMONEY_NET      /clicksformoney\.net/i   
+#describe CLICKSFORMONEY_NET     Frequent SPAM content   
 #
 #
 #   0.000    0.001    0.000    1.00    1.00  CLICK_TO_REMOVE_3
@@ -113,13 +113,13 @@ body CLICK_TO_REMOVE_3		/http:.{0,50}action=remove/is
 describe CLICK_TO_REMOVE_3	Click-to-remove with PHP/ASP action found
 #
 #
-#   0.000    0.000    0.000    0.00    1.00  CLICK_TO_REMOVE_MAILTO
-lang de describe CLICK_TO_REMOVE_MAILTO   Click-to-remove mit mailto: gefunden
-lang es describe CLICK_TO_REMOVE_MAILTO Click-to-remove with mailto: found
-lang fr describe CLICK_TO_REMOVE_MAILTO    Demande de cliquer sur un lien pour être retiré de la liste
-score CLICK_TO_REMOVE_MAILTO         1.0
-body CLICK_TO_REMOVE_MAILTO        /\bclick to.{0,30}remove.{0,50}mailto:/is   
-describe CLICK_TO_REMOVE_MAILTO    Click-to-remove with mailto: found   
+#  0.000    0.000    0.001    0.00    1.00  CLICK_TO_REMOVE_MAILTO
+#lang de describe CLICK_TO_REMOVE_MAILTO   Click-to-remove mit mailto: gefunden
+#lang es describe CLICK_TO_REMOVE_MAILTO Click-to-remove with mailto: found
+#lang fr describe CLICK_TO_REMOVE_MAILTO    Demande de cliquer sur un lien pour être retiré de la liste
+#score CLICK_TO_REMOVE_MAILTO         1.0
+#body CLICK_TO_REMOVE_MAILTO        /\bclick to.{0,30}remove.{0,50}mailto:/is   
+#describe CLICK_TO_REMOVE_MAILTO    Click-to-remove with mailto: found   
 #
 #
 #   0.000    0.000    0.000    0.00    2.67  CORRUPT_MSGID
@@ -346,9 +346,9 @@ describe LASER_PRINTER          Discusses laser printer supplies
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  LIFE_INSURANCE
-score LIFE_INSURANCE		     1.0
-body LIFE_INSURANCE             /\blife insurance.{1,30}no.{1,15}exam/i
-describe LIFE_INSURANCE         No Examination life Insurance
+#score LIFE_INSURANCE		     1.0
+#body LIFE_INSURANCE             /\blife insurance.{1,30}no.{1,15}exam/i
+#describe LIFE_INSURANCE         No Examination life Insurance
 #
 #
 #   0.002    0.003    0.001    0.87    2.10  LONG_NUMERIC_HTTP_ADDR
@@ -557,205 +557,163 @@ score PSYCHIC			     1.0
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  RATWARE_00
-header RATWARE_00	ALL =~ /4\.\.72\.1712\.3/
-describe RATWARE_00	Bulk email software fingerprint (00) found in headers
+#header RATWARE_00	ALL =~ /4\.\.72\.1712\.3/
+#describe RATWARE_00	Bulk email software fingerprint (00) found in headers
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  RATWARE_01
-header RATWARE_01	ALL =~ /ACE Contact Manager/
-describe RATWARE_01	Bulk email software fingerprint (01) found in headers
+#header RATWARE_01	ALL =~ /ACE Contact Manager/
+#describe RATWARE_01	Bulk email software fingerprint (01) found in headers
 #
 #
-#   0.000    0.000    0.000    0.00    1.00  RATWARE_02
-header RATWARE_02	ALL =~ /Aristotle Mail/
-describe RATWARE_02	Bulk email software fingerprint (02) found in headers
+#  0.000    0.000    0.000    0.00    1.00  RATWARE_02
+#header RATWARE_02	ALL =~ /Aristotle Mail/
+#describe RATWARE_02	Bulk email software fingerprint (02) found in headers
 #
 #
-#   0.000    0.000    0.000    0.00    1.00  RATWARE_05
-header RATWARE_05	ALL =~ /clansoft/
-describe RATWARE_05	Bulk email software fingerprint (05) found in headers
+#  0.002    0.000    0.003    0.00    1.00  RATWARE_05
+#header RATWARE_05	ALL =~ /clansoft/
+#describe RATWARE_05	Bulk email software fingerprint (05) found in headers
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  RATWARE_07
-header RATWARE_07	ALL =~ /Cyber-Bomber/
-describe RATWARE_07	Bulk email software fingerprint (07) found in headers
+#header RATWARE_07	ALL =~ /Cyber-Bomber/
+#describe RATWARE_07	Bulk email software fingerprint (07) found in headers
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  RATWARE_10
-header RATWARE_10	ALL =~ /Dynamic Mail Server/
-describe RATWARE_10	Bulk email software fingerprint (10) found in headers
-#
-#
-#   0.000    0.000    0.000    0.00    1.00  RATWARE_11
-header RATWARE_11	ALL =~ /CTMailer/
-describe RATWARE_11	Bulk email software fingerprint (11) found in headers
+#header RATWARE_10	ALL =~ /Dynamic Mail Server/
+#describe RATWARE_10	Bulk email software fingerprint (10) found in headers
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  RATWARE_12
-header RATWARE_12	ALL =~ /E-Broadcaster/
-describe RATWARE_12	Bulk email software fingerprint (12) found in headers
+#header RATWARE_12	ALL =~ /E-Broadcaster/
+#describe RATWARE_12	Bulk email software fingerprint (12) found in headers
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  RATWARE_13
-header RATWARE_13	ALL =~ /E-mail Magnet/
-describe RATWARE_13	Bulk email software fingerprint (13) found in headers
+#header RATWARE_13	ALL =~ /E-mail Magnet/
+#describe RATWARE_13	Bulk email software fingerprint (13) found in headers
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  RATWARE_14
-header RATWARE_14	ALL =~ /Ellipse Bulk Emailer/
-describe RATWARE_14	Bulk email software fingerprint (14) found in headers
+#header RATWARE_14	ALL =~ /Ellipse Bulk Emailer/
+#describe RATWARE_14	Bulk email software fingerprint (14) found in headers
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  RATWARE_15
-header RATWARE_15	ALL =~ /EmailBlaster/
-describe RATWARE_15	Bulk email software fingerprint (15) found in headers
+#header RATWARE_15	ALL =~ /EmailBlaster/
+#describe RATWARE_15	Bulk email software fingerprint (15) found in headers
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  RATWARE_16
-header RATWARE_16	ALL =~ /Emailer.Platinum/
-describe RATWARE_16	Bulk email software fingerprint (16) found in headers
+#header RATWARE_16	ALL =~ /Emailer.Platinum/
+#describe RATWARE_16	Bulk email software fingerprint (16) found in headers
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  RATWARE_18
-header RATWARE_18	ALL =~ /Extractor/
-describe RATWARE_18	Bulk email software fingerprint (18) found in headers
+#header RATWARE_18	ALL =~ /Extractor/
+#describe RATWARE_18	Bulk email software fingerprint (18) found in headers
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  RATWARE_19
-header RATWARE_19	ALL =~ /Floodgate/
-describe RATWARE_19	Bulk email software fingerprint (19) found in headers
+#header RATWARE_19	ALL =~ /Floodgate/
+#describe RATWARE_19	Bulk email software fingerprint (19) found in headers
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  RATWARE_20
-header RATWARE_20	ALL =~ /FlashSend/
-describe RATWARE_20	Bulk email software fingerprint (20) found in headers
+#header RATWARE_20	ALL =~ /FlashSend/
+#describe RATWARE_20	Bulk email software fingerprint (20) found in headers
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  RATWARE_21
-header RATWARE_21	ALL =~ /Goldrush/
-describe RATWARE_21	Bulk email software fingerprint (21) found in headers
+#header RATWARE_21	ALL =~ /Goldrush/
+#describe RATWARE_21	Bulk email software fingerprint (21) found in headers
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  RATWARE_24
-header RATWARE_24	ALL =~ /Mailcast/
-describe RATWARE_24	Bulk email software fingerprint (24) found in headers
+#header RATWARE_24	ALL =~ /Mailcast/
+#describe RATWARE_24	Bulk email software fingerprint (24) found in headers
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  RATWARE_25
-header RATWARE_25	ALL =~ /MailKing/
-describe RATWARE_25	Bulk email software fingerprint (25) found in headers
+#header RATWARE_25	ALL =~ /MailKing/
+#describe RATWARE_25	Bulk email software fingerprint (25) found in headers
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  RATWARE_26
-header RATWARE_26	ALL =~ /MassE-Mail/
-describe RATWARE_26	Bulk email software fingerprint (26) found in headers
+#header RATWARE_26	ALL =~ /MassE-Mail/
+#describe RATWARE_26	Bulk email software fingerprint (26) found in headers
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  RATWARE_27
-header RATWARE_27	ALL =~ /massmail.pl/
-describe RATWARE_27	Bulk email software fingerprint (27) found in headers
+#header RATWARE_27	ALL =~ /massmail.pl/
+#describe RATWARE_27	Bulk email software fingerprint (27) found in headers
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  RATWARE_30
-header RATWARE_30	ALL =~ /News Breaker/
-describe RATWARE_30	Bulk email software fingerprint (30) found in headers
+#header RATWARE_30	ALL =~ /News Breaker/
+#describe RATWARE_30	Bulk email software fingerprint (30) found in headers
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  RATWARE_31
-header RATWARE_31	ALL =~ /pop3.report/
-describe RATWARE_31	Bulk email software fingerprint (31) found in headers
+#header RATWARE_31	ALL =~ /pop3.report/
+#describe RATWARE_31	Bulk email software fingerprint (31) found in headers
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  RATWARE_32
-header RATWARE_32	ALL =~ /RamoMail/
-describe RATWARE_32	Bulk email software fingerprint (32) found in headers
+#header RATWARE_32	ALL =~ /RamoMail/
+#describe RATWARE_32	Bulk email software fingerprint (32) found in headers
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  RATWARE_33
-header RATWARE_33	ALL =~ /Ready Aim/
-describe RATWARE_33	Bulk email software fingerprint (33) found in headers
+#header RATWARE_33	ALL =~ /Ready Aim/
+#describe RATWARE_33	Bulk email software fingerprint (33) found in headers
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  RATWARE_34
-header RATWARE_34	ALL =~ /Shopping.Planet/
-describe RATWARE_34	Bulk email software fingerprint (34) found in headers
+#header RATWARE_34	ALL =~ /Shopping.Planet/
+#describe RATWARE_34	Bulk email software fingerprint (34) found in headers
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  RATWARE_35
-header RATWARE_35	ALL =~ /Stalker.s/
-describe RATWARE_35	Bulk email software fingerprint (35) found in headers
+#header RATWARE_35	ALL =~ /Stalker.s/
+#describe RATWARE_35	Bulk email software fingerprint (35) found in headers
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  RATWARE_36
-header RATWARE_36	ALL =~ /TBBS\/TIGER/
-describe RATWARE_36	Bulk email software fingerprint (36) found in headers
+#header RATWARE_36	ALL =~ /TBBS\/TIGER/
+#describe RATWARE_36	Bulk email software fingerprint (36) found in headers
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  RATWARE_37
-header RATWARE_37	ALL =~ /TOO BAD/
-describe RATWARE_37	Bulk email software fingerprint (37) found in headers
+#header RATWARE_37	ALL =~ /TOO BAD/
+#describe RATWARE_37	Bulk email software fingerprint (37) found in headers
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  RATWARE_38
-header RATWARE_38	ALL =~ /TotalMailTURBO Mail/
-describe RATWARE_38	Bulk email software fingerprint (38) found in headers
-#
-#
-#   0.000    0.000    0.000    0.00    1.00  RATWARE_40
-header RATWARE_40	ALL =~ /V3,1,2,0/
-describe RATWARE_40	Bulk email software fingerprint (40) found in headers
+#header RATWARE_38	ALL =~ /TotalMailTURBO Mail/
+#describe RATWARE_38	Bulk email software fingerprint (38) found in headers
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  RATWARE_41
-header RATWARE_41	ALL =~ /V3,2,2,0/
-describe RATWARE_41	Bulk email software fingerprint (41) found in headers
-#
-#
-#   0.000    0.000    0.000    0.00    1.00  RATWARE_42
-header RATWARE_42	ALL =~ /V.null.\.1712\.3/
-describe RATWARE_42	Bulk email software fingerprint (42) found in headers
+#header RATWARE_41	ALL =~ /V3,2,2,0/
+#describe RATWARE_41	Bulk email software fingerprint (41) found in headers
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  RATWARE_43
-header RATWARE_43	ALL =~ /WindoZ/
-describe RATWARE_43	Bulk email software fingerprint (43) found in headers
+#header RATWARE_43	ALL =~ /WindoZ/
+#describe RATWARE_43	Bulk email software fingerprint (43) found in headers
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  RATWARE_45
-header RATWARE_45	ALL =~ /WorldMerge/
-describe RATWARE_45	Bulk email software fingerprint (45) found in headers
+#header RATWARE_45	ALL =~ /WorldMerge/
+#describe RATWARE_45	Bulk email software fingerprint (45) found in headers
 #
-#
-#   0.002    0.003    0.001    0.71    2.00  RATWARE_ANSMTP
-score RATWARE_ANSMTP		2.0
-#
-#
-#   0.000    0.000    0.000    0.00    2.00  RATWARE_COGNI
-score RATWARE_COGNI		2.0
-#
-#
-#   0.002    0.003    0.002    0.55    2.00  RATWARE_CSMTP
-score RATWARE_CSMTP		2.0
-#
-#
-#   0.000    0.000    0.000    0.00    2.00  RATWARE_HASH_1
-score RATWARE_HASH_1		2.0
-#
-#
-#   0.000    0.000    0.000    0.00    2.00  RATWARE_MAMA
-score RATWARE_MAMA		2.0
-#
-#
-#   0.001    0.000    0.001    0.00    2.00  RATWARE_NETMAILER
-score RATWARE_NETMAILER		2.0
-#
-#
-#   0.004    0.006    0.003    0.66    2.00  RATWARE_YMR
-score RATWARE_YMR		2.0
 #
 #
 #   0.008    0.003    0.011    0.18    1.00  REAL_THING
-lang fr describe REAL_THING             Contient la formule 'the real thing'
+#lang fr describe REAL_THING             Contient la formule 'the real thing'
 #
 #
 #   0.004    0.010    0.000    1.00    1.00  YOU_HAVE_BEEN_SELECTED
@@ -805,10 +763,10 @@ test SPAM_REDIRECTOR ok http://rd.yahoo.com/?http://somesite.com/
 test SPAM_REDIRECTOR ok http://wwp.icq.com/?http://anothersite.com/
 #
 #
-#   0.000    0.000    0.000    0.00    1.00  SPY_ON_FRIENDS
-score SPY_ON_FRIENDS		     1.0
-body SPY_ON_FRIENDS             /\binvestigat.{0.15} (?:friend|employee|neighbor)/i
-describe SPY_ON_FRIENDS         Investigate your Friends!
+#  0.000    0.000    0.000    0.00    1.00  SPY_ON_FRIENDS
+#score SPY_ON_FRIENDS		     1.0
+#body SPY_ON_FRIENDS             /\binvestigat.{0.15} (?:friend|employee|neighbor)/i
+#describe SPY_ON_FRIENDS         Investigate your Friends!
 #
 #
 #   0.000    0.000    0.000    0.00    4.00  STAINLESS_STEEL
@@ -826,7 +784,7 @@ score SUBJECT_HAS_DATE          -1.0
 #
 #
 #   1.061    0.134    1.621    0.08    1.00  SUBJ_ENDS_IN_Q_MARK
-lang fr describe SUBJ_ENDS_IN_Q_MARK    L'entête Subject: se termine par un point d'interrogation
+#lang fr describe SUBJ_ENDS_IN_Q_MARK    L'entête Subject: se termine par un point d'interrogation
 #
 #
 #   0.243    0.202    0.268    0.43    1.00  SUBJ_HAS_Q_MARK
@@ -843,9 +801,6 @@ score SUPERLONG_LINE                 0.384
 #   1.497    0.451    2.130    0.17    1.00  SUSPECT_LIST_HEADERS
 header   SUSPECT_LIST_HEADERS   eval:suspect_list_headers()
 describe SUSPECT_LIST_HEADERS   Mailing list headers are suspicious
-#
-#
-#   0.045    0.059    0.037    0.61    1.00  SUSPICIOUS_CC_RECIPS
 #
 #
 #   0.000    0.001    0.000    1.00    1.00  THIS_AINT_JUNK
@@ -882,9 +837,6 @@ describe TO_MALFORMED		To: has a malformed address
 lang de describe TO_MALFORMED             To: ist eine ungueltige Adresse
 lang fr describe TO_MALFORMED           L'entête To: contient une adresse mal formée
 score TO_MALFORMED                   1.115
-#
-#
-#   3.676    1.786    4.819    0.27    1.11  TO_MALFORMED
 #
 #
 #   0.002    0.001    0.003    0.22   -1.00  TRACK_NUMBER
@@ -1051,3 +1003,9 @@ header PGP_SIGNATURE            Content-Type =~ /protocol=.?application\/pgp-sig
 describe PGP_SIGNATURE          Contains a PGP-signed message (signature attached)
 tflags PGP_SIGNATURE            nice
 score PGP_SIGNATURE             -3
+
+#   0.001    0.002    0.000    1.00    2.00  RATWARE_UPROAR
+#header RATWARE_UPROAR          X-Mailer =~ /Uproar Mass Mailer/
+#describe RATWARE_UPROAR        Bulk email software fingerprint (Uproar) found in headers
+
+
