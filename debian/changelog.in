@@ -1,3 +1,68 @@
+spamassassin (2.43-1) unstable; urgency=low
+
+  * New upstream release
+  * The -m option is no longer recommended. It is buggy.
+
+ -- Duncan Findlay <duncf@debian.org>  Tue, 15 Oct 2002 23:18:01 -0400
+
+spamassassin (2.42-1) unstable; urgency=low
+
+  * New upstream release
+    (Closes: #160309, #160901, #162013, #159704, #163143, #156263)
+      Various AWL fixes
+      -m fixed (better)
+      Various misc bug fixes.
+  * Added SENT_BY_AFBACKUP and SENT_BY_APTLC to 65_debian.cf
+    (Closes: #155527, #155634)
+  * Added --oknodo's in /etc/init.d/spamassassin (Closes: #161981)
+
+ -- Duncan Findlay <duncf@debian.org>  Fri,  4 Oct 2002 18:18:10 -0400
+
+spamassassin (2.41-2) unstable; urgency=low
+
+  * Applies perl-5.8 / -m patch for spamd.
+    (Closes: #159826, #159038, #159984)
+  * Adds debconf note for removal of spamproxyd (Closes: #159930)
+
+ -- Duncan Findlay <duncf@debian.org>  Sat,  7 Sep 2002 11:23:40 -0400
+
+spamassassin (2.41-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Duncan Findlay <duncf@debian.org>  Thu,  5 Sep 2002 18:07:13 -0400
+
+spamassassin (2.40-1) unstable; urgency=low
+
+  * New upstream release:
+    Spamproxyd removed -- WILL BREAK CONFIGS -- sorry! (Closes: #156938)
+    Spamassassin will no longer deliver mail, only filter (-P flag by
+     default/can't negate)
+    all_spam_to improved to be smarter (Closes: #151320)
+    config option to avoid checking dns before use (Closes: #153245)
+
+  * Init script will not fail on stop if spamd not running
+    (Closes: #158913)
+  * Logcheck files fixed (symlinks removed, messages updated)
+    (Closes: #146221, #155295)
+  * "N16" fix applied. (Will be in upstream 2.41)
+  * Added link to dman's exim integration stuff in README.Debian
+    (Closes: #151526)
+
+ -- Duncan Findlay <duncf@debian.org>  Tue,  3 Sep 2002 01:47:17 -0400
+
+spamassassin (2.31-2) unstable; urgency=low
+
+  * Changed Recommends: spamc to Depends: spamc
+
+ -- Duncan Findlay <duncf@debian.org>  Tue, 25 Jun 2002 13:38:15 -0400
+
+spamassassin (2.31-1) unstable; urgency=low
+
+  * New upstream release
+
+ -- Duncan Findlay <duncf@debian.org>  Thu, 20 Jun 2002 23:09:42 -0400
+
 spamassassin (2.30-2) unstable; urgency=low
 
   * Changed init script to use /var/run/spamd.pid
