@@ -76,6 +76,13 @@ header T_BTAMAIL_HEADER		ALL =~ /btamail\.net\.cn/i
 # bug 1108
 header T_HEADER_ALL_CAPS	eval:header_all_caps()
 
+# bug 1106
+header __OUTLOOK_EXCEPT_IMO	X-Mailer =~ /Microsoft Outlook(?! IMO)/
+header __OUTLOOK_MSGID		Message-Id =~ /^<[0-9a-f]{12,12}\$[0-9a-f]{8,8}\$[0-9a-f]{8,8}\@.{1,50}>$/
+meta T_FORGED_OUTLOOK_MAILER	(__OUTLOOK_EXCEPT_IMO && !__OUTLOOK_MSGID)
+describe T_FORGED_OUTLOOK_MAILER	Forged mail pretending to be from Outlook/OE
+score T_FORGED_OUTLOOK_MAILER	1.0
+
 ###########################################################################
 
 body T_BANG_BOSS		/\bboss!/i
@@ -516,4 +523,6 @@ score     T_HTML_LINK_UNSUB      0.01
 meta T_TOO_MANY_UA	( (USER_AGENT.+ +) > 1) 
 meta T_UA_AND_XM	( USER_AGENT && __HAS_X_MAILER )
 
+# isn't this about the same as BTAMAIL_URL?  I suggest comparing
+# and/or removing overlap before adding permanently
 body T_BTAMAIL_BODY	/btamail\.net\.cn/i
