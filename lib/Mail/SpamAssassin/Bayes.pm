@@ -161,10 +161,6 @@ use constant MAP_HEADERS_MID => 1;
 use constant MAP_HEADERS_FROMTOCC => 1;
 use constant MAP_HEADERS_USERAGENT => 1;
 
-
-  use constant ADD_INVIZ_TOKENS_I_PREFIX => 0;
-  use constant ADD_INVIZ_TOKENS_NO_PREFIX => 0;
-
 # We store header-mined tokens in the db with a "HHeaderName:val" format.
 # some headers may contain lots of gibberish tokens, so allow a little basic
 # compression by mapping the header name at least here.  these are the headers
@@ -325,28 +321,15 @@ sub read_db_configs {
 
 # The calling functions expect a uniq'ed array of tokens ...
 sub tokenize {
-  my ($self, $msg, $msgdata) = @_;
+  my ($self, $msg, $body) = @_;
 
   # Tokenize the body and put everything together
-  my @tokens = map { $self->tokenize_line ($_, '', 1) } @{$msgdata->{bayes_token_body}};
-
-  # Tokenize the URI list
-  push (@tokens, map { $self->tokenize_line ($_, '', 1) } @{$msgdata->{bayes_token_uris}});
+  my @tokens = map { $self->tokenize_line ($_, '', 1) } @{$body};
 
   # Tokenize the headers
   my %hdrs = $self->tokenize_headers ($msg);
   while( my($prefix, $value) = each %hdrs ) {
     push(@tokens, $self->tokenize_line ($value, "H$prefix:", 0));
-  }
-
-  # add invisible tokens
-  if (ADD_INVIZ_TOKENS_I_PREFIX) {
-    push (@tokens, map { $self->tokenize_line ($_, "I*:", 1) }
-                                    @{$msgdata->{bayes_token_inviz}});
-  }
-  if (ADD_INVIZ_TOKENS_NO_PREFIX) {
-    push (@tokens, map { $self->tokenize_line ($_, "", 1) }
-                                    @{$msgdata->{bayes_token_inviz}});
   }
 
   # Go ahead and uniq the array
@@ -701,7 +684,8 @@ sub learn {
     return if $ignore;
   }
 
-  my $msgdata = $self->get_body_from_msg ($msg);
+  $msg->extract_message_metadata ($self->{main});
+  my $body = $self->get_body_from_msg ($msg);
   my $ret;
 
   eval {
@@ -718,7 +702,7 @@ sub learn {
     }
 
     if ($ok) {
-      $ret = $self->learn_trapped ($isspam, $msg, $msgdata, $id);
+      $ret = $self->learn_trapped ($isspam, $msg, $body, $id);
 
       if (!$self->{main}->{learn_caller_will_untie}) {
         $self->{store}->untie_db();
@@ -737,7 +721,7 @@ sub learn {
 
 # this function is trapped by the wrapper above
 sub learn_trapped {
-  my ($self, $isspam, $msg, $msgdata, $msgid) = @_;
+  my ($self, $isspam, $msg, $body, $msgid) = @_;
   my @msgid = ( $msgid );
 
   if (!defined $msgid) {
@@ -795,7 +779,7 @@ sub learn_trapped {
   #
   $msgatime = time if ( $msgatime - time > 86400 );
 
-  for ($self->tokenize ($msg, $msgdata)) {
+  for ($self->tokenize ($msg, $body)) {
     if ($isspam) {
       $self->{store}->tok_count_change (1, 0, $_, $msgatime);
     } else {
@@ -818,7 +802,8 @@ sub forget {
   if (!$self->{conf}->{use_bayes}) { return; }
   if (!defined $msg) { return; }
 
-  my $msgdata = $self->get_body_from_msg ($msg);
+  $msg->extract_message_metadata ($self->{main});
+  my $body = $self->get_body_from_msg ($msg);
   my $ret;
 
   # we still tie for writing here, since we write to the seen db
@@ -837,7 +822,7 @@ sub forget {
     }
 
     if ($ok) {
-      $ret = $self->forget_trapped ($msg, $msgdata, $id);
+      $ret = $self->forget_trapped ($msg, $body, $id);
 
       if (!$self->{main}->{learn_caller_will_untie}) {
         $self->{store}->untie_db();
@@ -856,7 +841,7 @@ sub forget {
 
 # this function is trapped by the wrapper above
 sub forget_trapped {
-  my ($self, $msg, $msgdata, $msgid) = @_;
+  my ($self, $msg, $body, $msgid) = @_;
   my @msgid = ( $msgid );
   my $isspam;
 
@@ -898,7 +883,7 @@ sub forget_trapped {
     $self->{store}->nspam_nham_change (0, -1);
   }
 
-  for ($self->tokenize ($msg, $msgdata)) {
+  for ($self->tokenize ($msg, $body)) {
     if ($isspam) {
       $self->{store}->tok_count_change (-1, 0, $_);
     } else {
@@ -948,38 +933,35 @@ sub get_msgid {
   return wantarray ? @msgid : $msgid[0];
 }
 
+sub add_uris_for_permsgstatus {
+  my ($self, $permsgstatus) = @_;
+  return $permsgstatus->get_uri_list();
+}
+
 sub get_body_from_msg {
   my ($self, $msg) = @_;
 
   if (!ref $msg) {
     # I have no idea why this seems to happen. TODO
     warn "msg not a ref: '$msg'";
-    return { };
+    return [ ];
   }
-
   $msg->extract_message_metadata ($self->{main});
   my $permsgstatus =
         Mail::SpamAssassin::PerMsgStatus->new($self->{main}, $msg);
-  my $msgdata = $self->get_msgdata_from_permsgstatus ($permsgstatus);
+
+  my $body = $msg->get_visible_rendered_body_text_array();
+  # TODO! also add URI extraction to {metadata}
+  push (@{$body}, $self->add_uris_for_permsgstatus($permsgstatus));
   $permsgstatus->finish();
 
-  if (!defined $msgdata) {
+  if (!defined $body) {
     # why?!
     warn "failed to get body for ".scalar($self->get_msgid($self->{msg}))."\n";
-    return { };
+    return [ ];
   }
 
-  return $msgdata;
-}
-
-sub get_msgdata_from_permsgstatus {
-  my ($self, $msg) = @_;
-
-  my $msgdata = { };
-  $msgdata->{bayes_token_body} = $msg->{msg}->get_visible_rendered_body_text_array();
-  $msgdata->{bayes_token_inviz} = $msg->{msg}->get_invisible_rendered_body_text_array();
-  @{$msgdata->{bayes_token_uris}} = $msg->get_uri_list();
-  return $msgdata;
+  return $body;
 }
 
 ###########################################################################
@@ -1074,7 +1056,7 @@ sub is_scan_available {
 # Finally, the scoring function for testing mail.
 
 sub scan {
-  my ($self, $permsgstatus, $msg) = @_;
+  my ($self, $permsgstatus, $msg, $body) = @_;
   my $score;
 
   if( $self->ignore_message($permsgstatus) ) {
@@ -1091,7 +1073,8 @@ sub scan {
 
   dbg ("bayes corpus size: nspam = $ns, nham = $nn");
 
-  my $msgdata = $self->get_msgdata_from_permsgstatus ($permsgstatus);
+  # Add URIs to the body ...
+  push (@{$body}, $self->add_uris_for_permsgstatus ($permsgstatus));
 
   # Figure out our probabilities for the message tokens
   my %pw = map {
@@ -1101,7 +1084,7 @@ sub scan {
       } else {
 	($_ => $pw);
       }
-  } $self->tokenize ($msg, $msgdata);
+  } $self->tokenize ($msg, $body);
 
   # If none of the tokens were found in the DB, we're going to skip
   # this message...
