@@ -23,6 +23,7 @@ my $killfile_receiveds = qr{(?:
     |from abv-sfo\S+\.CNET\.COM
     |for :include:\S+/MapQuest/
     |from bounce\.winxpnews\.com
+    |\(envelope-from divx-return-\S+\@lists\.divx\.com\)
 )}x;
 
 my $killfile_froms = qr{(?:

@@ -283,3 +283,15 @@ test DOMAIN_BODY ok   Get .BIZ while it's hot!
 test DOMAIN_BODY ok   .info
 test DOMAIN_BODY ok   Get new .us domains
 test DOMAIN_BODY fail www.fobar.biz
+
+test MORTGAGE_OBFU ok  Mort$a$e
+test MORTGAGE_OBFU ok  Mor$gage
+test MORTGAGE_OBFU ok  Mort$age
+test MORTGAGE_OBFU ok  Mortga$e
+test MORTGAGE_OBFU fail Mortsa$e
+test MORTGAGE_OBFU fail Morlage
+test MORTGAGE_OBFU fail mortgage
+test MORTGAGE_OBFU fail mortgage$
+test MORTGAGE_OBFU fail mortgage$
+
+

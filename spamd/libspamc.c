@@ -18,7 +18,6 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
-#include <netdb.h>
 #include <arpa/inet.h>
 
 #ifdef HAVE_SYSEXITS_H
@@ -83,9 +82,9 @@ static const int EXPANSION_ALLOWANCE = 16384;
 /* Set the protocol version that this spamc speaks */
 static const char *PROTOCOL_VERSION="SPAMC/1.2";
 
-/* Aug 14, 2002 bj: No more ctx! */
 static int
-try_to_connect (const struct sockaddr *addr, int *sockptr)
+try_to_connect (const struct sockaddr *argaddr, const struct hostent *hent,
+                int hent_port, int *sockptr)
 {
 #ifdef USE_TCP_NODELAY
   int value;
@@ -94,6 +93,21 @@ try_to_connect (const struct sockaddr *addr, int *sockptr)
   int status = -1;
   int origerr;
   int numloops;
+  int hent_hostnum = 0;
+  struct sockaddr_in addrbuf, *addr;
+
+  /* only one set of connection targets can be used.  assert this */
+  if (argaddr == NULL && hent == NULL) {
+      syslog (LOG_ERR, "oops! both NULL in try_to_connect");
+      return EX_SOFTWARE;
+  } else if (argaddr != NULL && hent != NULL) {
+      syslog (LOG_ERR, "oops! both non-NULL in try_to_connect");
+      return EX_SOFTWARE;
+  }
+
+  if (hent != NULL) {
+    for (hent_hostnum=1; hent->h_addr_list[hent_hostnum] != 0; hent_hostnum++) {}
+  }
 
   if(-1 == (mysock = socket(PF_INET,SOCK_STREAM,0)))
   {
@@ -137,6 +151,18 @@ try_to_connect (const struct sockaddr *addr, int *sockptr)
 #endif
 
   for (numloops=0; numloops < MAX_CONNECT_RETRIES; numloops++) {
+    if (argaddr != NULL) {
+      addr = (struct sockaddr_in *) argaddr;     /* use the one provided */
+    } else {
+      /* cycle through the addrs in hent */
+      memset(&addrbuf, 0, sizeof(addrbuf));
+      addrbuf.sin_family=AF_INET;
+      addrbuf.sin_port=htons(hent_port);
+      memcpy (&addrbuf.sin_addr, hent->h_addr_list[numloops % hent_hostnum],
+                        sizeof(addrbuf.sin_addr));
+      addr = &addrbuf;
+    }
+
     status = connect(mysock,(const struct sockaddr *) addr, sizeof(*addr));
 
     if (status < 0)
@@ -145,7 +171,7 @@ try_to_connect (const struct sockaddr *addr, int *sockptr)
       syslog (LOG_ERR, "connect() to spamd at %s failed, retrying (%d/%d): %m",
                         inet_ntoa(((struct sockaddr_in *)addr)->sin_addr),
                         numloops+1, MAX_CONNECT_RETRIES);
-      sleep(1);
+      sleep(CONNECT_RETRY_SLEEP);
 
     } else {
       *sockptr = mysock;
@@ -342,7 +368,10 @@ void message_dump(int in_fd, int out_fd, struct message *m){
     }
 }
 
-int message_filter(const struct sockaddr *addr, char *username, int flags, struct message *m){
+static int _message_filter(const struct sockaddr *addr,
+                const struct hostent *hent, int hent_port, char *username,
+                int flags, struct message *m)
+{
     char *buf=NULL, is_spam[5];
     int len, expected_len, i, header_read=0;
     int sock;
@@ -369,7 +398,7 @@ int message_filter(const struct sockaddr *addr, char *username, int flags, struc
     len+=i=snprintf(buf+len, 1024-len, "\r\n");
     if(i<0 || len>1024){ free(buf); free(m->out); m->out=m->msg; m->out_len=m->msg_len; return EX_OSERR; }
 
-    if((i=try_to_connect(addr, &sock))!=EX_OK){
+    if((i=try_to_connect(addr, hent, hent_port, &sock))!=EX_OK){
         free(buf);
         free(m->out); m->out=m->msg; m->out_len=m->msg_len;
         close(sock);
@@ -497,60 +526,49 @@ int message_filter(const struct sockaddr *addr, char *username, int flags, struc
     return EX_OK;
 }
 
-int lookup_host(const char *hostname, int port, struct sockaddr *a){
-    struct sockaddr_in *addr=(struct sockaddr_in *)a;
-  struct hostent *hent;
-  int origherr;
+static int _lookup_host(const char *hostname, struct hostent *out_hent)
+{
+    struct hostent *hent = NULL;
+    int origherr;
 
-    memset(&a, 0, sizeof(a));
+    /* no need to try using inet_addr(), gethostbyname() will do that */
 
-    addr->sin_family=AF_INET;
-    addr->sin_port=htons(port);
-
-    /* first, try to mangle it directly into an addr->  This will work
-   * for numeric IP addresses, but not for hostnames...
-   */
-    addr->sin_addr.s_addr = inet_addr (hostname);
-    if (addr->sin_addr.s_addr == INADDR_NONE) {
-    /* If that failed, we can use gethostbyname() to resolve it.
-     */
     if (NULL == (hent = gethostbyname(hostname))) {
-      origherr = h_errno;	/* take a copy before syslog() */
-      syslog (LOG_ERR, "gethostbyname(%s) failed: h_errno=%d",
-	      hostname, origherr);
-      switch(origherr)
-      {
-      case HOST_NOT_FOUND:
-      case NO_ADDRESS:
-      case NO_RECOVERY:
-                return EX_NOHOST;
-      case TRY_AGAIN:
-                return EX_TEMPFAIL;
-              default:
-                return EX_OSERR;
-      }
+        origherr = h_errno;	/* take a copy before syslog() */
+        syslog (LOG_ERR, "gethostbyname(%s) failed: h_errno=%d",
+                hostname, origherr);
+        switch(origherr)
+        {
+        case HOST_NOT_FOUND:
+        case NO_ADDRESS:
+        case NO_RECOVERY:
+                  return EX_NOHOST;
+        case TRY_AGAIN:
+                  return EX_TEMPFAIL;
+                default:
+                  return EX_OSERR;
+        }
     }
 
-        memcpy (&addr->sin_addr, hent->h_addr, sizeof(addr->sin_addr));
-  }
+    memcpy (out_hent, hent, sizeof(struct hostent));
 
     return EX_OK;
 }
 
 int message_process(const char *hostname, int port, char *username, int max_size, int in_fd, int out_fd, const int flags){
-    struct sockaddr addr;
+    struct hostent hent;
     int ret;
     struct message m;
 
     m.type=MESSAGE_NONE;
 
-    ret=lookup_host(hostname, port, &addr);
+    ret=lookup_host_for_failover(hostname, &hent);
     if(ret!=EX_OK) goto FAIL;
     
     m.max_len=max_size;
     ret=message_read(in_fd, flags, &m);
     if(ret!=EX_OK) goto FAIL;
-    ret=message_filter(&addr, username, flags, &m);
+    ret=message_filter_with_failover(&hent, port, username, flags, &m);
     if(ret!=EX_OK) goto FAIL;
     if(message_write(out_fd, &m)<0) goto FAIL;
     if(m.is_spam!=EX_TOOBIG) {
@@ -588,3 +606,33 @@ int process_message(const char *hostname, int port, char *username, int max_size
 
     return message_process(hostname, port, username, max_size, in_fd, out_fd, flags);
 }
+
+/* public APIs, which call into the static code and enforce sockaddr-OR-hostent
+ * conventions */
+
+int lookup_host(const char *hostname, int port, struct sockaddr *out_addr)
+{
+  struct sockaddr_in *addr = (struct sockaddr_in *)out_addr;
+  struct hostent hent;
+  int ret;
+
+  memset(&out_addr, 0, sizeof(out_addr));
+  addr->sin_family=AF_INET;
+  addr->sin_port=htons(port);
+  ret = _lookup_host(hostname, &hent);
+  memcpy (&(addr->sin_addr), hent.h_addr, sizeof(addr->sin_addr));
+  return ret;
+}
+
+int lookup_host_for_failover(const char *hostname, struct hostent *hent) {
+  return _lookup_host(hostname, hent);
+}
+
+int message_filter(const struct sockaddr *addr, char *username, int flags,
+                struct message *m)
+{ return _message_filter (addr, NULL, 0, username, flags, m); }
+
+int message_filter_with_failover (const struct hostent *hent, int port,
+                char *username, int flags, struct message *m)
+{ return _message_filter (NULL, hent, port, username, flags, m); }
+

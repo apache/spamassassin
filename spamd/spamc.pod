@@ -30,7 +30,9 @@ score/threshold to stdout (as ints) or 0/0 if there was an error.
 
 =item B<-d> I<host>
 
-Connect to spamd server on given host.
+Connect to spamd server on given host.  If I<host> resolves to multiple
+addresses, then spamc will fail-over to the other addresses, if the first one
+cannot be connected to.
 
 =item B<-e> I<command> I<[args]>
 

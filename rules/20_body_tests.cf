@@ -573,7 +573,8 @@ describe FREE_MONEY             Free money!
 body MORTGAGE_RATES		/Mortgage rates/i
 describe MORTGAGE_RATES		Information on mortgage rates
 
-body MORTGAGE_OBFU	        /mor[\$t][\$g]a[\$g]e/i
+# detect "mort$age", but not "mortgage"
+body MORTGAGE_OBFU	        /mor[tga\$]*\$[ga\$]*e/i
 describe MORTGAGE_OBFU 	        Attempt at obfuscating the word "mortgage"
 
 body TAKE_ACTION_NOW		/take action now!/i
