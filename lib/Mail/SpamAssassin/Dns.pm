@@ -9,6 +9,8 @@ use Mail::SpamAssassin::Conf;
 use File::Spec;
 use IO::Socket;
 use IPC::Open2;
+use POSIX ":sys_wait_h";        # sorry Craig ;)
+
 use Carp;
 use strict;
 
@@ -17,7 +19,9 @@ use vars qw{
 	@EXISTING_DOMAINS $IS_DNS_AVAILABLE $VERSION
 };
 
-@EXISTING_DOMAINS = qw{spamassassin.org
+# don't lookup SpamAssassin.org -- use better-connected sites
+# instead ;)
+@EXISTING_DOMAINS = qw{
                        kernel.org
                        slashdot.org
                        google.com
@@ -57,14 +61,12 @@ BEGIN {
     require Net::DNS;
     require Net::DNS::Resolver;
   };
-
-  # Use Razor2 if it's available, Razor1 otherwise
   eval {
     require Razor2::Client::Agent;
-  } or eval {
+  };
+  eval {
     require Razor::Client;
   };
-
   eval {
     require MIME::Base64;
   };
@@ -369,7 +371,6 @@ sub razor2_lookup {
 
   my $oldslash = $/;
 
-  # Use Razor2 if it's available
   {
     eval {
       local ($^W) = 0;    # argh, warnings in Razor
@@ -476,14 +477,6 @@ sub is_dcc_available {
     return 0;
   }
 
-  # jm: this could still fail
-  if (!open(DCCHDL, "$dccproc -V 2>&1 |")) {
-    dbg ("DCC is not available: open failed");
-    return 0;
-  }
-
-  @resp = <DCCHDL>;
-  close DCCHDL;
   dbg ("DCC is available: ".join(" ", @resp));
   return 1;
 }
@@ -614,14 +607,6 @@ sub is_pyzor_available {
     return 0;
   }
 
-  # jm: this could still fail
-  if (!open(PyzorHDL, "$pyzor ping 2>&1 |")) {
-    dbg ("Pyzor is not available: open failed");
-    return 0;
-  }
-
-  @resp = <PyzorHDL>;
-  close PyzorHDL;
   dbg ("Pyzor is available: ".join(" ", @resp));
   return 1;
 }
