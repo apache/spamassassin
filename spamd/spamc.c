@@ -4,6 +4,8 @@
  * The text of this license is included in the SpamAssassin distribution in the file named "License"
  */
 
+#include "libspamc.h"
+
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -21,7 +23,6 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 #include <pwd.h>
-#include "libspamc.h"
 
 /* RedHat 5.2 doesn't define Shutdown 2nd Parameter Constants */
 /* KAM 12-4-01 */
@@ -46,10 +47,15 @@
 
 # ifndef EX__MAX
 # define EX__MAX 77
+# endif
 
 extern char *optarg;
+#endif
+
+/* don't def in_addr_t for Digital UNIX or IRIX, they have it in netinet/in.h */
+#if (defined(__sun__) && defined(__sparc__) && !defined(__svr4__)) /* SunOS */ \
+     || (defined(hpux) || defined(__hpux)) /* HPUX */
 typedef unsigned long	in_addr_t;	/* base type for internet address */
-# endif
 #endif
 
 #ifndef INADDR_NONE
