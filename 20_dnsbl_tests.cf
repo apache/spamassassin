@@ -38,17 +38,17 @@ require_version @@VERSION@@
 # NJABL
 # URL: http://www.dnsbl.njabl.org/
 
-header __RCVD_IN_NJABL		eval:check_rbl('njabl', 'dnsbl.njabl.org.')
-describe __RCVD_IN_NJABL	Received via a relay in dnsbl.njabl.org
+header __RCVD_IN_NJABL		eval:check_rbl('njabl', 'combined.njabl.org.')
+describe __RCVD_IN_NJABL	Received via a relay in combined.njabl.org
 tflags __RCVD_IN_NJABL		net
 
 header RCVD_IN_NJABL_RELAY	eval:check_rbl_sub('njabl', '127.0.0.2')
 describe RCVD_IN_NJABL_RELAY	NJABL: sender is confirmed open relay
 tflags RCVD_IN_NJABL_RELAY	net
 
-header RCVD_IN_NJABL_DIALUP	eval:check_rbl('njabl-notfirsthop', 'dnsbl.njabl.org.', '127.0.0.3')
-describe RCVD_IN_NJABL_DIALUP	NJABL: dialup sender did non-local SMTP
-tflags RCVD_IN_NJABL_DIALUP	net
+header RCVD_IN_NJABL_DUL	eval:check_rbl('njabl-notfirsthop', 'combined.njabl.org.', '127.0.0.3')
+describe RCVD_IN_NJABL_DUL	NJABL: dialup sender did non-local SMTP
+tflags RCVD_IN_NJABL_DUL	net
 
 header RCVD_IN_NJABL_SPAM	eval:check_rbl_sub('njabl', '127.0.0.4')
 describe RCVD_IN_NJABL_SPAM	NJABL: sender is confirmed spam source
