@@ -446,7 +446,12 @@ sub check_for_from_domain_in_received_headers {
   my ($self, $domain, $desired) = @_;
   
   if (exists $self->{from_domain_in_received}) {
-      return $self->{from_domain_in_received};
+      if ($desired eq 'true') {
+	  return $self->{from_domain_in_received};
+      }
+      else {
+	  return !$self->{from_domain_in_received};
+      }
   }
 
   my $from = $self->get('From:addr');
@@ -458,11 +463,11 @@ sub check_for_from_domain_in_received_headers {
   my $rcvd = $self->get('Received');
 
   if($rcvd =~ /from.*\Q$domain\E.*[\[\(][0-9]+\.[0-9]+\.[0-9]+\.[0-9]+[\]\)].*by.*\Q$domain\E/) {
-      $self->{from_domain_in_received} = ($desired eq 'true');
+      $self->{from_domain_in_received} = 1;
       return ($desired eq 'true');
   }
 
-  $self->{from_domain_in_received} = ($desired ne 'true');
+  $self->{from_domain_in_received} = 0;
   return ($desired ne 'true');   
 }
 
