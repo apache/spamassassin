@@ -1321,117 +1321,119 @@ the message has passed through
 
 =cut
 
+# only uses two arguments, ignores $defval
+sub _get {
+  my ($self, $request) = @_;
+
+  my $result;
+  my $getaddr = 0;
+  my $getname = 0;
+  my $getraw = 0;
+
+  # special queries
+  if (index($request, ':') != -1) {
+    $getaddr = ($request =~ s/:addr$//);
+    $getname = ($request =~ s/:name$//);
+    $getraw = ($request =~ s/:raw$//);
+  }
+
+  # ALL: entire raw headers
+  if ($request eq 'ALL') {
+    $result = $self->{msg}->get_all_headers(1);
+  }
+  # EnvelopeFrom: the SMTP MAIL FROM: address
+  elsif ($request eq 'EnvelopeFrom') {
+    $result = $self->get_envelope_from();
+  }
+  # untrusted relays list, as string
+  elsif ($request eq 'X-Spam-Relays-Untrusted') {
+    $result = $self->{relays_untrusted_str};
+  }
+  # trusted relays list, as string
+  elsif ($request eq 'X-Spam-Relays-Trusted') {
+    $result = $self->{relays_trusted_str};
+  }
+  # ToCc: the combined recipients list
+  elsif ($request eq 'ToCc') {
+    $result = join("\n", $self->{msg}->get_header('To', $getraw));
+    if ($result) {
+      chomp $result;
+      $result .= ", " if $result =~ /\S/;
+    }
+    $result .= join("\n", $self->{msg}->get_header('Cc', $getraw));
+    $result = undef if !$result;
+  }
+  # MESSAGEID: handle lists which move the real message-id to another
+  # header for resending.
+  elsif ($request eq 'MESSAGEID') {
+    $result = join("\n", grep { defined($_) && length($_) > 0 }
+		   $self->{msg}->get_header('X-Message-Id', $getraw),
+		   $self->{msg}->get_header('Resent-Message-Id', $getraw),
+		   $self->{msg}->get_header('X-Original-Message-ID', $getraw),
+		   $self->{msg}->get_header('Message-Id', $getraw));
+  }
+  # a conventional header
+  else {
+    $result = join('', $self->{msg}->get_header($request, $getraw));
+    $result = undef if !$result;
+  }
+      
+  # special queries
+  if (defined $result && ($getaddr || $getname)) {
+    $result =~ s/^[^:]+:(.*);\s*$/$1/gs;	# 'undisclosed-recipients: ;'
+    $result =~ s/\s+/ /g;			# reduce whitespace
+    $result =~ s/^\s+//;			# leading whitespace
+    $result =~ s/\s+$//;			# trailing whitespace
+
+    if ($getaddr) {
+      # Get the email address out of the header
+      # All of these should result in "jm@foo":
+      # jm@foo
+      # jm@foo (Foo Blah)
+      # jm@foo, jm@bar
+      # display: jm@foo (Foo Blah), jm@bar ;
+      # Foo Blah <jm@foo>
+      # "Foo Blah" <jm@foo>
+      # "'Foo Blah'" <jm@foo>
+      #
+      # strip out the (comments)
+      $result =~ s/\s*\(.*?\)//g;
+      # "Foo Blah" <jm@xxx> or <jm@xxx>
+      $result =~ s/^[^<]*?<(.*?)>.*$/$1/;
+      # multiple addresses on one line? remove all but first
+      $result =~ s/,.*$//;
+    }
+    elsif ($getname) {
+      # Get the real name out of the header
+      # All of these should result in "Foo Blah":
+      #
+      # jm@foo (Foo Blah)
+      # jm@foo (Foo Blah), jm@bar
+      # display: jm@foo (Foo Blah), jm@bar ;
+      # Foo Blah <jm@foo>
+      # "Foo Blah" <jm@foo>
+      # "'Foo Blah'" <jm@foo>
+      #
+      $result =~ s/^[\'\"]*(.*?)[\'\"]*\s*<.+>\s*$/$1/g
+	  or $result =~ s/^.+\s\((.*?)\)\s*$/$1/g; # jm@foo (Foo Blah)
+    }
+  }
+  return $result;
+}
+
 sub get {
   my ($self, $request, $defval) = @_;
-  local ($_);
 
-  if (exists $self->{hdr_cache}->{$request}) {
-    $_ = $self->{hdr_cache}->{$request};
+  if (!exists $self->{hdr_cache}->{$request}) {
+    $self->{hdr_cache}->{$request} = _get(@_);
   }
-  else {
-    my $hdrname = $request;
-    my $getaddr = ($hdrname =~ s/:addr$//);
-    my $getname = ($hdrname =~ s/:name$//);
-    my $getraw = ($hdrname eq 'ALL' || $hdrname =~ s/:raw$//);
 
-    if ($hdrname eq 'ALL') {
-      $_ = $self->{msg}->get_all_headers($getraw);
-    }
-    # EnvelopeFrom: the SMTP MAIL FROM: addr
-    elsif ($hdrname eq 'EnvelopeFrom') {
-      $getraw = 1;        # this will *not* be encoded unless it's a trick
-      $getname = 0;        # avoid other tricks
-      $getaddr = 0;
-      $_ = $self->get_envelope_from();
-    }
-    # ToCc: the combined recipients list
-    elsif ($hdrname eq 'ToCc') {
-      $_ = join ("\n", $self->{msg}->get_header ('To', $getraw));
-      if ($_ ne '') {
-        chop $_;
-        $_ .= ", " if /\S/;
-      }
-      $_ .= join ("\n", $self->{msg}->get_header ('Cc', $getraw));
-      undef $_ if $_ eq '';
-    }
-    # MESSAGEID: handle lists which move the real message-id to another
-    # header for resending.
-    elsif ($hdrname eq 'MESSAGEID') {
-      $_ = join ("\n", grep { defined($_) && length($_) > 0 }
-                $self->{msg}->get_header ('X-Message-Id', $getraw),
-                $self->{msg}->get_header ('Resent-Message-Id', $getraw),
-                $self->{msg}->get_header ('X-Original-Message-ID', $getraw), # bug 2122
-                $self->{msg}->get_header ('Message-Id', $getraw));
-    }
-    # untrusted relays list, as string
-    elsif ($hdrname eq 'X-Spam-Relays-Untrusted') {
-      $_ = $self->{relays_untrusted_str};
-    }
-    # trusted relays list, as string
-    elsif ($hdrname eq 'X-Spam-Relays-Trusted') {
-      $_ = $self->{relays_trusted_str};
-    }
-    # a conventional header
-    else {
-      my @hdrs = $self->{msg}->get_header ($hdrname, $getraw);
-      if ($#hdrs >= 0) {
-        $_ = join ('', @hdrs);
-      }
-      else {
-        $_ = undef;
-      }
-    }
-
-    if (defined) {
-      if ($getaddr || $getname) {
-        s/^[^:]+:(.*);\s*$/$1/gs;	# 'undisclosed-recipients: ;'
-        s/\s+/ /g;			# reduce whitespace to single space
-        s/^\s+//;			# leading wsp
-        s/\s+$//;			# trailing wsp
-
-        if ($getaddr) {
-       	  # Get the email address out of the header
-	  # All of these should result in "jm@foo":
-	  #
-	  # jm@foo
-	  # jm@foo (Foo Blah)
-	  # jm@foo, jm@bar
-	  # display: jm@foo (Foo Blah), jm@bar ;
-          # Foo Blah <jm@foo>
-	  # "Foo Blah" <jm@foo>
-	  # "'Foo Blah'" <jm@foo>
-	  #
-          s/\s*\(.*?\)//g;		# strip out the (comments)
-          s/^[^<]*?<(.*?)>.*$/$1/;	# "Foo Blah" <jm@foo> or <jm@foo>
-          s/,.*$//;			# multiple addrs on one line? remove all but first
-        }
-        elsif ($getname) {
-	  # Get the real name out of the header
-	  # All of these should result in "Foo Blah":
-	  #
-	  # jm@foo (Foo Blah)
-	  # jm@foo (Foo Blah), jm@bar
-	  # display: jm@foo (Foo Blah), jm@bar ;
-          # Foo Blah <jm@foo>
-	  # "Foo Blah" <jm@foo>
-	  # "'Foo Blah'" <jm@foo>
-	  #
-          s/^[\'\"]*(.*?)[\'\"]*\s*<.+>\s*$/$1/g
-              or s/^.+\s\((.*?)\)\s*$/$1/g;           # jm@foo (Foo Blah)
-        }
-      }
-    }
-    $self->{hdr_cache}->{$request} = $_;
-  }
+  my $result = $self->{hdr_cache}->{$request};
+  return $result if defined $result;
 
   # If the requested header wasn't found, we should return either
   # a default value as specified by the caller, or the blank string ''.
-  if (!defined) {
-    $defval ||= '';
-    $_ = $defval;
-  }
-
-  return $_;
+  return $defval || '';
 }
 
 ###########################################################################
