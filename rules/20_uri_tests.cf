@@ -75,11 +75,11 @@ describe URI_IS_POUND		Filename is just a '\#'; probably a JS trick
 uri BARGAIN_URL			/bargain([sz]|-\S+)?\.(?:com|biz)/
 describe BARGAIN_URL		Includes a link to a likely spammer domain
 
-# this is somewhat loose, but results are good
+# these are somewhat loose, but results are good
 uri BIZ_TLD  			/\.biz(?::\d+)?(?:\/|$)/i
 describe BIZ_TLD		Contains an URL in the BIZ top-level domain    
 
-uri INFO_TLD			/^(?:https?:\/\/|mailto:)[^\/]+\.info(?:\/|$)/i
+uri INFO_TLD  			/\.info(?::\d+)?(?:\/|$)/i
 describe INFO_TLD		Contains an URL in the INFO top-level domain    
 
 # Matt Cline
