@@ -179,10 +179,15 @@ caughtspam
 works as expected.  First, send yourself a test email that doesn't contain
 anything suspicious.  You should receive it normally, but there will be a
 header containing "X-Spam-Status: No".  If you are only tagging your spam,
-send yourself an obvious spam mail and check to be sure it is marked as
-spam.  If your test emails don't get through to you, immediately rename
-your .forward file until you figure out cause of the the problem, so you
-don't lose incoming email.
+send yourself a copy of the GTUBE test string to check to be sure it is
+marked as spam.  GTUBE is located in the sample-spam.txt message
+distributed with SpamAssassin and also at:
+
+  http://www.spamassassin.org/gtube/
+
+If your test emails don't get through to you, immediately rename your
+.forward file until you figure out cause of the the problem, so you don't
+lose incoming email.
 
 
 Required Modules
