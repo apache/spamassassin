@@ -33,14 +33,6 @@ test FROM_STARTS_WITH_NUMS     fail matt@sergeant.org
 test FORGED_YAHOO_RCVD fail by mf1.lng.yahoo.com (8.11.1/8.11.1) id g3SDfPH19426
 test NUMERIC_HTTP_ADDR ok http://123456789/foo/bar
 
-test US_DOLLARS fail $-$NFbMF$K!"A49q$+$iLd$$9g$o$;$,;&E~$7$F$$$^$9!#
-test US_DOLLARS ok Twenty Million Five Hundred Thousand United States Dollars
-test US_DOLLARS ok Eight million, Five Hundred United States dollars
-test US_DOLLARS ok One Million, Five Hundred Thousand U. S.  Dollars
-test US_DOLLARS ok EIHGTEEN MILLION UNITED STATE DOLLARS
-test US_DOLLARS ok 24million U.S dollars cash
-test US_DOLLARS ok 47 million US DOLLARS
-test US_DOLLARS ok FIVE MILLION FIVE HOUNDRED THOUSAND CANADIAN DOLLAS)
 
 test US_DOLLARS_2 fail JP charset test: this should not match: $1 $
 test US_DOLLARS_2 fail JP charset test: this should not match: $1$
