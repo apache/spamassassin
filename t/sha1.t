@@ -22,7 +22,7 @@ use Mail::SpamAssassin;
 use Mail::SpamAssassin::SHA1;
 use constant HAS_DIGEST_SHA1 => eval { require Digest::SHA1; };
 
-plan tests => 15;
+plan tests => 18;
 
 sub try {
   my ($data, $want) = @_;
@@ -57,7 +57,7 @@ sub string {
   return $string;
 }
 
-my $habeas = <<END;
+my $text_blob = <<END;
 X-Habeas-SWE-1: winter into spring
 X-Habeas-SWE-2: brightly anticipated
 X-Habeas-SWE-3: like Habeas SWE (tm)
@@ -69,15 +69,44 @@ X-Habeas-SWE-8: Message (HCM) and not spam. Please report use of this
 X-Habeas-SWE-9: mark in spam to <http://www.habeas.com/report/>.
 END
 
-$habeas =~ tr/A-Z/a-z/;
-$habeas =~ tr/ / /s;
-$habeas =~ s/\/?>/\/>/;
+$text_blob =~ tr/A-Z/a-z/;
+$text_blob =~ tr/ / /s;
+$text_blob =~ s/\/?>/\/>/;
+
+# check the valid one
+ok(try($text_blob, "42ab3d716380503f66c4d44017c7f37b04458a9a"));
+
+# check an invalid one
+$text_blob =~ s/0/O/;
+ok(!try($text_blob, "42ab3d716380503f66c4d44017c7f37b04458a9a"));
 
 # fixed strings
 ok(try("squeamish ossifrage\n", "820550664cf296792b38d1647a4d8c0e1966af57"));
 ok(try("abc", "a9993e364706816aba3e25717850c26c9cd0d89d"));
 ok(try("abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq",
        "84983e441c3bd26ebaae4aa1f95129e5e54670f1"));
+
+# longest word in the english language ...
+ok(try("pneuminoultramicroscopicosilicovolcanokoniosis", "6cd152f7a76fb5c2717cee2fdf9c0cdca798cd33"));
+
+
+$text_blob = <<END;
+"I wonder if they'd use a cow as a heat shield for a space rocket...  Make it
+kind of like a barbeque...  They can land in the ocean, get out, and have
+some hamburgers...  They can mingle and wait for the Navy to arrive..." - Theo
+END
+
+ok(try($text_blob, '65aaa454875b1a5342ecdfe41786117201126aad'));
+
+$text_blob .= <<END;
+ if you're happy and you know it eat some spam.    
+ if your arteries aren't congested have some ham.
+ if you're happy and you know it and your cholesterol isn't bloated have some
+  ham and eggs and bacon while you can.         
+END
+
+ok(!try($text_blob, '65aaa454875b1a5342ecdfe41786117201126aad'));
+
 
 # garbled strings
 ok(try(string(287, 1), "909f99a779adb66a76fc53ab56c7dd1caf35d0fd"));
@@ -91,9 +120,3 @@ ok(try(string(584, 24869), "69396239246666faed31d6f5884c7469d915d4d8"));
 ok(try(string(367, 51474), "15201559b3ffb278918a2f7a35d2b702a72fb391"));
 ok(try(string(504, 64273), "73e56c49eecef44a53048e27baa42e491375eb23"));
 
-# habeas
-ok(try($habeas, "42ab3d716380503f66c4d44017c7f37b04458a9a"));
-
-# anti-habeas
-$habeas =~ s/0/O/;
-ok(!try($habeas, "42ab3d716380503f66c4d44017c7f37b04458a9a"));
