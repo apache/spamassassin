@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.637 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.638 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -157,8 +157,9 @@ body T_ENTITY_OTHER2_B		/\&\#(?:33|39|40|46|47)\;/
 meta T_ENTITY_OTHER2_M		(T_ENTITY_OTHER2_R || T_ENTITY_OTHER2_B)
 
 ########################################################################
-# some test rules
+# HTML title rules
 
+# title not in head and/or in body
 body T_HTML_TITLE_MISPLACED_1	eval:html_test('t_title_misplaced_1')
 body T_HTML_TITLE_MISPLACED_2	eval:html_test('t_title_misplaced_2')
 body T_HTML_TITLE_MISPLACED_3	eval:html_test('t_title_misplaced_3')
@@ -166,4 +167,11 @@ body T_HTML_TITLE_MISPLACED_4	eval:html_test('t_title_misplaced_4')
 meta T_HTML_TITLE_MISPLACED_M1	(T_HTML_TITLE_MISPLACED_1 && T_HTML_TITLE_MISPLACED_2)
 meta T_HTML_TITLE_MISPLACED_M2	(T_HTML_TITLE_MISPLACED_1 || T_HTML_TITLE_MISPLACED_2)
 
+# this won't work well until we parse HTML documents separately
 body T_HTML_TITLE_EXTRA		eval:html_test('t_title_extra')
+
+# possible replacement rules
+body T_HTML_TITLE_EMPTY		eval:html_title('!~ /\S/s')
+body T_HTML_TITLE_UNTITLED_1	eval:html_title('=~ /untitled/i')
+body T_HTML_TITLE_UNTITLED_2	eval:html_title('=~ /new page \d+/i')
+body T_HTML_TITLE_UNTITLED_3	eval:html_title('=~ /untitled|new page \d+/i')
