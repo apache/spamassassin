@@ -142,7 +142,6 @@ try_to_connect (const struct sockaddr *argaddr, struct hostent *hent,
 
   hent = NULL; /* cannot use hent after this point, syslog() may overwrite it */
 
-  syslog (LOG_ERR, "dbg: socket");
   if(-1 == (mysock = socket(PF_INET,SOCK_STREAM,0)))
   {
     origerr = errno;    /* take a copy before syslog() */
@@ -186,7 +185,6 @@ try_to_connect (const struct sockaddr *argaddr, struct hostent *hent,
 #endif
 
   for (numloops=0; numloops < MAX_CONNECT_RETRIES; numloops++) {
-    syslog (LOG_ERR, "dbg: loop %d", numloops);
     if (argaddr != NULL) {
       addr = (struct sockaddr_in *) argaddr;     /* use the one provided */
     } else {
@@ -206,7 +204,7 @@ try_to_connect (const struct sockaddr *argaddr, struct hostent *hent,
       addr = &addrbuf;
     }
 
-    syslog (LOG_ERR, "dbg: connect() to spamd at %s", inet_ntoa(((struct sockaddr_in *)addr)->sin_addr));
+    syslog (LOG_DEBUG, "dbg: connect() to spamd at %s", inet_ntoa(((struct sockaddr_in *)addr)->sin_addr));
     status = connect(mysock,(const struct sockaddr *) addr, sizeof(*addr));
 
     if (status < 0)
