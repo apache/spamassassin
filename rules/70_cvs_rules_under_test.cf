@@ -109,14 +109,10 @@ describe T_CHECK_EMAIL_ISFREE Body contains an e-mail address listed by Email::I
 # 12/20 - Not great, but looks ok, what say ye?  - tvd
 # sounds like it's worth something.  maybe combined with from_webmail
 # type meta subrule...
-# daf		0.000   0.0000   0.0000    0.500   0.11    0.01  T_FROM_HAS_UNDERLINE_NUMS
-# easmith	0.107   0.4216   0.0210    0.953   0.80    0.01  T_FROM_HAS_UNDERLINE_NUMS
-# jm		0.460   1.2612   0.1220    0.912   0.73    0.01  T_FROM_HAS_UNDERLINE_NUMS
-# quinlan	0.484   1.2217   0.0130    0.989   0.90    0.01  T_FROM_HAS_UNDERLINE_NUMS
-# rODbegbie	0.471   1.4918   0.0600    0.961   0.86    0.01  T_FROM_HAS_UNDERLINE_NUMS
-# theo		0.540   1.2008   0.1308    0.902   0.68    0.01  T_FROM_HAS_UNDERLINE_NUMS
+# 12/25 - this was looking for T_REPLY_TO_HAS_UNDERLINE_NUMS which got promoted
+# we need to be more careful about this kind of stuff. :(
 header __FROM_HAS_UNDERLINE_NUMS	From =~ /_\S?(?:[a-z]+\w*?\d+|\d+\w*?[a-z]+)\w*\@/i
-meta T_FROM_HAS_UNDERLINE_NUMS		(!T_REPLY_TO_HAS_UNDERLINE_NUMS && __FROM_HAS_UNDERLINE_NUMS)
+meta T_FROM_HAS_UNDERLINE_NUMS		(!REPLY_TO_HAS_UNDERLINE_NUMS && __FROM_HAS_UNDERLINE_NUMS)
 describe T_FROM_HAS_UNDERLINE_NUMS	From: contains an underline and numbers/letters
 
 # tvd - 12/25 - part of me says to promote this with strong ham sign, but
