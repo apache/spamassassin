@@ -46,6 +46,12 @@ WriteMakefile(
 
 );
 
+sub MY::tools_other {
+	package MY;
+	my $inherited = shift->SUPER::tools_other (@_);
+	$inherited."\nCFLAGS=-g\n";
+}
+
 sub MY::install {
   package MY;
   my $inherited = shift->SUPER::install (@_);
