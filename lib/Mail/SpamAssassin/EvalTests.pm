@@ -712,13 +712,13 @@ sub check_subject_for_lotsa_8bit_chars {
   my ($self) = @_;
   local ($_);
 
-  $_ = $self->get ('Subject');
+  $_ = $self->get('Subject');
 
   # cut [ and ] because 8-bit posts to mailing lists may not get
   # hit otherwise. e.g.: Subject: [ILUG] X�uX .  Also cut
   # *, since mail that goes through spamassassin multiple times will
   # not be tagged on the second pass otherwise.
-  s/\[\]\* //g;
+  s/[\[\]\* ]//g;
 
   return 1 if ($self->are_more_high_bits_set ($_));
   return 0;
