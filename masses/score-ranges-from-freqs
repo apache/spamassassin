@@ -75,6 +75,7 @@ foreach my $test (sort { $soratio{$b} <=> $soratio{$a} } keys %freq) {
   my $nonspam = $freq_nonspam{$test};
   my $soratio = $soratio{$test};
   my $mutatable = $mutable_tests{$test};
+  my $tflags = $tflags->{$test}; $tflags ||= '';
 
   if (!$mutatable) {
     printf OUT ("%3.1f %3.1f 0 $test\n", 0, 0);
@@ -86,7 +87,6 @@ foreach my $test (sort { $soratio{$b} <=> $soratio{$a} } keys %freq) {
   # for scores based on this.
   my ($lo, $hi) = ratio_in_0to1_to_range($soratio);
 
-  my $tflags = $tflags->{$test}; $tflags ||= '';
   if ($tflags =~ /\bnice\b/) {
     # "nice" scores are negative, for obvious reasons. make
     # it so, and swap around so lo < hi.
