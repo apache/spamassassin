@@ -165,6 +165,7 @@ my %makefile = (
     'EXE_FILES' => {
       'sa-filter.raw'    => 'sa-filter',
       'sa-learn.raw'     => 'sa-learn',
+      'sa-update.raw'    => 'sa-update',
       'spamc/spamc.c'    => 'spamc/spamc$(EXE_EXT)',
       'spamd/spamd.raw'  => 'spamd/spamd',
     },
@@ -173,6 +174,7 @@ my %makefile = (
         'spamassassin'     => '$(INST_MAN1DIR)/spamassassin.$(MAN1EXT)',
         'sa-filter'        => '$(INST_MAN1DIR)/sa-filter.$(MAN1EXT)',
         'sa-learn'         => '$(INST_MAN1DIR)/sa-learn.$(MAN1EXT)',
+        'sa-update'        => '$(INST_MAN1DIR)/sa-update.$(MAN1EXT)',
         'spamc/spamc.pod'  => '$(INST_MAN1DIR)/spamc.$(MAN1EXT)',
         'spamd/spamd'      => '$(INST_MAN1DIR)/spamd.$(MAN1EXT)',
     },
@@ -211,7 +213,7 @@ my %makefile = (
     },
 
     'clean' => { FILES => join(' ' =>
-        'sa-filter', 'sa-learn',
+        'sa-filter', 'sa-learn', 'sa-update',
         
         'spamd/spamd',
 
@@ -1092,6 +1094,9 @@ sa-filter: sa-filter.raw
 	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -i$? -o$@
 
 sa-learn: sa-learn.raw
+	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -i$? -o$@
+
+sa-update: sa-update.raw
 	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -i$? -o$@
 
 spamd/spamd: spamd/spamd.raw
