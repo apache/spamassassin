@@ -503,6 +503,11 @@ Whether or not to wait a long time for locks to complete (optional, default 0).
 During the opportunistic journal sync and expire check, don't actually do the
 expire but report back whether or not it should occur (optional, default 0).
 
+=item no_relearn
+
+If doing a learn operation, and the message has already been learned as
+the opposite type, don't re-learn the message.
+
 =back
 
 =cut
@@ -515,13 +520,24 @@ sub init_learner {
   # Make sure we're already initialized ...
   $self->init(1);
 
+  my %kv = (
+    'force_expire'			=> 'learn_force_expire',
+    'learn_to_journal'			=> 'learn_to_journal',
+    'caller_will_untie'			=> 'learn_caller_will_untie',
+    'wait_for_lock'			=> 'learn_wait_for_lock',
+    'opportunistic_expire_check_only'	=> 'opportunistic_expire_check_only',
+    'no_relearn'			=> 'learn_no_relearn',
+  );
+
+  my %ret;
+
   # Set any other options that need setting ...
-  if (defined $opts->{force_expire}) { $self->{learn_force_expire} = $opts->{force_expire}; }
-  if (defined $opts->{learn_to_journal}) { $self->{learn_to_journal} = $opts->{learn_to_journal}; }
-  if (defined $opts->{caller_will_untie}) { $self->{learn_caller_will_untie} = $opts->{caller_will_untie}; }
-  if (defined $opts->{wait_for_lock}) { $self->{learn_wait_for_lock} = $opts->{wait_for_lock}; }
-  if (defined $opts->{opportunistic_expire_check_only}) { $self->{opportunistic_expire_check_only} = $opts->{opportunistic_expire_check_only}; }
-  1;
+  while( my($k,$v) = each %kv ) {
+    $ret{$k} = $self->{$v};
+    if (exists $opts->{$k}) { $self->{$v} = $opts->{$k}; }
+  }
+
+  return \%ret;
 }
 
 ###########################################################################

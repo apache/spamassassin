@@ -782,6 +782,14 @@ sub learn_trapped {
       } elsif ($seen !~ /^[hs]$/) {
         warn("bayes: db_seen corrupt: value='$seen' for $msgid, ignored");
       } else {
+        # bug 3704: If the message was already learned, don't try learning it again.
+        # this prevents, for instance, manually learning as spam, then autolearning
+        # as ham, or visa versa.
+        if ($self->{main}->{learn_no_relearn}) {
+	  dbg("bayes: $msgid already learnt as opposite, not re-learning");
+	  return 0;
+	}
+
         dbg("bayes: $msgid already learnt as opposite, forgetting first");
 
         # kluge so that forget() won't untie the db on us ...
