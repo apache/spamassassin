@@ -613,14 +613,21 @@ sub check {
     {
 	while(1)
 	{
-	    $_ = $client->getline;
-	    if(!defined $_)
+	    my $line = $client->getline;
+	    if(!defined $line)
 	    {
 		protocol_error ("(EOF during headers)");
 		return 1;
 	    }
+            $line =~ s/\r\n$//;
+            last unless $line;
 
-	    if (/^\r\n/s) { last; }
+            my($header, $value) = split(/: /, $line, 2);
+            if (!defined $value)
+            {
+                protocol_error("(header not in 'Name: value' format)");
+                return 1;
+            }
 
 	    # We'll run handle user unless we've been told not
 	    # to process per-user config files.  Otherwise
@@ -631,8 +638,14 @@ sub check {
 	    # only need to do the SQL lookup if $opt{'sql-config'} IS
 	    # true.  (I got that wrong the first time.)
 
-	    if (/^User: (.*)\r\n/)
+	    if ($header eq 'User')
 	    {
+                if ($value !~ /^([\x20-\xFF]+)$/)
+                {
+		    protocol_error ("(User header contains control chars)");
+                    return 1;
+                }
+
 		$current_user = $1;
 		auth_ident($current_user) if $opt{'auth-ident'};
 
@@ -653,7 +666,13 @@ sub check {
 		  }
 		}
 	    }
-	    if (/^Content-length: ([0-9]*)\r\n/i) {
+	    elsif ($header eq 'Content-length')
+            {
+                if ($value !~ /^(\d+)$/)
+                {
+		    protocol_error ("(Content-Length contains non-numeric bytes)");
+                    return 1;
+                }
 		$expected_length = $1;
 	    }
 	}
