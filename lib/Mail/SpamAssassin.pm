@@ -76,7 +76,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 $VERSION = "2.40";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.107 2002/07/29 15:09:35 jmason Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.108 2002/07/29 16:25:10 jmason Exp $';
 
 sub Version { $VERSION; }
 
@@ -162,6 +162,11 @@ If set to 1, no tests that require internet access will be performed. (default:
 If set to 1, the user preferences file will not be created if it doesn't
 already exist. (default: 0)
 
+=item save_pattern_hits
+
+If set to 1, the patterns hit can be retrieved from the
+C<Mail::SpamAssassin::PerMsgStatus> object.  Used for debugging.
+
 =back
 
 If none of C<rules_filename>, C<userprefs_filename>, or C<config_text> is set,
@@ -201,6 +206,8 @@ sub new {
   $DEBUG->{rulesrun}=64;
 
   $self->{conf} ||= new Mail::SpamAssassin::Conf ($self);
+
+  $self->{save_pattern_hits} ||= 0;
   $self;
 }
 

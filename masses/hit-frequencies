@@ -117,6 +117,7 @@ sub readlogs {
     my $isspam = 0; ($file eq $spam) and $isspam = 1;
 
     while (<IN>) {
+      next if (/^#/);
       /^(.)\s+(-?\d+)\s+(\S+)\s*(\S*)/ or next;
       my $caught = ($1 eq 'Y');
       my $hits = $2;
