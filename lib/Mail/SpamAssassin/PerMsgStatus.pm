@@ -627,7 +627,8 @@ sub get_decoded_body_text_array {
 
   } elsif ($self->{found_encoding_quoted_printable}) {
     $_ = join ('', @{$textary});
-    s/\=([0-9A-Fa-f]{2})/chr(hex($1))/ge; s/\=\n/\n/;
+    s/\=\r?\n//gs;
+    s/\=([0-9A-Fa-f]{2})/chr(hex($1))/ge;
     my @ary = split (/^/, $_);
     return \@ary;
 
@@ -649,9 +650,9 @@ sub get_decoded_stripped_body_text_array {
     /^SPAM: / and next;         # SpamAssassin markup
     /^--/ and next;		# MIME bits
     /Content-.*: / and next;	# MIME bits
-    s/=$//gis;			# QP line endings
     $text .= $_;
   }
+  $text =~ s/=\r?\n//gis;	# QP line endings
 
   # sort out escaped QP markup
   $text =~ s/=20/ /gis;

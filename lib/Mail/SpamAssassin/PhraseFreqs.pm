@@ -20,7 +20,7 @@ sub check_phrase_freqs {
   $text =~ s/^SPAM: .*$//gm;
   $text =~ s/^Content-.*: .*$//gm;
   $text =~ s/^--.*$//gm;
-  $text =~ s/=\r?\n?$//gm;
+  $text =~ s/\=\n//gis;
 
   # strip markup and QP
   $text =~ s/=20/ /gis;
