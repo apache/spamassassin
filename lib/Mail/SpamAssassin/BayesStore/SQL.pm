@@ -129,6 +129,8 @@ sub tie_db_writable {
 
   return 0 unless (HAS_DBI);
 
+  return 1 if ($self->{_dbh}); # already connected
+
   my $main = $self->{bayes}->{main};
 
   $self->read_db_configs();
@@ -183,6 +185,7 @@ sub untie_db {
   return unless (defined($self->{_dbh}));
 
   $self->{_dbh}->disconnect();
+  $self->{_dbh} = undef;
 }
 
 =head2 calculate_expire_delta
@@ -942,6 +945,342 @@ sub perform_upgrade {
 
   return 1;
 }
+
+=head2 clear_database
+
+public instance (Boolean) clear_database ()
+
+Description:
+This method deletes all records for a particular user.
+
+Callers should be aware that any errors returned by this method
+could causes the database to be inconsistent for the given user.
+
+=cut
+
+sub clear_database {
+  my ($self) = @_;
+
+  $self->tie_db_writable();
+
+  return 0 unless (defined($self->{_dbh}));
+
+  my $rows = $self->{_dbh}->do("DELETE FROM bayes_vars WHERE username = ?",
+			       undef,
+			       $self->{_username});
+  unless (defined($rows)) {
+    dbg("SQL Error removing user (bayes_vars) data: ".$self->{_dbh}->errstr());
+    return 0;
+  }
+
+  $rows = $self->{_dbh}->do("DELETE FROM bayes_seen WHERE username = ?",
+			    undef,
+			    $self->{_username});
+  unless (defined($rows)) {
+    dbg("SQL Error removing seen data: ".$self->{_dbh}->errstr());
+    return 0;
+  }
+
+  $rows = $self->{_dbh}->do("DELETE FROM bayes_token WHERE username = ?",
+			    undef,
+			    $self->{_username});
+  unless (defined($rows)) {
+    dbg("SQL Error removing token data: ".$self->{_dbh}->errstr());
+    return 0;
+  }
+
+  return 1;
+}
+
+=head2 backup_database
+
+public instance (Boolean) backup_database ()
+
+Description:
+This method will dump the users database in a marchine readable format.
+
+=cut
+
+sub backup_database {
+  my ($self) = @_;
+
+  return 0 unless ($self->tie_db_readonly());
+
+  return 0 unless (defined($self->{_dbh}));
+
+  my @vars = $self->get_storage_variables();
+
+  print "v\t$vars[6]\tdb_version # this must be the first line!!!\n";
+  print "v\t$vars[1]\tnum_spam\n";
+  print "v\t$vars[2]\tnum_nonspam\n";
+
+  my $token_sql = "SELECT spam_count, ham_count, atime, token
+                     FROM bayes_token
+                    WHERE username = ?
+                      AND (spam_count > 0 OR ham_count > 0)
+                    ORDER BY token";
+
+  my $seen_sql = "SELECT flag, msgid
+                    FROM bayes_seen
+                   WHERE username = ?";
+
+  my $sth = $self->{_dbh}->prepare($token_sql);
+
+  unless (defined ($sth)) {
+    dbg("bayes: backup_database: SQL Error: ".$self->{_dbh}->errstr());
+    return 0;
+  }
+
+  my $rc = $sth->execute($self->{_username});
+
+  unless ($rc) {
+    dbg("bayes: backup_database: SQL Error: ".$self->{_dbh}->errstr());
+    return 0;
+  }
+
+  while (my @values = $sth->fetchrow_array()) {
+    print "t\t" . join("\t",@values) . "\n";
+  }
+
+  $sth->finish();
+
+  $sth = $self->{_dbh}->prepare($seen_sql);
+
+  unless (defined ($sth)) {
+    dbg("bayes: backup_database: SQL Error: ".$self->{_dbh}->errstr());
+    return 0;
+  }
+
+  $rc = $sth->execute($self->{_username});
+
+  unless ($rc) {
+    dbg("bayes: backup_database: SQL Error: ".$self->{_dbh}->errstr());
+    return 0;
+  }
+
+  while (my @values = $sth->fetchrow_array()) {
+    print "s\t" . join("\t",@values) . "\n";
+  }
+
+  $sth->finish();
+
+  $self->untie_db();
+
+  return 1;
+}
+
+=head2 restore_database
+
+public instance (Boolean) restore_database (String $filename, Boolean $showdots)
+
+Description:
+This method restores a database from the given filename, C<$filename>.
+
+Callers should be aware that any errors returned by this method
+could causes the database to be inconsistent for the given user.
+
+=cut
+
+sub restore_database {
+  my ($self, $filename, $showdots) = @_;
+
+  if (!open(DUMPFILE, '<', $filename)) {
+    dbg("bayes: Unable to open backup file $filename: $!");
+    return 0;
+  }
+
+  return 0 unless ($self->tie_db_writable());
+
+  return 0 unless (defined($self->{_dbh}));
+
+  # This is the critical phase (moving sql around), so don't allow it
+  # to be interrupted.
+  local $SIG{'INT'} = 'IGNORE';
+  local $SIG{'HUP'} = 'IGNORE' if (!Mail::SpamAssassin::Util::am_running_on_windows());
+  local $SIG{'TERM'} = 'IGNORE';
+
+  unless ($self->clear_database()) {
+    dbg("bayes: Database now in inconsistent state for ".$self->{_username});
+    return 0;
+  }
+
+  my $token_count = 0;
+  my $db_version;
+  my $num_spam = 0;
+  my $num_ham = 0;
+  my $error_p = 0;
+  my $line_count = 0;
+
+  my $line = <DUMPFILE>;
+  $line_count++;
+  # We require the database version line to be the first in the file so we can figure out how
+  # to properly deal with the file.  If it is not the first line then fail
+  if ($line =~ m/^v\s+(\d+)\s+db_version/) {
+    $db_version = $1;
+  }
+  else {
+    dbg("bayes: Database Version must be the first line in the backup file, correct and re-run.");
+    return 0;
+  }
+
+  my $tokensql = "INSERT INTO bayes_token
+                    (username, token, spam_count, ham_count, atime)
+                  VALUES (?,?,?,?,?)";
+
+  my $tokensth = $self->{_dbh}->prepare_cached($tokensql);
+
+  my $seensql = "INSERT INTO bayes_seen (username, msgid, flag)
+                   VALUES (?, ?, ?)";
+
+  my $seensth = $self->{_dbh}->prepare_cached($seensql);
+
+  unless (defined($seensth)) {
+    dbg("SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: Database now in inconsistent state for ".$self->{_username});
+    return 0;
+  }
+
+  while (my $line = <DUMPFILE>) {
+    chomp($line);
+    $line_count++;
+
+    if ($line_count % 1000 == 0) {
+      print STDERR "." if ($showdots);
+    }
+
+    my @parsed_line = split(/\s+/, $line, 5);
+
+    if ($parsed_line[0] eq 'v') { # variable line
+      my $value = $parsed_line[1] + 0;
+      if ($parsed_line[2] eq 'num_spam') {
+	$num_spam = $value;
+      }
+      elsif ($parsed_line[2] eq 'num_nonspam') {
+	$num_ham = $value;
+      }
+      else {
+	dbg("bayes: restore_database: Skipping unknown line: $line");
+      }
+    }
+    elsif ($parsed_line[0] eq 't') { # token line
+      my $spam_count = $parsed_line[1] + 0;
+      my $ham_count = $parsed_line[2] + 0;
+      my $atime = $parsed_line[3] + 0;
+      my $token = $parsed_line[4];
+
+      my $token_warn_p = 0;
+      my @warnings;
+
+      if ($spam_count < 0) {
+	$spam_count = 0;
+	push(@warnings,'Spam Count < 0, resetting');
+	$token_warn_p = 1;
+      }
+      if ($ham_count < 0) {
+	$ham_count = 0;
+	push(@warnings,'Ham Count < 0, resetting');
+	$token_warn_p = 1;
+      }
+
+      if ($spam_count == 0 && $ham_count == 0) {
+	dbg("bayes: Token has zero spam and ham count, skipping.");
+	next;
+      }
+
+      if ($atime > time()) {
+	$atime = time();
+	push(@warnings,'atime > current time, resetting');
+	$token_warn_p = 1;
+      }
+
+      if ($token_warn_p) {
+	dbg("bayes: Token ($token) has the following warnings:\n".join("\n",@warnings));
+      }
+
+      my $rc = $tokensth->execute($self->{_username},
+				  $token,
+				  $spam_count,
+				  $ham_count,
+				  $atime);
+      unless ($rc) {
+	dbg("bayes: Error inserting token for line: $line\nSQL Error: ".$self->errstr());
+	$error_p = 1;
+      }
+      $token_count++;
+    }
+    elsif ($parsed_line[0] eq 's') { # seen line
+      my $flag = $parsed_line[1];
+      my $msgid = $parsed_line[2];
+
+      unless ($flag eq 'h' || $flag eq 's') {
+	dbg("bayes: Unknown seen flag ($flag) for line: $line, skipping");
+	next;
+      }
+
+      my $rc = $seensth->execute($self->{_username},
+				 $msgid,
+				 $flag);
+      unless ($rc) {
+	dbg("bayes: Error inserting msgid in seen table for line: $line\nSQL Error: ".$self->errstr());
+	$error_p = 1;
+      }
+    }
+    else {
+      dbg("bayes: Skipping unknown line: $line");
+      next;
+    }
+  }
+  close(DUMPFILE);
+
+  print STDERR "\n" if ($showdots);
+
+  unless ($num_spam) {
+    dbg("bayes: Unable to find num spam, please check file.");
+    $error_p = 1;
+  }
+
+  unless ($num_ham) {
+    dbg("bayes: Unable to find num ham, please check file.");
+    $error_p = 1;
+  }
+
+  if ($error_p) {
+    dbg("bayes: Error(s) while attempting to load $filename, correct and Re-Run");
+
+    $self->clear_database();
+
+    dbg("bayes: Database now in inconsistent state for ".$self->{_username});
+    return 0;
+  }
+
+  # There is a race condition here which is why we suggest that the user
+  # turn off SA for the duration of a restore operation.  If something comes
+  # along and calls initialize_db() before this little bit of code runs then
+  # this insert will fail, but at least we'll now wipe out the bayes_token
+  # entries for this user so that we are in a somewhat ok state.
+  my $varsupdatesql = "INSERT INTO bayes_vars (username, spam_count, ham_count)
+                       VALUES(?,?,?)";
+  
+  my $rows = $self->{_dbh}->do($varsupdatesql,
+			       undef,
+			       $self->{_username}, $num_spam, $num_ham);
+  
+  unless (defined($rows)) {
+    dbg("bayes: Error inserting user variables (bayes_vars).");
+    dbg("bayes: SQL Error:".$self->{_dbh}->errstr());
+    $self->clear_database();
+    dbg("bayes; Database now in inconsistent state for ".$self->{_username});
+    return 0;
+  }
+
+  dbg("bayes: Parsed $line_count lines.");
+  dbg("bayes: Created database with $token_count tokens based on $num_spam Spam Messages and $num_ham Ham Messages.");
+
+  $self->untie_db();
+
+  return 1;
+}
+
 
 =head1 Private Methods
 

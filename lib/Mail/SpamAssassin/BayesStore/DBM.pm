@@ -443,8 +443,6 @@ sub untie_db {
 
   $self->{already_tied} = 0;
   $self->{db_version} = undef;
-
-  return 1;
 }
 
 ###########################################################################
@@ -1256,6 +1254,275 @@ sub upgrade_old_dbm_files_trapped {
 
   return 0;
 }
+
+sub clear_database {
+  my ($self) = @_;
+
+  return 0 unless ($self->tie_db_writable());
+
+  my $path = $self->{bayes}->{main}->sed_path ($self->{bayes}->{main}->{conf}->{bayes_path});
+
+  foreach my $dbname (@DBNAMES, 'journal') {
+    my $name = $path.'_'.$dbname;
+    unlink $name;
+    dbg("bayes: clear_database: removing $dbname");
+  }
+
+  $self->untie_db();
+
+  return 1;
+}
+
+sub backup_database {
+  my ($self) = @_;
+
+  # we tie writable because we want the upgrade code to kick in if needed
+  return 0 unless ($self->tie_db_writable());
+
+  my @vars = $self->get_storage_variables();
+
+  print "v\t$vars[6]\tdb_version # this must be the first line!!!\n";
+  print "v\t$vars[1]\tnum_spam\n";
+  print "v\t$vars[2]\tnum_nonspam\n";
+
+  while (my ($tok, $packed) = each %{$self->{db_toks}}) {
+    next if ($tok =~ MAGIC_RE); # skip magic tokens
+
+    my ($ts, $th, $atime) = $self->tok_unpack($packed);
+
+    print "t\t$ts\t$th\t$atime\t$tok\n";
+  }
+
+  while (my ($msgid, $flag) = each %{$self->{db_seen}}) {
+    print "s\t$flag\t$msgid\n";
+  }
+
+  $self->untie_db();
+
+  return 1;
+}
+
+sub restore_database {
+  my ($self, $filename, $showdots) = @_;
+
+  if (!open(DUMPFILE, '<', $filename)) {
+    dbg("bayes: Unable to open backup file $filename: $!");
+    return 0;
+  }
+   
+  if (!$self->tie_db_writable()) {
+    dbg("bayes: failed to tie db writable");
+    return 0;
+  }
+
+  my $main = $self->{bayes}->{main};
+  my $path = $main->sed_path ($main->{conf}->{bayes_path});
+
+  # use a temporary PID-based suffix just in case another one was
+  # created previously by an interrupted expire
+  my $tmpsuffix = "convert$$";
+  my $tmptoksdbname = $path.'_toks.'.$tmpsuffix;
+  my $tmpseendbname = $path.'_seen.'.$tmpsuffix;
+  my $toksdbname = $path.'_toks';
+  my $seendbname = $path.'_seen';
+
+  my %new_toks;
+  my %new_seen;
+  my $umask = umask 0;
+  unless (tie %new_toks, "DB_File", $tmptoksdbname, O_RDWR|O_CREAT|O_EXCL,
+	  (oct ($main->{conf}->{bayes_file_mode}) & 0666)) {
+    dbg("bayes: Failed to tie temp toks db: $!");
+    $self->untie_db();
+    return 0;
+  }
+  unless (tie %new_seen, "DB_File", $tmpseendbname, O_RDWR|O_CREAT|O_EXCL,
+	  (oct ($main->{conf}->{bayes_file_mode}) & 0666)) {
+    dbg("bayes: Failed to tie temp seen db: $!");
+    untie %new_toks;
+    unlink $tmptoksdbname;
+    $self->untie_db();
+    return 0;
+  }
+  umask $umask;
+
+  my $line_count = 0;
+  my $db_version;
+  my $token_count = 0;
+  my $num_spam = 0;
+  my $num_ham = 0;
+  my $error_p = 0;
+  my $newest_token_age = 0;
+  # Kinda wierd I know, but we need a nice big value and we know there will be
+  # no tokens > time() since we reset atime if > time(), so use that with a
+  # little buffer just in case.
+  my $oldest_token_age = time() + 100000;
+
+  my $line = <DUMPFILE>;
+  $line_count++;
+
+  # We require the database version line to be the first in the file so we can
+  # figure out how to properly deal with the file.  If it is not the first
+  # line then fail
+  if ($line =~ m/^v\s+(\d+)\s+db_version/) {
+    $db_version = $1;
+  }
+  else {
+    dbg("bayes: Database Version must be the first line in the backup file, correct and re-run.");
+    untie %new_toks;
+    untie %new_seen;
+    unlink $tmptoksdbname;
+    unlink $tmpseendbname;
+    $self->untie_db();
+    return 0;
+  }
+
+  while (my $line = <DUMPFILE>) {
+    chomp($line);
+    $line_count++;
+
+    if ($line_count % 1000 == 0) {
+      print STDERR "." if ($showdots);
+    }
+
+    my @parsed_line = split(/\s+/, $line, 5);
+
+    if ($parsed_line[0] eq 'v') { # variable line
+      my $value = $parsed_line[1] + 0;
+      if ($parsed_line[2] eq 'num_spam') {
+	$num_spam = $value;
+      }
+      elsif ($parsed_line[2] eq 'num_nonspam') {
+	$num_ham = $value;
+      }
+      else {
+	dbg("bayes: restore_database: Skipping unknown line: $line");
+      }
+    }
+    elsif ($parsed_line[0] eq 't') { # token line
+      my $spam_count = $parsed_line[1] + 0;
+      my $ham_count = $parsed_line[2] + 0;
+      my $atime = $parsed_line[3] + 0;
+      my $token = $parsed_line[4];
+
+      my $token_warn_p = 0;
+      my @warnings;
+
+      if ($spam_count < 0) {
+	$spam_count = 0;
+	push(@warnings,'Spam Count < 0, resetting');
+	$token_warn_p = 1;
+      }
+      if ($ham_count < 0) {
+	$ham_count = 0;
+	push(@warnings,'Ham Count < 0, resetting');
+	$token_warn_p = 1;
+      }
+
+      if ($spam_count == 0 && $ham_count == 0) {
+	dbg("bayes: Token has zero spam and ham count, skipping.");
+	next;
+      }
+
+      if ($atime > time()) {
+	$atime = time();
+	push(@warnings,'atime > current time, resetting');
+	$token_warn_p = 1;
+      }
+
+      if ($token_warn_p) {
+	dbg("bayes: Token ($token) has the following warnings:\n".join("\n",@warnings));
+      }
+      $new_toks{$token} = $self->tok_pack($spam_count, $ham_count, $atime);
+      if ($atime < $oldest_token_age) {
+	$oldest_token_age = $atime;
+      }
+      if ($atime > $newest_token_age) {
+	$newest_token_age = $atime;
+      }
+      $token_count++;
+    }
+    elsif ($parsed_line[0] eq 's') { # seen line
+      my $flag = $parsed_line[1];
+      my $msgid = $parsed_line[2];
+
+      unless ($flag eq 'h' || $flag eq 's') {
+	dbg("bayes: Unknown seen flag ($flag) for line: $line, skipping");
+	next;
+      }
+      $new_seen{$msgid} = $flag;
+    }
+    else {
+      dbg("bayes: Skipping unknown line: $line");
+      next;
+    }
+  }
+  close(DUMPFILE);
+
+  print STDERR "\n" if ($showdots);
+
+  unless ($num_spam) {
+    dbg("bayes: Unable to find num spam, please check file.");
+    $error_p = 1;
+  }
+
+  unless ($num_ham) {
+    dbg("bayes: Unable to find num ham, please check file.");
+    $error_p = 1;
+  }
+
+  if ($error_p) {
+    dbg("bayes: Error(s) while attempting to load $filename, correct and Re-Run");
+
+    untie %new_toks;
+    untie %new_seen;
+    unlink $tmptoksdbname;
+    unlink $tmpseendbname;
+    $self->untie_db();
+    return 0;
+  }
+
+  # set the calculated magic tokens
+  $new_toks{$DB_VERSION_MAGIC_TOKEN} = 2;
+  $new_toks{$NTOKENS_MAGIC_TOKEN} = $token_count;
+  $new_toks{$NSPAM_MAGIC_TOKEN} = $num_spam;
+  $new_toks{$NHAM_MAGIC_TOKEN} = $num_ham;
+  $new_toks{$NEWEST_TOKEN_AGE_MAGIC_TOKEN} = $newest_token_age;
+  $new_toks{$OLDEST_TOKEN_AGE_MAGIC_TOKEN} = $oldest_token_age;
+
+  # go ahead and zero out these, chances are good that they are bogus anyway.
+  $new_toks{$LAST_EXPIRE_MAGIC_TOKEN} = 0;
+  $new_toks{$LAST_JOURNAL_SYNC_MAGIC_TOKEN} = 0;
+  $new_toks{$LAST_ATIME_DELTA_MAGIC_TOKEN} = 0;
+  $new_toks{$LAST_EXPIRE_REDUCE_MAGIC_TOKEN} = 0;
+
+  local $SIG{'INT'} = 'IGNORE';
+  local $SIG{'TERM'} = 'IGNORE';
+  local $SIG{'HUP'} = 'IGNORE' if (!Mail::SpamAssassin::Util::am_running_on_windows());
+
+  untie %new_toks;
+  untie %new_seen;
+  $self->untie_db();
+
+  # Here is where something can go horribly wrong and screw up the bayes
+  # database files.  If we are able to copy one and not the other then it
+  # will leave the database in an inconsistent state.  Since this is an
+  # edge case, and they're trying to replace the DB anyway we should be ok.
+  unless (rename($tmptoksdbname, $toksdbname)) {
+    dbg("bayes: Error while renaming $tmptoksdbname to $toksdbname: $!");
+    return 0;
+  }
+  unless (rename($tmpseendbname, $seendbname)) {
+    dbg("bayes: Error while renaming $tmpseendbname to $seendbname: $!");
+    dbg("bayes: Database now in inconsistent state.");
+    return 0;
+  }
+
+  dbg("bayes: Parsed $line_count lines.");
+  dbg("bayes: Created database with $token_count tokens based on $num_spam Spam Messages and $num_ham Ham Messages.");
+
+  return 1;
+}
+
 
 ###########################################################################
 

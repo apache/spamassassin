@@ -741,6 +741,54 @@ sub perform_upgrade {
   die "perform_upgrade: not implemented\n";
 }
 
+=head2 clear_database
+
+public instance (Boolean) clear_database ()
+
+Description:
+This method deletes all records for a particular user.
+
+Callers should be aware that any errors returned by this method
+could causes the database to be inconsistent for the given user.
+
+=cut
+
+sub clear_database {
+  my ($self) = @_;
+  die "clear_database: not implemented\n";
+}
+
+=head2 backup_database
+
+public instance (Boolean) backup_database ()
+
+Description:
+This method will dump the users database in a marchine readable format.
+
+=cut
+
+sub backup_database {
+  my ($self) = @_;
+  die "backup_database: not implemented\n";
+}
+
+=head2 restore_database
+
+public instance (Boolean) restore_database (String $filename, Boolean $showdots)
+
+Description:
+This method restores a database from the given filename, C<$filename>.
+
+Callers should be aware that any errors returned by this method
+could causes the database to be inconsistent for the given user.
+
+=cut
+
+sub restore_database {
+  my ($self, $filename, $showdots) = @_;
+  die "restore_database: not implemented\n";
+}
+
 sub dbg { Mail::SpamAssassin::dbg (@_); }
 sub sa_die { Mail::SpamAssassin::sa_die (@_); }
 

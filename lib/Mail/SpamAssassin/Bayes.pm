@@ -1329,6 +1329,7 @@ sub dump_bayes_db {
   if (!$self->{main}->{learn_caller_will_untie}) {
     $self->{store}->untie_db();
   }
+  return 1;
 }
 
 # Stolen from Archive Iteraator ...  Should probably end up in M::SA::Util

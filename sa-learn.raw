@@ -119,6 +119,10 @@ GetOptions(
   'dump:s' => \$opt{'dump'},
   'import' => \$opt{'import'},
 
+  'clear' => \$opt{'clear'},
+  'backup' => \$opt{'backup'},
+  'restore=s' => \$opt{'restore'},
+
   'dir'    => sub { $opt{'old_format'} = 'dir'; },
   'file'   => sub { $opt{'old_format'} = 'file'; },
   'mbox'   => sub { $opt{'format'}     = 'mbox'; },
@@ -148,10 +152,13 @@ if ( !defined $isspam
   && !defined $forget
   && !defined $opt{'dump'}
   && !defined $opt{'import'}
+  && !defined $opt{'clear'}
+  && !defined $opt{'backup'}
+  && !defined $opt{'restore'}
   && !defined $opt{'folders'} )
 {
   usage( 0,
-"Please select either --spam, --ham, --folders, --forget, --sync, --import or --dump"
+"Please select either --spam, --ham, --folders, --forget, --sync, --import,\n--dump, --clear, --backup or --restore"
   );
 }
 
@@ -233,6 +240,44 @@ if ( defined $opt{'import'} ) {
   my $ret = $spamtest->{bayes_scanner}->{store}->perform_upgrade();
   $spamtest->finish_learner();
   exit( !$ret );
+}
+
+if (defined $opt{'clear'}) {
+  unless ($spamtest->{bayes_scanner}->{store}->clear_database()) {
+    $spamtest->finish_learner();
+    die "ERROR: Bayes clear returned an error, please re-run with -D for more information\n";
+  }
+
+  $spamtest->finish_learner();
+  exit 0;
+}
+
+if (defined $opt{'backup'}) {
+  unless ($spamtest->{bayes_scanner}->{store}->backup_database()) {
+    $spamtest->finish_learner();
+    die "ERROR: Bayes backup returned an error, please re-run with -D for more information\n";
+  }
+
+  $spamtest->finish_learner();
+  exit 0;
+}
+
+if (defined $opt{'restore'}) {
+
+  my $filename = $opt{'restore'};
+
+  unless ($filename) {
+    $spamtest->finish_learner();
+    die "ERROR: You must specify a filename to restore.\n";
+  }
+
+  unless ($spamtest->{bayes_scanner}->{store}->restore_database($filename, $opt{'showdots'})) {
+    $spamtest->finish_learner();
+    die "ERROR: Bayes restore returned an error, please re-run with -D for more information\n";
+  }
+
+  $spamtest->finish_learner();
+  exit 0;
 }
 
 if ( !$spamtest->{conf}->{use_bayes} ) {
@@ -461,6 +506,10 @@ Options:
                                    databases after scan
  -L, --local			   Operate locally, no network accesses
  --import                          Upgrade data from an earlier database version
+ --clear                           Wipe out existing database
+ --backup                          Backup, to STDOUT, existing database
+ --restore <filename>              Restore a database from filename
+
  -C path, --configpath=path, --config-file=path   Path to standard configuration dir
  -p prefs, --prefspath=file, --prefs-file=file    Set user preferences file
  --siteconfigpath=path             Path for site configs (def: /etc/mail/spamassassin)
@@ -741,6 +790,25 @@ the data tokens.
 
 Can also use the B<--regexp> I<RE> option to specify which tokens to
 display based on a regular expression.
+
+=item B<--clear>
+
+Clear an existing Bayes database by removing all traces of the database.
+
+WARNING: This is destructive and should be used with care.
+
+=item B<--backup>
+
+Performs a dump of the Bayes database in machine/human readable format.
+
+The dump will include token and seen data.  It is suitable for input back
+into the --restore command.
+
+=item B<--restore>=I<filename>
+
+Performs a restore of the Bayes database defined by I<filename>.
+
+WARNING: This is a destructive operation, previous Bayes data will be wiped out.
 
 =item B<-h>, B<--help>
 
