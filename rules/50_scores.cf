@@ -1,5 +1,5 @@
 # SpamAssassin rules file: scores.
-# $Id: 50_scores.cf,v 1.197.2.19 2002/09/03 19:58:54 quinlan Exp $
+# $Id: 50_scores.cf,v 1.197.2.20 2002/09/04 08:39:27 quinlan Exp $
 ###########################################################################
 # Default scores.   Note that if a test is named in the files, but a score is
 # not assigned here, the default score will be set to 1.
@@ -823,7 +823,7 @@ score YR_MEMBERSHIP_EXCH             1.2
 # miscellaneous network tests
 
 score BAD_HELO_WARNING               2.29
-score NO_MX_FOR_FROM                 0.5
+score NO_MX_FOR_FROM                 3.09
 score ROUND_THE_WORLD                2.80
 
 # message digest tests

@@ -75,7 +75,10 @@ $WORD_OBFUSCATION_CHARS = '*_.,/|-+=';
 sub check_for_from_mx {
   my ($self) = @_;
 
-  my $from = $self->get ('From:addr');
+  my $from = $self->get ('Reply-To:addr');
+  if (!defined $from || $from !~ /\@\S+/) {
+    $from = $self->get ('From:addr');
+  }
   return 0 unless ($from =~ /\@(\S+)/);
   $from = $1;
 
@@ -92,18 +95,22 @@ sub check_for_from_mx {
     return 0;
   }
 
-  # Try 3 times to protect against temporary outages.  sleep between checks
-  # to give the DNS a chance to recover.
+  # Try check_mx_attempts times to protect against temporary outages.
+  # sleep between checks to give the DNS a chance to recover.
   for my $i (1..$self->{conf}->{check_mx_attempts}) {
-    my @mx = Net::DNS::mx ($self->{res}, $from);
-    dbg ("DNS MX records found: ".scalar (@mx));
-    if (scalar @mx > 0) { return 0; }
+    my @mx = Net::DNS::mx($self->{res}, $from);
+    dbg ("DNS MX records found: " . scalar(@mx));
+    return 0 if (scalar @mx > 0);
 
-    # A records only for mail servers is perfectly OK.
-    my @a = $self->{res}->search ($from);
-    dbg ("DNS A records found: ".scalar (@a));
-    if (scalar @a > 0) { return 0; }
-
+    my $query = $self->{res}->search($from);
+    if ($query) {
+      my $count = 0;
+      foreach my $rr ($query->answer) {
+	$count++ if ($rr->type eq "A");
+      }
+      dbg ("DNS A records found: $count");
+      return 0 if ($count > 0);
+    }
     if ($i < $self->{conf}->{check_mx_attempts}) {sleep $self->{conf}->{check_mx_delay}; };
   }
 
