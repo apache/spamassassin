@@ -335,12 +335,6 @@ sub check_for_forged_received_trail {
   return ($self->{mismatch_from} > 1);
 }
 
-sub check_for_forged_received_trail_old_style {
-  my ($self) = @_;
-  $self->_check_for_forged_received_old_style unless exists $self->{mismatch_from_old_style};
-  return ($self->{mismatch_from_old_style} > 1);
-}
-
 # FORGED_RCVD_HELO
 sub check_for_forged_received_helo {
   my ($self) = @_;
@@ -434,52 +428,6 @@ sub _check_for_forged_received {
     {
       dbg ("forged-HELO: mismatch on from: '$prev' != '$by'");
       $self->{mismatch_from}++;
-    }
-  }
-}
-
-sub _check_for_forged_received_old_style {
-  my ($self) = @_;
-
-  $self->{mismatch_from_old_style} = 0;
-
-  my @received = grep(/\S/, split(/\n/, $self->get ('Received')));
-  my @by;
-  my @from;
-  my @helo;
-  my @fromip;
-
-  for (my $i = 0; $i < $#received; $i++) {
-    if ($received[$i] =~ s/\bby[\t ]+(\w+(?:[\w.-]+\.)+\w+)//i) {
-      $by[$i] = lc($1);
-      $by[$i] =~ s/.*\.(\S+\.\S+)$/$1/;
-    }
-    if ($received[$i] =~ s/\bfrom[\t ]+(\w+(?:[\w.-]+\.)+\w+)//i) {
-      $from[$i] = lc($1);
-      $from[$i] =~ s/.*\.(\S+\.\S+)$/$1/;
-    }
-    if ($received[$i] =~ s/\bhelo[=\t ]+(\w+(?:[\w.-]+\.)+\w+)//i) {
-      $helo[$i] = lc($1);
-      $helo[$i] =~ s/.*\.(\S+\.\S+)$/$1/;
-    }
-    if ($received[$i] =~ s/^ \((?:\S+ |)\[(${IP_ADDRESS})\]\)//i) {
-      $fromip[$i] = $1;
-    }
-
-    if (defined ($from[$i]) && defined($fromip[$i])) {
-      if ($from[$i] =~ /^localhost(?:\.localdomain|)$/) {
-        if ($fromip[$i] eq '127.0.0.1') {
-          # valid: bouncing around inside 1 machine, via the localhost
-          # interface (freshmeat newsletter does this).
-          $from[$i] = undef;
-        }
-      }
-    }
-
-    if ($i > 0 && defined($by[$i]) && defined($from[$i - 1]) &&
-        ($by[$i] ne $from[$i - 1]))
-    {
-      $self->{mismatch_from_old_style}++;
     }
   }
 }

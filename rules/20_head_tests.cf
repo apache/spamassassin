@@ -288,9 +288,6 @@ describe SMTPD_IN_RCVD		Received via SMTPD32 server (SMTPD32-n.n)
 header LOTS_OF_CC_LINES		eval:check_lots_of_cc_lines()
 describe LOTS_OF_CC_LINES	Lots and lots of Cc: headers
 
-header FORGED_RCVD_TRAIL	eval:check_for_forged_received_trail()
-describe FORGED_RCVD_TRAIL	trail of Received: headers seems to be forged
-
 header FORGED_AOL_RCVD	        eval:check_for_fake_aol_relay_in_rcvd()
 describe FORGED_AOL_RCVD	Received forged, contains fake AOL relays
 
@@ -321,8 +318,14 @@ describe FORGED_GW05_RCVD	Forged 'by gw05' 'Received:' header found
 header FORGED_MX_HOTMAIL	Received =~ /^from mx\d+\.hotmail\.com /m
 describe FORGED_MX_HOTMAIL	Forged hotmail.com Received 'from mx' header
 
+# not used directly right now due to FPs; but CONFIRMED_FORGED turns it
+# into a 1.0 S/O rule anyway, so that's not a problem ;)
+# 2.626   3.6340   1.5251    0.704   0.34    1.44  FORGED_RCVD_TRAIL
+# 0.956   3.3890   0.0000    1.000   0.98    4.30  CONFIRMED_FORGED
+header __FORGED_RCVD_TRAIL	eval:check_for_forged_received_trail()
+
 # forgery meta-rules: more reliable than their inputs
-meta CONFIRMED_FORGED		(FORGED_RCVD_TRAIL && (FORGED_AOL_RCVD || FORGED_HOTMAIL_RCVD || FORGED_EUDORAMAIL_RCVD || FORGED_YAHOO_RCVD || FORGED_JUNO_RCVD || FORGED_GW05_RCVD || FORGED_MX_HOTMAIL))
+meta CONFIRMED_FORGED		(__FORGED_RCVD_TRAIL && (FORGED_AOL_RCVD || FORGED_HOTMAIL_RCVD || FORGED_EUDORAMAIL_RCVD || FORGED_YAHOO_RCVD || FORGED_JUNO_RCVD || FORGED_GW05_RCVD || FORGED_MX_HOTMAIL))
 describe CONFIRMED_FORGED	Received headers are forged
 
 meta MULTI_FORGED		((FORGED_AOL_RCVD + FORGED_HOTMAIL_RCVD + FORGED_EUDORAMAIL_RCVD + FORGED_YAHOO_RCVD + FORGED_JUNO_RCVD + FORGED_GW05_RCVD) > 1)

@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.606 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.607 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -214,9 +214,4 @@ describe T_FAKED_HOTMAIL_DAV	'X-Originating-Email' header does not match 'From'
 
 header T_HAS_X_ORIG_HOST	X-Originating-Host =~ /^\[/
 describe T_HAS_X_ORIG_HOST	Has an 'X-Originating-Host' header
-
-# http://bugzilla.spamassassin.org/show_bug.cgi?id=1839
-# if this does better than FORGED_RCVD_TRAIL, we'll just stick with
-# this version and remove the mismatch_from code from the new one
-header T_FORGED_RCVD_TRAIL	eval:check_for_forged_received_trail_old_style()
 
