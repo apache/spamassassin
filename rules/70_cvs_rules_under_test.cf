@@ -108,3 +108,18 @@ describe T_UNLIMITED              Unlimited in caps
 # http://www.hughes-family.org/bugzilla/show_bug.cgi?id=699
 header T_MICROSOFT		exists:microsoft
 describe T_MICROSOFT		A "microsoft" header was found
+
+# I (yet) haven't seen any spam with accents, umlauts etc. in the From or Subject
+#   -- Malte
+header T_FROM_ISO885915		From =~ /=\?ISO-8859-15?\?q\?(?:[a-z]*=[A-F][0-9A-F][a-z]*)+\?=/i
+describe T_FROM_ISO885915	From contains encoded ISO-8859-1(5) characters
+tflags T_FROM_ISO885915		nice
+header T_SUBJ_ISO885915		Subject =~ /=\?ISO-8859-15?\?q\?(?:[a-z]*=[A-F][0-9A-F][a-z]*)+\?=/i
+describe T_SUBJ_ISO885915	Subject contains encoded ISO-8859-1(5) characters
+tflags T_SUBJ_ISO885915		nice
+
+# Till now no spammer told me where he's working at :o)
+#   -- Malte
+header T_NOSPAM_INC		exists:Organization
+describe T_NOSPAM_INC		Where are you working at?
+tflags T_NOSPAM_INC		nice
