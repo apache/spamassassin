@@ -868,6 +868,20 @@ sub handle_user_setuid_with_sql
           logmsg "info: setuid to $username succeeded, reading scores from SQL.";
         }
     }
+
+    my $spam_conf_dir = $dir . '/.spamassassin';  #needed for AWL, Bayes, etc.
+    if ( ! -d $spam_conf_dir )
+    {
+       if ( mkdir $spam_conf_dir )
+       {
+          logmsg "info: created $spam_conf_dir for $username.";
+       }
+       else
+       {
+          logmsg "info: failed to create $spam_conf_dir for $username.";
+       }
+    }
+	  
     $spamtest->load_scoreonly_sql ($username);
 
     $spamtest->signal_user_changed ({ username => $username });
