@@ -1,6 +1,6 @@
 # SpamAssassin rules file: rules under test, $Rev$
 #
-# This file is a placeholder for rules "under probation", ie. checked into
+# This file is a placeholder for rules "under probation", i.e. checked into
 # SVN for testing. It should not be distributed; if the rules have good
 # stats after a mass-check or two, then fold them into the distributed
 # rules files.
@@ -91,7 +91,7 @@ describe T_RCVD_NUMERIC_HELO_LASTUNT	Received: contains IP for HELO (not first l
 # 0.683   1.3791   0.0134    0.990   0.90    0.01  T_URI_UNPRINTABLE:quinlan
 # 0.956   1.1479   0.5948    0.659   0.26    0.01  T_URI_UNPRINTABLE:rODbegbie
 # 0.734   0.7756   0.0885    0.898   0.66    0.01  T_URI_UNPRINTABLE:theo
-# FPs?  wierd
+# FPs?  weird
 uri	T_URI_UNPRINTABLE	/\%0/
 describe T_URI_UNPRINTABLE	URI contains unprintable characters
 
@@ -754,3 +754,10 @@ describe T_DRUGS_SLEEP_EREC 	Has refs to an E.D. and prescription sleep aid
 meta T_DRUGS_MANYKINDS	(T_DRUGS_ERECTILE + T_DRUGS_DIET + T_DRUGS_PAIN + T_DRUGS_SLEEP + T_DRUGS_MUSCLE + T_DRUGS_ANXIETY + T_DRUGS_DEPRESSION >3)
 describe T_DRUGS_MANYKINDS 	contains refs to four different kinds of drugs
 
+# possible replacements for SUSPICIOUS_RECIPS
+header T_SUSPICIOUS_RECIPS_55	eval:similar_recipients('0.55','undef')
+header T_SUSPICIOUS_RECIPS_60	eval:similar_recipients('0.60','undef')
+header T_SUSPICIOUS_RECIPS_65	eval:similar_recipients('0.65','undef')
+header T_SUSPICIOUS_RECIPS_70	eval:similar_recipients('0.70','undef')
+header T_SUSPICIOUS_RECIPS_75	eval:similar_recipients('0.75','undef')
+header T_SUSPICIOUS_RECIPS_80	eval:similar_recipients('0.80','undef')
