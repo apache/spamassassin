@@ -100,7 +100,8 @@ sub razor_report {
     my $rc = Razor::Client->new ($config, %options);
     die "undefined Razor::Client\n" if (!$rc);
 
-    if ($Razor::Client::VERSION >= 1.12) {
+    my $ver = $Razor::Client::VERSION;
+    if ($ver >= 1.12) {
       my $respary = $rc->report ('spam' => \@msg);
       for my $resp (@$respary) { $response .= $resp; }
     } else {

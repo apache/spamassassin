@@ -182,7 +182,8 @@ sub razor_lookup {
     my $rc = Razor::Client->new ($config, %options);
     die "undefined Razor::Client\n" if (!$rc);
 
-    if ($Razor::Client::VERSION >= 1.12) {
+    my $ver = $Razor::Client::VERSION;
+    if ($ver >= 1.12) {
       my $respary = $rc->check ('spam' => \@msg);
       # response can be "0" or "1". there can be many responses.
       # so if we get 5 responses, and one of them's 1, we
