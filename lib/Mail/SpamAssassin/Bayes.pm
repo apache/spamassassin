@@ -231,20 +231,6 @@ sub sanity_check_is_untied {
 
 ###########################################################################
 
-sub sanity_check_is_untied {
-  my $self = shift;
-
-  # do a sanity check here.  Wierd things happen if we remain tied
-  # after compiling; for example, spamd will never see that the
-  # number of messages has reached the bayes-scanning threshold.
-  if ($self->{store}->{already_tied} || $self->{store}->{is_locked}) {
-    warn "SpamAssassin: oops! still tied/locked to bayes DBs, untie'ing\n";
-    $self->{store}->untie_db();
-  }
-}
-
-###########################################################################
-
 # read configuration items to control bayes behaviour.  Called by
 # BayesStore::read_db_configs().
 sub read_db_configs {
