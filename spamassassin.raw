@@ -43,45 +43,39 @@ eval {
   require Mail::SpamAssassin;
   require Mail::SpamAssassin::NoMailAudit;
 
-  #getopts ('atc:p:ehVDxrPw:l:dLSWRM:F:C:Z:') or usage();
-
-  Getopt::Long::Configure("bundling");
+  Getopt::Long::Configure(qw(gnu_getopt no_auto_abbrev no_ignore_case));
   GetOptions(
-	     'auto-whitelist' => \$opt{'auto-whitelist'}, 'a' => \$opt{'auto-whitelist'},
-	     'error-code|exit-code|e:i' => \$opt{'error-code'},
-	     'help|h' => \$opt{'help'},
-	     'test-mode|t' => \$opt{'test-mode'},
-	     'report!' => \$opt{'report'}, 'r' => \$opt{'report'},
-	     'add-to-whitelist|W' => \$opt{'add-to-whitelist'},
-	     'remove-from-whitelist|R' => \$opt{'remove-from-whitelist'},
-	     'add-to-blacklist' => \$opt{'add-to-blacklist'},
-	     'warning-from|w=s' => \$opt{'warning-from'},
-	     'log-to-mbox|l=s' => \$opt{'log-to-mbox'},
-	     'local!' => \$opt{'local'}, 'L' => \$opt{'local'},
-	     'stop-at-threshold!' => \$opt{'stop-at-threshold'}, 'S' => \$opt{'stop-at-threshold'},
+	     'whitelist-factory|M=s'             => \$opt{'whitelist-factory'},
+	     'auto-whitelist|a'                  => \$opt{'auto-whitelist'},
+	     'add-to-whitelist|W'                => \$opt{'add-to-whitelist'},
+	     'remove-from-whitelist|R'           => \$opt{'remove-from-whitelist'},
+	     'add-to-blacklist'                  => \$opt{'add-to-blacklist'},
+	     'warning-from|w=s'                  => \$opt{'warning-from'},
+	     'local-only|local|L!'               => \$opt{'local'},
+	     'stop-at-threshold|S!'              => \$opt{'stop-at-threshold'},
 	     'remove-markup|despamassassinify|d' => \$opt{'remove-markup'},
-	     'config-file|c|C=s' => \$opt{'config-file'},
-	     'prefs-file|p=s' => \$opt{'prefs-file'},
-	     'debug!' => \$opt{'debug'}, 'D' => \$opt{'debug'},
-	     'version|V' => \$opt{'version'},
-	     'create-prefs!', => \$opt{'create-prefs'}, 'x' => sub {$opt{'create-prefs'}=0},
-	     'whitelist-factory|M=s' => \$opt{'whitelist-factory'},
-             'debug-level|Z=s' => \$opt{'debug-level'},
+	     'report|r'                          => \$opt{'report'},
+	     'config-file|config-dir|c|C=s'      => \$opt{'config-file'},
+	     'prefs-file|p=s'                    => \$opt{'prefs-file'},
+	     'create-prefs!'                     => \$opt{'create-prefs'},
+	       'x'                               => sub { $opt{'create-prefs'} = 0 },
+	     'log-to-mbox|l=s'                   => \$opt{'log-to-mbox'},
+	     'error-code|exit-code|e:i'          => \$opt{'error-code'},
+	     'test-mode|test|t'                  => \$opt{'test-mode'},
+	     'debug-level|debug|D:s'             => \$opt{'debug-level'},
+	     'version|V'                         => \$opt{'version'},
+	     'help|h|?'                          => \$opt{'help'},
+
 
              # NOTE: ignored for backwards compatibility. will be stripped
              # in a future release.
+	     'pipe|P'    => sub { warn "The -P option has been removed.\n" },
+	     'F=i'       => sub { warn "The -F option has been removed.\n" },
 	     'add-from!' => sub { warn "The --add-from option has been removed.\n" },
-	     'F=i' => sub { warn "The -F option has been removed.\n" },
-	     'pipe|P' => sub { warn "The -P option has been removed.\n" }
-
   ) or usage(0, "Unknown option!");
-
   if (defined $opt{'help'}) { usage(0, "For more information read the spamassassin man page"); }
   if (defined $opt{'version'}) {
-    my $ver = Mail::SpamAssassin::Version();
-    print <<EOVERSION;
-SpamAssassin version $ver
-EOVERSION
+    print "SpamAssassin version " . Mail::SpamAssassin::Version() . "\n";
     exit 0;
   }
 
@@ -96,8 +90,8 @@ EOVERSION
 # No use of Mail::Audit at all, apart from the accept(), reject() and
 # resend() methods (which are proxied transparently).  Lovely.
 #
-use Mail::SpamAssassin::NoMailAudit;
-my $mail = Mail::SpamAssassin::NoMailAudit->new ();
+  use Mail::SpamAssassin::NoMailAudit;
+  my $mail = Mail::SpamAssassin::NoMailAudit->new ();
 
 # For Mail::Audit users -- this is the magic. Just create a Mail::SpamAssassin
 # object like this, then run the check() method as below; if it returns a
@@ -115,21 +109,21 @@ my $mail = Mail::SpamAssassin::NoMailAudit->new ();
     'userprefs_filename' => $opt{'prefs-file'},
     'local_tests_only'	=> $opt{'local'},
     'stop_at_threshold' => $opt{'stop-at-threshold'},
-    'debug'		=> $opt{'debug'},
+    'debug'             => defined($opt{'debug-level'}),
     'dont_copy_prefs'   => ($opt{'create-prefs'} ? 0 : 1),
     'DEF_RULES_DIR'     => $DEF_RULES_DIR,
-    'LOCAL_RULES_DIR'     => $LOCAL_RULES_DIR,
+    'LOCAL_RULES_DIR'   => $LOCAL_RULES_DIR,
   });
 
 # set debug levels, if any specified (only useful for this command-line
 # tool really)
   if (defined $opt{'debug-level'} && $opt{'debug-level'} ne '') {
     my $levels = $opt{'debug-level'};
-    while ($levels =~ s/^(\S+)=(-?\d+),*//s) {
+    while ($levels =~ s/^([a-z]+)=([+-]?\d+)[,;:]*//s) {
       $Mail::SpamAssassin::DEBUG->{$1} = $2 + 0;
     }
-    if ($levels ne '') {
-      usage(0, "--debug-level option bad!");
+    if ($levels !~ /^\s*$/) {
+      usage(0, "bad areas in --debug option ($levels)!");
     }
   }
 
@@ -233,7 +227,7 @@ my $mail = Mail::SpamAssassin::NoMailAudit->new ();
 
 };
 
-if ($@) {	
+if ($@) {
   # eval failed; we died somewhere in there.
   warn $@;
   exit 70;		# == EX_SOFTWARE in sysexits.h. caught by MTA
@@ -252,33 +246,38 @@ spamassassin - mail filter to identify spam using text analysis
 
 =head1 SYNOPSIS
 
-=over
+B<spamassassin> [options] < I<mailmessage> > I<output>
 
-=item spamassassin [option ...] < mailmessage > output
+B<spamassassin> B<-d> < I<mailmessage> > <output>
+
+B<spamassassin> B<-r> [B<-w> I<addr>] < I<mailmessage>
+
+B<spamassassin> B<-W>|B<-R> < I<mailmessage>
 
 Options:
 
- -P, --pipe                         Deliver to STDOUT (now default)
- -a, --auto-whitelist, --whitelst   Use auto-whitelists
- -h, --help                         Print usage message
- -e, --error-code, --exit-code      Exit with a non-zero exit code for spam
- -t, --test-mode                    Pipe message through and add extra report
- -r, --report                       Report message as spam
- -W, --add-to-whitelist             Add addresses in mail to whitelist
- -R, --remove-from-whitelist        Remove addresses in mail from whitelist
- -w fromaddr, --warning-from=addr   Send a warning mail to sender from fromaddr
- -l filename, --log-to-mbox=file    Log messages to a mbox file
- -L, --local                        Local tests only (no online tests)
- -S, --stop-at-threshold            Stop tests after the threshold is reached
- -d, --remove-markup		    Remove spam reports from a message
- -C file, --config-file=file        Set configuration file
- -p prefs, --prefs-file=file        Set user preferences file
- -x, --nouser-config                Disable user config files
- -M, --whitelist-factory            Select whitelist factory
- -D, --debug		            Print debugging messages
- -Z area=nn,... , --debug-level=area=nn,...   Set debugging levels
-
-=back
+ -P, --pipe                        Deliver to STDOUT (now default)
+ -L, --local                       Local tests only (no online tests)
+ -S, --stop-at-threshold           Stop tests when the threshold is reached
+ -a, --auto-whitelist              Use auto-whitelists
+ -M, --whitelist-factory           Select whitelist factory
+ -W, --add-to-whitelist            Add addresses in mail to whitelist
+ -R, --remove-from-whitelist       Remove all addresses found in mail
+                                   from whitelist
+ -r, --report                      Report message as spam
+ -w addr, --warning-from=addr      Send a warning mail to sender from addr
+ -d, --remove-markup               Remove spam reports from a message
+ -C file, --config-file=file       Set configuration file
+ -p prefs, --prefs-file=file       Set user preferences file
+ -x, --nouser-config               Disable user config files
+ -e, --exit-code                   Exit with a non-zero exit code if the
+                                   tested message was spam
+ -l filename, --log-to-mbox=file   Log messages to a mbox file
+ -t, --test-mode                   Pipe message through and add extra
+                                   report to the bottom
+ -D, --debug [area=n,...]          Print debugging messages
+ -V, --version                     Print version
+ -h, --help                        Print usage message
 
 =head1 OPTIONS
 
@@ -373,18 +372,15 @@ Read configuration from I<config>.
 
 Read user score preferences from I<prefs>.
 
-=item B<-D>, B<--debug>
+=item B<-D> [I<area=n,...>], B<--debug> [I<area=n,...>]
 
-Produce diagnostic output.
+Produce diagnostic output. The level of diagnostic output can be set for each
+area separately; I<area> is the area of the code to instrument, and I<n> is
+a positive or negative number indicating the debug level or bitmask for that 
+area of code.  For example, to produce diagnostic output on all rules that 
+hit, use:
 
-=item B<-Z> I<area=nn,...>, B<--debug-level>=I<area=nn,...>
-
-Set level of diagnostic output to produce.  I<area> is the area of the code
-to instrument, and I<nn> is a positive or negative number indicating the
-debug level or bitmask for that area of code.  For example, to produce
-diagnostic output on all rules that hit, use:
-
-        spamassassin -D -Zrulesrun=255
+        spamassassin -D rulesrun=255
 
 =item B<-x>, B<--nouser-config>
 
