@@ -133,7 +133,7 @@ exit;
 
 sub readlogs {
   my $spam = $ARGV[0] || "spam.log";
-  my $nonspam = $ARGV[1] || "nonspam.log";
+  my $nonspam = $ARGV[1] || (-f "good.log" ? "good.log" : "nonspam.log");
 
   foreach my $file ($spam, $nonspam) {
     open (IN, "<$file");
