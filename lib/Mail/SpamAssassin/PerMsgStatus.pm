@@ -61,6 +61,7 @@ sub new {
     'test_names_hit'    => [ ],
     'tests_already_hit' => { },
     'hdr_cache'         => { },
+    'rule_errors'       => 0,
   };
 
   $self->{conf} = $self->{main}->{conf};
@@ -1166,6 +1167,7 @@ EOT
 
   if ($@) {
     warn "Failed to run header SpamAssassin tests, skipping some: $@\n";
+    $self->{rule_errors}++;
   }
   else {
     Mail::SpamAssassin::PerMsgStatus::_head_tests($self);
@@ -1597,6 +1599,7 @@ EOT
   if ($@) {
     warn "Failed to compile full SpamAssassin tests, skipping:\n".
 	      "\t($@)\n";
+    $self->{rule_errors}++;
   } else {
     Mail::SpamAssassin::PerMsgStatus::_full_tests($self, $fullmsgref);
   }
@@ -1753,6 +1756,7 @@ EOT
 
     if ($@) {
         warn "Failed to run header SpamAssassin tests, skipping some: $@\n";
+        $self->{rule_errors}++;
     } else {
         Mail::SpamAssassin::PerMsgStatus::_meta_tests($self);
     }
@@ -1814,6 +1818,7 @@ sub run_eval_tests {
     if ($@) {
       warn "Failed to run $rulename SpamAssassin test, skipping:\n".
       		"\t($@)\n";
+      $self->{rule_errors}++;
       next;
     }
 
@@ -1864,6 +1869,7 @@ sub run_rbl_eval_tests {
 	if ($@) {
 	  warn "Failed to run $rulename RBL SpamAssassin test, skipping:\n".
 		    "\t($@)\n";
+          $self->{rule_errors}++;
 	  next;
 	}
 

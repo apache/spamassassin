@@ -60,10 +60,11 @@ eval {
 	     'config-file|config-dir|c|C=s'      => \$opt{'config-file'},
 	     'prefs-file|p=s'                    => \$opt{'prefs-file'},
 	     'create-prefs!'                     => \$opt{'create-prefs'},
-	       'x'                               => sub { $opt{'create-prefs'} = 0 },
+	     'x'                                 => sub { $opt{'create-prefs'} = 0 },
 	     'log-to-mbox|l=s'                   => \$opt{'log-to-mbox'},
 	     'error-code|exit-code|e:i'          => \$opt{'error-code'},
 	     'test-mode|test|t'                  => \$opt{'test-mode'},
+             'lint'                              => \$opt{'lint'},
 	     'debug-level|debug|D:s'             => \$opt{'debug-level'},
 	     'version|V'                         => \$opt{'version'},
 	     'help|h|?'                          => \$opt{'help'},
@@ -81,19 +82,23 @@ eval {
     exit 0;
   }
 
+  my $mail;
+
 # 1.
 # Standard Mail::Audit start.  No longer used due to bugs in M:A, regarding
 # handling of slightly misformatted input.
 #
 # require Mail::Audit;
-# my $mail = Mail::Audit->new();
+# $mail = Mail::Audit->new();
 
 # 2.
 # No use of Mail::Audit at all, apart from the accept(), reject() and
 # resend() methods (which are proxied transparently).  Lovely.
 #
   use Mail::SpamAssassin::NoMailAudit;
-  my $mail = Mail::SpamAssassin::NoMailAudit->new ();
+  if (!$opt{'lint'}) {
+    $mail = Mail::SpamAssassin::NoMailAudit->new ();
+  }
 
 # For Mail::Audit users -- this is the magic. Just create a Mail::SpamAssassin
 # object like this, then run the check() method as below; if it returns a
@@ -134,6 +139,10 @@ eval {
     $mail->{noexit} = 1;
     $mail->accept ($opt{'log-to-mbox'});
     $mail->{noexit} = 0;
+  }
+
+  if ($opt{'lint'}) {
+    exit $spamtest->lint_rules ();
   }
 
 # handle removing reports
@@ -277,6 +286,7 @@ Options:
  -l filename, --log-to-mbox=file   Log messages to a mbox file
  -t, --test-mode                   Pipe message through and add extra
                                    report to the bottom
+ --lint                            Lint the rule set: report syntax errors
  -D, --debug [area=n,...]          Print debugging messages
  -V, --version                     Print version
  -h, --help                        Print usage message
@@ -321,6 +331,12 @@ http://www.rhyolite.com/anti-spam/dcc/ ).
 If the message contains SpamAssassin markup, this will be stripped out
 automatically before submission.  The support modules for DCC and Razor
 must be installed for spam to be reported to each service.
+
+=item B<--lint>
+
+Syntax check (lint) the rule set and configuration files, reporting
+typos and rules that do not compile correctly.  Exits immediately with
+0 if there are no errors, or greater than 0 if any errors are found.
 
 =item B<-W>, B<--add-to-whitelist>
 

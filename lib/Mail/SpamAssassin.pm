@@ -87,7 +87,7 @@ $TIMELOG->{dummy}=0;
 
 $VERSION = "2.40";
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.115 2002/08/20 23:10:05 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.115.2.1 2002/08/22 22:12:19 jmason Exp $'))[2 .. 5, 8]));
 # If you hacked up your SA, add a token to identify it here. Eg.: I use "mss<number>",
 # <number> increasing with every hack. Deersoft might want to use "pro" :o)
 # "cvs" is added automatically if this file is tagged as 'Exp'erimental.
@@ -593,6 +593,39 @@ sub compile_now {
   }
 
   1;
+}
+
+###########################################################################
+
+=item $failed = $f->lint_rules ()
+
+Syntax-check the current set of rules.  Returns the number of 
+syntax errors discovered, or 0 if the configuration is valid.
+
+=cut
+
+sub lint_rules {
+  my ($self) = @_;
+
+  dbg ("ignore: using a test message to lint rules");
+  my @testmsg = ("From: ignore\@compiling.spamassassin.taint.org\n", 
+    "Subject: \n",
+    "Message-Id:  <".time."\@lint_rules>\n", "\n",
+    "I need to make this message body somewhat long so TextCat preloads\n"x20);
+
+  $self->{lint_rules} = $self->{conf}->{lint_rules} = 1;
+  $self->{syntax_errors} = 0;
+  $self->{rule_errors} = 0;
+
+  $self->init(1);
+  $self->{syntax_errors} += $self->{conf}->{errors};
+
+  my $mail = Mail::SpamAssassin::NoMailAudit->new(data => \@testmsg);
+  my $status = $self->check($mail);
+  $self->{syntax_errors} += $status->{rule_errors};
+  $status->finish();
+
+  return ($self->{syntax_errors});
 }
 
 ###########################################################################
