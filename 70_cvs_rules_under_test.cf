@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.626 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.627 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -19,73 +19,73 @@
 ###########################################################################
 
 # http://bugzilla.spamassassin.org/show_bug.cgi?id=2088
-###header T_RATWARE_MIME_844412	Content-Type =~ /boundary="[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"/
+header T_RATWARE_MIME_844412	Content-Type =~ /boundary="[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"/
 
 # http://bugzilla.spamassassin.org/show_bug.cgi?id=2087
-###header T_RATWARE_OE_DM	X-Mailer =~ /^Microsoft Outlook Express [\d\.]+ DM$/
+header T_RATWARE_OE_DM	X-Mailer =~ /^Microsoft Outlook Express [\d\.]+ DM$/
 
 # a referral ID
-###uri T_REF_ID			/[\?\&]RefID/
+uri T_REF_ID			/[\?\&]RefID/
 
 # http://bugzilla.spamassassin.org/show_bug.cgi?id=2089
-###header T_DATE_EXTRA_SPACE	Date =~ /^..., .\d ... \d\d\d\d \d\d:\d\d:\d\d  [\+\-]\d\d\d\d$/
+header T_DATE_EXTRA_SPACE	Date =~ /^..., .\d ... \d\d\d\d \d\d:\d\d:\d\d  [\+\-]\d\d\d\d$/
 
 # another one for bug 2089, may be more useful:
-###full __END_HASHBUSTER_1		/\n\[[a-z0-9]+\]\n\s*\Z/
-###meta T_RATWARE_2089		(NO_REAL_NAME && TO_ADDRESS_EQ_REAL && __END_HASHBUSTER_1)
+full __END_HASHBUSTER_1		/\n\[[a-z0-9]+\]\n\s*\Z/
+meta T_RATWARE_2089		(NO_REAL_NAME && TO_ADDRESS_EQ_REAL && __END_HASHBUSTER_1)
 
 # this is really badly faked.  Also the spammer who uses "25250101"
 # for the build is a total hippie.
-###header T_RATWARE_GECKO_BUILD	User-Agent =~ /Gecko\/(?!200\d\d\d\d\d)\d/
+header T_RATWARE_GECKO_BUILD	User-Agent =~ /Gecko\/(?!200\d\d\d\d\d)\d/
 
 # another good way to catch mozilla fakery
-###header __UA_GECKO		User-Agent =~ /Gecko\//
-###header __EXISTS_ACCEPT_LANG	exists:X-Accept-Language
-###meta T_RATWARE_GECKO_NO_LANG	(__UA_GECKO && !__EXISTS_ACCEPT_LANG)
+header __UA_GECKO		User-Agent =~ /Gecko\//
+header __EXISTS_ACCEPT_LANG	exists:X-Accept-Language
+meta T_RATWARE_GECKO_NO_LANG	(__UA_GECKO && !__EXISTS_ACCEPT_LANG)
 
 # reminder: develop these after 2.60
-# full T_SPRINTF_5X	/[^-][A-F1-9][A-F0-9]{5,7}-[A-F1-9][A-F0-9]{5,7}-[A-F1-9][A-F0-9]{5,7}-[A-F1-9][A-F0-9]{5,7}-[A-F1-9][A-F0-9]{5,7}[^-]/
+full T_SPRINTF_5X	/[^-][A-F1-9][A-F0-9]{5,7}-[A-F1-9][A-F0-9]{5,7}-[A-F1-9][A-F0-9]{5,7}-[A-F1-9][A-F0-9]{5,7}-[A-F1-9][A-F0-9]{5,7}[^-]/
 
 # (time_t/4444)
-# header T_TIME_OVER_4444	ALL =~ /\D23[67][0-9][0-9][0-9]\D/
+header T_TIME_OVER_4444	ALL =~ /\D23[67][0-9][0-9][0-9]\D/
 
 # http://www.linux.or.jp/~ukai/l-u-spam/local.cf
-# header T_LJ_MISYOUDAKU Subject =~ /L\$>5Bz/
-# describe T_LJ_MISYOUDAKU Misyoudaku
-# header T_LJ_BANG_BANG Subject =~ /(!\*|\033\$[B@]).*(!\*|\033\([BJ]!)/
-# describe T_LJ_BANG_BANG !...!
-# header T_LJ_STAR Subject =~ /(\"\(|\*)/
-# describe T_LJ_STAR *
-# header T_LJ_KOUKOKU Subject =~ /9-9p/
-# describe T_LJ_KOUKOKU KOUKOKU
-# body T_LJ_HAISHINTEISHI /G\[\?\.(..)*(Dd;_|ITMW)/
-# describe T_LJ_HAISHINTEISHI Haishin Teishi
-# body T_LJ_KOUDOKUKAIJO /9XFI(..)*2r=\|/
-# describe T_LJ_KOUDOKUKAIJO Koudoku Kaijo
-# body T_LJ_MURYOU /L5NA/
-# describe T_LJ_MURYOU Muryou
-# header T_LJ_X_MAILER         X-Mailer =~ /(GpsMailer|SpireMail|IM2000 Version|Pinta Magazine|MultiMail|BSMTP DLL|E-Magazine|Direct Email|Achi-Kochi Mail|MagicalMail|InternetPost for Active Platform|Web Based Pronto)/
-# describe T_LJ_X_MAILER       spammer's choice of X-Mailer
-# header T_LJ_X_MAILER_U       X-MAILER =~ /Mail Explorer For Internet /
-# describe T_LJ_X_MAILER_U     spammer's choice of X-MAILER
-# header T_LJ_X_MAIL_AGENT     X-Mail-Agent =~ /(Extra Japan)/
-# describe T_LJ_X_MAIL_AGENT   spammer's choice of X-Mail-Agent
-# # also http://tlec.linux.or.jp/docs/user_prefs
-# meta T_LJ_MISYOUDAKUKOUKOKU T_LJ_MISYOUDAKU && T_LJ_KOUKOKU && T_LJ_STAR
-# describe T_LJ_MISYOUDAKUKOUKOKU T_LJ_MISYOUDAKU && T_LJ_KOUKOKU && T_LJ_STAR
+header T_LJ_MISYOUDAKU Subject =~ /L\$>5Bz/
+describe T_LJ_MISYOUDAKU Misyoudaku
+header T_LJ_BANG_BANG Subject =~ /(!\*|\033\$[B@]).*(!\*|\033\([BJ]!)/
+describe T_LJ_BANG_BANG !...!
+header T_LJ_STAR Subject =~ /(\"\(|\*)/
+describe T_LJ_STAR *
+header T_LJ_KOUKOKU Subject =~ /9-9p/
+describe T_LJ_KOUKOKU KOUKOKU
+body T_LJ_HAISHINTEISHI /G\[\?\.(..)*(Dd;_|ITMW)/
+describe T_LJ_HAISHINTEISHI Haishin Teishi
+body T_LJ_KOUDOKUKAIJO /9XFI(..)*2r=\|/
+describe T_LJ_KOUDOKUKAIJO Koudoku Kaijo
+body T_LJ_MURYOU /L5NA/
+describe T_LJ_MURYOU Muryou
+header T_LJ_X_MAILER         X-Mailer =~ /(GpsMailer|SpireMail|IM2000 Version|Pinta Magazine|MultiMail|BSMTP DLL|E-Magazine|Direct Email|Achi-Kochi Mail|MagicalMail|InternetPost for Active Platform|Web Based Pronto)/
+describe T_LJ_X_MAILER       spammer's choice of X-Mailer
+header T_LJ_X_MAILER_U       X-MAILER =~ /Mail Explorer For Internet /
+describe T_LJ_X_MAILER_U     spammer's choice of X-MAILER
+header T_LJ_X_MAIL_AGENT     X-Mail-Agent =~ /(Extra Japan)/
+describe T_LJ_X_MAIL_AGENT   spammer's choice of X-Mail-Agent
+# also http://tlec.linux.or.jp/docs/user_prefs
+meta T_LJ_MISYOUDAKUKOUKOKU T_LJ_MISYOUDAKU && T_LJ_KOUKOKU && T_LJ_STAR
+describe T_LJ_MISYOUDAKUKOUKOKU T_LJ_MISYOUDAKU && T_LJ_KOUKOKU && T_LJ_STAR
 
 # replacements for PORN_4; split out sub-patterns as some are more FP-prone
 # than others.
-### uri T_PORN_URL_XXX         /^https?:\/\/[\w\.-]*xxx[\w-]*\./
-### uri T_PORN_URL_SEX         /^https?:\/\/[\w\.-]*(?<!es|ba)(?<!dle|sus)sex[\w-]*\./
-### uri T_PORN_URL_ANAL        /^https?:\/\/[\w\.-]*anal(?!og|y[sz])[\w-]*\./
-### uri T_PORN_URL_SLUT        /^https?:\/\/[\w\.-]*slut[\w-]*\./
-### uri T_PORN_URL_CUM         /^https?:\/\/[\w\.-]*(?<!cir)(?<!\bdo)cum(?!ul|be?r|b?en)[\w-]*\./
-### uri T_PORN_URL_LUST        /^https?:\/\/[\w\.-]*lust(?!(?<=illust)(?:rat|rious)|(?<=clust)er)[\w-]*\./
-### uri T_PORN_URL_PANT        /^https?:\/\/[\w\.-]*pant(?:y|ies)[\w-]*\./
-### uri T_PORN_URL_SUCK        /^https?:\/\/[\w\.-]*suck[\w-]*\./
-### uri T_PORN_URL_TEEN        /^https?:\/\/[\w\.-]*(?<!thir|four|eigh|nine)(?<!fif|six)(?<!seven)teen[\w-]*\./
-### uri T_PORN_URL_MISC        /^https?:\/\/[\w\.-]*(pussy|nympho|porn|hard-?core|taboo|whore|voyeur|lesbian|gurlpages|naughty|lolita|schoolgirl|kooloffer|erotic)[\w-]*\./
+uri T_PORN_URL_XXX         /^https?:\/\/[\w\.-]*xxx[\w-]*\./
+uri T_PORN_URL_SEX         /^https?:\/\/[\w\.-]*(?<!es|ba)(?<!dle|sus)sex[\w-]*\./
+uri T_PORN_URL_ANAL        /^https?:\/\/[\w\.-]*anal(?!og|y[sz])[\w-]*\./
+uri T_PORN_URL_SLUT        /^https?:\/\/[\w\.-]*slut[\w-]*\./
+uri T_PORN_URL_CUM         /^https?:\/\/[\w\.-]*(?<!cir)(?<!\bdo)cum(?!ul|be?r|b?en)[\w-]*\./
+uri T_PORN_URL_LUST        /^https?:\/\/[\w\.-]*lust(?!(?<=illust)(?:rat|rious)|(?<=clust)er)[\w-]*\./
+uri T_PORN_URL_PANT        /^https?:\/\/[\w\.-]*pant(?:y|ies)[\w-]*\./
+uri T_PORN_URL_SUCK        /^https?:\/\/[\w\.-]*suck[\w-]*\./
+uri T_PORN_URL_TEEN        /^https?:\/\/[\w\.-]*(?<!thir|four|eigh|nine)(?<!fif|six)(?<!seven)teen[\w-]*\./
+uri T_PORN_URL_MISC        /^https?:\/\/[\w\.-]*(pussy|nympho|porn|hard-?core|taboo|whore|voyeur|lesbian|gurlpages|naughty|lolita|schoolgirl|kooloffer|erotic)[\w-]*\./
 
-### header T_DATE_DOUBLE_DASH	Date =~ /:\d\d --\d\d\d\d$/
+header T_DATE_DOUBLE_DASH	Date =~ /:\d\d --\d\d\d\d$/
 
