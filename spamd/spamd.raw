@@ -643,7 +643,7 @@ sub logmsg
        $main::SIGPIPE_RECEIVED = 0;
     }
 
-    $SIG{'PIPE'} = $old;
+    $SIG{'PIPE'} = $old if defined($old);
 }
 
 sub kill_handler
