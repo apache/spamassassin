@@ -79,6 +79,7 @@ Options:
   -p prefs         user preferences file
                    (default:	$prefs )
   -D		   log diagnostic messages
+  -x               turn off per-user config files
 
 Version: $ver      Home: http://spamassassin.org/
 
@@ -89,14 +90,14 @@ EOUSAGE
 
 use vars qw{
   $opt_t $opt_c $opt_p $opt_h $opt_V $opt_D $opt_r $opt_P $opt_w $opt_l
-  $opt_d $opt_L $opt_e $opt_W $opt_M $opt_R $opt_F $opt_a $opt_S
+  $opt_d $opt_L $opt_e $opt_W $opt_M $opt_R $opt_F $opt_a $opt_S $opt_x
 };
 
 eval {
   require Mail::SpamAssassin;
   require Mail::SpamAssassin::NoMailAudit;
 
-  getopts ('atc:p:ehVDrPw:l:dLSWRM:F:') or usage();
+  getopts ('atc:p:ehVDxrPw:l:dLSWRM:F:') or usage();
 
   if (defined $opt_h) { usage(); }
   if (defined $opt_V) {
@@ -147,7 +148,8 @@ my $mail = Mail::SpamAssassin::NoMailAudit->new ( add_From_line => $opt_F );
     'userprefs_filename' => $opt_p,
     'local_tests_only'	=> $opt_L,
     'stop_at_threshold' => $opt_S,
-    'debug'		=> $opt_D
+    'debug'		=> $opt_D,
+    'dont_copy_prefs'   => $opt_x
   });
 
 # handle logging of received mails
