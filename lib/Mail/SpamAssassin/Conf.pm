@@ -823,6 +823,12 @@ C<modifiers> as regexp modifiers in the usual style.
 If the C<[if-unset: STRING]> tag is present, then C<STRING> will
 be used if the header is not found in the mail message.
 
+=item header SYMBOLIC_TEST_NAME exists:name_of_header
+
+Define a header existence test.  C<name_of_header> is the name of a
+header to test for existence.  This is just a very simple version of
+the above header tests.
+
 =item header SYMBOLIC_TEST_NAME eval:name_of_eval_method([arguments])
 
 Define a header eval test.  C<name_of_eval_method> is the name of 
@@ -833,6 +839,11 @@ are optional arguments to the function call.
     if (/^header\s+(\S+)\s+eval:(.*)$/) {
       $self->add_test ($1, $2, $type_head_evals);
       $self->{user_rules_to_compile} = 1 if $scoresonly;
+      next;
+    }
+    if (/^header\s+(\S+)\s+exists:(.*)$/) {
+      $self->add_test ($1, "$2 =~ /./", $type_head_tests);
+      $self->{descriptions}->{$1} = "Found a $2 header";
       next;
     }
     if (/^header\s+(\S+)\s+(.*)$/) {
