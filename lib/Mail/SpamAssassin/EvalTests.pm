@@ -2763,8 +2763,8 @@ sub check_blank_line_ratio {
     $minlines = 1;
   }
 
-  $fulltext = $self->get_decoded_body_text_array();
   if (! exists $self->{blank_line_ratio}->{$minlines}) {
+    $fulltext = $self->get_decoded_body_text_array();
     my ($blank) = 0;
     if (scalar @{$fulltext} >= $minlines) {
       foreach my $line (@{$fulltext}) {
