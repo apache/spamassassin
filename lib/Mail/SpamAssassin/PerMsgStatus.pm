@@ -689,6 +689,19 @@ sub get_decoded_body_text_array {
 
 ###########################################################################
 
+# A URI can be like:
+#
+#   href=foo.htm
+#   href = foo.htm
+#   href="foo.htm"
+#   href='foo.htm'
+#   href = 'foo.htm'
+#   href = ' foo.htm '
+#
+# and such.  Have to deal with all of it
+#
+my $URI_in_tag = qr/\s*=\s*["']?\s*([^'">\s]*)\s*["']?[^>]*/;
+
 sub get_decoded_stripped_body_text_array {
   my ($self) = @_;
   local ($_);
@@ -709,34 +722,69 @@ sub get_decoded_stripped_body_text_array {
 
     $text .= $_;
   }
-  $text =~ s/=\r?\n//gis;	# QP line endings
 
-  # sort out escaped QP markup
-  $text =~ s/=20/ /gis;
-  $text =~ s/=3E/>/gis;         # spam trick, disguise HTML
-  $text =~ s/=[0-9a-f][0-9a-f]//gis;
+  # Get rid of comments.  Isn't the non-greedy ".*?" awful expensive?
+  #
+  # There might be things in comments we'd want to look at, like
+  # SCRIPT and STYLE content, but that can be taken care of with
+  # rawbody tests.
+  $text =~ s/<!--.*?-->//gs;
 
-  $text =~ s/\n\n+/<p>/gs;	# keep paragraph breaks
+  # Try to put paragraph breaks where'd they'd be in HTML.  There's
+  # an optional "/" before the ends of some tags in case it's XML style.
+  $text =~ s/<BR\/?>\s*<BR\/?>/\n\n/gis; # Two line breaks
+  $text =~ s/<HR\/?>/\n\n/gis;           # Horizontal line
 
-  # strip HTML tags and entities
-  $text =~ s/(?:\&\#0147;|\&\#0148;|\&quot;)/"/gs;
-  $text =~ s/\&\#0146;/'/gs;
+  # Keep paragraph breaks
+  $text =~ s/\n\n+/<p>/gs;
+
+  # Convert hex entities to decimal equivalents, so that the specific
+  # decimal regexps will match
+  $text =~ s/\&\#x([a-f0-9]+);/"&#" . hex($1) . ";"/ieg;
+
+  # Convert specific HTML entities
+  $text =~ s/(?:\&nbsp;|\&\#0?160;)/ /gis;
+  $text =~ s/(?:\&reg;|\&\#0?174;)/(R)/gis;
+  $text =~ s/(?:\&copy;|\&\#0?169;)/(C)/gis;
+  $text =~ s/\&\#0?153;/(TM)/gs;
+  $text =~ s/(?:\&\#0?147;|\&\#0?148;|\&\#0?132|\&quot;)/"/gis;
+  $text =~ s/\&\#0?146;/'/gs;
+  $text =~ s/\&\#0?145;/`/gs;
+  $text =~ s/\&\#0?150;/-/gs;  # En-dash
+  $text =~ s/\&\#0?151;/--/gs; # Em-dash
+  $text =~ s/\&\#0?152;/~/gs;
   $text =~ s/\&\#82(?:16|17|20|11);//gs;
   
-  # convert decimal and hex entities to their characters
+  # Convert <Q> tags
+  $text =~ s/<\/?Q\b[^>]*>/"/gis;
+    
+  # Convert decimal entities to their characters
   $text =~ s/\&\#(\d+);/chr($1)/eg;
-  $text =~ s/\&\#x([a-f0-9]+);/chr(hex($1))/eg;
   
-  # no idea what this is meant to do? Strip broken entities perhaps?
+  # Strip all remaining HTML entities
   $text =~ s/\&[-_a-zA-Z0-9]+;/ /gs;
   
   # join all consecutive whitespace into a single space
-  $text =~ s/\s+/ /gs;
-
-  $text =~ s/<p>/\n\n/gis;	# reinsert para breaks
+  $text =~ s/\s+/ /sg;
   
-  $text =~ s/<a\s+href\s*=\s*["']?(.*?)["']\s*>/URI:$1 /gis;
+  # reinsert para breaks
+  $text =~ s/<p>/\n\n/gis;
 
+  # Get rid of "BASEURI:" in case spammers insert it raw to try to
+  # mess us up
+  $text =~ s/BASEURI://sg;
+
+  # Extract URIs from various HTML tags, so that they'll still be there
+  # when the URI tests are done.
+  # <A>, <AREA>, <BASE> and <LINK> use "href=URI".
+  # <IMG>, <FRAME>, <IFRAME>, <EMBED> and <SCRIPT> use "src=URI"
+  # <FORM> uses "action=URI"
+  $text =~ s/<base\s[^>]*\bhref$URI_in_tag>/BASEURI:$1 /ogis;
+  $text =~ s/<(?:a|area|link)\s[^>]*\bhref$URI_in_tag>/URI:$1 /ogis;
+  $text =~ s/<(?:img|i?frame|embed|script)\s[^>]*\bsrc$URI_in_tag>/URI:$1 /ogis;
+  $text =~ s/<form\s[^>]*\baction$URI_in_tag>/URI:$1 /ogis;
+  
+  # Get rid of all remaing HTML and XML tags
   $text =~ s/<[?!\s]*[:a-z0-9]+\b[^>]*>//gis;
   $text =~ s/<\/[:a-z0-9]+>//gis;
 
@@ -756,6 +804,9 @@ sub get {
 
   my $getaddr = 0;
   if ($hdrname =~ s/:addr$//) { $getaddr = 1; }
+
+  my $getname = 0;
+  if ($hdrname =~ s/:name$//) { $getname = 1; }
 
   my @hdrs = $self->{msg}->get_header ($hdrname);
   if ($#hdrs >= 0) {
@@ -783,6 +834,11 @@ sub get {
     chomp; s/\r?\n//gs;
     s/^.*?<(.+)>\s*$/$1/g		# Foo Blah <jm@foo>
     	or s/^(.+)\s\(.*?\)\s*$/$1/g;	# jm@foo (Foo Blah)
+
+  } elsif ($getname) {
+    chomp; s/\r?\n//gs;
+    s/^[\'\"]*(.*?)[\'\"]*\s*<.+>\s*$/$1/g # Foo Blah <jm@foo>
+    	or s/^.+\s\((.*?)\)\s*$/$1/g;	   # jm@foo (Foo Blah)
 
   } else {
     $_ = $self->mime_decode_header ($_);
@@ -1081,12 +1137,25 @@ sub do_body_uri_tests {
   
   my $text = join('', @$textary);
   # warn("spam: /$uriRe/ $text\n");
-  
+
+  my $base_uri = "http://";
   while ($text =~ /\G.*?(<$uriRe>|$uriRe)/gsoc) {
       my $uri = $1;
+
       $uri =~ s/^<(.*)>$/$1/;
+
+      # Use <BASE HREF="URI"> to turn relative links into
+      # absolute links
+      if ($uri =~ s/^BASEURI://i) {
+        $base_uri = $uri;
+
+        # Make sure it ends in a slash
+        $base_uri .= "/" unless($base_uri =~ /\/$/);
+        next;
+      }
+
       $uri =~ s/^URI://i;
-      $uri = "http://$uri" unless $uri =~ /^[a-z]+:/i;
+      $uri = "${base_uri}$uri" unless $uri =~ /^[a-z]+:/i;
       # warn("Got URI: $uri\n");
       push @uris, $uri;
   }
