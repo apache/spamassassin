@@ -61,7 +61,7 @@ C<$plugin->inhibit_further_callbacks()> to block delivery of that event to
 later plugins in the chain.  This is useful if the plugin has handled the
 event, and there will be no need for later plugins to handle it as well.
 Some methods can also return C<$Mail::SpamAssassin::Plugin::INHIBIT_CALLBACKS>
-to do this, too.
+to do this, too; this will be noted in the method description below.
 
 If you're looking to write a simple eval rule, skip straight to 
 C<register_eval_rule()>, below.
@@ -116,6 +116,11 @@ Note that subclasses must provide the C<$mailsaobject> to the
 superclass constructor, like so:
 
   my $self = $class->SUPER::new($mailsaobject);
+
+Lifecycle note: plugins that will need to store per-scan state should not store
+that on the Plugin object; see C<check_start()> below.  It is also likewise
+recommended that configuration settings be stored on the Conf object; see
+C<parse_config()>.
 
 =cut
 
@@ -183,9 +188,11 @@ If the setting is not handled by this plugin, the method should return C<0> so
 that a later plugin may handle it, or so that SpamAssassin can output a warning
 message to the user if no plugin understands it.
 
-Note that it is suggested that configuration be stored on the
+Lifecycle note: it is suggested that configuration be stored on the
 C<Mail::SpamAssassin::Conf> object in use, instead of the plugin object itself.
-That can be found as C<$plugin->{main}->{conf}>.
+That can be found as C<$plugin->{main}->{conf}>.   This allows per-user and
+system-wide configuration to be dealt with correctly, with per-user overriding
+system-wide.
 
 =item $plugin->signal_user_changed ( { options ... } )
 
@@ -213,6 +220,14 @@ Signals that a message check operation is starting.
 
 The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
 
+Lifecycle note: it is recommended that rules that need to track test state on a
+per-scan basis should store that state on this object, not on the plugin object
+itself, since the plugin object will be shared between all active scanners.
+
+The message being scanned is accessible through the
+C<$permsgstatus->get_message()> API; there are a number of other public
+APIs on that object, too.  See C<Mail::SpamAssassin::PerMsgStatus> perldoc.
+
 =back
 
 =item $plugin->extract_metadata ( { options ... } )
@@ -237,9 +252,7 @@ accessed by the plugin.
 
 =item permsgstatus
 
-The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.  (Note
-that the message being scanned is accessible through the
-C<$permsgstatus->get_message()> API.)
+The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
 
 =back
 
@@ -281,7 +294,7 @@ results are about to be returned to the caller.
 
 The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
 The current score, names of rules that hit, etc. can be retrieved
-using the APIs on this object.
+using the public APIs on this object.
 
 =back
 
@@ -372,7 +385,7 @@ is not hit.
 
 State for a single message being scanned should be stored on the C<$checker>
 object, not on the C<$self> object, since C<$self> persists between scan
-operations.
+operations.  See the 'lifecycle note' on the C<check_start()> method above.
 
 =cut
 

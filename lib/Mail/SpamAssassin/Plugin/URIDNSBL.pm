@@ -191,7 +191,7 @@ sub parse_config {
         is_rhsbl => 0
       };
     }
-    return 1;
+    return $Mail::SpamAssassin::Plugin::INHIBIT_CALLBACKS;
   }
   elsif ($key eq 'urirhsbl') {
     if ($opts->{value} =~ /^(\S+)\s+(\S+)\s+(\S+)$/) {
@@ -204,11 +204,11 @@ sub parse_config {
         is_rhsbl => 1
       };
     }
-    return 1;
+    return $Mail::SpamAssassin::Plugin::INHIBIT_CALLBACKS;
   }
   elsif ($key eq 'uridnsbl_timeout') {
     $opts->{conf}->{uridnsbl_timeout} = $opts->{value};
-    return 1;
+    return $Mail::SpamAssassin::Plugin::INHIBIT_CALLBACKS;
   }
   return 0;
 }
