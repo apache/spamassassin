@@ -668,7 +668,7 @@ describe T_SENDER_NO_REVERSE    No reverse lookup for sender's IP
 
 header __MSGID_OE_LONG_14	MESSAGEID =~ /<[a-f0-9]{14}\$[a-f0-9]{8}\$[a-f0-9]{8}\@/
 header __CDO			X-Mailer =~ /Microsoft CDO/
-header T_MSGID_OE_LONG_14	(__MSGID_OE_LONG_14 && !__CDO)
+meta   T_MSGID_OE_LONG_14	(__MSGID_OE_LONG_14 && !__CDO)
 
 # Nov 12 2002 jm: a test to catch spammers who HELO as a host at a big site
 # (aol, hotmail etc.) but whose rDNS lists them at some dialup ISP or another
