@@ -1,18 +1,21 @@
 1. Get the latest CVS version of SA following the instructions on the
-sourceforge website.  You don't need to install it, just get it.  Instructions
-at:
+sourceforge website.  You don't need to install it, just get it.
+Instructions at:
 
   https://sourceforge.net/cvs/?group_id=25457
 
 2. Now cd to the "masses" directory in the checked-out CVS code tree.
 3. Read README to gain understanding of what mass-check does.
-4. Run mass-check against your non-spam mail archive.
-5. sort -rn +1 nonspam.log | head -20
+4. Run mass-check against your ham mail archive.
+5. sort -rn +1 ham.log | head -20
 6. Check each of those 20 messages by hand to make sure they're not spam that
    slipped through, or a forward of a spam message.
 7. Repeat #6 until the top 20 are "clean"
-8. rename nonspam.log to nonspam-yourname.log (ie for me nonspam-craig.log)
-9. rsync -CPcvuzb nonspam-yourname.log belphegore.hughes-family.org::corpus
+8. Repeat steps 4-7 for your spam archive until they are "clean".
+9. Run a mass-check for ham and spam together (one mass-check run)
+10. rename ham.log and spam.log to ham-yourname.log and spam-yourname.log
+    (ie for Craig Hughes: ham-craig.log and spam-craig.log)
+9. rsync -CPcvuzb ham-yourname.log spam-yourname.log belphegore.hughes-family.org::corpus
 
 That should do it.  In the future when you re-run this procedure
 (starting from the top to get latest CVS rules), the rsync bit should
@@ -23,4 +26,3 @@ from run to run.
 Thanks for your help,
 
 C
-
