@@ -994,6 +994,13 @@ sub html_text {
 	$self->{html}{$backhair}++;
       }
     }
+    if ($self->{html_text}[-1] =~ /\b(\S{1,7})$/s) {
+      my $start = length($1);
+      if ($text =~ /^(\S{1,7})\b/s) {
+	my $backhair = "backhair2_" . $start . "_" . length($1);
+	$self->{html}{$backhair}++;
+      }
+    }
   }
 
   push @{$self->{html_text}}, $text;
