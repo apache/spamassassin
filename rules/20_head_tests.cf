@@ -535,6 +535,24 @@ header X_VMP_TEXT               exists:X-VMP-Text
 header X_GCMULTI                exists:X-GCMulti
 header X_MIME_KEY		exists:X-Mime-Key
 header MICROSOFT		exists:microsoft
+describe X_ENC_PRESENT		Message has X-Encoding header
+describe X_ESMTP		Message has x-esmtp header
+describe X_LIBRARY		Message has X-Library header
+describe X_LIST_UNSUBSCRIBE	Message has X-List-Unsubscribe header
+describe X_MAIL_ID_PRESENT	Message has X-MailingID header
+describe X_PMFLAGS_PRESENT	Message has X-PMFLAGS header
+describe X_PRECEDENCE_REF	Message has X-Precedence-Ref header
+describe X_SERV_HOST_PRESENT	Message has X-ServerHost header
+describe X_SMTPEXP_REGISTRATION	Message has X-SMTPExp-Registration header
+describe X_SMTPEXP_VERSION	Message has X-SMTPExp-Version header
+describe X_STORMPOST_TO		Message has X-Stormpost-To header
+describe X_X_PRESENT		Message has X-x header
+describe X_FIX_PRESENT		Message has X-Fix header
+describe COMPLAIN_TO		Message has Complain-To header
+describe X_VMP_TEXT		Message has X-VMP-Text header
+describe X_GCMULTI		Message has X-GCMulti header
+describe X_MIME_KEY		Message has X-Mime-Key header
+describe MICROSOFT		Message has microsoft header
 
 header   MIME_ODD_CASE		ALL =~ /\nMiME-Version: /s
 describe MIME_ODD_CASE		MiME-Version header (oddly capitalized)

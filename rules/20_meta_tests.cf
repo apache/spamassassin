@@ -43,6 +43,7 @@ describe PLING_PLING            Subject has lots of exclamation marks
 header __RCVD_BY_HOTMAIL	Received =~ / by hotmail\.com /
 body __MIME_HTML_ONLY		eval:check_for_mime_html_only()
 meta MIME_HTML_ONLY		(!__RCVD_BY_HOTMAIL && __MIME_HTML_ONLY)
+describe MIME_HTML_ONLY		Message only has text/html MIME parts
 
 ##############################################################################
 
@@ -110,3 +111,4 @@ header __REGSITE_COM		Received =~ /\.registeredsite\.com\s/
 header __X_BEENTHERE		exists:X-BeenThere
 header __IDENT_NOBODY_LOCALHOST Received =~ /\bident[:=]nobody\@localhost\b/i
 meta IDENT_NOBODY		(__IDENT_NOBODY && !__IDENT_NOBODY_LOCALHOST && !__REGSITE_COM && !((FORGOTTEN_PASSWORD + __X_BEENTHERE + KNOWN_MAILING_LIST) > 1))
+describe IDENT_NOBODY		Received lines include an 'ident:nobody' string

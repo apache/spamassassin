@@ -49,6 +49,8 @@ tflags REFERENCES               nice
 # User-Agent isn't usually found with spam, but ignore it if we already account with a compensate rule
 header __USER_AGENT		exists:User-Agent
 meta USER_AGENT			( __USER_AGENT && !USER_AGENT_PINE && !USER_AGENT_MUTT && !USER_AGENT_MOZILLA_UA && !USER_AGENT_MOZILLA_XM && !USER_AGENT_MACOE && !USER_AGENT_ENTOURAGE && !USER_AGENT_KMAIL && !USER_AGENT_IMP && !USER_AGENT_TONLINE && !USER_AGENT_APPLEMAIL && !USER_AGENT_GNUS_UA && !USER_AGENT_GNUS_XM && !USER_AGENT_VM && !USER_AGENT_MSN && !USER_AGENT_FORTE )
+describe USER_AGENT		Has a User-Agent header
+tflags USER_AGENT               nice
 
 # these headers have very low correlation with spam
 header CRON_ENV                 exists:X-Cron-Env
@@ -58,9 +60,15 @@ header X_MAILING_LIST           exists:X-Mailing-List
 header X_LOOP                   exists:X-Loop
 header X_ACCEPT_LANG            exists:X-Accept-Language
 header RESENT_TO                exists:Resent-To
+describe CRON_ENV		Has a X-Cron-Env header
+describe IN_REP_TO		Has a In-Reply-To header
+describe X_AUTH_WARNING		Has a X-Authentication-Warning header
+describe X_MAILING_LIST		Has a X-Mailing-List header
+describe X_LOOP			Has a X-Loop header
+describe X_ACCEPT_LANG		Has a X-Accept-Language  header
+describe RESENT_TO		Has a Resent-To header
 tflags CRON_ENV                 nice
 tflags IN_REP_TO                nice
-tflags USER_AGENT               nice
 tflags X_AUTH_WARNING           nice
 tflags X_MAILING_LIST           nice
 tflags X_LOOP                   nice
