@@ -199,6 +199,9 @@ rawbody QUOTED_EMAIL_TEXT       /^>+\s+.{60,72}$/
 describe QUOTED_EMAIL_TEXT	Contains what looks like a quoted email text
 tflags QUOTED_EMAIL_TEXT	nice
 
+body QUOTE_TWICE_1              /^> >\s/
+describe QUOTE_TWICE_1          Contains twice quoted reply
+tflags QUOTE_TWICE_1            nice
 
 # spamassassin@davidgreenaway.com (David Greenaway)
 body     FORGOTTEN_PASSWORD     /[fF]org[oe]t.{0,25}[pP]assword/
