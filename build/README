@@ -60,7 +60,8 @@ SPAMASSASSIN RELEASE PROCEDURE
   Verify that the X-Spam-* headers use the correct version string,
   without an SVN revision number (those are only for dev builds).
 
-- create the Changes file.  There are two options here:
+- create the Changes file.  Do this step on your own checkout, as
+  the release checkout is read-only.   There are two options here:
 
   - For releases on a maintainance branch (e.g. 3.0.1, .2, etc.):
 
@@ -75,6 +76,29 @@ SPAMASSASSIN RELEASE PROCEDURE
 
     r5810 was the start of the 3.0.0 work; replace with the correct rev
     number for the point you want to start at.
+
+- Check in the updated Changes file.
+
+    svn commit -m "preparing to release X.Y.Z" Changes
+
+- SVN tag the release files.  This is done using "svn copy".
+  For a maintainance release (x.y.1, x.y.2):
+
+    repo=https://svn.apache.org/repos/asf/spamassassin
+    svn copy -m "creating tag for release 2.62" \
+	$repo/branches/b2_6_0 \
+	$repo/tags/spamassassin_release_2_6_2
+
+  For a trunk release (x.y.0):
+
+    repo=https://svn.apache.org/repos/asf/spamassassin
+    svn copy -m "creating tag for release 3.0.0" \
+	$repo/trunk \
+	$repo/tags/spamassassin_release_3_0_0
+
+  This will do a completely server-side tagging (which is the same as
+  a branch really) of whatever the latest branch revision to be the new
+  base of the tag release.
 
 - run "make distcheck" to ensure all files are included in the
   distribution that should be, and to ensure all files that are listed
@@ -101,33 +125,14 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 - SVN commit the release files, including 'Changes':
 
-	svn commit -m "X.YZ RELEASED"
-
-- SVN tag the release files.  This is done using "svn copy".
-  For a maintainance release (x.y.1, x.y.2):
-
-    repo=https://svn.apache.org/repos/asf/spamassassin
-    svn copy -m "creating tag for release 2.62" \
-	$repo/branches/b2_6_0 \
-	$repo/tags/spamassassin_release_2_6_2
-
-  For a trunk release (x.y.0):
-
-    repo=https://svn.apache.org/repos/asf/spamassassin
-    svn copy -m "creating tag for release 3.0.0" \
-	$repo/trunk \
-	$repo/tags/spamassassin_release_3_0_0
-
-  This will do a completely server-side tagging (which is the same as
-  a branch really) of whatever the latest branch revision to be the new
-  base of the tag release.
+	svn commit -m "X.Y.Z RELEASED"
 
 - Now, start the new development codebase.  For minor updates of a 2.x
   tree (e.g. 2.x1, 2.x2), you don't need to branch; for major updates
-  (2.x0) you should use a new development branch, off HEAD.
+  (2.x0) you should use a new development branch, off the trunk.
 
     repo=https://svn.apache.org/repos/asf/incubator/spamassassin
-    svn copy $repo/trunk \
+    svn copy $repo/tags/spamassassin_release_3_0_0 \
            $repo/branches/b3_0_0
 
   "trunk" is SVN's concept of head.  Typically, our branches are named
@@ -144,18 +149,43 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 	(where X.Y.N is the new version number)
 
-- copy the tarballs to the website.
+- (for rc and prerelease builds) copy the tarballs to the website.
 
         cp ~/site/released/Mail-SpamAssassin-[VERSION].* \
             /www/spamassassin.apache.org/released/
 
+- (for full release builds) copy the tarballs to www.apache.org/dist:
+
+        cp ~/site/released/Mail-SpamAssassin-$version.* \
+            /www/www.apache.org/dist/spamassassin/source
+
+        version=X.Y.Z
+        (
+          cd /www/www.apache.org/dist/spamassassin
+          ln -s source/Mail-SpamAssassin-$version.* .
+
+          for ext in {tar.bz2,tar.gz,zip}{,.asc,.md5,.sha1} ; do
+            rm -f Mail-SpamAssassin-current.$ext
+            ln -s Mail-SpamAssassin-$version.$ext \
+                    Mail-SpamAssassin-current.$ext
+          done
+        )
+
+        chmod -R g+w /www/www.apache.org/dist/spamassassin
+
+- (for full release builds) remove release tarballs from now-obsolete
+  versions from dist:
+
+        cd /www/www.apache.org/dist/spamassassin
+        prev=X.Y.notZ
+        rm -f source/Mail-SpamAssassin-$prev.*
+        rm -f binaries/*/Mail-SpamAssassin-$prev.*
+
+  (Archive copies are automatically kept on archive.apache.org/dist/ .)
+
 - edit SpamAssassin site through WebMake, change released_version item
   at top of file to be X.Y.Z, then run "webmake" or hit "Build Fully"
   in the Web interface
-
-- run this to update the mirrors: (NO LONGER REQUIRED FOR APACHE SITE)
-
-    ~/lib/html_spamassassin_put.rsync
 
 - upload to CPAN at http://pause.cpan.org/
 
@@ -170,13 +200,13 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   ( http://freshmeat.net/add-release/14876/ may work )
 
-- announce on SpamAssassin-Talk, SpamAssassin-Devel, and
-  SpamAssassin-Announce.  Be sure to include the MD5 checksums
-  in this mail, so paranoid folks can check the tarball's integrity.
+- announce on SpamAssassin-Users, SpamAssassin-Dev, and
+  SpamAssassin-Announce.  Be sure to include the MD5 checksums in this
+  mail, so paranoid folks can check the tarball's integrity.
 
-- Approve the posting to SpamAssassin-Announce (the list admins
-  will get a mail indicating how to do this.)
+- Approve the posting to SpamAssassin-Announce (the list admins will get a
+  mail indicating how to do this.)
 
-lastmod: Jul  9 2004 jm
+lastmod: Aug 12 2004 jm
 
 // vim:tw=74:
