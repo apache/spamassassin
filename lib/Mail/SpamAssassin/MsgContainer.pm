@@ -180,6 +180,16 @@ sub add_body_part {
   push @{ $self->{'body_parts'} }, $part;
 }
 
+=item raw()
+
+Return a reference to the the raw array.
+
+=cut
+
+sub raw {
+  return $self->{'raw'};
+}
+
 =item decode()
 
 Decode base64 and quoted-printable parts.
