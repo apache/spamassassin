@@ -100,13 +100,13 @@ describe BAD_HELO_WARNING	Fake name used in SMTP HELO command
 header SUBJ_FULL_OF_8BITS	eval:check_subject_for_lotsa_8bit_chars()
 describe SUBJ_FULL_OF_8BITS	Subject is full of 8-bit characters
 
-header RCVD_IN_RBL		eval:check_rbl('rbl.maps.vix.com')
+header RCVD_IN_RBL		eval:check_rbl('blackholes.mail-abuse.org.')
 describe RCVD_IN_RBL		Received via a relay listed in the RBL
 
-header RCVD_IN_RELAYS_ORBS_ORG	eval:check_rbl('relays.orbs.org')
+header RCVD_IN_RELAYS_ORBS_ORG	eval:check_rbl('relays.orbs.org.')
 describe RCVD_IN_RELAYS_ORBS_ORG Received via a relay in relays.orbs.org
 
-header RCVD_IN_MAIL_ABUSE_ORG	eval:check_rbl('relays.mail-abuse.org')
+header RCVD_IN_MAIL_ABUSE_ORG	eval:check_rbl('relays.mail-abuse.org.')
 describe RCVD_IN_MAIL_ABUSE_ORG	Received via a relay in relays.mail-abuse.org
 
 ###########################################################################
