@@ -41,11 +41,6 @@ score/threshold to stdout (as ints) or 0/0 if there was an error.
 Combining B<-c> and B<-E> is a no-op, since B<-c> implies the behaviour
 of B<-E>.
 
-=item B<-E>
-
-Filter according to the other options, but set the process exitcode to 1 if
-message is spam, 0 if not spam or processing failure occurs.
-
 =item B<-d> I<host>
 
 In TCP/IP mode, connect to spamd server on given host (default: localhost). 
@@ -64,6 +59,11 @@ B<-e> is taken as arguments to the command (it's like I<rxvt> or I<xterm>).
 
 This option is not supported on Win32 platforms.
 
+=item B<-E>
+
+Filter according to the other options, but set the process exitcode to 1 if
+message is spam, 0 if not spam or processing failure occurs.
+
 =item B<-h>
 
 Print this help message and terminate without action.
@@ -73,6 +73,10 @@ Print this help message and terminate without action.
 For TCP/IP sockets, randomize the IP addresses returned from a DNS name
 lookup (when more than one IP is returned). This provides for a kind of
 hostname-base load balancing.
+
+=item B<-l>
+
+Send log messages to stderr, instead of to the syslog.
 
 =item B<-p> I<port>
 
@@ -128,6 +132,14 @@ TCP/IP connection.
 
 This option is not supported on Win32 platforms.
 
+=item B<-V>
+
+Report the version of this C<spamc> client.  If built with SSL support,
+an additional line will be included noting this, like so:
+
+  SpamAssassin Client version 3.0.0-rc4
+    compiled with SSL support (OpenSSL 0.9.7d 17 Mar 2004)
+
 =item B<-x>
 
 Don't use the 'safe fallback' error-recovery method, which passes through the
@@ -151,26 +163,10 @@ as follows:
     EX_NOPERM       77  permission denied
     EX_CONFIG       78  configuration error
 
-=item B<-f>
-
-This switch is obsolete, and is silently ignored for backwards compatibility.
-
 =item B<-y>
 
 Just output the names of the tests hit to stdout, on one line, separated
 by commas.
-
-=item B<-l>
-
-Send log messages to stderr, instead of to the syslog.
-
-=item B<-V>
-
-Report the version of this C<spamc> client.  If built with SSL support,
-an additional line will be included noting this, like so:
-
-  SpamAssassin Client version 3.0.0-pre2-r22977
-    compiled with SSL support (OpenSSL 0.9.7d 17 Mar 2004)
 
 =back
 
