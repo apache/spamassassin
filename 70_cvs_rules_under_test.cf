@@ -10,13 +10,6 @@
 #
 ###########################################################################
 
-# "you are subscribed to FooList as <addr@example.com>"
-# "you are currently subscribed as [addr@example.com]"
-# "Your subscribed e-mail address is [addr@example.com]"
-body T_SENT_TO_ADDR        /(?:you are.{0,40} subscribed|subscribed e?-?mail address).{0,99}\S+\@\S+\.\S+/i
-describe T_SENT_TO_ADDR    Details address subscribed to this list
-tflags T_SENT_TO_ADDR nice
-
 # new MIME_BOUND tests
 #
 # results for quinlan:
@@ -63,3 +56,19 @@ score T_FROM_ALL_NUMS		0.5
 body T_EASY_MONEY		/\b(?:easy|big|fast)\s*(?:money|cash|bucks|(?-i:E)uros)\b/i
 describe T_EASY_MONEY		Body claims "easy money" or similar
 score T_EASY_MONEY		0.5
+
+# jm: somehow these guys keep slipping through, and they're very persistent.
+# they use both azoogle.com and azogle.com, but this header is always
+# in this format.
+header T_AZOOGLE                X-Info =~ /service to abuse\@azoogle\.com$/
+describe T_AZOOGLE              From azoogle.com, azogle.com, etc.
+score T_AZOOGLE                 3.0
+
+# some ratware makes random usernames with lots of numbers
+header T_FROM_HAS_LOTSA_NUMS_5      From =~ /(?:\d[^\@\s]*){5}\@/
+header T_FROM_HAS_LOTSA_NUMS_6      From =~ /(?:\d[^\@\s]*){6}\@/
+header T_FROM_HAS_LOTSA_NUMS_7      From =~ /(?:\d[^\@\s]*){7}\@/
+header T_FROM_HAS_LOTSA_NUMS_8      From =~ /(?:\d[^\@\s]*){8}\@/
+header T_FROM_HAS_LOTSA_NUMS_9      From =~ /(?:\d[^\@\s]*){9}\@/
+header T_FROM_HAS_LOTSA_NUMS_15      From =~ /(?:\d[^\@\s]*){15}\@/
+
