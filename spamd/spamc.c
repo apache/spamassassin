@@ -15,7 +15,7 @@
 
 int main(int argc,char **argv)
 {
-  int port = 6666;
+  int port = 22874;
   int mysock = socket(PF_INET,SOCK_STREAM,0);
   ssize_t bytes;
   char buf[8192];

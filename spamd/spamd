@@ -17,7 +17,7 @@ my $spamtest = Mail::SpamAssassin->new({local_tests_only=>1});
 sub spawn;  # forward declaration
 sub logmsg { print "$0 $$: @_ at ", scalar localtime, "\n" }
 
-my $port = shift || 6666;
+my $port = shift || 22874;
 my $proto = getprotobyname('tcp');
 
 ($port) = $port =~ /^(\d+)$/ or die "invalid port";
