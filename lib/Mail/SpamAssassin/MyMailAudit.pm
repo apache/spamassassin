@@ -1,4 +1,4 @@
-# $Id: MyMailAudit.pm,v 1.2 2001/10/27 09:04:31 jmason Exp $
+# $Id: MyMailAudit.pm,v 1.3 2002/01/15 04:30:12 jmason Exp $
 
 package Mail::SpamAssassin::MyMailAudit;
 
@@ -9,9 +9,11 @@ use Mail::Internet;
 
 sub new {
     my $class = shift;
-    if ($Mail::Audit::VERSION > 1.9) {
-        return $class->SUPER::new(@_);
-    }
+
+    # still not fixed. doh.
+    #if ($Mail::Audit::VERSION > 1.9) {
+        #return $class->SUPER::new(@_);
+    #}
     
     ## Code copied verbatim from Mail::Audit 1.9, with local patch applied.
     
