@@ -21,22 +21,26 @@ BEGIN {			# added by jm for use inside the distro
 }
 
 use strict;
+use Config;
 
 use IO::Socket;
 use IO::Handle;
 use IO::Pipe;
-use Config;
+
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::NoMailAudit;
 use Mail::SpamAssassin::NetSet;
+
 use Getopt::Long;
 use Pod::Usage;
 use Sys::Syslog qw(:DEFAULT setlogsock);
 use POSIX qw(:sys_wait_h);
 use POSIX qw(setsid);
 use Errno;
+
 use File::Spec;
 use File::Path;
+
 # Load Time::HiRes if it's available
 BEGIN {
   eval { require Time::HiRes };
@@ -82,7 +86,7 @@ foreach (keys %ENV) {
   $ENV{$_} =~ /^(.*)$/ and $ENV{$_} = $1;
 }
 
-my @OLD_ARGV = @ARGV;    # Getopt::Long tends to clear @ARGV
+my @ORIG_ARGV = @ARGV;    # Getopt::Long tends to clear @ARGV  but it's needed in daemonize() later on
 Getopt::Long::Configure ("bundling");
 GetOptions(
   'socketpath=s'                => \$opt{'socketpath'},
@@ -125,13 +129,13 @@ GetOptions(
   'server-cert=s'               => \$opt{'server-cert'},
 
   # will be stripped in future release
-  'add-from!'	=> sub { warn "The --add-from option has been removed\n" },
-  'F=i'		=> sub { warn "The -F option has been removed\n" },
-  'S'		=> sub { warn "The -S option has been removed\n" },
+  'add-from!'          => sub { warn "The --add-from option has been removed\n" },
+  'F=i'                => sub { warn "The -F option has been removed\n" },
+  'S'                  => sub { warn "The -S option has been removed\n" },
   'stop-at-threshold!' => sub { warn "The --stop-at-threshold option has been removed\n" },
 
 ) or pod2usage(-exitval => $resphash{'EX_USAGE'}, -verbose => 0);
-@ARGV = @OLD_ARGV;
+@ARGV = @ORIG_ARGV;
 
 $opt{'help'} and pod2usage(-exitval => $resphash{'EX_USAGE'}, -verbose => 0, -message => 'For more details, use "man spamd"');
 
@@ -188,7 +192,8 @@ if ($opt{'ssl'}) {
   }
 }
 
-# This can be changed on the command line with the -s flag
+# This can be changed on the command line with the -s flag; special cases:
+# * A log facility of 'stderr' will log to STDERR
 my $log_facility = $opt{'syslog'}        || 'mail';
 my $log_socket   = $opt{'syslog-socket'} || 'unix';
 $log_facility = 'stderr' if $log_socket eq 'none';
