@@ -870,7 +870,7 @@ sub get {
 
   if ($getaddr) {
     chomp; s/\r?\n//gs;
-    s/\(.*?\)//g;               # strip out the (comments)
+    s/\s*\(.*?\)//g;            # strip out the (comments)
     s/^.*?<(.*?)>\s*$/$1/;      # "Foo Blah" <jm@foo> or <jm@foo>
 
   } elsif ($getname) {
