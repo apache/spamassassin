@@ -25,7 +25,7 @@ close(SCORES);
 while(<SPAM>)
 {
     next if /^#/;
-    /.\s+[-0-9]*\s+[^\s]+\s+([^\s]*)(\s+?:bayes=\S+)\s*?$/;
+    /.\s+[-0-9]*\s+[^\s]+\s+([^\s]*)(\s+?:(?:bayes|time)=\S+)\s*?$/;
     my @rules=split /,/,$1;
     my $score = 0.0;
     foreach $rule (@rules)
