@@ -262,3 +262,17 @@ header T_FAKE_OUTBLAZE_MID	Message-Id =~ /\.mr\.outblaze\.com/
 header T_ALL_TRUSTED		eval:check_all_trusted()
 describe T_ALL_TRUSTED		Did not pass through any untrusted hosts
 
+# both aspects of same spammer tool
+header T_NETIP_RCVD		Received =~ /netIP with HTTP\;/
+header T_NETIP_BOUND		Content-Type =~ /boundary="--ALT--[A-Z]{4}\d/
+
+header T_XORIGIP_INVALID	X-Originating-IP =~ /[^\[\]\s\.\d]/
+
+# some tests to catch long lines of random dictionary words
+# this could be slow, being a rawbody rule, but if it works well maybe
+# we should consider a way to spot these kinds of auto-generated
+# text patterns efficiently...
+rawbody T_BAYESBUSTER_LINE_12	/^([a-z]{3,} ){12,}<[Bb][Rr]>$/
+rawbody T_BAYESBUSTER_LINE_15	/^([a-z]{3,} ){15,}<[Bb][Rr]>$/
+rawbody T_BAYESBUSTER_LINE_15I	/^([a-z]{3,} ){15,}<br>$/i
+
