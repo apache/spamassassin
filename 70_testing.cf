@@ -661,3 +661,6 @@ uri T_REDIRECTOR_2	m{^(?:[^:/?\#]+)://.*(?:[^:/?\#]+)://}
 header T_RATWARE_FAKED_AOL_UA	User-Agent =~ /^AOL /
 describe T_RATWARE_FAKED_AOL_UA	AOL clients don't use the User-Agent header
 
+uri T_URI_HTTP_TO_HEX_IP	/^https?:\/\/(?:[^\@]*\@|)0x[0-9a-f]{8}/i
+describe T_URI_HTTP_TO_HEX_IP	URI contains a link to a hexadecimal IP address
+
