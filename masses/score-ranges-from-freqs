@@ -146,69 +146,23 @@ foreach my $test (sort { $ranking{$b} <=> $ranking{$a} } keys %freq) {
   my $ranking = $ranking{$test};
   my $mutable = $mutable_tests{$test};
 
-  if (!$mutable || $rules{$test}->{score} == 0) { # didn't look for score 0 - tvd
+  # look for score of 0
+  if (!$mutable || $rules{$test}->{score} == 0) {
     printf OUT ("%3.3f %3.3f 0 $test\n",
                          $rules{$test}->{score},
                          $rules{$test}->{score});
     next;
   }
 
-  # 0.0 = best nice, 1.0 = best nonnice
-  if ($is_nice{$test}) {
-    $ranking = .5 - ($ranking / 2);
-  } else {
-    $ranking = .5 + ($ranking / 2);
-  }
-
   my ($lo, $hi);
-  if ($use_sliding_window) {
-    ($lo, $hi) = sliding_window_ratio_to_range($ranking);
-  } else {
-    ($lo, $hi) = shrinking_window_ratio_to_range($ranking);
+  if ($is_nice{$test}) {
+    $hi = 0;
+    $lo = $ranking{$test} * -4.5;
   }
-
-  # tvd
-  my $tflags = $rules{$test}->{tflags}; $tflags ||= '';
-  if ( $is_nice{$test} && ( $ranking < .5 ) ) { # proper nice rule
-    if ( $tflags =~ /\blearn\b/ ) { # learn rules should get a higher score # -5.4
-      $lo *=1.8;
-    }
-    elsif ($soratio <= 0.05 && $nonspam > 0.5) { # let good rules be larger if they want to, -4.5
-      $lo *= 1.5;
-    }
-
-    $hi =	($soratio == 0) ? $lo :
-    		($soratio <= 0.005 ) ? $lo/1.1 :
-    		($soratio <= 0.010 && $nonspam > 0.2) ? $lo/2.0 :
-		($soratio <= 0.025 && $nonspam > 1.5) ? $lo/10.0 :
-		0;
-
-    if ( $soratio >= 0.35 ) { # auto-disable bad rules
-      ($lo,$hi) = (0,0);
-    }
+  else {
+    $lo = 0;
+    $hi = $ranking{$test} * 4.5;
   }
-  elsif ( !$is_nice{$test} && ( $ranking >= .5 ) ) { # proper spam rule
-    if ( $tflags =~ /\blearn\b/ ) { # learn rules should get a higher score
-      $hi *=1.8;
-    }
-    elsif ( $soratio >= 0.99 && $spam > 1.0 ) {
-      $hi *= 1.5; # let good rules be larger if they want to
-    }
-
-    $lo =	($soratio == 1) ? $hi:
-    		($soratio >= 0.995 ) ? $hi/4.0 :
-    		($soratio >= 0.990 && $spam > 1.0) ? $hi/8.0 :
-		($soratio >= 0.900 && $spam > 10.0) ? $hi/24.0 :
-		0;
-
-    if ( $soratio <= 0.65 ) { # auto-disable bad rules
-      ($lo,$hi) = (0,0);
-    }
-  }
-  else { # rule that has bad nice setting
-    ($lo,$hi) = (0,0);
-  }
-  $mutable = 0 if ( $hi == $lo );
 
   printf OUT ("%3.1f %3.1f $mutable $test\n", $lo, $hi);
 }
