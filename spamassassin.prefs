@@ -106,6 +106,13 @@ score X_EM_VER_PRESENT		5
 # may-be-forged Received: header found in the headers.
 score FORGED_RCVD_FOUND		1
 
+# From: address claims to be sent from hotmail.com, but does not use
+# their formatting
+score FROM_FORGED_HOTMAIL	2
+
+# spam-tool gibberish in the X-Mailer line
+score X_MAILER_GIBBERISH	4
+
 ###########################################################################
 
 score RAZOR_CHECK		4
@@ -119,7 +126,7 @@ score SUBJ_REMOVE		4
 score MAILTO_WITH_SUBJ_REMOVE	4
 score MAILTO_WITH_SUBJ		3
 score JAVASCRIPT		2
-score REALLY_UNSAFE_JAVASCRIPT	3
+score REALLY_UNSAFE_JAVASCRIPT	8
 score SLIGHTLY_UNSAFE_JAVASCRIPT 1
 score CLICK_HERE_LINK		3
 score SPAM_FORM			3
@@ -132,6 +139,7 @@ score S_1618			4
 score SECTION_301		3
 score NUMERIC_HTTP_ADDR		3
 score TRACKER_ID		3
+score POPLAUNCH			4
 
 score ONLINE_BIZ_OPS		2
 score INTL_EXEC_GUILD		3
@@ -148,6 +156,8 @@ score EXCUSE_8			2
 score EXCUSE_9			2
 score GREEN_EXCUSE_1		3
 score GREEN_EXCUSE_2		3
+
+score FILTERED_BY_WORLDREMOVE	3
 
 ###########################################################################
 # Compensation for common false positives.
