@@ -418,7 +418,7 @@ sub check_for_forged_juno_received_headers {
   my ($self) = @_;
 
   my $from = $self->get('From:addr');
-  if($from !~ /juno.com/) { return 0; }
+  if($from !~ /\bjuno.com/) { return 0; }
 
   if($self->gated_through_received_hdr_remover()) { return 0; }
 
@@ -427,12 +427,12 @@ sub check_for_forged_juno_received_headers {
   my $rcvd = $self->get('Received');
 
   if (!$xorig) {  # New style Juno has no X-Originating-IP header, and other changes
-    if($rcvd !~ /from.*juno\.com.*\[[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\].*by/) { return 1; }
+    if($rcvd !~ /from.*\bjuno\.com.*\[[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\].*by/) { return 1; }
     if($xmailer !~ /Juno /) { return 1; }
   } else {
-    if($rcvd !~ /from.*mail\.com.*\[[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\].*by/) { return 1; }
+    if($rcvd !~ /from.*\bmail\.com.*\[[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+\].*by/) { return 1; }
     if($xorig !~ /[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+/) { return 1; }
-    if($xmailer !~ /mail\.com/) { return 1; }
+    if($xmailer !~ /\bmail\.com/) { return 1; }
   }
 
   return 0;   
@@ -446,28 +446,35 @@ sub check_for_from_domain_in_received_headers {
   my ($self, $domain, $desired) = @_;
   
   if (exists $self->{from_domain_in_received}) {
-      if ($desired eq 'true') {
-	  return $self->{from_domain_in_received};
+      if (exists $self->{from_domain_in_received}->{$domain}) {
+	  if ($desired eq 'true') {
+	      # See use of '0e0' below for why we force int() here:
+	      return int($self->{from_domain_in_received}->{$domain});
+	  }
+	  else {
+	      # And why we deliberately do NOT use integers here:
+	      return !$self->{from_domain_in_received}->{$domain};
+	  }
       }
-      else {
-	  return !$self->{from_domain_in_received};
-      }
+  } else {
+      $self->{from_domain_in_received} = {};
   }
 
   my $from = $self->get('From:addr');
-  if($from !~ /\Q$domain\E/i) {
-      $self->{from_domain_in_received} = 0;
+  if ($from !~ /\b\Q$domain\E/i) {
+      # '0e0' is Perl idiom for "true but zero":
+      $self->{from_domain_in_received}->{$domain} = '0e0';
       return 0;
   }
 
   my $rcvd = $self->get('Received');
 
-  if($rcvd =~ /from.*\Q$domain\E.*[\[\(][0-9]+\.[0-9]+\.[0-9]+\.[0-9]+[\]\)].*by.*\Q$domain\E/) {
-      $self->{from_domain_in_received} = 1;
+  if ($rcvd =~ /from.*\b\Q$domain\E.*[\[\(][0-9]+\.[0-9]+\.[0-9]+\.[0-9]+[\]\)].*by.*\b\Q$domain\E/) {
+      $self->{from_domain_in_received}->{$domain} = 1;
       return ($desired eq 'true');
   }
 
-  $self->{from_domain_in_received} = 0;
+  $self->{from_domain_in_received}->{$domain} = '0e0';
   return ($desired ne 'true');   
 }
 
