@@ -128,6 +128,10 @@ describe MSGID_NO_HOST 		Message-Id has no hostname
 header MSGID_OUTLOOK_INVALID	eval:check_outlook_message_id()
 describe MSGID_OUTLOOK_INVALID	Message-Id is fake (in Outlook Express format)
 
+# catches a few spams missed by MSGID_OUTLOOK_INVALID
+meta MSGID_DOLLARS		(__OUTLOOK_DOLLARS_MSGID && !__HAS_OUTLOOK_IN_MAILER && !__UNUSABLE_MSGID)
+describe MSGID_DOLLARS		Message-Id has pattern used in spam
+
 ###########################################################################
 
 header MSGID_FROM_MTA_SHORT	eval:mta_added_message_id('short')
