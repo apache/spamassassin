@@ -103,18 +103,12 @@ sub locate {
 	while (my $line = <FILE>) {
 	    last if $line !~ /^#/;
 	    $time++ if $line =~ /\b(?!08)\d\d:\d\d:\d\d\b/;
-#	    $tag++ if $line =~ /CURRENT_CORPORA_SUBMIT_VERSION/;
-#	    $tag++ if $line =~ /CURRENT_CORPORA_WEEKLY_VERSION/ && /-net-/;
 	    $revision{$_} = $1 if $line =~ m/(?:CVS|SVN) revision:\s*(\S+)/;
 	}
 	close(FILE);
 	if (!$time) {
 	    $skip .= "# skipped $_: time is between 0800 UTC and 0900 UTC\n";
 	}
-#	if (!$tag) {
-#	    $skip .= "# skipped $_: tag not CURRENT_CORPORA_SUBMIT_VERSION\n";
-#	}
-#	($time && $tag);
 	$time;
     } @files;
 }
@@ -169,19 +163,46 @@ sub current {
 	    next if ($class eq "NET" && $age !~ /^(?:new|all|age|7day)$/);
 
 	    # net vs. local
-	    my @ham_net = grep { /-net-/ } @ham;
-	    my @spam_net = grep { /-net-/ } @spam;
 	    if ($class eq "NET") {
-		@ham = @ham_net;
-		@spam = @spam_net;
+		@ham = grep { /-net-/ } @ham;
+		@spam = grep { /-net-/ } @spam;
 	    }
 	    else {
-		# remove duplicates
-		for my $net (@ham_net) {
-		    @ham = grep { $_ ne $net } @ham;
+		# if both net and local exist, use newer
+		my %spam;
+		my %ham;
+		
+		for my $file (@spam) {
+		    $spam{$1}++ if ($file =~ m/-(\w+)\.log$/);
 		}
-		for my $net (@spam_net) {
-		    @spam = grep { $_ ne $net } @spam;
+		for my $file (@ham) {
+		    $ham{$1}++ if ($file =~ m/-(\w+)\.log$/);
+		}
+		while (my ($user, $count) = each %ham) {
+		    if ($count > 1) {
+			my @matches = grep { m/-$user\.log$/ } @ham;
+			my $new;
+			for (@matches) {
+			    if (!defined $new || -M $_ < -M $new) {
+				$new = $_;
+			    }
+			}
+			next unless $new;
+			@ham = grep { !/-$user\.log$/ || $_ eq $new } @ham;
+		    }
+		}
+		while (my ($user, $count) = each %spam) {
+		    if ($count > 1) {
+			my @matches = grep { m/-$user\.log$/ } @spam;
+			my $new;
+			for (@matches) {
+			    if (!defined $new || -M $_ < -M $new) {
+				$new = $_;
+			    }
+			}
+			next unless $new;
+			@spam = grep { !/-$user\.log$/ || $_ eq $new } @spam;
+		    }
 		}
 	    }
 	    
