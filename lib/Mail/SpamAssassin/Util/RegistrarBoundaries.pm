@@ -78,6 +78,7 @@ $FOUR_LEVEL_DOMAINS = qr( (?:
 
 $THREE_LEVEL_DOMAINS = qr( (?:
   demon\.co\.uk |
+  esc\.edu\.ar |
 
   # http://www.neustar.us/policies/docs/rfc_1480.txt
   [^\.]+\.${US_STATES}\.us )
@@ -119,6 +120,7 @@ $TWO_LEVEL_DOMAINS = qr{ (?:
   mil\.ar |
   net\.ar |
   org\.ar |
+  uba\.ar |
   e164\.arpa |
   ac\.at |
   co\.at |
