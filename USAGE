@@ -143,6 +143,15 @@ Other Installation Notes
     override these files.
 
 
+  - Rules can be turned off by setting their scores to 0 in a
+    configuration or user-preference file.
+
+
+  - Speakers of Chinese, Japanese and Korean should turn off the 8-bit
+    rules listed in the "user_prefs.template" file; we've found out that
+    these rules are still triggering on non-spam CJK mails.
+
+
   - The distribution includes 'spamd', a daemonized version of the
     perl script, and 'spamc', a low-overhead C client for this,
     contributed by Craig R. Hughes.  This greatly reduces the overhead of
@@ -181,9 +190,26 @@ Other Installation Notes
     to do this, feel free to set up a simple alias to forward any mails to
     <someaddress@spamtraps.taint.org> -- replace "someaddress" with
     something to identify you, such as your email addr or website with
-    non-alphanumeric chars replaced by underscores, or similar.   This
-    will feed it into my spam-trapping system running on taint.org, where
-    it will be fed into Razor.
+    non-alphanumeric chars replaced by underscores, or similar.  (Please
+    also send me a mail at jm - spamtraps at jmason dot org if you do
+    this, so that I know who to contact if it starts going haywire, or the
+    quality drops.)
+    
+    Mails sent to an address at the spamtraps domain are fed into the
+    SpamAssassin.org spam-trapping system, where they will then be
+    virus-scanned, de-duplicated, and fed into Razor, DCC, Pyzor and OPM.
+
+    Some notes: I monitor the quality of feeds coming into this, and if it
+    turns out to contain occasional bits of non-spam mail, I'll start
+    bouncing your feed with a 550 -- as a spam feed that isn't reliably
+    spam-only is *not* suitable for a spamtrap.
+    
+    Also, messages relayed to the spamtrap must be either (a) direct
+    relaying as performed by a sendmail alias, or (b) message/rfc822
+    attachments with no Content-Transfer-Encoding.  Again, if they're not,
+    I'll 550 them.  And finally, if I can't figure out who's in control of
+    the feed, you guessed it, 550.  So try to keep the quality control
+    up!
 
 
   - Scores and other user preferences can now be loaded from an SQL
