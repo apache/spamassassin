@@ -358,8 +358,12 @@ sub read_cmt_rules_from_text {
   my $seenrules = 0;
   my $lastwasrule = 0;
   foreach my $line (split(/^/m, $text)) {
+    $line =~ s/(?<!\\)#.*$//;# remove comments
+    $line =~ s/^\s+//;  # remove leading whitespace
+    $line =~ s/\s+$//;  # remove tailing whitespace
+
     if ($line =~ 
-/^\s*(header|rawbody|body|full|meta|uri|score|describe|tflags)\s+(\S+)\s+(.*)$/
+/^\s*(header|urirhsbl|uribl|rawbody|body|full|meta|uri|score|describe|tflags)\s+(\S+)\s+(.*)$/
       )
     {
       my $type = $1;
@@ -376,7 +380,7 @@ sub read_cmt_rules_from_text {
       if ($line =~ /\S/) {
         if ($lastwasrule) {
           # assume it's a continuation of the last line
-          chop($cmt->{mcrules});
+          chomp ($cmt->{mcrules});
           $cmt->{mcrules} .= "$line\n";
         }
       }
