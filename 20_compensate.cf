@@ -1,9 +1,9 @@
 # SpamAssassin rules file: compensation for common false positives.
-# $Id: 20_compensate.cf,v 1.60 2002/09/04 18:36:49 jmason Exp $
+# $Id: 20_compensate.cf,v 1.61 2002/09/04 18:52:50 jmason Exp $
 ###########################################################################
 # Header compensation tests
 
-require_version 2.41
+require_version 2.50
 
 # support for Habeas sender-warranted email: http://www.habeas.com/
 header HABEAS_SWE               eval:message_is_habeas_swe()
