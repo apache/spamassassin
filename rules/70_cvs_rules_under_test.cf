@@ -239,38 +239,6 @@ body T_HTML_IMAGE_RATIO_18     eval:html_image_ratio('0.016','0.018')
 # so we should probably not promote it along with the others.
 body T_HTML_IMAGE_RATIO_20     eval:html_image_ratio('0.018','0.020')
 
-####################################################################
-
-# quinlan: I think we could promote 3 and above.  A numeric function
-# test might work well too.  Also worth some further experimentation:
-# maybe also try adding colors and other attributes into the count.
-#
-# Note that these are HTML_MESSAGE numbers, so S/O values above 0.80
-# are pretty good.
-#
-#OVERALL%   SPAM% NONSPAM%     S/O    RANK   SCORE  NAME
-#  24928    19300     5628    0.774   0.00    0.00  (all messages)
-#100.000  77.4230  22.5770    0.774   0.00    0.00  (all messages as %)
-# 37.626  34.0364  49.9645    0.405   0.11    0.01  T_HTML_SHOUTING1
-# 24.287  26.3337  17.2530    0.604   0.25    0.01  T_HTML_SHOUTING2
-#  8.205  10.1117   1.6525    0.860   0.62    0.01  T_HTML_SHOUTING3
-#  3.035   3.8151   0.3554    0.915   0.73    0.01  T_HTML_SHOUTING4
-#  1.350   1.6129   0.4442    0.784   0.46    0.01  T_HTML_SHOUTING5
-#  0.392   0.4911   0.0533    0.902   0.70    0.01  T_HTML_SHOUTING6
-#  0.224   0.2843   0.0178    0.941   0.79    0.01  T_HTML_SHOUTING7
-#  0.140   0.1809   0.0000    1.000   0.95    0.01  T_HTML_SHOUTING8
-#  0.356   0.4446   0.0533    0.893   0.68    0.01  T_HTML_SHOUTING9
-#
-body T_HTML_SHOUTING1            eval:html_range('max_shouting','0','1')
-body T_HTML_SHOUTING2            eval:html_range('max_shouting','1','2')
-body T_HTML_SHOUTING3            eval:html_range('max_shouting','2','3')
-body T_HTML_SHOUTING4            eval:html_range('max_shouting','3','4')
-body T_HTML_SHOUTING5            eval:html_range('max_shouting','4','5')
-body T_HTML_SHOUTING6            eval:html_range('max_shouting','5','6')
-body T_HTML_SHOUTING7            eval:html_range('max_shouting','6','7')
-body T_HTML_SHOUTING8            eval:html_range('max_shouting','7','8')
-body T_HTML_SHOUTING9            eval:html_range('max_shouting','8')
-
 ##################################################################
 
 # actually, this looks really good!  Dec  6 2002 jm: except for rod's
