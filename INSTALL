@@ -50,13 +50,19 @@ These steps assume the following, so substitute as necessary:
   - Your home directory is /home/user
   - The location of the procmail executable is /usr/bin/procmail
 
-1. Uncompress the SpamAssassin archive
+1. Uncompress and extract the SpamAssassin archive, using "unzip" or "tar
+xvfz", in a temporary directory.
 
-2. Move/rename the created SpamAssassin directory where you want to
-permanently place it in your user directory:
-    mv Mail-SpamAssassin-2.1 ~/bin/SpamAssassin
+2. change directory into it:
 
-3. Make SpamAssassin as normal ("perl Makefile.PL", "make")
+	cd Mail-SpamAssassin-*
+
+3. Make SpamAssassin as normal, but using your home directory as the
+target:
+
+	perl Makefile.PL PREFIX=~/sausr SYSCONFDIR=~/saetc
+	make
+	make install
 
 4. If you already use procmail, skip to step 6.  If not, ensure procmail
 is installed using "which procmail" or install it from www.procmail.org.
@@ -66,27 +72,27 @@ lines:
 
 "|IFS=' ' && exec /usr/bin/procmail -f- || exit 75 #user"
 
-6. Edit or create a .procmailrc file in your home directory containing
-the below lines.  If you already have a .procmailrc file, add the lines
-to the top of your .procmailrc file:
+6. Edit or create a .procmailrc file in your home directory containing the
+below lines.  If you already have a .procmailrc file, add the lines to the
+top of your .procmailrc file:
 
 :0fw
-| /home/user/bin/SpamAssassin/spamassassin -c /home/user/bin/SpamAssassin/rules
+| /home/user/sausr/bin/spamassassin
 
-  The above line filters all incoming mail through SpamAssassin and tags
+The above line filters all incoming mail through SpamAssassin and tags
 probable spam with a unique header.  If you would prefer to have spam
-blocked and saved to a file called caughtspam in your home directory
-instead of passed through and tagged, append this directly below the
-above lines:
+blocked and saved to a file called "caughtspam" in your home directory,
+instead of passed through and tagged, append this directly below the above
+lines:
 
 :0:
 * ^X-Spam-Status: Yes
 caughtspam
 
 7. Now, you should be ready to send some test emails and ensure everything
-works as expected.  First, send yourself a test email that doesn't contain 
+works as expected.  First, send yourself a test email that doesn't contain
 anything suspicious.  You should receive it normally, but there will be a
-header containing X-Spam-Status: No.  If you are only tagging your spam,
+header containing "X-Spam-Status: No".  If you are only tagging your spam,
 send yourself an obvious spam mail and check to be sure it is marked as
 spam.  If your test emails don't get through to you, immediately rename
 your .forward file until you figure out cause of the the problem, so you
@@ -476,3 +482,7 @@ directory to see what can be set.  Common first-time tweaks include:
 	off.
 
 
+
+(end of INSTALL)
+
+// vim:tw=74:

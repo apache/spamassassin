@@ -3,7 +3,6 @@ require 5.005;
 # RPM builders, or people building in their home dirs:
 # set PREFIX (default = /usr)
 # set SYSCONFDIR (default = /etc)
-#
 # e.g. "perl Makefile.PL PREFIX=/home/jm/sausr SYSCONFDIR=/home/jm/saetc"
 
 # this is a good place to put -g, -R/usr/local/lib etc.
@@ -101,7 +100,7 @@ sub MY::postamble {
   my $self = shift;
 
   my $sysconfdir = $self->{SYSCONFDIR};
-  $sysconfdir ||= '$(DESTDIR)/etc';
+  $sysconfdir ||= '/etc';
 
 qq#
 
@@ -119,8 +118,8 @@ SYSCONFDIR      = $sysconfdir
 
 #. q#
 
-DEF_RULES_DIR	= $(DESTDIR)$(PREFIX)/share/spamassassin
-LOCAL_RULES_DIR	= $(DESTDIR)$(SYSCONFDIR)/mail/spamassassin
+DEF_RULES_DIR	= $(PREFIX)/share/spamassassin
+LOCAL_RULES_DIR	= $(SYSCONFDIR)/mail/spamassassin
 
 FIXPATHFLAGS    = -DDEF_RULES_DIR="$(DEF_RULES_DIR)" \
                   -DLOCAL_RULES_DIR="$(LOCAL_RULES_DIR)" \
