@@ -2797,7 +2797,6 @@ sub check_access_database {
   $path = $self->{main}->sed_path ($path);
   dbg("Tie-ing to DB file R/O in $path");
   if ( tie %access,"DB_File",$path, O_RDONLY ) {
-    my $rcvd = $self->get ('Received');
     my @lookfor = ();
 
     # Look for "From:" versions as well!
@@ -2818,10 +2817,22 @@ sub check_access_database {
       }
     }
 
-    if ( defined $rcvd && $rcvd =~ /($IPV4_ADDRESS)/o ) {
-      # IP
-      # net (rotate over IP)
-      my($ip) = $1;
+    # we can only match this if we have at least 1 untrusted header
+    if ( $self->{num_relays_untrusted} > 0 ) {
+      my $lastunt = $self->{relays_untrusted}->[0];
+
+      # If there was a reverse lookup, use it in a lookup
+      if ( ! $lastunt->{no_reverse_dns} ) {
+        my $rdns = $lastunt->{lc_rdns};
+        while( $rdns =~ /\./ ) {
+          push(@lookfor, "From:$rdns", $rdns);
+          $rdns =~ s/^[^.]*\.//;
+        }
+        push(@lookfor, "From:$rdns", $rdns);
+      }
+
+      # do both IP and net (rotate over IP)
+      my($ip) = $lastunt->{ip};
       $ip =~ tr/0-9.//cd;
       while( $ip =~ /\./ ) {
         push(@lookfor, "From:$ip", $ip);
@@ -2834,6 +2845,7 @@ sub check_access_database {
     my %cache = ();
     foreach ( @lookfor ) {
       next if ( $cache{$_}++ );
+      dbg("accessdb: Looking for $_");
       my $result = $access{$_} || next;
 
       my($type) = split(/:/,$result);
