@@ -88,4 +88,7 @@ describe T_MONTH_TRIAL            Month Trial Offer
 body T_LOW_PRICE                  /\blow.{0,4} (?-i:P)rice/i
 describe T_LOW_PRICE              Lowest Price
 
+# http://www.hughes-family.org/bugzilla/show_bug.cgi?id=586
+body T_APPLY_ONLINE               /\bapply (?-i:O)nline/i
+describe T_APPLY_ONLINE           Apply Online
 
