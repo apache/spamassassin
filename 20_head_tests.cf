@@ -170,11 +170,10 @@ describe DATE_IN_FUTURE_48_96	Date: is 48 to 96 hours after Received: date
 header DATE_IN_FUTURE_96_XX	eval:check_for_shifted_date('96', 'undef')
 describe DATE_IN_FUTURE_96_XX	Date: is 96 hours or more after Received: date
 
-# bug 681: Tony L. Svanstrom: rewrote ADVERT_CODE tests
 header ADVERT_CODE		Subject =~ /^\W*ADV\b/i
 describe ADVERT_CODE		Subject: starts with advertising tag
 
-header ADVERT_CODE2		Subject =~ /\bA\s*D\s*V\b/i
+header ADVERT_CODE2		Subject =~ /\w.*\b(?!ADV\.)A\s*D\s*V\b/i
 describe ADVERT_CODE2		Subject: contains advertising tag
 
 # Korean UCE Subject: lines are usually 8-bit, but are occasionally encoded
