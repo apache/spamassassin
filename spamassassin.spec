@@ -2,7 +2,7 @@
 %define real_name Mail-SpamAssassin
 %define version 1.5
 %define real_version 1.5
-%define release 2
+%define release 1
 %define initdir %{_initrddir}
 
 Summary: This is SpamAssassin, a spam filter for email which can be invoked from mail delivery agents.
