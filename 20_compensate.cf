@@ -19,9 +19,4 @@
 
 require_version @@VERSION@@
 
-# support for Habeas sender-warranted email: http://www.habeas.com/
-header HABEAS_SWE               eval:message_is_habeas_swe()
-describe HABEAS_SWE             Has Habeas warrant mark (http://www.habeas.com/)
-tflags HABEAS_SWE               nice
-
 ###########################################################################
