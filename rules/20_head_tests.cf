@@ -236,10 +236,6 @@ tflags NO_DNS_FOR_FROM          net
 header FROM_AND_TO_SAME		eval:check_for_from_to_same()
 describe FROM_AND_TO_SAME	From and To are the same, but not exactly
 
-header BAD_HELO_WARNING		eval:check_for_bad_helo()
-describe BAD_HELO_WARNING	Fake name used in SMTP HELO command
-tflags BAD_HELO_WARNING         net
-
 header SUBJ_FULL_OF_8BITS	eval:check_subject_for_lotsa_8bit_chars()
 describe SUBJ_FULL_OF_8BITS	Subject is full of 8-bit characters
 
