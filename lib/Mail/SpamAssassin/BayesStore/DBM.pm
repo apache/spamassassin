@@ -1483,8 +1483,8 @@ sub restore_database {
   my $line_count = 0;
   my $db_version;
   my $token_count = 0;
-  my $num_spam = 0;
-  my $num_ham = 0;
+  my $num_spam;
+  my $num_ham;
   my $error_p = 0;
   my $newest_token_age = 0;
   # Kinda wierd I know, but we need a nice big value and we know there will be
@@ -1622,12 +1622,12 @@ sub restore_database {
 
   print STDERR "\n" if ($showdots);
 
-  unless ($num_spam) {
+  unless (defined($num_spam)) {
     dbg("bayes: Unable to find num spam, please check file.");
     $error_p = 1;
   }
 
-  unless ($num_ham) {
+  unless (defined($num_ham)) {
     dbg("bayes: Unable to find num ham, please check file.");
     $error_p = 1;
   }

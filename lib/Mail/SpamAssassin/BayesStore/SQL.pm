@@ -1231,9 +1231,12 @@ sub backup_database {
 
   my @vars = $self->get_storage_variables();
 
+  my $num_spam = $vars[1] || 0;
+  my $num_ham = $vars[2] || 0;
+
   print "v\t$vars[6]\tdb_version # this must be the first line!!!\n";
-  print "v\t$vars[1]\tnum_spam\n";
-  print "v\t$vars[2]\tnum_nonspam\n";
+  print "v\t$num_spam\tnum_spam\n";
+  print "v\t$num_ham\tnum_nonspam\n";
 
   my $token_sql = "SELECT spam_count, ham_count, atime, token
                      FROM bayes_token
@@ -1332,8 +1335,8 @@ sub restore_database {
 
   my $token_count = 0;
   my $db_version;
-  my $num_spam = 0;
-  my $num_ham = 0;
+  my $num_spam;
+  my $num_ham;
   my $error_p = 0;
   my $line_count = 0;
 
@@ -1456,12 +1459,12 @@ sub restore_database {
 
   print STDERR "\n" if ($showdots);
 
-  unless ($num_spam) {
+  unless (defined($num_spam)) {
     dbg("bayes: Unable to find num spam, please check file.");
     $error_p = 1;
   }
 
-  unless ($num_ham) {
+  unless (defined($num_ham)) {
     dbg("bayes: Unable to find num ham, please check file.");
     $error_p = 1;
   }
