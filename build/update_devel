@@ -1,0 +1,34 @@
+#!/bin/bash
+
+WEBDIR=/home/jm/public_html_spamassassin
+
+vers=`build/get_version`
+
+# delete old CVS files
+find . -name '.#*' -print | xargs rm -f
+
+make clean ; perl Makefile.PL ; make
+
+make text_html_doc
+
+make distcheck
+
+echo "Creating 'Changes' file from CVS change log..."
+cvs2cl.pl -f Changes
+
+rm -f Mail-SpamAssassin-$vers.tar.gz Mail-SpamAssassin-$vers.zip
+make tardist
+cp Mail-SpamAssassin-$vers.tar.gz $WEBDIR/devel
+
+make zipdist
+cp Mail-SpamAssassin-$vers.zip $WEBDIR/devel
+
+echo "Copying distribution into /dist on site..."
+(
+  cd $WEBDIR
+  tar xfz devel/Mail-SpamAssassin-$vers.tar.gz	\
+		2>&1 | grep -v 'Archive contains future timestamp'
+  rm -rf dist ; mv Mail-SpamAssassin-$vers dist
+)
+
+ls -l $WEBDIR/devel
