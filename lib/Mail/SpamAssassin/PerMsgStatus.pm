@@ -1853,10 +1853,8 @@ sub do_meta_tests {
     return;
   }
 
-  my ($rulename);
+  my ( %rule_deps, %setup_rules, %meta, $rulename );
   my $evalstr = '';
-
-  my ( %rule_deps, %meta );
 
   # Get the list of meta tests
   my @metas = keys %{ $self->{conf}{meta_tests} };
@@ -1866,10 +1864,10 @@ sub do_meta_tests {
     my $rule   = $self->{conf}->{meta_tests}->{$rulename};
     my @tokens =
       $rule =~ m/([\w\.\[][\w\.\*\?\+\[\^\]]+|[\(\)]|\|\||\&\&|>=?|<=?|==|!=|!|[\+\-\*\/]|\d+)/g;
-
-    my $setupline = "";
-    my $expr      = "";
     my $token;
+
+    # Set the rule blank to start
+    $meta{$rulename} = "";
 
     # By default, there are no dependencies for a rule
     @{ $rule_deps{$rulename} } = ();
@@ -1879,24 +1877,21 @@ sub do_meta_tests {
 
       # Numbers can't be rule names
       if ( $token =~ /^(?:\W+|\d+)$/ ) {
-        $expr .= "$token ";
+        $meta{$rulename} .= "$token ";
       }
       else {
-        $expr .= "\$self->{tests_already_hit}->{$token} ";
-
-        # avoid "undefined" warnings by providing a default value here
-        $setupline .= "\$self->{tests_already_hit}->{$token} ||= 0;\n";
+        $meta{$rulename} .= "\$self->{'tests_already_hit'}->{'$token'} ";
+	$setup_rules{$token}=1;
 
 	# If the token is another meta rule, add it as a dependency
         push ( @{ $rule_deps{$rulename} }, $token )
           if ( exists $self->{conf}{meta_tests}->{$token} );
       }
     }
-
-    # Store the pieces of information we need for this rule
-    $meta{$rulename}->{'setupline'} = $setupline;
-    $meta{$rulename}->{'expr'}      = $expr;
   }
+
+  # avoid "undefined" warnings by providing a default value for needed rules
+  $evalstr .= join("\n", (map { "\$self->{'tests_already_hit'}->{'$_'} ||= 0;" } keys %setup_rules), "");
 
   # Sort by length of dependencies list.  It's more likely we'll get
   # the dependencies worked out this way.
@@ -1916,13 +1911,7 @@ sub do_meta_tests {
       next if ( grep( $metas{$_}, @{ $rule_deps{ $metas[$i] } } ) );
 
       # Add this meta rule to the eval line
-      $evalstr .= '
-        ' . $meta{ $metas[$i] }->{'setupline'} . ';
-        if (' . $meta{ $metas[$i] }->{'expr'} . ') {
-            $self->got_hit (q#' . $metas[$i] . '#, "");
-        }
-
-    ';
+      $evalstr .= '  if ('.$meta{$metas[$i]}.') { $self->got_hit (q#'.$metas[$i].'#, ""); }'."\n";
       splice @metas, $i--, 1;    # remove this rule from our list
     }
   } while ( $#metas != $count && $#metas > -1 ); # run until we can't go anymore
@@ -1940,7 +1929,7 @@ sub do_meta_tests {
     package Mail::SpamAssassin::PerMsgStatus;
 
     sub _meta_tests {
-        # note: cannot set $^W here on perl 5.6.1 at least, it
+        # note: cannot set \$^W here on perl 5.6.1 at least, it
         # crashes meta tests.
 
         my (\$self) = \@_;
