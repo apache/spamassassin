@@ -3,7 +3,7 @@
 # options
 #
 # -c=file       set $cffile
-# -f            use fork-based model to save RAM (used for mailbox files)
+# --fork        use fork-based model to save RAM (used for mailbox files)
 # --all         don't skip big messages
 # --mh          use mh-style folder (directory of messages named with numbers)
 # --mn          find_missed('nonspam.log')
@@ -49,7 +49,7 @@ use Getopt::Long;
 # flush buffer immediately so if mass-check fails or stops we don't get a corrupt line
 $|++;
 
-GetOptions("c=s", "f", "all", "head=i", "mh", "ms", "mn", "single", "sort",
+GetOptions("c=s", "fork", "all", "head=i", "mh", "ms", "mn", "single", "sort",
 	   "tail=i", "loghits");
 
 #use Devel::Peek;
@@ -79,7 +79,7 @@ $spamtest = new Mail::SpamAssassin ({
 $spamtest->compile_now(1);
 
 my $iter = new Mail::ArchiveIterator ({
-        'opt_fork' => $opt_f,
+        'opt_fork' => $opt_fork,
         'opt_mh' => $opt_mh,
         'opt_single' => $opt_single,
         'opt_sort' => $opt_sort,

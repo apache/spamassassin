@@ -1,9 +1,9 @@
 #!/usr/bin/perl -w
 
 # use this to  debug the SORatio -> score-range mapping:
-for $rat (0.1, 0.3, 0.5, 0.7, 1.0) {
-my ($lo, $hi) = ratio_in_0to1_to_range($rat); warn "JMD $rat $lo $hi";
-} die;
+#for $rat (0.1, 0.3, 0.5, 0.7, 1.0) {
+#my ($lo, $hi) = ratio_in_0to1_to_range($rat); warn "JMD $rat $lo $hi";
+#} die;
 
 my $argcffile = shift @ARGV;
 
