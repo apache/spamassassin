@@ -870,8 +870,18 @@ sub _parse_rfc822_date {
 sub subject_is_all_caps {
    my ($self) = @_;
    my $subject = $self->get('Subject');
+
+   return 0 if subject_missing($self);
+
    $subject =~ s/[^a-zA-Z]//;
    return $subject eq uc($subject);
+}
+
+sub subject_missing {
+   my ($self) = @_;
+   my $subject = $self->get('Subject');
+   chomp($subject);
+   return length($subject) ? 0 : 1;
 }
 
 ###########################################################################
