@@ -14,49 +14,53 @@ my $killfile_message_ids = qr{(?:
 )}x;
 
 my $killfile_receiveds = qr{(?:
-    from\s\S+\s\S+\sby\s(?:anclsmtp\d\d|myfamlsmtp\d\d)\.myfamily\.com
-    |\(envelope-from\snews\@mail\d\.globalscape\.com\)
-    |from\sivillage-\d+\.ivillage\.com\s
-    |for\s<(?:KarenCedar|lorin.stein|fsg.publicity|richard.deitch|davidh)\@fsg\.com>
-    |for\s<(?:reekie)\@vineyard.net>
-    |from\sLLin\s\(llin\.hq\.cmp\.com
-    |from\sFDLN01\.fed\.com\s
-    |\(envelope-from\sbounce-gozilla-newsletters-\S+\@pro\.netatlantic\.com\)
-    |\(envelope-from\sdivx-return-\S+\@lists\.divx\.com\)
-    |\(envelope-from\s<news\@zonelabs\.rsc02\.com>\)
-    |\(envelope-from\sYour_Astrologer\@mailer1\.astrology\.com\)
-    |\(envelope-from\sfirewalls-bounce\@isc\.org\)
-    |\(envelope-from\swebmaster\@mail2fans\.com\)
-    |\(envelope-from\s<officedepot\d\@officedepot\.rsc01\.com>\)
-    |\(envelope-from\sfoxsportsflash-return\@mailings\.foxsports\.com\)
-    |\(envelope-from\sowner-nolist-\S+\@LISTSERV\.BELIEFNET\.COM\)
-    |from\sexim-colo-01\.whoc\.theplanet\.co\.uk\s
-    |\sby\semail\.ebgames\.com\s
-    |by\soutgoing\.securityfocus\.com\s.Postfix.
-    |envelope-from\sowner-announce\@hq\.lp\.org
-    |envelope-from\ssecurity-advisories\@freebsd\.org
+    for\s<(?:gfhj|sdhbgsfhg|dth|cnariani|KarenCedar|lorin.stein|fsg.publicity|richard.deitch|davidh)\@fsg\.com>
+    |for\s<(?:elizabek|reekie)\@vineyard\.net>
+    |for\s<(?:stu)\@westernchief\.com>
     |for\s:include:\S+/MapQuest/
-    |for\s<fortress\S*\@shangri-la\.dropbear\.id\.au>
-    |for\s<cmyers_highvision_net\@spamtraps\.taint\.org>
-    |for\s<spamz0rsaretehsuks\@spamtraps\.taint\.org>
-    |for\s<jeffrey_thompsonic_com\@spamtraps\.taint\.org>
-    |for\s<postmaster_neto.net\@spamtraps\.taint\.org>
-    |for\s<vineyard\.gazette\@spamtraps\.taint\.org>
-    |from\sHDX\S+\.hmdelivery\.com\s\(hdx\S+\.hmdelivery\.com
-    |by\smail\.scope\.ie
-    |for\s<spamistehsuk\@spamtraps\.taint\.org>
-    |for\s<jmarotta\@resqnet\.com>
-    |\(envelope-from\sbounce-webtorials-\S+\@lists\.netline\.com\)
     |for\s<ccastell\@RESQNET\.COM>
     |for\s<ccastell\@resqnet\.com>
-    |by\ssebastian\.icelandair\.is
-    |\(envelope-from\swwf\S+-errors\S+\@bounce\.wwf\.com\)
-    |<\S+\@listserv\.computerworld\.com>
-    |\(envelope-from\sBounces_\S+\@CWMAILIN\.COMPUTERWORLD\.COM\)
-    |\(envelope-from\s<away_\S+\@newsletters\.away\.com>\)
+    |for\s<jmarotta\@resqnet\.com>
     |for\s<tlai\@spamtraps\.taint\.org>
+    |for\s<cmyers_highvision_net\@spamtraps\.taint\.org>
+    |for\s<fortress\S*\@shangri-la\.dropbear\.id\.au>
+    |for\s<jeffrey_thompsonic_com\@spamtraps\.taint\.org>
+    |for\s<postmaster_neto.net\@spamtraps\.taint\.org>
+    |for\s<spamistehsuk\@spamtraps\.taint\.org>
+    |for\s<spamz0rsaretehsuks\@spamtraps\.taint\.org>
+    |for\s<vineyard\.gazette\@spamtraps\.taint\.org>
+    |<\S+\@listserv\.computerworld\.com>
+    |\(envelope-from\s<away_\S+\@newsletters\.away\.com>\)
+    |\(envelope-from\s<news\@zonelabs\.rsc02\.com>\)
+    |\(envelope-from\s<officedepot\d\@officedepot\.rsc01\.com>\)
+    |\(envelope-from\sBounces_\S+\@CWMAILIN\.COMPUTERWORLD\.COM\)
+    |\(envelope-from\sYour_Astrologer\@mailer1\.astrology\.com\)
+    |\(envelope-from\sbounce-gozilla-newsletters-\S+\@pro\.netatlantic\.com\)
+    |\(envelope-from\sbounce-webtorials-\S+\@lists\.netline\.com\)
+    |\(envelope-from\sdivx-return-\S+\@lists\.divx\.com\)
+    |\(envelope-from\sfirewalls-bounce\@isc\.org\)
+    |\(envelope-from\sfoxsportsflash-return\@mailings\.foxsports\.com\)
+    |\(envelope-from\snews\@mail\d\.globalscape\.com\)
+    |\(envelope-from\sowner-nolist-\S+\@LISTSERV\.BELIEFNET\.COM\)
+    |\(envelope-from\swebmaster\@mail2fans\.com\)
+    |\(envelope-from\swwf\S+-errors\S+\@bounce\.wwf\.com\)
+    |\sby\semail\.ebgames\.com\s
+    |by\smail\.scope\.ie
+    |by\soutgoing\.securityfocus\.com\s.Postfix.
+    |by\ssebastian\.icelandair\.is
+    |envelope-from\sowner-announce\@hq\.lp\.org
+    |envelope-from\ssecurity-advisories\@freebsd\.org
+    |from\sFDLN01\.fed\.com\s
+    |from\sHDX\S+\.hmdelivery\.com\s\(hdx\S+\.hmdelivery\.com
+    |from\smarketing.sonypictures.com\s\(zt01.sonypictures.com
+    |from\sLISTSERV.DLI.COM\sby\sLISTSERV.DLI.COM\s
+    |from\sLLin\s\(llin\.hq\.cmp\.com
+    |from\s\S+\s\S+\sby\s(?:anclsmtp\d\d|myfamlsmtp\d\d)\.myfamily\.com
     |from\sabv-sfo\S+\.CNET\.COM
+    |from\sapplenews.lists.apple.com\s\(applenews.lists.apple.com
     |from\sbounce\.winxpnews\.com
+    |from\sexim-colo-01\.whoc\.theplanet\.co\.uk\s
+    |from\sivillage-\d+\.ivillage\.com\s
     |from\smacromedia\.com
     |from\strafford\.com\sby\slists\.aktiv\.com
 )}x;
@@ -73,6 +77,7 @@ my $killfile_froms = qr{(?:
     |<Online.*\@newsletter\.online\.com>
     |<no-reply\@no-more-viruses-please\.com>
     |<Joke-Of-The-Day-return-.*\@mta03\.optamail\.com>
+    |<replyem\@jcpenneyeservices\.com>
     |<Cooking\.com\.\S+\@mail\.cooking\.com>
     |<cio\@UPDATE\.CIO\.COM>
     |<DirectTV\S+\@vmadmin\.com>
