@@ -97,6 +97,7 @@ sub wanted {
     my $out = '';
     foreach my $t (sort keys %{$status->{pattern_hits}}) {
       $_ = $status->{pattern_hits}->{$t};
+      $_ ||= '';
       s/\r/\\r/gs;      # fix unprintables
       s/\n/\\n/gs;
       $out .= "$t=\"$_\" ";
