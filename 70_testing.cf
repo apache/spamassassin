@@ -368,3 +368,6 @@ body T_INT_VICODIN	eval:check_obfu_word('vicodin')
 body T_INT_LEVITRA	eval:check_obfu_word('levitra')
 body T_INT_ERECT	eval:check_obfu_word('erection')
 body T_INT_PENIS	eval:check_obfu_word('penis')
+
+header __RATWARE_NAME_ID	eval:check_ratware_name_id()
+meta T_RATWARE_NAME_ID	__RATWARE_0_TZ_DATE && __RATWARE_NAME_ID
