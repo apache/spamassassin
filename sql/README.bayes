@@ -94,7 +94,7 @@ Enter password: <adminpassword>
 
 To install the tables for PostgreSQL, use:
 
-psql -u <username> -f bayes_pg.sql <databasename>
+psql -U <username> -f bayes_pg.sql <databasename>
 
 Once you have created the database and added the tables, just add the
 required lines to your global configuration file (local.cf).

@@ -104,7 +104,7 @@ CREATE TABLE awl (
 
 For PostgreSQL, use the following:
 
-psql -u <username> -f awl_pg.sql <databasename>
+psql -U <username> -f awl_pg.sql <databasename>
 
 Once you have created the database and added the table, just add the required
 lines to your global configuration file (local.cf).  Note that you
