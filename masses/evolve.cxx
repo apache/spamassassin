@@ -23,10 +23,10 @@ int threshold = 5;	// threshold of spam vs. non-spam
 
 int nn, ny, yn, yy;	// simple number of y/n diagnoses
 
-// These floats are the same as above, but massively-y or massively-n scores
-// count extra.  This encourages clear decisions about spam or not.
+// These floats are the same as above, but incorrect scores are penalised
+// by how wrong they are.
 //
-float nnscore, nyscore, ynscore, yyscore;
+float nyscore, ynscore;
 
 float nybias	= 5.0;
 int sleepTime	= 0;		// time to sleep during runs
@@ -43,14 +43,14 @@ void printhits (FILE *fout) {
       	ny, yn);
 
   fprintf (fout,
-"# Correctly non-spam: %6d  %3.2f%%  (%3.2f%% overall, %6.0f adjusted)\n",
+"# Correctly non-spam: %6d  %3.2f%%  (%3.2f%% overall)\n",
         nn, (nn / (float) num_nonspam) * 100.0,
-        (nn / (float) num_tests) * 100.0, nnscore);
+        (nn / (float) num_tests) * 100.0);
 
   fprintf (fout,
-"# Correctly spam:     %6d  %3.2f%%  (%3.2f%% overall, %6.0f adjusted)\n",
+"# Correctly spam:     %6d  %3.2f%%  (%3.2f%% overall)\n",
         yy, (yy / (float) num_spam) * 100.0,
-	(yy / (float) num_tests) * 100.0, yyscore);
+	(yy / (float) num_tests) * 100.0);
 
   fprintf (fout,
 "# False positives:    %6d  %3.2f%%  (%3.2f%% overall, %6.0f adjusted)\n",
@@ -86,7 +86,7 @@ void counthitsfromscores (void) {
   int i;
 
   nn = ny = yn = yy = 0;
-  nnscore = nyscore = ynscore = yyscore = 0.0;
+  nyscore = ynscore = 0.0;
 
   for (file = 0; file < num_tests; file++) {
     float score;
@@ -97,27 +97,23 @@ void counthitsfromscores (void) {
       hits += score;
     }
 
-    // divide by 50 so we get e.g.
-    // 1.02 for a positive spam which is 1 pt over the threshold
+    // we use the xxscore vars as a weighted "crapness" score; ie.
+    // higher is worse.  incorrect diagnoses add (1 + incorrectness)
+    // to them, where "incorrectness" is (num_points_over_threshold) / 5.0.
+    //
+    // This way, massively-incorrect scores are massively penalised.
+    // 
     if (is_spam[file]) {
       if (hits > threshold) {
 	yy++;
-	// maximise diff between hits and threshold
-	yyscore += ((hits - threshold) / 50.0) + 1.0;
       } else {
-	yn++;
-	// penalise diff between hits and threshold. bigger is worse
-	ynscore += ((threshold - hits) / 50.0) + 1.0;
+	yn++; ynscore += ((threshold - hits) / 5.0) + 1.0;
       }
     } else {
       if (hits > threshold) {
-	ny++;
-	// penalise diff between hits and threshold. bigger is worse
-	nyscore += ((hits - threshold) / 50.0) + 1.0;
+	ny++; nyscore += ((hits - threshold) / 5.0) + 1.0;
       } else {
 	nn++;
-	// maximise diff between hits and threshold
-	nnscore += ((threshold - hits) / 50.0) + 1.0;
       }
     }
   }
