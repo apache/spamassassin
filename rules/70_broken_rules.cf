@@ -211,3 +211,20 @@
 #rawbody CARRIAGE_RETURNS	eval:check_carriage_returns()
 #describe CARRIAGE_RETURNS	Message contains a lot of ^M characters
 #lang fr describe CARRIAGE_RETURNS       Message contennant plein de caractères ^M (retour chariot)
+#
+#header NIGERIAN_SUBJECT3	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*your assistance\b/i
+#describe NIGERIAN_SUBJECT3	Subject is indicative of a Nigerian spam
+#header NIGERIAN_SUBJECT4	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*i need your urgent\b/i
+#describe NIGERIAN_SUBJECT4	Subject is indicative of a Nigerian spam
+#header NIGERIAN_SUBJECT5	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*treat as urgent\b/i
+#describe NIGERIAN_SUBJECT5	Subject is indicative of a Nigerian spam
+#header NIGERIAN_SUBJECT7	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*[!*_-]+\s*(?:business|urgent)/i
+#describe NIGERIAN_SUBJECT7	Subject is indicative of a Nigerian spam
+#header NIGERIAN_SUBJECT8	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*(?:appeal|request) for urgent assistance$/i
+#describe NIGERIAN_SUBJECT8	Subject is indicative of a Nigerian spam
+#
+#meta FORGED_MUA_MUTT		__USER_AGENT_MUTT && !__VALID_MUTT_MSGID
+#describe FORGED_MUA_MUTT	Forged mail pretending to be sent from Mutt
+#
+#body EU_EMAIL_OPTOUT            	/EU (?:e-?mail opt.?out|e.?commerce) directive/i
+#describe EU_EMAIL_OPTOUT        	Claims compliance with European spam regulations
