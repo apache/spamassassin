@@ -135,15 +135,29 @@ sub check_for_from_to_equivalence {
 # separated because the first test is more accurate than the second test.
 # However, we only run the primary function once for better performance.
 
-my $cache_mta_id;
-my $cache_mta_first;
-my $cache_mta_later;
+sub check_for_mta_message_id_first {
+  my ($self) = @_;
 
-sub check_for_mta_message_id {
-  my ($self, $id) = @_;
+  if (! exists $self->{mta_first}) {
+    $self->_check_mta_message_id();
+  }
+  return $self->{mta_first};
+}
 
-  $cache_mta_first = 0;
-  $cache_mta_later = 0;
+sub check_for_mta_message_id_later {
+  my ($self) = @_;
+
+  if (! exists $self->{mta_later}) {
+    $self->_check_mta_message_id();
+  }
+  return $self->{mta_later};
+}
+
+sub _check_mta_message_id {
+  my ($self) = @_;
+
+  $self->{mta_first} = 0;
+  $self->{mta_later} = 0;
 
   my $all = $self->get ('ALL');
   my $later_mta;
@@ -161,12 +175,14 @@ sub check_for_mta_message_id {
     return;
   }
 
+  my $id = $self->get ('Message-Id');
+
   # exempt certain Message-Id headers (could backfire so be prepared to remove)
   return if $id =~ /\@.*(localhost\.localdomain|linux\.local|yahoo)/;
 
   # no further checks in simple case
   if ($later_mta) {
-    $cache_mta_later = 1;
+    $self->{mta_later} = 1;
     return;
   }
 
@@ -205,31 +221,9 @@ sub check_for_mta_message_id {
 
   # finally, the test
   if ($first eq $id) {
-    $cache_mta_first = 1;
+    $self->{mta_first} = 1;
     return;
   }
-}
-
-sub check_for_mta_message_id_first {
-  my ($self) = @_;
-
-  my $id = $self->get ('Message-Id');
-  if (!defined($cache_mta_id) || $id ne $cache_mta_id) {
-      $cache_mta_id = $id;
-      check_for_mta_message_id($self, $id);
-  }
-  return $cache_mta_first;
-}
-
-sub check_for_mta_message_id_later {
-  my ($self) = @_;
-
-  my $id = $self->get ('Message-Id');
-  if (!defined($cache_mta_id) || $id ne $cache_mta_id) {
-      $cache_mta_id = $id;
-      check_for_mta_message_id($self, $id);
-  }
-  return $cache_mta_later;
 }
 
 ###########################################################################
@@ -996,46 +990,40 @@ gotone:
 
 ###########################################################################
 
-my $cache_date_rcvd;
-my $cache_date_diff;
-
 sub check_for_shifted_date {
   my ($self, $min, $max) = @_;
 
-  my $rcvd = $self->get ('Received');
-  if (!defined($cache_date_rcvd) || $rcvd ne $cache_date_rcvd) {
-    $cache_date_rcvd = $rcvd;
-    $cache_date_diff = $self->_check_date_diff();
+  if (!exists $self->{date_diff}) {
+    $self->_check_date_diff();
   }
-  return (($min eq 'undef' || $cache_date_diff >= (60 * 60 * $min)) &&
-	  ($max eq 'undef' || $cache_date_diff < (60 * 60 * $max)));
+  return (($min eq 'undef' || $self->{date_diff} >= (3600 * $min)) &&
+	  ($max eq 'undef' || $self->{date_diff} < (3600 * $max)));
 }
 
 sub _check_date_diff {
   my ($self) = @_;
   local ($_);
 
+  $self->{date_diff} = 0;
+
   my $rcvd = $self->get ('Received');
   # if we have no Received: headers, chances are we're archived mail
-  # with a limited set of hdrs. return 0.
-  if (!defined $rcvd || $rcvd eq '') {
-    return 0;
-  }
+  # with a limited set of headers
+  return if (!defined $rcvd || $rcvd eq '');
 
   # a Resent-Date: header takes precedence over any Date: header
   my $date = $self->get ('Resent-Date');
   if (!defined $date || $date eq '') {
-      $date = $self->get ('Date');
+    $date = $self->get ('Date');
   }
-  # don't barf here; just return an OK return value, as there's already
-  # a good test for this.
-  if (!defined $date || $date eq '') { return 0; }
+  # just return since there's already a good test for this
+  return if (!defined $date || $date eq '');
 
   chomp ($date);
   my $time = $self->_parse_rfc822_date ($date);
 
   # parse_rfc822_date failed
-  if (! $time) { return 0; }
+  return if (! $time);
 
   # use second date. otherwise fetchmail Received: hdrs will screw it up
   my @rcvddatestrs = ($rcvd =~ /\s.?\d+ \S\S\S \d+ \d+:\d+:\d+ \S+/g);
@@ -1050,7 +1038,7 @@ sub _check_date_diff {
 
   if ($#rcvddates <= 0) {
     dbg ("no dates found in Received headers, not raising flag");
-    return 0;
+    return;
   }
 
   my @diffs;
@@ -1070,7 +1058,7 @@ sub _check_date_diff {
   # use the date with the smallest absolute difference
   # (experimentally, this results in the fewest false positives)
   @diffs = sort { abs($a) <=> abs($b) } @diffs;
-  return $diffs[0];
+  $self->{date_diff} = $diffs[0];
 }
 
 sub _parse_rfc822_date {
