@@ -241,6 +241,7 @@ double score_msg(PGAContext *ctx, int p, int pop, int i)
 double evaluate(PGAContext *ctx, int p, int pop)
 {
   double tot_score = 0.0;
+  double ynweight,nyweight;
   int i;
   yyscore = ynscore = nyscore = nnscore = 0.0;
   ga_yy=ga_yn=ga_ny=ga_nn=0;
@@ -250,8 +251,6 @@ double evaluate(PGAContext *ctx, int p, int pop)
   {
     tot_score += score_msg(ctx,p,pop,i);
   }
-
-  double ynweight,nyweight;
 
 #if 1
 
@@ -368,8 +367,9 @@ void showSummary(PGAContext *ctx)
     if(0 == PGAGetGAIterValue(ctx) % 300)
     {
       int genome = PGAGetBestIndex(ctx,PGA_OLDPOP);
+      FILE *scores_file = NULL;
       PGAGetEvaluation(ctx, genome, PGA_OLDPOP);
-      FILE *scores_file = fopen("craig-evolve.scores","w");
+      scores_file = fopen("craig-evolve.scores","w");
       WriteString(ctx, scores_file, genome, PGA_OLDPOP);
       fclose(scores_file);
       dump(stdout);
