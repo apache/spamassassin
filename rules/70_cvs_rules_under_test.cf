@@ -177,13 +177,6 @@ describe T_FROM_OFFERS          From address is "offers at something"
 header T_FROM_OFFERS_2          From:addr =~ /^offers/i
 header T_FROM_OFFERS_3          From:addr =~ /\@\S*offers/i
 
-# quinlan: these may overlap some existing CLICK rules, check before adding
-body     T_HTML_LINK_CLICK_HERE eval:html_eval('anchor_text', '=~ /click\s+here/i')
-body     T_HTML_LINK_CLICK_CAPS eval:html_eval('anchor_text', '=~ /CLICK/')
-# bug 1208: added for fun!
-body T_CLICK_LINK		/\b(click|enter|follow)\s+(this\s+)?link/i
-describe T_CLICK_LINK		"Click this link"
-
 # Nov 12 2002 jm: still not sure about this one. ALL.current reports
 # 0.108   0.4001   0.0062    0.985   0.93    1.00  T_IDENT_NOBODY
 # combined for all submitters.  too dangerous considering the amount
