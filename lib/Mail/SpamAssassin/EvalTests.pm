@@ -339,10 +339,14 @@ sub check_for_faraway_charset {
 
   my $type = $self->get ('Content-Type');
   $type ||= $self->get ('Content-type');
-  my $locale = $ENV{'LANG'};
+
+  my @locales = split (' ', $self->{conf}->{ok_locales});
+  push (@locales, $ENV{'LANG'});
 
   if ($type =~ /^.*charset=\"(.+?)\"/i || $type =~ /^.*charset=(\S+)/i) {
-    if (!Mail::SpamAssassin::Locales::is_charset_ok_for_locale ($1, $locale)) {
+    if (!Mail::SpamAssassin::Locales::is_charset_ok_for_locales
+		      ($1, @locales))
+    {
       return 1;
     }
   }
@@ -358,9 +362,13 @@ sub check_for_faraway_charset_in_body {
 		/isx)
   {
     my $type = $1;
-    my $locale = $ENV{'LANG'};
+    my @locales = split (' ', $self->{conf}->{ok_locales});
+    push (@locales, $ENV{'LANG'});
+
     if ($type =~ /[\"](.+?)[\"]/i || $type =~ /^(\S+)/i) {
-      if (!Mail::SpamAssassin::Locales::is_charset_ok_for_locale ($1, $locale)) {
+      if (!Mail::SpamAssassin::Locales::is_charset_ok_for_locales
+      			($1, @locales))
+      {
 	return 1;
       }
     }
