@@ -2,21 +2,16 @@
 Important Note For Users Upgrading From Earlier Versions
 --------------------------------------------------------
 
-2.6x will be the last major version to support versions of on-disk
-database systems via the AnyDBM_File interface, other than DB_File.  We
-*strongly* recommend that installers also install DB_File, since it is
-more resilient and requires less resources than the other on-disk database
-modules supported by Perl.  In particular, GDBM_File is very likely to
-crash due to shortcomings in that database format.
+Due to major reliability shortcomings in the database support libraries
+other than DB_File, we now require that the DB_File module be installed to
+use SpamAssassin's Bayes rules.
 
-SpamAssassin will still work without DB_File installed; but due to the
-shortcomings in these modules, we suggest you run without Bayes enabled,
-or in Bayes read-only mode.
+SpamAssassin will still work without DB_File installed, but the Bayes
+support will be disabled.
 
-If you install DB_File and wish to import the old Bayes database data,
-there is an upgrade script in the "tools" directory called
-"sa-learn-upgrade-db" which will copy old entries from other formats, into
-a new DB_File file.
+If you install DB_File and wish to import old Bayes database data, each
+user with a Bayes db should run "sa-learn --import" to copy old entries
+from the other formats into a new DB_File file.
 
 
 Note For Users Upgrading From SpamAssassin 2.3x or 2.4x

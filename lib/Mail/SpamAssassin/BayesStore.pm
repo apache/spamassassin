@@ -4,14 +4,13 @@ use strict;
 use bytes;
 use Fcntl;
 
-BEGIN { @AnyDBM_File::ISA = qw(DB_File GDBM_File NDBM_File SDBM_File); }
-use AnyDBM_File;
-
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Util;
 use File::Basename;
 use File::Spec;
 use File::Path;
+
+use constant HAS_DB_FILE => eval { require DB_File; };
 
 use vars qw{
   @ISA
@@ -55,10 +54,10 @@ use vars qw{
 
 @DBNAMES = qw(toks seen);
 
-# Possible file extensions used by the kinds of database files AnyDBM
+# Possible file extensions used by the kinds of database files DB_File
 # might create.  We need these so we can create a new file and rename
 # it into place.
-@DB_EXTENSIONS = ('', '.db', '.dir', '.pag', '.dbm', '.cdb');
+@DB_EXTENSIONS = ('', '.db');
 
 # These are the magic tokens we use to track stuff in the DB.
 # The format is '^M^A^G^I^C' followed by any string you want.
@@ -135,6 +134,10 @@ sub tie_db_readonly {
     dbg ("bayes_path not defined");
     return 0;
   }
+  if (!HAS_DB_FILE) {
+    dbg ("bayes: DB_File module not installed, cannot use Bayes");
+    return 0;
+  }
 
   my $path = $main->sed_path ($main->{conf}->{bayes_path});
 
@@ -151,7 +154,7 @@ sub tie_db_readonly {
     my $db_var = 'db_'.$dbname;
     dbg("bayes: $$ tie-ing to DB file R/O $name");
     # untie %{$self->{$db_var}} if (tied %{$self->{$db_var}});
-    tie %{$self->{$db_var}},"AnyDBM_File",$name, O_RDONLY,
+    tie %{$self->{$db_var}},"DB_File",$name, O_RDONLY,
 		 (oct ($main->{conf}->{bayes_file_mode}) & 0666)
        or goto failed_to_tie;
   }
@@ -194,6 +197,10 @@ sub tie_db_writable {
     dbg ("bayes_path not defined");
     return 0;
   }
+  if (!HAS_DB_FILE) {
+    dbg ("bayes: DB_File module not installed, cannot use Bayes");
+    return 0;
+  }
 
   my $path = $main->sed_path ($main->{conf}->{bayes_path});
 
@@ -227,7 +234,7 @@ sub tie_db_writable {
     my $name = $path.'_'.$dbname;
     my $db_var = 'db_'.$dbname;
     dbg("bayes: $$ tie-ing to DB file R/W $name");
-    tie %{$self->{$db_var}},"AnyDBM_File",$name, O_RDWR|O_CREAT,
+    tie %{$self->{$db_var}},"DB_File",$name, O_RDWR|O_CREAT,
 		 (oct ($main->{conf}->{bayes_file_mode}) & 0666)
        or goto failed_to_tie;
   }
@@ -338,7 +345,7 @@ sub upgrade_db {
     # anyway)
     my %new_toks;
     my $umask = umask 0;
-    tie %new_toks, "AnyDBM_File", "${name}.new", O_RDWR|O_CREAT|O_EXCL,
+    tie %new_toks, "DB_File", "${name}.new", O_RDWR|O_CREAT|O_EXCL,
           (oct ($main->{conf}->{bayes_file_mode}) & 0666) or return 1;
     umask $umask;
 
@@ -396,7 +403,7 @@ sub upgrade_db {
     }
 
     # re-tie to the new db in read-write mode ...
-    tie %{$self->{db_toks}},"AnyDBM_File", $name, O_RDWR|O_CREAT,
+    tie %{$self->{db_toks}},"DB_File", $name, O_RDWR|O_CREAT,
 	 (oct ($main->{conf}->{bayes_file_mode}) & 0666) or return 1;
 
     dbg ("bayes: upgraded database format from v".$self->{db_version}." to v2 in ".(time - $started)." seconds");
@@ -607,7 +614,7 @@ sub expire_old_tokens_trapped {
   # anyway)
   my %new_toks;
   my $umask = umask 0;
-  tie %new_toks, "AnyDBM_File", $name, O_RDWR|O_CREAT|O_EXCL,
+  tie %new_toks, "DB_File", $name, O_RDWR|O_CREAT|O_EXCL,
 	       (oct ($main->{conf}->{bayes_file_mode}) & 0666);
   umask $umask;
   my $oldest;
@@ -1275,6 +1282,102 @@ sub scan_count_get {
   }
 
   0;
+}
+
+###########################################################################
+
+# this is called directly from sa-learn(1).
+sub upgrade_old_dbm_files {
+  my ($self, $opts) = @_;
+  my $ret = 0;
+
+  eval {
+    local $SIG{'__DIE__'};	# do not run user die() traps in here
+
+    use File::Basename;
+    use File::Copy;
+
+    # bayes directory
+    my $main = $self->{bayes}->{main};
+    my $path = $main->sed_path($main->{conf}->{bayes_path});
+    my $dir = dirname($path);
+
+    # make temporary copy since old dbm and new dbm may have same name
+    opendir(DIR, $dir) || die "can't opendir $dir: $!";
+    my @files = grep { /^bayes_(?:seen|toks)(?:\.\w+)?$/ } readdir(DIR);
+    closedir(DIR);
+    if (@files < 2 || !grep(/bayes_seen/,@files) || !grep(/bayes_toks/,@files))
+    {
+      die "unable to find bayes_toks and bayes_seen, stopping\n";
+    }
+    for (@files) {
+      copy("$dir/$_", "$dir/old_$_") || die "can't copy $_ to old_$_: $!\n";
+    }
+
+    # delete previous to make way for import
+    for (@files) { unlink("$dir/$_"); }
+
+    # import
+    if ($self->tie_db_writable()) {
+      $ret += $self->upgrade_old_dbm_files_trapped("$dir/old_bayes_seen",
+						   $self->{db_seen});
+      $ret += $self->upgrade_old_dbm_files_trapped("$dir/old_bayes_toks",
+						   $self->{db_toks});
+    }
+
+    if ($ret == 2) {
+      print "import successful, original files saved with \"old\" prefix\n";
+    }
+    else {
+      print "import failed, original files saved with \"old\" prefix\n";
+    }
+  };
+  my $err = $@;
+
+  $self->untie_db();
+
+  # if we died, untie the dbm files
+  if ($err) {
+    warn "bayes upgrade_old_dbm_files: $err\n";
+    return 0;
+  }
+  $ret;
+}
+
+sub upgrade_old_dbm_files_trapped {
+  my ($self, $filename, $output) = @_;
+
+  my $count;
+  my %in;
+
+  print "upgrading to DB_File, please be patient: $filename\n";
+
+  # try each type of file until we find one with > 0 entries
+  for my $dbm ('DB_File', 'GDBM_File', 'NDBM_File', 'SDBM_File') {
+    $count = 0;
+    # wrap in eval so it doesn't run in general use.  This accesses db
+    # modules directly.
+    eval '
+      use ' . $dbm . ';
+      tie %in, "' . $dbm . '", $filename, O_RDONLY, 0600;
+      %{ $output } = %in;
+      $count = scalar keys %{ $output };
+      untie %in;
+    ';
+    if ($@) {
+      print "$dbm: $dbm module not installed, nothing copied.\n";
+      dbg("error was: $@");
+    }
+    elsif ($count == 0) {
+      print "$dbm: no database of that kind found, nothing copied.\n";
+    }
+    else {
+      print "$dbm: copied $count entries.\n";
+      return 1;
+    }
+  }
+
+  return 0;
 }
 
 ###########################################################################

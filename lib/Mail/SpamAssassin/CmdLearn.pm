@@ -52,7 +52,9 @@ sub cmdline_run {
              'debug-level|D:s'                  => \$opt{'debug-level'},
              'version|V'                        => \$opt{'version'},
              'help|h|?'                         => \$opt{'help'},
+
 	     'dump:s'			=> \$opt{'dump'},
+	     'import'			=> \$opt{'import'},
 
 	     'dir'			=> sub { $opt{'old_format'} = 'dir'; },
 	     'file'			=> sub { $opt{'old_format'} = 'file'; },
@@ -74,8 +76,9 @@ sub cmdline_run {
   if ($opt{'force-expire'}) {
     $rebuildonly=1;
   }
-  if ( !defined $isspam && !defined $rebuildonly && !defined $forget && !defined $opt{'dump'} && !defined $opt{'folders'} ) {
-    usage(0, "Please select either --spam, --ham, --folders, --forget, --rebuild or --dump");
+
+  if ( !defined $isspam && !defined $rebuildonly && !defined $forget && !defined $opt{'dump'} && !defined $opt{'import'} && !defined $opt{'folders'} ) {
+    usage(0, "Please select either --spam, --ham, --folders, --forget, --rebuild, --import or --dump");
   }
 
   # We need to make sure the journal syncs pre-forget...
@@ -136,6 +139,19 @@ sub cmdline_run {
     $spamtest->dump_bayes_db($magic, $toks, $opt{'regexp'});
     $spamtest->finish_learner();
     return 0;
+  }
+
+  if (defined $opt{'import'}) {
+    if ( defined $bayes_override_path ) {
+      # init() above ties to the db r/o and leaves it that way
+      # so we need to untie before dumping (it'll reopen)
+      $spamtest->finish_learner();
+      $spamtest->{conf}->{bayes_path} = $bayes_override_path;
+    }
+
+    my $ret = $spamtest->{bayes_scanner}->{store}->upgrade_old_dbm_files();
+    $spamtest->finish_learner();
+    return (!(defined $ret && $ret == 2));
   }
 
   $spamtest->init_learner({

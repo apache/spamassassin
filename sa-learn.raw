@@ -64,7 +64,7 @@ Options:
  --force-expire			   Force an expiry run, rebuild every time
  --dump [all|data|magic]           Display the contents of the Bayes database
                                    Takes optional argument for what to display
-  --dbpath <path>                  For dump only, specifies (in bayes_path form)
+  --dbpath <path>                  For dump/import only, specifies (in bayes_path form)
                                    where to read the Bayes DB from
   --regexp <re>                    For dump only, specifies which tokens to
                                    dump based on a regular expression.
@@ -75,6 +75,7 @@ Options:
  --showdots                        Show progress using dots
  --no-rebuild                      Skip building databases after scan
  -L, --local			   Operate locally, no network accesses
+ --import                          Upgrade data from an earlier database version
  -C path, --configpath=path, --config-file=path   Path to standard configuration dir
  -p prefs, --prefspath=file, --prefs-file=file    Set user preferences file
  --siteconfigpath=path             Path for site configs (def: /etc/mail/spamassassin)
@@ -383,6 +384,17 @@ slightly lower accuracy.
 
 Note that this is currently ignored, as current versions of SpamAssassin will
 not perform network access while learning; but future versions may.
+
+=item B<--import>
+
+If you previously used SpamAssassin's Bayesian learner without the C<DB_File>
+module installed, it will have created files in other formats, such as
+C<GDBM_File>, C<NDBM_File>, or C<SDBM_File>.  This switch allows you to migrate
+that old data into the C<DB_File> format.  It will overwrite any data currently
+in the C<DB_File>.
+
+Can also be used with the B<--dbpath> I<path> option to specify the location of
+the Bayes files to use.
 
 =back
 
