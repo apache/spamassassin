@@ -560,4 +560,6 @@ header T_FAKE_HELO_BIGFOOT	eval:check_for_rdns_helo_mismatch("bigfoot\.com","big
 header T_FAKE_HELO_ATTBI	eval:check_for_rdns_helo_mismatch("attbi\.com","attbi\.com")
 header T_FAKE_HELO_YAHOO_CA	eval:check_for_rdns_helo_mismatch("yahoo\.ca","yahoo\.ca")
 header T_FAKE_HELO_HOTPOP	eval:check_for_rdns_helo_mismatch("hotpop\.com","hotpop\.com")
+header T_FAKE_HELO_SHAW_CA	eval:check_for_rdns_helo_mismatch("shaw(?:\.ca|cable\.net)","shaw\.ca")
+header T_FAKE_HELO_AMAZON	eval:check_for_rdns_helo_mismatch("amazon\.com","amazon\.com")
 
