@@ -55,7 +55,7 @@ uri IP_LINK_PLUS	/^https?\:\/\/(?:\S*\@)?\d+\.\d+\.\d+\.\d+.{0,20}(?:cgi|click|a
 describe IP_LINK_PLUS	Dotted-decimal IP address followed by CGI
 
 uri UNSUB_SCRIPT		/^https?:\/\/.*?cgi.*?(?:unsubscribe|remove)/i
-describe UNSUB_SCRIPT		URL of CGI script has "unsubscribe" or "remove"
+describe UNSUB_SCRIPT		URL of CGI script has unsubscribe or remove
 
 uri UNSUB_PAGE			/^https?:\/\/.*?(?!cgi).*?unsubscribe/i
 describe UNSUB_PAGE		URL of page called "unsubscribe"

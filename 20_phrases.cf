@@ -307,7 +307,7 @@ body PENIS_ENLARGE		/\b(?:enlarge|increase|grow|lengthen|larger\b|bigger\b|longe
 describe PENIS_ENLARGE		Information on getting larger penis/breasts
 
 body PENIS_ENLARGE2		/\b(?:penis|male organ|pee[ -]?pee|dick|sc?hlong|wh?anger|breast).{0,50}\b(?:enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b|\binches\b)/i
-describe PENIS_ENLARGE2		Information on getting larger penis/breasts (2)
+describe PENIS_ENLARGE2		Information on getting larger penis/breasts
 
 body     IMPOTENCE              /\b(?:impotence (?:problem|cure|solution)|Premature Ejaculation|erectile dysfunction)/i
 describe IMPOTENCE              Impotence cure
@@ -372,10 +372,10 @@ describe US_DOLLARS		Talks about a million dollars
 
 # to still match all test cases
 body US_DOLLARS_2               /\s(?:\$|US\$|usd?).?\d{2,3}(?:\.\d)?.?(?:m|millions?)\b/i
-describe US_DOLLARS_2           Mentions money ($NNN.N m/USDNNN.N m/US$NN.N m)
+describe US_DOLLARS_2           Mentions $$$ ($NNN.N m/USDNNN.N m/US$NN.N m)
 
 body US_DOLLARS_3               /(?:\$|usd).?\d{1,3}[,.]\d{3}[,.]\d{3}(?:[,.]\d\d)?/i
-describe US_DOLLARS_3           Mentions millions of dollars ($NN,NNN,NNN.NN)
+describe US_DOLLARS_3           Mentions millions of $ ($NN,NNN,NNN.NN)
 
 body MILLION_USD              	/Million\b.{0,40}\b(?:United States? Dollars?|USD)/i
 describe MILLION_USD 		Talks about millions of dollars
@@ -1001,7 +1001,7 @@ describe VERB_UP_TO_OR_MORES	Has add/lose/make/save up to X or more
 
 # Feb 18 2003 jm: another Nigerian scam phrase
 body NIGERIAN_SCAM_VIRTUE	/by virtue of its nature as being utterly confidential/i
-describe NIGERIAN_SCAM_VIRTUE	Contains Nigerian Scam (virtue of its nature)
+describe NIGERIAN_SCAM_VIRTUE	Possible Nigerian Scam Text
 
 # Feb 18 2003 jm: try another combo.  I'm not sure __NIGERIAN_HONESTY is req'd.
 body __NIGERIAN_CODE_CONDUCT	/\bcode of conduct\b/i
