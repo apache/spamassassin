@@ -459,6 +459,29 @@ sub parse_received_line {
       goto enough;
     }
 
+    if (/ \(Postfix\) with/) {
+      # Received: from localhost (unknown [127.0.0.1])
+      # by cabbage.jmason.org (Postfix) with ESMTP id A96E18BD97
+      # for <jm@localhost>; Thu, 13 Mar 2003 15:23:15 -0500 (EST)
+      if ( /^from (\S+) \((\S+) \[(${IP_ADDRESS})\]\) by (\S+) / ) {
+	$mta_looked_up_dns = 1;
+	$helo = $1; $rdns = $2; $ip = $3; $by = $4;
+	if ($rdns eq 'unknown') { $rdns = ''; }
+	goto enough;
+      }
+
+      # Received: from 207.8.214.3 (unknown[211.94.164.65])
+      # by puzzle.pobox.com (Postfix) with SMTP id 9029AFB732;
+      # Sat,  8 Nov 2003 17:57:46 -0500 (EST)
+      # (Pobox.com version: reported in bug 2745)
+      if ( /^from (\S+) \((\S+)\[(${IP_ADDRESS})\]\) by (\S+) / ) {
+	$mta_looked_up_dns = 1;
+	$helo = $1; $rdns = $2; $ip = $3; $by = $4;
+	if ($rdns eq 'unknown') { $rdns = ''; }
+	goto enough;
+      }
+    }
+
     # MiB: 2003/11/29 Some qmail-ldap headers may be misinterpreted as sendmail-headers
     #      resulting in a messed-up interpretation. We have to skip sendmail tests
     #      if we find evidence that this is a qmail-ldap header.
@@ -486,29 +509,6 @@ sub parse_received_line {
       $helo = $1; $ip = $3; $by = $4;
       $ident = $2;
       goto enough;
-    }
-
-    if (/ \(Postfix\) with/) {
-      # Received: from localhost (unknown [127.0.0.1])
-      # by cabbage.jmason.org (Postfix) with ESMTP id A96E18BD97
-      # for <jm@localhost>; Thu, 13 Mar 2003 15:23:15 -0500 (EST)
-      if ( /^from (\S+) \((\S+) \[(${IP_ADDRESS})\]\) by (\S+) / ) {
-	$mta_looked_up_dns = 1;
-	$helo = $1; $rdns = $2; $ip = $3; $by = $4;
-	if ($rdns eq 'unknown') { $rdns = ''; }
-	goto enough;
-      }
-
-      # Received: from 207.8.214.3 (unknown[211.94.164.65])
-      # by puzzle.pobox.com (Postfix) with SMTP id 9029AFB732;
-      # Sat,  8 Nov 2003 17:57:46 -0500 (EST)
-      # (Pobox.com version: reported in bug 2745)
-      if ( /^from (\S+) \((\S+)\[(${IP_ADDRESS})\]\) by (\S+) / ) {
-	$mta_looked_up_dns = 1;
-	$helo = $1; $rdns = $2; $ip = $3; $by = $4;
-	if ($rdns eq 'unknown') { $rdns = ''; }
-	goto enough;
-      }
     }
 
     # Received: from 213.123.174.21 by lw11fd.law11.hotmail.msn.com with HTTP;
@@ -564,16 +564,17 @@ sub parse_received_line {
     if (/^from \S+( \(HELO \S*\))? \((\S+\@)?\[?${IP_ADDRESS}\]?\)( \(envelope-sender <\S+>\))? by \S+( \(.+\))* with (.* )?(SMTP|QMQP)/) {
 
        if (/^from (\S+) \(HELO \[?([^ \[\(\)\]]*)\]?\) \((\S+)\@\[?(${IP_ADDRESS})\]?\)( \(envelope-sender <\S+>\))? by (\S+)/) {
-          $rdns = $1; $helo = $2; $ident = $3; $ip = $4; $by = $6;
+         $rdns = $1; $helo = $2; $ident = $3; $ip = $4; $by = $6;
        }
        elsif (/^from (\S+) \(HELO \[?([^ \[\(\)\]]*)\]?\) \(\[?(${IP_ADDRESS})\]?\)( \(envelope-sender <\S+>\))? by (\S+)/) {
-          $rdns = $1; $helo = $2; $ip = $3; $by = $5;
+         $rdns = $1; $helo = $2; $ip = $3; $by = $5;
        }
        elsif (/^from (\S+) \((\S+)\@\[?(${IP_ADDRESS})\]?\)( \(envelope-sender <\S+>\))? by (\S+)/) {
-          $rdns = $1; $ident = $2; $ip = $3; $by = $5;
+	 # note: absence of HELO means that it matched rDNS in qmail-land
+         $helo = $rdns = $1; $ident = $2; $ip = $3; $by = $5;
        }
        elsif (/^from (\S+) \(\[?(${IP_ADDRESS})\]?\)( \(envelope-sender <\S+>\))? by (\S+)/) {
-          $rdns = $1; $ip = $2; $by = $4;
+         $helo = $rdns = $1; $ip = $2; $by = $4;
        }
        # qmail doesn't perform rDNS requests by itself, but is usually called
        # by tcpserver or a similar daemon that passes rDNS information to qmail-smtpd.
@@ -1029,7 +1030,7 @@ enough:
 	# really has no rDNS (rather than that the MTA didn't bother
 	# looking it up for us).
 	$relay->{no_reverse_dns} = 1;
-	$rdns = $ip;		# default no-rDNS to be the IP
+	$rdns = '';
       } else {
 	$relay->{rdns_not_in_headers} = 1;
       }
@@ -1039,7 +1040,7 @@ enough:
 
       if (!$rdns) {
 	$relay->{no_reverse_dns} = 1;
-	$rdns = $ip;		# default no-rDNS to be the IP
+	$rdns = '';
       }
     }
   }

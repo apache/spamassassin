@@ -425,6 +425,21 @@ sub check {
   $msg;
 }
 
+=item $status = $f->check_message_text ($mailtext)
+
+Check a mail, encapsulated in a plain string C<$mailtext>, to determine if it
+is spam or not.
+
+Otherwise identical to C<check()> above.
+
+=cut
+
+sub check_message_text {
+  my ($self, $mailtext) = @_;
+  my $msg = $self->parse($mailtext, 1);
+  return $self->check($msg);
+}
+
 ###########################################################################
 
 =item $status = $f->learn ($mail, $id, $isspam, $forget)
