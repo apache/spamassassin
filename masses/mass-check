@@ -43,7 +43,8 @@ sub mass_check_mailbox {
   my $folder = shift;
 
   open (MBOX, "<$folder") or warn "open $folder failed $@";
-  while (<MBOX>) { /^From (\S+)  ... .../ and last; }
+  while (<MBOX>) { /^From \S+ +... ... / and last; }
+  $count = 1;
 
   while (!eof MBOX) {
     my $tmpf = "/tmp/mass-check.$$";
@@ -51,19 +52,25 @@ sub mass_check_mailbox {
     my $msgid = undef;
     while (<MBOX>) {
       /^Message-I[dD]: (.*)\s*$/ and $msgid = $1;
-      /^From (\S+)  ... .../ and last; print MSG;
+      /^From \S+ +... ... / and last;
+      print MSG;
     }
     close MSG;
 
-    next unless defined ($msgid);
-    $msgid =~ s/[^-_<>A-Za-z0-9\.\,\:\=\+\@]/_/gs;	# make safe
+    if (defined ($msgid)) {
+      $msgid =~ s/[^-_<>A-Za-z0-9\.\,\:\=\+\@]/_/gs;	# make safe
+    } else {
+      $msgid = "<".($count++)."\@no_msgid_in_msg>";
+    }
     $msgid = "$folder:$msgid";		# so we can find it again
 
     open (STDIN, "<$tmpf");
     my $ma = Mail::Audit->new();
     docheck ($msgid, $ma);
+    close STDIN;
   }
   close MBOX;
+  unlink $tmpf;
 }
 
 sub docheck {

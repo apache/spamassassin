@@ -64,26 +64,10 @@ void writescores (FILE *fout) {
 
 // ---------------------------------------------------------------------------
 
-void counthits (GARealGenome &genome) {
-  int file, i, len;
+void counthitsfromscores (void) {
+  int file;
   float hits;
-
-  len = genome.length();
-  if (len != num_scores) {
-    cerr << "len != numscores: "<<len<<"  "<<num_scores<<endl;
-    exit(1);
-  }
-
-  // copy the new scores to the "scores" array
-  for (i = 0; i < len; i++) {
-    if (is_mutatable[i]) {
-      scores[i] = genome[i];
-      if (scores[i] == 0.0) { scores[i] = 0.1; }
-
-    } else {
-      scores[i] = bestscores[i];	// use the standard one
-    }
-  }
+  int i;
 
   nn = ny = yn = yy = 0;
 
@@ -110,6 +94,31 @@ void counthits (GARealGenome &genome) {
       }
     }
   }
+}
+
+// ---------------------------------------------------------------------------
+
+void counthits (GARealGenome &genome) {
+  int i, len;
+
+  len = genome.length();
+  if (len != num_scores) {
+    cerr << "len != numscores: "<<len<<"  "<<num_scores<<endl;
+    exit(1);
+  }
+
+  // copy the new scores to the "scores" array
+  for (i = 0; i < len; i++) {
+    if (is_mutatable[i]) {
+      scores[i] = genome[i];
+      if (scores[i] == 0.0) { scores[i] = 0.1; }
+
+    } else {
+      scores[i] = bestscores[i];	// use the standard one
+    }
+  }
+
+  counthitsfromscores();
 }
 
 // ---------------------------------------------------------------------------
@@ -151,13 +160,14 @@ main (int argc, char **argv) {
   int arg;
   int demeMode	= 0;
   int convergeMode = 0;
+  int justCount = 0;
   int npops	= 5;		// num pops (for deme mode)
   int popsize	= 0;		// population size
   int generations = 1500;	// generations to run
   float pconv	= 1.00;		// threshhold for when we have converged
   int nconv	= 300;		// how many gens back to check for convergence
 
-  while ((arg = getopt (argc, argv, "b:c:s:m:g:")) != -1) {
+  while ((arg = getopt (argc, argv, "b:c:s:m:g:C")) != -1) {
     switch (arg) {
       case 'b':
 	nybias = atof(optarg);
@@ -179,6 +189,10 @@ main (int argc, char **argv) {
 	pconv = atof(optarg);
 	break;
 
+      case 'C':
+	justCount = 1;
+	break;
+
       case 'g':
 	demeMode = 0;
 	generations = atoi(optarg);
@@ -190,10 +204,24 @@ main (int argc, char **argv) {
     }
   }
 
-  if (popsize == 0) { usage(); }
-
   loadscores ();
   loadtests ();
+
+  if (justCount) {
+    cout << "Counts for current genome:" << endl;
+
+    // copy the base scores to the "scores" array
+    int i;
+    for (i = 0; i < num_scores; i++) {
+      scores[i] = bestscores[i];
+    }
+
+    counthitsfromscores();
+    printhits (stdout);
+    exit (0);
+  }
+
+  if (popsize == 0) { usage(); }
 
   GARandomSeed();	// use time ^ $$
 

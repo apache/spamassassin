@@ -1,5 +1,9 @@
 #!/usr/bin/perl -w
 
+my $cffile = shift @ARGV;
+$cffile ||= "../spamassassin.cf";
+
+
 my @unmutated_tests = qw(
 BALANCE_FOR_LONG
 OSIRU_CONFIRMED_SPAM_SOURCE
@@ -70,7 +74,8 @@ sub readlogs {
 sub readscores {
   $scores = { };
 
-  open (IN, "<../spamassassin.cf");
+  print "Reading scores from \"$cffile\"...\n";
+  open (IN, "<$cffile") or warn "cannot read $cffile\n";
   while (<IN>) {
     s/#.*$//g; s/^\s+//; s/\s+$//;
 
