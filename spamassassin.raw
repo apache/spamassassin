@@ -293,13 +293,19 @@ The default tagging operations that take place are detailed in L</TAGGING>.
 =head1 CONFIGURATION FILES
 
 The rule base, text templates, and rule description text are loaded from the
-configuration file.  The default configuration file, if B<-c> is not specified,
-is F<$Config{installsitelib}/spamassassin.cf>.
+configuration files.
+
+The default configuration file is F<$Config{installsitelib}/spamassassin.cf>.
+This file will always be read first.
+
+F</etc/spamassassin.cf> (or the file specified with C<-c>)  will be read next,
+if it exists.  This is a good place to add your own site-wide preferences.
 
 The user preferences (such as scores to attach to each rule), are loaded from
 the file specified in the B<-p> argument.  If this is not specified,
-F<~/.spamassassin.cf> is used if it exists, otherwise
-F<$Config{installsitelib}/spamassassin.prefs> is used.
+F<~/.spamassassin.cf> is used if it exists.  C<spamassassin> will create this
+file if it does not exist, using F<$Config{installsitelib}/spamassassin.prefs>
+as a template.
 
 =head1 TAGGING
 

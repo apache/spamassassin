@@ -62,6 +62,7 @@ use Config;
 use vars	qw{
   	@ISA $VERSION $HOME_URL $DEBUG
 	@default_rules_path @default_prefs_path @default_userprefs_path
+	@site_rules_path
 };
 
 @ISA = qw();
@@ -76,13 +77,16 @@ $DEBUG = 0;
 @default_rules_path = qw(
         ./spamassassin.cf
         ../spamassassin.cf
-        /etc/spamassassin.cf
         __installsitelib__/spamassassin.cf
+);
+
+@site_rules_path = qw(
+        /etc/spamassassin.cf
 );
     
 @default_prefs_path = qw(
-        /etc/spamassassin.prefs
         __installsitelib__/spamassassin.prefs
+        /etc/spamassassin.prefs
 );
 
 @default_userprefs_path = qw(
@@ -399,23 +403,18 @@ sub init {
   if (!defined $self->{config_text}) {
     $self->{config_text} = '';
 
-    my $fname = $self->{rules_filename};
-    if (!defined $fname) {
-      $fname = $self->first_existing_path (@default_rules_path);
-    }
-    dbg ("using \"$fname\" for rules file");
+    my $fname = $self->first_existing_path (@default_rules_path);
+    $self->{config_text} .= $self->read_cf ($fname, 'default rules file');
 
-    if (defined $fname && -f $fname && -s _) {
-      open (IN, "<".$fname) or
-		  warn "cannot open \"$fname\"\n";
-      $self->{config_text} .= join ('', <IN>);
-      close IN;
-    }
+    $fname = $self->{rules_filename};
+    $fname ||= $self->first_existing_path (@site_rules_path);
+    $self->{config_text} .= $self->read_cf ($fname, 'site rules file');
 
     if ( $use_user_pref != 0 ) {
       $fname = $self->{userprefs_filename};
-      if (!defined $fname) {
-	$fname = $self->first_existing_path (@default_userprefs_path);
+      $fname ||= $self->first_existing_path (@default_userprefs_path);
+
+      if (defined $fname) {
 	dbg ("using \"$fname\" for user prefs file");
 
         if (!-f $fname && !$self->create_default_prefs($fname)) {
@@ -423,12 +422,7 @@ sub init {
         }
       }
 
-      if (defined $fname && -f $fname && -s _) {
-	open (IN, "<".$fname) or
-		    warn "cannot open \"$fname\"\n";
-	$self->{config_text} .= join ('', <IN>);
-	close IN;
-      }
+      $self->{config_text} .= $self->read_cf ($fname, 'user prefs');
     }
   }
 
@@ -438,6 +432,21 @@ sub init {
   delete $self->{config_text};
 
   # TODO -- open DNS cache etc. if necessary
+}
+
+sub read_cf {
+  my ($self, $fname, $desc) = @_;
+
+  return '' unless defined ($fname);
+
+  dbg ("using \"$fname\" for $desc");
+  my $txt = '';
+  if (-f $fname && -s _) {
+    open (IN, "<".$fname) or warn "cannot open \"$fname\"\n";
+    $txt = join ('', <IN>);
+    close IN;
+  }
+  return $txt;
 }
 
 =item $f->create_default_prefs ()
