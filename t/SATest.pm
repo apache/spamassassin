@@ -218,10 +218,13 @@ sub start_spamd {
   $spamd_pid = 0;
   my $retries = 20;
   while ($spamd_pid <= 0) {
+    my $spamdlog = '';
+
     if (open (IN, "<log/$testname.spamd")) {
       while (<IN>) {
 	/Address already in use/ and $retries = 0;
 	/server pid: (\d+)/ and $spamd_pid = $1;
+	$spamdlog .= $_;
       }
       close IN;
       last if ($spamd_pid);
@@ -229,7 +232,7 @@ sub start_spamd {
 
     sleep 2;
     if ($retries-- <= 0) {
-      warn "spamd start failed";
+      warn "spamd start failed: log: $spamdlog";
       warn "\n\nMaybe you need to kill a running spamd process?\n\n";
       return 0;
     }
