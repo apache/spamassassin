@@ -251,6 +251,37 @@ sub ok_all_patterns {
   }
 }
 
+sub skip_all_patterns {
+  my $skip = shift;
+  foreach my $pat (sort keys %patterns) {
+    my $type = $patterns{$pat};
+    print "\tChecking $type\n";
+    if (defined $found{$type}) {
+      skip ($skip, $found{$type} == 1) or warn "Found more than once: $type\n";
+      warn "\tThis test should have been skipped: $skip\n" if $skip;
+    } else {
+      if ($skip) {
+        warn "\tTest skipped: $skip\n";
+      } else {
+        warn "\tNot found: $type = $pat\n";
+      }
+      skip ($skip, 0);                     # keep the right # of tests
+    }
+  }
+  foreach my $pat (sort keys %anti_patterns) {
+    my $type = $anti_patterns{$pat};
+    print "\tChecking for anti-pattern $type\n";
+    if (defined $found_anti{$type}) {
+      warn "\tFound anti-pattern: $type = $pat\n";
+      skip ($skip, 0);
+    }
+    else
+    {
+      skip ($skip, 1);
+    }
+  }
+}
+
 sub clear_pattern_counters {
   %found = ();
   %found_anti = ();
