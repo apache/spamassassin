@@ -491,6 +491,13 @@ sub check_for_forged_yahoo_received_headers {
 
   if ($self->gated_through_received_hdr_remover()) { return 0; }
 
+  # bug 3740: ignore bounces from Yahoo!.   only honoured if the
+  # correct rDNS shows up in the trusted relay list, or first untrusted relay
+  if ($from eq 'MAILER-DAEMON@yahoo.com' &&
+      ($self->{relays_trusted_str} =~ / rdns=\S+\.yahoo\.com /
+        || $self->{relays_untrusted_str} =~ /^[^\]]+ rdns=\S+\.yahoo\.com /))
+            { return 0; }
+
   if ($rcvd =~ /by web\S+\.mail\.yahoo\.com via HTTP/) { return 0; }
   if ($rcvd =~ /by smtp\S+\.yahoo\.com with SMTP/) { return 0; }
   my $IP_ADDRESS = IP_ADDRESS;
