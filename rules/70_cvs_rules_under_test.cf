@@ -71,16 +71,21 @@ score T_FORGED_MUA_MOZILLA3     1.0
 
 ########################################################################
 
-# this is the only To/Cc/From "no lower" version of this idea with a
-# somewhat reasonable S/O ratio
-# Dec 18 2002 jm: not bothered with this
-header T_FROM_NO_LOWER		From !~ /[a-z]/
-
-###########################################################################
-
 # Dec 18 2002 jm:
 # pretty good, will promote it tomorrow once Allen's had a look at
 # excluding his FPs
+# 12/23 - tvd - not bad for everyone except me where it's really a ham sign. :|
+#  mail from twig (webmail) seem to be most of the fps, let's try a third ?
+# daf          0.000   0.0000   0.0000    0.500   0.11    1.00  T_IDENT_NOBODY
+# easmith      0.024   0.0363   0.0210    0.634   0.23    1.00  T_IDENT_NOBODY
+# jm           0.136   0.4598   0.0000    1.000   0.96    1.00  T_IDENT_NOBODY
+# quinlan      0.270   0.6923   0.0000    1.000   0.93    1.00  T_IDENT_NOBODY
+# rODbegbie    0.000   0.0000   0.0000    0.500   0.12    1.00  T_IDENT_NOBODY
+# theo         0.091   0.0071   0.1442    0.047   0.00    1.00  T_IDENT_NOBODY
+# easmith      0.008   0.0363   0.0000    1.000   0.92    0.01  T_IDENT_NOBODY2
+# quinlan      0.270   0.6923   0.0000    1.000   0.93    0.01  T_IDENT_NOBODY2
+# rODbegbie    0.000   0.0000   0.0000    0.500   0.12    0.01  T_IDENT_NOBODY2
+# theo         0.088   0.0071   0.1397    0.048   0.00    0.01  T_IDENT_NOBODY2
 header __IDENT_NOBODY		Received =~ /ident[:=]nobody\b/i
 header __REGSITE_COM		Received =~ /\.registeredsite\.com\s/
 meta T_IDENT_NOBODY		(__IDENT_NOBODY && !__REGSITE_COM)
@@ -89,14 +94,9 @@ score T_IDENT_NOBODY		1.0
 # Allen's version
 header __X_BEENTHERE		exists:X-BeenThere
 meta T_IDENT_NOBODY2		(__IDENT_NOBODY && !__REGSITE_COM && !((FORGOTTEN_PASSWORD + SUBJECT_IS_LIST + __X_BEENTHERE + KNOWN_MAILING_LIST) > 1))
-
-# Dec 20 2002 jm: let's try and catch these spammers out
-header __XIMIAN_MUA	     X-Mailer =~ /^(?:Ximian Evolution|Evolution\/\d+\.)/
-# interestingly the last word (\S+) always seems to be 'camel' ;)
-header __XIMIAN_MSGID	     MESSAGEID =~ /^<\d{10}\.\d+\.\d+\.\S+\@/
-meta T_USER_AGENT_XIMIAN     (__XIMIAN_MSGID && __XIMIAN_MUA && !__UNUSABLE_MSGID)
-score  T_USER_AGENT_XIMIAN   -0.5
-tflags T_USER_AGENT_XIMIAN   nice
+# Theo's version
+header __IDENT_NOBODY_LOCALHOST Received =~ /\bident[:=]nobody\@localhost\b/i
+meta T_IDENT_NOBODY3		(__IDENT_NOBODY && !__IDENT_NOBODY_LOCALHOST && !__REGSITE_COM && !((FORGOTTEN_PASSWORD + SUBJECT_IS_LIST + __X_BEENTHERE + KNOWN_MAILING_LIST) > 1))
 
 ##############################################################################
 
@@ -133,6 +133,7 @@ describe T_CHECK_EMAIL_ISFREE Body contains an e-mail address listed by Email::I
 # Dec 20 2002 jm: my FPs *do not* contain this pattern! does.. not.. compute...
 # ok, it's the implicit addition of "mailto:" for mail-addr lookalikes, which
 # also includes user@host CVSroot specs etc.  Let's try using a rawbody pattern.
+# 12/22 - tvd - most people don't have any hits, only jm (.33%) and quinlan (.02%)
 rawbody T_NUMERIC_MAILTO_ADDR	/\bmailto:[^\s\@]{1,20}\@\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/is
 
 #bug 652
@@ -277,27 +278,32 @@ header T_SUSPECT_RECIPIENTS_3	eval:check_for_suspect_recipients('4','5')
 header T_SUSPECT_RECIPIENTS_4	eval:check_for_suspect_recipients('5','6')
 header T_SUSPECT_RECIPIENTS_5	eval:check_for_suspect_recipients('6','undef')
 
-# bug 727
-# also suggested was 'be your own boss' which is already in as BE_BOSS
-body T_FIRE_BOSS         /\bfire your boss\b/i
-
 # bug 710
+# 12/23 - tvd - works well for quinlan, not for anyone else
+# quinlan      0.182   0.4683   0.0000    1.000   0.93    0.01  T_WINNER
+# rODbegbie    0.159   0.1303   0.1699    0.434   0.08    0.01  T_WINNER
+# theo         0.080   0.1628   0.0270    0.858   0.58    0.01  T_WINNER
 body T_WINNER                     /\b(?:you(?:'| a)re a|lucky|big|next) winners?\b/i
 describe T_WINNER                 Claims you are a winner
 
+# 12/23 - tvd - works well for quinlan, not for anyone else
+# quinlan      0.389   0.9978   0.0000    1.000   0.93    0.01  T_YOU_WON
+# rODbegbie    0.242   0.5701   0.1111    0.837   0.56    0.01  T_YOU_WON
+# theo         0.361   0.5168   0.2614    0.664   0.27    0.01  T_YOU_WON
 body T_YOU_WON                    /\byou(?:'ve| have)? won(?!'|\w)/i
 describe T_YOU_WON                You have WON!
 
+# 12/23 - tvd - works well for quinlan, not for anyone else
+# quinlan      1.341   3.1155   0.2080    0.937   0.77    0.01  T_WIN
+# rODbegbie    4.160   0.8633   5.4819    0.136   0.00    0.01  T_WIN
+# theo         1.140   1.2601   1.0638    0.542   0.15    0.01  T_WIN
 body T_WIN		/\b(?:register|chances?|opportunity|enter|entered|players?|more|could)\b.{0,9}\bwin\b|win.{0,9}(?:!|up to|cash|big|car|now|free|\$[0-9,\.\$]+)\b/i
 describe T_WIN			Who really wins?
 
+# 12/23 - tvd - works well for quinlan, not for anyone else
+# quinlan      0.135   0.3258   0.0130    0.962   0.82    0.01  T_WINNING
+# rODbegbie    0.270   0.2443   0.2810    0.465   0.10    0.01  T_WINNING
+# theo         0.234   0.3752   0.1442    0.722   0.35    0.01  T_WINNING
 body T_WINNING			/\bwinning (?:strategies|entry|cash|numbers?|free|!)\b|(?-i:WINNING)|award.winning|\bclaim your winnings/i
 describe T_WINNING		Winning Stuff
 
-# bug 764
-# similar to SAVE_UP_TO and SAVE_MONEY, but a little more generic
-body	T_UP_TO_OR_MORES		/up to \S+( \S+)? or more/i
-describe T_UP_TO_OR_MORES		Has generic 'up to X or more' noise
-
-body	T_VERB_UP_TO_OR_MORES	/(add|lose|make|save) up to \S+( \S+)? or more/i
-describe T_VERB_UP_TO_OR_MORES	Has '(add|lose|make|save) up to X or more' noise
