@@ -110,6 +110,7 @@ package Mail::SpamAssassin::Plugin::URIDNSBL;
 *dbg=\&Mail::SpamAssassin::Plugin::dbg;
 
 use Mail::SpamAssassin::Plugin;
+use Mail::SpamAssassin::Constants qw(:ip);
 use Mail::SpamAssassin::Util;
 use strict;
 use warnings;
@@ -460,28 +461,46 @@ sub query_domain {
   #return;
 
   $dom = lc $dom;
-  return if $scanstate->{seen_domain}->{$dom}; $scanstate->{seen_domain}->{$dom}=1;
-  $self->log_dns_result ("querying domain $dom");
+  return if $scanstate->{seen_domain}->{$dom};
+  $scanstate->{seen_domain}->{$dom} = 1;
+  $self->log_dns_result("querying domain $dom");
 
   my $obj = {
     querystart => time,
     dom => $dom
   };
 
+  my $single_dnsbl = 0;
   if ($dom =~ /^\d+\.\d+\.\d+\.\d+$/) { 
-    $self->lookup_dnsbl_for_ip ($scanstate, $obj, $dom);
+    my $IPV4_ADDRESS = IPV4_ADDRESS;
+    my $IP_PRIVATE = IP_PRIVATE;
+    # only look up the IP if it is public and valid
+    if ($dom =~ /^$IPV4_ADDRESS$/ && $dom !~ /^$IP_PRIVATE$/) {
+      $self->lookup_dnsbl_for_ip($scanstate, $obj, $dom);
+      # and check the IP in RHSBLs too
+      if ($dom =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/) {
+	$dom = "$4.$3.$2.$1";
+	$single_dnsbl = 1;
+      }
+    }
   }
   else {
+    $single_dnsbl = 1;
+  }
+
+  if ($single_dnsbl) {
     # look up the domain in the RHSBL subset
     my $cf = $scanstate->{active_rules_rhsbl};
     foreach my $rulename (keys %{$cf}) {
       my $rulecf = $scanstate->{scanner}->{conf}->{uridnsbls}->{$rulename};
-      $self->lookup_single_dnsbl ($scanstate, $obj, $rulename,
-                          $dom, $rulecf->{zone}, $rulecf->{type});
+      $self->lookup_single_dnsbl($scanstate, $obj, $rulename,
+				 $dom, $rulecf->{zone}, $rulecf->{type});
     }
 
     # perform NS, A lookups to look up the domain in the non-RHSBL subset
-    $self->lookup_domain_ns ($scanstate, $obj, $dom);
+    if ($dom !~ /^\d+\.\d+\.\d+\.\d+$/) {
+      $self->lookup_domain_ns($scanstate, $obj, $dom);
+    }
   }
 }
 
@@ -506,13 +525,27 @@ sub complete_ns_lookup {
   $self->close_ent_socket ($ent);
   my @answer = $packet->answer;
 
+  my $IPV4_ADDRESS = IPV4_ADDRESS;
+  my $IP_PRIVATE = IP_PRIVATE;
+
   foreach my $rr (@answer) {
     my $str = $rr->string;
     next unless (defined($str) && defined($dom));
     $self->log_dns_result ("NSs for $dom: $str");
 
     if ($str =~ /IN\s+NS\s+(\S+)/) {
-      $self->lookup_a_record($scanstate, $ent->{obj}, $1);
+      my $nsmatch = $1;
+
+      if ($nsmatch =~ /^\d+\.\d+\.\d+\.\d+\.?$/) {
+	$nsmatch =~ s/\.$//;
+	# only look up the IP if it is public and valid
+	if ($nsmatch =~ /^$IPV4_ADDRESS$/ && $nsmatch !~ /^$IP_PRIVATE$/) {
+	  $self->lookup_dnsbl_for_ip($scanstate, $ent->{obj}, $nsmatch);
+	}
+      }
+      else {
+	$self->lookup_a_record($scanstate, $ent->{obj}, $nsmatch);
+      }
     }
   }
 }
@@ -559,8 +592,8 @@ sub lookup_dnsbl_for_ip {
   my $cf = $scanstate->{active_rules_revipbl};
   foreach my $rulename (keys %{$cf}) {
     my $rulecf = $scanstate->{scanner}->{conf}->{uridnsbls}->{$rulename};
-    $self->lookup_single_dnsbl ($scanstate, $obj, $rulename,
-			$revip, $rulecf->{zone}, $rulecf->{type});
+    $self->lookup_single_dnsbl($scanstate, $obj, $rulename,
+			       $revip, $rulecf->{zone}, $rulecf->{type});
   }
 }
 
