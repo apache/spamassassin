@@ -53,6 +53,7 @@ package Mail::SpamAssassin;
 # We do our best to make SA run with any Perl downto 5.005. You might want to
 # read <http://www.perldoc.com/perl5.8.0/pod/perl56delta.html> if you plan to 
 # hack SA and are used to Perl 5.6+.
+# (jm: Matt's just saying that 'cos they use 5.005 in MessageLabs ;)
 use 5.005;
 
 use Mail::SpamAssassin::Conf;
@@ -87,7 +88,7 @@ $TIMELOG->{dummy}=0;
 
 $VERSION = "2.40";
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.115.2.3 2002/08/27 23:54:52 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.115.2.4 2002/08/28 22:46:27 jmason Exp $'))[2 .. 5, 8]));
 # If you hacked up your SA, add a token to identify it here. Eg.: I use "mss<number>",
 # <number> increasing with every hack. Deersoft might want to use "pro" :o)
 # "cvs" is added automatically if this file is tagged as 'Exp'erimental.
@@ -98,15 +99,17 @@ sub Version { join('-', $VERSION, @EXTRA_VERSION) }
 
 $HOME_URL = "http://spamassassin.org/";
 
-#__installsitelib__/spamassassin.cf
-#__installvendorlib__/spamassassin.cf
+# note that the CWD takes priority.  This is required in case a user
+# is testing a new version of SpamAssassin on a machine with an older
+# version installed.  Unless you can come up with a fix for this that
+# allows "make test" to work, don't change this.
 @default_rules_path = (
+	'./rules',
+	'../rules',
         '__def_rules_dir__',
         '__prefix__/share/spamassassin',
         '/usr/local/share/spamassassin',
   	'/usr/share/spamassassin',
-	'./rules',
-	'../rules',
 );
 
 # first 3 are BSDish, latter 2 Linuxish
