@@ -320,7 +320,7 @@ Options:
  -d, --remove-markup               Remove spam reports from a message
  -C file, --config-file=file       Path to standard configuration dir
  -p prefs, --prefs-file=file       Set user preferences file
- -x, --nouser-config               Disable user config files
+ -x, --nocreate-prefs              Don't create user preferences file
  -e, --exit-code                   Exit with a non-zero exit code if the
                                    tested message was spam
  -l filename, --log-to-mbox=file   Log messages to a mbox file
@@ -500,9 +500,9 @@ hit, use:
 
         spamassassin -D rulesrun=255
 
-=item B<-x>, B<--nouser-config>
+=item B<-x>, B<--nocreate-prefs>
 
-Disable per-user configuration files.
+Disable creation of user preferences file.
 
 =item B<-M> I<factory>, B<--whitelist-factory>=I<factory>
 
