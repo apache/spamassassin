@@ -102,8 +102,7 @@ the below lines.  If you already have a .procmailrc file, add the lines
 to the top of your .procmailrc file:
 
 :0fw
-| /home/user/bin/SpamAssassin/spamassassin -P -c
-/home/user/bin/SpamAssassin/rules
+| /home/user/bin/SpamAssassin/spamassassin -P -c /home/user/bin/SpamAssassin/rules
 
   The above line filters all incoming mail through SpamAssassin and tags
 probable spam with a unique header.  If you would prefer to have spam
