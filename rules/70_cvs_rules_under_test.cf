@@ -21,3 +21,29 @@ meta T_VALID_EARTHLINK     (__X_EM_VERSION && __X_EM_REGISTRATION && __X_MAILER_
 score T_VALID_EARTHLINK -1.0
 tflags T_VALID_EARTHLINK nice
 
+# new MIME_BOUND tests
+#
+# results for quinlan:
+#  1.350    4.145    0.000    1.00    0.87    1.00  T_MIME_BOUND_NEXTPART
+#  0.911    2.799    0.000    1.00    0.84    1.00  T_MIME_BOUND_DASH_DIGIT
+#  0.131    0.404    0.000    1.00    0.71    1.00  T_MIME_BOUND_MANY_HEX
+#  0.123    0.377    0.000    1.00    0.71    1.00  T_MIME_BOUND_TEP
+#  0.096    0.296    0.000    1.00    0.69    1.00  T_MIME_BOUND_MULTIPART
+
+# This may need tweaking if new NextPart formats appear.
+header __NEXTPART_ALL		Content-Type =~ /NextPart/
+header __NEXTPART_NORMAL	Content-Type =~ /-{3}[-_]=_NextPart_[\dA-F]{3}(_[\dA-F]{3,8})?_[\dA-F]{8}.[\dA-F]{8}\b/
+meta T_MIME_BOUND_NEXTPART	(__NEXTPART_ALL && !__NEXTPART_NORMAL)
+score T_MIME_BOUND_NEXTPART	1.0
+
+header T_MIME_BOUND_DASH_DIGIT	Content-Type =~ /boundary="_-{10}=_\d{19,22}"/
+score T_MIME_BOUND_DASH_DIGIT	1.0
+
+header T_MIME_BOUND_MANY_HEX	Content-Type =~ /boundary="[\da-f]{8}(?:-[\da-f]{4}){3}-[\da-f]{12}"/
+score T_MIME_BOUND_MANY_HEX	1.0
+
+header T_MIME_BOUND_TEP		Content-Type =~ /boundary="TEP-\d{9,10}\.\d{10}\.\d{10}"/
+score T_MIME_BOUND_TEP		1.0
+
+header T_MIME_BOUND_MULTIPART	Content-Type =~ /Multipart.?Boundary/
+score T_MIME_BOUND_MULTIPART	1.0
