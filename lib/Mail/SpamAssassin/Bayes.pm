@@ -199,6 +199,7 @@ sub new {
   my $self = {
     'main'              => $main,
     'log_raw_counts'	=> 0,
+    'conf'		=> $main->{conf},
 
     # Off. See comment above cached_probs_get().
     #'cached_probs'	=> { },
@@ -217,7 +218,7 @@ sub new {
 
 sub finish {
   my $self = shift;
-  if (!$self->{conf}->{use_bayes}) { return; }
+  if (!$self->{main}->{conf}->{use_bayes}) { return; }
   $self->{store}->untie_db();
 }
 
