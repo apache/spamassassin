@@ -116,6 +116,23 @@ meta T_FORGED_MUA_MOZILLA	(__MOZILLA_MUA && !__UNUSABLE_MSGID && !__MOZILLA_MSGI
 describe T_FORGED_MUA_MOZILLA	Forged mail pretending to be from Mozilla
 score T_FORGED_MUA_MOZILLA	1.0
 
+# Hmm... maybe possible to use a variant on the check_outlook_timestamp_token
+# test for the time component of the MOZILLA rules. - Allen
+
+header __MOZILLA_MSGID2         MESSAGEID =~ /^<[A-F\d]{8}\.[A-F\d]{4,8}\@\S+>$/m
+meta T_FORGED_MUA_MOZILLA2      (__MOZILLA_MUA && !__UNUSABLE_MSGID && !__MOZILLA_MSGID2)
+describe T_FORGED_MUA_MOZILLA2  Forged mail pretending to be from Mozilla (2)
+score T_FORGED_MUA_MOZILLA2     1.0
+
+header __MOZILLA_MSGID3         MESSAGEID =~ /^<[A-F\d]{8}\.[A-F1-9][A-F\d]{0,7}\@\S+>$/m
+meta T_FORGED_MUA_MOZILLA3      (__MOZILLA_MUA && !__UNUSABLE_MSGID && !__MOZILLA_MSGID3)
+describe T_FORGED_MUA_MOZILLA3  Forged mail pretending to be from Mozilla (3)
+score T_FORGED_MUA_MOZILLA3     1.0
+
+# note: T_FORGED_MUA_MOZILLA4 now obsolete since I put the CWT/DCE thing into
+# check_messageid_not_usable()
+
+
 # Internet Mail Service
 # Dec 10 2002 jm: dan, ditto here
 header __IMS_MUA		X-Mailer =~ /Internet Mail Service/
@@ -149,6 +166,26 @@ header __EUDORA_MSGID		MESSAGEID =~ /^<(?:\d\d?\.){4,5}\d{14}\.[a-f0-9]{8}\@\S+>
 meta T_FORGED_MUA_EUDORA	(__EUDORA_MUA && !__EUDORA_MSGID && !__UNUSABLE_MSGID && !__MAC_EUDORA_MUA)
 describe T_FORGED_MUA_EUDORA	Forged mail pretending to be from Eudora
 score T_FORGED_MUA_EUDORA	1.0
+
+
+
+meta T_FORGED_MUA_EUDORA2       (__EUDORA_MUA && !__EUDORA_MSGID && !__UNUSABLE_MSGID && !__MAC_EUDORA_MUA && !X_LOOP && !X_MAILING_LIST)
+describe T_FORGED_MUA_EUDORA2   Forged mail pretending to be from Eudora (2)
+score T_FORGED_MUA_EUDORA2      1.0
+
+header __OLD_EUDORA1            X-Mailer =~ /Eudora\s+Pro\s+Version\s+[1-4]\.\b/
+header __OLD_EUDORA2            X-Mailer =~ /\bEudora\s+(?:(?:Pro|Light)\s+)?Version\s+[1-4]\.\b/
+header __QUALCOMM               X-Mailer =~ /\bQUALCOMM\b/
+
+meta T_FORGED_MUA_EUDORA3       (__EUDORA_MUA && !__EUDORA_MSGID && !__UNUSABLE_MSGID && !__MAC_EUDORA_MUA && !__OLD_EUDORA1 && !(__OLD_EUDORA2 && !__QUALCOMM))
+describe T_FORGED_MUA_EUDORA3   Forged mail pretending to be from Eudora (3)
+score T_FORGED_MUA_EUDORA3      1.0
+
+meta T_FORGED_MUA_EUDORA4       (__EUDORA_MUA && !__EUDORA_MSGID && !__UNUSABLE_MSGID && !X_LOOP && !_X_MAILING_LIST && !__MAC_EUDORA_MUA && !__OLD_EUDORA1 && !(__OLD_EUDORA2 && !__QUALCOMM))
+describe T_FORGED_MUA_EUDORA4   Forged mail pretending to be from Eudora (4)
+score T_FORGED_MUA_EUDORA4      1.0
+
+
 
 ########################################################################
 
