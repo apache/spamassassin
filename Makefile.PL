@@ -115,7 +115,7 @@ package MY;
 sub MY::libscan {
   my($self,$path) = @_;
 
-  return '' if ($path !~ /\.pm$/);
+  return '' if ($path !~ /\.pm$/ && $path !~ /spamc/);
   return $path;
 }
 
