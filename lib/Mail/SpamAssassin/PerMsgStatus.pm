@@ -1024,7 +1024,7 @@ sub do_head_tests {
 
     # dbg ("header regexp test '.$rulename.'");
     $evalstr .= '
-      return if $self->{stop_at_threshold} && $self->is_spam;
+      return if $self->{stop_at_threshold} && $self->{is_spam};
       if ($self->{conf}->{scores}->{q#'.$rulename.'#}) {
         # warn("testing: ", $self->get(q#'.$hdrname.'#,q#'.$def.'#), " vs '.$rulename.' ($self->{conf}->{scores}->{q{'.$rulename.'}})\n");
         if ($self->get(q#'.$hdrname.'#, q#'.$def.'#) '.$testtype.'~ '.$pat.') {
@@ -1268,7 +1268,7 @@ sub do_body_uri_tests {
   foreach $rulename (@negative_tests, @positive_tests) {
     $pat = $self->{conf}->{uri_tests}->{$rulename};
     $evalstr .= '
-      return if $self->{stop_at_threshold} && $self->is_spam;
+      return if $self->{stop_at_threshold} && $self->{is_spam};
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
         if ('.$pat.') { $self->got_uri_pattern_hit (q{'.$rulename.'}); }
       }
@@ -1337,7 +1337,7 @@ sub do_rawbody_tests {
   foreach $rulename (@negative_tests, @positive_tests) {
     $pat = $self->{conf}->{rawbody_tests}->{$rulename};
     $evalstr .= '
-      return if $self->{stop_at_threshold} && $self->is_spam;
+      return if $self->{stop_at_threshold} && $self->{is_spam};
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
         if ('.$pat.') { $self->got_body_pattern_hit (q{'.$rulename.'}); }
       }
@@ -1406,7 +1406,7 @@ sub do_full_tests {
   foreach $rulename (@negative_tests, @positive_tests) {
     $pat = $self->{conf}->{full_tests}->{$rulename};
     $evalstr .= '
-      return if $self->{stop_at_threshold} && $self->is_spam;
+      return if $self->{stop_at_threshold} && $self->{is_spam};
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
 	if ($$fullmsgref =~ '.$pat.') {
 	  $self->got_body_pattern_hit (q{'.$rulename.'});
@@ -1513,7 +1513,7 @@ sub run_eval_tests {
 
   foreach my $rulename (sort keys %{$evalhash}) {
     next unless ($self->{conf}->{scores}->{$rulename});
-    return if $self->{stop_at_threshold} && $self->is_spam;
+    return if $self->{stop_at_threshold} && $self->{is_spam};
     my $evalsub = $evalhash->{$rulename};
 
     my $result;
