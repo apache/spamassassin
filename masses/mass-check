@@ -31,6 +31,7 @@ use vars qw($opt_c $opt_f $opt_fork $opt_all $opt_head $opt_mh $opt_ms $opt_mn
 use FindBin;
 use lib "$FindBin::Bin/lib";
 use lib "$FindBin::Bin/../lib";
+eval "use bytes";
 use Mail::SpamAssassin::ArchiveIterator;
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::NoMailAudit;
