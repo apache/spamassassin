@@ -744,3 +744,6 @@ header __CT_TEXT_PLAIN          Content-Type =~ /^text\/plain\b/i
 meta MIME_HEADER_CTYPE_ONLY     (!__CD && !__CTE && __CT && !__MIME_VERSION && !__CT_TEXT_PLAIN)
 describe MIME_HEADER_CTYPE_ONLY 'Content-Type' found without required MIME headers
 
+header WITH_LC_SMTP		Received =~ /\swith\ssmtp;\s/
+describe WITH_LC_SMTP		Received line contains spam-sign (lowercase smtp)
+
