@@ -19,6 +19,6 @@ q{ From: does not include a real name}, 'noreal',
 
 );
 
-ok (sdrun ("-p 18972", "-p 18972 < data/spam/001", \&patterns_run_cb));
+ok (sdrun ("-L -p 18972", "-p 18972 < data/spam/001", \&patterns_run_cb));
 ok_all_patterns();
 

@@ -106,7 +106,15 @@ sub sdrun {
 
   start_spamd ($sdargs);
 
-  my $spamcargs = "$spamc -p $spamdport $args";
+  my $spamcargs;
+  if($args !~ /(?:-p\s*[0-9]+|-o)/)
+  {
+    $spamcargs = "$spamc -p $spamdport $args";
+  }
+  else
+  {
+    $spamcargs = "$spamc $args";
+  }
   $spamcargs =~ s!/!\\!g if ($^O =~ /^MS(DOS|Win)/i);
 
   print ("\t$spamcargs\n");
@@ -128,7 +136,15 @@ sub start_spamd {
     $sdargs = $ENV{'SD_ARGS'} . " ". $sdargs;
   }
 
-  my $spamdargs = "$spamd -D -p $spamdport $sdargs";
+  my $spamdargs;
+  if($sdargs !~ /(?:-p\s*[0-9]+|-o)/)
+  {
+    $spamdargs = "$spamd -D -p $spamdport $sdargs";
+  }
+  else
+  {
+    $spamdargs = "$spamd -D $sdargs";
+  }
   $spamdargs =~ s!/!\\!g if ($^O =~ /^MS(DOS|Win)/i);
 
   print ("\t$spamdargs > log/$testname.spamd 2>&1 &\n");
@@ -159,7 +175,7 @@ sub start_spamd {
 }
 
 sub stop_spamd {
-  kill (15, $spamd_pid);
+  print ("Killed ",kill (15, $spamd_pid)," spamd instances\n");
 }
 
 # ---------------------------------------------------------------------------
