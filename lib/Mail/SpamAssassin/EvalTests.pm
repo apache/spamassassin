@@ -2200,14 +2200,14 @@ sub check_for_uppercase {
 
 # UNWANTED_LANGUAGE_BODY
 sub check_language {
-  my ($self, $body) = @_;
+  my ($self) = @_;
   $self->_check_language();
   return $self->{undesired_language_body};
 }
 
 # UNWANTED_LANGUAGE_BODY
 sub _check_language {
-  my ($self, $body) = @_;
+  my ($self) = @_;
 
   if (defined $self->{undesired_language_body}) {
     return $self->{undesired_language_body};
