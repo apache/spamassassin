@@ -127,7 +127,7 @@ mkdir -p %{buildroot}/etc/mail/spamassassin
 %attr(755,root,root) %{_bindir}/*
 %config(noreplace) %attr(755,root,root) %{initdir}/spamassassin
 %config(noreplace) %{_sysconfdir}/mail/spamassassin
-%config(noreplace) %{_datadir}/spamassassin
+%{_datadir}/spamassassin
 %{_mandir}/man1/*
 
 %files tools
