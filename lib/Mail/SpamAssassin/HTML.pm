@@ -140,13 +140,14 @@ sub html_end {
   }
 
   # final result arrays
-  $self->put_results(comment => $self->{comment});
-  $self->put_results(title => $self->{title});
   $self->put_results(anchor => $self->{anchor});
+  $self->put_results(comment => $self->{comment});
+  $self->put_results(script => $self->{script});
+  $self->put_results(title => $self->{title});
+  $self->put_results(uri => $self->{uri});
 
   # final result hashes
   $self->put_results(inside => $self->{inside});
-  $self->put_results(uri => $self->{uri});
 
   # end-of-document result values that don't require looking at the text
   if (exists $self->{backhair}) {
@@ -707,6 +708,7 @@ sub html_text {
   # text that is not part of body
   if (exists $self->{inside}{script} && $self->{inside}{script} > 0)
   {
+    push @{ $self->{script} }, $text;
     if ($text =~ /\bon(?:blur|contextmenu|focus|load|resize|submit|unload)\b/i)
     {
       $self->put_results(html_event_unsafe => 1);
