@@ -2954,17 +2954,19 @@ sub check_access_database {
     foreach ( @lookfor ) {
       next if ( $cache{$_}++ );
       dbg("accessdb: Looking for $_");
-      my $result = $access{$_} || next;
 
-      my($type) = split(/:/,$result);
+      # Some systems put a null at the end of the key, most don't...
+      my $result = $access{$_} || $access{"$_\000"} || next;
+
+      my($type) = split(/\W/,$result);
       if ( exists $ok{$type} ) {
-	dbg("accessdb hit OK: $type, $_");
+	dbg("accessdb: hit OK: $type, $_");
         $retval = 0;
 	last;
       }
-      if ( exists $bad{$type} ) {
+      if (exists $bad{$type} || $type =~ /^\d+$/) {
         $retval = 1;
-	dbg("accessdb hit not-OK: $type, $_");
+	dbg("accessdb: hit not-OK: $type, $_");
       }
     }
 
