@@ -494,17 +494,19 @@ sub add_touches_to_journal {
 
   # use append mode, write atomically, then close, so simultaneous updates are
   # not lost
-  my $umask = 077;
   if (!open (OUT, ">>".$path)) {
     warn "cannot write to $path, Bayes db update ignored\n";
-    umask $umask;
     return;
   }
-  umask $umask;
+
+  my $conf = $self->{bayes}->{main}->{conf};
+  chmod(oct ($conf->{bayes_file_mode}) & 0666, $path) || warn "cannot set permissions on $path\n";
+
   print OUT $self->{string_to_journal};
   if (!close OUT) {
     warn "cannot write to $path, Bayes db update ignored\n";
   }
+
   $self->{string_to_journal} = '';
 }
 
@@ -662,6 +664,11 @@ sub scan_count_increment {
   # it ;)
 
   open (OUT, ">>".$path) or warn "cannot append to $path\n";
+
+  # The file should have the same file mode as the other bayes files...
+  my $conf = $self->{bayes}->{main}->{conf};
+  chmod(oct ($conf->{bayes_file_mode}) & 0666, $path) || warn "cannot set permissions on $path\n";
+
   print OUT "."; close OUT or warn "cannot append to $path\n";
 
   # note the tiny race cond between close above, and this -s.  Again, if we
