@@ -648,11 +648,12 @@ _spamc_read_full_line(struct message *m, int flags, SSL * ssl, int sock,
 		      char *buf, size_t *lenp, size_t bufsiz)
 {
     int failureval;
-    size_t bytesread = 0;
+    int bytesread = 0;
     size_t len;
 
     UNUSED_VARIABLE(m);
 
+    *lenp = 0;
     /* Now, read from spamd */
     for (len = 0; len < bufsiz - 1; len++) {
 	if (flags & SPAMC_USE_SSL) {
@@ -660,6 +661,11 @@ _spamc_read_full_line(struct message *m, int flags, SSL * ssl, int sock,
 	}
 	else {
 	    bytesread = fd_timeout_read(sock, 0, buf + len, 1);
+	}
+
+	if (bytesread <= 0) {
+	    failureval = EX_IOERR;
+	    goto failure;
 	}
 
 	if (buf[len] == '\n') {
@@ -670,11 +676,6 @@ _spamc_read_full_line(struct message *m, int flags, SSL * ssl, int sock,
 	    }
 	    *lenp = len;
 	    return EX_OK;
-	}
-
-	if (bytesread <= 0) {
-	    failureval = EX_IOERR;
-	    goto failure;
 	}
     }
 

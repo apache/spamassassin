@@ -35,7 +35,6 @@ typedef int SSL_METHOD;
 
 #ifdef _WIN32
 #include <winsock.h>
-typedef int ssize_t;
 //
 // BSD-compatible socket error codes for Win32
 //
@@ -86,7 +85,7 @@ typedef int ssize_t;
 
 #endif
 
-ssize_t fd_timeout_read(int fd, char fdflag, void *, size_t);
+int fd_timeout_read(int fd, char fdflag, void *, size_t);
 int ssl_timeout_read(SSL * ssl, void *, int);
 
 /* these are fd-only, no SSL support */

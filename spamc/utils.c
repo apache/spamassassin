@@ -31,7 +31,6 @@
 #pragma warning( disable : 4115 4127 4514 )
 #endif
 
-typedef int ssize_t;
 #include <io.h>
 #endif
 #include <errno.h>
@@ -68,9 +67,9 @@ static void catch_alrm(int x)
 }
 #endif
 
-ssize_t fd_timeout_read(int fd, char fdflag, void *buf, size_t nbytes)
+int fd_timeout_read(int fd, char fdflag, void *buf, size_t nbytes)
 {
-    ssize_t nred;
+    int nred;
     int origerr;
 #ifndef _WIN32
     sigfunc *sig;
@@ -83,11 +82,11 @@ ssize_t fd_timeout_read(int fd, char fdflag, void *buf, size_t nbytes)
 
     do {
 	if (fdflag) {
-	    nred = read(fd, buf, nbytes);
+	    nred = (int)read(fd, buf, nbytes);
 	    origerr = errno;
 	}
 	else {
-	    nred = recv(fd, buf, nbytes, 0);
+	    nred = (int)recv(fd, buf, nbytes, 0);
 #ifndef _WIN32
 	    origerr = errno;
 #else
