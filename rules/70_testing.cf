@@ -303,6 +303,12 @@ header T_SUBJ_VICODIN_3		Subject =~ /v.{0,2}i.{0,2}c.{0,3}[0o].{0,2}d.{0,2}i.{0,
 header T_SUBJ_VICODIN_4		Subject =~ /v.{0,2}i.{0,2}c.{0,2}[0o].{0,2}d.{0,2}i.{0,2}n/i
 header T_SUBJ_DRUG_ED_C		Subject =~ /\bc.{0,2}i.{0,2}a.{0,2}l.{0,2}i.{0,2}s\b/i
 header T_SUBJ_DRUG_ED_L		Subject =~ /l.{0,2}e.{0,2}v.{0,2}i.{0,2}t.{0,2}r.{0,2}a/i
+header T_SUBJ_DRUG_ED_R		Subject =~ /regalis/i
+header T_SUBJ_DRUG_ED_R_2	Subject =~ /\bregalis\b/i
+header T_SUBJ_DRUG_ED_R_3	Subject =~ /r.{0,1}e.{0,1}g.{0,1}a.{0,1}l.{0,1}i.{0,1}s/i
+header T_SUBJ_DRUG_ED_R_4	Subject =~ /\br.{0,1}e.{0,1}g.{0,1}a.{0,1}l.{0,1}i.{0,1}s\b/i
+header T_SUBJ_DRUG_ED_R_5	Subject =~ /r.{0,2}e.{0,2}g.{0,2}a.{0,2}l.{0,2}i.{0,2}s/i
+header T_SUBJ_DRUG_ED_R_6	Subject =~ /\br.{0,2}e.{0,2}g.{0,2}a.{0,2}l.{0,2}i.{0,2}s\b/i
 
 # partial messages; currently-theoretical attack
 # unsurprisingly this hits 0/0 right now.  But should we promote it anyway
@@ -688,6 +694,10 @@ describe T_HTML_PLAIN_TEXT      Message is HTML pretending to be plain text
 
 meta     T_TEXT_ONLY            (__MIME_TEXT_ONLY && !HTML_MESSAGE)
 describe T_TEXT_ONLY            Message is plain text only
+
+# bug 2893
+body T_DRUG_ED_CAPS		/(?:\bCIALIS|LEVITRA|VIAGRA|REGALIS)/
+describe T_DRUG_ED_CAPS		Mentions an E.D. drug
 
 # Bug 2168
 header T_BAD_MOZILLA_VERSION    User-Agent =~ /Mozilla\/5\.0\d\d/
