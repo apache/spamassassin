@@ -275,7 +275,7 @@ for ( $waitedpid = 0;
 	    my @msglines = (<STDIN>);
 	    my $actual_length = length (join '', @msglines);
 	    pre_chew_for_mail_audit (\@msglines);
-	    my $mail = Mail::SpamAssassin::MyMailAudit->new ( data => \@m=esglines );
+	    my $mail = Mail::SpamAssassin::MyMailAudit->new ( data => \@msglines );
 
 	    # Check length if we're supposed to
 	    if($expected_length)
@@ -411,14 +411,14 @@ sub create_default_cf_if_needed {
 sub pre_chew_for_mail_audit {
     my ($msglines) = @_;
 
-    my $inhdrs = 1;
-    return map {
-	return unless $inhdrs; /^$/ and $inhdrs = 0;
-
-	/^From / and next;	# may fix the #1 M:A bug ;)
-	s/\r\n/\n/s;		# clean off \r\n's
-	$_;
-    } @{$msglines};
+    my @newhdrs = (); while ($_ = shift (@{$msglines})) {
+      /^From / and next;        # may fix the #1 M:A bug ;)
+      s/\r\n/\n/s;              # clean off \r\n's
+      push (@newhdrs, $_);      
+      /^$/ and last;
+    } 
+    
+    unshift (@{$msglines}, @newhdrs);
 }
 
 =head1 NAME

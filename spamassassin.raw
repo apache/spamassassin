@@ -224,16 +224,14 @@ if ($@) {
 sub pre_chew_for_mail_audit {
     my ($msglines) = @_;
 
-    @newlines = ();
-
-    while ($_ = shift (@{$msglines})) {
+    my @newhdrs = (); while ($_ = shift (@{$msglines})) {
       /^From / and next;	# may fix the #1 M:A bug ;)
-      /^$/ and last;
       s/\r\n/\n/s;		# clean off \r\n's
-      push (@newlines, $_);
+      push (@newhdrs, $_);
+      /^$/ and last;
     }
 
-    @{$msglines} = (@newlines, @{$msglines});
+    unshift (@{$msglines}, @newhdrs);
 }
 
 
