@@ -112,8 +112,9 @@ score T_FORGED_MUA_MOZILLA	1.0
 
 # Outlook
 header __OUTLOOK_MUA		X-Mailer =~ /\bOutlook\b(?! IMO)/
-header __OUTLOOK_MSGID		Message-Id =~ /^<[0-9a-f]{12}\$[0-9a-f]{8}\$[0-9a-f]{8}\@\S+>$/
-meta T_FORGED_MUA_OUTLOOK	(__OUTLOOK_MUA && !__OUTLOOK_MSGID)
+header __OUTLOOK_MSGID_1	Message-Id =~ /^<[0-9a-f]{12}\$[0-9a-f]{8}\$[0-9a-f]{8}\@\S+>$/
+header __OUTLOOK_MSGID_2	Message-Id =~ /^<OE[0-9A-Za-z]{25}\@hotmail\.com>$/
+meta T_FORGED_MUA_OUTLOOK	(__OUTLOOK_MUA && !(__OUTLOOK_MSGID_1 || __OUTLOOK_MSGID_2))
 describe T_FORGED_MUA_OUTLOOK	Forged mail pretending to be from Outlook
 score T_FORGED_MUA_OUTLOOK	1.0
 
