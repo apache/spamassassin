@@ -85,14 +85,14 @@ EOUSAGE
 
 use vars qw{
   $opt_t $opt_c $opt_p $opt_h $opt_V $opt_D $opt_r $opt_P $opt_w $opt_l
-  $opt_d $opt_L $opt_e $opt_W
+  $opt_d $opt_L $opt_e $opt_W $opt_M
 };
 
 eval {
   require Mail::SpamAssassin;
   require Mail::SpamAssassin::MyMailAudit;
 
-  getopts ('tc:p:hVDrPw:l:dLW') or usage();
+  getopts ('tc:p:hVDrPw:l:dLWM:') or usage();
 
   if (defined $opt_h) { usage(); }
   if (defined $opt_V) {
@@ -148,15 +148,29 @@ EOVERSION
 
   # create a factory for the persistent address list.
   # choose one of these implementations!
+  # The -M "Mail::SpamAssassin::ImplClassAddrList" flag can be used
+  # to switch between them.
 
-  # DB-file-based: probably faster:
-  require Mail::SpamAssassin::DBBasedAddrList;
-  my $addrlistfactory = Mail::SpamAssassin::DBBasedAddrList->new();
+  my $addrlistfactory;
+  if (defined $opt_M) {
+    eval '
+      require '.$opt_M.'; $addrlistfactory = '.$opt_M.'->new();
+    ';
+    if ($@) { warn $@; undef $addrlistfactory; }
 
-  # directory-based: may take up more disk space, and be slower, but is
-  # safer in the face of concurrency.
-  # require Mail::SpamAssassin::DirBasedAddrList;
-  # my $addrlistfactory = Mail::SpamAssassin::DirBasedAddrList->new();
+  } else {
+
+    # DB-file-based: probably faster:
+    #
+    require Mail::SpamAssassin::DBBasedAddrList;
+    $addrlistfactory = Mail::SpamAssassin::DBBasedAddrList->new();
+
+    # directory-based: may take up more disk space, and be slower, but is
+    # safer in the face of concurrency.
+    #
+    # require Mail::SpamAssassin::DirBasedAddrList;
+    # $addrlistfactory = Mail::SpamAssassin::DirBasedAddrList->new();
+  }
 
   $spamtest->set_persistent_address_list_factory ($addrlistfactory);
 

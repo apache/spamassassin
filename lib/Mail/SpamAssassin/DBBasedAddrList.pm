@@ -35,12 +35,14 @@ sub new_checker {
     'accum'             => { },
   };
 
-
   if(defined($main->{conf}->{auto_whitelist_path})) # if undef then don't worry -- empty hash!
   {
-      dbg("Tie-ing to DB file in ",$main->{conf}->{auto_whitelist_path});
-      tie %{$self->{accum}},"AnyDBM_File",$main->{conf}->{auto_whitelist_path},O_RDWR|O_CREAT|O_EXCL, oct ($main->{conf}->{auto_whitelist_file_mode})
-	  or die "Cannot open auto_whitelist_path: $!\n";
+      my $path = $main->sed_path ($main->{conf}->{auto_whitelist_path});
+
+      dbg("Tie-ing to DB file in ",$path);
+      tie %{$self->{accum}},"AnyDBM_File",$path, O_RDWR|O_CREAT|O_EXCL,
+		    (oct ($main->{conf}->{auto_whitelist_file_mode}) & 0666)
+	  or die "Cannot open auto_whitelist_path $path: $!\n";
   }
 
    bless ($self, $class);

@@ -26,6 +26,7 @@ sub sa_t_init {
   $spamdport = 48373;		# whatever
 
   $scr_cf_args = "";
+  $scr_test_args = "";
 
   (-f "t/test_dir") && chdir("t");        # run from ..
   rmtree ("log");
@@ -71,19 +72,22 @@ sub sarun {
   rmtree ("log/outputdir.tmp"); # some tests use this
   mkdir ("log/outputdir.tmp", 0755);
 
+  %found = ();
+  %found_anti = ();
+
   if (defined $ENV{'SA_ARGS'}) {
     $args = $ENV{'SA_ARGS'} . " ". $args;
   }
-  $args = $scr_cf_args . " " . $args;
+  $args = "$scr_cf_args $scr_test_args $args";
 
   # added fix for Windows tests from Rudif
   my $scrargs = "$scr $args";
   $scrargs =~ s!/!\\!g if ($^O =~ /^MS(DOS|Win)/i);
   print ("\t$scrargs\n");
-  system ("$scrargs > log/$testname.out");
+  system ("$scrargs > log/$testname.${Test::ntest}");
   $sa_exitcode = ($?>>8);
   if ($sa_exitcode != 0) { return undef; }
-  &checkfile ("$testname.out", $read_sub);
+  &checkfile ("$testname.${Test::ntest}", $read_sub);
   1;
 }
 

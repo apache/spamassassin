@@ -594,6 +594,7 @@ sub expand_name ($) {
 sub sed_path {
   my $self = shift;
   my $path = shift;
+  return undef if (!defined $path);
   $path =~ s/__installsitelib__/$Config{installsitelib}/gs;
   $path =~ s/__installvendorlib__/$Config{installvendorlib}/gs;
   $path =~ s/^\~([^\/]*)/$self->expand_name($1)/es;
