@@ -190,7 +190,7 @@ sub _check_recipients {
   my $previous = '';
   @address = ();
   foreach my $current (@tmp) {
-    next if ($current eq $previous);
+    next if (lc($current) eq lc($previous));
     push(@address, ($previous = $current));
   }
 
