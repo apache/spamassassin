@@ -96,42 +96,47 @@ meta T_MIME_HEADER_CTYPE_ONLY	(!__CD && !__CTE && __CT && !__MIME_VERSION && !__
 # only needed a \b around the shortest X-Mailer regular expressions
 
 # Dec  9 2002 jm: bloody Lyris eats message-ids, hurts the Eudora test
-header __GW_THRU_LYRIS		List-Unsubscribe =~ /<mailto:leave-\S+\@\S+>$/
+# Dec 10 2002 jm: also some ezmlm, I think :(
+header __GW_THRU_REWRITER	List-Unsubscribe =~ /<mailto:(?:leave-\S+|\S+-unsubscribe)\@\S+>$/
 
 # AOL
 header __AOL_MUA		X-Mailer =~ /\bAOL\b/
 header __AOL_MSGID		MESSAGEID =~ /^<[0-9a-f]{1,3}\.[0-9a-f]{6,8}\.[0-9a-f]{8}\@aol.com>$/m
-meta T_FORGED_MUA_AOL		(__AOL_MUA && !__AOL_MSGID)
+meta T_FORGED_MUA_AOL		(__AOL_MUA && !__GW_THRU_REWRITER && !__AOL_MSGID)
 describe T_FORGED_MUA_AOL	Forged mail pretending to be from AOL
 score T_FORGED_MUA_AOL		1.0
 
 # Mozilla
+# Dec 10 2002 jm: dan, you have fps for this, could you check 'em?
 header __MOZILLA_MUA		X-Mailer =~ /\bMozilla\b/
 header __MOZILLA_MSGID		MESSAGEID =~ /^<[A-F\d]{8}\.[A-F\d]{4,8}\@\S+>$/
-meta T_FORGED_MUA_MOZILLA	(__MOZILLA_MUA && !__MOZILLA_MSGID)
+meta T_FORGED_MUA_MOZILLA	(__MOZILLA_MUA && !__GW_THRU_REWRITER && !__MOZILLA_MSGID)
 describe T_FORGED_MUA_MOZILLA	Forged mail pretending to be from Mozilla
 score T_FORGED_MUA_MOZILLA	1.0
 
 # Internet Mail Service
+# Dec 10 2002 jm: dan, ditto here
 header __IMS_MUA		X-Mailer =~ /Internet Mail Service/
 header __IMS_MSGID		MESSAGEID =~ /^<[A-F\d]{36,40}\@\S+>$/m
-meta T_FORGED_MUA_IMS		(__IMS_MUA && !__IMS_MSGID)
+meta T_FORGED_MUA_IMS		(__IMS_MUA && !__GW_THRU_REWRITER && !__IMS_MSGID)
 describe T_FORGED_MUA_IMS	Forged mail pretending to be from IMS
 score T_FORGED_MUA_IMS		1.0
 
 # Outlook
 # Note: this uses __IMS_MSGID from above
+# Dec 10 2002 jm: ready to go, once IMS fps are fixed and we can move
+# the dependency
 header __OUTLOOK_MUA		X-Mailer =~ /\bOutlook\b(?! IMO| Express Mac)/
 header __OUTLOOK_MSGID_1	MESSAGEID =~ /^<[0-9a-f]{12}\$[0-9a-f]{8}\$[0-9a-f]{8}\@\S+>$/m
 header __OUTLOOK_MSGID_2	MESSAGEID =~ /^<(?:OE[0-9A-Za-z]{25}|DAV[0-9A-Za-z]{24})\@hotmail\.com>$/m
-meta T_FORGED_MUA_OUTLOOK	(__OUTLOOK_MUA && !(__OUTLOOK_MSGID_1 || __OUTLOOK_MSGID_2 || __IMS_MSGID))
+meta T_FORGED_MUA_OUTLOOK	(__OUTLOOK_MUA && !__GW_THRU_REWRITER && !(__OUTLOOK_MSGID_1 || __OUTLOOK_MSGID_2 || __IMS_MSGID))
 describe T_FORGED_MUA_OUTLOOK	Forged mail pretending to be from Outlook
 score T_FORGED_MUA_OUTLOOK	1.0
 
 # Outlook IMO (Internet Mail Only)
 header __OIMO_MUA		X-Mailer =~ /Outlook IMO/
 header __OIMO_MSGID		MESSAGEID =~ /^<[A-P]{26}A[AB]\.[-_\w.]+\@\S+>$/m
-meta T_FORGED_MUA_OIMO		(__OIMO_MUA && !__OIMO_MSGID && !__GW_THRU_LYRIS)
+meta T_FORGED_MUA_OIMO		(__OIMO_MUA && !__OIMO_MSGID && !__GW_THRU_REWRITER)
 describe T_FORGED_MUA_OIMO	Forged mail pretending to be from Outlook IMO
 score T_FORGED_MUA_OIMO		1.0
 
@@ -139,7 +144,7 @@ score T_FORGED_MUA_OIMO		1.0
 header __EUDORA_MUA		X-Mailer =~ /\b(?:QUALCOMM|Eudora)\b/
 header __MAC_EUDORA_MUA		X-Mailer =~ /Eudora for Macintosh/
 header __EUDORA_MSGID		MESSAGEID =~ /^<(?:\d\d?\.){4,5}\d{14}\.[a-f0-9]{8}\@\S+>$/m
-meta T_FORGED_MUA_EUDORA	(__EUDORA_MUA && !__EUDORA_MSGID && !__GW_THRU_LYRIS && !__MAC_EUDORA_MUA)
+meta T_FORGED_MUA_EUDORA	(__EUDORA_MUA && !__EUDORA_MSGID && !__GW_THRU_REWRITER && !__MAC_EUDORA_MUA)
 describe T_FORGED_MUA_EUDORA	Forged mail pretending to be from Eudora
 score T_FORGED_MUA_EUDORA	1.0
 
@@ -418,21 +423,6 @@ meta T_HTML_50_70_IMGS3         ((HTML_50_60 || HTML_60_70) && __T_HTML_NUM_IMGS
 
 ####################################################################
 
-# quinlan: I think we should promote T_HTML_BIG_FONT_B.  Not the others.
-#
-#OVERALL%   SPAM% NONSPAM%     S/O    RANK   SCORE  NAME
-#  24928    19300     5628    0.774   0.00    0.00  (all messages)
-#100.000  77.4230  22.5770    0.774   0.00    0.00  (all messages as %)
-# 33.950  36.8797  23.8806    0.607   0.26    0.01  T_HTML_TAG_EXISTS_CENTER
-#  3.868   4.9111   0.2843    0.945   0.81    0.01  T_HTML_BIG_FONT_B
-#  8.425   6.9892  13.3618    0.343   0.05    0.01  T_HTML_FONT_SIZE_PX
-#  5.562   6.1673   3.4826    0.639   0.26    0.01  T_HTML_STYLE_LINE_HEIGHT
-#
-body T_HTML_TAG_EXISTS_CENTER	eval:html_tag_exists('center')
-body T_HTML_BIG_FONT_B		eval:html_test('big_font_B')
-body T_HTML_FONT_SIZE_PX	eval:html_test('font_px')
-body T_HTML_STYLE_LINE_HEIGHT	eval:html_test('line_height')
-
 # quinlan: I think we could promote 3 and above.  A numeric function
 # test might work well too.  Also worth some further experimentation:
 # maybe also try adding colors and other attributes into the count.
@@ -466,6 +456,8 @@ body T_HTML_SHOUTING9            eval:html_range('max_shouting','8')
 # 0 hits on all corpora!  Is this in a MIME header or something?
 # Dec  9 2002 quinlan:
 # trying it as rawbody instead of body
+# Dec 10 2002 jm:
+# still nothing for some reason.  wierd
 rawbody T_HTML_MAIL_ONLY             /HTML only email, sorry/i
 
 # actually, this looks really good!  Dec  6 2002 jm: except for rod's
@@ -619,14 +611,6 @@ body T_IMAGE_AREA_RATIO_50	eval:image_area_ratio('0.0045','0.0050')
 header   T_SENDER_NO_REVERSE    eval:check_for_sender_no_reverse()
 describe T_SENDER_NO_REVERSE    No reverse lookup for sender's IP
 
-# Nov 12 2002 jm: a test to catch spammers who HELO as a host at a big site
-# (aol, hotmail etc.) but whose rDNS lists them at some dialup ISP or another
-# ;)
-# Dec  6 2002 jm: updated to avoid quite a few FPs
-# Dec  9 2002 jm: Dan, you have 2 or 3 hams hitting this. could you check?
-header T_RCVD_FAKE_HELO_DOTCOM_2	eval:check_for_fake_dotcom_helo()
-describe T_RCVD_FAKE_HELO_DOTCOM_2	Faked HELO-as-dotcom found
-
 # Matt Cline, Bug #1220
 body T_FOR_FREE                   /\bfor FREE\b/i
 body T_COMPLETELY_FREE            /\b(?:100%|completely|totally|absolutely) Free/i
@@ -651,17 +635,6 @@ describe T_LOTS_OF_STUFF         Thousands or millions of pics/movies/etc
 
 body     T_LOTS_OF_SPACE         /\bover\s+(?:\d{1,3}[,\.])*\d{3,}\s*(?:MB|GB)/i
 describe T_LOTS_OF_SPACE         Over XYZ MB/GB of junk
-
-# not sure about this - it could be a markup dropping from Eudora...
-# let's see what happens in the nightly run anyway.
-rawbody  T_X_HTML_TAG_FOUND	/<x-html>/
-describe T_X_HTML_TAG_FOUND	Found a non-standard tag ('x-html')
-
-# Dec  8 2002 jm: noticed this implied in passing in Dan's
-# CVS messages. ;)  no nonspam hits but only a small number of spam ones,
-# for me.
-header T_HTML_ALL_CAPS		Content-Type =~ /TEXT\/HTML/
-describe T_HTML_ALL_CAPS	Content type is "TEXT/HTML" in all caps
 
 # possible replacement for our current CTYPE_JUST_HTML
 # looks for messages with either text/html ctype or all mime parts that
@@ -695,4 +668,9 @@ tflags T_MUTT_WITH_MSGID	nice
 # nonspam seems to have low numbers, spam (which is faked) has high ones
 header T_AA9_HOSTNAME_IN_FROM	 From:addr =~ /\@[a-ln-z]{1,2}[5-9]+\.\S+\./i
 describe T_AA9_HOSTNAME_IN_FROM  'From' has fake 'letter-letter-number' hostname
+
+# I'd noticed this before, but the spams were all hit by other rules, until
+# today.  So let's try it now
+header T_TO_NO_SPACE_AFTER_NAME	To =~ /^[^<@]+[a-zA-Z0-9]</
+describe T_TO_NO_SPACE_AFTER_NAME  No space after real name in 'To'
 

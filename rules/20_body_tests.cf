@@ -254,6 +254,12 @@ describe HTML_TAG_EXISTS_PARAM	HTML has "param" tag
 body HTML_TAG_EXISTS_TBODY	eval:html_tag_exists('tbody')
 describe HTML_TAG_EXISTS_TBODY	HTML has "tbody" tag
 
+body HTML_TAG_EXISTS_X_HTML	eval:html_tag_exists('x-html')
+describe HTML_TAG_EXISTS_X_HTML	HTML has "x-html" tag
+
+body HTML_BIG_FONT_B		eval:html_test('big_font_B')
+describe HTML_BIG_FONT_B        HTML has a big "font" and "B" tag combo
+
 ###########################################################################
 # rawbody HTML tests
 
