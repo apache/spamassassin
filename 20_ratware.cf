@@ -213,7 +213,7 @@ describe FORGED_OUTLOOK_TAGS	Outlook can't send HTML in this format
 # filters.
 #
 # http://groups.google.com/groups?selm=atp1ip0n22%40enews3.newsguy.com
-rawbody RATWARE_HASH_DASH	/[a-z\d]+-([a-z\d]{16}-)+[a-z\d]+(?-i:l)\d+/i
+rawbody RATWARE_HASH_DASH	/[a-z\d]-[a-z\d]{16}-[a-z\d]{1,16}(?-i:l)\d/i
 describe RATWARE_HASH_DASH	Contains a hashbuster in Send-Safe format
 
 # spammer tool, sometimes has "netIP with HTTP;" in Received: header
