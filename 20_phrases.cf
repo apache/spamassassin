@@ -498,8 +498,8 @@ describe HIDDEN_CHARGES		Talks about Hidden Charges
 body GET_STARTED_NOW	        /\bget started (?-i:N)ow\b/i
 describe GET_STARTED_NOW	Get Started Now
 
-body FINANCIAL		        /\bfinancial(?:ly)? free/i
-describe FINANCIAL 		Financial Freedom
+body FIN_FREE		        /\bfinancial(?:ly)? free/i
+describe FIN_FREE 		Freedom of a financial nature
 
 body FORWARD_LOOKING	        /\bcontains forward-looking statements\b/i
 describe FORWARD_LOOKING	Stock Disclaimer Statement
@@ -633,9 +633,6 @@ describe OUR_AFFILIATE_PARTNERS Mentions their affiliate partners
 
 body OUR_STRICT_ANTI		/our strict anti/i
 describe OUR_STRICT_ANTI	Mentions their strict antipathy on something
-
-body STOP_OFFERING		/\b(?:(?=[cefmpruw])(?:wish|want|unsub|reward|receive|recurring|remove|permission|partner|further|future|e.?mail|continue|click).{0,64}){2}.{0,8}(?=[cdos])(?:special|offer|coupon|discount)s?\b/i
-describe STOP_OFFERING		Stop the offers, coupons, discounts etc!
 
 body BANG_BOSS        		/\bboss!/i
 describe BANG_BOSS        	Talks about your boss with an exclamation!
