@@ -506,7 +506,7 @@ sub scan_directory {
   }
   else {
     # ignore ,234 (deleted or refiled messages) and MH metadata dotfiles
-    @files = grep { !/^[^,.]/ } readdir(DIR);
+    @files = grep { !/^[,.]/ } readdir(DIR);
   }
   closedir(DIR);
 
