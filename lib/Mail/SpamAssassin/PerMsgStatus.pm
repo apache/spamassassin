@@ -808,17 +808,46 @@ sub mime_decode_header {
   # Latin1: =?ISO-8859-1?Q?Keld_J=F8rn_Simonsen?= <keld@dkuug.dk>
   # Latin1: =?ISO-8859-1?Q?Andr=E9_?= Pirard <PIRARD@vm1.ulg.ac.be>
 
-  if ($enc =~ s{=\?([^\?]+)\?Q\?([^\?]+)\?=}{
+  if ($enc =~ s{\s*=\?([^\?]+)\?[Qq]\?([^\?]+)\?=}{
     		$self->decode_mime_bit ($1, $2);
 	      }eg)
   {
+    my $rawenc = $enc;
+
+    # Sitck lines back together when the encoded header wraps a line eg:
+    #
+    # Subject: =?iso-2022-jp?B?WxskQjsoM1gyI0N6GyhCIBskQk4iREwkahsoQiAy?=
+    #   =?iso-2022-jp?B?MDAyLzAzLzE5GyRCOWYbKEJd?=
+
+    $enc = "";
+    my $splitenc;
+
+    foreach $splitenc (split (/\n/, $rawenc)) {
+      $enc .= $splitenc;
+    }
     dbg ("decoded MIME header: \"$enc\"");
   }
 
-  # TODO: handle base64-encoded headers. eg:
+  # handle base64-encoded headers. eg:
   # =?UTF-8?B?Rlc6IFBhc3NpbmcgcGFyYW1ldGVycyBiZXR3ZWVuIHhtbHMgdXNp?=
   # =?UTF-8?B?bmcgY29jb29uIC0gcmVzZW50IA==?=   (yuck)
-  # not high-priorty as they're still very rare.
+
+  if ($enc =~ s{\s*=\?([^\?]+)\?[Bb]\?([^\?]+)\?=}{
+    		$self->generic_base64_decode ($2);
+	      }eg)
+  {
+    my $rawenc = $enc;
+
+    # Sitck lines back together when the encoded header wraps a line
+
+    $enc = "";
+    my $splitenc;
+
+    foreach $splitenc (split (/\n/, $rawenc)) {
+      $enc .= $splitenc;
+    }
+    dbg ("decoded MIME header: \"$enc\"");
+  }
 
   return $enc;
 }
@@ -828,6 +857,7 @@ sub decode_mime_bit {
   local ($_) = $text;
 
   if ($encoding =~ /^US-ASCII$/i
+  	|| $encoding =~ /^ISO646-US/i
   	|| $encoding =~ /^ISO-8859-\d+$/i
   	|| $encoding =~ /^UTF-8$/i
 	|| $encoding =~ /KOI8-\w$/i
