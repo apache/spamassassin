@@ -829,10 +829,12 @@ sub is_scan_available {
 
   if ($ns < $MIN_SPAM_CORPUS_SIZE_FOR_BAYES) {
     dbg("debug: Only $ns spam(s) in Bayes DB < $MIN_SPAM_CORPUS_SIZE_FOR_BAYES");
+    $self->{store}->untie_db();
     return 0;
   }
   if ($nn < $MIN_HAM_CORPUS_SIZE_FOR_BAYES) {
     dbg("debug: Only $nn ham(s) in Bayes DB < $MIN_HAM_CORPUS_SIZE_FOR_BAYES");
+    $self->{store}->untie_db();
     return 0;
   }
 
