@@ -173,8 +173,18 @@ eval {
 
 # handle removing reports
   if ($opt{'remove-markup'}) {
-    print $spamtest->remove_spamassassin_markup ($mail);
-    $mail->ignore();		# will exit
+    # If we're not going to retest, just remove the markup and print it out
+    if (!$opt{'test-mode'}) {
+      print $spamtest->remove_spamassassin_markup ($mail);
+      exit(0);
+    }
+    else {
+      # remove the markup and retest it...  a little more tricky ...
+      # go ahead and remove the markup, then fake that the clean version
+      # was what was sent in
+      #
+      $mail = Mail::SpamAssassin::MsgParser->parse ($spamtest->remove_spamassassin_markup ($mail));
+    }
   }
 
 # handle unconditional reportage
@@ -182,7 +192,7 @@ eval {
     if ( $spamtest->report_as_spam ($mail) ) {
       warn "Warning, unable to report spam\nFor more information, re-run with -D option to see debug output.\n";
     }
-    $mail->ignore();		# will exit
+    exit(0);
   }
 
 # handle revoke
@@ -190,7 +200,7 @@ eval {
       if ( $spamtest->revoke_as_spam ($mail) ) {
           warn "Warning, unable to revoke spam\n";
       }
-      $mail->ignore();          # will exit
+      exit(0);
   }
 
   if ($@) { warn $@; }
@@ -219,7 +229,7 @@ eval {
     }
 
     # don't need to log here -- it's already been done
-    $mail->ignore();		# will exit
+    exit(0);
   }
 
   # not reporting? OK, do checks instead.  Create a status object which

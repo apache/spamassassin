@@ -902,7 +902,7 @@ sub remove_spamassassin_markup {
     }
   }
 
-  my $hdrs = $mail_obj->get_all_headers();
+  my $hdrs = $mail_obj->get_pristine_header();
 
   # remove DOS line endings
   $hdrs =~ s/\r//gs;
@@ -979,7 +979,7 @@ sub remove_spamassassin_markup {
     }
   }
 
-  return $hdrs."\n".join ('', @newbody);
+  return $hdrs.join ('', @newbody);
 }
 
 ###########################################################################
