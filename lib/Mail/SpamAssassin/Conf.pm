@@ -169,8 +169,7 @@ sub new {
   $self->{bayes_file_mode} = "0700";
   $self->{bayes_use_hapaxes} = 1;
   $self->{bayes_use_chi2_combining} = 1;
-  $self->{bayes_expiry_min_db_size} = 100000;
-  $self->{bayes_expiry_scan_count} = 5000;
+  $self->{bayes_expiry_max_db_size} = 150000;
   $self->{bayes_ignore_headers} = [ ];
   $self->{bayes_min_ham_num} = 200;
   $self->{bayes_min_spam_num} = 200;
@@ -1921,26 +1920,31 @@ in corpus size etc.
       $self->{bayes_use_chi2_combining} = $1; next;
     }
 
-=item bayes_expiry_min_db_size		(default: 100000)
+=item bayes_expiry_max_db_size		(default: 150000)
 
-What should be the minimum size of the Bayes tokens database?  The
-database will never be shrunk below this many entries. 100000 entries
-is roughly equivalent to a 5Mb database file.
+What should be the maximum size of the Bayes tokens database?  The
+database will autoexpire when the number of tokens reaches this amount.
+150k is roughly equivalent to a 8Mb database file.  If this option is
+set to 0, the database will grow without autoexpiring the older tokens.
+
+When expiry occurs, the Bayes system will keep either 75% of the maximum
+value, or 100,000 tokens, whichever has a larger value.
 
 =cut
-    if (/^bayes_expiry_min_db_size\s+(\d+)$/) {
-      $self->{bayes_expiry_min_db_size} = $1; next;
+    if (/^bayes_expiry_max_db_size\s+(\d+)$/) {
+      $self->{bayes_expiry_max_db_size} = $1; next;
     }
 
-=item bayes_expiry_scan_count		(default: 5000)
+=item bayes_journal_max_size		(default: 150000)
 
-When expiring old entries from the Bayes databases, tokens which have not
-been read in this many messages will be removed (unless to do so would
-shrink the database below the C<bayes_expiry_min_db_size> size).
+SpamAssassin will opportunistically sync the journal and the database.
+It will do so at least once a day, but can also sync if the file size
+goes above this setting, in bytes.  If set to 0, the journal sync will
+only occur once a day.
 
 =cut
-    if (/^bayes_expiry_scan_count\s+(.*)$/) {
-      $self->{bayes_expiry_scan_count} = $1; next;
+    if (/^bayes_journal_max_size\s+(\d+)$/) {
+      $self->{bayes_journal_max_size} = $1; next;
     }
 
 =item user_scores_dsn DBI:databasetype:databasename:hostname:port

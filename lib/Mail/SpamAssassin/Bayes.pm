@@ -225,6 +225,7 @@ sub new {
     'main'              => $main,
     'conf'		=> $main->{conf},
     'log_raw_counts'	=> 0,
+    'tz'		=> Mail::SpamAssassin::Util::local_tz(),
 
     # Off. See comment above cached_probs_get().
     #'cached_probs'	=> { },
@@ -684,13 +685,15 @@ sub learn_trapped {
   my ($wc, @tokens) = $self->tokenize ($msg, $body);
   my %seen = ();
 
+  my $msgatime = $self->receive_date(scalar $msg->get_all_headers());
+
   for (@tokens) {
     if ($seen{$_}) { next; } else { $seen{$_} = 1; }
 
     if ($isspam) {
-      $self->{store}->tok_count_change (1, 0, $_);
+      $self->{store}->tok_count_change (1, 0, $_, $msgatime);
     } else {
-      $self->{store}->tok_count_change (0, 1, $_);
+      $self->{store}->tok_count_change (0, 1, $_, $msgatime);
     }
   }
 
@@ -822,12 +825,12 @@ sub get_body_from_msg {
 ###########################################################################
 
 sub sync {
-  my ($self, $opts) = @_;
+  my ($self, $sync, $expire, $opts) = @_;
   if (!$self->{conf}->{use_bayes}) { return 0; }
 
   dbg("Syncing Bayes journal and expiring old tokens...");
-  $self->{store}->sync_journal($opts);
-  $self->{store}->expire_old_tokens($opts);
+  $self->{store}->sync_journal($opts) if ( $sync );
+  $self->{store}->expire_old_tokens($opts) if ( $expire );
   dbg("Syncing complete.");
 
   return 0;
@@ -977,6 +980,8 @@ sub scan {
   my %seen = ();
   my $pw;
 
+  my $msgatime = $self->receive_date(scalar $msg->get_all_headers());
+
   # Off. See comment above cached_probs_get().
   #if (CACHE_S_N_TO_PROBS_MAPPING) {
   #$self->check_for_cached_probs_invalidated($ns, $nn);
@@ -1023,7 +1028,7 @@ sub scan {
     push (@sorted, $pw);
 
     # update the atime on this token, it proved useful
-    $self->{store}->tok_touch ($_);
+    $self->{store}->tok_touch ($_, $msgatime);
 
     dbg ("bayes token '$_' => $pw");
   }
@@ -1048,9 +1053,8 @@ sub scan {
   }
 
   $self->{store}->add_touches_to_journal();
-  $self->{store}->scan_count_increment();
 
-  $self->opportunistic_expire();
+  $self->opportunistic_calls();
   $self->{store}->untie_db();
   return $score;
 
@@ -1060,7 +1064,7 @@ skip:
   return 0.5;           # nice and neutral
 }
 
-sub opportunistic_expire {
+sub opportunistic_calls {
   my($self) = @_;
 
   # Is an expire or journal sync running?
@@ -1069,7 +1073,11 @@ sub opportunistic_expire {
 
   # handle expiry and journal syncing
   if ($self->{store}->expiry_due()) {
-    $self->sync();
+    $self->{store}->set_running_expire_tok();
+    $self->sync(1,1);
+  }
+  elsif ( $self->{store}->journal_sync_due() ) {
+    $self->sync(1,0);
   }
 }
 
@@ -1167,17 +1175,25 @@ sub dump_bayes_db {
   return 0 unless $self->{conf}->{use_bayes};
   return 0 unless $self->{store}->tie_db_readonly();
 
-  my($sb,$ns,$nh,$nt,$le,$oa,$bv) = $self->{store}->get_magic_tokens();
-  $sb = $self->{store}->scan_count_get(); # we want current scan count, not scan base count
+  my($sb,$ns,$nh,$nt,$le,$oa,$bv,$js,$ad,$er,$na) = $self->{store}->get_magic_tokens();
+  $sb = $self->{store}->scan_count_get() if ( $bv < 1 ); # we want current scan count, not scan base count
+
+  my $template = '%3.3f %10d %10d %10d  %s'."\n";
 
   if ( $magic ) {
-    printf ("%3.3f %8d %8d %8d  %s\n", 0.0, 0, $ns, 0, 'non-token data: nspam');
-    printf ("%3.3f %8d %8d %8d  %s\n", 0.0, 0, $nh, 0, 'non-token data: nham');
-    printf ("%3.3f %8d %8d %8d  %s\n", 0.0, 0, $nt, 0, 'non-token data: ntokens');
-    printf ("%3.3f %8d %8d %8d  %s\n", 0.0, 0, $oa, 0, 'non-token data: oldest age');
-    printf ("%3.3f %8d %8d %8d  %s\n", 0.0, 0, $sb, 0, 'non-token data: current scan-count');
-    printf ("%3.3f %8d %8d %8d  %s\n", 0.0, 0, $le, 0, 'non-token data: last expiry scan-count');
-    printf ("%3.3f %8d %8d %8d  %s\n", 0.0, 0, $bv, 0, 'non-token data: bayes db version');
+    printf ($template, 0.0, 0, $bv, 0, 'non-token data: bayes db version');
+    printf ($template, 0.0, 0, $ns, 0, 'non-token data: nspam');
+    printf ($template, 0.0, 0, $nh, 0, 'non-token data: nham');
+    printf ($template, 0.0, 0, $nt, 0, 'non-token data: ntokens');
+    printf ($template, 0.0, 0, $oa, 0, 'non-token data: oldest atime');
+    printf ($template, 0.0, 0, $na, 0, 'non-token data: newest atime') if ( $bv >= 2 );
+    printf ($template, 0.0, 0, $sb, 0, 'non-token data: current scan-count') if ( $bv < 2 );
+    printf ($template, 0.0, 0, $js, 0, 'non-token data: last journal sync atime') if ( $bv >= 2 );
+    printf ($template, 0.0, 0, $le, 0, 'non-token data: last expiry atime');
+    if ( $bv >= 2 ) {
+      printf ($template, 0.0, 0, $ad, 0, 'non-token data: last expire atime delta');
+      printf ($template, 0.0, 0, $er, 0, 'non-token data: last expire reduction count');
+    }
   }
 
   if ( $toks ) {
@@ -1190,13 +1206,79 @@ sub dump_bayes_db {
       $prob ||= 0.5;
 
       my ($ts, $th, $atime) = $self->{store}->tok_get ($tok);
-      printf "%3.3f %8d %8d %8d  %s\n",$prob,$ts,$th,$atime,$tok;
+      printf $template,$prob,$ts,$th,$atime,$tok;
     }
   }
 
   if (!$self->{main}->{learn_caller_will_untie}) {
     $self->{store}->untie_db();
   }
+}
+
+# Stolen from Archive Iteraator ...  Should probably end up in M::SA::Util
+# Modified to call first_date via $self->first_date()
+sub receive_date {
+  my ($self, $header) = @_;
+
+  $header ||= '';
+  $header =~ s/\n[ \t]+/ /gs;	# fix continuation lines
+
+  my @rcvd = ($header =~ /^Received:(.*)/img);
+  my @local;
+  my $time;
+
+  if (@rcvd) {
+    if ($rcvd[0] =~ /qmail \d+ invoked by uid \d+/ ||
+	$rcvd[0] =~ /\bfrom (?:localhost\s|(?:\S+ ){1,2}\S*\b127\.0\.0\.1\b)/)
+    {
+      push @local, (shift @rcvd);
+    }
+    if (@rcvd && ($rcvd[0] =~ m/\bby localhost with \w+ \(fetchmail-[\d.]+/)) {
+      push @local, (shift @rcvd);
+    }
+    elsif (@local) {
+      unshift @rcvd, (shift @local);
+    }
+  }
+
+  if (@rcvd) {
+    $time = $self->first_date(shift @rcvd);
+    return $time if defined($time);
+  }
+  if (@local) {
+    $time = $self->first_date(@local);
+    return $time if defined($time);
+  }
+  if ($header =~ /^(?:From|X-From-Line:)\s+(.+)$/im) {
+    my $string = $1;
+    $string .= " ".$self->{tz} unless $string =~ /(?:[-+]\d{4}|\b[A-Z]{2,4}\b)/;
+    $time = $self->first_date($string);
+    return $time if defined($time);
+  }
+  if (@rcvd) {
+    $time = $self->first_date(@rcvd);
+    return $time if defined($time);
+  }
+  if ($header =~ /^Resent-Date:\s*(.+)$/im) {
+    $time = $self->first_date($1);
+    return $time if defined($time);
+  }
+  if ($header =~ /^Date:\s*(.+)$/im) {
+    $time = $self->first_date($1);
+    return $time if defined($time);
+  }
+
+  return time;
+}
+
+sub first_date {
+  my ($self, @strings) = @_;
+
+  foreach my $string (@strings) {
+    my $time = Mail::SpamAssassin::Util::parse_rfc822_date($string);
+    return $time if defined($time) && $time;
+  }
+  return undef;
 }
 
 1;

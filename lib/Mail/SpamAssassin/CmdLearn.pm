@@ -70,6 +70,12 @@ sub cmdline_run {
     usage(0, "Please select either --spam, --ham, --forget, --rebuild, or --dump");
   }
 
+  # We need to make sure the journal syncs pre-forget...
+  if ( defined $forget && exists $opt{'norebuild'} ) {
+    delete $opt{'norebuild'};
+    warn "sa-learn warning: --forget requires read/write access to the database, and is incompatible with --no-rebuild\n";
+  }
+
   if (defined $opt{'format'} && $opt{'format'} eq 'single') {
     $opt{'format'} = 'file';
     push (@ARGV, '-');
@@ -135,6 +141,13 @@ sub cmdline_run {
     srand ($opt{'randseed'});
   }
 
+  # sync the journal first if we're going to go r/w so we make sure to
+  # learn everything before doing anything else.
+  #
+  if (!$opt{norebuild}) {
+    $spamtest->rebuild_learner_caches();
+  }
+
   # run this lot in an eval block, so we can catch die's and clear
   # up the dbs.
   eval {
@@ -169,10 +182,6 @@ sub cmdline_run {
 
     print STDERR "\n" if ($opt{showdots});
     print "Learned from $messagecount messages.\n";
-
-    if (!$opt{norebuild}) {
-      $spamtest->rebuild_learner_caches();
-    }
   };
 
   if ($@) {
