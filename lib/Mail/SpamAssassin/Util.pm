@@ -963,7 +963,7 @@ sub setuid_to_euid {
   return if (RUNNING_ON_WINDOWS);
 
   # remember the target uid, the first number is the important one
-  my($touid) = split(/\s+/, $>);
+  my $touid = $>;
 
   if ($< != $touid) {
     dbg ("changing real uid from $< to match effective uid $touid");
@@ -978,7 +978,7 @@ sub setuid_to_euid {
 
       $> = $<;			# revert euid to ruid
       $< = $touid;		# change ruid to target
-      $> = "$touid $touid";	# change euid back to target
+      $> = $touid;		# change euid back to target
     }
 
     # Check that we have now accomplished the setuid
