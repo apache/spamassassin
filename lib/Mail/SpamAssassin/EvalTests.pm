@@ -1301,7 +1301,7 @@ sub check_rbl {
   $self->load_resolver();
 
   dbg("Got the following IPs: ".join(", ", @ips), "rbl", -3);
-  if ($#ips > 1) {
+  if ($#ips > 0) {
     # If the set name is foo-lastN, check only the Received header that is
     # N hops from the final MTA (where 0 only checks the final Received
     # header).
