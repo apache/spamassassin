@@ -438,6 +438,34 @@ sub check_for_forged_juno_received_headers {
   return 0;   
 }
 
+#Received: from dragnet.sjc.ebay.com (dragnet.sjc.ebay.com [10.6.21.14])
+#	by bashir.ebay.com (8.10.2/8.10.2) with SMTP id g29JpwB10940
+#	for <rod@begbie.com>; Sat, 9 Mar 2002 11:51:58 -0800
+
+sub check_for_from_domain_in_received_headers {
+  my ($self, $domain, $desired) = @_;
+  
+  if (exists $self->{from_domain_in_received}) {
+      return $self->{from_domain_in_received};
+  }
+
+  my $from = $self->get('From:addr');
+  if($from !~ /\Q$domain\E/i) {
+      $self->{from_domain_in_received} = 0;
+      return 0;
+  }
+
+  my $rcvd = $self->get('Received');
+
+  if($rcvd =~ /from.*\Q$domain\E.*[\[\(][0-9]+\.[0-9]+\.[0-9]+\.[0-9]+[\]\)].*by.*\Q$domain\E/) {
+      $self->{from_domain_in_received} = ($desired eq 'true');
+      return ($desired eq 'true');
+  }
+
+  $self->{from_domain_in_received} = ($desired ne 'true');
+  return ($desired ne 'true');   
+}
+
 # ezmlm has a very bad habit of removing Received: headers! bad ezmlm.
 #
 sub gated_through_received_hdr_remover {

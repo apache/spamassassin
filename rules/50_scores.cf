@@ -102,6 +102,7 @@ score EXCUSE_7                       1.305
 score FAKED_IP_IN_RCVD               3.647
 score FAKED_UNDISC_RECIPS            3.461
 score FILTERED_BY_WORLDREMOVE        2.626
+score FORGED_EBAY_RCVD		     5.0
 score FORGED_EUDORAMAIL_RCVD         4.585
 score FORGED_GW05_RCVD               4.851
 score FORGED_HOTMAIL_RCVD            0.500
@@ -426,7 +427,7 @@ score RCVD_IN_RBL		     0.0
 score RCVD_IN_RSS		     0.0
 score RCVD_IN_DUL		     0.0
 score RCVD_IN_BL_SPAMCOP_NET	     0.0
-
+score GENUINE_EBAY_RCVD		   -10.0
 ###########################################################################
 # Compensation for common false positives.
 
