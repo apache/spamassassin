@@ -1260,8 +1260,12 @@ from spamd, try changing this setting.
 
 =item B<-u> I<username>, B<--username>=I<username>
 
-Run as the named user.  The alternative, default behaviour is to setuid() to
-the user running C<spamc>, if C<spamd> is running as root.
+Run as the named user.  If this option is not set, the default behaviour
+is to setuid() to the user running C<spamc>, if C<spamd> is running
+as root.
+
+Note: "--username=root" disables the setuid() functionality and leaves
+spamd running as root.
 
 =item B<-x>, B<--nouser-config>, B<--user-config>
 
