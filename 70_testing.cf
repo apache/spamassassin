@@ -306,3 +306,7 @@ meta T_RATWARE_WHATEVER		__OUTLOOK_DOLLARS_MSGID && !__HAS_X_MAILER
 
 body T_HTML_CLOSED_TWICE	eval:html_eval('closed_html', '> 1')
 body T_BODY_CLOSED_TWICE	eval:html_eval('closed_body', '> 1')
+
+# possible IDN spoofing attack: http://www.shmoo.com/idn/homograph.txt
+uri T_HIGH_CODEPAGE_URI         /^https?:\/\/[^\/]*\&\#(?:\d{4,}|[3456789]\d\d);/i
+
