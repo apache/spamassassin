@@ -267,7 +267,7 @@ sub learn {
     $self->{conf}->set_score_set($orig_scoreset % 2); # reduce to autolearning scores
     foreach my $test ( @{$self->{test_names_hit}} ) {
       # ignore tests with 0 score in this scoreset or if the test is a learning or userconf test
-      next if ( ! exists $self->{conf}->{scores}->{$test} || $self->{conf}->{scores}->{$test} == 0 );
+      next if ( $self->{conf}->{scores}->{$test} == 0 );
       next if ( exists $self->{conf}->{tflags}->{$test} && $self->{conf}->{tflags}->{$test} =~ /\b(?:learn|userconf)\b/ );
 
       $hits += $self->{conf}->{scores}->{$test};

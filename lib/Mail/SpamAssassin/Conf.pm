@@ -1965,11 +1965,13 @@ sub add_test {
   $self->{test_types}->{$name} = $type;
   $self->{tflags}->{$name} ||= '';
 
-  # T_ rules (in a testing probationary period) get low, low scores
-  if ($name =~ /^T_/) {
-    $self->{scores}->{$name} ||= 0.01;
-  } else {
-    $self->{scores}->{$name} ||= 1.0;
+  # All scoresets should have a score defined, so if the one we're in doesn't, we need to set them all.
+  if ( ! exists $self->{scores}->{$name} ) {
+    # T_ rules (in a testing probationary period) get low, low scores
+    my $set_score = $name=~/^T_/ ? 0.01 : 1.0;
+    for my $index (0..3) {
+      $self->{scoreset}->[$index]->{$name} = $set_score;
+    }
   }
 }
 
