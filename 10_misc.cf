@@ -147,8 +147,8 @@ ok_languages            all
 
 # Mail which scores outside this range will be fed back into SpamAssassin's
 # learning system automatically, to train the Bayesian scanner.
-bayes_auto_learn_threshold_nonspam	-2
-bayes_auto_learn_threshold_spam		15
+bayes_auto_learn_threshold_nonspam	0.1
+bayes_auto_learn_threshold_spam		12.0
 
 # Set this to 0 to turn off auto-learning.
 bayes_auto_learn			1
