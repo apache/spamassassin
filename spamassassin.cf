@@ -428,8 +428,6 @@ body CALL_1_800			/(?:call|dial).*1-800-[\dA-Z]+-?[\dA-Z]+/i
 describe CALL_1_800		Contains a 1-800- number
 body ONLINE_BIZ_OPS		/online business opportunities/i
 describe ONLINE_BIZ_OPS		Wants you to do business online
-body REMOVAL_INSTRUCTIONS	/Removal instructions/i
-describe REMOVAL_INSTRUCTIONS	Gives instructions on how to remove you from list
 body BILLION_DOLLARS		/[BM]ILLION DOLLAR/
 describe BILLION_DOLLARS	Talks about lots of money
 body OPT_IN			/opt-in/i
@@ -473,12 +471,6 @@ body ADDRESSES_ON_CD		/addresses on cd/i
 describe ADDRESSES_ON_CD	Only thing addresses on CD are useful for is SPAM
 body SHOES_GUY			/(?:(?:Lingui|Guilin).*){2,}/i
 describe SHOES_GUY		Want some shoes?
-
-# almost all print-out spammer forms have this.  You see, it makes
-# credit card processing a lot cheaper, and cuts down fees -- so it
-# will always be there ;)
-body PRINT_FORM_SIGNATURE	/Signature:.*_________________/i
-describe PRINT_FORM_SIGNATURE	Asks for your signature on a form
 
 body EXCUSE_1			/You (?:were sent|have received) this message because/i
 describe EXCUSE_1		Gives a lame excuse about why you were sent this SPAM
@@ -529,6 +521,9 @@ describe GREEN_EXCUSE_2		Claims SPAM helps the environment
 
 body VIAGRA			/VIAGRA/
 describe VIAGRA			Plugs Viagra
+
+body YOU_HAVE_BEEN_SELECTED	/You have been selected as a (?:finalist|winner)/i
+describe YOU_HAVE_BEEN_SELECTED	"You have been selected as a finalist", sure
 
 body FREE_PRIORITY_MAIL		/FREE PRIORITY MAIL SHIPPING/i
 describe FREE_PRIORITY_MAIL	There's no such things as a free shipping
@@ -656,7 +651,7 @@ describe MURKOWSKI_CRUFT	Old Murkowski disclaimer
 
 # (contrib: skod)
 body PRINT_FORM_SIGNATURE	/Sign(ature)?(?:\s*here|\s*please)?:.*___*/i
-describe PRINT_FORM_SIGNATURE	Asks you for your signature
+describe PRINT_FORM_SIGNATURE	Asks you for your signature on a form
 
 # (contrib: skod)
 body MAIL_IN_ORDER_FORM		/Mail-in Order Form/i
@@ -1041,10 +1036,10 @@ score WWW_REMOVEYOU_COM              4.0
 score X_EM_VER_PRESENT               0.4
 score VERY_SUSP_CC_RECIPS            3.0
 score VERY_SUSP_RECIPS               3.0
+score YOU_HAVE_BEEN_SELECTED         2.0
 score X_MAILER_GIBBERISH             3.2
 score X_MSMAIL_PRIORITY_HIGH         1.4
 score INCREASE_TRAFFIC		     1.4
-score REMOVAL_INSTRUCTIONS	     2.0
 score X_PRIORITY_HIGH                1.4
 score ONE_TIME_MAILING		     2.0
 score SUBJ_HAS_SPACES	             2.0

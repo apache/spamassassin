@@ -193,6 +193,24 @@ sub check {
 
 ###########################################################################
 
+=item $status = $f->check_message_text ($mailtext)
+
+Check a mail, encapsulated in a plain string, to determine if it is spam or
+not.
+
+Otherwise identical to C<$f->check()> above.
+
+=cut
+
+sub check_message_text {
+  my ($self, $mailtext) = @_;
+  my @lines = split (/\n/s, $mailtext);
+  my $mail_obj = Mail::SpamAssassin::MyMailAudit->new ('data' => \@lines);
+  return $self->check ($mail_obj);
+}
+
+###########################################################################
+
 =item $f->report_as_spam ($mail, $options)
 
 Report a mail, encapsulated in a C<Mail::Audit> object, as human-verified spam.
