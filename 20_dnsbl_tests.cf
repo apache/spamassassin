@@ -95,6 +95,9 @@ tflags RCVD_IN_OPM              net
 # multihop.dsbl.org lists servers which open SMTP servers relay through,
 # unconfirmed.dsbl.org lists servers tested by "untrusted" users.
 # See http://dsbl.org/ for full details.
+# transfers: yes - rsync and http, see http://dsbl.org/usage
+# pay-to-use: no
+# delist: automated/distributed
 header RCVD_IN_DSBL            rbleval:check_rbl_txt('dsbl', 'list.dsbl.org.')
 describe RCVD_IN_DSBL          Received via a relay in list.dsbl.org
 tflags RCVD_IN_DSBL            net
