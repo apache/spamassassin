@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.65 2003/02/23 12:15:48 quinlan Exp $
+# $Id: HTML.pm,v 1.66 2003/02/27 09:30:50 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -201,7 +201,6 @@ sub html_tests {
   }
   if ($tag eq "font" && exists $attr->{color}) {
     my $c = lc($attr->{color});
-    $self->{html}{font_color_nohash} = 1 if $c =~ /^[0-9a-f]{6}$/;
     $self->{html}{font_color_unsafe} = 1 if ($c =~ /^\#?[0-9a-f]{6}$/ &&
 				     $c !~ /^\#?(?:00|33|66|80|99|cc|ff){3}$/);
     $self->{html}{font_color_name} = 1 if ($c !~ /^\#?[0-9a-f]{6}$/ &&
@@ -392,8 +391,7 @@ sub html_comment {
 sub html_declaration {
   my ($self, $text) = @_;
 
-  # yeah, I know it's not really a tag
-  if ($text =~ /^!doctype/i) {
+  if ($text =~ /^<!doctype/i) {
     my $tag = "!doctype";
 
     $self->{html}{elements}++;
