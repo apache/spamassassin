@@ -262,11 +262,11 @@ sub parse {
           my $cond = pop @if_stack;
 
           if ($cond->{type} eq 'if') {
-            warn "unclosed 'if' in ".
+            warn "config: unclosed 'if' in ".
                   $self->{currentfile}.": if ".$cond->{conditional}."\n";
           }
           else {
-            die "unknown 'if' type: ".$cond->{type}."\n";
+            die "config: unknown 'if' type: ".$cond->{type}."\n";
           }
 
           $conf->{errors}++;
@@ -326,7 +326,7 @@ sub parse {
       #$value =~ s/^(\d+)\.(\d{1,3}).*$/sprintf "%d.%d", $1, $2/e;
 
       if ($ver ne $value) {
-        warn "configuration file \"$self->{currentfile}\" requires version ".
+        warn "config: configuration file \"$self->{currentfile}\" requires version ".
                 "$value of SpamAssassin, but this is code version ".
                 "$ver. Maybe you need to use ".
                 "the -C switch, or remove the old config files? ".
@@ -350,11 +350,11 @@ sub parse {
     if ($cmd) {
       if ($self->{scoresonly}) {              # reading user config from spamd
         if ($cmd->{is_priv} && !$conf->{allow_user_rules}) {
-          dbg ("config: not parsing, 'allow_user_rules' is 0: $line");
+          dbg("config: not parsing, 'allow_user_rules' is 0: $line");
           goto failed_line;
         }
         if ($cmd->{is_admin}) {
-          dbg ("config: not parsing, administrator setting: $line");
+          dbg("config: not parsing, administrator setting: $line");
           goto failed_line;
         }
       }
@@ -401,14 +401,13 @@ failed_line:
     my $msg = $parse_error;
     if (!$msg) {
       # the default warning, if a more specific one isn't output
-      $msg = "config: SpamAssassin failed to parse line, ".
-                        "skipping: $line";
+      $msg = "config: failed to parse line, skipping: $line";
     }
 
     if ($conf->{lint_rules}) {
       warn $msg."\n";
     } else {
-      dbg ($msg);
+      dbg($msg);
     }
     $conf->{errors}++;
   }
@@ -443,7 +442,8 @@ sub handle_conditional {
       $eval .= "\"$1\" ";       # note: untaints!
     }
     else {
-      $bad++; warn "unparseable chars in 'if $value': '$token'\n";
+      $bad++;
+      warn "config: unparseable chars in 'if $value': '$token'\n";
     }
   }
 
@@ -485,18 +485,18 @@ sub lint_check {
     # Check for description and score issues in lint fashion
     while ( ($k,$v) = each %{$conf->{descriptions}} ) {
       if (length($v) > 50) {
-        warn "warning: description for $k is over 50 chars\n";
+        warn "config: warning: description for $k is over 50 chars\n";
         $conf->{errors}++;
       }
       if (!exists $conf->{tests}->{$k}) {
-        warn "warning: description exists for non-existent rule $k\n";
+        warn "config: warning: description exists for non-existent rule $k\n";
         $conf->{errors}++;
       }
     }
 
     while ( my($sk) = each %{$conf->{scores}} ) {
       if (!exists $conf->{tests}->{$sk}) {
-        warn "warning: score set for non-existent rule $sk\n";
+        warn "config: warning: score set for non-existent rule $sk\n";
         $conf->{errors}++;
       }
     }
@@ -516,7 +516,7 @@ sub set_default_scores {
   while ( ($k,$v) = each %{$conf->{tests}} ) {
     if ($conf->{lint_rules}) {
       if (length($k) > 22 && $k !~ /^__/ && $k !~ /^T_/) {
-        warn "warning: rule '$k' is over 22 chars\n";
+        warn "config: warning: rule '$k' is over 22 chars\n";
         $conf->{errors}++;
       }
     }
@@ -558,7 +558,7 @@ sub setup_default_code_cb {
     $cmd->{code} = \&set_template_append;
   }
   else {
-    die "unknown conf type $type!";
+    die "config: unknown conf type $type!";
   }
 }
 
@@ -706,7 +706,7 @@ sub add_test {
 
   # Don't allow invalid names ...
   if ($name !~ /^\w+$/) {
-    warn "error: rule '$name' has invalid characters (not Alphanumeric + Underscore)\n";
+    warn "config: error: rule '$name' has invalid characters (not Alphanumeric + Underscore)\n";
     $conf->{errors}++;
     return;
   }
@@ -752,7 +752,7 @@ sub is_regexp_valid {
     return 1;
 
   } else {
-    warn "invalid regexp for rule $name: $re\n";
+    warn "config: invalid regexp for rule $name: $re\n";
     $self->{conf}->{errors}++;
     return 0;
   }
@@ -820,15 +820,15 @@ sub fix_path_relative_to_current_file {
   if (!File::Spec->file_name_is_absolute ($path)) {
     my ($vol, $dirs, $file) = File::Spec->splitpath ($self->{currentfile});
     $path = File::Spec->catpath ($vol, $dirs, $path);
-    dbg ("plugin: fixed relative path: $path");
+    dbg("plugin: fixed relative path: $path");
   }
   return $path;
 }
 
 ###########################################################################
 
-sub dbg { Mail::SpamAssassin::dbg (@_); }
-sub sa_die { Mail::SpamAssassin::sa_die (@_); }
+sub dbg { Mail::SpamAssassin::dbg(@_); }
+sub sa_die { Mail::SpamAssassin::sa_die(@_); }
 
 ###########################################################################
 

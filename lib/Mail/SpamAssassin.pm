@@ -92,7 +92,7 @@ BEGIN {
 
 use vars qw{
   @ISA $VERSION $SUB_VERSION @EXTRA_VERSION $IS_DEVEL_BUILD $HOME_URL
-  $DEBUG
+  $DEBUG $INFO %facilities
   @default_rules_path @default_prefs_path
   @default_userprefs_path @default_userstate_dir
   @site_rules_path
@@ -243,36 +243,23 @@ sub new {
   if (!defined $self) { $self = { }; }
   bless ($self, $class);
 
-  $DEBUG->{enabled} = 0;
-  if (defined $self->{debug} && $self->{debug} > 0) { $DEBUG->{enabled} = 1; }
+  # define debugging facilities first
+  $INFO = 0;
+  $DEBUG = 0;
+  if (defined $self->{debug} && ref($self->{debug}) eq "ARRAY") {
+    $facilities{$_} = 1 for @{ $self->{debug} };
+    # turn on informational notices
+    $INFO = 1 if keys %facilities;
+    # turn on debugging if facilities other than "info" are enabled
+    $DEBUG = keys %facilities && !(keys %facilities == 1 && $facilities{info});
+  }
 
-  # Make the first thing output by debug the version...
-  dbg("SpamAssassin version ".Version());
+  # first debugging information possibly printed should be the version
+  info("generic: SpamAssassin version ".Version());
 
   # if the libs are installed in an alternate location, and the caller
   # didn't set PREFIX, we should have an estimated guess ready ...
   $self->{PREFIX} ||= '@@PREFIX@@';  # substituted at 'make' time
-
-  # This should be moved elsewhere, I know, but SA really needs debug sets 
-  # I'm putting the intialization here for now, move it if you want
-
-  # For each part of the code, you can set debug levels. If the level is
-  # progressive, use negative numbers (the more negative, the move debug info
-  # is put out), and if you want to use bit fields, use positive numbers
-  # All code path debug codes should be listed here with a value of 0 if you
-  # want them disabled -- Marc
-
-  $DEBUG->{datediff}=-1;
-  $DEBUG->{razor}=-3;
-  $DEBUG->{dcc}=0;
-  $DEBUG->{pyzor}=0;
-  $DEBUG->{rbl}=0;
-  $DEBUG->{dnsavailable}=-2;
-  $DEBUG->{bayes}=0;
-  # Bitfield:
-  # header regex: 1 | body-text: 2 | uri tests: 4 | raw-body-text: 8
-  # full-text regexp: 16 | run_eval_tests: 32 | run_rbl_eval_tests: 64
-  $DEBUG->{rulesrun}=64;
 
   $self->{conf} ||= new Mail::SpamAssassin::Conf ($self);
   $self->{plugins} = Mail::SpamAssassin::PluginHandler->new ($self);
@@ -321,7 +308,7 @@ sub create_locker {
     $self->{locker} = new Mail::SpamAssassin::Locker::'.$class.' ($self);
   '; ($@) and die $@;
 
-  if (!defined $self->{locker}) { die "oops! no locker"; }
+  if (!defined $self->{locker}) { die "locker: oops! no locker"; }
 }
 
 ###########################################################################
@@ -441,12 +428,13 @@ sub learn {
   my $msg = Mail::SpamAssassin::PerMsgLearner->new($self, $mail_obj);
 
   if ($forget) {
+    dbg("learn: forgetting message");
     $msg->forget($id);
   } elsif ($isspam) {
-    dbg("Learning Spam");
+    dbg("learn: learning spam");
     $msg->learn_spam($id);
   } else {
-    dbg("Learning Ham");
+    dbg("learn: learning ham");
     $msg->learn_ham($id);
   }
 
@@ -487,7 +475,7 @@ Whether or not to wait a long time for locks to complete (optional, default 0).
 sub init_learner {
   my $self = shift;
   my $opts = shift;
-  dbg ("Initialising learner");
+  dbg("learn: initializing learner");
 
   # Make sure we're already initialized ...
   $self->init(1);
@@ -578,7 +566,7 @@ sub signal_user_changed {
   my $opts = shift;
   my $set = 0;
 
-  dbg ("user has changed");
+  dbg("info: user has changed");
 
   if (defined $opts && $opts->{username}) {
     $self->{username} = $opts->{username};
@@ -845,7 +833,7 @@ sub remove_spamassassin_markup {
 
   my $mbox = $mail_obj->get_mbox_separator() || '';
 
-  dbg("Removing Markup");
+  dbg("markup: removing markup");
 
   # Go looking for a "report_safe" encapsulated message.  Abort out ASAP
   # if we have definitive proof it's not an encapsulated message.
@@ -924,7 +912,7 @@ sub remove_spamassassin_markup {
     # let the 3.0 decoding do it...
     next if ($hdrs =~ /^X-Spam-Prev-$header:/im);
 
-    dbg ("Removing markup in $header");
+    dbg("markup: removing markup in $header");
     if ($header eq 'Subject') {
       my $tag = $self->{conf}->{rewrite_header}->{'Subject'};
       $tag = quotemeta($tag);
@@ -979,7 +967,7 @@ sub read_scoreonly_config {
 
   if (!open(IN,"<$filename")) {
     # the file may not exist; this should not be verbose
-    dbg ("read_scoreonly_config: cannot open \"$filename\": $!");
+    dbg("config: read_scoreonly_config: cannot open \"$filename\": $!");
     return;
   }
   my $text = join ('',<IN>);
@@ -988,7 +976,7 @@ sub read_scoreonly_config {
   $self->{conf}->{main} = $self;
   $self->{conf}->parse_scores_only ($text);
   if ($self->{conf}->{allow_user_rules}) {
-      dbg("finishing parsing!");
+      dbg("config: finishing parsing!");
       $self->{conf}->finish_parsing();
   }
   delete $self->{conf}->{main};	# to allow future GC'ing
@@ -1037,7 +1025,7 @@ the Mail::SpamAssassin object.
 sub load_scoreonly_ldap {
   my ($self, $username) = @_;
 
-  dbg("load_scoreonly_ldap($username)");
+  dbg("config: load_scoreonly_ldap($username)");
   my $src = Mail::SpamAssassin::Conf::LDAP->new ($self);
   $self->{username} = $username;
   $src->load($username);
@@ -1096,7 +1084,7 @@ sub compile_now {
     "Message-Id:  <".time."\@spamassassin_spamd_init>\n", "\n",
     "I need to make this message body somewhat long so TextCat preloads\n"x20);
 
-  dbg ("ignore: test message to precompile patterns and load modules");
+  dbg("ignore: test message to precompile patterns and load modules");
 
   # Backup default values which deal with userstate.
   # This is done so we can create any new files in, presumably, a temp dir.
@@ -1181,9 +1169,9 @@ sub debug_diagnostics {
     if (eval ' require '.$module.'; $modver = $'.$module.'::VERSION; 1;')
     {
       $modver ||= '(undef)';
-      dbg ("diag: module installed: $module, version $modver");
+      dbg("diag: module installed: $module, version $modver");
     } else {
-      dbg ("diag: module not installed: $module ('require' failed)");
+      dbg("diag: module not installed: $module ('require' failed)");
     }
   }
 }
@@ -1200,7 +1188,7 @@ syntax errors discovered, or 0 if the configuration is valid.
 sub lint_rules {
   my ($self) = @_;
 
-  dbg ("ignore: using a test message to lint rules");
+  dbg("ignore: using a test message to lint rules");
   my @testmsg = ("From: ignore\@compiling.spamassassin.taint.org\n", 
     "Subject: \n",
     "Message-Id:  <".CORE::time()."\@lint_rules>\n", "\n",
@@ -1323,7 +1311,7 @@ sub init {
 
       if (defined $fname) {
         if (!-f $fname && !$self->{dont_copy_prefs} && !$self->create_default_prefs($fname)) {
-          warn "Failed to create default user preference file $fname\n";
+          warn "config: failed to create default user preference file $fname\n";
         }
       }
 
@@ -1332,7 +1320,7 @@ sub init {
   }
 
   if ($self->{config_text} !~ /\S/) {
-    warn "No configuration text or files found! Please check your setup.\n";
+    warn "config: no configuration text or files found! please check your setup\n";
   }
 
   # Go and parse the config!
@@ -1364,10 +1352,10 @@ sub init {
 	require '.$type.';
 	$factory = '.$type.'->new();
       ';
-      if ($@) { warn $@; undef $factory; }
+      if ($@) { warn "auto-whitelist: $@"; undef $factory; }
     }
     else {
-      warn "illegal auto_whitelist_factory setting\n";
+      warn "auto-whitelist: illegal auto_whitelist_factory setting\n";
     }
     $self->set_persistent_address_list_factory($factory) if defined $factory;
   }
@@ -1384,7 +1372,7 @@ sub read_cf {
 
   return '' unless defined ($path);
 
-  dbg ("using \"$path\" for $desc");
+  dbg("config: using \"$path\" for $desc");
   my $txt = '';
 
   if (-d $path) {
@@ -1398,7 +1386,7 @@ sub read_cf {
         dbg("config: read file $file");
       }
       else {
-        warn "cannot open \"$file\": $!\n";
+        warn "config: cannot open \"$file\": $!\n";
 	next;
       }
     }
@@ -1412,7 +1400,7 @@ sub read_cf {
       dbg("config: read file $path");
     }
     else {
-      warn "cannot open \"$path\": $!\n";
+      warn "config: cannot open \"$path\": $!\n";
     }
   }
 
@@ -1436,12 +1424,12 @@ sub get_and_create_userstate_dir {
   $fname ||= $self->first_existing_path (@default_userstate_dir);
 
   if (defined $fname && !$self->{dont_copy_prefs}) {
-    dbg ("using \"$fname\" for user state dir");
+    dbg("config: using \"$fname\" for user state dir");
   }
 
   if (!-d $fname) {
     # not being able to create the *dir* is not worth a warning at all times
-    eval { mkpath ($fname, 0, 0700) } or dbg ("mkdir $fname failed: $@ $!\n");
+    eval { mkpath($fname, 0, 0700) } or dbg("config: mkdir $fname failed: $@ $!\n");
   }
   $fname;
 }
@@ -1465,7 +1453,7 @@ sub create_default_prefs {
   }
 
   if ($userdir && $userdir ne $self->{user_dir}) {
-    warn "Oops! user_dirs don't match! '$userdir' vs '$self->{user_dir}'\n";
+    warn "config: oops! user_dirs don't match! '$userdir' vs '$self->{user_dir}'\n";
   }
 
   if (!-f $fname)
@@ -1490,18 +1478,18 @@ sub create_default_prefs {
         if (($< == 0) && ($> == 0) && defined($user)) { # chown it
           my ($uid,$gid) = (getpwnam($user))[2,3];
           unless (chown($uid, $gid, $fname)) {
-            warn "Couldn't chown $fname to $uid:$gid for $user: $!\n";
+            warn "config: couldn't chown $fname to $uid:$gid for $user: $!\n";
           }
         }
-        warn "Created user preferences file: $fname\n";
+        warn "config: created user preferences file: $fname\n";
         return(1);
       }
       else {
-        warn "Cannot write to $fname: $!\n";
+        warn "config: cannot write to $fname: $!\n";
       }
     }
     else {
-      warn "Cannot open $defprefs: $!\n";
+      warn "config: cannot open $defprefs: $!\n";
     }
   }
 
@@ -1565,7 +1553,7 @@ sub first_existing_path {
 sub get_cf_files_in_dir {
   my ($self, $dir) = @_;
 
-  opendir(SA_CF_DIR, $dir) or warn "cannot opendir $dir: $!\n";
+  opendir(SA_CF_DIR, $dir) or warn "config: cannot opendir $dir: $!\n";
   my @cfs = grep { /\.cf$/i && -f "$dir/$_" } readdir(SA_CF_DIR);
   closedir SA_CF_DIR;
 
@@ -1639,31 +1627,41 @@ sub find_all_addrs_in_line {
   return @addrs;
 }
 
-# Only the first argument is needed, and it can be a reference to a list if
-# you want
+# usage: dbg("facility: message")
+# This is used for all low priority debugging messages.
 sub dbg {
-  my $dbg=$Mail::SpamAssassin::DEBUG;
+  return unless $Mail::SpamAssassin::DEBUG;
 
-  return unless $dbg->{enabled};
+  my $facility = "generic";
+  my $message = shift;
 
-  my ($msg, $codepath, $level) = @_;
-
-  $msg=join('',@{$msg}) if (ref $msg);
-
-  if (defined $codepath) {
-    if (not defined $dbg->{$codepath}) {
-      warn("dbg called with codepath $codepath, but it's not defined, skipping (message was \"$msg\"\n");
-      return 0;
-    } elsif (not defined $level) {
-      warn("dbg called with codepath $codepath, but no level threshold (message was \"$msg\"\n");
-    }
+  if ($message =~ /^(\S+?):\s*(.*)/) {
+    $facility = $1;
+    $message = $2;
   }
-  # Negative levels are just level numbers, the more negative, the more debug
-  return if (defined $level and $level<0 and not $dbg->{$codepath} <= $level);
-  # Positive levels are bit fields
-  return if (defined $level and $level>0 and not $dbg->{$codepath} & $level);
 
-  warn "debug: $msg\n";
+  if ($facilities{all} || $facilities{$facility}) {
+    warn "debug: $facility: $message\n";
+  }
+}
+
+# usage: info("facility: message")
+# This is used for informational messages indicating a normal, but
+# significant, condition.  This should be very infrequently called.
+sub info {
+  return unless $Mail::SpamAssassin::INFO;
+
+  my $facility = "generic";
+  my $message = shift;
+
+  if ($message =~ /^(\S+?):\s*(.*)/) {
+    $facility = $1;
+    $message = $2;
+  }
+
+  if ($facilities{all} || $facilities{info} || $facilities{$facility}) {
+    warn "info: $facility: $message\n";
+  }
 }
 
 # sa_die -- used to die with a useful exit code.
@@ -1682,11 +1680,11 @@ sub _is_storable_available {
   }
   elsif (!eval { require Storable; }) {
     $self->{storable_available} = 0;
-    dbg("no Storable module found");
+    dbg("info: no Storable module found");
   }
   else {
     $self->{storable_available} = 1;
-    dbg("Storable module v".$Storable::VERSION." found");
+    dbg("info: Storable module v".$Storable::VERSION." found");
   }
 
   return $self->{storable_available};
@@ -1705,13 +1703,13 @@ so that the object will use its current configuration.  i.e.:
   # backup configuration to %conf_backup
   my %conf_backup = ();
   $spamtest->copy_config(undef, \%conf_backup) ||
-    die "error returned from copy_config!\n";
+    die "config: error returned from copy_config!\n";
 
   ... do stuff, perhaps modify the config, etc ...
 
   # reset the configuration back to the original
   $spamtest->copy_config(\%conf_backup, undef) ||
-    die "error returned from copy_config!\n";
+    die "config: error returned from copy_config!\n";
 
 =cut
 

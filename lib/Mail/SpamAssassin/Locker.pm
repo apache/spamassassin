@@ -43,21 +43,21 @@ sub new {
 sub safe_lock {
   my ($self, $path, $max_retries) = @_;
   # max_retries is optional, should default to about 30
-  die "safe_lock not implemented by Locker subclass";
+  die "locker: safe_lock not implemented by Locker subclass";
 }
 
 ###########################################################################
 
 sub safe_unlock {
   my ($self, $path) = @_;
-  die "safe_unlock not implemented by Locker subclass";
+  die "locker: safe_unlock not implemented by Locker subclass";
 }
 
 ###########################################################################
 
 sub refresh_lock {
   my ($self, $path) = @_;
-  die "refresh_lock not implemented by Locker subclass";
+  die "locker: refresh_lock not implemented by Locker subclass";
 }
 
 ###########################################################################

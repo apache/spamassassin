@@ -59,17 +59,17 @@ use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/oi);
 
     clean_path_in_taint_mode();
     if ( !$displayed_path++ ) {
-      dbg("Current PATH is: ".join($Config{'path_sep'},File::Spec->path()));
+      dbg("util: current PATH is: ".join($Config{'path_sep'},File::Spec->path()));
     }
     foreach my $path (File::Spec->path()) {
       my $fname = File::Spec->catfile ($path, $filename);
       if ( -f $fname ) {
         if (-x $fname) {
-          dbg ("executable for $filename was found at $fname");
+          dbg("util: executable for $filename was found at $fname");
           return $fname;
         }
         else {
-          dbg("$filename was found at $fname, but isn't executable");
+          dbg("util: $filename was found at $fname, but isn't executable");
         }
       }
     }
@@ -85,10 +85,10 @@ use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/oi);
   my $cleaned_taint_path = 0;
 
   sub clean_path_in_taint_mode {
-    return if ( $cleaned_taint_path++ );
+    return if ($cleaned_taint_path++);
     return unless am_running_in_taint_mode();
 
-    dbg("Running in taint mode, removing unsafe env vars, and resetting PATH");
+    dbg("util: running in taint mode, removing unsafe env vars, and resetting PATH");
 
     delete @ENV{qw(IFS CDPATH ENV BASH_ENV)};
 
@@ -102,31 +102,31 @@ use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/oi);
       $dir = File::Spec->canonpath($1);
 
       if (!File::Spec->file_name_is_absolute($dir)) {
-	dbg("PATH included '$dir', which is not absolute, dropping.");
+	dbg("util: PATH included '$dir', which is not absolute, dropping");
 	next;
       }
       elsif (!(@stat=stat($dir))) {
-	dbg("PATH included '$dir', which doesn't exist, dropping.");
+	dbg("util: PATH included '$dir', which doesn't exist, dropping");
 	next;
       }
       elsif (!-d _) {
-	dbg("PATH included '$dir', which isn't a directory, dropping.");
+	dbg("util: PATH included '$dir', which isn't a directory, dropping");
 	next;
       }
       elsif (($stat[2]&2) != 0) {
         # World-Writable directories are considered insecure.
         # We could be more paranoid and check all of the parent directories as well,
         # but it's good for now.
-	dbg("PATH included '$dir', which is world writable, dropping.");
+	dbg("util: PATH included '$dir', which is world writable, dropping");
 	next;
       }
 
-      dbg("PATH included '$dir', keeping.");
+      dbg("util: PATH included '$dir', keeping");
       push(@path, $dir);
     }
 
     $ENV{'PATH'} = join($Config{'path_sep'}, @path);
-    dbg("Final PATH set to: ".$ENV{'PATH'});
+    dbg("util: final PATH set to: ".$ENV{'PATH'});
   }
 }
 
@@ -155,7 +155,7 @@ sub am_running_in_taint_mode {
     # seriously mind-bending perl
     $AM_TAINTED = not eval { eval "1 || $blank" || 1 };
   }
-  dbg ("running in taint mode? ". ($AM_TAINTED ? "yes" : "no"));
+  dbg("util: running in taint mode? ". ($AM_TAINTED ? "yes" : "no"));
   return $AM_TAINTED;
 }
 
@@ -189,7 +189,7 @@ sub untaint_file_path {
   if ($path =~ $re) {
     return $1;
   } else {
-    warn "security: cannot untaint path: \"$path\"\n";
+    warn "util: cannot untaint path: \"$path\"\n";
     return $path;
   }
 }
@@ -208,7 +208,7 @@ sub untaint_hostname {
     return $1;
   }
   else {
-    warn "security: cannot untaint hostname: \"$host\"\n";
+    warn "util: cannot untaint hostname: \"$host\"\n";
     return $host;
   }
 }
@@ -250,7 +250,7 @@ sub untaint_var {
     ${$_} = untaint_var(${$_});
   }
   else {
-    warn "Can't untaint a " . ref($_) . "!\n";
+    warn "util: can't untaint a " . ref($_) . "!\n";
   }
   return $_;
 }
@@ -348,7 +348,7 @@ sub parse_rfc822_date {
   } elsif (s/ (\d+) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d{2,3}) / /i) {
     $dd = $1; $mon = lc($2); $yyyy = $3;
   } else {
-    dbg ("time cannot be parsed: $date");
+    dbg("util: time cannot be parsed: $date");
     return undef;
   }
 
@@ -392,7 +392,7 @@ sub parse_rfc822_date {
   };
 
   if ($@) {
-    dbg ("time cannot be parsed: $date, $yyyy-$mmm-$dd $hh:$mm:$ss");
+    dbg("util: time cannot be parsed: $date, $yyyy-$mmm-$dd $hh:$mm:$ss");
     return undef;
   }
 
@@ -502,12 +502,12 @@ sub portable_getpwuid {
   if (!RUNNING_ON_WINDOWS) {
     eval ' sub _getpwuid_wrapper { getpwuid($_[0]); } ';
   } else {
-    dbg ("defining getpwuid() wrapper using 'unknown' as username");
+    dbg("util: defining getpwuid() wrapper using 'unknown' as username");
     eval ' sub _getpwuid_wrapper { fake_getpwuid($_[0]); } ';
   }
 
   if ($@) {
-    warn "Failed to define getpwuid() wrapper: $@\n";
+    warn "util: failed to define getpwuid() wrapper: $@\n";
   } else {
     return Mail::SpamAssassin::Util::_getpwuid_wrapper(@_);
   }
@@ -759,7 +759,7 @@ sub secure_tmpfile {
                  File::Spec->tmpdir()
                );
   if (!$tmpdir) {
-    die "Cannot find a temporary directory! set TMP or TMPDIR in env";
+    die "util: cannot find a temporary directory, set TMP or TMPDIR in environment";
   }
 
   my ($reportfile,$tmpfile);
@@ -986,7 +986,7 @@ sub setuid_to_euid {
   my $touid = $>;
 
   if ($< != $touid) {
-    dbg ("changing real uid from $< to match effective uid $touid");
+    dbg("util: changing real uid from $< to match effective uid $touid");
     $< = $touid; # try the simple method first
 
     # bug 3586: Some perl versions, typically those on a BSD-based
@@ -994,7 +994,7 @@ sub setuid_to_euid {
     # can be changed.  So this is a kluge for us to get around the
     # typical spamd-ish behavior of: $< = 0, $> = someuid ...
     if ( $< != $touid ) {
-      dbg("initial attempt to change real uid failed, trying BSD workaround");
+      dbg("util: initial attempt to change real uid failed, trying BSD workaround");
 
       $> = $<;			# revert euid to ruid
       $< = $touid;		# change ruid to target
@@ -1003,7 +1003,7 @@ sub setuid_to_euid {
 
     # Check that we have now accomplished the setuid
     if ($< != $touid) {
-      die "setuid $< to $touid failed!";
+      die "util: setuid $< to $touid failed!";
     }
   }
 }
@@ -1033,7 +1033,7 @@ sub helper_app_pipe_open_unix {
   # do a fork-open, so we can setuid() back
   my $pid = open ($fh, '-|');
   if (!defined $pid) {
-    die "cannot fork: $!";
+    die "util: cannot fork: $!";
   }
 
   if ($pid != 0) {
@@ -1042,24 +1042,24 @@ sub helper_app_pipe_open_unix {
 
   # else, child process.  go setuid...
   setuid_to_euid();
-  dbg ("setuid: helper proc $$: ruid=$< euid=$>");
+  dbg("util: setuid: helper proc $$: ruid=$< euid=$>");
 
   if ($stdinfile) {              # < $tmpfile
     close STDIN;
-    open (STDIN, "<$stdinfile") or die "cannot open $stdinfile: $!";
+    open (STDIN, "<$stdinfile") or die "util: cannot open $stdinfile: $!";
   }
 
   if ($duperr2out) {             # 2>&1
     close STDERR;
-    open STDERR, ">&STDOUT" or die "dup STDOUT failed: $!";
+    open STDERR, ">&STDOUT" or die "util: dup STDOUT failed: $!";
   }
 
   exec @cmdline;
-  die "exec failed: $!";
+  die "util: exec failed: $!";
 }
 
 ###########################################################################
 
-sub dbg { Mail::SpamAssassin::dbg (@_); }
+sub dbg { Mail::SpamAssassin::dbg(@_); }
 
 1;

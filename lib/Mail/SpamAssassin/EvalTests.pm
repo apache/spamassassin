@@ -249,7 +249,7 @@ sub _check_for_forged_received {
     my $hlo = $helo[$i];
     my $by = $by[$i];
 
-    dbg ("forged-HELO: from=".(defined $frm ? $frm : "(undef)").
+    dbg("eval: forged-HELO: from=".(defined $frm ? $frm : "(undef)").
 			" helo=".(defined $hlo ? $hlo : "(undef)").
 			" by=".(defined $by ? $by : "(undef)"));
 
@@ -263,7 +263,7 @@ sub _check_for_forged_received {
 		&& $frm =~ /^\w+(?:[\w.-]+\.)+\w+$/
 		&& $frm ne $hlo && !helo_forgery_whitelisted($frm, $hlo))
     {
-      dbg ("forged-HELO: mismatch on HELO: '$hlo' != '$frm'");
+      dbg("eval: forged-HELO: mismatch on HELO: '$hlo' != '$frm'");
       $self->{mismatch_helo}++;
     }
 
@@ -282,7 +282,7 @@ sub _check_for_forged_received {
 		$hclassb ne $fclassb &&
 		!($hlo =~ /$IP_IN_RESERVED_RANGE/o))
 	{
-	  dbg ("forged-HELO: massive mismatch on IP-addr HELO: '$hlo' != '$fip'");
+	  dbg("eval: forged-HELO: massive mismatch on IP-addr HELO: '$hlo' != '$fip'");
 	  $self->{mismatch_ip_helo}++;
 	}
       }
@@ -293,7 +293,7 @@ sub _check_for_forged_received {
 		&& $prev =~ /^\w+(?:[\w.-]+\.)+\w+$/
 		&& $by ne $prev && !helo_forgery_whitelisted($by, $prev))
     {
-      dbg ("forged-HELO: mismatch on from: '$prev' != '$by'");
+      dbg("eval: forged-HELO: mismatch on from: '$prev' != '$by'");
       $self->{mismatch_from}++;
     }
   }
@@ -675,7 +675,7 @@ sub _check_received_helos {
 
       # ok, let's catch the case where there's *no* reverse DNS there either
       if ($no_rdns) {
-	dbg ("Received: no rDNS for dotcom HELO: from=$from_host HELO=$helo_host");
+	dbg("eval: Received: no rDNS for dotcom HELO: from=$from_host HELO=$helo_host");
 	$self->{no_rdns_dotcom_helo} = 1;
       }
     }
@@ -773,7 +773,7 @@ sub check_for_sender_no_reverse {
 sub check_from_in_list {
   my ($self,$list) = @_;
   my $list_ref = $self->{conf}{$list};
-  warn "Could not find list $list" unless defined $list_ref;
+  warn "eval: could not find list $list" unless defined $list_ref;
 
   foreach my $addr (all_from_addrs $self) {
     return 1 if _check_whitelist $self $list_ref, $addr;
@@ -787,7 +787,7 @@ sub check_from_in_list {
 sub check_to_in_list {
   my ($self,$list) = @_;
   my $list_ref = $self->{conf}{$list};
-  warn "Could not find list $list" unless defined $list_ref;
+  warn "eval: could not find list $list" unless defined $list_ref;
 
   foreach my $addr (all_to_addrs $self) {
     return 1 if _check_whitelist $self $list_ref, $addr;
@@ -902,7 +902,7 @@ sub check_from_in_auto_whitelist {
       my $meanscore = $whitelist->check_address($_, $origip);
       my $delta = 0;
 
-      dbg("AWL active, pre-score: $self->{score}, autolearn score: $awlpoints, ".
+      dbg("auto-whitelist: AWL active, pre-score: $self->{score}, autolearn score: $awlpoints, ".
 	"mean: ". ($meanscore || 'undef') .", IP: ". ($origip || 'undef'));
 
       if (defined ($meanscore)) {
@@ -933,12 +933,12 @@ sub check_from_in_auto_whitelist {
     };
 
     if (!$evalok) {
-      dbg ("open of AWL file failed: $@");
+      dbg("auto-whitelist: open of auto-whitelist file failed: $@");
       # try an unlock, in case we got that far
       eval { $whitelist->finish(); };
     }
 
-    dbg("Post AWL score: ".$self->{score});
+    dbg("auto-whitelist: post auto-whitelist score: ".$self->{score});
 
     # test hit is above
     return 0;
@@ -1044,7 +1044,7 @@ sub all_from_addrs {
   my %addrs = map { $_ => 1 } @addrs;
   @addrs = keys %addrs;
 
-  dbg("all '*From' addrs: " . join(" ", @addrs));
+  dbg("eval: all '*From' addrs: " . join(" ", @addrs));
   $self->{all_from_addrs} = \@addrs;
   return @addrs;
 }
@@ -1098,7 +1098,7 @@ sub all_to_addrs {
     # noted some in <http://www.ii.com/internet/robots/procmail/qs/#envelope>
   }
 
-  dbg("all '*To' addrs: " . join(" ", @addrs));
+  dbg("eval: all '*To' addrs: " . join(" ", @addrs));
   $self->{all_to_addrs} = \@addrs;
   return @addrs;
 
@@ -1231,7 +1231,7 @@ sub check_rbl_backend {
   return 0 unless $self->is_dns_available();
   $self->load_resolver();
   
-  dbg ("checking RBL $rbl_server, set $set", "rbl", -1);
+  dbg("dns: checking RBL $rbl_server, set $set");
 
   # ok, make a list of all the IPs in the untrusted set
   my @fullips = map { $_->{ip} } @{$self->{relays_untrusted}};
@@ -1264,9 +1264,9 @@ sub check_rbl_backend {
   # relays, so we can return right now.
   return 0 unless (scalar @ips + scalar @originating > 0);
 
-  dbg("rbl: IPs found: full-external: ".join(", ", @fullips).
+  dbg("dns: IPs found: full-external: ".join(", ", @fullips).
 	" untrusted: ".join(", ", @ips).
-	" originating: ".join(", ", @originating), "rbl", -3);
+	" originating: ".join(", ", @originating));
 
   if (scalar @ips + scalar @originating > 0) {
     # If name is foo-notfirsthop, check all addresses except for
@@ -1310,7 +1310,7 @@ sub check_rbl_backend {
       }
     }
   }
-  dbg("rbl: only inspecting the following IPs: ".join(", ", @ips), "rbl", -3);
+  dbg("dns: only inspecting the following IPs: ".join(", ", @ips));
 
   eval {
     foreach my $ip (@ips) {
@@ -1347,7 +1347,7 @@ sub check_rbl_sub {
 
 # backward compatibility
 sub check_rbl_results_for {
-  #warn "check_rbl_results_for() is deprecated, use check_rbl_sub()\n";
+  #warn "dns: check_rbl_results_for() is deprecated, use check_rbl_sub()\n";
   check_rbl_sub(@_);
 }
 
@@ -1433,7 +1433,7 @@ sub check_dns_sender {
     return 0;
   }
 
-  dbg ("checking A and MX for host $host", "rbl", -1);
+  dbg("dns: checking A and MX for host $host");
 
   $self->do_dns_lookup($rule, 'A', $host);
   $self->do_dns_lookup($rule, 'MX', $host);
@@ -1556,12 +1556,12 @@ sub word_is_in_dictionary {
     my $filename = $self->{main}->first_existing_path (@default_triplets_path);
 
     if (!defined $filename) {
-      dbg("failed to locate the triplets.txt file");
+      dbg("eval: failed to locate the triplets.txt file");
       return 1;
     }
 
     if (!open (TRIPLETS, "<$filename")) {
-      dbg ("failed to open '$filename', cannot check dictionary");
+      dbg("eval: failed to open '$filename', cannot check dictionary");
       return 1;
     }
 
@@ -1580,7 +1580,7 @@ sub word_is_in_dictionary {
   for ($i = 0; $i < ($word_len - 2); $i++) {
     my $triplet = substr($word, $i, 3);
     if (!$triplets{$triplet}) {
-      dbg ("Unique ID: Letter triplet '$triplet' from word '$word' not valid");
+      dbg("eval: unique ID: letter triplet '$triplet' from word '$word' not valid");
       return 0;
     }
   } # for ($i = 0; $i < ($word_len - 2); $i++)
@@ -1784,22 +1784,22 @@ gotone:
   my $revdns = $self->lookup_ptr ($relayerip);
   if (!defined $revdns) { $revdns = '(unknown)'; }
 
-  dbg ("round-the-world: mail relayed through $relay by ".	
+  dbg("eval: round-the-world: mail relayed through $relay by ".	
   	"$relayerip (HELO $relayer, rev DNS says $revdns)");
 
   if ($revdns =~ /\.${ROUND_THE_WORLD_RELAYERS}$/oi) {
-    dbg ("round-the-world: yep, I think so (from rev dns)");
+    dbg("eval: round-the-world: yep, I think so (from rev dns)");
     $self->{round_the_world_revdns} = 1;
     return;
   }
 
   if ($relayer =~ /\.${ROUND_THE_WORLD_RELAYERS}$/oi) {
-    dbg ("round-the-world: yep, I think so (from HELO)");
+    dbg("eval: round-the-world: yep, I think so (from HELO)");
     $self->{round_the_world_helo} = 1;
     return;
   }
 
-  dbg ("round-the-world: probably not");
+  dbg("eval: round-the-world: probably not");
   return;
 }
 
@@ -1914,11 +1914,10 @@ sub _get_received_header_times {
     foreach $rcvd (@local) {
       if ($rcvd =~ m/(\s.?\d+ \S\S\S \d+ \d+:\d+:\d+ \S+)/) {
 	my $date = $1;
-	dbg ("trying Received fetchmail header date for real time: $date",
-	     "datediff", -2);
+	dbg("eval: trying Received fetchmail header date for real time: $date");
 	my $time = Mail::SpamAssassin::Util::parse_rfc822_date($date);
 	if (defined($time) && (time() >= $time)) {
-	  dbg ("time_t from date=$time, rcvd=$date", "datediff", -2);
+	  dbg("eval: time_t from date=$time, rcvd=$date");
 	  push @fetchmail_times, $time;
 	}
       }
@@ -1935,10 +1934,10 @@ sub _get_received_header_times {
   foreach $rcvd (@received) {
     if ($rcvd =~ m/(\s.?\d+ \S\S\S \d+ \d+:\d+:\d+ \S+)/) {
       my $date = $1;
-      dbg ("trying Received header date for real time: $date", "datediff", -2);
+      dbg("eval: trying Received header date for real time: $date");
       my $time = Mail::SpamAssassin::Util::parse_rfc822_date($date);
       if (defined($time)) {
-	dbg ("time_t from date=$time, rcvd=$date", "datediff", -2);
+	dbg("eval: time_t from date=$time, rcvd=$date");
 	push @header_times, $time;
       }
     }
@@ -1947,7 +1946,7 @@ sub _get_received_header_times {
   if (scalar(@header_times)) {
     $self->{received_header_times} = [ @header_times ];
   } else {
-    dbg ("no dates found in Received headers", "datediff", -1);
+    dbg("eval: no dates found in Received headers");
   }
 }
 
@@ -1987,10 +1986,10 @@ sub _check_date_received {
   if (scalar(@dates_poss)) {	# use median
     $self->{date_received} = (sort {$b <=> $a}
 			      (@dates_poss))[int($#dates_poss/2)];
-    dbg("Date chosen from message: " .
-	scalar(localtime($self->{date_received})), "datediff", -2);
+    dbg("eval: date chosen from message: " .
+	scalar(localtime($self->{date_received})));
   } else {
-    dbg("no dates found in message", "datediff", -1);
+    dbg("eval: no dates found in message");
   }
 }
 
@@ -2800,7 +2799,7 @@ sub check_access_database {
   my %bad = map { $_ => 1 } qw/ REJECT ERROR DISCARD /;
 
   $path = $self->{main}->sed_path ($path);
-  dbg("Tie-ing to DB file R/O in $path");
+  dbg("accessdb: tie-ing to DB file R/O in $path");
   if (tie %access,"DB_File",$path, O_RDONLY) {
     my @lookfor = ();
 
@@ -2850,7 +2849,7 @@ sub check_access_database {
     my %cache = ();
     foreach (@lookfor) {
       next if ($cache{$_}++);
-      dbg("accessdb: Looking for $_");
+      dbg("accessdb: looking for $_");
 
       # Some systems put a null at the end of the key, most don't...
       my $result = $access{$_} || $access{"$_\000"} || next;
@@ -2867,13 +2866,13 @@ sub check_access_database {
       }
     }
 
-    dbg("Untie-ing DB file $path");
+    dbg("accessdb: untie-ing DB file $path");
     untie %access;
 
     return $retval;
   }
   else {
-    dbg("Cannot open accessdb $path R/O: $!");
+    dbg("accessdb: cannot open accessdb $path R/O: $!");
   }
   0;
 }
@@ -2929,7 +2928,7 @@ sub check_for_rdns_helo_mismatch {	# T_FAKE_HELO_*
       if ($self->is_dns_available()) {
 	my $vrdns = $self->lookup_ptr ($relay->{ip});
 	if (defined $vrdns && $vrdns ne $claimed) {
-	  dbg ("rdns/helo mismatch: helo=$relay->{helo} ".	
+	  dbg("eval: rdns/helo mismatch: helo=$relay->{helo} ".	
 		"claimed-rdns=$claimed true-rdns=$vrdns");
 	  return 1;
 	  # TODO: instead, we should set a flag and check it later for
@@ -2949,7 +2948,7 @@ sub check_for_rdns_helo_mismatch {	# T_FAKE_HELO_*
       }
 
       # otherwise there *is* a mismatch
-      dbg ("rdns/helo mismatch: helo=$relay->{helo} rdns=$claimed");
+      dbg("eval: rdns/helo mismatch: helo=$relay->{helo} rdns=$claimed");
       return 1;
     }
   }
@@ -3168,7 +3167,7 @@ sub _multipart_alternative_difference {
       #
       if ($type eq 'text/html') {
         foreach my $w (grep(/\w/,split(/\s+/,$rnd))) {
-	  #dbg("HTML: $w");
+	  #dbg("eval: HTML: $w");
           $html{$w}++;
         }
 
@@ -3180,7 +3179,7 @@ sub _multipart_alternative_difference {
       }
       else {
         foreach my $w (grep(/\w/,split(/\s+/,$rnd))) {
-	  #dbg("TEXT: $w");
+	  #dbg("eval: TEXT: $w");
           $text{$w}++;
         }
       }
@@ -3196,7 +3195,7 @@ sub _multipart_alternative_difference {
       delete $html{$k} if (exists $html{$k} && $html{$k}-$text{$k} < 1);
     }
 
-    #map { dbg("LEFT: $_") } keys %html;
+    #map { dbg("eval: LEFT: $_") } keys %html;
 
     # In theory, the tokens should be the same in both text and html
     # parts, so there would be 0 tokens left in the html token list, for
@@ -3205,7 +3204,7 @@ sub _multipart_alternative_difference {
     my $diff = scalar(keys %html)/$orig*100;
     $self->{madiff} = $diff if ($diff > $self->{madiff});
 
-    dbg(sprintf "madiff: left: %d, orig: %d, max-difference: %0.2f%%", scalar(keys %html), $orig, $self->{madiff});
+    dbg("eval: " . sprintf "madiff: left: %d, orig: %d, max-difference: %0.2f%%", scalar(keys %html), $orig, $self->{madiff});
   }
 
   return;
@@ -3235,7 +3234,7 @@ sub check_for_http_redirector {
 	$_ = Mail::SpamAssassin::Util::uri_to_domain(lc($_)) || $_;
       }
       next if ($redir eq $dest);
-      dbg("redirect: found $redir to $dest, flagging");
+      dbg("eval: redirect: found $redir to $dest, flagging");
       return 1;
     }
   }

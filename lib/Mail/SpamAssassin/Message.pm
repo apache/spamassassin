@@ -278,17 +278,17 @@ sub _do_parse {
   # If we're called when we don't need to be, then just go ahead and return.
   return if (!defined $toparse);
 
-  dbg("---- MIME PARSER START ----");
+  dbg("message: ---- MIME PARSER START ----");
 
   # Figure out the boundary
   my ($boundary);
   ($self->{'type'}, $boundary) = Mail::SpamAssassin::Util::parse_content_type($self->header('content-type'));
-  dbg("main message type: ".$self->{'type'});
+  dbg("message: main message type: ".$self->{'type'});
 
   # Make the tree
   $self->parse_body( $self, $self, $boundary, $toparse, 1 );
 
-  dbg("---- MIME PARSER END ----");
+  dbg("message: ---- MIME PARSER END ----");
 }
 
 =item find_parts()
@@ -460,7 +460,7 @@ to generate the tree.
 sub _parse_multipart {
   my($self, $msg, $_msg, $boundary, $body) = @_;
 
-  dbg("parsing multipart, got boundary: ".(defined $boundary ? $boundary : ''));
+  dbg("message: parsing multipart, got boundary: ".(defined $boundary ? $boundary : ''));
 
   # NOTE: The MIME boundary REs here are very specific to be mostly RFC 1521
   # compliant, but also allow possible malformations to still work.  Please
@@ -520,7 +520,7 @@ sub _parse_multipart {
       my($p_boundary);
       ($part_msg->{'type'}, $p_boundary) = Mail::SpamAssassin::Util::parse_content_type($part_msg->header('content-type'));
       $p_boundary ||= $boundary;
-      dbg("found part of type ".$part_msg->{'type'}.", boundary: ".(defined $p_boundary ? $p_boundary : ''));
+      dbg("message: found part of type ".$part_msg->{'type'}.", boundary: ".(defined $p_boundary ? $p_boundary : ''));
       $self->parse_body( $msg, $part_msg, $p_boundary, $part_array, 0 );
 
       # rfc 1521 says /^--boundary--$/ but MUAs have a tendancy to just
@@ -587,7 +587,7 @@ Generate a leaf node and add it to the parent.
 sub _parse_normal {
   my ($self, $msg, $part_msg, $boundary, $body) = @_;
 
-  dbg("parsing normal part");
+  dbg("message: parsing normal part");
 
   $part_msg->{'type'} =
     Mail::SpamAssassin::Util::parse_content_type($part_msg->header('content-type'));
@@ -685,7 +685,7 @@ sub get_rendered_body_text_array {
   $text =~ tr/ \t\n\r\x0b\xa0/ /s;	# whitespace => space
   $text =~ tr/\f/\n/;			# form feeds => newline
   
-  # warn "JMD $text";
+  # warn "message: $text";
 
   my @textary = split_into_array_of_short_lines ($text);
   $self->{text_rendered} = \@textary;
@@ -838,7 +838,7 @@ sub extract_message_metadata {
 sub get_metadata {
   my ($self, $hdr) = @_;
   if (!$self->{metadata}) {
-    warn "oops! get_metadata() called after finish_metadata()"; return;
+    warn "metadata: oops! get_metadata() called after finish_metadata()"; return;
   }
   $self->{metadata}->{strings}->{$hdr};
 }
@@ -850,7 +850,7 @@ sub get_metadata {
 sub put_metadata {
   my ($self, $hdr, $text) = @_;
   if (!$self->{metadata}) {
-    warn "oops! put_metadata() called after finish_metadata()"; return;
+    warn "metadata: oops! put_metadata() called after finish_metadata()"; return;
   }
   $self->{metadata}->{strings}->{$hdr} = $text;
 }
@@ -862,7 +862,7 @@ sub put_metadata {
 sub delete_metadata {
   my ($self, $hdr) = @_;
   if (!$self->{metadata}) {
-    warn "oops! delete_metadata() called after finish_metadata()"; return;
+    warn "metadata: oops! delete_metadata() called after finish_metadata()"; return;
   }
   delete $self->{metadata}->{strings}->{$hdr};
 }
@@ -875,7 +875,7 @@ sub get_all_metadata {
   my ($self) = @_;
 
   if (!$self->{metadata}) {
-    warn "oops! get_all_metadata() called after finish_metadata()"; return;
+    warn "metadata: oops! get_all_metadata() called after finish_metadata()"; return;
   }
   my @ret = ();
   foreach my $key (sort keys %{$self->{metadata}->{strings}}) {
@@ -939,6 +939,6 @@ sub receive_date {
 
 # ---------------------------------------------------------------------------
 
-sub dbg { Mail::SpamAssassin::dbg (@_); }
+sub dbg { Mail::SpamAssassin::dbg(@_); }
 
 1;

@@ -61,14 +61,14 @@ sub classify {
     my @lm;
     my $ngram = {};
     my $rang = 1;
-    dbg("Loading languages file...");
+    dbg("textcat: loading languages file...");
 
     if (!defined $languages_filename) {
       return;
     }
 
     open(LM, $languages_filename)
-	|| die "cannot open languages: $!\n";
+	|| die "textcat: cannot open languages: $!\n";
     local $/ = undef;
     @lm = split(/\n/, <LM>);
     close(LM);
@@ -110,11 +110,11 @@ sub classify {
     @answers=(@answers, shift(@results));
   }
   if (@answers > $opt_a) {
-    dbg("Can't determine language uniquely enough");
+    dbg("textcat: can't determine language uniquely enough");
     return ();
   }
   else {
-    dbg("Language possibly: ".join(",",@answers));
+    dbg("textcat: language possibly: ".join(",",@answers));
     return @answers;
   }
 }
@@ -155,6 +155,6 @@ sub create_lm {
   return @sorted;
 }
 
-sub dbg { Mail::SpamAssassin::dbg (@_); }
+sub dbg { Mail::SpamAssassin::dbg(@_); }
 
 1;

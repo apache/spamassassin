@@ -133,7 +133,7 @@ sub _check_spf {
 
   my $lasthop = $scanner->{relays_untrusted}->[0];
   if (!defined $lasthop) {
-    dbg ("SPF: message was delivered entirely via trusted relays, not required");
+    dbg("spf: message was delivered entirely via trusted relays, not required");
     return;
   }
 
@@ -142,20 +142,20 @@ sub _check_spf {
   my $sender = '';
 
   if ($ishelo) {
-    dbg ("SPF: checking HELO (helo=$helo, ip=$ip)");
+    dbg("spf: checking HELO (helo=$helo, ip=$ip)");
 
     if ($helo !~ /^\d+\.\d+\.\d+\.\d+$/) {
       # get rid of hostname part of domain, understanding delegation
       $helo = Mail::SpamAssassin::Util::RegistrarBoundaries::trim_domain ($helo);
     }
 
-    dbg ("SPF: trimmed HELO down to '$helo'");
+    dbg("spf: trimmed HELO down to '$helo'");
 
   } else {
     $sender = $lasthop->{envfrom};
 
     if ($sender) {
-      dbg ("SPF: found Envelope-From in last untrusted Received header");
+      dbg("spf: found Envelope-From in last untrusted Received header");
     }
     else {
       # We cannot use the env-from data, since it went through 1 or
@@ -163,7 +163,7 @@ sub _check_spf {
       # rewritten it.
       #
       if ($scanner->{num_relays_trusted} > 0) {
-	dbg ("SPF: relayed through one or more trusted relays, cannot use header-based Envelope-From, skipping");
+	dbg("spf: relayed through one or more trusted relays, cannot use header-based Envelope-From, skipping");
 	return;
       }
 
@@ -176,25 +176,25 @@ sub _check_spf {
     }
 
     if (!$sender) {
-      dbg ("SPF: cannot get Envelope-From, cannot use SPF");
+      dbg("spf: cannot get Envelope-From, cannot use SPF");
       return;
     }
-    dbg ("SPF: checking EnvelopeFrom (helo=$helo, ip=$ip, envfrom=$sender)");
+    dbg("spf: checking EnvelopeFrom (helo=$helo, ip=$ip, envfrom=$sender)");
   }
 
   # this test could probably stand to be more strict, but try to test
   # any invalid HELO hostname formats with a header rule
   if ($ishelo && ($helo =~ /^\d+\.\d+\.\d+\.\d+$/ || $helo =~ /^[^.]+$/)) {
-    dbg ("SPF: cannot check HELO of '$helo', skipping");
+    dbg("spf: cannot check HELO of '$helo', skipping");
     return;
   }
   if (!$helo) {
-    dbg ("SPF: cannot get HELO, cannot use SPF");
+    dbg("spf: cannot get HELO, cannot use SPF");
     return;
   }
 
   if ($scanner->server_failed_to_respond_for_domain($helo)) {
-    dbg ("SPF: we had a previous timeout on '$helo', skipping");
+    dbg("spf: we had a previous timeout on '$helo', skipping");
     return;
   }
 
@@ -202,7 +202,7 @@ sub _check_spf {
   eval {
     require Mail::SPF::Query;
     if ($Mail::SPF::Query::VERSION < 1.996) {
-      die "Mail::SPF::Query 1.996 or later required, this is $Mail::SPF::Query::VERSION\n";
+      die "spf: Mail::SPF::Query 1.996 or later required, this is $Mail::SPF::Query::VERSION\n";
     }
     $query = Mail::SPF::Query->new (ip => $ip,
 				    sender => $sender,
@@ -212,7 +212,7 @@ sub _check_spf {
   };
 
   if ($@) {
-    dbg ("SPF: cannot load or create Mail::SPF::Query module");
+    dbg("spf: cannot load or create Mail::SPF::Query module");
     return;
   }
 
@@ -230,9 +230,9 @@ sub _check_spf {
 
   if ($@) {
     if ($@ =~ /^__alarm__$/) {
-      dbg ("SPF: lookup timed out after $timeout secs.");
+      dbg("spf: lookup timed out after $timeout seconds");
     } else {
-      warn ("SPF: lookup failed: $@\n");
+      warn("spf: lookup failed: $@\n");
     }
     return 0;
   }
@@ -259,11 +259,11 @@ sub _check_spf {
     }
   }
 
-  dbg ("SPF: query for $sender/$ip/$helo: result: $result, comment: $comment");
+  dbg("spf: query for $sender/$ip/$helo: result: $result, comment: $comment");
 }
 
 ###########################################################################
 
-sub dbg { Mail::SpamAssassin::dbg (@_); }
+sub dbg { Mail::SpamAssassin::dbg(@_); }
 
 1;

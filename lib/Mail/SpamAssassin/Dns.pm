@@ -104,7 +104,7 @@ sub do_rbl_lookup {
 
   # only make a specific query once
   if (!defined $self->{dnspending}->{$type}->{$host}->[BGSOCK]) {
-    dbg("rbl: launching DNS $type query for $host in background", "rbl", -1);
+    dbg("dns: launching DNS $type query for $host in background");
     $self->{rbl_launch} = time;
     $self->{dnspending}->{$type}->{$host}->[BGSOCK] =
 	$self->{res}->bgsend($host, $type);
@@ -133,7 +133,7 @@ sub do_dns_lookup {
 
   # only make a specific query once
   if (!defined $self->{dnspending}->{$type}->{$host}->[BGSOCK]) {
-    dbg("dns: launching DNS $type query for $host in background", "rbl", -1);
+    dbg("dns: launching DNS $type query for $host in background");
     $self->{rbl_launch} = time;
     $self->{dnspending}->{$type}->{$host}->[BGSOCK] =
 	$self->{res}->bgsend($host, $type);
@@ -236,7 +236,7 @@ sub process_dnsbl_set {
     elsif ($subtest =~ s/^sb://) {
       # SB rules are not available to users
       if ($self->{conf}->{user_defined_rules}->{$rule}) {
-        dbg ("RBL: skipping rule '$rule': not supported when user-defined");
+        dbg("dns: skipping rule '$rule': not supported when user-defined");
         next;
       }
 
@@ -315,7 +315,7 @@ sub harvest_dnsbl_queries {
     $timeout = $dynamic if ($dynamic < $timeout);
     sleep 1;
   }
-  dbg("RBL: success for " . ($total - @left) . " of $total queries", "rbl", 0);
+  dbg("dns: success for " . ($total - @left) . " of $total queries");
   # timeouts
   for my $query (@left) {
     my $string = '';
@@ -326,7 +326,7 @@ sub harvest_dnsbl_queries {
       $string = join(",", grep defined, @{$query->[RULES]});
     }
     my $delay = time - $self->{rbl_launch};
-    dbg("DNS: timeout for $string after $delay seconds", "rbl", 0);
+    dbg("dns: timeout for $string after $delay seconds");
     undef $query->[BGSOCK];
   }
   # register hits
@@ -379,7 +379,7 @@ sub is_dccifd_available {
   my ($self) = @_;
 
   if ($self->{main}->{local_tests_only}) {
-    dbg ("local tests only, ignoring DCCifd");
+    dbg("dcc: local tests only, ignoring dccifd");
     return 0;
   }
 
@@ -391,14 +391,14 @@ sub is_dccifd_available {
   }
 
   unless ($dccifd && -S $dccifd && -w _ && -r _ ) {
-    dbg ("DCCifd is not available: no r/w dccifd socket found.");
+    dbg("dcc: dccifd is not available: no r/w dccifd socket found.");
     return 0;
   }
 
   # Remember any found dccifd socket
   $self->{conf}->{dcc_dccifd_path} = $dccifd;
 
-  dbg ("DCCifd is available: ".$self->{conf}->{dcc_dccifd_path});
+  dbg("dcc: dccifd is available: ".$self->{conf}->{dcc_dccifd_path});
   return 1;
 }
 
@@ -406,7 +406,7 @@ sub is_dcc_available {
   my ($self) = @_;
 
   if ($self->{main}->{local_tests_only}) {
-    dbg ("local tests only, ignoring DCC");
+    dbg("dcc: local tests only, ignoring DCC");
     return 0;
   }
   if (!$self->{conf}->{use_dcc}) { return 0; }
@@ -422,14 +422,14 @@ sub is_dcc_available {
   }
 
   unless ($dccproc && -x $dccproc) {
-    dbg ("DCC is not available: no executable dccproc found.");
+    dbg("dcc: DCC is not available: no executable dccproc found.");
     return 0;
   }
 
   # Remember any found dccproc
   $self->{conf}->{dcc_path} = $dccproc;
 
-  dbg ("DCC is available: ".$self->{conf}->{dcc_path});
+  dbg("dcc: DCC is available: ".$self->{conf}->{dcc_path});
   return 1;
 }
 
@@ -447,23 +447,23 @@ sub dccifd_lookup {
   $count{fuz2} = 0;
 
   if ($self->{main}->{local_tests_only}) {
-    dbg ("local tests only, ignoring DCCifd");
+    dbg("dcc: local tests only, ignoring dccifd");
     return 0;
   }
 
   if ($$fulltext eq '') {
-    dbg ("empty message, ignoring DCCifd");
+    dbg("dcc: empty message, ignoring dccifd");
     return 0;
   }
 
   if ( ! $self->{conf}->{dcc_home} ) {
-	dbg ("dcc_home not defined, should not get here");
+	dbg("dcc: dcc_home not defined, should not get here");
     return 0;
   }
 
   $sockpath = $self->{conf}->{dcc_dccifd_path};
   if ( ! -S $sockpath || ! -w _ || ! -r _ ) {
-	dbg ("dccifd not a socket, should not get here");
+	dbg("dcc: dccifd not a socket, should not get here");
     return 0;
   }
 
@@ -475,26 +475,26 @@ sub dccifd_lookup {
     alarm($timeout);
 
     my $sock = IO::Socket::UNIX->new(Type => SOCK_STREAM,
-      Peer => $sockpath) || dbg("failed to open socket") && die;
+      Peer => $sockpath) || dbg("dcc: failed to open socket") && die;
 
     # send the options and other parameters to the daemon
-    $sock->print("header\n") || dbg("failed write") && die; # options
-    $sock->print("0.0.0.0\n") || dbg("failed write") && die; #client
-    $sock->print("\n") || dbg("failed write") && die; #HELO value
-    $sock->print("\n") || dbg("failed write") && die; #sender
-    $sock->print("unknown\r\n") || dbg("failed write") && die; # recipients
-    $sock->print("\n") || dbg("failed write") && die; # recipients
+    $sock->print("header\n") || dbg("dcc: failed write") && die; # options
+    $sock->print("0.0.0.0\n") || dbg("dcc: failed write") && die; #client
+    $sock->print("\n") || dbg("dcc: failed write") && die; #HELO value
+    $sock->print("\n") || dbg("dcc: failed write") && die; #sender
+    $sock->print("unknown\r\n") || dbg("dcc: failed write") && die; # recipients
+    $sock->print("\n") || dbg("dcc: failed write") && die; # recipients
 
     $sock->print($$fulltext);
 
-    $sock->shutdown(1) || dbg("failed socket shutdown: $!") && die;
+    $sock->shutdown(1) || dbg("dcc: failed socket shutdown: $!") && die;
 	
-    $sock->getline() || dbg("failed read status") && die;
-    $sock->getline() || dbg("failed read multistatus") && die;
+    $sock->getline() || dbg("dcc: failed read status") && die;
+    $sock->getline() || dbg("dcc: failed read multistatus") && die;
 
     my @null = $sock->getlines();
     if ( $#null == -1 ) {
-      dbg("failed read header");
+      dbg("dcc: failed read header");
       die;
     }
 
@@ -507,7 +507,7 @@ sub dccifd_lookup {
       $response .= $v;
     }
 
-    dbg("DCCifd: got response: $response");
+    dbg("dcc: dccifd got response: $response");
   };
   alarm(0); # if we die'd above, need to reset here
 
@@ -516,16 +516,16 @@ sub dccifd_lookup {
   if ($@) {
     $response = undef;
     if ($@ =~ /alarm/) {
-      dbg ("DCCifd check timed out after $timeout secs.");
+      dbg("dcc: dccifd check timed out after $timeout secs.");
       return 0;
     } else {
-      warn ("DCCifd -> check skipped: $! $@");
+      warn("dcc: dccifd -> check skipped: $! $@");
       return 0;
     }
   }
 
   if (!defined $response || $response !~ /^X-DCC/) {
-    dbg ("DCCifd -> check failed - no X-DCC returned: $response");
+    dbg("dcc: dccifd check failed - no X-DCC returned: $response");
     return 0;
   }
 
@@ -548,7 +548,7 @@ sub dccifd_lookup {
   }
 
   if ($count{body} >= $self->{conf}->{dcc_body_max} || $count{fuz1} >= $self->{conf}->{dcc_fuz1_max} || $count{fuz2} >= $self->{conf}->{dcc_fuz2_max}) {
-    dbg ("DCCifd: Listed! BODY: $count{body} of $self->{conf}->{dcc_body_max} FUZ1: $count{fuz1} of $self->{conf}->{dcc_fuz1_max} FUZ2: $count{fuz2} of $self->{conf}->{dcc_fuz2_max}");
+    dbg("dcc: listed! BODY: $count{body} of $self->{conf}->{dcc_body_max} FUZ1: $count{fuz1} of $self->{conf}->{dcc_fuz1_max} FUZ2: $count{fuz2} of $self->{conf}->{dcc_fuz2_max}");
     return 1;
   }
   
@@ -566,7 +566,7 @@ sub dcc_lookup {
   $count{fuz2} = 0;
 
   if ($self->{main}->{local_tests_only}) {
-    dbg ("local tests only, ignoring DCC");
+    dbg("dcc: local tests only, ignoring DCC");
     return 0;
   }
   if (!$self->{conf}->{use_dcc}) { return 0; }
@@ -591,7 +591,7 @@ sub dcc_lookup {
       $opts = $1;
     }
 
-    dbg("DCC command: ".join(' ', $path, "-H", $opts, "< '$tmpf'", "2>&1"),'dcc',-1);
+    dbg("dcc: command: ".join(' ', $path, "-H", $opts, "< '$tmpf'", "2>&1"));
 
     # my $pid = open(DCC, join(' ', $path, "-H", $opts, "< '$tmpf'", "2>&1", '|')) || die "$!\n";
     my $pid = Mail::SpamAssassin::Util::helper_app_pipe_open(*DCC,
@@ -602,7 +602,7 @@ sub dcc_lookup {
     close DCC;
 
     if ( $#null == -1 ) {
-      dbg("failed read header");
+      dbg("dcc: failed read header");
       die;
     }
 
@@ -616,10 +616,10 @@ sub dcc_lookup {
     }
 
     unless (defined($response)) {
-      die ("no response\n");	# yes, this is possible
+      die("dcc: no response\n");	# yes, this is possible
     }
 
-    dbg("DCC: got response: $response");
+    dbg("dcc: got response: $response");
 
     alarm(0);
     $self->cleanup_kids($pid);
@@ -630,19 +630,19 @@ sub dcc_lookup {
 
   if ($@) {
     if ($@ =~ /^__alarm__$/) {
-      dbg ("DCC -> check timed out after $timeout secs.");
+      dbg("dcc: check timed out after $timeout secs.");
     } elsif ($@ =~ /^__brokenpipe__$/) {
-      dbg ("DCC -> check failed: Broken pipe.");
+      dbg("dcc: check failed: broken pipe");
     } elsif ($@ eq "no response\n") {
-      dbg ("DCC -> check failed: no response");
+      dbg("dcc: check failed: no response");
     } else {
-      warn ("DCC -> check failed: $@\n");
+      warn("dcc: check failed: $@\n");
     }
     return 0;
   }
 
   if (!defined($response) || $response !~ /^X-DCC/) {
-    dbg ("DCC -> check failed: no X-DCC returned (did you create a map file?): $response");
+    dbg("dcc: check failed: no X-DCC returned (did you create a map file?): $response");
     return 0;
   }
 
@@ -665,7 +665,7 @@ sub dcc_lookup {
   }
 
   if ($count{body} >= $self->{conf}->{dcc_body_max} || $count{fuz1} >= $self->{conf}->{dcc_fuz1_max} || $count{fuz2} >= $self->{conf}->{dcc_fuz2_max}) {
-    dbg ("DCC: Listed! BODY: $count{body} of $self->{conf}->{dcc_body_max} FUZ1: $count{fuz1} of $self->{conf}->{dcc_fuz1_max} FUZ2: $count{fuz2} of $self->{conf}->{dcc_fuz2_max}");
+    dbg("dcc: listed! BODY: $count{body} of $self->{conf}->{dcc_body_max} FUZ1: $count{fuz1} of $self->{conf}->{dcc_fuz1_max} FUZ2: $count{fuz2} of $self->{conf}->{dcc_fuz2_max}");
     return 1;
   }
   
@@ -676,7 +676,7 @@ sub is_pyzor_available {
   my ($self) = @_;
 
   if ($self->{main}->{local_tests_only}) {
-    dbg ("local tests only, ignoring Pyzor");
+    dbg("pyzor: local tests only, ignoring Pyzor");
     return 0;
   }
   if (!$self->{conf}->{use_pyzor}) { return 0; }
@@ -687,11 +687,11 @@ sub is_pyzor_available {
     if ($pyzor) { $self->{conf}->{pyzor_path} = $pyzor; }
   }
   unless ($pyzor && -x $pyzor) {
-    dbg ("Pyzor is not available: pyzor not found");
+    dbg("pyzor: not available: pyzor not found");
     return 0;
   }
 
-  dbg ("Pyzor is available: ".$self->{conf}->{pyzor_path});
+  dbg("pyzor: available: ".$self->{conf}->{pyzor_path});
   return 1;
 }
 
@@ -706,7 +706,7 @@ sub pyzor_lookup {
   $pyzor_whitelisted = 0;
 
   if ($self->{main}->{local_tests_only}) {
-    dbg ("local tests only, ignoring Pyzor");
+    dbg("pyzor: local tests only, ignoring Pyzor");
     return 0;
   }
   if (!$self->{conf}->{use_pyzor}) { return 0; }
@@ -729,7 +729,7 @@ sub pyzor_lookup {
     my $opts = $self->{conf}->{pyzor_options};
     $opts =~ s/[^-A-Za-z0-9 \/_]/_/gs;	# sanitise
  
-    dbg("Pyzor command: ".join(' ', $path, $opts, "check", "< '$tmpf'", "2>&1"),'pyzor',-1);
+    dbg("pyzor: command: ".join(' ', $path, $opts, "check", "< '$tmpf'", "2>&1"));
 
     #my $pid = open(PYZOR, join(' ', $path, $opts, "check", "< '$tmpf'", "2>&1", '|')) || die "$!\n";
     my $pid = Mail::SpamAssassin::Util::helper_app_pipe_open(*PYZOR,
@@ -740,13 +740,13 @@ sub pyzor_lookup {
     close PYZOR;
 
     unless (@response) {
-      die ("no response\n");	# yes, this is possible
+      die("pyzor: no response\n");	# yes, this is possible
     }
     map { chomp } @response;
-    dbg("Pyzor: got response: " . join("\\n", @response));
+    dbg("pyzor: got response: " . join("\\n", @response));
 
     if ($response[0] =~ /^Traceback/) {
-      die ("internal error\n");
+      die("pyzor: internal error\n");
     }
 
     alarm(0);
@@ -759,13 +759,13 @@ sub pyzor_lookup {
   if ($@) {
     chomp $@;
     if ($@ eq "__alarm__") {
-      dbg ("Pyzor -> check timed out after $timeout secs.");
+      dbg("pyzor: check timed out after $timeout secs.");
     } elsif ($@ eq "__brokenpipe__") {
-      dbg ("Pyzor -> check failed: Broken pipe.");
+      dbg("pyzor: check failed: broken pipe");
     } elsif ($@ eq "no response") {
-      dbg ("Pyzor -> check failed: no response");
+      dbg("pyzor: check failed: no response");
     } else {
-      warn ("Pyzor -> check failed: $@\n");
+      warn("pyzor: check failed: $@\n");
     }
     return 0;
   }
@@ -779,7 +779,7 @@ sub pyzor_lookup {
 
   } else {
     # warn on failures to parse (jm)
-    dbg ("Pyzor: couldn't grok response \"$response[0]\"");
+    dbg("pyzor: failure to parse response \"$response[0]\"");
   }
 
   # moved this around a bit; no point in testing RE twice (jm)
@@ -790,7 +790,7 @@ sub pyzor_lookup {
   }
 
   if ($pyzor_count >= $self->{conf}->{pyzor_max}) {
-    dbg ("Pyzor: Listed! $pyzor_count of $self->{conf}->{pyzor_max} and whitelist is $pyzor_whitelisted");
+    dbg("pyzor: listed! $pyzor_count of $self->{conf}->{pyzor_max} and whitelist is $pyzor_whitelisted");
     return 1;
   }
 
@@ -821,12 +821,12 @@ sub load_resolver {
       $self->{res}->persistent_udp(1);
     }
     1;
-  };   #  or warn "eval failed: $@ $!\n";
+  };   #  or warn "dns: eval failed: $@ $!\n";
 
-  dbg ("is Net::DNS::Resolver available? " .
+  dbg("dns: is Net::DNS::Resolver available? " .
        ($self->{no_resolver} ? "no" : "yes"));
   if (!$self->{no_resolver} && defined $Net::DNS::VERSION) {
-    dbg("Net::DNS version: ".$Net::DNS::VERSION);
+    dbg("dns: Net::DNS version: ".$Net::DNS::VERSION);
   }
 
   return (!$self->{no_resolver});
@@ -839,7 +839,7 @@ sub lookup_ns {
   return if ($self->server_failed_to_respond_for_domain ($dom));
 
   my $nsrecords;
-  dbg ("looking up NS for '$dom'");
+  dbg("dns: looking up NS for '$dom'");
 
   if (exists $self->{dnscache}->{NS}->{$dom}) {
     $nsrecords = $self->{dnscache}->{NS}->{$dom};
@@ -856,7 +856,7 @@ sub lookup_ns {
       $nsrecords = $self->{dnscache}->{NS}->{$dom} = [ @nses ];
     };
     if ($@) {
-      dbg ("NS lookup failed horribly, perhaps bad resolv.conf setting?");
+      dbg("dns: NS lookup failed horribly, perhaps bad resolv.conf setting?");
       return undef;
     }
   }
@@ -871,7 +871,7 @@ sub lookup_mx {
   return if ($self->server_failed_to_respond_for_domain ($dom));
 
   my $mxrecords;
-  dbg ("looking up MX for '$dom'");
+  dbg("dns: looking up MX for '$dom'");
 
   if (exists $self->{dnscache}->{MX}->{$dom}) {
     $mxrecords = $self->{dnscache}->{MX}->{$dom};
@@ -886,7 +886,7 @@ sub lookup_mx {
       $mxrecords = $self->{dnscache}->{MX}->{$dom} = [ @ips ];
     };
     if ($@) {
-      dbg ("MX lookup failed horribly, perhaps bad resolv.conf setting?");
+      dbg("dns: MX lookup failed horribly, perhaps bad resolv.conf setting?");
       return undef;
     }
   }
@@ -902,7 +902,7 @@ sub lookup_mx_exists {
   if (!defined $recs) { return undef; }
   if (scalar @{$recs}) { $ret = 1; }
 
-  dbg ("MX for '$dom' exists? $ret");
+  dbg("dns: MX for '$dom' exists? $ret");
   return $ret;
 }
 
@@ -911,20 +911,20 @@ sub lookup_ptr {
 
   return undef unless $self->load_resolver();
   if ($self->{main}->{local_tests_only}) {
-    dbg ("local tests only, not looking up PTR");
+    dbg("dns: local tests only, not looking up PTR");
     return undef;
   }
 
   my $IP_IN_RESERVED_RANGE = IP_IN_RESERVED_RANGE;
 
   if ($dom =~ /${IP_IN_RESERVED_RANGE}/) {
-    dbg ("IP is reserved, not looking up PTR: $dom");
+    dbg("dns: IP is reserved, not looking up PTR: $dom");
     return undef;
   }
 
   return if ($self->server_failed_to_respond_for_domain ($dom));
 
-  dbg ("looking up PTR record for '$dom'");
+  dbg("dns: looking up PTR record for '$dom'");
   my $name = '';
 
   if (exists $self->{dnscache}->{PTR}->{$dom}) {
@@ -945,11 +945,11 @@ sub lookup_ptr {
     };
 
     if ($@) {
-      dbg ("PTR lookup failed horribly, perhaps bad resolv.conf setting?");
+      dbg("dns: PTR lookup failed horribly, perhaps bad resolv.conf setting?");
       return undef;
     }
   }
-  dbg ("PTR for '$dom': '$name'");
+  dbg("dns: PTR for '$dom': '$name'");
 
   # note: undef is never returned, unless DNS is unavailable.
   return $name;
@@ -960,13 +960,13 @@ sub lookup_a {
 
   return undef unless $self->load_resolver();
   if ($self->{main}->{local_tests_only}) {
-    dbg ("local tests only, not looking up A records");
+    dbg("dns: local tests only, not looking up A records");
     return undef;
   }
 
   return if ($self->server_failed_to_respond_for_domain ($name));
 
-  dbg ("looking up A records for '$name'");
+  dbg("dns: looking up A records for '$name'");
   my @addrs = ();
 
   if (exists $self->{dnscache}->{A}->{$name}) {
@@ -987,12 +987,12 @@ sub lookup_a {
     };
 
     if ($@) {
-      dbg ("A lookup failed horribly, perhaps bad resolv.conf setting?");
+      dbg("dns: A lookup failed horribly, perhaps bad resolv.conf setting?");
       return undef;
     }
   }
 
-  dbg ("A records for '$name': ".join (' ', @addrs));
+  dbg("dns: A records for '$name': ".join (' ', @addrs));
   return @addrs;
 }
 
@@ -1005,7 +1005,7 @@ sub is_dns_available {
 
   $IS_DNS_AVAILABLE = 0;
   if ($dnsopt eq "no") {
-    dbg ("dns_available set to no in config file, skipping test", "dnsavailable", -1);
+    dbg("dns: dns_available set to no in config file, skipping test");
     return $IS_DNS_AVAILABLE;
   }
 
@@ -1015,7 +1015,7 @@ sub is_dns_available {
 
   if ($dnsopt eq "yes") {
     $IS_DNS_AVAILABLE = 1;
-    dbg ("dns_available set to yes in config file, skipping test", "dnsavailable", -1);
+    dbg("dns: dns_available set to yes in config file, skipping test");
     return $IS_DNS_AVAILABLE;
   }
 
@@ -1023,15 +1023,13 @@ sub is_dns_available {
   if (defined $Net::DNS::VERSION) {
     if (Mail::SpamAssassin::Util::am_running_on_windows()) {
       if ($Net::DNS::VERSION < 0.46) {
-	dbg("Net::DNS version is $Net::DNS::VERSION, but need 0.46 for Win32",
-	    "dnsavailable", -1);
+	dbg("dns: Net::DNS version is $Net::DNS::VERSION, but need 0.46 for Win32");
 	return $IS_DNS_AVAILABLE;
       }
     }
     else {
       if ($Net::DNS::VERSION < 0.34) {
-	dbg("Net::DNS version is $Net::DNS::VERSION, but need 0.34",
-	    "dnsavailable", -1);
+	dbg("dns: Net::DNS version is $Net::DNS::VERSION, but need 0.34");
 	return $IS_DNS_AVAILABLE;
       }
     }
@@ -1041,9 +1039,9 @@ sub is_dns_available {
 
   if ($dnsopt =~ /test:\s+(.+)$/) {
     my $servers=$1;
-    dbg("servers: $servers");
+    dbg("dns: servers: $servers");
     @domains = split (/\s+/, $servers);
-    dbg("Looking up NS records for user specified servers: ".join(", ", @domains), "dnsavailable", -1);
+    dbg("dns: looking up NS records for user specified servers: ".join(", ", @domains));
   } else {
     @domains = @EXISTING_DOMAINS;
   }
@@ -1053,27 +1051,27 @@ sub is_dns_available {
   # simply fallen out ;)
   for(my $retry = 3; $retry > 0 and $#domains>-1; $retry--) {
     my $domain = splice(@domains, rand(@domains), 1);
-    dbg ("trying ($retry) $domain...", "dnsavailable", -2);
+    dbg("dns: trying ($retry) $domain...");
     my $result = $self->lookup_ns($domain);
     if(defined $result && scalar @$result > 0) {
       if ( $result ) {
-        dbg ("NS lookup of $domain succeeded => Dns available (set dns_available to hardcode)", "dnsavailable", -1);
+        dbg("dns: NS lookup of $domain succeeded => Dns available (set dns_available to hardcode)");
         $IS_DNS_AVAILABLE = 1;
         last;
       }
     }
     else {
-      dbg ("NS lookup of $domain failed horribly => Perhaps your resolv.conf isn't pointing at a valid server?", "dnsavailable", -1);
+      dbg("dns: NS lookup of $domain failed horribly, your resolv.conf may not be pointing at a valid server");
       $IS_DNS_AVAILABLE = 0; # should already be 0, but let's be sure.
       last; 
     }
   }
 
-  dbg ("All NS queries failed => DNS unavailable (set dns_available to override)", "dnsavailable", -1) if ($IS_DNS_AVAILABLE == 0);
+  dbg("dns: all NS queries failed => DNS unavailable (set dns_available to override)") if ($IS_DNS_AVAILABLE == 0);
 
 done:
   # jm: leaving this in!
-  dbg ("is DNS available? $IS_DNS_AVAILABLE");
+  dbg("dns: is DNS available? $IS_DNS_AVAILABLE");
   return $IS_DNS_AVAILABLE;
 }
 
@@ -1082,7 +1080,7 @@ done:
 sub server_failed_to_respond_for_domain {
   my ($self, $dom) = @_;
   if ($self->{dns_server_too_slow}->{$dom}) {
-    dbg ("DNS: server for '$dom' failed to reply previously, not asking again");
+    dbg("dns: server for '$dom' failed to reply previously, not asking again");
     return 1;
   }
   return 0;
@@ -1090,7 +1088,7 @@ sub server_failed_to_respond_for_domain {
 
 sub set_server_failed_to_respond_for_domain {
   my ($self, $dom) = @_;
-  dbg ("DNS: server for '$dom' failed to reply, marking as bad");
+  dbg("dns: server for '$dom' failed to reply, marking as bad");
   $self->{dns_server_too_slow}->{$dom} = 1;
 }
 
@@ -1099,7 +1097,7 @@ sub set_server_failed_to_respond_for_domain {
 sub enter_helper_run_mode {
   my ($self) = @_;
 
-  dbg ("entering helper-app run mode");
+  dbg("info: entering helper-app run mode");
   $self->{old_slash} = $/;              # Razor pollutes this
   %{$self->{old_env}} = ();
   if ( defined %ENV ) {
@@ -1128,7 +1126,7 @@ sub enter_helper_run_mode {
 sub leave_helper_run_mode {
   my ($self) = @_;
 
-  dbg ("leaving helper-app run mode");
+  dbg("info: leaving helper-app run mode");
   $/ = $self->{old_slash};
   %ENV = %{$self->{old_env}};
 }

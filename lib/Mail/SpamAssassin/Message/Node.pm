@@ -231,7 +231,7 @@ Adds a Node child object to the current node object.
 sub add_body_part {
   my($self, $part) = @_;
 
-  dbg("added part, type: ".$part->{'type'});
+  dbg("message: added part, type: ".$part->{'type'});
   push @{ $self->{'body_parts'} }, $part;
 }
 
@@ -274,13 +274,13 @@ sub decode {
     my $encoding = lc $self->header('content-transfer-encoding') || '';
 
     if ( $encoding eq 'quoted-printable' ) {
-      dbg("decoding: quoted-printable");
+      dbg("message: decoding quoted-printable");
       $self->{'decoded'} = [
         map { s/\r\n/\n/; $_; } split ( /^/m, Mail::SpamAssassin::Util::qp_decode( join ( "", @{$self->{'raw'}} ) ) )
 	];
     }
     elsif ( $encoding eq 'base64' ) {
-      dbg("decoding: base64");
+      dbg("message: decoding base64");
 
       # if it's not defined or is 0, do the whole thing, otherwise only decode
       # a portion
@@ -300,10 +300,10 @@ sub decode {
     else {
       # Encoding is one of 7bit, 8bit, binary or x-something
       if ( $encoding ) {
-        dbg("decoding: other encoding type ($encoding), ignoring");
+        dbg("message: decoding other encoding type ($encoding), ignoring");
       }
       else {
-        dbg("decoding: no encoding detected");
+        dbg("message: no encoding detected");
       }
       $self->{'decoded'} = $self->{'raw'};
     }
@@ -511,7 +511,7 @@ sub __decode_header {
     return Mail::SpamAssassin::Util::qp_decode($data);
   }
   else {
-    die "Unknown encoding type '$cte' in RFC2047 header";
+    die "message: unknown encoding type '$cte' in RFC2047 header";
   }
 }
 
@@ -671,7 +671,7 @@ sub finish {
 
 # ---------------------------------------------------------------------------
 
-sub dbg { Mail::SpamAssassin::dbg (@_); }
+sub dbg { Mail::SpamAssassin::dbg(@_); }
 
 1;
 __END__

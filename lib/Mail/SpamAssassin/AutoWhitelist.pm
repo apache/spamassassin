@@ -106,7 +106,7 @@ sub check_address {
       my $noipent = $self->{checker}->get_addr_entry ($noipaddr);
 
       if (defined $noipent->{count} && $noipent->{count} > 0) {
-	dbg ("AWL: found entry w/o IP address for $addr: replacing with $origip");
+	dbg("auto-whitelist: found entry w/o IP address for $addr: replacing with $origip");
 	$self->{checker}->remove_entry($noipent);
         # Now assign proper entry the count and totscore values of the no ip entry
         # instead of assigning the whole value to avoid wiping out any information added
@@ -239,6 +239,6 @@ sub pack_addr {
 
 ###########################################################################
 
-sub dbg { Mail::SpamAssassin::dbg (@_); }
+sub dbg { Mail::SpamAssassin::dbg(@_); }
 
 1;
