@@ -30,8 +30,9 @@ while ($#ARGV >= 0) {
 }
 
 print "BAD TESTS REPORT\n";
-print "\nRule file syntax issues:\n\n";
 readrules();
+print "\n" .((scalar keys %rulefile) + 1). " rules found.\n";
+print "\nRule file syntax issues:\n\n";
 lintrules();
 
 if ($opt_falsefreqs) {
@@ -150,7 +151,7 @@ sub concat_rule_lang {
 sub readrules {
   my @files = <../rules/[0-9]*.cf>;
   my $file;
-  @rulesfound = ();
+  %rulesfound = ();
   %langs = ();
   foreach $file (@files) {
     open (IN, "<$file");
@@ -163,30 +164,30 @@ sub readrules {
       }
 
       if (/^(header|rawbody|body|full|uri)\s+(\S+)\s+/) {
-        push (@rulesfound, $2);
+        $rulesfound{$2} = 1;
         $rulefile{$2} ||= $file;
         $scorefile{$1} = $file;
         $score{$2} ||= 1.0;
         $tflags{$2} ||= '';
         $descfile{$2} ||= $file;       # a rule with no score or desc is OK
       } elsif (/^describe\s+(\S+)\s+/) {
-        push (@rulesfound, $1);
+        $rulesfound{$1} = 1;
         $descfile{concat_rule_lang ($1, $lang)} ||= $file;
         $descfile{$1} ||= $file;
       } elsif (/^tflags\s+(\S+)\s+(.+)$/) {
-        push (@rulesfound, $1);
+        $rulesfound{$1} = 1;
         $tflags{$1} = $2;
         $tflagsfile{concat_rule_lang ($1, $lang)} = $file;
         $tflagsfile{$1} = $file;
       } elsif (/^score\s+(\S+)\s+(.+)$/) {
-        push (@rulesfound, $1);
+        $rulesfound{$1} = 1;
         $scorefile{concat_rule_lang ($1, $lang)} = $file;
         $scorefile{$1} = $file;
         $score{$1} = $2;
       } elsif (/^(clear-report-template|clear-spamtrap-template|report|spamtrap|
                 clear-terse-report-template|terse-report|
                 required_hits|ok_locales|ok_languages|test|lang|
-                spamphrase|whitelist_from
+                spamphrase|whitelist_from|require_version
                 )/x) {
         next;
       } else {
@@ -196,10 +197,12 @@ sub readrules {
     close IN;
   }
   @langsfound = sort keys %langs;
+  @rulesfound = sort keys %rulesfound;
 }
 
 sub lintrules {
   my %possible_renames = ();
+
   foreach my $rule (@rulesfound) {
     my $match = $rule;
     $match =~ s/_\d+[^_]+$//gs;    # trim e.g. "_20K"
