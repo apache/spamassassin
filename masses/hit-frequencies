@@ -1,7 +1,11 @@
 #!/usr/bin/perl -w
 
 use Getopt::Std;
-getopts("fm:px");
+getopts("fm:pxh");
+
+use vars qw {
+  $opt_f $opt_m $opt_p $opt_x $opt_h
+};
 
 sub usage {
   die "hit-frequencies [-f] [-m RE] [-p] [-x] [spam log] [nonspam log]
@@ -16,6 +20,8 @@ sub usage {
 
 ";
 }
+
+usage() if($opt_h);
 
 if ($opt_p) {
   $opt_x = 1;
@@ -154,10 +160,10 @@ exit;
 
 sub readlogs {
   my $spam = $ARGV[0] || "spam.log";
-  my $nonspam = $ARGV[1] || "nonspam.log";
+  my $nonspam = $ARGV[1] || (-f "good.log" ? "good.log" : "nonspam.log");
 
   foreach my $file ($spam, $nonspam) {
-    open (IN, "<$file");
+    open (IN, "<$file") || die "Could not open file '$file': $!";
 
     my $isspam = 0; ($file eq $spam) and $isspam = 1;
 
