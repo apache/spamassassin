@@ -18,23 +18,23 @@ use Getopt::Std;
 use POSIX ":sys_wait_h";
 
 my %resphash = (
-    EX_OK          => 0,  # no problems
-    EX_USAGE       => 64, # command line usage error
-    EX_DATAERR     => 65, # data format error
-    EX_NOINPUT     => 66, # cannot open input
-    EX_NOUSER      => 67, # addressee unknown
-    EX_NOHOST      => 68, # host name unknown
-    EX_UNAVAILABLE => 69, # service unavailable
-    EX_SOFTWARE    => 70, # internal software error
-    EX_OSERR       => 71, # system error (e.g., can't fork)
-    EX_OSFILE      => 72, # critical OS file missing
-    EX_CANTCREAT   => 73, # can't create (user) output file
-    EX_IOERR       => 74, # input/output error
-    EX_TEMPFAIL    => 75, # temp failure; user is invited to retry
-    EX_PROTOCOL    => 76, # remote error in protocol
-    EX_NOPERM      => 77, # permission denied
-    EX_CONFIG      => 78, # configuration error
-);
+		EX_OK          => 0,  # no problems
+		EX_USAGE       => 64, # command line usage error
+		EX_DATAERR     => 65, # data format error
+		EX_NOINPUT     => 66, # cannot open input
+		EX_NOUSER      => 67, # addressee unknown
+		EX_NOHOST      => 68, # host name unknown
+		EX_UNAVAILABLE => 69, # service unavailable
+		EX_SOFTWARE    => 70, # internal software error
+		EX_OSERR       => 71, # system error (e.g., can't fork)
+		EX_OSFILE      => 72, # critical OS file missing
+		EX_CANTCREAT   => 73, # can't create (user) output file
+		EX_IOERR       => 74, # input/output error
+		EX_TEMPFAIL    => 75, # temp failure; user is invited to retry
+		EX_PROTOCOL    => 76, # remote error in protocol
+		EX_NOPERM      => 77, # permission denied
+		EX_CONFIG      => 78, # configuration error
+		);
 
 sub usage
 {
@@ -47,9 +47,9 @@ Options:
     -h            Print this usage message and exit
     -L            Use local tests only (no DNS or other network lookups)
     -A host,...   Set list of authorized ip addresses which can connect to this server
-                    (defaults to 127.0.0.1 only)
+    (defaults to 127.0.0.1 only)
     -i ipaddr     Listen on the specified IP address (defaults to 127.0.0.1,
-                  use 0.0.0.0 to listen on all available addresses)
+						      use 0.0.0.0 to listen on all available addresses)
     -p port       Listen on the specific port (otherwise default is port 783)
     -u username   Run as named user, instead of running setuid to spamc user
     -d		  Daemonize, detach from parent process
@@ -79,9 +79,9 @@ sub daemonize
 }
 
 use vars qw{
-  	$opt_d $opt_h $opt_L $opt_p $opt_A $opt_x $opt_s $opt_D $opt_u
+    $opt_d $opt_h $opt_L $opt_p $opt_A $opt_x $opt_s $opt_D $opt_u
 	$opt_P $opt_c $opt_a $opt_i $opt_q
-};
+    };
 
 
 getopts('hdLxqp:A:s:Du:Pcai:') or usage();
@@ -118,10 +118,10 @@ if (defined $ENV{'HOME'}) {
 }
 
 my $spamtest = Mail::SpamAssassin->new({
-  dont_copy_prefs => $dontcopy,
-  local_tests_only => $opt_L,
-  debug => $opt_D,
-  paranoid => ($opt_P || 0),
+    dont_copy_prefs => $dontcopy,
+    local_tests_only => $opt_L,
+    debug => $opt_D,
+    paranoid => ($opt_P || 0),
 });
 
 $opt_a and eval
@@ -203,12 +203,12 @@ for ( $waitedpid = 0;
     my $name = gethostbyaddr($iaddr,AF_INET);
 
     if ($allowed{inet_ntoa($iaddr)} ) {
-       logmsg "connection from $name [",
-       				inet_ntoa($iaddr),"] at port $port";
+	logmsg "connection from $name [",
+	inet_ntoa($iaddr),"] at port $port";
     } else {
-       logmsg "unauthorized connection from $name [",
-       				inet_ntoa($iaddr),"] at port $port";
-       next;
+	logmsg "unauthorized connection from $name [",
+	inet_ntoa($iaddr),"] at port $port";
+	next;
     }
 
     spawn sub {
@@ -231,16 +231,15 @@ for ( $waitedpid = 0;
         if (/SKIP SPAMC\/(.*)/)
 	{
 	    logmsg "skipped large message in ".
-			 sprintf("%3d", time - $start) ." seconds.\n";
+		sprintf("%3d", time - $start) ." seconds.\n";
 	    return 0;
 
 	}
 
-        # If we get the PROCESS command, the client is going to send a
-        # message that we need to filter.  This is were all the real
-        # work is one.
+	# It might be a CHECK message, meaning that we should just check
+	# if it's spam or not, then return the appropriate response.
 
-        if (/PROCESS SPAMC\/(.*)/)
+	elsif (/CHECK SPAMC\/(.*)/)
 	{
 	    my $version = $1;
 	    my $expected_length;
@@ -296,7 +295,108 @@ for ( $waitedpid = 0;
             elsif ( $setuid_to_user && $> == 0 )
             {
                 logmsg "Still running as root: user not specified, ".
-			"not found, or set to root.  Fall back to nobody.";
+		    "not found, or set to root.  Fall back to nobody.";
+		my $uid = getpwnam('nobody');
+		if (!defined $uid) { die "no UID for nobody"; }
+                $> = $uid;
+            }
+
+	    my $resp = "EX_OK";
+
+	    # Now read in message
+	    my @msglines = (<STDIN>);
+	    my $actual_length = length (join '', @msglines);
+	    my $mail = Mail::SpamAssassin::NoMailAudit->new ( data => \@msglines );
+
+	    # Check length if we're supposed to
+	    if($expected_length)
+	    {
+		if($actual_length != $expected_length) { protocol_error ("(Content-length mismatch: $expected_length vs. $actual_length)"); return 1; }
+	    }
+
+	    # Now use copy-on-writed (hopefully) SA object
+	    my $status = $spamtest->check($mail);
+	    my $msg_score = int($status->get_hits);
+	    my $msg_threshold = int($status->get_required_hits);
+	    my $was_it_spam;
+	    if ($status->is_spam)
+	    {
+		print "SPAMD/1.1 $resphash{$resp} $resp\r\nSpam: True ; $msg_score / $msg_threshold\r\n\r\n";
+		$was_it_spam = 'identified spam';
+	    }
+	    else
+	    {
+		print "SPAMD/1.1 $resphash{$resp} $resp\r\nSpam: False ; $msg_score / $msg_threshold\r\n\r\n";
+		$was_it_spam = 'clean message';
+	    }
+	    $current_user ||= '(unknown)';
+	    logmsg "$was_it_spam for $current_user:$> in ".
+		sprintf("%3d", time - $start) ." seconds.\n";
+
+	    $status->finish();	# added by jm to allow GC'ing
+	}
+
+        # If we get the PROCESS command, the client is going to send a
+        # message that we need to filter.  This is were all the real
+        # work is one.
+
+        elsif (/PROCESS SPAMC\/(.*)/)
+	{
+	    my $version = $1;
+	    my $expected_length;
+
+            # Protocol version 1.0 and greater may have "User:" and
+            # "Content-length:" headers.  But they're not required.
+
+	    if($version > 1.0)
+	    {
+		while(1)
+                {
+                    $_ = <STDIN>;
+                    if(!defined $_)
+                    {
+                        protocol_error ("(EOF during headers)");
+                        return 1;
+                    }
+
+                    if (/^\r\n/s) { last; }
+
+                    # We'll run handle user unless we've been told not
+                    # to process per-user config files.  Otherwise
+                    # we'll check and see if we need to try SQL
+                    # lookups.  If $opt_x is NOT true, we need to try
+                    # their config file and then do the SQL lookup.
+                    # If $opt_x IS true, we skip the conf file and
+                    # only need to do the SQL lookup if $opt_q IS
+                    # true.  (I got that wrong the first time.)
+
+                    if (/^User: (.*)\r\n/)
+                    {
+                        if ($opt_x)
+                        {
+			    if ($opt_q) {
+				handle_user_sql($1);
+			    }
+                        }
+			else
+                        {
+                            handle_user($1);
+                        }
+                    }
+		    if (/^Content-length: ([0-9]*)\r\n/i) {
+			$expected_length = $1;
+		    }
+                }
+	    }
+
+            if ($spamtest->{paranoid} && $setuid_to_user && $> == 0)
+            {
+                logmsg "PARANOID: Still running as root, close connection.";
+	    }
+            elsif ( $setuid_to_user && $> == 0 )
+            {
+                logmsg "Still running as root: user not specified, ".
+		    "not found, or set to root.  Fall back to nobody.";
 		my $uid = getpwnam('nobody');
 		if (!defined $uid) { die "no UID for nobody"; }
                 $> = $uid;
@@ -325,19 +425,19 @@ for ( $waitedpid = 0;
 	    if($version >= 1.2) # Spamc protocol 1.2 means it accepts content-length
 	    {
 		print "SPAMD/1.1 $resphash{$resp} $resp\r\n",
-		      "Content-length: $msg_resp_length\r\n\r\n",
-		      $msg_resp;
+		"Content-length: $msg_resp_length\r\n\r\n",
+		$msg_resp;
 	    }
 	    else # Earlier than 1.2 didn't accept content-length
 	    {
 		print "SPAMD/1.0 $resphash{$resp} $resp\r\n",
-		      $msg_resp;
+		$msg_resp;
 	    }
 	    my $was_it_spam;
 	    if($status->is_spam) { $was_it_spam = 'identified spam'; } else { $was_it_spam = 'clean message'; }
 	    $current_user ||= '(unknown)';
 	    logmsg "$was_it_spam for $current_user:$> in ".
-			 sprintf("%3d", time - $start) ." seconds.\n";
+		sprintf("%3d", time - $start) ." seconds.\n";
 
 	    $status->finish();	# added by jm to allow GC'ing
 	}
@@ -354,17 +454,17 @@ for ( $waitedpid = 0;
 	# Needed on SunOS, where SIGCHLD=IGNORE doesn't make it automatic.
 	my $kid;
 	do {
-	  $kid = waitpid(-1,&WNOHANG);
+	    $kid = waitpid(-1,&WNOHANG);
 	} until ($kid <= 0);
     };
 }
 
 sub protocol_error {
-  local $_ = shift;
+    local $_ = shift;
 
-  my $resp = "EX_PROTOCOL";
-  print "SPAMD/1.0 $resphash{$resp} Bad header line: $_\r\n";
-  logmsg "bad protocol: header error: $_";
+    my $resp = "EX_PROTOCOL";
+    print "SPAMD/1.0 $resphash{$resp} Bad header line: $_\r\n";
+    logmsg "bad protocol: header error: $_";
 }
 
 sub spawn {
@@ -394,22 +494,22 @@ sub handle_user
 
     $current_user = $username;
     my ($name,$pwd,$uid,$gid,$quota,$comment,$gcos,$dir,$etc) =
-    				getpwnam($username);
+	getpwnam($username);
 
     if ( !$spamtest->{paranoid} && !defined($uid) ) {
-       #if we are given a username, but can't look it up,
-       #Maybe NIS is down? lets break out here to allow
-       #them to get 'defaults' when we are not running paranoid.
-       logmsg "handle_user() -> unable to find user [$username]!\n";
-       return 0;
+	#if we are given a username, but can't look it up,
+	#Maybe NIS is down? lets break out here to allow
+	#them to get 'defaults' when we are not running paranoid.
+	logmsg "handle_user() -> unable to find user [$username]!\n";
+	return 0;
     }
 
     if ($setuid_to_user) {
-      $> = $uid;
-      if ($> != $uid) {
-	logmsg "setuid to $uid failed";
-	die;		# make it fatal to avoid security breaches
-      }
+	$> = $uid;
+	if ($> != $uid) {
+	    logmsg "setuid to $uid failed";
+	    die;		# make it fatal to avoid security breaches
+	}
     }
 
     my $cf_file = $dir."/.spamassassin/user_prefs";
@@ -452,105 +552,105 @@ sub logmsg
 
 sub kill_handler
 {
-  my ($sig) = @_;
-  logmsg "server killed by SIG$sig, shutting down";
-  close Server;
-  exit 0;
+    my ($sig) = @_;
+    logmsg "server killed by SIG$sig, shutting down";
+    close Server;
+    exit 0;
 }
 
 =head1 NAME
 
-spamd - daemonized version of spamassassin
+    spamd - daemonized version of spamassassin
 
-=head1 SYNOPSIS
+    =head1 SYNOPSIS
 
-spamd [options]
+    spamd [options]
 
-=head1 OPTIONS
+    =head1 OPTIONS
 
-=over
+    =over
 
-=item B<-c>
+    =item B<-c>
 
-Create user preferences files if they don't exist (default: don't)
+    Create user preferences files if they don't exist (default: don't)
 
-=item B<-d>
+    =item B<-d>
 
-Detach from starting process and run in background (daemonize)
+    Detach from starting process and run in background (daemonize)
 
-=item B<-D>
+    =item B<-D>
 
-Print debugging messages
+    Print debugging messages
 
-=item B<-h>
+    =item B<-h>
 
-Print a brief help message, then exit without further action
+    Print a brief help message, then exit without further action
 
-=item B<-L>
+    =item B<-L>
 
-Perform only local tests on all mail.  In other words, skip DNS and other
-network tests.  Works the same as the C<-L> flag to C<spamassassin(1)>
+    Perform only local tests on all mail.  In other words, skip DNS and other
+    network tests.  Works the same as the C<-L> flag to C<spamassassin(1)>
 
-=item B<-A> I<host,...>
+    =item B<-A> I<host,...>
 
-Specify a list of authorized hosts which can connect to this spamd instance.
-The list is one of valid IP addresses, separated by commas.  By default, connections are only accepted from localhost
+    Specify a list of authorized hosts which can connect to this spamd instance.
+    The list is one of valid IP addresses, separated by commas.  By default, connections are only accepted from localhost
 
-=item B<-p> I<port>
+    =item B<-p> I<port>
 
-Optionally specifies the port number for the server to listen on.
+    Optionally specifies the port number for the server to listen on.
 
-=item B<-P>
+    =item B<-P>
 
-Die on user errors (for the user passed from spamc) instead of falling back to user I<nobody> and using the default configuration
+    Die on user errors (for the user passed from spamc) instead of falling back to user I<nobody> and using the default configuration
 
-=item B<-s> I<facility>
+    =item B<-s> I<facility>
 
-Specify the syslog facility to use (default: mail)
+    Specify the syslog facility to use (default: mail)
 
-=item B<-u> I<username>
+    =item B<-u> I<username>
 
-Run as the named user.  The alternative, default behaviour is to setuid() to
-the user running C<spamc>, if C<spamd> is running as root
+    Run as the named user.  The alternative, default behaviour is to setuid() to
+    the user running C<spamc>, if C<spamd> is running as root
 
-=item B<-x>
+    =item B<-x>
 
-Turn off per-user config files.  All users will just get the default
-configuration
+    Turn off per-user config files.  All users will just get the default
+    configuration
 
-=item B<-q>
+    =item B<-q>
 
-Turn on SQL lookups even when per-user config files have been disabled
-with B<-x>. this is useful for spamd hosts which don't have user's
-home directories but do want to load user preferences from an SQL
-database.
+    Turn on SQL lookups even when per-user config files have been disabled
+    with B<-x>. this is useful for spamd hosts which don't have user's
+    home directories but do want to load user preferences from an SQL
+    database.
 
-=back
+    =back
 
-=head1 DESCRIPTION
+    =head1 DESCRIPTION
 
-The purpose of this program is to provide a daemonized version of the
-spamassassin executable.  The goal is improving throughput performance for
-automated mail checking.
+    The purpose of this program is to provide a daemonized version of the
+    spamassassin executable.  The goal is improving throughput performance for
+    automated mail checking.
 
-This is intended to be used alongside C<spamc>, a fast, low-overhead C client
-program.
+    This is intended to be used alongside C<spamc>, a fast, low-overhead C client
+    program.
 
-See the README file in the C<spamd> directory of the SpamAssassin distribution
-for more details.
+    See the README file in the C<spamd> directory of the SpamAssassin distribution
+    for more details.
 
-=head1 SEE ALSO
+    =head1 SEE ALSO
 
-spamc(1)
-spamassassin(1)
+    spamc(1)
+    spamassassin(1)
 Mail::SpamAssassin(3)
 
-=head1 AUTHOR
+    =head1 AUTHOR
 
-Craig R Hughes E<lt>craig@hughes-family.orgE<gt>
+    Craig R Hughes E<lt>craig@hughes-family.orgE<gt>
 
-=head1 PREREQUISITES
+    =head1 PREREQUISITES
 
-C<Mail::SpamAssassin>
+    C<Mail::SpamAssassin>
 
-=cut
+    =cut
