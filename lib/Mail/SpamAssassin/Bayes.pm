@@ -1109,22 +1109,39 @@ sub compute_declassification_distance {
 
 
 # Check to make sure we can tie() the DB, and we have enough entries to do a scan
+# if we're told the caller will untie(), go ahead and leave the db tied.
 sub is_scan_available {
   my $self = shift;
 
   return 0 unless $self->{conf}->{use_bayes};
   return 0 unless $self->{store}->tie_db_readonly();
 
+  # We need the DB to stay tied, so if the journal sync occurs, don't untie!
+  my $caller_untie = $self->{main}->{learn_caller_will_untie};
+  $self->{main}->{learn_caller_will_untie} = 1;
+
+  # Do a journal sync if necessary.  Do this before the nspam_nham_get()
+  # call since the sync may cause an update in the number of messages
+  # learnt.
+  $self->opportunistic_calls(1);
+
+  # Reset the variable appropriately
+  $self->{main}->{learn_caller_will_untie} = $caller_untie;
+
   my ($ns, $nn) = $self->{store}->nspam_nham_get();
 
   if ($ns < $self->{conf}->{bayes_min_spam_num}) {
     dbg("bayes: Not available for scanning, only $ns spam(s) in Bayes DB < ".$self->{conf}->{bayes_min_spam_num});
-    $self->{store}->untie_db();
+    if (!$self->{main}->{learn_caller_will_untie}) {
+      $self->{store}->untie_db();
+    }
     return 0;
   }
   if ($nn < $self->{conf}->{bayes_min_ham_num}) {
     dbg("bayes: Not available for scanning, only $nn ham(s) in Bayes DB < ".$self->{conf}->{bayes_min_ham_num});
-    $self->{store}->untie_db();
+    if (!$self->{main}->{learn_caller_will_untie}) {
+      $self->{store}->untie_db();
+    }
     return 0;
   }
 
@@ -1137,6 +1154,11 @@ sub is_scan_available {
 sub scan {
   my ($self, $permsgstatus, $msg) = @_;
   my $score;
+
+  # When we're doing a scan, we'll guarantee that we'll do the untie,
+  # so override the global setting until we're done.
+  my $caller_untie = $self->{main}->{learn_caller_will_untie};
+  $self->{main}->{learn_caller_will_untie} = 1;
 
   goto skip if ($self->ignore_message($permsgstatus));
 
@@ -1258,9 +1280,19 @@ skip:
     dbg ("bayes: not scoring message, returning undef");
   }
 
+  # Take any opportunistic actions we can take
   $self->opportunistic_calls();
+
+  # Do any cleanup we need to do
   $self->{store}->cleanup();
-  $self->{store}->untie_db();
+
+  # Reset the value accordingly
+  $self->{main}->{learn_caller_will_untie} = $caller_untie;
+
+  # If our caller won't untie the db, we need to do it.
+  if (!$caller_untie) {
+    $self->{store}->untie_db();
+  }
 
   $permsgstatus->{tag_data}{BAYESTCHAMMY} = $tcount_hammy;
   $permsgstatus->{tag_data}{BAYESTCSPAMMY} = $tcount_spammy;
@@ -1271,7 +1303,7 @@ skip:
 }
 
 sub opportunistic_calls {
-  my($self) = @_;
+  my($self, $journal_only) = @_;
 
   # If we're not already tied, abort.
   if (!$self->{store}->db_readable()) {
@@ -1287,7 +1319,7 @@ sub opportunistic_calls {
   }
 
   # handle expiry and syncing
-  if ($self->{store}->expiry_due()) {
+  if (!$journal_only && $self->{store}->expiry_due()) {
     dbg("bayes: opportunistic call found expiry due");
 
     # sync will bring the DB R/W as necessary, and the expire will remove

@@ -737,8 +737,9 @@ sub sync_due {
   # Yes if the file size is larger than the specified maximum size.
   return 1 if (-s _ > $conf->{bayes_journal_max_size});
 
-  # Yes if it's been at least a day since the last sync.
-  return 1 if (time - $vars[7] > 86400);
+  # Yes there has been a sync before, and if it's been at least a day
+  # since that sync.
+  return 1 if (($vars[7] > 0) && (time - $vars[7] > 86400));
 
   # No, I guess not.
   return 0;
