@@ -147,7 +147,9 @@ if ($opt{'ssl'}) {
 }
 
 # This can be changed on the command line with the -s flag
-my $log_facility = $opt{'syslog'} || 'mail';
+my $log_facility = $opt{'syslog'}       || 'mail';
+my $log_socket   = $opt{'sylog-socket'} || 'unix';
+$log_facility = 'stderr' if $log_socket eq 'none';
 
 my $dontcopy = 1;
 if ($opt{'create-prefs'}) { $dontcopy = 0; }
@@ -178,8 +180,8 @@ my $spamtest = Mail::SpamAssassin->new({
 
 if ($log_facility ne 'stderr') {
   eval {
-    setlogsock('unix');
-    syslog('debug', 'spamd starting');  # required to actually open the socket
+    setlogsock($log_socket);
+    syslog('debug', "spamd starting");  # required to actually open the socket
   };
 
   # Solaris sometimes doesn't support UNIX-domain syslog sockets apparently;
@@ -187,13 +189,14 @@ if ($log_facility ne 'stderr') {
   if ($@) {
     eval {
       setlogsock('inet');
-      syslog('debug', 'spamd starting');
+      syslog('debug', "spamd starting");
     };
+    $log_socket = 'inet' unless $@;
   }
 
   # fall back to stderr if all else fails
   if ($@) {
-    warn "failed to setlogsock() on this platform; reporting logs to stderr\n";
+    warn "failed to setlogsock(${log_socket}) on this platform; reporting logs to stderr\n";
     $log_facility = 'stderr';
   }
 }
