@@ -215,18 +215,14 @@ sub get_all_headers {
   if (!defined ($self->{add_From_line}) || $self->{add_From_line} == 1) {
     my $from = $self->{from_line};
     if (!defined $from) {
-      my $f = $self->get_header("From") || "spamassassin\@localhost\n";
+      my $f = $self->get_header("From") || '';
       chomp ($f);
 
       #warn "$f";
       #warn "---";
 
       $f =~ tr/\n/ /s;                            # unwrap the line
-      $f = (split(/,/, $f))[0];                   # look only at the first address
-
-      $f =~ tr/ / /s;                             # squash double spaces
-      $f =~ s/^\s//;                              # and remove leading
-      $f =~ s/\s$//;                              # and trailing spaces
+      $f =~ s/^\s*(.*?)\s*$/$1/;                  # and remove leading and trailing spaces
 
       #warn "$f";
       #warn "---";
@@ -242,6 +238,10 @@ sub get_all_headers {
             if ($c eq '"' or $c eq '(') {         # find next block opening
               $s = $c eq '(' ? ')' : '"';
               $p = $i;
+            }
+            elsif ($c eq ',') {                   # begin of next address;
+              substr($f, $i) = '';                # look at the first one only
+              last;                               # and break here
             }
           }
           else {
@@ -270,7 +270,7 @@ sub get_all_headers {
           substr($f, $p) = '';                    # so remove till the end
         }
       }
-      $f =~ tr/ / /s;                             # squash double spaces again
+      $f =~ s/^\s*(.*?)\s*$/$1/;                  # remove leading and trailing spaces again
 
       #warn "$f";
       #warn "---";
