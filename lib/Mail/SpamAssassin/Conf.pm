@@ -987,8 +987,6 @@ Select the locales to allow from the list below:
     type => $CONF_TYPE_STRING
   });
 
-=back
-
 =head2 NETWORK TEST OPTIONS
 
 =item trusted_networks ip.add.re.ss[/mask] ...   (default: none)
