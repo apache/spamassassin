@@ -1355,11 +1355,6 @@ sub create_default_cf_if_needed {
 
 sub logmsg
 {
-  # install a new handler for SIGPIPE -- this signal has been
-  # found to occur with syslog-ng after syslog-ng restarts.
-  my $orig_sigpipe_handler = $SIG{'PIPE'};
-  $SIG{'PIPE'} = sub { $main::SIGPIPE_RECEIVED++; };
-
   my $msg = join(" ", @_);
   $msg =~ s/[\r\n]+$//;      # remove any trailing newlines
   $msg =~ s/[[:cntrl:]]/_/g; # replace all other control chars with underscores
@@ -1387,6 +1382,10 @@ sub logmsg
   }
   # log to syslog (if logging isn't disabled completely via 'null')
   elsif ($log_socket ne 'none') {
+    # install a new handler for SIGPIPE -- this signal has been
+    # found to occur with syslog-ng after syslog-ng restarts.
+    local $SIG{'PIPE'} = sub { $main::SIGPIPE_RECEIVED++ };
+
     openlog('spamd', 'cons,pid', $log_facility);
 
     eval { syslog('info', "%s", $msg); };
@@ -1418,8 +1417,6 @@ sub logmsg
       }
     }
   }
-
-  $SIG{'PIPE'} = $orig_sigpipe_handler if defined($orig_sigpipe_handler);
 }
 
 sub kill_handler
