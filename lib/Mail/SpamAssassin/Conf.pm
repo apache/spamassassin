@@ -484,11 +484,6 @@ C<modifiers> as regexp modifiers in the usual style.
 If the C<[if-unset: STRING]> tag is present, then C<STRING> will
 be used if the header is not found in the mail message.
 
-=cut
-    if (/^header\s+(\S+)\s+(.*)$/) {
-      $self->add_test ($1, $2, $type_head_tests); next;
-    }
-
 =item header SYMBOLIC_TEST_NAME eval:name_of_eval_method([arguments])
 
 Define a header eval test.  C<name_of_eval_method> is the name of 
@@ -498,6 +493,9 @@ are optional arguments to the function call.
 =cut
     if (/^header\s+(\S+)\s+eval:(.*)$/) {
       $self->add_test ($1, $2, $type_head_evals); next;
+    }
+    if (/^header\s+(\S+)\s+(.*)$/) {
+      $self->add_test ($1, $2, $type_head_tests); next;
     }
 
 =item body SYMBOLIC_TEST_NAME /pattern/modifiers
@@ -511,11 +509,6 @@ Base-64-encoded format if necessary.
 Currently, SpamAssassin also tests 'body' tests against the undecoded
 message as well, but this is likely to change soon.
 
-=cut
-    if (/^body\s+(\S+)\s+(.*)$/) {
-      $self->add_test ($1, $2, $type_body_tests); next;
-    }
-
 =item body SYMBOLIC_TEST_NAME eval:name_of_eval_method([args])
 
 Define a body eval test.  See above.
@@ -523,6 +516,9 @@ Define a body eval test.  See above.
 =cut
     if (/^body\s+(\S+)\s+eval:(.*)$/) {
       $self->add_test ($1, $2, $type_body_evals); next;
+    }
+    if (/^body\s+(\S+)\s+(.*)$/) {
+      $self->add_test ($1, $2, $type_body_tests); next;
     }
 
 =item full SYMBOLIC_TEST_NAME /pattern/modifiers
@@ -533,11 +529,6 @@ The 'full body' of a message is the text, including all textual parts, but
 undecoded.  Currently, SpamAssassin also tests 'full' tests against the decoded
 message as well, but this may change soon.
 
-=cut
-    if (/^full\s+(\S+)\s+(.*)$/) {
-      $self->add_test ($1, $2, $type_full_tests); next;
-    }
-
 =item full SYMBOLIC_TEST_NAME eval:name_of_eval_method([args])
 
 Define a full-body eval test.  See above.
@@ -545,6 +536,9 @@ Define a full-body eval test.  See above.
 =cut
     if (/^full\s+(\S+)\s+eval:(.*)$/) {
       $self->add_test ($1, $2, $type_full_evals); next;
+    }
+    if (/^full\s+(\S+)\s+(.*)$/) {
+      $self->add_test ($1, $2, $type_full_tests); next;
     }
 
 =item razor_config filename
