@@ -1781,6 +1781,7 @@ sub nonspace_length {
   }
 
   $body = join('', @{$body});
+  $body =~ s/\bURI:\S+//g;
   $body =~ tr/ \t\n\r\f//cd;
   $self->{nonspace} = length($body);
 
