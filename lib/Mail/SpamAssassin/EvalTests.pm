@@ -1039,6 +1039,12 @@ sub check_razor {
 sub check_for_base64_enc_text {
   my ($self, $fulltext) = @_;
 
+  # If the message itself is base64-encoded, return positive
+  my $cte = $self->get('Content-Transfer-Encoding');
+  if ( defined $cte && $cte =~ /^\s*base64\s*$/i ) {
+  	return 1;
+  }
+
   if ($$fulltext =~ /\n\n.{0,100}(
     	\nContent-Type:\stext\/.{0,200}
 	\nContent-Transfer-Encoding:\sbase64.*?
