@@ -360,68 +360,7 @@ describe T_DISGUISE_PORN_MUNDANE	Attempts to disguise mundane words used in porn
 # bug 4023
 body T_NO_SCRIP_NEEDED		/no.{1,10}P(?:er|re)scription.{1,10}(?:needed|require|necessary)/i
 
-##########################################################################
-
-# new way to phrase unsubscribe link
-body T_NO_THANKS	m{(?:no thanks|not interested|unsubscribe here).{0,5}http://}i
-
-# rude MUA programs
-body T_RUDE_MUA_1	/Get a capable html e-mailer/i
-body T_RUDE_MUA_2	/Switch to HTML version:/i
-body T_RUDE_MUA_3	/This message contains an HTML formatted message but your email client does/i
-body T_RUDE_MUA_4	/not support the display of HTML. Please view this message in a different/i
-body T_RUDE_MUA_5	/You must have a HTML capable browser to view this email/i
-body T_RUDE_MUA_6	/Your mailer do not support HTML messages. Switch to a better mailer/i
-body T_RUDE_MUA_7	/Votre lecteur d'email doit accepter le HTML/i
-body T_RUDE_MUA_8	eval:html_text_match('comment', 'You need an e-mail client capable of viewing HTML to view this message')
-
-# some header rules
-header T_ORG_MIME_TOOLS		Organization =~ /MIME-tools/
-header T_UA_MIME_TOOLS		User-Agent =~ /MIME-tools/
-header T_X_MIME_AUTOCONVERTED	X-MIME-Autoconverted =~ /Yes/
-header X_ENCODING		exists:X-Encoding
-header X_ENCODING_MIME		X-Encoding =~ /MIME/
-
 ########################################################################
-
-body T_HTML_TAG_EXIST_BGSOUND	eval:html_tag_exists('bgsound')
-
-body T_HTML_IMAGE_SIZE_ZERO	eval:html_test('image_size_zero')
-
-# title trickery
-body __MIME_ATTACHMENT		eval:check_for_mime('mime_attachment')
-
-body T_HTML_TITLE_80		eval:html_text_match('title', '.{80}')
-body T_HTML_TITLE_90		eval:html_text_match('title', '.{90}')
-body T_HTML_TITLE_100		eval:html_text_match('title', '.{100}')
-body T_HTML_TITLE_110		eval:html_text_match('title', '.{110}')
-body T_HTML_TITLE_120		eval:html_text_match('title', '.{120}')
-body T_HTML_TITLE_140		eval:html_text_match('title', '.{140}')
-body T_HTML_TITLE_160		eval:html_text_match('title', '.{160}')
-body T_HTML_TITLE_180		eval:html_text_match('title', '.{180}')
-body T_HTML_TITLE_200		eval:html_text_match('title', '.{200}')
-
-body T_TITLE_SUBJECT_RATIO_20	eval:html_title_subject_ratio('2.0')
-body T_TITLE_SUBJECT_RATIO_25	eval:html_title_subject_ratio('2.5')
-body T_TITLE_SUBJECT_RATIO_30	eval:html_title_subject_ratio('3.0')
-body T_TITLE_SUBJECT_RATIO_35	eval:html_title_subject_ratio('3.5')
-body T_TITLE_SUBJECT_RATIO_40	eval:html_title_subject_ratio('4.0')
-
-meta T_HTML_TITLE_80B		T_HTML_TITLE_80 && !__MIME_ATTACHMENT
-meta T_HTML_TITLE_90B		T_HTML_TITLE_90 && !__MIME_ATTACHMENT
-meta T_HTML_TITLE_100B		T_HTML_TITLE_100 && !__MIME_ATTACHMENT
-meta T_HTML_TITLE_110B		T_HTML_TITLE_110 && !__MIME_ATTACHMENT
-meta T_HTML_TITLE_120B		T_HTML_TITLE_120 && !__MIME_ATTACHMENT
-meta T_HTML_TITLE_140B		T_HTML_TITLE_140 && !__MIME_ATTACHMENT
-meta T_HTML_TITLE_160B		T_HTML_TITLE_160 && !__MIME_ATTACHMENT
-meta T_HTML_TITLE_180B		T_HTML_TITLE_180 && !__MIME_ATTACHMENT
-meta T_HTML_TITLE_200B		T_HTML_TITLE_200 && !__MIME_ATTACHMENT
-
-meta T_TITLE_SUBJECT_RATIO_20B	T_TITLE_SUBJECT_RATIO_20 && !__MIME_ATTACHMENT
-meta T_TITLE_SUBJECT_RATIO_25B	T_TITLE_SUBJECT_RATIO_25 && !__MIME_ATTACHMENT
-meta T_TITLE_SUBJECT_RATIO_30B	T_TITLE_SUBJECT_RATIO_30 && !__MIME_ATTACHMENT
-meta T_TITLE_SUBJECT_RATIO_35B	T_TITLE_SUBJECT_RATIO_35 && !__MIME_ATTACHMENT
-meta T_TITLE_SUBJECT_RATIO_40B	T_TITLE_SUBJECT_RATIO_40 && !__MIME_ATTACHMENT
 
 # deal with those annoying probe-like mails
 # For TVD:
@@ -431,10 +370,15 @@ meta T_TITLE_SUBJECT_RATIO_40B	T_TITLE_SUBJECT_RATIO_40 && !__MIME_ATTACHMENT
 #  1.397   1.5609   0.0000    1.000   0.67    0.01  T_EMPTY_MSG2
 #  No subject exists and no body text and it's to undisclosed-recips:
 #  1.351   1.5102   0.0000    1.000   0.33    0.01  T_EMPTY_MSG3
-meta T_EMPTY_MSG        !__NONEMPTY_BODY
-meta T_EMPTY_MSG2       !__HAS_SUBJECT && !__NONEMPTY_BODY
-meta T_EMPTY_MSG3       UNDISC_RECIPS && !__HAS_SUBJECT && !__NONEMPTY_BODY
 body __NONEMPTY_BODY    /\S/
+meta T_EMPTY_MSG	!__NONEMPTY_BODY
+meta T_EMPTY_MSG2	!__HAS_SUBJECT && !__NONEMPTY_BODY
+meta T_EMPTY_MSG3	UNDISC_RECIPS && !__HAS_SUBJECT && !__NONEMPTY_BODY
+meta T_EMPTY_MSG4	UNDISC_RECIPS && !__NONEMPTY_BODY
+# __MIME_ATTACHMENT defined in 20_html_tests.cf, put a note there
+# if one of these is promoted
+meta T_EMPTY_MSG5	!__MIME_ATTACHMENT && !__HAS_SUBJECT && !__NONEMPTY_BODY
+meta T_EMPTY_MSG6	!__MIME_ATTACHMENT && !__NONEMPTY_BODY
 
 # idea of looking for consonant strings seen in airmax.cf
 header T_NOVOWEL_FROM_6_LC	From =~ /[bcdfghjklmnpqrstvwxyz]{6}/
@@ -511,10 +455,3 @@ uri T_NOVOWEL_URI2_8_LC	m%^https?://[^/]*[bcdfghjklmnpqrstvwxyz]{8}%
 uri T_NOVOWEL_URI2_8_AC	m%^https?://[^/]*[bcdfghjklmnpqrstvwxyz]{8}%i
 uri T_NOVOWEL_URI2_9_LC	m%^https?://[^/]*[bcdfghjklmnpqrstvwxyz]{9}%
 uri T_NOVOWEL_URI2_9_AC	m%^https?://[^/]*[bcdfghjklmnpqrstvwxyz]{9}%i
-
-# idea to allow . in addition to \s seen in airmax.cf's MONOTONE_WORDS*
-# rules, but we'll try it in LONGWORDS to avoid duplication of effort
-body __T_LONGWORDS_A	/\b(?:[a-z]{8,}[\s\.]+){6}/
-body __T_LONGWORDS_B	/\b(?:[a-z]{6,}[\s\.]+){9}/
-body __T_LONGWORDS_C	/\b(?:[a-z]{5,}[\s\.]+){10}/
-meta T_LONGWORDS	(__T_LONGWORDS_A + __T_LONGWORDS_B + __T_LONGWORDS_C > 1)
