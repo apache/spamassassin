@@ -44,7 +44,7 @@ sub cmdline_run {
 	     'learnprob=f'			=> \$opt{'learnprob'},
 	     'randseed=i'			=> \$opt{'randseed'},
 
-             'debug-level|D'                    => \$opt{'debug-level'},
+             'debug-level|D:s'                  => \$opt{'debug-level'},
              'version|V'                        => \$opt{'version'},
              'help|h|?'                         => \$opt{'help'},
 
