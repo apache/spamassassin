@@ -95,10 +95,7 @@ Note for Users Upgrading to SpamAssassin 3.0.0
   user_scores_sql_custom_query config option.
 
 - SpamAssassin runs in "taint mode" by default for improved security.
-  Certain third-party modules, such as Razor v2, may be incompatible with
-  taint mode. For Razor v2, you will need to be using v2.40 of
-  razor-agents or higher which allows taint mode by default.  Earlier
-  versions which are patched to allow taint mode may be used as well.
+  Certain third-party modules may be incompatible with taint mode.
 
 - 2.6x deprecated the use of the "check_bayes_db" script, and it
   has been removed in 3.0.0.  Please see the sa-learn man/pod
