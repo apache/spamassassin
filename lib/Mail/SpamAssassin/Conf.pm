@@ -1328,27 +1328,6 @@ Specify options to the pyzor command. Please note that only
       $self->{pyzor_options} = $1; next;
     }
 
-=item num_check_received { integer }   (default: 9)
-
-How many received lines from and including the original mail relay
-do we check in RBLs (at least 1 or 2 is recommended).
-
-Note that for checking against dialup lists, you can call C<check_rbl()> with a
-special set name of B<set-notfirsthop> and this rule will only be matched
-against the relays except for the very first one; this allows SpamAssassin to
-catch dialup-sent spam, without penalizing people who properly relay through
-their ISP.
-
-See the C<trusted_networks> option to specify which relays you trust.  This is
-a much better way to control DNSBL-checking behaviour, and C<num_check_received>
-is deprecated as a result.
-
-=cut
-
-    if (/^num_check_received\s+(\d+)$/) {
-      $self->{num_check_received} = $1+0; next;
-    }
-
 =item trusted_networks ip.add.re.ss[/mask] ...   (default: none)
 
 What networks or hosts are 'trusted' in your setup.   B<Trusted> in this case
@@ -1799,6 +1778,27 @@ add_header all Pyzor _PYZOR_
 	$self->{headers_ham}->{"Pyzor"} = "_PYZOR_";
       }
       next;
+    }
+
+=item num_check_received { integer }   (default: 9)
+
+How many received lines from and including the original mail relay
+do we check in RBLs (at least 1 or 2 is recommended).
+
+Note that for checking against dialup lists, you can call C<check_rbl()> with a
+special set name of B<set-notfirsthop> and this rule will only be matched
+against the relays except for the very first one; this allows SpamAssassin to
+catch dialup-sent spam, without penalizing people who properly relay through
+their ISP.
+
+This option is deprecated in version 2.60 and later.  It will be removed
+in a future version.  Please use the C<trusted_networks> option instead
+(it is a much better way to control DNSBL-checking behaviour).
+
+=cut
+
+    if (/^num_check_received\s+(\d+)$/) {
+      $self->{num_check_received} = $1+0; next;
     }
 
 =item use_terse_report { 0 | 1 }   (default: 1)
