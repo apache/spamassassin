@@ -120,6 +120,9 @@ tflags MIME_CHARSET_FARAWAY	userconf
 body MPART_ALT_DIFF	eval:multipart_alternative_difference('99', '100')
 describe MPART_ALT_DIFF	HTML and text parts are different
 
+body MPART_ALT_DIFF_COUNT	eval:multipart_alternative_difference_count('3', '1')
+describe MPART_ALT_DIFF_COUNT	HTML and text parts are different
+
 ###########################################################################
 
 body CHARSET_FARAWAY		eval:check_for_faraway_charset()
