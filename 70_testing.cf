@@ -158,7 +158,7 @@ body T_ENTITY_OTHER2_B		/\&\#(?:33|39|40|46|47)\;/
 meta T_ENTITY_OTHER2_M		(T_ENTITY_OTHER2_R || T_ENTITY_OTHER2_B)
 
 # according to the postmaster at qualcomm, no mail is sent from
-eudora.com, but it's heavily joe-jobbed ...
+# eudora.com, but it's heavily joe-jobbed ...
 header T_FROM_EUDORA            From:addr =~ /\@eudora\.com/i
 
 # similar concept for Delphi.com.  Was an ISP, now a car company!
