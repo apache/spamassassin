@@ -168,7 +168,7 @@ sub callback {
     }
 
     if ($plugin->{_inhibit_further_callbacks}) {
-      dbg("plugin: $plugin inhibited further callbacks");
+      # dbg("plugin: $plugin inhibited further callbacks");
       last;
     }
   }
