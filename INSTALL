@@ -217,9 +217,11 @@ installed:
 
     If you plan to run SpamAssassin on a multiprocessor machine, or one
     with a hyperthreaded CPU like a Pentium 4, it is strongly recommended
-    that you ensure version 2.13 (or newer) is installed.  This fixes a
+    that you ensure version 2.12 (or newer) is installed.  This fixes a
     bug that causes hangs under heavy load with that hardware
-    configuration.
+    configuration.  (The fix might also be in version 2.10 already,
+    see <http://bugzilla.spamassassin.org/show_bug.cgi?id=4010> for more
+    information.)
 
     Debian: apt-get install libstorable-perl
     Gentoo: emerge dev-perl/Storable
