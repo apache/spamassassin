@@ -184,46 +184,6 @@ sub razor_report {
       undef $response;
     }
   }
-  elsif ($type eq 'report') { # fall back to Razor1 but only if we are reporting spam
-    my @msg = split (/^/m, $fulltext);
-    my $config = $self->{conf}->{razor_config};
-    $config ||= $self->{main}->sed_path ("~/razor.conf");
-    my %options = (
-      'debug'     => $Mail::SpamAssassin::DEBUG->{enabled}
-    );
-
-    eval {
-      require Razor::Client;
-      require Razor::Agent;
-      local ($^W) = 0;            # argh, warnings in Razor
-  
-      local $SIG{ALRM} = sub { die "alarm\n" };
-      alarm $timeout;
-  
-      my $rc = Razor::Client->new ($config, %options);
-      adie ("Problem while loading Razor: $!") if (!$rc);
-  
-      my $ver = $Razor::Client::VERSION;
-      if ($ver >= 1.12) {
-        my $respary = $rc->report ('spam' => \@msg);
-        for my $resp (@$respary) { $response .= $resp; }
-      } else {
-        $response = $rc->report (\@msg);
-      }
-  
-      alarm 0;
-      dbg ("Razor: spam reported, response is \"$response\".");
-    };
-    
-    if ($@) {
-      if ($@ =~ /alarm/) {
-        dbg ("razor report timed out after $timeout secs.");
-      } else {
-        warn "razor-report failed: $! $@";
-      }
-      undef $response;
-    }
-  }
 
   $self->leave_helper_run_mode();
 
@@ -361,8 +321,7 @@ sub delete_fulltext_tmpfile { Mail::SpamAssassin::PerMsgStatus::delete_fulltext_
 sub is_pyzor_available { Mail::SpamAssassin::PerMsgStatus::is_pyzor_available(@_); }
 sub is_dcc_available { Mail::SpamAssassin::PerMsgStatus::is_dcc_available(@_); }
 sub is_razor_available {
-  Mail::SpamAssassin::PerMsgStatus::is_razor2_available(@_) ||
-  Mail::SpamAssassin::PerMsgStatus::is_razor1_available(@_);
+  Mail::SpamAssassin::PerMsgStatus::is_razor2_available(@_);
 }
 
 sub enter_helper_run_mode { Mail::SpamAssassin::PerMsgStatus::enter_helper_run_mode(@_); }

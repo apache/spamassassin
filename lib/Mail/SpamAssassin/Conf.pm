@@ -120,7 +120,6 @@ sub new {
 
   $self->{num_check_received} = 2;
 
-  $self->{use_razor1} = 1;
   $self->{use_razor2} = 1;
   $self->{razor_config} = undef;
   $self->{razor_timeout} = 10;
@@ -1205,17 +1204,6 @@ See dialup_codes for more details and an example
 
     if (/^num_check_received\s+(\d+)$/) {
       $self->{num_check_received} = $1+0; next;
-    }
-
-
-=item use_razor1 ( 0 | 1 )		(default 1)
-
-Whether to use Razor version 1, if it is available.
-
-=cut
-
-    if (/^use_razor1\s+(\d+)$/) {
-      $self->{use_razor1} = $1; next;
     }
 
 =item use_razor2 ( 0 | 1 )		(default 1)

@@ -2331,21 +2331,6 @@ sub _check_attachments {
 # FULL-MESSAGE TESTS:
 ###########################################################################
 
-sub check_razor1 {
-  my ($self) = @_;
-
-  return 0 unless ($self->is_razor1_available());
-  return 0 if ($self->{already_checked_razor1});
-
-  $self->{already_checked_razor1} = 1;
-
-  # note: we don't use $fulltext. instead we get the raw message,
-  # unfiltered, for razor1 to check.  ($fulltext removes MIME
-  # parts etc.)
-  my $full = $self->get_full_message_as_text();
-  return $self->razor1_lookup (\$full);
-}
-
 sub check_razor2 {
   my ($self) = @_;
 

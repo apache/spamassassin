@@ -15,7 +15,6 @@ require 5.005;
 # LOCAL_RULES_DIR      +  $(INST_SYSCONFDIR)/mail/spamassassin
 # INST_SITELIB	       +  $(INSTALLSITELIB)
 #
-# RUN_RAZOR1_TESTS        (prompt if Razor 1 found)
 # RUN_RAZOR2_TESTS        (prompt if Razor 2 found)
 #
 # PERL_BIN             *  current path to Perl
@@ -38,9 +37,8 @@ require 5.005;
 # You can also override the automatic ./configure step by just
 # running that yourself first. But this should not be necessary.
 #
-# The Razor prompts ("run Razor 1 tests?" and "run Razor 2 tests?"
-# can be overridden by setting RUN_RAZOR1_TESTS or RUN_RAZOR2_TESTS to
-# "y" or "n".
+# The Razor prompt ("run Razor 2 tests?") can be overridden by setting
+# RUN_RAZOR2_TESTS to "y" or "n".
 #
 ###########################################################################
 
@@ -57,7 +55,6 @@ $ExtUtils::MakeMaker::Recognized_Att_Keys{'LOCAL_RULES_DIR'} = 1;
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'PKG_LOCAL_RULES_DIR'} = 1;
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'INST_SITELIB'} = 1;
 
-$ExtUtils::MakeMaker::Recognized_Att_Keys{'RUN_RAZOR1_TESTS'} = 1;
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'RUN_RAZOR2_TESTS'} = 1;
 
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'PERL_BIN'} = 1;
@@ -130,7 +127,7 @@ my %makefile = (
 	'spamd/spamc$(EXE_EXT) spamd/libspamc.so spamd/spamd doc '.
 	'spamd/sslspamc$(EXE_EXT) spamd/libsslspamc.so '.
 	'binaries.mk config.h config.status config.cache config.log '.
-	'qmail/qmail-spamc t/do_razor t/do_razor1 t/do_razor2 '
+	'qmail/qmail-spamc t/do_razor2 '
     },
 
     'AUTHOR' => 'Justin Mason <jm@jmason.org>',
@@ -177,16 +174,13 @@ WriteMakefile(%makefile);
 # again....
 my $argv = join (' ', @ARGV);
 
-for (my $v = 1; $v <= 2; $v++) {
+for (my $v = 2; $v <= 2; $v++) {
   my $do;
 
   $do = ($argv =~ /\bRUN_RAZOR${v}_TESTS?=(.)/)[0];
 
   if (!defined($do)) {
-    if ($v == 1) {
-      $do = ! eval { require Razor::Client };
-    }
-    elsif ($v == 2) {
+    if ($v == 2) {
       $do = ! eval { require Razor2::Client::Agent };
     }
 
