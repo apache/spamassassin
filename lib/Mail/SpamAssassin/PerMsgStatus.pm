@@ -1200,17 +1200,18 @@ sub do_body_tests {
     $evalstr .= '
       return if ('.$score.' > 0) && $self->{stop_at_threshold} && $self->is_spam();
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
-        # call procedurally as it is faster. also note $_ is passed implicitly as a global
-        '.$rulename.'_body_test($self);
+        # call procedurally as it is faster.
+        '.$rulename.'_body_test($self,@_);
       }
     ';
     $evalstr2 .= '
     sub '.$rulename.'_body_test {
            my $self = shift;
-           # note: $_ must be the current line being checked.
-           if ('.$pat.') { 
-	      $self->got_body_pattern_hit (q{'.$rulename.'}); 
-              '. ($debugenabled ? ran_rule_debug_code ($rulename,"body-text regex", 2) : '') . '
+           foreach ( @_ ) {
+             if ('.$pat.') { 
+	        $self->got_body_pattern_hit (q{'.$rulename.'}); 
+                '. ($debugenabled ? ran_rule_debug_code ($rulename,"body-text regex", 2) : '') . '
+	     }
 	   }
     }
     ';
@@ -1225,10 +1226,7 @@ sub do_body_tests {
 
   sub _body_tests {
     my \$self = shift;
-    foreach (\@_) {
-        $evalstr
-	;
-    }
+    $evalstr;
   }
 
   1;
@@ -1400,16 +1398,17 @@ sub do_body_uri_tests {
     $evalstr .= '
       return if ('.$score.' > 0) && $self->{stop_at_threshold} && $self->is_spam();
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
-        '.$rulename.'_uri_test($self, $_); # call procedurally for speed
+        '.$rulename.'_uri_test($self, @_); # call procedurally for speed
       }
     ';
     $evalstr2 .= '
     sub '.$rulename.'_uri_test {
        my $self = shift;
-       $_ = shift;
-       if ('.$pat.') { 
-          $self->got_uri_pattern_hit (q{'.$rulename.'});
-          '. ($debugenabled ? ran_rule_debug_code ($rulename,"uri test", 4) : '') . '
+       foreach ( @_ ) {
+         if ('.$pat.') { 
+            $self->got_uri_pattern_hit (q{'.$rulename.'});
+            '. ($debugenabled ? ran_rule_debug_code ($rulename,"uri test", 4) : '') . '
+         }
        }
     }
     ';
@@ -1424,10 +1423,7 @@ sub do_body_uri_tests {
 
   sub _body_uri_tests {
     my \$self = shift;
-    foreach (\@_) {
-        $evalstr
-    ;
-    }
+    $evalstr;
   }
 
   1;
@@ -1484,16 +1480,17 @@ sub do_rawbody_tests {
     $evalstr .= '
       return if ('.$score.' > 0) && $self->{stop_at_threshold} && $self->is_spam();
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
-         '.$rulename.'_rawbody_test($self, $_); # call procedurally for speed
+         '.$rulename.'_rawbody_test($self, @_); # call procedurally for speed
       }
     ';
     $evalstr2 .= '
     sub '.$rulename.'_rawbody_test {
        my $self = shift;
-       $_ = shift;
-       if ('.$pat.') { 
-          $self->got_body_pattern_hit (q{'.$rulename.'});
-          '. ($debugenabled ? ran_rule_debug_code ($rulename,"body_pattern_hit", 8) : '') . '
+       foreach ( @_ ) {
+         if ('.$pat.') { 
+            $self->got_body_pattern_hit (q{'.$rulename.'});
+            '. ($debugenabled ? ran_rule_debug_code ($rulename,"body_pattern_hit", 8) : '') . '
+         }
        }
     }
     ';
@@ -1508,10 +1505,7 @@ sub do_rawbody_tests {
 
   sub _rawbody_tests {
     my \$self = shift;
-    foreach (\@_) {
-        $evalstr
-	;
-    }
+    $evalstr;
   }
 
   1;
