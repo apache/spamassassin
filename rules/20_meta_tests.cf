@@ -51,10 +51,11 @@ describe NIGERIAN_BODY	Message body indicates a Nigerian spam
 body __NIGERIAN_BODY_1	/\b(?:financial|confiden(?:tial|ce)|safe(?:ty)?|mutual|secret|success(?:ful)?|risk-?free|details|business).{1,30}\btransaction\b/i
 body __NIGERIAN_BODY_2	/\btransaction\b.{1,30}\b(?:magnitude|diplomatic|strict|absolute|secret|confiden(?:tial|ce)|guarantee)/i
 body __NIGERIAN_BODY_3	/BASED ON INFORMATION GATHERED ABOUT YOU, WE BELIEVE\s*YOU WOULD BE IN A POSITION TO HELP US IN TRANSFER/i
-body __NIGERIAN_BODY_4	/\bBarrister\b/i
+#body __NIGERIAN_BODY_4	/\bBarrister\b/i
+body __NIGERIAN_BODY_5 /\bpoisoned (?:to death )?by his business associate/i
 body __NIGERIAN_BODY_6	/\bIt is with trust and confidentiality\b/i
-body __NIGERIAN_BODY_7	/\bU\.?S\.?(?:D\.?)?\s*(?:\$\s*)?(?:\d+,\d+,\d+|\d+\.\d+\s*milli?on)/i
-body __NIGERIAN_BODY_8	/\b(?:You may be surprised to receive this letter from me|this letter (?:may come to you as|will be) a surprise)\b/i
+body __NIGERIAN_BODY_7	/\bU\.?S\.?(?:D\.?)?\s*(?:\$\s*)?(?:\d+,\d+,\d+|\d+\.\d+\.\d+|\d+(?:\.\d+)?\s*milli?on)/i
+body __NIGERIAN_BODY_8	/\b(?:You may be sur?prised to receive this letter from me|this (?:letter|mail) (?:(?:may|will) come to you as|will be) a sur?prise)\b/i
 body __NIGERIAN_BODY_9	/\bthe .{1,10} son of\b/i
 body __NIGERIAN_BODY_10	/\burgent and(?: very)? (?:profitable|confidential) business (?:proposal|proposition)\b/i
 body __NIGERIAN_BODY_11	/\bassistance to relocate\b/i
@@ -66,7 +67,7 @@ body __NIGERIAN_BODY_16	/\bI am a Private Investigator\b/i
 body __NIGERIAN_BODY_17	/\bWRITING THIS LETTER TO SOLICIT\b/i
 body __NIGERIAN_BODY_18	/\bSEVERAL ATTEMPTS HAVE BEEN MADE WITH OUT SUCCESS\b/i
 body __NIGERIAN_BODY_19	/\bMY PROPOSAL IS ACCEPTABLE\b/i
-body __NIGERIAN_BODY_20	/\d+%\)? (?:of the total (?:amount|sum|money)|for you|for my investment|for (?:us|me))\b/i
+body __NIGERIAN_BODY_20	/\d+%\)? (?:of (?:the total|this|the) (?:amount|sum|money)|for you|for my investment|for (?:us|me)|.{0,15}\bfor your expenses)\b/i
 body __NIGERIAN_BODY_21 /\bforeign account\b/i
 body __NIGERIAN_BODY_22 /\btrust (?:and|&) confidentiality\b/i
 body __NIGERIAN_BODY_25	/\bvery beneficial to both of us\b/i
@@ -84,6 +85,7 @@ body __NIGERIAN_BODY_36 /\battached to ticket number\b/i
 body __NIGERIAN_BODY_37 /\ball funds will be returned\b/i
 body __NIGERIAN_BODY_38 /\b(?:International\b.{1,15}\bLottery|lottery\b.{1,15}\binternational)\b/i
 body __NIGERIAN_BODY_39 /\bYOUR FULL NAMES?,?(?:and|&)? FULL CONTACT ADDRESS\b/i
+body __NIGERIAN_BODY_40	/\bsend .{1,30}\byour telefax Numbers?\b/i
 
 
 meta NIGERIAN_SUBJECT	(__NIGERIAN_SUBJECT.+ +) > 0
@@ -95,6 +97,6 @@ header __NIGERIAN_SUBJECT4	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*i need your urgen
 header __NIGERIAN_SUBJECT5	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*treat as urgent\b/i
 header __NIGERIAN_SUBJECT6	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*(?:family )?assis?tance\s*$/i
 header __NIGERIAN_SUBJECT7	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*[!*_-]+\s*(?:business|urgent)/i
-header __NIGERIAN_SUBJECT8	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*(?:appeal|request) for urgent/i
+header __NIGERIAN_SUBJECT8	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*(?:appeal|request) for urgent assistance\b/i
 
 ##############################################################################
