@@ -1198,20 +1198,11 @@ sub subject_is_all_caps {
    my ($self) = @_;
    my $subject = $self->get('Subject');
 
-   return 0 if subject_missing($self);
-
-   $subject =~ s/[^a-zA-Z]//;
-
-   return 0 if $subject !~ / /; # Don't match one word subjects!
-
+   $subject =~ s/^\s+//;
+   $subject =~ s/\s+$//;
+   return 0 if $subject !~ /\s/;	# don't match one word subjects
+   $subject =~ s/[^a-zA-Z]//g;		# only look at letters
    return length($subject) && ($subject eq uc($subject));
-}
-
-sub subject_missing {
-   my ($self) = @_;
-   my $subject = $self->get('Subject');
-   chomp($subject);
-   return length($subject) ? 0 : 1;
 }
 
 ###########################################################################
