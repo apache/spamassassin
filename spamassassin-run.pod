@@ -59,6 +59,7 @@ Options:
  --add-addr-to-whitelist=addr      Add addr to persistent address whitelist
  --add-addr-to-blacklist=addr      Add addr to persistent address blacklist
  --remove-addr-from-whitelist=addr Remove addr from persistent address list
+ --progress                        Print progress bar
  -D, --debug [area=n,...]          Print debugging messages
  -V, --version                     Print version
  -h, --help                        Print usage message
@@ -233,6 +234,13 @@ the default directories (usually C</etc/mail/spamassassin> or similar).
 =item B<-p> I<prefs>, B<--prefspath>=I<prefs>, B<--prefs-file>=I<prefs>
 
 Read user score preferences from I<prefs> (usually C<$HOME/.spamassassin/user_prefs>).
+
+=item B<--progress>
+
+Prints a progress bar (to STDERR) showing the current progress.  This option
+will only be useful if you are redirecting STDOUT (and not STDERR).  In the
+case where no valid terminal is found this option will behave very much like
+the --showdots option in other SpamAssassin programs.
 
 =item B<-D> [I<area,...>], B<--debug> [I<area,...>]
 
