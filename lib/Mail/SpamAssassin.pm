@@ -40,6 +40,7 @@ package Mail::SpamAssassin;
 
 use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::PerMsgStatus;
+use Mail::SpamAssassin::Reporter;
 use Carp;
 use File::Basename;
 use File::Path;
@@ -153,9 +154,73 @@ sub check {
   local ($_);
 
   $self->init();
-  my $msg = new Mail::SpamAssassin::PerMsgStatus ($self, $audit);
+  my $mail = $self->encapsulate_audit ($audit);
+  my $msg = new Mail::SpamAssassin::PerMsgStatus ($self, $mail);
   $msg->check();
   $msg;
+}
+
+###########################################################################
+
+=item $f->report_as_spam ($mail)
+
+Report a mail, encapsulated in a C<Mail::Audit> object, as human-verified spam.
+This will submit the mail message to live databases of spam, allowing other
+users to block this message.
+
+=cut
+
+sub report_as_spam {
+  my ($self, $audit) = @_;
+  local ($_);
+
+  $self->init();
+  my $mail = $self->encapsulate_audit ($audit);
+  my $msg = new Mail::SpamAssassin::Reporter ($self, $mail);
+  $msg->report();
+}
+
+###########################################################################
+
+sub encapsulate_audit {
+  my ($self, $audit) = @_;
+
+  if (!defined $self->{mail_audit_supports_encapsulation}) {
+    # test Mail::Audit for new-style encapsulation of the Mail::Internet
+    # message object.
+    my ($hdr, $val);
+    foreach my $hdrtest (qw(From To Subject Message-Id Date Sender)) {
+      $val = $audit->get ($hdrtest);
+      if (defined $val) { $hdr = $hdrtest; last; }
+    }
+
+    if (!defined $val) {                  # ah, just make one up
+      $hdr = 'X-SpamAssassin-Test-Header'; $val = 'x';
+    }
+
+    # now try using one of the new methods...
+    if (eval q{
+		  $audit->replace_header ($hdr, $val);
+		  1;
+	  })
+    {
+      dbg ("using Mail::Audit message-encapsulation code");
+      $self->{mail_audit_supports_encapsulation} = 1;
+    } else {
+      dbg ("using Mail::Audit exposed-message-object code");
+      $self->{mail_audit_supports_encapsulation} = 0;
+    }
+  }
+
+  if ($self->{mail_audit_supports_encapsulation}) {
+    return new Mail::SpamAssassin::EncappedMessage ($self, $audit);
+  } else {
+    return new Mail::SpamAssassin::ExposedMessage ($self, $audit);
+  }
+}
+
+sub dbg {
+  if ($Mail::SpamAssassin::DEBUG > 0) { warn "debug: ".join('',@_)."\n"; }
 }
 
 1;

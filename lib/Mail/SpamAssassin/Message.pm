@@ -39,11 +39,18 @@ sub new {
 ###########################################################################
 
 sub get_header {
-  die "unimpled base method";
+  my ($self, $hdr) = @_;
+  $self->{audit}->get ($hdr);
 }
 
 sub put_header {
-  die "unimpled base method";
+  my ($self, $hdr, $text) = @_;
+  $self->{audit}->put_header ($hdr, $text);
+}
+
+sub get_all_headers {
+  my ($self) = @_;
+  $self->{audit}->header();
 }
 
 sub replace_header {

@@ -31,40 +31,24 @@ sub new {
 
 ###########################################################################
 
-sub get_header {
-  my ($self, $hdr) = @_;
-  my $mail = $self->{audit};
-  $mail->get ($hdr);
-}
-
-sub put_header {
-  my ($self, $hdr, $text) = @_;
-  my $mail = $self->{audit};
-  $mail->put_header ($hdr, $text);
-}
-
 sub replace_header {
-  my ($self, $hdr, $text) = @_;
-  my $mail = $self->{audit};
-  $mail->{obj}->head->replace ($hdr, $text);
+  my ($self, $hdr, $val) = @_;
+  $self->{audit}->{obj}->head->replace ($hdr, $val);
 }
 
 sub delete_header {
   my ($self, $hdr) = @_;
-  my $mail = $self->{audit};
-  $mail->{obj}->head->delete ($hdr);
+  $self->{audit}->{obj}->head->delete ($hdr);
 }
 
 sub get_body {
   my ($self) = @_;
-  my $mail = $self->{audit};
-  $mail->{obj}->body();
+  $self->{audit}->{obj}->body();
 }
 
 sub replace_body {
   my ($self, $aryref) = @_;
-  my $mail = $self->{audit};
-  $mail->{obj}->body ($aryref);
+  $self->{audit}->{obj}->body ($aryref);
 }
 
 1;

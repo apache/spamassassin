@@ -6,6 +6,7 @@ package Mail::SpamAssassin::EvalTests;
 package Mail::SpamAssassin::PerMsgStatus;
 
 use Mail::SpamAssassin::Conf;
+use IO::Socket;
 use Carp;
 use strict;
 
@@ -199,6 +200,78 @@ sub check_for_very_long_text {
 }
 
 ###########################################################################
+# FULL-MESSAGE TESTS:
+###########################################################################
+
+sub check_razor {
+  my ($self, $fulltext) = @_;
+
+  return 0 unless ($self->is_razor_available());
+  return $self->razor_lookup ($fulltext);
+}
+
+###########################################################################
+# non-public methods.
+
+sub is_razor_available {
+  my ($self) = @_;
+  my $razor_avail = 0;
+
+  eval '
+    use Razor::Signature; 
+    use Razor::String;
+    $razor_avail = 1;
+    1;
+  ';
+
+  dbg ("is Razor available? $razor_avail");
+
+  return $razor_avail;
+}
+
+sub razor_lookup {
+  my ($self, $fulltext) = @_;
+
+  my @msg = split (/\n/, $fulltext);
+
+  my $Rserver = $self->{main}->{conf}->{razor_host};
+  my $Rport   = $self->{main}->{conf}->{razor_port};
+
+  my $sock = new IO::Socket::INET PeerAddr => $Rserver,
+				  PeerPort => $Rport, 
+				  Proto    => 'tcp';
+  if (!$sock) {
+    dbg ("failed to connect to Razor server $Rserver:$Rport, ignoring Razor");
+    return 0;
+  }
+
+  my $sig = 'x';
+  my $response = '';
+
+  eval q{
+    use Razor::String;
+    use Razor::Signature; 
+
+    $sig = Razor::Signature->hash (\@msg);
+    undef @msg;		# no longer needed
+
+    my %message;
+    $message{'key'} = $sig;
+    $message{'action'} = "lookup";
+    my $str = Razor::String::hash2str ( {%message} );
+
+    $sock->autoflush;
+    print $sock "$str\n.\n";
+    $response = join ('', <$sock>);
+    undef $sock;
+
+  1;} or warn "razor check failed: $! $@";
+
+  if ($response =~ /Positive $sig/) { return 1; }
+  return 0;
+}
+
+###########################################################################
 
 sub load_resolver {
   my ($self) = @_;
@@ -251,8 +324,8 @@ done:
   return $IS_DNS_AVAILABLE;
 }
 
-sub dbg {
-  if ($Mail::SpamAssassin::DEBUG > 0) { warn "debug: ".join('',@_)."\n"; }
-}
+###########################################################################
+
+sub dbg { Mail::SpamAssassin::dbg (@_); }
 
 1;
