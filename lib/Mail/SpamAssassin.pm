@@ -94,7 +94,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.135 2002/10/30 13:18:08 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.136 2002/10/30 15:41:09 jmason Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -396,10 +396,17 @@ sub finish_learner {
 
 Signals that the current user has changed (possibly using C<setuid>), meaning
 that SpamAssassin should close any per-user databases it has open, and re-open
-using ones appropriate for the new user.  You may pass the following
-attribute-value pairs to this method:
+using ones appropriate for the new user.
+
+Note that this should be called I<after> reading any per-user configuration, as
+that data may override some paths opened in this method.  You may pass the
+following attribute-value pairs:
 
 =over 4
+
+=item username
+
+The username of the user.
 
 =item user_dir
 

@@ -629,10 +629,16 @@ sub handle_user
     #
     if ($opt{'vpopmail'} && $opt{'username'}) {
 	create_default_cf_if_needed ($cf_file, $username, $dir);
+	$spamtest->read_scoreonly_config ($cf_file);
+	$spamtest->signal_user_changed ({ username => $username,
+					user_dir => "$dir/.spamassassin" });
+
     } else {
 	create_default_cf_if_needed ($cf_file, $username);
+	$spamtest->read_scoreonly_config ($cf_file);
+	$spamtest->signal_user_changed ({ username => $username });
     }
-    $spamtest->read_scoreonly_config ($cf_file);
+
     return 1;
 }
 
@@ -646,11 +652,6 @@ sub handle_virtual_user
 	# contain per-user preferences.
 	my $dir=$opt{'virtual-config'};
 	my $file="$dir/$username.prefs";
-
-	# TODO: assume that $dir/$username will be a writable directory we can
-	# use for AWL, Bayes dbs etc.
-	$spamtest->signal_user_changed ({ username => $username,
-					    user_dir => "$dir/$username" });
 
 	# If the user file is not there, look for a default.prefs
 	if(! -f $file) {
@@ -668,6 +669,11 @@ sub handle_virtual_user
 
 	# Found a config, load it.
 	$spamtest->read_scoreonly_config($file);
+
+	# TODO: assume that $dir/$username will be a writable directory we can
+	# use for AWL, Bayes dbs etc.
+	$spamtest->signal_user_changed ({ username => $username,
+					    user_dir => "$dir/$username" });
 	return(1);
 }
 
@@ -703,14 +709,13 @@ sub handle_user_setuid_with_sql
         }
     }
     $spamtest->load_scoreonly_sql ($username);
+
+    $spamtest->signal_user_changed ({ username => $username });
     return 1;
 }
 
 sub create_default_cf_if_needed {
     my ($cf_file, $username, $userdir) = @_;
-
-    $spamtest->signal_user_changed ({ username => $username,
-					user_dir => $userdir });
 
     # Parse user scores, creating default .cf if needed:
     if( ! -r $cf_file && ! $spamtest->{'dont_copy_prefs'})
