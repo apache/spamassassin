@@ -1,4 +1,4 @@
-# $Id: MIME.pm,v 1.7 2003/10/02 19:29:36 felicity Exp $
+# $Id: MIME.pm,v 1.8 2003/10/02 22:59:00 quinlan Exp $
 
 package Mail::SpamAssassin::MIME;
 use strict;
@@ -90,23 +90,7 @@ sub add_body_part {
     $part->{$k} = $v;
   }
 
-  ## RENDER
-  # Some parts, like HTML, should be rendered to get rid of the markup,
-  # comments, invisible text, etc.
-  my $rendered;
-
-  # If it's a known HTML message, render it.
-  if ($type eq "text/html") {
-    # Render the HTML
-    $rendered = [];
-  }
-
-  # If a rendered part exists, add it to the part.
-  if ( defined $rendered ) {
-    $part->{rendered} = $rendered;
-  }
-
-  ## Add the part to body_parts
+  # Add the part to body_parts
   push @{ $self->{body_parts} }, $part;
 }
 

@@ -22,6 +22,8 @@ use strict;
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::MIME;
+use Mail::SpamAssassin::PerMsgStatus; # HTML
+use Mail::SpamAssassin::HTML;
 use MIME::Base64;
 use MIME::QuotedPrint;
 
@@ -343,20 +345,21 @@ sub _decode_header {
 }
 
 sub _decode_body {
-  my($self, $msg, $part_msg, $boundary, $body ) = @_;
+  my ($self, $msg, $part_msg, $boundary, $body) = @_;
 
   dbg("decoding attachment\n");
 
-  my ( $type, $content, $filename ) = $self->_decode( $part_msg, $body );
+  my ($type, $decoded, $name) = $self->_decode($part_msg, $body);
 
   my $opts = {
-  	decoded => $content,
+  	decoded => $decoded,
 	raw => $body,
 	boundary => $boundary,
 	headers => $part_msg->{headers},
 	raw_headers => $part_msg->{raw_headers},
   };
-  $opts->{name} = $filename if ( $filename );
+  $opts->{name} = $name if $name;
+  $opts->{rendered} = _render_text($decoded) if $type =~ m/^text/i;
 
   $msg->add_body_part( $type, $opts );
 }
@@ -411,6 +414,35 @@ sub _decode {
     # No encoding, so just point to the raw data ...
     return $type, $body, $filename;
   }
+}
+
+# render text/plain as text/html based on a heuristic which simulates
+# a certain common mail client
+sub html_near_start {
+  my ($pad) = @_;
+
+  my $count = 0;
+  $count += ($pad =~ tr/\n//d) * 2;
+  $count += ($pad =~ tr/\n//cd);
+  return ($count < 24);
+}
+
+sub _render_text {
+  my ($decoded) = @_;
+
+  my $text = join('', @{ $decoded });
+
+  # render text/plain as text/html based on a heuristic which simulates
+  # a certain common mail client
+  if ($text =~ m/^(.{0,18}<(?:$Mail::SpamAssassin::PerMsgStatus::re_start)(?:\s.*?)?>)/ois &&
+      html_near_start($1))
+  {
+    $text = "rendered as text/html";
+  }
+  else {
+    $text = "rendered as text/plain";
+  }
+  return $text;
 }
 
 sub dbg { Mail::SpamAssassin::dbg (@_); }
