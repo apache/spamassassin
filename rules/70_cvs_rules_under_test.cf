@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.594 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.595 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -95,11 +95,10 @@ header T_RCVD_IN_FIVETEN_FREE	rbleval:check_rbl_sub('fiveten', '127.0.0.12')
 tflags T_RCVD_IN_FIVETEN_FREE net
 
 # some dial-up lists that seem decent, worth testing some more
-header T_RCVD_IN_DUL_BOFH rbleval:check_rbl('pdl-notfirsthop', 'pdl.bofh.it.')
 header T_RCVD_IN_DUN_DNSRBL rbleval:check_rbl('dun-notfirsthop', 'dun.dnsrbl.net.')
-header T_RCVD_IN_DUL_AUPADS rbleval:check_rbl('duinv-notfirsthop', 'duinv.aupads.org.')
-tflags T_RCVD_IN_DUL_BOFH net
 tflags T_RCVD_IN_DUN_DNSRBL net
+# another one
+header T_RCVD_IN_DUL_AUPADS rbleval:check_rbl('duinv-notfirsthop', 'duinv.aupads.org.')
 tflags T_RCVD_IN_DUL_AUPADS net
 
 # bug 1733: SenderBase
