@@ -1102,12 +1102,17 @@ sub nonsense_from_percent {
     }
 
     if (!$names_triplets_loaded) {
-        my $filename = $self->{main}->{rules_filename} .
-          "/name-triplets.txt";
+        my $filename = "/name-triplets.txt";
+
+        foreach my $tr_path ( $self->{main}->{DEF_RULES_DIR}, $self->{main}->{LOCAL_RULES_DIR} ) {
+            next unless -f "$tr_path$filename";
+            $filename = "$tr_path$filename";
+            last;
+        }
 
         if (!open (TRIPLETS, "<$filename")) {
             dbg ("failed to open '$filename', cannot check dictionary");
-            return 1;
+            return 0;
         }
 
         while (<TRIPLETS>) {
