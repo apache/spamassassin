@@ -187,13 +187,7 @@ sub tie_db_writable {
     };
   }
 
-  my $tout;
-  if ($main->{learn_wait_for_lock}) {
-    $tout = $main->{conf}->{bayes_manual_lock_timeout};
-  } else {
-    $tout = $main->{conf}->{bayes_opportunistic_lock_timeout};
-  }
-  if ($main->{locker}->safe_lock ($tout, $path)) {
+  if ($main->{locker}->safe_lock ($path)) {
     $self->{locked_file} = $path;
     $self->{is_locked} = 1;
   } else {
@@ -492,9 +486,7 @@ sub nspam_nham_get {
 
 sub get_running_expire_tok {
   my ($self) = @_;
-  my $running = $self->{db_toks}->{$RUNNING_EXPIRE_MAGIC_TOKEN};
-  if (!$running || $running =~ /\D/) { return undef; }
-  return $running;
+  return $self->{db_toks}->{$RUNNING_EXPIRE_MAGIC_TOKEN};
 }
 
 sub set_running_expire_tok {

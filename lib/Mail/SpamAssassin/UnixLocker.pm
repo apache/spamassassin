@@ -34,9 +34,10 @@ sub new {
 # by Kelsey Cummings <kgc@sonic.net>, with mods by jm and quinlan
 
 use constant LOCK_MAX_AGE => 600;	# seconds 
+use constant LOCK_MAX_RETRIES => 30;	# average 1 per second
 
 sub safe_lock {
-  my ($self, $max_retries, $path) = @_;
+  my ($self, $path) = @_;
   my $is_locked = 0;
   my @stat;
 
@@ -53,7 +54,7 @@ sub safe_lock {
   autoflush LTMP 1;
   dbg("lock: $$ created $lock_tmp");
 
-  for (my $retries = 0; $retries < $max_retries; $retries++) {
+  for (my $retries = 0; $retries < LOCK_MAX_RETRIES; $retries++) {
     if ($retries > 0) {
       select(undef, undef, undef, (rand(1.0) + 0.5));
     }

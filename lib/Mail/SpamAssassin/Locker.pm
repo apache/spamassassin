@@ -25,7 +25,7 @@ sub new {
 ###########################################################################
 
 sub safe_lock {
-  my ($self, $max_retries, $path) = @_;
+  my ($self, $path) = @_;
   die "safe_lock not implemented by Locker subclass";
 }
 

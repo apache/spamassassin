@@ -27,9 +27,10 @@ sub new {
 ###########################################################################
 
 use constant LOCK_MAX_AGE => 600;       # seconds 
+use constant LOCK_MAX_RETRIES => 30;    # average 1 per second
 
 sub safe_lock {
-  my ($self, $max_retries, $path) = @_;
+  my ($self, $path) = @_;
   my @stat;
 
   my $lock_file = "$path.lock";
@@ -38,7 +39,7 @@ sub safe_lock {
     dbg("lock: $$ breaking stale lock: $lock_file");
     unlink $lock_file;
   }
-  for (my $retries = 0; $retries < $max_retries; $retries++) {
+  for (my $retries = 0; $retries < LOCK_MAX_RETRIES; $retries++) {
     if ($retries > 0) {
       sleep(1);
     }
@@ -51,7 +52,7 @@ sub safe_lock {
     my @stat = stat($lock_file);
     # check age of lockfile ctime
     my $age = ($#stat < 11 ? undef : $stat[10]);
-    if ((!defined($age) && $retries > $max_retries / 2) ||
+    if ((!defined($age) && $retries > LOCK_MAX_RETRIES / 2) ||
 	(time - $age > LOCK_MAX_AGE))
     {
       dbg("lock: $$ breaking stale lock: $lock_file");
