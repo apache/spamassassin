@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.20 2002/10/04 23:44:10 felicity Exp $
+# $Id: HTML.pm,v 1.21 2002/10/04 23:46:46 felicity Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -226,8 +226,7 @@ sub html_tests {
       }
   }
 
-  if ($tag eq "img" && exists $attr->{width} && $attr->{width} =~ /^\d+$/ && exists $attr->{height} && $attr->{height}
-  =~ /^\d+$/ ) {
+  if ($tag eq "img" && exists $attr->{width} && $attr->{width} =~ /^\d+$/ && exists $attr->{height} && $attr->{height} =~ /^\d+$/ ) {
       my $area = $attr->{width} * $attr->{height};
       $self->{html}{total_image_area} += $area;
 
