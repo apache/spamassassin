@@ -457,6 +457,12 @@ sub razor2_lookup {
 	      $part++;
 	    }
 	  }
+	  else {
+	    # If we have some new $objects format that isn't close to
+	    # the current razor-agents 2.x version, we won't FP but we
+	    # should alert in debug.
+	    dbg("It looks like the internal Razor object has changed format!  Tell spamassassin-devel!");
+	  }
         }
       }
       else {
