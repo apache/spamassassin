@@ -65,10 +65,20 @@ describe T_AZOOGLE              From azoogle.com, azogle.com, etc.
 score T_AZOOGLE                 3.0
 
 # some ratware makes random usernames with lots of numbers
-header T_FROM_HAS_LOTSA_NUMS_5      From =~ /(?:\d[^\@\s]*){5}\@/
-header T_FROM_HAS_LOTSA_NUMS_6      From =~ /(?:\d[^\@\s]*){6}\@/
-header T_FROM_HAS_LOTSA_NUMS_7      From =~ /(?:\d[^\@\s]*){7}\@/
-header T_FROM_HAS_LOTSA_NUMS_8      From =~ /(?:\d[^\@\s]*){8}\@/
-header T_FROM_HAS_LOTSA_NUMS_9      From =~ /(?:\d[^\@\s]*){9}\@/
-header T_FROM_HAS_LOTSA_NUMS_15      From =~ /(?:\d[^\@\s]*){15}\@/
+# now requires that addr starts with a number, try to cut down FPs,
+# since prev versions hit on TMDA addresses!
+header T_FROM_HAS_LOTSA_NUMS2_4      From:addr =~ /^\d(?:\d[^\@\s]*){4}\@/
+header T_FROM_HAS_LOTSA_NUMS2_5      From:addr =~ /^\d(?:\d[^\@\s]*){5}\@/
+header T_FROM_HAS_LOTSA_NUMS3_3      From:addr =~ /^\d\d(?:[^\d\@\s]*\d){3}[^\@\s]*\@/
+header T_FROM_HAS_LOTSA_NUMS3_4      From:addr =~ /^\d\d(?:[^\d\@\s]*\d){4}[^\@\s]*\@/
+header T_FROM_HAS_LOTSA_NUMS3_5      From:addr =~ /^\d\d(?:[^\d\@\s]*\d){5}[^\@\s]*\@/
+header T_FROM_HAS_LOTSA_NUMS3_6      From:addr =~ /^\d\d(?:[^\d\@\s]*\d){6}[^\@\s]*\@/
+
+# variants that require >= 1 non-digit
+header T_FROM_HAS_ALPHAS           From:addr =~ /[a-zA-Z][^\@\s]+\@/
+score T_FROM_HAS_ALPHAS 0.1
+meta T_FROM_HAS_LOTSA_NUMS4_3      (T_FROM_HAS_LOTSA_NUMS3_3 && __T_FROM_HAS_ALPHAS)
+meta T_FROM_HAS_LOTSA_NUMS4_4      (T_FROM_HAS_LOTSA_NUMS3_4 && __T_FROM_HAS_ALPHAS)
+meta T_FROM_HAS_LOTSA_NUMS4_5      (T_FROM_HAS_LOTSA_NUMS3_5 && __T_FROM_HAS_ALPHAS)
+meta T_FROM_HAS_LOTSA_NUMS4_6      (T_FROM_HAS_LOTSA_NUMS3_6 && __T_FROM_HAS_ALPHAS)
 
