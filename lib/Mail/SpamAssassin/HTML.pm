@@ -913,6 +913,11 @@ sub html_tests {
     {
       $self->{html}{web_bugs} = 1;
     }
+    if (exists $attr->{src} &&
+	$attr->{src} =~ /\.(?:pl|cgi|php|asp|jsp|cfm|\/$)\b/i)
+    {
+      $self->{html}{t_web_bugs} = 1;
+    }
   }
   if ($tag eq "form" && exists $attr->{action}) {
     $self->{html}{form_action_mailto} = 1 if $attr->{action} =~ /mailto:/i
