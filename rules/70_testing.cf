@@ -389,7 +389,7 @@ body T_INT_VIOXX	eval:check_obfu_word('vioxx')
 body T_INT_XANAX	eval:check_obfu_word('xanax')
 
 # TVD: my FPs for this are all things like "pill's benefits"
-body T_INT_PILLS	eval:check_obfu_word('pill(?!<\')s')
+body T_INT_PILLS	eval:check_obfu_word('pills')
 
 # TVD: my FPs for this are from last names in sentences.
 # ala "... see Dave Price's results for ..."
