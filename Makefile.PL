@@ -59,9 +59,8 @@ my @ATT_KEYS = (
 
 
   'ENABLE_SSL',       # Set to 'yes' to build spamc with SSL support.
-  'CONTACT_ADDRESS',  # Don't ask for the contact address, use this string.
-  'RUN_RAZOR_TESTS',  # Don't ask wether the Razor tests should be run, use
-    'RUN_RAZOR2_TESTS'# this setting.
+  'CONTACT_ADDRESS',  # To not ask for the contact address, use this.
+  'RUN_NET_TESTS',    # To not ask whether net tests should be run, use this.
 );
 
 
@@ -96,7 +95,7 @@ sub yesno {
 my %opt = (
   'enable_ssl'      => undef,
   'contact_address' => undef,
-  'run_razor_tests' => undef,
+  'run_net_tests'   => undef,
   'destdir'         => undef,
   '__cruft'         => undef,
   'ignore_cruft'    => undef,
@@ -208,7 +207,7 @@ my %makefile = (
 	'spamd/binaries.mk spamd/config.h spamd/config.status '.
 	'spamd/config.cache spamd/config.log '.
 	'spamd/autom4te.cache qmail/qmail-spamc'.
-	't/do_razor2 t/log'
+	't/do_net t/log'
     },
 
     'AUTHOR'   => 'Justin Mason <jm@jmason.org>',
@@ -331,26 +330,21 @@ if (!defined $opt{'contact_address'}) {
 }
 $makefile{'macro'}{'CONTACT_ADDRESS'} = $opt{'contact_address'};
 
-if (!defined $opt{'run_razor_tests'}) {
-  my $got_razor2 = eval { require Razor2::Client::Agent };
-
-  if ($got_razor2) {
-    $opt{'run_razor_tests'} = prompt(
-      "Run Razor v2 tests (these may fail due to network problems)? (y/n)",
-      'n'
-    );
-    print "\n";
-  }
+if (!defined $opt{'run_net_tests'}) {
+  $opt{'run_net_tests'} = prompt(
+    "Run network tests (these may fail due to network problems)? (y/n)",
+    'n');
+  print "\n";
 }
-$opt{'run_razor_tests'} = bool($opt{'run_razor_tests'});
-if ($opt{'run_razor_tests'}) {
-  open(FLAG, "> t/do_razor2");
+$opt{'run_net_tests'} = bool($opt{'run_net_tests'});
+if ($opt{'run_net_tests'}) {
+  open(FLAG, "> t/do_net");
   close(FLAG);
 }
 else {
-  unlink("t/do_razor2");
+  unlink("t/do_net");
 }
-$makefile{'macro'}{'TEST_RUN_RAZOR'} = yesno($opt{'run_razor_tests'});
+$makefile{'macro'}{'RUN_NET_TESTS'} = yesno($opt{'run_net_tests'});
 
 
 # Now dump the Makefile
