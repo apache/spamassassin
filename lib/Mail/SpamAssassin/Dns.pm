@@ -393,6 +393,11 @@ sub razor2_lookup {
         $rc->{opt} = \%opt;
         $rc->do_conf() or die $rc->errstr;
 
+	# If we're a DOS formatted file, make sure the blank line between
+	# header and body has a carriage return (\r) in it.  This seems to
+	# confuse Razor, so let's get rid of it.
+	$$fulltext =~ s/\n\r\n/\n\n/;
+
         my @msg     = ($fulltext);
         my $objects = $rc->prepare_objects( \@msg )
           or die "error in prepare_objects";
