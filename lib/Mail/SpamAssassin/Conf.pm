@@ -52,6 +52,7 @@ sub new {
   $self->{razor_config} = $ENV{'HOME'}."/razor.conf";
   $self->{auto_whitelist_path} = $ENV{'HOME'}."/.spamassassin/auto-whitelist";
   $self->{auto_whitelist_file_mode} = '0600';	# AS STRING
+  $self->{auto_whitelist_threshold} = 3;
   $self->{rewrite_subject} = 1;
   $self->{report_header} = 0;
   $self->{use_terse_report} = 0;
@@ -210,6 +211,9 @@ sub _parse {
     }
     if (/^auto[-_]whitelist[-_]file[-_]mode\s*(.*)\s*$/) {
       $self->{auto_whitelist_file_mode} = $1; next;
+    }
+    if (/^auto[-_]whitelist[-_]threshold\s*(.*)\s*$/) {
+      $self->{auto_whitelist_threshold} = $1; next;
     }
 
     if (/^user[-_]scores[-_]dsn\s+(\S+)$/) {

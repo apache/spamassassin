@@ -20,8 +20,9 @@ sub new {
 
   my $self = {
     'main'		=> $main,
-    'threshold'		=> 3
   };
+
+  $self->{threshold} = $main->{conf}->{auto_whitelist_threshold};
 
   if (!defined $self->{main}->{pers_addr_list_factory}) {
     $self->{checker} = undef;
