@@ -169,6 +169,12 @@ my $spam_count = 0;
 my $ham_count = 0;
 my $init_results = 0;
 
+# Deal with --rewrite
+if (defined $opt_rewrite) {
+  my $rewrite = ($opt_rewrite ? $opt_rewrite : "/tmp/out");
+  open(REWRITE, "> $rewrite") || die "open of $rewrite failed: $!";
+}
+
 # Deal with --before and --after
 foreach my $time ($opt_before, $opt_after) {
   if ($time && $time =~ /^-\d+$/) {
@@ -211,6 +217,11 @@ if ($opt_progress) {
 }
 
 print STDERR "\n" if ($opt_showdots);
+
+if (defined $opt_rewrite) {
+  close(REWRITE);
+}
+
 exit;
 
 ###########################################################################
@@ -391,9 +402,7 @@ sub wanted {
   }
 
   if (defined $opt_rewrite) {
-    open(REWRITE, "> " . ($opt_rewrite ? $opt_rewrite : "/tmp/out"));
     print REWRITE $status->rewrite_mail();
-    close(REWRITE);
   }
 
   $id =~ s/\s/_/g;
@@ -534,5 +543,3 @@ sub memory_track_finish {
   }
   $str;
 }
-
-
