@@ -200,36 +200,105 @@ sub parsed_metadata {
   # get all domains in message
   # TODO! we need a method that provides more metadata about where
   # the URI was found so we can ignore hammy decoys.
-  my %domlist = ( );
-  foreach my $uri ($scanner->get_uri_list()) {
-    my $dom = Mail::SpamAssassin::Util::uri_to_domain($uri);
-    if ($dom) {
-      if (exists $scanner->{main}->{conf}->{uridnsbl_skip_domains}->{$dom}) {
-        dbg("uridnsbl: found domain $dom in skip list");
+
+  # use the visible anchor uris first
+  my @uri_ordered = ();
+
+  # use the parsed uris from the rendered message text
+  # IMPORTANT: to get the html parsed into metadata, we need to call
+  # get_parsed_uri_list() which calls get_decoded_stripped_body_text_array(),
+  # which does the metadata stuff ...  DO THIS BEFORE SETTING $html !!!
+  my @parsed = $scanner->get_parsed_uri_list();
+
+  # Generate the full list of html-parsed domains.
+  my $html = $scanner->{msg}->{metadata}->{html}->{uri_canon} || { };
+
+  # list specific tags to use in order
+  foreach ( 'a', 'form', 'img' ) {
+    if (exists $html->{$_}) {
+      push(@uri_ordered, $html->{$_});
+      delete $html->{$_};
+    }
+  }
+
+  # use the rest of the uris, except empty anchor uris
+  if (keys %{$html}) {
+    my @list = ();
+    while(my($type, $array) = each %{$html}) {
+      next if ($type eq 'a_empty');
+      push(@list, @{$array});
+      delete $html->{$type};
+    }
+    push(@uri_ordered, \@list) if (@list);
+  }
+
+  # now, use any of the URIs we parsed out of the message
+  push(@uri_ordered, \@parsed) if (@parsed);
+
+  # finally, use any uris from empty anchor tags
+  if (exists $html->{a_empty}) {
+    push(@uri_ordered, $html->{a_empty});
+    delete $html->{a_empty};
+  }
+
+  # at this point, @uri_ordered is an ordered array of uri arrays
+
+  my %domlist = ();
+  while (keys %domlist < $scanner->{main}->{conf}->{uridnsbl_max_domains} && @uri_ordered) {
+    my $array = shift @uri_ordered;
+    my %domains = ();
+
+    # run through and find the domains in this grouping
+    foreach (@{$array}) {
+      my $domain = $self->usable_uri_domain($scanner->{main}->{conf}->{uridnsbl_skip_domains}, $_);
+      next unless $domain;
+      next if $domlist{$domain};
+      $domains{$domain} = 1;
+    }
+
+    # at this point %domains has the list of new domains found in this
+    # grouping
+
+    # the new domains are all useful, just add them in
+    if (keys(%domlist) + keys(%domains) <= $scanner->{main}->{conf}->{uridnsbl_max_domains}) {
+      foreach (keys %domains) {
+        $domlist{$_} = 1;
       }
-      else {
-        $domlist{$dom} = 1;
+    }
+    else {
+      # trim down to a limited number - pick randomly
+      my $i;
+      my @longlist = keys %domains;
+      while (@longlist && keys %domlist < $scanner->{main}->{conf}->{uridnsbl_max_domains}) {
+        my $r = int rand (scalar @longlist);
+        $domlist{splice (@longlist, $r, 1)} = 1;
       }
     }
   }
 
-  # trim down to a limited number - pick randomly
-  my $i;
-  my @longlist = keys %domlist;
-  my @shortlist = ();
-  for ($i = $scanner->{main}->{conf}->{uridnsbl_max_domains}; $i > 0; $i--) {
-    my $r = int rand (scalar @longlist);
-    push (@shortlist, splice (@longlist, $r, 1));
-    last if (scalar @longlist <= 0);
-  }
-
   # and query
-  dbg("uridnsbl: domains to query: ".join(' ',@shortlist));
-  foreach my $dom (@shortlist) {
+  dbg("uridnsbl: domains to query: ".join(' ',keys %domlist));
+  foreach my $dom (keys %domlist) {
     $self->query_domain ($scanstate, $dom);
   }
 
   return 1;
+}
+
+sub usable_uri_domain {
+  my($self, $skip_domains, $uri) = @_;
+
+  my $dom = Mail::SpamAssassin::Util::uri_to_domain($uri);
+  if ($dom) {
+    if (exists $skip_domains->{$dom}) {
+      dbg("uridnsbl: domain $dom in skip list");
+    }
+    else {
+      return $dom;
+    }
+  }
+
+  return;
 }
 
 sub set_config {

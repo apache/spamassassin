@@ -1783,68 +1783,21 @@ sub get_uri_list {
     return @{$self->{uri_list}};
   }
 
-  # TVD: we used to use decoded_body which is fine, except then we'll
-  # try parsing URLs out of HTML, which is what the HTML code is going
-  # to do (note: we know the HTML parsing occurs, because we call for the
-  # rendered text which does HTML parsing...)  trying to get URLs out of
-  # HTML w/out parsing causes issues, so let's not do it.
-  # also, if we allow $textary to be passed in, we need to invalidate
-  # the cache first. fyi.
-  my $textary = $self->get_decoded_stripped_body_text_array();
-
-  $self->{redirect_num} = 0;
-
-  my ($rulename, $pat, @uris);
-  local ($_);
-
-  my $text;
-
-  for (@$textary) {
-    # NOTE: do not modify $_ in this loop
-    while (/($uriRe)/igo) {
-      my $uri = $1;
-
-      $uri =~ s/^<(.*)>$/$1/;
-      $uri =~ s/[\]\)>#]$//;
-
-      if ($uri !~ /^${schemeRE}:/io) {
-        # If it's a hostname that was just sitting out in the
-        # open, without a protocol, and not inside of an HTML tag,
-        # the we should add the proper protocol in front, rather
-        # than using the base URI.
-        if ($uri =~ /^www\d*\./i) {
-          # some spammers are using unschemed URIs to escape filters
-          push (@uris, $uri);
-          $uri = "http://$uri";
-        }
-        elsif ($uri =~ /^ftp\./i) {
-          push (@uris, $uri);
-          $uri = "ftp://$uri";
-        }
-      }
-
-      # warn("uri: got URI: $uri\n");
-      push @uris, $uri;
-    }
-    while (/($Addr_spec_re)/go) {
-      my $uri = $1;
-
-      $uri = "mailto:$uri";
-
-      #warn("uri: got URI: $uri\n");
-      push @uris, $uri;
-    }
-  }
+  # IMPORTANT: to get the html parsed into metadata, we need to call
+  # get_parsed_uri_list() which calls get_decoded_stripped_body_text_array(),
+  # which does the metadata stuff ...  DO THIS BEFORE LOOKING FOR METADATA!!!
+  my @uris = $self->get_parsed_uri_list();
 
   # get URIs from HTML parsing
-  # use the metadata version as $self->{html} may not be set yet
-  if (defined $self->{msg}->{metadata}->{html}->{uri}) {
-    push @uris, @{ $self->{msg}->{metadata}->{html}->{uri} };
+  # use the metadata version as $self->{html} is probably not set yet
+  if (defined $self->{msg}->{metadata}->{html}->{uri_canon}) {
+    while(my($type, $array) = each %{ $self->{msg}->{metadata}->{html}->{uri_canon} }) {
+      push(@uris, @{$array});
+    }
   }
 
-  @uris = Mail::SpamAssassin::Util::uri_list_canonify(@uris);
-
   # get domain list
+  $self->{redirect_num} = 0;
   my %domains;
   for (@uris) {
     # count redirection attempts and log it
@@ -1858,14 +1811,79 @@ sub get_uri_list {
   $self->{uri_domain_count} = keys %domains;
   $self->{uri_list} = \@uris;
 
-  # list out the URLs for debugging ...
-  if (Mail::SpamAssassin::dbg_check('uri')) {
-    foreach my $nuri (@uris) {
-      dbg("uri: uri found: $nuri");
+  return @uris;
+}
+
+sub get_parsed_uri_list {
+  my($self) = @_;
+
+  # use cached answer if available
+  unless (defined $self->{parsed_uri_list}) {
+    # TVD: we used to use decoded_body which is fine, except then we'll
+    # try parsing URLs out of HTML, which is what the HTML code is going
+    # to do (note: we know the HTML parsing occurs, because we call for the
+    # rendered text which does HTML parsing...)  trying to get URLs out of
+    # HTML w/out parsing causes issues, so let's not do it.
+    # also, if we allow $textary to be passed in, we need to invalidate
+    # the cache first. fyi.
+    my $textary = $self->get_decoded_stripped_body_text_array();
+
+    my ($rulename, $pat, @uris);
+    local ($_);
+
+    my $text;
+
+    for (@$textary) {
+      # NOTE: do not modify $_ in this loop
+      while (/($uriRe)/igo) {
+        my $uri = $1;
+
+        $uri =~ s/^<(.*)>$/$1/;
+        $uri =~ s/[\]\)>#]$//;
+
+        if ($uri !~ /^${schemeRE}:/io) {
+          # If it's a hostname that was just sitting out in the
+          # open, without a protocol, and not inside of an HTML tag,
+          # the we should add the proper protocol in front, rather
+          # than using the base URI.
+          if ($uri =~ /^www\d*\./i) {
+            # some spammers are using unschemed URIs to escape filters
+            push (@uris, $uri);
+            $uri = "http://$uri";
+          }
+          elsif ($uri =~ /^ftp\./i) {
+            push (@uris, $uri);
+            $uri = "ftp://$uri";
+          }
+        }
+
+        # warn("uri: got URI: $uri\n");
+        push @uris, $uri;
+      }
+      while (/($Addr_spec_re)/go) {
+        my $uri = $1;
+
+        $uri = "mailto:$uri";
+
+        #warn("uri: got URI: $uri\n");
+        push @uris, $uri;
+      }
+    }
+
+    @uris = Mail::SpamAssassin::Util::uri_list_canonify(@uris);
+
+    # setup the cache and return
+    $self->{parsed_uri_list} = \@uris;
+
+    # list out the URLs for debugging ...
+    if (Mail::SpamAssassin::dbg_check('uri')) {
+      foreach my $nuri (@uris) {
+        dbg("uri: parsed uri found: $nuri");
+      }
     }
   }
 
-  return @uris;
+  return @{$self->{parsed_uri_list}};
 }
 
 sub do_body_uri_tests {

@@ -32,6 +32,9 @@ require Exporter;
 @EXPORT = qw(get_results name_to_rgb);
 @EXPORT_OK = qw();
 
+# Make the main dbg() accessible in our package w/o an extra function
+*dbg=\&Mail::SpamAssassin::dbg;
+
 # elements defined by the HTML 4.01 and XHTML 1.0 DTDs (do not change them!)
 # does not include XML
 my %elements = map {; $_ => 1 }
@@ -128,6 +131,39 @@ sub html_end {
 
   delete $self->{text_style};
 
+  # deal with the previous a tag.  if the part in between
+  # <a href=...> and </a> is not blank (ie: there was something there we
+  # consider visible), add the uri to the list.  otherwise, drop the uri and
+  # mark that we found an "empty uri".
+  # Note: this is also done in html_tests
+  if ($self->{anchor_last}) {
+    if (length $self->{anchor}->[$self->{anchor_index}]) {
+      $self->push_uri('a', $self->{anchor_last});
+    }
+    else {
+      $self->push_uri('a_empty', $self->{anchor_last});
+    }
+  }
+
+#  my @uri;
+  if (defined $self->{uri}) {
+    while(my($type, $array) = each %{ $self->{uri} }) {
+#      push(@uri, @{$array});
+      my @tmp = Mail::SpamAssassin::Util::uri_list_canonify(@{$array});
+      $self->{uri_cooked}->{$type} = \@tmp;
+      # list out the URLs for debugging ...
+      if (Mail::SpamAssassin::dbg_check('uri')) {
+        foreach my $nuri (@tmp) {
+          dbg("uri: uri found, type $type: $nuri");
+        }
+      }
+    }
+  }
+
+#  $self->put_results(uri => \@uri);
+  $self->put_results(uri_raw => $self->{uri});
+  $self->put_results(uri_canon => $self->{uri_cooked});
+
   # final results scalars
   $self->put_results(image_area => $self->{image_area});
   $self->put_results(max_shouting => $self->{max_shouting});
@@ -144,7 +180,6 @@ sub html_end {
   $self->put_results(comment => $self->{comment});
   $self->put_results(script => $self->{script});
   $self->put_results(title => $self->{title});
-  $self->put_results(uri => $self->{uri});
 
   # final result hashes
   $self->put_results(inside => $self->{inside});
@@ -337,14 +372,14 @@ sub html_whitespace {
 # puts the uri onto the internal array
 # note: uri may be blank (<a href=""></a> obfuscation, etc.)
 sub push_uri {
-  my ($self, $uri) = @_;
+  my ($self, $location, $uri) = @_;
 
   # URIs don't have leading/trailing whitespace ...
   $uri =~ s/^\s+//;
   $uri =~ s/\s+$//;
 
   my $target = target_uri($self->{base_href} || "", $uri);
-  push @{ $self->{uri} }, $target;
+  push @{ $self->{uri}->{$location} }, $target;
 }
 
 sub html_uri {
@@ -353,22 +388,22 @@ sub html_uri {
   # ordered by frequency of tag groups
   if ($tag =~ /^(?:body|table|tr|td)$/) {
     if (defined $attr->{background}) {
-      $self->push_uri($attr->{background});
+      $self->push_uri($tag, $attr->{background});
     }
   }
-  elsif ($tag =~ /^(?:a|area|link)$/) {
+  elsif ($tag =~ /^(?:area|link)$/) {
     if (defined $attr->{href}) {
-      $self->push_uri($attr->{href});
+      $self->push_uri($tag, $attr->{href});
     }
   }
   elsif ($tag =~ /^(?:img|frame|iframe|embed|script|bgsound)$/) {
     if (defined $attr->{src}) {
-      $self->push_uri($attr->{src});
+      $self->push_uri($tag, $attr->{src});
     }
   }
   elsif ($tag eq "form") {
     if (defined $attr->{action}) {
-      $self->push_uri($attr->{action});
+      $self->push_uri($tag, $attr->{action});
     }
   }
   elsif ($tag eq "base") {
@@ -376,7 +411,7 @@ sub html_uri {
       # use <BASE HREF="URI"> to turn relative links into absolute links
 
       # even if it is a base URI, handle like a normal URI as well
-      push @{ $self->{uri} }, $uri;
+      $self->push_uri($tag, $uri);
 
       # a base URI will be ignored by browsers unless it is an absolute
       # URI of a standard protocol
@@ -638,6 +673,19 @@ sub html_tests {
 
   # special text delimiters - <a> and <title>
   if ($tag eq "a") {
+    # deal with the previous a tag.  if the part in between
+    # <a href=...> and </a> is not blank (ie: there was something there we
+    # consider visible), add the uri to the list.  otherwise, drop the uri and
+    # mark that we found an "empty uri".
+    # Note: this is also done in html_end
+    if ($self->{anchor_last}) {
+      if (length $self->{anchor}->[$self->{anchor_index}]) {
+        $self->push_uri('a', $self->{anchor_last});
+      }
+      else {
+        $self->push_uri('a_empty', $self->{anchor_last});
+      }
+    }
     $self->{anchor_last} = (exists $attr->{href} ? $attr->{href} : "");
     $self->{anchor_index}++;
     $self->{anchor}->[$self->{anchor_index}] = "";
