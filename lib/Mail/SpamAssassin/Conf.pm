@@ -1326,7 +1326,7 @@ within 5 seconds of the beginning of the check or they will be timed out.
 =item dns_available { yes | test[: name1 name2...] | no }   (default: test)
 
 By default, SpamAssassin will query some default hosts on the internet to
-attempt to check if DNS is working on not. The problem is that it can
+attempt to check if DNS is working or not. The problem is that it can
 introduce some delay if your network connection is down, and in some cases it
 can wrongly guess that DNS is unavailable because the test connections failed.
 SpamAssassin includes a default set of 13 servers, among which 3 are picked
