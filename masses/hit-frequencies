@@ -39,7 +39,7 @@ if ($opt_p) {
     printf "%7s  %7s  %7s %6s  %6s  %s\n",
   	"OVERALL%", "FNEG%", "FPOS%", "S/O", "SCORE", "NAME";
   } else {
-    printf "%7s  %7s  %7s %6s  %6s  %s\n",
+    printf "%7s %7s %7s  %6s  %6s  %s\n",
   	"OVERALL%", "SPAM%", "NONSPAM%", "S/O", "SCORE", "NAME";
   }
   printf "%7d  %7d  %7d  %6.2f  %6.2f  (all messages)\n",

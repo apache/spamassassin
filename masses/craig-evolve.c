@@ -6,11 +6,8 @@
  *  cleaner.
  */
 
-extern "C" {
-#include <pgapack.h>
-}
+#include "pgapack.h"
 
-#include <iostream>
 #include <unistd.h>
 #include "tmp/scores.h"
 #include "tmp/tests.h"
@@ -22,14 +19,14 @@ void dump(FILE *);
 void WriteString(PGAContext *ctx, FILE *fp, int p, int pop);
 void showSummary(PGAContext *ctx);
 
-double threshold = 5.0;
+const double threshold = 5.0;
 double nybias = 5.0;
 const int exhaustive_eval = 1;
 
 const double mutation_rate = 0.01;
 const double mutation_noise = 0.5;
 const double regression_coefficient = 0.75;
-//const double SCORE_CAP = 3.0;
+const double SCORE_CAP = 3.0;
 
 const double crossover_rate = 0.65;
 
@@ -42,13 +39,20 @@ int justCount = 0;
 
 void usage()
 {
-  cerr << "usage: evolve [-s size] [args]\n"
-    << "\n"
-    << "  -s size = population size (50 recommended)\n"
-    << "  -b nybias = bias towards false negatives (10.0 default)\n"
-    << "\n"
-    << "  -C = just count hits and exit, no evolution\n"
-    <<endl;
+#ifdef USE_MPI
+  int rank;
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  if(rank == 0) {
+#endif
+  printf("usage: evolve [-s size] [args]\n"
+     "\n"
+     "  -s size = population size (50 recommended)\n"
+     "  -b nybias = bias towards false negatives (10.0 default)\n"
+     "\n"
+     "  -C = just count hits and exit, no evolution\n\n");
+#ifdef USE_MPI
+  }
+#endif
   exit (30);
 }
 
@@ -66,7 +70,7 @@ void init_data()
     loadtests();
     loadscores();
     nybias = nybias*((double)num_spam)/((double)num_nonspam);
-    //printf("nybias normalized to %f\n",nybias);
+    printf("nybias normalized to %f\n",nybias);
   }
 
 #ifdef USE_MPI
@@ -85,9 +89,15 @@ void init_data()
 
 int main(int argc, char **argv) {
     PGAContext *ctx;
+    int i,p;
+
+#ifdef USE_MPI
+    MPI_Init(&argc, &argv);
+#endif
+//#ifndef USE_MPI
     int arg;
 
-    while ((arg = getopt (argc, argv, "b:s:t:C")) != -1) {
+    while ((arg = getopt (argc, argv, "b:s:C")) != -1) {
       switch (arg) {
         case 'b':
           nybias = atof(optarg);
@@ -95,10 +105,6 @@ int main(int argc, char **argv) {
 
         case 's':
           pop_size = atoi(optarg);
-          break;
-
-        case 't':
-          threshold = (double) atof(optarg);
           break;
 
         case 'C':
@@ -110,10 +116,8 @@ int main(int argc, char **argv) {
           break;
       }
     }
+//#endif
 
-#ifdef USE_MPI
-     MPI_Init(&argc, &argv);
-#endif
      init_data();
 
      ctx = PGACreate(&argc, argv, PGA_DATATYPE_REAL, num_scores, PGA_MINIMIZE);
@@ -155,15 +159,15 @@ int main(int argc, char **argv) {
      PGASetUp(ctx);
 
      // Now initialize the scores
-     for(int i=0; i<num_scores; i++)
+     for(i=0; i<num_scores; i++)
      {
-       for(int p=0; p<pop_size; p++)
+       for(p=0; p<pop_size; p++)
        {
-	 //if (!justCount && is_mutatable[i])
-	 //{
-            //if(bestscores[i] > SCORE_CAP) bestscores[i] = SCORE_CAP;
-	    //else if(bestscores[i] < -SCORE_CAP) bestscores[i] = -SCORE_CAP;
-	 //}
+	 if (!justCount && is_mutatable[i])
+	 {
+            if(bestscores[i] > SCORE_CAP) bestscores[i] = SCORE_CAP;
+	    else if(bestscores[i] < -SCORE_CAP) bestscores[i] = -SCORE_CAP;
+	 }
 	 PGASetRealAllele(ctx, p, PGA_NEWPOP, i, bestscores[i]);
        }
      }
@@ -184,9 +188,10 @@ double ynscore,nyscore,yyscore,nnscore;
 double score_msg(PGAContext *ctx, int p, int pop, int i)
 {
   double msg_score = 0.0;
+  int j;
 
   // For every test the message hit on
-  for(int j=num_tests_hit[i]-1; j>=0; j--)
+  for(j=num_tests_hit[i]-1; j>=0; j--)
   {
     // Up the message score by the allele for this test in the genome
     msg_score += PGAGetRealAllele(ctx, p, pop, tests_hit[i][j]);
@@ -231,11 +236,12 @@ double score_msg(PGAContext *ctx, int p, int pop, int i)
 double evaluate(PGAContext *ctx, int p, int pop)
 {
   double tot_score = 0.0;
+  int i;
   yyscore = ynscore = nyscore = nnscore = 0.0;
   ga_yy=ga_yn=ga_ny=ga_nn=0;
 
   // For every message
-  for (int i=num_tests-1; i>=0; i--)
+  for (i=num_tests-1; i>=0; i--)
   {
     tot_score += score_msg(ctx,p,pop,i);
   }
@@ -279,16 +285,18 @@ double evaluate(PGAContext *ctx, int p, int pop)
  * then add a little gaussian noise.
  *
  * Aug 21 2002 jm: we now use ranges and allow PGA to take care of it.
+ */
 int myMutation(PGAContext *ctx, int p, int pop, double mr) {
     int         count=0;
+    int i,j;
 
-    for (int i=0; i<num_scores; i++)
+    for (i=0; i<num_scores; i++)
     {
       if(is_mutatable[i] && PGARandomFlip(ctx, mr))
       {
 	double gene_sum=0.0;
 	// Find the mean
-	for(int j=0; j<pop_size; j++) { if(p!=j) gene_sum += PGAGetRealAllele(ctx, j, pop, i); }
+	for(j=0; j<pop_size; j++) { if(p!=j) gene_sum += PGAGetRealAllele(ctx, j, pop, i); }
 	gene_sum /= (double)(pop_size-1);
 	// Regress towards it...
 	gene_sum = (1.0-regression_coefficient)*gene_sum+regression_coefficient*PGAGetRealAllele(ctx, p, pop, i);
@@ -300,29 +308,18 @@ int myMutation(PGAContext *ctx, int p, int pop, double mr) {
     }
     return count;
 }
- */
 
 
 void dump(FILE *fp)
 {
-    fprintf (fp,"\n# SUMMARY for threshold %3.1f:\n", threshold);
-    fprintf (fp,"# Correctly non-spam: %6d  %4.2f%%  (%4.2f%% of non-spam corpus)\n", ga_nn,
-        (ga_nn / (float) num_tests) * 100.0,
-        (ga_nn / (float) num_nonspam) * 100.0);
-    fprintf (fp,"# Correctly spam:     %6d  %4.2f%%  (%4.2f%% of spam corpus)\n", ga_yy,
-        (ga_yy / (float) num_tests) * 100.0,
-        (ga_yy / (float) num_spam) * 100.0);
-    fprintf (fp,"# False positives:    %6d  %4.2f%%  (%4.2f%% of nonspam, %6.0f weighted)\n", ga_ny,
-        (ga_ny / (float) num_tests) * 100.0,
-        (ga_ny / (float) num_nonspam) * 100.0,
-        nyscore*nybias);
-    fprintf (fp,"# False negatives:    %6d  %4.2f%%  (%4.2f%% of spam, %6.0f weighted)\n", ga_yn,
-        (ga_yn / (float) num_tests) * 100.0,
-        (ga_yn / (float) num_spam) * 100.0,
-        ynscore);
-    fprintf (fp,"# TOTAL:              %6d  %3.2f%%\n\n", num_tests, 100.0);
+    fprintf (fp,"\n# SUMMARY:            %6d / %6d\n#\n", ga_ny, ga_yn);
+    fprintf (fp,"# Correctly non-spam: %6d  %3.2f%%  (%3.2f%% overall)\n", ga_nn, (ga_nn / (float) num_nonspam) * 100.0, (ga_nn / (float) num_tests) * 100.0);
+    fprintf (fp,"# Correctly spam:     %6d  %3.2f%%  (%3.2f%% overall)\n", ga_yy, (ga_yy / (float) num_spam) * 100.0, (ga_yy / (float) num_tests) * 100.0);
+    fprintf (fp,"# False positives:    %6d  %3.2f%%  (%3.2f%% overall, %6.0f adjusted)\n", ga_ny, (ga_ny / (float) num_nonspam) * 100.0, (ga_ny / (float) num_tests) * 100.0, nyscore*nybias);
+    fprintf (fp,"# False negatives:    %6d  %3.2f%%  (%3.2f%% overall, %6.0f adjusted)\n", ga_yn, (ga_yn / (float) num_spam) * 100.0, (ga_yn / (float) num_tests) * 100.0, ynscore);
     fprintf (fp,"# Average score for spam:  %3.1f    nonspam: %3.1f\n",(ynscore+yyscore)/((double)(ga_yn+ga_yy)),(nyscore+nnscore)/((double)(ga_nn+ga_ny)));
     fprintf (fp,"# Average for false-pos:   %3.1f  false-neg: %3.1f\n",(nyscore/(double)ga_ny),(ynscore/(double)ga_yn));
+    fprintf (fp,"# TOTAL:              %6d  %3.2f%%\n#\n", num_tests, 100.0);
 }
 
 /*****************************************************************************
@@ -331,6 +328,7 @@ void dump(FILE *fp)
 void WriteString(PGAContext *ctx, FILE *fp, int p, int pop)
 {
   int rank;
+  int i;
 
 #ifdef USE_MPI
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -342,7 +340,7 @@ void WriteString(PGAContext *ctx, FILE *fp, int p, int pop)
   {
     evaluate(ctx,p,pop);
     dump(fp);
-    for(int i=0; i<num_scores; i++)
+    for(i=0; i<num_scores; i++)
     {
       fprintf(fp,"score %-30s %2.3f\n",score_names[i],PGAGetRealAllele(ctx, p, pop, i));
     }
