@@ -272,8 +272,8 @@ sub replace_body {
 
 sub as_string {
   my ($self) = @_;
-  return join ('', $self->get_all_headers()) . "\n" .
-                join ('', @{$self->get_body()});
+  return join ('', $self->get_all_headers(), "\n",
+                @{$self->get_body()});
 }
 
 # ---------------------------------------------------------------------------
@@ -335,7 +335,7 @@ sub accept {
       }
 
       flock(MBOX, LOCK_EX) or warn "failed to lock $file: $!";
-      print MBOX $self->as_string();
+      print MBOX $self->as_string()."\n";
       flock(MBOX, LOCK_UN) or warn "failed to unlock $file: $!";
       close MBOX;
 
