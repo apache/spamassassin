@@ -167,7 +167,7 @@ sub add_score {
 sub remove_entry {
   my ($self, $entry) = @_;
   delete $self->{accum}->{$entry->{addr}};
-  delete $self->{accum}->{$entry->{addr}};
+  delete $self->{accum}->{$entry->{addr}.'|totscore'};
 }
 
 ###########################################################################
