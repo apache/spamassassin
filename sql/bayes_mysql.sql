@@ -27,7 +27,8 @@ CREATE TABLE bayes_token (
   ham_count int(11) NOT NULL default '0',
   atime int(11) NOT NULL default '0',
   PRIMARY KEY  (id, token),
-  KEY bayes_token_idx1 (token)
+  INDEX bayes_token_idx1 (token),
+  INDEX bayes_token_idx2 (id, atime)
 ) TYPE=MyISAM;
 
 CREATE TABLE bayes_vars (
