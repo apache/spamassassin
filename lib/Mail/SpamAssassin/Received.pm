@@ -1,4 +1,4 @@
-# $Id: Received.pm,v 1.17 2003/06/07 23:34:10 jmason Exp $
+# $Id: Received.pm,v 1.18 2003/06/07 23:37:26 jmason Exp $
 
 # ---------------------------------------------------------------------------
 
@@ -7,9 +7,8 @@
 # the last one of those are 'untrusted'.
 #
 # We determine trust by detecting if they are inside the network ranges
-# specified in 'trusted_networks'.  Dan has promised to write some code which
-# uses a persistent db to determine (statistically) other trusted relays,
-# without user configuration.
+# specified in 'trusted_networks'.  There is also an inference algorithm
+# which determines other trusted relays without user configuration.
 #
 # There's another type of Received header: the semi-trusted one.  This is the
 # header added by *our* MX, at the boundary of trust; we can trust the IP
