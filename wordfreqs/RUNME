@@ -13,17 +13,20 @@ date
 
 mv spam.local nonspam.local logs/old
 
-./mass-phrase-freq /local2/mail-archives/scoop.1999.gz >> nonspam.local
-./mass-phrase-freq /local2/mail-archives/oldmail.1998.gz >> nonspam.local
-
 ./mass-phrase-freq-for-jm ; sh commands.sh
 
-for f in /local2/mail-archives/crackmice-old/* ; do
-  ./mass-phrase-freq $f >> nonspam.local
+for f in /local/mail-archives/recent/nonspam/* ; do
+  echo Checking $f: ; ./mass-phrase-freq $f  >> nonspam.local
 done
 
-./mass-phrase-freq /local2/mail-archives/kelsey.spamtrap.gz >> spam.local
-./mass-phrase-freq /local2/mail-archives/spam.2000-2001.gz >> spam.local
+./mass-phrase-freq /local/mail-archives/recent/spamtrap/20020717/nonspam.mbox >> nonspam.local
+
+./mass-phrase-freq /local/mail-archives/recent/spamtrap/20020717/mbox >> spam.local
+
+for f in /local/mail-archives/old/nonspam/* /local/mail-archives/recent/nonspam/*
+do
+  echo Checking $f: ; ./mass-phrase-freq $f >> nonspam.local
+done
 
 echo "
 

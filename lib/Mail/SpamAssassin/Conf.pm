@@ -396,7 +396,11 @@ See above.
 =item required_hits n.nn   (default: 5)
 
 Set the number of hits required before a mail is considered spam.  C<n.nn> can
-be an integer or a real number.
+be an integer or a real number.  5.0 is the default setting, and is quite
+aggressive; it would be suitable for a single-user setup, but if you're an ISP
+installing SpamAssassin, you should probably set the default to be something
+much more conservative, like 8.0 or 10.0.  Experience has shown that you
+B<will> get plenty of user complaints otherwise!
 
 =cut
 
