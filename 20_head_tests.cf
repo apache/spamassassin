@@ -478,11 +478,14 @@ tflags ROUND_THE_WORLD          net
 header MISSING_HEADERS		eval:check_for_missing_to_header()
 describe MISSING_HEADERS	Missing To: header
 
-header SUSPICIOUS_RECIPS        ToCc =~ /(@[-a-z0-9_.]{2,}).*(?:\1.*){8,}/is
-describe SUSPICIOUS_RECIPS      To: and Cc: contain similar domains at least 8 times
+header SUSPICIOUS_RECIPS	eval:similar_recipients('0.6','1.2')
+describe SUSPICIOUS_RECIPS	Similar addresses in recipient list
 
-header VERY_SUSP_RECIPS		ToCc =~ /\b([a-z][a-z])[^@,<>\(\) ]{0,20}(@[-a-z0-9_\.]{3}).{0,80}?(?:\1[^@,<>\(\) ]{0,20}\2.{0,80}?){5,}/is
-describe VERY_SUSP_RECIPS       To: and Cc: contain similar usernames at least 5 times
+header VERY_SUSP_RECIPS		eval:similar_recipients('1.2','undef')
+describe VERY_SUSP_RECIPS	Very similar addresses in recipient list 
+
+header SORTED_RECIPS		eval:sorted_recipients()
+describe SORTED_RECIPS		Recipient list is sorted by address
 
 header USER_IN_WHITELIST_TO     eval:check_to_in_whitelist()
 describe USER_IN_WHITELIST_TO   User is listed in 'whitelist_to'
