@@ -207,7 +207,7 @@ describe EXCUSE_7		Claims you can be removed from the list
 body EXCUSE_8			/requests to be taken off our mailing list/i
 describe EXCUSE_8		Claims you can be removed from the list
 
-body EXCUSE_10			/if you (?:(?:want|wish|care|prefer) not to |(?:don't|do not) (?:want|wish|care) to )(?:be contacted again|receive (any)?\s*(?:more|future|further) (?:e?-?mail|messages?|offers|solicitations))/i
+body EXCUSE_10			/if you (?:(?:want|wish|care|prefer) not to |(?:don't|do not) (?:want|wish|care) to )(?:be contacted again|receive (any)?\s*(?:more|future|further)\b.{1,10}\b(?:e?-?mail|messages?|offers|solicitations))/i
 describe EXCUSE_10		"if you do not wish to receive any more"
 
 body EXCUSE_11			/you.{0,15}(?:name|mail).{0,15}(?:was|were).{0,15}list/i
