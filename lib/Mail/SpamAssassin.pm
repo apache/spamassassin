@@ -91,7 +91,7 @@ $VERSION = "2.60";              # update after release
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.211 2003/09/22 19:32:14 felicity Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.212 2003/09/23 00:08:04 felicity Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -1214,9 +1214,7 @@ sub init {
 
   $self->{conf}->set_score_set ($set);
 
-  if ($self->{conf}->{bayes_auto_learn}) {
-    $self->init_learner({ 'learn_to_journal' => $self->{conf}->{bayes_learn_to_journal} });
-  }
+  $self->init_learner({ 'learn_to_journal' => $self->{conf}->{bayes_learn_to_journal} });
 
   if ($self->{only_these_rules}) {
     $self->trim_rules($self->{only_these_rules});

@@ -660,7 +660,15 @@ sub learn_trapped {
       warn ("db_seen corrupt: value='$seen' for $msgid. ignored");
     } else {
       dbg ("$msgid: already learnt as opposite, forgetting first");
+
+      # kluge so that forget() won't untie the db on us ...
+      my $orig = $self->{main}->{learn_caller_will_untie};
+      $self->{main}->{learn_caller_will_untie} = 1;
+
       $self->forget ($msg);
+
+      # reset the value post-forget() ...
+      $self->{main}->{learn_caller_will_untie} = $orig;
     }
   }
 
@@ -707,7 +715,14 @@ sub forget {
   eval {
     local $SIG{'__DIE__'};	# do not run user die() traps in here
 
-    if ($self->{store}->tie_db_writable()) {
+    my $ok;
+    if ($self->{main}->{learn_to_journal}) {
+      $ok = $self->{store}->tie_db_readonly();
+    } else {
+      $ok = $self->{store}->tie_db_writable();
+    }
+
+    if ($ok) {
       $ret = $self->forget_trapped ($msg, $body, $id);
 
       if (!$self->{main}->{learn_caller_will_untie}) {
