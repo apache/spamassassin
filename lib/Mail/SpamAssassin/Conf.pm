@@ -66,9 +66,13 @@ optional, and the default is shown below.
  _YESNO_           "Yes"/"No" for is/isn't spam
  _SCORE_           message score
  _REQD_            message threshold
- _VERSION_         version (eg. 2.61 or 2.70-r6142-foo1)
+ _VERSION_         version (eg. 3.0.0 or 3.1.0-r26142-foo1)
  _SUBVERSION_      sub-version/code revision date (eg. 2004-01-10)
- _HOSTNAME_        hostname
+ _HOSTNAME_        hostname of the machine the mail was processed on
+ _REMOTEHOSTNAME_  hostname of the machine the mail was sent from, only
+                   available with spamd
+ _REMOTEHOSTADDR_  ip address of the machine the mail was sent from, only
+                   available with spamd
  _BAYES_           bayes score
  _TOKENSUMMARY_    number of new, neutral, spammy, and hammy tokens found
  _BAYESTC_         number of new tokens found

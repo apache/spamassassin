@@ -865,20 +865,26 @@ sub accept_a_conn {
   # keep track of start time
   my $start = time;
 
+  my $remote_hostname;
+  my $remote_hostaddr;
   if ( $opt{'socketpath'} ) {
+    $remote_hostname = 'localhost';
+    $remote_hostaddr = '127.0.0.1';
     logmsg( "got connection over " . $opt{'socketpath'} );
   }
   else {
     my ( $port, $ip ) = sockaddr_in( $client->peername );
-    my $name = gethostbyaddr( $ip, AF_INET );
+    
+    $remote_hostaddr = inet_ntoa($ip);
+    $remote_hostname = gethostbyaddr($ip, AF_INET)
+                    || $remote_hostaddr;
 
-    $ip = inet_ntoa($ip);
-    $name ||= $ip;
-    if ( ip_is_allowed($ip) ) {
-      logmsg("connection from $name [$ip] at port $port");
+    my $msg = "connection from ${remote_hostname} [${remote_hostaddr}] at port ${port}";
+    if ( ip_is_allowed($remote_hostaddr) ) {
+      logmsg($msg);
     }
     else {
-      logmsg("unauthorized connection from $name [$ip] at port $port");
+      logmsg("unauthorized " . $msg);
       $client->close;
       return 0;
     }
@@ -911,7 +917,7 @@ sub accept_a_conn {
   # message that we need to filter.
 
   elsif (/(PROCESS|CHECK|SYMBOLS|REPORT|REPORT_IFSPAM) SPAMC\/(.*)/) {
-    check( $1, $2, $start );
+    check( $1, $2, $start, $remote_hostname, $remote_hostaddr );
   }
 
   # Looks like a client is just seeing if we're alive.
@@ -932,7 +938,7 @@ sub accept_a_conn {
 }
 
 sub check {
-  my ( $method, $version, $start ) = @_;
+  my ( $method, $version, $start_time, $remote_hostname, $remote_hostaddr ) = @_;
   local ($_);
   my $expected_length;
 
@@ -1060,6 +1066,9 @@ sub check {
 
   if ( $method eq 'PROCESS' ) {
 
+    $status->set_tag('REMOTEHOSTNAME', $remote_hostname);
+    $status->set_tag('REMOTEHOSTADDR', $remote_hostaddr);
+
     # Build the message to send back and measure it
     my $msg_resp        = $status->rewrite_mail();
     my $msg_resp_length = length($msg_resp);
@@ -1118,7 +1127,7 @@ sub check {
     }
   }
 
-  my $scantime = sprintf( "%.1f", time - $start );
+  my $scantime = sprintf( "%.1f", time - $start_time );
 
   logmsg( "$was_it_spam ($msg_score/$msg_threshold) for $current_user:$> in"
       . " $scantime seconds, $actual_length bytes." );
