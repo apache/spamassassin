@@ -76,6 +76,7 @@ Options:
  --ham				   Learn messages as ham (non-spam)
  --spam				   Learn messages as spam
  --forget			   Forget a message
+ --use-ignores                     Use bayes_ignore_from and bayes_ignore_to
  --rebuild			   Rebuild the database if needed
  --force-expire			   Force an expiry run, rebuild every time
  --dbpath <path>                   Allows commandline override (in bayes_path form)
@@ -334,6 +335,14 @@ spam.  Alternatively, if you have previously learnt them as spam, it'll skip
 them this time around.  If the messages have already been filtered through
 SpamAssassin, the learner will ignore any modifications SpamAssassin may have
 made.
+
+=item B<--use-ignore>
+
+Don't learn the message if a from address matches configuration file
+item C<bayes_ignore_from> or a to address matches C<bayes_ignore_to>.
+The option might be used when learning from a large file of messages
+from which the hammy spam messages or spammy ham messages have not
+been removed.
 
 =item B<--rebuild>
 

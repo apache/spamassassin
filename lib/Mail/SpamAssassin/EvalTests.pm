@@ -913,6 +913,35 @@ sub check_for_sender_no_reverse {
 
 ###########################################################################
 
+sub check_from_in_list {
+  my ($self,$list) = @_;
+  my $list_ref = $self->{conf}{$list};
+  warn "Could not find list $list" unless defined $list_ref;
+
+  foreach my $addr ( all_from_addrs $self ) {
+    return 1 if _check_whitelist $self $list_ref, $addr;
+  }
+
+  return 0;
+}
+
+###########################################################################
+
+sub check_to_in_list {
+  my ($self,$list) = @_;
+  my $list_ref = $self->{conf}{$list};
+  warn "Could not find list $list" unless defined $list_ref;
+
+  foreach my $addr ( all_to_addrs $self ) {
+    return 1 if _check_whitelist $self $list_ref, $addr;
+  }
+
+  return 0;
+}
+
+
+###########################################################################
+
 sub check_from_in_whitelist {
   my ($self) = @_;
   local ($_);

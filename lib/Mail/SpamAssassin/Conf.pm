@@ -239,6 +239,8 @@ sub new {
   $self->{bayes_min_ham_num} = 200;
   $self->{bayes_min_spam_num} = 200;
   $self->{bayes_learn_during_report} = 1;
+  $self->{bayes_ignore_from} = { };
+  $self->{bayes_ignore_to} = { };
 
   # Allow alternate bayes storage implementation
   $self->{bayes_store_module} = '';
@@ -1619,6 +1621,46 @@ How many seconds to wait before retrying an MX check.
       $self->{check_mx_delay} = $value+0; next;
     }
 
+=item bayes_ignore_from add@ress.com
+
+Bayesian classification and autolearning will not be performed on mail
+from the listed addresses.  Program C<sa-learn> will also ignore the
+listed addresses if it is invoked using the C<--use-ignores> option.
+One or more addresses can be listed, see C<whitelist_from>.
+
+Spam messages from certain senders may contain many words that
+frequently occur in ham.  For example, one might read messages from a
+preferred bookstore but also get unwanted spam messages from other
+bookstores.  If the unwanted messages are learned as spam then any
+messages discussing books, including the preferred bookstore and
+antiquarian messages would be in danger of being marked as spam.  The
+addresses of the annoying bookstores would be listed.  (Assuming they
+were halfway legitimate and didn't send you mail through myriad
+affiliates.)
+
+Those who have pieces of spam in legitimate messages or otherwise
+receive ham messages containing potentially spammy words might fear
+that some spam messages might be in danger of being marked as ham.
+The addresses of the spam mailing lists, correspondents, etc.  would
+be listed.
+
+=cut
+
+
+    if (/^bayes_ignore_from\s+(.+)$/) {
+      $self->add_to_addrlist ('bayes_ignore_from', split (' ', $1)); next;
+    }
+
+=item bayes_ignore_to add@ress.com
+
+Bayesian classification and autolearning will not be performed on mail
+to the listed addresses.  See C<bayes_ignore_from> for details.
+
+=cut
+
+    if (/^bayes_ignore_to\s+(.+)$/) {
+      $self->add_to_addrlist ('bayes_ignore_to', split (' ', $1)); next;
+    }
 
 =item dns_available { yes | test[: name1 name2...] | no }   (default: test)
 

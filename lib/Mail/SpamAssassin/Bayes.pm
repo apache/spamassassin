@@ -229,6 +229,7 @@ sub new {
     'main'              => $main,
     'conf'		=> $main->{conf},
     'log_raw_counts'	=> 0,
+    'use_ignores'       => 1,
     'tz'		=> Mail::SpamAssassin::Util::local_tz(),
   };
   bless ($self, $class);
@@ -645,11 +646,37 @@ sub tokenize_mail_addrs {
 
 ###########################################################################
 
+sub ignore_message {
+  my ($Bayes,$PMS) = @_;
+
+  return 0 unless $Bayes->{use_ignores};
+
+  my $ignore = $PMS->check_from_in_list('bayes_ignore_from')
+    		|| $PMS->check_to_in_list('bayes_ignore_to');
+
+  dbg("Not using Bayes, bayes_ignore_from or _to rule") if $ignore;
+
+  return $ignore;
+}
+
+###########################################################################
+
 sub learn {
   my ($self, $isspam, $msg, $id) = @_;
 
   if (!$self->{conf}->{use_bayes}) { return; }
   if (!defined $msg) { return; }
+
+  if( $self->{use_ignores} )  # Remove test when PerMsgStatus available.
+  {
+    # DMK, koppel@ece.lsu.edu:  Hoping that the ultimate fix to bug 2263 will
+    # make it unnecessary to construct a PerMsgStatus here.
+    my $PMS = new Mail::SpamAssassin::PerMsgStatus $self->{main}, $msg;
+    my $ignore = $self->ignore_message($PMS);
+    $PMS->finish();
+    return if $ignore;
+  }
+
   my $body = $self->get_body_from_msg ($msg);
   my $ret;
 
@@ -1028,9 +1055,11 @@ sub is_scan_available {
 sub scan {
   my ($self, $permsgstatus, $msg, $body) = @_;
 
-  if ( !$self->is_scan_available() ) {
+  if( $self->ignore_message($permsgstatus) ) {
     goto skip;
   }
+
+  goto skip unless $self->is_scan_available();
 
   my ($ns, $nn) = $self->{store}->nspam_nham_get();
 

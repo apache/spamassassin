@@ -39,6 +39,7 @@ sub cmdline_run {
   my ($opts) = shift;
 
   %opt = ( 'force-expire' => 0,
+           'use-ignores'  => 0,
   	   'norebuild'    => 0,
 	 );
 
@@ -60,6 +61,7 @@ sub cmdline_run {
 	     'no-rebuild|norebuild'		=> \$opt{'norebuild'},
 	     'local|L'				=> \$opt{'local'},
 	     'force-expire'			=> \$opt{'force-expire'},
+             'use-ignores'                      => \$opt{'use-ignores'},
 
              'stopafter=i'                      => \$opt{'stopafter'},
 	     'learnprob=f'			=> \$opt{'learnprob'},
@@ -179,6 +181,8 @@ sub cmdline_run {
       wait_for_lock	=> 1,
       caller_will_untie	=> 1
   });
+
+  $spamtest->{bayes_scanner}{use_ignores} = $opt{'use-ignores'};
 
   if ($rebuildonly) {
     $spamtest->rebuild_learner_caches({
