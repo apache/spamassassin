@@ -3581,7 +3581,6 @@ sub register_eval_rule {
 
 sub finish {
   my ($self) = @_;
-  $self->{parser}->finish();
   delete $self->{parser};
   delete $self->{main};
 }
