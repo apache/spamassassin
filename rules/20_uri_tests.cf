@@ -50,6 +50,10 @@ describe PORN_4			URL uses words and phrases which indicate porn (4)
 uri WWW_CLIK4YOU_COM		/clik4you\.com/i
 describe WWW_CLIK4YOU_COM	Frequent Spam content
 
+# bug 1801
+uri IP_LINK_PLUS	/^https?\:\/\/(?:\S*\@)?\d+\.\d+\.\d+\.\d+.{0,20}(?:cgi|click|ads|id\=)/i
+describe IP_LINK_PLUS	Dotted-decimal IP address followed by CGI
+
 uri UNSUB_SCRIPT		/^https?:\/\/.*?cgi.*?(?:unsubscribe|remove)/i
 describe UNSUB_SCRIPT		URL of CGI script called "unsubscribe" or "remove"
 
