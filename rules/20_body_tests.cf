@@ -92,7 +92,7 @@ describe HTTP_WITH_EMAIL_IN_URL	'remove' URL contains an email address
 rawbody SUPERLONG_LINE		/^[^<]{199,}$/m
 describe SUPERLONG_LINE		Contains a line >=199 characters long
 
-body ASCII_FORM_ENTRY		/[^<][A-Za-z][A-Za-z]+.{1,15}?\s+_{30,}/
+rawbody ASCII_FORM_ENTRY	/[^<][A-Za-z][A-Za-z]+.{1,15}?\s+_{30,}/
 describe ASCII_FORM_ENTRY	Contains an ASCII-formatted form
 body PRINT_OUT_AND_FAX		/print\s+out\s+and\s+fax/i
 describe PRINT_OUT_AND_FAX	Contains words 'print out and fax'

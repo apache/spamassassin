@@ -1,5 +1,5 @@
 
-OPT = -O6
+OPT = -g -O6
 GALIB =	./galib245
 PGALIB = pgapack
 
