@@ -278,70 +278,18 @@ sub learn {
       !$self->{conf}->{use_bayes} ||
       $self->{disable_auto_learning})
   {
-      $self->{auto_learn_status} = "disabled";
-      return;
-  }
-
-  # Figure out min/max for autolearning.
-  # Default to specified auto_learn_threshold settings
-  my $min = $self->{conf}->{bayes_auto_learn_threshold_nonspam};
-  my $max = $self->{conf}->{bayes_auto_learn_threshold_spam};
-
-  # Find out what score we should consider this message to have ...
-  my $score = $self->_get_autolearn_points();
-
-  dbg("learn: auto-learn? ham=$min, spam=$max, ".
-                "body-points=".$self->{body_only_points}.", ".
-                "head-points=".$self->{head_only_points}.", ".
-		"learned-points=".$self->{learned_points});
-
-  my $isspam;
-  if ($score < $min) {
-    $isspam = 0;
-  } elsif ($score >= $max) {
-    $isspam = 1;
-  } else {
-    dbg("learn: auto-learn? no: inside auto-learn thresholds, not considered ham or spam");
-    $self->{auto_learn_status} = "no";
+    $self->{auto_learn_status} = "disabled";
     return;
   }
 
-  my $learner_said_ham_points = -1.0;
-  my $learner_said_spam_points = 1.0;
+  my $isspam = $self->{main}->call_plugins ("autolearn_discriminator", {
+      permsgstatus => $self
+    });
 
-  if ($isspam) {
-    my $required_body_points = 3;
-    my $required_head_points = 3;
-
-    if ($self->{body_only_points} < $required_body_points) {
-      $self->{auto_learn_status} = "no";
-      dbg("learn: auto-learn? no: scored as spam but too few body points (".
-	  $self->{body_only_points}." < ".$required_body_points.")");
-      return;
-    }
-    if ($self->{head_only_points} < $required_head_points) {
-      $self->{auto_learn_status} = "no";
-      dbg("learn: auto-learn? no: scored as spam but too few head points (".
-	  $self->{head_only_points}." < ".$required_head_points.")");
-      return;
-    }
-    if ($self->{learned_points} < $learner_said_ham_points) {
-      $self->{auto_learn_status} = "no";
-      dbg("learn: auto-learn? no: scored as spam but learner indicated ham (".
-	  $self->{learned_points}." < ".$learner_said_ham_points.")");
-      return;
-    }
-
-  } else {
-    if ($self->{learned_points} > $learner_said_spam_points) {
-      $self->{auto_learn_status} = "no";
-      dbg("learn: auto-learn? no: scored as ham but learner indicated spam (".
-	  $self->{learned_points}." > ".$learner_said_spam_points.")");
-      return;
-    }
+  if (!defined $isspam) {
+    $self->{auto_learn_status} = 'no';
+    return;
   }
-
-  dbg("learn: auto-learn? yes, ".($isspam?"spam ($score > $max)":"ham ($score < $min)"));
 
   $self->{main}->call_plugins ("autolearn", {
       permsgstatus => $self,
@@ -389,10 +337,74 @@ sub _get_autowhitelist_points {
   return (sprintf "%0.3f", $points) + 0;
 }
 
-# This function is for exclusive use by the autolearn function to figure
-# out the various score values related to autolearning.
+=item $score = $status->get_autolearn_points()
+
+Return the message's score as computed for auto-learning.  Certain tests are
+ignored:
+
+  - rules with tflags set to 'learn' (the Bayesian rules)
+
+  - rules with tflags set to 'userconf' (user white/black-listing rules, etc)
+
+  - rules with tflags set to 'noautolearn'
+
+Also note that auto-learning occurs using scores from either scoreset 0 or 1,
+depending on what scoreset is used during message check.  It is likely that the
+message check and auto-learn scores will be different.
+
+=cut
+
+sub get_autolearn_points {
+  my ($self) = @_;
+  $self->_get_autolearn_points();
+  return $self->{autolearn_points};
+}
+
+=item $score = $status->get_head_only_points()
+
+Return the message's score as computed for auto-learning, ignoring
+all rules except for header-based ones.
+
+=cut
+
+sub get_head_only_points {
+  my ($self) = @_;
+  $self->_get_autolearn_points();
+  return $self->{head_only_points};
+}
+
+=item $score = $status->get_learned_points()
+
+Return the message's score as computed for auto-learning, ignoring
+all rules except for learning-based ones.
+
+=cut
+
+sub get_learned_points {
+  my ($self) = @_;
+  $self->_get_autolearn_points();
+  return $self->{learned_points};
+}
+
+=item $score = $status->get_body_only_points()
+
+Return the message's score as computed for auto-learning, ignoring
+all rules except for body-based ones.
+
+=cut
+
+sub get_body_only_points {
+  my ($self) = @_;
+  $self->_get_autolearn_points();
+  return $self->{body_only_points};
+}
+
 sub _get_autolearn_points {
   my ($self) = @_;
+
+  return if (exists $self->{autolearn_points});
+  # ensure it only gets computed once, even if we return early
+  $self->{autolearn_points} = 0;
 
   # This function needs to use use sum($score[scoreset % 2]) not just {score}.
   # otherwise we shift what we autolearn on and it gets really wierd.  - tvd
@@ -452,7 +464,7 @@ sub _get_autolearn_points {
   $points = (sprintf "%0.3f", $points) + 0;
   dbg("learn: auto-learn: message score: ".$self->{score}.", computed score for autolearn: $points");
 
-  return $points;
+  $self->{autolearn_points} = $points;
 }
 
 ###########################################################################
