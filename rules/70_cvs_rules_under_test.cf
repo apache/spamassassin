@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.485 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.486 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -343,25 +343,17 @@ describe T_GENERIC_VIAGRA	Mentions Generic Viagra
 uri T_IP_LINK_PLUS	/^https?\:\/\/(?:\S*\@)?\d+\.\d+\.\d+\.\d+.{0,20}(?:cgi|click|ads|id\=)/i
 describe T_IP_LINK_PLUS		Dotted-decimal IP address followed by GCI, clickthru, etc.
 
-# try various redirects to see what works best
-uri T_YAHOO_REDIR_1		/^https?\:\/\/rd\.yahoo\.com\/[0-9]{4,}/i
-describe T_YAHOO_REDIR_1	Yahoo Redirect
+# works on old email okay
+uri T_YAHOO_REDIR		/^https?\:\/\/rd\.yahoo\.com\/(?:[0-9]{4,}|partner\b|dir\b)/i
+describe T_YAHOO_REDIR		Yahoo Redirect
 
-uri T_YAHOO_REDIR_2		/^https?\:\/\/rd\.yahoo\.com\/DailyNews\b/i
-describe T_YAHOO_REDIR_2	Yahoo Redirect
-
-uri T_YAHOO_REDIR_3		/^https?\:\/\/rd\.yahoo\.com\/dir\b/i
-describe T_YAHOO_REDIR_3	Yahoo Redirect
-
-uri T_YAHOO_REDIR_4		/^https?\:\/\/rd\.yahoo\.com\/welcome\b/i
-describe T_YAHOO_REDIR_4	Yahoo Redirect
-
-uri T_YAHOO_REDIR_5		/^https?\:\/\/rd\.yahoo\.com\/partner\b/i
-describe T_YAHOO_REDIR_5	Yahoo Redirect
-
-# alternate version found in 70_cvs_rules_under_test.cf
-uri T_YAHOO_REDIRECTOR		/^http:\/\/rd\.yahoo\.com/i
-describe T_YAHOO_REDIRECTOR	Uses commonly-spammed redirector URL
+# Justin says Yahoo stopped using this hostname entirely (which makes me
+# wonder if spammers will still use it and whether it will work on our
+# older corpus mail)
+uri T_YAHOO_REDIRECTOR_1	/^http:\/\/rd\.yahoo\.com/i
+describe T_YAHOO_REDIRECTOR_1	Uses commonly-spammed redirector URL
+uri T_YAHOO_REDIRECTOR_2	/^https?:\/\/rd\.yahoo\.com/i
+describe T_YAHOO_REDIRECTOR_2	Uses commonly-spammed redirector URL
 
 uri T_ASIAN_LINKS			/(?:^https?\:\/\/|^mailto\:).{0,20}\.(?:kr|jp)\//i
 describe T_ASIAN_LINKS		Links to Korea, Japan, etc.
