@@ -24,12 +24,12 @@ cp Mail-SpamAssassin-$vers.zip $WEBDIR/devel
 
 echo $vers > $WEBDIR/latest_version
 
-make clean distclean
 rm -rf $WEBDIR/dist $WEBDIR/doc
 mkdir $WEBDIR/dist
 tar cf - --exclude=CVS --exclude='.#*' . | ( cd $WEBDIR/dist ; tar xf - )
 tar cf - --exclude=CVS --exclude='.#*' doc | ( cd $WEBDIR ; tar xf - )
 
+( cd $WEBDIR/dist ; make clean distclean )
 ( cd $WEBDIR/devel ; cvs add -kb *SpamAssassin* )
 
 ls -l $WEBDIR/devel
