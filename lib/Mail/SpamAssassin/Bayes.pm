@@ -808,8 +808,14 @@ sub is_available {
 
   my ($ns, $nn) = $self->{store}->nspam_nham_get();
 
-  return 0 if ($ns < $MIN_SPAM_CORPUS_SIZE_FOR_BAYES);
-  return 0 if ($nn < $MIN_HAM_CORPUS_SIZE_FOR_BAYES);
+  if ($ns < $MIN_SPAM_CORPUS_SIZE_FOR_BAYES) {
+    dbg("debug: Only $ns spam(s) in Bayes DB < $MIN_SPAM_CORPUS_SIZE_FOR_BAYES");
+    return 0;
+  }
+  if ($nn < $MIN_HAM_CORPUS_SIZE_FOR_BAYES) {
+    dbg("debug: Only $nn ham(s) in Bayes DB < $MIN_HAM_CORPUS_SIZE_FOR_BAYES");
+    return 0;
+  }
 
   return 1;
 }
