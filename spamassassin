@@ -1,6 +1,7 @@
 #!/usr/bin/perl -w
 
 use Getopt::Std;
+use Config;
 
 use FindBin;
 BEGIN {
@@ -43,8 +44,15 @@ BEGIN {
   }
 }
 
+$default_rules_1 = '/etc/spamassassin.cf';
+$default_rules_2 = $Config{installsitelib}.'/spamassassin.cf';
+
+$default_prefs_1 = '/etc/spamassassin.prefs';
+$default_prefs_2 = $Config{installsitelib}.'/spamassassin.prefs';
+$default_userprefs = $ENV{'HOME'}.'/.spamassassin.cf';
+
 sub usage {
-  my $ver = Mail::SpamAssassin::Main::Version();
+  my $ver = Mail::SpamAssassin::Version();
   die <<EOUSAGE;
 
 Usage: spamassassin [option ...] < mailmessage > output
@@ -52,8 +60,13 @@ Usage: spamassassin [option ...] < mailmessage > output
 Options:
  
   -t               only testing
+
   -c config        configuration file
+                   (default: $default_rules_1
+                          or $default_rules_2 )
+
   -p prefs         user preferences file
+                   (default: $default_userprefs )
 
 Version: $ver      Home: http://spamassassin.taint.org/
 
@@ -61,7 +74,7 @@ EOUSAGE
 }
 
 
-require Mail::SpamAssassin::Main;
+require Mail::SpamAssassin;
 require Mail::Audit;
 
 use vars qw{
@@ -72,41 +85,62 @@ getopts ('tc:p:hV') or usage();
 
 if (defined $opt_h) { usage(); }
 if (defined $opt_V) {
-  my $ver = Mail::SpamAssassin::Main::Version();
+  my $ver = Mail::SpamAssassin::Version();
   print <<EOVERSION;
 SpamAssassin version $ver
 EOVERSION
   exit 0;
 }
 
-# For Mail::Audit users -- this is the magic. Just create a
-# Mail::SpamAssassin::Main object like this, then run the
-# check() method as below; if it returns a non-undef value,
-# then you've got spam, otherwise it's normal mail.
+# standard Mail::Audit start
+my $mail = Mail::Audit->new();
+
+# For Mail::Audit users -- this is the magic. Just create a Mail::SpamAssassin
+# object like this, then run the check() method as below; if it returns a
+# non-undef value, then you've got spam, otherwise it's normal mail.
 #
-# This implementation does other stuff though; it tags it
-# nicely etc.
+# You can then use the rewrite() method (passing in the Mail::Audit object) to
+# rewrite the spam.
 #
-my $spamtest = new Mail::SpamAssassin::Main ({
-  'testing'		=> $opt_t,
+# (This implementation does other stuff though, such as -t support, and setting
+# up the user's rules files if they don't exist; ignore that stuff.)
+
+$opt_c ||= $default_rules_1;
+if (!-f $opt_c) { $opt_c = $default_rules_2; }
+
+if (!defined $opt_p) {
+  $opt_p = $default_userprefs;
+
+  if (!-f $opt_p) {
+    # copy in the default one for later editing
+
+    my $defprefs = $default_prefs_1;
+    if (!-f $defprefs) { $defprefs = $default_prefs_2; }
+    use File::Copy;
+    copy ($defprefs, $opt_p);
+
+    warn "Created user preferences file: $opt_p\n";
+  }
+}
+
+my $spamtest = new Mail::SpamAssassin ({
   'rules_filename'	=> $opt_c,
   'userprefs_filename'	=> $opt_p
 });
 
-my $mail = Mail::Audit->new();
-my $isspam = $spamtest->check ($mail);
-$spamtest->rewrite ($mail);
+my $status = $spamtest->check ($mail);
+$status->rewrite_mail ();
 
-if ($opt_t) {
+if ($opt_t) {				# support -t
+  # add the spam report to the end of the body as well, if testing.
   my $lines = $mail->{obj}->body();
-  push (@{$lines}, split (/$/, $spamtest->{report}));
+  push (@{$lines}, split (/$/, $status->get_report()));
   $mail->{obj}->body ($lines);
-
   $mail->{obj}->print (\*STDOUT);
-
-} else {
-  $mail->accept();
+  exit;
 }
+
+$mail->accept();
 
 # ---------------------------------------------------------------------------
 
@@ -124,7 +158,16 @@ spamassassin - mail filter to identify spam using text analysis
 
 =head1 DESCRIPTION
 
-TODO
+SpamAssassin is a mail filter to identify spam using text analysis.
+
+Using its rule base, it uses a wide range of heuristic tests on mail headers
+and body text to identify "spam", also known as unsolicited commercial email.
+
+Once identified, the mail is then tagged as spam for later filtering using
+the user's own mail user-agent application.
+
+The default tagging operations that take place are detailed in the L<TAGGING>
+section below.
 
 =head1 OPTIONS
 
@@ -136,11 +179,54 @@ Test mode.
 
 =item -c config
 
-Read configuration from C<config>.
+Read configuration from C<config>.  The default configuration file, if this is
+not specified, is C<$Config{installsitelib}/spamassassin.cf>.
 
 =item -p prefs
 
-Read user score preferences from C<prefs>.
+Read user score preferences from C<prefs>.  The default preferences file,  if
+this is not specified, is C<~/.spamassassin.cf>.
+
+=back
+
+=head1 TAGGING FOR SPAM MAILS
+
+The modifications made are as follows:
+
+=over 4
+
+=item Subject: header
+
+The string C<*****SPAM*****> is prepended to the subject.
+
+=item X-Spam-Status: header
+
+A string, C<Yes, hits=nn required=nn> is set in this header to reflect
+the filter status.
+
+=item X-Spam-Flag: header
+
+Set to C<YES>.
+
+=item Content-Type: header
+
+Set to C<text/plain>, in order to defang HTML mail or other active
+content that could "call back" to the spammer.
+
+=item spam mail body text
+
+The SpamAssassin report is added to top of the mail message body.
+
+=back
+
+=head1 TAGGING FOR NON-SPAM MAILS
+
+=over 4
+
+=item X-Spam-Status: header
+
+A string, C<No, hits=nn required=nn> is set in this header to reflect
+the filter status.
 
 =back
 
@@ -171,6 +257,8 @@ C<Mail::Audit>
 C<Mail::Internet>
 
 =head1 COREQUISITES
+
+C<Net::DNS>
 
 =cut
 

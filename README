@@ -5,7 +5,7 @@ Welcome to SpamAssassin!
 SpamAssassin is a mail filter to identify spam using text analysis.
 
 Using its rule base, it uses a wide range of heuristic tests on mail headers
-and body text, to identify "spam", or unsolicited commercial email.
+and body text to identify "spam", also known as unsolicited commercial email.
 
 Once identified, the mail can then be optionally tagged as spam for later
 filtering using the user's own mail user-agent application.
@@ -15,6 +15,110 @@ Mail::SpamAssassin, a set of perl modules which implement a Mail::Audit plugin,
 allowing SpamAssassin to be used in a Mail::Audit filter, or (possibly at some
 point) in a spam-protection proxy POP/IMAP server.
 
-SpamAssassin is distributed under Perl's Artistic license.
+SpamAssassin lives at http://spamassassin.taint.org/ or in CPAN, and is
+distributed under Perl's Artistic license.
 
+SpamAssassin owes a lot of inspiration to Mark Jeftovic's filter.plx,
+http://AntiSpam.shmOOze.net/filter/ , which I contributed some code to.
+However, SpamAssassin is a ground-up rewrite with an entirely different
+ruleset, and a different code model and installation system.
+
+
+
+Installing SpamAssassin
+-----------------------
+
+The easiest way to do this is using CPAN.pm, like so:
+
+	perl -MCPAN -e shell
+	install Mail::SpamAssassin
+	quit
+
+Alternatively download the tarfile or zipfile from
+http://spamassassin.taint.org/ and install that like so:
+
+	[unzip/untar the archive]
+	cd spamassassin-*
+	perl Makefile.PL
+	make
+	make install		[as root]
+
+You will require the Mail::Audit and Net::DNS Perl modules (although if
+Net::DNS is not supplied, SpamAssassin will still work, just not as
+effectively).
+
+
+
+Using SpamAssassin
+------------------
+
+
+If you want to use Mail::Audit:
+
+    - Install it on your mail server, as above.
+
+    - run "perldoc Mail::SpamAssassin" and take a look at the synopsis, it
+      outlines what you need to add to your audit script.
+
+
+
+If you don't:
+
+    - Install it on your mail server, as above.
+
+    - Test it:
+
+    	./spamassassin -t < sample-nonspam.txt > nonspam.out
+    	./spamassassin -t < sample-spam.txt > spam.out
+
+      Verify (using a text viewer, ie. "less" or "notepad") that nonspam.out
+      has not been tagged as spam, and that spam.out has.  The files should
+      contain the full text and headers of the messages, and there should be no
+      errors when you run the commands.
+
+      If the commands do not work, DO NOT PROCEED TO THE NEXT STEP, as you
+      will lose mail!
+
+    - Make a backup of your .forward (if it exists).
+
+    	cp ~/.forward ~/.forward.bak
+
+    - Change your ~/.forward file so it reads like this:
+
+    	"| /path/to/spamassassin > /var/spool/mail/username"
+
+      Where "/path/to/spamassassin" is the path to where the "spamassassin"
+      script is installed, and "/var/spool/mail/username" is the path to your
+      mail spool.
+
+    - Send yourself a mail message, and ensure it gets to you.  If it does not,
+      copy your old backed-up .forward file back into place and ask your
+      sysadmin for help!
+
+      	cp ~/.forward.bak ~/.forward
+	echo "Help!" | mail root
+
+
+
+Customising
+-----------
+
+When installing SpamAssassin, the configuration files defining the list of
+rules and the default user preferences are written to INSTALLSITELIB, or
+/usr/lib/perl5/site_perl/5.005 (or similar) on a typical UNIX system.
+
+Users who run "spamassassin" will receive a copy of the user preferences in
+their home directories as the file "~/.spamassassin.cf".  This allows them to
+edit their preferences and reweight the rules, or to increase or decrease the
+"line in the sand" at which point a mail is judged spam (or not).
+
+Systems administrators can edit the
+"/usr/lib/perl5/site_perl/5.005/spamfilter.cf" file to add new rules for all
+users on the system, or they can edit
+"/usr/lib/perl5/site_perl/5.005/spamfilter.prefs" to set default preferences
+for the users.
+
+There is no difference in interpretation between the rules file and the
+preferences file, so users can add new rules for their own use in the
+~/.spamfilter.cf file, if they like.
 
