@@ -1723,30 +1723,41 @@ sub do_awl_tests {
       dbg ("failed to find originating IP in '$rcvd'");
     }
 
-    # Create the AWL object, then check
-    $self->{auto_whitelist} = Mail::SpamAssassin::AutoWhitelist->new($self->{main});
+    # Create the AWL object, catching 'die's
+    my $whitelist;
+    my $evalok = eval {
+      $whitelist = Mail::SpamAssassin::AutoWhitelist->new($self->{main});
 
-    my $meanscore = $self->{auto_whitelist}->check_address($_, $origip);
-    my $delta = 0;
+      # check
+      my $meanscore = $whitelist->check_address($_, $origip);
+      my $delta = 0;
 
-    dbg("AWL active, pre-score: ".$self->{hits}.", mean: ".($meanscore||'undef').
-                        ", originating-ip: ".($origip||'undef'));
+      dbg("AWL active, pre-score: ".$self->{hits}.", mean: ".($meanscore||'undef').
+                          ", originating-ip: ".($origip||'undef'));
 
-    if(defined($meanscore))
-    {
-	$delta = ($meanscore - $self->{hits})*$self->{main}->{conf}->{auto_whitelist_factor};
+      if(defined($meanscore))
+      {
+          $delta = ($meanscore - $self->{hits})*$self->{main}->{conf}->{auto_whitelist_factor};
+      }
+
+      if($delta != 0)
+      {
+          $self->_handle_hit("AWL",$delta,"AWL: ","Auto-whitelist adjustment");
+      }
+
+      dbg("Post AWL score: ".$self->{hits});
+
+      # Update the AWL
+      $whitelist->add_score($self->{hits});
+      $whitelist->finish();
+      1;
+    };
+
+    if (!$evalok) {
+      dbg ("open of AWL file failed: $@");
+      # try an unlock, in case we got that far
+      eval { $whitelist->finish(); };
     }
-
-    if($delta != 0)
-    {
-	$self->_handle_hit("AWL",$delta,"AWL: ","Auto-whitelist adjustment");
-    }
-
-    dbg("Post AWL score: ".$self->{hits});
-
-    # Update the AWL
-    $self->{auto_whitelist}->add_score($self->{hits});
-    $self->{auto_whitelist}->finish();		# done with this now
 }
 
 ###########################################################################

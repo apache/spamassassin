@@ -57,6 +57,7 @@ sub new_checker {
       $|=1;
       select($old_fh);
 
+
       for (my $i = 0; $i < $lock_tries; $i++) #try $lock_tries (seconds) times to get lock
       {
          dbg("$$ Trying to get lock on $path pass $i");
@@ -88,6 +89,8 @@ sub new_checker {
 	 }
       }
 
+      # TODO: trap signals to unlock the db file here on SIGINT and SIGTERM
+
       close(LTMP);
       unlink($lock_tmp);
 
@@ -96,19 +99,24 @@ sub new_checker {
 	 dbg("Tie-ing to DB file R/W in $path");
 	 tie %{$self->{accum}},"AnyDBM_File",$path, O_RDWR|O_CREAT,   #open rw w/lock
 		       (oct ($main->{conf}->{auto_whitelist_file_mode}) & 0666)
-	     or die "Cannot open auto_whitelist_path $path: $!\n";
+	     or goto failed_to_tie;
       } 
       else 
       {
 	 dbg("Tie-ing to DB file R/O in $path");
 	 tie %{$self->{accum}},"AnyDBM_File",$path, O_RDONLY,         #open ro w/o lock
 		       (oct ($main->{conf}->{auto_whitelist_file_mode}) & 0666)
-	     or die "Cannot open auto_whitelist_path $path: $!\n";
+	     or goto failed_to_tie;
       } 
   }
 
   bless ($self, $class);
-  $self;
+  return $self;
+
+failed_to_tie:
+  unlink($self->{lock_file}) ||
+     dbg ("Couldn't unlink " . $self->{lock_file} . ": $!\n");
+  die "Cannot open auto_whitelist_path $path: $!\n";
 }
 
 ###########################################################################
@@ -122,6 +130,7 @@ sub finish {
        unlink($self->{lock_file}) ||
           dbg ("Couldn't unlink " . $self->{lock_file} . ": $!\n");
     }
+    # TODO: untrap signals to unlock the db file here
 }
 
 ###########################################################################
