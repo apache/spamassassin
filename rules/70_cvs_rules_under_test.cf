@@ -465,14 +465,23 @@ header T_BAD_HELO2           eval:check_for_bad_helo2()
 
 body __IMG_TAG			eval:html_tag_exists('img')
 uri __IMG_URI			/\.(?:gif|jpe?g|png)$/i
-body __TEXT_64			eval:nonspace_length('0','64')
-body __TEXT_128			eval:nonspace_length('64','128')
-body __TEXT_192			eval:nonspace_length('128','192')
-body __TEXT_256			eval:nonspace_length('192','256')
 
+body __TEXT_32			eval:nonspace_length('0','32')
+body __TEXT_64			eval:nonspace_length('32','64')
+body __TEXT_96			eval:nonspace_length('64','96')
+body __TEXT_128			eval:nonspace_length('96','128')
+body __TEXT_160			eval:nonspace_length('128','160')
+body __TEXT_192			eval:nonspace_length('160','192')
+body __TEXT_224			eval:nonspace_length('192','224')
+body __TEXT_256			eval:nonspace_length('224','256')
+
+meta T_IMAGE_ONLY_32	((__IMG_TAG ||(__IMG_URI&&HTML_MESSAGE))&& __TEXT_32)
 meta T_IMAGE_ONLY_64	((__IMG_TAG ||(__IMG_URI&&HTML_MESSAGE))&& __TEXT_64)
+meta T_IMAGE_ONLY_96	((__IMG_TAG ||(__IMG_URI&&HTML_MESSAGE))&& __TEXT_96)
 meta T_IMAGE_ONLY_128	((__IMG_TAG ||(__IMG_URI&&HTML_MESSAGE))&& __TEXT_128)
+meta T_IMAGE_ONLY_160	((__IMG_TAG ||(__IMG_URI&&HTML_MESSAGE))&& __TEXT_160)
 meta T_IMAGE_ONLY_192	((__IMG_TAG ||(__IMG_URI&&HTML_MESSAGE))&& __TEXT_192)
+meta T_IMAGE_ONLY_224	((__IMG_TAG ||(__IMG_URI&&HTML_MESSAGE))&& __TEXT_224)
 meta T_IMAGE_ONLY_256	((__IMG_TAG ||(__IMG_URI&&HTML_MESSAGE))&& __TEXT_256)
 
 ##############################################################################
