@@ -1110,8 +1110,8 @@ sub nonsense_from_percent {
         }
         close(TRIPLETS);
 
-        $triplets_loaded = 1;
-    } # if (!$triplets_loaded)
+        $names_triplets_loaded = 1;
+    } # if (!$names_triplets_loaded)
 
     my @addr_parts = split(/\@/, $self->get('From:addr'));
 
