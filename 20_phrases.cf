@@ -24,6 +24,7 @@ body DISCONTINUE		/\"discontinue\".{1,15}no further notices/i
 describe DISCONTINUE		List removal information
 body REMOVE_FROM_LIST		/to be removed from (?:the|my|our) (?:mailing|e.?mail|opt[ -]?in)? ?list/i
 describe REMOVE_FROM_LIST	To be removed from list
+tflags REMOVE_FROM_LIST info
 body REMOVE_RESPECT		/(?:respect|honou?r) all removal requests/i
 describe REMOVE_RESPECT		We respect all removal requests
 
@@ -342,6 +343,8 @@ describe MAILTO_WITH_SUBJ_REMOVE	mailto URI includes removal text
 # uses these to handle auto-subscribe/unsubscribe features
 rawbody MAILTO_LINK		/=[3D=\s"']*mailto:/is
 describe MAILTO_LINK		Includes a URL link to send an email
+tflags MAILTO_LINK info
+
 body AOL_USERS_LINK		/AOL\s+Users\s+Click/is
 describe AOL_USERS_LINK		Includes a link for AOL users to click
 
@@ -878,9 +881,6 @@ describe CHANGE_TERMS           Terms and conditions
 
 body     DONT_DELETE            /\b(?:don'?t delete this|do not delete)/i
 describe DONT_DELETE            Don't delete me!  Nooooo!!!!
-
-body EU_EMAIL_OPTOUT            	/EU (?:e-?mail opt.?out|e.?commerce) directive/i
-describe EU_EMAIL_OPTOUT        	Claims compliance with European spam regulations
 
 body EXCUSE_8                   /requests to be taken off our mailing list/i
 describe EXCUSE_8               Claims you can be removed from the list
