@@ -8,7 +8,7 @@ use Config;
 use ExtUtils::MakeMaker 5.45;
 
 use constant RUNNING_ON_WINDOWS => ($^O =~ /^(mswin|dos|os2)/oi);
-
+use constant HAS_DBI => eval { require DBI; };
 
 my @ATT_KEYS = (
   # PLEASE READ THE FILE 'PACKAGING' FOR INFORMATION ON THESE VARIABLES.
@@ -340,10 +340,13 @@ else {
 }
 $makefile{'macro'}{'RUN_NET_TESTS'} = yesno($opt{'run_net_tests'});
 
-$opt{'run_awl_sql_tests'} = prompt('Run SQL Based AutoWhitelist Tests (additional information required) (y/n)', "n");
-print "\n";
+if (HAS_DBI) {
+  $opt{'run_awl_sql_tests'} = prompt('Run SQL Based AutoWhitelist Tests (additional information required) (y/n)', "n");
+  print "\n";
 
-$opt{'run_awl_sql_tests'} = bool($opt{'run_awl_sql_tests'});
+  $opt{'run_awl_sql_tests'} = bool($opt{'run_awl_sql_tests'});
+}
+
 if ($opt{'run_awl_sql_tests'}) {
   my $user_awl_dsn = prompt("SQL AWL DSN (user_awl_dsn): ", "dbi:mysql:spamassassin:localhost");
   my $user_awl_sql_username = prompt("SQL AWL DB username (user_awl_sql_username): ", "");
@@ -365,10 +368,13 @@ else {
   unlink("t/sql_based_whitelist.cf");
 }
 
-$opt{'run_bayes_sql_tests'} = prompt("Run Bayes SQL storage tests (additional information required)? (y/n)", 'n');
-print "\n";
+if (HAS_DBI) {
+  $opt{'run_bayes_sql_tests'} = prompt("Run Bayes SQL storage tests (additional information required)? (y/n)", 'n');
+  print "\n";
 
-$opt{'run_bayes_sql_tests'} = bool($opt{'run_bayes_sql_tests'});
+  $opt{'run_bayes_sql_tests'} = bool($opt{'run_bayes_sql_tests'});
+}
+
 if ($opt{'run_bayes_sql_tests'}) {
   my $bayes_sql_dsn = prompt("Bayes SQL DSN (bayes_sql_dsn): ", "dbi:mysql:spamassassin:localhost");
   my $bayes_sql_username = prompt("Bayes SQL DB username (bayes_sql_username): ", "");
