@@ -96,6 +96,11 @@ use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/oi);
 
     dbg("util: running in taint mode, removing unsafe env vars, and resetting PATH");
 
+    if (RUNNING_ON_WINDOWS) {
+      dbg("util: running on a Windows-esque platform, skipping PATH cleaning");
+      return;
+    }
+
     delete @ENV{qw(IFS CDPATH ENV BASH_ENV)};
 
     # Go through and clean the PATH out
