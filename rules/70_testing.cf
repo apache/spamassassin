@@ -230,8 +230,15 @@ rawbody T_BAYESBUSTER_LINE_15	/^([a-z]{3,} ){15,}<[Bb][Rr]>$/
 rawbody T_BAYESBUSTER_LINE_15I	/^([a-z]{3,} ){15,}<br>$/i
 
 # reported by Kurtis Rader, bug 2890
-uri T_MSN_REDIR		/^http:\/\/shopping\.msn\.com\/trackurl\.aspx\?/i
+uri T_MSN_REDIR		m{^https?://shopping\.msn\.com/trackurl\.aspx\?}i
 describe T_MSN_REDIR	Has MSN Redirect URI
+
+# reported by Kurtis Rader, bug 2901
+uri T_AOL_REDIR_1	m{^https?://www\.aol\.com/ams/clickThruRedirect.adp\?}i
+uri T_AOL_REDIR_2	m{^https?://www\.aol\.com/ams/}i
+uri T_AOL_REDIR_3	m{^https?://www\.aol\.com/.*https?://}i
+uri T_AOL_REDIR_4	m{^https?://www\.aol\.com/ams/.*https?://}i
+describe T_AOL_REDIR	Has AOL Redirect URI
 
 # more portable replacement for RCVD_NUMERIC_HELO that doesn't rely on
 # Received headers using "helo=" prefix
