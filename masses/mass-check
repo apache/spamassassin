@@ -9,7 +9,6 @@
 # --ms          find_missed('spam.log')
 # --net         turn on network checks!
 # --mid         report Message-ID from each message
-# --bayes       report score from Bayesian classifier
 # --debug       report debugging information
 # --showdots    print a dot for each scanned message
 #
@@ -29,6 +28,10 @@
 # --dir         subsequent targets are directories
 # --file        subsequent targets are files in RFC 822 format
 # --mbox        subsequent targets are mbox files
+#
+#
+# Just left over functions we should remove at some point:
+# --bayes       report score from Bayesian classifier
 #
 # non-option arguments are used as target names (mail files and folders),
 # the target format is: <class>:<format>:<location>
@@ -196,7 +199,7 @@ sub wanted {
   if (defined($time)) {
     push(@extra, "time=$time");
   }
-  if ($opt_bayes && defined $status->{bayes_score}) {
+  if (defined $status->{bayes_score}) {
     push(@extra, "bayes=" . $status->{bayes_score});
   }
   if ($opt_mid) {
