@@ -1,0 +1,958 @@
+# SpamAssassin rules file.
+#
+# The format is easy to grok:
+#
+#   report line-of-spam-report-text
+#       (some template items supported are:)
+#       _HITS_: the number of hits the message triggered
+#       _REQD_: the required hits to be considered spam
+#       _SUMMARY_: the full details of what hits were triggered
+#       _VER_: SpamAssassin version
+#       _HOME_: SpamAssassin home URL
+#
+#   header SYMBOLIC_TEST_NAME	header op pattern
+#	(The operations allowed (so far) are: =~  and: !~)
+#       (header can be 'ALL', which returns the text of all headers)
+#       (note that non-appearing headers are returned as the string 'undef')
+#
+#   header SYMBOLIC_TEST_NAME	eval:name_of_eval_method([args])
+#
+#   body SYMBOLIC_TEST_NAME	/pattern/modifiers
+#	(Evaluated for each text or HTML line in the message body.
+#       If you plan to use the default weight (1), you can omit the
+#       SYMBOLIC_TEST_NAME and just use "." instead.
+#
+#   body SYMBOLIC_TEST_NAME	eval:name_of_eval_method([args])
+#	(this is evaluated for the entire message body, not for each line)
+#
+#   full SYMBOLIC_TEST_NAME	/pattern/modifiers
+#	(Evaluated for the entire message body as one string.
+#       If you plan to use the default weight (1), you can omit the
+#       SYMBOLIC_TEST_NAME and just use "." instead.
+#
+#   full SYMBOLIC_TEST_NAME	eval:name_of_eval_method([args])
+#	(this is evaluated for the entire message, headers and all)
+#
+#   describe SYMBOLIC_TEST_NAME Textual description of test
+#       (body pattern tests don't require a description.)
+#
+# # starts a comment, whitespace is not significant.
+#
+###########################################################################
+
+# Default template. Try to keep it under 76 columns (inside the the dots below).
+# Bear in mind that EVERY line will be prefixed with "SPAM: " in order to make
+# it clear what's been added, and allow other filters to *remove* spamfilter
+# modifications, so you lose 6 columns right there.
+#
+#      ......................................................................
+clear-report-template
+report ------------- Comienzo de los resultados de SpamAssassin ---------------
+report Este correo probablemente es spam. El mensaje original ha sido alterado
+report para que pueda reconocer o bloquear en el futuro correo no solicitado, 
+report usando las capacidades de filtrado que incorpora su lector de correo.
+report 
+report Detalles del análisis:   (_HITS_ puntos, _REQD_ requeridos)
+report _SUMMARY_
+report ---------------- Fin de los resultados de SpamAssassin -----------------
+#      ......................................................................
+
+###########################################################################
+# and now, a template for spam-trap responses.  If the first few lines
+# begin with "Xxxxxx: " where Xxxxxx is a header, they'll be used as
+# headers.
+
+clear-spamtrap-template
+spamtrap Subject: this address is no longer available
+
+spamtrap [this message has been automatically generated]
+spamtrap 
+spamtrap Please note that this address is no longer in use, and nowadays
+spamtrap receives nothing but unsolicited commercial mail.  Accordingly,
+spamtrap any mail sent to it is added to several spam-tracking databases,
+spamtrap then automatically deleted.
+spamtrap
+spamtrap If you genuinely want to contact the owner of the address, please
+spamtrap re-check your contact lists, or search the web, to find their
+spamtrap current e-mail address.
+spamtrap 
+spamtrap The mail you sent is reproduced in full below, for resending to
+spamtrap the correct address.  Sorry for the inconvenience!
+spamtrap 
+spamtrap [-- Signed: the SpamAssassin mail filter]
+spamtrap 
+
+###########################################################################
+
+# Terse report template.
+#
+#            ......................................................................
+clear-terse-report-template
+terse-report ---- Comienzo de los resultados de SpamAssassin
+terse-report _HITS_ puntos, _REQD_ requeridos;
+terse-report _SUMMARY_
+terse-report ---- Fin de los resultados de SpamAssassin
+#            ......................................................................
+###########################################################################
+
+header NO_REAL_NAME		From =~ /^\s*\<?\S+\@\S+\>?\s*$/
+describe NO_REAL_NAME		From: no incluye un nombre real
+
+header FROM_ENDS_IN_NUMS	From =~ /\d+\@/
+describe FROM_ENDS_IN_NUMS	From: finaliza en números
+
+# (contrib: David Hull)
+header FROM_NO_USER		From =~ /(?:^\@|<\@| \@|<>)/
+describe FROM_NO_USER		From: no tiene parte local antes de la @
+
+header TO_NO_USER		To =~ /(?:^\@|<\@| \@|<>)/
+describe TO_NO_USER		To: no tiene parte local antes de la @
+
+header PLING			Subject =~ /\!/
+describe PLING			El Subject tiene un signo de exclamación
+
+header PLING_PLING		Subject =~ /\!\!+/
+describe PLING_PLING		El Subject tiene muchos signos de exclamación
+
+header SUBJ_HAS_UNIQ_ID		eval:check_for_unique_subject_id()
+describe SUBJ_HAS_UNIQ_ID	El Subject contiene un número ID único
+
+header UNDISC_RECIPS		To =~ /^undisclosed-recipients?:\s*;$/
+describe UNDISC_RECIPS		Enviado a "undisclosed-recipients"
+
+header FAKED_UNDISC_RECIPS	To =~ /Undisclosed.*Recipient\S*@/i
+describe FAKED_UNDISC_RECIPS	Camuflado a "Undisclosed-Recipients"
+
+header SUBJ_ALL_CAPS		Subject =~ /^[A-Z0-9\W]{6,}[^a-z]+$/
+describe SUBJ_ALL_CAPS		El Subject está en mayúsculas
+
+# (allow this test to pass if there's no Message-Id header)
+header MSGID_HAS_NO_AT		Message-Id !~ /\@/ [if-unset: NO@MSGID]
+describe MSGID_HAS_NO_AT	El Message-Id no tiene la @
+
+header MSGID_SPAMSIGN_1		Message-Id =~ /^<[0-9a-f]{12,12}\$[0-9a-f]{8,8}\$[0-9a-f]{8,8}\@>$/
+describe MSGID_SPAMSIGN_1	El Message-Id ha sido generado por una herramienta de spam
+
+header INVALID_MSGID		Message-Id !~ /^<(?:\".+\"|[^\s]+)\@(?:\[.+\]|[^\s]+)>$/
+describe INVALID_MSGID		Message-Id no válido, de acuerdo al RFC-2822
+
+header INVALID_DATE		Date =~ / AM| PM/i
+describe INVALID_DATE		Cabecera Date: inválida (tiene AM/PM)
+
+header INVALID_DATE_NO_TZ	Date =~ /^..., \d+ ... .... ..:..:..$/
+describe INVALID_DATE_NO_TZ	Cabecera Date: inválida (no timezone)
+
+header SUBJ_HAS_Q_MARK		Subject =~ /\?.{2,}$/
+describe SUBJ_HAS_Q_MARK	Subject: contiene un signo de interrogación
+
+header SUBJ_ENDS_IN_Q_MARK	Subject =~ /\?+\s*$/
+describe SUBJ_ENDS_IN_Q_MARK	Subject: finaliza en un signo de interrogación
+
+header ADVERT_CODE		Subject =~ /(^\s*|\s+)ADV:/i
+describe ADVERT_CODE		Subject: contiene signos de publicidad
+
+header FRIEND_AT_PUBLIC	To =~ /(yourdomain|you|your|public).(com|org|net)/i
+describe FRIEND_AT_PUBLIC	enviado a you@you.com o similar
+
+header TO_EMPTY			To =~ /^(?:\@|\s*$)/ [if-unset: UNSET]
+describe TO_EMPTY		To: está vacío
+
+header REPLY_TO_EMPTY		Reply-To =~ /^(?:\@|\s*$)/ [if-unset: UNSET]
+describe REPLY_TO_EMPTY		Reply-To: está vacío
+
+header ALL_CAPS_SUBJECT		ALL =~ /\nSUBJECT: /s
+describe ALL_CAPS_SUBJECT	Encontrada cabecera SUBJECT:
+
+header X_EM_VER_PRESENT		X-Em-Version =~ /\S/
+describe X_EM_VER_PRESENT	Encontrada cabecera X-Em-Version:
+
+header NO_MX_FOR_FROM		eval:check_for_from_mx()
+describe NO_MX_FOR_FROM		No existe regristo MX para el dominio del From:
+
+header KNOWN_BAD_DIALUPS	eval:check_for_bad_dialup_ips()
+describe KNOWN_BAD_DIALUPS	Recibido desde conocidas fuentes de spam
+
+header FROM_AND_TO_SAME		eval:check_for_from_to_equivalence()
+describe FROM_AND_TO_SAME	From y To son la misma dirección
+
+header BAD_HELO_WARNING		eval:check_for_bad_helo()
+describe BAD_HELO_WARNING	Nombre incorrecto usado en el comando SMTP HELO
+
+header SUBJ_FULL_OF_8BITS	eval:check_subject_for_lotsa_8bit_chars()
+describe SUBJ_FULL_OF_8BITS	Subject está lleno de caracteres de 8-bit
+
+header MDAEMON_2_7_4		Received =~ /with SMTP .MDaemon.v2.7.SP4.R./
+describe MDAEMON_2_7_4		Received de un problemático SMTP server (MDaemon 2.7.4SP4R)
+
+header SMTPD_IN_RCVD		Received =~ /\(SMTPD32-\d+\..+\)/
+describe SMTPD_IN_RCVD		Received del servidor SMTPD32 (SMTPD32-n.n)
+
+header POST_IN_RCVD		Received =~ / Post\.(?:sk|cz)/
+describe POST_IN_RCVD		Received contene el nombre falso 'Post.cz'
+
+# the new first arg for check_rbl() indicates what type of check it is;
+# each type of check is stored in a separate set, and if an IP has already
+# been hit in that set, it will not be checked with any other zone in
+# that set.
+header RCVD_IN_RELAYS_ORDB_ORG	eval:check_rbl('relay', 'relays.ordb.org.')
+describe RCVD_IN_RELAYS_ORDB_ORG Recibido de un relay en relays.ordb.org
+
+header RCVD_IN_OSIRUSOFT_COM	eval:check_rbl('relay', 'relays.osirusoft.com.')
+describe RCVD_IN_OSIRUSOFT_COM	Recibido de un relay en relays.osirusoft.com
+
+# X prefix is so that these are run after RCVD_IN_OSIRUSOFT_COM. tests
+# are run in alphanumerically-sorted order.
+header X_OSIRU_SPAM_SRC		eval:check_rbl_results_for('relay', '127.0.0.4')
+describe X_OSIRU_SPAM_SRC	Osirusoft.com: el remitente es Confirmada
+Fuente de Spam
+
+header X_OSIRU_SPAMWARE_SITE	eval:check_rbl_results_for('relay', '127.0.0.6')
+describe X_OSIRU_SPAMWARE_SITE	Osirusoft.com: el remitente es un sitio afin al Spame o vendedor
+
+# NOTE: commercial tests, see README file for details
+header RCVD_IN_RBL		eval:check_rbl('rbl', 'blackholes.mail-abuse.org.')
+describe RCVD_IN_RBL		Recibido desde un RBLed relay, visite http://www.mail-abuse.org/rbl/
+
+header RCVD_IN_RSS		eval:check_rbl('relay', 'relays.mail-abuse.org.')
+describe RCVD_IN_RSS		Recibido desde RSSed relay, visite http://www.mail-abuse.org/rss/
+
+header RCVD_IN_DUL		eval:check_rbl('dialup', 'dialups.mail-abuse.org.')
+describe RCVD_IN_DUL		Recibido desde dialup, visite http://www.mail-abuse.org/dul/
+
+# NOTE: commercial test, see README file for details
+header RCVD_IN_BL_SPAMCOP_NET	eval:check_rbl('spamcop', 'bl.spamcop.net.')
+describe RCVD_IN_BL_SPAMCOP_NET	Recibido desde un relay en bl.spamcop.net
+
+# don't include From:!  Many UNIX MTA's get false positives otherwise
+# ditto for Reply-To:, some list software inserts Received and Reply-To hdrs
+header FORGED_RCVD_FOUND	ALL =~ /\nSubject:.*\nReceived: /s
+describe FORGED_RCVD_FOUND	Encontrada posible cabecera forzada 'Received:'
+
+header YR_MEMBERSHIP_EXCH	Subject =~ /Your Membership Exchange/
+describe YR_MEMBERSHIP_EXCH	Subject contiene 'Your Membership Exchange'
+
+header FROM_FORGED_HOTMAIL	From =~ /^[^"]+\S+\@hotmail\.com/i
+describe FROM_FORGED_HOTMAIL	Forzado From: simula ser de hotmail.com
+
+header DIFFERENT_REPLY_TO	eval:check_for_spam_reply_to()
+describe DIFFERENT_REPLY_TO	Reply-To: muy diferente del From: o del To:
+
+header LOTS_OF_CC_LINES		eval:check_lots_of_cc_lines()
+describe LOTS_OF_CC_LINES	Montones y montones de cabeceras Cc:
+
+header FROM_NAME_EQ_FROM_ADDR	eval:check_from_name_eq_from_address()
+describe FROM_NAME_EQ_FROM_ADDR	'From:' también usado como el nombre real del remitente
+
+header FORGED_HOTMAIL_RCVD	eval:check_for_forged_hotmail_received_headers()
+describe FORGED_HOTMAIL_RCVD	Encontrada cabecera forzada 'Received:' de
+hotmail.com
+
+header FORGED_GW05_RCVD		eval:check_for_forged_gw05_received_headers()
+describe FORGED_GW05_RCVD	Encontrada cabecera forzada 'by gw05' 'Received:'
+
+header CHARSET_FARAWAY		eval:check_for_faraway_charset()
+describe CHARSET_FARAWAY	El conjunto de caracteres indica un
+lenguaje extranjero
+
+header NONEXISTENT_CHARSET	Content-Type =~ /charset="DEFAULT/
+describe NONEXISTENT_CHARSET	El conjunto de caracteres no existe
+
+header X_MAILER_GIBBERISH	X-Mailer =~ /^[A-Fa-f0-9\.]{48,}$/
+describe X_MAILER_GIBBERISH	'X-Mailer' contiene basura
+
+header X_PRIORITY_HIGH		X-Priority =~ /^1/
+describe X_PRIORITY_HIGH	Enviado con 'X-Priority' alta
+
+header X_MSMAIL_PRIORITY_HIGH	X-Msmail-Priority =~ /^High/
+describe X_MSMAIL_PRIORITY_HIGH Enviado con 'X-Msmail-Priority' alta
+
+header MAY_BE_FORGED            Received =~ /\(may be forged\)/i
+describe MAY_BE_FORGED          'Received:' tiene el aviso 'may be forged'
+
+header SHORT_RECEIVED_LINE	Received =~ /\S{120,}/s
+describe SHORT_RECEIVED_LINE	'Received:' contiene un nombre muy grande
+
+header CORRUPT_MSGID		Message-Id =~ /\@Received: /
+describe CORRUPT_MSGID		'Message-Id' contiene pedazos de la cabecera Received
+
+header MSG_ID_ADDED_BY_MTA	Message-Id =~ / \(added by /
+describe MSG_ID_ADDED_BY_MTA	'Message-Id' fue añadido por un relay
+
+header MANY_FROMS		From =~ /^[^\"\<\(]+, [^\"\<\(]+$/
+describe MANY_FROMS		'From' contiene más de una dirección
+
+# *so* many spams come from here.
+header FROM_BTAMAIL		From =~ /\@btamail.net.cn/i
+describe FROM_BTAMAIL		De una dirección @btamail.net.cn
+
+header USER_IN_BLACKLIST	eval:check_from_in_blacklist()
+describe USER_IN_BLACKLIST	From: la dirección está en la lista negra
+del usuario
+
+header MISSING_HEADERS		eval:check_for_missing_headers()
+describe MISSING_HEADERS	No existe alguna de las cabeceras From:, To: o Date:
+
+# (contrib: skod)
+# modified by jm to remove bulk_mailer, matches on a mailing list I'm on
+header RATWARE ALL =~ /(?:4\.\.72\.1712\.3|ACE Contact Manager|Aristotle Mail|Avalanche|Calypso|clansoft|Cognigen|Cold Fusion|Cyber-Bomber|Crescent|DiffondiCool|Dynamic Mail Server|CTMailer|E-Broadcaster|E-mail Magnet|Ellipse Bulk Emailer|EmailBlaster|Emailer.Platinum|eMerge|Extractor|Floodgate|FlashSend|Goldrush|Group Mail|Internet Marketing|Mailcast|MailKing|MassE-Mail|massmail\.pl|Matchmaker|NetMailer|News Breaker|pop3.report|RamoMail|Ready Aim|Shopping.Planet|Stalker.s|TBBS\/TIGER|TOO BAD|TotalMailTURBO Mail|V3,1,6,1|V3,1,2,0|V3,2,2,0|V.null.\.1712\.3|WindoZ|WinNT.s.Blat|WorldMerge|YMR)/
+
+describe RATWARE 		Señales de software de envío masivo encontrado en las cabeceras
+score RATWARE			2.0
+
+# contrib: Craig (total regexp wizardry here ;)
+header SUSPICIOUS_RECIPS        To =~ /(@[-a-z0-9_.]+).*(?:\1.*){9,}/is
+describe SUSPICIOUS_RECIPS      To: contiene el mismo dominio al menos 10
+veces
+
+header SUSPICIOUS_CC_RECIPS	Cc =~ /(@[-a-z0-9_.]+).*(?:\1.*){9,}/is
+describe SUSPICIOUS_CC_RECIPS	Cc: contiene el mismo dominio al menos 10
+veces
+
+header VERY_SUSP_RECIPS         To =~ /(..)[^@]*(@[-a-z0-9_.]+).*(?:\1[^@]*\2.*){9,}/is
+describe VERY_SUSP_RECIPS       To: contiene direcciones similares 10 veces
+
+header VERY_SUSP_CC_RECIPS	Cc =~ /(..)[^@]*(@[-a-z0-9_.]+).*(?:\1[^@]*\2.*){9,}/is
+describe VERY_SUSP_CC_RECIPS	Cc: contiene direcciones similares 10 veces
+
+###########################################################################
+
+full RAZOR_CHECK		eval:check_razor()
+describe RAZOR_CHECK		Incluido en Razor, visita http://razor.sourceforge.net/
+
+###########################################################################
+
+body REMOVE_SUBJ		/remove.*subject/i
+body SUBJ_REMOVE		/subject.*remove/i
+body REPLY_REMOVE_SUBJECT	/reply.*remove.*subject/i
+body REMOVE_IN_QUOTES		/\"remove\"/i
+
+body JAVASCRIPT			/<SCRIPT.*LANGUAGE.*JavaScript/i
+body REALLY_UNSAFE_JAVASCRIPT	/<body .*onLoad/i
+body SLIGHTLY_UNSAFE_JAVASCRIPT	/on(?:Blur|Error|KeyDown|KeyUp|Load|MouseOver|Resize|Unload)/i
+
+body HTML_WITH_BGCOLOR		/<body .*bgcolor[=3d\"\'\#]+[0-9a-e][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]/i
+describe HTML_WITH_BGCOLOR	Correo HTML con un fondo no blanco
+
+body SPAM_FORM			/CHANGE EMAIL ADDRESS IN ACTION OF FORM/
+body SPAM_FORM_RETURN		/return validate_form/
+body SPAM_FORM_INPUT		/<input name=.*submit type=.*submit value=.*" *Submit By E-Mail *">/i
+
+body BUGGY_CGI			/Below is the result of your feedback form/
+body BUGGY_CGI_DE		/Neue Mail aus dem Fitzshop Briefkasten./
+body BUGGY_CGI_DE_2		/Diese Mail wurde &uuml;bertragen von/
+
+# these are now full tests instead of body tests, to catch QP-encoded
+# split lines
+full SENT_IN_COMPLIANCE		/message .{0,10}sen(?:d|t) in compliance (?:of|with)/
+full PARA_A_2_C_OF_1618		/Paragraph .a.{0,10}2.{0,10}C. of S. 1618/i
+full BILL_1618			/Bill.{0,10}1618.{0,10}TITLE.{0,10}III/i
+full S_1618			/S..{0,10}1618.{0,10}-.{0,10}SECTION.{0,10}301/i
+full SECTION_301		/SECTION.{0,10}301/
+
+body POPLAUNCH			/StealthLaunch PopLaunch.\s/
+body CHECK_OR_MONEY_ORDER	/check or money order/i
+
+body NUMERIC_HTTP_ADDR		/http\:\/\/\d+\//is
+body NORMAL_HTTP_TO_IP		/http\:\/\/\d+\.\d+\.\d+\.\d+\//is
+body LONG_NUMERIC_HTTP_ADDR	/http\:\/\/000\d+/is
+body HTTP_USERNAME_USED		/http\:\/\/[^\s\/]+\@/is
+
+body SUPERLONG_LINE		/^[^<]{199,}$/m
+body ASCII_FORM_ENTRY		/[A-Za-z][A-Za-z]+.*\s+_{30,}/
+
+body AMAZING			/AMAZING/
+body GUARANTEE			/GUARANTEE/
+body PROFITS			/PROFITS/
+body NO_QS_ASKED		/NO QUESTIONS ASKED/
+body FULL_REFUND		/FULL REFUND/
+body FOR_FREE			/for FREE/
+body MONEY_MAKING		/money making/i
+body BULK_EMAIL			/bulk e-*mail/i
+body DEAR_FRIEND		/Dear Friend/
+body CASHCASHCASH		/\${3,}/
+body CALL_NOW			/CALL NOW/
+body CALL_888			/(?:call|dial).*888-[\dA-Z]+-?[\dA-Z]+/i
+body CALL_1_800			/(?:call|dial).*1-800-[\dA-Z]+-?[\dA-Z]+/i
+body ONLINE_BIZ_OPS		/online business opportunities/i
+body REMOVAL_INSTRUCTIONS	/Removal instructions/i
+body BILLION_DOLLARS		/[BM]ILLION DOLLAR/
+body OPT_IN			/opt-in/i
+body DIRECT_EMAIL		/direct e-*mail/i
+body MASS_EMAIL			/mass e-*mail/i
+body EMAIL_MARKETING		/e-*mail marketing/i
+body PRODUCED_AND_SENT_OUT	/This a.?d is produced and sent out by/
+body INCREASE_TRAFFIC		/increase.* traffic/i
+
+# this one gets a few false positives
+body SOCIAL_SEC_NUMBER		/social security (?:number|record)/i
+
+# but this one almost never does, and catches *lots* of spam ;)
+body TRACE_BY_SSN		/Trace anyone by social security number/i
+
+body INTL_EXEC_GUILD		/International Executive Guild/
+body ANOTHER_NET_AD		/Another Internet Ad campaign produced/
+body LASER_PRINTER		/LASER PRINTER SUPPLIES/
+body DIGITAL_FX1		/Digital FX1/
+body OFFICE_OF_MD		/The Office of *The Managing Director/
+body BRAND_NEW_PAGER		/BRAND NEW Pager FREE/
+body ADDRESSES_ON_CD		/addresses on cd/i
+body SHOES_GUY			/(?:(?:Lingui|Guilin).*){2,}/i
+
+# almost all print-out spammer forms have this.  You see, it makes
+# credit card processing a lot cheaper, and cuts down fees -- so it
+# will always be there ;)
+body PRINT_FORM_SIGNATURE	/Signature:.*_________________/i
+
+body EXCUSE_1			/You (?:were sent|have received) this message because/i
+body EXCUSE_2			/If you did not opt.in/i
+body EXCUSE_3			/to (?:be removed|be deleted|no longer receive th(?:is|ese) messages?) (?:from|send|reply|[e-]*mail)/i
+body EXCUSE_4			/To Be Removed,? Please/i
+body EXCUSE_5			/that your email address is removed/i
+
+# strange pattern because otherwise it matches the std. majordomo line
+body EXCUSE_6			/(?:wish to|click to|To) remove yourself/
+
+body EXCUSE_7			/you (?:wish|want|would like|desire) to be removed/i
+body EXCUSE_8			/requests to be taken off our mailing list/
+body EXCUSE_9		/If you do.*n.*t (?:want|wish|care) to receive emails (?:on this subject|in the future)/i
+
+body EXCUSE_10			/if you (?:(?:want|wish|care|prefer) not to |(?:don't|do not) (?:want|wish|care) to )(?:be contacted again|receive (any)?\s*(?:more|future|further) (?:e?-?mail|messages?|offers|solicitations))/i
+describe EXCUSE_10		"if you do not wish to receive any more"
+
+body EXCUSE_11			/you.*(?:name|mail).*(?:was|were).*list/i
+body EXCUSE_12			/this (?:e?-?mail|message) (?:has reached|was sent to) you in error/i
+body EXCUSE_13			/mail was sent to you because /i
+body EXCUSE_14			/you do not wish to receive further /i
+body EXCUSE_15			/this is not (?:spam|unsolicited)/i
+body EXCUSE_16			/have received this (?:e?-?mail|message) in error[, ]* or/
+body EXCUSE_17			/received .* by mistake/i
+body EXCUSE_18			/we do not (?:spam|send unsolicited)/i
+
+body GREEN_EXCUSE_1	/using email instead can significantly reduce this/i
+body GREEN_EXCUSE_2	/the trees, save the planet, use email!/i
+
+body VIAGRA			/VIAGRA/
+
+body FREE_PRIORITY_MAIL		/FREE PRIORITY MAIL SHIPPING/i
+body LIMITED_TIME_ONLY		/LIMITED TIME ONLY/i
+body STRONG_BUY			/strong buy/i
+
+body WE_HONOR_ALL		/we (?:honou?r|respect)(?: all|) remov[eal] requests/i
+body FILTERED_BY_WORLDREMOVE	/filtered by WorldRemove/
+
+body COMMUNIGATE		/transferred with a trial version of CommuniGate/
+
+# contrib: skod
+body AUTO_EMAIL_REMOVAL		/Auto Email Removal/
+
+body PORN_1			/\bbarely\b.*\blegal\b/i
+body PORN_2			/\bwild\b.*\bhardcore\b/i
+
+# updated by: skod & Craig & jm
+body PORN_3			/(?:(?:\bcum|\borg[iy]|\bwild|fuck|\bteen|\baction\b|spunk|\bpussy\b|\bpussies\b|suck\b|sucking\b|\bhot\b|\bhottest\b|\bvoyeur|\ble[sz]b(?:ian|o)|\banal\b|\binterracial|\basian\b|\bamateur|\bsex+\b|\bslut|explicit|xxx[^x]|\blive\b|celebrity|\blick|\bsuck|webcam|\bass\b|\bschoolgirl\b|\bstrip|\bhorny\b|\bhorniest\b|\berotic|\boral\b|\bhardcore\b|\bblow[ -]*job|\bnast(?:y|iest)\b).*){3,}/i
+describe PORN_3			Cuida tu idioma!
+
+body PORN_4 	/http:\/\/[\w\.]*(?:xxx|sex|anal|slut|pussy|cum|nympho|suck|porn|hardcore|taboo|whore|voyeur|lesbian|gurlpages|naughty|lolita|teen|schoolgirl|fetish|kooloffer|erotic)\w*\./
+describe PORN_4			URL sospechosa de pornografía
+
+# (contrib: skod)
+body PORN_5			/SEX STARVED NYMPHOMANIAC/i
+describe PORN_5			Ninfómanos?? Claro!!
+
+# (contrib: skod)
+body PORN_6			/(?:\d+\+? xxx pictures|xxx photos?)/i
+describe PORN_6			Mencionadas imágenes XXX
+
+body PORN_7			/Free XXX/i
+
+body TRACKER_ID			/^\W{4,6} (?:[a-z]{10,}|[A-Z]{10,}) \W{4,6}\s*$/
+
+body OPPORTUNITY		/OPPORTUNITY/
+body PURE_PROFIT		/PURE PROFIT/
+body STOCK_PICK			/STOCK PICK/
+body STOCK_ALERT		/stock alert/i
+
+# some frequently-advertised URLs
+body E_WEBHOSTCENTRAL_URL	/http:\/\/.*e-webhostcentral\.com/i
+body FREEWEBHOSTINGCENTRAL	/http:\/\/.*freewebhostingcentral/i
+body FREEWEBCO_NET_URL		/http:\/\/.*freewebco\.net/i
+body 25FREEMEGS_URL		/http:\/\/.*25freemegs\.com/i
+body WEB4PORNO_URL		/http:\/\/.*web4porno\.com/i
+body CLICKSFORMONEY_NET		/http:\/\/.*clicksformoney\.net/i
+body WWW_REMOVEYOU_COM		/http:\/\/.*removeyou\.com/i
+body WWW_DIRECTFORCEMARKETING_COM /http:\/\/.*directforcemarketing\.com/i
+body WWW_NETSITESFORFREE_NET	/http:\/\/.*netsitesforfree\.net/i
+
+body FREE_CONSULTATION		/FREE CONSULTATION/i
+body INCREASE_SALES		/INCREASE SALES/i
+
+# (contrib: Matt Sergeant)
+body LARGE_HEX			/^\s*[0-9a-fA-F]{40,}/
+score LARGE_HEX			2
+
+# somehow "/name.*\bcredit.?card\b/is" won't match, even if
+# it's there.  *boggle* (contrib: WW)
+body WANTS_CREDIT_CARD          /\bcredit.?card\s+order/i
+describe WANTS_CREDIT_CARD      Pide detalles de la tarjeta de crédito
+
+# (contrib: WW)
+body ASKS_BILLING_ADDRESS       /\bbilling address\b/i
+describe ASKS_BILLING_ADDRESS   Pide cuenta del banco
+
+# (contrib: WW)
+body CYBER_FIRE_POWER           /(?:by|for) Cyber FirePower\!/
+describe CYBER_FIRE_POWER       menciona Cyber FirePower!, una herramienta de spam
+
+# (contrib: WW)
+# modified by jm to stop it matching on all-space lines
+body LINE_OF_YELLING            /^[A-Z0-9\$\.,\'\!\?\s]{20,}[A-Z0-9\$\.,\'\!\?][A-Z0-9\$\.,\'\!\?\s]{20,}$/
+describe LINE_OF_YELLING        A WHOLE LINE OF YELLING DETECTED
+
+###########################################################################
+# some full-text matches; note the [3D=\s"']* bits of the patterns, which
+# match some gibberish produced by quoted-printable encoding of HTML, often
+# in the middle of a HTML "attribute=value" pair.
+
+full JUST_MAILED_PAGE		/\n\n.{0,160}<!-- saved from url=/s
+
+full CLICK_HERE_LINK		/click here.{0,100}<\/a>/is
+full CLICK_BELOW		/click below/is
+
+# (contrib: skod)
+body HALF_PRICE_OFFER		/Half Price Offer/i
+describe HALF_PRICE_OFFER	"Half price offer" suena bastante a spam...
+
+# (contrib: skod)
+body MURKOWSKI_CRUFT		/www\.senate\.gov\/~?murkowski/
+describe MURKOWSKI_CRUFT	Old Murkowski disclaimer
+
+# (contrib: skod)
+body PRINT_FORM_SIGNATURE	/Sign(ature)?(?:\s*here|\s*please)?:.*___*/i
+
+# (contrib: skod)
+body MAIL_IN_ORDER_FORM		/Mail-in Order Form/i
+describe MAIL_IN_ORDER_FORM	Contains mail-in order form
+
+# (contrib: skod)
+body FOR_INSTANT_ACCESS		/FOR INSTANT ACCESS CLICK HERE/i
+describe FOR_INSTANT_ACCESS	Botón de acceso instantáneo
+
+# (contrib: skod)
+body NO_SELLING			/absolutely NO selling/
+
+# (contrib: skod)
+body UNIVERSITY_DIPLOMAS	/\b(?:college|university)\s+diploma/i
+describe UNIVERSITY_DIPLOMAS	University Diplomas
+
+# (contrib: skod)
+body NEW_DOMAIN_EXTENSIONS	/new\s*domain\s*extension/i
+describe NEW_DOMAIN_EXTENSIONS	Possible registry spammer
+
+# (contrib: skod)
+full MONSTERHUT			/monsterhut.com/
+describe MONSTERHUT		mentions monsterhut.com
+
+# (contrib: skod)
+body EMAIL_HARVEST		/email harvest/
+
+# (contrib: WW)
+full CLICK_TO_REMOVE_MAILTO     /\bclick to.{0,30}remove.{0,50}mailto:/is
+describe CLICK_TO_REMOVE_MAILTO Click-to-remove with mailto: found
+
+full CLICK_TO_REMOVE_2          /href.{0,50}mailto:.{0,50}click.{0,50}remove/is
+describe CLICK_TO_REMOVE_2      Click-to-remove with mailto: found beforehand
+
+# (contrib: WW, mod by David Hull)
+full TO_BE_REMOVED_REPLY        /\bto\b.{0,60}\b(?:remove|unsubscribe).{0,60}\breply\b/is
+describe TO_BE_REMOVED_REPLY    Says: "to be removed, reply via email" or similar
+
+full REMOVAL_INSTRUCTIONS	/REMOVAL INSTRUCTIONS/i
+
+# (contrib: WW)
+full THIS_AINT_SPAM             /This.{0,60}is not SPAM/is
+describe THIS_AINT_SPAM         Claims "This is not spam"
+
+# (contrib: WW)
+full WE_HATE_SPAM               /We .{0,60}oppose the use of SPAM/is
+describe WE_HATE_SPAM           Says "We strongly oppose the use of SPAM email"
+
+# (contrib: WW)
+body IN_ACCORDANCE_WITH_LAWS    /this e?-?mail.*in accordance with.*law/
+describe IN_ACCORDANCE_WITH_LAWS Claims to be in accordance with some Spam law
+
+body HR_3113                    /H\.\s*R\.\s*3113/is
+describe HR_3113                Mentions Spam law "H.R. 3113"
+
+body UCE_MAIL_ACT               /Unsolicited Commercial Electronic Mail Act/
+describe UCE_MAIL_ACT           Mentions Spam Law "UCE-Mail Act"
+
+full PENIS_ENLARGE		/(?:(?:\bpenis\b|\benlarge).{0,50}){2,}/is
+
+body WORK_AT_HOME		/WORK (?:AT|FROM) HOME/
+
+body HOME_EMPLOYMENT		/HOME EMPLOYMENT/i
+
+# suggested by Nick Rothwell
+body HUNZA_DIET_BREAD		/HUNZA DIET BREAD/
+
+full A_HREF_TO_IP		/href[3D=\s\"\']*http:\/\/\d+\.\d+\.\d+\.\d+\:?\d*\//is
+describe A_HREF_TO_IP		Link to an IP-address instead of a named host
+
+full A_HREF_TO_REMOVE		/href[3D=\s\"\']*\S+(?:unsubscribe|remove)/i
+describe A_HREF_TO_REMOVE	Link to a URL containing "remove"
+
+body REMOVE_SCRIPT		/https?:\/\/.*cgi.*\/(?:unsubscribe|remove)\./
+describe REMOVE_SCRIPT		URL of CGI script called "remove"
+
+body REMOVE_PAGE		/https?:\/\/[^\/]+\/(?:unsubscribe|remove)/
+describe REMOVE_PAGE		URL of page called "remove"
+
+# include the \n\n so we don't match mailto's in the headers!  Some list software
+# uses these to handle auto-subscribe/unsubscribe features
+full MAILTO_LINK		/\n\n.*=[3D=\s"']*mailto:/is
+full MAILTO_WITH_SUBJ_REMOVE	/mailto:\S+\?subject=[3D=\s"']*remove/is
+full MAILTO_WITH_SUBJ		/\n\n.*mailto:\S+\?subject=/is
+full FORM_W_MAILTO_ACTION	/action=[3D=\s"']*mailto:/is
+full AOL_USERS_LINK		/AOL\s+Users\s+Click\s+Here/is
+
+body MAILTO_TO_SPAM_ADDR	/mailto:[a-z]+\d{2,}\@/is
+
+full WEB_BUGS			/<\s*img\s[^>]*src[^>]+\?/i
+describe WEB_BUGS		Image tag with an ID code to identify you
+
+# many spammers seem to do this nowadays (and probably track
+# their customers with it).  (contrib: WW)
+full RELAYING_FRAME		/<frame\b[^>]+\bsrc=[3D=\s"']*http:\/\//is
+describe RELAYING_FRAME		Frame wanted to load outside URL
+
+# Cyber FirePower! rants about 'Internet terrorists' aka spam fighters
+# (contrib: WW)
+full INTERNET_TERROR_RANT       /At the time of this mailing the return email address is a bonafide.*legitimate return email address that was signed up for with the express purpose .*Internet terrorists\./si
+describe INTERNET_TERROR_RANT   Cyber FirePower! rant about losing dropboxes
+
+full BASE64_ENC_TEXT		eval:check_for_base64_enc_text()
+describe BASE64_ENC_TEXT	Message text disguised using base-64 encoding
+
+full CHARSET_FARAWAY_BODY	eval:check_for_faraway_charset_in_body()
+describe CHARSET_FARAWAY_BODY	Character set indicates foreign language body
+
+full NIGERIAN_SCAM		/BASED ON INFORMATION GATHERED ABOUT YOU, WE BELIEVE\s*YOU WOULD BE IN A POSITION TO HELP US IN TRANSFER/
+describe NIGERIAN_SCAM		Nigerian scam, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
+
+# (contrib: skod)
+body NIGERIAN_SCAM_2		/(?:Government of Nigeria|NIGERIA NATIONAL)/
+describe NIGERIAN_SCAM_2	Mutated Nigerian scams
+
+body UNNEEDED_HTML_ENCODING	/font=3E/i
+describe UNNEEDED_HTML_ENCODING	Unneeded encoding of HTML tags
+
+###########################################################################
+# Compensation for common false positives.
+
+body BALANCE_FOR_LONG		eval:check_for_very_long_text()
+describe BALANCE_FOR_LONG	Message text is over 500 lines long
+
+header USER_IN_WHITELIST	eval:check_from_in_whitelist()
+describe USER_IN_WHITELIST	From: address is in the user's white-list
+
+# the idea is that most legit newsletters will claim their copyright; spammers
+# do not seem to for some reason.  (Kevin Dangoor)
+body COPYRIGHT_CLAIMED		/copyright.*all rights reserved./i
+
+###########################################################################
+# not quite spam, but dangerous/irritating nonetheless, and easy to catch.
+
+full SIRCAM_SIGNATURE		/Content-Disposition: attachment;\s+filename=.[^\n]+\.\S\S\S\.(bat|com|lnk|pif)./s
+describe SIRCAM_SIGNATURE	SECURITY: The Sircam worm
+
+# contrib: skod
+full BADTRANS_WORM              /Content-ID: <EA4DMGBP9p>/
+describe BADTRANS_WORM          SECURITY: The BadTrans worm, see http://securityresponse.symantec.com/avcenter/venc/data/w32.badtrans.b@mm.html
+
+###########################################################################
+# Default scores.   Note that if a test is named above, but a score is not
+# assigned here, the default score will be set to 1.
+
+# The following block of scores were generating using the mass-checking
+# scripts, and a genetic algorithm, to determine the optimum scores which
+# resulted in minimum false positives or negatives.  Summary of this set:
+
+# SUMMARY:                62 /   1784
+#
+# Correctly non-spam:  40861  99.85%  (48.85% overall,  44750 adjusted)
+# Correctly spam:      40939  95.82%  (48.94% overall,  51349 adjusted)
+# False positives:        62  0.15%  (0.07% overall,     65 adjusted)
+# False negatives:      1784  4.18%  (2.13% overall,   1858 adjusted)
+# TOTAL:               83646  100.00%
+
+# Start of GA-evolved scores...
+
+score 25FREEMEGS_URL                 3.2
+score ADDRESSES_ON_CD                3.5
+score ADVERT_CODE                    4.0
+score ALL_CAPS_SUBJECT               2.0
+score AMAZING                        3.0
+score ANOTHER_NET_AD                 2.0
+score AOL_USERS_LINK                 0.9
+score ASCII_FORM_ENTRY               2.7
+score ASKS_BILLING_ADDRESS           0.1
+score AUTO_EMAIL_REMOVAL             2.7
+score A_HREF_TO_IP                   2.0
+score A_HREF_TO_REMOVE               2.5
+score BAD_HELO_WARNING               1.1
+score BASE64_ENC_TEXT                0.7
+score BILLION_DOLLARS                1.4
+score BILL_1618                      2.0
+score BRAND_NEW_PAGER                2.9
+score BUGGY_CGI                      3.3
+score BUGGY_CGI_DE                   2.9
+score BUGGY_CGI_DE_2                 2.6
+score BULK_EMAIL                     2.1
+score CALL_1_800                     1.7
+score CALL_888                       3.3
+score CALL_NOW                       3.1
+score CASHCASHCASH                   1.1
+score CHARSET_FARAWAY                4.0
+score CHARSET_FARAWAY_BODY           1.2
+score CHECK_OR_MONEY_ORDER           1.8
+score CLICKSFORMONEY_NET             3.4
+score CLICK_BELOW                    4.0
+score CLICK_HERE_LINK                3.3
+score CLICK_TO_REMOVE_MAILTO         2.1
+score CLICK_TO_REMOVE_2  	     2.1
+score COMMUNIGATE                    3.6
+score CORRUPT_MSGID                  2.7
+score CYBER_FIRE_POWER               2.0
+score DEAR_FRIEND                    0.1
+score DIFFERENT_REPLY_TO             2.3
+score DIGITAL_FX1                    2.8
+score DIRECT_EMAIL                   1.3
+score EMAIL_HARVEST                  3.6
+score EMAIL_MARKETING                4.0
+score EXCUSE_1                       2.0
+score EXCUSE_10                      1.1
+score EXCUSE_11                      1.1
+score EXCUSE_12                      4.0
+score EXCUSE_13                      4.0
+score EXCUSE_14                      2.0
+score EXCUSE_15                      2.1
+score EXCUSE_16                      1.1
+score EXCUSE_17                      2.0
+score EXCUSE_18                      3.4
+score EXCUSE_2                       2.0
+score EXCUSE_3                       3.8
+score EXCUSE_4                       3.8
+score EXCUSE_5                       2.4
+score EXCUSE_6                       2.0
+score EXCUSE_7                       2.6
+score EXCUSE_8                       2.4
+score EXCUSE_9                       1.2
+score E_WEBHOSTCENTRAL_URL           2.4
+score FAKED_UNDISC_RECIPS            4.0
+score FILTERED_BY_WORLDREMOVE        3.2
+score FORGED_GW05_RCVD               4.0
+score FORGED_HOTMAIL_RCVD            0.1
+score FORM_W_MAILTO_ACTION           2.9
+score FOR_FREE                       1.8
+score FOR_INSTANT_ACCESS             2.2
+score FREEWEBCO_NET_URL              2.0
+score FREEWEBHOSTINGCENTRAL          3.6
+score FREE_CONSULTATION              4.0
+score FREE_PRIORITY_MAIL             1.4
+score FRIEND_AT_PUBLIC               4.0
+score FROM_AND_TO_SAME               1.8
+score FROM_BTAMAIL                   3.0
+score FROM_ENDS_IN_NUMS              1.6
+score FROM_FORGED_HOTMAIL            3.0
+score FROM_NAME_EQ_FROM_ADDR         4.0
+score FROM_NO_USER                   3.2
+score FULL_REFUND                    4.0
+score GREEN_EXCUSE_1                 3.8
+score GREEN_EXCUSE_2                 3.4
+score GUARANTEE                      2.0
+score HALF_PRICE_OFFER               1.1
+score HOME_EMPLOYMENT                1.8
+score HR_3113                        3.4
+score HTTP_USERNAME_USED             1.9
+score HUNZA_DIET_BREAD               2.8
+score INCREASE_SALES                 2.9
+score INTERNET_TERROR_RANT           2.0
+score INTL_EXEC_GUILD                2.3
+score INVALID_DATE                   3.2
+score INVALID_MSGID                  2.0
+score IN_ACCORDANCE_WITH_LAWS        2.4
+score JAVASCRIPT                     1.5
+score JUST_MAILED_PAGE               2.0
+score KNOWN_BAD_DIALUPS              1.1
+score LASER_PRINTER                  3.0
+score LIMITED_TIME_ONLY              2.4
+score LINE_OF_YELLING                1.1
+score LONG_NUMERIC_HTTP_ADDR         2.0
+score LOTS_OF_CC_LINES               4.0
+score MAILTO_LINK                    1.0
+score MAILTO_TO_SPAM_ADDR            2.0
+score MAILTO_WITH_SUBJ               2.0
+score MAILTO_WITH_SUBJ_REMOVE        2.0
+score MAIL_IN_ORDER_FORM             4.0
+score MANY_FROMS                     2.4
+score MASS_EMAIL                     1.8
+score MDAEMON_2_7_4                  1.3
+score MISSING_HEADERS                2.3
+score MONEY_MAKING                   2.2
+score MONSTERHUT                     2.0
+score MSGID_HAS_NO_AT                0.1
+score MSGID_SPAMSIGN_1               2.5
+score MSG_ID_ADDED_BY_MTA            2.1
+score MURKOWSKI_CRUFT                2.7
+score NEW_DOMAIN_EXTENSIONS          4.0
+score NIGERIAN_SCAM                  2.6
+score NIGERIAN_SCAM_2                2.7
+score NONEXISTENT_CHARSET            2.0
+score NORMAL_HTTP_TO_IP              2.1
+score NO_QS_ASKED                    4.0
+score NO_SELLING                     1.8
+score NUMERIC_HTTP_ADDR              4.0
+score OFFICE_OF_MD                   1.1
+score ONLINE_BIZ_OPS                 2.0
+score OPPORTUNITY                    3.1
+score OPT_IN                         1.9
+score PARA_A_2_C_OF_1618             3.9
+score PENIS_ENLARGE                  2.3
+score POPLAUNCH                      3.2
+score PORN_1                         3.1
+score PORN_2                         2.8
+score PORN_3                         2.2
+score PORN_4                         1.9
+score PORN_5                         2.2
+score PORN_6                         2.0
+score POST_IN_RCVD                   2.2
+score PRINT_FORM_SIGNATURE           2.0
+score PRODUCED_AND_SENT_OUT          4.0
+score PROFITS                        0.6
+score PURE_PROFIT                    4.0
+score REALLY_UNSAFE_JAVASCRIPT       0.1
+score RELAYING_FRAME                 3.8
+score REMOVAL_INSTRUCTIONS           4.0
+score REMOVE_IN_QUOTES               2.5
+score REMOVE_PAGE                    2.7
+score REMOVE_SCRIPT                  2.0
+score REMOVE_SUBJ                    2.1
+score REPLY_REMOVE_SUBJECT           2.0
+score REPLY_TO_EMPTY                 2.2
+score SECTION_301                    3.5
+score SENT_IN_COMPLIANCE             4.0
+score SHOES_GUY                      3.9
+score SHORT_RECEIVED_LINE            2.0
+score SLIGHTLY_UNSAFE_JAVASCRIPT     1.6
+score SMTPD_IN_RCVD                  2.9
+score SOCIAL_SEC_NUMBER              2.4
+score SPAM_FORM                      2.0
+score SPAM_FORM_INPUT                3.9
+score SPAM_FORM_RETURN               2.0
+score STOCK_ALERT                    4.0
+score STOCK_PICK                     2.2
+score STRONG_BUY                     3.7
+score SUBJ_ALL_CAPS                  1.0
+score SUBJ_FULL_OF_8BITS             4.0
+score SUBJ_HAS_UNIQ_ID               3.7
+score SUBJ_REMOVE                    3.9
+score SUPERLONG_LINE                 0.8
+score S_1618                         2.0
+score THIS_AINT_SPAM                 2.0
+score TO_BE_REMOVED_REPLY            2.2
+score TO_EMPTY                       2.5
+score TO_NO_USER                     3.7
+score TRACE_BY_SSN                   4.0
+score TRACKER_ID                     1.7
+score UCE_MAIL_ACT                   2.4
+score UNIVERSITY_DIPLOMAS            2.2
+score UNNEEDED_HTML_ENCODING         2.5
+score VIAGRA                         3.9
+score WANTS_CREDIT_CARD              1.4
+score WEB4PORNO_URL                  3.3
+score WEB_BUGS                       2.0
+score WE_HATE_SPAM                   2.4
+score WE_HONOR_ALL                   3.0
+score WORK_AT_HOME                   3.3
+score WWW_DIRECTFORCEMARKETING_COM   3.7
+score WWW_NETSITESFORFREE_NET        3.2
+score WWW_REMOVEYOU_COM              4.0
+score X_EM_VER_PRESENT               0.4
+score VERY_SUSP_CC_RECIPS            3.0
+score VERY_SUSP_RECIPS               3.0
+score X_MAILER_GIBBERISH             3.2
+score X_MSMAIL_PRIORITY_HIGH         1.4
+score INCREASE_TRAFFIC		     1.4
+score REMOVAL_INSTRUCTIONS	     2.0
+score X_PRIORITY_HIGH                1.4
+score YR_MEMBERSHIP_EXCH             4.0
+
+# End of GA-evolved scores.
+
+# some non-GA-generated scores: either network tests, occuring with
+# very low frequency, or very frequently causing false positives.
+
+score INVALID_DATE_NO_TZ             2.0
+score UNDISC_RECIPS                  1.0
+score MAY_BE_FORGED                  0.5
+score HTML_WITH_BGCOLOR              1.2
+score FORGED_RCVD_FOUND              0.5
+score NO_REAL_NAME                   1.2
+score PLING                          0.8
+score PLING_PLING                    1.2
+score USER_IN_BLACKLIST		     10.0
+
+score SUBJ_ENDS_IN_Q_MARK            0.1
+score SUBJ_HAS_Q_MARK                0.1
+score NO_MX_FOR_FROM                 1.8
+score RAZOR_CHECK		     3.0
+score RCVD_IN_RELAYS_ORDB_ORG	     2.0
+score RCVD_IN_OSIRUSOFT_COM	     2.0
+score X_OSIRU_SPAM_SRC		     3.0
+score X_OSIRU_SPAMWARE_SITE	     5.0
+
+# unscored by default -- commercial services.  If you pay for these,
+# give them a score so they will be checked.
+
+score RCVD_IN_RBL		     0.0
+score RCVD_IN_RSS		     0.0
+score RCVD_IN_DUL		     0.0
+score RCVD_IN_BL_SPAMCOP_NET	     0.0
+
+###########################################################################
+# Compensation for common false positives.
+
+score BALANCE_FOR_LONG		    -2.0
+score COPYRIGHT_CLAIMED		    -2.0
+score USER_IN_WHITELIST		    -100.0
+
+###########################################################################
+# Some not-quite-spam scores; block common virii with these.  (it's feature
+# creep, but it's easy to implement ;)
+
+score SIRCAM_SIGNATURE		    10.0
+score BADTRANS_WORM                 10.0
+
+###########################################################################
+# Database configuration options.
+#
+# user_scores_dsn MUST be in the form:
+# DBI:databasetype:databasename:hostname:port
+# ex. DBI:mysql:spamassassin:localhost
+#
+# user_scores_sql_username is the authorized username to connect to DSN
+# user_scores_sql_password is the password for the database username
+
+#user_scores_dsn		DBI:mysql:spamassassin:localhost
+#user_scores_sql_username	spam
+#user_scores_sql_password	spamfilter
+
+###########################################################################
+# Default whitelists.  These should be addresses which send mail that
+# is often tagged (incorrectly) as spam; it also helps that they be
+# addresses of big companies with lots of lawyers, so if spammers
+# impersonate them, they'll get into big trouble, so it doesn't provide
+# a shortcut around SpamAssassin.
+
+whitelist_from	billing@networksolutions.com
+
