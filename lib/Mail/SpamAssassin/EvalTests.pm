@@ -2251,6 +2251,7 @@ sub _check_attachments {
       if (/^$/) {
 	$where = 2;
 	$part++;
+	$part_bytes[$part] = 0 if $cd !~ /attachment/;
 	$part_type[$part] = $ctype;
 	$self->_check_mime_header($ctype, $cte, $cd, $charset, $name);
       }
