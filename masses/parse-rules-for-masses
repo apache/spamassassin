@@ -54,6 +54,7 @@ if (!defined $outputfile) {
 $scoreset = 0 if ( !defined $scoreset );
 
 my $rules = { };
+my $reuse = { };
 readrules(@rulesdirs);
 
 my $scores = { };
@@ -84,6 +85,9 @@ sub readrules {
         elsif (/<gen:mutable>/i) {
           $scores_mutable = 1;
         }
+
+	# oh, this is a dirty dirty hack, but we don't need this at runtime
+	s/^#reuse/reuse/;
 
         s/#.*$//g; s/^\s+//; s/\s+$//; next if /^$/;
 
@@ -125,7 +129,16 @@ sub readrules {
 	  }
           $rules->{$name}->{score} = $score;
           $rules->{$name}->{mutable} = $scores_mutable;
-        }
+        } elsif (/^reuse\s+(.*)$/) {
+	  my ($new, @old) = split(' ', $1);
+	  push @old, $new;
+	  for my $old (@old) {
+	    $reuse->{$old} ||= { };
+	    $reuse->{$old}->{reuse} = $new;
+	  }
+	  $reuse->{$new} ||= { };
+	  $reuse->{$new}->{skip} = 1;
+	}
       }
       close IN;
     }
@@ -163,7 +176,7 @@ sub writerules {
   print OUT "# dumped at ".`date`."\n";
 
   $Data::Dumper::Purity = 1;
-  print OUT Data::Dumper->Dump ([$rules, $scores], ['*rules', '*scores']);
+  print OUT Data::Dumper->Dump ([$rules, $scores, $reuse], ['*rules', '*scores', '*reuse']);
 
   print OUT "1;";
   close OUT;
