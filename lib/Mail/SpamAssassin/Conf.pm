@@ -104,6 +104,7 @@ sub new {
   $self->{auto_whitelist_factor} = 0.5;
 
   $self->{rewrite_subject} = 1;
+  $self->{spam_level_stars} = 1;
   $self->{subject_tag} = '*****SPAM*****';
   $self->{report_header} = 0;
   $self->{use_terse_report} = 0;
@@ -283,6 +284,22 @@ disabled here.
     if (/^rewrite[-_]subject\s+(\d+)$/) {
       $self->{rewrite_subject} = $1+0; next;
     }
+
+=item spam_level_stars { 0 | 1 }        (default: 1)
+
+By default, a header field called "X-Spam-Level" will be added to the message,
+with its value set to a number of asterisks equal to the score of the message.
+In other words, for a message scoring 7.2 points:
+
+X-Spam-Level: *******
+
+This can be useful for MUA rule creation.
+
+=cut
+
+   if(/^spam[-_]level[-_]stars\s+(\d+)$/) {
+      $self->{spam_level_stars} = $1+0; next;
+   }
 
 =item subject_tag STRING ... 		(default: *****SPAM*****)
 
