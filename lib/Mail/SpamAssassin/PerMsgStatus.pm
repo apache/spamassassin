@@ -111,6 +111,15 @@ sub check {
   $self->{head_only_hits} = 0;
   $self->{hits} = 0;
 
+  # Resident Mail::SpamAssassin code will possibly never change score
+  # sets, even if bayes becomes available.  So we should do a quick check
+  # to see if we should go from {0,1} to {2,3}.  We of course don't need
+  # to do this switch if we're already using bayes ... ;)
+  my $set = $self->{conf}->get_score_set();
+  if ( $set&2 && $self->{main}->{bayes_scanner}->is_available() ) {
+    $self->{conf}->set_score_set ($set|2);
+  }
+
   {
     # If you run timelog from within specified rules, prefix the message with
     # "Rulename -> " so that it's easy to pick out details from the overview
