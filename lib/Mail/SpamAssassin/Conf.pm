@@ -122,6 +122,9 @@ $CONF_TYPE_TEMPLATE         = 6;
 $MISSING_REQUIRED_VALUE     = -998;
 $INVALID_VALUE              = -999;
 
+# set to "1" by the test suite code, to record regression tests
+# $Mail::SpamAssassin::Conf::COLLECT_REGRESSION_TESTS = 1;
+
 # search for "sub new {" to find the start of the code
 ###########################################################################
 
@@ -2441,6 +2444,7 @@ general running of SpamAssassin.
     setting => 'test',
     is_admin => 1,
     code => sub {
+      return unless defined($Mail::SpamAssassin::Conf::COLLECT_REGRESSION_TESTS);
       my ($self, $key, $value, $line) = @_;
       if ($value !~ /^(\S+)\s+(ok|fail)\s+(.*)$/) { return $INVALID_VALUE; }
       $self->{parser}->add_regression_test($1, $2, $3);
