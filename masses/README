@@ -18,22 +18,22 @@ have sitting around in folders!
 CONDITIONS
 ----------
 
-    1. First of all, you must be running it on a UNIX system; it's not
-    portable to other OSes yet.  Also currently it only reads UNIX
-    mailbox format files, or MH spool directories.
+1. First of all, you must be running it on a UNIX system; it's not portable to
+other OSes yet.  Also currently it only reads UNIX mailbox format files, or MH
+spool directories.
 
-    2. This will not work unless you have separated the mail messages
-    you'll be analysing into separate "spam" and "non-spam" piles.  It
-    doesn't matter how many mailboxes contain spam, or how many mailboxes
-    contain non-spam; you just need to be sure you know which set is which!
+2. This will not work unless you have separated the mail messages you'll be
+analysing into separate "spam" and "non-spam" piles.  It doesn't matter how
+many mailboxes contain spam, or how many mailboxes contain non-spam; you just
+need to be sure you know which set is which!
 
-
-#2 is the important one there.  If you have occasional spams scattered through
+The latter is most important.  If you have occasional spams scattered through
 your mailboxes, the analysis will be useless.
 
-(Note: even if you have a very small number of spams so far, this is not a bad
-thing, and it's worth analysing them.  I've kept every spam I've got for the
-last 2 years, but I'm low on guaranteed-non-spam mails to analyse with.)
+(Note: even if you have collected only a very small number of spams so far,
+this is not a bad thing, and it's worth analysing them.  I've kept every spam
+I've got for the last 2 years, but I'm low on guaranteed-non-spam mails to
+analyse with.)
 
 
 HOW TO PARTICIPATE
@@ -130,3 +130,5 @@ continual_evolve.sh :
   Continually runs the evolver, saving its results into separate files.
   Handy for running overnight.
 
+
+-- EOF -- lastmod: Oct 11 2001 jm 
