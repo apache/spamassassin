@@ -59,7 +59,7 @@ WriteMakefile(
     'NAME'	=> 'Mail::SpamAssassin',
     'VERSION_FROM' => 'lib/Mail/SpamAssassin.pm', # finds $VERSION
 
-    'EXE_FILES'	=> [ 'spamassassin', 'spamd/spamc', 'spamd/spamd' ],
+    'EXE_FILES'	=> [ 'spamassassin', 'spamd/spamc$(EXE_EXT)', 'spamd/spamd' ],
 
     'MAN1PODS' => { %man1pods },
 
@@ -86,7 +86,7 @@ WriteMakefile(
 	      },
 
     'clean' => { FILES =>
-	'pod2htm* spamassassin spamd/spamc spamd/libspamc.so spamd/spamd doc '.
+	'pod2htm* spamassassin spamd/spamc$(EXE_EXT) spamd/libspamc.so spamd/spamd doc '.
 	'binaries.mk config.h config.status config.cache config.log'
     },
 
@@ -150,7 +150,7 @@ spamd/spamd: spamd/spamd.raw
 spamd/libspamc.so: binaries.mk
 	$(MAKE) -f binaries.mk $@
 
-spamd/spamc: binaries.mk
+spamd/spamc$(EXE_EXT): binaries.mk
 	$(MAKE) -f binaries.mk $@
 
 binaries.mk: configure
