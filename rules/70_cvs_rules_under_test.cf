@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.644 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.645 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -146,6 +146,10 @@ meta T_MSGID_DOLLARS_4		(__OUTLOOK_DOLLARS_MSGID && !__T_DOLLAR_MUA_2 && !__UNUS
 header T_RCVD_IN_RSL	 	rbleval:check_rbl_txt('rsl', 'relays.visi.com.')
 describe T_RCVD_IN_RSL		Received via a relay in RSL
 tflags T_RCVD_IN_RSL		net
+
+header T_RCVD_IN_PDL	 	rbleval:check_rbl_txt('pdl-notfirsthop', 'dialups.visi.com.')
+describe T_RCVD_IN_PDL		Received via a relay in PDL, http://www.pan-am.ca/pdl/
+tflags T_RCVD_IN_PDL		net
 
 rawbody T_RNDMX			/<rndmx\b/
 describe T_RNDMX		Contains 'rndmx' hashbuster code
