@@ -14,33 +14,6 @@
 header T_INVALID_MSGID		Message-Id !~ /^<(?:[a-zA-Z0-9.!\#\$%&'*\+\/=?\^_{}|~-]+|\".+\")\@(?:[a-zA-Z0-9.-]+|\[\d{1,3}(?:\.\d{1,3}){3}\])>(?:\s*\(.*\))?\s*$/ [if-unset: <NO@MSGID>]
 describe T_INVALID_MSGID	Message-Id is not valid, according to RFC 2822
 
-# new MIME_BOUND tests
-
-# This may need tweaking if new NextPart formats appear.
-# notes: original version
-header __NEXTPART_ALL		Content-Type =~ /NextPart/
-header __NEXTPART_NORMAL	Content-Type =~ /-{3}[-_]=_NextPart_[\dA-F]{3}(_[\dA-F]{3,8})?_[\dA-F]{8}.[\dA-F]{8}\b/
-meta T_MIME_BOUND_NEXTPART	(__NEXTPART_ALL && !__NEXTPART_NORMAL)
-score T_MIME_BOUND_NEXTPART	1.0
-
-# notes: original version made more picky
-header __NEXTPART_ALL2		Content-Type =~ /NextPart/
-header __NEXTPART_NORMAL2	Content-Type =~ /="(?:----_?=_)?NextPart_[\dA-F]{3}(_[\dA-F]{3,8})?_[\dA-F]{8}\.[\dA-F]{8}"/
-meta T_MIME_BOUND_NEXTPART2	(__NEXTPART_ALL2 && !__NEXTPART_NORMAL2)
-score T_MIME_BOUND_NEXTPART2	1.0
-
-# notes: original version made somewhat less picky
-header __NEXTPART_ALL3		Content-Type =~ /NextPart/
-header __NEXTPART_NORMAL3	Content-Type =~ /="(?:----_?=_)?NextPart(?:(?:_[\da-zA-Z]+){1,4}|_[\dA-F]{3}(_[\dA-F]{3,8})?_[\dA-F]{8}\.[\dA-F]{8})"/
-meta T_MIME_BOUND_NEXTPART3	(__NEXTPART_ALL3 && !__NEXTPART_NORMAL3)
-score T_MIME_BOUND_NEXTPART3	1.0
-
-# notes: original version made much less picky
-header __NEXTPART_ALL4		Content-Type =~ /NextPart/
-header __NEXTPART_NORMAL4	Content-Type =~ /="(?:----_?=_)?NextPart(?:_[\da-zA-Z]+){1,4}(?:\.[\dA-F]{8})?"/
-meta T_MIME_BOUND_NEXTPART4	(__NEXTPART_ALL4 && !__NEXTPART_NORMAL4)
-score T_MIME_BOUND_NEXTPART4	1.0
-
 # results for quinlan
 #  0.149    0.458    0.000    1.00    0.72    0.50  T_FROM_TOPICA
 header T_FROM_TOPICA		From:addr =~ /\@(?:\w+\.)?email-publisher\.com$/
