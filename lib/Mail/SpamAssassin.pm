@@ -115,7 +115,7 @@ if (defined $IS_DEVEL_BUILD && $IS_DEVEL_BUILD) {
 
 sub Version { $VERSION=~/^(\d+)\.(\d\d\d)(\d\d\d)$/; join('-', sprintf("%d.%d.%d",$1,$2,$3), @EXTRA_VERSION) }
 
-$HOME_URL = "http://spamassassin.org/";
+$HOME_URL = "http://spamassassin.apache.org/";
 
 # note that the CWD takes priority.  This is required in case a user
 # is testing a new version of SpamAssassin on a machine with an older
@@ -1805,7 +1805,8 @@ C<Sys::Syslog>
 
 =head1 MORE DOCUMENTATION
 
-See also E<lt>http://spamassassin.org/E<gt> for more information.
+See also E<lt>http://spamassassin.apache.org/E<gt> and
+E<lt>http://wiki.apache.org/spamassassin/E<gt> for more information.
 
 =head1 SEE ALSO
 
@@ -1831,6 +1832,6 @@ in the file C<LICENSE> included with the distribution.
 The latest version of this library is likely to be available from CPAN
 as well as:
 
-  http://spamassassin.org/
+  E<lt>http://spamassassin.apache.org/E<gt>
 
 =cut

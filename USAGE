@@ -82,9 +82,9 @@ If you use procmail, or haven't decided on any of the above examples:
 
 If you want to use SpamAssassin site-wide:
 
-  - take a look at the notes on the website, at
-    http://spamassassin.org/sitewide.html .  You will probably want to use
-    'spamd' (see below).
+  - take a look at the notes on the Wiki website, currently at
+    <http://wiki.apache.org/spamassassin/UsingSiteWide>.  You will probably
+    want to use 'spamd' (see below).
 
   - *PLEASE* let your users know you've installed it, and how to turn it
     off!   This is our #1 tech support query, and the users are usually
@@ -214,17 +214,6 @@ Other Installation Notes
 
   - Scores and other user preferences can now be loaded from an SQL
     database; see the 'sql' subdirectory for more details.
-
-
-  - Edward Fang <edfang /at/ visi.net> has contributed the
-    'communigate.sh' script for CommunigatePro, available from
-    http://SpamAssassin.org/released/contrib/ .
-
-
-  - James Henstridge <james /at/ daa.com.au> has contributed an LMTP proxy
-    server (designed for Cyrus, but probably will work fine with others),
-    again it's in the contrib directory at
-    http://SpamAssassin.org/released/contrib/ .
 
 
   - Lots more ways to integrate SpamAssassin can be read at

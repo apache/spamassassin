@@ -42,9 +42,9 @@ Group:          Applications/Mail
 Name: %{name}
 Version: %{version}
 Release: %{release}
-License: Apache Software License
-URL: http://spamassassin.org/
-Source: http://spamassassin.org/released/Mail-SpamAssassin-%{real_version}.tar%{srcext}
+License: Apache License 2.0
+URL: http://spamassassin.apache.org/
+Source: http://spamassassin.apache.org/released/Mail-SpamAssassin-%{real_version}.tar%{srcext}
 Buildroot: %{_tmppath}/%{name}-root
 Prefix: %{_prefix}
 Prereq: /sbin/chkconfig
