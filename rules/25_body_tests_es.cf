@@ -11,7 +11,7 @@
 #
 ###########################################################################
 
-lang es body REMOVE_ES_01             /(?:Para no|[sS]i (?:U(?:ste)?d\. )?no (?:deseas?|qui?er[ée]s)) (?:seguir )?reci[vb]i(?:r|endo) (?:en el futuro )?(?:ninguna otra|m.s|nuestr[ao]s?|est[ao]s?)?\s?(?:correos?|mensajes?|publicidad|informaci.n|ofertas?|(?:e-?)?mails? promocional(?:es)?|avisos)/i
+lang es body REMOVE_ES_01             /(?:Para (?:no|dejar de)|[sS]i (?:U(?:ste)?d\. )?no (?:deseas?|qui?er[ée]s)) (?:seguir )?reci[vb]i(?:r|endo) (?:en el futuro )?(?:ninguna otra|m.s|nuestr[ao]s?|est[ao]s?)?\s?(?:correos?|mensajes?|publicidad|informaci.n|ofertas?|bolet.n(?:es)?|(?:e-?)?mails? promocional(?:es)?|avisos)/i
 lang es describe REMOVE_ES_01         Claims you can be removed in Spanish
 
 lang es body REMOVE_ES_02             /(?:Para ser (?:elimina|removi)do|Si quieres? salir|Para eliminarse) del? (?:nuestra|esta|mailing) ?lista?,? (?:sera removido|responda el mail|solo tienes? que marcar|enviar un ?e-?mail)/i
@@ -105,7 +105,7 @@ lang es describe CONTRA_REEMBOLSO_ES	Pago contra reembolso.
 lang es body PEDIDO_ES			/haga su pedido/i
 lang es describe PEDIDO_ES		Para hacer su pedido.
 
-lang es body CLICK_ES			/ha(?:ga|z|ciendo) click aqu. para/i
+lang es body CLICK_ES			/(?:ha(?:ga|z|ciendo) click|oprim[ae]) aqu. para/i
 lang es describe CLICK_ES		Haga click aqui.
 
 lang es body REGALO_ES			/[lt]e (?:regal|obsequi)amos/i
