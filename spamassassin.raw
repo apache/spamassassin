@@ -170,6 +170,7 @@ if ( defined $opt{'debug-level'} && $opt{'debug-level'} ne '' ) {
 }
 
 if ( $opt{'lint'} ) {
+  $spamtest->debug_diagnostics();
   exit $spamtest->lint_rules();
 }
 

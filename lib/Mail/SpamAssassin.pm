@@ -1140,6 +1140,35 @@ sub compile_now {
 
 ###########################################################################
 
+=item $f->debug_diagnostics ()
+
+Output some diagnostic information, useful for debugging SpamAssassin
+problems.
+
+=cut
+
+sub debug_diagnostics {
+  my ($self) = @_;
+
+  foreach my $module (sort qw(
+        Net::DNS Razor2::Client::Agent MIME::Base64
+        IO::Socket::UNIX DB_File Digest::SHA1
+        MIME::Base64 DBI URI Net::LDAP Storable
+        ))
+  {
+    my $modver;
+    if (eval ' require '.$module.'; $modver = $'.$module.'::VERSION; 1;')
+    {
+      $modver ||= '(undef)';
+      dbg ("diag: module installed: $module, version $modver");
+    } else {
+      dbg ("diag: module not installed: $module ('require' failed)");
+    }
+  }
+}
+
+###########################################################################
+
 =item $failed = $f->lint_rules ()
 
 Syntax-check the current set of rules.  Returns the number of 
