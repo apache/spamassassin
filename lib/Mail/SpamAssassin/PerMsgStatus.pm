@@ -280,7 +280,8 @@ sub learn {
 
   dbg ("auto-learn? ham=$min, spam=$max, ".
                 "body-points=".$self->{body_only_points}.", ".
-                "head-points=".$self->{head_only_points});
+                "head-points=".$self->{head_only_points}.", ".
+		"learned-points=".$self->{learned_points});
 
   my $isspam;
 
@@ -306,7 +307,7 @@ sub learn {
   } elsif ($score >= $max) {
     $isspam = 1;
   } else {
-    dbg ("auto-learn? no: inside auto-learn thresholds");
+    dbg ("auto-learn? no: inside auto-learn thresholds, not considered ham or spam");
     $self->{auto_learn_status} = "no";
     return;
   }
@@ -320,19 +321,19 @@ sub learn {
 
     if ($self->{body_only_points} < $required_body_points) {
       $self->{auto_learn_status} = "no";
-      dbg ("auto-learn? no: too few body points (".
+      dbg ("auto-learn? no: scored as spam but too few body points (".
                   $self->{body_only_points}." < ".$required_body_points.")");
       return;
     }
     if ($self->{head_only_points} < $required_head_points) {
       $self->{auto_learn_status} = "no";
-      dbg ("auto-learn? no: too few head points (".
+      dbg ("auto-learn? no: scored as spam but too few head points (".
                   $self->{head_only_points}." < ".$required_head_points.")");
       return;
     }
     if ($self->{learned_points} < $learner_said_ham_points) {
       $self->{auto_learn_status} = "no";
-      dbg ("auto-learn? no: learner indicated ham (".
+      dbg ("auto-learn? no: scored as spam but learner indicated ham (".
                   $self->{learned_points}." < ".$learner_said_ham_points.")");
       return;
     }
@@ -340,7 +341,7 @@ sub learn {
   } else {
     if ($self->{learned_points} > $learner_said_spam_points) {
       $self->{auto_learn_status} = "no";
-      dbg ("auto-learn? no: learner indicated spam (".
+      dbg ("auto-learn? no: scored as ham but learner indicated spam (".
                   $self->{learned_points}." > ".$learner_said_spam_points.")");
       return;
     }
