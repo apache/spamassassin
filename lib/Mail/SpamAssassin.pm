@@ -61,7 +61,8 @@ use Config;
 
 use vars	qw{
   	@ISA $VERSION $HOME_URL $DEBUG
-	@default_rules_path @default_prefs_path @default_userprefs_path
+	@default_rules_path @default_prefs_path
+	@default_userprefs_path @default_userstate_dir
 	@site_rules_path
 };
 
@@ -98,6 +99,10 @@ $DEBUG = 0;
         ~/.spamassassin.cf
 );
 
+@default_userstate_dir = qw(
+        ~/.spamassassin
+);
+
 ###########################################################################
 
 =item $f = new Mail::SpamAssassin( [ { opt => val, ... } ] )
@@ -114,6 +119,10 @@ The filename to load spam-identifying rules from. (optional)
 =item userprefs_filename
 
 The filename to load preferences from. (optional)
+
+=item userstate_dir
+
+The directory user state is stored in. (optional)
 
 =item config_text
 
@@ -481,18 +490,30 @@ sub init {
     $self->{config_text} .= $self->read_cf ($fname, 'site rules file');
 
     if ( $use_user_pref != 0 ) {
+
+      # user state directory
+      $fname = $self->{userstate_dir};
+      $fname ||= $self->first_existing_path (@default_userstate_dir);
+
+      if (defined $fname && !$self->{dont_copy_prefs}) {
+	dbg ("using \"$fname\" for user state dir");
+
+	if (!-d $fname) {
+	  mkpath ($fname, 0, 0700) or warn "mkdir $fname failed\n";
+	}
+      }
+
+      # user prefs file
       $fname = $self->{userprefs_filename};
       $fname ||= $self->first_existing_path (@default_userprefs_path);
 
       if (defined $fname) {
-	dbg ("using \"$fname\" for user prefs file");
-
         if (!-f $fname && !$self->create_default_prefs($fname)) {
           warn "Failed to create default prefs file $fname\n";
         }
       }
 
-      $self->{config_text} .= $self->read_cf ($fname, 'user prefs');
+      $self->{config_text} .= $self->read_cf ($fname, 'user prefs file');
     }
   }
 

@@ -117,6 +117,9 @@ describe PLING_PLING		Subject has lots of exclamation marks
 header SUBJ_HAS_UNIQ_ID		eval:check_for_unique_subject_id()
 describe SUBJ_HAS_UNIQ_ID	Subject contains a unique ID number
 
+header SUBJ_HAS_SPACES		Subject =~ /(?:\s{8,}|\t)/
+describe SUBJ_HAS_SPACES	Subject contains lots of white space
+
 header UNDISC_RECIPS		To =~ /^undisclosed-recipients?:\s*;$/
 describe UNDISC_RECIPS		Valid-looking To "undisclosed-recipients"
 
@@ -891,6 +894,7 @@ score INCREASE_TRAFFIC		     1.4
 score REMOVAL_INSTRUCTIONS	     2.0
 score X_PRIORITY_HIGH                1.4
 score ONE_TIME_MAILING		     2.0
+score SUBJ_HAS_SPACES	             2.0
 score YR_MEMBERSHIP_EXCH             4.0
 
 # End of GA-evolved scores.
