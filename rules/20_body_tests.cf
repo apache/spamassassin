@@ -383,7 +383,7 @@ describe EXCUSE_7		Claims you can be removed from the list
 body EXCUSE_10			/if you (?:(?:want|wish|care|prefer) not to |do ?n[o']t (?:want|wish|care) to )(?:be contacted again|receive (?:any ?)?(?:more|future|further)\b.{1,10}\b(?:e?-?mail|message|offer|solicitation)s?|be included)/i
 describe EXCUSE_10		"if you do not wish to receive any more"
 
-body EXCUSE_11			/you.{0,15}(?:name|mail).{0,15}(?:was|were).{0,15}list/i
+body EXCUSE_11			/you.{0,15}(?:name|mail).{0,15}(?:was|were|our).{0,15}list/i
 describe EXCUSE_11		Claims you were on a list
 body EXCUSE_12			/this (?:e?-?mail|message) (?:(?:has )?reached|was sent to) you in error/i
 describe EXCUSE_12		Nobody's perfect
@@ -1533,4 +1533,7 @@ describe MONSTERHUT             Mentions monsterhut.com
 #   0.002    0.004    0.001    0.81    1.00  MURKOWSKI_CRUFT
 rawbody MURKOWSKI_CRUFT         /www\.senate\.gov\/~?murkowski/
 describe MURKOWSKI_CRUFT        Old Murkowski disclaimer
+
+body EARN_MONEY			/\b(?:earn|make|making|made|received?|discounted)\s+(?:up\s+to|as\s+much\s+as|over|at\s+least|a\s+full)?\s*\$\s*[0-9,]{2}/i
+describe EARN_MONEY		Message talks about earning money
 
