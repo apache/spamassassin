@@ -268,3 +268,10 @@ tflags RCVD_IN_MAPS_NML		net
 #header RCVD_IN_MAPS_OPS	eval:check_rbl_sub('rblplus', '8')
 #describe RCVD_IN_MAPS_OPS	Relay in OPS, http://www.mail-abuse.org/ops/
 #tflags RCVD_IN_MAPS_OPS	net
+
+# ---------------------------------------------------------------------------
+# Other DNS tests
+
+header NO_DNS_FOR_FROM		eval:check_dns_sender()
+describe NO_DNS_FOR_FROM	Envelope sender has no MX or A DNS records
+tflags NO_DNS_FOR_FROM		net

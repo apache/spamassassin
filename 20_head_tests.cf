@@ -287,10 +287,6 @@ describe FRIEND_AT_PUBLIC	sent to you@you.com or similar
 header FRIEND_PUBLIC		ALL =~ /^(?:to|cc|from):.*friend\@public\.com/im
 describe FRIEND_PUBLIC		sent from or to friend@public.com
 
-header NO_DNS_FOR_FROM		eval:check_for_from_dns()
-describe NO_DNS_FOR_FROM	Domain in From header has no MX or A DNS records
-tflags NO_DNS_FOR_FROM          net
-
 header FROM_AND_TO_SAME		eval:check_for_from_to_same()
 describe FROM_AND_TO_SAME	From and To are the same, but not exactly
 
