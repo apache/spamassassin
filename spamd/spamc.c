@@ -99,8 +99,8 @@ full_read (int fd, unsigned char *buf, int min, int len)
     if (thistime < 0) {
       return -1;
     } else if (thistime == 0) {
-      // EOF, but we didn't read the minimum.  return what we've read
-      // so far and next read (if there is one) will return 0.
+      /* EOF, but we didn't read the minimum.  return what we've read
+       * so far and next read (if there is one) will return 0. */
       return total;
     }
 
@@ -119,7 +119,7 @@ full_write (int fd, const unsigned char *buf, int len)
     thistime = write (fd, buf+total, len-total);
 
     if (thistime < 0) {
-      return thistime;        // always an error for writes
+      return thistime;        /* always an error for writes */
     }
     total += thistime;
   }
