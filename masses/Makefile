@@ -1,6 +1,6 @@
 # Pick whether or not to use MPI here
 # Allowed values are yes, no
-MPI = yes
+MPI = no
 
 # Pick a platform to build for - currently support linux, macosx
 PLATFORM = linux

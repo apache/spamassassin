@@ -113,7 +113,7 @@ foreach my $test (sort { $ranking{$b} <=> $ranking{$a} } keys %freq) {
   my $tflags = $rules{$test}->{tflags}; $tflags ||= '';
 
   if (!$mutatable) {
-    printf OUT ("%3.1f %3.1f 0 $test\n",
+    printf OUT ("%3.3f %3.3f 0 $test\n",
                          $rules{$test}->{score},
                          $rules{$test}->{score});
     next;
