@@ -322,6 +322,7 @@ sub accept {
   my $file = shift;
 
   # determine location of mailspool
+  if (!defined $file) {
   if ($ENV{'MAIL'}) {
     $file = $ENV{'MAIL'};
   } elsif (-d "/var/spool/mail/") {
@@ -330,6 +331,7 @@ sub accept {
     $file = "/var/mail/" . getpwuid($>);
   } else {
     die('Could not determine mailspool location for your system.  Try setting $MAIL in the environment.');
+  }
   }
 
   # some bits of code from Mail::Audit here:
