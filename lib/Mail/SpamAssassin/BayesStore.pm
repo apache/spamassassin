@@ -227,7 +227,7 @@ sub untie_db {
   }
 
   if ($self->{is_locked}) {
-    dbg ("bayes: files locked, breaking lock.");
+    dbg ("bayes: files locked, now unlocking lock");
     Mail::SpamAssassin::Util::safe_unlock($self->{locked_file});
     $self->{is_locked} = 0;
   }
