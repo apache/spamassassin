@@ -1,4 +1,235 @@
 ------------------------------------------------------------------------
+r35708 | quinlan | 2004-08-05 01:27:22 +0000 (Thu, 05 Aug 2004) | 2 lines
+
+use proper name of license: Apache License, Version 2.0
+
+------------------------------------------------------------------------
+r35707 | quinlan | 2004-08-05 01:25:13 +0000 (Thu, 05 Aug 2004) | 2 lines
+
+add COPYRIGHT note (trying to hit the major top-level documents)
+
+------------------------------------------------------------------------
+r35706 | quinlan | 2004-08-05 01:24:06 +0000 (Thu, 05 Aug 2004) | 2 lines
+
+update URLs in various places
+
+------------------------------------------------------------------------
+r35705 | jm | 2004-08-05 01:14:25 +0000 (Thu, 05 Aug 2004) | 1 line
+
+removed out-of-date copyright notice; now replaced by stuff in LICENSE, CREDITS and NOTICE
+------------------------------------------------------------------------
+r35704 | quinlan | 2004-08-05 00:58:43 +0000 (Thu, 05 Aug 2004) | 2 lines
+
+remove my copyright
+
+------------------------------------------------------------------------
+r35695 | mss | 2004-08-04 19:37:17 +0000 (Wed, 04 Aug 2004) | 2 lines
+
+Some further man page tweaking.
+
+------------------------------------------------------------------------
+r35694 | mss | 2004-08-04 19:14:13 +0000 (Wed, 04 Aug 2004) | 2 lines
+
+bug 3665: reordered the man page chapters so they follow the common order SYNOPSIS->DESCRIPTION->OPTIONS->OTHERS
+
+------------------------------------------------------------------------
+r35685 | parker | 2004-08-04 14:46:40 +0000 (Wed, 04 Aug 2004) | 1 line
+
+Bug 3656: Fix broken --backup
+------------------------------------------------------------------------
+r35673 | sidney | 2004-08-04 05:28:53 +0000 (Wed, 04 Aug 2004) | 1 line
+
+bug 3638: make test errors in Windows and bug 3639: spamc tests skipped under Windows unless started in t directory
+------------------------------------------------------------------------
+r35667 | jm | 2004-08-04 04:27:22 +0000 (Wed, 04 Aug 2004) | 1 line
+
+another doco fix
+------------------------------------------------------------------------
+r35666 | jm | 2004-08-04 04:26:34 +0000 (Wed, 04 Aug 2004) | 1 line
+
+doco fix
+------------------------------------------------------------------------
+r35662 | jm | 2004-08-04 03:28:01 +0000 (Wed, 04 Aug 2004) | 1 line
+
+bug 3627: patch 2195 applied; the new rewrite-cf-with-new-scores will add a score for AWL.  this seems to break the whitelist_addrs.t test, so removed.  omit scores for lang xx locale-specific rules, otherwise 'make test' fails.   sets 'tflags net' rules scores to 0 for scoresets 0 and 2, instead of defaulting them to 1 (which makes no sense).
+------------------------------------------------------------------------
+r35661 | quinlan | 2004-08-04 03:22:38 +0000 (Wed, 04 Aug 2004) | 2 lines
+
+bug 3627: separate mutable rules from immutable rules using division
+
+------------------------------------------------------------------------
+r35660 | hstern | 2004-08-04 03:03:59 +0000 (Wed, 04 Aug 2004) | 5 lines
+
+* validate-model
+  Redirected stderr from fp-fn-statistics to /dev/null to avoid all of the spam
+  from running the validation set against set0/2.
+
+
+------------------------------------------------------------------------
+r35659 | hstern | 2004-08-04 03:00:21 +0000 (Wed, 04 Aug 2004) | 3 lines
+
+Trivial floating point arithmetic fix.
+
+
+------------------------------------------------------------------------
+r35621 | quinlan | 2004-08-03 07:14:39 +0000 (Tue, 03 Aug 2004) | 2 lines
+
+bug 3634: performance improvements
+
+------------------------------------------------------------------------
+r35614 | quinlan | 2004-08-03 02:47:32 +0000 (Tue, 03 Aug 2004) | 2 lines
+
+various performance improvements, long header test
+
+------------------------------------------------------------------------
+r35585 | quinlan | 2004-08-02 09:53:17 +0000 (Mon, 02 Aug 2004) | 2 lines
+
+more documentation
+
+------------------------------------------------------------------------
+r35584 | quinlan | 2004-08-02 09:51:30 +0000 (Mon, 02 Aug 2004) | 2 lines
+
+documentation tweak
+
+------------------------------------------------------------------------
+r35550 | quinlan | 2004-08-01 22:04:35 +0000 (Sun, 01 Aug 2004) | 2 lines
+
+documentation fix
+
+------------------------------------------------------------------------
+r31067 | felicity | 2004-08-01 00:18:24 +0000 (Sun, 01 Aug 2004) | 1 line
+
+bug 3651: if calling compile_now(), the available Bayes DB will remain tied.  a warning will then pop up (sanity_check_untie) before untieing.  so explicitly untie the DB when we're finished.
+------------------------------------------------------------------------
+r31066 | quinlan | 2004-07-31 23:42:11 +0000 (Sat, 31 Jul 2004) | 2 lines
+
+add scantime parameter to logs
+
+------------------------------------------------------------------------
+r31033 | quinlan | 2004-07-31 09:28:10 +0000 (Sat, 31 Jul 2004) | 3 lines
+
+trivial speed-up, doing s/^\s+|\s+$//g; is always much slower than using
+two replacements
+
+------------------------------------------------------------------------
+r30966 | quinlan | 2004-07-30 05:47:29 +0000 (Fri, 30 Jul 2004) | 2 lines
+
+add -i flag to ignore leading data (handy for using tail on a mbox)
+
+------------------------------------------------------------------------
+r30960 | sidney | 2004-07-30 02:37:01 +0000 (Fri, 30 Jul 2004) | 1 line
+
+Spillchucker had insufficient magic
+------------------------------------------------------------------------
+r30959 | sidney | 2004-07-30 02:33:38 +0000 (Fri, 30 Jul 2004) | 1 line
+
+Update build and test instructions for spamc under Windows to reflect changes we made
+------------------------------------------------------------------------
+r30957 | parker | 2004-07-30 02:11:05 +0000 (Fri, 30 Jul 2004) | 1 line
+
+Bug 3640: Clear current_user variable so handle_sql_user will be called when no User: header present
+------------------------------------------------------------------------
+r30954 | felicity | 2004-07-30 00:26:15 +0000 (Fri, 30 Jul 2004) | 1 line
+
+bug 3644: rewrite_header changes parens in the rewrite section to brackets.  we should do that for the From and To fields, to avoid any issues with comment parsing, but leave Subject alone.
+------------------------------------------------------------------------
+r30927 | parker | 2004-07-29 14:02:53 +0000 (Thu, 29 Jul 2004) | 1 line
+
+Bug 3628: Skip test when Storable is not installed
+------------------------------------------------------------------------
+r30889 | quinlan | 2004-07-29 02:27:05 +0000 (Thu, 29 Jul 2004) | 3 lines
+
+trivial speed-up for UNRESOLVED_TEMPLATE (removes * and +, uses {n,m}
+instead with no loss of hits on my spam corpus)
+
+------------------------------------------------------------------------
+r30880 | jm | 2004-07-28 21:43:39 +0000 (Wed, 28 Jul 2004) | 1 line
+
+as requested, configure rebuilt with autoconf 2.59
+------------------------------------------------------------------------
+r30879 | quinlan | 2004-07-28 21:27:43 +0000 (Wed, 28 Jul 2004) | 2 lines
+
+bug 3599: don't add -Wall to CFLAGS unless we believe GCC is being used
+
+------------------------------------------------------------------------
+r30835 | quinlan | 2004-07-28 09:16:13 +0000 (Wed, 28 Jul 2004) | 2 lines
+
+port 587 is open for business
+
+------------------------------------------------------------------------
+r30811 | sidney | 2004-07-28 03:39:22 +0000 (Wed, 28 Jul 2004) | 1 line
+
+bug 3506: fix declaration of size_t var that should have been ssize_t, use int instead of ssize_t, test for timeout before test for newline
+------------------------------------------------------------------------
+r30803 | mss | 2004-07-27 20:56:38 +0000 (Tue, 27 Jul 2004) | 2 lines
+
+Reverted last commit as per Daniel's veto.
+
+------------------------------------------------------------------------
+r30793 | mss | 2004-07-27 18:27:23 +0000 (Tue, 27 Jul 2004) | 2 lines
+
+bug 3599: Removed -Wall from the CFLAGS for now to make it compile with non-GCC compilers. The file configure.in is currently broken and needs some love for 3.1.
+
+------------------------------------------------------------------------
+r30725 | felicity | 2004-07-26 17:38:16 +0000 (Mon, 26 Jul 2004) | 1 line
+
+setting executable property on score-generation scripts which were mising them
+------------------------------------------------------------------------
+r30724 | hstern | 2004-07-26 17:22:40 +0000 (Mon, 26 Jul 2004) | 13 lines
+
+
+* compare-models
+* config.set0
+* config.set1
+* extract-results
+* generate-corpus
+* tenpass/split-log-into-buckets-random
+* validate-model
+
+  Fixing wierdness from previous commit where contents of new files were
+  duplicated.
+
+
+------------------------------------------------------------------------
+r30702 | mss | 2004-07-25 23:40:03 +0000 (Sun, 25 Jul 2004) | 4 lines
+
+Another rather trivial change to add some debugging output before sockets are established. Should help a lot to track down stuff like <http://bugs.gentoo.org/show_bug.cgi?id=58122>.
+
+The whole code around there is currently a real mess, I'll refactor it for 3.1.
+
+------------------------------------------------------------------------
+r30701 | mss | 2004-07-25 22:41:26 +0000 (Sun, 25 Jul 2004) | 2 lines
+
+Trivial change to error output ("$! $@" -> "$! ($@)")
+
+------------------------------------------------------------------------
+r23229 | quinlan | 2004-07-25 05:30:00 +0000 (Sun, 25 Jul 2004) | 2 lines
+
+bug 3633: trivial fix as suggested by Bob Menschel
+
+------------------------------------------------------------------------
+r23195 | mss | 2004-07-23 18:41:19 +0000 (Fri, 23 Jul 2004) | 2 lines
+
+A small typo.
+
+------------------------------------------------------------------------
+r23193 | mss | 2004-07-23 18:32:55 +0000 (Fri, 23 Jul 2004) | 2 lines
+
+A little additional wordsmithing, but Klaus did a great job, most the time I just corrected some lower-case characters (please use "E-Mail" instead of "E-mail" or even "e-Mail" in German).
+
+------------------------------------------------------------------------
+r23192 | felicity | 2004-07-23 15:43:19 +0000 (Fri, 23 Jul 2004) | 1 line
+
+update changes file for pre3
+------------------------------------------------------------------------
+r23178 | jm | 2004-07-23 04:08:57 +0000 (Fri, 23 Jul 2004) | 1 line
+
+3.0.0-pre4 devel cycle started
+------------------------------------------------------------------------
+r23175 | jm | 2004-07-23 04:06:20 +0000 (Fri, 23 Jul 2004) | 1 line
+
+3.0.0-pre3 RELEASED
+------------------------------------------------------------------------
 r23174 | quinlan | 2004-07-23 03:58:25 +0000 (Fri, 23 Jul 2004) | 2 lines
 
 move URIBL rules to URIBL section and zero their non-net scores

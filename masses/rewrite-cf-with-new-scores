@@ -161,6 +161,7 @@ sub generate_scores {
   my ($name, @scores) = @_;
 
   my $isnet = ($rules{$name}->{tflags} =~ /\bnet\b/);
+  my $islearn = ($rules{$name}->{tflags} =~ /\blearn\b/);
 
   # Set defaults if not already set
   $scores[0] ||= 0;
@@ -175,6 +176,10 @@ sub generate_scores {
   # net rules never have a non-zero score in sets 0 and 2
   for(my $i=0;$i<$NUM_SCORESETS;$i++) {
     if ($isnet && ($i & 1) == 0) {
+      $scores[$i] = 0;
+      $flag = 0 if ( $i > 0 && $scores[$i] != $scores[$i-1] );
+    }
+    if ($islearn && ($i & 2) == 0) {
       $scores[$i] = 0;
       $flag = 0 if ( $i > 0 && $scores[$i] != $scores[$i-1] );
     }
