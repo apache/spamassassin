@@ -6,10 +6,14 @@ use Test;
 
 use constant TEST_ENABLED => (-e 't/do_net');
 use constant HAS_SPFQUERY => eval { require Mail::SPF::Query; };
+# Do not run this test on non-Linux unices as root, due to a bug
+# in Sys::Hostname::Long (which Mail::Query::SPF uses.)
 # See <http://bugzilla.spamassassin.org/show_bug.cgi?id=3806>
-use constant IS_SOLARIS   => $^O eq 'solaris';
+use constant IS_LINUX   => $^O eq 'linux';
+use constant AM_ROOT    => $< == 0;
 
-use constant DO_RUN       => TEST_ENABLED && HAS_SPFQUERY && !IS_SOLARIS;
+use constant DO_RUN     => TEST_ENABLED && HAS_SPFQUERY &&
+                                        !(AM_ROOT && !IS_LINUX);
 
 BEGIN {
   
