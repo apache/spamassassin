@@ -274,7 +274,7 @@ sub dcc_report {
     alarm $timeout;
 
     my $cmd = join(" ", $self->{main}->{conf}->{dcc_path},'-t many',$self->{main}->{conf}->{dcc_options});
-    open(DCC, "| $cmd") || die "Couldn't fork \"$cmd\"";
+    open(DCC, "| $cmd > /dev/null 2>&1") || die "Couldn't fork \"$cmd\"";
     print DCC $fulltext;
     close(DCC) || die "Received error code $? from \"$cmd\"";
 
@@ -337,7 +337,7 @@ sub pyzor_report {
     alarm $timeout;
 
     my $cmd = join(" ", $self->{main}->{conf}->{pyzor_path},'report');
-    open(PYZ, "| $cmd") || die "Couldn't fork \"$cmd\"";
+    open(PYZ, "| $cmd > /dev/null 2>&1") || die "Couldn't fork \"$cmd\"";
     print PYZ $fulltext;
     close(PYZ) || die "Received error code $? from \"$cmd\"";
 
