@@ -136,7 +136,10 @@ sub check {
   if (!$self->{is_spam} && defined $self->{auto_whitelist}) {
     $self->{auto_whitelist}->increment_pass_accumulator();
   }
-  $self->{auto_whitelist}->finish();		# done with this now
+
+  if (defined $self->{auto_whitelist}) {
+    $self->{auto_whitelist}->finish();		# done with this now
+  }
 
   if ($self->{conf}->{use_terse_report}) {
     $_ = $self->{conf}->{terse_report_template};
@@ -545,6 +548,7 @@ sub get_raw_body_text_array {
 
   # else it's a multipart MIME message. Skip non-text parts and
   # just assemble the body array from the text bits.
+
   $self->{body_text_array} = [ ];
   my $multipart_boundary = "--$1\n";
   my $end_boundary = "--$1--\n";
@@ -566,7 +570,8 @@ sub get_raw_body_text_array {
       $_ = $body->[$line++];
       last unless defined $_;
 
-      if (/^Content-[Tt]ype: (?:text\/\S+|multipart\/alternative)/) {
+      if (/^Content-[Tt]ype: (text\/\S+|multipart\/alternative)/) {
+	$ctype = $1;
 	push (@{$self->{body_text_array}}, $_);
 	next;
       }

@@ -9,7 +9,7 @@ use Test; BEGIN { plan tests => 5 };
 %patterns = (
 
 q{ Possibly-forged 'Received:' header found }, 'rcvdspotted',
-q{ BODY: /To Be Removed,? Please/i }, 'bodyspotted',
+q{ BODY: Claims you can be removed from the list }, 'bodyspotted',
 
 );
 

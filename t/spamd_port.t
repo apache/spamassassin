@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_port");
-use Test; BEGIN { plan tests => 23 };
+use Test; BEGIN { plan tests => 17 };
 
 # ---------------------------------------------------------------------------
 
@@ -16,10 +16,6 @@ q{ Invalid Date: header}, 'date',
 q{ Subject has an exclamation mark}, 'apling',
 q{ From: ends in numbers}, 'endsinnums',
 q{ From: does not include a real name}, 'noreal',
-q{ BODY: /remove.*subject/i}, 'removesubject',
-q{ BODY: /To Be Removed,? Please/i}, 'toberemoved',
-q{ BODY: /remove.*subject/i}, 'removesubj',
-q{ BODY: /\"remove\"/i}, 'remove',
 
 
 );

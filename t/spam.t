@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spam");
-use Test; BEGIN { plan tests => 23 };
+use Test; BEGIN { plan tests => 25 };
 
 # ---------------------------------------------------------------------------
 
@@ -16,10 +16,10 @@ q{ Invalid Date: header}, 'date',
 q{ Subject has an exclamation mark}, 'apling',
 q{ From: ends in numbers}, 'endsinnums',
 q{ From: does not include a real name}, 'noreal',
-q{ BODY: /remove.*subject/i}, 'removesubject',
-q{ BODY: /To Be Removed,? Please/i}, 'toberemoved',
-q{ BODY: /remove.*subject/i}, 'removesubj',
-q{ BODY: /\"remove\"/i}, 'remove',
+q{ BODY: List removal information }, 'removesubject',
+q{ BODY: Claims you can be removed from the list}, 'toberemoved',
+q{ Says: "to be removed, reply via email" }, 'removesubj',
+q{ BODY: Nobody's perfect }, 'remove',
 
 
 );
