@@ -1,5 +1,5 @@
 # SpamAssassin rules file: scores.
-# $Id: 50_scores.cf,v 1.197.2.9 2002/08/28 11:38:07 jmason Exp $
+# $Id: 50_scores.cf,v 1.197.2.10 2002/08/28 11:51:43 jmason Exp $
 ###########################################################################
 # Default scores.   Note that if a test is named in the files, but a score is
 # not assigned here, the default score will be set to 1.
@@ -691,7 +691,6 @@ score RCVD_IN_VISI                   2.0
 score HABEAS_HIL                    30.0
 score RCVD_IN_BONDEDSENDER         -10.0
 
-
 # The fudge scores below expect that you use the following scores for MAPS
 #score RCVD_IN_VARBL		     4.5
 #score RCVD_IN_RSS		     2.0
@@ -728,21 +727,21 @@ score RCVD_IN_BL_SPAMCOP_NET	     0.0
 ###########################################################################
 # Compensation for common false positives.
 
-score HABEAS_SWE                     0.120
-score EVITE			    -10
-score NMS_CGI_NOT_BUGGY             -10
+score HABEAS_SWE                     20
+score EVITE			     -10
+score NMS_CGI_NOT_BUGGY              -10
 
 # GA never changes the whitelist/blacklist scores
 
-score USER_IN_BLACKLIST		    100.0
+score USER_IN_BLACKLIST		     100.0
 
-score USER_IN_WHITELIST		    -100.0
+score USER_IN_WHITELIST		     -100.0
 
 # Not really false positives but the user wants spam!
 
-score USER_IN_WHITELIST_TO       -6.0  # they want some spam
-score USER_IN_MORE_SPAM_TO      -20.0  # they want more spam
-score USER_IN_ALL_SPAM_TO      -100.0  # they want all spam, go figure :)
+score USER_IN_WHITELIST_TO           -6.0  # they want some spam
+score USER_IN_MORE_SPAM_TO           -20.0  # they want more spam
+score USER_IN_ALL_SPAM_TO            -100.0  # they want all spam, go figure :)
 
 ###########################################################################
 
