@@ -84,6 +84,7 @@ sub new {
   $self->{scoreset_current} = 0;
   $self->set_score_set (0);
   $self->{tflags} = { };
+  $self->{source_file} = { };
 
   # after parsing, tests are refiled into these hashes for each test type.
   # this allows e.g. a full-text test to be rewritten as a body test in
