@@ -206,8 +206,6 @@ body EXCUSE_7			/you (?:wish|want|would like|desire) to be removed/i
 describe EXCUSE_7		Claims you can be removed from the list
 body EXCUSE_8			/requests to be taken off our mailing list/i
 describe EXCUSE_8		Claims you can be removed from the list
-body EXCUSE_9			/If you do.{0,3}n.{0,3}t (?:want|wish|care) to receive emails (?:on this subject|in the future)/i
-describe EXCUSE_9		Claims you can be removed from the list
 
 body EXCUSE_10			/if you (?:(?:want|wish|care|prefer) not to |(?:don't|do not) (?:want|wish|care) to )(?:be contacted again|receive (any)?\s*(?:more|future|further) (?:e?-?mail|messages?|offers|solicitations))/i
 describe EXCUSE_10		"if you do not wish to receive any more"
@@ -255,9 +253,6 @@ describe TARGETED               Targeted Traffic / Email Addresses
 body YOU_HAVE_BEEN_SELECTED	/You have been selected as a (?:finalist|winner)/i
 describe YOU_HAVE_BEEN_SELECTED	"You have been selected as a finalist", sure
 
-# add .{0,10} as sometimes it's quoted as: "free" priority mail shipping ;)
-body FREE_PRIORITY_MAIL		/FREE.{0,10} PRIORITY MAIL SHIPPING/i
-describe FREE_PRIORITY_MAIL	There's no such thing as a free shipping
 body LIMITED_TIME_ONLY		/LIMITED TIME (?:ONLY|offer)/i
 describe LIMITED_TIME_ONLY	Offers a limited time offer
 body STRONG_BUY			/strong buy/i
@@ -421,10 +416,6 @@ describe DOMAIN_BODY		Domain registration spam body
 rawbody MONSTERHUT		/monsterhut.com/
 describe MONSTERHUT		Mentions monsterhut.com
 
-# (contrib: skod)
-body EMAIL_HARVEST		/email harvest/
-describe EMAIL_HARVEST		Email harvest leads to SPAM for thanksgiving
-
 # (contrib: WW)
 body CLICK_TO_REMOVE_MAILTO        /\bclick to.{0,30}remove.{0,50}mailto:/is
 describe CLICK_TO_REMOVE_MAILTO    Click-to-remove with mailto: found
@@ -502,10 +493,6 @@ describe TAKE_ACTION_NOW	Tells you to 'take action now!'
 body THE_FOLLOWING_FORM		/the following form\b/i
 describe THE_FOLLOWING_FORM	Asks you to fill out a form
 
-# suggested by Nick Rothwell
-body HUNZA_DIET_BREAD		/HUNZA/i
-describe HUNZA_DIET_BREAD	Offers a tasty-sounding dietary product
-
 # include the \n\n so we don't match mailto's in the headers!  Some list software
 # uses these to handle auto-subscribe/unsubscribe features
 rawbody MAILTO_LINK		/=[3D=\s"']*mailto:/is
@@ -527,8 +514,8 @@ rawbody HTML_EMBEDS		/<(?:object|embed)\s/i
 describe HTML_EMBEDS		HTML with embedded plugin object
 
 # Cyber FirePower! rants about 'Internet terrorists' aka spam fighters
-# (contrib: WW)
-body INTERNET_TERROR_RANT       /At the time of this mailing the return email address is a bonafide legitimate return email address that was signed up for with the express purpose.{0,30}internet terrorists\./si
+# (contrib: WW) (jm: tweaked to match again)
+body INTERNET_TERROR_RANT       /At the time of this mailing.{9,50}legitimate return email address.{100,299}internet terrorists/i
 describe INTERNET_TERROR_RANT   Cyber FirePower! rant about losing dropboxes
 
 body CHARSET_FARAWAY		eval:check_for_faraway_charset()
@@ -598,9 +585,6 @@ describe TONER			Contains "Toner Cartridge"
 
 body CASINO			/casino/i
 describe CASINO			Contains "Casino"
-
-body MYCASINOBUILDER		/MYCASINOBUILDER.COM/i
-describe MYCASINOBUILDER	Contains "mycasinobuilder.com"
 
 body ONCE_IN_LIFETIME		/once in a lifetime opportunity/i
 describe ONCE_IN_LIFETIME	Once in a lifetime, apparently
@@ -1003,9 +987,6 @@ describe CABLE_CONVERTER	Cable Converter
 body LUXURY_CAR		        /\bluxury car\b/i
 describe LUXURY_CAR		Luxury Car
 
-body PROTECT_ASSETS	        /\b(?:judgement|lein|divorce|seizure) proof\b/i
-describe PROTECT_ASSETS		Protect Assets
-
 body BREAKTHROUGH_2	        /\b(?:revolutionary|medical) breakthrough\b/i
 describe BREAKTHROUGH_2		Breakthrough
 
@@ -1018,8 +999,8 @@ describe HARD_CASH		Is cash really hard?
 body BIG_BUCKS		        /\bbig bucks\b/i
 describe BIG_BUCKS		Big Bucks
 
-body BUY_JUDGEMENTS	        /\b(?:purchase|collect|divorce) {0,20} judgements\b/i
-describe BUY_JUDGEMENTS		Purchase Judgements
+body BUY_JUDGEMENTS	        /\b(?:purchase|collect|divorce)\b.{0,30}\bjudgements\b/i
+describe BUY_JUDGEMENTS		Buying judgements
 
 body LYING_EYES		        /\bbelieve your eyes\b/i
 describe LYING_EYES		Will not Belive your Eyes!
