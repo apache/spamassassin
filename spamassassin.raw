@@ -182,12 +182,19 @@ eval {
       # go ahead and remove the markup, then fake that the clean version
       # was what was sent in
       #
-      $mail = $spamtest->parse ($spamtest->remove_spamassassin_markup ($mail));
+      my $new_mail = $spamtest->parse ($spamtest->remove_spamassassin_markup ($mail));
+      $mail->finish();
+      $mail = $new_mail;
     }
   }
 
 # handle unconditional reportage
   if ($opt{'report'}) {
+    # Make sure the message is clean first ...
+    my $new_mail = $spamtest->parse ($spamtest->remove_spamassassin_markup ($mail));
+    $mail->finish();
+    $mail = $new_mail;
+
     if ( $spamtest->report_as_spam ($mail) ) {
       warn "Warning, unable to report spam\nFor more information, re-run with -D option to see debug output.\n";
     }
@@ -196,10 +203,15 @@ eval {
 
 # handle revoke
   if ($opt{'revoke'}) {
-      if ( $spamtest->revoke_as_spam ($mail) ) {
-          warn "Warning, unable to revoke spam\n";
-      }
-      exit(0);
+    # Make sure the message is clean first ...
+    my $new_mail = $spamtest->parse ($spamtest->remove_spamassassin_markup ($mail));
+    $mail->finish();
+    $mail = $new_mail;
+
+    if ( $spamtest->revoke_as_spam ($mail) ) {
+      warn "Warning, unable to revoke spam\nFor more information, re-run with -D option to see debug output.\n";
+    }
+    exit(0);
   }
 
   if ($@) { warn $@; }

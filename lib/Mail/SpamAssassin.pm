@@ -741,9 +741,6 @@ sub report_as_spam {
 
   $self->init(1);
 
-  # Let's make sure the markup was removed first ...
-  $mail = $self->parse ($self->remove_spamassassin_markup($mail));
-
   # learn as spam if enabled
   if ( $self->{conf}->{bayes_learn_during_report} ) {
     $self->learn ($mail, undef, 1, 0);
@@ -783,9 +780,6 @@ sub revoke_as_spam {
   local ($_);
 
   $self->init(1);
-
-  # Let's make sure the markup was removed first ...
-  $mail = $self->parse ($self->remove_spamassassin_markup($mail));
 
   # learn as nonspam
   $self->learn ($mail, undef, 0, 0);
