@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.92 2003/05/26 19:39:01 quinlan Exp $
+# $Id: HTML.pm,v 1.93 2003/06/09 04:32:07 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -573,6 +573,21 @@ sub html_comment {
       $self->{html}{big_font_B} = 1 if (lc($type) eq "pt" && $size > 12);
     }
   }
+
+  for my $tag ('center', 'li', 'img', 'a') {
+    if (exists $self->{html_inside}{$tag} && $self->{html_inside}{$tag} > 0) {
+      $self->{html}{"t_comment_in_$tag"} = 1;
+    }
+  }
+  if (exists $self->{html}{shouting} && $self->{html}{shouting} > 0) {
+    $self->{html}{t_comment_in_shouting_0} = 1;
+  }
+  if (exists $self->{html}{shouting} && $self->{html}{shouting} > 1) {
+    $self->{html}{t_comment_in_shouting_1} = 1;
+  }
+  if (exists $self->{html}{shouting} && $self->{html}{shouting} > 2) {
+    $self->{html}{t_comment_in_shouting_2} = 1;
+  }
 }
 
 sub html_declaration {
@@ -584,6 +599,20 @@ sub html_declaration {
     $self->{html}{elements}++;
     $self->{html}{tags}++;
     $self->{html_inside}{$tag} = 0;
+  }
+  for my $tag ('html', 'head', 'body', 'center') {
+    if (exists $self->{html_inside}{$tag} && $self->{html_inside}{$tag} > 0) {
+      $self->{html}{"t_declaration_in_$tag"} = 1;
+    }
+  }
+  if (exists $self->{html}{shouting} && $self->{html}{shouting} > 0) {
+    $self->{html}{t_declaration_in_shouting_0} = 1;
+  }
+  if (exists $self->{html}{shouting} && $self->{html}{shouting} > 1) {
+    $self->{html}{t_declaration_in_shouting_1} = 1;
+  }
+  if (exists $self->{html}{shouting} && $self->{html}{shouting} > 2) {
+    $self->{html}{t_declaration_in_shouting_2} = 1;
   }
 }
 
