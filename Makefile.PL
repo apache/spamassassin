@@ -128,7 +128,8 @@ my %makefile = (
 	'spamd/spamc$(EXE_EXT) spamd/libspamc.so spamd/spamd doc '.
 	'spamd/sslspamc$(EXE_EXT) spamd/libsslspamc.so '.
 	'binaries.mk config.h config.status config.cache config.log '.
-	'qmail/qmail-spamc t/do_razor2 '
+	'autom4te.cache qmail/qmail-spamc'.
+	't/do_razor t/do_razor1 t/do_razor2'
     },
 
     'AUTHOR' => 'Justin Mason <jm@jmason.org>',
