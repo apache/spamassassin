@@ -81,10 +81,6 @@ describe HTML_COMMENT_SHORT	HTML comment is very short
 body HTML_COMMENT_SAVED_URL	eval:html_text_match('comment', '<!-- saved from url=\(\d{4}\)')
 describe HTML_COMMENT_SAVED_URL	HTML message is a saved web page
 
-# Comment is a spam sign when following <DIV>
-body HTML_CONVERTED		eval:html_test('div_converted')
-describe HTML_CONVERTED		HTML conversion tool used by spam
-
 body HTML_EMBEDS		eval:html_test('embeds')
 describe HTML_EMBEDS		HTML with embedded plugin object
 
