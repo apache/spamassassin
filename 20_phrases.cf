@@ -39,8 +39,8 @@ describe REPLY_REMOVE_SUBJECT	List removal information
 body REMOVE_FROM_LIST		/to be removed from (?:the|my|our) (?:mailing|e.?mail|opt[ -]?in)? ?list/i
 describe REMOVE_FROM_LIST	To be removed from list
 
-body REMOVE_REMOVAL_1WORD	/remov\S{0,64}remov/i
-describe REMOVE_REMOVAL_1WORD	List removal information
+body MULTI_REMOVAL_1WORD	/remov\S{0,64}remov/i
+describe MULTI_REMOVAL_1WORD	List removal information
 
 # bug 1022: MGM_POSTCARD #2 original
 body REMOVE_POSTAL		/(?:Send(?:ing)? a (?:postal mail|postcard) to (?:Unsubscribe|Customer ?Service|remove)|unsubscribe by (?:postal mail|postcard))/i
@@ -438,8 +438,8 @@ describe ACCEPT_CREDIT_CARDS	Accept Credit Cards
 body BAD_CREDIT		        /\b(?:bad|poor|no\b|eliminate|repair|(?:re)?establish|damag).{0,10} (?:credit|debt)\b/i
 describe BAD_CREDIT		Eliminate Bad Credit
 
-body UNSECURED_CREDIT	        /\bunsecured.{0,10}(?:master ?card|visa|credit|loans|debt)\b/i
-describe UNSECURED_CREDIT	Unsecured Credit/Debt
+body NONSECURED_CREDIT	        /\bunsecured.{0,10}(?:master ?card|visa|credit|loans|debt)\b/i
+describe NONSECURED_CREDIT	Non-secured Credit/Debt
 
 body LOW_INTEREST	        /\blow.{0,20} interest rates?\b/i
 describe LOW_INTEREST		Lower Interest Rates
@@ -614,7 +614,7 @@ body FORWARD_LOOKING	        /\bcontains forward-looking statements\b/i
 describe FORWARD_LOOKING	Stock Disclaimer Statement
 
 body SATISFACTION		/\bsatisfaction .{0,9}g(?:ua|au)ranteed\b/i
-describe SATISFACTION		Satisfaction Guaranteed
+describe SATISFACTION		Mail guarantees satisfaction
 
 # Avoid an FP noted by NISHIJIMA Takanori: 'Japanese string sequence:
 # "Su" "Ku" "Na"  "I" "Ko" "Su" "To" "De" "Yo" "Ri" ...
@@ -785,8 +785,8 @@ body START_NOW_CAPS             /S(?i:tart now)/
 describe START_NOW_CAPS 	Talks about 'starting now' with capitals
 body WORRY_FREE                 /worry free/i
 describe WORRY_FREE             No Worries, Mate
-body INCREASE_SEX               /increased?.{0,9}(?:sex|stamina)/i
-describe INCREASE_SEX 		Talks about a bigger drive for sex
+body MORE_SEX               /increased?.{0,9}(?:sex|stamina)/i
+describe MORE_SEX 		Talks about a bigger drive for sex
 
 body BANG_GUARANTEE		/\bguaranteed?\!/i
 describe BANG_GUARANTEE		Something is emphatically guaranteed
