@@ -161,6 +161,36 @@ body T_HTML_LINK_PUSH_HERE	eval:html_text_match('anchor', '(?i)(?:push|go|cl[1l]
 body T_HTML_LINK_OPT		eval:html_text_match('anchor', '(?i)opt.?(?:out|in)')
 body T_HTML_LINK_OPT_OUT	eval:html_text_match('anchor', '(?i)opt.?out')
 
+body T_HTML_LINK_IMAGE		eval:html_text_match('anchor', '<img>')
+body T_HTML_LINK_IMAGE2		eval:html_text_match('anchor', '^<img>$')
+body T_HTML_IMAGE_ONLY_28	eval:html_image_only('2400','2800')
+body T_HTML_IMAGE_ONLY_32	eval:html_image_only('2800','3200')
+body T_HTML_IMAGE_RATIO_10	eval:html_image_ratio('0.008','0.010')
+body T_HTML_IMAGE_RATIO_12	eval:html_image_ratio('0.010','0.012')
+
+meta T_HTML_LINK_IMAGE_ONLY_04	(T_HTML_LINK_IMAGE && HTML_IMAGE_ONLY_04)
+meta T_HTML_LINK_IMAGE_ONLY_08	(T_HTML_LINK_IMAGE && HTML_IMAGE_ONLY_08)
+meta T_HTML_LINK_IMAGE_ONLY_12	(T_HTML_LINK_IMAGE && HTML_IMAGE_ONLY_12)
+meta T_HTML_LINK_IMAGE_ONLY_16	(T_HTML_LINK_IMAGE && HTML_IMAGE_ONLY_16)
+meta T_HTML_LINK_IMAGE_ONLY_20	(T_HTML_LINK_IMAGE && HTML_IMAGE_ONLY_20)
+meta T_HTML_LINK_IMAGE_ONLY_24	(T_HTML_LINK_IMAGE && HTML_IMAGE_ONLY_24)
+meta T_LINK_HTML_IMAGE_ONLY_28	(T_HTML_LINK_IMAGE && T_HTML_IMAGE_ONLY_28)
+meta T_LINK_HTML_IMAGE_ONLY_32	(T_HTML_LINK_IMAGE && T_HTML_IMAGE_ONLY_32)
+
+meta T_HTML_LINK_IMAGE_RATIO_02	(T_HTML_LINK_IMAGE && HTML_IMAGE_RATIO_02)
+meta T_HTML_LINK_IMAGE_RATIO_04	(T_HTML_LINK_IMAGE && HTML_IMAGE_RATIO_04)
+meta T_HTML_LINK_IMAGE_RATIO_06	(T_HTML_LINK_IMAGE && HTML_IMAGE_RATIO_06)
+meta T_HTML_LINK_IMAGE_RATIO_08	(T_HTML_LINK_IMAGE && HTML_IMAGE_RATIO_08)
+meta T_LINK_HTML_IMAGE_RATIO_10	(T_HTML_LINK_IMAGE && T_HTML_IMAGE_RATIO_10)
+meta T_LINK_HTML_IMAGE_RATIO_12	(T_HTML_LINK_IMAGE && T_HTML_IMAGE_RATIO_12)
+
+body T_HTML_LINK_IMAGE_BUG_1	eval:html_test('t_anchor_image_bug_1')
+body T_HTML_LINK_IMAGE_BUG_2	eval:html_test('t_anchor_image_bug_2')
+body T_HTML_LINK_IMAGE_BUG_3	eval:html_test('t_anchor_image_bug_3')
+meta T_HTML_LINK_IMAGE_BUG_4	T_HTML_LINK_IMAGE_BUG_1 && T_HTML_LINK_IMAGE2
+meta T_HTML_LINK_IMAGE_BUG_5	T_HTML_LINK_IMAGE_BUG_2 && T_HTML_LINK_IMAGE2
+meta T_HTML_LINK_IMAGE_BUG_6	T_HTML_LINK_IMAGE_BUG_3 && T_HTML_LINK_IMAGE2
+
 body T_HTML_EXTRA_CLOSE_0	eval:html_test('extra_close')
 body T_HTML_EXTRA_CLOSE_1	eval:html_eval('extra_close', '> 1')
 body T_HTML_EXTRA_CLOSE_2	eval:html_eval('extra_close', '> 2')
@@ -177,11 +207,22 @@ body T_HTML_EXTRA_CLOSE_F	eval:html_range('extra_close_ratio', '0.16', '0.32')
 
 # bug 3529 - LONGWORDS false positives
 # fast version, but probably less accurate
-meta T_LONGWORDS_1	(__LONGWORDS_A || __LONGWORDS_D)
-# maybe more accurate versions
-meta T_LONGWORDS_2	(__LONGWORDS_B || __LONGWORDS_C || __LONGWORDS_D)
-meta T_LONGWORDS_3	(__LONGWORDS_B + __LONGWORDS_C + __LONGWORDS_D > 1)
-meta T_LONGWORDS_4	(__LONGWORDS_A + __LONGWORDS_B + __LONGWORDS_C + __LONGWORDS_D > 1)
+meta T_LONGWORDS_01	(__LONGWORDS_A || __LONGWORDS_B)
+meta T_LONGWORDS_02	(__LONGWORDS_A || __LONGWORDS_C)
+meta T_LONGWORDS_03	(__LONGWORDS_A || __LONGWORDS_D)
+meta T_LONGWORDS_04	(__LONGWORDS_B || __LONGWORDS_C)
+meta T_LONGWORDS_05	(__LONGWORDS_B || __LONGWORDS_D)
+meta T_LONGWORDS_06	(__LONGWORDS_C || __LONGWORDS_D)
+meta T_LONGWORDS_07	(__LONGWORDS_A || __LONGWORDS_B || __LONGWORDS_C)
+meta T_LONGWORDS_08	(__LONGWORDS_A || __LONGWORDS_B || __LONGWORDS_D)
+meta T_LONGWORDS_09	(__LONGWORDS_A || __LONGWORDS_C || __LONGWORDS_D)
+meta T_LONGWORDS_10	(__LONGWORDS_B || __LONGWORDS_C || __LONGWORDS_D)
+meta T_LONGWORDS_11	(__LONGWORDS_A + __LONGWORDS_B + __LONGWORDS_C > 1)
+meta T_LONGWORDS_12	(__LONGWORDS_A + __LONGWORDS_B + __LONGWORDS_D > 1)
+meta T_LONGWORDS_13	(__LONGWORDS_A + __LONGWORDS_C + __LONGWORDS_D > 1)
+meta T_LONGWORDS_14	(__LONGWORDS_B + __LONGWORDS_C + __LONGWORDS_D > 1)
+meta T_LONGWORDS_15	(__LONGWORDS_A + __LONGWORDS_B + __LONGWORDS_C + __LONGWORDS_D > 1)
+meta T_LONGWORDS_16	(__LONGWORDS_A + __LONGWORDS_B + __LONGWORDS_C + __LONGWORDS_D > 2)
 
 header T_INVALID_DATE		Date !~ /^\s*(?:(?i:Mon|Tue|Wed|Thu|Fri|Sat|Sun),\s+)?[0-3\s]?[0-9]\s+(?i:Jan|Feb|Ma[ry]|Apr|Ju[nl]|Aug|Sep|Oct|Nov|Dec)\s+(?:[12][901])?[0-9]{2}\s+[0-2]?[0-9](?:\:[0-5][0-9]){1,2}\s+(?:[AP]M\s+)?(?:[+-][0-9]{4}|UT|[A-Z]{2,3}T)(?:\s+\(.*\))?\s*$/ [if-unset: Wed, 31 Jul 2002 16:41:57 +0200]
 
@@ -479,4 +520,5 @@ describe  T_SARE_SUB_DOLLARS    Subject is dollar sign and numerics only
 rawbody __INTERRUPTUS           /(?:[a-zA-Z0-9]<[\/ ]{0,2}?(?!br)(?!p)(?!sup)(?!li)(?!b)(?!i)(?!option)(?!a (?:href|name))(?:\b|!--)[^>]{0,64}?>[a-zA-Z0-9].{0,64}){3}/i
 meta T_INTERRUPTUS              MIME_HTML_ONLY && __INTERRUPTUS
 describe T_INTERRUPTUS          Hypertextus Interruptus - HTML-obfuscated text
+
 
