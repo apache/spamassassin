@@ -7,6 +7,7 @@ use Cwd;
 use Config;
 use File::Path;
 use File::Copy;
+use File::Basename;
 
 # Set up for testing. Exports (as global vars):
 # out: $home: $HOME env variable
@@ -37,11 +38,12 @@ sub sa_t_init {
   $spamc ||= "../spamd/spamc";
 
   $spamdport = 48373;		# whatever
-  $spamd_cf_args = "-C ../rules";
+  $spamd_cf_args = "-C log/test_rules_copy";
 
-  $scr_cf_args = "-C ../rules -p log/test_default.cf";
+  $scr_cf_args = "-C log/test_rules_copy";
   $scr_pref_args = "";
   $scr_test_args = "";
+  $set_test_prefs = 0;
   $default_cf_lines = "
     bayes_path ./log/user_state/bayes
     auto_whitelist_path ./log/user_state/auto-whitelist
@@ -50,11 +52,17 @@ sub sa_t_init {
   (-f "t/test_dir") && chdir("t");        # run from ..
   rmtree ("log");
   mkdir ("log", 0755);
+  mkdir ("log/test_rules_copy", 0755);
+  for $file (<../rules/*.cf>) {
+    $base = basename $file;
+    copy ($file, "log/test_rules_copy/$base")
+		or warn "cannot copy $file to log/test_rules_copy/$base";
+  }
 
-  copy ("../rules/user_prefs.template", "log/test_default.cf")
+  copy ("../rules/user_prefs.template", "log/test_rules_copy/99_test_default.cf")
 	or die "user prefs copy failed";
 
-  open (PREFS, ">>log/test_default.cf");
+  open (PREFS, ">>log/test_rules_copy/99_test_default.cf");
   print PREFS $default_cf_lines;
   close PREFS;
 
@@ -80,6 +88,13 @@ sub tstfile {
 
 sub tstprefs {
   my $lines = shift;
+
+  $set_test_prefs = 1;
+
+  # TODO: should we use -p, or modify the test_rules_copy/99_test_default.cf?
+  # for now, I'm taking the -p route, since we have to be able to test
+  # the operation of user-prefs in general, itself.
+
   open (OUT, ">log/tst.cf") or die;
   print OUT $lines; close OUT;
   $scr_pref_args = "-p log/tst.cf";
@@ -216,6 +231,10 @@ sub start_spamd {
     $spamdargs = "$spamd -D $sdargs";
   }
   $spamdargs =~ s!/!\\!g if ($^O =~ /^MS(DOS|Win)/i);
+
+  if ($set_test_prefs) {
+    warn "oops! SATest.pm: a test prefs file was created, but spamd isn't reading it\n";
+  }
 
   print ("\t$spamdargs > log/$testname.spamd 2>&1 &\n");
   system ("$spamdargs > log/$testname.spamd 2>&1 &");
