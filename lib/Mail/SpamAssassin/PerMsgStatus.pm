@@ -1252,7 +1252,7 @@ my $mark       = q(-_.!~*'());                                    #'; emacs
 my $unreserved = "A-Za-z0-9\Q$mark\E\x00-\x08\x0b\x0c\x0e-\x1f";
 my $uricSet = quotemeta($reserved) . $unreserved . "%";
 
-my $schemeRE = qr/[a-zA-Z][a-zA-Z0-9.+\-]*/;
+my $schemeRE = qr/[a-zA-Z][a-zA-Z0-9.+\-]{4,10}/;
 
 my $uricCheat = $uricSet;
 $uricCheat =~ tr/://d;
@@ -1309,6 +1309,7 @@ sub do_body_uri_tests {
 
       $uri =~ s/^<(.*)>$/$1/;
       $uri =~ s/[\]\)>#]$//;
+      #dbg("uri tests: found $uri");
 
       # Use <BASE HREF="URI"> to turn relative links into
       # absolute links.
