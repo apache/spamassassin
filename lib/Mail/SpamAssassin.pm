@@ -86,7 +86,7 @@ use vars qw{
 };
 
 $VERSION = "2.63";              # update after release
-$IS_DEVEL_BUILD = 1;            # change for release versions
+$IS_DEVEL_BUILD = 0;            # change for release versions
 
 @ISA = qw();
 
