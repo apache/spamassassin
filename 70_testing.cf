@@ -149,23 +149,35 @@ meta T_HTML_LINK_IMAGE_2650	__HTML_LENGTH_2650 && __HTML_LINK_IMAGE
 meta T_HTML_LINK_IMAGE_3072	__HTML_LENGTH_3072 && __HTML_LINK_IMAGE
 meta T_HTML_LINK_IMAGE_4096	__HTML_LENGTH_4096 && __HTML_LINK_IMAGE
 
-body T_HTML_EXTRA_CLOSE_06	eval:html_range('closed_extra_ratio', '0.06', 'inf')
-body T_HTML_EXTRA_CLOSE_07	eval:html_range('closed_extra_ratio', '0.07', 'inf')
-body T_HTML_EXTRA_CLOSE_08	eval:html_range('closed_extra_ratio', '0.08', 'inf')
-body T_HTML_EXTRA_CLOSE_09	eval:html_range('closed_extra_ratio', '0.09', 'inf')
-body T_HTML_EXTRA_CLOSE_10	eval:html_range('closed_extra_ratio', '0.10', 'inf')
-body T_HTML_EXTRA_CLOSE_11	eval:html_range('closed_extra_ratio', '0.11', 'inf')
-body T_HTML_EXTRA_CLOSE_12	eval:html_range('closed_extra_ratio', '0.12', 'inf')
-body T_HTML_EXTRA_CLOSE_13	eval:html_range('closed_extra_ratio', '0.13', 'inf')
-body T_HTML_EXTRA_CLOSE_14	eval:html_range('closed_extra_ratio', '0.14', 'inf')
-body T_HTML_EXTRA_CLOSE_15	eval:html_range('closed_extra_ratio', '0.15', 'inf')
-body T_HTML_EXTRA_CLOSE_16	eval:html_range('closed_extra_ratio', '0.16', 'inf')
+# try using ranges
+body __HTML_LENGTH_0000_0512	eval:html_range('length', '0', '512')
+body __HTML_LENGTH_0000_1024	eval:html_range('length', '0', '1024')
+body __HTML_LENGTH_0512_1024	eval:html_range('length', '512', '1024')
+body __HTML_LENGTH_1024_1536	eval:html_range('length', '1024', '1536')
+body __HTML_LENGTH_1024_2048	eval:html_range('length', '1024', '2048')
+body __HTML_LENGTH_1536_2048	eval:html_range('length', '1536', '2048')
 
-# try allowing uppercase for the first letter
+# two
+meta T_HTML_LINK_IMAGE_ONE	__HTML_LENGTH_0000_1024 && __HTML_LINK_IMAGE
+meta T_HTML_LINK_IMAGE_TWO	__HTML_LENGTH_1024_2048 && __HTML_LINK_IMAGE
+
+# three
+meta T_HTML_LINK_IMAGE_A	__HTML_LENGTH_0000_0512 && __HTML_LINK_IMAGE
+meta T_HTML_LINK_IMAGE_B	__HTML_LENGTH_0512_1024 && __HTML_LINK_IMAGE
+meta T_HTML_LINK_IMAGE_C	__HTML_LENGTH_1024_2048 && __HTML_LINK_IMAGE
+
+# four
+meta T_HTML_LINK_IMAGE_0	__HTML_LENGTH_0000_0512 && __HTML_LINK_IMAGE
+meta T_HTML_LINK_IMAGE_1	__HTML_LENGTH_0512_1024 && __HTML_LINK_IMAGE
+meta T_HTML_LINK_IMAGE_2	__HTML_LENGTH_1024_1536 && __HTML_LINK_IMAGE
+meta T_HTML_LINK_IMAGE_3	__HTML_LENGTH_1536_2048 && __HTML_LINK_IMAGE
+
+# try allowing uppercase for the first letter to supplement LONGWORDS
+# (probably not worth it)
 body __T_LONGWORDS_A	/\b(?:[A-Za-z][a-z]{7,}\s+){6}/
 body __T_LONGWORDS_B	/\b(?:[A-Za-z][a-z]{5,}\s+){9}/
 body __T_LONGWORDS_C	/\b(?:[A-Za-z][a-z]{4,}\s+){10}/
-meta T_LONGWORDS	(__T_LONGWORDS_A + __T_LONGWORDS_B + __T_LONGWORDS_C > 1)
+meta T_LONGWORDS	(__T_LONGWORDS_A + __T_LONGWORDS_B + __T_LONGWORDS_C > 2 && !LONGWORDS)
 
 ##########################################################################
 # bug 2843
@@ -265,10 +277,6 @@ describe T_INDYLIB       Uses spam-only version of Indy library
 
 ##########################################################################
 
-body	T_HTML_EMPTY_URI	eval:html_test('blank_uri')
-body	T_HTML_EMPTY_URI_IMG	eval:html_text_match('blank_uri', '^img$')
-body	T_HTML_EMPTY_URI_IFRAME	eval:html_text_match('blank_uri', '^iframe$')
-
 # bug 3186
 uri T_BIZ_TLD		/^(?:https?:\/\/|mailto:)[^\/]+\.biz(?![-a-z0-9])/i
 
@@ -277,12 +285,7 @@ uri T_BIZ_TLD		/^(?:https?:\/\/|mailto:)[^\/]+\.biz(?![-a-z0-9])/i
 # bug 3570
 # anti-phishing rules, will probably have a low hit-rate
 #
-#  1.415   1.7346   0.0000    1.000   0.85    0.01  T_FORGED_MSGID_HOTMAIL
-#  1.351   1.6569   0.0000    1.000   0.84    0.01  T_FORGED_MSGID_YAHOO
-#  0.443   0.5433   0.0000    1.000   0.73    0.01  T_FORGED_MSGID_EXCITE
-#  0.198   0.2423   0.0000    1.000   0.66    0.01  T_FORGED_MSGID_MSN
 #  0.057   0.0698   0.0000    1.000   0.55    0.01  T_FORGED_EBAY
-#  0.052   0.0642   0.0000    1.000   0.55    0.01  T_FORGED_MSGID_AOL
 #  0.047   0.0573   0.0000    1.000   0.54    0.01  T_FORGED_CITI
 #  0.034   0.0412   0.0000    1.000   0.52    0.01  T_FORGED_SUNTRUST
 #  0.016   0.0191   0.0000    1.000   0.49    0.01  T_FORGED_ABOUT
@@ -318,41 +321,6 @@ uri      __URI_ABOUT_COM	m{^https?://.{0,32}\babout\.com\b}i
 meta     T_FORGED_ABOUT		(!__RCVD_ABOUT_COM && __FROM_ABOUT_COM && !__URI_ABOUT_COM)
 describe T_FORGED_ABOUT		Message appears to be forged, (about.com)
 
-header   __AT_YAHOO_MSGID	MESSAGEID =~ /\@yahoo\.com\b/i
-header   __FROM_YAHOO_COM	From =~ /\@yahoo\.com\b/i
-meta     T_FORGED_MSGID_YAHOO	(__AT_YAHOO_MSGID && !__FROM_YAHOO_COM)
-describe T_FORGED_MSGID_YAHOO	Message-ID is forged, (yahoo.com)
-
-header   __AT_MSN_MSGID		MESSAGEID =~ /\@msn\.com\b/i
-header   __FROM_MSN_COM		From =~ /\@msn\.com\b/i
-meta     T_FORGED_MSGID_MSN	(__AT_MSN_MSGID && (!__FROM_MSN_COM && !__FROM_HOTMAIL_COM && !__FROM_YAHOO_COM))
-describe T_FORGED_MSGID_MSN	Message-ID is forged, (msn.com)
-
-header   __AT_HOTMAIL_MSGID	MESSAGEID =~ /\@hotmail\.com\b/i
-header   __FROM_HOTMAIL_COM	From =~ /\@hotmail\.com\b/i
-meta     T_FORGED_MSGID_HOTMAIL	(__AT_HOTMAIL_MSGID && (!__FROM_HOTMAIL_COM && !__FROM_MSN_COM && !__FROM_YAHOO_COM))
-describe T_FORGED_MSGID_HOTMAIL	Message-ID is forged, (hotmail.com)
-
-header   __AT_AOL_MSGID		MESSAGEID =~ /\@aol\.com\b/i
-header   __FROM_AOL_COM		From =~ /\@aol\.com\b/i
-meta     T_FORGED_MSGID_AOL	(__AT_AOL_MSGID && !__FROM_AOL_COM)
-describe T_FORGED_MSGID_AOL	Message-ID is forged, (aol.com)
-
-header   __AT_EXCITE_MSGID	MESSAGEID =~ /\@excite\.com\b/i
-header   __MY_RCVD_EXCITE	Received =~ /\.excite\.com\b/i
-meta     T_FORGED_MSGID_EXCITE	(__AT_EXCITE_MSGID && !__MY_RCVD_EXCITE)
-describe T_FORGED_MSGID_EXCITE	Message-ID is forged, (excite.com)
-
-uri      T_SPOOF_COM2OTH 	m{^https?://(?:\w+\.)+?com\.(?:\w+\.){2,}}i
-describe T_SPOOF_COM2OTH	 a.com.b.c
-
-uri      T_SPOOF_COM2COM	 m{^https?://(?:\w+\.)+?com\.(?:\w+\.)+?com}i
-describe T_SPOOF_COM2COM 	a.com.b.com
-
-# CDNs (Akamai (edgesuite), Speedera, and NYUD, so far) do this, so skip them.
-uri      T_SPOOF_OURI		m{^https?://(?:[a-z0-9_-]+?\.){2,}(?:com|net|org|biz|info|edu|www)(?!\.(?:\w+\.)?(?:edgesuite|nyud|speedera)\.net)(?:\.[a-z0-9_%-]+?){2,}(?:(?::|%3a)\d+)?}i
-describe T_SPOOF_OURI	 	URL has items in odd places
-
 ##########################################################################
 
 # http://bugzilla.spamassassin.org/show_bug.cgi?id=3645
@@ -373,13 +341,3 @@ tflags T_DNS_FROM_SECURITYSAGE	net
 header T_DNS_FROM_AHBL_RHSBL	eval:check_rbl_envfrom('t_ahbl', 'rhsbl.ahbl.org.')
 tflags T_DNS_FROM_AHBL_RHSBL	net
 
-# throw a few more on the stack
-uri      T_SPOOF_NET2COM	 m{^https?://(?:\w+\.)+?(?:net|org)\.(?:\w+\.)+?com}i
-describe T_SPOOF_NET2COM 	a.net.b.com
-
-uri      T_SPOOF_COM2NET	 m{^https?://(?:\w+\.)+?com\.(?:\w+\.)+?(?:net|org)}i
-describe T_SPOOF_COM2NET 	a.com.b.net
-
-# might be covered with T_SPOOF_OURI ?
-uri      T_SPOOF_NET2OTH 	m{^https?://(?:\w+\.)+?(?:net|org)\.(?:\w+\.){2,}}i
-describe T_SPOOF_NET2OTH	 a.net.b.c
