@@ -96,8 +96,12 @@ header __HAS_XOIP		X-Originating-Ip =~ /^\[/
 meta FORGED_MUA_MSN		(__USER_AGENT_MSN && (!__HAS_XOAT || !__HAS_XOIP))
 describe FORGED_MUA_MSN		Forged mail pretending to be from MSN
 
-# AOL
-header __AOL_MUA		X-Mailer =~ /\bAOL\b/
+# AOL -- the "fat" version of the client, not Communicator
+# seen in spam:
+# X-Mailer: AOL 7.0 for Windows US sub 118
+# X-Mailer: AOL 8.0 for Windows US sub 230
+# X-Mailer: AOL 4.0 for Windows UK sub 1285
+header __FAT_AOL_MUA           X-Mailer =~ /AOL \S+ for Windows/
 
 # Internet Mail Service
 header __IMS_MUA		X-Mailer =~ /Internet Mail Service/
@@ -146,7 +150,7 @@ describe FORGED_MUA_EUDORA	Forged mail pretending to be from Eudora
 # Mar 26 2003 jm: AOL MUAs add a Received line, and do not use "real names" in
 # From or To headers, as far as I can see, quinlan: also see bug 1426
 header __AOL_FROM		From:addr =~ /\@aol\.com$/i
-meta FORGED_MUA_AOL_FROM	(__AOL_MUA && !__AOL_FROM)
+meta FORGED_MUA_AOL_FROM	(__FAT_AOL_MUA && !__AOL_FROM)
 describe FORGED_MUA_AOL_FROM	Forged mail pretending to be from AOL (by From)
 
 # From private mail with developers.  Some top tips here!
@@ -165,7 +169,7 @@ describe FORGED_MUA_THEBAT_BOUN Mail pretending to be from The Bat! (boundary)
 meta FORGED_OUTLOOK_HTML	(__OUTLOOK_MUA && MIME_HTML_ONLY)
 describe FORGED_OUTLOOK_HTML	Outlook can't send HTML message only
 
-meta FORGED_AOL_HTML		(__AOL_MUA && MIME_HTML_ONLY)
+meta FORGED_AOL_HTML		(__FAT_AOL_MUA && MIME_HTML_ONLY)
 describe FORGED_AOL_HTML	AOL can't send HTML message only
 
 meta FORGED_IMS_HTML		(__IMS_MUA && MIME_HTML_ONLY)
