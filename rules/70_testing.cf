@@ -354,11 +354,4 @@ body T_NO_SCRIP_NEEDED		/no.{1,10}P(?:er|re)scription.{1,10}(?:needed|require|ne
 
 ########################################################################
 
-# bug 4054: contributions from Maxime Ritter (airmax.cf)
-
-# only works on full, may be better to check in Message object for this
-full __ISO_VALID		/charset=\"?iso-(?:8859-\d{1,2}|2022-(?:jp|kr))\b/i
-full __ISO_CHARSET		/charset=\"?iso-\S+-\S+\b/i
-meta T_BAD_ISO_CHARSET		(__ISO_CHARSET && !__ISO_VALID)
-
 body T_NORMAL_HTTP_TO_IP	eval:check_numeric_http()
