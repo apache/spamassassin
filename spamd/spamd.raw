@@ -140,15 +140,7 @@ sub logmsg {
 }
 
 my $port = $opt_p || 22874;
-my $addr;
-if ($opt_i)
-{
-    $addr = gethostbyname($opt_i);
-}
-else
-{
-    $addr = INADDR_ANY;
-}
+my $addr = gethostbyname($opt_i || '127.0.0.1');
 my $proto = getprotobyname('tcp');
 
 ($port) = $port =~ /^(\d+)$/ or die "invalid port";
