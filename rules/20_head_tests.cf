@@ -573,9 +573,8 @@ describe POST_IN_RCVD           Received contains fake 'Post.cz' hostname
 header TO_INVESTORS             To =~ /\bInvestors\@/
 describe TO_INVESTORS           To: non-existent 'Investors' address
 
-header TO_MALFORMED             To !~ /(?:(?:\"[^\"]+\"|\S+)\@\S+\.\S+|undisclosed-recipients:|<\S+(?:\!\S+){1,}>|^\s*$)/ [if-unset: unset@unset.unset]
+header TO_MALFORMED             To !~ /(?:(?:\"[^\"]+\"|\S+)\@\S+\.\S+|^\s*.+:\s*;|^\s*\"[^\"]+\":\s*;|^\s*\([^\)]*\)\s*$|<\S+(?:\!\S+){1,}>|^\s*$)/ [if-unset: unset@unset.unset]
 describe TO_MALFORMED           To: has a malformed address
-
 
 # jm: somehow these guys keep slipping through, and they're very persistent.
 # they use both azoogle.com and azogle.com, but this header is always
