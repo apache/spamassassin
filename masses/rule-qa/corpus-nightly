@@ -1,10 +1,6 @@
 #!/bin/sh
 
-# $HOME/.corpus should contain settings for these values:
-#
-# tree=/home/corpus/svn/spamassassin
-# username=joe
-# password=xyzzy
+# settings are located in $HOME/.corpus
 
 . $HOME/.corpus
 
@@ -59,14 +55,23 @@ set -e
 
 # run test
 cd masses
+rm -f spamassassin/auto*
 rm -f spamassassin/bayes*
 rm -f razor-agent.log
 date > test.start
 if [ -n "$net" ]; then
-	./mass-check --net -j 8 -f /home/corpus/mail/corpus
+	prefs=$prefs_weekly
+	opts=$opts_weekly
 else
-	./mass-check -f /home/corpus/mail/corpus
+	prefs=$prefs_nightly
+	opts=$opts_nightly
 fi
+if [ -n "$prefs" -a -f "$prefs" ]; then
+	cp $prefs spamassassin/user_prefs
+else
+	rm -f spamassassin/user_prefs
+fi
+./mass-check $opts -f $corpus
 uptime
 date > test.end
 

@@ -1,14 +1,6 @@
 #!/usr/bin/perl -w
 
-# $HOME/.corpus should contain settings for these values:
-#
-# corpus=/home/corpus/corpus
-# tree=/home/corpus/svn/spamassassin
-# tmp=/home/corpus/tmp
-# tagtime=/home/corpus/log/tagtime
-# html=/home/html/root/users/corpus
-# username=joe
-# password=xyzzy
+# settings are located in $HOME/.corpus
 
 use strict;
 use POSIX qw(nice);
@@ -49,7 +41,7 @@ sub configure {
     while(<C>) {
 	chomp;
 	s/#.*//;
-	if (/^(.*?)\s*=\s*(.*)/) {
+	if (/^\s*(.*?)\s*=\s*(.*?)\s*/) {
 	    $opt{$1} = $2;
 	}
     }

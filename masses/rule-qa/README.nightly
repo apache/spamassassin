@@ -15,17 +15,34 @@ Recommended stuff:
    $HOME/cvs/spamassassin        - the tree (checked out with the correct tag)
    $HOME/cvs/spamassassin/corpus - the corpus description (for "mass-check -f")
 
- - $HOME/.corpus contains various settings as described in the scripts
+ - $HOME/.corpus contains various settings:
 
-------- start of cut text --------------
-corpus=/home/corpus/corpus
-html=/home/html/root/users/corpus
-tagtime=/home/corpus/log/tagtime
-tmp=/home/corpus/tmp
-tree=/home/corpus/cvs/spamassassin
-username=joe
-password=xyzzy
-------- end ----------------------------
+   # location of corpus file (mass-check -f $corpus)
+   corpus=/home/corpus/corpus
+
+   # location for summary results
+   html=/home/html/root/users/corpus
+
+   # location of tagtime file
+   tagtime=/home/corpus/log/tagtime
+
+   # temporary working directory for summary results
+   tmp=/home/corpus/tmp
+
+   # subversion directory location
+   tree=/home/corpus/svn/spamassassin
+
+   # rsync username and password
+   username=joe
+   password=xyzzy
+
+   # weekly and nightly mass-check options
+   opts_weekly=--restart=500 --tail=15000 --net -j 8
+   opts_nightly=--restart=500 --tail=15000 --net -j 8
+
+   # weekly and nightly mass-check user_prefs files
+   prefs_weekly=/home/corpus/corpus/user_prefs.weekly
+   prefs_nightly=/home/corpus/corpus/user_prefs.nightly
 
  - the following cron job (hours for tagtime and corpus-nightly for your
    local time, this is US/Pacific)
