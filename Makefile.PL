@@ -323,8 +323,8 @@ if (RUNNING_ON_WINDOWS) {
     pop    @{$makefile{EXE_FILES}};
     delete $makefile{MAN1PODS}{'spamc/spamc.pod'};
   }
-  # And require Net::DNS v0.44
-  #$makefile{PREREQ_PM}{Net::DNS} = 0.44;
+  # And require Net::DNS v0.46
+  #$makefile{PREREQ_PM}{Net::DNS} = 0.46;
 }
 
 
