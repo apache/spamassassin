@@ -133,10 +133,15 @@ sub sa_t_init {
 # suite runs on the same machine simultaneously
 sub probably_unused_spamd_port {
   my $port;
+  my @nstat = ();
+  if (open(NSTAT, "netstat -a -n 2>&1 |")) {
+    @nstat = grep(/^\s*tcp/i, <NSTAT>);
+    close(NSTAT);
+  }
   my $delta = ($$ % 32768) || int(rand(32768));
   for (1..10) {
     $port = 32768 + $delta;
-    last unless getservbyport($port, "tcp");
+    last unless (getservbyport($port, "tcp") || grep(/[:.]$port\s/, @nstat));
     $delta = int(rand(32768));
   }
   return $port;
