@@ -16,8 +16,8 @@ Summary:        a spam filter for email which can be invoked from mail delivery 
 Summary(pl):    Filtr antyspamowy, przeznaczony dla programów dostarczaj±cych pocztê (MDA)
 
 Group:          Applications/Mail
-%define version 2.50
-%define real_version 2.50
+%define version 2.51
+%define real_version 2.51
 %define release 1
 
 %define name    spamassassin
@@ -116,7 +116,11 @@ aplikacji do czytania poczty.
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
 %makeinstall PREFIX=%buildroot/%{_prefix} \
         INSTALLMAN1DIR=%buildroot/%{_mandir}/man1 \
-        INSTALLMAN3DIR=%buildroot/%{_mandir}/man3
+	INSTALLMAN3DIR=%buildroot/%{_mandir}/man3 \
+	INSTALLSITEMAN1DIR=%buildroot/%{_mandir}/man1 \
+	INSTALLSITEMAN3DIR=%buildroot/%{_mandir}/man3 \
+	INSTALLVENDORMAN1DIR=%buildroot/%{_mandir}/man1 \
+	INSTALLVENDORMAN3DIR=%buildroot/%{_mandir}/man3
 install -d %buildroot/%{initdir}
 install -d %buildroot/%{_includedir}
 install -m 0755 spamd/redhat-rc-script.sh %buildroot/%{initdir}/spamassassin
@@ -163,6 +167,16 @@ if [ $1 = 0 ]; then
 fi
 
 %changelog
+* Tue Feb 25 2003 Theo Van Dinter <felicity@kluge.net> -3
+- changed "make install" call to properly set where the man pages go.
+  Fixes oddities between MakeMaker and RPM.  <grumble>
+
+* Tue Feb 25 2003 Theo Van Dinter <felicity@kluge.net> -2
+- put in a patch to fix dependency problems with RPM 4.1
+
+* Thu Feb 20 2003 Theo Van Dinter <felicity@kluge.net> 2.50-1
+- upgraded to real 2.50 release
+
 * Sun Feb 02 2003 Theo Van Dinter <felicity@kluge.net>
 - instead of us trying to do a restart, call service condrestart to do
   it for us. :)
