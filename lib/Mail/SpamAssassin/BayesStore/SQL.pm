@@ -922,14 +922,37 @@ sub nspam_nham_change {
 
   return 0 unless (defined($self->{_dbh}));
 
-  my $sql = "UPDATE bayes_vars
-                SET spam_count = spam_count + ?,
-                    ham_count = ham_count + ?
-              WHERE id = ?";
+  my $sql;
+  my @bindings;
+
+  if ($num_spam != 0 && $num_ham != 0) {
+    $sql = "UPDATE bayes_vars
+               SET spam_count = spam_count + ?,
+                   ham_count = ham_count + ?
+             WHERE id = ?";
+    @bindings = ($num_spam, $num_ham, $self->{_userid});
+  }
+  elsif ($num_spam != 0) {
+    $sql = "UPDATE bayes_vars
+              SET spam_count = spam_count + ?
+             WHERE id = ?";
+    @bindings = ($num_spam, $self->{_userid});
+  }
+  elsif ($num_ham != 0) {
+    $sql = "UPDATE bayes_vars
+               SET ham_count = ham_count + ?
+            WHERE id = ?";
+    @bindings = ($num_ham, $self->{_userid});
+  }
+  else {
+    # For some reason called with no delta, it's ok though so just return
+    dbg("bayes: nspam_nham_change: Called with no delta on spam or ham.");
+    return 1;
+  }
 
   my $rows = $self->{_dbh}->do($sql,
 			       undef,
-			       $num_spam, $num_ham, $self->{_userid});
+			       @bindings);
 
   unless (defined($rows)) {
     dbg("bayes: nspam_nham_change: SQL Error: ".$self->{_dbh}->errstr());
