@@ -203,6 +203,10 @@ sub check {
   # delete temporary storage and memory allocation used during checking
   $self->delete_fulltext_tmpfile();
 
+  # now that we've finished checking the mail, clear out this cache
+  # to avoid unforeseen side-effects.
+  $self->{hdr_cache} = { };
+
   # Round the score to 3 decimal places to avoid rounding issues
   # We assume required_score to be properly rounded already.
   # add 0 to force it back to numeric representation instead of string.
@@ -213,24 +217,9 @@ sub check {
                         " tests=".$self->get_names_of_tests_hit());
   $self->{is_spam} = $self->is_spam();
 
-  my $report;
-  $report = $self->{conf}->{report_template};
-  $report ||= '(no report template found)';
-
-  $report = $self->_replace_tags($report);
-
-  # now that we've finished checking the mail, clear out this cache
-  # to avoid unforeseen side-effects.
-  $self->{hdr_cache} = { };
-
-  $report =~ s/\n*$/\n\n/s;
-  $self->{report} = $report;
-
   $self->{main}->call_plugins ("check_end", { permsgstatus => $self });
 
-  # tell the message object to clean up its metadata, we won't need
-  # it any more
-  $self->{msg}->finish_metadata();
+  1;
 }
 
 ###########################################################################
@@ -473,6 +462,18 @@ C<\n> characters.
 
 sub get_report {
   my ($self) = @_;
+
+  if (!exists $self->{'report'}) {
+    my $report;
+    $report = $self->{conf}->{report_template};
+    $report ||= '(no report template found)';
+
+    $report = $self->_replace_tags($report);
+
+    $report =~ s/\n*$/\n\n/s;
+    $self->{report} = $report;
+  }
+
   return $self->{report};
 }
 
@@ -615,7 +616,7 @@ sub rewrite_report_safe {
   }
 
   # the SpamAssassin report
-  my $report = $self->{report};
+  my $report = $self->get_report();
 
   # get original headers, "pristine" if we can do it
   my $from = $self->{msg}->get_pristine_header("From");
