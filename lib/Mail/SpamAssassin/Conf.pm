@@ -230,6 +230,22 @@ whitelist_from simon@example.com
       $self->add_to_addrlist ('whitelist_from', split (' ', $1)); next;
     }
 
+=item unwhitelist_from add@ress.com
+
+Used to override a default whitelist_from entry, so for example a distribution whitelist_from
+can be overriden in a local.cf file, or an individual user can override a whitelist_from entry
+in their own .user_prefs file.
+
+eg.
+unwhitelist_from joe@example.com fred@example.com
+unwhitelist_from *@amazon.com
+
+=cut
+
+	if(/^unwhitelist[-_]from\s+(.+)\s*$/ {
+		$self->remove_from_addrlist ('whitelist_from', split (' ', $1)); next;
+	}
+
 =item blacklist_from add@ress.com
 
 Used to specify addresses which send mail that is often tagged (incorrectly) as
@@ -240,6 +256,23 @@ non-spam, but which the user doesn't want.  Same format as C<whitelist_from>.
     if (/^blacklist[-_]from\s+(.+)\s*$/) {
       $self->add_to_addrlist ('blacklist_from', split (' ', $1)); next;
     }
+
+=item unblacklist_from add@ress.com
+
+Used to override a default blacklist_from entry, so for example a distribution blacklist_from
+can be overriden in a local.cf file, or an individual user can override a blacklist_from entry
+in their own .user_prefs file.
+
+eg.
+unblacklist_from joe@example.com fred@example.com
+unblacklist_from *@spammer.com
+
+=cut
+
+	if(/^unblacklist[-_]from\s+(.+)\s*$/ {
+		$self->remove_from_addrlist ('blacklist_from', split (' ', $1)); next;
+	}
+
 
 =item whitelist_to add@ress.com
 
@@ -1310,6 +1343,14 @@ sub add_to_addrlist {
     $re =~ s/([^\*_a-zA-Z0-9])/\\$1/g;		# escape any possible metachars
     $re =~ s/\*/\.\*/g;				# "*" -> "any string"
     $self->{$singlelist}->{$addr} = qr/^${re}$/;
+  }
+}
+
+sub remove_from_addrlist {
+  my ($self, $singlelist, @addrs) = @_;
+  
+  foreach my $addr (@addrs) {
+	delete($self->{$singlelist}->{$addr});
   }
 }
 
