@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.573 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.574 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -331,3 +331,8 @@ header T_HAS_X_ORIG_EMAIL	X-Originating-Email =~ /\S/
 describe T_HAS_X_ORIG_EMAIL	Has an 'X-Originating-Email' header
 header T_HAS_X_ORIG_HOST	X-Originating-Host =~ /^\[/
 describe T_HAS_X_ORIG_HOST	Has an 'X-Originating-Host' header
+
+# bug 1580 SATISFACTION too broad?
+# Replace SATISFACTION with this if scores improve
+body T_SATISFACTION /\bsatisfaction .{0,9}g(?:ua|au)ranteed\b/i
+describe T_SATISFACTION             Satisfaction Guaranteed
