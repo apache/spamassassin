@@ -24,6 +24,7 @@ close(SCORES);
 
 while(<SPAM>)
 {
+    next if /^#/;
     /.\s+[-0-9]*\s+[^\s]+\s+([^\s]*)\s*$/;
     my @rules=split /,/,$1;
     my $score = 0.0;

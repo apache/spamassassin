@@ -64,6 +64,12 @@ sub new {
   $self->{conf} = $self->{main}->{conf};
   $self->{stop_at_threshold} = $self->{main}->{stop_at_threshold};
 
+  # used with "mass-check --loghits"
+  if ($self->{main}->{save_pattern_hits}) {
+    $self->{save_pattern_hits} = 1;
+    $self->{pattern_hits} = { };
+  }
+
   bless ($self, $class);
   $self;
 }
@@ -1053,22 +1059,33 @@ sub decode_mime_bit {
   return $_;
 }
 
-# save a bit of verbosity
 sub ran_rule_debug_code {
-  my ($rulename, $ruletype, $bit) = @_;
+  my ($self, $rulename, $ruletype, $bit) = @_;
 
-  my $dump_hits_code = '';
+  return '' if (!$Mail::SpamAssassin::DEBUG->{enabled}
+                && !$self->{save_pattern_hits});
+
+  my $log_hits_code = '';
+  my $save_hits_code = '';
+
   if ($Mail::SpamAssassin::DEBUG->{enabled} &&
       ($Mail::SpamAssassin::DEBUG->{rulesrun} & $bit) != 0)
   {
     # note: keep this in 'single quotes' to avoid the $ & performance hit,
     # unless specifically requested by the caller.
-    $dump_hits_code = ': match=\'$&\'';
+    $log_hits_code = ': match=\'$&\'';
+  }
+
+  if ($self->{save_pattern_hits}) {
+    $save_hits_code = '
+        $self->{pattern_hits}->{q{'.$rulename.'}} = $&;
+    ';
   }
 
   return '
     dbg ("Ran '.$ruletype.' rule '.$rulename.' ======> got hit'.
-        $dump_hits_code.'", "rulesrun", '.$bit.');
+        $log_hits_code.'", "rulesrun", '.$bit.');
+    '.$save_hits_code.'
   ';
 
   # do we really need to see when we *don't* get a hit?  If so, it should be a
@@ -1114,7 +1131,6 @@ sub do_head_tests {
   }
   @negative_tests = sort { $self->{conf}{scores}{$a} <=> $self->{conf}{scores}{$b} } @negative_tests;
   @positive_tests = sort { $self->{conf}{scores}{$b} <=> $self->{conf}{scores}{$a} } @positive_tests;
-  my $debugenabled = $Mail::SpamAssassin::DEBUG->{enabled};
 
   foreach $rulename (@negative_tests, @positive_tests) {
     $rule = $self->{conf}->{head_tests}->{$rulename};
@@ -1141,7 +1157,7 @@ sub do_head_tests {
 
         if ($self->get(q#'.$hdrname.'#, q#'.$def.'#) '.$testtype.'~ '.$pat.') {
           $self->got_hit (q#'.$rulename.'#, q{});
-          '. ($debugenabled ? ran_rule_debug_code ($rulename,"header regex", 1) : '') . '
+          '. $self->ran_rule_debug_code ($rulename,"header regex", 1) . '
         }
       }';
 
@@ -1205,7 +1221,6 @@ sub do_body_tests {
   }
   @negative_tests = sort { $self->{conf}{scores}{$a} <=> $self->{conf}{scores}{$b} } @negative_tests;
   @positive_tests = sort { $self->{conf}{scores}{$b} <=> $self->{conf}{scores}{$a} } @positive_tests;
-  my $debugenabled = $Mail::SpamAssassin::DEBUG->{enabled};
 
   foreach $rulename (@negative_tests, @positive_tests) {
     $pat = $self->{conf}->{body_tests}->{$rulename};
@@ -1223,7 +1238,7 @@ sub do_body_tests {
            foreach ( @_ ) {
              if ('.$pat.') { 
 	        $self->got_body_pattern_hit (q{'.$rulename.'}); 
-                '. ($debugenabled ? ran_rule_debug_code ($rulename,"body-text regex", 2) : '') . '
+                '. $self->ran_rule_debug_code ($rulename,"body-text regex", 2) . '
 	     }
 	   }
     }
@@ -1403,7 +1418,6 @@ sub do_body_uri_tests {
   }
   @negative_tests = sort { $self->{conf}{scores}{$a} <=> $self->{conf}{scores}{$b} } @negative_tests;
   @positive_tests = sort { $self->{conf}{scores}{$b} <=> $self->{conf}{scores}{$a} } @positive_tests;
-  my $debugenabled = $Mail::SpamAssassin::DEBUG->{enabled};
 
   foreach $rulename (@negative_tests, @positive_tests) {
     $pat = $self->{conf}->{uri_tests}->{$rulename};
@@ -1420,7 +1434,7 @@ sub do_body_uri_tests {
        foreach ( @_ ) {
          if ('.$pat.') { 
             $self->got_uri_pattern_hit (q{'.$rulename.'});
-            '. ($debugenabled ? ran_rule_debug_code ($rulename,"uri test", 4) : '') . '
+            '. $self->ran_rule_debug_code ($rulename,"uri test", 4) . '
          }
        }
     }
@@ -1485,7 +1499,6 @@ sub do_rawbody_tests {
   }
   @negative_tests = sort { $self->{conf}{scores}{$a} <=> $self->{conf}{scores}{$b} } @negative_tests;
   @positive_tests = sort { $self->{conf}{scores}{$b} <=> $self->{conf}{scores}{$a} } @positive_tests;
-  my $debugenabled = $Mail::SpamAssassin::DEBUG->{enabled};
 
   foreach $rulename (@negative_tests, @positive_tests) {
     $pat = $self->{conf}->{rawbody_tests}->{$rulename};
@@ -1502,7 +1515,7 @@ sub do_rawbody_tests {
        foreach ( @_ ) {
          if ('.$pat.') { 
             $self->got_body_pattern_hit (q{'.$rulename.'});
-            '. ($debugenabled ? ran_rule_debug_code ($rulename,"body_pattern_hit", 8) : '') . '
+            '. $self->ran_rule_debug_code ($rulename,"body_pattern_hit", 8) . '
          }
        }
     }
@@ -1566,7 +1579,6 @@ sub do_full_tests {
   }
   @negative_tests = sort { $self->{conf}{scores}{$a} <=> $self->{conf}{scores}{$b} } @negative_tests;
   @positive_tests = sort { $self->{conf}{scores}{$b} <=> $self->{conf}{scores}{$a} } @positive_tests;
-  my $debugenabled = $Mail::SpamAssassin::DEBUG->{enabled};
 
   foreach $rulename (@negative_tests, @positive_tests) {
     $pat = $self->{conf}->{full_tests}->{$rulename};
@@ -1576,7 +1588,7 @@ sub do_full_tests {
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
 	if ($$fullmsgref =~ '.$pat.') {
 	  $self->got_body_pattern_hit (q{'.$rulename.'});
-          '. ($debugenabled ? ran_rule_debug_code ($rulename,"full-text regex", 16) : '') . '
+          '. $self->ran_rule_debug_code ($rulename,"full-text regex", 16) . '
 	}
       }
     ';

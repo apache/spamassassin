@@ -70,6 +70,7 @@ sub readlogs {
 	open (IN, "<$file");
 
 	while (<IN>) {
+            next if /^#/;
 	    my $this_line = $_;
 	    /^.\s+(\d+)\s+\S+\s*/ or next;
 	    my $hits = $1;

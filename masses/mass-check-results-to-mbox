@@ -11,6 +11,7 @@ while ($#ARGV >= 0) {
 }
 
 while (<>) {
+  next if /^#/;
   /^.\s+\d+\s+(\S+) / or next;
   my $mail = $1;
 

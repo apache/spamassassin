@@ -9,6 +9,7 @@
 # --mn          find_missed('nonspam.log')
 # --ms          find_missed('spam.log')
 # --single      folder is a single mail message
+# --loghits     log the text hit for patterns (useful for debugging)
 #
 # options for maildir and mh-style folders
 # --head=N      only check first N messages
@@ -30,7 +31,7 @@ use Getopt::Long;
 $|++;
 
 GetOptions("c=s", "f", "all", "head=i", "mh", "ms", "mn", "single", "sort",
-	   "tail=i");
+	   "tail=i", "loghits");
 
 #use Devel::Peek;
 
@@ -54,8 +55,11 @@ if ($opt_f) { $FORK = 1; }
 $spamtest = new Mail::SpamAssassin ({
   'rules_filename'      => $cffile,
   'userprefs_filename'  => "$FindBin::Bin/spamassassin.prefs",
+  'save_pattern_hits'   => $opt_loghits,
+  'dont_copy_prefs'     => 1,
   'local_tests_only'    => 1
 });
+
 $spamtest->compile_now(1);
 
 my $count = 0;
@@ -86,6 +90,19 @@ sub wanted {
   printf "%s %2d %s %s\n",
 		    ($yorn ? 'Y' : '.'),
 		    $hits, $id, $tests;
+
+  if ($opt_loghits) {
+    my $out = '';
+    foreach my $t (sort keys %{$status->{pattern_hits}}) {
+      $_ = $status->{pattern_hits}->{$t};
+      s/\r/\\r/gs;      # fix unprintables
+      s/\n/\\n/gs;
+      $out .= "$t=\"$_\" ";
+    }
+    if ($out ne '') {
+      chop $out; print "# ".$out."\n";
+    }
+  }
 
   $status->finish();
   undef $ma;		# clean 'em up
@@ -293,6 +310,7 @@ sub find_missed {
 
   open (IN, "<$file");
   while (<IN>) {
+    next if /^#/;
     /^.\s+\d+\s+(\S+)\s*/ or next;
     my $id = $1;
     my $score = 0.0;
