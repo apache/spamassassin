@@ -106,7 +106,9 @@ sub mass_check_mh_folder {
   my $self = shift;
   my $folder = shift;
   opendir(DIR, $folder) || die "Can't open $folder dir: $!";
-  my @files = grep { -f } map { "$folder/$_" } grep { /^[0-9]/ } readdir(DIR);
+  my @files = grep { -f }
+		map { "$folder/$_" }
+		grep { /^(?:[0-9]|[\da-f]{32}$)/ } readdir(DIR);
   closedir(DIR);
 
   @files = sortbynum(@files) if $self->{opt_sort};
@@ -114,20 +116,12 @@ sub mass_check_mh_folder {
   splice(@files, 0, -$self->{opt_tail}) if $self->{opt_tail};
   foreach my $mail (@files)
   {
-    if ($mail =~ /\.gz$/) {
-      open (STDIN, "gunzip -cd $mail |") or warn "gunzip $mail failed: $@";
-    } elsif ($mail =~ /\.bz2$/) {
-      open (STDIN, "bzip2 -cd $mail |") or warn "bunzip2 $mail failed: $@";
-    } else {
-      open (STDIN, "<$mail") or warn "open $mail failed: $@";
-    }
+    open_folder ($mail) or next;
 
     # skip too-big mails
-    if (! $self->{opt_all} && -s STDIN > 250*1024) {
-      warn "Skipping message, too large (>250k): $mail\n";
-      return;
-    }
-    my @msg = (<STDIN>);
+    if (! $self->{opt_all} && -s ARCFOLDER > 250*1024) { close ARCFOLDER; next; }
+    my @msg = (<ARCFOLDER>);
+    close ARCFOLDER;
 
     $self->visit_a_mail ($mail, \@msg);
   }
@@ -149,20 +143,11 @@ sub mass_check_maildir {
   splice(@files, 0, -$self->{opt_tail}) if $self->{opt_tail};
   foreach my $mail (@files)
   {
-    if ($mail =~ /\.gz$/) {
-      open (STDIN, "gunzip -cd $mail |") or warn "gunzip $mail failed: $@";
-    } elsif ($mail =~ /\.bz2$/) {
-      open (STDIN, "bzip2 -cd $mail |") or warn "bunzip2 $mail failed: $@";
-    } else {
-      open (STDIN, "<$mail") or warn "open $mail failed: $@";
-    }
+    open_folder($mail) or next;
 
-    # skip too-big mails
-    if (! $self->{opt_all} && -s STDIN > 250*1024) {
-      warn "Skipping message, too large (>250k)";
-      return;
-    }
-    my @msg = (<STDIN>);
+    if (! $self->{opt_all} && -s ARCFOLDER > 250*1024) { close ARCFOLDER; next; }
+    my @msg = (<ARCFOLDER>);
+    close ARCFOLDER;
 
     $self->visit_a_mail ($mail, \@msg);
   }
@@ -172,22 +157,11 @@ sub mass_check_single {
   my $self = shift;
   my $folder = shift;
 
-  if ($folder =~ /\.gz$/) {
-    open (STDIN, "gunzip -cd $folder |") or warn "gunzip $folder failed: $@";
-  } elsif ($folder =~ /\.bz2$/) {
-    open (STDIN, "bzip2 -cd $folder |") or warn "bunzip2 $folder failed: $@";
-  } elsif ($folder eq '-') {
-    # do nothing; it's on STDIN
-  } else {
-    open (STDIN, "<$folder") or warn "open $folder failed: $@";
-  }
+  open_folder($folder) or return;
 
-  # skip too-big mails
-  if (! $self->{opt_all} && -s STDIN > 250*1024) {
-    warn "Skipping message, too large (>250k)";
-    return;
-  }
-  my @msg = (<STDIN>);
+  if (! $self->{opt_all} && -s ARCFOLDER > 250*1024) { close ARCFOLDER; next; }
+  my @msg = (<ARCFOLDER>);
+  close ARCFOLDER;
 
   $self->visit_a_mail ($folder, \@msg);
 }
@@ -196,25 +170,20 @@ sub mass_check_mailbox {
   my $self = shift;
   my $folder = shift;
 
-  if ($folder =~ /\.gz$/) {
-    open (MBOX, "gunzip -cd $folder |") or warn "gunzip $folder failed: $@";
-  } elsif ($folder =~ /\.bz2$/) {
-    open (MBOX, "bzip2 -cd $folder |") or warn "bunzip2 $folder failed: $@";
-  } else {
-    open (MBOX, "<$folder") or warn "open $folder failed: $@";
-  }
-  while (<MBOX>) { /^From \S+ +... ... / and last; }
+  open_folder($folder) or return;
+
+  while (<ARCFOLDER>) { /^From \S+ +... ... / and last; }
 
   my $count = 0;
   my $host  = $ENV{'HOSTNAME'} || $ENV{'HOST'} || `hostname` || 'localhost';
 
-  while (!eof MBOX) {
+  while (!eof ARCFOLDER) {
     my @msg = ();
     my $in_header = 1;
     my $msgid = undef;
     $count++;
 
-    while (<MBOX>) {
+    while (<ARCFOLDER>) {
       if (/^$/ && $in_header) {
         $in_header = 0 ;
 
@@ -245,7 +214,45 @@ sub mass_check_mailbox {
     if ($self->{opt_fork}) { exit; }
   }
 
-  close MBOX;
+  close ARCFOLDER;
+}
+
+############################################################################
+
+sub open_folder {
+  my ($file) = @_;
+
+  $file = untaint_file_path($file);
+
+  my $expr;
+  if ($file =~ /\.gz$/) {
+    $expr = "gunzip -cd '".$file."' |";
+  }
+  elsif ($file =~ /\.bz2$/) {
+    $expr = "bzip2 -cd '".$file."' |";
+  }
+  elsif ($file eq '-') {
+    $expr = '-';		# == open STDIN
+  }
+  else {
+    $expr = '<'.$file;
+  }
+
+  if (!open (ARCFOLDER, $expr)) {
+    warn "unable to open $file: $@";
+    return 0;
+  }
+  return 1;
+}
+
+############################################################################
+
+# copied from Mail::SpamAssassin::Util
+sub untaint_file_path {
+  my ($path) = @_;
+  return unless defined($path);
+  $path =~ /^([-_A-Za-z\xA0-\xFF 0-9\.\@\=\+\,\/\\\:]+)$/;
+  return $1;
 }
 
 ############################################################################

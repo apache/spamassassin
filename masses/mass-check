@@ -31,7 +31,7 @@ use vars qw($opt_c $opt_f $opt_fork $opt_all $opt_head $opt_mh $opt_ms $opt_mn
 use FindBin;
 use lib "$FindBin::Bin/lib";
 use lib "$FindBin::Bin/../lib";
-use Mail::ArchiveIterator;
+use Mail::SpamAssassin::ArchiveIterator;
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::NoMailAudit;
 use Getopt::Long;
@@ -76,7 +76,7 @@ $spamtest = new Mail::SpamAssassin ({
 $spamtest->compile_now(1);
 $spamtest->read_scoreonly_config("$FindBin::Bin/mass-check.cf");
 
-my $iter = new Mail::ArchiveIterator ({
+my $iter = new Mail::SpamAssassin::ArchiveIterator ({
         'opt_fork' => $opt_fork,
         'opt_mh' => $opt_mh,
         'opt_single' => $opt_single,
