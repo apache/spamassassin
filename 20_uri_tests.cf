@@ -135,3 +135,5 @@ describe HTTP_77		Contains a URL-encoded hostname (HTTP77)
 uri URI_AFFILIATE		/aff\w+id=/i
 describe URI_AFFILIATE		Contains a URI with an affiliate ID code
 
+uri URI_LONG_HOSTNAME		/^https?:\/\/[a-z0-9]{25,29}\./i
+describe URI_LONG_HOSTNAME	Contains a URI with a long hostname
