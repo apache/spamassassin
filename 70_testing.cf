@@ -387,7 +387,6 @@ body T_HTML_ATTR_UNIQUE_75_100	eval:html_range('attr_unique_bad','0.75','1.0')
 # SpamAssassin local.cf for AHBL BlackList / BlockList
 # "Old blackholes.2mbit.com resurrected as AHBL (dnsbl.ahbl.org)"
 # URL: http://www.ahbl.org
-# jm 03/07/2004: looks like it's dead again.
 # 0.000   0.0000   0.0000    0.500   0.11    0.00  __RCVD_IN_AHBL
 header __RCVD_IN_AHBL eval:check_rbl('ahbl', 'dnsbl.ahbl.org.')
 describe __RCVD_IN_AHBL AHBL: sender is in DNSbl dnsbl.ahbl.org
