@@ -91,7 +91,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.115.2.6 2002/09/03 11:16:17 msquadrat Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.115.2.7 2002/09/03 16:11:40 jmason Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -424,6 +424,8 @@ sub reply_with_warning {
 
 Returns the text of the message, with any SpamAssassin-added text (such
 as the report, or X-Spam-Status headers) stripped.
+
+Note that the B<$mail> object is not modified.
 
 =cut
 

@@ -131,7 +131,7 @@ fi
 
 %files 
 %defattr(-,root,root)
-%doc README Changes TODO sample-nonspam.txt sample-spam.txt spamd/README.spamd doc
+%doc README Changes INSTALL sample-nonspam.txt sample-spam.txt spamd/README.spamd doc
 %attr(755,root,root) %{_bindir}/*
 %attr(755,root,root) %{_sysconfdir}/rc.d/init.d/spamassassin
 %config(noreplace) %{initdir}/spamassassin

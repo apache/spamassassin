@@ -36,7 +36,7 @@ package Mail::SpamAssassin::SHA1;
 require 5.002;
 use strict;
 use integer;
-no warnings "uninitialized";
+#no warnings "uninitialized";   # not good on Perl 5.005
 
 use vars qw(@ISA @EXPORT);
 require Exporter;
