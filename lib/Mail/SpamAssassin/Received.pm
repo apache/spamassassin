@@ -1,4 +1,4 @@
-# $Id: Received.pm,v 1.11 2003/04/10 21:43:14 jmason Exp $
+# $Id: Received.pm,v 1.12 2003/05/19 19:33:13 felicity Exp $
 
 # ---------------------------------------------------------------------------
 
@@ -123,16 +123,16 @@ sub parse_received_headers {
   # and rules can use it.  Note that rule_tests.t does not impl put_header,
   # so protect against that here.
   if ($self->{msg}->can ("delete_header")) {
-    $self->{msg}->delete_header ("X-SA-Relays-Trusted");
-    $self->{msg}->delete_header ("X-SA-Relays-Untrusted");
-    # $self->{msg}->delete_header ("X-SA-Relays-Semitrusted");
+    $self->{msg}->delete_header ("X-Spam-Relays-Trusted");
+    $self->{msg}->delete_header ("X-Spam-Relays-Untrusted");
+    # $self->{msg}->delete_header ("X-Spam-Relays-Semitrusted");
 
     if ($self->{msg}->can ("put_header")) {
-      $self->{msg}->put_header ("X-SA-Relays-Trusted",
+      $self->{msg}->put_header ("X-Spam-Relays-Trusted",
 				  $self->{relays_trusted_str});
-      $self->{msg}->put_header ("X-SA-Relays-Untrusted",
+      $self->{msg}->put_header ("X-Spam-Relays-Untrusted",
 				  $self->{relays_untrusted_str});
-      # $self->{msg}->put_header ("X-SA-Relays-Semitrusted",
+      # $self->{msg}->put_header ("X-Spam-Relays-Semitrusted",
 				# $self->{relays_semitrusted_str});
     }
   }
