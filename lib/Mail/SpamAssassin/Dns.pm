@@ -44,9 +44,11 @@ use vars qw{
 # from them; however we do not, so we should ignore them.
 # cf. <http://www.iana.org/assignments/ipv4-address-space>,
 #     <http://duxcw.com/faq/network/privip.htm>,
-#     <http://duxcw.com/faq/network/autoip.htm>
+#     <http://duxcw.com/faq/network/autoip.htm>,
+#     <ftp://ftp.rfc-editor.org/in-notes/rfc3330.txt>
 #
 # Last update
+#   2003-04-15 Updated - bug 1784
 #   2003-04-07 Justin Mason - removed some now-assigned nets
 #   2002-08-24 Malte S. Stretz - added 172.16/12, 169.254/16
 #   2002-08-23 Justin Mason - added 192.168/16
@@ -54,26 +56,41 @@ use vars qw{
 #              msgid:<5.1.0.14.0.20020812211512.00a33cc0@192.168.50.2>
 #
 $IP_IN_RESERVED_RANGE = qr{^(?:
-  192\.168|                        # 192.168/16:              Private Use
-  10|                              # 10/8:                    Private Use
-  172\.(?:1[6-9]|2[0-9]|3[01])|    # 172.16-172.31/16:        Private Use
-  169\.254|                        # 169.254/16:              Private Use (APIPA)
-  127|                             # 127/8:                   Private Use (localhost)
+  10|                              # 10.0.0.0/8:          Private-Use Networks (see RFC3330) 
+  127|                             # 127/8:               Loopback (see RFC3330) 
+  128\.0|                          # 128.0/16:            Reserved (subject to allocation) (see RFC3330) 
+  169\.254|                        # 169.254/16:          Link Local (APIPA) (see RFC3330) 
+  172\.(?:1[6-9]|2[0-9]|3[01])|    # 172.16-172.31/16:    Private-Use Networks (see RFC3330) 
+  191\.255|                        # 191.255/16:          Reserved (subject to allocation) (see RFC3330) 
+  192\.0\.0|                       # 192.0.0/24:          Reserved (subject to allocation) (see RFC3330) 
+  192\.0\.2|                       # 192.0.2/24:          Test-Net (see RFC3330) 
+  192\.88\.99|                     # 192.88.99/24:        6to4 Relay Anycast (see RFC3330) 
+  192\.168|                        # 192.168.0.0/16:      Private-Use Networks (see RFC3330) 
+  198\.1[89]|                      # 198.18.0.0/15:       Device Benchmark Testing (see RFC3330) 
+  223\.255\.255|                   # 223.255.255.0/24:    Reserved (subject to allocation) (see RFC3330) 
+  [01257]|                         # 0/8:                 "This" Network (see RFC3330) 
+                                   # 1-2/8, 5/8, 7/8:     IANA Reserved 
 
-  [01257]|                         # 000-002/8, 005/8, 007/8: Reserved
-  2[37]|                           # 023/8, 027/8:            Reserved
-  3[1679]|                         # 031/8, 036/8, 037/8, 039/8: Reserved
-  4[12]|                           # 041/8, 042/8:            Reserved
-  5[89]|                           # 058/8, 059/8:            Reserved
-  7[0-9]|                          # 070-079/8:               Reserved
-  8[3-9]|                          # 082
-  9[0-9]|                          #  -
-  1[01][0-9]|                      #  -
-  12[0-6]|                         # 126/8:                   Reserved
-  197|                             # 197/8:                   Reserved
-  223|                             # 223/8:                   Reserved
-  24[0-9]|                         # 240-
-  25[0-5]|                         # 255/8:                   Reserved
+  2[37]|                           # 23/8, 27/8:          IANA Reserved 
+  3[1679]|                         # 31/8, 36/8, 37/8:    IANA Reserved 
+                                   # 39/8:                Reserved (subject to allocation) (see RFC3330) 
+  4[12]|                           # 41/8, 42/8:          IANA Reserved   
+  5[89]|                           # 58/8, 59/8:          IANA Reserved   
+  7[0-9]|                          # 70-79/8:             IANA Reserved    
+  8[3-9]|                          # 83-89/8:             IANA Reserved   
+  9[0-9]|                          # 90-99/8:             IANA Reserved   
+  1[01][0-9]|                      # 100-119/8:           IANA Reserved   
+  12[0-6]|                         # 120-126/8:           IANA Reserved   
+  17[3-9]|                         # 173-179/8:           IANA Reserved   
+  18[0-7]|                         # 180-187/8:           IANA Reserved   
+  189|                             # 189/8:               IANA Reserved   
+  19[07]|                          # 190/8, 197/8:        IANA Reserved   
+  223|                             # 223/8:               IANA Reserved   
+  22[4-9]|                         # 224-229/8:           Multicast (see RFC3330)  
+  23[0-9]|                         # 230-239/8:           Multicast (see RFC3330)  
+  24[0-9]|                         # 240-249/8:           Reserved for Future Use (see RFC3330) 
+  25[0-5]                          # 250-255/8:           Reserved for Future Use (see RFC3330) 
+
 )\.}x;
 
 $IS_DNS_AVAILABLE = undef;
