@@ -1,45 +1,69 @@
 #!/usr/bin/perl -w
 
+# read the skipped scores and their previous values
 %skipped_scores = ();
-open (IN, "<freqs");
+my ($name, $base, $muta);
+open (IN, "<tmp/scores.data");
 while (<IN>) {
-  next if /^\s+OVERALL\s/;
-  @s = split;
-  if ($s[0] < 0) { $skipped_scores{$s[3]} = 1; }
+  chomp;
+  /^n(.*)$/ and $name = $1;
+  /^b(.*)$/ and $base = $1;
+  /^m(.*)$/ and $muta = $1;
+
+  if (/^\./ && defined($name)) {
+    if ($muta == 0) { $skipped_scores{$name} = $base; }
+  }
 }
+if ($muta == 0) { $skipped_scores{$name} = $base; }
 close IN;
 
+# now read the evolved scores
 my $gascores = '';
 while (<>) {
   /^score\s+(\S+)\s/ or next;
   next if (defined $skipped_scores{$1});
   next if ($1 eq '(null)');	# er, oops ;)
-
   $gascores .= $_;
 }
 
 open (IN, "<../rules/50_scores.cf");
 my $out = '';
 my $pre = '';
+
+# read until '# Start of GA-evolved scores', removing scores from our
+# new list if we come across them.
 while (<IN>) {
   if (/^\s*score\s+(\S+)\s/) {
+    delete $skipped_scores{$1};
     $gascores =~ s/^score\s+$1\s.*?\n//gm;
   }
   $pre .= $_;
   /^# Start of GA-evolved scores/ and last;
 }
 
+# now skip until '# End of GA-evolved scores'
 while (<IN>) {
   /^# End of GA-evolved scores/ and last;
 }
-$out .= $_;
+if (defined $_) {
+  $out .= $_;
+}
 
+# and read until EOF, again removing score sfrom our list as we find 'em.
 while (<IN>) {
   if (/^\s*score\s+(\S+)\s/) {
+    delete $skipped_scores{$1};
     $gascores =~ s/^score\s+$1\s.*?\n//gm;
   }
   $out .= $_;
 }
 close IN;
 
-print $pre, "\n", $gascores, "\n", $out;
+# finally, make a string of the scores that were not in either list
+my $missing = '';
+foreach my $key (sort keys %skipped_scores) {
+  $missing .= sprintf ("score %-30s %3.1f\n", $key, $skipped_scores{$key});
+}
+if ($missing ne '') { $missing = "# Missed scores:\n\n".$missing; }
+
+print $pre, "\n", $gascores, "\n", $out, "\n", $missing;

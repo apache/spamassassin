@@ -1,3 +1,4 @@
 #!/bin/sh
 
 ./logs-to-c $* && ./evolve -C > results.baseline
+head results.baseline
