@@ -16,9 +16,20 @@ RCVD_IN_RELAYS_ORBS_ORG
 RCVD_IN_RSS
 RCVD_IN_RELAYS_ORDB_ORG
 RAZOR_CHECK
+
 COPYRIGHT_CLAIMED
 SIRCAM_SIGNATURE
 USER_IN_WHITELIST
+
+UNDISC_RECIPS
+MAY_BE_FORGED
+HTML_WITH_BGCOLOR
+FORGED_RCVD_FOUND
+NO_REAL_NAME
+PLING
+PLING_PLING
+SUBJ_HAS_Q_MARK
+SUBJ_ENDS_IN_Q_MARK
   );
 
 my $threshold = 5;
@@ -27,15 +38,15 @@ my $iterlimit = 0;
 my %is_spam = ();
 my %tests_hit = ();
 
+my $scores;
+readscores();
+my $origscores = $scores;
+
 print "Reading per-message hit stat logs and scores...\n";
 my $total;
 my $totspam;
 my $totnonspam;
 readlogs();
-
-my $scores;
-readscores();
-my $origscores = $scores;
 
 print "Writing logs and current scores as C code...\n";
 
@@ -56,9 +67,16 @@ sub readlogs {
       my $hits = $1;
 
       $_ = $'; s/,,+/,/g; s/^\s+//; s/\s+$//;
-      my @tests = split (/,,*/, $_);
+      my @tests = ();
+      foreach my $tst (split (/,/, $_)) {
+	next if ($tst eq '');
+	if (!defined $scores->{$tst}) {
+	  warn "unknown test in $file, ignored: $tst\n";
+	  next;
+	}
+	push (@tests, $tst);
+      }
 
-      # $prevhits{$count} = $hits;
       $tests_hit{$count} = \@tests;
 
       if ($file eq "spam.log") {
@@ -102,7 +120,7 @@ sub writescores_c {
   print OUT "
 
 int num_scores = $size;
-unsigned char is_mutatable[$size];
+unsigned char is_mutatable[$size]; 	/* er, is_mutable I think ;) */
 float bestscores[$size];
 float scores[$size];
 char *score_names[$size];

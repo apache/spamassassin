@@ -34,6 +34,7 @@ sub get_body {
 sub replace_body {
   my ($self, $aryref) = @_;
   $self->{mail_object}->{obj}->body ($aryref);
+  undef $aryref;		# help in GC'ing
 }
 
 1;

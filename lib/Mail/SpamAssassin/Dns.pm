@@ -128,11 +128,10 @@ sub razor_lookup {
     # 'debug'	=> 1
   );
 
-  if (!eval q{
-    use Razor::Client;
-    use Razor::Signature; 
-    my $rc = new Razor::Client ($config, %options);
-    $response = $rc->check (\@msg);
+  if (!eval {
+    require Razor::Client;
+    require Razor::Signature; 
+    $response = Razor::Client->new($config, %options)->check (\@msg);
   1;})
   {
     warn ("$! $@") unless ($@ eq "timeout\n");
@@ -151,14 +150,14 @@ sub load_resolver {
   if (defined $self->{res}) { return 1; }
   $self->{no_resolver} = 1;
 
-  eval '
-    use Net::DNS;
+  eval {
+    require Net::DNS;
     $self->{res} = new Net::DNS::Resolver;
     if (defined $self->{res}) {
       $self->{no_resolver} = 0;
     }
     1;
-  ';   #  or warn "eval failed: $@ $!\n";
+  };   #  or warn "eval failed: $@ $!\n";
   dbg ("is Net::DNS::Resolver unavailable? $self->{no_resolver}");
 
   return (!$self->{no_resolver});
@@ -171,10 +170,11 @@ sub lookup_mx {
   my $ret = 0;
 
   dbg ("looking up MX for '$dom'");
-  eval '
-    if (mx ($self->{res}, $dom)) { $ret = 1; }
-    1;
-  ' or sa_die (71, "MX lookup died: $@ $!\n");
+
+  eval {
+    if (Net::DNS::mx ($self->{res}, $dom)) { $ret = 1; }
+  1; } or sa_die (71, "MX lookup died: $@ $!\n");
+
   # 71 == EX_OSERR.  MX lookups are not supposed to crash and burn!
 
   dbg ("MX for '$dom' exists? $ret");
@@ -190,6 +190,10 @@ sub is_dns_available {
   $IS_DNS_AVAILABLE = 0;
   goto done if ($self->{main}->{local_tests_only});
   goto done unless $self->load_resolver();
+
+  # TODO: retry every now and again if we get this far, but the
+  # next test fails?  could be because the ethernet cable has
+  # simply fallen out ;)
   goto done unless $self->lookup_mx ($EXISTING_DOMAIN);
 
   $IS_DNS_AVAILABLE = 1;

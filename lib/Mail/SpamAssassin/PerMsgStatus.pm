@@ -85,7 +85,7 @@ sub check {
       my $bodytext = $self->get_raw_body_text_array();
       $self->do_body_tests($bodytext);
       $self->do_body_eval_tests($bodytext);
-      $bodytext = undef;
+      undef $bodytext;
     }
 
     # do body tests with decoded portions
@@ -95,16 +95,17 @@ sub check {
 	$self->do_body_tests($decoded);
 	$self->do_body_eval_tests($decoded);
       }
-      $decoded = undef;
+      undef $decoded;
     }
 
     # and do full tests: first with entire, full, undecoded message
+    # still skip application/image attachments though
     {
       my $fulltext = join ('', $self->{msg}->get_all_headers(), "\n",
-      				@{$self->{msg}->get_body()});
+      				@{$self->get_raw_body_text_array()});
       $self->do_full_tests(\$fulltext);
       $self->do_full_eval_tests(\$fulltext);
-      $fulltext = undef;
+      undef $fulltext;
     }
 
     # then with decoded message
@@ -115,9 +116,9 @@ sub check {
 				  @{$decoded});
 	$self->do_full_tests(\$fulltext);
 	$self->do_full_eval_tests(\$fulltext);
-	$fulltext = undef;
+	undef $fulltext;
       }
-      $decoded = undef;
+      undef $decoded;
     }
 
     $self->do_head_eval_tests();
@@ -308,6 +309,8 @@ sub rewrite_as_spam {
     # while ($_ = shift @textary) { /^$/ and last; }
     # $self->{msg}->replace_body (\@textary);
 
+    undef @textary;		# please perl, GC this properly
+
     $srcmsg = $self->{main}->encapsulate_mail_object($new_msg);
 
     # delete the SpamAssassin-added headers in the target message.
@@ -341,7 +344,7 @@ sub rewrite_as_spam {
 
   my $lines = $srcmsg->get_body();
   unshift (@{$lines}, split (/$/, $self->{report}));
-  ${$lines}[0] =~ s/\n//;
+  $lines->[0] =~ s/\n//;
   $self->{msg}->replace_body ($lines);
 
   $self->{msg}->get_mail_object;
@@ -397,9 +400,18 @@ called to ensure Perl's garbage collection will clean up old status objects.
 
 sub finish {
   my ($self) = @_;
+
+  delete $self->{body_text_array};
   delete $self->{main};
   delete $self->{msg};
   delete $self->{conf};
+  delete $self->{res};
+  delete $self->{hits};
+  delete $self->{test_names_hit};
+  delete $self->{test_logs};
+  delete $self->{replacelines};
+
+  $self = { };
 }
 
 ###########################################################################
@@ -437,9 +449,8 @@ sub get_raw_body_text_array {
   my $multipart_boundary = "--$1\n";
   my $end_boundary = "--$1--\n";
 
-  my @workingbody = @{$body};
-
-  while ($_ = (shift @workingbody)) {
+  my $line = 0;
+  while (defined ($_ = $body->[$line++])) {
     push (@{$self->{body_text_array}}, $_);
 
     if (/^Content-Transfer-Encoding: /) {
@@ -451,18 +462,21 @@ sub get_raw_body_text_array {
     }
 
     if ($multipart_boundary eq $_) {
-      $_ = (shift @workingbody);
+      $_ = $body->[$line++];
       last unless defined $_;
-      next if /^Content-[Tt]ype: (?:text\/\S+|multipart\/alternative)/;
+
+      if (/^Content-[Tt]ype: (?:text\/\S+|multipart\/alternative)/) {
+	push (@{$self->{body_text_array}}, $_);
+	next;
+      }
 
       # skip this attachment, it's non-text.
-      while ($_ = (shift @workingbody)) {
+      while (defined ($_ = $body->[$line++])) {
 	if ($end_boundary eq $_) { last; }
-	if ($multipart_boundary eq $_) { unshift (@workingbody, $_); last; }
+	if ($multipart_boundary eq $_) { $line--; last; }
       }
     }
   }
-  @workingbody = ();
 
   return $self->{body_text_array};
 }
@@ -494,14 +508,14 @@ sub get_decoded_body_text_array {
 
     $_ = $self->slow_base64_decode ($_);
     # print "decoded: $_\n";
-    my @lines = split (/^/, $_);
-    return \@lines;
+    my @ary = split (/^/, $_);
+    return \@ary;
 
   } elsif ($self->{found_encoding_quoted_printable}) {
-    $_ = join ('', $textary);
+    $_ = join ('', @{$textary});
     s/\=([0-9A-Fa-f]{2})/chr(hex($1))/ge; s/\=\n/\n/;
-    my @lines = split (/^/, $_);
-    return \@lines;
+    my @ary = split (/^/, $_);
+    return \@ary;
 
   } else {
     return undef;
@@ -528,6 +542,7 @@ sub get {
 
   if ($hdrname eq 'Message-Id' && (!defined($_) || $_ eq '')) {
     $_ = join ("\n", $self->{msg}->get_header ('Message-ID'));	# news-ish
+    if ($_ eq '') { undef $_; }
   }
 
   if (!defined $_) {
@@ -623,7 +638,7 @@ sub do_head_tests {
     my ($hdrname, $testtype, $pat) = 
     		$rule =~ /^\s*(\S+)\s*(\=|\!)\~\s*(\S.*?\S)\s*$/;
 
-    if ($pat =~ s/\s+\[if-unset:\s+(.+)\]\s*$//i) { $def = $1; }
+    if ($pat =~ s/\s+\[if-unset:\s+(.+)\]\s*$//) { $def = $1; }
     $_ = $self->get ($hdrname, $def);
     s/#/[HASH]/gs;		# avoid probs with eval below
 
@@ -657,7 +672,7 @@ sub do_body_tests {
   }
 
   # generate the loop that goes through each line...
-  $evalstr = 'foreach $_ (@{$textary}) { '.$evalstr.'; }';
+  $evalstr = 'foreach $_ (@{$textary}) { study; '.$evalstr.'; }';
 
   # and run it.
   if (!eval $evalstr.'1;') {
