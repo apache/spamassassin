@@ -345,11 +345,14 @@ if ( $log_socket ne 'file' and $log_facility ne 'null' ) {
   # same is true for perl 5.6.0 build on an early version of Red Hat 7!
   # In that case we try it with INET.
   if ( $err and $log_socket ne 'inet' ) {
-    warn "connection failed: $err\n" . "trying to connect to syslog/inet...\n"
-      if $opt{'debug'};
+    if ( $opt{'debug'} ) {
+      warn "connection failed: $err\n";
+      warn "trying to connect to syslog/inet...\n";
+    }
     eval {
       defined( setlogsock('inet') ) || die $!;
-      syslog( 'debug', "%s", "spamd starting" );
+      openlog_for_spamd();
+      syslog( 'debug', "%s", "spamd starting, 2nd try" );
       syslog( 'debug', "%s", "failed to setlogsock(${log_socket}): $err" );
       syslog( 'debug', "%s",
         "falling back to inet (you might want to use --syslog-socket=inet)" );
@@ -1590,6 +1593,7 @@ sub logmsg_syslog {
       # the log handle, then try again.
       closelog();
       openlog_for_spamd();
+      syslog( 'debug', "%s", "syslog reopened" );
       syslog( 'info', "%s", $msg );
 
       # now report what happend
