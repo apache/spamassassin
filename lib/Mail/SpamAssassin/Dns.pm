@@ -300,9 +300,9 @@ sub harvest_dnsbl_queries {
   dbg("RBL: success for " . ($total - @left) . " of $total queries", "rbl", 0);
   # timeouts
   for my $query (@left) {
-    my $rules = join(",", @{$query->[RULES]});
+    my $sets = join(",", @{$query->[SETS]});
     my $delay = time - $self->{rbl_launch};
-    dbg("RBL: timeout for $rules after $delay seconds", "rbl", 0);
+    dbg("RBL: timeout for $sets after $delay seconds", "rbl", 0);
     undef $query->[BGSOCK];
   }
   # register hits
@@ -388,9 +388,8 @@ sub razor2_lookup {
       local $SIG{ALRM} = sub { die "alarm\n" };
       alarm $timeout;
 
-      my $rc =
-        Razor2::Client::Agent->new('razor-check')
-        ;                 # everything's in the module!
+      # everything's in the module!
+      my $rc = Razor2::Client::Agent->new('razor-check');
 
       if ($rc) {
         my %opt = (
@@ -499,6 +498,9 @@ sub razor2_lookup {
           warn("razor2 check skipped: $! $@");
         }
       }
+
+  # work around serious brain damage in Razor2 (constant seed)
+  srand;
 
   $self->leave_helper_run_mode();
 
