@@ -199,9 +199,9 @@ describe DOMAINS_CHEAP		Subject: domain names are cheap
 header DOMAIN_SUBJECT		Subject =~ /(?:\s(?:\.|dot\s+)(?:info|biz|name)|domain)\b.*\b(?:extension|info|regist(?:ry|ration|er)|submission)/i
 describe DOMAIN_SUBJECT		Subject: domain registration spam subject
 
-header NO_MX_FOR_FROM		eval:check_for_from_mx()
-describe NO_MX_FOR_FROM		No MX records for the From: domain
-tflags NO_MX_FOR_FROM           net
+header NO_DNS_FOR_FROM		eval:check_for_from_dns()
+describe NO_DNS_FOR_FROM	No MX or A records for the From: domain
+tflags NO_DNS_FOR_FROM          net
 
 header FROM_AND_TO_SAME		eval:check_for_from_to_same()
 describe FROM_AND_TO_SAME	From and To are the same, but not exactly
