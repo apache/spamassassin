@@ -389,13 +389,17 @@ Options:
  -r, --report                      Report message as spam
  -k, --revoke                      Revoke message as spam
  -d, --remove-markup               Remove spam reports from a message
- -C path, --configpath=path, --config-file=path	  Path to standard configuration dir
- -p prefs, --prefspath=file, --prefs-file=file    Set user preferences file
- --siteconfigpath=path             Path for site configs (def: /etc/mail/spamassassin)
+ -C path, --configpath=path, --config-file=path
+                                   Path to standard configuration dir
+ -p prefs, --prefspath=file, --prefs-file=file
+                                   Set user preferences file
+ --siteconfigpath=path             Path for site configs
+                                   (def: /etc/mail/spamassassin)
  -x, --nocreate-prefs              Don't create user preferences file
  -e, --exit-code                   Exit with a non-zero exit code if the
                                    tested message was spam
- --mbox				   read in messages from a mbox file
+ --mbox [filename]                 read in messages from a mbox file, given
+                                   by 'filename' or STDIN otherwise.
  -t, --test-mode                   Pipe message through and add extra
                                    report to the bottom
  --lint                            Lint the rule set: report syntax errors
@@ -578,9 +582,10 @@ hit, use:
 
 Disable creation of user preferences file.
 
-=item B<--mbox>
+=item B<--mbox> [filename]
 
-Specify that the input message(s) are in mbox format.
+Specify that the input message(s) are in mbox format.  If I<filename> is
+given, messages will be read in from that file.  Otherwise, STDIN is used.
 
 =back
 
