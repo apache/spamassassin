@@ -857,6 +857,7 @@ failure:
 static float
 _locale_safe_string_to_float (char *buf, int siz)
 {
+  int is_neg;
   char *cp, *dot;
   int divider;
   float ret, postdot;
@@ -865,6 +866,9 @@ _locale_safe_string_to_float (char *buf, int siz)
 
   /* ok, let's illustrate using "100.033" as an example... */
   
+  is_neg = 0;
+  if (*buf == '-') { is_neg = 1; }
+
   ret = (float) (strtol (buf, &dot, 10));
   if (dot == NULL) { return 0.0; }
   if (dot != NULL && *dot != '.') { return ret; }
@@ -890,7 +894,11 @@ _locale_safe_string_to_float (char *buf, int siz)
    * cp="", divider=1000
    */
 
-  ret += (postdot / ((float) divider));
+  if (is_neg) {
+    ret -= (postdot / ((float) divider));
+  } else {
+    ret += (postdot / ((float) divider));
+  }
   /* ex: ret == 100.033, tada! ... hopefully */
 
   return ret;
@@ -1343,3 +1351,65 @@ char           **addrp;
 	}
 	return EX_OK;
 }
+
+
+/* --------------------------------------------------------------------------- */
+
+/*
+ * Unit tests.  Must be built externally, e.g.:
+ *
+ * gcc -g -DLIBSPAMC_UNIT_TESTS spamd/spamc.c spamd/libspamc.c spamd/utils.c -o libspamctest
+ * ./libspamctest
+ *
+ */
+#ifdef LIBSPAMC_UNIT_TESTS
+
+static void
+_test_locale_safe_string_to_float_val (float input) {
+  char inputstr[99], cmpbuf1[99], cmpbuf2[99];
+  float output;
+
+  snprintf (inputstr, 99, "%f", input);
+  output = _locale_safe_string_to_float (inputstr, 99);
+  if (input == output) { return; }
+
+  /* could be a rounding error.  print as string and compare those */
+  snprintf (cmpbuf1, 98, "%f", input);
+  snprintf (cmpbuf2, 98, "%f", output);
+  if (!strcmp (cmpbuf1, cmpbuf2)) { return; }
+
+  printf ("FAIL: input=%f != output=%f\n", input, output);
+}
+
+static void
+unit_test_locale_safe_string_to_float (void) {
+  float statictestset[] = {	/* will try both +ve and -ve */
+	0.1, 0.01, 0.001, 0.0001, 0.00001, 0.000001,
+	9.1, 9.91, 9.991, 9.9991, 9.99991, 9.999991,
+	0.0		/* end of set constant */
+  };
+  float num;
+  int i;
+
+  printf ("starting unit_test_locale_safe_string_to_float\n");
+  /* tests of precision */
+  for (i = 0; statictestset[i] != 0.0; i++) {
+    _test_locale_safe_string_to_float_val (statictestset[i]);
+    _test_locale_safe_string_to_float_val (-statictestset[i]);
+    _test_locale_safe_string_to_float_val (1-statictestset[i]);
+    _test_locale_safe_string_to_float_val (1+statictestset[i]);
+  }
+  /* now exhaustive, in steps of 0.01 */
+  for (num = -1000.0; num < 1000.0; num += 0.01) {
+    _test_locale_safe_string_to_float_val (num);
+  }
+  printf ("finished unit_test_locale_safe_string_to_float\n");
+}
+
+void
+do_libspamc_unit_tests (void) {
+  unit_test_locale_safe_string_to_float();
+  exit (0);
+}
+
+#endif /* LIBSPAMC_UNIT_TESTS */

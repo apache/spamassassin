@@ -244,6 +244,11 @@ int main(int argc, char **argv){
 
   transport_init(&trans);
 
+#ifdef LIBSPAMC_UNIT_TESTS
+  /* unit test support; divert execution.  will not return */
+  do_libspamc_unit_tests();
+#endif
+
   openlog ("spamc", LOG_CONS|LOG_PID, LOG_MAIL);
   signal (SIGPIPE, SIG_IGN);
 
