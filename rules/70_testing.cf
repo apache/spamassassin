@@ -478,12 +478,6 @@ uri T_URI_DIGITS_10_AC	m%^https?://[^/?]*\d{10}%i
 
 # bug 4054: contributions from Maxime Ritter (airmax.cf)
 
-# possibly improved Yahoo! forgery rule
-# probably better to add these exemptions to the eval test
-header __GMANE_INJECTED		X-Injected-Via-Gmane =~  /http:\/\/gmane.org\//
-header __GMANE_LOOM		User-Agent =~ /^Loom/ 
-meta T_FORGED_YAHOO_RCVD	(FORGED_YAHOO_RCVD && !GMANE_INJECTED && !__GMANE_LOOM)
-
 full __ISO_VALID		/charset=\"?iso-(?:8859-\d{1,2}|2022-(?:jp|kr))\b/
 full __ISO_CHARSET_1		/charset=\"?iso-\d{4}-\d{1,2}\b/
 full __ISO_CHARSET_2		/charset=\"?iso-\S+\b/
