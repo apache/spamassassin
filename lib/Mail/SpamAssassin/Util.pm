@@ -907,7 +907,8 @@ sub uri_list_canonify {
 
       # "http://0x7f000001/"
       elsif ($host =~ /^0x[0-9a-f]+$/i) {
-        $host =~ s/^0x([0-9a-f]+)/sprintf "%d",hex($1)/gei;
+        # only take last 4 octets
+        $host =~ s/^0x[0-9a-f]*?([0-9a-f]{1,8})$/sprintf "%d",hex($1)/gei;
         push(@nuris, join ('', $proto, decode_ulong_to_ip($host), $rest));
       }
 
