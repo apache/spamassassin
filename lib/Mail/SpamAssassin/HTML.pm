@@ -30,7 +30,7 @@ my @EXPORT = qw($re_start $re_loose $re_strict get_results);
 my @EXPORT_OK = qw();
 
 use HTML::Parser 3.24 ();
-use vars qw($re_start $re_loose $re_strict);
+use vars qw($re_start $re_loose $re_strict $re_other);
 
 # elements that trigger HTML rendering in text/plain in some mail clients
 # (repeats ones listed in $re_strict)
@@ -42,6 +42,9 @@ $re_strict = 'a|abbr|acronym|address|area|b|base|bdo|big|blockquote|body|br|butt
 
 # loose list of HTML events
 my $events = 'on(?:activate|afterupdate|beforeactivate|beforecopy|beforecut|beforedeactivate|beforeeditfocus|beforepaste|beforeupdate|blur|change|click|contextmenu|controlselect|copy|cut|dblclick|deactivate|errorupdate|focus|focusin|focusout|help|keydown|keypress|keyup|load|losecapture|mousedown|mouseenter|mouseleave|mousemove|mouseout|mouseover|mouseup|mousewheel|move|moveend|movestart|paste|propertychange|readystatechange|reset|resize|resizeend|resizestart|select|submit|timeerror|unload)';
+
+# other non-standard tags
+$re_other = 'o:\w+/?|x-sigsep|x-tab';
 
 my %tested_colors;
 
@@ -146,10 +149,15 @@ sub html_render {
 sub html_tag {
   my ($self, $tag, $attr, $num) = @_;
 
-  $self->{html}{"inside_$tag"} += $num;
-
-  $self->{html}{elements}++ if $tag =~ /^(?:$re_strict|$re_loose)$/io;
+  if ($tag =~ /^(?:$re_strict|$re_loose|$re_other)$/io) {
+    $self->{html}{elements}++;
+    $self->{html}{elements_seen}++ if !exists $self->{html}{"inside_$tag"};
+  }
   $self->{html}{tags}++;
+  $self->{html}{tags_seen}++ if !exists $self->{html}{"inside_$tag"};
+
+  $self->{html}{"inside_$tag"} += $num;
+  $self->{html}{"inside_$tag"} = 0 if $self->{html}{"inside_$tag"} < 0;
 
   if ($tag =~ /^(?:body|table|tr|th|td)$/) {
     $self->html_bgcolor($tag, $attr, $num);

@@ -293,6 +293,12 @@ sub rendered {
       if (exists $self->{html_results}{total_comment_length} && $self->{html_results}{non_uri_len} > 0) {
         $self->{html_results}{total_comment_ratio} = $self->{html_results}{total_comment_length} / $self->{html_results}{non_uri_len};
       }
+      if (exists $self->{html_results}{tags}) {
+	$self->{html_results}{t_bad_tag_ratio} = ($self->{html_results}{tags} - $self->{html_results}{elements}) / $self->{html_results}{tags};
+	$self->{html_results}{t_bad_tag_count} = ($self->{html_results}{tags} - $self->{html_results}{elements});
+	$self->{html_results}{t_bad_tag_unique_ratio} = ($self->{html_results}{tags_seen} - $self->{html_results}{elements_seen}) / $self->{html_results}{tags_seen};
+	$self->{html_results}{t_bad_tag_unique_count} = ($self->{html_results}{tags_seen} - $self->{html_results}{elements_seen});
+      }
     }
     else {
       $self->{'rendered_type'} = $self->{'type'};
