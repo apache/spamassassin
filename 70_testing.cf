@@ -761,3 +761,10 @@ tflags T_S41_S9_GT_5_4 net
 tflags T_S41_S9_GT_5_5 net
 
 ########################################################################
+
+# let's see how this works
+meta T_SPF_PASS_NO_SBL          (SPF_PASS && !RCVD_IN_SBL)
+meta T_SPF_HELO_PASS_NO_SBL     (SPF_HELO_PASS && !RCVD_IN_SBL)
+tflags T_SPF_PASS_NO_SBL        net nice
+tflags T_SPF_HELO_PASS_NO_SBL   net nice
+
