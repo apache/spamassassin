@@ -34,7 +34,7 @@ if (!-r $ident) {
 
 %patterns = (
 
-q{ Listed in Razor v2 }, 'spam',
+q{ Listed in Razor2 }, 'spam',
 
 );
 
