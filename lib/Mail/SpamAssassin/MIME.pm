@@ -97,8 +97,8 @@ sub find_parts {
   if ( $self->{'type'} =~ /$re/ ) {
     push(@ret, $self);
   }
-  elsif ( $self->{'type'} =~ m@^multipart/@i ) {
-    # This object is a multipart container.  Search all children.
+  elsif ( exists $self->{'body_parts'} ) {
+    # This object is a subtree root.  Search all children.
     foreach my $parts ( @{$self->{'body_parts'}} ) {
       # Add the recursive results to our results
       push(@ret, $parts->find_parts($re));
@@ -172,28 +172,6 @@ sub add_body_part {
 
   dbg("added part, type: ".$part->{'type'});
   push @{ $self->{'body_parts'} }, $part;
-}
-
-sub body {
-  my $self = shift;
-  my $type = lc(shift);
-  return unless @{ $self->{body_parts} };
-  if ($type) {
-
-    # warn("body has ", scalar(@{ $self->{body_parts} }), " [$type]\n");
-    foreach my $body ( @{ $self->{body_parts} } ) {
-
-      # warn("type: $body->[0]\n");
-      if ( $type eq lc( $body->{type} ) ) {
-        return $body;
-      }
-    }
-  }
-  else {
-
-    # return first body part
-    return $self->{body_parts}[0];
-  }
 }
 
 sub dbg { Mail::SpamAssassin::dbg (@_); }

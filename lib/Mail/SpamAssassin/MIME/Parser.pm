@@ -45,6 +45,8 @@ This is the only public method available!
 sub parse {
   my($self,$message) = @_;
 
+  dbg("---- MIME PARSER START ----");
+
   # protect it from abuse ...
   local $_;
 
@@ -83,7 +85,12 @@ sub parse {
 
   my ($boundary);
   ($msg->{'type'}, $boundary) = Mail::SpamAssassin::Util::parse_content_type($msg->header('content-type'));
+  dbg("main message type: ".$msg->{'type'});
+
+  # Make the tree
   $self->_parse_body( $msg, $msg, $boundary, \@message, 1 );
+
+  dbg("---- MIME PARSER END ----");
 
   return $msg;
 }
@@ -131,12 +138,6 @@ sub _parse_body {
     # If it's not multipart, go ahead and just deal with it.
     $self->_parse_normal( $msg, $_msg, $boundary, $body );
   }
-
-  if ( !$msg->body() ) {
-    dbg("No message body found. Reparsing as blank.");
-    my $part_msg = Mail::SpamAssassin::MIME->new();
-    $self->_parse_normal( $msg, $part_msg, $boundary, [] );
-  }
 }
 
 =item _parse_multipart()
@@ -167,23 +168,18 @@ sub _parse_multipart {
     # Else, there's no boundary, so leave the whole part...
   }
 
-  my $part_msg =
-    Mail::SpamAssassin::MIME->new();    # just used for headers storage
+  my $part_msg = Mail::SpamAssassin::MIME->new();    # prepare a new tree node
   my $in_body = 0;
-
   my $header;
   my $part_array;
 
   my $line_count = @{$body};
   foreach ( @{$body} ) {
+    # if we're on the last body line, or we find a boundary marker, deal with the mime part
     if ( --$line_count == 0 || ($boundary && /^\-\-\Q$boundary\E/) ) {
+      my $line = $_; # remember the last line
 
-      # end of part
-      my $line = $_;
-      chomp;
-      dbg("Got end of MIME section: $_");
-
-      # per rfc 1521, the CRLF before the boundary is part of the boundary ...
+      # per rfc 1521, the CRLF before the boundary is part of the boundary:
       # NOTE: The CRLF preceding the encapsulation line is conceptually
       # attached to the boundary so that it is possible to have a part
       # that does not end with a CRLF (line break). Body parts that must
@@ -192,21 +188,24 @@ sub _parse_multipart {
       # of the preceding body part, and the second of which is part of the
       # encapsulation boundary.
       if ($part_array) {
-        chomp( $part_array->[ scalar @{$part_array} - 1 ] );
-        splice @{$part_array}, -1
-          if ( $part_array->[ scalar @{$part_array} - 1 ] eq '' );
+        chomp( $part_array->[-1] );  # trim the CRLF that's part of the boundary
+        splice @{$part_array}, -1 if ( $part_array->[-1] eq '' ); # blank line for the boundary only ...
 
         my($p_boundary);
 	($part_msg->{'type'}, $p_boundary) = Mail::SpamAssassin::Util::parse_content_type($part_msg->header('content-type'));
         $p_boundary ||= $boundary;
+	dbg("found part of type ".$part_msg->{'type'}.", boundary: ".$p_boundary);
         $self->_parse_body( $msg, $part_msg, $p_boundary, $part_array, 0 );
       }
 
       last if ($boundary && $line =~ /^\-\-\Q${boundary}\E\-\-$/);
+
+      # make sure we start with a new clean node
       $in_body  = 0;
       $part_msg = Mail::SpamAssassin::MIME->new();
       undef $part_array;
       undef $header;
+
       next;
     }
 
@@ -247,12 +246,8 @@ Generate a leaf node and add it to the parent.
 sub _parse_normal {
   my ($self, $msg, $part_msg, $boundary, $body) = @_;
 
-  dbg("parsing normal".(defined $boundary ? ", got boundary: $boundary":""));
-  delete $part_msg->{body_parts}; # single parts don't need a body_parts piece ...
-
-  dbg("decoding attachment");
+  dbg("parsing normal, decoding attachment");
   my ($type, $decoded, $name) = $self->_decode($part_msg, $body);
-  dbg("decoded $type");
 
   $part_msg->{'type'} = $type;
   $part_msg->{'decoded'} = $decoded;
@@ -266,6 +261,14 @@ sub _parse_normal {
   }
 
   $msg->add_body_part($part_msg);
+
+  # now that we've added the leaf node, let's go ahead and kill
+  # body_parts (used for sub-trees).  it could end up being recursive,
+  # and well, let's avoid that. ;)
+  #
+  # BTW: please leave this after add_body_parts() since it'll add it back.
+  #
+  delete $part_msg->{body_parts};
 }
 
 sub __decode_header {
@@ -317,15 +320,17 @@ sub _decode {
     ($filename) = ( $type =~ /name="?([^\";]+)"?/i );
   }
 
-  if ( lc( $msg->header('content-transfer-encoding') ) eq 'quoted-printable' ) {
-    dbg("decoding QP file");
+  my $encoding = lc $msg->header('content-transfer-encoding') || '';
+
+  if ( $encoding eq 'quoted-printable' ) {
+    dbg("decoding: quoted-printable");
     my @output =
       map { s/\r\n/\n/; $_; } split ( /^/m, Mail::SpamAssassin::Util::qp_decode( join ( "", @{$body} ) ) );
 
     return $type, \@output, $filename;
   }
-  elsif ( lc( $msg->header('content-transfer-encoding') ) eq 'base64' ) {
-    dbg("decoding B64 file");
+  elsif ( $encoding eq 'base64' ) {
+    dbg("decoding: base64");
 
     # Generate the decoded output
     my $output = [ Mail::SpamAssassin::Util::base64_decode(join("", @{$body})) ];
@@ -337,7 +342,12 @@ sub _decode {
   }
   else {
     # Encoding is one of 7bit, 8bit, binary or x-something
-    dbg("decoding other encoding");
+    if ( $encoding ) {
+      dbg("decoding: other encoding type ($encoding), ignoring");
+    }
+    else {
+      dbg("decoding: no encoding detected");
+    }
 
     # No encoding, so just point to the raw data ...
     return $type, $body, $filename;
