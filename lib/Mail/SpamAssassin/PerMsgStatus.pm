@@ -219,6 +219,7 @@ sub rewrite_as_spam {
 
   my $lines = $self->{msg}->get_body();
   unshift (@{$lines}, split (/$/, $self->{report}));
+  ${$lines}[0] =~ s/\n//;
   $self->{msg}->replace_body ($lines);
 
   $self->{msg}->{audit};
