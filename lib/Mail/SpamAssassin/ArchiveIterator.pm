@@ -61,7 +61,91 @@ sub run {
     die "set_functions never called";
   }
 
-  foreach my $target (@targets) {
+  if ($self->{opt_j} == 1) {
+    my $message;
+    my $class;
+    my $result;
+    my $messages;
+
+    # message-array
+    ($MESSAGES,$messages) = $self->message_array(\@targets);
+
+    while ($message = (shift @{$messages})) {
+      my ($class, undef, $date) = index_unpack($message);
+      $result = $self->run_message($message);
+      &{$self->{result_sub}}($class, $result, $date) if $result;
+    }
+  }
+  elsif ($self->{opt_j} > 1) {
+    my $select = IO::Select->new();
+
+    my $total_count = 0;
+    my $needs_restart = 0;
+    my @child = ();
+    my @pid = ();
+    my $messages;
+
+    $self->start_children($self->{opt_j}, \@child, \@pid, $select);
+
+    # message-array
+    ($MESSAGES,$messages) = $self->message_array(\@targets);
+    my $MESSAGE = $MESSAGES; # temp version for us ...  mass-check uses $MESSAGES directly.  boo.
+
+    # feed childen
+    while ($select->count()) {
+      foreach my $socket ($select->can_read()) {
+	my $result;
+	my $line;
+	while ($line = readline $socket) {
+	  if ($line =~ /^RESULT ([hs])/) {
+	    $needs_restart = 1 if ( defined $self->{opt_restart} && (++$total_count % $self->{opt_restart}) == 0 );
+	    if ( $MESSAGE && !$needs_restart ) { # we still have messages, send one to child
+	      print { $socket } (shift @{$messages}) . "\n";
+	      $MESSAGE--;
+	    }
+	    else { # no more messages, so stop listening on this child
+	      $select->remove($socket);
+	    }
+	    if ($result) {
+	      chop $result;	# need to chop the \n before RESULT
+	      &{$self->{result_sub}}($1, $result);
+	    }
+	    last;
+	  }
+	  elsif ($line eq "START\n") {
+	    if ( $MESSAGE ) { # we still have messages, send one to child
+	      print { $socket } (shift @{$messages}) . "\n";
+	      $MESSAGE--;
+	    }
+	    else { # no more messages, so stop listening on this child
+	      $select->remove($socket);
+	    }
+	    last;
+	  }
+	  $result .= $line;
+	}
+      }
+      if ( $needs_restart && $MESSAGE ) {
+	$needs_restart = 0;
+
+        #print "debug: Needs restart, $MESSAGES total, $MESSAGE left.\n";
+        $self->reap_children($self->{opt_j}, \@child, \@pid);
+	@child=();
+	@pid=();
+        $self->start_children($self->{opt_j}, \@child, \@pid, $select);
+      }
+    }
+    # reap children
+    $self->reap_children($self->{opt_j}, \@child, \@pid);
+  }
+}
+
+############################################################################
+
+sub message_array {
+  my($self, $targets) = @_;
+
+  foreach my $target (@${targets}) {
     my ($class, $format, $rawloc) = split(/:/, $target, 3);
 
     my @locations = $self->fix_globs($rawloc);
@@ -104,97 +188,59 @@ sub run {
     }
     push @messages, (splice @s), (splice @h);
   }
-  $MESSAGES = scalar(@messages);
+  return (scalar(@messages),\@messages);
+}
 
-  if ($self->{opt_j} == 1) {
-    my $message;
-    my $class;
-    my $result;
-    while ($message = (shift @messages)) {
-      my ($class, undef, $date) = index_unpack($message);
-      $result = $self->run_message($message);
-      &{$self->{result_sub}}($class, $result, $date) if $result;
-    }
-  }
-  elsif ($self->{opt_j} > 1) {
-    my $io = IO::Socket->new();
-    my $select = IO::Select->new();
-    my @child;
-    my @parent;
-    my @pid;
+sub start_children {
+  my($self, $count, $child, $pid, $socket) = @_;
 
-    # create children
-    for (my $i = 0; $i < $self->{opt_j}; $i++) {
-      ($child[$i],$parent[$i]) = $io->socketpair(AF_UNIX,SOCK_STREAM,PF_UNSPEC)
-	  or die "socketpair failed: $!";
-      if ($pid[$i] = fork) {
-	close $parent[$i];
-	$select->add($child[$i]);
-	next;
-      }
-      elsif (defined $pid[$i]) {
-	my $result;
-	my $line;
-	close $child[$i];
-	print { $parent[$i] } "START\n";
-	while ($line = readline $parent[$i]) {
-	  chomp $line;
-	  if ($line eq "exit") {
-	    print { $parent[$i] } "END\n";
-	    close $parent[$i];
-	    exit;
-	  }
-	  $result = $self->run_message($line);
-	  print { $parent[$i] } "$result\nRESULT $line\n";
-	}
-	exit;
-      }
-      else {
-	die "cannot fork: $!";
-      }
+  my $io = IO::Socket->new();
+  my $parent;
+
+  # create children
+  for (my $i = 0; $i < $count; $i++) {
+    ($child->[$i],$parent) = $io->socketpair(AF_UNIX,SOCK_STREAM,PF_UNSPEC)
+	or die "socketpair failed: $!";
+    if ($pid->[$i] = fork) {
+      close $parent;
+      $socket->add($child->[$i]);
+      #print "debug: starting new child $i (pid ",$pid->[$i],")\n";
+      next;
     }
-    # feed childen
-    while ($select->count()) {
-      foreach my $socket ($select->can_read()) {
-	my $result;
-	my $line;
-	while ($line = readline $socket) {
-	  if ($line =~ /^RESULT ([hs])/) {
-	    if ( @messages ) { # we still have messages, send one to child
-	      print { $socket } (shift @messages) . "\n";
-	    }
-	    else { # no more messages, so stop listening on this child
-	      $select->remove($socket);
-	    }
-	    if ($result) {
-	      chop $result;	# need to chop the \n before RESULT
-	      &{$self->{result_sub}}($1, $result);
-	    }
-	    last;
-	  }
-	  elsif ($line eq "START\n") {
-	    if ( @messages ) { # we still have messages, send one to child
-	      print { $socket } (shift @messages) . "\n";
-	    }
-	    else { # no more messages, so stop listening on this child
-	      $select->remove($socket);
-	    }
-	    last;
-	  }
-	  $result .= $line;
+    elsif (defined $pid->[$i]) {
+      my $result;
+      my $line;
+      close $child->[$i];
+      print { $parent } "START\n";
+      while ($line = readline $parent) {
+	chomp $line;
+	if ($line eq "exit") {
+	  print { $parent } "END\n";
+	  close $parent;
+	  exit;
 	}
+	$result = $self->run_message($line);
+	print { $parent } "$result\nRESULT $line\n";
       }
+      exit;
     }
-    # reap children
-    for (my $i = 0; $i < $self->{opt_j}; $i++) {
-      print { $child[$i] } "exit\n"; # tell the child to die.
-      my $line = readline $child[$i]; # read its END statement.
-      waitpid($pid[$i], 0); # wait for the signal ...
+    else {
+      die "cannot fork: $!";
     }
   }
 }
 
-############################################################################
+sub reap_children {
+  my($self, $count, $socket, $pid) = @_;
+
+  for (my $i = 0; $i < $count; $i++) {
+    #print "debug: killing child $i (pid ",$pid->[$i],")\n";
+    print { $socket->[$i] } "exit\n"; # tell the child to die.
+    my $line = readline $socket->[$i]; # read its END statement.
+    close $socket->[$i];
+    waitpid($pid->[$i], 0); # wait for the signal ...
+  }
+}
 
 sub mail_open {
   my ($file) = @_;
