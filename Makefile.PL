@@ -142,6 +142,22 @@ my %makefile = (
 
 # MakeMaker prior to 5.45 doesn't support PM_FILTER, so we have to implement it ourselves
 if($mm_version < 5.45) {
+warn <<ITSALLSOSTUPID;
+
+Your version of ExtUtils::MakeMaker is a pre-5.45. We need to include a
+nasty workaround to make it work with our make routines. You will get
+loads of warnings and it is very likely to break at various places.
+
+*Please* consider updating to a version later than 5.45. It's available
+on CPAN <http://search.cpan.org/search?module=ExtUtils::MakeMaker>.
+
+Hint: Perl 5.6.1 and older ship good versions of ExtUtils::MakeMaker;
+
+If anything breaks while building Mail::SpamAssassin, please file a bug
+at <http://bugzilla.spamassassin.org>.
+
+ITSALLSOSTUPID
+
   $makefile{SKIP} = [ 'pm_to_blib' ];
   $makefile{macro}{PM_FILTER} = $makefile{PM_FILTER};
   delete $makefile{PM_FILTER};
