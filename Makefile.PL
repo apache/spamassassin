@@ -225,7 +225,7 @@ FIXVARS		= -Mvars \
 		  -DPREFIX="$(INST_PREFIX)" \
 		  -DDEF_RULES_DIR="$(DEF_RULES_DIR)" \
 		  -DLOCAL_RULES_DIR="$(LOCAL_RULES_DIR)" \
-# . qq#		  -DINSTALLSITELIB="\$(INST_SITELIB)"
+		  -DINSTALLSITELIB="$(INST_SITELIB)"
 
 # . ($mm_version < 5.45 ? q#
 pm_to_blib: $(TO_INST_PM)
