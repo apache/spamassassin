@@ -595,7 +595,7 @@ sub check_for_msn_groups_headers {
   # http://www.hughes-family.org/bugzilla/show_bug.cgi?id=591
   return 0 unless $self->get('Message-Id') =~ /^<$listname-\S+\@groups\.msn\.com>/;
   return 0 unless $self->get('X-Loop') =~ /^notifications\@groups\.msn\.com/;
-  return 0 unless $self->get('Return-Path') =~ /<$listname-bounce\@groups\.msn\.com>/;
+  return 0 unless $self->get('EnvelopeFrom') =~ /<$listname-bounce\@groups\.msn\.com>/;
 
   $_ = $self->get ('Received');
   return 0 if !/from mail pickup service by groups\.msn\.com\b/;
@@ -1216,8 +1216,7 @@ sub all_from_addrs {
   # http://www.hughes-family.org/bugzilla/show_bug.cgi?id=672
   my $resent = $self->get ('Resent-From');
   if (defined $resent && $resent =~ /\S/) {
-    @addrs = $self->{main}->find_all_addrs_in_line (
-  	 $self->get ('Resent-From'));
+    @addrs = $self->{main}->find_all_addrs_in_line ($resent);
 
   } else {
     @addrs = $self->{main}->find_all_addrs_in_line
@@ -1225,8 +1224,7 @@ sub all_from_addrs {
   	 $self->get ('Envelope-Sender') .       # qmail: new-inject(1)
   	 $self->get ('Resent-Sender') .         # procmailrc manpage
   	 $self->get ('X-Envelope-From') .       # procmailrc manpage
-  	 $self->get ('Return-Path') .           # Postfix, sendmail; rfc821
-  	 $self->get ('Resent-From'));
+  	 $self->get ('EnvelopeFrom'));          # SMTP envelope
     # http://www.cs.tut.fi/~jkorpela/headers.html is useful here
   }
 

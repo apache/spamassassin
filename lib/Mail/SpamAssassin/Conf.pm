@@ -701,6 +701,9 @@ set of headers:
 	X-Envelope-From
 	From
 
+In addition, the "envelope sender" data, taken from the SMTP envelope
+data where this is available, is looked up.
+
 e.g.
 
   whitelist_from joe@example.com fred@example.com
@@ -864,6 +867,23 @@ as C<whitelist_from>.
 There are three levels of To-whitelisting, C<whitelist_to>, C<more_spam_to>
 and C<all_spam_to>.  Users in the first level may still get some spammish
 mails blocked, but users in C<all_spam_to> should never get mail blocked.
+
+The headers checked for whitelist addresses are as follows: if C<Resent-To> or
+C<Resent-Cc> are set, use those; otherwise check all addresses taken from the
+following set of headers:
+
+        To
+        Cc
+        Apparently-To
+        Delivered-To
+        Envelope-Recipients
+        Apparently-Resent-To
+        X-Envelope-To
+        Envelope-To
+        X-Delivered-To
+        X-Original-To
+        X-Rcpt-To
+        X-Real-To
 
 =item more_spam_to add@ress.com
 
