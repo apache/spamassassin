@@ -299,7 +299,7 @@ sub do_head_tests {
   my ($self) = @_;
   local ($_);
 
-  dbg ("running header regexp tests");
+  dbg ("running header regexp tests; score so far=".$self->{hits});
 
   my ($rulename, $rule);
   while (($rulename, $rule) = each %{$self->{conf}->{head_tests}}) {
@@ -327,7 +327,7 @@ sub do_body_tests {
   local ($_);
   $self->clear_test_state();
 
-  dbg ("running body-text per-line regexp tests");
+  dbg ("running body-text per-line regexp tests; score so far=".$self->{hits});
 
   # build up the eval string...
   my $evalstr = '';
@@ -354,7 +354,7 @@ sub do_full_tests {
   local ($_);
   $self->clear_test_state();
 
-  dbg ("running full-text regexp tests");
+  dbg ("running full-text regexp tests; score so far=".$self->{hits});
 
   # build up the eval string...
   my $evalstr = '';

@@ -23,7 +23,7 @@ sub new {
     'main' => shift,
   }; bless ($self, $class);
 
-  $self->{perline_body_tests} = { };
+  $self->{body_tests} = { };
   $self->{head_tests} = { };
   $self->{head_evals} = { };
   $self->{body_evals} = { };
@@ -78,7 +78,7 @@ sub parse_rules {
     if (/^body\s+(\S+)\s+(.*)$/) {
       my $name = $1; my $tst = $2;
       if ($name eq '.') { $name = ($counter++); }
-      $self->{perline_body_tests}->{$name} = $tst;
+      $self->{body_tests}->{$name} = $tst;
       $self->{scores}->{$name} ||= 1;
       next;
     }
