@@ -259,6 +259,19 @@ describe __BILL_1618    Possible mention of bill 1618 (anti-spam bill)
 meta     T_ANTISPAM_BILL  REMOVE_IN_QUOTES && __BILL_1618
 describe T_ANTISPAM_BILL  Very likely mention of anti-spam bill
 
+# bug 1308
+# somewhat less-expensive version
+header T_SUSPICIOUS_RECIPS	ToCc =~ /(@[-a-z0-9_.]{2,}).{0,64}(?:\1.{0,64}){8,}/is
+#
+# maybe replace SUSPICIOUS_RECIPS and VERY_SUSP_RECIPS
+# needs some more work and thought, but this is the right idea
+# maybe have two front-end functions (one for domains and one for usernames)
+header T_SUSPECT_RECIPIENTS_1	eval:check_for_suspect_recipients('2.5','3')
+header T_SUSPECT_RECIPIENTS_2	eval:check_for_suspect_recipients('3','4')
+header T_SUSPECT_RECIPIENTS_3	eval:check_for_suspect_recipients('4','5')
+header T_SUSPECT_RECIPIENTS_4	eval:check_for_suspect_recipients('5','6')
+header T_SUSPECT_RECIPIENTS_5	eval:check_for_suspect_recipients('6','undef')
+
 # bug 727
 # also suggested was 'be your own boss' which is already in as BE_BOSS
 body T_FIRE_BOSS         /\bfire your boss\b/i
