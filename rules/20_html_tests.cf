@@ -234,6 +234,12 @@ describe HTML_OBFUSCATE_70_80	Message is 70% to 80% HTML obfuscation
 describe HTML_OBFUSCATE_80_90	Message is 80% to 90% HTML obfuscation
 describe HTML_OBFUSCATE_90_100	Message is 90% to 100% HTML obfuscation
 
+# HTML attribute testing
+body HTML_ATTR_BAD		eval:html_range('attr_bad','0.75','1.0')
+describe HTML_ATTR_BAD		HTML has many bad attributes in tags
+body HTML_ATTR_UNIQUE		eval:html_range('attr_unique_bad','0.5','1.0')
+describe HTML_ATTR_UNIQUE	HTML appears to have random attributes in tags
+
 # many spammers seem to do this nowadays (and probably track
 # their customers with it).  (contrib: WW)
 body HTML_RELAYING_FRAME	eval:html_test('relaying_frame')
