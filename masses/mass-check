@@ -2,9 +2,9 @@
 
 use lib "../lib";
 use Mail::SpamAssassin;
+use Mail::SpamAssassin::NoMailAudit;
 
 #use Mail::Audit;
-use Mail::SpamAssassin::NoMailAudit;
 #use Devel::Peek;
 
 $cffile = '../rules/50_scores.cf';
@@ -39,28 +39,64 @@ $spamtest->compile_now();
 
 my $count = 0;
 
-foreach my $folder (@ARGV) {
-  if ($folder =~ /.tar$/)
-  {
-      # it's an MH or Cyrus folder in a tar file
-      use Archive::Tar;
-      mass_check_mh_tar_file($folder);
-  }
-  elsif (-d $folder &&
-  	(-f "$folder/1" || -f "$folder/1.gz" || -f "$folder/cyrus.index"))
-  {
-    # it's an MH folder or a Cyrus mailbox
-    mass_check_mh_folder($folder);
+mass_check_all_folders (\&wanted, @ARGV);
+exit;
 
-  } elsif (-f $folder) {
-    mass_check_mailbox($folder);
+sub wanted {
+  my ($id, $dataref) = @_;
+
+  # my $ma = Mail::Audit->new('data' => \@msg);
+  my $ma = Mail::SpamAssassin::NoMailAudit->new ('data' => $dataref);
+
+  $ma->{noexit} = 1;
+  my $status = $spamtest->check ($ma);
+  $status->rewrite_mail ();
+
+  $_ = $ma->get ("X-Spam-Status");
+  /^(\S+), hits=(\S+) required=\S+ tests=(.+)\s*$/s;
+
+  my $yorn = $status->is_spam();
+  my $hits = $status->get_hits();
+  my $tests = $status->get_names_of_tests_hit();
+  $status->finish();
+
+  undef $ma;		# clean 'em up
+  undef $status;
+
+  printf "%s %2d %s %s\n",
+		    ($yorn ? 'Y' : '.'),
+		    $hits, $id, $tests;
+
+# system ("ps alxww | grep mass-check | grep perl | grep -v grep");#JMD
+  if ($FORK) { exit; }
+}
+
+###########################################################################
+
+sub mass_check_all_folders {
+  my $sub = shift;
+
+  foreach my $folder (@_) {
+    if ($folder =~ /.tar$/)
+    {
+	# it's an MH or Cyrus folder in a tar file
+	use Archive::Tar;
+	mass_check_mh_tar_file($sub, $folder);
+    }
+    elsif (-d $folder &&
+	  (-f "$folder/1" || -f "$folder/1.gz" || -f "$folder/cyrus.index"))
+    {
+      # it's an MH folder or a Cyrus mailbox
+      mass_check_mh_folder($sub, $folder);
+
+    } elsif (-f $folder) {
+      mass_check_mailbox($sub, $folder);
+    }
   }
 }
 
-exit;
-
-
 sub mass_check_mh_tar_file {
+  my $sub = shift;
   my $filename = shift;
   my $tar = Archive::Tar->new();
   $tar->read($filename);
@@ -69,16 +105,13 @@ sub mass_check_mh_tar_file {
       next if $mail =~ m#/$# or $mail =~ /cyrus\.(index|header|cache)/;
       my $msg_data = $tar->get_content($mail);
       my @msg = split("\r\n",$tar->get_content($mail));
-
-      #my $ma = Mail::Audit->new(data => \@msg);
-      my $ma = Mail::SpamAssassin::NoMailAudit->new(data => \@msg);
-
       $mail =~ s/\s/_/g;
-      docheck ($mail, $ma);
+      &$sub ($mail, \@msg);
   }
 }
 
 sub mass_check_mh_folder {
+  my $sub = shift;
   my $folder = shift;
   my @files = <$folder/[0-9]*>;
   foreach my $mail (@files)
@@ -99,15 +132,15 @@ sub mass_check_mh_folder {
 
     # skip too-big mails
     if (-s STDIN > 250*1024) { close STDIN; next; }
+    my @msg = (<STDIN>);
+    close STDIN;
 
-    #my $ma = Mail::Audit->new();
-    my $ma = Mail::SpamAssassin::NoMailAudit->new();
-
-    docheck ($mail, $ma);
+    &$sub ($mail, \@msg);
   }
 }
 
 sub mass_check_mailbox {
+  my $sub = shift;
   my $folder = shift;
 
   if ($folder =~ /\.gz$/) {
@@ -146,42 +179,13 @@ sub mass_check_mailbox {
     $msgid = "$folder:$msgid";		# so we can find it again
     $msgid =~ s/\s/_/gs;	# make safe
 
-    # my $ma = Mail::Audit->new('data' => \@msg);
-    my $ma = Mail::SpamAssassin::NoMailAudit->new( 'data' => \@msg );
-
-    docheck ($msgid, $ma);
-
-    if ($FORK) { exit; }
+    &$sub ($msgid, \@msg);
   }
+
   close MBOX;
 }
 
-sub docheck {
-  my $id = shift;
-  my $ma = shift;
-
-  $ma->{noexit} = 1;
-  my $status = $spamtest->check ($ma);
-  $status->rewrite_mail ();
-
-  $_ = $ma->get ("X-Spam-Status");
-  /^(\S+), hits=(\S+) required=\S+ tests=(.+)\s*$/s;
-
-  my $yorn = $status->is_spam();
-  my $hits = $status->get_hits();
-  my $tests = $status->get_names_of_tests_hit();
-  $status->finish();
-
-  undef $ma;		# clean 'em up
-  undef $status;
-
-  printf "%s %2d %s %s\n",
-		    ($yorn ? 'Y' : '.'),
-		    $hits, $id, $tests;
-
-# system ("ps alxww | grep mass-check | grep perl | grep -v grep");#JMD
-}
-
+############################################################################
 
 sub find_missed {
   my $file = shift;
@@ -244,4 +248,5 @@ sub found_missed {
 
   print "$score $id $tests\n";
 }
+
 
