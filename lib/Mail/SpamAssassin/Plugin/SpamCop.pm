@@ -41,6 +41,7 @@ package Mail::SpamAssassin::Plugin::SpamCop;
 
 # Make the main dbg() accessible in our package w/o an extra function
 *dbg=\&Mail::SpamAssassin::Plugin::dbg;
+*info=\&Mail::SpamAssassin::Plugin::info;
 
 use Mail::SpamAssassin::Plugin;
 use IO::Socket;
@@ -136,11 +137,11 @@ sub plugin_report {
   if (!$self->{options}->{dont_report_to_spamcop}) {
     if ($self->spamcop_report($options)) {
       $options->{report}->{report_available} = 1;
-      dbg("reporter: spam reported to SpamCop");
+      info("reporter: spam reported to SpamCop");
       $options->{report}->{report_return} = 1;
     }
     else {
-      dbg("reporter: could not report spam to SpamCop");
+      info("reporter: could not report spam to SpamCop");
     }
   }
 }

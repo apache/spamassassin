@@ -43,6 +43,7 @@ package Mail::SpamAssassin::Plugin::DCC;
 
 # Make the main dbg() accessible in our package w/o an extra function
 *dbg=\&Mail::SpamAssassin::Plugin::dbg;
+*info=\&Mail::SpamAssassin::Plugin::info;
 
 use Mail::SpamAssassin::Plugin;
 use IO::Socket;
@@ -570,11 +571,11 @@ sub plugin_report {
     my $tmpf = $options->{report}->create_fulltext_tmpfile($options->{text});
     if ($self->dcc_report($options, $tmpf)) {
       $options->{report}->{report_available} = 1;
-      dbg("reporter: spam reported to DCC");
+      info("reporter: spam reported to DCC");
       $options->{report}->{report_return} = 1;
     }
     else {
-      dbg("reporter: could not report spam to DCC");
+      info("reporter: could not report spam to DCC");
     }
     $options->{report}->delete_fulltext_tmpfile();
   }

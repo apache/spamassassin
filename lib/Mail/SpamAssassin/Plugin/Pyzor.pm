@@ -37,6 +37,7 @@ package Mail::SpamAssassin::Plugin::Pyzor;
 
 # Make the main dbg() accessible in our package w/o an extra function
 *dbg=\&Mail::SpamAssassin::Plugin::dbg;
+*info=\&Mail::SpamAssassin::Plugin::info;
 
 use Mail::SpamAssassin::Plugin;
 use strict;
@@ -319,11 +320,11 @@ sub plugin_report {
     my $tmpf = $options->{report}->create_fulltext_tmpfile($options->{text});
     if ($self->pyzor_report($options, $tmpf)) {
       $options->{report}->{report_available} = 1;
-      dbg("reporter: spam reported to Pyzor");
+      info("reporter: spam reported to Pyzor");
       $options->{report}->{report_return} = 1;
     }
     else {
-      dbg("reporter: could not report spam to Pyzor");
+      info("reporter: could not report spam to Pyzor");
     }
     $options->{report}->delete_fulltext_tmpfile();
   }
