@@ -596,7 +596,7 @@ if ( $opt{'socketpath'} ) {
       $uid = $puid;
     }
     if ($group) {
-      my ($name,$pass,$ggid,$members) = getpwnam($group)
+      my ($name,$pass,$ggid,$members) = getgrnam($group)
                             or die "$group not in group database\n";
       $gid = $ggid;
     }
