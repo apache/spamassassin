@@ -101,7 +101,9 @@ use constant LOCALHOST => qr/
 		      127\.0\.0\.1 \b
 		    |
 		      # pure-IPv6 address
-		      (?<!:)
+		      (?:IPv6:    # with optional prefix
+                        | (?<!:)
+                      )
 		      (?:0{0,4}\:){0,7} 1 
 		    )
 		  /oxi;
@@ -138,7 +140,9 @@ use constant IP_ADDRESS => qr/
 		    |
 		      # a pure-IPv6 address
 		      # don't use \b here, it hits on :'s
-		      (?<!:)
+		      (?:IPv6:    # with optional prefix
+                        | (?<!:)
+                      )
 		      (?:[a-f0-9]{0,4}\:){0,7} [a-f0-9]{0,4}
 		    )
 		  /oxi;
