@@ -128,8 +128,6 @@ tflags SUBJECT_MONTH_2		nice
 header FROM_EGROUPS             X-eGroups-Return =~ /^sentto-.*\@returns.groups.yahoo.com$/
 describe FROM_EGROUPS           Appears to be from yahoo groups
 tflags FROM_EGROUPS		nice
-test FROM_EGROUPS  ok           sentto-2537484-52529-1020428367-Sxm=olswang.com@returns.groups.yahoo.com
-test FROM_EGROUPS  fail         spammer@returns.groups.yahoo.com
 
 # thanks Rod, these work better
 header FWD_MSG                  Subject =~ /Fwd:\s/
