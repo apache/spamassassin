@@ -14,7 +14,7 @@
 #
 ###########################################################################
 
-lang es body REMOVE_ES_01             /(?:Para (?:no|dejar de)|[sS]i (?:U(?:ste)?d\. )?no (?:deseas?|qui?er[ée]s)) (?:seguir )?reci[vb]i(?:r|endo) (?:en el futuro )?(?:ninguna otra|m.s|nuestr[ao]s?|est[ao]s?)?\s?(?:correos?|mensajes?|publicidad|informaci.n|ofertas?|(?:promoci.n|bolet.n)(?:es)?|(?:e-?)?mails? promocional(?:es)?|avisos)/i
+lang es body REMOVE_ES_01             /(?:Para (?:no|dejar de)|[sS]i (?:U(?:ste)?d\. )?no (?:deseas?|qui?er[ée]s)) (?:seguir )?reci[vb]i(?:r|endo) (?:en el futuro |m.s )?(?:ninguna otra|nuestr[ao]s?|est[ao]s?)?\s?(?:correos?|mensajes?|publicidad|informaci.n|ofertas?|(?:promoci.n|bolet.n)(?:es)?|(?:e-?)?mails? promocional(?:es)?|avisos)/i
 lang es describe REMOVE_ES_01         Claims you can be removed in Spanish
 
 lang es body REMOVE_ES_02             /(?:Para ser (?:elimina|removi)do|Si quieres? salir|Para eliminarse) del? (?:nuestra|esta|mailing) ?lista?,? (?:sera removido|responda el mail|solo tienes? que marcar|enviar un ?e-?mail)/i
@@ -64,7 +64,7 @@ lang es describe DEJAR_DE_FUMAR_ES	Para dejar de fumar
 
 ## This ones most likelly will appear only in spanish mails
 #
-lang es body GRATIS_ES			/(?:llame|totalmente|TOTALMENTE|ABSOLUTAMENTE|ES).{1,14}GRATIS/
+lang es body GRATIS_ES			/(?:llame|totalmente|TOTALMENTE|ABSOLUTAMENTE|ES).{1,14}GRAT(?:UITO|IS)/
 lang es describe GRATIS_ES		NOS CHILLAN PARA DECIR QUE ES GRATIS
 lang es score GRATIS_ES	1.4
 
@@ -99,7 +99,7 @@ lang es describe ALTA_BUSCADORES_ES	Alta en buscadores hispanos.
 lang es body EXCLAMACION_ES		/COMPRE|PROMOCI[OÓ]N|REALMENTE|INFORMESE|(?:CONTACTE|VISIT|RESPOND|ENVI|PID|COMPR|SOLICIT|CONSULT|ESCRIB|LLAM)[AE](?:NOS)?|OFERTAS/
 lang es describe EXCLAMACION_ES		IMPERATIVOS/EXCLAMACIONES EN MAYUSCULAS.
 
-lang es body PRESENTAMOS_ES		/[tl]e (?:ofrece|presenta|informa|informare)mos/i
+lang es body PRESENTAMOS_ES		/[tl]e (?:ofrece|presenta|informa(?:re)?)mos/i
 lang es describe PRESENTAMOS_ES		Presentación de un nuevo producto.
 
 lang es body CONTRA_REEMBOLSO_ES	/(?:envios|pago) contra[r -]?reembolso/i
@@ -123,7 +123,7 @@ lang es describe GANADORES_ES_02	Ha sido ganador.
 lang es body PORNO_GRATIS_ES		/porno .{3,5} gratis/i
 lang es describe PORNO_GRATIS_ES	Porno gratis.
 
-lang es body MAS_INFORMACION_ES		/(?:si qu?ier[ée]s|para) (?:m.s|mayor) informaci.n/i
+lang es body MAS_INFORMACION_ES		/(?:si qu?ier[ée]s|para) (?:solicitar )?(?:m.s|mayor) informaci.n/i
 lang es describe MAS_INFORMACION_ES	Mas informacion.
 
 lang es body INFORMACION_RESERVA_ES	/Informaci.n y reserva/i
