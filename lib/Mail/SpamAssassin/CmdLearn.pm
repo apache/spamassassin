@@ -65,6 +65,10 @@ sub cmdline_run {
     print "SpamAssassin version " . Mail::SpamAssassin::Version() . "\n";
     exit 0;
   }
+
+  if ($opt{'force-expire'}) {
+    $rebuildonly=1;
+  }
   if ( !defined $isspam && !defined $rebuildonly && !defined $forget ) {
     usage(0, "Please select either --spam, --ham, --forget, or --rebuild");
   }

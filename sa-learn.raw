@@ -60,8 +60,8 @@ Options:
  --ham				   Learn messages as ham (non-spam)
  --spam				   Learn messages as spam
  --forget			   Forget a message
- --rebuild			   Rebuild the database
- --force-expire			   With --rebuild, force an expiry run
+ --rebuild			   Rebuild the database if needed
+ --force-expire			   Force an expiry run, rebuild every time
  -f file, --folders=file           Read list of files/directories from file
  --dir                             Learn a directory of RFC 822 files
  --file                            Learn a file in RFC 822 format
@@ -304,7 +304,7 @@ a busy server.
 
 =item B<--force-expire>
 
-Forces an expiry run when specified with B<--rebuild>.
+Forces an expiry run, regardless of whether it may be necessary or not.
 
 =item B<--forget>
 

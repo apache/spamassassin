@@ -17,6 +17,9 @@ use Fcntl;
 
 use Time::Local;
 
+BEGIN { @AnyDBM_File::ISA = qw(DB_File GDBM_File NDBM_File SDBM_File); }
+use AnyDBM_File;
+
 use vars qw{
   $IP_ADDRESS
   $CCTLDS_WITH_LOTS_OF_OPEN_RELAYS
