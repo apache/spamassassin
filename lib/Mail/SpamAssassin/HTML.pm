@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.12 2002/09/24 16:59:44 jmason Exp $
+# $Id: HTML.pm,v 1.13 2002/09/24 17:12:58 jmason Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -43,16 +43,6 @@ sub html_uri {
   }
   elsif ($tag =~ /^(?:img|frame|iframe|embed|script)$/) {
     push @{$self->{html_text}}, "URI:$uri " if $uri = $attr->{src};
-    if (defined ($attr->{alt}) && $attr->{alt} ne '') {
-      $self->{html}{alt_tags} = 1;
-    }
-    if (defined($attr->{height}) && defined($attr->{width})) {
-      my $h = $attr->{height};        # can return "HEIGHT" if no value!
-      my $w = $attr->{width};
-      if ($h =~ /^\d$/ && $w =~ /^\d$/ && $h + $w < 10) {
-        $self->{html}{spacer_images} = 1;
-      }
-    }
   }
   elsif ($tag =~ /^(?:body|table|tr|td)$/) {
     push @{$self->{html_text}}, "URI:$uri " if $uri = $attr->{background};
