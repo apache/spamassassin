@@ -574,7 +574,7 @@ describe X_ORIG_IP_NOT_IPV4	X-Originating-IP doesn't look like IPv4 address
 # match the format of a legit X-Auth-Warning header, and hit on fake ones
 # normal: "e4e.oac.uci.edu: foo owned process doing -bs"
 # fake: "bzgrdag, upaeqehv"
-header X_AUTH_WARN_FAKED	X-Authentication-Warning !~ /^(\S+\.\S+): / [if-unset: host.example.net: foo owned process doing -bs]
+header X_AUTH_WARN_FAKED	X-Authentication-Warning !~ /(?:set sender to \S{2,80} using -f|owned process doing -bs|claimed to be|didn.t use HELO protocol)/ [if-unset: host.example.com: foo owned process doing -bs]
 describe X_AUTH_WARN_FAKED	X-Authentication-Warning header looks faked
 
 # host no longer exists according to administrator
