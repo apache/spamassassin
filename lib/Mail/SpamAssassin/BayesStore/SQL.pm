@@ -825,12 +825,12 @@ sub tok_get_all {
   my $results_index = 0;
   my $bunch_end;
 
-  my $multi_sql = "SELECT token, spam_count, ham_count, atime
+  my $multi_sql = "SELECT RPAD(token,5,' '), spam_count, ham_count, atime
                      FROM bayes_token
                     WHERE id = ?
                       AND token IN ";
 
-  my $single_sql = "SELECT token, spam_count, ham_count, atime
+  my $single_sql = "SELECT RPAD(token,5,' '), spam_count, ham_count, atime
                       FROM bayes_token
                      WHERE id = ?
                        AND token = ?";
@@ -1293,7 +1293,7 @@ sub backup_database {
   print "v\t$num_spam\tnum_spam\n";
   print "v\t$num_ham\tnum_nonspam\n";
 
-  my $token_sql = "SELECT spam_count, ham_count, atime, token
+  my $token_sql = "SELECT spam_count, ham_count, atime, RPAD(token,5,' ')
                      FROM bayes_token
                     WHERE id = ?
                       AND (spam_count > 0 OR ham_count > 0)";
