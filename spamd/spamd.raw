@@ -779,7 +779,7 @@ sub check {
 	$mail = $status->rewrite_mail; #if $status->is_spam;
 
         # Build the message to send back and measure it
-        my $msg_resp = $mail->as_string();
+        my $msg_resp = $mail->get_pristine();
         my $msg_resp_length = length($msg_resp);
         if($version >= 1.3) # Spamc protocol 1.3 means multi hdrs are OK
         {
