@@ -16,7 +16,6 @@ use constant BIG_LINES => BIG_BYTES/65;	# 65 bytes/line is a good approximation
 
 my $no;
 my $tz;
-#my $MESSAGES;
 
 BEGIN {
   $no = 1;
