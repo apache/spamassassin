@@ -875,8 +875,8 @@ score RCVD_IN_BL_SPAMCOP_NET	     0.0
 # Compensation for common false positives.
 
 score BALANCE_FOR_LONG		    -2.0
-score USER_IN_WHITELIST		    -5.0
 score COPYRIGHT_CLAIMED		    -2.0
+score USER_IN_WHITELIST		    -100.0
 
 ###########################################################################
 # Some not-quite-spam scores; block common virii with these.  (it's feature
