@@ -1,9 +1,10 @@
-require 5.005;
+require 5.6.1;
 
 use strict;
+use warnings;
 use Config;
 
-use ExtUtils::MakeMaker;
+use ExtUtils::MakeMaker 5.45;
 
 use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/oi);
 
@@ -49,11 +50,11 @@ my @ATT_KEYS = (
   'INSTALLSITECONF',  #
   'INSTALLVENDORCONF',#
 
-  'DEFRULESDIR',      # A synonyme for 'DATADIR'.
-  'LOCALRULESDIR',    # " "        "   'CONFDIR'.
+  'DEFRULESDIR',      # A synonym for 'DATADIR'.
+  'LOCALRULESDIR',    # " "       "   'CONFDIR'.
 
   'PERL_BIN',         # Sets the Perl interpreter used by the scripts.
-  'PERL_VERSION',     # Some parts in SpamAssassin are dependant on the version
+  'PERL_VERSION',     # Some parts in SpamAssassin were dependant on the version
   'PERL_WARN',        # Can be used to disable warnings in the scripts
   'PERL_TAINT',       # "   "  "    "  "    taint mode for the scripts (DON'T)
 
@@ -118,25 +119,25 @@ ARGV: foreach (@ARGV) {
 
 
 # Gather some information about what EU::MM offers and/or needs
-my($mm_version, $mm_has_destdir, $mm_has_good_destdir, $mm_needs_destdir, $mm_has_pm_filter);
+my(
+  $mm_version,
+  $mm_knows_destdir,
+  $mm_has_destdir,
+  $mm_has_good_destdir,
+  $mm_needs_destdir,
+);
 
 # Store the version for later use
 $mm_version          = $ExtUtils::MakeMaker::VERSION;
 
 # MakeMaker prior to 6.11 doesn't support DESTDIR which is needed for
 # packaging with builddir!=destdir. See bug 2388.
-$mm_has_destdir      = $ExtUtils::MakeMaker::Recognized_Att_Keys{DESTDIR};
+$mm_knows_destdir    = $ExtUtils::MakeMaker::Recognized_Att_Keys{DESTDIR};
 $mm_has_good_destdir = $mm_version >= 6.11;
 # Add DESTDIR hack only if it's requested (and necessary)
 $mm_needs_destdir    = $opt{'destdir'} && !$mm_has_destdir;
-$mm_has_destdir    ||= $mm_needs_destdir;
-push(@ATT_KEYS, 'DESTDIR') if $mm_has_destdir;
-
-# MakeMaker prior to 5.46 doesn't support PM_FILTER, so we have to
-# implement it ourselves. Also bear in mind that MakeMaker (5.45) from
-# Perl 5.6.1 supports that option while the one from 5.6.0 doesn't; they
-# do have the same version though! See bug 1652.
-$mm_has_pm_filter    = $mm_version >  5.45 || ($mm_version == 5.45 && $] > 5.006);
+$mm_has_destdir      = $mm_knows_destdir || $mm_needs_destdir;
+push(@ATT_KEYS, 'DESTDIR') if $mm_needs_destdir;
 
 # Now make EU::MM understand our extended vars
 foreach my $key (@ATT_KEYS) {
@@ -145,8 +146,8 @@ foreach my $key (@ATT_KEYS) {
 
 
 # Gather the rules files in the range 00-69; we do this in perl because it's more portable
-my @rulesfiles = map { s,^rules/,,; $_ } (<rules/*.cf>);
-my $rulesfiles = join(' ', (grep { /^[0-6][0-9]_/ } @rulesfiles), qw(user_prefs.template triplets.txt languages));
+my @datafiles = map { s,^rules/,,; $_ } (<rules/*.cf>);
+my $datafiles = join(' ', (grep { /^[0-6][0-9]_/ } @datafiles), qw(user_prefs.template triplets.txt languages));
 
 # Only build spamd and spamc on non-Windows platforms
 my @SPAMD_EXE_FILES = ();
@@ -161,53 +162,53 @@ my %makefile = (
     'VERSION_FROM' => 'lib/Mail/SpamAssassin.pm', # finds $VERSION
 
     'EXE_FILES'	=> [
-			'spamassassin', 'sa-learn',
-			@SPAMD_EXE_FILES
-		],
+        'spamassassin', 'sa-learn',
+        @SPAMD_EXE_FILES
+    ],
 
     'MAN1PODS' => {
-	'spamassassin'    => '$(INST_MAN1DIR)/spamassassin.$(MAN1EXT)',
-	'sa-learn'        => '$(INST_MAN1DIR)/sa-learn.$(MAN1EXT)',
-	'spamd/spamc.pod' => '$(INST_MAN1DIR)/spamc.$(MAN1EXT)',
-	'spamd/spamd'     => '$(INST_MAN1DIR)/spamd.$(MAN1EXT)',
+        'spamassassin'    => '$(INST_MAN1DIR)/spamassassin.$(MAN1EXT)',
+        'sa-learn'        => '$(INST_MAN1DIR)/sa-learn.$(MAN1EXT)',
+        'spamd/spamc.pod' => '$(INST_MAN1DIR)/spamc.$(MAN1EXT)',
+        'spamd/spamd'     => '$(INST_MAN1DIR)/spamd.$(MAN1EXT)',
     },
 
     'PL_FILES' => { },
 
     'PMLIBDIRS' => [ 'lib' ],
 
-    'PM_FILTER' => '$(PERL) build/preprocessor -Mconditional $(FIXBYTES) -Mvars -DVERSION="$(VERSION)" -DPREFIX="$(I_PREFIX)"',
+    'PM_FILTER' => '$(PREPROCESS) -Mconditional -Mvars -DVERSION="$(VERSION)" -DPREFIX="$(I_PREFIX)"',
 
     'macro' => {
-	RULES => $rulesfiles,
+        DATAFILES => $datafiles,
     },
 
     # be quite explicit about this; afaik CPAN.pm is sensible using this
     'PREREQ_PM' => {
-	'ExtUtils::MakeMaker' => 5.45 *0, # we have compatibility code in build/preprocessor.pm
-	'File::Spec'    => 0.8,           # older versions lack some routines we need
-	'File::Copy'    => 2.02,          # this version is shipped with 5.005_03, the oldest version known to work
-	'Pod::Usage'    => 1.10,          # all versions prior to this do seem to be buggy
-	'HTML::Parser'  => 3.24,          # the HTML code is based on this parser
-	'Text::Wrap'    => 98.112902,     # this version is shipped with 5.005_03, the oldest version known to work
-	'Sys::Hostname' => 0,
-	'Time::Local'   => 0,
-	'Errno'         => 0,
+        'File::Spec'    => 0.8,           # older versions lack some routines we need
+        'File::Copy'    => 2.02,          # this version is shipped with 5.005_03, the oldest version known to work
+        'Pod::Usage'    => 1.10,          # all versions prior to this do seem to be buggy
+        'HTML::Parser'  => 3.24,          # the HTML code is based on this parser
+        'Text::Wrap'    => 98.112902,     # this version is shipped with 5.005_03, the oldest version known to work
+        'Sys::Hostname' => 0,
+        'Time::Local'   => 0,
+        'Errno'         => 0,
     },
 
     'dist' => {
-		COMPRESS => 'gzip -9f', SUFFIX => 'gz',
-		DIST_DEFAULT => 'tardist'
-	      },
+        COMPRESS => 'gzip -9f',
+        SUFFIX => 'gz',
+        DIST_DEFAULT => 'tardist'
+    },
 
     'clean' => { FILES =>
-	'pod2htm* spamassassin sa-learn '.
-	'spamd/spamc$(EXE_EXT) spamd/libspamc.so spamd/spamd doc '.
-	'spamd/libsslspamc.so '.
-	'spamd/binaries.mk spamd/config.h spamd/config.status '.
-	'spamd/config.cache spamd/config.log '.
-	'spamd/autom4te.cache qmail/qmail-spamc'.
-	't/do_net t/log'
+        'pod2htm* spamassassin sa-learn '.
+        'spamd/spamc$(EXE_EXT) spamd/libspamc.so spamd/spamd doc '.
+        'spamd/libsslspamc.so '.
+        'spamd/binaries.mk spamd/config.h spamd/config.status '.
+        'spamd/config.cache spamd/config.log '.
+        'spamd/autom4te.cache qmail/qmail-spamc'.
+        't/do_net t/log'
     },
 
     'AUTHOR'   => 'Justin Mason <jm@jmason.org>',
@@ -283,31 +284,6 @@ elsif ($opt{'destdir'} and !$mm_has_good_destdir) {
 DESTDIR_BUG
   $error =~ s/^ {4}//gm;
   warn $error;
-}
-
-
-if (!$mm_has_pm_filter) {
-  my $error = <<ANCIENT_VERSION;
-
-    ***********************************************************************
-    Your version of ExtUtils::MakeMaker does not support PM_FILTER.
-    The \"make\" process will almost certainly have many warnings and it is
-    very likely to fail.
-
-    You can use either the CPAN shell or go to
-      <http://search.cpan.org/search?module=ExtUtils::MakeMaker>
-    to get an up-to-date version.
-
-    Perl 5.6.1 and later versions also include recent versions by default.
-    ***********************************************************************
-
-ANCIENT_VERSION
-  $error =~ s/^ {4}//gm;
-  warn $error;
-
-  $makefile{SKIP} = [ 'pm_to_blib' ];
-  $makefile{macro}{PM_FILTER} = $makefile{PM_FILTER};
-  delete $makefile{PM_FILTER};
 }
 
 
@@ -801,6 +777,16 @@ sub MY::constants {
       }
     }
 
+    if (line_has_macro_def($line, 'MM_VERSION')) {
+      # These macros are just for debugging purposes.
+      $line = join("\n", $line,
+         macro_def(MM_HAS_DESTDIR      => ::yesno($mm_has_destdir)),
+         macro_def(MM_HAS_GOOD_DESTDIR => ::yesno($mm_has_good_destdir)),
+         macro_def(MM_KNOWS_DESTDIR    => ::yesno($mm_knows_destdir)),
+         macro_def(MM_NEEDS_DESTDIR    => ::yesno($mm_needs_destdir)),
+       );
+    }
+
     # Add DESTDIR support if necessary
     if ($mm_needs_destdir) {
       if (line_has_macro_def($line, 'INSTALLDIRS')) {
@@ -903,9 +889,6 @@ FIXVARS		= -Mvars \
 		  -DINSTALLSITELIB="$(I_LIBDIR)" \
 		  -DCONTACT_ADDRESS="$(CONTACT_ADDRESS)"
 
-FIXBYTES	= -Mbytes \
-		  -DPERL_VERSION="$(PERL_VERSION)"
-
 FIXBANG		= -Msharpbang \
 		  -DPERL_BIN="$(PERL_BIN)" \
 		  -DPERL_WARN="$(PERL_WARN)" \
@@ -913,19 +896,6 @@ FIXBANG		= -Msharpbang \
 
 SPAMC_SOURCES	= spamd/spamc.c spamd/libspamc.c spamd/utils.c qmail/qmail-spamc.c
 
-  EOD
-
-  if (!$mm_has_pm_filter) {
-    $code .= <<'    EOD';
-pm_to_blib: $(TO_INST_PM)
-	@ $(PERL) "-I$(INST_ARCHLIB)" "-I$(INST_LIB)" \
-	"-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" -Ibuild \
-	-MExtUtils::Install -Mpreprocessor \
-	-e "ExtUtils::Install::Post545::pm_to_blib({qw{$(PM_TO_BLIB)}}, '$(INST_LIB)/auto', '$(PM_FILTER)')"
-    EOD
-  }
-
-  $code .= <<'  EOD';
 
 spamassassin: spamassassin.raw
 	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -i$? -o$@
@@ -965,7 +935,7 @@ conf__install:
 data__install:
 	-$(MKPATH) $(B_DATADIR)
 	$(PERL) -e "map unlink, <$(B_DATADIR)/*>"
-	$(PREPROCESS) $(FIXVARS) -m$(PERM_RW) -Irules -O$(B_DATADIR) $(RULES)
+	$(PREPROCESS) $(FIXVARS) -m$(PERM_RW) -Irules -O$(B_DATADIR) $(DATAFILES)
 	$(CHMOD) $(PERM_RWX) $(B_DATADIR)
 
 text_html_doc: made-doc-stamp

@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 # This script isn't supposed to be run by hand, it's used by `make` as a pre-
 # processor. It currently accepts these options on the command line:
 #
@@ -27,17 +27,13 @@
 #                        by double at-signs, eg. @@VERSION@@. The values are
 #                        taken from the environment and can be overwritten with
 #                        the -D switch. Empty/undefined variables are removed.
-#   bytes                comments out each "use bytes" from the code if the 
-#                        code is built with Perl < 5.6.1. Ths pragma is used to 
-#                        force byte semantics rather than character semantics 
-#                        to work around Unicode bugs in Perl 5.8.0.
-#                        Uses PERL_VERSION (Watch out: You have to define old
-#                        Perls via eg. PERL_VERSION=5.5.30 (5.005_03))
 #   sharpbang            Does some sharpbang (#!) replacement. Uses PERL_BIN and
 #                        PERL_WARN.
 
 
 use strict;
+use warnings;
+
 use Config;
 use File::Spec;
 
@@ -51,9 +47,12 @@ my $indir;
 my $outdir;
 my $mode;
 
+
+# Each environment variable counts as an own defined var for us.
 foreach (keys %ENV) {
   $defines{$_} = $ENV{$_};
 }
+
 
 foreach (@ARGV) {
   if    (/^-M([a-z]+)$/)       { $modules{$1} = 1; }
@@ -69,7 +68,7 @@ foreach (@ARGV) {
 
 # On Windows, we get -m without an arg.  avoid problems with that
 # by just ignoring that switch.
-if (defined($mode) && $mode eq '0') { undef $mode; }
+$mode = undef unless $mode;
 
 my $l = 1;
 my $fname;
@@ -80,11 +79,9 @@ if (defined ($indir) && defined ($outdir) && scalar @infiles > 0) {
     do_file ($in, $out);
   }
 }
-
 elsif (defined ($infile) && defined($outfile)) {
   do_file ($infile, $outfile);
 }
-
 else {
   # just do STDIN/STDOUT . Not recommended for portability as
   # it requires "<" and ">" for Makefile to do its work.
@@ -110,8 +107,8 @@ sub read_defs {
 
 sub do_file {
   my ($in, $out) = @_;
-  open (STDIN, "<$in") or die "Cannot open $in: $!";
-  open (OUT, ">$out") or die "Cannot open $out: $!";
+  open (STDIN, "<$in")  or die "Cannot open $in: $!";
+  open (OUT,   ">$out") or die "Cannot open $out: $!";
   select OUT;
   do_stdin();
   close STDIN; close OUT;
@@ -139,7 +136,7 @@ sub do_stdin {
   }
 
   # Taint mode is enabled per default except on 5.005
-  my $perl_taint = (($] < 5.006) ? '' : ' -T');
+  my $perl_taint = ' -T';
   # The taint mode can be disabled with -DPERL_TAINT=<yes|no>
   if ($defines{'PERL_TAINT'} and $defines{'PERL_TAINT'} eq 'no') {
     $perl_taint = '';
@@ -167,14 +164,6 @@ sub do_stdin {
     if ($modules{'vars'}) {
       # Replace all @@VARS@@
       s/\@\@([A-Z][A-Z0-9_]*)\@\@/$defines{$1}/g;
-    }
-
-    # Comment out use bytes for old Perls
-    if ($modules{'bytes'} && ($perl_version < 5.006)) {
-      if(/^[^#]*\buse\s+bytes\b/) {
-        s/^(\s*)/$1#/;
-        s/$/\t##REMOVED_ON_BUILD##/;
-      }
     }
 
     # Sharpbang (#!) replacement (see also ExtUtils::MY->fixin)

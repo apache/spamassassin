@@ -57,10 +57,8 @@ ExtUtils::MakeMaker. So we had to extend its logic quite a bit. And to
 make it worse did the internal logic change extremely between the 5.x
 and 6.x series, especially for packaging stuff. We had to "backport"
 (ie. hack into) some of the functionality ExtUtils::MakeMaker 6.11 and
-later offers. It's obvious how error-prone this is. So throughout
-this text you'll find some recommendations for versions you should use;
-you should definitely use version 5.45 or later, recommended is 6.16
-and later.
+later offers. It's obvious how error-prone this is. So the recommended
+version of ExtUtils::MakeMaker is 6.16 or later.
 
 The following ressources might help understanding this stuff:
 [MANEUMM616], [MM00779], [P5P94113].
@@ -224,15 +222,16 @@ CONTACT_ADDRESS:
     The user can find some information on the page http://example.com/tag/:
     	perl Makefile.PL CONTACT_ADDRESS="http://example.com/tag/"
 
-RUN_RAZOR_TESTS:
-  Vipul's Razor is an optional module. If that module is found to be installed
-  some special tests can be performed when 'make test' is run. The builder is
-  asked if he wants to do so. Default is "no" (because those tests can fail if
-  there are problems with the network connection or the servers).
+RUN_NET_TESTS:
+  Vipul's Razor and Net::DNS are optional modules. If one of those modules is
+  found to be installed, some special tests can be performed when 'make test'
+  is run. The builder is asked if he wants to do so. Default is "no" (because
+  those tests can fail if there are problems with the network connection or
+  the servers).
 
   Sample:
     Run only the Razor tests:
-	perl Makefile.PL RUN_RAZOR_TESTS=yes < /dev/null
+	perl Makefile.PL RUN_NET_TESTS=yes < /dev/null
 	make test TEST_FILES="t/razor*.t"
 
 
@@ -262,12 +261,9 @@ PERL_VERSION:
   for its version. If that fails, the version of the perl which called
   Makefile.PL is used. Sometimes one might have to correct this.
 
-  ATTENTION: The version always has to be given in the three-component style.
-  So the floating-point representation of old Perls has to be "converted".
-
   Sample:
-    Building with Perl 5.8.0 for Perl 5.005_03:
-    	perl-5.8.0 Makefile.PL PERL_VERSION=5.5.30
+    Building with Perl 5.8.0 for Perl 5.6.2:
+    	perl-5.8.0 Makefile.PL PERL_VERSION=5.6.2
 
 
 Building with another ExtUtils::MakeMaker

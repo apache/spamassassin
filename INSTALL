@@ -215,30 +215,19 @@ lose incoming email.
 Required Modules
 ----------------
 
-These modules are required for spamassassin to build:
+These modules are required for SpamAssassin to build:
 
-  - ExtUtils::MakeMaker >= 5.45 (from CPAN, or included in Perl 5.6 and
-                                 higher)
+  - ExtUtils::MakeMaker >= 5.45 (included in Perl 5.6.1 and later)
 
     The ExtUtils::MakeMaker module is required in version 5.45 or later.
     Without the proper version the build will fail to create the Makefile.
-    This is included in Perl versions 5.6 and later.
+    This is included in Perl versions 5.6.1 and later.
 
-    Version 6.16 or later is recommended.
+    Version 6.16 or later is recommended (which is included in Perl 5.8.1
+    and 5.6.2).
 
 
-These modules are required for spamassassin to run:
-
-  - File::Spec >= 0.8    (from CPAN, or included in Perl 5.6 and higher)
-
-    The File::Spec module is required in version 0.8 (Mar 2000) or later.
-    This is included in Perl versions 5.6 and later.
-
-  - Pod::Usage >= 1.10   (from CPAN, or included in Perl 5.6 and higher)
-
-    The Pod::Usage module is required.  This is included in Perl versions
-    5.6 and later.  The modules shipped with earlier versions  are buggy
-    and need to be upgraded.
+These additional modules are required for SpamassAssin to run:
 
   - HTML::Parser >= 3.24 (from CPAN)
 
@@ -255,10 +244,9 @@ These modules are required for spamassassin to run:
     This is a required module if you use spamd.  spamd logs information
     about scanned messages to syslog using this module.
 
-    Note: perl versions 5.003_07 and later should have Sys::Syslog already
+    Note: perl versions 5.6.0 and later should have Sys::Syslog already
     installed.  You can easily test this by running:
-    perl -MSys::Syslog -e 1
-
+	perl -MSys::Syslog -e 1
     If it generates an error, you need to install the module.  If the
     command just returns, you should be ok.
 
@@ -272,7 +260,7 @@ not as effectively -- some of the spam-detection tests will have to be
 skipped.
 
 
-  - DB_File	(from CPAN)
+  - DB_File         (from CPAN, included in many distributions)
 
     Used to store data on-disk, for the Bayes-style logic and
     auto-whitelist.  *Much* more efficient than the other standard Perl
@@ -284,7 +272,16 @@ skipped.
 	quit
 
 
-  - Net::DNS	(from CPAN)
+  - Digest::SHA1    (from CPAN)
+
+    The Digest::SHA1 module will speed up some cryptographic hash tests,
+    but is not required (although it may be required by another module).
+
+    If you use Debian, you can get Digest::SHA1 from the libdigest-sha1-perl
+    package.
+
+
+  - Net::DNS        (from CPAN)
 
     Used to check the RBL, RSS, DUL etc. and perform MX checks.
     Recommended.
@@ -295,7 +292,7 @@ skipped.
 	quit
 
 
-  - Razor	http://razor.sourceforge.net/
+  - Razor           http://razor.sourceforge.net/
 
     Used to check message signatures against Vipul's Razor collaborative
     filtering network.  Razor is not available from CPAN -- you have to
@@ -311,42 +308,54 @@ skipped.
     You (and any users who use Razor) will need to register an account
     to do so, like this:
 
-	# razor-client          [creates symbolic links]
-	# razor-admin -create   [creates the razor home]
-	# razor-admin -register [registers an account]
-    
+	razor-client          [creates symbolic links]
+	razor-admin -create   [creates the razor home]
+	razor-admin -register [registers an account]
+
     If you want to use Razor and you are using Vipul's Razor 2.22 or higher
     (until at least 2.36), you need to apply a small patch to use Razor in
     "taint mode" which is now the default in SpamAssassin.  The instructions
     are located in the Razor2.patch file.
 
 
-  - DCC    http://www.rhyolite.com/anti-spam/dcc/
+  - DCC             http://www.rhyolite.com/anti-spam/dcc/
 
     DCC (Distributed Checksum Clearinghouse) is a system similar to Razor.
     It supports fuzzy checksums and therefore detects some more spams than
     Razor does at the moment.
 
-    To install it, download
-    http://www.rhyolite.com/anti-spam/dcc/source/dcc-dccproc.tar.Z and
-    perform the following steps:
+    To install it, perform the following steps:
 
-	# tar xfvz dcc-dccproc.tar.Z
-	# cd dcc-dccproc-X.X.X
-	# ./configure && make && make install
-	# cdcc 'info'
+	wget http://www.dcc-servers.net/dcc/source/dcc-dccproc.tar.Z
+	tar xfvz dcc-dccproc.tar.Z
+	cd dcc-dccproc-*
+	./configure && make && make install
 
-    The last command will give some output. One line of it should contain
-    something like:
+    You might want to replace the configure call with something like this to
+    get an FHS compliant install:
+	./configure \
+	    --bindir=$(PREFIX)/bin \
+            --libexecdir=$(PREFIX)/lib/dcc \
+            --mandir=$(PREFIX)/man \
+            --homedir=/var/lib/dcc
 
-	dcc.rhyolite.com,-         RTT+0 ms    anon
+    Finally call cdcc::
+
+	cdcc info
+
+    The last command will give some output. The output should contain lines
+    like this:
+
+	dcc1.dcc-servers.net,-         RTT+0 ms    anon
+	dcc2.dcc-servers.net,-         RTT+0 ms    anon
+	...
 
     Note that MIMEDefang users may need to set the 'dcc_path'
     configuration setting, since MIMEDefang does not set a PATH by
-    default.
+    default. See also 'perldoc Mail::SpamAssassin::Conf'.
 
 
-  - Pyzor    http://pyzor.sourceforge.net/
+  - Pyzor           http://pyzor.sourceforge.net/
 
     Used to check message signatures against the Pyzor collaborative
     filtering network.  Pyzor was initially "a Python implementation of
@@ -360,15 +369,15 @@ skipped.
     https://sourceforge.net/project/showfiles.php?group_id=50000 and
     perform the following steps:
 
-        # bunzip2 pyzor-*.tar.bz2
-        # cd pyzor-*
-        # python setup.py build
-        # python setup.py install
+	tar xvfj pyzor-*.tar.bz2
+	cd pyzor-*
+	python setup.py build
+	python setup.py install
 
     Note that your system might install the modules and scripts with
     non-world-readable permissions.  Correct this with a command such as:
 
-	# chmod -R a+rX /usr/share/doc/pyzor \
+	chmod -R a+rX /usr/share/doc/pyzor \
 		/usr/lib/python2.2/site-packages/pyzor \
 		/usr/bin/pyzor /usr/bin/pyzord
 
@@ -380,7 +389,7 @@ skipped.
     default.
 
 
-  - Mail::Audit, Mail::Internet, Net::SMTP	(from CPAN)
+  - Mail::Audit, Mail::Internet, Net::SMTP        (from CPAN)
 
     If you want to use SpamAssassin with Mail::Audit, you will (obviously)
     require the Mail::Audit module, and any modules it requires (there's
@@ -401,22 +410,13 @@ skipped.
 	quit
 
 
-  - Digest::SHA1  (from CPAN)
-
-    The Digest::SHA1 module will speed up some cryptographic hash tests,
-    but is not required (although it may be required by another module).
-
-    If you use Debian, you can get Digest::SHA1 from the libdigest-sha1-perl
-    package.
-
-
-  - Net::Ident   (from CPAN)
+  - Net::Ident      (from CPAN)
 
     If you plan to use the --auth-ident option to spamd, you will need
     to install this module.
 
 
-  - IO::Socket::SSL	(from CPAN)
+  - IO::Socket::SSL (from CPAN)
 
     If you wish to use SSL encryption to communicate between spamc and
     spamd (the --ssl option to spamd), you need to install this
