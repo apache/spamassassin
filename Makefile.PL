@@ -1,12 +1,37 @@
 require 5.005;
 
 # RPM builders, or people building in their home dirs:
-# set PREFIX (default = /usr)
-# set SYSCONFDIR (default = /etc)
-# e.g. "perl Makefile.PL PREFIX=/home/jm/sausr SYSCONFDIR=/home/jm/saetc"
+#
+# VARIABLE                DEFAULT
+# -------------           -----------------
+# PREFIX               *  /usr
+# INST_PREFIX          +  $PREFIX
+# SYSCONFDIR           *  /etc
+# INST_SYSCONFDIR      +  $SYSCONFDIR
+# PKG_DEF_RULES_DIR    *  $DEF_RULES_DIR or $(PREFIX)/share/spamassassin
+# DEF_RULES_DIR        +  $(INST_PREFIX)/share/spamassassin
+
+# PKG_LOCAL_RULES_DIR  *  $LOCAL_RULES_DIR
+#                         or $(SYSCONFDIR)/mail/spamassassin
+# LOCAL_RULES_DIR      +  $(INST_SYSCONFDIR)/mail/spamassassin
+# RUN_RAZOR1_TESTS        (prompt if Razor 1 found)
+# RUN_RAZOR2_TESTS        (prompt if Razor 2 found)
+#
+# * means the variable is used for build time
+# + means the variable is used for run time
+#
+# For example, to install in your home dir:
+#
+#   perl Makefile.PL PREFIX=/home/jm/sausr SYSCONFDIR=/home/jm/saetc
+#
+# Or to build a package in /tmp/build, but with its internal paths
+# referring to /usr and /etc:
+#
+#   perl Makefile.PL PREFIX=/tmp/build/usr SYSCONFDIR=/tmp/build/etc \
+#                       INST_PREFIX=/usr INST_SYSCONFDIR=/etc
 #
 # You can also override the automatic ./configure step by just
-# running that yourself first.
+# running that yourself first. But this should not be necessary.
 #
 # The Razor prompts ("run Razor 1 tests?" and "run Razor 2 tests?"
 # can be overridden by setting RUN_RAZOR1_TESTS or RUN_RAZOR2_TESTS to
@@ -18,9 +43,13 @@ use strict;
 use Config;
 use ExtUtils::MakeMaker;
 
+$ExtUtils::MakeMaker::Recognized_Att_Keys{'INST_PREFIX'} = 1;
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'SYSCONFDIR'} = 1;
+$ExtUtils::MakeMaker::Recognized_Att_Keys{'INST_SYSCONFDIR'} = 1;
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'DEF_RULES_DIR'} = 1;
+$ExtUtils::MakeMaker::Recognized_Att_Keys{'PKG_DEF_RULES_DIR'} = 1;
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'LOCAL_RULES_DIR'} = 1;
+$ExtUtils::MakeMaker::Recognized_Att_Keys{'PKG_LOCAL_RULES_DIR'} = 1;
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'RUN_RAZOR1_TESTS'} = 1;
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'RUN_RAZOR2_TESTS'} = 1;
 
@@ -55,7 +84,7 @@ my %makefile = (
 
     'PMLIBDIRS' => [ 'lib' ],
    
-    'PM_FILTER' => '$(PERL) build/preprocessor -Mconditional -Mvars -DVERSION=$(VERSION) -DPREFIX="$(PREFIX)"',
+    'PM_FILTER' => '$(PERL) build/preprocessor -Mconditional -Mvars -DVERSION=$(VERSION) -DPREFIX="$(INST_PREFIX)"',
 
     'macro' => {
 	RULES => $rulesfiles,
@@ -159,21 +188,34 @@ sub MY::postamble {
 
   my $self = shift;
 
+  my $instprefix = $self->{INST_PREFIX} || $self->{PREFIX};
   my $sysconfdir  = $self->{SYSCONFDIR}      || '/etc';
-  my $defrulesdir = $self->{DEF_RULES_DIR}   || '$(PREFIX)/share/spamassassin';
-  my $locrulesdir = $self->{LOCAL_RULES_DIR} || '$(SYSCONFDIR)/mail/spamassassin';
+  my $instsysconfdir = $self->{INST_SYSCONFDIR} || $sysconfdir;
+  my $pkgdefrulesdir = $self->{PKG_DEF_RULES_DIR} || $self->{DEF_RULES_DIR}
+    || '$(PREFIX)/share/spamassassin';
+  my $defrulesdir = $self->{DEF_RULES_DIR}
+    || '$(INST_PREFIX)/share/spamassassin';
+  my $pkglocalrulesdir = $self->{PKG_LOCAL_RULES_DIR}
+    || $self->{LOCAL_RULES_DIR} || '$(INST_SYSCONFDIR)/mail/spamassassin';
+  my $localrulesdir = $self->{LOCAL_RULES_DIR} || '$(SYSCONFDIR)/mail/spamassassin';
+
+
 
   my $gotpods = keys(%{$self->{MAN1PODS}}) || keys(%{$self->{MAN3PODS}}) || keys(%{$self->{EXTRAPODS}}) || 0;
 
 qq#
+INST_PREFIX     = $instprefix
 SYSCONFDIR      = $sysconfdir
+INST_SYSCONFDIR = $instsysconfdir
+PKG_DEF_RULES_DIR = $pkgdefrulesdir
 DEF_RULES_DIR	= $defrulesdir
-LOCAL_RULES_DIR	= $locrulesdir
+PKG_LOCAL_RULES_DIR = $pkglocalrulesdir
+LOCAL_RULES_DIR	= $localrulesdir
 # . q#
 
 FIXVARS		= -Mvars \
 		  -DVERSION="$(VERSION)" \
-		  -DPREFIX="$(PREFIX)" \
+		  -DPREFIX="$(INST_PREFIX)" \
 		  -DDEF_RULES_DIR="$(DEF_RULES_DIR)" \
 		  -DLOCAL_RULES_DIR="$(LOCAL_RULES_DIR)" \
 		  -DINSTALLSITELIB="$(INSTALLSITELIB)"
@@ -214,16 +256,16 @@ spamd/spamc$(EXE_EXT): binaries.mk
 binaries.mk: configure
 	./configure
 
-inst_cfs: $(LOCAL_RULES_DIR) $(LOCAL_RULES_DIR)/local.cf
-	$(RM_RF) $(DEF_RULES_DIR)
-	$(MKPATH) $(DEF_RULES_DIR)
-	$(PERL) build/preprocessor $(FIXVARS) -Irules -O$(DEF_RULES_DIR) $(RULES)
-	$(CHMOD) $(PERM_RWX) $(DEF_RULES_DIR)
+inst_cfs: $(PKG_LOCAL_RULES_DIR) $(PKG_LOCAL_RULES_DIR)/local.cf
+	$(RM_RF) $(PKG_DEF_RULES_DIR)
+	$(MKPATH) $(PKG_DEF_RULES_DIR)
+	$(PERL) build/preprocessor $(FIXVARS) -Irules -O$(PKG_DEF_RULES_DIR) $(RULES)
+	$(CHMOD) $(PERM_RWX) $(PKG_DEF_RULES_DIR)
 
-$(LOCAL_RULES_DIR):
+$(PKG_LOCAL_RULES_DIR):
 	$(MKPATH) $@
 
-$(LOCAL_RULES_DIR)/local.cf: rules/local.cf
+$(PKG_LOCAL_RULES_DIR)/local.cf: rules/local.cf
 	$(PERL) -e 'use File::Copy; (-f "$@") or copy ("$?", "$@");'
 
 text_html_doc: made-doc-stamp
