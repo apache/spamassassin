@@ -353,9 +353,6 @@ sub wanted {
   if (defined($time)) {
     push(@extra, "time=".$time);
   }
-  if (defined($time)) {
-    push(@extra, "time=".$time);
-  }
   if ($status && defined $status->{bayes_score}) {
     push(@extra, "bayes=".$status->{bayes_score});
   }
