@@ -493,6 +493,14 @@ sub dcc_lookup {
     timelog("dcc check failed", "dcc", 2);
     return 0;
   }
+
+  if ($self->{conf}->{dcc_add_header}) {
+    if ($response =~ /^(X-DCC.*): (.*)$/) {
+      $left  = $1;
+      $right = $2;
+      $self->{msg}->put_header($left, $right);
+    }
+  }
  
   $response =~ s/many/999999/ig;
   $response =~ s/ok\d?/0/ig;
@@ -505,14 +513,6 @@ sub dcc_lookup {
   }
   if ($response =~ /Fuz2=(\d+)/) {
     $count{fuz2} = $1+0;
-  }
-
-  if ($self->{conf}->{dcc_add_header}) {
-    if ($response =~ /^(X-DCC.*): (.*)$/) {
-      $left  = $1;
-      $right = $2;
-      $self->{msg}->put_header($left, $right);
-    }
   }
 
   if ($count{body} >= $self->{conf}->{dcc_body_max} || $count{fuz1} >= $self->{conf}->{dcc_fuz1_max} || $count{fuz2} >= $self->{conf}->{dcc_fuz2_max}) {
