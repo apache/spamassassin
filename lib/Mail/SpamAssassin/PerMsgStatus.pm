@@ -888,7 +888,6 @@ sub get_decoded_stripped_body_text_array {
     $hp->eof;
     $text = join('', @{$self->{html_text}});
     $self->{html}{ratio} = ($raw - length($text)) / $raw if $raw;
-    delete $self->{html_inside};
     delete $self->{html_last_tag};
   }
 
