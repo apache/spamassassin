@@ -266,8 +266,10 @@ sub learn {
     dbg ("auto-learn: recomputing score based on scoreset ".($orig_scoreset%2));
     $self->{conf}->set_score_set($orig_scoreset % 2); # reduce to autolearning scores
     foreach my $test ( @{$self->{test_names_hit}} ) {
-      next if ( $test =~ /^BAYES/ ); # we can't add in bayes into this ...
-      next if ( ! exists $self->{conf}->{scores}->{$test} );
+      # ignore tests with 0 score in this scoreset or if the test is a learning test
+      next if ( $self->{conf}->{scores}->{$test} == 0 );
+      next if ( exists $self->{conf}->{tflags}->{$test} && $self->{conf}->{tflags}->{$test} =~ /\blearn\b/ );
+
       $hits += $self->{conf}->{scores}->{$test};
     }
     $hits = (sprintf "%0.3f", $hits) + 0;
