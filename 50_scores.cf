@@ -330,7 +330,6 @@ score OPT_IN                         2.085
 score ORDER_NOW                      1.791
 score OUTSTANDING_VALUE		     1.0
 score PARA_A_2_C_OF_1618             2.187
-score PARTIAL_RFC_2369               1.0
 score PENIS_ENLARGE                  1.283
 score PENIS_ENLARGE2                 4.319
 score PENNIES_A_DAY                  2.943
@@ -384,7 +383,10 @@ score SENT_IN_COMPLIANCE             1.182
 score SERIOUS_ONLY                   2.735
 score SHOPPING_SPREE		     1.0
 score SHORT_RECEIVED_LINE            4.251
-score SIGNATURE_DELIM                0.488
+score SIGNATURE_LONG_DENSE           -1.0
+score SIGNATURE_LONG_SPARSE          -0.5
+score SIGNATURE_SHORT_DENSE          -2.0
+score SIGNATURE_SHORT_SPARSE         -1.5
 score SIGNIFICANT		     1.0
 score SIGN_UP			     1.0
 score SLIGHTLY_UNSAFE_JAVASCRIPT     0.693
@@ -408,6 +410,7 @@ score SUBJ_HAS_UNIQ_ID               2.542
 score SUBJ_REMOVE                    0.323
 score SUPERLONG_LINE                 0.384
 score SUPPLIES_LIMITED		     1.0
+score SUSPECT_LIST_HEADERS           1.0
 score SUSPICIOUS_RECIPS              0.213
 score S_1618                         1.413
 score TAKE_ACTION_NOW                2.675
