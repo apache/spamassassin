@@ -714,6 +714,8 @@ describe FROM_NUM_AT_WEBMAIL  From address is webmail, but starts with a number
 # sending mail.
 header RECEIVED_IDENT_SQUID      Received =~ /ident[:=]squid\b/i
 describe RECEIVED_IDENT_SQUID    Message was sent by a Squid HTTP proxy
+header RECEIVED_IDENT_CACHEFLOW  Received =~ /CacheFlowServer/
+describe RECEIVED_IDENT_CACHEFLOW Received contains 'CacheFlowServer' IDENT name
 
 # common spam-dropping: To: C:\VICTIMS.txt@yourmx.org
 header TO_TXT			To =~ /\.txt[\'\"]?\@/i
