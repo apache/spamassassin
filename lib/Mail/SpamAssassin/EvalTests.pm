@@ -2669,4 +2669,29 @@ sub check_header_count_range {
   return ( scalar @hdrs >= $min && scalar @hdrs <= $max );
 }
 
+sub check_blank_line_ratio {
+  my ($self, $fulltext, $min, $max, $minlines) = @_;
+
+  if ( !defined $minlines || $minlines < 1 ) {
+    $minlines = 1;
+  }
+
+  $fulltext = $self->get_decoded_body_text_array();
+  if ( ! exists $self->{blank_line_ratio}->{$minlines} ) {
+    my($blank) = 0;
+    if ( scalar @{$fulltext} >= $minlines ) {
+      foreach my $line ( @{$fulltext} ) {
+        next if ( $line =~ /\S/ );
+        $blank++;
+      }
+      $self->{blank_line_ratio}->{$minlines} = 100 * $blank / scalar @{$fulltext};
+    }
+    else {
+      $self->{blank_line_ratio}->{$minlines} = -1; # don't report if it's a blank message ...
+    }
+  }
+
+  return ( ($min == 0 && $self->{blank_line_ratio}->{$minlines} <= $max) || ($self->{blank_line_ratio}->{$minlines} > $min && $self->{blank_line_ratio}->{$minlines} <= $max) );
+}
+
 1;
