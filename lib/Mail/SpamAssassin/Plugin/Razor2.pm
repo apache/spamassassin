@@ -45,7 +45,7 @@ sub new {
   bless ($self, $class);
 
   $self->{razor2_available} = 0;
-  $mailsaobject->{conf}->{razor2_timeout} = 10;
+  $mailsaobject->{conf}->{razor_timeout} = 10;
 
   if ($mailsaobject->{local_tests_only}) {
     dbg("razor2: local tests only, skipping razor2");
@@ -148,7 +148,7 @@ sub handle_parser_error {
 
 sub razor2_lookup {
   my ($self, $permsgstatus, $fulltext) = @_;
-  my $timeout=$self->{main}->{conf}->{razor_timeout} || 10;
+  my $timeout=$self->{main}->{conf}->{razor_timeout};
 
   # Set the score for the ranged checks
   $self->{razor2_cf_score} = 0;
