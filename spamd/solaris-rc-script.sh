@@ -11,11 +11,13 @@
 # 
 # /etc/rc2.d/S78spamd
 
+PATH=$PATH:/usr/bin:/usr/local/bin
+
 case "$1" in
 'start')
-	if [ -f /usr/local/lib/perl5/site_perl/5.6.1/spamassassin.cf -a -x /usr/local/bin/spamd ]
+	if [ -x /usr/bin/spamd -o -x /usr/local/bin/spamd ]
 	then
-		/usr/local/bin/spamd -d
+		spamd -d
 	fi
 
 	;;

@@ -17,14 +17,15 @@
 # Check that networking is up.
 [ ${NETWORKING} = "no" ] && exit 0
 
-[ -f /usr/bin/spamd ] || exit 0
+[ -f /usr/bin/spamd -o -f /usr/local/bin/spamd ] || exit 0
+PATH=$PATH:/usr/bin:/usr/local/bin
 
 # See how we were called.
 case "$1" in
   start)
 	# Start daemon.
 	echo -n "Starting spamd: "
-	daemon /usr/bin/spamd -d -a -c
+	daemon spamd -d -a -c
 	touch /var/lock/spamd
 	;;
   stop)
