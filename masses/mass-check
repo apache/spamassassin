@@ -12,7 +12,6 @@
 # --single      folder is a single mail message
 # --loghits     log the text hit for patterns (useful for debugging)
 # --showdots    print a dot for each scanned message
-# --nokillfile  don't use the "QUICK HACK"
 # --bayes       report score from Bayesian classifier
 #
 # options for maildir and mh-style folders
@@ -21,21 +20,6 @@
 # --tail=N      only check last N messages
 #
 # all following arguments are used as the name of mail folders
-
-###########################################################################
-# QUICK HACK: some of our spamtraps are getting nonspam newsletters. ignore
-# those mails here...
-
-my $killfile_message_ids = qr{(?:
-    <\d\d\d\d\S+\@dev\.lifetimetv\.com>
-    |<\d+\.\S+\@fmail..\.real-net\.net>
-    |<3D53A59C000A4029\@mta3n\.bluewin\.ch>
-)}x;
-
-my $killfile_receiveds = qr{(?:
-    from\s\S+\s\S+\sby\s(?:anclsmtp\d\d|myfamlsmtp\d\d)\.myfamily\.com
-    |for :include:\S+/MapQuest/
-)}x;
 
 ###########################################################################
 
@@ -57,7 +41,9 @@ $|++;
 GetOptions("c=s", "f=s", "fork", "all", "head=i", "mh", "ms", "mn", "single",
         "sort", "tail=i", "loghits", "showdots", "nokillfile", "bayes");
 
-#use Devel::Peek;
+if ($opt_nokillfile) {
+  warn "mass-check --nokillfile switch is now obsolete, ignored.\n";
+}
 
 if ($opt_c) {
   $cffile = $opt_c;
@@ -123,17 +109,6 @@ sub wanted {
 
   # my $ma = Mail::Audit->new('data' => \@msg);
   my $ma = Mail::SpamAssassin::NoMailAudit->new ('data' => $dataref);
-
-  unless ($opt_nokillfile) {
-    # killfile for mass-checks
-    $_ = $ma->get_header("Message-Id");
-    if (defined($_) && /${killfile_message_ids}/os)
-                { logkilled($ma,$id, "unwanted Message-Id"); return; }
-
-    $_ = join ('', $ma->get_header("Received"));
-    if (defined($_) && /${killfile_receiveds}/os)
-                { logkilled($ma,$id, "unwanted Received chain"); return; }
-  }
 
   $ma->{noexit} = 1;
 
