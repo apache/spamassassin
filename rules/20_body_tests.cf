@@ -1,5 +1,5 @@
 # SpamAssassin rules file: tests.
-# $Id: 20_body_tests.cf,v 1.247 2002/09/04 18:52:50 jmason Exp $
+# $Id: 20_body_tests.cf,v 1.248 2002/09/09 04:16:55 zelgadis Exp $
 # 
 # note: body tests are run with long lines, so be sure to limit the
 # size of searches; use ".{0,30}" instead of ".*" to avoid huge
@@ -825,7 +825,7 @@ describe CREDIT_BUREAU		Credit Bureaus
 body ACCEPT_CREDIT_CARDS        /\baccept.{1,15}credit cards?\b/i
 describe ACCEPT_CREDIT_CARDS	Accept Credit Cards
 
-body BAD_CREDIT		        /\b(?:bad|poor|no|eliminate|repair|(?:re)establish|damag).{0,10} (?:credit|debt)\b/i
+body BAD_CREDIT		        /\b(?:bad|poor|no\b|eliminate|repair|(?:re)?establish|damag).{0,10} (?:credit|debt)\b/i
 describe BAD_CREDIT		Eliminate Bad Credit
 
 body UNSECURED_CREDIT	        /\bunsecured.{0,10}(?:master ?card|visa|credit|loans|debt)\b/i
