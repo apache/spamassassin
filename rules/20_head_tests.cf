@@ -191,20 +191,8 @@ header NO_MX_FOR_FROM		eval:check_for_from_mx()
 describe NO_MX_FOR_FROM		No MX records for the From: domain
 tflags NO_MX_FOR_FROM           net
 
-header FROM_AND_TO_SAME_1	eval:check_for_from_to_same('exact_both')
-describe FROM_AND_TO_SAME_1	From and To the same (1)
-
-#header FROM_AND_TO_SAME_2	eval:check_for_from_to_same('exact_none')
-#describe FROM_AND_TO_SAME_2	From and To are same (2)
-
-header FROM_AND_TO_SAME_3	eval:check_for_from_to_same('rough_both')
-describe FROM_AND_TO_SAME_3	From and To are same (3)
-
-header FROM_AND_TO_SAME_5	eval:check_for_from_to_same('rough_to')
-describe FROM_AND_TO_SAME_5	From and To are same (5)
-
-#header FROM_AND_TO_SAME_6	eval:check_for_from_to_same('rough_none')
-#describe FROM_AND_TO_SAME_6	From and To are same (6)
+header FROM_AND_TO_SAME		eval:check_for_from_to_same()
+describe FROM_AND_TO_SAME	From and To are the same, but not exactly
 
 header BAD_HELO_WARNING		eval:check_for_bad_helo()
 describe BAD_HELO_WARNING	Fake name used in SMTP HELO command
