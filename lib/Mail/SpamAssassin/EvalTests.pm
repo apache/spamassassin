@@ -80,6 +80,25 @@ sub check_for_from_to_equivalence {
 
 ###########################################################################
 
+sub check_for_forged_hotmail_received_headers {
+  my ($self) = @_;
+  my $rcvd = $self->get ('Received');
+
+  # Hotmail formats its received headers like this:
+  # Received: from hotmail.com (f135.law8.hotmail.com [216.33.241.135])
+  # spammers do not ;)
+
+  if ($rcvd =~ /from hotmail.com/
+  	&& $rcvd !~ /from hotmail.com \(\S+\.\S+\.hotmail\.com /)
+  {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+###########################################################################
+
 sub check_for_bad_helo {
   my ($self) = @_;
   local ($_);

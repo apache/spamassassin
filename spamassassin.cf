@@ -65,7 +65,7 @@ describe FROM_ENDS_IN_NUMS	From: ends in numbers
 header PLING_PLING		Subject =~ /\!+/
 describe PLING_PLING		Subject has lots of exclamation marks
 
-header SUBJ_HAS_UNIQ_ID		Subject =~ /\s+(?:\s{6,}[-a-z0-9]{4,}|[-:\#\(\[]+[-a-zA-Z0-9]{4,}[\]\)]+|[-:\#][-a-zA-Z0-9]{4,})$/
+header SUBJ_HAS_UNIQ_ID		Subject =~ /(?:[-_\s]{7,}[-a-z0-9]{4,}|\s+[-:\#\(\[]+[-a-zA-Z0-9]{4,}[\]\)]+|\s+[-:\#][-a-zA-Z0-9]{4,})$/
 describe SUBJ_HAS_UNIQ_ID	Subject contains a unique ID number
 
 header UNDISC_RECIPS		To =~ /Undisclosed.*Recipients/i
@@ -83,7 +83,7 @@ describe INVALID_DATE		Invalid Date: header
 header SUBJ_HAS_Q_MARK		Subject =~ /\?/
 describe SUBJ_HAS_Q_MARK	Subject: ends in a question mark
 
-header ADVERT_CODE		Subject =~ /ADV:/
+header ADVERT_CODE		Subject =~ /^\s*ADV:/i
 describe ADVERT_CODE		Subject: contains advertising tag
 
 header FRIEND_AT_PUBLIC	To =~ /(yourdomain|you|your|public).(com|org|net)/i
@@ -92,7 +92,7 @@ describe FRIEND_AT_PUBLIC	sent to you@you.com or similar
 header TO_EMPTY			To =~ /^(?:\@|\s*$)/
 describe TO_EMPTY		To: is empty
 
-header REPLY_TO_EMPTY		Reply-To =~ /^\@/
+header REPLY_TO_EMPTY		Reply-To =~ /^\@*$/
 describe REPLY_TO_EMPTY		Reply-To: is empty
 
 header X_EM_VER_PRESENT		X-Em-Version =~ /\S/
@@ -128,6 +128,18 @@ describe RCVD_IN_RELAYS_ORDB_ORG Received via a relay in relays.ordb.org
 header FORGED_RCVD_FOUND	ALL =~ /\n(?:Date|Subject|From):.*\nReceived: .*\n\n/s
 describe FORGED_RCVD_FOUND	Possibly-forged 'Received:' header found
 
+header YR_MEMBERSHIP_EXCH	Subject =~ /Your Membership Exchange/
+describe YR_MEMBERSHIP_EXCH	Subject contains 'Your Membership Exchange'
+
+header FROM_FORGED_HOTMAIL	From =~ /^[^"]+\S+\@hotmail\.com/i
+describe FROM_FORGED_HOTMAIL	Forged From: line claiming to be from hotmail.com
+
+header FORGED_HOTMAIL_RCVD	eval:check_for_forged_hotmail_received_headers()
+describe FORGED_HOTMAIL_RCVD	Forged hotmail.com 'Received:' header found
+
+header X_MAILER_GIBBERISH	X-Mailer =~ /^[A-Fa-f0-9\.]{48,}$/
+describe X_MAILER_GIBBERISH	'X-Mailer' line contains gibberish
+
 ###########################################################################
 
 full RAZOR_CHECK		eval:check_razor('razor.vipul.net:2702')
@@ -153,6 +165,8 @@ body PARA_A_2_C_OF_1618		/Paragraph .a.*2.*C. of S. 1618/i
 body BILL_1618			/Bill.*1618.*TITLE.*III/i
 body S_1618			/S.\s*1618\s*-\s*SECTION\s*301/i
 body SECTION_301		/SECTION\s*301/
+
+body POPLAUNCH			/StealthLaunch PopLaunch.\s/
 
 body NUMERIC_HTTP_ADDR		/http\:\/\/\d+\//i
 body SUPERLONG_LINE		/.{199,}/
@@ -191,6 +205,9 @@ body EXCUSE_6			/to remove yourself/i
 body EXCUSE_7			/you would like to be removed/i
 body EXCUSE_8			/requests to be taken off our mailing list/
 body EXCUSE_9		/If you do.*n.*t want to receive emails on this subject/i
+body EXCUSE_10			/if you (?:wish|care) not to (?:be contacted again|receive any\s*more solicitations)/i
+body EXCUSE_11			/you.*(?:name|mail).*(?:was|were).*list/i
+body EXCUSE_12			/(?:received this e?-?mail|has reached you) in error/i
 
 body GREEN_EXCUSE_1	/using email instead can significantly reduce this/i
 body GREEN_EXCUSE_2	/the trees, save the planet, use email!/i
@@ -198,11 +215,12 @@ body GREEN_EXCUSE_2	/the trees, save the planet, use email!/i
 body FREE_PRIORITY_MAIL		/FREE PRIORITY MAIL SHIPPING/i
 body LIMITED_TIME_ONLY		/LIMITED TIME ONLY/i
 
-body WE_HONOR_ALL		/We honor ALL remove requests/i
+body WE_HONOR_ALL		/we honou?r(?: all|) remove requests/i
+body FILTERED_BY_WORLDREMOVE	/filtered by WorldRemove/
 
 body PORN_1			/\bbarely\b.*\blegal\b/i
 body PORN_2			/\bwild\b.*\bhardcore\b/i
-body PORN_3			/(?:(?:\bcum|\bteen|\baction\b|\bhot\b).*){2,}/i
+body PORN_3			/(?:(?:\bcum|\bteen|\baction\b|\bhot\b|\bhottest\b).*){2,}/i
 
 body TRACKER_ID			/^\s*\W{4,} \w{10,} \W{4,}\s*$/
 
@@ -218,6 +236,7 @@ body INCREASE_SALES		/INCREASE SALES/i
 # in the middle of a HTML "attribute=value" pair.
 
 full CLICK_HERE_LINK		/click here.{0,100}<\/a>/is
+full CLICK_BELOW		/click below/is
 full A_HREF_TO_IP		/href[3D=\s\"\']*http:\/\/\d+\.\d+\.\d+\.\d+\:?\d*\//is
 full MAILTO_LINK		/=[3D=\s"']*mailto:/is
 full MAILTO_WITH_SUBJ_REMOVE	/mailto:\S+\?subject=[3D=\s"']*remove/is
