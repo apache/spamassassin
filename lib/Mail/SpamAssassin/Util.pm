@@ -251,10 +251,10 @@ sub portable_getpwuid {
   }
 
   if (!RUNNING_ON_WINDOWS) {
-    eval ' sub _getpwuid_wrapper { getpwuid(@_); } ';
+    eval ' sub _getpwuid_wrapper { getpwuid($_[0]); } ';
   } else {
     dbg ("defining getpwuid() wrapper using 'unknown' as username");
-    eval ' sub _getpwuid_wrapper { fake_getpwuid(@_); } ';
+    eval ' sub _getpwuid_wrapper { fake_getpwuid($_[0]); } ';
   }
 
   if ($@) {
