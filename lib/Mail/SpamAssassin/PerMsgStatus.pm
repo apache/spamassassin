@@ -411,9 +411,16 @@ sub rewrite_as_spam {
       my $boundary = "--" . quotemeta($1);
       my @main_part;
 
-      push(@main_part, shift(@{$lines})) while ($lines->[0] !~ /^$boundary/i);
-      push(@main_part, shift(@{$lines})) while ($lines->[0] !~ /^$/);
-      push(@main_part, shift(@{$lines}));
+      if (grep(/^$boundary/i, @{$lines})) {
+        # If, for some reason, the boundry marker doesn't appear in the
+        # body of the text, don't bother with the following three lines,
+        # because otherwise @{$lines} will go down to zero size, so
+        # $lines->[0] will be undefined, and Perl (or at least some versions
+        # of it) will go into an infinite loop of throwing warnings.
+        push(@main_part, shift(@{$lines})) while ($lines->[0] !~ /^$boundary/i);
+        push(@main_part, shift(@{$lines})) while ($lines->[0] !~ /^$/);
+        push(@main_part, shift(@{$lines}));
+      }
 
       unshift (@{$lines}, split (/$/, $rep));
       $lines->[0] =~ s/\n//;
