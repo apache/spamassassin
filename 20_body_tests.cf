@@ -21,6 +21,7 @@ describe SPAM_PHRASES_040	spam-phrase score is over 40
 full SPAM_PHRASES_100		eval:check_for_spam_phrases_scoring("100")
 describe SPAM_PHRASES_100	spam-phrase score is over 100
 
+
 ###########################################################################
 
 body REMOVE_SUBJ		/remove.{1,15}subject/i
@@ -249,8 +250,7 @@ describe PORN_1			Uses words and phrases which indicate porn (1)
 body PORN_2			/\bwild\b.{0,15}\bhard[ -]?core\b/i
 describe PORN_2			Uses words and phrases which indicate porn (2)
 
-# updated by: skod & Craig & jm
-body PORN_3			/(?:(?:\blolita|\bcum|\borg[iy]|\bwild|fuck|\bteen|\baction\b|spunk|\bpussy\b|\bpussies\b|suck\b|sucking\b|\bhot\b|\bhottest\b|\bvoyeur|\ble[sz]b(?:ian|o)|\banal\b|\binterracial|\basian\b|\bamateur|\bsex+\b|\bslut|explicit|(?:[^x]|\b)xxx(?:[^x]|\b)|\blive\b|celebrity|\blick|\bsuck|\bdorm\b|webcam|\bass\b|\bschoolgirl\b|\bstrip|\bhorny\b|\bhorniest\b|\berotic|\boral\b|\bpenis\b|\bhardcore\b|\bblow[ -]*job|\bnast(?:y|iest)\b|\bporn|\bwhore|\bsex[ -]?fest|\bnaked|\bnude|\bvirgin|\bnaughty\b|\bnaughtiest\b|\bgirls\b|\bcelebs?\b|\bbabes\b|\badult\b|\bskank|\btits\b|\btitties\b).{0,15}){3,}/i
+full PORN_3			eval:porn_word_test()
 describe PORN_3			Uses words and phrases which indicate porn (3)
 
 test     PORN_3      ok         Wild Asian hot peppers
