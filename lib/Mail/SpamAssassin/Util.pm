@@ -300,7 +300,7 @@ sub add_cidr_to_net_set {
 
   $nets ||= [ ];
   foreach (@_) {
-    my ($ip, $bits) = m#^\s*(\d+\.\d+\.\d+\.\d+)(?:/(\d+))?\s*$#;
+    my ($ip, $bits) = m#^\s*([\d\.]+)(?:/(\d+))?\s*$#;
 
     if (!defined $ip) {
       warn "illegal network address given: '$_'\n";
