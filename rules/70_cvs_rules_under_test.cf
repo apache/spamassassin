@@ -66,7 +66,14 @@ body T_THIS_AINT_SPAM		/This.{0,30}is.{1,10}not?.{0,15}spam/is
 describe T_THIS_AINT_SPAM	Claims "This is not spam"
 
 # this rule needs some tweaking to reduce FPs
-body T_EXCUSE_24		/you(?:'ve|'re| have| are)? receiv(?:ed|ing) this (?:e.?mail|advertisement) (?:by either|because)/i
+# original version
+body T_EXCUSE_24_V1		/you(?:'ve|'re| have| are)? receiv(?:ed|ing) this (?:e.?mail|advertisement) (?:by either|because)/i
+# "more spam" version
+body T_EXCUSE_24_V2		/you(?:'ve|'re| have| are)? receiv(?:e|ed|ing) this (?:e.?mail|advertisement|offer|special|recurring|paid).{0,16}\b(?:by either|because)/i
+# "more spam" version minus "you are"
+body T_EXCUSE_24_V3		/you(?:'ve|'re| have)? receiv(?:e|ed|ing) this (?:e.?mail|advertisement|offer|special|recurring|paid).{0,16}\b(?:by either|because)/i
+# "more spam" version minus "email"
+body T_EXCUSE_24_V4		/you(?:'ve|'re| have| are)? receiv(?:e|ed|ing) this (?:advertisement|offer|special|recurring|paid).{0,16}\b(?:by either|because)/i
 
 ###########################################################################
 # quinlan: I converted almost 2000 postfix anti-spam rules into SA format,
