@@ -52,6 +52,7 @@ use vars qw{
 
 $IGNORED_HDRS = qr{(?: (?:X-)?Sender    # misc noise
   |Delivered-To |Delivery-Date
+  |(?:X-)?Envelope-To
   |X-MIME-Auto[Cc]onverted |X-Converted-To-Plain-Text
 
   |Received     # handled specially
@@ -98,9 +99,12 @@ $IGNORED_HDRS = qr{(?: (?:X-)?Sender    # misc noise
   |X-Original[Aa]rrival[Tt]ime
 
   # Annotations from IMAP, POP, and MH:
-  |Status |Replied |Forwarded
+  |(?:X-)?Status |X-Flags |Replied |Forwarded
   |Lines |Content-Length
   |X-UIDL?
+
+  # Annotations from Bugzilla
+  |X-Bugzilla-[^:]+
 
   # Annotations from VM: (thanks to Allen Smith)
   |X-VM-(?:Bookmark|(?:POP|IMAP)-Retrieved|Labels|Last-Modified
@@ -140,6 +144,7 @@ use constant TOKENIZE_LONG_TOKENS_AS_SKIPS => 1;
   'X-Mailer'		=> '*x',
   'X-Authentication-Warning' => '*a',
   'Organization'	=> '*o',
+  'Organisation'        => '*o',
   'Content-Type'	=> '*c',
 );
 
