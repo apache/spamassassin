@@ -52,8 +52,8 @@ foreach my $symbol ($sa->{conf}->regression_tests()) {
         my $test_type = $conf->{test_types}->{$symbol};
         next unless defined($test_type);        # score, but no test
 
-        if ($test_type == $Mail::SpamAssassin::Conf::type_head_tests ||
-            $test_type == $Mail::SpamAssassin::Conf::type_head_evals)
+        if ($test_type == Mail::SpamAssassin::Conf::TYPE_HEAD_TESTS ||
+            $test_type == Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS)
         {
             my $test_string = $conf->{head_tests}->{$symbol} || $conf->{head_evals}->{$symbol};
             my ($header_name) = $test_string =~ /^(\S+)/;
