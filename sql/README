@@ -65,9 +65,9 @@ Database Schema
 The database must contain a table named by 'user_scores_sql_table' (default
 setting: "userpref") with at least three fields:
 
-username varchar(8)	# this is the username whose e-mail is being filtered
-preference varchar(30) 	# the preference (whitelist_from, required_hits, etc.)
-value varchar(100)	# the value of the named preference
+  username varchar(8)	  # this is the username whose e-mail is being filtered
+  preference varchar(30)  # the preference (whitelist_from, required_hits, etc.)
+  value varchar(100)	  # the value of the named preference
 
 You can add as many other fields you wish as long as the above three fields are
 contained in the table.
@@ -127,11 +127,13 @@ If you do not see the above text, then the SQL query was not successful, and
 you should see any error messages reported. <username> should be the user
 that was passed to spamd and is usually the user executing spamc.
 
+Note that any prefs stored under the username '@GLOBAL' are used as defaults
+for all users.  (in earlier versions, 'GLOBAL' was used, but this is now
+deprecated).
 
-
-This has only been tested using MySQL as the RDMS, but it has been written
-with the utmost simplicity using DBI, and any database driver that conforms
-to the DBI interface should work without problems.
+This code has only been tested using MySQL as the RDMS, but it has been written
+with the utmost simplicity using DBI, and any database driver that conforms to
+the DBI interface should work without problems.
 
 ******
 NB:  This should be considered BETA, and the interface, schema, or overall

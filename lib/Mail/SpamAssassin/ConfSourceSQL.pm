@@ -76,9 +76,11 @@ sub load_with_dbi {
    my $dbh = DBI->connect($dsn, $dbuser, $dbpass, {'PrintError' => 0});
 
    if($dbh) {
-      my $sql = 
-         "select preference, value  from $table where username = " .
-         $dbh->quote($username) ." OR username = 'GLOBAL'";
+      my $sql = "select preference, value  from $table where ". 
+        "username = ".$dbh->quote($username).
+        " or username = 'GLOBAL'".
+        " or username = '\@GLOBAL' order by username asc";
+
       my $sth = $dbh->prepare($sql);
       if($sth) {
          my $rv  = $sth->execute();
