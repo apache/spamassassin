@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.496 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.497 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -62,25 +62,29 @@ body __HTML_TAG_EXISTS_DOCTYPE	eval:html_tag_exists('!doctype')
 meta T_MIME_HTML_NO_DOCTYPE	(__MIME_HTML && !__HTML_TAG_EXISTS_DOCTYPE)
 
 # 2003-05-15
-# some variations on the HTML_IMAGE_WEB_BUGS test (aiming for higher S/O
-# ratio if possible)
-body T_HTML_IMAGE_WEB_BUGS_0	eval:html_test('t_image_web_bugs0')
-body T_HTML_IMAGE_WEB_BUGS_1	eval:html_test('t_image_web_bugs1')
-body T_HTML_IMAGE_WEB_BUGS_2	eval:html_test('t_image_web_bugs2')
-body T_HTML_IMAGE_WEB_BUGS_3	eval:html_test('t_image_web_bugs3')
-body T_HTML_IMAGE_WEB_BUGS_4	eval:html_test('t_image_web_bugs4')
-body T_HTML_IMAGE_WEB_BUGS_5	eval:html_test('t_image_web_bugs5')
-body T_HTML_IMAGE_WEB_BUGS_ANY_0	eval:html_test('t_image_web_bugs_any0')
-body T_HTML_IMAGE_WEB_BUGS_ANY_1	eval:html_test('t_image_web_bugs_any1')
-body T_HTML_IMAGE_WEB_BUGS_ANY_2	eval:html_test('t_image_web_bugs_any2')
-body T_HTML_IMAGE_WEB_BUGS_ANY_3	eval:html_test('t_image_web_bugs_any3')
-# replacement for current HTML_WEB_BUGS
-body T_HTML_WEB_BUGS_0		eval:html_test('t_web_bugs0')
-body T_HTML_WEB_BUGS_1		eval:html_test('t_web_bugs1')
-body T_HTML_WEB_BUGS_2		eval:html_test('t_web_bugs2')
-body T_HTML_WEB_BUGS_3		eval:html_test('t_web_bugs3')
-body T_HTML_WEB_BUGS_4		eval:html_test('t_web_bugs4')
-body T_HTML_WEB_BUGS_5		eval:html_test('t_web_bugs5')
+# possible replacements for current HTML_IMAGE_WEB_BUGS test
+body T_HTML_IMAGE_WEB_BUGS_0	eval:html_test('t_image_web_bugs_0')
+body T_HTML_IMAGE_WEB_BUGS_1	eval:html_test('t_image_web_bugs_1')
+body T_HTML_IMAGE_WEB_BUGS_2	eval:html_test('t_image_web_bugs_2')
+body T_HTML_IMAGE_WEB_BUGS_3	eval:html_test('t_image_web_bugs_3')
+body T_HTML_IMAGE_WEB_BUGS_4	eval:html_test('t_image_web_bugs_4')
+body T_HTML_IMAGE_WEB_BUGS_5	eval:html_test('t_image_web_bugs_5')
+
+# possible replacements for current HTML_WEB_BUGS test
+body T_HTML_WEB_BUGS_0		eval:html_test('t_web_bugs_0')
+body T_HTML_WEB_BUGS_1		eval:html_test('t_web_bugs_1')
+body T_HTML_WEB_BUGS_2		eval:html_test('t_web_bugs_2')
+body T_HTML_WEB_BUGS_3		eval:html_test('t_web_bugs_3')
+body T_HTML_WEB_BUGS_4		eval:html_test('t_web_bugs_4')
+body T_HTML_WEB_BUGS_5		eval:html_test('t_web_bugs_5')
+body T_HTML_WEB_BUGS_6		eval:html_test('t_web_bugs_6')
+body T_HTML_WEB_BUGS_7		eval:html_test('t_web_bugs_7')
+body T_HTML_WEB_BUGS_8		eval:html_test('t_web_bugs_8')
+body T_HTML_WEB_BUGS_9		eval:html_test('t_web_bugs_9')
+body T_HTML_WEB_BUGS_10		eval:html_test('t_web_bugs_10')
+body T_HTML_WEB_BUGS_11		eval:html_test('t_web_bugs_11')
+body T_HTML_WEB_BUGS_12		eval:html_test('t_web_bugs_12')
+body T_HTML_WEB_BUGS_13		eval:html_test('t_web_bugs_13')
 
 # 2003-02-25: quinlan
 # Whee... more HTML tests!
