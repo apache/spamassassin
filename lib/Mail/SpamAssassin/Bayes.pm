@@ -37,7 +37,7 @@ BEGIN { @AnyDBM_File::ISA = qw(DB_File GDBM_File NDBM_File SDBM_File); }
 use AnyDBM_File;
 
 use vars qw{ @ISA @DBNAMES
-  @TOKENIZE_HDRS
+  $IGNORED_HDRS
   $MIN_SPAM_CORPUS_SIZE_FOR_BAYES
   $MIN_HAM_CORPUS_SIZE_FOR_BAYES
   $USE_ROBINSON_FX_EQUATION_FOR_LOW_FREQS
@@ -48,9 +48,33 @@ use vars qw{ @ISA @DBNAMES
 
 @ISA = qw();
 
-# Which headers should we scan for tokens?  Don't use all of them,
-# as it's easy to pick up spurious clues from some.
-@TOKENIZE_HDRS = qw(From To Content-Type X-Mailer User-Agent);
+# Which headers should we scan for tokens?  Don't use all of them, as it's easy
+# to pick up spurious clues from some.  What we now do is use all of them
+# *less* these well-known headers; that way we can pick up spammers' tracking
+# headers.
+#
+# Don't use the following... From and To; frequently forged.  Date: can provide
+# incorrect cues if your spam corpus is older/newer than nonspam.  Subject:
+# already included as part of body.  List headers: a spamfiltering mailing list
+# will become a nonspam sign.  Received: (TODO) ditto; need to use only the
+# last 2 rcvd lines.
+
+$IGNORED_HDRS = qr{(?:
+		  From |To |Cc |MIME-Version |Content-Transfer-Encoding
+		  |List-Unsubscribe |List-Subscribe |List-Owner
+		  |X-List-Host |Message-Id |Received |Date
+		  |Sender |X-MailScanner |X-MailScanner-SpamCheck
+		  |Delivered-To |X-Spam-Status |X-Spam-Level
+		  |Reply-To |Errors-To |X-Antispam |Message-ID
+		  |CC |Subject |Return-Path |Delivery-Return-Path
+		  |X-Pyzor |Content-Class |Thread-Index
+		  |X-Mailman-Version |X-Beenthere
+		  |X-OriginalArrivalTime |X-MimeOLE
+		  |X-Spam-Checker-Version |X-Spam-Report
+		  |X-Spam-Flag |X-Original-Date |List-Archive
+		  |List-Id |List-Post |List-Help |X-RBL-Warning
+		  |X-MDaemon-Deliver-To
+		)}x;
 
 # How big should the corpora be before we allow scoring using Bayesian
 # tests?
@@ -213,7 +237,8 @@ sub tie_db_writable {
     my $name = $path.'_'.$dbname;
     my $db_var = 'db_'.$dbname;
     dbg("bayes: tie-ing to DB file R/W $name");
-    untie %{$self->{$db_var}} if (tied %{$self->{$db_var}});
+    # not convinced this is needed, or is efficient!
+    # untie %{$self->{$db_var}} if (tied %{$self->{$db_var}});
     tie %{$self->{$db_var}},"AnyDBM_File",$name, O_RDWR|O_CREAT,
 		 (oct ($main->{conf}->{bayes_file_mode}) & 0666)
        or goto failed_to_tie;
@@ -272,17 +297,11 @@ sub tokenize {
   my ($self, $msg, $body) = @_;
   my $wc = 0;
   my @tokens = ();
-  my @hdrs = ();
 
   # TODO: should we prefix header-tokens, e.g. with "H:", so they don't
   # modify probs for body-tokens?
-  foreach my $hdr (@TOKENIZE_HDRS) {
-    $_ = $msg->get_header ($hdr);
-    next unless (defined($_) && $_ ne '');
-    push (@hdrs, $_);
-  }
-
-  for (@{$body}, @hdrs) {
+  my $hdr = $self->get_header_text ($msg);
+  for (@{$body}, $hdr) {
     tr/A-Z/a-z/;
 
     # include quotes, .'s and -'s for URIs, and [$,]'s for Nigerian-scam strings,
@@ -303,6 +322,34 @@ sub tokenize {
   }
 
   ($wc, @tokens);
+}
+
+sub get_header_text {
+  my ($self, $msg) = @_;
+
+  my $hdrs = $msg->get_all_headers();
+
+  # we don't care about whitespace; so fix continuation lines to make the next
+  # bit easier
+  $hdrs =~ s/\n[ \t]+/   /gs;
+
+  # first, keep a copy of Received hdrs
+  my @rcvdlines = ($hdrs =~ /^Received: [^\n]*$/gim);
+
+  # and now delete lines for headers we don't want
+  $hdrs =~ s/^From \S+[^\n]+$//gim;
+  $hdrs =~ s/^${IGNORED_HDRS}: [^\n]*$//gim;
+
+  # and re-add the very last received line: usually a good source of
+  # spamware tokens
+  my $lastrcvd = pop @rcvdlines;
+  if (defined $lastrcvd) { $hdrs .= $lastrcvd; }
+
+  # do *not* remove the header names, they make good tokens too for
+  # spamware tracker headers like X-Track.
+
+  $hdrs =~ s/\s+/ /gs; dbg ("tokenize: header tokens = \"$hdrs\"");
+  return $hdrs;
 }
 
 ###########################################################################
