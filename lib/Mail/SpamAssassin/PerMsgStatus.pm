@@ -1465,6 +1465,15 @@ my $domain      = qq<(?:$domain_ref|$domain_lit)>;
 # Finally, the address-spec regex (more or less)
 my $Addr_spec_re   = qr<$local_part\s*\@\s*$domain>o;
 
+# Returns an array of all URIs found in the message.  It takes
+# a combination of the URIs found in the rendered body and the
+# URIs found when parsing the HTML in the message.  The array will
+# include the "raw" URI as well as "slightly cooked" versions --
+# ie: 'http://%77%77%77.spamassassin.org/' will get turned into:
+# ( 'http://%77&#00119;%77.spamassassin.org/', 'http://www.spamassassin.org/' )
+# -- this lets us run rules against both the original and "correct"
+# versions easily.
+#
 # This really belongs in metadata
 sub get_uri_list {
   my ($self) = @_;
@@ -1479,6 +1488,8 @@ sub get_uri_list {
   # to do (note: we know the HTML parsing occurs, because we call for the
   # rendered text which does HTML parsing...)  trying to get URLs out of
   # HTML w/out parsing causes issues, so let's not do it.
+  # also, if we allow $textary to be passed in, we need to invalidate
+  # the cache first. fyi.
   my $textary = $self->get_decoded_stripped_body_text_array();
 
   my ($rulename, $pat, @uris);
@@ -1560,7 +1571,7 @@ sub get_uri_list {
     }
   }
 
-  # remove duplicates
+  # remove duplicates, merge nuris and uris
   my %uris = map { $_ => 1 } @uris, @nuris;
   @uris = keys %uris;
 
