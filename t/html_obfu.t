@@ -18,13 +18,13 @@ q{ VIAGRA } => 'VIAGRA',
 q{ OPPORTUNITY } => 'OPPORTUNITY',
 );
 
-tstlocalrules ("
+tstlocalrules ('
 body NATURAL	/\b(?:100.|completely|totally|all) natural/i
 body GUARANTEE	/\bGUARANTEE\b/
 body MILLION_EMAIL	/million (?:\w+ )?(?:e-?mail )?addresses/i
 body OUR_AFFILIATE_PARTNERS	/our affiliate partners/i
 body VIAGRA	/viagra/i
 body OPPORTUNITY	/OPPORTUNITY/
-");
+');
 sarun ("-L -t < data/spam/011", \&patterns_run_cb);
 ok_all_patterns();
