@@ -1856,17 +1856,8 @@ sub do_meta_tests {
     my ($rulename, $rule);
     my $evalstr = '';
 
-    my @tests = keys %{$self->{conf}{meta_tests}};
-
-    my @all_tests = ();
-
-    foreach my $test_type ('body_tests', 'uri_tests', 'uri_evals',
-    'head_tests', 'head_evals', 'body_evals', 'full_tests',
-    'full_evals', 'rawbody_tests', 'rawbody_evals') {
-      push(@all_tests, keys %{$self->{conf}{$test_type}});
-    }
-
-    foreach $rulename (@tests) {
+    # Go through each meta test setting up the eval string
+    foreach $rulename ( sort keys %{$self->{conf}{meta_tests}} ) {
         $rule = $self->{conf}->{meta_tests}->{$rulename};
 
         my @tokens = $rule =~ m/([\w\.\[][\w\.\*\?\+\[\^\]]+|[\(\)]|\|\||\&\&|>=?|<=?|==|!=|!|[\+\-\*\/]|\d+)/g;
@@ -1890,6 +1881,7 @@ sub do_meta_tests {
 
         # dbg ("meta expression: $expr");
 
+	# Add this meta rule to the eval line
         $evalstr .= '
         ' . $setupline . ';
         if (' . $expr . ') {
@@ -1899,6 +1891,7 @@ sub do_meta_tests {
     ';
     }
 
+    # setup the environment for meta tests
     $evalstr = <<"EOT";
 {
     package Mail::SpamAssassin::PerMsgStatus;
