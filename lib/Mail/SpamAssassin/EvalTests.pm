@@ -2681,9 +2681,19 @@ sub check_for_to_in_subject {
 
   my $return = $subject =~ /^\s*\Q$to\E,\S/;       # "user,\S" case sensitive
 
-  if ( $test && !$return ) { # test versions
+  if ( defined $test ) { # test versions
     if ( $test == 1 ) {
       $return = $subject =~ /\b\Q$full_to\E\b/i;   # "user@domain.com"
+    }
+    elsif ( $test == 2 ) {
+      $to = ucfirst $to;
+      $return = $subject =~ /^\s*\Q$to\E,\S/;       # "user,\S" case sensitive (ucfirst)
+    }
+    elsif ( $test == 3 ) {
+      $return = $subject =~ /^\s*\Q$to\E,\S/i;       # "user,\S" case insensitive
+    }
+    elsif ( $test == 4 ) {
+      $return = $subject =~ /^\s*\Q$full_to\E\b/i;   # "user@domain.com"
     }
   }
   return $return;
