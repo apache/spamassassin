@@ -188,10 +188,17 @@ sub dnsbl_hit {
 sub dnsbl_uri {
   my ($self, $question, $answer) = @_;
 
-  if ($question->string =~ m/^(\S+?)\.?\s+(\S+)\s+(\S+)/) {
-    my ($dnsname, $dnsclassval, $dnstypeval) = ($1, $2, $3);
-    my $dnsuri = "dns:$dnsname?class=$dnsclassval;type=$dnstypeval";
-    push @{ $self->{dnsuri}->{$dnsuri} }, $answer->rdatastr;
+  my $qname = $question->qname;
+  my $rdatastr = $answer->rdatastr;
+
+  if (defined $qname && defined $rdatastr) {
+    my $qclass = $question->qclass;
+    my $qtype = $question->qtype;
+    my @vals;
+    push(@vals, "class=$qclass") if $qclass ne "IN";
+    push(@vals, "type=$qtype") if $qtype ne "A";
+    my $uri = "dns:$qname" . (@vals ? "?" . join(";", @vals) : "");
+    push @{ $self->{dnsuri}->{$uri} }, $rdatastr;
   }
 }
 
