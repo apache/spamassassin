@@ -1815,7 +1815,7 @@ sub check_for_mime_long_line_qp {
   return $self->{mime_long_line_qp};
 }
 
-sub check_for_mime_suspect_name {
+sub check_for_mime_suspect_name { # MIME_SUSPECT_NAME
   my ($self) = @_;
 
   $self->_check_attachments unless exists $self->{mime_suspect_name};
@@ -1850,7 +1850,7 @@ sub _check_mime_header {
     $name =~ s/.*\.//;
     $ctype =~ s@/(x-|vnd\.)@/@;
     if (   ($name =~ /^html?$/ && $ctype ne "text/html")
-	|| ($name =~ /^jpe?g$/ && $ctype ne "image/jpeg")
+	|| ($name =~ /^jpe?g$/ && $ctype !~ m@^image/p?jpeg@)
 	|| ($name eq "pdf" && $ctype ne "application/pdf")
 	|| ($name eq "gif" && $ctype ne "image/gif")
 	|| ($name eq "txt" && $ctype ne "text/plain")
