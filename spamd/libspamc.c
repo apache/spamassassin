@@ -341,7 +341,7 @@ void message_dump(int in_fd, int out_fd, struct message *m){
 }
 
 int message_filter(const struct sockaddr *addr, char *username, int flags, struct message *m){
-    char *buf=NULL, is_spam[5];
+    char *buf=NULL, is_spam[6];
     int len, expected_len, i, header_read=0;
     int sock;
     float version;
