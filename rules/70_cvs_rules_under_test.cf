@@ -10,13 +10,8 @@
 #
 ###########################################################################
 
-# improvement on NO_REAL_NAME
-header __NO_NAME		From =~ /^\s*<?\S+\@\S+\>?\s*$/
-header __EMPTY_NAME		From =~ /^\s*\"\"\s*<?\S+\@\S+\>?\s*$/
-meta T_NO_REAL_NAME		(__NO_NAME || __EMPTY_NAME)
-describe T_NO_REAL_NAME		From: does not include a real name
-
 # should be fixed now
+# %%% INVALID_MSGID
 header T_INVALID_MSGID		Message-Id !~ /^<(?:[a-zA-Z0-9.,!\#\$%&'*\+\/=?\^_{}|~-]+|\".+\")\@(?:[a-zA-Z0-9_.-]+|\[\d{1,3}(?:\.\d{1,3}){3}\])>(?:\s*\(.*\))?\s*$/ [if-unset: <NO@MSGID>]
 describe T_INVALID_MSGID	Message-Id is not valid, according to RFC 2822
 
@@ -74,10 +69,16 @@ body T_HTML_WEB_BUGS_BACKGROUND	eval:html_test('web_bugs_background')
 body T_HTML_WEB_BUGS_SRC	eval:html_test('web_bugs_src')
 
 # possible improvements for HTML_JAVASCRIPT
+# %%% HTML_JAVASCRIPT
 body T_HTML_JAVASCRIPT		eval:html_test('t_javascript')
 
 # possible replacement/supplement for FROM_BTAMAIL
+# %%% FROM_BTAMAIL
 header T_BTAMAIL_HEADER		ALL =~ /btamail\.net\.cn/i
+
+# spam URLs containing "china"
+header T_CHINA_HEADER		ALL =~ /\@china\.com/i
+uri T_CHINA_URL			/(?:freehost|yada)china\.com/i
 
 # plain old body rule
 # group with SENT_IN_COMPLIANCE
@@ -85,13 +86,55 @@ body T_FURTHER_TRANSMISSIONS	/further transmissions to you by the sender/i
 describe T_FURTHER_TRANSMISSIONS	Claims compliance with spam regulations
 score T_FURTHER_TRANSMISSIONS	1.0
 
+# mortgage and refinance rules
+body T_MORTGAGE_WAITING		/mortgage companies make you wait/i
+body T_MORTGAGE_NETWORK		/will be transmitted to our network of mortgage specialists/i
+body T_REFINANCE_NOW		/time to refinance|refinanc\w{1,3}\b.{0,16}\bnow\b/i
+body T_HELPED_FINANCE		/you helped me finance a new home and I got a very good deal/i
+body T_FALLING_INTEREST		/falling interest/i
+
+body T_ORDER_REPORT		/order report .\s?\d from/i
+describe T_ORDER_REPORT		Order a report from someone
+
+# dear user
+body T_DEAR_USER		/dear(?: \w+)? user/i
+
+# new porn rules
+body T_PORN_14			/hard.?core.?porn/i
+body T_PORN_15			/(?:college|eating|licking|spears|tight|wet|shaved|voyeur|young|teen(?:age)?).{0,16}pussy/i
+body T_PORN_16			/(?:nasty|teen|dir(?:ty|iest)?|little).{0,16}\bsluts?/i
+
+# 419 spam, group/merge with other Nigeria rules
+body T_MILLION_USD		/Million\b.{0,40}\b(?:United States? Dollars?|USD)/i
+
+# multiple spaces in subject lines, and other ways of embedding tracking codes
+header T_SUBJ_HAS_TIME_ID	Subject =~ /\sTime[: ]+\d+:\d+:\d+ [AP]M\s*$/i
+
+# faked addresses tend to come from big public sites
+#
+# first rule just requires fewer digits than the second, I get no FPs for
+# length 4 and above
+#
+# I get FPs and not many more spam hits if I try to allow hits on more than
+# one line (it seems like spammers tend to put the faked addresses at the
+# beginning of address lists)
+#
+header T_ADDR_NUMS_BIGSITE_1	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{4,}\@(?:aol|bigfoot|compuserve|excite|hotmail|juno|prodigy|yahoo)\.(?:com|net|org)/mi
+header T_ADDR_NUMS_BIGSITE_2	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@(?:aol|bigfoot|compuserve|excite|hotmail|juno|prodigy|yahoo)\.(?:com|net|org)/mi
+
+# to replace CHARSET_FARAWAY_BODY
+# %%% CHARSET_FARAWAY_BODY
+rawbody __MIME_FARAWAY_CHARSET	eval:check_for_mime_faraway_charset()
+body __HIGHBITS			/(?:[\x80-\xff].?){4,}/
+meta T_MIME_FARAWAY_CHARSET	(__MIME_FARAWAY_CHARSET && __HIGHBITS)
+
 ########################################################################
 # bug 1106: forged MUAs
 # only needed a \b around the shortest X-Mailer regular expressions
 
 # AOL
 header __AOL_MUA		X-Mailer =~ /\bAOL\b/
-header __AOL_MSGID		Message-Id =~ /^<[0-9a-f]{1,3}\.[0-9a-f]{7,8}\.[0-9a-f]{8}\@aol.com>$/
+header __AOL_MSGID		Message-Id =~ /^<[0-9a-f]{1,3}\.[0-9a-f]{6,8}\.[0-9a-f]{8}\@aol.com>$/
 meta T_FORGED_MUA_AOL		(__AOL_MUA && !__AOL_MSGID)
 describe T_FORGED_MUA_AOL	Forged mail pretending to be from AOL
 score T_FORGED_MUA_AOL		1.0
@@ -114,7 +157,8 @@ score T_FORGED_MUA_MOZILLA	1.0
 header __OUTLOOK_MUA		X-Mailer =~ /\bOutlook\b(?! IMO)/
 header __OUTLOOK_MSGID_1	Message-Id =~ /^<[0-9a-f]{12}\$[0-9a-f]{8}\$[0-9a-f]{8}\@\S+>$/
 header __OUTLOOK_MSGID_2	Message-Id =~ /^<OE[0-9A-Za-z]{25}\@hotmail\.com>$/
-meta T_FORGED_MUA_OUTLOOK	(__OUTLOOK_MUA && !(__OUTLOOK_MSGID_1 || __OUTLOOK_MSGID_2))
+header __OUTLOOK_MSGID_3	Message-Id =~ /^<DAV[0-9A-Za-z]{24}\@hotmail\.com>$/
+meta T_FORGED_MUA_OUTLOOK	(__OUTLOOK_MUA && !(__OUTLOOK_MSGID_1 || __OUTLOOK_MSGID_2 || __OUTLOOK_MSGID_3))
 describe T_FORGED_MUA_OUTLOOK	Forged mail pretending to be from Outlook
 score T_FORGED_MUA_OUTLOOK	1.0
 
@@ -144,6 +188,8 @@ score T_FORGED_MUA_THEBAT	1.0
 # possible replacements for SUBJ_HAS_SPACES
 # original version from a postfix filter (Craig Sanders)
 # adds some hits, but loses some too
+# %%% SUBJ_HAS_SPACES
+# %%% SUBJ_ENDS_IN_SPACES
 header T_SUBJ_ENDS_IN_SPACES	Subject =~ /\s{6,}([^0 \t]\S{3,})?$/
 # distilled new rules (merge of T_SUBJ_ENDS_IN_SPACES and SUBJ_HAS_SPACES)
 header T_SUBJ_HAS_SPACES1	Subject =~ /(?:\s{6,}|\t)/
@@ -569,22 +615,33 @@ uri T_HEX_HOST	/^https?:\/\/[^\/]*0x[0-9a-fA-F]{2}/
 describe T_HEX_HOST	Looks like an URL with obfuscated hex IP address
 score T_HEX_HOST	0.01
 
-# If we see % followed by 21-7e except 2[2356f], 3[a-f], and 40, they don't need escaping, suspicious...
-# This is pretty ugly, but I couldn't think of a better way to do it. :|
-uri T_HTTP_ESCAPED_URI_SUSPICIOUS	m@%(?:2[147-9a-e]|3[0-9]|4[1-9a-f]|[56][0-9a-f]|7[0-9a-e])@i
-describe T_HTTP_ESCAPED_URI_SUSPICIOUS      Uses unnecessary %-escapes inside a URL's path
-score T_HTTP_ESCAPED_URI_SUSPICIOUS 0.01
-
-# conservative version of above rule, just look for 0-9, A-Z, a-z
+# conservative version, just look for 0-9, A-Z, a-z
 uri T_EXCESSIVE_URI_ESCAPES_V1		m/%(?:3[0-9]|[46][1-9a-f]|[57][\da])/i
 describe T_EXCESSIVE_URI_ESCAPES_V1	Unnecessary %-escapes inside a URL
 score T_EXCESSIVE_URI_ESCAPES_V1	0.01
 
-# somewhat conservative version, look for 0-9, A-Z, a-z plus the most common
-# non-letters that are 100% spam and no ham: '|', '-', ';', '(', and ')'
-uri T_EXCESSIVE_URI_ESCAPES_V2		m/%(?:2[89d]|3[0-9b]|[46][1-9a-f]|[57][\dac])/i
+# somewhat conservative version, look for 0-9, A-Z, a-z plus the 3 most common
+# non-letters that are highly indicative of spam: '|', '-', ';'
+uri T_EXCESSIVE_URI_ESCAPES_V2		m/%(?:2d|3[0-9b]|[46][1-9a-f]|[57][\dac])/i
 describe T_EXCESSIVE_URI_ESCAPES_V2	Unnecessary %-escapes inside a URL
 score T_EXCESSIVE_URI_ESCAPES_V2	0.01
+
+# less conservative version, look for 0-9, A-Z, a-z plus the 3 most common
+# non-letters that are highly indicative of spam: '|', '-', ';', '(', and ')'
+uri T_EXCESSIVE_URI_ESCAPES_V3		m/%(?:2[89d]|3[0-9b]|[46][1-9a-f]|[57][\dac])/i
+describe T_EXCESSIVE_URI_ESCAPES_V3	Unnecessary %-escapes inside a URL
+score T_EXCESSIVE_URI_ESCAPES_V3	0.01
+
+# T_EXCESSIVE_URI_ESCAPES_V3 except require two matches
+uri T_EXCESSIVE_URI_ESCAPES_V4		m/(?:%(?:2[89d]|3[0-9b]|[46][1-9a-f]|[57][\dac]).*){2}/i
+describe T_EXCESSIVE_URI_ESCAPES_V4	Unnecessary %-escapes inside a URL
+score T_EXCESSIVE_URI_ESCAPES_V4	0.01
+
+# T_EXCESSIVE_URI_ESCAPES_V3 except require three matches (to avoid hitting
+# matching parens
+uri T_EXCESSIVE_URI_ESCAPES_V5		m/(?:%(?:2[89d]|3[0-9b]|[46][1-9a-f]|[57][\dac]).*){3}/i
+describe T_EXCESSIVE_URI_ESCAPES_V5	Unnecessary %-escapes inside a URL
+score T_EXCESSIVE_URI_ESCAPES_V5	0.01
 
 # Most/all of these require that From addresses do not start with numbers.
 # let's see how this does... (jm)
@@ -664,10 +721,15 @@ describe T_EARN_MONEY        Message talks about earning money
 # will often query the ident server on a relay; Squid proxies should not be
 # sending mail.
 
-header T_IDENT_SQUID    Received =~ /ident[:=]squid\b/i
-describe T_IDENT_SQUID  Message was sent by a Squid HTTP proxy
-score T_IDENT_SQUID     1.0
+header T_IDENT_SQUID		Received =~ /ident[:=]squid\b/i
+describe T_IDENT_SQUID		Message was sent by a Squid HTTP proxy
+score T_IDENT_SQUID		1.0
 
+header T_IDENT_NOBODY		Received =~ /ident[:=]nobody\b/i
+describe T_IDENT_NOBODY		Message was sent by nobody
+score T_IDENT_NOBODY		1.0
+
+# %%% EXCUSE_10
 body T_EXCUSE_10			/if you (?:(?:want|wish|care|prefer) not to |do ?n[o']t (?:want|wish|care) to )(?:be contacted again|receive (?:any ?)?(?:more|future|further)\b.{1,10}\b(?:e?-?mail|message|offer|solicitation)s?|be included)/i
 
 body T_EXCUSE_25		/you have been included (?:mistakenly|by mistake)/i
