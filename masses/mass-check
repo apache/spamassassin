@@ -276,13 +276,17 @@ sub wanted {
   # log-uris support
   my $status;
   my @uris;
+  my $before;
+  my $after;
   if ($opt_loguris) {
     my $pms = Mail::SpamAssassin::PerMsgStatus->new($spamtest, $ma);
     @uris = $pms->get_uri_list();
     $pms->finish();
 
   } else {
+    $before = time;
     $status = $spamtest->check($ma);
+    $after = time;
   }
 
   my @extra;
@@ -307,6 +311,7 @@ sub wanted {
     $mid =~ tr/-A-Za-z0-9_!#%&=~<@>/./c;     # replace dangerous chars with . (so regexp search just works)
     push(@extra, "mid=$mid");
   }
+  push(@extra, "scantime=" . ($after - $before));
 
   my $yorn;
   my $score;
