@@ -76,19 +76,16 @@ body HTML_TABLE_THICK_BORD		eval:html_test('thick_border')
 describe HTML_TABLE_THICK_BORD	HTML table has thick border
 
 # HTML comment tests
-body HTML_COMMENT_EMAIL		eval:html_eval('comment_text', '=~ /\S+\@\S+/')
+body HTML_COMMENT_EMAIL		eval:html_text('comment', '=~ /\S+\@\S+/')
 describe HTML_COMMENT_EMAIL	HTML comment contains email address
 
 body HTML_COMMENT_SHOUTING	eval:html_test('comment_shouting')
 describe HTML_COMMENT_SHOUTING	HTML comment inside of "shouting" markup
 
-body HTML_COMMENT_SKY		eval:html_eval('comment_text', '=~ /SKY-(?:Email-Address|Database|Mailing|List)/')
-describe HTML_COMMENT_SKY	HTML comment contains SKY database codes
-
-body HTML_COMMENT_8BITS		eval:html_eval('comment_text', '=~ /[\x80-\xff]{3,}/')
+body HTML_COMMENT_8BITS		eval:html_text('comment', '=~ /[\x80-\xff]{3,}/')
 describe HTML_COMMENT_8BITS	HTML comment has 3 consecutive 8-bit chars
 
-body HTML_COMMENT_SAVED_URL	eval:html_eval('comment_text', '=~ /<!-- saved from url=\(\d{4}\)/')
+body HTML_COMMENT_SAVED_URL	eval:html_text('comment', '=~ /<!-- saved from url=\(\d{4}\)/')
 describe HTML_COMMENT_SAVED_URL	HTML message is a saved web page
 
 # Comment is a spam sign when following <DIV>
@@ -322,13 +319,13 @@ describe HTML_NONELEMENT_70_80	70% to 80% of HTML elements are non-standard
 describe HTML_NONELEMENT_80_90	80% to 90% of HTML elements are non-standard
 describe HTML_NONELEMENT_90_100	90% to 100% of HTML elements are non-standard
 
-body HTML_TITLE_EMPTY		eval:html_title('!~ /\S/s')
+body HTML_TITLE_EMPTY		eval:html_text('title', '!~ /\S/s')
 describe HTML_TITLE_EMPTY	HTML title contains no text
 
 body HTML_TITLE_EXTRA		eval:html_test('title_extra')
 describe HTML_TITLE_EXTRA	HTML has more than one title
 
-body HTML_TITLE_UNTITLED	eval:html_title('=~ /untitled|new page \d+/i')
+body HTML_TITLE_UNTITLED	eval:html_text('title', '=~ /untitled|new page \d+/i')
 describe HTML_TITLE_UNTITLED	HTML title contains "Untitled"
 
 ###########################################################################
