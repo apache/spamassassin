@@ -33,7 +33,7 @@ my $skip = '';
 
 sub version {
     my $line;
-    if (open(TESTING, "$opt{tree}/rules/70_cvs_rules_under_test.cf")) {
+    if (open(TESTING, "$opt{tree}/rules/70_testing.cf")) {
 	chomp($line = <TESTING>);
 	if ($line =~ m/^#.*Rev(?:ision)?:\s*(\S+).*/) {
 	    $revision = $1;

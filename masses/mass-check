@@ -136,7 +136,7 @@ my $who   = `id -un 2>/dev/null`;   chomp $who;
 my $where = `uname -n 2>/dev/null`; chomp $where;
 my $when  = `date -u`;              chomp $when;
 my $revision = "unknown";
-if (open(TESTING, "$opt_c/70_cvs_rules_under_test.cf")) {
+if (open(TESTING, "$opt_c/70_testing.cf")) {
   chomp($revision = <TESTING>);
   $revision =~ s/.*\$Rev:\s*(\S+).*/$1/;
   close(TESTING);
