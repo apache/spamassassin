@@ -8,90 +8,91 @@
 # inefficient; if you're going to add a new RATWARE test, please name
 # the specific header, as that's much quicker.
 
-header RATWARE_GROUPMAIL   ALL =~ /Group Mail/
-describe RATWARE_GROUPMAIL Bulk email software fingerprint (Group Mail) found in headers
-header RATWARE_IMKTG	   ALL =~ /Internet Marketing/
-describe RATWARE_IMKTG	   Bulk email software fingerprint (IMktg) found in headers
-header RATWARE_NETMAILER   ALL =~ /NetMailer/
-describe RATWARE_NETMAILER Bulk email software fingerprint (NetMailer) found in headers
-header RATWARE_YMR	   ALL =~ /YMR/
-describe RATWARE_YMR	   Bulk email software fingerprint (YMR) found in headers
-header RATWARE_MATCHMAKER  ALL =~ /Matchmaker/
-describe RATWARE_MATCHMAKER Bulk email software fingerprint (Matchmaker) found in headers
-header RATWARE_DIFFOND	   ALL =~ /DiffondiCool/
-describe RATWARE_DIFFOND   Bulk email software fingerprint (DiffondiCool) found in headers
-header RATWARE_COGNI       ALL =~ /Cognigen/
-describe RATWARE_COGNI	   Bulk email software fingerprint (Cognigen) found in headers
-header RATWARE_STORM       X-Mailer =~ /StormPost 1.0/
-describe RATWARE_STORM     Bulk email software fingerprint (StormPost) found in headers
+header RATWARE_GROUPMAIL	ALL =~ /Group Mail/
+describe RATWARE_GROUPMAIL	Bulk email software fingerprint (Group Mail) found in headers
+header RATWARE_IMKTG		ALL =~ /Internet Marketing/
+describe RATWARE_IMKTG		Bulk email software fingerprint (IMktg) found in headers
+header RATWARE_NETMAILER	ALL =~ /NetMailer/
+describe RATWARE_NETMAILER	Bulk email software fingerprint (NetMailer) found in headers
+header RATWARE_YMR		ALL =~ /YMR/
+describe RATWARE_YMR		Bulk email software fingerprint (YMR) found in headers
+header RATWARE_MATCHMAKER	ALL =~ /Matchmaker/
+describe RATWARE_MATCHMAKER	Bulk email software fingerprint (Matchmaker) found in headers
+header RATWARE_DIFFOND		ALL =~ /DiffondiCool/
+describe RATWARE_DIFFOND	Bulk email software fingerprint (DiffondiCool) found in headers
+header RATWARE_COGNI		ALL =~ /Cognigen/
+describe RATWARE_COGNI		Bulk email software fingerprint (Cognigen) found in headers
+header RATWARE_STORM		X-Mailer =~ /StormPost/
+describe RATWARE_STORM		Bulk email software fingerprint (StormPost) found in headers
 
 # We should not be seeing X-Mailer headers from news gateways, in email messages.
 # TODO: check to see if legit mails, gatewayed from USENET to mail, might contain
 # this header!
-header RATWARE_EGROUPS     X-Mailer =~ /eGroups Message Poster/
-describe RATWARE_EGROUPS   Bulk email software fingerprint (eGroups) found in headers
+header RATWARE_EGROUPS		X-Mailer =~ /eGroups Message Poster/
+describe RATWARE_EGROUPS	Bulk email software fingerprint (eGroups) found in headers
 
-header RATWARE_CSMTP     X-Mailer =~ /CSMTPConnection v/
-describe RATWARE_CSMTP   Bulk email software fingerprint (CSMTPConnection) found in headers
-header RATWARE_XMAILER     X-Mailer =~ /{%xmailer%}/
-describe RATWARE_XMAILER   Bulk email software fingerprint (xmailer tag) found in headers
-header RATWARE_LC_OUTLOOK     X-Mailer =~ /^outlook$/
-describe RATWARE_LC_OUTLOOK   Bulk email software fingerprint (outlook) found in headers
-header RATWARE_CARETOP     X-Mailer =~ /Caretop 2604/
-describe RATWARE_CARETOP   Bulk email software fingerprint (Caretop) found in headers
-header RATWARE_PASCUAL     X-Mailer =~ /made from pascual/
-describe RATWARE_PASCUAL   Bulk email software fingerprint (pascual) found in headers
-header RATWARE_GR     X-Mailer =~ /GRMessageQueue/
-describe RATWARE_GR   Bulk email software fingerprint (/GRMessageQueue/) found in headers
-header RATWARE_JPFREE     X-Mailer =~ /jpfree Group Mail Express v1.0/
-describe RATWARE_JPFREE   Bulk email software fingerprint (jpfree) found in headers
-header RATWARE_VC_IPA     X-Mailer =~ /2.0-b55-VC_IPA/
-describe RATWARE_VC_IPA   Bulk email software fingerprint (VC_IPA) found in headers
-header RATWARE_EPAPER     X-Mailer =~ /EPaper Boy/
-describe RATWARE_EPAPER   Bulk email software fingerprint (EPaper) found in headers
-header RATWARE_HSU     X-Mailer =~ /Mailer by Henry Su/
-describe RATWARE_HSU   Bulk email software fingerprint (HSU) found in headers
-header RATWARE_MMAILER     X-Mailer =~ /MMailer v3.0/
-describe RATWARE_MMAILER   Bulk email software fingerprint (MMailer) found in headers
-header RATWARE_MBOMBER     X-Mailer =~ /Mail Bomber/
-describe RATWARE_MBOMBER   Bulk email software fingerprint (Mail Bomber) found in headers
-header RATWARE_JIXING     X-Mailer =~ /JiXing .{0,30}Design By JohnnieHuang/
-describe RATWARE_JIXING   Bulk email software fingerprint (JiXing) found in headers
-header RATWARE_YAM     X-Mailer =~ /Yam Mailer v1.0/
-describe RATWARE_YAM   Bulk email software fingerprint (Yam) found in headers
-header RATWARE_POWERC     X-Mailer =~ /PowerCampaign v2.30.003--/
-describe RATWARE_POWERC   Bulk email software fingerprint (PowerCampaign) found in headers
-header RATWARE_SEEDNET     X-Mailer =~ /Seednet custom enewsletter/
-describe RATWARE_SEEDNET   Bulk email software fingerprint (Seednet) found in headers
-header RATWARE_EVAMAIL     X-Mailer =~ /EVAMAIL/
-describe RATWARE_EVAMAIL   Bulk email software fingerprint (EVAMAIL) found in headers
-header RATWARE_CBLAST     X-Mailer =~ /Campaign Blaster/
-describe RATWARE_CBLAST   Bulk email software fingerprint (Campaign Blaster) found in headers
-header RATWARE_MAMA     X-Mailer =~ /mama sender auth:/
-describe RATWARE_MAMA   Bulk email software fingerprint (mama) found in headers
-header RATWARE_EBIZ     X-Mailer =~ /eBizmailer3.0/
-describe RATWARE_EBIZ   Bulk email software fingerprint (eBizmailer) found in headers
-header RATWARE_OPTIN     X-Mailer =~ /Opt-In Lightning By Garvinweb/
-describe RATWARE_OPTIN   Bulk email software fingerprint (Opt-In Lightning) found in headers
-header RATWARE_UPROAR     X-Mailer =~ /Uproar Mass Mailer/
-describe RATWARE_UPROAR   Bulk email software fingerprint (Uproar) found in headers
+header RATWARE_ANSMTP		X-Mailer =~ /_ANSMTP_/
+describe RATWARE_ANSMTP		Bulk email software fingerprint (ANSMTP) found in headers
+header RATWARE_CSMTP		X-Mailer =~ /CSMTPConnection/
+describe RATWARE_CSMTP		Bulk email software fingerprint (CSMTPConnection) found in headers
+header RATWARE_CARETOP		X-Mailer =~ /Caretop 2604/
+describe RATWARE_CARETOP	Bulk email software fingerprint (Caretop) found in headers
+header RATWARE_PASCUAL		X-Mailer =~ /made from pascual/
+describe RATWARE_PASCUAL	Bulk email software fingerprint (pascual) found in headers
+header RATWARE_GR		X-Mailer =~ /GRMessageQueue/
+describe RATWARE_GR		Bulk email software fingerprint (GRMessageQueue) found in headers
+header RATWARE_JPFREE		X-Mailer =~ /jpfree Group Mail Express/
+describe RATWARE_JPFREE		Bulk email software fingerprint (jpfree) found in headers
+header RATWARE_VC_IPA		X-Mailer =~ /2\.0-b55-VC_IPA/
+describe RATWARE_VC_IPA		Bulk email software fingerprint (VC_IPA) found in headers
+header RATWARE_EPAPER		X-Mailer =~ /EPaper Boy/
+describe RATWARE_EPAPER		Bulk email software fingerprint (EPaper) found in headers
+header RATWARE_HSU		X-Mailer =~ /Mailer by Henry Su/
+describe RATWARE_HSU		Bulk email software fingerprint (Henry Su) found in headers
+header RATWARE_MMAILER		X-Mailer =~ /MMailer v3\.0/
+describe RATWARE_MMAILER	Bulk email software fingerprint (MMailer) found in headers
+header RATWARE_MBOMBER		X-Mailer =~ /Mail Bomber/
+describe RATWARE_MBOMBER	Bulk email software fingerprint (Mail Bomber) found in headers
+header RATWARE_JIXING		X-Mailer =~ /JiXing .{0,30}Design By JohnnieHuang/
+describe RATWARE_JIXING		Bulk email software fingerprint (JiXing) found in headers
+header RATWARE_YAM		X-Mailer =~ /Yam Mailer v1\.0/
+describe RATWARE_YAM		Bulk email software fingerprint (Yam) found in headers
+header RATWARE_POWERC		X-Mailer =~ /PowerCampaign/
+describe RATWARE_POWERC		Bulk email software fingerprint (PowerCampaign) found in headers
+header RATWARE_SEEDNET		X-Mailer =~ /Seednet custom enewsletter/
+describe RATWARE_SEEDNET	Bulk email software fingerprint (Seednet) found in headers
+header RATWARE_EVAMAIL		X-Mailer =~ /EVAMAIL/
+describe RATWARE_EVAMAIL	Bulk email software fingerprint (EVAMAIL) found in headers
+header RATWARE_CBLAST		X-Mailer =~ /Campaign Blaster/
+describe RATWARE_CBLAST		Bulk email software fingerprint (Campaign Blaster) found in headers
+header RATWARE_MAMA		X-Mailer =~ /mama sender auth:/
+describe RATWARE_MAMA		Bulk email software fingerprint (mama) found in headers
+header RATWARE_EBIZ		X-Mailer =~ /eBizmailer3\.0/
+describe RATWARE_EBIZ		Bulk email software fingerprint (eBizmailer) found in headers
+header RATWARE_OPTIN		X-Mailer =~ /Opt-In Lightning By Garvinweb/
+describe RATWARE_OPTIN		Bulk email software fingerprint (Opt-In Lightning) found in headers
+header RATWARE_UPROAR		X-Mailer =~ /Uproar Mass Mailer/
+describe RATWARE_UPROAR		Bulk email software fingerprint (Uproar) found in headers
 
-header RATWARE_CURMAIL     X-Mailer =~ /CurrentMailer\~/
-describe RATWARE_CURMAIL   Bulk email software fingerprint (CurrentMailer) found in headers
-header RATWARE_CHARSET     X-Mailer =~ /charset\(89\)/
-describe RATWARE_CHARSET   Bulk email software fingerprint (charset) found in headers
-header RATWARE_SCREWUP_1     X-Mailer =~ /^X-Mailer: /
-describe RATWARE_SCREWUP_1   Bulk email software fingerprint (screwup 1) found in headers
-header RATWARE_SCREWUP_2     X-Mailer =~ /^: /
-describe RATWARE_SCREWUP_2   Bulk email software fingerprint (screwup 2) found in headers
-header RATWARE_ANSMTP     X-Mailer =~ /_ANSMTP_/
-describe RATWARE_ANSMTP   Bulk email software fingerprint (ANSMTP) found in headers
-header RATWARE_HASH_1     X-Mailer =~ /^\w+!\w+\#\w+\*$/
-describe RATWARE_HASH_1   Bulk email software fingerprint (hash 1) found in headers
-header RATWARE_HASH_2     X-Mailer =~ /^[A-Za-z0-9\._]{16,}$/
-describe RATWARE_HASH_2   Bulk email software fingerprint (hash 2) found in headers
-header RATWARE_OE_PI       X-Mailer =~ /OutLook Express 3\.14159/
-describe RATWARE_OE_PI     X-Mailer contains 'OutLook Express 3.14159'
+header RATWARE_XMAILER		X-Mailer =~ /{%xmailer%}/
+describe RATWARE_XMAILER	Bulk email software fingerprint (xmailer tag) found in headers
+header RATWARE_CURMAIL		X-Mailer =~ /CurrentMailer\~/
+describe RATWARE_CURMAIL	Bulk email software fingerprint (CurrentMailer) found in headers
+header RATWARE_CHARSET		X-Mailer =~ /\Qcharset(89)\E/
+describe RATWARE_CHARSET	Bulk email software fingerprint (charset) found in headers
+header RATWARE_SCREWUP_1	X-Mailer =~ /^X-Mailer: /
+describe RATWARE_SCREWUP_1	Bulk email software fingerprint (screwup 1) found in headers
+header RATWARE_SCREWUP_2	X-Mailer =~ /^: /
+describe RATWARE_SCREWUP_2	Bulk email software fingerprint (screwup 2) found in headers
+header RATWARE_HASH_1		X-Mailer =~ /^\w+!\w+\#\w+\*$/
+describe RATWARE_HASH_1		Bulk email software fingerprint (hash 1) found in headers
+header RATWARE_HASH_2		X-Mailer =~ /^[A-Za-z0-9\._]{16,}$/
+describe RATWARE_HASH_2		Bulk email software fingerprint (hash 2) found in headers
+
+header RATWARE_LC_OUTLOOK	X-Mailer =~ /^outlook$/
+describe RATWARE_LC_OUTLOOK	Bulk email software fingerprint ("outlook") found in headers
+header RATWARE_OE_PI		X-Mailer =~ /Out[Ll]ook Express 3\.14159/
+describe RATWARE_OE_PI		X-Mailer contains "OutLook Express 3.14159"
 
 
 # commented all of these until they get some hits ;)
