@@ -910,8 +910,9 @@ score USER_IN_ALL_SPAM_TO -100.000
 # Habeas: http://www.habeas.com/
 #
 
-score HABEAS_SWE -8.0
-score HABEAS_VIOLATOR 16.0
+score HABEAS_SWE -0.001
+score HABEAS_INFRINGER 0 8.0 0 8.0
+score HABEAS_USER 0 -8.0 0 -8.0
 
 #
 # Bayesian Classifier
