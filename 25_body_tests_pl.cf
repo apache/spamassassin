@@ -1,0 +1,143 @@
+# polish spamassassin body tests.
+#
+# please be aware that values are just my estimates
+# and could be wrong. Use with care.
+# contact info: <radek@alter.pl>
+
+lang pl body PL_ZAPRASZAMY		/ZAPRASZAMY/
+lang pl body PL_SERDECZ_ZAPRASZAMY	/serdecznie.*zapraszamy/i
+lang pl body PL_ZAMOWIENIE		/zam.wieni/i
+lang pl body PL_BEZPLATNIE		/bezp.atn/i
+lang pl body PL_NISKIE_CENY		/nisk.* cen/i
+lang pl body PL_JESZCZE_DZIS		/jeszcze .*dzi/i
+lang pl body PL_NAJNIZ_CENY		/najni.* cen/i
+lang pl body PL_SPEC_OFERTA		/specjaln.*ofert/i
+lang pl body PL_GDZIEKUPIC		/GDZIE.*KUPI/i
+lang pl body PL_NASZ_OFERT		/nasz.* ofert/i
+lang pl body PL_NASZ_FIRMA		/nasz.* firm/i
+lang pl body PL_CENY_TTO		/cen.*tto/i
+lang pl body PL_MAILING			/maill?ing/i
+lang pl body PL_OFERTA_CENOWA		/ofert.* cen/i
+lang pl body PL_WWW_ADRESY_ORG		/www.adresy.org/i
+lang pl body PL_WSPOLRPACA		/zainteresowan.*wsp..prac/
+
+lang pl body PL_ZALICZENIE_POCZT	/zaliczeni.*poczt/i
+lang pl describe PL_ZALICZENIE_POCZT	Tresc zawiera 'Za zaliczeniem pocztowym...'
+lang pl score PL_ZALICZENIE_POCZT	1.0
+
+lang pl body PL_UPOWAZNIENIE_VAT	/upowaznien.*wystawienia faktury.*podpisu odbiorc/i
+lang pl describe PL_UPOWAZNIENIE_VAT	Tresc zawiera 'Upowaznienie do wystawiania faktur VAT...'
+lang pl score PL_UPOWAZNIENIE_VAT	1.5
+
+lang pl body PL_ZALICZENIE_POCZT	/zaliczeni.*poczt/i
+lang pl describe PL_ZALICZENIE_POCZT	Tresc zawiera 'Za zaliczeniem pocztowym...'
+lang pl score PL_ZALICZENIE_POCZT	1.0
+
+lang pl body PL_JESLI_NIE_CHCESZ	/je.*li nie chce/i
+lang pl describe PL_JESLI_NIE_CHCESZ	Tresc zawiera 'Je¿eli nie chcesz (otrzymywac)...'
+lang pl score PL_JESLI_NIE_CHCESZ	2.0
+
+lang pl body PL_JEZELI_NIE_INTERESUA	/je.*li nie interesuj/i
+lang pl describe JEZELI_NIE_INTERESUA	Tresc zawiera 'Je¿eli nie interesuj±...'
+lang pl score PJEZELI_NIE_INTERESUA	2.0
+
+lang pl body PL_JEZELI_NIE		/je.*li.*nie .ycz.*sobie/i
+lang pl describe PL_JEZELI_NIE		Tresc zawiera 'Je¿eli (Pañstwo) nie ¿yczycie(sz) sobie'
+lang pl score PL_JEZELI_NIE		2.5
+
+lang pl body PL_ZAMOW_TERAZ		/zam.w teraz/i
+lang pl describe PL_ZAMOW_TERAZ		Tresc zawiera 'Zamów teraz!!!'
+lang pl score PL_ZAMOW_TERAZ		2.5
+
+lang pl body PL_NABYCIA_UNAS		/do nabycia u nas/i
+lang pl describe PL_NABYCIA_UNAS	Tresc zawiera 'do nabycia u nas'
+lang pl score PL_NABYCIA_UNAS		2.0
+
+lang pl body PL_NADANO_JEDNORAZOWO	/wiadomo.. nadano jednorazowo/i
+lang pl describe PL_NADANO_JEDNORAZOWO Tresc zawiera 'Wiadomo¶æ nadano jednorazowo...'
+lang pl score PL_NADANO_JEDNORAZOWO	2.0
+
+lang pl body PL_NADANO_NA_PODSTAWIE	/wiadomo.. nadano na podstawie /i
+lang pl describe PL_NADANO_NA_PODSTAWIE Tresc zawiera 'Wiadomo¶æ nadano na podstawie...'
+lang pl score PL_NADANO_NA_PODSTAWIE	2.0
+
+lang pl body PL_SZANOWNI_PANSTWO	/Szanowni Pa.stwo/
+lang pl describe PL_SZANOWNI_PANSTWO	Tre¶æ zawiera 'Szanowni Pañstwo'
+lang pl score PL_SZANOWNI_PANSTWO	1.5
+
+lang pl body PL_ZAPROSICI_PANSTWO	/zaprosi.*pa.stw/
+lang pl describe PL_ZAPROSICI_PANSTWO	Tre¶æ zawiera 'Zaprosiæ pañstwo'
+lang pl score PL_ZAPROSICI_PANSTWO	1.5
+
+lang pl body PL_DOPISKIEM_NIE		/odes.anie.*dopiskiem.*NIE/
+lang pl describe PL_DOPISKIEM_NIE	Tre¶æ zawiera 'odes³anie z dopiskiem NIE'
+lang pl score PL_DOPISKIEM_NIE		2.5
+
+lang pl body PL_ARTYKUL_USTAWY		/Art.*25.*ust.*2.*pkt.*2/i
+lang pl describe PL_ARTYKUL_USTAWY	Tre¶æ zawiera 'Artykul 25 ust 2 punkt 2'
+lang pl score PL_ARTYKUL_USTAWY		2.5
+
+lang pl body PL_DANE_OSOBOWE		/ustaw.*ochronie danych osobowych/i
+lang pl describe PL_DANE_OSOBOWE	Tre¶æ zawiera 'Ustawy o ochronie danych osobowych'
+lang pl score PL_DANE_OSOBOWE		2.0
+
+lang pl body PL_ADRESOW_PUBLICZ		/na.podstawie.adres.*mail.publicznie.dost.pn/i
+lang pl describe PL_ADRESOW_PUBLICZ	Tresc zawiera 'na podstawie adresow e-mail publicznie...'
+lang pl score PL_ADRESOW_PUBLICZ	2.0
+
+lang pl body PL_PUBL_DOSTEPNY		/publicznie dost.pn/i
+lang pl describe PL_PUBL_DOSTEPNY	Tresc zawiera 'publicznie dostêpny (email)'
+lang pl score PL_PUBL_DOSTEPNY		1.5
+
+lang pl body PL_ADRES_EMAIL		/adres.*mail.*zosta/i
+lang pl describe PL_ADRES_EMAIL		Tre¶æ zawiera 'adres e-mail zostal znaleziony/pozyskany'
+lang pl score PL_ADRES_EMAIL		2.0
+
+lang pl body PL_ADRES_EMAIL_3		/adres.*pochodzi z og.lnodost.pnych/i
+lang pl describe PL_ADRES_EMAIL_3	Tre¶æ zawiera 'adres (e-mail) pochodzi z ogólnodostêpnych....'
+lang pl score PL_ADRES_EMAIL_3		2.0
+
+lang pl body PL_ZAJETY_CZAS		/przepraszam.*zaj.ty czas/i
+lang pl describe PL_ZAJETY_CZAS		Tresc zawiera 'przepraszamy za zajêty czas'
+lang pl score PL_ZAJETY_CZAS		2.5
+
+lang pl body PL_DASHOFER		/Z powazaniem Wydawnictwo Verlag Dashofer/
+lang pl describe PL_DASHOFER		Tre¶æ jest od wydawnictwa Verlag Dashofer (spamerzy)
+lang pl score PL_DASHOFER		1.0
+
+lang pl body PL_PUSTY_MAIL		/pros.*pustego.*maila/i
+lang pl describe PL_PUSTY_MAIL		Tresc zawiera 'Prosimy o przes³anie pustego maila'
+lang pl score PL_PUSTY_MAIL		2.0
+
+lang pl body PL_PUSTY_MAIL_2		/wys.a. pusty.*mail/i
+lang pl describe PL_PUSTY_MAIL_2	Tresc zawiera 'Wys³aæ pusty mail'
+lang pl score PL_PUSTY_MAIL_2		2.0
+
+lang pl body PL_USUNAC_MAIL		/usun.*adres.*mail/i
+lang pl describe PL_USUNAC_MAIL		Tresc zawiera 'Aby usun±æ adres e-mail...'
+lang pl score PL_USUNAC_MAIL		2.5
+
+lang pl body PL_ADRES_Z_BAZY		/adres.* z .*bazy/i
+lang pl describe PL_ADRES_Z_BAZY	Tresc zawiera '...adres z bazy...'
+lang pl score PL_ADRES_Z_BAZY		2.0
+
+lang pl body PL_USUN_Z_BAZY		/USUN Z BAZY/i
+lang pl describe PL_USUN_Z_BAZY		Tresc zawiera 'USUN Z BAZY'
+lang pl score PL_USUN_Z_BAZY		2.0
+
+lang pl body PL_MAIL_Z_TEMATEM		/mail.* temat/i
+lang pl describe PL_MAIL_Z_TEMATEM	Tresc zawiera '...mail z tematem...'
+lang pl score PL_MAIL_Z_TEMATEM		1.5
+
+lang pl body PL_PROSBA_O_ZWROTNY	/pros.*zwrot.*mail/i
+lang pl describe PL_PROSBA_O_ZWROTNY	Tresc zawiera '...prosimy o zwrotny e-mail...'
+lang pl score PL_PROSBA_O_ZWROTNY	2.0
+
+lang pl body PL_TEMAT_USUN		/tema.* USUN/i
+lang pl describe PL_TEMAT_USUN		Tresc zawiera 'temat USUN'
+lang pl score PL_TEMAT_USUN		2.0
+
+lang pl body PL_KLIKNIJ_W_LINK		/kliknij.* w .*link/i
+lang pl describe PL_KLIKNIJ_W_LINK	Tresc zawiera 'kliknij w poni¿szy link'
+lang pl score PL_KLIKNIJ_W_LINK		2.0
+
