@@ -23,8 +23,14 @@ describe FROM_NAME_NO_SPACES	From: no spaces in name
 header TO_NO_USER		To =~ /(?:^\@|<\@| \@[^<]*$|<>)/ [if-unset: unset@unset.unset]
 describe TO_NO_USER		To: has no local-part before @ sign
 
-header TO_MALFORMED		To !~ /(?:(?:\"[^\"]+\"|\S+)\@\S+\.\S+|undisclosed-recipients:|<\S+(\!\S+){1,}>)/ [if-unset: unset@unset.unset]
+header TO_MALFORMED		To !~ /(?:(?:\"[^\"]+\"|\S+)\@\S+\.\S+|undisclosed-recipients:|<\S+(\!\S+){1,}>|^\s*$)/ [if-unset: unset@unset.unset]
 describe TO_MALFORMED		To: has a malformed address
+
+header TO_EMPTY			To =~ /^\s*$/ [if-unset: UNSET]
+describe TO_EMPTY		To: is empty
+
+header REPLY_TO_EMPTY		Reply-To =~ /^\s*$/ [if-unset: UNSET]
+describe REPLY_TO_EMPTY		Reply-To: is empty
 
 header TO_LOCALPART_EQ_REAL     To =~ /^\s*(\"?)([\w%\+\-=_\.]+)\1\s*<\2\@[\w%\+\-=_\.]+>/i
 describe TO_LOCALPART_EQ_REAL   To: repeats local-part as real name
@@ -159,12 +165,6 @@ describe FRIEND_AT_PUBLIC	sent to you@you.com or similar
 header DOMAIN_SUBJECT		Subject =~ /(\s(\.|dot\s+)(info|biz|name)|domain)\b.*(extension|info|regist(ry|ration|er)|submission)/i
 describe DOMAIN_SUBJECT		Subject: domain registration spam subject
 
-header TO_EMPTY			To =~ /^(?:\@|\s*$)/ [if-unset: UNSET]
-describe TO_EMPTY		To: is empty
-
-header REPLY_TO_EMPTY		Reply-To =~ /^(?:\@|\s*$)/ [if-unset: UNSET]
-describe REPLY_TO_EMPTY		Reply-To: is empty
-
 header ALL_CAPS_HEADER		ALL =~ /\n(?:TO|FROM|SUBJECT|DATE):/s
 describe ALL_CAPS_HEADER	Header with all capitals found
 
@@ -176,6 +176,24 @@ describe NO_MX_FOR_FROM		No MX records for the From: domain
 
 header KNOWN_BAD_DIALUPS	eval:check_for_bad_dialup_ips()
 describe KNOWN_BAD_DIALUPS	Received via known spam-harbouring dialups
+
+header FROM_AND_TO_SAME_1	eval:check_for_from_to_same('exact_both')
+describe FROM_AND_TO_SAME_1	From and To the same (1)
+
+header FROM_AND_TO_SAME_2	eval:check_for_from_to_same('exact_none')
+describe FROM_AND_TO_SAME_2	From and To are same (2)
+
+header FROM_AND_TO_SAME_3	eval:check_for_from_to_same('rough_both')
+describe FROM_AND_TO_SAME_3	From and To are same (3)
+
+header FROM_AND_TO_SAME_4	eval:check_for_from_to_same('rough_from')
+describe FROM_AND_TO_SAME_4	From and To are same (4)
+
+header FROM_AND_TO_SAME_5	eval:check_for_from_to_same('rough_to')
+describe FROM_AND_TO_SAME_5	From and To are same (5)
+
+header FROM_AND_TO_SAME_6	eval:check_for_from_to_same('rough_none')
+describe FROM_AND_TO_SAME_6	From and To are same (6)
 
 header BAD_HELO_WARNING		eval:check_for_bad_helo()
 describe BAD_HELO_WARNING	Fake name used in SMTP HELO command
@@ -492,6 +510,7 @@ header X_X_PRESENT		exists:X-x
 # these headers have very low correlation with spam
 header CRON_ENV			exists:X-Cron-Env
 header IN_REP_TO		exists:In-Reply-To
+header REFERENCES		exists:References
 header RESENT_TO		exists:Resent-To
 header USER_AGENT		exists:User-Agent
 header X_AUTH_WARNING		exists:X-Authentication-Warning
@@ -505,8 +524,17 @@ describe MIME_ODD_CASE		MiME-Version header (oddly capitalized)
 header   OE_PI			X-Mailer =~ /OutLook Express 3\.14159/
 describe OE_PI			X-Mailer contains 'OutLook Express 3.14159'
 
+header   MISSING_MIMEOLE	eval:missing_mimeole()
+describe MISSING_MIMEOLE	Message has X-MSMail-Priority, but no X-MimeOLE
+
 header   MISSING_OUTLOOK_NAME	eval:missing_outlook_name()
-describe MISSING_OUTLOOK_NAME	Message looks like Outlook, but isn't.
+describe MISSING_OUTLOOK_NAME	Message looks like Outlook, but isn't
+
+header   PRIORITY_NO_NAME	eval:priority_no_name()
+describe PRIORITY_NO_NAME	Message has priority setting, but no X-Mailer
+
+header   PARTIAL_RFC_2369	eval:partial_rfc_2369()
+describe PARTIAL_RFC_2369	1 or 2 headers out of 6 headers from RFC 2369
 
 header PGP_SIGNATURE_2		Content-Type =~ /protocol=.?application\/pgp-signature.?;/i
 describe PGP_SIGNATURE_2	Contains a PGP-signed message (signature attached)
