@@ -70,6 +70,9 @@ describe LOTS_OF_STUFF		Thousands or millions of pictures, movies, etc.
 body DISGUISE_PORN              /\b(?:c[*0]cks?|d[1*]cks?|h[0*]rny|b[1*]tch(?:es)|f[*0]ckk?ed|p[*]ssy|p[*]ssies)\b/i
 describe DISGUISE_PORN          Attempts to disguise porn words
 
+body DISGUISE_PORN_MUNDANE	/\b(?:h[0*]t|y[0*][uv]ng|b[0*]ys?|g[1*]r[1l]s?|g[1l]rls?|w[1*]ves|w[1*]fe|s3xy?|p[0*]rn[o0*]?)\b/i
+describe DISGUISE_PORN_MUNDANE	Attempts to disguise mundane words used in porn
+
 # thx to vince.delvecchio@analog.com for the legwork on the negative
 # lookbehinds here; saved a lot of work for us (bug 1035), also see bug 1835
 uri PORN_URL_SEX                /^https?:\/\/[\w\.-]*(?<!es|ba)(?<!dle|sus)sex(?!press)[\w-]*\./i

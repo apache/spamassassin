@@ -299,12 +299,6 @@ describe T_INTERRUPTUS          Hypertextus Interruptus - HTML-obfuscated text
 
 ##########################################################################
 
-# bug 2397 - CLA requested
-body T_DISGUISE_PORN_MUNDANE	/\b(?:h[0*]t|y[0*][uv]ng|b[0*]ys?|g[1*]r[1l]s?|g[1l]rls?|w[1*]ves|w[1*]fe|s3xy?|p[0*]rn[o0*]?)\b/i
-describe T_DISGUISE_PORN_MUNDANE	Attempts to disguise mundane words used in porn
-
-##########################################################################
-
 # bug 4023
 body T_NO_SCRIP_NEEDED		/no.{1,10}P(?:er|re)scription.{1,10}(?:needed|require|necessary)/i
 
