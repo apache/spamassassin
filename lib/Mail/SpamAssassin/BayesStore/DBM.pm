@@ -16,6 +16,9 @@
 
 package Mail::SpamAssassin::BayesStore::DBM;
 
+# Make the main dbg() accessible in our package w/o an extra function
+*dbg=\&Mail::SpamAssassin::dbg;
+
 use strict;
 use warnings;
 use bytes;
@@ -1810,7 +1813,6 @@ sub db_writable {
 
 ###########################################################################
 
-sub dbg { Mail::SpamAssassin::dbg(@_); }
 sub sa_die { Mail::SpamAssassin::sa_die(@_); }
 
 1;

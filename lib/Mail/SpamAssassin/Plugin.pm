@@ -93,6 +93,10 @@ that SpamAssassin will call back to:
 =cut
 
 package Mail::SpamAssassin::Plugin;
+
+# Make the main dbg() accessible in our package w/o an extra function
+*dbg=\&Mail::SpamAssassin::dbg;
+
 use Mail::SpamAssassin;
 
 use strict;
@@ -558,8 +562,6 @@ plugin wishes to output debug information, it should call
 C<Mail::SpamAssassin::Plugin::dbg($msg)>.
 
 =cut
-
-sub dbg { Mail::SpamAssassin::dbg(@_); }
 
 1;
 

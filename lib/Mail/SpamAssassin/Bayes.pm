@@ -47,6 +47,9 @@ The results are incorporated into SpamAssassin as the BAYES_* rules.
 
 package Mail::SpamAssassin::Bayes;
 
+# Make the main dbg() accessible in our package w/o an extra function
+*dbg=\&Mail::SpamAssassin::dbg;
+
 use strict;
 use warnings;
 use bytes;
@@ -1376,7 +1379,6 @@ sub opportunistic_calls {
 
 ###########################################################################
 
-sub dbg { Mail::SpamAssassin::dbg(@_); }
 sub sa_die { Mail::SpamAssassin::sa_die(@_); }
 
 ###########################################################################

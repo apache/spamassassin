@@ -14,6 +14,9 @@ This plugin requires the IP::Country::Fast module from CPAN.
 
 package Mail::SpamAssassin::Plugin::RelayCountry;
 
+# Make the main dbg() accessible in our package w/o an extra function
+*dbg=\&Mail::SpamAssassin::Plugin::dbg;
+
 use Mail::SpamAssassin::Plugin;
 use strict;
 use warnings;
@@ -64,7 +67,5 @@ sub extract_metadata {
 
   return 1;
 }
-
-sub dbg { Mail::SpamAssassin::dbg(@_); }
 
 1;

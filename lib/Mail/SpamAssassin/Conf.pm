@@ -70,6 +70,9 @@ use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::Conf::Parser;
 use File::Spec;
 
+# Make the main dbg() accessible in our package w/o an extra function
+*dbg=\&Mail::SpamAssassin::dbg;
+
 use strict;
 use warnings;
 use bytes;
@@ -3561,7 +3564,6 @@ sub finish {
 
 ###########################################################################
 
-sub dbg { Mail::SpamAssassin::dbg(@_); }
 sub sa_die { Mail::SpamAssassin::sa_die(@_); }
 
 ###########################################################################

@@ -46,6 +46,9 @@ class.  This object encapsulates all the per-message state.
 
 package Mail::SpamAssassin::PerMsgStatus;
 
+# Make the main dbg() accessible in our package w/o an extra function
+*dbg=\&Mail::SpamAssassin::dbg;
+
 use strict;
 use warnings;
 use bytes;
@@ -2567,7 +2570,6 @@ ok:
 
 ###########################################################################
 
-sub dbg { Mail::SpamAssassin::dbg(@_); }
 sub sa_die { Mail::SpamAssassin::sa_die(@_); }
 
 ###########################################################################

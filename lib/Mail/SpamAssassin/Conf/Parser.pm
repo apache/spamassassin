@@ -118,6 +118,10 @@ up first for speed.
 =cut
 
 package Mail::SpamAssassin::Conf::Parser;
+
+# Make the main dbg() accessible in our package w/o an extra function
+*dbg=\&Mail::SpamAssassin::dbg;
+
 use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Constants qw(:sa);
 
@@ -845,7 +849,6 @@ sub fix_path_relative_to_current_file {
 
 ###########################################################################
 
-sub dbg { Mail::SpamAssassin::dbg(@_); }
 sub sa_die { Mail::SpamAssassin::sa_die(@_); }
 
 ###########################################################################

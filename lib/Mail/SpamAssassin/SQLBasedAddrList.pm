@@ -69,6 +69,9 @@ see C<Mail::SpamAssassin::Conf> for more information.
 
 package Mail::SpamAssassin::SQLBasedAddrList;
 
+# Make the main dbg() accessible in our package w/o an extra function
+*dbg=\&Mail::SpamAssassin::dbg;
+
 use strict;
 use warnings;
 use bytes;
@@ -354,7 +357,5 @@ sub _unpack_addr {
 
   return ($email, $ip);
 }
-
-sub dbg { Mail::SpamAssassin::dbg(@_); }
 
 1;
