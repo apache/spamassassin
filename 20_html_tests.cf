@@ -216,26 +216,26 @@ body HTML_LINK_CLICK_CAPS	eval:html_eval('anchor_text', '=~ /CLICK/')
 describe HTML_LINK_CLICK_CAPS	HTML link text says "CLICK"
 
 # HTML obfuscation
-body HTML_OBFUSCATION_00_10	eval:html_range('obfuscation_ratio','.0','.1')
-body HTML_OBFUSCATION_10_20	eval:html_range('obfuscation_ratio','.1','.2')
-body HTML_OBFUSCATION_20_30	eval:html_range('obfuscation_ratio','.2','.3')
-body HTML_OBFUSCATION_30_40	eval:html_range('obfuscation_ratio','.3','.4')
-body HTML_OBFUSCATION_40_50	eval:html_range('obfuscation_ratio','.4','.5')
-body HTML_OBFUSCATION_50_60	eval:html_range('obfuscation_ratio','.5','.6')
-body HTML_OBFUSCATION_60_70	eval:html_range('obfuscation_ratio','.6','.7')
-body HTML_OBFUSCATION_70_80	eval:html_range('obfuscation_ratio','.7','.8')
-body HTML_OBFUSCATION_80_90	eval:html_range('obfuscation_ratio','.8','.9')
-body HTML_OBFUSCATION_90_100	eval:html_range('obfuscation_ratio','.9','1.0')
-describe HTML_OBFUSCATION_00_10		Message is 0% to 10% HTML obfuscation
-describe HTML_OBFUSCATION_10_20		Message is 10% to 20% HTML obfuscation
-describe HTML_OBFUSCATION_20_30		Message is 20% to 30% HTML obfuscation
-describe HTML_OBFUSCATION_30_40		Message is 30% to 40% HTML obfuscation
-describe HTML_OBFUSCATION_40_50		Message is 40% to 50% HTML obfuscation
-describe HTML_OBFUSCATION_50_60		Message is 50% to 60% HTML obfuscation
-describe HTML_OBFUSCATION_60_70		Message is 60% to 70% HTML obfuscation
-describe HTML_OBFUSCATION_70_80		Message is 70% to 80% HTML obfuscation
-describe HTML_OBFUSCATION_80_90		Message is 80% to 90% HTML obfuscation
-describe HTML_OBFUSCATION_90_100	Message is 90% to 100% HTML obfuscation
+body HTML_OBFUSCATE_00_10	eval:html_range('obfuscation_ratio','.0','.1')
+body HTML_OBFUSCATE_10_20	eval:html_range('obfuscation_ratio','.1','.2')
+body HTML_OBFUSCATE_20_30	eval:html_range('obfuscation_ratio','.2','.3')
+body HTML_OBFUSCATE_30_40	eval:html_range('obfuscation_ratio','.3','.4')
+body HTML_OBFUSCATE_40_50	eval:html_range('obfuscation_ratio','.4','.5')
+body HTML_OBFUSCATE_50_60	eval:html_range('obfuscation_ratio','.5','.6')
+body HTML_OBFUSCATE_60_70	eval:html_range('obfuscation_ratio','.6','.7')
+body HTML_OBFUSCATE_70_80	eval:html_range('obfuscation_ratio','.7','.8')
+body HTML_OBFUSCATE_80_90	eval:html_range('obfuscation_ratio','.8','.9')
+body HTML_OBFUSCATE_90_100	eval:html_range('obfuscation_ratio','.9','1.0')
+describe HTML_OBFUSCATE_00_10		Message is 0% to 10% HTML obfuscation
+describe HTML_OBFUSCATE_10_20		Message is 10% to 20% HTML obfuscation
+describe HTML_OBFUSCATE_20_30		Message is 20% to 30% HTML obfuscation
+describe HTML_OBFUSCATE_30_40		Message is 30% to 40% HTML obfuscation
+describe HTML_OBFUSCATE_40_50		Message is 40% to 50% HTML obfuscation
+describe HTML_OBFUSCATE_50_60		Message is 50% to 60% HTML obfuscation
+describe HTML_OBFUSCATE_60_70		Message is 60% to 70% HTML obfuscation
+describe HTML_OBFUSCATE_70_80		Message is 70% to 80% HTML obfuscation
+describe HTML_OBFUSCATE_80_90		Message is 80% to 90% HTML obfuscation
+describe HTML_OBFUSCATE_90_100	Message is 90% to 100% HTML obfuscation
 
 # many spammers seem to do this nowadays (and probably track
 # their customers with it).  (contrib: WW)
@@ -275,14 +275,14 @@ describe HTML_TAG_BALANCE_HEAD	HTML has unbalanced "head" tags
 body HTML_TAG_BALANCE_TABLE	eval:html_tag_balance('table', '> 0')
 describe HTML_TAG_BALANCE_TABLE	HTML is missing "table" close tags
 
-body HTML_TAG_EXISTS_MARQUEE	eval:html_tag_exists('marquee')
-describe HTML_TAG_EXISTS_MARQUEE	HTML has "marquee" tag
+body HTML_TAG_EXIST_MARQUEE	eval:html_tag_exists('marquee')
+describe HTML_TAG_EXIST_MARQUEE	HTML has "marquee" tag
 
-body HTML_TAG_EXISTS_PARAM	eval:html_tag_exists('param')
-describe HTML_TAG_EXISTS_PARAM	HTML has "param" tag
+body HTML_TAG_EXIST_PARAM	eval:html_tag_exists('param')
+describe HTML_TAG_EXIST_PARAM	HTML has "param" tag
 
-body HTML_TAG_EXISTS_TBODY	eval:html_tag_exists('tbody')
-describe HTML_TAG_EXISTS_TBODY	HTML has "tbody" tag
+body HTML_TAG_EXIST_TBODY	eval:html_tag_exists('tbody')
+describe HTML_TAG_EXIST_TBODY	HTML has "tbody" tag
 
 # percentage of tags that are not legal elements in HTML
 body HTML_BADTAG_00_10	eval:html_range('bad_tag_ratio','0.00','0.10')
