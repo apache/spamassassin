@@ -312,6 +312,7 @@ header T_FAKE_OUTBLAZE_MID	Message-Id =~ /\.mr\.outblaze\.com/
 
 header T_ALL_TRUSTED		eval:check_all_trusted()
 describe T_ALL_TRUSTED		Did not pass through any untrusted hosts
+tflags T_ALL_TRUSTED		nice
 
 # both aspects of same spammer tool
 header T_NETIP_RCVD		Received =~ /netIP with HTTP\;/
@@ -348,4 +349,9 @@ describe T_RE_UC_3WORDS	Has Subject in form "Re: UPPERCASE, word word word"
 # Spammers are now attempting to use tiny font sizes to hide hashbusters
 body T_HTML_FONT_TINY		eval:html_test('tiny_font')
 describe T_HTML_FONT_TINY	HTML has a tiny font
+
+# more portable replacement for RCVD_NUMERIC_HELO that doesn't rely on
+# Received headers using "helo=" prefix
+header T_RCVD_NUMERIC_HELO	X-Spam-Relays-Untrusted =~ / helo=\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3} /
+describe T_RCVD_NUMERIC_HELO	Received: contains an IP address used for HELO
 
