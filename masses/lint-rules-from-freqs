@@ -65,7 +65,6 @@ while (<>) {
   my $tf = $tflags{$name};
   next if ($tf =~ /net/);
   next if ($tf =~ /userconf/);
-          warn "$tf $so $score $badrule $name\n";
 
   if ($overall == 0.0 && $spam == 0.0 && $nons == 0.0) {        # sanity!
     $badrule = 'no matches';

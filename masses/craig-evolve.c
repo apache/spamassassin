@@ -299,7 +299,7 @@ double evaluate(PGAContext *ctx, int p, int pop)
    if(ynscore>3) ynweight = log(ynscore); else ynweight = 0;
 
    return (double)ga_yn + nybias*((double)ga_ny + nyweight) + -ynweight;
-#endif USE_LOG_SCORE_EVALUATION
+#endif /* USE_LOG_SCORE_EVALUATION */
 }
 
 #else
