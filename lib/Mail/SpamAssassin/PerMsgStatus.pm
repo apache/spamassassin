@@ -2375,6 +2375,7 @@ sub delete_fulltext_tmpfile {
   my ($self) = @_;
   if (defined $self->{fulltext_tmpfile}) {
     unlink $self->{fulltext_tmpfile};
+    $self->{fulltext_tmpfile} = undef;
   }
 }
 
