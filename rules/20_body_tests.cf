@@ -1053,7 +1053,7 @@ describe GET_PAID		Get Paid
 body BEEN_TURNED_DOWN	        /\bbeen turned down\b/i
 describe BEEN_TURNED_DOWN	Have you been turned down?
 
-body ONE_TIME			/\bone.time (?:charge|investment|offer)/i
+body ONE_TIME			/\bone\W+time (?:charge|investment|offer|promotion)/i
 describe ONE_TIME		One Time Rip Off
 
 body COMPETE		        /\bcompete for your business\b/i
