@@ -19,10 +19,17 @@ void showSummary(PGAContext *ctx);
 
 const double threshold = 5.0;
 const double nybias = 10.0;
-const double mutation_rate = 0.01;
-const double crossover_rate = 0.66;
+const int exhaustive_eval = 1;
+
+const double mutation_rate = 0.2;
+const double mutation_noise = 1.0;
+const double regression_coefficient = 0.5;
+
+const double crossover_rate = 0.0;
+
 const int pop_size = 100;
 const int replace_num = 25;
+
 const int maxiter = 10000;
 
 void init_data()
@@ -56,15 +63,16 @@ int main(int argc, char **argv) {
 
      PGASetNumReplaceValue(ctx, replace_num);
 
-     PGASetMutationAndCrossoverFlag(ctx, PGA_TRUE);
+     PGASetMutationOrCrossoverFlag(ctx, PGA_TRUE);
 
      PGASetMutationBoundedFlag(ctx, PGA_FALSE);
      PGASetUserFunction(ctx, PGA_USERFUNCTION_MUTATION, (void *)myMutation);
 
-     PGASetCrossoverType(ctx, PGA_CROSSOVER_UNIFORM);
+     PGASetCrossoverType(ctx, PGA_CROSSOVER_ONEPT);
+     PGASetCrossoverProb(ctx, crossover_rate);
 
-     // Never print builtin stuff
      PGASetPrintFrequencyValue(ctx,300);
+     PGASetPrintOptions(ctx, PGA_REPORT_AVERAGE);
 
      PGASetStoppingRuleType(ctx, PGA_STOP_NOCHANGE);
      PGASetMaxNoChangeValue(ctx, 300);
@@ -93,63 +101,78 @@ int main(int argc, char **argv) {
 }
 
 int ga_yy,ga_yn,ga_ny,ga_nn;
-double ynscore,nyscore;
+double ynscore,nyscore,yyscore,nnscore;
+
+inline double score_msg(PGAContext *ctx, int p, int pop, int i)
+{
+  double msg_score = 0.0;
+  // For every test the message hit on
+  for(int j=num_tests_hit[i]-1; j>=0; j--)
+  {
+    // Up the message score by the allele for this test in the genome
+    msg_score += PGAGetRealAllele(ctx, p, pop, tests_hit[i][j]);
+  }
+
+  // Ok, now we know the score for this message.  Let's see how this genome did...
+       
+  if(is_spam[i])
+  {
+    if(msg_score > threshold)
+    {
+      // Good positive
+      ga_yy++;
+      yyscore += msg_score;
+    }
+    else
+    {
+      // False negative
+      ga_yn++;
+      ynscore += threshold - msg_score;
+    }
+  }
+  else
+  {
+    if(msg_score > threshold)
+    {
+      // False positive
+      ga_ny++;
+      nyscore += msg_score - threshold;
+    }
+    else
+    {
+      // Good negative
+      ga_nn++;
+      nnscore += msg_score;
+    }
+  }
+
+  return msg_score;
+}
+
 double evaluate(PGAContext *ctx, int p, int pop)
 {
   double tot_score = 0.0;
-     ynscore = 0.0; nyscore = 0.0;
-     ga_yy=ga_yn=ga_ny=ga_nn=0;
+  yyscore = ynscore = nyscore = nnscore = 0.0;
+  ga_yy=ga_yn=ga_ny=ga_nn=0;
 
-     // For every message
-     for (int i=num_tests-1; i>=0; i--)
-     {
-       double msg_score = 0.0;
-       // For every test the message hit on
-       for(int j=num_tests_hit[i]-1; j>=0; j--)
-       {
-	 // Up the message score by the allele for this test in the genome
-	 msg_score += PGAGetRealAllele(ctx, p, pop, tests_hit[i][j]);
-       }
+  // For every message
+  for (int i=num_tests-1; i>=0; i--)
+  {
+    tot_score += score_msg(ctx,p,pop,i);
+  }
+//   yyscore = log(yyscore);
+//   ynscore = log(ynscore);
+//   nyscore = log(nyscore);
+//   nnscore = log(nnscore);
 
-       tot_score += msg_score;
-
-       // Ok, now we know the score for this message.  Let's see how this genome did...
-       
-       if(is_spam[i])
-       {
-	 if(msg_score > threshold)
-	 {
-	   // Good positive
-	   ga_yy++;
-	 }
-	 else
-	 {
-	   // False negative
-	   ga_yn++;
-	   ynscore += threshold - msg_score;
-	 }
-       }
-       else
-       {
-	 if(msg_score > threshold)
-	 {
-	   // False positive
-	   ga_ny++;
-	   nyscore += msg_score - threshold;
-	 }
-	 else
-	 {
-	   // Good negative
-	   ga_nn++;
-	 }
-       }
-     }
-     //     ynscore /= 5.0;
-     //     nyscore /= 5.0;
-
-     return (double) ((double)ga_yn)+ynscore + (((double)ga_ny)+nyscore)*nybias;
+  return (double) ((double)ga_yn)+ynscore + (((double)ga_ny)+nyscore)*nybias + (ynscore-nnscore)/1000.0;
 }
 
+/*
+ * This mutation function tosses a weighted coin for each allele.  If the allele is to be mutated,
+ * then the way it's mutated is to regress it toward the mean of the population for that allele,
+ * then add a little gaussian noise.
+ */
 int myMutation(PGAContext *ctx, int p, int pop, double mr) {
     int         count=0;
 
@@ -157,7 +180,14 @@ int myMutation(PGAContext *ctx, int p, int pop, double mr) {
     {
       if(is_mutatable[i] && PGARandomFlip(ctx, mr))
       {
-	PGASetRealAllele(ctx, p, pop, i, PGAGetRealAllele(ctx, p, pop, i)+PGARandomUniform(ctx, -1.0, 1.0));
+	double gene_sum=0.0;
+	// Find the mean
+	for(int j=0; j<pop_size; j++) { if(p!=j) gene_sum += PGAGetRealAllele(ctx, j, pop, i); }
+	gene_sum /= (double)(pop_size-1);
+	// Regress towards it...
+	gene_sum = (1.0-regression_coefficient)*gene_sum+regression_coefficient*PGAGetRealAllele(ctx, p, pop, i);
+	// Set this gene in this allele to be the average, plus some gaussian noise
+	PGASetRealAllele(ctx, p, pop, i, PGARandomGaussian(ctx, gene_sum, mutation_noise));
 	count++;
       }
     }
