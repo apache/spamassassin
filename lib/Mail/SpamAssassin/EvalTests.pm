@@ -229,6 +229,34 @@ sub _check_mta_message_id {
 
 ###########################################################################
 
+# yet another test for faked Received: headers
+sub check_for_forged_received_trail {
+  my ($self) = @_;
+
+  my @received = grep(/\S/, split(/\n/, $self->get ('Received')));
+  my @by;
+  my @from;
+  my $mismatch = 0;
+  my $local;
+
+  for (my $i = 0; $i < $#received; $i++) {
+    if ($received[$i] =~ s/\bby[\t ]+(\w+([\w.-]+\.)+\w+)//i) {
+      $by[$i] = lc($1);
+      $by[$i] =~ s/.*\.(\S+\.\S+)$/$1/;
+    }
+    if ($received[$i] =~ s/\bfrom[\t ]+(\w+([\w.-]+\.)+\w+)//i) {
+      $from[$i] = lc($1);
+      $from[$i] =~ s/.*\.(\S+\.\S+)$/$1/;
+    }
+    if ($i > 0 && exists($by[$i]) && exists($from[$i - 1]) &&
+	($by[$i] ne $from[$i - 1]))
+    {
+      $mismatch++;
+    }
+  }
+  return ($mismatch > 1);
+}
+
 # FORGED_HOTMAIL_RCVD
 sub check_for_forged_hotmail_received_headers {
   my ($self) = @_;
