@@ -847,13 +847,7 @@ sub uri_list_canonify {
 }
 
 sub decode_ulong_to_ip {
-  my ($ulong) = @_;
-  my @octets = ();
-  unshift (@octets, $ulong & 0xff); $ulong >>= 8;
-  unshift (@octets, $ulong & 0xff); $ulong >>= 8;
-  unshift (@octets, $ulong & 0xff); $ulong >>= 8;
-  unshift (@octets, $ulong & 0xff);
-  return join (".", @octets);
+  return join(".", unpack("CCCC",pack("H*", sprintf "%08lx", $_[0])));
 }
 
 ###########################################################################
