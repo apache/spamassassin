@@ -82,9 +82,15 @@ sub child_exited {
 
 sub set_child_state {
   my ($self, $pid, $state) = @_;
-  $self->{kids}->{$pid} = $state;
-  dbg ("prefork: child $pid: entering state $state");
-  $self->compute_lowest_child_pid();
+
+  if ($state == PFSTATE_STARTING || exists $self->{kids}->{$pid}) {
+    $self->{kids}->{$pid} = $state;
+    dbg ("prefork: child $pid: entering state $state");
+    $self->compute_lowest_child_pid();
+
+  } else {
+    dbg ("prefork: child $pid: ignored new state $state, already exited");
+  }
 }
 
 sub compute_lowest_child_pid {
@@ -202,8 +208,12 @@ sub read_one_line_from_child_socket {
     dbg ("prefork: child closed connection");
 
     # stop it being select'd
-    vec(${$self->{backchannel}->{selector}}, $sock->fileno, 1) = 0;
-    $sock->close();
+    my $fno = $sock->fileno;
+    if (defined $fno) {
+      vec(${$self->{backchannel}->{selector}}, $fno, 1) = 0;
+      $sock->close();
+    }
+
     return PFSTATE_ERROR;
   }
 
@@ -233,9 +243,20 @@ sub order_idle_child_to_accept {
   my ($self) = @_;
 
   my $kid = $self->{lowest_idle_pid};
-  if (defined $kid) {
+  if (defined $kid)
+  {
     my $sock = $self->{backchannel}->get_socket_for_child($kid);
-    $sock->syswrite ("A\n");
+    if (!$sock->syswrite ("A\n"))
+    {
+      # failure to write to the child; bad news.  call it dead
+      warn "prefork: killing rogue child $kid, failed to write: $!\n";
+      $self->set_child_state ($kid, PFSTATE_KILLED);
+      kill 'INT' => $kid;
+
+      # retry with another child
+      return $self->order_idle_child_to_accept();
+    }
+
     dbg ("prefork: ordered $kid to accept");
 
     # now wait for it to say it's done that
@@ -269,7 +290,8 @@ sub child_now_ready_to_accept {
   my ($self, $kid) = @_;
   if ($self->{waiting_for_idle_child}) {
     my $sock = $self->{backchannel}->get_socket_for_child($kid);
-    $sock->syswrite ("A\n");
+    $sock->syswrite ("A\n")
+        or die "prefork: $kid claimed it was ready, but write failed: $!";
     $self->{waiting_for_idle_child} = 0;
   }
 }
