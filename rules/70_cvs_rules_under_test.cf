@@ -830,3 +830,78 @@ body T_EXCUSE_11 /you.{0,15}(?:name|mail).{0,15}(?:was|were|our).{0,15}list/i
 
 header   T_SENDER_NO_REVERSE    eval:check_for_sender_no_reverse()
 describe T_SENDER_NO_REVERSE    No reverse lookup for sender's IP
+
+
+##############################################################################
+
+# Potential replacement for our current nigerian stuff - tvd
+# I was hoping bayes would do it, but so far it only catches ~30% of
+# these based on "train on half the corpus".  They test well for me
+# (no FPs) but I want to see how they work for everyone else. :) )
+# ideally, I'd like to use just 9, but subject and body may be good too
+# depending on fp levels.  If we get rid of 5, we can trim a lot of the
+# meta stuff out since most of it is a list of african geography.
+#
+# OVERALL%   SPAM% NONSPAM%     S/O    RANK   SCORE  NAME
+#   22805     8916    13889    0.391   0.00    0.00  (all messages)
+# 100.000  39.0967  60.9033    0.391   0.00    0.00  (all messages as %)
+#   0.517   1.3235   0.0000    1.000   1.00    0.01  T_NIGERIAN_9
+#   0.412   1.0543   0.0000    1.000   0.74    0.01  T_NIGERIAN_BODY
+#   0.390   0.9982   0.0000    1.000   0.69    0.01  T_NIGERIAN_5
+#   0.215   0.5496   0.0000    1.000   0.26    0.01  T_NIGERIAN_SUBJECT
+
+body __NIGERIAN_BODY_1	/\b(?:financial|confiden(?:tial|ce)|safe(?:ty)?|mutual|secret|success(?:ful)?|risk-?free|details).{1,30}\btransaction\b/i
+body __NIGERIAN_BODY_2	/\btransaction\b.{1,30}\b(?:magnitude|diplomatic|strict|absolute|secret|confiden(?:tial|ce)|guarantee)/i
+body __NIGERIAN_BODY_3	/BASED ON INFORMATION GATHERED ABOUT YOU, WE BELIEVE\s*YOU WOULD BE IN A POSITION TO HELP US IN TRANSFER/i
+body __NIGERIAN_BODY_4	/\bBarrister\b/i
+body __NIGERIAN_BODY_5	/\bmillions?(?: of)? dollars\b/i
+body __NIGERIAN_BODY_6	/\bIt is with trust and confidentiality\b/i
+body __NIGERIAN_BODY_7	/\bUSD?\s*(?:\$\s*)?(?:\d+,\d+,\d+|\d+\.\d+\s*million)/i
+body __NIGERIAN_BODY_8	/\b(?:You may be surprised to receive this letter from me|this letter will be a surprise)\b/i
+body __NIGERIAN_BODY_9	/\bthe .{1,10} son of\b/i
+body __NIGERIAN_BODY_10	/\burgent and(?: very)? confidential business proposition\b/i
+body __NIGERIAN_BODY_11	/\bassistance to relocate\b/i
+body __NIGERIAN_BODY_12 /\bto which will be transferred the sum\b/i
+body __NIGERIAN_BODY_13	/\byour(?: private)? (?:tele)?phone (?:and|&) fax Numbers?\b/i
+body __NIGERIAN_BODY_14	/\bthe importance of Secrecy\b/i
+body __NIGERIAN_BODY_15	/\bmodalities\b/i
+body __NIGERIAN_BODY_16	/\bI am a Private Investigator\b/i
+body __NIGERIAN_BODY_17	/\bWRITING THIS LETTER TO SOLICIT\b/i
+body __NIGERIAN_BODY_18	/\bSEVERAL ATTEMPTS HAVE BEEN MADE WITH OUT SUCCESS\b/i
+body __NIGERIAN_BODY_19	/\bMY PROPOSAL IS ACCEPTABLE\b/i
+body __NIGERIAN_BODY_20	/\d+% (?:of the total sum|for your effort|for my investment)\b/i
+body __NIGERIAN_BODY_21 /\bforeign account\b/i
+body __NIGERIAN_BODY_22 /\btrust (?:and|&) confidentiality\b/i
+
+
+header T_NIGERIAN_SUBJECT	Subject =~ /^\s*(?:URGENT|your assistance|i need your urgent|treat as urgent)\b/i
+meta T_NIGERIAN_BODY	( __NIGERIAN_BODY_.+ + ) > 1
+meta T_NIGERIAN_5	(( __AFRICAN_COUNTRY.+ + ) > 0) && ( (( __NIGERIAN_BODY_.+ + ) > 1) || T_NIGERIAN_SUBJECT )
+meta T_NIGERIAN_9	T_NIGERIAN_SUBJECT || (( __NIGERIAN_BODY_.+ + ) > 1)
+
+
+body __AFRICAN_COUNTRY_1	/\bAlgeria/i
+body __AFRICAN_COUNTRY_7	/\bCameroon\b/i
+body __AFRICAN_COUNTRY_10	/\bCongo\b/i
+body __AFRICAN_COUNTRY_12	/\bEgypt(?:ian)?\b/i
+body __AFRICAN_COUNTRY_14	/\bEthiopia/i
+body __AFRICAN_COUNTRY_19	/\bIvory\s+Coast\b/i
+body __AFRICAN_COUNTRY_20	/\bKenya/i
+body __AFRICAN_COUNTRY_22	/\bLiberia/i
+body __AFRICAN_COUNTRY_23	/\bLibya\b/i
+body __AFRICAN_COUNTRY_30	/\bMozambique\b/i
+body __AFRICAN_COUNTRY_31	/\bNamibia/i
+body __AFRICAN_COUNTRY_35	/\bSenegal\b/i
+body __AFRICAN_COUNTRY_37	/\bSierra Leone\b/i
+body __AFRICAN_COUNTRY_38	/\bSomalia/i
+body __AFRICAN_COUNTRY_39	/\bS(?:outh|o?\.)\s+Africa/i
+body __AFRICAN_COUNTRY_40	/\bSudan\b/i
+body __AFRICAN_COUNTRY_34	/\bRwanda/i
+body __AFRICAN_COUNTRY_32	/\bNigeria/i
+body __AFRICAN_COUNTRY_48	/\bZimbabwe\b/i
+body __AFRICAN_COUNTRY_CONT	/\bAfrica/i
+body __AFRICAN_COUNTRY_50	/\bjohannesburg\b/i
+body __AFRICAN_COUNTRY_51	/\bLagos\b/i
+body __AFRICAN_COUNTRY_52	/\bcape town\b/i
+
+##############################################################################
