@@ -7,7 +7,7 @@ mv spam.{local,alltime} nonspam.local logs/old
 # ---------------------------------------------------------------------------
 # recent non-spam data
 
-./mass-check-MH-spool ; sh commands.sh
+./local-scripts-jm/mass-check-MH-spool ; sh commands.sh
 
 for f in /local/mail-archives/recent/nonspam/* ; do
   echo Checking $f: ; ./mass-check --loghits -c ../rules $f >> nonspam.local
