@@ -231,7 +231,7 @@ for ( $waitedpid = 0;
 
 	    my $resp = "EX_OK";
 	    # Now read in message
-	    my $mail = Mail::Audit->new();
+	    my $mail = Mail::SpamAssassin::MyMailAudit->new();
 
 	    # Now use copy-on-writed (hopefully) SA object
 	    my $status = $spamtest->check($mail);
