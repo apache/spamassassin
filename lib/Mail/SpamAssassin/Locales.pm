@@ -1,6 +1,7 @@
 package Mail::SpamAssassin::Locales;
 
 use strict;
+eval "use bytes";
 use vars	qw{ %charsets_for_locale };
 
 ###########################################################################

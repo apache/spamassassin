@@ -28,6 +28,7 @@ The results are incorporated into SpamAssassin as the BAYES_* rules.
 package Mail::SpamAssassin::Bayes;
 
 use strict;
+eval "use bytes";
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::BayesStore;

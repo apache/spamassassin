@@ -36,6 +36,7 @@ package Mail::SpamAssassin::SHA1;
 require 5.002;
 use strict;
 use integer;
+eval "use bytes";
 
 use vars qw(@ISA @EXPORT);
 require Exporter;

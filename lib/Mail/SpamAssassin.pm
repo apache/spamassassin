@@ -50,6 +50,7 @@ filtering databases, such as Vipul's Razor ( http://razor.sourceforge.net/ ).
 
 package Mail::SpamAssassin;
 use strict;
+eval "use bytes";
 
 # We do our best to make SA run with any Perl downto 5.005. You might want to
 # read <http://www.perldoc.com/perl5.8.0/pod/perl56delta.html> if you plan to 
@@ -94,7 +95,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.139 2002/12/05 19:09:07 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.140 2002/12/13 11:04:13 matt_sergeant Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.

@@ -2,6 +2,7 @@
 package Mail::SpamAssassin::DBBasedAddrList;
 
 use strict;
+eval "use bytes";
 
 # tell AnyDBM_File to prefer DB_File, if possible.
 # BEGIN { @AnyDBM_File::ISA = qw(DB_File GDBM_File NDBM_File SDBM_File); }

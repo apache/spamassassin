@@ -15,6 +15,7 @@
 package Mail::SpamAssassin::TextCat;
 
 use strict;
+eval "use bytes";
 use vars qw($opt_a $opt_f $opt_t $opt_u);
 
 my @lm;

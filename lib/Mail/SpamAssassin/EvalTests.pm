@@ -14,6 +14,7 @@ use Mail::SpamAssassin::SHA1 qw(sha1);
 use Mail::SpamAssassin::TextCat;
 use Time::Local;
 use strict;
+eval "use bytes";
 
 use vars qw{
 	$IP_ADDRESS

@@ -1,6 +1,7 @@
 package Mail::SpamAssassin::CmdLearn;
 
 use strict;
+eval "use bytes";
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::ArchiveIterator;

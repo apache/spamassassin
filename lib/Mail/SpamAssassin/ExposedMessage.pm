@@ -5,6 +5,7 @@ package Mail::SpamAssassin::ExposedMessage;
 
 use Carp;
 use strict;
+eval "use bytes";
 
 use Mail::SpamAssassin::AuditMessage;
 

@@ -4,6 +4,7 @@ package Mail::SpamAssassin::Message;
 
 use Carp;
 use strict;
+eval "use bytes";
 
 use vars	qw{
   	@ISA
