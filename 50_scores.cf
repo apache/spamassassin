@@ -55,7 +55,7 @@ score CLICK_HERE_LINK                1.80
 score CLICK_TO_REMOVE_2              3.01
 score COMMUNIGATE                    4.95
 score CORRUPT_MSGID                  1.00
-score CTYPE_JUST_HTML                4.33
+score CTYPE_JUST_HTML                3.33
 score CYBER_FIRE_POWER               1.21
 score DATE_IN_FUTURE                 1.91
 score DATE_MISSING                   1.00
@@ -99,7 +99,6 @@ score FRIEND_AT_PUBLIC               1.41
 score FROM_AND_TO_SAME               1.75
 score FROM_BTAMAIL                   1.00
 score FROM_ENDS_IN_NUMS              1.94
-score FROM_FORGED_HOTMAIL            1.00
 score FROM_HAS_MIXED_NUMS            1.00
 score FROM_MALFORMED                 2.80
 score FROM_MISSING                   1.00
@@ -258,6 +257,7 @@ score FOR_JUST_SOME_AMT              0.5
 score INVALID_DATE_ODD_MONTH         2.00
 score YOU_HAVE_BEEN_SELECTED         1.43
 score HTTP_ESCAPED_HOST              4.00
+score HTTP_CTRL_CHARS_HOST           4.00
 
 # End of GA-evolved scores.
 
@@ -277,6 +277,7 @@ score BUGGY_CGI_PT                   4.0
 score BUGGY_CGI_DE                   4.0
 score BUGGY_CGI_DE_2                 4.0
 score BUGGY_CGI_DE_3                 4.0
+score FROM_FORGED_HOTMAIL            0.0
 
 score SUBJ_ENDS_IN_Q_MARK            0.1
 score SUBJ_HAS_Q_MARK                0.1
