@@ -17,7 +17,7 @@ q{ HASHCASH_24 }, 'hashcash24',
 );
 
 tstprefs ('
-    hashcash_accept test@example.com test2@example.com jm@jmason.org
+    hashcash_accept test@example.com test1@example.com test2@example.com
     hashcash_doublespend_path log/user_state/hashcash_seen
     ');
 
@@ -25,7 +25,7 @@ sarun ("-L -t < data/nice/001", \&patterns_run_cb);
 ok_all_patterns();
 
 %patterns = (
-q{ HASHCASH_21 }, 'hashcash21',
+q{ HASHCASH_20 }, 'hashcash20',
 );
 
 sarun ("-L -t < data/nice/001", \&patterns_run_cb);
