@@ -21,7 +21,7 @@ describe FROM_HAS_MIXED_NUMS	From: contains numbers mixed in with letters
 header FROM_NO_USER		From =~ /(?:^\@|<\@| \@[^<]*$|<>)/ [if-unset: unset@unset.unset]
 describe FROM_NO_USER		From: has no local-part before @ sign
 
-header FROM_NAME_NO_SPACES	From =~ /(^(?!=\?)\S+\s*<\S+\@\S+>|\(\S+\)$)/;
+header FROM_NAME_NO_SPACES	From =~ /(^(?!=\?)\S+\s*<\S+\@\S+>|\(\S+\)$)/
 describe FROM_NAME_NO_SPACES	From: no spaces in name
 
 header TO_NO_USER		To =~ /(?:^\@|<\@| \@[^<]*$|<>)/ [if-unset: unset@unset.unset]
