@@ -615,7 +615,7 @@ sub check {
             my($header, $value) = split(/:\s*/, $line, 2);
             if (!defined $value)
             {
-                protocol_error($_);
+                protocol_error($line);
                 return 1;
             }
             $header = lc($header);
@@ -631,7 +631,7 @@ sub check {
 
             if ($header eq 'user')
             {
-                if ($value !~ /^([\x20-\x7F]+)$/i) # any 7bit char except ctrls
+                if ($value !~ /^([\x20-\x7F]+)$/) # any 7bit char except ctrls
                 {
                     protocol_error($line);
                     return 1;
