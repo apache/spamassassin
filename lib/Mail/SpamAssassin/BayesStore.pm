@@ -567,21 +567,29 @@ sub sync_journal {
   my $ok_to_remove = 0;
   eval {
     local $SIG{'__DIE__'};	# do not run user die() traps in here
+    my %tokens = ();
 
     if ($self->tie_db_writable()) {
       while (<JOURNAL>) {
-        $count++;
-        if (/^c (-?\d+) (-?\d+) (\d+) (.*)$/) {
-          $self->tok_sync_counters ($1+0, $2+0, $3+0, $4);
-        } elsif (/^t (\d+) (.*)$/) {
-          $self->tok_touch_token ($1+0, $2);
-        } elsif (/^n (-?\d+) (-?\d+)$/) {
-          $self->tok_sync_nspam_nham ($1+0, $2+0);
+        if (/^t (\d+) (.*)$/) {
+	  $tokens{$2} = $1+0;
+#        } elsif (/^c (-?\d+) (-?\d+) (\d+) (.*)$/) {
+#          $self->tok_sync_counters ($1+0, $2+0, $3+0, $4);
+#        } elsif (/^n (-?\d+) (-?\d+)$/) {
+#          $self->tok_sync_nspam_nham ($1+0, $2+0);
         } else {
           warn "Bayes journal: gibberish: $_";
         }
 
-        if ($showdots && ($count % 1000) == 0) {
+      }
+
+      # Now that we've determined the tokens and their final values,
+      # update the DB.  Should be much smaller than the full journal
+      # entries.
+      while( my($k,$v) = each %tokens ) {
+        $self->tok_touch_token ($v, $k);
+
+        if ($showdots && ($count++ % 1000) == 0) {
           print STDERR ".";
         }
       }
@@ -611,7 +619,7 @@ sub sync_journal {
 
   my $done = time();
   my $msg = ("synced Bayes databases from journal in ".($done - $started).
-	" seconds: $count entries");
+	" seconds: $count unique entries");
 
   if ($opts->{verbose}) {
     print $msg,"\n";
