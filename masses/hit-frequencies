@@ -9,7 +9,13 @@ readscores();
   printf "%10s  %10s  %10s  %s\n",
   	"OVERALL", "SPAM", "NONSPAM", "NAME";
 
-foreach my $test (sort { $freq_spam{$b} <=> $freq_spam{$a} } keys %freq) {
+foreach my $test (sort { 
+		  (defined ($freq_spam{$b}) ? $freq_spam{$b} : 0) <=>
+		  (defined ($freq_spam{$a}) ? $freq_spam{$a} : 0)
+		} keys %freq)
+{
+  $freq_spam{$test} ||= 0;
+  $freq_nonspam{$test} ||= 0;
   printf "%10d  %10d  %10d  %s\n",
   	$freq{$test}, $freq_spam{$test}, $freq_nonspam{$test}, $test;
 }

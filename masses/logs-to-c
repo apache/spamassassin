@@ -147,6 +147,9 @@ void loadscores (void) {
   foreach my $name (sort keys %{$scores}) {
     if (!defined $is_mutatable{$name}) { $is_mutatable{$name} = 1; }
 
+    $range_lo{$name} ||= 0.1;
+    $range_hi{$name} ||= 1.5;
+
     print OUT 
     " bestscores[$count] = ".$scores->{$name}.";", "\t",
     " is_mutatable[$count] = ".$is_mutatable{$name}.";", "\t",
