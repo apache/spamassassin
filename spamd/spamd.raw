@@ -927,6 +927,13 @@ Note: Although spamd will check per-user config files for every message, any
 changes to the system-wide config files will require restarting spamd for
 the changes to take effect.
 
+=head1 BUGS
+
+Perl 5.005_03 seems to have a bug, which spamd triggers, causing messages to
+pass through unscanned.  Upgrading to Perl 5.6 seems to fix the problem, so
+that's the current workaround.  More information can be found at
+http://www.hughes-family.org/bugzilla/show_bug.cgi?id=497
+
 =head1 SEE ALSO
 
 spamc(1)
