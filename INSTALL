@@ -192,6 +192,11 @@ These modules are required for spamassassin to run:
     If you use Debian, you can get HTML::Parser from the libhtml-parser-perl
     package.
 
+  - Sys::Syslog    (from CPAN)
+
+    This is a required module if you use spamd.  spamd logs information
+    about scanned messages to syslog using this module.
+
 Optional Additional Modules
 ---------------------------
 
