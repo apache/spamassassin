@@ -55,22 +55,13 @@ test NIGERIAN_SCAM_7 ok of Late President LAURENT DESIRE KABILA
 test NIGERIAN_SCAM_7 ok LATE PRESIDENT MOBUTU SESE-SEKO
 test NIGERIAN_SCAM_7 ok Timu Bangura, who is the immediate past Minister
 #
-test NIGERIAN_SCAM_8 ok VLAJKO STOJILJKOVIC, one of the people indicted at the Hague War Crimes Tribunal in Hague
 #
 test NIGERIAN_SCAM_9 ok at the private banking sector
 test NIGERIAN_SCAM_9 ok a private security company
 #
 test NIGERIAN_SCAM_10 ok next of kin
 #
-test NIGERIAN_SCAM_11 ok I work in a bank at
-test NIGERIAN_SCAM_11 ok HAVE WORKED FOR A BANK
 #
-test NIGERIAN_SCAM_12 ok the first son of
-test NIGERIAN_SCAM_12 ok the only son of
-test NIGERIAN_SCAM_12 ok AM THE ONLY MALE CHILD OF
-test NIGERIAN_SCAM_12 ok THE FIRST MALE CHILD OF
-test NIGERIAN_SCAM_12 ok the second son of
-test NIGERIAN_SCAM_12 ok As the eldest son of
 #
 test NIGERIAN_SCAM_13 ok WEALTHY COCOA MERCHANT BASED IN
 test NIGERIAN_SCAM_13 ok WEALTHY GOLD MERCHANT IN
@@ -128,39 +119,21 @@ test NIGERIAN_TRANSACTION_2 ok give this transaction a diplomatic coverage
 test NIGERIAN_TRANSACTION_2 ok in this transaction  strict confidence
 test NIGERIAN_TRANSACTION_2 ok keep the transaction strictly confidential.
 #
-test     PORN_3      ok         Wild Asian hot peppers
-test     PORN_3      fail       Wild Asian cucumbers
-test     PORN_3      fail       Hot lesbo xxxx
-test     PORN_3      fail       Hot lesbians
 test     PORN_9       ok        sex-fest
 test     PORN_9       ok        cum-dumpster
 test     PORN_9       fail      talcum-dumpster
-test     PORN_10      ok        Lolita
-test     PORN_10      ok        whores
-test     PORN_10      ok        xxx
-test     PORN_10      fail      xxxx
-test     PORN_11      ok        hard-core
-test     PORN_11      fail      amateurish
-test     PORN_11      fail      proamateur
 test     PORN_12      ok        sluts and whores
 test     PORN_12      ok        hardcore sex
 test     PORN_12      fail      lolita
 test     PORN_13      ok        must be at least 18
 test     PORN_13      ok        must be over 18
 test     PORN_13      fail      must be at least 13
-test     PORN_14     ok         I am 18 years old
-test     PORN_14     fail       My name is matt
-test     PORN_14     fail       I am 18 years older than
-test     PORN_14     fail       pics
-test     PORN_14     fail       microscopics
 test FROM_ENDS_IN_NUMS     ok   matt1234@sergeant.org
 test FROM_ENDS_IN_NUMS     fail matt@sergeant.org
 test FROM_STARTS_WITH_NUMS     ok   1234matt@sergeant.org
 test FROM_STARTS_WITH_NUMS     fail matt@sergeant.org
 test FORGED_YAHOO_RCVD fail by mf1.lng.yahoo.com (8.11.1/8.11.1) id g3SDfPH19426
 test NUMERIC_HTTP_ADDR ok http://123456789/foo/bar
-test SPAM_REDIRECTOR ok http://rd.yahoo.com/?http://somesite.com/
-test SPAM_REDIRECTOR ok http://wwp.icq.com/?http://anothersite.com/
 test PGP_SIGNATURE_2 ok Content-Type: multipart/signed; micalg=pgp-sha1;protocol="application/pgp-signature"; boundary="n8g4imXOkfNTN/H1"
 test PGP_SIGNATURE_2 fail Content-Type: text/plain; charset=us-ascii
 test SEARCH_ENGINE_PROMO ok	evaluated for FREE for its keyword placement in the top twenty major search engines
@@ -194,20 +167,8 @@ test US_DOLLARS_4 fail $-$NFbMF$K!"A49q$+$iLd$$9g$o$;$,;&E~$7$F$$$^$9!#
 test US_DOLLARS_4 ok of US$8.5 million (Eight
 test US_DOLLARS_4 ok of US8.5 millions (Eight
 
-test OUTLOOK_FW_MSG ok Subject: FW: White Stripes Tour!
-test OUTLOOK_FW_MSG ok Subject: Fw: Thank you yourself
-test OUTLOOK_FW_MSG fail Subject: Fwd: Dracula
-test OUTLOOK_FW_MSG fail Subject: fw:                                       . qBQyzOWqKYggZT0oDJzp41nd
-test OUTLOOK_FW_MSG fail Subject: FW:>Re: Spruce up your life!DGKJWI
 
-test FWD_MSG ok Subject: Fwd: Dracula
-test FWD_MSG ok Subject: [landho] Fwd: tell rod
-test FWD_MSG fail Subject: Fwd:Pure Opt-In for half the price
-test FWD_MSG fail Subject: Re: RE: FWD: search results        .       .       .
 
-test FWD_MSG_2 ok Subject: Thanks, Lucky, for helping to kill gnutella (fwd)
-test FWD_MSG_2 ok Subject: Version 1.1.8 of the DCC (fwd)
-test FWD_MSG_2 fail Subject: this is not (fwd) valid
 
 # note: have to use "." instead of "#", as it's the comment char
 test HTML_TEXT_FF0000 fail <body bgcolor=.ff0000>foo</body>

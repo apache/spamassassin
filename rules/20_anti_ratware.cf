@@ -6,8 +6,6 @@ describe USER_AGENT_PINE	Message-Id indicates a non-spam MUA (Pine)
 header USER_AGENT_MUTT		User-Agent =~ /^Mutt\/\d(?:\.\d+){2,4}/
 describe USER_AGENT_MUTT	User-Agent header indicates a non-spam MUA (Mutt)
 
-header USER_AGENT_GNUS_UA	User-Agent =~ /^Gnus v\d(?:\.\d+){1,2}\/X?Emacs \d+\.\d+/
-describe USER_AGENT_GNUS_UA	User-Agent header indicates a non-spam MUA (Gnus)
 
 header USER_AGENT_MOZILLA_UA	User-Agent =~ /^Mozilla\/5\.\d+ \(.*\) Gecko\/\d{8}(?: |$)/
 describe USER_AGENT_MOZILLA_UA	User-Agent header indicates a non-spam MUA (Mozilla)
@@ -27,8 +25,6 @@ describe USER_AGENT_KMAIL	User-Agent header indicates a non-spam MUA (KMail)
 header USER_AGENT_IMP		User-Agent =~ /^Internet Messaging Program \(IMP\) [34]\.\d/
 describe USER_AGENT_IMP		User-Agent header indicates a non-spam MUA (IMP)
 
-header USER_AGENT_AOL		X-Mailer   =~ /^AOL (?:[5-7]\.0 )?for (?:Win|Mac).* sub \d+$/
-describe USER_AGENT_AOL		X-Mailer header indicates a non-spam MUA (AOL)
 
 header USER_AGENT_TONLINE	X-Mailer   =~ /^T-Online (?:e|Web)Mail \d\.\d+$/
 describe USER_AGENT_TONLINE	X-Mailer header indicates a non-spam MUA (T-Offline)
@@ -39,7 +35,6 @@ describe USER_AGENT_APPLEMAIL	X-Mailer header indicates a non-spam MUA (Apple Ma
 
 tflags USER_AGENT_PINE       nice
 tflags USER_AGENT_MUTT       nice
-tflags USER_AGENT_GNUS_UA    nice
 tflags USER_AGENT_MOZILLA_UA nice
 tflags USER_AGENT_MOZILLA_XM nice
 tflags USER_AGENT_MACOE      nice
@@ -47,6 +42,5 @@ tflags USER_AGENT_OUTLOOK    nice
 tflags USER_AGENT_ENTOURAGE  nice
 tflags USER_AGENT_KMAIL      nice
 tflags USER_AGENT_IMP        nice
-tflags USER_AGENT_AOL        nice
 tflags USER_AGENT_TONLINE    nice
 tflags USER_AGENT_APPLEMAIL  nice

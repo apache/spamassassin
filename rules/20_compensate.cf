@@ -90,9 +90,6 @@ header Q_FOR_SELLER             Subject =~ /Question.*(?:for|to|from eBay).*(?:s
 describe Q_FOR_SELLER           Subject is an eBay question
 tflags Q_FOR_SELLER		nice
 
-header SUBJECT_HAS_DATE         Subject =~ /1?\d[-\/][1-3]?\d[-\/](?:20)?0\d/
-describe SUBJECT_HAS_DATE       Subject contains a date
-tflags SUBJECT_HAS_DATE		nice
 
 # TERRIBLE hitrate ;) 1:1 spam to nonspam
 #  2.75     2.93     2.58    0.53   -2.00  FROM_NEWS_LIST (fn)
@@ -135,17 +132,8 @@ describe FROM_EGROUPS           Appears to be from yahoo groups
 tflags FROM_EGROUPS		nice
 
 # thanks Rod, these work better
-header FWD_MSG                  Subject =~ /Fwd:\s/
-describe FWD_MSG                Forwarded email
-tflags FWD_MSG		        nice
 
-header FWD_MSG_2                Subject =~ /\s\(fwd\)\s*$/
-describe FWD_MSG_2              Forwarded email
-tflags FWD_MSG_2	        nice
 
-header OUTLOOK_FW_MSG           Subject =~ /\[?F[Ww]:\s/
-describe OUTLOOK_FW_MSG         Forwarded email (Outlook style)
-tflags OUTLOOK_FW_MSG		nice
 
 # compensate for common false pos on above rule: Yahoo! webmail
 header YAHOO_MSGID_ADDED        ALL =~ /Message-Id: <\S+\.mail.yahoo.com>\nReceived: .*by \S+mail.yahoo.com via HTTP;/s
@@ -176,9 +164,6 @@ body MSN_FOOTER1                /MSN Photos is the easiest way to share and prin
 describe MSN_FOOTER1            Common footer for MSN
 tflags MSN_FOOTER1		nice
 
-body MAILBITS_EMAIL             /This is a free service provided by MailBits\.com\./
-describe MAILBITS_EMAIL         recommended page from MailBits.com
-tflags MAILBITS_EMAIL		nice
 
 body GROUPS_YAHOO_1             /^Your use of Yahoo! Groups is subject to http:\/\/\Qdocs.yahoo.com\E\/info\/terms\//
 describe GROUPS_YAHOO_1         Yahoo! Groups message
@@ -218,13 +203,7 @@ tflags PGP_SIGNATURE		nice
 #describe BALANCE_FOR_LONG       Message text is over 10K in size
 #tflags BALANCE_FOR_LONG		nice
 #
-#body BALANCE_FOR_LONG_20K       eval:check_for_very_long_text('20000')
-#describe BALANCE_FOR_LONG_20K   Message text is over 20K in size
-#tflags BALANCE_FOR_LONG_20K	nice
 #
-#body BALANCE_FOR_LONG_40K       eval:check_for_very_long_text('40000')
-#describe BALANCE_FOR_LONG_40K   Message text is over 40K in size
-#tflags BALANCE_FOR_LONG_40K	nice
 
 rawbody PATCH_UNIFIED_DIFF	/^\@\@ [-+0-9]+,[0-9]+ [-+0-9]+,[0-9]+ \@\@$/
 describe PATCH_UNIFIED_DIFF	Contains what looks like a patch from diff -u
@@ -247,17 +226,8 @@ describe QUOTED_EMAIL_TEXT	Contains what looks like a quoted email text
 tflags QUOTED_EMAIL_TEXT	nice
 
 # matt@nightrealms.com (Matthew Cline)
-header   FAILURE_NOTICE_1       Subject =~ /^(?:failure notice|returned mail:|Delivery Status Notification|Undeliverable:)/i
-describe FAILURE_NOTICE_1       Mailer daemon failure notice (1)
-tflags   FAILURE_NOTICE_1       nice
 
-body     FAILURE_NOTICE_2       /\b(?:Delivery to the following recipients failed|This Message was undeliverable|The following addresses had permanent fatal errors|did not reach the following recipient)\b/i
-describe FAILURE_NOTICE_2       Mailer daemon failure notice (2)
-tflags   FAILURE_NOTICE_2       nice
 
-header   MAILER_DAEMON          From =~ /^(?:Mail Delivery \w+ )?<?mailer.?daemon\@\S+>?(?: \(Mail Delivery \w+\))?$/i
-describe MAILER_DAEMON          From the Mailer-Daemon
-tflags   MAILER_DAEMON          nice
 
 # spamassassin@davidgreenaway.com (David Greenaway)
 body     FORGOTTEN_PASSWORD     /[fF]org[oe]t.{0,25}[pP]assword/
