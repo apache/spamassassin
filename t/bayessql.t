@@ -3,6 +3,7 @@
 use lib '.'; use lib 't';
 use SATest;
 use Test;
+use Symbol qw(delete_package);
 
 use constant TEST_ENABLED => (-e 'bayessql.cf' || -e 't/bayessql.cf');
 use constant HAS_DBI => eval { require DBI; }; # for our cleanup stuff
@@ -16,7 +17,7 @@ BEGIN {
     unshift(@INC, '../blib/lib');
   }
 
-  plan tests => ((TEST_ENABLED && HAS_DBI) ? 44 : 0);
+  plan tests => ((TEST_ENABLED && HAS_DBI) ? 53 : 0);
 
   onfail => sub {
     warn "\n\nNote: Failure may be due to an incorrect config.";
@@ -55,11 +56,73 @@ sa_t_init("bayes");
 tstlocalrules ("
 $dbconfig
 bayes_sql_override_username $testuser
+loadplugin validuserplugin data/validuserplugin.pm
+bayes_sql_username_authorized 1
 ");
 
 use Mail::SpamAssassin;
 
 my $sa = create_saobj();
+
+$sa->init();
+
+ok($sa);
+
+ok($sa->{bayes_scanner});
+
+ok($sa->{bayes_scanner}->{store}->tie_db_writable());
+
+# This bit breaks abstraction a bit, the userid is an implementation detail,
+# but is necessary to perform some of the tests.  Perhaps in the future we
+# can add some sort of official API for this sort of thing.
+my $testuserid = $sa->{bayes_scanner}->{store}->{_userid};
+ok(defined($testuserid));
+
+ok($sa->{bayes_scanner}->{store}->clear_database());
+
+ok(database_clear_p($testuser, $testuserid));
+
+$sa->finish_learner();
+
+undef $sa;
+
+# this removes the loaded plugin from this scope so we can reload it again later
+delete_package("validuserplugin");
+
+sa_t_init("bayes");
+
+tstlocalrules ("
+$dbconfig
+bayes_sql_override_username iwillfail
+loadplugin validuserplugin data/validuserplugin.pm
+bayes_sql_username_authorized 1
+");
+
+$sa = create_saobj();
+
+$sa->init();
+
+ok($sa);
+
+ok($sa->{bayes_scanner});
+
+ok(!$sa->{bayes_scanner}->{store}->tie_db_writable());
+
+$sa->finish_learner();
+
+undef $sa;
+
+# this removes the loaded plugin from this scope so we can reload it again later
+delete_package("validuserplugin");
+
+sa_t_init("bayes");
+
+tstlocalrules ("
+$dbconfig
+bayes_sql_override_username $testuser
+");
+
+$sa = create_saobj();
 
 $sa->init();
 
@@ -179,7 +242,7 @@ $sa->{bayes_scanner}->{store}->untie_db();
 # This bit breaks abstraction a bit, the userid is an implementation detail,
 # but is necessary to perform some of the tests.  Perhaps in the future we
 # can add some sort of official API for this sort of thing.
-my $testuserid = $sa->{bayes_scanner}->{store}->{_userid};
+$testuserid = $sa->{bayes_scanner}->{store}->{_userid};
 ok(defined($testuserid));
 
 ok($sa->{bayes_scanner}->{store}->clear_database());
