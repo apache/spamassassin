@@ -894,7 +894,7 @@ sub rewrite_no_report_safe {
         # if we're not going to do a rewrite, skip this header!
         next if (!/^(From|Subject|To):/i);
 	my $hdr = ucfirst(lc($1));
-	next if (!exists $self->{conf}->{rewrite_header}->{$hdr});
+	next if (!defined $self->{conf}->{rewrite_header}->{$hdr});
 
 	# pop the original version onto the end of the header array
         if ($created_subject) {
