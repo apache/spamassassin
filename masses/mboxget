@@ -1,0 +1,27 @@
+#!/usr/bin/perl -w
+
+# mboxget - get a message from a mailbox
+#
+# usage: mboxget [mass-check-mbox-id ...]
+
+use strict;
+
+my $prog = $0;
+$prog =~ s@.*/@@;
+
+foreach my $where (@ARGV) {
+  my ($file, $offset) = ($where =~ m/(.*)\.(\d+)$/);
+  open(INPUT, $file) || die("$prog: open $file failed: $!\n");
+  seek(INPUT, $offset, 0) || die("$prog: seek $offset failed: $!\n");
+  my $past = 0;
+  while (<INPUT>) {
+    if ($past) {
+      last if substr($_,0,5) eq "From ";
+    }
+    else {
+      $past = 1;
+    }
+    print $_;
+  }
+  close INPUT;
+}
