@@ -198,8 +198,8 @@ full SIGNATURE_LONG_SPARSE	eval:check_signature('8', '15', '1')
 describe SIGNATURE_LONG_SPARSE	Long signature present (empty lines)
 tflags SIGNATURE_LONG_SPARSE	nice
 
-body EGP_HTML_BANNER            /^<!-- \S+begin egp html banner/
-describe EGP_HTML_BANNER        non-spam EGP banner found
+rawbody EGP_HTML_BANNER         /^<!-- \S+begin egp html banner/
+describe EGP_HTML_BANNER        non-spam Yahoo! Groups banner found
 tflags EGP_HTML_BANNER		nice
 
 body MAILMAN_CONFIRM            /We have received a request .*subscription of your email address.* to the .* mailing list/
