@@ -169,7 +169,7 @@ sub readscores {
       $freq_nonspam{$2} ||= 0;
       $tflags{$2} ||= '';
       $score{$2} ||= 1.0;
-    } elsif (/^tflags\s+(.+)$/) {
+    } elsif (/^tflags\s+(\S+)\s+(.+)$/) {
       $tflags{$1} = $2;
     } elsif (/^score\s+(\S+)\s+(.+)$/) {
       $score{$1} = $2;
