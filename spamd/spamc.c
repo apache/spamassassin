@@ -47,6 +47,7 @@
      || (defined(__osf__)) /* Digital UNIX */ \
      || (defined(hpux) || defined(__hpux)) /* HPUX */
 
+extern int optind;
 extern char *optarg;
 #endif
 

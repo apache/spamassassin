@@ -2,7 +2,9 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spam");
-use Test; BEGIN { plan tests => 2 };
+use Test; BEGIN { plan tests => -e 't/do_razor' ? 2 : 0 };
+
+exit unless -e 't/do_razor';
 
 # ---------------------------------------------------------------------------
 
