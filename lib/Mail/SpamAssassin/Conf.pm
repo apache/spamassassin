@@ -717,7 +717,7 @@ determine that SpamAssassin is running.
     }
   });
 
-=item report_safe { 0 | 1 | 2 }	(default: 1)
+=item report_safe ( 0 | 1 | 2 )	(default: 1)
 
 if this option is set to 1, if an incoming message is tagged as spam,
 instead of modifying the original message, SpamAssassin will create a
@@ -1119,7 +1119,7 @@ Empty the list of internal networks.
     }
   });
 
-=item skip_rbl_checks { 0 | 1 }   (default: 0)
+=item skip_rbl_checks ( 0 | 1 )   (default: 0)
 
 By default, SpamAssassin will run RBL checks.  If your ISP already does this
 for you, set this to 1.
@@ -1499,7 +1499,7 @@ win32 depending on the platform in use.
     }
   });
 
-=item fold_headers { 0 | 1 }        (default: 1)
+=item fold_headers ( 0 | 1 )        (default: 1)
 
 By default,  headers added by SpamAssassin will be whitespace folded.
 In other words, they will be broken up into multiple lines instead of
@@ -1721,7 +1721,7 @@ then, they may only add rules from below).
 
 =over 4
 
-=item allow_user_rules { 0 | 1 }		(default: 0)
+=item allow_user_rules ( 0 | 1 )		(default: 0)
 
 This setting allows users to create rules (and only rules) in their
 C<user_prefs> files for use with C<spamd>. It defaults to off, because
@@ -2376,7 +2376,7 @@ This option gives the password used by the above DSN.
     type => $CONF_TYPE_STRING
   });
 
-=item bayes_sql_username_authorized (0 | 1)  (default: 0)
+=item bayes_sql_username_authorized ( 0 | 1 )  (default: 0)
 
 Whether to call the services_authorized_for_username plugin hook in BayesSQL.
 If the hook does not determine that the user is allowed to use bayes or is
