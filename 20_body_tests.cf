@@ -155,7 +155,8 @@ describe MIME_HTML_MOSTLY	Multipart message almost all text/html MIME parts
 body MIME_HTML_ONLY		eval:check_for_mime_html_only()
 describe MIME_HTML_ONLY		Message only has text/html MIME parts
 
-# only works for multipart/alternative
+# multipart/alternative has very good accuracy, other multipart types are
+# similar to MIME_HTML_ONLY so they don't need a separate rule
 header __CTYPE_MULTIPART_ALT	Content-Type =~ /multipart\/alternative/i
 meta MIME_HTML_ONLY_MULTI	(__CTYPE_MULTIPART_ALT && MIME_HTML_ONLY)
 describe MIME_HTML_ONLY_MULTI	Multipart message only has text/html MIME parts
