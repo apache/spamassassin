@@ -200,3 +200,11 @@ describe UNIQUE_WORDS	Message body has many words used only once
 
 body DOMAIN_RATIO	eval:check_domain_ratio('0.026')
 describe DOMAIN_RATIO	Message body mentions many internet domains
+
+body __LONGWORDS_A	/\b(?:[a-z]{8,}\s+){6}/
+body __LONGWORDS_B	/\b(?:[a-z]{7,}\s+){8}/
+body __LONGWORDS_C	/\b(?:[a-z]{6,}\s+){9}/
+body __LONGWORDS_D	/\b(?:[a-z]{5,}\s+){10}/
+
+meta LONGWORDS		(__LONGWORDS_A || __LONGWORDS_B || __LONGWORDS_C || __LONGWORDS_D)
+describe LONGWORDS	Long string of long words
