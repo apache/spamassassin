@@ -2012,6 +2012,51 @@ sub remove_from_addrlist_rcvd {
   }
 }
 
+###########################################################################
+
+sub maybe_header_only {
+  my($self,$rulename) = @_;
+  my $type = $self->{test_types}->{$rulename};
+
+  if (($type == TYPE_HEAD_TESTS) || ($type == TYPE_HEAD_EVALS)) {
+    return 1;
+
+  } elsif ($type == TYPE_META_TESTS) {
+    my $tflags = $self->{tflags}->{$rulename}; $tflags ||= '';
+    if ($tflags =~ m/\bnet\b/i) {
+      return 0;
+    } else {
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
+sub maybe_body_only {
+  my($self,$rulename) = @_;
+  my $type = $self->{test_types}->{$rulename};
+
+  if (($type == TYPE_BODY_TESTS) || ($type == TYPE_BODY_EVALS)
+	|| ($type == TYPE_URI_TESTS) || ($type == TYPE_URI_EVALS))
+  {
+    # some rawbody go off of headers...
+    return 1;
+
+  } elsif ($type == TYPE_META_TESTS) {
+    my $tflags = $self->{tflags}->{$rulename}; $tflags ||= '';
+    if ($tflags =~ m/\bnet\b/i) {
+      return 0;
+    } else {
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
+###########################################################################
+
 sub dbg { Mail::SpamAssassin::dbg (@_); }
 sub sa_die { Mail::SpamAssassin::sa_die (@_); }
 
