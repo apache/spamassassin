@@ -474,3 +474,8 @@ uri      T_SPOOF_OURI		m{^https?:/{0,2}(?:[^@/]+@)*?(?:[a-z0-9_-]+?\.){2,}(?:com
 describe T_SPOOF_OURI	 	URL has items in odd places
 
 ##########################################################################
+
+# http://bugzilla.spamassassin.org/show_bug.cgi?id=3645
+header    T_SARE_SUB_DOLLARS    Subject =~ /^\s*(?:\w+ )?(?:\w+: )?\$\d+\s*$/
+describe  T_SARE_SUB_DOLLARS    Subject is dollar sign and numerics only
+
