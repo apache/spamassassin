@@ -201,8 +201,9 @@ body T_HTML_IMAGE_AREA_3B	eval:html_range('image_area','325000','350000')
 body T_HTML_IMAGE_AREA_3C	eval:html_range('image_area','350000','375000')
 body T_HTML_IMAGE_AREA_3D	eval:html_range('image_area','375000','400000')
 
-# I am still testing the range, the final version will have
-# significantly fewer instances.
+# I am still testing the range, the final version will have significantly
+# fewer instances (my current thinking is 200 bytes of range per rule, so
+# there will be 6 to 8 rules in the final version)
 body T_HTML_IMAGE_ONLY_01	eval:html_image_only('0000','0100')
 body T_HTML_IMAGE_ONLY_02	eval:html_image_only('0100','0200')
 body T_HTML_IMAGE_ONLY_03	eval:html_image_only('0200','0300')
@@ -218,6 +219,11 @@ body T_HTML_IMAGE_ONLY_12	eval:html_image_only('1100','1200')
 body T_HTML_IMAGE_ONLY_13	eval:html_image_only('1200','1300')
 body T_HTML_IMAGE_ONLY_14	eval:html_image_only('1300','1400')
 body T_HTML_IMAGE_ONLY_15	eval:html_image_only('1400','1500')
+# I added a few more rules since there was a interesting peak of good S/O
+# ratio at 15 that I'm curious about.
+body T_HTML_IMAGE_ONLY_16	eval:html_image_only('1500','1600')
+body T_HTML_IMAGE_ONLY_17	eval:html_image_only('1600','1700')
+body T_HTML_IMAGE_ONLY_18	eval:html_image_only('1700','1800')
 
 # This looks pretty good now.
 body T_HTML_IMAGE_RATIO_02     eval:html_image_ratio('0.000','0.002')
@@ -229,6 +235,8 @@ body T_HTML_IMAGE_RATIO_12     eval:html_image_ratio('0.010','0.012')
 body T_HTML_IMAGE_RATIO_14     eval:html_image_ratio('0.012','0.014')
 body T_HTML_IMAGE_RATIO_16     eval:html_image_ratio('0.014','0.016')
 body T_HTML_IMAGE_RATIO_18     eval:html_image_ratio('0.016','0.018')
+# quinlan: T_HTML_IMAGE_RATIO_20 is a bit worse than HTML_MESSAGE
+# so we should probably not promote it along with the others.
 body T_HTML_IMAGE_RATIO_20     eval:html_image_ratio('0.018','0.020')
 
 ####################################################################
