@@ -465,8 +465,8 @@ sub _build_status_line {
   my ($self) = @_;
   my $line;
 
-  $line  = ($self->is_spam() ? "Yes" : "No") . ",\n";
-  $line .= sprintf("\thits=%2.1f required=%2.1f\n",
+  $line  = ($self->is_spam() ? "Yes, " : "No, ");
+  $line .= sprintf("hits=%2.1f required=%2.1f\n",
              $self->{hits}, $self->{conf}->{required_hits});
 
   if($_ = $self->get_names_of_tests_hit()) {
