@@ -148,18 +148,17 @@ tflags RCVD_IN_OPM_HTTP_POST	net
 # ---------------------------------------------------------------------------
 # Spamhaus XBL+SBL
 
-header __RCVD_IN_SBL_XBL	eval:check_rbl_txt('sblxbl', 'sbl-xbl.spamhaus.org.')
+header __RCVD_IN_SBL_XBL	eval:check_rbl('sblxbl', 'sbl-xbl.spamhaus.org.')
 describe __RCVD_IN_SBL_XBL	Received via a relay in Spamhaus SBL+XBL
 tflags __RCVD_IN_SBL_XBL	net
 
 # SBL is the Spamhaus Block List: http://www.spamhaus.org/sbl/
-header RCVD_IN_SBL		eval:check_rbl_sub('sblxbl', '(?i)/sbl')
+header RCVD_IN_SBL		eval:check_rbl_sub('sblxbl', '127.0.0.2')
 describe RCVD_IN_SBL		Received via a relay in Spamhaus SBL
 tflags RCVD_IN_SBL		net
 
 # XBL is the Exploits Block List: http://www.spamhaus.org/xbl/
-# contains data from the CBL, probably supercedes that.
-header RCVD_IN_XBL		eval:check_rbl_sub('sblxbl', '(?i)/xbl')
+header RCVD_IN_XBL		eval:check_rbl_sub('sblxbl', '127.0.0.4')
 describe RCVD_IN_XBL		Received via a relay in Spamhaus XBL
 tflags RCVD_IN_XBL		net
 
