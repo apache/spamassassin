@@ -33,15 +33,12 @@ if (scalar (@ARGV) != 3) {
 
 my ($cmd, $src, $tgt, $lnk) = @ARGV;
 
-# Check if the source is a symlink and read the target.  On systems which do
-# not support symlinks, readlink will bail out which is catched by the eval,
-# similar to what 'perldoc -f symlink' suggests.  It will fall back to copy
-# then.
-if ($cmd eq 'symlink' && !SYMLINK) {
-  $cmd = 'copy';
-}
+# If symlinks work and source is a symlink and we're copying, do a symlink.
+$cmd = 'symlink' if (SYMLINK && -l $src);
+# If symlinks do not work and we're symlinking, do a copy.
+$cmd = 'copy' if (!SYMLINK && $cmd eq 'symlink');
 
-# If we're supposed to link, do so.
+# Figure out the symlink source.
 if ($cmd eq 'symlink') {
   $lnk = (-l $src) ? readlink($src) : $src;
 }
