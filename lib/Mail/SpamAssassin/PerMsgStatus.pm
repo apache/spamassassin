@@ -2153,6 +2153,7 @@ sub _handle_hit {
 				       $rule,"($score points)",
 				       $area, $desc, $self->{test_log_msgs});
     }
+    $self->{test_log_msgs} = '';	# clear test logs
 }
 
 sub handle_hit {
