@@ -1,7 +1,8 @@
 # SpamAssassin user preferences file.  See 'man Mail::SpamAssassin::Conf' for
 # details of what can be tweaked.
 #* 
-#* Note: this file is never read by SpamAssassin.  Instead, it will be copied
+#* Note: this file is not read by SpamAssassin until copied into the user directory
+#* Instead, it will be copied
 #* to a user's home directory, allowing them to perform personalised
 #* customisation.  If you want to make changes to the site-wide defaults,
 #* create a file in /etc/spamassassin or /etc/mail/spamassassin instead.
