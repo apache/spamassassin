@@ -113,7 +113,7 @@ GetOptions(
   'randseed=i'  => \$opt{'randseed'},
   'stopafter=i' => \$opt{'stopafter'},
 
-  'debug-level|D:s' => \$opt{'debug-level'},
+  'debug-level|D:s' => \$opt{'debug'},
   'help|h|?'        => \$opt{'help'},
   'version|V'       => \$opt{'version'},
 
@@ -143,6 +143,20 @@ if ( defined $opt{'help'} ) {
 if ( defined $opt{'version'} ) {
   print "SpamAssassin version " . Mail::SpamAssassin::Version() . "\n";
   exit 0;
+}
+
+# set debug areas, if any specified (only useful for command-line tools)
+my @debug;
+if (defined $opt{'debug'}) {
+  if ($opt{'debug'}) {
+    @debug = split(/,/, $opt{'debug'});
+    if (grep { !/^\S+$/ } @debug) {
+      usage(0, "bad areas in --debug option!");
+    }
+  }
+  else {
+    @debug = ("all");
+  }
 }
 
 if ( $opt{'force-expire'} ) {
@@ -186,7 +200,7 @@ $spamtest = new Mail::SpamAssassin(
     rules_filename      => $opt{'configpath'},
     site_rules_filename => $opt{'siteconfigpath'},
     userprefs_filename  => $opt{'prefspath'},
-    debug               => defined( $opt{'debug-level'} ),
+    debug               => \@debug,
     local_tests_only    => 1,
     dont_copy_prefs     => 1,
     PREFIX              => $PREFIX,
