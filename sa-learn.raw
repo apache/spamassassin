@@ -1,5 +1,4 @@
 #!/usr/bin/perl -w -T
-
 # <@LICENSE>
 # Copyright 2004 Apache Software Foundation
 # 
@@ -1081,28 +1080,29 @@ The B<sa-learn> command is part of the B<Mail::SpamAssassin> Perl module.
 Install this as a normal Perl module, using C<perl -MCPAN -e shell>,
 or by hand.
 
-=head1 ENVIRONMENT
-
-No environment variables, aside from those used by perl, are required to
-be set.
-
 =head1 SEE ALSO
 
-Mail::SpamAssassin(3)
 spamassassin(1)
+spamc(1)
+Mail::SpamAssassin(3)
 
-http://www.paulgraham.com/ , Paul Graham's "A Plan For Spam" paper
+E<lt>http://www.paulgraham.com/E<gt>
+Paul Graham's "A Plan For Spam" paper
 
-http://radio.weblogs.com/0101454/stories/2002/09/16/spamDetection.html , Gary
-Robinson's f(x) and combining algorithms, as used in SpamAssassin
+E<lt>http://radio.weblogs.com/0101454/stories/2002/09/16/spamDetection.htmlE<gt>
+Gary Robinson's f(x) and combining algorithms, as used in SpamAssassin
 
-http://www.bgl.nu/~glouis/bogofilter/ , 'Training on error' page.  A discussion
-of various Bayes training regimes, including 'train on error' and unsupervised
-training
+E<lt>http://www.bgl.nu/~glouis/bogofilter/E<gt>
+'Training on error' page.  A discussion of various Bayes training regimes,
+including 'train on error' and unsupervised training.
 
-=head1 AUTHOR
+=head1 PREREQUISITES
 
-Justin Mason E<lt>jm /at/ jmason.orgE<gt>
+C<Mail::SpamAssassin>
+
+=head1 AUTHORS
+
+The SpamAssassin(tm) Project E<lt>http://spamassassin.apache.org/E<gt>
 
 =cut
 

@@ -812,25 +812,25 @@ hand.
 For further details on how to install, please read the C<INSTALL> file
 from the SpamAssassin distribution.
 
-=head1 ENVIRONMENT
-
-No environment variables, aside from those used by perl, are required to
-be set.
-
 =head1 SEE ALSO
 
 sa-learn(1)
-Mail::SpamAssassin(3)
+spamd(1)
+spamc(1)
 Mail::SpamAssassin::Conf(3)
-Razor(3)
+Mail::SpamAssassin(3)
+
+=head1 PREREQUISITES
+
+C<Mail::SpamAssassin>
 
 =head1 BUGS
 
-http://bugzilla.spamassassin.org/
+See <http://bugzilla.spamassassin.org/>
 
-=head1 AUTHOR
+=head1 AUTHORS
 
-Justin Mason E<lt>jm /at/ jmason.orgE<gt>
+The SpamAssassin(tm) Project <http://spamassassin.apache.org/>
 
 =cut
 

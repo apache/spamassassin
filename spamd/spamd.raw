@@ -2238,21 +2238,25 @@ when the C<spamd> server is killed.
 
 =back
 
+=head1 SEE ALSO
+
+spamc(1)
+spamassassin(1)
+Mail::SpamAssassin::Conf(3)
+Mail::SpamAssassin(3)
+
+=head1 PREREQUISITES
+
+C<Mail::SpamAssassin>
+
 =head1 BUGS
 
 The C<-m> switch may trigger signal-handling bugs in many versions
 of Perl.
 
-=head1 SEE ALSO
+=head1 AUTHORS
 
-spamc(1)
-spamassassin(1)
-Mail::SpamAssassin(3)
-Mail::SpamAssassin::Conf(3)
-
-=head1 PREREQUISITES
-
-C<Mail::SpamAssassin>
+The SpamAssassin(tm) Project <http://spamassassin.apache.org/>
 
 =cut
 
