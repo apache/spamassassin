@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use lib '.'; use lib 't';
-use SATest; sa_t_init("spam");
+use SATest; sa_t_init("reportheader");
 use Test; BEGIN { plan tests => 33 };
 
 # ---------------------------------------------------------------------------
