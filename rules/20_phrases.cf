@@ -358,6 +358,7 @@ describe THE_FOLLOWING_FORM	Asks you to fill out a form
 # this works best as rawbody
 # do not add "subscribe", "unsubscribe", or "help"
 rawbody MAILTO_WITH_SUBJ_REMOVE		/mailto:.{0,64}\@.{0,64}\?subject=(?:\"|3D)*(?:remove?|delete|please.?(?:delete|remove|unsubscribe)|abuse|off\b|stop|take.?me.?off)/i
+describe MAILTO_WITH_SUBJ_REMOVE	mailto URI includes removal text
 
 # include the \n\n so we don't match mailto's in the headers!  Some list software
 # uses these to handle auto-subscribe/unsubscribe features
@@ -1085,8 +1086,8 @@ body BANG_GUARANTEE		/\bguaranteed?\!/i
 describe BANG_GUARANTEE		Something is emphatically guaranteed
 
 # seems to be inserted with s1618 rules VERY heavily
-body WE_HATE_SPAM /\banti-spam policy\b/i
-describe WE_HATE_SPAM Mailer is against spam -- aren't we all?
+body WE_HATE_SPAM2		/\banti-spam policy\b/i
+describe WE_HATE_SPAM2		Mailer is against spam -- aren't we all?
 
 # similar to SAVE_UP_TO and SAVE_MONEY, but a little more generic
 body	UP_TO_OR_MORES		/up to \S+( \S+)? or more/i
