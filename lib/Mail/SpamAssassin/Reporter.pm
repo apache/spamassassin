@@ -169,7 +169,7 @@ sub close_pipe_fh {
 
 sub razor_report {
   my ($self, $fulltext, $revoke) = @_;
-  my $timeout=$self->{conf}->{razor_timeout};
+  my $timeout=$self->{conf}->{razor_timeout} || 10;
   my $response;
 
   # If we passed in a true value for $revoke then we must be revoking
