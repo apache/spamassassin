@@ -51,12 +51,6 @@ $WORD_OBFUSCATION_CHARS = '*_.,/|-+=';
 # HEAD TESTS:
 ###########################################################################
 
-# if anyone can explain why I can't import this from Util.pm, I'd be
-# very appreciative!
-sub parse_rfc822_date {
-  return Mail::SpamAssassin::Util::parse_rfc822_date(@_);
-}
-
 sub check_for_from_mx {
   my ($self) = @_;
 

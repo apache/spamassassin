@@ -77,6 +77,7 @@ sub cmdline_run {
       use_whitelist     => $opt{'auto-whitelist'},
       bias_scores       => $opt{'bias-scores'},
       force_expire	=> $opt{'force-expire'},
+      caller_will_untie	=> 1
   });
 
   if ($opts->{rebuildonly}) {
@@ -122,9 +123,7 @@ sub cmdline_run {
     if ($@) { die $@ unless ($@ =~ /HITLIMIT/); }
 
     print STDERR "\n" if ($opt{showdots});
-    if (defined $learnprob) {
-      warn "Learned from $messagecount messages.\n";
-    }
+    warn "Learned from $messagecount messages.\n";
 
     if (!$opt{norebuild}) {
       $spamtest->rebuild_learner_caches();
