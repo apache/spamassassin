@@ -33,6 +33,7 @@ sub new {
 
   $self->{scores} = { };
   $self->{required_hits} = 5;
+  $self->{auto_report_threshold} = 20;
   $self->{report_template} = '';
 
   $self;
@@ -112,10 +113,17 @@ sub parse_rules {
       next;
     }
 
+    if (/^auto_report_threshold\s+(\d+)$/) {
+      $self->{auto_report_threshold} = $1+0;
+      next;
+    }
+
 failed_line:
-    warn "Failed to parse line in SpamAssassin configuration, skipping: $_\n";
+    dbg ("Failed to parse line in SpamAssassin configuration, skipping: $_");
   }
 }
+
+sub dbg { Mail::SpamAssassin::dbg (@_); }
 
 ###########################################################################
 

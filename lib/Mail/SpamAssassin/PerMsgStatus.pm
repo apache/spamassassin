@@ -201,8 +201,9 @@ sub rewrite_as_spam {
   $self->{msg}->replace_header ("Subject", $_);
 
   # add some headers...
-  $_ = sprintf ("Yes, hits=%d required=%d", $self->{hits},
-        $self->{required_hits});
+  $_ = sprintf ("Yes, hits=%d required=%d",
+  			$self->{hits}, $self->{required_hits});
+
   $self->{msg}->put_header ("X-Spam-Status", $_);
   $self->{msg}->put_header ("X-Spam-Flag", 'YES');
 
@@ -213,6 +214,7 @@ sub rewrite_as_spam {
   my $lines = $self->{msg}->get_body();
   unshift (@{$lines}, split (/$/, $self->{report}));
   $self->{msg}->replace_body ($lines);
+
   $self->{msg}->{audit};
 }
 
@@ -223,6 +225,27 @@ sub rewrite_as_non_spam {
         $self->{required_hits});
   $self->{msg}->put_header ("X-Spam-Status", $_);
   $self->{msg}->{audit};
+}
+
+=item $status->handle_auto_report ()
+
+If this mail message has a high enough hit score, report it to spam-tracking
+services straight away, without waiting for user confirmation.  See the
+documentation for L<spamassassin>'s C<-r> switch for details on what
+spam-tracking services are used.
+
+=cut
+
+sub handle_auto_report {
+  my ($self) = @_;
+
+  dbg ("auto-report? score=".$self->{hits}.
+  			" threshold=".$self->{conf}->{auto_report_threshold});
+
+  if ($self->{hits} >= $self->{conf}->{auto_report_threshold}) {
+    dbg ("score is high enough to automatically report this as spam");
+    $self->{main}->report_as_spam ($self->{msg}->{audit});
+  }
 }
 
 ###########################################################################

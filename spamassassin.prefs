@@ -5,6 +5,10 @@
 #   required_hits n
 #		(how many hits are required to tag a mail as spam.)
 #
+#   auto_report_threshold n
+#		(spams with this many hits or more, will be reported
+#		as spam straightaway without requiring human verification.)
+#
 #   score SYMBOLIC_TEST_NAME n
 #		(if this is omitted, 1 is used as a default score.
 #		Set the score to 0 to ignore the test.)
@@ -14,6 +18,7 @@
 ###########################################################################
 
 required_hits		5
+auto_report_threshold	15
 
 ###########################################################################
 # Scores for header tests.
