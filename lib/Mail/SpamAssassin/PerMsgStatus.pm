@@ -228,6 +228,7 @@ sub check {
 
     # auto-learning
     $self->learn();
+    $self->{main}->call_plugins ("check_post_learn", { permsgstatus => $self });
   }
 
   # delete temporary storage and memory allocation used during checking
@@ -2396,7 +2397,7 @@ sub got_pattern_hit {
 
 =item $status->clear_test_state()
 
-Clear test state, including test log messages from C<$status->test_log()>.
+Clear test state, including test log messages from C<$status-E<gt>test_log()>.
 
 =cut
 
