@@ -123,7 +123,7 @@ sub check_for_forged_hotmail_received_headers {
 
   if ($self->gated_through_received_hdr_remover()) { return 0; }
 
-  if ($rcvd =~ /from \S*hotmail.com \(\S+\.hotmail(?:\.msn|)\.com / && $ip)
+  if ($rcvd =~ /from \S*hotmail.com \(\S+\.hotmail(?:\.msn|)\.com[ \)]/ && $ip)
                 { return 0; }
   if ($rcvd =~ /from \S+ by \S+\.hotmail(?:\.msn|)\.com with HTTP\;/ && $ip)
                 { return 0; }
