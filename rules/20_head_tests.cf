@@ -169,6 +169,15 @@ describe INVALID_DATE		Invalid Date: header (not RFC 2822)
 header INVALID_DATE_TZ_ABSURD	Date =~ /[-+](?:1[4-9]\d\d|[2-9]\d\d\d)$/
 describe INVALID_DATE_TZ_ABSURD	Invalid Date: header (timezone does not exist)
 
+header INVALID_TZ_CST		ALL =~ /[+-]\d\d[30]0(?<!-0600|-0500|\+0800|\+0930|\+1030)\s+(?:\bCST\b|\(CST\))/
+describe INVALID_TZ_CST		Invalid date in header (wrong CST timezone)
+
+header INVALID_TZ_EST		ALL =~ /[+-]\d\d[30]0(?<!-0500|-0300|\+1000|\+1100)\s+(?:\bEST\b|\(EST\))/
+describe INVALID_TZ_CST		Invalid date in header (wrong EST timezone)
+
+header INVALID_TZ_GMT		ALL =~ /[+-]\d\d[30]0(?<![+-]0000)\s+(?:\b(?:GMT|UTC)\b(?![\w+-])|\((?:GMT|UTC)\))/
+describe INVALID_TZ_GMT		Invalid date in header (wrong GMT/UTC timezone)
+
 header DATE_YEAR_ZERO_FIRST	Date =~ /[nbrylgptvc]\s+0\d\d\d(?:\s|$)/
 describe DATE_YEAR_ZERO_FIRST	Invalid Date: year begins with zero
 
