@@ -626,16 +626,21 @@ sub check_for_faraway_charset_in_body {
 
   if ($$fulltext =~ /\n\n.*\n
   		Content-Type:\s(.{0,100}charset=[^\n]+)\n
+                (.*)\n
+                Content-Type:\s
 		/isx)
   {
     my $type = $1;
+    my $sampleofbody = $2;
     my @locales = $self->get_my_locales();
     $type = get_charset_from_ct_line ($type);
     if (defined $type &&
       !Mail::SpamAssassin::Locales::is_charset_ok_for_locales
 		      ($type, @locales))
     {
-      return 1;
+      if ($self->are_more_high_bits_set ($sampleofbody)) {
+        return 1;
+      }
     }
   }
 
