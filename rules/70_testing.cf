@@ -98,37 +98,57 @@ header T_PC_CUR_DATE_TIME_1	ALL =~ /%CURRENT_DATE_TIME/
 header T_PC_CUR_DATE_TIME_2	ALL =~ /[%\#\[\$]CURRENT_DATE_TIME/
 
 # RAND rules
-header T_PC_RND_HEADER_1	ALL =~ /%RA?ND_[A-Z]/
-body T_PC_RND_BODY_1		/%RA?ND_[A-Z]/
-rawbody T_PC_RND_RAWBODY_1	/%RA?ND_[A-Z]/
+header T_PC_RND_HEADER_P1	ALL =~ /%RA?ND_[A-Z]/
+header T_PC_RND_HEADER_P2	ALL =~ /%RA?ND(?:OM)?_[A-Z]/
+header T_PC_RND_HEADER_P3	ALL =~ /%RA?ND_[A-Z]/i
+header T_PC_RND_HEADER_P4	ALL =~ /%RA?ND(?:OM)?_[A-Z]/i
+body T_PC_RND_BODY_P1		/%RA?ND_[A-Z]/
+body T_PC_RND_BODY_P2		/%RA?ND(?:OM)?_[A-Z]/
+body T_PC_RND_BODY_P3		/%RA?ND_[A-Z]/i
+body T_PC_RND_BODY_P4		/%RA?ND(?:OM)?_[A-Z]/i
+rawbody T_PC_RND_RAWBODY_P1	/%RA?ND_[A-Z]/
+rawbody T_PC_RND_RAWBODY_P2	/%RA?ND(?:OM)?_[A-Z]/
+rawbody T_PC_RND_RAWBODY_P3	/%RA?ND_[A-Z]/i
+rawbody T_PC_RND_RAWBODY_P4	/%RA?ND(?:OM)?_[A-Z]/i
 
-header T_PC_RND_HEADER_2	ALL =~ /[%\#\[\$]RA?ND_[A-Z]/
-body T_PC_RND_BODY_2		/[%\#\[\$]RA?ND_[A-Z]/
-rawbody T_PC_RND_RAWBODY_2	/[%\#\[\$]RA?ND_[A-Z]/
+header T_PC_RND_HEADER_H1	ALL =~ /\#RA?ND_[A-Z]/
+header T_PC_RND_HEADER_H2	ALL =~ /\#RA?ND(?:OM)?_[A-Z]/
+header T_PC_RND_HEADER_H3	ALL =~ /\#RA?ND_[A-Z]/i
+header T_PC_RND_HEADER_H4	ALL =~ /\#RA?ND(?:OM)?_[A-Z]/i
+body T_PC_RND_BODY_H1		/\#RA?ND_[A-Z]/
+body T_PC_RND_BODY_H2		/\#RA?ND(?:OM)?_[A-Z]/
+body T_PC_RND_BODY_H3		/\#RA?ND_[A-Z]/i
+body T_PC_RND_BODY_H4		/\#RA?ND(?:OM)?_[A-Z]/i
+rawbody T_PC_RND_RAWBODY_H1	/\#RA?ND_[A-Z]/
+rawbody T_PC_RND_RAWBODY_H2	/\#RA?ND(?:OM)?_[A-Z]/
+rawbody T_PC_RND_RAWBODY_H3	/\#RA?ND_[A-Z]/i
+rawbody T_PC_RND_RAWBODY_H4	/\#RA?ND(?:OM)?_[A-Z]/i
 
-header T_PC_RND_HEADER_3	ALL =~ /%RA?ND(?:OM)?_[A-Z]/
-body T_PC_RND_BODY_3		/%RA?ND(?:OM)?_[A-Z]/
-rawbody T_PC_RND_RAWBODY_3	/%RA?ND(?:OM)?_[A-Z]/
+header T_PC_RND_HEADER_D1	ALL =~ /\$RA?ND_[A-Z]/
+header T_PC_RND_HEADER_D2	ALL =~ /\$RA?ND(?:OM)?_[A-Z]/
+header T_PC_RND_HEADER_D3	ALL =~ /\$RA?ND_[A-Z]/i
+header T_PC_RND_HEADER_D4	ALL =~ /\$RA?ND(?:OM)?_[A-Z]/i
+body T_PC_RND_BODY_D1		/\$RA?ND_[A-Z]/
+body T_PC_RND_BODY_D2		/\$RA?ND(?:OM)?_[A-Z]/
+body T_PC_RND_BODY_D3		/\$RA?ND_[A-Z]/i
+body T_PC_RND_BODY_D4		/\$RA?ND(?:OM)?_[A-Z]/i
+rawbody T_PC_RND_RAWBODY_D1	/\$RA?ND_[A-Z]/
+rawbody T_PC_RND_RAWBODY_D2	/\$RA?ND(?:OM)?_[A-Z]/
+rawbody T_PC_RND_RAWBODY_D3	/\$RA?ND_[A-Z]/i
+rawbody T_PC_RND_RAWBODY_D4	/\$RA?ND(?:OM)?_[A-Z]/i
 
-header T_PC_RND_HEADER_4	ALL =~ /[%\#\[\$]RA?ND(?:OM)?_[A-Z]/
-body T_PC_RND_BODY_4		/[%\#\[\$]RA?ND(?:OM)?_[A-Z]/
-rawbody T_PC_RND_RAWBODY_4	/[%\#\[\$]RA?ND(?:OM)?_[A-Z]/
-
-header T_PC_RND_HEADER_5	ALL =~ /%RA?ND_[A-Z]/i
-body T_PC_RND_BODY_5		/%RA?ND_[A-Z]/i
-rawbody T_PC_RND_RAWBODY_5	/%RA?ND_[A-Z]/i
-
-header T_PC_RND_HEADER_6	ALL =~ /[%\#\[\$]RA?ND_[A-Z]/i
-body T_PC_RND_BODY_6		/[%\#\[\$]RA?ND_[A-Z]/i
-rawbody T_PC_RND_RAWBODY_6	/[%\#\[\$]RA?ND_[A-Z]/i
-
-header T_PC_RND_HEADER_7	ALL =~ /%RA?ND(?:OM)?_[A-Z]/i
-body T_PC_RND_BODY_7		/%RA?ND(?:OM)?_[A-Z]/i
-rawbody T_PC_RND_RAWBODY_7	/%RA?ND(?:OM)?_[A-Z]/i
-
-header T_PC_RND_HEADER_8	ALL =~ /[%\#\[\$]RA?ND(?:OM)?_[A-Z]/i
-body T_PC_RND_BODY_8		/[%\#\[\$]RA?ND(?:OM)?_[A-Z]/i
-rawbody T_PC_RND_RAWBODY_8	/[%\#\[\$]RA?ND(?:OM)?_[A-Z]/i
+header T_PC_RND_HEADER_S1	ALL =~ /\[RA?ND_[A-Z]/
+header T_PC_RND_HEADER_S2	ALL =~ /\[RA?ND(?:OM)?_[A-Z]/
+header T_PC_RND_HEADER_S3	ALL =~ /\[RA?ND_[A-Z]/i
+header T_PC_RND_HEADER_S4	ALL =~ /\[RA?ND(?:OM)?_[A-Z]/i
+body T_PC_RND_BODY_S1		/\[RA?ND_[A-Z]/
+body T_PC_RND_BODY_S2		/\[RA?ND(?:OM)?_[A-Z]/
+body T_PC_RND_BODY_S3		/\[RA?ND_[A-Z]/i
+body T_PC_RND_BODY_S4		/\[RA?ND(?:OM)?_[A-Z]/i
+rawbody T_PC_RND_RAWBODY_S1	/\[RA?ND_[A-Z]/
+rawbody T_PC_RND_RAWBODY_S2	/\[RA?ND(?:OM)?_[A-Z]/
+rawbody T_PC_RND_RAWBODY_S3	/\[RA?ND_[A-Z]/i
+rawbody T_PC_RND_RAWBODY_S4	/\[RA?ND(?:OM)?_[A-Z]/i
 
 # Matt Kettler's antidrug.cf ruleset.  bug 3009
 # should probably move good ones from here directly into 20_drugs.cf?
