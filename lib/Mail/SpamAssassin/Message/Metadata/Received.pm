@@ -390,7 +390,7 @@ sub parse_received_line {
 
   if (/^from /) {
     # try to catch enveloper senders
-    if (/envelope-(?:sender|from)[ =](\S+)\b/) {
+    if (/(?:return-path:? |envelope-(?:sender|from)[ =])(\S+)\b/i) {
       $envfrom = $1;
     }
 
