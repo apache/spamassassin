@@ -1256,7 +1256,7 @@ describe CHILD_SUPPORT          "Collect Child Support" Scam
 body ITS_LEGAL                  /\b(?:perfectly|absolutely|100%|totally) legal\b/i
 describe ITS_LEGAL              Claims to be Legal
 
-body FREE_GRANT                 /\bfree (?-i:G)rants?\b/i
+body FREE_GRANT                 /\b(?:free|government) (?-i:G)rants?\b/i
 describe FREE_GRANT             Free Grant Money
 
 body VIAGRA_ONLINE              /\bviagra .{0,25}(?:express|online|overnight)/i
