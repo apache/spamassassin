@@ -952,6 +952,38 @@ sub load_resolver {
   return (!$self->{no_resolver});
 }
 
+sub lookup_ns {
+  my ($self, $dom) = @_;
+
+  return unless $self->load_resolver();
+  return if ($self->server_failed_to_respond_for_domain ($dom));
+
+  my $nsrecords;
+  dbg ("looking up NS for '$dom'");
+
+  if (exists $self->{dnscache}->{NS}->{$dom}) {
+    $nsrecords = $self->{dnscache}->{NS}->{$dom};
+
+  } else {
+    eval {
+      my $query = $self->{res}->search($dom, 'NS');
+      my @nses = ();
+      if ($query) {
+	foreach my $rr ($query->answer) {
+	  if ($rr->type eq "NS") { push (@nses, $rr->nsdname); }
+	}
+      }
+      $nsrecords = $self->{dnscache}->{NS}->{$dom} = [ @nses ];
+    };
+    if ($@) {
+      dbg ("NS lookup failed horribly, perhaps bad resolv.conf setting?");
+      return undef;
+    }
+  }
+
+  $nsrecords;
+}
+
 sub lookup_mx {
   my ($self, $dom) = @_;
 
@@ -1113,7 +1145,7 @@ sub is_dns_available {
     my $servers=$1;
     dbg("servers: $servers");
     @domains = split (/\s+/, $servers);
-    dbg("Looking up MX records for user specified servers: ".join(", ", @domains), "dnsavailable", -1);
+    dbg("Looking up NS records for user specified servers: ".join(", ", @domains), "dnsavailable", -1);
   } else {
     @domains = @EXISTING_DOMAINS;
   }
@@ -1124,22 +1156,22 @@ sub is_dns_available {
   for(my $retry = 3; $retry > 0 and $#domains>-1; $retry--) {
     my $domain = splice(@domains, rand(@domains), 1);
     dbg ("trying ($retry) $domain...", "dnsavailable", -2);
-    my $result = $self->lookup_mx_exists($domain);
-    if(defined $result) {
+    my $result = $self->lookup_ns($domain);
+    if(defined $result && scalar @$result > 0) {
       if ( $result ) {
-        dbg ("MX lookup of $domain succeeded => Dns available (set dns_available to hardcode)", "dnsavailable", -1);
+        dbg ("NS lookup of $domain succeeded => Dns available (set dns_available to hardcode)", "dnsavailable", -1);
         $IS_DNS_AVAILABLE = 1;
         last;
       }
     }
     else {
-      dbg ("MX lookup of $domain failed horribly => Perhaps your resolv.conf isn't pointing at a valid server?", "dnsavailable", -1);
+      dbg ("NS lookup of $domain failed horribly => Perhaps your resolv.conf isn't pointing at a valid server?", "dnsavailable", -1);
       $IS_DNS_AVAILABLE = 0; # should already be 0, but let's be sure.
       last; 
     }
   }
 
-  dbg ("All MX queries failed => DNS unavailable (set dns_available to override)", "dnsavailable", -1) if ($IS_DNS_AVAILABLE == 0);
+  dbg ("All NS queries failed => DNS unavailable (set dns_available to override)", "dnsavailable", -1) if ($IS_DNS_AVAILABLE == 0);
 
 done:
   # jm: leaving this in!
