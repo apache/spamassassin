@@ -1357,8 +1357,9 @@ sub upgrade_old_dbm_files_trapped {
     $count = 0;
     # wrap in eval so it doesn't run in general use.  This accesses db
     # modules directly.
-    eval '
-      use ' . $dbm . ';
+    # Note: (bug 2390), the 'use' needs to be on the same line as the eval
+    # for RPM dependency checks to work properly.  It's lame, but...
+    eval 'use ' . $dbm . ';
       tie %in, "' . $dbm . '", $filename, O_RDONLY, 0600;
       %{ $output } = %in;
       $count = scalar keys %{ $output };
