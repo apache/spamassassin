@@ -5,7 +5,7 @@ use Fcntl;
 use AnyDBM_File ;
 use vars qw( %h $k $v ) ;
 
-tie %h, "AnyDBM_File", $ENV{HOME}."/.spamassassin/auto-whitelist.accum", O_RDWR|O_CREAT|O_EXCL,0600
+tie %h, "AnyDBM_File", $ENV{HOME}."/.spamassassin/auto_whitelist", O_RDWR|O_CREAT|O_EXCL,0600
     or die "Cannot open file 'fruit': $!\n";
 
 # print the contents of the file
