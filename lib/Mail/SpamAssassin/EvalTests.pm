@@ -295,7 +295,7 @@ sub _check_mta_message_id {
 # FORGED_RCVD_TRAIL
 sub check_for_forged_received_trail {
   my ($self) = @_;
-  $self->_check_attachments unless exists $self->{mismatch_from};
+  $self->_check_for_forged_received unless exists $self->{mismatch_from};
   return ($self->{mismatch_from} > 1);
 }
 
@@ -309,14 +309,14 @@ sub check_for_forged_received_helo {
 sub _check_for_forged_received {
   my ($self) = @_;
 
+  $self->{mismatch_helo} = 0;
+  $self->{mismatch_from} = 0;
+
   my @received = grep(/\S/, split(/\n/, $self->get ('Received')));
   my @by;
   my @from;
   my @helo;
   my @fromip;
-
-  $self->{mismatch_helo} = 0;
-  $self->{mismatch_from} = 0;
 
   for (my $i = 0; $i < $#received; $i++) {
     if ($received[$i] =~ s/\bby[\t ]+(\w+(?:[\w.-]+\.)+\w+)//i) {
