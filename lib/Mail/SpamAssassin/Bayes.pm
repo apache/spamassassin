@@ -54,11 +54,11 @@ use vars qw{ @ISA @DBNAMES
 # *less* these well-known headers; that way we can pick up spammers' tracking
 # headers.
 #
-# Don't use the following... From and To; frequently forged.  Date: can provide
+# Don't use the following... From, To, Cc; frequently forged.  Date: can provide
 # incorrect cues if your spam corpus is older/newer than nonspam.  Subject:
 # already included as part of body.  List headers: a spamfiltering mailing list
 # will become a nonspam sign.  Received: (TODO) ditto; need to use only the
-# last 2 rcvd lines.
+# last 2 rcvd lines.  Spam-filter or virus-filter signs: obvious reasons.
 
 $IGNORED_HDRS = qr{(?:
 		  From |To |Cc |MIME-Version |Content-Transfer-Encoding
@@ -76,7 +76,8 @@ $IGNORED_HDRS = qr{(?:
 		  |List-Id |List-Post |List-Help |X-RBL-Warning
 		  |X-MDaemon-Deliver-To| X-Virus-Scanned
 		  |X-MIME-Autoconverted | Status |Content-Length
-		  |Lines |X-UID |Delivery-Date
+		  |Lines |X-UID |Delivery-Date |X-Virus-Scanned
+		  |X-Spam-Hits |X-Spam |X-Spam-Score
 		)}x;
 
 # How big should the corpora be before we allow scoring using Bayesian
