@@ -52,8 +52,6 @@ WriteMakefile(
 
     'PMLIBDIRS' => [ 'lib' ],
     
-    'PM_FILTER' => '$(PERL) build/preprocessor -Mconditional -Mvars -DVERSION=$(VERSION) -DPREFIX="$(PREFIX)"',
-
     # be quite explicit about this; afaik CPAN.pm is sensible using this
     'PREREQ_PM' => {
                         'File::Spec' => 0.8,
