@@ -50,7 +50,8 @@ typedef unsigned long	in_addr_t;	/* base type for internet address */
 /* jm: turned off for now, it should not be necessary. */
 #undef USE_TCP_NODELAY
 
-int SAFE_FALLBACK=-1;
+int SAFE_FALLBACK=-1; /* default to on now - CRH */
+
 int CHECK_ONLY=0;
 
 const int EX_ISSPAM = 1;

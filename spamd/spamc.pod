@@ -29,6 +29,8 @@ connection failures to spamd will cause message delivery failures.
 Even with this flag set however, if spamc connects successfully, and then
 encounters an error at a later stage of communication, it will still return
 an exitcode.
+This now defaults to B<on>, and can't be turned off.  This flag is accepted
+though for backwards-compatibility.
 
 =item B<-h>
 
