@@ -247,30 +247,6 @@ header   T_TELESPRLY            Received =~ /dsl\.telesp\.net\.br/
 describe T_TELESPRLY            Spam passed through known spam relay domain
 
 ##########################################################################
-# finish up rules from bug 2843 (above)
-
-# respin
-header T_SUBJECT_NOVOWEL_6	Subject =~ /[bcdfghjklmnpqrstvwxz]{6}/i
-header T_SUBJECT_NOVOWEL_7	Subject =~ /[bcdfghjklmnpqrstvwxz]{7}/i
-header T_SUBJECT_NOVOWEL_8	Subject =~ /[bcdfghjklmnpqrstvwxz]{8}/i
-header T_SUBJECT_NOVOWEL_9	Subject =~ /[bcdfghjklmnpqrstvwxz]{9}/i
-# with y?
-header T_SUBJECT_NOVOWEL_6Y	Subject =~ /[bcdfghjklmnpqrstvwxyz]{6}/i
-header T_SUBJECT_NOVOWEL_7Y	Subject =~ /[bcdfghjklmnpqrstvwxyz]{7}/i
-header T_SUBJECT_NOVOWEL_8Y	Subject =~ /[bcdfghjklmnpqrstvwxyz]{8}/i
-header T_SUBJECT_NOVOWEL_9Y	Subject =~ /[bcdfghjklmnpqrstvwxyz]{9}/i
-# exemptions - this seems too English specific :-(
-header __SUBJECT_ORDER		Subject =~ /\b(?:order|status|confirmation|id)\b/i
-meta T_SUBJECT_NOVOWEL_6_N	T_SUBJECT_NOVOWEL_6 && !__SUBJECT_ORDER
-meta T_SUBJECT_NOVOWEL_7_N	T_SUBJECT_NOVOWEL_7 && !__SUBJECT_ORDER
-meta T_SUBJECT_NOVOWEL_8_N	T_SUBJECT_NOVOWEL_8 && !__SUBJECT_ORDER
-meta T_SUBJECT_NOVOWEL_9_N	T_SUBJECT_NOVOWEL_9 && !__SUBJECT_ORDER
-meta T_SUBJECT_NOVOWEL_6Y_N	T_SUBJECT_NOVOWEL_6Y && !__SUBJECT_ORDER
-meta T_SUBJECT_NOVOWEL_7Y_N	T_SUBJECT_NOVOWEL_7Y && !__SUBJECT_ORDER
-meta T_SUBJECT_NOVOWEL_8Y_N	T_SUBJECT_NOVOWEL_8Y && !__SUBJECT_ORDER
-meta T_SUBJECT_NOVOWEL_9Y_N	T_SUBJECT_NOVOWEL_9Y && !__SUBJECT_ORDER
-
-##########################################################################
 
 # bug 3570
 # anti-phishing rules, will probably have a low hit-rate
