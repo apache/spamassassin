@@ -86,6 +86,12 @@ sub usage {
 
 }
 
+# Check to make sure the script version and the module version matches.
+# If not, die here!  Also, deal with unchanged VERSION macro.
+if ($Mail::SpamAssassin::VERSION ne '@@VERSION@@' && '@@VERSION@@' ne "\@\@VERSION\@\@") {
+  die 'ERROR!  spamassassin script is v@@VERSION@@, but using modules v'.$Mail::SpamAssassin::VERSION."!\n";
+}
+
 my %opt = ( 'create-prefs' => 1, 'format' => 'detect' );
 my $doing_whitelist_operation = 0;
 my $count                     = 0;
