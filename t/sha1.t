@@ -27,19 +27,19 @@ plan tests => 15;
 sub try {
   my ($data, $want) = @_;
 
-# test our pure perl code
+  # test our pure perl code
   my $perl_sha1 = unpack("H*", Mail::SpamAssassin::SHA1::perl_sha1($data));
 
-# test the fast version if we have it
+  # test the fast version if we have it
   my $digest_sha1;
   if (HAS_DIGEST_SHA1) {
     $digest_sha1 = Digest::SHA1::sha1_hex($data);
   }
 
-# test as it is going to be used by SpamAssassin, including hex conversion
+  # test as it is going to be used by SpamAssassin, including hex conversion
   my $sa_sha1_hex = Mail::SpamAssassin::SHA1::sha1_hex($data);
 
-# and just to be really careful explicitly test sha1bin too
+  # and just to be really careful explicitly test sha1 too
   my $sa_sha1 = unpack("H*", Mail::SpamAssassin::SHA1::sha1($data));
 
   my $failure = 0;

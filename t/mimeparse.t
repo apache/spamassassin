@@ -103,7 +103,7 @@ foreach my $k ( sort keys %files ) {
 	  $res = '';
 	}
 	else {
-	  $res = Mail::SpamAssassin::SHA1::SHA1($parts[0]->decode());
+	  $res = Mail::SpamAssassin::SHA1::sha1_hex($parts[0]->decode());
 	}
 	#print ">> $res\n";
         $res = $res eq $_;
