@@ -25,14 +25,18 @@ case "$1" in
   start)
 	# Start daemon.
 	echo -n "Starting spamd: "
-	daemon spamd -d -a -c
+	daemon spamd -d -c
+	RETVAL = $?
 	touch /var/lock/spamd
+	echo
 	;;
   stop)
 	# Stop daemons.
 	echo -n "Shutting down spamd: "
 	killproc spamd
+	RETVAL = $?
 	rm -f /var/lock/spamd
+	echo
 	;;
   restart)
 	$0 stop
