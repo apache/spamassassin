@@ -765,23 +765,23 @@ sub seen_get {
 sub seen_put {
   my ($self, $msgid, $seen) = @_;
 
-  #if ($self->{bayes}->{main}->{learn_to_journal}) {
-  #  $self->defer_update ("m $seen $msgid");
-  #}
-  #else {
+  if ($self->{bayes}->{main}->{learn_to_journal}) {
+    $self->defer_update ("m $seen $msgid");
+  }
+  else {
     $self->{db_seen}->{$msgid} = $seen;
-  #}
+  }
 }
 
 sub seen_delete {
   my ($self, $msgid) = @_;
 
-  #if ($self->{bayes}->{main}->{learn_to_journal}) {
-  #  $self->defer_update ("m f $msgid");
-  #}
-  #else {
+  if ($self->{bayes}->{main}->{learn_to_journal}) {
+    $self->defer_update ("m f $msgid");
+  }
+  else {
     delete $self->{db_seen}->{$msgid};
-  #}
+  }
 }
 
 ###########################################################################
