@@ -217,9 +217,13 @@ sub parsed_metadata {
 sub parse_config {
   my ($self, $opts) = @_;
 
+  my $conf = $opts->{conf};
   my $key = $opts->{key};
+  my $value = $opts->{value};
+  my $line = $opts->{line};
+
   if ($key eq 'uridnsbl') {
-    if ($opts->{value} =~ /^(\S+)\s+(\S+)\s+(\S+)$/) {
+    if ($value =~ /^(\S+)\s+(\S+)\s+(\S+)$/) {
       my $rulename = $1;
       my $zone = $2;
       my $type = $3;
@@ -231,8 +235,9 @@ sub parse_config {
       $self->inhibit_further_callbacks(); return 1;
     }
   }
-  elsif ($key eq 'urirhsbl') {
-    if ($opts->{value} =~ /^(\S+)\s+(\S+)\s+(\S+)$/) {
+
+  if ($key eq 'urirhsbl') {
+    if ($value =~ /^(\S+)\s+(\S+)\s+(\S+)$/) {
       my $rulename = $1;
       my $zone = $2;
       my $type = $3;
@@ -244,8 +249,9 @@ sub parse_config {
       $self->inhibit_further_callbacks(); return 1;
     }
   }
-  elsif ($key eq 'urirhssub') {
-    if ($opts->{value} =~ /^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)$/) {
+
+  if ($key eq 'urirhssub') {
+    if ($value =~ /^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)$/) {
       my $rulename = $1;
       my $zone = $2;
       my $type = $3;
@@ -264,16 +270,28 @@ sub parse_config {
       $self->inhibit_further_callbacks(); return 1;
     }
   }
-  elsif ($key eq 'uridnsbl_timeout') {
-    $opts->{conf}->{uridnsbl_timeout} = $opts->{value};
+
+  if ($key eq 'uridnsbl_timeout') {
+    $self->handle_parser_error($opts,
+      Mail::SpamAssassin::Conf::Parser::set_numeric_value($conf, $key, $value, $line)
+    );
     $self->inhibit_further_callbacks(); return 1;
   }
-  elsif ($key eq 'uridnsbl_skip_domain') {
-    foreach my $domain (split(/\s+/, $opts->{value})) {
+
+  if ($key eq 'uridnsbl_max_domains') {
+    $self->handle_parser_error($opts,
+      Mail::SpamAssassin::Conf::Parser::set_numeric_value($conf, $key, $value, $line)
+    );
+    $self->inhibit_further_callbacks(); return 1;
+  }
+
+  if ($key eq 'uridnsbl_skip_domain') {
+    foreach my $domain (split(/\s+/, $value)) {
       $opts->{conf}->{uridnsbl_skip_domains}->{lc $domain} = 1;
     }
     $self->inhibit_further_callbacks(); return 1;
   }
+
   return 0;
 }
 
