@@ -61,10 +61,25 @@ C<$plugin->inhibit_further_callbacks()> to block delivery of that event to
 later plugins in the chain.  This is useful if the plugin has handled the
 event, and there will be no need for later plugins to handle it as well.
 
+=head1 INTERFACE
+
+In all the plugin APIs below, C<options> refers to a reference to a hash
+containing name-value pairs.   This is used to ensure future-compatibility, in
+that we can add new options in future without affecting objects built to an
+earlier version of the API.
+
+For example, here would be how to print out the C<line> item in a
+C<parse_config()> method:
+
+  sub parse_config {
+    my ($self, $opts) = @_;
+    print "MyPlugin: parse_config got ".$opts->{line}."\n";
+  }
+
+=head1 METHODS
+
 The following methods can be overridden by subclasses to handle events
 that SpamAssassin will call back to:
-
-=head1 INTERFACE
 
 =over 4
 
@@ -115,6 +130,7 @@ sub new {
   $self;
 }
 
+# ---------------------------------------------------------------------------
 =item $plugin->parse_config ( { options ... } )
 
 Parse a configuration line that hasn't already been handled.  C<options>
@@ -150,10 +166,146 @@ That can be found as C<$plugin->{main}->{conf}>.
 
 sub parse_config {
   my ($self, $opts) = @_;
-  # implemented by subclasses, no-op by default
-  return 0;
+  return 0;	# implemented by subclasses, no-op by default
 }
 
+# ---------------------------------------------------------------------------
+=item $plugin->signal_user_changed ( { options ... } )
+
+Signals that the current user has changed for a new one.
+
+=over 4
+
+=item username
+
+The new user's username.
+
+=item user_dir
+
+The new user's storage directory.
+
+=back
+
+=cut
+
+sub signal_user_changed {
+  my ($self, $opts) = @_;
+  return 0;	# implemented by subclasses, no-op by default
+}
+
+# ---------------------------------------------------------------------------
+=item $plugin->check_start ( { options ... } )
+
+Signals that a message check operation is starting.
+
+=over 4
+
+=item permsgstatus
+
+The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
+
+=back
+
+=cut
+
+sub check_start {
+  my ($self, $opts) = @_;
+  return 0;	# implemented by subclasses, no-op by default
+}
+
+# ---------------------------------------------------------------------------
+=item $plugin->parsed_metadata ( { options ... } )
+
+Signals that a message's metadata has been parsed, and can now be
+accessed, or supplemented, by the plugin.
+
+=over 4
+
+=item permsgstatus
+
+The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.  (Note
+that the message being scanned is accessible through the
+C<$permsgstatus->get_message()> API.)
+
+=back
+
+=cut
+
+sub parsed_metadata {
+  my ($self, $opts) = @_;
+  return 0;	# implemented by subclasses, no-op by default
+}
+
+# ---------------------------------------------------------------------------
+=item $plugin->check_end ( { options ... } )
+
+Signals that a message check operation has just finished, and the
+results are about to be returned to the caller.
+
+=over 4
+
+=item permsgstatus
+
+The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
+The current hits, names of rules that hit, etc. can be retrieved
+using the APIs on this object.
+
+=back
+
+=cut
+
+sub check_end {
+  my ($self, $opts) = @_;
+  return 0;	# implemented by subclasses, no-op by default
+}
+
+# ---------------------------------------------------------------------------
+=item $plugin->autolearn ( { options ... } )
+
+Signals that a message is about to be auto-learned as either ham or spam.
+
+=over 4
+
+=item permsgstatus
+
+The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
+
+=item isspam
+
+C<1> if the message is spam, C<0> if ham.
+
+=back
+
+=cut
+
+sub autolearn {
+  my ($self, $opts) = @_;
+  return 0;	# implemented by subclasses, no-op by default
+}
+
+# ---------------------------------------------------------------------------
+=item $plugin->per_msg_finish ( { options ... } )
+
+Signals that a C<Mail::SpamAssassin::PerMsgStatus> object is being
+destroyed, and any per-scan context held on that object by this
+plugin should be destroyed as well.
+
+=over 4
+
+=item permsgstatus
+
+The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
+
+=back
+
+=cut
+
+sub per_msg_finish {
+  my ($self, $opts) = @_;
+  return 0;	# implemented by subclasses, no-op by default
+}
+
+# ---------------------------------------------------------------------------
 =item $plugin->finish ()
 
 Called when the C<Mail::SpamAssassin> object is destroyed.

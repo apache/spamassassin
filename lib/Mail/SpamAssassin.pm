@@ -578,6 +578,11 @@ sub signal_user_changed {
 
   $self->{conf}->set_score_set ($set);
 
+  $self->call_plugins ("signal_user_changed", {
+		username => $self->{username},
+		userdir => $self->{user_dir},
+	      });
+
   1;
 }
 

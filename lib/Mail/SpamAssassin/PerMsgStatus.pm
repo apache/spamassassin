@@ -112,6 +112,13 @@ sub check {
   my ($self) = @_;
   local ($_);
 
+  $self->{learned_hits} = 0;
+  $self->{body_only_hits} = 0;
+  $self->{head_only_hits} = 0;
+  $self->{hits} = 0;
+
+  $self->{main}->call_plugins ("check_start", { permsgstatus => $self });
+
   # in order of slowness; fastest first, slowest last.
   # we do ALL the tests, even if a spam triggers lots of them early on.
   # this lets us see ludicrously spammish mails (score: 40) etc., which
@@ -122,11 +129,6 @@ sub check {
 
   # TVD: we may want to do more than just clearing out the headers, but ...
   $self->{msg}->delete_header('X-Spam-.*');
-
-  $self->{learned_hits} = 0;
-  $self->{body_only_hits} = 0;
-  $self->{head_only_hits} = 0;
-  $self->{hits} = 0;
 
   # Resident Mail::SpamAssassin code will possibly never change score
   # sets, even if bayes becomes available.  So we should do a quick check
@@ -148,6 +150,9 @@ sub check {
     $self->_check_language ($decoded);
     undef $decoded;                # this is cached anyway for the main set
   }
+
+  # allow plugins to add more metadata, read the stuff that's there, etc.
+  $self->{main}->call_plugins ("parsed_metadata", { permsgstatus => $self });
 
   {
     # Here, we launch all the DNS RBL queries and let them run while we
@@ -229,6 +234,7 @@ sub check {
   $report =~ s/\n*$/\n\n/s;
   $self->{report} = $report;
 
+  $self->{main}->call_plugins ("check_end", { permsgstatus => $self });
 }
 
 ###########################################################################
@@ -331,6 +337,12 @@ sub learn {
   }
 
   dbg ("auto-learn? yes, ".($isspam?"spam ($hits > $max)":"ham ($hits < $min)"));
+
+  $self->{main}->call_plugins ("autolearn", {
+      permsgstatus => $self,
+      isspam => $isspam
+    });
+
   eval {
     my $learnstatus = $self->{main}->learn ($self->{msg}, undef, $isspam, 0);
     $learnstatus->finish();
@@ -498,6 +510,19 @@ sub get_content_preview {
   };
 
   $str;
+}
+
+###########################################################################
+
+=item $msg = $status->get_message()
+
+Return the object representing the message being scanned.
+
+=cut
+
+sub get_message {
+  my ($self) = @_;
+  return $self->{msg};
 }
 
 ###########################################################################
@@ -881,6 +906,10 @@ called to ensure Perl's garbage collection will clean up old status objects.
 
 sub finish {
   my ($self) = @_;
+
+  $self->{main}->call_plugins ("per_msg_finish", {
+	  permsgstatus => $self
+	});
 
   delete $self->{body_text_array};
   delete $self->{main};
