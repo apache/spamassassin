@@ -435,5 +435,8 @@ describe X_FIX_PRESENT         Found an X-Fix header
 header   MIME_ODD_CASE         ALL =~ /\nMiME-Version: /s
 describe MIME_ODD_CASE         MiME-Version header (oddly capitalized)
 
+header   OE_PI                 X-Mailer =~ /OutLook Express 3\.14159/
+describe OE_PI                 X-Mailer contains 'OutLook Express 3.14159'
+
 header CRON_ENV					ALL =~ /\nX-Cron-Env:/s
 describe CRON_ENV				Looks like a CRON job report
