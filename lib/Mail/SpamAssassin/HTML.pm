@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.33 2002/10/11 22:31:56 felicity Exp $
+# $Id: HTML.pm,v 1.34 2002/10/12 06:28:18 zelgadis Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -356,6 +356,8 @@ sub html_tests {
     $self->{html}{title_text} = "";
   }
 
+  $self->{html}{anchor_text} ||= "" if ($tag eq "a");
+
   $self->{html}{header_tag} = 1 if ($tag =~ /^h\d$/);
 }
 
@@ -365,6 +367,10 @@ sub html_text {
   if ($text =~ /\S/) {
     # measuring consecutive image tags with no intervening text
     $self->{html}{consec_imgs} = 0;
+  }
+
+  if (exists $self->{html_inside}{a} && $self->{html_inside}{a} > 0) {
+    $self->{html}{anchor_text} .= " $text";
   }
 
   if (exists $self->{html_inside}{script} && $self->{html_inside}{script} > 0)
