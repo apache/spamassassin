@@ -33,6 +33,9 @@ sub check_phrase_freqs {
   $text =~ s/[^A-Za-z!]/ /gs;
   $text =~ s/\s+/ /gs;
 
+  # kill ignored stopwords -- too small for us to match
+  $text =~ s/ (?:to|of|in|a|an|and|the|on|if|or) / /gs;
+
   # msg_len_factor: 1000 = 200 words of 5 chars avg.  so a message of 
   # 2000 chars will score 1/2 as much to compensate for having more phrases
   #

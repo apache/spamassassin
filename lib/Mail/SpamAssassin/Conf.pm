@@ -574,7 +574,7 @@ Define a full-body pattern test.  C<pattern> is a Perl regular expression.
 
 The 'full body' of a message is the un-decoded text, including all parts
 (including images or other attachments).  SpamAssassin no longer tests
-full tests against decoded text; use L<rawbody> for that.
+full tests against decoded text; use C<rawbody> for that.
 
 =item full SYMBOLIC_TEST_NAME eval:name_of_eval_method([args])
 
