@@ -144,8 +144,11 @@ sub check {
 
     my $decoded = $self->get_decoded_stripped_body_text_array();
 
-    # TODO: this has been put on the metadata object.  should we
-    # use it directly there?
+    # this has been put on the metadata object.  we could use it
+    # directly, but $self->{msg}->{metadata}->{html} goes through a lot
+    # of referencing ...
+    # NOTE: this has to come after get_decoded_stripped_body_text_array() as it's
+    # the one that sets {metadata}->{html} ...
     $self->{html} = $self->{msg}->{metadata}->{html};
 
     my $bodytext = $self->get_decoded_body_text_array();
@@ -1624,8 +1627,9 @@ sub get_uri_list {
   }
 
   # get URIs from HTML parsing
-  if (defined $self->{html}{uri}) {
-    push @uris, @{ $self->{html}{uri} };
+  # use the metadata version as $self->{html} may not be set yet
+  if (defined $self->{msg}->{metadata}->{html}->{uri}) {
+    push @uris, @{ $self->{msg}->{metadata}->{html}->{uri} };
   }
 
   @uris = Mail::SpamAssassin::Util::uri_list_canonify(@uris);

@@ -21,7 +21,27 @@ use Mail::SpamAssassin;
 use Mail::SpamAssassin::HTML;
 use Mail::SpamAssassin::Util;
 
-plan tests => 56;
+plan tests => 57;
+
+##############################################
+
+# initialize SpamAssassin
+my $sa = Mail::SpamAssassin->new({
+    rules_filename => "$prefix/t/log/test_rules_copy",
+    site_rules_filename => "$prefix/t/log/test_default.cf",
+    local_tests_only    => 1,
+    debug             => 0,
+    dont_copy_prefs   => 1,
+});
+$sa->init(0); # parse rules
+
+open (IN, "<data/spam/009");
+my $mail = $sa->parse(\*IN);
+close IN;
+my $msg = Mail::SpamAssassin::PerMsgStatus->new($sa, $mail);
+
+my @uris = $msg->get_uri_list();
+ok((@uris == 1) && ($uris[0] eq 'http://62.16.101.59/livesex.htm'));
 
 ##############################################
 

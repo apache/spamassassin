@@ -400,7 +400,6 @@ sub push_uri {
 
 sub html_uri {
   my ($self, $tag, $attr, $num) = @_;
-  my $uri;
 
   # ordered by frequency of tag groups
   if ($tag =~ /^(?:body|table|tr|td)$/) {
@@ -416,7 +415,7 @@ sub html_uri {
     $self->push_uri($attr->{action});
   }
   elsif ($tag eq "base") {
-    if ($uri = $attr->{href}) {
+    if (my $uri = $attr->{href}) {
       # use <BASE HREF="URI"> to turn relative links into absolute links
 
       # even if it is a base URI, handle like a normal URI as well
