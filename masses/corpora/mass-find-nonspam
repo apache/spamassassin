@@ -1,0 +1,132 @@
+#!/usr/bin/perl -w
+#
+# used to clean out spamtraps.
+
+my $killfile_message_ids = qr{(?:
+    <\d\d\d\d\S+\@dev\.lifetimetv\.com>
+    |<\d+\.\S+\@fmail..\.real-net\.net>
+    |<3D53A59C000A4029\@mta3n\.bluewin\.ch>
+    |<\S+JavaMail\._accucast\@ecacmail01\.hsn\.com>
+    |<LYRIS-\d+-\d+-\S+\@newsletter\.zeit\.de>
+    |<LISTMANAGERSQL-\S+\@mailcontrol\.bellevuedata\.com>
+    |<LISTMANAGER-\S+\@lister\.masie\.com>
+    |<CA-.*\@cert\.org>
+)}x;
+
+my $killfile_receiveds = qr{(?:
+    from\s\S+\s\S+\sby\s(?:anclsmtp\d\d|myfamlsmtp\d\d)\.myfamily\.com
+    |\(envelope-from\snews\@mail\d\.globalscape\.com\)
+    |from\sivillage-\d+\.ivillage\.com
+    |\(envelope-from\sbounce-gozilla-newsletters-\S+\@pro\.netatlantic\.com\)
+    |\(envelope-from\sdivx-return-\S+\@lists\.divx\.com\)
+    |\(envelope-from\s<news\@zonelabs\.rsc02\.com>\)
+    |\(envelope-from\sYour_Astrologer\@mailer1\.astrology\.com\)
+    |\(envelope-from\sfirewalls-bounce\@isc\.org\)
+    |\(envelope-from\swebmaster\@mail2fans\.com\)
+    |\(envelope-from\s<officedepot\d\@officedepot\.rsc01\.com>\)
+    |\(envelope-from\sfoxsportsflash-return\@mailings\.foxsports\.com\)
+    |\(envelope-from\sowner-nolist-\S+\@LISTSERV\.BELIEFNET\.COM\)
+    |from\sexim-colo-01\.whoc\.theplanet\.co\.uk\s
+    |\sby\semail\.ebgames\.com\s
+    |by\soutgoing\.securityfocus\.com\s.Postfix.
+    |envelope-from\sowner-announce\@hq\.lp\.org
+    |envelope-from\ssecurity-advisories\@freebsd\.org
+    |for\s:include:\S+/MapQuest/
+    |for\s<fortress\S*\@shangri-la\.dropbear\.id\.au>
+    |for\s<cmyers_highvision_net\@spamtraps\.taint\.org>
+    |for\s<spamz0rsaretehsuks\@spamtraps\.taint\.org>
+    |for\s<jeffrey_thompsonic_com\@spamtraps\.taint\.org>
+    |for\s<postmaster_neto.net\@spamtraps\.taint\.org>
+    |for\s<vineyard\.gazette\@spamtraps\.taint\.org>
+    |from\sHDX\S+\.hmdelivery\.com\s\(hdx\S+\.hmdelivery\.com
+    |by\smail\.scope\.ie
+    |for\s<spamistehsuk\@spamtraps\.taint\.org>
+    |for\s<jmarotta\@resqnet\.com>
+    |\(envelope-from\sbounce-webtorials-\S+\@lists\.netline\.com\)
+    |for\s<ccastell\@RESQNET\.COM>
+    |for\s<ccastell\@resqnet\.com>
+    |by\ssebastian\.icelandair\.is
+    |\(envelope-from\swwf\S+-errors\S+\@bounce\.wwf\.com\)
+    |<\S+\@listserv\.computerworld\.com>
+    |\(envelope-from\sBounces_\S+\@CWMAILIN\.COMPUTERWORLD\.COM\)
+    |\(envelope-from\s<away_\S+\@newsletters\.away\.com>\)
+    |for\s<tlai\@spamtraps\.taint\.org>
+    |from\sabv-sfo\S+\.CNET\.COM
+    |from\sbounce\.winxpnews\.com
+    |from\smacromedia\.com
+    |from\strafford\.com\sby\slists\.aktiv\.com
+)}x;
+
+my $killfile_froms = qr{(?:
+    <listsupport\@internet\.com>
+    |<journal\@wrox\.com>
+    |<burpeeseed\@List\.burpee\.com>
+    |<preferredcustomer\@photoworks\.com>
+    |<proedigitaldigest\@proe\.com>
+    |<subscriptions\@mcafee\.com>
+    |Computerworld_WebAppDev\@Computerworld\.com
+    |<news\@real-net\.net>
+    |<Online.*\@newsletter\.online\.com>
+    |<no-reply\@no-more-viruses-please\.com>
+    |<Joke-Of-The-Day-return-.*\@mta03\.optamail\.com>
+    |<Cooking\.com\.\S+\@mail\.cooking\.com>
+    |<cio\@UPDATE\.CIO\.COM>
+    |<DirectTV\S+\@vmadmin\.com>
+    |<\S+\@icelandair\.is>
+    |<urnews\@unixreview\.email-publisher\.com>
+    |<\S+\@lists\.techtarget\.com>
+    |<gcn\@eletters\.gcn\.com>
+    |<subscriber\.email\@df.\.jobserve\.com>
+    |newsletter\@rp-online\.de
+    |<newsletters\@cotswoldoutdoor\.com>
+)}x;
+
+###########################################################################
+
+use lib "lib";
+use lib "../lib";
+use lib "../../lib";
+use Mail::ArchiveIterator;
+use Mail::SpamAssassin::NoMailAudit;
+
+# flush buffer immediately so if mass-check fails or stops we don't get a corrupt line
+$|++;
+
+my $iter = new Mail::ArchiveIterator ({
+  });
+
+$iter->set_function (\&wanted);
+$iter->run (@ARGV);
+
+#foreach my $from (sort {$count{$b} <=> $count{$a}} keys %count) {
+#print "$count{$from}   $from $lastsubject{$from}  $lastid{$from}\n";
+#}
+exit;
+
+###########################################################################
+
+sub get_or_empty {
+  my ($ma, $hdr) = @_;
+  my $str = join (' ', $ma->get_header ($hdr)); $str ||= ''; return $str;
+}
+
+sub wanted {
+  my ($id, $dataref) = @_;
+
+  my $ma = Mail::SpamAssassin::NoMailAudit->new ('data' => $dataref);
+  my $from = $ma->get_header ("From");
+  return unless defined($from);
+
+  if ($from =~ /${killfile_froms}/o
+    || get_or_empty($ma,"Message-Id") =~ /${killfile_message_ids}/o
+    || get_or_empty($ma,"Received") =~ /${killfile_receiveds}/o)
+  {
+    print "$id\n";
+  }
+
+  #chomp $from;
+  #$count{$from}++;
+  #chomp ($lastsubject{$from} = $ma->get_header("Subject"));
+  #chomp ($lastid{$from} = $id);
+}
+
