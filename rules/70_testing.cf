@@ -355,6 +355,8 @@ body T_HOST_DOM_RATIO_90_20	eval:check_host_domain_ratio('90','20')
 body T_MALE_ENHANCE	/male enhancement/i
 body T_IMPR_STAM	/\bimprov.{1,32}stamina/i
 
+# these need to have "decently long" words.  things like "sex" FP too easily
+# in normal use, ala: "jackson's ex-wife" vs "Best S E X you"
 body T_INT_PROFIT	eval:check_obfu_word('profit')
 body T_INT_MORTGAGE	eval:check_obfu_word('mortgage')
 body T_INT_REFINANCE	eval:check_obfu_word('refinance')
@@ -363,11 +365,19 @@ body T_INT_ROLEX	eval:check_obfu_word('rolex')
 body T_INT_VIAGRA	eval:check_obfu_word('viagra')
 body T_INT_CIALIS	eval:check_obfu_word('cialis')
 body T_INT_CELEBREX	eval:check_obfu_word('celebrex')
-body T_INT_SEX		eval:check_obfu_word('sex')
 body T_INT_VICODIN	eval:check_obfu_word('vicodin')
 body T_INT_LEVITRA	eval:check_obfu_word('levitra')
 body T_INT_ERECT	eval:check_obfu_word('erection')
 body T_INT_PENIS	eval:check_obfu_word('penis')
+body T_INT_MILLION	eval:check_obfu_word('million')
+body T_INT_BILLION	eval:check_obfu_word('billion')
+body T_INT_MILF		eval:check_obfu_word('milf')
+body T_INT_PRESCRIPT	eval:check_obfu_word('prescription')
+body T_INT_PHARMACY	eval:check_obfu_word('pharmacy')
+body T_INT_PILLS	eval:check_obfu_word('pills')
+body T_INT_OFFERS	eval:check_obfu_word('offers')
+body T_INT_OBLIGATION	eval:check_obfu_word('obligation')
+body T_INT_ANXIETY	eval:check_obfu_word('anxiety')
 
 header __RATWARE_NAME_ID	eval:check_ratware_name_id()
 meta T_RATWARE_NAME_ID	__RATWARE_0_TZ_DATE && __RATWARE_NAME_ID
