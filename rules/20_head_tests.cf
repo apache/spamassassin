@@ -397,11 +397,15 @@ describe GAPPY_SUBJECT		Subject: contains G.a.p.p.y-T.e.x.t
 # X-Message-Id
 # bad FP rate: Comment, Date-warning
 
+# slower version with same stats as of 2003-05-12
+# header X_LIST_UNSUBSCRIBE	X-List-Unsubscribe:addr =~ /\d{3}.*\d{3}.*\@/
+header X_LIST_UNSUBSCRIBE	exists:X-List-Unsubscribe
+describe X_LIST_UNSUBSCRIBE	Message has X-List-Unsubscribe header
+
 # these headers have very high correlation with spam
 header X_ENC_PRESENT		exists:X-Encoding
 header X_ESMTP			exists:x-esmtp
 header X_LIBRARY		exists:X-Library
-header X_LIST_UNSUBSCRIBE	exists:X-List-Unsubscribe
 header X_MAIL_ID_PRESENT	exists:X-MailingID
 header X_PMFLAGS_PRESENT	exists:X-PMFLAGS
 header X_PRECEDENCE_REF		exists:X-Precedence-Ref
@@ -417,7 +421,6 @@ header MICROSOFT		exists:microsoft
 describe X_ENC_PRESENT		Message has X-Encoding header
 describe X_ESMTP		Message has x-esmtp header
 describe X_LIBRARY		Message has X-Library header
-describe X_LIST_UNSUBSCRIBE	Message has X-List-Unsubscribe header
 describe X_MAIL_ID_PRESENT	Message has X-MailingID header
 describe X_PMFLAGS_PRESENT	Message has X-PMFLAGS header
 describe X_PRECEDENCE_REF	Message has X-Precedence-Ref header
@@ -673,10 +676,9 @@ header TO_FILENAME		To =~ /<[CDEF]:/
 header ID_REPLY_TO_REPLY	Reply-To:addr =~ /reply.*\d{4}.*\@/i
 
 # unsubscribe from a numbered address
-header ID_X_LIST_UNSUBSCRIBE	X-List-Unsubscribe:addr =~ /\d{3}.*\d{3}.*\@/
 header __ID_REPLY_TO		Reply-To:addr =~ /\d{3}.*\d{3}.*\@/
 header __ID_RETURN_PATH		Return-path:addr =~ /\d{3}.*\d{3}.*\@/
-meta ID_UNIQUE			(ID_X_LIST_UNSUBSCRIBE && __ID_RETURN_PATH && __ID_REPLY_TO)
+meta ID_UNIQUE			(X_LIST_UNSUBSCRIBE && __ID_RETURN_PATH && __ID_REPLY_TO)
 
 # 2003-04-12
 # juno.com anti-forgery rule based on valid juno.com account names
