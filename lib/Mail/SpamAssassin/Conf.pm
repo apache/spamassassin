@@ -41,6 +41,7 @@ Where appropriate, default values are listed in parentheses.
 =cut
 
 package Mail::SpamAssassin::Conf;
+use Mail::SpamAssassin::Util;
 
 use strict;
 use bytes;
@@ -190,6 +191,8 @@ sub new {
   $self->{whitelist_to} = { };
   $self->{more_spam_to} = { };
   $self->{all_spam_to} = { };
+
+  $self->{trusted_networks} = [ ];
 
   # this will hold the database connection params
   $self->{user_scores_dsn} = '';
@@ -1224,6 +1227,46 @@ See dialup_codes for more details and an example
 
     if (/^num_check_received\s+(\d+)$/) {
       $self->{num_check_received} = $1+0; next;
+    }
+
+=item trusted_networks ip.add.re.ss[/mask] ...   (default: none)
+
+What networks or hosts are 'trusted' in your setup.   B<Trusted> in this case
+means that relay hosts on these networks are considered to not be potentially
+operated by spammers, open relays, or open proxies.  DNS blacklist checks
+will never query for hosts on these networks.
+
+If a C</mask> is specified, it's considered a CIDR-style 'netmask', specified
+in bits.  If it is not specified, just the single IP address specified is used,
+as if the mask was C</32>.
+
+Examples:
+
+	trusted_networks 192.168/16 127/8
+	trusted_networks 212.17.35.15
+
+This operates additively, so a C<trusted_networks> line after another one
+will result in all those networks becoming trusted.  To clear out the
+existing entries, use C<clear_trusted_networks>.
+
+=cut
+
+    if (/^trusted_networks\s+(.+)$/) {
+      foreach my $net (split (' ', $1)) {
+	Mail::SpamAssassin::Util::add_cidr_to_net_set
+				    ($self->{trusted_networks}, $net);
+      }
+      next;
+    }
+
+=item clear_trusted_networks
+
+Empty the list of trusted networks.
+
+=cut
+
+    if (/^clear_trusted_networks$/) {
+      $self->{trusted_networks} = [ ]; next;
     }
 
 =item use_razor2 ( 0 | 1 )		(default 1)

@@ -294,6 +294,45 @@ sub fake_getpwuid {
 
 ###########################################################################
 
+sub add_cidr_to_net_set {
+  my $nets = shift;
+  local ($_);
+
+  $nets ||= [ ];
+  foreach (@_) {
+    my ($ip, $bits) = m#^\s*(\d+\.\d+\.\d+\.\d+)(?:/(\d+))?\s*$#;
+
+    if (!defined $ip) {
+      warn "illegal network address given: '$_'\n";
+      next;
+    }
+
+    defined $bits or $bits = 32;
+    my $mask = 0xFFffFFff  ^ ((2 ** (32-$bits)) - 1);
+
+    push @{$nets}, {
+      mask => $mask,
+      ip   => my_inet_aton($ip) & $mask,
+    };
+  }
+
+  $nets;
+}
+
+sub ip_is_in_net_set {
+  my ($nets, $ip) = @_;
+
+  $ip = my_inet_aton($ip);
+  foreach my $net (@${nets}) {
+    return 1 if (($ip & $net->{mask}) == $net->{ip});
+  }
+  0;
+}
+
+sub my_inet_aton { unpack("N", pack("C4", split(/\./, $_[0]))) }
+
+###########################################################################
+
 sub dbg { Mail::SpamAssassin::dbg (@_); }
 
 1;

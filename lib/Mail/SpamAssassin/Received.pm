@@ -1,4 +1,4 @@
-# $Id: Received.pm,v 1.4 2003/04/05 22:24:49 felicity Exp $
+# $Id: Received.pm,v 1.5 2003/04/05 22:53:14 jmason Exp $
 
 package Mail::SpamAssassin::Received;
 1;
@@ -23,9 +23,7 @@ $LOCALHOST = qr{(?:
 sub parse_received_headers {
   my ($self) = @_;
 
-  $self->{relays_untrusted} = [ ];
-  $self->{num_relays_untrusted} = 0;
-  $self->{relays_untrusted_str} = '';
+  $self->{relays} = [ ];
 
   my $hdrs = $self->get('Received');
   $hdrs ||= '';
@@ -52,25 +50,64 @@ sub parse_received_headers {
     $self->parse_received_line ($_);
   }
 
-  chop ($self->{relays_untrusted_str}); # remove trailing ws
+  $self->{relays_trusted} = [ ];
+  $self->{num_relays_trusted} = 0;
+  $self->{relays_trusted_str} = '';
+
+  $self->{relays_untrusted} = [ ];
+  $self->{num_relays_untrusted} = 0;
+  $self->{relays_untrusted_str} = '';
+
+  # now figure out what relays are trusted...
+  my $trusted = $self->{conf}->{trusted_networks};
+  my $relay;
+  my $in_trusted = 1;
+
+  while (defined ($relay = shift @{$self->{relays}}))
+  {
+    if ($in_trusted &&
+	!Mail::SpamAssassin::Util::ip_is_in_net_set ($trusted, $relay->{ip}))
+    {
+      $in_trusted = 0;		# we're in deep water now
+    }
+
+    # TODO: add inference code using a persistent db
+
+    dbg ("received-header: relay ".$relay->{ip}." trusted? ".$in_trusted);
+
+    if ($in_trusted) {
+      push (@{$self->{relays_trusted}}, $relay);
+      $self->{relays_trusted_str} .= $relay->{as_string}." ";
+    } else {
+      push (@{$self->{relays_untrusted}}, $relay);
+      $self->{relays_untrusted_str} .= $relay->{as_string}." ";
+    }
+  }
+  delete $self->{relays};		# tmp, no longer needed
+
+  chop ($self->{relays_trusted_str});	# remove trailing ws
+  chop ($self->{relays_untrusted_str});	# remove trailing ws
+
+  # OK, we've now split the relay list into trusted and untrusted.
 
   # add the stringified representation to the message object, so Bayes
   # and rules can use it.  Note that rule_tests.t does not impl put_header,
   # so protect against that here.
   if ($self->{msg}->can ("delete_header")) {
+    $self->{msg}->delete_header ("X-SA-Relays-Trusted");
     $self->{msg}->delete_header ("X-SA-Relays-Untrusted");
-  }
-  if ($self->{msg}->can ("put_header")) {
-    $self->{msg}->put_header ("X-SA-Relays-Untrusted",
-				$self->{relays_untrusted_str});
+    if ($self->{msg}->can ("put_header")) {
+      $self->{msg}->put_header ("X-SA-Relays-Trusted",
+				  $self->{relays_trusted_str});
+      $self->{msg}->put_header ("X-SA-Relays-Untrusted",
+				  $self->{relays_untrusted_str});
+    }
   }
 
   # be helpful; save some cumbersome typing
+  $self->{num_relays_trusted} = scalar (@{$self->{relays_trusted}});
   $self->{num_relays_untrusted} = scalar (@{$self->{relays_untrusted}});
 }
-
-# TODO: evaluate trust of headers and move trusted entries from
-# "X-SA-Relays-Untrusted" into "X-SA-Relays-Trusted".
 
 # ---------------------------------------------------------------------------
 
@@ -575,18 +612,21 @@ sub parse_received_line {
   # moved the "trusted" ones out of the way.  In fact, this op
   # here may be movable too; no need to lookup trusted IPs all the time.
   if ($rdns eq '') {
-    dbg ("received-header: lookup PTR: $ip");
     $rdns = $self->lookup_ptr ($ip); $rdns ||= '';
   }
 
-  # add spaces so things like Bayes can tokenize them easily
-  my $asstr = "[ ip=$ip rdns=$rdns helo=$helo by=$by ident=$ident ] ";
-  $self->{relays_untrusted_str} .= $asstr;
+  # as-string rep. use spaces so things like Bayes can tokenize them easily.
+  # NOTE: when tokenizing or matching, be sure to note that new
+  # entries may be added to this string later.   However, the *order*
+  # of entries must be preserved, so that regexps that assume that
+  # e.g. "ip" comes before "helo" will still work.
+  #
+  my $asstr = "[ ip=$ip rdns=$rdns helo=$helo by=$by ident=$ident ]";
 
   my $isrsvd = ($ip =~ /^${IP_IN_RESERVED_RANGE}$/o);
 
   # add it to an internal array so Eval tests can use it
-  push (@{$self->{relays_untrusted}}, {
+  push (@{$self->{relays}}, {
 	ip => $ip,
 	rdns => $rdns,
 	helo => $helo,
@@ -596,7 +636,7 @@ sub parse_received_line {
 	lc_rdns => (lc $rdns),
 	lc_helo => (lc $helo),
 	ip_is_reserved => $isrsvd,
-	asstr => $asstr
+	as_string => $asstr
       });
 }
 
