@@ -1037,8 +1037,20 @@ sub bayes_report_make_list {
 
 Set a template tag, as used in C<add_header>, report templates, etc. This API
 is intended for use by plugins.   Tag names will be converted to an
-all-uppercase representation internally.  See C<Mail::SpamAssassin::Conf>'s
-C<TEMPLATE TAGS> section for more details on tags.
+all-uppercase representation internally.
+
+C<$value> can be a subroutine reference, which will be evaluated each time
+the template is expanded.  Note that perl supports closures, which means
+that variables set in the caller's scope can be accessed inside this C<sub>.
+For example:
+
+    my $text = "hello world!";
+    $status->set_tag("FOO", sub {
+              return $text;
+            });
+
+See C<Mail::SpamAssassin::Conf>'s C<TEMPLATE TAGS> section for more details on
+how template tags are used.
 
 =cut
 
@@ -1205,10 +1217,17 @@ sub _get_tag {
           );
 
   if (exists $tags{$tag}) {
-      return $tags{$tag}->(@_);
-  } elsif ($self->{tag_data}->{$tag}) {
-    return $self->{tag_data}->{$tag};
-  } else {
+    return $tags{$tag}->(@_);
+  }
+  elsif ($self->{tag_data}->{$tag}) {
+    my $data = $self->{tag_data}->{$tag};
+    if (ref $data eq 'CODE') {
+      return $data->(@_);
+    } else {
+      return $data;
+    }
+  }
+  else {
     return "";
   }
 }
