@@ -550,3 +550,12 @@ header T_RUSSIAN_UCE_SUBJECT	Subject =~ /\xf0\xe5\xea\xeb\xe0\xec\xf3/
 header T_FORGED_YAHOO_RCVD_SMTP    Received =~ /from smtp(?:\d{1,2}|\d{4,})\.mail(?:\.[^\.]+|)\.yahoo\.com /
 describe T_FORGED_YAHOO_RCVD_SMTP  Received: contains forged Yahoo! SMTP server hostname
 
+# replacement for FORGED_MUA_THEBAT.  http://www.ritlabs.com/the_bat/spammer.html
+# notes: 'There are clues that make it obvious that the spam message didn't come
+# from The Bat!. For one thing, it has an "X-MSMail-Priority: Normal"
+# header. The Bat! doesn't use this.'
+header __BAT_MUA                X-Mailer =~ /The Bat!/
+header __BAT_XMSMP              X-MSMail-Priority =~ /\S/
+meta T_FORGED_MUA_THEBAT        (__BAT_MUA && __BAT_XMSMP)
+describe T_FORGED_MUA_THEBAT    Forged mail pretending to be from The Bat!
+
