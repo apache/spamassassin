@@ -314,15 +314,6 @@
 #score STAINLESS_STEEL                4.0
 #
 #
-#
-#   0.029    0.078    0.000    1.00   -1.00  USER_AGENT_GNUS_XM
-#score USER_AGENT_GNUS_XM        -0.1
-#header USER_AGENT_GNUS_XM      X-Mailer   =~ /^Gnus\/\d\.\d+ /
-#describe USER_AGENT_GNUS_XM    X-Mailer header indicates a non-spam MUA (Gnus)
-#tflags USER_AGENT_GNUS_XM nice
-#score USER_AGENT_GNUS_XM -1.0
-#
-#
 #   0.000    0.000    0.000    0.00    1.00  VIGORA
 #body VIGORA                     /\bVigora\b/
 #describe VIGORA                 Some sort of viagra alternative
