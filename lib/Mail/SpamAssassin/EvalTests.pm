@@ -2743,7 +2743,7 @@ sub check_for_rdns_helo_mismatch {	# T_FAKE_HELO_*
       # claims it is.
       if ($self->is_dns_available()) {
 	my $vrdns = $self->lookup_ptr ($relay->{ip});
-	if ($vrdns ne $claimed) {
+	if (defined $vrdns && $vrdns ne $claimed) {
 	  dbg ("rdns/helo mismatch: helo=$relay->{helo} ".	
 		"claimed-rdns=$claimed true-rdns=$vrdns");
 	  return 1;
