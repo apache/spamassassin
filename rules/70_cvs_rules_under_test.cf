@@ -77,11 +77,6 @@ describe T_QUOTE_TWICE_1        Contains twice quoted reply
 score T_QUOTE_TWICE_1           -1.0
 
 # Needs testing
-body T_QUOTE_TWICE_2            /^>>/
-describe T_QUOTE_TWICE_2        Contains twice quoted reply
-score T_QUOTE_TWICE_2           -1.0
-
-# Needs testing
 # Outlook Express has spaces around the text, Outlook doesn't
 # (jm comment: please add ^ anchor if possible.)
 body T_OUTLOOK_REPLY            /----- ?Original Message ?-----/s
