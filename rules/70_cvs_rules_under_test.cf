@@ -255,3 +255,19 @@ body T_MARKETING_PARTNERS  /(?:marketing|network) partner|partner site/i
 describe T_MARKETING_PARTNERS     Claims you registered with some kind of partner
 body T_MARKETING_PARTNERS_2  /(?:marketing|network) partner|partner (?:web)?site/i
 describe T_MARKETING_PARTNERS_2    Claims you registered with some kind of partner
+
+# to try fixing the overlap between the two rules (bug 786)
+# DEAR_SOMEBODY has a bad S/O, I'm tempted to remove it, but want to
+# see if this helps any first.
+# 12/23-tvd
+body __DEAR_SOMEBODY              /Dear [A-Z][a-z]+/
+meta T_DEAR_SOMEBODY              __DEAR_SOMEBODY && !DEAR_SOMETHING
+
+# WEIRD_PORT hits http://www.cnn.com:USArticle1840@www.liquidshirts.com/
+# which actually doesn't have a weird port in it.
+uri      T_WEIRD_PORT     m{https?://.+?:(?:[^8][^0]|\d|\d\d\d+)(?:/|\s|$)}
+
+# T_USERPASS looks for a username and (optional) password in an url
+# per bug 1273
+# 12/23-tvd
+uri      T_USERPASS     m{https?://.+?(?::.+?)?\@}
