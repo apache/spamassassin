@@ -104,12 +104,15 @@ header MSGID_HAS_NO_AT		Message-Id !~ /\@/
 describe MSGID_HAS_NO_AT	Message-Id has no @ sign
 
 header INVALID_DATE		Date =~ / AM| PM/i
-describe INVALID_DATE		Invalid Date: header
+describe INVALID_DATE		Invalid Date: header (has AM/PM)
+
+header INVALID_DATE_NO_TZ	Date =~ /^..., .. ... .... ..:..:..$/
+describe INVALID_DATE_NO_TZ	Invalid Date: header (no timezone)
 
 header SUBJ_HAS_Q_MARK		Subject =~ /\?/
 describe SUBJ_HAS_Q_MARK	Subject: ends in a question mark
 
-header ADVERT_CODE		Subject =~ /^\s*ADV:/i
+header ADVERT_CODE		Subject =~ /(^\s*|\s+)ADV:/i
 describe ADVERT_CODE		Subject: contains advertising tag
 
 header FRIEND_AT_PUBLIC	To =~ /(yourdomain|you|your|public).(com|org|net)/i
@@ -166,6 +169,12 @@ describe FORGED_HOTMAIL_RCVD	Forged hotmail.com 'Received:' header found
 header X_MAILER_GIBBERISH	X-Mailer =~ /^[A-Fa-f0-9\.]{48,}$/
 describe X_MAILER_GIBBERISH	'X-Mailer' line contains gibberish
 
+header X_PRIORITY_HIGH		X-Priority =~ /^1/
+describe X_PRIORITY_HIGH	Sent with 'X-Priority' set to high
+
+header X_MSMAIL_PRIORITY_HIGH	X-Msmail-Priority =~ /^High/
+describe X_MSMAIL_PRIORITY_HIGH	Sent with 'X-Msmail-Priority' set to high
+
 ###########################################################################
 
 full RAZOR_CHECK		eval:check_razor('razor.vipul.net:2702')
@@ -207,7 +216,8 @@ body BULK_EMAIL			/bulk e-*mail/i
 body DEAR_FRIEND		/Dear Friend/
 body CASHCASHCASH		/\${5,}/
 body CALL_NOW			/CALL NOW/
-body CALL_888			/call.*888-\d+-\d+/i
+body CALL_888			/(?:call|dial).*888-[\dA-Z]+-?[\dA-Z]+/i
+body CALL_1_800			/(?:call|dial).*1-800-[\dA-Z]+-?[\dA-Z]+/i
 body ONLINE_BIZ_OPS		/online business opportunities/i
 body REMOVAL_INSTRUCTIONS	/Removal instructions/i
 body BILLION_DOLLARS		/[BM]ILLION DOLLAR/
@@ -234,6 +244,9 @@ body EXCUSE_9		/If you do.*n.*t want to receive emails on this subject/i
 body EXCUSE_10			/if you (?:wish|care) not to (?:be contacted again|receive any\s*more solicitations)/i
 body EXCUSE_11			/you.*(?:name|mail).*(?:was|were).*list/i
 body EXCUSE_12			/(?:received this e?-?mail|has reached you) in error/i
+body EXCUSE_13			/mail was sent to you because /i
+body EXCUSE_14			/you do not wish to receive further /i
+body EXCUSE_15			/this is not spam/i
 
 body GREEN_EXCUSE_1	/using email instead can significantly reduce this/i
 body GREEN_EXCUSE_2	/the trees, save the planet, use email!/i
@@ -263,12 +276,21 @@ body INCREASE_SALES		/INCREASE SALES/i
 
 full CLICK_HERE_LINK		/click here.{0,100}<\/a>/is
 full CLICK_BELOW		/click below/is
+
 full A_HREF_TO_IP		/href[3D=\s\"\']*http:\/\/\d+\.\d+\.\d+\.\d+\:?\d*\//is
+describe A_HREF_TO_IP		Link to an IP-address instead of a named host
+
+full A_HREF_TO_REMOVE		/href[3D=\s\"\']*\S+(?:unsubscribe|remove)/i
+describe A_HREF_TO_REMOVE	Link to a URL containing "remove"
+
 full MAILTO_LINK		/=[3D=\s"']*mailto:/is
 full MAILTO_WITH_SUBJ_REMOVE	/mailto:\S+\?subject=[3D=\s"']*remove/is
 full MAILTO_WITH_SUBJ		/mailto:\S+\?subject=/is
 full FORM_W_MAILTO_ACTION	/action=[3D=\s"']*mailto:/is
 full AOL_USERS_LINK		/AOL\s+Users\s+Click\s+Here/is
+
+full WEB_BUGS			/<\s*img\s[^>]*src[^>]+\?/i
+describe WEB_BUGS		Image tag with an ID code to identify you
 
 ###########################################################################
 # Compensation for common false positives.
