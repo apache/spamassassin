@@ -33,6 +33,8 @@ my $killfile_receiveds = qr{(?:
     |for :include:\S+/MapQuest/
 )}x;
 
+my @ignore_rules = ('USER_IN_WHITELIST');
+
 ###########################################################################
 
 use vars qw($opt_c $opt_fork $opt_all $opt_head $opt_mh $opt_ms $opt_mn
@@ -222,6 +224,9 @@ sub readscores {
     }
   }
   close IN;
+  for (@ignore_rules) {
+      $score->{$_} = 0;
+  }
 
   $scores;
 }
