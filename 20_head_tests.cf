@@ -248,6 +248,10 @@ describe FROM_MISSING		Missing From: header
 header DATE_MISSING		Date =~ /^UNSET$/ [if-unset: UNSET]
 describe DATE_MISSING		Missing Date: header
 
+# Steve Linford via Charlie Watts: good test!
+header CTYPE_JUST_HTML		eval:check_for_content_type_just_html()
+describe CTYPE_JUST_HTML	HTML-only mail, with no text version
+
 header ROUND_THE_WORLD		eval:check_for_round_the_world_received()
 describe ROUND_THE_WORLD	Received: says mail bounced all around the world
 
