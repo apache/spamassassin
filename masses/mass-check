@@ -1,12 +1,13 @@
 #!/usr/bin/perl
 
-use lib "../lib";
+use FindBin;
+use lib "$FindBin::Bin/../lib";
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::NoMailAudit;
 
 #use Devel::Peek;
 
-$cffile = '../rules';
+$cffile = "$FindBin::Bin/../rules";
 
 if (defined $ARGV[0] && $ARGV[0] eq '-c') {
   shift; $cffile = $ARGV[0]; shift;
