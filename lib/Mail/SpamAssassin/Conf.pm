@@ -1197,12 +1197,12 @@ line's 'by' host, it's trusted
 
 =item *
 
-if the address of the 'from' host is in a reserved network range,
+if the address of the 'from' host is in a private network range,
 then it's trusted
 
 =item *
 
-if any addresses of the 'by' host is in a reserved network range,
+if any addresses of the 'by' host is in a private network range,
 then it's trusted
 
 =back
@@ -2106,14 +2106,14 @@ zone.  There's a few things to note:
 
 =over 4
 
-=item duplicated or reserved IPs
+=item duplicated or private IPs
 
 Duplicated IPs are only queried once and reserved IPs are not queried.
-Reserved IPs are those listed in
+Private IPs are those listed in
 <http://www.iana.org/assignments/ipv4-address-space>,
 <http://duxcw.com/faq/network/privip.htm>,
 <http://duxcw.com/faq/network/autoip.htm>, or
-<ftp://ftp.rfc-editor.org/in-notes/rfc3330.txt>
+<ftp://ftp.rfc-editor.org/in-notes/rfc3330.txt> as private.
 
 =item the 'set' argument
 

@@ -946,10 +946,10 @@ sub lookup_ptr {
     return undef;
   }
 
-  my $IP_IN_RESERVED_RANGE = IP_IN_RESERVED_RANGE;
+  my $IP_PRIVATE = IP_PRIVATE;
 
-  if ($dom =~ /${IP_IN_RESERVED_RANGE}/) {
-    dbg("dns: IP is reserved, not looking up PTR: $dom");
+  if ($dom =~ /${IP_PRIVATE}/) {
+    dbg("dns: IP is private, not looking up PTR: $dom");
     return undef;
   }
 
