@@ -774,6 +774,10 @@ sub uri_list_canonify {
     # sometimes we catch URLs on multiple lines
     $uri =~ s/\n//g;
 
+    # URLs won't have leading/trailing whitespace
+    $uri =~ s/^\s+//;
+    $uri =~ s/\s+$//;
+
     # Make a copy so we don't trash the original
     my $nuri = $uri;
 
