@@ -1,3 +1,158 @@
+2003-07-01 02:05  jmason
+
+	* Changes: ready to release PR2
+
+2003-07-01 01:42  jmason
+
+	* rules/70_cvs_rules_under_test.cf: couple of testing rules for
+	after 2.60
+
+2003-06-30 14:12  felicity
+
+	* lib/Mail/SpamAssassin/Conf.pm: cut/pasted documentation
+	explaining that remove_header won't remove X-Spam-Checker-Version
+
+2003-06-30 04:29  jmason
+
+	* rules/70_cvs_rules_under_test.cf: bug 2089: new rules to catch
+	those messages.  Also a URI rule to catch referral IDs
+
+2003-06-30 03:30  jmason
+
+	* rules/70_cvs_rules_under_test.cf: bug 2087: rule added
+
+2003-06-30 03:18  jmason
+
+	* rules/70_cvs_rules_under_test.cf: bug 2088; test rule added,
+	commented
+
+2003-06-30 03:05  felicity
+
+	* sa-learn.raw, lib/Mail/SpamAssassin/Conf.pm: bug 2155: make
+	learn-to-journal a restricted command.	also move some of the other
+	options around to make the flow better in the documentation.
+
+2003-06-30 02:27  felicity
+
+	* lib/Mail/: SpamAssassin.pm, SpamAssassin/Bayes.pm,
+	SpamAssassin/CmdLearn.pm, SpamAssassin/Conf.pm: bug 2154: 1)
+	sa-learn called init, which called init_learner with the config
+	options.  for me, this enabled learn to journal.      cmdlearn then
+	called init_learner with the appropriate options for forget (don't
+	learn to journal), except that init_learner only can enable, not
+	disable options.  so we always learned to the journal.	see #2.
+	
+	2) during a forget (which can be called when we're learning an
+	already learned message as a different type as well), we didn't
+	update the journal.
+	
+	3) auto_learn_journal is a minomer since all learning goes to the
+	journal.
+	
+	so: we now allow init_learner to enable or disable options
+	depending on true/false values, we rename auto_learn_to_journal to
+	just be learn_to_journal, and forget now will update the journal if
+	necessary.
+
+2003-06-30 02:21  felicity
+
+	* lib/Mail/SpamAssassin/PerMsgStatus.pm: bug 2151: perl 5.005
+	didn't like the $foo(@_) type specification to run the $foo
+	referenced subroutine.
+
+2003-06-30 02:19  felicity
+
+	* lib/Mail/SpamAssassin/Conf.pm: bug 2149: config options related
+	to the default x-spam-level header wouldn't make changes to the
+	spam version of the header.
+
+2003-06-30 02:18  felicity
+
+	* lib/Mail/SpamAssassin/Conf.pm: bug 2148: there was no way to
+	remove a single header without wiping them all out, so add a
+	remove_header configuration option to deal with single headers.
+
+2003-06-30 02:17  felicity
+
+	* lib/Mail/SpamAssassin/BayesStore.pm: bug 2147: if "sa-learn
+	--rebuild" is run to upgrade from bayes v0 to bayes v2, an error
+	will occur because the journal file gets removed during the
+	upgrade.
+
+2003-06-30 02:15  felicity
+
+	* lib/Mail/: SpamAssassin.pm, SpamAssassin/PerMsgStatus.pm: bug
+	2030: found 2 places which could potentially find no message-id and
+	learn/revoke as ham.
+
+2003-06-29 16:43  felicity
+
+	* masses/: CORPUS_SUBMIT, CORPUS_SUBMIT_NIGHTLY: updated the
+	documents to be more accurate in today's mass-check world.
+
+2003-06-29 03:19  felicity
+
+	* lib/Mail/SpamAssassin/PerMsgStatus.pm: accidental commit, oops.
+
+2003-06-29 03:17  felicity
+
+	* lib/Mail/SpamAssassin/: Conf.pm, PerMsgStatus.pm: bug 2150: perl
+	5.005 complains that -r isn't in C<>, so ...
+
+2003-06-29 03:16  jmason
+
+	* README: noting that 2.6x is the last release to support perl
+	5.005
+
+2003-06-28 21:45  quinlan
+
+	* rules/: 20_dnsbl_tests.cf, 50_scores.cf: bug 2144: add
+	-lastuntrusted to BondedSender query
+
+2003-06-27 19:40  felicity
+
+	* spamd/spamd.raw: bug 1962: spamd would never detect when it was
+	running in taint mode since %ENV is untainted at the start of the
+	process.
+
+2003-06-26 15:56  felicity
+
+	* spamd/redhat-rc-script.sh: bug 2081: changed default spamd flags
+	to use -H and -m5
+
+2003-06-26 15:52  felicity
+
+	* Makefile.PL: bug 2131: Makefile.PL was missing doco on
+	CONTACT_ADDRESS parameter
+
+2003-06-26 15:47  felicity
+
+	* spamd/redhat-rc-script.sh: bug 2133: the redhat rc script should
+	use "spamassassin" instead of "spamd" ...
+
+2003-06-26 05:26  quinlan
+
+	* lib/Mail/SpamAssassin/EvalTests.pm: bug 1095: RBL warnings in
+	EvalTests.pm
+
+2003-06-26 05:25  quinlan
+
+	* rules/70_broken_rules.cf: remove the score overrides!  I just
+	realized these are probably now misbalancing the current scores
+
+2003-06-25 17:45  jmason
+
+	* build/README: updated build process to add a disttest step
+
+2003-06-25 17:42  jmason
+
+	* t/data/spam/008: made test file more spammy to avoid test failure
+	on spamd_utf8.t
+
+2003-06-25 15:42  felicity
+
+	* rules/50_scores.cf: undisabled rule scores for now ...
+
 2003-06-24 22:33  felicity
 
 	* rules/50_scores.cf: updated bayes scores to the 2.54 version, and
@@ -5205,11 +5360,7 @@
 	* BUGS, MANIFEST, MANIFEST.SKIP, MailAudit.patch,
 	masses/RUNME.TWOSTEP, masses/craig-evolve.c.ALTIVEC,
 	rules/40_spam_phrases.cf, t/reportheader.t, t/spamd_report.t,
-	t/data/nice/001, wordfreqs/.cvsignore, wordfreqs/README,
-	wordfreqs/RUNME, wordfreqs/RUNME.DOGMA, wordfreqs/RUNME.SONIC,
-	wordfreqs/join-and-settle-phrases, wordfreqs/mass-phrase-freq,
-	wordfreqs/mass-phrase-freq-for-jm, wordfreqs/settle-phrases:
-	removed more obsolete code from CVS and MANIFEST
+	t/data/nice/001: removed more obsolete code from CVS and MANIFEST
 
 2003-02-20 12:23  jmason
 
@@ -6168,10 +6319,6 @@
 
 	* lib/Mail/SpamAssassin/Conf.pm: removed obsolete unnamed-rule
 	support, which was never used
-
-2003-01-27 21:32  jmason
-
-	* wordfreqs/README: note for wordfreqs README
 
 2003-01-27 21:31  jmason
 
@@ -12675,9 +12822,7 @@
 	spamd/README.spamd, spamd/libspamc.c, spamd/libspamc.h,
 	spamd/spamc.c, spamd/spamc.pod, spamd/spamd.raw, spamd/utils.c,
 	spamd/utils.h, t/SATest.pm, t/basic_lint.t, t/rule_tests.t,
-	tools/check_whitelist, wordfreqs/RUNME, wordfreqs/RUNME.SONIC,
-	wordfreqs/join-and-settle-phrases: merged code back from 2.4.0
-	release branch
+	tools/check_whitelist: merged code back from 2.4.0 release branch
 
 2002-08-28 18:13  jmason
 
@@ -13094,8 +13239,7 @@
 2002-08-23 12:22  jmason
 
 	* MANIFEST, MANIFEST.SKIP, masses/CORPUS_POLICY,
-	masses/mass-check-results-to-mbox,
-	wordfreqs/join-and-settle-phrases: s/opt-in/verified opt-in/, and
+	masses/mass-check-results-to-mbox: s/opt-in/verified opt-in/, and
 	removed whitelist test mails from distro, they're too big
 
 2002-08-23 12:05  msquadrat
@@ -13259,9 +13403,8 @@
 
 2002-08-22 18:20  jmason
 
-	* MANIFEST, Makefile.PL, wordfreqs/RUNME,
-	wordfreqs/join-and-settle-phrases: spamproxyd now removed from
-	distro; problems reported, better as a separate download
+	* MANIFEST, Makefile.PL: spamproxyd now removed from distro;
+	problems reported, better as a separate download
 
 2002-08-22 17:54  hughescr
 
@@ -13297,14 +13440,10 @@
 	speed-up by using tr/// instead of s// for body-wide character
 	replacement
 
-2002-08-21 17:40  jmason
-
-	* wordfreqs/RUNME.SONIC: updated for current corpus layout
-
 2002-08-21 17:32  jmason
 
-	* lib/Mail/SpamAssassin/Conf.pm, wordfreqs/RUNME: added a warning
-	for ISPs in required_hits manual entry
+	* lib/Mail/SpamAssassin/Conf.pm: added a warning for ISPs in
+	required_hits manual entry
 
 2002-08-21 17:27  msquadrat
 
