@@ -521,8 +521,8 @@ describe FOR_INSTANT_ACCESS	Instant Access button
 body NO_SELLING			/absolutely NO selling/
 
 # (contrib: skod)
-body UNIVERSITY_DIPLOMAS	/\bUNIVERSITY\s+DIPLOMA/
-describe UNIVERSITY_DIPLOMAS	UNIVERSITY DIPLOMAS
+body UNIVERSITY_DIPLOMAS	/\b(?:college|university)\s+diploma/i
+describe UNIVERSITY_DIPLOMAS	University Diplomas
 
 # (contrib: skod)
 body NEW_DOMAIN_EXTENSIONS	/new\s*domain\s*extension/i
@@ -638,7 +638,11 @@ body COPYRIGHT_CLAIMED		/copyright.*all rights reserved./i
 # not quite spam, but dangerous/irritating nonetheless, and easy to catch.
 
 full SIRCAM_SIGNATURE		/Content-Disposition: attachment;\s+filename=.[^\n]+\.\S\S\S\.(bat|com|lnk|pif)./s
-describe SIRCAM_SIGNATURE	SECURITY: message contains the Sircam worm
+describe SIRCAM_SIGNATURE	SECURITY: The Sircam worm
+
+# contrib: skod
+full BADTRANS_WORM              /Content-ID: <EA4DMGBP9p>/
+describe BADTRANS_WORM          SECURITY: The BadTrans worm, see http://securityresponse.symantec.com/avcenter/venc/data/w32.badtrans.b@mm.html
 
 ###########################################################################
 # Default scores.   Note that if a test is named above, but a score is not
@@ -899,6 +903,7 @@ score USER_IN_WHITELIST		    -100.0
 # creep, but it's easy to implement ;)
 
 score SIRCAM_SIGNATURE		    10.0
+score BADTRANS_WORM                 10.0
 
 ###########################################################################
 # Database configuration options.
