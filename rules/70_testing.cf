@@ -61,6 +61,7 @@ header T_TIME_OVER_4444	ALL =~ /\D23[67][0-9][0-9][0-9]\D/
 # than others.
 uri T_PORN_URL_XXX	/^https?:\/\/[\w\.-]*xxx[\w-]*\./
 uri T_PORN_URL_SEX	/^https?:\/\/[\w\.-]*(?<!es|ba)(?<!dle|sus)sex[\w-]*\./
+uri T_PORN_URL_SEX2	/^https?:\/\/[\w\.-]*(?<!es|ba)(?<!dle|sus)sex(?!press)[\w-]*\./
 uri T_PORN_URL_ANAL	/^https?:\/\/[\w\.-]*anal(?!og|y[sz])[\w-]*\./
 uri T_PORN_URL_SLUT	/^https?:\/\/[\w\.-]*slut[\w-]*\./
 uri T_PORN_URL_CUM	/^https?:\/\/[\w\.-]*(?<!cir)(?<!\bdo)cum(?!ul|be?r|b?en)[\w-]*\./
