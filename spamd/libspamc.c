@@ -287,8 +287,8 @@ int message_read(int fd, int flags, struct message *m){
     }
 }
 
-ssize_t message_write(int fd, struct message *m){
-    ssize_t total=0;
+long message_write(int fd, struct message *m){
+    long total=0;
     off_t i, j;
     char buffer[1024];
 
@@ -333,7 +333,9 @@ void message_dump(int in_fd, int out_fd, struct message *m){
     char buf[8196];
     int bytes;
     
-    if(m!=NULL && m->type!=MESSAGE_NONE) message_write(out_fd, m);
+    if(m!=NULL && m->type!=MESSAGE_NONE) {
+        message_write(out_fd, m);
+    }
     while((bytes=full_read(in_fd, buf, 8192, 8192))>0){
         if(bytes!=full_write(out_fd, buf, bytes));
     }

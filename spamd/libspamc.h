@@ -69,7 +69,7 @@ int message_read(int in_fd, int flags, struct message *m);
  * MESSAGE_NONE messages have nothing to write. Also note that if you ran the
  * message through message_filter with SPAMC_CHECK_ONLY, it will only output
  * the "score/threshold" line. */
-ssize_t message_write(int out_fd, struct message *m);
+long message_write(int out_fd, struct message *m);
 
 /* Pass the message through spamd (at addr) as the specified user, with the
  * given flags. Returns EX_OK on success, or various errors on error. If it was

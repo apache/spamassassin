@@ -209,6 +209,9 @@ FAIL:
         return EX_NOTSPAM;
     } else {
         message_dump(STDIN_FILENO, out_fd, &m);
+        if (ret == EX_TOOBIG) {
+          return 0;
+        }
         return ret;
     }
 }
