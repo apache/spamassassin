@@ -108,8 +108,8 @@ sub check_for_from_to_equivalence {
 sub check_for_forged_hotmail_received_headers {
   my ($self) = @_;
 
-  my $to = $self->get ('To:addr');
-  if ($to !~ /hotmail.com/) { return 0; }
+  my $from = $self->get ('From:addr');
+  if ($from !~ /hotmail.com/) { return 0; }
 
   my $rcvd = $self->get ('Received');
   $rcvd =~ s/\s+/ /gs;		# just spaces, simplify the regexp
@@ -131,8 +131,8 @@ sub check_for_forged_hotmail_received_headers {
 sub check_for_forged_excite_received_headers {
   my ($self) = @_;
 
-  my $to = $self->get ('To:addr');
-  if ($to !~ /excite.com/) { return 0; }
+  my $from = $self->get ('From:addr');
+  if ($from !~ /excite.com/) { return 0; }
 
   my $rcvd = $self->get ('Received');
   $rcvd =~ s/\s+/ /gs;		# just spaces, simplify the regexp
@@ -158,8 +158,8 @@ sub check_for_forged_excite_received_headers {
 sub check_for_forged_yahoo_received_headers {
   my ($self) = @_;
 
-  my $to = $self->get ('To:addr');
-  if ($to !~ /yahoo.com/) { return 0; }
+  my $from = $self->get ('From:addr');
+  if ($from !~ /yahoo.com/) { return 0; }
 
   my $rcvd = $self->get ('Received');
   $rcvd =~ s/\s+/ /gs;		# just spaces, simplify the regexp
