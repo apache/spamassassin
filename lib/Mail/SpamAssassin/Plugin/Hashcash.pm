@@ -68,6 +68,7 @@ sub parse_config {
   my $conf = $opts->{conf};
   my $key = $opts->{key};
   my $value = $opts->{value};
+  my $line = $opts->{line};
 
 =over 4
 
@@ -78,7 +79,11 @@ Whether to use hashcash, if it is available.
 =cut
 
   if ( $key eq 'use_hashcash' ) {
-    $conf->{use_hashcash} = $value+0; return 1;
+    $self->handle_parser_error($opts,
+      Mail::SpamAssassin::Conf::Parser::set_numeric_value($conf, $key, $value, $line)
+    );
+    $self->inhibit_further_callbacks();
+    return 1;
   }
 
 =item hashcash_accept add@ress.com ...
@@ -100,7 +105,9 @@ C<hashcash_accept> lines is also OK.
 =cut
 
   if ( $key eq 'hashcash_accept' ) {
-    $conf->add_to_addrlist ('hashcash_accept', split (/\s+/, $value)); return 1;
+    $conf->add_to_addrlist ('hashcash_accept', split (/\s+/, $value));
+    $self->inhibit_further_callbacks();
+    return 1;
   }
 
 =item hashcash_doublespend_path /path/to/file   (default: ~/.spamassassin/hashcash_seen)
@@ -116,7 +123,11 @@ suitable for sharing between multiple users.
 =cut
 
   if ( $key eq 'hashcash_doublespend_path' ) {
-    $conf->{hashcash_doublespend_path} = $value; return 1;
+    $self->handle_parser_error($opts,
+      Mail::SpamAssassin::Conf::Parser::set_string_value($conf, $key, $value, $line)
+    );
+    $self->inhibit_further_callbacks();
+    return 1;
   }
 
 =item hashcash_doublespend_file_mode            (default: 0700)
@@ -130,11 +141,47 @@ not have any execute bits set (the umask is set to 111).
 =cut
 
   if ( $key eq 'hashcash_doublespend_file_mode' ) {
-    $conf->{hashcash_doublespend_file_mode} = $value+0; return 1;
+    $self->handle_parser_error($opts,
+      Mail::SpamAssassin::Conf::Parser::set_numeric_value($conf, $key, $value, $line)
+    );
+    $self->inhibit_further_callbacks();
+    return 1;
   }
 
   return 0;
 }
+
+sub handle_parser_error {
+  my($self, $opts, $ret_value) = @_;
+
+  my $conf = $opts->{conf};
+  my $key = $opts->{key};
+  my $value = $opts->{value};
+  my $line = $opts->{line};
+
+  my $msg = '';
+
+  if ($ret_value && $ret_value eq $Mail::SpamAssassin::Conf::INVALID_VALUE) {
+    $msg = "config: SpamAssassin failed to parse line, ".
+           "\"$value\" is not valid for \"$key\", ".
+           "skipping: $line";
+  }
+  elsif ($ret_value && $ret_value eq $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE) {
+    $msg = "config: SpamAssassin failed to parse line, ".
+           "no value provided for \"$key\", ".
+           "skipping: $line";
+  }
+
+  return unless $msg;
+
+  if ($conf->{lint_rules}) {
+    warn $msg."\n";
+  } else {
+    dbg($msg);
+  } 
+  $conf->{errors}++;
+  return;
+} 
 
 ###########################################################################
 
