@@ -640,11 +640,15 @@ sub is_dns_available {
     my $domain = splice(@domains, rand(@domains), 1);
     dbg("dns: trying ($retry) $domain...");
     my $result = $self->lookup_ns($domain);
-    if(defined $result && scalar @$result > 0) {
-      if ( $result ) {
+    if(defined $result) {
+      if (scalar @$result > 0) {
         dbg("dns: NS lookup of $domain succeeded => DNS available (set dns_available to override)");
         $IS_DNS_AVAILABLE = 1;
         last;
+      }
+      else {
+        dbg("dns: NS lookup of $domain failed, no results found");
+	next;
       }
     }
     else {
