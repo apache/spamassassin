@@ -110,8 +110,7 @@ sub is_razor_available {
 
 sub razor_report {
   my ($self, $fulltext) = @_;
-
-  my $timeout = 10;             # seconds
+  my $timeout=$self->{main}->{conf}->{razor_timeout};
   my $response;
 
   # razor also debugs to stdout. argh. fix it to stderr...
@@ -159,7 +158,7 @@ sub razor_report {
         $rc->authenticate($ident) or adie ($rc->errprefix("reportit"));
         $rc->report($objects)     or adie ($rc->errprefix("reportit"));
         $rc->disconnect() or adie ($rc->errprefix("reportit"));
-        $response = $objects->[0]->{resp}->[0]->{res};
+        $response = 1; # razor 2.14 says that if we get here, we did ok.
       }
       else {
         warn "undefined Razor2::Client::Agent\n";
@@ -179,7 +178,7 @@ sub razor_report {
         warn "razor2 report failed: $! $@";
       }
       undef $response;
-      }
+    }
   }
   else {
     my @msg = split (/^/m, $fulltext);
@@ -195,7 +194,7 @@ sub razor_report {
       local ($^W) = 0;            # argh, warnings in Razor
   
       local $SIG{ALRM} = sub { die "alarm\n" };
-      alarm 10;
+      alarm $timeout;
   
       my $rc = Razor::Client->new ($config, %options);
       adie ("Problem while loading Razor: $!") if (!$rc);
@@ -238,52 +237,51 @@ sub razor_report {
 
 sub is_dcc_available {
   my ($self) = @_;
-  my (@resp);
 
   if ($self->{main}->{local_tests_only}) {
     dbg ("local tests only, ignoring DCC");
     return 0;
   }
 
-  if (!open(DCCHDL, "dccproc -V 2>&1 |")) {
-    dbg ("DCC is not available");
-    return 0;
-  } 
-  else {
-    @resp = <DCCHDL>;
-    close DCCHDL;
-    dbg ("DCC is available: ".join(" ", @resp));
-    return 1;
+  my $dccproc = $self->{main}->{conf}->{dcc_path} || '';
+  unless ($dccproc) {
+    foreach my $path (File::Spec->path()) {
+      $dccproc = File::Spec->catfile ($path, 'dccproc');
+      if (-x $dccproc) {
+        dbg ("DCC was found at $dccproc");
+        $self->{main}->{conf}->{dcc_path} = $dccproc;
+        last;
+      }
+    }
   }
-}
+  unless (-x $dccproc) {
+    dbg ("DCC is not available: dccproc not found");
+    return 0;
+  }
 
-use Symbol qw(gensym);
+  dbg ("DCC is available: ".$self->{main}->{conf}->{dcc_path});
+  return 1;
+}
 
 sub dcc_report {
   my ($self, $fulltext) = @_;
+  my $timeout=$self->{main}->{conf}->{dcc_timeout};
 
   eval {
-    use IPC::Open2;
-    my ($dccin, $dccout, $pid);
-
     local $SIG{ALRM} = sub { die "alarm\n" };
     local $SIG{PIPE} = sub { die "brokenpipe\n" };
 
-    alarm 10;
+    alarm $timeout;
 
-    $dccin  = gensym();
-    $dccout = gensym();
-
-    $pid = open2($dccout, $dccin, 'dccproc -t many '.$self->{main}->{conf}->{dcc_options}.' >/dev/null 2>&1');
-
-    print $dccin $fulltext;
-
-    close ($dccin);
-
-    waitpid ($pid, 0);
+    my $cmd = join(" ", $self->{main}->{conf}->{dcc_path},'-t many',$self->{main}->{conf}->{dcc_options});
+    open(DCC, "| $cmd") || die "Couldn't fork \"$cmd\"";
+    print DCC $fulltext;
+    close(DCC) || die "Received error code $? from \"$cmd\"";
 
     alarm(0);
   };
+
+  alarm 0;
 
   if ($@) {
     if ($@ =~ /alarm/) {
@@ -302,52 +300,51 @@ sub dcc_report {
 
 sub is_pyzor_available {
   my ($self) = @_;
-  my (@resp);
 
   if ($self->{main}->{local_tests_only}) {
     dbg ("local tests only, ignoring Pyzor");
     return 0;
   }
 
-  if (!open(PyzorHDL, "pyzor ping 2>&1 |")) {
-    dbg ("Pyzor is not available");
-    return 0;
-  } 
-  else {
-    @resp = <PyzorHDL>;
-    close PyzorHDL;
-    dbg ("Pyzor is available: ".join(" ", @resp));
-    return 1;
+  my $pyzor = $self->{main}->{conf}->{pyzor_path} || '';
+  unless ($pyzor) {
+    foreach my $path (File::Spec->path()) {
+      $pyzor = File::Spec->catfile ($path, 'pyzor');
+      if (-x $pyzor) {
+        dbg ("Pyzor was found at $pyzor");
+        $self->{main}->{conf}->{pyzor_path} = $pyzor;
+        last;
+      }
+    }
   }
+  unless (-x $pyzor) {
+    dbg ("Pyzor is not available: pyzor not found");
+    return 0;
+  }
+  
+  dbg ("Pyzor is available: ".$self->{main}->{conf}->{pyzor_path});
+  return 1;
 }
-
-use Symbol qw(gensym);
 
 sub pyzor_report {
   my ($self, $fulltext) = @_;
+  my $timeout=$self->{main}->{conf}->{pyzor_timeout};
 
   eval {
-    use IPC::Open2;
-    my ($pyzorin, $pyzorout, $pid);
-
     local $SIG{ALRM} = sub { die "alarm\n" };
     local $SIG{PIPE} = sub { die "brokenpipe\n" };
 
-    alarm 10;
+    alarm $timeout;
 
-    $pyzorin  = gensym();
-    $pyzorout = gensym();
-
-    $pid = open2($pyzorout, $pyzorin, 'pyzor report >/dev/null 2>&1');
-
-    print $pyzorin $fulltext;
-
-    close ($pyzorin);
-
-    waitpid ($pid, 0);
+    my $cmd = join(" ", $self->{main}->{conf}->{pyzor_path},'report');
+    open(PYZ, "| $cmd") || die "Couldn't fork \"$cmd\"";
+    print PYZ $fulltext;
+    close(PYZ) || die "Received error code $? from \"$cmd\"";
 
     alarm(0);
   };
+
+  alarm 0;
 
   if ($@) {
     if ($@ =~ /alarm/) {
