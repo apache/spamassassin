@@ -14,12 +14,22 @@ Recommended stuff:
 
  - $HOME/.corpus contains various settings as described in the scripts
 
+------- start of cut text --------------
+corpus=/home/corpus/corpus
+html=/home/html/root/users/corpus
+tagtime=/home/corpus/log/tagtime
+tmp=/home/corpus/tmp
+tree=/home/corpus/cvs/spamassassin
+username=joe
+password=xyzzy
+------- end ----------------------------
+
  - the following cron job (hours for tagtime and corpus-nightly for your
    local time, this is US/Pacific)
 
 The "tagtime" and "corpus-nightly" cron jobs run twice a day due to
 daylight savings, but exit if it's 0800-0859 or 1000-1059 UTC (which
-means you can "corpus-nightly" any other time of day if you want.
+means you can "corpus-nightly" any other time of day if you want).
 
 ------- start of cut text --------------
 0 1,2 * * * /home/corpus/scripts/corpus-tagtime
