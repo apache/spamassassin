@@ -217,8 +217,8 @@ body PURE_PROFIT		/PURE PROFIT/
 full CLICK_HERE_LINK		/click here.{0,100}<\/a>/is
 full A_HREF_TO_IP		/href[3D=\s\"\']*http:\/\/\d+\.\d+\.\d+\.\d+\:?\d*\//is
 full MAILTO_LINK		/=[3D=\s"']*mailto:/is
-full MAILTO_WITH_SUBJ_REMOVE	/mailto:\S+\?subject=[3D=\s"']*remove/is
-full MAILTO_WITH_SUBJ		/mailto:\S+\?subject=/is
+full MAILTO_WITH_SUBJ_REMOVE	/=mailto:\S+\?subject=[3D=\s"']*remove/is
+full MAILTO_WITH_SUBJ		/=mailto:\S+\?subject=/is
 full FORM_W_MAILTO_ACTION	/action=[3D=\s"']*mailto:/is
 
 ###########################################################################
