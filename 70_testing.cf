@@ -249,18 +249,6 @@ describe T_TELESPRLY            Spam passed through known spam relay domain
 ##########################################################################
 # finish up rules from bug 2843 (above)
 
-# long headers
-header T_SUBJECT_LONG_170	Subject =~ /.{170,}/
-header T_SUBJECT_LONG_180	Subject =~ /.{180,}/
-header T_SUBJECT_LONG_190	Subject =~ /.{190,}/
-header T_SUBJECT_LONG_200	Subject =~ /.{200,}/
-header T_SUBJECT_LONG_210	Subject =~ /.{210,}/
-
-# random Subject text
-header T_RNDSPM7		Subject =~ /\b[bcdfghjklnpqrvwz]{5}\b/i
-describe T_RNDSPM7		Subject contains random-text spamsign
-header T_RNDSPM9		Subject =~ /\b[bcdfghjklmnpqrstvwxz]{7}\b/i
-describe T_RNDSPM9		Subject contains random-text spamsign
 # respin
 header T_SUBJECT_NOVOWEL_6	Subject =~ /[bcdfghjklmnpqrstvwxz]{6}/i
 header T_SUBJECT_NOVOWEL_7	Subject =~ /[bcdfghjklmnpqrstvwxz]{7}/i
@@ -271,6 +259,16 @@ header T_SUBJECT_NOVOWEL_6Y	Subject =~ /[bcdfghjklmnpqrstvwxyz]{6}/i
 header T_SUBJECT_NOVOWEL_7Y	Subject =~ /[bcdfghjklmnpqrstvwxyz]{7}/i
 header T_SUBJECT_NOVOWEL_8Y	Subject =~ /[bcdfghjklmnpqrstvwxyz]{8}/i
 header T_SUBJECT_NOVOWEL_9Y	Subject =~ /[bcdfghjklmnpqrstvwxyz]{9}/i
+# exemptions - this seems too English specific :-(
+header __SUBJECT_ORDER		Subject =~ /\b(?:order|status|confirmation|id)\b/i
+meta T_SUBJECT_NOVOWEL_6_N	T_SUBJECT_NOVOWEL_6 && !__SUBJECT_ORDER
+meta T_SUBJECT_NOVOWEL_7_N	T_SUBJECT_NOVOWEL_7 && !__SUBJECT_ORDER
+meta T_SUBJECT_NOVOWEL_8_N	T_SUBJECT_NOVOWEL_8 && !__SUBJECT_ORDER
+meta T_SUBJECT_NOVOWEL_9_N	T_SUBJECT_NOVOWEL_9 && !__SUBJECT_ORDER
+meta T_SUBJECT_NOVOWEL_6Y_N	T_SUBJECT_NOVOWEL_6Y && !__SUBJECT_ORDER
+meta T_SUBJECT_NOVOWEL_7Y_N	T_SUBJECT_NOVOWEL_7Y && !__SUBJECT_ORDER
+meta T_SUBJECT_NOVOWEL_8Y_N	T_SUBJECT_NOVOWEL_8Y && !__SUBJECT_ORDER
+meta T_SUBJECT_NOVOWEL_9Y_N	T_SUBJECT_NOVOWEL_9Y && !__SUBJECT_ORDER
 
 ##########################################################################
 
