@@ -351,7 +351,7 @@ double evaluate(PGAContext *ctx, int p, int pop)
 	  /*weighted min false-pos*/((double)ga_ny)*nybias +
 	  /*min score(false-pos)*/nyweight*nybias +
 	  /*max score(false-neg)*/-ynweight;
-#endif USE_LOG_SCORE_EVALUATION
+#endif //USE_LOG_SCORE_EVALUATION
 }
 
 float score_msg(float *myscores, int i)
@@ -401,7 +401,7 @@ float score_msg(float *myscores, int i)
 
   return msg_score;
 }
-#endif __ALTIVEC__
+#endif //__ALTIVEC__
 
 /*
  * Mutate by adding a little gaussian noise (while staying in bounds)
