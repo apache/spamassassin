@@ -1603,8 +1603,8 @@ my $Addr_spec_re   = qr<$local_part\s*\@\s*$domain>o;
 # a combination of the URIs found in the rendered body and the
 # URIs found when parsing the HTML in the message.  The array will
 # include the "raw" URI as well as "slightly cooked" versions --
-# ie: 'http://%77&#00119;%77.spamassassin.org/' will get turned into:
-# ( 'http://%77&#00119;%77.spamassassin.org/', 'http://www.spamassassin.org/' )
+# ie: 'http://%77&#00119;%77.example.com/' will get turned into:
+# ( 'http://%77&#00119;%77.example.com/', 'http://www.example.com/' )
 # -- this lets us run rules against both the original and "correct"
 # versions easily.
 #
