@@ -5,9 +5,9 @@
 
 #%include        /usr/lib/rpm/macros.perl
 
-%define perl_archlib %(eval "`perl -V:installarchlib`"; echo "$installarchlib")
-%define perl_sitelib %(eval "`perl -V:installsitelib`"; echo "$installsitelib")
-%define perl_sitearch %(eval "`perl -V:installsitearch`"; echo "$installsitearch")
+%define perl_archlib %(eval "`%{__perl} -V:installarchlib`"; echo "$installarchlib")
+%define perl_sitelib %(eval "`%{__perl} -V:installsitelib`"; echo "$installsitelib")
+%define perl_sitearch %(eval "`%{__perl} -V:installsitearch`"; echo "$installsitearch")
 
 %define pdir    Mail
 %define pnam    SpamAssassin
