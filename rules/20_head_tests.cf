@@ -42,6 +42,15 @@ header TO_ADDRESS_EQ_REAL	To =~ /^\s*"([^"@]+\@[^"@]+)"\s+<\1>\s*$/i
 describe TO_ADDRESS_EQ_REAL	To: repeats address as real name
 # The "From" equiv is already set up as FROM_NAME_EQ_FROM_ADDR.
 
+header UNDISC_RECIPS		To =~ /^undisclosed-recipients?:\s*;$/
+describe UNDISC_RECIPS		Valid-looking To "undisclosed-recipients"
+
+header FAKED_UNDISC_RECIPS	To =~ /Undisclosed.*Recipient(s[^:]|[^s])/i
+describe FAKED_UNDISC_RECIPS	Faked To "Undisclosed-Recipients"
+
+header TO_INVESTORS		To =~ /\bInvestors\@/
+describe TO_INVESTORS		To: non-existent 'Investors' address
+
 header FROM_MALFORMED		From !~ /(?:\"[^\"]+\"|\S+)\@\S+\.\S+|<\S+(\!\S+){1,}>/ [if-unset: unset@unset.unset]
 describe FROM_MALFORMED		From: has a malformed address
 
@@ -56,15 +65,6 @@ describe SUBJ_HAS_UNIQ_ID	Subject contains a unique ID number
 
 header SUBJ_HAS_SPACES		Subject =~ /(?:\s{6,}|\t)/
 describe SUBJ_HAS_SPACES	Subject contains lots of white space
-
-header UNDISC_RECIPS		To =~ /^undisclosed-recipients?:\s*;$/
-describe UNDISC_RECIPS		Valid-looking To "undisclosed-recipients"
-
-header FAKED_UNDISC_RECIPS	To =~ /Undisclosed.*Recipient(s[^:]|[^s])/i
-describe FAKED_UNDISC_RECIPS	Faked To "Undisclosed-Recipients"
-
-header TO_INVESTORS		To =~ /\bInvestors\@/
-describe TO_INVESTORS		To: non-existent 'Investors' address
 
 header SUBJ_ALL_CAPS		eval:subject_is_all_caps()
 describe SUBJ_ALL_CAPS		Subject is all capitals
