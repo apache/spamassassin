@@ -286,6 +286,7 @@ describe HTML_SHORT_CENTER	HTML is very short with CENTER tag
 body HTML_TITLE_EMPTY		eval:html_text_not_match('title', '(?s)\S')
 describe HTML_TITLE_EMPTY	HTML title contains no text
 
+# __MIME_ATTACHMENT also used in 20_meta_tests.cf
 body __MIME_ATTACHMENT		eval:check_for_mime('mime_attachment')
 
 body __HTML_TITLE_120		eval:html_text_match('title', '.{120}')
