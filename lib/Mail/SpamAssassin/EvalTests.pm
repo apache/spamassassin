@@ -1441,7 +1441,7 @@ sub check_for_faraway_charset {
     # number of 8-bit chars in the body text first.
 
     $body = join ("\n", @$body);
-
+    $body =~ s/\b(?:URI:\S+)//g;	# strip URIs out
     if ($self->are_more_high_bits_set ($body)) {
       return 1;
     }
