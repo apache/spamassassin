@@ -61,7 +61,6 @@ describe T_BODY_8BITS		Body includes 8 consecutive 8-bit characters
 
 # HTML control -- HTML spam rules should all have better S/O than this
 body T_HTML_MESSAGE		eval:html_message()
-score T_HTML_MESSAGE		0.0000001
 
 # HTML input form tests
 # T_HTML_TAG_EXISTS_FORM has about the same accuracy as HTML_MESSAGE
@@ -152,6 +151,41 @@ body __HIGHBITS			/(?:[\x80-\xff].?){4,}/
 meta T_MIME_FARAWAY_CHARSET	(__MIME_FARAWAY_CHARSET && __HIGHBITS)
 tflags T_MIME_FARAWAY_CHARSET userconf
 
+body T_MIME_EXCESSIVE_BASE64		eval:check_for_mime_excessive_base64()
+describe T_MIME_EXCESSIVE_BASE64	base64 encoding without base64 header
+
+body T_MIME_EXCESSIVE_QP_V1_001	eval:check_for_mime_excessive_qp_v1('0.001')
+body T_MIME_EXCESSIVE_QP_V1_002	eval:check_for_mime_excessive_qp_v1('0.002')
+body T_MIME_EXCESSIVE_QP_V1_003	eval:check_for_mime_excessive_qp_v1('0.003')
+body T_MIME_EXCESSIVE_QP_V1_004	eval:check_for_mime_excessive_qp_v1('0.004')
+body T_MIME_EXCESSIVE_QP_V1_005	eval:check_for_mime_excessive_qp_v1('0.005')
+body T_MIME_EXCESSIVE_QP_V1_006	eval:check_for_mime_excessive_qp_v1('0.006')
+body T_MIME_EXCESSIVE_QP_V1_007	eval:check_for_mime_excessive_qp_v1('0.007')
+body T_MIME_EXCESSIVE_QP_V1_008	eval:check_for_mime_excessive_qp_v1('0.008')
+body T_MIME_EXCESSIVE_QP_V1_009	eval:check_for_mime_excessive_qp_v1('0.009')
+body T_MIME_EXCESSIVE_QP_V1_010	eval:check_for_mime_excessive_qp_v1('0.010')
+body T_MIME_EXCESSIVE_QP_V1_011	eval:check_for_mime_excessive_qp_v1('0.011')
+body T_MIME_EXCESSIVE_QP_V1_012	eval:check_for_mime_excessive_qp_v1('0.012')
+body T_MIME_EXCESSIVE_QP_V1_013	eval:check_for_mime_excessive_qp_v1('0.013')
+body T_MIME_EXCESSIVE_QP_V1_014	eval:check_for_mime_excessive_qp_v1('0.014')
+body T_MIME_EXCESSIVE_QP_V1_015	eval:check_for_mime_excessive_qp_v1('0.015')
+
+body T_MIME_EXCESSIVE_QP_V2_001	eval:check_for_mime_excessive_qp_v2('0.001')
+body T_MIME_EXCESSIVE_QP_V2_002	eval:check_for_mime_excessive_qp_v2('0.002')
+body T_MIME_EXCESSIVE_QP_V2_003	eval:check_for_mime_excessive_qp_v2('0.003')
+body T_MIME_EXCESSIVE_QP_V2_004	eval:check_for_mime_excessive_qp_v2('0.004')
+body T_MIME_EXCESSIVE_QP_V2_005	eval:check_for_mime_excessive_qp_v2('0.005')
+body T_MIME_EXCESSIVE_QP_V2_006	eval:check_for_mime_excessive_qp_v2('0.006')
+body T_MIME_EXCESSIVE_QP_V2_007	eval:check_for_mime_excessive_qp_v2('0.007')
+body T_MIME_EXCESSIVE_QP_V2_008	eval:check_for_mime_excessive_qp_v2('0.008')
+body T_MIME_EXCESSIVE_QP_V2_009	eval:check_for_mime_excessive_qp_v2('0.009')
+body T_MIME_EXCESSIVE_QP_V2_010	eval:check_for_mime_excessive_qp_v2('0.010')
+body T_MIME_EXCESSIVE_QP_V2_011	eval:check_for_mime_excessive_qp_v2('0.011')
+body T_MIME_EXCESSIVE_QP_V2_012	eval:check_for_mime_excessive_qp_v2('0.012')
+body T_MIME_EXCESSIVE_QP_V2_013	eval:check_for_mime_excessive_qp_v2('0.013')
+body T_MIME_EXCESSIVE_QP_V2_014	eval:check_for_mime_excessive_qp_v2('0.014')
+body T_MIME_EXCESSIVE_QP_V2_015	eval:check_for_mime_excessive_qp_v2('0.015')
+
 ########################################################################
 # bug 1106: forged MUAs
 # only needed a \b around the shortest X-Mailer regular expressions
@@ -224,8 +258,6 @@ header __FROM_NO_LOWER		From !~ /[a-z]/
 header __FROM_EXISTS		exists:From
 meta T_NO_LOWER_FROM_1		(__FROM_NO_LOWER)
 meta T_NO_LOWER_FROM_2		(__FROM_NO_LOWER && __FROM_EXISTS)
-score T_NO_LOWER_FROM_1 0.01
-score T_NO_LOWER_FROM_2 0.01
 
 # bug 1108, To: and Cc: headers
 header __TO_NLA			To !~ /[a-z]/
@@ -265,33 +297,6 @@ meta T_NO_LOWER_TO_CC_ALL_E	(__CC_NLA && __CC_E) || (__TO_NLA && __TO_E)
 meta T_NO_LOWER_TO_CC_USER_E	(__CC_NLU && __CC_E) || (__TO_NLU && __TO_E)
 meta T_NO_LOWER_TO_CC_HOST_E	(__CC_NLH && __CC_E) || (__TO_NLH && __TO_E)
 meta T_NO_LOWER_TO_CC_EITHER_E	(((__CC_NLU || __CC_NLH) && __CC_E) || ((__TO_NLU || __TO_NLH) && __TO_E))
-
-# I'm dogfooding, so set scores low until FPs (undisclosed recips etc.) are
-# sorted out
-score T_NO_LOWER_TO_ALL		0.01
-score T_NO_LOWER_TO_USER	0.01
-score T_NO_LOWER_TO_HOST	0.01
-score T_NO_LOWER_TO_EITHER	0.01
-#
-score T_NO_LOWER_TOCC_ALL	0.01
-score T_NO_LOWER_TOCC_USER	0.01
-score T_NO_LOWER_TOCC_HOST	0.01
-score T_NO_LOWER_TOCC_EITHER	0.01
-#
-score T_NO_LOWER_TO_ALL_E	0.01
-score T_NO_LOWER_TO_USER_E	0.01
-score T_NO_LOWER_TO_HOST_E	0.01
-score T_NO_LOWER_TO_EITHER_E	0.01
-#
-score T_NO_LOWER_TOCC_ALL_E	0.01
-score T_NO_LOWER_TOCC_USER_E	0.01
-score T_NO_LOWER_TOCC_HOST_E	0.01
-score T_NO_LOWER_TOCC_EITHER_E	0.01
-#
-score T_NO_LOWER_TO_CC_ALL_E	0.01
-score T_NO_LOWER_TO_CC_USER_E	0.01
-score T_NO_LOWER_TO_CC_HOST_E	0.01
-score T_NO_LOWER_TO_CC_EITHER_E	0.01
 
 ###########################################################################
 
@@ -367,28 +372,6 @@ header   T_NONSENSE_FROM_96_97 eval:nonsense_from_percent('96', '97')
 header   T_NONSENSE_FROM_97_98 eval:nonsense_from_percent('97', '98')
 header   T_NONSENSE_FROM_98_99 eval:nonsense_from_percent('98', '99')
 header   T_NONSENSE_FROM_99_100 eval:nonsense_from_percent('99', '100')
-
-score   T_NONSENSE_FROM_00_10  0.01
-score   T_NONSENSE_FROM_10_20  0.01
-score   T_NONSENSE_FROM_20_30  0.01
-score   T_NONSENSE_FROM_30_40  0.01
-score   T_NONSENSE_FROM_40_50  0.01
-score   T_NONSENSE_FROM_50_60  0.01
-score   T_NONSENSE_FROM_60_70  0.01
-score   T_NONSENSE_FROM_70_80  0.01
-score   T_NONSENSE_FROM_80_90  0.01
-#score   T_NONSENSE_FROM_90_100 0.01
-
-score   T_NONSENSE_FROM_90_91 0.01
-score   T_NONSENSE_FROM_91_92 0.01
-score   T_NONSENSE_FROM_92_93 0.01
-score   T_NONSENSE_FROM_93_94 0.01
-score   T_NONSENSE_FROM_94_95 0.01
-score   T_NONSENSE_FROM_95_96 0.01
-score   T_NONSENSE_FROM_96_97 0.01
-score   T_NONSENSE_FROM_97_98 0.01
-score   T_NONSENSE_FROM_98_99 0.01
-score   T_NONSENSE_FROM_99_100 0.01
 
 ############################################################
 
@@ -493,98 +476,6 @@ meta T_HTML_50_70_IMGS3         (HTML_50_70 && __T_HTML_NUM_IMGS_3)
 
 #---------------------------------------------------------
 
-score T_HTML_IMAGE_AREA01        0.01
-score T_HTML_IMAGE_AREA02        0.01
-score T_HTML_IMAGE_AREA03        0.01
-score T_HTML_IMAGE_AREA04        0.01
-score T_HTML_IMAGE_AREA05        0.01
-score T_HTML_IMAGE_AREA06        0.01
-score T_HTML_IMAGE_AREA07        0.01
-score T_HTML_IMAGE_AREA08        0.01
-score T_HTML_IMAGE_AREA09        0.01
-score T_HTML_IMAGE_AREA10        0.01
-score T_HTML_IMAGE_AREA11        0.01
-score T_HTML_IMAGE_AREA12        0.01
-score T_HTML_IMAGE_AREA13        0.01
-score T_HTML_IMAGE_AREA14        0.01
-score T_HTML_IMAGE_AREA15        0.01
-score T_HTML_IMAGE_AREA16        0.01
-score T_HTML_IMAGE_AREA17        0.01
-score T_HTML_IMAGE_AREA18        0.01
-score T_HTML_IMAGE_AREA19        0.01
-
-score T_HTML_NUM_IMGS01          0.01
-score T_HTML_NUM_IMGS02          0.01
-score T_HTML_NUM_IMGS03          0.01
-score T_HTML_NUM_IMGS04          0.01
-score T_HTML_NUM_IMGS05          0.01
-score T_HTML_NUM_IMGS06          0.01
-score T_HTML_NUM_IMGS07          0.01
-score T_HTML_NUM_IMGS08          0.01
-score T_HTML_NUM_IMGS09          0.01
-score T_HTML_NUM_IMGS10          0.01
-score T_HTML_NUM_IMGS11          0.01
-score T_HTML_NUM_IMGS12          0.01
-score T_HTML_NUM_IMGS13          0.01
-score T_HTML_NUM_IMGS14          0.01
-score T_HTML_NUM_IMGS15          0.01
-score T_HTML_NUM_IMGS16          0.01
-score T_HTML_NUM_IMGS17          0.01
-score T_HTML_NUM_IMGS18          0.01
-score T_HTML_NUM_IMGS19          0.01
-score T_HTML_NUM_IMGS20          0.01
-
-score T_HTML_CONSEC_IMGS01       0.01
-score T_HTML_CONSEC_IMGS02       0.01
-score T_HTML_CONSEC_IMGS03       0.01
-score T_HTML_CONSEC_IMGS04       0.01
-score T_HTML_CONSEC_IMGS05       0.01
-score T_HTML_CONSEC_IMGS06       0.01
-score T_HTML_CONSEC_IMGS07       0.01
-score T_HTML_CONSEC_IMGS08       0.01
-score T_HTML_CONSEC_IMGS09       0.01
-score T_HTML_CONSEC_IMGS10       0.01
-score T_HTML_CONSEC_IMGS11       0.01
-score T_HTML_CONSEC_IMGS12       0.01
-score T_HTML_CONSEC_IMGS13       0.01
-score T_HTML_CONSEC_IMGS14       0.01
-score T_HTML_CONSEC_IMGS15       0.01
-score T_HTML_CONSEC_IMGS16       0.01
-score T_HTML_CONSEC_IMGS17       0.01
-score T_HTML_CONSEC_IMGS18       0.01
-score T_HTML_CONSEC_IMGS19       0.01
-
-
-score T_HTML_MAX_IMG_RATIO01     0.01
-score T_HTML_MAX_IMG_RATIO02     0.01
-score T_HTML_MAX_IMG_RATIO02B    0.01
-score T_HTML_MAX_IMG_RATIO03     0.01
-score T_HTML_MAX_IMG_RATIO03B    0.01
-score T_HTML_MAX_IMG_RATIO04     0.01
-score T_HTML_MAX_IMG_RATIO05     0.01
-score T_HTML_MAX_IMG_RATIO06     0.01
-score T_HTML_MAX_IMG_RATIO07     0.01
-score T_HTML_MAX_IMG_RATIO08     0.01
-score T_HTML_MAX_IMG_RATIO09     0.01
-score T_HTML_MAX_IMG_RATIO10     0.01
-
-score T_HTML_MIN_IMG_RATIO1      0.01
-score T_HTML_MIN_IMG_RATIO2      0.01
-score T_HTML_MIN_IMG_RATIO3      0.01
-score T_HTML_MIN_IMG_RATIO4      0.01
-score T_HTML_MIN_IMG_RATIO5      0.01
-score T_HTML_MIN_IMG_RATIO6      0.01
-
-
-score T_HTML_NUM_IMGS01B         0.01
-score T_HTML_NUM_IMGS02B         0.01
-score T_HTML_CONSEC_IMGS01B      0.01
-score T_HTML_IMAGE_AREA03B       0.01
-score T_HTML_IMAGE_AREA04B       0.01
-score T_HTML_IMAGE_AREA05B       0.01
-score T_HTML_IMAGE_AREA06B       0.01
-score T_HTML_50_70_IMGS3         0.01
-
 ####################################################################
 
 header T_FROM_ENDS_IN_NUMS1       From =~ /\D\d\@/
@@ -593,13 +484,6 @@ header T_FROM_ENDS_IN_NUMS3       From =~ /\D\d\d\d\@/
 header T_FROM_ENDS_IN_NUMS4       From =~ /\D\d\d\d\d\@/
 header T_FROM_ENDS_IN_NUMS5       From =~ /\D\d\d\d\d\d\@/
 header T_FROM_ENDS_IN_NUMS6       From =~ /\d\d\d\d\d\d\@/
-
-score T_FROM_ENDS_IN_NUMS1       0.01
-score T_FROM_ENDS_IN_NUMS2       0.01
-score T_FROM_ENDS_IN_NUMS3       0.01
-score T_FROM_ENDS_IN_NUMS4       0.01
-score T_FROM_ENDS_IN_NUMS5       0.01
-score T_FROM_ENDS_IN_NUMS6       0.01
 
 ############################################################
 
@@ -626,17 +510,6 @@ body T_HTML_SHOUTING6            eval:html_range('max_shouting','5','6')
 body T_HTML_SHOUTING7            eval:html_range('max_shouting','6','7')
 body T_HTML_SHOUTING8            eval:html_range('max_shouting','7','8')
 body T_HTML_SHOUTING9            eval:html_range('max_shouting','8')
-
-score T_HTML_SHOUTING1            0.01
-score T_HTML_SHOUTING2            0.01
-score T_HTML_SHOUTING3            0.01
-score T_HTML_SHOUTING4            0.01
-score T_HTML_SHOUTING5            0.01
-score T_HTML_SHOUTING6            0.01
-score T_HTML_SHOUTING7            0.01
-score T_HTML_SHOUTING8            0.01
-score T_HTML_SHOUTING9            0.01
-
 
 ##################################################################
 # testing the HTML percentage range
@@ -667,18 +540,15 @@ body T_HTML_MAIL_ONLY             /HTML only email, sorry/i
 # catches stuff like "http://www.yahoo.com@0xD5.0xEF.0x8F.0x9D"
 uri T_HEX_HOST	/^https?:\/\/[^\/]*0x[0-9a-fA-F]{2}/
 describe T_HEX_HOST	Looks like an URL with obfuscated hex IP address
-score T_HEX_HOST	0.01
 
 # Most/all of these require that From addresses do not start with numbers.
 # let's see how this does... (jm)
 header T_FROM_NUM_AT_WEBMAIL    From:addr =~ /^\d\S+\@(?:msn\.com|flashmail\.com|mailexcite\.com|prodigy\.net|yahoo\.\S+|hotmail\.com|eudoramail\.com|aol\.com|excite\.com|email\.com|earthlink\.net|geocities\.com|hknetmail\.com|angelfire\.com)/i
 describe T_FROM_NUM_AT_WEBMAIL  From address is webmail, but starts with a number
-score T_FROM_NUM_AT_WEBMAIL     0.01
 
 # actually, this looks really good!
 header T_FROM_OFFERS            From:addr =~ /offers\S*\@/
 describe T_FROM_OFFERS          From address is "offers at something"
-score T_FROM_OFFERS             0.01
 
 # These three have had their ' ' (space) with \s+ for slightly better
 # results on my corpus.  If it looks good for everyone, these can replace
@@ -715,10 +585,6 @@ meta T_OPT_HEADER2		(__T_OPT_HEADER_ALL2 && !__T_OPT_HEADER_SUBJ2)
 body     T_HTML_LINK_CLICK_HERE eval:html_eval('anchor_text', '=~ /click\s+here/i')
 body     T_HTML_LINK_MONEY      eval:html_eval('anchor_text', '=~/\s\$/')
 body     T_HTML_LINK_UNSUB      eval:html_eval('anchor_text', '=~/unsubscribe/i')
-
-score     T_HTML_LINK_CLICK_HERE 0.01
-score     T_HTML_LINK_MONEY      0.01
-score     T_HTML_LINK_UNSUB      0.01
 
 # Some spammers try to get multiple negative scores by adding in different
 # user-agent looking headers.  TOO_MANY_UA adds up all of our USER_AGENT
