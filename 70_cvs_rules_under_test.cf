@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.590 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.591 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -114,30 +114,6 @@ header T_RCVD_IN_OSIRU_OPT_IN		rbleval:check_rbl_sub('osirusoft', '127.0.0.7')
 header T_RCVD_IN_OSIRU_OPEN_PROXY	rbleval:check_rbl_sub('osirusoft', '127.0.0.9')
 tflags T_RCVD_IN_OSIRU_OPT_IN net
 tflags T_RCVD_IN_OSIRU_OPEN_PROXY net
-
-# SORBS
-# transfers: both axfr and ixfr available
-# url: http://www.dnsbl.sorbs.net/
-# pay-to-use: no
-# delist: $50 fee for T_RCVD_IN_SORBS_SPAM, others are retested on request (free)
-header T_RCVD_IN_SORBS	rbleval:check_rbl('sorbs', 'dnsbl.sorbs.net.')
-tflags T_RCVD_IN_SORBS net
-header T_RCVD_IN_SORBS_HTTP	rbleval:check_rbl_sub('sorbs', '127.0.0.2')
-tflags T_RCVD_IN_SORBS_HTTP net
-header T_RCVD_IN_SORBS_MISC	rbleval:check_rbl_sub('sorbs', '127.0.0.3')
-tflags T_RCVD_IN_SORBS_MISC net
-header T_RCVD_IN_SORBS_SMTP	rbleval:check_rbl_sub('sorbs', '127.0.0.4')
-tflags T_RCVD_IN_SORBS_SMTP net
-header T_RCVD_IN_SORBS_SOCKS	rbleval:check_rbl_sub('sorbs', '127.0.0.5')
-tflags T_RCVD_IN_SORBS_SOCKS net
-header T_RCVD_IN_SORBS_SPAM	rbleval:check_rbl_sub('sorbs', '127.0.0.6')
-tflags T_RCVD_IN_SORBS_SPAM net
-header T_RCVD_IN_SORBS_WEB	rbleval:check_rbl_sub('sorbs', '127.0.0.7')
-tflags T_RCVD_IN_SORBS_WEB net
-header T_RCVD_IN_SORBS_BLOCK	rbleval:check_rbl_sub('sorbs', '127.0.0.8')
-tflags T_RCVD_IN_SORBS_BLOCK net
-header T_RCVD_IN_SORBS_ZOMBIE	rbleval:check_rbl_sub('sorbs', '127.0.0.9')
-tflags T_RCVD_IN_SORBS_ZOMBIE net
 
 # some dial-up lists that seem decent, worth testing some more
 header T_RCVD_IN_DUL_BOFH rbleval:check_rbl('pdl-notfirsthop', 'pdl.bofh.it.')
