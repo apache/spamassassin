@@ -372,7 +372,7 @@ body PRINT_FORM_SIGNATURE	/Sign(?:ature)?(?:\s*here|\s*please)?:.{0,30}___*/i
 describe PRINT_FORM_SIGNATURE	Asks you for your signature on a form
 
 # (contrib: skod)
-body MAIL_IN_ORDER_FORM		/Mail-in Order Form/i
+body MAIL_IN_ORDER_FORM		/\b(?:Mail-in|secure|ez|credit.card|fax this) Order Form\b/i
 describe MAIL_IN_ORDER_FORM	Contains mail-in order form
 
 # (contrib: skod)
