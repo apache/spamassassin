@@ -117,7 +117,7 @@ sub check {
   # to see if we should go from {0,1} to {2,3}.  We of course don't need
   # to do this switch if we're already using bayes ... ;)
   my $set = $self->{conf}->get_score_set();
-  if ( $set < 2 && $self->{main}->{bayes_scanner}->is_available() ) {
+  if ( ($set & 2) == 0 && $self->{main}->{bayes_scanner}->is_available() ) {
     $self->{conf}->set_score_set ($set|2);
   }
 
@@ -280,13 +280,14 @@ sub learn {
   # autolearn on and it gets really wierd.  - tvd
   my $hits = 0;
   my $orig_scoreset = $self->{conf}->get_score_set();
-  if ( $orig_scoreset < 2 ) { # we don't need to recompute
+  if ( ($orig_scoreset & 2) == 0 ) { # we don't need to recompute
     dbg ("auto-learn: currently using scoreset $orig_scoreset.  no need to recompute.");
     $hits = $self->{hits};
   }
   else {
-    dbg ("auto-learn: currently using scoreset $orig_scoreset.  recomputing score based on scoreset ".($orig_scoreset%2).".");
-    $self->{conf}->set_score_set($orig_scoreset % 2); # reduce to autolearning scores
+    my $new_scoreset = $orig_scoreset & ~2;
+    dbg ("auto-learn: currently using scoreset $orig_scoreset.  recomputing score based on scoreset $new_scoreset.");
+    $self->{conf}->set_score_set($new_scoreset); # reduce to autolearning scores
     foreach my $test ( @{$self->{test_names_hit}} ) {
       # ignore tests with 0 score in this scoreset or if the test is a learning or userconf test
       next if ( $self->{conf}->{scores}->{$test} == 0 );
