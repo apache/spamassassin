@@ -111,7 +111,9 @@ else
 my $dontcopy = 1;
 if ($opt_c) { $dontcopy = 0; }
 
-undef $ENV{'HOME'};		# we do not want to use this we running as spamd
+if (defined $ENV{'HOME'}) {
+  delete $ENV{'HOME'};		# we do not want to use this we running as spamd
+}
 
 my $spamtest = Mail::SpamAssassin->new({
   dont_copy_prefs => $dontcopy,
@@ -133,12 +135,15 @@ $spamtest->compile_now();	# ensure all modules etc. are loaded
 $/ = "\n";			# argh, Razor resets this!  Bad Razor!
 
 sub spawn;  # forward declaration
+
 setlogsock('unix');
+openlog('spamd','cons,pid',$log_facility);
 
 # jm: NOTE: this should probably just openlog() once, in parent pid, for
 # efficiency (TODO)
 sub logmsg {
-  openlog('spamd','cons,pid',$log_facility); syslog('info',"@_"); closelog();
+  syslog('info',"@_");
+  if ($opt_D) { warn "logmsg: @_\n"; }
 }
 
 my $port = $opt_p || 22874;
@@ -177,11 +182,11 @@ if ($opt_u) {
     $setuid_to_user = 1;
 }
 
-logmsg "server started on port $port";
 if ($opt_D) {
     warn "server started on port $port\n";
     warn "server pid: $$\n";
 }
+logmsg "server started on port $port";
 
 my $waitedpid = 0;
 my $current_user;
@@ -213,8 +218,23 @@ for ( $waitedpid = 0;
 	$|=1; # always immediately flush output
 	# First request line off stream
         local $_ = <STDIN>;
+
+	if (!defined $_) {
+	    protocol_error ("(closed before headers)");
+	    return 1;
+	}
+
 	chomp;
-        if(/PROCESS SPAMC\/(.*)/)
+
+        if(/SKIP SPAMC\/(.*)/)
+	{
+	    # this is OK -- spamc reckoned the mail is too big to be
+	    # bothered checking it. just return.
+	    logmsg "skipped large message in ".
+			 sprintf("%3d", time - $start) ." seconds.\n";
+	    return 0;
+
+	} elsif(/PROCESS SPAMC\/(.*)/)
 	{
 	    my $version = $1;
 	    my $expected_length;

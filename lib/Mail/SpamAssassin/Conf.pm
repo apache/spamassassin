@@ -49,7 +49,8 @@ sub new {
   $self->{report_template} = '';
   $self->{terse_report_template} = '';
   $self->{spamtrap_template} = '';
-  $self->{razor_config} = $ENV{'HOME'}."/razor.conf";
+
+  $self->{razor_config} = $self->{main}->sed_path ("~/razor.conf");
 
   # this will be sedded by whitelist implementations, so ~ is OK
   $self->{auto_whitelist_path} = "~/.spamassassin/auto-whitelist";

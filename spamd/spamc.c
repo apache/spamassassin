@@ -137,17 +137,20 @@ int send_message(int in,int out,char *username, int max_size)
   size_t bytes,bytes2;
   int ret = EX_OK;
 
+  if(NULL == (header_buf = malloc(1024))) return EX_OSERR;
 
   /* Ok, now we'll read the message into the buffer up to the limit */
   /* Hmm, wonder if this'll just work ;) */
   if((bytes = full_read (in, msg_buf, max_size+1024, max_size+1024)) > max_size)
   {
     /* Message is too big, so return so we can dump the message back out */
+    bytes2 = snprintf(header_buf,1024,"SKIP %s\r\nUser: %s\r\n\r\n",
+			PROTOCOL_VERSION, username);
+    full_write (out,header_buf,bytes2);
     ret = ESC_PASSTHROUGHRAW;
   } else
   {
     /* First send header */
-    if(NULL == (header_buf = malloc(1024))) return EX_OSERR;
     if(NULL != username)
     {
       bytes2 = snprintf(header_buf,1024,"PROCESS %s\r\nUser: %s\r\nContent-length: %d\r\n\r\n",PROTOCOL_VERSION,username,bytes);
@@ -158,11 +161,10 @@ int send_message(int in,int out,char *username, int max_size)
     }
 
     full_write (out,header_buf,bytes2);
-
-    free(header_buf);
-
     full_write (out,msg_buf,bytes);
   }
+
+  free(header_buf);
 
   amount_read = bytes;
   shutdown(out,SHUT_WR);
