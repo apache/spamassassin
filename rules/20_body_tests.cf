@@ -1,5 +1,5 @@
 # SpamAssassin rules file: tests.
-# $Id: 20_body_tests.cf,v 1.249 2002/09/09 04:42:46 zelgadis Exp $
+# $Id: 20_body_tests.cf,v 1.250 2002/09/09 04:54:37 zelgadis Exp $
 # 
 # note: body tests are run with long lines, so be sure to limit the
 # size of searches; use ".{0,30}" instead of ".*" to avoid huge
@@ -507,7 +507,7 @@ describe PREST_NON_ACCREDITED	'Prestigious Non-Accredited Universities'
 body NEW_DOMAIN_EXTENSIONS	/\bnew .{0,15}\bextension/i
 describe NEW_DOMAIN_EXTENSIONS	Possible registry spammer
 
-body DOMAIN_BODY		/\s(?:\.|dot\s+)(?:info|biz|name)\s/i
+body DOMAIN_BODY		/(?:\s|^)(?:\.|dot\s+)(?:info|biz|name)\b|(?:\s|^)\.\w+ domain/mi
 describe DOMAIN_BODY		Domain registration spam body
 
 body CLICK_TO_REMOVE_2          /mailto:.{0,50}click.{0,50}remove/is
