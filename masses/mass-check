@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 
 # options
 #
@@ -16,6 +16,9 @@
 # --tail=N      only check last N messages
 #
 # all following arguments are used as the name of mail folders
+
+use vars qw($opt_c $opt_f $opt_all $opt_head $opt_mh $opt_ms $opt_mn
+	    $opt_single $opt_sort $opt_tail);
 
 use FindBin;
 use lib "$FindBin::Bin/../lib";
