@@ -934,4 +934,6 @@ sub check_for_spam_phrases_scoring {
 
 ###########################################################################
 
+sub check_for_missing_headers { return 0; } # obsolete test
+
 1;
