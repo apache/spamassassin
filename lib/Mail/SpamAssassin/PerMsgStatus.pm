@@ -1114,6 +1114,7 @@ sub get_decoded_stripped_body_text_array {
   $self->{html}{image_area} = 0;
   $self->{html}{shouting} = 0;
   $self->{html}{max_shouting} = 0;
+  $self->{html}{total_comment_ratio} = 0;
 
   # do HTML conversions if necessary
   if ($text =~ m/<(?:$re_strict|$re_loose|!--|!doctype)(?:\s|>)/ois) {
@@ -1159,6 +1160,9 @@ sub get_decoded_stripped_body_text_array {
       }
       $self->{html}{non_space_len} = $self->{html}{non_uri_len} - $space;
       $self->{html}{ratio} = ($raw - $self->{html}{non_uri_len}) / $raw;
+      if (exists $self->{html}{total_comment_length} && $self->{html}{non_uri_len} > 0) {
+        $self->{html}{total_comment_ratio} = $self->{html}{total_comment_length} / $self->{html}{non_uri_len};
+      }
     } # if ($raw > 0)
     delete $self->{html_last_tag};
 

@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.68 2003/03/01 20:09:08 jmason Exp $
+# $Id: HTML.pm,v 1.69 2003/03/03 00:43:44 felicity Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -364,6 +364,8 @@ sub html_comment {
   $self->{html}{comment_sky} = 1 if $text =~ /SKY-(?:Email-Address|Database|Mailing|List)/;
   $self->{html}{comment_blank} = 1 if $text =~ /^<!--\s*-->$/;
   $self->{html}{comment_no_alphanum} = 1 if ( $text !~ /\w/ );
+
+  $self->{html}{total_comment_length} += length($text) + 7;	# 7 = "<!--" + "-->"
 
   if (exists $self->{html_inside}{script} && $self->{html_inside}{script} > 0)
   {
