@@ -67,7 +67,12 @@ foreach my $symbol ($sa->{conf}->regression_tests()) {
 		|| $sa->{conf}->{head_evals}->{$priority}->{$symbol};
 	      last if $test_string;
             }
+	    if (ref($test_string) eq 'ARRAY'){
+	      $test_string = join("_", @{$test_string});
+	      $test_string = "Received" if ($test_string =~ /received/i);
+	    }
             my ($header_name) = $test_string =~ /^(\S+)/;
+	    $header_name =~ s/:.*$//; # :name, :addr, etc.
             # warn("got header name: $header_name - setting to: $string\n");
 	    $mail = $sa->parse(["${header_name}: $string\n","\n","\n"]);
         }
@@ -83,6 +88,9 @@ foreach my $symbol ($sa->{conf}->regression_tests()) {
 	    $mail = $sa->parse(["Content-type: $type\n","\n","$string\n"]);
         }
 
+	# debugging, what message is being processed
+	#print $symbol, "\n", "-"x48, "\n", $mail->get_pristine(), "\n", "-"x48, "\n";
+
         my $msg = Mail::SpamAssassin::PerMsgStatus->new($sa, $mail);
         my $conf = $msg->{conf};
 
@@ -97,6 +105,9 @@ foreach my $symbol ($sa->{conf}->regression_tests()) {
 
 	my %rules_hit = map { $_ => 1 } split(/,/,$msg->get_names_of_tests_hit()),
 		split(/,/,$msg->get_names_of_subtests_hit());
+
+	# debugging, what rule hits actually occurred
+	#print $symbol, ": ", join(", ", keys(%rules_hit), "\n");
 
         ok( (exists $rules_hit{$symbol} ? 1 : 0), ($ok_or_fail eq 'ok' ? 1 : 0),
                 "Test for '$symbol' (type: $test_type) against '$string'" );
