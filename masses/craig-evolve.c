@@ -14,11 +14,11 @@
 
 
 /* Craig's log(score) evaluator, not as aggressive against FPs I think */
-//#define USE_LOG_SCORE_EVALUATION
+#define USE_LOG_SCORE_EVALUATION
 
 /* Use score ranges derived from hit-frequencies S/O ratio,
  * and numbers of mails hit */
-#define USE_SCORE_RANGES
+//#define USE_SCORE_RANGES
 
 
 double evaluate(PGAContext *, int, int);
@@ -35,7 +35,9 @@ const int exhaustive_eval = 1;
 const double mutation_rate = 0.01;
 const double mutation_noise = 0.5;
 const double regression_coefficient = 0.75;
-//const double SCORE_CAP = 3.0;
+#ifndef USE_SCORE_RANGES
+const double SCORE_CAP = 3.0;
+#endif
 
 const double crossover_rate = 0.65;
 
@@ -58,6 +60,7 @@ void usage()
      "  -s size = population size (50 recommended)\n"
      "  -r replace = number of individuals to replace each generation (20 recommended)\n"
      "  -b nybias = bias towards false negatives (10.0 default)\n"
+     "  -t threshold = threshold for spam/nonspam decision\n"
      "\n"
      "  -C = just count hits and exit, no evolution\n\n");
 #ifdef USE_MPI
@@ -68,22 +71,21 @@ void usage()
 
 void init_data()
 {
-  int  rank;
-
 #ifdef USE_MPI
+  int rank;
+
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-#else 
-  rank = 0;
-#endif
 
   if (rank == 0) {
+#endif
+
     loadtests();
     loadscores();
     nybias = nybias*((double)num_spam)/((double)num_nonspam);
-    //printf("nybias normalized to %f\n",nybias);
-  }
 
 #ifdef USE_MPI
+  }
+
   MPI_Bcast(num_tests_hit, num_tests, MPI_CHAR, 0, MPI_COMM_WORLD);
   MPI_Bcast(&nybias, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Bcast(is_spam, num_tests, MPI_CHAR, 0, MPI_COMM_WORLD);
@@ -104,7 +106,6 @@ int main(int argc, char **argv) {
 #ifdef USE_MPI
     MPI_Init(&argc, &argv);
 #endif
-//#ifndef USE_MPI
     int arg;
 
     while ((arg = getopt (argc, argv, "b:r:s:t:C")) != -1) {
@@ -134,7 +135,6 @@ int main(int argc, char **argv) {
           break;
       }
     }
-//#endif
 
      init_data();
 
@@ -163,7 +163,6 @@ int main(int argc, char **argv) {
 
 #else
 
-     // jm: try out using ranges instead of our own mutator
      PGASetMutationBoundedFlag(ctx, PGA_FALSE);
      PGASetMutationType(ctx, PGA_MUTATION_RANGE);
      PGASetRealInitRange (ctx, range_lo, range_hi);
@@ -367,17 +366,15 @@ void dump(FILE *fp)
  *****************************************************************************/
 void WriteString(PGAContext *ctx, FILE *fp, int p, int pop)
 {
-  int rank;
   int i;
 
 #ifdef USE_MPI
+  int rank;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-#else
-  rank = 0;
-#endif
 
   if(0 == rank)
   {
+#endif
     evaluate(ctx,p,pop);
     dump(fp);
     for(i=0; i<num_scores; i++)
@@ -385,21 +382,21 @@ void WriteString(PGAContext *ctx, FILE *fp, int p, int pop)
       fprintf(fp,"score %-30s %2.3f\n",score_names[i],PGAGetRealAllele(ctx, p, pop, i));
     }
     fprintf ( fp,"\n" );
+#ifdef USE_MPI
   }
+#endif
 }
 
 void showSummary(PGAContext *ctx)
 {
+#ifdef USE_MPI
   int rank;
 
-#ifdef USE_MPI
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-#else
-  rank = 0;
-#endif
 
   if(0 == rank)
   {
+#endif
     if(0 == PGAGetGAIterValue(ctx) % 300)
     {
       int genome = PGAGetBestIndex(ctx,PGA_OLDPOP);
@@ -414,5 +411,7 @@ void showSummary(PGAContext *ctx)
     {
       printf("%d",(PGAGetGAIterValue(ctx)/5)%10);
     }
+#ifdef USE_MPI
   }
+#endif
 }
