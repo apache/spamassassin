@@ -83,7 +83,7 @@ use vars qw{
 };
 
 $VERSION = "2.41";              # update after release
-$IS_DEVEL_BUILD = 1;            # comment for release versions
+#$IS_DEVEL_BUILD = 1;            # comment for release versions
 
 # Create the hash so that it really points to something, otherwise we can't
 # get a reference to it -- Marc
@@ -91,7 +91,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.115.2.8 2002/09/05 12:13:28 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.115.2.9 2002/09/05 18:05:21 jmason Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
