@@ -142,6 +142,15 @@ tflags T_NO_DNS_FOR_RECIPS_ONE		net
 tflags T_NO_DNS_FOR_RECIPS_TWO		net
 tflags T_NO_DNS_FOR_RECIPS_MANY		net
 
+# 2003-03-03: quinlan
+# some rule speed-ups (idea from Matt Sergeant)
+body T_PORN_15		/(?=[celstwvy])(?:college|eating|licking|spears|tight|wet|shaved|voyeur|young|teen(?:age)?).{0,16}pussy/i
+body T_OFFERS_ETC	/\b(?:(?=[cefmpruw])(?:wish|want|unsub|reward|receive|recurring|remove|permission|partner|further|future|e.?mail|continue|click).{0,64}){2}.{0,8}(?=[cdos])(?:special|offer|coupon|discount)s?\b/i
+body T_HOT_NASTY	/\b(?=[dehklnswxy])(?:horny|nasty|hot|wild|young|horniest|nastiest|hottest|wildest|youngest|naughty|dirtiest|slutty|kinky|lusty|extreme|xxx+)\b.{0,9}\b(?=[acfghilmpsvx])(?:virgin|asian|cheerleader|sex|selection|fuck|fucking|anal\b|lesb(?:ian|o)|incest|chicks?|pics|movies|video|gay\b|porn|h[a\@]rdcore|schoolgirls|amateur|slut|adult|cum|xxx|sites?|hotties|shit)/i
+body T_CELEBRITY_PORN	/\bceleb(?:rity|rities|s).{0,15}(?=[cenps])(?:sex|porn|pics|caught|nude|exposed|content)|\b(?=[fhns])(?:steamy|hot|nude|shocking|free|h[a\@]rdcore) celeb(?:rity|rities|s)/i
+body T_VACATION_SCAM	/\b(?=[dfms])(?:free|mini-?|dream|special).{0,10}vacation|vacation (?=[fgop])(?:offer|promotion|package|for two|getaway)/i
+body T_HAIR_LOSS	/\b(?=[gnrt])(?:thinn?ing|restore|grow|new) hair|\bhair loss/i
+
 # bug 1416, possible replacement for AS_SEEN_ON
 body     T_AS_SEEN_ON             /seen on\b\s*(?:T\.?V\.?|ABC|NBC|CBS|CNN|Oprah|USA Today|48 Hours|New York Times|\w+\s+T\.?V\.?|:)/i
 
@@ -158,6 +167,35 @@ meta T_FAKED_IMS		(__IMS_MUA && __MIME_HTML_ONLY)
 body T_REMOVE_REMOVAL_16	/remov(?:e|al).{0,16}remov(?:e|al)/i
 body T_REMOVE_REMOVAL_32	/remov(?:e|al).{0,32}remov(?:e|al)/i
 body T_REMOVE_REMOVAL_64	/remov(?:e|al).{0,64}remov(?:e|al)/i
+rawbody T_REMOVE_REMOVAL_16R	/remov(?:e|al).{0,16}remov(?:e|al)/i
+rawbody T_REMOVE_REMOVAL_32R	/remov(?:e|al).{0,32}remov(?:e|al)/i
+rawbody T_REMOVE_REMOVAL_64R	/remov(?:e|al).{0,64}remov(?:e|al)/i
+
+# 2003-03-04: quinlan (my final attempt at this idea)
+# bug 821: test for "good" RFC2369 headers (was: reverse SUSPECT_LIST_HEADERS)
+#
+# good genomes             non-good genomes
+#    S/O HAM-SPAM HUSPOA      S/O HAM-SPAM HUSPOA
+# ------ -------- ------   ------ -------- ------
+#   0.00       40 111100    19.12       84 010000
+#   0.00       71 111110    44.18     2132 000000
+#   0.00       96 011011   100.00       -1 011010
+#   1.21     1372 111101   100.00       -4 111000
+# (Note: above S/O ratios are not adjusted to be a 50/50 mix)
+#
+# quinlan results:
+# OVERALL%   SPAM%     HAM%     S/O    RANK   SCORE  NAME
+#   20076     8138    11938    0.405   0.00    0.00  (all messages)
+# 100.000  40.5360  59.4640    0.405   0.00    0.00  (all messages as %)
+#   8.029   0.2089  13.3607    0.015   0.90   -0.01  T_GOOD_LIST_HEADERS
+header	__LIST_HELP		exists:List-Help
+header	__LIST_UNSUBSCRIBE	exists:List-Unsubscribe
+header	__LIST_SUBSCRIBE	exists:List-Subscribe
+header	__LIST_POST		exists:List-Post
+header	__LIST_OWNER		exists:List-Owner
+header	__LIST_ARCHIVE		exists:List-Archive
+meta T_GOOD_LIST_HEADERS	(__LIST_UNSUBSCRIBE && __LIST_SUBSCRIBE && ((__LIST_HELP && __LIST_POST && !(__LIST_OWNER && __LIST_ARCHIVE)) || (!__LIST_HELP && !__LIST_POST && __LIST_OWNER && __LIST_ARCHIVE)))
+tflags T_GOOD_LIST_HEADERS	nice
 
 # bug 1438, possible replacement for the current HOTMAIL_FOOTER* rules
 # rename current HOTMAIL_FOOTER# to __HOTMAIL_FOOTER#, and change these too.
