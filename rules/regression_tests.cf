@@ -157,6 +157,7 @@ test PGP_SIGNATURE_2 ok Content-Type: multipart/signed; micalg=pgp-sha1;protocol
 test PGP_SIGNATURE_2 fail Content-Type: text/plain; charset=us-ascii
 test SEARCH_ENGINE_PROMO ok	evaluated for FREE for its keyword placement in the top twenty major search engines
 #
+test US_DOLLARS fail $-$NFbMF$K!"A49q$+$iLd$$9g$o$;$,;&E~$7$F$$$^$9!#
 test US_DOLLARS ok Twenty Million Five Hundred Thousand United States Dollars
 test US_DOLLARS ok Eight million, Five Hundred United States dollars
 test US_DOLLARS ok One Million, Five Hundred Thousand U. S.  Dollars
@@ -167,17 +168,20 @@ test US_DOLLARS ok FIVE MILLION FIVE HOUNDRED THOUSAND CANADIAN DOLLAS)
 #
 test US_DOLLARS_2 fail JP charset test: this should not match: $1 $
 test US_DOLLARS_2 fail JP charset test: this should not match: $1$
+test US_DOLLARS_2 fail $-$NFbMF$K!"A49q$+$iLd$$9g$o$;$,;&E~$7$F$$$^$9!#
 test US_DOLLARS_2 ok of USD$17.4M only
 test US_DOLLARS_2 ok amount $21.5m represents
 test US_DOLLARS_2 ok of US$26.4 million
 test US_DOLLARS_2 ok the $21.5 million,
 #
+test US_DOLLARS_3 fail $-$NFbMF$K!"A49q$+$iLd$$9g$o$;$,;&E~$7$F$$$^$9!#
 test US_DOLLARS_3 ok OF US$75,000,000.00 ( SEVENTYFIVE
 test US_DOLLARS_3 ok DOLLAR(USD$30,000,000,00.)
 test US_DOLLARS_3 ok ($21,500,000.)
 test US_DOLLARS_3 ok ($ 152,000.000.00)
 #
 test US_DOLLARS_4 fail JP charset test: this should not match: $1 $
-test US_DOLLARS_4 fail JP charset test: this should not match: $1 $
+test US_DOLLARS_4 fail JP charset test: this should not match: $1$
+test US_DOLLARS_4 fail $-$NFbMF$K!"A49q$+$iLd$$9g$o$;$,;&E~$7$F$$$^$9!#
 test US_DOLLARS_4 ok of US$8.5 million (Eight
 test US_DOLLARS_4 ok of US8.5 millions (Eight
