@@ -1,5 +1,5 @@
 # SpamAssassin rules file: tests.
-# $Id: 20_head_tests.cf,v 1.164 2002/08/23 09:40:10 hughescr Exp $
+# $Id: 20_head_tests.cf,v 1.165 2002/08/23 10:02:27 hughescr Exp $
 ###########################################################################
 
 require_version 2.40
@@ -214,6 +214,10 @@ header X_OSIRU_OPEN_RELAY		rbleval:check_rbl_results_for('osirusoft', '127.0.0.2
 describe X_OSIRU_OPEN_RELAY	DNSBL: sender is Confirmed Open Relay
 tflags X_OSIRU_OPEN_RELAY         net
 
+header X_OSIRU_DUL		rbleval:check_rbl_results_for('osirusoft', '127.0.0.3')
+describe X_OSIRU_DUL		DNSBL: sender ip address in in a dialup block
+tflags X_OSIRU_DUL		net
+
 header X_OSIRU_SPAM_SRC		rbleval:check_rbl_results_for('osirusoft', '127.0.0.4')
 describe X_OSIRU_SPAM_SRC	DNSBL: sender is Confirmed Spam Source
 tflags X_OSIRU_SPAM_SRC         net
@@ -222,7 +226,7 @@ header X_OSIRU_SPAMWARE_SITE	rbleval:check_rbl_results_for('osirusoft', '127.0.0
 describe X_OSIRU_SPAMWARE_SITE	DNSBL: sender is a Spamware site or vendor
 tflags X_OSIRU_SPAMWARE_SITE    net
 
-header X_OSIRU_DUL_FH		rbleval:check_rbl('osirusoft-dul-firsthop', 'dialups.mail-abuse.org.')
+header X_OSIRU_DUL_FH		rbleval:check_rbl('osirusoft-dul-firsthop', 'relays.osirusoft.com.')
 describe X_OSIRU_DUL_FH		Received from first hop dialup listed in relays.osirusoft.com
 tflags X_OSIRU_DUL_FH           net
 

@@ -1,5 +1,5 @@
 # SpamAssassin rules file: scores.
-# $Id: 50_scores.cf,v 1.201 2002/08/23 09:40:10 hughescr Exp $
+# $Id: 50_scores.cf,v 1.202 2002/08/23 10:02:27 hughescr Exp $
 ###########################################################################
 # Default scores.   Note that if a test is named in the files, but a score is
 # not assigned here, the default score will be set to 1.
@@ -580,6 +580,7 @@ score PYZOR_CHECK                    3.0
 
 score RCVD_IN_RELAYS_ORDB_ORG	     2.5
 score RCVD_IN_OSIRUSOFT_COM	     0.5
+score X_OSIRU_DUL                    1.5
 score X_OSIRU_DUL_FH		    -1.5
 score X_OSIRU_OPEN_RELAY	     3.5
 score X_OSIRU_SPAM_SRC		     3.5
