@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.616 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.617 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -27,10 +27,4 @@ tflags T_RCVD_IN_DUN_DNSRBL net
 header T_RCVD_IN_FABEL		rbleval:check_rbl('fabel', 'spamsources.fabel.dk.')
 describe T_RCVD_IN_FABEL	Received via a relay in spamsources.fabel.dk
 tflags T_RCVD_IN_FABEL net
-
-# bug 1733: SenderBase
-# sa.senderbase.org for SpamAssassin queries
-# test.senderbase.org for everything else (until SenderBase is in production)
-header __SENDERBASE rbleval:check_rbl_txt('senderbase', 'sa.senderbase.org.')
-tflags __SENDERBASE net
 
