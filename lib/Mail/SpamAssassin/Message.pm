@@ -562,7 +562,7 @@ sub _parse_multipart {
         }
         $header = $_;
       }
-      elsif (/^$/) {
+      elsif (/^\s*$/) {
         if ($header) {
           my ( $key, $value ) = split ( /:\s*/, $header, 2 );
           $part_msg->header( $key, $value );

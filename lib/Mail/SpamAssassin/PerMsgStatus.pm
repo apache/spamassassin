@@ -878,8 +878,19 @@ sub rewrite_no_report_safe {
 
   # put the pristine headers into an array
   # skip the X-Spam- headers, but allow the X-Spam-Prev headers to remain.
+  # since there may be a missing header/body 
   #
-  my(@pristine_headers) = grep(!/^X-Spam-(?!Prev-)/i, $self->{msg}->get_pristine_header() =~ /^([^:]+:[ \t]*(?:.*\n(?:\s+\S.*\n)*))/mig);
+  my @pristine_headers = split(/^/m, $self->{msg}->get_pristine_header());
+  for (my $line = 0; $line <= $#pristine_headers; $line++) {
+    next unless ($pristine_headers[$line] =~ /^X-Spam-(?!Prev-)/i);
+    splice @pristine_headers, $line, 1 while ($pristine_headers[$line] =~ /^(?:X-Spam-(?!Prev-)|\s+\S)/i);
+    $line--;
+  }
+  my $separator;
+  if ($pristine_headers[$#pristine_headers] =~ /^\s*$/) {
+    $separator = pop @pristine_headers;
+  }
+
   my $addition = 'headers_ham';
 
   if($self->{is_spam})
@@ -928,7 +939,6 @@ sub rewrite_no_report_safe {
     push(@pristine_headers, "X-Spam-$header: $line\n");
   }
 
-  my $separator = $self->{msg}->{missing_head_body_separator} ? '' : "\n";
   return join('', @pristine_headers, $separator, $self->{msg}->get_pristine_body());
 }
 

@@ -441,7 +441,7 @@ sub run_file {
   my @msg;
   my $header = '';
   while(<INPUT>) {
-    if (!$header && /^$/) {
+    if (!$header && /^\s*$/) {
       $header = join('', @msg);
     }
 
@@ -479,7 +479,7 @@ sub run_mailbox {
       return;
     }
 
-    if (!$header && /^$/) {
+    if (!$header && /^\s*$/) {
       $header = join('', @msg);
     }
 
@@ -513,7 +513,7 @@ sub run_mbx {
       return;
     }
 
-    if (!$header && /^$/) {
+    if (!$header && /^\s*$/) {
       $header = join('', @msg);
     }
 
@@ -875,7 +875,7 @@ sub scan_file {
   my $header;
   mail_open($mail) or return;
   while (<INPUT>) {
-    last if /^$/;
+    last if /^\s*$/;
     $header .= $_;
   }
   close(INPUT);
@@ -920,7 +920,7 @@ sub scan_mailbox {
       my $header = $first;	# remember first line
       while (<INPUT>) {
 	if ($in_header) {
-	  if (/^$/) {
+	  if (/^\s*$/) {
 	    $in_header = 0;
 	  }
 	  else {
@@ -993,7 +993,7 @@ sub scan_mbx {
 		# gather up the headers...
 		my $header = '';
 		while (<INPUT>) {
-		    last if (/^$/);
+		    last if (/^\s*$/);
 		    $header .= $_;
 		}
 

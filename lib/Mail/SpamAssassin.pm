@@ -937,7 +937,7 @@ sub remove_spamassassin_markup {
   $hdrs =~ s/\r//gs;
 
   # unfold SA added headers, but not X-Spam-Prev headers ...
-  1 while $hdrs =~ s/(\nX-Spam-(?!Prev).+?)\n[ \t]+/$1 /g;
+  1 while $hdrs =~ s/(\nX-Spam-(?!Prev).+?)\n[ \t]+(\S.*\n)/$1 $2/g;
 
 ###########################################################################
   # Backward Compatibilty, pre 3.0.x.
