@@ -114,17 +114,49 @@ sub check_for_forged_hotmail_received_headers {
   my $rcvd = $self->get ('Received');
   $rcvd =~ s/\s+/ /gs;		# just spaces, simplify the regexp
 
+  my $ip = $self->get ('X-Originating-IP');
+  if ($ip =~ /\d+\.\d+\.\d+\.\d+/) { $ip = 1; } else { $ip = 0; }
+
   # Hotmail formats its received headers like this:
   # Received: from hotmail.com (f135.law8.hotmail.com [216.33.241.135])
   # spammers do not ;)
 
-  #if ($rcvd !~ /from hotmail.com/) { return 0; }
+  if ($self->gated_through_received_hdr_remover()) { return 0; }
+
+  if ($rcvd =~ /from \S*hotmail.com \(\S+\.hotmail(?:\.msn|)\.com / && $ip)
+                { return 0; }
+  if ($rcvd =~ /from \S+ by \S+\.hotmail(?:\.msn|)\.com with HTTP\;/ && $ip)
+                { return 0; }
+
+  return 1;
+}
+
+###########################################################################
+
+sub check_for_forged_eudoramail_received_headers {
+  my ($self) = @_;
+
+  my $from = $self->get ('From:addr');
+  if ($from !~ /excite.com/) { return 0; }
+
+  my $rcvd = $self->get ('Received');
+  $rcvd =~ s/\s+/ /gs;		# just spaces, simplify the regexp
+
+  my $ip = $self->get ('X-Sender-Ip');
+  if ($ip =~ /\d+\.\d+\.\d+\.\d+/) { $ip = 1; } else { $ip = 0; }
+
+  # Eudoramail formats its received headers like this:
+  # Received: from Unknown/Local ([?.?.?.?]) by shared1-mail.whowhere.com;
+  #      Thu Nov 29 13:44:25 2001
+  # Message-Id: <JGDHDEHPPJECDAAA@shared1-mail.whowhere.com>
+  # Organization: QUALCOMM Eudora Web-Mail  (http://www.eudoramail.com:80)
+  # X-Sender-Ip: 192.175.21.146
+  # X-Mailer: MailCity Service
 
   if ($self->gated_through_received_hdr_remover()) { return 0; }
 
-  if ($rcvd =~ /from \S*hotmail.com \(\S+\.hotmail(?:\.msn|)\.com /) { return 0; }
-  if ($rcvd =~ /from \S+ by \S+\.hotmail(?:\.msn|)\.com with HTTP\;/) { return 0; }
-
+  if ($rcvd =~ /by \S*whowhere.com\;/ && $ip) { return 0; }
+  
   return 1;
 }
 
@@ -152,7 +184,7 @@ sub check_for_forged_excite_received_headers {
 
   if ($self->gated_through_received_hdr_remover()) { return 0; }
 
-  if ($rcvd =~ /from \S*excite.com /) { return 0; }
+  if ($rcvd =~ /from \S*excite.com (\S+) by \S*excite.com/) { return 0; }
   
   return 1;
 }

@@ -388,7 +388,14 @@ sub rewrite_as_spam {
 
   } else {
     my $lines = $srcmsg->get_body();
-    unshift (@{$lines}, split (/$/, $self->{report}));
+
+    my $rep = $self->{report};
+    my $cte = $self->{msg}->get_header ('Content-Transfer-Encoding');
+    if (defined $cte && $cte =~ /quoted-printable/) {
+      $rep =~ s/=/=3D/gs;               # quote the = chars
+    }
+
+    unshift (@{$lines}, split (/$/, $rep));
     $lines->[0] =~ s/\n//;
     $self->{msg}->replace_body ($lines);
   }
