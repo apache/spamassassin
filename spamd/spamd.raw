@@ -514,8 +514,8 @@ sub handle_user
 
 sub handle_user_sql
 {
-    my $username = shift;
-    $spamtest->load_scoreonly_sql ($username);
+    $current_user = shift;
+    $spamtest->load_scoreonly_sql ($current_user);
     return 1;
 }
 
