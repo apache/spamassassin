@@ -6,9 +6,15 @@
  *  cleaner.
  */
 
+#ifdef __cplusplus
 extern "C" {
+#endif
+
 #include <pgapack.h>
+
+#ifdef __cplusplus
 }
+#endif
 
 #include "tmp/scores.h"
 #include "tmp/tests.h"
