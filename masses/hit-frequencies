@@ -269,7 +269,7 @@ if (! $opt_i) {
   }
 
   # second half of ranking is the unwanted rank
-  my $normalize = (scalar keys %wranks) / (scalar keys %uranks);
+  my $normalize = (scalar keys %wranks) / (scalar keys %uranks || 0.001);
   $position = 0;
   $last = undef;
   for my $test (@unwanted) {
