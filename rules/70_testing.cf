@@ -482,14 +482,14 @@ header T_NOVOWEL_FROMADDR1_8_LC	From:addr =~ /\@.*[bcdfghjklmnpqrstvwxyz]{8}/
 header T_NOVOWEL_FROMADDR1_8_AC	From:addr =~ /\@.*[bcdfghjklmnpqrstvwxyz]{8}/i
 header T_NOVOWEL_FROMADDR1_9_LC	From:addr =~ /\@.*[bcdfghjklmnpqrstvwxyz]{9}/
 header T_NOVOWEL_FROMADDR1_9_AC	From:addr =~ /\@.*[bcdfghjklmnpqrstvwxyz]{9}/i
-uri T_NOVOWEL_URI1_6_LC	m{https?://[^/]+/.*[bcdfghjklmnpqrstvwxyz]{6}}
-uri T_NOVOWEL_URI1_6_AC	m{https?://[^/]+/.*[bcdfghjklmnpqrstvwxyz]{6}}/i
-uri T_NOVOWEL_URI1_7_LC	m{https?://[^/]+/.*[bcdfghjklmnpqrstvwxyz]{7}}
-uri T_NOVOWEL_URI1_7_AC	m{https?://[^/]+/.*[bcdfghjklmnpqrstvwxyz]{7}}/i
-uri T_NOVOWEL_URI1_8_LC	m{https?://[^/]+/.*[bcdfghjklmnpqrstvwxyz]{8}}
-uri T_NOVOWEL_URI1_8_AC	m{https?://[^/]+/.*[bcdfghjklmnpqrstvwxyz]{8}}/i
-uri T_NOVOWEL_URI1_9_LC	m{https?://[^/]+/.*[bcdfghjklmnpqrstvwxyz]{9}}
-uri T_NOVOWEL_URI1_9_AC	m{https?://[^/]+/.*[bcdfghjklmnpqrstvwxyz]{9}}/i
+uri T_NOVOWEL_URI1_6_LC	m%^https?://[^/]+/.*[bcdfghjklmnpqrstvwxyz]{6}%
+uri T_NOVOWEL_URI1_6_AC	m%^https?://[^/]+/.*[bcdfghjklmnpqrstvwxyz]{6}%i
+uri T_NOVOWEL_URI1_7_LC	m%^https?://[^/]+/.*[bcdfghjklmnpqrstvwxyz]{7}%
+uri T_NOVOWEL_URI1_7_AC	m%^https?://[^/]+/.*[bcdfghjklmnpqrstvwxyz]{7}%i
+uri T_NOVOWEL_URI1_8_LC	m%^https?://[^/]+/.*[bcdfghjklmnpqrstvwxyz]{8}%
+uri T_NOVOWEL_URI1_8_AC	m%^https?://[^/]+/.*[bcdfghjklmnpqrstvwxyz]{8}%i
+uri T_NOVOWEL_URI1_9_LC	m%^https?://[^/]+/.*[bcdfghjklmnpqrstvwxyz]{9}%
+uri T_NOVOWEL_URI1_9_AC	m%^https?://[^/]+/.*[bcdfghjklmnpqrstvwxyz]{9}%i
 # now try before separator
 header T_NOVOWEL_FROM2_6_LC	From =~ /[bcdfghjklmnpqrstvwxyz]{6}.*\@/
 header T_NOVOWEL_FROM2_6_AC	From =~ /[bcdfghjklmnpqrstvwxyz]{6}.*\@/i
@@ -507,14 +507,14 @@ header T_NOVOWEL_FROMADDR2_8_LC	From:addr =~ /[bcdfghjklmnpqrstvwxyz]{8}.*\@/
 header T_NOVOWEL_FROMADDR2_8_AC	From:addr =~ /[bcdfghjklmnpqrstvwxyz]{8}.*\@/i
 header T_NOVOWEL_FROMADDR2_9_LC	From:addr =~ /[bcdfghjklmnpqrstvwxyz]{9}.*\@/
 header T_NOVOWEL_FROMADDR2_9_AC	From:addr =~ /[bcdfghjklmnpqrstvwxyz]{9}.*\@/i
-uri T_NOVOWEL_URI2_6_LC	m{https?://[^/]*[bcdfghjklmnpqrstvwxyz]{6}}
-uri T_NOVOWEL_URI2_6_AC	m{https?://[^/]*[bcdfghjklmnpqrstvwxyz]{6}}/i
-uri T_NOVOWEL_URI2_7_LC	m{https?://[^/]*[bcdfghjklmnpqrstvwxyz]{7}}
-uri T_NOVOWEL_URI2_7_AC	m{https?://[^/]*[bcdfghjklmnpqrstvwxyz]{7}}/i
-uri T_NOVOWEL_URI2_8_LC	m{https?://[^/]*[bcdfghjklmnpqrstvwxyz]{8}}
-uri T_NOVOWEL_URI2_8_AC	m{https?://[^/]*[bcdfghjklmnpqrstvwxyz]{8}}/i
-uri T_NOVOWEL_URI2_9_LC	m{https?://[^/]*[bcdfghjklmnpqrstvwxyz]{9}}
-uri T_NOVOWEL_URI2_9_AC	m{https?://[^/]*[bcdfghjklmnpqrstvwxyz]{9}}/i
+uri T_NOVOWEL_URI2_6_LC	m%^https?://[^/]*[bcdfghjklmnpqrstvwxyz]{6}%
+uri T_NOVOWEL_URI2_6_AC	m%^https?://[^/]*[bcdfghjklmnpqrstvwxyz]{6}%i
+uri T_NOVOWEL_URI2_7_LC	m%^https?://[^/]*[bcdfghjklmnpqrstvwxyz]{7}%
+uri T_NOVOWEL_URI2_7_AC	m%^https?://[^/]*[bcdfghjklmnpqrstvwxyz]{7}%i
+uri T_NOVOWEL_URI2_8_LC	m%^https?://[^/]*[bcdfghjklmnpqrstvwxyz]{8}%
+uri T_NOVOWEL_URI2_8_AC	m%^https?://[^/]*[bcdfghjklmnpqrstvwxyz]{8}%i
+uri T_NOVOWEL_URI2_9_LC	m%^https?://[^/]*[bcdfghjklmnpqrstvwxyz]{9}%
+uri T_NOVOWEL_URI2_9_AC	m%^https?://[^/]*[bcdfghjklmnpqrstvwxyz]{9}%i
 
 # idea to allow . in addition to \s seen in airmax.cf's MONOTONE_WORDS*
 # rules, but we'll try it in LONGWORDS to avoid duplication of effort
