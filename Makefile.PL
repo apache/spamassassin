@@ -54,7 +54,7 @@ WriteMakefile(
                         'File::Spec' => 0.8,
                         'File::Copy' => 0,
                         'Pod::Usage' => 0,
-                        'HTML::Parser' => 0,
+                        'HTML::Parser' => 3.0,
                         'Text::Wrap' => 0,
                         'Time::Local' => 0,
                   },
