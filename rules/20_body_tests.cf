@@ -135,10 +135,14 @@ body MONEY_MAKING		/money making/i
 describe MONEY_MAKING		Discusses money making
 body BULK_EMAIL			/bulk e-*mail/i
 describe BULK_EMAIL		Talks about bulk email
-body DEAR_EMAIL			/Dear [A-Za-z0-9_-]+\@/
+body DEAR_EMAIL			/\bDear [A-Za-z0-9_-]+\@/
 describe DEAR_EMAIL		Dear you@you.com?
-body DEAR_FRIEND		/Dear (?:Friend|IT\b|Internet|candidate|sir|madam|investor|travell?er)/i
+body DEAR_FRIEND		/\bDear Friend\b/i
 describe DEAR_FRIEND		How dear can you be if you don't know my name?
+body DEAR_SOMETHING		/\bDear (?:Friend|IT\W|Internet|candidate|sirs?|madam|investor|travell?er|car shopper|web)\b/i
+describe DEAR_SOMETHING		Contains 'Dear (something)'
+body DEAR_SOMEBODY              /Dear [A-Z][a-z]+/
+describe DEAR_SOMEBODY          Contains 'Dear Somebody'
 body CASHCASHCASH		/\${3,}/
 describe CASHCASHCASH		Contains at least 3 dollar signs in a row
 body CALL_NOW			/CALL NOW/i
@@ -582,9 +586,6 @@ describe GREAT_OFFER            Trying to offer you something
 
 body SUBJ_2_CREDIT              /subject to credit approval/i
 describe SUBJ_2_CREDIT          Contains 'subject to credit approval'
-
-body DEAR_SOMEBODY              /Dear [A-Z][a-z]+/
-describe DEAR_SOMEBODY          Contains 'Dear Somebody'
 
 body GAPPY_TEXT                 /\b(?:[a-z][-_\.\,\:\;\'\~\s]{1,3}){5,}/i
 describe GAPPY_TEXT             Contains 'G.a.p.p.y-T.e.x.t'
