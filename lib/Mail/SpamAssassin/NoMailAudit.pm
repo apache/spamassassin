@@ -267,7 +267,7 @@ sub delete_header {
 
   # Delete all versions of the header, case insensitively
   foreach my $dhdr ( $self->_get_header_list($hdr,1) ) {
-    @{$self->{header_order}} = grep( index($_,"$dhdr:") != 0, @{$self->{header_order}} );
+    @{$self->{header_order}} = grep( rindex($_,"$dhdr:",0) != 0, @{$self->{header_order}} );
     delete $self->{headers}->{$dhdr};
   }
 }
