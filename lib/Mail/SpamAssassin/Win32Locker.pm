@@ -90,6 +90,19 @@ sub safe_unlock {
 
 ###########################################################################
 
+sub refresh_lock {
+  my($self, $path) = @_;
+
+  # this could arguably read the lock and make sure the same process
+  # owns it, but this shouldn't, in theory, be an issue.
+  utime time, time, "$path.lock";
+
+  dbg("refresh: $$ refresh $path.lock");
+}
+
+###########################################################################
+
+
 sub dbg { Mail::SpamAssassin::dbg (@_); }
 
 1;

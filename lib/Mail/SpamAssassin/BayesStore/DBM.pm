@@ -180,11 +180,16 @@ sub tie_db_writable {
     return 0;
   }
 
-  # return if we've already tied to the db's, using the same mode
-  # (locked/unlocked) as before.
-  return 1 if ($self->{already_tied} && $self->{is_locked} == 1);
-
+  # Useful shortcut ...
   my $main = $self->{bayes}->{main};
+
+  # if we've already tied the db's using the same mode
+  # (locked/unlocked) as we want now, freshen the lock and return.
+  if ($self->{already_tied} && $self->{is_locked} == 1) {
+    $main->{locker}->refresh_lock ($self->{locked_file});
+    return 1;
+  }
+
   if (!defined($main->{conf}->{bayes_path})) {
     dbg ("bayes_path not defined");
     return 0;
