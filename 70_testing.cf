@@ -469,6 +469,11 @@ header		T_URIBL_WS_SURBL	eval:check_uridnsbl('T_URIBL_WS_SURBL')
 describe	T_URIBL_WS_SURBL	Contains a URL listed in the WS SURBL blocklist
 tflags		T_URIBL_WS_SURBL	net
 
+urirhsbl	T_URIBL_BE_SURBL	be.surbl.org.	A
+header		T_URIBL_BE_SURBL	eval:check_uridnsbl('T_URIBL_BE_SURBL')
+describe	T_URIBL_BE_SURBL	Contains a URL listed in the BE SURBL blocklist
+tflags		T_URIBL_BE_SURBL	net
+
 endif   # Mail::SpamAssassin::Plugin::URIDNSBL
 
 # a couple to try out
