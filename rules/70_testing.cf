@@ -261,8 +261,6 @@ meta T_ORANGES_AND_SPAM_2	T_ORANGES_AND_SPAM_POST + T_ORANGES_AND_SPAM_TELE == 1
 meta T_ORANGES_AND_SPAM_3	T_ORANGES_AND_SPAM_POST && !T_ORANGES_AND_SPAM_TELE
 meta T_ORANGES_AND_SPAM_4	!T_ORANGES_AND_SPAM_POST && T_ORANGES_AND_SPAM_TELE
 
-header T_FROM_MIME_ENCODED_TWICE	From:raw =~ /=\?\S+\?[BQ]\?.*=\?\S+\?[BQ]\?/i
-
 ########################################################################
 
 # bug 2903
