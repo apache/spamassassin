@@ -1,3 +1,22 @@
+spamassassin (2.53-1) unstable; urgency=low
+
+  * New upstream release (Closes: #185887)
+      Fixes false positives in SUBJ_ALL_CAPS from KOI8 mail (Closes:
+       #168682)
+      Fixes problems with --syslog-socket=none (Closes: #179925)
+      Fixes --nouser-config (Closes: #164284)
+      base64 and utf-8 no longer penalized (Closes: #165393)
+      spamd now does setgid in addition to setuid (Closes: #182869)
+      sa-learn docs explain ham as non-spam (Closes: #183286)
+      Fixes some Bayes corruption
+  * Fixes logcheck format. (Closes: #182838)
+  * Added -m option by default. (Closes: #183323)
+  * Added po-debconf support (Patch from Andre Luis Lopes
+    <andrelop@ig.com.br>) (Closes: #184126)
+  * Added a debian/watch file for uscan
+
+ -- Duncan Findlay <duncf@debian.org>  Thu,  3 Apr 2003 19:23:43 -0500
+
 spamassassin (2.50-1) unstable; urgency=low
 
   * New upstream release: (Closes: #181836)
