@@ -1,3 +1,512 @@
+2002-10-15 16:21  jmason
+
+	* lib/Mail/SpamAssassin.pm: 2.43 RELEASE
+
+2002-10-15 15:24  jmason
+
+	* Makefile.PL, Makefile.PL: oops, left some stuff in from devel
+
+2002-10-15 13:05  jmason
+
+	* INSTALL, MANIFEST, MANIFEST.SKIP, Makefile.PL,
+	contrib/snp.tar.gz, masses/.cvsignore,
+	rules/70_cvs_rules_under_test.cf, spamd/spamc.c: added doco for
+	snprintf on SunOS from Mike Nolan; added optind for spamd; added
+	cmdline flags to Makefile.PL for Razor tests; new test for 'squid'
+	ident token in Received hdrs from Jason Staples; cvsignores and
+	MANIFESTs updated
+
+2002-10-15 13:00  jmason
+
+	* INSTALL, contrib/snp.tar.gz, spamd/spamc.c, t/razor.t,
+	t/razor2.t: added doco for snprintf on SunOS from Mike Nolan; added
+	optind for spamd
+
+2002-10-15 11:00  jmason
+
+	* masses/: find-extremes, mass-check-results-to-mbox,
+	local-scripts-jm/mass-check-MH-spool,
+	local-scripts-jm/mass-check-all-mail-archives: added Allen's
+	chi-square script
+
+2002-10-15 08:43  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: bug 1106: T_FORGED_MUA_*
+	additions
+
+2002-10-15 03:49  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: add T_NO_REAL_NAME (possible
+	improvement on NO_REAL_NAME) add 3 possible improvements on
+	SUBJ_HAS_SPACES bug 1108: add some T_NO_LOWER_* rules with better
+	results
+
+2002-10-14 17:48  jmason
+
+	* spamd/: libspamc.c, libspamc.c: bug 1107: spamc with -e could
+	lose mail if spamd was down. fix by anomie
+
+2002-10-14 17:44  jmason
+
+	* spamd/: spamd.raw, spamd.raw: made REAPER non-default again;
+	warnings about -m; moved POD sections around
+
+2002-10-14 16:50  felicity
+
+	* rules/70_cvs_rules_under_test.cf: Added a new phrase to EXCUSE_10
+	that increases the spam hits with no new FPs for me:
+	
+	  1.344    3.262    0.008    1.00    0.71    1.00  T_EXCUSE_10
+	  1.286    3.120    0.008    1.00    0.71    0.33  EXCUSE_10
+	
+	Also added 2 new test rules.  They catch a few FN spams I have, but
+	are low matching overall.  Have to see how they do for everyone
+	else:
+	
+	  0.044    0.106    0.000    1.00    0.64    1.00  T_EXCUSE_25
+	  0.039    0.095    0.000    1.00    0.63    1.00  T_LEAVE_ADDR
+
+2002-10-14 01:11  quinlan
+
+	* lib/Mail/SpamAssassin/EvalTests.pm,
+	rules/70_cvs_rules_under_test.cf: bug 1108: remove
+	T_HEADER_ALL_CAPS (not good enough to use)
+
+2002-10-13 18:54  felicity
+
+	* rules/70_cvs_rules_under_test.cf: I've been using this rule for a
+	while and it seems to work very well for me (~5.5% spam, 0%
+	non-spam).
+
+2002-10-13 18:37  felicity
+
+	* lib/Mail/SpamAssassin/EvalTests.pm: More filtering required for
+	the all caps header test.
+
+2002-10-13 10:20  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: removing T_BTAMAIL_BODY
+	(BTAMAIL_URL has slightly more hits and covers all T_BTAMAIL_BODY
+	hits except for one message)   1.855	4.885	 0.000	  1.00	 
+	0.89	1.00  BTAMAIL_URL   1.838    4.843    0.000    1.00    0.89
+	   1.00  T_BTAMAIL_BODY
+
+2002-10-13 10:12  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: bug 1106: add
+	T_FORGED_OUTLOOK_MAILER
+
+2002-10-13 09:28  quinlan
+
+	* lib/Mail/SpamAssassin/EvalTests.pm,
+	rules/70_cvs_rules_under_test.cf: bug 1108: add T_HEADER_ALL_CAPS
+
+2002-10-13 04:44  felicity
+
+	* rules/70_cvs_rules_under_test.cf: I wasn't going to submit this,
+	but check this out!
+	
+	OVERALL%   SPAM% NONSPAM%     S/O    RANK   SCORE  NAME   20488    
+	8350	12138	 0.41	 0.00	 0.00  (all messages)	2.133	
+	5.234	 0.000	  1.00	  1.00	  1.00	T_BTAMAIL_BODY
+
+2002-10-13 04:20  zelgadis
+
+	* rules/70_cvs_rules_under_test.cf: Bug #1112: T_TOO_MANY_UA regexp
+	should be "USER_AGENT.+", not "USER_AGENT.*"
+
+2002-10-13 03:58  zelgadis
+
+	* lib/Mail/SpamAssassin/Conf.pm,
+	lib/Mail/SpamAssassin/PerMsgStatus.pm,
+	rules/70_cvs_rules_under_test.cf: Bug #1112: Specify meta rules
+	using regexps
+
+2002-10-12 21:39  felicity
+
+	* rules/70_cvs_rules_under_test.cf: Added two new test rules
+
+2002-10-12 12:17  quinlan
+
+	* lib/Mail/SpamAssassin/HTML.pm, rules/70_cvs_rules_under_test.cf:
+	bug 906: uncomment DATE_IN_PAST_48_96 for now (working on date code
+	again) bug 1067: remove T_HTML_IMG_ALT_ONLY1 and
+	T_HTML_IMG_ALT_ONLY2 bug 1066: HTML_WEB_BUGS now requires the image
+	filename extension in hexadecimal case (behavior of
+	T_HTML_WEB_BUGS2); remove T_HTML_WEB_BUGS1, T_HTML_WEB_BUGS2, and
+	T_HTML_IMG_SRC_NO_IMAGE; add T_HTML_WEB_BUGS_BACKGROUND and
+	T_HTML_WEB_BUGS_SRC (split up version of HTML_WEB_BUGS)
+
+2002-10-12 07:28  zelgadis
+
+	* rules/70_cvs_rules_under_test.cf, lib/Mail/SpamAssassin/HTML.pm:
+	Bug #1105: Anchor text HTML eval tests
+
+2002-10-12 07:13  zelgadis
+
+	* masses/hit-frequencies: Bug #1104: hit-frequencies -X option:
+	exclude log entries
+
+2002-10-12 02:20  felicity
+
+	* rules/70_cvs_rules_under_test.cf: catches some mails that don't
+	get caught otherwise with SA.  it may have FP problems, but I want
+	to see how it works for everyone else first.
+	
+	  0.534    1.279    0.025    0.98    0.00    1.00  T_OPT_HEADER
+
+2002-10-11 23:31  felicity
+
+	* lib/Mail/SpamAssassin/HTML.pm, rules/70_cvs_rules_under_test.cf:
+	Not all perls understand "inf", so I keep having to fix the code
+	that expects this behavior.
+	
+	I also added the real scores to my "improved" test rules to avoid
+	confusion for whether they should be pos or neg.
+
+2002-10-11 10:39  quinlan
+
+	* rules/70_cvs_rules_under_test.cf, lib/Mail/SpamAssassin/HTML.pm:
+	bug 1065: completely revise HTML input form tests, old ones were no
+	better than T_HTML_TAG_EXISTS_FORM
+
+2002-10-11 10:37  quinlan
+
+	* rules/50_scores.cf: change FORM_W_MAILTO_ACTION to
+	HTML_FORM_ACTION_MAILTO
+
+2002-10-11 09:38  matt_sergeant
+
+	* t/data/spam/gtube.eml: Updated gtube to have no extended chars as
+	apparently it messes with certain language installations of
+	exchange otherwise.
+
+2002-10-11 09:38  matt_sergeant
+
+	* rules/20_body_tests.cf: `cat /tmp/cvssvnhym`
+
+2002-10-11 08:55  quinlan
+
+	* rules/: 20_body_tests.cf, 70_cvs_rules_under_test.cf: promote
+	T_HTML_FORM_ACTION_MAILTO to HTML_FORM_ACTION_MAILTO (replaces
+	FORM_W_MAILTO_ACTION)
+
+2002-10-11 08:27  quinlan
+
+	* lib/Mail/SpamAssassin/PerMsgStatus.pm: bug 1076: HTML parsing
+	heuristic improvement
+
+2002-10-10 16:30  jmason
+
+	* INSTALL, Makefile.PL, spamassassin.spec: fixed bugs 1089, 1075:
+	package-builds are unnecessarily difficult due to SA inserting
+	RPM_BUILD_ROOT paths into code
+
+2002-10-10 06:54  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: add some variations for
+	T_HTTP_ESCAPED_URI_SUSPICIOUS
+
+2002-10-10 03:10  felicity
+
+	* rules/70_cvs_rules_under_test.cf: Added 3 potential replacement
+	rule versions
+
+2002-10-10 00:51  jmason
+
+	* rules/70_cvs_rules_under_test.cf: added 2 new testing rules;
+	removed ADMANMAIL, too low overall
+
+2002-10-09 23:18  quinlan
+
+	* rules/20_head_tests.cf: fix typo
+
+2002-10-09 23:17  quinlan
+
+	* rules/: 20_body_tests.cf, 20_head_tests.cf,
+	70_cvs_rules_under_test.cf: promote T_REMOVE_FROM_LIST to
+	REMOVE_FROM_LIST (replacement) promote T_SENT_IN_COMPLIANCE to
+	SENT_IN_COMPLIANCE (replacement) promote T_NEVER_ANOTHER to
+	NEVER_ANOTHER promote T_MILLION_EMAIL to MILLION_EMAIL promote
+	EXCUSE_24_V4 to EXCUSE_24 promote T_CANNOT_BE_SPAM to
+	CANNOT_BE_SPAM promote T_RECEIVE_EMAIL to RECEIVE_EMAIL promote
+	T_RECEIVE_OFFER to RECEIVE_OFFER promote T_ACCEPT_CREDIT_CARDS to
+	ACCEPT_CREDIT_CARDS (replacement) merge T_HOME_LOANS into REFINANCE
+	(just add a "s?") promote T_DIET_V1 to DIET (replacement) promote
+	T_REFINANCE_YOUR_HOME to REFINANCE_YOUR_HOME (replacement) promote
+	T_ADVERT_CODE2 to ADVERT_CODE2 (replacement) promote T_SAVINGS to
+	SAVINGS promote T_SUBJ_AS_SEEN, T_SUBJ_DOUBLE_YOUR,
+	T_SUBJ_FOR_ONLY,  T_SUBJ_FREE_INSTANT, T_SUBJ_NOW_ONLY,
+	T_SUBJ_RIPPED,	T_SUBJ_YOUR_DEBT, T_SUBJ_YOUR_FAMILY,
+	T_SUBJ_YOUR_OWN add some new T_ tests remove suboptimal T_BANG_
+	tests
+
+2002-10-09 16:28  msquadrat
+
+	* Makefile.PL: note to myself: always do a `make clean` before
+	`make test`
+
+2002-10-09 16:06  jmason
+
+	* t/lang_pl_tests.t: fixed lang_pl_tests.t
+
+2002-10-09 15:42  jmason
+
+	* t/: db_based_whitelist_ips.t, reportheader.t, spam.t, spamd.t,
+	spamd_port.t: fixed test failures from report_header etc change
+
+2002-10-09 15:33  jmason
+
+	* Makefile.PL: fixed Makefile.PL; spamc was not being built, and
+	'make test' was failing very obviously as a result. >:(
+
+2002-10-09 15:18  jmason
+
+	* lib/Mail/SpamAssassin.pm: blacklist-from-mail-message should not
+	blacklist To/Cc addrs etc., only From
+
+2002-10-09 15:13  jmason
+
+	* contrib/spamcheck.py: bug 655: spamcheck.py exits with TEMPFAIL
+	whereever possible
+
+2002-10-09 15:08  jmason
+
+	* README, lib/Mail/SpamAssassin/Conf.pm, rules/10_misc.cf: made
+	defang_mime 0, rewrite_subject 0, report_header 1, use_terse_report
+	1 default as per bug 837
+
+2002-10-09 11:13  jmason
+
+	* lib/Mail/: SpamAssassin.pm, SpamAssassin.pm: use a sensible
+	default if PREFIX is unset
+
+2002-10-09 00:45  felicity
+
+	* lib/Mail/SpamAssassin/HTML.pm, rules/70_cvs_rules_under_test.cf:
+	$self->{html}{min_img_ratio} is "inf" by default, which gets
+	checked via "<" which causes perl to error.  Added a check that
+	allows "inf" to do the right thing.
+	
+	Added a rule to check for % encoding in URIs that don't need to be
+	there (characters that don't need encoding via RFC).
+
+2002-10-08 22:19  felicity
+
+	* rules/70_cvs_rules_under_test.cf: Added rule to catch URLs like
+	"http://www.yahoo.com@0xD5.0xEF.0x8F.0x9D".  Doesn't hit a lot in
+	my corpus, but ...
+
+2002-10-08 20:02  felicity
+
+	* lib/Mail/: SpamAssassin.pm, SpamAssassin.pm: Fixes bug 1083: Use
+	of uninitialized value in concatenation (.) at
+	/usr/lib/perl5/site_perl/5.6.0/Mail/SpamAssassin.pm line 919.
+
+2002-10-08 19:54  msquadrat
+
+	* lib/Mail/SpamAssassin.pm: ok, let's update the version, too
+
+2002-10-08 19:01  msquadrat
+
+	* spamd/spamd.raw: fixed bug 1081: spamd and syslog new line issue
+
+2002-10-08 18:59  msquadrat
+
+	* lib/Mail/SpamAssassin.pm: tagging as devel again
+
+2002-10-08 18:52  msquadrat
+
+	* spamd/spamd.raw: fixed bug 1081: spamd and syslog new line issue
+
+2002-10-08 16:20  matt_sergeant
+
+	* t/: gtube.t, data/spam/gtube.eml: GTUBE regression tests
+
+2002-10-08 16:20  matt_sergeant
+
+	* rules/: 50_scores.cf, 20_body_tests.cf: Added GTUBE test
+
+2002-10-08 12:40  jmason
+
+	* lib/Mail/SpamAssassin/: Reporter.pm, Reporter.pm: synced DCC,
+	Pyzor reporting to b2_4_0; do not use open2() due to spamd issues;
+	send output to /dev/null
+
+2002-10-08 12:34  jmason
+
+	* lib/Mail/SpamAssassin/: AutoWhitelist.pm, AutoWhitelist.pm:
+	re-added 2.31 AWL behaviour
+
+2002-10-07 20:18  quinlan
+
+	* lib/Mail/SpamAssassin/HTML.pm: make $re_loose and $re_strict
+	usable outside of HTML.pm
+
+2002-10-07 14:37  quinlan
+
+	* lib/Mail/SpamAssassin/EvalTests.pm: bug 1072: fix variable name
+
+2002-10-07 09:48  quinlan
+
+	* lib/Mail/SpamAssassin/HTML.pm, rules/70_cvs_rules_under_test.cf:
+	add T_HTML_FORM_ACTION_MAILTO as replacement for
+	FORM_W_MAILTO_ACTION
+
+2002-10-07 09:09  quinlan
+
+	* lib/Mail/SpamAssassin/HTML.pm: add a comment
+
+2002-10-07 08:10  quinlan
+
+	* rules/: 20_body_tests.cf, 30_text_de.cf, 30_text_es.cf,
+	30_text_fr.cf, 50_scores.cf: bug 1070: remove
+	UNNEEDED_HTML_ENCODING
+
+2002-10-07 07:54  zelgadis
+
+	* masses/hit-frequencies: Bug #1069: Do hit-frequencies only on log
+	entries matching regexp
+
+2002-10-07 05:45  quinlan
+
+	* lib/Mail/SpamAssassin/HTML.pm, rules/70_cvs_rules_under_test.cf:
+	bug 1065: add tests for unsubscribe/remove and subscribe
+
+2002-10-07 04:44  zelgadis
+
+	* rules/70_cvs_rules_under_test.cf: Bug #1065: Added
+	T_HTML_TAG_EXISTS_FORM, for comparison.
+
+2002-10-07 03:32  quinlan
+
+	* lib/Mail/SpamAssassin/HTML.pm, rules/70_cvs_rules_under_test.cf:
+	bug 1061: possible improvement for HTML_JAVASCRIPT
+
+2002-10-07 02:46  quinlan
+
+	* lib/Mail/SpamAssassin/HTML.pm, rules/20_body_tests.cf,
+	rules/50_scores.cf, rules/70_cvs_rules_under_test.cf: add HTML IMG
+	ALT value to HTML text rename some HTML eval test names to begin
+	with "HTML_" bug 1065: HTML input form rules bug 1066: HTML web
+	bugs has too many FPs bug 1067: HTML ALT TAG rules bug 1068:
+	HTML_MESSAGE "control" rule to detect HTML
+
+2002-10-06 00:03  felicity
+
+	* spamassassin.spec: Fixed a few typos
+
+2002-10-06 00:02  felicity
+
+	* spamassassin.spec: Fixed some typos
+
+2002-10-05 23:07  zelgadis
+
+	* lib/Mail/SpamAssassin/HTML.pm: Added "use strict" to HTML.pm
+
+2002-10-05 11:49  quinlan
+
+	* lib/Mail/SpamAssassin/HTML.pm, rules/70_cvs_rules_under_test.cf:
+	add HTML tag counting generalize recent HTML range tests fix a
+	warning or two
+
+2002-10-05 11:02  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: add missing newline after
+	T_HTML_MAIL_ONLY
+
+2002-10-05 10:24  zelgadis
+
+	* rules/70_cvs_rules_under_test.cf, lib/Mail/SpamAssassin/HTML.pm,
+	lib/Mail/SpamAssassin/PerMsgStatus.pm: Bug #1058: Misc HTML style
+	related rules
+
+2002-10-05 06:57  quinlan
+
+	* masses/overlap: traverse last element in @test
+
+2002-10-05 06:25  quinlan
+
+	* masses/overlap: overlap - print overlap between test pairs
+
+2002-10-05 05:08  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: promote T_Q_THIS_IS_AN_AD to
+	THIS_IS_AN_AD T_SAVINGS is fixed version of SAVINGS
+	T_ACCEPT_CREDIT_CARDS is possibly lower-FP version of
+	ACCEPT_CREDIT_CARDS T_ADVERT_CODE2 is minor improvement of
+	ADVERT_CODE2 remove T_Q_FIND_OUT_ANY1 (100% overlap with
+	FIND_ANYTHING) remove T_Q_FIND_OUT_ANY2 (100% overlap with
+	FIND_ANYTHING) remove T_Q_ONETIME1 (100% overlap with
+	ONE_TIME_MAILING) remove T_Q_ONETIME2 (100% overlap with
+	ONE_TIME_MAILING) rename T_Q_ONETIME3 to T_NEVER_ANOTHER remove
+	T_Q_INKJET_PITCH (100% overlap with TONER) remove T_Q_SAVE_PERCENT
+	(used to find the problem with T_SAVINGS) remove T_Q_YOUR_PENIS
+	(100% overlap with PENIS_ENLARGE) remove T_Q_CREDIT_BODY (used to
+	generate T_ACCEPT_CREDIT_CARDS) remove T_Q_FREE_ADULT (100% overlap
+	with FREE_PORN) remove T_Q_FREE_MEMBERSHIP (100% overlap with
+	FREE_MEMBERSHIP) remove T_Q_LOCATE_ASSETTS (100% overlap with
+	HIDDEN_ASSETS) remove T_Q_YOUR_SIZE (100% overlap with
+	PENIS_ENLARGE) rename remaining T_Q_* rules
+
+2002-10-05 04:54  quinlan
+
+	* rules/20_body_tests.cf: promote T_Q_THIS_IS_AN_AD to
+	THIS_IS_AN_AD
+
+2002-10-05 03:52  quinlan
+
+	* rules/: 20_body_tests.cf, 20_head_tests.cf,
+	70_cvs_rules_under_test.cf: promote T_Q_OKAY3 to UNDER_BILL_1618
+	promote T_Q_INVALUABLE to INVALUABLE_MARKETING promote
+	T_Q_LIFE_INSURANCE to SUBJ_LIFE_INSURANCE promote
+	T_Q_VIAGRA_SUBJECT to SUBJ_VIAGRA rename T_Q_OKAY1 to
+	T_CANNOT_BE_SPAM merge T_Q_OKAY2 and SENT_IN_COMPLIANCE into
+	T_SENT_IN_COMPLIANCE split T_UNPRINTABLE rules into T_UNPRINTABLE
+	and T_HIGHBIT
+
+2002-10-05 00:46  felicity
+
+	* lib/Mail/SpamAssassin/HTML.pm: I just didn't like it on two
+	different lines ...
+
+2002-10-05 00:44  felicity
+
+	* lib/Mail/SpamAssassin/HTML.pm: When computing area, the new HTML
+	tests didn't check that width and height were numerals only.  Added
+	in a check for /^\d+$/ to avoid bad HTML, and things like
+	"width=40%" and such.
+
+2002-10-04 22:45  duncf
+
+	* rules/10_misc.cf: Typo. (user_prefs.template, not .prefs)
+
+2002-10-04 22:41  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: prepend T_ to ADMANMAIL
+
+2002-10-04 20:06  msquadrat
+
+	* Makefile.PL, build/preprocessor.pm: fixed bug 1046 (again): make
+	does now work with ExtUtils::MakeMaker < 5.45
+	
+	plus some small changes/cleanups: * the hash for WriteMakefile() is
+	now pre-build; makes it much easier to	 implement exceptions like
+	the PM_FILTER and the POD ones * use strict; always a good idea :o)
+	* made it possible to change {DEF,LOCAL}_RULES_DIR on the command
+	line * moved MY::libscan downto the other MY stuff; also made it
+	look for *.pm	only (`make install` always copied some backups of
+	mine) * made the Razor questions to be asked _after_ the Makefile
+	is created
+
+2002-10-04 16:29  jmason
+
+	* Changes, lib/Mail/SpamAssassin.pm: RELEASED 2.42
+
+2002-10-04 16:23  jmason
+
+	* lib/Mail/SpamAssassin.pm: RELEASED 2.42
+
 2002-10-04 11:14  jmason
 
 	* lib/Mail/SpamAssassin/Conf.pm, rules/70_cvs_rules_under_test.cf:
