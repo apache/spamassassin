@@ -1,16 +1,34 @@
+# <@LICENSE>
+# Copyright 2004 Apache Software Foundation
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+
 =head1 NAME
 
 URIDNSBL - look up URLs against DNS blocklists
-
-This works by analysing message text and HTML for URLs, extracting the
-domain names from those, querying their NS records in DNS, resolving
-the hostnames used therein, and querying various DNS blocklists for
-those IP addresses.  This is quite effective.
 
 =head1 SYNOPSIS
 
   loadplugin    Mail::SpamAssassin::Plugin::URIDNSBL
   uridnsbl	URIBL_SBLXBL    sbl-xbl.spamhaus.org.   TXT
+
+=head1 DESCRIPTION
+
+This works by analysing message text and HTML for URLs, extracting the
+domain names from those, querying their NS records in DNS, resolving
+the hostnames used therein, and querying various DNS blocklists for
+those IP addresses.  This is quite effective.
 
 =head1 CONFIGURATION
 

@@ -1,22 +1,3 @@
-=head1 NAME
-
-Mail::SpamAssassin::Plugin::Razor2 - perform Razor check of messages
-
-Vipul's Razor is a distributed, collaborative, spam detection and
-filtering network based on user submissions of spam.  Detection is done
-with signatures that efficiently spot mutating spam content and user
-input is validated through reputation assignments.
-
-See http://razor.sourceforge.net/ for more information about Razor.
-
-=head1 SYNOPSIS
-
-  loadplugin     Mail::SpamAssassin::Plugin::Razor2
-
-=over 4
-
-=cut
-
 # <@LICENSE>
 # Copyright 2004 Apache Software Foundation
 #
@@ -32,6 +13,27 @@ See http://razor.sourceforge.net/ for more information about Razor.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # </@LICENSE>
+
+=head1 NAME
+
+Mail::SpamAssassin::Plugin::Razor2 - perform Razor check of messages
+
+=head1 SYNOPSIS
+
+  loadplugin     Mail::SpamAssassin::Plugin::Razor2
+
+=head1 DESCRIPTION
+
+Vipul's Razor is a distributed, collaborative, spam detection and
+filtering network based on user submissions of spam.  Detection is done
+with signatures that efficiently spot mutating spam content and user
+input is validated through reputation assignments.
+
+See http://razor.sourceforge.net/ for more information about Razor.
+
+=over 4
+
+=cut
 
 package Mail::SpamAssassin::Plugin::Razor2;
 

@@ -1,23 +1,3 @@
-=head1 NAME
-
-Mail::SpamAssassin::Plugin::SpamCop - perform SpamCop reporting of messages
-
-SpamCop is a service for reporting spam.  SpamCop determines the origin
-of unwanted email and reports it to the relevant Internet service
-providers.  By reporting spam, you have a positive impact on the
-problem.  Reporting unsolicited email also helps feed spam filtering
-systems, including, but not limited to, SpamCop's own service.
-
-See http://www.spamcop.net/ for more information about SpamCop.
-
-=head1 SYNOPSIS
-
-  loadplugin     Mail::SpamAssassin::Plugin::SpamCop
-
-=over 4
-
-=cut
-
 # <@LICENSE>
 # Copyright 2004 Apache Software Foundation
 #
@@ -33,6 +13,29 @@ See http://www.spamcop.net/ for more information about SpamCop.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # </@LICENSE>
+
+=head1 NAME
+
+Mail::SpamAssassin::Plugin::SpamCop - perform SpamCop reporting of messages
+
+=head1 SYNOPSIS
+
+  loadplugin     Mail::SpamAssassin::Plugin::SpamCop
+
+=head1 DESCRIPTION
+
+SpamCop is a service for reporting spam.  SpamCop determines the origin
+of unwanted email and reports it to the relevant Internet service
+providers.  By reporting spam, you have a positive impact on the
+problem.  Reporting unsolicited email also helps feed spam filtering
+systems, including, but not limited to, the SpamCop blacklist used in
+SpamAssassin as a DNSBL.
+
+See http://www.spamcop.net/ for more information about SpamCop.
+
+=over 4
+
+=cut
 
 package Mail::SpamAssassin::Plugin::SpamCop;
 

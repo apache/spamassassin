@@ -1,6 +1,29 @@
+# <@LICENSE>
+# Copyright 2004 Apache Software Foundation
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+
 =head1 NAME
 
 MSExec - determine if the message includes a Microsoft executable file
+
+=head1 SYNOPSIS
+
+  loadplugin     Mail::SpamAssassin::Plugin::MSExec
+  body           MICROSOFT_EXECUTABLE eval:check_microsoft_executable()
+
+=head1 DESCRIPTION
 
 This rule works by checking for 3 possibilities in the message in any
 application/* or text/* part in the message:
@@ -14,11 +37,6 @@ application/* or text/* part in the message:
 =item - in application parts, look for a base64 encoded executable start string
 
 =back
-
-=head1 SYNOPSIS
-
-  loadplugin     Mail::SpamAssassin::Plugin::MSExec
-  body           MICROSOFT_EXECUTABLE eval:check_microsoft_executable()
 
 =cut
 

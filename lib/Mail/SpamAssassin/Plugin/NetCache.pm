@@ -1,18 +1,43 @@
-=head1 
+# <@LICENSE>
+# Copyright 2004 Apache Software Foundation
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
 
-To try this out, write these lines to /etc/mail/spamassassin/plugintest.cf:
+=head1 NAME
+
+Mail::SpamAssassin::Plugin::NetCache - store network check results in headers
+
+=head1 SYNOPSIS
 
   loadplugin     Mail::SpamAssassin::Plugin::NetCache
 
-=cut
+=head1 DESCRIPTION
 
-## This is a plugin to store network check results in the message header
-## the idea is that we store all results (positive and negative) in the
-## headers, then during mass-check we pull the results out and use them for
-## "live" data to give better results during score generation.
-##
-## Definitely still a WOP.  Needs more plugin hooks as appropriate, needs code
-## to put results in header and to pull results back out from said headers, etc.
+This is a work-in-progress experimental plugin not for general use.
+
+This plugin stores network check results in the message header.  The
+idea is to store all results (positive and negative) in the headers,
+then during mass-check, pull the results out and use them for "live"
+data to give better results during SpamAssassin score generation.
+
+This needs more plugin hooks as appropriate, needs code to put results
+in header and to pull results back out from said headers, etc.
+
+To try this plugin, write the above two lines in the synopsis to
+C</etc/mail/spamassassin/plugintest.cf>.
+
+=cut
 
 package Mail::SpamAssassin::Plugin::NetCache;
 

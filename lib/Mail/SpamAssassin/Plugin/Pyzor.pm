@@ -1,20 +1,3 @@
-=head1 NAME
-
-Mail::SpamAssassin::Plugin::Pyzor - perform Pyzor check of messages
-
-Pyzor is a collaborative, networked system to detect and block spam
-using identifying digests of messages.
-
-See http://pyzor.sourceforge.net/ for more information about Pyzor.
-
-=head1 SYNOPSIS
-
-  loadplugin     Mail::SpamAssassin::Plugin::Pyzor
-
-=over 4
-
-=cut
-
 # <@LICENSE>
 # Copyright 2004 Apache Software Foundation
 #
@@ -30,6 +13,25 @@ See http://pyzor.sourceforge.net/ for more information about Pyzor.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # </@LICENSE>
+
+=head1 NAME
+
+Mail::SpamAssassin::Plugin::Pyzor - perform Pyzor check of messages
+
+=head1 SYNOPSIS
+
+  loadplugin     Mail::SpamAssassin::Plugin::Pyzor
+
+=head1 DESCRIPTION
+
+Pyzor is a collaborative, networked system to detect and block spam
+using identifying digests of messages.
+
+See http://pyzor.sourceforge.net/ for more information about Pyzor.
+
+=over 4
+
+=cut
 
 package Mail::SpamAssassin::Plugin::Pyzor;
 

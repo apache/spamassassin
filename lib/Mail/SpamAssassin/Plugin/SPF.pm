@@ -1,16 +1,3 @@
-=head1 NAME
-
-Mail::SpamAssassin::Plugin::SPF - perform SPF verification tests
-
-This plugin checks a message against Sender Policy Framework (SPF)
-records published by the domain owners in DNS to fight email address
-forgery and make it easier to identify spams.
-
-=head1 SYNOPSIS
-
-  loadplugin     Mail::SpamAssassin::Plugin::SPF
-  
-=cut
 # <@LICENSE>
 # Copyright 2004 Apache Software Foundation
 # 
@@ -26,6 +13,22 @@ forgery and make it easier to identify spams.
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # </@LICENSE>
+
+=head1 NAME
+
+Mail::SpamAssassin::Plugin::SPF - perform SPF verification tests
+
+=head1 SYNOPSIS
+
+  loadplugin     Mail::SpamAssassin::Plugin::SPF
+
+=head1 DESCRIPTION
+
+This plugin checks a message against Sender Policy Framework (SPF)
+records published by the domain owners in DNS to fight email address
+forgery and make it easier to identify spams.
+
+=cut
 
 package Mail::SpamAssassin::Plugin::SPF;
 
