@@ -222,6 +222,9 @@ describe SHORT_RECEIVED_LINE	'Received:' contains huge hostname
 header CORRUPT_MSGID		Message-Id =~ /\@Received: /
 describe CORRUPT_MSGID		'Message-Id' contains bits of Received header
 
+header MSG_ID_ADDED_BY_MTA	Message-Id =~ / \(added by /
+describe MSG_ID_ADDED_BY_MTA	'Message-Id' was added by a relay
+
 header MANY_FROMS		From =~ /^[^"<]+, [^"<]+$/
 describe MANY_FROMS		'From' contains more than one address
 
@@ -288,6 +291,12 @@ body MASS_EMAIL			/mass e-*mail/i
 body EMAIL_MARKETING		/e-*mail marketing/i
 body PRODUCED_AND_SENT_OUT	/This a.?d is produced and sent out by/
 
+# this one gets a few false positives
+body SOCIAL_SEC_NUMBER		/social security (?:number|record)/i
+
+# but this one almost never does, and catches *lots* of spam ;)
+body TRACE_BY_SSN		/Trace anyone by social security number/i
+
 body INTL_EXEC_GUILD		/International Executive Guild/
 body ANOTHER_NET_AD		/Another Internet Ad campaign produced/
 body LASER_PRINTER		/LASER PRINTER SUPPLIES/
@@ -335,6 +344,8 @@ body TRACKER_ID			/^\W{4,6} (?:[a-z]{10,}|[A-Z]{10,}) \W{4,6}\s*$/
 
 body OPPORTUNITY		/OPPORTUNITY/
 body PURE_PROFIT		/PURE PROFIT/
+body STOCK_PICK			/STOCK PICK/
+body STOCK_ALERT		/stock alert/i
 
 body FREE_CONSULTATION		/FREE CONSULTATION/i
 body INCREASE_SALES		/INCREASE SALES/i
@@ -398,6 +409,9 @@ describe BASE64_ENC_TEXT	Message text disguised using base-64 encoding
 
 full NIGERIAN_SCAM		/BASED ON INFORMATION GATHERED ABOUT YOU, WE BELIEVE\s*YOU WOULD BE IN A POSITION TO HELP US IN TRANSFER/
 describe NIGERIAN_SCAM		Nigerian scam, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
+
+body UNNEEDED_HTML_ENCODING	/font=3E/i
+describe UNNEEDED_HTML_ENCODING	Unneeded encoding of HTML tags
 
 ###########################################################################
 # Compensation for common false positives.
@@ -575,6 +589,7 @@ score X_EM_VER_PRESENT               3.4
 score X_MAILER_GIBBERISH             3.9
 score X_MSMAIL_PRIORITY_HIGH         0.2
 score X_PRIORITY_HIGH                1.8
+score UNNEEDED_HTML_ENCODING         3.0
 score YR_MEMBERSHIP_EXCH             3.9
 
 ###########################################################################
