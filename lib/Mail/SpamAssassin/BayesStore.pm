@@ -254,8 +254,9 @@ sub expire_old_tokens {
 
   eval {
     local $SIG{'__DIE__'};	# do not run user die() traps in here
-    $self->tie_db_writable();
-    $ret = $self->expire_old_tokens_trapped ($opts);
+    if ($self->tie_db_writable()) {
+      $ret = $self->expire_old_tokens_trapped ($opts);
+    }
   };
   my $err = $@;
 
@@ -541,21 +542,22 @@ sub sync_journal {
   eval {
     local $SIG{'__DIE__'};	# do not run user die() traps in here
 
-    $self->tie_db_writable();
-    while (<JOURNAL>) {
-      $count++;
-      if (/^c (-?\d+) (-?\d+) (\d+) (.*)$/) {
-	$self->tok_sync_counters ($1+0, $2+0, $3+0, $4);
-      } elsif (/^t (\d+) (.*)$/) {
-	$self->tok_touch_token ($1+0, $2);
-      } elsif (/^n (-?\d+) (-?\d+)$/) {
-	$self->tok_sync_nspam_nham ($1+0, $2+0);
-      } else {
-	warn "Bayes journal: gibberish: $_";
-      }
+    if ($self->tie_db_writable()) {
+      while (<JOURNAL>) {
+        $count++;
+        if (/^c (-?\d+) (-?\d+) (\d+) (.*)$/) {
+          $self->tok_sync_counters ($1+0, $2+0, $3+0, $4);
+        } elsif (/^t (\d+) (.*)$/) {
+          $self->tok_touch_token ($1+0, $2);
+        } elsif (/^n (-?\d+) (-?\d+)$/) {
+          $self->tok_sync_nspam_nham ($1+0, $2+0);
+        } else {
+          warn "Bayes journal: gibberish: $_";
+        }
 
-      if ($showdots && ($count % 1000) == 0) {
-	print STDERR ".";
+        if ($showdots && ($count % 1000) == 0) {
+          print STDERR ".";
+        }
       }
     }
   };
@@ -658,7 +660,7 @@ sub scan_count_get {
   # avoid a wierd warning: non-numeric data in there
   if (!$count || $count =~ /\D/) { $count = 0; }
   my $path = $self->{scan_count_little_file};
-  $count += (-e $path ? -s _ : 0);
+  $count += (defined $path && -e $path ? -s _ : 0);
   $count;
 }
 
@@ -666,6 +668,7 @@ sub scan_count_increment {
   my ($self) = @_;
 
   my $path = $self->{scan_count_little_file};
+  return unless defined($path);
 
   # Use filesystem-level append operations.  These are very fast, and
   # on a local disk on UNIX at least, guaranteed not to overwrite another
@@ -712,12 +715,12 @@ sub scan_count_increment_big_counter {
   eval {
     local $SIG{'__DIE__'};      # do not run user die() traps in here
 
-    $self->tie_db_writable();
-
-    my $count = $self->{db_toks}->{$SCANCOUNT_BASE_MAGIC_TOKEN};
-    $count ||= 0;
-    $count += MAX_SIZE_FOR_SCAN_COUNT_FILE;
-    $self->{db_toks}->{$SCANCOUNT_BASE_MAGIC_TOKEN} = $count;
+    if ($self->tie_db_writable()) {
+      my $count = $self->{db_toks}->{$SCANCOUNT_BASE_MAGIC_TOKEN};
+      $count ||= 0;
+      $count += MAX_SIZE_FOR_SCAN_COUNT_FILE;
+      $self->{db_toks}->{$SCANCOUNT_BASE_MAGIC_TOKEN} = $count;
+    }
   };
 
   my $failure;

@@ -532,11 +532,12 @@ sub learn {
   eval {
     local $SIG{'__DIE__'};	# do not run user die() traps in here
 
-    $self->{store}->tie_db_writable();
-    $ret = $self->learn_trapped ($isspam, $msg, $body);
+    if ($self->{store}->tie_db_writable()) {
+      $ret = $self->learn_trapped ($isspam, $msg, $body);
 
-    if (!$self->{main}->{learn_caller_will_untie}) {
-      $self->{store}->untie_db();
+      if (!$self->{main}->{learn_caller_will_untie}) {
+        $self->{store}->untie_db();
+      }
     }
   };
 
@@ -605,11 +606,12 @@ sub forget {
   eval {
     local $SIG{'__DIE__'};	# do not run user die() traps in here
 
-    $self->{store}->tie_db_writable();
-    $ret = $self->forget_trapped ($msg, $body);
+    if ($self->{store}->tie_db_writable()) {
+      $ret = $self->forget_trapped ($msg, $body);
 
-    if (!$self->{main}->{learn_caller_will_untie}) {
-      $self->{store}->untie_db();
+      if (!$self->{main}->{learn_caller_will_untie}) {
+        $self->{store}->untie_db();
+      }
     }
   };
 
