@@ -94,8 +94,6 @@ body DEAR_FRIEND		/^\s*Dear Friend\b/i
 describe DEAR_FRIEND		How dear can you be if you don't know my name?
 body DEAR_SOMETHING		/\bDear (?:IT\W|Internet|candidate|sirs?|madam|investor|travell?er|car shopper|web)\b/i
 describe DEAR_SOMETHING		Contains 'Dear (something)'
-body DEAR_SOMEBODY              /Dear [A-Z][a-z]+/
-describe DEAR_SOMEBODY          Contains 'Dear Somebody'
 body CALL_NOW			/\bCALL NOW/i
 describe CALL_NOW		Urges you to call now
 body CALL_FREE			/\b(?:call|dial|toll free|order).{1,15}8(?:00|88|77|66|55|44|33|22)[\)\s-]*[\dA-Z]+[\s-]?[\dA-Z]+/i
@@ -866,7 +864,7 @@ describe HIDDEN_ASSETS          'Hidden' assets
 body SAVE_THOUSANDS             /\bsave (?:thousands|millions)\b/i
 describe SAVE_THOUSANDS         Save big money
 
-body MARKETING_PARTNERS         /marketing partner|partner site/i
+body MARKETING_PARTNERS         /(?:marketing|network) partner|partner (?:web)?site/i
 describe MARKETING_PARTNERS     Claims you registered with some kind of partner
 
 # note the tense used, hopefully it won't hit FPs this way
