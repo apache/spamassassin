@@ -19,16 +19,8 @@ use strict;
 use SATest; sa_t_init("rule_names");
 use Test;
 use Mail::SpamAssassin;
+use Mail::SpamAssassin::SHA1;
 use vars qw(%patterns %anti_patterns);
-
-# use a pre-set rand() seed.   Otherwise we WILL get non-deterministic
-# failures from people running "make test" -- which will be a PITA!
-# if you want to use your own seed, set the RULE_NAMES_SEED env var.
-# if you want randomness, use "RULE_NAMES_SEED=-1".
-my $seed = 2323;
-if ($ENV{'RULE_NAMES_SEED'}) { $seed = $ENV{'RULE_NAMES_SEED'}; }
-if ($seed < 0) { $seed = time^$$; }
-srand ($seed);
 
 # initialize SpamAssassin
 my $sa = Mail::SpamAssassin->new({
@@ -81,7 +73,7 @@ tstprefs ("
 sarun ("-L < $mail", \&patterns_run_cb);
 ok_all_patterns();
 
-# function to write test email with randomly ordered tests in body
+# function to write test email with varied (not random) ordering tests in body
 sub write_mail {
   if (open(MAIL, ">$mail")) {
     print MAIL <<'EOF';
@@ -100,10 +92,11 @@ Content-Transfer-Encoding: 7bit
 
 EOF
     print MAIL join("\n", @tests) . "\n\n";
-    # this is non-deterministic, but we are looking for random failures
+    # we are looking for random failures, but we do a deterministic
+    # test to prevent too much frustration with "make test"
     # 25 iterations gets most hits most of the time, but 10 is large enough
     for (1..10) {
-      print MAIL join("\n", shuffle(@tests)) . "\n\n";
+      print MAIL join("\n", sha1_shuffle($_, @tests)) . "\n\n";
     }
     close(MAIL);
   }
@@ -113,9 +106,18 @@ EOF
 }
 
 # Fisher-Yates shuffle
-sub shuffle {
+sub fy_shuffle {
   for (my $i = $#_; $i > 0; $i--) {
     @_[$_,$i] = @_[$i,$_] for rand $i+1;
   }
   return @_;
+}
+
+# SHA1 shuffle
+sub sha1_shuffle {
+  my $i = shift;
+  return map { $_->[0] }
+         sort { $a->[1] cmp $b->[1] }
+         map { [$_, Mail::SpamAssassin::SHA1::sha1($_ . $i)] }
+         @_;
 }
