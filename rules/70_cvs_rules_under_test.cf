@@ -91,9 +91,6 @@ header T_Q_FRIEND_PUBLIC	ALL =~ /^(to|cc|from):.*friend\@public\.com/im
 header T_Q_FIND_OUT_ANY1 	Subject =~ /Find Out Any/i
 body T_Q_FIND_OUT_ANY2		/Find Out Anything About Anyone/i
 
-body T_Q_MORTGAGE_BEST		/(?:low(?:est|er)?|free|second|rate|best|refinanc(?:e|ing)|online|instant) mortgage/i
-body T_Q_MORTGAGE_PITCH		/mortgage (?:rates?|quotes?|approv(?:al|ed)|payment|interest|loans?|app(?:\b|lication))/i
-
 # similar to THIS_AINT_SPAM
 body T_Q_OKAY1			/cannot be considered spam/i
 # similar to SENT_IN_COMPLIANCE

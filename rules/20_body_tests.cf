@@ -591,6 +591,12 @@ describe HOME_EMPLOYMENT	Information on how to work at home (2)
 body     NO_EXPERIENCE          /\bNo EXPERIENCE/i
 describe NO_EXPERIENCE          No experience needed!
 
+body MORTGAGE_BEST		/(?:low(?:est|er)?|free|second|rate|best|refinanc(?:e|ing)|online|instant) mortgage/i
+describe MORTGAGE_BEST		Information on mortgages
+
+body MORTGAGE_PITCH		/mortgage (?:rates?|quotes?|approv(?:al|ed)|payment|interest|loans?|app(?:\b|lication))/i
+describe MORTGAGE_PITCH		Looks like mortgage pitch
+
 body MORTGAGE_RATES		/Mortgage rates/i
 describe MORTGAGE_RATES		Information on mortgage rates
 
