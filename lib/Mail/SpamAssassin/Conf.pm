@@ -1419,6 +1419,8 @@ spam, but you can tune these up or down with these two settings.
     #
     if ($scoresonly && !$self->{allow_user_rules}) { goto failed_line; }
 
+    if ($scoresonly) { dbg("Checking privileged commands in user config"); }
+
 =back
 
 =head1 SETTINGS
@@ -1446,7 +1448,6 @@ his/her C<user_prefs> file, which could have a significant effect on
 server load. It is not recommended.
 
 =cut
-
 
     if (/^allow_user_rules\s+(\d+)$/) {
       $self->{allow_user_rules} = $1+0; 
@@ -1524,10 +1525,6 @@ score Z_FUDGE_DUL_OSIRU_FH	1.5
 	next;
     }
 
-
-    if ($scoresonly) { dbg("Checking privileged commands in user config"); }
-
-
 =item header SYMBOLIC_TEST_NAME header op /pattern/modifiers	[if-unset: STRING]
 
 Define a test.  C<SYMBOLIC_TEST_NAME> is a symbolic test name, such as
@@ -1577,22 +1574,24 @@ are optional arguments to the function call.
 
 =cut
     if (/^header\s+(\S+)\s+rbleval:(.*)$/) {
-      $self->add_test ($1, $2, TYPE_RBL_EVALS); next;
+      $self->add_test ($1, $2, TYPE_RBL_EVALS);
       $self->{user_rules_to_compile} = 1 if $scoresonly;
+      next;
     }
     if (/^header\s+(\S+)\s+rblreseval:(.*)$/) {
-      $self->add_test ($1, $2, TYPE_RBL_RES_EVALS); next;
+      $self->add_test ($1, $2, TYPE_RBL_RES_EVALS);
       $self->{user_rules_to_compile} = 1 if $scoresonly;
+      next;
     }
     if (/^header\s+(\S+)\s+eval:(.*)$/) {
       my ($name,$rule) = ($1, $2);
       # Backward compatibility with old rule names -- Marc
+      $self->{user_rules_to_compile} = 1 if $scoresonly;
       if ($name =~ /^RCVD_IN/) {
         $self->add_test ($name, $rule, TYPE_RBL_EVALS); next;
       } else {
         $self->add_test ($name, $rule, TYPE_HEAD_EVALS); next;
       }
-      $self->{user_rules_to_compile} = 1 if $scoresonly;
       next;
     }
     if (/^header\s+(\S+)\s+exists:(.*)$/) {
