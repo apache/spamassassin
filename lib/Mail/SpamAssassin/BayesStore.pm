@@ -245,6 +245,11 @@ sub expire_old_tokens_trapped {
   my $started = time();
   my @vars = $self->get_storage_variables();
 
+  if ( $vars[10] > time ) {
+    dbg("bayes: expiry found newest atime in the future, resetting to current time");
+    $vars[10] = time;
+  }
+
   # How many tokens do we want to keep?
   my $goal_reduction = int($self->{expiry_max_db_size} * 0.75); # expire to 75% of max_db
   dbg("bayes: expiry check keep size, 75% of max: $goal_reduction");

@@ -250,6 +250,15 @@ sub token_expiration {
   # Figure out how old is too old...
   my $too_old = $vars[10] - $newdelta; # tooold = newest - delta
 
+  # if token atime > newest, reset to newest ...
+  my $sql = "UPDATE bayes_token SET atime=? WHERE username = ? and atime > ?";
+  my $rows = $self->{_dbh}->do($sql, undef, $vars[10], $self->{_username}, $vars[10]);
+  unless (defined($rows)) {
+    dbg("bayes: reset tokens in future: SQL Error: ".$self->{_dbh}->errstr());
+    return 0;
+  }
+
+  # Do the expire
   my $sql = "DELETE from bayes_token WHERE username = ? and atime < ?";
 
   my $rows = $self->{_dbh}->do($sql, undef, $self->{_username}, $too_old);

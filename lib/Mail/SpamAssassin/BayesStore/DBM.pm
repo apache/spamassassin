@@ -528,6 +528,11 @@ sub token_expiration {
     if ($atime < $too_old) {
       $deleted++;
     } else {
+      # if token atime > newest, reset to newest ...
+      if ( $atime > $vars[10] ) {
+        $atime = $vars[10];
+      }
+
       $new_toks{$tok} = $self->tok_pack ($ts, $th, $atime); $kept++;
       if (!defined($oldest) || $atime < $oldest) { $oldest = $atime; }
       if ($ts + $th == 1) {
