@@ -487,6 +487,22 @@ Options:
  -V, --version                     Print version
  -h, --help                        Print usage message
 
+=head1 DESCRIPTION
+
+SpamAssassin is a mail filter to identify spam using text analysis and several
+internet-based realtime blacklists.
+
+Using its rule base, it uses a wide range of heuristic tests on mail headers
+and body text to identify "spam", also known as unsolicited commercial email.
+
+Once identified, the mail is then tagged as spam for later filtering using the
+user's own mail user-agent application.
+
+SpamAssassin also includes support for reporting spam messages to collaborative
+filtering databases, such as Vipul's Razor ( http://razor.sourceforge.net/ ).
+
+The default tagging operations that take place are detailed in L</TAGGING>.
+
 =head1 OPTIONS
 
 =over 4
@@ -664,22 +680,6 @@ is the mailbox format used within the University of Washington's IMAP
 implementation; see http://www.washington.edu/imap/ .
 
 =back
-
-=head1 DESCRIPTION
-
-SpamAssassin is a mail filter to identify spam using text analysis and several
-internet-based realtime blacklists.
-
-Using its rule base, it uses a wide range of heuristic tests on mail headers
-and body text to identify "spam", also known as unsolicited commercial email.
-
-Once identified, the mail is then tagged as spam for later filtering using the
-user's own mail user-agent application.
-
-SpamAssassin also includes support for reporting spam messages to collaborative
-filtering databases, such as Vipul's Razor ( http://razor.sourceforge.net/ ).
-
-The default tagging operations that take place are detailed in L</TAGGING>.
 
 =head1 CONFIGURATION FILES
 
