@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.546 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.547 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -351,5 +351,5 @@ meta T_MIME_HTML_ONLY_MULTI_OTHER	(__CTYPE_MULTIPART_OTHER && __MIME_HTML_ONLY)
 # compare against SUBJ_FULL_OF_8BITS.  MSOE produces 8-bit subject lines
 # (bug 1918)
 header __MIMEOLE		X-MIMEOLE =~ /Produced By Microsoft MimeOLE/
-header T_SUBJ_FULL_OF_8BITS	(SUBJ_FULL_OF_8BITS && !__MIMEOLE)
+meta T_SUBJ_FULL_OF_8BITS	(SUBJ_FULL_OF_8BITS && !__MIMEOLE)
 
