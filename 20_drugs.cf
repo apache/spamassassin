@@ -79,9 +79,6 @@ describe DRUG_ED_SILD		Talks about an E.D. drug using its chemical name
 body DRUG_ED_GENERIC		/Generic Viagra/
 describe DRUG_ED_GENERIC	Mentions Generic Viagra
 
-body DRUG_ED_HERBAL		/\bherbal v(?:iagra)?\b/i
-describe DRUG_ED_HERBAL		Plugs "Herbal Viagra"
-
 body DRUG_ED_ONLINE		/\bviagra .{0,25}(?:express|online|overnight)/i
 describe DRUG_ED_ONLINE		Fast Viagra Delivery 
 body DEEP_DISC_MEDS		/\bdeep discount med(?:s|ications)\b/i
@@ -260,29 +257,6 @@ meta DRUGS_ANXIETY (__DRUGS_ANXIETY1 || __DRUGS_ANXIETY2 || __DRUGS_ANXIETY3 || 
 describe DRUGS_ANXIETY 	Refers to an anxiety control drug
 meta DRUGS_ANXIETY_OBFU ( (__DRUGS_ANXIETY1 &&! __DRUGS_ANXIETY_XAN) || (__DRUGS_ANXIETY3 && !__DRUGS_ANXIETY_VAL))
 describe DRUGS_ANXIETY_OBFU 	Obfuscated reference to an anxiety control drug
-#antidepressant
-#prozac
-body __DRUGS_DEPRESSION1	/\b_{0,3}p[_\W]?r[_\W]?[o0\xF2-\xF6][_\W]?z[_\W]?[a4\xE0-\xE6@][_\W]?c_{0,3}\b/i
-#fluoxetine 
-body __DRUGS_DEPRESSION2	/\bfluoxetine\b/i
-#buspar
-body __DRUGS_DEPRESSION3	/\bbuspar\b/i
-#paxil
-body __DRUGS_DEPRESSION4	/\b_{0,3}p[_\W]?[a4\xE0-\xE6@][_\W]?x[_\W]?[i1!|l\xEC-\xEF][_\W]?[l!|1]_{0,3}(?:\b|\s)/i
-#wellbutrin
-body __DRUGS_DEPRESSION5	/\bwellbutrin\b/i
-#lexapro
-body __DRUGS_DEPRESSION6	/\blexapro\b/i
-#zoloft
-body __DRUGS_DEPRESSION7	/\b_{0,3}z[_\W]?[o0\xF2-\xF6][_\W]?l[_\W]?[o0\xF2-\xF6][_\W]?f[_\W]?t_{0,3}\b/i
-#elavil
-body __DRUGS_DEPRESSION8	/\belavil\b/i
-#sarafem
-body __DRUGS_DEPRESSION9	/\bsarafem\b/i
-#remeron
-body __DRUGS_DEPRESSION10	/\bremeron\b/i
-meta DRUGS_DEPRESSION (__DRUGS_DEPRESSION1 || __DRUGS_DEPRESSION2 || __DRUGS_DEPRESSION3 || __DRUGS_DEPRESSION4 ||__DRUGS_DEPRESSION5 ||__DRUGS_DEPRESSION6 ||__DRUGS_DEPRESSION7 ||__DRUGS_DEPRESSION8 || __DRUGS_DEPRESSION9 || __DRUGS_DEPRESSION10)
-describe DRUGS_DEPRESSION 	Refers to an antidepressant
 
 body DRUGS_SMEAR1		/(?:Viagra|Valium|Xanax|Soma|Cialis){2}/i
 describe DRUGS_SMEAR1	Two or more drugs crammed together into one word
@@ -290,16 +264,8 @@ describe DRUGS_SMEAR1	Two or more drugs crammed together into one word
 #search for "weird" combinations that are unlikely to 
 #be prescribed together for a single event, thus unlikely to be
 #mentioned in the same email, except an online pharmacy ad.
-meta DRUGS_DIET_EREC	(DRUGS_ERECTILE && DRUGS_DIET)
-describe DRUGS_DIET_EREC 	Refers to both an erectile and a diet drug
-meta DRUGS_PAIN_EREC	(DRUGS_ERECTILE && DRUGS_PAIN)
-describe DRUGS_PAIN_EREC 	Refers to both an erectile and a painkiller
-meta DRUGS_DEPR_EREC	(DRUGS_ERECTILE && DRUGS_DEPRESSION)
-describe DRUGS_DEPR_EREC 	Refers to both an erectile and an antidepressant
 meta DRUGS_ANXIETY_EREC (DRUGS_ERECTILE && DRUGS_ANXIETY)
 describe DRUGS_ANXIETY_EREC 	Refers to both an erectile and an anxiety drug
-meta DRUGS_DIET_PAIN	(DRUGS_DIET && DRUGS_PAIN)
-describe DRUGS_DIET_PAIN Refers to both a diet drug and a pain drug
 meta DRUGS_SLEEP_EREC	(DRUGS_ERECTILE && DRUGS_SLEEP)
 describe DRUGS_SLEEP_EREC 	Refers to both an erectile and a sleep aid drug
 

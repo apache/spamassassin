@@ -30,9 +30,6 @@ describe NUMERIC_HTTP_ADDR	Uses a numeric IP address in URL
 uri NORMAL_HTTP_TO_IP		/^https?\:\/\/(?:\S*\@)?\d+\.\d+\.\d+\.\d+/i
 describe NORMAL_HTTP_TO_IP	Uses a dotted-decimal IP address in URL
  	
-uri HTTP_WITH_EMAIL_IN_URL	/^https?\:\/\/\S+=[-_\+a-z0-9\.]+\@[-_\+a-z0-9\.]+\.[-_\+a-z0-9]{2,3}(?:\&|\s)/
-describe HTTP_WITH_EMAIL_IN_URL	'remove' URL contains an email address
-
 # Theo sez:
 # Have gotten FPs off this, and whitespace can't be in the host, so...
 # %    Visit my homepage: http://i.like.foo.com %
@@ -56,17 +53,11 @@ describe IP_LINK_PLUS	Dotted-decimal IP address followed by CGI
 uri REMOVE_PAGE			/^https?:\/\/[^\/]+\/.*?remove/
 describe REMOVE_PAGE		URL of page called "remove"
  	
-uri MAILTO_WITH_SUBJ		/^mailto:\S+\?subject=/is
-describe MAILTO_WITH_SUBJ	Includes a link to send a mail with a subject
- 	
 uri MAILTO_TO_SPAM_ADDR		/^mailto:[a-z]+\d{2,}\@/is
 describe MAILTO_TO_SPAM_ADDR	Includes a link to a likely spammer email
  	
 uri MAILTO_TO_REMOVE		/^mailto:.*?remove/is
 describe MAILTO_TO_REMOVE	Includes a 'remove' email address
-
-uri JAVASCRIPT_URI		/^javascript:/i
-describe JAVASCRIPT_URI		Javascript protocol in a URI
 
 # allow ports 80 and 443 which are http and https, respectively
 # we don't want to hit http://www.cnn.com:USArticle1840@www.liquidshirts.com/
@@ -81,15 +72,8 @@ describe USERPASS               URL contains username and (optional) password
 uri URI_IS_POUND		m{\#$}
 describe URI_IS_POUND		Filename is just a '\#'; probably a JS trick
 
-uri BTAMAIL_URL			/btamail\.net\.cn/i
-describe BTAMAIL_URL		Frequent Spam content
- 	
 uri BARGAIN_URL			/bargain([sz]|-\S+)?\.(?:com|biz)/
 describe BARGAIN_URL		Includes a link to a likely spammer domain
-
-# this is actually effective.  What are they doing over there?
-uri BZ_TLD			/^(?:https?:\/\/|mailto:)[^\/]+\.bz(?:\/|$)/i
-describe BZ_TLD			Contains a URL in the BZ top-level domain    
 
 # this is somewhat loose, but results are good
 uri BIZ_TLD  			/\.biz(?:\/|$)/i
@@ -101,20 +85,15 @@ describe INFO_TLD		Contains a URL in the INFO top-level domain
 # Matt Cline
 # Pretty good for most folks, except for jm: I have a really stupid
 # e-commerce bunch obfuscating their URLs with this for some reason. screw 'em
-uri      HTTP_ENTITIES_HOST	m{https?://[^\s\">/]*\&\#[\da-f]+}i
-describe HTTP_ENTITIES_HOST	URI obscured with character entities
+# jm: hesitant to remove this outright; it should be good against phishers
+#uri      HTTP_ENTITIES_HOST	m{https?://[^\s\">/]*\&\#[\da-f]+}i
+#describe HTTP_ENTITIES_HOST	URI obscured with character entities
 
 uri YAHOO_RD_REDIR		m{^https?\://rd\.yahoo\.com/(?:[0-9]{4,}|partner\b|dir\b)}i
 describe YAHOO_RD_REDIR		Has Yahoo Redirect URI
 
-uri YAHOO_SRD_REDIR		m{^https?://.*\bsrd\.yahoo\.com/}i
-describe YAHOO_SRD_REDIR	Has Yahoo Redirect URI
-
 uri YAHOO_DRS_REDIR		m{^https?://drs\.yahoo\.com/}i
 describe YAHOO_DRS_REDIR	Has Yahoo Redirect URI
-
-uri MORTGAGE_LINKS		/(?:^https?\:\/\/|^mailto\:).{0,20}(?:low|about)mortgage/i
-describe MORTGAGE_LINKS		Message has link to mortgage URI
 
 uri URI_OFFERS			m/offer([sz]|-\S+)?\.(?:com|bi?z)/i
 describe URI_OFFERS		Message has link to company offers
@@ -134,9 +113,6 @@ describe HTTP_77		Contains a URL-encoded hostname (HTTP77)
 # affiliateid, aff_id, aff_sub_id etc.
 uri URI_AFFILIATE		/aff\w+id=/i
 describe URI_AFFILIATE		Contains a URI with an affiliate ID code
-
-uri URI_LONG_HOSTNAME		/^https?:\/\/[a-z0-9]{25,29}\./i
-describe URI_LONG_HOSTNAME	Contains a URI with a long hostname
 
 # really a URI rule
 header URI_REDIRECTOR		eval:check_for_http_redirector()
