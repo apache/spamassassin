@@ -124,18 +124,6 @@ tflags T_LISTPROC1		nice
 
 ########################################################################
 
-# bug 1308
-# only two rules are needed to effectively subdivide the range
-header T_SUSPICIOUS_RECIPS	eval:similar_recipients('0.6','1.2')
-header T_VERY_SUSP_RECIPS	eval:similar_recipients('1.2','undef')
-describe T_SUSPICIOUS_RECIPS	Similar addresses in recipient list
-describe T_VERY_SUSP_RECIPS	Very similar addresses in recipient list 
-# another rule based on same idea
-header T_SORTED_RECIPS		eval:sorted_recipients()
-describe T_SORTED_RECIPS	Recipient list is sorted by address
-
-########################################################################
-
 # more work on slow rules, mostly adding \b, but with one or two other
 # performance improvement attempts, total speed-up if all of these are
 # applied is 2.0%
