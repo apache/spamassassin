@@ -84,7 +84,7 @@ ssl_timeout_read (SSL *ssl, void *buf, int nbytes)
 #ifdef SPAMC_SSL
     nred = SSL_read (ssl, buf, nbytes);
 #else
-    nred = 0;			// never used
+    nred = 0;			/* never used */
 #endif
   } while(nred < 0 && errno == EAGAIN);
 
