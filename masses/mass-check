@@ -48,6 +48,7 @@ usage: mass-check [options] target ...
   --after=N     only test mails received after time_t N (negative values
                 are an offset from current time, e.g. -86400 = last day)
                 or after date as parsed by Time::ParseDate (e.g. '-6 months')
+  --before=N    same as --after, except received times are before time_t N
   --all         don't skip big messages
   --head=N      only check first N ham and N spam (N messages if -n used)
   --tail=N      only check last N ham and N spam (N messages if -n used)
@@ -75,7 +76,7 @@ use vars qw($opt_c $opt_p $opt_f $opt_j $opt_n $opt_o $opt_all $opt_bayes
 	    $opt_debug $opt_format $opt_hamlog $opt_head $opt_loghits
 	    $opt_mid $opt_mh $opt_ms $opt_net $opt_nosort $opt_progress
 	    $opt_showdots $opt_spamlog $opt_tail $opt_rules $opt_restart
-	    $opt_loguris $opt_after $opt_rewrite $opt_deencap);
+	    $opt_loguris $opt_after $opt_before $opt_rewrite $opt_deencap);
 
 use FindBin;
 use lib "$FindBin::Bin/../lib";
@@ -98,7 +99,7 @@ $opt_spamlog = "spam.log";
 GetOptions("c=s", "p=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug",
 	   "hamlog=s", "head=i", "loghits", "mh", "mid", "ms", "net",
 	   "progress", "rewrite:s", "showdots", "spamlog=s", "tail=i",
-	   "rules=s", "restart=i", "after=s", "loguris", "deencap=s",
+	   "rules=s", "restart=i", "after=s", "before=s", "loguris", "deencap=s",
 	   "dir" => sub { $opt_format = "dir"; },
 	   "file" => sub { $opt_format = "file"; },
 	   "mbox" => sub { $opt_format = "mbox"; },
@@ -160,16 +161,23 @@ my $spam_count = 0;
 my $ham_count = 0;
 my $init_results = 0;
 
-if ($opt_after && $opt_after =~ /^-\d+$/) {
-  $opt_after = time + $opt_after;
+# Deal with --before and --after
+foreach my $time ($opt_before, $opt_after) {
+  if ($time && $time =~ /^-\d+$/) {
+    $time = time + $time;
+  }
+  elsif ($time && $time !~ /^-?\d+$/) {
+    if (HAS_TIME_PARSEDATE) {
+      $time = Time::ParseDate::parsedate($time, GMT => 1, PREFER_PAST => 1);
+    }
+    else { 
+      die "You need Time::ParseDate if you use either the --before or --after option.";
+    }
+  }
 }
-elsif ($opt_after && $opt_after !~ /^-?\d+$/) {
-  if (HAS_TIME_PARSEDATE) {
-    $opt_after = Time::ParseDate::parsedate($opt_after, GMT => 1, PREFER_PAST => 1);
-  }
-  else { 
-    die "You need Time::ParseDate if you use the --after option.";
-  }
+
+if ($opt_before && $opt_after && $opt_after >= $opt_before) {
+  die "--before ($opt_before) <= --after ($opt_after) -- conflict!";
 }
 
 my $iter = new Mail::SpamAssassin::ArchiveIterator({
@@ -179,6 +187,7 @@ my $iter = new Mail::SpamAssassin::ArchiveIterator({
 	'opt_head' => $opt_head,
 	'opt_tail' => $opt_tail,
 	'opt_after' => $opt_after,
+	'opt_before' => $opt_before,
 	'opt_restart' => $opt_restart,
 });
 

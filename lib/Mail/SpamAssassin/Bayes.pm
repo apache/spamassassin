@@ -801,7 +801,7 @@ sub learn_trapped {
     $self->{store}->nspam_nham_change (0, 1);
   }
 
-  my $msgatime = $self->receive_date(scalar $msg->get_all_headers(0,1));
+  my $msgatime = $msg->receive_date();
 
   # If the message atime comes back as being more than 1 day in the
   # future, something's messed up and we should revert to current time as
@@ -1180,7 +1180,7 @@ sub scan {
   # If the message atime comes back as being in the future, something's
   # messed up and we should revert to current time as a safety measure.
   #
-  my $msgatime = $self->receive_date(scalar $msg->get_all_headers(0,1));
+  my $msgatime = $msg->receive_date();
   my $now = time;
   $msgatime = $now if ( $msgatime > $now );
 
@@ -1409,72 +1409,6 @@ sub dump_bayes_db {
     $self->{store}->untie_db();
   }
   return 1;
-}
-
-# Stolen from Archive Iteraator ...  Should probably end up in M::SA::Util
-# Modified to call first_date via $self->first_date()
-sub receive_date {
-  my ($self, $header) = @_;
-
-  $header ||= '';
-  $header =~ s/\n[ \t]+/ /gs;	# fix continuation lines
-
-  my @rcvd = ($header =~ /^Received:(.*)/img);
-  my @local;
-  my $time;
-
-  if (@rcvd) {
-    if ($rcvd[0] =~ /qmail \d+ invoked by uid \d+/ ||
-	$rcvd[0] =~ /\bfrom (?:localhost\s|(?:\S+ ){1,2}\S*\b127\.0\.0\.1\b)/)
-    {
-      push @local, (shift @rcvd);
-    }
-    if (@rcvd && ($rcvd[0] =~ m/\bby localhost with \w+ \(fetchmail-[\d.]+/)) {
-      push @local, (shift @rcvd);
-    }
-    elsif (@local) {
-      unshift @rcvd, (shift @local);
-    }
-  }
-
-  if (@rcvd) {
-    $time = $self->first_date(shift @rcvd);
-    return $time if defined($time);
-  }
-  if (@local) {
-    $time = $self->first_date(@local);
-    return $time if defined($time);
-  }
-  if ($header =~ /^(?:From|X-From-Line:)\s+(.+)$/im) {
-    my $string = $1;
-    $string .= " ".$self->{tz} unless $string =~ /(?:[-+]\d{4}|\b[A-Z]{2,4}\b)/;
-    $time = $self->first_date($string);
-    return $time if defined($time);
-  }
-  if (@rcvd) {
-    $time = $self->first_date(@rcvd);
-    return $time if defined($time);
-  }
-  if ($header =~ /^Resent-Date:\s*(.+)$/im) {
-    $time = $self->first_date($1);
-    return $time if defined($time);
-  }
-  if ($header =~ /^Date:\s*(.+)$/im) {
-    $time = $self->first_date($1);
-    return $time if defined($time);
-  }
-
-  return time;
-}
-
-sub first_date {
-  my ($self, @strings) = @_;
-
-  foreach my $string (@strings) {
-    my $time = Mail::SpamAssassin::Util::parse_rfc822_date($string);
-    return $time if defined($time) && $time;
-  }
-  return undef;
 }
 
 1;

@@ -804,6 +804,21 @@ sub finish {
 
 # ---------------------------------------------------------------------------
 
+=item receive_date()
+
+Return a time_t value with the received date of the current message,
+or current time if received time couldn't be determined.
+
+=cut
+
+sub receive_date {
+  my($self) = @_;
+
+  return Mail::SpamAssassin::Util::receive_date(scalar $self->get_all_headers(0,1));
+}
+
+# ---------------------------------------------------------------------------
+
 sub dbg { Mail::SpamAssassin::dbg (@_); }
 
 1;

@@ -814,6 +814,72 @@ sub uri_list_canonify {
 
 ###########################################################################
 
+sub first_date {
+  my (@strings) = @_;
+
+  foreach my $string (@strings) {
+    my $time = parse_rfc822_date($string);
+    return $time if defined($time) && $time;
+  }
+  return undef;
+}
+
+sub receive_date {
+  my ($header) = @_;
+
+  $header ||= '';
+  $header =~ s/\n[ \t]+/ /gs;	# fix continuation lines
+
+  my @rcvd = ($header =~ /^Received:(.*)/img);
+  my @local;
+  my $time;
+
+  if (@rcvd) {
+    if ($rcvd[0] =~ /qmail \d+ invoked by uid \d+/ ||
+	$rcvd[0] =~ /\bfrom (?:localhost\s|(?:\S+ ){1,2}\S*\b127\.0\.0\.1\b)/)
+    {
+      push @local, (shift @rcvd);
+    }
+    if (@rcvd && ($rcvd[0] =~ m/\bby localhost with \w+ \(fetchmail-[\d.]+/)) {
+      push @local, (shift @rcvd);
+    }
+    elsif (@local) {
+      unshift @rcvd, (shift @local);
+    }
+  }
+
+  if (@rcvd) {
+    $time = first_date(shift @rcvd);
+    return $time if defined($time);
+  }
+  if (@local) {
+    $time = first_date(@local);
+    return $time if defined($time);
+  }
+  if ($header =~ /^(?:From|X-From-Line:)\s+(.+)$/im) {
+    my $string = $1;
+    $string .= " ".local_tz() unless $string =~ /(?:[-+]\d{4}|\b[A-Z]{2,4}\b)/;
+    $time = first_date($string);
+    return $time if defined($time);
+  }
+  if (@rcvd) {
+    $time = first_date(@rcvd);
+    return $time if defined($time);
+  }
+  if ($header =~ /^Resent-Date:\s*(.+)$/im) {
+    $time = first_date($1);
+    return $time if defined($time);
+  }
+  if ($header =~ /^Date:\s*(.+)$/im) {
+    $time = first_date($1);
+    return $time if defined($time);
+  }
+
+  return time;
+}
+
+###########################################################################
+
 sub dbg { Mail::SpamAssassin::dbg (@_); }
 
 1;

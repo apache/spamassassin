@@ -28,13 +28,7 @@ use Mail::SpamAssassin::Util;
 use constant BIG_BYTES => 256*1024;	# 256k is a big email
 use constant BIG_LINES => BIG_BYTES/65;	# 65 bytes/line is a good approximation
 
-my $no;
-my $tz;
-
-BEGIN {
-  $no = 1;
-  $tz = local_tz();
-}
+my $no = 1;
 
 use vars qw {
   $MESSAGES
@@ -54,8 +48,6 @@ sub new {
 
   $self->{s} = { };		# spam, of course
   $self->{h} = { };		# ham, as if you couldn't guess
-
-  $self->{opt_after} ||= 0;	# default to 0
 
   $self;
 }
@@ -414,79 +406,24 @@ sub mail_open {
   return 1;
 }
 
-sub first_date {
-  my (@strings) = @_;
-
-  foreach my $string (@strings) {
-    my $time = Mail::SpamAssassin::Util::parse_rfc822_date($string);
-    return $time if defined($time) && $time;
-  }
-  return undef;
-}
-
-sub receive_date {
-  my ($self, $header) = @_;
-
-  $header ||= '';
-  $header =~ s/\n[ \t]+/ /gs;	# fix continuation lines
-
-  my @rcvd = ($header =~ /^Received:(.*)/img);
-  my @local;
-  my $time;
-
-  if (@rcvd) {
-    if ($rcvd[0] =~ /qmail \d+ invoked by uid \d+/ ||
-	$rcvd[0] =~ /\bfrom (?:localhost\s|(?:\S+ ){1,2}\S*\b127\.0\.0\.1\b)/)
-    {
-      push @local, (shift @rcvd);
-    }
-    if (@rcvd && ($rcvd[0] =~ m/\bby localhost with \w+ \(fetchmail-[\d.]+/)) {
-      push @local, (shift @rcvd);
-    }
-    elsif (@local) {
-      unshift @rcvd, (shift @local);
-    }
-  }
-
-  if (@rcvd) {
-    $time = first_date(shift @rcvd);
-    return $time if defined($time);
-  }
-  if (@local) {
-    $time = first_date(@local);
-    return $time if defined($time);
-  }
-  if ($header =~ /^(?:From|X-From-Line:)\s+(.+)$/im) {
-    my $string = $1;
-    $string .= " $tz" unless $string =~ /(?:[-+]\d{4}|\b[A-Z]{2,4}\b)/;
-    $time = first_date($string);
-    return $time if defined($time);
-  }
-  if (@rcvd) {
-    $time = first_date(@rcvd);
-    return $time if defined($time);
-  }
-  if ($header =~ /^Resent-Date:\s*(.+)$/im) {
-    $time = first_date($1);
-    return $time if defined($time);
-  }
-  if ($header =~ /^Date:\s*(.+)$/im) {
-    $time = first_date($1);
-    return $time if defined($time);
-  }
-
-  return time;
-}
-
 ############################################################################
 
 sub message_is_useful_by_date  {
   my ($self, $date) = @_;
 
-  return 1 unless $self->{opt_after};	# not using that feature
-  return 0 unless $date;		# undef or 0 date = unusable
+  return 0 unless $date;	# undef or 0 date = unusable
 
-  return $date > $self->{opt_after};
+  if (!$self->{opt_after} && !$self->{opt_before}) {
+    # Not using the feature
+    return 1;
+  }
+  elsif (!$self->{opt_before}) {
+    # Just case about after
+    return $date > $self->{opt_after};
+  }
+  else {
+    return (($date < $self->{opt_before}) && ($date > $self->{opt_after}));
+  }
 }
 
 ############################################################################
@@ -531,7 +468,7 @@ sub scan_directory {
       $header .= $_;
     }
     close(INPUT);
-    my $date = $self->receive_date($header);
+    my $date = Mail::SpamAssassin::Util::receive_date($header);
     next if !$self->message_is_useful_by_date($date);
     $self->{$class}->{index_pack($class, "f", $date, $mail)} = $date;
   }
@@ -552,7 +489,7 @@ sub scan_file {
     $header .= $_;
   }
   close(INPUT);
-  my $date = $self->receive_date($header);
+  my $date = Mail::SpamAssassin::Util::receive_date($header);
   return if !$self->message_is_useful_by_date($date);
   $self->{$class}->{index_pack($class, "f", $date, $mail)} = $date;
 }
@@ -615,7 +552,7 @@ sub scan_mailbox {
 	  $t = $no++;
 	}
 	else {
-	  $t = $self->receive_date($header);
+	  $t = Mail::SpamAssassin::Util::receive_date($header);
 	  next if !$self->message_is_useful_by_date($t);
 	}
 	$self->{$class}->{index_pack($class, "m", $t, "$file.$offset")} = $t;
