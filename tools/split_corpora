@@ -33,7 +33,13 @@ my @IN_FILES    = @ARGV;
 usage() if (@IN_FILES == 0);
 
 my @targets = ();
-foreach (@IN_FILES) { push (@targets, "ham:dir:$_"); }
+foreach (@IN_FILES) {
+  if (-d $_) {
+    push (@targets, "ham:dir:$_");
+  } else {
+    push (@targets, "ham:mbox:$_");
+  }
+}
 
 my @bucket_fhs = ();
 foreach my $bucket (1 .. $num_buckets) {

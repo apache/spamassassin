@@ -83,7 +83,7 @@ $IGNORED_HDRS = qr{(?: (?:X-)?Sender    # misc noise
   # these
   |X-MailScanner(?:-SpamCheck)?
   |X-Spam(?:-(?:Status|Level|Flag|Report|Hits|Score|Checker-Version))?
-  |X-Antispam |X-RBL-Warning
+  |X-Antispam |X-RBL-Warning |X-Mailscanner
   |X-MDaemon-Deliver-To |X-Virus-Scanned
   |X-Mass-Check-Id
   |X-Pyzor |X-DCC-\S{2,25}-Metrics
@@ -114,14 +114,42 @@ $IGNORED_HDRS = qr{(?: (?:X-)?Sender    # misc noise
 # Note only the presence of these headers, in order to reduce the
 # hapaxen they generate.
 $MARK_PRESENCE_ONLY_HDRS = qr{(?: X-Face
-  |X-(?:Gnu[Pp][Gg]|[GP]PG)(?:-Key)?-Fingerprint
-)}x;
+  |X-(?:Gnu-?PG|PGP|GPG)(?:-Key)?-Fingerprint
+)}ix;
 
 # tweaks tested as of Nov 18 2002 by jm: see SpamAssassin-devel list archives
 # for results.  The winners are now the default settings.
 use constant IGNORE_TITLE_CASE => 1;
 use constant TOKENIZE_LONG_8BIT_SEQS_AS_TUPLES => 1;
 use constant TOKENIZE_LONG_TOKENS_AS_SKIPS => 1;
+
+# NEW TESTING
+use constant PRE_CHEW_ADDR_HEADERS => 0;
+use constant NO_NUMERIC_IN_HEADERS => 0;
+use constant TST_IGNORE_MSGID => 0;
+use constant TST_CHEW_BODY_URIS => 0;
+use constant TST_CHEW_BODY_MAILTOS => 0;
+use constant TST_HDRS_TOKENIZE_LONG_TOKENS_AS_SKIPS => 1;
+use constant TST_BODY_TOKENIZE_LONG_TOKENS_AS_SKIPS => 1;
+use constant PROB_BOUND_LOWER => 0.000;
+use constant PROB_BOUND_UPPER => 1.000;
+use constant CHI_ROBINSON_X_CONSTANT  => 0.538;
+use constant CHI_ROBINSON_S_CONSTANT  => 0.373;
+use constant CHI_ROBINSON_MIN_PROB_STRENGTH  => 0.346;
+
+
+##orig##use constant PRE_CHEW_ADDR_HEADERS => 0;
+##orig##use constant NO_NUMERIC_IN_HEADERS => 0;
+##orig##use constant TST_IGNORE_MSGID => 0;
+##orig##use constant TST_CHEW_BODY_URIS => 0;
+##orig##use constant TST_CHEW_BODY_MAILTOS => 0;
+##orig##use constant TST_HDRS_TOKENIZE_LONG_TOKENS_AS_SKIPS => 1;
+##orig##use constant TST_BODY_TOKENIZE_LONG_TOKENS_AS_SKIPS => 1;
+##orig##use constant PROB_BOUND_LOWER => 0.001;
+##orig##use constant PROB_BOUND_UPPER => 0.999;
+##orig##use constant CHI_ROBINSON_X_CONSTANT  => 0.538;
+##orig##use constant CHI_ROBINSON_S_CONSTANT  => 0.373;
+##orig##use constant CHI_ROBINSON_MIN_PROB_STRENGTH  => 0.346;
 
 # We store header-mined tokens in the db with a "HHeaderName:val" format.
 # some headers may contain lots of gibberish tokens, so allow a little basic
@@ -158,19 +186,19 @@ use constant USE_ROBINSON_FX_EQUATION_FOR_LOW_FREQS => 1;
 
 # Value for 'x' in the f(w) equation.
 # "Let x = the number used when n [hits] is 0."
-use constant CHI_ROBINSON_X_CONSTANT  => 0.538;
+###use constant CHI_ROBINSON_X_CONSTANT  => 0.538;
 use constant GARY_ROBINSON_X_CONSTANT => 0.600;
 
 # Value for 's' in the f(w) equation.  "We can see s as the "strength" (hence
 # the use of "s") of an original assumed expectation ... relative to how
 # strongly we want to consider our actual collected data."  Low 's' means
 # trust collected data more strongly.
-use constant CHI_ROBINSON_S_CONSTANT  => 0.373;
+###use constant CHI_ROBINSON_S_CONSTANT  => 0.373;
 use constant GARY_ROBINSON_S_CONSTANT => 0.160;
 
 # Should we ignore tokens with probs very close to the middle ground (.5)?
 # tokens need to be outside the [ .5-MPS, .5+MPS ] range to be used.
-use constant CHI_ROBINSON_MIN_PROB_STRENGTH  => 0.346;
+###use constant CHI_ROBINSON_MIN_PROB_STRENGTH  => 0.346;
 use constant GARY_ROBINSON_MIN_PROB_STRENGTH => 0.430;
 
 # How many of the most significant tokens should we use for the p(w)
@@ -184,8 +212,8 @@ use constant MAX_TOKEN_LENGTH => 15;
 # lower and upper bounds for probabilities; we lock probs into these
 # so one high-strength token can't overwhelm a set of slightly lower-strength
 # tokens.
-use constant PROB_BOUND_LOWER => 0.001;
-use constant PROB_BOUND_UPPER => 0.999;
+##use constant PROB_BOUND_LOWER => 0.001;
+##use constant PROB_BOUND_UPPER => 0.999;
 
 ###########################################################################
 
@@ -295,6 +323,8 @@ sub tokenize_line {
   my $isbody = $_[3];
   local ($_) = $_[1];
 
+  my $in_headers = ($tokprefix ne '');
+
   my($bv) = ($self->{store}->get_magic_tokens())[6];
   my $magic_re = $self->{store}->get_magic_re($bv);
 
@@ -344,7 +374,25 @@ sub tokenize_line {
 		people|place|first|because|
 		And|give|year|information|can)$/x);
 
-    if ($len > MAX_TOKEN_LENGTH) {
+    # are we in the body?  If so, apply some body-specific breakouts
+    if (!$in_headers) {
+      if (TST_CHEW_BODY_MAILTOS && $token =~ /\S\@\S/i) {
+	my @toks = $self->tokenize_mail_addrs ($token);
+	push (@{$self->{tokens}}, @toks);
+	$wc += scalar @toks;
+      }
+      elsif (TST_CHEW_BODY_URIS && $token =~ /\S\.[a-z]/i) {
+	my $bit = $token; while ($bit =~ s/^[^\.]+\.(.+)$/$1/gs) {
+	  push (@{$self->{tokens}}, "UD:".$1); $wc++;	# UD = URL domain
+	}
+      }
+    }
+
+    # note: do not trim down overlong tokens if they contain '*'.  This is
+    # used as part of split tokens such as "HTo:D*net" indicating that 
+    # the domain ".net" appeared in the To header.
+    #
+    if ($len > MAX_TOKEN_LENGTH && $token !~ /\*/) {
       if (TOKENIZE_LONG_8BIT_SEQS_AS_TUPLES && $token =~ /[\xa0-\xff]{2}/) {
 	# Matt sez: "Could be asian? Autrijus suggested doing character ngrams,
 	# but I'm doing tuples to keep the dbs small(er)."  Sounds like a plan
@@ -355,7 +403,10 @@ sub tokenize_line {
 	next;
       }
 
-      if (TOKENIZE_LONG_TOKENS_AS_SKIPS) {
+    if (($in_headers && TST_HDRS_TOKENIZE_LONG_TOKENS_AS_SKIPS)
+		|| (!$in_headers && TST_BODY_TOKENIZE_LONG_TOKENS_AS_SKIPS))
+    {
+	# if (TOKENIZE_LONG_TOKENS_AS_SKIPS) {
 	# Spambayes trick via Matt: Just retain 7 chars.  Do not retain
 	# the length, it does not help; see my mail to -devel of Nov 20 2002.
 	# "sk:" stands for "skip".
@@ -370,7 +421,8 @@ sub tokenize_line {
     # patterns instead of text copies.
 
     # replace digits with 'N'...
-    if ($token =~ /\d/) {
+    if ($token =~ /\d/ && (!$in_headers || !NO_NUMERIC_IN_HEADERS))
+    {
       $token =~ s/\d/N/gs;
 
       # stop-list for numeric tokens.  These are squarely in the gray
@@ -410,6 +462,8 @@ sub tokenize_headers {
 
   $hdrs =~ s/^${IGNORED_HDRS}: [^\n]*$//gim;
 
+  if (TST_IGNORE_MSGID) { $hdrs =~ s/^Message-I[dD]: [^\n]*$//gim;}
+
   # and re-add the last 2 received lines: usually a good source of
   # spamware tokens and HELO names.
   if ($#rcvdlines >= 0) { $hdrs .= "\n".$rcvdlines[$#rcvdlines]; }
@@ -428,6 +482,11 @@ sub tokenize_headers {
     # special tokenization for some headers:
     if ($hdr =~ /^(?:|X-|Resent-)Message-I[dD]$/) {
       $val = $self->pre_chew_message_id ($val);
+    }
+    elsif (PRE_CHEW_ADDR_HEADERS && $hdr =~ /^(?:|X-|Resent-)
+	(?:Return-Path|From|To|Cc|Reply-To|Errors-To|Mail-Followup-To|Sender)$/ix)
+    {
+      $val = $self->pre_chew_addr_header ($val);
     }
     elsif ($hdr eq 'Received') {
       $val = $self->pre_chew_received ($val);
@@ -536,6 +595,28 @@ sub pre_chew_received {
   $val =~ s/\b(?:with|from|for|SMTP|ESMTP)\b/ /g;
 
   $val;
+}
+
+sub pre_chew_addr_header {
+  my ($self, $val) = @_;
+  local ($_);
+
+  my @addrs = $self->{main}->find_all_addrs_in_line ($val);
+  my @toks = ();
+  foreach (@addrs) {
+    push (@toks, $self->tokenize_mail_addrs ($_));
+  }
+  return join (' ', @toks);
+}
+
+sub tokenize_mail_addrs {
+  my ($self, $addr) = @_;
+
+  ($addr =~ /(.+)\@(.+)$/) or return ();
+  my @toks = ();
+  push(@toks, "U*".$1, "D*".$2);
+  $_ = $2; while (s/^[^\.]+\.(.+)$/$1/gs) { push(@toks, "D*".$1); }
+  return @toks;
 }
 
 ###########################################################################
@@ -709,6 +790,11 @@ sub get_msgid {
   $msgid;
 }
 
+sub add_uris_for_permsgstatus {
+  my ($self, $permsgstatus) = @_;
+  return $permsgstatus->get_uri_list();
+}
+
 sub get_body_from_msg {
   my ($self, $msg) = @_;
 
@@ -719,7 +805,9 @@ sub get_body_from_msg {
   }
   my $permsgstatus =
         Mail::SpamAssassin::PerMsgStatus->new($self->{main}, $msg);
+
   my $body = $permsgstatus->get_decoded_stripped_body_text_array();
+  push (@{$body}, $self->add_uris_for_permsgstatus($permsgstatus));
   $permsgstatus->finish();
 
   if (!defined $body) {
@@ -864,7 +952,7 @@ sub is_scan_available {
 # Finally, the scoring function for testing mail.
 
 sub scan {
-  my ($self, $msg, $body) = @_;
+  my ($self, $permsgstatus, $msg, $body) = @_;
 
   if ( !$self->is_scan_available() ) {
     goto skip;
@@ -878,6 +966,7 @@ sub scan {
 
   dbg ("bayes corpus size: nspam = $ns, nham = $nn");
 
+  push (@{$body}, $self->add_uris_for_permsgstatus ($permsgstatus));
   my ($wc, @tokens) = $self->tokenize ($msg, $body);
 
   if ($wc <= 0) {
@@ -898,6 +987,7 @@ sub scan {
       ();		# exit map()
     } else {
       $seen{$_} = 1;
+      # warn "JMD bayes token found: '$_'\n";
       $pw = $self->compute_prob_for_token ($_, $ns, $nn);
       if (!defined $pw) {
 	();		# exit map()

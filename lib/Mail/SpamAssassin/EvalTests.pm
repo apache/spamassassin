@@ -2432,7 +2432,7 @@ sub check_bayes {
 
   if (!exists ($self->{bayes_score})) {
     $self->{bayes_score} = $self->{main}->{bayes_scanner}->scan
-						($self->{msg}, $fulltext);
+					  ($self, $self->{msg}, $fulltext);
   }
 
   if (($min == 0 || $self->{bayes_score} > $min) &&
