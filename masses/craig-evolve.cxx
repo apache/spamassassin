@@ -18,7 +18,7 @@ void WriteString(PGAContext *ctx, FILE *fp, int p, int pop);
 void showSummary(PGAContext *ctx);
 
 const double threshold = 5.0;
-double nybias = 10.0;
+double nybias = 15.0;
 const int exhaustive_eval = 1;
 
 const double mutation_rate = 0.01;
