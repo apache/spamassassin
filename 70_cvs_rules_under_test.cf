@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.516 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.517 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -442,3 +442,7 @@ body     T_TRY_FOR_YOURSELF       /\btry (?:for|it|it for) yourself\b/i
 header T_FROM_NO_USER		From =~ /(?:^\@|<\@| \@[^\)<]*$|<>)/ [if-unset: unset@unset.unset]
 header T_TO_NO_USER		To =~ /(?:^\@|<\@| \@[^\)<]*$|<>)/ [if-unset: unset@unset.unset]
 
+# bug 1874:
+# replaces WE_HONOR_ALL and REMOVE_RESPECT
+# for me this matches all the same messages as the 2 it replaces
+body T_WE_HONOR_ALL		/\b(?:honou?r|respect)(?: all)? remov(?:e|al) requests?\b/i
