@@ -41,7 +41,7 @@ sub new {
   $self->{s} = { };		# spam, of course
   $self->{h} = { };		# ham, as if you couldn't guess
 
-  $self->{opt_onlyafter} ||= 0;	# default to 0
+  $self->{opt_after} ||= 0;	# default to 0
 
   $self;
 }
@@ -406,11 +406,11 @@ sub receive_date {
 sub message_is_useful_by_date  {
   my ($self, $date) = @_;
 
-  if (!$self->{opt_onlyafter}) { return 1; }	# not using that feature
+  if (!$self->{opt_after}) { return 1; }	# not using that feature
 
   if (!$date) { return 0; }			# undef or 0 date = unusable
 
-  if ($date <= $self->{opt_onlyafter}) {
+  if ($date <= $self->{opt_after}) {
     return 0;
   } else {
     return 1;
@@ -460,7 +460,7 @@ sub scan_directory {
     }
     close(INPUT);
     my $date = $self->receive_date($header);
-    if (!$self->message_is_useful_by_date ($date)) { next; }
+    next if !$self->message_is_useful_by_date($date);
     $self->{$class}->{index_pack($class, "f", $date, $mail)} = $date;
   }
 }
@@ -481,7 +481,7 @@ sub scan_file {
   }
   close(INPUT);
   my $date = $self->receive_date($header);
-  if (!$self->message_is_useful_by_date ($date)) { next; }
+  return if !$self->message_is_useful_by_date($date);
   $self->{$class}->{index_pack($class, "f", $date, $mail)} = $date;
 }
 
@@ -541,7 +541,7 @@ sub scan_mailbox {
 	  $t = $no++;
 	} else {
 	  $t = $self->receive_date($header);
-	  if (!$self->message_is_useful_by_date ($t)) { next; }
+	  next if !$self->message_is_useful_by_date($t);
 	}
 	$self->{$class}->{index_pack($class, "m", $t, "$file.$offset")} = $t;
       }
