@@ -38,16 +38,10 @@ header		URIBL_SBL	eval:check_uridnsbl('URIBL_SBL')
 describe	URIBL_SBL	Contains a URL listed in the SBL blocklist
 tflags		URIBL_SBL	net
 
-uridnsbl	URIBL_DSBL	list.dsbl.org.		TXT
-header		URIBL_DSBL	eval:check_uridnsbl('URIBL_DSBL')
-describe	URIBL_DSBL	Contains a URL listed in the DSBL blocklist
-tflags		URIBL_DSBL	net
-
-# SORBS has many, many FPs in this form
-#uridnsbl	URIBL_SORBS	dnsbl.sorbs.net.	A
-#header		URIBL_SORBS	eval:check_uridnsbl('URIBL_SORBS')
-#describe	URIBL_SORBS	Contains a URL listed in the SORBS blocklist
-#tflags		URIBL_SORBS	net
+urirhsbl	URIBL_SC_SURBL	sc.surbl.org.	A
+header		URIBL_SC_SURBL	eval:check_uridnsbl('T_URIBL_SC_SURBL')
+describe	URIBL_SC_SURBL	Contains a URL listed in the SC SURBL blocklist
+tflags		URIBL_SC_SURBL	net
 
 endif   # Mail::SpamAssassin::Plugin::URIDNSBL
 
