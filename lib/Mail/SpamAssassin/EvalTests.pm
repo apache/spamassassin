@@ -1173,6 +1173,42 @@ sub check_obfuscated_words {
   }
 }
 
+sub check_unique_words {
+  my ($self, $body, $total, $ratio) = @_;
+
+  if (!defined $self->{unique_words_repeat}) {
+    $self->_check_unique_words($body);
+  }
+  my $unique = $self->{unique_words_repeat};
+  my $repeat = $self->{unique_words_unique};
+  return ((($unique + $repeat) > $total) &&
+	  ($unique / ($unique + $repeat) > $ratio));
+}
+
+sub _check_unique_words {
+  my ($self, $body) = @_;
+
+  $self->{unique_words_repeat} = 0;
+  $self->{unique_words_unique} = 0;
+  my %count;
+#  for my $line (@$body) {
+#    for my $w (grep(/\w/, split(/\s+/, $line))) {
+  for (@$body) {
+    my $line = $_;		# copy to avoid mucking
+    tr/A-Za-z0-9/ /cs;
+    for my $w (split(' ', lc $_)) {
+      $count{$w}++;
+    }
+  }
+  my $unique = 0;
+  my $repeat = 0;
+  for my $count (values %count) {
+    $count == 1 ? $unique++ : $repeat++;
+  }
+  $self->{unique_words_repeat} = $unique;
+  $self->{unique_words_unique} = $repeat;
+}
+
 ###########################################################################
 
 sub check_from_in_blacklist {
