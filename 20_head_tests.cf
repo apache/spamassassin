@@ -9,6 +9,11 @@ describe FROM_ENDS_IN_NUMS	From: ends in numbers
 test FROM_ENDS_IN_NUMS     ok   matt1234@sergeant.org
 test FROM_ENDS_IN_NUMS     fail matt@sergeant.org
 
+header FROM_STARTS_WITH_NUMS	From =~ /^\d\d/
+describe FROM_STARTS_WITH_NUMS	From: starts with nums
+test FROM_STARTS_WITH_NUMS     ok   1234matt@sergeant.org
+test FROM_STARTS_WITH_NUMS     fail matt@sergeant.org
+
 header FROM_HAS_MIXED_NUMS	From =~ /\d+[a-z]+\d+\S*@/i
 describe FROM_HAS_MIXED_NUMS	From: contains numbers mixed in with letters
 
