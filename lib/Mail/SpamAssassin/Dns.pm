@@ -214,6 +214,8 @@ sub process_dnsbl_result {
     $self->dnsbl_uri($question, $answer);
     # TODO: there are some CNAME returns that might be useful
     next if ($answer->type ne 'A' && $answer->type ne 'TXT');
+    # skip any A record that isn't on 127/8
+    next if ($answer->type eq 'A' && $answer->rdatastr !~ /^127\./);
     for my $rule (@{$query->[RULES]}) {
       $self->dnsbl_hit($rule, $question, $answer);
     }
