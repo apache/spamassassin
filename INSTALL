@@ -234,7 +234,12 @@ skipped.
     perform MX checks, and is also used when manually reporting spam to
     SpamCop.  Recommended.
 
-    Under Windows at least version 0.46 is required.
+    If this is installed and you are using network tests of any variety
+    (which is the default), then you need to make sure the Net::DNS
+    version is sufficiently up-to-date:
+
+      - version 0.34 or higher on Unix systems
+      - version 0.46 or higher on Windows systems
 
 
   - Net::SMTP        (from CPAN)
