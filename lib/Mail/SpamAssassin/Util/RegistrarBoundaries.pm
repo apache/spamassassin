@@ -91,6 +91,7 @@ $TWO_LEVEL_DOMAINS = qr{ (?:
 
   # data from http://spamcheck.freeapp.net/two-level-tlds , in turn from
   # http://www.bestregistrar.com/help/ccTLD.htm
+  # http://www.hkdnr.net.hk/instructions/new_domain.html
 
   com\.ac |
   edu\.ac |
@@ -311,6 +312,9 @@ $TWO_LEVEL_DOMAINS = qr{ (?:
   com\.hk |
   net\.hk |
   org\.hk |
+  gov\.hk |
+  edu\.hk |
+  idv\.hk |
   co\.hu |
   org\.hu |
   info\.hu |
