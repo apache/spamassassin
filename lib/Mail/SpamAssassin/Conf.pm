@@ -332,7 +332,7 @@ e.g.
 
 Used to override a default whitelist_from entry, so for example a distribution whitelist_from
 can be overriden in a local.cf file, or an individual user can override a whitelist_from entry
-in their own .user_prefs file.
+in their own C<user_prefs> file.
 
 e.g.
 
@@ -360,7 +360,7 @@ non-spam, but which the user doesn't want.  Same format as C<whitelist_from>.
 
 Used to override a default blacklist_from entry, so for example a distribution blacklist_from
 can be overriden in a local.cf file, or an individual user can override a blacklist_from entry
-in their own .user_prefs file.
+in their own C<user_prefs> file.
 
 e.g.
 
