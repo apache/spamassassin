@@ -2337,6 +2337,10 @@ sub _check_mime_header {
     $self->{mime_qp_count}++;
   }
 
+  if ($cd && $cd =~ /attachment/) {
+    $self->{mime_attachment}++;
+  }
+
   if ($ctype =~ /^text/ &&
       $cte =~ /base64/ &&
       $charset !~ /utf-8/ &&
@@ -3064,6 +3068,23 @@ sub html_text_match {
     }
   }
   return 0;
+}
+
+sub html_title_subject_ratio {
+  my ($self, undef, $ratio) = @_;
+
+  my $subject = $self->get('Subject');
+  if (! $subject) {
+    return 0;
+  }
+  my $max = 0;
+  for my $string (@{ $self->{html}{title} }) {
+    if ($string) {
+      my $ratio = length($string) / length($subject);
+      $max = $ratio if $ratio > $max;
+    }
+  }
+  return $max > $ratio;
 }
 
 sub html_text_not_match {
