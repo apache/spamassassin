@@ -94,7 +94,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.187 2003/05/15 20:04:18 felicity Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.188 2003/05/24 20:32:42 quinlan Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -660,9 +660,9 @@ sub report_as_spam {
 
 =item $f->revoke_as_spam ($mail, $options)
 
-Revoke a mail, encapsulated in a C<Mail::Audit> object, as human-verified ham.
-This will revoke the mail message from live, collaborative, spam-blocker
-databases, allowing other users to block this message.
+Revoke a mail, encapsulated in a C<Mail::Audit> object, as human-verified ham
+(non-spam).  This will revoke the mail message from live, collaborative,
+spam-blocker databases, allowing other users to block this message.
 
 It will also submit the mail to SpamAssassin's Bayesian learner as nonspam.
 

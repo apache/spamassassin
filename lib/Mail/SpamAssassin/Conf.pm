@@ -1463,8 +1463,8 @@ setting.  Example:
 =item bayes_min_ham_num			(Default: 200)
 =item bayes_min_spam_num		(Default: 200)
 
-To be accurate, the Bayes system does not activate until a certain number
-of ham and spam have been learned.  The default is 200 of each ham and
+To be accurate, the Bayes system does not activate until a certain number of
+ham (non-spam) and spam have been learned.  The default is 200 of each ham and
 spam, but you can tune these up or down with these two settings.
 
 =cut
