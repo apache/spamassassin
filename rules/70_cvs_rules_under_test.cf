@@ -144,3 +144,9 @@ header T_TO_FILENAME           To =~ /^<C:\\/
 
 # bug 1394, possible replacement for ORDER_NOW
 body T_ORDER_NOW                  /\border (?:now|soon|fast|quickly|while|today)\b/i
+
+# Matt Cline
+# 0.206   0.2631   0.0000    1.000   0.89    0.01  T_OBFUSCATING_COMMENT2
+rawbody  __OBFUSCATING_COMMENT2 /[^\s>]<![^-].{0,64}?[^-]>[^\s<]/
+meta     T_OBFUSCATING_COMMENT2 __OBFUSCATING_COMMENT2 && MIME_HTML_ONLY
+describe T_OBFUSCATING_COMMENT2 HTML comments which obfuscate text (2)
