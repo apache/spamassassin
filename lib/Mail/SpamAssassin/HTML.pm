@@ -52,6 +52,9 @@ my $re_attr = 'abbr|accept-charset|accept|accesskey|action|align|alink|alt|archi
 # attributes: stuff we accept
 my $re_attr_extra = 'family|wrap|/';
 
+# style attribute not accepted
+my $re_attr_no_style = 'base|basefont|head|html|meta|param|script|style|title';
+
 # style attributes
 my %ok_attribute = (
 		 text => [qw(body)],
@@ -171,17 +174,19 @@ sub html_render {
 sub html_tag {
   my ($self, $tag, $attr, $num) = @_;
 
-  if ($tag =~ /^(?:$re_strict|$re_loose|$re_other)$/io) {
+  my $is_element = ($tag =~ /^(?:$re_strict|$re_loose|$re_other)$/io);
+
+  # general tracking
+  if ($is_element) {
     $self->{html}{elements}++;
     $self->{html}{elements_seen}++ if !exists $self->{html}{"inside_$tag"};
   }
   $self->{html}{tags}++;
   $self->{html}{tags_seen}++ if !exists $self->{html}{"inside_$tag"};
-
   $self->{html}{"inside_$tag"} += $num;
   $self->{html}{"inside_$tag"} = 0 if $self->{html}{"inside_$tag"} < 0;
 
-  # attributes
+  # check attributes
   for my $name (keys %$attr) {
     if ($name !~ /^(?:$re_attr|$re_attr_extra)$/io) {
       $self->{html}{attr_bad}++;
@@ -192,24 +197,30 @@ sub html_tag {
     $self->{"attr_seen_$name"} = 1;
   }
 
-  # TODO: cover other changes
-  if ($tag =~ /^(?:body|font|table|tr|th|td|big|small|basefont|marquee)$/) {
-    $self->text_style($tag, $attr, $num);
-  }
+  # ignore non-elements
+  if ($is_element) {
+    if ($tag =~ /^(?:body|font|table|tr|th|td|big|small|basefont|marquee)$/) {
+      $self->text_style($tag, $attr, $num);
+    }
+    # TODO: cover "style" and CSS
+    if ($tag !~ /^(?:$re_attr_no_style)$/ && exists $attr->{style}) {
+      $self->css_style($tag, $attr, $num);
+    }
 
-  if ($num == 1) {
-    $self->html_format($tag, $attr, $num);
-    $self->html_uri($tag, $attr, $num);
-    $self->html_tests($tag, $attr, $num);
+    # start tags
+    if ($num == 1) {
+      $self->html_format($tag, $attr, $num);
+      $self->html_uri($tag, $attr, $num);
+      $self->html_tests($tag, $attr, $num);
+      $self->{html_last_tag} = $tag;
+    }
 
-    $self->{html_last_tag} = $tag;
-  }
-
-  if ($tag =~ /^(?:b|i|u|strong|em|big|center|h\d)$/) {
-    $self->{html}{shouting} += $num;
-
-    if ($self->{html}{shouting} > $self->{html}{max_shouting}) {
-      $self->{html}{max_shouting} = $self->{html}{shouting};
+    # shouting
+    if ($tag =~ /^(?:b|i|u|strong|em|big|center|h\d)$/) {
+      $self->{html}{shouting} += $num;
+      if ($self->{html}{shouting} > $self->{html}{max_shouting}) {
+	$self->{html}{max_shouting} = $self->{html}{shouting};
+      }
     }
   }
 }
@@ -647,6 +658,12 @@ sub close_tag {
   while (my %current = %{ pop @{ $self->{text_style} } }) {
     last if $current{tag} eq $tag;
   }
+}
+
+# process CSS style attribute
+sub css_style {
+  my ($self, $tag, $attr, $num) = @_;
+
 }
 
 # body, font, table, tr, th, td, big, small
