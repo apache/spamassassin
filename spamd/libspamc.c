@@ -955,7 +955,8 @@ int message_filter(struct transport *tp, const char *username,
     char buf[8192];
     int bufsiz = (sizeof(buf) / sizeof(*buf)) - 4; /* bit of breathing room */
     int len, i;
-    int sock, rc;
+    int sock = -1;
+    int rc;
     char versbuf[20];
     float version;
     int response;
@@ -1075,7 +1076,7 @@ int message_filter(struct transport *tp, const char *username,
     len = 0;		/* overwrite those headers */
 
     if (flags&SPAMC_CHECK_ONLY) {
-	close(sock);
+	close(sock); sock = -1;
 	if (m->is_spam == EX_TOOBIG) {
 	      /* We should have gotten headers back... Damnit. */
 	      failureval = EX_PROTOCOL; goto failure;
@@ -1112,7 +1113,7 @@ int message_filter(struct transport *tp, const char *username,
 	m->out_len+=len;
 
 	shutdown(sock, SHUT_RD);
-	close(sock);
+	close(sock); sock = -1;
     }
     libspamc_timeout = 0;
 
@@ -1126,7 +1127,9 @@ int message_filter(struct transport *tp, const char *username,
 
 failure:
     free(m->out); m->out=m->msg; m->out_len=m->msg_len;
-    close(sock);
+    if (sock != -1) {
+      close(sock);
+    }
     libspamc_timeout = 0;
 
     if(flags&SPAMC_USE_SSL) {
