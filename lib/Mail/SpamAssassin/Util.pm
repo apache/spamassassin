@@ -206,11 +206,12 @@ sub untaint_hostname {
   return unless defined($host);
   return '' if ($host eq '');
 
-  # from RFC 1035, but allowing domains starting with numbers
-  my $label = q/[A-Za-z\d](?:[A-Za-z\d-]{0,61}[A-Za-z\d])?/;
-  my $domain = qq<$label(?:\.$label)*>;
-
-  if (length($host) <= 255 && $host =~ /^($domain)$/) {
+  # from RFC 1035, but allowing domains starting with numbers:
+  #   $label = q/[A-Za-z\d](?:[A-Za-z\d-]{0,61}[A-Za-z\d])?/;
+  #   $domain = qq<$label(?:\.$label)*>;
+  #   length($host) <= 255 && $host =~ /^($domain)$/
+  # expanded (no variables in the re) because of a tainting bug in Perl 5.8.0
+  if (length($host) <= 255 && $host =~ /^([a-z\d](?:[a-z\d-]{0,61}[a-z\d])?(?:\.[a-z\d](?:[a-z\d-]{0,61}[a-z\d])?)*)$/i) {
     return $1;
   }
   else {
