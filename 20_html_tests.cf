@@ -104,11 +104,23 @@ describe HTML_EVENT		HTML contains auto-executing code
 body HTML_EVENT_UNSAFE		eval:html_test('html_event_unsafe')
 describe HTML_EVENT_UNSAFE	HTML contains unsafe auto-executing code
 
+body HTML_FONT_SIZE_TINY	eval:html_eval('min_size', '< 1')
+describe HTML_FONT_SIZE_TINY	HTML font size is tiny
+
+body HTML_FONT_SIZE_NONE	eval:html_eval('min_size', '< 0')
+describe HTML_FONT_SIZE_NONE	HTML font size is negative
+
+body HTML_FONT_SIZE_LARGE	eval:html_range('max_size', '5', '6')
+describe HTML_FONT_SIZE_LARGE	HTML font size is large
+
+body HTML_FONT_SIZE_HUGE	eval:html_range('max_size', '6', 'inf')
+describe HTML_FONT_SIZE_HUGE	HTML font size is huge
+
 body HTML_FONT_BIG		eval:html_test('big_font')
-describe HTML_FONT_BIG		HTML has a big font
+describe HTML_FONT_BIG		HTML tag for a big font size
 
 body HTML_FONT_TINY		eval:html_test('tiny_font')
-describe HTML_FONT_TINY		HTML has a tiny font
+describe HTML_FONT_TINY		HTML tag for a tiny font size
 
 body HTML_FONT_INVISIBLE	eval:html_test('font_invisible')
 describe HTML_FONT_INVISIBLE	HTML font color is same as background
@@ -122,7 +134,7 @@ describe HTML_FONT_FACE_BAD	HTML font face is not a word
 body HTML_FONT_FACE_CAPS	eval:html_test('font_face_caps')
 describe HTML_FONT_FACE_CAPS	HTML font face has excess capital characters
 
-body HTML_FORMACTION_MAILTO		eval:html_test('form_action_mailto')
+body HTML_FORMACTION_MAILTO	eval:html_test('form_action_mailto')
 describe HTML_FORMACTION_MAILTO	HTML includes a form which sends mail
 
 # HTML_IMAGE_ONLY - not much raw HTML with images (absolute)
