@@ -86,6 +86,14 @@ static const int EXPANSION_ALLOWANCE = 16384;
 /* Set the protocol version that this spamc speaks */
 static const char *PROTOCOL_VERSION="SPAMC/1.3";
 
+/* "private" part of struct message.
+ * we use this instead of the struct message directly, so that we
+ * can add new members without affecting the ABI.
+ */
+struct libspamc_private_message {
+  int flags;	/* copied from "flags" arg to message_read() */
+};
+
 int libspamc_timeout = 0;
 
 static int
@@ -416,6 +424,14 @@ static int message_read_bsmtp(int fd, struct message *m){
 int message_read(int fd, int flags, struct message *m){
     libspamc_timeout = 0;
 
+    /* create the "private" part of the struct message */
+    m->priv = malloc (sizeof (struct libspamc_private_message));
+    if (m->priv == NULL) {
+        syslog(LOG_ERR, "message_read: malloc failed");
+        return EX_OSERR;
+    }
+    m->priv->flags = flags;
+
     switch(flags&SPAMC_MODE_MASK){
       case SPAMC_RAW_MODE:
         return message_read_raw(fd, m);
@@ -435,17 +451,17 @@ long message_write(int fd, struct message *m){
     off_t jlimit;
     char buffer[1024];
 
-    /* if we're to output a message, m->is_spam will be EX_OUTPUTMESSAGE */
-    if(m->is_spam==EX_ISSPAM || m->is_spam==EX_NOTSPAM){
-	return full_write(fd, (unsigned char *) m->out, m->out_len);
+    if (m->priv->flags&SPAMC_CHECK_ONLY) {
+	if(m->is_spam==EX_ISSPAM || m->is_spam==EX_NOTSPAM){
+	    return full_write(fd, (unsigned char *) m->out, m->out_len);
+
+	} else {
+	    syslog(LOG_ERR, "oops! SPAMC_CHECK_ONLY is_spam: %d\n", m->is_spam);
+	    return -1;
+	}
     }
 
-    if (m->is_spam != EX_OUTPUTMESSAGE && m->is_spam != EX_TOOBIG) {
-      syslog(LOG_ERR,
-	    "Cannot write this message, is_spam = %d!\n", m->is_spam);
-      return -1;
-    }
-
+    /* else we're not in CHECK_ONLY mode */
     switch(m->type){
       case MESSAGE_NONE:
         syslog(LOG_ERR, "Cannot write this message, it's MESSAGE_NONE!\n");
@@ -683,15 +699,14 @@ static int _message_filter(const struct sockaddr *addr,
     len = 0;		/* overwrite those headers */
 
     if (flags&SPAMC_CHECK_ONLY) {
-      close(sock);
-      if (m->is_spam == EX_TOOBIG) {
-	    /* We should have gotten headers back... Damnit. */
-	    failureval = EX_PROTOCOL; goto failure;
-      }
-      return EX_OK;
+	close(sock);
+	if (m->is_spam == EX_TOOBIG) {
+	      /* We should have gotten headers back... Damnit. */
+	      failureval = EX_PROTOCOL; goto failure;
+	}
+	return EX_OK;
     }
     else {
-	m->is_spam=EX_OUTPUTMESSAGE;
 	if (m->content_length < 0) {
 	    /* should have got a length too. */
 	    failureval = EX_PROTOCOL; goto failure;
@@ -806,6 +821,7 @@ FAIL:
 void message_cleanup(struct message *m) {
    if (m->out != NULL && m->out != m->raw) free(m->out);
    if (m->raw != NULL) free(m->raw);
+   if (m->priv != NULL) free(m->priv);
    clear_message(m);
 }
 
@@ -848,4 +864,3 @@ int message_filter(const struct sockaddr *addr, char *username, int flags,
 int message_filter_with_failover (const struct hostent *hent, int port,
                 char *username, int flags, struct message *m)
 { return _message_filter (NULL, hent, port, username, flags, m); }
-

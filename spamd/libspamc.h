@@ -17,7 +17,6 @@
 #define EX_NOTSPAM		  0
 #define EX_ISSPAM		  1
 #define EX_TOOBIG		866
-#define EX_OUTPUTMESSAGE	867
 
 /* Aug 14, 2002 bj: Bitflags instead of lots of bool parameters */
 #define SPAMC_MODE_MASK      1
@@ -45,6 +44,8 @@ typedef enum {
     MAX_MESSAGE_TYPE
 } message_type_t;
 
+struct libspamc_private_message;
+
 struct message {
     /* Set before passing the struct on! */
     int max_len;  /* messages larger than this will return EX_TOOBIG */
@@ -60,12 +61,14 @@ struct message {
 
     /* Filled in by filter_message */
     int is_spam;              /* EX_ISSPAM if the message is spam, EX_NOTSPAM
-                                 if not, EX_OUTPUTMESSAGE if a filtered message
-				 is returned in "out" below. */
+                                 if not */
     float score, threshold;   /* score and threshold */
     char *out; int out_len;   /* Output from spamd. Either the filtered
                                  message, or the check-only response. Or else,
                                  a pointer to msg above. */
+
+    /* these members added in SpamAssassin version 2.60: */
+    struct libspamc_private_message *priv;
 };
 
 /* Aug 14, 2002 bj: New interface functions */
