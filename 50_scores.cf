@@ -97,7 +97,7 @@
 # False negatives:       164  0.49%  (0.92% of spam,    437 weighted)
 # TCR: 74.527197  SpamRecall: 99.079%  SpamPrec: 99.915%  FP: 0.04%  FN: 0.49%
 
-# Start of GA-evolved scores
+# Start of generated scores
 
 score ACCEPT_CREDIT_CARDS 2.507 2.596 0 1.037
 score ACT_NOW_CAPS 0.545 1.343 0 0.699
@@ -881,9 +881,9 @@ score UP_TO_OR_MORES 0 0.390 0 0
 score DOMAIN_SUBJECT 0
 score RATWARE_EVAMAIL 2.900 2.800 0 0
 
-# End of GA-evolved scores.
+# End of generated scores.
 
-# Scores for tests that are scored manually or with isolated GA runs.  Most
+# Scores for tests that are scored manually or with isolated rescore runs.  Most
 # are net tests, userconf tests, tests occuring with very low frequency, or
 # tests with many false positives.
 
@@ -994,7 +994,7 @@ score MIME_SUSPECT_NAME 0.100
 # accessdb lookups
 score ACCESSDB 0
 
-# GA never changes the whitelist/blacklist scores
+# rescore never changes the whitelist/blacklist scores
 
 score USER_IN_BLACKLIST 100.000
 score USER_IN_WHITELIST -100.000
