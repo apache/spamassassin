@@ -53,7 +53,7 @@ replace_tag	X	(?:[x\xd7]|><)
 replace_tag	Y	[y\xff\xfd\xa5j]
 replace_tag	Z	[zs]
 replace_tag	IMG	(?:jpe?g|gif|png)
-replace_tag	SP	[\s\d_*\$\%(),.:;?!}{\[\]|\/?^#~\xa1`'+-]
+replace_tag	SP	[\s\d_*\$\%(),.:;?!}{\[\]|\/?^\#~\xa1`'+-]
 replace_tag	CUR	[\$\xa5\xa3\xa4\xa2]
 
 endif   # Mail::SpamAssassin::Plugin::ReplaceTags
