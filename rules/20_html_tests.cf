@@ -201,12 +201,8 @@ describe HTML_LINK_CLICK_CAPS	HTML link text says "CLICK"
 body HTML_RELAYING_FRAME	eval:html_test('relaying_frame')
 describe HTML_RELAYING_FRAME	Frame wanted to load outside URL
 
-# these two rules could probably use some tweaking/merging still
 body HTML_WEB_BUGS		eval:html_test('web_bugs')
-describe HTML_WEB_BUGS		Image tag with an ID code to identify you
-
-body HTML_IMAGE_WEB_BUGS	eval:html_test('image_web_bugs')
-describe HTML_IMAGE_WEB_BUGS	Tiny image used to identify you
+describe HTML_WEB_BUGS		Image tag intended to identify you
 
 body HTML_WIN_BLUR		eval:html_test('window_blur')
 describe HTML_WIN_BLUR		Javascript to move windows around
