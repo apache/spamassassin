@@ -116,6 +116,7 @@ sub new {
   $self->{check_mx_attempts} = 2;
   $self->{check_mx_delay} = 5;
   $self->{ok_locales} = '';
+  $self->{ok_languages} = '';
   $self->{allow_user_rules} = 0;
 
   $self->{dcc_body_max} = 999999;
@@ -399,6 +400,158 @@ How many seconds to wait before retrying an MX check.
       $self->{check_mx_delay} = $1+0; next;
     }
 
+=item ok_languages xx [ yy zz ... ]		(default: all)
+
+Which languages are considered OK to receive mail from.  Mail using
+character sets used by these languages will not be marked as possibly
+being spam in an undesired language.
+
+The following languages are recognized.  In your configuration, you must
+use the language specifier located in the first column, not the English
+name for the language.  You may also specify "all" if your language is
+not listed or if you want to allow any language.
+
+=over 4
+
+=item af	afrikaans
+
+=item am	amharic
+
+=item ar	arabic
+
+=item be	byelorussian
+
+=item bg	bulgarian
+
+=item bs	bosnian
+
+=item ca	catalan
+
+=item cs	czech
+
+=item cy	welsh
+
+=item da	danish
+
+=item de	german
+
+=item el	greek
+
+=item en	english
+
+=item eo	esperanto
+
+=item es	spanish
+
+=item et	estonian
+
+=item eu	basque
+
+=item fa	persian
+
+=item fi	finnish
+
+=item fr	french
+
+=item fy	frisian
+
+=item ga	irish
+
+=item gd	scots
+
+=item he	hebrew
+
+=item hi	hindi
+
+=item hr	croatian
+
+=item hu	hungarian
+
+=item hy	armenian
+
+=item id	indonesian
+
+=item is	icelandic
+
+=item it	italian
+
+=item ja	japanese
+
+=item ka	georgian
+
+=item ko	korean
+
+=item la	latin
+
+=item lt	lithuanian
+
+=item lv	latvian
+
+=item mr	marathi
+
+=item ms	malay
+
+=item ne	nepali
+
+=item nl	dutch
+
+=item no	norwegian
+
+=item pl	polish
+
+=item pt	portuguese
+
+=item qu	quechua
+
+=item rm	rhaeto-romance
+
+=item ro	romanian
+
+=item ru	russian
+
+=item sa	sanskrit
+
+=item sco	scots
+
+=item sk	slovak
+
+=item sl	slovenian
+
+=item sq	albanian
+
+=item sr	serbian
+
+=item sv	swedish
+
+=item sw	swahili
+
+=item ta	tamil
+
+=item th	thai
+
+=item tl	tagalog
+
+=item tr	turkish
+
+=item uk	ukrainian
+
+=item vi	vietnamese
+
+=item yi	yiddish
+
+=item zh	chinese
+
+=back
+
+Note that the language cannot always be recognized.  In that case, no
+points will be assigned.
+
+=cut
+
+    if (/^ok[-_]languages\s+(.+)$/) {
+      $self->{ok_languages} = $1; next;
+    }
+
 =item ok_locales xx [ yy zz ... ]		(default: en)
 
 Which locales (country codes) are considered OK to receive mail from.  Mail
@@ -438,9 +591,9 @@ Chinese (both simplified and traditional)
 
 =back
 
-So to simply allow all character sets through without giving them points, use
+To simply allow all character sets through without giving them points, use
 
-	ok_locales	ja ko ru th zh
+	ok_locales	all
 
 =cut
 

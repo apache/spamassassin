@@ -88,15 +88,19 @@ terse-report ---- End of SpamAssassin results
 
 ###########################################################################
 # Default prefs values: users can override these in their 
-# ~/.spamassassin.prefs files.
+# ~/.spamassassin/user_prefs files.
 
 # How many hits before a mail is considered spam.
 required_hits           5
 
-# Mail using languages used in these country codes will not be marked
+# Mail using locales used in these country codes will not be marked
 # as being possibly spam in a foreign language.
-#
 ok_locales              en
+
+# Mail using languages used in these country codes will not be marked
+# as being possibly spam in a foreign language.  This is an expensive
+# test, so it is set to "all" so the test will not be used by default.
+ok_languages            all
 
 # Some common prefs settings can be set here, to take effect site-wide
 # unless the user override them. See the .prefs file for explanations.
