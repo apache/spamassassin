@@ -1899,36 +1899,6 @@ Clear the unsafe_report template.
     code => \&Mail::SpamAssassin::Conf::Parser::set_template_clear
   });
 
-=item spamtrap ...some text for spamtrap reply mail...
-
-A template for spam-trap responses.  If the first few lines begin with
-C<Xxxxxx: yyy> where Xxxxxx is a header and yyy is some text, they'll be used
-as headers.  See the C<10_misc.cf> configuration file in
-C</usr/share/spamassassin> for an example.
-
-Unfortunately tags can not be used with this option.
-
-=cut
-
-  push (@cmds, {
-    command => 'spamtrap',
-    setting => 'spamtrap_template',
-    default => '',
-    type => $CONF_TYPE_TEMPLATE
-  });
-
-=item clear_spamtrap_template
-
-Clear the spamtrap template.
-
-=cut
-
-  push (@cmds, {
-    command => 'clear_spamtrap_template',
-    setting => 'spamtrap_template',
-    code => \&Mail::SpamAssassin::Conf::Parser::set_template_clear
-  });
-
 =back
 
 =head1 RULE DEFINITIONS AND PRIVILEGED SETTINGS
