@@ -874,6 +874,10 @@ sub get_decoded_stripped_body_text_array {
   $self->{html} = {};
   $self->{html_inside} = {};
   $self->{html}{ratio} = 0;
+  $self->{html}{total_image_area} = 0;
+  $self->{html}{num_imgs}         = 0;
+  $self->{html}{consec_imgs}      = 0;
+  $self->{html}{max_consec_imgs}  = 0;
 
   # do HTML conversions if necessary
   if ($text =~ m/<\s*[a-z:!][a-z:\d_-]*(?:\s.*?)?\s*>/is) {
