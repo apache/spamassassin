@@ -20,7 +20,7 @@ Regression Test Options
 -----------------------
 
 The test case scripts are located in directory t/ under the root
-build directory, in files named t/*.t
+build directory, in files named t/*.t .
 
 When the tests are run, those that are not applicable in your OS or
 with the build options that you selected will be skipped.
@@ -39,6 +39,20 @@ Wildcards can be used in shell file globbing syntax, as in
 
 The wildcard syntax does not work with standard Windows command
 shells.
+
+You can also run individual test scripts directly, from the "t" directory,
+like so:
+
+ cd t
+ ./spamc.t
+
+Getting more output from the tests
+----------------------------------
+
+The test suite can be run in a verbose mode using the TEST_VERBOSE=1
+switch:
+
+ make test TEST_VERBOSE=1
 
 Options set using environment variables
 ---------------------------------------
