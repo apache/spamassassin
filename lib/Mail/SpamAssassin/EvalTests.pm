@@ -3344,4 +3344,19 @@ sub check_obfu_word {
   return 0;
 }
 
+###########################################################################
+
+sub check_ratware_name_id {
+  my ($self) = @_;
+
+  my $mid = $self->get('MESSAGEID');
+  my $from = $self->get('From');
+  if ($mid =~ m/<[A-Z]{28}\.([^>]+?)>/) {
+     if ($from =~ m/\"[^\"]+\"\s*<$1>/) {
+       return 1;
+     }
+  }
+  return 0;
+}
+
 1;
