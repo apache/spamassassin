@@ -135,6 +135,14 @@ header T_MSG_ID_ADDED_BY_MTA_LATER	eval:mta_added_message_id('later')
 header T_MSG_ID_ADDED_BY_MTA_BACKUP	eval:mta_added_message_id('backup')
 tflags T_MSG_ID_ADDED_BY_MTA_BACKUP	net
 
+# 2003-03-02: quinlan
+header T_NO_DNS_FOR_RECIPS_ONE		eval:check_for_recips_dns('1','2')
+header T_NO_DNS_FOR_RECIPS_TWO		eval:check_for_recips_dns('2','3')
+header T_NO_DNS_FOR_RECIPS_MANY		eval:check_for_recips_dns('3','undef')
+tflags T_NO_DNS_FOR_RECIPS_ONE		net
+tflags T_NO_DNS_FOR_RECIPS_TWO		net
+tflags T_NO_DNS_FOR_RECIPS_MANY		net
+
 # bug 1416, possible replacement for AS_SEEN_ON
 body     T_AS_SEEN_ON             /seen on\b\s*(?:T\.?V\.?|ABC|NBC|CBS|CNN|Oprah|USA Today|48 Hours|New York Times|\w+\s+T\.?V\.?|:)/i
 
@@ -145,6 +153,12 @@ meta T_FAKED_OUTLOOK		(__OUTLOOK_MUA && __MIME_HTML_ONLY)
 meta T_FAKED_AOL		(__AOL_MUA && __MIME_HTML_ONLY)
 meta T_FAKED_THEBAT		(__THEBAT_MUA && __MIME_HTML_ONLY)
 meta T_FAKED_IMS		(__IMS_MUA && __MIME_HTML_ONLY)
+
+# 2003-03-02: quinlan
+# double REMOVE tests
+body T_REMOVE_REMOVAL_16	/remov(?:e|al).{0,16}remov(?:e|al)/i
+body T_REMOVE_REMOVAL_32	/remov(?:e|al).{0,32}remov(?:e|al)/i
+body T_REMOVE_REMOVAL_64	/remov(?:e|al).{0,64}remov(?:e|al)/i
 
 # bug 1421, possible replacement for USERPASS
 uri T_USERPASS                    m{https?://[^/\s]+?(?::[^/\s]+?)?\@}
