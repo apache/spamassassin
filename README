@@ -85,7 +85,9 @@ Customising SpamAssassin
 These are the configuration files installed by SpamAssassin.  The commands
 that can be used therein are listed in the POD documentation for the
 Mail::SpamAssassin::Conf class (run the following command to read it:
-"perldoc Mail::SpamAssassin::Conf").
+"perldoc Mail::SpamAssassin::Conf").  Note: The following directories are
+the standard defaults that people use.  There is an explanation of all the
+default locations that SpamAssassin will look at the end.
 
   - /usr/share/spamassassin/*.cf:
 
@@ -143,6 +145,37 @@ Mail::SpamAssassin::Conf class (run the following command to read it:
 
 	See "perldoc sa-learn-nonspam" for more documentation on how
 	to train this.
+
+File Locations:
+SpamAssassin will look in a number of areas to find the default
+configuration files that are used.  The "__*__" text are variables which
+get set during installation.  You can see their values by viewing the
+first several lines of the "spamassassin" or "spamd" scripts.
+
+  - Distributed Configuration Files
+        '__def_rules_dir__'
+        '__prefix__/share/spamassassin'
+        '/usr/local/share/spamassassin'
+        '/usr/share/spamassassin'
+
+  - Site Configuration Files
+        '__local_rules_dir__'
+        '__prefix__/etc/mail/spamassassin'
+        '__prefix__/etc/spamassassin'
+        '/usr/local/etc/spamassassin'
+        '/usr/pkg/etc/spamassassin'
+        '/usr/etc/spamassassin'
+        '/etc/mail/spamassassin'
+        '/etc/spamassassin'
+
+  - Default User Preferences File
+        '__local_rules_dir__/user_prefs.template'
+        '__prefix__/etc/mail/spamassassin/user_prefs.template'
+        '__prefix__/share/spamassassin/user_prefs.template'
+        '/etc/spamassassin/user_prefs.template'
+        '/etc/mail/spamassassin/user_prefs.template'
+        '/usr/local/share/spamassassin/user_prefs.template'
+        '/usr/share/spamassassin/user_prefs.template'
 
 
 After installation, try "perldoc Mail::SpamAssassin::Conf" to see what
