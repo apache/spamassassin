@@ -292,11 +292,17 @@ takes longer to get it right than a full training session would.
 
 =item B<--ham>
 
-Learn the input message(s) as ham.
+Learn the input message(s) as ham.   If you have previously learnt
+any of the messages as spam, SpamAssassin will forget them first, then
+re-learn them as ham.  Alternatively, if you have previously learnt
+them as ham, it'll skip them this time around.
 
 =item B<--spam>
 
-Learn the input message(s) as spam.
+Learn the input message(s) as spam.   If you have previously learnt
+any of the messages as ham, SpamAssassin will forget them first, then
+re-learn them as spam.  Alternatively, if you have previously learnt
+them as spam, it'll skip them this time around.
 
 =item B<--rebuild>
 
@@ -456,7 +462,7 @@ spamassassin(1)
 http://www.paulgraham.com/ , Paul Graham's "A Plan For Spam" paper
 
 http://radio.weblogs.com/0101454/stories/2002/09/16/spamDetection.html , Gary
-Robinson's f(x) and combining algorithms
+Robinson's f(x) and combining algorithms, as used in SpamAssassin
 
 http://www.bgl.nu/~glouis/bogofilter/test6000.html , discussion of various
 Bayes training regimes, including 'train on error' and unsupervised training
