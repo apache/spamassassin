@@ -689,7 +689,7 @@ describe CONGRATULATIONS	Congratulations - you've been scammed?
 body SIGN_UP			/\b(?:free sign up|sign up today)\b/i
 describe SIGN_UP		Sign up Free Today
 
-body FREE_CELL_PHONE	 	/\bfree .{0,12}(?:cell|mobile) phone/i
+body FREE_CELL_PHONE            /\bfree .{0,12}(?:cell(?:ular)?|mobile) phone|cell(?:ular)? phone for free/i
 describe FREE_CELL_PHONE	Free Cell Phone
 
 body FREE_PREVIEW		/\bfree preview\b/i
