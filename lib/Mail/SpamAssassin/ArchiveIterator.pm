@@ -287,6 +287,9 @@ sub run {
     }
 
     # we now have a temp file with the messages to process
+    # in theory, our file pointer is at the start of the file, but make sure.
+    # NOTE: do this here, not in message_array, since that will only affect
+    # the child.
     seek ($self->{messageh}, 0, 0);
     $MESSAGES = $self->next_message();
 
