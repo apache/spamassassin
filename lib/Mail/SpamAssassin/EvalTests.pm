@@ -219,8 +219,10 @@ sub _check_mta_message_id {
 
   my $id = $self->get ('Message-Id');
 
-  # exempt certain Message-Id headers (could backfire so be prepared to remove)
-  return if $id =~ /\@.*(?:localhost\.localdomain|linux\.local|yahoo)/;
+  # Yahoo! and Wanadoo.fr do add their Message-Id on transport time:
+  # Yahoo! MIDs can depend on the country: yahoo.com, yahoo.fr, yahoo.co.uk, etc.
+  # Wanadoo MIDs end always in wanadoo.fr
+  return if $id =~ /\@[a-z0-9.-]+\.(?:yahoo|wanadoo)(?:\.[a-z]{2,3}){1,2}>/;
 
   # no further checks in simple case
   if ($later_mta) {
