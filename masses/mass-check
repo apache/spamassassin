@@ -30,16 +30,15 @@ foreach my $folder (@ARGV) {
     $_ = $ma->get ("X-Spam-Status");
     /^(\S+), hits=(\S+) required=\S+ tests=(.+)\s*$/s;
 
-    my $yorn = $1;
-    my $hits = $2+0;
-    my $tests = $3;
-    $tests =~ s/\s+//gs;
+    my $yorn = $status->is_spam();
+    my $hits = $status->get_hits();
+    my $tests = $status->get_names_of_tests_hit();
 
     $ma = undef;		# clean 'em up
     $status = undef;
 
     printf "%s %2d %s %s\n",
-		      (($yorn eq "Yes") ? 'Y' : '.'),
+		      ($yorn ? 'Y' : '.'),
 		      $hits, $mail, $tests;
   }
 }
