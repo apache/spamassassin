@@ -91,7 +91,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.130 2002/10/09 10:13:11 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.131 2002/10/09 14:18:52 jmason Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -426,9 +426,10 @@ sub add_address_to_blacklist {
 
 =item $f->add_all_addresses_to_blacklist ($mail)
 
-Given a mail message, find as many addresses in the usual headers (To,
-Cc, From etc.), and the message body, and adds them to the automatic
-whitelist database with a high score, effectively blacklisting them.
+Given a mail message, find addresses in the From headers and add them to the
+automatic whitelist database with a high score, effectively blacklisting them.
+
+Note that To and Cc addresses are not used.
 
 =cut
 
@@ -436,11 +437,22 @@ sub add_all_addresses_to_blacklist {
   my ($self, $mail_obj) = @_;
 
   my $list = Mail::SpamAssassin::AutoWhitelist->new($self);
-  foreach my $addr ($self->find_all_addrs_in_mail ($mail_obj)) {
+
+  $self->init(1);
+  my $mail = $self->encapsulate_mail_object ($mail_obj);
+
+  my @addrlist = ();
+  my @hdrs = $mail->get_header ('From');
+  if ($#hdrs > 0) {
+    push (@addrlist, $self->find_all_addrs_in_line (join (" ", @hdrs)));
+  }
+
+  foreach my $addr (@addrlist) {
     if ($list->add_known_bad_address ($addr)) {
       print "SpamAssassin auto-whitelist: blacklisting address: $addr\n";
     }
   }
+
   $list->finish();
 }
 
