@@ -3358,6 +3358,7 @@ sub check_host_domain_ratio {
         else {
           # mad skillz yo
           if ($_ eq 's') {
+            # we should figure out how to handle "pill's benefits"
             $_ = '[sz]';
           }
 
