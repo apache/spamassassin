@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.1 2002/08/19 13:14:31 matt_sergeant Exp $
+# $Id: HTML.pm,v 1.2 2002/08/20 02:08:48 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -44,7 +44,7 @@ sub html_uri {
   elsif ($tag =~ /^(?:img|frame|iframe|embed|script)$/) {
     $self->{html_text} .= "URI:$uri " if $uri = $attr->{src};
   }
-  elsif ($tag =~ /^(?:table|td)$/) {
+  elsif ($tag =~ /^(?:body|table|tr|td)$/) {
     $self->{html_text} .= "URI:$uri " if $uri = $attr->{background};
   }
   elsif ($tag eq "form") {
@@ -190,7 +190,11 @@ sub html_tests {
       $self->{html}{font_face_odd} = 1 if ! /^\s*(?:arial|comic sans ms|courier new|geneva|helvetica|ms mincho|sans-serif|serif|tahoma|times new roman|verdana)\s*$/i;
     }
   }
-  if ($tag eq "img" && exists $attr->{src} && $attr->{src} =~ /\?/) {
+  if (($tag eq "img" && exists $attr->{src} &&
+       $attr->{src} =~ /(?:\?|[a-f\d]{12,})/i) ||
+      ($tag =~ /^(?:body|table|tr|td)$/ && exists $attr->{background} &&
+       $attr->{background} =~ /(?:\?|[a-f\d]{12,})/i))
+  {
     $self->{html}{web_bugs} = 1;
   }
   if ($tag =~ /^i?frame$/) {
