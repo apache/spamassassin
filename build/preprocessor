@@ -3,7 +3,10 @@
 # processor. It currently accepts these options on the command line:
 #
 #   -M<module>            Enables <module>
-#   -D<variable>=<value>  Defines the <variable> to be <value>
+#   -D<variable>=<value>  Defines the <variable> to be <value>; if the value
+#                         doesn't contain an equal sign, it is interpreted
+#                         as a file and all of its lines containing equal
+#                         signs are taken as <variable>=<value> pairs
 #
 # and some more to help with non-UNIX platforms, where command-line input
 # and output redirection are not always available:
@@ -52,6 +55,7 @@ foreach (keys %ENV) {
 foreach (@ARGV) {
   if    (/^-M([a-z]+)$/)       { $modules{$1} = 1; }
   elsif (/^-D([A-Z_]+)=(.*)$/) { $defines{$1} = $2; }
+  elsif (/^-D([^=]+)$/)        { read_defs($1); } 
   elsif (/^-i(.+)$/)           { $infile = $1; }
   elsif (/^-o(.+)$/)           { $outfile = $1; }
   elsif (/^-I(.+)$/)           { $indir = $1; }
@@ -80,10 +84,27 @@ else {
   do_stdin();
 }
 
+
+sub read_defs {
+  my ($in) = @_;
+  open (DEFS, "<$in") or die "Connot open $in: $!";
+  foreach (<DEFS>) {
+    $_ =~ s/^\s+|\s+$//g;
+    next if /^#/;
+    next unless /=/;
+    my ($var, $val) = split(/\s*=\s*/, $_, 2);
+    $var =~ tr/A-Z_//cd;
+    $defines{$var} = $val;
+  }
+  close (DEFS);
+}
+
+
 sub do_file {
   my ($in, $out) = @_;
   open (STDIN, "<$in") or die "Cannot open $in: $!";
-  open (OUT, ">$out") or die "Cannot open $out: $!"; select OUT;
+  open (OUT, ">$out") or die "Cannot open $out: $!";
+  select OUT;
   do_stdin();
   close STDIN; close OUT;
 }
