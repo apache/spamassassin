@@ -303,7 +303,7 @@ sub learn {
   } elsif ($hits >= $max) {
     $isspam = 1;
   } else {
-    dbg ("auto-learn? no: inside auto-learn thresholds or safety zone around required_hits");
+    dbg ("auto-learn? no: inside auto-learn thresholds");
     return;
   }
 
