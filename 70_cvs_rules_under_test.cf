@@ -136,6 +136,40 @@ describe T_SORTED_RECIPS	Recipient list is sorted by address
 
 ########################################################################
 
+# more work on slow rules, mostly adding \b, but with one or two other
+# performance improvement attempts, total speed-up if all of these are
+# applied is 2.0%
+#   RULE                  TIME FRACTION
+# large speed-up, use unless the new rule is significantly worse than original 
+#   T_PORN_16             0.34
+#   T_VERB_UP_TO_OR_MORES 0.44
+#   T_SELECTED_YOU        0.50
+#   T_SOME_BREAKTHROUGH   0.62
+#   T_CELEBRITY_PORN      0.64
+#   T_AMATEUR_PORN        0.76
+# small speed-up, use if the new rule is about the same as original or better
+#   T_RAPE                0.87
+#   T_MARKETING_PARTNERS  0.89
+#   T_HAIR_LOSS           0.91
+# no measurable speed-up, only use if rule is equal or better
+#   T_ONLINE_PHARMACY     1.00
+#   T_WINNER              1.03
+
+body T_CELEBRITY_PORN		/\bceleb(?:rity|rities|s).{0,15}(?:sex|porn|pics|caught|nude|exposed|content)|\b(?:steamy|hot|nude|shocking|free|h[a\@]rdcore) celeb(?:rity|rities|s)/i
+body T_MARKETING_PARTNERS	/\b(?:marketing|network) partner|\bpartner (?:web)?site/i
+body T_PORN_16			/\b(?:nasty|teen|dir(?:ty|iest)?|little).{0,16}\bsluts?/i 
+body T_ONLINE_PHARMACY		/\bonline pharmacy|\b(?:drugs|medications) online/i
+body T_SOME_BREAKTHROUGH	/\b(?:science|medical|major|scientific|fundamental|technology|revolutionary)\s+breakthrough/i
+body T_AMATEUR_PORN		/\bamateur .{0,9}(?:sex|porn|star|sites?|college|babes|action|pics|trash|gang|rape)|\b(?:real|best) amateur/i
+body T_HAIR_LOSS		/\b(?:thinn?ing|restore|grow|new) hair|\bhair loss/i
+body T_VERB_UP_TO_OR_MORES	/\b(add|lose|make|save) up to \S+( \S+)? or more/i
+body T_SELECTED_YOU		/\b(?:you (?:have been|were) selected|\bwe (?:have )?selected you)/i
+body T_RAPE			/\b(?:virgin|gang|teen|amateur) rape|\brape (?:sites?|sex)\b/i
+body T_WINNER			/\byou.{0,4} a winner|\bregister to win/i
+body T__NIGERIAN_BODY_1		/\b(?:financial|confiden(?:tial|ce)|safe|mutual|secret|success|risk-?free|details|business).{1,30}\btransaction\b/i
+
+########################################################################
+
 # 12/25 - tvd - this FPs on Car Talk newsletters, the hit rate is pretty
 # low all around (likely to just remove), but let's try a meta exception anyway.
 header T_X_BULKMAIL			exists:X-Bulkmail
