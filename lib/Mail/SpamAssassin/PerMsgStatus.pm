@@ -40,7 +40,7 @@ use Mail::SpamAssassin::EncappedMessage;
 use Mail::Audit;
 
 use vars	qw{
-  	@ISA
+  	@ISA $base64alphabet
 };
 
 @ISA = qw();
@@ -76,23 +76,49 @@ sub check {
   # in order of slowness; fastest first, slowest last.
   # we do ALL the tests, even if a spam triggers lots of them early on.
   # this lets us see ludicrously spammish mails (score: 40) etc., which
-  # (TODO) we can then immediately submit to spamblocking services.
+  # we can then immediately submit to spamblocking services.
+  # Also, if parts of the message contain encoded bits (quoted-printable
+  # or base64), we test *both*.
 
   {
-    $self->{msg_body_array} = $self->{msg}->get_body();
-    $self->{full_msg_string} = $self->{msg}->get_all_headers()."\n".
-				  join ('', @{$self->{msg_body_array}});
-
     $self->do_head_tests();
-    $self->do_body_tests();
-    $self->do_body_eval_tests();
-    $self->do_full_tests();
-    $self->do_full_eval_tests();
-    $self->do_head_eval_tests();
 
-    # these are big, so delete them now.
-    delete $self->{msg_body_array};
-    delete $self->{full_msg_string};
+    # do body tests with raw text portions
+    {
+      my $bodytext = $self->get_raw_body_text_array();
+      $self->do_body_tests($bodytext);
+      $self->do_body_eval_tests($bodytext);
+    }
+
+    # do body tests with decoded portions
+    {
+      my $decoded = $self->get_decoded_body_text_array();
+      if (defined $decoded) {
+	$self->do_body_tests($decoded);
+	$self->do_body_eval_tests($decoded);
+      }
+    }
+
+    # and do full tests: first with entire, full, undecoded message
+    {
+      my $fulltext = join ('', $self->{msg}->get_all_headers(), "\n",
+      				@{$self->{msg}->get_body()});
+      $self->do_full_tests($fulltext);
+      $self->do_full_eval_tests($fulltext);
+    }
+
+    # then with decoded message
+    {
+      my $decoded = $self->get_decoded_body_text_array();
+      if (defined $decoded) {
+	my $fulltext = join ('', $self->{msg}->get_all_headers(), "\n",
+				  @{$decoded});
+	$self->do_full_tests($fulltext);
+	$self->do_full_eval_tests($fulltext);
+      }
+    }
+
+    $self->do_head_eval_tests();
   }
 
   $self->{required_hits} = $self->{conf}->{required_hits};
@@ -125,6 +151,53 @@ sub is_spam {
   my ($self) = @_;
   return $self->{is_spam};
 }
+
+###########################################################################
+
+=item $list = $status->get_names_of_tests_hit ()
+
+After a mail message has been checked, this method can be called.  It will
+return a comma-separated string, listing all the symbolic test names
+of the tests which were trigged by the mail.
+
+=cut
+
+sub get_names_of_tests_hit {
+  my ($self) = @_;
+
+  $self->{test_names_hit} =~ s/,$//;
+  return $self->{test_names_hit};
+}
+
+###########################################################################
+
+=item $num = $status->get_hits ()
+
+After a mail message has been checked, this method can be called.  It will
+return the number of hits this message incurred.
+
+=cut
+
+sub get_hits {
+  my ($self) = @_;
+  return $self->{hits};
+}
+
+###########################################################################
+
+=item $num = $status->get_required_hits ()
+
+After a mail message has been checked, this method can be called.  It will
+return the number of hits required for a mail to be considered spam.
+
+=cut
+
+sub get_required_hits {
+  my ($self) = @_;
+  return $self->{required_hits};
+}
+
+###########################################################################
 
 =item $report = $status->get_report ()
 
@@ -244,10 +317,9 @@ sub rewrite_as_spam {
   $self->{msg}->replace_header ("Subject", $_);
 
   # add some headers...
-  $self->{test_names_hit} =~ s/,$//;
 
   $_ = sprintf ("Yes, hits=%d required=%d tests=%s",
-	$self->{hits}, $self->{required_hits}, $self->{test_names_hit});
+	$self->{hits}, $self->{required_hits}, $self->get_names_of_tests_hit());
 
   $self->{msg}->put_header ("X-Spam-Status", $_);
   $self->{msg}->put_header ("X-Spam-Flag", 'YES');
@@ -305,11 +377,21 @@ sub handle_auto_report {
 ###########################################################################
 # Non-public methods from here on.
 
-sub get_body_text {
+sub get_raw_body_text_array {
   my ($self) = @_;
   local ($_);
 
-  if (defined $self->{body_text}) { return $self->{body_text}; }
+  if (defined $self->{body_text_array}) { return $self->{body_text_array}; }
+
+  $self->{found_encoding_base64} = 0;
+  $self->{found_encoding_quoted_printable} = 0;
+
+  my $cte = $self->{msg}->get_header ('Content-Transfer-Encoding');
+  if (defined $cte && $cte =~ /quoted-printable/) {
+    $self->{found_encoding_quoted_printable} = 1;
+  } elsif (defined $cte && $cte =~ /base64/) {
+    $self->{found_encoding_base64} = 1;
+  }
 
   my $ctype = $self->{msg}->get_header ('Content-Type');
   $ctype ||=  $self->{msg}->get_header ('Content-type');
@@ -317,20 +399,28 @@ sub get_body_text {
 
   my $body = $self->{msg}->get_body();
   if ($ctype !~ /boundary="(.*)"/) {
-    $self->{body_text} = $body;
-    return $self->{body_text};
+    $self->{body_text_array} = $body;
+    return $self->{body_text_array};
   }
 
   # else it's a multipart MIME message. Skip non-text parts and
   # just assemble the body array from the text bits.
-  $self->{body_text} = [ ];
+  $self->{body_text_array} = [ ];
   my $multipart_boundary = "--$1\n";
   my $end_boundary = "--$1--\n";
 
   my @workingbody = @{$body};
 
   while ($_ = (shift @workingbody)) {
-    push (@{$self->{body_text}}, $_);
+    push (@{$self->{body_text_array}}, $_);
+
+    if (/^Content-Transfer-Encoding: /) {
+      if (/quoted-printable/) {
+	$self->{found_encoding_quoted_printable} = 1;
+      } elsif (/base64/) {
+	$self->{found_encoding_base64} = 1;
+      }
+    }
 
     if ($multipart_boundary eq $_) {
       $_ = (shift @workingbody);
@@ -344,7 +434,48 @@ sub get_body_text {
     }
   }
 
-  return $self->{body_text};
+  return $self->{body_text_array};
+}
+
+###########################################################################
+
+sub get_decoded_body_text_array {
+  my ($self) = @_;
+  local ($_);
+  my $textary = $self->get_raw_body_text_array();
+
+  # TODO: doesn't yet handle checking multiple-attachment messages,
+  # where one part is qp and another is b64.  Instead the qp will
+  # be simply stripped.
+
+  if ($self->{found_encoding_base64}) {
+    $_ = '';
+    my $foundb64 = 0;
+    foreach my $line (@{$textary}) {
+      if (length($line) != 77) {	# 76 + newline
+	if ($foundb64) {
+	  $_ .= $line;		# last line of block is usually short
+	  last;
+	}
+      } else {
+	$_ .= $line; $foundb64 = 1;
+      }
+    }
+
+    $_ = $self->slow_base64_decode ($_);
+    # print "decoded: $_\n";
+    my @lines = split (/^/, $_);
+    return \@lines;
+
+  } elsif ($self->{found_encoding_quoted_printable}) {
+    $_ = join ('', $textary);
+    s/\=([0-9A-Fa-f]{2})/chr(hex($1))/ge; s/\=\n/\n/;
+    my @lines = split (/^/, $_);
+    return \@lines;
+
+  } else {
+    return undef;
+  }
 }
 
 ###########################################################################
@@ -415,7 +546,7 @@ sub do_head_tests {
 }
 
 sub do_body_tests {
-  my ($self) = @_;
+  my ($self, $textary) = @_;
   my ($rulename, $pat);
   local ($_);
   $self->clear_test_state();
@@ -431,7 +562,6 @@ sub do_body_tests {
   }
 
   # generate the loop that goes through each line...
-  my $textary = $self->get_body_text();
   $evalstr = 'foreach $_ (@{$textary}) { study; '.$evalstr.'; }';
 
   # and run it.
@@ -442,7 +572,7 @@ sub do_body_tests {
 }
 
 sub do_full_tests {
-  my ($self) = @_;
+  my ($self, $fullmsgstring) = @_;
   my ($rulename, $pat);
   local ($_);
   $self->clear_test_state();
@@ -458,7 +588,7 @@ sub do_full_tests {
   }
 
   # and run it.
-  $_ = $self->{full_msg_string};
+  $_ = $fullmsgstring; $fullmsgstring = undef;
   if (!eval 'study; '.$evalstr.'; 1;') {
     warn "Failed to run full SpamAssassin tests, skipping:\n".
 	      "\t($@)\n";
@@ -473,13 +603,13 @@ sub do_head_eval_tests {
 }
 
 sub do_body_eval_tests {
-  my ($self) = @_;
-  $self->run_eval_tests ($self->{conf}->{body_evals}, 'BODY: ', $self->{msg_body_array});
+  my ($self, $bodystring) = @_;
+  $self->run_eval_tests ($self->{conf}->{body_evals}, 'BODY: ', $bodystring);
 }
 
 sub do_full_eval_tests {
-  my ($self) = @_;
-  $self->run_eval_tests ($self->{conf}->{full_evals}, '', $self->{full_msg_string});
+  my ($self, $fullmsgstring) = @_;
+  $self->run_eval_tests ($self->{conf}->{full_evals}, '', $fullmsgstring);
 }
 
 ###########################################################################
@@ -560,6 +690,57 @@ sub got_hit {
 sub test_log {
   my ($self, $msg) = @_;
   $self->{test_log_msgs} .= sprintf ("%16s [%s]\n", "", $msg);
+}
+
+###########################################################################
+# Rather than add a requirement for MIME::Base64, use a slower but
+# built-in base64 decode mechanism.
+#
+# original credit for this code:
+# b64decode -- decode a raw BASE64 message
+# A P Barrett <barrett@ee.und.ac.za>, October 1993
+# Minor mods by jm@jmason.org for spamassassin and "use strict"
+
+sub slow_base64_decode {
+  my ($self) = shift;
+  local ($_) = shift;
+
+  $base64alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.
+		    'abcdefghijklmnopqrstuvwxyz'.
+		    '0123456789+/'; # and '='
+
+  my $leftover = '';
+
+  # ignore illegal characters
+  s/[^$base64alphabet]//go;
+  # insert the leftover stuff from last time
+  $_ = $leftover . $_;
+  # if there are not a multiple of 4 bytes, keep the leftovers for later
+  m/^((....)*)/; $_=$&; $leftover=$';
+  # turn each group of 4 values into 3 bytes
+  s/(....)/&b64decodesub($1)/eg;
+  # special processing at EOF for last few bytes
+  if (eof) {
+      $_ .= &b64decodesub($leftover); $leftover = '';
+  }
+  # output it
+  return $_;
+}
+
+# b64decodesub -- takes some characters in the base64 alphabet and
+# returns the raw bytes that they represent.
+sub b64decodesub
+{
+  local ($_) = $_[0];
+	   
+  # translate each char to a value in the range 0 to 63
+  eval qq{ tr!$base64alphabet!\0-\77!; };
+  # keep 6 bits out of every 8, and pack them together
+  $_ = unpack('B*', $_); # look at the bits
+  s/(..)(......)/$2/g;   # keep 6 bits of every 8
+  s/((........)*)(.*)/$1/; # throw away spare bits (not multiple of 8)
+  $_ = pack('B*', $_);   # turn the bits back into bytes
+  $_; # return
 }
 
 ###########################################################################
