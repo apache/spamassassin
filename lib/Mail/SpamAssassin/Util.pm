@@ -636,17 +636,19 @@ sub parse_content_type {
   # white space, the white space must be presumed to have been added by
   # a gateway, and must be deleted.)"
   #
-  ## Be more conservative and require non-blank boundaries?
-  #my($boundary) = $ct =~ m!\bboundary\s*=("[^"]*[^"\s]"|[^";\s]+)!i;
-  ## Be a little more liberal and accept blank boundaries?
-  my($boundary) = $ct =~ m!\bboundary\s*=("[^"]*"|[^";\s]*)!i;
+  # In practice:
+  # - MUAs accept whitespace before and after the "=" character
+  # - only an opening double quote seems to be needed
+  # - non-quoted boundaries should be followed by space, ";", or end of line
+  # - blank boundaries seem to not work
+  my($boundary) = $ct =~ m!\bboundary\s*=\s*("[^"]+|[^\s";]+(?=[\s;]|$))!i;
 
-  # If there are double-quotes in the boundary, get rid of them.
-  $boundary =~ tr/"//d if ( defined $boundary );
+  # remove double-quotes in boundary (should only be at start and end)
+  $boundary =~ tr/"//d if defined $boundary;
 
   # Parse out the charset and name, if they exist.
   my($charset) = $ct =~ /\bcharset\s*=\s*["']?(.*?)["']?(?:;|$)/i;
-  my($name) = $ct =~ /name\s*=\s*["']?(.*?)["']?(?:;|$)/i;
+  my($name) = $ct =~ /\b(?:file)?name\s*=\s*["']?(.*?)["']?(?:;|$)/i;
 
   # Get the type out ...
   $ct =~ s/;.*$//;                    # strip everything after first semi-colon
