@@ -606,3 +606,12 @@ meta T_MIME_HTML_NO_BODY_TAG	MIME_HTML_ONLY && !__TAG_EXISTS_BODY
 #   0.722   1.2360   0.0000    1.000   1.00    0.01  T_URI_PXLG
 uri T_URI_PXLG		m{http://(?:www\.)?pxlg\.com}i
 describe T_URI_PXLG	URL references pxlg.com
+
+# alan premselaar <alien@12inch.com>, see SpamAssassin-talk list
+header  T_SUBJ_JAPAN_SPAM  Subject =~ /L\$\>5Bz9\-9p\"\(/
+describe T_SUBJ_JAPAN_SPAM Subject: contains Japanese mandatory unsolicited mail tag
+
+# via private mail with Mark Delany; thx Mark!
+header T_FORGED_YAHOO_RCVD_SMTP    Received =~ /from smtp(?:\d{1,2}|\d{4,})\.mail(?:\.[^\.]+|)\.yahoo\.com /
+describe T_FORGED_YAHOO_RCVD_SMTP  Received: contains forged Yahoo! SMTP server hostname
+
