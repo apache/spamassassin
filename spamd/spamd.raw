@@ -706,15 +706,14 @@ sub check {
     while ($_ = $client->getline()) {
         if (($actual_length == 0) .. /^$/) {             # still in header
             if (/^(Resent-)?Message-Id:\s+(.*?)\s*$/i) {
-                my $id = $2;
-                while($id =~ s/\([^\(\)]*\)//) {};    # remove comments and
-                $id =~ s/^\s+|\s+$//g;                # leading and trailing spaces
-                $id =~ s/\s.*$//;                     # keep only the first token
-                unless ($1) {
-                    $msgid  = $id;
-                } else {
-                    $rmsgid = $id;
-                }
+                my $id = $1 ? \$rmsgid : \$msgid;
+                $$id = $2 || '';
+                while($$id =~ s/\([^\(\)]*\)//) {}; # remove comments and
+                $$id =~ s/^\s+|\s+$//g;             # leading and trailing spaces
+                $$id =~ s/^.*?<(.*?)>.*$/$1/;       # keep only the id itself
+                $$id =~ s/[^\x21-\x7e]/?/g;         # replace all weird chars
+                $$id =~ s/[<>]/?/g;                 # plus all dangling angle brackets
+                $$id =~ s/^(.+)$/<$1>/;             # re-bracket the id (if not empty)
             }
         }
         push(@msglines, $_);
@@ -726,9 +725,10 @@ sub check {
     $current_user ||= "(unknown)";
     logmsg(
       ($method eq 'PROCESS' ? "processing" : "checking") .
-      " message $msgid" . 
-      ($rmsgid ? " ($rmsgid)" : "" ) . 
-      " for ${current_user}:$>."
+        " message $msgid" . 
+        ($rmsgid ? " aka $rmsgid" : "" ) . 
+        " for ${current_user}:$>" . 
+      "."
     );
 
     my $mail = Mail::SpamAssassin::NoMailAudit->new (
@@ -1115,7 +1115,8 @@ sub logmsg
   $SIG{'PIPE'} = sub { $main::SIGPIPE_RECEIVED++; };
 
   my $msg = join(" ", @_);
-  chomp($msg);             # remove possible trailing newlines
+  $msg =~ s/[\r\n]+$//;      # remove any trailing newlines
+  $msg =~ s/[[:cntrl:]]/_/g; # replace all other control chars with underscores
 
   warn "logmsg: $msg\n" if $opt{'debug'};
 
