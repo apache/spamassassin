@@ -971,7 +971,7 @@ sub _check_whitelist_rcvd {
     my $regexp = $list->{$white_addr}{re};
     foreach my $domain (@{$list->{$white_addr}{domain}}) {
       
-      if ($addr =~ /${regexp}/i) {
+      if ($addr =~ qr/${regexp}/i) {
         foreach my $lastunt (@relays) {
           my $rdns = $lastunt->{lc_rdns};
           if ($rdns =~ /(?:^|\.)\Q${domain}\E$/) { return 1; }
@@ -1001,7 +1001,7 @@ sub _check_whitelist {
   if (defined ($list->{$addr})) { return 1; }
   study $addr;
   foreach my $regexp (values %{$list}) {
-    if ($addr =~ /$regexp/i) {
+    if ($addr =~ qr/$regexp/i) {
       return 1;
     }
   }
