@@ -420,6 +420,10 @@ sub razor2_lookup {
           }
           $rc->check($objects) or die $rc->errprefix("checkit");
           $rc->disconnect() or die $rc->errprefix("checkit");
+
+	  # if we got here, we're done doing remote stuff, abort the alert
+	  alarm 0;
+
 	  # so $objects->[0] is the first (only) message, and ->{spam} is a general yes/no
           $self->{razor2_result} = $response = $objects->[0]->{spam};
 	  # good for debugging, but leave this off!
@@ -434,6 +438,7 @@ sub razor2_lookup {
 	    if ( exists $cf->{resp} ) {
 	      my $tmpcf = $cf->{resp}->[0]->{cf}; # Part confidence
 	      my $tmpct = $cf->{resp}->[0]->{ct}; # Part contested?
+	      dbg("Found Razor2 part: ct? ".(defined $tmpct?$tmpct:"0").", cf=".(defined $tmpcf?$tmpcf:"0"));
 	      $self->{razor2_cf_score} = $tmpcf if ( !defined $tmpct && defined $tmpcf && $tmpcf > $self->{razor2_cf_score} );
 	    }
 	  }
@@ -469,6 +474,8 @@ sub razor2_lookup {
     open (STDOUT, ">&OLDOUT");
     close OLDOUT;
   }
+
+  dbg("Razor2 results: spam? ".$self->{razor2_result}."  highest cf score: ".$self->{razor2_cf_score});
 
   if (defined $response && $response) {
       timelog("Razor2 -> Finished razor test: confirmed spam", "razor", 2);
