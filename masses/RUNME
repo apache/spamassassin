@@ -11,30 +11,28 @@ cd /home/jm/ftp/spamassassin/masses
 set -x
 date
 
-mv spam.log nonspam.log logs/old
-
-cat logs/contrib/nonspam.log* > nonspam.log
-cat logs/contrib/spam.log* > spam.log
+mv spam.local nonspam.local logs/old
 
 # ./download-trapped-spam
-# ./mass-check /local2/mail-archives/spamtrap/mbox >> spam.log
+# ./mass-check /local2/mail-archives/spamtrap/mbox >> spam.local
 
-./mass-check /local2/mail-archives/kelsey.spamtrap.gz >> spam.log
-./mass-check /local2/mail-archives/spam.2000-2001.gz >> spam.log
+./mass-check /local2/mail-archives/kelsey.spamtrap.gz >> spam.local
+./mass-check /local2/mail-archives/spam.2000-2001.gz >> spam.local
 
-./mass-check /local2/mail-archives/scoop.1999 >> nonspam.log
-./mass-check /local2/mail-archives/oldmail.1998 >> nonspam.log
+./mass-check /local2/mail-archives/scoop.1999 >> nonspam.local
+./mass-check /local2/mail-archives/oldmail.1998 >> nonspam.local
 
 ./mass-check-for-jm ; sh commands.sh
 
 for f in /local2/mail-archives/crackmice-old/* ; do
-  ./mass-check $f >> nonspam.log
+  ./mass-check $f >> nonspam.local
 done
 
 rsync -vrze ssh dogma.slashnull.org:ftp/spamassassin/masses/spam.log spam.dogma
-cat spam.dogma >> spam.log
 rsync -vrze ssh dogma.slashnull.org:ftp/spamassassin/masses/nonspam.log nonspam.dogma
-cat nonspam.dogma >> nonspam.log
+
+cat nonspam.local nonspam.dogma logs/contrib/nonspam.log* > nonspam.log
+cat spam.local spam.dogma logs/contrib/spam.log* > spam.log
 
 ./mk-baseline-results
 ./hit-frequencies > freqs
