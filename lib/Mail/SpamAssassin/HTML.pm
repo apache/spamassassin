@@ -987,6 +987,13 @@ sub html_text {
     if ($self->{html_text}[-1] =~ /\S$/s && $text =~ /^\S/s) {
       $self->{html}{obfuscation}++;
     }
+    if ($self->{html_text}[-1] =~ /\b(\w{1,7})$/s) {
+      my $start = length($1);
+      if ($text =~ /^(\w{1,7})\b/s) {
+	my $backhair = "backhair_" . $start . "_" . length($1);
+	$self->{html}{$backhair}++;
+      }
+    }
   }
 
   push @{$self->{html_text}}, $text;
