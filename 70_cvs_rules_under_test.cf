@@ -487,16 +487,26 @@ score T_IDENT_NOBODY		1.0
 # tvd: these fp a bit, so they're disabled
 #header __T_MSGID_37	MESSAGEID =~ /^<?\d{13,}\.SM\d+\@[^>]/m
 #header __T_MSGID_16	MESSAGEID =~ /^<?[A-Z]\d{10}\@/m
+# percents are fp percent of spam hits ...
+# 52% fp for daf
+#header T_BAD_MSGID_19	MESSAGEID =~ /^<?\w{7}-\w{6}-\w{2}\.\d{4}(?:-\d{2}){5}\@/m
+# these are all message ids from exchange, the front part is a server name...
+# 10% for rod
+#header T_BAD_MSGID_20	MESSAGEID =~ /^<?EXCH\S+\@/m
+# 10% for dan, 7% for rod, <1% for tvd
+#header T_BAD_MSGID_24	MESSAGEID =~ /^<?[A-Z0-9_-]*SERV[A-Za-z0-9_-]+[0-9a-f]{8}\@/m
+# 40% for rod
+#header T_BAD_MSGID_26	MESSAGEID =~ /^<?[A-Z0-9_-]*MAIL[a-zA-Z0-9_-]+0000[0-9a-f]{4}\@/m
+#meta T_MSGID_S_1	( T_BAD_MSGID_.+ + ) > 0
+# only tvd
+#header T_BAD_MSGID_17	MESSAGEID =~ /^<?DGTBAD\S+\@/m
 
-header T_BAD_MSGID_17	MESSAGEID =~ /^<?DGTBAD\S+\@/m
-header T_BAD_MSGID_10	MESSAGEID =~ /^<?(?:\d+\$){3}\d+\@/m
-header T_BAD_MSGID_8	MESSAGEID =~ /^<?\d{4}\$\w+\@/m
-header T_BAD_MSGID_20	MESSAGEID =~ /^<?EXCH\S+\@/m
-header T_BAD_MSGID_19	MESSAGEID =~ /^<?\w{7}-\w{6}-\w{2}\.\d{4}(?:-\d{2}){5}\@/m
-header T_BAD_MSGID_24	MESSAGEID =~ /^<?[A-Z0-9_-]*SERV[A-Za-z0-9_-]+[0-9a-f]{8}\@/m
-header T_BAD_MSGID_26	MESSAGEID =~ /^<?[A-Z0-9_-]*MAIL[a-zA-Z0-9_-]+0000[0-9a-f]{4}\@/m
-header T_BAD_MSGID_32	MESSAGEID =~ /^<?auto-00000\d+\@/m
-meta T_MSGID_S_1	( T_BAD_MSGID_.+ + ) > 0
+# no fp
+header T_SPAM_MSGID_10	MESSAGEID =~ /^<?(?:\d+\$){3}\d+\@/m
+# no fp
+header T_SPAM_MSGID_8	MESSAGEID =~ /^<?\d{4}\$\w+\@/m
+# 10% justin, 16% for rod
+header T_SPAM_MSGID_32	MESSAGEID =~ /^<?auto-00000\d+\@/m
 
 # Matt Cline: New ratware and user-agent tests
 header T_RATWARE_BIXON       X-Mailer =~ /Bixon ThunderMail/
