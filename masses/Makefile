@@ -1,17 +1,18 @@
 
 OPT = -O6
-GALIB =	galib245
+GALIB =	/local2/galib245
 PGALIB = pgapack
 
-all: evolve craig-evolve
-	strip evolve
-	strip craig-evolve
+all:
+	echo "Either do  make evolve  or  make craig-evolve"
 
 evolve: tmp/tests.h evolve.o
 	g++ -Wall $(OPT) -fexceptions -L$(GALIB)/ga evolve.o -o evolve -lga -lm
+	strip evolve
 
 craig-evolve: tmp/tests.h craig-evolve.cxx
 	mpiCC -Wall $(OPT) -Dlinux -DWL=2 -DOPTIMIZE -L$(PGALIB)/lib/linux -I$(PGALIB)/include -lpgaO -lm craig-evolve.cxx -o craig-evolve
+	strip craig-evolve
 
 tmp/tests.h: spam.log nonspam.log tmp/ranges.data logs-to-c
 	./logs-to-c
