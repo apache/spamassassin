@@ -461,7 +461,22 @@ sub check_for_unique_subject_id {
   if (/[-_\.\s]{7,}([-a-z0-9]{4,})$/
 	|| /\s{3,}[-:\#\(\[]+([-a-z0-9]{4,})[\]\)]+$/
 	|| /\s{3,}[:\#\(\[]*([0-9]{4,})[\]\)]*$/
-	|| /\s{3,}[-:\#]([a-z0-9]{5,})$/)
+	|| /\s{3,}[-:\#]([a-z0-9]{5,})$/
+
+        # (7217vPhZ0-478TLdy5829qicU9-0@26) and similar
+        || /\(([-\w]{7,}\@\d+)\)$/
+
+        # Seven or more digits at the end of a subject is almost certainly
+        # a id.
+        || /\b(\d{7,})\s*$/
+
+        # A number at the end of the subject, if it's after the end of a
+        # sentence (ending in "!" or "?"), is almost certainly an id
+        || /[!\?]\s*(\d{4,})\s*$/
+
+        # 9095IPZK7-095wsvp8715rJgY8-286-28 and similar
+        || /\b(\w{7,}-\w{7,}-\d+-\d+)\s*$/
+     )
   {
     $id = $1;
   }
