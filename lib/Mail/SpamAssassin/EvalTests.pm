@@ -2561,10 +2561,6 @@ sub _check_attachments {
   # MIME header information
   my $part = -1;		# MIME part index
 
-  # regular expressions
-  my $re_cte = qr/^Content-Transfer-Encoding:\s*(.+)/i;
-  my $re_cd = qr/^Content-Disposition:\s*(.+)/i;
-
   # indicate the scan has taken place
   $self->{mime_checked_attachments} = 1;
 
@@ -2599,12 +2595,13 @@ sub _check_attachments {
     }
 
     my $cte = $p->get_header('Content-Transfer-Encoding') || '';
-    if ($cte =~ /$re_cte/) { $cte = lc($1); }
-    chomp($cte = defined($cte) ? $cte : "");
+    chomp($cte = defined($cte) ? lc $cte : "");
 
     my $cd = $p->get_header('Content-Disposition') || '';
-    if ($cd =~ /$re_cd/) { $cd = lc($1); }
-    chomp($cd = defined($cd) ? $cd : "");
+    chomp($cd = defined($cd) ? lc $cd : "");
+
+    $charset = lc $charset if ($charset);
+    $name = lc $name if ($name);
 
     $self->_check_mime_header($ctype, $cte, $cd, $charset, $name);
 
