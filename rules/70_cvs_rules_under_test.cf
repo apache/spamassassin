@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.498 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.499 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -397,43 +397,10 @@ describe T_BANNED_LINKS6		Links to Banned Companies 6
 rawbody T_HREF_3D			/(?:href|src)=3D\"/i
 describe T_HREF_3D		Uses href=3D Trick
 
-# bug 1803
-# These two get bad S/Os.  tvd - 2003/05/17
-# 0.174   0.4024   0.0461    0.897   0.69    0.01  T_GAPPY_PORN_01
-# 0.075   0.1651   0.0238    0.874   0.64    0.01  T_GAPPY_PORN_02
-body T_GAPPY_PORN_01                       /\b(?:s\We\Wx|p\Wo\Wr\Wn|x\Wx\Wx|f\Wu\Wc\Wk|p\Wa\Wr\Wt\Wy|t\We\We\Wn|f\Wu\Wn|h\Wo\Wt)/i
-describe T_GAPPY_PORN_01           G.a.p.p.y - P.o.r.n
-body T_GAPPY_PORN_02                       /\b(?:s\.e\.x|p\.o\.r\.n|x\.x\.x|f\.u\.c\.k|p\.a\.r\.t\.y|t\.e\.e\.n|f\.u\.n|h\.o\.t)/i
-describe T_GAPPY_PORN_02           G.a.p.p.y - P.o.r.n
-
 # bug 1876
 rawbody		T_PUSHHERELINK		/<a[^>]*>[^<]*((push|go)\s(here|this) |cease.{1,10}mail)[^<]*<\/a>/i
 describe	T_PUSHHERELINK		Link asks you to "push here" or "go here" or "cease mail" or the like
 
 uri 		T_DOLLARMACHINE 		/dollar.?machine/i
 uri 		T_HITBOX 			/hitbox\.com/i
-
-# From: SpamTalk <SpamTalk@US.NET56.net>
-body T_NRALA		/never receive any letters again/i
-describe T_NRALA	disclaims future contacts
-body T_ONEMSG		/a one time message/i
-describe T_ONEMSG	talks about a one time message
-body T_ATAKEN		/address was taken from the open resources/i
-describe T_ATAKEN	talks about where address was harvested
-body T_LOOKS2HELP	/I am looking to help/i
-describe T_LOOKS2HELP	talks about being a samaritan
-body T_RSIMM		/really succeed in making money/i
-describe T_RSIMM	talks about making money
-body T_IMREAL		/I am a real person/i
-describe T_IMREAL	claims non-pseudoness of existance
-body T_NOHYPE		/this is no hype/i
-describe T_NOHYPE	claims non-hype content
-body T_HONESTCUZ	/an honest offer because/i
-describe T_HONESTCUZ	lies to you about what is being touted
-body T_STRUGGLE		/like to struggle/i
-describe T_STRUGGLE	proclaims familiarty with struggling
-body T_NGAWHERE		/and not get anywhere/i
-describe T_NGAWHERE	rambles about not getting anywhere
-body T_DN2BIZ		/get down to business/i
-describe T_DN2BIZ	implores get down to business
 
