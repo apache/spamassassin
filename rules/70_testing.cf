@@ -236,11 +236,6 @@ describe  T_SARE_SUB_DOLLARS    Subject is dollar sign and numerics only
 rawbody T_INTERRUPTUS           /(?:[a-zA-Z0-9]<[\/ ]{0,2}?(?!br)(?!p)(?!sup)(?!li)(?!b)(?!i)(?!option)(?!a (?:href|name))(?:\b|!--)[^>]{0,64}?>[a-zA-Z0-9].{0,64}){3}/i
 describe T_INTERRUPTUS          Hypertextus Interruptus - HTML-obfuscated text
 
-##########################################################################
-
-# bug 4023
-body T_NO_SCRIP_NEEDED		/no.{1,10}P(?:er|re)scription.{1,10}(?:needed|require|necessary)/i
-
 ########################################################################
 
 body T_NORMAL_HTTP_TO_IP	eval:check_numeric_http()
@@ -365,44 +360,23 @@ meta T_PRIORITY_NO_NAME_ONE_REF		((__HAS_X_PRIORITY + __HAS_MSMAIL_PRI == 1) && 
 # bug 2513
 # try per-MUA rules
 header __REPTO_OVERQUOTE		Reply-To =~ /"[\w. -]+"\s*\</
-meta T_REPTO_OVERQUOTE_XMAILER		__REPTO_OVERQUOTE && __HAS_X_MAILER
-meta T_REPTO_OVERQUOTE_NO_XMAILER	__REPTO_OVERQUOTE && !__HAS_X_MAILER
-meta T_REPTO_OVERQUOTE_USERAGENT	__REPTO_OVERQUOTE && __USER_AGENT
-meta T_REPTO_OVERQUOTE_NO_USERAGENT	__REPTO_OVERQUOTE && !__USER_AGENT
-meta T_REPTO_OVERQUOTE_NAMED_MUA	__REPTO_OVERQUOTE && (__HAS_X_MAILER || __USER_AGENT)
-meta T_REPTO_OVERQUOTE_NO_NAMED_MUA	__REPTO_OVERQUOTE && !(__HAS_X_MAILER || __USER_AGENT)
-meta T_REPTO_OVERQUOTE_MOZILLA		__REPTO_OVERQUOTE && __MOZILLA_MUA
 meta T_REPTO_OVERQUOTE_AOL		__REPTO_OVERQUOTE && __AOL_MUA
-meta T_REPTO_OVERQUOTE_IMS		__REPTO_OVERQUOTE && __IMS_MUA
-meta T_REPTO_OVERQUOTE_OE		__REPTO_OVERQUOTE && __OE_MUA
-meta T_REPTO_OVERQUOTE_OIMO		__REPTO_OVERQUOTE && __OIMO_MUA
-meta T_REPTO_OVERQUOTE_EUDORA		__REPTO_OVERQUOTE && __EUDORA_MUA
-meta T_REPTO_OVERQUOTE_THEBAT		__REPTO_OVERQUOTE && __THEBAT_MUA
-meta T_REPTO_OVERQUOTE_IMS		__REPTO_OVERQUOTE && __ANY_IMS_MUA
-meta T_REPTO_OVERQUOTE_OUTLOOK		__REPTO_OVERQUOTE && __ANY_OUTLOOK_MUA
+meta T_REPTO_OVERQUOTE_MSN1		__REPTO_OVERQUOTE && __FROM_MSN_COM
+meta T_REPTO_OVERQUOTE_MSN2		__REPTO_OVERQUOTE && __AT_MSN_MSGID
 meta T_REPTO_OVERQUOTE_QUALCOMM		__REPTO_OVERQUOTE && __ANY_QUALCOMM_MUA
-meta T_REPTO_OVERQUOTE_SQUIRRELMAIL	__REPTO_OVERQUOTE && __HAS_SQUIRRELMAIL_IN_MAILER
-meta T_REPTO_OVERQUOTE_MSN		__REPTO_OVERQUOTE && __USER_AGENT_MSN
+meta T_REPTO_OVERQUOTE_THEBAT		__REPTO_OVERQUOTE && __THEBAT_MUA
+meta T_REPTO_OVERQUOTE_YAHOO1		__REPTO_OVERQUOTE && __FROM_YAHOO_COM
+meta T_REPTO_OVERQUOTE_YAHOO2		__REPTO_OVERQUOTE && __AT_YAHOO_MSGID
 #
 header __REPTO_QUOTE			Reply-To =~ /".*"\s*\</
-meta T_REPTO_QUOTE_XMAILER		__REPTO_QUOTE && __HAS_X_MAILER
-meta T_REPTO_QUOTE_NO_XMAILER		__REPTO_QUOTE && !__HAS_X_MAILER
-meta T_REPTO_QUOTE_USERAGENT		__REPTO_QUOTE && __USER_AGENT
-meta T_REPTO_QUOTE_NO_USERAGENT		__REPTO_QUOTE && !__USER_AGENT
-meta T_REPTO_QUOTE_NAMED_MUA		__REPTO_QUOTE && (__HAS_X_MAILER || __USER_AGENT)
-meta T_REPTO_QUOTE_NO_NAMED_MUA		__REPTO_QUOTE && !(__HAS_X_MAILER || __USER_AGENT)
-meta T_REPTO_QUOTE_MOZILLA		__REPTO_QUOTE && __MOZILLA_MUA
 meta T_REPTO_QUOTE_AOL			__REPTO_QUOTE && __AOL_MUA
 meta T_REPTO_QUOTE_IMS			__REPTO_QUOTE && __IMS_MUA
-meta T_REPTO_QUOTE_OE			__REPTO_QUOTE && __OE_MUA
-meta T_REPTO_QUOTE_OIMO			__REPTO_QUOTE && __OIMO_MUA
-meta T_REPTO_QUOTE_EUDORA		__REPTO_QUOTE && __EUDORA_MUA
-meta T_REPTO_QUOTE_THEBAT		__REPTO_QUOTE && __THEBAT_MUA
-meta T_REPTO_QUOTE_IMS			__REPTO_QUOTE && __ANY_IMS_MUA
-meta T_REPTO_QUOTE_OUTLOOK		__REPTO_QUOTE && __ANY_OUTLOOK_MUA
+meta T_REPTO_QUOTE_MSN1			__REPTO_QUOTE && __FROM_MSN_COM
+meta T_REPTO_QUOTE_MSN2			__REPTO_QUOTE && __AT_MSN_MSGID
 meta T_REPTO_QUOTE_QUALCOMM		__REPTO_QUOTE && __ANY_QUALCOMM_MUA
-meta T_REPTO_QUOTE_SQUIRRELMAIL		__REPTO_QUOTE && __HAS_SQUIRRELMAIL_IN_MAILER
-meta T_REPTO_QUOTE_MSN			__REPTO_QUOTE && __USER_AGENT_MSN
+meta T_REPTO_QUOTE_THEBAT		__REPTO_QUOTE && __THEBAT_MUA
+meta T_REPTO_QUOTE_YAHOO1		__REPTO_QUOTE && __FROM_YAHOO_COM
+meta T_REPTO_QUOTE_YAHOO2		__REPTO_QUOTE && __AT_YAHOO_MSGID
 
 # bug 3896: URIs in various TLDs, other than 3rd level www
 uri T_URI_NO_WWW_BIZ_1	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{7,}\.biz\/\S{15,}/i
@@ -428,16 +402,6 @@ uri T_URI_NO_WWW_ANY_CGI_START_2_1	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{7,}\.\w
 uri T_URI_NO_WWW_ANY_CGI_START_2_2	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.[^.]{7,}\.\w+\.[a-z]{2}\/\?\S{15,}/i
 
 ########################################################################
-
-# long message IDs, what else?
-header T_MSGID_LONG_130_110_55	MESSAGEID =~ /<.{130,}>|<.{110,}\@|\@.{55,}>/m
-header T_MSGID_LONG_140_120_55	MESSAGEID =~ /<.{140,}>|<.{120,}\@|\@.{55,}>/m
-header T_MSGID_LONG_150_130_55	MESSAGEID =~ /<.{150,}>|<.{130,}\@|\@.{55,}>/m
-header T_MSGID_LONG_160_140_55	MESSAGEID =~ /<.{160,}>|<.{140,}\@|\@.{55,}>/m
-header T_MSGID_LONG_130_110_60	MESSAGEID =~ /<.{130,}>|<.{110,}\@|\@.{60,}>/m
-header T_MSGID_LONG_140_120_60	MESSAGEID =~ /<.{140,}>|<.{120,}\@|\@.{60,}>/m
-header T_MSGID_LONG_150_130_60	MESSAGEID =~ /<.{150,}>|<.{130,}\@|\@.{60,}>/m
-header T_MSGID_LONG_160_140_60	MESSAGEID =~ /<.{160,}>|<.{140,}\@|\@.{60,}>/m
 
 # bug 2563: false positives
 body T_BODY_ENHANCEMENT		/\b(?:enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b|\binches\b).{0,50}\b(?:penis|male organ|pee[ -]?pee|dick|sc?hlong|wh?anger|breast(?!\s+cancer))/i
