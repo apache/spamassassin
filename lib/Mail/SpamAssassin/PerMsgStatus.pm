@@ -1448,7 +1448,6 @@ sub do_body_uri_tests {
 
   my $base_uri = "http://";
   while ($text =~ /\G.*?(<$uriRe>|$uriRe)/gsoc) {
-      # warn("URI: $1\n");
       my $uri = $1;
 
       $uri =~ s/^<(.*)>$/$1/;
@@ -1486,9 +1485,12 @@ sub do_body_uri_tests {
         # the we should add the proper protocol in front, rather
         # than using the base URI.
         if ($uri =~ /^www\d?\./i) {
+          # some spammers are using unschemed URIs to escape filters
+          push (@uris, $uri);
           $uri = "http://$uri";
         }
         elsif ($uri =~ /^ftp\./i) {
+          push (@uris, $uri);
           $uri = "ftp://$uri";
         }
         else {
