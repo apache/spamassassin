@@ -1313,7 +1313,7 @@ sub subject_is_all_caps {
    $subject =~ s/^\s+//;
    $subject =~ s/\s+$//;
    return 0 if $subject !~ /\s/;	# don't match one word subjects
-   return 0 if (length $subject < 10)   # don't match short subjects
+   return 0 if (length $subject < 10);  # don't match short subjects
    $subject =~ s/[^a-zA-Z]//g;		# only look at letters
    return length($subject) && ($subject eq uc($subject));
 }

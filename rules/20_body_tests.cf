@@ -7,9 +7,11 @@
 
 full RAZOR_CHECK		eval:check_razor()
 describe RAZOR_CHECK		Listed in Razor, see http://razor.sourceforge.net/
+tflags RAZOR_CHECK              net
 
-full DCC_CHECK          eval:check_dcc()
-describe DCC_CHECK          Listed in DCC, see http://www.rhyolite.com/anti-spam/dcc/dcc-tree/dcc.html
+full DCC_CHECK                  eval:check_dcc()
+describe DCC_CHECK              Listed in DCC, see http://www.rhyolite.com/anti-spam/dcc/dcc-tree/dcc.html
+tflags DCC_CHECK                net
 
 full FREQ_SPAM_PHRASE		eval:check_for_spam_phrases("10")
 describe FREQ_SPAM_PHRASE	Contains phrases frequently found in spam
@@ -60,7 +62,7 @@ rawbody SPAM_FORM		/CHANGE EMAIL ADDRESS IN ACTION OF FORM/
 describe SPAM_FORM		Form for changing email address
 rawbody SPAM_FORM_RETURN	/return validate_form/
 describe SPAM_FORM_RETURN	Form for checking email address
-rawbody SPAM_FORM_INPUT		/<input name=.*submit type=.*submit value=.*" *Submit By E-Mail *">/i
+rawbody SPAM_FORM_INPUT		/<input name=.{0,5}submit.{0,99} Submit By E-Mail /i
 describe SPAM_FORM_INPUT	Form for verifying email address
 
 body BUGGY_CGI			/Below is the result of your feedback form/
@@ -96,8 +98,6 @@ describe EU_EMAIL_OPTOUT	Claims compliance with SPAM regulations
 body EU_200_32_CE		/Directive 200.32.CE/i
 describe EU_200_32_CE		Claims compliance with SPAM regulations
 
-body POPLAUNCH			/StealthLaunch PopLaunch.\s/
-describe POPLAUNCH		SPAM software
 body CHECK_OR_MONEY_ORDER	/check or money order/i
 describe CHECK_OR_MONEY_ORDER	Talk about a check or money order
 
@@ -174,18 +174,10 @@ describe SOCIAL_SEC_NUMBER	Talks about social security numbers
 body TRACE_BY_SSN		/Trace anyone by social security number/i
 describe TRACE_BY_SSN		Talks about tracing by SSN
 
-body INTL_EXEC_GUILD		/International Executive Guild/
-describe INTL_EXEC_GUILD	Well known SPAM senders
-body ANOTHER_NET_AD		/Another Internet Ad campaign produced/
-describe ANOTHER_NET_AD		Tells you it's an ad
 body LASER_PRINTER		/LASER PRINTER SUPPLIES/
 describe LASER_PRINTER		Discusses laser printer supplies
-body BRAND_NEW_PAGER		/BRAND NEW Pager FREE/
-describe BRAND_NEW_PAGER	No such thing as a free lunch
 body ADDRESSES_ON_CD		/addresses on cd/i
 describe ADDRESSES_ON_CD	Only thing addresses on CD are useful for is SPAM
-body SHOES_GUY			/(?:\b(?:Lingui|Guilin)\b.{1,30}){2,}/i
-describe SHOES_GUY		Want some shoes?
 
 body EXCUSE_1			/\b(?:You (?:were sent|have received|are receiving)|You're receiving).{0,15}(?:message|e-?mail)s? because/i
 describe EXCUSE_1		Gives a lame excuse about why you were sent this SPAM
@@ -204,8 +196,6 @@ describe EXCUSE_6		Claims you can be removed from the list
 
 body EXCUSE_7			/you (?:wish|want|would like|desire) to be removed/i
 describe EXCUSE_7		Claims you can be removed from the list
-body EXCUSE_8			/requests to be taken off our mailing list/i
-describe EXCUSE_8		Claims you can be removed from the list
 
 body EXCUSE_10			/if you (?:(?:want|wish|care|prefer) not to |(?:don't|do not) (?:want|wish|care) to )(?:be contacted again|receive (any)?\s*(?:more|future|further)\b.{1,10}\b(?:e?-?mail|messages?|offers|solicitations))/i
 describe EXCUSE_10		"if you do not wish to receive any more"
@@ -227,11 +217,6 @@ describe EXCUSE_17		Suspect you might have received the message by mistake
 body EXCUSE_18			/we do not (?:spam|send unsolicited)/i
 describe EXCUSE_18		Claims not to be SPAM
 
-body GREEN_EXCUSE_1		/using email instead can significantly reduce this/i
-describe GREEN_EXCUSE_1		Claims SPAM helps the environment
-body GREEN_EXCUSE_2		/the trees, save the planet, use email!/i
-describe GREEN_EXCUSE_2		Claims SPAM helps the environment
-
 # jm: keep this case-sensitive, otherwise it FP's
 body VIAGRA			/VIAGRA/
 describe VIAGRA			Plugs Viagra
@@ -250,9 +235,6 @@ describe VIGORA                 Some sort of viagra alternative
 body TARGETED                   /\btargeted (?:traffic|e-?mail|internet|leads?)\b/i
 describe TARGETED               Targeted Traffic / Email Addresses
 
-body YOU_HAVE_BEEN_SELECTED	/You have been selected as a (?:finalist|winner)/i
-describe YOU_HAVE_BEEN_SELECTED	"You have been selected as a finalist", sure
-
 body LIMITED_TIME_ONLY		/LIMITED TIME (?:ONLY|offer)/i
 describe LIMITED_TIME_ONLY	Offers a limited time offer
 body STRONG_BUY			/strong buy/i
@@ -260,8 +242,6 @@ describe STRONG_BUY		Tells you about a strong buy
 
 body WE_HONOR_ALL		/we (?:honou?r|respect)(?: all)? remov(?:e|al) requests/i
 describe WE_HONOR_ALL		Claims to honor removal requests
-body FILTERED_BY_WORLDREMOVE	/filtered by WorldRemove/
-describe FILTERED_BY_WORLDREMOVE Claims to listen to some removal request list
 
 # Jul  2 2002 jm: note that CommuniGate is *not* spam software, it's totally legit.
 # but beginning spammers often download a trial version and spam with it.
@@ -388,10 +368,6 @@ body CLICK_BELOW		/click .{0,30}(?:here|below)/is
 describe CLICK_BELOW		Asks you to click below
 
 # (contrib: skod)
-rawbody MURKOWSKI_CRUFT		/www\.senate\.gov\/~?murkowski/
-describe MURKOWSKI_CRUFT	Old Murkowski disclaimer
-
-# (contrib: skod)
 body PRINT_FORM_SIGNATURE	/Sign(ature)?(?:\s*here|\s*please)?:.{0,30}___*/i
 describe PRINT_FORM_SIGNATURE	Asks you for your signature on a form
 
@@ -402,10 +378,6 @@ describe MAIL_IN_ORDER_FORM	Contains mail-in order form
 # (contrib: skod)
 body FOR_INSTANT_ACCESS		/INSTANT ACCESS/i
 describe FOR_INSTANT_ACCESS	Instant Access button
-
-# (contrib: skod)
-body NO_SELLING			/absolutely NO selling/i
-describe NO_SELLING		Claims not to be selling anything
 
 # (contrib: skod)
 body UNIVERSITY_DIPLOMAS	/\b(?:college|university)\s+diplomas/i
@@ -420,10 +392,6 @@ describe NEW_DOMAIN_EXTENSIONS	Possible registry spammer
 
 body DOMAIN_BODY		/\s(\.|dot\s+)(info|biz|name)\s/i
 describe DOMAIN_BODY		Domain registration spam body
-
-# (contrib: skod)
-rawbody MONSTERHUT		/monsterhut.com/
-describe MONSTERHUT		Mentions monsterhut.com
 
 # (contrib: WW)
 body CLICK_TO_REMOVE_MAILTO        /\bclick to.{0,30}remove.{0,50}mailto:/is
@@ -447,9 +415,6 @@ describe REMOVAL_INSTRUCTIONS	Gives instructions for removal from list
 # (contrib: WW)
 body THIS_AINT_SPAM             /This.{0,30}is not (?:a )?spam/is
 describe THIS_AINT_SPAM         Claims "This is not spam"
-
-body THIS_AINT_JUNK             /This.{0,30}is not (?:a )?junk (?:email)?/is
-describe THIS_AINT_JUNK         Claims "This is not junk email"
 
 # (contrib: WW)
 body WE_HATE_SPAM               /We .{0,30}oppose the use of SPAM/is
@@ -823,8 +788,8 @@ describe REFINANCE		Refinance Home
 body LIFE_INSURANCE	        /\blife insurance.{1,30}no.{1,15}exam/i
 describe LIFE_INSURANCE		No Examination life Insurance
 
-body SEARCH_ENGINE	        /\b(?:(?:submit|traffic|top).{0.10} search engines?|site ranking)\b/i
-describe SEARCH_ENGINE		Search Engine Site Ranking
+#body SEARCH_ENGINE	        /\b(?:(?:submit|traffic|top).{0.10} search engines?|site ranking)\b/i
+#describe SEARCH_ENGINE		Search Engine Site Ranking
 
 body SEARCH_ENGINE_PROMO        /\b(?:(?:submitt?|list)(?:ed|ing|s)?|place(?:d|ment))\b.{0,15}\b(?:in|to).{0,15}\b(?:search(?:ing|)\s*(?:engine|site)|director(?:y|ies))s?\b/is
 describe SEARCH_ENGINE_PROMO    Discusses search engine listings
@@ -879,9 +844,6 @@ describe BUY_DIRECT		Buy Direct
 
 body PRICES_WONT_LAST	        /\bprices.{0,11} last\b/i
 describe PRICES_WONT_LAST	Prices won't Last
-
-body SLASH_PRICE	        /\bslash.{0,2} price/i
-describe SLASH_PRICE		Slashed Price
 
 body DRASTIC_REDUCED	        /\bdrastic.{0,4} reduc/i
 describe DRASTIC_REDUCED	Drastically Reduced
@@ -1066,9 +1028,6 @@ describe GETAWAY		Weekend Getaway
 body HGH			/\b(?:human growth hormone|(?-i:HGH)|H.G.H)\b/i
 describe HGH			Human Growth Hormone
 
-body WEALTH		        /\bachieve .{0,15}wealth\b/i
-describe WEALTH			Achieve Wealth
-
 body GIVING_AWAY	        /\bgiving away\b/i
 describe GIVING_AWAY		They're just giving it away!
 
@@ -1092,9 +1051,6 @@ describe COMPETE		Compete for your business
 
 body CANCEL		        /\bcancel at any time\b/i
 describe CANCEL			Cancel at any time!
-
-body SELECTED		        /\byou.{0.9} been selected\b/i
-describe SELECTED		You've been selected! Lucky You!
 
 body CHANGE_TERMS	        /\bterms and conditions\b/i
 describe CHANGE_TERMS		Terms and conditions

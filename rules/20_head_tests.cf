@@ -171,9 +171,6 @@ describe DOMAIN_SUBJECT		Subject: domain registration spam subject
 header ALL_CAPS_HEADER		ALL =~ /\n(?:TO|FROM|SUBJECT|DATE):/s
 describe ALL_CAPS_HEADER	Header with all capitals found
 
-header X_UIDL_SPAMSIGN		X-UIDL =~ /[^\s\x21-\x7E]/
-describe X_UIDL_SPAMSIGN	X-UIDL: header contains invalid chars
-
 header NO_MX_FOR_FROM		eval:check_for_from_mx()
 describe NO_MX_FOR_FROM		No MX records for the From: domain
 tflags NO_MX_FOR_FROM           net
