@@ -47,10 +47,12 @@
 #if (defined(__sun__) && defined(__sparc__) && !defined(__svr4__)) /* SunOS */ \
      || (defined(__sgi))  /* IRIX */ \
      || (defined(__osf__)) /* Digital UNIX */ \
-     || (defined(hpux) || defined(__hpux)) /* HPUX */
+     || (defined(hpux) || defined(__hpux)) /* HPUX */ \
+     || (defined(_WIN32) || defined(__CYGWIN__)) /* CygWin, Win32 */
 
 extern int optind;
 extern char *optarg;
+
 #endif
 
 /* safe fallback defaults to on now - CRH */
