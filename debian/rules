@@ -41,6 +41,7 @@ configure-stamp:
 
 	perl Makefile.PL INSTALLDIRS=vendor \
 	 PREFIX=$(CURDIR)/debian/$(packagei)/usr \
+	 VENDORPREFIX=$(CURDIR)/debian/$(packagei)/usr \
 	 SYSCONFDIR=$(CURDIR)/debian/$(packagei)/etc \
 	 INST_PREFIX=/usr INST_SYSCONFDIR=/etc \
 	 PKG_LOCAL_RULES_DIR=$(CURDIR)/debian/$(packagei)/etc/spamassassin \
@@ -71,7 +72,7 @@ clean:
 # Spamassassin ONLY
 
 build-indep: build-indep-stamp
-
+build-indep-stamp: configure
 	dh_testdir
 
 	$(MAKE) CFOPTIMIZE="$(CFLAGS)" CFCCFLAGS="" CFLIBS="" CFLDFLAGS=""
@@ -141,7 +142,7 @@ binary-indep: build-indep install-indep
 # dpkg 1.10 or 1.11, I'm told.)
 
 build-arch: build-arch-stamp
-build-arch-stamp: configure debian/po/templates.pot
+build-arch-stamp: configure
 
 	dh_testdir
 
