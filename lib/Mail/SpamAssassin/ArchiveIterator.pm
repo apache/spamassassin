@@ -531,7 +531,9 @@ sub start_children {
 	my($class, $format, $date, $where, $result) = $self->run_message($line);
 	$result ||= '';
 
-	# If opt_n is set, the input date was -1, so reset it if possible
+	# If opt_n is set, the original input date wasn't known,
+	# but run_message would have calculated it, so reset the packed
+	# version if possible ...
         if ($self->{opt_n} && $class && $format && defined $date && $where) {
 	  $line = index_pack($class, $format, $date, $where);
         }
@@ -635,7 +637,7 @@ sub scan_directory {
 
   foreach my $mail (@files) {
     if ($self->{opt_n}) {
-      $self->{$class}->{index_pack($class, "f", -1, $mail)} = $no++;
+      $self->{$class}->{index_pack($class, "f", AI_TIME_UNKNOWN, $mail)} = $no++;
       next;
     }
     my $header;
@@ -655,7 +657,7 @@ sub scan_file {
   my ($self, $class, $mail) = @_;
 
   if ($self->{opt_n}) {
-    $self->{$class}->{index_pack($class, "f", -1, $mail)} = $no++;
+    $self->{$class}->{index_pack($class, "f", AI_TIME_UNKNOWN, $mail)} = $no++;
     return;
   }
   my $header;
@@ -725,7 +727,7 @@ sub scan_mailbox {
       if ($header) {
 	my $t;
 	if ($self->{opt_n}) {
-	  $self->{$class}->{index_pack($class, "m", -1, "$file.$offset")} = $no++;
+	  $self->{$class}->{index_pack($class, "m", AI_TIME_UNKNOWN, "$file.$offset")} = $no++;
 	}
 	else {
 	  $t = Mail::SpamAssassin::Util::receive_date($header);
@@ -787,7 +789,7 @@ sub scan_mbx {
 
 		my $t;
 		if ($self->{opt_n}) {
-		  $self->{$class}->{index_pack($class, "b", -1, "$file.$offset")} = $no++;
+		  $self->{$class}->{index_pack($class, "b", AI_TIME_UNKNOWN, "$file.$offset")} = $no++;
 		} else {
 		  $t = Mail::SpamAssassin::Util::receive_date($header);
 		  next if !$self->message_is_useful_by_date($t);
@@ -840,7 +842,7 @@ sub run_file {
   }
   close INPUT;
 
-  if ($date == -1) {
+  if ($date == AI_TIME_UNKNOWN) {
     $date = Mail::SpamAssassin::Util::receive_date($header);
   }
 
@@ -878,7 +880,7 @@ sub run_mailbox {
   }
   close INPUT;
 
-  if ($date == -1) {
+  if ($date == AI_TIME_UNKNOWN) {
     $date = Mail::SpamAssassin::Util::receive_date($header);
   }
 
@@ -912,7 +914,7 @@ sub run_mbx {
   }
   close INPUT;
 
-  if ($date == -1) {
+  if ($date == AI_TIME_UNKNOWN) {
     $date = Mail::SpamAssassin::Util::receive_date($header);
   }
 

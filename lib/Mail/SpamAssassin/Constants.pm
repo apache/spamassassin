@@ -36,7 +36,7 @@ use base qw( Exporter );
 @SA_VARS = qw(
 	META_TEST_MIN_PRIORITY HARVEST_DNSBL_PRIORITY MBX_SEPARATOR
 	MAX_BODY_LINE_LENGTH MAX_HEADER_KEY_LENGTH MAX_HEADER_VALUE_LENGTH
-	MAX_HEADER_LENGTH ARITH_EXPRESSION_LEXER
+	MAX_HEADER_LENGTH ARITH_EXPRESSION_LEXER AI_TIME_UNKNOWN
 );
 
 %EXPORT_TAGS = (
@@ -210,5 +210,13 @@ use constant ARITH_EXPRESSION_LEXER => qr/(?:
         [\+\-\*\/]|                             # Mathematical Operator
         [\?:]                                   # ? : Operator
       )/ox;
+
+# ArchiveIterator
+
+# if AI doesn't read in the message in the first pass to see if the received
+# date makes the message useful or not, we need to mark it so that in the
+# second pass (when the message is actually read + processed) the received
+# date is calculated.  this value signifies "unknown" from the first pass.
+use constant AI_TIME_UNKNOWN => -1;
 
 1;
