@@ -35,8 +35,7 @@ my %outputs = (
 sub mywarn;
 
 open (RULES, ">70_scraped.cf") or die "cannot write to output file";
-print RULES "# SpamAssassin rules file: bugzilla-scraped needs-mc rules\n",
-            "# generated on ",(scalar localtime time),"\n\n";
+print RULES "# SpamAssassin rules file: bugzilla-scraped needs-mc rules\n\n";
 
 open (COMMIT, ">".$conf{MCTMP}."/commit.msg") or die "cannot write to output file";
 print COMMIT "auto-mass-checks:\n\n";
@@ -117,9 +116,14 @@ sub do_bug {
     $cmt->{cmtnum} = $count;
     $ctx->{cmts_by_num}->{$count} = $cmt;
     push @{$ctx->{cmts}}, $cmt;
-    process_comment($ctx, $cmt);
     $count++;
   }
+  foreach my $cmt (@{$xml->{bug}->{long_desc}}) {
+    process_comment_for_needsmc($ctx, $cmt);
+  }
+  # foreach my $cmt (@{$xml->{bug}->{long_desc}}) {
+  # process_comment_for_done($ctx, $cmt);
+  # }
 
   # now mark all the ones that need mass-checking
   my @trigger_cmts = ();
@@ -185,6 +189,7 @@ sub do_bug {
   $outputs{$bug} = { };
   $outputs{$bug}{rulenames} = $ctx->{rulenames};
   $outputs{$bug}{trigger_cmts} = \@trigger_cmts;
+  print "\n\n";
 }
 
 sub validate_rule_code {
@@ -213,12 +218,19 @@ sub fixup_rule_code {
     next if ($n eq 'MC');   # a glitch, from the comments
 
     my $newname = $n;
+    my $rnd;
 
-    # use part of base64(bug.cmtnum) instead of "random" values,
-    # so it doesn't keep changing every night
-    my $rnd = sha1_base64("$bug.$cmtnum");
-    $rnd =~ /(...)$/;   # last 3 base64-its
-    $rnd = $1;
+    if (0)          # use randomness?
+    {
+      # use part of base64(bug.cmtnum) instead of "random" values,
+      # so it doesn't keep changing every night
+      $rnd = sha1_base64("$bug.$cmtnum");
+      $rnd =~ /(...)$/;   # last 3 base64-its
+      $rnd = $1;
+    }
+    else {
+      $rnd = "b${bug}_c${cmtnum}";      # the verbose version
+    }
 
     # ensure it's unique; we only need to add randomness if we have already
     # seen a rule by that name
@@ -252,15 +264,10 @@ sub add_rule_code {
   print RULES $cf;
 }
 
-sub process_comment {
+sub process_comment_for_needsmc {
   my ($ctx, $cmt) = @_;
 
-  my $text = $cmt->{thetext};
-  $text =~ s/&lt;/</gs;
-  $text =~ s/&gt;/>/gs;
-  $text =~ s/&quot;/"/gs;
-  $text =~ s/&amp;/\&/gs;
-
+  my $text = decode_xml_text ($cmt->{thetext});
   if ($text =~ /NEEDSMC/) {
     if ($cmt->{who} !~ $ALLOWED_NEEDSMCERS) {
       needsmc_not_permitted($ctx, $cmt);
@@ -276,22 +283,28 @@ sub process_comment {
         $cmt->{needsmc_end} = $cmt->{cmtnum};
       }
       else {
-        $cmt->{needsmc_start} = 0;
+        $cmt->{needsmc_start} = $ctx->{default_needsmc_start};
         $cmt->{needsmc_end} = $cmt->{cmtnum};
       }
       print "bug $ctx->{bugnum} cmt $cmt->{cmtnum}: needs-mc by $cmt->{who} from $cmt->{needsmc_start} to $cmt->{needsmc_end}\n";
     }
   }
-  elsif ($text =~ /\# DONEMC (\d+)/) {
+  elsif ($text =~ /\# DONEMC (\d+)/)
+  {
     my $done = $1;
     $cmt->{needsmc_done} = $done;
     my $mccmt = $ctx->{cmts_by_num}->{$done};
 
     # note that future "NEEDMC"s start from after that comment's
     # NEEDMC end number
-    $ctx->{default_needsmc_start} = $mccmt->{needsmc_end} + 1;
+    $ctx->{default_needsmc_start} =
+            ($mccmt->{needsmc_end}||$mccmt->{prior_needsmc_end}) + 1;
 
-    # delete the "needsmc" flag from that comment object
+    # delete the "needsmc" flag from that comment object.  save
+    # a copy of the start/end values in case we have multiple DONEMC
+    # comments later
+    $mccmt->{prior_needsmc_start} = $mccmt->{needsmc_start};
+    $mccmt->{prior_needsmc_end} = $mccmt->{needsmc_end};
     delete $mccmt->{needsmc_start};
     delete $mccmt->{needsmc_end};
     $mccmt->{has_needsmc} = 0;
@@ -305,44 +318,22 @@ sub process_comment {
     $text =~ s/}}}.*?$//s; #{{{
     $text =~ s/}}}.*?{{{//gs; #}}}
     $text .= "\n";
-    $cmt->{mcrules} = $text;
     print "bug $ctx->{bugnum} cmt $cmt->{cmtnum}: rules in marked block\n";
+    read_cmt_rules_from_text($ctx, $cmt, $text);
   }
   else {
-    $cmt->{mcrules} ||= '';
-    my $seenrules = 0;
-    my $lastwasrule = 0;
-    foreach my $line (split(/^/m, $text)) {
-      if ($line =~ 
-  /^\s*(header|rawbody|body|full|meta|uri|score|describe|tflags)\s+(\S+)\s+(.*)$/
-        )
-      {
-        my $type = $1;
-        my $name = $2;
-        my $code = $3;
-        $cmt->{mcrules} .= "$type $name $code\n";
-	$lastwasrule = 1;
-        if (!$seenrules) {
-          print "bug $ctx->{bugnum} cmt $cmt->{cmtnum}: rules inline\n";
-          $seenrules++;
-        }
-      }
-      else {
-        if ($line =~ /\S/) {
-	  if ($lastwasrule) {
-	    # assume it's a continuation of the last line
-	    chop($cmt->{mcrules});
-	    $cmt->{mcrules} .= "$line\n";
-	  }
-	}
-	else {
-	  $lastwasrule = 0;
- 	}
-      }
-    }
-
-    print "bug $ctx->{bugnum} cmt $cmt->{cmtnum}: code: \n".$cmt->{mcrules};
+    # just infer it...
+    read_cmt_rules_from_text($ctx, $cmt, $text);
   }
+}
+
+sub decode_xml_text {
+  my $text = shift;
+  $text =~ s/&lt;/</gs;
+  $text =~ s/&gt;/>/gs;
+  $text =~ s/&quot;/"/gs;
+  $text =~ s/&amp;/\&/gs;
+  $text;
 }
 
 sub needsmc_not_permitted {
@@ -357,5 +348,47 @@ sub mywarn {
   if ($log =~ /^bug (\d+)/) {
     $outputs{messages}{$1} ||= '';
     $outputs{messages}{$1} .= $log;
+  }
+}
+
+sub read_cmt_rules_from_text {
+  my ($ctx, $cmt, $text) = @_;
+
+  $cmt->{mcrules} ||= '';
+  my $seenrules = 0;
+  my $lastwasrule = 0;
+  foreach my $line (split(/^/m, $text)) {
+    if ($line =~ 
+/^\s*(header|rawbody|body|full|meta|uri|score|describe|tflags)\s+(\S+)\s+(.*)$/
+      )
+    {
+      my $type = $1;
+      my $name = $2;
+      my $code = $3;
+      $cmt->{mcrules} .= "$type $name $code\n";
+      $lastwasrule = 1;
+      if (!$seenrules) {
+        print "bug $ctx->{bugnum} cmt $cmt->{cmtnum}: rules inline\n";
+        $seenrules++;
+      }
+    }
+    else {
+      if ($line =~ /\S/) {
+        if ($lastwasrule) {
+          # assume it's a continuation of the last line
+          chop($cmt->{mcrules});
+          $cmt->{mcrules} .= "$line\n";
+        }
+      }
+      else {
+        $lastwasrule = 0;
+      }
+    }
+  }
+
+  if ($cmt->{mcrules} =~ /\S/) {
+    my $ruletext = $cmt->{mcrules};
+    $ruletext =~ s/^/>> /gm;
+    print "bug $ctx->{bugnum} cmt $cmt->{cmtnum}: code: \n".$ruletext;
   }
 }
