@@ -149,12 +149,12 @@ body T_INT_AFFORDABLE	eval:check_obfu_word('affordable')
 body T_INT_ANXIETY	eval:check_obfu_word('anxiety')
 body T_INT_BILLION	eval:check_obfu_word('billion')
 body T_INT_CELEBREX	eval:check_obfu_word('celebrex')
-body T_INT_CIALIS	eval:check_obfu_word('cialis')
+body T_INT_CPILL	eval:check_obfu_word('cialis')
 body T_INT_CREDIT	eval:check_obfu_word('credit')
 body T_INT_ERECT	eval:check_obfu_word('erection')
 body T_INT_FREE		eval:check_obfu_word('free')
 body T_INT_HUNDREDS	eval:check_obfu_word('hundreds')
-body T_INT_LEVITRA	eval:check_obfu_word('levitra')
+body T_INT_LPILL	eval:check_obfu_word('levitra')
 body T_INT_MILF		eval:check_obfu_word('milf')
 body T_INT_MILLION	eval:check_obfu_word('million')
 body T_INT_MONEY	eval:check_obfu_word('money')
@@ -171,10 +171,10 @@ body T_INT_ROLEX	eval:check_obfu_word('rolex')
 body T_INT_SOFTWARE	eval:check_obfu_word('software')
 body T_INT_THOUSANDS	eval:check_obfu_word('thousands')
 body T_INT_VALIUM	eval:check_obfu_word('valium')
-body T_INT_VIAGRA	eval:check_obfu_word('viagra')
+body T_INT_VPILL	eval:check_obfu_word('viagra')
 body T_INT_VICODIN	eval:check_obfu_word('vicodin')
 body T_INT_VIOXX	eval:check_obfu_word('vioxx')
-body T_INT_XANAX	eval:check_obfu_word('xanax')
+body T_INT_XPILL	eval:check_obfu_word('xanax')
 
 # TVD: my FPs for this are all things like "pill's benefits"
 body T_INT_PILLS	eval:check_obfu_word('pills')
@@ -230,9 +230,9 @@ body T_OBFU_CELEBREX_W2_P2	/<inter W2><post P2>(?!celebrex)<C><E><L><E><B><R><E>
 body T_OBFU_CELEBREX_W2_P3	/<inter W2><post P3>(?!celebrex)<C><E><L><E><B><R><E><X>/i
 body T_OBFU_CELEBREX_W3_P2	/<inter W3><post P2>(?!celebrex)<C><E><L><E><B><R><E><X>/i
 body T_OBFU_CELEBREX_W3_P3	/<inter W3><post P3>(?!celebrex)<C><E><L><E><B><R><E><X>/i
-body T_OBFU_CIALIS	/(?!cialis)<C><I><A><L><I><S>/i
-body T_OBFU_CIALIS_W1_P2	/<inter W1><post P2>(?!cialis)<C><I><A><L><I><S>/i
-body T_OBFU_CIALIS_W1_P3	/<inter W1><post P3>(?!cialis)<C><I><A><L><I><S>/i
+body T_OBFU_CPILL	/(?!cialis)<C><I><A><L><I><S>/i
+body T_OBFU_CPILL_W1_P2	/<inter W1><post P2>(?!cialis)<C><I><A><L><I><S>/i
+body T_OBFU_CPILL_W1_P3	/<inter W1><post P3>(?!cialis)<C><I><A><L><I><S>/i
 body T_OBFU_CLICK	/(?!click)<C><L><I><C><K>/i
 body T_OBFU_CLICK_W1_P2	/<inter W1><post P2>(?!click)<C><L><I><C><K>/i
 body T_OBFU_CLICK_W1_P3	/<inter W1><post P3>(?!click)<C><L><I><C><K>/i
@@ -287,13 +287,13 @@ body T_OBFU_GUARANTEE_W2_P3	/<inter W2><post P3>(?!guarantee)<G><U><A><R><A><N><
 body T_OBFU_GUARANTEE_W3_P2	/<inter W3><post P2>(?!guarantee)<G><U><A><R><A><N><T><E><E>/i
 body T_OBFU_GUARANTEE_W3_P3	/<inter W3><post P3>(?!guarantee)<G><U><A><R><A><N><T><E><E>/i
 body T_OBFU_HUNDREDS	/(?!hundreds)<H><U><N><D><R><E><D><S>/i
-body T_OBFU_LEVITRA	/(?!levitra)<L><E><V><I><T><R><A>/i
-body T_OBFU_LEVITRA_W1_P2	/<inter W1><post P2>(?!levitra)<L><E><V><I><T><R><A>/i
-body T_OBFU_LEVITRA_W1_P3	/<inter W1><post P3>(?!levitra)<L><E><V><I><T><R><A>/i
-body T_OBFU_LEVITRA_W2_P2	/<inter W2><post P2>(?!levitra)<L><E><V><I><T><R><A>/i
-body T_OBFU_LEVITRA_W2_P3	/<inter W2><post P3>(?!levitra)<L><E><V><I><T><R><A>/i
-body T_OBFU_LEVITRA_W3_P2	/<inter W3><post P2>(?!levitra)<L><E><V><I><T><R><A>/i
-body T_OBFU_LEVITRA_W3_P3	/<inter W3><post P3>(?!levitra)<L><E><V><I><T><R><A>/i
+body T_OBFU_LPILL	/(?!levitra)<L><E><V><I><T><R><A>/i
+body T_OBFU_LPILL_W1_P2	/<inter W1><post P2>(?!levitra)<L><E><V><I><T><R><A>/i
+body T_OBFU_LPILL_W1_P3	/<inter W1><post P3>(?!levitra)<L><E><V><I><T><R><A>/i
+body T_OBFU_LPILL_W2_P2	/<inter W2><post P2>(?!levitra)<L><E><V><I><T><R><A>/i
+body T_OBFU_LPILL_W2_P3	/<inter W2><post P3>(?!levitra)<L><E><V><I><T><R><A>/i
+body T_OBFU_LPILL_W3_P2	/<inter W3><post P2>(?!levitra)<L><E><V><I><T><R><A>/i
+body T_OBFU_LPILL_W3_P3	/<inter W3><post P3>(?!levitra)<L><E><V><I><T><R><A>/i
 body T_OBFU_MEDICATION	/(?!medication)<M><E><D><I><C><A><T><I><O><N>/i
 body T_OBFU_MEDICATION_W1_P2	/<inter W1><post P2>(?!medication)<M><E><D><I><C><A><T><I><O><N>/i
 body T_OBFU_MEDICATION_W1_P3	/<inter W1><post P3>(?!medication)<M><E><D><I><C><A><T><I><O><N>/i
@@ -460,13 +460,13 @@ body T_OBFU_VALIUM_W2_P2	/<inter W2><post P2>(?!valium)<V><A><L><I><U><M>/i
 body T_OBFU_VALIUM_W2_P3	/<inter W2><post P3>(?!valium)<V><A><L><I><U><M>/i
 body T_OBFU_VALIUM_W3_P2	/<inter W3><post P2>(?!valium)<V><A><L><I><U><M>/i
 body T_OBFU_VALIUM_W3_P3	/<inter W3><post P3>(?!valium)<V><A><L><I><U><M>/i
-body T_OBFU_VIAGRA	/(?!viagra)<V><I><A><G><R><A>/i
-body T_OBFU_VIAGRA_W1_P2	/<inter W1><post P2>(?!viagra)<V><I><A><G><R><A>/i
-body T_OBFU_VIAGRA_W1_P3	/<inter W1><post P3>(?!viagra)<V><I><A><G><R><A>/i
-body T_OBFU_VIAGRA_W2_P2	/<inter W2><post P2>(?!viagra)<V><I><A><G><R><A>/i
-body T_OBFU_VIAGRA_W2_P3	/<inter W2><post P3>(?!viagra)<V><I><A><G><R><A>/i
-body T_OBFU_VIAGRA_W3_P2	/<inter W3><post P2>(?!viagra)<V><I><A><G><R><A>/i
-body T_OBFU_VIAGRA_W3_P3	/<inter W3><post P3>(?!viagra)<V><I><A><G><R><A>/i
+body T_OBFU_VPILL	/(?!viagra)<V><I><A><G><R><A>/i
+body T_OBFU_VPILL_W1_P2	/<inter W1><post P2>(?!viagra)<V><I><A><G><R><A>/i
+body T_OBFU_VPILL_W1_P3	/<inter W1><post P3>(?!viagra)<V><I><A><G><R><A>/i
+body T_OBFU_VPILL_W2_P2	/<inter W2><post P2>(?!viagra)<V><I><A><G><R><A>/i
+body T_OBFU_VPILL_W2_P3	/<inter W2><post P3>(?!viagra)<V><I><A><G><R><A>/i
+body T_OBFU_VPILL_W3_P2	/<inter W3><post P2>(?!viagra)<V><I><A><G><R><A>/i
+body T_OBFU_VPILL_W3_P3	/<inter W3><post P3>(?!viagra)<V><I><A><G><R><A>/i
 body T_OBFU_VICODIN	/(?!vicodin)<V><I><C><O><D><I><N>/i
 body T_OBFU_VICODIN_W1_P2	/<inter W1><post P2>(?!vicodin)<V><I><C><O><D><I><N>/i
 body T_OBFU_VICODIN_W1_P3	/<inter W1><post P3>(?!vicodin)<V><I><C><O><D><I><N>/i
@@ -483,13 +483,13 @@ body T_OBFU_VIOXX_W3_P2	/<inter W3><post P2>(?!vioxx)<V><I><O><X><X>/i
 body T_OBFU_VIOXX_W3_P3	/<inter W3><post P3>(?!vioxx)<V><I><O><X><X>/i
 body T_OBFU_VISIT_W1_P2	/<inter W1><post P2>(?!visit)<V><I><S><I><T>/i
 body T_OBFU_VISIT_W1_P3	/<inter W1><post P3>(?!visit)<V><I><S><I><T>/i
-body T_OBFU_XANAX	/(?!xanax)<X><A><N><A><X>/i
-body T_OBFU_XANAX_W1_P2	/<inter W1><post P2>(?!xanax)<X><A><N><A><X>/i
-body T_OBFU_XANAX_W1_P3	/<inter W1><post P3>(?!xanax)<X><A><N><A><X>/i
-body T_OBFU_XANAX_W2_P2	/<inter W2><post P2>(?!xanax)<X><A><N><A><X>/i
-body T_OBFU_XANAX_W2_P3	/<inter W2><post P3>(?!xanax)<X><A><N><A><X>/i
-body T_OBFU_XANAX_W3_P2	/<inter W3><post P2>(?!xanax)<X><A><N><A><X>/i
-body T_OBFU_XANAX_W3_P3	/<inter W3><post P3>(?!xanax)<X><A><N><A><X>/i
+body T_OBFU_XPILL	/(?!xanax)<X><A><N><A><X>/i
+body T_OBFU_XPILL_W1_P2	/<inter W1><post P2>(?!xanax)<X><A><N><A><X>/i
+body T_OBFU_XPILL_W1_P3	/<inter W1><post P3>(?!xanax)<X><A><N><A><X>/i
+body T_OBFU_XPILL_W2_P2	/<inter W2><post P2>(?!xanax)<X><A><N><A><X>/i
+body T_OBFU_XPILL_W2_P3	/<inter W2><post P3>(?!xanax)<X><A><N><A><X>/i
+body T_OBFU_XPILL_W3_P2	/<inter W3><post P2>(?!xanax)<X><A><N><A><X>/i
+body T_OBFU_XPILL_W3_P3	/<inter W3><post P3>(?!xanax)<X><A><N><A><X>/i
 
 replace_rules T_OBFU_AFFORDABLE
 replace_rules T_OBFU_AFFORDABLE_W1_P2
@@ -526,9 +526,9 @@ replace_rules T_OBFU_CELEBREX_W2_P2
 replace_rules T_OBFU_CELEBREX_W2_P3
 replace_rules T_OBFU_CELEBREX_W3_P2
 replace_rules T_OBFU_CELEBREX_W3_P3
-replace_rules T_OBFU_CIALIS
-replace_rules T_OBFU_CIALIS_W1_P2
-replace_rules T_OBFU_CIALIS_W1_P3
+replace_rules T_OBFU_CPILL
+replace_rules T_OBFU_CPILL_W1_P2
+replace_rules T_OBFU_CPILL_W1_P3
 replace_rules T_OBFU_CLICK
 replace_rules T_OBFU_CLICK_W1_P2
 replace_rules T_OBFU_CLICK_W1_P3
@@ -583,13 +583,13 @@ replace_rules T_OBFU_GUARANTEE_W2_P3
 replace_rules T_OBFU_GUARANTEE_W3_P2
 replace_rules T_OBFU_GUARANTEE_W3_P3
 replace_rules T_OBFU_HUNDREDS
-replace_rules T_OBFU_LEVITRA
-replace_rules T_OBFU_LEVITRA_W1_P2
-replace_rules T_OBFU_LEVITRA_W1_P3
-replace_rules T_OBFU_LEVITRA_W2_P2
-replace_rules T_OBFU_LEVITRA_W2_P3
-replace_rules T_OBFU_LEVITRA_W3_P2
-replace_rules T_OBFU_LEVITRA_W3_P3
+replace_rules T_OBFU_LPILL
+replace_rules T_OBFU_LPILL_W1_P2
+replace_rules T_OBFU_LPILL_W1_P3
+replace_rules T_OBFU_LPILL_W2_P2
+replace_rules T_OBFU_LPILL_W2_P3
+replace_rules T_OBFU_LPILL_W3_P2
+replace_rules T_OBFU_LPILL_W3_P3
 replace_rules T_OBFU_MEDICATION
 replace_rules T_OBFU_MEDICATION_W1_P2
 replace_rules T_OBFU_MEDICATION_W1_P3
@@ -756,13 +756,13 @@ replace_rules T_OBFU_VALIUM_W2_P2
 replace_rules T_OBFU_VALIUM_W2_P3
 replace_rules T_OBFU_VALIUM_W3_P2
 replace_rules T_OBFU_VALIUM_W3_P3
-replace_rules T_OBFU_VIAGRA
-replace_rules T_OBFU_VIAGRA_W1_P2
-replace_rules T_OBFU_VIAGRA_W1_P3
-replace_rules T_OBFU_VIAGRA_W2_P2
-replace_rules T_OBFU_VIAGRA_W2_P3
-replace_rules T_OBFU_VIAGRA_W3_P2
-replace_rules T_OBFU_VIAGRA_W3_P3
+replace_rules T_OBFU_VPILL
+replace_rules T_OBFU_VPILL_W1_P2
+replace_rules T_OBFU_VPILL_W1_P3
+replace_rules T_OBFU_VPILL_W2_P2
+replace_rules T_OBFU_VPILL_W2_P3
+replace_rules T_OBFU_VPILL_W3_P2
+replace_rules T_OBFU_VPILL_W3_P3
 replace_rules T_OBFU_VICODIN
 replace_rules T_OBFU_VICODIN_W1_P2
 replace_rules T_OBFU_VICODIN_W1_P3
@@ -779,13 +779,13 @@ replace_rules T_OBFU_VIOXX_W3_P2
 replace_rules T_OBFU_VIOXX_W3_P3
 replace_rules T_OBFU_VISIT_W1_P2
 replace_rules T_OBFU_VISIT_W1_P3
-replace_rules T_OBFU_XANAX
-replace_rules T_OBFU_XANAX_W1_P2
-replace_rules T_OBFU_XANAX_W1_P3
-replace_rules T_OBFU_XANAX_W2_P2
-replace_rules T_OBFU_XANAX_W2_P3
-replace_rules T_OBFU_XANAX_W3_P2
-replace_rules T_OBFU_XANAX_W3_P3
+replace_rules T_OBFU_XPILL
+replace_rules T_OBFU_XPILL_W1_P2
+replace_rules T_OBFU_XPILL_W1_P3
+replace_rules T_OBFU_XPILL_W2_P2
+replace_rules T_OBFU_XPILL_W2_P3
+replace_rules T_OBFU_XPILL_W3_P2
+replace_rules T_OBFU_XPILL_W3_P3
 
 endif   #ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
 
