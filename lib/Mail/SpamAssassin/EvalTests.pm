@@ -2613,21 +2613,6 @@ sub _check_attachments {
 }
 
 ###########################################################################
-# FULL-MESSAGE TESTS:
-###########################################################################
-
-sub check_pyzor {
-  my ($self, $full) = @_;
-
-  return 0 unless ($self->is_pyzor_available());
-  return 0 if ($self->{already_checked_pyzor});
-
-  $self->{already_checked_pyzor} = 1;
-
-  return $self->pyzor_lookup($full);
-}
-
-###########################################################################
 
 sub check_for_fake_aol_relay_in_rcvd {
   my ($self) = @_;

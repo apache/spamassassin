@@ -991,64 +991,6 @@ Select the locales to allow from the list below:
 
 =over 4
 
-=item use_pyzor ( 0 | 1 )		(default: 1)
-
-Whether to use Pyzor, if it is available.
-
-=cut
-
-  push (@cmds, {
-    setting => 'use_pyzor',
-    default => 1,
-    type => $CONF_TYPE_BOOL
-  });
-
-=item pyzor_timeout n              (default: 10)
-
-How many seconds you wait for Pyzor to complete, before scanning continues
-without the Pyzor results.
-
-=cut
-
-  push (@cmds, {
-    setting => 'pyzor_timeout',
-    default => 10,
-    type => $CONF_TYPE_NUMERIC
-  });
-
-=item pyzor_max NUMBER
-
-Pyzor is a system similar to Razor.  This option sets how often a message's
-body checksum must have been reported to the Pyzor server before SpamAssassin
-will consider the Pyzor check as matched.
-
-The default is 5.
-
-=cut
-
-  push (@cmds, {
-    setting => 'pyzor_max',
-    default => 5,
-    type => $CONF_TYPE_NUMERIC
-  });
-
-=item pyzor_options [option ...]
-
-Additional options for the pyzor(1) command line.   Note that for security,
-only characters in the ranges A-Z, a-z, 0-9, -, _ and / are permitted.
-
-=cut
-
-  push (@cmds, {
-    setting => 'pyzor_options',
-    default => '',
-    code => sub {
-      my ($self, $key, $value, $line) = @_;
-      if ($value !~ /^([-A-Za-z0-9_\/ ]+)$/) { return $INVALID_VALUE; }
-      $self->{pyzor_options} = $1;
-    }
-  });
-
 =item spamcop_from_address add@ress.com   (default: none)
 
 This address is used during manual reports to SpamCop as the From:
@@ -2451,22 +2393,6 @@ general running of SpamAssassin.
       if ($value !~ /^(\S+)\s+(ok|fail)\s+(.*)$/) { return $INVALID_VALUE; }
       $self->{parser}->add_regression_test($1, $2, $3);
     }
-  });
-
-=item pyzor_path STRING
-
-This option tells SpamAssassin specifically where to find the C<pyzor> client
-instead of relying on SpamAssassin to find it in the current PATH.
-Note that if I<taint mode> is enabled in the Perl interpreter, you should
-use this, as the current PATH will have been cleared.
-
-=cut
-
-  push (@cmds, {
-    setting => 'pyzor_path',
-    is_admin => 1,
-    default => undef,
-    type => $CONF_TYPE_STRING
   });
 
 =item use_auto_whitelist ( 0 | 1 )		(default: 1)
