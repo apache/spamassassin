@@ -47,13 +47,15 @@ sa-forget - train spamassassin to forget about a mail
 =head1 SYNOPSIS
 
 B<sa-forget> [options] --file I<message>
+
 B<sa-forget> [options] --mbox I<mailbox>
+
 B<sa-forget> [options] --dir I<directory>
 
 Options:
 
  -f file, --folders=file           Read list of files/directories from file
- --dir                             Learn a directory of RFC 822 formatted files
+ --dir                             Learn a directory of RFC 822 files
  --file                            Check a file in RFC 822 format
  --mbox                            Check a file in mbox format
  --showdots                        Show progress using dots
