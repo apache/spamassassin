@@ -1,8 +1,17 @@
 #!/usr/bin/perl
 
+BEGIN {
+  if (-e 't/test_dir') { # if we are running "t/rule_tests.t", kluge around ...
+    chdir 't';
+  }
+
+  if (-e 'test_dir') {            # running from test directory, not ..
+    unshift(@INC, '../blib/lib');
+  }
+}
+
 my $prefix = '.';
 if (-e 'test_dir') {            # running from test directory, not ..
-  use lib '../lib';
   $prefix = '..';
 }
 
