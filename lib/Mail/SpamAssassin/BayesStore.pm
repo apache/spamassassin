@@ -153,7 +153,7 @@ sub tie_db_readonly {
   return 1;
 
 failed_to_tie:
-  warn "Cannot open bayes_path $path R/O: $!\n";
+  warn "Cannot open bayes databases ${path}_* R/O: tie failed: $!\n";
   return 0;
 }
 
@@ -190,7 +190,7 @@ sub tie_db_writable {
     $self->{locked_file} = $path;
     $self->{is_locked} = 1;
   } else {
-    warn "Cannot open bayes_path $path R/W: $!\n";
+    warn "Cannot open bayes databases ${path}_* R/W: lock failed: $!\n";
     return 0;
   }
 
@@ -215,12 +215,13 @@ sub tie_db_writable {
   return 1;
 
 failed_to_tie:
+  my $err = $!;
   umask $umask;
   if ($self->{is_locked}) {
     $self->{bayes}->{main}->{locker}->safe_unlock ($self->{locked_file});
     $self->{is_locked} = 0;
   }
-  warn "Cannot open bayes_path $path R/W: $!\n";
+  warn "Cannot open bayes databases ${path}_* R/W: tie failed: $err\n";
   return 0;
 }
 
