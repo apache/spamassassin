@@ -55,7 +55,12 @@ my %is_nice = ();
 
 if (!defined $argcffile) { $argcffile = "../rules"; }
 system ("./parse-rules-for-masses -d \"$argcffile\" -s $scoreset") and die;
-require "./tmp/rules.pl";
+if (-e "tmp/rules.pl") {
+  require "./tmp/rules.pl";
+}
+else {
+  die "parse-rules-for-masses had no error but no tmp/rules.pl!?!";
+}
 
 while (<>) {
   /^\s*([\d\.]+)\s+([\d\.]+)\s+([\d\.]+)\s+([\d\.]+)\s+([\d\.]+)\s+\S+\s+(.+)\s*$/ or next;
