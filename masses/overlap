@@ -54,13 +54,21 @@ print "COUNT\tPAIR/A\tPAIR/B\tA,B\n";
 
 foreach $k (sort { $pair{$b} <=> $pair{$a} } keys %pair) {
     my ($a, $b) = split(/ /, $k);
+    next unless $solo{$a};
+    next unless $solo{$b};
     my $a_pct = $pair{$k} / $solo{$a};
     my $b_pct = $pair{$k} / $solo{$b};
-    if ($opt_a || ($a_pct > $b_pct) || ($a_pct == $b_pct && $a lt $b)) {
-	printf "%d\t%.3f\t%.3f\t%s,%s\n", $pair{$k}, $a_pct, $b_pct, $a, $b;
+    if ($opt_a) {
+	printf "%d\t%.3f\t%.3f\t%s,%s\n", $pair{$k},$a_pct,$b_pct,$a,$b;
+	printf "%d\t%.3f\t%.3f\t%s,%s\n", $pair{$k},$b_pct,$a_pct,$b,$a;
     }
     else {
-	printf "%d\t%.3f\t%.3f\t%s,%s\n", $pair{$k}, $b_pct, $a_pct, $b, $a;
+	if (($a_pct > $b_pct) || ($a_pct == $b_pct && $a lt $b)) {
+	    printf "%d\t%.3f\t%.3f\t%s,%s\n", $pair{$k},$a_pct,$b_pct,$a,$b;
+	}
+	else {
+	    printf "%d\t%.3f\t%.3f\t%s,%s\n", $pair{$k},$b_pct,$a_pct,$b,$a;
+	}
     }
 }
 
@@ -70,14 +78,12 @@ sub read_file {
     open(FILE, $input) || die "open failed: $input";
     my $line = 0;
     while(<FILE>) {
-	chomp;
 	next if /^#/;
-	if (/^[Y.]\s+-?\d+\s+\S+\s+(.*)/) {
+	if (/^[Y.]\s+-?\d+\s+\S+\s+(\S+)/) {
 	    my @tests = sort (split(/,/, $1));
 	    for (my $i = 0; $i <= $#tests; $i++) {
-		my $start = $opt_a ? 0 : ($i + 1);
 		$solo{$tests[$i]}++;
-		for (my $j = $start; $j <= $#tests; $j++) {
+		for (my $j = ($i + 1); $j <= $#tests; $j++) {
 		    next if $i == $j;
 		    $pair{$tests[$i] . " " . $tests[$j]}++;
 		}
