@@ -168,8 +168,8 @@ use constant ROBINSON_S_TIMES_X => ROBINSON_S_CONSTANT * ROBINSON_X_CONSTANT;
 
 # Should we ignore tokens with probs very close to the middle ground (.5)?
 # tokens need to be outside the [ .5-MPS, .5+MPS ] range to be used.
-use constant ROBINSON_MIN_PROB_STRENGTH => 0.346;
-#use constant ROBINSON_MIN_PROB_STRENGTH => 0.1;
+#use constant ROBINSON_MIN_PROB_STRENGTH => 0.346;
+use constant ROBINSON_MIN_PROB_STRENGTH => 0.1;
 
 # note: these seem to work well for Gary-combining.
 #use constant ROBINSON_X_CONSTANT => 0.6;
