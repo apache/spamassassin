@@ -86,16 +86,16 @@ use vars qw{
 };
 
 $VERSION = "2.60";              # update after release
-$IS_DEVEL_BUILD = 1;            # change for release versions
+#$IS_DEVEL_BUILD = 1;            # change for release versions
 
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.207 2003/09/19 04:02:40 quinlan Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.208 2003/09/19 05:36:43 felicity Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
-@EXTRA_VERSION = qw(rc5);
+@EXTRA_VERSION = qw(rc6);
 
 if (defined $IS_DEVEL_BUILD && $IS_DEVEL_BUILD) {
   push(@EXTRA_VERSION, 'cvs');
