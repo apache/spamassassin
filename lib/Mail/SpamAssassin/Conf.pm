@@ -220,6 +220,15 @@ sub _parse {
       next;
     }
 
+=item require_version n.nn
+
+Indicates that the entire file, from this line on, requires a certain version
+of SpamAssassin to run.  If an older or newer version of SpamAssassin tries to
+read configuration from this file, it will output a warning instead, and
+ignore it.
+
+=cut
+
     if (/^require[-_]version\s+(.*)\s*$/) {
       my $req_version = $1 + 0.0;
       if ($Mail::SpamAssassin::VERSION != $req_version) {
