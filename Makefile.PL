@@ -157,7 +157,7 @@ my %makefile = (
     # will be converted later on).  Use the source file name as the key and
     # the executable as the value.
     'EXE_FILES' => {
-      'spamassassin.raw'    => 'spamassassin',
+      'spamassassin.raw' => 'spamassassin',
       'sa-learn.raw'     => 'sa-learn',
       'sa-update.raw'    => 'sa-update',
       'spamc/spamc.c'    => 'spamc/spamc$(EXE_EXT)',
@@ -165,6 +165,7 @@ my %makefile = (
     },
 
     'MAN1PODS' => {
+        'spamassassin'     => '$(INST_MAN1DIR)/spamassassin.$(MAN1EXT)',
         'spamassassin-script.pod' => '$(INST_MAN1DIR)/spamassassin-script.$(MAN1EXT)',
         'sa-learn'         => '$(INST_MAN1DIR)/sa-learn.$(MAN1EXT)',
         'sa-update'        => '$(INST_MAN1DIR)/sa-update.$(MAN1EXT)',
