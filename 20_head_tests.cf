@@ -329,6 +329,9 @@ describe FROM_TOPICA		From an address @email-publisher.com
 header USER_IN_BLACKLIST	eval:check_from_in_blacklist()
 describe USER_IN_BLACKLIST	From: address is in the user's black-list
 
+header USER_IN_WHITELIST	eval:check_from_in_whitelist()
+describe USER_IN_WHITELIST	From: address is in the user's white-list
+
 header FROM_MISSING		From =~ /^UNSET$/ [if-unset: UNSET]
 describe FROM_MISSING		Missing From: header
 
