@@ -148,6 +148,9 @@ describe MIME_HTML_NO_CHARSET	Message text in HTML without specified charset
 rawbody  MIME_MISSING_BOUNDARY	eval:check_for_mime('mime_missing_boundary')
 describe MIME_MISSING_BOUNDARY	MIME section missing boundary
 
+body MIME_MULTIPART_SHORT	eval:check_mime_multipart_ratio('0.00','0.01')
+describe MIME_MULTIPART_SHORT	Alternative plain text is much shorter than HTML
+
 rawbody MIME_QP_DEFICIENT	eval:check_for_mime('mime_qp_illegal')
 describe MIME_QP_DEFICIENT	Deficient quoted-printable encoding in body
 
