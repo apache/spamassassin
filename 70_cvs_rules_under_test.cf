@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.631 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.632 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -96,6 +96,24 @@ header T_RCVD_IN_CBL	eval:check_rbl_txt('cbl', 'cbl.abuseat.org.')
 describe T_RCVD_IN_CBL	Received via a relay in cbl.abuseat.org
 tflags T_RCVD_IN_CBL	net
 score T_RCVD_IN_CBL	0.1
+
+# SPF support.  "pass" is nice, "fail" is bad, "softfail" is bad, but
+# not as bad as "fail".
+header T_SPF_PASS	eval:check_for_spf_pass()
+tflags T_SPF_PASS	net nice
+score T_SPF_PASS	-0.1
+header T_SPF_FAIL	eval:check_for_spf_fail()
+tflags T_SPF_FAIL	net 
+score T_SPF_FAIL	0.1
+header T_SPF_SOFTFAIL	eval:check_for_spf_softfail()
+tflags T_SPF_SOFTFAIL	net
+score T_SPF_SOFTFAIL	0.1
+
+
+header T_ALL_RELAYS_NEAR_MXES	eval:check_for_all_relays_near_mxes()
+tflags T_ALL_RELAYS_NEAR_MXES	net nice
+score T_ALL_RELAYS_NEAR_MXES	-0.1
+describe T_ALL_RELAYS_NEAR_MXES	All relays are near to their MXes
 
 # try out new versions of username in subject ...
 # "user@domain.com" in the subject, case insensitive
