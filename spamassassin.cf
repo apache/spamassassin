@@ -286,9 +286,11 @@ describe A_HREF_TO_IP		Link to an IP-address instead of a named host
 full A_HREF_TO_REMOVE		/href[3D=\s\"\']*\S+(?:unsubscribe|remove)/i
 describe A_HREF_TO_REMOVE	Link to a URL containing "remove"
 
-full MAILTO_LINK		/=[3D=\s"']*mailto:/is
+# include the \n\n so we don't match mailto's in the headers!  Some list software
+# uses these to handle auto-subscribe/unsubscribe features
+full MAILTO_LINK		/\n\n.*=[3D=\s"']*mailto:/is
 full MAILTO_WITH_SUBJ_REMOVE	/mailto:\S+\?subject=[3D=\s"']*remove/is
-full MAILTO_WITH_SUBJ		/mailto:\S+\?subject=/is
+full MAILTO_WITH_SUBJ		/\n\n.*mailto:\S+\?subject=/is
 full FORM_W_MAILTO_ACTION	/action=[3D=\s"']*mailto:/is
 full AOL_USERS_LINK		/AOL\s+Users\s+Click\s+Here/is
 
