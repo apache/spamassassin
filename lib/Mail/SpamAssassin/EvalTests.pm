@@ -259,6 +259,25 @@ sub check_razor {
   return $self->razor_lookup ($site, $fulltext);
 }
 
+sub check_for_base64_enc_text {
+  my ($self, $fulltext) = @_;
+
+  if ($$fulltext =~ /\n\n.{0,100}(
+    	\nContent-Type:\stext\/.{0,200}
+	\nContent-Transfer-Encoding:\sbase64.*?
+	\n\n)/isx)
+  {
+    my $otherhdrs = $1;
+    if ($otherhdrs =~ /^Content-Disposition: (?:attachment|inline)/im) {
+      return 0;		# text attachments are OK
+    } else {
+      return 1;		# no Content-Disp: header found, it's bad
+    }
+  }
+
+  return 0;
+}
+
 ###########################################################################
 
 1;

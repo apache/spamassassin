@@ -52,6 +52,11 @@ Here's what to do:
 	./mass-check ~/Mail/work >> nonspam.log
 	./mass-check ~/Mail/foo >> nonspam.log
 
+    This is a *lot* faster than the more paranoid incoming-mail checks, since
+    it runs without doing DNS or Razor lookups and without forking
+    subprocesses.  However it can still take a while for large numbers of
+    messages.
+
   - and run it for the spam folders:
 
 	: > spam.log
