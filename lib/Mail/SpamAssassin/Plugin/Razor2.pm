@@ -57,7 +57,7 @@ sub new {
   # figure out if razor is even available or not ...
   $self->{razor2_available} = 0;
   if ($mailsaobject->{local_tests_only}) {
-    dbg("razor2: local tests only, skipping razor2");
+    dbg("razor2: local tests only, skipping Razor");
   }
   else {
     if (eval { require Razor2::Client::Agent; }) {
@@ -307,7 +307,7 @@ sub razor2_access {
       # DSNs and errors in syslog etc., yuck
       dbg("$debug: razor2 $type could not connect to any servers");
     } elsif ($err =~ /timeout/i) {
-      dbg("$debug: razor2 $type timed out connecting to razor servers");
+      dbg("$debug: razor2 $type timed out connecting to servers");
     } else {
       warn("$debug: razor2 $type failed: $! $err");
     }
