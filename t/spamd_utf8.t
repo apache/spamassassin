@@ -4,7 +4,7 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_utf8");
 use Test; BEGIN { plan tests => 3 };
 
-$ENV{'LANG'} = 'en_US.utf8';	# ensure we test in UTF-8 locale
+$ENV{'LANG'} = 'en_US.UTF-8';	# ensure we test in UTF-8 locale
 
 # ---------------------------------------------------------------------------
 
