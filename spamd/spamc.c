@@ -63,9 +63,12 @@ static int timeout = 600;
 
 void print_usage(void)
 {
-  printf("Usage: spamc [-d host] [-p port] [-B] [-c] [-f] [-h] [-x] [-t tout] [-e command [args]]\n");
+  printf("Usage: spamc [options] < message\n\n");
   printf("-B: BSMTP mode - expect input to be a single SMTP-formatted message\n");
   printf("-c: check only - print score/threshold and exit code set to 0 if message is not spam, 1 if spam\n");
+  printf("-r: report if spam - print report for spam messages\n");
+  printf("-R: report - print report for all messages\n");
+  printf("-y: symbols - print only the names of the tests hit\n");
   printf("-d host: specify host to connect to  [default: localhost]\n");
   printf("-e command [args]: Command to output to instead of stdout. MUST BE THE LAST OPTION.\n");
   printf("-f: fallback safely - in case of comms error, dump original message unchanges instead of setting exitcode\n");
@@ -75,7 +78,7 @@ void print_usage(void)
   printf("-S: use SSL to talk to spamd\n");
   printf("-u username: specify the username for spamd to process this message under\n");
   printf("-x: don't fallback safely - in a comms error, exit with an error code\n");
-  printf("-t: timeout in seconds to read from spamd. 0 disables. [default: 600]\n");
+  printf("-t: timeout in seconds to read from spamd. 0 disables. [default: 600]\n\n");
 }
 
 int
@@ -83,7 +86,7 @@ read_args(int argc, char **argv, char **hostname, int *port, int *max_size, char
 {
   int opt, i, j;
 
-  while(-1 != (opt = getopt(argc,argv,"-Bcd:e:fhp:t:s:u:xS")))
+  while(-1 != (opt = getopt(argc,argv,"-BcrRd:e:fhyp:t:s:u:xS")))
   {
     switch(opt)
     {
@@ -95,6 +98,21 @@ read_args(int argc, char **argv, char **hostname, int *port, int *max_size, char
     case 'c':
       {
         flags |= SPAMC_CHECK_ONLY;
+	break;
+      }
+    case 'r':
+      {
+        flags |= SPAMC_REPORT_IFSPAM;
+	break;
+      }
+    case 'R':
+      {
+        flags |= SPAMC_REPORT;
+	break;
+      }
+    case 'y':
+      {
+        flags |= SPAMC_SYMBOLS;
 	break;
       }
     case 'd':
@@ -247,7 +265,7 @@ int main(int argc, char **argv){
 
 FAIL:
     get_output_fd(&out_fd);
-    if(flags&SPAMC_CHECK_ONLY){
+    if(flags&SPAMC_CHECK_ONLY || flags&SPAMC_REPORT || flags&SPAMC_REPORT_IFSPAM){
         full_write(out_fd, (unsigned char *) "0/0\n", 4);
         return EX_NOTSPAM;
     } else {

@@ -28,6 +28,24 @@ Just check if the message is spam or not.  Set process exitcode to 1 is
 message is spam, 0 if not spam or processing failure occurs.  Will print
 score/threshold to stdout (as ints) or 0/0 if there was an error.
 
+=item B<-r>
+
+Just output the SpamAssassin report text to stdout, if the message is spam.
+If the message is ham, nothing will be printed.  The first line of the output
+is the number of hits and the threshold, in this format:
+
+	hits/threshold
+
+=item B<-R>
+
+Just output the SpamAssassin report text to stdout, for all messages.
+See B<-r> for details of the output format used.
+
+=item B<-y>
+
+Just output the names of the tests hit to stdout, on one line, separated
+by commas.
+
 =item B<-d> I<host>
 
 Connect to spamd server on given host.  If I<host> resolves to multiple

@@ -513,8 +513,19 @@ static int _message_filter(const struct sockaddr *addr,
     }
     m->out_len=0;
 
+
     /* Build spamd protocol header */
-    len=snprintf(buf, bufsiz, "%s %s\r\n", (flags&SPAMC_CHECK_ONLY)?"CHECK":"PROCESS", PROTOCOL_VERSION);
+    if(flags & SPAMC_CHECK_ONLY) 
+      len=snprintf(buf, bufsiz, "CHECK %s\r\n", PROTOCOL_VERSION);
+    else if(flags & SPAMC_REPORT_IFSPAM)
+      len=snprintf(buf, bufsiz, "REPORT_IFSPAM %s\r\n", PROTOCOL_VERSION);
+    else if(flags & SPAMC_REPORT) 
+      len=snprintf(buf, bufsiz, "REPORT %s\r\n", PROTOCOL_VERSION);
+    else if(flags & SPAMC_SYMBOLS) 
+      len=snprintf(buf, bufsiz, "SYMBOLS %s\r\n", PROTOCOL_VERSION);
+    else
+      len=snprintf(buf, bufsiz, "PROCESS %s\r\n", PROTOCOL_VERSION);
+
     if(len<0 || len >= bufsiz){ free(m->out); m->out=m->msg; m->out_len=m->msg_len; return EX_OSERR; }
     if(username!=NULL){
         len+=i=snprintf(buf+len, bufsiz-len, "User: %s\r\n", username);
@@ -608,7 +619,7 @@ static int _message_filter(const struct sockaddr *addr,
                 if(buf[len]=='\n'){
                     buf[len]='\0';
                     if(flags&SPAMC_CHECK_ONLY){
-                        /* Check only mode, better be "Spam: x; y / x" */
+                        /* Check only or report mode, better be "Spam: x; y / x" */
                         i=sscanf(buf, "Spam: %5s ; %f / %f", is_spam, &m->score, &m->threshold);
                         
                         if(i!=3){
@@ -617,6 +628,7 @@ static int _message_filter(const struct sockaddr *addr,
                         }
                         m->out_len=snprintf(m->out, m->max_len+EXPANSION_ALLOWANCE, "%.1f/%.1f\n", m->score, m->threshold);
                         m->is_spam=strcasecmp("true", is_spam)?EX_NOTSPAM:EX_ISSPAM;
+
                         close(sock);
                         return EX_OK;
                     } else {

@@ -550,21 +550,24 @@ sub check {
     }
     else		# $method eq 'CHECK' et al
     {
-	my $response_header = "SPAMD/1.1 $resphash{$resp} $resp\r\n"; 
+      print $client "SPAMD/1.1 $resphash{$resp} $resp\r\n"; 
 
-	if ($method eq "REPORT_IFSPAM") {
-	    $response_header .= "X-Spam-Status: $response_spam_status, hits=$msg_score required=$msg_threshold tests="
-		. $status->get_names_of_tests_hit()
-		. " version=" . Mail::SpamAssassin::Version();
-	}
-	else
-	{
-	    $response_header .= "Spam: $response_spam_status ; $msg_score / $msg_threshold";
-	}
+      if($method eq "CHECK") {
+	    print $client "Spam: $response_spam_status ; $msg_score / $msg_threshold\r\n\r\n";
+      }
+      else {
+        my $msg_resp = '';
 
-	print $client $response_header, "\r\n\r\n";
-	print $client $status->get_names_of_tests_hit,"\r\n" if ($method eq "SYMBOLS");
-	print $client $status->get_report,"\r\n" if ($method eq "REPORT" or ($method eq "REPORT_IFSPAM" and $status->is_spam));
+        if($method eq "REPORT" or ($method eq "REPORT_IFSPAM" and $status->is_spam)) {
+	    $msg_resp = "$msg_score/$msg_threshold\r\n" . 
+            $status->{test_logs};
+        }
+        elsif($method eq "SYMBOLS") {
+          $msg_resp = $status->get_names_of_tests_hit;
+        }
+
+        printf $client "Content-length: %d\r\n\r\n%s", length($msg_resp), $msg_resp;
+      }
     }
 
     logmsg "$was_it_spam ($msg_score/$msg_threshold) for $current_user:$> in ".

@@ -265,6 +265,7 @@ sub stop_spamd {
     }
 
     $spamd_pid = 0;
+    undef $spamd_never_started;
     return $killed;
   }
 }
