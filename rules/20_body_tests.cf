@@ -704,9 +704,6 @@ describe US_DOLLARS_3           Nigerian scam key phrase ($NN,NNN,NNN.NN)
 body US_DOLLARS_4               /\s(?:\$|US\$|usd?).?\d{1,3}\.\d+.?(?:m|millions?)\b/i
 describe US_DOLLARS_4           Nigerian scam key phrase ($NNN.N m/USDNNN.N m/US$NN.N m)
 
-rawbody UNNEEDED_HTML_ENCODING	/font=3E/i
-describe UNNEEDED_HTML_ENCODING	Unneeded encoding of HTML tags
-
 rawbody FRONTPAGE		/FrontPage.Editor/
 describe FRONTPAGE		Frontpage used to create the message
 
