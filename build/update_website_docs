@@ -2,6 +2,7 @@
 
 WEBDIR=/www/spamassassin.apache.org
 vers=3.0.x
+
 find . -name '.#*' -print | xargs rm -f # delete old CVS files
 
 [ -d $WEBDIR/full/$vers ] || mkdir -p $WEBDIR/full/$vers
