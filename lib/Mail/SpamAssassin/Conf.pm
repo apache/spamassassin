@@ -1549,20 +1549,6 @@ SpamAssassin's learning systems automatically as a spam message.
       $self->{bayes_auto_learn_threshold_spam} = $1+0; next;
     }
 
-=item bayes_learn_to_journal  	(default 0)
-
-If this option is set, when SpamAssassin does Bayes learning, it will put
-the information into the journal instead of directly into the database.
-This lowers contention for locking the database for a write, but will
-also cause more access to the journal and cause a delay before the
-updates cause a change in the Bayes database.
-
-=cut
-
-    if (/^bayes_learn_to_journal\s+(.*)$/) {
-      $self->{bayes_learn_to_journal} = $1+0; next;
-    }
-
 =item bayes_ignore_header	
 
 If you receive mail filtered by upstream mail systems, like
@@ -2294,6 +2280,18 @@ in corpus size etc.
       $self->{bayes_use_chi2_combining} = $1; next;
     }
 
+=item bayes_journal_max_size		(default: 102400)
+
+SpamAssassin will opportunistically sync the journal and the database.
+It will do so at least once a day, but can also sync if the file size
+goes above this setting, in bytes.  If set to 0, the journal sync will
+only occur once a day.
+
+=cut
+    if (/^bayes_journal_max_size\s+(\d+)$/) {
+      $self->{bayes_journal_max_size} = $1; next;
+    }
+
 =item bayes_expiry_max_db_size		(default: 150000)
 
 What should be the maximum size of the Bayes tokens database?  When expiry
@@ -2317,16 +2315,18 @@ database surpasses the bayes_expiry_max_db_size value.
       $self->{bayes_auto_expire} = $1; next;
     }
 
-=item bayes_journal_max_size		(default: 102400)
+=item bayes_learn_to_journal  	(default 0)
 
-SpamAssassin will opportunistically sync the journal and the database.
-It will do so at least once a day, but can also sync if the file size
-goes above this setting, in bytes.  If set to 0, the journal sync will
-only occur once a day.
+If this option is set, whenever SpamAssassin does Bayes learning, it
+will put the information into the journal instead of directly into the
+database.  This lowers contention for locking the database to execute
+an update, but will also cause more access to the journal and cause a
+delay before the updates are actually committed to the Bayes database.
 
 =cut
-    if (/^bayes_journal_max_size\s+(\d+)$/) {
-      $self->{bayes_journal_max_size} = $1; next;
+
+    if (/^bayes_learn_to_journal\s+(.*)$/) {
+      $self->{bayes_learn_to_journal} = $1+0; next;
     }
 
 =item user_scores_dsn DBI:databasetype:databasename:hostname:port
