@@ -146,10 +146,9 @@ sub do_stdin {
 
     # Conditional compiling
     if ($modules{'conditional'}) {
-      # Comment out lines carrying the REMOVE_ON_BUILD or (deprecated) REMOVEFORINST tag
+      # DELETE lines carrying the REMOVE_ON_BUILD or (deprecated) REMOVEFORINST tag
       if(/\bREMOVE(?:FORINST|_ON_BUILD)\b/) {
-        s/^(\s*)/$1#/;
-        s/(?:##)?REMOVE(?:FORINST|_ON_BUILD)(?:##)?/##REMOVED_ON_BUILD##/;
+	next;
       }
     }
 
