@@ -490,11 +490,11 @@ sub expire_old_tokens_trapped {
   # Figure out atime delta as necessary
   my $too_old = 0;
 
-  # How many tokens do we want to keep today?
+  # How many tokens do we want to keep?
   my $goal_reduction = int($self->{expiry_max_db_size} * 0.75); # expire to 75% of max_db
   # Make sure we keep at least 100000 tokens in the DB
-  $goal_reduction = 100000 if ( $goal_reduction > 100000 );
-  # Turn goal_reduction into how many to expire.
+  $goal_reduction = 100000 if ( $goal_reduction < 100000 );
+  # Now turn goal_reduction into how many to expire.
   $goal_reduction = $magic[3] - $goal_reduction;
 
   # assume the old atime is ok ...
@@ -508,13 +508,15 @@ sub expire_old_tokens_trapped {
   #   assume mail flow stays roughly the same month to month, recompute if it's > 1 month
   # - last atime delta was under 12hrs
   #   if we're expiring often max_db_size should go up, but let's recompute just to check
+  # - last reduction count was < 1000 tokens
+  #   ditto
   # - new estimated atime delta is under 12hrs
   #   ditto
   # - difference of last reduction to current goal reduction is > 50%
   #   if the two values are out of balance, estimating atime is going to be funky, recompute
   #
-  my $ratio = ($magic[9] > $goal_reduction) ? $magic[9]/$goal_reduction : $goal_reduction/$magic[9];
-  if ( (time() - $magic[4] > 86400*30) || ($magic[8] < 43200) || ($newdelta < 43200) || ($ratio > 1.5) ) {
+  my $ratio = ($magic[9] > 0 && $magic[9] > $goal_reduction) ? $magic[9]/$goal_reduction : $goal_reduction/$magic[9];
+  if ( (time() - $magic[4] > 86400*30) || ($magic[8] < 43200) || ($magic[9] < 1000) || ($newdelta < 43200) || ($ratio > 1.5) ) {
     my $start = 43200; # exponential search starting at ...?  1/2 day, 1, 2, 4, 8, 16, ...
     my %delta = (); # use a hash since an array is going to be very sparse
 
@@ -539,7 +541,8 @@ sub expire_old_tokens_trapped {
     # $i is now equal to the exponent we should use ...
     if ( $i == 0 ) { # couldn't find a good atime.  abort!
       $self->{db_toks}->{$LAST_EXPIRE_MAGIC_TOKEN} = time();
-      return 1;
+      $self->remove_running_expire_tok(); # this won't be cleaned up, so do it now.
+      return 1; # we want to indicate things ran as expected
     }
 
     $newdelta = $start * 1 << ($i-1);
@@ -680,7 +683,7 @@ sub expiry_due {
 
   dbg("Bayes DB expiry: Tokens in DB: $ntoks, Expiry max size: ".$self->{expiry_max_db_size}.", Oldest atime: ".$magic[5].", Newest atime: ".$magic[10].", Last expire: ".$magic[4].", Current time: ".time(),'bayes','-1');
 
-  if ($ntoks < 100000 ||			# keep at least 100k tokens
+  if ($ntoks <= 100000 ||			# keep at least 100k tokens
       $self->{expiry_max_db_size} == 0 ||	# config says don't expire
       $self->{expiry_max_db_size} > $ntoks ||	# not enough tokens to cause an expire
       $magic[10]-$magic[5] < 43200 ||		# delta between oldest and newest < 12h
