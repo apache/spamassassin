@@ -15,12 +15,15 @@ BEGIN {
   my $bin = ($bin[0] ? File::Spec->catpath(@bin[0..1]) : $bin[1])  # /home/jm/foo -> /home/jm
             || File::Spec->curdir;                                 # foo          -> .
 
-  # These are common paths where the SA libs might be found.
-  foreach (qw(lib ../lib ../lib/site_perl ../lib/spamassassin ../share/spamassassin/lib)) {
-    my $dir = File::Spec->catdir($bin, split('/', $_));
-    if(-f File::Spec->catfile($dir, "Mail", "SpamAssassin.pm")) {
-      unshift(@INC, $dir);
-      last;
+  # check to make sure it wasn't just installed in the normal way
+  if (!-e '@@INSTALLSITELIB@@/Mail/SpamAssassin.pm') {
+    # These are common paths where the SA libs might be found.
+    foreach (qw(lib ../lib ../lib/site_perl ../lib/spamassassin ../share/spamassassin/lib)) {
+      my $dir = File::Spec->catdir($bin, split('/', $_));
+      if(-f File::Spec->catfile($dir, "Mail", "SpamAssassin.pm")) {
+        unshift(@INC, $dir);
+        last;
+      }
     }
   }
 }
