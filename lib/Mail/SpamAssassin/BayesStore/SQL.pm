@@ -1099,7 +1099,7 @@ sub tok_touch_all {
   my $rows = $self->{_dbh}->do($sql, undef, @bindings);
 
   unless (defined($rows)) {
-    dbg("bayes: tok_touch: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: tok_touch_all: SQL Error: ".$self->{_dbh}->errstr());
     return 0;
   }
 
@@ -1117,7 +1117,7 @@ sub tok_touch_all {
   $rows = $self->{_dbh}->do($sql, undef, $atime, $self->{_userid}, $atime);
 
   unless (defined($rows)) {
-    dbg("bayes: tok_touch: SQL Error: ".$self->{_dbh}->errstr());
+    dbg("bayes: tok_touch_all: SQL Error: ".$self->{_dbh}->errstr());
     return 0;
   }
 
