@@ -638,9 +638,7 @@ sub url_encode {
       #    or it is one of  "<", ">", """, "#", "%",
       #                     ";", "/", "?", ":", "@", "=" or "&"
       # THEN preserve its encoding
-      unless (/(20|7f|[0189a-fA-F][0-9a-fA-F])/i
-	      || /2[2356fF]|3[a-fA-F]|40/i)
-      {
+      unless (/(20|7f|[0189a-fA-F][0-9a-fA-F])/i) {
 	s/\%([2-7][0-9a-fA-F])/sprintf "%c", hex($1)/e;
 	push(@unencoded, $_);
       }
