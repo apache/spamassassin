@@ -586,6 +586,34 @@ meta T_IMAGE_ONLY3_256	(!FROM_EGROUPS && (__IMG_TAG || (__IMG_URI&&HTML_MESSAGE)
 
 ##############################################################################
 
+# quinlan: yet another image test, whee.
+
+# smaller is worse
+body T_IMAGE_COUNT_RATIO_05	eval:image_count_ratio('00','05')
+body T_IMAGE_COUNT_RATIO_10	eval:image_count_ratio('05','10')
+body T_IMAGE_COUNT_RATIO_15	eval:image_count_ratio('10','15')
+body T_IMAGE_COUNT_RATIO_20	eval:image_count_ratio('15','20')
+body T_IMAGE_COUNT_RATIO_25	eval:image_count_ratio('20','25')
+body T_IMAGE_COUNT_RATIO_30	eval:image_count_ratio('25','30')
+body T_IMAGE_COUNT_RATIO_35	eval:image_count_ratio('30','35')
+body T_IMAGE_COUNT_RATIO_40	eval:image_count_ratio('35','40')
+body T_IMAGE_COUNT_RATIO_45	eval:image_count_ratio('40','45')
+body T_IMAGE_COUNT_RATIO_50	eval:image_count_ratio('45','50')
+
+# smaller is worse
+body T_IMAGE_AREA_RATIO_05	eval:image_area_ratio('0.0000','0.0005')
+body T_IMAGE_AREA_RATIO_10	eval:image_area_ratio('0.0005','0.0010')
+body T_IMAGE_AREA_RATIO_15	eval:image_area_ratio('0.0010','0.0015')
+body T_IMAGE_AREA_RATIO_20	eval:image_area_ratio('0.0015','0.0020')
+body T_IMAGE_AREA_RATIO_25	eval:image_area_ratio('0.0020','0.0025')
+body T_IMAGE_AREA_RATIO_30	eval:image_area_ratio('0.0025','0.0030')
+body T_IMAGE_AREA_RATIO_35	eval:image_area_ratio('0.0030','0.0035')
+body T_IMAGE_AREA_RATIO_40	eval:image_area_ratio('0.0035','0.0040')
+body T_IMAGE_AREA_RATIO_45	eval:image_area_ratio('0.0040','0.0045')
+body T_IMAGE_AREA_RATIO_50	eval:image_area_ratio('0.0045','0.0050')
+
+##############################################################################
+
 # Nov 12 2002 jm: not keen on this.  many ISPs do not provide rDNS these
 # days as policy. stupid policy, but there we are. and SpamAssassin policy
 # is not to punish users with stupid ISPs...
