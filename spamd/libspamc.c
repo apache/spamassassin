@@ -45,11 +45,7 @@
 # define h_errno errno
 # endif
 
-# ifndef EX__MAX
-# define EX__MAX 77
-
 extern char *optarg;
-# endif
 #endif
 
 #ifndef INADDR_NONE
@@ -63,6 +59,11 @@ typedef unsigned long   in_addr_t;      /* base type for internet address */
 
 /* jm: turned off for now, it should not be necessary. */
 #undef USE_TCP_NODELAY
+
+#ifndef EX__MAX
+/* jm: very conservative figure, should be well out of range on almost all NIXes */
+#define EX__MAX 200 
+#endif
 
 static const int ESC_PASSTHROUGHRAW = EX__MAX+666;
 
