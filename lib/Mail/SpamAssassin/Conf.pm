@@ -127,6 +127,11 @@ use constant TYPE_URI_EVALS     => 0x0011;
 use constant TYPE_META_TESTS    => 0x0012;
 use constant TYPE_RBL_EVALS     => 0x0013;
 
+my @rule_types = ("body_tests", "uri_tests", "uri_evals",
+                  "head_tests", "head_evals", "body_evals", "full_tests",
+                  "full_evals", "rawbody_tests", "rawbody_evals",
+		  "rbl_evals", "meta_tests");
+
 $VERSION = 'bogus';     # avoid CPAN.pm picking up version strings later
 
 ###########################################################################
@@ -314,6 +319,166 @@ sub set_score_set {
 sub get_score_set {
   my($self) = @_;
   return $self->{scoreset_current};
+}
+
+sub get_rule_types {
+  my ($self) = @_;
+
+  return @rule_types;
+}
+
+sub get_rule_keys {
+  my ($self, $test_type, $priority) = @_;
+
+  # special case rbl_evals since they do not have a priority
+  if ($test_type eq 'rbl_evals') {
+    return keys(%{$self->{$test_type}});
+  }
+
+  if (defined($priority)) {
+    return keys(%{$self->{$test_type}->{$priority}});
+  }
+  else {
+    my @rules;
+    foreach my $priority (keys(%{$self->{priorities}})) {
+      push(@rules, keys(%{$self->{$test_type}->{$priority}}));
+    }
+    return @rules;
+  }
+}
+
+sub get_rule_value {
+  my ($self, $test_type, $rulename, $priority) = @_;
+
+  # special case rbl_evals since they do not have a priority
+  if ($test_type eq 'rbl_evals') {
+    return keys(%{$self->{$test_type}->{$rulename}});
+  }
+
+  if (defined($priority)) {
+    return $self->{$test_type}->{$priority}->{$rulename};
+  }
+  else {
+    foreach my $priority (keys(%{$self->{priorities}})) {
+      if (exists($self->{$test_type}->{$priority}->{$rulename})) {
+	return $self->{$test_type}->{$priority}->{$rulename};
+      }
+    }
+    return undef; # if we get here we didn't find the rule
+  }
+}
+
+sub delete_rule {
+  my ($self, $test_type, $rulename, $priority) = @_;
+
+  # special case rbl_evals since they do not have a priority
+  if ($test_type eq 'rbl_evals') {
+    return delete($self->{$test_type}->{$rulename});
+  }
+
+  if (defined($priority)) {
+    return delete($self->{$test_type}->{$priority}->{$rulename});
+  }
+  else {
+    foreach my $priority (keys(%{$self->{priorities}})) {
+      if (exists($self->{$test_type}->{$priority}->{$rulename})) {
+	return delete($self->{$test_type}->{$priority}->{$rulename});
+      }
+    }
+    return undef; # if we get here we didn't find the rule
+  }
+}
+
+# trim_rules ($regexp)
+#
+# Remove all rules that don't match the given regexp (or are sub-rules of
+# meta-tests that match the regexp).
+
+sub trim_rules {
+  my ($self, $regexp) = @_;
+
+  my @all_rules;
+
+  foreach my $rule_type ($self->get_rule_types()) {
+    push(@all_rules, $self->get_rule_keys($rule_type));
+  }
+
+  my @rules_to_keep = grep(/$regexp/, @all_rules);
+
+  if (@rules_to_keep == 0) {
+    die "trim_rules(): All rules excluded, nothing to test.\n";
+  }
+
+  my @meta_tests    = grep(/$regexp/, $self->get_rule_keys('meta_tests'));
+  foreach my $meta (@meta_tests) {
+    push(@rules_to_keep, $self->add_meta_depends($meta))
+  }
+
+  my %rules_to_keep_hash = ();
+
+  foreach my $rule (@rules_to_keep) {
+    $rules_to_keep_hash{$rule} = 1;
+  }
+
+  foreach my $rule_type ($self->get_rule_types()) {
+    foreach my $rule ($self->get_rule_keys($rule_type)) {
+      $self->delete_rule($rule_type, $rule)
+        if (!$rules_to_keep_hash{$rule});
+    }
+  }
+} # trim_rules()
+
+sub add_meta_depends {
+  my ($self, $meta) = @_;
+
+  my @rules = ();
+
+  my @tokens = $self->get_rule_value('meta_tests', $meta) =~ m/(\w+)/g;
+
+  @tokens = grep(!/^\d+$/, @tokens);
+  # @tokens now only consists of sub-rules
+
+  foreach my $token (@tokens) {
+    die "meta test $meta depends on itself\n" if $token eq $meta;
+    push(@rules, $token);
+
+    # If the sub-rule is a meta-test, recurse
+    if ($self->get_rule_value('meta_tests', $token)) {
+      push(@rules, $self->add_meta_depends($token));
+    }
+  } # foreach my $token (@tokens)
+
+  return @rules;
+} # add_meta_depends()
+
+sub is_rule_active {
+  my ($self, $test_type, $rulename, $priority) = @_;
+
+  # special case rbl_evals since they do not have a priority
+  if ($test_type eq 'rbl_evals') {
+    return 0 unless ($self->{$test_type}->{$rulename});
+    return ($self->{scores}->{$rulename});
+  }
+
+  # first determine if the rule is defined
+  if (defined($priority)) {
+    # we have a specific priority
+    return 0 unless ($self->{$test_type}->{$priority}->{$rulename});
+  }
+  else {
+    # no specific priority so we must loop over all currently defined
+    # priorities to see if the rule is defined
+    my $found_p = 0;
+    foreach my $priority (keys %{$self->{priorities}}) {
+      if ($self->{$test_type}->{$priority}->{$rulename}) {
+	$found_p = 1;
+	last;
+      }
+    }
+    return 0 unless ($found_p);
+  }
+
+  return ($self->{scores}->{$rulename});
 }
 
 sub _parse {
@@ -3134,31 +3299,6 @@ sub register_eval_rule {
   my ($self, $pluginobj, $nameofsub) = @_;
   $self->{eval_plugins}->{$nameofsub} = $pluginobj;
 }
-
-sub is_rule_active {
-  my ($self, $test_type, $rulename, $priority) = @_;
-
-  # first determine if the rule is defined
-  if (defined($priority)) {
-    # we have a specific priority
-    return 0 unless ($self->{$test_type}->{$priority}->{$rulename});
-  }
-  else {
-    # no specific priority so we must loop over all currently defined
-    # priorities to see if the rule is defined
-    my $found_p = 0;
-    foreach my $priority (keys %{$self->{priorities}}) {
-      if ($self->{$test_type}->{$priority}->{$rulename}) {
-	$found_p = 1;
-	last;
-      }
-    }
-    return 0 unless ($found_p);
-  }
-
-  return ($self->{scores}->{$rulename});
-}
-
 
 sub finish {
   my ($self) = @_;
