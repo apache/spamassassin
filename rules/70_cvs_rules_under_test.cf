@@ -199,7 +199,7 @@ score T_FORGED_MUA_AOL		1.0
 
 # Internet Mail Service
 header __IMS_MUA		X-Mailer =~ /Internet Mail Service/
-header __IMS_MSGID		Message-Id =~ /^<[A-F\d]{38,40}\@\S+>$/
+header __IMS_MSGID		Message-Id =~ /^<[A-F\d]{36,40}\@\S+>$/
 meta T_FORGED_MUA_IMS		(__IMS_MUA && !__IMS_MSGID)
 describe T_FORGED_MUA_IMS	Forged mail pretending to be from IMS
 score T_FORGED_MUA_IMS		1.0
