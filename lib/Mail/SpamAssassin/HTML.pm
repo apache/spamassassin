@@ -120,6 +120,8 @@ sub html_render {
   $self->{html_visible_text} = [];
   $self->{html_invisible_text} = [];
   $self->{html_last_tag} = 0;
+  $self->{html}{closed_html} = 0;
+  $self->{html}{closed_body} = 0;
 
   $self->{html}{length} += $1 if (length($text) =~ m/^(\d+)$/);	# untaint
 
@@ -216,6 +218,10 @@ sub html_tag {
       $self->html_uri($tag, $attr, $num);
       $self->html_tests($tag, $attr, $num);
       $self->{html_last_tag} = $tag;
+    }
+    elsif ($num == -1) {
+      $self->{html}{closed_html} = 1 if $tag eq "html";
+      $self->{html}{closed_body} = 1 if $tag eq "body";
     }
 
     # shouting
@@ -921,6 +927,8 @@ sub html_text {
   my $visible_for_bayes = 1;
   if ($text =~ /[^ \t\n\r\f\x0b\xa0]/) {
     $visible_for_bayes = $self->html_font_invisible($text);
+    $self->{html}{text_after_body} = 1 if $self->{html}{closed_body};
+    $self->{html}{text_after_html} = 1 if $self->{html}{closed_html};
   }
 
   $text =~ s/^\n//s if $self->{html_last_tag} eq "br";
