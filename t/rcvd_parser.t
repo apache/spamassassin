@@ -454,6 +454,18 @@ q{
 },
 q{
 
+Received: from list.brainbuzz.com (63.146.189.86:23198)
+    by mx1.yourtech.net with [XMail 1.20 ESMTP Server]
+    id <S72E> for <jjjjjjjjjj@obfuscatedellingson.org> from <bounce-cscommunity-11965901@list.obfuscatedzzzzzzz.com>; Sat, 18 Sep 2004 23:17:54 -0500
+
+},
+q{
+
+[ ip=63.146.189.86 rdns= helo=list.brainbuzz.com by=mx1.yourtech.net ident= envfrom=bounce-cscommunity-11965901@list.obfuscatedzzzzzzz.com id=S72E ]
+
+},
+q{
+
 Received: from pop.vip.sc5.yahoo.com [216.136.173.10]
       by localhost with POP3 (fetchmail-5.9.13)
       for pppppppppp@hhhhhhhhh.net (single-drop); Sun, 22 Feb 2004 20:46:25 -0600 (CST)
