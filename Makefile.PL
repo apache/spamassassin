@@ -17,7 +17,7 @@ WriteMakefile(
     'NAME'	=> 'Mail::SpamAssassin',
     'VERSION_FROM' => 'lib/Mail/SpamAssassin.pm', # finds $VERSION
 
-    'EXE_FILES'	=> [ 'spamassassin'],
+    'EXE_FILES'	=> [ 'spamassassin', 'spamd/spamc', 'spamd/spamd' ],
 
     'PL_FILES' => '',
 
@@ -36,7 +36,7 @@ WriteMakefile(
 	      },
 
     'clean' => { FILES =>
-	'pod2html* spamassassin'
+	'pod2html* spamassassin spamd/spamc spamd/spamd'
     },
 
     'AUTHOR' => 'Justin Mason <jm@jmason.org>',
@@ -61,6 +61,10 @@ pm_to_blib: spamassassin
 
 spamassassin: spamassassin.raw
 	$(PERL) fixpath.pl spamassassin.raw $@
+	$(CHMOD) $(PERM_RWX) $@
+
+spamd/spamd: spamd/spamd.raw
+	$(PERL) fixpath.pl spamd/spamd.raw $@
 	$(CHMOD) $(PERM_RWX) $@
 
 inst_cfs: spamassassin.cf spamassassin.prefs
