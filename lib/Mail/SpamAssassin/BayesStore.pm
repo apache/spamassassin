@@ -511,13 +511,22 @@ sub expire_old_tokens_trapped {
     return 1; # we want to indicate things ran as expected
   }
 
-  # assume the old atime is ok ...
+  # Estimate new atime delta based on the last atime delta
   my $newdelta = 0;
   if ( $magic[9] > 0 ) {
     $newdelta = int($magic[8] * $goal_reduction / $magic[9]); # newdelta = olddelta * goal / old;
   }
 
-  # First expire or "odd" looking results cause a first pass to determine atime
+  # Calculate size difference between last expiration token removal
+  # count and the current goal removal count.
+  my $ratio = ($magic[9] == 0 || $magic[9] > $goal_reduction) ? $magic[9]/$goal_reduction : $goal_reduction/$magic[9];
+
+  dbg("bayes: First pass?  Current: ".time().", Last: ".$magic[4].", atime: ".$magic[8].", count: ".$magic[9].", newdelta: $newdelta, ratio: $ratio");
+
+  ## ESTIMATION PHASE
+  #
+  # Do this for the first expire or "odd" looking results cause a first pass to determine atime:
+  #
   # - last expire was more than 30 days ago
   #   assume mail flow stays roughly the same month to month, recompute if it's > 1 month
   # - last atime delta was under 12hrs
@@ -529,10 +538,6 @@ sub expire_old_tokens_trapped {
   # - difference of last reduction to current goal reduction is > 50%
   #   if the two values are out of balance, estimating atime is going to be funky, recompute
   #
-  my $ratio = ($magic[9] == 0 || $magic[9] > $goal_reduction) ? $magic[9]/$goal_reduction : $goal_reduction/$magic[9];
-
-  dbg("bayes: First pass?  Current: ".time().", Last: ".$magic[4].", atime: ".$magic[8].", count: ".$magic[9].", newdelta: $newdelta, ratio: $ratio");
-
   if ( (time() - $magic[4] > 86400*30) || ($magic[8] < 43200) || ($magic[9] < 1000) || ($newdelta < 43200) || ($ratio > 1.5) ) {
     dbg("bayes: something fishy, calculating atime (first pass)");
     my $start = 43200; # exponential search starting at ...?  1/2 day, 1, 2, 4, 8, 16, ...
@@ -692,7 +697,7 @@ sub journal_sync_due {
 
   ## Ok, should we do a sync?
 
-  # Not if it doesn't exist, it's not a file, or it's 0 bytes long.
+  # Not if the journal file doesn't exist, it's not a file, or it's 0 bytes long.
   return 0 unless (stat($self->get_journal_filename()) && -f _ && -s _);
 
   # Yes if the file size is larger than the specified maximum size.

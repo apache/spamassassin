@@ -5,7 +5,7 @@ use SATest; sa_t_init("spamd_protocol_10");
 use Test; BEGIN { plan tests => 10 };
 
 use File::Path;
-use IO::Socket;
+use IO::Socket::INET;
 use Mail::SpamAssassin::Conf;
 
 # ---------------------------------------------------------------------------
@@ -35,7 +35,7 @@ ok_all_patterns();
 clear_pattern_counters();
 
 seek (DATA, $startofdata, SEEK_SET);
-my $out = run_symbols (1);	# use protocol 1.0
+$out = run_symbols (1);	# use protocol 1.0
 ok (defined ($out));
 
 if ($out =~ /Spam: True \; ([\d\.]+) \/ 5\.0/) {
@@ -54,8 +54,8 @@ exit;
 sub run_symbols {
   my $proto10 = shift;
 
-  if (($socket = IO::Socket::INET->new(PeerAddr => 'localhost',
-      PeerPort => $spamdport, Proto => "tcp", Type => SOCK_STREAM)) eq undef)
+  if (!defined($socket = IO::Socket::INET->new(PeerAddr => 'localhost',
+      PeerPort => $spamdport, Proto => "tcp", Type => SOCK_STREAM)))
   {
 	  warn("FAILED - Couldn't Connect to SpamCheck Host\n");
 	  return undef;

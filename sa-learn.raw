@@ -122,9 +122,9 @@ analysis. Furthermore, once given a basis for the analysis, the engine can
 continue to learn iteratively by applying both it's non-Bayesian and Bayesian
 ruleset together to create evolving "intelligence".
 
-SpamAssassin 2.50 supports Bayesian spam analysis, in the form of the
-BAYES rules. This is a new feature, quite powerful, and is disabled
-until enough messages have been learnt.
+SpamAssassin 2.50 and later supports Bayesian spam analysis, in
+the form of the BAYES rules. This is a new feature, quite powerful,
+and is disabled until enough messages have been learnt.
 
 The pros of Bayesian spam analysis:
 
@@ -425,18 +425,6 @@ simultaneously, but only one can write at a time, this uses a 'journal' file.
 When you run C<sa-learn --rebuild>, the journal is read, and the tokens that
 were accessed during the journal's lifetime will have their last-access time
 updated in the C<bayes_toks> database.
-
-=item bayes_msgcount
-
-Every time SpamAssassin accesses a mail message for scanning, or every time
-the C<sa-learn> command is run, the 'message count' is increased by one.
-This is used to control expiration of old tokens.
-
-Since many processes may be running simultaneously, SpamAssassin does not
-use a locked database file for this operation; instead, it uses the size
-of this file as a counter, appending one byte for each message.  Once it
-hits 5000 bytes, the C<bayes_toks> database is locked, and the message
-counter entry in that database is increased accordingly.
 
 =back
 
