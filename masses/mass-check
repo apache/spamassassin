@@ -199,17 +199,17 @@ sub wanted {
   }
   if ($opt_mid) {
     my $mid = $ma->get_header("Message-Id");
-    if (!$mid) {
-      $mid = $id;
-      if (defined($time)) {
-	$mid =~ s@^.*/@@;
-	$mid .= "." . $time;	# message time is more stable than real time
-      }
-      $mid = "<$mid\@$host.masses.spamassassin.org>";
+    if ($mid) {     # message contains a Message-Id:
+      while($mid =~ s/\([^\(\)]*\)//s) {};   # remove comments and
+      $mid =~ s/^\s+|\s+$//sg;               # leading and trailing spaces
+      $mid =~ s/\s.*$//s;                    # keep only the first token
     }
-    $mid =~ s/^\s+//g;
-    $mid =~ s/\s+$//g;
-    $mid =~ s/[\s:,\\]/./sg;	# replace with . so regexp search just works
+    else {          # it doesn't have a Message-Id:
+      $mid = $id;             # so build one from the id
+      $mid =~ s,^.*/,,;       # remove the path
+      $mid = "<$mid\@$host.masses.spamassassin.org>";  # and put it together
+    }
+    $mid =~ tr/-A-Za-z0-9_!#%&=~<@>/./c;     # replace dangerous chars with . (so regexp search just works)
     push(@extra, "mid=$mid");
   }
 
@@ -257,10 +257,10 @@ sub wanted {
 sub logkilled {
   my ($ma, $id, $reason) = @_;
 
-  my $from = $ma->get_header("From") || 'undef';
-  my $to = $ma->get_header("To") || 'undef';
-  my $subj = $ma->get_header("Subject") || 'undef';
-  my $mid = $ma->get_header("Message-Id") || 'undef';
+  my $from = $ma->get_header("From")       || 'undef';
+  my $to   = $ma->get_header("To")         || 'undef';
+  my $subj = $ma->get_header("Subject")    || 'undef';
+  my $mid  = $ma->get_header("Message-Id") || 'undef';
   chomp ($from);
   chomp ($to);
   chomp ($subj);
