@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_maxsize");
-use Test; BEGIN { plan tests => (!$SKIP_SPAMD_TESTS? 1 : 0) };
+use Test; BEGIN { plan tests => ($SKIP_SPAMD_TESTS ? 0 : 1) };
 
 exit if $SKIP_SPAMD_TESTS;
 

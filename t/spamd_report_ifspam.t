@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_report_ifspam");
-use Test; BEGIN { plan tests => (!$SKIP_SPAMD_TESTS? 10 : 0) };
+use Test; BEGIN { plan tests => ($SKIP_SPAMD_TESTS ? 0 : 10) };
 
 exit if $SKIP_SPAMD_TESTS;
 

@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_allow_user_rules");
-use Test; BEGIN { plan tests => (!$SKIP_SPAMD_TESTS? 5 : 0) };
+use Test; BEGIN { plan tests => ($SKIP_SPAMD_TESTS ? 0 : 5) };
 
 exit if $SKIP_SPAMD_TESTS;
 

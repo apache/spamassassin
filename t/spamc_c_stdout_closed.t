@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamc_c_stdout_closed");
-use Test; BEGIN { plan tests => (!$SKIP_SPAMD_TESTS? 2 : 0) };
+use Test; BEGIN { plan tests => ($SKIP_SPAMD_TESTS ? 0 : 2) };
 
 exit if $SKIP_SPAMD_TESTS;
 
