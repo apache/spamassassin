@@ -286,8 +286,8 @@ describe FORGED_RCVD_HELO	Received: contains a forged HELO
 header RCVD_HELO_IP_MISMATCH	eval:helo_ip_mismatch()
 describe RCVD_HELO_IP_MISMATCH	Received: HELO and IP do not match, but should
 
-header RCVD_NUMERIC_HELO	Received =~ /helo[= ]\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/i
-describe RCVD_NUMERIC_HELO	Received: contains a numeric HELO
+header RCVD_NUMERIC_HELO	eval:check_for_numeric_helo()
+describe RCVD_NUMERIC_HELO	Received: contains an IP address used for HELO
 
 # no legit mailer claims that their mailserver has no name
 # overlaps with RCVD_DOUBLE_IP*, but let's see how it is scored
