@@ -56,13 +56,13 @@ while ! wget -q -nd -m http://rsync.spamassassin.org/$VERS-versions.txt ; do
   sleep 60
   COUNT=`expr $COUNT + 1`
   if [ $COUNT -gt 5 ]; then
-    echo "Couldn't get the nightly revision version, aborting!" >&2
+    echo "Couldn't get the $VERS revision version, aborting!" >&2
     exit 2
   fi
 done
 
 CREV=`$SVNVERS .`
-NREV=`tail -1 nightly-versions.txt | awk '{print $2}'`
+NREV=`tail -1 $VERS-versions.txt | awk '{print $2}'`
 
 if [ $CREV -ge $NREV ]; then
   echo "Current rev ($CREV) newer or equal to nightly rev ($NREV)"
