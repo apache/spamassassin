@@ -2829,6 +2829,15 @@ sub check_for_rdns_helo_mismatch {	# T_FAKE_HELO_*
   # what ratware does too.
   return 0 if $self->sent_by_applemail();
 
+  # the IETF's list-management system mangles Received headers,
+  # "faking" a HELO, resulting in FPs.  So if we received the
+  # mail from the IETF's outgoing SMTP server, skip it.
+  if ($self->{relays_untrusted_str} =~ /^\[ [^\]]*
+		  ip=132\.151\.1\.\S+\s+ rdns=\S*ietf\.org /x)
+  {
+    return 0;
+  }
+
   my $firstuntrusted = 1;
   foreach my $relay (@{$self->{relays_untrusted}}) {
     my $wasfirst = $firstuntrusted;
