@@ -857,29 +857,30 @@ sub get_decoded_stripped_body_text_array {
   $text =~ s/=([a-fA-F0-9]{2})/chr(hex($1))/ge;
   $text =~ s/=\n//g;
 
-  # do HTML conversions if necessary
+  # reset variables used in HTML tests
   $self->{html} = {};
+  $self->{html_inside} = {};
   $self->{html}{ratio} = 0;
-  if ($text =~ m/<\s*[a-z:!][a-z:\d_-]*(?:\s.*?)?\s*>/is) {
-    my $raw = length($text);
 
+  # do HTML conversions if necessary
+  if ($text =~ m/<\s*[a-z:!][a-z:\d_-]*(?:\s.*?)?\s*>/is) {
     $self->{html_text} = [];
     $self->{html_last_tag} = 0;
+    my $raw = length($text);
     my $hp = HTML::Parser->new(
-                api_version => 3,
-                handlers => [start =>   [sub { $self->html_tag(@_) },"tagname,attr,'+1'"],
-                             end =>     [sub { $self->html_tag(@_) },"tagname,attr,'-1'"],
-                             text =>    [sub { $self->html_text(@_) },"dtext"],
-                             comment => [sub { $self->html_comment(@_) },"text"],
-                ],
-                marked_sections => 1);
-    
+		api_version => 3,
+		handlers => [
+		  start => [sub { $self->html_tag(@_) }, "tagname,attr,'+1'"],
+		  end => [sub { $self->html_tag(@_) }, "tagname,attr,'-1'"],
+		  text => [sub { $self->html_text(@_) }, "dtext"],
+		  comment => [sub { $self->html_comment(@_) }, "text"],
+		],
+		marked_sections => 1);
+
     $hp->parse($text);
     $hp->eof;
     $text = join('', @{$self->{html_text}});
     $self->{html}{ratio} = ($raw - length($text)) / $raw if $raw;
-    delete $self->{html_inside};
-    delete $self->{html_last_tag};
   }
 
   # whitespace handling (warning: small changes have large effects!)

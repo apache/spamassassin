@@ -1687,6 +1687,38 @@ sub check_for_mime_excessive_qp {
   return ($length != 0 && ($qp > ($length / 20)));
 }
 
+sub check_for_mixed_case_html {
+  my ($self, $rawbody) = @_;
+
+  my $count = 0;
+  my $lower = 0;
+  my $upper = 0;
+
+  for (@{$rawbody}) {
+    my $line = $_;
+
+    while ($line =~ s/<\s*\/?([a-z:!][a-z:\d_-]*)(?:\s.*?)?\s*>//i) {
+      $count++;
+      if ($1 eq lc($1)) {
+	$lower++;
+      }
+      elsif ($1 eq uc($1)) {
+	$upper++;
+      }
+    }
+  }
+  return 0 unless $count;
+
+  my $percent;
+  if ($lower > $upper) {
+    $percent = ($count - $lower) / $count;
+  }
+  else {
+    $percent = ($count - $upper) / $count;
+  }
+  return ($percent > 0.1 && $percent < 0.9 && $count > 15);
+}
+
 sub check_language {            # UNDESIRED_LANGUAGE_BODY
   my ($self, $body) = @_;
 
