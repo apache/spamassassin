@@ -321,45 +321,6 @@ body T_LOW_PRICE                  /\blow.{0,4} Price/i
 body     T_LOTS_OF_STUFF         /\b(?:\d{1,3}[,\.])+\d{3}.{0,20}\b(?:pics|pictures|images|photos|movies)/i
 describe T_LOTS_OF_STUFF         Thousands or millions of pics/movies/etc
 
-# Good correlation between mutt msgids and nonspam.  Also provides
-# a good way to hammer those Mutt-forging spammers looking to
-# get the bonus points we added for it in 2.4x
-# Dec 17 2002 jm: off until after 2.50 release
-#header __MUTT12_MSGID	Message-Id =~ /20[01]\d[01]\d[0123]\d[012]\d[0-5]\d\d\d\.[A-Z]{1,2}\d{2,5}\@/
-#header __MUTT12_UA	User-Agent =~ /^Mutt\/1\.[234]\.\d+i/
-#header __MUTT12_XM	X-Mailer =~ /^Mutt\/1\.[234]\.\d+i/
-#meta T_FORGED_MUTT_NO_MSGID	((__MUTT12_UA || __MUTT12_XM) && !__MUTT12_MSGID)
-#meta T_MUTT_WITH_MSGID		((__MUTT12_UA || __MUTT12_XM) && __MUTT12_MSGID)
-#tflags T_MUTT_WITH_MSGID	nice
-
-# These are possible replacements for/additions to RAZOR2_CHECK - tvd
-# cf is how likely the message is spam.  RAZOR2_CHECK returns true if
-# cf>=min_cf (as defined by user/config).  I think we should leave that,
-# but probably lower the RAZOR2_CHECK score and add in more points based
-# on the range.  I dunno, I haven't fully figured out the rule integration
-# for this yet.
-body T_RAZOR2_RANGE_01_10	eval:check_razor2_range('01','10')
-body T_RAZOR2_RANGE_11_20	eval:check_razor2_range('11','20')
-body T_RAZOR2_RANGE_21_30	eval:check_razor2_range('21','30')
-body T_RAZOR2_RANGE_31_40	eval:check_razor2_range('31','40')
-body T_RAZOR2_RANGE_41_50	eval:check_razor2_range('41','50')
-body T_RAZOR2_RANGE_51_60	eval:check_razor2_range('51','60')
-body T_RAZOR2_RANGE_61_70	eval:check_razor2_range('61','70')
-body T_RAZOR2_RANGE_71_80	eval:check_razor2_range('71','80')
-body T_RAZOR2_RANGE_81_90	eval:check_razor2_range('81','90')
-body T_RAZOR2_RANGE_91_100	eval:check_razor2_range('91','100')
-#score T_RAZOR2_RANGE_01_10 0.1
-#score T_RAZOR2_RANGE_11_20 0.2
-#score T_RAZOR2_RANGE_21_30 0.4
-#score T_RAZOR2_RANGE_31_40 0.6
-#score T_RAZOR2_RANGE_41_50 1.0
-#score T_RAZOR2_RANGE_51_60 1.2
-#score T_RAZOR2_RANGE_61_70 1.4
-#score T_RAZOR2_RANGE_71_80 1.6
-#score T_RAZOR2_RANGE_81_90 1.8
-#score T_RAZOR2_RANGE_91_100 2
-
-
 # bug 1207:
 #
 # these do not work so well (daf+easmith+quinlan+rODbegbie+theo)
