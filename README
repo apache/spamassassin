@@ -253,8 +253,9 @@ Commercial Tests
 
 There are several tests in the spamassassin configuration file which are
 turned off by default, namely the mail-abuse.org and bl.spamcop.net tests.
-The mail-abuse.org tests are RCVD_IN_RBL, RCVD_IN_RSS, and RCVD_IN_DUL;
-the bl.spamcop.net test is called RCVD_IN_BL_SPAMCOP_NET.
+The mail-abuse.org tests are RCVD_IN_MAPS_RBL, RCVD_IN_MAPS_DUL,
+RCVD_IN_MAPS_RSS, RCVD_IN_MAPS_NML, and RCVD_IN_MAPS_OPS; the
+bl.spamcop.net test is called RCVD_IN_BL_SPAMCOP_NET.
 
 These are commercial services, so you need to pay money to use them.
 
@@ -272,10 +273,12 @@ http://www.mail-abuse.org/feestructure.html .
 To turn on the tests, simply assign them a non-zero score, e.g. by adding
 these lines to your ~/.spamassassin/user_prefs file:
 
-    score RCVD_IN_RBL               10
-    score RCVD_IN_RSS               1
-    score RCVD_IN_DUL               1
-    score RCVD_IN_BL_SPAMCOP_NET    3
+    score RCVD_IN_BL_SPAMCOP_NET 3
+    score RCVD_IN_MAPS_RBL 3
+    score RCVD_IN_MAPS_DUL 1
+    score RCVD_IN_MAPS_RSS 2
+    score RCVD_IN_MAPS_NML 2
+    score RCVD_IN_MAPS_OPS 2
 
 To see how RBL checks work, use `spamassassin -D rbl=-3'. This will
 display all debug messages related to rbl checking.
