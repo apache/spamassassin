@@ -143,6 +143,7 @@ sub am_running_on_windows {
 #
 sub untaint_file_path {
   my ($path) = @_;
+  return unless defined($path);
   $path =~ /^([-_A-Za-z\xA0-\xFF 0-9\.\@\=\+\,\/\\\:]+)$/;
   return $1;
 }
