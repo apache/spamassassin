@@ -15,7 +15,7 @@ q{ NO_REAL_NAME}, 'noreal',
 );
 
 %is_ham_patterns = (
-q{LINES_OF_YELLING}, 'yelling'
+q{X_LOOP}, 'x_loop'
 );
 
 %patterns = %is_spam_patterns;
