@@ -164,7 +164,7 @@ sub razor_report {
         $rc->authenticate($ident) or adie ($rc->errprefix("reportit"));
         $rc->report($objects)     or adie ($rc->errprefix("reportit"));
         $rc->disconnect() or adie ($rc->errprefix("reportit"));
-        $response = $objects->[0]->{resp}->[0]->{res};
+        $response = 1; # Razor 2.14 says that if we get here, we did ok.
       }
       else {
         warn "undefined Razor2::Client::Agent\n";
