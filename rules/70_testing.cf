@@ -265,33 +265,6 @@ meta T_PRIORITY_NO_NAME_ONE		((__HAS_X_PRIORITY + __HAS_MSMAIL_PRI == 1) && !__H
 meta T_PRIORITY_NO_NAME_BOTH_REF	((__HAS_X_PRIORITY && __HAS_MSMAIL_PRI) && !__HAS_X_MAILER && !__IS_EXCH && !__USER_AGENT && !__HAS_REFERENCES)
 meta T_PRIORITY_NO_NAME_ONE_REF		((__HAS_X_PRIORITY + __HAS_MSMAIL_PRI == 1) && !__HAS_X_MAILER && !__IS_EXCH && !__USER_AGENT && !__HAS_REFERENCES)
 
-# bug 2513
-# try per-MUA rules
-header __REPTO_OVERQUOTE		Reply-To =~ /"[\w. -]+"\s*\</
-meta T_REPTO_OVERQUOTE_THEBAT		__REPTO_OVERQUOTE && __THEBAT_MUA
-#
-header __REPTO_QUOTE			Reply-To =~ /".*"\s*\</
-meta T_REPTO_QUOTE_AOL			__REPTO_QUOTE && __AOL_MUA
-meta T_REPTO_QUOTE_IMS			__REPTO_QUOTE && __IMS_MUA
-meta T_REPTO_QUOTE_MSN1			__REPTO_QUOTE && __FROM_MSN_COM
-meta T_REPTO_QUOTE_MSN2			__REPTO_QUOTE && __AT_MSN_MSGID
-meta T_REPTO_QUOTE_MSN3			__REPTO_QUOTE && (__FROM_MSN_COM || __AT_MSN_MSGID)
-meta T_REPTO_QUOTE_QUALCOMM		__REPTO_QUOTE && __ANY_QUALCOMM_MUA
-meta T_REPTO_QUOTE_THEBAT		__REPTO_QUOTE && __THEBAT_MUA
-meta T_REPTO_QUOTE_YAHOO1		__REPTO_QUOTE && __FROM_YAHOO_COM
-meta T_REPTO_QUOTE_YAHOO2		__REPTO_QUOTE && __AT_YAHOO_MSGID
-meta T_REPTO_QUOTE_YAHOO3		__REPTO_QUOTE && (__FROM_YAHOO_COM || __AT_YAHOO_MSGID)
-
-########################################################################
-
-# bug 3896: URIs in various TLDs, other than 3rd level www
-# baseline
-uri T_URI_NO_WWW_ANY_CGI	/^(?:https?:\/\/)?[^\/]+(?<!\/www)\.[^.]{7,}\.[^.]{7,}\.(?!biz|info)[a-z]{2,4}\/\?\S{14,}/i
-# fourth-level not starting with www, various lengths
-uri T_URI_NO_WWW_ANY_CGI_3	/^(?:https?:\/\/)?[^\/]+(?<!\/www)\.[^.]{3,}\.[^.]{3,}\.(?!biz|info)[a-z]{2,4}\/\?\S{14,}/i
-uri T_URI_NO_WWW_ANY_CGI_5	/^(?:https?:\/\/)?[^\/]+(?<!\/www)\.[^.]{5,}\.[^.]{5,}\.(?!biz|info)[a-z]{2,4}\/\?\S{14,}/i
-uri T_URI_NO_WWW_ANY_CGI_7	/^(?:https?:\/\/)?[^\/]+(?<!\/www)\.[^.]{7,}\.[^.]{7,}\.(?!biz|info)[a-z]{2,4}\/\?\S{14,}/i
-
 ########################################################################
 
 # remove evals if these aren't promoted
@@ -303,3 +276,5 @@ tflags T_NO_RELAYS      nice
 header __NO_RCVD        exists:Received
 meta T_NO_RCVD        (!__NO_RCVD)
 
+uri T_SCHEME_MIXED_CASE_1	/^(?![a-z]{3,6}:)[A-Za-z]{3,6}:/
+uri T_SCHEME_MIXED_CASE_2	/^(?![a-z]{3,6}:|[A-Z]{3,6})[A-Za-z]{3,6}:/

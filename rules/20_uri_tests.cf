@@ -155,3 +155,6 @@ describe URI_NO_WWW_INFO_CGI	CGI in .info TLD other than third-level "www"
 
 uri URI_NO_WWW_BIZ_CGI	/^(?:https?:\/\/)?[^\/]+(?<!\/www)\.[^.]{7,}\.biz\/(?=\S{15,})\S*\?/i
 describe URI_NO_WWW_BIZ_CGI	CGI in .biz TLD other than third-level "www"
+
+uri URI_NO_WWW_ANY_CGI	/^(?:https?:\/\/)?[^\/]+(?<!\/www)\.[^.]{3,}\.[^.]{3,}\.(?!biz|info)[a-z]{2,4}\/\?\S{14,}/i
+describe URI_NO_WWW_ANY_CGI	CGI with long hostname other fourth-level "www"
