@@ -214,7 +214,7 @@ sub result {
 
 sub wanted {
   my ($id, $time, $dataref) = @_;
-  my $out;
+  my ($out, $after, $begin);
 
   my $ma = Mail::SpamAssassin::NoMailAudit->new('data' => $dataref);
   $ma->{noexit} = 1;
@@ -228,7 +228,9 @@ sub wanted {
     $ma = Mail::SpamAssassin::NoMailAudit->new ('data' => $dataref);
   }
 
+  $before = time;
   my $status = $spamtest->check($ma);
+  $after = time;
 
   my @extra;
   if (defined($time)) {
@@ -252,6 +254,7 @@ sub wanted {
     $mid =~ tr/-A-Za-z0-9_!#%&=~<@>/./c;     # replace dangerous chars with . (so regexp search just works)
     push(@extra, "mid=$mid");
   }
+  push(@extra, "scantime=" . ($after - $before));
 
   my $yorn = $status->is_spam() ? 'Y' : '.';
   my $hits = $status->get_hits();
