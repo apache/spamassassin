@@ -1320,7 +1320,7 @@ sub do_body_uri_tests {
 
   for (@$textary) {
     # NOTE: do not modify $_ in this loop
-    while (/\G.*?(<$uriRe>|$uriRe)/gsoc) {
+    while (/($uriRe)/go) {
       my $uri = $1;
 
       $uri =~ s/^<(.*)>$/$1/;
@@ -1335,7 +1335,7 @@ sub do_body_uri_tests {
         # open, without a protocol, and not inside of an HTML tag,
         # the we should add the proper protocol in front, rather
         # than using the base URI.
-        if ($uri =~ /^www\d?\./i) {
+        if ($uri =~ /^www\d*\./i) {
           # some spammers are using unschemed URIs to escape filters
           push (@uris, $uri);
           $uri = "http://$uri";
@@ -1352,8 +1352,7 @@ sub do_body_uri_tests {
       # warn("Got URI: $uri\n");
       push @uris, $uri;
     }
-    pos = 0;
-    while (/\G.*?($Addr_spec_re)/gsoc) {
+    while (/($Addr_spec_re)/go) {
       my $uri = $1;
 
       $uri =~ s/^URI://i;
@@ -1366,10 +1365,6 @@ sub do_body_uri_tests {
 
   dbg("uri tests: Done uriRE");
   
-#  for (@uris) {
-#    print STDERR "uri $_\n";
-#  }
-
   $self->clear_test_state();
   if ( defined &Mail::SpamAssassin::PerMsgStatus::_body_uri_tests ) {
     # ok, we've compiled this before.
