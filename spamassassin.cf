@@ -98,8 +98,11 @@ terse-report ---- End of SpamAssassin results
 header NO_REAL_NAME		From =~ /^\s*\<?\S+\@\S+\>?\s*$/
 describe NO_REAL_NAME		From: does not include a real name
 
-header FROM_ENDS_IN_NUMS	From =~ /\d+\@/
-describe FROM_ENDS_IN_NUMS	From: ends in numbers
+header FROM_ENDS_IN_NUMS	From =~ /\d\d\@/
+describe FROM_ENDS_IN_NUMS	From: ends in more than 1 number
+
+header FROM_HAS_MIXED_NUMS	From =~ /\d+[a-z]+\d+\S*@/i
+describe FROM_HAS_MIXED_NUMS	From: contains numbers mixed in with letters
 
 # (contrib: David Hull)
 header FROM_NO_USER		From =~ /(?:^\@|<\@| \@|<>)/ [if-unset: unset@unset.unset]
@@ -821,6 +824,9 @@ describe USER_IN_MORE_SPAM_TO	User is listed in 'more_spam_to'
 header USER_IN_ALL_SPAM_TO	eval:check_to_in_all_spam()
 describe USER_IN_ALL_SPAM_TO	User is listed in 'all_spam_to'
 
+header ORDER_STATUS		Subject =~ / order\b/i
+describe ORDER_STATUS		Subject looks like order info
+
 # the idea is that most legit newsletters will claim their copyright; spammers
 # do not seem to for some reason.  (Kevin Dangoor)
 full COPYRIGHT_CLAIMED		/copyright.{0,100}all rights reserved/is
@@ -934,6 +940,7 @@ score FRIEND_AT_PUBLIC               4.0
 score FROM_AND_TO_SAME               1.9
 score FROM_BTAMAIL                   4.0
 score FROM_ENDS_IN_NUMS              2.0
+score FROM_HAS_MIXED_NUMS		2.0
 score FROM_FORGED_HOTMAIL            2.0
 score FROM_MALFORMED                 1.4
 score FROM_MISSING                   4.0
@@ -1107,9 +1114,10 @@ score RCVD_IN_BL_SPAMCOP_NET	     0.0
 
 score BALANCE_FOR_LONG		    -2.0
 score COPYRIGHT_CLAIMED		    -2.0
+score ORDER_STATUS		    -3.0
+score Q_FOR_SELLER		    -4.0
 score USER_IN_WHITELIST		    -100.0
 score A_FROM_IN_AUTO_WLIST	    -100.0
-score Q_FOR_SELLER		    -4.0
 
 # Not really false positives but the user wants spam!
 
