@@ -317,6 +317,9 @@ sub parse_received_headers {
   # be helpful; save some cumbersome typing
   $self->{num_relays_trusted} = scalar (@{$self->{relays_trusted}});
   $self->{num_relays_untrusted} = scalar (@{$self->{relays_untrusted}});
+
+  dbg ("metadata: X-Spam-Relays-Trusted: ".$self->{relays_trusted_str});
+  dbg ("metadata: X-Spam-Relays-Untrusted: ".$self->{relays_untrusted_str});
 }
 
 sub lookup_all_ips {
