@@ -45,6 +45,7 @@ use vars qw{ @ISA @DBNAMES
   $ROBINSON_MIN_PROB_STRENGTH
   $N_SIGNIFICANT_TOKENS
   $MAX_TOKEN_LENGTH
+  %HEADER_NAME_COMPRESSION
 };
 
 @ISA = qw();
@@ -63,10 +64,10 @@ use vars qw{ @ISA @DBNAMES
 $IGNORED_HDRS = qr{(?:
 		  From |To |Cc |MIME-Version |Content-Transfer-Encoding
 		  |List-Unsubscribe |List-Subscribe |List-Owner
-		  |X-List-Host |Message-Id |Received |Date
+		  |X-List-Host |Received |Date
 		  |Sender |X-MailScanner |X-MailScanner-SpamCheck
 		  |Delivered-To |X-Spam-Status |X-Spam-Level
-		  |Reply-To |Errors-To |X-Antispam |Message-ID
+		  |Reply-To |Errors-To |X-Antispam 
 		  |CC |Subject |Return-Path |Delivery-Return-Path
 		  |X-Pyzor |Content-Class |Thread-Index
 		  |X-Mailman-Version |X-Beenthere
@@ -78,7 +79,25 @@ $IGNORED_HDRS = qr{(?:
 		  |X-MIME-Autoconverted | Status |Content-Length
 		  |Lines |X-UID |Delivery-Date |X-Virus-Scanned
 		  |X-Spam-hits |X-Spam |X-Spam-Score
+		  |X-Mass-Check-Id
 		)}x;
+
+# We store header-mined tokens in the db with a "H:HeaderName:val" format.
+# some headers may contain lots of gibberish tokens, so allow a little basic
+# compression by mapping the header name at least here.  these are the headers
+# which appear with the most frequency in my db.  note: this doesn't have to
+# be 2-way (ie. LHSes that map to the same RHS are not a problem), but mixing
+# tokens from multiple different headers may impact accuracy, so might as well
+# avoid this if possible.
+%HEADER_NAME_COMPRESSION = (
+  'Message-Id' => '*m',
+  'Message-ID' => '*M',
+  'Received' => '*r',
+  'User-Agent' => '*u',
+  'References' => '*f',
+  'In-Reply-To' => '*i',
+  'X-Originalarrivaltime' => '*o',
+);
 
 # How big should the corpora be before we allow scoring using Bayesian
 # tests?
@@ -105,6 +124,12 @@ $ROBINSON_MIN_PROB_STRENGTH = 0.1;
 # How long a token should we hold onto?  (note: German speakers typically
 # will require a longer token than English ones.)
 $MAX_TOKEN_LENGTH = 20;
+
+# lower and upper bounds for probabilities; we lock probs into these
+# so one high-strength token can't overwhelm a set of slightly lower-strength
+# tokens.
+use constant PROB_BOUND_LOWER => 0.001;
+use constant PROB_BOUND_UPPER => 0.999;
 
 # we have 5 databases for efficiency.  To quote Matt:
 # > need five db files though to make it real fast:
@@ -171,7 +196,7 @@ sub tie_db_readonly {
     my $name = $path.'_'.$dbname;
     my $db_var = 'db_'.$dbname;
     dbg("bayes: tie-ing to DB file R/O $name");
-    untie %{$self->{$db_var}} if (tied %{$self->{$db_var}});
+    # untie %{$self->{$db_var}} if (tied %{$self->{$db_var}});
     tie %{$self->{$db_var}},"AnyDBM_File",$name, O_RDONLY,
 		 (oct ($main->{conf}->{bayes_file_mode}) & 0666)
        or goto failed_to_tie;
@@ -295,7 +320,6 @@ sub finish {
 # TODO: should we try to get some header data in here too?  possible good
 # sources are:
 #
-# Message-ID (contains spamtool patterns)
 # Content-Type (mime boundaries ditto)
 # X-Mailer, User-Agent (spamtool signatures)
 # Received (should only take last 2 or 3 Received entries)
@@ -311,12 +335,12 @@ sub tokenize {
   $self->{tokens} = [ ];
 
   for (@{$body}) {
-    $wc += $self->tokenize_line ($_, '');
+    $wc += $self->tokenize_line ($_, '', 0);
   }
 
   my %hdrs = $self->tokenize_headers ($msg);
   foreach my $prefix (keys %hdrs) {
-    $wc += $self->tokenize_line ($hdrs{$prefix}, "H:$prefix:");
+    $wc += $self->tokenize_line ($hdrs{$prefix}, "H:$prefix:", 1);
   }
 
   my @toks = @{$self->{tokens}}; delete $self->{tokens};
@@ -327,6 +351,7 @@ sub tokenize_line {
   my $self = $_[0];
   local ($_) = $_[1];
   my $tokprefix = $_[2];
+  my $casesensitive = $_[3];
 
   # include quotes, .'s and -'s for URIs, and [$,]'s for Nigerian-scam strings,
   # and ISO-8859-15 alphas.  DO split on @'s, so username and domains in
@@ -344,7 +369,9 @@ sub tokenize_line {
     next if length($token) > $MAX_TOKEN_LENGTH;
     $wc++;
 
-    push (@{$self->{tokens}}, $tokprefix.$token);
+    if ($casesensitive) {
+      push (@{$self->{tokens}}, $tokprefix.$token);
+    }
 
     # now do some token abstraction; in other words, make them act like
     # patterns instead of text copies.
@@ -385,12 +412,29 @@ sub tokenize_headers {
   if ($#rcvdlines >= 1) { $hdrs .= "\n".$rcvdlines[$#rcvdlines-1]; }
 
   while ($hdrs =~ /^(\S+): ([^\n]*)$/gim) {
-    if (defined $parsed{$1}) {
-      $parsed{$1} .= " ".$2;
-    } else {
-      $parsed{$1} = $2;
+    my $hdr = $1;
+    my $val = $2;
+
+    # special tokenization for some headers:
+    if ($hdr =~ /^Message-I[dD]$/) {
+      # try to split Message-ID segments on probable ID boundaries. Note that
+      # Outlook message-ids seem to contain a server identifier ID in the last
+      # 8 bytes before the @.  Make sure this becomes its own token, it's a
+      # great spam-sign for a learning system!
+      $val =~ s/[^_A-Za-z0-9]/ /g;
     }
-    dbg ("tokenize: header tokens for $1 = \"$parsed{$1}\"");
+
+    # replaced with "compressed" version if possible
+    if (defined $HEADER_NAME_COMPRESSION{$hdr}) {
+      $hdr = $HEADER_NAME_COMPRESSION{$hdr};
+    }
+
+    if (defined $parsed{$hdr}) {
+      $parsed{$hdr} .= " ".$val;
+    } else {
+      $parsed{$hdr} = $val;
+    }
+    dbg ("tokenize: header tokens for $hdr = \"$parsed{$hdr}\"");
   }
 
   return %parsed;
@@ -464,12 +508,15 @@ sub learn_trapped {
     # if we don't have both corpora, skip generating probabilities.
     # we can't get useful results without both.
     next if ($nn == 0 || $ns == 0);
-    $self->compute_prob_for_token ($_, $ns, $nn);
+    if ($self->{main}->{bayes_on_the_fly_recalc}) {
+      $self->compute_prob_for_token ($_, $ns, $nn);
+    }
   }
 
   $self->{db_seen}->{$msgid} = ($isspam ? 's' : 'h');
 
   # do this costly operation once every 500 mails
+  # TODO: come up with a time-based recalc operation instead
   if ($ns != 0 && $nn != 0 && (($ns+$nn) % 500) == 0) {
     $self->recompute_all_probs();
 
@@ -564,7 +611,9 @@ sub forget_trapped {
     # if we don't have both corpora, skip generating probabilities.
     # we can't get useful results without both.
     next if ($nn == 0 || $ns == 0);
-    $self->compute_prob_for_token ($_, $ns, $nn);
+    if ($self->{main}->{bayes_on_the_fly_recalc}) {
+      $self->compute_prob_for_token ($_, $ns, $nn);
+    }
   }
 
   delete $self->{db_seen}->{$msgid};
@@ -769,10 +818,10 @@ sub scan {
 	# enforce (max .01 (min .99 (score))) as per Graham; it allows
 	# a majority of spam clues to override 1 or 2 very-strong nonspam clues.
 	#
-	if ($pw < 0.01) {
-	  ($_ => 0.01);
-	} elsif ($pw > 0.99) {
-	  ($_ => 0.99);
+	if ($pw < PROB_BOUND_LOWER) {
+	  ($_ => PROB_BOUND_LOWER);
+	} elsif ($pw > PROB_BOUND_UPPER) {
+	  ($_ => PROB_BOUND_UPPER);
 	} else {
 	  ($_ => $pw);
 	}

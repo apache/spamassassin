@@ -94,7 +94,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.136 2002/10/30 15:41:09 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.137 2002/11/13 11:43:00 jmason Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -354,6 +354,12 @@ method.
 Whether or not to add addresses to the automatic whitelist while learning.
 (optional, default 0)
 
+=item bayes_on_the_fly_recalc
+
+Whether to recalculate Bayes probabilities on-the-fly when learning.  By
+default, SpamAssassin will require the caller to call C<rebuild_learner_caches>
+eventually instead.  (optional, default 0)
+
 =back
 
 =cut
@@ -363,6 +369,7 @@ sub init_learner {
   my $opts = shift;
   dbg ("Initialising learner");
   if ($opts->{use_whitelist}) { $self->{learn_with_whitelist} = 1; }
+  if ($opts->{bayes_on_the_fly_recalc}) { $self->{bayes_on_the_fly_recalc} = 1; }
   1;
 }
 

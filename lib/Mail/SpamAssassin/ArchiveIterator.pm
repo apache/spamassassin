@@ -55,16 +55,18 @@ sub run {
 	require Archive::Tar;   # jm: require avoids warning
 	$self->mass_check_tar_file($folder);
     }
-    elsif (-d $folder &&
-	   ($self->{opt_mh} || -f "$folder/1" || -f "$folder/1.gz" || -f "$folder/cyrus.index"))
-    {
-      # it's an MH folder or a Cyrus mailbox
-      $self->mass_check_mh_folder($folder);
-    }
     elsif (-d $folder && -d "$folder/cur" && -d "$folder/new" )
     {
       # Maildir!
       $self->mass_check_maildir($folder);
+    }
+    elsif (-d $folder)
+    {
+      # it's an MH folder or a Cyrus mailbox
+      # not necessary to check this: just assume it's MH/Cyrus. if we
+      # do these conditions, a non-packed MH folder will be ignored silently
+      #($self->{opt_mh} || -f "$folder/1" || -f "$folder/1.gz" || -f "$folder/cyrus.index"))
+      $self->mass_check_mh_folder($folder);
     }
     elsif (-f $folder && $self->{opt_single})
     {
