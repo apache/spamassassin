@@ -25,6 +25,7 @@
 my $killfile_message_ids = qr{(?:
     <\d\d\d\d\S+\@dev\.lifetimetv\.com>
     |<\d+\.\S+\@fmail..\.real-net\.net>
+    |<3D53A59C000A4029\@mta3n\.bluewin\.ch>     # a klez
 )}x;
 
 my $killfile_receiveds = qr{(?:
@@ -101,9 +102,12 @@ sub wanted {
 
   # killfile for mass-checks
   $_ = $ma->get_header("Message-Id");
-  if (defined($_) && /${killfile_message_ids}/os) { logkilled($ma); return; }
+  if (defined($_) && /${killfile_message_ids}/os)
+                { logkilled($ma, "skipped killfiled message"); return; }
+
   $_ = join ('', $ma->get_header("Received"));
-  if (defined($_) && /${killfile_receiveds}/os) { logkilled($ma); return; }
+  if (defined($_) && /${killfile_receiveds}/os)
+                { logkilled($ma, "skipped killfiled message"); return; }
 
   $ma->{noexit} = 1;
   $spamtest->remove_spamassassin_markup($ma);
@@ -122,6 +126,10 @@ sub wanted {
   printf "%s %2d %s %s\n",
 		    ($yorn ? 'Y' : '.'),
 		    $hits, $id, $tests;
+
+  if ($tests =~ /MICROSOFT_EXECUTABLE|MIME_SUSPECT_NAME/) {
+    logkilled($ma, "possible virus");
+  }
 
   if ($opt_loghits) {
     my $out = '';
@@ -146,6 +154,7 @@ sub wanted {
 
 sub logkilled {
   my ($ma) = shift;
+  my $reason = shift;
 
   my $from = $ma->get_header ("From");
   my $to = $ma->get_header ("To");
