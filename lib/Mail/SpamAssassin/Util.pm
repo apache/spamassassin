@@ -656,13 +656,12 @@ sub first_available_module {
 # thanks to http://www2.picante.com:81/~gtaylor/autobuse/ for this
 # code.
 sub secure_tmpfile {
-  my $tmpdir = File::Spec->tmpdir();
+  my $tmpdir = Mail::SpamAssassin::Util::untaint_file_path(
+                 File::Spec->tmpdir()
+               );
   if (!$tmpdir) {
-    die "cannot write to a temporary directory! set TMP or TMPDIR in env";
+    die "Cannot find a temporary directory! set TMP or TMPDIR in env";
   }
-
-  $tmpdir = Mail::SpamAssassin::Util::untaint_file_path ($tmpdir);
-  my $template = $tmpdir."/sa.$$.";
 
   my $reportfile;
   my $umask = 0;
@@ -670,14 +669,21 @@ sub secure_tmpfile {
     # we do not rely on the obscurity of this name for security...
     # we use a average-quality PRG since this is all we need
     my $suffix = join ('',
-		       (0..9, 'A'..'Z','a'..'z')[rand 62,
-						 rand 62,
-						 rand 62,
-						 rand 62,
-						 rand 62,
-						 rand 62]);
-    $reportfile = $template . $suffix;
-
+                       (0..9, 'A'..'Z','a'..'z')[rand 62,
+                                                 rand 62,
+                                                 rand 62,
+                                                 rand 62,
+                                                 rand 62,
+                                                 rand 62]);
+    $reportfile = File::Spec->catfile(
+                    $tmpdir,
+                    join ('.',
+                      "spamassassin",
+                      $$,
+                      $suffix,
+                      "tmp",
+                    )
+                  );
     # ...rather, we require O_EXCL|O_CREAT to guarantee us proper
     # ownership of our file; read the open(2) man page.
   } while (! sysopen (TMPFILE, $reportfile, O_RDWR|O_CREAT|O_EXCL, 0600));
