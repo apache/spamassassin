@@ -44,7 +44,7 @@ Set the maximum message size which will be sent to spamd -- any bigger than this
 
 =item B<-u> I<username>
 
-Have spamd read the config file for the given username to be added to the default configuration
+This argument has been obsoleted.  To have spamd use per-user-config files, run spamc as the user whose config files spamd should load.
 
 =back
 
