@@ -397,8 +397,11 @@ describe CONGRATULATIONS	Congratulations - you've been scammed?
 # do not add "new" since there's non-spam about "new cell phone numbers"
 # separated into two rules since one seems to have a lot of
 # sourceforge list advertisement false positives
-body FREE_CELL_PHONE          	/\b(?-i:F)ree\b.{0,24}(?:cell(?:ular)?|mobile).{0,4}phones?/i
-describe FREE_CELL_PHONE 	Talks about free mobile phones
+body CELL_PHONE_FREE          	/\b(?-i:F)ree\b.{0,24}(?:cell(?:ular)?|mobile).{0,4}phones?/i
+describe CELL_PHONE_FREE 	Talks about free mobile phones
+
+body CELL_PHONE_IMPROVE		/\b(?:(?:boost|antenna|reception).{0,16}(?:cell|mobile|phone|cord.?less)|(?:cell|mobile|phone|cord.?less).{0,16}(?:boost|antenna|reception))/i
+describe CELL_PHONE_IMPROVE	Talks about cell-phone signal improvement
 
 body FREE_LEADS			/\bfree leads\b/i
 describe FREE_LEADS		Free Leads
@@ -773,9 +776,6 @@ describe OUR_COMPENSATION	Mentions their full compensation
 
 body OUR_STRICT_ANTI		/our strict anti/i
 describe OUR_STRICT_ANTI	Mentions their strict antipathy on something
-
-body CELL_PHONE_BOOST		/\b(?:(?:boost|antenna|reception).{0,16}(?:cell|mobile|phone|cord.?less)|(?:cell|mobile|phone|cord.?less).{0,16}(?:boost|antenna|reception))/i
-describe CELL_PHONE_BOOST	Talks about cell-phone signal improvement
 
 body OFFERS_ETC			/\b(?:(?=[cefmpruw])(?:wish|want|unsub|reward|receive|recurring|remove|permission|partner|further|future|e.?mail|continue|click).{0,64}){2}.{0,8}(?=[cdos])(?:special|offer|coupon|discount)s?\b/i
 describe OFFERS_ETC		Stop the offers, coupons, discounts etc!
