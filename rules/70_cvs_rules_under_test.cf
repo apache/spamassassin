@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.577 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.578 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -306,8 +306,8 @@ meta T_MIME_HTML_ONLY_MULTI_OTHER	(__CTYPE_MULTIPART_OTHER && __MIME_HTML_ONLY)
 ######################################################################
 
 # a new ratware-forgery format
-header T_LC_ESMTP_RCVD    Received =~ /^from (?:unknown|\d+\.\d+\.\d+\.\d+) \(\S+\) by \S+ with esmtp; /
-describe T_LC_ESMTP_RCVD  Received header contains forged lowercase 'esmtp' relay  
+header T_LC_ESMTP_RCVD    Received =~ /^from (?:(?:unknown|\d+\.\d+\.\d+\.\d+) \(\S+\)|\[\d+\.\d+\.\d+\.\d+\]) by \S+ with (?:esmtp|local|smtp); /m
+describe T_LC_ESMTP_RCVD  Forged 'esmtp'-type Received header
 
 # bug 1426
 # AOL users' From never includes a real name
