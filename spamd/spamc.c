@@ -18,11 +18,12 @@
 #include <netdb.h>
 #include <arpa/inet.h>
 
-
 #ifndef INADDR_NONE
 #define       INADDR_NONE             ((in_addr_t) 0xffffffff)
 #endif
 
+/* jm: turned off for now, it should not be necessary. */
+#undef USE_TCP_NODELAY
 
 void print_usage(void)
 {
@@ -126,6 +127,7 @@ try_to_connect (const struct sockaddr *addr, int *sockptr)
     }
   }
   
+#ifdef USE_TCP_NODELAY
   value = 1;		/* make this explicit! */
   if(-1 == setsockopt(mysock,0,TCP_NODELAY,&value,sizeof(value)))
   {
@@ -142,6 +144,7 @@ try_to_connect (const struct sockaddr *addr, int *sockptr)
       break;		/* ignored */
     }
   }
+#endif
 
   if(connect(mysock,(const struct sockaddr *) addr, sizeof(*addr)) < 0)
   {
