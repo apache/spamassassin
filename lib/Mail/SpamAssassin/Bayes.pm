@@ -1303,7 +1303,7 @@ sub dump_bayes_db {
 
   my($sb,$ns,$nh,$nt,$le,$oa,$bv,$js,$ad,$er,$na) = @vars;
 
-  my $template = '%3.3f %10d %10d %10d  %s'."\n";
+  my $template = '%3.3f %10u %10u %10u  %s'."\n";
 
   if ( $magic ) {
     printf ($template, 0.0, 0, $bv, 0, 'non-token data: bayes db version');
