@@ -85,8 +85,9 @@ header RCVD_IN_ORBS		rbleval:check_rbl('orbs', 'orbs.dorkslayers.com.')
 describe RCVD_IN_ORBS		Received via a relay in orbs.dorkslayers.com
 tflags RCVD_IN_ORBS             net
 
-# http://www.blitzed.org/opm/ , a recommended open-proxies list.
-header RCVD_IN_OPM		rbleval:check_rbl_txt('opm', 'opm.blitzed.org.')
+# http://www.blitzed.org/opm/ - a recommended open-proxies list
+# OPM supports TXT queries, but A queries are needed for sub-tests
+header RCVD_IN_OPM		rbleval:check_rbl('opm', 'opm.blitzed.org.')
 describe RCVD_IN_OPM		Received via a relay in opm.blitzed.org
 tflags RCVD_IN_OPM              net
 
