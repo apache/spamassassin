@@ -1,0 +1,163 @@
+# SpamAssassin rules file: DNS blacklist tests
+#
+# Please don't modify this file as your changes will be overwritten with
+# the next update. Use @@LOCAL_RULES_DIR@@/local.cf instead.
+# See 'perldoc Mail::SpamAssassin::Conf' for details.
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of either the Artistic License or the GNU General
+# Public License as published by the Free Software Foundation; either
+# version 1 of the License, or (at your option) any later version.
+#
+# See the file "License" in the top level of the SpamAssassin source
+# distribution for more details.
+#
+###########################################################################
+
+require_version @@VERSION@@
+
+# See the Mail::SpamAssassin::Conf manual page for details of how to use
+# check_rbl().
+
+# ---------------------------------------------------------------------------
+# Multizone / Multi meaning BLs first.
+# 
+# Note that currently TXT queries cannot be used for these, since the
+# DNSBLs do not return the A type (127.0.0.x) as part of the TXT reply.
+# Well, at least Osirusoft and NJABL don't, it seems, as of Apr 7 2003.
+
+# Osirusoft, like MAPS RBL+ is a multi-meaning BL, so it is treated separately
+header RCVD_IN_OSIRUSOFT_COM	rbleval:check_rbl('osirusoft', 'relays.osirusoft.com.')
+describe RCVD_IN_OSIRUSOFT_COM	Received via a relay in relays.osirusoft.com
+tflags RCVD_IN_OSIRUSOFT_COM    net
+
+# X prefix was used to insure that it was run at the end, but it's not needed
+# anymore since we run the rule with rblreseval -- Marc
+header X_OSIRU_OPEN_RELAY	rbleval:check_rbl_results_for('osirusoft', '127.0.0.2')
+describe X_OSIRU_OPEN_RELAY	DNSBL: sender is Confirmed Open Relay
+tflags X_OSIRU_OPEN_RELAY	net
+
+# TODO: problem.  cannot use this!
+header X_OSIRU_DUL		rbleval:check_rbl_results_for('osirusoft', '127.0.0.3')
+describe X_OSIRU_DUL		DNSBL: sender ip address in in a dialup block
+tflags X_OSIRU_DUL		net
+
+header X_OSIRU_SPAM_SRC		rbleval:check_rbl_results_for('osirusoft', '127.0.0.4')
+describe X_OSIRU_SPAM_SRC	DNSBL: sender is Confirmed Spam Source
+tflags X_OSIRU_SPAM_SRC         net
+
+header X_OSIRU_SPAMWARE_SITE	rbleval:check_rbl_results_for('osirusoft', '127.0.0.6')
+describe X_OSIRU_SPAMWARE_SITE	DNSBL: sender is a Spamware site or vendor
+tflags X_OSIRU_SPAMWARE_SITE    net
+
+# ---------------------------------------------------------------------------
+
+header RCVD_IN_NJABL		rbleval:check_rbl('njabl', 'dnsbl.njabl.org.')
+describe RCVD_IN_NJABL		Received via a relay in dnsbl.njabl.org
+tflags RCVD_IN_NJABL		net
+
+# note: X_ prefix so X_NJABL_OPEN_PROXY happens after RCVD_IN_NJABL.
+header X_NJABL_OPEN_PROXY	rbleval:check_rbl_results_for('njabl', '127.0.0.2')
+describe X_NJABL_OPEN_PROXY	NJABL: sender is proxy/relay/formmail/spam-source
+tflags X_NJABL_OPEN_PROXY	net
+ 	
+header X_NJABL_DIALUP		rbleval:check_rbl_results_for('njabl', '127.0.0.3')
+describe X_NJABL_DIALUP		NJABL: sender is on dialup/dynamic IP
+tflags X_NJABL_DIALUP		net
+
+# ---------------------------------------------------------------------------
+
+# Now, single zone BLs follow:
+# the new first arg for check_rbl() indicates what type of check it is;
+# each type of check is stored in a separate set, and if an IP has already
+# been hit in that set, it will not be checked with any other zone in
+# that set.
+header RCVD_IN_RELAYS_ORDB_ORG	rbleval:check_rbl('ordb', 'relays.ordb.org.')
+describe RCVD_IN_RELAYS_ORDB_ORG Received via a relay in relays.ordb.org
+tflags RCVD_IN_RELAYS_ORDB_ORG  net
+
+# SBL is the Spamhaus Block List: http://www.spamhaus.org/sbl/ .
+header RCVD_IN_SBL		rbleval:check_rbl_txt('sbl', 'sbl.spamhaus.org.')
+describe RCVD_IN_SBL		Received via SBLed relay, see http://www.spamhaus.org/sbl/
+tflags RCVD_IN_SBL              net
+
+header RCVD_IN_ORBS		rbleval:check_rbl('orbs', 'orbs.dorkslayers.com.')
+describe RCVD_IN_ORBS		Received via a relay in orbs.dorkslayers.com
+tflags RCVD_IN_ORBS             net
+
+# http://www.blitzed.org/opm/ , a recommended open-proxies list.
+header RCVD_IN_OPM		rbleval:check_rbl_txt('opm', 'opm.blitzed.org.')
+describe RCVD_IN_OPM		Received via a relay in opm.blitzed.org
+tflags RCVD_IN_OPM              net
+
+# DSBL catches open relays, badly-installed CGI scripts and open SOCKS and
+# HTTP proxies.  list.dsbl.org lists servers tested by "trusted" users,
+# multihop.dsbl.org lists servers which open SMTP servers relay through,
+# unconfirmed.dsbl.org lists servers tested by "untrusted" users.
+# See http://dsbl.org/ for full details.
+header RCVD_IN_DSBL            rbleval:check_rbl_txt('dsbl', 'list.dsbl.org.')
+describe RCVD_IN_DSBL          Received via a relay in list.dsbl.org
+tflags RCVD_IN_DSBL            net
+
+# Warning, several big ISP's mail relays (not open to outside people)
+# are listed on multihop. Do not set a high score on this.  Note too
+# that those IPs often are listed in unconfirmed.dsbl.org at the same
+# time.
+header RCVD_IN_MULTIHOP_DSBL   rbleval:check_rbl('multihop', 'multihop.dsbl.org.')
+describe RCVD_IN_MULTIHOP_DSBL Received via a relay in multihop.dsbl.org
+tflags RCVD_IN_MULTIHOP_DSBL   net
+
+# We want to count this in the open relay set so that someone doesn't get scored
+# twice (at least by default) for being listed there and in some other relay BL.
+# Users can request a double hit and double score by changing 'relay' with
+# 'unconfirmed_dsbl' or something like that, but I don't think it should be
+# a default  -- Marc
+header RCVD_IN_UNCONFIRMED_DSBL        rbleval:check_rbl_txt('unconfdsbl', 'unconfirmed.dsbl.org.')
+describe RCVD_IN_UNCONFIRMED_DSBL      Received via a relay in unconfirmed.dsbl.org
+tflags RCVD_IN_UNCONFIRMED_DSBL        net
+
+
+# Other miscellaneous RBLs are listed here:
+header RCVD_IN_RFCI		rbleval:check_rbl_txt('rfci', 'ipwhois.rfc-ignorant.org.')
+describe RCVD_IN_RFCI		Received via a relay in ipwhois.rfc-ignorant.org
+tflags RCVD_IN_RFCI             net
+
+header HABEAS_HIL		rbleval:check_rbl('hil', 'hil.habeas.com.')
+describe HABEAS_HIL		Sender is on www.habeas.com Habeas Infringer List
+tflags HABEAS_HIL		net
+
+meta HABEAS_VIOLATOR		(HABEAS_SWE && HABEAS_HIL)
+describe HABEAS_VIOLATOR	On Habeas Infringer List and using Habeas warrant mark
+tflags HABEAS_VIOLATOR		net
+
+# bondedsender.org provides an RBL-style whitelist for trusted relays
+header RCVD_IN_BONDEDSENDER	rbleval:check_rbl('bondedsender', 'query.bondedsender.org.')
+describe RCVD_IN_BONDEDSENDER	Bonded sender, see http://www.bondedsender.org/referred.html
+tflags RCVD_IN_BONDEDSENDER	net nice
+
+# ---------------------------------------------------------------------------
+
+# NOTE: semi-commercial test, see README file for details
+header RCVD_IN_BL_SPAMCOP_NET	rbleval:check_rbl_txt('spamcop', 'bl.spamcop.net.')
+describe RCVD_IN_BL_SPAMCOP_NET	Received via a relay in bl.spamcop.net
+tflags RCVD_IN_BL_SPAMCOP_NET   net
+
+# ---------------------------------------------------------------------------
+
+# NOTE: commercial tests, see README file for details
+header RCVD_IN_RBL		rbleval:check_rbl('rbl', 'blackholes.mail-abuse.org.')
+describe RCVD_IN_RBL		Received via RBLed relay, see http://www.mail-abuse.org/rbl/
+tflags RCVD_IN_RBL              net
+
+header RCVD_IN_RSS		rbleval:check_rbl('rss', 'relays.mail-abuse.org.')
+describe RCVD_IN_RSS		Received via RSSed relay, see http://www.mail-abuse.org/rss/
+tflags RCVD_IN_RSS              net
+
+header RCVD_IN_DUL		rbleval:check_rbl('dialup-notfirsthop', 'dialups.mail-abuse.org.')
+describe RCVD_IN_DUL		Received from dialup, see http://www.mail-abuse.org/dul/
+tflags RCVD_IN_DUL              net
+
+header RCVD_IN_NML		rbleval:check_rbl('nml', 'nonconfirm.mail-abuse.org.')
+describe RCVD_IN_NML		Received via non-confirming mailing host, see http://www.mail-abuse.org/nml/
+tflags RCVD_IN_NML              net
+
