@@ -836,20 +836,23 @@ sub do_full_eval_tests {
 ###########################################################################
 
 sub mk_param {
-    my $param = shift;
-    if ($param =~ /^['"](.*)['"]$/) {
-        return $1;
-    }
-    return $param;
+  my $param = shift;
+
+  my @ret = ();
+  while ($param =~ s/^\s*['"](.*?)['"](?:,|)\s*//) {
+    push (@ret, $1);
+  }
+  return @ret;
 }
 
 sub run_eval_tests {
   my ($self, $evalhash, $prepend2desc, @extraevalargs) = @_;
-  my ($rulename, $pat, $evalsub, @args);
+  my ($rulename, $pat, @args);
   local ($_);
 
-  while (($rulename, $evalsub) = each %{$evalhash}) {
+  foreach my $rulename (sort keys %{$evalhash}) {
     next unless ($self->{conf}->{scores}->{$rulename});
+    my $evalsub = $evalhash->{$rulename};
 
     my $result;
     $self->clear_test_state();
@@ -905,22 +908,6 @@ sub handle_hit {
   $self->{hits} += $score;
 
   $self->{test_names_hit} .= $rule.",";
-
-sub generic_base64_decode {
-    my ($self, $to_decode) = @_;
-    
-    my $retval;
-    eval {
-        require MIME::Base64;
-        $retval = MIME::Base64::decode_base64($to_decode);
-    };
-    if ($@) {
-        return $self->slow_base64_decode($to_decode);
-    }
-    else {
-        return $retval;
-    }
-}
 
   $self->{test_logs} .= sprintf ("%-18s %s%s\n%s",
 		"Hit! (".$score." point".($score == 1 ? "":"s").")",
@@ -991,6 +978,24 @@ sub b64decodesub
   s/((........)*)(.*)/$1/; # throw away spare bits (not multiple of 8)
   $_ = pack('B*', $_);   # turn the bits back into bytes
   $_; # return
+}
+
+# contributed by Matt: a wrapper for slow_base64_decode() which uses
+# MIME::Base64 if it's installed.
+sub generic_base64_decode {
+    my ($self, $to_decode) = @_;
+    
+    my $retval;
+    eval {
+        require MIME::Base64;
+        $retval = MIME::Base64::decode_base64($to_decode);
+    };
+    if ($@) {
+        return $self->slow_base64_decode($to_decode);
+    }
+    else {
+        return $retval;
+    }
 }
 
 ###########################################################################

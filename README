@@ -71,18 +71,6 @@ Here's how to install this using CPAN.pm:
 	install Mail::Audit
 	quit
 
-There is a problem with Mail::Audit versions up to and including 1.9,
-which will cause mail to be rewritten as it passes through Mail::Audit.
-SpamAssassin will still work OK, although some aspects (Razor matching in
-particular) may not provide any hits as a result, and the "strip2" test in
-the SpamAssassin test suite will fail.
-
-A patch has been submitted to the author of Mail::Audit, so hopefully the
-next version will work OK.  In the meantime, you may wish to apply the
-patch yourself; see the file "MailAudit.patch" in this directory in that
-case.
-
-
 
 Optional Additional Modules
 ---------------------------

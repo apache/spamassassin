@@ -53,14 +53,16 @@ BEGIN {
 ###########################################################################
 
 sub do_rbl_lookup {
-  my ($self, $dom, $ip, $found) = @_;
+  my ($self, $set, $dom, $ip, $found) = @_;
   return $found if $found;
 
   my $q = $self->{res}->search ($dom);
+
   if ($q) {
     foreach my $rr ($q->answer) {
       if ($rr->type eq "A") {
 	my $addr = $rr->address();
+	dbg ("record found for $dom = $addr");
 
 	if ($addr ne '127.0.0.2' && $addr ne '127.0.0.3') {
 	  $self->test_log ("RBL check: found relay ".$dom.", type: ".$addr);
@@ -70,8 +72,8 @@ sub do_rbl_lookup {
 	  $self->test_log ("RBL check: found relay ".$dom);
 	}
 
-	$self->{rbl_IN_As_found} .= $addr.' ';
-	$self->{rbl_matches_found} .= $ip.' ';
+	$self->{$set}->{rbl_IN_As_found} .= $addr.' ';
+	$self->{$set}->{rbl_matches_found} .= $ip.' ';
 	return ($found+1);
       }
     }

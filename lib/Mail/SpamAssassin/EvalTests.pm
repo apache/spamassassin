@@ -210,10 +210,11 @@ sub check_from_name_eq_from_address {
 ###########################################################################
 
 sub check_rbl {
-  my ($self, $rbl_domain) = @_;
+  my ($self, $set, $rbl_domain) = @_;
   local ($_);
-  my $rcv = $self->get ('Received');
+  dbg ("checking RBL $rbl_domain, set $set");
 
+  my $rcv = $self->get ('Received');
   my @ips = ($rcv =~ /\[(\d+\.\d+\.\d+\.\d+)\]/g);
   return 0 unless ($#ips >= 0);
 
@@ -224,13 +225,13 @@ sub check_rbl {
     @ips = @ips[$#ips-1 .. $#ips];        # only check the originating 2
   }
 
-  if (!defined $self->{rbl_IN_As_found}) {
-    $self->{rbl_IN_As_found} = ' ';
-    $self->{rbl_matches_found} = ' ';
+  if (!defined $self->{$set}->{rbl_IN_As_found}) {
+    $self->{$set}->{rbl_IN_As_found} = ' ';
+    $self->{$set}->{rbl_matches_found} = ' ';
   }
 
   init_rbl_check_reserved_ips();
-  my $already_matched_in_other_zones = ' '.$self->{rbl_matches_found}.' ';
+  my $already_matched_in_other_zones = ' '.$self->{$set}->{rbl_matches_found}.' ';
   my $found = 0;
 
   # First check that DNS is available, if not do not perform this check.
@@ -240,7 +241,7 @@ sub check_rbl {
       next if ($ip =~ /${IP_IN_RESERVED_RANGE}/o);
       next if ($already_matched_in_other_zones =~ / ${ip} /);
       next unless ($ip =~ /(\d+)\.(\d+)\.(\d+)\.(\d+)/);
-      $found = $self->do_rbl_lookup ("$4.$3.$2.$1.".$rbl_domain, $ip, $found);
+      $found = $self->do_rbl_lookup ($set, "$4.$3.$2.$1.".$rbl_domain, $ip, $found);
     }
   };
 
@@ -250,12 +251,14 @@ sub check_rbl {
 ###########################################################################
 
 sub check_rbl_results_for {
-  my ($self, $addr) = @_;
+  my ($self, $set, $addr) = @_;
 
+  dbg ("checking RBL results in set $set for $addr");
   return 0 unless $self->is_dns_available();
-  return 0 unless defined ($self->{rbl_IN_As_found});
+  return 0 unless defined ($self->{$set});
+  return 0 unless defined ($self->{$set}->{rbl_IN_As_found});
 
-  my $inas = ' '.$self->{rbl_IN_As_found}.' ';
+  my $inas = ' '.$self->{$set}->{rbl_IN_As_found}.' ';
   if ($inas =~ / ${addr} /) { return 1; }
 
   return 0;
