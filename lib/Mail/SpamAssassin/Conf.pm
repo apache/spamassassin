@@ -100,20 +100,14 @@ sub _parse {
 
     # note: no eval'd code should be loaded before the SECURITY line below.
     #
-    if (/^whitelist_from\s+\*\@(\S+)\s*$/) {
-      push (@{$self->{whitelist_from_doms}}, $1); next;
+    if (/^whitelist_from\s+(.+)\s*$/) {
+      $self->add_to_addrlist ($self->{whitelist_from},
+      	$self->{whitelist_from_doms}, split (' ', $1)); next;
     }
 
-    if (/^blacklist_from\s+\*\@(\S+)\s*$/) {
-      push (@{$self->{blacklist_from_doms}}, $1); next;
-    }
-
-    if (/^whitelist_from\s+(\S+)\s*$/) {
-      push (@{$self->{whitelist_from}}, $1); next;
-    }
-
-    if (/^blacklist_from\s+(\S+)\s*$/) {
-      push (@{$self->{blacklist_from}}, $1); next;
+    if (/^blacklist_from\s+(.+)\s*$/) {
+      $self->add_to_addrlist ($self->{blacklist_from},
+      	$self->{blacklist_from_doms}, split (' ', $1)); next;
     }
 
     if (/^describe\s+(\S+)\s+(.*)$/) {
@@ -238,6 +232,18 @@ sub finish_parsing {
   }
 
   delete $self->{tests};		# free it up
+}
+
+sub add_to_addrlist {
+  my ($self, $singlelist, $domlist, @addrs) = @_;
+
+  foreach my $addr (@addrs) {
+    if ($addr =~ /^\*\@(\S+)/) {
+      push (@{$domlist}, $1);
+    } else {
+      push (@{$singlelist}, $addr);
+    }
+  }
 }
 
 sub dbg { Mail::SpamAssassin::dbg (@_); }

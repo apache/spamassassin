@@ -48,6 +48,7 @@ sub is_charset_ok_for_locales {
   return 1 if ($cs =~ /^CP125/);
   return 1 if ($cs =~ /^WINDOWS125/);
   return 1 if ($cs eq 'IBM852');
+  return 1 if ($cs =~ /^UNICODE-1-1-UTF-[78]/);	# wtf? never heard of it
   return 1 if ($cs eq 'XUNKNOWN'); # added by sendmail when converting to 8bit
 
   foreach my $locale (@locales) {

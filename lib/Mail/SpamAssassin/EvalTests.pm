@@ -273,6 +273,7 @@ sub check_for_unique_subject_id {
   my ($self) = @_;
   local ($_);
   $_ = lc $self->get ('Subject');
+  study;
 
   my $id = undef;
   if (/[-_\.\s]{7,}([-a-z0-9]{4,})$/
@@ -293,7 +294,7 @@ sub word_is_in_dictionary {
   my ($self, $word) = @_;
   local ($_);
 
-  $word =~ tr/A-Z/a-z/;
+  # $word =~ tr/A-Z/a-z/;
   $word =~ s/^\s+//;
   $word =~ s/\s+$//;
   return 0 if ($word =~ /[^a-z]/);

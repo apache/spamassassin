@@ -284,6 +284,19 @@ header RATWARE ALL =~ /(?:4\.\.72\.1712\.3|ACE Contact Manager|Aristotle Mail|Av
 describe RATWARE 		Bulk email software fingerprints found in headers
 score RATWARE			2.0
 
+# contrib: Craig (total regexp wizardry here ;)
+header SUSPICIOUS_RECIPS        To =~ /(@[-a-z0-9_.]+).*(?:\1.*){9,}/is
+describe SUSPICIOUS_RECIPS      To: contains same domain at least 10 times
+
+header SUSPICIOUS_CC_RECIPS	Cc =~ /(@[-a-z0-9_.]+).*(?:\1.*){9,}/is
+describe SUSPICIOUS_CC_RECIPS	Cc: contains same domain at least 10 times
+
+header VERY_SUSP_RECIPS         To =~ /(..)[^@]*(@[-a-z0-9_.]+).*(?:\1[^@]*\2.*){9,}/is
+describe VERY_SUSP_RECIPS       To: contains very similar addresses 10 times
+
+header VERY_SUSP_CC_RECIPS	Cc =~ /(..)[^@]*(@[-a-z0-9_.]+).*(?:\1[^@]*\2.*){9,}/is
+describe VERY_SUSP_CC_RECIPS	Cc: contains very similar addresses 10 times
+
 ###########################################################################
 
 full RAZOR_CHECK		eval:check_razor()
@@ -417,8 +430,9 @@ body AUTO_EMAIL_REMOVAL		/Auto Email Removal/
 body PORN_1			/\bbarely\b.*\blegal\b/i
 body PORN_2			/\bwild\b.*\bhardcore\b/i
 
-# updated by: skod
-body PORN_3			/(?:(?:\bcum|\borgy\b|\bwild|\bfuck|\bteen|\baction\b|\bspunk\b|\bpussy\b|\bpussies\b|\bsuck\b|\bsucking\b|\bhot\b|\bhottest\b|\bvoyeur\b\|\blesbian\b|\banal\b).*){3,}/i
+# updated by: skod & Craig
+body PORN_3			/(?:(?:\bcum|\borgy\b|\bwild|\bfuck|\bteen|\baction\b|\bspunk\b|\bpussy\b|\bpussies\b|\bsuck\b|\bsucking\b|\bhot\b|\bhottest\b|\bvoyeur\b\|\blesbian\b|\banal\b|\bwebcam\b|\bass\b|\bstrip).*){3,}/i
+describe PORN_3			Mind your language!
 
 body PORN_4 	/http:\/\/[\w\.]*(?:xxx|sex|anal|slut|pussy|cum|nympho|suck|porn|hardcore|taboo|whore|voyeur|lesbian|gurlpages|naughty|kooloffer)\w*\./
 describe PORN_4			Suspected porn URL
@@ -507,8 +521,8 @@ describe FOR_INSTANT_ACCESS	Instant Access button
 body NO_SELLING			/absolutely NO selling/
 
 # (contrib: skod)
-body UNIVERSITY_DIPLOMAS	/UNIVERSITY DIPLOMAS/
-describe UNIVERSITY_DIPLOMAS	You know that they'll be back...
+body UNIVERSITY_DIPLOMAS	/\bUNIVERSITY\s+DIPLOMA/
+describe UNIVERSITY_DIPLOMAS	UNIVERSITY DIPLOMAS
 
 # (contrib: skod)
 body NEW_DOMAIN_EXTENSIONS	/new\s*domain\s*extension/i
@@ -834,6 +848,8 @@ score WWW_DIRECTFORCEMARKETING_COM   3.7
 score WWW_NETSITESFORFREE_NET        3.2
 score WWW_REMOVEYOU_COM              4.0
 score X_EM_VER_PRESENT               0.4
+score VERY_SUSP_CC_RECIPS            3.0
+score VERY_SUSP_RECIPS               3.0
 score X_MAILER_GIBBERISH             3.2
 score X_MSMAIL_PRIORITY_HIGH         1.4
 score X_PRIORITY_HIGH                1.4
