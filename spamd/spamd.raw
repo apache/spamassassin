@@ -802,8 +802,7 @@ sub daemonize
 
 my @allowed_nets;
 sub set_allowed_ip {
-    foreach (@_){
-        #warn "Allowing connections from '$_'.\n";
+    foreach (@_) {
         my ($ip, $bits) = m#^\s*(\d+\.\d+\.\d+\.\d+)(?:/(\d+))?\s*$#
                 or die "illegal network address given: '$_'.  Aborting.\n";
         defined $bits or $bits = 32;
