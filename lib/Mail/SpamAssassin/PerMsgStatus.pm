@@ -254,12 +254,33 @@ sub learn {
 		"head-hits=".$self->{head_only_hits});
 
   my $isspam;
-  if (     $self->{hits} < $self->{conf}->{auto_learn_threshold_nonspam}
-	&& $self->{hits} < $self->{conf}->{required_hits} - $auto_learn_safety)
+
+  # This section should use sum($score[scoreset % 2]) not just {hits}.  otherwise we shift what we
+  # autolearn on and it gets really wierd.  - tvd
+  my $hits = 0;
+  my $orig_scoreset = $self->{conf}->get_score_set();
+  if ( $orig_scoreset < 2 ) { # we don't need to recompute
+    $hits = $self->{hits};
+  }
+  else {
+    dbg ("auto-learn: recomputing score based on scoreset ".($orig_scoreset%2));
+    $self->{conf}->set_score_set($orig_scoreset % 2); # reduce to autolearning scores
+    foreach my $test ( @{$self->{test_names_hit}} ) {
+      next if ( $test =~ /^BAYES/ ); # we can't add in bayes into this ...
+      next if ( ! exists $self->{conf}->{scores}->{$test} );
+      $hits += $self->{conf}->{scores}->{$test};
+    }
+    $hits = (sprintf "%0.3f", $hits) + 0;
+    dbg ("auto-learn: original score: ".$self->{hits}.", recomputed score: $hits");
+    $self->{conf}->set_score_set($orig_scoreset); # return to appropriate scoreset
+  }
+
+  if (     $hits < $self->{conf}->{auto_learn_threshold_nonspam}
+	&& $hits < $self->{conf}->{required_hits} - $auto_learn_safety)
   {
     $isspam = 0;
-  } elsif ($self->{hits} >= $self->{conf}->{auto_learn_threshold_spam}
-	&& $self->{hits} >= $self->{conf}->{required_hits} + $auto_learn_safety)
+  } elsif ($hits >= $self->{conf}->{auto_learn_threshold_spam}
+	&& $hits >= $self->{conf}->{required_hits} + $auto_learn_safety)
   {
     $isspam = 1;
   } else {
