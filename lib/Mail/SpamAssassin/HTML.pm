@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.98 2003/10/06 00:19:34 quinlan Exp $
+# $Id: HTML.pm,v 1.99 2003/10/15 04:58:10 quinlan Exp $
 
 # HTML decoding TODOs
 # - add URIs to list for faster URI testing
@@ -564,10 +564,39 @@ sub html_tests {
   if ($tag =~ /^(?:object|embed)$/) {
     $self->{html}{embeds} = 1;
   }
-  if ($tag eq "title" &&
-      !(exists $self->{html_inside}{body} && $self->{html_inside}{body} > 0))
-  {
-    $self->{html}{title_text} = "";
+  if ($tag eq "title") {
+    $self->{html}{title_text} = "" unless defined $self->{html}{title_tag};
+    $self->{html}{title_tag}++;
+    # begin test code
+    if (exists $self->{html}{"inside_body"} &&
+	$self->{html}{"inside_body"} > 0)
+    {
+      $self->{html}{t_title_misplaced_1}++;
+    }
+    if (!(exists $self->{html}{"inside_head"} &&
+	  $self->{html}{"inside_head"} > 0))
+    {
+      $self->{html}{t_title_misplaced_2}++;
+    }
+    if (exists $self->{html}{"inside_body"} &&
+	$self->{html}{"inside_body"} > 0 &&
+	!(exists $self->{html}{"inside_head"} &&
+	  $self->{html}{"inside_head"} > 0))
+    {
+      $self->{html}{t_title_misplaced_3}++;
+    }
+    if ((exists $self->{html}{"inside_body"} &&
+	$self->{html}{"inside_body"} > 0) ||
+	!(exists $self->{html}{"inside_head"} &&
+	  $self->{html}{"inside_head"} > 0))
+    {
+      $self->{html}{t_title_misplaced_4}++;
+    }
+    if ($self->{html}{title_tag} > 1)
+    {
+      $self->{html}{t_title_extra}++;
+    }
+    # end test code
   }
   if ($tag eq "meta" &&
       exists $attr->{'http-equiv'} &&
@@ -614,10 +643,9 @@ sub html_text {
     return;
   }
 
-  if (!(exists $self->{html}{"inside_body"} && $self->{html}{"inside_body"} > 0) &&
-        exists $self->{html}{"inside_title"} && $self->{html}{"inside_title"} > 0)
+  if (exists $self->{html}{"inside_title"} && $self->{html}{"inside_title"} > 0)
   {
-    $self->{html}{title_text} .= $text;
+    $self->{html}{title_text} .= $text if ($self->{html}{title_tag} == 1);
   }
 
   $self->html_font_invisible($text) if $text =~ /[^ \t\n\r\f\x0b\xa0]/;
