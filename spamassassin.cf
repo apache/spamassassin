@@ -269,6 +269,9 @@ describe FROM_BTAMAIL		From an address @btamail.net.cn
 header USER_IN_BLACKLIST	eval:check_from_in_blacklist()
 describe USER_IN_BLACKLIST	From: address is in the user's black-list
 
+header MISSING_HEADERS		eval:check_for_missing_headers()
+describe MISSING_HEADERS	Missing one of From:, To: or Date: headers
+
 ###########################################################################
 
 full RAZOR_CHECK		eval:check_razor()
