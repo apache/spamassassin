@@ -200,3 +200,17 @@ tflags DISCLAIMER_LEGALESE	nice
 body EMAIL_ATTRIBUTION		/^"?\w.{4,} (?:wrote|writes):$/
 describe EMAIL_ATTRIBUTION	Contains what looks like an email attribution
 tflags EMAIL_ATTRIBUTION	nice
+
+# matt@nightrealms.com (Matthew Cline)
+header   FAILURE_NOTICE_1       Subject =~ /^(?:failure notice|returned mail:|Delivery Status Notification|Undeliverable:)/i
+describe FAILURE_NOTICE_1       Mailer daemon failure notice (1)
+tflags   FAILURE_NOTICE_1       nice
+
+body     FAILURE_NOTICE_2       /\b(?:Delivery to the following recipients failed|This Message was undeliverable|The following addresses had permanent fatal errors|did not reach the following recipient)\b/i
+describe FAILURE_NOTICE_2       Mailer daemon failure notice (2)
+tflags   FAILURE_NOTICE_2       nice
+
+header   MAILER_DAEMON          From =~ /mailer.?daemon\@/i
+describe MAILER_DAEMON          From the mailer daemon
+tflags   MAILER_DAEMON          nice
+
