@@ -9,3 +9,9 @@
 # helps identify probationary rules in test output.
 
 ######################################################################
+
+# was removed, but rule has been improved since then
+header MAILER_DAEMON		From =~ /^(?:Mail Delivery \w+ )?<?mailer.?daemon\@\S+>?(?: \(Mail Delivery \w+\))?$/i
+describe MAILER_DAEMON		From the Mailer-Daemon
+tflags MAILER_DAEMON		nice
+score MAILER_DAEMON		-1.0
