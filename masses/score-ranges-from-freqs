@@ -103,19 +103,31 @@ while (<>) {
   $freq_nonspam{$test} = $nonspam;
 
   my $tflags = $rules{$test}->{tflags}; $tflags ||= '';
+
+  # "userconf" rules, or "net" rules in set 0/2, or "learn" rules
+  # in set 1/3, are nonmutable.
   if ($tflags =~ /\buserconf\b/ ||
-      ( ($scoreset % 2) == 0 && $tflags =~ /\bnet\b/ )) {
+      ( ($scoreset % 2) == 0 && $tflags =~ /\bnet\b/ ) ||
+      ( ($scoreset % 2) == 1 && $tflags =~ /\blearn\b/ ))
+  {
     $mutable_tests{$test} = 0;
   } else {
     $mutable_tests{$test} = 1;
   }
+
+  # rules read from the non-mutable section
+  if (!$rules{$test}->{mutable}) {
+    $mutable_tests{$test} = 0;
+  }
+
   if ($tflags =~ m/\bnice\b/i) {
     $is_nice{$test} = 1;
   } else {
     $is_nice{$test} = 0;
   }
 
-  if ($overall < 0.01) {        # less than 0.01% of messages were hit
+  # less than 0.01% of messages were hit: force these rules to 0.0
+  if ($overall < 0.01) {
     $mutable_tests{$test} = 0;
     $soratio{$test} = 0.5;
     $ranking{$test} = 0.0;
@@ -146,13 +158,11 @@ foreach my $test (sort { $ranking{$b} <=> $ranking{$a} } keys %freq) {
   my $ranking = $ranking{$test};
   my $mutable = $mutable_tests{$test};
 
-  # look for score of 0
-  # TODO: *why* do we do this?  it results in really good rules
-  # being disabled sometimes!
+  # non-mutable, or score of 0 -- lock down to current score.
   if (!$mutable || $rules{$test}->{score} == 0) {
     printf OUT ("%3.3f %3.3f 0 $test\n",
-                         $rules{$test}->{score},
-                         $rules{$test}->{score});
+                              $rules{$test}->{score},
+                              $rules{$test}->{score});
     next;
   }
 

@@ -66,11 +66,22 @@ sub readrules {
   foreach my $indir (@_) {
     my @files = <$indir/[0-9]*.cf>;
     my $file;
+    my $scores_mutable = 1;
     %rulesfound = ();
     %langs = ();
     foreach $file (sort @files) {
       open (IN, "<$file");
-      while (<IN>) {
+      while (<IN>)
+      {
+        # these appear in comments, so deal with them before comment stripping
+        # takes place
+        if (/<\/gen:mutable>/i) {
+          $scores_mutable = 0;
+        }
+        elsif (/<gen:mutable>/i) {
+          $scores_mutable = 1;
+        }
+
         s/#.*$//g; s/^\s+//; s/\s+$//; next if /^$/;
 
         my $lang = '';
@@ -106,6 +117,7 @@ sub readrules {
 	    ($score) = (split(/\s+/,$score))[$scoreset];
 	  }
           $rules->{$name}->{score} = $score;
+          $rules->{$name}->{mutable} = $scores_mutable;
         }
       }
       close IN;
@@ -127,6 +139,10 @@ sub readrules {
       } else {
         $rules->{$rule}->{score} = $def;
       }
+
+      # if a rule didn't have a score specified, assume it's
+      # mutable
+      $rules->{$name}->{mutable} = 1;
     }
   }
 }
