@@ -77,6 +77,8 @@ header RATWARE_DIRECT_EMAIL	X-Mailer =~ /Direct Email/i
 describe RATWARE_DIRECT_EMAIL	Bulk email fingerprint (Direct Email) found
 header RATWARE_RCVD_LC_ESMTP	Received =~ /^from (?:(?:unknown|\d+\.\d+\.\d+\.\d+) \(\S+\)|\[\d+\.\d+\.\d+\.\d+\]) by \S+ with (?:esmtp|local|smtp); /m
 describe RATWARE_RCVD_LC_ESMTP	Bulk email fingerprint ('esmtp' Received) found
+header RATWARE_RCVD_BONUS_SPC	Received =~ /\) by  [a-zA-Z0-9]/
+describe RATWARE_RCVD_BONUS_SPC	Bulk email fingerprint (bonus space) found
 
 ###########################################################################
 # Now, detect forgeries of real MUAs
