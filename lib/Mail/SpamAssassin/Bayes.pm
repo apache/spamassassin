@@ -862,6 +862,8 @@ sub compute_prob_for_token {
   #if (defined $prob) { return $prob; }
   #}
 
+  return 0.5 if ( $ns == 0 || $nn == 0 );
+
   my $ratios = ($s / $ns);
   my $ration = ($n / $nn);
 
