@@ -566,7 +566,7 @@ sub dcc_lookup {
     $self->{conf}->{dcc_options} =~ /^([^\;\'\"\0]+)$/;
     my $opts = $1;
 
-    my $pid = open(DCC, join(' ', $path, "-H", $opts, "< '$tmpf.'", "2>&1", '|')) || die "$!\n";
+    my $pid = open(DCC, join(' ', $path, "-H", $opts, "< '$tmpf'", "2>&1", '|')) || die "$!\n";
     $response = <DCC>;
     close DCC;
 
@@ -691,7 +691,7 @@ sub pyzor_lookup {
     my $pid = open(PYZOR, join(' ', $path, "check", "< '$tmpf'", "2>&1", '|')) || die "$!\n";
     $response = <PYZOR>;
     close PYZOR;
-    
+
     unless (defined($response)) { # this is possible for DCC, let's be on the safe side
       die ("no response\n");
     }
