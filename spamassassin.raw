@@ -323,7 +323,9 @@ Print help message and exit.
 
 =item B<-t>, B<--test-mode>
 
-Test mode.  Pipe message through and add extra report.
+Test mode.  Pipe message through and add extra report.  Note that the report
+text assumes that the message is spam, since in normal use it is only visible
+in this case.  Pay attention to the score instead.
 
 =item B<-r>, B<--report>
 
