@@ -166,20 +166,6 @@ header T_MANY_MX_6 From:addr =~ /\@mx\d+\..{1,30}\./i
 header T_MANY_MX_7 From:addr =~ /\@\w\d+\..{1,30}\./i
 header T_MANY_MX_8 From:addr =~ /\@\w\d+/i
 
-# hmmm... body doesn't seem to work for these
-rawbody T_OBSCURED_EMAIL_3	/^\w+\^\S+\(\w{2,3}\b/m
-rawbody T_OBSCURED_EMAIL_4	/^\s*\w+\^\S+\(\w{2,3}\b/m
-rawbody T_OBSCURED_EMAIL_5	/^\s?\w+\^\S+\(\w{2,3}\b/m
-# so try looking anywhere on the line
-body T_OBSCURED_EMAIL_6		/\w+\^\S+\(\w{2,3}\b/m
-body T_OBSCURED_EMAIL_7		/\w+\^\S+\(\w{2,4}\b/m
-rawbody T_OBSCURED_EMAIL_8	/\w+\^\S+\(\w{2,3}\b/m
-rawbody T_OBSCURED_EMAIL_9	/\w+\^\S+\(\w{2,4}\b/m
-# test these for completeness
-uri T_OBSCURED_EMAIL_10		/^\w+\^\S+\(\w{2,3}\b/m
-uri T_OBSCURED_EMAIL_11		/^\s*\w+\^\S+\(\w{2,3}\b/m
-uri T_OBSCURED_EMAIL_12		/^\s?\w+\^\S+\(\w{2,3}\b/m
-
 # another spin
 body T_TRACKER_ID_6	/[a-z0-9]{6,24}[-_a-z0-9]{12,36}[a-z0-9]{6,24}\s*\z/is
 body T_TRACKER_ID_7	/\b[a-z0-9]{6,24}[-_a-z0-9]{12,36}[a-z0-9]{6,24}\s*\z/is
