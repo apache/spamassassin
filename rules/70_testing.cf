@@ -41,21 +41,14 @@ header T_RATWARE_OE_DM	X-Mailer =~ /^Microsoft Outlook Express [\d\.]+ DM$/
 #  0.093   0.1201   0.0000    1.000   0.93    0.01  T_SPRINTF_5X
 full T_SPRINTF_5X	/[^-][A-F1-9][A-F0-9]{5,7}-[A-F1-9][A-F0-9]{5,7}-[A-F1-9][A-F0-9]{5,7}-[A-F1-9][A-F0-9]{5,7}-[A-F1-9][A-F0-9]{5,7}[^-]/
 
-# (time_t/4444)
-# low hit rate
-#  0.115   0.1174   0.1061    0.525   0.13    0.01  T_TIME_OVER_4444
-header T_TIME_OVER_4444	ALL =~ /\D23[67][0-9][0-9][0-9]\D/
-
 # replacements for PORN_4; split out sub-patterns as some are more FP-prone
 # than others.
-uri T_PORN_URL_XXX	/^https?:\/\/[\w\.-]*xxx[\w-]*\./
 uri T_PORN_URL_SEX	/^https?:\/\/[\w\.-]*(?<!es|ba)(?<!dle|sus)sex(?!press)[\w-]*\./
 uri T_PORN_URL_ANAL	/^https?:\/\/[\w\.-]*anal(?!og|y[sz])[\w-]*\./
 uri T_PORN_URL_SLUT	/^https?:\/\/[\w\.-]*slut[\w-]*\./
 uri T_PORN_URL_CUM	/^https?:\/\/[\w\.-]*(?<!cir)(?<!\bdo)cum(?!ul|be?r|b?en)[\w-]*\./
 uri T_PORN_URL_LUST	/^https?:\/\/[\w\.-]*lust(?!(?<=illust)(?:rat|rious)|(?<=clust)er)[\w-]*\./
 uri T_PORN_URL_PANT	/^https?:\/\/[\w\.-]*pant(?:y|ies)[\w-]*\./
-uri T_PORN_URL_SUCK	/^https?:\/\/[\w\.-]*suck[\w-]*\./
 uri T_PORN_URL_TEEN	/^https?:\/\/[\w\.-]*(?<!thir|four|eigh|nine)(?<!fif|six)(?<!seven)teen(?!th)[\w-]*\./
 uri T_PORN_URL_MISC	/^https?:\/\/[\w\.-]*(pussy|nympho|porn|hard-?core|taboo|whore|voyeur|lesbian|gurlpages|naughty|lolita|schoolgirl|kooloffer|erotic)[\w-]*\./
 
@@ -166,8 +159,6 @@ header T_FROM_EUDORA            From:addr =~ /\@eudora\.com/i
 # will be pretty safe.  (lower rule as a baseline to see if we miss much)
 header T_FROM_DELPHI		From:addr =~ /\d[^\@]+\d[^\@]+\@delphi\.com/i
 header T_FROM_DELPHI_BASIC	From:addr =~ /\@delphi\.com/i
-
-body T_RANDO_MIZE		/\$RAN[DOMI]*\s+[DOMI]*ZE/
 
 # great Yahoo! forgery rule, but is it going to be stable?
 header __YAHOO_MSGID		Message-ID =~ /\@yahoo\.com>/i
@@ -385,7 +376,6 @@ header T_HELO_DYNAMIC_CHELLO X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S+upc-f\.
 header T_HELO_DYNAMIC_ATTBI  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S+\d+\S+\.client2\.attbi\.com/i
 # pcp04024417pcs.toresd01.pa.comcast.net [68.86.206.126]
 # bgp542174bgs.ewndsr01.nj.comcast.net[68.38.144.91]
-header T_HELO_DYNAMIC_COMCAST X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=(?:pcp|bgp)\S+(?:pcs|bgs)\.comcast\.net/i
 # CPE0004e2372711-CM000a73666706.cpe.net.cable.rogers.com
 # CPE00e0184f0eba-CM014490118324.cpe.net.cable.rogers.com [24.43.109.140]
 header T_HELO_DYNAMIC_ROGERS X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=CPE\d+\S+\.rogers\.com/i
@@ -435,7 +425,6 @@ header T_HELO_OPTONLINE X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S+\.dyn\.opton
 # adsl-68-248-121-117.dsl.applwi.ameritech.net [68.248.121.117]
 # pool-151-203-32-68.bos.east.verizon.net [151.203.32.68]
 # 12-218-225-223.client.mchsi.com [12.218.225.223]
-
 
 # bug 2992: Proposed new rules, Martin Radford
 header T_RCVD_DOUBLE_IP		Received =~ /from \[\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\] by \d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3} with/
@@ -491,11 +480,6 @@ header T_REGSOFT        Received =~ /hd\.regsoft\.net/i
 # same ratware; forges dates as 'with SMTP; Jan, 17 2004 22:05:48 -0300'
 header T_DATE_COMMA     Received =~ /\bwith \S+\; [A-Z][a-z][a-z],\s+\d\d\s+\d\d\d\d\s/
 
-# bug 3028, make HAS_MSG_FROM2 case insensitive -- also trying to ignore
-# anything not an address
-header __HAS_MSN_FROM2         From:addr =~ /(?:hotmail|msn)\.com/i
-meta T_FAKED_HOTMAIL_DAV         (__HAS_MSN_RCVD_DAV && __HAS_MSN_ORIG_EMAIL && !__HAS_MSN_FROM2)
-
 # some HTML rules to try
 body T_HTML_TAG_BALANCE_FONT_0	eval:html_tag_balance('font', '!= 0')
 describe T_HTML_TAG_BALANCE_FONT_0	HTML has unbalanced "font" tags
@@ -537,9 +521,6 @@ uri T_GOOGLE_REDIR	m{^http://www\.google(\.\S+)?\.[a-z]{2,3}/url\?}i
 
 header T_RATWARE_FAKED_AOL_UA	User-Agent =~ /^AOL /
 describe T_RATWARE_FAKED_AOL_UA	AOL clients don't use the User-Agent header
-
-uri T_URI_HTTP_TO_HEX_IP	/^https?:\/\/(?:[^\@]*\@|)0x[0-9a-f]{8}/i
-describe T_URI_HTTP_TO_HEX_IP	URI contains a link to a hexadecimal IP address
 
 # bug 2996: HTML attribute testing
 body T_HTML_ATTR_00_10	eval:html_range('attr_bad','0.0','0.1')
