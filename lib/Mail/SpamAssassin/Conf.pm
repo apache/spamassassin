@@ -1629,11 +1629,15 @@ randomly.
 
 You can however specify your own list by specifying
 
-dns_available test: server1.tld server2.tld server3.tld
+  dns_available test: server1.tld server2.tld server3.tld
 
 Please note, the DNS test queries for MX records so if you specify your
 own list of servers, please make sure to choose the one(s) which has an
 associated MX record.
+
+SpamAssassin's network rules are run in parallel.  This can cause overhead
+in terms of the number of file descriptors required; it is recommended
+that the minimum limit on fds be raised to at least 256 for safety.
 
 =cut
 
