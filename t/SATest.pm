@@ -41,7 +41,8 @@ sub sa_t_init {
   $spamc = $ENV{'SPAMC_SCRIPT'};
   $spamc ||= "../spamd/spamc";
 
-  $spamdport = 48373;		# whatever
+  $spamdport = $ENV{'SPAMD_PORT'};
+  $spamdport ||= 48373;		# whatever
   $spamd_cf_args = "-C log/test_rules_copy";
 
   $scr_cf_args = "-C log/test_rules_copy";
