@@ -1613,6 +1613,7 @@ setting.  Example:
     }
 
 =item bayes_min_ham_num			(Default: 200)
+
 =item bayes_min_spam_num		(Default: 200)
 
 To be accurate, the Bayes system does not activate until a certain number of
