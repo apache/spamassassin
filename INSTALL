@@ -19,6 +19,12 @@ line) no longer takes place.  Instead the message is rewritten.
 Using Razor version 1 is no longer supported.  Please upgrade to Razor
 version 2.
 
+2.6x will be the last major version to support versions of on-disk
+database systems via the AnyDBM_File interface, other than DB_File.   We
+strongly recommend that installers also install DB_File, since it is more
+resilient and requires less resources than the other on-disk database
+modules supported by Perl.
+
 
 Installing SpamAssassin
 -----------------------
