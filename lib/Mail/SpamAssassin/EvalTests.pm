@@ -120,6 +120,8 @@ sub check_for_forged_hotmail_received_headers {
 
   #if ($rcvd !~ /from hotmail.com/) { return 0; }
 
+  if ($self->gated_through_received_hdr_remover()) { return 0; }
+
   if ($rcvd =~ /from \S*hotmail.com \(\S+\.hotmail(?:\.msn|)\.com /) { return 0; }
   if ($rcvd =~ /from \S+ by \S+\.hotmail(?:\.msn|)\.com with HTTP\;/) { return 0; }
 
@@ -148,6 +150,8 @@ sub check_for_forged_excite_received_headers {
   #    <luv@luv.asn.au>; Fri, 22 Jun 2001 20:36:12 -0700
   # spammers do not ;)
 
+  if ($self->gated_through_received_hdr_remover()) { return 0; }
+
   if ($rcvd =~ /from \S*excite.com /) { return 0; }
   
   return 1;
@@ -167,9 +171,34 @@ sub check_for_forged_yahoo_received_headers {
   # not sure about this
   #if ($rcvd !~ /from \S*yahoo\.com/) { return 0; }
 
+  if ($self->gated_through_received_hdr_remover()) { return 0; }
+
   if ($rcvd =~ /by web\S+\.mail\.yahoo\.com via HTTP/) { return 0; }
+  if ($rcvd =~ /by smtp\.\S+\.yahoo\.com with SMTP/) { return 0; }
 
   return 1;
+}
+
+# ezmlm has a very bad habit of removing Received: headers! bad ezmlm.
+#
+sub gated_through_received_hdr_remover {
+  my ($self) = @_;
+
+  my $txt = $self->get ("Mailing-List");
+  if (defined $txt && $txt =~ /^contact \S+\@\S+\; run by ezmlm$/) {
+    my $dlto = $self->get ("Delivered-To");
+    my $rcvd = $self->get ("Received");
+
+    # ensure we have other indicative headers too
+    if ($dlto =~ /^mailing list \S+\@\S+/ &&
+      	$rcvd =~ /qmail \d+ invoked from network\); \d+ ... \d+/ &&
+      	$rcvd =~ /qmail \d+ invoked by .{3,20}\); \d+ ... \d+/)
+    {
+      return 1;
+    }
+  }
+
+  return 0;
 }
 
 ###########################################################################
