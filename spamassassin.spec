@@ -16,8 +16,8 @@ Summary:        a spam filter for email which can be invoked from mail delivery 
 Summary(pl):    Filtr antyspamowy, przeznaczony dla programów dostarczaj±cych pocztê (MDA)
 
 Group:          Applications/Mail
-%define version 2.54
-%define real_version 2.54
+%define version 2.55
+%define real_version 2.55
 %define release 1
 
 %define name    spamassassin
@@ -167,6 +167,9 @@ if [ $1 = 0 ]; then
 fi
 
 %changelog
+* Sun May 18 2003 Theo Van Dinter <felicity@kluge.net> 2.55-1
+- updated to 2.55
+
 * Thu Apr 03 2003 Theo Van Dinter <felicity@kluge.net> 2.54-1
 - updated to 2.54
 
