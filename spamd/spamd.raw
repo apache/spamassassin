@@ -623,11 +623,6 @@ sub check {
 		protocol_error("(header not in 'Name: value' format)");
                 return 1;
             }
-	    if ($value eq '')
-	    {
-		Mail::SpamAssassin::dbg('ignored empty '$header' header');
-		next;
-	    }
 
             # We'll run handle user unless we've been told not
             # to process per-user config files.  Otherwise
@@ -640,7 +635,7 @@ sub check {
 
             if ($header eq 'User')
             {
-                if ($value !~ /^([\x20-\xFF]+)$/)
+                if ($value !~ /^([\x20-\xFF]*)$/)
                 {
                    protocol_error ("(User header contains control chars)");
                     return 1;
@@ -668,7 +663,7 @@ sub check {
             }
 	    elsif ($header eq 'Content-length')
             {
-		if ($value !~ /^(\d+)$/)
+		if ($value !~ /^(\d*)$/)
 		{
 		    protocol_error ("(Content-Length contains non-numeric bytes)");
 		    return 1;
