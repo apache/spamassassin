@@ -173,6 +173,7 @@ package Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::NetSet;
 use Mail::SpamAssassin::Constants qw(:sa);
+use Mail::SpamAssassin::Conf::Parser;
 use File::Spec;
 
 use strict;
@@ -249,7 +250,10 @@ sub set_default_commands {
 #          if this is set, a 'code' block is assigned based on the type.
 #
 # code:    a subroutine to deal with the setting.  only used if 'type'
-# is not set.  ONE OF 'code' OR 'type' IS REQUIRED.
+# is not set.  ONE OF 'code' OR 'type' IS REQUIRED.  The arguments passed
+# to the function are ($self, $key, $value, $line), where $key is the
+# setting (*not* the command), $value is the value string, and $line is
+# the entire line.
 #
 # default: the default value for the setting.  may be omitted if the default
 # value is a non-scalar type, which should be set in the Conf ctor.  note for
@@ -414,11 +418,9 @@ e.g.
 =cut
 
   push (@cmds, {
-    setting => 'unwhitelist_from',
-    code => sub {
-      my ($self, $key, $value, $line) = @_;
-      $self->remove_from_addrlist ('whitelist_from', split (/\s+/, $value));
-    }
+    command => 'unwhitelist_from',
+    setting => 'whitelist_from',
+    code => \&Mail::SpamAssassin::Conf::Parser::remove_addrlist_value
   });
 
 =item whitelist_from_rcvd addr@lists.sourceforge.net sourceforge.net
@@ -455,7 +457,8 @@ these are often targets for spammer spoofing.
     setting => 'whitelist_from_rcvd',
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      $self->add_to_addrlist_rcvd ('whitelist_from_rcvd', split(/\s+/, $value));
+      $self->{parser}->add_to_addrlist_rcvd ('whitelist_from_rcvd',
+                                        split(/\s+/, $value));
     }
   });
 
@@ -463,7 +466,8 @@ these are often targets for spammer spoofing.
     setting => 'def_whitelist_from_rcvd',
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      $self->add_to_addrlist_rcvd ('def_whitelist_from_rcvd', split(/\s+/, $value));
+      $self->{parser}->add_to_addrlist_rcvd ('def_whitelist_from_rcvd',
+                                        split(/\s+/, $value));
     }
   });
 
@@ -520,8 +524,10 @@ e.g.
     setting => 'unwhitelist_from_rcvd',
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      $self->remove_from_addrlist_rcvd('whitelist_from_rcvd', split (/\s+/, $value));
-      $self->remove_from_addrlist_rcvd('def_whitelist_from_rcvd', split (/\s+/, $value));
+      $self->{parser}->remove_from_addrlist_rcvd('whitelist_from_rcvd',
+                                        split (/\s+/, $value));
+      $self->{parser}->remove_from_addrlist_rcvd('def_whitelist_from_rcvd',
+                                        split (/\s+/, $value));
     }
   });
 
@@ -552,11 +558,9 @@ e.g.
 
 
   push (@cmds, {
-    setting => 'unblacklist_from',
-    code => sub {
-      my ($self, $key, $value, $line) = @_;
-      $self->remove_from_addrlist ('blacklist_from', split (/\s+/, $value));
-    }
+    command => 'unblacklist_from',
+    setting => 'blacklist_from',
+    code => \&Mail::SpamAssassin::Conf::Parser::remove_addrlist_value
   });
 
 
@@ -1056,7 +1060,7 @@ Clear the report template.
     command => 'clear_report_template',
     setting => 'report_template',
     default => '',
-    code => \&set_template_clear
+    code => \&Mail::SpamAssassin::Conf::Parser::set_template_clear
   });
 
 =item report_contact ...text of contact address...
@@ -1116,7 +1120,7 @@ Clear the unsafe_report template.
   push (@cmds, {
     command => 'clear_unsafe_report_template',
     setting => 'unsafe_report_template',
-    code => \&set_template_clear
+    code => \&Mail::SpamAssassin::Conf::Parser::set_template_clear
   });
 
 =item spamtrap ...some text for spamtrap reply mail...
@@ -1146,7 +1150,7 @@ Clear the spamtrap template.
   push (@cmds, {
     command => 'clear_spamtrap_template',
     setting => 'spamtrap_template',
-    code => \&set_template_clear
+    code => \&Mail::SpamAssassin::Conf::Parser::set_template_clear
   });
 
 =item describe SYMBOLIC_TEST_NAME description ...
@@ -1162,7 +1166,8 @@ length to no more than 50 characters.
 =cut
 
   push (@cmds, {
-    setting => 'describe',
+    command => 'describe',
+    setting => 'descriptions',
     is_frequent => 1,
     type => $CONF_TYPE_HASH_KEY_VALUE
   });
@@ -2241,18 +2246,18 @@ single A record containing a bitmask of results.
         my ($name, $fn) = ($1, $2);
 
         if ($fn =~ /^check_rbl/) {
-          $self->add_test ($name, $fn, TYPE_RBL_EVALS);
+          $self->{parser}->add_test ($name, $fn, TYPE_RBL_EVALS);
         }
         else {
-          $self->add_test ($name, $fn, TYPE_HEAD_EVALS);
+          $self->{parser}->add_test ($name, $fn, TYPE_HEAD_EVALS);
         }
       }
       elsif ($value =~ /^(\S+)\s+exists:(.*)$/) {
-        $self->add_test ($1, "$2 =~ /./", TYPE_HEAD_TESTS);
+        $self->{parser}->add_test ($1, "$2 =~ /./", TYPE_HEAD_TESTS);
         $self->{descriptions}->{$1} = "Found a $2 header";
       }
       else {
-        $self->add_test (split(/\s+/,$value,2), TYPE_HEAD_TESTS);
+        $self->{parser}->add_test (split(/\s+/,$value,2), TYPE_HEAD_TESTS);
       }
     }
   });
@@ -2281,10 +2286,10 @@ Define a body eval test.  See above.
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if ($value =~ /^(\S+)\s+eval:(.*)$/) {
-        $self->add_test ($1, $2, TYPE_BODY_EVALS);
+        $self->{parser}->add_test ($1, $2, TYPE_BODY_EVALS);
       }
       else {
-        $self->add_test (split(/\s+/,$value,2), TYPE_BODY_TESTS);
+        $self->{parser}->add_test (split(/\s+/,$value,2), TYPE_BODY_TESTS);
       }
     }
   });
@@ -2303,7 +2308,7 @@ points of the URI, and will also be faster.
 
 # we don't do URI evals yet - maybe later
 #    if (/^uri\s+(\S+)\s+eval:(.*)$/) {
-#      $self->add_test ($1, $2, TYPE_URI_EVALS);
+#      $self->{parser}->add_test ($1, $2, TYPE_URI_EVALS);
 #      next;
 #    }
   push (@cmds, {
@@ -2311,7 +2316,7 @@ points of the URI, and will also be faster.
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      $self->add_test (split(/\s+/,$value,2), TYPE_URI_TESTS);
+      $self->{parser}->add_test (split(/\s+/,$value,2), TYPE_URI_TESTS);
     }
   });
 
@@ -2337,9 +2342,9 @@ Define a raw-body eval test.  See above.
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if ($value =~ /^(\S+)\s+eval:(.*)$/) {
-        $self->add_test ($1, $2, TYPE_RAWBODY_EVALS);
+        $self->{parser}->add_test ($1, $2, TYPE_RAWBODY_EVALS);
       } else {
-        $self->add_test (split(/\s+/,$value,2), TYPE_RAWBODY_TESTS);
+        $self->{parser}->add_test (split(/\s+/,$value,2), TYPE_RAWBODY_TESTS);
       }
     }
   });
@@ -2364,9 +2369,9 @@ Define a full-body eval test.  See above.
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if ($value =~ /^(\S+)\s+eval:(.*)$/) {
-        $self->add_test ($1, $2, TYPE_FULL_EVALS);
+        $self->{parser}->add_test ($1, $2, TYPE_FULL_EVALS);
       } else {
-        $self->add_test (split(/\s+/,$value,2), TYPE_FULL_TESTS);
+        $self->{parser}->add_test (split(/\s+/,$value,2), TYPE_FULL_TESTS);
       }
     }
   });
@@ -2405,7 +2410,7 @@ ignore these for scoring.
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      $self->add_test (split(/\s+/,$value,2), TYPE_META_TESTS);
+      $self->{parser}->add_test (split(/\s+/,$value,2), TYPE_META_TESTS);
     }
   });
 
@@ -2492,7 +2497,7 @@ general running of SpamAssassin.
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if ($value !~ /^(\S+)\s+(ok|fail)\s+(.*)$/) { return $INVALID_VALUE; }
-      $self->add_regression_test($1, $2, $3);
+      $self->{parser}->add_regression_test($1, $2, $3);
     }
   });
 
@@ -3076,11 +3081,15 @@ sub new {
     main => shift
   }; bless ($self, $class);
 
+  $self->{parser} = Mail::SpamAssassin::Conf::Parser->new($self);
+
   set_default_commands();
   $self->{registered_commands} = $DEFAULT_COMMANDS;
-  $self->set_defaults_from_command_list();
+  $self->{parser}->set_defaults_from_command_list();
 
   $self->{errors} = 0;
+  $self->{plugins_loaded} = { };
+
   $self->{tests} = { };
   $self->{descriptions} = { };
   $self->{test_types} = { };
@@ -3159,7 +3168,7 @@ sub set_defaults_from_command_list {
 sub mtime {
     my $self = shift;
     if (@_) {
-        $self->{mtime} = shift;
+      $self->{mtime} = shift;
     }
     return $self->{mtime};
 }
@@ -3168,13 +3177,15 @@ sub mtime {
 
 sub parse_scores_only {
   my ($self) = @_;
-  $self->_parse ($_[1], 1); # don't copy $rules!
+  $_[0]->{parser}->parse ($_[1], 1);
 }
 
 sub parse_rules {
   my ($self) = @_;
-  $self->_parse ($_[1], 0); # don't copy $rules!
+  $_[0]->{parser}->parse ($_[1], 0);
 }
+
+###########################################################################
 
 sub set_score_set {
   my ($self, $set) = @_;
@@ -3300,7 +3311,6 @@ sub add_meta_depends {
   my ($self, $meta) = @_;
 
   my @rules = ();
-
   my @tokens = $self->get_rule_value('meta_tests', $meta) =~ m/(\w+)/g;
 
   @tokens = grep(!/^\d+$/, @tokens);
@@ -3351,404 +3361,20 @@ sub is_rule_active {
 
 ###########################################################################
 
-sub build_command_luts {
-  my ($self) = @_;
-
-  return if $self->{already_built_config_lookup};
-  $self->{already_built_config_lookup} = 1;
-
-  $self->{command_luts} = { };
-  $self->{command_luts}->{frequent} = { };
-  $self->{command_luts}->{remaining} = { };
-
-  my $set;
-  foreach my $cmd (@{$self->{registered_commands}})
-  {
-    # first off, decide what set this is in.
-    if ($cmd->{is_frequent}) { $set = 'frequent'; }
-    else { $set = 'remaining'; }
-
-    # next, its priority (used to ensure frequently-used params
-    # are parsed first)
-    my $cmdname = $cmd->{command} || $cmd->{setting};
-    foreach my $name ($cmdname, @{$cmd->{aliases}}) {
-      $self->{command_luts}->{$set}->{$name} = $cmd;
-    }
-  }
+sub add_to_addrlist {
+  my $self = shift; $self->{parser}->add_to_addrlist(@_);
+}
+sub add_to_addrlist_rcvd {
+  my $self = shift; $self->{parser}->add_to_addrlist_rcvd(@_);
+}
+sub remove_from_addrlist {
+  my $self = shift; $self->{parser}->remove_from_addrlist(@_);
+}
+sub remove_from_addrlist_rcvd {
+  my $self = shift; $self->{parser}->remove_from_addrlist_rcvd(@_);
 }
 
 ###########################################################################
-
-sub _parse {
-  my ($self, undef, $scoresonly) = @_; # leave $rules in $_[1]
-
-  $self->{scoresonly} = $scoresonly;
-
-  # Language selection:
-  # See http://www.gnu.org/manual/glibc-2.2.5/html_node/Locale-Categories.html
-  # and http://www.gnu.org/manual/glibc-2.2.5/html_node/Using-gettextized-software.html
-  my $lang = $ENV{'LANGUAGE'}; # LANGUAGE has the highest precedence but has a
-  if ($lang) {                 # special format: The user may specify more than
-    $lang =~ s/:.*$//;         # one language here, colon separated. We use the
-  }                            # first one only (lazy bums we are :o)
-  $lang ||= $ENV{'LC_ALL'};
-  $lang ||= $ENV{'LC_MESSAGES'};
-  $lang ||= $ENV{'LANG'};
-  $lang ||= 'C';               # Nothing set means C/POSIX
-
-  if ($lang =~ /^(C|POSIX)$/) {
-    $lang = 'en_US';           # Our default language
-  } else {
-    $lang =~ s/[@.+,].*$//;    # Strip codeset, modifier/audience, etc.
-  }                            # (eg. .utf8 or @euro)
-
-  # build and get fast-access handles on the command lookup tables
-  $self->build_command_luts();
-  my $lut_frequent = $self->{command_luts}->{frequent};
-  my $lut_remaining = $self->{command_luts}->{remaining};
-
-  $self->{currentfile} = '(no file)';
-  my $skip_parsing = 0;
-  my @curfile_stack = ();
-  my @if_stack = ();
-  my @conf_lines = split (/\n/, $_[1]);
-  my $line;
-
-  while (defined ($line = shift @conf_lines)) {
-    $line =~ s/(?<!\\)#.*$//; # remove comments
-    $line =~ s/^\s+|\s+$//g;  # remove leading and trailing spaces (including newlines)
-    next unless($line); # skip empty lines
-
-    # handle i18n
-    if ($line =~ s/^lang\s+(\S+)\s+//) { next if ($lang !~ /^$1/i); }
-
-    my($key, $value) = split(/\s+/, $line, 2);
-    $key = lc $key;
-    # convert all dashes in setting name to underscores.
-    $key =~ s/-/_/g;
-
-    # Do a better job untainting this info ...
-    $value = '' unless defined($value);
-    $value =~ /^(.*)$/;
-    $value = $1;
-
-    # File/line number assertions
-    if ($key eq 'file') {
-      if ($value =~ /^start\s+(.+)$/) {
-        push (@curfile_stack, $self->{currentfile});
-        $self->{currentfile} = $1;
-        next;
-      }
-
-      if ($value =~ /^end\s/) {
-        if (scalar @if_stack > 0) {
-          my $cond = pop @if_stack;
-
-          if ($cond->{type} eq 'ifplugin') {
-            warn "unclosed 'if' in ".
-                  $self->{currentfile}.": ifplugin ".$cond->{plugin}."\n";
-          } else {
-            die "unknown 'if' type: ".$cond->{type}."\n";
-          }
-
-          $self->{errors}++;
-          @if_stack = ();
-        }
-        $skip_parsing = 0;
-
-        my $curfile = pop @curfile_stack;
-        if (defined $curfile) {
-          $self->{currentfile} = $curfile;
-        } else {
-          $self->{currentfile} = '(no file)';
-        }
-        next;
-      }
-    }
-
-    # now handle the commands.
-    if ($key eq 'include') {
-      $value = $self->fix_path_relative_to_current_file($value);
-      my $text = $self->{main}->read_cf($value, 'included file');
-      unshift (@conf_lines, split (/\n/, $text));
-      next;
-    }
-
-    if ($key eq 'ifplugin') {
-      push (@if_stack, {
-          type => 'ifplugin',
-          plugin => $value,
-          skip_parsing => $skip_parsing
-        });
-
-      if ($self->{plugins_loaded}->{$value}) {
-        # leave $skip_parsing as-is; we may not be parsing anyway in this block.
-        # in other words, support nested 'if's and 'require_version's
-      } else {
-        $skip_parsing = 1;
-      }
-      next;
-    }
-
-    # and the endif statement:
-    if ($key eq 'endif') {
-      my $lastcond = pop @if_stack;
-      $skip_parsing = $lastcond->{skip_parsing};
-      next;
-    }
-
-    if ($key eq 'require_version') {
-      # if it wasn't replaced during install, assume current version ...
-      next if ($value eq "\@\@VERSION\@\@");
-
-      my $ver = $Mail::SpamAssassin::VERSION;
-
-      # if we want to allow "require_version 3.0" be good for all
-      # "3.0.x" versions:
-      ## make sure it's a numeric value
-      #$value += 0.0;
-      ## convert 3.000000 -> 3.0, stay backwards compatible ...
-      #$ver =~ s/^(\d+)\.(\d{1,3}).*$/sprintf "%d.%d", $1, $2/e;
-      #$value =~ s/^(\d+)\.(\d{1,3}).*$/sprintf "%d.%d", $1, $2/e;
-
-      if ($ver ne $value) {
-        warn "configuration file \"$self->{currentfile}\" requires version ".
-                "$value of SpamAssassin, but this is code version ".
-                "$ver. Maybe you need to use ".
-                "the -C switch, or remove the old config files? ".
-                "Skipping this file";
-        $skip_parsing = 1;
-        $self->{errors}++;
-      }
-      next;
-    }
-
-    # preprocessing? skip all other commands
-    next if $skip_parsing;
-
-    my $cmd = $lut_frequent->{$key}; # check the frequent command set
-    if (!$cmd) {
-      $cmd = $lut_remaining->{$key}; # no? try the rest
-    }
-
-    # we've either fallen through with no match, in which case this
-    # if() will fail, or we have a match.
-    if ($cmd) {
-      if ($self->{scoresonly}) {              # reading user config from spamd
-        if ($cmd->{is_priv} && !$self->{allow_user_rules}) {
-          dbg ("config: not parsing, 'allow_user_rules' is 0: $line");
-          goto failed_line;
-        }
-        if ($cmd->{is_admin}) {
-          dbg ("config: not parsing, administrator setting: $line");
-          goto failed_line;
-        }
-      }
-
-      if (!$cmd->{code}) {
-        $self->setup_default_code_cb ($cmd);
-      }
-
-      my $ret = &{$cmd->{code}} ($self, $key, $value, $line);
-
-      if ($ret && $ret eq $INVALID_VALUE) {
-        warn "invalid value for \"$key\": $value\n";
-        $self->{errors}++;
-      } else {
-        next;
-      }
-    }
-
-failed_line:
-
-    # last ditch: try to see if the plugins know what to do with it
-    if ($self->{main}->call_plugins ("parse_config", {
-                key => $key,
-                value => $value,
-                line => $line,
-                conf => $self,
-                user_config => $self->{scoresonly}
-            }))
-    {
-      # a plugin dealt with it successfully.
-      next;
-    }
-
-###########################################################################
-
-    my $msg = "Failed to parse line in SpamAssassin configuration, ".
-                        "skipping: $line";
-
-    if ($self->{lint_rules}) {
-      warn $msg."\n";
-    } else {
-      dbg ($msg);
-    }
-    $self->{errors}++;
-  }
-
-  $self->lint_check();
-  $self->set_default_scores();
-
-  delete $self->{scoresonly};
-}
-
-# Let's do some linting here ...
-# This is called from _parse(), BTW, so we can check for $self->{tests}
-# easily before finish_parsing() is called and deletes it.
-#
-sub lint_check {
-  my ($self) = @_;
-  my ($k, $v);
-  if ($self->{lint_rules})
-  {
-    # Check for description and score issues in lint fashion
-    while ( ($k,$v) = each %{$self->{descriptions}} ) {
-      if (length($v) > 50) {
-        warn "warning: description for $k is over 50 chars\n";
-        $self->{errors}++;
-      }
-      if (!exists $self->{tests}->{$k}) {
-        warn "warning: description exists for non-existent rule $k\n";
-        $self->{errors}++;
-      }
-    }
-
-    while ( my($sk) = each %{$self->{scores}} ) {
-      if (!exists $self->{tests}->{$sk}) {
-        warn "warning: score set for non-existent rule $sk\n";
-        $self->{errors}++;
-      }
-    }
-  }
-}
-
-# we should set a default score for all valid rules...  Do this here
-# instead of add_test because mostly 'score' occurs after the rule is
-# specified, so why set the scores to default, then set them again at
-# 'score'?
-# 
-sub set_default_scores {
-  my ($self) = @_;
-  my ($k, $v);
-  while ( ($k,$v) = each %{$self->{tests}} ) {
-    if ($self->{lint_rules}) {
-      if (length($k) > 22 && $k !~ /^__/ && $k !~ /^T_/) {
-        warn "warning: rule '$k' is over 22 chars\n";
-        $self->{errors}++;
-      }
-    }
-
-    if ( ! exists $self->{scores}->{$k} ) {
-      # T_ rules (in a testing probationary period) get low, low scores
-      my $set_score = ($k =~/^T_/) ? 0.01 : 1.0;
-
-      $set_score = -$set_score if ( $self->{tflags}->{$k} =~ /\bnice\b/ );
-      for my $index (0..3) {
-        $self->{scoreset}->[$index]->{$k} = $set_score;
-      }
-    }
-  }
-}
-
-###########################################################################
-
-sub setup_default_code_cb {
-  my ($self, $cmd) = @_;
-  my $type = $cmd->{type};
-
-  if ($type == $CONF_TYPE_STRING) {
-    $cmd->{code} = \&set_string_value;
-  }
-  elsif ($type == $CONF_TYPE_BOOL) {
-    $cmd->{code} = \&set_bool_value;
-  }
-  elsif ($type == $CONF_TYPE_NUMERIC) {
-    $cmd->{code} = \&set_numeric_value;
-  }
-  elsif ($type == $CONF_TYPE_HASH_KEY_VALUE) {
-    $cmd->{code} = \&set_hash_key_value;
-  }
-  elsif ($type == $CONF_TYPE_ADDRLIST) {
-    $cmd->{code} = \&set_addrlist_value;
-  }
-  elsif ($type == $CONF_TYPE_TEMPLATE) {
-    $cmd->{code} = \&set_template_append;
-  }
-  else {
-    die "unknown conf type $type!";
-  }
-}
-
-sub set_numeric_value {
-  my ($self, $key, $value, $line) = @_;
-  $self->{$key} = $value+0.0; }
-
-sub set_bool_value {
-  my ($self, $key, $value, $line) = @_;
-  $self->{$key} = $value+0;
-}
-
-sub set_string_value {
-  my ($self, $key, $value, $line) = @_;
-  $self->{$key} = $value;
-}
-
-sub set_hash_key_value {
-  my ($self, $key, $value, $line) = @_;
-  my($k,$v) = split(/\s+/, $value, 2);
-  $self->{$key}->{$k} = $v;
-}
-
-sub set_addrlist_value {
-  my ($self, $key, $value, $line) = @_;
-  $self->add_to_addrlist ($key, split (' ', $value));
-}
-
-sub set_template_append {
-  my ($self, $key, $value, $line) = @_;
-  if ( $value =~ /^"(.*?)"$/ ) { $value = $1; }
-  $self->{$key.'_template'} .= $value."\n";
-}
-
-sub set_template_clear {
-  my ($self, $key, $value, $line) = @_;
-  $self->{$key.'_template'} = '';
-}
-
-###########################################################################
-
-sub add_test {
-  my ($self, $name, $text, $type) = @_;
-
-  # Don't allow invalid names ...
-  if ($name !~ /^\w+$/) {
-    warn "error: rule '$name' has invalid characters (not Alphanumeric + Underscore)\n";
-    $self->{errors}++;
-    return;
-  }
-
-  $self->{tests}->{$name} = $text;
-  $self->{test_types}->{$name} = $type;
-  $self->{tflags}->{$name} ||= '';
-  $self->{priority}->{$name} ||= 0;
-  $self->{source_file}->{$name} = $self->{currentfile};
-
-  if ($self->{scoresonly}) {
-    $self->{user_rules_to_compile}->{$type} = 1;
-  }
-}
-
-sub add_regression_test {
-  my ($self, $name, $ok_or_fail, $string) = @_;
-  if ($self->{regression_tests}->{$name}) {
-    push @{$self->{regression_tests}->{$name}}, [$ok_or_fail, $string];
-  }
-  else {
-    # initialize the array, and create one element
-    $self->{regression_tests}->{$name} = [ [$ok_or_fail, $string] ];
-  }
-}
 
 sub regression_tests {
   my $self = shift;
@@ -3763,6 +3389,8 @@ sub regression_tests {
     return keys %{$self->{regression_tests}};
   }
 }
+
+###########################################################################
 
 # note: error 70 == SA_SOFTWARE
 sub finish_parsing {
@@ -3850,53 +3478,6 @@ sub finish_parsing {
   delete $self->{priority};             # free it up
 }
 
-sub add_to_addrlist {
-  my ($self, $singlelist, @addrs) = @_;
-
-  foreach my $addr (@addrs) {
-    $addr = lc $addr;
-    my $re = $addr;
-    $re =~ s/[\000\\\(]/_/gs;			# paranoia
-    $re =~ s/([^\*\?_a-zA-Z0-9])/\\$1/g;	# escape any possible metachars
-    $re =~ tr/?/./;				# "?" -> "."
-    $re =~ s/\*/\.\*/g;				# "*" -> "any string"
-    $self->{$singlelist}->{$addr} = qr/^${re}$/;
-  }
-}
-
-sub add_to_addrlist_rcvd {
-  my ($self, $listname, $addr, $domain) = @_;
-
-  $addr = lc $addr;
-  if ($self->{$listname}->{$addr}) {
-    push @{$self->{$listname}->{$addr}{domain}}, $domain;
-  }
-  else {
-    my $re = $addr;
-    $re =~ s/[\000\\\(]/_/gs;			# paranoia
-    $re =~ s/([^\*\?_a-zA-Z0-9])/\\$1/g;	# escape any possible metachars
-    $re =~ tr/?/./;				# "?" -> "."
-    $re =~ s/\*/\.\*/g;				# "*" -> "any string"
-    $self->{$listname}->{$addr}{re} = qr/^${re}$/;
-    $self->{$listname}->{$addr}{domain} = [ $domain ];
-  }
-}
-
-sub remove_from_addrlist {
-  my ($self, $singlelist, @addrs) = @_;
-
-  foreach my $addr (@addrs) {
-        delete($self->{$singlelist}->{$addr});
-  }
-}
-
-sub remove_from_addrlist_rcvd {
-  my ($self, $listname, @addrs) = @_;
-  foreach my $addr (@addrs) {
-    delete($self->{$listname}->{$addr});
-  }
-}
-
 ###########################################################################
 
 sub maybe_header_only {
@@ -3946,19 +3527,10 @@ sub maybe_body_only {
 
 sub load_plugin {
   my ($self, $package, $path) = @_;
-  if ($path) { $path = $self->fix_path_relative_to_current_file($path); }
-  $self->{main}->{plugins}->load_plugin ($package, $path);
-}
-
-sub fix_path_relative_to_current_file {
-  my ($self, $path) = @_;
-
-  if (!File::Spec->file_name_is_absolute ($path)) {
-    my ($vol, $dirs, $file) = File::Spec->splitpath ($self->{currentfile});
-    $path = File::Spec->catpath ($vol, $dirs, $path);
-    dbg ("plugin: fixed relative path: $path");
+  if ($path) {
+    $path = $self->{parser}->fix_path_relative_to_current_file($path);
   }
-  return $path;
+  $self->{main}->{plugins}->load_plugin ($package, $path);
 }
 
 sub load_plugin_succeeded {
@@ -3971,8 +3543,12 @@ sub register_eval_rule {
   $self->{eval_plugins}->{$nameofsub} = $pluginobj;
 }
 
+###########################################################################
+
 sub finish {
   my ($self) = @_;
+  $self->{parser}->finish();
+  delete $self->{parser};
   delete $self->{main};
 }
 
