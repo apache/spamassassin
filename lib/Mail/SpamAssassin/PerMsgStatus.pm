@@ -34,6 +34,8 @@ package Mail::SpamAssassin::PerMsgStatus;
 use Carp;
 use strict;
 
+use Text::Wrap qw();
+
 use Mail::SpamAssassin::EvalTests;
 use Mail::SpamAssassin::AutoWhitelist;
 
@@ -355,16 +357,10 @@ sub rewrite_as_spam {
 
   # add some headers...
 
-  $_ = sprintf ("Yes, hits=%2.1f required=%2.1f tests=%s version=%s",
-	$self->{hits}, $self->{conf}->{required_hits},
-	$self->get_names_of_tests_hit(),
-	$Mail::SpamAssassin::VERSION);
-
-  $self->{msg}->put_header ("X-Spam-Status", $_);
+  $self->{msg}->put_header ("X-Spam-Status", $self->_build_status_line());
   $self->{msg}->put_header ("X-Spam-Flag", 'YES');
-  if($self->{main}->{conf}->{spam_level_stars} == 1) 
-  {
-      $self->{msg}->put_header("X-Spam-Level", $self->{main}->{conf}->{spam_level_char} x int($self->{hits}));
+  if($self->{main}->{conf}->{spam_level_stars} == 1) {
+    $self->{msg}->put_header("X-Spam-Level", $self->{main}->{conf}->{spam_level_char} x int($self->{hits}));
   }
 
   $self->{msg}->put_header ("X-Spam-Checker-Version",
@@ -456,17 +452,35 @@ sub rewrite_as_non_spam {
 
   $self->{test_names_hit} =~ s/,$//;
 
-  $_ = sprintf ("No, hits=%2.1f required=%2.1f tests=%s version=%s",
-	$self->{hits}, $self->{conf}->{required_hits},
-	$self->get_names_of_tests_hit(),
-	$Mail::SpamAssassin::VERSION);
+  # Add some headers...
 
-  $self->{msg}->put_header ("X-Spam-Status", $_);
-  if($self->{main}->{conf}->{spam_level_stars} == 1)
-  {
-	  $self->{msg}->put_header("X-Spam-Level", $self->{main}->{conf}->{spam_level_char} x int($self->{hits}));
+  $self->{msg}->put_header ("X-Spam-Status", $self->_build_status_line());
+  if($self->{main}->{conf}->{spam_level_stars} == 1) {
+    $self->{msg}->put_header("X-Spam-Level", $self->{main}->{conf}->{spam_level_char} x int($self->{hits}));
   }
   $self->{msg}->get_mail_object;
+}
+
+sub _build_status_line {
+  my ($self) = @_;
+  my $line;
+
+  $line  = ($self->is_spam() ? "Yes" : "No") . ",\n";
+  $line .= sprintf("\thits=%2.1f required=%2.1f\n",
+             $self->{hits}, $self->{conf}->{required_hits});
+
+  if($_ = $self->get_names_of_tests_hit()) {
+    $Text::Wrap::columns   = 74;
+    $Text::Wrap::huge      = 'overflow';
+    $Text::Wrap::break     = '(?<=,)';
+    $line .= Text::Wrap::wrap("\ttests=", "\t      ", $_) . "\n";
+  } else {
+    $line .= "\ttests=none\n";
+  }
+
+  $line .= "\tversion=" . $Mail::SpamAssassin::VERSION;
+
+  return $line;
 }
 
 ###########################################################################
