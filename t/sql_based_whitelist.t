@@ -3,8 +3,7 @@
 use lib '.'; use lib 't';
 use SATest;
 
-use constant TEST_ENABLED => (-e 't/sql_based_whitelist.cf'
-                              || -e 'sql_based_whitelist.cf');
+use constant TEST_ENABLED => conf_bool('run_awl_sql_tests');
 
 use Test;
 

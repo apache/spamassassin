@@ -5,7 +5,7 @@ use SATest;
 use Test;
 use Symbol qw(delete_package);
 
-use constant TEST_ENABLED => (-e 'bayessql.cf' || -e 't/bayessql.cf');
+use constant TEST_ENABLED => conf_bool('run_bayes_sql_tests');
 use constant HAS_DBI => eval { require DBI; }; # for our cleanup stuff
 
 BEGIN { 
