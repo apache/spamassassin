@@ -1,0 +1,32 @@
+#!/bin/bash
+
+echo "
+
+NOTE: this is a sample.  You need to customise it to
+fit your corpus of spam and nonspam mails.
+
+"
+cd /home/jm/ftp/spamassassin/masses
+
+set -x
+date
+
+mkdir -p logs/old 2>/dev/null
+mv spam.log nonspam.log logs/old
+
+./mass-check /local2/mail-archives/spamtrap/mbox > spam.log
+
+(
+./mass-check /home/mailman/archives/public/crackmice.mbox/crackmice.mbox
+./mass-check /home/mailman/archives/public/iiu.mbox/iiu.mbox
+./mass-check /home/mailman/archives/public/wan-dublin.mbox/wan-dublin.mbox
+./mass-check /home/mailman/archives/public/io-announce.mbox/io-announce.mbox
+) > nonspam.log
+
+echo "
+
+scp dogma.slashnull.org:ftp/spamassassin/masses/spam.log spam.dogma
+scp dogma.slashnull.org:ftp/spamassassin/masses/nonspam.log nonspam.dogma
+
+"
+
