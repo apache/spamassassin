@@ -416,3 +416,7 @@ describe	T_INTL_DRIVERS_LICENSE 	International driving license
 # from bug 662
 header T_ADDR_FREE		From =~ /\b(?-i:F)ree(?-i:[ A-Z]).*</i
 describe T_ADDR_FREE		From Address contains FREE
+
+# from bug 1119
+header T_X_MIME_KEY        exists:X-Mime-Key
+describe T_X_MIME_KEY		X-Mime-Key header exists
