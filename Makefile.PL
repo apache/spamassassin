@@ -110,7 +110,7 @@ spamproxy/spamproxyd: spamproxy/spamproxyd.raw
 
 spamd/spamc: spamd/spamc.c
 	$(CFCC) $(CFCCFLAGS) $(CFOPTIMIZE) spamd/spamc.c \
-			-o $@
+			-o $@ $(CFLDFLAGS) $(CFLIBS)
 
 inst_cfs: $(LOCAL_RULES_DIR) $(DEF_RULES_DIR) $(DEF_RULES_DIR)/user_prefs.template $(LOCAL_RULES_DIR)/local.cf migrate_cfs
 	for file in $(RULES) ; do \

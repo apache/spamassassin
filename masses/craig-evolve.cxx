@@ -18,7 +18,7 @@ void WriteString(PGAContext *ctx, FILE *fp, int p, int pop);
 void showSummary(PGAContext *ctx);
 
 const double threshold = 5.0;
-double nybias = 20.0;
+double nybias = 10.0;
 const int exhaustive_eval = 1;
 
 const double mutation_rate = 0.01;
@@ -27,8 +27,8 @@ const double regression_coefficient = 0.5;
 
 const double crossover_rate = 0.65;
 
-const int pop_size = 100;
-const int replace_num = 25;
+const int pop_size = 200;
+const int replace_num = 50;
 
 const int maxiter = 50000;
 
@@ -42,6 +42,7 @@ void init_data()
     loadscores();
   }
 
+  nybias = nybias*((double)num_spam)/((double)num_nonspam);
   MPI_Bcast(num_tests_hit, num_tests, MPI_CHAR, 0, MPI_COMM_WORLD);
   MPI_Bcast(&nybias, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Bcast(is_spam, num_tests, MPI_CHAR, 0, MPI_COMM_WORLD);
@@ -111,7 +112,7 @@ int main(int argc, char **argv) {
 int ga_yy,ga_yn,ga_ny,ga_nn;
 double ynscore,nyscore,yyscore,nnscore;
 
-inline double score_msg(PGAContext *ctx, int p, int pop, int i)
+double score_msg(PGAContext *ctx, int p, int pop, int i)
 {
   double msg_score = 0.0;
   // For every test the message hit on
@@ -168,12 +169,15 @@ double evaluate(PGAContext *ctx, int p, int pop)
   {
     tot_score += score_msg(ctx,p,pop,i);
   }
-//   yyscore = log(yyscore);
-//   ynscore = log(ynscore);
-//   nyscore = log(nyscore);
-//   nnscore = log(nnscore);
+   yyscore = log(yyscore);
+   ynscore = log(ynscore);
+   nyscore = log(nyscore);
+   nnscore = log(nnscore);
 
-  return (double) ((double)ga_yn + (double)ga_ny*nybias) + (nyscore*nybias - ynscore)/(nyscore+ynscore);
+  return  /*min false-neg*/(double)ga_yn +
+	  /*weighted min false-pos*/((double)ga_ny)*nybias +
+	  /*min score(false-pos)*/((double)nyscore)*nybias +
+	  /*max score(false-neg)*/(-(double)ynscore);
 }
 
 /*
