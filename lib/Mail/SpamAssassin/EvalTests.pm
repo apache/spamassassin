@@ -1740,28 +1740,6 @@ sub check_carriage_returns {
 }
 
 ###########################################################################
-# HTML parser tests
-###########################################################################
-
-# A possibility for spotting heavy HTML spam and image-only spam
-# Submitted by Michael Moncur 7/26/2002, see bug #608
-sub html_percentage {
-  my (undef, undef, $min, $max) = @_;
-
-  my $html_percent = $Mail::SpamAssassin::PerMsgStatus::html{ratio} * 100;
-  return ($html_percent > $min && $html_percent <= $max);
-}
-
-sub html_table_thick_border {
-  return ($Mail::SpamAssassin::PerMsgStatus::html{border} > 1);
-}
-
-sub html_test {
-  my (undef, undef, $test) = @_;
-  return $Mail::SpamAssassin::PerMsgStatus::html{$test};
-}
-
-###########################################################################
 # MIME/uuencode attachment tests
 ###########################################################################
 
