@@ -236,7 +236,7 @@ my %makefile = (
 
     },
 
-    'AUTHOR'   => 'The Apache SpamAssassin Project <dev@spamassassin.apache.org>',
+    'AUTHOR'   => 'The Apache SpamAssassin Project <dev at spamassassin.apache.org>',
     'ABSTRACT' => 'SpamAssassin is an extensible email filter which is used to identify spam.',
 
     # We have only this Makefile.PL and this option keeps MakeMaker from
@@ -447,6 +447,7 @@ if (Mail::SpamAssassin::Util::DependencyInfo::long_diagnostics() != 0) {
 
 # Now finish the meta hash and dump the Makefile
 $makefile{EXE_FILES} = [ values %{$makefile{EXE_FILES}} ];
+$makefile{AUTHOR} =~ s/(<.+) at (.+>)/$1\@$2/;
 WriteMakefile(%makefile);
 print "Makefile written by ExtUtils::MakeMaker ${mm_version}\n";
 
