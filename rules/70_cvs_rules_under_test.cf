@@ -759,17 +759,15 @@ body __AFRICAN_COUNTRY_54	/\bangola/i
 # some meditation on outlookish Message-Id formats results in these.
 # easy ones first ;)
 
-header T_MSGID_OE_LONG_14	MESSAGEID =~ /<[a-f0-9]{14}\$[a-f0-9]{8}\$[a-f0-9]{8}\@/
-header T_MSGID_OE_LONG_15	MESSAGEID =~ /<[a-f0-9]{15,}\$[a-f0-9]{8}\$[a-f0-9]{8}\@/
+header __MSGID_OE_LONG_14	MESSAGEID =~ /<[a-f0-9]{14}\$[a-f0-9]{8}\$[a-f0-9]{8}\@/
+header __CDO			X-Mailer =~ /Microsoft CDO/
+header T_MSGID_OE_LONG_14	(__MSGID_OE_LONG_14 && !__CDO)
 
 # Nov 12 2002 jm: a test to catch spammers who HELO as a host at a big site
 # (aol, hotmail etc.) but whose rDNS lists them at some dialup ISP or another
 # ;)
 header T_RCVD_FAKE_HELO_DOTCOM_2	eval:check_for_fake_dotcom_helo()
 describe T_RCVD_FAKE_HELO_DOTCOM_2	Faked HELO-as-dotcom found
-
-header T_IDENT_CACHEFLOW	Received =~ /CacheFlowServer/
-describe T_IDENT_CACHEFLOW	Received contains 'CacheFlowServer' IDENT name
 
 # Matt Cline, Bug #1220
 body T_FOR_FREE                   /\bfor FREE\b/i
