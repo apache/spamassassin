@@ -87,7 +87,8 @@ $LOCALHOST = qr{(?:
 # ---------------------------------------------------------------------------
 # an IP address, in IPv4 format only.
 #
-$IPV4_ADDRESS = qr/\b(?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
+$IPV4_ADDRESS = qr/\b
+		    (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
                     (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
                     (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
                     (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)
@@ -97,16 +98,28 @@ $IPV4_ADDRESS = qr/\b(?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
 # an IP address, in IPv4, IPv4-mapped-in-IPv6, or IPv6 format.  NOTE: cannot
 # just refer to $IPV4_ADDRESS, due to perl bug reported in nesting qr//s. :(
 #
-$IP_ADDRESS = qr/\b (?:IPv6:|) (?: (?:0*:0*:ffff:(?:0*:|)|) # IPv4-mapped-in-IPv6
-                    (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
-                    (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
-                    (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
-                    (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)
-                  | # an IPv6 address, seems to always be at least 6 words
-                    [a-f0-9]{0,4} \:[a-f0-9]{0,4}
-                    \:[a-f0-9]{0,4} \:[a-f0-9]{0,4}
-                    \:[a-f0-9]{0,4} \:[a-f0-9]{0,4} (?:\:[a-f0-9]{0,4})*
-                  )\b/oxi;
+$IP_ADDRESS = qr/
+		    (?:
+		      \b(?<!:)	# ensure no "::" IPv4 marker before this one
+		      # plain IPv4, as above
+		      (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
+		      (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
+		      (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
+		      (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\b
+		    |
+		      # IPv4 mapped in IPv6
+		      \:\: (?:[a-f0-9]{0,4}\:){0,4}
+		      (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
+		      (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
+		      (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
+		      (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\b
+		    |
+		      # a pure-IPv6 address
+		      # don't use \b here, it hits on :'s
+		      (?<!:)
+		      (?:[a-f0-9]{0,4}\:){0,7} [a-f0-9]{0,4}
+		    )
+		  /oxi;
 
 # ---------------------------------------------------------------------------
 
