@@ -595,11 +595,10 @@ body T_LEAVE_ADDR		/leave your address/i
 # This doesn't do terrifically on my corpus, but it's not bad, want to
 # see how it works in a larger arena: - tvd
 #  0.249    0.586    0.037    0.94    0.54    1.00  T_TURN
-body __T_TURN /\bturn\s+your\s+.{1,15}\s+into\b/i
 body __T_TURN_INVEST /\bturn\s+.{1,15}\s+investment\s+into\b/i
 body __T_TURN_HOBBY /\bturn\s+(?:\w+)\s+hobby\s+into\b/i
 body __T_TURN_MONEY /\bturn\s+.{0,15}(?:\$\s*\d+|dollars?|euros?|pennies|pounds?).{1,15}\binto\b/i
-meta T_TURN ( __T_TURN || __T_TURN_INVEST || __T_TURN_HOBBY || __T_TURN_MONEY)
+meta T_TURN ( __T_TURN_INVEST || __T_TURN_HOBBY || __T_TURN_MONEY)
 
 # I spent the better part of a day hacking around with the Message-Id
 # stuff.  I found a few new regexps that works fairly well on my corpus
@@ -611,8 +610,8 @@ header __T_MSGID_8	Message-Id =~ /^<?\d{4}\$\w+\@/
 header __T_MSGID_20	Message-Id =~ /^<?EXCH\S+\@/
 header __T_MSGID_19	Message-Id =~ /^<?\w{7}-\w{6}-\w{2}\.\d{4}(?:-\d{2}){5}\@/
 header __T_MSGID_11	Message-Id =~ /^<?\d\w+\$\w{4,}\@/
-header __T_MSGID_24	Message-Id =~ /^<?.*SERV\D.*\@/
-header __T_MSGID_26	Message-Id =~ /^<?.*MAIL.*0000[0-9a-f]{4}\@/
+header __T_MSGID_24	Message-Id =~ /^<?[A-Z0-9_-]*SERV[A-Za-z0-9_-]+[0-9a-f]{8}\@/
+header __T_MSGID_26	Message-Id =~ /^<?[A-Z0-9_-]*MAIL[a-zA-Z0-9_-]+0000[0-9a-f]{4}\@/
 header __T_MSGID_37	Message-Id =~ /^<?\d{13,}\.SM\d+\@[^>]/
 header __T_MSGID_16	Message-Id =~ /^<?[A-Z]\d{10}\@/
 header __T_MSGID_32	Message-Id =~ /^<?auto-00000\d+\@/
