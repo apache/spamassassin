@@ -44,6 +44,7 @@ sub new {
   $class = ref($class) || $class;
   my $self = {
     plugins		=> [ ],
+    cbs 		=> { },
     main		=> $main
   };
   bless ($self, $class);
@@ -110,23 +111,36 @@ sub callback {
   my $subname = shift;
   my ($ret, $overallret);
 
-  foreach my $plugin (@{$self->{plugins}}) {
+  # have we set up the cache entry for this callback type?
+  if (!exists $self->{cbs}->{$subname}) {
+    # nope.  run through all registered plugins and see which ones
+    # implement this type of callback
+    my @subs = ();
+    foreach my $plugin (sort @{$self->{plugins}}) {
+      my $methodref = $plugin->can ($subname);
+      if (defined $methodref) {
+        push (@subs, [ $plugin, $methodref ]);
+        dbg ("plugin: ${plugin} implements '$subname'");
+      }
+    }
+    $self->{cbs}->{$subname} = \@subs;
+  }
+
+  foreach my $cbpair (@{$self->{cbs}->{$subname}}) {
+    my ($plugin, $methodref) = @$cbpair;
+
     $plugin->{_inhibit_further_callbacks} = 0;
 
-    my $methodref = $plugin->can ($subname);
+    eval {
+      $ret = &$methodref ($plugin, @_);
+    };
+    if ($ret) {
+      #dbg ("plugin: ${plugin}->${methodref} => $ret");
+      $overallret = $ret;
 
-    if (defined $methodref) {
-      eval {
-	$ret = &$methodref ($plugin, @_);
-      };
-      if ($ret) {
-        dbg ("plugin: ${plugin}->${subname} => $ret");
-        $overallret = $ret;
-
-        if ($ret == $Mail::SpamAssassin::Plugin::INHIBIT_CALLBACKS) {
-          $plugin->{_inhibit_further_callbacks} = 1;
-          $ret = 1;
-        }
+      if ($ret == $Mail::SpamAssassin::Plugin::INHIBIT_CALLBACKS) {
+        $plugin->{_inhibit_further_callbacks} = 1;
+        $ret = 1;
       }
     }
 
@@ -144,6 +158,7 @@ sub callback {
 
 sub finish {
   my $self = shift;
+  delete $self->{cbs};
   foreach my $plugin (@{$self->{plugins}}) {
     $plugin->finish();
     delete $plugin->{main};
