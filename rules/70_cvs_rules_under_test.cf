@@ -530,6 +530,20 @@ header T_FAKE_HELO_HOTPOP	eval:check_for_rdns_helo_mismatch("hotpop\.com","hotpo
 header T_FAKE_HELO_SHAW_CA	eval:check_for_rdns_helo_mismatch("shaw(?:\.ca|cable\.net)","shaw\.ca")
 header T_FAKE_HELO_AMAZON	eval:check_for_rdns_helo_mismatch("amazon\.com","amazon\.com")
 
+# 2003-04-12
+# juno.com anti-forgery rule based on valid juno.com account names
+# reference: http://www.juno.com/legal/spam.html
+# quinlan: not a lot of hits for me, but maybe it will work better for others
+header __JUNO_FROM		From:addr =~ /\@juno\.com\b/i
+# my initial reading of their valid account name rules
+header __JUNO_FROM_VALID	From:addr =~ /^[a-z](?:[a-z0-9_-]|\.(?!\.)){0,62}[a-z0-9]\@juno\.com\b/i
+meta T_FORGED_JUNO_FROM		(__JUNO_FROM && !__JUNO_FROM_VALID)
+# more restrictive interpretation of their valid account name rules,
+# don't allow any of the permitted non-alphanumeric characters to be
+# repeated, this should probably be verified
+header __JUNO_FROM_VALID2	From:addr =~ /^[a-z](?:[a-z0-9]|[-._](?![-._])){0,62}[a-z0-9]\@juno\.com\b/i
+meta T_FORGED_JUNO_FROM2	(__JUNO_FROM && !__JUNO_FROM_VALID2)
+
 # 2003-04-11
 # bug 1769, possible replacement rules
 # replacement for OBFUSCATING_COMMENT (we already have two of these rules,
