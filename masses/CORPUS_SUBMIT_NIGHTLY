@@ -24,8 +24,8 @@ Next, cd to the "masses" subdir and create a new pair of mass-check logfiles
 using that tag.
 
   cd /home/you/directory/spamassassin/masses
-  rm nonspam.log spam.log
-  touch nonspam.log spam.log
+  rm ham.log spam.log
+  touch ham.log spam.log
 
 
 Run all your mass-check scripts into those logfiles.  This is up to you!
@@ -36,8 +36,8 @@ Craig gave you (ask him for one!), ditto for the password.
 
   RSYNC_PASSWORD="[whatever_craig_told_you_it_was]"
   export RSYNC_PASSWORD
-  rsync -CPcvuzb nonspam.log \
-        you@belphegore.hughes-family.org::corpus/nonspam-you.log
+  rsync -CPcvuzb ham.log \
+        you@belphegore.hughes-family.org::corpus/ham-you.log
   rsync -CPcvuzb spam.log \
         you@belphegore.hughes-family.org::corpus/spam-you.log
 
