@@ -139,36 +139,12 @@ lang de describe BLANK_LINES_70_80 Nachrichtentext besteht zu 70-80% aus Leerzei
 lang de describe BLANK_LINES_80_90 Nachrichtentext besteht zu 80-90% aus Leerzeilen
 lang de describe BLANK_LINES_90_100 Nachrichtentext besteht zu 90-100% aus Leerzeilen
 lang de describe HABEAS_SWE Benutzt Markenzeichen von Habeas (http://www.habeas.com/)
-lang de describe RCVD_IN_NJABL Transportiert via Rechner in Liste von dnsbl.njabl.org
-lang de describe RCVD_IN_NJABL_RELAY NJABL: Senderechner als "Open Relay" best‰tigt
-lang de describe RCVD_IN_NJABL_DIALUP NJABL: Senderechner nur tempor‰r mit Internet verbunden
-lang de describe RCVD_IN_NJABL_SPAM NJABL: Senderechner ist best‰tigter Spam-Versender
-lang de describe RCVD_IN_NJABL_MULTI NJABL: mehrfach ¸ber "open relay"-Rechner weitergeleitet
-lang de describe RCVD_IN_NJABL_CGI NJABL: gesendet ¸ber ein veraltetes und ungesichertes Webformular
-lang de describe RCVD_IN_NJABL_PROXY NJABL: Senderechner als "open proxy" gemeldet
-lang de describe RCVD_IN_SORBS Transportiert via Rechner in Liste von www.dnsbl.sorbs.net
-lang de describe RCVD_IN_SORBS_HTTP SORBS: Senderechner als "open HTTP proxy" gemeldet
-lang de describe RCVD_IN_SORBS_MISC SORBS: Senderechner als "open proxy" gemeldet
-lang de describe RCVD_IN_SORBS_SMTP SORBS: Senderechner ist ein ungesicherter Mail-Server
-lang de describe RCVD_IN_SORBS_SOCKS SORBS: Senderechner als "open SOCKS proxy" gemeldet
-lang de describe RCVD_IN_SORBS_SPAM SORBS Senderechner ist bekannter Spam-Versender
-lang de describe RCVD_IN_SORBS_WEB SORBS: Senderechner ist ein ungesicherter WWW-Server
-lang de describe RCVD_IN_SORBS_BLOCK Senderechner verweigert Tests durch SORBS
-lang de describe RCVD_IN_SORBS_ZOMBIE SORBS: Senderechner in Liste "entf¸hrter" Adressblˆcke
-lang de describe RCVD_IN_OPM Transportiert via Rechner in Liste von opm.blitzed.org
-lang de describe RCVD_IN_OPM_WINGATE OPM: Senderechner als "open WinGate proxy" gemeldet
-lang de describe RCVD_IN_OPM_SOCKS OPM: Senderechner als "open SOCKS proxy" gemeldet
-lang de describe RCVD_IN_OPM_HTTP OPM: Senderechner als "open HTTP CONNECT proxy" gemeldet
-lang de describe RCVD_IN_OPM_ROUTER OPM: Senderechner als "open router proxy" gemeldet
-lang de describe RCVD_IN_OPM_HTTP_POST OPM: Senderechner als "open HTTP POST proxy" gemeldet
-lang de describe RCVD_IN_SBL Transportiert via Rechner in SBL-Liste (http://www.spamhaus.org/sbl/)
 lang de describe RCVD_IN_DSBL Transportiert via Rechner in Liste von list.dsbl.org
 lang de describe RCVD_IN_RFCI Transportiert via Rechner in ipwhois-Liste von www.rfc-ignorant.org
 lang de describe DNS_FROM_RFCI_DSN Absenderadresse in dsn-Liste von www.rfc-ignorant.org
 lang de describe HABEAS_VIOLATOR Sender verletzt das Warenzeichen der Firma Habeas
 lang de describe RCVD_IN_BSP_TRUSTED Senderechner in Liste von http://www.bondedsender.org/
 lang de describe RCVD_IN_BSP_OTHER Senderechner in Liste von http://www.bondedsender.org/
-lang de describe RCVD_IN_DYNABLOCK Senderechner nur tempor‰r mit Internet verbunden
 lang de describe RCVD_IN_BL_SPAMCOP_NET Transportiert via Rechner in Liste von www.spamcop.net
 lang de describe RCVD_IN_MAPS_RBL Transportiert via Rechner in Liste von http://www.mail-abuse.org/rbl/
 lang de describe RCVD_IN_MAPS_DUL Transportiert via Rechner in Liste von http://www.mail-abuse.org/dul/
@@ -967,3 +943,32 @@ lang de describe BAYES_70 Spamwahrscheinlichkeit nach Bayes-Test: 70-80%
 lang de describe BAYES_80 Spamwahrscheinlichkeit nach Bayes-Test: 80-90%
 lang de describe BAYES_90 Spamwahrscheinlichkeit nach Bayes-Test: 90-99%
 lang de describe BAYES_99 Spamwahrscheinlichkeit nach Bayes-Test: 99-100%
+
+lang de describe RCVD_IN_NJABL_CGI NJABL: Gesendet ¸ber ein veraltetes und ungesichertes Webformular
+lang de describe RCVD_IN_NJABL_DUL NJABL: Senderechner nur tempor‰r mit Internet verbunden
+lang de describe RCVD_IN_NJABL_MULTI NJABL: Mehrfach ¸ber "open relay"-Rechner weitergeleitet
+lang de describe RCVD_IN_NJABL_PROXY NJABL: Senderechner als "open proxy" gemeldet
+lang de describe RCVD_IN_NJABL_RELAY NJABL: Senderechner als "Open Relay" best‰tigt
+lang de describe RCVD_IN_NJABL_SPAM NJABL: Senderechner ist best‰tigter Spam-Versender
+lang de describe RCVD_IN_SBL Transportiert via Rechner in SBL-Liste (http://www.spamhaus.org/sbl/)
+lang de describe RCVD_IN_SORBS_BLOCK SORBS: Senderechner verweigert Tests
+lang de describe RCVD_IN_SORBS_DUL SORBS: Senderechner nur tempor‰r mit Internet verbunden
+lang de describe RCVD_IN_SORBS_HTTP SORBS: Senderechner als "open HTTP proxy" gemeldet
+lang de describe RCVD_IN_SORBS_MISC SORBS: Senderechner als "open proxy" gemeldet
+lang de describe RCVD_IN_SORBS_SMTP SORBS: Senderechner ist ein ungesicherter Mail-Server
+lang de describe RCVD_IN_SORBS_SOCKS SORBS: Senderechner als "open SOCKS proxy" gemeldet
+lang de describe RCVD_IN_SORBS_WEB SORBS: Senderechner ist ein ungesicherter WWW-Server
+lang de describe RCVD_IN_SORBS_ZOMBIE SORBS: Senderechner in Liste "entf¸hrter" Adressblˆcke
+lang de describe RCVD_IN_XBL Transportiert via Rechner in XBL-Liste (http://www.spamhaus.org/xbl/)
+lang de describe __RCVD_IN_NJABL Transportiert via Rechner in Liste von combined.njabl.org
+lang de describe __RCVD_IN_SBL_XBL Transportiert via Rechner in SBL+XBL-Liste (http://www.spamhaus.org/)
+lang de describe __RCVD_IN_SORBS SORBS: Senderechner in Liste von dnsbl.sorbs.net
+
+lang de describe X_MESSAGE_INFO Kopfzeile "X-Message-Info"
+lang de describe MIME_BOUND_DD_DIGITS Bestimmtes Muster von Spam-Software in MIME-Begrenzung
+lang de describe RCVD_DOUBLE_IP_SPAM Kennzeichen von Spam-Software (doppelte IP-Adresse)
+lang de describe MSGID_SPAM_CAPS Kopfzeile "Message-ID" von Spam-Software erzeugt (GroÅﬂbuchstaben)
+lang de describe RATWARE_RCVD_AT "Received"-Kopfzeile mit @-Zeichen
+lang de describe SUBJECT_DRUG_GAP_X Betreff enthÅ‰lt 'xanax' mit L.Å¸.c.k.e.n
+lang de describe SUBJECT_DRUG_GAP_S Betreff enthÅ‰lt 'soma' mit L.Å¸.c.k.e.n
+lang de describe SUBJECT_DRUG_GAP_VA Betreff enthÅ‰lt 'valium' mit L.Å¸.c.k.e.n

@@ -30,17 +30,17 @@ require_version @@VERSION@@
 # NJABL
 # URL: http://www.dnsbl.njabl.org/
 
-header RCVD_IN_NJABL		eval:check_rbl('njabl', 'dnsbl.njabl.org.')
-describe RCVD_IN_NJABL		Received via a relay in dnsbl.njabl.org
-tflags RCVD_IN_NJABL		net
+header __RCVD_IN_NJABL		eval:check_rbl('njabl', 'combined.njabl.org.')
+describe __RCVD_IN_NJABL	Received via a relay in combined.njabl.org
+tflags __RCVD_IN_NJABL		net
 
 header RCVD_IN_NJABL_RELAY	eval:check_rbl_sub('njabl', '127.0.0.2')
 describe RCVD_IN_NJABL_RELAY	NJABL: sender is confirmed open relay
 tflags RCVD_IN_NJABL_RELAY	net
 
-header RCVD_IN_NJABL_DIALUP	eval:check_rbl('njabl-notfirsthop', 'dnsbl.njabl.org.', '127.0.0.3')
-describe RCVD_IN_NJABL_DIALUP	NJABL: dialup sender did non-local SMTP
-tflags RCVD_IN_NJABL_DIALUP	net
+header RCVD_IN_NJABL_DUL	eval:check_rbl('njabl-notfirsthop', 'combined.njabl.org.', '127.0.0.3')
+describe RCVD_IN_NJABL_DUL	NJABL: dialup sender did non-local SMTP
+tflags RCVD_IN_NJABL_DUL	net
 
 header RCVD_IN_NJABL_SPAM	eval:check_rbl_sub('njabl', '127.0.0.4')
 describe RCVD_IN_NJABL_SPAM	NJABL: sender is confirmed spam source
@@ -65,29 +65,29 @@ tflags RCVD_IN_NJABL_PROXY	net
 # pay-to-use: no
 # delist: $50 fee for RCVD_IN_SORBS_SPAM, others have free retest on request
 
-header RCVD_IN_SORBS		eval:check_rbl('sorbs', 'dnsbl.sorbs.net.')
-describe RCVD_IN_SORBS		SORBS: sender is listed in SORBS
-tflags RCVD_IN_SORBS		net
+header __RCVD_IN_SORBS		eval:check_rbl('sorbs', 'dnsbl.sorbs.net.')
+describe __RCVD_IN_SORBS	SORBS: sender is listed in SORBS
+tflags __RCVD_IN_SORBS		net
 
 header RCVD_IN_SORBS_HTTP	eval:check_rbl_sub('sorbs', '127.0.0.2')
 describe RCVD_IN_SORBS_HTTP	SORBS: sender is open HTTP proxy server
 tflags RCVD_IN_SORBS_HTTP	net
 
-header RCVD_IN_SORBS_SOCKS	eval:check_rbl_sub('sorbs', '127.0.0.3')
-describe RCVD_IN_SORBS_SOCKS	SORBS: sender is open SOCKS proxy server
-tflags RCVD_IN_SORBS_SOCKS	net
-
-header RCVD_IN_SORBS_MISC	eval:check_rbl_sub('sorbs', '127.0.0.4')
+header RCVD_IN_SORBS_MISC	eval:check_rbl_sub('sorbs', '127.0.0.3')
 describe RCVD_IN_SORBS_MISC	SORBS: sender is open proxy server
 tflags RCVD_IN_SORBS_MISC	net
 
-header RCVD_IN_SORBS_SMTP	eval:check_rbl_sub('sorbs', '127.0.0.5')
+header RCVD_IN_SORBS_SMTP	eval:check_rbl_sub('sorbs', '127.0.0.4')
 describe RCVD_IN_SORBS_SMTP	SORBS: sender is open SMTP relay
 tflags RCVD_IN_SORBS_SMTP	net
 
-header RCVD_IN_SORBS_SPAM	eval:check_rbl_sub('sorbs', '127.0.0.6')
-describe RCVD_IN_SORBS_SPAM	SORBS: spam source or spam-supporting ISP
-tflags RCVD_IN_SORBS_SPAM	net
+header RCVD_IN_SORBS_SOCKS	eval:check_rbl_sub('sorbs', '127.0.0.5')
+describe RCVD_IN_SORBS_SOCKS	SORBS: sender is open SOCKS proxy server
+tflags RCVD_IN_SORBS_SOCKS	net
+
+#header RCVD_IN_SORBS_SPAM	eval:check_rbl_sub('sorbs', '127.0.0.6')
+#describe RCVD_IN_SORBS_SPAM	SORBS: sender is a spam source
+#tflags RCVD_IN_SORBS_SPAM	net
 
 header RCVD_IN_SORBS_WEB	eval:check_rbl_sub('sorbs', '127.0.0.7')
 describe RCVD_IN_SORBS_WEB	SORBS: sender is a abuseable web server
@@ -101,50 +101,32 @@ header RCVD_IN_SORBS_ZOMBIE	eval:check_rbl_sub('sorbs', '127.0.0.9')
 describe RCVD_IN_SORBS_ZOMBIE	SORBS: sender is on a hijacked network
 tflags RCVD_IN_SORBS_ZOMBIE	net
 
-# Dynablock used to be at easynet.nl; closed down there, but reopened
-# by SORBS.
-header RCVD_IN_DYNABLOCK        eval:check_rbl('sorbs-notfirsthop', 'dnsbl.sorbs.net.', '127.0.0.10')
-describe RCVD_IN_DYNABLOCK      Sent directly from dynamic IP address
-tflags RCVD_IN_DYNABLOCK        net
+header RCVD_IN_SORBS_DUL	eval:check_rbl('sorbs-notfirsthop', 'dnsbl.sorbs.net.', '127.0.0.10')
+describe RCVD_IN_SORBS_DUL	SORBS: sent directly from dynamic IP address
+tflags RCVD_IN_SORBS_DUL	net
 
 # ---------------------------------------------------------------------------
-# OPM (recommended, supports TXT queries, but A queries needed for sub-tests)
-# transfers: axfr/ixfr for trusted sites
-# url: http://opm.blitzed.org/
-# pay-to-use: no
-# delist: automatic expiry, no fee, retested on request (free)
+# Spamhaus SBL+XBL
+#
+# Spamhaus XBL contains both the Abuseat CBL (cbl.abuseat.org) and Blitzed
+# OPM (opm.blitzed.org) lists so it's not necessary to query those as well.
 
-header RCVD_IN_OPM		eval:check_rbl('opm', 'opm.blitzed.org.')
-describe RCVD_IN_OPM		Received via a relay in opm.blitzed.org
-tflags RCVD_IN_OPM		net
+header __RCVD_IN_SBL_XBL	eval:check_rbl('sblxbl', 'sbl-xbl.spamhaus.org.')
+describe __RCVD_IN_SBL_XBL	Received via a relay in Spamhaus SBL+XBL
+tflags __RCVD_IN_SBL_XBL	net
 
-header RCVD_IN_OPM_WINGATE	eval:check_rbl_sub('opm', '1')
-describe RCVD_IN_OPM_WINGATE	OPM: sender is open WinGate proxy
-tflags RCVD_IN_OPM_WINGATE	net
+# SBL is the Spamhaus Block List: http://www.spamhaus.org/sbl/
+header RCVD_IN_SBL		eval:check_rbl_sub('sblxbl', '127.0.0.2')
+describe RCVD_IN_SBL		Received via a relay in Spamhaus SBL
+tflags RCVD_IN_SBL		net
 
-header RCVD_IN_OPM_SOCKS	eval:check_rbl_sub('opm', '2')
-describe RCVD_IN_OPM_SOCKS	OPM: sender is open SOCKS proxy
-tflags RCVD_IN_OPM_SOCKS	net
-
-header RCVD_IN_OPM_HTTP		eval:check_rbl_sub('opm', '4')
-describe RCVD_IN_OPM_HTTP	OPM: sender is open HTTP CONNECT proxy
-tflags RCVD_IN_OPM_HTTP		net
-
-header RCVD_IN_OPM_ROUTER	eval:check_rbl_sub('opm', '8')
-describe RCVD_IN_OPM_ROUTER	OPM: sender is open router proxy
-tflags RCVD_IN_OPM_ROUTER	net
-
-header RCVD_IN_OPM_HTTP_POST	eval:check_rbl_sub('opm', '16')
-describe RCVD_IN_OPM_HTTP_POST	OPM: sender is open HTTP POST proxy
-tflags RCVD_IN_OPM_HTTP_POST	net
+# XBL is the Exploits Block List: http://www.spamhaus.org/xbl/
+header RCVD_IN_XBL		eval:check_rbl('sblxbl-notfirsthop', 'sbl-xbl.spamhaus.org.', '127.0.0.[456]')
+describe RCVD_IN_XBL		Received via a relay in Spamhaus XBL
+tflags RCVD_IN_XBL		net
 
 # ---------------------------------------------------------------------------
 # Now, single zone BLs follow:
-
-# SBL is the Spamhaus Block List: http://www.spamhaus.org/sbl/
-header RCVD_IN_SBL		eval:check_rbl_txt('sbl', 'sbl.spamhaus.org.')
-describe RCVD_IN_SBL		Received via a relay in Spamhaus Block List
-tflags RCVD_IN_SBL		net
 
 # DSBL catches open relays, badly-installed CGI scripts and open SOCKS and
 # HTTP proxies.  list.dsbl.org lists servers tested by "trusted" users,

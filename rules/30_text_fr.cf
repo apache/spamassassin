@@ -760,35 +760,11 @@ lang fr describe RCVD_IN_BL_SPAMCOP_NET	Relais listé dans http://spamcop.net/bl.
 lang fr describe RCVD_IN_BSP_OTHER	Relais participant au Bonded Sender Program (autre relais)
 lang fr describe RCVD_IN_BSP_TRUSTED	Relais participant au Bonded Sender Program (relais connu)
 lang fr describe RCVD_IN_DSBL		Relais listé dans list.dsbl.org, voir http://dsbl.org
-lang fr describe RCVD_IN_DYNABLOCK	Envoyé directement depuis une adresse IP dynamique
 lang fr describe RCVD_IN_MAPS_DUL	Relais listé dans DUL, http://www.mail-abuse.org/dul/
 lang fr describe RCVD_IN_MAPS_NML	Relais listé dans NML, http://www.mail-abuse.org/nml/
 lang fr describe RCVD_IN_MAPS_RBL	Relais listé dans RBL, http://www.mail-abuse.org/rbl/
 lang fr describe RCVD_IN_MAPS_RSS	Relais listé dans RSS, http://www.mail-abuse.org/rss/
-lang fr describe RCVD_IN_NJABL		Relais listé dans http://www.njabl.org (dnsbl)
-lang fr describe RCVD_IN_NJABL_CGI	NJABL: Emis par un script formmail vulnérable
-lang fr describe RCVD_IN_NJABL_DIALUP	NJABL: Envoyé depuis une adresse IP dynamique
-lang fr describe RCVD_IN_NJABL_MULTI	NJABL: Envoyé par un relais ouvert multi-étages
-lang fr describe RCVD_IN_NJABL_PROXY	NJABL: Envoyé depuis un proxy ouvert
-lang fr describe RCVD_IN_NJABL_RELAY	NJABL: Envoyé par un relais ouvert confirmé
-lang fr describe RCVD_IN_NJABL_SPAM	NJABL: Envoyé depuis une source de spam confirmée
-lang fr describe RCVD_IN_OPM		Relais open-proxy listé dans http://www.blitzed.org/bopm/
-lang fr describe RCVD_IN_OPM_HTTP	OPM: Envoyé par un proxy HTTP CONNECT ouvert
-lang fr describe RCVD_IN_OPM_HTTP_POST	OPM: Envoyé par un proxy HTTP POST ouvert
-lang fr describe RCVD_IN_OPM_ROUTER	OPM: Envoyé par un proxy routeur ouvert
-lang fr describe RCVD_IN_OPM_SOCKS	OPM: Envoyé par un proxy SOCKS ouvert
-lang fr describe RCVD_IN_OPM_WINGATE	OPM: Envoyé par un proxy WinGate ouvert
 lang fr describe RCVD_IN_RFCI		Relais listé dans http://www.rfc-ignorant.org (ipwhois)
-lang fr describe RCVD_IN_SBL		Relais listé dans http://www.spamhaus.org/sbl/
-lang fr describe RCVD_IN_SORBS		SORBS: Relais listé dans SORBS
-lang fr describe RCVD_IN_SORBS_BLOCK	SORBS: Relais refusant d'être testé par SORBS
-lang fr describe RCVD_IN_SORBS_HTTP	SORBS: Envoyé par un proxy HTTP ouvert
-lang fr describe RCVD_IN_SORBS_MISC	SORBS: Envoyé par un proxy ouvert
-lang fr describe RCVD_IN_SORBS_SMTP	SORBS: Envoyé par un relais SMTP ouvert
-lang fr describe RCVD_IN_SORBS_SOCKS	SORBS: Envoyé par un proxy SOCKS ouvert
-lang fr describe RCVD_IN_SORBS_SPAM	SORBS: Envoyé depuis une source de spam
-lang fr describe RCVD_IN_SORBS_WEB	SORBS: Envoyé depuis un serveur web vulnérable
-lang fr describe RCVD_IN_SORBS_ZOMBIE	SORBS: Envoyé depuis un réseau IP piraté
 lang fr describe RCVD_NUMERIC_HELO	Received: contient un HELO numérique
 lang fr describe RCVD_6_CAPS_ESMTP_ID	Received: d'outil de spam (Variante ESMTP ID 6 majuscules)
 lang fr describe READ_TO_END		Contient une formule incitant à lire le message jusqu'à la fin
@@ -979,3 +955,19 @@ lang fr describe YAHOO_REDIR		Comporte une URI de redirection Yahoo
 lang fr describe YOUR_INCOME		Fait référence à vos revenus (en anglais)
 lang fr describe YOU_CAN_SEARCH		Vous propose des renseignements sur n'importe qui
 lang fr describe YOU_WON                Vous avez gagné ! Chouette ! Gagné le droit de poubelliser ce mail !
+
+lang fr describe RCVD_IN_NJABL_CGI	NJABL: Emis par un script formmail vulnérable
+lang fr describe RCVD_IN_NJABL_DUL	NJABL: Envoyé depuis une adresse IP dynamique
+lang fr describe RCVD_IN_NJABL_MULTI	NJABL: Envoyé par un relais ouvert multi-étages
+lang fr describe RCVD_IN_NJABL_PROXY	NJABL: Envoyé depuis un proxy ouvert
+lang fr describe RCVD_IN_NJABL_RELAY	NJABL: Envoyé par un relais ouvert confirmé
+lang fr describe RCVD_IN_NJABL_SPAM	NJABL: Envoyé depuis une source de spam confirmée
+lang fr describe RCVD_IN_SBL		Relais listé dans http://www.spamhaus.org/sbl/
+lang fr describe RCVD_IN_SORBS_BLOCK	SORBS: Relais refusant d'être testé par SORBS
+lang fr describe RCVD_IN_SORBS_DUL	Envoyé directement depuis une adresse IP dynamique
+lang fr describe RCVD_IN_SORBS_HTTP	SORBS: Envoyé par un proxy HTTP ouvert
+lang fr describe RCVD_IN_SORBS_MISC	SORBS: Envoyé par un proxy ouvert
+lang fr describe RCVD_IN_SORBS_SMTP	SORBS: Envoyé par un relais SMTP ouvert
+lang fr describe RCVD_IN_SORBS_SOCKS	SORBS: Envoyé par un proxy SOCKS ouvert
+lang fr describe RCVD_IN_SORBS_WEB	SORBS: Envoyé depuis un serveur web vulnérable
+lang fr describe RCVD_IN_SORBS_ZOMBIE	SORBS: Envoyé depuis un réseau IP piraté

@@ -19,21 +19,29 @@ use vars qw{
   @EXISTING_DOMAINS $IS_DNS_AVAILABLE $VERSION
 };
 
-# don't lookup SpamAssassin.org -- use better-connected sites
-# instead ;)
+# use very well-connected domains (fast DNS response, many DNS servers,
+# geographical distribution is a plus, TTL of at least 3600s)
 @EXISTING_DOMAINS = qw{
-  kernel.org
-  slashdot.org
+  adelphia.net
+  akamai.com
+  apache.org
+  cingular.com
+  colorado.edu
+  comcast.net
+  doubleclick.com
+  ebay.com
+  gmx.net
   google.com
-  google.de
-  microsoft.com
+  intel.com
+  kernel.org
+  linux.org
+  mit.edu
+  motorola.com
+  msn.com
+  sourceforge.net
+  sun.com
+  w3.org
   yahoo.com
-  yahoo.de
-  amazon.com
-  amazon.de
-  nytimes.com
-  leo.org
-  gwdg.de
 };
 
 # Initialize a regexp for reserved IPs, i.e. ones that could be
@@ -259,8 +267,11 @@ sub process_dnsbl_set {
       }
     }
     # regular expression
-    elsif ($rdatastr =~ /\Q$subtest\E/) {
-      $self->dnsbl_hit($rule, $question, $answer);
+    else {
+      my $test = qr/$subtest/;
+      if ($rdatastr =~ /$test/) {
+	$self->dnsbl_hit($rule, $question, $answer);
+      }
     }
   }
 }
