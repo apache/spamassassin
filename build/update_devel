@@ -41,8 +41,4 @@ md5sum Mail-SpamAssassin-$vers.zip \
 )
 # ( cd $WEBDIR/devel && cvs add -kb *SpamAssassin* )
 
-# this can take a while.
-echo "Creating 'Changes' file from CVS change log..."
-cvs2cl.pl -f Changes -l "-d'>2002-06-18'"
-
 ls -l $WEBDIR/devel
