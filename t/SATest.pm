@@ -167,7 +167,7 @@ sub sarun {
   system ("$scrargs > log/$testname.${Test::ntest}");
   $sa_exitcode = ($?>>8);
   if ($sa_exitcode != 0) { return undef; }
-  &checkfile ("$testname.${Test::ntest}", $read_sub);
+  &checkfile ("$testname.${Test::ntest}", $read_sub) if (defined $read_sub);
   1;
 }
 
@@ -201,7 +201,7 @@ sub salearnrun {
   system ("$salearnargs > log/$testname.${Test::ntest}");
   $salearn_exitcode = ($?>>8);
   if ($salearn_exitcode != 0) { return undef; }
-  &checkfile ("$testname.${Test::ntest}", $read_sub);
+  &checkfile ("$testname.${Test::ntest}", $read_sub) if (defined $read_sub);
   1;
 }
 
@@ -237,7 +237,7 @@ sub spamcrun {
 
   %found = ();
   %found_anti = ();
-  &checkfile ("$testname.out", $read_sub);
+  &checkfile ("$testname.out", $read_sub) if (defined $read_sub);
 }
 
 sub spamcrun_background {
