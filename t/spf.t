@@ -16,7 +16,7 @@ use constant DO_RUN     => TEST_ENABLED && HAS_SPFQUERY &&
 
 BEGIN {
   
-  plan tests => (DO_RUN ? 2 : 0);
+  plan tests => (DO_RUN ? 4 : 0);
 
 };
 
@@ -32,3 +32,10 @@ exit unless (DO_RUN);
 sarun ("-t < data/nice/spf1", \&patterns_run_cb);
 ok_all_patterns();
 
+%patterns = (
+    q{ SPF_HELO_FAIL }, 'helo_fail',
+    q{ SPF_FAIL }, 'fail',
+);
+
+sarun ("-t < data/spam/spf1", \&patterns_run_cb);
+ok_all_patterns();
