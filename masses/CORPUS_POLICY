@@ -13,6 +13,10 @@ we use to judge if a corpus is "good" or not.  It should be:
     (which may include talk of "sales", "marketing", "offers" etc), or verified
     opt-in mail newsletters. This is a *very* important point!
 
+  - containing no old spam mail.  Older spam uses different tricks and
+    terminology, which will impact SpamAssassin's accuracy when it's filtering
+    "live", new mail.  Please try not to scan spam older than 6 months.
+
   - cleaned of viruses, and forwarded spam messages.  These will skew the
     results.
 
@@ -26,4 +30,4 @@ Once you run "mass-check" on a corpus, see the instructions in "CORPUS_SUBMIT"
 for details of how to verify that the top scorers are not accidental spam that
 got through.
 
-lastmod: Aug 12 2002 jm 
+lastmod: Jan 13 2003 jm
