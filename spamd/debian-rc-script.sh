@@ -6,7 +6,7 @@
 
 # Based on skeleton by Miquel van Smoorenburg and Ian Murdock
 
-PATH=/sbin:/bin:/usr/sbin:/usr/bin
+PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin
 DAEMON=/usr/sbin/spamd
 NAME=spamd
 SNAME=spamassassin
