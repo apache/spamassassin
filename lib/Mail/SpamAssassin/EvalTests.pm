@@ -291,7 +291,7 @@ sub check_for_forged_received_trail {
       $from[$i] = lc($1);
       $from[$i] =~ s/.*\.(\S+\.\S+)$/$1/;
     }
-    if ($i > 0 && exists($by[$i]) && exists($from[$i - 1]) &&
+    if ($i > 0 && defined($by[$i]) && defined($from[$i - 1]) &&
 	($by[$i] ne $from[$i - 1]))
     {
       $mismatch++;
