@@ -162,7 +162,6 @@ sub new {
 
   # Go through all the headers of the message
   my $header = '';
-  my $boundary;
   while ( my $current = shift @message ) {
     unless ($self->{'missing_head_body_separator'}) {
       $self->{'pristine_headers'} .= $current;
@@ -205,18 +204,14 @@ sub new {
         last;
       }
       else {
-	# If we're currently dealing with a content-type header, and there's a
-	# boundary defined, use it.  Since there could be multiple
-	# content-type headers in a message, the last one will be the one we
-	# should use, so just keep updating as they come in.
-        if ($header =~ /^Content-Type:/i) {
-	  my ($type, $temp_boundary) =
-	    Mail::SpamAssassin::Util::parse_content_type(substr($header, 13));
-	  $boundary = $temp_boundary if (defined $temp_boundary);
-	}
-
         # Check for missing head/body separator
-        if (!@message || (defined $boundary && $message[0] =~ /^--\Q$boundary\E(?:--|\s*$)/)) {
+	# RFC 2822, s2.2:
+	# A field name MUST be composed of printable US-ASCII characters
+	# (i.e., characters that have values between 33 (041) and 126 (176), inclusive),
+	# except colon (072).
+	# FOR THIS NEXT PART: list off the valid REs for what can be next:
+	#	Header, header continuation, blank line
+        if (!@message || $message[0] !~ /^(?:[\041-\071\073-\176]+:|[ \t]|\r?$)/) {
 	  # No body or no separator before mime boundary is invalid
           $self->{'missing_head_body_separator'} = 1;
 	  
@@ -668,39 +663,44 @@ sub _parse_multipart {
       next;
     }
 
-    if ($in_body) {
-      # we run into a perl bug if the lines are astronomically long (probably
-      # due to lots of regexp backtracking); so cut short any individual line
-      # over MAX_BODY_LINE_LENGTH bytes in length.  This can wreck HTML
-      # totally -- but IMHO the only reason a luser would use
-      # MAX_BODY_LINE_LENGTH-byte lines is to crash filters, anyway.
-      while (length ($_) > MAX_BODY_LINE_LENGTH) {
-        push (@{$part_array}, substr($_, 0, MAX_BODY_LINE_LENGTH)."\n");
-        substr($_, 0, MAX_BODY_LINE_LENGTH) = '';
-      }
-      push ( @{$part_array}, $_ );
-    }
-    else {
+    if (!$in_body) {
       s/\s+$//;
-      if (m/^\S/) {
+      if (m/^[\041-\071\073-\176]+:/) {
         if ($header) {
           my ( $key, $value ) = split ( /:\s*/, $header, 2 );
           $part_msg->header( $key, $value );
         }
         $header = $_;
+	next;
       }
-      elsif (/^\s*$/) {
+      elsif (/^[ \t]/) {
+        $_ =~ s/^\s*//;
+        $header .= $_;
+	next;
+      }
+      else {
         if ($header) {
           my ( $key, $value ) = split ( /:\s*/, $header, 2 );
           $part_msg->header( $key, $value );
         }
         $in_body = 1;
-      }
-      else {
-        $_ =~ s/^\s*//;
-        $header .= $_;
+
+	# if there's a blank line separator, that's good.  if there isn't,
+	# it's a body line, so drop through.
+	next if (/^\r?$/);
       }
     }
+
+    # we run into a perl bug if the lines are astronomically long (probably
+    # due to lots of regexp backtracking); so cut short any individual line
+    # over MAX_BODY_LINE_LENGTH bytes in length.  This can wreck HTML
+    # totally -- but IMHO the only reason a luser would use
+    # MAX_BODY_LINE_LENGTH-byte lines is to crash filters, anyway.
+    while (length ($_) > MAX_BODY_LINE_LENGTH) {
+      push (@{$part_array}, substr($_, 0, MAX_BODY_LINE_LENGTH)."\n");
+      substr($_, 0, MAX_BODY_LINE_LENGTH) = '';
+    }
+    push ( @{$part_array}, $_ );
   }
 
 }
