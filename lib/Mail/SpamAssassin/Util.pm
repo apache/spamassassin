@@ -44,8 +44,12 @@ sub safe_lock {
   my $is_locked = 0;
   my @stat;
 
-  open(LTMP, ">$lock_tmp") or
+  my $umask = 077;
+  if ( !open(LTMP, ">$lock_tmp") ) {
+      umask $umask;
       die "cannot create tmp lockfile $lock_tmp for $lock_file: $!\n";
+  }
+  umask $umask;
   autoflush LTMP 1;
   dbg("lock: created $lock_tmp");
 

@@ -2320,6 +2320,7 @@ sub secure_tmpfile {
   my $template = $tmpdir."/sa.$$.";
 
   my $reportfile;
+  my $umask = 0;
   do {
       # we do not rely on the obscurity of this name for security...
       # we use a average-quality PRG since this is all we need
@@ -2335,6 +2336,7 @@ sub secure_tmpfile {
       # ...rather, we require O_EXCL|O_CREAT to guarantee us proper
       # ownership of our file; read the open(2) man page.
   } while (! sysopen (TMPFILE, $reportfile, O_WRONLY|O_CREAT|O_EXCL, 0600));
+  umask $umask;
 
   return ($reportfile, \*TMPFILE);
 }

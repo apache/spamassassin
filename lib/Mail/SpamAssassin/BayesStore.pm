@@ -188,6 +188,7 @@ sub tie_db_writable {
     return 0;
   }
 
+  my $umask = umask 0;
   foreach my $dbname (@DBNAMES) {
     my $name = $path.'_'.$dbname;
     my $db_var = 'db_'.$dbname;
@@ -198,6 +199,7 @@ sub tie_db_writable {
 		 (oct ($main->{conf}->{bayes_file_mode}) & 0666)
        or goto failed_to_tie;
   }
+  umask $umask;
 
   # ensure we count 1 mailbox learnt as an event worth marking,
   # expiry-wise
@@ -206,6 +208,7 @@ sub tie_db_writable {
   return 1;
 
 failed_to_tie:
+  umask $umask;
   if ($self->{is_locked}) {
     Mail::SpamAssassin::Util::safe_unlock($self->{locked_file});
     $self->{is_locked} = 0;
@@ -288,8 +291,10 @@ sub expire_old_tokens_trapped {
   # use O_EXCL to avoid races (bonus paranoia, since we should be locked
   # anyway)
   my %new_toks;
+  my $umask = umask 0;
   tie %new_toks, "AnyDBM_File", $name, O_RDWR|O_CREAT|O_EXCL,
 	       (oct ($main->{conf}->{bayes_file_mode}) & 0666);
+  umask $umask;
   my @deleted_toks;
   my $oldest;
 
@@ -491,10 +496,13 @@ sub add_touches_to_journal {
 
   # use append mode, write atomically, then close, so simultaneous updates are
   # not lost
+  my $umask = 077;
   if (!open (OUT, ">>".$path)) {
     warn "cannot write to $path, Bayes db update ignored\n";
+    umask $umask;
     return;
   }
+  umask $umask;
   print OUT $self->{string_to_journal};
   if (!close OUT) {
     warn "cannot write to $path, Bayes db update ignored\n";
