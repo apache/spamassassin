@@ -50,7 +50,7 @@ sub new {
   $self->{terse_report_template} = '';
   $self->{spamtrap_template} = '';
   $self->{razor_config} = $ENV{'HOME'}."/razor.conf";
-  $self->{auto_whitelist_path} = undef;
+  $self->{auto_whitelist_path} = $ENV{'HOME'}."/.spamassassin/auto-whitelist";
   $self->{auto_whitelist_file_mode} = '0700';	# AS STRING
   $self->{auto_whitelist_threshold} = 3;
   $self->{rewrite_subject} = 1;
