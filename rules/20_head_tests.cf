@@ -162,6 +162,9 @@ describe NO_MX_FOR_FROM		No MX records for the From: domain
 header KNOWN_BAD_DIALUPS	eval:check_for_bad_dialup_ips()
 describe KNOWN_BAD_DIALUPS	Received via known spam-harbouring dialups
 
+header FROM_AND_TO_SAME		eval:check_for_from_to_equivalence()
+describe FROM_AND_TO_SAME	From and To the same address
+
 header BAD_HELO_WARNING		eval:check_for_bad_helo()
 describe BAD_HELO_WARNING	Fake name used in SMTP HELO command
 
