@@ -165,90 +165,15 @@ header T_RATWARE_RCVD_PF_1  Received =~ / \(Postfix\) with ESMTP id .+\; \S+ \d+
 header T_RATWARE_RCVD_AT    Received =~ / by \S+\@\S+ with Microsoft SMTPSVC/
 
 ########################################################################
-# Spamhaus suggested only testing final external IP with XBL, but try
-# technique on most blacklists since it helps so much with XBL
-# (just prefixed set name with 'x' and added T_ to start of test name)
 
-header __T_RCVD_IN_NJABL	eval:check_rbl('xnjabl-firsttrusted', 'combined.njabl.org.')
-describe __T_RCVD_IN_NJABL	Received via a relay in combined.njabl.org
-tflags __T_RCVD_IN_NJABL	net
+# McFadden Associates - SpamAssassin Recipe
+# 1/20/2004 - http://bl.csma.biz/
+header T_RCVD_IN_CSMA_BL	eval:check_rbl('csma_bl', 'bl.csma.biz.')
+describe T_RCVD_IN_CSMA_BL	Received via a blocked site in bl.csma.biz
+tflags T_RCVD_IN_CSMA_BL	net
 
-header T_RCVD_IN_NJABL_RELAY	eval:check_rbl_sub('xnjabl-firsttrusted', '127.0.0.2')
-describe T_RCVD_IN_NJABL_RELAY	NJABL: sender is confirmed open relay
-tflags T_RCVD_IN_NJABL_RELAY	net
+header T_DNS_FROM_SECURITYSAGE	eval:check_rbl_envfrom('securitysage', 'blackhole.securitysage.com.')
+describe T_RCVD_IN_SECURITYSAGE	Envelope sender in blackholes.securitysage.com
+tflags T_DNS_FROM_SECURITYSAGE	net
 
-header T_RCVD_IN_NJABL_DUL	eval:check_rbl('xnjabl-firsttrusted', 'combined.njabl.org.', '127.0.0.3')
-describe T_RCVD_IN_NJABL_DUL	NJABL: dialup sender did non-local SMTP
-tflags T_RCVD_IN_NJABL_DUL	net
-
-header T_RCVD_IN_NJABL_SPAM	eval:check_rbl_sub('xnjabl-firsttrusted', '127.0.0.4')
-describe T_RCVD_IN_NJABL_SPAM	NJABL: sender is confirmed spam source
-tflags T_RCVD_IN_NJABL_SPAM	net
-
-header T_RCVD_IN_NJABL_MULTI	eval:check_rbl_sub('xnjabl-firsttrusted', '127.0.0.5')
-describe T_RCVD_IN_NJABL_MULTI	NJABL: sent through multi-stage open relay
-tflags T_RCVD_IN_NJABL_MULTI	net
-
-header T_RCVD_IN_NJABL_CGI	eval:check_rbl_sub('xnjabl-firsttrusted', '127.0.0.8')
-describe T_RCVD_IN_NJABL_CGI	NJABL: sender is an open formmail
-tflags T_RCVD_IN_NJABL_CGI	net
-
-header T_RCVD_IN_NJABL_PROXY	eval:check_rbl_sub('xnjabl-firsttrusted', '127.0.0.9')
-describe T_RCVD_IN_NJABL_PROXY	NJABL: sender is an open proxy
-tflags T_RCVD_IN_NJABL_PROXY	net
-
-header __T_RCVD_IN_SORBS	eval:check_rbl('xsorbs-firsttrusted', 'dnsbl.sorbs.net.')
-describe __T_RCVD_IN_SORBS	SORBS: sender is listed in SORBS
-tflags __T_RCVD_IN_SORBS	net
-
-header T_RCVD_IN_SORBS_HTTP	eval:check_rbl_sub('xsorbs-firsttrusted', '127.0.0.2')
-describe T_RCVD_IN_SORBS_HTTP	SORBS: sender is open HTTP proxy server
-tflags T_RCVD_IN_SORBS_HTTP	net
-
-header T_RCVD_IN_SORBS_MISC	eval:check_rbl_sub('xsorbs-firsttrusted', '127.0.0.3')
-describe T_RCVD_IN_SORBS_MISC	SORBS: sender is open proxy server
-tflags T_RCVD_IN_SORBS_MISC	net
-
-header T_RCVD_IN_SORBS_SMTP	eval:check_rbl_sub('xsorbs-firsttrusted', '127.0.0.4')
-describe T_RCVD_IN_SORBS_SMTP	SORBS: sender is open SMTP relay
-tflags T_RCVD_IN_SORBS_SMTP	net
-
-header T_RCVD_IN_SORBS_SOCKS	eval:check_rbl_sub('xsorbs-firsttrusted', '127.0.0.5')
-describe T_RCVD_IN_SORBS_SOCKS	SORBS: sender is open SOCKS proxy server
-tflags T_RCVD_IN_SORBS_SOCKS	net
-
-#header T_RCVD_IN_SORBS_SPAM	eval:check_rbl_sub('xsorbs-firsttrusted', '127.0.0.6')
-#describe T_RCVD_IN_SORBS_SPAM	SORBS: sender is a spam source
-#tflags T_RCVD_IN_SORBS_SPAM	net
-
-header T_RCVD_IN_SORBS_WEB	eval:check_rbl_sub('xsorbs-firsttrusted', '127.0.0.7')
-describe T_RCVD_IN_SORBS_WEB	SORBS: sender is a abuseable web server
-tflags T_RCVD_IN_SORBS_WEB	net
-
-header T_RCVD_IN_SORBS_BLOCK	eval:check_rbl_sub('xsorbs-firsttrusted', '127.0.0.8')
-describe T_RCVD_IN_SORBS_BLOCK	SORBS: sender demands to never be tested
-tflags T_RCVD_IN_SORBS_BLOCK	net
-
-header T_RCVD_IN_SORBS_ZOMBIE	eval:check_rbl_sub('xsorbs-firsttrusted', '127.0.0.9')
-describe T_RCVD_IN_SORBS_ZOMBIE	SORBS: sender is on a hijacked network
-tflags T_RCVD_IN_SORBS_ZOMBIE	net
-
-header T_RCVD_IN_SORBS_DUL	eval:check_rbl('xsorbs-firsttrusted', 'dnsbl.sorbs.net.', '127.0.0.10')
-describe T_RCVD_IN_SORBS_DUL	SORBS: sent directly from dynamic IP address
-tflags T_RCVD_IN_SORBS_DUL	net
-
-header __T_RCVD_IN_SBL_XBL	eval:check_rbl('xsblxbl-firsttrusted', 'sbl-xbl.spamhaus.org.')
-describe __T_RCVD_IN_SBL_XBL	Received via a relay in Spamhaus SBL+XBL
-tflags __T_RCVD_IN_SBL_XBL	net
-
-header T_RCVD_IN_SBL		eval:check_rbl_sub('xsblxbl-firsttrusted', '127.0.0.2')
-describe T_RCVD_IN_SBL		Received via a relay in Spamhaus SBL
-tflags T_RCVD_IN_SBL		net
-
-header T_RCVD_IN_BL_SPAMCOP_NET	eval:check_rbl_txt('xspamcop-firsttrusted', 'bl.spamcop.net.')
-describe T_RCVD_IN_BL_SPAMCOP_NET	Received via a relay in bl.spamcop.net
-tflags T_RCVD_IN_BL_SPAMCOP_NET	net
-
-header T_RCVD_IN_RSL		eval:check_rbl_txt('xrsl-firsttrusted', 'relays.visi.com.')
-describe T_RCVD_IN_RSL		Received via a relay in RSL
-tflags T_RCVD_IN_RSL		net
+########################################################################
