@@ -1,5 +1,5 @@
 # SpamAssassin rules file: scores.
-# $Id: 50_scores.cf,v 1.214 2002/09/07 22:05:19 quinlan Exp $
+# $Id: 50_scores.cf,v 1.215 2002/09/10 10:13:01 jmason Exp $
 ###########################################################################
 # Default scores.   Note that if a test is named in the files, but a score is
 # not assigned here, the default score will be set to 1.
@@ -850,6 +850,9 @@ score RCVD_IN_SBL                    3.18
 score RCVD_IN_UNCONFIRMED_DSBL       0.77
 score RCVD_IN_VISI                   2.62
 score RCVD_IN_BONDEDSENDER         -10.0
+
+# provisional score, just added.
+score RCVD_IN_OPM                    1.0
 
 # ok_languages and ok_locales
 

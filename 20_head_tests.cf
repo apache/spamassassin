@@ -1,5 +1,5 @@
 # SpamAssassin rules file: tests.
-# $Id: 20_head_tests.cf,v 1.177 2002/09/09 18:53:05 jmason Exp $
+# $Id: 20_head_tests.cf,v 1.178 2002/09/10 10:13:01 jmason Exp $
 ###########################################################################
 
 require_version 2.50
@@ -253,6 +253,11 @@ tflags RCVD_IN_SBL              net
 header RCVD_IN_ORBS		rbleval:check_rbl('relay', 'orbs.dorkslayers.com.')
 describe RCVD_IN_ORBS		Received via a relay in orbs.dorkslayers.com
 tflags RCVD_IN_ORBS             net
+
+# http://www.blitzed.org/opm/ , a recommended open-proxies list.
+header RCVD_IN_OPM		rbleval:check_rbl('relay', 'opm.blitzed.org.')
+describe RCVD_IN_OPM		Received via a relay in opm.blitzed.org
+tflags RCVD_IN_OPM              net
 
 # DSBL catches open relays, badly-installed CGI scripts and open SOCKS and
 # HTTP proxies.  list.dsbl.org lists servers tested by "trusted" users,
