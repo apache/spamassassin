@@ -84,9 +84,9 @@ sub run {
     my $messages;
 
     # message-array
-    $MESSAGES = $self->message_array(\@targets);
+    ($MESSAGES, $messages) = $self->message_array(\@targets);
 
-    while ($message = $self->next_message()) {
+    while ($message = shift @{$messages}) {
       my ($class, undef, $date) = index_unpack($message);
       $result = $self->run_message($message);
       &{$self->{result_sub}}($class, $result, $date) if $result;
@@ -104,26 +104,17 @@ sub run {
     # Have some kids ...
     $self->start_children($self->{opt_j}, \@child, \@pid, $select);
 
-    # Prep a temp file for messages to run
     my $tmpf;
     ($tmpf, $self->{messageh}) = Mail::SpamAssassin::Util::secure_tmpfile();
     unlink $tmpf;
-
-    # Prep to have child labor results ...
-    my $io = IO::Socket->new();
-    my($child,$parent) = $io->socketpair(AF_UNIX,SOCK_STREAM,PF_UNSPEC);
+    undef $tmpf;
 
     # Have a child figure out what we should be doing ...
     if ( $tmpf = fork() ) { # parent
-      close($parent);
-      chomp($MESSAGES = readline $child);
       waitpid($tmpf, 0);
-      close($child);
     }
     elsif ( defined $tmpf ) { # child
-      close($child);
-      select $parent;
-      print $self->message_array(\@targets),"\n";
+      $self->message_array(\@targets, $self->{messageh});
       exit;
     }
     else {
@@ -132,7 +123,7 @@ sub run {
 
     # Ok, we now have a temp file with the messages to process ...
     seek ($self->{messageh}, 0, 0);
-    undef $io;
+    $MESSAGES = $self->next_message();
 
     # feed childen, make them work for it, repeat.
     while ($select->count()) {
@@ -211,6 +202,8 @@ sub run {
 	$self->start_children($self->{opt_j}, \@child, \@pid, $select);
       }
     }
+
+    close($self->{messageh});
     # reap children
     $self->reap_children($self->{opt_j}, \@child, \@pid);
   }
@@ -219,7 +212,7 @@ sub run {
 ############################################################################
 
 sub message_array {
-  my($self, $targets) = @_;
+  my($self, $targets, $fh) = @_;
 
   foreach my $target (@${targets}) {
     my ($class, $format, $rawloc) = split(/:/, $target, 3);
@@ -290,13 +283,12 @@ sub message_array {
     push @messages, (splice @s), (splice @h);
   }
 
-  my $count = scalar @messages;
-  my $message;
-  while ($message = shift @messages) {
-    print { $self->{messageh} } "$message\n";
+  if ( defined $fh ) {
+    print { $fh } map { "$_\n" } scalar(@messages), @messages;
+    return;
   }
-
-  return $count;
+  
+  return scalar(@messages), \@messages;
 }
 
 sub next_message {
