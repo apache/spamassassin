@@ -246,9 +246,6 @@ rawbody SPAM_FORM_RETURN	/return validate_form/
 describe SPAM_FORM_RETURN	Form for checking email address
 rawbody SPAM_FORM_ACTION	/action="\&\#\d+;\&\#\d+;\&\#\d+;\&\#\d+;/i
 describe SPAM_FORM_ACTION	Obfuscated action attribute in HTML form
-rawbody SPAM_FORM_INPUT		/<input name=.{0,5}submit.{0,99} Submit By E-Mail /i
-describe SPAM_FORM_INPUT	Form for verifying email address
-
 rawbody  OBFUSCATING_COMMENT	/[^\s>]<!--.{0,12}?-->[^\s<]/
 describe OBFUSCATING_COMMENT	HTML comments which obfuscate text
 
@@ -840,12 +837,6 @@ describe SIGN_UP		Sign up Free Today
 body FREE_CELL_PHONE            /\bfree .{0,12}(?:cell(?:ular)?|mobile) phone|cell(?:ular)? phone for free/i
 describe FREE_CELL_PHONE	Free Cell Phone
 
-body FREE_PREVIEW		/\bfree preview\b/i
-describe FREE_PREVIEW		Free Preview
-
-body FREE_ACCESS		/\bfree access\b/i
-describe FREE_ACCESS		Free Access
-
 body FREE_LEADS			/\bfree leads\b/i
 describe FREE_LEADS		Free Leads
 
@@ -867,12 +858,6 @@ describe FREE_QUOTE		Free Quote
 
 body FREE_QUOTE_INSTANT		/free.{0,12}(?:(?:instant|express|online|no.?obligation).{0,4})+.{0,32}\bquote/i
 describe FREE_QUOTE_INSTANT	Free express or no-obligation quote
-
-body FREE_INSTALL	        /\bfree installation\b/i
-describe FREE_INSTALL		Free Installation
-
-body FREE_SAMPLE	        /\bfree sample/i
-describe FREE_SAMPLE		Free Sample
 
 body FREE_DVD		        /\bfree dvd/i
 describe FREE_DVD		Free DVD
@@ -1137,9 +1122,6 @@ describe HIDDEN_CHARGES		Talks about Hidden Charges
 body GET_STARTED_NOW	        /\bget started (?-i:N)ow\b/i
 describe GET_STARTED_NOW	Get Started Now
 
-body GET_IT_NOW		        /\bget it now\b/i
-describe GET_IT_NOW		Get it now!
-
 body ONLY_COST		        /\bonly .{0,9}\$/i
 describe ONLY_COST		Only $$$
 
@@ -1215,9 +1197,6 @@ describe MLM			Multi Level Marketing mentioned
 
 body NOT_MLM                    /\bnot (?:MLM|multi.level.marketing)\b/i
 describe NOT_MLM		Apparently, NOT Multi Level Marketing
-
-body UNCLAIMED_MONEY	        /\bunclaimed (?:funds|money|prizes?|rewards?)\b/i
-describe UNCLAIMED_MONEY	People just leave money laying around
 
 body SERIOUS_CASH	        /\bserious cash\b/i
 describe SERIOUS_CASH		Serious cash
@@ -1501,8 +1480,6 @@ body FILTERED_BY_WORLDREMOVE    /filtered by WorldRemove/
 describe FILTERED_BY_WORLDREMOVE Claims to listen to some removal request list
 
 # 0.01     0.01     0.01    0.58    1.00  FREE_HOSTING (low matches)
-body FREE_HOSTING               /(?-i:F)ree hosting/i
-describe FREE_HOSTING           Contains 'free hosting' with capitals
 body FREE_HOSTING               /\bfree hosting\b/i
 describe FREE_HOSTING           Free Hosting
 

@@ -40,8 +40,6 @@ header RATWARE_HASH_2		X-Mailer =~ /^[A-Za-z0-9\._]{16,}$/
 describe RATWARE_HASH_2		Bulk email software fingerprint (hash 2) found in headers
 header RATWARE_JPFREE		X-Mailer =~ /jpfree Group Mail Express/
 describe RATWARE_JPFREE		Bulk email software fingerprint (jpfree) found in headers
-header RATWARE_GROUPMAIL	ALL =~ /Group Mail/
-describe RATWARE_GROUPMAIL	Bulk email software fingerprint (Group Mail) found in headers
 header RATWARE_VC_IPA		X-Mailer =~ /2\.0-b55-VC_IPA/
 describe RATWARE_VC_IPA		Bulk email software fingerprint (VC_IPA) found in headers
 header RATWARE_GROUPMAIL	ALL =~ /Group Mail/
