@@ -1,4 +1,4 @@
-# $Id: MailingList.pm,v 1.8 2002/08/17 16:06:16 jmason Exp $
+# $Id: MailingList.pm,v 1.9 2002/09/06 01:33:46 zelgadis Exp $
 
 # Eval Tests to detect genuine mailing lists.
 
@@ -42,10 +42,30 @@ sub detect_ml_ezmlm {
 #  List-Unsubscribe: .*<mailto:.*=unsubscribe>
 #  List-Archive: 
 #  X-Mailman-Version: \d
+#
+# However, for for mailing list membership reminders, most of
+# those headers are gone, so we identify on the following:
+#
+#  Subject: ...... mailing list memberships reminder
+#  X-Mailman-Version: \d
+#  Precedence: bulk
+#  X-No-Archive: yes
+#  X-Ack: no
+#  Errors-To: 
+#  X-BeenThere: 
 sub detect_ml_mailman {
     my ($self) = @_;
     return 0 unless $self->get('x-mailman-version') =~ /^\d/;
     return 0 unless $self->get('precedence') eq "bulk\n";
+
+    if ($self->get('subject') =~ /mailing list memberships reminder$/) {
+        return 0 unless $self->get('errors-to');
+        return 0 unless $self->get('x-beenthere');
+        return 0 unless $self->get('x-no-archive') =~ /yes/;
+        return 0 unless $self->get('x-ack') =~ /no/;
+        return 1;
+    }
+
     return 0 unless $self->get('list-id');
     return 0 unless $self->get('list-help') =~ /^<mailto:/;
     return 0 unless $self->get('list-post') =~ /^<mailto:/;
