@@ -104,6 +104,7 @@ score FORGED_EUDORAMAIL_RCVD         2.548
 score FORGED_GW05_RCVD               2.857
 score FORGED_HOTMAIL_RCVD            0.530
 score FORGED_JUNO_RCVD               2.027
+score FORGED_RCVD_FOUND              0.500
 score FORGED_YAHOO_RCVD              1.998
 score FORM_W_MAILTO_ACTION           2.971
 score FOR_FREE                       0.211
@@ -173,6 +174,7 @@ score MASS_EMAIL                     1.166
 score MAY_BE_FORGED                  1.341
 score MDAEMON_2_7_4                  1.900
 score MICRO_CAP_WARNING              3.987
+score MIME_MISSING_BOUNDARY          1.500
 score MIME_NULL_BLOCK                0.157
 score MIME_ODD_CASE                  1.500
 score MISSING_HEADERS                0.932
@@ -332,7 +334,6 @@ score YOU_HAVE_BEEN_SELECTED         2.606
 # some non-GA-generated scores: either network tests, occuring with
 # very low frequency, or very frequently causing false positives.
 
-score FORGED_RCVD_FOUND              0.5
 score BUGGY_CGI_PT                   4.0
 score BUGGY_CGI_DE                   4.0
 score BUGGY_CGI_DE_2                 4.0
