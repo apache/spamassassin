@@ -709,8 +709,6 @@ while (1) {
 	{
 	    logmsg "skipped large message in ".
 		sprintf("%3d", time - $start) ." seconds.";
-	    return 0;
-
 	}
 
 	# It might be a CHECK message, meaning that we should just check
@@ -726,14 +724,15 @@ while (1) {
 	elsif (/PING SPAMC\/(.*)/)
 	{
 		print $client "SPAMD/1.2 $resphash{EX_OK} PONG\r\n";
-		return 0;
 	}
         # If it was none of the above, then we don't know what it was.
 
 	else
 	{
 	    protocol_error ($_);
+	    return 1;
 	}
+	return 0;
       };
     }
 }
