@@ -1318,15 +1318,13 @@ sub check_for_num_yelling_lines {
 sub check_for_mime_excessive_qp {
   my ($self, $body) = @_;
 
-  my $length = 0;
-  my $qp = 0;
-
   # Note: We don't use $body because it removes MIME parts.  Instead, we
-  # get the raw unfiltered body.
-  foreach my $line (@{$self->{msg}->get_body()}) {
-      $length += length($line);
-      $qp += $line =~ s/\=([0-9A-Fa-f]{2})/$1/g;
-  }
+  # get the raw unfiltered body AND WE MUST NOT CHANGE ANY LINE.
+  $body = join('', @{$self->{msg}->get_body()});
+
+  my $length = length($body);
+  my $qp = $body =~ s/\=([0-9A-Fa-f]{2})/$1/g;
+
   # this seems like a decent cutoff
   return ($length != 0 && ($qp > ($length / 20)));
 }
@@ -1348,7 +1346,7 @@ sub check_for_mime_missing_boundary {
   }
 
   # Note: We don't use $body because it removes MIME parts.  Instead, we
-  # get the raw unfiltered message.
+  # get the raw unfiltered body AND WE MUST NOT CHANGE ANY LINE.
   foreach my $line (@{$self->{msg}->get_body()}) {
     if ($line =~ /^--/) {
       foreach my $boundary (@boundary) {
