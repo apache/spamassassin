@@ -1880,7 +1880,7 @@ sub slow_base64_decode {
   # insert the leftover stuff from last time
   $_ = $leftover . $_;
   # if there are not a multiple of 4 bytes, keep the leftovers for later
-  m/^((....)*)/; $_=$&; $leftover=$';
+  m/^((?:....)*)(.*)/ ; $_ = $1 ; $leftover = $2 ;
   # turn each group of 4 values into 3 bytes
   s/(....)/&b64decodesub($1)/eg;
   # special processing at EOF for last few bytes
