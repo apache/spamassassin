@@ -50,7 +50,7 @@ $WORD_OBFUSCATION_CHARS = '*_.,/|-+=';
 # HEAD TESTS:
 ###########################################################################
 
-sub check_for_from_mx {
+sub check_for_from_dns {
   my ($self) = @_;
 
   my $from = $self->get ('Reply-To:addr');
