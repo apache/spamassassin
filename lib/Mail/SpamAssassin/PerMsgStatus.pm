@@ -1474,6 +1474,10 @@ sub get_uri_list {
   foreach my $uri ( @uris ) {
     next if ( $uri =~ /^mailto:/i );
 
+    # bug 2844
+    # http://www.foo.biz?id=3 -> http://www.foo.biz/?id=3
+    $uri =~ s/^(https?:\/\/[^\/\?]+)\?/$1\/?/;
+
     my($nuri, $unencoded, $encoded) = Mail::SpamAssassin::Util::URLEncode($uri);
     if ( $nuri ne $uri ) {
       push(@uris, $nuri);
