@@ -931,6 +931,16 @@ sub remove_spamassassin_markup {
   1 while ($body =~ s/^\n?SPAM: ----.+\n(?:SPAM:.*\n)*SPAM: ----.+\n\n//);
 ###########################################################################
 
+  # 3.0 version -- support for previously-nonexistent Subject hdr.
+  # ensure the Subject line didn't *really* contain "(nonexistent)" in
+  # the original message!
+  if ($hdrs =~ /^X-Spam-Prev-Subject:\s*\(nonexistent\)$/m
+        && $hdrs !~ /^Subject:.*\(nonexistent\).*$/m)
+  {
+    $hdrs =~ s/(^|\n)X-Spam-Prev-Subject:\s*\(nonexistent\)\n/$1\n/s;
+    $hdrs =~ s/(^|\n)Subject:\s*[ \t]*.*\n(?:\s+\S.*\n)*/$1\n/s;
+  }
+
   # 3.0 version -- revert from X-Spam-Prev to original ...
   while ($hdrs =~ s/^X-Spam-Prev-(([^:]+:)[ \t]*.*\n(?:\s+\S.*\n)*)//m) {
     my($hdr, $name) = ($1,$2);
