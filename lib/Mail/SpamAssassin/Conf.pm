@@ -1834,7 +1834,7 @@ sub add_to_addrlist {
   foreach my $addr (@addrs) {
     my $re = lc $addr;
     $re =~ s/[\000\\\(]/_/gs;			# paranoia
-    $re =~ s/([^\*\?_a-zA-Z0-9])/\\$1/g;		# escape any possible metachars
+    $re =~ s/([^\*\?_a-zA-Z0-9])/\\$1/g;	# escape any possible metachars
     $re =~ s/\?/\./g;                           # "?" -> "."
     $re =~ s/\*/\.\*/g;				# "*" -> "any string"
     $self->{$singlelist}->{$addr} = qr/^${re}$/;
