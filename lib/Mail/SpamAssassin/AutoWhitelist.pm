@@ -68,11 +68,33 @@ sub new {
 
   $self->{factor} = $main->{conf}->{auto_whitelist_factor};
 
-  if (!defined $self->{main}->{pers_addr_list_factory}) {
+  my $factory;
+  if ($main->{pers_addr_list_factory}) {
+    $factory = $main->{pers_addr_list_factory};
+  }
+  else {
+    my $type = $main->{conf}->{auto_whitelist_factory};
+    if ($type =~ /^([_A-Za-z0-9:]+)$/) {
+      $type = $1;
+      eval '
+  	    require '.$type.';
+            $factory = '.$type.'->new();
+           ';
+      if ($@) { 
+	warn "auto-whitelist: $@";
+	undef $factory;
+      }
+      $main->set_persistent_address_list_factory($factory) if $factory;
+    }
+    else {
+      warn "auto-whitelist: illegal auto_whitelist_factory setting\n";
+    }
+  }
+
+  if (!defined $factory) {
     $self->{checker} = undef;
   } else {
-    $self->{checker} =
-  	$self->{main}->{pers_addr_list_factory}->new_checker ($self->{main});
+    $self->{checker} = $factory->new_checker($self->{main});
   }
 
   bless ($self, $class);
@@ -225,7 +247,7 @@ sub modify_address {
   $entry = $self->{checker}->get_addr_entry ($fulladdr);
   $self->{checker}->add_score($entry, $score);
 
-  return 0;
+  return 1;
 }
 
 ###########################################################################

@@ -1223,49 +1223,6 @@ auto and manual learning enabled.
     type => $CONF_TYPE_BOOL
   });
 
-=item auto_whitelist_factor n	(default: 0.5, range [0..1])
-
-How much towards the long-term mean for the sender to regress a message.
-Basically, the algorithm is to track the long-term mean score of messages for
-the sender (C<mean>), and then once we have otherwise fully calculated the
-score for this message (C<score>), we calculate the final score for the
-message as:
-
-C<finalscore> = C<score> +  (C<mean> - C<score>) * C<factor>
-
-So if C<factor> = 0.5, then we'll move to half way between the calculated
-score and the mean.  If C<factor> = 0.3, then we'll move about 1/3 of the way
-from the score toward the mean.  C<factor> = 1 means just use the long-term
-mean; C<factor> = 0 mean just use the calculated score.
-
-=cut
-
-  push (@cmds, {
-    setting => 'auto_whitelist_factor',
-    default => 0.5,
-    type => $CONF_TYPE_NUMERIC
-  });
-
-=item auto_whitelist_db_modules Module ...	(default: see below)
-
-What database modules should be used for the auto-whitelist storage database
-file.   The first named module that can be loaded from the perl include path
-will be used.  The format is:
-
-  PreferredModuleName SecondBest ThirdBest ...
-
-ie. a space-separated list of perl module names.  The default is:
-
-  DB_File GDBM_File NDBM_File SDBM_File
-
-=cut
-
-  push (@cmds, {
-    setting => 'auto_whitelist_db_modules',
-    default => 'DB_File GDBM_File NDBM_File SDBM_File',
-    type => $CONF_TYPE_STRING
-  });
-
 =item bayes_auto_learn ( 0 | 1 )      (default: 1)
 
 Whether SpamAssassin should automatically feed high-scoring mails (or
@@ -2236,9 +2193,9 @@ ignore these for scoring.
 
 Used to set flags on a test.  These flags are used in the
 score-determination back end system for details of the test's
-behaviour.  Please see C<bayes_auto_learn> and C<use_auto_whitelist>
-for more information about tflag interaction with those systems.
-The following flags can be set:
+behaviour.  Please see C<bayes_auto_learn> for more information
+about tflag interaction with those systems. The following flags
+can be set:
 
 =over 4
 
@@ -2353,61 +2310,6 @@ general running of SpamAssassin.
     }
   });
 
-=item use_auto_whitelist ( 0 | 1 )		(default: 1)
-
-Whether to use auto-whitelists.  Auto-whitelists track the long-term
-average score for each sender and then shift the score of new messages
-toward that long-term average.  This can increase or decrease the score
-for messages, depending on the long-term behavior of the particular
-correspondent.
-
-For more information about the auto-whitelist system, please look
-at the the C<Automatic Whitelist System> section of the README file.
-The auto-whitelist is not intended as a general-purpose replacement
-for static whitelist entries added to your config files.
-
-Note that certain tests are ignored when determining the final
-message score:
-
- - rules with tflags set to 'noautolearn'
-
-=cut
-
-  push (@cmds, {
-    setting => 'use_auto_whitelist',
-    is_admin => 1,
-    default => 1,
-    type => $CONF_TYPE_BOOL
-  });
-
-=item auto_whitelist_factory module (default: Mail::SpamAssassin::DBBasedAddrList)
-
-Select alternative whitelist factory module.
-
-=cut
-
-  push (@cmds, {
-    setting => 'auto_whitelist_factory',
-    is_admin => 1,
-    default => 'Mail::SpamAssassin::DBBasedAddrList',
-    type => $CONF_TYPE_STRING
-  });
-
-=item auto_whitelist_path /path/to/file	(default: ~/.spamassassin/auto-whitelist)
-
-Automatic-whitelist directory or file.  By default, each user has their own, in
-their C<~/.spamassassin> directory with mode 0700, but for system-wide
-SpamAssassin use, you may want to share this across all users.
-
-=cut
-
-  push (@cmds, {
-    setting => 'auto_whitelist_path',
-    is_admin => 1,
-    default => '__userstate__/auto-whitelist',
-    type => $CONF_TYPE_STRING
-  });
-
 =item bayes_path /path/to/file	(default: ~/.spamassassin/bayes)
 
 Path for Bayesian probabilities databases.  Several databases will be created,
@@ -2428,23 +2330,6 @@ database per user.)
     is_admin => 1,
     default => '__userstate__/bayes',
     type => $CONF_TYPE_STRING
-  });
-
-=item auto_whitelist_file_mode		(default: 0700)
-
-The file mode bits used for the automatic-whitelist directory or file.
-
-Make sure you specify this using the 'x' mode bits set, as it may also be used
-to create directories.  However, if a file is created, the resulting file will
-not have any execute bits set (the umask is set to 111).
-
-=cut
-
-  push (@cmds, {
-    setting => 'auto_whitelist_file_mode',
-    is_admin => 1,
-    default => '0700',
-    type => $CONF_TYPE_NUMERIC
   });
 
 =item bayes_file_mode		(default: 0700)
@@ -2664,72 +2549,6 @@ C<SELECT preference, value FROM _TABLE_ WHERE username = _USERNAME_ OR username 
     type => $CONF_TYPE_STRING
   });
 
-=item user_awl_dsn DBI:databasetype:databasename:hostname:port
-
-If you load user auto-whitelists from an SQL database, this will set the DSN
-used to connect.  Example: C<DBI:mysql:spamassassin:localhost>
-
-=cut
-
-  push (@cmds, {
-    setting => 'user_awl_dsn',
-    is_admin => 1,
-    type => $CONF_TYPE_STRING
-  });
-
-=item user_awl_sql_username username
-
-The authorized username to connect to the above DSN.
-
-=cut
-
-  push (@cmds, {
-    setting => 'user_awl_sql_username',
-    is_admin => 1,
-    type => $CONF_TYPE_STRING
-  });
-
-=item user_awl_sql_password password
-
-The password for the database username, for the above DSN.
-
-=cut
-
-  push (@cmds, {
-    setting => 'user_awl_sql_password',
-    is_admin => 1,
-    type => $CONF_TYPE_STRING
-  });
-
-=item user_awl_sql_table tablename
-
-The table user auto-whitelists are stored in, for the above DSN.
-
-=cut
-
-  push (@cmds, {
-    setting => 'user_awl_sql_table',
-    is_admin => 1,
-    default => 'awl',
-    type => $CONF_TYPE_STRING
-  });
-
-=item user_awl_sql_override_username
-
-Used by the SQLBasedAddrList storage implementation.
-
-If this option is set the SQLBasedAddrList module will override the set
-username with the value given.  This can be useful for implementing global
-or group based auto-whitelist databases.
-
-=cut
-
-  push (@cmds, {
-    setting => 'user_awl_sql_override_username',
-    default => '',
-    type => $CONF_TYPE_STRING
-  });
-
 =item user_scores_ldap_username
 
 This is the Bind DN used to connect to the LDAP server.
@@ -2902,10 +2721,6 @@ optional, and the default is shown below.
  _BAYESTCHAMMY_    number of hammy tokens found
  _HAMMYTOKENS(N)_  the N most significant hammy tokens (default, 5)
  _SPAMMYTOKENS(N)_ the N most significant spammy tokens (default, 5)
- _AWL_             AWL modifier
- _AWLMEAN_         Mean score on which AWL modification is based
- _AWLCOUNT_        Number of messages on which AWL modification is based
- _AWLPRESCORE_     Score before AWL
  _DATE_            rfc-2822 date of scan
  _STARS(*)_        one "*" (use any character) for each full score point
                    (note: limited to 50 'stars')

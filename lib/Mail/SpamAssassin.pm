@@ -737,12 +737,11 @@ whitelist database.
 
 sub add_address_to_whitelist {
   my ($self, $addr) = @_;
-  my $list = Mail::SpamAssassin::AutoWhitelist->new($self);
-  if ($list->add_known_good_address ($addr)) {
-    print "SpamAssassin auto-whitelist: adding address: $addr\n";
-  }
-  $list->finish();
+
+  $self->call_plugins("whitelist_address", { address => $addr });
 }
+
+###########################################################################
 
 =item $f->add_all_addresses_to_whitelist ($mail)
 
@@ -754,13 +753,9 @@ etc.), and the message body, and add them to the automatic whitelist database.
 sub add_all_addresses_to_whitelist {
   my ($self, $mail_obj) = @_;
 
-  my $list = Mail::SpamAssassin::AutoWhitelist->new($self);
   foreach my $addr ($self->find_all_addrs_in_mail ($mail_obj)) {
-    if ($list->add_known_good_address ($addr)) {
-      print "SpamAssassin auto-whitelist: adding address: $addr\n";
-    }
+    $self->call_plugins("whitelist_address", { address => $addr });
   }
-  $list->finish();
 }
 
 ###########################################################################
@@ -774,12 +769,11 @@ whitelist database.
 
 sub remove_address_from_whitelist {
   my ($self, $addr) = @_;
-  my $list = Mail::SpamAssassin::AutoWhitelist->new($self);
-  if ($list->remove_address ($addr)) {
-    print "SpamAssassin auto-whitelist: removing address: $addr\n";
-  }
-  $list->finish();
+
+  $self->call_plugins("remove_address", { address => $addr });
 }
+
+###########################################################################
 
 =item $f->remove_all_addresses_from_whitelist ($mail)
 
@@ -792,13 +786,9 @@ database.
 sub remove_all_addresses_from_whitelist {
   my ($self, $mail_obj) = @_;
 
-  my $list = Mail::SpamAssassin::AutoWhitelist->new($self);
   foreach my $addr ($self->find_all_addrs_in_mail ($mail_obj)) {
-    if ($list->remove_address ($addr)) {
-      print "SpamAssassin auto-whitelist: removing address: $addr\n";
-    }
+    $self->call_plugins("remove_address", { address => $addr });
   }
-  $list->finish();
 }
 
 ###########################################################################
@@ -812,12 +802,10 @@ whitelist database with a high score, effectively blacklisting them.
 
 sub add_address_to_blacklist {
   my ($self, $addr) = @_;
-  my $list = Mail::SpamAssassin::AutoWhitelist->new($self);
-  if ($list->add_known_bad_address ($addr)) {
-    print "SpamAssassin auto-whitelist: blacklisting address: $addr\n";
-  }
-  $list->finish();
+  $self->call_plugins("blacklist_address", { address => $addr });
 }
+
+###########################################################################
 
 =item $f->add_all_addresses_to_blacklist ($mail)
 
@@ -831,8 +819,6 @@ Note that To and Cc addresses are not used.
 sub add_all_addresses_to_blacklist {
   my ($self, $mail_obj) = @_;
 
-  my $list = Mail::SpamAssassin::AutoWhitelist->new($self);
-
   $self->init(1);
 
   my @addrlist = ();
@@ -842,15 +828,10 @@ sub add_all_addresses_to_blacklist {
   }
 
   foreach my $addr (@addrlist) {
-    if ($list->add_known_bad_address ($addr)) {
-      print "SpamAssassin auto-whitelist: blacklisting address: $addr\n";
-    }
+    $self->call_plugins("blacklist_address", { address => $addr });
   }
 
-  $list->finish();
 }
-
-###########################################################################
 
 ###########################################################################
 
@@ -1115,9 +1096,8 @@ If C<$keep_userstate> is true, compile_now() will revert any configuration
 options which have a default with I<__userstate__> in it post-init(),
 and then re-change the option before returning.  This lets you change
 I<$ENV{'HOME'}> to a temp directory, have compile_now() and create any
-files there as necessary (auto-whitelist, etc,) without disturbing the
-actual files as changed by a configuration option.  By default, this
-is disabled.
+files there as necessary without disturbing the actual files as changed
+by a configuration option.  By default, this is disabled.
 
 =cut
 
@@ -1378,26 +1358,6 @@ sub init {
   $set |= 1 unless $self->{local_tests_only};
   $set |= 2 if $self->{bayes_scanner}->is_scan_available();
   $self->{conf}->set_score_set ($set);
-
-  # Deal with autowhitelist
-  if ($self->{conf}->{use_auto_whitelist} &&
-      $self->{conf}->{auto_whitelist_factory})
-  {
-    my $factory;
-    my $type = $self->{conf}->{auto_whitelist_factory};
-    if ($type =~ /^([_A-Za-z0-9:]+)$/) {
-      $type = $1;
-      eval '
-	require '.$type.';
-	$factory = '.$type.'->new();
-      ';
-      if ($@) { warn "auto-whitelist: $@"; undef $factory; }
-    }
-    else {
-      warn "auto-whitelist: illegal auto_whitelist_factory setting\n";
-    }
-    $self->set_persistent_address_list_factory($factory) if defined $factory;
-  }
 
   if ($self->{only_these_rules}) {
     $self->{conf}->trim_rules($self->{only_these_rules});

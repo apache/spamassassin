@@ -56,7 +56,6 @@ use Carp;
 
 use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::EvalTests;
-use Mail::SpamAssassin::AutoWhitelist;
 use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Util;
 
@@ -313,28 +312,6 @@ sub learn {
     dbg("learn: auto-learning failed: $@");
     $self->{auto_learn_status} = "failed";
   }
-}
-
-# This function is for exclusive use by the autowhitelist function to
-# figure out the score to be used for inclusion in the AWL.
-sub _get_autowhitelist_points {
-  my ($self) = @_;
-
-  my $scores = $self->{conf}->{scores};
-  my $tflags = $self->{conf}->{tflags};
-  my $points = 0;
-
-  foreach my $test (@{$self->{test_names_hit}})
-  {
-    # ignore tests with 0 score in this scoreset,
-    # or if the test is a learning or userconf test
-    next if ($scores->{$test} == 0);
-    next if (exists $tflags->{$test} && $tflags->{$test} =~ /\bnoautolearn\b/);
-
-    $points += $scores->{$test};
-  }
-
-  return (sprintf "%0.3f", $points) + 0;
 }
 
 =item $score = $status->get_autolearn_points()

@@ -56,6 +56,7 @@ lib/Mail/SpamAssassin/PerMsgLearner.pm
 lib/Mail/SpamAssassin/PerMsgStatus.pm
 lib/Mail/SpamAssassin/PersistentAddrList.pm
 lib/Mail/SpamAssassin/Plugin.pm
+lib/Mail/SpamAssassin/Plugin/AWL.pm
 lib/Mail/SpamAssassin/Plugin/AutoLearnThreshold.pm
 lib/Mail/SpamAssassin/Plugin/DCC.pm
 lib/Mail/SpamAssassin/Plugin/DomainKeys.pm
@@ -167,6 +168,7 @@ rules/30_text_fr.cf
 rules/30_text_nl.cf
 rules/30_text_pl.cf
 rules/50_scores.cf
+rules/60_awl.cf
 rules/60_whitelist.cf
 rules/STATISTICS-set1.txt
 rules/STATISTICS-set2.txt

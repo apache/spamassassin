@@ -582,6 +582,45 @@ Reference to the original message object
 
 =back
 
+=item $plugin->whitelist_address( { options ... } )
+
+Called when a request is made to add an address to a
+persistent address list.
+
+=over 4
+
+=item address
+
+Address you wish to add.
+
+=back
+
+=item $plugin->blacklist_address( { options ... } )
+
+Called when a request is made to add an address to a
+persistent address list.
+
+=over 4
+
+=item address
+
+Address you wish to add.
+
+=back
+
+=item $plugin->remove_address( { options ... } )
+
+Called when a request is made to remove an address to a
+persistent address list.
+
+=over 4
+
+=item address
+
+Address you wish to remove.
+
+=back
+
 =item $plugin->finish ()
 
 Called when the C<Mail::SpamAssassin> object is destroyed.

@@ -28,12 +28,6 @@
 # user slip-up could result in scribbling side-effects in the bayes
 # db as a result -- which is hard to remedy.
 
-# TODO: this test name is hard-coded several places, change everywhere
-header AWL			eval:check_from_in_auto_whitelist()
-describe AWL			From: address is in the auto white-list
-tflags AWL			userconf noautolearn
-priority AWL                    1000
-
 # we *do* allow the user to autolearn based on this, because it's hard
 # to accidentally blacklist someone's From address.
 header USER_IN_BLACKLIST	eval:check_from_in_blacklist()
