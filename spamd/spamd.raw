@@ -827,6 +827,8 @@ sub spawn {
 
         # else carry on
         logmsg("error: $@ $!, continuing");
+
+        if ($client) { $client->close(); }  # avoid fd leaks
       }
 
       # if we changed UID during processing, change back!
