@@ -222,10 +222,13 @@ if ($opt{'ssl'}) {
 }
 
 # This can be changed on the command line with the -s flag; special cases:
-# * A log facility of 'null' disables all logging
-# REIMPLEMENT: add log_facility of 'stderr'
+# * A log facility of 'stderr' will log to STDERR
+# * " "   "        "  'null' disables all logging
 my $log_facility = $opt{'syslog'}        || 'mail';
 my $log_socket   = $opt{'syslog-socket'} || 'unix';
+$log_facility = 'stderr' if $log_socket eq   'none';
+$log_facility = 'null'   if $log_facility eq 'stderr' # don't duplicate log
+                            and $opt{'debug'};        # messages in debug mode
 
 # REIMPLEMENT: if $log_socket is none, fall back to log_facility 'stderr'.
 # If log_fac is stderr and $opt{'debug'}, set log_fac to 'null' to avoid
@@ -273,7 +276,7 @@ my $spamtest = Mail::SpamAssassin->new({
 
 # Do whitelist later in tmp dir. Side effect: this will be done as -u user.
 
-if ($log_facility ne 'null') { # REIMPLEMENT: or 'stderr'
+if ($log_facility ne 'stderr') {
   eval {
     setlogsock($log_socket);
     syslog('debug', "spamd starting");  # required to actually open the socket
@@ -289,11 +292,10 @@ if ($log_facility ne 'null') { # REIMPLEMENT: or 'stderr'
     $log_socket = 'inet' unless $@;
   }
 
-  # fall back to null if all else fails
-  # REIMPLEMENT: this should be stderr
+  # fall back to stderr if all else fails
   if ($@) {
-    warn "failed to setlogsock(${log_socket}) on this platform; reporting logs to null\n";
-    $log_facility = 'null';
+    warn "failed to setlogsock(${log_socket}) on this platform; reporting logs to stderr\n";
+    $log_facility = 'stderr';
   }
 }
 
@@ -1106,10 +1108,14 @@ sub logmsg
 
   warn "logmsg: $msg\n" if $opt{'debug'};
 
+  # log to STDERR:
+  # bug 605: http://bugzilla.spamassassin.org/show_bug.cgi?id=605
+  # more efficient for daemontools if --syslog=stderr is used
+  if ($log_facility eq 'stderr') {
+    print STDERR "$msg\n";
+  }
   # log to syslog (if logging isn't disabled completely via 'null')
-  # REIMPLEMENT: if 'stderr', just print $msg to STDERR with a 
-  # newline.
-  if ($log_facility ne 'null') {
+  elsif ($log_facility ne 'null') {
     openlog('spamd', 'cons,pid', $log_facility);
 
     eval { syslog('info', "%s", $msg); };
@@ -1486,7 +1492,9 @@ Currently, use of this without B<-u> is not supported.
 
 =item B<-s> I<facility>, B<--syslog>=I<facility>
 
-Specify the syslog facility to use (default: mail).
+Specify the syslog facility to use (default: mail).  If C<stderr> is specified,
+output will be written to stderr.  This is useful if you're running C<spamd>
+under the C<daemontools> package.
 
 =item B<--syslog-socket>=I<type>
 
