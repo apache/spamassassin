@@ -330,7 +330,11 @@ STDIN, to the automatic whitelist.
 =item B<-R>, B<--remove-from-whitelist>
 
 Remove all email addresses, in the headers and body of the mail message read
-from STDIN, from the automatic whitelist.
+from STDIN, from the automatic whitelist.  STDIN must get a full email message, so
+to remove a single address you have to get creative, eg:
+
+C<echo 'From: email@address.domain' | spamassassin -R> or
+C<echo -e '\r\nemail@address.domain' | spamassassin -R>
 
 =item B<-w> I<fromaddr>, B<--warning-from>=I<fromaddr>
 
