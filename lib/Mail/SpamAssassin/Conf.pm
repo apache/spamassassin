@@ -273,12 +273,6 @@ sub new {
   $self->{user_scores_sql_username} = '';
   $self->{user_scores_sql_password} = '';
 
-  # REIMPLEMENT: to allow integration with Horde's pref storage, we may want to
-  # reimplement this patch.  required: 5 config settings:
-  # "user_scores_sql_field_username", "...preference", "...value" and
-  # "...scope", and finally, 'user_scores_sql_table'.  Defaults are "username",
-  # "preference", "value", "spamassassin" and "userpref".
-
   # defaults for SQL based auto-whitelist
   $self->{user_awl_sql_table} = 'awl';
 
@@ -2666,10 +2660,60 @@ The password for the database username, for the above DSN.
       $self->{user_scores_sql_password} = $value; next;
     }
 
-    # REIMPLEMENT: to allow integration with Horde's pref stuff.  allow setting
-    # user_scores_sql_field_{username,preference,value,scope} and
-    # user_scores_sql_table here.  All just take \S+ and set the string of the
-    # same name on $self.
+=item user_scores_sql_custom_query query
+
+This option gives you the ability to create a custom SQL query to
+retrieve user scores and preferences.  In order to work correctly your
+query should return two values, the preference name and value, in that
+order.  In addition, there are several "variables" that you can use
+as part of your query, these variables will be substituted for the
+current values right before the query is run.  The current allowed
+variables are:
+
+=over 4
+
+=item _TABLE_
+
+The name of the table where user scores and preferences are stored, default
+is userpref.
+
+=item _USERNAME_
+
+The current user's username.
+
+=item _MAILBOX_
+
+The portion before the @ as derived from the current user's username.
+
+=item _DOMAIN_
+
+The portion after the @ as derived from the current user's username, this
+value may be null.
+
+=back
+
+The query must be one one continuous line in order to parse correctly.
+
+Here are several example queries, please note that these are broken up
+for easy reading, in your config it should be one continuous line.
+
+=item Current default query:
+
+SELECT preference, value FROM _TABLE_ WHERE username = _USERNAME_ OR username = '@GLOBAL' ORDER BY username ASC
+
+=item Use global and then domain level defaults:
+
+SELECT preference, value FROM _TABLE_ WHERE username = _USERNAME_ OR username = '@GLOBAL' OR username = '@~'||_DOMAIN_ ORDER BY username ASC
+
+=item Maybe global prefs should override user prefs:
+
+SELECT preference, value FROM _TABLE_ WHERE username = _USERNAME_ OR username = '@GLOBAL' ORDER BY username DESC
+
+=cut
+
+    if ($key eq 'user_scores_sql_custom_query') {
+      $self->{user_scores_sql_custom_query} = $value; next;
+    }
 
 =item user_awl_dsn DBI:databasetype:databasename:hostname:port
 

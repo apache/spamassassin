@@ -8,9 +8,11 @@ be able to update their local preferences on how SpamAssassin will filter their
 e-mail.  The most common use for a system like this would be for users to be
 able to update the white list of addresses (whitelist_from) without the need
 for them to update their $HOME/.spamassassin/user_prefs file.  It is also quite
-common for users listed in /etc/passwd to not have a home directory,
-therefore, the only way to have their own local settings would be through an
-RDBMS system.
+common for users listed in /etc/passwd to not have a home directory, therefore,
+the only way to have their own local settings would be through an RDBMS system.
+
+Note that this will NOT look for test rules, only local scores, whitelist_from(s),
+required_score, and auto_report_threshold.
 
 SpamAssassin will check the global configuration file (ie. any file matching
 /etc/mail/spamassassin/*.cf) for the following settings:
@@ -23,8 +25,8 @@ SpamAssassin will check the global configuration file (ie. any file matching
 The first option, user_scores_dsn, describes the data source name that will be
 used to create the connection to your SQL server.  It MUST be in the format
 as listed above.  <driver> should be the DBD driver that you have installed
-to access your database.
-<connection> can differ depending on which database you are using.
+to access your database. <connection> can differ depending on which
+database you are using.
 
 For MySQL, connection should take the format
 
@@ -53,9 +55,11 @@ For additional information, please refer to the DBD::* documentation
 for your particular driver.
 
 If the user_scores_dsn option does not exist, SpamAssassin will not
-attempt to use SQL for retrieving users' preferences. Note that this
-will NOT look for test rules, only local scores, whitelist_from(s),
-required_score, and auto_report_threshold.
+attempt to use SQL for retrieving users' preferences.
+
+If spamd can not connect using user_scores_dsn, or an error occurs when querying
+the SQL server during message filtering, spam checking will not be performed
+on that message.
 
 The other two required options tells SpamAssassin to use the defined
 username and password to establish the connection.
@@ -190,9 +194,8 @@ If you do not see the above text, then the SQL query was not successful, and
 you should see any error messages reported. <username> should be the user
 that was passed to spamd and is usually the user executing spamc.
 
-Note that any prefs stored under the username '@GLOBAL' are used as defaults
-for all users.  (in earlier versions, 'GLOBAL' was used, but this is now
-deprecated).
+Note that under the default configuration any prefs stored under the
+username '@GLOBAL' are used as defaults for all users.
 
 This code has only been tested using MySQL as the RDMS, but it has been written
 with the utmost simplicity using DBI, and any database driver that conforms to

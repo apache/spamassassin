@@ -89,19 +89,21 @@ sub load {
    my $dsn = $self->{main}->{conf}->{user_scores_dsn};
    if(!defined($dsn) || $dsn eq '') {
      dbg ("No DSN defined; skipping sql");
-     return;
+     return 1;
    }
 
    eval {
      # make sure we can see croak messages from DBI
-     local $SIG{'__DIE__'} = sub { warn "$_[0]"; };
+     local $SIG{'__DIE__'} = sub { die "$_[0]"; };
      require DBI;
      load_with_dbi($self, $username, $dsn);
    };
 
    if ($@) {
-     warn "failed to load user scores from SQL database, ignored\n";
+     warn "failed to load user ($username) scores from SQL database: $@\n";
+     return 0;
    }
+   return 1;
 }
 
 sub load_with_dbi {
@@ -110,8 +112,8 @@ sub load_with_dbi {
    my $main = $self->{main};
    my $dbuser = $main->{conf}->{user_scores_sql_username};
    my $dbpass = $main->{conf}->{user_scores_sql_password};
+   my $custom_query = $main->{conf}->{user_scores_sql_custom_query};
 
-   # REIMPLEMENT: use settings from $main->{conf} here
    my $f_preference = 'preference';
    my $f_value = 'value';
    my $f_username = 'username';
@@ -120,11 +122,25 @@ sub load_with_dbi {
    my $dbh = DBI->connect($dsn, $dbuser, $dbpass, {'PrintError' => 0});
 
    if($dbh) {
-      my $sql = "select $f_preference, $f_value  from $f_table where ". 
-        "$f_username = ".$dbh->quote($username).
-        " or $f_username = 'GLOBAL'".
-        " or $f_username = '\@GLOBAL' order by $f_username asc";
+     my $sql;
+     if (defined($custom_query)) {
+       $sql = $custom_query;
+       my $quoted_username = $dbh->quote($username);
+       my ($mailbox, $domain) = split('@',$username);
+       my $quoted_mailbox = $dbh->quote($mailbox);
+       my $quoted_domain = $dbh->quote($domain);
 
+       $sql =~ s/_USERNAME_/$quoted_username/g;
+       $sql =~ s/_TABLE_/$f_table/g;
+       $sql =~ s/_MAILBOX_/$quoted_mailbox/g;
+       $sql =~ s/_DOMAIN_/$quoted_domain/g;
+     }
+     else {
+       $sql = "select $f_preference, $f_value  from $f_table where ". 
+        "$f_username = ".$dbh->quote($username).
+        " or $f_username = '\@GLOBAL' order by $f_username asc";
+     }
+     dbg("ConfSourceSQL: executing SQL: $sql");
       my $sth = $dbh->prepare($sql);
       if($sth) {
          my $rv  = $sth->execute();
@@ -135,14 +151,15 @@ sub load_with_dbi {
             while(@row = $sth->fetchrow_array()) {
                $text .= "$row[0]\t$row[1]\n";
             }
+dbg("Returned text is:\n$text");
             if($text ne '') {
             	$main->{conf}->parse_scores_only(join('',$text));
             }
             $sth->finish();
-         } else { warn "SQL Error: $sql\n".$sth->errstr."\n"; }
-      } else { warn "SQL Error: " . $dbh->errstr . "\n"; }
+         } else { die "SQL Error: $sql\n".$sth->errstr."\n"; }
+      } else { die "SQL Error: " . $dbh->errstr . "\n"; }
    $dbh->disconnect();
-   } else { warn "SQL Error: " . DBI->errstr . "\n"; }
+   } else { die "SQL Error: " . DBI->errstr . "\n"; }
 }
 
 ###########################################################################

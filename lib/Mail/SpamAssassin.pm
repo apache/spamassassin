@@ -1034,7 +1034,10 @@ sub load_scoreonly_sql {
 
   my $src = Mail::SpamAssassin::ConfSourceSQL->new ($self);
   $self->{username} = $username;
-  $src->load($username);
+  unless ($src->load($username)) {
+    return 0;
+  }
+  return 1;
 }
 
 ###########################################################################

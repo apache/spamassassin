@@ -784,7 +784,10 @@ sub check {
     }
 
     if ($opt{'sql-config'} && !defined($current_user)) {
-        handle_user_sql('nobody');
+      unless (handle_user_sql('nobody')) {
+	service_unavailable_error("Error fetching user preferences via SQL");
+	exit;
+      }
     }
 
     if ($opt{'ldap-config'} && !defined($current_user)) {
@@ -983,13 +986,19 @@ sub got_user_header
   if (!$opt{'user-config'})
   {
     if ($opt{'sql-config'}) {
-      handle_user_sql($current_user);
+      unless (handle_user_sql($current_user)) {
+	service_unavailable_error("Error fetching user preferences via SQL");
+	exit;
+      }	
     } elsif ($opt{'ldap-config'}) {
       handle_user_ldap($current_user);
     } elsif ($opt{'virtual-config'} || $opt{'virtual-config-dir'}) {
       handle_virtual_user($current_user);
     } elsif ($opt{'setuid-with-sql'}) {
-      handle_user_setuid_with_sql($current_user);
+      unless (handle_user_setuid_with_sql($current_user)) {
+	service_unavailable_error("Error fetching user preferences via SQL");
+	exit;
+      }
       $setuid_to_user = 1; #to benefit from any paranoia.
     } elsif ($opt{'setuid-with-ldap'}) {
       handle_user_setuid_with_ldap($current_user);
@@ -1000,7 +1009,10 @@ sub got_user_header
   {
     handle_user($current_user);
     if ($opt{'sql-config'}) {
-      handle_user_sql($current_user);
+      unless (handle_user_sql($current_user)) {
+	service_unavailable_error("Error fetching user preferences via SQL");
+	exit;
+      }
     }
   }
   return 0;
@@ -1024,6 +1036,13 @@ sub protocol_error
     my $resp = "EX_PROTOCOL";
     print $client "SPAMD/1.0 $resphash{$resp} Bad header line: $err\r\n";
     logmsg "bad protocol: header error: $err";
+}
+
+sub service_unavailable_error {
+  my ($err) = @_;
+  my $resp = "EX_UNAVAILABLE";
+  print $client "SPAMD/1.0 $resphash{$resp} Service Unavailable: $err\r\n";
+  logmsg "service unavailable: $err";
 }
 
 ###########################################################################
@@ -1228,10 +1247,11 @@ sub handle_virtual_user
     return(1);
 }
 
-sub handle_user_sql
-{
-    $spamtest->load_scoreonly_sql (@_);
-    return 1;
+sub handle_user_sql {
+  unless($spamtest->load_scoreonly_sql(@_)) {
+    return 0;
+  }
+  return 1;
 }
 
 sub handle_user_ldap
@@ -1284,7 +1304,9 @@ sub handle_user_setuid_with_sql
        }
     }
 	  
-    $spamtest->load_scoreonly_sql ($username);
+    unless ($spamtest->load_scoreonly_sql($username)) {
+      return 0;
+    }
 
     $spamtest->signal_user_changed ({ username => $username });
     return 1;
