@@ -42,7 +42,11 @@
 ### END INIT INFO
 
 # Source SuSE config
-. /etc/rc.config
+if !  grep /etc/SuSE-release -e '^VERSION *= *[67]' &>/dev/null; then
+    echo -e "\n\n\t\033[1;31mSorry, this script just works with SuSE up to 7.x\033[m\017\t\n\n" >&2
+    exit 5
+fi
+. /etc/rc.config || exit 5
 
 # Determine the base and follow a runlevel link name.
 base=${0##*/}
@@ -117,13 +121,13 @@ function my_getpid()
   echo $pid
 
   # is there any process running at that pid?
-  test -d /proc/$pid         || return 10
-
-  cmd=`cat /proc/$pid/cmdline 2>/dev/null | cut -d' ' -f1`
-  test -n "$cmd"             || return 1
+  test -f /proc/$pid/cmdline \
+    -a -r /proc/$pid/cmdline || return 10
 
   # is that a spamd or what?
-  test $cmd = $SPAMD_BIN     || return 11
+  cmd=`cat /proc/$pid/cmdline 2>/dev/null | grep -aF $SPAMD_BIN`
+  test -n "$cmd"             || return 11
+
   return 0
 }
 
