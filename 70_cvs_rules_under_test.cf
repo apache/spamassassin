@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.543 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.544 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -346,4 +346,11 @@ describe T_OBFUSCATING_BAD_PI	Contains illegal XML PI to obfuscate text
 rawbody T_OBFUSCATING_BAD_TAG_2	/\w(?:<\s*[^>]*>)+\w/
 describe T_OBFUSCATING_BAD_TAG_2 Contains illegal HTML tags to obfuscate text
 
+# rule to compare against MIME_HTML_ONLY
+# (note similar rule: MIME_HTML_ONLY_MULTI)
+header __CTYPE_MULTIPART_MIXED	Content-Type =~ /multipart\/mixed/i
+meta T_MIME_HTML_ONLY_MULTI_MIXED	(__CTYPE_MULTIPART_MIXED && __MIME_HTML_ONLY)
+#
+header __CTYPE_MULTIPART_OTHER	Content-Type =~ /multipart\/(?!mixed)(?!alternative)/i
+meta T_MIME_HTML_ONLY_MULTI_OTHER	(__CTYPE_MULTIPART_OTHER && __MIME_HTML_ONLY)
 
