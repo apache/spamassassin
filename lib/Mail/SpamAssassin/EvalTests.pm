@@ -1356,11 +1356,9 @@ sub check_for_faraway_charset_in_body {
 
   my $content_type = $self->get('Content-Type');
   $content_type = '' unless defined $content_type;
-  $content_type =~ /\bboundary\s*=\s*["']?(.*?)["']?(?:;|$)/i;
+  $content_type =~ /\bboundary\s*=\s*["']?(.*?)["']?(?:;|$)/i
+    or return 0; # No message sections to check
   my $boundary = "\Q$1\E";
-
-  # No message sections to check
-  return 0 unless ( defined $boundary );
 
   # Grab the whole mime body part
   my($mimebody) = ($$fulltext =~ /^(--$boundary\n.*
