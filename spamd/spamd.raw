@@ -478,6 +478,10 @@ sub check {
        }
     }
 
+   if ($opt{'sql-config'} && !defined($current_user)) {
+     handle_user_sql('nobody');
+   }
+
     my $resp = "EX_OK";
 
     # Now read in message
@@ -1094,6 +1098,9 @@ Turn on SQL lookups even when per-user config files have been disabled
 with B<-x>. this is useful for spamd hosts which don't have user's
 home directories but do want to load user preferences from an SQL
 database.
+
+If your spamc client does not support sending the C<User:> header,
+like C<exiscan>, then the SQL username used will always be B<nobody>.
 
 =item B<-Q>, B<--setuid-with-sql>
 
