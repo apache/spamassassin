@@ -33,8 +33,7 @@ sub cmdline_run {
              'config-file|C=s'                  => \$opt{'config-file'},
              'prefs-file|p=s'                   => \$opt{'prefs-file'},
 
-             # arguments from mass-check.  don't add more unless you're
-             # sure they're required!
+	     'folders|f=s'			=> \$opt{'folders'},
              'showdots'                         => \$opt{'showdots'},
 	     'no-rebuild'			=> \$opt{'norebuild'},
 	     'force-expire'			=> \$opt{'force-expire'},
@@ -102,6 +101,15 @@ sub cmdline_run {
 
     $SIG{INT} = \&killed;
     $SIG{TERM} = \&killed;
+
+    if ($opt{folders}) {
+      open (F, $opt{folders}) || die $!;
+      while (<F>) {
+	chomp;
+	target($_);
+      }
+      close (F);
+    }
 
     my $iter = new Mail::SpamAssassin::ArchiveIterator ({
 	'opt_j' => 1,
