@@ -4,7 +4,7 @@
 # spamd children ;)
 
 use lib '.'; use lib 't';
-use SATest; sa_t_init("spamd_prefork_stress");
+use SATest; sa_t_init("spamd_prefork_stress_2");
 use Test;
 
 our $RUN_THIS_TEST;
@@ -41,7 +41,7 @@ q{ NO_REAL_NAME}, 'noreal',
 
 );
 
-start_spamd("-L -m1");
+start_spamd("-L -m1 --round-robin");
 ok ($spamd_pid > 1);
 ok (spamcrun ("< data/spam/001", \&patterns_run_cb));
 ok_all_patterns();
