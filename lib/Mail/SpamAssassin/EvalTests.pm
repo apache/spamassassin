@@ -1643,7 +1643,7 @@ sub check_for_mime_excessive_qp {
   return ($length != 0 && ($qp > ($length / 20)));
 }
 
-sub check_language {
+sub check_language {            # UNDESIRED_LANGUAGE_BODY
   my ($self, $body) = @_;
 
   my @languages = split (' ', $self->{conf}->{ok_languages});
