@@ -16,14 +16,14 @@ The first time you do this: check out the CVS version of SpamAssassin, using
 Every night from then on, check out the correct version of SpamAssassin.  This
 is tagged nightly using "CURRENT_CORPORA_SUBMIT_VERSION":
 
-  cd /home/you/directory
+  cd /home/you/directory/spamassassin
   cvs -z3 update -dP -r CURRENT_CORPORA_SUBMIT_VERSION
 
 
 Next, cd to the "masses" subdir and create a new pair of mass-check logfiles
 using that tag.
 
-  cd /home/you/directory/masses
+  cd /home/you/directory/spamassassin/masses
   rm nonspam.log spam.log
   touch nonspam.log spam.log
 
