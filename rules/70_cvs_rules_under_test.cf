@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.587 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.588 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -17,13 +17,6 @@
 # distribution for more details.
 #
 ###########################################################################
-
-# 2003-02-23: quinlan
-# Message-Id: format tests
-# 13 hexadecimal digits instead of 12
-header T_MSGID_OUTLOOK_HEX	Message-Id =~ /<[a-f0-9]{13}\$[a-f0-9]{8}\$[a-f0-9]{8}\@/
-# this one high correlation with ratware "EMWAC SMTPRS"
-header T_MSGID_B_DIGITS		Message-Id =~ /<B\d{10}\@/
 
 # NOTE: uses __ANY_OUTLOOK_MUA.  This catches Send-Safe and a few others
 header __OL_STYLE_FROM		From =~ /\".*\" <.+>/
