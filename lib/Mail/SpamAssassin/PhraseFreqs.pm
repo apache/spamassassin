@@ -39,7 +39,10 @@ sub check_phrase_freqs {
   # msg_len_factor: 1000 = 200 words of 5 chars avg.  so a message of 
   # 2000 chars will score 1/2 as much to compensate for having more phrases
   #
-  my $msg_len_factor = 1000 / (length $text);
+  my $msg_len_factor;
+  if(length($text) > 0) { $msg_len_factor = 1000 / length($text); }
+  # avoid division by zero and have really short messages score high - crh
+  else { $msg_len_factor = 1000; }
 
   # print "words found: $text\n";
 
