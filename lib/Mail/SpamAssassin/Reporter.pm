@@ -52,7 +52,8 @@ sub report {
   $self->{msgtext} = $hdrs."\n".$body;
 
   if ($self->is_razor_available()) {
-    $self->razor_report($self->{msgtext});
+    $self->razor_report($self->{msgtext})
+    	and print "SpamAssassin: spam reported to Razor.\n";
   }
 }
 
@@ -114,7 +115,7 @@ sub razor_report {
 
   1;} or warn "razor check failed: $! $@";
 
-  if ($response =~ /Positive $sig/) { return 1; }
+  if ($response =~ /Accepted $sig/) { return 1; }
   return 0;
 }
 

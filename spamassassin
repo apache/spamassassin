@@ -194,8 +194,10 @@ spamassassin - mail filter to identify spam using text analysis
   spamassassin [option ...] < mailmessage > output
 
   -t               only testing
+  -r               report this message as verified spam
   -c config        configuration file
   -p prefs         user preferences file
+  -D               produce diagnostic output
 
 =head1 DESCRIPTION
 
@@ -204,8 +206,11 @@ SpamAssassin is a mail filter to identify spam using text analysis.
 Using its rule base, it uses a wide range of heuristic tests on mail headers
 and body text to identify "spam", also known as unsolicited commercial email.
 
-Once identified, the mail is then tagged as spam for later filtering using
-the user's own mail user-agent application.
+Once identified, the mail is then tagged as spam for later filtering using the
+user's own mail user-agent application.
+
+SpamAssassin also includes support for reporting spam messages to collaborative
+filtering databases, such as Vipul's Razor ( http://razor.sourceforge.net/ ).
 
 The default tagging operations that take place are detailed in the L<TAGGING>
 section below.
@@ -286,6 +291,7 @@ be set.
 
 C<Mail::SpamAssassin>
 C<Mail::Audit>
+C<Razor>
 
 =head1 AUTHOR
 
@@ -298,6 +304,7 @@ C<Mail::Audit>
 =head1 COREQUISITES
 
 C<Net::DNS>
+C<Razor>
 
 =cut
 
