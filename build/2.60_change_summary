@@ -1,5 +1,15 @@
+Pick it up from:
 
-Changes since 2.50:
+  http://SpamAssassin.org/released/Mail-SpamAssassin-2.60-rc5.tar.gz
+  http://SpamAssassin.org/released/Mail-SpamAssassin-2.60-rc5.zip
+
+md5sums:
+
+  f139350d41271ad2858227cd79800eef  Mail-SpamAssassin-2.60-rc5.tar.gz
+  57603fbe604048a870bcec1f1c460765  Mail-SpamAssassin-2.60-rc5.zip
+
+
+Changes since 2.5x:
 
 - spamd now supports UNIX-domain sockets for low-overhead scanning, thanks
   to Steve Friedl for this.  Strongly recommended if you're running spamc
@@ -40,6 +50,10 @@ Changes since 2.50:
 - new bayes backend, including new database format, ability to learn messages
   to the journal, etc.  Improved expiration mechanism
 
+- HTML::Parser 3.24 or higher is now required
+
+- taint mode is now enabled by default for extra security
+
 - lots of bugs fixed and new rules added. ;)
 
 
@@ -73,24 +87,48 @@ added to sa-learn via the "--dump" parameter.  Please see the sa-learn
 man/pod documentation for more info.
 
 
-Changes since 2.60 rc2:
+Other notes:
 
-- bug 2334: trusted network inference ignores 'local tests only'
+- SpamAssassin 2.6x will be the last release supporting perl 5.005,
+  so it's suggested to upgrade to at least perl 5.6.1
 
-- bug 2370: removed support for non-DB_File database modules in Bayes
+- Razor2 isn't fully taint safe.  So since SpamAssassin 2.60 enables
+  taint mode by default, there's a Razor2.patch file which needs to be
+  applied to Razor2.  Documentation exists in the patch file.
 
-- bug 2365: Osirusoft rules dropped
 
-- bug 2356: report_safe_copy_headers was broken
+Changes since 2.60 rc4:
 
-- bug 2338: Razor static srand() worked around
+- misc documentation fixes
 
-- bug 2360: Bonded Sender queries changed zone
+- include information about patching Razor2 to be more taint safe,
+  since SpamAssassin uses taint mode by default now.
 
-- bug 2347: add_header did not support multiple newlines
+- set BAYES_40 and BAYES_44 to be -0.001 instead of +0.001
 
-- bug 2354: header options now more backward-compatible
+- bug 2302: to determine if SpamAssassin markup is in the message,
+  use X-Spam-Checker-Version instead of X-Spam-Status since the latter
+  is no longer required
 
-- bug 2359: "make install" logic for non-standard PREFIXes broken
+- bug 2395: when removing SpamAssassin markup from the message, remove
+  any custom headers that would be added by the site/user configuration
 
---j.
+- bug 2442: taint mode detection may not always work if what calls
+  SpamAssassin had untainted certain environment variables.  SpamAssassin
+  will now try much harder to detect taint mode.
+
+- bug 2445: if "always_add_headers 1" is enabled and a message hits zero
+  rules, an uninitialized value warning could occur.
+
+- bug 2450: if SA is run in taint mode, instead of resetting PATH to a
+  given directory set, untaint the current PATH directories.  also,
+  make sure the PATH seperators were correct for the given platform.
+
+- bug 2452: perl 5.005 could overwrite the local.cf file during install
+  if it already existed
+
+- bug 2460: perl 5.005's glob function is not taint safe, so disable
+  globbing in perl 5.005 running in taint mode
+
+- bug 2463: use of environment variables may cause uninitialized value
+  warnings when calling Razor, DCC, or Pyzor due to environment copying
