@@ -1,7 +1,7 @@
-# SpamAssassin rules file: CVS rules under test, $Rev$
+# SpamAssassin rules file: rules under test, $Rev$
 #
 # This file is a placeholder for rules "under probation", ie. checked into
-# CVS for testing. It should not be distributed; if the rules have good
+# SVN for testing. It should not be distributed; if the rules have good
 # stats after a mass-check or two, then fold them into the distributed
 # rules files.
 #
@@ -540,3 +540,7 @@ header T_REGSOFT        Received =~ /hd\.regsoft\.net/i
 # same ratware; forges dates as 'with SMTP; Jan, 17 2004 22:05:48 -0300'
 header T_DATE_COMMA     Received =~ /\bwith \S+\; [A-Z][a-z][a-z],\s+\d\d\s+\d\d\d\d\s/
 
+# bug 3028, make HAS_MSG_FROM2 case insensitive -- also trying to ignore
+# anything not an address
+header __HAS_MSN_FROM2         From:addr =~ /(?:hotmail|msn)\.com/i
+meta T_FAKED_HOTMAIL_DAV         (__HAS_MSN_RCVD_DAV && __HAS_MSN_ORIG_EMAIL && !__HAS_MSN_FROM2)
