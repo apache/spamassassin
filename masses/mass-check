@@ -1,12 +1,11 @@
 #!/usr/bin/perl
 
+use Devel::Peek;
 use lib "../lib";
 use Mail::SpamAssassin;
 
-use Mail::SpamAssassin::NoMailAudit;
-
 #use Mail::Audit;
-#use Mail::Internet;
+use Mail::SpamAssassin::NoMailAudit;
 
 $cffile = '../rules/50_scores.cf';
 
@@ -57,6 +56,9 @@ foreach my $folder (@ARGV) {
     mass_check_mailbox($folder);
   }
 }
+
+exit;
+
 
 sub mass_check_mh_tar_file {
   my $filename = shift;
@@ -176,6 +178,8 @@ sub docheck {
   printf "%s %2d %s %s\n",
 		    ($yorn ? 'Y' : '.'),
 		    $hits, $id, $tests;
+
+# system ("ps alxww | grep mass-check | grep perl | grep -v grep");#JMD
 }
 
 
