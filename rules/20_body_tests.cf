@@ -453,7 +453,7 @@ body TRACKER_ID		/^[a-z0-9]{6,}[-_a-z0-9]{12,}[a-z0-9]{6,}\s*\z/is
 describe TRACKER_ID	Incorporates a tracking ID number
 
 # heh heh heh... tags used to (presumably) generate those anti-Razor random IDs
-body MARKUP_RAND                /{%RAND%}/
+body MARKUP_RAND                /\{%RAND%\}/
 describe MARKUP_RAND            RAND found, spammer forgot to run the random-ID generator
 body MARKUP_SSPL                /SSPLTM/
 describe MARKUP_SSPL            SSPL found, spammer forgot to run the random-ID generator
@@ -992,7 +992,7 @@ describe DRASTIC_REDUCED	Drastically Reduced
 body DO_IT_TODAY        /\b(?:join|register|order|apply) .{0,10}(?-i:T)oday\b/i
 describe DO_IT_TODAY		Do it Today
 
-body ACT_NOW		        /\b(?:act.{0,4} now|do.{0.5} hesitate|start now)\b/i
+body ACT_NOW		        /\b(?:act.{0,4} now|do.{0,5} hesitate|start now)\b/i
 describe ACT_NOW		Act Now! Don't Hesitate!
 
 body WHY_WAIT		        /\b(?:why wait|what are you waiting for)\b/i
