@@ -33,6 +33,9 @@ describe REPLY_REMOVE_SUBJECT	List removal information
 body REMOVE_IN_QUOTES		/\"remove\"/i
 describe REMOVE_IN_QUOTES	List removal information
 
+body DISCONTINUE		/\"discontinue\".{1,15}no further notices/i
+describe DISCONTINUE		List removal information
+
 rawbody JAVASCRIPT			/<SCRIPT/i
 describe JAVASCRIPT			JavaScript code
 rawbody REALLY_UNSAFE_JAVASCRIPT	/<(?:body|frame) [^>]*on(?:Load|UnLoad|BeforeUnload)[\s=3d\"\']*\S+[\"\']?/is
