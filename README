@@ -52,6 +52,11 @@ SpamAssassin, which runs persistently.  Using "spamc", a lightweight C
 client, this allows an MTA to process large volumes of mail through
 SpamAssassin without having to fork/exec a perl interpreter for each one.
 
+For those sites running qmail as your MTA, the "qmail" directory contains
+two ways to integrate spamc with your system.  Kobe Lenjou has contributed
+a patch to qmail-scanner, and John Peacock has contributed a QMAILQUEUE
+enabled qmail-spamc.  See the README*'s for more details.
+
 Ian R. Justman has contributed "spamproxy", a spam-filtering SMTP proxy
 server.  This lives in the "released" directory on the web site.
 
