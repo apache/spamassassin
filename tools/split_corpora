@@ -58,6 +58,9 @@ die $@ unless ($@ =~ /HITLIMIT/);
 foreach my $fh (@bucket_fhs) {
   $fh->close();
 }
+if ($messagecount < $opt_l) {
+  warn "warning: only found $messagecount messages instead of $opt_l\n";
+}
 
 #############################################
 
