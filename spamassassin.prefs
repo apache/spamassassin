@@ -37,13 +37,13 @@ ok_locales		en
 # By default, the subject lines of suspected spam will be tagged.
 # This can be disabled here.
 #
-# rewrite_subject 0
+# rewrite_subject 1
 
-# By default, spamassassin will include its report in the body
+# By default, SpamAssassin will include its report in the body
 # of suspected spam. Enabling this causes the report to go in the
 # headers instead. Using 'use_terse_report' for this is recommended.
 #
-# report_header 1
+# report_header 0
 
 # By default, SpamAssassin uses a fairly long report format.
 # Enabling this uses a shorter format which includes all the
@@ -52,16 +52,22 @@ ok_locales		en
 #
 # use_terse_report 0
 
-# By default, spamassassin will change the Content-type: header of
+# By default, SpamAssassin will change the Content-type: header of
 # suspected spam to "text/plain". This is a safety feature. If you
 # prefer to leave the Content-type header alone, set this to 0.
 #
-# defang_mime 0
+# defang_mime 1
 
 # By default, SpamAssassin will run RBL checks.  If your ISP already
 # does this, set this to 1.
 #
-# skip_rbl_checks 1
+# skip_rbl_checks 0
+
+# By default, SpamAssassin checks the From: address for a valid MX
+# three times, waiting 5 seconds each time. You can change this here.
+#
+# check_mx_attempts 3
+# check_mx_delay 5
 
 ###########################################################################
 # Add your own customised scores for some tests below.  The default scores are
