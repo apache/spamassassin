@@ -34,11 +34,6 @@ header T_FRAGMENTED_MESSAGE	Content-Type =~ /message\/partial/i
 # I'm curious, may help explain more ALL_TRUSTED fps
 body T_SA_MARKED_UP     /Spam detection software, running on the system /
 
-# more general template rule to try
-header T_INCOMPLETE_TEMPLATE_C	ALL =~ /^(?!(?i:X-UIDL|X-Face|To|Cc|From|Subject|References|In-Reply-To|(?:X-|Resent-|X-Original-)?Message-Id):)[\w-]+:(?:[^\n]*|\n[ \t])*%[A-Z][A-Z_-]+[^%A-Za-z_-]/ms
-# should be the last pass
-header T_INCOMPLETE_TEMPLATE_CX	ALL =~ /^(?!(?i:X-UIDL|X-Face|To|Cc|From|Subject|References|In-Reply-To|(?:X-|Resent-|X-Original-)?Message-Id):)[\w-]+:(?:[^\n]*|\n[ \t])*%[A-Z][A-Z_-]+/ms
-
 ########################################################################
 
 # IADB
