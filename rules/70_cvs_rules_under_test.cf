@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.553 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.554 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -329,4 +329,8 @@ meta T_MIME_HTML_ONLY_MULTI_OTHER	(__CTYPE_MULTIPART_OTHER && __MIME_HTML_ONLY)
 # (bug 1918)
 header __MIMEOLE		X-MIMEOLE =~ /Produced By Microsoft MimeOLE/
 meta T_SUBJ_FULL_OF_8BITS	(SUBJ_FULL_OF_8BITS && !__MIMEOLE)
+
+# a new ratware-forgery format
+header T_LC_ESMTP_RCVD    Received =~ /^from (?:unknown|\d+\.\d+\.\d+\.\d+) \(\S+\) by \S+ with esmtp; /
+describe T_LC_ESMTP_RCVD  Received header contains forged lowercase 'esmtp' relay  
 
