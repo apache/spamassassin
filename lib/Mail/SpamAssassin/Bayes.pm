@@ -313,10 +313,10 @@ sub tokenize_line {
   my $wc = 0;
 
   foreach my $token (split) {
-    next if ( $token =~ /^\*\*[A-Z]+$/ ); # skip false magic tokens
-
     $token =~ s/^[-'"\.,]+//;        # trim non-alphanum chars at start or end
     $token =~ s/[-'"\.,]+$//;        # so we don't get loads of '"foo' tokens
+
+    next if ( $token =~ /^\*\*[A-Z]+$/ ); # skip false magic tokens
 
     # *do* keep 3-byte tokens; there's some solid signs in there
     my $len = length($token);
