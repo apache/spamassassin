@@ -936,6 +936,12 @@ sub check_for_unique_subject_id {
      )
   {
     $id = $1;
+    # exempt online purchases
+    if ($id =~ /\d{5,}/
+	&& /(?:item|invoice|order|number|confirmation).{1,6}$id\s*$/)
+    {
+      $id = 0;
+    }
   }
 
   return ($id && !$self->word_is_in_dictionary($id));
