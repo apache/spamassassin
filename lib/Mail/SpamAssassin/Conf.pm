@@ -258,7 +258,6 @@ sub add_default_spam_headers {
   $self->{headers_spam}->{"Status"} = "_YESNO_, hits=_HITS_ required=_REQD_ tests=_TESTS_ autolearn=_AUTOLEARN_ version=_VERSION_";
   $self->{headers_spam}->{"Level"} = "_STARS(*)_";
   $self->{headers_spam}->{"Checker-Version"} = "SpamAssassin _VERSION_ (_SUBVERSION_) on _HOSTNAME_";
-  $self->{headers_spam}->{"Report"} = "_REPORT_";
 }
 
 sub add_default_ham_headers {
@@ -827,14 +826,19 @@ setting may also make it somewhat more difficult to extract or view the
 original message.
 
 If this option is set to 0, incoming spam is only modified by adding
-some headers and no changes will be made to the body.
-
-Note: If report_safe is set to 0, then B<X-Spam-Report> is not added.
+some C<X-Spam-> headers and no changes will be made to the body.  In
+addition, a header named B<X-Spam-Report> will be added to spam.  You
+can use the B<remove_header> option to remove that header after setting
+B<report_safe> to 0.
 
 =cut
 
     if (/^report_safe\s+(\d+)$/) {
-      $self->{report_safe} = $1+0; next;
+      $self->{report_safe} = $1+0;
+      if (! $self->{report_safe}) {
+	$self->{headers_spam}->{"Report"} = "_REPORT_";
+      }
+      next;
     }
 
 =item skip_rbl_checks { 0 | 1 }   (default: 0)
@@ -1665,10 +1669,10 @@ B<add_header> options to customize headers.
 
 =item always_add_report { 0 | 1 }	(default: 0)
 
-When the B<report_safe> option is turned on, mail tagged as spam will
-include a report in a header named B<X-Spam-Report>.  If you set this option
-to C<1>, the report will always be included in the B<X-Spam-Report> header
-regardless of whether the mail is tagged as spam.
+When the B<report_safe> option is turned off, mail tagged as spam will
+include a report in a header named B<X-Spam-Report>.  If you set
+B<always_add_report> to C<1>, the report will also be included in the
+B<X-Spam-Report> header for non-spam mail.
 
 This option is deprecated in version 2.60 and later.  It will be removed in
 a future version.  Please use the flexible B<add_header> option instead:
@@ -2521,12 +2525,6 @@ sub regression_tests {
 # note: error 70 == SA_SOFTWARE
 sub finish_parsing {
   my ($self) = @_;
-
-  # disable X-Spam-Report: header if report_safe is turned on
-  if ($self->{report_safe}) {
-    delete $self->{headers_spam}->{"Report"};
-    delete $self->{headers_ham}->{"Report"};
-  }
 
   while (my ($name, $text) = each %{$self->{tests}}) {
     my $type = $self->{test_types}->{$name};

@@ -129,9 +129,6 @@ add_header all Level _STARS(*)_
 #        UNDISC_RECIPS autolearn=spam version=2.60-cvs
 add_header all Status "_YESNO_, hits=_HITS_ required=_REQD_ tests=_TESTS_ autolearn=_AUTOLEARN_ version=_VERSION_"
 
-# note that the X-Spam-Report: header is disabled when report_safe is on
-add_header spam Report _REPORT_
-
 ###########################################################################
 # Default prefs values: users can override these in their 
 # ~/.spamassassin/user_prefs files.
