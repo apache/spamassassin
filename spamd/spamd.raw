@@ -831,6 +831,8 @@ dbg("info: server started on $listeninfo (running version "
 logmsg("server started on $listeninfo (running version "
     . Mail::SpamAssassin::Version() . ")" );
 
+my $remote_port;
+
 # Fork off our children.
 for ( 1 .. $childlimit ) {
   spawn();
@@ -1068,6 +1070,7 @@ sub accept_a_conn {
   if ( $opt{'socketpath'} ) {
     $remote_hostname = 'localhost';
     $remote_hostaddr = '127.0.0.1';
+    $remote_port = $opt{'socketpath'};
     logmsg( "got connection over " . $opt{'socketpath'} );
   }
   else {
@@ -1076,6 +1079,7 @@ sub accept_a_conn {
     $remote_hostaddr = inet_ntoa($ip);
     $remote_hostname = gethostbyaddr($ip, AF_INET)
                     || $remote_hostaddr;
+    $remote_port = $port;
 
     my $msg = "connection from ${remote_hostname} [${remote_hostaddr}] at port ${port}";
     if ( ip_is_allowed($remote_hostaddr) ) {
@@ -1358,7 +1362,12 @@ sub check {
 
   # add a summary "result:" line, based on mass-check format
   my @extra;
-  push(@extra, "scantime=".$scantime, "size=$actual_length");
+  push(@extra, "scantime=".$scantime, "size=$actual_length",
+            "user=".$current_user, "uid=".$>,
+            "required_score=".$msg_threshold,
+            "rhost=".$remote_hostname, "raddr=".$remote_hostaddr,
+            "rport=".$remote_port);
+
   {
     my $safe = $msgid; $safe =~ s/[\x00-\x20\s,]/_/gs; push(@extra, "mid=$safe");
   }
