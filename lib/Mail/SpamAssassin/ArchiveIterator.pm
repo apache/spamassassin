@@ -34,19 +34,6 @@ sub new {
   if (!defined $self) { $self = { }; }
   bless ($self, $class);
 
-  if ($self->{opt_o}) {
-    autoflush STDOUT 1;
-    print STDOUT $self->{log_header};
-  }
-  else {
-    open(HAM, "> $self->{opt_hamlog}");
-    open(SPAM, "> $self->{opt_spamlog}");
-    autoflush HAM 1;
-    autoflush SPAM 1;
-    print HAM $self->{log_header};
-    print SPAM $self->{log_header};
-  }
-
   $self->{s} = { };		# spam, of course
   $self->{h} = { };		# ham, as if you couldn't guess
 
@@ -55,9 +42,10 @@ sub new {
 
 ###########################################################################
 
-sub set_function {
-  my ($self, $fn) = @_;
-  $self->{wanted_sub} = $fn;
+sub set_functions {
+  my ($self, $wanted, $result) = @_;
+  $self->{wanted_sub} = $wanted;
+  $self->{result_sub} = $result;
 }
 
 ###########################################################################
@@ -116,7 +104,7 @@ sub run {
     while ($message = (shift @messages)) {
       $class = substr($message, 0, 1);
       $result = $self->run_message($message);
-      $self->log_result($class, $result) if $result;
+      $self->process_a_result($class, $result) if $result;
     }
   }
   elsif ($self->{opt_j} > 1) {
@@ -147,7 +135,7 @@ sub run {
 	    exit;
 	  }
 	  $result = $self->run_message($line);
-	  print { $parent[$i] } $result . "$line\n";
+	  print { $parent[$i] } $result . "\nRESULT $line\n";
 	}
 	exit;
       }
@@ -166,9 +154,10 @@ sub run {
 	    $done++;
 	    last;
 	  }
-	  if ($line =~ /^([hs])/ || $line eq "START\n") {
+	  if ($line =~ /^RESULT ([hs])/ || $line eq "START\n") {
+	    chop($result);
 	    print { $socket } (@messages ? (shift @messages) : "exit") . "\n";
-	    $self->log_result($1, $result) if defined($1) && $result;
+	    $self->process_a_result($1, $result) if defined($1) && $result;
 	    last;
 	  }
 	  $result .= $line;
@@ -202,20 +191,6 @@ sub mass_check_open {
     return 0;
   }
   return 1;
-}
-
-sub log_result {
-  my ($self, $class, $result) = @_;
-
-  if ($self->{opt_o}) {
-    print STDOUT $result;
-  }
-  elsif ($class eq "s") {
-    print SPAM $result;
-  }
-  elsif ($class eq "h") {
-    print HAM $result;
-  }
 }
 
 sub first_date {
@@ -425,6 +400,12 @@ sub visit_a_mail {
   my ($self, $mail, $dataref) = @_;
   my $sub = $self->{wanted_sub};
   return &$sub($mail, $dataref);
+}
+
+sub process_a_result {
+  my ($self, $class, $result) = @_;
+  my $sub = $self->{result_sub};
+  return &$sub($class, $result);
 }
 
 ############################################################################

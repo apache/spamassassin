@@ -101,20 +101,29 @@ my $log_header = "# mass-check results from $who\@$where, on $when\n" .
 		 "# M:SA version ".$spamtest->Version()."\n" .
 		 '# CVS tag: $Name:  $' . "\n";
 
+if ($opt_o) {
+  autoflush STDOUT 1;
+  print STDOUT $log_header;
+}
+else {
+  open(HAM, "> $opt_hamlog");
+  open(SPAM, "> $opt_spamlog");
+  autoflush HAM 1;
+  autoflush SPAM 1;
+  print HAM $log_header;
+  print SPAM $log_header;
+}
+
 my $iter = new Mail::SpamAssassin::ArchiveIterator({
 	'opt_j' => $opt_j,
 	'opt_n' => $opt_n,
-	'opt_o' => $opt_o,
 	'opt_all' => $opt_all,
 	'opt_head' => $opt_head,
 	'opt_tail' => $opt_tail,
-	'opt_spamlog' => $opt_spamlog,
-	'opt_hamlog' => $opt_hamlog,
-	'log_header' => $log_header,
 });
 
-$iter->set_function (\&wanted);
-$iter->run (@targets);
+$iter->set_functions(\&wanted, \&result);
+$iter->run(@targets);
 print STDERR "\n" if ($opt_showdots);
 exit;
 
@@ -132,6 +141,20 @@ sub target  {
 }
 
 ###########################################################################
+
+sub result {
+  my ($class, $result) = @_;
+
+  if ($opt_o) {
+    print STDOUT $result;
+  }
+  elsif ($class eq "s") {
+    print SPAM $result;
+  }
+  elsif ($class eq "h") {
+    print HAM $result;
+  }
+}
 
 sub wanted {
   my ($id, $dataref) = @_;
