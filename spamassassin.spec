@@ -13,7 +13,6 @@ License: Artistic
 Group: Networking/Mail
 URL: http://spamassassin.org/
 Source: http://spamassassin.org/devel/Mail-SpamAssassin-%{real_version}.tar.gz
-Patch: spamassassin-migrate.patch
 Requires: perl >= 5.004
 Buildroot: %{_tmppath}/%{name}-root
 Prefix: %{_prefix}
@@ -35,7 +34,6 @@ which create a server that considerably speeds processing of mail.
 
 %prep -q
 %setup -q -n %{real_name}-%{real_version}
-%patch -p1
 
 %build
 %{__perl} Makefile.PL PREFIX=%{prefix}
@@ -74,14 +72,12 @@ fi
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
 
 %post
-if [ -f /etc/spamassassin.cf ]; then
-	%{__mv} /etc/spamassassin.cf /etc/mail/spamassassin/migrated.cf
-fi
-if [ -f /etc/mail/spamassassin.cf ]; then
-	%{__mv} /etc/mail/spamassassin.cf /etc/mail/spamassassin/migrated.cf
-fi
 
 %changelog
+
+* Mon Jul 29 2002 Justin Mason <jm@jmason.org>
+- removed migrate_cfs code, obsolete
+
 * Thu Jul 25 2002 Justin Mason <jm@jmason.org>
 - removed findbin patch, obsolete
 
