@@ -3288,4 +3288,25 @@ sub check_for_missing_hb_separator {
   return defined $self->{msg}->{'missing_head_body_separator'};
 }
 
+###########################################################################
+
+sub check_unresolved_template {
+  my ($self) = @_;
+
+  my $all = $self->get('ALL');	# cached access
+  $all =~ s/\n[ \t]+/ /gs;	# fix continuation lines
+  
+  for my $header (split(/\n/, $all)) {
+    # slightly faster to test in this order
+    if ($header =~ /%[A-Z][A-Z_-]/ &&
+	$header !~ /^(?:X-UIDL|X-Face|To|Cc|From|Subject|References|In-Reply-To|(?:X-|Resent-|X-Original-)?Message-Id):/i)
+    {
+      return 1;
+    }
+  }
+  return 0;
+}
+
+###########################################################################
+
 1;
