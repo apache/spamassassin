@@ -1516,6 +1516,24 @@ sub message_from_debian_bts {
   return 0;
 }
 
+sub message_from_sf_bts {
+  my ($self)  = @_;
+
+  my  $all    = $self->get('ALL');
+  
+  # These headers are always in exactly this order.
+  # Note: Spaces have to be escaped in /x mode
+  if ($all    =~ /\nTo:\ noreply\@sourceforge\.net
+                  \nFrom:\ noreply\@sourceforge\.net
+                  \nSubject:\ \[\ [A-Za-z0-9]+-Bugs-\d+\ \]\ [^\n]+
+                  \nMessage-Id:\ <[0-9A-Za-z]{7}-[0-9A-Za-z]{6}-[0-9]{2}\@[a-z]+-sf-web\d+\.sourceforge\.net>
+                  \n/mx) {
+    return 1;
+  }
+  
+  return 0;
+}
+
 ###########################################################################
 
 # This test was originally based on RFC 2369 compliance.  However, the
