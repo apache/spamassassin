@@ -1310,8 +1310,13 @@ sub upgrade_old_dbm_files {
     {
       die "unable to find bayes_toks and bayes_seen, stopping\n";
     }
+    # untaint @files (already safe after grep)
+    @files = map { /(.*)/, $1 } @files;
+
     for (@files) {
-      copy("$dir/$_", "$dir/old_$_") || die "can't copy $_ to old_$_: $!\n";
+      my $src = "$dir/$_";
+      my $dst = "$dir/old_$_";
+      copy($src, $dst) || die "can't copy $src to $dst: $!\n";
     }
 
     # delete previous to make way for import
