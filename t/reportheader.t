@@ -12,7 +12,7 @@ $ENV{'LC_ALL'} = 'C';             # a cheat, but we need the patterns to work
 
 q{ Spam detection software, running on the system "}, 'spam-report-body',
 q{ Subject: There yours for FREE!}, 'subj',
-q{ X-Spam-Status: Yes, hits=}, 'status',
+q{ X-Spam-Status: Yes, score=}, 'status',
 q{ X-Spam-Flag: YES}, 'flag',
 q{ From: ends in numbers}, 'endsinnums',
 q{ From: does not include a real name}, 'noreal',

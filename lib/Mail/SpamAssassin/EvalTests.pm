@@ -962,7 +962,7 @@ sub check_from_in_auto_whitelist {
       }
     }
 
-    my $awlhits = $self->get_nonlearn_nonuserconf_hits();
+    my $awlpoints = $self->get_nonlearn_nonuserconf_points();
 
     # Create the AWL object, catching 'die's
     my $whitelist;
@@ -973,11 +973,11 @@ sub check_from_in_auto_whitelist {
       my $meanscore = $whitelist->check_address($_, $origip);
       my $delta = 0;
 
-      dbg("AWL active, pre-score: $self->{hits}, autolearn score: $awlhits, ".
+      dbg("AWL active, pre-score: $self->{score}, autolearn score: $awlpoints, ".
 	"mean: ". ($meanscore || 'undef') .", IP: ". ($origip || 'undef'));
 
       if (defined ($meanscore)) {
-        $delta = ($meanscore - $awlhits) * $self->{main}->{conf}->{auto_whitelist_factor};
+        $delta = ($meanscore - $awlpoints) * $self->{main}->{conf}->{auto_whitelist_factor};
 	$self->{tag_data}->{AWL} = sprintf("%2.1f",$delta);
 	# Save this for _AWL_ tag
       }
@@ -986,7 +986,7 @@ sub check_from_in_auto_whitelist {
       # early high-scoring messages are reinforced compared to
       # later ones.  http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=159704
       if (!$self->{disable_auto_learning}) {
-        $whitelist->add_score($awlhits);
+        $whitelist->add_score($awlpoints);
       }
 
       # current AWL score changes with each hit
@@ -1009,7 +1009,7 @@ sub check_from_in_auto_whitelist {
       eval { $whitelist->finish(); };
     }
 
-    dbg("Post AWL score: ".$self->{hits});
+    dbg("Post AWL score: ".$self->{score});
 
     # test hit is above
     return 0;

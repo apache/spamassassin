@@ -838,8 +838,8 @@ sub check {
     # Now use copy-on-writed (hopefully) SA object
     my $status = $spamtest->check($mail);
 
-    my $msg_score = sprintf("%.1f",$status->get_hits);
-    my $msg_threshold = sprintf("%.1f",$status->get_required_hits);
+    my $msg_score = sprintf("%.1f",$status->get_score);
+    my $msg_threshold = sprintf("%.1f",$status->get_required_score);
 
     my $response_spam_status = "";
     my $was_it_spam;

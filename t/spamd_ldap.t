@@ -16,7 +16,7 @@ exit unless (TEST_ENABLED);
 %patterns = (
 
 q{ Subject: There yours for FREE!}, 'subj',
-q{ X-Spam-Status: Yes, hits=}, 'status',
+q{ X-Spam-Status: Yes, score=}, 'status',
 q{ X-Spam-Flag: YES}, 'flag',
 q{ X-Spam-Level: **********}, 'stars',
 q{ X-Spam-Foo: LDAP read}, 'ldap_config_read',

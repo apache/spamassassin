@@ -12,7 +12,7 @@ exit unless (!$SKIP_SPAMD_TESTS && !$RUNNING_ON_WINDOWS);
 %patterns = (
 
 q{ Subject: There yours for FREE!}, 'subj',
-q{ X-Spam-Status: Yes, hits=}, 'status',
+q{ X-Spam-Status: Yes, score=}, 'status',
 q{ X-Spam-Flag: YES}, 'flag',
 
 

@@ -246,7 +246,7 @@ sub wanted {
 
   # remove SpamAssassin markup, if present and the mail was spam
   $_ = $ma->get_header ("X-Spam-Status");
-  if (defined($_) && /^Yes, hits=/) {
+  if (defined($_) && /^Yes,/) {
     $ma = $spamtest->parse ($spamtest->remove_spamassassin_markup($ma));
   }
 
@@ -276,7 +276,7 @@ sub wanted {
   }
 
   my $yorn = $status->is_spam() ? 'Y' : '.';
-  my $hits = $status->get_hits();
+  my $score = $status->get_score();
   my $tests = join(",", sort(grep(length,$status->get_names_of_tests_hit(),$status->get_names_of_subtests_hit())));
   my $extra = join(",", @extra);
 
@@ -288,7 +288,7 @@ sub wanted {
 
   $id =~ s/\s/_/g;
 
-  $out .= sprintf("%s %2d %s %s %s\n", $yorn, $hits, $id, $tests, $extra);
+  $out .= sprintf("%s %2d %s %s %s\n", $yorn, $score, $id, $tests, $extra);
 
   if ($tests =~ /MICROSOFT_EXECUTABLE|MIME_SUSPECT_NAME/) {
     $out .= logkilled($ma, $id, "possible virus");

@@ -247,7 +247,7 @@ results are about to be returned to the caller.
 =item permsgstatus
 
 The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
-The current hits, names of rules that hit, etc. can be retrieved
+The current score, names of rules that hit, etc. can be retrieved
 using the APIs on this object.
 
 =back

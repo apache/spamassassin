@@ -77,7 +77,7 @@ sub new {
   my $self = {
     'main'              => $main,
     'msg'               => $msg,
-    'hits'              => 0,
+    'score'             => 0,
     'test_logs'         => '',
     'test_names_hit'    => [ ],
     'subtest_names_hit' => [ ],
@@ -112,10 +112,10 @@ sub check {
   my ($self) = @_;
   local ($_);
 
-  $self->{learned_hits} = 0;
-  $self->{body_only_hits} = 0;
-  $self->{head_only_hits} = 0;
-  $self->{hits} = 0;
+  $self->{learned_points} = 0;
+  $self->{body_only_points} = 0;
+  $self->{head_only_points} = 0;
+  $self->{score} = 0;
 
   $self->{main}->call_plugins ("check_start", { permsgstatus => $self });
 
@@ -206,25 +206,19 @@ sub check {
     $self->learn();
 
     # add points from learning systems (Bayes and AWL)
-    $self->{hits} += $self->{learned_hits};
+    $self->{score} += $self->{learned_points};
   }
 
   $self->delete_fulltext_tmpfile();
 
-  # Round the hits down to the nearest 0.1.  Technically, using int
-  # instead of a true floor function rounds up to the nearest 0.1 for
-  # negative numbers, but who really cares.
-  # Fixes bug http://bugzilla.spamassassin.org/show_bug.cgi?id=2607
-  $self->{hits} = int($self->{hits} * 10) / 10;
 
-  
-  # Round the hits to 3 decimal places to avoid rounding issues
-  # We assume required_hits to be properly rounded already.
+  # Round the score to 3 decimal places to avoid rounding issues
+  # We assume required_score to be properly rounded already.
   # add 0 to force it back to numeric representation instead of string.
-  $self->{hits} = (sprintf "%0.3f", $self->{hits}) + 0;
+  $self->{score} = (sprintf "%0.3f", $self->{score}) + 0;
   
-  dbg ("is spam? score=".$self->{hits}.
-                        " required=".$self->{conf}->{required_hits}.
+  dbg ("is spam? score=".$self->{score}.
+                        " required=".$self->{conf}->{required_score}.
                         " tests=".$self->get_names_of_tests_hit());
   $self->{is_spam} = $self->is_spam();
 
@@ -269,31 +263,31 @@ sub learn {
   my $max = $self->{conf}->{bayes_auto_learn_threshold_spam};
 
   dbg ("auto-learn? ham=$min, spam=$max, ".
-                "body-hits=".$self->{body_only_hits}.", ".
-                "head-hits=".$self->{head_only_hits});
+                "body-points=".$self->{body_only_points}.", ".
+                "head-points=".$self->{head_only_points});
 
   my $isspam;
 
-  # This section should use sum($score[scoreset % 2]) not just {hits}.  otherwise we shift what we
+  # This section should use sum($score[scoreset % 2]) not just {score}.  otherwise we shift what we
   # autolearn on and it gets really wierd.  - tvd
-  my $hits = 0;
+  my $score = 0;
   my $orig_scoreset = $self->{conf}->get_score_set();
   if ( ($orig_scoreset & 2) == 0 ) { # we don't need to recompute
     dbg ("auto-learn: currently using scoreset $orig_scoreset.  no need to recompute.");
-    $hits = $self->{hits};
+    $score = $self->{score};
   }
   else {
     my $new_scoreset = $orig_scoreset & ~2;
     dbg ("auto-learn: currently using scoreset $orig_scoreset.  recomputing score based on scoreset $new_scoreset.");
     $self->{conf}->set_score_set($new_scoreset); # reduce to autolearning scores
-    my $hits = $self->get_nonlearn_nonuserconf_hits();
-    dbg ("auto-learn: original score: ".$self->{hits}.", recomputed score: $hits");
+    $score = $self->get_nonlearn_nonuserconf_points();
+    dbg ("auto-learn: original score: ".$self->{score}.", recomputed score: $score");
     $self->{conf}->set_score_set($orig_scoreset); # return to appropriate scoreset
   }
 
-  if ($hits < $min) {
+  if ($score < $min) {
     $isspam = 0;
-  } elsif ($hits >= $max) {
+  } elsif ($score >= $max) {
     $isspam = 1;
   } else {
     dbg ("auto-learn? no: inside auto-learn thresholds");
@@ -301,42 +295,42 @@ sub learn {
     return;
   }
 
-  my $learner_said_ham_hits = -1.0;
-  my $learner_said_spam_hits = 1.0;
+  my $learner_said_ham_points = -1.0;
+  my $learner_said_spam_points = 1.0;
 
   if ($isspam) {
-    my $required_body_hits = 3;
-    my $required_head_hits = 3;
+    my $required_body_points = 3;
+    my $required_head_points = 3;
 
-    if ($self->{body_only_hits} < $required_body_hits) {
+    if ($self->{body_only_points} < $required_body_points) {
       $self->{auto_learn_status} = "no";
-      dbg ("auto-learn? no: too few body hits (".
-                  $self->{body_only_hits}." < ".$required_body_hits.")");
+      dbg ("auto-learn? no: too few body points (".
+                  $self->{body_only_points}." < ".$required_body_points.")");
       return;
     }
-    if ($self->{head_only_hits} < $required_head_hits) {
+    if ($self->{head_only_points} < $required_head_points) {
       $self->{auto_learn_status} = "no";
-      dbg ("auto-learn? no: too few head hits (".
-                  $self->{head_only_hits}." < ".$required_head_hits.")");
+      dbg ("auto-learn? no: too few head points (".
+                  $self->{head_only_points}." < ".$required_head_points.")");
       return;
     }
-    if ($self->{learned_hits} < $learner_said_ham_hits) {
+    if ($self->{learned_points} < $learner_said_ham_points) {
       $self->{auto_learn_status} = "no";
       dbg ("auto-learn? no: learner indicated ham (".
-                  $self->{learned_hits}." < ".$learner_said_ham_hits.")");
+                  $self->{learned_points}." < ".$learner_said_ham_points.")");
       return;
     }
 
   } else {
-    if ($self->{learned_hits} > $learner_said_spam_hits) {
+    if ($self->{learned_points} > $learner_said_spam_points) {
       $self->{auto_learn_status} = "no";
       dbg ("auto-learn? no: learner indicated spam (".
-                  $self->{learned_hits}." > ".$learner_said_spam_hits.")");
+                  $self->{learned_points}." > ".$learner_said_spam_points.")");
       return;
     }
   }
 
-  dbg ("auto-learn? yes, ".($isspam?"spam ($hits > $max)":"ham ($hits < $min)"));
+  dbg ("auto-learn? yes, ".($isspam?"spam ($score > $max)":"ham ($score < $min)"));
 
   $self->{main}->call_plugins ("autolearn", {
       permsgstatus => $self,
@@ -362,12 +356,12 @@ sub learn {
   }
 }
 
-sub get_nonlearn_nonuserconf_hits {
+sub get_nonlearn_nonuserconf_points {
   my ($self) = @_;
 
   my $scores = $self->{conf}->{scores};
   my $tflags = $self->{conf}->{tflags};
-  my $hits = 0;
+  my $points = 0;
 
   foreach my $test ( @{$self->{test_names_hit}} )
   {
@@ -376,10 +370,10 @@ sub get_nonlearn_nonuserconf_hits {
     next if ($scores->{$test} == 0);
     next if (exists $tflags->{$test} && $tflags->{$test} =~ /\bnoautolearn\b/);
 
-    $hits += $scores->{$test};
+    $points += $scores->{$test};
   }
 
-  return (sprintf "%0.3f", $hits) + 0;
+  return (sprintf "%0.3f", $points) + 0;
 }
 
 ###########################################################################
@@ -395,7 +389,7 @@ spam-like.
 sub is_spam {
   my ($self) = @_;
   # changed to test this so sub-tests can ask "is_spam" during a run
-  return ($self->{hits} >= $self->{conf}->{required_hits});
+  return ($self->{score} >= $self->{conf}->{required_score});
 }
 
 ###########################################################################
@@ -434,30 +428,40 @@ sub get_names_of_subtests_hit {
 
 ###########################################################################
 
-=item $num = $status->get_hits ()
+=item $num = $status->get_score ()
 
 After a mail message has been checked, this method can be called.  It will
-return the number of hits this message incurred.
+return the message's score.
 
 =cut
 
+sub get_score {
+  my ($self) = @_;
+  return $self->{score};
+}
+
 sub get_hits {
   my ($self) = @_;
-  return $self->{hits};
+  return $self->{score};
 }
 
 ###########################################################################
 
-=item $num = $status->get_required_hits ()
+=item $num = $status->get_required_score ()
 
 After a mail message has been checked, this method can be called.  It will
-return the number of hits required for a mail to be considered spam.
+return the score required for a mail to be considered spam.
 
 =cut
 
+sub get_required_score {
+  my ($self) = @_;
+  return $self->{conf}->{required_score};
+}
+
 sub get_required_hits {
   my ($self) = @_;
-  return $self->{conf}->{required_hits};
+  return $self->{conf}->{required_score};
 }
 
 ###########################################################################
@@ -868,9 +872,11 @@ sub _get_tag {
 
             YESNO => sub { $self->{is_spam} ? "Yes" : "No"; },
 
-            HITS => sub { sprintf ("%2.1f", $self->{hits}); },
+            HITS => sub { sprintf ("%2.1f", int ($self->{score} * 10) / 10); },
 
-            REQD => sub { sprintf ("%2.1f", $self->{conf}->{required_hits}); },
+	    SCORE => sub { sprintf ("%2.1f", int ($self->{score} * 10) / 10); },
+
+            REQD => sub { sprintf ("%2.1f", $self->{conf}->{required_score}); },
 
             VERSION => sub { return Mail::SpamAssassin::Version()},
 
@@ -891,7 +897,7 @@ sub _get_tag {
 
             STARS => sub {
               my $arg = (shift || "*");
-              my $length = int($self->{hits});
+              my $length = int($self->{score});
               $length = 50 if $length > 50;
               return $arg x $length;
             },
@@ -959,7 +965,7 @@ sub finish {
   delete $self->{msg};
   delete $self->{conf};
   delete $self->{res};
-  delete $self->{hits};
+  delete $self->{score};
   delete $self->{test_names_hit};
   delete $self->{subtest_names_hit};
   delete $self->{test_logs};
@@ -1243,7 +1249,7 @@ sub do_head_tests {
   # eval tests need to use stuff in here.
   $self->{test_log_msgs} = ();        # clear test state
 
-  dbg ("running header regexp tests; score so far=".$self->{hits});
+  dbg ("running header regexp tests; score so far=".$self->{score});
 
   my $doing_user_rules = 
     $self->{conf}->{user_rules_to_compile}->{Mail::SpamAssassin::Conf::TYPE_HEAD_TESTS};
@@ -1330,7 +1336,7 @@ sub do_body_tests {
   my ($self, $textary) = @_;
   local ($_);
 
-  dbg ("running body-text per-line regexp tests; score so far=".$self->{hits});
+  dbg ("running body-text per-line regexp tests; score so far=".$self->{score});
 
   my $doing_user_rules = 
     $self->{conf}->{user_rules_to_compile}->{Mail::SpamAssassin::Conf::TYPE_BODY_TESTS};
@@ -1561,7 +1567,7 @@ sub do_body_uri_tests {
   my ($self, $textary) = @_;
   local ($_);
 
-  dbg ("running uri tests; score so far=".$self->{hits});
+  dbg ("running uri tests; score so far=".$self->{score});
   my @uris = $self->get_uri_list();
 
   my $doing_user_rules = 
@@ -1638,7 +1644,7 @@ sub do_rawbody_tests {
   my ($self, $textary) = @_;
   local ($_);
 
-  dbg ("running raw-body-text per-line regexp tests; score so far=".$self->{hits});
+  dbg ("running raw-body-text per-line regexp tests; score so far=".$self->{score});
 
   my $doing_user_rules = 
     $self->{conf}->{user_rules_to_compile}->{Mail::SpamAssassin::Conf::TYPE_RAWBODY_TESTS};
@@ -1714,7 +1720,7 @@ sub do_full_tests {
   my ($self, $fullmsgref) = @_;
   local ($_);
   
-  dbg ("running full-text regexp tests; score so far=".$self->{hits});
+  dbg ("running full-text regexp tests; score so far=".$self->{score});
 
   my $doing_user_rules = 
     $self->{conf}->{user_rules_to_compile}->{Mail::SpamAssassin::Conf::TYPE_FULL_TESTS};
@@ -1796,7 +1802,7 @@ sub do_meta_tests {
   my ($self) = @_;
   local ($_);
 
-  dbg( "running meta tests; score so far=" . $self->{hits} );
+  dbg( "running meta tests; score so far=" . $self->{score} );
 
   my $doing_user_rules = 
     $self->{conf}->{user_rules_to_compile}->{Mail::SpamAssassin::Conf::TYPE_META_TESTS};
@@ -2087,15 +2093,15 @@ sub _handle_hit {
 
     # ignore 'noautolearn' rules when considering score for Bayes auto-learning
     if ($tflags =~ /\bnoautolearn\b/i) {
-      $self->{learned_hits} += $score;
+      $self->{learned_points} += $score;
     }
     else {
-      $self->{hits} += $score;
+      $self->{score} += $score;
       if (!$self->{conf}->maybe_header_only ($rule)) {
-        $self->{body_only_hits} += $score;
+        $self->{body_only_points} += $score;
       }
       if (!$self->{conf}->maybe_body_only ($rule)) {
-        $self->{head_only_hits} += $score;
+        $self->{head_only_points} += $score;
       }
     }
 

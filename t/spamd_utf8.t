@@ -12,7 +12,7 @@ $ENV{'LANG'} = 'en_US.UTF-8';	# ensure we test in UTF-8 locale
 
 %patterns = (
 
-q{ X-Spam-Status: Yes, hits=}, 'status',
+q{ X-Spam-Status: Yes, score=}, 'status',
 q{ X-Spam-Flag: YES}, 'flag',
 
 

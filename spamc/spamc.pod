@@ -77,12 +77,12 @@ In TCP/IP mode, connect to spamd server listening on given port
 
 =item B<-r>
 
-Just output the SpamAssassin report text to stdout, if the message
-is spam.  If the message is ham (non-spam), nothing will be printed.
-The first line of the output is the number of hits and the threshold,
-in this format:
+Just output the SpamAssassin report text to stdout, if the message is
+spam.  If the message is ham (non-spam), nothing will be printed.  The
+first line of the output is the message score and the threshold, in
+this format:
 
-	hits/threshold
+	score/threshold
 
 =item B<-R>
 

@@ -64,7 +64,7 @@ optional, and the default is shown below.
 
  _YESNOCAPS_       "YES"/"NO" for is/isn't spam
  _YESNO_           "Yes"/"No" for is/isn't spam
- _HITS_            message score
+ _SCORE_           message score
  _REQD_            message threshold
  _VERSION_         version (eg. 2.61 or 2.70-r6142-foo1)
  _SUBVERSION_      sub-version/code revision date (eg. 2004-01-10)
@@ -85,7 +85,7 @@ optional, and the default is shown below.
  _RBL_             full results for positive RBL queries in DNS URI format
  _LANGUAGES_       possible languages of mail
  _PREVIEW_         content preview
- _REPORT_          terse report of tests hits (for header reports)
+ _REPORT_          terse report of tests hit (for header reports)
  _SUMMARY_         summary of tests hit for standard report (for body reports)
  _CONTACTADDRESS_  contents of the 'report_contact' setting
 
@@ -166,7 +166,7 @@ sub new {
   # testing stuff
   $self->{regression_tests} = { };
 
-  $self->{required_hits} = 5.0;
+  $self->{required_score} = 5.0;
   $self->{report_charset} = '';
   $self->{report_template} = '';
   $self->{unsafe_report_template} = '';
@@ -704,21 +704,23 @@ be blacklisted.  Same format as C<blacklist_from>.
 
 =over 4
 
-=item required_hits n.nn   (default: 5)
+=item required_score n.nn (default: 5)
 
-Set the number of hits required before a mail is considered spam.  C<n.nn> can
-be an integer or a real number.  5.0 is the default setting, and is quite
-aggressive; it would be suitable for a single-user setup, but if you're an ISP
-installing SpamAssassin, you should probably set the default to be more
-conservative, like 8.0 or 10.0.  It is not recommended to automatically delete
-or discard messages marked as spam, as your users B<will> complain, but if you
-choose to do so, only delete messages with an exceptionally high score such as
-15.0 or higher.
+Set the score required before a mail is considered spam.  C<n.nn> can
+be an integer or a real number.  5.0 is the default setting, and is
+quite aggressive; it would be suitable for a single-user setup, but if
+you're an ISP installing SpamAssassin, you should probably set the
+default to be more conservative, like 8.0 or 10.0.  It is not
+recommended to automatically delete or discard messages marked as
+spam, as your users B<will> complain, but if you choose to do so, only
+delete messages with an exceptionally high score such as 15.0 or
+higher. This option was previously known as C<required_hits> and that
+name is still accepted, but is deprecated.
 
 =cut
 
-    if ( $key eq 'required_hits' ) {
-      $self->{required_hits} = $value+0.0; next;
+    if ( ($key eq 'required_hits') || ($key eq 'required_score') ) {
+      $self->{required_score} = $value+0.0; next;
     }
 
 =item score SYMBOLIC_TEST_NAME n.nn [ n.nn n.nn n.nn ]
@@ -781,7 +783,7 @@ header will be tagged with C<STRING> to indicate that a message is
 spam. For the From or To headers, this will take the form of an RFC
 2822 comment following the address in parantheses. For the Subject
 header, this will be prepended to the original subject. Note that you
-should only use the _REQD_ and _HITS_ tags when rewriting the Subject
+should only use the _REQD_ and _SCORE_ tags when rewriting the Subject
 header unless C<report_safe> is 0. Otherwise, you will not be able to
 remove the SpamAssassin markup. Parentheses are not permitted in
 STRING. (They will be converted to square brackets.)
@@ -836,10 +838,10 @@ subset of messages will be changed).
 
 See also C<clear_headers> for removing headers.
 
-Here are some examples (these are the defaults in 2.60):
+Here are some examples (these are the defaults):
 
  add_header spam Flag _YESNOCAPS_
- add_header all Status _YESNO_, hits=_HITS_ required=_REQD_ tests=_TESTS_ autolearn=_AUTOLEARN_ version=_VERSION_
+ add_header all Status _YESNO_, score=_SCORE__ required=_REQD_ tests=_TESTS_ autolearn=_AUTOLEARN_ version=_VERSION_
  add_header all Level _STARS(*)_
  add_header all Checker-Version SpamAssassin _VERSION_ (_SUBVERSION_) on _HOSTNAME_
 

@@ -27,10 +27,11 @@ Steps to take for every installation:
     with a report from SpamAssassin, and there should be no errors when you
     run the commands.
 
-    Even though sample-nonspam.txt is not spam, nonspam.out will contain a
-    SpamAssassin report anyway.  This is a side-effect of the "-t" (test)
-    switch.  However, there should be less than 5 hits accumulated; when
-    the "-t" switch is not in use, the report text would not be added.
+    Even though sample-nonspam.txt is not spam, nonspam.out will
+    contain a SpamAssassin report anyway.  This is a side-effect of
+    the "-t" (test) switch.  However, there should be less than 5
+    points accumulated; when the "-t" switch is not in use, the report
+    text would not be added.
 
     If the commands do not work, DO NOT PROCEED TO THE NEXT STEP, as you
     will lose mail!

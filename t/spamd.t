@@ -11,7 +11,7 @@ exit if $SKIP_SPAMD_TESTS;
 %patterns = (
 
 q{ Subject: There yours for FREE!}, 'subj',
-q{ X-Spam-Status: Yes, hits=}, 'status',
+q{ X-Spam-Status: Yes, score=}, 'status',
 q{ X-Spam-Flag: YES}, 'flag',
 q{ X-Spam-Level: **********}, 'stars',
 q{ FROM_ENDS_IN_NUMS}, 'endsinnums',

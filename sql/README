@@ -37,7 +37,7 @@ the defined username and password to establish the connection.
 
 If the user_scores_dsn option does not exist, SpamAssassin will not attempt
 to use an SQL for retrieving users' preferences. Note that this will NOT look
-for test rules, only local scores, whitelist_from(s), required_hits, and
+for test rules, only local scores, whitelist_from(s), required_score, and
 auto_report_threshold.
 
 Requirements
@@ -66,7 +66,7 @@ The database must contain a table named by 'user_scores_sql_table' (default
 setting: "userpref") with at least three fields:
 
   username varchar(100)	  # this is the username whose e-mail is being filtered
-  preference varchar(30)  # the preference (whitelist_from, required_hits, etc.)
+  preference varchar(30)  # the preference (whitelist_from, required_score, etc.)
   value varchar(100)	  # the value of the named preference
 
 You can add as many other fields you wish as long as the above three fields are
