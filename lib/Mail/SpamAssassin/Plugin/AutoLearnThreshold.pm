@@ -170,10 +170,20 @@ sub autolearn_discriminator {
       return;
     }
 
+    if (!$scan->is_spam()) {
+      dbg("learn: auto-learn? no: scored as ham but autolearn wanted spam");
+      return;
+    }
+
   } else {
     if ($learned_points > $learner_said_spam_points) {
       dbg("learn: auto-learn? no: scored as ham but learner indicated spam (".
           $learned_points." > ".$learner_said_spam_points.")");
+      return;
+    }
+
+    if ($scan->is_spam()) {
+      dbg("learn: auto-learn? no: scored as spam but autolearn wanted ham");
       return;
     }
   }
