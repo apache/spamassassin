@@ -185,23 +185,29 @@ use vars qw{
   $CONF_TYPE_NUMERIC $CONF_TYPE_HASH_KEY_VALUE
   $CONF_TYPE_ADDRLIST $CONF_TYPE_TEMPLATE
   $INVALID_VALUE
+
+$TYPE_HEAD_TESTS $TYPE_HEAD_EVALS
+$TYPE_BODY_TESTS $TYPE_BODY_EVALS $TYPE_FULL_TESTS $TYPE_FULL_EVALS
+$TYPE_RAWBODY_TESTS $TYPE_RAWBODY_EVALS $TYPE_URI_TESTS $TYPE_URI_EVALS
+$TYPE_META_TESTS $TYPE_RBL_EVALS
 };
 
 @ISA = qw();
 
-# odd => eval test
-use constant TYPE_HEAD_TESTS    => 0x0008;
-use constant TYPE_HEAD_EVALS    => 0x0009;
-use constant TYPE_BODY_TESTS    => 0x000a;
-use constant TYPE_BODY_EVALS    => 0x000b;
-use constant TYPE_FULL_TESTS    => 0x000c;
-use constant TYPE_FULL_EVALS    => 0x000d;
-use constant TYPE_RAWBODY_TESTS => 0x000e;
-use constant TYPE_RAWBODY_EVALS => 0x000f;
-use constant TYPE_URI_TESTS     => 0x0010;
-use constant TYPE_URI_EVALS     => 0x0011;
-use constant TYPE_META_TESTS    => 0x0012;
-use constant TYPE_RBL_EVALS     => 0x0013;
+# odd => eval test.  Not constants so they can be shared with Parser
+# TODO: move to Constants.pm?
+$TYPE_HEAD_TESTS    = 0x0008;
+$TYPE_HEAD_EVALS    = 0x0009;
+$TYPE_BODY_TESTS    = 0x000a;
+$TYPE_BODY_EVALS    = 0x000b;
+$TYPE_FULL_TESTS    = 0x000c;
+$TYPE_FULL_EVALS    = 0x000d;
+$TYPE_RAWBODY_TESTS = 0x000e;
+$TYPE_RAWBODY_EVALS = 0x000f;
+$TYPE_URI_TESTS     = 0x0010;
+$TYPE_URI_EVALS     = 0x0011;
+$TYPE_META_TESTS    = 0x0012;
+$TYPE_RBL_EVALS     = 0x0013;
 
 my @rule_types = ("body_tests", "uri_tests", "uri_evals",
                   "head_tests", "head_evals", "body_evals", "full_tests",
@@ -212,6 +218,7 @@ $VERSION = 'bogus';     # avoid CPAN.pm picking up version strings later
 
 # these are variables instead of constants so that other classes can
 # access them; if they're constants, they'd have to go in Constants.pm
+# TODO: move to Constants.pm?
 $CONF_TYPE_STRING           = 1;
 $CONF_TYPE_BOOL             = 2;
 $CONF_TYPE_NUMERIC          = 3;
@@ -226,54 +233,7 @@ $INVALID_VALUE              = -999;
 sub set_default_commands {
   return if (defined $DEFAULT_COMMANDS);
 
-# -------------------------------------------------------------------------
-# here's how the config setting blocks work.  Each is a hashref which
-# may contain these keys:
-#
-# setting: the name of the setting it modifies, e.g. "required_score".
-# this also doubles as the default for 'command' (below).
-# THIS IS REQUIRED.
-#
-# command: the command string used in the config file for this setting.
-# optional; 'setting' will be used for the command if this is omitted.
-#
-# aliases: an [aryref] of other aliases for the same command.  optional.
-#
-# type:    the type of this setting:
-#            - $CONF_TYPE_STRING: string
-#            - $CONF_TYPE_NUMERIC: numeric value (float or int)
-#            - $CONF_TYPE_BOOL: boolean (0 or 1)
-#            - $CONF_TYPE_TEMPLATE: template, like "report"
-#            - $CONF_TYPE_ADDRLIST: address list, like "whitelist_from"
-#            - $CONF_TYPE_HASH_KEY_VALUE: hash key/value pair,
-#              like "describe" or tflags
-#          if this is set, a 'code' block is assigned based on the type.
-#
-# code:    a subroutine to deal with the setting.  only used if 'type'
-# is not set.  ONE OF 'code' OR 'type' IS REQUIRED.  The arguments passed
-# to the function are ($self, $key, $value, $line), where $key is the
-# setting (*not* the command), $value is the value string, and $line is
-# the entire line.
-#
-# default: the default value for the setting.  may be omitted if the default
-# value is a non-scalar type, which should be set in the Conf ctor.  note for
-# path types: using "__userstate__" is recommended for defaults, as it allows
-# Mail::SpamAssassin module users who set that configuration setting, to
-# receive the correct values.
-#
-# is_priv: set to 1 if this setting requires 'allow_user_rules' when
-# run from spamd.
-#
-# is_admin: set to 1 if this setting can only be set in the system-wide
-# config when run from spamd.
-#
-# is_frequent: set to 1 if this value occurs frequently in the config.
-# this means its looked up first for speed.
-#
-# note that this array can be extended by plugins, by adding the new
-# config settings to the $conf->{registered_commands} array ref.
-# -------------------------------------------------------------------------
-
+  # see "perldoc Mail::SpamAssassin::Conf::Parser" for details on this fmt.
   # push each config item like this, to avoid a POD bug; it can't just accept
   # ( { ... }, { ... }, { ...} ) otherwise POD parsing dies.
   my @cmds = ();
@@ -2246,18 +2206,18 @@ single A record containing a bitmask of results.
         my ($name, $fn) = ($1, $2);
 
         if ($fn =~ /^check_rbl/) {
-          $self->{parser}->add_test ($name, $fn, TYPE_RBL_EVALS);
+          $self->{parser}->add_test ($name, $fn, $TYPE_RBL_EVALS);
         }
         else {
-          $self->{parser}->add_test ($name, $fn, TYPE_HEAD_EVALS);
+          $self->{parser}->add_test ($name, $fn, $TYPE_HEAD_EVALS);
         }
       }
       elsif ($value =~ /^(\S+)\s+exists:(.*)$/) {
-        $self->{parser}->add_test ($1, "$2 =~ /./", TYPE_HEAD_TESTS);
+        $self->{parser}->add_test ($1, "$2 =~ /./", $TYPE_HEAD_TESTS);
         $self->{descriptions}->{$1} = "Found a $2 header";
       }
       else {
-        $self->{parser}->add_test (split(/\s+/,$value,2), TYPE_HEAD_TESTS);
+        $self->{parser}->add_test (split(/\s+/,$value,2), $TYPE_HEAD_TESTS);
       }
     }
   });
@@ -2286,10 +2246,10 @@ Define a body eval test.  See above.
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if ($value =~ /^(\S+)\s+eval:(.*)$/) {
-        $self->{parser}->add_test ($1, $2, TYPE_BODY_EVALS);
+        $self->{parser}->add_test ($1, $2, $TYPE_BODY_EVALS);
       }
       else {
-        $self->{parser}->add_test (split(/\s+/,$value,2), TYPE_BODY_TESTS);
+        $self->{parser}->add_test (split(/\s+/,$value,2), $TYPE_BODY_TESTS);
       }
     }
   });
@@ -2308,7 +2268,7 @@ points of the URI, and will also be faster.
 
 # we don't do URI evals yet - maybe later
 #    if (/^uri\s+(\S+)\s+eval:(.*)$/) {
-#      $self->{parser}->add_test ($1, $2, TYPE_URI_EVALS);
+#      $self->{parser}->add_test ($1, $2, $TYPE_URI_EVALS);
 #      next;
 #    }
   push (@cmds, {
@@ -2316,7 +2276,7 @@ points of the URI, and will also be faster.
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      $self->{parser}->add_test (split(/\s+/,$value,2), TYPE_URI_TESTS);
+      $self->{parser}->add_test (split(/\s+/,$value,2), $TYPE_URI_TESTS);
     }
   });
 
@@ -2342,9 +2302,9 @@ Define a raw-body eval test.  See above.
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if ($value =~ /^(\S+)\s+eval:(.*)$/) {
-        $self->{parser}->add_test ($1, $2, TYPE_RAWBODY_EVALS);
+        $self->{parser}->add_test ($1, $2, $TYPE_RAWBODY_EVALS);
       } else {
-        $self->{parser}->add_test (split(/\s+/,$value,2), TYPE_RAWBODY_TESTS);
+        $self->{parser}->add_test (split(/\s+/,$value,2), $TYPE_RAWBODY_TESTS);
       }
     }
   });
@@ -2369,9 +2329,9 @@ Define a full-body eval test.  See above.
     code => sub {
       my ($self, $key, $value, $line) = @_;
       if ($value =~ /^(\S+)\s+eval:(.*)$/) {
-        $self->{parser}->add_test ($1, $2, TYPE_FULL_EVALS);
+        $self->{parser}->add_test ($1, $2, $TYPE_FULL_EVALS);
       } else {
-        $self->{parser}->add_test (split(/\s+/,$value,2), TYPE_FULL_TESTS);
+        $self->{parser}->add_test (split(/\s+/,$value,2), $TYPE_FULL_TESTS);
       }
     }
   });
@@ -2410,7 +2370,7 @@ ignore these for scoring.
     is_priv => 1,
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      $self->{parser}->add_test (split(/\s+/,$value,2), TYPE_META_TESTS);
+      $self->{parser}->add_test (split(/\s+/,$value,2), $TYPE_META_TESTS);
     }
   });
 
@@ -3154,23 +3114,12 @@ sub new {
   $self;
 }
 
-sub set_defaults_from_command_list {
-  my ($self) = @_;
-  foreach my $cmd (@{$self->{registered_commands}}) {
-    # note! exists, not defined -- we want to be able to set
-    # "undef" default values.
-    if (exists($cmd->{default})) {
-      $self->{$cmd->{setting}} = $cmd->{default};
-    }
-  }
-}
-
 sub mtime {
-    my $self = shift;
-    if (@_) {
-      $self->{mtime} = shift;
-    }
-    return $self->{mtime};
+  my $self = shift;
+  if (@_) {
+    $self->{mtime} = shift;
+  }
+  return $self->{mtime};
 }
 
 ###########################################################################
@@ -3201,7 +3150,6 @@ sub get_score_set {
 
 sub get_rule_types {
   my ($self) = @_;
-
   return @rule_types;
 }
 
@@ -3392,90 +3340,8 @@ sub regression_tests {
 
 ###########################################################################
 
-# note: error 70 == SA_SOFTWARE
 sub finish_parsing {
-  my ($self) = @_;
-
-  while (my ($name, $text) = each %{$self->{tests}}) {
-    my $type = $self->{test_types}->{$name};
-    my $priority = $self->{priority}->{$name} || 0;
-    $self->{priorities}->{$priority}++;
-
-    # eval type handling
-    if (($type & 1) == 1) {
-      my @args;
-      if (my ($function, $args) = ($text =~ m/(.*?)\s*\((.*?)\)\s*$/)) {
-        if ($args) {
-          @args = ($args =~ m/['"](.*?)['"]\s*(?:,\s*|$)/g);
-        }
-        unshift(@args, $function);
-        if ($type == TYPE_BODY_EVALS) {
-          $self->{body_evals}->{$priority}->{$name} = \@args;
-        }
-        elsif ($type == TYPE_HEAD_EVALS) {
-          $self->{head_evals}->{$priority}->{$name} = \@args;
-        }
-        elsif ($type == TYPE_RBL_EVALS) {
-          # We don't do priorities for TYPE_RBL_EVALS
-          $self->{rbl_evals}->{$name} = \@args;
-        }
-        elsif ($type == TYPE_RAWBODY_EVALS) {
-          $self->{rawbody_evals}->{$priority}->{$name} = \@args;
-        }
-        elsif ($type == TYPE_FULL_EVALS) {
-          $self->{full_evals}->{$priority}->{$name} = \@args;
-        }
-        #elsif ($type == TYPE_URI_EVALS) {
-        #  $self->{uri_evals}->{$priority}->{$name} = \@args;
-        #}
-        else {
-          $self->{errors}++;
-          sa_die(70, "unknown type $type for $name: $text");
-        }
-      }
-      else {
-        $self->{errors}++;
-        sa_die(70, "syntax error for eval function $name: $text");
-      }
-    }
-    # non-eval tests
-    else {
-      if ($type == TYPE_BODY_TESTS) {
-        $self->{body_tests}->{$priority}->{$name} = $text;
-      }
-      elsif ($type == TYPE_HEAD_TESTS) {
-        $self->{head_tests}->{$priority}->{$name} = $text;
-      }
-      elsif ($type == TYPE_META_TESTS) {
-        # Meta Tests must have a priority of at least META_TEST_MIN_PRIORITY,
-        # if it's lower then reset the value
-        if ($priority < META_TEST_MIN_PRIORITY) {
-          # we need to lower the count of the old priority and raise the
-          # count of the new priority
-          $self->{priorities}->{$priority}--;
-          $priority = META_TEST_MIN_PRIORITY;
-          $self->{priorities}->{$priority}++;
-        }
-        $self->{meta_tests}->{$priority}->{$name} = $text;
-      }
-      elsif ($type == TYPE_URI_TESTS) {
-        $self->{uri_tests}->{$priority}->{$name} = $text;
-      }
-      elsif ($type == TYPE_RAWBODY_TESTS) {
-        $self->{rawbody_tests}->{$priority}->{$name} = $text;
-      }
-      elsif ($type == TYPE_FULL_TESTS) {
-        $self->{full_tests}->{$priority}->{$name} = $text;
-      }
-      else {
-        $self->{errors}++;
-        sa_die(70, "unknown type $type for $name: $text");
-      }
-    }
-  }
-
-  delete $self->{tests};		# free it up
-  delete $self->{priority};             # free it up
+  my ($self) = shift; $self->{parser}->finish_parsing();
 }
 
 ###########################################################################
@@ -3485,10 +3351,10 @@ sub maybe_header_only {
   my $type = $self->{test_types}->{$rulename};
   return 0 if (!defined ($type));
 
-  if (($type == TYPE_HEAD_TESTS) || ($type == TYPE_HEAD_EVALS)) {
+  if (($type == $TYPE_HEAD_TESTS) || ($type == $TYPE_HEAD_EVALS)) {
     return 1;
 
-  } elsif ($type == TYPE_META_TESTS) {
+  } elsif ($type == $TYPE_META_TESTS) {
     my $tflags = $self->{tflags}->{$rulename}; $tflags ||= '';
     if ($tflags =~ m/\bnet\b/i) {
       return 0;
@@ -3505,13 +3371,13 @@ sub maybe_body_only {
   my $type = $self->{test_types}->{$rulename};
   return 0 if (!defined ($type));
 
-  if (($type == TYPE_BODY_TESTS) || ($type == TYPE_BODY_EVALS)
-        || ($type == TYPE_URI_TESTS) || ($type == TYPE_URI_EVALS))
+  if (($type == $TYPE_BODY_TESTS) || ($type == $TYPE_BODY_EVALS)
+        || ($type == $TYPE_URI_TESTS) || ($type == $TYPE_URI_EVALS))
   {
     # some rawbody go off of headers...
     return 1;
 
-  } elsif ($type == TYPE_META_TESTS) {
+  } elsif ($type == $TYPE_META_TESTS) {
     my $tflags = $self->{tflags}->{$rulename}; $tflags ||= '';
     if ($tflags =~ m/\bnet\b/i) {
       return 0;

@@ -21,7 +21,6 @@ Mail::SpamAssassin::Conf::Parser - parse SpamAssassin configuration
 =head1 SYNOPSIS
 
   (see Mail::SpamAssassin)
-  
 
 =head1 DESCRIPTION
 
@@ -31,6 +30,75 @@ several internet-based realtime blacklists.
 This class is used internally by SpamAssassin to parse its configuration files.
 Please refer to the C<Mail::SpamAssassin> documentation for public interfaces.
 
+=head1 STRUCTURE OF A CONFIG BLOCK
+
+This is the structure of a config-setting block.  Each is a hashref which may
+contain these keys:
+
+=over 4
+
+=item setting
+
+the name of the setting it modifies, e.g. "required_score". this also doubles
+as the default for 'command' (below). THIS IS REQUIRED.
+
+=item command
+
+the command string used in the config file for this setting. optional;
+'setting' will be used for the command if this is omitted.
+
+=item aliases
+
+an [aryref] of other aliases for the same command.  optional.
+
+=item type
+
+the type of this setting:
+
+           - $CONF_TYPE_STRING: string
+           - $CONF_TYPE_NUMERIC: numeric value (float or int)
+           - $CONF_TYPE_BOOL: boolean (0 or 1)
+           - $CONF_TYPE_TEMPLATE: template, like "report"
+           - $CONF_TYPE_ADDRLIST: address list, like "whitelist_from"
+           - $CONF_TYPE_HASH_KEY_VALUE: hash key/value pair,
+             like "describe" or tflags
+
+if this is set, a 'code' block is assigned based on the type.
+
+=item code
+
+a subroutine to deal with the setting.  only used if 'type' is not set.  ONE OF
+'code' OR 'type' IS REQUIRED.  The arguments passed to the function are ($self,
+$key, $value, $line), where $key is the setting (*not* the command), $value is
+the value string, and $line is the entire line.
+
+=item default
+
+the default value for the setting.  may be omitted if the default value is a
+non-scalar type, which should be set in the Conf ctor.  note for path types:
+using "__userstate__" is recommended for defaults, as it allows
+Mail::SpamAssassin module users who set that configuration setting, to receive
+the correct values.
+
+=item is_priv
+
+set to 1 if this setting requires 'allow_user_rules' when run from spamd.
+
+=item is_admin
+
+set to 1 if this setting can only be set in the system-wide config when run
+from spamd.
+
+=item is_frequent
+
+set to 1 if this value occurs frequently in the config. this means it's looked
+up first for speed.
+
+=back
+
+Note that the registered commands array can be extended by plugins, by adding
+the new config settings to the C<$conf-<gt>{registered_commands}> array ref.
+
 =head1 METHODS
 
 =over 4
@@ -38,6 +106,8 @@ Please refer to the C<Mail::SpamAssassin> documentation for public interfaces.
 =cut
 
 package Mail::SpamAssassin::Conf::Parser;
+use Mail::SpamAssassin::Conf;
+use Mail::SpamAssassin::Constants qw(:sa);
 
 use strict;
 use bytes;
@@ -303,8 +373,6 @@ failed_line:
       next;
     }
 
-###########################################################################
-
     my $msg = "Failed to parse line in SpamAssassin configuration, ".
                         "skipping: $line";
 
@@ -453,6 +521,95 @@ sub set_template_append {
 sub set_template_clear {
   my ($conf, $key, $value, $line) = @_;
   $conf->{$key} = '';
+}
+
+###########################################################################
+
+# note: error 70 == SA_SOFTWARE
+sub finish_parsing {
+  my ($self) = @_;
+  my $conf = $self->{conf};
+
+  while (my ($name, $text) = each %{$conf->{tests}}) {
+    my $type = $conf->{test_types}->{$name};
+    my $priority = $conf->{priority}->{$name} || 0;
+    $conf->{priorities}->{$priority}++;
+
+    # eval type handling
+    if (($type & 1) == 1) {
+      my @args;
+      if (my ($function, $args) = ($text =~ m/(.*?)\s*\((.*?)\)\s*$/)) {
+        if ($args) {
+          @args = ($args =~ m/['"](.*?)['"]\s*(?:,\s*|$)/g);
+        }
+        unshift(@args, $function);
+        if ($type == $Mail::SpamAssassin::Conf::TYPE_BODY_EVALS) {
+          $conf->{body_evals}->{$priority}->{$name} = \@args;
+        }
+        elsif ($type == $Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS) {
+          $conf->{head_evals}->{$priority}->{$name} = \@args;
+        }
+        elsif ($type == $Mail::SpamAssassin::Conf::TYPE_RBL_EVALS) {
+          # We don't do priorities for $Mail::SpamAssassin::Conf::TYPE_RBL_EVALS
+          $conf->{rbl_evals}->{$name} = \@args;
+        }
+        elsif ($type == $Mail::SpamAssassin::Conf::TYPE_RAWBODY_EVALS) {
+          $conf->{rawbody_evals}->{$priority}->{$name} = \@args;
+        }
+        elsif ($type == $Mail::SpamAssassin::Conf::TYPE_FULL_EVALS) {
+          $conf->{full_evals}->{$priority}->{$name} = \@args;
+        }
+        #elsif ($type == $Mail::SpamAssassin::Conf::TYPE_URI_EVALS) {
+        #  $conf->{uri_evals}->{$priority}->{$name} = \@args;
+        #}
+        else {
+          $conf->{errors}++;
+          sa_die(70, "unknown type $type for $name: $text");
+        }
+      }
+      else {
+        $conf->{errors}++;
+        sa_die(70, "syntax error for eval function $name: $text");
+      }
+    }
+    # non-eval tests
+    else {
+      if ($type == $Mail::SpamAssassin::Conf::TYPE_BODY_TESTS) {
+        $conf->{body_tests}->{$priority}->{$name} = $text;
+      }
+      elsif ($type == $Mail::SpamAssassin::Conf::TYPE_HEAD_TESTS) {
+        $conf->{head_tests}->{$priority}->{$name} = $text;
+      }
+      elsif ($type == $Mail::SpamAssassin::Conf::TYPE_META_TESTS) {
+        # Meta Tests must have a priority of at least META_TEST_MIN_PRIORITY,
+        # if it's lower then reset the value
+        if ($priority < META_TEST_MIN_PRIORITY) {
+          # we need to lower the count of the old priority and raise the
+          # count of the new priority
+          $conf->{priorities}->{$priority}--;
+          $priority = META_TEST_MIN_PRIORITY;
+          $conf->{priorities}->{$priority}++;
+        }
+        $conf->{meta_tests}->{$priority}->{$name} = $text;
+      }
+      elsif ($type == $Mail::SpamAssassin::Conf::TYPE_URI_TESTS) {
+        $conf->{uri_tests}->{$priority}->{$name} = $text;
+      }
+      elsif ($type == $Mail::SpamAssassin::Conf::TYPE_RAWBODY_TESTS) {
+        $conf->{rawbody_tests}->{$priority}->{$name} = $text;
+      }
+      elsif ($type == $Mail::SpamAssassin::Conf::TYPE_FULL_TESTS) {
+        $conf->{full_tests}->{$priority}->{$name} = $text;
+      }
+      else {
+        $conf->{errors}++;
+        sa_die(70, "unknown type $type for $name: $text");
+      }
+    }
+  }
+
+  delete $conf->{tests};                # free it up
+  delete $conf->{priority};             # free it up
 }
 
 ###########################################################################

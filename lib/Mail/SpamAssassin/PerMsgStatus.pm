@@ -1316,7 +1316,7 @@ sub do_head_tests {
   dbg ("running header regexp tests; score so far=".$self->{score});
 
   my $doing_user_rules = 
-    $self->{conf}->{user_rules_to_compile}->{Mail::SpamAssassin::Conf::TYPE_HEAD_TESTS};
+    $self->{conf}->{user_rules_to_compile}->{$Mail::SpamAssassin::Conf::TYPE_HEAD_TESTS};
 
   # clean up priority value so it can be used in a subroutine name
   my $clean_priority;
@@ -1416,7 +1416,7 @@ sub do_body_tests {
   dbg ("running body-text per-line regexp tests; score so far=".$self->{score});
 
   my $doing_user_rules = 
-    $self->{conf}->{user_rules_to_compile}->{Mail::SpamAssassin::Conf::TYPE_BODY_TESTS};
+    $self->{conf}->{user_rules_to_compile}->{$Mail::SpamAssassin::Conf::TYPE_BODY_TESTS};
 
   # clean up priority value so it can be used in a subroutine name
   my $clean_priority;
@@ -1655,7 +1655,7 @@ sub do_body_uri_tests {
   dbg ("running uri tests; score so far=".$self->{score});
 
   my $doing_user_rules = 
-    $self->{conf}->{user_rules_to_compile}->{Mail::SpamAssassin::Conf::TYPE_URI_TESTS};
+    $self->{conf}->{user_rules_to_compile}->{$Mail::SpamAssassin::Conf::TYPE_URI_TESTS};
 
   # clean up priority value so it can be used in a subroutine name
   my $clean_priority;
@@ -1743,7 +1743,7 @@ sub do_rawbody_tests {
   dbg ("running raw-body-text per-line regexp tests; score so far=".$self->{score});
 
   my $doing_user_rules = 
-    $self->{conf}->{user_rules_to_compile}->{Mail::SpamAssassin::Conf::TYPE_RAWBODY_TESTS};
+    $self->{conf}->{user_rules_to_compile}->{$Mail::SpamAssassin::Conf::TYPE_RAWBODY_TESTS};
 
   # clean up priority value so it can be used in a subroutine name
   my $clean_priority;
@@ -1831,7 +1831,7 @@ sub do_full_tests {
   dbg ("running full-text regexp tests; score so far=".$self->{score});
 
   my $doing_user_rules = 
-    $self->{conf}->{user_rules_to_compile}->{Mail::SpamAssassin::Conf::TYPE_FULL_TESTS};
+    $self->{conf}->{user_rules_to_compile}->{$Mail::SpamAssassin::Conf::TYPE_FULL_TESTS};
 
   # clean up priority value so it can be used in a subroutine name
   my $clean_priority;
@@ -1930,7 +1930,7 @@ sub do_meta_tests {
   dbg( "running meta tests; score so far=" . $self->{score} );
 
   my $doing_user_rules = 
-    $self->{conf}->{user_rules_to_compile}->{Mail::SpamAssassin::Conf::TYPE_META_TESTS};
+    $self->{conf}->{user_rules_to_compile}->{$Mail::SpamAssassin::Conf::TYPE_META_TESTS};
 
   # clean up priority value so it can be used in a subroutine name
   my $clean_priority;
