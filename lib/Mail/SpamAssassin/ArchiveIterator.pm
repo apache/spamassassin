@@ -152,10 +152,11 @@ time_t value.
 
 =item wanted_sub
 
-Reference to a subroutine which will process message data.  Usually set
-via set_functions().  The routine will be passed 4 values: class (scalar),
-filename (scalar), received date (scalar), and message content (array
-reference, one message line per element).
+Reference to a subroutine which will process message data.  Usually
+set via set_functions().  The routine will be passed 5 values: class
+(scalar), filename (scalar), received date (scalar), message content
+(array reference, one message line per element), and the message format
+key ('f' for file, 'm' for mbox, 'b' for mbx).
 
 =item result_sub
 
@@ -417,13 +418,13 @@ sub run_message {
 
   my ($date, $class, $format, $mail) = run_index_unpack($msg);
 
-  if ($format eq "f") {
+  if ($format eq 'f') {
     return $self->run_file($class, $format, $mail, $date);
   }
-  elsif ($format eq "m") {
+  elsif ($format eq 'm') {
     return $self->run_mailbox($class, $format, $mail, $date);
   }
-  elsif ($format eq "b") {
+  elsif ($format eq 'b') {
     return $self->run_mbx($class, $format, $mail, $date);
   }
 }
@@ -452,7 +453,7 @@ sub run_file {
     $date = Mail::SpamAssassin::Util::receive_date($header);
   }
 
-  return($class, $format, $date, $where, &{$self->{wanted_sub}}($class, $where, $date, \@msg));
+  return($class, $format, $date, $where, &{$self->{wanted_sub}}($class, $where, $date, \@msg, $format));
 }
 
 sub run_mailbox {
@@ -490,7 +491,7 @@ sub run_mailbox {
     $date = Mail::SpamAssassin::Util::receive_date($header);
   }
 
-  return($class, $format, $date, $where, &{$self->{wanted_sub}}($class, $where, $date, \@msg));
+  return($class, $format, $date, $where, &{$self->{wanted_sub}}($class, $where, $date, \@msg, $format));
 }
 
 sub run_mbx {
@@ -524,7 +525,7 @@ sub run_mbx {
     $date = Mail::SpamAssassin::Util::receive_date($header);
   }
 
-  return($class, $format, $date, $where, &{$self->{wanted_sub}}($class, $where, $date, \@msg));
+  return($class, $format, $date, $where, &{$self->{wanted_sub}}($class, $where, $date, \@msg, $format));
 }
 
 ############################################################################
