@@ -985,59 +985,54 @@ sub check {
   # Now read in message
   my @msglines;
   my $actual_length = 0;
-  my $msgid;
-  my $rmsgid;
-  my $thisid = undef;
+  my $final_length  = defined $expected_length ?  # shortcut the check
+                             \$expected_length :  # if expected_length
+                             \$actual_length;     # is set or not.
   while ( $_ = $client->getline() ) {
-    if ( ( $actual_length == 0 ) .. /^$/ ) {    # still in header
-      if ( $thisid ) {
-        if (/^[ \t]/) {                         # folded line
-	  $$thisid .= $_;
-	}
-	else {
-          while ( $$thisid =~ s/\([^\(\)]*\)// )
-            { }                              # remove comments and
-          $$thisid =~ s/^\s+|\s+$//g;        # leading and trailing spaces
-          $$thisid =~ s/\s+/ /g;             # collapse spaces
-          $$thisid =~ s/^.*?<(.*?)>.*$/$1/;  # keep only the id itself
-          $$thisid =~ s/[^\x21-\x7e]/?/g;    # replace all weird chars
-          $$thisid =~ s/[<>]/?/g;            # plus all dangling angle brackets
-          $$thisid =~ s/^(.+)$/<$1>/;        # re-bracket the id (if not empty)
+    $actual_length += length($_);
+    last if $actual_length > ${$final_length};
 
-          $thisid = undef;
-	}
-      }
-      
-      if (/^(Resent-)?Message-Id:\s+(.*?)\s*$/i) {
-        $thisid   = $1 ? \$rmsgid : \$msgid;
-        $$thisid .= $2 || '';
-      }
+    push(@msglines, $_);    
+  }
+  
+  # Now parse *only* the message headers; the MIME tree won't be generated 
+  # yet, check() will do this on demand later on.
+  my $mail = $spamtest->parse(\@msglines, 0);
+  # Free some mem.
+  undef @msglines;
+
+  # Extract the Message-Id(s) for logging purposes.
+  my $msgid  = $mail->get_pristine_header("Message-Id");
+  my $rmsgid = $mail->get_pristine_header("Resent-Message-Id");
+  foreach my $id ((\$msgid, \$rmsgid)) {
+    if ( $$id ) {
+      while ( $$id =~ s/\([^\(\)]*\)// )
+         { }                            # remove comments and
+      $$id =~ s/^\s+|\s+$//g;          # leading and trailing spaces
+      $$id =~ s/\s+/ /g;               # collapse whitespaces
+      $$id =~ s/^.*?<(.*?)>.*$/$1/;    # keep only the id itself
+      $$id =~ s/[^\x21-\x7e]/?/g;      # replace all weird chars
+      $$id =~ s/[<>]/?/g;              # plus all dangling angle brackets
+      $$id =~ s/^(.+)$/<$1>/;          # re-bracket the id (if not empty)
     }
-    push ( @msglines, $_ );
-    $actual_length += length;
-    last
-      if ( defined($expected_length)
-      && ( $actual_length >= $expected_length ) );
   }
 
   $msgid        ||= "(unknown)";
   $current_user ||= "(unknown)";
   logmsg( ( $method eq 'PROCESS' ? "processing" : "checking" )
-    . " message $msgid"
+      . " message $msgid"
       . ( $rmsgid ? " aka $rmsgid" : "" )
       . " for ${current_user}:$>"
       . "." );
 
-  # Check length if we're supposed to
-  if ( $expected_length && ( $actual_length != $expected_length ) ) {
+  # Check length if we're supposed to.
+  if ( $actual_length != ${$final_length} ) {
     protocol_error(
-"(Content-Length mismatch: Expected $expected_length bytes, got $actual_length bytes)"
+      "(Content-Length mismatch: Expected ${$final_length} bytes, got $actual_length bytes)"
     );
+    $mail->finish();
     return 1;
   }
-
-  # Parse the input message
-  my $mail = $spamtest->parse( \@msglines, 1 );
 
   # Go ahead and check the message
   my $status = $spamtest->check($mail);
