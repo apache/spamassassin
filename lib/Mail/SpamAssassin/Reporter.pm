@@ -16,14 +16,13 @@ use vars	qw{
 sub new {
   my $class = shift;
   $class = ref($class) || $class;
-  my ($main, $msg) = @_;
+  my ($main, $msg, $options) = @_;
 
   my $self = {
     'main'		=> $main,
     'msg'		=> $msg,
+    'options'		=> $options,
   };
-
-  $self->{conf} = $self->{main}->{conf};
 
   bless ($self, $class);
   $self;
@@ -36,7 +35,7 @@ sub report {
 
   my $text = $self->{main}->remove_spamassassin_markup ($self->{msg});
 
-  if ($self->is_razor_available()) {
+  if (!$self->{options}->{dont_report_to_razor} && $self->is_razor_available()) {
     if ($self->razor_report($text)) {
       dbg ("SpamAssassin: spam reported to Razor.");
     }
@@ -66,7 +65,7 @@ sub razor_report {
   my ($self, $fulltext) = @_;
 
   my @msg = split (/^/m, $fulltext);
-  my $config = $self->{conf}->{razor_config};
+  my $config = $self->{main}->{conf}->{razor_config};
   my %options = (
     # 'debug'	=> 1
   );

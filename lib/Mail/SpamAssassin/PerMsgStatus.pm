@@ -375,7 +375,13 @@ sub handle_auto_report {
 
   if ($self->{hits} >= $self->{conf}->{auto_report_threshold}) {
     dbg ("score is high enough to automatically report this as spam");
-    $self->{main}->report_as_spam ($self->{msg}->get_mail_object);
+
+    my $testshit = $self->get_names_of_tests_hit();
+
+    my $opts = { };
+    if ($testshit =~ /RAZOR_CHECK/) { $opts->{dont_report_to_razor} = 1; }
+
+    $self->{main}->report_as_spam ($self->{msg}->get_mail_object, $opts);
   }
 }
 
