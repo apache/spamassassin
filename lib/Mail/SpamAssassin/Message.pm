@@ -249,7 +249,7 @@ sub get_pristine_header {
   my ($self, $hdr) = @_;
   
   return $self->{pristine_headers} unless $hdr;
-  my(@ret) = $self->{pristine_headers} =~ /^(?:$hdr:[ ]+(.*\n(?:\s+\S.*\n)*))/mig;
+  my(@ret) = $self->{pristine_headers} =~ /^(?:$hdr:[ \t]+(.*\n(?:\s+\S.*\n)*))/mig;
   if (@ret) {
     return wantarray ? @ret : $ret[-1];
   }

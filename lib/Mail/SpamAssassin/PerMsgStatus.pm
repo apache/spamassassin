@@ -763,7 +763,7 @@ sub rewrite_no_report_safe {
   # put the pristine headers into an array
   # skip the X-Spam- headers, but allow the X-Spam-Prev headers to remain.
   #
-  my(@pristine_headers) = grep(!/^X-Spam-(?!Prev-)/i, $self->{msg}->get_pristine_header() =~ /^([^:]+:\s*(?:.*\n(?:\s+\S.*\n)*))/mig);
+  my(@pristine_headers) = grep(!/^X-Spam-(?!Prev-)/i, $self->{msg}->get_pristine_header() =~ /^([^:]+:[ \t]*(?:.*\n(?:\s+\S.*\n)*))/mig);
   my $addition = 'headers_ham';
 
   if($self->{is_spam}) {
