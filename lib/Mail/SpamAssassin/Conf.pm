@@ -201,6 +201,9 @@ sub _parse {
   if ($lang eq 'C') { $lang = 'en_US'; }
   $lang =~ s/[\.\@].*$//;	# .utf8 or @euro
 
+  my $currentfile = '(no file)';
+  my $skipfile = 0;
+
   foreach (split (/\r?\n/, $_[1])) {
     s/\r//g; s/(^|(?<!\\))\#.*$/$1/;
     s/^\s+//; s/\s+$//; /^$/ and next;
@@ -208,6 +211,29 @@ sub _parse {
     # handle i18n
     if (s/^lang\s+(\S\S_\S\S)\s+//) { next if ($lang ne $1); }
     if (s/^lang\s+(\S\S)\s+//) { my $l = $1; next if ($lang !~ /${l}$/i); }
+
+    # Versioning assertions
+    if (/^file\s+start\s+(.+)\s*$/) { $currentfile = $1; next; }
+    if (/^file\s+end/) {
+      $currentfile = '(no file)';
+      $skipfile = 0;
+      next;
+    }
+
+    if (/^require[-_]version\s+(.*)\s*$/) {
+      my $req_version = $1 + 0.0;
+      if ($Mail::SpamAssassin::VERSION != $req_version) {
+        warn "configuration file \"$currentfile\" requires version ".
+                "$req_version of SpamAssassin, but this is code version ".
+                "$Mail::SpamAssassin::VERSION. Maybe you need to use ".
+                "the -c switch, or remove the old config files? ".
+                "Skipping this file";
+        $skipfile = 1;
+      }
+      next;
+    }
+
+    if ($skipfile) { next; }
 
     # note: no eval'd code should be loaded before the SECURITY line below.
 ###########################################################################

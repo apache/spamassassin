@@ -76,7 +76,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 $VERSION = "2.40";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.109 2002/08/13 22:50:44 jmason Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.110 2002/08/15 12:17:34 jmason Exp $';
 
 sub Version { $VERSION; }
 
@@ -655,23 +655,27 @@ sub init {
 }
 
 sub read_cf {
-  my ($self, $fname, $desc) = @_;
+  my ($self, $path, $desc) = @_;
 
-  return '' unless defined ($fname);
+  return '' unless defined ($path);
 
-  dbg ("using \"$fname\" for $desc");
+  dbg ("using \"$path\" for $desc");
   my $txt = '';
 
-  if (-d $fname) {
-    foreach my $file ($self->get_cf_files_in_dir ($fname)) {
+  if (-d $path) {
+    foreach my $file ($self->get_cf_files_in_dir ($path)) {
       open (IN, "<".$file) or warn "cannot open \"$file\": $!\n", next;
+      $txt .= "file start $file\n";     # let Conf know
       $txt .= join ('', <IN>);
+      $txt .= "file end $file\n";
       close IN;
     }
 
-  } elsif (-f $fname && -s _ && -r _) {
-    open (IN, "<".$fname) or warn "cannot open \"$fname\": $!\n";
+  } elsif (-f $path && -s _ && -r _) {
+    open (IN, "<".$path) or warn "cannot open \"$path\": $!\n";
+    $txt .= "file start $path\n";
     $txt = join ('', <IN>);
+    $txt .= "file end $path\n";
     close IN;
   }
 

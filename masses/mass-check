@@ -98,9 +98,9 @@ sub wanted {
 
   # killfile for mass-checks
   $_ = $ma->get_header("Message-Id");
-  if (/${killfile_message_ids}/os) { logkilled($ma); return; }
+  if (defined($_) && /${killfile_message_ids}/os) { logkilled($ma); return; }
   $_ = join ('', $ma->get_header("Received"));
-  if (/${killfile_receiveds}/os) { logkilled($ma); return; }
+  if (defined($_) && /${killfile_receiveds}/os) { logkilled($ma); return; }
 
   $ma->{noexit} = 1;
   $spamtest->remove_spamassassin_markup($ma);

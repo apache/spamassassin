@@ -1,5 +1,7 @@
 # URI tests
 
+require_version 2.40
+
 uri NUMERIC_HTTP_ADDR   /^https?\:\/\/\d{7,}/is
 describe NUMERIC_HTTP_ADDR  Uses a numeric IP address in URL
 
