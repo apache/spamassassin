@@ -114,11 +114,7 @@ header RCVD_IN_RFCI		rbleval:check_rbl_txt('rfci', 'ipwhois.rfc-ignorant.org.')
 describe RCVD_IN_RFCI		Received via a relay in ipwhois.rfc-ignorant.org
 tflags RCVD_IN_RFCI             net
 
-header HABEAS_HIL		rbleval:check_rbl('hil', 'hil.habeas.com.')
-describe HABEAS_HIL		Sender is on www.habeas.com Habeas Infringer List
-tflags HABEAS_HIL		net
-
-meta HABEAS_VIOLATOR		(HABEAS_SWE && HABEAS_HIL)
+header HABEAS_VIOLATOR		rbleval:check_rbl_swe('hil', 'hil.habeas.com.')
 describe HABEAS_VIOLATOR	On Habeas Infringer List and using Habeas warrant mark
 tflags HABEAS_VIOLATOR		net
 
