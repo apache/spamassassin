@@ -52,6 +52,7 @@ Options:
                   use 0.0.0.0 to listen on all available addresses)
   -p port         Listen on the specific port (default: 783)
   -q              Enable SQL config (only useful with -x)
+  -v              Enable vpopmail config  (only useful with -u set to vpopmail user)
   -s facility     Specify the syslog facility (default: mail)
   -u username     Run as named user, instead of running setuid to spamc user
   -x              Disable user config files
@@ -71,10 +72,10 @@ EOUSAGE
 
 use vars qw{
     $opt_d $opt_h $opt_L $opt_p $opt_A $opt_x $opt_s $opt_D $opt_u
-    $opt_P $opt_c $opt_a $opt_i $opt_q $opt_F $opt_S $opt_m
+    $opt_P $opt_c $opt_a $opt_i $opt_q $opt_F $opt_S $opt_m $opt_v
 };
 
-getopts('acdhi:p:qs:u:xA:DLSPF:m:') or usage();
+getopts('acdhi:p:qvs:u:xA:DLSPF:m:') or usage();
 
 $opt_h and usage();
 
@@ -525,14 +526,24 @@ sub handle_user
     my $username = shift;
 
     $current_user = $username;
+    #
+    # If vpopmail config enabled then look up userinfo for vpopmail uid
+    # as defined by $opt_u
+    #
+    my $userid = '';
+    if ($opt_v && $opt_u) {
+	$userid = $opt_u;
+    } else {
+	$userid = $username;
+    }
     my ($name,$pwd,$uid,$gid,$quota,$comment,$gcos,$dir,$etc) =
-	getpwnam($username);
+	getpwnam($userid);
 
     if ( !$spamtest->{paranoid} && !defined($uid) ) {
 	#if we are given a username, but can't look it up,
 	#Maybe NIS is down? lets break out here to allow
 	#them to get 'defaults' when we are not running paranoid.
-	logmsg "handle_user() -> unable to find user [$username]!\n";
+	logmsg "handle_user() -> unable to find user [$userid]!\n";
 	return 0;
     }
 
@@ -544,9 +555,23 @@ sub handle_user
 	}
     }
 
+    #
+    # If vpopmail config enabled then set $dir to virtual homedir
+    #
+    if ($opt_v && $opt_u) {
+	$dir = `$dir/bin/vuserinfo -d $username`;
+	$dir =~ s/\n//g;
+    }
     my $cf_file = $dir."/.spamassassin/user_prefs";
 
-    create_default_cf_if_needed ($cf_file, $username);
+    #
+    # If vpopmail config enabled then pass virtual homedir onto create_default_cf_needed
+    #
+    if ($opt_v && $opt_u) {
+	create_default_cf_if_needed ($cf_file, $username, $dir);
+    } else {
+	create_default_cf_if_needed ($cf_file, $username);
+    }
     $spamtest->read_scoreonly_config ($cf_file);
     return 1;
 }
@@ -559,14 +584,18 @@ sub handle_user_sql
 }
 
 sub create_default_cf_if_needed {
-    my ($cf_file, $username) = @_;
+    my ($cf_file, $username, $userdir) = @_;
 
     # Parse user scores, creating default .cf if needed:
     if( ! -r $cf_file && ! $spamtest->{dont_copy_prefs})
     {
 	logmsg "Creating default_prefs [$cf_file]";
 
-	$spamtest->create_default_prefs ($cf_file,$username);
+	#
+	# If vpopmail config enabled then pass virtual homedir onto create_default_prefs
+	# via $userdir
+	#
+	$spamtest->create_default_prefs ($cf_file,$username,$userdir);
 
 	if ( ! -r $cf_file )
 	{
@@ -656,6 +685,14 @@ Turn on SQL lookups even when per-user config files have been disabled
 with B<-x>. this is useful for spamd hosts which don't have user's
 home directories but do want to load user preferences from an SQL
 database.
+
+=item B<-v>
+
+Enable vpopmail config  (only useful with -u set to vpopmail
+user). This option is useful for vpopmail virtual users who
+do not have an entry in the system /etc/passwd file.  This
+allows spamd to lookup/create user_prefs in the vpopmail users
+own maildir.
 
 =item B<-s> I<facility>
 
