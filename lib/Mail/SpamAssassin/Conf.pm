@@ -584,6 +584,19 @@ B<always_add_report>.
      $self->{always_add_headers} = $1+0; next;
    }
 
+=item report_safe_copy_headers { header_name }
+
+If using report_safe, a few of the headers from the original message
+are copied into the wrapper header (From, To, Cc, Subject, Date, etc.)
+If you want to have other headers copied as well, you can add them
+using this option.  You can specify multiple headers on the same line,
+seperated by spaces, or you can just use multiple lines.
+
+=cut
+
+   if (/^report_safe_copy_headers\s+(.+?)\s*$/) {
+     push(@{$self->{report_safe_copy_headers}}, split(/\s+/, $1));
+   }
 
 =item always_add_report { 0 | 1 }	(default: 0)
 

@@ -639,6 +639,15 @@ sub rewrite_as_spam {
     Mail::SpamAssassin::Version() . " (" .
     $Mail::SpamAssassin::SUB_VERSION . ")\n";
 
+  if (defined $self->{conf}->{report_safe_copy_headers}) {
+    foreach my $hdr ( @{$self->{conf}->{report_safe_copy_headers}} ) {
+      next if ( exists $self->{headers_to_add}->{$hdr} );
+      my $hdrtext = $self->{msg}->get_pristine_header($hdr);
+      next unless $hdrtext;
+      $self->{headers_to_add}->{$hdr} = $hdrtext;
+    }
+  }
+
   # now add any test-specific markup headers (X-Pyzor etc.)
   foreach my $hdr (keys %{$self->{headers_to_add}}) {
     my $text = $self->{headers_to_add}->{$hdr};
