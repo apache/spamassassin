@@ -1254,8 +1254,10 @@ sub tok_put {
       $self->{db_toks}->{$NEWEST_TOKEN_AGE_MAGIC_TOKEN} = $atime;
     }
 
+    # Make sure to check for either !defined or "" ...  Apparently
+    # sometimes the DB module doesn't return the value correctly. :(
     my $oldmagic = $self->{db_toks}->{$OLDEST_TOKEN_AGE_MAGIC_TOKEN};
-    if (!defined ($oldmagic) || $atime < $oldmagic) {
+    if (!defined ($oldmagic) || $oldmagic eq "" || $atime < $oldmagic) {
       $self->{db_toks}->{$OLDEST_TOKEN_AGE_MAGIC_TOKEN} = $atime;
     }
   }
