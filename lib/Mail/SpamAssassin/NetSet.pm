@@ -65,6 +65,8 @@ sub add_cidr {
 
 sub get_num_nets {
   my ($self) = @_;
+
+  if (!exists $self->{nets}) { return 0; }
   return scalar @{$self->{nets}};
 }
 
