@@ -507,7 +507,7 @@ describe EXCUSE_10		"if you do not wish to receive any more"
 
 body EXCUSE_11			/you.*(?:name|mail).*(?:was|were).*list/i
 describe EXCUSE_11		Claims you were on a list
-body EXCUSE_12			/this (?:e?-?mail|message) (?:has reached|was sent to) you in error/i
+body EXCUSE_12			/this (?:e?-?mail|message) (?:(?:has )?reached|was sent to) you in error/i
 describe EXCUSE_12		Nobody's perfect
 body EXCUSE_13			/mail was sent to you because /i
 describe EXCUSE_13		Gives an excuse for why message was sent
