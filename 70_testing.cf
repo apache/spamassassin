@@ -26,11 +26,6 @@
 #
 ########################################################################
 
-# similar concept for Delphi.com.  Was an ISP, now a car company!
-# I think their username format is "First.Last"; requiring 2 digits
-# will be pretty safe.  (lower rule as a baseline to see if we miss much)
-header T_FROM_DELPHI		From:addr =~ /\d[^\@]+\d[^\@]+\@delphi\.com/i
-
 header T_RCVD_IN_BOGUSMX	eval:check_rbl_from_host('rfci-bmx', 'bogusmx.rfc-ignorant.org.')
 describe T_RCVD_IN_BOGUSMX	Received via a relay in BogusMX (rfc-ignorant.org)
 tflags T_RCVD_IN_BOGUSMX	net
@@ -310,6 +305,7 @@ body T_SA_MARKED_UP     /Spam detection software, running on the system /
 header T_FROM_NO_LOWER_1	From !~ /[a-z]/ [if-unset: x@example.com]
 header T_FROM_NO_LOWER_2	From:raw !~ /[a-z]/ [if-unset: x@example.com]
 header T_FROM_NO_LOWER_3	From:addr !~ /[a-z]/ [if-unset: x@example.com]
+header T_FROM_NO_LOWER_4	From:addr !~ /[a-z]/
 
 ########################################################################
 
