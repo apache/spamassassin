@@ -1047,7 +1047,15 @@ sub all_to_addrs {
   	 $self->get ('Apparently-Resent-To') .  # procmailrc manpage
   	 $self->get ('X-Envelope-To') .         # procmailrc manpage
   	 $self->get ('Envelope-To') .           # exim
-         $self->get ('Cc'));                    # std
+	 $self->get ('X-Delivered-To') .	# procmail quick start
+	 $self->get ('X-Original-To') .		# procmail quick start
+	 $self->get ('X-Rcpt-To') .		# procmail quick start
+	 $self->get ('X-Real-To') .		# procmail quick start
+	 $self->get ('Cc'));                    # std
+
+    # those are taken from various sources; thanks to Nancy McGough,
+    # who noted some in <http://www.ii.com/internet/robots/procmail/qs/#envelope>
+
   }
 
   dbg ("all '*To' addrs: ".join (" ", @addrs));
