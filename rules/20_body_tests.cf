@@ -253,6 +253,12 @@ describe PORN_2			Uses words and phrases which indicate porn (2)
 body PORN_3			/(?:(?:\blolita|\bcum|\borg[iy]|\bwild|fuck|\bteen|\baction\b|spunk|\bpussy\b|\bpussies\b|suck\b|sucking\b|\bhot\b|\bhottest\b|\bvoyeur|\ble[sz]b(?:ian|o)|\banal\b|\binterracial|\basian\b|\bamateur|\bsex+\b|\bslut|explicit|(?:[^x]|\b)xxx(?:[^x]|\b)|\blive\b|celebrity|\blick|\bsuck|\bdorm\b|webcam|\bass\b|\bschoolgirl\b|\bstrip|\bhorny\b|\bhorniest\b|\berotic|\boral\b|\bpenis\b|\bhardcore\b|\bblow[ -]*job|\bnast(?:y|iest)\b|\bporn|\bwhore|\bsex[ -]?fest|\bnaked|\bnude|\bvirgin|\bnaughty\b|\bnaughtiest\b|\bgirls\b|\bcelebs?\b|\bbabes\b|\badult\b|\bskank|\btits\b|\btitties\b).{0,15}){3,}/i
 describe PORN_3			Uses words and phrases which indicate porn (3)
 
+test     PORN_3      ok         Wild Asian hot peppers
+test     PORN_3      fail       Wild Asian cucumbers
+test     PORN_3      ok         Hot lesbo xxx
+test     PORN_3      fail       Hot lesbo xxxx
+test     PORN_3      fail       Hot lesbians
+
 # (contrib: skod)
 body PORN_6			/(?:\d+\+? xxx pictures|xxx photos?)/i
 describe PORN_6			Uses words and phrases which indicate porn (6)
@@ -264,17 +270,32 @@ body PORN_8			/(?:video|movie|teen|ware|mp3)z/
 describe PORN_8			Uses words and phrases which indicate porn (8)
 
 # Words which will almost never be seen outside of porn spam
-body     PORN_9                 /(?:sex|gay|slut|whore|cum|f.ck|adult|xxx)[ -]?fest|cum[ -]?shot|cum[ -]?dumpster/i
+body     PORN_9                 /(?:sex|gay|slut|whore|\bcum|f.ck|adult|xxx)[ -]?fest|\bcum[ -]?shot|\bcum[ -]?dumpster/i
 describe PORN_9                 Uses words and phrases which indicate porn (9)
+
+test     PORN_9       ok        sex-fest
+test     PORN_9       ok        cum-dumpster
+test     PORN_9       fail      talcum-dumpster
 
 # Words which mainly show up in porn spam
 body     PORN_10                /\blolita|\bslut|\bwhore|(?:[^x]|\b)xxx(?:[^x]|\b)|\bporn|\b(?:Asian|Japanese|oriental)\s+(?:girls|schoolgirls)\b|\bbabes\b|gang[ -]?bang|\bskank|\btits\b|\btitties\b|\bpussy\b|\bpussies\b|\bbi(?!-)\b|free pics/i
 describe PORN_10                Uses words and phrases which indicate porn (10)
 
+test     PORN_10      ok        Lolita
+test     PORN_10      ok        whores
+test     PORN_10      ok        xxx
+test     PORN_10      fail      xxxx
+
 # Words which often show up in spam, but also show up somewhat often in
 # non-spam
-body     PORN_11                /hard[ -]?core|web[ -]?cam|amateur/i
+body     PORN_11                /hard[ -]?core|web[ -]?cam|\bamateur\b/i
 describe PORN_11                Uses words and phrases which indicate porn (11)
+
+test     PORN_11      ok        hard-core
+test     PORN_11      ok        web cam
+test     PORN_11      ok        amateur
+test     PORN_11      fail      amateurish
+test     PORN_11      fail      proamateur
 
 # Like PORN_3, but it only needs to match two terms intead of three. To
 # compensate for only matching two terms, so as to not generate too many
@@ -283,12 +304,26 @@ describe PORN_11                Uses words and phrases which indicate porn (11)
 body     PORN_12                /(?:lolita|xxx|sex|slut|whore|hottest|hard-?core|horn|virgin|naught|web.?cam|le[sz]|skank|tit|puss|adult|fuck)/i and /(?:(?:\blolita|(?:[^x]|\b)xxx(?:[^x]|\b)|\bsex|\bslut|\bwhore|\bhottest\b|hard-?core|\bhorny\b|\bhorniest\b|\bvirgin|\bnaughty\b|\bnaughtiest\b|\bweb.?cam|\ble[sz]b(?:ian|o)|\bskank|\btits\b|\btitties\b|\bpussy\b|\bpussies\b|\badult\b|\bfuck).{0,7}){2,}/i
 describe PORN_12                Uses words and phrases which indicate porn (12)
 
+test     PORN_12      ok        sluts and whores
+test     PORN_12      ok        hardcore sex
+test     PORN_12      fail      lolita
+
 body     PORN_13                /must be (?:at least|over) 18/i
 describe PORN_13                Uses words and phrases which indicate porn (13)
 
+test     PORN_13      ok        must be at least 18
+test     PORN_13      ok        must be over 18
+test     PORN_13      fail      must be at least 13
+
 # Like PORN_11, but phrases which are *really* likely to show up in non-porn
-body     PORN_14                /\bpics\b|years? old|\bmy name'?s|\bmy name is/i
-describe PORN_14               Uses words and phrases which indicate porn (14)
+body     PORN_14                /\bpics\b|\byears? old\b|\bmy name'?s\b|\bmy name is\b/i
+describe PORN_14                Uses words and phrases which indicate porn (14)
+
+test     PORN_14     ok         I am 18 years old
+test     PORN_14     ok         My name is matt
+test     PORN_14     fail       I am 18 years older than
+test     PORN_14     ok         pics
+test     PORN_14     fail       microscopics
 
 body SEXY_PICS                  /sexy pictures/i
 describe SEXY_PICS              Sexy pictures
