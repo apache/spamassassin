@@ -110,6 +110,11 @@ sub is_razor_available {
 sub razor_lookup {
   my ($self, $site, $fulltext) = @_;
 
+  if ($self->{main}->{local_tests_only}) {
+    dbg ("local tests only, ignoring Razor");
+    return 0;
+  }
+
   my @msg = split (/\n/, $fulltext);
 
   $site =~ /^(\S+):(\d+)$/;
@@ -192,6 +197,7 @@ sub is_dns_available {
   return $IS_DNS_AVAILABLE if (defined $IS_DNS_AVAILABLE);
 
   $IS_DNS_AVAILABLE = 0;
+  goto done if ($self->{main}->{local_tests_only});
   goto done unless $self->load_resolver();
   goto done unless $self->lookup_mx ($EXISTING_DOMAIN);
 
