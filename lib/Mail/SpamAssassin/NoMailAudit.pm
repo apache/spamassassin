@@ -176,11 +176,15 @@ sub get_all_headers {
   my @lines = ();
 
   my $from = $self->{from_line};
-  if (defined $from) {
-    push (@lines, $from);
-  } else {
-    #$from = "From spamassassin\@localhost  ".(scalar localtime(time))."\n";
+  if (!defined $from) {
+    my $f = $self->get_header("From");
+    $f ||= "spamassassin\@localhost\n";
+    chomp ($f);
+    $f =~ s/^.*?<(.+)>\s*$/$1/g               # Foo Blah <jm@foo>
+        or $f =~ s/^(.+)\s\(.*?\)\s*$/$1/g;   # jm@foo (Foo Blah)
+    $from = "From $f  ".(scalar localtime(time))."\n";
   }
+  push (@lines, $from);
 
   foreach my $hdrcode (@{$self->{header_order}}) {
     $hdrcode =~ /^([^:]+):(\d+)$/ or next;
