@@ -1803,13 +1803,14 @@ sub _check_mime_header {
   }
 
   if ($name && $ctype ne "application/octet-stream") {
+    # MIME_SUSPECT_NAME triggered here
     $name =~ s/.*\.//;
     $ctype =~ s@/(x-|vnd\.)@/@;
-    if (   ($name =~ /^html?$/ && $ctype !~ m@^text/@)
+    if (   ($name =~ /^html?$/ && $ctype !~ m@^text/(?:html|xml|plain)@)
 	|| ($name =~ /^jpe?g$/ && $ctype !~ m@^image/p?jpeg@)
 	|| ($name eq "pdf" && $ctype ne "application/pdf")
 	|| ($name eq "gif" && $ctype ne "image/gif")
-	|| ($name eq "txt" && $ctype ne "text/plain")
+	|| ($name eq "txt" && $ctype !~ m@^text/@)      # text/english is OK, it seems
 	|| ($name eq "vcf" && $ctype ne "text/vcard")
 	|| ($name =~ /^(?:bat|com|exe|pif|scr|swf|vbs)$/ && $ctype !~ m@^application/@)
 	|| ($name eq "doc" && $ctype !~ m@^application/.*word$@)
