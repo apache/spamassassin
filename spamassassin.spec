@@ -126,7 +126,7 @@ mkdir -p %{buildroot}/etc/mail/spamassassin
 
 %files 
 %defattr(-,root,root)
-%doc README Changes sample-nonspam.txt sample-spam.txt spamd/README.spamd INSTALL BUGS COPYRIGHT LICENSE TRADEMARK USAGE
+%doc README Changes sample-nonspam.txt sample-spam.txt spamd/README.spamd INSTALL BUGS LICENSE TRADEMARK USAGE
 %attr(755,root,root) %{_bindir}/*
 %attr(644,root,root) %{_includedir}/*
 %attr(644,root,root) %{_libdir}/*.so
