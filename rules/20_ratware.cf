@@ -38,6 +38,8 @@ header RATWARE_OE_PI		X-Mailer =~ /Out[Ll]ook Express 3\.14159/
 describe RATWARE_OE_PI		X-Mailer contains "OutLook Express 3.14159"
 header RATWARE_STORM		X-Mailer =~ /StormPost/
 describe RATWARE_STORM		Bulk email software fingerprint (StormPost) found in headers
+uri RATWARE_STORM_URI		m{http://\S+/sp/t\.pl\?id=\d+:\d+}i
+describe RATWARE_STORM_URI	Bulk email software fingerprint (StormPost) found in headers
 header RATWARE_JIXING		X-Mailer =~ /JiXing .{0,30}Design By JohnnieHuang/
 describe RATWARE_JIXING		Bulk email software fingerprint (JiXing) found in headers
 header RATWARE_SCREWUP_1	X-Mailer =~ /^X-Mailer: /
