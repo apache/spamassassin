@@ -409,8 +409,10 @@ describe FORGED_MX_HOTMAIL	Forged hotmail.com Received 'from mx' header
 
 # forgery meta-rules: more reliable than their inputs
 meta CONFIRMED_FORGED         (FORGED_RCVD_TRAIL && (FORGED_AOL_RCVD || FORGED_HOTMAIL_RCVD || FORGED_EUDORAMAIL_RCVD || FORGED_YAHOO_RCVD || FORGED_JUNO_RCVD || FORGED_GW05_RCVD || FORGED_MX_HOTMAIL))
+describe CONFIRMED_FORGED	Received headers are forged
 
 meta MULTI_FORGED             ((FORGED_AOL_RCVD + FORGED_HOTMAIL_RCVD + FORGED_EUDORAMAIL_RCVD + FORGED_YAHOO_RCVD + FORGED_JUNO_RCVD + FORGED_GW05_RCVD) > 1)
+describe MULTI_FORGED		Received headers indicate multiple forgeries
 
 # Sep 23 2002 jm: another spamhaus rule
 header RCVD_BY_QVES_COM		Received =~ /by email.qves.com with Microsoft/
