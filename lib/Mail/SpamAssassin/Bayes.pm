@@ -715,7 +715,13 @@ sub learn_trapped {
   my ($wc, @tokens) = $self->tokenize ($msg, $body);
   my %seen = ();
 
-  my $msgatime = $self->receive_date(scalar $msg->get_all_headers());
+  my $msgatime = $self->receive_date(scalar $msg->get_all_headers(0,1));
+
+  # If the message atime comes back as being more than 1 day in the
+  # future, something's messed up and we should revert to current time as
+  # a safety measure.
+  #
+  $msgatime = time if ( $msgatime - time > 86400 );
 
   for (@tokens) {
     if ($seen{$_}) { next; } else { $seen{$_} = 1; }
@@ -997,7 +1003,13 @@ sub scan {
   my %seen = ();
   my $pw;
 
-  my $msgatime = $self->receive_date(scalar $msg->get_all_headers());
+  my $msgatime = $self->receive_date(scalar $msg->get_all_headers(0,1));
+
+  # If the message atime comes back as being more than 1 day in the
+  # future, something's messed up and we should revert to current time as
+  # a safety measure.
+  #
+  $msgatime = time if ( $msgatime - time > 86400 );
 
   my %pw = map {
     if ($seen{$_}) {

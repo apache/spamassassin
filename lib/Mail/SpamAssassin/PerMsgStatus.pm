@@ -745,7 +745,8 @@ $original
 
 EOM
   
-  $newmsg = $self->{msg}->{'mbox_sep'} . $newmsg if ( exists $self->{msg}->{'mbox_sep'} );
+  my $mbox = $self->{msg}->get_mbox_seperator();
+  $newmsg = $mbox . $newmsg if ( defined $mbox );
   my @lines = split (/^/m,  $newmsg);
   return Mail::SpamAssassin::MsgParser->parse(\@lines);
 }
@@ -788,7 +789,8 @@ sub rewrite_headers {
     push(@pristine_headers, "X-Spam-$header: $line\n");
   }
 
-  splice @pristine_headers, 0, 0, $self->{msg}->{'mbox_sep'} if ( exists $self->{msg}->{'mbox_sep'} );
+  my $mbox = $self->{msg}->get_mbox_seperator();
+  splice @pristine_headers, 0, 0, $mbox if ( defined $mbox );
   push(@pristine_headers, "\n", split (/^/m, $self->{msg}->get_pristine_body()));
   return Mail::SpamAssassin::MsgParser->parse(\@pristine_headers);
 }

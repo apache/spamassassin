@@ -471,8 +471,9 @@ sub get_header {
 =cut
 
 sub get_all_headers {
-  my ($self, $raw) = @_;
+  my ($self, $raw, $include_mbox) = @_;
   $raw ||= 0;
+  $include_mbox ||= 0;
 
   my %cache = ();
   my @lines = ();
@@ -481,11 +482,17 @@ sub get_all_headers {
     push(@lines, "$_: ".($self->get_header($_,$raw))[$cache{$_}++]);
   }
 
+  splice @lines, 0, 0, $self->{mbox_sep} if ( $include_mbox && exists $self->{mbox_sep} );
+
   if (wantarray) {
     return @lines;
   } else {
     return join ('', @lines);
   }
+}
+
+sub get_mbox_seperator {
+  return $_[0]->{mbox_sep};
 }
 
 =item get_body()
