@@ -80,7 +80,7 @@ my %opt = ( 'create-prefs' => 1);
 
 eval {
   require Mail::SpamAssassin;
-  require Mail::SpamAssassin::MsgParser;
+  require Mail::SpamAssassin::MsgContainer;
 
   # gnu_getopt is not available in Getopt::Long 2.24, see bug 732
   # gnu_compat neither.
@@ -168,7 +168,7 @@ eval {
   # incoming message
   #
   if (!$doing_address_only_whitelisting) {
-    $mail = Mail::SpamAssassin::MsgParser->parse ();
+    $mail = $spamtest->parse ();
   }
 
 # handle removing reports
@@ -183,7 +183,7 @@ eval {
       # go ahead and remove the markup, then fake that the clean version
       # was what was sent in
       #
-      $mail = Mail::SpamAssassin::MsgParser->parse ($spamtest->remove_spamassassin_markup ($mail));
+      $mail = $spamtest->parse ($spamtest->remove_spamassassin_markup ($mail));
     }
   }
 

@@ -59,7 +59,7 @@ bayes_sql_override_username $testuser
 ");
 
 use Mail::SpamAssassin;
-use Mail::SpamAssassin::MsgParser;
+use Mail::SpamAssassin::MsgContainer;
 
 my $sa = create_saobj();
 
@@ -87,7 +87,7 @@ foreach my $line (split(/^/m,$raw_message)) {
   push(@msg, $line);
 }
 
-my $mail = Mail::SpamAssassin::MsgParser->parse( \@msg );
+my $mail = $sa->parse( \@msg );
 
 ok($mail);
 
@@ -220,7 +220,7 @@ foreach my $line (split(/^/m,$raw_message)) {
   push(@msg, $line);
 }
 
-$mail = Mail::SpamAssassin::MsgParser->parse( \@msg );
+$mail = $sa->parse( \@msg );
 
 $body = $sa->{bayes_scanner}->get_body_from_msg($mail);
 
@@ -250,7 +250,7 @@ foreach my $line (split(/^/m,$raw_message)) {
   push(@msg, $line);
 }
 
-$mail = Mail::SpamAssassin::MsgParser->parse( \@msg );
+$mail = $sa->parse( \@msg );
 
 $body = $sa->{bayes_scanner}->get_body_from_msg($mail);
 

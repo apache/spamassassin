@@ -20,9 +20,8 @@ Mail::SpamAssassin - Spam detector and markup engine
 
 =head1 SYNOPSIS
 
-  my $mail = Mail::SpamAssassin::MsgParser->parse();
-
   my $spamtest = Mail::SpamAssassin->new();
+  my $mail = $spamtest->parse();
   my $status = $spamtest->check ($mail);
 
   if ($status->is_spam ()) {
@@ -297,6 +296,100 @@ sub new {
   }
 
   $self;
+}
+
+###########################################################################
+
+=item parse()
+
+Parse will return a Mail::SpamAssassin::MsgContainer object.  To use it,
+simply call C<Mail::SpamAssassin->parse($msg)>, where $msg is either undef
+(will use STDIN), a scalar of the entire message, an array reference
+of the message with 1 line per array element, or a file glob with the
+entire contents of the message.
+
+The procedure used to parse a message is recursive and ends up
+generating a tree of M::SA::MsgContainer objects.  parse() will generate
+the parent node of the tree, then pass the body of the message to
+M::SA::MsgParser->parse_body() which begins the recursive process.
+
+=cut
+
+sub parse {
+  my($self, $message) = @_;
+  $message ||= \*STDIN;
+
+  dbg("---- MIME PARSER START ----");
+
+  # protect it from abuse ...
+  local $_;
+
+  my @message;
+  if (ref $message eq 'ARRAY') {
+     @message = @{$message};
+  }
+  elsif (ref $message eq 'GLOB') {
+    if (defined fileno $message) {
+      @message = <$message>;
+    }
+  }
+  else {
+    @message = split ( /^/m, $message );
+  }
+
+  # Generate the main object and parse the appropriate MIME-related headers into it.
+  my $msg = Mail::SpamAssassin::MsgContainer->new();
+  my $header = '';
+  $msg->{'pristine_headers'} = '';
+
+  # Go through all the headers of the message
+  while ( my $last = shift @message ) {
+    # Store the non-modified headers in a scalar
+    $msg->{'pristine_headers'} .= $last;
+
+    if ( $last =~ /^From\s/ ) {
+      $msg->{'mbox_sep'} = $last;
+      next;
+    }
+
+    # NB: Really need to figure out special folding rules here!
+    if ( $last =~ /^[ \t]+/ ) {                    # if its a continuation
+      $header .= $last;                            # fold continuations
+      next;
+    }
+
+    # Ok, there's a header here, let's go ahead and add it in.
+    if ($header) {
+      my ( $key, $value ) = split ( /:\s*/, $header, 2 );
+      $msg->header( $key, $value );
+    }
+
+    # not a continuation...
+    $header = $last;
+
+    # Ok, we found the header/body blank line ...
+    last if ( $last =~ /^\r?$/m );
+  }
+
+  # Store the pristine body for later -- store as a copy since @message will get modified below
+  $msg->{'pristine_body'} = join('', @message);
+
+  # CRLF -> LF
+  for ( @message ) {
+    s/\r\n/\n/;
+  }
+
+  # Figure out the boundary
+  my ($boundary);
+  ($msg->{'type'}, $boundary) = Mail::SpamAssassin::Util::parse_content_type($msg->header('content-type'));
+  dbg("main message type: ".$msg->{'type'});
+
+  # Make the tree
+  Mail::SpamAssassin::MsgParser->parse_body( $msg, $msg, $boundary, \@message, 1 );
+
+  dbg("---- MIME PARSER END ----");
+
+  return $msg;
 }
 
 ###########################################################################
@@ -600,8 +693,7 @@ Otherwise identical to C<$f->check()> above.
 
 sub check_message_text {
   my $self = shift;
-  my @lines = split (/^/m, $_[0]);
-  my $mail_obj = Mail::SpamAssassin::MsgParser->parse (\@lines);
+  my $mail_obj = $self->parse (shift);
   return $self->check ($mail_obj);
 }
 
@@ -646,8 +738,7 @@ sub report_as_spam {
   $self->init(1);
 
   # Let's make sure the markup was removed first ...
-  my @msg = split (/^/m, $self->remove_spamassassin_markup($mail));
-  $mail = Mail::SpamAssassin::MsgParser->parse (\@msg);
+  $mail = $self->parse ($self->remove_spamassassin_markup($mail));
 
   # learn as spam if enabled
   if ( $self->{conf}->{bayes_learn_during_report} ) {
@@ -690,8 +781,7 @@ sub revoke_as_spam {
   $self->init(1);
 
   # Let's make sure the markup was removed first ...
-  my @msg = split (/^/m, $self->remove_spamassassin_markup($mail));
-  $mail = Mail::SpamAssassin::MsgParser->parse (\@msg);
+  $mail = $self->parse ($self->remove_spamassassin_markup($mail));
 
   # learn as nonspam
   $self->learn ($mail, undef, 0, 0);
@@ -1106,7 +1196,7 @@ sub compile_now {
   dbg ("ignore: test message to precompile patterns and load modules");
   $self->init($use_user_prefs);
 
-  my $mail = Mail::SpamAssassin::MsgParser->parse(\@testmsg);
+  my $mail = $self->parse(\@testmsg);
   my $status = Mail::SpamAssassin::PerMsgStatus->new($self, $mail,
                         { disable_auto_learning => 1 } );
   $status->word_is_in_dictionary("aba"); # load triplets.txt into memory
@@ -1153,7 +1243,7 @@ sub lint_rules {
   $self->init(1);
   $self->{syntax_errors} += $self->{conf}->{errors};
 
-  my $mail = Mail::SpamAssassin::MsgParser->parse(\@testmsg);
+  my $mail = $self->parse(\@testmsg);
   my $status = Mail::SpamAssassin::PerMsgStatus->new($self, $mail,
                         { disable_auto_learning => 1 } );
   $status->check();

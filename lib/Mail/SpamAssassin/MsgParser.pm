@@ -43,117 +43,22 @@ use Mail::SpamAssassin::MsgContainer;
 
 use constant MAX_BODY_LINE_LENGTH =>        2048;
 
-=item parse()
+=item parse_body()
 
-Unlike most modules, Mail::SpamAssassin::MsgParser will not return
-an object of the same type, but rather a Mail::SpamAssassin::MsgContainer
-object.  To use it, simply call
-C<Mail::SpamAssassin::MsgParser->parse($msg)>, where $msg is either
-a scalar, an array reference, or a glob, with the entire contents
-of the mesage.
-
-The procedure used to parse a message is recursive and ends up generating
-a tree of M::SA::MsgContainer objects.  parse() will generate the parent node
-of the tree, then pass the body of the message to _parse_body() which begins
-the recursive process.
-
-=cut
-
-sub parse {
-  my($self,$message) = @_;
-  $message ||= \*STDIN;
-
-  dbg("---- MIME PARSER START ----");
-
-  # protect it from abuse ...
-  local $_;
-
-  my @message;
-  if (ref $message eq 'ARRAY') {
-     @message = @{$message};
-  }
-  elsif (ref $message eq 'GLOB') {
-    if (defined fileno $message) {
-      @message = <$message>;
-    }
-  }
-  else {
-    @message = split ( /^/m, $message );
-  }
-
-  # Generate the main object and parse the appropriate MIME-related headers into it.
-  my $msg = Mail::SpamAssassin::MsgContainer->new();
-  my $header = '';
-  $msg->{'pristine_headers'} = '';
-
-  # Go through all the headers of the message
-  while ( my $last = shift @message ) {
-    # Store the non-modified headers in a scalar
-    $msg->{'pristine_headers'} .= $last;
-
-    if ( $last =~ /^From\s/ ) {
-      $msg->{'mbox_sep'} = $last;
-      next;
-    }
-
-    # NB: Really need to figure out special folding rules here!
-    if ( $last =~ /^[ \t]+/ ) {                    # if its a continuation
-      $header .= $last;                            # fold continuations
-      next;
-    }
-
-    # Ok, there's a header here, let's go ahead and add it in.
-    if ($header) {
-      my ( $key, $value ) = split ( /:\s*/, $header, 2 );
-      $msg->header( $key, $value );
-    }
-
-    # not a continuation...
-    $header = $last;
-
-    # Ok, we found the header/body blank line ...
-    last if ( $last =~ /^\r?$/m );
-  }
-
-  # Store the pristine body for later -- store as a copy since @message will get modified below
-  $msg->{'pristine_body'} = join('', @message);
-
-  # CRLF -> LF
-  for ( @message ) {
-    s/\r\n/\n/;
-  }
-
-  # Figure out the boundary
-  my ($boundary);
-  ($msg->{'type'}, $boundary) = Mail::SpamAssassin::Util::parse_content_type($msg->header('content-type'));
-  dbg("main message type: ".$msg->{'type'});
-
-  # Make the tree
-  $self->_parse_body( $msg, $msg, $boundary, \@message, 1 );
-
-  dbg("---- MIME PARSER END ----");
-
-  return $msg;
-}
-
-=head1 NON-PUBLIC METHODS
-
-=item _parse_body()
-
-_parse_body() passes the body part that was passed in onto the
+parse_body() passes the body part that was passed in onto the
 correct part parser, either _parse_multipart() for multipart/* parts,
 or _parse_normal() for everything else.  Multipart sections become the
 root of sub-trees, while everything else becomes a leaf in the tree.
 
-For multipart messages, the first call to _parse_body() doesn't create a
+For multipart messages, the first call to parse_body() doesn't create a
 new sub-tree and just uses the parent node to contain children.  All other
-calls to _parse_body() will cause a new sub-tree root to be created and
+calls to parse_body() will cause a new sub-tree root to be created and
 children will exist underneath that root.  (this is just so the tree
 doesn't have a root node which points at the actual root node ...)
 
 =cut
 
-sub _parse_body {
+sub parse_body {
   my($self, $msg, $_msg, $boundary, $body, $initial) = @_;
 
   # Figure out the simple content-type, or set it to text/plain
@@ -182,9 +87,11 @@ sub _parse_body {
   }
 }
 
+=head1 NON-PUBLIC METHODS
+
 =item _parse_multipart()
 
-Generate a root node, and for each child part call _parse_body()
+Generate a root node, and for each child part call parse_body()
 to generate the tree.
 
 =cut
@@ -237,7 +144,7 @@ sub _parse_multipart {
 	($part_msg->{'type'}, $p_boundary) = Mail::SpamAssassin::Util::parse_content_type($part_msg->header('content-type'));
         $p_boundary ||= $boundary;
 	dbg("found part of type ".$part_msg->{'type'}.", boundary: ".(defined $p_boundary ? $p_boundary : ''));
-        $self->_parse_body( $msg, $part_msg, $p_boundary, $part_array, 0 );
+        $self->parse_body( $msg, $part_msg, $p_boundary, $part_array, 0 );
       }
 
       last if (defined $boundary && $line =~ /^\-\-\Q${boundary}\E\-\-$/);

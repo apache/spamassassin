@@ -17,7 +17,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use strict;
 use Test;
-use Mail::SpamAssassin::MsgParser;
+use Mail::SpamAssassin::MsgContainer;
 use Mail::SpamAssassin::SHA1;
 
 my %files = (
@@ -88,7 +88,7 @@ plan tests => $numtests;
 
 foreach my $k ( sort keys %files ) {
   open(INP, $k) || die "Can't find $k:$!";
-  my $mail = Mail::SpamAssassin::MsgParser->parse(\*INP);
+  my $mail = Mail::SpamAssassin->parse(\*INP);
   close(INP);
   my $res = join("\n",$mail->content_summary());
   #print "---\n$res\n---\n";

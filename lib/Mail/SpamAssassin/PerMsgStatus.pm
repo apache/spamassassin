@@ -24,7 +24,7 @@ Mail::SpamAssassin::PerMsgStatus - per-message status (spam or not-spam)
     'rules_filename'      => '/etc/spamassassin.rules',
     'userprefs_filename'  => $ENV{HOME}.'/.spamassassin.cf'
   });
-  my $mail = Mail::SpamAssassin::MsgParser->parse();
+  my $mail = $spamtest->parse();
 
   my $status = $spamtest->check ($mail);
   if ($status->is_spam()) {
@@ -57,7 +57,7 @@ use Mail::SpamAssassin::AutoWhitelist;
 use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Received;
 use Mail::SpamAssassin::Util;
-use Mail::SpamAssassin::MsgParser;
+use Mail::SpamAssassin::MsgContainer;
 
 use constant MAX_BODY_LINE_LENGTH =>        2048;
 

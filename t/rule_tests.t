@@ -18,7 +18,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 use strict;
 use Test;
 use Mail::SpamAssassin;
-use Mail::SpamAssassin::MsgParser;
+use Mail::SpamAssassin::MsgContainer;
 use vars qw($num_tests);
 
 $num_tests = 1;
@@ -62,7 +62,7 @@ foreach my $symbol ($sa->{conf}->regression_tests()) {
             my $test_string = $sa->{conf}->{head_tests}->{$symbol} || $sa->{conf}->{head_evals}->{$symbol};
             my ($header_name) = $test_string =~ /^(\S+)/;
             # warn("got header name: $header_name - setting to: $string\n");
-	    $mail = Mail::SpamAssassin::MsgParser->parse(["${header_name}: $string\n","\n","\n"]);
+	    $mail = $sa->parse(["${header_name}: $string\n","\n","\n"]);
         }
         else {
             # warn("setting body: $string\n");
@@ -73,7 +73,7 @@ foreach my $symbol ($sa->{conf}->regression_tests()) {
 	    if ( $string =~ /<[^>]*>/ ) {
 	      $type = "text/html";
 	    }
-	    $mail = Mail::SpamAssassin::MsgParser->parse(["Content-type: $type\n","\n","$string\n"]);
+	    $mail = $sa->parse(["Content-type: $type\n","\n","$string\n"]);
         }
 
         my $msg = Mail::SpamAssassin::PerMsgStatus->new($sa, $mail);
