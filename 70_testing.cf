@@ -37,18 +37,6 @@ uri T_PORN_URL_PANT	/^https?:\/\/[\w\.-]*pant(?:y|ies)[\w-]*\./
 uri T_PORN_URL_TEEN	/^https?:\/\/[\w\.-]*(?<!thir|four|eigh|nine)(?<!fif|six)(?<!seven)teen(?!th)[\w-]*\./
 uri T_PORN_URL_MISC	/^https?:\/\/[\w\.-]*(pussy|nympho|porn|hard-?core|taboo|whore|voyeur|lesbian|gurlpages|naughty|lolita|schoolgirl|kooloffer|erotic)[\w-]*\./
 
-# test XBL with -notfirsthop
-# Note: can't use check_rbl_sub, but can rely on DNSBL caching to avoid
-# duplicate queries of sbl-xbl.
-header T_RCVD_IN_XBL_NFH	eval:check_rbl_txt('sblxbl-notfirsthop', 'sbl-xbl.spamhaus.org.', '(?i)/xbl')
-describe T_RCVD_IN_XBL_NFH	Received via a relay in Spamhaus XBL
-tflags T_RCVD_IN_XBL_NFH	net
-
-# ugh, is that right?
-header T_RCVD_IN_XBL_NFH_2	eval:check_rbl_txt('xbl-notfirsthop', 'xbl.spamhaus.org.')
-describe T_RCVD_IN_XBL_NFH_2	Received via a relay in Spamhaus XBL
-tflags T_RCVD_IN_XBL_NFH_2	net
-
 ########################################################################
 # SPF support.  "pass" is nice, "fail" is bad, "softfail" is bad, but
 # not as bad as "fail".
@@ -416,12 +404,6 @@ header T_FRAGMENTED_MESSAGE	Content-Type =~ /message\/partial/i
 # affiliateid, aff_id, aff_sub_id etc.
 uri T_URI_AFFILIATE		/aff\w+id=/i
 
-# Al Iverson reports: "forged, now no longer in use"
-header T_REGSOFT        Received =~ /hd\.regsoft\.net/i
-
-# same ratware; forges dates as 'with SMTP; Jan, 17 2004 22:05:48 -0300'
-header T_DATE_COMMA     Received =~ /\bwith \S+\; [A-Z][a-z][a-z],\s+\d\d\s+\d\d\d\d\s/
-
 # some HTML rules to try
 body T_HTML_TAG_BALANCE_FONT_0	eval:html_tag_balance('font', '!= 0')
 describe T_HTML_TAG_BALANCE_FONT_0	HTML has unbalanced "font" tags
@@ -441,7 +423,6 @@ describe T_HTML_TAG_BALANCE_DIV_2	HTML is missing "div" tags
 body T_HTML_FONT_SMALL_SIZE_1	eval:html_eval('min_size', '< 1')
 body T_HTML_FONT_SMALL_SIZE_2	eval:html_eval('min_size', '< 0')
 body T_HTML_FONT_SMALL_SIZE_3	eval:html_eval('min_size', '< -1')
-body T_HTML_FONT_SMALL_SIZE_4	eval:html_eval('min_size', '< -2')
 
 body T_HTML_FONT_LARGE_SIZE	eval:html_eval('max_size', '> 3')
 body T_HTML_FONT_LARGE_SIZE_0	eval:html_eval('max_size', '> 4')
@@ -568,11 +549,6 @@ body T_HTML_TEXT_CONTRAST_32	eval:html_test('text_contrast_32')
 # You must be joking, can you say "unix pipes" and "regular expressions"?
 body T_PIPE_OBFU           /[a-z]\|[a-z]/i
 describe T_PIPE_OBFU       Words dis|guised with a pipe sym|bol
-
-# I was diff'ing the tree when I saw this rule, I predict it will
-# at least work better than T_PIPE_OBFU.  :-)
-body T_APOSTROPHE_OBFU     /[a-z][a-z][a-z]'[a-z][a-z][a-z]/i
-describe T_APOSTROPHE_OBFU Words dis'guised with an apos'trophe
 
 # bug 2525: FORGED_IMS_HTML fp'ing because new IMS *DOES* use text/html
 # ctype.  ARGH.  This was noted in build 5.5.2656.59, so permit builds
