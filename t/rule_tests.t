@@ -67,7 +67,7 @@ foreach my $symbol ($sa->{conf}->regression_tests()) {
 
         $conf->{scores}->{$symbol} = 1;
         $msg->check();
-        ok( $msg->get_hits, ($ok_or_fail eq 'ok' ? 1 : 0),
+        ok( $msg->get_hits(), ($ok_or_fail eq 'ok' ? 1 : 0),
                 "Test for '$symbol' (type: $test_type) against '$string'" );
     }
 }

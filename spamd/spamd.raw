@@ -201,7 +201,6 @@ my $error_before_reaper;
 
 sub REAPER {
     $error_before_reaper = $!;  # take a copy before cleanupchildren()
-    cleanupchildren;            # may reset errno
     $SIG{CHLD} = \&REAPER;
 }
 
@@ -234,6 +233,7 @@ for ( ; 1; close Client)
       # perl 5.8.0, and some other platforms with -m.
       if ($! == &Errno::EINTR || $error_before_reaper == &Errno::EINTR) {
         warn "accept interrupted: $! $error_before_reaper";
+        cleanupchildren;
         next;
       } else {
         die "accept failed: $! $error_before_reaper";
