@@ -9,8 +9,8 @@ header USER_AGENT_GNUS       User-Agent =~ /^gnus\b/i
 describe USER_AGENT_GNUS     User-Agent header indicates a non-spam MUA
 header USER_AGENT_MOZILLA    User-Agent =~ /^mozilla\b/i
 describe USER_AGENT_MOZILLA  User-Agent header indicates a non-spam MUA
-header USER_AGENT_OE         User-Agent =~ /^Microsoft.Outlook.Express\b/i
-describe USER_AGENT_OE       User-Agent header indicates a non-spam MUA
+header USER_AGENT_OE         X-Mailer =~ /^Microsoft.Outlook.Express\b/i
+describe USER_AGENT_OE       X-Mailer header indicates a non-spam MUA
 header USER_AGENT_ENTOURAGE  User-Agent =~ /^Microsoft.Entourage\b/i
 describe USER_AGENT_ENTOURAGE User-Agent header indicates a non-spam MUA
 header USER_AGENT_KMAIL      User-Agent =~ /^kmail\b/i

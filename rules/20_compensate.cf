@@ -6,9 +6,11 @@ header GENUINE_EBAY_RCVD        eval:check_for_from_domain_in_received_headers('
 describe GENUINE_EBAY_RCVD      Message from eBay
 tflags GENUINE_EBAY_RCVD	nice
 
-header ORDER_STATUS             Subject =~ / order\b/i
-describe ORDER_STATUS           Subject looks like order info
-tflags ORDER_STATUS             nice
+# very bad results: 3.6 times as much spam as nonspam matches this
+#  0.45     0.47     0.13    0.78   -3.00  ORDER_STATUS (fn)
+#header ORDER_STATUS             Subject =~ / order\b/i
+#describe ORDER_STATUS           Subject looks like order info
+#tflags ORDER_STATUS             nice
 
 header   APPROVED_BY            Approved-By =~ /./
 describe APPROVED_BY            Has an Approved-By moderated list header
@@ -273,10 +275,13 @@ body     TRACK_NUMBER           /\bassign.{1,100}\b(?:ticket|tracking) number/i
 describe TRACK_NUMBER           Talks about tracking numbers
 tflags   TRACK_NUMBER           nice
 
-body     AUTO_RESP              /\bauto.{1,100}(?:response|reply)/i
-describe AUTO_RESP              Talks about automatic responses
-tflags   AUTO_RESP              nice
+# *terrible* results. :(
+#    0.14     0.14     0.13    0.51   -1.00  AUTO_RESP (fn)
+#body     AUTO_RESP              /\bauto.{1,100}(?:response|reply)/i
+#describe AUTO_RESP              Talks about automatic responses
+#tflags   AUTO_RESP              nice
 
+#    0.06     0.06     0.00    1.00   -1.00  ORDER_CONFIRM (non-nice but -ve score, low matches)
 #header ORDER_CONFIRM            Subject =~ /\border\b.{0,20}\bconfirm/i
 #describe ORDER_CONFIRM          Your order is confirmed!  I hope you like it.
 #tflags ORDER_CONFIRM            nice
