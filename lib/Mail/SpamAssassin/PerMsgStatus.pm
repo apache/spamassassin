@@ -1841,58 +1841,101 @@ sub do_awl_tests {
 ###########################################################################
 
 sub do_meta_tests {
-    my ($self) = @_;
-    local ($_);
+  my ($self) = @_;
+  local ($_);
 
-    dbg ("running meta tests; score so far=".$self->{hits});
+  dbg( "running meta tests; score so far=" . $self->{hits} );
 
-    # speedup code provided by Matt Sergeant
-    if (defined &Mail::SpamAssassin::PerMsgStatus::_meta_tests
-       && !$self->{conf}->{user_rules_to_compile} ) {
-        Mail::SpamAssassin::PerMsgStatus::_meta_tests($self);
-        return;
+  # speedup code provided by Matt Sergeant
+  if ( defined &Mail::SpamAssassin::PerMsgStatus::_meta_tests
+    && !$self->{conf}->{user_rules_to_compile} ) {
+    Mail::SpamAssassin::PerMsgStatus::_meta_tests($self);
+    return;
+  }
+
+  my ($rulename);
+  my $evalstr = '';
+
+  my ( %rule_deps, %meta );
+
+  # Get the list of meta tests
+  my @metas = keys %{ $self->{conf}{meta_tests} };
+
+  # Go through each rule and figure out what we need to do
+  foreach $rulename (@metas) {
+    my $rule   = $self->{conf}->{meta_tests}->{$rulename};
+    my @tokens =
+      $rule =~ m/([\w\.\[][\w\.\*\?\+\[\^\]]+|[\(\)]|\|\||\&\&|>=?|<=?|==|!=|!|[\+\-\*\/]|\d+)/g;
+
+    my $setupline = "";
+    my $expr      = "";
+    my $token;
+
+    # By default, there are no dependencies for a rule
+    @{ $rule_deps{$rulename} } = ();
+
+    # Go through each token in the meta rule
+    foreach $token (@tokens) {
+
+      # Numbers can't be rule names
+      if ( $token =~ /^(?:\W+|\d+)$/ ) {
+        $expr .= "$token ";
+      }
+      else {
+        $expr .= "\$self->{tests_already_hit}->{$token} ";
+
+        # avoid "undefined" warnings by providing a default value here
+        $setupline .= "\$self->{tests_already_hit}->{$token} ||= 0;\n";
+
+	# If the token is another meta rule, add it as a dependency
+        push ( @{ $rule_deps{$rulename} }, $token )
+          if ( exists $self->{conf}{meta_tests}->{$token} );
+      }
     }
 
-    my ($rulename, $rule);
-    my $evalstr = '';
+    # Store the pieces of information we need for this rule
+    $meta{$rulename}->{'setupline'} = $setupline;
+    $meta{$rulename}->{'expr'}      = $expr;
+  }
 
-    # Go through each meta test setting up the eval string
-    foreach $rulename ( sort keys %{$self->{conf}{meta_tests}} ) {
-        $rule = $self->{conf}->{meta_tests}->{$rulename};
+  # Sort by length of dependencies list.  It's more likely we'll get
+  # the dependencies worked out this way.
+  @metas = sort { @{ $rule_deps{$a} } <=> @{ $rule_deps{$b} } } @metas;
 
-        my @tokens = $rule =~ m/([\w\.\[][\w\.\*\?\+\[\^\]]+|[\(\)]|\|\||\&\&|>=?|<=?|==|!=|!|[\+\-\*\/]|\d+)/g;
+  my $count;
 
-        my ($token, $setupline, $expr);
+  # Now go ahead and setup the eval string
+  do {
+    $count = $#metas;
+    my %metas = map { $_ => 1 } @metas; # keep a small cache for fast lookups
 
-        $setupline = "";
-        $expr = "";
+    # Go through each meta rule we haven't done yet
+    for ( my $i = 0 ; $i <= $#metas ; $i++ ) {
 
-        foreach $token (@tokens) {
-            # Numbers can't be rule names
-            if ($token =~ /^(?:\W+|\d+)$/) {
-                $expr .= "$token ";
-            } else {
-                $expr .= "\$self->{tests_already_hit}->{$token} ";
-                # avoid "undefined" warnings by providing a default
-                # value here
-                $setupline .= "\$self->{tests_already_hit}->{$token} ||= 0;\n";
-            }
-        } # foreach $token (@tokens)
+      # If we depend on meta rules that haven't run yet, skip it
+      next if ( grep( $metas{$_}, @{ $rule_deps{ $metas[$i] } } ) );
 
-        # dbg ("meta expression: $expr");
-
-	# Add this meta rule to the eval line
-        $evalstr .= '
-        ' . $setupline . ';
-        if (' . $expr . ') {
-            $self->got_hit (q#'.$rulename.'#, "");
+      # Add this meta rule to the eval line
+      $evalstr .= '
+        ' . $meta{ $metas[$i] }->{'setupline'} . ';
+        if (' . $meta{ $metas[$i] }->{'expr'} . ') {
+            $self->got_hit (q#' . $metas[$i] . '#, "");
         }
 
     ';
+      splice @metas, $i--, 1;    # remove this rule from our list
     }
+  } while ( $#metas != $count && $#metas > -1 ); # run until we can't go anymore
 
-    # setup the environment for meta tests
-    $evalstr = <<"EOT";
+  # If there are any rules left, we can't solve the dependencies so complain
+  my %metas = map { $_ => 1 } @metas; # keep a small cache for fast lookups
+  foreach $rulename (@metas) {
+    dbg( "Excluding meta test $rulename; unsolved meta dependencies: "
+        . join ( ", ", grep($metas{$_},@{ $rule_deps{$rulename} }) ) );
+  }
+
+  # setup the environment for meta tests
+  $evalstr = <<"EOT";
 {
     package Mail::SpamAssassin::PerMsgStatus;
 
@@ -1909,15 +1952,16 @@ sub do_meta_tests {
 }
 EOT
 
-    eval $evalstr;
+  eval $evalstr;
 
-    if ($@) {
-        warn "Failed to run header SpamAssassin tests, skipping some: $@\n";
-        $self->{rule_errors}++;
-    } else {
-        Mail::SpamAssassin::PerMsgStatus::_meta_tests($self);
-    }
-} # do_meta_tests()
+  if ($@) {
+    warn "Failed to run header SpamAssassin tests, skipping some: $@\n";
+    $self->{rule_errors}++;
+  }
+  else {
+    Mail::SpamAssassin::PerMsgStatus::_meta_tests($self);
+  }
+}    # do_meta_tests()
 
 ###########################################################################
 
