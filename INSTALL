@@ -229,6 +229,11 @@ These additional modules are required for SpamassAssin to run:
     If it generates an error, you need to install the module.  If the
     command just returns, you should be ok.
 
+  - Storable             (from CPAN)
+
+    This is a required module if you use spamd, and allow user
+    configurations to be used (ie: you don't use "-x" or "-u").
+
 
 Optional Additional Modules
 ---------------------------

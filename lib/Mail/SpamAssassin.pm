@@ -1533,6 +1533,109 @@ sub sa_die {
   exit $exitcode;
 }
 
+# private function to find out if the Storable function is available...
+sub _is_storable_available {
+  my($self) = @_;
+
+  if (exists $self->{storable_available}) {
+  }
+  elsif (!eval { require Storable; }) {
+    $self->{storable_available} = 0;
+    dbg("no Storable module found");
+  }
+  else {
+    $self->{storable_available} = 1;
+    dbg("Storable module found");
+  }
+
+  return $self->{storable_available};
+}
+
+=item $f->copy_config ( [ $source ], [ $dest ] )
+
+Used for daemons to keep a persistent Mail::SpamAssassin object's
+configuration correct if switching between users.  Pass an associative
+array reference as either $source or $dest, and set the other to 'undef'
+so that the object will use its current configuration.  i.e.:
+
+  # create object w/ configuration
+  my $spamtest = Mail::SpamAssassin->new( ... );
+
+  # backup configuration to %conf_backup
+  my %conf_backup = ();
+  $spamtest->copy_config(undef, \%conf_backup) ||
+    die "error returned from copy_config!\n";
+
+  ... do stuff, perhaps modify the config, etc ...
+
+  # reset the configuration back to the original
+  $spamtest->copy_config(\%conf_backup, undef) ||
+    die "error returned from copy_config!\n";
+
+=cut
+
+sub copy_config {
+  my($self, $source, $dest) = @_;
+
+  # At least one of either source or dest needs to be a hash reference ...
+  unless ((defined $source && ref($source) ne 'HASH') ||
+          (defined $dest && ref($dest) ne 'HASH')) {
+    return 0;
+  }
+
+  # We need the Storable module for this, so if it's not available,
+  # return an error.
+  return 0 if (!$self->_is_storable_available()); 
+
+  # Set the other one to be the conf object
+  $source ||= $self->{conf};
+  $dest ||= $self->{conf};
+
+  # Copy the source array to the dest array
+  while(my($k,$v) = each %{$source}) {
+    # we know the main value doesn't need to get copied.
+    # also ignore anything plugin related, since users can't change that,
+    # and there are usually code references.
+    next if ($k eq 'main' || $k =~ /plugin/);
+
+
+    my $i = ref($v);
+
+    # Not a reference?  Just copy the value over.
+    if (!$i) {
+      $dest->{$k} = $v;
+    }
+    elsif ($i eq 'SCALAR' || $i eq 'ARRAY' || $i eq 'HASH') {
+      # It's a reference, so make a recursive copy
+      $dest->{$k} = Storable::dclone($v);
+    }
+    elsif ($k =~ /^(internal|trusted)_networks$/) {
+      # these are objects, but have a single hash array of interest
+      # it may not exist though, so deal with it appropriately.
+      if ($v->{nets}) {
+        # just copy the nets reference over ...
+        $dest->{$k}->{nets} = Storable::dclone($v->{nets});
+      }
+      else {
+	# this gets tricky...  the value is false, or doesn't exist,
+	# so we need to either delete or undef depending on the destination
+        if (exists $dest->{$k}) {
+	  delete $dest->{$k}->{nets};
+	}
+	else {
+          $dest->{$k}->{nets} = undef;
+        }
+      }
+    }
+#    else {
+#      warn ">> $k, $i\n";
+#    }
+  }
+
+  return 1;
+}
+
+
 1;
 __END__
 

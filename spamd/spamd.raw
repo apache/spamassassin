@@ -50,9 +50,6 @@ use Cwd ();
 use File::Spec 0.8;
 use File::Path;
 
-# used for dealing with configuration switching ...
-use Storable qw/freeze thaw/;
-
 # Check to make sure the script version and the module version matches.
 # If not, die here!  Also, deal with unchanged VERSION macro.
 if ($Mail::SpamAssassin::VERSION ne '@@VERSION@@' && '@@VERSION@@' ne "\@\@VERSION\@\@") {
@@ -642,9 +639,10 @@ preload_modules_with_tmp_homedir();
 
 # If we're going to be switching users in check(), let's backup the
 # fresh configuration now for later restoring ...
-my $conf_backup;
+my %conf_backup = ();
 if ($setuid_to_user) {
-  $conf_backup = freeze $spamtest->{conf};
+  $spamtest->copy_config(undef, \%conf_backup) ||
+    die "error returned from copy_config, no Storable module?\n";
 }
 
 # Fork off our children.
@@ -792,7 +790,8 @@ sub spawn {
           # (potentially), so let's restore back the saved version we
           # had before.
           #
-          $spamtest->{conf} = thaw $conf_backup;
+          $spamtest->copy_config(\%conf_backup, undef) ||
+	    die "error returned from copy_config, no Storable module?\n";
         }
       }
 
