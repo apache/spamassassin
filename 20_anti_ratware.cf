@@ -11,7 +11,16 @@
 header USER_AGENT_PINE		Message-Id =~ /^<Pine\.[A-Z]{3}\.\d\.[0-9A-Z]+\./
 describe USER_AGENT_PINE	Message-Id indicates a non-spam MUA (Pine)
 
-header USER_AGENT_MUTT		User-Agent =~ /^Mutt\/\d(?:\.\d+){1,4}/
+# From 0.93.2 - 1.2.5.1, message-id is:
+#  snprintf (buf, sizeof (buf), "<%d%02d%02d%02d%02d%02d.%c%d@%s>",
+#            tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour,
+#            tm->tm_min, tm->tm_sec, MsgIdPfx, getpid (), fqdn);
+#  MsgIdPfx = (MsgIdPfx == 'Z') ? 'A' : MsgIdPfx + 1;
+# The code from mutt 1.4 is adds a 'G' for some reason:
+#  snprintf (buf, sizeof (buf), "<%d%02d%02d%02d%02d%02d.G%c%d@%s>",
+header __VALID_MUTT_MSGID	Message-Id =~ /^<[1-9]\d{3}[01]\d[0-3]\d[0-2]\d(?:[0-5]\d){2}\.G?[A-Z]\d+\@[a-zA-Z0-9._-]+>$/
+header __USER_AGENT_MUTT	User-Agent =~ m@^Mutt/\d(?:\.\d+){1,4}@
+meta USER_AGENT_MUTT		__USER_AGENT_MUTT && __VALID_MUTT_MSGID
 describe USER_AGENT_MUTT	User-Agent header indicates a non-spam MUA (Mutt)
 
 header USER_AGENT_MOZILLA_UA	User-Agent =~ /^Mozilla\/5\.\d+ \(.*\) Gecko\/\d{8}(?: |$)/

@@ -136,6 +136,17 @@ describe T_CHECK_EMAIL_ISFREE Body contains an e-mail address listed by Email::I
 ########################################################################
 # bug 1192
 
+# 12/29 - tvd - where do I start?  Lots of FPs, but here are the different x-mailer types:
+# - mails from ebworld.com,netflix,veritas,etc: (__HAS_MSMAIL_PRI, "X-mailer: AspMail 2.4 (SMTP422575)")
+# - mails from bu.edu (__HAS_MSMAIL_PRI, "X-mailer: AspMail 4.0 4.03 (SMT40D82AF)")
+# - random mail (__HAS_MSMAIL_PRI, "X-Mailer: Microsoft Internet Mail 4.70.1155")
+# - mail to linux-lvm mailing list (__HAS_MIMEOLE, "X-Mailer: Internet Mail Service (5.5.2653.19)")
+# - mails from EFF (__HAS_MSMAIL_PRI, "X-Mailer: JMail 4.1.2 by Dimac")
+# - mails to mkrdns mailing list (__HAS_MSMAIL_PRI, "X-Mailer: Lotus Notes Release 5.0.6a  January 17, 2001")
+# - random mails (__HAS_MSMAIL_PRI, "X-Mailer: SquirrelMail (version 1.2.6)")
+# - mail to WGBH members (__HAS_MIMEOLE, "X-Mailer: UnityMail")
+# - mail from jobfind.com (__HAS_MIMEOLE, "X-Mailer: SearchEase Engine. V2.7.27")
+# - mail reporting abuse from hotmail (__HAS_MIMEOLE, "X-Mailer: Microsoft CSS 2000")
 header __HAS_OUTLOOK_IN_MAILER2	X-Mailer =~ /Microsoft (CDO|Outlook)\b/
 meta T_MISSING_OUTLOOK_NAME	((__HAS_MIMEOLE || __HAS_MSMAIL_PRI) && __HAS_X_MAILER && !__HAS_OUTLOOK_IN_MAILER2)
 
@@ -144,27 +155,3 @@ meta T_MISSING_OUTLOOK_NAME	((__HAS_MIMEOLE || __HAS_MSMAIL_PRI) && __HAS_X_MAIL
 rawbody T_MIME_DEFICIENT_QP	eval:check_for_mime('mime_qp_illegal')
 describe T_MIME_DEFICIENT_QP	Deficient quoted-printable encoding in body
 
-########################################################################
-
-# bug 1316
-# 12/28 - tvd - The goal is to catch when spammers use multiple user agents
-# we had a similar rule before for preemption, but now there's actually a report of this in the wild,
-# so I wanted to put the rule in and see what happens.
-# This will change USER_AGENT as well
-# Basically exists:User-Agent && !FAKE_USER_AGENT
-meta T_FAKE_USER_AGENT ( USER_AGENT_PINE + USER_AGENT_MUTT + USER_AGENT_MOZILLA_UA + USER_AGENT_MOZILLA_XM + USER_AGENT_MACOE + USER_AGENT_ENTOURAGE + USER_AGENT_KMAIL + USER_AGENT_IMP + USER_AGENT_TONLINE + USER_AGENT_APPLEMAIL + USER_AGENT_GNUS_UA + USER_AGENT_GNUS_XM + USER_AGENT_VM + USER_AGENT_MSN + USER_AGENT_FORTE + USER_AGENT_XIMIAN ) > 1
-
-# bug 1316
-# 12/28 - tvd - someone mentioned that there's a standard to the mutt
-# message-id.  Sure enough, unless mutt is compiled to send messages anonymously:
-# From 0.93.2 - 1.2.5.1, it was essentially:
-#  snprintf (buf, sizeof (buf), "<%d%02d%02d%02d%02d%02d.%c%d@%s>",
-#            tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour,
-#            tm->tm_min, tm->tm_sec, MsgIdPfx, getpid (), fqdn);
-#  MsgIdPfx = (MsgIdPfx == 'Z') ? 'A' : MsgIdPfx + 1;
-# The code from mutt 1.4 is adds a 'G' for some reason:
-#  snprintf (buf, sizeof (buf), "<%d%02d%02d%02d%02d%02d.G%c%d@%s>",
-header __VALID_MUTT_MSGID	Message-Id =~ /^<[1-9]\d{3}[01]\d[0-3]\d[0-2]\d(?:[0-5]\d){2}\.G?[A-Z]\d+\@[a-zA-Z0-9._-]+>$/
-header __USER_AGENT_MUTT	User-Agent =~ m@^Mutt/\d(?:\.\d+){1,4}@
-meta T_USER_AGENT_MUTT		__USER_AGENT_MUTT && __VALID_MUTT_MSGID
-meta T_FORGED_MUA_MUTT		__USER_AGENT_MUTT && !__VALID_MUTT_MSGID
