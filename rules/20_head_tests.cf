@@ -186,7 +186,7 @@ header YR_MEMBERSHIP_EXCH	Subject =~ /Your Membership Exchange/
 describe YR_MEMBERSHIP_EXCH	Subject contains 'Your Membership Exchange'
 
 header FROM_FORGED_HOTMAIL	From =~ /^[^"]+\S+\@hotmail\.com/i
-describe FROM_FORGED_HOTMAIL	Forged From: line claiming to be from hotmail.com
+describe FROM_FORGED_HOTMAIL	From: claiming to be hotmail not in their format
 
 header DIFFERENT_REPLY_TO	eval:check_for_spam_reply_to()
 describe DIFFERENT_REPLY_TO	Reply-To: massively different from From: or To:
@@ -199,6 +199,9 @@ describe FROM_NAME_EQ_FROM_ADDR	'From:' address also used as sender's real name
 
 header FORGED_HOTMAIL_RCVD	eval:check_for_forged_hotmail_received_headers()
 describe FORGED_HOTMAIL_RCVD	Forged hotmail.com 'Received:' header found
+
+header FORGED_EUDORAMAIL_RCVD	eval:check_for_forged_eudoramail_received_headers()
+describe FORGED_EUDORAMAIL_RCVD	Forged eudoramail.com 'Received:' header found
 
 header FORGED_YAHOO_RCVD	eval:check_for_forged_yahoo_received_headers()
 describe FORGED_YAHOO_RCVD	Forged yahoo.com 'Received:' header found
@@ -245,6 +248,9 @@ describe MANY_FROMS		'From' contains more than one address
 # *so* many spams come from here.
 header FROM_BTAMAIL		From =~ /\@btamail.net.cn/i
 describe FROM_BTAMAIL		From an address @btamail.net.cn
+# ditto
+header FROM_UGETMORE		From =~ /\@ugetmore4less.net/i
+describe FROM_UGETMORE		From an address @ugetmore4less.net
 
 header USER_IN_BLACKLIST	eval:check_from_in_blacklist()
 describe USER_IN_BLACKLIST	From: address is in the user's black-list
