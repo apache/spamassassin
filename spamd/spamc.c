@@ -48,34 +48,34 @@ int read_message(int in, int out)
   char buf[8192];
   float version; int response=EX_OK;
 
-  // jm: changed to 8190 for paranoia, since we use "bytes+1" below.
-  //
+  /* jm: changed to 8190 for paranoia, since we use "bytes+1" below.
+   * Never hurts to leave a byte spare as well ;) */
   for(bytes=0;bytes<8190;bytes++)
   {
-    if(read(in,&buf[bytes],1) == 0) // read header one byte at a time
+    if(read(in,&buf[bytes],1) == 0) /* read header one byte at a time */
     {
-      // Read to end of message!  Must be because this is version <1.0 server
-      write(out,buf,bytes); // so write out the message
-      break; // if we break here, the while loop below will never be entered and we'll return properly
+      /* Read to end of message!  Must be because this is version <1.0 server */
+      write(out,buf,bytes); /* so write out the message */
+      break; /* if we break here, the while loop below will never be entered and we'll return properly */
     }
     if('\n' == buf[bytes])
     {
-      buf[bytes+1] = '\0';	// terminate the string
+      buf[bytes+1] = '\0';	/* terminate the string */
       if(2 != sscanf(buf,"SPAMD/%f %d %*s",&version,&response))
       {
 	syslog (LOG_ERR, "spamd responded with bad string '%s'", buf);
 	exit(EX_PROTOCOL);
       }
-      flag = -1; // Set flag to show we found a header
+      flag = -1; /* Set flag to show we found a header */
       break;
     }
   }
 	
   if(!flag)
   {
-    // We never received a header, so it's a long message with version <1.0 server
-    write(out,buf,bytes); // so write out the message so far
-    // Now we'll fall into the while loop if there's more message left.
+    /* We never received a header, so it's a long message with version <1.0 server */
+    write(out,buf,bytes); /* so write out the message so far */
+    /* Now we'll fall into the while loop if there's more message left. */
   }
 
   if(EX_OK == response)
@@ -126,7 +126,7 @@ int process_message(in_addr_t host, int port)
       syslog (LOG_ERR, "setsockopt() to spamd failed: %m");
       return EX_SOFTWARE;
     default:
-      // ignored
+      /* ignored */
     }
   }
 
