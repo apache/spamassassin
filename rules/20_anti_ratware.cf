@@ -95,3 +95,8 @@ meta USER_AGENT_XIMIAN		(__XIMIAN_MSGID && __XIMIAN_MUA && !__UNUSABLE_MSGID)
 describe USER_AGENT_XIMIAN	Headers indicate a non-spam MUA (Ximian)
 tflags USER_AGENT_XIMIAN	nice
 
+# NOTE: uses rules from 20_ratware.cf
+meta USER_AGENT_AOL8            (__AOL8_MUA && __AOL8_FROM && __AOL8_RCVD && __AOL8_TO)
+describe USER_AGENT_AOL8        Headers indicates a non-spam MUA (AOL 7 or 8)
+tflags USER_AGENT_AOL8		nice
+

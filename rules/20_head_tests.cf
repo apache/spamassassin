@@ -775,3 +775,19 @@ describe NIGERIAN_SUBJECT6	Subject is indicative of a Nigerian spam
 header ACCESSDB			eval:check_access_database('/etc/mail/access.db')
 describe ACCESSDB		Message would have been caught by accessdb
 tflags ACCESSDB			userconf
+
+# via private mail with Mark Delany; thx Mark!
+header FORGED_YAHOO_RCVD_SMTP    Received =~ /from smtp(?:\d{1,2}|\d{4,})\.mail(?:\.[^\.]+|)\.yahoo\.com /
+describe FORGED_YAHOO_RCVD_SMTP  Received: contains forged Yahoo! SMTP server hostname
+
+# a new spamware tool; catch it
+header FORGED_RCVD_FROM_NUM	Received =~ /from \S+ \(\d+ \[/
+describe FORGED_RCVD_FROM_NUM	Received headers forged (numeric hostname)
+
+# seems to be ratware
+header RCVD_AM_PM		Received =~ /; [A-Z][a-z][a-z], \d{1,2} \d{4} \d{1,2}:\d\d:\d\d [AP]M [+-]\d{4}/
+describe RCVD_AM_PM		Received headers forged (AM/PM)
+
+header RATWARE_EMPTY_HELO	Received =~ /from  \(\) by /
+describe RATWARE_EMPTY_HELO	Received headers forged (empty HELO)
+
