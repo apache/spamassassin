@@ -713,9 +713,9 @@ sub uri_to_domain {
   #return if ($uri =~ /^mailto:/i);	# not mailto's, please (TODO?)
   return if ($uri =~ /^javascript:/i);
 
-  $uri =~ s,^mailto:\/*,,gs;	# drop the protocol
+  $uri =~ s,^mailto:\/*,,gsi;	# drop the protocol
   $uri =~ s,#.*$,,gs;		# drop fragment
-  $uri =~ s,^[a-z]+://,,gs;	# drop the protocol
+  $uri =~ s,^[a-z]+://,,gsi;	# drop the protocol
   $uri =~ s,^[^/]*\@,,gs;	# username/passwd
   $uri =~ s,[/\?\&].*$,,gs;	# path/cgi params
   $uri =~ s,:\d+$,,gs;		# port
