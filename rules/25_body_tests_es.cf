@@ -41,7 +41,7 @@ lang es describe REMOVE_ES-08		Claims you can opt-out
 lang es body SUBSCRIBE_ES_01		/Si usted desea Agregarse a nuestra base de datos/i
 lang es describe SUBSCRIBE_ES_01	If you want to subscribe...
 
-lang es body EXCUSE_ES_01             /est(?:o|e (?:correo|mensaje|(?:e-?)mail)|a carta) no (?:es|(?:puede ser|se) considera(?:d[oa])?) .?S[Pp][Aa][Mm].?,?(?:\(correo no deseado\))? (?:(?:puesto|ya) que|mientras)/i
+lang es body EXCUSE_ES_01             /est(?:o|e (?:correo|mensaje|(?:e-?)mail)|a carta) no (?:es|(?:puede se.|se(?: puede)?) considera(?:d[oa]|r)?) .?S[Pp][Aa][Mm].?,?(?:\(correo no deseado\))? (?:(?:puesto|ya) que|mientras|si)/i
 lang es describe EXCUSE_ES_01         Claims not to be spam in Spanish
 
 lang es body EXCUSE_ES_02             /Me he tomado la libertad de enviarle este mail por/i
@@ -96,7 +96,7 @@ lang es describe PROMOCION_ES		Promocion especial.
 lang es body ALTA_BUSCADORES_ES		/alta en (?:mas de )?\d{2,4} buscadores hispanos/i
 lang es describe ALTA_BUSCADORES_ES	Alta en buscadores hispanos.
 
-lang es body EXCLAMACION_ES		/COMPRE|PROMOCI[OÓ]N|REALMENTE|INFORMESE|(?:CONTACTE|VISIT|RESPOND|ENVI|PID|COMPR|SOLICIT|CONSULT|ESCRIB|LLAM)[AE](?:NOS)?|OFERTAS/
+lang es body EXCLAMACION_ES		/INF[OÓ]RMESE|(?:CONTACT|VISIT|RESPOND|ENVI|PID|COMPR|SOLICIT|CONSULT|ESCRIB|LLAM)[AE](?:NOS)?|PROMOCI[OÓ]N(?:ES)?|OFERTAS?|SIN COMPROMISO/
 lang es describe EXCLAMACION_ES		IMPERATIVOS/EXCLAMACIONES EN MAYUSCULAS.
 
 lang es body PRESENTAMOS_ES		/[tl]e (?:ofrece|presenta|informa(?:re)?)mos/i
@@ -108,10 +108,10 @@ lang es describe CONTRA_REEMBOLSO_ES	Pago contra reembolso.
 lang es body PEDIDO_ES			/haga su pedido/i
 lang es describe PEDIDO_ES		Para hacer su pedido.
 
-lang es body CLICK_ES			/(?:ha(?:ga|z|ciendo) click|oprim[ae]) aqu. para/i
+lang es body CLICK_ES			/(?:ha(?:ga|z|ciendo|cer) click|oprim[ae]) (?:aqu.|en el bot.n)/i
 lang es describe CLICK_ES		Haga click aqui.
 
-lang es body REGALO_ES			/[lt]e (?:regal|obsequi)amos/i
+lang es body REGALO_ES			/[lt]e (?:regal|obsequi)amos|ll.vate tu regalo/i
 lang es describe REGALO_ES		Los regalos no existen, salvo de nuestros amigos.
 
 lang es body GANADORES_ES_01		/Usted y su familia podr.an tener suerte y ser los ganadores/i
@@ -123,7 +123,7 @@ lang es describe GANADORES_ES_02	Ha sido ganador.
 lang es body PORNO_GRATIS_ES		/porno .{3,5} gratis/i
 lang es describe PORNO_GRATIS_ES	Porno gratis.
 
-lang es body MAS_INFORMACION_ES		/(?:si qu?ier[ée]s|para) (?:solicitar )?(?:m.s|mayor) informaci.n/i
+lang es body MAS_INFORMACION_ES		/(?:si qu?ier[ée]s|para|por) (?:solo )?(?:solicitar )?(?:m.s|mayor) informaci.n/i
 lang es describe MAS_INFORMACION_ES	Mas informacion.
 
 lang es body INFORMACION_RESERVA_ES	/Informaci.n y reserva/i
