@@ -10,7 +10,7 @@ eval "use bytes";
 use vars qw (@ISA @EXPORT $HOSTNAME $AM_TAINTED);
 require Exporter;
 @ISA = qw(Exporter);
-@EXPORT = qw(local_tz parse_rfc822_date);
+@EXPORT = qw(local_tz);
 
 use Fcntl ':DEFAULT',':flock';
 use Mail::SpamAssassin;
