@@ -50,6 +50,11 @@ filtering databases, such as Vipul's Razor ( http://razor.sourceforge.net/ ).
 
 package Mail::SpamAssassin;
 
+# We do our best to make SA run with any Perl downto 5.005. You might want to
+# read <http://www.perldoc.com/perl5.8.0/pod/perl56delta.html> if you plan to 
+# hack SA and are used to Perl 5.6+.
+use 5.005;
+
 use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::ConfSourceSQL;
 use Mail::SpamAssassin::PerMsgStatus;
@@ -66,10 +71,10 @@ use Config;
 BEGIN {
   eval { require Time::HiRes };
   Time::HiRes->import( qw(time) ) unless $@;
-}  
+}
 
-use vars	qw{
-  	@ISA $VERSION $SUB_VERSION $HOME_URL $DEBUG $TIMELOG
+use vars qw{
+	@ISA $VERSION $SUB_VERSION @EXTRA_VERSION $HOME_URL $DEBUG $TIMELOG
 	@default_rules_path @default_prefs_path
 	@default_userprefs_path @default_userstate_dir
 	@site_rules_path @old_site_rules_path
@@ -81,9 +86,15 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 $VERSION = "2.40";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.112 2002/08/16 12:15:58 jmason Exp $';
+# SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.113 2002/08/19 21:16:39 msquadrat Exp $'))[2 .. 5, 8]));
+# If you hacked up your SA, add a token to identify it here. Eg.: I use "mss<number>",
+# <number> increasing with every hack. Deersoft might want to use "pro" :o)
+# "cvs" is added automatically if this file is tagged as 'Exp'erimental.
+@EXTRA_VERSION = qw();
 
-sub Version { $VERSION; }
+push(@EXTRA_VERSION, 'cvs') if($SUB_VERSION =~ /-exp$/);
+sub Version { join('-', $VERSION, @EXTRA_VERSION) }
 
 $HOME_URL = "http://spamassassin.org/";
 
