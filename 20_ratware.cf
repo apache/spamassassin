@@ -155,3 +155,13 @@ describe FORGED_BAT_MSGID	Forged mail pretending to be from The Bat! (mid)
 describe FORGED_BAT_CHARSET	Forged mail pretending to be from The Bat! (charset)
 describe FORGED_BAT_BOUNDARY	Forged mail pretending to be from The Bat! (boundary)
 
+
+meta FORGED_OUTLOOK_HTML	(__OUTLOOK_MUA && __MIME_HTML_ONLY)
+describe FORGED_OUTLOOK_HTML	Outlook can't send HTML message only
+
+meta FORGED_AOL_HTML		(__AOL_MUA && __MIME_HTML_ONLY)
+describe FORGED_AOL_HTML	AOL can't send HTML message only
+
+meta FORGED_IMS_HTML		(__IMS_MUA && __MIME_HTML_ONLY)
+describe FORGED_IMS_HTML	IMS can't send HTML message only
+
