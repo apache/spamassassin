@@ -108,13 +108,13 @@ sub am_running_on_windows {
 sub untaint_file_path {
   my ($path) = @_;
 
+  return unless defined($path);
+  return '' if ($path eq '');
+
   # Barry Jaspan: allow ~ and spaces, good for Windows.  Also return ''
   # if input is '', as it is a safe path.
   my $chars = '-_A-Za-z\xA0-\xFF0-9\.\@\=\+\,\/\\\:';
   my $re = qr/^\s*([$chars][${chars}~ ]*)$/o;
-
-  return unless defined($path);
-  return "" if ($path eq "");
 
   if ($path =~ $re) {
     return $1;
