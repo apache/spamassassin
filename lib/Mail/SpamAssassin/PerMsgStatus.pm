@@ -105,7 +105,7 @@ sub check {
       # warn "JMD ". join ("", @{$decoded}). "\n";
       $self->do_body_tests($decoded);
       $self->do_body_eval_tests($decoded);
-      $self->do_body_uri_tests($decoded);
+      # $self->do_body_uri_tests($decoded);
       undef $decoded;
     }
     timelog("Finished body tests", "bodytest", 2);
@@ -116,6 +116,8 @@ sub check {
       my $bodytext = $self->get_decoded_body_text_array();
       $self->do_rawbody_tests($bodytext);
       $self->do_rawbody_eval_tests($bodytext);
+      # NB: URI tests moved down here because "strip" removes too much
+      $self->do_body_uri_tests($bodytext);
       undef $bodytext;
     }
     timelog("Finished raw body tests", "rawbodytest", 2);
@@ -1285,13 +1287,15 @@ sub do_body_uri_tests {
   
   my $text = join('', @$textary);
   study $text;
-  # warn("spam: /$uriRe/ $text\n");
+  # warn("spam: $text\n");
 
   my $base_uri = "http://";
   while ($text =~ /\G.*?(<$uriRe>|$uriRe)/gsoc) {
+      # warn("URI: $1\n");
       my $uri = $1;
 
       $uri =~ s/^<(.*)>$/$1/;
+      $uri =~ s/[\]\)>#]$//;
 
       # Use <BASE HREF="URI"> to turn relative links into
       # absolute links.
