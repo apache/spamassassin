@@ -95,43 +95,50 @@ static int timeout = 600;
 static void
 usg(char *str)
 {
-  fprintf (stderr, str);
+  fprintf(stderr, "%s", str);
 }
 
-void print_usage(void)
+void
+print_usage(void)
 {
     usg("Usage: spamc [options] [-e command [args]] < message\n");
     usg("Options:\n");
-    usg("  -B                  Assume input is a single BSMTP-formatted message.\n");
-    usg("  -c                  Just print the summary line and set an exit code.\n");
-    usg("  -y                  Just print the names of the tests hit.\n");
-    usg("  -r                  Print full report for messages identified as spam.\n");
-    usg("  -R                  Print full report for all messages.\n");
-    usg("  -E                  Filter as normal, and set an exit code.\n");
-    usg("  -e command [args]   Pipe the output to the given command instead of stdout.\n"
-           "                      This must be the last option.\n");
-    usg("  -h                  Print this help message and exit.\n");
 
-    usg("  -d host             Specify host to connect to.\n"
-           "                      [default: localhost]\n");
-    usg("  -H                  Randomize IP addresses for the looked-up hostname.\n");
+    usg("  -d host             Specify host to connect to."
+        "                      [default: localhost]\n");
+    usg("  -H                  Randomize IP addresses for the looked-up\n"
+        "                      hostname.\n");
     usg("  -p port             Specify port for connection to spamd.\n"
-           "                      [default: 783]\n");
-    usg("  -s size             Specify maximum message size, in bytes.\n"
-           "                      [default: 250k]\n");
+        "                      [default: 783]\n");
 #ifdef SPAMC_SSL
     usg("  -S                  Use SSL to talk to spamd.\n");
 #endif
-    usg("  -t timeout          Timeout in seconds for communications to spamd.\n"
-           "                      [default: 600]\n");
-    usg("  -u username         User for spamd to process this message under.\n");
 #ifndef _WIN32
     usg("  -U path             Connect to spamd via UNIX domain sockets.\n");
 #endif
-
+    usg("  -t timeout          Timeout in seconds for communications to\n"
+        "                      spamd. [default: 600]\n");
+    usg("  -s size             Specify maximum message size, in bytes.\n"
+        "                      [default: 250k]\n");
+    usg("  -u username         User for spamd to process this message under.\n"
+        "                      [default: current user]\n");
+    
+    usg("  -B                  Assume input is a single BSMTP-formatted\n"
+        "                      message.\n");
+    
+    usg("  -c                  Just print the summary line and set an exit\n"
+        "                      code.\n");
+    usg("  -y                  Just print the names of the tests hit.\n");
+    usg("  -r                  Print full report for messages identified as\n"
+        "                      spam.\n");
+    usg("  -R                  Print full report for all messages.\n");
+    usg("  -E                  Filter as normal, and set an exit code.\n");
+    
     usg("  -x                  Don't fallback safely.\n");
     usg("  -l                  Log errors and warnings to stderr.\n");
-    usg("\n");
+    usg("  -e command [args]   Pipe the output to the given command instead\n"
+        "                      of stdout. This must be the last option.\n");
+    usg("  -h                  Print this help message and exit.\n");
 }
 
 int
@@ -260,7 +267,7 @@ read_args(int argc, char **argv,
             case '?':
             {
                 libspamc_log (flags, LOG_ERR, "invalid usage");
-                /* NOTE: falls through to usage case below... */
+                /* FALLTHROUGH */
             }
             case 'h':
             case 1:
@@ -279,12 +286,14 @@ void get_output_fd(int *fd)
     int fds[2];
     pid_t pid;
 #endif
+
     if (*fd != -1)
 	return;
     if (exec_argv == NULL) {
 	*fd = STDOUT_FILENO;
 	return;
     }
+    
 #ifndef _WIN32
     if (pipe(fds)) {
         libspamc_log(flags, LOG_ERR, "pipe creation failed: %m");
@@ -305,18 +314,21 @@ void get_output_fd(int *fd)
 	*fd = fds[1];
 	return;
     }
+    
     /* parent process (see above) */
     close(fds[1]);
     if (dup2(fds[0], STDIN_FILENO)) {
 	libspamc_log(flags, LOG_ERR, "redirection of stdin failed: %m");
 	exit(EX_OSERR);
     }
+    
     close(fds[0]);		/* no point in leaving extra fds lying around */
     execv(exec_argv[0], exec_argv);
     libspamc_log(flags, LOG_ERR, "exec failed: %m");
 #else
     fprintf(stderr, "exec failed: %d\n", errno);
 #endif
+
     exit(EX_OSERR);
 }
 
@@ -373,6 +385,7 @@ int main(int argc, char **argv)
 		return EX_OSERR;
 	    }
 	}
+        
 	memset(userbuf, 0, sizeof userbuf);
 	strncpy(userbuf, curr_user->pw_name, sizeof userbuf - 1);
 	userbuf[sizeof userbuf - 1] = '\0';
