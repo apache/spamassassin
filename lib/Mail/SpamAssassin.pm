@@ -49,14 +49,14 @@ use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::Reporter;
 use Mail::SpamAssassin::Replier;
-use Carp;
+use Mail::SpamAssassin::MyMailAudit;
+
 use File::Basename;
 use File::Path;
 use File::Spec;
 use File::Copy;
 use Cwd;
 use Config;
-use strict;
 
 use vars	qw{
   	@ISA $VERSION $HOME_URL $DEBUG
@@ -323,22 +323,41 @@ sub read_scoreonly_config {
 }
 
 ###########################################################################
+
+=item $f->compile_now ()
+
+Compile all patterns, load all configuration files, and load all
+possibly-required Perl modules.
+
+Normally, Mail::SpamAssassin uses lazy evaluation where possible, but if you
+plan to fork() or start a new perl interpreter thread to process a message,
+this is suboptimal, as each process/thread will have to perform these actions.
+
+Call this function in the master thread or process to perform the actions
+straightaway, so that the sub-processes will not have to.
+
+=cut
+
+sub compile_now {
+  my ($self) = @_;
+
+  # note: this may incur network access. Good.  We want to make sure
+  # as much as possible is preloaded!
+  my @testmsg = ("From: ignore\@compiling.spamassassin.taint.org\n",
+  			"\n", "x\n");
+
+  dbg ("ignore: test message to precompile patterns and load modules");
+  $self->init();
+  my $mail = Mail::SpamAssassin::MyMailAudit->new(data => \@testmsg);
+  $self->check($mail)->finish();
+
+  1;
+}
+
+###########################################################################
 # non-public methods.
 
 sub init {
-
-# crh: These were moved here from spamd, since they really should get loaded as part of initialization of the lib
-eval {
-  require Net::DNS;
-  require Net::DNS::Resolver;
-};
-
-eval {
-  require Razor::Client;
-  require Razor::Signature; 
-  require Razor::String;
-};
-
   my ($self) = @_;
 
   if ($self->{_initted}) { return; }
@@ -353,7 +372,7 @@ eval {
     }
     dbg ("using \"$fname\" for rules file");
 
-    if (defined $fname) {
+    if (defined $fname && -f $fname && -s _) {
       open (IN, "<".$fname) or
 		  warn "cannot open \"$fname\"\n";
       $self->{config_text} .= join ('', <IN>);
@@ -380,7 +399,7 @@ eval {
       }
     }
 
-    if (defined $fname) {
+    if (defined $fname && -f $fname && -s _) {
       open (IN, "<".$fname) or
 		  warn "cannot open \"$fname\"\n";
       $self->{config_text} .= join ('', <IN>);
@@ -457,16 +476,15 @@ sub encapsulate_mail_object {
     }
 
     # now try using one of the new methods...
-    if (eval q{
-		  $mail_obj->replace_header ($hdr, $val);
-		  1;
-	  })
+    eval { $mail_obj->replace_header ($hdr, $val); };
+
+    if ($@)
     {
-      dbg ("using Mail::Audit message-encapsulation code");
-      $self->{mail_audit_supports_encapsulation} = 1;
-    } else {
       dbg ("using Mail::Audit exposed-message-object code");
       $self->{mail_audit_supports_encapsulation} = 0;
+    } else {
+      dbg ("using Mail::Audit message-encapsulation code");
+      $self->{mail_audit_supports_encapsulation} = 1;
     }
   }
 
@@ -475,6 +493,7 @@ sub encapsulate_mail_object {
     # warning: Changed indirect object syntax here because of new() function 
     # above which may bite us in the foot some time. See Damian Conway's book for details
     return Mail::SpamAssassin::EncappedMessage->new($mail_obj);
+
   } else {
     require Mail::SpamAssassin::ExposedMessage;
     return Mail::SpamAssassin::ExposedMessage->new($mail_obj);

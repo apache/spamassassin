@@ -74,7 +74,9 @@ my $spamtest = Mail::SpamAssassin->new({
   local_tests_only=> $opt_L,
   dont_copy_prefs => 1
 });
-$spamtest->init();
+
+$spamtest->compile_now();	# ensure all modules etc. are loaded
+$/ = "\n";			# argh, Razor resets this!  Bad Razor!
 
 sub spawn;  # forward declaration
 setlogsock('unix');
@@ -92,7 +94,7 @@ my $proto = getprotobyname('tcp');
 chdir '/'               or die "Can't chdir to /: $!";
 open STDIN, '/dev/null' or die "Can't read /dev/null: $!";
 open STDOUT, '>/dev/null' or die "Can't write to /dev/null: $!";
-open STDERR, '>/dev/null' or die "Can't write to /dev/null: $!";
+# open STDERR, '>/dev/null' or die "Can't write to /dev/null: $!";
 
 socket(Server, PF_INET, SOCK_STREAM, $proto)        || die "socket: $!";
 setsockopt(Server,SOL_SOCKET,SO_REUSEADDR,pack("l", 1)) || die "setsockopt: $!";
@@ -129,7 +131,7 @@ for ( $waitedpid = 0;
     spawn sub {
 	$|=1; # always immediately flush output
 	# First request line off stream
-        $_ = <STDIN>;
+        local $_ = <STDIN>;
 	chomp;
         if(/PROCESS SPAMC\/(.*)/)
 	{
@@ -139,7 +141,11 @@ for ( $waitedpid = 0;
 		while(1)
 		{
 		    $_ = <STDIN>;
-		    if(/^\r\n/) { last; }
+		    if(!defined $_) {
+			protocol_error ("(EOF during headers)");
+			return 1;
+		    }
+		    if (/^\r\n/s) { last; }
 		    if(/^User: (.*)\r\n/)
 		    {
 			my $username = $1;
@@ -170,12 +176,17 @@ for ( $waitedpid = 0;
 	}
 	else
 	{
-	    my $resp = "EX_PROTOCOL";
-	    print "SPAMD/1.0 $resphash{$resp} Bad header line: $_\r\n";
-	    logmsg "bad protocol: header error: $_";
+	    protocol_error ($_);
 	}
     };
+}
 
+sub protocol_error {
+  local $_ = shift;
+
+  my $resp = "EX_PROTOCOL";
+  print "SPAMD/1.0 $resphash{$resp} Bad header line: $_\r\n";
+  logmsg "bad protocol: header error: $_";
 }
 
 sub allowed {

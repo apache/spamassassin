@@ -5,9 +5,6 @@ package Mail::SpamAssassin::Replier;
 use Carp;
 use strict;
 
-use Mail::SpamAssassin::ExposedMessage;
-use Mail::SpamAssassin::EncappedMessage;
-
 use vars	qw{
   	@ISA
 };
@@ -46,7 +43,9 @@ sub reply {
   $addr =~ s/^.*?<(.+)>\s*$/$1/g                 # Foo Blah <jm@foo>
         or $addr =~ s/^(.+)\s\(.*?\)\s*$/$1/g;   # jm@foo (Foo Blah)
 
+  require Mail::Internet;
   my $reply = new Mail::Internet();
+
   $reply->replace ('To', $addr);
   $reply->replace ('From', $replysender);
 

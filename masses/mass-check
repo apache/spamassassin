@@ -4,18 +4,6 @@ use lib "../lib";
 use Mail::Internet;
 use Mail::SpamAssassin;
 
-# load these now before we do any forks
-eval {
-  use Net::DNS;
-  use Net::DNS::Resolver;
-};
-
-eval {
-  use Razor::Client;
-  use Razor::Signature; 
-  use Razor::String;
-};
-
 my $FORK = 0;
 if (defined $ARGV[0] && $ARGV[0] eq '-f') { $FORK = 1; }
 
@@ -33,7 +21,7 @@ $spamtest = new Mail::SpamAssassin ({
   'userprefs_filename'  => "../spamassassin.prefs",
   'local_tests_only'    => 1
 });
-$spamtest->init();
+$spamtest->compile_now();
 
 my $count = 0;
 

@@ -57,6 +57,14 @@ sub new {
   $self;
 }
 
+sub mtime {
+    my $self = shift;
+    if (@_) {
+	$self->{mtime} = shift;
+    }
+    return $self->{mtime};
+}
+
 ###########################################################################
 
 sub parse_scores_only {
