@@ -413,11 +413,127 @@ uri T_URI_3896_36	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{8,}\.biz\/\S{25,}/i
 # bug 2863
 uri T_URI_PARSE_BUG       /(?:\%0[01]|\0).*\@/
 
-# few random rule ideas...
+# not too bad
 header T_MSGID_MULTIPLE_AT	MESSAGEID =~ /<[^>]*\@[^>]*\@/
 
-header __MSGID_DOLLARS_ANY	MESSAGEID =~ /^<\w{12}\$\w{8}\$\w{8}\@\S+>$/m
-meta T_MSGID_DOLLARS_RANDOM	__MSGID_DOLLARS_ANY && !__OUTLOOK_DOLLARS_MSGID
+########################################################################
 
-header __MSGID_DOLLARS_ANY2	MESSAGEID =~ /^<\S{12}\$\S{8}\$\S{8}\@\S+>$/m
-meta T_MSGID_DOLLARS_RANDOM2	__MSGID_DOLLARS_ANY2 && !__OUTLOOK_DOLLARS_MSGID
+# okay formats
+# 12,8,8
+header __MSGID_DOLLARS_OK1	MESSAGEID =~ /^<[0-9a-f]{12}\$[0-9a-f]{8}\$[0-9a-f]{8}\@\S+>$/m
+# 2 of 3: 12,8,8
+header __MSGID_DOLLARS_OK2	MESSAGEID =~ /^<[0-9a-f]{12}\$[0-9a-f]{8}\$[0-9a-f]+\@\S+>$/m
+header __MSGID_DOLLARS_OK3	MESSAGEID =~ /^<[0-9a-f]{12}\$[0-9a-f]+\$[0-9a-f]{8}\@\S+>$/m
+header __MSGID_DOLLARS_OK4	MESSAGEID =~ /^<[0-9a-f]+\$[0-9a-f]{12}\$[0-9a-f]{8}\@\S+>$/m
+# 10-14,6-10,6-10
+header __MSGID_DOLLARS_OK4	MESSAGEID =~ /^<[0-9a-f]{10,14}\$[0-9a-f]{6,10}\$[0-9a-f]{6,10}\@\S+>$/m
+# 2 of 3: 10-14,6-10,6-10
+header __MSGID_DOLLARS_OK5	MESSAGEID =~ /^<[0-9a-f]{10,14}\$[0-9a-f]{6,10}\$[0-9a-f]+\@\S+>$/m
+header __MSGID_DOLLARS_OK6	MESSAGEID =~ /^<[0-9a-f]{10,14}\$[0-9a-f]+\$[0-9a-f]{6,10}\@\S+>$/m
+header __MSGID_DOLLARS_OK7	MESSAGEID =~ /^<[0-9a-f]+\$[0-9a-f]{6,10}\$[0-9a-f]{6,10}\@\S+>$/m
+# loose lengths
+header __MSGID_DOLLARS_OK8	MESSAGEID =~ /^<[0-9a-f]+\$[0-9a-f]+\$[0-9a-f]+\@\S+>$/m
+header __MSGID_DOLLARS_OK9	MESSAGEID =~ /^<[0-9a-f]{2,}\$[0-9a-f]{2,}\$[0-9a-f]{2,}\@\S+>$/m
+header __MSGID_DOLLARS_OKA	MESSAGEID =~ /^<[0-9a-f]{4,}\$[0-9a-f]{4,}\$[0-9a-f]{4,}\@\S+>$/m
+header __MSGID_DOLLARS_OKB	MESSAGEID =~ /^<[0-9a-f]{6,}\$[0-9a-f]{6,}\$[0-9a-f]{6,}\@\S+>$/m
+header __MSGID_DOLLARS_OKC	MESSAGEID =~ /^<[0-9a-f]{6,}\$[0-9a-f]{4,}\$[0-9a-f]{4,}\@\S+>$/m
+header __MSGID_DOLLARS_OKD	MESSAGEID =~ /^<[0-9a-f]{8,}\$[0-9a-f]{6,}\$[0-9a-f]{6,}\@\S+>$/m
+
+# not okay formats
+# 12,8,8
+header __MSGID_DOLLARS_BAD0	MESSAGEID =~ /^<\w{12}\$\w{8}\$\w{8}\@\S+>$/m
+# 2 of 3: 12,8,8
+header __MSGID_DOLLARS_BAD1	MESSAGEID =~ /^<\w{12}\$\w{8}\$\w+\@\S+>$/m
+header __MSGID_DOLLARS_BAD2	MESSAGEID =~ /^<\w{12}\$\w+\$\w{8}\@\S+>$/m
+header __MSGID_DOLLARS_BAD3	MESSAGEID =~ /^<\w+\$\w{12}\$\w{8}\@\S+>$/m
+# 10-14,6-10,6-10
+header __MSGID_DOLLARS_BAD4	MESSAGEID =~ /^<\w{10,14}\$\w{6,10}\$\w{6,10}\@\S+>$/m
+# 2 of 3: 10-14,6-10,6-10
+header __MSGID_DOLLARS_BAD5	MESSAGEID =~ /^<\w{10,14}\$\w{6,10}\$\w+\@\S+>$/m
+header __MSGID_DOLLARS_BAD6	MESSAGEID =~ /^<\w{10,14}\$\w+\$\w{6,10}\@\S+>$/m
+header __MSGID_DOLLARS_BAD7	MESSAGEID =~ /^<\w+\$\w{6,10}\$\w{6,10}\@\S+>$/m
+# loose lengths
+header __MSGID_DOLLARS_BAD8	MESSAGEID =~ /^<\w+\$\w+\$\w+\@\S+>$/m
+header __MSGID_DOLLARS_BAD9	MESSAGEID =~ /^<\w{2,}\$\w{2,}\$\w{2,}\@\S+>$/m
+header __MSGID_DOLLARS_BADA	MESSAGEID =~ /^<\w{4,}\$\w{4,}\$\w{4,}\@\S+>$/m
+header __MSGID_DOLLARS_BADB	MESSAGEID =~ /^<\w{6,}\$\w{6,}\$\w{6,}\@\S+>$/m
+header __MSGID_DOLLARS_BADC	MESSAGEID =~ /^<\w{6,}\$\w{4,}\$\w{4,}\@\S+>$/m
+header __MSGID_DOLLARS_BADD	MESSAGEID =~ /^<\w{8,}\$\w{6,}\$\w{6,}\@\S+>$/m
+
+# meta rules
+meta T_MSGID_DOLLARS_RND0	__MSGID_DOLLARS_BAD1 && !__MSGID_DOLLARS_OK1
+# 2 of 3: 12,8,8
+meta T_MSGID_DOLLARS_RND1	__MSGID_DOLLARS_BAD1 && !__MSGID_DOLLARS_OK1
+meta T_MSGID_DOLLARS_RND2	__MSGID_DOLLARS_BAD2 && !__MSGID_DOLLARS_OK2
+meta T_MSGID_DOLLARS_RND3	__MSGID_DOLLARS_BAD3 && !__MSGID_DOLLARS_OK3
+meta T_MSGID_DOLLARS_RND123	T_MSGID_DOLLARS_RND1 || T_MSGID_DOLLARS_RND2 || T_MSGID_DOLLARS_RND3
+# 10-14,6-10,6-10
+meta T_MSGID_DOLLARS_RND4	__MSGID_DOLLARS_BAD4 && !__MSGID_DOLLARS_OK4
+# 2 of 3: 10-14,6-10,6-10
+meta T_MSGID_DOLLARS_RND5	__MSGID_DOLLARS_BAD5 && !__MSGID_DOLLARS_OK5
+meta T_MSGID_DOLLARS_RND6	__MSGID_DOLLARS_BAD6 && !__MSGID_DOLLARS_OK6
+meta T_MSGID_DOLLARS_RND7	__MSGID_DOLLARS_BAD7 && !__MSGID_DOLLARS_OK7
+meta T_MSGID_DOLLARS_RND567	T_MSGID_DOLLARS_RND5 || T_MSGID_DOLLARS_RND6 || T_MSGID_DOLLARS_RND7
+# loose lengths
+meta T_MSGID_DOLLARS_RND8	__MSGID_DOLLARS_BAD8 && !__MSGID_DOLLARS_OK8
+meta T_MSGID_DOLLARS_RND9	__MSGID_DOLLARS_BAD9 && !__MSGID_DOLLARS_OK9
+meta T_MSGID_DOLLARS_RNDA	__MSGID_DOLLARS_BADA && !__MSGID_DOLLARS_OKA
+meta T_MSGID_DOLLARS_RNDB	__MSGID_DOLLARS_BADB && !__MSGID_DOLLARS_OKB
+meta T_MSGID_DOLLARS_RNDC	__MSGID_DOLLARS_BADC && !__MSGID_DOLLARS_OKC
+meta T_MSGID_DOLLARS_RNDD	__MSGID_DOLLARS_BADD && !__MSGID_DOLLARS_OKD
+
+########################################################################
+
+# long message IDs, what else?
+header T_MSGID_LONG_120		MESSAGEID =~ /<.{120,}>/m
+header T_MSGID_LONG_125		MESSAGEID =~ /<.{125,}>/m
+header T_MSGID_LONG_130		MESSAGEID =~ /<.{130,}>/m
+header T_MSGID_LONG_135		MESSAGEID =~ /<.{135,}>/m
+header T_MSGID_LONG_140		MESSAGEID =~ /<.{140,}>/m
+header T_MSGID_LONG_145		MESSAGEID =~ /<.{145,}>/m
+header T_MSGID_LONG_150		MESSAGEID =~ /<.{150,}>/m
+header T_MSGID_LONG_155		MESSAGEID =~ /<.{155,}>/m
+header T_MSGID_LONG_160		MESSAGEID =~ /<.{160,}>/m
+header T_MSGID_LONG_165		MESSAGEID =~ /<.{165,}>/m
+header T_MSGID_LONG_170		MESSAGEID =~ /<.{170,}>/m
+header T_MSGID_LONG_175		MESSAGEID =~ /<.{175,}>/m
+header T_MSGID_LONG_180		MESSAGEID =~ /<.{180,}>/m
+header T_MSGID_LONG_185		MESSAGEID =~ /<.{185,}>/m
+header T_MSGID_LONG_190		MESSAGEID =~ /<.{190,}>/m
+header T_MSGID_LONG_195		MESSAGEID =~ /<.{195,}>/m
+header T_MSGID_LONG_200		MESSAGEID =~ /<.{200,}>/m
+
+header T_MSGID_LONG_LP_100	MESSAGEID =~ /<.{100,}\@/m
+header T_MSGID_LONG_LP_105	MESSAGEID =~ /<.{105,}\@/m
+header T_MSGID_LONG_LP_110	MESSAGEID =~ /<.{110,}\@/m
+header T_MSGID_LONG_LP_115	MESSAGEID =~ /<.{115,}\@/m
+header T_MSGID_LONG_LP_120	MESSAGEID =~ /<.{120,}\@/m
+header T_MSGID_LONG_LP_125	MESSAGEID =~ /<.{125,}\@/m
+header T_MSGID_LONG_LP_130	MESSAGEID =~ /<.{130,}\@/m
+header T_MSGID_LONG_LP_135	MESSAGEID =~ /<.{135,}\@/m
+header T_MSGID_LONG_LP_140	MESSAGEID =~ /<.{140,}\@/m
+header T_MSGID_LONG_LP_145	MESSAGEID =~ /<.{145,}\@/m
+header T_MSGID_LONG_LP_150	MESSAGEID =~ /<.{150,}\@/m
+
+header T_MSGID_LONG_D_45	MESSAGEID =~ /\@.{45,}>/m
+header T_MSGID_LONG_D_50	MESSAGEID =~ /\@.{50,}>/m
+header T_MSGID_LONG_D_55	MESSAGEID =~ /\@.{55,}>/m
+header T_MSGID_LONG_D_60	MESSAGEID =~ /\@.{60,}>/m
+header T_MSGID_LONG_D_65	MESSAGEID =~ /\@.{65,}>/m
+header T_MSGID_LONG_D_70	MESSAGEID =~ /\@.{70,}>/m
+header T_MSGID_LONG_D_75	MESSAGEID =~ /\@.{75,}>/m
+header T_MSGID_LONG_D_80	MESSAGEID =~ /\@.{80,}>/m
+header T_MSGID_LONG_D_85	MESSAGEID =~ /\@.{85,}>/m
+header T_MSGID_LONG_D_90	MESSAGEID =~ /\@.{90,}>/m
+header T_MSGID_LONG_D_95	MESSAGEID =~ /\@.{95,}>/m
+header T_MSGID_LONG_D_100	MESSAGEID =~ /\@.{100,}>/m
+header T_MSGID_LONG_D_105	MESSAGEID =~ /\@.{105,}>/m
+header T_MSGID_LONG_D_110	MESSAGEID =~ /\@.{110,}>/m
+header T_MSGID_LONG_D_115	MESSAGEID =~ /\@.{115,}>/m
+header T_MSGID_LONG_D_120	MESSAGEID =~ /\@.{120,}>/m
+header T_MSGID_LONG_D_125	MESSAGEID =~ /\@.{125,}>/m
+header T_MSGID_LONG_D_130	MESSAGEID =~ /\@.{130,}>/m
+header T_MSGID_LONG_D_135	MESSAGEID =~ /\@.{135,}>/m
+header T_MSGID_LONG_D_140	MESSAGEID =~ /\@.{140,}>/m
+header T_MSGID_LONG_D_145	MESSAGEID =~ /\@.{145,}>/m
+header T_MSGID_LONG_D_150	MESSAGEID =~ /\@.{150,}>/m
