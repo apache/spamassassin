@@ -392,7 +392,7 @@ sub parse {
     }
 
     # last ditch: try to see if the plugins know what to do with it
-    if ($conf->{main}->call_plugins ("parse_config", {
+    if ($conf->{main}->call_plugins("parse_config", {
                 key => $key,
                 value => $value,
                 line => $line,
@@ -711,6 +711,9 @@ sub finish_parsing {
       }
     }
   }
+
+  # named this way just in case we ever want a "finish_parsing_start"
+  $conf->{main}->call_plugins("finish_parsing_end", { conf => $conf });
 
   delete $conf->{tests};                # free it up
   delete $conf->{priority};             # free it up
