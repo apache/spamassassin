@@ -1267,9 +1267,6 @@ sub scan {
     dbg ("bayes token '$raw_token' => $pw");
   }
 
-  # we don't really care about the return value here
-  $self->{store}->tok_touch_all(\@touch_tokens, $msgatime);
-
   if (!@sorted || (REQUIRE_SIGNIFICANT_TOKENS_TO_SCORE > 0 && 
 	$#sorted <= REQUIRE_SIGNIFICANT_TOKENS_TO_SCORE))
   {
@@ -1287,6 +1284,11 @@ sub scan {
   goto skip unless defined $score;
 
   dbg ("bayes: score = $score");
+
+  # no need to call tok_touch_all unless there were significant
+  # tokens and a score was returned
+  # we don't really care about the return value here
+  $self->{store}->tok_touch_all(\@touch_tokens, $msgatime);
 
   $permsgstatus->{bayes_nspam} = $ns;
   $permsgstatus->{bayes_nham} = $nn;
