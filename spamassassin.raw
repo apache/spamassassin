@@ -76,6 +76,7 @@ eval {
 	     'report!' => \$opt{'report'}, 'r' => \$opt{'report'},
 	     'add-to-whitelist|W' => \$opt{'add-to-whitelist'},
 	     'remove-from-whitelist|R' => \$opt{'remove-from-whitelist'},
+	     'add-to-blacklist' => \$opt{'add-to-blacklist'},
 	     'add-from!' => \$opt{'add-from'}, 'F=i' => \$opt{'add-from'},
 	     'warning-from|w=s' => \$opt{'warning-from'},
 	     'log-to-mbox!' => \$opt{'log-to-mbox'}, 'l' => \$opt{'log-to-mbox'},
@@ -87,7 +88,7 @@ eval {
 	     'debug!' => \$opt{'debug'}, 'D' => \$opt{'debug'},
 	     'version|V' => \$opt{'version'},
 	     'create-prefs!', => \$opt{'create-prefs'}, 'x' => sub {$opt{'create-prefs'}=0},
-	     'whitelist-factory|M=s' => \$opt{'whitelist-factory'},
+	     'whitelist-factory|M=s' => \$opt{'whitelist-factory'}
   ) or usage(0, "Unknown option!");
 
   if (defined $opt{'help'}) { usage(0, "For more information read the spamassassin man page"); }
@@ -170,7 +171,7 @@ my $mail = Mail::SpamAssassin::NoMailAudit->new ( add_From_line => ($opt{'add-fr
     $mail->ignore();		# will exit
   }
 
-($opt{'auto-whitelist'} or $opt{'remove-from-whitelist'} or $opt{'add-to-whitelist'}) and eval
+($opt{'auto-whitelist'} or $opt{'remove-from-whitelist'} or $opt{'add-to-whitelist'} or $opt{'add-to-blacklist'}) and eval
 {
   # create a factory for the persistent address list.
   # choose one of these implementations!
@@ -206,6 +207,16 @@ my $mail = Mail::SpamAssassin::NoMailAudit->new ( add_From_line => ($opt{'add-fr
 
   if ($opt{'remove-from-whitelist'}) {
     $spamtest->remove_all_addresses_from_whitelist ($mail);
+    if ($opt{'log-to-mbox'}) {
+      $mail->{noexit} = 1;
+      $mail->accept ($opt{'log-to-mbox'});
+      $mail->{noexit} = 0;
+    }
+    $mail->ignore();		# will exit
+  }
+
+  if ($opt{'add-to-blacklist'}) {
+    $spamtest->add_all_addresses_to_blacklist ($mail);
     if ($opt{'log-to-mbox'}) {
       $mail->{noexit} = 1;
       $mail->accept ($opt{'log-to-mbox'});

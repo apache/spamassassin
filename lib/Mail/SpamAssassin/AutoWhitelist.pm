@@ -103,6 +103,31 @@ sub add_known_good_address {
 
 ###########################################################################
 
+=item awl->add_known_bad_address($addr);
+
+This method will add a score of 100 to the given address -- effectively
+"bootstrapping" the address as being one that should be blacklisted.
+
+=cut
+
+sub add_known_bad_address {
+  my ($self, $addr) = @_;
+
+  if (!defined $self->{checker}) {
+    return undef;		# no factory defined; we can't check
+  }
+
+  my $entry = $self->{checker}->get_addr_entry ($addr);
+
+  $self->{checker}->add_score($entry,100);
+
+  return 0;
+}
+
+
+
+###########################################################################
+
 sub remove_address {
   my ($self, $addr) = @_;
 

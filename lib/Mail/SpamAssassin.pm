@@ -78,7 +78,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 $VERSION = "2.31";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.97 2002/06/16 19:48:24 hughescr Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.98 2002/06/18 00:40:28 duncf Exp $';
 
 sub Version { $VERSION; }
 
@@ -330,6 +330,28 @@ sub remove_all_addresses_from_whitelist {
   foreach my $addr ($self->find_all_addrs_in_mail ($mail_obj)) {
     if ($list->remove_address ($addr)) {
       print "SpamAssassin auto-whitelist: removing address: $addr\n";
+    }
+  }
+  $list->finish();
+}
+
+###########################################################################
+
+=item $f->add_all_addresses_to_blacklist ($mail)
+
+Given a mail message, find as many addresses in the usual headers (To,
+Cc, From etc.), and the message body, and adds them to the automatic
+whitelist database with a high score, effectively blacklisting them.
+
+=cut
+
+sub add_all_addresses_to_blacklist {
+  my ($self, $mail_obj) = @_;
+
+  my $list = Mail::SpamAssassin::AutoWhitelist->new($self);
+  foreach my $addr ($self->find_all_addrs_in_mail ($mail_obj)) {
+    if ($list->add_known_bad_address ($addr)) {
+      print "SpamAssassin auto-whitelist: adding address: $addr\n";
     }
   }
   $list->finish();
