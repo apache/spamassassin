@@ -1,3 +1,100 @@
+2003-09-16 02:10  quinlan
+
+	* lib/Mail/SpamAssassin/Dns.pm: bug 2463: warnings due to %ENV
+	autovivifaction
+
+2003-09-16 00:31  quinlan
+
+	* lib/Mail/SpamAssassin/Conf.pm: minor formatting change
+
+2003-09-15 23:02  quinlan
+
+	* lib/Mail/SpamAssassin/Util.pm: bug 2442:
+	am_running_in_taint_mode() does not seem to work
+
+2003-09-15 23:00  quinlan
+
+	* lib/Mail/SpamAssassin/CmdLearn.pm: bug 2302: finish converting to
+	the 2.6x add_header stuff
+
+2003-09-15 22:59  quinlan
+
+	* sa-learn.raw, lib/Mail/SpamAssassin/ArchiveIterator.pm: bug 2460:
+	ArchiveIterator.pm: insecure dependency in glob in taint-mode
+
+2003-09-15 08:20  quinlan
+
+	* lib/Mail/SpamAssassin/Conf.pm: minor documentation reformatting
+
+2003-09-15 03:02  felicity
+
+	* lib/Mail/SpamAssassin/PerMsgStatus.pm: bug 2395: 2.60 allows the
+	addition of custom headers, so we should, at minimum, remove the
+	ones SA is configured to add.
+
+2003-09-15 02:41  felicity
+
+	* Makefile.PL: bug 2452: on some versions of perl (5.005 at least),
+	the site-wide local.cf file could be overwritten accidently.
+
+2003-09-14 21:04  duncf
+
+	* INSTALL: Slight clarification of documentation.
+
+2003-09-14 20:31  felicity
+
+	* INSTALL: bug 2449: updated docs
+
+2003-09-14 20:30  felicity
+
+	* lib/Mail/SpamAssassin/Util.pm: bug 2450: when SA previously
+	detected that it's in taint mode, it would reset PATH to a known
+	string (/bin:/usr/bin:/usr/lcoal/bin).	There were a few problems
+	with this however, 1) that negates any special dirs that the
+	admin/user needed in PATH (dccproc, etc,) 2) That's a UNIX-centric
+	path, it doesn't work on Windows/etc.
+	
+	So not only should we go through and just untaint the dirs in PATH
+	(verify they exist, that they're not relative, etc,) and also make
+	sure when we finalize PATH, it uses the appropriate path seperator
+	as configured in perl.
+
+2003-09-13 17:27  felicity
+
+	* lib/Mail/SpamAssassin/PerMsgStatus.pm: bug 2445: if
+	"always_add_headers 1" is enabled and a message hits zero rules, an
+	uninitialized value warning could occur.
+
+2003-09-13 11:41  msquadrat
+
+	* PACKAGING: fix some typos
+
+2003-09-12 23:11  felicity
+
+	* rules/50_scores.cf: bayes 40 and 44 ought to be negative, even
+	though they're abs(score) 0.001...
+
+2003-09-12 22:49  quinlan
+
+	* Razor2.patch: more rephrasing
+
+2003-09-12 22:32  quinlan
+
+	* Razor2.patch: slight rephrasing
+
+2003-09-12 04:06  quinlan
+
+	* INSTALL, README, Razor2.patch: more Razor2 taint-mode
+	documentation changes
+
+2003-09-12 03:46  quinlan
+
+	* Razor2.patch: patch needed to run taint-safe with Razor2
+
+2003-09-12 01:21  felicity
+
+	* Changes: updated for rc4
+
 2003-09-12 00:10  msquadrat
 
 	* Makefile.PL: bug 2434: that META.yml stuff was introduced with
