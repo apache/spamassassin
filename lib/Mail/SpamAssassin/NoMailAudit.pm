@@ -35,6 +35,10 @@ sub new {
   $self->{headers} = { };
   $self->{header_order} = [ ];
 
+  # an option: SpamAssassin can set this appropriately.
+  # undef means 'figure it out yourself'.
+  $self->{add_From_line} = undef;
+
   bless ($self, $class);
 
   if (defined $opts{'data'}) {

@@ -6,6 +6,14 @@ my $freqs = { };
 my $only_in_spam = { };
 my $only_in_nonspam = { };
 
+my $lines = 0; open (IN, "<spam.wf"); while (<IN>) { $lines++; } close IN;
+my $spamlines = $lines;
+
+my $lines = 0; open (IN, "<nonspam.wf"); while (<IN>) { $lines++; } close IN;
+my $nonspamlines = $lines;
+
+$nonspam_bias = ($spamlines) / ($nonspamlines+1);
+
 open (IN, "<spam.wf");
 while (<IN>) {
   /^\s*(\d+)\s+(\S+\s\S+)$/ or next; my $c = $1; my $w = $2;
@@ -24,7 +32,7 @@ while (<IN>) {
   /^\s*(\d+)\s+(\S+\s\S+)$/ or next; my $c = $1; my $w = $2;
 
   if (defined $freqs->{$w}) {
-    $freqs->{$w} -= $c;
+    $freqs->{$w} -= ($c * $nonspam_bias);
     delete $only_in_spam->{$w};
   } else {
 
