@@ -1298,7 +1298,7 @@ sub handle_virtual_config_dir {
     $dir =~ s/\%\%/\%/g;
 
     $userdir   = $dir;
-    $prefsfile = $dir . '/user_prefs';
+    $prefsfile = $dir . '/.spamassassin/user_prefs';
 
     # Log that the default configuration is being used for a user.
     logmsg("Using default config for $username: $prefsfile");
