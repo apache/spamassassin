@@ -287,3 +287,34 @@ header T_RATWARE_HASH_2_V2_B    X-Mailer =~ /^[A-Za-z0-9_]{14,}$/
 header T_RATWARE_HASH_2_C       X-Mailer =~ /^[A-Za-z0-9]{16,}$/
 header T_RATWARE_HASH_2_V2_C    X-Mailer =~ /^[A-Za-z0-9]{14,}$/
 
+body T_HTML_JS_0	eval:html_text_match('uri', '^(?is)javascript:')
+body T_HTML_JS_1	eval:html_text_match('uri', '^(?is)\s*javascript:')
+body T_HTML_JS_2	eval:html_text_match('uri', '^(?is)javascript:.*;')
+body T_HTML_JS_3	eval:html_text_match('uri', '^(?is)\s*javascript:.*;')
+
+body T_HTML_JS_LONG_040	eval:html_text_match('uri', '^(?is)javascript:.{40}')
+body T_HTML_JS_LONG_080	eval:html_text_match('uri', '^(?is)javascript:.{80}')
+body T_HTML_JS_LONG_120	eval:html_text_match('uri', '^(?is)javascript:.{120}')
+body T_HTML_JS_LONG_160	eval:html_text_match('uri', '^(?is)javascript:.{160}')
+body T_HTML_JS_LONG_200	eval:html_text_match('uri', '^(?is)javascript:.{200}')
+
+body T_HTML_JS_EXPR_1	eval:html_text_match('uri', '^(?is)javascript:.*;')
+body T_HTML_JS_EXPR_2	eval:html_text_match('uri', '^(?is)javascript:.*;.*;')
+body T_HTML_JS_EXPR_3	eval:html_text_match('uri', '^(?is)javascript:.*;.*;.*;')
+body T_HTML_JS_EXPR_4	eval:html_text_match('uri', '^(?is)javascript:.*;.*;.*;.*;')
+body T_HTML_JS_EXPR_5	eval:html_text_match('uri', '^(?is)javascript:.*;.*;.*;.*;.*;')
+
+body T_HTML_SCRIPT_0		eval:html_text_match('script', '.')
+body T_HTML_SCRIPT_1		eval:html_text_match('script', ';')
+
+body T_HTML_SCRIPT_LONG_040	eval:html_text_match('script', '.{40}')
+body T_HTML_SCRIPT_LONG_080	eval:html_text_match('script', '.{80}')
+body T_HTML_SCRIPT_LONG_120	eval:html_text_match('script', '.{120}')
+body T_HTML_SCRIPT_LONG_160	eval:html_text_match('script', '.{160}')
+body T_HTML_SCRIPT_LONG_200	eval:html_text_match('script', '.{200}')
+
+body T_HTML_SCRIPT_EXPR_1	eval:html_text_match('script', ';')
+body T_HTML_SCRIPT_EXPR_2	eval:html_text_match('script', ';.*;')
+body T_HTML_SCRIPT_EXPR_3	eval:html_text_match('script', ';.*;.*;')
+body T_HTML_SCRIPT_EXPR_4	eval:html_text_match('script', ';.*;.*;.*;')
+body T_HTML_SCRIPT_EXPR_5	eval:html_text_match('script', ';.*;.*;.*;.*;')
