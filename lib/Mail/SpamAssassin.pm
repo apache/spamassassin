@@ -1627,7 +1627,7 @@ sub _is_storable_available {
   }
   else {
     $self->{storable_available} = 1;
-    dbg("Storable module found");
+    dbg("Storable module v".$Storable::VERSION." found");
   }
 
   return $self->{storable_available};
