@@ -137,7 +137,7 @@ sub read_argv {
 	    $freq{$2} = $1;
 	}
 	# "mass-check" format
-	elsif (/^[Y.]\s+-?\d+\s+\S+\s+(.*)/) {
+	elsif (/^[Y.]\s+-?\d+\s+\S+\s+(\S+)/) {
 	    $type = 2;
 	    foreach (split(/,/, $1)) {
 		$freq{$_}++;
