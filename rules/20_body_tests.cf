@@ -132,7 +132,15 @@ body MONEY_MAKING		/money making/i
 describe MONEY_MAKING		Discusses money making
 body BULK_EMAIL			/bulk e-*mail/i
 describe BULK_EMAIL		Talks about bulk email
-body DEAR_FRIEND		/Dear Friend/
+body DEAR_EMAIL			/Dear [A-Za-z0-9_-]+\@/
+describe DEAR_EMAIL		Dear you@you.com?
+test DEAR_EMAIL ok Dear duncf@rogers.com,
+test DEAR_EMAIL fail Dear Duncan!
+body DEAR_FRIEND		/Dear (?:Friend|IT\W|Internet)/i
+test DEAR_FRIEND ok Dear IT professional,
+test DEAR_FRIEND ok Dear Internet Investor:
+test DEAR_FRIEND ok Dear friend,
+test DEAR_FRIEND fail Dear Mr. Ithacus,
 describe DEAR_FRIEND		How dear can you be if you don't know my name?
 body CASHCASHCASH		/\${3,}/
 describe CASHCASHCASH		Contains at least 3 dollar signs in a row
