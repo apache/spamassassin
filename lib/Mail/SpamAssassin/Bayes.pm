@@ -1019,6 +1019,10 @@ sub compute_prob_for_token {
   if (!defined($s) || !defined($n) || !defined($atime)) {
     ($s, $n, $atime) = $self->{store}->tok_get ($token);
   }
+
+  # store for use by header tags which list Bayes info
+  $self->{tok_raw_data}->{$token} = { s=>$s, n=>$n, atime=>$atime };
+
   return if ($s == 0 && $n == 0);
 
   if (!USE_ROBINSON_FX_EQUATION_FOR_LOW_FREQS) {
@@ -1147,6 +1151,10 @@ sub scan {
   my $pw;
   my @tokens = $self->tokenize ($msg, $msgdata);
 
+  # keep a temporary cache for tok_get() values, in case it's used
+  # for tokens; this is populated in compute_prob_for_token()
+  $self->{tok_raw_data} = { };
+
   # Figure out our probabilities for the message tokens
   my %pw = map {
       $pw = $self->compute_prob_for_token ($_, $ns, $nn);
@@ -1172,7 +1180,8 @@ sub scan {
   # messed up and we should revert to current time as a safety measure.
   #
   my $msgatime = $self->receive_date(scalar $msg->get_all_headers(0,1));
-  $msgatime = time if ( $msgatime > time );
+  my $now = time;
+  $msgatime = $now if ( $msgatime > $now );
 
   # now take the $count most significant tokens and calculate probs using
   # Robinson's formula.
@@ -1195,7 +1204,10 @@ sub scan {
     # SPAMMYTOKENS tags that aren't there or collecting data that
     # won't be used?  Just collecting the data is certainly simpler.
     #
-    my ($s, $n, $a) = $self->{store}->tok_get ($_);
+    my $tokgot = $self->{tok_raw_data}->{$_} || { };
+    my $s = $tokgot->{s};
+    my $n = $tokgot->{n};
+    my $a = $tokgot->{atime};
     push @$tinfo_spammy, [$_,$pw,$s,$n,$a] if $pw >= 0.5 && ++$tcount_spammy;
     push @$tinfo_hammy,  [$_,$pw,$s,$n,$a] if $pw <  0.5 && ++$tcount_hammy;
 
@@ -1206,6 +1218,8 @@ sub scan {
 
     dbg ("bayes token '$_' => $pw");
   }
+
+  delete $self->{tok_raw_data};         # don't need this anymore
 
   if (!@sorted || (REQUIRE_SIGNIFICANT_TOKENS_TO_SCORE > 0 && 
 	$#sorted <= REQUIRE_SIGNIFICANT_TOKENS_TO_SCORE))
