@@ -910,3 +910,6 @@ tflags T_USER_AGENT_XIMIAN   nice
 header T_USER_AGENT_PMMAIL   X-Mailer =~ m!^PMMail \d\.\d+(?:\w|\.\d+)? [Ff]or OS/2(?: Warp \d\.\d+)?$!
 score  T_USER_AGENT_PMMAIL   -0.5
 tflags T_USER_AGENT_PMMAIL   nice
+
+# Bug 1133
+header T_BAD_HELO2           eval:check_for_bad_helo2()
