@@ -48,10 +48,10 @@ body __NIGERIAN_BODY_2	/\btransaction\b.{1,30}\b(?:magnitude|diplomatic|strict|a
 body __NIGERIAN_BODY_3	/BASED ON INFORMATION GATHERED ABOUT YOU, WE BELIEVE\s*YOU WOULD BE IN A POSITION TO HELP US IN TRANSFER/i
 body __NIGERIAN_BODY_4	/\bBarrister\b/i
 body __NIGERIAN_BODY_6	/\bIt is with trust and confidentiality\b/i
-body __NIGERIAN_BODY_7	/\bUSD?\s*(?:\$\s*)?(?:\d+,\d+,\d+|\d+\.\d+\s*milli?on)/i
+body __NIGERIAN_BODY_7	/\bU\.?S\.?(?:D\.?)?\s*(?:\$\s*)?(?:\d+,\d+,\d+|\d+\.\d+\s*milli?on)/i
 body __NIGERIAN_BODY_8	/\b(?:You may be surprised to receive this letter from me|this letter (?:may come to you as|will be) a surprise)\b/i
 body __NIGERIAN_BODY_9	/\bthe .{1,10} son of\b/i
-body __NIGERIAN_BODY_10	/\burgent and(?: very)? confidential business proposition\b/i
+body __NIGERIAN_BODY_10	/\burgent and(?: very)? (?:profitable|confidential) business (?:proposal|proposition)\b/i
 body __NIGERIAN_BODY_11	/\bassistance to relocate\b/i
 body __NIGERIAN_BODY_12 /\bto which will be transferred the sum\b/i
 body __NIGERIAN_BODY_13	/\byour(?: private)? (?:tele)?phone (?:and|&) fax Numbers?\b/i
@@ -61,7 +61,7 @@ body __NIGERIAN_BODY_16	/\bI am a Private Investigator\b/i
 body __NIGERIAN_BODY_17	/\bWRITING THIS LETTER TO SOLICIT\b/i
 body __NIGERIAN_BODY_18	/\bSEVERAL ATTEMPTS HAVE BEEN MADE WITH OUT SUCCESS\b/i
 body __NIGERIAN_BODY_19	/\bMY PROPOSAL IS ACCEPTABLE\b/i
-body __NIGERIAN_BODY_20	/\d+% (?:of the total (?:amount|sum)|for you|for my investment|for (?:us|me))\b/i
+body __NIGERIAN_BODY_20	/\d+%\)? (?:of the total (?:amount|sum)|for you|for my investment|for (?:us|me))\b/i
 body __NIGERIAN_BODY_21 /\bforeign account\b/i
 body __NIGERIAN_BODY_22 /\btrust (?:and|&) confidentiality\b/i
 body __NIGERIAN_BODY_25	/\bvery beneficial to both of us\b/i
@@ -73,6 +73,8 @@ body __NIGERIAN_BODY_30	/\bfavou?rable response\b/i
 body __NIGERIAN_BODY_31	/\btotal acceptance and commitment\b/i
 body __NIGERIAN_BODY_32 /\blocate(?: .{1,20})? extended relative/i
 body __NIGERIAN_BODY_33 /\bhonest cooperation\b/i
+body __NIGERIAN_BODY_34 /\b(?:wife|son) of the late\b/i
+body __NIGERIAN_BODY_35 /\bintuitive confidence/i
 
 
 meta NIGERIAN_SUBJECT	(__NIGERIAN_SUBJECT.+ +) > 0
