@@ -10,7 +10,7 @@ find . -name '.#*' -print | xargs rm -f
 make clean ; perl Makefile.PL ; make
 
 make text_html_doc
-( cd doc; tar cf - . ) | ( cd $WEBDIR/devel ; tar xf - )
+( cd doc; tar cf - . ) | ( cd $WEBDIR/doc ; tar xf - )
 
 make distcheck
 
