@@ -84,10 +84,6 @@ sub cmdline_run {
     close (F);
   }
 
-  my $who = `id -un 2>/dev/null`; chop $who;
-  my $where = `uname -n 2>/dev/null`; chop $where;
-  my $when = `date`; chop $when;
-
   $iter->set_function (\&wanted);
   $iter->run (@targets);
   print STDERR "\n" if ($opt{showdots});
