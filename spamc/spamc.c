@@ -176,7 +176,7 @@ read_args(int argc, char **argv,
 #endif
     int opt;
     int ret = EX_OK;
-
+    
     while ((opt = getopt(argc, argv, opts)) != -1)
     {
         switch (opt)
@@ -202,7 +202,14 @@ read_args(int argc, char **argv,
             {
                 int i, j;
                 
-                if ((exec_argv = malloc(sizeof(*exec_argv) * (argc - optind + 2))) == NULL)
+                /* FIXME: The sizeof on a yet uninitialized value looks 
+                 *        strange -- or is this supposed to be sizeof(char)?
+                 *        sizeof(char) is always 1 though so all this does is
+                 *        causing confusion (if I see this correct)
+                 *  -- mss 2004-05-27
+                 */
+                exec_argv = malloc(sizeof(*exec_argv) * (argc - optind + 2));
+                if (exec_argv == NULL)
                     return EX_OSERR;
                 
                 for (i = 0, j = optind - 1; j < argc; i++, j++)
@@ -291,7 +298,7 @@ read_args(int argc, char **argv,
             case '?':
             case ':':
             {
-                libspamc_log (flags, LOG_ERR, "invalid usage");
+                libspamc_log(flags, LOG_ERR, "invalid usage");
                 ret = EX_USAGE;
                 /* FALLTHROUGH */
             }
@@ -300,77 +307,91 @@ read_args(int argc, char **argv,
                 print_usage();
                 exit(ret);
             }
-	    case 'V':
-	    {
-	        print_version();
-		exit(ret);
-	    }
+            case 'V':
+            {
+                print_version();
+                exit(ret);
+            }
         }
     }
+    
     return ret;
 }
 
-void get_output_fd(int *fd)
+void
+get_output_fd(int *fd)
 {
 #ifndef _WIN32
-    int fds[2];
+    int pipe_fds[2];
     pid_t pid;
 #endif
 
     if (*fd != -1)
 	return;
+    
+    /* If we aren't told to feed our output to an external app, we simply
+     * write to stdout.
+     */
     if (exec_argv == NULL) {
 	*fd = STDOUT_FILENO;
 	return;
     }
+#ifdef _WIN32
+    libspamc_log(flags, LOG_CRIT, "THIS MUST NOT HAPPEN AS -e IS NOT SUPPORTED UNDER WINDOWS.");
+    exit(EX_OSERR);
+#endif
     
-#ifndef _WIN32
-    if (pipe(fds)) {
-        libspamc_log(flags, LOG_ERR, "pipe creation failed: %m");
+    /* Create a pipe for communication between child and parent. */
+    if (pipe(pipe_fds)) {
+	libspamc_log(flags, LOG_ERR, "pipe creation failed: %m");
 	exit(EX_OSERR);
     }
+    
     pid = fork();
     if (pid < 0) {
 	libspamc_log(flags, LOG_ERR, "fork failed: %m");
 	exit(EX_OSERR);
     }
     else if (pid == 0) {
-	/* child process */
-	/* Normally you'd expect the parent process here, however that would
+	/* This is the child process:
+	 * Normally you'd expect the parent process here, however that would
 	 * screw up an invoker waiting on the death of the parent. So instead,
 	 * we fork a child to feed the data and have the parent exec the new
-	 * prog */
-	close(fds[0]);
-	*fd = fds[1];
+	 * program.
+	 */
+	close(pipe_fds[0]);
+	*fd = pipe_fds[1];
 	return;
     }
     
-    /* parent process (see above) */
-    close(fds[1]);
-    if (dup2(fds[0], STDIN_FILENO)) {
+    /* This is the parent process (see above) */
+    close(pipe_fds[1]);
+    if (dup2(pipe_fds[0], STDIN_FILENO)) {
 	libspamc_log(flags, LOG_ERR, "redirection of stdin failed: %m");
 	exit(EX_OSERR);
     }
+    /* No point in leaving extra fds lying around. */
+    close(pipe_fds[0]);
     
-    close(fds[0]);		/* no point in leaving extra fds lying around */
+    /* Now execute the command specified. */
     execv(exec_argv[0], exec_argv);
+    
+    /* Whoa, something failed... */
     libspamc_log(flags, LOG_ERR, "exec failed: %m");
-#else
-    fprintf(stderr, "exec failed: %d\n", errno);
-#endif
-
     exit(EX_OSERR);
 }
 
-int main(int argc, char **argv)
+
+int
+main(int argc, char *argv[])
 {
-    int max_size = 250 * 1024;
-    const char *username = NULL;
-    int ret;
+    int max_size;
+    const char *username;
+    struct transport trans;
     struct message m;
     int out_fd = -1;
-    struct transport trans;
     int result;
+    int ret;
 
     transport_init(&trans);
 
@@ -384,24 +405,26 @@ int main(int argc, char **argv)
     signal(SIGPIPE, SIG_IGN);
 #endif
 
+   /* Now parse the command line arguments. First, set the defaults. */
+   max_size = 250 * 1024;
+   username = NULL;
    if ((ret = read_args(argc, argv, &max_size, &username, &trans)) != EX_OK)
        return ret;
 
-  /*--------------------------------------------------------------------
-   * DETERMINE USER
-   *
-   * If the program's caller didn't identify the user to run as, use the
-   * current user for this. Note that we're not talking about UNIX perm-
-   * issions, but giving SpamAssassin a username so it can do per-user
-   * configuration (whitelists & the like).
-   *
-   * Since "curr_user" points to static library data, we don't wish to risk
-   * some other part of the system overwriting it, so we copy the username
-   * to our own buffer - then this won't arise as a problem.
-   */
-
 #ifndef _WIN32
-    if (NULL == username) {
+    /**********************************************************************
+     * DETERMINE USER
+     *
+     * If the program's caller didn't identify the user to run as, use the
+     * current user for this. Note that we're not talking about UNIX perm-
+     * issions, but giving SpamAssassin a username so it can do per-user
+     * configuration (whitelists & the like).
+     *
+     * Since "curr_user" points to static library data, we don't wish to
+     * risk some other part of the system overwriting it, so we copy the 
+     * username to our own buffer -- then this won't arise as a problem.
+     */
+    if (username == NULL) {
 	static char userbuf[256];
 	struct passwd *curr_user;
 
@@ -412,9 +435,7 @@ int main(int argc, char **argv)
 		printf("0/0\n");
 		return EX_NOTSPAM;
 	    }
-	    else {
-		return EX_OSERR;
-	    }
+	    return EX_OSERR;
 	}
         
 	memset(userbuf, 0, sizeof userbuf);
@@ -431,13 +452,13 @@ int main(int argc, char **argv)
 	srand(getpid() ^ time(NULL));
     }
 
-  /*--------------------------------------------------------------------
-   * SET UP TRANSPORT
-   *
-   * This takes the user parameters and digs up what it can about how
-   * we connect to the spam daemon. Mainly this involves lookup up the
-   * hostname and getting the IP addresses to connect to.
-   */
+    /**********************************************************************
+     * SET UP TRANSPORT
+     *
+     * This takes the user parameters and digs up what it can about how
+     * we connect to the spam daemon. Mainly this involves lookup up the
+     * hostname and getting the IP addresses to connect to.
+     */
     m.type = MESSAGE_NONE;
     m.out = NULL;
     m.raw = NULL;
@@ -449,7 +470,8 @@ int main(int argc, char **argv)
     setmode(STDIN_FILENO, O_BINARY);
     setmode(STDOUT_FILENO, O_BINARY);
 #endif
-    if ((ret = transport_setup(&trans, flags)) == EX_OK) {
+    ret = transport_setup(&trans, flags);
+    if (ret == EX_OK) {
 	ret = message_read(STDIN_FILENO, flags, &m);
 	if (ret == EX_OK) {
 	    ret = message_filter(&trans, username, flags, &m);
@@ -469,10 +491,7 @@ int main(int argc, char **argv)
                             ret = result;
                         }
 		    }
-#ifdef _WIN32
-		    WSACleanup();
-#endif
-		    return ret;
+		    goto finish;
 		}
 	    }
 	}
@@ -506,6 +525,8 @@ int main(int argc, char **argv)
 	    ret = EX_OK;
 	}
     }
+    
+finish:
 #ifdef _WIN32
     WSACleanup();
 #endif
