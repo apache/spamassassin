@@ -71,7 +71,7 @@ if [ -n "$prefs" -a -f "$prefs" ]; then
 else
 	rm -f spamassassin/user_prefs
 fi
-./mass-check $opts -f $corpus
+./mass-check $opts
 uptime
 date > test.end
 

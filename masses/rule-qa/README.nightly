@@ -37,12 +37,12 @@ Recommended stuff:
    password=xyzzy
 
    # weekly and nightly mass-check options
-   opts_weekly=--restart=500 --tail=15000 --net -j 8
-   opts_nightly=--restart=500 --tail=15000 --net -j 8
+   opts_weekly="--restart=500 --tail=15000 --net -j 8 -f /home/corpus/mail/corpus"
+   opts_nightly="--restart=500 --tail=15000 -f /home/corpus/mail/corpus"
 
    # weekly and nightly mass-check user_prefs files
-   prefs_weekly=/home/corpus/corpus/user_prefs.weekly
-   prefs_nightly=/home/corpus/corpus/user_prefs.nightly
+   prefs_weekly=/home/corpus/mail/user_prefs.weekly
+   prefs_nightly=/home/corpus/mail/user_prefs.nightly
 
  - the following cron job (hours for tagtime and corpus-nightly for your
    local time, this is US/Pacific)
