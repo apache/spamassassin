@@ -443,8 +443,11 @@ describe WEB_BUGS		Image tag with an ID code to identify you
 
 # many spammers seem to do this nowadays (and probably track
 # their customers with it).  (contrib: WW)
-rawbody RELAYING_FRAME		/<frame\b[^>]+\bsrc=[3D=\s"']*http:\/\//is
+rawbody RELAYING_FRAME		/<i?frame\s/i
 describe RELAYING_FRAME		Frame wanted to load outside URL
+
+rawbody HTML_EMBEDS		/<(?:object|embed\s/i
+describe HTML_EMBEDS		HTML with embedded plugin object
 
 # Cyber FirePower! rants about 'Internet terrorists' aka spam fighters
 # (contrib: WW)
