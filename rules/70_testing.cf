@@ -339,3 +339,36 @@ body	T_EMPTY_URI_SRC_SCRIPT	eval:html_text_match('blank_uri', '^script$')
 
 # can only be from "form"
 body	T_EMPTY_URI_ACTION	eval:html_text_match('blank_uri', '^form$')
+
+# bug 3499
+body T_MPART_ALT_DIFF1_1    eval:multipart_alternative_difference_count('1','1')
+body T_MPART_ALT_DIFF2_1    eval:multipart_alternative_difference_count('2','1')
+body T_MPART_ALT_DIFF3_1    eval:multipart_alternative_difference_count('3','1')
+body T_MPART_ALT_DIFF4_1    eval:multipart_alternative_difference_count('4','1')
+body T_MPART_ALT_DIFF5_1    eval:multipart_alternative_difference_count('5','1')
+body T_MPART_ALT_DIFF8_1    eval:multipart_alternative_difference_count('8','1')
+body T_MPART_ALT_DIFF10_1   eval:multipart_alternative_difference_count('10','1')
+
+body T_MPART_ALT_DIFF1_5    eval:multipart_alternative_difference_count('1','5')
+body T_MPART_ALT_DIFF2_5    eval:multipart_alternative_difference_count('2','5')
+body T_MPART_ALT_DIFF3_5    eval:multipart_alternative_difference_count('3','5')
+body T_MPART_ALT_DIFF4_5    eval:multipart_alternative_difference_count('4','5')
+body T_MPART_ALT_DIFF5_5    eval:multipart_alternative_difference_count('5','5')
+body T_MPART_ALT_DIFF8_5    eval:multipart_alternative_difference_count('8','5')
+body T_MPART_ALT_DIFF10_5   eval:multipart_alternative_difference_count('10','5')
+
+body T_MPART_ALT_DIFF1_10   eval:multipart_alternative_difference_count('1','10')
+body T_MPART_ALT_DIFF2_10   eval:multipart_alternative_difference_count('2','10')
+body T_MPART_ALT_DIFF3_10   eval:multipart_alternative_difference_count('3','10')
+body T_MPART_ALT_DIFF4_10   eval:multipart_alternative_difference_count('4','10')
+body T_MPART_ALT_DIFF5_10   eval:multipart_alternative_difference_count('5','10')
+body T_MPART_ALT_DIFF8_10   eval:multipart_alternative_difference_count('8','10')
+body T_MPART_ALT_DIFF10_10  eval:multipart_alternative_difference_count('10','10')
+
+body T_MPART_ALT_DIFF1_20   eval:multipart_alternative_difference_count('1','20')
+body T_MPART_ALT_DIFF2_20   eval:multipart_alternative_difference_count('2','20')
+body T_MPART_ALT_DIFF3_20   eval:multipart_alternative_difference_count('3','20')
+body T_MPART_ALT_DIFF4_20   eval:multipart_alternative_difference_count('4','20')
+body T_MPART_ALT_DIFF5_20   eval:multipart_alternative_difference_count('5','20')
+body T_MPART_ALT_DIFF8_20   eval:multipart_alternative_difference_count('8','20')
+body T_MPART_ALT_DIFF10_20  eval:multipart_alternative_difference_count('10','20')
