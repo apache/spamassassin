@@ -472,34 +472,6 @@ header T_HEADER_72	ALL =~ /\nX-yd:/
 rawbody T_HTML_FONT_SIZE_0PX	/<font\b[^>]+0px/i
 rawbody T_HTML_FONT_COLOR_WHITE	/<font\b[^>]+white/i
 
-# bug 3916
-header __RCVD_IN_WHOIS		eval:check_rbl('whois', 'combined-HIB.dnsiplists.completewhois.com.')
-tflags __RCVD_IN_WHOIS		net
-
-header T_RCVD_IN_WHOIS_BOGONS	eval:check_rbl_sub('whois', '127.0.0.2')
-describe T_RCVD_IN_WHOIS_BOGONS	CompleteWhois: sender on bogons IP block
-tflags T_RCVD_IN_WHOIS_BOGONS	net
-
-header T_RCVD_IN_WHOIS_HIJACKED	eval:check_rbl_sub('whois', '127.0.0.3')
-describe T_RCVD_IN_WHOIS_HIJACKED	CompleteWhois: sender on hijacked IP block
-tflags T_RCVD_IN_WHOIS_HIJACKED	net
-
-header T_RCVD_IN_WHOIS_INVALID	eval:check_rbl_sub('whois', '127.0.0.4')
-describe T_RCVD_IN_WHOIS_INVALID	CompleteWhois: sender on invalid whois IP block
-tflags T_RCVD_IN_WHOIS_INVALID	net
-
-header T_RCVD_IN_WHOIS_BOGONS_NFH	eval:check_rbl('whois-notfirsthop', 'combined-HIB.dnsiplists.completewhois.com.', '127.0.0.2')
-describe T_RCVD_IN_WHOIS_BOGONS_NFH	CompleteWhois: sender on bogons IP block
-tflags T_RCVD_IN_WHOIS_BOGONS_NFH	net
-
-header T_RCVD_IN_WHOIS_HIJACKED_NFH	eval:check_rbl('whois-notfirsthop', 'combined-HIB.dnsiplists.completewhois.com.', '127.0.0.3')
-describe T_RCVD_IN_WHOIS_HIJACKED_NFH	CompleteWhois: sender on hijacked IP block
-tflags T_RCVD_IN_WHOIS_HIJACKED_NFH	net
-
-header T_RCVD_IN_WHOIS_INVALID_NFH	eval:check_rbl('whois-notfirsthop', 'combined-HIB.dnsiplists.completewhois.com.', '127.0.0.4')
-describe T_RCVD_IN_WHOIS_INVALID_NFH	CompleteWhois: sender on invalid whois IP block
-tflags T_RCVD_IN_WHOIS_INVALID_NFH	net
-
 ########################################################################
 
 # case matters for this one
