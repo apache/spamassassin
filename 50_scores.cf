@@ -187,6 +187,7 @@ score MAY_BE_FORGED                  1.558
 score MDAEMON_2_7_4                  2.558
 score MICRO_CAP_WARNING              3.663
 score MIME_EXCESSIVE_QP              2.430
+score MIME_LONG_LINE_QP              1.0
 score MIME_MISSING_BOUNDARY          3.887
 score MIME_NULL_BLOCK                -0.975
 score MIME_ODD_CASE                  4.339
@@ -419,6 +420,11 @@ score ROUND_THE_WORLD		     3.0
 # across each corpus for this score to be GA evolved
 
 score UNDESIRED_LANGUAGE_BODY        2.0
+
+# highly generic tests for viruses that are scored just high enough to run
+
+score MICROSOFT_EXECUTABLE           0.1
+score MIME_SUSPECT_NAME              0.1
 
 # unscored by default -- commercial services.  If you pay for these,
 # give them a score so they will be checked.
