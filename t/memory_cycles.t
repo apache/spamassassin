@@ -63,16 +63,15 @@ exit;
 # Test::Memory::Cycle would be a nice way to do this -- but it relies
 # on Test::More.  so just do it ourselves.
 
-use Devel::Cycle;
 our $cycles;
 
 sub check_for_cycles {
   my $obj = shift;
   $cycles = 0;
-  find_cycle ($obj, \&cyclecb);
+  Devel::Cycle::find_cycle ($obj, \&cyclecb);
   if ($cycles) {
     print "found $cycles cycles! dump to follow:\n";
-    find_cycle ($obj);  # with default output-to-stdout callback
+    Devel::Cycle::find_cycle ($obj);  # with default output-to-stdout callback
     return 0;
   } else {
     return 1;
