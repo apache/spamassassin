@@ -536,22 +536,22 @@ describe CHARSET_FARAWAY_BODY	Character set indicates foreign language body
 body NIGERIAN_SCAM		/BASED ON INFORMATION GATHERED ABOUT YOU, WE BELIEVE\s*YOU WOULD BE IN A POSITION TO HELP US IN TRANSFER/i
 describe NIGERIAN_SCAM		Nigerian scam, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
 
-body NIGERIAN_SCAM_2 /\b(?:Government|Federal Republic)\b of Nigeria|Nigerian? \b(?:NATIONAL|Government|embassy|chamber of commerce)\b/i
+body NIGERIAN_SCAM_2 /\b(?:Government|Federal Republic)\b.{1,10}(?:Nigerian?|Sierra[- ]?Leone)\b.{1,10}(?:NATIONAL|Government|embassy|chamber of commerce)\b/i
 describe NIGERIAN_SCAM_2	Mutated Nigerian scams, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
 
 body NIGERIAN_SCAM_3            /(?:Bank of Nigeria|Nigerian? National Petroleum)/i
 describe NIGERIAN_SCAM_3        Nigerian Bank or Petroleum scam, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
 
-body NIGERIAN_SCAM_4 /\b(wife|widow|son|husband)\b.{0,60}\b(?:Abacha|Kabila|Sekou?|Stojiljkovic)\b/i
+body NIGERIAN_SCAM_4 /\b(wife|widow|son|husband)\b.{0,60}\b(?:Abacha|Kabila|Sekou?|Stojiljkovic|Bangura)\b/i
 describe NIGERIAN_SCAM_4        Nigerian widow needs your help, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
 
-body NIGERIAN_SCAM_5 /\b(?:Abacha|Kabila|Sekou?|Stojiljkovic)\b.{0,60}\b(wife|widow|son|husband)\b/i
+body NIGERIAN_SCAM_5 /\b(?:Abacha|Kabila|Sekou?|Stojiljkovic|Bangura)\b.{0,60}\b(wife|widow|son|husband)\b/i
 describe NIGERIAN_SCAM_5        Nigerian widow needs your help, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
 
-body NIGERIAN_SCAM_6 /\b(?:late|former|new|Nigerian|military)\b.{0,20}\bhead of state/i
+body NIGERIAN_SCAM_6 /\b(?:late|former|past|new|Nigerian|military)\b.{0,20}\bhead of state/i
 describe NIGERIAN_SCAM_6        Mutated Nigerian scams (6)
 
-body NIGERIAN_SCAM_7 /\b(?:late|former)\b.{0,40}\b(?:Abacha|Kabila|Sekou?|Stojiljkovic)\b|\b(?:Abacha|Kabila|Sekou?|Stojiljkovic)\b.{0,40}\b(?:late|former)\b/i
+body NIGERIAN_SCAM_7 /\b(?:late|former|past)\b.{0,40}\b(?:Abacha|Kabila|Sekou?|Stojiljkovic|Bangura)\b|\b(?:Abacha|Kabila|Sekou?|Stojiljkovic|Bangura)\b.{0,40}\b(?:late|former|past)\b/i
 describe NIGERIAN_SCAM_7        Mutated Nigerian scams (7)
 
 body NIGERIAN_SCAM_8 /\b(?:Tribunal|War Crimes|Hague)\b.{0,60}\b(?:Vlajko|Stojiljkovic)\b|\b(?:Vlajko|Stojiljkovic)\b.{0,60}\b(?:Tribunal|War Crimes|Hague)\b/i 
