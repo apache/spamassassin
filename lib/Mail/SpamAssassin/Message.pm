@@ -40,6 +40,11 @@ sub create_new {
   die "unimplemented base method";
 }
 
+sub get_pristine_header {
+  my ($self, $hdr) = @_;
+  die "unimplemented base method";
+}
+
 sub get_header {
   my ($self, $hdr) = @_;
   die "unimplemented base method";

@@ -29,6 +29,10 @@ sub delete_header {
   $self->{mail_object}->delete_header ($hdr);
 }
 
+sub get_pristine_header {
+  return $self->get_header(@_);
+}
+
 sub get_header {
   my ($self, $hdr) = @_;
 
