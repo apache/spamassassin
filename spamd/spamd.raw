@@ -817,6 +817,10 @@ sub spawn {
     sigprocmask( POSIX::SIG_UNBLOCK(), $sigset )
       or die "Can't unblock SIGINT for fork: $!\n";
 
+    # set process name where supported
+    # this will help make it clear via process listing which is child/parent
+    $0 = 'spamd child';
+
     # handle $clients_per_child connections, then die in "old" age...
     for ( my $i = 0 ; $i < $clients_per_child ; $i++ ) {
 
