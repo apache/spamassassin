@@ -79,18 +79,12 @@ describe MSGID_CHARS_WEIRD	Message-Id has characters often found in spam
 header INVALID_MSGID		Message-Id !~ /^<(?:\".+\"|[^\s]+)\@(?:\[.+\]|[^\s]+)>$/ [if-unset: <NO@MSGID>]
 describe INVALID_MSGID		Message-Id is not valid, according to RFC-2822
 
-header INVALID_DATE		Date =~ / AM| PM/i
-describe INVALID_DATE		Invalid Date: header (has AM/PM)
-
-header INVALID_DATE_NO_TZ	Date =~ /^..., \d+ ... .... ..:..:..$/
-describe INVALID_DATE_NO_TZ	Invalid Date: header (no timezone)
+header INVALID_DATE		Date !~ /^((Sun|Mon|Tue|Wed|Thu|Fri|Sat), )?([\d ]?\d) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d\d|\d\d\d\d) \d\d:\d\d(:\d\d)? (UT|[A-Z]{3,5}|[+-]\d\d\d\d)(\s+\(.*\))?\s*$/
+describe INVALID_DATE		Invalid Date: header (not RFC 822)
 
 # allow +1300, NZ timezone
 header INVALID_DATE_TZ_ABSURD	Date =~ /[-+](?:1[4-9]\d\d|[2-9]\d\d\d)$/
 describe INVALID_DATE_TZ_ABSURD	Invalid Date: header (timezone does not exist)
-
-header INVALID_DATE_ODD_MONTH	Date =~ /\d+ [^A-Z]{3,} \d\d\d\d/i
-describe INVALID_DATE_ODD_MONTH Invalid Date: header (wierd month)
 
 header DATE_IN_FUTURE		eval:check_for_forward_date()
 describe DATE_IN_FUTURE		Date: Differs by more than 4 days from received date
