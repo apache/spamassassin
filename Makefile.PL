@@ -19,6 +19,12 @@ WriteMakefile(
 
     'EXE_FILES'	=> [ 'spamassassin', 'spamd/spamc', 'spamd/spamd' ],
 
+    'MAN1PODS' => {
+	    'spamassassin' => '$(INST_MAN1DIR)/spamassassin.$(MAN1EXT)',
+	    'spamd/spamc.pod' => '$(INST_MAN1DIR)/spamc.$(MAN1EXT)',
+	    'spamd/spamd' => '$(INST_MAN1DIR)/spamd.$(MAN1EXT)',
+    },
+
     'PL_FILES' => '',
 
     'PMLIBDIRS' => [ 'lib' ],
