@@ -495,7 +495,7 @@ sub _parse_normal {
   if ($part_msg->{'type'} =~ /^message\b/i) {
     $part_msg->add_body_part(
     	Mail::SpamAssassin::Message->new({message=>$body, parsenow=>1})
-    };
+    );
 
     return;
   }
