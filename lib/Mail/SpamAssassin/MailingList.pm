@@ -1,4 +1,4 @@
-# $Id: MailingList.pm,v 1.2 2002/07/27 23:31:03 quinlan Exp $
+# $Id: MailingList.pm,v 1.3 2002/08/06 11:36:39 jmason Exp $
 
 # Eval Tests to detect genuine mailing lists.
 
@@ -11,6 +11,12 @@ sub detect_mailing_list {
     my ($self) = @_;
     return 1 if $self->detect_ml_ezmlm();
     return 1 if $self->detect_ml_mailman();
+    return 1 if $self->detect_ml_sympa();
+    return 0;
+}
+
+sub detect_moderated_mailing_list {
+    my ($self) = @_;
     return 0;
 }
 

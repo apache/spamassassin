@@ -56,9 +56,17 @@ header PGP_SIGNATURE_2          Content-Type =~ /protocol=.?application\/pgp-sig
 describe PGP_SIGNATURE_2        Contains a PGP-signed message (signature attached)
 tflags PGP_SIGNATURE_2		nice
 
+# came from a known mailing list system -- but one which does *not* have built-in
+# (or working!) spam filtering.
 header   KNOWN_MAILING_LIST     eval:detect_mailing_list()
 describe KNOWN_MAILING_LIST     Email came from some known mailing list software
 tflags KNOWN_MAILING_LIST	nice
+
+# this gives even better points; lists from these systems are typically moderated,
+# or use their own spam filtering as well.
+header   KNOWN_MOD_MAILING_LIST eval:detect_moderated_mailing_list()
+describe KNOWN_MOD_MAILING_LIST Email came from some known moderated list software
+tflags KNOWN_MOD_MAILING_LIST	nice
 
 # from Theo Van Dinter, see http://www.hughes-family.org/bugzilla/show_bug.cgi?id=591
 body MSN_GROUPS                 eval:check_for_msn_groups_headers()
