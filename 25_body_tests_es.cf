@@ -10,7 +10,7 @@ describe REMOVE_ES_01         Claims you can be removed in Spanish
 body REMOVE_ES_02             /(Para ser (?:eliminado|removido)|Si quiere(?:s|) salir) de (?:nuestra|esta) lista(,?) (?:sera removido|responda el mail|solo tiene(?:s)? que marcar)/i
 describe REMOVE_ES_02           Claims you can be removed in Spanish
 
-body REMOVE_ES_03             /(?:Si )(Ud\.|usted)? desea(?:s)? ser (?:borrado|removido|eliminado) (?:por favor |de (?:cualquier listado futuro,|nuestra (lista de correo|base de datos)) )?(s.lo )?(?:responda|env.(?:ar|e|a) (?:un |)e(-)?mail|haga)/i
+body REMOVE_ES_03             /(?:Si )(Ud\.|usted)? desea(?:s)? ser (?:borrado|removido|eliminado) (?:por favor |de (?:la lista de email|cualquier listado futuro,|nuestra (lista de correo|base de datos)) )?(s.lo )?(?:por favor|responda|env.(?:ar|e|a) (?:un |)e(-)?mail|haga)/i
 describe REMOVE_ES_03           Claims you can be removed in Spanish
 
 body REMOVE_ES_04             /(?:si desea|para) no recibir mas (?:nuestras promociones|mensajes)/i
@@ -19,7 +19,7 @@ describe REMOVE_ES_04           Claims you can be removed in Spanish
 body REMOVE_ES_05		/un email.{1,10}y procedo a eliminarle de mi base de datos/i
 describe REMOVE_ES_05		If you send an email you will be OptOut
 
-body REMOVE_ES_06		/Si no desea ser incluido en futuros envíos/
+body REMOVE_ES_06		/Si no desea ser incluido en futuros env.os/i
 describe REMOVE_ES_06		Claims you can opt-out
 
 body EXCUSE_ES_01             /(?:este e-mail|esta carta) no (?:puede ser|se) considera(?:d(?:o|a)) (?:\(|)SPAM(?:\)|) (?:ya que|mientras)/i
@@ -34,7 +34,7 @@ describe EXCUSE_ES_03         Someone requested an spammer to spam you in Spanis
 body EXCUSE_ES_04             /Este es un correo no solicitado enviado a petici.n de/
 describe EXCUSE_ES_04         Someone requested an spammer to spam you in Spanish
 
-lang es body EXCUSE_ES_05             /Enviamos este mail por considerar la difusión del correo electrónico una alternativa económica/
+lang es body EXCUSE_ES_05             /Enviamos este mail por considerar la difusión (?:a través de|del) correo electrónico una alternativa económica/
 lang es describe EXCUSE_ES_05         El correo como alternativa comercial
 
 lang es body DEJAR_DE_FUMAR_ES		/(?:pastillas|dispositivo|terapia) para dejar de fumar/i
@@ -55,7 +55,7 @@ lang es body LEY_ORGANICA_ES		/(?:nos adherimos a|En cumplimiento de lo dispuest
 lang es describe LEY_ORGANICA_ES	Dice cumplir con la ley
 lang es score LEY_ORGANICA_ES		2.0
 
-lang es body NORMATIVA_SPAM_ES		/(?:Bajo el Decreto S\.1618 titulo III aprobado por el 105 congreso|105 congreso base de las normativas internacionales sobre SPAM)/i
+lang es body NORMATIVA_SPAM_ES		/(?:Bajo el Decreto S\.1618 titulo (?:III|3ro\.) aprobado por el 105 congreso|105 congreso base de las normativas internacionales sobre SPAM)/i
 lang es describe NORMATIVA_SPAM_ES	Clama cumplir con la normativa SPAM
 lang es score NORMATIVA_SPAM_ES	2.0
 
@@ -74,7 +74,7 @@ lang es describe EXCLAMACION_ES		IMPERATIVOS EN MAYUSCULAS.
 lang es body PRESENTAMOS_ES	/(?:te|le) (?:ofrecemos|presentamos|informamos que|informaremos)/i
 lang es describe PRESENTAMOS_ES	Presentación de un nuevo producto.
 
-lang es body CONTRA_REEMBOLSO_ES	/pago contra reembolso/i
+lang es body CONTRA_REEMBOLSO_ES	/(?:envios|pago) contra(?:\ |-)reembolso/i
 lang es describe CONTRA_REEMBOLSO_ES	Pago contra reembolso.
 
 lang es body CLICK_ES		/(?:haga|haz) click aqu. para/
