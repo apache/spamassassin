@@ -373,8 +373,9 @@ sub rendered {
 
       # some tests done after rendering
       my $r = $self->{html_results}; # temporary reference for brevity
-      my $space = 0;
+      $r->{html_message} = 1;
       $r->{html_length} = 0;
+      my $space = 0;
       for my $line (@lines) {
         $line = pack ('C0A*', $line);
         $space += ($line =~ tr/ \t\n\r\x0b\xa0/ \t\n\r\x0b\xa0/);
@@ -391,21 +392,6 @@ sub rendered {
       }
       if (exists $r->{tags} && exists $r->{obfuscation}) {
 	$r->{obfuscation_ratio} = $r->{obfuscation} / $r->{tags};
-      }
-      if (exists $r->{tags} && exists $r->{t_obfuscation1}) {
-	$r->{t_obfuscation1_ratio} = $r->{t_obfuscation1} / $r->{tags};
-      }
-      if (exists $r->{tags} && exists $r->{t_obfuscation2}) {
-	  $r->{t_obfuscation2_ratio} = $r->{t_obfuscation2} / $r->{tags};
-      }
-      if (exists $r->{tags} && exists $r->{t_obfuscation3}) {
-	  $r->{t_obfuscation3_ratio} = $r->{t_obfuscation3} / $r->{tags};
-      }
-      if (exists $r->{tags} && exists $r->{t_obfuscation4}) {
-	  $r->{t_obfuscation4_ratio} = $r->{t_obfuscation4} / $r->{tags};
-      }
-      if (exists $r->{tags} && exists $r->{t_obfuscation5}) {
-	  $r->{t_obfuscation5_ratio} = $r->{t_obfuscation5} / $r->{tags};
       }
       if (exists $r->{attr_bad} && exists $r->{attr_all}) {
 	$r->{attr_bad} = $r->{attr_bad} / $r->{attr_all};
