@@ -8,17 +8,21 @@
 # By default, it'll do a set0 run, but you can change that by adding
 # --net or --bayes to the commandline.
 #
-# --net by itself will automatically try running 6 mass-checks in parallel
+# --net by itself will automatically try running 4 mass-checks in parallel
 #
 
 CORPUS=/home/felicity/SA/corpus
 SA_VER=/home/felicity/SA/spamassassin-corpora
-export RSYNC_PASSWORD="your_rsync_password"
+SVN=/usr/local/bin/svn
+SVNVERS=/usr/local/bin/svnversion
 
 NET=0
 BAYES=0
-OPTS="--progress"
-FILENAME="your_rsync_username"
+OPTS="--progress --after=-2592000"
+RSYNC_USER=your_rsync_username
+RSYNC_PASSWORD="your_rsync_password"; export RSYNC_PASSWORD
+VERS=nightly
+FILENAME=$RSYNC_USER
 
 while [ ! -z "$1" ]; do
   if [ "$1" = "--net" ]; then
@@ -32,10 +36,11 @@ done
 if [ $NET -eq 1 ]; then
   FILENAME="net-$FILENAME"
   OPTS="$OPTS --net"
+  VERS=weekly
 
   # We want to do this with more parallelization, but not if Bayes is also running ...
   if [ $BAYES -eq 0 ]; then
-    OPTS="$OPTS -j 6"
+    OPTS="$OPTS -j 4 --restart 1000"
   fi
 fi
 if [ $BAYES -eq 1 ]; then
@@ -47,11 +52,29 @@ fi
 echo "[Updating $SA_VER]"
 cd $SA_VER
 COUNT=0
-while ! cvs -q up; do
+while ! wget -q -nd -m http://rsync.spamassassin.org/$VERS-versions.txt ; do
   sleep 60
   COUNT=`expr $COUNT + 1`
   if [ $COUNT -gt 5 ]; then
-    echo "Couldn't do a CVS update, aborting!" >&2
+    echo "Couldn't get the nightly revision version, aborting!" >&2
+    exit 2
+  fi
+done
+
+CREV=`$SVNVERS`
+NREV=`tail -1 nightly-versions.txt | awk '{print $2}'`
+
+if [ $CREV -ge $NREV ]; then
+  echo "Current rev ($CREV) newer or equal to nightly rev ($NREV)"
+  exit 0
+fi
+
+COUNT=0
+while ! $SVN update -r $NREV; do
+  sleep 60
+  COUNT=`expr $COUNT + 1`
+  if [ $COUNT -gt 5 ]; then
+    echo "Couldn't do a SVN update, aborting!" >&2
     exit 2
   fi
 done
@@ -74,13 +97,14 @@ if [ ! -s ham.log -o ! -s spam.log ]; then
 	exit 1
 fi
 
-mv -f ham.log ham-$FILENAME.log
-mv -f spam.log spam-$FILENAME.log
-mv -f results.log results-$FILENAME.log
+mv -f ham.log results/ham-$FILENAME.log
+mv -f spam.log results/spam-$FILENAME.log
+mv -f results.log results/hf/results-$FILENAME.log
 
+cd results
 # now we have our ham.log and spam.log files...
 echo "[Uploading daily corpus logs]"
-rsync -qCPcvuzb *-$FILENAME.log $FILENAME@rsync.spamassassin.org::corpus/
+rsync -qCPcvuzb *-$FILENAME $RSYNC_USER@rsync.spamassassin.org::corpus/
 
 echo "[Our results]"
-cat results-$FILENAME.log
+cat hf/results-$FILENAME.log

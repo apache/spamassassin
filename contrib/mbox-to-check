@@ -17,9 +17,10 @@ use vars qw/*name *dir *prune/;
 *dir    = *File::Find::dir;
 *prune  = *File::Find::prune;
 
+my @dirs = @ARGV || ( 'ham', 'spam' );
 
 # Traverse desired filesystems
-File::Find::find({wanted => \&wanted}, 'ham', 'spam');
+File::Find::find({wanted => \&wanted}, @dirs);
 exit;
 
 
