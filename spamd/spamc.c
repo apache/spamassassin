@@ -50,7 +50,11 @@ typedef unsigned long	in_addr_t;	/* base type for internet address */
 /* jm: turned off for now, it should not be necessary. */
 #undef USE_TCP_NODELAY
 
-int SAFE_FALLBACK=0;
+int SAFE_FALLBACK=-1;
+int CHECK_ONLY=0;
+
+const int EX_ISSPAM = 1;
+const int EX_NOTSPAM = 0;
 
 const int ESC_PASSTHROUGHRAW = EX__MAX+666;
 
@@ -67,11 +71,12 @@ const char *PROTOCOL_VERSION="SPAMC/1.2";
 
 void print_usage(void)
 {
-  printf("Usage: spamc [-d host] [-p port] [-f] [-h]\n");
+  printf("Usage: spamc [-d host] [-p port] [-c|-f] [-h]\n");
   printf("-d host: specify host to connect to  [default: localhost]\n");
   printf("-p port: specify port for connection [default: 783]\n");
   printf("-f: fallback safely - in case of comms error, dump original message unchanges instead of setting exitcode\n");
   printf("-s size: specify max message size, any bigger and it will be returned w/out processing [default: 250k]\n");
+  printf("-c: check only - print score/threshold and exit code set to 0 if message is not spam, 1 if spam\n");
   printf("-h: print this help message\n");
 }
 
@@ -161,13 +166,27 @@ int send_message(int in,int out,char *username, int max_size)
   } else
   {
     /* First send header */
-    if(NULL != username)
+    if(CHECK_ONLY)
     {
-      bytes2 = snprintf(header_buf,1024,"PROCESS %s\r\nUser: %s\r\nContent-length: %d\r\n\r\n",PROTOCOL_VERSION,username,bytes);
+      if(NULL != username)
+      {
+	bytes2 = snprintf(header_buf,1024,"CHECK %s\r\nUser: %s\r\nContent-length: %d\r\n\r\n",PROTOCOL_VERSION,username,bytes);
+      }
+      else
+      {
+	bytes2 = snprintf(header_buf,1024,"CHECK %s\r\nContent-length: %d\r\n\r\n",PROTOCOL_VERSION,bytes);
+      }
     }
     else
     {
-      bytes2 = snprintf(header_buf,1024,"PROCESS %s\r\nContent-length: %d\r\n\r\n",PROTOCOL_VERSION,bytes);
+      if(NULL != username)
+      {
+	bytes2 = snprintf(header_buf,1024,"PROCESS %s\r\nUser: %s\r\nContent-length: %d\r\n\r\n",PROTOCOL_VERSION,username,bytes);
+      }
+      else
+      {
+	bytes2 = snprintf(header_buf,1024,"PROCESS %s\r\nContent-length: %d\r\n\r\n",PROTOCOL_VERSION,bytes);
+      }
     }
 
     full_write (out,header_buf,bytes2);
@@ -186,6 +205,8 @@ int read_message(int in, int out, int max_size)
   size_t bytes;
   int header_read=0;
   char buf[8192];
+  char is_spam[5];
+  int score,threshold;
   float version;
   int response=EX_OK;
   char* out_buf;
@@ -242,11 +263,31 @@ int read_message(int in, int out, int max_size)
 	}
 	if('\n' == buf[bytes])
 	{
-	  /* Ok, found a header line, it better be content-length */
-	  if(1 != sscanf(buf,"Content-length: %d",&expected_length))
+	  if(CHECK_ONLY)
 	  {
-	    /* Something's wrong, so bail */
-	    response = EX_PROTOCOL; break;
+	    /* Ok, found a header line, it better be "Spam: x; y / x" */
+	    if(3 != sscanf(buf,"Spam: %5s ; %d / %d",is_spam,&score,&threshold))
+	    {
+	      response = EX_PROTOCOL; break;
+	    }
+
+	    if(!strcasecmp("true",is_spam)) /* If message is indeed spam */
+	    {
+	      response = EX_ISSPAM; break;
+	    }
+	    else
+	    {
+	      response = EX_NOTSPAM; break;
+	    }
+	  }
+	  else
+	  {
+	    /* Ok, found a header line, it better be content-length */
+	    if(1 != sscanf(buf,"Content-length: %d",&expected_length))
+	    {
+	      /* Something's wrong, so bail */
+	      response = EX_PROTOCOL; break;
+	    }
 	  }
 
 	  /* Ok, got here means we just read the content-length.  Now suck up the header/body separator.. */
@@ -263,7 +304,7 @@ int read_message(int in, int out, int max_size)
     }
   }
 
-  if(EX_OK == response)
+  if(!CHECK_ONLY && EX_OK == response)
   {
     while((bytes=full_read (in,buf,8192, 8192)) > 0)
     {
@@ -281,7 +322,7 @@ int read_message(int in, int out, int max_size)
 
   shutdown(in,SHUT_RD);
 
-  if (EX_OK == response)
+  if (!CHECK_ONLY && EX_OK == response)
   {
     /* Check the content length for sanity */
     if(expected_length && expected_length != out_index)
@@ -429,7 +470,7 @@ int process_message(const char *hostname, int port, char *username, int max_size
       exstatus = read_message(mysock,STDOUT_FILENO,max_size);
     }
 
-    if(ESC_PASSTHROUGHRAW == exstatus || (SAFE_FALLBACK && EX_OK != exstatus))
+    if(!CHECK_ONLY && (ESC_PASSTHROUGHRAW == exstatus || (SAFE_FALLBACK && EX_OK != exstatus)))
     {
       /* Message was too big or corrupted, so dump the buffer then bail */
       full_write (STDOUT_FILENO,msg_buf,amount_read);
@@ -454,10 +495,15 @@ void read_args(int argc, char **argv, char **hostname, int *port, int *max_size,
 {
   int opt;
 
-  while(-1 != (opt = getopt(argc,argv,"d:p:u:hfs:")))
+  while(-1 != (opt = getopt(argc,argv,"cd:p:u:hfs:")))
   {
     switch(opt)
     {
+    case 'c':
+      {
+	CHECK_ONLY = -1;
+	break;
+      }
     case 'd':
       {
 	*hostname = optarg;	/* fix the ptr to point to this string */
