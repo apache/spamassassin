@@ -1,0 +1,23 @@
+
+loadplugin Mail::SpamAssassin::Plugin::URIDNSBL
+
+# note that this plugin defines a new config setting, 'uridnsbl',
+# which lists the zones to look up in advance.  The rules will
+# not hit unless each rule has a corresponding 'uridnsbl' line.
+
+# URI-DNSBL lookups can take a *maximum* of this many seconds past the
+# normal DNSBL lookups.
+uridnsbl_timeout	2
+
+uridnsbl	URIBL_SBLXBL	sbl-xbl.spamhaus.org.	TXT
+header		URIBL_SBLXBL	eval:check_uridnsbl('URIBL_SBLXBL')
+describe	URIBL_SBLXBL	Contains a URL listed in the SBL/XBL blocklist
+
+uridnsbl	URIBL_DSBL	list.dsbl.org.		TXT
+header		URIBL_DSBL	eval:check_uridnsbl('URIBL_DSBL')
+describe	URIBL_DSBL	Contains a URL listed in the DSBL blocklist
+
+uridnsbl	URIBL_SORBS	dnsbl.sorbs.net.	A
+header		URIBL_SORBS	eval:check_uridnsbl('URIBL_SORBS')
+describe	URIBL_SORBS	Contains a URL listed in the SORBS blocklist
+
