@@ -15,7 +15,7 @@ use ExtUtils::MakeMaker;
 my $rulesfiles = join (' ', map { s/rules.//; $_ } (<rules/*.cf>));
 $rulesfiles =~ s/local\.cf//;
 
-$rulesfiles .= " rules/triplets.txt";
+$rulesfiles .= " triplets.txt";
 
 sub MY::libscan {
   my($self,$path) = @_;
