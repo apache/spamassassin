@@ -201,14 +201,16 @@ my %makefile = (
 		DIST_DEFAULT => 'tardist'
 	      },
 
-    'clean' => { FILES =>
-	'pod2htm* spamassassin sa-learn '.
-	'spamd/spamc$(EXE_EXT) spamd/libspamc.so spamd/spamd doc '.
-	'spamd/libsslspamc.so '.
-	'spamd/binaries.mk spamd/config.h spamd/config.status '.
-	'spamd/config.cache spamd/config.log '.
-	'spamd/autom4te.cache qmail/qmail-spamc'.
-	't/do_razor2 t/log'
+    'clean' => { FILES => join(' ' =>
+        'doc', 'pod2htm*',
+        'spamassassin', 'sa-learn',
+        'spamd/spamd', 'spamd/spamc$(EXE_EXT)',
+        'spamd/libspamc.so', 'spamd/libsslspamc.so',
+        'spamd/binaries.mk', 'spamd/config.h', 'spamd/config.status',
+        'spamd/config.cache', 'spamd/config.log', 'spamd/autom4te.cache',
+        'qmail/qmail-spamc',
+        't/do_razor2', 't/log'
+      )
     },
 
     'AUTHOR'   => 'Justin Mason <jm@jmason.org>',
@@ -742,7 +744,6 @@ sub MY::libscan {
   init_MY_globals($self);
 
   return q{} if $path =~ m{
-                  windows_install|
                   (^|/)CVS(/|$)|
                   [/.](orig|old|rej|diff|patch|bak|backup|my)$
                 }ix;
