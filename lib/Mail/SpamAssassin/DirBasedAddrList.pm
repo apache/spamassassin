@@ -34,7 +34,7 @@ sub new_checker {
     'main'		=> $main,
   };
 
-  $self->{dir} = $main->{conf}->{auto_whitelist_dir};
+  $self->{dir} = $main->{conf}->{auto_whitelist_path};
   $self->{mode} = oct ($main->{conf}->{auto_whitelist_file_mode});
 
   bless ($self, $class);
