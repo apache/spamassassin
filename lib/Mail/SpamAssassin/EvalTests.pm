@@ -3113,13 +3113,42 @@ sub check_for_all_relays_near_mxes {
   my ($self) = @_;
 
   return unless $self->is_dns_available();
-  foreach my $relay (@{$self->{relays_untrusted}}) {
-    if (!$self->mx_of_helo_near_ip ($relay->{helo}, $relay->{ip})) {
-      dbg ("helo $relay->{helo} is not near $relay->{ip}");
-      return 0;
-    } else {
-      dbg ("helo $relay->{helo} is near $relay->{ip}");
+
+  # Allow a max 15-second timeout to do this test, looking up all MX and
+  # A records.
+  # TODO: use the BGSOCK stuff in Dns, and start these along with the RBL
+  # queries.  May be pointless if the accuracy is poor though.
+
+  my $timeout = $self->{conf}->{rbl_timeout};
+  my $allmxesnear = 0;
+
+  eval {
+    local $SIG{ALRM} = sub { die "alarm\n" };
+    alarm($timeout);
+
+    foreach my $relay (@{$self->{relays_untrusted}}) {
+      if (!$self->mx_of_helo_near_ip ($relay->{helo}, $relay->{ip})) {
+	dbg ("helo $relay->{helo} is not near $relay->{ip}");
+	die "notnear";
+      } else {
+	dbg ("helo $relay->{helo} is near $relay->{ip}");
+      }
     }
+
+    $allmxesnear = 1;	# completed without dying
+
+  };
+  alarm(0); # if we die'd above, need to reset here
+
+  if ($@) {
+    if ($@ =~ /alarm/) {
+      dbg ("all-MXes check timed out after $timeout secs.");
+    } elsif ($@ =~ /notnear/) {
+      # fine! just return
+    } else {
+      warn ("all-MXes -> check skipped: $! $@");
+    }
+    return 0;
   }
 
   # note: an empty @{$self->{relays_untrusted}} is fine -- it means

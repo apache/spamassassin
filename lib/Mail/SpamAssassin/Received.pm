@@ -1,4 +1,4 @@
-# $Id: Received.pm,v 1.30 2003/09/29 05:34:34 jmason Exp $
+# $Id: Received.pm,v 1.31 2003/09/29 18:13:08 jmason Exp $
 
 # ---------------------------------------------------------------------------
 
@@ -45,6 +45,10 @@ $CCTLDS_WITH_SUBDELEGATION = qr{
 	na| nc| np| nz| pa| pe| ph| pl| py| ru| sg| sh| sv| sy| th|
 	tn| tr| tw| ua| ug| uk| uy| ve| vi| yu| za)
 }ixo;
+
+# Should trust be computed based on the MX records of hostnames used in
+# HELO?  Disabled; too slow.
+use constant SLOW_TRUST_BASED_ON_HELO_MXES => 0;
 
 # ---------------------------------------------------------------------------
 
@@ -200,11 +204,14 @@ sub parse_received_headers {
       # if the IP address used is close to an MX for the hostname used in
       # the HELO, then it's likely to be incoming traffic.  Trust it.
       # (TODO: not 100% sure about this yet)
+      # Disabled: way too slow.  Seems to be 3 times slower with this on!
 
       if (!$inferred_as_trusted) {
-	if ($self->mx_of_helo_near_ip ($relay->{helo}, $relay->{ip})) {
-	  dbg ("received-header: helo $relay->{helo} is near $relay->{ip}");
-	  $inferred_as_trusted = 1;
+	if (SLOW_TRUST_BASED_ON_HELO_MXES) {
+	  if ($self->mx_of_helo_near_ip ($relay->{helo}, $relay->{ip})) {
+	    dbg ("received-header: helo $relay->{helo} is near $relay->{ip}");
+	    $inferred_as_trusted = 1;
+	  }
 	}
       }
 
