@@ -1,4 +1,245 @@
 ------------------------------------------------------------------------
+r23174 | quinlan | 2004-07-23 03:58:25 +0000 (Fri, 23 Jul 2004) | 2 lines
+
+move URIBL rules to URIBL section and zero their non-net scores
+
+------------------------------------------------------------------------
+r23173 | jm | 2004-07-23 03:57:27 +0000 (Fri, 23 Jul 2004) | 1 line
+
+update script to deal with recent website changes
+------------------------------------------------------------------------
+r23172 | felicity | 2004-07-23 03:44:15 +0000 (Fri, 23 Jul 2004) | 1 line
+
+addition of -S warning in spamd left the no longer valid --no-S code, which caused warnings in perl 5.6.1.
+------------------------------------------------------------------------
+r23171 | quinlan | 2004-07-23 03:33:38 +0000 (Fri, 23 Jul 2004) | 2 lines
+
+bug 3621: add SpamCop reporting feature
+
+------------------------------------------------------------------------
+r23170 | parker | 2004-07-23 03:23:02 +0000 (Fri, 23 Jul 2004) | 1 line
+
+PR3588: German Translations from Klaus Heinz
+------------------------------------------------------------------------
+r23169 | felicity | 2004-07-23 03:12:59 +0000 (Fri, 23 Jul 2004) | 1 line
+
+bug 3554: we should keep commandline support for all deprecated or removed options, and either put out a warning (for options we can ignore) or an error/die (for options that can't).  for things like the shift from 2.x to 3.x, and -a changing to a config option, we should error out and let the user know to look up the config option.
+------------------------------------------------------------------------
+r23168 | felicity | 2004-07-23 03:08:17 +0000 (Fri, 23 Jul 2004) | 1 line
+
+bug 3586: on BSD-related platforms, the default perl may be 'picky' about when it allows setuid().  Mac OS X doesn't allow setuid() at all (documentation added to spamd/README).  FreeBSD (and presumably the other *BSD variants) don't allow setuid() unless euid == 0, so we work around this by trying a simple setuid() and if it fails, change euid, then ruid, then euid again.  spamd, for instance, sets euid for processing messages, which shows this issue.
+------------------------------------------------------------------------
+r23167 | felicity | 2004-07-23 02:54:13 +0000 (Fri, 23 Jul 2004) | 1 line
+
+bug 3604: add docs for -E and -V to pod docs, -f and -V in the usage output, -e and -U are  non-win32 only.
+------------------------------------------------------------------------
+r23166 | jm | 2004-07-23 02:44:23 +0000 (Fri, 23 Jul 2004) | 1 line
+
+preparing for pre3 release
+------------------------------------------------------------------------
+r23165 | jm | 2004-07-23 02:43:41 +0000 (Fri, 23 Jul 2004) | 1 line
+
+updating MANIFEST
+------------------------------------------------------------------------
+r23164 | jm | 2004-07-23 02:41:35 +0000 (Fri, 23 Jul 2004) | 1 line
+
+bug 3627: scores for set 0, set 1
+------------------------------------------------------------------------
+r23163 | jm | 2004-07-23 02:40:25 +0000 (Fri, 23 Jul 2004) | 16 lines
+
+bug 3627: several bugs in masses scripts, fixed:
+
+- logs-to-c: rules that are immutable with a score of 0 are not recorded
+  in the logs; therefore, will not be used for score generation at all.
+
+  Unfortunately, 'score-ranges-from-freqs' will set a rule to 0 and
+  immutable if it hits less than 0.01%.  This then means that the rule
+  is not recorded, and when "rewrite-cf-with-new-scores" runs, it uses
+  the default score (1.0) for those rules. oops!
+
+  Fixed this by assuming that if there's a rule in the "generated scores"
+  section, but the GA didn't use it, its score should be set to 0.
+  And if the rule exists according to "parse-rules-for-masses", but
+  the GA didn't use it and there's no score, the same applies.
+
+
+------------------------------------------------------------------------
+r23162 | jm | 2004-07-23 02:34:00 +0000 (Fri, 23 Jul 2004) | 1 line
+
+bug 3627: comment T_ rules while GA and mass-checks are going on
+------------------------------------------------------------------------
+r23156 | felicity | 2004-07-22 18:15:09 +0000 (Thu, 22 Jul 2004) | 1 line
+
+small doco typo
+------------------------------------------------------------------------
+r23133 | jm | 2004-07-22 04:07:13 +0000 (Thu, 22 Jul 2004) | 1 line
+
+bug 3584: improvements to score learning system; lots, too many to list here.  Henry's patch
+------------------------------------------------------------------------
+r23132 | felicity | 2004-07-22 03:47:13 +0000 (Thu, 22 Jul 2004) | 1 line
+
+bug 3609: bayes_learn_to_journal wasn't honored in spamd.  we now backup the setting in spamd, and update it per the user's configuration in signal_changed_user().
+------------------------------------------------------------------------
+r23123 | sidney | 2004-07-21 18:23:45 +0000 (Wed, 21 Jul 2004) | 1 line
+
+fix bug 3624 spamd truncated last line and update regression tests
+------------------------------------------------------------------------
+r23108 | sidney | 2004-07-21 02:07:58 +0000 (Wed, 21 Jul 2004) | 1 line
+
+bug 3573: add regression test for SSL inspamc and spamd
+------------------------------------------------------------------------
+r23105 | parker | 2004-07-21 00:37:07 +0000 (Wed, 21 Jul 2004) | 1 line
+
+Bug 3614: fix misspelling in new 3.0 API, code, and documentation
+------------------------------------------------------------------------
+r23100 | felicity | 2004-07-20 21:03:16 +0000 (Tue, 20 Jul 2004) | 1 line
+
+sorting the options to getopts, fixing whitespace balancing, etc.
+------------------------------------------------------------------------
+r23088 | quinlan | 2004-07-20 18:43:05 +0000 (Tue, 20 Jul 2004) | 4 lines
+
+bug 3620: correct fix for pathologically slow DRUG_DOSAGE rule
+my apologies, I thought this had committed, but there was a conflicting
+commit which wasn't mentioned in the bug
+
+------------------------------------------------------------------------
+r23086 | felicity | 2004-07-20 18:02:21 +0000 (Tue, 20 Jul 2004) | 1 line
+
+bug 3612: the code was looking at the header name, not the header value, if envelope_sender_header was specified.
+------------------------------------------------------------------------
+r23085 | parker | 2004-07-20 17:08:20 +0000 (Tue, 20 Jul 2004) | 1 line
+
+Bug 3538: Add sanity check after all rules have been checked to make sure that harvest_dnsbl_queries is run
+------------------------------------------------------------------------
+r23074 | hstern | 2004-07-20 02:55:20 +0000 (Tue, 20 Jul 2004) | 4 lines
+
+ * 50_scores.cf
+   Rejected changes.
+
+
+------------------------------------------------------------------------
+r23073 | hstern | 2004-07-20 02:30:41 +0000 (Tue, 20 Jul 2004) | 6 lines
+
+ * rules/50_scores.cf
+ * rules/STATISTICS.txt
+ * rules/STATISTICS-set1.txt
+   Generated scores for set0 and set1 for 3.0-rc1
+
+
+------------------------------------------------------------------------
+r23071 | felicity | 2004-07-19 23:29:54 +0000 (Mon, 19 Jul 2004) | 1 line
+
+trivial regex fixes.  removed unnecessary (?: ... ) parens from DRUG_ED_CAPS.  DRUG_DOSAGE had inefficient OR regexp instead of a simpler character set.
+------------------------------------------------------------------------
+r22982 | felicity | 2004-07-16 21:13:05 +0000 (Fri, 16 Jul 2004) | 1 line
+
+small doco update
+------------------------------------------------------------------------
+r22977 | felicity | 2004-07-16 18:57:20 +0000 (Fri, 16 Jul 2004) | 1 line
+
+reverting change from 22962.  needs a bugzilla ticket and dev vote.
+------------------------------------------------------------------------
+r22962 | quinlan | 2004-07-16 08:33:20 +0000 (Fri, 16 Jul 2004) | 2 lines
+
+it's "separator"
+
+------------------------------------------------------------------------
+r22960 | quinlan | 2004-07-16 07:48:20 +0000 (Fri, 16 Jul 2004) | 2 lines
+
+documentation fix: NS records are used now instead of MX records
+
+------------------------------------------------------------------------
+r22950 | felicity | 2004-07-16 03:02:54 +0000 (Fri, 16 Jul 2004) | 1 line
+
+fix for typo
+------------------------------------------------------------------------
+r22949 | felicity | 2004-07-16 02:54:23 +0000 (Fri, 16 Jul 2004) | 1 line
+
+bug 3610: HEAD_ILLEGAL_CHARS throws an exception if the header is mostly blank (div by zero).
+------------------------------------------------------------------------
+r22948 | felicity | 2004-07-16 02:50:06 +0000 (Fri, 16 Jul 2004) | 1 line
+
+bug 3608: razor keeps its logfile open after processing completes, so we need to close it, as long as the logfile isn't STDOUT or STDERR.
+------------------------------------------------------------------------
+r22947 | felicity | 2004-07-16 02:46:51 +0000 (Fri, 16 Jul 2004) | 1 line
+
+bug 3595: spamd needs to do copy_config() when virtual-config-dir is specified
+------------------------------------------------------------------------
+r22946 | felicity | 2004-07-16 02:44:44 +0000 (Fri, 16 Jul 2004) | 1 line
+
+bug 3483: modify bayes sync_due() behavior, don't sync based on 'no sync in at least 1 day' if there hasn't been a sync before.  add an opportunistic journal sync call to is_scan_available() so that learn_to_journal w/out already having a db initialized will work.  add code so that is_scan_available() and scan() certify that they'll untie the db, overriding the global version appropriately.
+------------------------------------------------------------------------
+r22917 | felicity | 2004-07-14 21:21:34 +0000 (Wed, 14 Jul 2004) | 1 line
+
+add in debug statements showing what the bayes opportunistic calls are doing (failed, expiry due, sync due, etc.)
+------------------------------------------------------------------------
+r22886 | felicity | 2004-07-14 00:37:54 +0000 (Wed, 14 Jul 2004) | 1 line
+
+bug 3595: sed_path_cache wasn't being invalidated between message runs in daemon mode.  copy_config() will now invalidate the cache value before restoring the original values if they existed.
+------------------------------------------------------------------------
+r22864 | felicity | 2004-07-13 06:41:03 +0000 (Tue, 13 Jul 2004) | 1 line
+
+bug 3596: spamd would exit if requested username didn't equal ident username.  the function should just return an error instead.
+------------------------------------------------------------------------
+r22863 | quinlan | 2004-07-13 05:24:19 +0000 (Tue, 13 Jul 2004) | 2 lines
+
+updates to corpus policy as discussed on spamassassin-dev
+
+------------------------------------------------------------------------
+r22862 | quinlan | 2004-07-13 01:59:07 +0000 (Tue, 13 Jul 2004) | 2 lines
+
+clarification to __ rules
+
+------------------------------------------------------------------------
+r22861 | felicity | 2004-07-13 01:55:48 +0000 (Tue, 13 Jul 2004) | 1 line
+
+more doco updates
+------------------------------------------------------------------------
+r22860 | felicity | 2004-07-13 01:35:51 +0000 (Tue, 13 Jul 2004) | 1 line
+
+a bunch of doco updates
+------------------------------------------------------------------------
+r22856 | felicity | 2004-07-12 23:26:28 +0000 (Mon, 12 Jul 2004) | 1 line
+
+fix stupid comment typo
+------------------------------------------------------------------------
+r22836 | quinlan | 2004-07-12 07:38:41 +0000 (Mon, 12 Jul 2004) | 2 lines
+
+whitelisting your own domain
+
+------------------------------------------------------------------------
+r22833 | jm | 2004-07-12 05:40:55 +0000 (Mon, 12 Jul 2004) | 1 line
+
+updating hosting credits, linking to Reynolds Technology, and breaking it out into its own paragraph
+------------------------------------------------------------------------
+r22825 | felicity | 2004-07-12 04:24:42 +0000 (Mon, 12 Jul 2004) | 1 line
+
+strip out sourceforge references from documentation, since we're not using them for anything at this point.
+------------------------------------------------------------------------
+r22824 | felicity | 2004-07-12 03:54:44 +0000 (Mon, 12 Jul 2004) | 1 line
+
+update webbuild stuff with new perl location
+------------------------------------------------------------------------
+r22814 | felicity | 2004-07-11 05:32:38 +0000 (Sun, 11 Jul 2004) | 1 line
+
+update_devel was naming files as M-SA-3.0.0-pre2-r#####, which should've been M-SA-3.0-dev
+------------------------------------------------------------------------
+r22782 | felicity | 2004-07-10 03:28:43 +0000 (Sat, 10 Jul 2004) | 1 line
+
+the spec file needs updating for the new 'display' version tar name
+------------------------------------------------------------------------
+r22781 | jm | 2004-07-10 02:55:25 +0000 (Sat, 10 Jul 2004) | 1 line
+
+updated build docs
+------------------------------------------------------------------------
+r22780 | jm | 2004-07-10 02:55:07 +0000 (Sat, 10 Jul 2004) | 1 line
+
+3.0.0-pre3 devel cycle started
+------------------------------------------------------------------------
+r22778 | jm | 2004-07-10 02:52:58 +0000 (Sat, 10 Jul 2004) | 1 line
+
+3.0.0-pre2 RELEASED - note: pre-release only
+------------------------------------------------------------------------
 r22777 | jm | 2004-07-10 02:44:52 +0000 (Sat, 10 Jul 2004) | 1 line
 
 fixing more bugs in this process.  argh
