@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.593 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.594 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -101,11 +101,6 @@ header T_RCVD_IN_DUL_AUPADS rbleval:check_rbl('duinv-notfirsthop', 'duinv.aupads
 tflags T_RCVD_IN_DUL_BOFH net
 tflags T_RCVD_IN_DUN_DNSRBL net
 tflags T_RCVD_IN_DUL_AUPADS net
-
-# bug 1017: domain-based blacklists, experimental
-# dsn.rfc-ignorant.org
-header T_DNS_FROM_RFCI_DSN	rbleval:check_rbl_from_host('rfci-dsn', 'dsn.rfc-ignorant.org.')
-tflags T_DNS_FROM_RFCI_DSN net
 
 # bug 1733: SenderBase
 # sa.senderbase.org for SpamAssassin queries
