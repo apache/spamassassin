@@ -3315,4 +3315,24 @@ sub check_unresolved_template {
 
 ###########################################################################
 
+# potentially slow and inefficient
+sub check_for_unsubscribe {
+  my ($self) = @_;
+
+  my %substr;
+  for my $addr ($self->all_to_addrs()) {
+    $substr{$addr} = 1;
+    $addr =~ s/\@/%40/;
+    $substr{$addr} = 1;
+  }
+  for my $uri ($self->get_uri_list()) {
+    for my $substr (grep { length($_) > 4 } keys %substr) {
+      return 1 if $uri =~ /^(?!mailto:).+\Q$substr\E/i
+    }
+  }
+  return 0;
+}
+
+###########################################################################
+
 1;
