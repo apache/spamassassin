@@ -38,11 +38,12 @@ be much faster to load than the whole spamassassin program (and a perl VM).
 Installation
 ------------
 
-For now spamc/spamd must be installed separately from the main SpamAssassin
-distribution.  Simply enter this directory and 'make', then copy the two
-executables to where you want them.  Then, configure your system to run spamd
-in the background, and where your mailer invokes 'spamassassin -P' instead
-invoke 'spamc'.  It's that easy!
+Simply copy the two executables to where you want them.  Then, configure your
+system to run spamd in the background, and where your mailer invokes
+'spamassassin -P' instead invoke 'spamc'.  It's that easy!
+
+There's a Red Hat/Mandrake-style startup script called 'spamassassin'
+in this directory, suitable for installation in /etc/rc.d/init.d .
 
 Performance
 -----------
