@@ -171,6 +171,7 @@ sub new {
   $self->{bayes_expiry_use_scan_count} = 0;
   $self->{bayes_expiry_days} = 30;
   $self->{bayes_expiry_scan_count} = 5000;
+  $self->{bayes_ignore_headers} = [ ];
 
   $self->{whitelist_from} = { };
   $self->{blacklist_from} = { };
@@ -1573,6 +1574,23 @@ things will go wrong.
 =cut
     if (/^bayes[-_]file[-_]mode\s+(.*)$/) {
       $self->{bayes_file_mode} = $1; next;
+    }
+
+=item bayes_ignore_header	
+
+If you receive mail filtered by upstream mail systems, like
+a spam-filtering ISP or mailing list, and that service adds
+new headers (as most of them do), these headers may provide
+inappropriate cues to the Bayesian classifier, allowing it
+to take a "short cut". To avoid this, list the headers using this
+setting.  Example:
+
+	bayes_ignore_header X-Upstream-Spamfilter
+	bayes_ignore_header X-Upstream-SomethingElse
+
+=cut
+    if (/^bayes[-_]ignore[-_]header\s+(.*)$/) {
+      push (@{$self->{bayes_ignore_headers}}, $1); next;
     }
 
 =item bayes_use_hapaxes		(default: 1)
