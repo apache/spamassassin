@@ -516,7 +516,12 @@ sub expire_old_tokens_trapped {
   # Estimate new atime delta based on the last atime delta
   my $newdelta = 0;
   if ( $magic[9] > 0 ) {
-    $newdelta = int($magic[8] * $goal_reduction / $magic[9]); # newdelta = olddelta * goal / old;
+    # newdelta = olddelta * old / goal;
+    # this may seem backwards, but since we're talking delta here,
+    # not actual atime, we want smaller atimes to expire more tokens,
+    # and visa versa.
+    #
+    $newdelta = int($magic[8] * $magic[9] / $goal_reduction);
   }
 
   # Calculate size difference between last expiration token removal

@@ -493,7 +493,7 @@ reduction is number of tokens - number of tokens to keep.
 
 =item - if an expire has been done before, guesstimate the new
 atime delta based on the old atime delta.  (new_atime_delta =
-old_atime_delta * goal / old_reduction_count)
+old_atime_delta * old_reduction_count / goal)
 
 =item - if no expire has been done before, or the last expire looks
 "wierd", do an estimation pass.  The definition of "wierd" is:
