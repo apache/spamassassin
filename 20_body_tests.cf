@@ -90,13 +90,6 @@ describe HTML_WITH_BGCOLOR	HTML mail with non-white background
 
 body BIG_FONT			eval:html_big_font()
 describe BIG_FONT		FONT Size +2 and up or 3 and up
-test BIG_FONT ok		<font size="5"> foo </font>
-test BIG_FONT ok		<font size="+2"> foo </font>
-test BIG_FONT ok		<font size="3"> foo </font>
-test BIG_FONT fail		<font size="2"> foo </font>
-test BIG_FONT fail		<font size="+1"> foo </font>
-test BIG_FONT fail		<font size="-1"> foo </font>
-test BIG_FONT fail		<font size="1"> foo </font>
 
 body WEB_BUGS			eval:html_web_bugs()
 describe WEB_BUGS		Image tag with an ID code to identify you
@@ -130,14 +123,9 @@ describe SPAM_FORM_INPUT	Form for verifying email address
 
 rawbody NUMERIC_COMMENT         /<!--\d{3,}-->/
 describe NUMERIC_COMMENT        Contains a comment with nothing but a number in it
-test NUMERIC_COMMENT     ok     Some text <!--34555--> followed by more
-test NUMERIC_COMMENT     fail   Something <!-- A comment --> and more
 
 rawbody  OBFUSCATING_COMMENT    /[^\s>]<!--.{0,12}?-->[^\s<]/
 describe OBFUSCATING_COMMENT    HTML comments which obfuscate text
-test OBFUSCATING_COMMENT ok     This is a te<!--foo-->st
-test OBFUSCATING_COMMENT fail   Not a <!-- problem --> here
-test OBFUSCATING_COMMENT fail   This <tag><!-- neither --></tag> I hope
 
 ###########################################################################
 
@@ -341,11 +329,7 @@ describe COMMUNIGATE		Sent using a trial version of CommuniGate
 # be stripped before this match
 body TRACKER_ID		/^[a-z0-9]{6,}[-_a-z0-9]{12,}[a-z0-9]{6,}\s*\z/is
 
-describe TRACKER_ID		Incorporates a tracking ID number
-test TRACKER_ID     ok          2174Hzdm0-105YUqT8863DiDg0-616mqbE4931HEBc0-732qBHd6314l52
-test TRACKER_ID     ok          ofsknxxdqgtgqvsoiytkivajvtj
-test TRACKER_ID     fail        <!-- ADMINISTRIVIA -->
-test TRACKER_ID     fail        Donau-Dampfschifffahrts-Kapitaen
+describe TRACKER_ID	Incorporates a tracking ID number
 
 # heh heh heh... tags used to (presumably) generate those anti-Razor random IDs
 body MARKUP_RAND                /{%RAND%}/
@@ -1348,7 +1332,6 @@ describe PRIORITY_MAIL          Orders shipped by priority mail
 # Selling insurance online
 body SAVE_ON_INSURANCE         /\bsave .{0,20}\bon (?:your\s+)?(?:auto|car|life|health|medical)? ?insurance\b/i
 describe SAVE_ON_INSURANCE     Trying to sell insurance online
-test SAVE_ON_INSURANCE      ok Compare and Save Instantly On Your Auto Insurance
 
 body STOP_SNORING		/\bstop\s+snoring\b/i
 describe STOP_SNORING		Contains "Stop Snoring"
@@ -1394,15 +1377,15 @@ body DOMAIN_4U2         /[\@\.]\S{0,20}(?:[42](?:yo)?u|foryou|you2)\S{1,20}\.(?:
 describe DOMAIN_4U2     Domain name containing "4u", "u2" or variants.
 
 # Thanks, Paul Graham! ;)
-rawbody HTML_TEXT_FF0000   /<font[^>]* color=['"](?:.ff0000|red)/i
+rawbody HTML_TEXT_FF0000   /<font[^>]* color=['"]?(?:.ff0000|red)/i
 describe HTML_TEXT_FF0000  Contains HTML text in eye-scorching red
 # these are the next top colors after bright red, as far as I can see:
-rawbody HTML_TEXT_007236   /<font[^>]* color=['"]007236/i
+rawbody HTML_TEXT_007236   /<font[^>]* color=['"]?007236/i
 describe HTML_TEXT_007236  Contains HTML text in green
-rawbody HTML_TEXT_000066   /<font[^>]* color=['"]000066/i
+rawbody HTML_TEXT_000066   /<font[^>]* color=['"]?000066/i
 describe HTML_TEXT_000066  Contains HTML text in dark blue
-rawbody HTML_TEXT_FFFF00   /<font[^>]* color=['"]ffff00/i
+rawbody HTML_TEXT_FFFF00   /<font[^>]* color=['"]?ffff00/i
 describe HTML_TEXT_FFFF00  Contains HTML text in bright yellow
-rawbody HTML_TEXT_0000FF   /<font[^>]* color=['"]0000ff/i
+rawbody HTML_TEXT_0000FF   /<font[^>]* color=['"]?0000ff/i
 describe HTML_TEXT_0000FF  Contains HTML text in blue
 
