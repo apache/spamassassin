@@ -77,7 +77,7 @@ void print_usage(void)
   printf("-s size: specify max message size, any bigger and it will be returned w/out processing [default: 250k]\n");
   printf("-S: use SSL to talk to spamd\n");
   printf("-u username: specify the username for spamd to process this message under\n");
-  printf("-x: don't fallback safely - in a comms error, exit with an error code\n");
+  printf("-x: don't fallback safely - in a comms error, exit with a TEMPFAIL error code\n");
   printf("-t: timeout in seconds to read from spamd. 0 disables. [default: 600]\n\n");
 }
 

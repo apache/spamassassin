@@ -592,7 +592,7 @@ static int _message_filter(const struct sockaddr *addr,
 
     m->is_spam=EX_TOOBIG;
     if((m->out=malloc(m->max_len+EXPANSION_ALLOWANCE+1))==NULL){
-        return EX_OSERR;
+        failureval = EX_OSERR; goto failure;
     }
     m->out_len=0;
 
