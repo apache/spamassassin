@@ -365,6 +365,7 @@ sub parse_received_line {
   my $helo = '';
   my $rdns = '';
   my $by = '';
+  my $id = '';
   my $ident = '';
   my $envfrom = '';
   my $mta_looked_up_dns = 0;
@@ -382,6 +383,11 @@ sub parse_received_line {
   # break them down.  We have to do something like this, because
   # some MTAs will swap position of rdns and helo -- so we can't
   # simply use simplistic regexps.
+
+  # try to catch unique message identifier
+  if (/\sid\s+<?([^\s<>;]{3,})/) {
+    $id = $1;
+  }
 
   if (/^from /) {
     # try to catch enveloper senders
@@ -1025,6 +1031,7 @@ enough:
     ip => $ip,
     by => $by,
     helo => $helo,
+    id => $id,
     ident => $ident,
     envfrom => $envfrom,
     lc_by => (lc $by),
@@ -1068,7 +1075,7 @@ enough:
   # of entries must be preserved, so that regexps that assume that
   # e.g. "ip" comes before "helo" will still work.
   #
-  my $asstr = "[ ip=$ip rdns=$rdns helo=$helo by=$by ident=$ident envfrom=$envfrom intl=0 ]";
+  my $asstr = "[ ip=$ip rdns=$rdns helo=$helo by=$by ident=$ident envfrom=$envfrom intl=0 id=$id ]";
   dbg ("received-header: parsed as $asstr");
   $relay->{as_string} = $asstr;
 

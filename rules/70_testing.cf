@@ -478,13 +478,21 @@ header T_ADVERT_CODE2	Subject =~ /\w.*\bA\s*D\s*V\b/
 body T_NO_COST                    /\bno (?:(?:extra|hidden) )?(?:cost|charge)\b/i
 
 # URL obfuscation services
-uri T_URL_SHORTEN_1		m{http://makeashorterlink.com/}i
-uri T_URL_SHORTEN_2		m{http://shorl.com/}i
-uri T_URL_SHORTEN_3		m{http://tinyurl.com/}i
-uri T_URL_SHORTEN_4		m{http://xrl.us/}i
-uri T_URL_SHORTEN_5		m{http://snipurl.com/}i
-uri T_URL_SHORTEN_6		m{http://lin.kz/}i
+uri T_URL_SHORTEN_1		m{http://makeashorterlink\.com/}i
+uri T_URL_SHORTEN_2		m{http://shorl\.com/}i
+uri T_URL_SHORTEN_3		m{http://tinyurl\.com/}i
+uri T_URL_SHORTEN_4		m{http://xrl\.us/}i
+uri T_URL_SHORTEN_5		m{http://snipurl\.com/}i
+uri T_URL_SHORTEN_6		m{http://lin\.kz/}i
+
+# possible replacement for MTA_FROM_MTA_SHORT
+# maybe delete MSGID_FROM_MTA_LATER and MSGID_FROM_MTA_BACKUP too
+header T_MSGID_FROM_MTA_1	eval:message_id_from_mta_1()
+header T_MSGID_FROM_MTA_2	eval:message_id_from_mta_2()
+header T_MSGID_FROM_MTA_3	eval:message_id_from_mta_3()
+header T_MSGID_FROM_MTA_4	eval:message_id_from_mta_4()
 
 # bug 3268
 body T_REDIRECTOR       eval:check_for_http_redirector()
 describe T_REDIRECTOR	Message has HTTP redirector URI
+

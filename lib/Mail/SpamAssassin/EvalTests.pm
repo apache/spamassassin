@@ -326,6 +326,71 @@ sub _mta_added_message_id {
   }
 }
 
+# Message-ID for untrusted message was added by a trusted relay
+sub message_id_from_mta_1 {
+  my ($self) = @_;
+
+  my $id = $self->get('MESSAGEID');
+  return unless defined($id) && $id;
+
+  if ($self->{num_relays_untrusted} > 0) {
+    for my $rcvd (@{$self->{relays_untrusted}}[0], @{$self->{relays_trusted}})
+    {
+      return 1 if $rcvd->{id} && (index($id, $rcvd->{id}) != -1);
+    }
+  }
+  return 0;
+}
+
+# Message-ID for untrusted message was added by a trusted relay
+sub message_id_from_mta_2 {
+  my ($self) = @_;
+
+  my $id = $self->get('Resent-Message-ID') || $self->get('Message-ID');
+  return unless defined($id) && $id;
+
+  if ($self->{num_relays_untrusted} > 0) {
+    for my $rcvd (@{$self->{relays_untrusted}}[0], @{$self->{relays_trusted}})
+    {
+      return 1 if $rcvd->{id} && (index($id, $rcvd->{id}) != -1);
+    }
+  }
+  return 0;
+}
+
+
+# Message-ID for untrusted message was added by a trusted relay
+sub message_id_from_mta_3 {
+  my ($self) = @_;
+
+  my $id = $self->get('MESSAGEID');
+  return unless defined($id) && $id;
+
+  if ($self->{num_relays_untrusted} > 0) {
+    for my $rcvd (@{$self->{relays_untrusted}}[0], @{$self->{relays_trusted}})
+    {
+      return 1 if $rcvd->{id} && (index(lc($id), lc($rcvd->{id})) != -1);
+    }
+  }
+  return 0;
+}
+
+# Message-ID for untrusted message was added by a trusted relay
+sub message_id_from_mta_4 {
+  my ($self) = @_;
+
+  my $id = $self->get('Resent-Message-ID') || $self->get('Message-ID');
+  return unless defined($id) && $id;
+
+  if ($self->{num_relays_untrusted} > 0) {
+    for my $rcvd (@{$self->{relays_untrusted}}[0], @{$self->{relays_trusted}})
+    {
+      return 1 if $rcvd->{id} && (index(lc($id), lc($rcvd->{id})) != -1);
+    }
+  }
+  return 0;
+}
+
 ###########################################################################
 
 # FORGED_RCVD_TRAIL
@@ -619,9 +684,9 @@ sub check_for_forged_yahoo_received_headers {
 
   my $rcvd = $self->get ('Received');
   
-  if ( $self->get("Resent-From") && $self->get("Resent-To") ) {
+  if ($self->get("Resent-From") && $self->get("Resent-To")) {
     my $xrcvd = $self->get("X-Received");
-    $rcvd = $xrcvd if ( $xrcvd );
+    $rcvd = $xrcvd if $xrcvd;
   }
   $rcvd =~ s/\s+/ /gs;		# just spaces, simplify the regexp
 
@@ -906,7 +971,7 @@ sub check_from_in_list {
   my $list_ref = $self->{conf}{$list};
   warn "Could not find list $list" unless defined $list_ref;
 
-  foreach my $addr ( all_from_addrs $self ) {
+  foreach my $addr (all_from_addrs $self) {
     return 1 if _check_whitelist $self $list_ref, $addr;
   }
 
@@ -920,7 +985,7 @@ sub check_to_in_list {
   my $list_ref = $self->{conf}{$list};
   warn "Could not find list $list" unless defined $list_ref;
 
-  foreach my $addr ( all_to_addrs $self ) {
+  foreach my $addr (all_to_addrs $self) {
     return 1 if _check_whitelist $self $list_ref, $addr;
   }
 
@@ -1375,7 +1440,7 @@ sub check_rbl_backend {
   # in @fullips.  It includes the IPs that are trusted, but
   # not in internal_networks.
   my @fullexternal = map {
-	(!$_->{internal}) ? ( $_->{ip} ) : ()
+	(!$_->{internal}) ? ($_->{ip}) : ()
       } @{$self->{relays_trusted}};
   push (@fullexternal, @fullips);	# add untrusted set too
 
@@ -1425,7 +1490,7 @@ sub check_rbl_backend {
     {
       push(@ips, @originating);
       if ($1 eq "first") {
-	@ips = ( $ips[0] );
+	@ips = ($ips[0]);
       }
       else {
 	shift @ips;
@@ -1669,10 +1734,10 @@ sub get_address_commonality_ratio {
   my %counts1 = ();
   my %counts2 = ();
 
-  foreach ( split(//, lc $addr1) ) {
+  foreach (split(//, lc $addr1)) {
     $counts1{$_}++;
   }
-  foreach ( split(//, lc $addr2) ) {
+  foreach (split(//, lc $addr2)) {
     $counts2{$_}++;
   }
 
@@ -1903,7 +1968,7 @@ sub check_for_shifted_date {
 
 sub received_within_months {
   # filters out some false positives in old corpus mail - Allen
-  my($self,$min,$max) = @_;
+  my ($self,$min,$max) = @_;
 
   if (!exists($self->{date_received})) {
     $self->_check_date_received();
@@ -1949,7 +2014,7 @@ sub _get_received_header_times {
   $self->{received_header_times} = [ () ];
   $self->{received_fetchmail_time} = undef;
 
-  my(@received);
+  my (@received);
   my $received = $self->get('Received');
   if (defined($received) && length($received)) {
     @received = grep {$_ =~ m/\S/} (split(/\n/,$received));
@@ -1961,7 +2026,7 @@ sub _get_received_header_times {
   }
 
   # handle fetchmail headers
-  my(@local);
+  my (@local);
   if (($received[0] =~
       m/\bfrom (?:localhost\s|(?:\S+ ){1,2}\S*\b127\.0\.0\.1\b)/) ||
       ($received[0] =~ m/qmail \d+ invoked by uid \d+/)) {
@@ -1978,7 +2043,7 @@ sub _get_received_header_times {
   my $rcvd;
 
   if (scalar(@local)) {
-    my(@fetchmail_times);
+    my (@fetchmail_times);
     foreach $rcvd (@local) {
       if ($rcvd =~ m/(\s.?\d+ \S\S\S \d+ \d+:\d+:\d+ \S+)/) {
 	my $date = $1;
@@ -1999,7 +2064,7 @@ sub _get_received_header_times {
     }
   }
 
-  my(@header_times);
+  my (@header_times);
   foreach $rcvd (@received) {
     if ($rcvd =~ m/(\s.?\d+ \S\S\S \d+ \d+:\d+:\d+ \S+)/) {
       my $date = $1;
@@ -2022,7 +2087,7 @@ sub _get_received_header_times {
 sub _check_date_received {
   my $self = $_[0];
 
-  my(@dates_poss);
+  my (@dates_poss);
 
   $self->{date_received} = 0;
 
@@ -2037,7 +2102,7 @@ sub _check_date_received {
   if (!exists($self->{received_header_times})) {
     $self->_get_received_header_times();
   }
-  my(@received_header_times) = @{ $self->{received_header_times} };
+  my (@received_header_times) = @{ $self->{received_header_times} };
   if (scalar(@received_header_times)) {
     push @dates_poss, $received_header_times[0];
   }
@@ -2078,13 +2143,13 @@ sub _check_date_diff {
   if (!exists($self->{received_header_times})) {
     $self->_get_received_header_times();
   }
-  my(@header_times) = @{ $self->{received_header_times} };
+  my (@header_times) = @{ $self->{received_header_times} };
 
   if (!scalar(@header_times)) {
     return;			# archived mail?
   }
 
-  my(@diffs) = map {$self->{date_header_time} - $_} (@header_times);
+  my (@diffs) = map {$self->{date_header_time} - $_} (@header_times);
 
   # if the last Received: header has no difference, then we choose to
   # exclude it
@@ -2585,9 +2650,9 @@ sub _check_attachments {
   $self->{mime_suspect_name} = 0;
 
   # Get all parts ...
-  foreach my $p ( $self->{msg}->find_parts(qr/./) ) {
+  foreach my $p ($self->{msg}->find_parts(qr/./)) {
     # message headers
-    my($ctype, $boundary, $charset, $name) = Mail::SpamAssassin::Util::parse_content_type($p->get_header("content-type"));
+    my ($ctype, $boundary, $charset, $name) = Mail::SpamAssassin::Util::parse_content_type($p->get_header("content-type"));
 
     if ($ctype eq 'multipart/alternative') {
       $self->{mime_multipart_alternative} = 1;
@@ -2606,7 +2671,7 @@ sub _check_attachments {
 
     # If we're not in a leaf node in the tree, there will be no raw
     # section, so skip it.
-    if ( ! $p->is_leaf() ) {
+    if (! $p->is_leaf()) {
       next;
     }
 
@@ -2615,8 +2680,8 @@ sub _check_attachments {
     $part_bytes[$part] = 0 if $cd !~ /attachment/;
 
     my $previous = '';
-    foreach ( @{$p->raw()} ) {
-      if ( $cte =~ /base64/i ) {
+    foreach (@{$p->raw()}) {
+      if ($cte =~ /base64/i) {
         if ($previous =~ /^\s*$/ && /^\s*$/) {
 	  $self->{mime_base64_blanks} = 1;
         }
@@ -2629,7 +2694,7 @@ sub _check_attachments {
 	$self->{mime_html_no_charset} = 0;
       }
       if ($self->{mime_multipart_alternative} && $cd !~ /attachment/ &&
-          ( $ctype eq 'text/plain' || $ctype eq 'text/html' ) ) {
+          ($ctype eq 'text/plain' || $ctype eq 'text/html')) {
 	$part_bytes[$part] += length;
       }
 
@@ -2701,7 +2766,7 @@ sub check_razor2 {
   my ($self) = @_;
 
   return 0 unless ($self->is_razor2_available());
-  return $self->{razor2_result} if ( defined $self->{razor2_result} );
+  return $self->{razor2_result} if (defined $self->{razor2_result});
 
   # note: we don't use $fulltext. instead we get the raw message,
   # unfiltered, for razor2 to check.  ($fulltext removes MIME
@@ -2744,7 +2809,7 @@ sub check_dcc {
   # unfiltered, for DCC to check.  ($fulltext removes MIME
   # parts etc.)
   my $full = $self->{msg}->get_pristine();
-  if ( $have_dccifd ) {
+  if ($have_dccifd) {
     return $self->dccifd_lookup (\$full);
   } else {
     return $self->dcc_lookup (\$full);
@@ -2915,22 +2980,22 @@ sub check_header_count_range {
   my ($self, $hdr, $min, $max) = @_;
   my %uniq = ();
   my @hdrs = grep(!$uniq{$_}++, $self->{msg}->get_header ($hdr));
-  return ( scalar @hdrs >= $min && scalar @hdrs <= $max );
+  return (scalar @hdrs >= $min && scalar @hdrs <= $max);
 }
 
 sub check_blank_line_ratio {
   my ($self, $fulltext, $min, $max, $minlines) = @_;
 
-  if ( !defined $minlines || $minlines < 1 ) {
+  if (!defined $minlines || $minlines < 1) {
     $minlines = 1;
   }
 
   $fulltext = $self->get_decoded_body_text_array();
-  if ( ! exists $self->{blank_line_ratio}->{$minlines} ) {
-    my($blank) = 0;
-    if ( scalar @{$fulltext} >= $minlines ) {
-      foreach my $line ( @{$fulltext} ) {
-        next if ( $line =~ /\S/ );
+  if (! exists $self->{blank_line_ratio}->{$minlines}) {
+    my ($blank) = 0;
+    if (scalar @{$fulltext} >= $minlines) {
+      foreach my $line (@{$fulltext}) {
+        next if ($line =~ /\S/);
         $blank++;
       }
       $self->{blank_line_ratio}->{$minlines} = 100 * $blank / scalar @{$fulltext};
@@ -2940,11 +3005,13 @@ sub check_blank_line_ratio {
     }
   }
 
-  return ( ($min == 0 && $self->{blank_line_ratio}->{$minlines} <= $max) || ($self->{blank_line_ratio}->{$minlines} > $min && $self->{blank_line_ratio}->{$minlines} <= $max) );
+  return (($min == 0 && $self->{blank_line_ratio}->{$minlines} <= $max) ||
+	  ($self->{blank_line_ratio}->{$minlines} > $min &&
+	   $self->{blank_line_ratio}->{$minlines} <= $max));
 }
 
 sub check_access_database {
-  my($self, $path) = @_;
+  my ($self, $path) = @_;
 
   if (!HAS_DB_FILE) {
     return 0;
@@ -2956,20 +3023,20 @@ sub check_access_database {
 
   $path = $self->{main}->sed_path ($path);
   dbg("Tie-ing to DB file R/O in $path");
-  if ( tie %access,"DB_File",$path, O_RDONLY ) {
+  if (tie %access,"DB_File",$path, O_RDONLY) {
     my @lookfor = ();
 
     # Look for "From:" versions as well!
-    foreach my $from ( $self->all_from_addrs() ) {
+    foreach my $from ($self->all_from_addrs()) {
       # $user."\@"
       # rotate through $domain and check
-      my($user,$domain) = split(/\@/, $from,2);
+      my ($user,$domain) = split(/\@/, $from,2);
       push(@lookfor, "From:$from",$from);
-      if ( $user ) {
+      if ($user) {
         push(@lookfor, "From:$user\@", "$user\@");
       }
-      if ( $domain ) {
-        while( $domain =~ /\./ ) {
+      if ($domain) {
+        while ($domain =~ /\./) {
           push(@lookfor, "From:$domain", $domain);
           $domain =~ s/^[^.]*\.//;
         }
@@ -2978,13 +3045,13 @@ sub check_access_database {
     }
 
     # we can only match this if we have at least 1 untrusted header
-    if ( $self->{num_relays_untrusted} > 0 ) {
+    if ($self->{num_relays_untrusted} > 0) {
       my $lastunt = $self->{relays_untrusted}->[0];
 
       # If there was a reverse lookup, use it in a lookup
-      if ( ! $lastunt->{no_reverse_dns} ) {
+      if (! $lastunt->{no_reverse_dns}) {
         my $rdns = $lastunt->{lc_rdns};
-        while( $rdns =~ /\./ ) {
+        while($rdns =~ /\./) {
           push(@lookfor, "From:$rdns", $rdns);
           $rdns =~ s/^[^.]*\.//;
         }
@@ -2992,9 +3059,9 @@ sub check_access_database {
       }
 
       # do both IP and net (rotate over IP)
-      my($ip) = $lastunt->{ip};
+      my ($ip) = $lastunt->{ip};
       $ip =~ tr/0-9.//cd;
-      while( $ip =~ /\./ ) {
+      while($ip =~ /\./) {
         push(@lookfor, "From:$ip", $ip);
 	$ip =~ s/\.[^.]*$//;
       }
@@ -3003,15 +3070,15 @@ sub check_access_database {
 
     my $retval = 0;
     my %cache = ();
-    foreach ( @lookfor ) {
-      next if ( $cache{$_}++ );
+    foreach (@lookfor) {
+      next if ($cache{$_}++);
       dbg("accessdb: Looking for $_");
 
       # Some systems put a null at the end of the key, most don't...
       my $result = $access{$_} || $access{"$_\000"} || next;
 
-      my($type) = split(/\W/,$result);
-      if ( exists $ok{$type} ) {
+      my ($type) = split(/\W/,$result);
+      if (exists $ok{$type}) {
 	dbg("accessdb: hit OK: $type, $_");
         $retval = 0;
 	last;
@@ -3237,7 +3304,7 @@ sub html_range {
   # not all perls understand what "inf" means, so we need to do
   # non-numeric tests!  urg!
   if (!defined $max || $max eq "inf") {
-    return ( $test eq "inf" ) ? 1 : ($test > $min);
+    return ($test eq "inf") ? 1 : ($test > $min);
   }
   elsif ($test eq "inf") {
     # $max < inf, so $test == inf means $test > $max
@@ -3252,9 +3319,9 @@ sub html_range {
 ###########################################################################
 
 sub multipart_alternative_difference {
-  my($self, $fulltext, $min, $max) = @_;
+  my ($self, $fulltext, $min, $max) = @_;
 
-  $self->_multipart_alternative_difference() unless ( exists $self->{madiff} );
+  $self->_multipart_alternative_difference() unless (exists $self->{madiff});
 
   if (($min == 0 || $self->{madiff} > $min) &&
       ($max eq "undef" || $self->{madiff} <= $max)) {
@@ -3264,7 +3331,7 @@ sub multipart_alternative_difference {
 }
 
 sub _multipart_alternative_difference {
-  my($self) = @_;
+  my ($self) = @_;
   $self->{madiff} = 0;
 
   # Find all multipart/alternative parts in the message
@@ -3286,15 +3353,15 @@ sub _multipart_alternative_difference {
   }
 
   # Go through each of the multipart parts
-  foreach my $part ( @ma ) {
+  foreach my $part (@ma) {
     my %html = ();
     my %text = ();
 
     # limit our search to text-based parts
     my @txt = $part->find_parts(qr@^text\b@i);
-    foreach my $text ( @txt ) {
+    foreach my $text (@txt) {
       # we only care about the rendered version of the part
-      my($type, $rnd) = $text->rendered();
+      my ($type, $rnd) = $text->rendered();
 
       # parse the rendered text into tokens.  assume they are whitespace
       # separated, and ignore anything that doesn't have a word-character
@@ -3302,8 +3369,8 @@ sub _multipart_alternative_difference {
       # points, horizontal lines, etc.  this assumes that punctuation
       # in one part will be the same in other parts.
       #
-      if ( $type eq 'text/html' ) {
-        foreach my $w ( grep(/\w/,split(/\s+/,$rnd)) ) {
+      if ($type eq 'text/html') {
+        foreach my $w (grep(/\w/,split(/\s+/,$rnd))) {
 	  #dbg("HTML: $w");
           $html{$w}++;
         }
@@ -3315,7 +3382,7 @@ sub _multipart_alternative_difference {
 	}
       }
       else {
-        foreach my $w ( grep(/\w/,split(/\s+/,$rnd)) ) {
+        foreach my $w (grep(/\w/,split(/\s+/,$rnd))) {
 	  #dbg("TEXT: $w");
           $text{$w}++;
         }
@@ -3324,12 +3391,12 @@ sub _multipart_alternative_difference {
 
     # How many HTML tokens do we have at the start?
     my $orig = keys %html;
-    next if ( $orig == 0 );
+    next if ($orig == 0);
 
     # If the token appears at least as many times in the text part as
     # in the html part, remove it from the list of html tokens.
-    while( my($k,$v) = each %text ) {
-      delete $html{$k} if ( exists $html{$k} && $html{$k}-$text{$k} < 1 );
+    while(my ($k,$v) = each %text) {
+      delete $html{$k} if (exists $html{$k} && $html{$k}-$text{$k} < 1);
     }
 
     #map { dbg("LEFT: $_") } keys %html;
@@ -3339,7 +3406,7 @@ sub _multipart_alternative_difference {
     # a 0% difference rate.  Calculate it here, and record the difference
     # if it's been the highest so far in this message.
     my $diff = scalar(keys %html)/$orig*100;
-    $self->{madiff} = $diff if ( $diff > $self->{madiff} );
+    $self->{madiff} = $diff if ($diff > $self->{madiff});
 
     dbg(sprintf "madiff: left: %d, orig: %d, max-difference: %0.2f%%", scalar(keys %html), $orig, $self->{madiff});
   }
@@ -3350,7 +3417,7 @@ sub _multipart_alternative_difference {
 ###########################################################################
 
 sub check_domain_ratio {
-  my($self, $body, $ratio) = @_;
+  my ($self, $body, $ratio) = @_;
   my $length = (length(join('', @{$body})) || 1);
   if (!defined $self->{uri_domain_count}) {
     $self->get_uri_list();
@@ -3362,18 +3429,18 @@ sub check_domain_ratio {
 ###########################################################################
 
 sub check_for_http_redirector {
-  my($self) = @_;
+  my ($self) = @_;
 
-  foreach ( $self->get_uri_list() ) {
+  foreach ($self->get_uri_list()) {
     while (s{^https?://([^/:\?]+).+?(https?://([^/:\?]+).+)$}{$2}g) {
-      my($redir, $dest) = ($1,$3);
+      my ($redir, $dest) = ($1,$3);
       foreach ($redir,$dest) {
 	# Strip down to domain.tld
         s/^(?:.+\.)([^.]+\.[^.]+)$/$1/;
 	# make sure we do things case-insensitively
 	$_ = lc $_;
       }
-      next if ( $redir eq $dest );
+      next if ($redir eq $dest);
       dbg("redirect: found $redir to $dest, flagging");
       return 1;
     }
