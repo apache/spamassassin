@@ -83,6 +83,8 @@ sub check_for_from_to_equivalence {
   my ($self) = @_;
   my $from = $self->get ('From:addr');
   my $to = $self->get ('To:addr');
+
+  if ($from eq '' && $to eq '') { return 0; }
   ($from eq $to);
 }
 
