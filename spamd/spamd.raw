@@ -392,7 +392,7 @@ if ( $log_facility eq 'null' ) {
 
 # Close the logfile on exit.
 END {
-  close(STDLOG) if $log_socket eq 'file';
+  close(STDLOG) if (defined $log_socket && $log_socket eq 'file');
 }
 
 # The code above was quite complicated. Make sure everything fits together.
