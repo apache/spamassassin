@@ -157,6 +157,8 @@ sub tie_db_readonly {
        or goto failed_to_tie;
   }
 
+  $self->{db_version} = ($self->get_magic_tokens())[6];
+
   # If the DB version is one we don't understand, abort!
   if ( $self->check_db_version() ) {
     $self->untie_db();
@@ -164,7 +166,6 @@ sub tie_db_readonly {
   }
 
   $self->{scan_count_little_file} = $path.'_msgcount';
-  $self->{db_version} = ($self->get_magic_tokens())[6];
   return 1;
 
 failed_to_tie:
@@ -280,13 +281,12 @@ sub check_db_version {
 sub upgrade_db {
   my ($self) = @_;
 
-  my $db_ver = ($self->get_magic_tokens())[6];
-  return 0 if ( $db_ver == DB_VERSION );
+  return 0 if ( $self->{db_version} == DB_VERSION );
   return 1 if ( $self->check_db_version() );
 
   # If the current DB version is lower than the new version, upgrade!
-  if ( $db_ver < DB_VERSION ) {
-    # Do conversions in order so we can go 1 -> 3, make sure to update $db_ver
+  if ( $self->{db_version} < DB_VERSION ) {
+    # Do conversions in order so we can go 1 -> 3, make sure to update $self->{db_version}
 
     # since DB_File will not shrink a database (!!), we need to *create*
     # a new one instead.
@@ -294,7 +294,7 @@ sub upgrade_db {
     my $path = $main->sed_path ($main->{conf}->{bayes_path});
     my $name = $path.'_toks';
 
-    if ( $db_ver == 0 ) {
+    if ( $self->{db_version} == 0 ) {
       dbg ("bayes: upgrading database format from v0 to v1");
 
       # Magic tokens for version 0, defined as '**[A-Z]+'
@@ -357,12 +357,12 @@ sub upgrade_db {
 		 (oct ($main->{conf}->{bayes_file_mode}) & 0666) or return 1;
 
       dbg ("bayes: upgraded database format from v0 to v1 in ".(time - $started)." seconds");
-      $self->{db_version} = $db_ver = 1; # need this for other functions which check
+      $self->{db_version} = 1; # need this for other functions which check
     }
 
-    # if ( $db_ver == 1 ) {
+    # if ( $self->{db_version} == 1 ) {
     #   ...
-    #   $self->{db_version} = $db_ver = 2; # need this for other functions which check
+    #   $self->{db_version} = 2; # need this for other functions which check
     # }
     # ... and so on.
   }
