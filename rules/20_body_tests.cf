@@ -224,8 +224,18 @@ describe GREEN_EXCUSE_1		Claims SPAM helps the environment
 body GREEN_EXCUSE_2		/the trees, save the planet, use email!/i
 describe GREEN_EXCUSE_2		Claims SPAM helps the environment
 
-body VIAGRA			/VIAGRA/i
+# jm: keep this case-sensitive, otherwise it FP's
+body VIAGRA			/VIAGRA/
 describe VIAGRA			Plugs Viagra
+
+body NATURAL_VIAGRA             /\bnatural viagra\b/i
+describe NATURAL_VIAGRA         Plugs "Natural Viagra"
+
+body HERBAL_VIAGRA              /\bherbal viagra\b/i
+describe HERBAL_VIAGRA          Plugs "Herbal Viagra"
+
+body TARGETED                   /\btargeted (?:traffic|e-?mail|internet|leads?)\b/i
+describe TARGETED               Targeted Traffic / Email Addresses
 
 body YOU_HAVE_BEEN_SELECTED	/You have been selected as a (?:finalist|winner)/i
 describe YOU_HAVE_BEEN_SELECTED	"You have been selected as a finalist", sure
@@ -827,13 +837,20 @@ describe BAD_CREDIT		Eliminate Bad Credit
 body UNSECURED_CREDIT	        /\bunsecured.{0,10}(?:master ?card|visa|credit|loans|debt)\b/i
 describe UNSECURED_CREDIT	Unsecured Credit/Debt
 
-body LOW_INTEREST	        /\blow.{0,20} interest rate\b/i
+body LOW_INTEREST	        /\blow.{0,20} interest rates?\b/i
 describe LOW_INTEREST		Lower Interest Rates
+
+body COMPARE_RATES              /\bcompare .{0,9}rates?\b/i
+describe COMPARE_RATES          Compare Rates
+
+# jm: made harder for FP; require a capital S
+body SAVE_UP_TO                 /\b(?-i:S)ave up to\b/i
+describe SAVE_UP_TO             Save Up To
 
 body LOW_PAYMENT	        /\b(?:reduce|low).{0.12} payment\b/i
 describe LOW_PAYMENT		Lower Monthly Payment
 
-body CONSOLIDATE_DEBT	        /\bconsolidate .{0,9} (?:debt|credit)|debt (?:consolidation|elimination)/i
+body CONSOLIDATE_DEBT	        /\b(?:consolidate .{0,9} (?:debt|credit)|debt (?:consolidation|elimination))\b/i
 describe CONSOLIDATE_DEBT	Consolidate Debt and Credit
 
 body CREDITORS_CALLING	        /\bcreditors calling\b/i
@@ -1057,6 +1074,9 @@ describe WINNING		Who really wins?
 body PROMOTION		        /\bspecial promotion\b/i
 describe PROMOTION		Special Promotion
 
+body FREE_PASSWORD              /\bfree .{0,9}passwords?\b/i
+describe FREE_PASSWORD          Offers Free (often stolen) Passwords
+
 body HIDDEN_CHARGES	        /\bhidden charges\b/i
 describe HIDDEN_CHARGES		Talks about Hidden Charges
 
@@ -1162,7 +1182,8 @@ describe SPY_ON_FRIENDS	        Investigate your Friends!
 body DIG_UP_INFO	        /\bdig up information\b/i
 describe DIG_UP_INFO		Dig up Dirt on Friends
 
-body MLM		        /\b(?:MLM|multi.level.marketing)\b/i
+# Marc Perkel: added "not"
+body MLM		        /\bnot (?:MLM|multi.level.marketing)\b/i
 describe MLM			Multi Level Marketing
 
 body UNCLAIMED_MONEY	        /\bunclaimed (?:funds|money)\b/i
@@ -1249,4 +1270,28 @@ describe RAPE                   Possible porn - Rape
 
 body LESBIAN                    /\b(?:xxx|horny|hot|young) lesbian|lesbian (?:sites?|action|bitch)\b/i
 describe LESBIAN                Possible porn - Lesbian Site
+
+body CHILD_SUPPORT              /\buncollected child support\b/i
+describe CHILD_SUPPORT          "Collect Child Support" Scam
+
+body ITS_LEGAL                  /\b(?:perfectly|absolutely|100%|totally) legal\b/i
+describe ITS_LEGAL              Claims to be Legal
+
+body FREE_GRANT                 /\bfree grants? (?:of|money)\b/i
+describe FREE_GRANT             Free Grant Money
+
+body VIAGRA_ONLINE              /\bviagra .{0,25}(?:express|online|overnight)/i
+describe VIAGRA_ONLINE          Fast Viagra Delivery
+
+body VIAGRA_COMBO               /\bviagra .{0,15}(?:phentermine|xenical|tenuate|zyban|propecia)\b/i
+describe VIAGRA_COMBO           Viagra and other drugs
+
+body HIDDEN_ASSETS              /hidden assets/i
+describe HIDDEN_ASSETS          Hidden Assets
+
+body SAVE_THOUSANDS             /\bsave (?:thousands|millions)\b/i
+describe SAVE_THOUSANDS         Save big money
+
+body REFINANCE_YOUR_HOME        /\brefinance your (?:current|) (?:home|house)\b/i
+describe REFINANCE_YOUR_HOME    "Refinance your home with us" - sure...
 
