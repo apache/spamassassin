@@ -504,8 +504,8 @@ describe FIN_FREE 		Freedom of a financial nature
 body FORWARD_LOOKING	        /\bcontains forward-looking statements\b/i
 describe FORWARD_LOOKING	Stock Disclaimer Statement
 
-body SATISFACTION		/\bsatisfaction .{0,9}g(?:ua|au)ranteed\b/i
-describe SATISFACTION		Mail guarantees satisfaction
+body SATIS_GUAR	        	/\bsatisfaction .{0,9}g(?:ua|au)ranteed\b/i
+describe SATIS_GUAR		Mail guarantees satisfaction
 
 # Avoid an FP noted by NISHIJIMA Takanori: 'Japanese string sequence:
 # "Su" "Ku" "Na"  "I" "Ko" "Su" "To" "De" "Yo" "Ri" ...
