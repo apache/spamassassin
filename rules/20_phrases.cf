@@ -657,11 +657,11 @@ describe BE_BOSS		Be your own boss
 body DIG_UP_INFO	        /\bdig up information\b/i
 describe DIG_UP_INFO		Dig up Dirt on Friends
 
-body MLM		        /\b(?:MLM|multi.level.marketing)\b/i
-describe MLM			Multi Level Marketing mentioned
+body ML_MARKETING	        /\b(?:MLM|multi.level.marketing)\b/i
+describe ML_MARKETING		Multi Level Marketing mentioned
 
-body NOT_MLM                    /\bnot (?:MLM|multi.level.marketing)\b/i
-describe NOT_MLM		Apparently, NOT Multi Level Marketing
+body NOT_ML_MARKETING		/\bnot (?:MLM|multi.level.marketing)\b/i
+describe NOT_ML_MARKETING	Apparently, NOT Multi Level Marketing
 
 body SERIOUS_CASH	        /\bserious cash\b/i
 describe SERIOUS_CASH		Serious cash
