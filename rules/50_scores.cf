@@ -831,10 +831,11 @@ score X_NJABL_DIALUP                 0.50
 
 # ok_languages and ok_locales
 
-score UNDESIRED_LANGUAGE_BODY        3.97
 score CHARSET_FARAWAY                3.20
-score CHARSET_FARAWAY_BODY           2.45
 score CHARSET_FARAWAY_HEADERS        2.06
+score HTML_CHARSET_FARAWAY           0.5
+score MIME_CHARSET_FARAWAY           2.45
+score UNDESIRED_LANGUAGE_BODY        3.97
 
 # highly generic tests for viruses that are scored just high enough to run
 

@@ -144,6 +144,7 @@ body CHARSET_FARAWAY		eval:check_for_faraway_charset()
 describe CHARSET_FARAWAY	Character set indicates a foreign language
 tflags CHARSET_FARAWAY          userconf
 
+# note: __HIGHBITS is used by HTML_CHARSET_FARAWAY
 rawbody __MIME_CHARSET_FARAWAY	eval:check_for_mime_faraway_charset()
 body __HIGHBITS			/(?:[\x80-\xff].?){4,}/
 meta MIME_CHARSET_FARAWAY	(__MIME_CHARSET_FARAWAY && __HIGHBITS)
