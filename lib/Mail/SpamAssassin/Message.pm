@@ -395,6 +395,132 @@ sub get_pristine_body {
 
 # ---------------------------------------------------------------------------
 
+=item extract_message_metadata($main)
+
+=cut
+
+sub extract_message_metadata {
+  my ($self, $main) = @_;
+
+  # do this only once per message, it can be expensive
+  if ($self->{already_extracted_metadata}) { return; }
+  $self->{already_extracted_metadata} = 1;
+
+  $self->{metadata}->extract ($self, $main);
+}
+
+# ---------------------------------------------------------------------------
+
+=item $str = get_metadata($hdr)
+
+=cut
+
+sub get_metadata {
+  my ($self, $hdr) = @_;
+  if (!$self->{metadata}) {
+    warn "metadata: oops! get_metadata() called after finish_metadata()"; return;
+  }
+  $self->{metadata}->{strings}->{$hdr};
+}
+
+=item put_metadata($hdr, $text)
+
+=cut
+
+sub put_metadata {
+  my ($self, $hdr, $text) = @_;
+  if (!$self->{metadata}) {
+    warn "metadata: oops! put_metadata() called after finish_metadata()"; return;
+  }
+  $self->{metadata}->{strings}->{$hdr} = $text;
+}
+
+=item delete_metadata($hdr)
+
+=cut
+
+sub delete_metadata {
+  my ($self, $hdr) = @_;
+  if (!$self->{metadata}) {
+    warn "metadata: oops! delete_metadata() called after finish_metadata()"; return;
+  }
+  delete $self->{metadata}->{strings}->{$hdr};
+}
+
+=item $str = get_all_metadata()
+
+=cut
+
+sub get_all_metadata {
+  my ($self) = @_;
+
+  if (!$self->{metadata}) {
+    warn "metadata: oops! get_all_metadata() called after finish_metadata()"; return;
+  }
+  my @ret = ();
+  foreach my $key (sort keys %{$self->{metadata}->{strings}}) {
+    push (@ret, "$key: " . $self->{metadata}->{strings}->{$key} . "\n");
+  }
+  return (wantarray ? @ret :  join('', @ret));
+}
+
+# ---------------------------------------------------------------------------
+
+=item finish_metadata()
+
+Destroys the metadata for this message.  Once a message has been
+scanned fully, the metadata is no longer required.   Destroying
+this will free up some memory.
+
+=cut
+
+sub finish_metadata {
+  my ($self) = @_;
+  if (defined ($self->{metadata})) {
+    $self->{metadata}->finish();
+    delete $self->{metadata};
+  }
+}
+
+=item finish()
+
+Clean up an object so that it can be destroyed.
+
+=cut
+
+sub finish {
+  my ($self) = @_;
+
+  # Clean ourself up
+  $self->finish_metadata();
+  undef $self->{pristine_headers};
+  undef $self->{pristine_body};
+  delete $self->{pristine_headers};
+  delete $self->{pristine_body};
+  delete $self->{text_decoded};
+  delete $self->{text_rendered};
+
+  # Destroy the tree ...
+  $self->SUPER::finish();
+}
+
+# ---------------------------------------------------------------------------
+
+=item receive_date()
+
+Return a time_t value with the received date of the current message,
+or current time if received time couldn't be determined.
+
+=cut
+
+sub receive_date {
+  my($self) = @_;
+
+  return Mail::SpamAssassin::Util::receive_date(scalar $self->get_all_headers(0,1));
+}
+
+# ---------------------------------------------------------------------------
+
 =back
 
 =head1 PARSING METHODS, NON-PUBLIC
@@ -811,132 +937,6 @@ sub split_into_array_of_short_lines {
     push (@result, $line);
   }
   @result;
-}
-
-# ---------------------------------------------------------------------------
-
-=item $str = get_metadata($hdr)
-
-=cut
-
-sub extract_message_metadata {
-  my ($self, $main) = @_;
-
-  # do this only once per message, it can be expensive
-  if ($self->{already_extracted_metadata}) { return; }
-  $self->{already_extracted_metadata} = 1;
-
-  $self->{metadata}->extract ($self, $main);
-}
-
-# ---------------------------------------------------------------------------
-
-=item $str = get_metadata($hdr)
-
-=cut
-
-sub get_metadata {
-  my ($self, $hdr) = @_;
-  if (!$self->{metadata}) {
-    warn "metadata: oops! get_metadata() called after finish_metadata()"; return;
-  }
-  $self->{metadata}->{strings}->{$hdr};
-}
-
-=item put_metadata($hdr, $text)
-
-=cut
-
-sub put_metadata {
-  my ($self, $hdr, $text) = @_;
-  if (!$self->{metadata}) {
-    warn "metadata: oops! put_metadata() called after finish_metadata()"; return;
-  }
-  $self->{metadata}->{strings}->{$hdr} = $text;
-}
-
-=item delete_metadata($hdr)
-
-=cut
-
-sub delete_metadata {
-  my ($self, $hdr) = @_;
-  if (!$self->{metadata}) {
-    warn "metadata: oops! delete_metadata() called after finish_metadata()"; return;
-  }
-  delete $self->{metadata}->{strings}->{$hdr};
-}
-
-=item $str = get_all_metadata()
-
-=cut
-
-sub get_all_metadata {
-  my ($self) = @_;
-
-  if (!$self->{metadata}) {
-    warn "metadata: oops! get_all_metadata() called after finish_metadata()"; return;
-  }
-  my @ret = ();
-  foreach my $key (sort keys %{$self->{metadata}->{strings}}) {
-    push (@ret, "$key: " . $self->{metadata}->{strings}->{$key} . "\n");
-  }
-  return (wantarray ? @ret :  join('', @ret));
-}
-
-# ---------------------------------------------------------------------------
-
-=item finish_metadata()
-
-Destroys the metadata for this message.  Once a message has been
-scanned fully, the metadata is no longer required.   Destroying
-this will free up some memory.
-
-=cut
-
-sub finish_metadata {
-  my ($self) = @_;
-  if (defined ($self->{metadata})) {
-    $self->{metadata}->finish();
-    delete $self->{metadata};
-  }
-}
-
-=item finish()
-
-Clean up an object so that it can be destroyed.
-
-=cut
-
-sub finish {
-  my ($self) = @_;
-
-  # Clean ourself up
-  $self->finish_metadata();
-  undef $self->{pristine_headers};
-  undef $self->{pristine_body};
-  delete $self->{pristine_headers};
-  delete $self->{pristine_body};
-  delete $self->{text_decoded};
-  delete $self->{text_rendered};
-
-  # Destroy the tree ...
-  $self->SUPER::finish();
-}
-
-# ---------------------------------------------------------------------------
-
-=item receive_date()
-
-Return a time_t value with the received date of the current message,
-or current time if received time couldn't be determined.
-
-=cut
-
-sub receive_date {
-  my($self) = @_;
-
-  return Mail::SpamAssassin::Util::receive_date(scalar $self->get_all_headers(0,1));
 }
 
 # ---------------------------------------------------------------------------
