@@ -118,7 +118,7 @@ sub _find_parts {
     # This object is a subtree root.  Search all children.
     foreach my $parts ( @{$self->{'body_parts'}} ) {
       # Add the recursive results to our results
-      push(@ret, $parts->_find_parts($re));
+      push(@ret, $parts->_find_parts($re, $onlyleaves, 1));
     }
   }
 
