@@ -77,6 +77,8 @@ sub parse_received_headers {
   $self->{num_relays_untrusted} = 0;
   $self->{relays_untrusted_str} = '';
 
+  $self->{num_relays_unparseable} = 0;
+
   # now figure out what relays are trusted...
   my $trusted = $main->{conf}->{trusted_networks};
   my $internal = $main->{conf}->{internal_networks};
@@ -462,23 +464,14 @@ sub parse_received_line {
       # Received: from sc8-sf-list1-b.sourceforge.net ([10.3.1.13] helo=sc8-sf-list1.sourceforge.net) by sc8-sf-list2.sourceforge.net with esmtp (Exim 3.31-VA-mm2 #1 (Debian)) id 18t301-0007Bh-00; Wed, 12 Mar 2003 01:58:13 -0800
       # Received: from dsl092-072-213.bos1.dsl.speakeasy.net ([66.92.72.213] helo=blazing.arsecandle.org) by sc8-sf-list1.sourceforge.net with esmtp (Cipher TLSv1:DES-CBC3-SHA:168) (Exim 3.31-VA-mm2 #1 (Debian)) id 18lyuU-0007TI-00 for <SpamAssassin-talk@lists.sourceforge.net>; Thu, 20 Feb 2003 14:11:18 -0800
       # Received: from eclectic.kluge.net ([66.92.69.221] ident=[W9VcNxE2vKxgWHD05PJbLzIHSxcmZQ/O]) by sc8-sf-list1.sourceforge.net with esmtp (Cipher TLSv1:DES-CBC3-SHA:168) (Exim 3.31-VA-mm2 #1 (Debian)) id 18m0hT-00031I-00 for <spamassassin-talk@lists.sourceforge.net>; Thu, 20 Feb 2003 16:06:00 -0800
-      if (/^from (\S+) \(\[(${IP_ADDRESS})\](:\d+)? helo=(\S+) ident=(\S+)\) by (\S+) /) {
-	$rdns=$1; $ip = $2; $helo = $4; $ident = $5; $by = $6; goto enough;
-      }
-      # (and without ident)
-      if (/^from (\S+) \(\[(${IP_ADDRESS})\](:\d+)? helo=(\S+)\) by (\S+) /) {
-	$rdns=$1; $ip = $2; $helo = $4; $by = $5; goto enough;
-      }
-
       # Received: from mail.ssccbelen.edu.pe ([216.244.149.154]) by yzordderrex
       # with esmtp (Exim 3.35 #1 (Debian)) id 18tqiz-000702-00 for
       # <jm@example.com>; Fri, 14 Mar 2003 15:03:57 +0000
-      if (/^from (\S+) \(\[(${IP_ADDRESS})\](:\d+)?\) by (\S+) /) {
-	# speculation: Exim uses this format when rdns==helo. TODO: verify fully
-	$rdns= $1; $ip = $2; $helo = $1; $by = $4; goto enough;
-      }
-      if (/^from (\S+) \(\[(${IP_ADDRESS})\](:\d+)? ident=(\S+)\) by (\S+) /) {
-	$rdns= $1; $ip = $2; $helo = $1; $ident = $4; $by = $5; goto enough;
+      if (/^from (\S+) \(\[(${IP_ADDRESS})\](.*?)\) by (\S+) /) {
+        $rdns=$1; $ip = $2; my $sub = $3; $by = $4;
+        $sub =~ s/helo=(\S+)// and $helo = $1;
+        $sub =~ s/ident=(\S+)// and $ident = $1;
+        goto enough;
       }
 
       # Received: from boggle.ihug.co.nz [203.109.252.209] by grunt6.ihug.co.nz
@@ -853,12 +846,10 @@ sub parse_received_line {
       goto enough;
     }
 
-    # Received: from raptor.research.att.com (bala@localhost) by
-    # raptor.research.att.com (SGI-8.9.3/8.8.7) with ESMTP id KAA14788 
-    # for <asrg@example.com>; Fri, 7 Mar 2003 10:37:56 -0500 (EST)
-    if (/^from (\S+) \((\S+\@\S+)\) by (\S+) \(/) { return; }
-
-    # Received: from mmail by argon.connect.org.uk with local (connectmail/exim) id 18tOsg-0008FX-00; Thu, 13 Mar 2003 09:20:06 +0000
+    # Received: from mmail by argon.connect.org.uk with local (connectmail/exim)
+    # id 18tOsg-0008FX-00; Thu, 13 Mar 2003 09:20:06 +0000
+    # Received: from andrew by trinity.supernews.net with local (Exim 4.12)
+    # id 18xeL6-000Dn1-00; Tue, 25 Mar 2003 02:39:00 +0000
     if (/^from (\S+) by (\S+) with local/) { return; }
 
     # Received: from [192.168.1.104] (account nazgul HELO [192.168.1.104])
@@ -972,6 +963,12 @@ sub parse_received_line {
   # ignore any lines starting with "by", we want the "from"s!
   if (/^by /) { return; }
 
+  # Received: from raptor.research.att.com (bala@localhost) by
+  # raptor.research.att.com (SGI-8.9.3/8.8.7) with ESMTP id KAA14788 
+  # for <asrg@example.com>; Fri, 7 Mar 2003 10:37:56 -0500 (EST)
+  # make this localhost-specific, so we know it's safe to ignore
+  if (/^from \S+ \(\S+\@${LOCALHOST}\) by \S+ \(/) { return; }
+
   # from qmail-scanner-general-admin@lists.sourceforge.net by alpha by uid 7791 with qmail-scanner-1.14 (spamassassin: 2.41. Clear:SA:0(-4.1/5.0):. Processed in 0.209512 secs)
   if (/^from \S+\@\S+ by \S+ by uid \S+ /) { return; }
 
@@ -985,38 +982,42 @@ sub parse_received_line {
   # with SMTP id h2R2iivG093740; Wed, 26 Mar 2003 20:44:44 -0600 
   # (CST) (envelope-from x@x.org)
   # Received: from localhost (localhost [127.0.0.1]) (uid 500) by mail with local; Tue, 07 Jan 2003 11:40:47 -0600
-  if (/^from ${LOCALHOST} \((?:\S+\@)?${LOCALHOST}[\) ]/) { return; }
+  if (/^from ${LOCALHOST} \((?:\S+\@)?${LOCALHOST}[\)\[]/) { return; }
 
   # Received: from olgisoft.com (127.0.0.1) by 127.0.0.1 (EzMTS MTSSmtp
   # 1.55d5) ; Thu, 20 Mar 03 10:06:43 +0100 for <asrg@ietf.org>
   if (/^from \S+ \((?:\S+\@)?${LOCALHOST}\) /) { return; }
 
   # Received: from casper.ghostscript.com (raph@casper [127.0.0.1]) h148aux8016336verify=FAIL); Tue, 4 Feb 2003 00:36:56 -0800
-  # TODO: could use IPv6 localhost
-  if (/^from (\S+) \(\S+\@\S+ \[127\.0\.0\.1\]\) /) { return; }
+  if (/^from (\S+) \(\S+\@\S+ \[${LOCALHOST}\]\) /) { return; }
 
   # Received: from (AUTH: e40a9cea) by vqx.net with esmtp (courier-0.40) for <asrg@ietf.org>; Mon, 03 Mar 2003 14:49:28 +0000
   if (/^from \(AUTH: (\S+)\) by (\S+) with /) { return; }
+
+  # Received: Message by Barricade wilhelm.eyp.ee with ESMTP id h1I7hGU06122 for <spamassassin-talk@lists.sourceforge.net>; Tue, 18 Feb 2003 09:43:16 +0200
+  if (/^Message by /) {
+    return;	# whatever
+  }
 
   # Received: FROM ca-ex-bridge1.nai.com BY scwsout1.nai.com ;
   # Fri Feb 07 10:18:12 2003 -0800
   if (/^FROM \S+ BY \S+ \; /) { return; }
 
-  # Received: from andrew by trinity.supernews.net with local (Exim 4.12)
-  # id 18xeL6-000Dn1-00; Tue, 25 Mar 2003 02:39:00 +0000
+  # ------------------------------------------------------------------------
+  # HANDOVERS WE KNOW WE CAN'T DEAL WITH: TCP transmission, but to MTAs that
+  # just don't log enough info for us to use (ie. no IP address present).
+  # Note: "goto unparseable" is strongly recommended here, unless you're sure
+  # the regexp won't match something in the field; otherwise ALL_TRUSTED may
+  # fire even in the presence of an unparseable Received header.
+
   # Received: from CATHY.IJS.SI by CATHY.IJS.SI (PMDF V4.3-10 #8779) id <01KTSSR50NSW001MXN@CATHY.IJS.SI>; Fri, 21 Mar 2003 20:50:56 +0100
   # Received: from MATT_LINUX by hippo.star.co.uk via smtpd (for mail.webnote.net [193.120.211.219]) with SMTP; 3 Jul 2002 15:43:50 UT
   # Received: from cp-its-ieg01.mail.saic.com by cpmx.mail.saic.com for me@jmason.org; Tue, 23 Jul 2002 14:09:10 -0700
-  if (/^from \S+ by \S+ (?:with|via|for|\()/) { return; }
+  if (/^from \S+ by \S+ (?:with|via|for|\()/) { goto unparseable; }
 
   # Received: from virtual-access.org by bolero.conactive.com ; Thu, 20 Feb 2003 23:32:58 +0100
   if (/^from (\S+) by (\S+) *\;/) {
-    return;	# can't trust this
-  }
-
-  # Received: Message by Barricade wilhelm.eyp.ee with ESMTP id h1I7hGU06122 for <spamassassin-talk@lists.sourceforge.net>; Tue, 18 Feb 2003 09:43:16 +0200
-  if (/^Message by /) {
-    return;	# whatever
+    goto unparseable;	# can't trust this
   }
 
   # ------------------------------------------------------------------------
@@ -1034,6 +1035,10 @@ sub parse_received_line {
 
   dbg("received-header: unknown format: $_");
   # and skip the line entirely!  We can't parse it...
+
+unparseable:
+
+  $self->{num_relays_unparseable}++;
   return;
 
   # ------------------------------------------------------------------------
