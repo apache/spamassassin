@@ -180,15 +180,18 @@ body BALANCE_FOR_LONG           eval:check_for_very_long_text()
 describe BALANCE_FOR_LONG       Message text is over 8K in size
 tflags BALANCE_FOR_LONG		nice
 
-rawbody UNIFIED_PATCH           /^\@\@ [-+0-9]+,[0-9]+ [-+0-9]+,[0-9]+ \@\@$/
-describe UNIFIED_PATCH          Contains what looks like a patch from diff -u
-tflags UNIFIED_PATCH		nice
+rawbody PATCH_UNIFIED_DIFF	/^\@\@ [-+0-9]+,[0-9]+ [-+0-9]+,[0-9]+ \@\@$/
+describe PATCH_UNIFIED_DIFF	Contains what looks like a patch from diff -u
+tflags PATCH_UNIFIED_DIFF	nice
 
-rawbody DIFF_C_PATCH            /^\*{3} \S+\s+\S{3} \S{3} .\d \d{2}:\d{2}:\d{2} \d+\s*$/
-describe DIFF_C_PATCH           Contains what looks like a patch from diff -c
-tflags DIFF_C_PATCH		nice
+rawbody PATCH_CONTEXT_DIFF	/^\*{3} \S+\s+\S{3} \S{3} .\d \d{2}:\d{2}:\d{2} \d+\s*$/
+describe PATCH_CONTEXT_DIFF	Contains what looks like a patch from diff -c
+tflags PATCH_CONTEXT_DIFF	nice
 
 body DISCLAIMER_LEGALESE        /This e?-?mail.{1,20}confidential.{1,20}legally privileged/
 describe DISCLAIMER_LEGALESE    Contains what looks like an 'E-Mail Disclaimer'
 tflags DISCLAIMER_LEGALESE	nice
 
+body EMAIL_ATTRIBUTION		/^"?\w.{4,} (?:wrote|writes):$/
+describe EMAIL_ATTRIBUTION	Contains what looks like an email attribution
+tflags EMAIL_ATTRIBUTION	nice

@@ -1497,6 +1497,21 @@ sub check_for_num_yelling_lines {
     return ($self->{num_yelling_lines} >= $threshold);
 }
 
+# A possibility for spotting heavy HTML spam and image-only spam
+# Submitted by Michael Moncur 7/26/2002, see bug #608, it uses both
+# $body and $rawbody so it needs to call get_decoded_body_text_array()
+sub check_html_percentage {
+  my ($self, $body, $min, $max) = @_;
+  my $rawlength = 0;
+  my $bodylength = 0;
+  my $rawbody = $self->get_decoded_body_text_array();
+  map($rawlength += length($_), grep (! /^SPAM: /, @{$rawbody}));
+  map($bodylength += length($_), @{$body});
+  return 0 if $rawlength == 0;
+  my $htmlpercent = ($rawlength - $bodylength) / $rawlength * 100;
+  return ($htmlpercent > $min && $htmlpercent <= $max);
+}
+
 sub check_for_mime_excessive_qp {
   my ($self) = @_;
 
