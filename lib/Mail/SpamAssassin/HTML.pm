@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.85 2003/05/17 02:55:52 quinlan Exp $
+# $Id: HTML.pm,v 1.86 2003/05/17 03:40:53 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -469,47 +469,37 @@ sub html_tests {
       $self->{html}{image_web_bugs} = 1;
     }
     if ($width < 2 && $height < 2 && exists $attr->{src}) {  
-      if ($attr->{src} =~ /\.(?:pl|cgi|php|asp)/)
+      if ($attr->{src} =~ /\.(?:pl|cgi|php|asp|jsp|cfm)\b/i)
       {
 	$self->{html}{'t_image_web_bugs0'} = 1;
       }
-      if ($attr->{src} =~ /\.(?:pl|cgi|php|asp)/i)
+      if ($attr->{src} =~ /\.(?:aspx?|pl|php[34]?|jsp|cfm|cgi)\b/i)
       {
 	$self->{html}{'t_image_web_bugs1'} = 1;
       }
-      if ($attr->{src} =~ /\.(?:pl|cgi|php|asp|jsp|cfm)/i)
+    }
+    if ((($width < 2 && $height < 2) || ($width * $height <= 9)) &&
+	exists $attr->{src})
+    {  
+      if ($attr->{src} =~ /\.(?:pl|cgi|php|asp|jsp|cfm)\b/i)
       {
 	$self->{html}{'t_image_web_bugs2'} = 1;
       }
-      if ($attr->{src} =~ /\.(?:pl|cgi|php|asp|jsp|cfm)\b/i)
+      if ($attr->{src} =~ /\.(?:aspx?|pl|php[34]?|jsp|cfm|cgi)\b/i)
       {
 	$self->{html}{'t_image_web_bugs3'} = 1;
       }
-      if ($attr->{src} !~ /\.(?:jpe?g|gif|png)$/i && $attr->{src} !~ /^cid:/i)
+    }
+    if ((($width < 4 && $height < 4) || ($width * $height <= 25)) &&
+	exists $attr->{src})
+    {  
+      if ($attr->{src} =~ /\.(?:pl|cgi|php|asp|jsp|cfm)\b/i)
       {
 	$self->{html}{'t_image_web_bugs4'} = 1;
       }
-    }
-    if ($width <= 1 && $height <= 1 && exists $attr->{src}) {  
-      if ($attr->{src} =~ /\.(?:pl|cgi|php|asp)/)
+      if ($attr->{src} =~ /\.(?:aspx?|pl|php[34]?|jsp|cfm|cgi)\b/i)
       {
 	$self->{html}{'t_image_web_bugs5'} = 1;
-      }
-      if ($attr->{src} =~ /\.(?:pl|cgi|php|asp)/i)
-      {
-	$self->{html}{'t_image_web_bugs6'} = 1;
-      }
-      if ($attr->{src} =~ /\.(?:pl|cgi|php|asp|jsp|cfm)/i)
-      {
-	$self->{html}{'t_image_web_bugs7'} = 1;
-      }
-      if ($attr->{src} =~ /\.(?:pl|cgi|php|asp|jsp|cfm)\b/i)
-      {
-	$self->{html}{'t_image_web_bugs8'} = 1;
-      }
-      if ($attr->{src} !~ /\.(?:jpe?g|gif|png)$/i && $attr->{src} !~ /^cid:/i)
-      {
-	$self->{html}{'t_image_web_bugs9'} = 1;
       }
     }
   }
