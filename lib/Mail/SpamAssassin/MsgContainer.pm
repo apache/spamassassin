@@ -55,6 +55,7 @@ sub new {
   my $self = {
     headers		=> {},
     raw_headers		=> {},
+    metadata		=> {},
     body_parts		=> [],
     header_order	=> [],
     };
@@ -501,6 +502,51 @@ sub ignore {
   my ($self) = @_;
   exit (0) unless $self->{noexit};
 }
+
+# ---------------------------------------------------------------------------
+
+=item $str = get_metadata($hdr)
+
+=cut
+
+sub get_metadata {
+  my ($self, $hdr) = @_;
+  $self->{metadata}->{$hdr};
+}
+
+=item put_metadata($hdr, $text)
+
+=cut
+
+sub put_metadata {
+  my ($self, $hdr, $text) = @_;
+  $self->{metadata}->{$hdr} = $text;
+}
+
+=item delete_metadata($hdr)
+
+=cut
+
+sub delete_metadata {
+  my ($self, $hdr) = @_;
+  delete $self->{metadata}->{$hdr};
+}
+
+=item $str = get_all_metadata()
+
+=cut
+
+sub get_all_metadata {
+  my ($self) = @_;
+
+  my @ret = ();
+  foreach my $key (sort keys %{$self->{metadata}}) {
+    push (@ret, $key, ": ", $self->{metadata}->{$key}, "\n");
+  }
+  return join ("", @ret);
+}
+
+# ---------------------------------------------------------------------------
 
 sub dbg { Mail::SpamAssassin::dbg (@_); }
 
