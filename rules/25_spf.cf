@@ -49,10 +49,10 @@ describe SPF_HELO_PASS	        SPF: HELO matches SPF record
 describe SPF_HELO_FAIL		SPF: HELO does not match SPF record (fail)
 describe SPF_HELO_SOFTFAIL	SPF: HELO does not match SPF record (softfail)
 
-tflags SPF_PASS		        net nice
+tflags SPF_PASS		        net nice userconf
 tflags SPF_FAIL			net
 tflags SPF_SOFTFAIL		net
-tflags SPF_HELO_PASS		net nice
+tflags SPF_HELO_PASS		net nice userconf
 tflags SPF_HELO_FAIL		net
 tflags SPF_HELO_SOFTFAIL	net
 
