@@ -338,8 +338,6 @@ sub rewrite_as_spam {
   # First, rewrite the subject line.
   if ($self->{conf}->{rewrite_subject}) {
     $_ = $srcmsg->get_header ("Subject");
-    my $SUBJ = $srcmsg->get_header ("SUBJECT"); # not really legal, but...
-    $_ ||= $SUBJ;
     $_ ||= '';
 
     my $tag = $self->{conf}->{subject_tag};
@@ -352,11 +350,7 @@ sub rewrite_as_spam {
     
     s/^(?:\Q${tag}\E |)/${tag} /g;
 
-    if (defined $SUBJ) {        # keep the uppercase subject header
-      $self->{msg}->replace_header ("SUBJECT", $_);
-    } else {
-      $self->{msg}->replace_header ("Subject", $_);
-    }
+    $self->{msg}->replace_header ("Subject", $_);
   }
 
   # add some headers...
@@ -376,11 +370,9 @@ sub rewrite_as_spam {
   # defang HTML mail; change it to text-only.
   if ($self->{conf}->{defang_mime}) {
     my $ct = $srcmsg->get_header ("Content-Type");
-    $ct ||= $srcmsg->get_header ("Content-type");
 
     if (defined $ct && $ct ne '' && $ct ne 'text/plain') {
       $self->{msg}->replace_header ("Content-Type", "text/plain");
-      $self->{msg}->delete_header ("Content-type"); 	# just in case
       $self->{msg}->replace_header ("X-Spam-Prev-Content-Type", $ct);
     }
   }
@@ -533,7 +525,6 @@ sub get_raw_body_text_array {
   }
 
   my $ctype = $self->{msg}->get_header ('Content-Type');
-  $ctype ||=  $self->{msg}->get_header ('Content-type');
   $ctype ||=  '';
 
   # if it's non-text, just return an empty body rather than the base64-encoded
