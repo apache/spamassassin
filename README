@@ -95,9 +95,31 @@ Using SpamAssassin
 ------------------
 
 
-If you want to use Mail::Audit:
+Steps to take for every installation:
 
     - Install Mail::Audit and Mail::SpamAssassin on your mail server, as above.
+
+    - Test it:
+
+    	spamassassin -t < sample-nonspam.txt > nonspam.out
+    	spamassassin -t < sample-spam.txt > spam.out
+
+      Verify (using a text viewer, ie. "less" or "notepad") that nonspam.out
+      has not been tagged as spam, and that spam.out has.  The files should
+      contain the full text and headers of the messages, the "spam.out" message
+      should be annotated with a report from SpamAssassin, and there should be
+      no errors when you run the commands.
+
+      (Note that there may be a warning from -w about a deprecated usage
+      in Net::DNS; this is totally harmless, but ugly. Until Net::DNS is
+      fixed this is unavoidable) :(
+
+      If the commands do not work, DO NOT PROCEED TO THE NEXT STEP, as you
+      will lose mail!
+
+
+
+If you want to use Mail::Audit:
 
     - run "perldoc Mail::SpamAssassin" and take a look at the synopsis, it
       outlines what you need to add to your audit script.
@@ -108,23 +130,35 @@ If you want to use Mail::Audit:
 
 
 
-If you don't:
+If you're using procmail:
 
-    - Install it on your mail server, as above.
+    - Make a backup of your .procmailrc (if it exists).
 
-    - Test it:
+    	cp ~/.procmailrc ~/.procmailrc.bak
 
-    	./spamassassin -t < sample-nonspam.txt > nonspam.out
-    	./spamassassin -t < sample-spam.txt > spam.out
+    - add the following lines to ~/.procmailrc, at the top of the file
+      before any existing recipes:
 
-      Verify (using a text viewer, ie. "less" or "notepad") that nonspam.out
-      has not been tagged as spam, and that spam.out has.  The files should
-      contain the full text and headers of the messages, the "spam" message
-      should be annotated with a report from SpamAssassin, and there should be
-      no errors when you run the commands.
+        :0fhw
+        | spamassassin -P
 
-      If the commands do not work, DO NOT PROCEED TO THE NEXT STEP, as you
-      will lose mail!
+        :0:  
+        * ^Subject:.*\*\*\*\*SPAM\*\*\*\*
+        caughtspam
+
+      That'll process all mail through SA, and refile spam messages to
+      a folder called "caughtspam" in your home directory.
+
+    - Send yourself a mail message, and ensure it gets to you.  If it does not,
+      copy your old backed-up .procmailrc file back into place and ask your
+      sysadmin for help!  Here's commands to do that:
+
+      	cp ~/.procmailrc.bak ~/.procmailrc
+	echo "Help!" | mail root
+
+
+
+If you don't use any mail filter just yet:
 
     - Make a backup of your .forward (if it exists).
 
@@ -132,10 +166,7 @@ If you don't:
 
     - Change your ~/.forward file so it reads like this:
 
-    	"| /path/to/spamassassin"
-
-      Where "/path/to/spamassassin" is the path to where the "spamassassin"
-      script is installed.
+    	"| spamassassin || exit 75"
 
     - Send yourself a mail message, and ensure it gets to you.  If it does not,
       copy your old backed-up .forward file back into place and ask your
@@ -143,6 +174,10 @@ If you don't:
 
       	cp ~/.forward.bak ~/.forward
 	echo "Help!" | mail root
+
+
+
+Other installation notes:
 
     - If you get spammed, it is helpful to everyone else if you re-run
       spamassassin with the "-r" option to report the message in question as
