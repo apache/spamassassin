@@ -66,7 +66,7 @@ else
   );
 
   # Enable SSL only if requested.
-  unless ($args{'enable-ssl'}) {
+  if ($args{'enable-ssl'} and $args{'enable-ssl'} ne 'yes') {
     delete $env{SSLCFLAGS};
     delete $env{SSLLIBS};
   }
