@@ -793,7 +793,7 @@ sub uri_to_domain {
   }
   
   # $uri is now the domain only
-  return $uri;
+  return lc $uri;
 }
 
 sub uri_list_canonify {
