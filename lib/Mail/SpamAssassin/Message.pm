@@ -85,6 +85,7 @@ sub new {
 
   $self->{pristine_headers} =	'';
   $self->{pristine_body} =	'';
+  $self->{mime_boundary_state} = {};
 
   bless($self,$class);
 
@@ -375,7 +376,11 @@ sub _parse_multipart {
     my $line;
     my $tmp_line = @{$body};
     for ($line=0; $line < $tmp_line; $line++) {
-      last if $body->[$line] =~ /^\-\-\Q$boundary\E$/;
+      if ($body->[$line] =~ /^\-\-\Q$boundary\E$/) {
+	# Make note that we found the opening boundary
+	$self->{mime_boundary_state}->{$boundary} = 1;
+        last;
+      }
     }
 
     # Found a boundary, ignore the preamble
@@ -416,7 +421,11 @@ sub _parse_multipart {
         $self->parse_body( $msg, $part_msg, $p_boundary, $part_array, 0 );
       }
 
-      last if (defined $boundary && $line =~ /^\-\-\Q${boundary}\E\-\-$/);
+      if (defined $boundary && $line =~ /^\-\-\Q${boundary}\E\-\-$/) {
+	# Make a note that we've seen the end boundary
+	$self->{mime_boundary_state}->{$boundary}--;
+        last;
+      }
 
       # make sure we start with a new clean node
       $in_body  = 0;

@@ -2552,7 +2552,6 @@ sub _check_attachments {
 
   # MIME status
   my $where = -1;		# -1 = start, 0 = nowhere, 1 = header, 2 = body
-  my %state;			# state of each MIME part
   my $qp_bytes = 0;		# total bytes in QP regions
   my $qp_count = 0;		# QP-encoded bytes in QP regions
   my @part_bytes;		# MIME part total bytes
@@ -2667,6 +2666,7 @@ sub _check_attachments {
   if ($qp_bytes) {
     $self->{mime_qp_ratio} = $qp_count / $qp_bytes;
   }
+
   if ($self->{mime_multipart_alternative}) {
     my $text;
     my $html;
@@ -2683,8 +2683,10 @@ sub _check_attachments {
       $self->{mime_multipart_ratio} = ($text / $html);
     }
   }
-  foreach my $str (keys %state) {
-    if ($state{$str} != 0) {
+
+  # Look to see if any multipart boundaries are not "balanced"
+  foreach my $val (values %{$self->{msg}->{mime_boundary_state}}) {
+    if ($val != 0) {
       $self->{mime_missing_boundary} = 1;
       last;
     }
