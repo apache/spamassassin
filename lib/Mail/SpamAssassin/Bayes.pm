@@ -442,13 +442,7 @@ sub tokenize_line {
       # stop-list for numeric tokens.  These are squarely in the gray
       # area, and it just slows us down to record them.
       if ($token !~ /^(?:
-		  H\*r:ip\* |
-		  \QH*r:NN.NN.NNN\E |
-		  \QH*r:N.N.N\E |
-		  \QH*r:NNN.NNN.NNN\E |
-		  \QH*r:NNNN\E |
-		  \QH*r:NNN.NN.NN\E |
-		  \QNNNN\E
+		  H\*r:ip\* | \QNNNN\E
 		)/x)
       {
 	push (@{$self->{tokens}}, 'N:'.$tokprefix.$token);
