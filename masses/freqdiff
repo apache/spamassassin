@@ -18,9 +18,9 @@
 # limitations under the License.
 # </@LICENSE>
 
-use vars qw($opt_a $opt_b $opt_c $opt_d $opt_h $opt_p $opt_r);
+use vars qw($opt_a $opt_b $opt_c $opt_d $opt_h $opt_p $opt_r $opt_l);
 use Getopt::Std;
-getopts("abcdhpr");
+getopts("abcdhprl:");
 
 my $prog = $0;
 $prog =~ s@.*/@@;
@@ -40,6 +40,7 @@ usage: $prog [options] [first input] [second input]
  -h    print this help
  -p    print percentage of frequencies ((first / (first + second)) * 100.0)
  -r    use relative frequencies (account for size of inputs, useful for -p)
+ -l N  only read first N lines
 
 default is -d if input line counts are within 1% of each other and -p otherwise
 EOF
@@ -143,9 +144,10 @@ sub read_argv {
 	    s/#.*//;
 	    next unless /\S/;
 	}
-        next if (/^OVERALL/);           # hit-frequencies header line
+	next if (/^OVERALL/);	# hit-frequencies header line
 
 	$line++;
+	next if ($opt_l && $line > $opt_l);
 	$last = $type;
 	# "sort | uniq -c" format
 	if (/^\s*(-?\d+|\d+\.\d+)\s+(.*)/) {
