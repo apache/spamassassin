@@ -81,6 +81,8 @@ sub cmdline_run {
     LOCAL_RULES_DIR     => $main::LOCAL_RULES_DIR,
   });
 
+  $spamtest->init (1);
+
   $spamtest->init_learner({
       use_whitelist     => $opt{'auto-whitelist'},
       bias_scores       => $opt{'bias-scores'},
@@ -89,7 +91,6 @@ sub cmdline_run {
   });
 
   if ($opts->{rebuildonly}) {
-    $spamtest->init (1);
     $spamtest->rebuild_learner_caches({
 		verbose => 1,
 		showdots => \$opt{'showdots'}
@@ -108,8 +109,6 @@ sub cmdline_run {
   # run this lot in an eval block, so we can catch die's and clear
   # up the dbs.
   eval {
-    $spamtest->init (1);
-
     $SIG{INT} = \&killed;
     $SIG{TERM} = \&killed;
 

@@ -94,7 +94,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.167 2003/02/03 12:42:11 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.168 2003/02/09 01:17:35 felicity Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -269,14 +269,6 @@ sub new {
       $self->{locker} = new Mail::SpamAssassin::UnixLocker ($self);
     '; ($@) and die $@;
   }
-
-  $self->{bayes_scanner} = new Mail::SpamAssassin::Bayes ($self);
-
-  my $set = 0;
-  $set |= 1 unless $self->{local_tests_only};
-  $set |= 2 if $self->{bayes_scanner}->is_available();
-
-  $self->{conf}->set_score_set ($set);
 
   $self->{encapsulated_content_description} = 'original message before SpamAssassin';
 
@@ -1070,6 +1062,14 @@ sub init {
   $self->{conf}->finish_parsing ();
 
   delete $self->{config_text};
+
+  $self->{bayes_scanner} = new Mail::SpamAssassin::Bayes ($self);
+
+  my $set = 0;
+  $set |= 1 unless $self->{local_tests_only};
+  $set |= 2 if $self->{bayes_scanner}->is_available();
+
+  $self->{conf}->set_score_set ($set);
 
   if ($self->{conf}->{auto_learn}) {
     $self->init_learner({ });
