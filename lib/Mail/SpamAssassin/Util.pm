@@ -428,6 +428,7 @@ sub time_to_rfc822_date {
 # characters to null.
 sub base64_decode {
   local $_ = shift;
+  my $decoded_length = shift;
 
   s/\s+//g;
   if (HAS_MIME_BASE64 && (length($_) % 4 == 0) &&
@@ -435,11 +436,21 @@ sub base64_decode {
   {
     # only use MIME::Base64 when the XS and Perl are both correct and quiet
     s/(=+)(?!=*$)/'A' x length($1)/ge;
+
+    # If only a certain number of bytes are requested, truncate the encoded
+    # version down to the appropriate size and return the requested bytes
+    if (defined $decoded_length) {
+      $_ = substr $_, 0, 4 * (int($decoded_length/3) + 1);
+      my $decoded = MIME::Base64::decode_base64($_);
+      return substr $decoded, 0, $decoded_length;
+    }
+
+    # otherwise, just decode the whole thing and return it
     return MIME::Base64::decode_base64($_);
   }
-  tr|A-Za-z0-9+/=||cd;			# remove non-base64 characters
+  tr{A-Za-z0-9+/=}{}cd;			# remove non-base64 characters
   s/=+$//;				# remove terminating padding
-  tr|A-Za-z0-9+/=| -_`|;		# translate to uuencode
+  tr{A-Za-z0-9+/=}{ -_`};		# translate to uuencode
   s/.$// if (length($_) % 4 == 1);	# unpack cannot cope with extra byte
 
   my $length;
@@ -447,6 +458,13 @@ sub base64_decode {
   while ($_) {
     $length = (length >= 84) ? 84 : length;
     $out .= unpack("u", chr(32 + $length * 3/4) . substr($_, 0, $length, ''));
+    last if (defined $decoded_length && length $out >= $decoded_length);
+  }
+
+  # If only a certain number of bytes are requested, truncate the encoded
+  # version down to the appropriate size and return the requested bytes
+  if (defined $decoded_length) {
+    return substr $out, 0, $decoded_length;
   }
 
   return $out;
