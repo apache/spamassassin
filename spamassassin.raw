@@ -1,11 +1,30 @@
 #!/usr/bin/perl -w
 
-use lib 'lib';
-use lib '../lib';		# for testing in ./t
+# Locate locally installed SA libraries.
+use File::Spec;
+BEGIN {
+  # Keep FindBin from croak()ing on STDERR and confusing MTAs
+  {
+    local STDERR;
+    open(STDERR, '>' . File::Spec->devnull()) || die $!;
+    require FindBin;
+  }
 
-# put use lines after 'use lib' lines
+  # These are common paths where the SA libs might be found.
+  foreach (qw(lib ../lib ../lib/site_perl ../lib/spamassassin ../share/spamassassin/lib)) {
+    # Note: FindBin returns '/' if it had problems recursing through the paths.
+    # But disallowing '/' might break chrooted systems.
+    my $dir = File::Spec->catdir($FindBin::Bin, split('/', $_));
+    if(-f File::Spec->catfile($dir, "Mail", "SpamAssassin.pm")) {
+      unshift(@INC, $dir);
+      last;
+    }
+  }
+}
+
 use Getopt::Long;
 use Pod::Usage;
+
 
 sub usage {
     my ($verbose, $message) = @_;
@@ -75,7 +94,7 @@ EOVERSION
 #my @msglines = (<STDIN>);
 #pre_chew_for_mail_audit (\@msglines);
 #require Mail::SpamAssassin::MyMailAudit;
-#my $mail = Mail::SpamAssassin::MyMailAudit->new ( data => \@msglines ); 
+#my $mail = Mail::SpamAssassin::MyMailAudit->new ( data => \@msglines );
 
 # 3.
 # No use of Mail::Audit at all, apart from the accept(), reject() and
