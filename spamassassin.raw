@@ -72,6 +72,7 @@ Options:
 		   (only useful if -r is used)
   -l filename      Log all mail messages to a mbox-format file
   -L               Local tests only, do not do internet-based checks
+  -S               Stop testing when spam threshold is reached
   -d		   Remove SpamAssassin reports from a mail message and print
   -c config        configuration file
                    (default:	$rules )
@@ -88,14 +89,14 @@ EOUSAGE
 
 use vars qw{
   $opt_t $opt_c $opt_p $opt_h $opt_V $opt_D $opt_r $opt_P $opt_w $opt_l
-  $opt_d $opt_L $opt_e $opt_W $opt_M $opt_R $opt_F $opt_a
+  $opt_d $opt_L $opt_e $opt_W $opt_M $opt_R $opt_F $opt_a $opt_S
 };
 
 eval {
   require Mail::SpamAssassin;
   require Mail::SpamAssassin::NoMailAudit;
 
-  getopts ('atc:p:ehVDrPw:l:dLWRM:F:') or usage();
+  getopts ('atc:p:ehVDrPw:l:dLSWRM:F:') or usage();
 
   if (defined $opt_h) { usage(); }
   if (defined $opt_V) {
@@ -145,6 +146,7 @@ my $mail = Mail::SpamAssassin::NoMailAudit->new ( add_From_line => $opt_F );
     'rules_filename'	=> $opt_c,
     'userprefs_filename' => $opt_p,
     'local_tests_only'	=> $opt_L,
+    'stop_at_threshold' => $opt_S,
     'debug'		=> $opt_D
   });
 
@@ -352,6 +354,11 @@ Do only the ''local'' tests, ones that do not require an internet connection to
 operate.  Normally, SpamAssassin will try to detect whether you are connected
 to the net before doing these tests anyway, but for faster checks you may wish
 to use this.
+
+=item B<-S>
+
+Stop spam checking as soon as the spam threshold is reached, to increase
+performance. This option also turns off Razor reporting.
 
 =item B<-d>
 
