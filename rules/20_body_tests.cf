@@ -313,7 +313,7 @@ body INCREASE_SALES		/INCREASE SALES/i
 describe INCREASE_SALES		Offers increased sales
 
 # (contrib: Matt Sergeant)
-rawbody LARGE_HEX		/^\s*[0-9a-fA-F]{70,}/
+body LARGE_HEX  		/[0-9a-fA-F]{70,}/
 describe LARGE_HEX		Contains a large block of hexadecimal code
 
 # somehow "/name.*\bcredit.?card\b/is" won't match, even if

@@ -592,6 +592,7 @@ sub get_raw_body_text_array {
     }
   }
 
+  #print "JMD ".join ("", @{$self->{body_text_array}})."\n\n\n";
   return $self->{body_text_array};
 }
 
