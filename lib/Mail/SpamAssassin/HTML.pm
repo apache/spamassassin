@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.25 2002/10/07 01:46:38 quinlan Exp $
+# $Id: HTML.pm,v 1.26 2002/10/07 02:32:02 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -161,6 +161,9 @@ sub html_tests {
   }
   if ($tag eq "script") {
     $self->{html}{javascript} = 1;
+  }
+  if ($tag eq "script" && exists $attr->{language}) {
+    $self->{html}{t_javascript} = 1 if $attr->{language} =~ /javascript/i;
   }
   if ($tag =~ /^(?:body|frame)$/) {
     for (keys %$attr) {
