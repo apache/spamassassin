@@ -1048,13 +1048,17 @@ sub is_dns_available {
     dbg ("dns_available set to no in config file, skipping test", "dnsavailable", -1);
     return $IS_DNS_AVAILABLE;
   }
+
+  # Even if "dns_available" is explicitly set to "yes", we want to ignore
+  # DNS if we're only supposed to be looking at local tests.
+  goto done if ($self->{main}->{local_tests_only});
+
   if ($dnsopt eq "yes") {
     $IS_DNS_AVAILABLE = 1;
     dbg ("dns_available set to yes in config file, skipping test", "dnsavailable", -1);
     return $IS_DNS_AVAILABLE;
   }
   
-  goto done if ($self->{main}->{local_tests_only});
   goto done unless $self->load_resolver();
 
   if ($dnsopt =~ /test:\s+(.+)$/) {
