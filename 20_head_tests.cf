@@ -665,3 +665,16 @@ describe RCVD_AM_PM		Received headers forged (AM/PM)
 header RATWARE_EMPTY_HELO	Received =~ /from  \(\) by /
 describe RATWARE_EMPTY_HELO	Received headers forged (empty HELO)
 
+describe TO_FILENAME		"To" header contains a filename
+header TO_FILENAME		To =~ /<[CDEF]:/
+
+# quinlan: 2003-03-10, updated 2003-03-22
+# reply to a numbered address
+header ID_REPLY_TO_REPLY	Reply-To:addr =~ /reply.*\d{4}.*\@/i
+
+# unsubscribe from a numbered address
+header ID_X_LIST_UNSUBSCRIBE	X-List-Unsubscribe:addr =~ /\d{3}.*\d{3}.*\@/
+header __ID_REPLY_TO		Reply-To:addr =~ /\d{3}.*\d{3}.*\@/
+header __ID_RETURN_PATH		Return-path:addr =~ /\d{3}.*\d{3}.*\@/
+meta ID_UNIQUE			(ID_X_LIST_UNSUBSCRIBE && __ID_RETURN_PATH && __ID_REPLY_TO)
+

@@ -48,7 +48,7 @@ describe PORN_4			URL uses words and phrases which indicate porn (4)
 
 # some frequently-advertised URLs
 uri WWW_CLIK4YOU_COM		/clik4you\.com/i
-describe WWW_CLIK4YOU_COM	Frequent SPAM content
+describe WWW_CLIK4YOU_COM	Frequent Spam content
 
 uri UNSUB_SCRIPT		/^https?:\/\/.*?cgi.*?(?:unsubscribe|remove)/i
 describe UNSUB_SCRIPT		URL of CGI script called "unsubscribe" or "remove"
@@ -82,16 +82,16 @@ uri USERPASS                    m{https?://[^/\s]+?(?::[^/\s]+?)?\@}
 describe USERPASS               URL contains username and (optional) password
 
 uri WWW_AUTOREMOVE_COM		/autoremove\.com/i   
-describe WWW_AUTOREMOVE_COM	Frequent SPAM content
+describe WWW_AUTOREMOVE_COM	Frequent Spam content
 
 uri URI_IS_POUND		m{\#$}
 describe URI_IS_POUND		Filename is just a '\#'; probably a JS trick
 
 uri BTAMAIL_URL			/btamail\.net\.cn/i
-describe BTAMAIL_URL		Frequent SPAM content
+describe BTAMAIL_URL		Frequent Spam content
  	
 uri CHINA_URL			/(?:freehost|yada)china\.com/i
-describe CHINA_URL		Frequent SPAM content
+describe CHINA_URL		Frequent Spam content
 
 uri MAILTO_TO_B2BMAIL		/^mailto:[^\s\@]{1,20}\@b2b-?mail\./is
 describe MAILTO_TO_B2BMAIL	Includes a link to a likely spammer email address (b2b-mail)
@@ -107,3 +107,7 @@ describe E_MAILPROMO_URL	Includes a link to a likely spammer domain (e-mailpromo
 
 uri BARGAIN_URL			/bargains?\.(?:com|biz)/
 describe BARGAIN_URL		Includes a link to a likely spammer domain
+
+uri URI_PXLG			m{http://(?:www\.)?pxlg\.com}i
+describe URI_PXLG		Frequent Spam Content
+
