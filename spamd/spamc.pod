@@ -30,9 +30,10 @@ score/threshold to stdout (as ints) or 0/0 if there was an error.
 
 =item B<-r>
 
-Just output the SpamAssassin report text to stdout, if the message is spam.
-If the message is ham, nothing will be printed.  The first line of the output
-is the number of hits and the threshold, in this format:
+Just output the SpamAssassin report text to stdout, if the message
+is spam.  If the message is ham (non-spam), nothing will be printed.
+The first line of the output is the number of hits and the threshold,
+in this format:
 
 	hits/threshold
 
