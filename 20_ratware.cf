@@ -84,7 +84,7 @@ header RATWARE_SCREWUP_1	X-Mailer =~ /^X-Mailer: /
 describe RATWARE_SCREWUP_1	Bulk email software fingerprint (screwup 1) found in headers
 header RATWARE_SCREWUP_2	X-Mailer =~ /^: /
 describe RATWARE_SCREWUP_2	Bulk email software fingerprint (screwup 2) found in headers
-header RATWARE_HASH_1		X-Mailer =~ /^\w+!\w+\#\w+\*$/
+header RATWARE_HASH_1		X-Mailer =~ /^\w+\!\w+\#\w+\*$/
 describe RATWARE_HASH_1		Bulk email software fingerprint (hash 1) found in headers
 header RATWARE_HASH_2		X-Mailer =~ /^[A-Za-z0-9\._]{16,}$/
 describe RATWARE_HASH_2		Bulk email software fingerprint (hash 2) found in headers
