@@ -704,3 +704,5 @@ describe JAPANESE_UCE_SUBJECT	Subject contains a Japanese UCE tag
 header RUSSIAN_UCE_SUBJECT	Subject =~ /\xf0\xe5\xea\xeb\xe0\xec\xf3/            
 describe RUSSIAN_UCE_SUBJECT	Subject contains a Russian UCE tag
 
+header HEADER_COUNT_MULTI_CTYPE		eval:check_header_count_range('Content-Type','2','999')
+describe HEADER_COUNT_MULTI_CTYPE	Multiple Content-Type headers found
