@@ -715,15 +715,10 @@ describe X_ORIG_IP_NOT_IPV4	X-Originating-IP doesn't look like IPv4 address
 header X_AUTH_WARN_FAKED	X-Authentication-Warning !~ /^(\S+\.\S+): / [if-unset: host.example.net: foo owned process doing -bs]
 describe X_AUTH_WARN_FAKED	X-Authentication-Warning header looks faked
 
-# Domain no longer exists according to administrator
+# host no longer exists according to administrator
 header FAKE_OUTBLAZE_RCVD	Received =~ /\.mr\.outblaze\.com/
 describe FAKE_OUTBLAZE_RCVD	Received header contains faked 'mr.outblaze.com'
 
-# Domain no longer used for email according to administrator
-header FAKE_FROM_ALTAVISTA	From:addr =~ /\@altavista\.com$/i
-describe FAKE_FROM_ALTAVISTA	From header contains faked 'altavista.com'
-header FAKE_REPTO_ALTAVISTA	Reply-To:addr =~ /\@altavista\.com$/i
-describe FAKE_REPTO_ALTAVISTA	Reply-To header contains faked 'altavista.com'
-header FAKE_ENVFROM_ALTAVISTA	EnvelopeFrom =~ /\@altavista\.com$/i
-describe FAKE_ENVFROM_ALTAVISTA	Envelope sender contains faked 'altavista.com'
-
+# domains never longer used for email, confirmed by administrator
+header FROM_NONSENDING_DOMAIN	From:addr =~ /\@(?:altavista\.com|eudora\.com)$/i
+describe FROM_NONSENDING_DOMAIN	Message is from domain that never sends email

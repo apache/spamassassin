@@ -43,17 +43,10 @@ rawbody T_ENTITY_OTHER2_R	/\&\#(?:33|39|40|46|47)\;/
 body T_ENTITY_OTHER2_B		/\&\#(?:33|39|40|46|47)\;/
 meta T_ENTITY_OTHER2_M		(T_ENTITY_OTHER2_R || T_ENTITY_OTHER2_B)
 
-# according to the postmaster at qualcomm, no mail is sent from
-# eudora.com, but it's heavily joe-jobbed ...
-# jm: maybe we should just collate these all into one "postmaster said
-# they're never used" rule, even if they're hitting 0/0 right now
-header T_FROM_EUDORA            From:addr =~ /\@eudora\.com/i
-
 # similar concept for Delphi.com.  Was an ISP, now a car company!
 # I think their username format is "First.Last"; requiring 2 digits
 # will be pretty safe.  (lower rule as a baseline to see if we miss much)
 header T_FROM_DELPHI		From:addr =~ /\d[^\@]+\d[^\@]+\@delphi\.com/i
-header T_FROM_DELPHI_BASIC	From:addr =~ /\@delphi\.com/i
 
 # great Yahoo! forgery rule, but is it going to be stable?
 # hmm.  good question :(
@@ -61,11 +54,6 @@ header __YAHOO_MSGID		Message-ID =~ /\@yahoo\.com>/i
 header __YAHOO_BEGINNING	Message-ID =~ /<\S+(?:\.\S+|\.\S+\.\S+\.\S+)\@/
 meta T_FORGED_YAHOO_MSGID	(__YAHOO_MSGID && !__YAHOO_BEGINNING)
 
-# Altavista.com's Greg Connor gconnor at nekodojo.org says 'they never send
-# mail'; <2423209050.1071572609@[172.23.65.45]>, Tue, 16 Dec 2003 11:03:29
-# -0800, on the spf-discuss at v2.listbox.com mailing list.  Let's see
-# what this results in!
-#
 header T_ALL_TRUSTED		eval:check_all_trusted()
 describe T_ALL_TRUSTED		Did not pass through any untrusted hosts
 tflags T_ALL_TRUSTED		nice
@@ -132,20 +120,10 @@ body T_HTML_FONT_SMALL_SIZE_1	eval:html_eval('min_size', '< 1')
 body T_HTML_FONT_SMALL_SIZE_2	eval:html_eval('min_size', '< 0')
 body T_HTML_FONT_SMALL_SIZE_3	eval:html_eval('min_size', '< -1')
 
+# these look pretty good
 body T_HTML_FONT_SIZE_BIG	eval:html_range('max_size', '4', '5')
 body T_HTML_FONT_SIZE_LARGE	eval:html_range('max_size', '5', '6')
 body T_HTML_FONT_SIZE_HUGE	eval:html_range('max_size', '6', 'inf')
-
-body T_HTML_FONT_SIZE_BIGGER	eval:html_range('max_size', '4.5', '5.5')
-body T_HTML_FONT_SIZE_LARGER	eval:html_range('max_size', '5.5', '6.5')
-body T_HTML_FONT_SIZE_HUGER	eval:html_range('max_size', '6.5', 'inf')
-
-body T_HTML_FONT_LARGE_SIZE	eval:html_eval('max_size', '> 3')
-body T_HTML_FONT_LARGE_SIZE_0	eval:html_eval('max_size', '> 4')
-body T_HTML_FONT_LARGE_SIZE_1	eval:html_eval('max_size', '> 5')
-body T_HTML_FONT_LARGE_SIZE_2	eval:html_eval('max_size', '> 6')
-body T_HTML_FONT_LARGE_SIZE_3	eval:html_eval('max_size', '> 7')
-body T_HTML_FONT_LARGE_SIZE_4	eval:html_eval('max_size', '> 8')
 
 ########################################################################
 
