@@ -177,7 +177,7 @@ describe PGP_SIGNATURE          Contains a PGP-signed message
 tflags PGP_SIGNATURE		nice
 
 body BALANCE_FOR_LONG           eval:check_for_very_long_text()
-describe BALANCE_FOR_LONG       Message text is over 500 lines long
+describe BALANCE_FOR_LONG       Message text is over 8K in size
 tflags BALANCE_FOR_LONG		nice
 
 rawbody UNIFIED_PATCH           /^\@\@ [-+0-9]+,[0-9]+ [-+0-9]+,[0-9]+ \@\@$/
