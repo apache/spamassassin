@@ -1047,9 +1047,13 @@ user I<nobody> and using the default configuration.
 
 Specify a maximum number of children to spawn. Spamd will wait until another
 child finishes before forking again. Meanwhile, incoming connections will be
-queued. Please note that there is a OS specific maximum of connections that
-can be queued. (Try C<perl -MSocket -e'print SOMAXCONN'> to find this
-maximum)
+queued.
+
+Please note that there is a OS specific maximum of connections that can be
+queued (Try C<perl -MSocket -e'print SOMAXCONN'> to find this maximum).
+Also, some OSes versions of perl may have issues with tracking child processes
+correctly, in which case this switch may cause core-dumps.  (one report
+is that perl versions pre-5.7.3 on IRIX can display this behaviour.)
 
 =item B<-H> I<directory>, B<--helper-home-dir>=I<directory>
 
