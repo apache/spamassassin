@@ -401,18 +401,20 @@ get_output_fd(int *fd)
 int
 get_current_user(char **username)
 {
+#ifndef _WIN32
+    struct passwd *curr_user;
+#endif
+
     if (*username != NULL) {
         *username = strdup(*username);
 	if (username == NULL)
 	    goto fail;
 	return EX_OK;
     }
-#ifdef _WIN32
 
+#ifdef _WIN32
     return EX_OK;
-    
 #else
-    struct passwd *curr_user;
     
     /* Get the passwd information for the effective uid spamc is running
      * under. Setting errno to zero is recommended in the manpage.
