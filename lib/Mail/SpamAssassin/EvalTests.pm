@@ -1318,8 +1318,8 @@ sub check_for_num_yelling_lines {
 sub check_for_mime_excessive_qp {
   my ($self, $body) = @_;
 
-  my $length;
-  my $qp;
+  my $length = 0;
+  my $qp = 0;
 
   # Note: We don't use $body because it removes MIME parts.  Instead, we
   # get the raw unfiltered body.
