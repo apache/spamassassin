@@ -71,11 +71,11 @@ exit;
 sub ratio_in_200_to_range {
   my $ratio = shift;
 
-  # the current algo maps 200.0 to a range between 1.0 and 4.5,
-  # and 1.0 to a range between 0.1 and 0.5.
+  # the current algo maps 200.0 to a range between 1.0 and 5.0,
+  # and 1.0 to a range between 0.1 and 1.0.
 
   my $hi_lo = 200 / 1.0;
-  my $hi_hi = 200 / 4.5;
+  my $hi_hi = 200 / 5.0;
   my $lo_lo =   1 / 0.1;
   my $lo_hi =   1 / 1.0;
 
