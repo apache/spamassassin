@@ -1,8 +1,4 @@
-/*
- * Copyright 2001 by Craig Hughes
- * Portions Copyright 2002 by Brad Jorsch
- *
- * <@LICENSE>
+/* <@LICENSE>
  * Copyright 2004 Apache Software Foundation
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");

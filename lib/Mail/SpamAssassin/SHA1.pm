@@ -23,8 +23,7 @@
 #   use, for inclusion in any free or for-profit product, royalty-free
 #   and with no further obligation to the author.
 #
-# Copyright (C) 2002  Daniel Quinlan
-# (adapted public domain code into a module)
+# (2002 Daniel Quinlan: adapted public domain code into a module)
 
 # <@LICENSE>
 # Copyright 2004 Apache Software Foundation

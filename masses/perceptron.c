@@ -1,6 +1,4 @@
-/* Copyright (c)2003  Henry Stern
- *
- * This program uses stochastic gradient descent to learn a scoreset for
+/* This program uses stochastic gradient descent to learn a scoreset for
  * SpamAssassin.  You'll need to run logs-to-c from spamassassin/masses to
  * generate the stuff in tmp.
  *

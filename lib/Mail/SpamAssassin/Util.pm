@@ -2,9 +2,6 @@
 # functions that stand alone, without requiring a $self object,
 # Portability functions especially.
 
-# Copyright (C) 2003  Justin Mason
-# Copyright (C) 2003  Daniel Quinlan
-
 # <@LICENSE>
 # Copyright 2004 Apache Software Foundation
 # 

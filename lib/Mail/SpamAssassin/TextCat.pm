@@ -1,12 +1,3 @@
-#
-# Copyright (C) 1997  Gertjan van Noord <vannoord@let.rug.nl>
-# (original author)
-#
-# TextCat is located at http://odur.let.rug.nl/~vannoord/TextCat/
-#
-# Copyright (C) 2002  Daniel Quinlan
-# (adapted for spamassassin, performance optimizations)
-
 # <@LICENSE>
 # Copyright 2004 Apache Software Foundation
 # 

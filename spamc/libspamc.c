@@ -1,10 +1,4 @@
-/*
- * Copyright 2001-2002 by Craig Hughes
- * Conversion to a thread-safe shared library Copyright 2002 by Liam Widdowson
- * Portions Copyright 2002 by Brad Jorsch
- * Windows adaption Copyright 2004 by Sidney Markowitz
- *
- * <@LICENSE>
+/* <@LICENSE>
  * Copyright 2004 Apache Software Foundation
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");

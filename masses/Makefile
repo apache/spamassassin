@@ -1,4 +1,3 @@
-# portions Copyright (c)2003  Henry Stern
 CC=		gcc
 CFLAGS=		-g -O2 -Wall 
 LDFLAGS=	-lm

@@ -1,5 +1,4 @@
 #!/usr/bin/perl
-# Copyright (c) 2004 Malte S. Stretz
 
 my %opts;
 my @args;

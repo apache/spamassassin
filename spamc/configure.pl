@@ -1,9 +1,6 @@
 #!/usr/bin/perl
 # autoconf wrapper (for Unix)/alternative (for Windows)
 #
-# Copyright 2004 by Malte S. Stretz.
-# Based on work done by Sidney Markowitz.
-#
 # <@LICENSE>
 # Copyright 2004 Apache Software Foundation
 #

@@ -1,6 +1,5 @@
 #!/usr/bin/perl -w
 
-# Copyright 2003 Duncan Findlay
 # This script is really sketchy and probably should be re-written to
 # be less sketchy.
 

@@ -1,5 +1,4 @@
-/*
- * <@LICENSE>
+/* <@LICENSE>
  * Copyright 2004 Apache Software Foundation
  * 
  * Licensed under the Apache License, Version 2.0 (the "License");
