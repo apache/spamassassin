@@ -379,6 +379,23 @@ sub handle_auto_report {
   }
 }
 
+=item $status->finish ()
+
+Indicate that this C<$status> object is finished with, and can be destroyed.
+
+If you are using SpamAssassin in a persistent environment, or checking many
+mail messages from one L<Mail::SpamAssassin> factory, this method should be
+called to ensure Perl's garbage collection will clean up old status objects.
+
+=cut
+
+sub finish {
+  my ($self) = @_;
+  delete $self->{main};
+  delete $self->{msg};
+  delete $self->{conf};
+}
+
 ###########################################################################
 # Non-public methods from here on.
 

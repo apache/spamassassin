@@ -82,6 +82,7 @@ sub docheck {
   my $tests = $status->get_names_of_tests_hit();
 
   $ma = undef;		# clean 'em up
+  $status->finish();
   $status = undef;
 
   printf "%s %2d %s %s\n",
