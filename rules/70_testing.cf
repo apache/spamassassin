@@ -188,74 +188,13 @@ body     T_RM_BPT_LONGWORDS_10_8_A /\b(?:[a-z]{10,}\s+){8}/
 body     T_RM_BPT_LONGWORDS_10_9_A /\b(?:[a-z]{10,}\s+){9}/
 body     T_RM_BPT_LONGWORDS_10_10_A /\b(?:[a-z]{10,}\s+){10}/
 
-# Interesting new feature; spamware HELO'ing, from a dialup IP addr,
-# using that IP's rDNS entry.  We can catch this easily.
-#
-# Note the '^[^\]]+ ' stanza: this ensures that we only match spamware
-# connecting to a trusted relay; if a mail came from a dynamic addr but
-# was relayed through their smarthost, that's fine.
-
-# dhcp024-210-034-053.columbus.rr.com [24.210.34.53]
-# c-66-176-16-108.se.client2.attbi.com [66.176.16.108]
-# c-67-168-174-61.client.comcast.net [67.168.174.61]
-# NNN-NNN-NNN-NNN.fibertel.com.ar
-# NN.NN.NNN.NNN.ap.yournet.ne.jp
-# NN.NNN.NN-NN.rev.gaoland.net
-# vaise-1-82-67-44-166.fbx.proxad.net [82.67.44.166]
-# lns-vlq-11-62-147-186-141.adsl.proxad.net [62.147.186.141]
-# dsl-200-95-109-107.prod-infinitum.com.mx [200.95.109.107]
-# port-212-202-77-203.reverse.qsc.de [212.202.77.203]
-# pool-151-203-32-68.bos.east.verizon.net [151.203.32.68]
-# c-67-164-133-216.client.comcast.net [67.164.133.216]
-# 200-171-228-6.customer.telesp.net.br [200.171.228.6]
-# modemcable090.28-201-24.mc.videotron.ca [24.201.28.90]
-# 80-218-47-160.dclient.hispeed.ch [80.218.47.160]
-# cdm-68-226-239-16.laft.cox-internet.com [68.226.239.16]
-# d53-64-35-171.nap.wideopenwest.com [64.53.171.35]
-# 74.67-201-80.adsl.skynet.be [80.201.67.74]
-# 12-218-225-223.client.mchsi.com [12.218.225.223]
-# (require an alpha first, as legit HELO'ing-as-IP-address is hit otherwise)
-header T_HELO_DYNAMIC_IPADDR X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[a-z]\S*\d+[^\d\s]\d+[^\d\s]\d+[^\d\s]\d+[^\d\s][^\.]*\.\S+\.\S+/i
 header T_HELO_DYNAMIC_IPADDR2 X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\d+[^\d\s]\d+[^\d\s]\d+[^\d\s]\d+[^\d\s][^\.]*\.\S+\.\S+/i
-# dhcp024-210-034-053.columbus.rr.com [24.210.34.53]
-# catv-506237d8.miskcatv.broadband.hu [80.98.55.216]
-# node-c-8b22.a2000.nl
-# cm89.omega139.maxonline.com.sg
-# cm114.gamma208.maxonline.com.sg
-header T_HELO_DYNAMIC_DHCP X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S*(?:cm|catv|docsis|cable|dsl|dhcp|cpe|node)\S*\d+[^\d\s]+\d+/i
 # wiley-170-10231.roadrunner.nf.net [205.251.210.249]
 header T_HELO_DYNAMIC_RR2   X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[a-z]+-\d{1,3}-\d{1,5}\.roadrunner/i
-# fia83-8.dsl.hccnet.nl [62.251.8.83]
-# fia160-115-100.dsl.hccnet.nl [80.100.115.160]
-header T_HELO_DYNAMIC_HCC   X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S*\d+[^\d\s]+\d+\S*\.(?:docsis|cable|dsl|adsl|dhcp|cpe)\./i
-# f88114.upc-f.chello.nl [80.56.88.114]
-header T_HELO_DYNAMIC_CHELLO X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S+upc-f\.chello\.nl/i
-# h0002a5d76857.ne.client2.attbi.com [65.96.12.59]
-header T_HELO_DYNAMIC_ATTBI  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S+\d+\S+\.client2\.attbi\.com/i
-# CPE0004e2372711-CM000a73666706.cpe.net.cable.rogers.com
-# CPE00e0184f0eba-CM014490118324.cpe.net.cable.rogers.com [24.43.109.140]
-header T_HELO_DYNAMIC_ROGERS X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=CPE\d+\S+\.rogers\.com/i
 # pcp04024417pcs.toresd01.pa.comcast.net [68.86.206.126]
 # bgp542174bgs.ewndsr01.nj.comcast.net[68.38.144.91]
 # Computer-udp135632uds.union01.nj.comcast.net [68.39.99.32]
 header T_HELO_DYNAMIC_COMCAST X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[a-z-]+\d+[a-z]{3}\.[a-z0-9]+\...\.comcast/i
-# ca-morpark-cuda1-zone7-b-159.vnnyca.adelphia.net[67.23.129.159]
-# tn-greenvillecuda1cable7a-36.atlaga.adelphia.net [68.171.113.36]
-# ky-richmond2a-123.rhmdky.adelphia.net [68.71.36.123]
-# ny-lackawannacadent4-chtwga3a-b-117.buf.adelphia.net [68.71.205.117]
-# fl-edel-u2-c3c-233.pbc.adelphia.net [68.64.89.233]
-header T_HELO_DYNAMIC_ADELPHIA X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[a-z]{2}-\S+-\d{1,3}\.[a-z]{3,8}\.adelphia\.net/i
-# pD9E4F89F.dip.t-dialin.net [217.228.248.159]
-header T_HELO_DYNAMIC_DIALIN X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[a-z][A-F0-9]+\.dip\./
-# 0xd5aaf40b.dhcp.kabelnettet.dk
-# 0x50a46949.virnxx11.adsl-dhcp.tele.dk
-header T_HELO_DYNAMIC_HEXIP X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=0x[a-f0-9]{8}\./
-# 118.Red-80-35-201.pooles.rima-tde.net
-header T_HELO_DYNAMIC_SPLIT_IP X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\d+\.\S+\d+[^\d\s]\d+[^\d\s]\d+[^\d\s]/
-# YahooBB219173000034.bbtec.net [219.173.0.34]
-header T_HELO_DYNAMIC_YAHOOBB X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=YahooBB/i
-# ool-18be1aaf.dyn.optonline.net [24.190.26.175]
-header T_HELO_OPTONLINE X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S+\.dyn\.optonline\.net/
 # h234n2fls32o895.telia.com [217.208.73.234]
 # h53n2fls32o828.telia.com
 # h116n2fls32o1111.telia.com
@@ -270,6 +209,7 @@ header T_HELO_DYNAMIC_TDS X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S+-[a-z]\d+\
 # q2l5s51.cm.chello.no
 # ec9z5l.cm.chello.no
 header T_HELO_DYNAMIC_CHELLO_NO  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S+\.cm\.chello\.no/i
+# f88114.upc-f.chello.nl [80.56.88.114]
 # g225174.upc-g.chello.nl
 # a151145.upc-a.chello.nl
 # a96134.upc-a.chello.nl
