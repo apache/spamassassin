@@ -259,11 +259,6 @@ describe        T_GEVALIACOFFEE           Selling Gevalia Coffee
 
 # bug 2970: Bob Menschel's "longwords" rules
 # describe LONGWORDS Long string of long words
-body     T_RM_BPT_LONGWORDS_4_6_A /\b(?:[a-z]{4,}\s+){6}/
-body     T_RM_BPT_LONGWORDS_4_7_A /\b(?:[a-z]{4,}\s+){7}/
-body     T_RM_BPT_LONGWORDS_4_8_A /\b(?:[a-z]{4,}\s+){8}/
-body     T_RM_BPT_LONGWORDS_4_9_A /\b(?:[a-z]{4,}\s+){9}/
-body     T_RM_BPT_LONGWORDS_4_10_A /\b(?:[a-z]{4,}\s+){10}/
 body     T_RM_BPT_LONGWORDS_5_6_A /\b(?:[a-z]{5,}\s+){6}/
 body     T_RM_BPT_LONGWORDS_5_7_A /\b(?:[a-z]{5,}\s+){7}/
 body     T_RM_BPT_LONGWORDS_5_8_A /\b(?:[a-z]{5,}\s+){8}/
@@ -294,42 +289,6 @@ body     T_RM_BPT_LONGWORDS_10_7_A /\b(?:[a-z]{10,}\s+){7}/
 body     T_RM_BPT_LONGWORDS_10_8_A /\b(?:[a-z]{10,}\s+){8}/
 body     T_RM_BPT_LONGWORDS_10_9_A /\b(?:[a-z]{10,}\s+){9}/
 body     T_RM_BPT_LONGWORDS_10_10_A /\b(?:[a-z]{10,}\s+){10}/
-
-body     T_RM_BPT_LONGWORDS_4_6 /\b(?:\w{4,}\s+){6}/
-body     T_RM_BPT_LONGWORDS_4_7 /\b(?:\w{4,}\s+){7}/
-body     T_RM_BPT_LONGWORDS_4_8 /\b(?:\w{4,}\s+){8}/
-body     T_RM_BPT_LONGWORDS_4_9 /\b(?:\w{4,}\s+){9}/
-body     T_RM_BPT_LONGWORDS_4_10 /\b(?:\w{4,}\s+){10}/
-body     T_RM_BPT_LONGWORDS_5_6 /\b(?:\w{5,}\s+){6}/
-body     T_RM_BPT_LONGWORDS_5_7 /\b(?:\w{5,}\s+){7}/
-body     T_RM_BPT_LONGWORDS_5_8 /\b(?:\w{5,}\s+){8}/
-body     T_RM_BPT_LONGWORDS_5_9 /\b(?:\w{5,}\s+){9}/
-body     T_RM_BPT_LONGWORDS_5_10 /\b(?:\w{5,}\s+){10}/
-body     T_RM_BPT_LONGWORDS_6_6 /\b(?:\w{6,}\s+){6}/
-body     T_RM_BPT_LONGWORDS_6_7 /\b(?:\w{6,}\s+){7}/
-body     T_RM_BPT_LONGWORDS_6_8 /\b(?:\w{6,}\s+){8}/
-body     T_RM_BPT_LONGWORDS_6_9 /\b(?:\w{6,}\s+){9}/
-body     T_RM_BPT_LONGWORDS_6_10 /\b(?:\w{6,}\s+){10}/
-body     T_RM_BPT_LONGWORDS_7_6 /\b(?:\w{7,}\s+){6}/
-body     T_RM_BPT_LONGWORDS_7_7 /\b(?:\w{7,}\s+){7}/
-body     T_RM_BPT_LONGWORDS_7_8 /\b(?:\w{7,}\s+){8}/
-body     T_RM_BPT_LONGWORDS_7_9 /\b(?:\w{7,}\s+){9}/
-body     T_RM_BPT_LONGWORDS_7_10 /\b(?:\w{7,}\s+){10}/
-body     T_RM_BPT_LONGWORDS_8_6 /\b(?:\w{8,}\s+){6}/
-body     T_RM_BPT_LONGWORDS_8_7 /\b(?:\w{8,}\s+){7}/
-body     T_RM_BPT_LONGWORDS_8_8 /\b(?:\w{8,}\s+){8}/
-body     T_RM_BPT_LONGWORDS_8_9 /\b(?:\w{8,}\s+){9}/
-body     T_RM_BPT_LONGWORDS_8_10 /\b(?:\w{8,}\s+){10}/
-body     T_RM_BPT_LONGWORDS_9_6 /\b(?:\w{9,}\s+){6}/
-body     T_RM_BPT_LONGWORDS_9_7 /\b(?:\w{9,}\s+){7}/
-body     T_RM_BPT_LONGWORDS_9_8 /\b(?:\w{9,}\s+){8}/
-body     T_RM_BPT_LONGWORDS_9_9 /\b(?:\w{9,}\s+){9}/
-body     T_RM_BPT_LONGWORDS_9_10 /\b(?:\w{9,}\s+){10}/
-body     T_RM_BPT_LONGWORDS_10_6 /\b(?:\w{10,}\s+){6}/
-body     T_RM_BPT_LONGWORDS_10_7 /\b(?:\w{10,}\s+){7}/
-body     T_RM_BPT_LONGWORDS_10_8 /\b(?:\w{10,}\s+){8}/
-body     T_RM_BPT_LONGWORDS_10_9 /\b(?:\w{10,}\s+){9}/
-body     T_RM_BPT_LONGWORDS_10_10 /\b(?:\w{10,}\s+){10}/
 
 # "www" hidden as "%77%77%77", "ww%77", etc.
 # note: *not* anchored to start of string, to catch use of redirectors
