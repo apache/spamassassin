@@ -47,6 +47,7 @@ void usage()
   printf("usage: evolve [-s size] [args]\n"
      "\n"
      "  -s size = population size (50 recommended)\n"
+     "  -r replace = number of individuals to replace each generation (20 recommended)\n"
      "  -b nybias = bias towards false negatives (10.0 default)\n"
      "\n"
      "  -C = just count hits and exit, no evolution\n\n");
@@ -106,6 +107,10 @@ int main(int argc, char **argv) {
         case 's':
           pop_size = atoi(optarg);
           break;
+
+	case 'r':
+	  replace_num = atoi(optarg);
+	  break;
 
         case 'C':
           justCount = 1;
