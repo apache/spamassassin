@@ -41,6 +41,9 @@ loaded from the C</usr/share/spamassassin> and C</etc/mail/spamassassin>
 directories.
 
 The C<#> character starts a comment, which continues until end of line.
+B<NOTE:> using the C<#> character in the regular expression rules requires
+escaping.  i.e.: C<\#>
+
 Whitespace in the files is not significant, but please note that starting a
 line with whitespace is deprecated, as we reserve its use for multi-line rule
 definitions, at some point in the future.
@@ -2044,7 +2047,9 @@ returned for this symbol is the text from all 3 headers, separated by newlines.
 C<op> is either C<=~> (contains regular expression) or C<!~> (does not contain
 regular expression), and C<pattern> is a valid Perl regular expression, with
 C<modifiers> as regexp modifiers in the usual style.   Note that multi-line
-rules are not supported, even if you use C<x> as a modifier.
+rules are not supported, even if you use C<x> as a modifier.  Also note that
+the C<#> character must be escaped (C<\#>) or else it will be considered to be
+the start of a comment and not part of the regexp.
 
 If the C<[if-unset: STRING]> tag is present, then C<STRING> will
 be used if the header is not found in the mail message.
@@ -2188,7 +2193,9 @@ including selections like '-notfirsthop' appearing at the end of the set name.
 
 =item body SYMBOLIC_TEST_NAME /pattern/modifiers
 
-Define a body pattern test.  C<pattern> is a Perl regular expression.
+Define a body pattern test.  C<pattern> is a Perl regular expression.  Note:
+as per the header tests, C<#> must be escaped (C<\#>) or else it is considered
+the beginning of a comment.
 
 The 'body' in this case is the textual parts of the message body;
 any non-text MIME parts are stripped, and the message decoded from
@@ -2220,7 +2227,9 @@ Define a body eval test.  See above.
 
 =item uri SYMBOLIC_TEST_NAME /pattern/modifiers
 
-Define a uri pattern test.  C<pattern> is a Perl regular expression.
+Define a uri pattern test.  C<pattern> is a Perl regular expression.  Note: as
+per the header tests, C<#> must be escaped (C<\#>) or else it is considered
+the beginning of a comment.
 
 The 'uri' in this case is a list of all the URIs in the body of the email,
 and the test will be run on each and every one of those URIs, adjusting the
@@ -2247,6 +2256,8 @@ points of the URI, and will also be faster.
 =item rawbody SYMBOLIC_TEST_NAME /pattern/modifiers
 
 Define a raw-body pattern test.  C<pattern> is a Perl regular expression.
+Note: as per the header tests, C<#> must be escaped (C<\#>) or else it is
+considered the beginning of a comment.
 
 The 'raw body' of a message is the raw data inside all textual parts.
 The text will be decoded from base64 or quoted-printable encoding,
@@ -2276,6 +2287,8 @@ Define a raw-body eval test.  See above.
 =item full SYMBOLIC_TEST_NAME /pattern/modifiers
 
 Define a full message pattern test.  C<pattern> is a Perl regular expression.
+Note: as per the header tests, C<#> must be escaped (C<\#>) or else it is
+considered the beginning of a comment.
 
 The full message is the pristine message headers plus the pristine message
 body, including all MIME data such as images, other attachments, MIME
