@@ -272,10 +272,7 @@ sub tokenize_line {
   my $self = $_[0];
   my $tokprefix = $_[2];
   my $isbody = $_[3];
-  local ($_);
-
-  # turn off utf8-ness to fix buginess
-  $_ = pack("C0A*", $_[1]);
+  local ($_) = $_[1];
 
   # include quotes, .'s and -'s for URIs, and [$,]'s for Nigerian-scam strings,
   # and ISO-8859-15 alphas.  Do not split on @'s; better results keeping it.
