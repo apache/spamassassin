@@ -452,3 +452,41 @@ header T_FROM_UNNEEDED_QUOTE	From =~ /"[\w.-]+"\s+\</
 header T_REPTO_UNNEEDED_QUOTE	Reply-To =~ /"[\w.-]+"\s+\</
 header T_FROM_UNNEEDED_QUOTE2	From =~ /"[\w.-]+"\s*\</
 header T_REPTO_UNNEEDED_QUOTE2	Reply-To =~ /"\[w.-]+"\s*\</
+
+# bug 3896
+uri T_URI_3896_1	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{6,}\.info\/\?\S{20,}/i
+uri T_URI_3896_2	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{6,}\.biz\/\?\S{20,}/i
+uri T_URI_3896_3	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{6,}\.info\/\S{20,}/i
+uri T_URI_3896_4	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{6,}\.biz\/\S{20,}/i
+uri T_URI_3896_5	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{4,}\.info\/\?\S{20,}/i
+uri T_URI_3896_6	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{4,}\.biz\/\?\S{20,}/i
+uri T_URI_3896_7	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{4,}\.info\/\S{20,}/i
+uri T_URI_3896_8	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{4,}\.biz\/\S{20,}/i
+uri T_URI_3896_9	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{8,}\.info\/\?\S{20,}/i
+uri T_URI_3896_10	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{8,}\.biz\/\?\S{20,}/i
+uri T_URI_3896_11	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{8,}\.info\/\S{20,}/i
+uri T_URI_3896_12	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{8,}\.biz\/\S{20,}/i
+uri T_URI_3896_13	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{6,}\.info\/\?\S{15,}/i
+uri T_URI_3896_14	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{6,}\.biz\/\?\S{15,}/i
+uri T_URI_3896_15	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{6,}\.info\/\S{15,}/i
+uri T_URI_3896_16	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{6,}\.biz\/\S{15,}/i
+uri T_URI_3896_17	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{4,}\.info\/\?\S{15,}/i
+uri T_URI_3896_18	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{4,}\.biz\/\?\S{15,}/i
+uri T_URI_3896_19	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{4,}\.info\/\S{15,}/i
+uri T_URI_3896_20	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{4,}\.biz\/\S{15,}/i
+uri T_URI_3896_21	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{8,}\.info\/\?\S{15,}/i
+uri T_URI_3896_22	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{8,}\.biz\/\?\S{15,}/i
+uri T_URI_3896_23	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{8,}\.info\/\S{15,}/i
+uri T_URI_3896_24	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{8,}\.biz\/\S{15,}/i
+uri T_URI_3896_25	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{6,}\.info\/\?\S{25,}/i
+uri T_URI_3896_26	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{6,}\.biz\/\?\S{25,}/i
+uri T_URI_3896_27	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{6,}\.info\/\S{25,}/i
+uri T_URI_3896_28	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{6,}\.biz\/\S{25,}/i
+uri T_URI_3896_29	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{4,}\.info\/\?\S{25,}/i
+uri T_URI_3896_30	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{4,}\.biz\/\?\S{25,}/i
+uri T_URI_3896_31	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{4,}\.info\/\S{25,}/i
+uri T_URI_3896_32	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{4,}\.biz\/\S{25,}/i
+uri T_URI_3896_33	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{8,}\.info\/\?\S{25,}/i
+uri T_URI_3896_34	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{8,}\.biz\/\?\S{25,}/i
+uri T_URI_3896_35	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{8,}\.info\/\S{25,}/i
+uri T_URI_3896_36	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{8,}\.biz\/\S{25,}/i
