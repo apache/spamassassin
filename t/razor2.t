@@ -34,7 +34,7 @@ if (!-r $ident) {
 
 %patterns = (
 
-q{ Listed in Razor v2 }, 'spam',
+q{ Listed in Razor2 }, 'spam',
 
 );
 
@@ -51,7 +51,7 @@ skip_all_patterns($razor_not_available);
 %patterns = ();
 %anti_patterns = (
 
-q{ Listed in Razor v2 }, 'nonspam',
+q{ Listed in Razor2 }, 'nonspam',
 
 );
 
