@@ -87,14 +87,14 @@ SPAMASSASSIN RELEASE PROCEDURE
 - SVN tag the release files.  This is done using "svn copy".
   For a maintainance release (x.y.1, x.y.2):
 
-    repo=https://svn.apache.org/repos/asf/incubator/spamassassin
+    repo=https://svn.apache.org/repos/asf/spamassassin
     svn copy -m "creating tag for release 2.62" \
 	$repo/branches/b2_6_0 \
 	$repo/tags/spamassassin_release_2_6_2
 
   For a trunk release (x.y.0):
 
-    repo=https://svn.apache.org/repos/asf/incubator/spamassassin
+    repo=https://svn.apache.org/repos/asf/spamassassin
     svn copy -m "creating tag for release 3.0.0" \
 	$repo/trunk \
 	$repo/tags/spamassassin_release_3_0_0
@@ -157,6 +157,6 @@ SPAMASSASSIN RELEASE PROCEDURE
 - Approve the posting to SpamAssassin-Announce (the list admins
   will get a mail indicating how to do this.)
 
-lastmod: Jun 19 2004 jm
+lastmod: Jul  9 2004 jm
 
 // vim:tw=74:
