@@ -22,8 +22,8 @@ if ($opt_p) {
 
 my %freq_spam = ();
 my %freq_nonspam = ();
-my $num_spam;
-my $num_nonspam;
+my $num_spam = 0;
+my $num_nonspam = 0;
 
 readlogs();
 readscores();
@@ -78,8 +78,8 @@ foreach my $test (sort {
   next if ($tflags{$test} =~ /net/);    # ignore net tests
 
   # adjust based on corpora sizes (and cvt to % while we're at it)
-  my $fsadj = ($fs / ($num_spam)) * 100.0;
-  my $fnadj = ($fn / ($num_nonspam)) * 100.0;
+  my $fsadj = $num_spam == 0 ? 0 : ($fs / ($num_spam)) * 100.0;
+  my $fnadj = $num_nonspam == 0 ? 0 : ($fn / ($num_nonspam)) * 100.0;
 
   if ($opt_f && $fsadj == 0 && $fnadj == 0) { next; }
 
