@@ -403,7 +403,8 @@ sub rewrite_as_spam {
       $rep =~ s/=/=3D/gs;               # quote the = chars
     }
 
-    if ($self->{msg}->get_header ('Content-Type') =~ /boundary=["']?(.*)["']?(;|$)/i) {
+    my $content_type = $self->{msg}->get_header('Content-Type');
+    if (defined($content_type) and $content_type =~ /boundary\s*=\s*["']?(.*)["']?(?:;|$)/i) {
       # Deal with MIME "null block".  If this is a multipart MIME mail,
       # peel off the MIME header for the main part of the message,
       # stick in the report, then put the MIME header back in front,
