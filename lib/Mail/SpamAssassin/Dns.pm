@@ -688,7 +688,9 @@ sub pyzor_lookup {
     # Note: not really tainted, this comes from system conf file.
     my $path = Mail::SpamAssassin::Util::untaint_file_path ($self->{conf}->{pyzor_path});
 
-    my $pid = open(PYZOR, join(' ', $path, "check", "< '$tmpf'", "2>&1", '|')) || die "$!\n";
+    my($opts) = ($self->{conf}->{pyzor_options} =~ /^([^\;\'\"\0]+)$/);
+ 
+    my $pid = open(PYZOR, join(' ', $path, $opts, "check", "< '$tmpf'", "2>&1", '|')) || die "$!\n";
     $response = <PYZOR>;
     close PYZOR;
 

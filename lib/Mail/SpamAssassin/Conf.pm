@@ -171,6 +171,7 @@ sub new {
   $self->{pyzor_max} = 5;
   $self->{pyzor_add_header} = 0;
   $self->{pyzor_timeout} = 10;
+  $self->{pyzor_options} = '';
 
   $self->{use_bayes} = 1;
   $self->{bayes_path} = "__userstate__/bayes";
@@ -1158,6 +1159,17 @@ The default is to not add the header.
 
 
 
+=item pyzor_options options
+
+Specify options to the pyzor command. Please note that only
+[A-Za-z0-9 -/] is allowed (security).
+
+=cut
+
+    if (/^pyzor[-_]options\s+([A-Za-z0-9 -\/]+)/) {
+      $self->{pyzor_options} = $1; next;
+    }
+
 =item num_check_received { integer }   (default: 2)
 
 How many received lines from and including the original mail relay
@@ -1764,7 +1776,7 @@ The default is C<-R>
 
 =cut
 
-    if (/^dcc[-_]options\s+[A-Z -]+/) {
+    if (/^dcc[-_]options\s+([A-Z -]+)/) {
       $self->{dcc_options} = $1; next;
     }
 
