@@ -1130,14 +1130,14 @@ Default:
   "relays.osirusoft.com." => "127.0.0.3" };
 
 WARNING!!! When passing a reference to a hash, you need to put the whole hash in
-one line for the parser to read it correctly (you can check with spamassassin -D
-< mesg)
+one line for the parser to read it correctly (you can check with 
+C<< spamassassin -D < mesg >>)
 
 Set this to what your RBLs return for dialup IPs
 It is used by dialup-firsthop and relay-firsthop rules so that you can match
 DUL codes and compensate DUL checks with a negative score if the IP is a dialup
 IP the mail originated from and it was properly relayed by a hop before reaching
-you (hopefully not your secondary MX :-D)
+you (hopefully not your secondary MX :-)
 The trailing "-firsthop" is magic, it's what triggers the RBL to only be run
 on the originating hop
 The idea is to not penalize (or penalize less) people who properly relayed
@@ -1417,7 +1417,7 @@ Currently this is the same value Razor itself uses: C<~/razor.conf>.
 Specify additional options to the dccproc(8) command. Please note that only
 [A-Z -] is allowed (security).
 
-The default is '-R'
+The default is C<-R>
 
 =cut
 
