@@ -89,9 +89,11 @@ RULES		= $rulesfiles
 
 CFCC		= $Config{cc}
 CFCCFLAGS	= $Config{ccflags} $MYCFLAGS
+CFCCDLFLAGS	= $Config{ccdlflags} $MYCFLAGS
 CFOPTIMIZE	= $Config{optimize}
 CFLIBS		= $Config{libs}
 CFLDFLAGS	= $Config{ldflags}
+CFLDDLFLAGS	= $Config{lddlflags}
 
 DEF_RULES_DIR	= $DEF_RULES_DIR
 LOCAL_RULES_DIR	= $LOCAL_RULES_DIR
@@ -112,8 +114,12 @@ spamproxy/spamproxyd: spamproxy/spamproxyd.raw
 	$(PERL) fixpath.pl spamproxy/spamproxyd.raw $@
 	$(CHMOD) $(PERM_RWX) $@
 
-spamd/spamc: spamd/spamc.c
-	$(CFCC) $(CFCCFLAGS) $(CFOPTIMIZE) spamd/spamc.c \
+spamd/libspamc.so: spamd/libspamc.c
+	$(CFCC) $(CFCCDLFLAGS) $(CFOPTIMIZE) spamd/libspamc.c \
+			-o $@ $(CFLDDLFLAGS) $(CFLIBS)
+
+spamd/spamc: spamd/spamc.c spamd/libspamc.c
+	$(CFCC) $(CFCCFLAGS) $(CFOPTIMIZE) spamd/spamc.c spamd/libspamc.c \
 			-o $@ $(CFLDFLAGS) $(CFLIBS)
 
 inst_cfs: $(LOCAL_RULES_DIR) $(DEF_RULES_DIR) $(DEF_RULES_DIR)/user_prefs.template $(LOCAL_RULES_DIR)/local.cf
