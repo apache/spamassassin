@@ -242,7 +242,7 @@ sub readlogs {
 
 sub readscores {
   my($cffile) = @_;
-  system ("./parse-rules-for-masses -d \"$cffile\"") and die;
+  system ("$FindBin::Bin/parse-rules-for-masses -d \"$cffile\"") and die;
   require "./tmp/rules.pl";
 }
 
