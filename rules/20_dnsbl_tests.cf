@@ -65,15 +65,7 @@ describe X_NJABL_DIALUP		NJABL: sender is on dialup/dynamic IP
 tflags X_NJABL_DIALUP		net
 
 # ---------------------------------------------------------------------------
-
 # Now, single zone BLs follow:
-# the new first arg for check_rbl() indicates what type of check it is;
-# each type of check is stored in a separate set, and if an IP has already
-# been hit in that set, it will not be checked with any other zone in
-# that set.
-header RCVD_IN_RELAYS_ORDB_ORG	rbleval:check_rbl('ordb', 'relays.ordb.org.')
-describe RCVD_IN_RELAYS_ORDB_ORG Received via a relay in relays.ordb.org
-tflags RCVD_IN_RELAYS_ORDB_ORG  net
 
 # SBL is the Spamhaus Block List: http://www.spamhaus.org/sbl/ .
 header RCVD_IN_SBL		rbleval:check_rbl_txt('sbl', 'sbl.spamhaus.org.')
