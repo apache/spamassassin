@@ -162,7 +162,7 @@ sub _get_header_list {
   my @cap_hdrs = grep(lc($_) eq $lchdr, keys(%{$self->{headers}}));
 
   # If the request is just for the list of headers names that matched only ...
-  if ( defined $header_name_only ) {
+  if ( defined $header_name_only && $header_name_only ) {
     return @cap_hdrs;
   }
   else {
