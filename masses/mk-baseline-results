@@ -4,4 +4,4 @@ make clean
 # ./hit-frequencies | ./score-ranges-from-freqs
 ./logs-to-c $*
 make OPT= evolve
-./evolve -C
+./evolve -C > results.baseline

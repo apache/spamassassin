@@ -567,14 +567,17 @@ sub get_raw_body_text_array {
     }
 
     if ($multipart_boundary eq $_) {
-      $_ = $body->[$line++];
-      last unless defined $_;
+      while (defined ($_ = $body->[$line++])) {
+	last if (/^$/);
 
-      if (/^Content-[Tt]ype: (text\/\S+|multipart\/alternative)/) {
-	$ctype = $1;
-	push (@{$self->{body_text_array}}, $_);
-	next;
+	if (/^Content-[Tt]ype: (text\/\S+|multipart\/alternative)/) {
+	  $ctype = $1;
+	  push (@{$self->{body_text_array}}, $_);
+	  next;
+	}
       }
+
+      last unless defined $_;
 
       # skip this attachment, it's non-text.
       while (defined ($_ = $body->[$line++])) {
