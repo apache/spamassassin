@@ -489,3 +489,10 @@ rawbody T_QUOTED_EMAIL_TEXT     /^>+\s+.{60,72}$/
 score T_CLICK_HERE_CAPS_LINK           0.634
 score T_QUOTED_EMAIL_TEXT              -0.2
 score T_CLICK_HERE_LINK                0.317
+
+# Potentially FP-prone, especially if you talk about optics. but it
+# matches a few messages that don't get properly marked otherwise.
+header __T_OPT_HEADER_SUBJ	Subject =~ /opt\W?.{2,3}\b/i
+header __T_OPT_HEADER_RESSUBJ	Resent-Subject =~ /opt\W?.{2,3}\b/i
+header __T_OPT_HEADER_ALL	ALL =~ /opt\W?.{2,3}\b/i
+meta T_OPT_HEADER		(__T_OPT_HEADER_ALL && !__T_OPT_HEADER_SUBJ && !__T_OPT_HEADER_RESSUBJ)
