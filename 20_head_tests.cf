@@ -264,8 +264,11 @@ describe CORRUPT_MSGID		'Message-Id' contains bits of Received header
 header MSG_ID_ADDED_BY_MTA	Message-Id =~ / \(added by /
 describe MSG_ID_ADDED_BY_MTA	'Message-Id' was added by a relay
 
-header MSG_ID_ADDED_BY_MTA_2	ALL =~ /\nMessage-Id: .*(?!yahoo).*\nReceived: /s
+header MSG_ID_ADDED_BY_MTA_2	eval:check_for_mta_message_id_later()
 describe MSG_ID_ADDED_BY_MTA_2	'Message-Id' was added by a relay (2)
+
+header MSG_ID_ADDED_BY_MTA_3	eval:check_for_mta_message_id_first()
+describe MSG_ID_ADDED_BY_MTA_3	'Message-Id' was added by a relay (3)
 
 # compensate for common false pos on above rule: Yahoo! webmail
 header YAHOO_MSGID_ADDED	ALL =~ /Message-Id: <\S+\.mail.yahoo.com>\nReceived: .*by \S+mail.yahoo.com via HTTP;/s
