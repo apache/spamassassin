@@ -929,7 +929,7 @@ sub rewrite_no_report_safe {
   my $new_hdrs_pre = '';
   my $new_hdrs_post = '';
   foreach my $hdr (@pristine_headers) {
-    if ($new_hdrs_post eq '' && $hdr =~ /^Return-[pP]ath:/) {
+    if ($new_hdrs_post eq '' && $hdr =~ /^Return-Path:/i) {
       $new_hdrs_pre .= $hdr;
     } else {
       $new_hdrs_post .= $hdr;
