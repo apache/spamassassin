@@ -1416,7 +1416,8 @@ that user.
 
 Write the process ID of the spamd parent to the file specified by I<pidfile>.
 The file will be unlinked when the parent exits.  Note that when running
-with the B<-u> option, the file must be writable by that user.
+with the B<-u> option, the file must be writable by that user.  Also note
+that this option is used only when running spamd in daemon mode via I<-d>.
 
 =item B<-v>, B<--vpopmail>
 
