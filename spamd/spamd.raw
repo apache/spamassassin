@@ -1306,19 +1306,19 @@ sub preload_modules_with_tmp_homedir {
   # bug 2015, bug 2223: rmpath() is not taint safe, so we've got to implement
   # our own poor man's rmpath. If it fails, we report only the first error.
   my $err;
-  opendir (TMPDIR, $tmpsadir) or $err ||= "open $tmpsadir: $!";
-  unless ($err) {
-    foreach my $f (File::Spec->no_upwards (readdir (TMPDIR))) {
-      $f = Mail::SpamAssassin::Util::untaint_file_path (
-             File::Spec->catfile ($tmpsadir, $f)
-           );
-      unlink ($f)             or $err ||= "remove $f: $!";
+  foreach my $d (($tmpsadir, $tmphome)) {
+    opendir (TMPDIR, $d) or $err ||= "open $d: $!";
+    unless ($err) {
+      foreach my $f (File::Spec->no_upwards (readdir (TMPDIR))) {
+        $f = Mail::SpamAssassin::Util::untaint_file_path (
+               File::Spec->catfile ($d, $f)
+             );
+        unlink ($f)             or $err ||= "remove $f: $!";
+      }
+      closedir (TMPDIR)         or $err ||= "close $d: $!";
     }
-    closedir (TMPDIR)         or $err ||= "close $tmpsadir: $!";
+    rmdir ($d)                  or $err ||= "remove $d: $!";
   }
-
-  rmdir ($tmpsadir)           or $err ||= "remove $tmpsadir: $!";
-  rmdir ($tmphome)            or $err ||= "remove $tmphome: $!";
 
   # If the dir still exists, log a warning.
   if (-d $tmphome) {
