@@ -1052,11 +1052,12 @@ sub html_text {
   push @{$self->{html_text}}, $text;
 }
 
+# note: $text includes <!-- and -->
 sub html_comment {
   my ($self, $text) = @_;
 
   push @{ $self->{html}{comment} }, $text;
-  $self->{html}{total_comment_length} += length($text) + 7; # "<!--" + "-->"
+  $self->{html}{total_comment_length} += length($text);
 
   if ($self->{html_last_tag} eq "div" &&
       $text =~ /Converted from text\/plain format/)
