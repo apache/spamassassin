@@ -1,4 +1,4 @@
-# $Id: MIME.pm,v 1.1 2003/09/24 06:18:38 felicity Exp $
+# $Id: MIME.pm,v 1.2 2003/09/24 19:30:32 felicity Exp $
 
 package Mail::SpamAssassin::MIME;
 use strict;
@@ -19,6 +19,11 @@ sub header {
   my $self   = shift;
   my $rawkey = shift;
   my $key    = lc($rawkey);
+
+  # Trim whitespace off of the header keys
+  $key       =~ s/^\s+//;
+  $key       =~ s/\s+$//;
+
   if (@_) {
     my ( $decoded_value, $raw_value ) = @_;
     $raw_value = $decoded_value unless defined $raw_value;
@@ -80,12 +85,13 @@ sub add_body_part {
 
 sub add_attachment {
   my $self = shift;
-  my ( $type, $lines, $name, $boundary ) = @_;
+  my ( $type, $lines, $name, $raw, $boundary ) = @_;
   push @{ $self->{attachments} },
     {
     filename => $name,
     type     => $type,
-    lines    => $lines,
+    decoded  => $lines,
+    raw      => $raw,
     boundary => $boundary,
     };
 }

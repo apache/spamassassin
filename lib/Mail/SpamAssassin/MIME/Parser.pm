@@ -1,4 +1,4 @@
-# $Id: Parser.pm,v 1.1 2003/09/24 06:18:38 felicity Exp $
+# $Id: Parser.pm,v 1.2 2003/09/24 19:30:32 felicity Exp $
 
 package Mail::SpamAssassin::MIME::Parser;
 use strict;
@@ -373,13 +373,13 @@ sub decode_body {
 
 sub decode_attachment {
   my $class = shift;
-  my ( $msg, $part_msg, $boundary, $fh ) = @_;
+  my ( $msg, $part_msg, $boundary, $body ) = @_;
 
   debug("decoding attachment\n");
 
-  my ( $type, $content, $filename ) = $class->decode( $part_msg, $fh );
+  my ( $type, $content, $filename ) = $class->decode( $part_msg, $body );
 
-  $msg->add_attachment( $type, $content, $filename, $boundary );
+  $msg->add_attachment( $type, $content, $filename, $body, $boundary );
 }
 
 sub decode {
@@ -405,7 +405,7 @@ sub decode {
   if ( lc( $msg->header('content-transfer-encoding') ) eq 'quoted-printable' ) {
     debug("decoding QP file\n");
     my @output =
-      split ( /^/m, MIME::Base64::decode_qp( join ( "", @{$body} ) ) );
+      split ( /^/m, MIME::QuotedPrint::decode_qp( join ( "", @{$body} ) ) );
 
     my $type = $msg->header('content-type');
     my ($filename) =
@@ -418,17 +418,19 @@ sub decode {
   }
   elsif ( lc( $msg->header('content-transfer-encoding') ) eq 'base64' ) {
     debug("decoding B64 file\n");
-    my @output =
-      split ( /^/m, MIME::Base64::decode_base64( join ( "", @{$body} ) ) );
+    my $output = [ MIME::Base64::decode_base64( join ( "", @{$body} ) ) ];
 
     my $type = $msg->header('content-type');
     my ($filename) =
       ( $msg->header('content-disposition') =~ /name="?([^\";]+)"?/i );
     if ( !$filename ) {
-      ($filename) = ( $msg->header('content-type') =~ /name="?([^\";]+)"?/i );
+      ($filename) = ( $type =~ /name="?([^\";]+)"?/i );
     }
 
-    return $type, \@output, $filename;
+    # If it's a type text or message, split it into an array of lines
+    $output = [ split(/^/m, $output->[0]) ] if ( $type =~ m@^(?:text|message)/@ );
+
+    return $type, $output, $filename;
   }
   else {
     debug("decoding other encoding\n");
