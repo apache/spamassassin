@@ -10,12 +10,12 @@ PGALIB = pgapack
 #GALIB = galib245
 
 all: craig-evolve
-	#echo "Either do  make evolve  or  make craig-evolve"
+#echo "Either do  make evolve  or  make craig-evolve"
 
 #evolve: tmp/tests.h evolve.o
-	#g++ -Wall $(OPT) -fexceptions -L$(GALIB)/ga evolve.o -o evolve -lga -lm
-	## cp evolve evolve.unstripped
-	#strip evolve
+#g++ -Wall $(OPT) -fexceptions -L$(GALIB)/ga evolve.o -o evolve -lga -lm
+## cp evolve evolve.unstripped
+#strip evolve
 
 craig-evolve: tmp/tests.h craig-evolve.cxx
 	$(CC) -Wall $(OPT) -Dlinux -DWL=2 -DOPTIMIZE -L$(PGALIB)/lib/linux -I$(PGALIB)/include craig-evolve.cxx -o craig-evolve -lpgaO -lm
