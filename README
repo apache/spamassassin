@@ -192,20 +192,8 @@ If you're using procmail:
 
       cp ~/.procmailrc ~/.procmailrc.bak
 
-  - add the following lines to ~/.procmailrc, at the top of the file
-    before any existing recipes:
-
-      :0fw:spam.lock
-      | spamassassin -P
-
-      :0e
-      {
-	 EXITCODE=$?
-      }
-
-      :0:  
-      * ^Subject: \*\*\*\*\*SPAM\*\*\*\*\*
-      caughtspam
+  - add the line from procmailrc.example to ~/.procmailrc, at the top of
+    the file before any existing recipes.
 
     That'll process all mail through SA, and refile spam messages to
     a folder called "caughtspam" in your home directory.
