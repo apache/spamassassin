@@ -739,46 +739,58 @@ sub get_decoded_stripped_body_text_array {
     $text .= $_;
   }
 
-  # Get rid of comments.
-  #
-  # There might be things in comments we'd want to look at, like
-  # SCRIPT and STYLE content, but that can be taken care of with
-  # rawbody tests.
-  $text =~ s/<!--.*?--\s*>//gs;
+  # do we need to do HTML conversions?
+  my $html = ($text =~ m/<.*>/s);
+  my $entities = ($text =~ m/\&[-_a-zA-Z0-9]+;/s);
 
-  # Try to put paragraph breaks where'd they'd be in HTML.  There's
-  # an optional "/" before the ends of some tags in case it's XML style.
-  $text =~ s/<BR\/?>\s*<BR\/?>/\n\n/gis; # Two line breaks
-  $text =~ s/<HR\/?>/\n\n/gis;           # Horizontal line
+  if ($html) {
+    # Get rid of comments.
+    #
+    # There might be things in comments we'd want to look at, like
+    # SCRIPT and STYLE content, but that can be taken care of with
+    # rawbody tests.
+    $text =~ s/<!--.*?--\s*>//gs;
+
+    # Try to put paragraph breaks where'd they'd be in HTML.  There's
+    # an optional "/" before the ends of some tags in case it's XML style.
+    $text =~ s/<BR\/?>\s*<BR\/?>/\n\n/gis; # Two line breaks
+    $text =~ s/<HR\/?>/\n\n/gis;           # Horizontal line
+  }
 
   # Keep paragraph breaks
   $text =~ s/\n\n+/<p>/gs;
 
-  # Convert hex entities to decimal equivalents, so that the specific
-  # decimal regexps will match
-  $text =~ s/\&\#x([a-f0-9]+);/"&#" . hex($1) . ";"/ieg;
+  if ($entities) {
+    # Convert hex entities to decimal equivalents, so that the specific
+    # decimal regexps will match
+    $text =~ s/\&\#x([a-f0-9]+);/"&#" . hex($1) . ";"/ieg;
 
-  # Convert specific HTML entities
-  $text =~ s/(?:\&nbsp;|\&\#0?160;)/ /gis;
-  $text =~ s/(?:\&reg;|\&\#0?174;)/(R)/gis;
-  $text =~ s/(?:\&copy;|\&\#0?169;)/(C)/gis;
-  $text =~ s/\&\#0?153;/(TM)/gs;
-  $text =~ s/(?:\&\#0?147;|\&\#0?148;|\&\#0?132|\&quot;)/"/gis;
-  $text =~ s/\&\#0?146;/'/gs;
-  $text =~ s/\&\#0?145;/`/gs;
-  $text =~ s/\&\#0?150;/-/gs;  # En-dash
-  $text =~ s/\&\#0?151;/--/gs; # Em-dash
-  $text =~ s/\&\#0?152;/~/gs;
-  $text =~ s/\&\#82(?:16|17|20|11);//gs;
+    # Convert specific HTML entities
+    $text =~ s/(?:\&nbsp;|\&\#0?160;)/ /gis;
+    $text =~ s/(?:\&reg;|\&\#0?174;)/(R)/gis;
+    $text =~ s/(?:\&copy;|\&\#0?169;)/(C)/gis;
+    $text =~ s/\&\#0?153;/(TM)/gs;
+    $text =~ s/(?:\&\#0?147;|\&\#0?148;|\&\#0?132|\&quot;)/"/gis;
+    $text =~ s/\&\#0?146;/'/gs;
+    $text =~ s/\&\#0?145;/`/gs;
+    $text =~ s/\&\#0?150;/-/gs;  # En-dash
+    $text =~ s/\&\#0?151;/--/gs; # Em-dash
+    $text =~ s/\&\#0?152;/~/gs;
+    $text =~ s/\&\#82(?:16|17|20|11);//gs;
+  }
+
+  if ($html) {
+    # Convert <Q> tags
+    $text =~ s/<\/?Q\b[^>]*>/"/gis;
+  }
+
+  if ($entities) {    
+    # Convert decimal entities to their characters
+    $text =~ s/\&\#(\d+);/chr($1)/eg;
   
-  # Convert <Q> tags
-  $text =~ s/<\/?Q\b[^>]*>/"/gis;
-    
-  # Convert decimal entities to their characters
-  $text =~ s/\&\#(\d+);/chr($1)/eg;
-  
-  # Strip all remaining HTML entities
-  $text =~ s/\&[-_a-zA-Z0-9]+;/ /gs;
+    # Strip all remaining HTML entities
+    $text =~ s/\&[-_a-zA-Z0-9]+;/ /gs;
+  }
 
   # turn off utf8-ness to fix a warn "bug" on 5.6.1
   $text = pack("C0A*", $text);
@@ -789,7 +801,7 @@ sub get_decoded_stripped_body_text_array {
   
   # join all consecutive whitespace into a single space
   $text =~ s/\s+/ /sg;
-  
+
   # reinsert para breaks
   $text =~ s/<p>/\n\n/gis;
 
@@ -797,19 +809,21 @@ sub get_decoded_stripped_body_text_array {
   # mess us up
   $text =~ s/BASEURI://sg;
 
-  # Extract URIs from various HTML tags, so that they'll still be there
-  # when the URI tests are done.
-  # <A>, <AREA>, <BASE> and <LINK> use "href=URI".
-  # <IMG>, <FRAME>, <IFRAME>, <EMBED> and <SCRIPT> use "src=URI"
-  # <FORM> uses "action=URI"
-  $text =~ s/<base\s[^>]*\bhref$URI_in_tag>/BASEURI:$1 /ogis;
-  $text =~ s/<(?:a|area|link)\s[^>]*\bhref$URI_in_tag>/URI:$1 /ogis;
-  $text =~ s/<(?:img|i?frame|embed|script)\s[^>]*\bsrc$URI_in_tag>/URI:$1 /ogis;
-  $text =~ s/<form\s[^>]*\baction$URI_in_tag>/URI:$1 /ogis;
+  if ($html) {
+    # Extract URIs from various HTML tags, so that they'll still be there
+    # when the URI tests are done.
+    # <A>, <AREA>, <BASE> and <LINK> use "href=URI".
+    # <IMG>, <FRAME>, <IFRAME>, <EMBED> and <SCRIPT> use "src=URI"
+    # <FORM> uses "action=URI"
+    $text =~ s/<base\s[^>]*\bhref$URI_in_tag>/BASEURI:$1 /ogis;
+    $text =~ s/<(?:a|area|link)\s[^>]*\bhref$URI_in_tag>/URI:$1 /ogis;
+    $text =~ s/<(?:img|i?frame|embed|script)\s[^>]*\bsrc$URI_in_tag>/URI:$1 /ogis;
+    $text =~ s/<form\s[^>]*\baction$URI_in_tag>/URI:$1 /ogis;
   
-  # Get rid of all remaing HTML and XML tags
-  $text =~ s/<[?!\s]*[:a-z0-9]+\b[^>]*>//gis;
-  $text =~ s/<\/[:a-z0-9]+>//gis;
+    # Get rid of all remaing HTML and XML tags
+    $text =~ s/<[?!\s]*[:a-z0-9]+\b[^>]*>//gis;
+    $text =~ s/<\/[:a-z0-9]+>//gis;
+  }
 
   my @textary = split (/^/, $text);
   return \@textary;
