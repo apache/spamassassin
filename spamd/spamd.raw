@@ -764,8 +764,9 @@ sub logmsg
     }
     
     openlog('spamd','cons,pid',$log_facility);
-    syslog('info',"@_");
-    if ($opt{'debug'}) { warn "logmsg: @_\n"; }
+    my $str = join ('', @_); $str =~ s/%/%%/gs; # protect against %s etc.
+    syslog('info',$str);
+    if ($opt{'debug'}) { warn "logmsg: $str\n"; }
 
     if ($main::SIGPIPE_RECEIVED) {
        # SIGPIPE recieved when writing to syslog - this has been
