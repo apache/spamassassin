@@ -252,7 +252,7 @@ header T_FROM_OFFERS_3          From:addr =~ /\@\S*offers/i
 body     T_HTML_LINK_CLICK_HERE eval:html_eval('anchor_text', '=~ /click\s+here/i')
 body     T_HTML_LINK_CLICK_CAPS eval:html_eval('anchor_text', '=~ /CLICK/')
 # bug 1208: added for fun!
-rawbody  T_CLICK_LINK		/\b(click|enter|follow)\s+(this\s+)?link/i
+body T_CLICK_LINK		/\b(click|enter|follow)\s+(this\s+)?link/i
 describe T_CLICK_LINK		"Click this link"
 
 # Nov 12 2002 jm: still not sure about this one. ALL.current reports
