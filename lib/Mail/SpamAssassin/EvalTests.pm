@@ -2472,7 +2472,7 @@ sub check_bayes {
 
   if (!exists ($self->{bayes_score})) {
     $self->{bayes_score} = $self->{main}->{bayes_scanner}->scan
-						($self->{msg}, $fulltext);
+			      ($self->{msg}, $fulltext);
   }
 
   if (($min == 0 || $self->{bayes_score} > $min) &&
@@ -2527,7 +2527,7 @@ sub check_outlook_timestamp_token {
 
   # quite generous, but we just want to be in the right ballpark, so we
   # can handle mostly-correct values OK, but catch random strings.
-  my $fudge = 200;
+  my $fudge = 250;
 
   $_ = $self->get ('Date');
   $_ = $self->_parse_rfc822_date($_); $_ ||= 0;
