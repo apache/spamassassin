@@ -301,7 +301,7 @@ int main(int argc, char **argv)
     const char *username = NULL;
     int ret;
     struct message m;
-    int out_fd;
+    int out_fd = -1;
     struct transport trans;
     int result;
 
@@ -381,8 +381,6 @@ int main(int argc, char **argv)
     setmode(STDOUT_FILENO, O_BINARY);
 #endif
     if ((ret = transport_setup(&trans, flags)) == EX_OK) {
-	out_fd = -1;
-
 	ret = message_read(STDIN_FILENO, flags, &m);
 	if (ret == EX_OK) {
 	    ret = message_filter(&trans, username, flags, &m);
