@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.506 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.507 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -54,9 +54,6 @@ meta T_HTML_WITHOUT_HTML_2	(__MIME_HTML && !(__TAG_EXISTS_HTML && HTML_MESSAGE))
 meta T_HTML_WITHOUT_HTML_3	(__MIME_HTML && !(__TAG_EXISTS_HTML || HTML_MESSAGE))
 describe T_HTML_WITHOUT_HTML	Claims to be HTML, but there is no HTML text
 
-# just delete if no better than existing HTML_COMMENT_RATIO
-meta T_HTML_COMMENT_RATIO		__HTML_COMMENT_RATIO && __MIME_HTML_ONLY
-
 # 2003-05-15
 # possible replacements for current HTML_IMAGE_WEB_BUGS test
 body T_HTML_IMAGE_WEB_BUGS_0	eval:html_test('t_image_web_bugs_0')
@@ -102,15 +99,11 @@ uri T_RS6_NET_URL			/\brs6\.net\b/i
 uri      T_HTTP_EXCESSIVE_ENTITIES m{^https?://\S*\&\#(?:0?3[0-9]|0?[46][1-9a-f]|0?[57][\da])}i
 describe T_HTTP_EXCESSIVE_ENTITIES Completely unnecessary %-escapes inside a URL
 
-body T_BLANK_LINE_RATIO_04_70_80	eval:check_blank_line_ratio('70','80','4')
-body T_BLANK_LINE_RATIO_04_80_90	eval:check_blank_line_ratio('80','90','4')
-body T_BLANK_LINE_RATIO_04_90_92	eval:check_blank_line_ratio('90','92','4')
-body T_BLANK_LINE_RATIO_04_92_94	eval:check_blank_line_ratio('92','94','4')
-body T_BLANK_LINE_RATIO_04_94_96	eval:check_blank_line_ratio('94','96','4')
-body T_BLANK_LINE_RATIO_04_96_98	eval:check_blank_line_ratio('96','98','4')
-body T_BLANK_LINE_RATIO_04_98_100	eval:check_blank_line_ratio('98','100','4')
 body T_BLANK_LINE_RATIO_04_70_100	eval:check_blank_line_ratio('70','100','4')
 body T_BLANK_LINE_RATIO_04_80_100	eval:check_blank_line_ratio('80','100','4')
+body T_BLANK_LINE_RATIO_04_70_80	eval:check_blank_line_ratio('70','80','4')
+body T_BLANK_LINE_RATIO_04_80_90	eval:check_blank_line_ratio('80','90','4')
+body T_BLANK_LINE_RATIO_04_90_100	eval:check_blank_line_ratio('90','100','4')
 
 ###########################################################################
 
@@ -309,10 +302,6 @@ meta T_X_PRI_MISMATCH_HI	(__X_PRI_HI && __HAS_MSMAIL_PRI && !__X_MSPRI_HI)
 meta T_X_PRI_MISMATCH_MD	(__X_PRI_MD && __HAS_MSMAIL_PRI && !__X_MSPRI_MD)
 meta T_X_PRI_MISMATCH_LO	(__X_PRI_LO && __HAS_MSMAIL_PRI && !__X_MSPRI_LO)
 
-# bug 1756
-body T_GENERIC_VIAGRA		/Generic Viagra/
-describe T_GENERIC_VIAGRA	Mentions Generic Viagra
-
 # bug 1801
 uri T_IP_LINK_PLUS	/^https?\:\/\/(?:\S*\@)?\d+\.\d+\.\d+\.\d+.{0,20}(?:cgi|click|ads|id\=)/i
 describe T_IP_LINK_PLUS		Dotted-decimal IP address followed by GCI, clickthru, etc.
@@ -376,15 +365,6 @@ uri 		T_DOLLARMACHINE 		/dollar.?machine/i
 uri 		T_HITBOX 			/hitbox\.com/i
 
 # bug 1900
-body		T_LOSEWEIGHT		/\blo+se.{1,10}\d+.{1,3}(?:lb|pound|kg|kilo)/i
-describe	T_LOSEWEIGHT		Describes weight loss
-
-body		T_LOSEBODYFAT		/(?:Body Fat Loss|Loss of body fat|lose.{1,10}body fat)/i
-describe	T_LOSEBODYFAT		Describes body fat loss
-
-body		T_RAVAGESOFAGING	/ravages of aging/i
-describe	T_RAVAGESOFAGING	Describes the ravages of aging
-
 body		T_BETTERMEMORY		/Better Memory/i
 describe	T_BETTERMEMORY		Describes "better memory"
 
@@ -398,13 +378,6 @@ header T_FROM_MIXED_ALPHANUM_06	From:addr =~ /[a-z]+\d+[a-z]+\d+[a-z]+\w*\@/i
 header T_FROM_MIXED_ALPHANUM_07	From:addr =~ /\d+[a-z]+\d+[a-z]+\d+\w*\@/i
 header T_FROM_MIXED_ALPHANUM_08	From:addr =~ /^[a-z]+\d+[a-z]+\d+[a-z]+\w*\@/i
 header T_FROM_MIXED_ALPHANUM_09	From:addr =~ /\d+\D+\d+\D+\d+\w*\@/i
-
-# bug 1922:
-body __NIGERIAN_BODY_43         /\blate .{0,15}(?:father|wife|husband|general|president|daughter|son|minister).{0,20}(?:wealthy|treasure|deposit|money|left|property|known|\$|US)/i
-body __NIGERIAN_BODY_44             /\b(?:of|the) late president\b/i
-body __NIGERIAN_BODY_45                 /\bsum of {0,20}(?:million|US|\$)|(?:deposit|left|huge|discovered|abandoned).{0,15} sum of/i
-body __NIGERIAN_BODY_46                 /\bmy name is\b/i
-body __NIGERIAN_BODY_47             /\bgive\s+you .{0,15}(?:fund|money|total|sum|contact|percent)\b/i
 
 # uri case changes
 uri T_URI_CASE_REVERSE_9	/(?:[a-z][A-Z].*|(?<!\b)[A-Z][a-z].*){9}/
@@ -439,6 +412,14 @@ uri T_URI_3CASE_SWITCH_4	/(?:[a-z][A-Z]+){4}/
 # hex escape in a directory name
 uri T_HTTP_ESCAPED_DIRECTORY	/^https?\:\/\/.*?\/.*%[0-9a-f]{2}.*\//i
 
-meta T_NIGERIAN_BODY	( __NIGERIAN_BODY_1 + __NIGERIAN_BODY_2 + __NIGERIAN_BODY_3 + __NIGERIAN_BODY_5 + __NIGERIAN_BODY_6 + __NIGERIAN_BODY_7 + __NIGERIAN_BODY_8 + __NIGERIAN_BODY_9 + __NIGERIAN_BODY_10 + __NIGERIAN_BODY_11 + __NIGERIAN_BODY_12 + __NIGERIAN_BODY_13 + __NIGERIAN_BODY_14 + __NIGERIAN_BODY_15 + __NIGERIAN_BODY_16 + __NIGERIAN_BODY_17 + __NIGERIAN_BODY_18 + __NIGERIAN_BODY_19 + __NIGERIAN_BODY_20 + __NIGERIAN_BODY_21 + __NIGERIAN_BODY_22 + __NIGERIAN_BODY_25 + __NIGERIAN_BODY_26 + __NIGERIAN_BODY_27 + __NIGERIAN_BODY_28 + __NIGERIAN_BODY_29 + __NIGERIAN_BODY_30 + __NIGERIAN_BODY_31 + __NIGERIAN_BODY_32 + __NIGERIAN_BODY_33 + __NIGERIAN_BODY_34 + __NIGERIAN_BODY_35 + __NIGERIAN_BODY_36 + __NIGERIAN_BODY_37 + __NIGERIAN_BODY_38 + __NIGERIAN_BODY_39 + __NIGERIAN_BODY_40 + __NIGERIAN_BODY_41 + __NIGERIAN_BODY_42 + __NIGERIAN_BODY_43 + __NIGERIAN_BODY_44 + __NIGERIAN_BODY_45 + __NIGERIAN_BODY_46 + __NIGERIAN_BODY_47 ) > 1
+# bug 1922:
+body __NIGERIAN_BODY_43         /\blate .{0,15}(?:father|wife|husband|general|president|daughter|son|minister).{0,20}(?:wealthy|treasure|deposit|money|left|property|known|\$|US)/i
+body __NIGERIAN_BODY_44             /\b(?:of|the) late president\b/i
+body __NIGERIAN_BODY_45                 /\bsum of {0,20}(?:million|US|\$)|(?:deposit|left|huge|discovered|abandoned).{0,15} sum of/i
+body __NIGERIAN_BODY_46             /\bgive\s+you .{0,15}(?:fund|money|total|sum|contact|percent)\b/i
 
-body 		T_REVERSE_AGING 		/\breverse.{1,5}aging\b/i
+meta T_NIGERIAN_BODY	( __NIGERIAN_BODY_1 + __NIGERIAN_BODY_2 + __NIGERIAN_BODY_3 + __NIGERIAN_BODY_5 + __NIGERIAN_BODY_6 + __NIGERIAN_BODY_7 + __NIGERIAN_BODY_8 + __NIGERIAN_BODY_9 + __NIGERIAN_BODY_10 + __NIGERIAN_BODY_11 + __NIGERIAN_BODY_12 + __NIGERIAN_BODY_13 + __NIGERIAN_BODY_14 + __NIGERIAN_BODY_15 + __NIGERIAN_BODY_16 + __NIGERIAN_BODY_17 + __NIGERIAN_BODY_18 + __NIGERIAN_BODY_19 + __NIGERIAN_BODY_20 + __NIGERIAN_BODY_21 + __NIGERIAN_BODY_22 + __NIGERIAN_BODY_25 + __NIGERIAN_BODY_26 + __NIGERIAN_BODY_27 + __NIGERIAN_BODY_28 + __NIGERIAN_BODY_29 + __NIGERIAN_BODY_30 + __NIGERIAN_BODY_31 + __NIGERIAN_BODY_32 + __NIGERIAN_BODY_33 + __NIGERIAN_BODY_34 + __NIGERIAN_BODY_35 + __NIGERIAN_BODY_36 + __NIGERIAN_BODY_37 + __NIGERIAN_BODY_38 + __NIGERIAN_BODY_39 + __NIGERIAN_BODY_40 + __NIGERIAN_BODY_41 + __NIGERIAN_BODY_42 + __NIGERIAN_BODY_43 + __NIGERIAN_BODY_44 + __NIGERIAN_BODY_45 + __NIGERIAN_BODY_46 ) > 1
+meta T_NIGERIAN_BODY2	( __NIGERIAN_BODY_1 + __NIGERIAN_BODY_2 + __NIGERIAN_BODY_3 + __NIGERIAN_BODY_5 + __NIGERIAN_BODY_6 + __NIGERIAN_BODY_7 + __NIGERIAN_BODY_8 + __NIGERIAN_BODY_9 + __NIGERIAN_BODY_10 + __NIGERIAN_BODY_11 + __NIGERIAN_BODY_12 + __NIGERIAN_BODY_13 + __NIGERIAN_BODY_14 + __NIGERIAN_BODY_15 + __NIGERIAN_BODY_16 + __NIGERIAN_BODY_17 + __NIGERIAN_BODY_18 + __NIGERIAN_BODY_19 + __NIGERIAN_BODY_20 + __NIGERIAN_BODY_21 + __NIGERIAN_BODY_22 + __NIGERIAN_BODY_25 + __NIGERIAN_BODY_26 + __NIGERIAN_BODY_27 + __NIGERIAN_BODY_28 + __NIGERIAN_BODY_29 + __NIGERIAN_BODY_30 + __NIGERIAN_BODY_31 + __NIGERIAN_BODY_32 + __NIGERIAN_BODY_33 + __NIGERIAN_BODY_34 + __NIGERIAN_BODY_35 + __NIGERIAN_BODY_36 + __NIGERIAN_BODY_37 + __NIGERIAN_BODY_38 + __NIGERIAN_BODY_39 + __NIGERIAN_BODY_40 + __NIGERIAN_BODY_41 + __NIGERIAN_BODY_42 + __NIGERIAN_BODY_43 + __NIGERIAN_BODY_44 + __NIGERIAN_BODY_45 + __NIGERIAN_BODY_46 ) > 2
+meta T_NIGERIAN_BODY3	( __NIGERIAN_BODY_1 + __NIGERIAN_BODY_2 + __NIGERIAN_BODY_3 + __NIGERIAN_BODY_5 + __NIGERIAN_BODY_6 + __NIGERIAN_BODY_7 + __NIGERIAN_BODY_8 + __NIGERIAN_BODY_9 + __NIGERIAN_BODY_10 + __NIGERIAN_BODY_11 + __NIGERIAN_BODY_12 + __NIGERIAN_BODY_13 + __NIGERIAN_BODY_14 + __NIGERIAN_BODY_15 + __NIGERIAN_BODY_16 + __NIGERIAN_BODY_17 + __NIGERIAN_BODY_18 + __NIGERIAN_BODY_19 + __NIGERIAN_BODY_20 + __NIGERIAN_BODY_21 + __NIGERIAN_BODY_22 + __NIGERIAN_BODY_25 + __NIGERIAN_BODY_26 + __NIGERIAN_BODY_27 + __NIGERIAN_BODY_28 + __NIGERIAN_BODY_29 + __NIGERIAN_BODY_30 + __NIGERIAN_BODY_31 + __NIGERIAN_BODY_32 + __NIGERIAN_BODY_33 + __NIGERIAN_BODY_34 + __NIGERIAN_BODY_35 + __NIGERIAN_BODY_36 + __NIGERIAN_BODY_37 + __NIGERIAN_BODY_38 + __NIGERIAN_BODY_39 + __NIGERIAN_BODY_40 + __NIGERIAN_BODY_41 + __NIGERIAN_BODY_42 + __NIGERIAN_BODY_43 + __NIGERIAN_BODY_44 + __NIGERIAN_BODY_45 + __NIGERIAN_BODY_46 ) > 3
+meta T_NIGERIAN_BODY4	( __NIGERIAN_BODY_1 + __NIGERIAN_BODY_2 + __NIGERIAN_BODY_3 + __NIGERIAN_BODY_5 + __NIGERIAN_BODY_6 + __NIGERIAN_BODY_7 + __NIGERIAN_BODY_8 + __NIGERIAN_BODY_9 + __NIGERIAN_BODY_10 + __NIGERIAN_BODY_11 + __NIGERIAN_BODY_12 + __NIGERIAN_BODY_13 + __NIGERIAN_BODY_14 + __NIGERIAN_BODY_15 + __NIGERIAN_BODY_16 + __NIGERIAN_BODY_17 + __NIGERIAN_BODY_18 + __NIGERIAN_BODY_19 + __NIGERIAN_BODY_20 + __NIGERIAN_BODY_21 + __NIGERIAN_BODY_22 + __NIGERIAN_BODY_25 + __NIGERIAN_BODY_26 + __NIGERIAN_BODY_27 + __NIGERIAN_BODY_28 + __NIGERIAN_BODY_29 + __NIGERIAN_BODY_30 + __NIGERIAN_BODY_31 + __NIGERIAN_BODY_32 + __NIGERIAN_BODY_33 + __NIGERIAN_BODY_34 + __NIGERIAN_BODY_35 + __NIGERIAN_BODY_36 + __NIGERIAN_BODY_37 + __NIGERIAN_BODY_38 + __NIGERIAN_BODY_39 + __NIGERIAN_BODY_40 + __NIGERIAN_BODY_41 + __NIGERIAN_BODY_42 + __NIGERIAN_BODY_43 + __NIGERIAN_BODY_44 + __NIGERIAN_BODY_45 + __NIGERIAN_BODY_46 ) > 4
+
