@@ -47,8 +47,8 @@ header __FROM_PHONE             From:addr =~ /^\d{3}(?:[-.]?\d{3}[-.]?\d{4}|\d{7
 meta FROM_ALL_NUMS              (__FROM_JUST_NUMBER && !__FROM_PHONE)
 describe FROM_ALL_NUMS          From an address that is all numbers (non-phone)
 
-describe FROM_OFFERS		From address is "at something-offers"
 header FROM_OFFERS		From:addr =~ /\@\S*offers/i
+describe FROM_OFFERS		From address is "at something-offers"
 
 header FROM_NO_USER		From =~ /(?:^\@|<\@| \@[^\)<]*$|<>)/ [if-unset: unset@unset.unset]
 describe FROM_NO_USER		From: has no local-part before @ sign
@@ -665,17 +665,19 @@ describe RCVD_AM_PM		Received headers forged (AM/PM)
 header RATWARE_EMPTY_HELO	Received =~ /from  \(\) by /
 describe RATWARE_EMPTY_HELO	Received headers forged (empty HELO)
 
-describe TO_FILENAME		"To" header contains a filename
 header TO_FILENAME		To =~ /<[CDEF]:/
+describe TO_FILENAME		"To" header contains a filename
 
 # quinlan: 2003-03-10, updated 2003-03-22
 # reply to a numbered address
 header ID_REPLY_TO_REPLY	Reply-To:addr =~ /reply.*\d{4}.*\@/i
+describe ID_REPLY_TO_REPLY	Reply-To address with reply and numbers
 
 # unsubscribe from a numbered address
 header __ID_REPLY_TO		Reply-To:addr =~ /\d{3}.*\d{3}.*\@/
 header __ID_RETURN_PATH		Return-path:addr =~ /\d{3}.*\d{3}.*\@/
 meta ID_UNIQUE			(X_LIST_UNSUBSCRIBE && __ID_RETURN_PATH && __ID_REPLY_TO)
+describe ID_UNIQUE		X-List-Unsubscribe has a numbered address
 
 # 2003-04-12
 # juno.com anti-forgery rule based on valid juno.com account names
