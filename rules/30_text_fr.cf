@@ -1,79 +1,89 @@
 # SpamAssassin translations: Française
 #
-# Translation by Olivier Nicole <on at cs.ait.ac dot th>,
-#   Asian Institute of Technology, Bangkok, Thaïlande
-#   & Maxime Ritter <airmax at netlibre dot info>
-#
-# Updated and completed by Michel Bouissou on 2003/06/16
+# Written by Michel Bouissou <michel@bouissou.net> for SpamAssassin 2.60
+# Latest revision: 2003/11/14
 #
 # Please don't modify this file as your changes will be overwritten with
 # the next update. Use /etc/mail/spamassassin/local.cf instead.
 # See 'perldoc Mail::SpamAssassin::Conf' for details.
 #
 # This program is free software; you can redistribute it and/or modify
-# it under the terms of either the Artistic License or the GNU General
-# Public License as published by the Free Software Foundation; either
-# version 1 of the License, or (at your option) any later version.
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
 #
 # See the file "License" in the top level of the SpamAssassin source
 # distribution for more details.
 #
 ###########################################################################
 
-#              ......................................................................
+#      ......................................................................
 lang fr clear-report-template
 lang fr report ------------------ Début de Rapport SpamAssassin ---------------------
-lang fr report Ce message est probablement du SPAM. Cette notice a été ajoutée par le
-lang fr report système d'analyse "SpamAssassin" sur le serveur "_HOSTNAME_", pour
-lang fr report vous aider à identifier ce type de messages. Le message original 
-lang fr report est ci-joint, pour que vous puissiez verifier que c'est vraiment du 
-lang fr report SPAM.
+lang fr report Ce message est probablement du SPAM (message non sollicité envoyé en
+lang fr report masse, publicité, escroquerie...).
 lang fr report
-lang fr report Si vous avez des questions, posez les à _CONTACTADDRESS_
+lang fr report Cette notice a été ajoutée par le système d'analyse "SpamAssassin" sur
+lang fr report votre serveur de courrier "_HOSTNAME_", pour vous
+lang fr report aider à identifier ce type de messages.
 lang fr report
-lang fr report Contenu du message: _PREVIEW_
+lang fr report Le système SpamAssassin ajoute un en-tête "X-Spam-Flag: YES" aux
+lang fr report messages qu'il considère comme étant probablement du Spam.
+lang fr report Vous pouvez si vous le souhaitez utiliser cette caractéristique
+lang fr report pour régler un filtre dans votre logiciel de lecture de courrier,
+lang fr report afin de détruire ou de classer à part ce type de message.
+lang fr report
+lang fr report Si ce robot a classifié incorrectement un message qui vous était
+lang fr report destiné, ou pour toute question, veuillez contacter l'administrateur
+lang fr report du système par e-mail à _CONTACTADDRESS_ .
+lang fr report
+lang fr report Voir http://spamassassin.org/tag/ pour plus de détails (en anglais).
 lang fr report
 lang fr report Détails de l'analyse du message:   (_HITS_ points, _REQD_ requis)
 lang fr report _SUMMARY_
 lang fr report -------------------- Fin de Rapport SpamAssassin ---------------------
-#              ......................................................................
 
+#      ......................................................................
 # Vous devriez changer "report_contact" dans le fichier 10_misc.cf.
 # _CONTACTADDRESS_ est remplacée par ce texte.
+#      ......................................................................
 
 lang fr clear-spamtrap-template
-lang fr spamtrap Subject: Adresse mail périmée / address is no longer available
+lang fr spamtrap Subject: Adresse mail périmée / Mail address discontinued
 lang fr spamtrap [English version follows]
 lang fr spamtrap [-----------------------]
-lang fr spamtrap [ce message a été généré automatiquement]
+lang fr spamtrap [Réponse automatique]
 lang fr spamtrap
-lang fr spamtrap Veuillez noter que cette adresse mail n'est plus utilisé,
-lang fr spamtrap et qu'elle ne recoit plus que des spams. En conséquence,
-lang fr spamtrap tout mail reçu à cet adresse est transmis à divers systèmes
-lang fr spamtrap de lutte contre le spam, puis automatiquement supprimé.
+lang fr spamtrap L'adresse e-mail à laquelle vous avez écrit n'est plus
+lang fr spamtrap utilisée, et ne reçoit plus que du spam. Par conséquent,
+lang fr spamtrap tout message reçu à cette adresses est transmis à divers
+lang fr spamtrap systèmes de lutte contre le spam, puis automatiquement
+lang fr spamtrap détruit.
 lang fr spamtrap
 lang fr spamtrap Si vous souhaitez joindre le propriétaire de cette ancienne
-lang fr spamtrap adresse mail, veuillez vous procurer sa nouvelle adresse,
-lang fr spamtrap éventuellement au moyen d'une recherche sur le web.
+lang fr spamtrap adresse mail, veuillez vous procurer sa nouvelle adresse, qui
+lang fr spamtrap ne peut pas vous être communiquée ici pour ne pas donner cette
+lang fr spamtrap information à d'éventuels spammeurs.
 lang fr spamtrap
-lang fr spamtrap [-- Signé : SpamAssassin, filtre automatique de mails]
+lang fr spamtrap [-- SpamAssassin, système anti-spam automatisé]
 lang fr spamtrap
 lang fr spamtrap [-----------------------]
-lang fr spamtrap [this message has been automatically generated]
+lang fr spamtrap [Automatically generated answer]
 lang fr spamtrap
-lang fr spamtrap Please note that this address is no longer in use, and nowadays
-lang fr spamtrap receives nothing but unsolicited commercial mail.  Accordingly,
-lang fr spamtrap any mail sent to it is added to several spam-tracking databases,
-lang fr spamtrap then automatically deleted.
+lang fr spamtrap The e-mail address to which you sent your message is obsolete,
+lang fr spamtrap and doesn't receive anything but spam anymore. Any message sent
+lang fr spamtrap to this address is automatically forwarded to several anti-spam
+lang fr spamtrap systems, then deleted.
 lang fr spamtrap
-lang fr spamtrap If you genuinely want to contact the owner of the address, please
-lang fr spamtrap re-check your contact lists, or search the web, to find their
-lang fr spamtrap current e-mail address.
+lang fr spamtrap If you truly want to contact the owner of this old address,
+lang fr spamtrap please try to find his/her new address, which cannot be given
+lang fr spamtrap by this system to avoid giving this address to possible
+lang fr spamtrap spammers.
 lang fr spamtrap
-lang fr spamtrap The mail you sent is reproduced in full below, for resending to
-lang fr spamtrap the correct address.  Sorry for the inconvenience!
+lang fr spamtrap Your original message is reproduced below, so you can resend it to
+lang fr spamtrap the correct recipient address.  Sorry for the inconvenience!
 lang fr spamtrap
-lang fr spamtrap [-- Signed: the SpamAssassin mail filter]
+lang fr spamtrap [-- Spamassassin, automated anti-spam system]
 lang fr spamtrap
 #                 ......................................................................
 
@@ -87,9 +97,11 @@ lang fr terse-report -------------------- Fin de Rapport SpamAssassin ----------
 lang fr clear-unsafe-report-template
 lang fr unsafe-report Le message original n'étant pas au format text brut, il est peut-être
 lang fr unsafe-report dangereux de l'ouvrir avec votre logiciel e-mail ; en particulier il
-lang fr unsafe-report pourrait contenir un virus, ou confirmer que votre adresse e-mail
-lang fr unsafe-report peut recevoir des spams. Si vous souhaitez lire le message, il est
-lang fr unsafe-report conseillé de l'enregistrer, puis de le lire avec un éditeur de texte.
+lang fr unsafe-report pourrait contenir un virus, ou confirmer à l'expéditeur que votre
+lang fr unsafe-report adresse e-mail est active, et peut recevoir du spam. Si vous voulez
+lang fr unsafe-report lire ce message, et n'êtes pas certain de la sécurité de votre logiciel
+lang fr unsafe-report e-mail, il est plus prudent d'enregistrer ce message sur votre disque
+lang fr unsafe-report dur, et de l'afficher ensuite avec un éditeur de texte.
 #                     ......................................................................
 
 #############
@@ -111,6 +123,7 @@ lang fr describe BAYES_99	L'algorithme Bayésien a évalué la probabilité de spam 
 
 
 lang fr describe ACCEPT_CREDIT_CARDS	Affirme accepter les cartes de crédit
+lang fr describe ACCESSDB		Ce message aurait été bloqué par accessdb
 lang fr describe ACT_NOW_CAPS		Demande d'agir immédiatement (en majuscules)
 lang fr describe ADDR_FREE		L'adresse de l'expéditeur contient le mot "FREE"
 lang fr describe ADDR_NUMS_AT_BIGSITE	Utilise une adresse ayant de nombreux chiffres, chez un gros F.S.I.
@@ -126,15 +139,12 @@ lang fr describe ANTISPAM_BILL		Mentionne très probablement une loi anti-spam
 lang fr describe AOL_USERS_LINK		Contient un lien à cliquer pour les utilisateurs d'AOL
 lang fr describe APPLY_FREE		Contient "Free Application" (inscription/participation gratuite)
 lang fr describe APPLY_ONLINE           Contient "Apply Online" (inscrivez-vous en ligne, "O" majuscule)
-lang fr describe APPROVED_BY		Contient un en-tête de liste de diffusion "Approved-By"
 lang fr describe ASCII_FORM_ENTRY	Contient un formulaire de réponse mis en page en ASCII
 lang fr describe ASKS_BILLING_ADDRESS   Demande une adresse de facturation
 lang fr describe AS_SEEN_ON		Offre un produit "vu à la télévision"
 lang fr describe AUTO_EMAIL_REMOVAL     Contient la formule "Auto Email Removal"
-lang fr describe AWL			Ajustement par liste blanche automatique
 lang fr describe AZOOGLE		Provient de azoogle.com, azogle.com, etc.
 lang fr describe BAD_CREDIT		Contient "Eliminate Bad Credit"
-lang fr describe BAD_HELO_WARNING       Faux nom utilisé dans la commande SMTP HELO
 lang fr describe BANG_BOSS        	Parle de votre "boss" avec point d'exclamation !
 lang fr describe BANG_EXERCISE		Parle d'exercices avec un point d'exclamation
 lang fr describe BANG_GUARANTEE		Quelque chose est "garanti" de manière emphatique
@@ -145,42 +155,45 @@ lang fr describe BANG_QUOTE            	Parle de devis avec point d'exclamation 
 lang fr describe BANKRUPTCY		Contient "Avoid Bankruptcy" (évitez la banqueroute)
 lang fr describe BARELY_LEGAL           Pornographie probable - légalité douteuse
 lang fr describe BARGAIN_URL		Contient un lien vers un domaine probablement spammeur
-lang fr describe BASE64_ENC_TEXT        Le texte du message est encodé en Base64
 lang fr describe BEEN_TURNED_DOWN	Contient "Have you been turned down ?" (avez-vous été plaqué ?)
 lang fr describe BEST_PORN		Pornographie probable "Best, Largest Porn Collections"
 lang fr describe BE_AMAZED              Contient la formule "be amazed"
 lang fr describe BE_BOSS		Contient "Be your own boss" (soyez votre propre patron)
-lang fr describe BILLION_DOLLARS        Parle de million/milliard de dollars
+lang fr describe BILLION_DOLLARS        Evoque des millions ou milliards de dollars
 lang fr describe BILL_1618              Revendique la conformité avec l'arrêt 1816 du sénat US
+lang fr describe BIZ_TLD		Contient une URL dans un domaine en .biz
+lang fr describe BLANK_LINES_70_80	Le corps du message a 70 à 80% de lignes vides
+lang fr describe BLANK_LINES_80_90	Le corps du message a 80 à 90% de lignes vides
+lang fr describe BLANK_LINES_90_100	Le corps du message a 90 à 100% de lignes vides
 lang fr describe BODY_8BITS		Contient plusieurs caractères 8-bits consécutifs
 lang fr describe BTAMAIL_HEADER		Un en-tête contient une adresse de btamail.net.cn
 lang fr describe BTAMAIL_URL		URL fréquemment trouvée dans le spam
 lang fr describe BUGGY_CGI              Réponse à un formulaire jamais rempli
-lang fr describe BUGZILLA_BUG		L'en-tête Subject ressemble à un bug publié dans Bugzilla
 lang fr describe BULK_EMAIL		Contient la formule "bulk email" (mailing en masse)
 lang fr describe BUY_DIRECT		Contient "Buy Direct" (achetez en direct)
 lang fr describe BUY_JUDGEMENTS		Propose d'acheter des jugements
+lang fr describe BZ_TLD			Contient une URL dans un domaine en .bz
 lang fr describe CABLE_CONVERTER	Parle de convertisseur / décodeur câble (spams fréquents)
-lang fr describe CALL_FREE		Contient un numéro de téléphone gratuit
+lang fr describe CALL_FREE		Contient un numéro d'appel gratuit
 lang fr describe CALL_NOW		Demande de téléphoner tout de suite (en anglais)
 lang fr describe CANNOT_BE_SPAM		Prétend que ce message "ne peut pas être considéré comme du spam" :-/
-lang fr describe CASHCASHCASH		Contient au moins trois $ à la suite
+lang fr describe CASHCASHCASH		Contient au moins trois symboles "$" successifs
 lang fr describe CASH_BONUS		Contient "Cash Bonus"
 lang fr describe CBYI			Contient le mot "CBYI"
 lang fr describe CELEBRITY_PORN		Pornographie probable "Celebrity Porn"
 lang fr describe CELL_PHONE_BOOST	Prétend améliorer la réception des téléphones mobiles
 lang fr describe CENTS_ON_DOLLAR	Contient "Cents on the Dollar"
 lang fr describe CHANGE_TERMS           Parle de clauses "Terms and conditions"
-lang fr describe CHARSET_FARAWAY        Message utilisant un jeu de caractères exotique
-lang fr describe CHARSET_FARAWAY_HEADERS	En-tête utilisant un jeu de caractères exotique
+lang fr describe CHARSET_FARAWAY	Message utilisant un jeu de caractères exotique
+lang fr describe CHARSET_FARAWAY_HEADER	En-tête utilisant un jeu de caractères exotique
 lang fr describe CHILD_SUPPORT          Escroquerie collectant des fonds "pour les enfants"
 lang fr describe CHINA_HEADER           Implique le domaine "china.com"
 lang fr describe CHINA_URL		URL chinoise fréquemment trouvée dans le spam
 lang fr describe CLICK_BELOW		Demande de cliquer ci-dessous
 lang fr describe CLICK_BELOW_CAPS	Demande de cliquer ci-dessous (majuscules)
-lang fr describe CLICK_TO_REMOVE_1	Contient "Click to be removed"
-lang fr describe CLICK_TO_REMOVE_2      Demande de cliquer sur un lien pour être retiré de la liste
-lang fr describe COMMUNIGATE		Envoyé par le programme de spam CommuniGate
+lang fr describe CLICK_TO_REMOVE_1	Contient "Click to be removed" (désabonnement)
+lang fr describe CLICK_TO_REMOVE_2      Contient "Click to be removed" (désabonnement)
+lang fr describe COMMUNIGATE		Provient du logiciel de spam CommuniGate
 lang fr describe COMPARE_RATES          Propose de comparer des taux "Compare Rates"
 lang fr describe COMPETE		Contient "Compete for your business"
 lang fr describe COMPLAIN_TO		Le message contient un en-tête "Complain-To header"
@@ -193,7 +206,6 @@ lang fr describe COPY_ACCURATELY	Contient formule souvent présente dans les chaî
 lang fr describe CREDIT_BUREAU		Parle de "bureau de crédit"
 lang fr describe CREDIT_CARD		Offre concernant des cartes de crédit
 lang fr describe CREDITORS_CALLING 	Contient "Calling Creditors"
-lang fr describe CRON_ENV		Contient un en-tête "X-Cron-Env"
 lang fr describe CUM_SHOT               Pornographie probable, "gros plans d'éjaculations"
 lang fr describe DAILY_PL		URL contient signe de spam, lien de redirection vers DailyPromotions
 lang fr describe DAILY_PXE		URL contient signe de spam, lien vers serveur DailyPromotions
@@ -210,19 +222,19 @@ lang fr describe DATE_IN_FUTURE_24_48	Date: est 24 à 48 heures après la date de 
 lang fr describe DATE_IN_FUTURE_48_96	Date: est 48 à 96 heures après la date de l'en-tête Received:
 lang fr describe DATE_IN_FUTURE_96_XX	Date: est plus de 96 heures après la date de l'en-tête Received:
 lang fr describe DATE_MISSING		En-tête "Date:" absent
+lang fr describe DATE_SPAMWARE_Y2K	L'en-tête date utilise un format Y2K inhabituel
 lang fr describe DATE_YEAR_ZERO_FIRST	L'en-tête Date: contient une année commençant par 0
 lang fr describe DCC_CHECK		Message listé par DCC: http://www.rhyolite.com/anti-spam/dcc/
 lang fr describe DEAR_FRIEND		Contient la formule "Dear friend"
 lang fr describe DEAR_SOMETHING		Le message contient "Dear... (quelqu'un)"
-lang fr describe DEBIAN_BTS_BUG         Ressemble à un bug Debian BTS
 lang fr describe DIET			Spam proposant une perte de poids
 lang fr describe DIG_UP_INFO		Spam proposant de fouiller la vie privée de vos amis
 lang fr describe DIRECT_EMAIL		Contient la formule "direct email"
-lang fr describe DISCLAIMER_LEGALESE    Contient ce qui ressemble à un "E-Mail Disclaimer"
 lang fr describe DISCONTINUE		Informations prétendant vous permettre de vous retirer de la liste
 lang fr describe DISGUISE_PORN          Tente de déguiser des termes pornographiques
+lang fr describe DNS_FROM_RFCI_DSN	Expéditeur From: listé dans dsn.rfc-ignorant.org
 lang fr describe DOMAINS_CHEAP		Sujet: "Noms de domaines pas chers"
-lang fr describe DOMAIN_BODY		Fait référence à l'enregistrement de nouveaux noms de domaine Internet
+lang fr describe DOMAIN_BODY		Propose la vente de noms de domaines Internet
 lang fr describe DOMAIN_SUBJECT		Le sujet fait référence aux nouveaux noms de domaine Internet
 lang fr describe DOMAIN_4U2             Nom de domaine contenant une variante de "4u"
 lang fr describe DONT_DELETE		Contient une formule incitant à ne pas effacer ce message
@@ -232,30 +244,26 @@ lang fr describe EARNINGS		Contient "Potential Earnings" (gains potentiels)
 lang fr describe EARN_MONEY		Propose de gagner de l'argent
 lang fr describe EARN_PER_WEEK		Propose de gagner de l'argent chaque semaine
 lang fr describe EASY_TERMS		Contient "Easy Terms" (échéances légères)
-lang fr describe EJACULATION		Prétend augmenter l'éjaculation
-lang fr describe EMAIL_ATTRIBUTION	Citation du nom de l'auteur d'un e-mail auquel on répond
+lang fr describe EJACULATION		Prétend augmenter l'éjaculation, Wow ;-)
 lang fr describe EMAIL_MARKETING        Contient la formule "email marketing"
+lang fr describe EMAIL_ROT13		Corps contient une adresse mail encodée en ROT13
 lang fr describe ENHANCE_WEBSITE        Parle d'améliorer n'importe quel site web "enhancing any website"
-lang fr describe EVITE			Contient une référence à evite.citysearch.com
-lang fr describe EXCUSE_ES_01		Prétend ne pas être du spam (en espagnol)
-lang fr describe EXCUSE_ES_02		Prend la liberté de vous envoyer du spam (en espagnol)
-lang fr describe EXCUSE_ES_03		Ce message vous à été envoyé à la demande de quelqu'un (en espagnol)
 lang fr describe EXCUSE_REMOVE		Explique comment être retiré des listes de mailing (soi-disant...)
 lang fr describe EXCUSE_1		Donne une fausse excuse pour l'envoi du message
 lang fr describe EXCUSE_2		Prétend que vous êtes d'accord pour recevoir ce SPAM
-lang fr describe EXCUSE_3		Prétend que vous pouvez être retiré de la liste
-lang fr describe EXCUSE_4		Prétend que vous pouvez être retiré de la liste
-lang fr describe EXCUSE_6		Prétend que vous pouvez être retiré de la liste
-lang fr describe EXCUSE_7		Prétend que vous pouvez être retiré de la liste
-lang fr describe EXCUSE_8               Prétend que vous pouvez être retiré de la liste
-lang fr describe EXCUSE_10		Propose de ne plus recevoir ce type de message
-lang fr describe EXCUSE_11		Prétend que l'adresse du destinataire était sur une liste
-lang fr describe EXCUSE_12		Excuses si le message a été envoyé par erreur
-lang fr describe EXCUSE_13		Donne une excuse à propos de l'envoi du message
-lang fr describe EXCUSE_14		Vous dit comment éviter (soi-disant) d'autres SPAM
-lang fr describe EXCUSE_15		Excuse prétendant que le message est légitime
-lang fr describe EXCUSE_16		Excuses si le message a été envoyé par erreur
-lang fr describe EXCUSE_18		Prétend ne pas être du SPAM
+lang fr describe EXCUSE_3		Prétend que vous pouvez vous faire supprimer de leur liste
+lang fr describe EXCUSE_4		Prétend que vous pouvez vous faire supprimer de leur liste
+lang fr describe EXCUSE_6		Prétend que vous pouvez vous faire supprimer de leur liste
+lang fr describe EXCUSE_7		Prétend que vous pouvez vous faire supprimer de leur liste
+lang fr describe EXCUSE_8               Prétend que vous pouvez vous faire supprimer de leur liste
+lang fr describe EXCUSE_10		Prétend que vous pouvez cesser de recevoir ces messages
+lang fr describe EXCUSE_11		Prétend que votre adresse figurait sur une liste légitime
+lang fr describe EXCUSE_12		Offre des excuses "si ce message vous a été envoyé par erreur"
+lang fr describe EXCUSE_13		Offre une excuse ou un prétexte à l'envoi de ce message
+lang fr describe EXCUSE_14		Vous dit comment éviter (prétendument) d'autres SPAM
+lang fr describe EXCUSE_15		Prétend qu'il s'agit d'un message légitime
+lang fr describe EXCUSE_16		Offre des excuses "si ce message vous a été envoyé par erreur"
+lang fr describe EXCUSE_18		Prétend ne pas être du spam
 lang fr describe EXCUSE_19		Prétend que vous vous êtes volontairement inscrit ou enregistré
 lang fr describe EXCUSE_20		Prétend que vous vous êtes enregistré sur leur site
 lang fr describe EXCUSE_21		Prétend que votre adresse a été obtenue de manière légitime
@@ -266,38 +274,75 @@ lang fr describe EXPERTS_SHOW_HOW       Parle de démonstration/explication fourn
 lang fr describe EXTRA_CASH		Offre des gains supplémentaires
 lang fr describe EXTRA_MPART_TYPE	En-tête "Content-type:...type=" surnuméraire
 lang fr describe E_MAILPROMO_URL	Lien vers un domaine probablement spammeur (e-mailpromo.net)
-lang fr describe FAILURE_NOTICE_1       Notification d'erreur par un serveur de mail (1)
-lang fr describe FAILURE_NOTICE_2       Notification d'erreur par un serveur de mail (2)
-lang fr describe FAKED_IP_IN_RCVD	Le champ Received: contient un nom avec une adresse IP falsifiée
-lang fr describe FAKED_UNDISC_RECIPS	Le champ To: contient une adresse 'Undisclosed-Recipients:' falsifiée
+lang fr describe FAKE_HELO_AOL		Le HELO ne correspond pas au rDNS: aol.com
+lang fr describe FAKE_HELO_BIGFOOT	Le HELO ne correspond pas au rDNS: bigfoot.com
+lang fr describe FAKE_HELO_CARAMAIL	Le HELO ne correspond pas au rDNS: caramail.com
+lang fr describe FAKE_HELO_EMAIL_COM	Le HELO ne correspond pas au rDNS: email.com
+lang fr describe FAKE_HELO_EUDORAMAIL	Le HELO ne correspond pas au rDNS: eudoramail.com
+lang fr describe FAKE_HELO_EXCITE	Le HELO ne correspond pas au rDNS: excite.com
+lang fr describe FAKE_HELO_FLASHMAIL	Le HELO ne correspond pas au rDNS: flashmail.com
+lang fr describe FAKE_HELO_HOTMAIL	Le HELO ne correspond pas au rDNS: hotmail.com
+lang fr describe FAKE_HELO_JUNO		Le HELO ne correspond pas au rDNS: juno.com
+lang fr describe FAKE_HELO_LYCOS	Le HELO ne correspond pas au rDNS: lycos.com
+lang fr describe FAKE_HELO_MAILCITY	Le HELO ne correspond pas au rDNS: mailcity.com
+lang fr describe FAKE_HELO_MAIL_COM	Le HELO ne correspond pas au rDNS: mail.com
+lang fr describe FAKE_HELO_MAIL_RU	Le HELO ne correspond pas au rDNS: mail.ru
+lang fr describe FAKE_HELO_MSN		Le HELO ne correspond pas au rDNS: msn.com
+lang fr describe FAKE_HELO_NETSCAPE_COM	Le HELO ne correspond pas au rDNS: netscape.com
+lang fr describe FAKE_HELO_NETZERO	Le HELO ne correspond pas au rDNS: netzero.net
+lang fr describe FAKE_HELO_SHAW_CA	Le HELO ne correspond pas au rDNS: shaw.ca
+lang fr describe FAKE_HELO_USA_NET	Le HELO ne correspond pas au rDNS: usa.net
+lang fr describe FAKE_HELO_YAHOO	Le HELO ne correspond pas au rDNS: yahoo.com
+lang fr describe FAKE_HELO_YAHOO_CA	Le HELO ne correspond pas au rDNS: yahoo.ca
+lang fr describe FAKE_HELO_YAHOO_CA	Le HELO ne correspond pas au rDNS: yahoo.ca
+lang fr describe FAKE_HELO_YAHOO_CA	Le HELO ne correspond pas au rDNS: yahoo.ca
+lang fr describe FAKED_HOTMAIL_DAV	X-Originating-Email ne correspond pas à From
+lang fr describe FAKED_IP_IN_RCVD	L'en-tête Received: contient une adresse IP falsifiée
+lang fr describe FAKED_UNDISC_RECIPS	Mention 'Undisclosed-Recipients:' falsifiée dans le "To:"
 lang fr describe FALLING_INTEREST	Parle de taux d'intérêt "Interest rates"
 lang fr describe FANTASTIC		Parle de très bonne affaire "Fantastic Deal"
 lang fr describe FINANCIAL 		Parle de "liberté financière" (Financial Freedom)
 lang fr describe FIND_ANYTHING		Vous propose de trouver des informations sur des gens
+lang fr describe FORGED_AOL_HTML	AOL n'envoie pas de messages en HTML seul
 lang fr describe FORGED_AOL_RCVD	En-tête Received: falsifié mentionnant un relais AOL bidon
+lang fr describe FORGED_HOTMAIL_RCVD2	From hotmail.com, mais sans "Received:"
+lang fr describe FORGED_AOL_TAGS	AOL n'envoie pas de HTML dans ce format
 lang fr describe FORGED_EUDORAMAIL_RCVD	Contient l'en-tête falsifié Received: eudoramail.com
 lang fr describe FORGED_GW05_RCVD	Contient l'en-tête falsifié Received: by gw05
 lang fr describe FORGED_HOTMAIL_RCVD	Contient l'en-tête falsifié Received: hotmail.com
+lang fr describe FORGED_IMS_HTML	IMS n'envoie pas de messages en HTML seul
+lang fr describe FORGED_IMS_TAGS	IMS n'envoie pas de HTML dans ce format
+lang fr describe FORGED_JUNO_FROM	Compte utilisateur invalide pour adresse @juno.com
 lang fr describe FORGED_JUNO_RCVD	Contient un en-tête Received: falsifié comme venant de juno.com
 lang fr describe FORGED_MUA_AOL         Message falsifié prétendant provenir d'AOL
+lang fr describe FORGED_MUA_AOL_FROM	Mail falsifié prétendant venir d'AOL (selon From)
+lang fr describe FORGED_MUA_APPLEMAIL	AppleMail n'envoie pas de messages en HTML seul
 lang fr describe FORGED_MUA_EUDORA	Message falsifié prétendant provenir du logiciel Eudora
 lang fr describe FORGED_MUA_IMS		Message falsifié prétendant provenir du logiciel IMS
 lang fr describe FORGED_MUA_MOZILLA	Message falsifié prétendant provenir du logiciel Mozilla
 lang fr describe FORGED_MUA_MSN		Message falsifié prétendant provenir de MSN
 lang fr describe FORGED_MUA_OIMO	Message falsifié prétendant provenir du logiciel MS Outlook IMO
 lang fr describe FORGED_MUA_OUTLOOK	Message falsifié prétendant provenir du logiciel MS Outlook
+lang fr describe FORGED_MUA_THEBAT	Message falsifié prétendant provenir du logiciel The Bat!
+lang fr describe FORGED_MUA_THEBAT_BOUN Mail prétendant provenir de The Bat! (boundary)
+lang fr describe FORGED_MUA_THEBAT_CS	Mail pretendant provenir de The Bat! (charset)
 lang fr describe FORGED_MX_HOTMAIL	En-tête falsifié Received: "from mx" hotmail.com
-lang fr describe FORGED_RCVD_TRAIL	Les derniers headers Received: semblent falsifiés
-lang fr describe FORGED_YAHOO_RCVD	Contient un en-tête falsifié Received: yahoo.com
+lang fr describe FORGED_OUTLOOK_HTML	Outlook n'envoie pas de messages en HTML seul
+lang fr describe FORGED_OUTLOOK_TAGS	Outlook n'envoie pas de HTML sous ce format
+lang fr describe FORGED_QUALCOMM_TAGS	QUALCOMM mailers n'envoient pas de HTML sous ce format
+lang fr describe FORGED_RCVD_FROM_NUM	En-tête Received falsifiés (hostname numérique)
+lang fr describe FORGED_RCVD_HELO	Received: contient un HELO falsifié
+lang fr describe FORGED_RCVD_NET_HELO	HELO utilisant un netblock IP incorrect
 lang fr describe FORGED_TELESP_RCVD	Contient un nom de machine falsifié chez un F.A.I. brésilien
-lang fr describe FORGOTTEN_PASSWORD     Contient un moyen de récupérer un mot de passe oublié
+lang fr describe FORGED_THEBAT_HTML	The Bat! n'envoie pas de messages en HTML seul
+lang fr describe FORGED_YAHOO_RCVD	Contient un en-tête falsifié Received: yahoo.com
+lang fr describe FORGED_YAHOO_RCVD_SMTP	En-tête contient un nom de serveur Yahoo falsifié
 lang fr describe FORWARD_LOOKING	Contient un "Stock Disclaimer Statement" (bourse)
 lang fr describe FOR_FREE		Contient la formule "for FREE"
-lang fr describe FOR_INSTANT_ACCESS	Contient un bouton pour obtenir un accès immédiat
 lang fr describe FOR_JUST_SOME_AMT	Contient la formule "for only" une certaine somme d'argent
 lang fr describe FREE_ACCESS            Contient "free access" (accès gratuit) avec des majuscules
 lang fr describe FREE_CELL_PHONE 	Parle de téléphones mobiles gratuits
-lang fr describe FREE_CONSULTATION	Offre de consulter gratuitement le service proposé
+lang fr describe FREE_CONSULTATION	Offre une consultation ou un essai gratuit
 lang fr describe FREE_DVD		Propose des DVD gratuits
 lang fr describe FREE_GRANT             Contient "Free Grant Money"
 lang fr describe FREE_INSTALL           Contient "free installation" (installation gratuite) avec majuscules
@@ -316,82 +361,74 @@ lang fr describe FRIEND_AT_PUBLIC	Mèl envoye à you@you.com ou équivalent
 lang fr describe FRIEND_PUBLIC		Envoyé par, ou pour friend@public.com
 lang fr describe FROM_ALL_NUMS		Adresse "From" composée uniquement de chiffres (pas un No. de tél.)
 lang fr describe FROM_AND_TO_SAME	Les en-têtes From: et To: comportent la même adresse
-lang fr describe FROM_EGROUPS           Semble provenir de Yahoo! Groups
 lang fr describe FROM_ENDS_IN_NUMS	L'en-tête From: se termine par un nombre
 lang fr describe FROM_HAS_MIXED_NUMS	L'en-tête From: mélange lettes et chiffres
 lang fr describe FROM_HAS_MIXED_NUMS2	L'adresse d'expéditeur correspond à un format de spammeur connu
-lang fr describe FROM_HAS_UNDERLINE_NUMS	Le champ expéditeur contient un "_" et des chiffres/lettres
+lang fr describe FROM_HAS_MIXED_NUMS3	From: contient un mélange de lettres et chiffres
+lang fr describe FROM_HAS_ULINE_NUMS	From: contient un "_" et un mélange de lettres et chiffres
+lang fr describe FROM_ILLEGAL_CHARS	From: contient trop de caractères bruts invalides
 lang fr describe FROM_NO_LOWER		Le champ expéditeur ne contient aucune lettre minuscule
 lang fr describe FROM_NO_USER		L'en-tête From: n'a pas de nom d'utilisateur avant le signe @
 lang fr describe FROM_NUM_AT_WEBMAIL	Adresse expéditeur sur webmail, et commençant par un chiffre
 lang fr describe FROM_OFFERS		L'adresse d'expéditeur est "at something-offers"
 lang fr describe FROM_STARTS_WITH_NUMS	L'en-tête From: commence par des chiffres
-lang fr describe FROM_WEBMAIL_ENDS_IN_NUMS6	From sur webmail, se terminant par plusieurs chiffres
+lang fr describe FROM_WEBMAIL_END_NUMS6	Provient d'un service webmail et From se termine par chiffres
 lang fr describe FRONTPAGE		Message créé avec le logiciel Frontpage
-lang fr describe FULL_REFUND		Propose un remboursement intégral
+lang fr describe FULL_REFUND		Vous garantit un "remboursement intégral" (en anglais)
 lang fr describe FURTHER_TRANSMISSIONS  Prétend être conforme aux réglementations sur le spam
-lang fr describe FWD_MSG                Message retransmis
 lang fr describe GAPPY_SUBJECT		L'en-tête Subject: contient du "t e x t e  e s p a c é"
 lang fr describe GENTLE_FEROCITY	Contient la formule "gentle ferocity"
-lang fr describe GENUINE_EBAY_RCVD      Message provenant d'eBay
 lang fr describe GET_IT_NOW		Contient "Get it now" (obtenez-le maintenant) avec majuscules
 lang fr describe GET_PAID		Contient "Get Paid" (soyez payé)
 lang fr describe GET_STARTED_NOW	Contient "Get Started Now" (Commencez dès maintenant)
 lang fr describe GREAT_OFFER		Vous fait une offre exceptionnelle
-lang fr describe GROUPS_YAHOO_1         Message provenant de Yahoo! Groups
 lang fr describe GTUBE			Test générique de courrier non sollicté en masse
 lang fr describe GUARANTEE		Contient le mot "guarantee" en majuscules
 lang fr describe GUARANTEED_STUFF	Copntient "Guaranteed Stuff" (produit garanti)
 lang fr describe GUARANTEED_100_PERCENT	Contient "One hundred percent guaranteed" (100% garanti)
-lang fr describe HABEAS_HIL		Expéditeur sur la liste d'infractions de www.habeas.com
 lang fr describe HABEAS_SWE             Utilise la marque de garantie d'Habeas (http://www.habeas.com/)
 lang fr describe HABEAS_VIOLATOR	Sur la liste d'infraction d'Habeas, mais utilise la marque d'Habeas
 lang fr describe HAIR_LOSS		Prétend lutter contre la calvitie
 lang fr describe HARDCORE_PORN          Pornographie probable "Hardcore Porn"
-lang fr describe HAS_ORGANIZATION       Possède un en-tête Organization (société...)
-lang fr describe HEADER_8BITS		Les en-têtes comportent 3 caractères 8-bits consécutifs
+lang fr describe HEAD_ILLEGAL_CHARS	En-tête contient trop de caractères bruts invalides
+lang fr describe HEADER_COUNT_CTYPE	Plusieurs en-têtes Content-Type
 lang fr describe HELPED_FINANCE         Témoignage bidon concernant un prêt
 lang fr describe HERBAL_VIAGRA          Parle de prétendu "Herbal Viagra"
-lang fr describe HGH			Propose de l'hormone de croissance humaine
+lang fr describe HG_HORMONE		Parle d'hormone de croissance humaine
 lang fr describe HIDDEN_ASSETS          Parle d'actifs cachés (hidden assets)
 lang fr describe HIDDEN_CHARGES		Parle de frais cachés (hidden charges)
 lang fr describe HIDE_WIN_STATUS	Javascript destiné à camoufler une URL dans le navigateur
 lang fr describe HOME_EMPLOYMENT	Propose un travail à la maison
-lang fr describe HOTMAIL_FOOTER1        Pied de message courant pour Hotmail
-lang fr describe HOTMAIL_FOOTER2        Pied de message courant pour Hotmail
-lang fr describe HOTMAIL_FOOTER3        Pied de message courant pour Hotmail
-lang fr describe HOTMAIL_FOOTER4        Pied de message courant pour Hotmail
-lang fr describe HOTMAIL_FOOTER5        Pied de message courant pour Hotmail
 lang fr describe HOT_NASTY		Pornographie probable: "Hot, Nasty, Wild, Young"
 lang fr describe HR_3113		Mentionne la loi sur le SPAM "H.R. 3113"
 lang fr describe HR_4176		Prétend être conforme au "House Bill 4176" (anti-spam)
 lang fr describe HTML_ALL_CAPS		L'en-tête "Content type:" est "TEXT/HTML" en majuscules
 lang fr describe HTML_CHARSET_FARAWAY	Jeu de caractères exotique utilisé pour le HTML
-lang fr describe HTML_COMMENT_EGP	Commentaire HTML contient une bannière Yahoo! Groups
 lang fr describe HTML_COMMENT_EMAIL	Commentaire HTML contient une adresse e-mail
+lang fr describe HTML_COMMENT_RATIO	Commentaires HTML pour une grande partie du message
 lang fr describe HTML_COMMENT_SAVED_URL	Le message HTML est une page web sauvegardée
+lang fr describe HTML_COMMENT_SHOUTING	Commentaires HTML à l'intérieur de marques "criantes"
 lang fr describe HTML_COMMENT_SKY	Commentaire HTML contient des codes de base de données SKY
 lang fr describe HTML_COMMENT_8BITS	Un commentaire HTML comporte 3 caractères 8-bits consécutifs
-lang fr describe HTML_EMBEDS		Contient une marque HTML faisant appel à une objet encastré
+lang fr describe HTML_EMBEDS		HTML: Inclusion d'objets
 lang fr describe HTML_EVENT_UNSAFE	Le HTML contient du code auto-exécutable potentiellement dangereux
 lang fr describe HTML_FONT_BIG		Police de taille +2 ou 3 et davantage
-lang fr describe HTML_FONT_BIG_B	Le HTML contient à la fois de grosses polices et des caractères gras
-lang fr describe HTML_FONT_COLOR_BLUE	Police bleue en HTML
-lang fr describe HTML_FONT_COLOR_CYAN	Police cyan en HTML
-lang fr describe HTML_FONT_COLOR_GRAY	Police grise en HTML
-lang fr describe HTML_FONT_COLOR_GREEN	Police verte en HTML
-lang fr describe HTML_FONT_COLOR_MAGENTA	Police magenta en HTML
-lang fr describe HTML_FONT_COLOR_NAME	Nom inhabituel pour couleur de police HTML
-lang fr describe HTML_FONT_COLOR_NOHASH	Caractère "#" manquant dans couleur de police HTML
-lang fr describe HTML_FONT_COLOR_RED	Police rouge en HTML
-lang fr describe HTML_FONT_COLOR_UNKNOWN	Le HTML utilise une couleur de police inconnue
-lang fr describe HTML_FONT_COLOR_UNSAFE	La couleur de police HTML n'est pas dans la palette "sûre" 6x6x6
-lang fr describe HTML_FONT_COLOR_YELLOW	Police jaune en HTML
+lang fr describe HTML_FONTCOLOR_BLUE	Police HTML de couleur bleue
+lang fr describe HTML_FONTCOLOR_CYAN	Police HTML de couleur cyan
+lang fr describe HTML_FONTCOLOR_GRAY	Police HTML de couleur grise
+lang fr describe HTML_FONTCOLOR_GREEN	Police HTML de couleur verte
+lang fr describe HTML_FONTCOLOR_MAGENTA	Police HTML de couleur magenta
+lang fr describe HTML_FONTCOLOR_NAME	Police HTML avec couleur de nom inhabituel
+lang fr describe HTML_FONTCOLOR_RED	Police HTML de couleur reouge
+lang fr describe HTML_FONTCOLOR_UNKNOWN	Police HTML de couleur inconnue
+lang fr describe HTML_FONTCOLOR_UNSAFE	Couleur de police HTML hors de la palette 6x6x6 sûre
+lang fr describe HTML_FONTCOLOR_YELLOW	Police HTML de couleur jaune
 lang fr describe HTML_FONT_FACE_BAD	Le nom de la police HTML n'est pas un mot
 lang fr describe HTML_FONT_FACE_CAPS	Le nom de la police HTML comporte trop de majuscules
 lang fr describe HTML_FONT_FACE_ODD	Police HTML rarement utilisée
 lang fr describe HTML_FONT_INVISIBLE	Couleur police HTML identique à couleur du fond (texte camouflé)
-lang fr describe HTML_FORM_ACTION_MAILTO	Le HTML inclut un formulaire qui envoie un mail
+lang fr describe HTML_FONT_LOW_CONTRAST	Police HTML de la même couleur que le fond
+lang fr describe HTML_FORMACTION_MAILTO	HTML inclut un formulaire d'envoi de mail
 lang fr describe HTML_IMAGE_AREA_04	Le HTML contient 4 à 5 kilopixels d'images
 lang fr describe HTML_IMAGE_AREA_05	Le HTML contient 5 à 6 kilopixels d'images
 lang fr describe HTML_IMAGE_AREA_06	Le HTML contient 6 à 7 kilopixels d'images
@@ -414,7 +451,9 @@ lang fr describe HTML_IMAGE_RATIO_14	HTML Faible ratio de texte par rapport aux 
 lang fr describe HTML_JAVASCRIPT	Présence de Javascript dans le HTML
 lang fr describe HTML_LINK_CLICK_CAPS	Le texte d'un lien HTML dit "CLICK" en majuscules
 lang fr describe HTML_LINK_CLICK_HERE	Le texte d'un lien HTML dit "click here"
+lang fr describe HTML_LINK_PUSH_HERE	HTML un lien texte dit "push here" ou similaire
 lang fr describe HTML_MESSAGE		HTML inclus dans le message
+lang fr describe HTML_MIME_NO_HTML_TAG	Message en HTML seul, mais sans tags HTML
 lang fr describe HTML_RELAYING_FRAME	Un cadre HTML essaie de charger une URL extérieure
 lang fr describe HTML_SHOUTING3		Le HTML semble "crier" très fort ;-)
 lang fr describe HTML_SHOUTING4		Le HTML semble "crier" très fort ;-)
@@ -423,7 +462,7 @@ lang fr describe HTML_SHOUTING6		Le HTML semble "crier" très fort ;-)
 lang fr describe HTML_SHOUTING7		Le HTML semble "crier" très fort ;-)
 lang fr describe HTML_SHOUTING8		Le HTML semble "crier" très fort ;-)
 lang fr describe HTML_SHOUTING9		Le HTML semble "crier" très fort ;-)
-lang fr describe HTML_TABLE_THICK_BORDER	Table HTML avec bordure épaisse
+lang fr describe HTML_TABLE_THICK_BORD	Table HTML avec bordure épaisse
 lang fr describe HTML_TAG_BALANCE_A	Tag de fermeture "a" HTML en excédent
 lang fr describe HTML_TAG_BALANCE_BODY	Le tag de fermeture de "body" HTML est manquant
 lang fr describe HTML_TAG_BALANCE_FONT	Tag de fermeture "font" HTML en excédent
@@ -450,11 +489,13 @@ lang fr describe HTML_60_70		Le message est composé de 60 à 70% de HTML
 lang fr describe HTML_70_80		Le message est composé de 70 à 80% de HTML
 lang fr describe HTML_80_90		Le message est composé de 80 à 90% de HTML
 lang fr describe HTML_90_100		Le message est composé de 90 à 100% de HTML
-lang fr describe HTTP_CTRL_CHARS_HOST	Utilise des caractères non valides dans le nom de la machine dans une URL
-lang fr describe HTTP_ESCAPED_HOST	Utilise des séquences % dans le nom de la machine dans une URL
-lang fr describe HTTP_EXCESSIVE_ESCAPES	Contient des %-escapes absolument superflus dans une URL
-lang fr describe HTTP_USERNAME_USED	Utilise une adresse mail dans une URL
-lang fr describe HTTP_WITH_EMAIL_IN_URL	L'URL pour se désabonner contient une adresse mèl
+lang fr describe HTTP_CTRL_CHARS_HOST	URI: Caractères invalides dans le nom de machine
+lang fr describe HTTP_ENTITIES_HOST	URI camouflée par des entités caractère
+lang fr describe HTTP_ESCAPED_HOST	URI: Contient des %-escapes dans le nom de machine
+lang fr describe HTTP_EXCESSIVE_ESCAPES	URI: Contient des %-escapes nombreux et superflus
+lang fr describe HTTP_WITH_EMAIL_IN_URL	L'URI de "désabonnement" contient une adresse e-mail
+lang fr describe ID_REPLY_TO_REPLY	Adresse de réponse avec "Reply" et des nombres
+lang fr describe ID_UNIQUE		X-List-Unsubscribe comporte une adresse numérique
 lang fr describe IDENT_NOBODY		Un en-tête Received comporte une chaîne "IDENT:nobody"
 lang fr describe IMPOTENCE		Prétend permettre de combattre l'impuissance
 lang fr describe INCOME			Contient "Additional Income" (revenu additionnel)
@@ -469,22 +510,22 @@ lang fr describe INVALID_DATE		L'en-tête Date: est incorrect (il contient AM/PM)
 lang fr describe INVALID_DATE_TZ_ABSURD	L'en-tête Date: est incorrect (la zone de temps n'existe pas)
 lang fr describe INVALID_MSGID		Le Message-ID est invalide, selon la RFC-2822
 lang fr describe INVALUABLE_MARKETING	Parle d'informations marketing "de valeur"
-lang fr describe IN_ACCORDANCE_WITH_LAWS	Prétend être en conformité avec une quelconque loi anti-spam
-lang fr describe IN_REP_TO		Contient l'en-tête In-Reply-To:
+lang fr describe IN_ACCORDANCE_WITH	Prétend être en conformité avec une quelconque loi anti-spam
+lang fr describe IP_LINK_PLUS		Adresse IP en décimal suivie d'un CGI
 lang fr describe ITS_LEGAL		Prétend être légal
+lang fr describe JAPANESE_UCE_SUBJECT	Sujet contient une marque japonaise de spam
 lang fr describe JAVASCRIPT_URI		Protocola Javascript dans une URI
 lang fr describe JODY			Contient le "témoignage" de "ma femme Jody"
 lang fr describe JOIN_MILLIONS		Contient "Join Millions of Americans"
 lang fr describe KIFF			Contient la formule "temple kiff"
-lang fr describe KNOWN_MAILING_LIST	Provient d'un logiciel de liste de diffusion connu
 lang fr describe KOREAN_UCE_SUBJECT	Le sujet contient des caractères coréens
 lang fr describe LARGE_COLLECTION	Pornographie probable: grand nombre de films, images, etc...
 lang fr describe LARGE_HEX		Contient une grande proportion de caractères hexadécimaux
 lang fr describe LESBIAN                Pornographie probable: site lesbien
 lang fr describe LIMITED_TIME_ONLY	Propose une "offre à durée limitée"
-lang fr describe LINES_OF_YELLING	Contient une ligne entière en MAJUSCULES
-lang fr describe LINES_OF_YELLING_2	Contient 2 lignes entières en MAJUSCULES
-lang fr describe LINES_OF_YELLING_3	Contient 3 lignes entières en MAJUSCULES
+lang fr describe LINES_OF_YELLING	Contient une ligne entièrement en majuscules
+lang fr describe LINES_OF_YELLING_2	Contient 2 lignes entièrement en majuscules
+lang fr describe LINES_OF_YELLING_3	Contient 3 lignes entièrement en majuscules
 lang fr describe LINK_TO_NO_SCHEME	Contient des liens sans préfixe http://
 lang fr describe LIVE_PORN              Pornographie probable: porno en direct-live
 lang fr describe LONG_DISTANCE		Offres téléphoniques longue distance
@@ -496,102 +537,117 @@ lang fr describe LOW_PAYMENT		Contient "Lower Monthly Payment" (Paiment mensuel 
 lang fr describe LOW_PRICE              Contient "Lowest Price" (le prix le plus bas)
 lang fr describe LUXURY_CAR		Luxury Car
 lang fr describe LYING_EYES		"Vous n'en croirez pas vos yeux !"
-lang fr describe MAILER_DAEMON		Message de service d'un serveur de courrier
-lang fr describe MAILMAN_CONFIRM	Contient un message de confirmation d'adresse envoyé par MailMan
-lang fr describe MAILMAN_REMINDER	Les en-têtes montrent qu'il s'agit d'un rappel d'abonnement à une liste
+lang fr describe MAILTO_SUBJ_REMOVE	Une URI d'envoi de mail indique un test de suppression
 lang fr describe MAILTO_TO_B2BMAIL	Contient un lien vers une adresse mail de spammeur probable (b2b-mail)
 lang fr describe MAILTO_LINK		Contient un lien HTTP pour envoyer un e-mail
-lang fr describe MAILTO_TO_REMOVE	Contient une adresse mèl pour se désabonner
+lang fr describe MAILTO_TO_REMOVE	Contient une adresse e-mail pour un "désabonnement"
 lang fr describe MAILTO_TO_SPAM_ADDR	Contient lien vers adr. mail ressemblant à une adr. de spammeur
 lang fr describe MAILTO_WITH_SUBJ	Contient un lien pour envoyer un e-mail avec un en-tête Subject:
-lang fr describe MAILTO_WITH_SUBJ_REMOVE	Contient un lien pour envoyer un mail avec "Subject: remove"
 lang fr describe MAIL_IN_ORDER_FORM     Contient la formule "Mail-in Order From"
-lang fr describe MAJORDOMO		Le sujet semble provenir du gestionaire de listes Majordomo
 lang fr describe MANY_EXCLAMATIONS	Le sujet comporte de nombreux points d'exclamation
 lang fr describe MANY_FROMS		L'en-tête From: contient plusieurs addresses
 lang fr describe MARKETING		Contient "Direct Marketing"
 lang fr describe MARKETING_PARTNERS	Prétend que vous vous êtes enregistré auprès d'un "partenaire" quelconque
 lang fr describe MARKET_SOLUTION	Contient "Marketing Solutions"
-lang fr describe MARKUP_RAND            RAND trouvé, spammeur ayant oublié de lancer le générateur d'ID aléatoires
-lang fr describe MARKUP_SSPL            SSPL trouvé, spammeur ayant oublié de lancer le générateur d'ID aléatoires
+lang fr describe MARKUP_RAND            Contient "RAND": Outil de spam aléatoire mal utilisé
+lang fr describe MARKUP_SSPL            Contient "SSPL": Outil de spam aléatoire mal utilisé
 lang fr describe MASS_EMAIL		Mentionne le mailing de masse
 lang fr describe MDAEMON_2_7_4		Reçu via un serveur SMTP buggué (MDaemon 2.7.4SP4R)
 lang fr describe MEET_SINGLES		Propose de rencontrer des célibataires
 lang fr describe MEGA_SITE              Pornographie possible "Mega porn"
-lang fr describe MICROSOFT_EXECUTABLE   Message incluant un éxécutable Microsoft
+lang fr describe MICROSOFT_EXECUTABLE   Contient un programme exécutable sur plateforme Microsoft
 lang fr describe MICRO_CAP_WARNING	Formule d'avertissement de la SEC à propos des investissements dans le micro-capital
 lang fr describe MILLION_EMAIL		Propose une liste d'un million d'adresses e-mail
 lang fr describe MILLION_USD 		Phrase clé d'escroquerie nigérienne (millions of dollars)
-lang fr describe MIME_BOUND_DASH_DIGIT	Les délimiteurs MIME contiennent un motif généré par un outil de spam
-lang fr describe MIME_BOUND_DIGITS_4	Les délimiteurs MIME contiennent un motif généré par un outil de spam
-lang fr describe MIME_BOUND_DIGITS_7	Les délimiteurs MIME contiennent un motif généré par un outil de spam
-lang fr describe MIME_BOUND_HASHES	Les délimiteurs MIME contiennent un motif généré par un outil de spam
-lang fr describe MIME_BOUND_HEX_24	Les délimiteurs MIME contiennent un motif généré par un outil de spam
-lang fr describe MIME_BOUND_MAIL_BOUND	Les délimiteurs MIME contiennent un motif généré par un outil de spam
-lang fr describe MIME_BOUND_MANY_HEX	Les délimiteurs MIME contiennent un motif généré par un outil de spam
-lang fr describe MIME_BOUND_NEXTPART	Les délimiteurs MIME contiennent un motif généré par un outil de spam
-lang fr describe MIME_BOUND_OPTIN	Les délimiteurs MIME contiennent un motif généré par un outil de spam
+lang fr describe __MIME_BASE64		Inclut un attachement en BASE64
+lang fr describe MIME_BASE64_BLANKS	Ligne blanches surnuméraires dans l'encodage BASE64
+lang fr describe MIME_BASE64_ILLEGAL	Attachement en BASE64 utilise des caractères invalides
+lang fr describe MIME_BASE64_LATIN	Texte en alphabet latin encodé en BASE64
+lang fr describe MIME_BASE64_NO_NAME	Attachement en BASE64 sans nom de fichier
+lang fr describe MIME_BASE64_TEXT	Texte du message camouflé par encodage en BASE64
+lang fr describe MIME_BOUND_DASH_DIGIT	Motif caractéristique d'outil de spam dans les délimiteurs MIME
+lang fr describe MIME_BOUND_DIGITS_4	Motif caractéristique d'outil de spam dans les délimiteurs MIME
+lang fr describe MIME_BOUND_DIGITS_7	Motif caractéristique d'outil de spam dans les délimiteurs MIME
+lang fr describe MIME_BOUND_HASHES	Motif caractéristique d'outil de spam dans les délimiteurs MIME
+lang fr describe MIME_BOUND_HEX_24	Motif caractéristique d'outil de spam dans les délimiteurs MIME
+lang fr describe MIME_BOUND_MAIL_BOUND	Motif caractéristique d'outil de spam dans les délimiteurs MIME
+lang fr describe MIME_BOUND_MANY_HEX	Motif caractéristique d'outil de spam dans les délimiteurs MIME
+lang fr describe MIME_BOUND_NEXTPART	Motif caractéristique d'outil de spam dans les délimiteurs MIME
+lang fr describe MIME_BOUND_OPTIN	Motif caractéristique d'outil de spam dans les délimiteurs MIME
 lang fr describe MIME_BOUND_RKFINDY     Motif caractéristique d'outil de spam (rkfindy) dans les délimiteurs MIME
-lang fr describe MIME_BOUND_TEP		Les délimiteurs MIME contiennent un motif généré par un outil de spam
+lang fr describe MIME_BOUND_TEP		Motif caractéristique d'outil de spam dans les délimiteurs MIME
 lang fr describe MIME_CHARSET_FARAWAY	Jeu de caractères MIME exotique
-lang fr describe MIME_DEFICIENT_QP	Encodage "quoted-printable" défectueux dans le corps
-lang fr describe MIME_EXCESSIVE_QP      Trop d'encodage "quoted-printable" dans le corps
 lang fr describe MIME_HEADER_CTYPE_ONLY En-tête "Content-Type" présent sans les en-têtes MIME requis
-lang fr describe MIME_HTML_NO_CHARSET 	Message en HTML ne précisant pas le jeu de caractères
+lang fr describe MIME_HTML_MOSTLY	Message multipart principalement en MIME text/html
+lang fr describe MIME_HTML_NO_CHARSET 	Message HTML sans précision du jeu de caractères utilisé
 lang fr describe MIME_HTML_ONLY		Le message possède uniquement des parties MIME text/html
-lang fr describe MIME_LONG_LINE_QP      Ligne de 'Quoted-printable' supérieure à 76 caractères
-lang fr describe MIME_MISSING_BOUNDARY  Manquent les limites de sections MIME
+lang fr describe MIME_HTML_ONLY_MULTI	Message multipart uniquement en MIME text/html
+lang fr describe MIME_MISSING_BOUNDARY  Limites de sections MIME manquantes
 lang fr describe MIME_ODD_CASE		Il y a un en-tête MiME-Version: (avec une 'i' minuscule)
-lang fr describe MIME_SUSPECT_NAME    	Le nom du fichier MIME ne correspond pas a son contenu
+lang fr describe __MIME_QP		Contient en attachement en quoted-printable
+lang fr describe MIME_QP_DEFICIENT	Encodage quoted-printable incorrect dans le corps
+lang fr describe MIME_QP_EXCESSIVE	Encodage quoted-printable excessif dans le corps
+lang fr describe MIME_QP_LONG_LINE	Ligne quoted-printable de plus de 76 caractères
+lang fr describe MIME_QP_NO_CHARSET	Texte en ligne quoted-printable sans spécification charset
+lang fr describe MIME_SUSPECT_NAME    	Le nom du fichier joint MIME semble suspect (virus ?)
 lang fr describe MISSING_HEADERS	Le message ne comporte pas l'en-tête To:
 lang fr describe MISSING_MIMEOLE	Possède un en-tête X-MSMail-Priority, mais pas de X-MimeOLE
 lang fr describe MISSING_OUTLOOK_NAME	Le message semble provenir d'Outlook, mais ce n'est pas le cas
 lang fr describe MLM			Le message parle de marketing multi-niveaux
-lang fr describe MONEY_BACK		Assure le remboursement
+lang fr describe MONEY_BACK		Vous garantit un "remboursement si insatisfait" (en anglais)
 lang fr describe MONEY_MAKING		Contient la formule "money making"
 lang fr describe MONSTERHUT             Le message mentionne monsterhut.com
 lang fr describe MORE_TRAFFIC           Contient "More Internet Traffic" (générez plus de trafic Internet)
 lang fr describe MORTGAGE_BEST		Informations sur des prêts (mortgage)
+lang fr describe MORTGAGE_LINKS		Comporte un lien vers une URI "mortgage" (prêts)
 lang fr describe MORTGAGE_NETWORK       Parle d'un réseau de prêts
 lang fr describe MORTGAGE_PITCH		Ressemble à une offre de prêt (mortgage)
 lang fr describe MORTGAGE_RATES		Parle de taux d'emprunts (mortage rates)
 lang fr describe MORTGAGE_WAITING       Parle d'une attente de prêts
-lang fr describe MSGID_CHARS_SPAM	L'en-tête Message-Id: contient des caractères qui indiquent un spam
-lang fr describe MSGID_GOOD_EXCHANGE	Message-ID indique que le message a été envoyé par MS Exchange
-lang fr describe MSGID_HAS_NO_AT	Le signe @ manque dans l'en-tête Message-Id:
-lang fr describe MSGID_NO_HOST 		le Message-Id ne comporte pas le nom de l'hôte
-lang fr describe MSGID_OUTLOOK_TIME	Message-ID falsifié (imitation format Outlook Express)
-lang fr describe MSGID_SPAM_ZEROES	Message-ID généré par outil de spam (variante zéros)
-lang fr describe MSGID_SPAMSIGN_1       L'en-tête Message-Id: a été généré par un outil de SPAM
-lang fr describe MSGID_SPAMSIGN_6LETTER	        Message-Id généré par un outil de spam (variante 6-lettres)
-lang fr describe MSGID_3_DOLLARS	Message-Id généré par un outil de spam (variante 3-dollars)
-lang fr describe MSGID_4NUMS_DOLLAR	Message-Id généré par un outil de spam (variente 4-num-dollar)
-lang fr describe MSG_ID_ADDED_BY_MTA_2	L'en-tête Message-ID a été ajouté par un relais (2)
-lang fr describe MSG_ID_ADDED_BY_MTA_3	L'en-tête Message-ID a été ajouté par un relais (3)
-lang fr describe MSN_FOOTER1            Pied de message courant pour MSN
-lang fr describe MSN_GROUPS             Provient de "MSN Communities"
+lang fr describe MSGID_FROM_MTA_BACKUP	Message-ID ajouté par un relais
+lang fr describe MSGID_FROM_MTA_HEADER	Message-ID ajouté par un relais
+lang fr describe MSGID_FROM_MTA_HOTMAIL	Message-ID ajouté par un relais hotmail.com
+lang fr describe MSGID_FROM_MTA_LATER	Message-ID ajouté par un relais
+lang fr describe MSGID_FROM_MTA_SHORT	Message-ID ajouté par un relais
+lang fr describe MSGID_HAS_NO_AT	Le signe @ manque dans l'en-tête Message-ID:
+lang fr describe MSGID_NO_HOST 		le Message-ID ne comporte pas le nom de l'hôte
+lang fr describe MSGID_OUTLOOK_INVALID	Message-ID falsifié (fortmat Outlook Express)
+lang fr describe MSGID_SPAM_1		Message-ID généré par un outil de spam
+lang fr describe MSGID_SPAM_6LETTER	Message-ID d'outil de spam: (variante 6-lettres)
+lang fr describe MSGID_SPAM_99X9XX99	Message-ID d'outil de spam: (variante 99x9xx99)
+lang fr describe MSGID_SPAM_ZEROES	Message-ID d'outil de spam: (variante 12-zéros)
+lang fr describe MSGID_THREESIXSIX	Message-ID indique que le message est du spam
+lang fr describe MSGID_3_DOLLARS	Message-ID généré par un outil de spam (variante 3-dollars)
+lang fr describe MSGID_4NUMS_DOLLAR	Message-ID généré par un outil de spam (variente 4-num-dollar)
 lang fr describe MULTI_FORGED		les en-têtes "Received" montrent de nombreuses falsifications
 lang fr describe MURKOWSKI_CRUFT        Contient le "Old Murkowski disclaimer"
 lang fr describe MUST_BE_18             Pornographie possible "Must be 18" (il faut être majeur)
+lang fr describe NA_DOLLARS		Parle d'un million de dollars "nord-américains"
 lang fr describe NASTY_GIRLS            Pornographie probable "Nasty Girls" (sal....)
 lang fr describe NATURAL_VIAGRA         Vante un prétendu "Natural Viagra"
 lang fr describe NEVER_ANOTHER		Prétend (en anglais) qu'aucun autre mail ne sera plus envoyé
 lang fr describe NEW_CUSTOMER		Pour "New Customers Only" (nouveaux clients seulement)
-lang fr describe NEW_DOMAIN_EXTENSIONS	Mentionne les nouveaux noms de domaine
+lang fr describe NEW_DOMAIN_EXTENSIONS	Propose la vente de noms de domaines des nouveaux TLDs
 lang fr describe NIGERIAN_BODY		Comporte de multiples signes d'escroquerie nigérienne
+lang fr describe NIGERIAN_BODY1		Corps ressemble à une escroquerie nigérienne 1+
+lang fr describe NIGERIAN_BODY2		Corps ressemble à une escroquerie nigérienne 2+
+lang fr describe NIGERIAN_BODY3		Corps ressemble à une escroquerie nigérienne 3+
+lang fr describe NIGERIAN_BODY4		Corps ressemble à une escroquerie nigérienne 4+
+lang fr describe NIGERIAN_BODY_GOVT_3	Corps: Nombreux indices d'escroquerie nigérienne
+lang fr describe NIGERIAN_SCAM_VIRTUE	Escroquerie nigérienne possible
 lang fr describe NIGERIAN_SUBJECT1	Sujet caractéristique d'une escroquerie nigérienne
 lang fr describe NIGERIAN_SUBJECT2	Le sujet est caractéristique d'une escroquerie nigérienne
 lang fr describe NIGERIAN_SUBJECT6	Sujet caractéristique d'une escroquerie nigérienne
 lang fr describe NONEXISTENT_CHARSET	Message rédigé dans un jeu de caractères inexistant
-lang fr describe NORMAL_HTTP_TO_IP	Utilise une adresse IP, en notation avec des points, dans une URL
+lang fr describe NORMAL_HTTP_TO_IP	URI: Contient une adresse IP en notation décimale
 lang fr describe NOT_ADVISOR		Contient "Not registered investment advisor"
-lang fr describe NOT_INTENDED		Offre réservée à ceux qui n'habitent pas un certain lieu
+lang fr describe NOT_INTENDED		Soi-disant réservé à ceux qui n'habitent pas tel état
 lang fr describe NOT_MLM		Apparemment PAS du marketing multi-niveaux
 lang fr describe NO_AGE			"Sans restriction d'âge"
-lang fr describe NO_CATCH		Assure qu'il n'y a pas de vice caché
+lang fr describe NO_CATCH		Prétend que ce n'est pas une arnaque
 lang fr describe NO_COST		Propose un produit ou service à un coût nul
 lang fr describe NO_CREDIT_CHECK	Contient "No Credit Check"
-lang fr describe NO_DISAPPOINTMENT	Assure que vous ne serez pas déçu
+lang fr describe NO_DISAPPOINTMENT	Prétend que vous ne serez pas déçu
 lang fr describe NO_DNS_FOR_FROM	Adresse From: inconnue en DNS (pas d'enregistrement MX)
 lang fr describe NO_EXPERIENCE          Contient une offre qui ne "requiert aucune expérience"
 lang fr describe NO_FEE			Contient "No Fees" (sans frais/abonnement/redevance...)
@@ -604,6 +660,7 @@ lang fr describe NO_MIDDLEMAN           Contient "No Middleman" (sans intermédia
 lang fr describe NO_OBLIGATION		Affirme qu'il s'agit d'une offre sans obligation de votre part
 lang fr describe NO_PURCHASE		Contient "No Purchase Necessary" (sans achat nécessaire)
 lang fr describe NO_QS_ASKED		Affirme "qu'on ne vous posera pas de questions"
+lang fr describe NO_RDNS_DOTCOM_HELO	HELO de F.A.I. important, mais pas de rDNS
 lang fr describe NO_REAL_NAME		Le champ From: ne contient pas le nom complet de l'expéditeur
 lang fr describe NO_SELLING             Prétend ne rien vendre
 lang fr describe NO_STRINGS		Contient "No Strings Attached"
@@ -627,21 +684,16 @@ lang fr describe OPT_OUT		Parle de "opting out" (version minuscules)
 lang fr describe OPT_OUT_CAPS		Parle de "opting out" (version majuscules)
 lang fr describe ORDER_NOW		Vous incite à passer une commande
 lang fr describe ORDER_REPORT           Incite à commander un "rapport" à quelqu'un
-lang fr describe ORIGINAL_MESSAGE	Ressemble à une réponse à un message
 lang fr describe OUR_AFFILIATE_PARTNERS Mentionne leurs "partenaires affiliés"
 lang fr describe OUR_COMPENSATION	Mentionne leur "compensation complète"
-lang fr describe OUR_OVERWHELMING_GROWTH	Mentionne leur "croissance exceptionnelle"
 lang fr describe OUR_PRIVACY_POLICY 	Mentionne leur politique de confidentialité (privacy policy)
 lang fr describe OUR_PUBLICATIONS	Mentionne leur site web et/ou publications
 lang fr describe OUR_STRICT_ANTI	Mentionne leur "stricte antipathie" pour quelque chose
-lang fr describe PATCH_CONTEXT_DIFF	Contient ce qui ressemble à un patch provenant de diff -c
-lang fr describe PATCH_UNIFIED_DIFF	Contient ce qui ressemble à un patch provenant diff -u
+lang fr describe OVERWHELMING_GROWTH	Mentionne leur "extraordinaire croissance"
 lang fr describe PAY_SITE               Pornographie probable - Site payant
 lang fr describe PENIS_ENLARGE		Arnaque prétendant augmenter la taile de votre pénis
 lang fr describe PENIS_ENLARGE2		Arnaque prétendant augmenter la taile de votre pénis
 lang fr describe PENNIES_A_DAY		Contient la formule "for only pennies a day"
-lang fr describe PGP_SIGNATURE		Contient un message signé par PGP / GnuPG
-lang fr describe PGP_SIGNATURE_2	Contient une signature PGP attachée au message
 lang fr describe PHONE_CANCER           Escroquerie à propos de "cancers provoqués par téléphones mobiles"
 lang fr describe PLING_PLING		Le sujet contient plusieurs points d'exclamation
 lang fr describe PLING_QUERY		Le sujet a un point d'interrogation ET un point d'exclamation
@@ -656,105 +708,116 @@ lang fr describe POST_IN_RCVD		Un en-tête Received: contient l'adresse falsifiée
 lang fr describe PREST_NON_ACCREDITED	Fait référence a une "prestigieuse université" non reconnue
 lang fr describe PRIORITY_MAIL          Parle de commandes envoyées par courrier prioritaire
 lang fr describe PRIORITY_NO_NAME	Possède un indicateur de priorité, mais pas d'en-tête X-Mailer
-lang fr describe PRINT_FORM_SIGNATURE	Demande votre signature sur un formulaire
+lang fr describe PRINT_FORM_SIGNATURE	Contient un formulaire à imprimer et renvoyer signé
 lang fr describe PRIZE			Parle de prix (à gagner)
 lang fr describe PRODUCED_AND_SENT_OUT	Formule mentionnant que ce message est une publicité
 lang fr describe PROMOTION		Contient "Special Promotion"
 lang fr describe PSYCHIC                Escroquerie parapsychologique
-lang fr describe PURE_PROFIT		Contient la formule 'pure profit'
+lang fr describe PURE_PROFIT		Contient "pure profit"
 lang fr describe PYZOR_CHECK		Message listé par Pyzor, voir http://pyzor.sf.net/
-lang fr describe QUOTED_EMAIL_TEXT	Contient ce qui ressemble à la citation d'un autre e-mail
-lang fr describe QUOTE_TWICE_1          Contient des réponses citées à deux niveaux
-lang fr describe Q_FOR_SELLER		Le sujet est une question issue d'eBay
 lang fr describe RAPE                   Pornographie probable - viols
-lang fr describe RATWARE_BANG_HASH 	Empreinte de logiciel de spam (bang-hash) trouvée dans les en-têtes
-lang fr describe RATWARE_CARETOP	Empreinte de logiciel de spam (Caretop) trouvée dans les en-têtes
-lang fr describe RATWARE_CHARSET	Empreinte de logiciel de spam (charset) trouvée dans les en-têtes
-lang fr describe RATWARE_CHARSET_V2 	Empreinte de logiciel de spam (charset 2) trouvée dans les en-têtes
-lang fr describe RATWARE_DIFFOND	Empreinte de logiciel de spam (DiffondiCool) trouvée dans les en-têtes
-lang fr describe RATWARE_DIRECT_EMAIL	Empreinte de logiciel de spam (Direct Email) trouvée dans les en-têtes
-lang fr describe RATWARE_EGROUPS	Empreinte de logiciel de mailing en masse (eGroups) trouvée dans les en-têtes
-lang fr describe RATWARE_EMWAC		Empreinte de logiciel de spam ("EMWAC SMTPRS") trouvée dans les en-têtes
-lang fr describe RATWARE_EVAMAIL	Empreinte de logiciel de spam (EVAMAIL) trouvée dans les en-têtes
-lang fr describe RATWARE_FLOAT 		Empreinte de logiciel de spam (float) trouvée dans les en-têtes
-lang fr describe RATWARE_GROUPMAIL	Empreinte de logiciel de spam (Group Mail) trouvée dans les en-têtes
-lang fr describe RATWARE_GR		Empreinte de logiciel de spam (GRMessageQueue) trouvée dans les en-têtes
-lang fr describe RATWARE_HASH_2		Empreinte de logiciel de spam (hash 2) trouvée dans les en-têtes
-lang fr describe RATWARE_HASH_2_V2	Empreinte de logiciel de spam (hash 2 v2) trouvée dans les en-têtes
-lang fr describe RATWARE_IMKTG		Empreinte de logiciel de spam (IMktg) trouvée dans les en-têtes
-lang fr describe RATWARE_JIXING		Empreinte de logiciel de spam (JiXing) trouvée dans les en-têtes
-lang fr describe RATWARE_JPFREE		Empreinte de logiciel de spam (jpfree) trouvée dans les en-têtes
-lang fr describe RATWARE_LC_OUTLOOK	Empreinte de logiciel de spam ("outlook") trouvée dans les en-têtes
-lang fr describe RATWARE_MMAILER	Empreinte de logiciel de spam (MMailer) trouvée dans les en-têtes
-lang fr describe RATWARE_OE_MALFORMED	L'en-tête X-Mailer indique un No de version d'Outlook Express malformé
+lang fr describe RATWARE_BAD_REFS	Mauvais format d'en-tête References
+lang fr describe RATWARE_BANG_HASH 	Trace de logiciel de spam (bang-hash) dans les en-têtes
+lang fr describe RATWARE_CARETOP	Trace de logiciel de spam (Caretop) dans les en-têtes
+lang fr describe RATWARE_CHARSET	Trace de logiciel de spam (charset) dans les en-têtes
+lang fr describe RATWARE_CHARSET_V2 	Trace de logiciel de spam (charset 2) dans les en-têtes
+lang fr describe RATWARE_DIFFOND	Trace de logiciel de spam (DiffondiCool) dans les en-têtes
+lang fr describe RATWARE_DIRECT_EMAIL	Trace de logiciel de spam (Direct Email) dans les en-têtes
+lang fr describe RATWARE_EGROUPS	Trace de logiciel de mailing en masse (eGroups) dans les en-têtes
+lang fr describe RATWARE_EMPTY_HELO	En-tête Received: falsifié (HELO vide)
+lang fr describe RATWARE_EMWAC		Trace de logiciel de spam ("EMWAC SMTPRS") dans les en-têtes
+lang fr describe RATWARE_EVAMAIL	Trace de logiciel de spam (EVAMAIL) dans les en-têtes
+lang fr describe RATWARE_EXISCAN_FORGED	En-têtes indiquant message Exiscan falsifié
+lang fr describe RATWARE_FLOAT 		Trace de logiciel de spam (float) dans les en-têtes
+lang fr describe RATWARE_GR		Trace de logiciel de spam (GRMessageQueue) dans les en-têtes
+lang fr describe RATWARE_HASH_DASH	Contient un "hashbuster" au format Send-Safe
+lang fr describe RATWARE_HASH_2		Trace de logiciel de spam (hash 2) dans les en-têtes
+lang fr describe RATWARE_HASH_2_V2	Trace de logiciel de spam (hash 2 v2) dans les en-têtes
+lang fr describe RATWARE_IMKTG		Trace de logiciel de spam (IMktg) dans les en-têtes
+lang fr describe RATWARE_JIXING		Trace de logiciel de spam (JiXing) dans les en-têtes
+lang fr describe RATWARE_JPFREE		Trace de logiciel de spam (jpfree) dans les en-têtes
+lang fr describe RATWARE_LC_OUTLOOK	Trace de logiciel de spam ("outlook") dans les en-têtes
+lang fr describe RATWARE_MMAILER	Trace de logiciel de spam (MMailer) dans les en-têtes
+lang fr describe RATWARE_OE_MALFORMED	En-tête X-Mailer indique No de version Outlook Express malformé
 lang fr describe RATWARE_OE_PI		L'en-tête X-Mailer contient "OutLook Express 3.14159"
-lang fr describe RATWARE_POWERC		Empreinte de logiciel de spam (PowerCampaign) trouvée dans les en-têtes
-lang fr describe RATWARE_SCREWUP_1	Empreinte de logiciel de spam (screwup 1) trouvée dans les en-têtes
-lang fr describe RATWARE_SCREWUP_2	Empreinte de logiciel de spam (screwup 2) trouvée dans les en-têtes
-lang fr describe RATWARE_STORM		Empreinte de logiciel de spam (StormPost) trouvée dans les en-têtes
-lang fr describe RATWARE_VC_IPA		Empreinte de logiciel de spam (VC_IPA) trouvée dans les en-têtes
-lang fr describe RATWARE_XMAILER	Empreinte de logiciel de spam (xmailer tag) trouvée dans les en-têtes
-lang fr describe RAZOR_CHECK		Message listé par Razor, voir http://razor.sourceforge.net
+lang fr describe RATWARE_POWERC		Trace de logiciel de spam (PowerCampaign) dans les en-têtes
+lang fr describe RATWARE_RCVD_BONUS_SPC	Trace de logiciel de spam (bonus space)
+lang fr describe RATWARE_RCVD_LC_ESMTP	Trace de logiciel de spam ('esmtp' Received)
+lang fr describe RATWARE_SCREWUP_1	Trace de logiciel de spam (screwup 1) dans les en-têtes
+lang fr describe RATWARE_SCREWUP_2	Trace de logiciel de spam (screwup 2) dans les en-têtes
+lang fr describe RATWARE_STORM		Trace de logiciel de spam (StormPost) dans les en-têtes
+lang fr describe RATWARE_STORM_URI	Trace de logiciel de spam (StormPost)
+lang fr describe RATWARE_VC_IPA		Trace de logiciel de spam (VC_IPA) dans les en-têtes
+lang fr describe RATWARE_XMAILER	Trace de logiciel de spam (xmailer tag) dans les en-têtes
+lang fr describe RATWARE_X_SCANNER	Comporte un en-tête X-Scanner
 lang fr describe RAZOR2_CHECK		Message listé par Razor2, voir http://razor.sourceforge.net
-lang fr describe RAZOR2_CF_RANGE_01_10  Razor2 donne un indice de confiance entre 1 et 10
-lang fr describe RAZOR2_CF_RANGE_11_20  Razor2 donne un indice de confiance entre 11 et 20
-lang fr describe RAZOR2_CF_RANGE_21_30  Razor2 donne un indice de confiance entre 21 et 30
-lang fr describe RAZOR2_CF_RANGE_31_40  Razor2 donne un indice de confiance entre 31 et 40
-lang fr describe RAZOR2_CF_RANGE_41_50  Razor2 donne un indice de confiance entre 41 et 50
-lang fr describe RAZOR2_CF_RANGE_51_60  Razor2 donne un indice de confiance entre 51 et 60
-lang fr describe RAZOR2_CF_RANGE_61_70  Razor2 donne un indice de confiance entre 61 et 70
-lang fr describe RAZOR2_CF_RANGE_71_80  Razor2 donne un indice de confiance entre 71 et 80
-lang fr describe RAZOR2_CF_RANGE_81_90  Razor2 donne un indice de confiance entre 81 et 90
-lang fr describe RAZOR2_CF_RANGE_91_100 Razor2 donne un indice de confiance entre 91 et 100
+lang fr describe RAZOR2_CF_RANGE_11_50	Razor2 donne un indice de confiance entre 11 et 50
+lang fr describe RAZOR2_CF_RANGE_51_100	Razor2 donne un indice de confiance entre 51 et 100
+lang fr describe RCVD_AM_PM		En-tête Received: falsifié (AM/PM)
 lang fr describe RCVD_BY_QVES_COM	Envoyé par un SpamHaus connu (qves)
-lang fr describe RCVD_FAKE_HELO_DOTCOM  Un en-tête Received contient un nom d'hôte falsifié dans le HELO
-lang fr describe RCVD_FAKE_HELO_DOTCOM_2      Un en-tête Received contient un nom d'hôte falsifié dans le HELO
-lang fr describe RCVD_IN_BL_SPAMCOP_NET	Relais listé dans bl.spamcom.net, voir http://spamcop.net/bl.shtml
-lang fr describe RCVD_IN_BONDEDSENDER	Reçu d'un participant au programme http://www.bondedsender.org/referred.html
+lang fr describe RCVD_FAKE_HELO_DOTCOM  En-tête Received contient nom d'hôte falsifié dans le HELO
+lang fr describe RCVD_IN_BL_SPAMCOP_NET	Relais listé dans http://spamcop.net/bl.shtml
+lang fr describe RCVD_IN_BSP_OTHER	Relais participant au Bonded Sender Program (autre relais)
+lang fr describe RCVD_IN_BSP_TRUSTED	Relais participant au Bonded Sender Program (relais connu)
 lang fr describe RCVD_IN_DSBL		Relais listé dans list.dsbl.org, voir http://dsbl.org
-lang fr describe RCVD_IN_DUL		Reçu depuis dialup listé dans DUL, voir http://www.mail-abuse.org/dul/
-lang fr describe RCVD_IN_DUL_FH		Le premier en-tête Received est un dialup, voir http://www.mail-abuse.org/dul/
-lang fr describe RCVD_IN_MULTIHOP_DSBL	Relais listé dans multihop.dsbl.org, voir http://dsbl.org
-lang fr describe RCVD_IN_NJABL		Relais listé dans dnsbl.njabl.org, voir http://www.njabl.org
-lang fr describe RCVD_IN_OPM		Relais open-proxy listé dans opm.blitzed.org, voir http://www.blitzed.org/bopm/
-lang fr describe RCVD_IN_ORBS		Relais listé dans orbs.dorkslayers.com, voir http://www.dorkslayers.org
-lang fr describe RCVD_IN_RBL		Relais listé dans RBL, voir http://www.mail-abuse.org/rbl/
-lang fr describe RCVD_IN_RELAYS_ORDB_ORG	Relais listé dans relays.ordb.org, voir http://www.ordb.org
-lang fr describe RCVD_IN_RFCI		Relais listé dans ipwhois.rfc-ignorant.org, voir http://www.rfc-ignorant.org
-lang fr describe RCVD_IN_RSS		Relais listé dans RSS, voir http://www.mail-abuse.org/rss/
-lang fr describe RCVD_IN_SBL		Relais listé dans SBL, voir http://www.spamhaus.org/sbl/
-lang fr describe RCVD_IN_UNCONFIRMED_DSBL	Relais listé dans unconfirmed.dsbl.org, voir http://dsbl.org
+lang fr describe RCVD_IN_DYNABLOCK	Envoyé directement depuis une adresse IP dynamique
+lang fr describe RCVD_IN_MAPS_DUL	Relais listé dans DUL, http://www.mail-abuse.org/dul/
+lang fr describe RCVD_IN_MAPS_NML	Relais listé dans NML, http://www.mail-abuse.org/nml/
+lang fr describe RCVD_IN_MAPS_RBL	Relais listé dans RBL, http://www.mail-abuse.org/rbl/
+lang fr describe RCVD_IN_MAPS_RSS	Relais listé dans RSS, http://www.mail-abuse.org/rss/
+lang fr describe RCVD_IN_NJABL		Relais listé dans http://www.njabl.org (dnsbl)
+lang fr describe RCVD_IN_NJABL_CGI	NJABL: Emis par un script formmail vulnérable
+lang fr describe RCVD_IN_NJABL_DIALUP	NJABL: Envoyé depuis une adresse IP dynamique
+lang fr describe RCVD_IN_NJABL_MULTI	NJABL: Envoyé par un relais ouvert multi-étages
+lang fr describe RCVD_IN_NJABL_PROXY	NJABL: Envoyé depuis un proxy ouvert
+lang fr describe RCVD_IN_NJABL_RELAY	NJABL: Envoyé par un relais ouvert confirmé
+lang fr describe RCVD_IN_NJABL_SPAM	NJABL: Envoyé depuis une source de spam confirmée
+lang fr describe RCVD_IN_OPM		Relais open-proxy listé dans http://www.blitzed.org/bopm/
+lang fr describe RCVD_IN_OPM_HTTP	OPM: Envoyé par un proxy HTTP CONNECT ouvert
+lang fr describe RCVD_IN_OPM_HTTP_POST	OPM: Envoyé par un proxy HTTP POST ouvert
+lang fr describe RCVD_IN_OPM_ROUTER	OPM: Envoyé par un proxy routeur ouvert
+lang fr describe RCVD_IN_OPM_SOCKS	OPM: Envoyé par un proxy SOCKS ouvert
+lang fr describe RCVD_IN_OPM_WINGATE	OPM: Envoyé par un proxy WinGate ouvert
+lang fr describe RCVD_IN_RFCI		Relais listé dans http://www.rfc-ignorant.org (ipwhois)
+lang fr describe RCVD_IN_SBL		Relais listé dans http://www.spamhaus.org/sbl/
+lang fr describe RCVD_IN_SORBS		SORBS: Relais listé dans SORBS
+lang fr describe RCVD_IN_SORBS_BLOCK	SORBS: Relais refusant d'être testé par SORBS
+lang fr describe RCVD_IN_SORBS_HTTP	SORBS: Envoyé par un proxy HTTP ouvert
+lang fr describe RCVD_IN_SORBS_MISC	SORBS: Envoyé par un proxy ouvert
+lang fr describe RCVD_IN_SORBS_SMTP	SORBS: Envoyé par un relais SMTP ouvert
+lang fr describe RCVD_IN_SORBS_SOCKS	SORBS: Envoyé par un proxy SOCKS ouvert
+lang fr describe RCVD_IN_SORBS_SPAM	SORBS: Envoyé depuis une source de spam
+lang fr describe RCVD_IN_SORBS_WEB	SORBS: Envoyé depuis un serveur web vulnérable
+lang fr describe RCVD_IN_SORBS_ZOMBIE	SORBS: Envoyé depuis un réseau IP piraté
+lang fr describe RCVD_NUMERIC_HELO	Received: contient un HELO numérique
+lang fr describe RCVD_6_CAPS_ESMTP_ID	Received: d'outil de spam (Variante ESMTP ID 6 majuscules)
 lang fr describe READ_TO_END		Contient une formule incitant à lire le message jusqu'à la fin
-lang fr describe RECEIVED_IDENT_CACHEFLOW	"Received:" contient le nom IDENT "CacheFlowServer"
+lang fr describe RECEIVED_CACHEFLOW	Received: contient le nom IDENT "CacheFlowServer"
 lang fr describe RECEIVED_IDENT_SQUID	Message envoyé par un proxy-HTTP Squid
 lang fr describe RECEIVE_EMAIL		Contient "Receive third party email"
 lang fr describe RECEIVE_OFFER		Porpose de recevoir une offre spéciale
-lang fr describe REFERENCES		Possède un en-tête "References" qui semble valide
 lang fr describe REFINANCE_NOW          Offre de refinancement immobilier
 lang fr describe REFINANCE_YOUR_HOME	Offre de refinancement immobilier
 lang fr describe REMOVAL_INSTRUCTIONS	Contient des instructions pour être "retiré de la liste"
-lang fr describe REMOVE_ES_01		Offre de vous retirer de la liste de distribution (en espagnol)
-lang fr describe REMOVE_ES_02		Offre de vous retirer de la liste de distribution (en espagnol)
-lang fr describe REMOVE_ES_03		Offre de vous retirer de la liste de distribution (en espagnol)
-lang fr describe REMOVE_ES_04		Offre de vous retirer de la liste de distribution (en espagnol)
 lang fr describe REMOVE_FROM_LIST	Contient des instructions pour être "retiré de la liste"
 lang fr describe REMOVE_IN_QUOTES	Contient des instructions pour être "retiré de la liste"
 lang fr describe REMOVE_PAGE		Contient une URL pointant sur une page de nom "remove"
 lang fr describe REMOVE_POSTAL		Demande l'envoi d'un courrier papier pour être (soi-disant) retiré de la liste
-lang fr describe REMOVE_RESPECT		Prétend "respecter toutes les demandes de retrait de la liste"
+lang fr describe REMOVE_REMOVAL_1WORD	Contient des informations de désabonnement
+lang fr describe REMOVE_REMOVAL_2WORD	Contient des informations de désabonnement
+lang fr describe REMOVE_REMOVAL_NEAR	Contient des informations de désabonnement
 lang fr describe REMOVE_SUBJ		Contient des instructions pour être "retiré de la liste"
 lang fr describe REPLY_REMOVE_SUBJECT	Contient des instructions pour être "retiré de la liste"
 lang fr describe REPLY_TO_EMPTY		Contient un en-tête Reply-To: vide
-lang fr describe REPLY_TO_HAS_UNDERLINE_NUMS  L'en-tête Reply-To contient un souligné "_" et des lettres et chiffres
-lang fr describe REPLY_WITH_QUOTES	Réponse à un message incluant du texte cité du message original
-lang fr describe RESENT_TO		Contient un en-tête Resent-To
-lang fr describe RESISTANCE_IS_FUTILE	Mentionne qu'il est impossible de se retirer de la liste
+lang fr describe REPLY_TO_ULINE_NUMS	Reply-To: contient un souligné "_" et des lettres/chiffres
+lang fr describe RESISTANCE_IS_FUTILE	Affirme que vous ne pouvez pas être retiré de la liste d'envoi
 lang fr describe REVERSE_AGING		Prétend permettre "d'inverser le vieillissement"
 lang fr describe RICH			Prétend que vous deviendrez riche (si seulement c'était vrai ;-)
 lang fr describe RISK_FREE		Propose une offre "sans aucun risque" (en anglais)
 lang fr describe ROUND_THE_WORLD	Les en-têtes Received: montrent que ce message a fait le tour du monde
 lang fr describe ROUND_THE_WORLD_LOCAL	En-têtes Received: donnent l'impression que le message a fait le tour du monde
-lang fr describe SAFEGUARD_NOTICE	Contient la signature d'un outil de spam sans licence
+lang fr describe RUSSIAN_UCE_SUBJECT	Subject: contient une marque de spam russe
+lang fr describe SAFEGUARD_NOTICE	Signature d'un outil de spam en mode démonstration
 lang fr describe SATISFACTION		Prétend que "votre satisfaction est garantie"
 lang fr describe SAVE_BUCKS		Prétend vous faire économiser de l'argent
 lang fr describe SAVE_MONEY		Prétend vous faire économiser beaucoup d'argent
@@ -768,18 +831,12 @@ lang fr describe SECTION_301		Prétend être conforme à l'arrêté anti-SPAM 301
 lang fr describe SEDUCTION		Prétend vous aider à avoir du succès auprès des femmes
 lang fr describe SEE_FOR_YOURSELF	Offre de juger par vous-même
 lang fr describe SELECTED_YOU		Prétend vous avoir "sélectionné" pour une quelconque raison
-lang fr describe SEMIFORGED_HOTMAIL_RCVD	From: @hotmail.com, mais pas d'en-tête "Received:" correspondant
 lang fr describe SENT_IN_COMPLIANCE	Prétend être conforme à un arrêté anti-SPAM
 lang fr describe SERIOUS_CASH		Contient "Serious cash" - Du fric, toujours du fric...
 lang fr describe SERIOUS_ONLY		"Offre réservée aux clients sérieux"
 lang fr describe SEX_FEST               Pornographie probable - Porn Fest
 lang fr describe SHOPPING_SPREE		Contient "Shopping Spree"
-lang fr describe SIGNATURE_LONG_DENSE	Le message possède une longue "signature" (sans lignes vides)
-lang fr describe SIGNATURE_LONG_SPARSE	Le message possède une longue "signature" (avec lignes vides)
-lang fr describe SIGNATURE_SHORT_DENSE	Le message possède une courte "signature" (sans lignes vides)
-lang fr describe SIGNATURE_SHORT_SPARSE	Le message possède une courte "signature" (avec lignes vides)
-lang fr describe SMIME_SIGNATURE        Le message est signé par S/MIME
-lang fr describe SMTPD_IN_RCVD		Relayé par un serveur SMTPD32
+lang fr describe SMTPD_IN_RCVD		Message transmis par un serveur SMTPD32
 lang fr describe SOME_BREAKTHROUGH	Parle d'une quelconque "avancée spectaculaire" (breakthrough)
 lang fr describe SORTED_RECIPS		La liste des destinataires est triée par ordre alphabétique
 lang fr describe SPAM_FORM		Contient un formulaire pour changer votre adresse e-mail
@@ -792,7 +849,6 @@ lang fr describe STOCK_PICK		Contient la formule "stock pick"
 lang fr describe STOP_SNORING		Contient "Stop Snoring" (arrêtez de ronfler)
 lang fr describe STRONG_BUY		Contient la formule "strong buy"
 lang fr describe SUBJECT_APPROVED	Le sujet parle d'être "approuvé"
-lang fr describe SUBJECT_IS_IN_REVIEW   Le sujet contient un marqueur de newsletter
 lang fr describe SUBJ_ALL_CAPS		Le sujet est en majuscules
 lang fr describe SUBJ_AS_SEEN		Le sujet contient "As Seen" (généralement "vu à la télé"...)
 lang fr describe SUBJ_BUY               Le sujet commence par "Buy, Buying" (achetez, achat)
@@ -801,14 +857,14 @@ lang fr describe SUBJ_DOUBLE_YOUR	Le sujet contient "Double Your" (doublez votre
 lang fr describe SUBJ_FOR_ONLY 		Le sujet contient "For Only" (pour seulement...)
 lang fr describe SUBJ_FREE_CAP		Le sujet contient "FREE" (gratuit) en majuscules
 lang fr describe SUBJ_FREE_INSTANT 	Le sujet contient "Free Instant" (gratuit et immédiat)
-lang fr describe SUBJ_FULL_OF_8BITS	Le sujet contient beaucoup de caractères 8 bits
 lang fr describe SUBJ_GUARANTEED        Le sujet contient GUARANTEED
 lang fr describe SUBJ_HAS_SPACES	Le sujet contient de nombreux espaces
 lang fr describe SUBJ_HAS_TIME_ID       Le sujet comporte un indicateur horaire
 lang fr describe SUBJ_HAS_UNIQ_ID       Le sujet contient un numéro unique d'identification
+lang fr describe SUBJ_ILLEGAL_CHARS	Subject: contient trop de caractères bruts invalides
 lang fr describe SUBJ_LIFE_INSURANCE	Le sujet contient "life insurance" (assurance vie)
-lang fr describe SUBJ_NOW_ONLY		Le sujet contient "Now Only"
-lang fr describe SUBJ_REMOVE		Contient des instructions pour se retirer de la liste
+lang fr describe SUBJ_NOW_ONLY		Le sujet contient "Now Only" (maintenant pour seulement...$)
+lang fr describe SUBJ_REMOVE		Le sujet parle de "désabonnement" d'une liste (en anglais)
 lang fr describe SUBJ_RIPPED		Le sujet contient "Ripped & Strong"
 lang fr describe SUBJ_VIAGRA		Le sujet contient "viagra"
 lang fr describe SUBJ_YOUR_DEBT		Le sujet contient "Your Bills" (vos factures) ou similaire
@@ -825,63 +881,55 @@ lang fr describe TARGETED		Parle d'envoi de messages "ciblés" (targeted)
 lang fr describe THE_BEST_RATE		Contient "Les meilleurs taux" (the best rates)
 lang fr describe THE_FOLLOWING_FORM	Contient la formule "the following form" (le formulaire suivant)
 lang fr describe THIS_AINT_SPAM		Prétend honteusement que ce n'est pas du spam...
-lang fr describe THIS_IS_AN_AD		Dit qu'il s'agit d'une publicité
+lang fr describe THIS_IS_AN_AD		Dit qu'il s'agit d'une publicité (merci ! Hop, poubelle !)
 lang fr describe TONER			Contient la formule "toner cartridge"
-lang fr describe TOO_MANY_MUA		Ce spammeur essaie de tromper le système en multipliant les en-têtes User-Agent
 lang fr describe TO_ADDRESS_EQ_REAL	L'en-tête To: Répète l'adresse e-mail comme nom véritable
 lang fr describe TO_EMPTY		L'en-tête To: est vide (pas de destinataire principal spécifié)
+lang fr describe TO_FILENAME		L'en-tête "To:" contient un nom de fichier
 lang fr describe TO_HAS_SPACES          L'adresse du destinataire (To:) contient des espaces
 lang fr describe TO_INVESTORS		L'en-tête To: est adressé à des "investisseurs" (investors)
 lang fr describe TO_MALFORMED		L'en-tête To: contient une adresse mal formée
 lang fr describe TO_NO_USER		L'en-tête To: ne contient pas de nom de destinataire avant le @
 lang fr describe TO_RECIP_MARKER        Le champ To: contient un marqueur "recipient"
 lang fr describe TO_TXT			Envoyé vers un fichiers texte
-lang fr describe TRACE_BY_SSN		Offre d'identifier quelqu'un grâce au numéro de sécutité sociale
+lang fr describe TRACE_BY_SSN		Propose de rechercher quelqu'un par son N° de sécurité sociale
 lang fr describe TRACKER_ID		Contient un numéro permettant de vous identifier
 lang fr describe UCE_MAIL_ACT		Prétend être conforme à l'arrêté anti-SPAM "UCE-Mail Act"
-lang fr describe UNCLAIMED_MONEY        Argent non réclamé: C'est connu, les gens laissent traîner leur blé ;-)
+lang fr describe UNCLAIMED_MONEY        Argent non réclamé: Chacun sait que c'est courant ;-)
 lang fr describe UNDER_BILL_1618	Prétend être conforme à l'arrêté anti-spam U.S. Senate Bill 1618
-lang fr describe UNWANTED_LANGUAGE_BODY	Message rédigé dans une langue non choisie (voir configuration)
 lang fr describe UNDISC_RECIPS		Le champ To: contient une adresse "Undisclosed-Recipients:" valide
-lang fr describe UNIVERSITY_DIPLOMAS	Fait référence à des diplômes universitaires
+lang fr describe UNIVERSITY_DIPLOMAS	Propose des diplômes universitaires bidons
 lang fr describe UNSECURED_CREDIT	Contient "Unsecured Credit/Debt"
 lang fr describe UNSUB_PAGE		Contient un lien vers une page web appelée "unsubscribe"
 lang fr describe UNSUB_SCRIPT		Contient un lien vers un script CGI appelé "unsubscribe"
+lang fr describe UNWANTED_LANGUAGE_BODY	Message dans une langue non désirée (config locale)
 lang fr describe UPPERCASE_25_50	Message composé de 25 à 50% de majuscules
 lang fr describe UPPERCASE_50_75	Message composé de 50 à 75% de majuscules
 lang fr describe UPPERCASE_75_100	Message composé de 75 à 100% de majuscules
 lang fr describe UP_TO_OR_MORES		Contient motif générique de type "jusqu'à X ou davantage" (argent)
 lang fr describe URGENT_BIZ		Contient la formule "urgent business"
+lang fr describe URI_4YOU		Comporte une URI "4you"
+lang fr describe URI_BANNEDCD		Comporte une URI "bannedcd"
+lang fr describe URI_DOLLARMACHINE	Comporte une URI "dollarmachine"
+lang fr describe URI_FREEHT		Comporte une URI "freeht"
+lang fr describe URI_HITBOX		Comporte une URI "hitbox.com"
 lang fr describe URI_IS_POUND		Le nom de fichier est juste "\#"; probablement une bidouille Javascript
+lang fr describe URI_OFFERS		Comporte un lien vers "company offers"
+lang fr describe URI_PXLG		Contenu fréquemment trouvé dans le spam
 lang fr describe USERNAME_IN_SUBJECT	Le sujet commence par le nom du destinataire
 lang fr describe USERPASS		URL contient nom utilisateur et mot de passe (optionnel)
-lang fr describe USER_AGENT		Possède un en-tête User-Agent
-lang fr describe USER_AGENT_APPLEMAIL 	En-tête X-Mailer provennant d'un MUA non-spammeur (Apple Mail)
-lang fr describe USER_AGENT_ENTOURAGE 	En-tête User-Agent provennant d'un MUA non-spammeur (Entourage)
-lang fr describe USER_AGENT_FORTE 	En-tête X-Mailer provennant d'un MUA non spammeur MUA (Forte)
-lang fr describe USER_AGENT_GNUS_UA 	En-tête User-Agent provennant d'un MUA non-spammeur (Gnus)
-lang fr describe USER_AGENT_GNUS_XM 	En-tête X-Mailer provennant d'un MUA non-spammeur (Gnus)
-lang fr describe USER_AGENT_IMP 	En-tête User-Agent provennant d'un MUA non-spammeur (IMP)
-lang fr describe USER_AGENT_KMAIL 	En-tête User-Agent provennant d'un MUA non-spammeur (KMail)
-lang fr describe USER_AGENT_MACOE 	En-tête User-Agent provennant d'un MUA non-spammeur (Mac O.Express)
-lang fr describe USER_AGENT_MOZILLA_UA 	En-tête User-Agent provennant d'un MUA non-spammeur (Mozilla)
-lang fr describe USER_AGENT_MOZILLA_XM 	En-tête X-Mailer provennant d'un MUA non-spammeur Netscape)
-lang fr describe USER_AGENT_MSN 	En-têtes indiquants un mail valide provenant de MSN
-lang fr describe USER_AGENT_MUTT 	En-tête User-Agent provennant d'un MUA non-spammeur (Mutt)
-lang fr describe USER_AGENT_PINE 	En-tête Message-Id indiquant un MUA non-spammeur (Pine)
-lang fr describe USER_AGENT_TONLINE 	En-tête X-Mailer provennant d'un MUA non-spammeur (T-Offline)
-lang fr describe USER_AGENT_VM 		En-tête X-Mailer provennant d'un MUA non-spammeur (VM)
-lang fr describe USER_AGENT_XIMIAN 	En-tête indiquants un MUA non-spammeur (Ximian)
-lang fr describe USER_IN_ALL_SPAM_TO	Le destinataire est dans la liste all_spam_to (config. SpamAssassin)
-lang fr describe USER_IN_BLACKLIST	L'expéditeur est sur la liste noire du destinataire
-lang fr describe USER_IN_MORE_SPAM_TO	Le destinataire est dans la liste more_spam_to (config. SpamAssassin)
-lang fr describe USER_IN_WHITELIST	L'expéditeur est sur la liste blanche (OK) du destinataire
-lang fr describe USER_IN_WHITELIST_TO	le destinataire est dans la liste blanche des destinataires (config SA)
+lang fr describe USER_IN_ALL_SPAM_TO	Destinataire sur la liste "all_spam_to" (config SA locale)
+lang fr describe USER_IN_BLACKLIST	Expéditeur sur la liste noire (config SA locale)
+lang fr describe USER_IN_BLACKLIST_TO   Destinataire sur la liste "blacklist_to" (config SA locale)
+lang fr describe USER_IN_DEF_WHITELIST	Expéditeur dans la liste OK par défaut de SpamAssassin
+lang fr describe USER_IN_MORE_SPAM_TO	Destinataire sur la liste "more_spam_to" (config SA locale)
+lang fr describe USER_IN_WHITELIST	Expéditeur sur la liste blanche (OK) (config SA locale)
+lang fr describe USER_IN_WHITELIST_TO	Destinataire sur la liste blanche (config SA)
 lang fr describe USER_4U2               La partie locale contient une variante de "4u"
 lang fr describe USE_IDENTITY		Parle de quelqu'un "utilisant votre identité"
 lang fr describe US_DOLLARS		Escroquerie nigérienne, phrase clé
-lang fr describe US_DOLLARS_2           Escroquerie nigérienne, version modifiée, phrase clé ($NNN.N m/USDNNN.N m)
-lang fr describe US_DOLLARS_3           Escroquerie nigérienne, version modifiée, phrase clé ($NN,NNN,NNN.NN)
+lang fr describe US_DOLLARS_2           Escroq. nigérienne, version modifiée, phrase clé ($NNN.N m/USDNNN.N m)
+lang fr describe US_DOLLARS_3           Escroq. nigérienne, version modifiée, phrase clé ($NN,NNN,NNN.NN)
 lang fr describe VACATION_SCAM		Escroquerie: Offre de vacances
 lang fr describe VAR_REF_IN_RECEIVED    Un en-tête Received contient une référence $variable
 lang fr describe VERB_UP_TO_OR_MORES	Contient du bruit de type 'add/lose/make/save up to X or more'
@@ -889,49 +937,45 @@ lang fr describe VERY_SUSP_RECIPS	L'en-tête To: contient plus de dix fois le mêm
 lang fr describe VIAGRA			Mentionne le Viagra
 lang fr describe VIAGRA_COMBO           Viagra et autres produits pharmaceutiques
 lang fr describe VIAGRA_ONLINE          Vente de Viagra par correspondance
-lang fr describe VJESTIKA		Mentionne l'aphrodisiaque Vjestika
+lang fr describe VJESTIKA		Propose l'aphrodisiaque Vjestika
+lang fr describe WALAA			Les spammeurs illettrés ne savent pas écrire "voilà"
 lang fr describe WANTS_CREDIT_CARD	Demande votre No. de carte de crédit
 lang fr describe WEALTH                 Vous propose de devenir riche, beau, célèbre et puissant
-lang fr describe WEIRD_PORT		Contient un numéro de port Internet non standard pour HTTP
+lang fr describe WEIRD_PORT		Lien HTTP vers un numéro de port non standard
 lang fr describe WEIRD_QUOTING		Utilisation étrange de symboles de citations
 lang fr describe WE_HATE_SPAM		Contient une formule qui prétend que l'auteur déteste le spam :-/
-lang fr describe WE_HATE_SPAM2		L'envoyeur prétend détester le spam.
+lang fr describe WE_HATE_SPAM2		L'envoyeur prétend détester le spam. Ca tombe bien, nous aussi !
 lang fr describe WE_HONOR_ALL		Prétend honorer toutes les demandes de retrait de la liste
-lang fr describe WE_PROMISE_YOU		Vous fait des promesses...
+lang fr describe WE_PROMISE_YOU		Vous fait des promesses... qui n'engagent que ceux qui les écoutent
 lang fr describe WHILE_SUPPLIES		"Offre à stock limité", dépêchez-vous, y'en a pas pour tout'l'monde...
-lang fr describe WHILE_YOU_SLEEP	Gagnez du pognon en dormant.
-lang fr describe WHY_PAY_MORE		Pourquoi payer plus ?
-lang fr describe WHY_WAIT		Qu'attendez-vous ?
+lang fr describe WHILE_YOU_SLEEP	Gagnez du pognon en dormant. Ben voyons.
+lang fr describe WHY_PAY_MORE		Pourquoi payer plus ? Et pourquoi lire ce mail ?
+lang fr describe WHY_WAIT		Qu'attendez-vous pour... jeter ce mail à la poubelle ;-)
 lang fr describe WITH_LC_SMTP		Une ligne Received: contient un signe de spam ("smtp" en minuscules)
 lang fr describe WORK_AT_HOME		Propose du travail à domicile
 lang fr describe WORRY_FREE             Combine sans soucis...
 lang fr describe WRINKLES		Anti-rides et autres graisses d'ours
-lang fr describe WWW_AUTOREMOVE_COM	Contenu souvent trouvé dans le spam
-lang fr describe WWW_CLIK4YOU_COM       Expression fréquement trouvée dans du spam
-lang fr describe X_ACCEPT_LANG		Possède un en-tête X-Accept-Language
-lang fr describe X_AUTH_WARNING		L'en-tête X-Authentication-Warning: est présent
+lang fr describe WWW_CLIK4YOU_COM       Domaine fréquemment mentionné dans le spam
 lang fr describe X_ENC_PRESENT		Il y a un en-tête X-Encoding:
 lang fr describe X_ESMTP		Possède un en-tête x-esmtp
 lang fr describe X_FIX_PRESENT		Il y a un en-tête X-Fix:
 lang fr describe X_GCMULTI		Possède un en-tête X-GCMulti
 lang fr describe X_LIBRARY		Le message comporte un en-tête X-Library
 lang fr describe X_LIST_UNSUBSCRIBE	Possède un en-tête X-List-Unsubscribe
-lang fr describe X_LOOP			Possède un en-tête X-Loop
 lang fr describe X_MAILER_GIBBERISH     L'en-tête X-Mailer: contient des informations incompréhensibles
-lang fr describe X_MAILING_LIST		Possède un en-tête X-Mailing-List
 lang fr describe X_MAIL_ID_PRESENT	L'en-tête X-MailingID: est présent
 lang fr describe X_MIME_KEY		Possède un en-tête X-Mime-Key
 lang fr describe X_MSMAIL_PRIORITY_HIGH L'en-tête X-Msmail-Priority: défini une priorité élevée
-lang fr describe X_NJABL_DIALUP		NJABL: Envoyé depuis une IP dialup ou dynamique
-lang fr describe X_NJABL_OPEN_PROXY	NJABL: relais listé comme proxy/relay/formmail/spam-source
+lang fr describe X_ORIG_HOST		Contient un en-tête X-Originating-Host
 lang fr describe X_PMFLAGS_PRESENT      Contient l'en-tête X-PMFLAGS: en majuscules
 lang fr describe X_PRECEDENCE_REF	Possède un en-tête X-Precedence-Ref
 lang fr describe X_PRIORITY_HIGH        L'en-tête X-Priority: défini une priorité élevée
+lang fr describe X_PRI_MISMATCH_HI	"X-Priority" et "X-MSMail-Priority" ne correspondent pas
 lang fr describe X_SERV_HOST_PRESENT	L'en-tête X-ServerHost: est présent
 lang fr describe X_STORMPOST_TO		Possède un en-tête X-Stormpost-To
 lang fr describe X_VMP_TEXT		Possède un en-tête X-VMP-Text
 lang fr describe X_X_PRESENT		Il y a un en-tête X-x:
-lang fr describe YAHOO_MSGID_ADDED      L'en-tête Message-Id: a été ajouté par Yahoo
-lang fr describe YOUR_INCOME		Mentionne vos revenus
+lang fr describe YAHOO_REDIR		Comporte une URI de redirection Yahoo
+lang fr describe YOUR_INCOME		Fait référence à vos revenus (en anglais)
 lang fr describe YOU_CAN_SEARCH		Vous propose des renseignements sur n'importe qui
-lang fr describe YOU_WON                Vous avez gagné ! Chouette !
+lang fr describe YOU_WON                Vous avez gagné ! Chouette ! Gagné le droit de poubelliser ce mail !
