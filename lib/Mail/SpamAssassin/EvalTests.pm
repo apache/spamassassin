@@ -185,6 +185,15 @@ sub _check_recipients {
     last if scalar(@address) >= TOCC_SIMILAR_COUNT;
   }
 
+  # remove duplicate addresses only when they appear next to each other
+  my @tmp = @address;
+  my $previous = '';
+  @address = ();
+  foreach my $current (@tmp) {
+    next if ($current eq $previous);
+    push(@address, ($previous = $current));
+  }
+
   # ideas that had both poor S/O ratios and poor hit rates:
   # - testing for reverse sorted recipient lists
   # - testing To: and Cc: headers separately
