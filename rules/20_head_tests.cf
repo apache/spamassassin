@@ -68,11 +68,6 @@ describe REPLY_TO_EMPTY		Reply-To: is empty
 header REPLY_TO_ULINE_NUMS    Reply-To =~ /_\S?(?:[a-z]+\w*?\d+|\d+\w*?[a-z]+)\w*\@/i [if-unset: UNSET]
 describe REPLY_TO_ULINE_NUMS  Reply-To: has an underline and numbers/letters
 
-# You don't want to let this match "'user@foo.bar'" <user@foo.bar>
-# (note single quotes) because some legitimate mailers seem to do that.
-header TO_ADDRESS_EQ_REAL	To =~ /^\s*"([^"@]+\@[^"@]+)"\s+<\1>\s*$/i
-describe TO_ADDRESS_EQ_REAL	To: repeats address as real name
-
 # NOTE: this is what 100% valid undisclosed-recipients mails look like.
 # If this gets a high score, that's a bug!
 header UNDISC_RECIPS		To =~ /^undisclosed-recipients?:\s*;$/
@@ -427,8 +422,6 @@ header X_X_PRESENT		exists:X-x
 header X_FIX_PRESENT            exists:X-Fix
 header COMPLAIN_TO		exists:Complain-To
 header X_VMP_TEXT               exists:X-VMP-Text
-header X_GCMULTI                exists:X-GCMulti
-header X_MIME_KEY		exists:X-Mime-Key
 header MICROSOFT		exists:microsoft
 describe X_ENC_PRESENT		Message has X-Encoding header
 describe X_ESMTP		Message has x-esmtp header
@@ -442,8 +435,6 @@ describe X_X_PRESENT		Message has X-x header
 describe X_FIX_PRESENT		Message has X-Fix header
 describe COMPLAIN_TO		Message has Complain-To header
 describe X_VMP_TEXT		Message has X-VMP-Text header
-describe X_GCMULTI		Message has X-GCMulti header
-describe X_MIME_KEY		Message has X-Mime-Key header
 describe MICROSOFT		Message has microsoft header
 
 header   MIME_ODD_CASE		ALL =~ /\nMiME-Version: /s
