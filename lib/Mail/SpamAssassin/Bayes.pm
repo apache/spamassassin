@@ -226,12 +226,6 @@ sub new {
     'conf'		=> $main->{conf},
     'log_raw_counts'	=> 0,
     'tz'		=> Mail::SpamAssassin::Util::local_tz(),
-
-    # Off. See comment above cached_probs_get().
-    #'cached_probs'	=> { },
-    #'cached_probs_ns'	=> 0,
-    #'cached_probs_nn'	=> 0,
-
   };
   bless ($self, $class);
 
@@ -914,13 +908,6 @@ sub compute_prob_for_token {
 
   my $prob;
 
-  # Off. See comment above cached_probs_get().
-  #use constant CACHE_S_N_TO_PROBS_MAPPING => 1;
-  #if (CACHE_S_N_TO_PROBS_MAPPING) {
-  #$prob = $self->cached_probs_get ($ns, $nn, $s, $n);
-  #if (defined $prob) { return $prob; }
-  #}
-
   return 0.5 if ( $ns == 0 || $nn == 0 );
 
   my $ratios = ($s / $ns);
@@ -946,47 +933,7 @@ sub compute_prob_for_token {
     $self->{raw_counts} .= " s=$s,n=$n ";
   }
 
-  # Off. See comment above cached_probs_get().
-  #if (CACHE_S_N_TO_PROBS_MAPPING) {
-  #$self->cached_probs_put ($ns, $nn, $s, $n, $prob);
-  #}
-
   return $prob;
-}
-
-###########################################################################
-# An in-memory cache of { nspam, nham } => probability.
-# Off for now: this actually slows things down by about 7%, while
-# increasing memory usage!
-
-sub cached_probs_get {
-  my ($self, $ns, $nn, $s, $n) = @_;
-
-  my $prob;
-  my $shash = $self->{cached_probs}->{$s}; if (!defined $shash) { return undef; }
-  $prob = $shash->{$n}; if (!defined $prob) { return undef; }
-  return $prob;
-}
-
-sub cached_probs_put {
-  my ($self, $ns, $nn, $s, $n, $prob) = @_;
-
-  if (exists $self->{cached_probs}->{$s}) {
-    $self->{cached_probs}->{$s}->{$n} = $prob;
-  } else {
-    $self->{cached_probs}->{$s} = { $n => $prob };
-  }
-}
-
-sub check_for_cached_probs_invalidated {
-  my ($self, $ns, $nn) = @_;
-  if ($self->{cached_probs_ns} != $ns || $self->{cached_probs_nn} != $nn) {
-    $self->{cached_probs} = { };	# blow away the old one
-    $self->{cached_probs_ns} = $ns;
-    $self->{cached_probs_nn} = $nn;
-    return 1;
-  }
-  return 0;
 }
 
 # Check to make sure we can tie() the DB, and we have enough entries to do a scan
@@ -1042,11 +989,6 @@ sub scan {
   my $pw;
 
   my $msgatime = $self->receive_date(scalar $msg->get_all_headers());
-
-  # Off. See comment above cached_probs_get().
-  #if (CACHE_S_N_TO_PROBS_MAPPING) {
-  #$self->check_for_cached_probs_invalidated($ns, $nn);
-  #}
 
   my %pw = map {
     if ($seen{$_}) {
