@@ -67,20 +67,27 @@ sub find_in_mailbox {
 sub mbox_search {
   my ($mail, $folder) = @_;
   my $wantid = $mail;
+  
+  my $count = 0;
+  my $host  = $ENV{'HOSTNAME'} || $ENV{'HOST'} || `hostname` || 'localhost';
 
   while (!eof MBOX) {
     my @msg = ();
     my $msgid = undef;
+    my $in_header = 1;
     $count++;
 
     while (<MBOX>) {
-      /^Message-[Ii][Dd]: (.*)\s*$/ and $msgid = $1;
+      if (/^$/ && $in_header) {
+        $in_header = 0 ;
 
-      if (/^$/) {
         if (!defined ($msgid)) {
-          $msgid = "<$count\@no_msgid_in_msg.taint.org>";
+          $msgid = sprintf('<no-msgid-in-msg-%06d@%s.masses.spamassasin.org>', $count, $host);
           push (@msg, "Message-Id: $msgid\n");
         }
+      }
+      if ($in_header) {
+        /^Message-Id: (.*)\s*$/i and $msgid = $1;
       }
 
       /^From \S+ +... ... / and last;
