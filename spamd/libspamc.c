@@ -635,7 +635,7 @@ static int _message_filter(const struct sockaddr *addr,
     char buf[8192];
     int bufsiz = (sizeof(buf) / sizeof(*buf)) - 4; /* bit of breathing room */
     int len, i;
-    int sock;
+    int sock = -1;
     char versbuf[20];
     float version;
     int response;
@@ -749,7 +749,7 @@ static int _message_filter(const struct sockaddr *addr,
     len = 0;		/* overwrite those headers */
 
     if (flags&SPAMC_CHECK_ONLY) {
-      close(sock);
+      close(sock); sock = -1;
       if (m->is_spam == EX_TOOBIG) {
 	    /* We should have gotten headers back... Damnit. */
 	    failureval = EX_PROTOCOL; goto failure;
@@ -779,7 +779,7 @@ static int _message_filter(const struct sockaddr *addr,
 	m->out_len+=len;
 
 	shutdown(sock, SHUT_RD);
-	close(sock);
+	close(sock); sock = -1;
     }
     libspamc_timeout = 0;
 
@@ -793,7 +793,9 @@ static int _message_filter(const struct sockaddr *addr,
 
 failure:
     free(m->out); m->out=m->msg; m->out_len=m->msg_len;
-    close(sock);
+    if (sock != -1) {
+      close(sock);
+    }
     libspamc_timeout = 0;
 
     if(flags&SPAMC_USE_SSL) {
