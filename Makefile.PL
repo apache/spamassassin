@@ -32,22 +32,27 @@ sub MY::libscan {
 
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
+
+# All the $(*MAN1*) stuff is empty/zero if Perl was Configured with -Dman1dir=none
+my %man1pods = (
+  'spamassassin'    => '$(INST_MAN1DIR)/spamassassin.$(MAN1EXT)',
+  'spamd/spamc.pod' => '$(INST_MAN1DIR)/spamc.$(MAN1EXT)',
+  'spamd/spamd'     => '$(INST_MAN1DIR)/spamd.$(MAN1EXT)',
+) if ($Config{installman1dir});
+
 WriteMakefile(
     'NAME'	=> 'Mail::SpamAssassin',
     'VERSION_FROM' => 'lib/Mail/SpamAssassin.pm', # finds $VERSION
 
-    'EXE_FILES'	=> [ 'spamassassin', 'spamd/spamc',
-    		'spamd/spamd', ],
+    'EXE_FILES'	=> [ 'spamassassin', 'spamd/spamc', 'spamd/spamd' ],
 
-    'MAN1PODS' => {
-	    'spamassassin' => '$(INST_MAN1DIR)/spamassassin.$(MAN1EXT)',
-	    'spamd/spamc.pod' => '$(INST_MAN1DIR)/spamc.$(MAN1EXT)',
-	    'spamd/spamd' => '$(INST_MAN1DIR)/spamd.$(MAN1EXT)',
-    },
+    'MAN1PODS' => { %man1pods },
 
     'PL_FILES' => { },
 
     'PMLIBDIRS' => [ 'lib' ],
+    
+    'PM_FILTER' => '$(PERL) build/preprocessor -Mconditional -Mvars -DVERSION=$(VERSION) -DPREFIX="$(PREFIX)"',
 
     # be quite explicit about this; afaik CPAN.pm is sensible using this
     'PREREQ_PM' => {
@@ -96,6 +101,9 @@ sub MY::postamble {
   my $sysconfdir = $self->{SYSCONFDIR};
   $sysconfdir ||= '/etc';
 
+  my $gotpods = (%{$self->{MAN1PODS}}) + (%{$self->{MAN3PODS}}) + (%{$self->{EXTRAPODS}});
+
+
 qq#
 
 RULES		= $rulesfiles
@@ -106,19 +114,21 @@ SYSCONFDIR      = $sysconfdir
 DEF_RULES_DIR	= $(PREFIX)/share/spamassassin
 LOCAL_RULES_DIR	= $(SYSCONFDIR)/mail/spamassassin
 
-FIXPATHFLAGS    = -DDEF_RULES_DIR="$(DEF_RULES_DIR)" \
+FIXVARS		= -Mvars \
+		  -DVERSION="$(VERSION)" \
+		  -DPREFIX="$(PREFIX)" \
+		  -DDEF_RULES_DIR="$(DEF_RULES_DIR)" \
 		  -DLOCAL_RULES_DIR="$(LOCAL_RULES_DIR)" \
-                  -DPREFIX="$(PREFIX)" \
 		  -DINSTALLSITELIB="$(INSTALLSITELIB)"
 
 pm_to_blib: spamassassin doc/.made
 
 spamassassin: spamassassin.raw
-	$(PERL) fixpath.pl $(FIXPATHFLAGS) spamassassin.raw $@
+	$(PERL) build/preprocessor $(FIXVARS) -Msharpbang <$? >$@
 	$(CHMOD) $(PERM_RWX) $@
 
 spamd/spamd: spamd/spamd.raw
-	$(PERL) fixpath.pl $(FIXPATHFLAGS) spamd/spamd.raw $@
+	$(PERL) build/preprocessor $(FIXVARS) -Msharpbang <$? >$@
 	$(CHMOD) $(PERM_RWX) $@
 
 spamd/libspamc.so: binaries.mk
@@ -131,9 +141,9 @@ binaries.mk: configure
 	./configure
 
 inst_cfs: $(DEF_RULES_DIR) $(LOCAL_RULES_DIR) $(LOCAL_RULES_DIR)/local.cf
-	$(RM_F) $(DEF_RULES_DIR)/*
+	$(RM_F) $(DEF_RULES_DIR)/*; \
 	for file in $(RULES) ; do \
-	  $(CP) rules/$$file $(DEF_RULES_DIR)/$$file; \
+	  $(PERL) build/preprocessor $(FIXVARS) <rules/$$file >$(DEF_RULES_DIR)/$$file; \
 	done
 	$(CHMOD) $(PERM_RW) $(DEF_RULES_DIR)/*
 
@@ -144,7 +154,7 @@ $(LOCAL_RULES_DIR):
 	$(MKPATH) $@
 
 $(LOCAL_RULES_DIR)/local.cf: rules/local.cf
-	test -e $@ || \
+	test -f $@ || \
 	  $(CP) rules/local.cf $@
 
 text_html_doc: doc/.made
@@ -153,14 +163,14 @@ text_html_doc: doc/.made
 doc:
 	$(MKPATH) $@
 
-doc/.made: doc $(MAN1PODS) $(MAN3PODS)
-	echo $(MAN1PODS) $(MAN3PODS)
+doc/.made: doc#. ($gotpods ? q# $(MAN1PODS) $(MAN3PODS) $(EXTRAPODS)
 	for f in $(MAN1PODS) $(MAN3PODS) $(EXTRAPODS) ; do \
+	      echo Converting POD in $$f; \
 	      pod2html $$f > doc/`echo $$f | $(PERL) -pe \
-	        's/(lib|spamd)\///; tr/\//_/; s/\.(pod|pm)$$//;'`.html ; \
+	        's,^(lib|spamd)/|\.(pod|pm)$$,,g; tr,/,_,;'`.html ; \
 	      pod2text $$f > doc/`echo $$f | $(PERL) -pe \
-	        's/(lib|spamd)\///; tr/\//_/; s/\.(pod|pm)$$//;'`.txt ; \
-	done
+	        's,^(lib|spamd)/|\.(pod|pm)$$,,g; tr,/,_,;'`.txt ; \
+	done# : '') . q#
 	touch doc/.made
 	$(RM_F) pod2htm*
 

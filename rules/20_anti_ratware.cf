@@ -1,4 +1,10 @@
-# Non-spam mailers
+# SpamAssassin rules file: known non-spam mailers ("ratware")
+#
+# Please don't modify this file as your changes will be overwritten with
+# the next update. Use @@LOCAL_RULES_DIR@@/local.cf instead.
+# See 'perldoc Mail::SpamAssassin::Conf' for details.
+#
+###########################################################################
 
 header USER_AGENT_PINE		Message-Id =~ /^<Pine\.[A-Z]{3}\.\d\.[0-9A-Z]+\./
 describe USER_AGENT_PINE	Message-Id indicates a non-spam MUA (Pine)

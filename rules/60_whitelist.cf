@@ -1,3 +1,9 @@
+# SpamAssassin rules file: default whitelists
+#
+# Please don't modify this file as your changes will be overwritten with
+# the next update. Use @@LOCAL_RULES_DIR@@/local.cf instead.
+# See 'perldoc Mail::SpamAssassin::Conf' for details.
+#
 ###########################################################################
 # Default whitelists.  These should be addresses which send mail that is often
 # tagged (incorrectly) as spam; it also helps that they be addresses of big
@@ -9,6 +15,7 @@
 #
 # Please do not add unmoderated public mailing lists here.  They are
 # too easily abused by spammers.
+#
 
 whitelist_from_rcvd  billing@networksolutions.com           networksolutions.com
 whitelist_from_rcvd  hostmaster@internic.net                internic.net

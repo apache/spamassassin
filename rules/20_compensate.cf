@@ -1,8 +1,13 @@
-# SpamAssassin rules file: compensation for common false positives.
+# SpamAssassin rules file: compensation for common false positives
+#
+# Please don't modify this file as your changes will be overwritten with
+# the next update. Use @@LOCAL_RULES_DIR@@/local.cf instead.
+# See 'perldoc Mail::SpamAssassin::Conf' for details.
+#
 ###########################################################################
 # Header compensation tests
 
-require_version 2.42
+require_version @@VERSION@@
 
 # support for Habeas sender-warranted email: http://www.habeas.com/
 header HABEAS_SWE               eval:message_is_habeas_swe()

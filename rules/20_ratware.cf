@@ -1,12 +1,16 @@
-#
-# 'Ratware' -- ie. bulk-mailers commonly used by spammers.
+# SpamAssassin rules file: known spam mailers
 #
 # Sometimes these leave 'sent by mailername' fingerprints in the
 # headers, which provide a nice way for us to catch them.
 #
+# Please don't modify this file as your changes will be overwritten with
+# the next update. Use @@LOCAL_RULES_DIR@@/local.cf instead.
+# See 'perldoc Mail::SpamAssassin::Conf' for details.
+#
 # Note that the tests which look at the "ALL" pseudoheader are quite
 # the specific header, as that's much quicker.
-
+#
+###########################################################################
 
 #   0.614    1.480    0.090    0.94    2.00  RATWARE_EGROUPS
 #   0.347    0.904    0.010    0.99    2.00  RATWARE_HASH_2

@@ -1,6 +1,12 @@
-# URI tests
+# SpamAssassin rules file: URI tests
+#
+# Please don't modify this file as your changes will be overwritten with
+# the next update. Use @@LOCAL_RULES_DIR@@/local.cf instead.
+# See 'perldoc Mail::SpamAssassin::Conf' for details.
+#
+###########################################################################
 
-require_version 2.42
+require_version @@VERSION@@
 
 uri NUMERIC_HTTP_ADDR   /^https?\:\/\/\d{7,}/is
 describe NUMERIC_HTTP_ADDR  Uses a numeric IP address in URL

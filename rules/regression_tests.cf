@@ -1,4 +1,10 @@
+# SpamAssassin rules file: regression tests
 #
+# This file contains tests perfomed on `make test`. It should not be
+# distributed.
+#
+###########################################################################
+
 test BIG_FONT      fail    <font size=3D2>
 test BIG_FONT      ok      <font size=3D+2>
 test BIG_FONT      ok      <font size=3D3>

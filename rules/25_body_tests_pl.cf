@@ -1,8 +1,17 @@
-# polish spamassassin body tests.
+# SpamAssassin translations: Polish
 #
-# please be aware that values are just my estimates
-# and could be wrong. Use with care.
-# contact info: <radek@alter.pl>
+# Contact info: <radek at alter dot pl>
+# Please be aware that values are just my estimates and could be wrong.
+# Use with care.
+#
+# Please don't modify this file as your changes will be overwritten with
+# the next update. Use @@LOCAL_RULES_DIR@@/local.cf instead.
+# See 'perldoc Mail::SpamAssassin::Conf' for details.
+#
+# Leaving some of these without "lang es" because they show up in English
+# language inboxes.
+#
+###########################################################################
 
 lang pl body PL_ZAPRASZAMY		/ZAPRASZAMY/
 lang pl body PL_SERDECZ_ZAPRASZAMY	/serdecznie.{0,50}zapraszamy/i

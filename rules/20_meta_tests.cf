@@ -1,13 +1,18 @@
-# SpamAssassin rules file: meta tests.
+# SpamAssassin rules file: meta tests
+#
+# Please don't modify this file as your changes will be overwritten with
+# the next update. Use @@LOCAL_RULES_DIR@@/local.cf instead.
+# See 'perldoc Mail::SpamAssassin::Conf' for details.
 #
 # Add meta tests which cover *both* headers and body here.
-# 
-# note: body tests are run with long lines, so be sure to limit the
-# size of searches; use ".{0,30}" instead of ".*" to avoid huge
+#
+# Note: body tests are run with long lines, so be sure to limit the
+# size of searches; use /.{0,30}/ instead of /.*/ to avoid huge
 # search times.
+#
 ###########################################################################
 
-require_version 2.42
+require_version @@VERSION@@
 
 # some tests that will trigger FPs on ISO-2022-JP mails.
 

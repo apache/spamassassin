@@ -1,7 +1,12 @@
-# SpamAssassin rules file: tests.
+# SpamAssassin rules file: header tests
+#
+# Please don't modify this file as your changes will be overwritten with
+# the next update. Use @@LOCAL_RULES_DIR@@/local.cf instead.
+# See 'perldoc Mail::SpamAssassin::Conf' for details.
+#
 ###########################################################################
 
-require_version 2.42
+require_version @@VERSION@@
 
 header NO_REAL_NAME		From =~ /^["\s]*\<?\S+\@\S+\>?\s*$/
 describe NO_REAL_NAME		From: does not include a real name

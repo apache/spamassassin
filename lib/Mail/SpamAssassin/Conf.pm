@@ -237,8 +237,9 @@ ignore it.
 
 =cut
 
-    if (/^require[-_]version\s+(.*)\s*$/) {
-      my $req_version = $1 + 0.0;
+    if (/^require[-_]version\s+(.*)$/) {
+      my $req_version = $1;
+      $req_version =~ s/^\@\@VERSION\@\@$/$Mail::SpamAssassin::VERSION/;
       if ($Mail::SpamAssassin::VERSION != $req_version) {
         warn "configuration file \"$currentfile\" requires version ".
                 "$req_version of SpamAssassin, but this is code version ".
