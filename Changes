@@ -1,4 +1,136 @@
 ------------------------------------------------------------------------
+r112261 | quinlan | 2004-12-16 00:27:25 +0000 (Thu, 16 Dec 2004) | 2 lines
+
+update version
+
+------------------------------------------------------------------------
+r112055 | quinlan | 2004-12-16 00:02:32 +0000 (Thu, 16 Dec 2004) | 2 lines
+
+bug 4015: rpmbuild find perl(DBI) as requirement
+
+------------------------------------------------------------------------
+r112053 | quinlan | 2004-12-15 23:58:20 +0000 (Wed, 15 Dec 2004) | 3 lines
+
+bug 4005: Yahoo groups messages flagged as forged (trivial patch, tested
+by Michael and I)
+
+------------------------------------------------------------------------
+r112037 | quinlan | 2004-12-15 22:28:42 +0000 (Wed, 15 Dec 2004) | 2 lines
+
+bug 4030: incapable Net::DNS module usage should be a warning, not a debug
+
+------------------------------------------------------------------------
+r112026 | jm | 2004-12-15 21:42:42 +0000 (Wed, 15 Dec 2004) | 1 line
+
+bug 2462: detect legitimate SMTP AUTH submission, to avoid false positives on Dynablock-style rules; thanks to Daryl C. W. O'Shea for the patch
+------------------------------------------------------------------------
+r111431 | parker | 2004-12-09 20:43:42 +0000 (Thu, 09 Dec 2004) | 1 line
+
+Bug 4019: Needed to add in RPAD call wherever token was used in a select
+------------------------------------------------------------------------
+r111402 | mss | 2004-12-09 16:09:11 +0000 (Thu, 09 Dec 2004) | 2 lines
+
+bug 3961:  Docu fix for two contradicting explanations of the -x switch.  Plus some small wordsmithing.
+
+------------------------------------------------------------------------
+r109930 | sidney | 2004-12-06 00:15:46 +0000 (Mon, 06 Dec 2004) | 1 line
+
+Take 2, this time checking in the correct file. Reformatting that Daniel did to the trunk version. Also, Microsoft added choices to the Platform SDK download page, added a word to say which one to download
+------------------------------------------------------------------------
+r109928 | sidney | 2004-12-06 00:13:40 +0000 (Mon, 06 Dec 2004) | 1 line
+
+Reformatting that Daniel did to the trunk version. Also, Microsoft added choices to the Platform SDK download page, added a word to say which one to download
+------------------------------------------------------------------------
+r109925 | sidney | 2004-12-05 23:45:28 +0000 (Sun, 05 Dec 2004) | 1 line
+
+Rewrite information about free VC++ downloads to include the need to and how to get and install nmake
+------------------------------------------------------------------------
+r109798 | felicity | 2004-12-04 14:42:46 +0000 (Sat, 04 Dec 2004) | 1 line
+
+cleaning up the spec file a little -- we haven't been updating changelog so remove it, also put the sql files in the standard documentation not tools...
+------------------------------------------------------------------------
+r109734 | quinlan | 2004-12-03 23:25:03 +0000 (Fri, 03 Dec 2004) | 2 lines
+
+bug 4014: change spamcop_submission_address to correct name, spamcop_to_address
+
+------------------------------------------------------------------------
+r109710 | felicity | 2004-12-03 17:23:15 +0000 (Fri, 03 Dec 2004) | 1 line
+
+have the URIDNSBL plugin handle both head and body evals as a kluge from 3.0.0
+------------------------------------------------------------------------
+r106380 | felicity | 2004-11-24 04:40:15 +0000 (Wed, 24 Nov 2004) | 1 line
+
+bug 3990: two small regexp errors in RegistrarBoundaries
+------------------------------------------------------------------------
+r76191 | felicity | 2004-11-17 23:58:18 +0000 (Wed, 17 Nov 2004) | 1 line
+
+bug 3967: fix performance issues with USERPASS and RATWARE_STORM_URI
+------------------------------------------------------------------------
+r76071 | parker | 2004-11-17 01:03:26 +0000 (Wed, 17 Nov 2004) | 1 line
+
+Bug 3953: Provide better debug output for sa-learn --restore
+------------------------------------------------------------------------
+r76069 | jm | 2004-11-17 00:50:46 +0000 (Wed, 17 Nov 2004) | 1 line
+
+bug 3816: deal with 'rewrite_header Subject' markup when no Subject header previously existed
+------------------------------------------------------------------------
+r71485 | jm | 2004-11-15 02:16:59 +0000 (Mon, 15 Nov 2004) | 1 line
+
+oops, wound up with 3 copies of one of the rcvd_parser tests
+------------------------------------------------------------------------
+r71481 | jm | 2004-11-15 01:33:25 +0000 (Mon, 15 Nov 2004) | 1 line
+
+bug 3950: Exim 'sender_fullhost' var was not recognized by Received header parser; fixed
+------------------------------------------------------------------------
+r71479 | felicity | 2004-11-15 01:01:23 +0000 (Mon, 15 Nov 2004) | 1 line
+
+bug 3942: EvalTests::_check_recipients() would sometimes parse out the wrong addresses/overwrite entries on the array/etc.
+------------------------------------------------------------------------
+r65563 | felicity | 2004-11-14 01:40:52 +0000 (Sun, 14 Nov 2004) | 1 line
+
+bug 3648: make sure that the read in config has a newline at the end of the last line
+------------------------------------------------------------------------
+r65561 | felicity | 2004-11-14 01:20:33 +0000 (Sun, 14 Nov 2004) | 1 line
+
+bug 3941: spamcop now only wants max 2 day old mail
+------------------------------------------------------------------------
+r56951 | felicity | 2004-11-08 17:37:17 +0000 (Mon, 08 Nov 2004) | 1 line
+
+small doco update specifying that Checker-Version can't be changed or removed
+------------------------------------------------------------------------
+r56700 | jm | 2004-11-05 22:41:55 +0000 (Fri, 05 Nov 2004) | 1 line
+
+bug 3922: fix 'make test' failure on Solaris
+------------------------------------------------------------------------
+r56150 | felicity | 2004-10-31 20:26:07 +0000 (Sun, 31 Oct 2004) | 1 line
+
+bug 3931: disable the 'plugin inhibited further callbacks' debug message.  it doesn't share any useful information, and clutters up the debug output.
+------------------------------------------------------------------------
+r56149 | felicity | 2004-10-31 20:23:22 +0000 (Sun, 31 Oct 2004) | 1 line
+
+bug 3930: uridnsbl plugin didn't respect the uridnsbl_max_domains value, nor did it allow it as a configuration option even though it's in the documentation...
+------------------------------------------------------------------------
+r55652 | quinlan | 2004-10-27 00:40:51 +0000 (Wed, 27 Oct 2004) | 2 lines
+
+bug 3928: trivial rule fix for MSCRM
+
+------------------------------------------------------------------------
+r55351 | felicity | 2004-10-23 04:03:57 +0000 (Sat, 23 Oct 2004) | 1 line
+
+prep 3.0.2 development, update spec file, etc.
+------------------------------------------------------------------------
+r55348 | jm | 2004-10-23 03:10:19 +0000 (Sat, 23 Oct 2004) | 1 line
+
+fixed doco for build procedure to reflect 3.0.x branch structure
+------------------------------------------------------------------------
+r55344 | jm | 2004-10-23 01:41:32 +0000 (Sat, 23 Oct 2004) | 1 line
+
+preparing to release 3.0.1
+------------------------------------------------------------------------
+r55343 | jm | 2004-10-23 01:40:58 +0000 (Sat, 23 Oct 2004) | 1 line
+
+READY TO RELEASE 3.0.1
+------------------------------------------------------------------------
 r55292 | quinlan | 2004-10-22 01:05:49 +0000 (Fri, 22 Oct 2004) | 2 lines
 
 bug 3916: deprecate RCVD_IN_RFC_IPWHOIS (trivial patch)
