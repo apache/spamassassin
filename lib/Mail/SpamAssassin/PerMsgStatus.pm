@@ -526,10 +526,12 @@ EOM
 sub rewrite_headers {
   my ($self) = @_;
 
-  # add headers
-  $self->{msg}->put_header ("X-Spam-Status", $self->_build_status_line());
-  if($self->{main}->{conf}->{spam_level_stars} == 1) {
-    $self->{msg}->put_header("X-Spam-Level", $self->{main}->{conf}->{spam_level_char} x int($self->{hits}));
+  # add headers?  always for spam, only if requested for nonspam
+  if ( $self->{is_spam} || $self->{main}->{conf}->{always_add_headers} == 1 ) {
+    $self->{msg}->put_header ("X-Spam-Status", $self->_build_status_line());
+    if($self->{main}->{conf}->{spam_level_stars} == 1) {
+      $self->{msg}->put_header("X-Spam-Level", $self->{main}->{conf}->{spam_level_char} x int($self->{hits}));
+    }
   }
 
   # add spam headers if spam
