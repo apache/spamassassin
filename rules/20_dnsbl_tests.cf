@@ -190,7 +190,9 @@ header DNS_FROM_RFCI_DSN	rbleval:check_rbl_from_host('rfci-dsn', 'dsn.rfc-ignora
 describe DNS_FROM_RFCI_DSN	From: sender listed in dsn.rfc-ignorant.org
 tflags DNS_FROM_RFCI_DSN	net
 
-header HABEAS_VIOLATOR		rbleval:check_rbl_swe('hil', 'hil.habeas.com.')
+# sa-hil.habeas.com for SpamAssassin queries
+# hil.habeas.com for everything else
+header HABEAS_VIOLATOR		rbleval:check_rbl_swe('hil', 'sa-hil.habeas.com.')
 describe HABEAS_VIOLATOR	Has Habeas warrant mark and on Infringer List
 tflags HABEAS_VIOLATOR		net
 
