@@ -87,7 +87,7 @@ $TIMELOG->{dummy}=0;
 
 $VERSION = "2.40";
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.114 2002/08/20 17:57:33 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.115 2002/08/20 23:10:05 jmason Exp $'))[2 .. 5, 8]));
 # If you hacked up your SA, add a token to identify it here. Eg.: I use "mss<number>",
 # <number> increasing with every hack. Deersoft might want to use "pro" :o)
 # "cvs" is added automatically if this file is tagged as 'Exp'erimental.
@@ -101,7 +101,7 @@ $HOME_URL = "http://spamassassin.org/";
 #__installsitelib__/spamassassin.cf
 #__installvendorlib__/spamassassin.cf
 @default_rules_path = (
-        '__default_rules_dir__',
+        '__def_rules_dir__',
         '__prefix__/share/spamassassin',
         '/usr/local/share/spamassassin',
   	'/usr/share/spamassassin',
@@ -805,7 +805,7 @@ sub sed_path {
   my ($self, $path) = @_;
   return undef if (!defined $path);
   $path =~ s/__local_rules_dir__/$self->{LOCAL_RULES_DIR} || ''/ges;
-  $path =~ s/__default_rules_dir__/$self->{DEFAULT_RULES_DIR} || ''/ges;
+  $path =~ s/__def_rules_dir__/$self->{DEF_RULES_DIR} || ''/ges;
   $path =~ s/__prefix__/$Config{prefix}/gs;
   $path =~ s/__sitelib__/$Config{sitelib}/gs;
   $path =~ s/__vendorlib__/$Config{vendorlib}/gs;

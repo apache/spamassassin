@@ -6,8 +6,9 @@
 # which is included as the file named "License"            #
 ############################################################
 
-$DEF_RULES_DIR = '@@DEF_RULES_DIR@@';  # substituted at install time
-$LOCAL_RULES_DIR = '@@LOCAL_RULES_DIR@@';  # substituted at install time
+my $DEF_RULES_DIR = '@@DEF_RULES_DIR@@';  # substituted at install time
+my $LOCAL_RULES_DIR = '@@LOCAL_RULES_DIR@@';  # substituted at install time
+use lib '@@INSTALLSITELIB@@'; # substituted at install time
 
 use lib '../lib';	# added by jm for use inside the distro
 use strict;

@@ -124,7 +124,8 @@ DEF_RULES_DIR	= $(DESTDIR)$(PREFIX)/share/spamassassin
 LOCAL_RULES_DIR	= $(DESTDIR)$(SYSCONFDIR)/mail/spamassassin
 
 FIXPATHFLAGS    = -DDEF_RULES_DIR="$(DEF_RULES_DIR)" \
-                  -DLOCAL_RULES_DIR="$(LOCAL_RULES_DIR)"
+                  -DLOCAL_RULES_DIR="$(LOCAL_RULES_DIR)" \
+                  -DINSTALLSITELIB="$(INSTALLSITELIB)"
 
 pm_to_blib: spamassassin doc/.made
 
