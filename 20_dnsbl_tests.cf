@@ -113,19 +113,19 @@ tflags RCVD_IN_BL_SPAMCOP_NET   net
 # ---------------------------------------------------------------------------
 
 # NOTE: commercial tests, see README file for details
-header RCVD_IN_RBL		rbleval:check_rbl('rbl', 'blackholes.mail-abuse.org.')
-describe RCVD_IN_RBL		Received via RBLed relay, see http://www.mail-abuse.org/rbl/
-tflags RCVD_IN_RBL              net
+header RCVD_IN_MAPS_RBL		rbleval:check_rbl('rbl', 'blackholes.mail-abuse.org.')
+describe RCVD_IN_MAPS_RBL		Received via RBLed relay, see http://www.mail-abuse.org/rbl/
+tflags RCVD_IN_MAPS_RBL              net
 
-header RCVD_IN_RSS		rbleval:check_rbl('rss', 'relays.mail-abuse.org.')
-describe RCVD_IN_RSS		Received via RSSed relay, see http://www.mail-abuse.org/rss/
-tflags RCVD_IN_RSS              net
+header RCVD_IN_MAPS_RSS		rbleval:check_rbl('rss', 'relays.mail-abuse.org.')
+describe RCVD_IN_MAPS_RSS		Received via RSSed relay, see http://www.mail-abuse.org/rss/
+tflags RCVD_IN_MAPS_RSS              net
 
-header RCVD_IN_DUL		rbleval:check_rbl('dialup-notfirsthop', 'dialups.mail-abuse.org.')
-describe RCVD_IN_DUL		Received from dialup, see http://www.mail-abuse.org/dul/
-tflags RCVD_IN_DUL              net
+header RCVD_IN_MAPS_DUL		rbleval:check_rbl('dialup-notfirsthop', 'dialups.mail-abuse.org.')
+describe RCVD_IN_MAPS_DUL		Received from dialup, see http://www.mail-abuse.org/dul/
+tflags RCVD_IN_MAPS_DUL              net
 
-header RCVD_IN_NML		rbleval:check_rbl('nml', 'nonconfirm.mail-abuse.org.')
-describe RCVD_IN_NML		Received via non-confirming mailing host, see http://www.mail-abuse.org/nml/
-tflags RCVD_IN_NML              net
+header RCVD_IN_MAPS_NML		rbleval:check_rbl('nml', 'nonconfirm.mail-abuse.org.')
+describe RCVD_IN_MAPS_NML		Received via non-confirming mailing host, see http://www.mail-abuse.org/nml/
+tflags RCVD_IN_MAPS_NML              net
 
