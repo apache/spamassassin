@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.612 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.613 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -18,77 +18,19 @@
 #
 ###########################################################################
 
-# mixed list, still need to check for cost, policies, etc.
-header T_RCVD_IN_DNSRBLSPAM	rbleval:check_rbl('dnsrblspam', 'spam.dnsrbl.net.')
-header T_RCVD_IN_INTERSIL	rbleval:check_rbl('intersil', 'blackholes.intersil.net.')
-header T_RCVD_IN_SPAMSOURCES_FABEL	rbleval:check_rbl('fabel', 'spamsources.fabel.dk.')
-header T_RCVD_IN_VOX_SCHPIDER_COM	rbleval:check_rbl('schpider', 'vox.schpider.com.')
-tflags T_RCVD_IN_DNSRBLSPAM net
-tflags T_RCVD_IN_INTERSIL net
-tflags T_RCVD_IN_SPAMSOURCES_FABEL net
-tflags T_RCVD_IN_VOX_SCHPIDER_COM net
+# some dial-up lists that seem decent, worth testing some more
+header T_RCVD_IN_DUN_DNSRBL rbleval:check_rbl('dun-notfirsthop', 'dun.dnsrbl.net.')
+tflags T_RCVD_IN_DUN_DNSRBL net
+
+# still need to check for cost, policies, etc.
+# URL: http://www.fabel.dk/relay/
+header T_RCVD_IN_FABEL		rbleval:check_rbl('fabel', 'spamsources.fabel.dk.')
+describe T_RCVD_IN_FABEL	Received via a relay in spamsources.fabel.dk
+tflags T_RCVD_IN_FABEL net
 
 # easynet.nl (formerly wirehub.net)
 header T_RCVD_IN_EASYNET_DYNABLOCK	rbleval:check_rbl('dynablock-notfirsthop', 'dynablock.easynet.nl.')
 tflags T_RCVD_IN_EASYNET_DYNABLOCK net
-header T_RCVD_IN_EASYNET_BLACKHOLES	rbleval:check_rbl('easynet', 'blackholes.easynet.nl.')
-tflags T_RCVD_IN_EASYNET_BLACKHOLES net
-
-# OPM sub-tests
-# transfers: axfr/ixfr for trusted sites
-# url: http://opm.blitzed.org/
-# pay-to-use: no
-# delist: automatic expiry, no fee, retested on request (free)
-header T_RCVD_IN_OPM_WINGATE		rbleval:check_rbl_sub('opm', '1')
-tflags T_RCVD_IN_OPM_WINGATE net
-header T_RCVD_IN_OPM_SOCKS		rbleval:check_rbl_sub('opm', '2')
-tflags T_RCVD_IN_OPM_SOCKS net
-header T_RCVD_IN_OPM_HTTP_CONNECT	rbleval:check_rbl_sub('opm', '4')
-tflags T_RCVD_IN_OPM_HTTP_CONNECT net
-header T_RCVD_IN_OPM_ROUTER		rbleval:check_rbl_sub('opm', '8')
-tflags T_RCVD_IN_OPM_ROUTER net
-header T_RCVD_IN_OPM_HTTP_POST		rbleval:check_rbl_sub('opm', '16')
-tflags T_RCVD_IN_OPM_HTTP_POST net
-
-# fiveten - many blacklists, the bulk one performs well
-# transfers: yes, most of the slave servers allow zone transfers
-# url: http://blackholes.five-ten-sg.com/
-# pay-to-use: no
-# delist: email address contact provided
-header T_RCVD_IN_FIVETEN	rbleval:check_rbl('fiveten', 'blackholes.five-ten-sg.com.')
-tflags T_RCVD_IN_FIVETEN net
-# bulk mailers that don't require confirmed opt-in from their customers,
-# or that have have allowed known spammers to become clients.
-header T_RCVD_IN_FIVETEN_BULK	rbleval:check_rbl_sub('fiveten', '127.0.0.4')
-tflags T_RCVD_IN_FIVETEN_BULK net
-# retest all of the rest (since check_rbl_sub wasn't used before)
-header T_RCVD_IN_FIVETEN_SPAM	rbleval:check_rbl_sub('fiveten', '127.0.0.2')
-tflags T_RCVD_IN_FIVETEN_SPAM net
-header T_RCVD_IN_FIVETEN_DIALUP	rbleval:check_rbl('fiveten-notfirsthop', 'blackholes.five-ten-sg.com.', '127.0.0.3')
-tflags T_RCVD_IN_FIVETEN_DIALUP net
-header T_RCVD_IN_FIVETEN_MULTISTAGE	rbleval:check_rbl_sub('fiveten', '127.0.0.5')
-tflags T_RCVD_IN_FIVETEN_MULTISTAGE net
-header T_RCVD_IN_FIVETEN_SINGLESTAGE	rbleval:check_rbl_sub('fiveten', '127.0.0.6')
-tflags T_RCVD_IN_FIVETEN_SINGLESTAGE net
-header T_RCVD_IN_FIVETEN_SPAMSUPPORT	rbleval:check_rbl_sub('fiveten', '127.0.0.7')
-tflags T_RCVD_IN_FIVETEN_SPAMSUPPORT net
-header T_RCVD_IN_FIVETEN_WEBFORM	rbleval:check_rbl_sub('fiveten', '127.0.0.8')
-tflags T_RCVD_IN_FIVETEN_WEBFORM net
-header T_RCVD_IN_FIVETEN_MISC	rbleval:check_rbl_sub('fiveten', '127.0.0.9')
-tflags T_RCVD_IN_FIVETEN_MISC net
-header T_RCVD_IN_FIVETEN_KLEZ	rbleval:check_rbl_sub('fiveten', '127.0.0.10')
-tflags T_RCVD_IN_FIVETEN_KLEZ net
-header T_RCVD_IN_FIVETEN_TCPA	rbleval:check_rbl_sub('fiveten', '127.0.0.11')
-tflags T_RCVD_IN_FIVETEN_TCPA net
-header T_RCVD_IN_FIVETEN_FREE	rbleval:check_rbl_sub('fiveten', '127.0.0.12')
-tflags T_RCVD_IN_FIVETEN_FREE net
-
-# some dial-up lists that seem decent, worth testing some more
-header T_RCVD_IN_DUN_DNSRBL rbleval:check_rbl('dun-notfirsthop', 'dun.dnsrbl.net.')
-tflags T_RCVD_IN_DUN_DNSRBL net
-# another one
-header T_RCVD_IN_DUL_AUPADS rbleval:check_rbl('duinv-notfirsthop', 'duinv.aupads.org.')
-tflags T_RCVD_IN_DUL_AUPADS net
 
 # bug 1733: SenderBase
 # sa.senderbase.org for SpamAssassin queries
@@ -105,102 +47,6 @@ tflags T_RCVD_IN_BONDEDSENDER net
 # older corpus mail)
 uri T_YAHOO_REDIRECTOR		/^https?:\/\/rd\.yahoo\.com/i
 describe T_YAHOO_REDIRECTOR	Uses commonly-spammed redirector URL
-
-# try to supplement HTTP_EXCESSIVE_ESCAPES (which tests anywhere in
-# the URL) with two new rules:
-#
-# HOST_EXCESSIVE_ESCAPES: test escapes in hostname
-# PATH_EXCESSIVE_ESCAPES: test escapes in pathname
-
-# HOST_EXCESSIVE_ESCAPES
-# ratio	count	hex	character
-# 99.83	572	2e	.
-uri __ESCAPE_2E			m@^https?://[^\s/]*%2E@i
-meta HOST_EXCESSIVE_ESCAPES_2E	(__ESCAPE_2E && !HTTP_EXCESSIVE_ESCAPES)
-# 100.0	331	25	%
-uri __ESCAPE_25			m@^https?://[^\s/]*%25@i
-meta HOST_EXCESSIVE_ESCAPES_25	(__ESCAPE_25 && !HTTP_EXCESSIVE_ESCAPES)
-# 100.0	38	2f	/
-uri __ESCAPE_2F			m@^https?://[^\s/]*%2F@i
-meta HOST_EXCESSIVE_ESCAPES_2F	(__ESCAPE_2F && !HTTP_EXCESSIVE_ESCAPES)
-# 96.97	33	2d	-
-uri __ESCAPE_2D			m@^https?://[^\s/]*%2D@i
-meta HOST_EXCESSIVE_ESCAPES_2D	(__ESCAPE_2D && !HTTP_EXCESSIVE_ESCAPES)
-# 100.0	16	3e	>
-uri __ESCAPE_3E			m@^https?://[^\s/]*%3E@i
-meta HOST_EXCESSIVE_ESCAPES_3E	(__ESCAPE_3E && !HTTP_EXCESSIVE_ESCAPES)
-# 100.0	16	3c	<
-uri __ESCAPE_3C			m@^https?://[^\s/]*%3C@i
-meta HOST_EXCESSIVE_ESCAPES_3C	(__ESCAPE_3C && !HTTP_EXCESSIVE_ESCAPES)
-# 100.0	16	20	SPACE
-uri __ESCAPE_20			m@^https?://[^\s/]*%20@i
-meta HOST_EXCESSIVE_ESCAPES_20	(__ESCAPE_20 && !HTTP_EXCESSIVE_ESCAPES)
-# 100.0	14	3d	=
-uri __ESCAPE_3D			m@^https?://[^\s/]*%3D@i
-meta HOST_EXCESSIVE_ESCAPES_3D	(__ESCAPE_3D && !HTTP_EXCESSIVE_ESCAPES)
-# 100.0	13	5f	_
-uri __ESCAPE_5F			m@^https?://[^\s/]*%5F@i
-meta HOST_EXCESSIVE_ESCAPES_5F	(__ESCAPE_5F && !HTTP_EXCESSIVE_ESCAPES)
-# 100.0	11	40	@
-uri __ESCAPE_40			m@^https?://[^\s/]*%40@i
-meta HOST_EXCESSIVE_ESCAPES_40	(__ESCAPE_40 && !HTTP_EXCESSIVE_ESCAPES)
-
-# PATH_EXCESSIVE_ESCAPES
-# ratio	count	hex	character
-# 96.99	1261	2f	/
-uri __ESCAPE2_2F		m@^https?://.*?/\S*%2F@i
-meta PATH_EXCESSIVE_ESCAPES_2F	(__ESCAPE2_2F && !HTTP_EXCESSIVE_ESCAPES)
-# 99.53	1067	5f	_
-uri __ESCAPE2_5F		m@^https?://.*?/\S*%5F@i
-meta PATH_EXCESSIVE_ESCAPES_5F	(__ESCAPE2_5F && !HTTP_EXCESSIVE_ESCAPES)
-# 97.98	595	25	%
-uri __ESCAPE2_25		m@^https?://.*?/\S*%25@i
-meta PATH_EXCESSIVE_ESCAPES_25	(__ESCAPE2_25 && !HTTP_EXCESSIVE_ESCAPES)
-# 95.74	446	3a	:
-uri __ESCAPE2_3A		m@^https?://.*?/\S*%3A@i
-meta PATH_EXCESSIVE_ESCAPES_3A	(__ESCAPE2_3A && !HTTP_EXCESSIVE_ESCAPES)
-# 93.65	378	3d	=
-uri __ESCAPE2_3D		m@^https?://.*?/\S*%3D@i
-meta PATH_EXCESSIVE_ESCAPES_3D	(__ESCAPE2_3D && !HTTP_EXCESSIVE_ESCAPES)
-# 95.02	321	26	&
-uri __ESCAPE2_26		m@^https?://.*?/\S*%26@i
-meta PATH_EXCESSIVE_ESCAPES_26	(__ESCAPE2_26 && !HTTP_EXCESSIVE_ESCAPES)
-# 99.61	256	2e	.
-uri __ESCAPE2_2E		m@^https?://.*?/\S*%2E@i
-meta PATH_EXCESSIVE_ESCAPES_2E	(__ESCAPE2_2E && !HTTP_EXCESSIVE_ESCAPES)
-# 95.07	223	3f	?
-uri __ESCAPE2_3F		m@^https?://.*?/\S*%3F@i
-meta PATH_EXCESSIVE_ESCAPES_3F	(__ESCAPE2_3F && !HTTP_EXCESSIVE_ESCAPES)
-# 100.0	168	7c	|
-uri __ESCAPE2_7C		m@^https?://.*?/\S*%7C@i
-meta PATH_EXCESSIVE_ESCAPES_7C	(__ESCAPE2_7C && !HTTP_EXCESSIVE_ESCAPES)
-# 100.0	98	2d	-
-uri __ESCAPE2_2D		m@^https?://.*?/\S*%2D@i
-meta PATH_EXCESSIVE_ESCAPES_2D	(__ESCAPE2_2D && !HTTP_EXCESSIVE_ESCAPES)
-# 100.0	15	a4	CURRENCY SIGN
-uri __ESCAPE2_A4		m@^https?://.*?/\S*%A4@i
-meta PATH_EXCESSIVE_ESCAPES_A4	(__ESCAPE2_A4 && !HTTP_EXCESSIVE_ESCAPES)
-# 100.0	15	28	(
-uri __ESCAPE2_28		m@^https?://.*?/\S*%28@i
-meta PATH_EXCESSIVE_ESCAPES_28	(__ESCAPE2_28 && !HTTP_EXCESSIVE_ESCAPES)
-# 100.0	14	29	)
-uri __ESCAPE2_29		m@^https?://.*?/\S*%29@i
-meta PATH_EXCESSIVE_ESCAPES_29	(__ESCAPE2_29 && !HTTP_EXCESSIVE_ESCAPES)
-# 100.0	13	14	DC4
-uri __ESCAPE2_14		m@^https?://.*?/\S*%14@i
-meta PATH_EXCESSIVE_ESCAPES_14	(__ESCAPE2_14 && !HTTP_EXCESSIVE_ESCAPES)
-# 100.0	12	b0	DEGREE SIGN
-uri __ESCAPE2_B0		m@^https?://.*?/\S*%B0@i
-meta PATH_EXCESSIVE_ESCAPES_B0	(__ESCAPE2_B0 && !HTTP_EXCESSIVE_ESCAPES)
-
-######
-
-uri T_URI_BANNEDCD	m@^(?:https?://|mailto:)[^\/]*bannedcd@i
-uri T_URI_FREEHT	m@^(?:https?://|mailto:)[^\/]*freeht@i
-uri T_URI_FAQCHAT	m@^(?:https?://|mailto:)[^\/]*faqchat@i
-uri T_URI_4YOU		m@^(?:https?://|mailto:)[^\/]*4you@i
-
-######################################################################
 
 # This is not necessarily intended for the 2.60 release; if it's not
 # 1.0 S/O, just leave it in here for 2.61cvs.
