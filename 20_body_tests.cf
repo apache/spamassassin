@@ -251,7 +251,7 @@ body BULK_EMAIL			/bulk e-*mail/i
 describe BULK_EMAIL		Talks about bulk email
 body DEAR_EMAIL			/\bDear [A-Za-z0-9_-]+\@/
 describe DEAR_EMAIL		Dear you@you.com?
-body DEAR_FRIEND		/\bDear Friend\b/i
+body DEAR_FRIEND		/^\s*Dear Friend\b/i
 describe DEAR_FRIEND		How dear can you be if you don't know my name?
 body DEAR_SOMETHING		/\bDear (?:Friend|IT\W|Internet|candidate|sirs?|madam|investor|travell?er|car shopper|web)\b/i
 describe DEAR_SOMETHING		Contains 'Dear (something)'
