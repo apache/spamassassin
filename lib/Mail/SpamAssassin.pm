@@ -77,8 +77,8 @@ use vars	qw{
 $TIMELOG->{dummy}=0;
 @ISA = qw();
 
-$VERSION = "2.31";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.99 2002/06/18 01:23:16 hughescr Exp $';
+$VERSION = "2.40";
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.100 2002/06/20 17:02:41 hughescr Exp $';
 
 sub Version { $VERSION; }
 
