@@ -6,6 +6,8 @@ Mail::SpamAssassin::Plugin::Razor2 - perform Razor2 check of messages
 
   loadplugin     Mail::SpamAssassin::Plugin::Razor2
 
+=over 4
+
 =cut
 
 # <@LICENSE>
