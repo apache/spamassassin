@@ -15,7 +15,7 @@ use Mail::SpamAssassin::Conf;
 
 q{ SPAMD/1.1 0 EX_OK }, 'response-11',
 q{ Spam: True ; }, 'spamheader',	# we use a regexp later for the rest
-q{ GTUBE }, 'symbolshit',
+q{ GTUBE }, 'gtube',
 
 );
 
