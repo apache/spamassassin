@@ -1034,6 +1034,8 @@ SpamAssassin:
 
 =item  _HOME_: SpamAssassin home URL
 
+=item  _PREVIEW_: a short cleaned snippet of the message contents
+
 =back
 
 =cut
