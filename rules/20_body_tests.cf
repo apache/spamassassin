@@ -279,9 +279,11 @@ describe PORN_10                Uses words and phrases which indicate porn (10)
 
 
 # Words which often show up in spam, but also show up somewhat often in
-# non-spam
-body     PORN_11                /\b(?:hard[ -]?core|web[ -]?cam|amateur\b)/i
-describe PORN_11                Uses words and phrases which indicate porn (11)
+# non-spam.
+# jm: removed "webcam", often appears in nonspam. better to match for it where
+# another porn term appears nearby (see below).
+body     PORN_11                /\b(?:hard[ -]?core|amateur\b)/i
+describe PORN_11                Uses words and phrases which may indicate porn (11)
 
 
 # Like PORN_3, but it only needs to match two terms intead of three. To
@@ -293,24 +295,35 @@ describe PORN_12                Uses words and phrases which indicate porn (12)
 
 
 body     PORN_13                /must be (?:at least|over) 18/i
-describe PORN_13                Uses words and phrases which indicate porn (13)
+describe PORN_13                Uses words and phrases which may indicate porn (13)
 
 
 # Like PORN_11, but phrases which are *really* likely to show up in non-porn
-body     PORN_14                /\b(?:pics\b|years? old\b|my name'?s\b|my name is\b)/i
-describe PORN_14                Uses words and phrases which indicate porn (14)
+# jm: removed "pics", too many FPs; removed "my name is", had a 4:1 FP ratio in my corpus
+body     PORN_14                /\b18 years? old\b/i
+describe PORN_14                Uses words and phrases which may indicate porn (14)
 
 
 body SEXY_PICS                  /sexy pictures/i
 describe SEXY_PICS              Sexy pictures
 
-rawbody TRACKER_ID		/^\W{4,6} (?:[a-z]{10,}|[A-Z]{10,}) \W{4,6}\s*$/
+# tracker IDs have mutated in the last 6 months; this now seems to get no hits
+#rawbody TRACKER_ID		/^[^<]\W{3,5} (?:[a-z]{10,}|[A-Z]{10,}) \W{3,5}[^>]\s*$/
+
+# this seems to be the new fashion (as of Jul 5 2002).  base64-encoded parts need to
+# be stripped before this match
+rawbody TRACKER_ID		/^[a-z0-9]{3,}[-_a-z0-9]{15,}[a-z0-9]{3,}\s*$/is
+
 describe TRACKER_ID		Incorporates a tracking ID number
+test TRACKER_ID     ok          2174Hzdm0-105YUqT8863DiDg0-616mqbE4931HEBc0-732qBHd6314l52
+test TRACKER_ID     ok          ofsknxxdqgtgqvsoiytkivajvtj
+test TRACKER_ID     fail        <!-- ADMINISTRIVIA -->
 
 body OPPORTUNITY		/OPPORTUNITY/
 describe OPPORTUNITY		Gives information about an opportunity
 body PURE_PROFIT		/PURE PROFIT/i
-describe PURE_PROFIT		Profit is dirty, not pure
+# this used to say 'Profit is dirty, not pure', but that's a bit extreme ;)
+describe PURE_PROFIT		Offers pure profit
 body STOCK_PICK			/STOCK PICK/i
 describe STOCK_PICK		Offers a stock pick
 body STOCK_ALERT		/stock alert/i
