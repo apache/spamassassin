@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("stripmarkup");
