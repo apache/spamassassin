@@ -284,10 +284,16 @@ sub learn {
   }
 
   dbg ("auto-learning from this message. is spam? $isspam");
-  my $learnstatus = $self->{main}->learn ($self->{msg},
-                        $self->get("Message-Id"), $isspam, 0);
-  $learnstatus->finish();
-  $self->{main}->finish_learner();	# for now
+  eval {
+    my $learnstatus = $self->{main}->learn ($self->{msg},
+			  $self->get("Message-Id"), $isspam, 0);
+    $learnstatus->finish();
+    $self->{main}->finish_learner();	# for now
+  };
+
+  if ($@) {
+    dbg ("auto-learning failed: $@");
+  }
 }
 
 ###########################################################################
