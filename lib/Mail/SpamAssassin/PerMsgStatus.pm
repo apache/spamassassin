@@ -1564,9 +1564,10 @@ sub get_uri_list {
     $uri =~ s/^(https?:\/\/[^\/\?]+)\?/$1\/?/;
 
     # deal with encoding of chars ...
-    # this is just the set of printable chars, minus ' ' (aka: dec 33-126)
+    # this is just the set of printable chars, minus ' ' (aka: dec 33-126, hex 21-7e)
     #
     $uri =~ s/\&\#0*(3[3-9]|[4-9]\d|1[01]\d|12[0-6]);/sprintf "%c",$1/e;
+    $uri =~ s/\&\#x0*(2[1-9]|[3-6][a-f0-9]|7[0-9a-e]);/sprintf "%c",hex($1)/ei;
 
     my($nuri, $unencoded, $encoded) = Mail::SpamAssassin::Util::URLEncode($uri);
     if ( $nuri ne $uri ) {
