@@ -21,8 +21,6 @@
 #          5. You can configure spamd with two more options in rc.config:
 #             SPAMD_OPTS="..."  add these options to the spamd command line
 #                               (read `man spamd`).
-#             SPAMD_AWL=yes     Enable the autowhitelist. The same as adding
-#                               "-a" to SPAMD_OPTS.
 #             SPAMD_NICE=<prio> Set the scheduling priority to <prio>; keeps
 #                               spamd from soaking up your system resources.
 #                               "yes" is equivalent to "5".
@@ -65,7 +63,6 @@ test -x $SPAMD_BIN || exit 5
 test -z "$SPAMD_PID"        && SPAMD_PID=/var/run/spamd.pid
 
 # Some options
-test "$SPAMD_AWL" == "yes"  && SPAMD_OPTS="$SPAMD_OPTS -a"
 test "$SPAMD_NICE" == "yes" && SPAMD_NICE=5
 test -n "$SPAMD_NICE"       && SPAMD_NICE="nice -n $SPAMD_NICE"
 

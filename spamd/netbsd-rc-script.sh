@@ -35,7 +35,7 @@ extra_commands="reload"
 sig_reload="HUP"
 
 # default values, may be overridden on NetBSD by setting them in /etc/rc.conf
-spamd_flags=${spamd_flags-"-H -c -a"}
+spamd_flags=${spamd_flags-"-H -c"}
 spamd=${spamd:-NO}
 spamd_fdlimit=${spamd_fdlimit-"128"}
 

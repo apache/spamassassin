@@ -42,10 +42,9 @@ For example if the user's maildir is:
 then their user_prefs would be stored in:
 	/home/vpopmail/domains/somedomain.net/4/userid/.spamassassin/user_prefs
 
-5. One gotcha - cannot have personal AWL dbs - only a sitewide AWL will work. 
-This is specified in your /etc/mail/spamassassin/local.cf file. Then add the 
-"-a" switch to spamd. Perhaps a future enhancement would be to add the 
-capability to have personal AWL db. 
+5. One gotcha - cannot have personal AWL dbs - only a sitewide AWL will work.
+This is specified in your /etc/mail/spamassassin/local.cf file.  Perhaps a
+future enhancement would be to add the capability to have personal AWL db.
 
 6. Of course vpopmail must have the seekable patch installed (see 
 http://www.thesafebox.com for patch). This will allow you to use procmail or 

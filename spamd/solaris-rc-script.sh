@@ -17,7 +17,7 @@ case "$1" in
 'start')
 	if [ -x /usr/bin/spamd -o -x /usr/local/bin/spamd ]
 	then
-		spamd -d -a -c
+		spamd -d -c
 	fi
 
 	;;
