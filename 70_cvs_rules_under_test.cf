@@ -167,21 +167,6 @@ describe T_FROM_HAS_UNDERLINE_NUMS	From: contains an underline and numbers/lette
 body __HTML_CHARSET_FARAWAY	eval:html_charset_faraway()
 meta T_HTML_CHARSET_FARAWAY	(__HTML_CHARSET_FARAWAY && __HIGHBITS)
 
-# bug 1300: rule speed-ups, these are purely for speeding up SLOW rules,
-# although the hit rates are expected to change a tiny bit.  (You do not
-# want to think about how slow testing these will be!)
-body T_MORTGAGE_BEST		/\b(?:low(?:est|er)?|free|second|rate|best|refinanc(?:e|ing)|online|instant) mortgage/i
-body T_CELEBRITY_PORN             /\bceleb(?:rity|rities|s).{0,15}(?:sex|porn|pics|caught|nude|exposed|content)|(?:steamy|hot|nude|shocking|free|h[a\@]rdcore) celeb(?:rity|rities|s)\b/i
-body T_CELL_PHONE_BOOST_1	/\b(?:(?:boost|antenna|reception).{0,32}(?:cell|mobile|phone|cord.?less)|(?:cell|mobile|phone|cord.?less).{0,32}(?:boost|antenna|reception))/i
-body T_CELL_PHONE_BOOST_2	/\b(?:(?:boost|antenna|reception).{0,24}(?:cell|mobile|phone|cord.?less)|(?:cell|mobile|phone|cord.?less).{0,24}(?:boost|antenna|reception))/i
-body T_CELL_PHONE_BOOST_3	/\b(?:(?:boost|antenna|reception).{0,16}(?:cell|mobile|phone|cord.?less)|(?:cell|mobile|phone|cord.?less).{0,16}(?:boost|antenna|reception))/i
-body T_OFFERS_ETC_1		/(?:\b(?:wish|want|unsub|reward|receive|recurring|remove|permission|partner|further|future|e.?mail|continue|click).{0,64}){2}.{0,8}(?:special|offer|coupon|discount)s?\b/i
-body T_OFFERS_ETC_2		/\b(?:(?:wish|want|unsub|reward|receive|recurring|remove|permission|partner|further|future|e.?mail|continue|click).{0,64}){2}.{0,8}(?:special|offer|coupon|discount)s?\b/i
-body T_OFFERS_ETC_3		/(?:\b(?:wish|want|unsub|reward|receive|recurring|remove|permission|partner|further|future|e.?mail|continue|click).{0,48}){2}.{0,8}(?:special|offer|coupon|discount)s?\b/i
-body T_OFFERS_ETC_4		/\b(?:(?:wish|want|unsub|reward|receive|recurring|remove|permission|partner|further|future|e.?mail|continue|click).{0,48}){2}.{0,8}(?:special|offer|coupon|discount)s?\b/i
-body T_OFFERS_ETC_5		/(?:\b(?:wish|want|unsub|reward|receive|recurring|remove|permission|partner|further|future|e.?mail|continue|click).{0,32}){2}.{0,8}(?:special|offer|coupon|discount)s?\b/i
-body T_OFFERS_ETC_6		/\b(?:(?:wish|want|unsub|reward|receive|recurring|remove|permission|partner|further|future|e.?mail|continue|click).{0,32}){2}.{0,8}(?:special|offer|coupon|discount)s?\b/i
-
 # 708
 body T_OFFER_1			/\b(?:free|trial|full|phone|points?|hottest|internet|great|of this|about this|dealer|responded|not an|pay|are able to|future|valuable|partner|receiv(?:e|ed|ing)|introductory|exclusive|promotional|coupon|bonus|further|following|product|proud to|additional|website|amazing|discounts?)\b.{0,9}(?:this|these|)\boffer(?:s|ings?|ed|)\b/i
 describe OFFER			Offers you Something

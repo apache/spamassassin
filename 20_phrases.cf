@@ -327,7 +327,7 @@ describe HOME_EMPLOYMENT	Information on how to work at home (2)
 body     NO_EXPERIENCE          /\bNo EXPERIENCE/i
 describe NO_EXPERIENCE          No experience needed!
 
-body MORTGAGE_BEST		/(?:low(?:est|er)?|free|second|rate|best|refinanc(?:e|ing)|online|instant) mortgage/i
+body MORTGAGE_BEST		/\b(?:low(?:est|er)?|free|second|rate|best|refinanc(?:e|ing)|online|instant) mortgage/i
 describe MORTGAGE_BEST		Information on mortgages
 
 body MORTGAGE_PITCH		/mortgage (?:rates?|quotes?|approv(?:al|ed)|payment|interest|loans?|app(?:\b|lication))/i
@@ -1061,10 +1061,10 @@ describe OUR_PUBLICATIONS	Mentions their website and/or publications
 body OUR_PRIVACY_POLICY         /our privacy policy can be found/i
 describe OUR_PRIVACY_POLICY 	Mentions where their privacy policy is
 
-body CELL_PHONE_BOOST		/(?:(?:boost|antenna|reception).{0,32}(?:cell|mobile|phone|cord.?less)|(?:cell|mobile|phone|cord.?less).{0,32}(?:boost|antenna|reception))/i
+body CELL_PHONE_BOOST		/\b(?:(?:boost|antenna|reception).{0,16}(?:cell|mobile|phone|cord.?less)|(?:cell|mobile|phone|cord.?less).{0,16}(?:boost|antenna|reception))/i
 describe CELL_PHONE_BOOST	Talks about cell-phone signal improvement
 
-body OFFERS_ETC			/(?:(?:wish|want|unsub|reward|receive|recurring|remove|permission|partner|further|future|e.?mail|continue|click).{0,64}){2}.{0,8}(?:specials?|offers?|coupons?|discounts?)\b/i
+body OFFERS_ETC			/\b(?:(?:wish|want|unsub|reward|receive|recurring|remove|permission|partner|further|future|e.?mail|continue|click).{0,64}){2}.{0,8}(?:special|offer|coupon|discount)s?\b/i
 describe OFFERS_ETC		Stop with the offers, coupons, discounts etc!
 
 body BANG_BOSS        		/\bboss!/i
