@@ -15,7 +15,8 @@ my @args;
   }
 }
 
-if ($opts{'M'} eq 'redirect') {
+my $mode = $opts{'M'};
+if ($mode eq 'redirect') {
   my $stdout = $opts{'o'}   || die "No -o";
   my $stderr = $opts{'O'}   || die "No -O";
   open (STDOUT, ">$stdout") || die "Could not redirect STDOUT to $stdout: $!";

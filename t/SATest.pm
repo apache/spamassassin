@@ -26,7 +26,6 @@ BEGIN {
 sub sa_t_init {
   my $tname = shift;
 
-  my $perl_path;
   if ($config{PERL_PATH}) {
     $perl_path = $config{PERL_PATH};
   }
@@ -38,14 +37,15 @@ sub sa_t_init {
     $perl_path =~ s|/[^/]*$|/$^X|;
   }
 
-  $perl_path .= " -T" if !defined($ENV{'TEST_PERL_TAINT'}) or $ENV{'TEST_PERL_TAINT'} ne 'no';
-  $perl_path .= " -w" if !defined($ENV{'TEST_PERL_WARN'})  or $ENV{'TEST_PERL_WARN'}  ne 'no';
+  $perl_cmd  = $perl_path;
+  $perl_cmd .= " -T" if !defined($ENV{'TEST_PERL_TAINT'}) or $ENV{'TEST_PERL_TAINT'} ne 'no';
+  $perl_cmd .= " -w" if !defined($ENV{'TEST_PERL_WARN'})  or $ENV{'TEST_PERL_WARN'}  ne 'no';
 
   $scr = $ENV{'SCRIPT'};
-  $scr ||= "$perl_path ../spamassassin";
+  $scr ||= "$perl_cmd ../spamassassin";
 
   $spamd = $ENV{'SPAMD_SCRIPT'};
-  $spamd ||= "$perl_path ../spamd/spamd -x";
+  $spamd ||= "$perl_cmd ../spamd/spamd";
 
   $spamc = $ENV{'SPAMC_SCRIPT'};
   $spamc ||= "../spamc/spamc";
@@ -237,7 +237,7 @@ sub sdrun {
 }
 
 sub start_spamd {
-  my $sdargs = shift;
+  my $spamd_extra_args = shift;
 
   if ($SKIP_SPAMD_TESTS) {
     warn "spamd tests cannot be run on this platform\n";
@@ -249,20 +249,25 @@ sub start_spamd {
   mkdir ("log/outputdir.tmp", 0755);
 
   if (defined $ENV{'SD_ARGS'}) {
-    $sdargs = $ENV{'SD_ARGS'} . " ". $sdargs;
+    $spamd_extra_args = $ENV{'SD_ARGS'} . " ". $spamd_extra_args;
   }
 
-  my $spamdargs;
-  if($sdargs !~ /(?:-C\s*[^-]\S+)/) {
-    $sdargs = "$spamd_cf_args $spamd_localrules_args $sdargs";
+  my @spamd_args = (
+      $spamd,
+      qq{-D},
+      qq{-s}, qq{stderr},
+      qq{-x},
+    );
+  if ($spamd_extra_args !~ /(?:-C\s*[^-]\S+)/) {
+    push(@spamd_args, 
+      $spamd_cf_args,
+      $spamd_localrules_args,
+    );
   }
-  if($sdargs !~ /(?:-p\s*[0-9]+|-o|--socketpath)/)
-  {
-    $spamdargs = "$spamd -D -p $spamdport $sdargs";
-  }
-  else
-  {
-    $spamdargs = "$spamd -D $sdargs";
+  if ($spamd_extra_args !~ /(?:-p\s*[0-9]+|-o|--socketpath)/) {
+    push(@spamd_args,
+      qq{-p}, $spamdport,
+    );
   }
 
   if ($set_test_prefs) {
@@ -272,15 +277,19 @@ sub start_spamd {
   my $spamd_stdout = "log/$testname-spamd.out";
   my $spamd_stderr = "log/$testname-spamd.err";
   my $spamd_stdlog = "log/$testname-spamd.log";
+  my $spamd_forker = $ENV{'SPAMD_FORKER'} ?
+                     $ENV{'SPAMD_FORKER'} :
+                     $perl_path;
   my $spamd_cmd    = join(' ',
-                      $Config{perlpath},
-                      qq{SATest.pl},
-                      qq{-Mredirect},
-                      qq{-o${spamd_stdout}},
-                      qq{-O${spamd_stderr}},
-                      qq{--},
-                      qq{$spamdargs},
-                      qq{&},
+                       $spamd_forker,
+                       qq{SATest.pl},
+                       qq{-Mredirect},
+                       qq{-o${spamd_stdout}},
+                       qq{-O${spamd_stderr}},
+                       qq{--},
+                       @spamd_args,
+                       $spamd_extra_args,
+                       qq{&},
                     );
   print ("\t${spamd_cmd}\n");
   system ($spamd_cmd);
