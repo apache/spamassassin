@@ -135,14 +135,10 @@ meta FORGED_MUA_EUDORA		(__EUDORA_MUA && !__EUDORA_MSGID && !__UNUSABLE_MSGID &&
 describe FORGED_MUA_EUDORA	Forged mail pretending to be from Eudora
 
 # Mar 26 2003 jm: AOL MUAs add a Received line, and do not use "real names" in
-# From or To headers, as far as I can see.
-header __AOL8_MUA		X-Mailer =~ /AOL [78]\.\d for Windows/
-header __AOL8_TO		To =~ /^\S+\@\S+\.\S+$/
-header __AOL8_FROM		From =~ /^\S+\@aol\.com$/
-header __AOL8_RCVD		Received =~ /^from \S+\@aol\.com by\s+imo-\S+\.mx\.aol\.com\s+\(mail_out_\S+\)\s+id\s+\S+\s+\(\d+\)\s+for\s+<\S+\@\S+>;\s+/m
-
-meta FORGED_MUA_AOL_FROM	(__AOL8_MUA && !__AOL8_FROM)
-describe FORGED_MUA_AOL_FROM	Forged mail pretending to be from AOL 8 (by From)
+# From or To headers, as far as I can see, quinlan: also see bug 1426
+header __AOL_FROM		From:addr =~ /\@aol\.com$/i
+meta FORGED_MUA_AOL_FROM	(__AOL_MUA && !__AOL_FROM)
+describe FORGED_MUA_AOL_FROM	Forged mail pretending to be from AOL (by From)
 
 # From private mail with developers.  Some top tips here!
 header __THEBAT_MUA		X-Mailer =~ /The Bat!/
