@@ -519,15 +519,25 @@ sub _build_status_line {
              $self->{hits}, $self->{conf}->{required_hits});
 
   if($_ = $self->get_names_of_tests_hit()) {
-    $Text::Wrap::columns   = 74;
-    $Text::Wrap::huge      = 'overflow';
-    $Text::Wrap::break     = '(?<=,)';
-    $line .= Text::Wrap::wrap("\ttests=", "\t      ", $_) . "\n";
+    if ( $self->{conf}->{fold_headers} ) { # Fold the headers!
+      $Text::Wrap::columns   = 74;
+      $Text::Wrap::huge      = 'overflow';
+      $Text::Wrap::break     = '(?<=,)';
+      $line .= Text::Wrap::wrap("\ttests=", "\t      ", $_) . "\n";
+    }
+    else {
+      $line .= " tests=$_";
+    }
   } else {
     $line .= "\ttests=none\n";
   }
 
   $line .= "\tversion=" . $Mail::SpamAssassin::VERSION;
+
+  # If the configuration says no folded headers, unfold what we have.
+  if ( ! $self->{conf}->{fold_headers} ) {
+    $line =~ s/\s+/ /g;
+  }
 
   return $line;
 }
