@@ -329,26 +329,36 @@ sub check_for_forged_received_helo {
   return ($self->{mismatch_helo} > 0);
 }
 
+# note: reverted to last working version
 sub _check_for_forged_received {
   my ($self) = @_;
 
   $self->{mismatch_helo} = 0;
   $self->{mismatch_from} = 0;
 
-  my @fromip = map { $_->{ip} } @{$self->{relays_untrusted}};
+  my @received = grep(/\S/, split(/\n/, $self->get ('Received')));
+  my @by;
+  my @from;
+  my @helo;
+  my @fromip;
 
-  # just pick up domains
-  my @by = map {
-		hostname_to_domain ($_->{lc_by});
-	      } @{$self->{relays_untrusted}};
-  my @from = map {
-		hostname_to_domain ($_->{lc_rdns});
-	      } @{$self->{relays_untrusted}};
-  my @helo = map {
-		hostname_to_domain ($_->{lc_helo});
-	      } @{$self->{relays_untrusted}};
+  for (my $i = 0; $i < $#received; $i++) {
+    if ($received[$i] =~ s/\bby[\t ]+(\w+(?:[\w.-]+\.)+\w+)//i) {
+      $by[$i] = lc($1);
+      $by[$i] =~ s/.*\.(\S+\.\S+)$/$1/;
+    }
+    if ($received[$i] =~ s/\bfrom[\t ]+(\w+(?:[\w.-]+\.)+\w+)//i) {
+      $from[$i] = lc($1);
+      $from[$i] =~ s/.*\.(\S+\.\S+)$/$1/;
+    }
+    if ($received[$i] =~ s/\bhelo[=\t ]+(\w+(?:[\w.-]+\.)+\w+)//i) {
+      $helo[$i] = lc($1);
+      $helo[$i] =~ s/.*\.(\S+\.\S+)$/$1/;
+    }
+    if ($received[$i] =~ s/^ \((?:\S+ |)\[(${IP_ADDRESS})\]\)//i) {
+      $fromip[$i] = $1;
+    }
 
-  for (my $i = 0; $i < $self->{num_relays_untrusted}; $i++) {
     if (defined ($from[$i]) && defined($fromip[$i])) {
       if ($from[$i] =~ /^localhost(?:\.localdomain|)$/) {
         if ($fromip[$i] eq '127.0.0.1') {
