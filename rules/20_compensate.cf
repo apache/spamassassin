@@ -250,7 +250,7 @@ body     FAILURE_NOTICE_2       /\b(?:Delivery to the following recipients faile
 describe FAILURE_NOTICE_2       Mailer daemon failure notice (2)
 tflags   FAILURE_NOTICE_2       nice
 
-header   MAILER_DAEMON          From =~ /mailer.?daemon\@/i
+header   MAILER_DAEMON          From =~ /^(?:Mail Delivery \w+ )?<?mailer.?daemon\@\S+>?(?: \(Mail Delivery \w+\))?$/i
 describe MAILER_DAEMON          From the Mailer-Daemon
 tflags   MAILER_DAEMON          nice
 
