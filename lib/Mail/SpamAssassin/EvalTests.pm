@@ -2303,7 +2303,7 @@ sub _check_attachments {
 ###########################################################################
 
 sub check_razor1 {
-  my ($self, $fulltext) = @_;
+  my ($self) = @_;
 
   return 0 unless ($self->is_razor1_available());
   return 0 if ($self->{already_checked_razor1});
@@ -2318,12 +2318,10 @@ sub check_razor1 {
 }
 
 sub check_razor2 {
-  my ($self, $fulltext) = @_;
+  my ($self) = @_;
 
   return 0 unless ($self->is_razor2_available());
-  return 0 if ($self->{already_checked_razor2});
-
-  $self->{already_checked_razor2} = 1;
+  return $self->{razor2_result} if ( defined $self->{razor2_result} );
 
   # note: we don't use $fulltext. instead we get the raw message,
   # unfiltered, for razor2 to check.  ($fulltext removes MIME
@@ -2512,6 +2510,22 @@ sub check_outlook_timestamp_token {
   if (abs ($diff) < $fudge) { return 0; }
 
   return 1;
+}
+
+# Check the cf value of a given message and return if it's within the given range
+sub check_razor2_range {
+  my ($self,$fulltext,$min,$max) = @_;
+
+  unless ( defined $self->{razor2_cf_score} ) {
+    # note: we don't use $fulltext. instead we get the raw message,
+    # unfiltered, for razor2 to check.  ($fulltext removes MIME
+    # parts etc.)
+    my $full = $self->get_full_message_as_text();
+    $self->razor2_lookup (\$full);
+  }
+
+  return 1 if ( $self->{razor2_cf_score} >= $min && $self->{razor2_cf_score} <= $max );
+  return 0;
 }
 
 1;

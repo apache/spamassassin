@@ -347,6 +347,11 @@ sub razor2_lookup {
   my ($self, $fulltext) = @_;
   my $timeout=$self->{conf}->{razor_timeout};
 
+  # Set the score for the ranged checks
+  $self->{razor2_cf_score} = 0;
+  return $self->{razor2_result} if ( defined $self->{razor2_result} );
+  $self->{razor2_result} = 0;
+
   if ($self->{main}->{local_tests_only}) {
     dbg ("local tests only, ignoring Razor2", "razor", -1);
     return 0;
@@ -414,7 +419,8 @@ sub razor2_lookup {
           }
           $rc->check($objects) or die $rc->errprefix("checkit");
           $rc->disconnect() or die $rc->errprefix("checkit");
-          $response = $objects->[0]->{spam};
+          $self->{razor2_result} = $response = $objects->[0]->{spam};
+          $self->{razor2_cf_score} = $objects->[0]->{p}->[0]->{resp}->[0]->{cf} if ( $response );
         }
       }
       else {
@@ -448,7 +454,7 @@ sub razor2_lookup {
     close OLDOUT;
   }
 
-  if ((defined $response) && ($response+0)) {
+  if (defined $response && $response) {
       timelog("Razor2 -> Finished razor test: confirmed spam", "razor", 2);
       return 1;
   }
