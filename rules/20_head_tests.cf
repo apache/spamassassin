@@ -265,10 +265,10 @@ header FORGED_EUDORAMAIL_RCVD	eval:check_for_forged_eudoramail_received_headers(
 describe FORGED_EUDORAMAIL_RCVD	Forged eudoramail.com 'Received:' header found
 
 header FORGED_YAHOO_RCVD	eval:check_for_forged_yahoo_received_headers()
-describe FORGED_YAHOO_RCVD	Forged yahoo.com 'Received:' header found
+describe FORGED_YAHOO_RCVD	'From' yahoo.com does not match 'Received' headers
 
 header FORGED_JUNO_RCVD		eval:check_for_forged_juno_received_headers()
-describe FORGED_JUNO_RCVD	Forged juno.com 'Received:' header found
+describe FORGED_JUNO_RCVD	'From' juno.com does not match 'Received' headers
 
 header FORGED_GW05_RCVD		eval:check_for_forged_gw05_received_headers()
 describe FORGED_GW05_RCVD	Forged 'by gw05' 'Received:' header found
