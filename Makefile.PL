@@ -131,7 +131,7 @@ my %makefile = (
 	'spamd/sslspamc$(EXE_EXT) spamd/libsslspamc.so '.
 	'binaries.mk config.h config.status config.cache config.log '.
 	'autom4te.cache qmail/qmail-spamc'.
-	't/do_razor t/do_razor1 t/do_razor2 '
+	't/do_razor t/do_razor1 t/do_razor2 t/log'
     },
 
     'AUTHOR' => 'Justin Mason <jm@jmason.org>',
@@ -192,13 +192,13 @@ for (my $v = 1; $v <= 2; $v++) {
 
   if (!defined($do)) {
     if ($v == 1) {
-      $do = ! eval { require Razor::Client };
+      $do = eval { require Razor::Client };
     }
     elsif ($v == 2) {
-      $do = ! eval { require Razor2::Client::Agent };
+      $do = eval { require Razor2::Client::Agent };
     }
 
-    if (!$do) {
+    if ($do) {
       prompt("Run Razor v${v} tests (these may fail due to network problems)? (y/n)", 'n') =~ /^(.)/;
       $do = $1;
     }
