@@ -655,11 +655,16 @@ sub _parse_rfc822_date {
   } elsif (s/ ([A-Z][a-z][a-z]) +(\d+) \d+:\d+:\d+ (\d\d\d\d) / /) {
     $dd = $2; $mon = $1; $yyyy = $3;
   } elsif (s/ (\d+) ([A-Z][a-z][a-z]) (\d\d) / /) {
-    $dd = $1; $mon = $2; $yyyy = 2000 + $3;	# bizarre
+    $dd = $1; $mon = $2; $yyyy = $3;
+  }
+
+  if (defined $yyyy && $yyyy < 100) {
+    # psycho Y2K crap
+    $yyyy = $3; if ($yyyy < 70) { $yyyy += 2000; } else { $yyyy += 1900; }
   }
 
   # hh:mm:ss
-  if (s/ (\d\d):(\d\d):(\d\d) / /) {
+  if (s/ ([\d\s]\d):(\d\d):(\d\d) / /) {
     $hh = $1; $mm = $2; $ss = $3;
   }
 
@@ -689,12 +694,14 @@ sub _parse_rfc822_date {
     return 0;
   }
 
-  $tzoff =~ /([-+])(\d\d)(\d\d)$/;	# convert to seconds difference
-  $tzoff = (($2 * 60) + $3) * 60;
-  if ($1 eq '-') {
-    $time -= $tzoff;
-  } else {
-    $time += $tzoff;
+  if ($tzoff =~ /([-+])(\d\d)(\d\d)$/)	# convert to seconds difference
+  {
+    $tzoff = (($2 * 60) + $3) * 60;
+    if ($1 eq '-') {
+      $time -= $tzoff;
+    } else {
+      $time += $tzoff;
+    }
   }
 
   return $time;
