@@ -488,7 +488,7 @@ describe HOME_EMPLOYMENT	Information on how to work at home (2)
 body     NO_EXPERIENCE          /\bNo EXPERIENCE/i
 describe NO_EXPERIENCE          No experience needed!
 
-body     FREE_MONEY             /\b(:?fast|free|easy|big)\s*(?:money|\$+|bucks|cash)/i
+body     FREE_MONEY             /\b(?:fast|free|easy|big)\s*(?:money|\$+|bucks|cash|(?-i:E)uros?)\b/i
 describe FREE_MONEY             Free money!
 
 body MORTGAGE_RATES		/Mortgage rates/i
