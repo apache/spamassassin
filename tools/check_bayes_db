@@ -19,6 +19,13 @@ foreach my $dbname (@DBNAMES) {
         or die "Cannot open file $name: $!\n";
 }
 
+printf ("%3.3f %8d %8d   %s\n", 0.0, 0,
+	$h{db_count}->{'nspam'}, 'non-token data: nspam');
+printf ("%3.3f %8d %8d   %s\n", 0.0, 0,
+	$h{db_count}->{'nham'}, 'non-token data: nham');
+printf ("%3.3f %8d %3.3f   %s\n", 0.0, 0,
+	$h{db_count}->{'robinson_x'}, 'non-token data: robinson_x');
+
 my %seen = ();
 my @k = ( keys(%{$h{db_toks_spam}}) , keys(%{$h{db_toks_ham}}) );
 for my $key (@k) {
