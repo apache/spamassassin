@@ -401,6 +401,18 @@ sub parse_received_line {
       return;
     }
 
+    if (/\[XMail /) { # bug 3791
+      # Received: from list.brainbuzz.com (63.146.189.86:23198) by mx1.yourtech.net with [XMail 1.20 ESMTP Server] id <S72E> for <jason@ellingson.org> from <bounce-cscommunity-11965901@list.cramsession.com>; Sat, 18 Sep 2004 23:17:54 -0500
+      # Received: from list.brainbuzz.com (63.146.189.86:23198) by mx1.yourtech.net (209.32.147.34:25) with [XMail 1.20 ESMTP Server] id <S72E> for <jason@ellingson.org> from <bounce-cscommunity-11965901@list.cramsession.com>; Sat, 18 Sep 2004 23:17:54 -0500
+      if (/^from (\S+) \((${IP_ADDRESS})(?::\d+)?\) by (\S+)(?: \(\S+\)|) with \[XMail/)
+      {
+	$helo = $1; $ip = $2; $by = $3;
+        / id <(\S+)> / and $id = $1;
+        / from <(\S+)>; / and $envfrom = $1;
+        goto enough;
+      }
+    }
+
     if (/Exim/) {
       # one of the HUGE number of Exim formats :(
       # This must be scriptable.
