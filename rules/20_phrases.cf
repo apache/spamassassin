@@ -834,9 +834,6 @@ describe MARKETING_PARTNERS	Claims you registered with a partner
 body PRIORITY_MAIL              /\b[Aa]ll\b.{0,20}\b[Oo]rders\b.{1,20}\bPriority Mail\b/
 describe PRIORITY_MAIL          Orders shipped by priority mail
 
-body SAVE_ON_INSURANCE		/\bsave .{0,20}\bon (?:your\s+)?(?:auto|car|life|health|medical)? ?insurance\b/i
-describe SAVE_ON_INSURANCE	Trying to sell insurance online
-
 body STOP_SNORING		/\bstop\s+snoring\b/i
 describe STOP_SNORING		Contains "Stop Snoring"
 
