@@ -55,7 +55,7 @@ sub run {
   my ($self, @targets) = @_;
 
   if (!defined $self->{wanted_sub}) {
-    die "set_function never called";
+    die "set_functions never called";
   }
 
   foreach my $target (@targets) {
@@ -105,7 +105,7 @@ sub run {
     while ($message = (shift @messages)) {
       $class = substr($message, 0, 1);
       $result = $self->run_message($message);
-      $self->process_a_result($class, $result) if $result;
+      &{$self->{result_sub}}($class, $result) if $result;
     }
   }
   elsif ($self->{opt_j} > 1) {
@@ -159,7 +159,7 @@ sub run {
 	    print { $socket } (@messages ? (shift @messages) : "exit") . "\n";
 	    if ($result) {
 	      chop $result;	# need to chop the \n before RESULT
-	      $self->process_a_result($1, $result) if defined($1);
+	      &{$self->{result_sub}}($1, $result) if defined($1);
 	    }
 	    last;
 	  }
@@ -374,7 +374,7 @@ sub run_file {
   my @msg = (<INPUT>);
   close INPUT;
 
-  $self->visit_a_mail($where, \@msg);
+  &{$self->{wanted_sub}}($where, \@msg);
 }
 
 sub run_mailbox {
@@ -400,21 +400,7 @@ sub run_mailbox {
     push (@msg, $_);
   }
   close INPUT;
-  $self->visit_a_mail("$file.$offset", \@msg);
-}
-
-############################################################################
-
-sub visit_a_mail {
-  my ($self, $mail, $dataref) = @_;
-  my $sub = $self->{wanted_sub};
-  return &$sub($mail, $dataref);
-}
-
-sub process_a_result {
-  my ($self, $class, $result) = @_;
-  my $sub = $self->{result_sub};
-  return &$sub($class, $result);
+  &{$self->{wanted_sub}}("$file.$offset", \@msg);
 }
 
 ############################################################################
