@@ -131,6 +131,7 @@ struct message
     int is_spam;		/* EX_ISSPAM if the message is spam, EX_NOTSPAM
 				   if not */
     float score, threshold;	/* score and threshold */
+    char *outbuf;		/* Buffer for output from spamd */
     char *out;
     int out_len;		/* Output from spamd. Either the filtered
 				   message, or the check-only response. Or else,
