@@ -123,33 +123,14 @@ use constant IGNORE_TITLE_CASE => 1;
 use constant TOKENIZE_LONG_8BIT_SEQS_AS_TUPLES => 1;
 use constant TOKENIZE_LONG_TOKENS_AS_SKIPS => 1;
 
-# NEW TESTING
-use constant PRE_CHEW_ADDR_HEADERS => 0;
+# tweaks of May 12 2003, see SpamAssassin-devel archives again.
+use constant PRE_CHEW_ADDR_HEADERS => 1;
 use constant NO_NUMERIC_IN_HEADERS => 0;
-use constant TST_IGNORE_MSGID => 0;
-use constant TST_CHEW_BODY_URIS => 0;
-use constant TST_CHEW_BODY_MAILTOS => 0;
-use constant TST_HDRS_TOKENIZE_LONG_TOKENS_AS_SKIPS => 1;
-use constant TST_BODY_TOKENIZE_LONG_TOKENS_AS_SKIPS => 1;
-use constant PROB_BOUND_LOWER => 0.001;
-use constant PROB_BOUND_UPPER => 0.999;
-use constant CHI_ROBINSON_X_CONSTANT  => 0.538;
-use constant CHI_ROBINSON_S_CONSTANT  => 0.150;
-use constant CHI_ROBINSON_MIN_PROB_STRENGTH  => 0.346;
-
-
-##orig##use constant PRE_CHEW_ADDR_HEADERS => 0;
-##orig##use constant NO_NUMERIC_IN_HEADERS => 0;
-##orig##use constant TST_IGNORE_MSGID => 0;
-##orig##use constant TST_CHEW_BODY_URIS => 0;
-##orig##use constant TST_CHEW_BODY_MAILTOS => 0;
-##orig##use constant TST_HDRS_TOKENIZE_LONG_TOKENS_AS_SKIPS => 1;
-##orig##use constant TST_BODY_TOKENIZE_LONG_TOKENS_AS_SKIPS => 1;
-##orig##use constant PROB_BOUND_LOWER => 0.001;
-##orig##use constant PROB_BOUND_UPPER => 0.999;
-##orig##use constant CHI_ROBINSON_X_CONSTANT  => 0.538;
-##orig##use constant CHI_ROBINSON_S_CONSTANT  => 0.373;
-##orig##use constant CHI_ROBINSON_MIN_PROB_STRENGTH  => 0.346;
+use constant IGNORE_MSGID_TOKENS => 0;
+use constant CHEW_BODY_URIS => 1;
+use constant CHEW_BODY_MAILADDRS => 1;
+use constant HDRS_TOKENIZE_LONG_TOKENS_AS_SKIPS => 1;
+use constant BODY_TOKENIZE_LONG_TOKENS_AS_SKIPS => 1;
 
 # We store header-mined tokens in the db with a "HHeaderName:val" format.
 # some headers may contain lots of gibberish tokens, so allow a little basic
@@ -186,19 +167,19 @@ use constant USE_ROBINSON_FX_EQUATION_FOR_LOW_FREQS => 1;
 
 # Value for 'x' in the f(w) equation.
 # "Let x = the number used when n [hits] is 0."
-###use constant CHI_ROBINSON_X_CONSTANT  => 0.538;
+use constant CHI_ROBINSON_X_CONSTANT  => 0.538;
 use constant GARY_ROBINSON_X_CONSTANT => 0.600;
 
 # Value for 's' in the f(w) equation.  "We can see s as the "strength" (hence
 # the use of "s") of an original assumed expectation ... relative to how
 # strongly we want to consider our actual collected data."  Low 's' means
 # trust collected data more strongly.
-###use constant CHI_ROBINSON_S_CONSTANT  => 0.373;
+use constant CHI_ROBINSON_S_CONSTANT  => 0.100;
 use constant GARY_ROBINSON_S_CONSTANT => 0.160;
 
 # Should we ignore tokens with probs very close to the middle ground (.5)?
 # tokens need to be outside the [ .5-MPS, .5+MPS ] range to be used.
-###use constant CHI_ROBINSON_MIN_PROB_STRENGTH  => 0.346;
+use constant CHI_ROBINSON_MIN_PROB_STRENGTH  => 0.346;
 use constant GARY_ROBINSON_MIN_PROB_STRENGTH => 0.430;
 
 # How many of the most significant tokens should we use for the p(w)
@@ -208,12 +189,6 @@ use constant N_SIGNIFICANT_TOKENS => 150;
 # How long a token should we hold onto?  (note: German speakers typically
 # will require a longer token than English ones.)
 use constant MAX_TOKEN_LENGTH => 15;
-
-# lower and upper bounds for probabilities; we lock probs into these
-# so one high-strength token can't overwhelm a set of slightly lower-strength
-# tokens.
-##use constant PROB_BOUND_LOWER => 0.001;
-##use constant PROB_BOUND_UPPER => 0.999;
 
 ###########################################################################
 
@@ -377,12 +352,12 @@ sub tokenize_line {
 
     # are we in the body?  If so, apply some body-specific breakouts
     if (!$in_headers) {
-      if (TST_CHEW_BODY_MAILTOS && $token =~ /\S\@\S/i) {
+      if (CHEW_BODY_MAILADDRS && $token =~ /\S\@\S/i) {
 	my @toks = $self->tokenize_mail_addrs ($token);
 	push (@{$self->{tokens}}, @toks);
 	$wc += scalar @toks;
       }
-      elsif (TST_CHEW_BODY_URIS && $token =~ /\S\.[a-z]/i) {
+      elsif (CHEW_BODY_URIS && $token =~ /\S\.[a-z]/i) {
 	my $bit = $token; while ($bit =~ s/^[^\.]+\.(.+)$/$1/gs) {
 	  push (@{$self->{tokens}}, "UD:".$1); $wc++;	# UD = URL domain
 	}
@@ -404,8 +379,8 @@ sub tokenize_line {
 	next;
       }
 
-    if (($in_headers && TST_HDRS_TOKENIZE_LONG_TOKENS_AS_SKIPS)
-		|| (!$in_headers && TST_BODY_TOKENIZE_LONG_TOKENS_AS_SKIPS))
+    if (($in_headers && HDRS_TOKENIZE_LONG_TOKENS_AS_SKIPS)
+		|| (!$in_headers && BODY_TOKENIZE_LONG_TOKENS_AS_SKIPS))
     {
 	# if (TOKENIZE_LONG_TOKENS_AS_SKIPS) {
 	# Spambayes trick via Matt: Just retain 7 chars.  Do not retain
@@ -463,7 +438,7 @@ sub tokenize_headers {
 
   $hdrs =~ s/^${IGNORED_HDRS}: [^\n]*$//gim;
 
-  if (TST_IGNORE_MSGID) { $hdrs =~ s/^Message-I[dD]: [^\n]*$//gim;}
+  if (IGNORE_MSGID_TOKENS) { $hdrs =~ s/^Message-I[dD]: [^\n]*$//gim;}
 
   # and re-add the last 2 received lines: usually a good source of
   # spamware tokens and HELO names.
@@ -1016,17 +991,6 @@ sub scan {
     if ($count-- < 0) { last; }
     my $pw = $pw{$_};
     next if (abs($pw - 0.5) < $self->{robinson_min_prob_strength});
-
-    # enforce (max PROB_BOUND_LOWER (min PROB_BOUND_UPPER (score))) as per
-    # Graham; it allows a majority of spam clues to override 1 or 2
-    # very-strong nonspam clues.  Moved here from above to save some CPU.
-    #
-    if ($pw < PROB_BOUND_LOWER) {
-      $pw = PROB_BOUND_LOWER;
-    } elsif ($pw > PROB_BOUND_UPPER) {
-      $pw = PROB_BOUND_UPPER;
-    }
-
     push (@sorted, $pw);
 
     # update the atime on this token, it proved useful
