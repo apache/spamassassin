@@ -13,7 +13,8 @@ Once identified, the mail can then be optionally tagged as spam for later
 filtering using the user's own mail user-agent application.
 
 In its most recent test, SpamAssassin differentiated between spam and
-non-spam mail correctly in 99.94% of cases.
+non-spam mail correctly in 99.94% of cases.  Since then, it's just been
+getting better and better!
 
 SpamAssassin also includes support for reporting spam messages
 automatically, and/or manually, to collaborative filtering databases such
@@ -36,10 +37,10 @@ SpamAssassin lives at http://spamassassin.taint.org/ or in CPAN, and is
 distributed under Perl's Artistic license.
 
 This module owes a lot of inspiration to Mark Jeftovic's filter.plx, which
-I contributed some code to (and used, of course).  However, SpamAssassin
-is a ground-up rewrite with a new, improved ruleset, and a different code
-model and installation system, and hopefully will be easy to adapt for a
-multitude of applications.
+I used for a long time, and contributed some code to.  However,
+SpamAssassin is a ground-up rewrite with a new, greatly improved ruleset,
+a different code model and installation system, and hopefully will be easy
+to adapt for a multitude of applications.
 
 	[2]: http://AntiSpam.shmOOze.net/filter/
 
@@ -97,12 +98,12 @@ skipped.
   - Razor	http://razor.sourceforge.net/
 
     Used to check message signatures against Vipul's Razor collaborative
-    filtering network.  Razor is currently in prototype, so it's not yet
-    available from CPAN -- you have to download it from the URL above.
+    filtering network.  Razor is not available from CPAN -- you have to
+    download it from the URL above.
 
-    Razor has a large number of dependencies on CPAN modules.  Feel
-    free to skip installing it, if this makes you nervous; SpamAssassin
-    will still work very well without it.
+    Razor has a large number of dependencies on CPAN modules.  Feel free
+    to skip installing it, if this makes you nervous; SpamAssassin will
+    still work well without it.
 
 
 Using SpamAssassin
@@ -178,6 +179,12 @@ If you're using procmail:
       cp ~/.procmailrc.bak ~/.procmailrc
       echo "Help!" | mail root
 
+
+If you want to use SpamAssassin site-wide:
+
+  - take a look at the notes on the website, at
+    http://spamassassin.taint.org/sitewide.html .  You may want to use
+    'spamd' (see below).
 
 
 If you don't use any mail filter just yet:
@@ -256,9 +263,9 @@ them to edit their preferences and reweight the rules, or to increase or
 decrease the "line in the sand" at which point a mail is judged spam (or
 not).
 
-Systems administrators can create the "/etc/spamfilter.cf" file to add new
+Systems administrators can create the "/etc/spamassassin.cf" file to add new
 rules for all users on the system, or they can create
-"/etc/spamfilter.prefs" to set default preferences for their users.
+"/etc/spamassassin.prefs" to set default preferences for their users.
 
 The default config files installed by SpamAssassin are generally written
 into the site_perl directory; this may be
@@ -272,9 +279,39 @@ they're currently unavoidable.
 
 There is no difference in interpretation between the rules file and the
 preferences file, so users can add new rules for their own use in the
-"~/.spamfilter.cf" file, if they like -- as long as they're running
+"~/.spamassassin.cf" file, if they like -- as long as they're running
 SpamAssassin themselves, and not using the site-wide "spamd" filtering
 system.
+
+So, to summarise:
+
+  - __SITE_PERL_DIRECTORY__/spamassassin.cf:
+
+	Distributed configuration file, with all defaults.  Do not
+	modify this, as it is overwritten when you upgrade.
+
+  - /etc/spamassassin.cf:
+
+  	Site config file, for system admins to create, modify, and
+	add local rules and scores to.  Modifications here will be
+	added to the config loaded from the above file.
+
+  - __SITE_PERL_DIRECTORY__/spamassassin.prefs:
+
+  	Distributed default preferences. Do not modify this, as it
+	is overwritten when you upgrade.
+
+  - /etc/spamassassin.prefs:
+
+  	Site default preferences, for system admins to create, modify,
+	and set defaults for users preferences files.  Takes precedence
+	over the above prefs file, if it exists.
+
+  - $USER_HOME/.spamassassin.cf:
+
+  	User preferences file.  If it does not exist, one of the 
+	default prefs file from above will be copied here for the
+	user to edit later, if they wish.
 
 
 Locali[sz]ation
@@ -308,7 +345,7 @@ turned off by default, namely the mail-abuse.org and bl.spamcop.net tests.
 The mail-abuse.org tests are RCVD_IN_RBL, RCVD_IN_RSS, and RCVD_IN_DUL;
 the bl.spamcop.net test is called RCVD_IN_BL_SPAMCOP_NET.
 
-These are both commercial services, so you need to pay money to use them.
+These are commercial services, so you need to pay money to use them.
 Having said that, the bl.spamcop.net service gets my recommendation as the
 most useful blacklisting DNS service I've found.  More information on it
 can be found at http://spamcop.net/bl.shtml .
