@@ -20,22 +20,26 @@ Mail::SpamAssassin::Plugin - SpamAssassin plugin base class
 
 =head1 SYNOPSIS
 
+=head2 SpamAssassin configuration:
+
+  loadplugin MyPlugin /path/to/myplugin.pm
+
+=head2 Perl code:
+
   package MyPlugin;
 
   use Mail::SpamAssassin::Plugin;
-  use vars qw(@ISA);
-  @ISA = qw(Mail::SpamAssassin::Plugin);
+  our @ISA = qw(Mail::SpamAssassin::Plugin);
 
   sub new {
-    my $class = shift;
-    my $mailsaobject = shift;
+    my ($class, $mailsa) = @_;
     
     # the usual perlobj boilerplate to create a subclass object
     $class = ref($class) || $class;
     my $self = $class->SUPER::new($mailsaobject);
     bless ($self, $class);
    
-    # then register an eval rule
+    # then register an eval rule, if desired...
     $self->register_eval_rule ("check_for_foo");
 
     # and return the new plugin object
