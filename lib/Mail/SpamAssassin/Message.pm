@@ -122,6 +122,7 @@ sub new {
 
   # Go through all the headers of the message
   my $header = '';
+  my $boundary;
   while ( my $last = shift @message ) {
     if ( $last =~ /^From\s/ ) {
 	# mbox formated mailbox
@@ -162,8 +163,26 @@ sub new {
     if ( $last =~ /^[ \t]+/ ) {                    # if its a continuation
       if ($header) {
         $header .= $last;                            # fold continuations
+
+	# If we're currently dealing with a content-type header, and there's a
+	# boundary defined, use it.  Since there could be multiple
+	# content-type headers in a message, the last one will be the one we
+	# should use, so just keep updating as they come in.
+        if ($header =~ /^content-type:\s*(\S.*)$/is) {
+	  my($type,$temp_boundary) = Mail::SpamAssassin::Util::parse_content_type($1);
+	  $boundary = $temp_boundary if ($type =~ /^multipart/ && defined $temp_boundary);
+	}
+
+	# Go onto the next header line, unless the next line is a
+	# multipart mime boundary, where we know we're going to stop
+	# below, so drop through for final header processing.
+        next unless (defined $boundary && $message[0] =~ /^--\Q$boundary\E(?:--|\s*$)/);
       }
-      next;
+      else {
+	# There was no previous header and this is just "out there"?
+	# Ignore it!
+        next;
+      }
     }
 
     # Ok, there's a header here, let's go ahead and add it in.
@@ -183,6 +202,15 @@ sub new {
 	  $self->{'truncated_header'} = 1;
 	}
         $self->header($key, $value);
+
+	# If we're currently dealing with a content-type header, and there's a
+	# boundary defined, use it.  Since there could be multiple
+	# content-type headers in a message, the last one will be the one we
+	# should use, so just keep updating as they come in.
+        if (lc $key eq 'content-type') {
+	  my($type,$temp_boundary) = Mail::SpamAssassin::Util::parse_content_type($value);
+	  $boundary = $temp_boundary if ($type =~ /^multipart/ && defined $temp_boundary);
+	}
       }
     }
 
@@ -190,7 +218,11 @@ sub new {
     $header = $last;
 
     # Ok, we found the header/body blank line ...
-    last if ( $last =~ /^\r?$/m );
+    last if ($last =~ /^\r?$/m);
+
+    # Alternately, if a multipart mime boundary is found in the header area,
+    # aka it's malformed, exit out as well and treat it as part of the body.
+    last if (defined $boundary && $message[0] =~ /^--\Q$boundary\E(?:--|\s*$)/);
   }
 
   # Store the pristine body for later -- store as a copy since @message

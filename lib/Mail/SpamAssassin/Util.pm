@@ -659,21 +659,31 @@ sub parse_content_type {
   # - only an opening double quote seems to be needed
   # - non-quoted boundaries should be followed by space, ";", or end of line
   # - blank boundaries seem to not work
+  #
   my($boundary) = $ct =~ m!\bboundary\s*=\s*("[^"]+|[^\s";]+(?=[\s;]|$))!i;
 
   # remove double-quotes in boundary (should only be at start and end)
+  #
   $boundary =~ tr/"//d if defined $boundary;
 
   # Parse out the charset and name, if they exist.
+  #
   my($charset) = $ct =~ /\bcharset\s*=\s*["']?(.*?)["']?(?:;|$)/i;
   my($name) = $ct =~ /\b(?:file)?name\s*=\s*["']?(.*?)["']?(?:;|$)/i;
 
-  # Get the type out ...
-  $ct =~ s/;.*$//;                    # strip everything after first semi-colon
-  $ct =~ s@^([^/]+(?:/[^/]*)?).*$@$1@;	# only something/something ...
+  # Get the actual MIME type out ...
+  # Note: the header content may not be whitespace unfolded, so make sure the
+  # REs do /s when appropriate.
+  #
+  $ct =~ s/;.*$//s;                     # strip everything after first semi-colon
+  $ct =~ s@^([^/]+(?:/[^/]*)?).*$@$1@s;	# only something/something ...
   $ct =~ tr/\000-\040\177-\377\042\050\051\054\056\072-\077\100\133-\135//d;    # strip inappropriate chars
   $ct = lc $ct;
 
+  # Now that the header has been parsed, return the requested information.
+  # In scalar context, just the MIME type, in array context the
+  # four important data parts (type, boundary, charset, and filename).
+  #
   return wantarray ? ($ct,$boundary,$charset,$name) : $ct;
 }
 
