@@ -573,34 +573,49 @@ describe EXTRA_MPART_TYPE       Message with extraneous Content-type:...type= he
 header TO_RECIP_MARKER          To =~ /\#recipient\#/
 describe TO_RECIP_MARKER        To header contains 'recipient' marker
 
-# MIME boundary tests; spam tools use distinctive patterns.
-header MIME_BOUND_HASHES     Content-type =~ /boundary=\"\#\#\#\#\#\#\#\#\#\#\"/
-header MIME_BOUND_DIGITS_1   Content-Type =~ /boundary=\"----------=_\d\d\d\d\d\d\d\d\d\d-\d\d\d\d-\d\d\"/
-header MIME_BOUND_DIGITS_2   Content-Type =~ /boundary=\"----------=_\d\d\d\d\d\d\d\d\d\d-\d\d\d\d\d-\d\"/
-header MIME_BOUND_DIGITS_3   Content-Type =~ /boundary=\"----\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\"/
-header MIME_BOUND_DIGITS_4   Content-Type =~ /boundary=\"_----------=_\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\"/
-header MIME_BOUND_DIGITS_5   Content-Type =~ /boundary=\"\d-\d\d\d\d\d\d\d\d\d-\d\d\d\d\d\d\d\d\d\d=:\d\d\d\d\d\"/
-header MIME_BOUND_DIGITS_6   Content-Type =~ /boundary=\"\d-\d\d\d\d\d\d\d\d\d\d-\d\d\d\d\d\d\d\d\d\d=:\d\d\d\d\d\"/
-header MIME_BOUND_DIGITS_7   Content-Type =~ /boundary=\d\d\d\d\d\d\d\d\d.\d\d\d\d\d\d\d\d\d\d\d\d\d/
-header MIME_BOUND_DIGITS_8   Content-Type =~ /boundary=\"\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\"/
-header MIME_BOUND_NEXTPART_1 Content-Type =~ /boundary=\"_NextPart_\d\d_\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\"/
-header MIME_BOUND_NEXTPART_2 Content-Type =~ /boundary=\"_NextPart_\d\d_\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\"/
-header MIME_BOUND_NEXTPART_3 Content-Type =~ /boundary=\"_NextPart_\d\d\d_\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\"/
-header MIME_BOUND_NEXTPART_4 Content-Type =~ /boundary=\"_NextPart_\d\d\d_\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\"/
-header MIME_BOUND_MA         Content-Type =~ /boundary=\"----=_[A-Z0-9]{8}_[A-Z0-9]{8}_MA\"/
-header MIME_BOUND_SEP1       Content-Type =~ /boundary=\"--==--==_Separator1\"/
-header MIME_BOUND_HEX29      Content-Type =~ /boundary=\"[0-9A-F]{29}\"/
-header MIME_BOUND_OPTIN      Content-Type =~ /boundary=\"\d\d\d\d\d\d\d\d-\d\d\d\d-\d\d\d\d-\d\d\d\d-\d\d\d\d\d\d\d\d\d\d\d\dOPTIN\"/
-header MIME_BOUND_HEX14      Content-Type =~ /boundary=\"==[0-9a-f]{14}\"/
-header MIME_BOUND_EQS_DASHES Content-Type =~ /boundary=\"==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==\"/
-header MIME_BOUND_MIME_BOUND Content-Type =~ /boundary=\"MIME_BOUNDARY-\d\d\d\d\d-\d-\d\d\d\d\d\d\d\d\d\d\"/
-header MIME_BOUND_MAIL_BOUND Content-Type =~ /boundary=\"___MAIL_BOUNDARY____\"/
-
-# http://www.hughes-family.org/bugzilla/show_bug.cgi?id=699
-header MICROSOFT             exists:microsoft
-describe MICROSOFT           A "microsoft" header was found
-
 header SAVINGS               Subject =~ /\bsave\s+(?:on\s+your|up\s+to|big|over|at\s+least|\d+\%|you)\b/i
 describe SAVINGS             Subject talks about savings
 
+# MIME boundary tests; spam tools use distinctive patterns.
+header MIME_BOUND_HASHES	Content-type =~ /boundary=\"\#{10}\"/
+describe MIME_BOUND_HASHES	Spam tool pattern in MIME boundary
+header MIME_BOUND_DIGITS_1	Content-Type =~ /boundary=\"----------=_\d{10}-\d{4}-\d{2}\"/
+describe MIME_BOUND_DIGITS_1	Spam tool pattern in MIME boundary
+header MIME_BOUND_DIGITS_2	Content-Type =~ /boundary=\"----------=_\d{10}-\d{5}-\d\"/
+describe MIME_BOUND_DIGITS_2	Spam tool pattern in MIME boundary
+header MIME_BOUND_DIGITS_3	Content-Type =~ /boundary=\"----\d{63}\"/
+describe MIME_BOUND_DIGITS_3	Spam tool pattern in MIME boundary
+header MIME_BOUND_DIGITS_4	Content-Type =~ /boundary=\"_----------=_\d{18}\"/
+describe MIME_BOUND_DIGITS_4	Spam tool pattern in MIME boundary
+header MIME_BOUND_DIGITS_5	Content-Type =~ /boundary=\"\d-\d{9}-\d{10}=:\d{5}\"/
+describe MIME_BOUND_DIGITS_5	Spam tool pattern in MIME boundary
+header MIME_BOUND_DIGITS_6	Content-Type =~ /boundary=\"\d-\d{10}-\d{10}=:\d{5}\"/
+describe MIME_BOUND_DIGITS_6	Spam tool pattern in MIME boundary
+header MIME_BOUND_DIGITS_7	Content-Type =~ /boundary=\d{9}\.\d{13}/
+describe MIME_BOUND_DIGITS_7	Spam tool pattern in MIME boundary
+header MIME_BOUND_DIGITS_8	Content-Type =~ /boundary=\"\d{24}"/
+describe MIME_BOUND_DIGITS_8	Spam tool pattern in MIME boundary
+header MIME_BOUND_NEXTPART_1	Content-Type =~ /boundary=\"_NextPart_\d{2}_\d{31}\"/
+describe MIME_BOUND_NEXTPART_1	Spam tool pattern in MIME boundary
+header MIME_BOUND_NEXTPART_2	Content-Type =~ /boundary=\"_NextPart_\d{3}_\d{30}\"/
+describe MIME_BOUND_NEXTPART_2	Spam tool pattern in MIME boundary
+header MIME_BOUND_MA		Content-Type =~ /boundary=\"----=_[A-Z0-9]{8}_[A-Z0-9]{8}_MA\"/
+describe MIME_BOUND_MA		Spam tool pattern in MIME boundary
+header MIME_BOUND_SEP1		Content-Type =~ /boundary=\"--==--==_Separator1\"/
+describe MIME_BOUND_SEP1	Spam tool pattern in MIME boundary
+header MIME_BOUND_HEX29		Content-Type =~ /boundary=\"[0-9A-F]{29}\"/
+describe MIME_BOUND_HEX29	Spam tool pattern in MIME boundary
+header MIME_BOUND_HEX14		Content-Type =~ /boundary=\"==[0-9a-f]{14}\"/
+describe MIME_BOUND_HEX14	Spam tool pattern in MIME boundary
+header MIME_BOUND_OPTIN		Content-Type =~ /boundary=\"\d{8}-\d{4}-\d{4}-\d{4}-\d{12}OPTIN\"/
+describe MIME_BOUND_OPTIN	Spam tool pattern in MIME boundary
+header MIME_BOUND_EQS_DASHES	Content-Type =~ /boundary=\"==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==\"/
+describe MIME_BOUND_EQS_DASHES	Spam tool pattern in MIME boundary
+header MIME_BOUND_MIME_BOUND	Content-Type =~ /boundary=\"MIME_BOUNDARY-\d{4}-\d-\d{10}\"/
+describe MIME_BOUND_MIME_BOUND	Spam tool pattern in MIME boundary
+header MIME_BOUND_MAIL_BOUND	Content-Type =~ /boundary=\"___MAIL_BOUNDARY____\"/
+describe MIME_BOUND_MAIL_BOUND	Spam tool pattern in MIME boundary
 
+# http://www.hughes-family.org/bugzilla/show_bug.cgi?id=699
+header MICROSOFT		exists:microsoft
+describe MICROSOFT		A "microsoft" header was found
