@@ -2026,57 +2026,6 @@ sub check_for_num_yelling_lines {
   return ($self->{num_yelling_lines} >= $threshold);
 }
 
-sub check_for_mime_excessive_qp {
-  my ($self, undef, $min) = @_;
-
-  if (exists $self->{mime_qp_ratio}) {
-    return $self->{mime_qp_ratio} >= $min;
-  }
-
-  $self->{mime_qp_ratio} = 0;
-
-  my $cte = $self->get('Content-Transfer-Encoding');
-  chomp($cte = defined($cte) ? lc($cte) : "");
-
-  # Note: We don't use rawbody because it removes MIME parts.  Instead,
-  # we get the raw unfiltered body.  We must not change any lines.
-  my $header = 0;  
-  my $len = 0;
-  my $qp = 0;
-  my $line;
-  for (@{$self->{msg}->get_body()}) {
-    $line = $_;
-
-    if ($line =~ /^Content-Transfer-Encoding:\s+(\S+)/i) {
-      $header = 1;
-      $cte = lc($1);
-    }
-    elsif ($header) {
-      $header = 0 if $line !~ /^[\w-]+:/;
-    }
-    elsif ($cte eq "quoted-printable") {
-      $len += length($line);
-      # whoever wrote this next line is an evil hacker -- jm
-      $qp += () = ($line =~ m/=(?:09|3[0-9ABCEF]|[2456][0-9A-F]|7[0-9A-E])/g);
-      # tabs and spaces at end of encoded line are okay.  Also, multiple
-      # whitespace at the end of a line are OK, like ">=20=20=20=20=20=20=20".
-      # Capture all of the trailing QP text, then split up each trailing
-      # sequence into individual hex values; subtract one for the null string
-      # before the first "=" at the begining of the string
-      my ($trailing) = ($line =~ m/((?:=09|=20)+)\s*$/gm);
-      next unless ($trailing);
-
-      $qp -= (length($trailing) / 3);
-    }
-  }
-
-  if ($len) {
-    $self->{mime_qp_ratio} = $qp / $len;  
-  }
-
-  return $self->{mime_qp_ratio} >= $min;
-}
-
 sub check_language {            # UNDESIRED_LANGUAGE_BODY
   my ($self, $body) = @_;
 
@@ -2201,11 +2150,26 @@ sub check_for_mime_missing_boundary {
   return $self->{mime_missing_boundary};
 }
 
+sub check_for_mime_excessive_qp {
+  my ($self, undef, $min) = @_;
+
+  $self->_check_attachments unless exists $self->{mime_qp_ratio};
+
+  return $self->{mime_qp_ratio} >= $min;
+}
+
 sub check_for_mime_long_line_qp {
   my ($self) = @_;
 
   $self->_check_attachments unless exists $self->{mime_long_line_qp};
   return $self->{mime_long_line_qp};
+}
+
+sub check_for_mime_long_line_qp2 {
+  my ($self) = @_;
+
+  $self->_check_attachments unless exists $self->{mime_long_line_qp2};
+  return $self->{mime_long_line_qp2};
 }
 
 sub check_for_mime_suspect_name { # MIME_SUSPECT_NAME
@@ -2289,9 +2253,11 @@ sub _check_attachments {
   my $previous = 'undef';	# the previous line
 
   # MIME status
-  my $where = 0;		# 0 = nowhere, 1 = header, 2 = body
+  my $where = -1;		# -1 = start, 0 = nowhere, 1 = header, 2 = body
   my @boundary;			# list of MIME boundaries
   my %state;			# state of each MIME part
+  my $qp_bytes = 0;		# total bytes in QP regions
+  my $qp_count = 0;		# QP-encoded bytes in QP regions
 
   # MIME header information
   my $ctype;			# Content-Type
@@ -2316,23 +2282,30 @@ sub _check_attachments {
   $self->{mime_faraway_charset} = 0;
   $self->{mime_html_no_charset} = 0;
   $self->{mime_long_line_qp} = 0;
+  $self->{mime_long_line_qp2} = 0;
   $self->{mime_missing_boundary} = 0;
+  $self->{mime_qp_ratio} = 0;
   $self->{mime_suspect_name} = 0;
 
+  # message headers
   $ctype = $self->get('Content-Type');
+  $cte = $self->get('Content-Transfer-Encoding');
+  chomp($cte = defined($cte) ? lc($cte) : "");
   if ($ctype =~ /$re_boundary/ && $1 ne '') {
     push (@boundary, "\Q$1\E");
   }
-  if ($ctype =~ /^text\//i) {
-    $cte = $self->get('Content-Transfer-Encoding');
-    if ($cte =~ /base64/i) {
-      $self->{mime_base64_encoded_text} = 1;
-    }
+  if ($ctype =~ /^text\//i && $cte =~ /base64/) {
+    $self->{mime_base64_encoded_text} = 1;
   }
 
   # Note: We don't use rawbody because it removes MIME parts.  Instead,
   # we get the raw unfiltered body.  We must not change any lines.
   for (@{$self->{msg}->get_body()}) {
+    # skip SpamAssassin mark-up
+    if ($where == -1) {
+      next if /^SPAM: /;
+      $where = 0 if /\S/;
+    }
     if (/^--/) {
       foreach my $boundary (@boundary) {
 	if (/^--$boundary$/) {
@@ -2374,10 +2347,32 @@ sub _check_attachments {
     {
       $self->{mime_long_line_qp} = 1;
     }
+    if ($where != 1 && $cte eq "quoted-printable" && length > 77) {
+      $self->{mime_long_line_qp2} = 1;
+    }
     if ($previous =~ /^begin [0-7]{3} ./ && /^M35J0``,````\$````/) {
       $self->{microsoft_executable} = 1;
     }
+    if ($where != 1 && $cte eq "quoted-printable") {
+      $qp_bytes += length;
+      if (index($_, '=') != -1) {
+	# whoever wrote this next line is an evil hacker -- jm
+	my $qp = () = m/=(?:09|3[0-9ABCEF]|[2456][0-9A-F]|7[0-9A-E])/g;
+	if ($qp) {
+	  $qp_count += $qp;
+	  # tabs and spaces at end of encoded line are okay.  Also, multiple
+	  # whitespace at the end of a line are OK, like ">=20=20=20=20=20=20".
+	  my ($trailing) = m/((?:=09|=20)+)\s*$/g;
+	  if ($trailing) {
+	    $qp_count -= (length($trailing) / 3);
+	  }
+	}
+      }
+    }
     $previous = $_;
+  }
+  if ($qp_bytes) {
+    $self->{mime_qp_ratio} = $qp_count / $qp_bytes;
   }
   foreach my $str (keys %state) {
     if ($state{$str} != 0) {
