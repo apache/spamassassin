@@ -65,6 +65,7 @@ $ExtUtils::MakeMaker::Recognized_Att_Keys{'CONTACT_ADDRESS'} = 1;
 
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'PERL_BIN'} = 1;
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'PERL_WARN'} = 1;
+$ExtUtils::MakeMaker::Recognized_Att_Keys{'PERL_TAINT'} = 1;
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'PERL_VERSION'} = 1;
 
 use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/oi);
@@ -86,7 +87,7 @@ if (!RUNNING_ON_WINDOWS) {
 }
 
 my %makefile = (
-    'NAME'	=> 'Mail::SpamAssassin',
+    'NAME'         => 'Mail::SpamAssassin',
     'VERSION_FROM' => 'lib/Mail/SpamAssassin.pm', # finds $VERSION
 
     'EXE_FILES'	=> [
@@ -114,13 +115,14 @@ my %makefile = (
     # be quite explicit about this; afaik CPAN.pm is sensible using this
     'PREREQ_PM' => {
 	'ExtUtils::MakeMaker' => 5.45 *0, # we have compatibility code in build/preprocessor.pm
-	'File::Spec' => 0.8,
-	'File::Copy' => 0,
-	'Pod::Usage' => 1.10,             # all versions prior to this do seem to be buggy
-	'HTML::Parser' => 3.0,
-	'Text::Wrap' => 0,
-	'Time::Local' => 0,
-	'Errno' => 0,
+	'File::Spec'   => 0.8,            # older versions lack some routines we need
+	'File::Copy'   => 2.02,           # this version is shipped with 5.005_03, the oldest version known to work
+	'Pod::Usage'   => 1.10,           # all versions prior to this do seem to be buggy
+	'HTML::Parser' => 3.0,            # the HTML code is based on this parser
+	'Text::Wrap'   => 98.112902,      # this version is shipped with 5.005_03, the oldest version known to work
+	'Sys::Syslog'  => 0,
+	'Time::Local'  => 0,
+	'Errno'        => 0,
     },
 
     'dist' => {
@@ -138,11 +140,12 @@ my %makefile = (
 	't/do_razor2 t/log'
     },
 
-    'AUTHOR' => 'Justin Mason <jm@jmason.org>',
-
-		  #----------------------------------------
+    'AUTHOR'   => 'Justin Mason <jm@jmason.org>',
     'ABSTRACT' => 'identify spam mail using text analysis',
 
+    # We have only this Makefile.PL and this option keeps MakeMaker from
+    # asking all questions twice after a 'make dist*'.
+    'NORECURS' => 1,
 );
 
 # MakeMaker prior to 5.46 doesn't support PM_FILTER, so we have to
@@ -154,6 +157,7 @@ my $pm_filter = $mm_version > 5.45 || ($mm_version == 5.45 && $] > 5.006);
 if(!$pm_filter) {
 warn <<ITSALLSOSTUPID;
 
+***********************************************************************
 Your version of ExtUtils::MakeMaker does not support PM_FILTER.
 We need to include a nasty workaround to make it work with our make
 routines. You will get loads of warnings and it is very likely to break
@@ -167,6 +171,7 @@ by default.
 
 If anything breaks while building Mail::SpamAssassin, please file a bug
 at <http://bugzilla.spamassassin.org>.
+***********************************************************************
 
 ITSALLSOSTUPID
 
@@ -202,7 +207,9 @@ if (!defined $contactaddr) {
     "What email address or URL should be used in the suspected-spam report\n".
     "text for users who want more information on your filter installation?\n".
     "(In particular, ISPs should change this to a local Postmaster contact)\n".
-    "default text:", "the administrator of that system");
+    "default text:", "the administrator of that system"
+  );
+  print "\n";
 }
 
 if (!defined $runrazor) {
@@ -211,7 +218,9 @@ if (!defined $runrazor) {
   if ($runrazor) {
     $runrazor = prompt(
       "Run Razor v2 tests (these may fail due to network problems)? (y/n)",
-      'n');
+      'n'
+    );
+    print "\n";
   }
 }  
 $runrazor = substr($runrazor, 0, 1);
@@ -224,6 +233,7 @@ else {
   unlink("t/do_razor2"); 
 }
 
+# Now dump the Makefile
 WriteMakefile(%makefile);
 
 #######################################################################
@@ -275,6 +285,7 @@ sub MY::postamble {
  
   my $perl_bin     = $self->{PERL_BIN}     || 'this';
   my $perl_warn    = $self->{PERL_WARN}    || 'auto';
+  my $perl_taint   = $self->{PERL_TAINT}   || 'auto';
   my $perl_version = $self->{PERL_VERSION} || 'this';
 
 
@@ -294,6 +305,7 @@ CONTACT_ADDRESS		= $contactaddr
 
 PERL_BIN		= $perl_bin
 PERL_WARN		= $perl_warn
+PERL_TAINT		= $perl_taint
 PERL_VERSION 		= $perl_version
 
 # . q#

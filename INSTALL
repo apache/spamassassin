@@ -185,10 +185,11 @@ These modules are required for spamassassin to run:
     The File::Spec module is required in version 0.8 (Mar 2000) or later.
     This is included in Perl versions 5.6 and later.
 
-  - Pod::Usage           (from CPAN, or included in Perl 5.6 and higher)
+  - Pod::Usage >= 1.10   (from CPAN, or included in Perl 5.6 and higher)
 
     The Pod::Usage module is required.  This is included in Perl versions
-    5.6 and later.
+    5.6 and later.  The modules shipped with earlier versions  are buggy
+    and need to be upgraded.
 
   - HTML::Parser >= 3.0  (from CPAN)
 
@@ -200,7 +201,7 @@ These modules are required for spamassassin to run:
     If you use Debian, you can get HTML::Parser from the libhtml-parser-perl
     package.
 
-  - Sys::Syslog    (from CPAN)
+  - Sys::Syslog          (from CPAN)
 
     This is a required module if you use spamd.  spamd logs information
     about scanned messages to syslog using this module.
