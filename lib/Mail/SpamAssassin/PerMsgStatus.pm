@@ -1217,22 +1217,18 @@ sub decode_mime_bit {
   my ($self, $encoding, $text) = @_;
   local ($_) = $text;
 
-  if ($encoding =~ /^US-ASCII$/i
-  	|| $encoding =~ /^ISO646-US/i
-  	|| $encoding =~ /^ISO-8859-\d+$/i
-  	|| $encoding =~ /^UTF-8$/i
-	|| $encoding =~ /KOI8-\w$/i
-	|| $encoding =~ /^WINDOWS-125\d$/i
-      )
-  {
-    # keep 8-bit stuff. forget mapping charsets though
-    s/_/ /g; s/\=([0-9A-F]{2})/chr(hex($1))/ge;
-  }
+  $encoding = lc($encoding);
 
-  if ($encoding eq 'UTF-16')
-  {
-    # we just dump the high bits and keep the 8-bit chars.
-    s/_/ /g; s/=00//g; s/\=([0-9A-F]{2})/chr(hex($1))/ge;
+  if ($encoding eq 'utf-16') {
+    # we just dump the high bits and keep the 8-bit characters
+    s/_/ /g;
+    s/=00//g;
+    s/\=([0-9A-F]{2})/chr(hex($1))/ge;
+  }
+  else {
+    # keep 8-bit stuff, forget mapping charsets though
+    s/_/ /g;
+    s/\=([0-9A-F]{2})/chr(hex($1))/ge;
   }
 
   return $_;
