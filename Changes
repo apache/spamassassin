@@ -1,3 +1,167 @@
+2002-12-15 08:44  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: add T_INVALID_MSGID2 test add
+	some comments on lesser rules
+
+2002-12-15 06:19  felicity
+
+	* rules/20_meta_tests.cf: Fixing some more of the nigerian issues
+
+2002-12-15 05:46  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: add some icky rules to test for
+	weird quotes in the body
+
+2002-12-15 04:27  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: tweak the T_HTML_IMAGE_ONLY
+	rule name numbering
+
+2002-12-15 01:50  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: remove some stuff I didn't mean
+	to check into CVS
+
+2002-12-15 01:48  quinlan
+
+	* lib/Mail/SpamAssassin/HTML.pm,
+	lib/Mail/SpamAssassin/PerMsgStatus.pm,
+	rules/70_cvs_rules_under_test.cf: remove T_HTML_NUM_IMGS*,
+	T_HTML_MIN_IMG_RATIO*, and T_HTML_MAX_IMG_RATIO* update
+	T_HTML_IMAGE_AREA*, T_HTML_IMAGE_ONLY*, and T_HTML_IMAGE_RATIO* fix
+	HTML length calculation
+
+2002-12-15 01:41  quinlan
+
+	* lib/Mail/SpamAssassin/EvalTests.pm: tweak Email::IsFree so it
+	only does the eval once per invocation of perl remove
+	&nonspace_length move &image_area_ratio to HTML.pm
+
+2002-12-15 01:25  felicity
+
+	* rules/20_meta_tests.cf: added some new strings to search for
+	international lottery nigerian-mutation
+
+2002-12-14 19:03  duncf
+
+	* lib/Mail/SpamAssassin/ArchiveIterator.pm: Bugzilla 1293: Fix
+	strict errs caused by use strict;
+
+2002-12-14 08:58  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: add a few T_IMAGE_AREA rules to
+	probe for a good end-point remove T_HTML_MAIL_ONLY,
+	T_HTML_LINK_MONEY, T_HTML_LINK_UNSUB
+
+2002-12-14 03:14  duncf
+
+	* rules/70_cvs_rules_under_test.cf: Adding rules for testing from
+	bug 509
+
+2002-12-13 23:22  duncf
+
+	* rules/70_cvs_rules_under_test.cf: Regression tests for
+	T_DOUBLE_SQUOTES_* and Bug 495: ACT_NOW revised
+
+2002-12-13 19:37  jmason
+
+	* lib/Mail/SpamAssassin/Conf.pm: bug 1258: note use of --lint
+
+2002-12-13 19:32  jmason
+
+	* t/SATest.pm: bug 1182 fixed: bayes should be ignored by default
+
+2002-12-13 19:27  jmason
+
+	* lib/Mail/SpamAssassin/EvalTests.pm, rules/60_whitelist.cf:
+	rfc-editor whitelisting, text/external-body parts: bug 1175
+
+2002-12-13 19:20  jmason
+
+	* lib/Mail/SpamAssassin/NoMailAudit.pm: bug 1157: multiple
+	Content-Type lines get past defang_mime
+
+2002-12-13 19:07  jmason
+
+	* Changes, rules/70_cvs_rules_under_test.cf: bug 1129:
+	T_DISGUISE_PORN
+
+2002-12-13 13:02  matt_sergeant
+
+	* rules/50_scores.cf: Reverted a stupid checkin from me playing
+	with a new scoreset. D'oh!
+
+2002-12-13 11:04  matt_sergeant
+
+	* lib/Mail/SpamAssassin.pm,
+	lib/Mail/SpamAssassin/ArchiveIterator.pm,
+	lib/Mail/SpamAssassin/AuditMessage.pm,
+	lib/Mail/SpamAssassin/Bayes.pm,
+	lib/Mail/SpamAssassin/BayesStore.pm,
+	lib/Mail/SpamAssassin/CmdLearn.pm, lib/Mail/SpamAssassin/Conf.pm,
+	lib/Mail/SpamAssassin/ConfSourceSQL.pm,
+	lib/Mail/SpamAssassin/DBBasedAddrList.pm,
+	lib/Mail/SpamAssassin/Dns.pm,
+	lib/Mail/SpamAssassin/EncappedMessage.pm,
+	lib/Mail/SpamAssassin/EvalTests.pm,
+	lib/Mail/SpamAssassin/ExposedMessage.pm,
+	lib/Mail/SpamAssassin/HTML.pm, lib/Mail/SpamAssassin/Locales.pm,
+	lib/Mail/SpamAssassin/MailingList.pm,
+	lib/Mail/SpamAssassin/Message.pm,
+	lib/Mail/SpamAssassin/NoMailAudit.pm,
+	lib/Mail/SpamAssassin/PerMsgLearner.pm,
+	lib/Mail/SpamAssassin/PerMsgStatus.pm,
+	lib/Mail/SpamAssassin/PersistentAddrList.pm,
+	lib/Mail/SpamAssassin/Replier.pm,
+	lib/Mail/SpamAssassin/Reporter.pm, lib/Mail/SpamAssassin/SHA1.pm,
+	lib/Mail/SpamAssassin/TextCat.pm,
+	lib/Mail/SpamAssassin/SMTP/SmartHost.pm, rules/50_scores.cf:
+	Littered "use bytes" everywhere. Runs fine on 5.00503 and 5.8.	 
+	(need to go through and remove pack() hacks now)  Added use strict
+	where it was missing.  Fixed strict issues introduced by the above
+	;-)
+
+2002-12-13 10:59  matt_sergeant
+
+	* masses/mass-check: fixed --sn/--sp change a print to a warn so
+	you can cleanly pipe the output somewhere
+
+2002-12-13 10:58  matt_sergeant
+
+	* t/db_awl_path.t: It kept bugging me that this outputs a warning.
+	So I fixed it ;-)
+
+2002-12-13 10:23  quinlan
+
+	* lib/Mail/SpamAssassin/HTML.pm,
+	lib/Mail/SpamAssassin/PerMsgStatus.pm,
+	rules/70_cvs_rules_under_test.cf: removing T_HTML_CONSEC_IMGS*
+	tests, they all have about the same S/O ratio as just testing for
+	image tags.
+
+2002-12-13 06:38  duncf
+
+	* rules/70_cvs_rules_under_test.cf,
+	lib/Mail/SpamAssassin/EvalTests.pm: Bug 1010: Testing
+	Email::IsFree; test needs to be reworked to be more efficient, just
+	for quality testing now; renamed DOUBLE_SQUOTES to T_* because
+	that's what it should've been in the first place
+
+2002-12-13 04:04  duncf
+
+	* rules/70_cvs_rules_under_test.cf: Bugzilla 1125: Double Single
+	quotes as evasion
+
+2002-12-13 03:45  duncf
+
+	* lib/Mail/SpamAssassin/EvalTests.pm: Bug 1183: Patch from Ken
+	Causey to improve RBL performance
+
+2002-12-13 02:53  duncf
+
+	* lib/Mail/SpamAssassin/Conf.pm: Bugzilla 1078: Conf.pm should have
+	ok_languages default to all
+
 2002-12-13 01:03  duncf
 
 	* spamd/spamc.c: Bugzilla 1247: fix SPAMC_SAFE_FALLBACK mode. Also

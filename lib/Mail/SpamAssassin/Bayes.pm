@@ -392,6 +392,12 @@ sub tokenize_headers {
   if ($#rcvdlines >= 0) { $hdrs .= "\n".$rcvdlines[$#rcvdlines]; }
   if ($#rcvdlines >= 1) { $hdrs .= "\n".$rcvdlines[$#rcvdlines-1]; }
 
+  # remove user-specified headers here, after Received, in case they
+  # want to ignore that too
+  foreach my $conf (@{$self->{main}->{conf}->{bayes_ignore_headers}}) {
+    $hdrs =~ s/^\Q${conf}\E: [^\n]*$//gim;
+  }
+
   while ($hdrs =~ /^(\S+): ([^\n]*)$/gim) {
     my $hdr = $1;
     my $val = $2;
