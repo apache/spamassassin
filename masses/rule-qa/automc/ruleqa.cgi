@@ -20,6 +20,7 @@ our %freqs_filenames = (
     'NET.age' => 'set 1 (network), by message age',
     'NET.all' => 'set 1 (network), by contributor',
     'NET.new' => 'set 1 (network), summary',
+    'OVERLAP.new' => 'set 0, overlaps between rules',
 );
 
 my $q = new CGI;
@@ -40,6 +41,7 @@ $s{overlap} = get_url_switch('s_overlap', 0);
 $s{new} = get_url_switch('s_new', 0);
 $s{age} = get_url_switch('s_age', 0);
 $s{all} = get_url_switch('s_all', 0);
+$s{overlap} = get_url_switch('s_overlap', 0);
 
 $s{headers} = get_url_switch('s_headers', 0);
 
@@ -104,7 +106,7 @@ my $tmpl = q{
   <input type=checkbox name=s_age !s_age!> Show freqs by message age<br/>
   <input type=checkbox name=s_all !s_all!> Show freqs by contributor<br/>
   <br/>
-  <input type=checkbox name=s_overlap !s_overlap!> Show overlaps between rules <em>(too slow, not implemented yet)</em><br/>
+  <input type=checkbox name=s_overlap !s_overlap!> Show overlaps between rules<br/>
   <br/>
   Date to display: <input type=textfield name=date value="!date!"><br/>
   <br/>
@@ -145,6 +147,10 @@ $s{details} and showfreqset('DETAILS');
 $s{html} and showfreqset('HTML');
 $s{net} and showfreqset('NET');
 
+# special case: we only build this for one set, as it's quite slow
+# to generate
+$s{overlap} and showfreqsubset("OVERLAP.new");
+
 print "
 
   </body></html>
@@ -177,12 +183,17 @@ sub read_freqs_file {
   $freqs_head{$key}=<IN>;
   $freqs_data{$key} = { };
   $freqs_ordr{$key} = [ ];
+  my $lastrule;
 
   while (<IN>) {
     if (/(?: \(all messages| results used:|OVERALL\% )/) {
       $freqs_head{$key} .= $_;
     }
+    elsif (/\s+overlap (.*)$/) {
+      $freqs_data{$key}{$lastrule} .= $_;
+    }
     elsif (/\s+(\S+?)(?:\:\S+)?\s*$/) {
+      $lastrule = $1;
       if (!exists $freqs_data{$key}{$1}) {
         push (@{$freqs_ordr{$key}}, $1);
         $freqs_data{$key}{$1} = '';
@@ -269,8 +280,15 @@ sub sub_freqs_head_line {
 
 sub sub_freqs_data_line {
   my ($str) = @_;
+
+  # normal freqs lines, with optional subselector after rule name
   $str =~ s/(  )(\S+?)(:\S+)?$/
         $1.gen_rule_link($2,$2).$3;
+    /gem;
+
+  # overlap lines
+  $str =~ s/^(\s+overlap\s+(?:ham|spam):\s+\d+% )(\S+?)$/
+        $1.gen_rule_link($2,$2);
     /gem;
 
   return $str;
@@ -328,7 +346,7 @@ sub get_params_except {
 
 =cut
 
-add this line to httpd.conf:
+to install, add this line to httpd.conf:
 
   ScriptAlias /ruleqa "/path/to/spamassassin/automc/ruleqa.cgi"
 
