@@ -102,7 +102,7 @@ sub check {
     # do body tests with decoded portions
     {
       my $decoded = $self->get_decoded_stripped_body_text_array();
-      # warn "JMD ". join ("", @{$decoded}). "\n";
+      # warn "dbg ". join ("", @{$decoded}). "\n";
       $self->do_body_tests($decoded);
       $self->do_body_eval_tests($decoded);
       # $self->do_body_uri_tests($decoded);
@@ -680,7 +680,7 @@ sub get_raw_body_text_array {
     }
   }
 
-  #print "JMD ".join ("", @{$self->{body_text_array}})."\n\n\n";
+  #print "dbg ".join ("", @{$self->{body_text_array}})."\n\n\n";
   return $self->{body_text_array};
 }
 
@@ -1726,6 +1726,11 @@ sub run_rbl_eval_tests {
   my ($self, $evalhash, $needresult) = @_;
   my ($rulename, $pat, @args);
   local ($_);
+
+  if ($self->{main}->{local_tests_only}) {
+    dbg ("local tests only, ignoring RBL eval", "rulesrun", 32);
+    return 0;
+  }
   
   my @tests = keys %{$evalhash};
 
