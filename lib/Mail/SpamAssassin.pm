@@ -1397,7 +1397,8 @@ sub read_cf {
     if (open (IN, "<".$path)) {
       $txt .= "file start $path\n";
       $txt = join ('', <IN>);
-      $txt .= "file end $path\n";
+      # add an extra \n in case file did not end in one.
+      $txt .= "\nfile end $path\n";
       close IN;
       dbg("config: read file $path");
     }
