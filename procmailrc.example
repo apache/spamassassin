@@ -2,11 +2,6 @@
 :0fw
 | spamassassin -P
 
-:0e
-{
-    EXITCODE=$?
-}
-
 :0:
 * ^X-Spam-Status: Yes
 caughtspam
