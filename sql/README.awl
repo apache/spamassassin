@@ -46,6 +46,8 @@ table name for the auto-whitelist table.
 
 user_awl_sql_table           awl
 
+For an example of connecting to a PostgreSQL database, see the README file.
+
 Requirements
 ------------
 
@@ -81,8 +83,8 @@ are contained in the table.
 
 Included is a default table that can be safely used in your own setup.  To use
 the default table, you must first create a database, and a username/password
-that can access that database.  (See "Creating A Database In MySQL", in
-"sql/README", if you don't have a suitable database ready.)
+that can access that database.  (See "Creating A Database", in "sql/README", if
+you don't have a suitable database ready.)
 
 To install the table, use the following command:
 
@@ -100,6 +102,9 @@ CREATE TABLE awl (
   PRIMARY KEY  (username,email,ip)
 ) TYPE=MyISAM;
 
+For PostgreSQL, use the following:
+
+psql -u <username> -f awl_pg.sql <databasename>
 
 Once you have created the database and added the table, just add the required
 lines to your global configuration file (local.cf).  Note that you

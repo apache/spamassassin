@@ -15,7 +15,7 @@ RDBMS system.
 SpamAssassin will check the global configuration file (ie. any file matching
 /etc/mail/spamassassin/*.cf) for the following settings:
 
-  user_scores_dsn		DBI:driver:database:hostname[:port]
+  user_scores_dsn		DBI:driver:connection
   user_scores_sql_username	dbusername
   user_scores_sql_password	dbpassword
   user_scores_sql_table         tablename
@@ -23,22 +23,43 @@ SpamAssassin will check the global configuration file (ie. any file matching
 The first option, user_scores_dsn, describes the data source name that will be
 used to create the connection to your SQL server.  It MUST be in the format
 as listed above.  <driver> should be the DBD driver that you have installed
-to access your database. <database> must be the name of the database that you
-created to store the user preference table. <hostname> is the name of the host
-that contains the SQL database server. <port> is the optional port number where
-your database server is listening.
+to access your database.
+<connection> can differ depending on which database you are using.
+
+For MySQL, connection should take the format
+
+  database:hostname[:port]
+
+<database> must be the name of the database that you created to store the user
+preference table. <hostname> is the name of the host that contains the SQL
+database server. <port> is the optional port number where your database server
+is listening.
 
   user_scores_dsn		DBI:mysql:spamassassin:localhost
 
 Would tell SpamAssassin to connect to the database named spamassassin using
 MySQL on the local server, and since <port> is omitted, the driver will use the
-default port number.  The other two required options tells SpamAssassin to use 
-the defined username and password to establish the connection.
+default port number.
 
-If the user_scores_dsn option does not exist, SpamAssassin will not attempt
-to use an SQL for retrieving users' preferences. Note that this will NOT look
-for test rules, only local scores, whitelist_from(s), required_score, and
-auto_report_threshold.
+For PostgreSQL, connection should take the following format:
+
+  dbname=database;[host=hostname;[port=port;]
+  
+  user_scores_dsn               DBI:Pg:dbname=spamassassin;host=localhost
+
+would do the same as the previous example.
+
+For additional information, please refer to the DBD::* documentation
+for your particular driver.
+
+If the user_scores_dsn option does not exist, SpamAssassin will not
+attempt to use SQL for retrieving users' preferences. Note that this
+will NOT look for test rules, only local scores, whitelist_from(s),
+required_score, and auto_report_threshold.
+
+The other two required options tells SpamAssassin to use the defined
+username and password to establish the connection.
+
 
 Requirements
 ------------
@@ -81,13 +102,12 @@ Included is a default table that can be safely used in your own setup.  To use
 the default table, you must first create a database, and a username/password
 that can access that database.
 
-To create a database, if one does not already exist, see "Creating A Database
-In MySQL" below.
+To create a database, if one does not already exist, see "Creating A Database"
+below.
 
+To install the table to a mysql database, use the following command:
 
-To install the table, use the following command:
-
-mysql -h <hostname> -u <adminusername> -p <databasename> < spamassasin.sql
+mysql -h <hostname> -u <adminusername> -p <databasename> < userpref_mysql.sql
 Enter password: <adminpassword>
 
 This will create the following table:
@@ -100,6 +120,12 @@ CREATE TABLE userpref (
   PRIMARY KEY (prefid),
   INDEX (username)
 ) TYPE=MyISAM;
+
+For PostgreSQL, use the following command:
+
+psql -U <username> -f userpref_pg.sql <databasename>
+
+This will create a table similar to above.
 
 Once you have created the database and added the table, just add the required
 lines to your global configuration file (local.cf).  Note that you must be
@@ -123,11 +149,11 @@ Also note that spamd may need the "-q" switch so it knows to look up users in
 the SQL table instead of /etc/passwd.  See "man spamd".
 
 
-Creating A Database In MySQL
-----------------------------
+Creating A Database 
+-------------------
 
-Here's the command to create a database, and user/password pair to access
-it, for MySQL:
+Here's the command to create a MySQL database, and user/password pair to access
+it:
 
 mysql -h <hostname> -u <adminusername> -p
 Enter password: <adminpassword>
@@ -136,6 +162,13 @@ mysql> insert into user (Host, User, Password) values('localhost','<username>', 
 mysql> insert into db (Host, Db, User, Select_priv) values('localhost','<databasename>','<username>','Y');
 mysql> create database <databasename>;
 mysql> quit
+
+
+To create the database for PostgreSQL, with a username/password:
+
+psql -U <adminuser> template1
+template1=# CREATE USER <username> PASSWORD '<password>';
+template1=# CREATE DATABASE <databasename> OWNER = <username>;
 
 
 Testing SpamAssassin/SQL
@@ -169,16 +202,3 @@ the DBI interface should work without problems.
 NB:  This should be considered BETA, and the interface, schema, or overall
 operation of SQL support may change at any time with future releases of SA.
 ******
-
-
-PHP Interface
--------------
-
-This can be downloaded from http://spamassassin.org/devel/ , called
-"php-sa-mysql-n.n"  where n.n is the version number.
-
-
-Please send any comments to jengland /at/ enetis.net .
-
-Justin England
-
