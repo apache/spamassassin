@@ -136,6 +136,7 @@ $spamtest->compile_now();	# ensure all modules etc. are loaded
 $/ = "\n";			# argh, Razor resets this!  Bad Razor!
 
 sub spawn;  # forward declaration
+sub logmsg; # forward declaration
 
 setlogsock('unix');
 openlog('spamd','cons,pid',$log_facility);
