@@ -89,46 +89,66 @@ sub run {
 
     # message-array
     ($MESSAGES,$messages) = $self->message_array(\@targets);
-    my $MESSAGE = $MESSAGES; # temp version for us ...  mass-check uses $MESSAGES directly.  boo.
+
+#warn ">> total: $MESSAGES\n";
 
     # feed childen
     while ($select->count()) {
       foreach my $socket ($select->can_read()) {
-	my $result;
+	my $result = '';
 	my $line;
 	while ($line = readline $socket) {
-	  if ($line =~ /^RESULT ([hs])/) {
-	    $needs_restart = 1 if ( defined $self->{opt_restart} && (++$total_count % $self->{opt_restart}) == 0 );
-	    if ( $MESSAGE && !$needs_restart ) { # we still have messages, send one to child
+	  if ($line =~ /^RESULT (.+)$/) {
+	  my($class,$type,$date) = index_unpack($1);
+
+#warn ">> RESULT: $class, $type, $date\n";
+	    $needs_restart = 1 if ( defined $self->{opt_restart} && ($total_count % $self->{opt_restart}) == 0 );
+
+	    # If there are still messages, and we don't need to restart, send a message.
+	    if ( ($MESSAGES>$total_count) && !$needs_restart ) {
 	      print { $socket } (shift @{$messages}) . "\n";
-	      $MESSAGE--;
+	      $total_count++;
+#warn ">> recv: $MESSAGES $total_count\n";
 	    }
-	    else { # no more messages, so stop listening on this child
+	    else { # stop listening on this child since we're done with it.
+#warn ">> removeresult: $needs_restart $MESSAGES $total_count\n";
 	      $select->remove($socket);
 	    }
+
+	    # Deal with the result we got.
 	    if ($result) {
 	      chop $result;	# need to chop the \n before RESULT
-	      &{$self->{result_sub}}($1, $result);
+	      &{$self->{result_sub}}($class, $result, $date);
 	    }
-	    last;
+
+	    last; # this will get out of the read for this client
 	  }
 	  elsif ($line eq "START\n") {
-	    if ( $MESSAGE ) { # we still have messages, send one to child
+	    if ( $MESSAGES>$total_count ) { # we still have messages, send one to child
 	      print { $socket } (shift @{$messages}) . "\n";
-	      $MESSAGE--;
+	      $total_count++;
+#warn ">> new: $MESSAGES $total_count\n";
 	    }
 	    else { # no more messages, so stop listening on this child
+#warn ">> removestart: $needs_restart $MESSAGES $total_count\n";
 	      $select->remove($socket);
 	    }
-	    last;
+
+	    last; # this will get out of the read for this client
 	  }
-	  $result .= $line;
+	  else { # result line, remember it.
+	    $result .= $line;
+	  }
 	}
       }
-      if ( $needs_restart && $MESSAGE ) {
+
+#warn ">> out of loop, $MESSAGES $total_count $needs_restart ".$select->count()."\n";
+
+      # If there are still messages to process, and we need to restart the children, let's go ahead.
+      if ( $needs_restart && $select->count() == 0 && ($MESSAGES>$total_count) ) {
 	$needs_restart = 0;
 
-        #print "debug: Needs restart, $MESSAGES total, $MESSAGE left.\n";
+#warn "debug: Needs restart, $MESSAGES total, $total_count done.\n";
         $self->reap_children($self->{opt_j}, \@child, \@pid);
 	@child=();
 	@pid=();
@@ -203,24 +223,31 @@ sub start_children {
 	or die "socketpair failed: $!";
     if ($pid->[$i] = fork) {
       close $parent;
+
+      # disable caching for parent<->child relations
+      my($old) = select($child->[$i]);
+      $|++;
+      select($old);
+
       $socket->add($child->[$i]);
-      #print "debug: starting new child $i (pid ",$pid->[$i],")\n";
+#warn "debug: starting new child $i (pid ",$pid->[$i],")\n";
       next;
     }
     elsif (defined $pid->[$i]) {
       my $result;
       my $line;
       close $child->[$i];
-      print { $parent } "START\n";
+      select($parent); $|++; # print to parent by default, turn off buffering
+      print "START\n";
       while ($line = readline $parent) {
 	chomp $line;
 	if ($line eq "exit") {
-	  print { $parent } "END\n";
+	  print "END\n";
 	  close $parent;
 	  exit;
 	}
 	$result = $self->run_message($line);
-	print { $parent } "$result\nRESULT $line\n";
+	print "$result\nRESULT $line\n";
       }
       exit;
     }
@@ -234,7 +261,7 @@ sub reap_children {
   my($self, $count, $socket, $pid) = @_;
 
   for (my $i = 0; $i < $count; $i++) {
-    #print "debug: killing child $i (pid ",$pid->[$i],")\n";
+#warn "debug: killing child $i (pid ",$pid->[$i],")\n";
     print { $socket->[$i] } "exit\n"; # tell the child to die.
     my $line = readline $socket->[$i]; # read its END statement.
     close $socket->[$i];

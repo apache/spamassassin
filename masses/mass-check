@@ -185,6 +185,7 @@ sub result {
   }
 
   $total_count++;
+#warn ">> result: $total_count $class $time\n";
 
   if ($opt_progress) {
     progress($time);
