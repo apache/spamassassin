@@ -730,8 +730,9 @@ sub expiry_due {
 
   dbg("Bayes DB expiry: Tokens in DB: $ntoks, Expiry max size: ".$self->{expiry_max_db_size}.", Oldest atime: ".$magic[5].", Newest atime: ".$magic[10].", Last expire: ".$magic[4].", Current time: ".time(),'bayes','-1');
 
+  my $conf = $self->{bayes}->{main}->{conf};
   if ($ntoks <= 100000 ||			# keep at least 100k tokens
-      $self->{expiry_max_db_size} == 0 ||	# config says don't expire
+      $conf->{bayes_auto_expire} == 0 ||	# config says don't expire
       $self->{expiry_max_db_size} > $ntoks ||	# not enough tokens to cause an expire
       $magic[10]-$magic[5] < 43200 ||		# delta between oldest and newest < 12h
       $self->{db_version} < DB_VERSION		# ignore old db formats

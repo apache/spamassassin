@@ -128,10 +128,6 @@ sub new {
   $self->{auto_whitelist_file_mode} = '0700';
   $self->{auto_whitelist_factor} = 0.5;
 
-  $self->{auto_learn} = 1;
-  $self->{auto_learn_threshold_nonspam} = -2.0;
-  $self->{auto_learn_threshold_spam} = 15.0;
-
   $self->{rewrite_subject} = 0;
   $self->{spam_level_stars} = 1;
   $self->{spam_level_char} = '*';
@@ -167,11 +163,15 @@ sub new {
   $self->{pyzor_options} = '';
 
   $self->{use_bayes} = 1;
+  $self->{bayes_auto_learn} = 1;
+  $self->{bayes_auto_learn_threshold_nonspam} = -2.0;
+  $self->{bayes_auto_learn_threshold_spam} = 15.0;
   $self->{bayes_path} = "__userstate__/bayes";
   $self->{bayes_file_mode} = "0700";
   $self->{bayes_use_hapaxes} = 1;
   $self->{bayes_use_chi2_combining} = 1;
   $self->{bayes_expiry_max_db_size} = 150000;
+  $self->{bayes_auto_expire} = 1;
   $self->{bayes_journal_max_size} = 102400;
   $self->{bayes_ignore_headers} = [ ];
   $self->{bayes_min_ham_num} = 200;
@@ -1439,7 +1439,7 @@ mean; C<factor> = 0 mean just use the calculated score.
       $self->{auto_whitelist_factor} = $1; next;
     }
 
-=item auto_learn ( 0 | 1 )	(default: 1)
+=item bayes_auto_learn ( 0 | 1 )      (default: 1)
 
 Whether SpamAssassin should automatically feed high-scoring mails (or
 low-scoring mails, for non-spam) into its learning systems.  The only
@@ -1457,30 +1457,30 @@ likely that the message check and auto-train scores will be different.
 
 =cut
 
-    if (/^auto_learn\s+(.*)$/) {
-      $self->{auto_learn} = $1+0; next;
+    if (/^(?:bayes_)?auto_learn\s+(.*)$/) {
+      $self->{bayes_auto_learn} = $1+0; next;
     }
 
-=item auto_learn_threshold_nonspam n.nn	(default -2.0)
+=item bayes_auto_learn_threshold_nonspam n.nn	(default -2.0)
 
 The score threshold below which a mail has to score, to be fed into
 SpamAssassin's learning systems automatically as a non-spam message.
 
 =cut
 
-    if (/^auto_learn_threshold_nonspam\s+(.*)$/) {
-      $self->{auto_learn_threshold_nonspam} = $1+0; next;
+    if (/^(?:bayes_)?auto_learn_threshold_nonspam\s+(.*)$/) {
+      $self->{bayes_auto_learn_threshold_nonspam} = $1+0; next;
     }
 
-=item auto_learn_threshold_spam n.nn	(default 15.0)
+=item bayes_auto_learn_threshold_spam n.nn	(default 15.0)
 
 The score threshold above which a mail has to score, to be fed into
 SpamAssassin's learning systems automatically as a spam message.
 
 =cut
 
-    if (/^auto_learn_threshold_spam\s+(.*)$/) {
-      $self->{auto_learn_threshold_spam} = $1+0; next;
+    if (/^(?:bayes_)?auto_learn_threshold_spam\s+(.*)$/) {
+      $self->{bayes_auto_learn_threshold_spam} = $1+0; next;
     }
 
 
@@ -1999,17 +1999,25 @@ in corpus size etc.
 
 =item bayes_expiry_max_db_size		(default: 150000)
 
-What should be the maximum size of the Bayes tokens database?  The
-database will autoexpire when the number of tokens reaches this amount.
-150k is roughly equivalent to a 8Mb database file.  If this option is
-set to 0, the database will grow without autoexpiring the older tokens.
-
-When expiry occurs, the Bayes system will keep either 75% of the maximum
-value, or 100,000 tokens, whichever has a larger value.
+What should be the maximum size of the Bayes tokens database?  When expiry
+occurs, the Bayes system will keep either 75% of the maximum value, or
+100,000 tokens, whichever has a larger value.  150,000 tokens is roughly
+equivalent to a 8Mb database file.
 
 =cut
     if (/^bayes_expiry_max_db_size\s+(\d+)$/) {
       $self->{bayes_expiry_max_db_size} = $1; next;
+    }
+
+=item bayes_auto_expire       		(default: 1)
+
+If enabled, the Bayes system will try to automatically expire old tokens
+from the database.  Auto-expiry occurs when the number of tokens in the
+database surpasses the bayes_expiry_max_db_size value.
+
+=cut
+    if (/^bayes_auto_expire\s+(\d+)$/) {
+      $self->{bayes_auto_expire} = $1; next;
     }
 
 =item bayes_journal_max_size		(default: 102400)

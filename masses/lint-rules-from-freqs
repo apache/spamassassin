@@ -221,8 +221,8 @@ sub readrules {
                 required_hits|ok_locales|ok_languages|test|lang|
                 spamphrase|whitelist_from|require_version|
 		clear_unsafe_report_template|unsafe_report|
-		auto_learn_threshold_nonspam|auto_learn_threshold_spam|
-		auto_learn
+		(?:bayes_)?auto_learn_threshold_nonspam|(?:bayes_)?auto_learn_threshold_spam|
+		(?:bayes_)?auto_learn
                 )/x) {
         next;
       } else {

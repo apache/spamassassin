@@ -259,14 +259,14 @@ so that future similar mails will be caught.
 sub learn {
   my ($self) = @_;
 
-  if (!$self->{conf}->{auto_learn}) { return; }
+  if (!$self->{conf}->{bayes_auto_learn}) { return; }
   if (!$self->{conf}->{use_bayes}) { return; }
   if ($self->{disable_auto_learning}) { return; }
 
   # Figure out min/max for autolearning.
   # Default to specified auto_learn_threshold settings
-  my $min = $self->{conf}->{auto_learn_threshold_nonspam};
-  my $max = $self->{conf}->{auto_learn_threshold_spam};
+  my $min = $self->{conf}->{bayes_auto_learn_threshold_nonspam};
+  my $max = $self->{conf}->{bayes_auto_learn_threshold_spam};
 
   dbg ("auto-learn? ham=$min, spam=$max, ".
 		"body-hits=".$self->{body_only_hits}.", ".
