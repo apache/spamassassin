@@ -227,14 +227,10 @@ sub word_is_in_dictionary {
   }
 
   while (<DICT>) {
-    chop;
-    if ($word eq $_) {
-      close DICT;
-      return 1;
-    }
+    chop; if ($word eq $_) { close DICT; return 1; }
   }
 
-  return 0;
+  close DICT; return 0;
 }
 
 ###########################################################################
