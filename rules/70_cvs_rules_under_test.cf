@@ -40,26 +40,10 @@ uri T_ADCLICK                   m,\Qhttp://www.adclick.ws/p\E,
 describe T_ADCLICK              Contains adclick URL
 score T_ADCLICK                 2.0
 
-# bug 1022: MGM_POSTCARD #1
-body T_UNSUBSCRIBE_POSTCARD	/send a postcard to Unsubscribe/
-describe T_UNSUBSCRIBE_POSTCARD	Send a postcard to unsubscribe
-score T_UNSUBSCRIBE_POSTCARD	2.0
-
 # bug 1022: MGM_POSTCARD #2 original
 body T_UNSUBSCRIBE_POSTAL	/(?:Send(?:ing|) a (?:postal mail|postcard) to (?:Unsubscribe|Customer ?Service|remove)|unsubscribe by (?:postal mail|postcard))/i
 describe T_UNSUBSCRIBE_POSTAL	Send real mail to unsubscribe
 score T_UNSUBSCRIBE_POSTAL	2.0
-
-# bug 1022: MGM_POSTCARD #2 small change
-body T_UNSUBSCRIBE_POSTAL2	/(?:Send(?:ing|) a (?:postal mail|postcard) to (?:Unsubscribe|Customer ?Service|remov(?:e|al))|unsubscribe by (?:postal mail|postcard))/i
-describe T_UNSUBSCRIBE_POSTAL2	Send real mail to unsubscribe
-score T_UNSUBSCRIBE_POSTAL2	2.0
-
-# quinlan: this is not any better on my corpus, but I figured it was
-# worth a shot
-body T_UNSUBSCRIBE_WTF		/(?:(?:customer ?service|unsubscribe|remov[ae]).{0,16}\b(?:postal mail|letter|postcard|fax)|\b(?:postal mail|letter|postcard|fax).{0,16}(?:customer ?service|unsubscribe|remov[ae]))/i
-describe T_UNSUBSCRIBE_WTF	Send a postcard/letter/fax to unsubscribe
-score T_UNSUBSCRIBE_WTF		2.0
 
 # intended to replace URGENT_BIZ
 body T_URGENT_BIZ		/URGENT.{0,16}(?:ASSISTANCE|BUSINESS|BUY|CONFIDENTIAL|NOTICE|PROPOSAL)/i
@@ -153,18 +137,13 @@ body T_Q_ONETIME1		/One[- ]?Time Mail/i
 body T_Q_ONETIME2		/this is a one[- ]?time (?:e-?mail|mailing|offer)/i
 body T_Q_ONETIME3		/Never Receive Another Mailing/i
 
-rawbody T_Q_PROGRAM_FILE	/name=\".*\.(?:asd|bat|chm|com|dll|exe|hta|lnk|js|jse|ocx|pif|scr|shb|shm|shs|vb|vbe|vbs|vxd|wsf|wsh)\"/i
-
-header T_Q_RATWARE_ENTITY	X-Mailer =~ /MIME-tools.*Entity/i
-
 # this works best as rawbody
 # similar to MAILTO_WITH_SUBJ_REMOVE and MAILTO_WITH_SUBJ
 # do not add "subscribe", "unsubscribe", or "help"
-rawbody T_Q_REMOVE_URL		/mailto:.*\@.*\?subject=(?:"|3D)*(?:remove?|delete|please.?(?:delete|remove|unsubscribe)|abuse|off\b|stop|take.?me.?off)/i
+rawbody T_Q_REMOVE_URL		/mailto:.{0,64}\@.{0,64}\?subject=(?:\"|3D)*(?:remove?|delete|please.?(?:delete|remove|unsubscribe)|abuse|off\b|stop|take.?me.?off)/i
 
 body T_Q_REMOVE1		/(?:respect|honou?r) all removal requests/i
 body T_Q_REMOVE3		/click here to be (?:permanently )?(?:removed|deleted)/i
-body T_Q_REMOVE4		/If you no longer wish to receive/i
 body T_Q_REMOVE5		/to be removed from (?:the|my|our) (?:mailing|e.?mail|opt[ -]?in)? list/i
 
 body T_Q_WEGOTYOU1		/because (?:you're|you (?:are )?)(?:registered|.{0,20}\bopt.{0,3}in)/i
@@ -181,7 +160,7 @@ header T_Q_FOR_ONLY 		Subject =~ /For Only/i
 header T_Q_FREE_INSTANT 	Subject =~ /Free Instant/i
 header T_Q_INKJET_PITCH		Subject =~ /inkjet cartridges/i
 header T_Q_LIFE_INSURANCE	Subject =~ /Life Insurance/i
-header T_Q_LOSE_WEIGHT		Subject =~ /(?:lose .*(?:weight|pounds|lbs)|weight.loss)/i
+header T_Q_LOSE_WEIGHT		Subject =~ /(?:lose .{0,16}(?:weight|pounds|lbs)|weight.loss)/i
 header T_Q_NOW_ONLY		Subject =~ /\bNow Only/i
 header T_Q_RIPPED		Subject =~ /Ripped & Strong/i
 header T_Q_SAVE_PERCENT		Subject =~ /save (?:[6-9]\d%|up to \d+%)/i
@@ -189,8 +168,7 @@ header T_Q_VIAGRA_SUBJECT	Subject =~ /Viagra/i
 header T_Q_YOUR_DEBT		Subject =~ /Your (?:Bills|Debt|Credit)/i
 header T_Q_YOUR_FAMILY		Subject =~ /Your Family/i
 header T_Q_YOUR_OWN		Subject =~ /Your Own/i
-header T_Q_YOUR_PENIS_V1	Subject =~ /Your Penis/i
-header T_Q_YOUR_PENIS_V2	Subject =~ /Your (?:Penis|Dick|Sc?hlong)/i
+header T_Q_YOUR_PENIS		Subject =~ /Your Penis/i
 
 body T_Q_UNPRINTABLE		/[[:^print:]]{8,}/
 body T_Q_CREDIT_BODY		/Accept Credit Cards/i
@@ -203,23 +181,22 @@ body T_Q_INVALUABLE		/Invaluable Marketing Information/i
 body T_Q_LOCATE_ASSETS		/Locate Hidden Assets/i
 body T_Q_MILLION_EMAIL		/Million (?:\w+ )?(?:E-?mail )?Addresses/i
 body T_Q_NOT_ADVISOR		/not a registered investment advisor/i
-body T_Q_PRODUCT_SERVICE_V1	/PRODUCT or SERVICE/i
-body T_Q_PRODUCT_SERVICE_V2	/PRODUCTS? or SERVICES?/i
+body T_Q_PRODUCT_SERVICE	/PRODUCTS? or SERVICES?/i
 # similar to OFFER, but fewer FPs
 body T_Q_RECEIVE_OFFER		/Receive Special Offer/i
 body T_Q_RECEIVE_EMAIL		/Receive Third Party Email/i
 body T_Q_REFINANCE_HOME		/Refinance Your Home/i
 body T_Q_USE_IDENTITY		/Using Your Identity/i
 body T_Q_YOU_CAN_SEARCH		/You Can Search For Anyone/i
-body T_Q_YOUR_SIZE_V1		/Your Penis Size/i
-body T_Q_YOUR_SIZE_V2		/Your (?:Penis|Dick|Sc?hlong) Size/i
+body T_Q_YOUR_SIZE		/Your Penis Size/i
 ###########################################################################
 
 header T_FORGED_TELESP_RCVD	Received =~ /\.(?!br).. \(\d+-\d+-\d+-\d+\.dsl\.telesp\.net\.br /
 describe T_FORGED_TELESP_RCVD	Contains forged hostname for a DSL IP in Brazil
 
-# These seem to work well for me to find a "unique identifier" which
-# happens to be a rot13 email address
+# These seem to work well for me to find a "unique identifier" which happens
+# to be a rot13 email address, note that these don't actually test for rot13
+# encoding, they look for the obscuring of the "@" and "."  characters.
 body T_ROT13_EMAIL		/^(\w+\^\S+\(\S+)(?:\s+\#+\s+\1)?\s*$/m
 describe T_ROT13_EMAIL		Message has what looks like a ROT13 encoded email address
 
@@ -228,6 +205,11 @@ describe T_ROT13_EMAIL_2	Message has what looks like a ROT13 encoded email addre
 
 body T_ROT13_EMAIL_3		/^(\w+\^\S+\(\S+)/m
 describe T_ROT13_EMAIL_3	Message has what looks like a ROT13 encoded email address
+
+# should have all the hits of T_ROT13_EMAIL_3 but perhaps be slightly less
+# prone to FPs
+body T_ROT13_EMAIL_4		/^\w+\^\S+\(\w{2,3}\b/m
+describe T_ROT13_EMAIL_4	Message has what looks like a ROT13 encoded email address
 
 # mailman list reminder mails are getting tagged in 2.41, adding a rule to check for these
 header __FROM_MAILMAN_OWNER	From:addr =~ /^mailman-owner@/
