@@ -604,10 +604,10 @@ header __T_MSGID_19	Message-Id =~ /^<?\w{7}-\w{6}-\w{2}\.\d{4}(?:-\d{2}){5}\@/
 header __T_MSGID_11	Message-Id =~ /^<?\d\w+\$\w{4,}\@/
 header __T_MSGID_24	Message-Id =~ /^<?[A-Z0-9_-]*SERV[A-Za-z0-9_-]+[0-9a-f]{8}\@/
 header __T_MSGID_26	Message-Id =~ /^<?[A-Z0-9_-]*MAIL[a-zA-Z0-9_-]+0000[0-9a-f]{4}\@/
-header __T_MSGID_37	Message-Id =~ /^<?\d{13,}\.SM\d+\@[^>]/
-header __T_MSGID_16	Message-Id =~ /^<?[A-Z]\d{10}\@/
+#header __T_MSGID_37	Message-Id =~ /^<?\d{13,}\.SM\d+\@[^>]/
+#header __T_MSGID_16	Message-Id =~ /^<?[A-Z]\d{10}\@/
 header __T_MSGID_32	Message-Id =~ /^<?auto-00000\d+\@/
-meta T_MSGID_S_1	( __T_MSGID_17 || __T_MSGID_10 || __T_MSGID_8 || __T_MSGID_20 || __T_MSGID_19 || __T_MSGID_11 || __T_MSGID_24 || __T_MSGID_26 || __T_MSGID_37 || __T_MSGID_16 || __T_MSGID_32 )
+meta T_MSGID_S_1	( __T_MSGID_17 || __T_MSGID_10 || __T_MSGID_8 || __T_MSGID_20 || __T_MSGID_19 || __T_MSGID_11 || __T_MSGID_24 || __T_MSGID_26 || __T_MSGID_32 )
 
 # Another Message-Id off-shoot, this time it's a lyris comp rule: - tvd
 #  0.466    0.000    0.760    0.00    0.85   -1.00  T_MSGID_LYRIS
