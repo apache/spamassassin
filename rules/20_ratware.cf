@@ -289,3 +289,9 @@ describe RATWARE_RCVD_AT	Bulk email fingerprint (Received @) found
 
 meta RATWARE_OUTLOOK_NONAME	__MSGID_DOLLARS_OK && !__HAS_X_MAILER
 describe RATWARE_OUTLOOK_NONAME	Bulk email fingerprint (Outlook no name) found
+
+header MSGID_RATWARE1		Message-Id =~ /<[A-Z]+\$[^\$]+\$.+@/
+describe MSGID_RATWARE1		Bulk email fingerprint found
+
+header RATWARE_BOUND_PIECE	Content-Type =~ /boundary=\"?--Piece/
+describe RATWARE_BOUND_PIECE	Bulk email fingerprint (piece boundary) found

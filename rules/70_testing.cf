@@ -313,12 +313,6 @@ body T_HTML_SCRIPT_EXPR_5	eval:html_text_match('script', ';.*;.*;.*;.*;')
 header T_NUMINTERUPTUS		Subject =~ /\b[a-z]{2,}\d+[a-z]{2,}/i
 header T_CRAZYCASE		Subject =~ /\b[a-z]{2,}[A-Z]+[a-z]{2,}/
 header T_PUNCTUSINTERUPTUS	Subject =~ m%\b[A-Z]{2,}[^/\sa-z0-9:+,@._=&'-]+[A-Z]{2,}%i
-header T_RATWARE_BOUND_PIECE	Content-Type =~ /boundary=\"?--Piece/
-header T_MSGID_RATWARE1		Message-Id =~ /<[A-Z]+\$[^\$]+\$.+@/
-header T_MSGID_RATWARE2		Message-Id =~ /<[A-Z]{4}\$[^\$]{13}\$.{4}@/
-
-body T_MALE_ENHANCE	/male enhancement/i
-body T_IMPR_STAM	/\bimprov.{1,32}stamina/i
 
 # these need to have "decently long" words.  things like "sex" FP too easily
 # in normal use, ala: "jackson's ex-wife" vs "Best S E X you"
