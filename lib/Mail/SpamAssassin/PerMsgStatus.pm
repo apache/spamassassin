@@ -2061,8 +2061,19 @@ sub run_eval_tests {
   
   my $debugenabled = $Mail::SpamAssassin::DEBUG->{enabled};
 
+  my $scoreset = $self->{conf}->get_score_set();
   while (my ($rulename, $test) = each %{$evalhash}) {
+    # Score of 0, skip it.
     next unless ($self->{conf}->{scores}->{$rulename});
+
+    # If the rule is a net rule, and we're in a non-net enabled scoreset, skip it.
+    next if (exists $self->{conf}->{tflags}->{$rulename} &&
+      (($scoreset & 1) == 0) && $self->{conf}->{tflags}->{$rulename} =~ /\bnet\b/);
+
+    # If the rule is a learn rule, and we're in a non-learn enabled scoreset, skip it.
+    next if (exists $self->{conf}->{tflags}->{$rulename} &&
+      (($scoreset & 2) == 0) && $self->{conf}->{tflags}->{$rulename} =~ /\blearn\b/);
+
     my $score = $self->{conf}{scores}{$rulename};
     my $result;
 
