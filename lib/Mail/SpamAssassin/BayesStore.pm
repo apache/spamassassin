@@ -19,7 +19,7 @@ use vars qw{
   @DBNAMES @DB_EXTENSIONS
   $NSPAM_MAGIC_TOKEN $NHAM_MAGIC_TOKEN $LAST_EXPIRE_MAGIC_TOKEN
   $NTOKENS_MAGIC_TOKEN $OLDEST_TOKEN_AGE_MAGIC_TOKEN
-  $SCANCOUNT_BASE_MAGIC_TOKEN $RUNNING_EXPIRE_MAGIC_TOKEN
+  $SCANCOUNT_BASE_MAGIC_TOKEN $RUNNING_EXPIRE_MAGIC_TOKEN $DB_VERSION_MAGIC_TOKEN
 };
 
 @ISA = qw();
@@ -69,8 +69,10 @@ $LAST_EXPIRE_MAGIC_TOKEN = '**LASTEXPIRE';
 $NTOKENS_MAGIC_TOKEN = '**NTOKENS';
 $SCANCOUNT_BASE_MAGIC_TOKEN = '**SCANBASE';
 $RUNNING_EXPIRE_MAGIC_TOKEN = '**RUNNINGEXPIRE';
+$DB_VERSION_MAGIC_TOKEN = '**DBVERSION';
 
 use constant MAX_SIZE_FOR_SCAN_COUNT_FILE => 5000;
+use constant DB_VERSION => 2;
 
 ###########################################################################
 
@@ -217,6 +219,10 @@ sub tie_db_writable {
   umask $umask;
   $self->{scan_count_little_file} = $path.'_msgcount';
 
+  # figure out if we need to do a DB version update and do it if necessary
+  # if upgrade_db has a problem, fail immediately
+  goto failed_to_tie if ( $self->upgrade_db() );
+
   # ensure we count 1 mailbox learnt as an event worth marking,
   # expiry-wise
   $self->scan_count_increment();
@@ -231,6 +237,28 @@ failed_to_tie:
     $self->{is_locked} = 0;
   }
   warn "Cannot open bayes databases ${path}_* R/W: tie failed: $err\n";
+  return 0;
+}
+
+# Check to see if we need to upgrade the DB, and do so if necessary
+sub upgrade_db {
+  my ($self) = @_;
+
+  my $db_ver = $self->{db_toks}->{$DB_VERSION_MAGIC_TOKEN};
+  if ( !defined $db_ver || $db_ver =~ /\D/ ) { $db_ver = 1; }
+
+  # If the current DB version is lower than the new version, upgrade!
+  if ( $db_ver < DB_VERSION ) {
+    # Do conversions in order so we can go 1 -> 3, make sure to update $db_ver
+
+    # if ( $db_ver == 1 ) { ... $db_ver = 2; }
+    # if ( $db_ver == 2 ) { ... $db_ver = 3; }
+  }
+  elsif ( $db_ver > DB_VERSION ) { # current DB is newer, ignore the DB!
+    dbg("bayes: Found DB Version $db_ver, but can only handle up to version ".DB_VERSION);
+    return 1;
+  }
+
   return 0;
 }
 
