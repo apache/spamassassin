@@ -69,7 +69,7 @@ use vars	qw{
 @ISA = qw();
 
 $VERSION = "2.21";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.83 2002/06/02 06:40:03 hughescr Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.84 2002/06/02 07:06:22 hughescr Exp $';
 
 sub Version { $VERSION; }
 
@@ -687,9 +687,12 @@ sub create_default_prefs {
 
 sub expand_name ($) {
   my ($self, $name) = @_;
-  return $ENV{HOME} if ($ENV{HOME} && $ENV{HOME} =~ /\//);
-  return (getpwnam($name))[7] if ($name ne '');
-  return (getpwuid($>))[7];
+  if ($name eq '') {
+      return $ENV{HOME} if ($ENV{HOME} && $ENV{HOME} =~ /\//);
+      return (getpwuid($>))[7];
+  } else {
+      return (getpwnam($name))[7];
+  }
 }
 
 sub sed_path {
