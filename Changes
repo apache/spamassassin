@@ -1,4 +1,40 @@
 ------------------------------------------------------------------------
+r6243 | felicity | 2004-01-20 20:44:32 +0000 (Tue, 20 Jan 2004) | 1 line
+
+2.64 devel cycle started
+------------------------------------------------------------------------
+r6241 | felicity | 2004-01-20 20:43:45 +0000 (Tue, 20 Jan 2004) | 1 line
+
+2.63 RELEASED
+------------------------------------------------------------------------
+r6239 | felicity | 2004-01-20 20:31:47 +0000 (Tue, 20 Jan 2004) | 2 lines
+
+bug 2291: routines to process body text could be run multiple times due to lack of caching of results.
+
+------------------------------------------------------------------------
+r6238 | felicity | 2004-01-20 20:30:17 +0000 (Tue, 20 Jan 2004) | 2 lines
+
+bug 2857: using "spamassassin -l /path/to/file" failed because the -l wouldn't untaint the path.
+
+------------------------------------------------------------------------
+r6237 | felicity | 2004-01-20 20:29:16 +0000 (Tue, 20 Jan 2004) | 5 lines
+
+bug 2938: when preparing the 2.62 release, the extra_version code got
+modified to use array subscripts which isn't supported in perl 5.005,
+therefore breaking the whole release on the 5.0 series.  this patch
+changes extra_version to simply be "svn" for devel versions.
+
+------------------------------------------------------------------------
+r6198 | felicity | 2004-01-18 05:52:19 +0000 (Sun, 18 Jan 2004) | 1 line
+
+updated spec file for 2.63
+------------------------------------------------------------------------
+r6194 | felicity | 2004-01-18 00:17:35 +0000 (Sun, 18 Jan 2004) | 3 lines
+
+added change summary for 2.62
+
+
+------------------------------------------------------------------------
 r6193 | felicity | 2004-01-17 23:22:56 +0000 (Sat, 17 Jan 2004) | 1 line
 
 2.63 devel cycle started

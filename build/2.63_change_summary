@@ -1,0 +1,47 @@
+Subject: SpamAssassin 2.63 is released!
+
+SpamAssassin is a mail filter which uses advanced statistical
+and heuristic tests to identify spam (also known as unsolicited
+commercial/bulk email).
+
+Downloading
+-----------
+
+Pick it up from:
+
+  http://SpamAssassin.org/released/Mail-SpamAssassin-2.63.tar.gz
+  http://SpamAssassin.org/released/Mail-SpamAssassin-2.63.tar.bz2
+  http://SpamAssassin.org/released/Mail-SpamAssassin-2.63.zip
+
+md5sum of archive files:
+fc5a8e69ef2355c30c7b71877ac58d57  Mail-SpamAssassin-2.63.tar.gz
+215303794096bc66712381115adabb25  Mail-SpamAssassin-2.63.tar.bz2
+4255080324987f336fa17773d3eeaa01  Mail-SpamAssassin-2.63.zip
+
+sha1sum of archive files:
+6bab68dfd6a5238fc84360ce08249657bed4bab3  Mail-SpamAssassin-2.63.tar.gz
+558ab8e2cb95e8b4c4a3652b37e656eb3dc4d52c  Mail-SpamAssassin-2.63.tar.bz2
+0288cd3669cafc3072d745c9c2efa916eb7ec3ca  Mail-SpamAssassin-2.63.zip
+
+
+Or on CPAN shortly, once the mirrors update.
+
+The release files also have a .asc accompanying them.  The file serves
+as an external GPG signature for the given release file.  The signing
+key is available via the wwwkeys.pgp.net keyserver, as well as
+http://www.spamassassin.org/released/GPG-SIGNING-KEY
+
+The key information is:
+
+pub  1024D/265FA05B 2003-06-09 SpamAssassin Signing Key <release@spamassassin.org>
+     Key fingerprint =3D 26C9 00A4 6DD4 0CD5 AD24  F6D7 DEE0 1987 265F A05B
+
+
+Summary of major changes since 2.62
+-----------------------------------
+
+  - Fixed bug related to perl 5.0 which stopped SpamAssassin from being runable
+  - Fixed bug where "spamassassin -l" parameter wouldn't be untainted before being used
+  - Added caching of body rendering results so that the message wouldn't
+    be rendered the same way multiple times unnecessarily.
+
