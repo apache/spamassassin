@@ -2,7 +2,7 @@
 
 cd /home/jm/ftp/spamassassin/masses
 
-mv spam.{local,alltime} nonspam.local logs/old
+mv spam.local alltime_spam.local nonspam.local logs/old
 
 # ---------------------------------------------------------------------------
 # recent non-spam data
@@ -61,14 +61,14 @@ dprofpp -O 100 > ./dprof.spam
 mv tmon.out ./tmon.spam
 
 # ---------------------------------------------------------------------------
-# ok, generate spam.alltime; check old spam archives
+# ok, generate alltime_spam.local; check old spam archives
 # don't use --loghits, this is *huge* so it'd take forever
 
 date
-cp spam.local spam.alltime
+cp spam.local alltime_spam.local
 # Aug 15 2002 jm: off for now
 #for f in /local/mail-archives/old/spam/* ; do
-  #echo Checking $f: ; ./mass-check -c ../rules $f >> spam.alltime
+  #echo Checking $f: ; ./mass-check -c ../rules $f >> alltime_spam.local
 #done
 
 echo "Done full scan"

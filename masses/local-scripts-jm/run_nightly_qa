@@ -26,58 +26,11 @@ cp $tmp/dprof.{spam,nonspam} $nowdir
 son=spamassassin.sonic.net
 rsync -vrze ssh $son:ftp/spamassassin/masses/spam.sonic spam.sonic
 rsync -vrze ssh $son:ftp/spamassassin/masses/nonspam.sonic nonspam.sonic
-if [ -f nonspam.sonic ] ; then
-  cat spam.sonic >> spam.local
-  cat nonspam.sonic >> nonspam.local
-fi
 
-# Freqs for recent data:
+cat spam.sonic spam.local > spam.log
+cat nonspam.sonic nonspam.local > nonspam.log
 
-rm -f {spam,nonspam}.log
-for f in spam nonspam ; do mv $f.local $f.log ; done
-
-./hit-frequencies -x -p | sort -g --key=4  > $tmp/freqs.local
-./hit-frequencies -x -p -f | sort -g --key=4 > $tmp/falsefreqs.local
-
-./lint-rules-from-freqs -f $tmp/falsefreqs.local \
-                        < $tmp/freqs.local > $tmp/badtests.local
-
-./mk-baseline-results
-
-# copy up the stuff completed so far...
-cp $tmp/freqs.local $nowdir/freqs.recent
-cp $tmp/falsefreqs.local $nowdir/falsefreqs.recent
-cp $tmp/badtests.local $nowdir/badtests.recent
-./local-scripts-jm/copy-qa-data-to-dogma
-
-
-# Freqs for all data:
-
-for f in spam nonspam ; do mv $f.log $f.local ; done
-
-mv spam.{alltime,log}
-mv nonspam.{local,log}
-
-./hit-frequencies -x -p | sort -g --key=4  > $tmp/freqs.alltime
-./hit-frequencies -x -p -f | sort -g --key=4 > $tmp/falsefreqs.alltime
-
-./lint-rules-from-freqs -f $tmp/falsefreqs.alltime \
-                        < $tmp/freqs.alltime > $tmp/badtests.alltime
-
-mv spam.{log,alltime}
-mv nonspam.{log,local}
-
-cp $tmp/freqs.alltime $nowdir/freqs.alltime
-cp $tmp/falsefreqs.alltime $nowdir/falsefreqs.alltime
-cp $tmp/badtests.alltime $nowdir/badtests.alltime
-
-
-# don't copy up the logs; save space
-# gzip -1 < nonspam.local > $nowdir/nonspam.log.gz
-# gzip -1 < spam.local > $nowdir/spam.log.gz
-# gzip -1 < spam.alltime > $nowdir/spam.alltime.gz
-
-./local-scripts-jm/copy-qa-data-to-dogma
+./local-scripts-jm/nightly_qa_results
 
 echo $nowdir
 ls -l $nowdir

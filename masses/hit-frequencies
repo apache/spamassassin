@@ -106,6 +106,9 @@ foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
   }
 
   my $soratio = $soratio{$test};
+  if (!defined $soratio) {
+    $soratio{$test} = soratio ($fsadj, $fnadj);
+  }
 
   if ($opt_p) {
     printf "%7.3f  %7.3f  %7.3f  %6.2f  %6.2f  %s\n",
