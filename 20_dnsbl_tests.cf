@@ -191,13 +191,13 @@ describe DNS_FROM_RFCI_DSN	From: sender listed in dsn.rfc-ignorant.org
 tflags DNS_FROM_RFCI_DSN	net
 
 # sa-hil.habeas.com for SpamAssassin queries
-# hil.habeas.com for other filters
+# hil.habeas.com for other queries
 header HABEAS_INFRINGER		eval:check_rbl_swe('hil', 'sa-hil.habeas.com.')
 describe HABEAS_INFRINGER	Has Habeas warrant mark and on Infringer List
 tflags HABEAS_INFRINGER		net
 
 # sa-hul.habeas.com for SpamAssassin queries
-# hul.habeas.com for other filters
+# hul.habeas.com for other queries
 header HABEAS_USER		eval:check_rbl_swe('hul', 'sa-hul.habeas.com.')
 describe HABEAS_USER		Has Habeas warrant mark and on User List
 tflags HABEAS_USER		net nice
@@ -211,10 +211,16 @@ describe RCVD_IN_BSP_OTHER	Sender is in Bonded Sender Program (other relay)
 tflags RCVD_IN_BSP_OTHER	net nice
 
 # SenderBase provides information about senders
+# http://www.senderbase.org/dnsresponses.html
 # sa.senderbase.org for SpamAssassin queries
-# test.senderbase.org for everything else (until SenderBase is in production)
-#header __SENDERBASE eval:check_rbl_txt('senderbase', 'sa.senderbase.org.')
-#tflags __SENDERBASE net
+# query.senderbase.org for other queries
+header __SENDERBASE eval:check_rbl_txt('senderbase', 'sa.senderbase.org.')
+tflags __SENDERBASE net
+
+# S23 = domain daily magnitude
+# S25 = date of first message from this domain
+header SENDERBASE_NEW_BULK	eval:check_rbl_sub('senderbase', 'S23 > 6.2 && (time - S25 < 120*86400)')
+describe SENDERBASE_NEW_BULK	Sender domain is new and very high volume
 
 # ---------------------------------------------------------------------------
 # NOTE: donation tests, see README file for details
