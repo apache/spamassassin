@@ -130,9 +130,6 @@ sub new {
   $self->{auto_whitelist_file_mode} = '0600';	# as string, with --x bits
   $self->{auto_whitelist_factor} = 0.5;
 
-  $self->{bayes_path} = "__userstate__/bayes";
-  $self->{bayes_file_mode} = "0700";	# as string, with --x bits
-
   $self->{auto_learn} = 0;
 
   $self->{rewrite_subject} = 0;
@@ -164,6 +161,15 @@ sub new {
   $self->{pyzor_max} = 5;
   $self->{pyzor_add_header} = 0;
   $self->{pyzor_timeout} = 10;
+
+  $self->{bayes_path} = "__userstate__/bayes";
+  $self->{bayes_file_mode} = "0700";	# as string, with --x bits
+  $self->{bayes_use_hapaxes} = 1;
+  $self->{bayes_use_chi2_combining} = 1;
+  $self->{bayes_expiry_min_db_size} = 100000;
+  $self->{bayes_expiry_use_scan_count} = 0;
+  $self->{bayes_expiry_days} = 30;
+  $self->{bayes_expiry_scan_count} = 5000;
 
   $self->{whitelist_from} = { };
   $self->{blacklist_from} = { };
@@ -1562,6 +1568,77 @@ things will go wrong.
 =cut
     if (/^bayes[-_]file[-_]mode\s+(.*)$/) {
       $self->{bayes_file_mode} = $1; next;
+    }
+
+=item bayes_use_hapaxes		(default: 1)
+
+Should the Bayesian classifier use hapaxes (words/tokens that occur only
+once) when classifying?  This produces significantly better hit-rates, but
+increases database size by about a factor of 8 to 10.
+
+=cut
+    if (/^bayes[-_]use[-_]hapaxes\s+(.*)$/) {
+      $self->{bayes_use_hapaxes} = $1; next;
+    }
+
+=item bayes_use_chi2_combining		(default: 1)
+
+Should the Bayesian classifier use chi-squared combining, instead of
+Robinson/Graham-style naive Bayesian combining?  Chi-squared produces
+more 'extreme' output results, but may be more resistant to changes
+in corpus size etc.
+
+=cut
+    if (/^bayes[-_]use[-_]chi2[-_]combining\s+(.*)$/) {
+      $self->{bayes_use_chi2_combining} = $1; next;
+    }
+
+=item bayes_expiry_min_db_size		(default: 100000)
+
+What should be the minimum size of the Bayes tokens database?  The
+database will never be shrunk below this many entries. 100k entries
+is roughly equivalent to a 5Mb database file.
+
+=cut
+    if (/^bayes[-_]expiry[-_]min[-_]db[-_]size\s+(.*)$/) {
+      $self->{bayes_expiry_min_db_size} = $1; next;
+    }
+
+=item bayes_expiry_use_scan_count		(default: 0)
+
+Should we use the number of scans that have occured for expiration, or the
+time elapsed?  Number of scans works better for test runs, but requires
+another file to be used to store the messagecount, which slows things down
+considerably.  Unless you're testing expiration, you do not want to use
+this.
+
+=cut
+    if (/^bayes[-_]expiry[-_]use[-_]scan[-_]count\s+(.*)$/) {
+      $self->{bayes_expiry_use_scan_count} = $1; next;
+    }
+
+=item bayes_expiry_days		(default: 30)
+
+When expiring old entries from the Bayes databases, tokens which have not
+been read in this many days will be removed (unless to do so would shrink
+the database below the C<bayes_expiry_min_db_size> size).  (Requires
+C<bayes_expiry_use_scan_count> be 0.)
+
+=cut
+    if (/^bayes[-_]expiry[-_]days\s+(.*)$/) {
+      $self->{bayes_expiry_days} = $1; next;
+    }
+
+=item bayes_expiry_scan_count		(default: 5000)
+
+When expiring old entries from the Bayes databases, tokens which have not
+been read in this many messages will be removed (unless to do so would
+shrink the database below the C<bayes_expiry_min_db_size> size).
+(Requires C<bayes_expiry_use_scan_count> be 1.)
+
+=cut
+    if (/^bayes[-_]expiry[-_]scan[-_]count\s+(.*)$/) {
+      $self->{bayes_expiry_scan_count} = $1; next;
     }
 
 =item user-scores-dsn DBI:databasetype:databasename:hostname:port

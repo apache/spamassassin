@@ -58,7 +58,7 @@ if ($@) { die $@ unless ($@ =~ /HITLIMIT/); }
 foreach my $fh (@bucket_fhs) {
   $fh->close();
 }
-if ($messagecount < $opt_l) {
+if ($opt_l && $messagecount < $opt_l) {
   warn "warning: only found $messagecount messages instead of $opt_l\n";
 }
 
@@ -67,7 +67,7 @@ if ($messagecount < $opt_l) {
 sub wanted {
   my ($msg_id, $data_ref) = @_;
 
-  if ($messagecount++ > $opt_l) { die 'HITLIMIT'; }
+  if ($opt_l && $messagecount++ > $opt_l) { die 'HITLIMIT'; }
 
   # Make sure message can be used for outputing mbox format
   if ($data_ref->[0] !~ /^From \S+ +... ... /) {

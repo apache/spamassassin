@@ -68,13 +68,15 @@ my %makefile = (
     'VERSION_FROM' => 'lib/Mail/SpamAssassin.pm', # finds $VERSION
 
     'EXE_FILES'	=> [ 'spamassassin', 'spamd/spamc$(EXE_EXT)', 'spamd/spamd',
-			'sa-learn-spam', 'sa-learn-nonspam', 'sa-forget'
+			'sa-learn-spam', 'sa-learn-nonspam', 'sa-forget',
+			'sa-learn-rebuild'
 		],
 
     'MAN1PODS' => { 
 	'spamassassin'    => '$(INST_MAN1DIR)/spamassassin.$(MAN1EXT)',
 	'sa-learn-spam'    => '$(INST_MAN1DIR)/sa-learn-spam.$(MAN1EXT)',
 	'sa-learn-nonspam'    => '$(INST_MAN1DIR)/sa-learn-nonspam.$(MAN1EXT)',
+	'sa-learn-rebuild'    => '$(INST_MAN1DIR)/sa-learn-rebuild.$(MAN1EXT)',
 	'sa-forget'    => '$(INST_MAN1DIR)/sa-forget.$(MAN1EXT)',
 	'spamd/spamc.pod' => '$(INST_MAN1DIR)/spamc.$(MAN1EXT)',
 	'spamd/spamd'     => '$(INST_MAN1DIR)/spamd.$(MAN1EXT)',
@@ -111,7 +113,7 @@ my %makefile = (
 	'pod2htm* spamassassin sa-forget sa-learn-spam sa-learn-nonspam '.
 	'spamd/spamc$(EXE_EXT) spamd/libspamc.so spamd/spamd doc '.
 	'binaries.mk config.h config.status config.cache config.log '.
-	'qmail/qmail-spamc'
+	'qmail/qmail-spamc sa-learn-rebuild '
     },
 
     'AUTHOR' => 'Justin Mason <jm@jmason.org>',
@@ -237,6 +239,10 @@ sa-learn-spam: sa-learn-spam.raw
 	$(CHMOD) $(PERM_RWX) $@
 
 sa-learn-nonspam: sa-learn-nonspam.raw
+	$(PERL) build/preprocessor $(FIXVARS) -Msharpbang -i$? -o$@
+	$(CHMOD) $(PERM_RWX) $@
+
+sa-learn-rebuild: sa-learn-rebuild.raw
 	$(PERL) build/preprocessor $(FIXVARS) -Msharpbang -i$? -o$@
 	$(CHMOD) $(PERM_RWX) $@
 

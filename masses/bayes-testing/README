@@ -1,4 +1,35 @@
 
+TESTING WITH BAYES
+------------------
+
+Dan said: "I think we need guidelines on how to train and mass-check Bayes
+using our spam and non-spam corpuses.  Maybe you could check something in?
+*nudge*".  OK then!
+
+If you're testing Bayes, or collating results on a change to the algorithms,
+please try to stick to these guidelines:
+
+  - train with at least 1000 spam and 1000 ham messages
+
+  - try to use at least as many ham as spam mails.
+
+  - use mail from your own mail feed, not public corpora if possible.  Many of
+    the important signs are taken from headers and are specific to you and your
+    systems.
+
+  - Try to train with older messages, and test with newer, if possible.
+
+  - As with the conventional "mass-check" runs, avoiding spam over 6 months old
+    is a good idea, as older spam uses old techniques that no longer are seen
+    in the wild.
+
+  - DO NOT test with any of the messages you trained with.  This will produce
+    over-inflated success rates.
+
+These are just guidelines (well, apart from the last one), so they can be
+bent slightly if needs be ;)
+
+
 ABOUT THE THRESHOLDS SCRIPT
 ---------------------------
 

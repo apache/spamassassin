@@ -30,20 +30,15 @@ package Mail::SpamAssassin::Bayes;
 use strict;
 
 use Mail::SpamAssassin;
+use Mail::SpamAssassin::BayesStore;
 use Mail::SpamAssassin::PerMsgStatus;
-use Fcntl ':DEFAULT',':flock';
-use Sys::Hostname;
 
-BEGIN { @AnyDBM_File::ISA = qw(DB_File GDBM_File NDBM_File SDBM_File); }
-use AnyDBM_File;
-
-use vars qw{ @ISA @DBNAMES
+use vars qw{ @ISA
   $IGNORED_HDRS
   $MARK_PRESENCE_ONLY_HDRS
   $MIN_SPAM_CORPUS_SIZE_FOR_BAYES
   $MIN_HAM_CORPUS_SIZE_FOR_BAYES
   %HEADER_NAME_COMPRESSION
-  $NSPAM_MAGIC_TOKEN $NHAM_MAGIC_TOKEN 
 };
 
 @ISA = qw();
@@ -194,38 +189,6 @@ use constant MAX_TOKEN_LENGTH => 15;
 use constant PROB_BOUND_LOWER => 0.001;
 use constant PROB_BOUND_UPPER => 0.999;
 
-# Use chi-squared combining instead of Gary-combining (Robinson/Graham-style
-# naive-Bayesian)?
-use constant USE_CHI_SQ_COMBINING => 1;
-
-# we have 5 databases for efficiency.  To quote Matt:
-# > need five db files though to make it real fast:
-# [probs] 1. ngood and nbad (two entries, so could be a flat file rather 
-# than a db file).	(now 2 entries in db_toks)
-# [toks]  2. good token -> number seen
-# [toks]  3. bad token -> number seen (both are packed into 1 entry in 1 db)
-# [probs]  4. Consolidated good token -> probability
-# [probs]  5. Consolidated bad token -> probability
-# > As you add new mails, you update the entry in 2 or 3, then regenerate
-# > the entry for that token in 4 or 5.
-# > Then as you test a new mail, you just need to pull the probability
-# > direct from 4 and 5, and generate the overall probability. A simple and
-# > very fast operation. 
-#
-# jm: we use probs as overall probability. <0.5 = ham, >0.5 = spam
-# Now, in fact, probs does not map token=>prob; instead it maps
-# hamcount:spamcount => prob, which keeps the db size down.
-#
-# also, added a new one to support forgetting, auto-learning, and
-# auto-forgetting for refiled mails:
-# [seen]  6. a list of Message-IDs of messages already learnt from. values
-# are 's' for learnt-as-spam, 'h' for learnt-as-ham.
-
-@DBNAMES = qw(toks seen);
-
-$NSPAM_MAGIC_TOKEN = '**NSPAM';
-$NHAM_MAGIC_TOKEN = '**NHAM';
-
 ###########################################################################
 
 sub new {
@@ -234,9 +197,6 @@ sub new {
   my ($main) = @_;
   my $self = {
     'main'              => $main,
-    'hostname'          => hostname,
-    'already_tied'      => 0,
-    'is_locked'         => 0,
     'log_raw_counts'	=> 0,
 
     # Off. See comment above cached_probs_get().
@@ -247,185 +207,16 @@ sub new {
   };
   bless ($self, $class);
 
+  $self->{store} = new Mail::SpamAssassin::BayesStore ($self);
+
   $self;
 }
 
 ###########################################################################
 
-sub tie_db_readonly {
-  my ($self) = @_;
-  my $main = $self->{main};
-
-  # return if we've already tied to the db's, using the same mode
-  # (locked/unlocked) as before.
-  return 1 if ($self->{already_tied} && $self->{is_locked} == 0);
-  $self->{already_tied} = 1;
-
-  $self->read_db_configs();
-
-  if (!defined($main->{conf}->{bayes_path})) {
-    dbg ("bayes_path not defined");
-    return 0;
-  }
-
-  my $path = $main->sed_path ($main->{conf}->{bayes_path});
-  # try several common DB file endings
-  if (!-f $path.'_toks'
-	&& !-f $path.'_toks.dir'
-	&& !-f $path.'_toks.db')
-  {
-    dbg ("bayes: no dbs present, cannot scan: ${path}_toks");
-    return 0;
-  }
-
-  foreach my $dbname (@DBNAMES) {
-    my $name = $path.'_'.$dbname;
-    my $db_var = 'db_'.$dbname;
-    dbg("bayes: tie-ing to DB file R/O $name");
-    # untie %{$self->{$db_var}} if (tied %{$self->{$db_var}});
-    tie %{$self->{$db_var}},"AnyDBM_File",$name, O_RDONLY,
-		 (oct ($main->{conf}->{bayes_file_mode}) & 0666)
-       or goto failed_to_tie;
-  }
-  return 1;
-
-failed_to_tie:
-  warn "Cannot open bayes_path $path R/O: $!\n";
-  return 0;
-}
-
-# tie() to the databases, read-write and locked.  Any callers of
-# this should ensure they call untie_db() afterwards!
-#
-sub tie_db_writable {
-  my ($self) = @_;
-  my $main = $self->{main};
-
-  # return if we've already tied to the db's, using the same mode
-  # (locked/unlocked) as before.
-  return 1 if ($self->{already_tied} && $self->{is_locked} == 1);
-  $self->{already_tied} = 1;
-
-  $self->read_db_configs();
-
-  if (!defined($main->{conf}->{bayes_path})) {
-    dbg ("bayes_path not defined");
-    return 0;
-  }
-
-  my $path = $main->sed_path ($main->{conf}->{bayes_path});
-
-  # untaint
-  $path =~ /^([-_\/\\\:A-Za-z0-9 \.]+)$/; $path = $1;
-
-  #NFS Safe Lockng (I hope!)
-  #Attempt to lock the dbfile, using NFS safe locking 
-  #Locking code adapted from code by Alexis Rosen <alexis@panix.com>
-  #Kelsey Cummings <kgc@sonic.net>
-  my $lock_file = $self->{lock_file} = $path.'.lock';
-  my $lock_tmp = $lock_file . '.' . $self->{hostname} . '.'. $$;
-  my $max_lock_age = 300; #seconds 
-  my $lock_tries = 30;
-
-  # untaint the name of the lockfile
-  $lock_tmp =~ /^([-_\/\\\:A-Za-z0-9 \.]+)$/; $lock_tmp = $1;
-
-  open(LTMP, ">$lock_tmp") || die "Cannot create tmp lockfile $lock_file : $!\n";
-  dbg ("bayes: created $lock_tmp");
-  my $old_fh = select(LTMP);
-  $|=1;
-  select($old_fh);
-
-  for (my $i = 0; $i < $lock_tries; $i++) {
-    dbg("bayes: $$ trying to get lock on $path pass $i");
-    print LTMP $self->{hostname}.".$$\n";
-    if ( link ($lock_tmp,$lock_file) ) {
-      dbg ("bayes: link to $lock_file ok");
-      $self->{is_locked} = 1;
-      last;
-
-    } else {
-      #link _may_ return false even if the link _is_ created
-      if ( (stat($lock_tmp))[3] > 1 ) {
-	dbg ("bayes: link to $lock_file: stat ok");
-	$self->{is_locked} = 1;
-	last;
-      }
-
-      #check to see how old the lockfile is
-      my $lock_age = (stat($lock_file))[10];
-      my $now = (stat($lock_tmp))[10];
-      if (!defined($lock_age) || $lock_age < $now - $max_lock_age) {
-	#we got a stale lock, break it
-	dbg("bayes: breaking stale lockfile: age=$lock_age now=$now");
-	unlink "$lock_file";
-      }
-      sleep(1);
-    }
-  }
-  close(LTMP);
-  unlink($lock_tmp);
-  dbg ("bayes: unlinked $lock_tmp");
-
-  foreach my $dbname (@DBNAMES) {
-    my $name = $path.'_'.$dbname;
-    my $db_var = 'db_'.$dbname;
-    dbg("bayes: tie-ing to DB file R/W $name");
-    # not convinced this is needed, or is efficient!
-    # untie %{$self->{$db_var}} if (tied %{$self->{$db_var}});
-    tie %{$self->{$db_var}},"AnyDBM_File",$name, O_RDWR|O_CREAT,
-		 (oct ($main->{conf}->{bayes_file_mode}) & 0666)
-       or goto failed_to_tie;
-  }
-  return 1;
-
-failed_to_tie:
-  unlink($self->{lock_file}) ||
-     dbg ("bayes: couldn't unlink " . $self->{lock_file} . ": $!\n");
-
-  warn "Cannot open bayes_path $path R/W: $!\n";
-  return 0;
-}
-
-sub read_db_configs {
-  my ($self) = @_;
-
-  # TODO: at some stage, this may be useful to read config items which
-  # control database bloat, like
-  #
-  # - use of hapaxes
-  # - use of case-sensitivity
-  # - more midrange-hapax-avoidance tactics when parsing headers (future)
-  # 
-  # for now, we just set these settings statically.
-
-  $self->{use_hapaxes} = 1;
-}
-
-###########################################################################
-
-sub untie_db {
-  my $self = shift;
-  dbg("bayes: untie-ing");
-
-  foreach my $dbname (@DBNAMES) {
-    my $db_var = 'db_'.$dbname;
-    dbg ("bayes: untie-ing $db_var");
-    untie %{$self->{$db_var}};
-  }
-
-  if ($self->{is_locked}) {
-    dbg ("bayes: files locked, breaking lock.");
-    unlink($self->{lock_file}) ||
-        dbg ("bayes: couldn't unlink " . $self->{lock_file} . ": $!\n");
-    $self->{is_locked} = 0;
-  }
-
-  $self->{already_tied} = 0;
-}
-
 sub finish {
-  $_[0]->untie_db();
+  my $self = shift;
+  $self->{store}->untie_db();
 }
 
 ###########################################################################
@@ -485,8 +276,22 @@ sub tokenize_line {
 
     # *do* keep 3-byte tokens; there's some solid signs in there
     my $len = length($token);
+
+    # but extend the stop-list. These are squarely in the gray
+    # area, and it just slows us down to record them.
     next if $len < 3 ||
-	$token =~ /^(?:and|the|not|any|for|from|one|The|has|have)$/;
+	($token =~ /^(?:a(?:nd|ny|ble|ll|re)|
+		m(?:uch|ost|ade|ore|ail|ake|ailing|any|ailto)|
+		t(?:his|he|ime|hrough|hat)|
+		w(?:hy|here|ork|orld|ith|ithout|eb)|
+		f(?:rom|or|ew)| e(?:ach|ven|mail)|
+		o(?:ne|ff|nly|wn|ut)| n(?:ow|ot|eed)|
+		s(?:uch|ame)| l(?:ook|ike|ong)|
+		y(?:ou|our|ou're)|
+		The|has|have|into|using|http|see|It's|it's|
+		number|just|both|come|years|right|know|already|
+		people|place|first|because|
+		And|give|year|information|can)$/x);
 
     if ($len > MAX_TOKEN_LENGTH) {
       if (TOKENIZE_LONG_8BIT_SEQS_AS_TUPLES && $token =~ /[\xa0-\xff]{2}/) {
@@ -515,7 +320,21 @@ sub tokenize_line {
 
     # replace digits with 'N'...
     if ($token =~ /\d/) {
-      $token =~ s/\d/N/gs; push (@{$self->{tokens}}, 'N:'.$tokprefix.$token);
+      $token =~ s/\d/N/gs;
+
+      # stop-list for numeric tokens.  These are squarely in the gray
+      # area, and it just slows us down to record them.
+      if ($token !~ /(?:
+		  \QN:H*r:NN.NN.NNN\E |
+		  \QN:H*r:N.N.N\E |
+		  \QN:H*r:NNN.NNN.NNN\E |
+		  \QN:H*r:NNNN\E |
+		  \QN:H*r:NNN.NN.NN\E |
+		  \QN:NNNN\E
+		)/x)
+      {
+	push (@{$self->{tokens}}, 'N:'.$tokprefix.$token);
+      }
     }
   }
 
@@ -559,6 +378,9 @@ sub tokenize_headers {
     elsif ($hdr eq 'Content-Type') {
       $val = $self->pre_chew_content_type ($val);
     }
+    elsif ($hdr eq 'MIME-Version') {
+      $val =~ s/1\.0//;		# totally innocuous
+    }
     elsif ($hdr =~ /^${MARK_PRESENCE_ONLY_HDRS}$/i) {
       $val = "1"; # just mark the presence, they create lots of hapaxen
     }
@@ -590,6 +412,10 @@ sub pre_chew_content_type {
     $boundary =~ s/([-_\.=]+)/ $1 /gs;
     $val .= $boundary;
   }
+
+  # stop-list words for Content-Type header: these wind up totally gray
+  $val =~ s/\b(?:text|charset)\b//;
+
   $val;
 }
 
@@ -664,16 +490,18 @@ sub learn {
   my $body = $self->get_body_from_msg ($msg);
   my $ret;
 
+  # we still tie for writing here, since we write to the seen db
+  # synchronously
   eval {
     local $SIG{'__DIE__'};	# do not run user die() traps in here
 
-    $self->tie_db_writable();
+    $self->{store}->tie_db_writable();
     $ret = $self->learn_trapped ($isspam, $msg, $body);
   };
 
   if ($@) {		# if we died, untie the dbs.
     my $failure = $@;
-    $self->untie_db();
+    $self->{store}->untie_db();
     die $failure;
   }
 
@@ -685,7 +513,7 @@ sub learn_trapped {
   my ($self, $isspam, $msg, $body) = @_;
 
   my $msgid = $self->get_msgid ($msg);
-  my $seen = $self->{db_seen}->{$msgid};
+  my $seen = $self->{store}->seen_get ($msgid);
   if (defined ($seen)) {
     if (($seen eq 's' && $isspam) || ($seen eq 'h' && !$isspam)) {
       dbg ("$msgid: already learnt correctly, not learning twice");
@@ -698,15 +526,11 @@ sub learn_trapped {
     }
   }
 
-  my $ns = $self->{db_toks}->{$NSPAM_MAGIC_TOKEN};
-  my $nn = $self->{db_toks}->{$NHAM_MAGIC_TOKEN};
-  $ns ||= 0;
-  $nn ||= 0;
-
-  if ($isspam) { $ns++; } else { $nn++; }
-
-  $self->{db_toks}->{$NSPAM_MAGIC_TOKEN} = $ns;
-  $self->{db_toks}->{$NHAM_MAGIC_TOKEN} = $nn;
+  if ($isspam) {
+    $self->{store}->nspam_nham_change (1, 0);
+  } else {
+    $self->{store}->nspam_nham_change (0, 1);
+  }
 
   my ($wc, @tokens) = $self->tokenize ($msg, $body);
   my %seen = ();
@@ -714,12 +538,14 @@ sub learn_trapped {
   for (@tokens) {
     if ($seen{$_}) { next; } else { $seen{$_} = 1; }
 
-    my ($ts, $th) = tok_unpack ($self->{db_toks}->{$_});
-    if ($isspam) { $ts++; } else { $th++; }
-    $self->{db_toks}->{$_} = tok_pack ($ts, $th);
+    if ($isspam) {
+      $self->{store}->tok_count_change (1, 0, $_);
+    } else {
+      $self->{store}->tok_count_change (0, 1, $_);
+    }
   }
 
-  $self->{db_seen}->{$msgid} = ($isspam ? 's' : 'h');
+  $self->{store}->seen_put ($msgid, ($isspam ? 's' : 'h'));
 }
 
 ###########################################################################
@@ -731,16 +557,18 @@ sub forget {
   my $body = $self->get_body_from_msg ($msg);
   my $ret;
 
+  # we still tie for writing here, since we write to the seen db
+  # synchronously
   eval {
     local $SIG{'__DIE__'};	# do not run user die() traps in here
 
-    $self->tie_db_writable();
+    $self->{store}->tie_db_writable();
     $ret = $self->forget_trapped ($msg, $body);
   };
 
   if ($@) {		# if we died, untie the dbs.
     my $failure = $@;
-    $self->untie_db();
+    $self->{store}->untie_db();
     die $failure;
   }
 
@@ -752,7 +580,7 @@ sub forget_trapped {
   my ($self, $msg, $body) = @_;
 
   my $msgid = $self->get_msgid ($msg);
-  my $seen = $self->{db_seen}->{$msgid};
+  my $seen = $self->{store}->seen_get ($msgid);
   my $isspam;
   if (defined ($seen)) {
     if ($seen eq 's') {
@@ -765,40 +593,25 @@ sub forget_trapped {
     }
   }
 
-  my $ns = $self->{db_toks}->{$NSPAM_MAGIC_TOKEN};
-  my $nn = $self->{db_toks}->{$NHAM_MAGIC_TOKEN};
-  $ns ||= 0;
-  $nn ||= 0;
-
-  # protect against going negative
   if ($isspam) {
-    $ns--; if ($ns < 0) { $ns = 0; }
-    $self->{db_toks}->{$NSPAM_MAGIC_TOKEN} = $ns;
+    $self->{store}->nspam_nham_change (-1, 0);
   } else {
-    $nn--; if ($nn < 0) { $nn = 0; }
-    $self->{db_toks}->{$NHAM_MAGIC_TOKEN} = $nn;
+    $self->{store}->nspam_nham_change (0, -1);
   }
 
   my ($wc, @tokens) = $self->tokenize ($msg, $body);
   my %seen = ();
   for (@tokens) {
     if ($seen{$_}) { next; } else { $seen{$_} = 1; }
-    my ($ts, $th) = tok_unpack ($self->{db_toks}->{$_});
 
     if ($isspam) {
-      $ts = ($ts <= 1 ? 0 : $ts-1);
+      $self->{store}->tok_count_change (-1, 0, $_);
     } else {
-      $th = ($th <= 1 ? 0 : $th-1);
-    }
-
-    if ($ts == 0 && $th == 0) {
-      delete $self->{db_toks}->{$_};
-    } else {
-      $self->{db_toks}->{$_} = tok_pack ($ts, $th);
+      $self->{store}->tok_count_change (0, -1, $_);
     }
   }
 
-  delete $self->{db_seen}->{$msgid};
+  $self->{store}->seen_delete ($msgid);
 }
 
 ###########################################################################
@@ -840,20 +653,20 @@ sub get_body_from_msg {
 
 ###########################################################################
 
-# now and again, this can be run to rebuild the probabilities cache.
-# This cache will be unusable if one of the corpora has not been scanned yet.
-# This operation can take a while...
-
-sub recompute_all_probs {
+sub sync {
   my ($self) = @_;
+  $self->{store}->sync_journal();
+  $self->{store}->expire_old_tokens();
   return 0;
 }
+
+###########################################################################
 
 # compute the probability that that token is spammish
 sub compute_prob_for_token {
   my ($self, $token, $ns, $nn) = @_;
 
-  my ($s, $n) = tok_unpack ($self->{db_toks}->{$token});
+  my ($s, $n, $atime) = $self->{store}->tok_get ($token);
   return if ($s == 0 && $n == 0);
 
   if (!USE_ROBINSON_FX_EQUATION_FOR_LOW_FREQS) {
@@ -945,12 +758,9 @@ sub check_for_cached_probs_invalidated {
 sub scan {
   my ($self, $msg, $body) = @_;
 
-  if (!$self->tie_db_readonly()) { goto skip; }
+  if (!$self->{store}->tie_db_readonly()) { goto skip; }
 
-  my $ns = $self->{db_toks}->{$NSPAM_MAGIC_TOKEN};
-  my $nn = $self->{db_toks}->{$NHAM_MAGIC_TOKEN};
-  $ns ||= 0;
-  $nn ||= 0;
+  my ($ns, $nn) = $self->{store}->nspam_nham_get();
 
   if ($self->{log_raw_counts}) {
     $self->{raw_counts} = " ns=$ns nn=$nn ";
@@ -1020,6 +830,9 @@ sub scan {
 
     push (@sorted, $pw);
 
+    # update the atime on this token, it proved useful
+    $self->{store}->tok_touch ($_);
+
     dbg ("bayes token '$_' => $pw");
   }
 
@@ -1030,7 +843,7 @@ sub scan {
 
   my $score;
 
-  if (USE_CHI_SQ_COMBINING) {
+  if ($self->{use_chi_sq_combining}) {
     $score = chi_squared_probs_combine (@sorted);
   } else {
     $score = robinson_naive_bayes_probs_combine (@sorted);
@@ -1042,7 +855,18 @@ sub scan {
     print "#Bayes-Raw-Counts: $self->{raw_counts}\n";
   }
 
-  $self->untie_db();
+  $self->{store}->add_touches_to_journal();
+  $self->{store}->scan_count_increment();
+
+  # handle expiry and journal syncing
+  if ($self->{store}->expiry_due()) {
+    dbg ("expiration is due: expiring old tokens now...");
+    $self->{store}->sync_journal();
+    $self->{store}->expire_old_tokens();
+    dbg ("expiration done");
+  }
+
+  $self->{store}->untie_db();
 
   return $score;
 
@@ -1055,59 +879,6 @@ skip:
 
 sub dbg { Mail::SpamAssassin::dbg (@_); }
 sub sa_die { Mail::SpamAssassin::sa_die (@_); }
-
-###########################################################################
-
-# token marshalling format for db_toks.
-
-# Since we may have many entries with few hits, especially thousands of hapaxes
-# (1-occurrence entries), use a flexible entry format, instead of simply "2
-# packed ints", to keep the memory and disk space usage down.  In my
-# 18k-message test corpus, only 8.9% have >= 8 hits in either counter, so we
-# can use a 1-byte representation for the other 91% of low-hitting entries
-# and save masses of space.
-
-# This looks like: XXSSSHHH (XX = format bits, SSS = 3 spam-count bits, HHH = 3
-# ham-count bits).  If XX in the first byte is 11, it's packed as this 1-byte
-# representation; otherwise, if XX in the first byte is 00, it's packed as
-# "CLL", ie. 1 byte and 2 32-bit "longs" in perl pack format.
-
-# Savings: roughly halves size of toks db, at the cost of a ~10% slowdown.
-
-use constant FORMAT_FLAG	=> 0xc0;	# 11000000
-  use constant ONE_BYTE_FORMAT	=> 0xc0;	# 11000000
-  use constant TWO_LONGS_FORMAT	=> 0x00;	# 00000000
-
-use constant ONE_BYTE_SSS_BITS	=> 0x38;	# 00111000
-use constant ONE_BYTE_HHH_BITS	=> 0x07;	# 00000111
-
-sub tok_unpack {
-  my ($packed, $ts, $th) = unpack("CLL", $_[0] || 0);
-
-  if (($packed & FORMAT_FLAG) == ONE_BYTE_FORMAT) {
-    return (($packed & ONE_BYTE_SSS_BITS) >> 3, $packed & ONE_BYTE_HHH_BITS);
-  }
-  elsif (($packed & FORMAT_FLAG) == TWO_LONGS_FORMAT) {
-    # use $ts and $th we just unpacked
-    return ($ts || 0, $th || 0);
-  }
-  # other formats would go here...
-  else {
-    warn "unknown packing format for Bayes db, please re-learn: $packed";
-    return (0, 0);
-  }
-}
-
-sub tok_pack {
-  my ($ts, $th) = @_;
-  $ts ||= 0;
-  $th ||= 0;
-  if ($ts < 8 && $th < 8) {
-    return pack ("C", ONE_BYTE_FORMAT | ($ts << 3) | $th);
-  } else {
-    return pack ("CLL", TWO_LONGS_FORMAT, $ts, $th);
-  }
-}
 
 ###########################################################################
 
