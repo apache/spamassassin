@@ -573,3 +573,8 @@ header __HAS_REFS		exists:References
 header __HAS_SUBJ_RE		Subject =~ /^re: /i
 meta T_REPLY_WITHOUT_HDRS	(__HAS_SUBJ_RE && !(__HAS_THREAD_TOPIC || __HAS_IRT || __HAS_REFS))
 
+# a new test idea. most ratware uses message templates I would guess.
+# Here's two popular ones...
+header T_HDR_ORDER_TRIMRS	ALL =~ /\nTo: [^\n]+\nReferences: <\S+@\S+>\nIn-Reply-To: <\S+@\S+>\nMessage-ID: <\S+@\S+>\nReply-To: [^\n]+\nSender: /
+header T_HDR_ORDER_MTSRIX	ALL =~ /\nMessage-ID: <\S+@\S+>\nTo: [^\n]+ <\S+>\nSubject: [^\n]+\nReferences: <\S+@\S+>\nIn-Reply-To: <\S+@\S+>\nX-Mailer: /
+
