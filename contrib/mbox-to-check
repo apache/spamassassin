@@ -1,0 +1,31 @@
+#! /usr/bin/perl -w
+
+#
+# This goes with the run-masses script to take the ham/spam directories
+# and spit out the appropriate spam:mbox:path statements for mass-check.
+#
+
+use strict;
+use File::Find ();
+
+# Set the variable $File::Find::dont_use_nlink if you're using AFS,
+# since AFS cheats.
+
+# for the convenience of &wanted calls, including -eval statements:
+use vars qw/*name *dir *prune/;
+*name   = *File::Find::name;
+*dir    = *File::Find::dir;
+*prune  = *File::Find::prune;
+
+
+# Traverse desired filesystems
+File::Find::find({wanted => \&wanted}, 'ham', 'spam');
+exit;
+
+
+sub wanted {
+    if ( -f $_ ) {
+	$name =~ m@^([^/]+)@;
+	print "$1:mbox:$name\n";
+    }
+}
