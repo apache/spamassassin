@@ -154,7 +154,7 @@ sub writescores_c {
     if ((scalar(@hits)+1) > $max_hits_per_msg) {
       $max_hits_per_msg = scalar(@hits)+1;
     }
-    }
+  }
 
   for ($i = 0; $i <= $#index_to_rule; $i++) {
     my $name = $index_to_rule[$i];
@@ -331,7 +331,7 @@ sub read_ranges {
     $range_hi{$t} = $2+0;
     my $mut = $3+0;
 
-    if ($t =~ /^__/) {
+    if ($allrules{$t}->{issubrule}) {
       $ignored_rule{$t} = 1;
       $mutable_tests{$t} = 0;
       next;
@@ -351,7 +351,7 @@ sub read_ranges {
       $mutable_tests{$t} = 0;
     } elsif ($range_lo{$t} == $range_hi{$t}) {
       $mutable_tests{$t} = 0;
-    } elsif ($allrules{$t}->{tflags} =~ m/userconf/) {
+    } elsif ($allrules{$t}->{tflags} =~ m/\buserconf\b/i) {
       $mutable_tests{$t} = 0;
     } else {
       $mutable_tests{$t} = 1;
@@ -365,14 +365,14 @@ sub read_ranges {
   # catch up on the ones missed; seems to be userconf or 0-hitters mostly.
   foreach my $t (sort keys %allrules) {
     next if (exists($range_lo{$t}));
-    if ($t =~ /^__/) {
+    if ($allrules{$t}->{issubrule}) {
       $ignored_rule{$t} = 1;
       $mutable_tests{$t} = 0;
       next;
     }
     $ignored_rule{$t} = 0;
     unless (exists($mutable_tests{$t}) &&
-	    ($allrules{$t}->{tflags} !~ m/userconf/)) {
+	    ($allrules{$t}->{tflags} !~ m/\buserconf\b/i)) {
       $mutable_tests{$t} = 0;
     }
     unless ($mutable_tests{$t} || $scores{$t}) {
@@ -380,6 +380,39 @@ sub read_ranges {
   }
     $index_to_rule[$count] = $t;
     $count++;
+  }
+  foreach my $t (keys %range_lo) {
+    next if ($ignored_rule{$t});
+    if ($mutable_tests{$t}) {
+      if (($scores{$t} == 1) && ($allrules{$t}->{tflags} =~ m/\bnice\b/i)) {
+	$scores{$t} = -1;
+      } elsif (($scores{$t} == 0.01) && ($t =~ m/^T_/) &&
+	       ($allrules{$t}->{tflags} =~ m/\bnice\b/i)) {
+	$scores{$t} = -0.01;
+      }
+      if ($scores{$t} >= $range_hi{$t}) {
+	$scores{$t} = $range_hi{$t} - 0.001;
+      } elsif ($scores{$t} <= $range_lo{$t}) {
+	$scores{$t} = $range_lo{$t} + 0.001;
+      }
+    } else {
+      if ($allrules{$t}->{tflags} =~ m/\buserconf\b/i) {
+	next;
+      } elsif ($range_lo{$t} == $range_hi{$t}) {
+	next;
+      }
+      if (($scores{$t} == 1) && ($allrules{$t}->{tflags} =~ m/\bnice\b/i)) {
+	$scores{$t} = -1;
+      } elsif (($scores{$t} == 0.01) && ($t =~ m/^T_/) &&
+	       ($allrules{$t}->{tflags} =~ m/\bnice\b/i)) {
+	$scores{$t} = -0.01;
+      }
+      if ($scores{$t} > $range_hi{$t}) {
+	$scores{$t} = $range_hi{$t};
+      } elsif ($scores{$t} < $range_lo{$t}) {
+	$scores{$t} = $range_lo{$t};
+      }
+    }
   }
 }
 
