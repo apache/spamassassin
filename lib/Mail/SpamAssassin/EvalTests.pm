@@ -1840,6 +1840,20 @@ sub message_is_habeas_swe {
 # BODY TESTS:
 ###########################################################################
 
+sub nonspace_length {
+  my ($self, $body, $min, $max) = @_;
+
+  if (exists $self->{nonspace}) {
+    return ($self->{nonspace} > $min && $self->{nonspace} <= $max);
+  }
+
+  $body = join('', @{$body});
+  $body =~ tr/ \t\n\r\f//cd;
+  $self->{nonspace} = length($body);
+
+  return ($self->{nonspace} > $min && $self->{nonspace} <= $max);
+}
+
 sub check_for_uppercase {
   my ($self, $body, $min, $max) = @_;
 
