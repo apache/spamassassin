@@ -1,4 +1,4 @@
-# $Id: rule_tests.t,v 1.1 2002/04/03 14:59:30 matt_sergeant Exp $
+# $Id: rule_tests.t,v 1.2 2002/04/03 15:10:28 matt_sergeant Exp $
 use strict;
 use Test;
 use Mail::SpamAssassin;
@@ -53,13 +53,6 @@ foreach my $symbol ($sa->{conf}->regression_tests()) {
         ok( $msg->get_hits, ($ok_or_fail eq 'ok' ? 1 : 0), "Test for $symbol against $string" );
 
         $num_tests++;
-
-        # Cleanup - yes this is horrid, and will make these tests very slow
-        # but I couldn't find a cleaner way - can you?
-        no strict 'refs';
-        for (qw(_head_tests _body_tests _body_uri_tests _rawbody_tests _full_tests)) {
-            undef *{"Mail::SpamAssassin::PerMsgStatus::" . $_};
-        }
     }
 }
 
