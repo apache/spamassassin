@@ -48,7 +48,7 @@ use Cwd;
 use strict;
 
 use vars	qw{
-  	@ISA $VERSION $HOME_URL
+  	@ISA $VERSION $HOME_URL $DEBUG
 };
 
 @ISA = qw();
@@ -57,6 +57,8 @@ $VERSION = "0.1";
 sub Version { $VERSION; }
 
 $HOME_URL = "http://spamassassin.taint.org/";
+
+$DEBUG = 0;
 
 ###########################################################################
 
@@ -94,6 +96,8 @@ sub new {
   my $self = shift;
   if (!defined $self) { $self = { }; }
   bless ($self, $class);
+
+  if (defined $self->{debug}) { $DEBUG = $self->{debug}+0; }
 
   $self->{conf} = new Mail::SpamAssassin::Conf ($self);
   $self;
