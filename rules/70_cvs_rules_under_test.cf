@@ -15,12 +15,6 @@ header T_INVALID_MSGID		Message-Id !~ /^<(?:[a-zA-Z0-9.!\#\$%&'*\+\/=?\^_{}|~-]+
 describe T_INVALID_MSGID	Message-Id is not valid, according to RFC 2822
 
 # new MIME_BOUND tests
-#
-# results for quinlan:
-#  1.350    4.145    0.000    1.00    0.87    1.00  T_MIME_BOUND_NEXTPART
-#  0.911    2.799    0.000    1.00    0.84    1.00  T_MIME_BOUND_DASH_DIGIT
-#  0.131    0.404    0.000    1.00    0.71    1.00  T_MIME_BOUND_MANY_HEX
-#  0.123    0.377    0.000    1.00    0.71    1.00  T_MIME_BOUND_TEP
 
 # This may need tweaking if new NextPart formats appear.
 # notes: original version
@@ -46,15 +40,6 @@ header __NEXTPART_ALL4		Content-Type =~ /NextPart/
 header __NEXTPART_NORMAL4	Content-Type =~ /="(?:----_?=_)?NextPart(?:_[\da-zA-Z]+){1,4}(?:\.[\dA-F]{8})?"/
 meta T_MIME_BOUND_NEXTPART4	(__NEXTPART_ALL4 && !__NEXTPART_NORMAL4)
 score T_MIME_BOUND_NEXTPART4	1.0
-
-header T_MIME_BOUND_DASH_DIGIT	Content-Type =~ /boundary="_-{10}=_\d{19,22}"/
-score T_MIME_BOUND_DASH_DIGIT	1.0
-
-header T_MIME_BOUND_MANY_HEX	Content-Type =~ /boundary="[\da-f]{8}(?:-[\da-f]{4}){3}-[\da-f]{12}"/
-score T_MIME_BOUND_MANY_HEX	1.0
-
-header T_MIME_BOUND_TEP		Content-Type =~ /boundary="TEP-\d{9,10}\.\d{10}\.\d{10}"/
-score T_MIME_BOUND_TEP		1.0
 
 # results for quinlan
 #  0.149    0.458    0.000    1.00    0.72    0.50  T_FROM_TOPICA
