@@ -5,6 +5,8 @@
 
 #%include        /usr/lib/rpm/macros.perl
 
+%define _unpackaged_files_terminate_build       0
+%define _missing_doc_files_terminate_build      0
 %define perl_sitelib %(eval "`%{__perl} -V:installsitelib`"; echo "$installsitelib")
 
 %define pdir    Mail
