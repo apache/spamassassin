@@ -941,9 +941,8 @@ sub html_text {
     if ($last =~ /\b([^\s\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]{1,7})\z/s) {
       my $start = length($1);
       if ($text =~ /^([^\s\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]{1,7})\b/s) {
-	my $backhair = "backhair_" . $start . "_" . length($1);
+	my $backhair = $start . "_" . length($1);
 	$self->{html}{backhair}->{$backhair}++;
-	$self->{html}{$backhair}++;
 	$self->{html}{backhair_count} = keys %{ $self->{html}{backhair} };
       }
     }
