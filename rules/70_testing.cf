@@ -205,10 +205,9 @@ meta T_ENTITY_OTHER2_M		(T_ENTITY_OTHER2_R || T_ENTITY_OTHER2_B)
 # HTML title rules
 
 # this won't work well until we parse HTML documents separately
-body T_HTML_TITLE_EXTRA		eval:html_test('t_title_extra')
+body T_HTML_TITLE_EXTRA		eval:html_test('title_extra')
 
 # possible replacement rules
-body T_HTML_TITLE_UNTITLED_1	eval:html_title('=~ /untitled/i')
 body T_HTML_TITLE_UNTITLED_2	eval:html_title('=~ /new page \d+/i')
 body T_HTML_TITLE_UNTITLED_3	eval:html_title('=~ /untitled|new page \d+/i')
 

@@ -3400,7 +3400,7 @@ sub html_eval {
 
 sub html_title {
   my ($self, undef, $expr) = @_;
-  for my $title (@{ $self->{html}{t_title} }) {
+  for my $title (@{ $self->{html}{title} }) {
     if (defined $title && eval "qq{\Q$title\E} $expr") {
       return 1;
     }

@@ -899,12 +899,11 @@ sub html_tests {
   }
   if ($tag eq "title") {
     $self->{html}{title_index}++;
-    $self->{html}{title_text} = "" if ($self->{html}{title_index} == 0);
+    $self->{html}{title}->[$self->{html}{title_index}] = "";
 
     # begin test code
-    $self->{html}{t_title}->[$self->{html}{title_index}] = "";
     if ($self->{html}{title_index} > 0) {
-      $self->{html}{t_title_extra}++;
+      $self->{html}{title_extra}++;
     }
     # end test code
   }
@@ -932,11 +931,11 @@ sub examine_text_style {
 sub html_text {
   my ($self, $text) = @_;
 
-  if (exists $self->{html}{"inside_a"} && $self->{html}{"inside_a"} > 0) {
+  if (exists $self->{html}{inside_a} && $self->{html}{inside_a} > 0) {
     $self->{html}{anchor_text} .= " $text";
   }
 
-  if (exists $self->{html}{"inside_script"} && $self->{html}{"inside_script"} > 0)
+  if (exists $self->{html}{inside_script} && $self->{html}{inside_script} > 0)
   {
     if ($text =~ /\b(?:$events)\b/io)
     {
@@ -952,17 +951,16 @@ sub html_text {
     return;
   }
 
-  if (exists $self->{html}{"inside_style"} && $self->{html}{"inside_style"} > 0) {
+  if (exists $self->{html}{inside_style} && $self->{html}{inside_style} > 0) {
     if ($text =~ /font(?:-size)?:\s*(\d+(?:\.\d*)?|\.\d+)(p[tx])/i) {
       $self->examine_text_style ($1, $2);
     }
     return;
   }
 
-  if (exists $self->{html}{"inside_title"} && $self->{html}{"inside_title"} > 0)
+  if (exists $self->{html}{inside_title} && $self->{html}{inside_title} > 0)
   {
-    $self->{html}{title_text} .= $text if ($self->{html}{title_index} == 0);
-    $self->{html}{t_title}->[$self->{html}{title_index}] .= $text;
+    $self->{html}{title}->[$self->{html}{title_index}] .= $text;
   }
 
   $self->html_font_invisible($text) if $text =~ /[^ \t\n\r\f\x0b\xa0]/;
@@ -992,7 +990,7 @@ sub html_comment {
   {
     $self->{html}{div_converted} = 1;
   }
-  if (exists $self->{html}{"inside_script"} && $self->{html}{"inside_script"} > 0)
+  if (exists $self->{html}{inside_script} && $self->{html}{inside_script} > 0)
   {
     if ($text =~ /\b(?:$events)\b/io)
     {
@@ -1008,7 +1006,7 @@ sub html_comment {
     return;
   }
 
-  if (exists $self->{html}{"inside_style"} && $self->{html}{"inside_style"} > 0) {
+  if (exists $self->{html}{inside_style} && $self->{html}{inside_style} > 0) {
     if ($text =~ /font(?:-size)?:\s*(\d+(?:\.\d*)?|\.\d+)(p[tx])/i) {
       $self->examine_text_style ($1, $2);
     }
