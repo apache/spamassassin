@@ -2,7 +2,8 @@
 
 WEBDIR=$HOME/spamassassin.taint.org
 
-vers=`build/get_version`
+vers=`build/get_version`				# 2.60-rc3
+minivers=`echo $vers | sed -e 's/-[a-z0-9A-Z]*$//'`	# 2.60
 
 # delete old CVS files
 find . -name '.#*' -print | xargs rm -f
@@ -19,6 +20,10 @@ make tardist
 make zipdist
 
 for ext in tar.gz zip ; do
+  if [ $minivers != $vers ] ; then
+    mv Mail-SpamAssassin-$minivers.$ext Mail-SpamAssassin-$vers.$ext
+  fi
+
   cp Mail-SpamAssassin-$vers.$ext $WEBDIR/devel
 
   md5sum Mail-SpamAssassin-$vers.$ext \
