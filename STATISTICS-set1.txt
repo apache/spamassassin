@@ -1,11 +1,3 @@
-./hit-frequencies -x -p -s 1 > freqs
-./score-ranges-from-freqs ../rules 1 < freqs
-./logs-to-c --scoreset=1
-Reading scores from "../rules"...
-Reading per-message hit stat logs and scores...
-Writing logs and current scores as C code...
-gcc -Wall -O9 -mcpu=athlon  -DWL=2 -DOPTIMIZE -Lpgapack/lib/linux -Ipgapack/include craig-evolve.c -o evolve -lpgaO -lm
-strip evolve
 STATISTICS REPORT FOR SPAMASSASSIN RULESET
 
 Classification success on test corpora, at default threshold:
