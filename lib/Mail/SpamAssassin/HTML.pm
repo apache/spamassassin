@@ -317,6 +317,8 @@ sub html_whitespace {
   }
 }
 
+# puts the uri onto the internal array
+# note: uri may be blank (<a href=""></a> obfuscation, etc.)
 sub push_uri {
   my ($self, $uri) = @_;
 
@@ -327,7 +329,7 @@ sub push_uri {
   $uri =~ s/\s+$//;
 
   my $target = target_uri($self->{base_href} || "", $uri);
-  push @{ $self->{uri} }, $target if $target;
+  push @{ $self->{uri} }, $target;
 }
 
 sub html_uri {
