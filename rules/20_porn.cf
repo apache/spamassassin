@@ -36,9 +36,6 @@ describe FREE_PORN              Possible porn - Free Porn
 body CUM_SHOT                   /\bcum[ -]?shots?\b/i
 describe CUM_SHOT               Possible porn - Cum Shot
 
-body PAY_SITE                   /\bpay[ -]?sites?\b/i
-describe PAY_SITE               Possible porn - Pay Site
-
 # "live cam" is a very common nonspam phrase, removed
 body LIVE_PORN                  /\blive .{0,9}(?:fuck(?:ing)?|sex|naked|girls?|virgins?|teens?|porno?)\b/i
 describe LIVE_PORN              Possible porn - Live Porn
@@ -57,9 +54,6 @@ describe NASTY_GIRLS            Possible porn - Nasty Girls
 
 body AMATEUR_PORN               /\bamateur .{0,9}(?:sex|porn|star|sites?|college|babes|action|pics|trash|gang|rape)|\b(?:real|best) amateur/i
 describe AMATEUR_PORN           Possible porn - Amateur Porn
-
-body PORN_CELEBRITY		/\bceleb(?:rity|rities|s).{0,15}(?=[cenps])(?:sex|porn|pics|caught|nude|exposed|content)|\b(?=[fhns])(?:steamy|hot|nude|shocking|free|h[a\@]rdcore) celeb(?:rity|rities|s)/i
-describe PORN_CELEBRITY		Possible porn - Celebrity Porn
 
 body SOMETHING_FOR_ADULTS       /\badult.{0,9}(?:entertainment|sites?|industry|only|business|membership)/i
 describe SOMETHING_FOR_ADULTS   Possible porn - Adult Web Sites
