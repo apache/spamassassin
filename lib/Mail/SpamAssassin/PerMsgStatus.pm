@@ -658,9 +658,15 @@ sub get_raw_body_text_array {
       }
     }
 
+    # This all breaks if you don't strip off carriage returns.
+    # Both here and below.
+    # (http://bugzilla.spamassassin.org/show_bug.cgi?id=516)
+    s/\r//;
+
     if ($multipart_boundary eq $_) {
       my $starting_line = $line;
       for ($line++; defined($_ = $bodyref->[$line]); $line++) {
+        s/\r//;
 	push (@{$self->{body_text_array}}, $_);
 
 	if (/^$/) { last; }
