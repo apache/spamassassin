@@ -2112,7 +2112,14 @@ sub message_is_habeas_swe {
     $text =~ s/\s+/ /g;
     $text =~ s/^\s|\s$//g;
     $text =~ s@/?>@/>@;
-    $self->{habeas_swe} = (sha1_hex($text) eq '76c65d9eb65e572166a08b50fd197b29af09d43a');
+    my $sha1 = sha1_hex($text);
+
+    if ($sha1 eq '76c65d9eb65e572166a08b50fd197b29af09d43a') {
+      $self->{habeas_swe} = 'gold';
+    }
+#    elsif ($sha1 eq 'f93247e6c1d457e97d8844ba359e6ea7cd9e745d') {
+#      $self->{habeas_swe} = 'silver';
+#    }
   }
 
   return $self->{habeas_swe};
