@@ -11,6 +11,7 @@ if (!defined $newscores || $scoreset < 0 || $scoreset >= $NUM_SCORESETS ) {
 
 system ("./parse-rules-for-masses -s $scoreset") and die;
 if (-e "tmp/rules.pl") {
+  # Note, the spaces need to stay in front of the require to work around a RPM 4.1 problem
   require "./tmp/rules.pl";
 }
 else {
