@@ -364,11 +364,8 @@ describe MAILTO_LINK		Includes a URL link to send an email
 body AOL_USERS_LINK		/AOL\s+Users\s+Click/is
 describe AOL_USERS_LINK		Includes a link for AOL users to click
 
-# Cyber FirePower! rants about 'Internet terrorists' aka spam fighters
-# (contrib: WW) (jm: tweaked to match again)
-
-body US_DOLLARS			/\b(?:\d{1,3})?Million\b.{0,40}\b(?:(?:United States?|Canadian) Dollar?s?|US(?:D|\$)|U\.? ?S\.? Dollar)/i
-describe US_DOLLARS		Talks about a million dollars
+body NA_DOLLARS			/\b(?:\d{1,3})?Million\b.{0,40}\b(?:Canadian Dollar?s?|US\$|U\.? ?S\.? Dollar)/i
+describe NA_DOLLARS		Talks about a million North American dollars
 
 # to still match all test cases
 body US_DOLLARS_2               /\s(?:\$|US\$|usd?).?\d{2,3}(?:\.\d)?.?(?:m|millions?)\b/i
