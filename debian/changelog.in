@@ -1,3 +1,28 @@
+spamassassin (2.44-1) unstable; urgency=low
+
+  * New upstream release (mainly bugfixes) (Closes: #160206)
+  * Acknowledge NMU (Closes: #178936)
+  * Bumped priority of debconf question to high
+    (Closes: #167451, #167452, #169751
+  * Removed dependency on libnet-smtp-server-perl (Closes: #175129)
+  * Fixed debian/rules CFLAGS with patch from <tino.keitel@web.de>
+    (Closes: #176659)
+  * Fix lintian warning:
+    "W: spamassassin: init-script-suggests-versioned-depends postinst"
+
+ -- Duncan Findlay <duncf@debian.org>  Fri, 31 Jan 2003 19:19:25 -0500
+
+spamassassin (2.43-1.1) unstable; urgency=high
+
+  * Non-maintainer upload at maintainer request
+  * Apply patch for overflow as reported to BUGTRAQ
+    "SpamAssassin / spamc+BSMTP remote buffer overflow"
+    (spamd/libspamc.c)
+  * Depending on how spamc is built, this may or may not be
+    exploitable
+
+-- Matt Zimmerman <mdz@debian.org>  Wed, 29 Jan 2003 11:08:12 -0500
+
 spamassassin (2.43-1) unstable; urgency=low
 
   * New upstream release
