@@ -753,76 +753,15 @@ sub check {
 
     if($version > 1.0)
     {
-        while(1)
-        {
-            my $line = $client->getline;
-            if(!defined $line)
-            {
-                protocol_error ("(EOF during headers)");
-                return 1;
-            }
-            $line =~ s/\r\n$//;
-            last unless $line;
+	my $hdrs = { };
 
-            my($header, $value) = split(/:\s*/, $line, 2);
-            if (!defined $value)
-            {
-		protocol_error("(header not in 'Name: value' format)");
-                return 1;
-            }
+	# parse_headers returns !=0 on failure
+        return 1 if parse_headers ($hdrs, $client, {
+		'Content-length' => \&got_clen_header,
+		'User' => \&got_user_header
+	    });
 
-            # We'll run handle user unless we've been told not
-            # to process per-user config files.  Otherwise
-            # we'll check and see if we need to try SQL
-            # lookups.  If $opt{'user-config'} is true, we need to try
-            # their config file and then do the SQL lookup.
-            # If $opt{'user-config'} IS NOT true, we skip the conf file and
-            # only need to do the SQL lookup if $opt{'sql-config'} IS
-            # true.  (I got that wrong the first time.)
-
-            if ($header eq 'User')
-            {
-                if ($value !~ /^([\x20-\xFF]*)$/)
-                {
-                   protocol_error ("(User header contains control chars)");
-                    return 1;
-                }
-
-		$current_user = $1;
-                auth_ident($current_user) if $opt{'auth-ident'};
-
-                if (!$opt{'user-config'})
-                {
-                  if ($opt{'sql-config'}) {
-                    handle_user_sql($current_user);
-		  } elsif ($opt{'ldap-config'}) {
-		    handle_user_ldap($current_user);
-                  } elsif ($opt{'virtual-config'} || $opt{'virtual-config-dir'}) {
-                    handle_virtual_user($current_user);
-                  } elsif ($opt{'setuid-with-sql'}) {
-                    handle_user_setuid_with_sql($current_user);
-                    $setuid_to_user = 1; #to benefit from any paranoia.
-		  } elsif ($opt{'setuid-with-ldap'}) {
-		    handle_user_setuid_with_ldap($current_user);
-		    $setuid_to_user = 1; # as above
-                  }
-                } else {
-                  handle_user($current_user);
-                  if ($opt{'sql-config'}) {
-                    handle_user_sql($current_user);
-                  }
-                }
-            }
-	    elsif ($header eq 'Content-length')
-            {
-		if ($value !~ /^(\d*)$/)
-		{
-		    protocol_error ("(Content-Length contains non-numeric bytes)");
-		    return 1;
-		}
-		$expected_length = $1;
-            }
-        }
+	$expected_length = $hdrs->{expected_length};
     }
 
     if ( $setuid_to_user && $> == 0 )
@@ -980,13 +919,113 @@ sub check {
     $status->finish();        # added by jm to allow GC'ing
 }
 
-sub protocol_error {
-    local $_ = shift;
+###########################################################################
 
-    my $resp = "EX_PROTOCOL";
-    print $client "SPAMD/1.0 $resphash{$resp} Bad header line: $_\r\n";
-    logmsg "bad protocol: header error: $_";
+# generalised header parser.  
+sub parse_headers
+{
+    my ($hdrs, $client, $subs) = @_;
+
+    # max 255 headers
+    for my $hcount (0 .. 255) {
+	my $line = $client->getline;
+	if(!defined $line)
+	{
+	    protocol_error ("(EOF during headers)");
+	    return 1;
+	}
+	$line =~ s/\r\n$//;
+	if (!$line) {
+	    return 0;
+	}
+
+	my($header, $value) = split(/:\s*/, $line, 2);
+	if (!defined $value)
+	{
+	    protocol_error("(header not in 'Name: value' format)");
+	    return 1;
+	}
+
+	my $ent = $subs->{$header};
+	if ($ent && &{$ent} ($hdrs, $header, $value)) {
+	    return 1;
+	}
+    }
+    
+    # avoid too-many-headers DOS attack
+    protocol_error ("(too many headers)");
+    return 1;
 }
+
+# We'll run handle user unless we've been told not
+# to process per-user config files.  Otherwise
+# we'll check and see if we need to try SQL
+# lookups.  If $opt{'user-config'} is true, we need to try
+# their config file and then do the SQL lookup.
+# If $opt{'user-config'} IS NOT true, we skip the conf file and
+# only need to do the SQL lookup if $opt{'sql-config'} IS
+# true.  (I got that wrong the first time.)
+#
+sub got_user_header
+{
+  my ($client, $header, $value) = @_;
+
+  if ($value !~ /^([\x20-\xFF]*)$/)
+  {
+      protocol_error ("(User header contains control chars)");
+      return 1;
+  }
+
+  $current_user = $1;
+  auth_ident($current_user) if $opt{'auth-ident'};
+
+  if (!$opt{'user-config'})
+  {
+    if ($opt{'sql-config'}) {
+      handle_user_sql($current_user);
+    } elsif ($opt{'ldap-config'}) {
+      handle_user_ldap($current_user);
+    } elsif ($opt{'virtual-config'} || $opt{'virtual-config-dir'}) {
+      handle_virtual_user($current_user);
+    } elsif ($opt{'setuid-with-sql'}) {
+      handle_user_setuid_with_sql($current_user);
+      $setuid_to_user = 1; #to benefit from any paranoia.
+    } elsif ($opt{'setuid-with-ldap'}) {
+      handle_user_setuid_with_ldap($current_user);
+      $setuid_to_user = 1; # as above
+    }
+  }
+  else
+  {
+    handle_user($current_user);
+    if ($opt{'sql-config'}) {
+      handle_user_sql($current_user);
+    }
+  }
+  return 0;
+}
+
+sub got_clen_header
+{
+  my ($hdrs, $header, $value) = @_;
+  if ($value !~ /^(\d*)$/)
+  {   
+      protocol_error ("(Content-Length contains non-numeric bytes)");
+      return 1;
+  }
+  $hdrs->{expected_length} = $1;
+  return 0;
+}
+
+sub protocol_error
+{
+    my ($err) = @_;
+    my $resp = "EX_PROTOCOL";
+    print $client "SPAMD/1.0 $resphash{$resp} Bad header line: $err\r\n";
+    logmsg "bad protocol: header error: $err";
+}
+
+###########################################################################
 
 sub spawn {
     my $coderef = shift;
