@@ -59,6 +59,8 @@ header RATWARE_DIFFOND		ALL =~ /DiffondiCool/
 describe RATWARE_DIFFOND	Bulk email fingerprint (DiffondiCool) found
 header RATWARE_RCVD_LC_ESMTP	Received =~ /^from (?:(?:unknown|\d+\.\d+\.\d+\.\d+) \(\S+\)|\[\d+\.\d+\.\d+\.\d+\]) by \S+ with (?:esmtp|local|smtp); /m
 describe RATWARE_RCVD_LC_ESMTP	Bulk email fingerprint ('esmtp' Received) found
+header RATWARE_MOZ_MALFORMED	User-Agent =~ /Mozilla\/5\.0\d\d/
+describe RATWARE_MOZ_MALFORMED	Bulk email fingerprint (Mozilla malformed) found
 
 ###########################################################################
 # Now, detect forgeries of real MUAs

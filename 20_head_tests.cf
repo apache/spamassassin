@@ -217,6 +217,9 @@ describe DATE_IN_FUTURE_48_96	Date: is 48 to 96 hours after Received: date
 header DATE_IN_FUTURE_96_XX	eval:check_for_shifted_date('96', 'undef')
 describe DATE_IN_FUTURE_96_XX	Date: is 96 hours or more after Received: date
 
+header DATE_TEMPLATE		ALL =~ /%CURRENT_DATE_TIME/
+describe DATE_TEMPLATE		Headers contain an unresolved date template
+
 ###########################################################################
 # illegal characters that should be MIME encoded
 # might want to exempt users using languages that don't use Latin
@@ -288,6 +291,9 @@ describe RCVD_HELO_IP_MISMATCH	Received: HELO and IP do not match, but should
 
 header RCVD_NUMERIC_HELO	eval:check_for_numeric_helo()
 describe RCVD_NUMERIC_HELO	Received: contains an IP address used for HELO
+
+header RCVD_ILLEGAL_IP		eval:check_for_illegal_ip()
+describe RCVD_ILLEGAL_IP	Received: contains illegal IP address
 
 # no legit mailer claims that their mailserver has no name
 # overlaps with RCVD_DOUBLE_IP*, but let's see how it is scored
@@ -693,7 +699,7 @@ describe FORGED_RCVD_NET_HELO	Host HELO'd using the wrong IP network
 header NO_RDNS_DOTCOM_HELO	eval:check_for_no_rdns_dotcom_helo()
 describe NO_RDNS_DOTCOM_HELO	Host HELO'd as a big ISP, but had no rDNS
 
-header X_ORIG_IP_NOT_IPV4	X-Originating-IP !~ /\[?(?:\d{1,3}\.){3}\d{1,3}\]?/ [if-unset: 0.0.0.0] 
+header X_ORIG_IP_NOT_IPV4	X-Originating-IP !~ /\[?(?:\d{1,3}\.){3}\d{1,3}\]?/ [if-unset: 0.0.0.0]
 describe X_ORIG_IP_NOT_IPV4	X-Originating-IP doesn't look like IPv4 address
 
 # match the format of a legit X-Auth-Warning header, and hit on fake ones
