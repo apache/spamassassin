@@ -360,12 +360,16 @@ sub get_pristine_body {
 
 # ---------------------------------------------------------------------------
 
+=back
+
 =head1 PARSING METHODS, NON-PUBLIC
 
 These methods take a RFC2822-esque formatted message and create a tree
 with all of the MIME body parts included.  Those parts will be decoded
 as necessary, and text/html parts will be rendered into a standard text
 format, suitable for use in SpamAssassin.
+
+=over 4
 
 =item parse_body()
 
