@@ -71,7 +71,7 @@ sub read_text_array_from_stdin {
   my @ary = ();
   while (<STDIN>) {
     push (@ary, $_);
-    /^$/ and last;
+    /^\r*$/ and last;
   }
 
   push (@ary, (<STDIN>));
@@ -92,13 +92,14 @@ sub parse_headers {
 
   while (defined ($_ = shift @{$self->{textarray}})) {
     # warn "JMD $_";
-    if (/^$/) { last; }
+    if (/^\r*$/) { last; }
 
     $entry = $hdr = $val = undef;
 
     if (/^\s/) {
       if (defined $prevhdr) {
 	$hdr = $prevhdr; $val = $_;
+        $val =~ s/\r+\n/\n/gs;          # trim CRs, we don't want them
 	$entry = $self->{headers}->{$hdr};
 	$entry->{$entry->{count} - 1} .= $val;
 	next;
@@ -116,6 +117,7 @@ sub parse_headers {
 
     } elsif (/^([^\x00-\x1f\x7f-\xff :]+): (.*)$/) {
       $hdr = $1; $val = $2;
+      $val =~ s/\r+//gs;          # trim CRs, we don't want them
       $entry = $self->_get_or_create_header_object ($hdr);
       $entry->{original} = 1;
 

@@ -138,7 +138,7 @@ sub check_for_forged_eudoramail_received_headers {
   my ($self) = @_;
 
   my $from = $self->get ('From:addr');
-  if ($from !~ /excite.com/) { return 0; }
+  if ($from !~ /eudoramail.com/) { return 0; }
 
   my $rcvd = $self->get ('Received');
   $rcvd =~ s/\s+/ /gs;		# just spaces, simplify the regexp
