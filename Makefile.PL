@@ -13,6 +13,7 @@ use ExtUtils::MakeMaker;
 
 # do this in perl, it's more portable
 my $rulesfiles = join (' ', map { s/rules.//; $_ } (<rules/*.cf>));
+$rulesfiles =~ s/local\.cf//;
 
 sub MY::libscan {
   my($self,$path) = @_;
@@ -112,7 +113,7 @@ spamd/spamc: spamd/spamc.c
 	$(CFCC) $(CFCCFLAGS) $(CFOPTIMIZE) spamd/spamc.c \
 			-o $@ $(CFLDFLAGS) $(CFLIBS)
 
-inst_cfs: $(LOCAL_RULES_DIR) $(DEF_RULES_DIR) $(DEF_RULES_DIR)/user_prefs.template $(LOCAL_RULES_DIR)/local.cf
+inst_cfs: $(LOCAL_RULES_DIR) $(DEF_RULES_DIR) $(DEF_RULES_DIR)/user_prefs.template $(LOCAL_RULES_DIR)/local.cf migrate_cfs
 	for file in $(RULES) ; do \
 	  $(CP) rules/$$file $(DEF_RULES_DIR)/$$file; \
 	done
@@ -122,6 +123,10 @@ $(DEF_RULES_DIR)/user_prefs.template: rules/user_prefs.template
 
 $(LOCAL_RULES_DIR)/local.cf: rules/local.cf
 	[ -f $(LOCAL_RULES_DIR)/local.cf ] || $(CP) rules/local.cf $(LOCAL_RULES_DIR)/local.cf
+
+migrate_cfs:
+	[ ! -f /etc/spamassassin.cf ] || $(MV) /etc/spamassassin.cf /etc/mail/spamassassin/migrated.cf
+	[ ! -f /etc/mail/spamassassin.cf ] || $(MV) /etc/mail/spamassassin.cf /etc/mail/spamassassin/migrated.cf
 
 $(DEF_RULES_DIR):
 	mkdir -p $(DEF_RULES_DIR)

@@ -389,6 +389,40 @@ these lines to your ~/.spamassassin.cf file:
     score RCVD_IN_BL_SPAMCOP_NET    4
 
 
+Automatic Whitelist System
+--------------------------
+
+SpamAssassin includes automatic whitelisting; if a mail sender sends 3
+mails which are not matched as spam, their address will be added to an
+automatic whitelist database.  This will mean that further mail from that
+address will never be tagged as spam, no matter how "spammish" it may
+appear.
+
+For command-line spamassassin users, this happens automatically.  'spamd'
+needs the '-a' command-line flag to do this.
+
+A system-wide auto-whitelist can be used, by setting the
+auto_whitelist_path and auto_whitelist_file_mode configuration commands
+appropriately, e.g.
+
+    auto_whitelist_path        /var/spool/spamassassin/auto-whitelist
+    auto_whitelist_file_mode   0777
+
+The spamassassin -W and -R command line flags provide an API to add and
+remove entries 'manually', if you so desire.  They operate based on an
+input mail message, to allow them to be set up as aliases which users can
+simply forward their mails to.  See the spamassassin manual page for more
+details.
+
+The default address-list implementation,
+Mail::SpamAssassin::DBBasedAddrList, uses Berkeley DB files to store the
+addresses.  If you are paranoid about concurrency issues, in a
+high-traffic setup, and/or using NFS, it may be safer to use the
+directory-based implementation -- Mail::SpamAssassin::DirBasedAddrList --
+which uses known-safe UNIX filesystem operations to implement this without
+the possibility of dangerous race conditions.
+
+
 (end of README)
 
 // vim:tw=74:

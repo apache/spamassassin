@@ -63,7 +63,8 @@ Options:
   -e               Exit with a non-zero exit code for spam messages
   -t               only testing; pipe message through and add extra report
   -r               mail message is verified as spam, report it
-  -W               add all addresses in mail header (from stdin) to whitelist
+  -W               add all addresses in mail (from stdin) to whitelist
+  -R               remove all addresses in mail (from stdin) from whitelist
   -w fromaddr	   send a warning mail back to the sender of the message,
                    notifying them that their message has been marked as spam
 		   (only useful if -r is used)
@@ -85,14 +86,14 @@ EOUSAGE
 
 use vars qw{
   $opt_t $opt_c $opt_p $opt_h $opt_V $opt_D $opt_r $opt_P $opt_w $opt_l
-  $opt_d $opt_L $opt_e $opt_W $opt_M
+  $opt_d $opt_L $opt_e $opt_W $opt_M $opt_R
 };
 
 eval {
   require Mail::SpamAssassin;
   require Mail::SpamAssassin::NoMailAudit;
 
-  getopts ('tc:p:ehVDrPw:l:dLWM:') or usage();
+  getopts ('tc:p:ehVDrPw:l:dLWRM:') or usage();
 
   if (defined $opt_h) { usage(); }
   if (defined $opt_V) {
@@ -196,7 +197,12 @@ my $mail = Mail::SpamAssassin::NoMailAudit->new ();
   $spamtest->set_persistent_address_list_factory ($addrlistfactory);
 
   if ($opt_W) {
-    $spamtest->add_all_header_address_to_whitelist ($mail);
+    $spamtest->add_all_addresses_to_whitelist ($mail);
+    $mail->ignore();		# will exit
+  }
+
+  if ($opt_R) {
+    $spamtest->remove_all_addresses_from_whitelist ($mail);
     $mail->ignore();		# will exit
   }
 
@@ -308,8 +314,13 @@ automatically before submission.
 
 =item B<-W>
 
-Add all email addresses, in the headers of the mail message read
-from STDIN, to the automatic whitelist.
+Add all email addresses, in the headers and body of the mail message read from
+STDIN, to the automatic whitelist.
+
+=item B<-R>
+
+Remove all email addresses, in the headers and body of the mail message read
+from STDIN, from the automatic whitelist.
 
 =item B<-w> I<fromaddr>
 
