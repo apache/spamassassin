@@ -6,10 +6,11 @@ use Carp;
 use strict;
 
 use vars	qw{
-  	@ISA
+  	@ISA $VERSION
 };
 
 @ISA = qw();
+$VERSION = 'bogus';	# avoid CPAN.pm picking up razor ver
 
 ###########################################################################
 
