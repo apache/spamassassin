@@ -35,11 +35,13 @@ SPAMASSASSIN RELEASE PROCEDURE
   on HEAD appearing in branches, if those revisions are in files created
   after the branch was created.   (I hate cvs -- jm)
 
-- run "./build/update_stable" to build the tar.gz files
+- run "./build/update_stable" to build the tar.gz files.
 
 - by default, they're written to ~/spamassassin.taint.org/released/ .
   This Works For Me (tm), as it's my local cvs checkout of the
   SpamAssassin website.  Copy them to wherever you want, yourself.
+
+- take a copy of the MD5sum line output.
 
 - test the tar.gz and zip files!  redo until they work!! ;)
 
@@ -90,7 +92,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   ( http://freshmeat.net/add-release/14876/ may work )
 
-- announce on SpamAssassin new site: http://news.spamassassin.org/
+- announce on SpamAssassin news site: http://news.spamassassin.org/
 
   ( http://news.spamassassin.org/modules.php?op=modload&name=Submit_News&file=index )
 
@@ -105,6 +107,6 @@ SPAMASSASSIN RELEASE PROCEDURE
 - Approve the posting to SpamAssassin-Announce (the list admins
   will get a mail indicating how to do this.)
 
-lastmod: Mar 20 2003 jm 
+lastmod: May 10 2003 jm
 
 // vim:tw=74:
