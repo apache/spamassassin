@@ -131,19 +131,18 @@ sub do_stdin {
     }
   }
 
-  # If we're using a CVS build, add the -w switch to turn on warnings
-  my $perl_warn = -f 'CVS/Repository' ? ' -w' : '';
-  # The warnings can be overwritten via -DPERL_WARN=<1|0>
-  if ($defines{'PERL_WARN'} && ($defines{'PERL_WARN'} ne 'auto')) {
-    if ($defines{'PERL_WARN'} eq 'yes') {
-      $perl_warn = ' -w';
-    }
-    elsif ($defines{'PERL_WARN'} eq 'no') {
-      $perl_warn = '';
-    }
-    else {
-      warn("Unknown value '$defines{'PERL_WARN'}' for PERL_WARN; assuming 'auto'");
-    }
+  # Warnings are enabled per default
+  my $perl_warn = ' -w';
+  # The warnings can be overwritten via -DPERL_WARN=<yes|no>
+  if ($defines{'PERL_WARN'} and $defines{'PERL_WARN'} eq 'no') {
+    $perl_warn = '';
+  }
+
+  # Taint mode is enabled per default
+  my $perl_taint = ' -T';
+  # The taint mode can be disabled with -DPERL_TAINT=<yes|no>
+  if ($defines{'PERL_TAINT'} and $defines{'PERL_TAINT'} eq 'no') {
+    $perl_taint = '';
   }
 
   # Save the Perl Version
@@ -160,7 +159,7 @@ sub do_stdin {
     if ($modules{'conditional'}) {
       # DELETE lines carrying the REMOVE_ON_BUILD or (deprecated) REMOVEFORINST tag
       if(/\bREMOVE(?:FORINST|_ON_BUILD)\b/) {
-	next;
+        next;
       }
     }
 
@@ -180,7 +179,7 @@ sub do_stdin {
 
     # Sharpbang (#!) replacement (see also ExtUtils::MY->fixin)
     if ($modules{'sharpbang'} && ($l == 1)) {
-      s/^#!.*perl.*$/#!${perl}${perl_warn}/;
+      s/^#!.*perl.*$/#!${perl}${perl_taint}${perl_warn}/;
     }
 
     print;

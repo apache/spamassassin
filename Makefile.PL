@@ -225,98 +225,83 @@ delete $makefile{'NO_META'} if $mm_version < 6.0;
 
 
 if (bool($opt{'__cruft'}, 0) and not bool($opt{'ignore_cruft'}, 0)) {
-  ($_=<<"  OLDCRUFT") =~ s/^ {4}//gm;
+  my $error = <<OLD_CRUFT;
 
     ***********************************************************************
-    You tried to use one of the variables
+    You attempted to use one of the following unsupported variables:
       INST_PREFIX
       INST_SITELIB
       INST_SYSCONFDIR
       DEF_RULES_DIR
       LOCAL_RULES_DIR
-    Those are not supported anymore. Please read the documents INSTALL and
-    PACKAGING to find out about the new way of changing these values.
+    Please read INSTALL and PACKAGING for new usage instructions.
 
-    Thanks and sorry for the inconvenience.
+    Thanks and sorry for any inconvenience.
     ***********************************************************************
 
-  OLDCRUFT
-  die $_;
+OLD_CRUFT
+  $error =~ s/^ {4}//gm;
+  die $error;
 }
-
 
 if ($mm_needs_destdir) {
-  ($_=<<"  DESTDIRHACK") =~ s/^ {4}//gm;
+  my $error = <<DESTDIR_HACK;
 
     ***********************************************************************
-    You used the variable
-      DESTDIR
-    but your installation of ExtUtils::MakeMaker ${mm_version} doesn't support
-    that directive natively.
+    ExtUtils::MakeMaker ${mm_version} doesn't include support for DESTDIR,
+    so if you want to be on the safe side, you might want to upgrade your
+    ExtUtils::MakeMaker to version 6.11 or later. It is available via CPAN.
 
-    This script includes a kludge to make it work with older versions, too.
-    If something does not work as expected, please report a bug to
-      <http://bugzilla.spamassassin.org>
-    including your version of ExtUtils::MakeMaker. We might also ask you to
-    attach the generated Makefile to that bug.
-
-    If you want to be on the safe side, you might want to upgrade your
-    ExtUtils::MakeMaker to at least version 6.11. It is available via CPAN.
     You can use either the CPAN shell or go to
       <http://search.cpan.org/search?module=ExtUtils::MakeMaker>
     to get an up-to-date version.
 
-    This is needed only for packaging, the end-users will not need to have
-    to upgrade to use SpamAssassin.
+    This should only be necessary if you are creating binary packages.
     ***********************************************************************
 
-  DESTDIRHACK
-  warn $_;
-} elsif ($opt{'destdir'} and !$mm_has_good_destdir) {
-  ($_=<<"  DESTDIRBUG") =~ s/^ {4}//gm;
+DESTDIR_HACK
+  $error =~ s/^ {4}//gm;
+  warn $error;
+}
+elsif ($opt{'destdir'} and !$mm_has_good_destdir) {
+  my $error = <<DESTDIR_BUG;
 
     ***********************************************************************
-    You used the variable
-      DESTDIR
-    but the implementation in your version of ExtUtils::MakeMaker ${mm_version}
-    is said to be buggy.
+    ExtUtils::MakeMaker ${mm_version} contains bugs that may cause problems
+    in the \"make\" process.  It is recommended that you upgrade
+    ExtUtils::MakeMaker to version 6.11 or later. It is available via CPAN.
 
-    If you want to be on the safe side, you might want to upgrade your
-    ExtUtils::MakeMaker to at least version 6.11. It is available via CPAN.
     You can use either the CPAN shell or go to
       <http://search.cpan.org/search?module=ExtUtils::MakeMaker>
     to get an up-to-date version.
 
-    This is needed only for packaging, the end-users will not need to have
-    to upgrade to use SpamAssassin.
+    This should only be necessary if you are creating binary packages.
     ***********************************************************************
 
-  DESTDIRBUG
-  warn $_;
+DESTDIR_BUG
+  $error =~ s/^ {4}//gm;
+  warn $error;
 }
 
 
-if(!$mm_has_pm_filter) {
-  ($_=<<"  ITSALLSOSTUPID") =~ s/^ {4}//gm;
+if (!$mm_has_pm_filter) {
+  my $error = <<ANCIENT_VERSION;
 
     ***********************************************************************
     Your version of ExtUtils::MakeMaker does not support PM_FILTER.
-    We need to include a nasty workaround to make it work with our make
-    routines. You will get loads of warnings and it is very likely to break
-    at various places.
+    The \"make\" process will almost certainly have many warnings and it is
+    very likely to fail.
 
-    *Please* consider updating to a version later than 5.45. Its available
-    on CPAN <http://search.cpan.org/search?module=ExtUtils::MakeMaker>.
+    You can use either the CPAN shell or go to
+      <http://search.cpan.org/search?module=ExtUtils::MakeMaker>
+    to get an up-to-date version.
 
-    Hint: Perl 5.6.1 and later ship good versions of ExtUtils::MakeMaker
-    by default.
-
-    If anything breaks while building Mail::SpamAssassin, please file a bug
-    at <http://bugzilla.spamassassin.org>.
+    Perl 5.6.1 and later versions also include recent versions by default.
     ***********************************************************************
 
-  ITSALLSOSTUPID
-  warn $_;
+ANCIENT_VERSION
+  $error =~ s/^ {4}//gm;
+  warn $error;
 
   $makefile{SKIP} = [ 'pm_to_blib' ];
   $makefile{macro}{PM_FILTER} = $makefile{PM_FILTER};
@@ -581,10 +566,10 @@ sub _set_macro_SYSCONFDIR {
   $macro = $repository . "SYSCONFDIR";
 
   # Is this macro already set?
-  return if defined get_macro($macro);
+  return if get_macro($macro);
 
   # Is this macro supposed to be overwritten?
-  if (defined get_macro('SYSCONFDIR')) {
+  if (get_macro('SYSCONFDIR')) {
     set_macro($macro, macro_ref('SYSCONFDIR'));
     return;
   }
@@ -619,11 +604,11 @@ sub _set_macro_DATADIR {
   $macro = "INSTALL" . repository($repository) . "DATA";
 
   # Is this macro already set?
-  return if defined get_macro($macro);
+  return if get_macro($macro);
 
   # Is this macro supposed to be overwritten?
   foreach my $omacro (qw(DATADIR DEFRULESDIR)) {
-    if (defined get_macro($omacro)) {
+    if (get_macro($omacro)) {
       set_macro($macro, get_macro($omacro));
       return;
     }
@@ -653,11 +638,11 @@ sub _set_macro_CONFDIR {
   $macro = "INSTALL" . repository($repository) . "CONF";
 
   # Is this macro already set?
-  return if defined get_macro($macro);
+  return if get_macro($macro);
 
   # Is this macro supposed to be overwritten?
   foreach my $omacro (qw(CONFDIR LOCALRULESDIR)) {
-    if (defined get_macro($omacro)) {
+    if (get_macro($omacro)) {
       set_macro($macro, get_macro($omacro));
       return;
     }
@@ -717,7 +702,7 @@ sub _set_macro_PERL_yesno {
   $macro = 'PERL_' . $macro;
   $val   = "";
   if (get_macro($macro)) {
-    $val = yesno(get_macro($macro));
+    $val = ::yesno(get_macro($macro));
   }
 
   set_macro($macro, $val);
@@ -781,7 +766,7 @@ sub MY::install {
 
     # Replace all other $(INSTALL*) vars (except $(INSTALLDIRS) of course)
     # with their $(DESTINSTALL*) counterparts
-    s/\Q$(\E(INSTALL[^D][^I][^R][^S][A-Z]+)\Q)\E/\$(DEST$1)/g;
+    s/\Q$(\E(INSTALL(?!DIRS)${MACRO_RE})\Q)\E/\$(DEST$1)/g;
   }
 
   clean_MY_globals($self);
@@ -824,7 +809,7 @@ sub MY::constants {
       if (line_has_macro_def($line, 'INSTALLDIRS')) {
         $line .= "\n" . macro_def('DESTDIR');
       }
-      elsif (line_has_macro_def($_, qr/INSTALL[A-Z]+/)) {
+      elsif (line_has_macro_def($line, qr/INSTALL${MACRO_RE}/)) {
         my $macro = get_macro_name_from_line($line);
         $line .= "\n" . macro_def('DEST' . $macro,
                           macro_ref('DESTDIR') . macro_ref($macro));
@@ -926,7 +911,8 @@ FIXBYTES	= -Mbytes \
 
 FIXBANG		= -Msharpbang \
 		  -DPERL_BIN="$(PERL_BIN)" \
-		  -DPERL_WARN="$(PERL_WARN)"
+		  -DPERL_WARN="$(PERL_WARN)" \
+		  -DPERL_TAINT="$(PERL_TAINT)"
 
 SPAMC_SOURCES	= spamd/spamc.c spamd/libspamc.c spamd/utils.c qmail/qmail-spamc.c
 
