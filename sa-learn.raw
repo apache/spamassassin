@@ -477,7 +477,7 @@ to start, here is the logic that is used:
 either bayes_expiry_max_db_size * 75% or 100,000 tokens.  therefore, the goal
 reduction is number of tokens - number of tokens to keep.
 
-=item - if the reduction number if < 1000 tokens, abort (not worth the effort).
+=item - if the reduction number is < 1000 tokens, abort (not worth the effort).
 
 =item - if an expire has been done before, guesstimate the new
 atime delta based on the old atime delta.  (new_atime_delta =
