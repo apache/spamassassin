@@ -1383,9 +1383,11 @@ sub priority_no_name {
 sub partial_rfc_2369 {
   my ($self) = @_;
 
+  # Jul  3 2002 jm: added Mailing-List so Yahoo!Groups mails aren't hit
   my $all = $self->get('ALL');
   my @headers = ('List-Help', 'List-Subscribe', 'List-Unsubscribe',
-		 'List-Post', 'List-Owner', 'List-Archive');
+		 'List-Post', 'List-Owner', 'List-Archive',
+                 'Mailing-List');
   my %count;
 
   foreach my $header (@headers) {
