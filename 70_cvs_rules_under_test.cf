@@ -845,7 +845,6 @@ body __NIGERIAN_BODY_1	/\b(?:financial|confiden(?:tial|ce)|safe(?:ty)?|mutual|se
 body __NIGERIAN_BODY_2	/\btransaction\b.{1,30}\b(?:magnitude|diplomatic|strict|absolute|secret|confiden(?:tial|ce)|guarantee)/i
 body __NIGERIAN_BODY_3	/BASED ON INFORMATION GATHERED ABOUT YOU, WE BELIEVE\s*YOU WOULD BE IN A POSITION TO HELP US IN TRANSFER/i
 body __NIGERIAN_BODY_4	/\bBarrister\b/i
-body __NIGERIAN_BODY_5	/\bmillions?(?: of)? dollars\b/i
 body __NIGERIAN_BODY_6	/\bIt is with trust and confidentiality\b/i
 body __NIGERIAN_BODY_7	/\bUSD?\s*(?:\$\s*)?(?:\d+,\d+,\d+|\d+\.\d+\s*million)/i
 body __NIGERIAN_BODY_8	/\b(?:You may be surprised to receive this letter from me|this letter will be a surprise)\b/i
@@ -860,11 +859,11 @@ body __NIGERIAN_BODY_16	/\bI am a Private Investigator\b/i
 body __NIGERIAN_BODY_17	/\bWRITING THIS LETTER TO SOLICIT\b/i
 body __NIGERIAN_BODY_18	/\bSEVERAL ATTEMPTS HAVE BEEN MADE WITH OUT SUCCESS\b/i
 body __NIGERIAN_BODY_19	/\bMY PROPOSAL IS ACCEPTABLE\b/i
-body __NIGERIAN_BODY_20	/\d+% (?:of the total (?:amount|sum)|for your effort|for my investment)\b/i
+body __NIGERIAN_BODY_20	/\d+% (?:of the total (?:amount|sum)|for you|for my investment|for (?:us|me))\b/i
 body __NIGERIAN_BODY_21 /\bforeign account\b/i
 body __NIGERIAN_BODY_22 /\btrust (?:and|&) confidentiality\b/i
 body __NIGERIAN_BODY_25	/\bvery beneficial to both of us\b/i
-body __NIGERIAN_BODY_26	/\bmillion (?:united states dollars|usd?)\b/i
+body __NIGERIAN_BODY_26	/\bmillion (?:.{1,25} thousand\s*)?(?:(?:united states|u\.?s\.?) dollars|(?i:U\.?S\.?D?))\b/i
 body __NIGERIAN_BODY_27	/\bcorrespondent branch\b/i
 body __NIGERIAN_BODY_28	/\btransaction is .{1,15} risk free.\b/i
 body __NIGERIAN_BODY_29	/\b(?:percentage|rate) of this money\b/i
