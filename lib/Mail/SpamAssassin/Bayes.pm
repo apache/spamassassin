@@ -6,8 +6,9 @@ Mail::SpamAssassin::Bayes - determine spammishness using a Bayesian classifier
 
 =head1 DESCRIPTION
 
-This is a form of Bayesian classification, using an algorithm based on the one
-detailed in Paul Graham's "A Plan For Spam" paper at:
+This is a Bayesian-like form of probability-analysis classification, using an
+algorithm based on the one detailed in Paul Graham's "A Plan For Spam" paper
+at:
 
   http://www.paulgraham.com/
 
@@ -40,11 +41,6 @@ use vars qw{ @ISA @DBNAMES
   $IGNORED_HDRS
   $MIN_SPAM_CORPUS_SIZE_FOR_BAYES
   $MIN_HAM_CORPUS_SIZE_FOR_BAYES
-  $USE_ROBINSON_FX_EQUATION_FOR_LOW_FREQS
-  $ROBINSON_S_CONSTANT
-  $ROBINSON_MIN_PROB_STRENGTH
-  $N_SIGNIFICANT_TOKENS
-  $MAX_TOKEN_LENGTH
   %HEADER_NAME_COMPRESSION
 };
 
@@ -53,22 +49,22 @@ use vars qw{ @ISA @DBNAMES
 # Which headers should we scan for tokens?  Don't use all of them, as it's easy
 # to pick up spurious clues from some.  What we now do is use all of them
 # *less* these well-known headers; that way we can pick up spammers' tracking
-# headers.
+# headers (which are obviously not well-known in advance!).
 #
 # Don't use the following... From, To, Cc; frequently forged.  Date: can provide
 # incorrect cues if your spam corpus is older/newer than nonspam.  Subject:
 # already included as part of body.  List headers: a spamfiltering mailing list
-# will become a nonspam sign.  Received: (TODO) ditto; need to use only the
-# last 2 rcvd lines.  Spam-filter or virus-filter signs: obvious reasons.
+# will become a nonspam sign.  Received: handled specially.
+# Spam-filter or virus-filter signs: obvious reasons.
 
 $IGNORED_HDRS = qr{(?:
-		  From |To |Cc |MIME-Version |Content-Transfer-Encoding
+		  From |To |Cc |CC |MIME-Version |Content-Transfer-Encoding
 		  |List-Unsubscribe |List-Subscribe |List-Owner
-		  |X-List-Host |Received |Date
+		  |X-List-Host |Received |Date |Subject
 		  |Sender |X-MailScanner |X-MailScanner-SpamCheck
 		  |Delivered-To |X-Spam-Status |X-Spam-Level
 		  |Reply-To |Errors-To |X-Antispam 
-		  |CC |Subject |Return-Path |Delivery-Return-Path
+		  |Return-Path |Delivery-Return-Path
 		  |X-Pyzor |Content-Class |Thread-Index
 		  |X-Mailman-Version |X-Beenthere
 		  |X-OriginalArrivalTime |X-MimeOLE
@@ -79,10 +75,10 @@ $IGNORED_HDRS = qr{(?:
 		  |X-MIME-Autoconverted | Status |Content-Length
 		  |Lines |X-UID |Delivery-Date |X-Virus-Scanned
 		  |X-Spam-hits |X-Spam |X-Spam-Score
-		  |X-Mass-Check-Id
+		  |X-Mass-Check-Id |Replied
 		)}x;
 
-# We store header-mined tokens in the db with a "H:HeaderName:val" format.
+# We store header-mined tokens in the db with a "HHeaderName:val" format.
 # some headers may contain lots of gibberish tokens, so allow a little basic
 # compression by mapping the header name at least here.  these are the headers
 # which appear with the most frequency in my db.  note: this doesn't have to
@@ -93,14 +89,15 @@ $IGNORED_HDRS = qr{(?:
   'Message-Id' => '*m',
   'Message-ID' => '*M',
   'Received' => '*r',
+  'Subject' => '*s',
   'User-Agent' => '*u',
   'References' => '*f',
   'In-Reply-To' => '*i',
   'X-Originalarrivaltime' => '*o',
 );
 
-# How big should the corpora be before we allow scoring using Bayesian
-# tests?
+# How big should the corpora be before we allow scoring using Bayesian tests?
+# Do not use constants here, these may be better as conf items. TODO
 $MIN_SPAM_CORPUS_SIZE_FOR_BAYES = 200;
 $MIN_HAM_CORPUS_SIZE_FOR_BAYES = 200;
 
@@ -108,22 +105,22 @@ $MIN_HAM_CORPUS_SIZE_FOR_BAYES = 200;
 # http://radio.weblogs.com/0101454/stories/2002/09/16/spamDetection.html ?
 # It gives better results, in that scores are more likely to distribute
 # into the <0.5 range for nonspam and >0.5 for spam.
-$USE_ROBINSON_FX_EQUATION_FOR_LOW_FREQS = 1;
+use constant USE_ROBINSON_FX_EQUATION_FOR_LOW_FREQS => 1;
 
 # This (apparently) works well as a value for 's' in the f(w) equation.
-$ROBINSON_S_CONSTANT = 0.45;
+use constant ROBINSON_S_CONSTANT => 0.45;
 
 # How many of the most significant tokens should we use for the p(w)
 # calculation?
-$N_SIGNIFICANT_TOKENS = 50;
+use constant N_SIGNIFICANT_TOKENS => 50;
 
 # Should we ignore tokens very close to the middle ground?  This value
 # is anecdotally effective.
-$ROBINSON_MIN_PROB_STRENGTH = 0.1;
+use constant ROBINSON_MIN_PROB_STRENGTH => 0.1;
 
 # How long a token should we hold onto?  (note: German speakers typically
 # will require a longer token than English ones.)
-$MAX_TOKEN_LENGTH = 20;
+use constant MAX_TOKEN_LENGTH => 20;
 
 # lower and upper bounds for probabilities; we lock probs into these
 # so one high-strength token can't overwhelm a set of slightly lower-strength
@@ -317,17 +314,6 @@ sub finish {
 
 ###########################################################################
 
-# TODO: should we try to get some header data in here too?  possible good
-# sources are:
-#
-# Content-Type (mime boundaries ditto)
-# X-Mailer, User-Agent (spamtool signatures)
-# Received (should only take last 2 or 3 Received entries)
-#
-# others can provide spurious clues.  The spambayes folks note that even
-# Date headers can subvert testing, if you've got a corpus of spam from
-# one date period and nonspam from another!
-
 sub tokenize {
   my ($self, $msg, $body) = @_;
 
@@ -335,12 +321,12 @@ sub tokenize {
   $self->{tokens} = [ ];
 
   for (@{$body}) {
-    $wc += $self->tokenize_line ($_, '', 0);
+    $wc += $self->tokenize_line ($_, '', 0, 1);
   }
 
   my %hdrs = $self->tokenize_headers ($msg);
   foreach my $prefix (keys %hdrs) {
-    $wc += $self->tokenize_line ($hdrs{$prefix}, "H:$prefix:", 1);
+    $wc += $self->tokenize_line ($hdrs{$prefix}, "H$prefix:", 1, 0);
   }
 
   my @toks = @{$self->{tokens}}; delete $self->{tokens};
@@ -352,12 +338,13 @@ sub tokenize_line {
   local ($_) = $_[1];
   my $tokprefix = $_[2];
   my $casesensitive = $_[3];
+  my $killtitlecase = $_[4];
 
   # include quotes, .'s and -'s for URIs, and [$,]'s for Nigerian-scam strings,
   # and ISO-8859-15 alphas.  DO split on @'s, so username and domains in
   # mail addrs are separate tokens.
   # Some useful tokens: "$31,000,000" "www.clock-speed.net"
-  tr/-A-Za-z0-9,_'"\$.\250\270\300-\377 / /cs;
+  tr/-A-Za-z0-9,_'"\$.\241-\377 / /cs;
 
   my $wc = 0;
 
@@ -366,11 +353,15 @@ sub tokenize_line {
     $token =~ s/[-'"\.,]+$//;        # so we don't get loads of '"foo' tokens
 
     next if length($token) < 3 || $token eq "and" || $token eq "the";
-    next if length($token) > $MAX_TOKEN_LENGTH;
+    next if length($token) > MAX_TOKEN_LENGTH;
     $wc++;
 
     if ($casesensitive) {
       push (@{$self->{tokens}}, $tokprefix.$token);
+    }
+
+    if ($killtitlecase) {
+      $token =~ s/^([A-Z])([^A-Z]+)$/ (lc $1) . $2 /ge;
     }
 
     # now do some token abstraction; in other words, make them act like
@@ -416,20 +407,32 @@ sub tokenize_headers {
     my $val = $2;
 
     # special tokenization for some headers:
-    if ($hdr =~ /^Message-I[dD]$/) {
+    if ($hdr =~ /^(?:|X-|Resent-)Message-I[dD]$/) {
       # try to split Message-ID segments on probable ID boundaries. Note that
       # Outlook message-ids seem to contain a server identifier ID in the last
       # 8 bytes before the @.  Make sure this becomes its own token, it's a
-      # great spam-sign for a learning system!
+      # great spam-sign for a learning system!  Be sure to split on ".".
       $val =~ s/[^_A-Za-z0-9]/ /g;
     }
+    elsif ($hdr eq 'Received') {
+      # Thanks to Dan for these.  Trim out "useless" tokens; sendmail-ish IDs
+      # and valid-format RFC-822/2822 dates
+      $val =~ s/\bid [a-zA-Z0-9]{7,20}\b//g;
+      $val =~ s/(?:(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun),\s)?
+		[0-3\s]?[0-9]\s
+		(?:Jan|Feb|Ma[ry]|Apr|Ju[nl]|Aug|Sep|Oct|Nov|Dec)\s
+		(?:19|20)?[0-9]{2}\s
+		[0-2][0-9](?:\:[0-5][0-9]){1,2}\s
+		(?:\s*\(|\)|\s*(?:[+-][0-9]{4})|\s*(?:UT|[A-Z]{2,3}T))*
+		//gx;
+    }
 
-    # replaced with "compressed" version if possible
+    # replace hdr name with "compressed" version if possible
     if (defined $HEADER_NAME_COMPRESSION{$hdr}) {
       $hdr = $HEADER_NAME_COMPRESSION{$hdr};
     }
 
-    if (defined $parsed{$hdr}) {
+    if (exists $parsed{$hdr}) {
       $parsed{$hdr} .= " ".$val;
     } else {
       $parsed{$hdr} = $val;
@@ -742,23 +745,26 @@ sub compute_prob_for_token {
   $s ||= 0;
   $n ||= 0;
 
-  if (!$USE_ROBINSON_FX_EQUATION_FOR_LOW_FREQS) {
+  if (!USE_ROBINSON_FX_EQUATION_FOR_LOW_FREQS) {
     return if ($s + $n < 10);      # ignore low-freq tokens
-  } else {
-    return if ($s + $n < 2);       # ignore hapaxes (1-occurence only)
+
+  # TEST: allow use of hapaxes; just modulate them using Robinson's f(x)
+  # } else {
+    # return if ($s + $n < 2);       # ignore hapaxes (1-occurence only)
+
   }
 
   my $ratios = ($s / $ns);
   my $ration = ($n / $nn);
   my $prob = ($ratios) / ($ration + $ratios);
 
-  if ($USE_ROBINSON_FX_EQUATION_FOR_LOW_FREQS) {
+  if (USE_ROBINSON_FX_EQUATION_FOR_LOW_FREQS) {
     # use Robinson's f(x) equation for low-n tokens, instead of just
     # ignoring them
     my $robx = $self->{robinson_x};
     my $robn = $s+$n;
     $prob = ($self->{robinson_s_dot_x} + ($robn * $prob)) /
-		  ($ROBINSON_S_CONSTANT + $robn);
+		  (ROBINSON_S_CONSTANT + $robn);
   }
 
   $self->{db_probs}->{$token} = pack ('f', $prob);
@@ -772,7 +778,7 @@ sub precompute_robinson_constants {
 
   $self->{robinson_x} = 0.5;	#TODO - use computed one?
   # precompute this here for speed
-  $self->{robinson_s_dot_x} = ($self->{robinson_x} * $ROBINSON_S_CONSTANT);
+  $self->{robinson_s_dot_x} = ($self->{robinson_x} * ROBINSON_S_CONSTANT);
 }
 
 ###########################################################################
@@ -836,7 +842,7 @@ sub scan {
 
   # now take the $count most significant tokens and calculate probs using
   # Robinson's formula.
-  my $count = $N_SIGNIFICANT_TOKENS;
+  my $count = N_SIGNIFICANT_TOKENS;
   my $P = 1;
   my $Q = 1;
   for (sort {
@@ -845,7 +851,7 @@ sub scan {
   {
     if ($count-- < 0) { last; }
     my $pw = $pw{$_};
-    next if (abs($pw - 0.5) < $ROBINSON_MIN_PROB_STRENGTH);
+    next if (abs($pw - 0.5) < ROBINSON_MIN_PROB_STRENGTH);
     $P *= (1-$pw);
     $Q *= $pw;
 
