@@ -85,13 +85,13 @@ header SUBJECT_FREQ             Subject =~ /\b(?:monday|daily|weekly|monthly)\b/
 describe SUBJECT_FREQ           Subject contains a frequency - probable newsletter
 tflags SUBJECT_FREQ		nice
 
-header SUBJECT_MONTH            Subject =~ /\b(?:Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)/
+header SUBJECT_MONTH            Subject =~ /\b(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|June?|July?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\b/
 describe SUBJECT_MONTH          Subject contains a month name - probable newsletter
 tflags SUBJECT_MONTH		nice
 
 # a case-insensitive one; doesn't have "Apr" => "0% APR!" or "May" => "you may
 # want to check this out".
-header SUBJECT_MONTH_2          Subject =~ /\b(?:Jan|Feb|Mar|Jun|Jul|Aug|Sep|Oct|Nov|Dec)/i
+header SUBJECT_MONTH_2          Subject =~ /\b(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|June?|July?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\b/i
 describe SUBJECT_MONTH_2        Subject contains a month name - probable newsletter (2)
 tflags SUBJECT_MONTH_2		nice
 
