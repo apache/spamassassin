@@ -661,3 +661,7 @@ header __EUD_STYLE_FROM		From =~ /^[^\"].+[^\"] <[^>]+>$/
 meta T_FORGED_MUA_EUDORA_FROM	(__ANY_QUALCOMM_MUA && !__EUD_STYLE_FROM)
 describe T_FORGED_MUA_EUDORA_FROM Forged mail pretending to be from Eudora (by From)
 
+# Mar 26 2003 jm: these actually got through in 2 FNs for me.
+header T_SQUASHED_FROM_1	From =~ /\"</
+header T_SQUASHED_FROM_2	From =~ />\(/
+
