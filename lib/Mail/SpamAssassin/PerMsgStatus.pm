@@ -1815,9 +1815,9 @@ sub get_uri_list {
 
   # get URIs from HTML parsing
   # use the metadata version as $self->{html} is probably not set yet
-  if (defined $self->{msg}->{metadata}->{html}->{uri_canon}) {
-    while(my($type, $array) = each %{ $self->{msg}->{metadata}->{html}->{uri_canon} }) {
-      push(@uris, @{$array});
+  if (defined $self->{msg}->{metadata}->{html}->{uri_detail}) {
+    while(my($uri, $info) = each %{ $self->{msg}->{metadata}->{html}->{uri_detail} }) {
+      push(@uris, @{$info->{cleaned}});
     }
   }
 

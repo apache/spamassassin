@@ -201,7 +201,7 @@ sub parsed_metadata {
   # TODO! we need a method that provides more metadata about where
   # the URI was found so we can ignore hammy decoys.
 
-  # use the visible anchor uris first
+  # list of arrays to use in order
   my @uri_ordered = ();
 
   # use the parsed uris from the rendered message text
@@ -211,34 +211,41 @@ sub parsed_metadata {
   my @parsed = $scanner->get_parsed_uri_list();
 
   # Generate the full list of html-parsed domains.
-  my $html = $scanner->{msg}->{metadata}->{html}->{uri_canon} || { };
+  my $html = $scanner->{msg}->{metadata}->{html}->{uri_detail} || { };
 
-  # list specific tags to use in order
-  foreach ( 'a', 'form', 'img' ) {
-    if (exists $html->{$_}) {
-      push(@uri_ordered, $html->{$_});
-      delete $html->{$_};
-    }
+  # go from uri => info to uri_ordered
+  # 0: a
+  # 1: form
+  # 2: img
+  # 3: !a_empty
+  # 4: parsed
+  # 5: a_empty
+  if (@parsed) {
+    $uri_ordered[4] = \@parsed;
   }
 
-  # use the rest of the uris, except empty anchor uris
-  if (keys %{$html}) {
-    my @list = ();
-    while(my($type, $array) = each %{$html}) {
-      next if ($type eq 'a_empty');
-      push(@list, @{$array});
-      delete $html->{$type};
+  while (my($uri, $info) = each %{$html}) {
+    my $entry = 3;
+
+    if ($info->{types}->{a}) {
+      $entry = 5;
+
+      # determine a vs a_empty
+      foreach my $at (@{$info->{anchor_text}}) {
+        if (length $at) {
+	  $entry = 0;
+	  last;
+	}
+      }
     }
-    push(@uri_ordered, \@list) if (@list);
-  }
+    elsif ($info->{types}->{form}) {
+      $entry = 1;
+    }
+    elsif ($info->{types}->{img}) {
+      $entry = 2;
+    }
 
-  # now, use any of the URIs we parsed out of the message
-  push(@uri_ordered, \@parsed) if (@parsed);
-
-  # finally, use any uris from empty anchor tags
-  if (exists $html->{a_empty}) {
-    push(@uri_ordered, $html->{a_empty});
-    delete $html->{a_empty};
+    push(@{$uri_ordered[$entry]}, @{$info->{cleaned}});
   }
 
   # at this point, @uri_ordered is an ordered array of uri arrays
@@ -246,6 +253,8 @@ sub parsed_metadata {
   my %domlist = ();
   while (keys %domlist < $scanner->{main}->{conf}->{uridnsbl_max_domains} && @uri_ordered) {
     my $array = shift @uri_ordered;
+    next unless $array;
+
     my %domains = ();
 
     # run through and find the domains in this grouping
