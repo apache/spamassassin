@@ -211,7 +211,7 @@ it from running.
 
       if ($relative && !exists $self->{scoreset}->[0]->{$rule}) {
         my $msg = "Relative score without previous setting in SpamAssassin ".
-                    "configuration, skipping: $_";
+                    "configuration, skipping: $line";
 
         if ($self->{lint_rules}) {
           warn $msg."\n";
@@ -222,7 +222,13 @@ it from running.
         return;
       }
 
-      if (@scores == 4) {
+      # If we're only passed 1 score, copy it to the other scoresets
+      if (@scores) {
+        if (@scores != 4) {
+          @scores = ( $scores[0], $scores[0], $scores[0], $scores[0] );
+        }
+
+        # Set the actual scoreset values appropriately
         for my $index (0..3) {
           my $score = $relative ?
             $self->{scoreset}->[$index]->{$rule} + $scores[$index] :
@@ -231,13 +237,16 @@ it from running.
           $self->{scoreset}->[$index]->{$rule} = $score + 0.0;
         }
       }
-      elsif (@scores > 0) {
-        my $score = $relative ?
-          $self->{scoreset}->[0]->{$rule} + $scores[0] : $scores[0];
+      else {
+        my $msg = "Score configuration option without actual scores, skipping: $line";
 
-        for my $index (0..3) {
-          $self->{scoreset}->[$index]->{$rule} = $score + 0.0;
+        if ($self->{lint_rules}) {
+          warn $msg."\n";
+        } else {
+          dbg ($msg);
         }
+        $self->{errors}++;
+        return;
       }
     }
   });
