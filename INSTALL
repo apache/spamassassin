@@ -1,6 +1,6 @@
 
-Important Note For Users Upgrading From Earlier Versions
---------------------------------------------------------
+Note For Users Upgrading From SpamAssassin 2.5x
+-----------------------------------------------
 
 Due to major reliability shortcomings in the database support libraries
 other than DB_File, we now require that the DB_File module be installed to
@@ -12,6 +12,29 @@ support will be disabled.
 If you install DB_File and wish to import old Bayes database data, each
 user with a Bayes db should run "sa-learn --import" to copy old entries
 from the other formats into a new DB_File file.
+
+Due to the database library change, and the change to the database format
+itself, you will want to do something like this when upgrading:
+
+- stop running spamassassin/spamd (ie: you don't want it to be running
+  during the upgrade)
+- run "sa-learn --rebuild", this will sync your journal.  if you skip this
+  step, any data from the journal will be lost when the DB is upgraded.
+- install DB_File module if necessary
+- upgrade SA to 2.6x
+- if you were using another database module previously, run
+  "sa-learn --import" to migrate the data into new DB_File files
+- run "sa-learn --rebuild", this will cause the db format to be upgraded.
+  if you want to make sure everything runs correctly, you can add the "-D"
+  option.
+- test the new database by running some sample mails through SpamAssassin,
+  and/or at least running "sa-learn --dump" to make sure the data looks
+  valid.
+- start running spamassassin/spamd again
+
+Obviously the steps will be different depending on your environment,
+but you get the idea. :)
+
 
 
 Note For Users Upgrading From SpamAssassin 2.3x or 2.4x
