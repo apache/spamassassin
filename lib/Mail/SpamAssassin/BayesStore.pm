@@ -97,14 +97,6 @@ sub read_db_configs {
   # for now, we just set these settings statically.
   my $conf = $self->{bayes}->{main}->{conf};
 
-  # use of hapaxes.  Set on bayes object, since it controls prob
-  # computation.
-  $self->{bayes}->{use_hapaxes} = $conf->{bayes_use_hapaxes};
-
-  # Use chi-squared combining instead of Gary-combining (Robinson/Graham-style
-  # naive-Bayesian)?
-  $self->{bayes}->{use_chi_sq_combining} = $conf->{bayes_use_chi2_combining};
-
   # Should we use the number of scans that have occured for expiration, or the
   # time elapsed?  number of scans works better for 10fcv runs, but requires
   # another file to be used to store the messagecount, which will slow things
@@ -124,6 +116,8 @@ sub read_db_configs {
   # database below this number of entries.  100k entries is roughly
   # equivalent to a 5Mb database file.
   $self->{expiry_min_db_size} = $conf->{bayes_expiry_min_db_size};
+
+  $self->{bayes}->read_db_configs();
 }
 
 ###########################################################################
@@ -649,6 +643,9 @@ sub get_journal_filename {
 
   my $main = $self->{bayes}->{main};
   my $fname = $main->sed_path ($main->{conf}->{bayes_path}."_journal");
+
+  # untaint
+  $fname =~ /^([-_\/\\\:A-Za-z0-9 \.]+)$/; $fname = $1;
 
   $self->{journal_live_path} = $fname;
   return $self->{journal_live_path};

@@ -45,6 +45,14 @@ describe USER_AGENT_GNUS_XM	X-Mailer header indicates a non-spam MUA (Gnus)
 header USER_AGENT_VM		X-Mailer =~ /^\s*VM\s+\d+\.\d+\s+under\s+.{0,30}?[Ee]macs\b/
 describe USER_AGENT_VM		X-Mailer header indicates a non-spam MUA (VM)
 
+# frequently forged, needs some correlation meta checks with other headers.
+header __USER_AGENT_MSN      X-Mailer =~ /^MSN Explorer /
+header __HAS_XOAT            X-Originalarrivaltime =~ /FILETIME/
+header __HAS_XOIP            X-Originating-Ip =~ /^\[/
+meta USER_AGENT_MSN          (__USER_AGENT_MSN && __HAS_XOAT && __HAS_XOIP)
+
+header USER_AGENT_FORTE      X-Mailer =~ /^Forte Agent \d\.\d+\/\d+\.\d+$/
+
 tflags USER_AGENT_PINE       nice
 tflags USER_AGENT_MUTT       nice
 tflags USER_AGENT_MOZILLA_UA nice
@@ -58,3 +66,7 @@ tflags USER_AGENT_APPLEMAIL  nice
 tflags USER_AGENT_GNUS_UA    nice
 tflags USER_AGENT_GNUS_XM    nice
 tflags USER_AGENT_VM         nice
+tflags USER_AGENT_MSN        nice
+tflags USER_AGENT_FORTE      nice
+
+

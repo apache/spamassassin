@@ -165,7 +165,7 @@ sub new {
   $self->{bayes_path} = "__userstate__/bayes";
   $self->{bayes_file_mode} = "0700";	# as string, with --x bits
   $self->{bayes_use_hapaxes} = 1;
-  $self->{bayes_use_chi2_combining} = 1;
+  $self->{bayes_use_chi2_combining} = 0;
   $self->{bayes_expiry_min_db_size} = 100000;
   $self->{bayes_expiry_use_scan_count} = 0;
   $self->{bayes_expiry_days} = 30;

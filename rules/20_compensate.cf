@@ -255,7 +255,21 @@ test FWD_MSG ok Subject: [landho] Fwd: tell rod
 test FWD_MSG fail Subject: Fwd:Pure Opt-In for half the price
 test FWD_MSG fail Subject: Re: RE: FWD: search results        .       .       .
 
+header __ORIGL_MESSAGE_AGENT	X-Mailer =~ /\b(?:Microsoft Outlook|Internet Mail Service|Mozilla|AOL)\b/
+rawbody __ORIG_MESSAGE_LINE	/^-{5,8} ?Original Message ?-{5,8}$/
+meta ORIGINAL_MESSAGE		(__ORIG_MESSAGE_AGENT && __ORIG_MESSAGE_LINE)
+describe ORIGINAL_MESSAGE	Looks like a reply to a message
+tflags ORIGINAL_MESSAGE		nice
+
+
 #  3.351   0.0060   4.5117    0.001   0.97   -1.00  T_MSGID_GOOD_EXCHANGE
 header MSGID_GOOD_EXCHANGE    Message-Id =~ /^<[A-Z]{28}\.\S+\@\S+>$/
 tflags MSGID_GOOD_EXCHANGE    nice
+
+# mailman list reminder mails are getting tagged in 2.41, adding a rule to check for these
+header __FROM_MAILMAN_OWNER     From:addr =~ /^mailman-owner@/
+header __SUBJECT_MAILMAN_REMIND Subject =~ /\bmailing list memberships reminder\b/
+meta MAILMAN_REMINDER		(__FROM_MAILMAN_OWNER && __SUBJECT_MAILMAN_REMIND)
+describe MAILMAN_REMINDER	Mail headers indicate a mailman membership reminder
+tflags MAILMAN_REMINDER		nice
 
