@@ -205,6 +205,18 @@ not as effectively -- some of the spam-detection tests will have to be
 skipped.
 
 
+  - DB_File	(from CPAN)
+
+    Used to store data on-disk, for the Bayes-style logic and
+    auto-whitelist.  *Much* more efficient than the other standard Perl
+    database packages.  Strongly recommended.
+
+	perl -MCPAN -e shell
+	o conf prerequisites_policy ask
+	install DB_File
+	quit
+
+
   - Net::DNS	(from CPAN)
 
     Used to check the RBL, RSS, DUL etc. and perform MX checks.
