@@ -9,6 +9,7 @@
 
 %define pdir    Mail
 %define pnam    SpamAssassin
+%define debug_package %{nil}
 
 Summary:        a spam filter for email which can be invoked from mail delivery agents
 Summary(pl):    Filtr antyspamowy, przeznaczony dla programów dostarczaj±cych pocztê (MDA)
@@ -109,7 +110,15 @@ aplikacji do czytania poczty.
 
 %install
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
-%makeinstall
+# Specify the man dir locations since Perl sometimes gets it wrong... :(
+%makeinstall \
+	INSTALLMAN1DIR=%{_mandir}/man1 \
+	INSTALLMAN3DIR=%{_mandir}/man3 \
+	INSTALLSITEMAN1DIR=%{_mandir}/man1 \
+	INSTALLSITEMAN3DIR=%{_mandir}/man3 \
+	INSTALLVENDORMAN1DIR=%{_mandir}/man1 \
+	INSTALLVENDORMAN3DIR=%{_mandir}/man3
+
 install -d %buildroot/%{initdir}
 install -d %buildroot/%{_includedir}
 install -m 0755 spamd/redhat-rc-script.sh %buildroot/%{initdir}/spamassassin
