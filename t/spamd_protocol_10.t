@@ -5,8 +5,7 @@ use SATest; sa_t_init("spamd_protocol_10");
 use Test; BEGIN { plan tests => 10 };
 
 use File::Path;
-use Fcntl qw/:seek/;
-use IO::Socket::INET;
+use IO::Socket;
 use Mail::SpamAssassin::Conf;
 
 # ---------------------------------------------------------------------------
@@ -22,78 +21,68 @@ q{ GTUBE }, 'symbolshit',
 
 start_spamd("-L");
 
-my $startofdata = tell(DATA);
-my $out = run_symbols (0);	# use protocol 1.2
-ok (defined ($out));
-
-if ($out =~ /Spam: True \; ([\d\.]+) \/ 5\.0/) {
-  # the exact count could be just over or under 1000. compute!
-  ok ($1 >= 980 && $1 < 1020);
+my $data = "";
+while (<DATA>) {
+  s/\r?\n?$/\n/;
+  $data .= $_;
 }
 
-patterns_run_cb ($out);
-ok_all_patterns();
-clear_pattern_counters();
+my $out;
 
-seek (DATA, $startofdata, SEEK_SET);
-$out = run_symbols (1);	# use protocol 1.0
-ok (defined ($out));
+for ($p = 0; $p <= 1; $p++) {
+  $out = run_symbols ($data, $p);
+  ok (defined ($out));
 
-if ($out =~ /Spam: True \; ([\d\.]+) \/ 5\.0/) {
-  # the exact count could be just over or under 1000. compute!
-  ok ($1 >= 980 && $1 < 1020);
+  if ($out =~ /Spam: True \; ([\d\.]+) \/ 5\.0/) {
+    # the exact count could be just over or under 1000. compute!
+    ok ($1 >= 980 && $1 < 1020);
+  }
+
+  patterns_run_cb ($out);
+  ok_all_patterns();
+  clear_pattern_counters();
 }
-
-patterns_run_cb ($out);
-ok_all_patterns();
-clear_pattern_counters();
 
 stop_spamd();
 exit;
 
 
 sub run_symbols {
-  my $proto10 = shift;
+  my($data, $proto10) = @_;
 
-  if (!defined($socket = IO::Socket::INET->new(PeerAddr => 'localhost',
-      PeerPort => $spamdport, Proto => "tcp", Type => SOCK_STREAM)))
-  {
-	  warn("FAILED - Couldn't Connect to SpamCheck Host\n");
-	  return undef;
-
-  } else {
-
-  if (!$proto10) {
-	  my $data = '';
-	  while (<DATA>) { chomp($_); chomp($_); $data .= $_."\n"; }
-	  sockwrite ("SYMBOLS SPAMC/1.2\r\n");
-	  sockwrite ("Content-Length: ".length($data)."\r\n\r\n");
-	  sockwrite ($data);
-
-  } else {
-	  sockwrite ("SYMBOLS SPAMC/1.0\r\n");
-	  while (<DATA>)
-	  {
-		  chomp($_);
-		  chomp($_);
-		  sockwrite ("$_\n");
-	  }
+  $socket = new IO::Socket::INET(
+                  PeerAddr => 'localhost',
+                  PeerPort => $spamdport,
+                  Proto    => "tcp",
+                  Type     => SOCK_STREAM
+                ); 
+  unless ($socket) {
+    warn("FAILED - Couldn't Connect to SpamCheck Host\n");
+    return undef;
   }
 
-	  shutdown($socket, 1);
-
-	  my @Data = ();
-
-	  while (<$socket>) {
-		  my ($Data) = (/^(.+)\r?\n?$/);
-		  print $Data;
-		  print "\n";
-		  push(@Data, $Data) if ($Data);
-	  }
-
-	  $socket = undef;
-	  return join ("\n", @Data);
+  if ($proto10) {
+    sockwrite ("SYMBOLS SPAMC/1.0\r\n");
   }
+  else {
+    sockwrite ("SYMBOLS SPAMC/1.2\r\n");
+    sockwrite ("Content-Length: " . length($data) . "\r\n");
+    sockwrite ("\r\n");
+  }
+  sockwrite ($data);
+
+  shutdown($socket, 1);
+
+  $data = "";
+  while (<$socket>) {
+    s/\r?\n?$/\n/;
+    print;
+    $data .= $_;
+  }
+
+  $socket = undef;
+
+  return $data;
 }
 
 sub sockwrite {
