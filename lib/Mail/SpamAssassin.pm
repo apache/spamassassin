@@ -94,7 +94,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.180 2003/03/17 20:28:33 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.181 2003/03/27 01:54:10 jmason Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -777,7 +777,7 @@ sub add_all_addresses_to_blacklist {
 
   my @addrlist = ();
   my @hdrs = $mail->get_header ('From');
-  if ($#hdrs > 0) {
+  if ($#hdrs >= 0) {
     push (@addrlist, $self->find_all_addrs_in_line (join (" ", @hdrs)));
   }
 
