@@ -198,13 +198,11 @@ spamd/spamc$(EXE_EXT): binaries.mk
 binaries.mk: configure
 	./configure
 
-inst_cfs: $(DEF_RULES_DIR) $(LOCAL_RULES_DIR) $(LOCAL_RULES_DIR)/local.cf
-	$(RM_F) $(DEF_RULES_DIR)/*
+inst_cfs: $(LOCAL_RULES_DIR) $(LOCAL_RULES_DIR)/local.cf
+	$(RM_F) $(DEF_RULES_DIR)
+        $(MKPATH) $(DEF_RULES_DIR)
 	$(PERL) build/preprocessor $(FIXVARS) -Irules -O$(DEF_RULES_DIR) $(RULES)
-	$(CHMOD) $(PERM_RW) $(DEF_RULES_DIR)/*
-
-$(DEF_RULES_DIR):
-	$(MKPATH) $@
+	$(CHMOD) $(PERM_RW) $(DEF_RULES_DIR)
 
 $(LOCAL_RULES_DIR):
 	$(MKPATH) $@
