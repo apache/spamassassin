@@ -38,6 +38,9 @@ import smtplib, socket
 
 # EX_TEMPFAIL is 75 on every Unix I've checked, but...
 # check /usr/include/sysexits.h if you have odd problems.
+USAGE = 64
+DATAERR = 65
+NOUSER = 67
 TEMPFAIL = 75
 
 # this class hacks smtplib's SMTP class into a shape where it will
@@ -187,32 +190,34 @@ def process_message(spamd_host, spamd_port, lmtp_host, sender, recipient):
             checked_data = data # fallback
         lmtp = LMTP(lmtp_host)
         code, msg = lmtp.lhlo()
-        if code != 250: sys.exit(75)
+        if code != 250: sys.exit(TEMPFAIL)
 
         #lmtp.set_debuglevel(1)
         try:
             lmtp.sendmail(sender, recipient, checked_data)
+        except smtplib.SMTPRecipientsRefused:
+            sys.exit(NOUSER)
         except smtplib.SMTPDataError, errors:
             if errors.smtp_code/100 == 4:
                 sys.exit(TEMPFAIL)
             else:
-                sys.exit(1)
+                sys.exit(DATAERR)
     else:
         # too much data.  Just pass it through unchanged
         lmtp = LMTP(lmtp_host)
         code, msg = lmtp.lhlo()
-        if code != 250: sys.exit(75)
+        if code != 250: sys.exit(TEMPFAIL)
         #lmtp.set_debuglevel(1)
 
         code, msg = lmtp.mail(sender)
-        if code != 250: sys.exit(1)
+        if code != 250: sys.exit(TEMPFAIL)
         code, msg = lmtp.rcpt(recipient)
-        if code != 250: sys.exit(1)
+        if code != 250: sys.exit(NOUSER)
 
         # send the data in chunks
         lmtp.putcmd("data")
         code, msg = lmtp.getreply()
-        if code != 354: sys.exit(1)
+        if code != 354: sys.exit(TEMPFAIL)
         lmtp.send(smtplib.quotedata(data))
         data = ''
         data = sys.stdin.read(CHUNKSIZE)
@@ -226,7 +231,7 @@ def process_message(spamd_host, spamd_port, lmtp_host, sender, recipient):
         if code/100 == 4:
             sys.exit(TEMPFAIL)
         elif code != 250:
-            sys.exit(1)
+            sys.exit(DATAERR)
 
 def main(argv):
     spamd_host = 'localhost'
@@ -238,26 +243,28 @@ def main(argv):
         opts, args = getopt.getopt(argv[1:], 's:r:l:')
     except getopt.error, err:
         sys.stderr.write('%s: %s\n' % (argv[0], err))
-        sys.exit(1)
+        sys.exit(USAGE)
     for opt, arg in opts:
         if opt == '-s': sender = arg
         elif opt == '-r': recipient = string.lower(arg)
         elif opt == '-l': lmtp_host = arg
         else:
             sys.stderr.write('unexpected argument\n')
-            sys.exit(1)
+            sys.exit(USAGE)
     if args:
         sys.stderr.write('unexpected argument\n')
-        sys.exit(1)
+        sys.exit(USAGE)
     if not lmtp_host or not sender or not recipient:
         sys.stderr.write('required argument missing\n')
-        sys.exit(1)
+        sys.exit(USAGE)
 
     try:
         process_message(spamd_host, spamd_port, lmtp_host, sender, recipient)
+    except SystemExit, status:
+        raise SystemExit, status
     except:
         sys.stderr.write('%s: %s\n' % sys.exc_info()[:2])
-        sys.exit(1)
+        sys.exit(TEMPFAIL)
 
 if __name__ == '__main__':
     main(sys.argv)
