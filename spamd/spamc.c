@@ -130,7 +130,7 @@ full_write (int fd, const unsigned char *buf, int len)
 int dump_message(int in,int out)
 {
   size_t bytes;
-  char buf[8192];
+  unsigned char buf[8192];
 
   while((bytes=full_read(in, buf, 8192, 8192)) > 0)
   {
@@ -477,7 +477,7 @@ int process_message(const char *hostname, int port, char *username, int max_size
       exstatus = read_message(mysock,STDOUT_FILENO,max_size);
     }
 
-    if(CHECKONLY && ESC_PASSTHROUGHRAW == exstatus)
+    if(CHECK_ONLY && ESC_PASSTHROUGHRAW == exstatus)
     {
 	exstatus = EX_OK;
     }
