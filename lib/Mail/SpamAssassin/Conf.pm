@@ -1261,6 +1261,10 @@ be used if the header is not found in the mail message.
 Note that test names which begin with '__' are reserved for meta-match
 sub-rules, and are not scored or listed in the 'tests hit' reports.
 
+If you add or modify a test, please be sure to run a sanity check afterwards
+by running C<spamassassin --lint>.  This will avoid confusing error
+messages, or other tests being skipped as a side-effect.
+
 
 =item header SYMBOLIC_TEST_NAME exists:name_of_header
 
