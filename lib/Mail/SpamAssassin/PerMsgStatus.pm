@@ -258,7 +258,18 @@ sub learn {
   # zone.
   my $auto_learn_safety = 4;
 
-  dbg ("auto-learn? safety=+/-$auto_learn_safety, ".
+  # Figure out min/max for autolearning.
+  # Default to specified auto_learn_threshold settings
+  my $min = $self->{conf}->{auto_learn_threshold_nonspam};
+  my $max = $self->{conf}->{auto_learn_threshold_spam};
+
+  # Now see if the safety settings are lower/higher and change if necessary.
+  my $tmp = $self->{conf}->{required_hits} - $auto_learn_safety;
+  $min = $tmp if ( $tmp < $min );
+  $tmp = $self->{conf}->{required_hits} + $auto_learn_safety;
+  $max = $tmp if ( $tmp > $max );
+
+  dbg ("auto-learn? safety=$auto_learn_safety, ham=$min, spam=$max, ".
 		"body-hits=".$self->{body_only_hits}.", ".
 		"head-hits=".$self->{head_only_hits});
 
@@ -269,10 +280,11 @@ sub learn {
   my $hits = 0;
   my $orig_scoreset = $self->{conf}->get_score_set();
   if ( $orig_scoreset < 2 ) { # we don't need to recompute
+    dbg ("auto-learn: currently using scoreset $orig_scoreset.  no need to recompute.");
     $hits = $self->{hits};
   }
   else {
-    dbg ("auto-learn: recomputing score based on scoreset ".($orig_scoreset%2));
+    dbg ("auto-learn: currently using scoreset $orig_scoreset.  recomputing score based on scoreset ".($orig_scoreset%2).".");
     $self->{conf}->set_score_set($orig_scoreset % 2); # reduce to autolearning scores
     foreach my $test ( @{$self->{test_names_hit}} ) {
       # ignore tests with 0 score in this scoreset or if the test is a learning or userconf test
@@ -286,13 +298,9 @@ sub learn {
     $self->{conf}->set_score_set($orig_scoreset); # return to appropriate scoreset
   }
 
-  if (     $hits < $self->{conf}->{auto_learn_threshold_nonspam}
-	&& $hits < $self->{conf}->{required_hits} - $auto_learn_safety)
-  {
+  if ($hits < $min) {
     $isspam = 0;
-  } elsif ($hits >= $self->{conf}->{auto_learn_threshold_spam}
-	&& $hits >= $self->{conf}->{required_hits} + $auto_learn_safety)
-  {
+  } elsif ($hits >= $max) {
     $isspam = 1;
   } else {
     dbg ("auto-learn? no: inside auto-learn thresholds or safety zone around required_hits");
@@ -315,7 +323,7 @@ sub learn {
     }
   }
 
-  dbg ("auto-learning from this message. is spam? $isspam");
+  dbg ("auto-learn? yes, ".($isspam?"spam ($hits > $max)":"ham ($hits < $min)"));
   eval {
     my $learnstatus = $self->{main}->learn ($self->{msg},
 			  $self->get("Message-Id"), $isspam, 0);
