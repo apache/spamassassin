@@ -102,3 +102,6 @@ header T_MSGID_GOOD_EXCHANGE      Message-Id =~ /^<[A-Z]{28}\.\S+\@\S+>$/
 score T_MSGID_GOOD_EXCHANGE       -1.0
 tflags T_MSGID_GOOD_EXCHANGE      nice
 
+# Looks good, but should be tested first.  fixes current THIS_AINT_SPAM
+body T_THIS_AINT_SPAM             /This.{0,30}is.{1,10}not?.{0,15}spam/is
+describe T_THIS_AINT_SPAM         Claims "This is not spam"
