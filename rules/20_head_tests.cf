@@ -623,3 +623,10 @@ describe FROM_LOCAL_HEX		From: localpart has long hexadecimal sequence
 
 header FROM_LOCAL_DIGITS	From =~ /\d{11}\S*\@/i
 describe FROM_LOCAL_DIGITS	From: localpart has long digit sequence
+
+header X_MAILER_SPAM		X-Mailer !~ m{[A-Z0-9./]} [if-unset: Foo 1.0]
+describe X_MAILER_SPAM		X-Mailer: header is bulk email fingerprint
+
+header __TOCC_EXISTS		exists:ToCc
+meta TO_CC_NONE			!__TOCC_EXISTS
+describe TO_CC_NONE		No To: or Cc: header
