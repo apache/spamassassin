@@ -99,8 +99,8 @@ use POSIX qw(strftime);
 use constant HAS_TIME_PARSEDATE => eval { require Time::ParseDate; };
 use Config;
 
-if (! -f 'tmp/rules.pl') {
-  system("make tmp/rules.pl");
+if (! -f "$FindBin::Bin/tmp/rules.pl") {
+  system("cd $FindBin::Bin; make tmp/rules.pl");
 }
 # note: for reuse, score set doesn't matter
 require "rules.pl";
