@@ -356,6 +356,8 @@ sub _check_for_forged_received {
   $self->{mismatch_helo} = 0;
   $self->{mismatch_ip_helo} = 0;
 
+  my $IP_IN_RESERVED_RANGE = IP_IN_RESERVED_RANGE;
+
   my @fromip = map { $_->{ip} } @{$self->{relays_untrusted}};
   # just pick up domains for these
   my @by = map {
@@ -417,7 +419,7 @@ sub _check_for_forged_received {
 	# allow private IP addrs here, could be a legit screwup
 	if ($hclassb && $fclassb && 
 		$hclassb ne $fclassb &&
-		!($hlo =~ /IP_IN_RESERVED_RANGE/o))
+		!($hlo =~ /$IP_IN_RESERVED_RANGE/o))
 	{
 	  dbg ("forged-HELO: massive mismatch on IP-addr HELO: '$hlo' != '$fip'");
 	  $self->{mismatch_ip_helo}++;
@@ -475,7 +477,9 @@ sub _check_for_forged_hotmail_received_headers {
         /from mail pickup service by hotmail\.com with Microsoft SMTPSVC;/);
 
   my $ip = $self->get ('X-Originating-Ip');
-  if ($ip =~ /IP_ADDRESS/) { $ip = 1; } else { $ip = 0; }
+  my $IP_ADDRESS = IP_ADDRESS;
+
+  if ($ip =~ /$IP_ADDRESS/) { $ip = 1; } else { $ip = 0; }
 
   # Hotmail formats its received headers like this:
   # Received: from hotmail.com (f135.law8.hotmail.com [216.33.241.135])
@@ -558,7 +562,8 @@ sub check_for_forged_eudoramail_received_headers {
   $rcvd =~ s/\s+/ /gs;		# just spaces, simplify the regexp
 
   my $ip = $self->get ('X-Sender-Ip');
-  if ($ip =~ /IP_ADDRESS/) { $ip = 1; } else { $ip = 0; }
+  my $IP_ADDRESS = IP_ADDRESS;
+  if ($ip =~ /$IP_ADDRESS/) { $ip = 1; } else { $ip = 0; }
 
   # Eudoramail formats its received headers like this:
   # Received: from Unknown/Local ([?.?.?.?]) by shared1-mail.whowhere.com;
@@ -627,8 +632,9 @@ sub check_for_forged_yahoo_received_headers {
 
   if ($rcvd =~ /by web\S+\.mail\.yahoo\.com via HTTP/) { return 0; }
   if ($rcvd =~ /by smtp\S+\.yahoo\.com with SMTP/) { return 0; }
+  my $IP_ADDRESS = IP_ADDRESS;
   if ($rcvd =~
-      /from \[IP_ADDRESS\] by \S+\.(?:groups|grp\.scd)\.yahoo\.com with NNFMP/) {
+      /from \[$IP_ADDRESS\] by \S+\.(?:groups|grp\.scd)\.yahoo\.com with NNFMP/) {
     return 0;
   }
 
@@ -662,14 +668,15 @@ sub check_for_forged_juno_received_headers {
   my $xmailer = $self->get('X-Mailer');
   my $xorig = $self->get('X-Originating-IP');
   my $rcvd = $self->get('Received');
+  my $IP_ADDRESS = IP_ADDRESS;
 
   if (!$xorig) {  # New style Juno has no X-Originating-IP header, and other changes
-    if($rcvd !~ /from.*\b(?:juno|untd)\.com.*[\[\(]IP_ADDRESS[\]\)].*by/
+    if($rcvd !~ /from.*\b(?:juno|untd)\.com.*[\[\(]$IP_ADDRESS[\]\)].*by/
         && $rcvd !~ / cookie\.(?:juno|untd)\.com /) { return 1; }
     if($xmailer !~ /Juno /) { return 1; }
   } else {
-    if($rcvd !~ /from.*\bmail\.com.*\[IP_ADDRESS\].*by/) { return 1; }
-    if($xorig !~ /IP_ADDRESS/) { return 1; }
+    if($rcvd !~ /from.*\bmail\.com.*\[$IP_ADDRESS\].*by/) { return 1; }
+    if($xorig !~ /$IP_ADDRESS/) { return 1; }
     if($xmailer !~ /\bmail\.com/) { return 1; }
   }
 
@@ -1375,11 +1382,12 @@ sub check_rbl_backend {
   # Make sure a header significantly improves results before adding here
   # X-Sender-Ip: could be worth using (very low occurance for me)
   # X-Sender: has a very low bang-for-buck for me
+  my $IP_ADDRESS = IP_ADDRESS;
   my @originating = ();
   for my $header ('X-Originating-IP', 'X-Apparently-From') {
     my $str = $self->get($header);
     next unless defined $str;
-    push (@originating, ($str =~ m/(IP_ADDRESS)/g));
+    push (@originating, ($str =~ m/($IP_ADDRESS)/g));
   }
 
   # Let's go ahead and trim away all Reserved ips (KLC)
@@ -1516,10 +1524,11 @@ sub ip_list_uniq_and_strip_reserved {
   my ($self, @origips) = @_;
   my @ips = ();
   my %seen = ();
+  my $IP_IN_RESERVED_RANGE = IP_IN_RESERVED_RANGE;
   foreach my $ip (@origips) {
     next unless $ip;
     next if (exists ($seen{$ip})); $seen{$ip} = 1;
-    next if ($ip =~ /IP_IN_RESERVED_RANGE/o);
+    next if ($ip =~ /$IP_IN_RESERVED_RANGE/o);
     push(@ips, $ip);
   }
   return @ips;
@@ -1821,6 +1830,7 @@ sub _check_for_round_the_world_received {
   $self->{round_the_world_revdns} = 0;
   $self->{round_the_world_helo} = 0;
   my $rcvd = $self->get ('Received');
+  my $IPV4_ADDRESS = IPV4_ADDRESS;
 
   # TODO: use new Received header parser
 
@@ -1833,7 +1843,7 @@ sub _check_for_round_the_world_received {
   #     Fri, 30 Nov 2001 08:57:47 +1000
   if ($rcvd =~ /
   	\nfrom\b.{0,20}\s(\S+\.${CCTLDS_WITH_LOTS_OF_OPEN_RELAYS})\s\(.{0,200}
-  	\nfrom\b.{0,20}\s([-_A-Za-z0-9.]+)\s.{0,30}\[(IPV4_ADDRESS)\]
+  	\nfrom\b.{0,20}\s([-_A-Za-z0-9.]+)\s.{0,30}\[($IPV4_ADDRESS)\]
   /osix) { $relay = $1; $relayer = $2; $relayerip = $3; goto gotone; }
 
   return 0;

@@ -985,7 +985,9 @@ sub lookup_ptr {
     return undef;
   }
 
-  if ($dom =~ IP_IN_RESERVED_RANGE) {
+  my $IP_IN_RESERVED_RANGE = IP_IN_RESERVED_RANGE;
+
+  if ($dom =~ /${IP_IN_RESERVED_RANGE}/) {
     dbg ("IP is reserved, not looking up PTR: $dom");
     return undef;
   }

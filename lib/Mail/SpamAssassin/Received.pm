@@ -104,6 +104,9 @@ sub parse_received_headers {
   my $did_user_specify_trust = ($trusted->get_num_nets() > 0);
   my $did_user_specify_internal = ($internal->get_num_nets() > 0);
 
+  my $IP_IN_RESERVED_RANGE = IP_IN_RESERVED_RANGE;
+  my $LOCALHOST = LOCALHOST;
+
   while (defined ($relay = shift @{$self->{relays}}))
   {
     # trusted_networks matches?
@@ -203,9 +206,9 @@ sub parse_received_headers {
 	my $found_non_rsvd = 0;
 	my $found_rsvd = 0;
 	foreach my $ip (@ips) {
-	  next if ($ip =~ /^LOCALHOST$/o);
+	  next if ($ip =~ /^${LOCALHOST}$/o);
 
-	  if ($ip !~ /IP_IN_RESERVED_RANGE/o) {
+	  if ($ip !~ /${IP_IN_RESERVED_RANGE}/o) {
 	    dbg ("received-header: 'by' ".$relay->{by}." has public IP $ip");
 	    $found_non_rsvd = 1;
 	  } else {
@@ -366,6 +369,7 @@ sub parse_received_line {
   my $envfrom = '';
   my $mta_looked_up_dns = 0;
   my $IP_ADDRESS = IP_ADDRESS;
+  my $IP_IN_RESERVED_RANGE = IP_IN_RESERVED_RANGE;
   my $LOCALHOST = LOCALHOST;
 
   # Received: (qmail 27981 invoked by uid 225); 14 Mar 2003 07:24:34 -0000
@@ -1062,7 +1066,7 @@ enough:
   dbg ("received-header: parsed as $asstr");
   $relay->{as_string} = $asstr;
 
-  my $isrsvd = ($ip =~ /IP_IN_RESERVED_RANGE/o);
+  my $isrsvd = ($ip =~ /${IP_IN_RESERVED_RANGE}/o);
   $relay->{ip_is_reserved} = $isrsvd;
 
   # add it to an internal array so Eval tests can use it
