@@ -117,3 +117,19 @@ describe URI_AFFILIATE		Contains a URI with an affiliate ID code
 # really a URI rule
 header URI_REDIRECTOR		eval:check_for_http_redirector()
 describe URI_REDIRECTOR		Message has HTTP redirector URI
+
+# a.com.b.c
+uri SPOOF_COM2OTH	m{^https?://(?:\w+\.)+?com\.(?:\w+\.){2,}}i
+describe SPOOF_COM2OTH	URI contains ".com" in middle
+
+# a.com.b.com
+uri SPOOF_COM2COM	m{^https?://(?:\w+\.)+?com\.(?:\w+\.)+?com}i
+describe SPOOF_COM2COM 	URI contains ".com" in middle and end
+
+# a.net.b.com
+uri SPOOF_NET2COM	m{^https?://(?:\w+\.)+?(?:net|org)\.(?:\w+\.)+?com}i
+describe SPOOF_NET2COM 	URI contains ".net" or ".org", then ".com"
+
+# CDNs (Akamai (edgesuite), Speedera, and NYUD, so far) do this, so skip them
+uri SPOOF_OURI		m{^https?://(?:[a-z0-9_-]+?\.){2,}(?:com|net|org|biz|info|edu|www)(?!\.(?:\w+\.)?(?:edgesuite|nyud|speedera)\.net)(?:\.[a-z0-9_%-]+?){2,}(?:(?::|%3a)\d+)?}i
+describe SPOOF_OURI	URL has items in odd places
