@@ -566,7 +566,6 @@ for ( ; ($paddr = accept(Client,Server)) ; close Client)
     # essentially does this!
 
     cleanupchildren;
-
 }
 
 sub protocol_error {
@@ -587,7 +586,13 @@ sub spawn {
     my $pid;
 
     cleanupchildren;
-    wait if ($opt{'max-children'} && $extrapid <= 0);
+    my $tries = 0;
+    while ($opt{'max-children'} && $extrapid <= 0) {
+      if ($tries++ > 0) { sleep (1); }
+      logmsg "hit max-children limit (".$opt{'max-children'}.
+                        "): waiting for some to exit";
+      cleanupchildren;
+    }
 	
     $extrapid--;
 
@@ -774,9 +779,9 @@ sub kill_handler
 }
 
 sub cleanupchildren {
-	while ( my $kid = waitpid(-1, &WNOHANG) > 0 ) {
-		$extrapid++;
-	}
+    while ( my $kid = waitpid(-1, &WNOHANG) > 0 ) {
+        $extrapid++;
+    }
 }
 
 use POSIX 'setsid';

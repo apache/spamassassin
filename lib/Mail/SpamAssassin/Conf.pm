@@ -42,7 +42,6 @@ Where appropriate, default values are listed in parentheses.
 
 package Mail::SpamAssassin::Conf;
 
-use Carp;
 use strict;
 
 use vars	qw{

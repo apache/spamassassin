@@ -93,19 +93,13 @@ sub sarun {
   1;
 }
 
-sub sdrun {
-  my $sdargs = shift;
+sub spamcrun {
   my $args = shift;
   my $read_sub = shift;
-
-  rmtree ("log/outputdir.tmp"); # some tests use this
-  mkdir ("log/outputdir.tmp", 0755);
 
   if (defined $ENV{'SC_ARGS'}) {
     $args = $ENV{'SC_ARGS'} . " ". $args;
   }
-
-  start_spamd ($sdargs);
 
   my $spamcargs;
   if($args !~ /(?:-p\s*[0-9]+|-o)/)
@@ -123,8 +117,44 @@ sub sdrun {
 
   $sa_exitcode = ($?>>8);
   if ($sa_exitcode != 0) { stop_spamd(); return undef; }
-  &checkfile ("$testname.out", $read_sub);
 
+  %found = ();
+  %found_anti = ();
+  &checkfile ("$testname.out", $read_sub);
+}
+
+sub spamcrun_background {
+  my $args = shift;
+  my $read_sub = shift;
+
+  if (defined $ENV{'SC_ARGS'}) {
+    $args = $ENV{'SC_ARGS'} . " ". $args;
+  }
+
+  my $spamcargs;
+  if($args !~ /(?:-p\s*[0-9]+|-o)/)
+  {
+    $spamcargs = "$spamc -p $spamdport $args";
+  }
+  else
+  {
+    $spamcargs = "$spamc $args";
+  }
+  $spamcargs =~ s!/!\\!g if ($^O =~ /^MS(DOS|Win)/i);
+
+  print ("\t$spamcargs &\n");
+  system ("$spamcargs > log/$testname.out &") and return 0;
+
+  1;
+}
+
+sub sdrun {
+  my $sdargs = shift;
+  my $args = shift;
+  my $read_sub = shift;
+
+  start_spamd ($sdargs);
+  spamcrun ($args, $read_sub);
   stop_spamd ();
 
   1;
@@ -132,6 +162,11 @@ sub sdrun {
 
 sub start_spamd {
   my $sdargs = shift;
+
+  return if (defined($spamd_pid) && $spamd_pid > 0);
+
+  rmtree ("log/outputdir.tmp"); # some tests use this
+  mkdir ("log/outputdir.tmp", 0755);
 
   if (defined $ENV{'SD_ARGS'}) {
     $sdargs = $ENV{'SD_ARGS'} . " ". $sdargs;
@@ -180,6 +215,7 @@ sub start_spamd {
 
 sub stop_spamd {
   print ("Killed ",kill (15, $spamd_pid)," spamd instances\n");
+  $spamd_pid = 0;
 }
 
 # ---------------------------------------------------------------------------
