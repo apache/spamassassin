@@ -763,3 +763,10 @@ header NIGERIAN_SUBJECT2	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*(?:very )?urgent\s+
 describe NIGERIAN_SUBJECT2	Subject is indicative of a Nigerian spam
 header NIGERIAN_SUBJECT6	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*(?:family )?assis?tance\s*$/i
 describe NIGERIAN_SUBJECT6	Subject is indicative of a Nigerian spam
+
+# this code uses an access database (sendmail, postfix, etc.)
+# Since you need to actively create an accessdb to use it, the rule is
+# considered userconf and is disabled by default.
+header ACCESSDB			eval:check_access_database('/etc/mail/access.db')
+describe ACCESSDB		Message would have been caught by accessdb
+tflags ACCESSDB			userconf
