@@ -610,10 +610,23 @@ score T_CLICK_HERE_LINK                0.317
 
 # Potentially FP-prone, especially if you talk about optics. but it
 # matches a few messages that don't get properly marked otherwise.
+#
+# quinlan results (my FPs were all of the form "foo-opt" where "foo-opt"
+# was a project to optimize "foo")
+#  0.185    0.361    0.078    0.82    0.40    1.00  T_OPT_HEADER
+#
 header __T_OPT_HEADER_SUBJ	Subject =~ /opt\W?.{2,3}\b/i
 header __T_OPT_HEADER_RESSUBJ	Resent-Subject =~ /opt\W?.{2,3}\b/i
 header __T_OPT_HEADER_ALL	ALL =~ /opt\W?.{2,3}\b/i
 meta T_OPT_HEADER		(__T_OPT_HEADER_ALL && !__T_OPT_HEADER_SUBJ && !__T_OPT_HEADER_RESSUBJ)
+#
+# modified version with no FPs and slightly better SPAM%
+# quinlan results
+#  0.145    0.382    0.000    1.00    0.72    1.00  T_OPT_HEADER2
+#
+header __T_OPT_HEADER_SUBJ2	ALL =~ /^(?:Resent-)?Subject:.*opt.?(in|out|oem|[\d@])(?:\b|\d|\@)/im
+header __T_OPT_HEADER_ALL2	ALL =~ /opt.?(?:in|out|oem|[\d@])(?:\b|\d|\@)/i
+meta T_OPT_HEADER2		(__T_OPT_HEADER_ALL2 && !__T_OPT_HEADER_SUBJ2)
 
 body     T_HTML_LINK_CLICK_HERE eval:html_eval('anchor_text', '=~ /click\s+here/i')
 body     T_HTML_LINK_MONEY      eval:html_eval('anchor_text', '=~/\s\$/')
@@ -628,11 +641,21 @@ score     T_HTML_LINK_UNSUB      0.01
 # tests and matches if more than 1 hits.  UA_AND_XM actually matches a
 # good amount of non-spam at the moment, the above problem can trigger
 # this rule as well.
-
+#
+# quinlan: these don't work too well for me
+#  0.000    0.000    0.000    0.00    0.00    1.00  T_TOO_MANY_UA
+#  0.202    0.000    0.325    0.00    0.00    1.00  T_UA_AND_XM
+#
 # T_TOO_MANY_UA uses "regexp and operator": all of the tests matching
 # regexp /USER_AGENT.*/ will be strung together with "+" between them.
 meta T_TOO_MANY_UA	( (USER_AGENT.+ +) > 1) 
 meta T_UA_AND_XM	( USER_AGENT && __HAS_X_MAILER )
+#
+# quinlan: these might work better, but I have no hits (they should be
+# syntactically correct, though)
+#
+header T_MANY_X_MAILER		ALL =~ /(?:\nX-Mailer:.*){2}/si
+header T_MANY_USER_AGENT	ALL =~ /(?:\nUser-Agent:.*){2}/si
 
 body T_EARN_MONEY /\b(?:earn|make|making|made|received?|discounted)\s+(?:up\s+to|as\s+much\s+as|over|at\s+least|a\s+full)?\s*\$\s*[0-9,]{2}/i
 describe T_EARN_MONEY        Message talks about earning money
