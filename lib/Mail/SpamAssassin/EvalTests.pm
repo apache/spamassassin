@@ -103,6 +103,25 @@ sub check_for_forged_hotmail_received_headers {
 
 ###########################################################################
 
+sub check_for_forged_yahoo_received_headers {
+  my ($self) = @_;
+  my $rcvd = $self->get ('Received');
+
+  # Hotmail formats its received headers like this:
+  # Received: from hotmail.com (f135.law8.hotmail.com [216.33.241.135])
+  # spammers do not ;)
+
+  if ($rcvd !~ /from \S*yahoo\.com/) { return 0; }
+
+  $rcvd =~ s/\s+/ /gs;		# just spaces, simplify the regexp
+
+  if ($rcvd =~ /from \S+ by web\S+\.mail\.yahoo\.com\;/) { return 0; }
+
+  return 1;
+}
+
+###########################################################################
+
 sub check_for_bad_helo {
   my ($self) = @_;
   local ($_);
