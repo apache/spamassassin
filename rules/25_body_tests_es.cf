@@ -34,11 +34,8 @@ describe EXCUSE_ES_01         Claims not to be spam in Spanish
 body EXCUSE_ES_02             /Me he tomado la libertad de enviarle este mail por/
 describe EXCUSE_ES_02         Someone fell free to send you a message in Spanish
 
-body EXCUSE_ES_03             /Este e-mail ha sido enviado por solicitud de/
+body EXCUSE_ES_03             /Este (?:es un )?(?:mensaje|(?:e(?:-)?)?mail|correo) (?:llega a usted gracias a|ha sido enviado por solicitud de|no solicitado enviado a petici.n de)/
 describe EXCUSE_ES_03         Someone requested an spammer to spam you in Spanish
-
-body EXCUSE_ES_04             /Este es un correo no solicitado enviado a petici.n de/
-describe EXCUSE_ES_04         Someone requested an spammer to spam you in Spanish
 
 lang es body EXCUSE_ES_05             /Enviamos este mail por considerar la difusión (?:a través de|del) correo electrónico una alternativa económica/
 lang es describe EXCUSE_ES_05         El correo como alternativa comercial
