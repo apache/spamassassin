@@ -17,6 +17,10 @@
 # Dec 17 2002 jm: btw, one FP is for
 # <41340.2001:770:18:1:250:4ff:feea:4364.1028136205.squirrel@webmail.heanet.ie>,
 # ie an IPv6 address in the msgid.  Not sure if that's interesting or not ;)
+
+# Dec 24 2002 jm: ok, I think we should drop these... not really getting
+# around the FPs
+
 header __VALID_MSGID MESSAGEID =~ /^<(?:[a-zA-Z0-9.,!\#\$%&'*\+\/=?\^_{}|~-]+|\".+\")\@(?:[a-zA-Z0-9_.-]+|\[\d{1,3}(?:\.\d{1,3}){3}\])>(?:\s*\(.*\))?\s*$/m [if-unset: <NO@MSGID>]
 header __HAS_MSGID		MESSAGEID =~ /\S/
 meta T_INVALID_MSGID		__HAS_MSGID && !__VALID_MSGID
@@ -55,6 +59,7 @@ score T_FORGED_MUA_MOZILLA	1.0
 
 # Hmm... maybe possible to use a variant on the check_outlook_timestamp_token
 # test for the time component of the MOZILLA rules. - Allen
+# Dec 24 2002 jm: probably worth a try.
 
 header __MOZILLA_MSGID2         MESSAGEID =~ /^<[A-F\d]{8}\.[A-F\d]{4,8}\@\S+>$/m
 meta T_FORGED_MUA_MOZILLA2      (__MOZILLA_MUA && !__UNUSABLE_MSGID && !__MOZILLA_MSGID2)
@@ -65,9 +70,6 @@ header __MOZILLA_MSGID3         MESSAGEID =~ /^<[A-F\d]{8}\.[A-F1-9][A-F\d]{0,7}
 meta T_FORGED_MUA_MOZILLA3      (__MOZILLA_MUA && !__UNUSABLE_MSGID && !__MOZILLA_MSGID3)
 describe T_FORGED_MUA_MOZILLA3  Forged mail pretending to be from Mozilla (3)
 score T_FORGED_MUA_MOZILLA3     1.0
-
-# note: T_FORGED_MUA_MOZILLA4 now obsolete since I put the CWT/DCE thing into
-# check_messageid_not_usable()
 
 ########################################################################
 
@@ -134,21 +136,14 @@ describe T_CHECK_EMAIL_ISFREE Body contains an e-mail address listed by Email::I
 # ok, it's the implicit addition of "mailto:" for mail-addr lookalikes, which
 # also includes user@host CVSroot specs etc.  Let's try using a rawbody pattern.
 # 12/22 - tvd - most people don't have any hits, only jm (.33%) and quinlan (.02%)
+# I say drop it - jm
 rawbody T_NUMERIC_MAILTO_ADDR	/\bmailto:[^\s\@]{1,20}\@\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/is
-
-#bug 652
-# 12/20 - looks very good for easmith, and pretty ok for everyone except rOD - tvd
-#easmith	0.536   2.4914   0.0000    1.000   0.93    0.01  T_SUBJ_BUY
-#jm		0.082   0.2365   0.0166    0.934   0.78    0.01  T_SUBJ_BUY
-#quinlan	0.056   0.1425   0.0000    1.000   0.92    0.01  T_SUBJ_BUY
-#rODbegbie	0.067   0.1658   0.0267    0.861   0.61    0.01  T_SUBJ_BUY
-#theo		0.120   0.2911   0.0135    0.956   0.81    0.01  T_SUBJ_BUY
-header T_SUBJ_BUY			Subject =~ /^buy/i
-describe T_SUBJ_BUY		Subject starts with Buy, Buying
 
 # bug 1014
 # from Allen
 # 12/20 - Not great, but looks ok, what say ye?  - tvd
+# sounds like it's worth something.  maybe combined with from_webmail
+# type meta subrule...
 # daf		0.000   0.0000   0.0000    0.500   0.11    0.01  T_FROM_HAS_UNDERLINE_NUMS
 # easmith	0.107   0.4216   0.0210    0.953   0.80    0.01  T_FROM_HAS_UNDERLINE_NUMS
 # jm		0.460   1.2612   0.1220    0.912   0.73    0.01  T_FROM_HAS_UNDERLINE_NUMS
@@ -158,43 +153,6 @@ describe T_SUBJ_BUY		Subject starts with Buy, Buying
 header __FROM_HAS_UNDERLINE_NUMS	From =~ /_\S?(?:[a-z]+\w*?\d+|\d+\w*?[a-z]+)\w*\@/i
 meta T_FROM_HAS_UNDERLINE_NUMS		(!T_REPLY_TO_HAS_UNDERLINE_NUMS && __FROM_HAS_UNDERLINE_NUMS)
 describe T_FROM_HAS_UNDERLINE_NUMS	From: contains an underline and numbers/letters
-
-# 708
-# quinlan FP: "at some point you offered" (match on the last three words)
-body T_OFFER_1			/\b(?:free|trial|full|phone|points?|hottest|internet|great|of this|about this|dealer|responded|not an|pay|are able to|future|valuable|partner|receiv(?:e|ed|ing)|introductory|exclusive|promotional|coupon|bonus|further|following|product|proud to|additional|website|amazing|discounts?)\b.{0,9}(?:this|these|)\boffer(?:s|ings?|ed|)\b/i
-describe T_OFFER_1		Offers you Something
-
-body T_OFFER_2			/\boffer(?:s|ings?|)\b.{0,9}\b(?:expires|subject|limited|ends|mailed|originator|contained|discounts?|confidential|is ood|available|valid|in error|!)\b/i
-describe T_OFFER_2		Offers you Something (2)
-
-body T_OFFER_3			/this offer is|we offer (?:you|over)|offers?@/i
-describe T_OFFER_3		Offers you Something (3)
-
-body T_SPECIAL_OFFER		/\bspecial .{0,15}\boffer(?:s|ings?|ed|)/i
-describe T_SPECIAL_OFFER		Special Offer
-
-uri T_OFFER_URI			/^https?:\/\/.*?(?:offers?\.\w|[.\/]offer|offer=)/i 
-describe T_OFFER_URI		Offer in link address
-
-# bug 726
-# 12/23 - The S/O and ranks for this one make me say no - tvd
-#easmith	1.335   0.3628   1.6158    0.183   0.01    0.01 T_VISIT_OUR_SITE
-#quinlan	1.952   4.8259   0.1170    0.976   0.87    0.01 T_VISIT_OUR_SITE
-#rODbegbie	1.641   3.0787   1.0650    0.743   0.40    0.01 T_VISIT_OUR_SITE
-#theo		2.776   6.4845   0.4147    0.940   0.77    0.01 T_VISIT_OUR_SITE
-body T_VISIT_OUR_SITE /\b(?:visit|enter)\s+(?:my|our|the|this)\s+(?:web\s*)?site/i
-describe T_VISIT_OUR_SITE         Wants you to visit a web site
-test T_VISIT_OUR_SITE  ok  Click below to enter our web site:
-test T_VISIT_OUR_SITE  ok  Visit Our Web Site and Learn The Facts
-test T_VISIT_OUR_SITE  ok  Just visit our site to learn how easy
-test T_VISIT_OUR_SITE  ok  Visit the sites of our major partners:
-# Dec 19 2002 jm: try out separation of "the", it seems to be FP-prone for me
-# 12/23 - S/O and ranks are a little better, but I still say no - tvd
-#easmith	1.180   0.2540   1.4479    0.149   0.00    0.01 T_VISIT_OUR_SITE_2
-#quinlan	1.865   4.6223   0.1040    0.978   0.87    0.01 T_VISIT_OUR_SITE_2
-#rODbegbie	1.478   2.8832   0.9147    0.759   0.42    0.01 T_VISIT_OUR_SITE_2
-#theo		2.704   6.3571   0.3787    0.944   0.78    0.01 T_VISIT_OUR_SITE_2
-body T_VISIT_OUR_SITE_2 /\b(?:visit|enter)\s+(?:my|our|this)\s+(?:web\s*)?site/i
 
 # Specific whitelisting for GradFinder.  They use the sender's own
 # From addr, so whitelist_from_rcvd won't cut it
@@ -259,12 +217,6 @@ uri T_MARINEDIGITAL_MAILTO	/mailto:\S+[.@]marinedigital\.com/
 # 12/22 - 0 hits for anyone - tvd
 uri T_ITSREMARKABLE_MAILTO	/mailto:\S+[.@]itsremarkable\.com/
 
-# bug 1211
-body     __BILL_1618    /\D301\D+a\W*2\W*c\D+1618\D/i
-describe __BILL_1618    Possible mention of bill 1618 (anti-spam bill)
-meta     T_ANTISPAM_BILL  REMOVE_IN_QUOTES && __BILL_1618
-describe T_ANTISPAM_BILL  Very likely mention of anti-spam bill
-
 # bug 1308
 # somewhat less-expensive version
 header T_SUSPICIOUS_RECIPS	ToCc =~ /(@[-a-z0-9_.]{2,}).{0,64}(?:\1.{0,64}){8,}/is
@@ -289,32 +241,7 @@ body T_SCAM_419_1		/MOHAMMED(?:\.|=2e)?\s?ABACHA/i
 body T_SCAM_419_2		/(?:government|bank) of nigeria/i
 body T_SCAM_419_3		/nigerian? (?:national|government)/i
 
-# bug 710
-# 12/23 - tvd - works well for quinlan, not for anyone else
-# quinlan      0.182   0.4683   0.0000    1.000   0.93    0.01  T_WINNER
-# rODbegbie    0.159   0.1303   0.1699    0.434   0.08    0.01  T_WINNER
-# theo         0.080   0.1628   0.0270    0.858   0.58    0.01  T_WINNER
-body T_WINNER                     /\b(?:you(?:'| a)re a|lucky|big|next) winners?\b/i
-describe T_WINNER                 Claims you are a winner
-
-# 12/23 - tvd - works well for quinlan, not for anyone else
-# quinlan      0.389   0.9978   0.0000    1.000   0.93    0.01  T_YOU_WON
-# rODbegbie    0.242   0.5701   0.1111    0.837   0.56    0.01  T_YOU_WON
-# theo         0.361   0.5168   0.2614    0.664   0.27    0.01  T_YOU_WON
-body T_YOU_WON                    /\byou(?:'ve| have)? won(?!'|\w)/i
-describe T_YOU_WON                You have WON!
-
-# 12/23 - tvd - works well for quinlan, not for anyone else
-# quinlan      1.341   3.1155   0.2080    0.937   0.77    0.01  T_WIN
-# rODbegbie    4.160   0.8633   5.4819    0.136   0.00    0.01  T_WIN
-# theo         1.140   1.2601   1.0638    0.542   0.15    0.01  T_WIN
-body T_WIN		/\b(?:register|chances?|opportunity|enter|entered|players?|more|could)\b.{0,9}\bwin\b|win.{0,9}(?:!|up to|cash|big|car|now|free|\$[0-9,\.\$]+)\b/i
-describe T_WIN			Who really wins?
-
-# 12/23 - tvd - works well for quinlan, not for anyone else
-# quinlan      0.135   0.3258   0.0130    0.962   0.82    0.01  T_WINNING
-# rODbegbie    0.270   0.2443   0.2810    0.465   0.10    0.01  T_WINNING
-# theo         0.234   0.3752   0.1442    0.722   0.35    0.01  T_WINNING
-body T_WINNING			/\bwinning (?:strategies|entry|cash|numbers?|free|!)\b|(?-i:WINNING)|award.winning|\bclaim your winnings/i
-describe T_WINNING		Winning Stuff
+# Dec 24 2002 jm: random check
+uri T_BARGAIN_URL		/bargains?\.(?:com|biz)/
+uri T_PROMO_URL			/promo(?:|tion)s?\.(?:com|biz)/
 

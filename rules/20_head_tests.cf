@@ -748,4 +748,8 @@ header WITH_LC_SMTP		Received =~ /\swith\ssmtp;\s/
 describe WITH_LC_SMTP		Received line contains spam-sign (lowercase smtp)
 
 header FROM_NO_LOWER		From !~ /[a-z]/
+describe FROM_NO_LOWER          'From' has no lower-case characters
+
+header SUBJ_BUY                 Subject =~ /^buy/i
+describe SUBJ_BUY               'Subject' starts with Buy, Buying
 
