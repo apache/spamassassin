@@ -176,8 +176,14 @@ describe T_HTTP_EXCESSIVE_ENTITIES Completely unnecessary %-escapes inside a URL
 
 # bug 1561
 # stronger version of USER_AGENT_APPLEMAIL
+# Apple Mail doesn't send text/html at all (unless it's an attachment)
+# It'll send text/plain, or multipart/alternative with text/plain and text/enriched parts (boundary of
+# "Apple-Mail-\d--\d+").  It can, however, send a multipart/mixed with a single text/html attachment, so
+# don't use MIME_HTML_ONLY.
+# perhaps limit CTYPE to "text/plain", "multipart/alternative" with "text/plain" and "text/enhanced", or
+# "multipart/mixed"?
 header __X_MAILER_APPLEMAIL	X-Mailer	=~ /^Apple Mail \(\d\.\d+\)$/
 header __MSGID_APPLEMAIL	Message-Id	=~ /^<[0-9A-F]{8}-(?:[0-9A-F]{4}-){3}[0-9A-F]{12}\@\S+>$/
 header __MIME_VERSION_APPLEMAIL	Mime-Version	=~ /^1\.0 \(Apple Message framework v\d+\)$/
-meta T_USER_AGENT_APPLEMAIL	!__MIME_HTML_ONLY && __X_MAILER_APPLEMAIL && ( __MSGID_APPLEMAIL || __MIME_VERSION_APPLEMAIL )
+meta T_USER_AGENT_APPLEMAIL	!__HTML_CTYPE_HEADER && __X_MAILER_APPLEMAIL && ( __MSGID_APPLEMAIL || __MIME_VERSION_APPLEMAIL )
 meta T_FORGED_MUA_APPLEMAIL	__X_MAILER_APPLEMAIL && !T_USER_AGENT_APPLEMAIL
