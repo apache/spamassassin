@@ -350,9 +350,10 @@ sub rewrite_as_spam {
 
   # add some headers...
 
-  $_ = sprintf ("Yes, hits=%d required=%d tests=%s",
+  $_ = sprintf ("Yes, hits=%d required=%d tests=%s version=%s",
 	$self->{hits}, $self->{conf}->{required_hits},
-	$self->get_names_of_tests_hit());
+	$self->get_names_of_tests_hit(),
+	$Mail::SpamAssassin::VERSION);
 
   $self->{msg}->put_header ("X-Spam-Status", $_);
   $self->{msg}->put_header ("X-Spam-Flag", 'YES');
@@ -402,9 +403,10 @@ sub rewrite_as_non_spam {
 
   $self->{test_names_hit} =~ s/,$//;
 
-  $_ = sprintf ("No, hits=%d required=%d tests=%s",
+  $_ = sprintf ("No, hits=%d required=%d tests=%s version=%s",
 	$self->{hits}, $self->{conf}->{required_hits},
-	$self->get_names_of_tests_hit());
+	$self->get_names_of_tests_hit(),
+	$Mail::SpamAssassin::VERSION);
 
   $self->{msg}->put_header ("X-Spam-Status", $_);
   $self->{msg}->get_mail_object;
@@ -746,6 +748,8 @@ sub do_head_tests {
     if ($pat =~ s/\s+\[if-unset:\s+(.+)\]\s*$//) { $def = $1; }
     $hdrname =~ s/#/[HASH]/g;		# avoid probs with eval below
     $def =~ s/#/[HASH]/g;
+
+      # dbg ("header regexp test '.$rulename.'");
 
     $evalstr .= '
       if ($self->get(q#'.$hdrname.'#, q#'.$def.'#) '.$testtype.'~ '.$pat.') {
