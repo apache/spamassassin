@@ -677,7 +677,7 @@ describe ACCESSDB		Message would have been caught by accessdb
 tflags ACCESSDB			userconf
 
 # via private mail with Mark Delany; thx Mark!
-header FORGED_YAHOO_RCVD_SMTP    Received =~ /from smtp(?:\d{1,2}|\d{4,})\.mail(?:\.[^\.]+|)\.yahoo\.com /
+header FORGED_YAHOO_RCVD_SMTP    Received =~ /from smtp(?:\d{1,2}|\d{4,})\.mail(?:\.[^\.]+)?\.yahoo\.com /
 describe FORGED_YAHOO_RCVD_SMTP  Header contains forged Yahoo! SMTP server hostname
 
 # a new spamware tool; catch it

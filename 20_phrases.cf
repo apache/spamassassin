@@ -43,7 +43,7 @@ body REMOVE_REMOVAL_1WORD	/remov\S{0,64}remov/i
 describe REMOVE_REMOVAL_1WORD	List removal information
 
 # bug 1022: MGM_POSTCARD #2 original
-body REMOVE_POSTAL		/(?:Send(?:ing|) a (?:postal mail|postcard) to (?:Unsubscribe|Customer ?Service|remove)|unsubscribe by (?:postal mail|postcard))/i
+body REMOVE_POSTAL		/(?:Send(?:ing)? a (?:postal mail|postcard) to (?:Unsubscribe|Customer ?Service|remove)|unsubscribe by (?:postal mail|postcard))/i
 describe REMOVE_POSTAL		Send real mail to be unsubscribed
 
 ###########################################################################

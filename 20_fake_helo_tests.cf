@@ -30,7 +30,7 @@ require_version @@VERSION@@
 
 header FAKE_HELO_AOL		eval:check_for_rdns_helo_mismatch("aol\.com","aol\.com")
 describe FAKE_HELO_AOL		Host HELO did not match rDNS: aol.com
-header FAKE_HELO_HOTMAIL	eval:check_for_rdns_helo_mismatch("hotmail(?:\.msn|)\.com","hotmail\.com")
+header FAKE_HELO_HOTMAIL	eval:check_for_rdns_helo_mismatch("hotmail(?:\.msn)?\.com","hotmail\.com")
 describe FAKE_HELO_HOTMAIL	Host HELO did not match rDNS: hotmail.com
 header FAKE_HELO_USA_NET	eval:check_for_rdns_helo_mismatch("usa\.net","usa\.net")
 describe FAKE_HELO_USA_NET	Host HELO did not match rDNS: usa.net
