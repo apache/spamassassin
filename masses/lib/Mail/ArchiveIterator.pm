@@ -93,6 +93,30 @@ sub mass_check_tar_file {
   }
 }
 
+sub mass_check_open {
+  my ($file) = @_;
+
+  if ($file =~ /\.gz$/) {
+    if (!open (STDIN, "gunzip -cd $file |")) {
+      warn "gunzip $file failed: $@";
+      return 0;
+    }
+  }
+  elsif ($file =~ /\.bz2$/) {
+    if (!open(STDIN, "bzip2 -cd $file |")) {
+      warn "bunzip2 $file failed: $@";
+      return 0;
+    }
+  }
+  else {
+    if (!open(STDIN, "<$file")) {
+      warn "open $file failed: $@";
+      return 0;
+    }
+  }
+  return 1;
+}
+
 sub mass_check_mh_folder {
   my $self = shift;
   my $folder = shift;
@@ -105,13 +129,7 @@ sub mass_check_mh_folder {
   splice(@files, 0, -$self->{opt_tail}) if $self->{opt_tail};
   foreach my $mail (@files)
   {
-    if ($mail =~ /\.gz$/) {
-      open (STDIN, "gunzip -cd $mail |") or warn "gunzip $mail failed: $@";
-    } elsif ($mail =~ /\.bz2$/) {
-      open (STDIN, "bzip2 -cd $mail |") or warn "bunzip2 $mail failed: $@";
-    } else {
-      open (STDIN, "<$mail") or warn "open $mail failed: $@";
-    }
+    mass_check_open($mail) or next;
 
     # skip too-big mails
     if (! $self->{opt_all} && -s STDIN > 250*1024) { close STDIN; next; }
@@ -138,13 +156,7 @@ sub mass_check_maildir {
   splice(@files, 0, -$self->{opt_tail}) if $self->{opt_tail};
   foreach my $mail (@files)
   {
-    if ($mail =~ /\.gz$/) {
-      open (STDIN, "gunzip -cd $mail |") or warn "gunzip $mail failed: $@";
-    } elsif ($mail =~ /\.bz2$/) {
-      open (STDIN, "bzip2 -cd $mail |") or warn "bunzip2 $mail failed: $@";
-    } else {
-      open (STDIN, "<$mail") or warn "open $mail failed: $@";
-    }
+    mass_check_open($mail) or next;
 
     # skip too-big mails
     if (! $self->{opt_all} && -s STDIN > 250*1024) { close STDIN; next; }
@@ -159,13 +171,7 @@ sub mass_check_single {
   my $self = shift;
   my $folder = shift;
 
-  if ($folder =~ /\.gz$/) {
-    open (STDIN, "gunzip -cd $folder |") or warn "gunzip $folder failed: $@";
-  } elsif ($folder =~ /\.bz2$/) {
-    open (STDIN, "bzip2 -cd $folder |") or warn "bunzip2 $folder failed: $@";
-  } else {
-    open (STDIN, "<$folder") or warn "open $folder failed: $@";
-  }
+  mass_check_open($folder) or return;
 
   # skip too-big mails
   if (! $self->{opt_all} && -s STDIN > 250*1024) { close STDIN; next; }
@@ -179,26 +185,21 @@ sub mass_check_mailbox {
   my $self = shift;
   my $folder = shift;
 
-  if ($folder =~ /\.gz$/) {
-    open (MBOX, "gunzip -cd $folder |") or warn "gunzip $folder failed: $@";
-  } elsif ($folder =~ /\.bz2$/) {
-    open (MBOX, "bzip2 -cd $folder |") or warn "bunzip2 $folder failed: $@";
-  } else {
-    open (MBOX, "<$folder") or warn "open $folder failed: $@";
-  }
-  while (<MBOX>) { /^From \S+ +... ... / and last; }
+  mass_check_open($folder) or return;
+
+  while (<STDIN>) { /^From \S+ +... ... / and last; }
 
   my $count = 0;
   my $host  = $ENV{'HOSTNAME'} || $ENV{'HOST'} || `hostname` || 'localhost';
 
-  while (!eof MBOX) {
+  while (!eof STDIN) {
     my @msg = ();
     my $in_header = 1;
     my $msgid = undef;
     my $hits = '';
     $count++;
 
-    while (<MBOX>) {
+    while (<STDIN>) {
       if (/^$/ && $in_header) {
         $in_header = 0 ;
 
@@ -230,7 +231,7 @@ sub mass_check_mailbox {
     if ($self->{opt_fork}) { exit; }
   }
 
-  close MBOX;
+  close STDIN;
 }
 
 ############################################################################
