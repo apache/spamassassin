@@ -58,6 +58,7 @@ sub safe_lock {
       umask $umask; # just in case
       die "lock: $$ cannot create lockfile $lock_file: $!\n";
   }
+  umask $umask; # we've created the file, so reset umask
 
   dbg("lock: $$ created $lock_file");
 
