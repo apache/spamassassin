@@ -51,6 +51,7 @@ GetOptions(
 	'max-children|m=i' => \$opt{'max-children'},
 	'port|p=i' => \$opt{'port'},
 	'sql-config!' => \$opt{'sql-config'}, 'q' => \$opt{'sql-config'},
+	'virtual-config|V=s' => \$opt{'virtual-config'},
 	'pidfile|r=s' => \$opt{'pidfile'},
 	'syslog|s=s' => \$opt{'syslog'},
 	'username|u=s' => \$opt{'username'},
@@ -284,6 +285,8 @@ for ( ; ($paddr = accept(Client,Server)) ; close Client)
                         {
 			               if ($opt{'sql-config'}) {
 				              handle_user_sql($current_user);
+			               } elsif ($opt{'virtual-config'}) {
+				              handle_virtual_user($current_user);
 			               }
                         }
                			else
@@ -397,6 +400,8 @@ for ( ; ($paddr = accept(Client,Server)) ; close Client)
                         {
 			    if ($opt{'sql-config'}) {
 				handle_user_sql($current_user);
+			    } elsif ($opt{'virtual-config'}) {
+				handle_virtual_user($current_user);
 			    }
                         }
 			else
@@ -587,6 +592,36 @@ sub handle_user
     return 1;
 }
 
+# Handle user configs without the necessity of having individual users or a
+# SQL database.
+sub handle_virtual_user
+{
+	my $username = shift;
+
+	# the virtual-config contains the path to a directory which will
+	# contain per-user preferences.
+	my $dir=$opt{'virtual-config'};
+	my $file="$dir/$username.prefs";
+
+	# If the user file is not there, look for a default.prefs
+	if(! -f $file) {
+		$file="$dir/default.prefs";
+		# And if that isn't there, log that it's misconfigured.
+		if(! -f $file) {
+			logmsg("Couldn't find a virtual directory or defaults "
+				. "for $username in $dir\n");
+			return(0);
+		} else {
+			# Log that the default configuration is being used for a user.
+			logmsg("Using default config for $username\n");
+		}
+	}
+
+	# Found a config, load it.
+	$spamtest->read_scoreonly_config($file);
+	return(1);
+}
+
 sub handle_user_sql
 {
     my $username = shift;
@@ -702,6 +737,7 @@ Options:
  -m num, --max-children num         Allow maximum num children
  -p port, --port                    Listen on specified port (default: 783)
  -q, --sql-config                   Enable SQL config (only useful with -x)
+ -V, --virtual-config=dir           Enable Virtual configs (needs -x)
  -r pidfile, --pidfile              Write the process id to pidfile
  -s facility, --syslog=facility     Specify the syslog facility (default: mail)
  -u username, --username=username   Run as username
@@ -763,9 +799,20 @@ with B<-x>. this is useful for spamd hosts which don't have user's
 home directories but do want to load user preferences from an SQL
 database.
 
+=item B<-V>, B<--virtual-config>=I<directory>
+
+This option specifies a directory which will contain per-user preference
+files.  The files are in the format of I<username>.prefs.  A
+I<default>.prefs file will be used if an individual user config is not
+found.
+
+Note that this B<requires> that B<-x> is used, and cannot be combined with
+SQL-based configuration.
+
 =item B<-r> I<pidfile>, B<--pidfile>=I<pidfile>
 
-Write the process ID of the spamd parent to the file specified by I<pidfile>.  The file will be unlinked when the parent exits.
+Write the process ID of the spamd parent to the file specified by I<pidfile>.
+The file will be unlinked when the parent exits.
 
 =item B<-v>, B<--vpopmail>
 
