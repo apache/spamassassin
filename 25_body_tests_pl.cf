@@ -180,11 +180,11 @@ lang pl describe PL_KLIKNIJ_W_LINK	Tresc zawiera 'kliknij w poni¿szy link'
 lang pl score PL_KLIKNIJ_W_LINK		2.0
 
 lang pl body PL_ZAPRASZAMY_UDZIAL	/apraszam.{0,50}udzia/i
-lang pl describr PL_ZAPRASZAMY_UDZIAL	Tresc zawiera 'Zapraszamy do udzialu'
+lang pl describe PL_ZAPRASZAMY_UDZIAL	Tresc zawiera 'Zapraszamy do udzialu'
 lang pl score PL_ZAPRASZAMY_UDZIAL	1.0
 
 lang pl body PL_JESLI_WIADOMOSC		/je.?li wiadomo.{0,50}wi.cej /i
-lang pl describr PL_JESLI_WIADOMOSC	Tresc zawiera 'Jezeli wiadomosc doszla wiecej..'
+lang pl describe PL_JESLI_WIADOMOSC	Tresc zawiera 'Jezeli wiadomosc doszla wiecej..'
 lang pl score PL_JESLI_WIADOMOSC	1.0
 
 lang pl body PL_ZGLOSZENIE_POWINNO	/zg.oszenie powinno/i
@@ -203,7 +203,7 @@ lang pl body PL_PROSIMY_O_SKLADANIE	/pros.{0,20}sk.ada.{0,30} na /i
 lang pl describe PL_PROSIMY_O_SKLADANIE	Tresc zawiera 'Prosimy o skladanie na...'
 lang pl score PL_PROSIMY_O_SKLADANIE	1.0
 
-lang pl body PL_REKLAMA                 /reklama (bez)?p.atna/i
+lang pl body PL_REKLAMA                 /reklama (?:bez)?p.atna/i
 lang pl describe PL_REKLAMA             Tresc zawiera 'reklama (bez)platna'
 lang pl score PL_REKLAMA                2.0
 
@@ -227,7 +227,7 @@ lang pl body PL_SWOICH_ZNAJOMYCH        /swoich znajomych i przyjaci.{2,6}/i
 lang pl describe PL_SWOICH_ZNAJOMYCH    Tresc zawiera 'swoich znajomych i przyjaciol'
 lang pl score PL_SWOICH_ZNAJOMYCH       0.4
 
-lang pl body PL_DODATKOWO               /dodatkowo dosta(j|ni)esz/i
+lang pl body PL_DODATKOWO               /dodatkowo dosta(?:j|ni)esz/i
 lang pl describe PL_DODATKOWO           Tresc zawiera 'dodatkowo dosta(j|ni)esz'
 lang pl score PL_DODATKOWO              0.6
 

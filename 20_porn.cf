@@ -100,6 +100,6 @@ describe PORN_16 		Possible porn - nasty, dirty, little etc.
 body LOTS_OF_STUFF              /\b(?:\d{1,3}[,\.])+\d{3}.{0,20}\b(?:pics|pictures|images|photos|movies)/i         
 describe LOTS_OF_STUFF          Thousands or millions of pics/movies/etc
 
-body DISGUISE_PORN              /\b(c[*0]cks?|d[1*]cks?|h[0*]rny|b[1*]tch(?:es)|f[*0]ckk?ed|p[*]ssy|p[*]ssies)\b/i
+body DISGUISE_PORN              /\b(?:c[*0]cks?|d[1*]cks?|h[0*]rny|b[1*]tch(?:es)|f[*0]ckk?ed|p[*]ssy|p[*]ssies)\b/i
 describe DISGUISE_PORN          Attempts to disguise porn words
 
