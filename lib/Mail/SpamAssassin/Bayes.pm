@@ -429,9 +429,13 @@ sub tokenize_headers {
   my ($self, $msg) = @_;
 
   my $hdrs = $msg->get_all_headers();
-  if ($msg->can ("get_all_metadata")) {
-    $hdrs .= $msg->get_all_metadata();
-  }
+
+  # jm: do not learn additional metadata (X-Languages, X-Relays-Untrusted)
+  # until we can generate that while running sa-learn. TODO
+  #
+  # if ($msg->can ("get_all_metadata")) {
+  # $hdrs .= $msg->get_all_metadata();
+  # }
 
   my %parsed = ();
 
