@@ -11,10 +11,17 @@ build/update_devel
 rm -rf $WEBDIR/doc
 tar cf - --exclude=CVS --exclude='.#*' doc | ( cd $WEBDIR ; tar xf - )
 
-for ext in tar.gz zip tar.gz.md5 zip.md5 ; do
+for ext in tar.gz.md5 zip.md5 ; do
   cp $WEBDIR/devel/Mail-SpamAssassin-$vers.$ext \
 	$WEBDIR/released/Mail-SpamAssassin-$vers.$ext
-  gpg --default-key 'SpamAssassin Development Team' -bsa \
+done
+
+for ext in tar.gz zip ; do
+  cp $WEBDIR/devel/Mail-SpamAssassin-$vers.$ext \
+	$WEBDIR/released/Mail-SpamAssassin-$vers.$ext
+
+  # Note this will prompt for the passphrase ...
+  gpg --default-key 'SpamAssassin Signing Key' -bsa \
 	$WEBDIR/released/Mail-SpamAssassin-$vers.$ext
 done
 
