@@ -185,6 +185,16 @@ sub dnsbl_hit {
   $self->{dnsresult}->{$rule}->{$log} = 1;
 }
 
+sub dnsbl_uri {
+  my ($self, $question, $answer) = @_;
+
+  if ($question->string =~ m/^(\S+?)\.?\s+(\S+)\s+(\S+)/) {
+    my ($dnsname, $dnsclassval, $dnstypeval) = ($1, $2, $3);
+    my $dnsuri = "dns:$dnsname?class=$dnsclassval;type=$dnstypeval";
+    push @{ $self->{dnsuri}->{$dnsuri} }, $answer->rdatastr;
+  }
+}
+
 sub process_dnsbl_result {
   my ($self, $query) = @_;
 
@@ -195,8 +205,9 @@ sub process_dnsbl_result {
 
   my $question = ($packet->question)[0];
   foreach my $answer ($packet->answer) {
-    # TODO: there are some CNAME returns, not sure what they represent
-    # nor whether they should be counted
+    # track all responses
+    $self->dnsbl_uri($question, $answer);
+    # TODO: there are some CNAME returns that might be useful
     next if ($answer->type ne 'A' && $answer->type ne 'TXT');
     for my $rule (@{$query->[RULES]}) {
       $self->dnsbl_hit($rule, $question, $answer);
@@ -298,6 +309,13 @@ sub harvest_dnsbl_queries {
       $self->got_hit($rule, "RBL: ");
     }
   }
+  # DNS URIs
+  while (my ($dnsuri, $answers) = each %{ $self->{dnsuri} }) {
+    # when parsing, look for elements of \".*?\" or \S+ with ", " as separator
+    $self->{tag_data}->{RBL} .= "<$dnsuri>" .
+	" [" . join(", ", @{ $answers }) . "]\n";
+  }
+  chomp $self->{tag_data}->{RBL};
 }
 
 ###########################################################################
@@ -310,6 +328,7 @@ sub rbl_finish {
   # TODO: do not remove this since it can be retained!
   delete $self->{dnspost};
   delete $self->{dnsresult};
+  delete $self->{dnsuri};
 }
 
 ###########################################################################

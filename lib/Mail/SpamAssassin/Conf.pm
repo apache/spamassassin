@@ -62,6 +62,7 @@ optional, and the default is shown below.
  _DCCB_            DCC's "Brand"
  _DCCR_            DCC's results
  _PYZOR_           Pyzor results
+ _RBL_             full results for positive RBL queries in DNS URI format
  _LANGUAGES_       possible languages of mail
  _PREVIEW_         content preview
  _REPORT_          report of tests hits (in terse format, ideal for in headers)
