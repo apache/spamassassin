@@ -144,7 +144,7 @@ sub new {
   $self->{check_mx_attempts} = 2;
   $self->{check_mx_delay} = 5;
   $self->{ok_locales} = 'all';
-  $self->{ok_languages} = '';
+  $self->{ok_languages} = 'all';
   $self->{allow_user_rules} = 0;
   $self->{user_rules_to_compile} = 0;
   $self->{fold_headers} = 1;
