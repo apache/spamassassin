@@ -52,6 +52,7 @@ GetOptions(
 	'syslog|s=s' => \$opt{'syslog'},
 	'username|u=s' => \$opt{'username'},
 	'vpopmail!' => \$opt{'vpopmail'}, 'v' => \$opt{'vpopmail'},
+	'configpath|C=s' => \$opt{'configpath'},
 	'user-config!' => \$opt{'user-config'}, 'x' => sub{$opt{'user-config'}=0},
 	'allowed-ips|A=s' => \@{$opt{'allowed-ip'}},
 	'debug!', => \$opt{'debug'}, 'D' => \$opt{'debug'},
@@ -61,7 +62,7 @@ GetOptions(
 	'stop-at-threshold!' => \$opt{'stop-at-threshold'}, 'S' => \$opt{'stop-at-threshold'}
 ) or pod2usage(-exitval => $resphash{'EXUSAGE'}, -verbose => 0);
 
-$opt{'help'} and pod2usage(-exitval => $resphash{EX_USAGE}, -verbose => 1);
+$opt{'help'} and pod2usage(-exitval => $resphash{EX_USAGE}, -verbose => 0, -message => 'For more details, use "man spamd"');
 
 # These can be changed on command line with -A flag
 my %allowed = ();
@@ -99,6 +100,7 @@ if (defined $ENV{'HOME'}) {
 
 my $spamtest = Mail::SpamAssassin->new({
     dont_copy_prefs => $dontcopy,
+    rules_filename => ($opt{'configpath'} || 0),
     local_tests_only => ($opt{'local'} || 0),
     stop_at_threshold => ($opt{'stop-at-threshold'} || 0),
     debug => ($opt{'debug'} || 0),
@@ -690,6 +692,7 @@ Options:
 
  -a, --auto-whitelist, --whitelist  Use auto-whitelists
  -c, --create-prefs                 Create user preferences files
+ -C path, --configpath=path         Path for default config files
  -d, --daemonize                    Daemonize
  -h, --help                         Print usage message.
  -i ipaddr, --listen-ip=ipaddr,...  Listen on the IP ipaddr (default: 127.0.0.1)
@@ -728,6 +731,10 @@ particular correspondent.  See the README file for more details.
 =item B<-c>, B<--create-prefs>
 
 Create user preferences files if they don't exist (default: don't).
+
+=item B<-C> I<path>, B<--configpath>=I<path>
+
+Use the specified path for locating configuration files.  Ignore the default directories.
 
 =item B<-d>, B<--daemonize>
 
