@@ -37,6 +37,8 @@ use vars qw( @ISA );
 
 @ISA = qw( Mail::SpamAssassin::BayesStore );
 
+use constant HAS_DBI => eval { require DBI; };
+
 =head1 METHODS
 
 =head2 new
@@ -66,29 +68,15 @@ sub new {
     return undef;
   }
 
-  my $dsn = $self->{bayes}->{conf}->{bayes_sql_dsn};
-  my $dbuser = $self->{bayes}->{conf}->{bayes_sql_username};
-  my $dbpass = $self->{bayes}->{conf}->{bayes_sql_password};
+  $self->{_dsn} = $self->{bayes}->{conf}->{bayes_sql_dsn};
+  $self->{_dbuser} = $self->{bayes}->{conf}->{bayes_sql_username};
+  $self->{_dbpass} = $self->{bayes}->{conf}->{bayes_sql_password};
 
-  my $dbh;
-  if (!eval {
-    require DBI;
-    # TODO: not sure about "PrintError" here
-    $dbh = DBI->connect($dsn, $dbuser, $dbpass, {'PrintError' => 1});
+  $self->{_dbh} = undef;
 
-    if (!$dbh) {
-      dbg("bayes: Unable to connect to database: ".DBI->errstr());
-    }
-    else {
-      dbg("bayes: Database connection established");
-    }
-    1;
-
-  }) {
+  unless (HAS_DBI) {
     dbg("bayes: Unable to connect to database: DBI module not available: $!");
   }
-
-  $self->{_dbh} = $dbh;
 
   if ($self->{bayes}->{conf}->{bayes_sql_override_username}) {
     $self->{_username} = $self->{bayes}->{conf}->{bayes_sql_override_username};
@@ -139,11 +127,25 @@ so that they can begin using the database immediately.
 sub tie_db_writable {
   my ($self) = @_;
 
-  return 0 unless (defined($self->{_dbh}));
+  return 0 unless (HAS_DBI);
 
   my $main = $self->{bayes}->{main};
 
   $self->read_db_configs();
+
+  # Turn off PrintError and explicitly set AutoCommit to off
+  my $dbh = DBI->connect($self->{_dsn}, $self->{_dbuser}, $self->{_dbpass},
+			 {'PrintError' => 0, 'AutoCommit' => 1});
+
+  if (!$dbh) {
+    dbg("bayes: Unable to connect to database: ".DBI->errstr());
+    return 0;
+  }
+  else {
+    dbg("bayes: Database connection established");
+  }
+
+  $self->{_dbh} = $dbh;
 
   # If the DB version is one we don't understand, abort!
   my $db_ver = $self->_get_db_version();
