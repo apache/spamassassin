@@ -755,9 +755,9 @@ if you want to allow any language.  The default setting is C<all>.
 
 =item fy	frisian
 
-=item ga	irish
+=item ga	irish gaelic
 
-=item gd	scots
+=item gd	scottish gaelic
 
 =item he	hebrew
 
