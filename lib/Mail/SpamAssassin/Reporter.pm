@@ -164,9 +164,8 @@ sub razor_report {
       local $SIG{ALRM} = sub { die "alarm\n" };
       alarm $timeout;
 
-      my $rc =
-          Razor2::Client::Agent->new("razor-$type")
-          ;                 # everything's in the module!
+      # everything's in the module!
+      my $rc = Razor2::Client::Agent->new("razor-$type");
 
       if ($rc) {
         my %opt = (
@@ -223,6 +222,9 @@ sub razor_report {
       undef $response;
     }
   }
+
+  # work around serious brain damage in Razor2 (constant seed)
+  srand;
 
   $self->leave_helper_run_mode();
 
