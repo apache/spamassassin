@@ -125,7 +125,7 @@ describe RCVD_IN_DUL		Received from a dialup IP, see http://www.mail-abuse.org/d
 header RCVD_IN_RELAYS_ORBS_ORG	eval:check_rbl('relays.orbs.org.')
 describe RCVD_IN_RELAYS_ORBS_ORG Received via a relay in relays.orbs.org
 
-header FORGED_RCVD_FOUND	ALL =~ /\n(?:Date|Subject|Reply-To|Message-Id):.*\nReceived:/s
+header FORGED_RCVD_FOUND	ALL =~ /\n(?:Date|Subject|From):.*\nReceived:/s
 describe FORGED_RCVD_FOUND	Forged 'Received:' header found
 
 ###########################################################################
