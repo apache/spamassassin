@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.542 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.543 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -82,30 +82,6 @@ describe T_HTTP_EXCESSIVE_ENTITIES Completely unnecessary %-escapes inside a URL
 
 header T_RATWARE_RCVD_BONUS_SPC	Received =~ /\) by  [a-zA-Z0-9]/
 describe T_RATWARE_RCVD_BONUS_SPC Received headers forged (extra spaces)
-
-# 2003-05-26: quinlan
-# bug 1434: look for multipart/alternative imbalance
-body T_MULTIPART_TRICK_A_00_10	eval:check_for_mime_multipart_trick('.00','.10')
-#
-body T_MULTIPART_TRICK_B_00_05	eval:check_for_mime_multipart_trick('.00','.05')
-body T_MULTIPART_TRICK_B_05_10	eval:check_for_mime_multipart_trick('.05','.10')
-#
-body T_MULTIPART_TRICK_C_00_02	eval:check_for_mime_multipart_trick('.00','.02')
-body T_MULTIPART_TRICK_C_02_04	eval:check_for_mime_multipart_trick('.02','.04')
-body T_MULTIPART_TRICK_C_04_06	eval:check_for_mime_multipart_trick('.04','.06')
-body T_MULTIPART_TRICK_C_06_08	eval:check_for_mime_multipart_trick('.06','.08')
-body T_MULTIPART_TRICK_C_08_10	eval:check_for_mime_multipart_trick('.08','.10')
-#
-body T_MULTIPART_TRICK_D_00_01	eval:check_for_mime_multipart_trick('.00','.01')
-body T_MULTIPART_TRICK_D_01_02	eval:check_for_mime_multipart_trick('.01','.02')
-body T_MULTIPART_TRICK_D_02_03	eval:check_for_mime_multipart_trick('.02','.03')
-body T_MULTIPART_TRICK_D_03_04	eval:check_for_mime_multipart_trick('.03','.04')
-body T_MULTIPART_TRICK_D_04_05	eval:check_for_mime_multipart_trick('.04','.05')
-body T_MULTIPART_TRICK_D_05_06	eval:check_for_mime_multipart_trick('.05','.06')
-body T_MULTIPART_TRICK_D_06_07	eval:check_for_mime_multipart_trick('.06','.07')
-body T_MULTIPART_TRICK_D_07_08	eval:check_for_mime_multipart_trick('.07','.08')
-body T_MULTIPART_TRICK_D_08_09	eval:check_for_mime_multipart_trick('.08','.09')
-body T_MULTIPART_TRICK_D_09_10	eval:check_for_mime_multipart_trick('.09','.10')
 
 # 2003-02-23: quinlan
 # Message-Id: format tests

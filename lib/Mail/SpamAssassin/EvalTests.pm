@@ -2039,6 +2039,15 @@ sub check_for_mime_excessive_qp {
   return $self->{mime_qp_ratio} >= $min;
 }
 
+sub check_mime_multipart_ratio {
+  my ($self, undef, $min, $max) = @_;
+
+  $self->_check_attachments unless exists $self->{mime_multipart_alternative};
+
+  return ($self->{mime_multipart_ratio} >= $min &&
+	  $self->{mime_multipart_ratio} < $max);
+}
+
 sub _check_mime_header {
   my ($self, $ctype, $cte, $cd, $charset, $name) = @_;
 
@@ -2123,17 +2132,6 @@ sub _check_mime_header {
   }
 }
 
-sub check_for_mime_multipart_trick {
-  my ($self, undef, $min, $max) = @_;
-
-  $self->_check_attachments unless exists $self->{t_mime_multipart_alternative};
-
-  return (($min eq 'undef' ||
-	   $self->{t_mime_multipart_alternative_ratio} >= $min) &&
-	  ($max eq 'undef' ||
-	   $self->{t_mime_multipart_alternative_ratio} < $max));
-}
-
 sub _check_attachments {
   my ($self) = @_;
 
@@ -2177,14 +2175,14 @@ sub _check_attachments {
   $self->{mime_faraway_charset} = 0;
   $self->{mime_html_no_charset} = 0;
   $self->{mime_missing_boundary} = 0;
+  $self->{mime_multipart_alternative} = 0;
+  $self->{mime_multipart_ratio} = 1.0;
   $self->{mime_qp_count} = 0;
   $self->{mime_qp_illegal} = 0;
   $self->{mime_qp_inline_no_charset} = 0;
   $self->{mime_qp_long_line} = 0;
   $self->{mime_qp_ratio} = 0;
   $self->{mime_suspect_name} = 0;
-  $self->{t_mime_multipart_alternative} = 0;
-  $self->{t_mime_multipart_alternative_ratio} = 1.0;
 
   # message headers
   $ctype = $self->get('Content-Type');
@@ -2195,7 +2193,7 @@ sub _check_attachments {
     push (@boundary, "\Q$1\E");
   }
   if ($ctype =~ /^multipart\/alternative/i) {
-    $self->{t_mime_multipart_alternative} = 1;
+    $self->{mime_multipart_alternative} = 1;
   }
 
   # check MIME headers in message header
@@ -2242,7 +2240,7 @@ sub _check_attachments {
       {
 	$self->{mime_html_no_charset} = 0;
       }
-      if ($self->{t_mime_multipart_alternative} &&
+      if ($self->{mime_multipart_alternative} &&
 	  $ctype =~ /^text\/(?:plain|html)/i &&
 	  $cd !~ /attachment/)
       {
@@ -2297,7 +2295,7 @@ sub _check_attachments {
   if ($qp_bytes) {
     $self->{mime_qp_ratio} = $qp_count / $qp_bytes;
   }
-  if ($self->{t_mime_multipart_alternative}) {
+  if ($self->{mime_multipart_alternative}) {
     my $text;
     my $html;
     for (my $i = 0; $i <= $part; $i++) {
@@ -2310,7 +2308,7 @@ sub _check_attachments {
       }
     }
     if (defined($text) && defined($html)) {
-      $self->{t_mime_multipart_alternative_ratio} = ($text / $html);
+      $self->{mime_multipart_ratio} = ($text / $html);
     }
   }
   foreach my $str (keys %state) {
