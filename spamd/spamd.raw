@@ -155,7 +155,7 @@ for ( $waitedpid = 0;
 			# Parse user scores:
 			if(-r "$dir/.spamassassin.cf")
 			{
-			    $spamtest->read_scoresonly_config ("$dir/.spamassassin.cf");
+			    $spamtest->read_scoreonly_config ("$dir/.spamassassin.cf");
 			}
 		    }
 		}
