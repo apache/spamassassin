@@ -37,23 +37,37 @@ sub new {
 
 ###########################################################################
 
-=item $meanscore = awl->check_address($addr);
+=item $meanscore = awl->check_address($addr, $originating_ip);
 
 This method will return the mean score of all messages associated with the
-given address, or undef if the address hasn't been seen before
+given address, or undef if the address hasn't been seen before.
+
+If B<$originating_ip> is supplied, it will be used in the lookup.
 
 =cut
 
 sub check_address {
-  my ($self, $addr) = @_;
+  my ($self, $addr, $origip) = @_;
 
   if (!defined $self->{checker}) {
     return undef;		# no factory defined; we can't check
   }
 
   $addr = lc $addr;
-  $addr =~ s/[\000\;\'\"\!]/_/gs;	# paranoia
-  $self->{entry} = $self->{checker}->get_addr_entry ($addr);
+  $addr =~ s/[\000\;\'\"\!\|]/_/gs;	# paranoia
+
+  $self->{entry} = undef;
+
+  if (defined $origip) {
+    $origip =~ s/\.\d{1,3}\.\d{1,3}$//gs;
+    $origip =~ s/[\000\;\'\"\!\|]/_/gs;	# paranoia
+    $self->{entry} = $self->{checker}->get_addr_entry ($addr."|ip=".$origip);
+  }
+
+  if (!defined $self->{entry}) {
+    # fall back to more general style
+    $self->{entry} = $self->{checker}->get_addr_entry ($addr);
+  }
 
   if($self->{entry}->{count} == 0) { return undef; }
 
@@ -96,6 +110,10 @@ sub add_known_good_address {
 
   my $entry = $self->{checker}->get_addr_entry ($addr);
 
+  # remove any old entries (will remove per-ip entries as well)
+  if ($entry->{count} > 0) {
+    $self->{checker}->remove_entry ($entry);
+  }
   $self->{checker}->add_score($entry,-100);
 
   return 0;
@@ -119,6 +137,10 @@ sub add_known_bad_address {
 
   my $entry = $self->{checker}->get_addr_entry ($addr);
 
+  # remove any old entries (will remove per-ip entries as well)
+  if ($entry->{count} > 0) {
+    $self->{checker}->remove_entry ($entry);
+  }
   $self->{checker}->add_score($entry,100);
 
   return 0;

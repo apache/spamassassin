@@ -166,8 +166,18 @@ sub add_score {
 
 sub remove_entry {
   my ($self, $entry) = @_;
-  delete $self->{accum}->{$entry->{addr}};
-  delete $self->{accum}->{$entry->{addr}.'|totscore'};
+
+  my $addr = $entry->{addr};
+  delete $self->{accum}->{$addr};
+  delete $self->{accum}->{$addr.'|totscore'};
+
+  # try to delete any per-IP entries for this addr as well.
+  # could be slow...
+  my @keys = grep { /^\Q$addr\E\|ip=/ } keys %{$self->{accum}};
+  foreach my $key (@keys) {
+    delete $self->{accum}->{$key};
+    delete $self->{accum}->{$key.'|totscore'};
+  }
 }
 
 ###########################################################################
