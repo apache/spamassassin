@@ -33,7 +33,7 @@ describe HTTP_ESCAPED_HOST	Uses %-escapes inside a URL's hostname
 
 # note: do not match \r or \n
 uri HTTP_CTRL_CHARS_HOST	/^https?\:\/\/[^\/\s]*[\x00-\x08\x0b\x0c\x0e-\x1f]/
-describe HTTP_CTRL_CHARS_HOST	Uses control sequences inside a URL's hostname
+describe HTTP_CTRL_CHARS_HOST	Uses control sequences inside a URL hostname
 
 # look for URI with escaped 0-9, A-Z, or a-z characters (other safe
 # characters are sometimes unnecessarily escaped in nonspam; requiring
@@ -44,7 +44,7 @@ describe HTTP_EXCESSIVE_ESCAPES	Completely unnecessary %-escapes inside a URL
 # thx to vince.delvecchio@analog.com for the legwork on the negative
 # lookbehinds here; saved a lot of work for us (bug 1035), also see bug 1835
 uri PORN_4			/^https?:\/\/[\w\.-]*(?:xxx|(?<!es|ba)(?<!dle|sus)sex|anal(?!og|y[sz])|slut|pussy|(?<!cir)(?<!\bdo)cum(?!ul|be?r|b?en)|nympho|suck|porn|hard-?core|taboo|whore|voyeur|lesbian|gurlpages|naughty|lolita|(?<!thir|four|eigh|nine)(?<!fif|six)(?<!seven)teen|schoolgirl|kooloffer|erotic|lust(?!(?<=illust)(?:rat|rious)|(?<=clust)er)|pant(?:y|ies))[\w-]*\./
-describe PORN_4			URL uses words and phrases which indicate porn (4)
+describe PORN_4			URL uses words/phrases which indicate porn
 
 # some frequently-advertised URLs
 uri WWW_CLIK4YOU_COM		/clik4you\.com/i
@@ -55,7 +55,7 @@ uri IP_LINK_PLUS	/^https?\:\/\/(?:\S*\@)?\d+\.\d+\.\d+\.\d+.{0,20}(?:cgi|click|a
 describe IP_LINK_PLUS	Dotted-decimal IP address followed by CGI
 
 uri UNSUB_SCRIPT		/^https?:\/\/.*?cgi.*?(?:unsubscribe|remove)/i
-describe UNSUB_SCRIPT		URL of CGI script called "unsubscribe" or "remove"
+describe UNSUB_SCRIPT		URL of CGI script has "unsubscribe" or "remove"
 
 uri UNSUB_PAGE			/^https?:\/\/.*?(?!cgi).*?unsubscribe/i
 describe UNSUB_PAGE		URL of page called "unsubscribe"
@@ -67,7 +67,7 @@ uri MAILTO_WITH_SUBJ		/^mailto:\S+\?subject=/is
 describe MAILTO_WITH_SUBJ	Includes a link to send a mail with a subject
  	
 uri MAILTO_TO_SPAM_ADDR		/^mailto:[a-z]+\d{2,}\@/is
-describe MAILTO_TO_SPAM_ADDR	Includes a link to a likely spammer email address
+describe MAILTO_TO_SPAM_ADDR	Includes a link to a likely spammer email
  	
 uri MAILTO_TO_REMOVE		/^mailto:.*?remove/is
 describe MAILTO_TO_REMOVE	Includes a 'remove' email address
@@ -98,10 +98,10 @@ uri CHINA_URL			/(?:freehost|yada)china\.com/i
 describe CHINA_URL		Frequent Spam content
 
 uri MAILTO_TO_B2BMAIL		/^mailto:[^\s\@]{1,20}\@b2b-?mail\./is
-describe MAILTO_TO_B2BMAIL	Includes a link to a likely spammer email address
+describe MAILTO_TO_B2BMAIL	Includes a link to a likely spammer email
 
 uri DAILY_PL			/\/logic\/[a-z]{2}\.pl/
-describe DAILY_PL		Spam URL pattern, DailyPromotions redirect link
+describe DAILY_PL		Spam URL pattern, DailyPromotions redirect
 
 uri DAILY_PXE			/http:\/\/(?:pxe|fx)\./i
 describe DAILY_PXE		Spam URL pattern, DailyPromotions server link
