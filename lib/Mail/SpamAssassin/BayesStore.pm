@@ -360,7 +360,9 @@ sub expire_old_tokens_trapped {
   while ($kept+$reprieved < $self->{expiry_min_db_size}) {
     my $deld = shift @deleted_toks;
     $new_toks{$deld->[0]} = tok_pack ($deld->[1], $deld->[2], $deld->[3]);
-    if (!defined($oldest) || $deld->[3] < $oldest) { $oldest = $deld->[3]; }
+    if (defined($deld->[3]) && (!defined($oldest) || $deld->[3] < $oldest)) {
+      $oldest = $deld->[3];
+    }
     $reprieved++;
   }
   @deleted_toks = ();		# free 'em up
@@ -721,6 +723,7 @@ sub tok_unpack {
 
 sub tok_pack {
   my ($ts, $th, $atime) = @_;
+  $ts ||= 0; $th ||= 0; $atime ||= 0;
   if ($ts < 8 && $th < 8) {
     return pack ("CS", ONE_BYTE_FORMAT | ($ts << 3) | $th, $atime);
   } else {
