@@ -59,11 +59,11 @@ use File::Copy;
 use Cwd;
 use Config;
 
-# Let's not make this required -- Marc
-#eval { require Time::HiRes };
-#Time::HiRes->import( qw(time) ) unless $@;
-# Unfortunately, the above doesn't work, please FIXME
-use Time::HiRes qw ( time );
+# Load Time::HiRes is it's available
+BEGIN {                                                                                                                                                                
+  eval { require Time::HiRes };                                                                                                                                        
+  Time::HiRes->import( qw(time) ) unless $@;                                                                                                                           
+}  
 
 use vars	qw{
   	@ISA $VERSION $SUB_VERSION $HOME_URL $DEBUG $TIMELOG
@@ -78,7 +78,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 $VERSION = "2.31";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.98 2002/06/18 00:40:28 duncf Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.99 2002/06/18 01:23:16 hughescr Exp $';
 
 sub Version { $VERSION; }
 
