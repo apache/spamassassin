@@ -1,9 +1,11 @@
 #!/bin/sh -e
 
-. /usr/share/debconf/confmodule
-
 # Make sure debconf runs before the postinst
+if [ -e /usr/share/debconf/confmodule ]; then 
+    . /usr/share/debconf/confmodule
+    
+    db_stop
+fi
 
-db_stop
 
 #DEBHELPER#
