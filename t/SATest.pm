@@ -23,6 +23,8 @@ sub sa_t_init {
   $spamc = $ENV{'SPAMC_SCRIPT'};
   $spamc ||= "../spamd/spamc";
 
+  $spamdport = 48373;		# whatever
+
   $scr_cf_args = "";
 
   (-f "t/test_dir") && chdir("t");        # run from ..
@@ -99,7 +101,7 @@ sub sdrun {
 
   start_spamd ($sdargs);
 
-  my $spamcargs = "$spamc $args";
+  my $spamcargs = "$spamc -p $spamdport $args";
   $spamcargs =~ s!/!\\!g if ($^O =~ /^MS(DOS|Win)/i);
 
   print ("\t$spamcargs\n");
@@ -121,7 +123,7 @@ sub start_spamd {
     $sdargs = $ENV{'SD_ARGS'} . " ". $sdargs;
   }
 
-  my $spamdargs = "$spamd -D $sdargs";
+  my $spamdargs = "$spamd -D -p $spamdport $sdargs";
   $spamdargs =~ s!/!\\!g if ($^O =~ /^MS(DOS|Win)/i);
 
   print ("\t$spamdargs > log/$testname.spamd 2>&1 &\n");
