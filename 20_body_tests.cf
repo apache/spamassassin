@@ -221,6 +221,10 @@ describe EXCUSE_17		Suspect you might have received the message by mistake
 body EXCUSE_18			/we do not (?:spam|send unsolicited)/i
 describe EXCUSE_18		Claims not to be SPAM
 
+# Please do *not* tweak this without solid frequencies to back it up.
+body EXCUSE_FUTURE              /be removed from future mailings/i
+describe EXCUSE_FUTURE          Talks about future mailings
+
 # jm: keep this case-sensitive, otherwise it FP's
 body VIAGRA			/VIAGRA/
 describe VIAGRA			Plugs Viagra
