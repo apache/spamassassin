@@ -275,8 +275,8 @@ describe HTML_TAG_BALANCE_HEAD	HTML has unbalanced "head" tags
 body HTML_TAG_BALANCE_TABLE	eval:html_tag_balance('table', '> 0')
 describe HTML_TAG_BALANCE_TABLE	HTML is missing "table" close tags
 
-body HTML_TAG_EXISTS_BASE	eval:html_tag_exists('base')
-describe HTML_TAG_EXISTS_BASE	HTML has "base" tags
+body HTML_TAG_EXISTS_MARQUEE	eval:html_tag_exists('marquee')
+describe HTML_TAG_EXISTS_MARQUEE	HTML has "marquee" tag
 
 body HTML_TAG_EXISTS_PARAM	eval:html_tag_exists('param')
 describe HTML_TAG_EXISTS_PARAM	HTML has "param" tag
