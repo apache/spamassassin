@@ -62,17 +62,21 @@ sub run {
   }
 
   foreach my $target (@targets) {
-    my ($class, $format, $location) = split(/:/, $target, 3);
+    my ($class, $format, $rawloc) = split(/:/, $target, 3);
 
-    $class = substr($class, 0, 1);
-    if ($format eq "dir") {
-      $self->scan_directory($class, $location);
-    }
-    elsif ($format eq "file") {
-      $self->scan_file($class, $location);
-    }
-    elsif ($format eq "mbox") {
-      $self->scan_mailbox($class, $location);
+    my @locations = $self->fix_globs($rawloc);
+
+    foreach my $location (@locations) {
+      $class = substr($class, 0, 1);
+      if ($format eq "dir") {
+	$self->scan_directory($class, $location);
+      }
+      elsif ($format eq "file") {
+	$self->scan_file($class, $location);
+      }
+      elsif ($format eq "mbox") {
+	$self->scan_mailbox($class, $location);
+      }
     }
   }
 
@@ -425,6 +429,19 @@ sub run_mailbox {
   }
   close INPUT;
   &{$self->{wanted_sub}}("$file.$offset", $date, \@msg);
+}
+
+############################################################################
+
+sub fix_globs {
+  my ($self, $path) = @_;
+
+  # fix home dir: ~ = /home/jm
+  $path =~ s/\~/$ENV{'HOME'}/g;
+
+  # fix csh-style globs: * = er, you know what it does ;)
+  my @paths = glob $path;
+  return @paths;
 }
 
 ############################################################################
