@@ -168,7 +168,6 @@ sub is_dcc_available {
 sub dcc_report {
   my ($self, $fulltext) = @_;
   my $timeout = 10;
-  my $response = undef;
 
   eval {
     use IPC::Open2;
@@ -191,7 +190,6 @@ sub dcc_report {
   };
 
   if ($@) {
-    $response = undef;
     if ($@ =~ /alarm/) {
       dbg ("DCC report timed out after 10 secs.");
       return 0;
