@@ -98,9 +98,8 @@ sub mass_check_mailbox {
   }
   while (<MBOX>) { /^From \S+ +... ... / and last; }
 
-  my $tmpf = "/tmp/mass-check.$$";
   while (!eof MBOX) {
-    open (MSG, ">$tmpf");
+    my @msg = ();
     my $msgid = undef;
     $count++;
 
@@ -110,14 +109,13 @@ sub mass_check_mailbox {
       if (/^$/) {
 	if (!defined ($msgid)) {
 	  $msgid = "<$count\@no_msgid_in_msg.taint.org>";
-	  print MSG "Message-Id: $msgid\n";
+	  push (@msg, "Message-Id: $msgid\n");
 	}
       }
 
       /^From \S+ +... ... / and last;
-      print MSG;
+      push (@msg, $_);
     }
-    close MSG;
 
     # switch to a fork-based model to save RAM
     if ($FORK && fork()) { wait; next; }
@@ -125,11 +123,8 @@ sub mass_check_mailbox {
     $msgid = "$folder:$msgid";		# so we can find it again
     $msgid =~ s/\s/_/gs;	# make safe
 
-    open (STDIN, "<$tmpf");
-    unlink $tmpf;
-    my $ma = Mail::Audit->new();
+    my $ma = Mail::Audit->new('data' => \@msg);
     docheck ($msgid, $ma);
-    close STDIN;
 
     if ($FORK) { exit; }
   }
