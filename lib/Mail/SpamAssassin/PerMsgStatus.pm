@@ -1471,18 +1471,18 @@ sub ran_rule_debug_code {
   # unless specifically requested by the caller.   Also split the
   # two chars, just to be paranoid and ensure that a buggy perl interp
   # doesn't impose that hit anyway (just in case)
-  my $log_hits_code = ': match=\'$' . '&\'';
+  my $match = '($' . '&' . '|| "negative match")';
 
   my $save_hits_code = '';
   if ($self->{save_pattern_hits}) {
     $save_hits_code = '
-        $self->{pattern_hits}->{q{'.$rulename.'}} = $' . '&;
+        $self->{pattern_hits}->{q{'.$rulename.'}} = '.$match.';
     ';
   }
 
   return '
-    dbg("rules: ran '.$ruletype.' rule '.$rulename.' ======> got hit'.
-        $log_hits_code.'");
+    dbg("rules: ran '.$ruletype.' rule '.$rulename.' ======> got hit: \"" . '.
+        $match.' . "\"");
     '.$save_hits_code.'
   ';
 }
@@ -1558,7 +1558,7 @@ sub do_head_tests {
         '.$self->hash_line_for_rule($rulename).'
         if ($self->get(q#'.$hdrname.'#, q#'.$def.'#) '.$testtype.'~ '.$pat.') {
           $self->got_hit (q#'.$rulename.'#, q{});
-          '. $self->ran_rule_debug_code ($rulename,"header regex", 1) . '
+          '. $self->ran_rule_debug_code($rulename, "header", 1) . '
         }
       }';
 
@@ -1644,8 +1644,8 @@ sub do_body_tests {
            foreach (@_) {
              '.$self->hash_line_for_rule($rulename).'
              if ('.$pat.') { 
-                $self->got_pattern_hit (q{'.$rulename.'}, "BODY: "); 
-                '. $self->ran_rule_debug_code ($rulename,"body-text regex", 2) . '
+                $self->got_pattern_hit(q{'.$rulename.'}, "BODY: "); 
+                '. $self->ran_rule_debug_code($rulename, "body", 2) . '
 		# Ok, we hit, stop now.
 		last;
              }
@@ -1894,8 +1894,8 @@ sub do_body_uri_tests {
        foreach (@_) {
          '.$self->hash_line_for_rule($rulename).'
          if ('.$pat.') { 
-            $self->got_pattern_hit (q{'.$rulename.'}, "URI: ");
-            '. $self->ran_rule_debug_code ($rulename,"uri test", 4) . '
+            $self->got_pattern_hit(q{'.$rulename.'}, "URI: ");
+            '. $self->ran_rule_debug_code($rulename, "uri", 4) . '
             # Ok, we hit, stop now.
             last;
          }
@@ -1983,8 +1983,8 @@ sub do_rawbody_tests {
        foreach (@_) {
          '.$self->hash_line_for_rule($rulename).'
          if ('.$pat.') { 
-            $self->got_pattern_hit (q{'.$rulename.'}, "RAW: ");
-            '. $self->ran_rule_debug_code ($rulename,"body_pattern_hit", 8) . '
+            $self->got_pattern_hit(q{'.$rulename.'}, "RAW: ");
+            '. $self->ran_rule_debug_code($rulename, "rawbody", 8) . '
             # Ok, we hit, stop now.
             last;
          }
@@ -2060,8 +2060,8 @@ sub do_full_tests {
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
         '.$self->hash_line_for_rule($rulename).'
         if ($$fullmsgref =~ '.$pat.') {
-          $self->got_pattern_hit (q{'.$rulename.'}, "FULL: ");
-          '. $self->ran_rule_debug_code ($rulename,"full-text regex", 16) . '
+          $self->got_pattern_hit(q{'.$rulename.'}, "FULL: ");
+          '. $self->ran_rule_debug_code($rulename, "full", 16) . '
         }
       }
     ';
@@ -2318,10 +2318,10 @@ sub run_eval_tests {
 
     if ($result) {
       $self->got_hit ($rulename, $prepend2desc);
-      dbg("rules: ran run_eval_test rule $rulename ======> got hit") if $debugenabled;
+      dbg("rules: ran eval rule $rulename ======> got hit") if $debugenabled;
     }
     #else {
-    #  dbg("rules: ran run_eval_test rule $rulename but did not get hit") if $debugenabled;
+    #  dbg("rules: ran eval rule $rulename ======> no hit") if $debugenabled;
     #}
   }
 }
