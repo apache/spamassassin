@@ -94,7 +94,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.184 2003/04/04 19:28:43 felicity Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.185 2003/04/22 07:31:33 jmason Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -469,6 +469,11 @@ from the Bayes databases (by calling C<finish_learner()>) (optional, default 0).
 
 Should an expiration run be forced to occur immediately? (optional, default 0).
 
+=item learn_to_journal
+
+Should learning data be written to the journal, instead of directly to the
+databases? (optional, default 0).
+
 =item wait_for_lock
 
 Whether or not to wait a long time for locks to complete (optional, default 0).
@@ -482,6 +487,7 @@ sub init_learner {
   my $opts = shift;
   dbg ("Initialising learner");
   if ($opts->{force_expire}) { $self->{learn_force_expire} = 1; }
+  if ($opts->{learn_to_journal}) { $self->{learn_to_journal} = 1; }
   if ($opts->{caller_will_untie}) { $self->{learn_caller_will_untie} = 1; }
   if ($opts->{wait_for_lock}) { $self->{learn_wait_for_lock} = 1; }
   1;

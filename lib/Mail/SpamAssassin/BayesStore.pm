@@ -583,21 +583,21 @@ sub remove_running_expire_tok {
 sub tok_count_change {
   my ($self, $ds, $dh, $tok) = @_;
 
-  # To defer writes while learning:
-  #$self->defer_update ("c $ds $dh ".$self->expiry_now()." ".$tok);
-
-  # To write immediately:
-  $self->tok_sync_counters ($ds, $dh, $self->expiry_now(), $tok);
+  if ($self->{bayes}->{main}->{learn_to_journal}) {
+    $self->defer_update ("c $ds $dh ".$self->expiry_now()." ".$tok);
+  } else {
+    $self->tok_sync_counters ($ds, $dh, $self->expiry_now(), $tok);
+  }
 }
  
 sub nspam_nham_change {
   my ($self, $ds, $dh) = @_;
 
-  # To defer writes while learning:
-  #$self->defer_update ("n $ds $dh");
-
-  # To write immediately:
-  $self->tok_sync_nspam_nham ($ds, $dh);
+  if ($self->{bayes}->{main}->{learn_to_journal}) {
+    $self->defer_update ("n $ds $dh");
+  } else {
+    $self->tok_sync_nspam_nham ($ds, $dh);
+  }
 }
 
 sub tok_touch {
@@ -610,8 +610,19 @@ sub defer_update {
   $self->{string_to_journal} .= $str."\n";
 }
 
+sub expiry_now {
+  my ($self) = @_;
+  $self->scan_count_get();
+}
+
+###########################################################################
+
 sub add_touches_to_journal {
   my ($self) = @_;
+
+  my $nbytes = length ($self->{string_to_journal});
+  return if ($nbytes == 0);
+
   my $path = $self->get_journal_filename();
 
   # use append mode, write atomically, then close, so simultaneous updates are
@@ -627,8 +638,6 @@ sub add_touches_to_journal {
   # do not use print() here, it will break up the buffer if it's >8192 bytes,
   # which could result in two sets of tokens getting mixed up and their
   # touches missed.
-
-  my $nbytes = length ($self->{string_to_journal});
   my $writ = 0;
   while ($writ < $nbytes) {
     my $len = syswrite (OUT, $self->{string_to_journal});
@@ -654,11 +663,6 @@ sub add_touches_to_journal {
   umask $umask; # reset umask
 
   $self->{string_to_journal} = '';
-}
-
-sub expiry_now {
-  my ($self) = @_;
-  $self->scan_count_get();
 }
 
 ###########################################################################
@@ -734,12 +738,12 @@ sub sync_journal_trapped {
 
     if (/^t (\d+) (.*)$/) { # Token timestamp update, cache resultant entries
       $tokens{$2} = $1+0;
-#   elsif (/^c (-?\d+) (-?\d+) (\d+) (.*)$/) { # Add/full token update
-#     $self->tok_sync_counters ($1+0, $2+0, $3+0, $4);
-#     $count++;
-#   } elsif (/^n (-?\d+) (-?\d+)$/) { # update ham/spam count
-#     $self->tok_sync_nspam_nham ($1+0, $2+0);
-#     $count++;
+    } elsif (/^c (-?\d+) (-?\d+) (\d+) (.*)$/) { # Add/full token update
+      $self->tok_sync_counters ($1+0, $2+0, $3+0, $4);
+      $count++;
+    } elsif (/^n (-?\d+) (-?\d+)$/) { # update ham/spam count
+      $self->tok_sync_nspam_nham ($1+0, $2+0);
+      $count++;
     } else {
       warn "Bayes journal: gibberish entry found: $_";
     }

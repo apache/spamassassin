@@ -355,9 +355,9 @@ Produce diagnostic output.
 =item B<--no-rebuild>
 
 Skip the slow rebuilding step which normally takes place after changing
-database entries.  If you plan to scan many folders in a batch, it is faster to
-use this switch and run C<sa-learn --rebuild> once all the folders have been
-scanned.
+database entries.  If you plan to scan many folders in a batch, or to learn
+individual messages one-by-one, it is faster to use this switch and run
+C<sa-learn --rebuild> once all the folders have been scanned.
 
 =item B<-L>, B<--local>
 

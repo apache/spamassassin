@@ -216,7 +216,9 @@ sub new {
 sub finish {
   my $self = shift;
   if (!$self->{conf}->{use_bayes}) { return; }
-  $self->{store}->untie_db();
+  if (!$self->{main}->{learn_caller_will_untie}) {
+    $self->{store}->untie_db();
+  }
 }
 
 ###########################################################################
@@ -541,12 +543,17 @@ sub learn {
   my $body = $self->get_body_from_msg ($msg);
   my $ret;
 
-  # we still tie for writing here, since we write to the seen db
-  # synchronously
   eval {
     local $SIG{'__DIE__'};	# do not run user die() traps in here
 
-    if ($self->{store}->tie_db_writable()) {
+    my $ok;
+    if ($self->{main}->{learn_to_journal}) {
+      $ok = $self->{store}->tie_db_readonly();
+    } else {
+      $ok = $self->{store}->tie_db_writable();
+    }
+
+    if ($ok) {
       $ret = $self->learn_trapped ($isspam, $msg, $body);
 
       if (!$self->{main}->{learn_caller_will_untie}) {
@@ -602,6 +609,7 @@ sub learn_trapped {
   }
 
   $self->{store}->seen_put ($msgid, ($isspam ? 's' : 'h'));
+  $self->{store}->add_touches_to_journal();
   1;
 }
 

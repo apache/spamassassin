@@ -114,6 +114,7 @@ sub cmdline_run {
 
   $spamtest->init_learner({
       force_expire	=> $opt{'force-expire'},
+      learn_to_journal	=> $opt{'norebuild'},
       wait_for_lock	=> 1,
       caller_will_untie	=> 1
   });
