@@ -615,7 +615,7 @@ describe SUBJ_2_CREDIT          Contains 'subject to credit approval'
 body DEAR_SOMEBODY              /Dear [A-Z][a-z]+/
 describe DEAR_SOMEBODY          Contains 'Dear Somebody'
 
-body GAPPY_TEXT                 /(?:[a-z][^a-z0-9]+){4,}/i
+body GAPPY_TEXT                 /(?:[a-z][-_\.\,\:\;\'\~]{1,3}){5,}/i
 describe GAPPY_TEXT             Contains 'G.a.p.p.y-T.e.x.t'
 
 body COPY_DVDS                  /copy.{1,20}dvd/i
