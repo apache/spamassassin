@@ -34,7 +34,6 @@ BEGIN {
   # mind ;)
 
   no strict;
-  no warnings 'all';
   local ($^W) = 0;
 
   eval {
