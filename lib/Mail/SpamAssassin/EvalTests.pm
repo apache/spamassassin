@@ -2627,28 +2627,6 @@ sub check_pyzor {
   return $self->pyzor_lookup($full);
 }
 
-sub check_dcc {
-  my ($self, $full) = @_;
-  my $have_dccifd = $self->is_dccifd_available();
-
-  return 0 unless ($have_dccifd || $self->is_dcc_available() );
-  return 0 if ($self->{already_checked_dcc});
-
-  $self->{already_checked_dcc} = 1;
-
-  # First check if there's already a X-DCC header with value of "bulk"
-  # and short-circuit if there is -- someone upstream might already have
-  # checked DCC for us.
-  return 1 if grep(/^X-DCC-(?:[^:]{1,80}-)?Metrics:/ && /bulk/, $self->{msg}->get_all_headers());
-  
-  if ($have_dccifd) {
-    return $self->dccifd_lookup($full);
-  }
-  else {
-    return $self->dcc_lookup($full);
-  }
-}
-
 ###########################################################################
 
 sub check_for_fake_aol_relay_in_rcvd {

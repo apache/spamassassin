@@ -991,66 +991,6 @@ Select the locales to allow from the list below:
 
 =over 4
 
-=item use_dcc ( 0 | 1 )		(default: 1)
-
-Whether to use DCC, if it is available.  DCC (Distributed Checksum
-Clearinghouse) is a system similar to Razor.
-
-=cut
-
-  push (@cmds, {
-    setting => 'use_dcc',
-    default => 1,
-    type => $CONF_TYPE_BOOL
-  });
-
-=item dcc_timeout n              (default: 10)
-
-How many seconds you wait for DCC to complete, before scanning continues
-without the DCC results.
-
-=cut
-
-  push (@cmds, {
-    setting => 'dcc_timeout',
-    default => 10,
-    type => $CONF_TYPE_NUMERIC
-  });
-
-=item dcc_body_max NUMBER
-
-=item dcc_fuz1_max NUMBER
-
-=item dcc_fuz2_max NUMBER
-
-This option sets how often a message's body/fuz1/fuz2 checksum must have been
-reported to the DCC server before SpamAssassin will consider the DCC check as
-matched.
-
-As nearly all DCC clients are auto-reporting these checksums you should set
-this to a relatively high value, e.g. C<999999> (this is DCC's MANY count).
-
-The default is C<999999> for all these options.
-
-=cut
-
-  push (@cmds, {
-    setting => 'dcc_body_max',
-    default => 999999,
-    type => $CONF_TYPE_NUMERIC
-  },
-  {
-    setting => 'dcc_fuz1_max',
-    default => 999999,
-    type => $CONF_TYPE_NUMERIC
-  },
-  {
-    setting => 'dcc_fuz2_max',
-    default => 999999,
-    type => $CONF_TYPE_NUMERIC
-  });
-
-
 =item use_pyzor ( 0 | 1 )		(default: 1)
 
 Whether to use Pyzor, if it is available.
@@ -2527,72 +2467,6 @@ use this, as the current PATH will have been cleared.
     is_admin => 1,
     default => undef,
     type => $CONF_TYPE_STRING
-  });
-
-=item dcc_home STRING
-
-This option tells SpamAssassin specifically where to find the dcc homedir.
-If C<dcc_path> is not specified, it will default to looking in C<dcc_home/bin>
-for dcc client instead of relying on SpamAssassin to find it in the current PATH.
-If it isn't found there, it will look in the current PATH. If a C<dccifd> socket
-is found in C<dcc_home>, it will use that interface that instead of C<dccproc>.
-
-=cut
-
-  push (@cmds, {
-    setting => 'dcc_home',
-    is_admin => 1,
-    type => $CONF_TYPE_STRING
-  });
-
-=item dcc_dccifd_path STRING
-
-This option tells SpamAssassin specifically where to find the dccifd socket.
-If C<dcc_dccifd_path> is not specified, it will default to looking in C<dcc_home>
-If a C<dccifd> socket is found, it will use it instead of C<dccproc>.
-
-=cut
-
-  push (@cmds, {
-    setting => 'dcc_dccifd_path',
-    is_admin => 1,
-    type => $CONF_TYPE_STRING
-  });
-
-=item dcc_path STRING
-
-This option tells SpamAssassin specifically where to find the C<dccproc>
-client instead of relying on SpamAssassin to find it in the current PATH.
-Note that if I<taint mode> is enabled in the Perl interpreter, you should
-use this, as the current PATH will have been cleared.
-
-=cut
-
-  push (@cmds, {
-    setting => 'dcc_path',
-    is_admin => 1,
-    default => undef,
-    type => $CONF_TYPE_STRING
-  });
-
-=item dcc_options options
-
-Specify additional options to the dccproc(8) command. Please note that only
-[A-Z -] is allowed (security).
-
-The default is C<-R>.
-
-=cut
-
-  push (@cmds, {
-    setting => 'dcc_options',
-    is_admin => 1,
-    default => '-R',
-    code => sub {
-      my ($self, $key, $value, $line) = @_;
-      if ($value !~ /^([A-Z -]+)/) { return $INVALID_VALUE; }
-      $self->{dcc_options} = $1;
-    }
   });
 
 =item use_auto_whitelist ( 0 | 1 )		(default: 1)
