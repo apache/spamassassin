@@ -1,0 +1,96 @@
+
+Changes since 2.50:
+
+- spamd now supports UNIX-domain sockets for low-overhead scanning, thanks
+  to Steve Friedl for this.  Strongly recommended if you're running spamc
+  on the same host as the spamd server
+
+- DNSBLs overhauled; lots of new lists, including SORBS and SpamCop BL;
+  dropped Osirusoft due to their retirement, brought on by a DDOS
+
+- better support for detecting 'invisible text' in HTML messages
+
+- new Bayes tweaks -- tokenization of partial address and URI elements
+
+- RBL timeouts are now handled much more efficiently; if one RBL is taking
+  much longer than all the others, it will be cut short and ignored
+
+- now reduces amount of IP addresses queried, by inferring trust relationships
+  between Received headers; trust can be manually specified using
+  "trusted_networks"
+
+- generalised Received-header parser to more easily detect HELO string
+  forgery and faked relay lines
+
+- default report updated to list the hostname of the machine where
+  SpamAssassin is running; also asks installer for administrative address
+  or URL, to reduce user confusion
+
+- "add_header": more flexible header rewriting, with a simple template system
+
+- workaround for red hat kernel with NPTL reporting "application bug" in
+  spamd due to use of waitpid() when SIGCHLD is set to SIG_IGN
+
+- dccifd support added
+
+- Razor 1 support dropped
+
+- support for domain-based blacklists
+
+- new bayes backend, including new database format, ability to learn messages
+  to the journal, etc.  Improved expiration mechanism
+
+- lots of bugs fixed and new rules added. ;)
+
+
+Bayes FYI: 2.60 has a new Bayes backend and database format.  Your old
+database(s) will automatically be upgraded the first time 2.60 tries
+to write to the DB, and any journal, if it exists, will be wiped out
+without being synced.
+
+In addition, we have had to drop support for Bayes databases in formats
+other than DB_File, due to a large number of serious issues (including
+crash and concurrency bugs) with those formats.
+
+So, what you want to do is something like this:
+
+- stop running spamassassin/spamd (ie: you don't want it to be running
+  during the upgrade)
+- run "sa-learn --rebuild", this will sync your journal.
+- upgrade SA to 2.60
+- install DB_File module if necessary
+- if you were using another database module, run "sa-learn --import"
+  to migrate the data into new DB_File files
+- run "sa-learn --rebuild", this will cause the db format to be upgraded
+- start running spamassassin/spamd again
+
+Obviously the steps will be different depending on your environment,
+but you get the idea. :)
+
+Bayes FYI 2: Because of the new database format, "check_bayes_db" will
+no longer function properly.  The functionality from that script was
+added to sa-learn via the "--dump" parameter.  Please see the sa-learn
+man/pod documentation for more info.
+
+
+Changes since 2.60 rc2:
+
+- bug 2334: trusted network inference ignores 'local tests only'
+
+- bug 2370: removed support for non-DB_File database modules in Bayes
+
+- bug 2365: Osirusoft rules dropped
+
+- bug 2356: report_safe_copy_headers was broken
+
+- bug 2338: Razor static srand() worked around
+
+- bug 2360: Bonded Sender queries changed zone
+
+- bug 2347: add_header did not support multiple newlines
+
+- bug 2354: header options now more backward-compatible
+
+- bug 2359: "make install" logic for non-standard PREFIXes broken
+
+--j.
