@@ -50,6 +50,7 @@ WriteMakefile(
 
     'PREREQ_PM' => {
                         'File::Copy' => 0,
+                        'Time::HiRes' => 0,
                   },
 
     'dist' => {
