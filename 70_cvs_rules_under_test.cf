@@ -688,3 +688,7 @@ describe T_OBFUSCATING_COMMENT	HTML comments which obfuscate text (2)
 header T_GAPPY_SUBJECT		Subject =~ /\b(?:[a-z][\W]{1,3}){4,}/i
 body T_AS_SEEN_ON		/seen [oi]n\b\s*(?:TV|ABC|NBC|CBS|CNN|Oprah|USA Today|48 Hours|(The )?New York Times|\w+\s+TV|:)/i
 body T_SEE_FOR_YOURSELF		/See (?:for|it|it for) yourself\b/i
+
+uri T_YAHOO_REDIRECTOR		/^http:\/\/rd\.yahoo\.com/i
+describe T_YAHOO_REDIRECTOR	Uses commonly-spammed redirector URL
+
