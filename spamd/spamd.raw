@@ -897,7 +897,8 @@ sub spawn {
   sigprocmask( POSIX::SIG_BLOCK(), $sigset )
     or die "Can't block SIGINT for fork: $!\n";
 
-  die "fork: $!" unless defined( $pid = fork );
+  $pid = fork();
+  die "fork: $!" unless defined $pid;
 
   if ($pid) {
     ## PARENT
