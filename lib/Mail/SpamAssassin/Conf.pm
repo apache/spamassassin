@@ -6,7 +6,7 @@ Mail::SpamAssassin::Conf - SpamAssassin configuration file
 
   # a comment
 
-  rewrite_subject                 1
+  rewrite_header Subject          *****SPAM*****
 
   full PARA_A_2_C_OF_1618         /Paragraph .a.{0,10}2.{0,10}C. of S. 1618/i
   describe PARA_A_2_C_OF_1618     Claims compliance with senate bill 1618
@@ -1738,7 +1738,11 @@ C<rewrite_header> option described above.
 =cut
 
     if (/^rewrite_subject\s+(\d+)$/) {
-      $self->{rewrite_header}->{Subject} = $self->{subject_tag};
+	if ($1) {
+	    $self->{rewrite_header}->{Subject} = $self->{subject_tag};
+	} else {
+	    delete $self->{rewrite_header}->{Subject};
+	}
       next;
     }
 
@@ -1750,7 +1754,8 @@ add_header option. If report_safe is not used (see below), you may
 only use the _HITS_ and _REQD_ tags, if report_safe is 0, or
 SpamAssassin will not be able to remove this markup from your message.
 
-The use of this option is deprecated. Use the rewrite_header option above.
+The use of this option is deprecated. Use the C<rewrite_header> option
+above.
 
 =cut
 

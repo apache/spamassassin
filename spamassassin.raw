@@ -557,12 +557,12 @@ present) from the original spam message:
 
 =item Subject: header
 
-The string C<*****SPAM*****> is also prepended to the subject,
-if the C<rewrite_subject 1> configuration option is given.
-
 =item From: header
 
 =item To: header
+
+The above headers can be modified if the relavent C<rewrite_header>
+option is given.
 
 =item Cc: header
 

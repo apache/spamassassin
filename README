@@ -222,10 +222,10 @@ can be set. Common first-time tweaks include:
         different thresholds are available in the "STATISTICS.txt" file in
         the "rules" directory.
 
-  - subject_tag
+  - rewrite_header, add_header
 
-        When rewrite_subject is on, the subject stamp is *****SPAM*****.
-        This can be used to change it.
+        These options affect the way messages are tagged as spam or
+	non-spam. This makes it easy to identify incoming mail.
 
   - ok_locales
 
