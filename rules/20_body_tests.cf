@@ -210,11 +210,11 @@ body EXCUSE_12			/this (?:e?-?mail|message) (?:(?:has )?reached|was sent to) you
 describe EXCUSE_12		Nobody's perfect
 body EXCUSE_13			/mail was sent to you because /i
 describe EXCUSE_13		Gives an excuse for why message was sent
-body EXCUSE_14			/you do not wish to receive further /i
+body EXCUSE_14			/you (?:do not|no longer) wish to receive/i
 describe EXCUSE_14		Tells you how to stop further SPAM
 body EXCUSE_15			/this (?:|e?-?mail|message )(?:is|was) (?:not|never) (?:spam|(?:sent |)unsolicited)/i
 describe EXCUSE_15		Claims to be legitimate email
-body EXCUSE_16			/received this (?:e?-?mail|message) in error[, ]* or/
+body EXCUSE_16			/received this.{1,10}in error/
 describe EXCUSE_16		I wonder how many emails they sent in error...
 body EXCUSE_17			/received.{0,15} by mistake/i
 describe EXCUSE_17		Suspect you might have received the message by mistake
@@ -290,6 +290,8 @@ body STOCK_ALERT		/stock alert/i
 describe STOCK_ALERT		Offers a stock alert
 body MICRO_CAP_WARNING		/Investing in micro-cap securities is highly speculative/i
 describe MICRO_CAP_WARNING	SEC-mandated penny-stock warning -- thanks SEC
+body INVESTOR_SPEC_SHEET	/Investor Spec Sheet/i
+describe INVESTOR_SPEC_SHEET	Standard investment opportunity spam
 
 # some frequently-advertised URLs
 rawbody E_WEBHOSTCENTRAL_URL		/http:\/\/.*e-webhostcentral\.com/i
