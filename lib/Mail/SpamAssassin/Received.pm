@@ -896,7 +896,7 @@ sub parse_received_line {
     # SMTP Relay (MMS v5.0)); Mon, 24 Mar 2003 19:49:48 -0500
     if (/^from (${IP_ADDRESS}) by (\S+) with /) {
       $ip = $1; $by = $2;
-	goto enough;
+      goto enough;
     }
 
     # Received: from pobox.com (h005018086b3b.ne.client2.attbi.com[66.31.45.164])
@@ -1034,18 +1034,16 @@ sub parse_received_line {
   if (/^helo=(\S+)[^-A-Za-z0-9\.]/) { $helo = $1; }
   if (/\[(${IP_ADDRESS})\]/) { $ip = $1; }
   if (/ by (\S+)[^-A-Za-z0-9\.]/) { $by = $1; }
-  if (defined $ip && defined $by) { goto enough; }
+  if ($ip && $by) { goto enough; }
 
   # ------------------------------------------------------------------------
   # OK, if we still haven't figured out at least the basics (IP and by), or
   # returned due to it being a known-crap format, let's warn so the user can
   # file a bug report or something.
 
-  if (!defined $ip || !defined $by) {
-    dbg ("received-header: unknown format: $_");
-    # and skip the line entirely!  We can't parse it...
-    return;
-  }
+  dbg ("received-header: unknown format: $_");
+  # and skip the line entirely!  We can't parse it...
+  return;
 
   # ------------------------------------------------------------------------
   # OK, line parsed (at least partially); now deal with the contents
