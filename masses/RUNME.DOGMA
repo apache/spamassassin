@@ -14,7 +14,7 @@ date
 mkdir -p logs/old 2>/dev/null
 mv spam.log nonspam.log logs/old
 
-./mass-check /local2/mail-archives/spamtrap/mbox > spam.log
+./mass-check /home/jm/lib/spamtrap/mbox > spam.log
 
 (
 ./mass-check /home/mailman/archives/public/crackmice.mbox/crackmice.mbox
