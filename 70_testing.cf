@@ -34,6 +34,16 @@ header T_FRAGMENTED_MESSAGE	Content-Type =~ /message\/partial/i
 # I'm curious, may help explain more ALL_TRUSTED fps
 body T_SA_MARKED_UP     /Spam detection software, running on the system /
 
+# more general template rule to try
+header __HEADER_TEMPLATE	ALL =~ /%[A-Z][A-Z_-]+[^%A-Za-z_-]/
+header __UIDL_TEMPLATE_LIKE	X-UIDL =~ /%[A-Z][A-Z_-]+[^%A-Za-z_-]/
+header __XFACE_TEMPLATE_LIKE	X-Face =~ /%[A-Z][A-Z_-]+[^%A-Za-z_-]/
+header __TOCC_TEMPLATE_LIKE	ToCc =~ /%[A-Z][A-Z_-]+[^%A-Za-z_-]/
+header __FROM_TEMPLATE_LIKE	From =~ /%[A-Z][A-Z_-]+[^%A-Za-z_-]/
+header __SUBJECT_TEMPLATE_LIKE	Subject =~ /%[A-Z][A-Z_-]+[^%A-Za-z_-]/
+meta T_HAS_TEMPLATE_0		__HEADER_TEMPLATE
+meta T_HAS_TEMPLATE_1		(__HEADER_TEMPLATE && !__UIDL_TEMPLATE_LIKE && !__XFACE_TEMPLATE_LIKE && !__TOCC_TEMPLATE_LIKE && !__FROM_TEMPLATE_LIKE && !__SUBJECT_TEMPLATE_LIKE)
+
 ########################################################################
 
 # IADB
