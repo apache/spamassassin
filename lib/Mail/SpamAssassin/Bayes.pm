@@ -363,11 +363,19 @@ sub tokenize_line {
     }
   }
 
+  # cache the magic token regexp...
+  my $magic_re = $self->{store}->get_magic_re();
+
   foreach my $token (split) {
     $token =~ s/^[-'"\.,]+//;        # trim non-alphanum chars at start or end
     $token =~ s/[-'"\.,]+$//;        # so we don't get loads of '"foo' tokens
 
-    next if ( $self->{store}->is_magic_token($token) ); # skip false magic tokens
+    # Skip false magic tokens
+    # TVD: we need to do a defined() check since SQL doesn't have magic
+    # tokens, so the SQL BayesStore returns undef.  I really want a way
+    # of optimizing that out, but I haven't come up with anything yet.
+    #
+    next if ( defined $magic_re && /$magic_re/ );
 
     # *do* keep 3-byte tokens; there's some solid signs in there
     my $len = length($token);

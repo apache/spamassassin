@@ -892,20 +892,13 @@ sub cleanup {
   return 1;
 }
 
-=head2 is_magic_token
-
-public instance (Boolean) is_magic_token (string $token)
-
-Description:
-This method determines if a given token is "magic" or special to the
-implementation.
+=head2 get_magic_re
 
 =cut
 
-sub is_magic_token {
-  my ($self, $token) = @_;
-
-  return 0; # nothing is magic
+sub get_magic_re {
+  my ($self) = @_;
+  undef;
 }
 
 =head2 sync

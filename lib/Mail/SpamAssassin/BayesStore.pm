@@ -685,18 +685,17 @@ sub cleanup {
   die "touches_cleanup: not implemented\n";
 }
 
-=head2 is_magic_token
+=head2 get_magic_re
 
-public instance (Boolean) is_magic_token (string $token)
+public instance get_magic_re (String)
 
 Description:
-This method determines if a given token is "magic" or special to the
-implementation.
+This method returns a regexp which indicates a magic token.
 
 =cut
 
-sub is_magic_token {
-  my ($self, $token) = @_;
+sub get_magic_re {
+  my ($self) = @_;
   die "is_magic_token: not implemented\n";
 }
 

@@ -919,14 +919,6 @@ sub get_magic_re {
   return qr/^\*\*[A-Z]+$/;
 }
 
-sub is_magic_token {
-  my ($self, $token) = @_;
-
-  my $magic_re = $self->get_magic_re($self->{db_version});
-
-  return ($token =~ /$magic_re/);
-}
-
 # provide a more generalized public insterface into the journal sync
 
 sub sync {
