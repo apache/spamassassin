@@ -692,3 +692,7 @@ body T_SEE_FOR_YOURSELF		/See (?:for|it|it for) yourself\b/i
 uri T_YAHOO_REDIRECTOR		/^http:\/\/rd\.yahoo\.com/i
 describe T_YAHOO_REDIRECTOR	Uses commonly-spammed redirector URL
 
+# I bet this will actually be effective.  What are they doing over there?
+uri T_BZ_TLD			/^http:\/\/[^\/]+\.bz(?:\/|$)/i
+describe T_BZ_TLD		Contains a URL in the BZ top-level domain
+
