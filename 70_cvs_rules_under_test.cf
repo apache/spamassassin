@@ -422,40 +422,10 @@ meta T_MIME_HTML_NO_MAJOR_TAG	MIME_HTML_ONLY && !__TAG_EXISTS_HTML && !__TAG_EXI
 # color stuff
 body T_HTML_FONT_COLOR_NAME	eval:html_test('t_font_color_name')
 describe T_HTML_FONT_COLOR_NAME	HTML font color has unusual name
-# possible improvements to invisible text
-body T_HTML_FONT_INVISIBLE1_16		eval:html_test('t_font_invisible1_16')
-body T_HTML_FONT_INVISIBLE1_32		eval:html_test('t_font_invisible1_32')
-body T_HTML_FONT_INVISIBLE1_48		eval:html_test('t_font_invisible1_48')
-body T_HTML_FONT_INVISIBLE1_64		eval:html_test('t_font_invisible1_64')
-body T_HTML_FONT_INVISIBLE1_80		eval:html_test('t_font_invisible1_80')
-body T_HTML_FONT_INVISIBLE1_96		eval:html_test('t_font_invisible1_96')
-body T_HTML_FONT_INVISIBLE1_112		eval:html_test('t_font_invisible1_112')
-body T_HTML_FONT_INVISIBLE1_128		eval:html_test('t_font_invisible1_128')
-body T_HTML_FONT_INVISIBLE1_144		eval:html_test('t_font_invisible1_144')
-body T_HTML_FONT_INVISIBLE1_160		eval:html_test('t_font_invisible1_160')
-body T_HTML_FONT_INVISIBLE1_176		eval:html_test('t_font_invisible1_176')
-body T_HTML_FONT_INVISIBLE1_192		eval:html_test('t_font_invisible1_192')
-body T_HTML_FONT_INVISIBLE1_208		eval:html_test('t_font_invisible1_208')
-body T_HTML_FONT_INVISIBLE1_224		eval:html_test('t_font_invisible1_224')
-body T_HTML_FONT_INVISIBLE1_240		eval:html_test('t_font_invisible1_240')
-body T_HTML_FONT_INVISIBLE1_256		eval:html_test('t_font_invisible1_256')
-# possible improvements to invisible text
-body T_HTML_FONT_INVISIBLE2_16		eval:html_test('t_font_invisible2_16')
-body T_HTML_FONT_INVISIBLE2_32		eval:html_test('t_font_invisible2_32')
-body T_HTML_FONT_INVISIBLE2_48		eval:html_test('t_font_invisible2_48')
-body T_HTML_FONT_INVISIBLE2_64		eval:html_test('t_font_invisible2_64')
-body T_HTML_FONT_INVISIBLE2_80		eval:html_test('t_font_invisible2_80')
-body T_HTML_FONT_INVISIBLE2_96		eval:html_test('t_font_invisible2_96')
-body T_HTML_FONT_INVISIBLE2_112		eval:html_test('t_font_invisible2_112')
-body T_HTML_FONT_INVISIBLE2_128		eval:html_test('t_font_invisible2_128')
-body T_HTML_FONT_INVISIBLE2_144		eval:html_test('t_font_invisible2_144')
-body T_HTML_FONT_INVISIBLE2_160		eval:html_test('t_font_invisible2_160')
-body T_HTML_FONT_INVISIBLE2_176		eval:html_test('t_font_invisible2_176')
-body T_HTML_FONT_INVISIBLE2_192		eval:html_test('t_font_invisible2_192')
-body T_HTML_FONT_INVISIBLE2_208		eval:html_test('t_font_invisible2_208')
-body T_HTML_FONT_INVISIBLE2_224		eval:html_test('t_font_invisible2_224')
-body T_HTML_FONT_INVISIBLE2_240		eval:html_test('t_font_invisible2_240')
-body T_HTML_FONT_INVISIBLE2_256		eval:html_test('t_font_invisible2_256')
+# nearly invisible text
+body T_HTML_FONT_NEAR_INVISIBLE_12	eval:html_test('t_font_near_invisible_12')
+body T_HTML_FONT_NEAR_INVISIBLE_14	eval:html_test('t_font_near_invisible_14')
+body T_HTML_FONT_NEAR_INVISIBLE_16	eval:html_test('t_font_near_invisible_16')
 
 # alan premselaar <alien@12inch.com>, see SpamAssassin-talk list
 header T_JAPANESE_UCE_SUBJECT_3	Subject =~ /L\$\>5Bz9\-9p\"\(/
