@@ -488,3 +488,6 @@ describe T_MSGID_SPAM_3_7	Message-ID has known spammer pattern
 # letter: 2/3 (pick a-z) | 1/3 (pick 0-9)
 header T_MSGID_EVIL_SPAM_1	MESSAGEID =~ /<[a-z\d][a-z\d\$-]+[a-z\d]\@[a-z\d][a-z\d.]+[a-z\d]>/
 header T_MSGID_EVIL_SPAM_2	MESSAGEID =~ /<[a-z\d][a-z\d\$-]{10,29}[a-z\d]\@[a-z\d][a-z\d.]{3,12}[a-z\d]>/
+
+header T_SUBJ_XANAX		Subject =~ /x.{0,2}a.{0,2}n.{0,2}a.{0,2}x/i
+
