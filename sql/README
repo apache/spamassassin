@@ -91,9 +91,10 @@ CREATE TABLE userpref (
 ) TYPE=MyISAM;
 
 Once you have created the database and added the table, just add the required
-lines to your global spamassassin.cf file.  Note that you must be running
-spamc/spamd in order for this to work, and the current username must be passed
-to spamd.  This can be done from spamc using the following .procmailrc recipe:
+lines to your global configuration file (local.cf).  Note that you must be
+running spamc/spamd in order for this to work, and the current username must
+be passed to spamd.  This can be done from spamc using the following
+.procmailrc recipe:
 
 :0wf
 | /usr/local/bin/spamc -f
