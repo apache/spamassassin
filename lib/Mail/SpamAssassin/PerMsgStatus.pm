@@ -491,7 +491,6 @@ sub get {
   my ($self, $hdrname, $defval) = @_;
   local ($_);
 
-
   if ($hdrname eq 'ALL') { return $self->{msg}->get_all_headers(); }
 
   my $getaddr = 0;
@@ -516,9 +515,66 @@ sub get {
   if ($getaddr) {
     s/^.*?<(.+)>\s*$/$1/g			# Foo Blah <jm@foo>
     	or s/^(.+)\s\(.*?\)\s*$/$1/g;	# jm@foo (Foo Blah)
+
+  } else {
+    $_ = $self->mime_decode_header ($_);
   }
 
   $_;
+}
+
+###########################################################################
+
+# This function will decode MIME-encoded headers.  Note that it is ONLY
+# used from test functions, so destructive or mildly inaccurate results
+# will not have serious consequences.  Do not replace the original message
+# contents with anything decoded using this!
+#
+sub mime_decode_header {
+  my ($self, $enc) = @_;
+
+  # cf. http://www.nacs.uci.edu/indiv/ehood/MHonArc/doc/resources/charsetconverters.html
+
+  # quoted-printable encoded headers.
+  # ASCII:  =?US-ASCII?Q?Keith_Moore?= <moore@cs.utk.edu>
+  # Latin1: =?ISO-8859-1?Q?Keld_J=F8rn_Simonsen?= <keld@dkuug.dk>
+  # Latin1: =?ISO-8859-1?Q?Andr=E9_?= Pirard <PIRARD@vm1.ulg.ac.be>
+
+  if ($enc =~ s{=\?([^\?]+)\?Q\?([^\?]+)\?=}{
+    		$self->decode_mime_bit ($1, $2);
+	      }eg)
+  {
+    dbg ("decoded MIME header: \"$enc\"");
+  }
+
+  # TODO: handle base64-encoded headers. eg:
+  # =?UTF-8?B?Rlc6IFBhc3NpbmcgcGFyYW1ldGVycyBiZXR3ZWVuIHhtbHMgdXNp?=
+  # =?UTF-8?B?bmcgY29jb29uIC0gcmVzZW50IA==?=   (yuck)
+  # not high-priorty as they're still very rare.
+
+  return $enc;
+}
+
+sub decode_mime_bit {
+  my ($self, $encoding, $text) = @_;
+  local ($_) = $text;
+
+  if ($encoding =~ /^US-ASCII$/i
+  	|| $encoding =~ /^ISO-8859-\d+$/i
+  	|| $encoding =~ /^UTF-8$/i
+      )
+  {
+    # keep 8-bit stuff. forget mapping charsets though
+    s/_/ /g; s/\=([0-9A-Fa-f]{2})/chr(hex($1))/ge;
+  }
+
+  if ($encoding eq 'UTF-16')
+  {
+    # we just dump the high bits and keep the 8-bit chars.
+    s/_/ /g; s/=00//g; s/\=([0-9A-Fa-f]{2})/chr(hex($1))/ge;
+  }
+
+  return $_;
 }
 
 ###########################################################################

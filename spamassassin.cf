@@ -214,11 +214,13 @@ body SPAM_FORM_RETURN		/return validate_form/
 body SPAM_FORM_INPUT		/<input name=.*submit type=.*submit value=.*" *Submit By E-Mail *">/i
 body DOLLAR_DOLLAR_DOLLAR	/\$\$\$/
 
-body SENT_IN_COMPLIANCE		/message .*sen(?:d|t) in compliance (?:of|with)/
-body PARA_A_2_C_OF_1618		/Paragraph .a.*2.*C. of S. 1618/i
-body BILL_1618			/Bill.*1618.*TITLE.*III/i
-body S_1618			/S.\s*1618\s*-\s*SECTION\s*301/i
-body SECTION_301		/SECTION\s*301/
+# these are now full tests instead of body tests, to catch QP-encoded
+# split lines
+full SENT_IN_COMPLIANCE		/message .{0,10}sen(?:d|t) in compliance (?:of|with)/
+full PARA_A_2_C_OF_1618		/Paragraph .a.{0,10}2.{0,10}C. of S. 1618/i
+full BILL_1618			/Bill.{0,10}1618.{0,10}TITLE.{0,10}III/i
+full S_1618			/S..{0,10}1618.{0,10}-.{0,10}SECTION.{0,10}301/i
+full SECTION_301		/SECTION.{0,10}301/
 
 body POPLAUNCH			/StealthLaunch PopLaunch.\s/
 

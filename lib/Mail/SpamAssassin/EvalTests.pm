@@ -115,8 +115,10 @@ sub check_subject_for_lotsa_8bit_chars {
   $_ = $self->get ('Subject');
 
   # include [ and ] because 8-bit posts to mailing lists may not get
-  # hit otherwise. e.g.: Subject: [ILUG] 出售傳真號碼 
-  my @highbits = /[\[\] \200-\377]/g; my $numhis = $#highbits+1;
+  # hit otherwise. e.g.: Subject: [ILUG] 出售傳真號碼 .  Also add
+  # *, since mail that goes through spamassassin multiple times will
+  # not be tagged on the second pass otherwise.
+  my @highbits = /[\[\]\* \200-\377]/g; my $numhis = $#highbits+1;
   my $numlos = length($_) - $numhis;
 
   ($numlos <= $numhis && $numhis > 3);
