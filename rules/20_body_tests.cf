@@ -1399,7 +1399,6 @@ describe FREE_HOSTING           Contains 'free hosting' with capitals
 # http://www.hughes-family.org/bugzilla/show_bug.cgi?id=678
 body USER_4U2                   /\b\S{0,20}(?:[^0-9][42](?:yo)?u|for-*you)(?:[.-]\S{1,20})?\@\S{1,20}\.(?:net|com|org|info)\b/
 describe USER_4U2               Local part containing a "4u" variant
-
 body DOMAIN_4U2                 /[\@\.]\S{0,20}(?:[^0-9][42](?:yo)?u|for-*you)(?:[.-]\S{1,20})?\.(?:net|com|org|info)\b/
 describe DOMAIN_4U2             Domain name containing a "4u" variant
 
@@ -1423,10 +1422,6 @@ describe MEMBER_2       Being a Member
 
 body GET_IT_NOW         /get it (?-i:N)ow/i
 describe GET_IT_NOW     Contains 'Get it now' with capitals
-
-# http://www.hughes-family.org/bugzilla/show_bug.cgi?id=678
-body DOMAIN_4U2         /[\@\.]\S{0,20}(?:[42](?:yo)?u|foryou|you2)\S{1,20}\.(?:net|com|org)\b/
-describe DOMAIN_4U2     Domain name containing "4u", "u2" or variants.
 
 rawbody HIDE_WIN_STATUS    /<[^>]+onMouseOver=[^>]+window\.status=/i
 describe HIDE_WIN_STATUS   Javascript to hide URLs in browser
