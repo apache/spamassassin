@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.560 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.561 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -570,3 +570,17 @@ header T_FRIEND_AT_PUBLIC	To =~ /(?:yourdomain|you|your|(?<!re)public)\.(?:com|o
 # a new ratware-forgery format
 header T_LC_ESMTP_RCVD    Received =~ /^from (?:unknown|\d+\.\d+\.\d+\.\d+) \(\S+\) by \S+ with esmtp; /
 describe T_LC_ESMTP_RCVD  Received header contains forged lowercase 'esmtp' relay  
+
+# bug 1426
+# AOL users' From never includes a real name
+# duncf
+
+meta T_NO_REAL_NAME_2            (NO_REAL_NAME && !__AOL_MUA)
+describe T_NO_REAL_NAME           From: does not include a real name
+
+meta T_AOL_FAKE_NAME              (__AOL_MUA && ! NO_REAL_NAME)
+describe T_AOL_FAKE_NAME          From: includes a real name, but AOL software can't do it
+
+header __T_AOL_MAIL               From =~ /.*\@aol\.com/
+meta T_AOL_FAKE_MAIL              (__AOL_MUA && !__T_AOL_MAIL)
+describe T_AOL_FAKE_MAIL          From: does not show an aol.com address, but email send using AOL software
