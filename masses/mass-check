@@ -162,6 +162,8 @@ sub logkilled {
   my $to = $ma->get_header ("To");
   my $subj = $ma->get_header ("Subject");
   my $msgid = $ma->get_header ("Message-Id");
+  $msgid ||= $ma->get_header ("Message-ID");
+  $msgid ||= '(??)';
   chop ($from);
   chop ($to);
   chop ($subj);
