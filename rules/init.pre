@@ -32,6 +32,10 @@ loadplugin Mail::SpamAssassin::Plugin::SPF
 #
 loadplugin Mail::SpamAssassin::Plugin::DCC
 
+# Pyzor - perform Pyzor message checks.
+#
+loadplugin Mail::SpamAssassin::Plugin::Pyzor
+
 # Razor2 - perform Razor2 message checks.
 #
 loadplugin Mail::SpamAssassin::Plugin::Razor2
