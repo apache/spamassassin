@@ -57,9 +57,9 @@ This argument has been semi-obsoleted.  To have spamd use per-user-config files,
 =head1 DESCRIPTION
 
 Spamc is the client half of the spamc/spamd pair.  It should be used in place
-of C<spamassassin -P> in scripts to process mail.  It will read the mail from
-stdin, and spool it to its connection to spamd, then read the result back and
-print it to stdout.  Spamc has extremely low overhead in loading, so it should
+of C<spamassassin> in scripts to process mail.  It will read the mail from
+STDIN, and spool it to its connection to spamd, then read the result back and
+print it to STDOUT.  Spamc has extremely low overhead in loading, so it should
 be much faster to load than the whole spamassassin program.
 
 See the F<README> file in the F<spamd> directory of the SpamAssassin distribution
