@@ -1298,15 +1298,8 @@ sub tok_sync_nspam_nham {
 sub _get_journal_filename {
   my ($self) = @_;
 
-  if (defined $self->{journal_live_path}) {
-    return $self->{journal_live_path};
-  }
-
   my $main = $self->{bayes}->{main};
-  my $fname = $main->sed_path ($main->{conf}->{bayes_path}."_journal");
-
-  $self->{journal_live_path} = $fname;
-  return $self->{journal_live_path};
+  return $main->sed_path ($main->{conf}->{bayes_path}."_journal");
 }
 
 ###########################################################################

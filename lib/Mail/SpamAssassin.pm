@@ -1138,6 +1138,9 @@ sub compile_now {
     $self->{conf}->{$k} = $v;
   }
 
+  # clear sed_path_cache
+  delete $self->{conf}->{sed_path_cache};
+
   1;
 }
 
@@ -1516,13 +1519,21 @@ sub sed_path {
   my ($self, $path) = @_;
   return undef if (!defined $path);
 
+  if (exists($self->{conf}->{sed_path_cache}->{$path})) {
+    return $self->{conf}->{sed_path_cache}->{$path};
+  }
+
+  my $orig_path = $path;
+
   $path =~ s/__local_rules_dir__/$self->{LOCAL_RULES_DIR} || ''/ges;
   $path =~ s/__def_rules_dir__/$self->{DEF_RULES_DIR} || ''/ges;
   $path =~ s{__prefix__}{$self->{PREFIX} || $Config{prefix} || '/usr'}ges;
   $path =~ s{__userstate__}{$self->get_and_create_userstate_dir()}ges;
   $path =~ s/^\~([^\/]*)/$self->expand_name($1)/es;
 
-  return Mail::SpamAssassin::Util::untaint_file_path ($path);
+  $path = Mail::SpamAssassin::Util::untaint_file_path ($path);
+  $self->{conf}->{sed_path_cache}->{$orig_path} = $path;
+  return $path;
 }
 
 sub first_existing_path {
