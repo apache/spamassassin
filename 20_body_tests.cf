@@ -202,7 +202,7 @@ body EXCUSE_13			/mail was sent to you because /i
 describe EXCUSE_13		Gives an excuse for why message was sent
 body EXCUSE_14			/you do not wish to receive further /i
 describe EXCUSE_14		Tells you how to stop further SPAM
-body EXCUSE_15			/this (?:|e?-?mail )is not (?:spam|unsolicited)/i
+body EXCUSE_15			/this (?:|e?-?mail|message )(?:is|was) (?:not|never) (?:spam|(?:sent |)unsolicited)/i
 describe EXCUSE_15		Claims to be legitimate email
 body EXCUSE_16			/received this (?:e?-?mail|message) in error[, ]* or/
 describe EXCUSE_16		I wonder how many emails they sent in error...
@@ -338,7 +338,7 @@ rawbody JUST_MAILED_PAGE	/\n\n.{0,160}<!-- saved from url=/s
 describe JUST_MAILED_PAGE	Saved web page
 rawbody CLICK_HERE_LINK		/click here.{0,100}<\/a>/is
 describe CLICK_HERE_LINK	Tells you to click on a URL
-body CLICK_BELOW		/click below/is
+body CLICK_BELOW		/click (?:here|below)/is
 describe CLICK_BELOW		Asks you to click below
 
 # (contrib: skod)
@@ -570,4 +570,13 @@ describe ONCE_IN_LIFETIME	Once in a lifetime, apparently
 
 body YOUR_INCOME		/\byour income\b/i
 describe YOUR_INCOME		Doing something with my income
+
+body BE_AMAZED			/\bbe amazed\b/i
+describe BE_AMAZED		Apparently, you'll be amazed
+
+body ITS_EFFECTIVE		/\bit's effective\b/i
+describe ITS_EFFECTIVE		Something claims to be effective
+
+body RESISTANCE_IS_FUTILE	/Replying to this email will not unsubscribe you./
+describe RESISTANCE_IS_FUTILE	Resistance to this spam is futile
 
