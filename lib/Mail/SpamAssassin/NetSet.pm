@@ -63,6 +63,11 @@ sub add_cidr {
   $numadded;
 }
 
+sub get_num_nets {
+  my ($self) = @_;
+  return scalar @{$self->{nets}};
+}
+
 sub contains_ip {
   my ($self, $ip) = @_;
 

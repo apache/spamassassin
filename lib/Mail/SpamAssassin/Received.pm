@@ -1,4 +1,4 @@
-# $Id: Received.pm,v 1.16 2003/06/04 02:05:43 duncf Exp $
+# $Id: Received.pm,v 1.17 2003/06/07 23:34:10 jmason Exp $
 
 # ---------------------------------------------------------------------------
 
@@ -25,6 +25,8 @@ package Mail::SpamAssassin::PerMsgStatus;
 
 use strict;
 use bytes;
+
+use Mail::SpamAssassin::Dns;
 
 use vars qw{
   $LOCALHOST
@@ -79,7 +81,9 @@ sub parse_received_headers {
   # now figure out what relays are trusted...
   my $trusted = $self->{conf}->{trusted_networks};
   my $relay;
+  my $first_by;
   my $in_trusted = 1;
+  my $did_user_specify_trust = ($trusted->get_num_nets() > 0);
 
   while (defined ($relay = shift @{$self->{relays}}))
   {
@@ -87,7 +91,73 @@ sub parse_received_headers {
       $in_trusted = 0;		# we're in deep water now
     }
 
-    # TODO: add inference code using a persistent db
+# OK, infer the handover, if we don't have real info.  Here's the
+# algorithm used (taken from Dan's mail):
+# 
+# Talking with Scott Banister (this was his idea) and Andrew Flury at
+# IronPort, we came up with an alternate and easier algorithm that doesn't
+# involve trees and we think should be good enough most of the time
+# whenever trusted IP headers is not set.  It also has the nice property
+# of being very easy to implement, but it should, of course, be tested
+# out.
+# 
+# "first" = top Received line in the message
+# 
+# "public" = not a local or private IP address
+# 
+# "mypublicnet" = first public "by" address
+# 
+# 1. Ignore all Received line where the "from" IP is in mypublicnet/16
+#    regardless of where they appear.  (The goal is to remove any relay
+#    steps that involve your network, relying on /16 is good enough since
+#    anything on your /16 is you or at worst involves your ISP.)
+# 
+# 2. Ignore all Received lines that contain local (127) or private (10.1,
+#    etc.) IP addresses anywhere, whether "from" or "by".  (The goal
+# 
+# 3. The first Received line that you don't ignore is the one that
+#    contains the "by" of your trusted relay and the "from" of the first
+#    untrusted relay (which is used for bondedsender testing and so on).
+
+    if ($in_trusted && !$did_user_specify_trust) {
+      my $inferred_as_trusted = 0;
+
+      # do we know what the IP addresses of the "by" host in the first
+      # header is?  If not, set them from this header, since it's the
+      # first one.  NOTE: this is a ref to an array, NOT a string.
+      if (!defined $first_by) {
+	$first_by = [ $self->lookup_all_ips ($relay->{by}) ];
+      }
+
+      # if the 'from' IP addr is in a reserved net range, it's not on
+      # the public internet.
+      if ($relay->{ip} =~ /^${Mail::SpamAssassin::Dns::IP_IN_RESERVED_RANGE}/) {
+	dbg ("received-header: 'from' ".$relay->{ip}." has reserved IP");
+	$inferred_as_trusted = 1;
+      }
+
+      # if the 'from' IP addr shares the same class B mask (/16) as
+      # the first relay found in the message, it's still on the
+      # user's network.
+      elsif ($self->ips_match_in_16_mask ([ $relay->{ip} ], $first_by)) {
+	dbg ("received-header: 'from' ".$relay->{ip}." is near to first 'by'");
+	$inferred_as_trusted = 1;
+      }
+
+      # if one of the IP addrs for the 'by' host is in a reserved net range,
+      # it's not on the public internet.
+      else {
+	my @ips = $self->lookup_all_ips ($relay->{by});
+	foreach my $ip (@ips) {
+	  if ($ip =~ /^${Mail::SpamAssassin::Dns::IP_IN_RESERVED_RANGE}/) {
+	    dbg ("received-header: 'by' ".$relay->{by}." has reserved IP $ip");
+	    $inferred_as_trusted = 1;
+	  }
+	}
+      }
+
+      if (!$inferred_as_trusted) { $in_trusted = 0; }
+    }
 
     dbg ("received-header: relay ".$relay->{ip}." trusted? ".
 			($in_trusted ? "yes" : "no"));
@@ -143,6 +213,36 @@ sub parse_received_headers {
   # be helpful; save some cumbersome typing
   $self->{num_relays_trusted} = scalar (@{$self->{relays_trusted}});
   $self->{num_relays_untrusted} = scalar (@{$self->{relays_untrusted}});
+}
+
+sub lookup_all_ips {
+  my ($self, $hostname) = @_;
+
+  my ($name,$aliases,$addrtype,$length,@addrs) = gethostbyname ($hostname);
+  my @ips = ();
+  foreach my $addr (@addrs) {
+    my ($a,$b,$c,$d) = unpack('C4', $addr);
+    push (@ips, "$a.$b.$c.$d");
+  }
+  return @ips;
+}
+
+sub ips_match_in_16_mask {
+  my ($self, $ipset1, $ipset2) = @_;
+  my ($b1, $b2);
+
+  foreach my $ip1 (@{$ipset1}) {
+    foreach my $ip2 (@{$ipset2}) {
+      next unless defined $ip1;
+      next unless defined $ip2;
+      next unless ($ip1 =~ /^(\d+\.\d+\.)/); $b1 = $1;
+      next unless ($ip2 =~ /^(\d+\.\d+\.)/); $b2 = $1;
+
+      if ($b1 eq $b2) { return 1; }
+    }
+  }
+
+  return 0;
 }
 
 # ---------------------------------------------------------------------------
