@@ -1612,7 +1612,8 @@ sub find_all_addrs_in_mail {
 sub find_all_addrs_in_line {
   my ($self, $line) = @_;
 
-  my $ID_PATTERN   = '[-a-z0-9_\+\:\/\.]+';
+  # a more permissive pattern based on "dot-atom" as per RFC2822
+  my $ID_PATTERN   = '[-a-z0-9_\+\:\=\!\#\$\%\&\*\^\?\{\}\|\~\/\.]+';
   my $HOST_PATTERN = '[-a-z0-9_\+\:\/]+';
 
   my @addrs = ();
