@@ -94,3 +94,15 @@ describe LOTS_OF_STUFF          Thousands or millions of pics/movies/etc
 body DISGUISE_PORN              /\b(?:c[*0]cks?|d[1*]cks?|h[0*]rny|b[1*]tch(?:es)|f[*0]ckk?ed|p[*]ssy|p[*]ssies)\b/i
 describe DISGUISE_PORN          Attempts to disguise porn words
 
+# thx to vince.delvecchio@analog.com for the legwork on the negative
+# lookbehinds here; saved a lot of work for us (bug 1035), also see bug 1835
+uri PORN_URL_SEX                /^https?:\/\/[\w\.-]*(?<!es|ba)(?<!dle|sus)sex(?!press)[\w-]*\./i
+describe PORN_URL_SEX           URL uses words/phrases which indicate porn (sex)
+uri PORN_URL_SLUT               /^https?:\/\/[\w\.-]*slut[\w-]*\./i
+describe PORN_URL_SLUT          URL uses words/phrases which indicate porn (slut)
+uri PORN_URL_PANT               /^https?:\/\/[\w\.-]*pant(?:y|ies)[\w-]*\./i
+describe PORN_URL_PANT          URL uses words/phrases which indicate porn (pant)
+uri PORN_URL_MISC               /^https?:\/\/[\w\.-]*(?:porn|hard-?core|taboo|lesbian|naughty)[\w-]*\./i
+describe PORN_URL_MISC          URL uses words/phrases which indicate porn (misc)
+
+
