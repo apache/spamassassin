@@ -204,6 +204,56 @@ sub check_from_in_blacklist {
 }
 
 ###########################################################################
+# added by DJ
+
+sub check_to_in_whitelist {
+  my ($self) = @_;
+  local ($_);
+  $_ = lc $self->get ('To:addr');
+
+  if (defined($self->{conf}->{whitelist_to}->{$_})) { return 1; }
+
+  s/[^\@]+\@//gs;     # jm@jmason.org => jmason.org
+  if (defined($self->{conf}->{whitelist_to_doms}->{$_})) { return 1; }
+
+  return 0;
+}
+
+
+###########################################################################
+# added by DJ
+
+sub check_to_in_more_spam {
+  my ($self) = @_;
+  local ($_);
+  $_ = lc $self->get ('To:addr');
+
+  if (defined($self->{conf}->{more_spam_to}->{$_})) { return 1; }
+
+  s/[^\@]+\@//gs;     # jm@jmason.org => jmason.org
+  if (defined($self->{conf}->{more_spam_to_doms}->{$_})) { return 1; }
+
+  return 0;
+}
+
+
+###########################################################################
+# added by DJ
+
+sub check_to_in_all_spam {
+  my ($self) = @_;
+  local ($_);
+  $_ = lc $self->get ('To:addr');
+
+  if (defined($self->{conf}->{all_spam_to}->{$_})) { return 1; }
+
+  s/[^\@]+\@//gs;     # jm@jmason.org => jmason.org
+  if (defined($self->{conf}->{all_spam_to_doms}->{$_})) { return 1; }
+
+  return 0;
+}
+
+###########################################################################
 
 sub check_lots_of_cc_lines {
   my ($self) = @_;
