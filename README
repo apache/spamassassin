@@ -267,23 +267,25 @@ them to edit their preferences and reweight the rules, or to increase or
 decrease the "line in the sand" at which point a mail is judged spam (or
 not).
 
-Systems administrators can edit the
-"/usr/lib/perl5/site_perl/5.005/spamfilter.cf" file to add new rules for
-all users on the system, or they can edit
-"/usr/lib/perl5/site_perl/5.005/spamfilter.prefs" to set default
-preferences for the users.  Note that the "/usr/lib/perl5/site_perl/5.005"
-path changes, depending on your OS and the version of perl you have
-installed (unfortunately).
+Systems administrators can create the "/etc/spamfilter.cf" file to add new
+rules for all users on the system, or they can create
+"/etc/spamfilter.prefs" to set default preferences for their users.
+
+The default config files installed by SpamAssassin are generally written
+into the site_perl directory; this may be
+"/usr/lib/perl5/site_perl/5.005", or similar.  This path changes,
+depending on your OS and the version of perl you have installed
+(unfortunately).
 
 These paths are pretty ugly, but since SpamAssassin uses Perl's
 Makefile-building system for portability and compatibility with CPAN,
-they're currently unavoidable.  However, if you prefer, you can move these
-files into /etc after installation, and SpamAssassin will pick them up
-from there instead.
+they're currently unavoidable.
 
 There is no difference in interpretation between the rules file and the
 preferences file, so users can add new rules for their own use in the
-"~/.spamfilter.cf" file, if they like.
+"~/.spamfilter.cf" file, if they like -- as long as they're running
+SpamAssassin themselves, and not using the site-wide "spamd" filtering
+system.
 
 
 Locali[sz]ation
