@@ -16,7 +16,8 @@ longer included.
 The default mode of tagging (which used to be ***SPAM*** in the subject
 line) no longer takes place.  Instead the message is rewritten.
 
-Using Razor version 1 is no longer supported.  Please upgrade to Razor version 2.
+Using Razor version 1 is no longer supported.  Please upgrade to Razor
+version 2.
 
 
 Installing SpamAssassin
@@ -239,8 +240,14 @@ skipped.
     still work well without it.
 
     Note that Razor support does not seem to work on Windows systems.
-    Win32 users should disable the Razor tests using "score RAZOR2_CHECK
-    0".
+    Win32 users should disable the Razor tests using "score RAZOR2_CHECK 0".
+
+    You (and any users who use Razor) will need to register an account
+    to do so, like this:
+
+	# razor-client		[creates symbolic links]
+	# razor-admin -create	[creates the razor home]
+	# razor-admin -register	[registers an account]
     
 
   - DCC    http://www.rhyolite.com/anti-spam/dcc/
@@ -253,10 +260,10 @@ skipped.
     http://www.rhyolite.com/anti-spam/dcc/source/dcc-dccproc.tar.Z and
     perform the following steps:
 
-    # tar xfvz dcc-dccproc.tar.Z
-    # cd dcc-dccproc-X.X.X
-    # ./configure && make && make install
-    # cdcc 'info'
+	# tar xfvz dcc-dccproc.tar.Z
+	# cd dcc-dccproc-X.X.X
+	# ./configure && make && make install
+	# cdcc 'info'
 
     The last command will give some output. One line of it should contain
     something like:
