@@ -783,6 +783,19 @@ sub check_for_cached_probs_invalidated {
   return 0;
 }
 
+sub is_available {
+  my $self = shift;
+
+  return 0 unless $self->{store}->tie_db_readonly();
+
+  my ($ns, $nn) = $self->{store}->nspam_nham_get();
+
+  return 0 if ($ns < $MIN_SPAM_CORPUS_SIZE_FOR_BAYES);
+  return 0 if ($nn < $MIN_HAM_CORPUS_SIZE_FOR_BAYES);
+
+  return 1;
+}
+
 ###########################################################################
 # Finally, the scoring function for testing mail.
 
