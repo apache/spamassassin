@@ -26,6 +26,11 @@ sub delete_header {
   $self->{mail_object}->{obj}->head->delete ($hdr);
 }
 
+sub get_header {
+    my ($self, $hdr) = @_;
+      $self->{mail_object}->get ($hdr);
+}
+
 sub get_body {
   my ($self) = @_;
   $self->{mail_object}->{obj}->body();

@@ -27,6 +27,19 @@ sub delete_header {
   $self->{mail_object}->delete_header ($hdr);
 }
 
+sub get_header {
+  my ($self, $hdr) = @_;
+
+  # Jul  1 2002 jm: needed to support 2.1 and later Mail::Audits, which
+  # modified the semantics of get() for no apparent reason (argh).
+
+  if ($Mail::Audit::VERSION > 2.0) {
+    return $self->{mail_object}->head->get ($hdr);
+  } else {
+    return $self->{mail_object}->get ($hdr);
+  }
+}
+
 sub get_body {
   my ($self) = @_;
   $self->{mail_object}->body();
@@ -34,7 +47,23 @@ sub get_body {
 
 sub replace_body {
   my ($self, $aryref) = @_;
-  $self->{mail_object}->body ($aryref);
+
+  # Jul  1 2002 jm: use MIME::Body to support newer versions of
+  # Mail::Audit. protect against earlier versions that don't have is_mime()
+  # method, and load the MIME::Body class using a string eval so SA
+  # doesn't itself have to require the MIMETools classes.
+  #
+  if (eval { $self->{mail_object}->is_mime(); }) {
+    my $newbody;
+    eval '
+      use MIME::Body;
+      my $newbody = new MIME::Body::InCore ($aryref);
+    ';
+    die "MIME::Body::InCore ctor failed" unless defined ($newbody);
+    return $self->{mail_object}->bodyhandle ($newbody);
+  }
+
+  return $self->{mail_object}->body ($aryref);
 }
 
 1;

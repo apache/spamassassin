@@ -21,11 +21,6 @@ sub create_new {
   return Mail::SpamAssassin::NoMailAudit->new(@args);
 }
 
-sub get_header {
-  my ($self, $hdr) = @_;
-  $self->{mail_object}->get ($hdr);
-}
-
 sub put_header {
   my ($self, $hdr, $text) = @_;
   $self->{mail_object}->put_header ($hdr, $text);

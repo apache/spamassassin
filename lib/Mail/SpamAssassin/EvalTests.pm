@@ -1452,8 +1452,10 @@ sub check_for_uppercase {
   $body = join('', @lines);
 
   # now count upper and lower case
+  # Jul  1 2002 jm: count numerals as lower case, otherwise 'date|mail'
+  # is spam
   my $upper = $body =~ s/([A-Z])/$1/sg;
-  my $lower = $body =~ s/([a-z])/$1/sg;
+  my $lower = $body =~ s/([a-z0-9])/$1/sg;
 
   if (($upper + $lower) == 0) {
     $self->{uppercase} = 0;
