@@ -1,8 +1,10 @@
 #!/bin/sh
 
 cd /home/automc/svn/spamassassin/masses/rule-qa/automc ; . config
-exec > LOG.after 2>&1
+exec >> LOG.after 2>&1
 set -x
+
+echo "RUNME.after starting"; date
 
 PATH=$PATH:/usr/local/bin
 
@@ -19,4 +21,4 @@ if [ ! -f $MCTMP/comments-posted ] ; then
   touch $MCTMP/comments-posted
 fi
 
-date
+echo "RUNME.after finished"; date

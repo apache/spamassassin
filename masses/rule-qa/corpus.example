@@ -24,3 +24,14 @@ opts_nightly="--restart=500 --tail=15000 -f /home/corpus/mail/corpus"
 # weekly and nightly mass-check user_prefs files
 prefs_weekly=/home/corpus/mail/user_prefs.weekly
 prefs_nightly=/home/corpus/mail/user_prefs.nightly
+
+# (optional) replacement rsync command.  leave commented in most cases
+# rsync_command=rsync -CPcvuzt --timeout=300 username@rsync.spamassassin.org::corpus/*.log .
+
+# should the sanity-checks for HTML-generation be ignored?
+always_update_html=0
+
+# should the revision numbers in the corpus files be ignored
+# when determining whether those logs should be used or not?
+ignore_revisions=0
+
