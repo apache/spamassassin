@@ -21,6 +21,11 @@ use warnings;
 
 use File::Spec;
 
+# try running directly
+if (-f "@@INSTALLBIN@@/sa-filter") {
+  exec "@@INSTALLBIN@@/sa-filter", @ARGV;
+}
+
 # try to find binary
 eval {
   my @bin = File::Spec->splitpath($0);
@@ -30,9 +35,6 @@ eval {
   $bin =~ s|//sa-filter|/sa-filter|;
   exec $bin, @ARGV;
 };
-
-# try using the PATH
-exec 'sa-filter', @ARGV;
 
 # die
 die "ERROR! unable to locate sa-filter script!\n";
