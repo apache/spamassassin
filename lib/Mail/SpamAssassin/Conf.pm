@@ -1215,13 +1215,14 @@ Specify options to the pyzor command. Please note that only
 =item num_check_received { integer }   (default: 2)
 
 How many received lines from and including the original mail relay
-do we check in RBLs (you'd want at least 1 or 2).
-Note that for checking against dialup lists, you can call check_rbl
-with a special set name of "set-firsthop" and this rule will only
-be matched against the first hop if there is more than one hop, so 
-that you can set a negative score to not penalize people who properly
-relayed through their ISP.
-See dialup_codes for more details and an example
+do we check in RBLs (at least 1 or 2 is recommended).
+
+Note that for checking against dialup lists, you can call C<check_rbl()> with a
+special set name of "set-firsthop" and this rule will only be matched against
+the first hop if there is more than one hop, so that you can set a negative
+score to not penalize people who properly relayed through their ISP.
+
+See also C<trusted_networks>, to specify which the relays you trust.
 
 =cut
 
