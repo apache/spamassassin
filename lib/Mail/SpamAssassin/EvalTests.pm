@@ -147,9 +147,15 @@ use constant TOCC_SIMILAR_LENGTH => 2;
 sub _check_recipients {
   my ($self) = @_;
 
-  my $to = $self->get('ToCc');	# get all recipients
-  $to =~ s/\(.*?\)//g;		# strip out the (comments)
-  my @address = ($to =~ m/([\w.=-]+\@\w+(?:[\w.-]+\.)+\w+)/g);
+  my @address;
+
+  # ToCc: pseudo-header works best, but sometimes Bcc: is better
+  for ('ToCc', 'Bcc') {
+    my $to = $self->get($_);	# get recipients
+    $to =~ s/\(.*?\)//g;	# strip out the (comments)
+    @address = ($to =~ m/([\w.=-]+\@\w+(?:[\w.-]+\.)+\w+)/g);
+    last if scalar(@address) >= TOCC_SIMILAR_COUNT;
+  }
 
   # ideas that had both poor S/O ratios and poor hit rates:
   # - testing for reverse sorted recipient lists
@@ -286,16 +292,31 @@ sub _check_mta_message_id {
 
 ###########################################################################
 
-# yet another test for faked Received: headers (FORGED_RCVD_TRAIL).
-
+# FORGED_RCVD_TRAIL
 sub check_for_forged_received_trail {
+  my ($self) = @_;
+  $self->_check_attachments unless exists $self->{mismatch_from};
+  return ($self->{mismatch_from} > 1);
+}
+
+# T_FORGED_RCVD_HELO
+sub check_for_forged_received_helo {
+  my ($self) = @_;
+  $self->_check_for_forged_received unless exists $self->{mismatch_helo};
+  return ($self->{mismatch_helo} > 0);
+}
+
+sub _check_for_forged_received {
   my ($self) = @_;
 
   my @received = grep(/\S/, split(/\n/, $self->get ('Received')));
   my @by;
   my @from;
+  my @helo;
   my @fromip;
-  my $mismatch = 0;
+
+  $self->{mismatch_helo} = 0;
+  $self->{mismatch_from} = 0;
 
   for (my $i = 0; $i < $#received; $i++) {
     if ($received[$i] =~ s/\bby[\t ]+(\w+(?:[\w.-]+\.)+\w+)//i) {
@@ -306,6 +327,10 @@ sub check_for_forged_received_trail {
       $from[$i] = lc($1);
       $from[$i] =~ s/.*\.(\S+\.\S+)$/$1/;
     }
+    if ($received[$i] =~ s/\bhelo[=\t ]+(\w+(?:[\w.-]+\.)+\w+)//i) {
+      $helo[$i] = lc($1);
+      $helo[$i] =~ s/.*\.(\S+\.\S+)$/$1/;
+    }
     if ($received[$i] =~ s/^ \((?:\S+ |)\[(${IP_ADDRESS})\]\)//i) {
       $fromip[$i] = $1;
     }
@@ -313,26 +338,25 @@ sub check_for_forged_received_trail {
     if (defined ($from[$i]) && defined($fromip[$i])) {
       if ($from[$i] =~ /^localhost(?:\.localdomain|)$/) {
         if ($fromip[$i] eq '127.0.0.1') {
-          # valid: bouncing around inside 1 machine, via the localhost interface.
-          # freshmeat newsletter does this.
+          # valid: bouncing around inside 1 machine, via the localhost
+          # interface (freshmeat newsletter does this).
           $from[$i] = undef;
         }
       }
     }
 
+    if ($i > 0 && defined($by[$i]) && defined($helo[$i - 1]) &&
+	($by[$i] ne $helo[$i - 1]))
+    {
+      $self->{mismatch_helo}++;
+    }
+
     if ($i > 0 && defined($by[$i]) && defined($from[$i - 1]) &&
 	($by[$i] ne $from[$i - 1]))
     {
-      $mismatch++;
+      $self->{mismatch_from}++;
     }
-
-    dbg ("forged_rcvd_trail: entry $i:"
-        ." by=".(defined $by[$i] ? $by[$i] : "(undef)")
-        ." from=".(defined $from[$i] ? $from[$i] : "(undef)")
-        ." mismatches=$mismatch");
   }
-
-  return ($mismatch > 1);
 }
 
 # FORGED_HOTMAIL_RCVD
@@ -2073,6 +2097,17 @@ sub check_for_mime {
 
   $self->_check_attachments unless exists $self->{$test};
   return $self->{$test};
+}
+
+# any text/html MIME part
+sub check_for_mime_html {
+  my ($self) = @_;
+
+  my $ctype = $self->get('Content-Type');
+  return 1 if (defined($ctype) && $ctype =~ m@text/html@i);
+
+  $self->_check_attachments unless exists $self->{mime_body_html_count};
+  return ($self->{mime_body_html_count} > 0);
 }
 
 # HTML without some other type of MIME text part
