@@ -194,6 +194,11 @@ meta MIME_CHARSET_FARAWAY	(__MIME_CHARSET_FARAWAY && __HIGHBITS)
 describe MIME_CHARSET_FARAWAY	MIME character set indicates foreign language
 tflags MIME_CHARSET_FARAWAY	userconf
 
+# This rule uses a simple algorithm to determine if the text and html
+# parts of an multipart/alternative message are different.
+body MPART_ALT_DIFF	eval:multipart_alternative_difference('99', '100')
+describe MPART_ALT_DIFF	HTML and text parts are different
+
 ###########################################################################
 
 body CHARSET_FARAWAY		eval:check_for_faraway_charset()
@@ -207,20 +212,6 @@ tflags UNWANTED_LANGUAGE_BODY          userconf
 body BODY_8BITS			eval:check_for_body_8bits()
 describe BODY_8BITS		Body includes 8 consecutive 8-bit characters
 tflags BODY_8BITS		userconf
-
-# Send-Safe ratware (idea from Alan Curry)
-# random alphanumerics, separated into groups of 16 by dashes (the first
-# and last group may be shorter), with a lowercase "l" and a number
-# appended. The final number is the length of the whole string not
-# including the dashes or the "l<number>".  Why? I have no idea.  It's
-# not a tracking code - the spamware does not save it locally.
-#
-# jm: it's specifically to throw off MIME base64 encoding, to evade AOL's
-# filters.
-#
-# http://groups.google.com/groups?selm=atp1ip0n22%40enews3.newsguy.com
-rawbody RATWARE_HASH_DASH	/[a-z\d]+-([a-z\d]{16}-)+[a-z\d]+(?-i:l)\d+/i
-describe RATWARE_HASH_DASH	Contains a hashbuster in Send-Safe format
 
 # duncf
 body EMAIL_ROT13     /\b[a-z(\]-]+\^[a-z-]+\([a-z]{2,3}\b/

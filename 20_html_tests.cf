@@ -29,7 +29,7 @@ require_version @@VERSION@@
 # please sort these by eval type then name
 
 # HTML control test, HTML spam rules should all have better S/O than this
-body HTML_MESSAGE		eval:html_message()
+body HTML_MESSAGE		eval:html_test('ratio')
 describe HTML_MESSAGE		HTML included in message
 
 # the HTML percentage range
@@ -223,6 +223,16 @@ body HTML_OBFUSCATION_60_70	eval:html_range('obfuscation_ratio','.6','.7')
 body HTML_OBFUSCATION_70_80	eval:html_range('obfuscation_ratio','.7','.8')
 body HTML_OBFUSCATION_80_90	eval:html_range('obfuscation_ratio','.8','.9')
 body HTML_OBFUSCATION_90_100	eval:html_range('obfuscation_ratio','.9','1.0')
+describe HTML_OBFUSCATION_00_10		Message is 0% to 10% HTML obfuscation
+describe HTML_OBFUSCATION_10_20		Message is 10% to 20% HTML obfuscation
+describe HTML_OBFUSCATION_20_30		Message is 20% to 30% HTML obfuscation
+describe HTML_OBFUSCATION_30_40		Message is 30% to 40% HTML obfuscation
+describe HTML_OBFUSCATION_40_50		Message is 40% to 50% HTML obfuscation
+describe HTML_OBFUSCATION_50_60		Message is 50% to 60% HTML obfuscation
+describe HTML_OBFUSCATION_60_70		Message is 60% to 70% HTML obfuscation
+describe HTML_OBFUSCATION_70_80		Message is 70% to 80% HTML obfuscation
+describe HTML_OBFUSCATION_80_90		Message is 80% to 90% HTML obfuscation
+describe HTML_OBFUSCATION_90_100	Message is 90% to 100% HTML obfuscation
 
 # many spammers seem to do this nowadays (and probably track
 # their customers with it).  (contrib: WW)
@@ -270,6 +280,50 @@ describe HTML_TAG_EXISTS_PARAM	HTML has "param" tag
 
 body HTML_TAG_EXISTS_TBODY	eval:html_tag_exists('tbody')
 describe HTML_TAG_EXISTS_TBODY	HTML has "tbody" tag
+
+# percentage of tags that are not legal elements in HTML
+body HTML_BADTAG_00_10	eval:html_range('bad_tag_ratio','0.00','0.10')
+body HTML_BADTAG_10_20	eval:html_range('bad_tag_ratio','0.10','0.20')
+body HTML_BADTAG_20_30	eval:html_range('bad_tag_ratio','0.20','0.30')
+body HTML_BADTAG_30_40	eval:html_range('bad_tag_ratio','0.30','0.40')
+body HTML_BADTAG_40_50	eval:html_range('bad_tag_ratio','0.40','0.50')
+body HTML_BADTAG_50_60	eval:html_range('bad_tag_ratio','0.50','0.60')
+body HTML_BADTAG_60_70	eval:html_range('bad_tag_ratio','0.60','0.70')
+body HTML_BADTAG_70_80	eval:html_range('bad_tag_ratio','0.70','0.80')
+body HTML_BADTAG_80_90	eval:html_range('bad_tag_ratio','0.80','0.90')
+body HTML_BADTAG_90_100	eval:html_range('bad_tag_ratio','0.90','1.00')
+describe HTML_BADTAG_00_10	HTML message is 0% to 10% bad tags
+describe HTML_BADTAG_10_20	HTML message is 10% to 20% bad tags
+describe HTML_BADTAG_20_30	HTML message is 20% to 30% bad tags
+describe HTML_BADTAG_30_40	HTML message is 30% to 40% bad tags
+describe HTML_BADTAG_40_50	HTML message is 40% to 50% bad tags
+describe HTML_BADTAG_50_60	HTML message is 50% to 60% bad tags
+describe HTML_BADTAG_60_70	HTML message is 60% to 70% bad tags
+describe HTML_BADTAG_70_80	HTML message is 70% to 80% bad tags
+describe HTML_BADTAG_80_90	HTML message is 80% to 90% bad tags
+describe HTML_BADTAG_90_100	HTML message is 90% to 100% bad tags
+
+# percentage of unique non-elements in HTML
+body HTML_NONELEMENT_00_10	eval:html_range('non_element_ratio','0.00','0.10')
+body HTML_NONELEMENT_10_20	eval:html_range('non_element_ratio','0.10','0.20')
+body HTML_NONELEMENT_20_30	eval:html_range('non_element_ratio','0.20','0.30')
+body HTML_NONELEMENT_30_40	eval:html_range('non_element_ratio','0.30','0.40')
+body HTML_NONELEMENT_40_50	eval:html_range('non_element_ratio','0.40','0.50')
+body HTML_NONELEMENT_50_60	eval:html_range('non_element_ratio','0.50','0.60')
+body HTML_NONELEMENT_60_70	eval:html_range('non_element_ratio','0.60','0.70')
+body HTML_NONELEMENT_70_80	eval:html_range('non_element_ratio','0.70','0.80')
+body HTML_NONELEMENT_80_90	eval:html_range('non_element_ratio','0.80','0.90')
+body HTML_NONELEMENT_90_100	eval:html_range('non_element_ratio','0.90','1.00')
+describe HTML_NONELEMENT_00_10	0% to 10% of HTML elements are non-standard
+describe HTML_NONELEMENT_10_20	10% to 20% of HTML elements are non-standard
+describe HTML_NONELEMENT_20_30	20% to 30% of HTML elements are non-standard
+describe HTML_NONELEMENT_30_40	30% to 40% of HTML elements are non-standard
+describe HTML_NONELEMENT_40_50	40% to 50% of HTML elements are non-standard
+describe HTML_NONELEMENT_50_60	50% to 60% of HTML elements are non-standard
+describe HTML_NONELEMENT_60_70	60% to 70% of HTML elements are non-standard
+describe HTML_NONELEMENT_70_80	70% to 80% of HTML elements are non-standard
+describe HTML_NONELEMENT_80_90	80% to 90% of HTML elements are non-standard
+describe HTML_NONELEMENT_90_100	90% to 100% of HTML elements are non-standard
 
 body HTML_TITLE_EMPTY		eval:html_eval('title_text', '!~ /\S/s')
 describe HTML_TITLE_EMPTY	HTML title contains no text
