@@ -1,4 +1,4 @@
-#!/usr/bin/perl -Tw
+#!/usr/bin/perl -w
 
 ############################################################
 # The code in this file is copyright 2001 by Craig Hughes  #
@@ -13,6 +13,7 @@ use Socket;
 use Carp;
 use Mail::Audit;
 use Mail::SpamAssassin;
+use Sys::Syslog qw(:DEFAULT setlogsock);
 my $spamtest = Mail::SpamAssassin->new({local_tests_only=>1});
 my %resphash = (
     EX_OK => 0,
@@ -34,7 +35,8 @@ my %resphash = (
 );
 
 sub spawn;  # forward declaration
-sub logmsg { print "$0 $$: @_ at ", scalar localtime, "\n" }
+setlogsock('unix');
+sub logmsg { openlog('spamd','cons,pid','mail'); syslog('info',"@_"); closelog(); }
 
 my $port = shift || 22874;
 my $proto = getprotobyname('tcp');
@@ -64,22 +66,36 @@ for ( $waitedpid = 0;
 {
     next if $waitedpid and not $paddr;
 
+    my($port,$iaddr) = sockaddr_in($paddr);
+    my $name = gethostbyaddr($iaddr,AF_INET);
+    logmsg "connection from $name [",inet_ntoa($iaddr),"] at port $port";
+
     spawn sub {
 	$|=1; # always immediately flush output
-	# First request lines off stream
-	my $request;
-	chomp($request = <STDIN>);
+	# First request line off stream
+        $_ = <STDIN>;
+	chomp;
+        if(/PROCESS SPAMC\/1\.0/)
+	{
+	    my $resp = "EX_OK";
+	    # Now read in message
+	    my $mail = Mail::Audit->new();
+	    # Now use copy-on-writed (hopefully) SA object
+	    my $status = $spamtest->check($mail);
+	    $status->rewrite_mail; #if $status->is_spam;
 
-	my $resp = "EX_OK";
-	# Now read in message
-	my $mail = Mail::Audit->new();
-	# Now use copy-on-writed (hopefully) SA object
-	my $status = $spamtest->check($mail);
-	$status->rewrite_mail; #if $status->is_spam;
+	    print "SPAMD/1.0 $resphash{$resp} $resp\r\n",$mail->header,"\n",(join '',@{$mail->body});
 
-	print "SPAMD/1.0 $resphash{$resp} $resp\r\n",$mail->header,"\n",(join '',@{$mail->body});
+	    logmsg "processed successfully";
 
-	$status->finish();	# added by jm to allow GC'ing
+	    $status->finish();	# added by jm to allow GC'ing
+	}
+	else
+	{
+	    my $resp = "EX_PROTOCOL";
+	    print "SPAMD/1.0 $resphash{$resp} Bad header line: $_\r\n";
+	    logmsg "bad protocol: header error: $_";
+	}
     };
 
 }
