@@ -11,7 +11,8 @@ Instructions at:
 6. Check each of those 20 messages by hand to make sure they're not spam that
    slipped through, or a forward of a spam message.
 7. Repeat #6 until the top 20 are "clean"
-8. Repeat steps 4-7 for your spam archive until they are "clean".
+8. Repeat steps 4-7 for your spam archive until they are "clean"
+   (except you do sort -n +1 spam.log to look for low scoring spam)
 9. Run a mass-check for ham and spam together (one mass-check run)
 10. rename ham.log and spam.log to ham-yourname.log and spam-yourname.log
     (ie for Craig Hughes: ham-craig.log and spam-craig.log)
