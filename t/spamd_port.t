@@ -17,7 +17,6 @@ q{ X-Spam-Flag: YES}, 'flag',
 
 );
 
-ok(sdrun ("-L -p 18972", "-p 18972 < data/spam/001", \&patterns_run_cb));
+my $port = probably_unused_spamd_port();
+ok(sdrun ("-L -p $port", "-p $port < data/spam/001", \&patterns_run_cb));
 ok_all_patterns();
-
-
