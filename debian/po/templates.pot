@@ -1,0 +1,85 @@
+#
+#    Translators, if you are not familiar with the PO format, gettext
+#    documentation is worth reading, especially sections dedicated to
+#    this format, e.g. by running:
+#         info -n '(gettext)PO Files'
+#         info -n '(gettext)Header Entry'
+#
+#    Some information specific to po-debconf are available at
+#            /usr/share/doc/po-debconf/README-trans
+#         or http://www.debian.org/intl/l10n/po-debconf/README-trans
+#
+#    Developers do not need to manually edit POT or PO files.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"POT-Creation-Date: 2003-03-08 18:22-0300\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=CHARSET\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Description
+#: ../spamassassin.templates:3
+msgid "spamassassin local delivery and spamproxyd deleted!"
+msgstr ""
+
+#. Description
+#: ../spamassassin.templates:3
+msgid ""
+"As of 2.40-1, spamproxyd has been removed from the spamassassin package. "
+"(This was an upstream decision) If you have been using spamproxyd, you may "
+"not wish to continue the installation. You will be given a chance to abort "
+"shortly."
+msgstr ""
+
+#. Description
+#: ../spamassassin.templates:3
+msgid ""
+"Furthermore, spamassassin now has the -P argument by default. If you have "
+"been using spamassassin without the -P argument to do local delivery, you "
+"will need to reconfigure your mail stream manually. (If you are using "
+"spamassassin through procmail, you can safely ignore this.)"
+msgstr ""
+
+#. Choices
+#: ../spamassassin.templates:16
+msgid "Yes, No"
+msgstr ""
+
+#. Description
+#: ../spamassassin.templates:18
+msgid "Delete out of date config files in /etc/spamassassin?"
+msgstr ""
+
+#. Description
+#: ../spamassassin.templates:18
+msgid ""
+"As of 2.42-1, rules files for spamassassin will be placed in /usr/share/"
+"spamassassin because of a tighter relationship between rule files and the "
+"version of spamassassin. You currently have rules files in /etc/"
+"spamassassin. Would you like all previously included configuration files "
+"deleted? If you don't, you will probably need to do this yourself, or you "
+"will get annoying warnings!"
+msgstr ""
+
+#. Choices
+#: ../spamassassin.templates:28
+msgid "Continue, Cancel"
+msgstr ""
+
+#. Description
+#: ../spamassassin.templates:30
+msgid "There may be errors on the upgrade."
+msgstr ""
+
+#. Description
+#: ../spamassassin.templates:30
+msgid ""
+"As previously indicated, you may experience errors after this upgrade. You "
+"may cancel now, and fix the problem, or you may continue."
+msgstr ""

@@ -1,0 +1,102 @@
+#
+#    Translators, if you are not familiar with the PO format, gettext
+#    documentation is worth reading, especially sections dedicated to
+#    this format, e.g. by running:
+#         info -n '(gettext)PO Files'
+#         info -n '(gettext)Header Entry'
+#
+#    Some information specific to po-debconf are available at
+#            /usr/share/doc/po-debconf/README-trans
+#         or http://www.debian.org/intl/l10n/po-debconf/README-trans
+#
+#    Developers do not need to manually edit POT or PO files.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: spamassassin-2.50-1\n"
+"POT-Creation-Date: 2003-03-08 18:22-0300\n"
+"PO-Revision-Date: 2003-03-09 21:35+0300\n"
+"Last-Translator: André Luís Lopes <andrelop@ig.com.br>\n"
+"Language-Team: Debian-BR Project <debian-l10n-portuguese@lists.debian.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=ISO-8859-1\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Description
+#: ../spamassassin.templates:3
+msgid "spamassassin local delivery and spamproxyd deleted!"
+msgstr "Entrega local do spamassassin e do spamproxyd apagadas !"
+
+#. Description
+#: ../spamassassin.templates:3
+msgid ""
+"As of 2.40-1, spamproxyd has been removed from the spamassassin package. "
+"(This was an upstream decision) If you have been using spamproxyd, you may "
+"not wish to continue the installation. You will be given a chance to abort "
+"shortly."
+msgstr ""
+"Desde a versão 2.40-1, o spamproxyd foi removido do pacote spamassassin."
+" ( Esta foi uma opção do desenvolvedor do spamassassin) Caso você "
+"esteja usando o spamproxyd você pode não desejar continuar esta com a "
+"instalação. Breve lhe será dad uma chance de abortar a instalação."
+
+#. Description
+#: ../spamassassin.templates:3
+msgid ""
+"Furthermore, spamassassin now has the -P argument by default. If you have "
+"been using spamassassin without the -P argument to do local delivery, you "
+"will need to reconfigure your mail stream manually. (If you are using "
+"spamassassin through procmail, you can safely ignore this.)"
+msgstr ""
+"Adicionalmente, o spamssassin agora usa o argumento -P por padrão. Caso "
+"você esteja usando o spamassassin sem o argumento -P para fazer entrega "
+"local você precisará reconfigurar seu fluxo de mensagens manualmente. "
+"(Caso você esteja usando o spamassassin através do procmail você pode "
+"ignorar esse aviso com segurança.)"
+
+#. Choices
+#: ../spamassassin.templates:16
+msgid "Yes, No"
+msgstr "Sim, Não"
+
+#. Description
+#: ../spamassassin.templates:18
+msgid "Delete out of date config files in /etc/spamassassin?"
+msgstr "Apagar arquivos de configuração de datas em /etc/spamassassin ?"
+
+#. Description
+#: ../spamassassin.templates:18
+msgid ""
+"As of 2.42-1, rules files for spamassassin will be placed in /usr/share/"
+"spamassassin because of a tighter relationship between rule files and the "
+"version of spamassassin. You currently have rules files in /etc/"
+"spamassassin. Would you like all previously included configuration files "
+"deleted? If you don't, you will probably need to do this yourself, or you "
+"will get annoying warnings!"
+msgstr ""
+"Desde a versão 2.42-1, os arquivos de regras para o spamassassin são "
+"colocados em /usr/share/spamassassin devido a um relacionamento mais "
+"estreito entre os arquivos de regras e a versão do spamassassin. Você "
+"gostaria que todos os arquivos de configuração incluídos fossem "
+"apagados ? Caso você não queira que isso aconteça você provavelmente "
+"precisará fazer isso manualmente o você irá receber avisos chatos !"
+
+#. Choices
+#: ../spamassassin.templates:28
+msgid "Continue, Cancel"
+msgstr "Continuar, Cancelar"
+
+#. Description
+#: ../spamassassin.templates:30
+msgid "There may be errors on the upgrade."
+msgstr "Podem existir erros na atualização."
+
+#. Description
+#: ../spamassassin.templates:30
+msgid ""
+"As previously indicated, you may experience errors after this upgrade. You "
+"may cancel now, and fix the problem, or you may continue."
+msgstr ""
+"Como indicado anteriormente, você pode encontrar erros depois desta "
+"atualização. Você pode cancelá-la agora e corrigir o problema ou você "
+"pode continuar."
