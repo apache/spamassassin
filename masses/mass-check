@@ -18,6 +18,16 @@
 #
 # all following arguments are used as the name of mail folders
 
+###########################################################################
+# QUICK HACK: some of our spamtraps are getting nonspam newsletters. ignore
+# those mails here...
+
+$skipped_list_message_ids = qr{
+    <\d\d\d\d\S+\@dev\.lifetimetv\.com>
+}x;
+
+###########################################################################
+
 use vars qw($opt_c $opt_f $opt_all $opt_head $opt_mh $opt_ms $opt_mn
 	    $opt_single $opt_sort $opt_tail);
 
@@ -82,7 +92,11 @@ sub wanted {
   # my $ma = Mail::Audit->new('data' => \@msg);
   my $ma = Mail::SpamAssassin::NoMailAudit->new ('data' => $dataref);
 
-  #my $msgid = $ma->get_header("Message-Id");
+  # killfile for mass-checks
+  my $msgid = $ma->get_header("Message-Id");
+  if ($msgid =~ /${skipped_list_message_ids}/o) {
+    return;
+  }
 
   $ma->{noexit} = 1;
   $spamtest->remove_spamassassin_markup($ma);
