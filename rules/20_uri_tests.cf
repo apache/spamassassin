@@ -60,9 +60,12 @@ describe HTTP_NUMBER_WORD   URL contains spamhaus signature: numbered servers
 uri JAVASCRIPT_URI	/^javascript:/i
 describe JAVASCRIPT_URI	Javascript protocol in a URI
 
-# off: very few hits (1 in last 6 months)
-
 uri      WEIRD_PORT             m{https?:\/\/[^/:\s]+:\d+}
 describe WEIRD_PORT             Uses non-standard port number for HTTP
 
+# freqs:  0.003    0.008    0.000    1.00    1.00  WWW_AUTOREMOVE_COM
+uri WWW_AUTOREMOVE_COM      /autoremove\.com/i   
+describe WWW_AUTOREMOVE_COM     Frequent SPAM content
+uri WWW_TRAFFICWOW_NET      /trafficwow\.net/i
+describe WWW_TRAFFICWOW_NET         Frequent SPAM content
 
