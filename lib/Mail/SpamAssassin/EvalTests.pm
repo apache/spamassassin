@@ -1979,28 +1979,6 @@ sub check_for_mime_excessive_qp {
   return $self->{mime_qp_ratio} >= $min;
 }
 
-# this test should probably be rolled into _check_attachments()
-sub check_for_mime_excessive_base64 {
-  my ($self) = @_;
-
-  my $count = 0;
-  my $cte = $self->get('Content-Transfer-Encoding');
-  chomp($cte = defined($cte) ? lc($cte) : "");
-  for (@{$self->{msg}->get_body()}) {
-    if (/^Content-Transfer-Encoding:\s+(\S+)/i) {
-      $cte = lc($1);
-    }
-    if ($cte ne "base64" && /^[A-Za-z0-9\/+]{60,77}\s*$/) {
-      $count++;
-      return 1 if $count > 5;
-    }
-    else {
-      $count = 0;
-    }
-  }
-  return 0;
-}
-
 sub check_language {            # UNDESIRED_LANGUAGE_BODY
   my ($self, $body) = @_;
 
