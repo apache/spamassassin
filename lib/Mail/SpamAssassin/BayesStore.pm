@@ -682,7 +682,11 @@ sub scan_count_increment {
 
   my $conf = $self->{bayes}->{main}->{conf};
   my $umask = umask(0777 - (oct ($conf->{bayes_file_mode}) & 0666));
-  open (OUT, ">>".$path) or warn "cannot append to $path\n";
+  if (!open (OUT, ">>".$path)) {
+    warn "cannot write to $path, Bayes db update ignored\n";
+    umask $umask; # reset umask
+    return;
+  }
   print OUT "."; close OUT or warn "cannot append to $path\n";
   umask $umask; # reset umask
 
