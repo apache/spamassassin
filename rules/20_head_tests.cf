@@ -776,3 +776,7 @@ describe FROM_NO_LOWER          'From' has no lower-case characters
 header SUBJ_BUY                 Subject =~ /^buy/i
 describe SUBJ_BUY               'Subject' starts with Buy, Buying
 
+header __FROM_HAS_UNDERLINE_NUMS	From =~ /_\S?(?:[a-z]+\w*?\d+|\d+\w*?[a-z]+)\w*\@/i
+meta FROM_HAS_UNDERLINE_NUMS		(!REPLY_TO_HAS_UNDERLINE_NUMS && __FROM_HAS_UNDERLINE_NUMS)
+describe FROM_HAS_UNDERLINE_NUMS	From: contains an underline and numbers/letters
+
