@@ -487,7 +487,7 @@ authors of scripts which use SpamAssassin.
 
 sub get_full_message_as_text {
   my ($self) = @_;
-  return join ("", $self->{msg}->get_all_headers(),
+  return join ("", $self->{msg}->get_all_headers(), "\n",
 			@{$self->{msg}->get_body()});
 }
 
