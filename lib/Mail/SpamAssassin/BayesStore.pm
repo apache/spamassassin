@@ -292,9 +292,6 @@ sub upgrade_db {
 
   dbg("bayes: detected bayes db format ".$self->{db_version}.", upgrading");
 
-  local $SIG{'INT'} = 'IGNORE';
-  local $SIG{'HUP'} = 'IGNORE';
-
   # since DB_File will not shrink a database (!!), we need to *create*
   # a new one instead.
   my $main = $self->{bayes}->{main};
@@ -305,23 +302,11 @@ sub upgrade_db {
   my $jpath = $self->get_journal_filename();
   if ( -f $jpath ) {
     dbg("bayes: old journal file found, removing.");
-    if ( !unlink $jpath ) {
-      rename $jpath, "$jpath.old"; # desperation attempt
-      warn "Couldn't remove $jpath: $!";
-    }
+    warn "Couldn't remove $jpath: $!" if ( !unlink $jpath );
   }
 
   if ( $self->{db_version} < 2 ) {
     dbg ("bayes: upgrading database format from v".$self->{db_version}." to v2");
-
-    # older versions used scancount, so kill the stupid little file ...
-    my $msgc = $path.'_msgcount';
-    if ( -f $msgc ) {
-      dbg("bayes: old msgcount file found, removing.");
-      if ( !unlink $msgc ) {
-        warn "Couldn't remove $msgc: $!";
-      }
-    }
 
     my($DB_NSPAM_MAGIC_TOKEN, $DB_NHAM_MAGIC_TOKEN, $DB_NTOKENS_MAGIC_TOKEN);
     my($DB_OLDEST_TOKEN_AGE_MAGIC_TOKEN, $DB_LAST_EXPIRE_MAGIC_TOKEN);
@@ -385,6 +370,21 @@ sub upgrade_db {
     untie %{$self->{db_toks}};
     untie %new_toks;
 
+    # This is the critical phase (moving files around), so don't allow
+    # it to be interrupted.
+    local $SIG{'INT'} = 'IGNORE';
+    local $SIG{'HUP'} = 'IGNORE';
+    local $SIG{'TERM'} = 'IGNORE';
+
+    # older versions used scancount, so kill the stupid little file ...
+    my $msgc = $path.'_msgcount';
+    if ( -f $msgc ) {
+      dbg("bayes: old msgcount file found, removing.");
+      if ( !unlink $msgc ) {
+        warn "Couldn't remove $msgc: $!";
+      }
+    }
+
     # now rename in the new one.  Try several extensions
     for my $ext (@DB_EXTENSIONS) {
       my $newf = $name.'.new'.$ext;
@@ -445,9 +445,6 @@ sub untie_db {
 sub expire_old_tokens {
   my ($self, $opts) = @_;
   my $ret;
-
-  local $SIG{'INT'} = 'IGNORE';
-  local $SIG{'HUP'} = 'IGNORE';
 
   eval {
     local $SIG{'__DIE__'};	# do not run user die() traps in here
@@ -655,6 +652,12 @@ sub expire_old_tokens_trapped {
   # now untie so we can do renames
   untie %{$self->{db_toks}};
   untie %new_toks;
+
+  # This is the critical phase (moving files around), so don't allow
+  # it to be interrupted.
+  local $SIG{'INT'} = 'IGNORE';
+  local $SIG{'HUP'} = 'IGNORE';
+  local $SIG{'TERM'} = 'IGNORE';
 
   # now rename in the new one.  Try several extensions
   for my $ext (@DB_EXTENSIONS) {
@@ -1025,9 +1028,6 @@ sub sync_journal {
   # if $path doesn't exist, or it's not a file, or is 0 bytes in length, return
   if ( !stat($path) || !-f _ || -z _ ) { return 0; }
 
-  local $SIG{'INT'} = 'IGNORE';
-  local $SIG{'HUP'} = 'IGNORE';
-
   eval {
     local $SIG{'__DIE__'};	# do not run user die() traps in here
     if ($self->tie_db_writable()) {
@@ -1067,6 +1067,12 @@ sub sync_journal_trapped {
     warn "bayes: bad permissions on journal, can't read: $path\n";
     return 0;
   }
+
+  # This is the critical phase (moving files around), so don't allow
+  # it to be interrupted.
+  local $SIG{'INT'} = 'IGNORE';
+  local $SIG{'HUP'} = 'IGNORE';
+  local $SIG{'TERM'} = 'IGNORE';
 
   # retire the journal, so we can update the db files from it in peace.
   # TODO: use locking here
