@@ -258,9 +258,17 @@ sub parse {
   $text =~ s/&nbsp;/ /g;
 
   # ALWAYS pack it into byte-representation, even if we're using 'use bytes',
-  # since the HTML::Parser object may use Unicode internally.
-  # (bug 1417, maybe)
-  $self->SUPER::parse(pack('C0A*', $text));
+  # since the HTML::Parser object may use Unicode internally. (bug 1417,
+  # maybe).  Also, ignore stupid warning that can't be suppressed: 'Parsing of
+  # undecoded UTF-8 will give garbage when decoding entities at ..'
+  {
+    local $SIG{__WARN__} = sub {
+      warn @_ unless ($_[0] =~ /^Parsing of undecoded UTF-8/);
+    };
+
+    $self->SUPER::parse(pack('C0A*', $text));
+  }
+
   $self->SUPER::eof;
 
   return $self->{text};
