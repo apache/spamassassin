@@ -49,6 +49,7 @@ Options:
                     (defaults to 127.0.0.1 only)
     -p port       Listen on the specific port (otherwise default is port 22874)
     -u username   Run as named user, instead of running setuid to spamc user
+    -d		  Daemonize, detach from parent process
     -x            Disable user config files
     -s            Specify the syslog facility (default: mail)
     -D            Print debugging messages
@@ -57,13 +58,27 @@ EOUSAGE
     exit $resphash{EX_USAGE};
 }
 
+use POSIX 'setsid';
+sub daemonize
+{
+	chdir '/' or die "Can't chdir to '/': $!";
+	open STDIN,'/dev/null' or die "Can't read '/dev/null': $!";
+	open STDOUT,'>/dev/null' or die "Can't write '/dev/null': $!";
+   defined(my $pid=fork) or die "Can't fork: $!";
+   exit if $pid;
+   setsid or die "Can't start new session: $!";
+   open STDERR,'>&STDOUT' or die "Can't duplicate stdout: $!";
+}
+
 use vars qw{
-  	$opt_h $opt_L $opt_p $opt_A $opt_x $opt_s $opt_D $opt_u
+  	$opt_d $opt_h $opt_L $opt_p $opt_A $opt_x $opt_s $opt_D $opt_u
 };
 
-getopts('hLxp:A:s:Du:') or usage();
+getopts('hdLxp:A:s:Du:') or usage();
 
 $opt_h and usage();
+
+$opt_d and daemonize();
 
 # These can be changed on command line with -A flag
 my @allowed_clients;
@@ -310,6 +325,10 @@ spamd [options]
 =head1 OPTIONS
 
 =over
+
+=item B<-d>
+
+Detach from starting process and run in background (daemonize).
 
 =item B<-h>
 
