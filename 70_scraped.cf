@@ -1,0 +1,42 @@
+# SpamAssassin rules file: bugzilla-scraped needs-mc rules
+# generated on Sun Jan 16 14:46:49 2005
+
+## MC: bug 2243 cmt 13: start
+header MC_T_ALL_8BITS_795 ALL =~ /[\x80-\xff]{3,}/
+header MC_T_CONTENT_TYPE_8BITS_969 Content-Type =~ /[\x80-\xff]{3,}/
+header MC_T_DATE_8BITS_58 Date =~ /[\x80-\xff]{3,}/
+header MC_T_FROM_8BITS_547 From =~ /[\x80-\xff]{3,}/
+header MC_T_MESSAGEID_8BITS_160 MESSAGEID =~ /[\x80-\xff]{3,}/
+header MC_T_MESSAGE_ID_8BITS_640 Message-Id =~ /[\x80-\xff]{3,}/
+header MC_T_RECEIVED_8BITS_302 Received =~ /[\x80-\xff]{3,}/
+header MC_T_REPLY_TO_8BITS_339 Reply-To =~ /[\x80-\xff]{3,}/
+header MC_T_SUBJECT_8BITS_953 Subject =~ /[\x80-\xff]{3,}/
+header MC_T_TO_8BITS_996 To =~ /[\x80-\xff]{3,}/
+header MC_T_X_INFO_8BITS_340 X-Info =~ /[\x80-\xff]{3,}/
+header MC_T_X_MAILER_8BITS_606 X-Mailer=~ /[\x80-\xff]{3,}/
+header MC_T_X_MIMEOLE_8BITS_42 X-MimeOLE =~ /[\x80-\xff]{3,}/
+header MC_T_X_MSMAIL_PRIORITY_8BITS_338 X-Msmail-Priority =~ /[\x80-\xff]{3,}/
+header MC_T_X_ORIGINATING_EMAIL_8BITS_605 X-Originating-Email =~ /[\x80-\xff]{3,}/
+header MC_T_X_ORIGINATING_HOST_8BITS_535 X-Originating-Host =~ /[\x80-\xff]{3,}/
+header MC_T_X_PRIORITY_8BITS_253 X-Priority =~ /[\x80-\xff]{3,}/
+meta MC_T_8BIT_HEADERS_615 ( MC_T_ALL_8BITS_795 && !MC_T_FROM_8BITS_547 && !MC_T_SUBJECT_8BITS_953 &&!MC_T_TO_8BITS_996 && !MC_T_REPLY_TO_8BITS_339 && !MC_T_X_ORIGINATING_EMAIL_8BITS_605)
+
+meta MC_T_8BIT_HEADERS2_933 ( MC_T_ALL_8BITS_795 && !MC_T_FROM_8BITS_547 && !MC_T_SUBJECT_8BITS_953 &&!MC_T_TO_8BITS_996 && !MC_T_REPLY_TO_8BITS_339)
+
+meta MC_T_8BIT_HEADERS3_903 ( MC_T_ALL_8BITS_795 && !MC_T_FROM_8BITS_547 && !MC_T_SUBJECT_8BITS_953 &&!MC_T_TO_8BITS_996)
+
+## MC: bug 2243 cmt 13: end
+
+## MC: bug 2243 cmt 14: start
+meta MC_T_8BIT_HEADERS_38 (T_ALL_8BITS && !T_FROM_8BITS && !T_SUBJECT_8BITS &&!T_TO_8BITS && !T_REPLY_TO_8BITS && !T_X_ORIGINATING_EMAIL_8BITS)
+
+meta MC_T_8BIT_HEADERS2_615 (T_ALL_8BITS && !T_FROM_8BITS && !T_SUBJECT_8BITS &&!T_TO_8BITS && !T_REPLY_TO_8BITS)
+
+meta MC_T_8BIT_HEADERS3_501 (T_ALL_8BITS && !T_FROM_8BITS && !T_SUBJECT_8BITS)
+meta MC_T_8BIT_HEADERS4_892 (T_ALL_8BITS && !T_FROM_8BITS && !T_TO_8BITS)
+meta MC_T_8BIT_HEADERS5_805 (T_ALL_8BITS && !T_SUBJECT_8BITS && !T_TO_8BITS)
+meta MC_T_8BIT_HEADERS6_94 (T_ALL_8BITS && !T_FROM_8BITS)
+meta MC_T_8BIT_HEADERS7_838 (T_ALL_8BITS && !T_SUBJECT_8BITS)
+meta MC_T_8BIT_HEADERS8_376 (T_ALL_8BITS && !T_TO_8BITS)
+## MC: bug 2243 cmt 14: end
+
