@@ -609,10 +609,10 @@ header __RECEIVED_DAV		Received =~ /\bwith DAV;/
 meta DAV_NON_HOTMAIL		__RECEIVED_DAV && !(__HOTMAIL_RCVD && __HOTMAIL_SMTPSVC && __HOTMAIL_OIP)
 describe DAV_NON_HOTMAIL	Message sent using DAV, but not via Hotmail
 
-header FROM_DOMAIN_NOVOWEL	From =~ /\@\S*[bcdfghjklmnpqrstvwxyz]{7}/i
+header FROM_DOMAIN_NOVOWEL	From =~ /\@\S*[bcdfghjklmnpqrstvwxz]{7}/i
 describe FROM_DOMAIN_NOVOWEL	From: domain has lots of non-vowel letters
 
-header FROM_LOCAL_NOVOWEL	From =~ /[bcdfghjklmnpqrstvwxyz]{7}\S*\@/i
+header FROM_LOCAL_NOVOWEL	From =~ /[bcdfghjklmnpqrstvwxz]{7}\S*\@/i
 describe FROM_LOCAL_NOVOWEL	From: localpart has lots of non-vowel letters
 
 header FROM_LOCAL_HEX		From =~ /[0-9a-f]{11}\S*\@/i
