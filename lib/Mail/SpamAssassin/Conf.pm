@@ -1676,29 +1676,10 @@ meta META2        (3 * TEST1 - 2 * TEST2) > 0
 Note that Perl builtins and functions, like C<abs()>, B<can't> be
 used, and will be treated as rule names.
 
-=item meta SYMBOLIC_TEST_NAME regular expression
-
-Finally, parts of a meta rule may be defined by a regexp followed by
-an operator.  All rules matching the regular expression will be strung
-together, with the given operator between each expression.  The rule
-compiler will add "^" and "$" before and after each regexp, so the
-regexp must match the entire rule; a rule name begining with a "." or
-a "[" will be treated as a regexp.
-
-As an example:
-
-meta TOO_MANY_UA      ( (USER_AGENT.* +) > 1)
-
-Will expand to:
-
-meta TOO_MANY_UA    ( USER_AGENT_PINE + USER_AGENT_MUTT + USER_AGENT_MOZILLA_UA + USER_AGENT_MOZILLA_XM + USER_AGENT_MACOE + USER_AGENT_ENTOURAGE + USER_AGENT_KMAIL + USER_AGENT_IMP + USER_AGENT_TONLINE + USER_AGENT_APPLEMAIL + USER_AGENT_GNUS_UA + USER_AGENT_GNUS_XM > 1 )
-
 If you want to define a meta-rule, but do not want its individual sub-rules to
 count towards the final score unless the entire meta-rule matches, give the
 sub-rules names that start with '__' (two underscores).  SpamAssassin will
 ignore these for scoring.
-
-Meta rules cannot use other meta rules as sub-rules in this release.
 
 =cut
 
