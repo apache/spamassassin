@@ -61,10 +61,14 @@ GetOptions("children=n" => \$children,
            "minperchild=n" => \$minperchild,
            "maxperchild=n" => \$maxperchild) or die $syntax;
 
-die $syntax unless @ARGV == 3;
+die $syntax unless @ARGV == 2;
 my ($srcaddr, $srcport) = split /:/, $ARGV[0];
 my ($dstaddr, $dstport) = split /:/, $ARGV[1];
-my $spamaddr = $ARGV[2];
+if(@ARGV == 3) {
+  my $spamaddr = $ARGV[2];
+} else {
+  my $spamaddr = "recipient";
+}
 
 print "Trying to start using source $srcaddr port $srcport, " .
       "destination $dstaddr port $dstport, " . 
@@ -164,8 +168,12 @@ while($conn = $server->accept()) {
     if ($status->is_spam ()) {
         $status->rewrite_mail ();
         $message = join ("",$mail->header(),@{$mail->body()});
-        @recipients = ("$spamaddr");
-        $recips = \@recipients;
+        if($spamaddr ne "recipient") {
+          @recipients = ("$spamaddr");
+          $recips = \@recipients;
+        } else {
+          $recips = $client->{TO};
+        }
     } else {
         $recips = $client->{TO};
     }
