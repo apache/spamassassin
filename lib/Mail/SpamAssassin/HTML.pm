@@ -303,7 +303,9 @@ sub parse {
 sub html_tag {
   my ($self, $tag, $attr, $num) = @_;
 
-  if (exists $elements{$tag} || $tag =~ m@^(?:o|st):[\w-]+/?$@) {
+  my $maybe_namespace = ($tag =~ m@^(?:o|st\d):[\w-]+/?$@);
+
+  if (exists $elements{$tag} || $maybe_namespace) {
     $self->{elements}++;
     $self->{elements_seen}++ if !exists $self->{inside}{$tag};
   }
@@ -314,6 +316,8 @@ sub html_tag {
     $self->{inside}{$tag} = 0;
     $self->{closed_extra}++;
   }
+
+  return if $maybe_namespace;
 
   # check attributes
   for my $name (keys %$attr) {
