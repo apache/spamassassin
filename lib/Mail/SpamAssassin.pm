@@ -94,7 +94,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.160 2003/01/09 23:51:51 msquadrat Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.161 2003/01/14 22:55:47 jmason Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -1069,7 +1069,7 @@ sub get_and_create_userstate_dir {
 
   if (!-d $fname) {
     # not being able to create the *dir* is not worth a warning at all times
-    mkpath ($fname, 0, 0700) or dbg ("mkdir $fname failed: $!\n");
+    eval { mkpath ($fname, 0, 0700) } or dbg ("mkdir $fname failed: $@ $!\n");
   }
   $fname;
 }
