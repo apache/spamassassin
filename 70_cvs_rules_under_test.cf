@@ -522,3 +522,7 @@ describe T_FORGED_MUA_EUDORA_FROM Forged mail pretending to be from Eudora (by F
 header T_RATWARE_MIZSPEELING	eval:check_for_mizspeeling_ratware()
 describe T_RATWARE_MIZSPEELING	Sent using spammer tool (mizspeeling)
 
+# ho ho ho
+body T_WALAA		/instructions and walaa\b/i
+describe T_WALAA	Illiterate spammer cannot spell 'voila'
+
