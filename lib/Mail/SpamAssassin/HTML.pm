@@ -631,10 +631,11 @@ sub html_tests {
     }
   }
   if ($tag eq "font" && exists $attr->{size}) {
-    $self->{html}{t_tiny_font} = 1 if (($attr->{size} =~ /^\s*(\d+)/ && $1 < 1) ||
-			    ($attr->{size} =~ /\-(\d+)/ && $1 >= 3));
-    $self->{html}{big_font} = 1 if (($attr->{size} =~ /^\s*(\d+)/ && $1 > 3) ||
-			    ($attr->{size} =~ /\+(\d+)/ && $1 >= 1));
+    $size = $size;
+    $self->{html}{tiny_font} = 1 if (($size =~ /^\s*(\d+)/ && $1 < 1) ||
+				     ($size =~ /\-(\d+)/ && $1 >= 3));
+    $self->{html}{big_font} = 1 if (($size =~ /^\s*(\d+)/ && $1 > 3) ||
+				    ($size =~ /\+(\d+)/ && $1 >= 1));
   }
   if ($tag eq "font" && exists $attr->{color}) {
     my $bg = $self->{bgcolor_color}[-1];
@@ -780,8 +781,8 @@ sub html_tests {
 sub examine_text_style {
   my ($self, $size, $type) = @_;
   $type = lc $type;
-  $self->{html}{t_tiny_font} = 1 if ($type eq "pt" && $size < 4);
-  $self->{html}{t_tiny_font} = 1 if ($type eq "pt" && $size < 4);
+  $self->{html}{tiny_font} = 1 if ($type eq "pt" && $size < 4);
+  $self->{html}{tiny_font} = 1 if ($type eq "pt" && $size < 4);
   $self->{html}{big_font} = 1 if ($type eq "pt" && $size > 14);
   $self->{html}{big_font} = 1 if ($type eq "px" && $size > 18);
 }

@@ -107,6 +107,9 @@ describe HTML_EVENT_UNSAFE	HTML contains unsafe auto-executing code
 body HTML_FONT_BIG		eval:html_test('big_font')
 describe HTML_FONT_BIG		HTML has a big font
 
+body HTML_FONT_TINY		eval:html_test('tiny_font')
+describe HTML_FONT_TINY		HTML has a tiny font
+
 body HTML_FONTCOLOR_UNSAFE	eval:html_test('font_color_unsafe')
 describe HTML_FONTCOLOR_UNSAFE	HTML font color not in safe 6x6x6 palette
 
