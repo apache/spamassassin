@@ -458,14 +458,11 @@ See above.
 Set the number of hits required before a mail is considered spam.  C<n.nn> can
 be an integer or a real number.  5.0 is the default setting, and is quite
 aggressive; it would be suitable for a single-user setup, but if you're an ISP
-installing SpamAssassin, you should probably set the default to be something
-much more conservative, like 8.0 or 10.0.  Experience has shown that you
-B<will> get plenty of user complaints otherwise!
-
-Francesco Potorti reports 'on a system running for about 500 users, I set
-required_hits to 5.7, for marking, and set a limit of 15 (by looking at
-X-Spam-Level with procmail) for automatic discarding to an (infrequently
-checked) quarantine directory.'
+installing SpamAssassin, you should probably set the default to be more
+conservative, like 8.0 or 10.0.  It is not recommended to automatically delete
+or discard messages marked as spam, as your users B<will> complain, but if you
+choose to do so, only delete messages with an exceptionally high score such as
+15.0 or higher.
 
 =cut
 
