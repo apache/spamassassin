@@ -32,6 +32,7 @@ typedef int SSL;		/* fake type to avoid conditional compilation */
 typedef int SSL_CTX;
 typedef int SSL_METHOD;
 #endif
+
 #ifdef _WIN32
 #include <winsock.h>
 typedef int ssize_t;
