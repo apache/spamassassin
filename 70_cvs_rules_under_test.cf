@@ -522,7 +522,3 @@ score     T_HTML_LINK_UNSUB      0.01
 # regexp /USER_AGENT.*/ will be strung together with "+" between them.
 meta T_TOO_MANY_UA	( (USER_AGENT.+ +) > 1) 
 meta T_UA_AND_XM	( USER_AGENT && __HAS_X_MAILER )
-
-# isn't this about the same as BTAMAIL_URL?  I suggest comparing
-# and/or removing overlap before adding permanently
-body T_BTAMAIL_BODY	/btamail\.net\.cn/i
