@@ -94,7 +94,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.189 2003/05/29 01:23:11 felicity Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.190 2003/06/01 20:17:10 felicity Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -232,6 +232,10 @@ sub new {
 
   $DEBUG->{enabled} = 0;
   if (defined $self->{debug} && $self->{debug} > 0) { $DEBUG->{enabled} = 1; }
+
+  # if the libs are installed in an alternate location, and the caller
+  # didn't set PREFIX, we should have an estimated guess ready ...
+  $self->{PREFIX} ||= '@@PREFIX@@';  # substituted at 'make' time
 
   # This should be moved elsewhere, I know, but SA really needs debug sets 
   # I'm putting the intialization here for now, move it if you want
