@@ -549,7 +549,7 @@ sub expire_old_tokens_trapped {
     dbg("bayes: something fishy, calculating atime (first pass)");
     my $start = 43200; # exponential search starting at ...?  1/2 day, 1, 2, 4, 8, 16, ...
     my %delta = (); # use a hash since an array is going to be very sparse
-    my $count = 9; # max try $start * 2**$count
+    my $max_expire_mult = 512; # $max_expire_mult * $start = max expire time (256 days), power of 2.
 
     # do the first pass, figure out atime delta
     foreach my $tok (keys %{$self->{db_toks}}) {
@@ -559,7 +559,7 @@ sub expire_old_tokens_trapped {
 
       # Go through from $start * 1 to $start * 512, mark how many tokens we would expire
       my $token_age = $magic[10] - $atime;
-      for( my $i = 1, my $j = 2**$count; $i <= $j; $i<<=1 ) {
+      for( my $i = 1; $i <= $max_expire_mult; $i<<=1 ) {
         if ( $token_age >= $start * $i ) {
           $delta{$i}++;
 	}
@@ -571,32 +571,36 @@ sub expire_old_tokens_trapped {
       }
     }
 
-    # Now figure out which exponent gives the closest results to goal_reduction, without going over ...
-    # Go from the largest delta backwards so the reduction size increases
-    # (tokens that expire at 4 also expire at 3, 2, and 1, so 1 will be the largest expiry...)
+    # Now figure out which max_expire_mult value gives the closest results to goal_reduction, without
+    # going over ...  Go from the largest delta backwards so the reduction size increases
+    # (tokens that expire at 4 also expire at 3, 2, and 1, so 1 will always be the largest expiry...)
     #
-    my $i;
-    for($i=$count+1, my $j = (1<<($i-1)); $i > 0; $i--, $j = (1<<($i-1))) {
-      next unless exists $delta{$j};
-      last if ($delta{$j} > $goal_reduction);
+    for( ; $max_expire_mult > 0; $max_expire_mult>>=1 ) {
+      next unless exists $delta{$max_expire_mult};
+      if ($delta{$max_expire_mult} > $goal_reduction) {
+        $max_expire_mult<<=1; # the max expire is actually the next power of 2 out
+	last;
+      }
     }
 
-    # $i is now equal to the exponent we should use ...
+    # if max_expire_mult gets to 0, either we can't expire anything, or 1 is <= $goal_reduction
+    $max_expire_mult ||= 1;
+
+    # $max_expire_mult is now equal to the value we should use ...
     # Check to see if the atime value we found is really good.
     # It's not good if:
-    # - $i exponent would not expire any tokens.  This means that the majority of
+    # - $max_expire_mult would not expire any tokens.  This means that the majority of
     #   tokens are old or new, and more activity is required before an expiry can occur.
     # - reduction count < 1000, not enough tokens to be worth doing an expire.
     #
-    $i = 1 << $i;
-    if ( !exists $delta{$i} || $delta{$i} < 1000 ) {
+    if ( !exists $delta{$max_expire_mult} || $delta{$max_expire_mult} < 1000 ) {
       dbg("bayes: couldn't find a good delta atime, need more token difference, skipping expire.");
       $self->{db_toks}->{$LAST_EXPIRE_MAGIC_TOKEN} = time();
       $self->remove_running_expire_tok(); # this won't be cleaned up, so do it now.
       return 1; # we want to indicate things ran as expected
     }
 
-    $newdelta = $start * $i;
+    $newdelta = $start * $max_expire_mult;
   }
 
   # use O_EXCL to avoid races (bonus paranoia, since we should be locked
