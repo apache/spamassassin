@@ -16,21 +16,19 @@ echo $vers > $WEBDIR/latest_version
 
 rm -f Mail-SpamAssassin-$vers.tar.gz Mail-SpamAssassin-$vers.zip
 make tardist
-cp Mail-SpamAssassin-$vers.tar.gz $WEBDIR/devel
-
 make zipdist
-cp Mail-SpamAssassin-$vers.zip $WEBDIR/devel
 
-md5sum Mail-SpamAssassin-$vers.tar.gz \
-	> $WEBDIR/devel/Mail-SpamAssassin-$vers.tar.gz.md5
-md5sum Mail-SpamAssassin-$vers.zip \
-	> $WEBDIR/devel/Mail-SpamAssassin-$vers.zip.md5
+for ext in tar.gz zip ; do
+  cp Mail-SpamAssassin-$vers.$ext $WEBDIR/devel
 
-gpgsign=$HOME/bin/gpgsign
-$gpgsign Mail-SpamAssassin-$vers.tar.gz
-$gpgsign Mail-SpamAssassin-$vers.zip
-mv Mail-SpamAssassin-$vers.tar.gz.asc $WEBDIR/devel/Mail-SpamAssassin-$vers.tar.gz.asc
-mv Mail-SpamAssassin-$vers.zip.asc $WEBDIR/devel/Mail-SpamAssassin-$vers.zip.asc
+  md5sum Mail-SpamAssassin-$vers.$ext \
+	  > $WEBDIR/devel/Mail-SpamAssassin-$vers.$ext.md5
+
+  gpgsign=$HOME/bin/gpgsign
+  rm -f Mail-SpamAssassin-$vers.$ext.asc
+  $gpgsign Mail-SpamAssassin-$vers.$ext
+  mv Mail-SpamAssassin-$vers.$ext.asc $WEBDIR/devel/Mail-SpamAssassin-$vers.$ext.asc
+done
 
 # ( cd $WEBDIR/devel && cvs add -kb *SpamAssassin* )
 

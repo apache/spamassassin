@@ -21,6 +21,7 @@ for ext in tar.gz zip ; do
 	$WEBDIR/released/Mail-SpamAssassin-$vers.$ext
 
   gpgsign=$HOME/bin/gpgsign
+  rm -f Mail-SpamAssassin-$vers.$ext.asc
   $gpgsign Mail-SpamAssassin-$vers.$ext
   mv Mail-SpamAssassin-$vers.$ext.asc $WEBDIR/devel/Mail-SpamAssassin-$vers.$ext.asc
 done
