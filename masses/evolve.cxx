@@ -399,7 +399,7 @@ main (int argc, char **argv) {
     if (gens % 5 == 0) {
       cout << "."; cout.flush();
 
-      if (gens % 30 == 0) {
+      if (gens % (20000/popsize) == 0) {
 	cout << "\nProgress: gen=" << gens << " convergence="
 	      << ga.statistics().convergence()
 	      << ":\n";

@@ -3,5 +3,5 @@
 make clean
 # ./hit-frequencies | ./score-ranges-from-freqs
 ./logs-to-c $*
-make OPT=
+make OPT= evolve
 ./evolve -C

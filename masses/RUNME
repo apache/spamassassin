@@ -32,8 +32,10 @@ rsync -vrze ssh $dog:ftp/spamassassin/masses/nonspam.log nonspam.dogma
 cat nonspam.local nonspam.dogma logs/contrib/nonspam.log* > nonspam.log
 cat spam.local spam.dogma logs/contrib/spam.log* > spam.log
 
-./mk-baseline-results
 ./hit-frequencies > freqs
+./mk-baseline-results
+
+./copy-logs-to-deimos
 
 make clean
 make evolve
