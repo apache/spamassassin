@@ -92,7 +92,7 @@ describe MSGID_CHARS_WEIRD	Message-Id has characters often found in spam
 header INVALID_MSGID		Message-Id !~ /^<(?:\".+\"|[^\s]+)\@(?:\[.+\]|[^\s]+)>(?:| added by \S+)$/ [if-unset: <NO@MSGID>]
 describe INVALID_MSGID		Message-Id is not valid, according to RFC-2822
 
-header INVALID_DATE		Date !~ /^((Sun|Mon|Tue|Wed|Thu|Fri|Sat), )?([\d ]?\d) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d\d|\d\d\d\d) \d\d:\d\d(:\d\d)? (UT|[A-Z]{3,5}|[+-]\d\d\d\d)(\s+\(.*\))?\s*$/
+header INVALID_DATE		Date !~ /^((Sun|Mon|Tue|Wed|Thu|Fri|Sat), )?([\d ]?\d) (Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec) (\d\d|\d\d\d\d) \d\d:\d\d(:\d\d)? (UT|[A-Z]{3,5}|[+-]\d\d\d\d)(\s+\(.*\))?\s*$/ [if-unset: Date: Sun, 21 Jul 2002 10:29:57 -0700]
 describe INVALID_DATE		Invalid Date: header (not RFC 822)
 
 # allow +1300, NZ timezone
