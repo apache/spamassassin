@@ -279,7 +279,7 @@ if ($opt{'debug'}) {
   warn "server pid: $$\n";
 }
 
-logmsg("server started on port $port (running version ". Mail::SpamAssassin::Version().")\n");
+logmsg("server started on port $port (running version ". Mail::SpamAssassin::Version(). ")");
 
 my $current_user;
 my $client;
