@@ -1,0 +1,45 @@
+
+ABOUT THE THRESHOLDS SCRIPT
+---------------------------
+
+The "thresholds" script is an emulation of the spambayes testing
+methodology:  it computes ham/spam hits across a corpus for each
+algorithm, then, by dividing those hits into FPs, FNs, and "unsure"s, and
+attaching a "cost" to each of those, it computes optimum spam and ham
+cutoff points.  (It also outputs TCRs.)
+
+BTW, the idea of cutoffs is a spambayes one; the range
+
+  0.0 .......... ham_cutoff ........ spam_cutoff ......... 1.0
+
+maps to
+
+     MAIL IS HAM           UNSURE            MAIL IS SPAM
+
+SpamAssassin can be more sophisticated in terms of turning the bayes value
+into scores across a range of [ -4.0, 4.0 ].  However the insight the
+"unsure" value provides is good to visualise the shape of the graph
+anyway, even if we don't use the same scoring system.
+
+But the important thing for our tests is that the threshold results,
+together with the histograms, give a good picture of how the algorithm
+scatters the results across the table.  Ideally, we want
+
+  - all ham clustered around 0.0
+  - all spam clustered around 1.0
+  - as little ham and spam as possible in the "unsure" middle-ground
+
+So the best algorithms are the ones that are closest to this ideal;
+in terms of the results below that means this is the pecking order
+for good results, strong indicators first...
+
+  - a low cost figure
+  - low FPs
+  - low FNs
+  - low unsures
+  - a large difference between thresholds
+
+We can then tweak the threshold-to-SpamAssassin-score mapping so that we
+maximise the output of the bayes rules in SpamAssassin score terms, by
+matching our score ranges to the ham_cutoff and spam_cutoff points.
+
