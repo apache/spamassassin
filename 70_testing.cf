@@ -673,3 +673,6 @@ describe T_DIGEST_MULTIPLE   Message hits more than one network digest check
 # too easy.
 body T_SUBJ_VIA_GRA		/\bvia.gra\b/i
 
+# spams that are assembled from a Javascript array
+rawbody T_JS_FROMCHARCODE	/String\.fromCharCode/
+
