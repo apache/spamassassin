@@ -57,10 +57,3 @@ score T_SOME_BREAKTHROUGH	0.5
 body T_SELECTED_YOU		/(?:you (?:have been|were) selected|we (?:have )?selected you)/i
 score T_SELECTED_YOU		0.5
 
-# jm: somehow these guys keep slipping through, and they're very persistent.
-# they use both azoogle.com and azogle.com, but this header is always
-# in this format.
-header T_AZOOGLE                X-Info =~ /service to abuse\@azoogle\.com$/
-describe T_AZOOGLE              From azoogle.com, azogle.com, etc.
-score T_AZOOGLE                 3.0
-
