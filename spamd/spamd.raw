@@ -275,7 +275,6 @@ for ( $waitedpid = 0;
 	    # Now read in message
 	    my @msglines = (<STDIN>);
 	    my $actual_length = length (join '', @msglines);
-	    pre_chew_for_mail_audit (\@msglines);
 	    my $mail = Mail::SpamAssassin::NoMailAudit->new ( data => \@msglines );
 
 	    # Check length if we're supposed to
@@ -392,22 +391,6 @@ sub create_default_cf_if_needed {
 	    logmsg "Couldn't create readable default_prefs for [$cf_file]";
 	}
     }
-}
-
-# check for an assortment of crap that Mail::Audit cannot deal with: DOS
-# line-endings, extra 'From ' lines, etc.
-#
-sub pre_chew_for_mail_audit {
-    my ($msglines) = @_;
-
-    my @newhdrs = (); while ($_ = shift (@{$msglines})) {
-      /^From / and next;        # may fix the #1 M:A bug ;)
-      s/\r\n/\n/s;              # clean off \r\n's
-      push (@newhdrs, $_);      
-      /^$/ and last;
-    } 
-    
-    unshift (@{$msglines}, @newhdrs);
 }
 
 =head1 NAME

@@ -409,7 +409,7 @@ sub word_is_in_dictionary {
     return 1;		# fail safe
   }
 
-  $sword = substr $word, 0, 4;  # Perhaps 5 is better than 4.
+  my $sword = substr $word, 0, 4;  # Perhaps 5 is better than 4.
 
   dbg ("checking dictionary for \"$sword\", (was $word)");
 
