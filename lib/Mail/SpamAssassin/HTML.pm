@@ -126,9 +126,9 @@ sub html_end {
   $self->put_results(length => $self->{length});
   $self->put_results(min_size => $self->{min_size});
   $self->put_results(max_size => $self->{max_size});
-  $self->put_results(extra_close => $self->{extra_close});
   if (exists $self->{tags}) {
-    $self->put_results(extra_close_ratio => ($self->{extra_close} / $self->{tags}));
+    $self->put_results(closed_extra_ratio =>
+		       ($self->{closed_extra} / $self->{tags}));
   }
 
   # final result arrays
@@ -216,7 +216,7 @@ sub parse {
   $self->{min_size} = 3;	# start at default size
   $self->{closed_html} = 0;
   $self->{closed_body} = 0;
-  $self->{extra_close} = 0;
+  $self->{closed_extra} = 0;
   $self->{text} = [];		# rendered text
   $self->{text_invisible} = '';	# vec of invisibility state in $self->{text}
 
@@ -271,7 +271,7 @@ sub html_tag {
   $self->{inside}{$tag} += $num;
   if ($self->{inside}{$tag} < 0) {
     $self->{inside}{$tag} = 0;
-    $self->{extra_close}++;
+    $self->{closed_extra}++;
   }
 
   # check attributes
