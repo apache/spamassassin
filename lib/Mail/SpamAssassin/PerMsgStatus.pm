@@ -88,6 +88,7 @@ sub check {
       my $bodytext = $self->get_raw_body_text_array();
       $self->do_body_tests($bodytext);
       $self->do_body_eval_tests($bodytext);
+      $bodytext = undef;
     }
 
     # do body tests with decoded portions
@@ -97,14 +98,16 @@ sub check {
 	$self->do_body_tests($decoded);
 	$self->do_body_eval_tests($decoded);
       }
+      $decoded = undef;
     }
 
     # and do full tests: first with entire, full, undecoded message
     {
       my $fulltext = join ('', $self->{msg}->get_all_headers(), "\n",
       				@{$self->{msg}->get_body()});
-      $self->do_full_tests($fulltext);
-      $self->do_full_eval_tests($fulltext);
+      $self->do_full_tests(\$fulltext);
+      $self->do_full_eval_tests(\$fulltext);
+      $fulltext = undef;
     }
 
     # then with decoded message
@@ -113,9 +116,11 @@ sub check {
       if (defined $decoded) {
 	my $fulltext = join ('', $self->{msg}->get_all_headers(), "\n",
 				  @{$decoded});
-	$self->do_full_tests($fulltext);
-	$self->do_full_eval_tests($fulltext);
+	$self->do_full_tests(\$fulltext);
+	$self->do_full_eval_tests(\$fulltext);
+	$fulltext = undef;
       }
+      $decoded = undef;
     }
 
     $self->do_head_eval_tests();
@@ -429,10 +434,12 @@ sub get_raw_body_text_array {
 
       # skip this attachment, it's non-text.
       while ($_ = (shift @workingbody)) {
-	last if ($multipart_boundary eq $_ || $end_boundary eq $_);
+	if ($end_boundary eq $_) { last; }
+	if ($multipart_boundary eq $_) { unshift (@workingbody, $_); last; }
       }
     }
   }
+  @workingbody = ();
 
   return $self->{body_text_array};
 }
@@ -572,7 +579,7 @@ sub do_body_tests {
 }
 
 sub do_full_tests {
-  my ($self, $fullmsgstring) = @_;
+  my ($self, $fullmsgref) = @_;
   my ($rulename, $pat);
   local ($_);
   $self->clear_test_state();
@@ -583,13 +590,13 @@ sub do_full_tests {
   my $evalstr = '';
   while (($rulename, $pat) = each %{$self->{conf}->{full_tests}}) {
     $evalstr .= '
-      if ('.$pat.') { $self->got_hit (q{'.$rulename.'}, q{}); }
+      if ($$fullmsgref =~ '.$pat.') { $self->got_hit (q{'.$rulename.'}, q{}); }
     ';
   }
 
   # and run it.
-  $_ = $fullmsgstring; $fullmsgstring = undef;
-  if (!eval 'study; '.$evalstr.'; 1;') {
+  # study $$fullmsgref;
+  if (!eval $evalstr.'; 1;') {
     warn "Failed to run full SpamAssassin tests, skipping:\n".
 	      "\t($@)\n";
   }
@@ -608,8 +615,8 @@ sub do_body_eval_tests {
 }
 
 sub do_full_eval_tests {
-  my ($self, $fullmsgstring) = @_;
-  $self->run_eval_tests ($self->{conf}->{full_evals}, '', $fullmsgstring);
+  my ($self, $fullmsgref) = @_;
+  $self->run_eval_tests ($self->{conf}->{full_evals}, '', $fullmsgref);
 }
 
 ###########################################################################
@@ -751,7 +758,6 @@ sub work_out_local_domain {
   # TODO -- if needed.
 
   # my @rcvd = $self->{msg}->get_header ("Received");
-  # print "JMD ".join (' ',@rcvd);
 
 # from dogma.slashnull.org (dogma.slashnull.org [212.17.35.15]) by
     # mail.netnoteinc.com (Postfix) with ESMTP id 3E010114097 for
