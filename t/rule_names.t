@@ -41,7 +41,11 @@ while (my ($test, $type) = each %{ $sa->{conf}->{test_types} }) {
 # run tests
 my $mail = 'log/rule_names.eml';
 write_mail();
-plan tests => (scalar @tests);
+plan tests => (scalar @tests),
+  onfail => sub {
+    warn "\n\n   Note: rule_name failures may be only cosmetic" .
+    "\n        but must be fixed before release\n\n";
+  };
 %patterns = ();
 my $i = 1;
 for my $test (@tests) {
