@@ -451,10 +451,6 @@ logmsg("server started on $listeninfo (running version ". Mail::SpamAssassin::Ve
 my $current_user;
 my $client;
 
-# qmail vpopmail support
-my $assign = "/var/qmail/users/assign";    # where to find domain to user mappings
-my (%qmailu, $qu_load);
-
 my $readvec = "";
 my %pipes = ();
 vec($readvec, $server->fileno, 1) = 1;
@@ -905,8 +901,6 @@ sub handle_user
     my $userid = '';
     if ($opt{'vpopmail'} && $opt{'username'}) {
 	$userid = $opt{'username'};
-    } elsif ( $opt{'vpopmail'} ) {
-        $userid = "vpopmail";
     } else {
 	$userid = $username;
     }
@@ -949,23 +943,19 @@ sub handle_user
     # If vpopmail config enabled then pass virtual homedir onto create_default_cf_needed
     #
     if ($opt{'vpopmail'}) {
-	if ($opt{'username'}) {
-	    create_default_cf_if_needed ($cf_file, $username, $dir);
-	    $spamtest->read_scoreonly_config ($cf_file);
-	    $spamtest->signal_user_changed ({ username => $username,
-					    user_dir => "$dir" });
-	} else {
-	    my $sysnam = get_user_from_address ($username);
-	    $spamtest->read_scoreonly_config ($cf_file);
-	    $spamtest->signal_user_changed ({ username => $sysnam,
-					    user_dir => "$dir" })
+	if (!$opt{'username'}) {
+	    warn "cannot use vpopmail without -u\n";
 	}
+	create_default_cf_if_needed ($cf_file, $username, $dir);
+	$spamtest->read_scoreonly_config ($cf_file);
+	$spamtest->signal_user_changed ({ username => $username,
+						user_dir => $dir });
 
     } else {
 	create_default_cf_if_needed ($cf_file, $username);
 	$spamtest->read_scoreonly_config ($cf_file);
 	$spamtest->signal_user_changed ({ username => $username,
-					    user_dir => $dir });
+						user_dir => $dir });
     }
 
     return 1;
@@ -1102,48 +1092,6 @@ sub create_default_cf_if_needed {
 	    logmsg "Couldn't create readable default_prefs for [$cf_file]";
 	}
     }
-}
-
-sub get_user_from_address {
-   my ($user, $domain) = split(/@/, $_[0]);
-   my $dom = lc($domain);
-
-   if ( $qmailu{$dom} ne "" ) {
-      warn "returning result from cache.\n" if ($opt{'debug'});
-      my $nam = getpwuid($qmailu{$dom});
-      return $nam;
-   } else {
-      warn "cache miss\n" if ($opt{'debug'});
-      &fill_qmailu_cache($assign);
-      if ( $qmailu{$dom} ne "" ) {
-         my $nam = getpwuid($qmailu{$dom});
-         return $nam;
-      } else {
-         return 0;
-      }
-   }
-}
-
-sub fill_qmailu_cache {
-   # rather than parsing the qmail users/assign file every time a message
-   # arrives, we run this once when spamd is loaded and check the files
-   # modified time each query to know when to reload it.
-        
-   my ($READ, $WRITE) = (stat($_[0]))[8,9];
-   if ( $WRITE > $qu_load ) {       
-      undef %qmailu;
-      $qu_load = time;       
-      open(ASSIGN, $_[0]) || die "couldn't open $_[0]: $!\n";
-         warn "loading $_[0] into cache...." if ($opt{'debug'});
-         while(<ASSIGN>) {
-            my @data = split(/:/, $_);
-            $qmailu{$data[1]} = $data[2];
-         };
-         warn "done.\n" if ($opt{'debug'});
-      close(ASSIGN);
-   } else {
-      warn "$_[0] already cached.\n" if ($opt{'debug'});
-   }
 }
 
 sub logmsg
@@ -1534,9 +1482,7 @@ this allows spamd to lookup/create user_prefs in the vpopmail user's own
 maildir.  This option is useful for vpopmail virtual users who do not have an
 entry in the system /etc/passwd file.
 
-If specified without B<-u>, then it allows every mail account on a vpopmail
-virtual domain setup to have their own user-customizable spamassassin
-preferences, assuming they have their own home directory set.
+Currently, use of this without B<-u> is not supported.
 
 =item B<-s> I<facility>, B<--syslog>=I<facility>
 
