@@ -732,8 +732,16 @@ sub handle_virtual_user
     my $prefsfile;
 
     if (defined $dir) {
-        my $safename = $username; $safename =~ s/[^-A-Za-z0-9\+_\.\,\@\=]/_/gs;
+        my $safename = $username;
+	$safename =~ s/[^-A-Za-z0-9\+_\.\,\@\=]/_/gs;
+	my $localpart = '';
+	my $domain = '';
+	if ($safename =~ /^(.*)\@(.*)$/) { $localpart = $1; $domain = $2; }
+
 	$dir =~ s/\%u/${safename}/g;
+	$dir =~ s/\%l/${localpart}/g;
+	$dir =~ s/\%d/${domain}/g;
+
 	$userdir = $dir;
 	$prefsfile = $dir.'/user_prefs';
 	# Log that the default configuration is being used for a user.
@@ -1140,8 +1148,19 @@ users, for the B<-x> switch.  If this and the B<--virtual-config> switch are
 both used, this will take precedence.
 
 The I<pattern> is used as a base pattern for the directory name.  Any
-and all occurrences of C<%u> in this pattern will be replaced with the
-name of the current user, as sent by spamc.
+of the following escapes can be used:
+
+=over 4
+
+=item %u -- replaced with the full name of the current user, as sent by spamc.
+
+=item %l -- replaced with the 'local part' of the current username.  In other
+words, if the username is an email address, this is the part before the C<@>
+sign.
+
+=item %d -- replaced with the 'domain' of the current username.  In other
+words, if the username is an email address, this is the part after the C<@>
+sign.
 
 So for example, if C</vhome/users/%u/spamassassin> is specified, and spamc
 sends a virtual username of C<jm@example.com>, the directory
