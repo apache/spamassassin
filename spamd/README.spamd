@@ -212,15 +212,15 @@ The following commands are defined as of protocol 1.2:
 
 CHECK         --  Just check if the passed message is spam or not and reply as described below
 
-SYMBOLS       --  Check if message is spam or not, and return score plus list of symbols hit(*)
+SYMBOLS       --  Check if message is spam or not, and return score plus list of symbols hit
 
-REPORT        --  Check if message is spam or not, and return score plus report(*)
+REPORT        --  Check if message is spam or not, and return score plus report
+
+REPORT_IFSPAM --  Check if message is spam or not, and return score plus report if the message is spam
 
 SKIP          --  Ignore this message -- client opened connection then changed its mind
 
 PROCESS       --  Process this message as described above and return modified message
-
-(*) These methods are not supported as yet by spamc
 
 CHECK command returns just a header (terminated by "\r\n\r\n") with the first
 line as for PROCESS (ie a response code and message), and then a header called
