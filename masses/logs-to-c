@@ -1,9 +1,10 @@
 #!/usr/bin/perl -w
 
 use Getopt::Long;
-use vars qw($opt_cffile $opt_count $opt_lambda $opt_threshold);
+use vars qw($opt_cffile $opt_count $opt_lambda $opt_threshold
+		$opt_spam $opt_nonspam);
 
-GetOptions("cffile=s", "count", "lambda=f", "threshold=f");
+GetOptions("cffile=s", "count", "lambda=f", "threshold=f", "spam=s", "nonspam=s");
 my $argcffile = $opt_cffile;
 
 my $justcount = 0;
@@ -11,6 +12,9 @@ if ($opt_count) { $justcount = 1; }
 
 my $threshold = 5;
 if ($opt_threshold) { $threshold = $opt_threshold; }
+
+$opt_spam ||= 'spam.log';
+$opt_nonspam ||= 'nonspam.log';
 
 my $nybias = 10;
 
@@ -58,7 +62,7 @@ sub readlogs {
     $yyscore = $ynscore = $nyscore = $nnscore = 0.0;
   }
 
-  foreach my $file ("spam.log", "nonspam.log") {
+  foreach my $file ($opt_spam, $opt_nonspam) {
     open (IN, "<$file");
 
     while (<IN>) {
@@ -89,7 +93,7 @@ sub readlogs {
         $tests_hit{$count} = \@tests;
       }
 
-      if ($file eq "spam.log") {
+      if ($file eq $opt_spam) {
 	$num_spam++;
         if ($justcount) {
           if ($score >= $threshold) {
@@ -281,21 +285,18 @@ sub read_ranges {
 }
 
 sub evaluate {
+   my $fprate = ($ga_ny / $num_tests) * 100.0;
+   my $fnrate = ($ga_yn / $num_tests) * 100.0;
+
    printf ("\n# SUMMARY for threshold %3.1f:\n", $threshold);
    printf "# Correctly non-spam: %6d  %4.2f%%  (%4.2f%% of non-spam corpus)\n", $ga_nn,
-       ($ga_nn /  $num_tests) * 100.0,
-       ($ga_nn /  $num_nonspam) * 100.0;
+       ($ga_nn /  $num_tests) * 100.0, ($ga_nn /  $num_nonspam) * 100.0;
    printf "# Correctly spam:     %6d  %4.2f%%  (%4.2f%% of spam corpus)\n" , $ga_yy,
-       ($ga_yy /  $num_tests) * 100.0,
-       ($ga_yy /  $num_spam) * 100.0;
+       ($ga_yy /  $num_tests) * 100.0, ($ga_yy /  $num_spam) * 100.0;
    printf "# False positives:    %6d  %4.2f%%  (%4.2f%% of nonspam, %6.0f weighted)\n", $ga_ny,
-       ($ga_ny /  $num_tests) * 100.0,
-       ($ga_ny /  $num_nonspam) * 100.0,
-       $nyscore*$nybias;
+       $fprate, ($ga_ny /  $num_nonspam) * 100.0, $nyscore*$nybias;
    printf "# False negatives:    %6d  %4.2f%%  (%4.2f%% of spam, %6.0f weighted)\n", $ga_yn,
-       ($ga_yn /  $num_tests) * 100.0,
-       ($ga_yn /  $num_spam) * 100.0,
-       $ynscore;
+       $fnrate, ($ga_yn /  $num_spam) * 100.0, $ynscore;
 
   # convert to the TCR metrics used in the published lit
   my $nspamspam = $ga_yy;
@@ -316,8 +317,7 @@ sub evaluate {
 
   my $sr = ($nspamspam / $nspam) * 100.0;
   my $sp = ($nspamspam / ($nspamspam + $nlegitspam)) * 100.0;
-  printf "# TCR: %3.6f   SpamRecall: %3.6f%%   SpamPrecision: %3.6f%%\n",
-                  $tcr, $sr, $sp;
+  printf "# TCR: %3.6f  SpamRecall: %3.3f%%  SpamPrec: %3.3f%%  FP: %3.2f%%  FN: %3.2f%%\n", $tcr, $sr, $sp, $fprate, $fnrate;
 }
 
 __DATA__
