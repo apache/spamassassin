@@ -549,7 +549,8 @@ only use the _REQD_ and _SCORE_ tags when rewriting the Subject header
 unless C<report_safe> is 0. Otherwise, you may not be able to remove
 the SpamAssassin markup via the normal methods.  Parentheses are not
 permitted in STRING if rewriting the From or To headers. (They will be
-converted to square brackets.)
+converted to square brackets.)  A null value for C<STRING> will remove
+any existing rewrite for the specified header.
 
 =cut
 
@@ -562,6 +563,11 @@ converted to square brackets.)
 
       # We only deal with From, Subject, and To ...
       if ($hdr =~ /^(?:From|Subject|To)$/) {
+	unless (defined $string && $string =~ /\S/) {
+	  delete $self->{rewrite_header}->{$hdr};
+	  return;
+	}
+
 	if ($hdr ne 'Subject') {
           $string =~ tr/()/[]/;
 	}
