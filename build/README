@@ -16,6 +16,10 @@ SPAMASSASSIN DEVELOPMENT SNAPSHOT PROCEDURE
 
   All can be copied from ~jm on minotaur if required.
 
+- ensure your PATH is correct:
+
+    PATH=$HOME/perl584/bin:$HOME/sabuildtools/bin:$PATH
+
 - run "./build/update_devel" to build the tar.gz files
 
 - by default, they're written to ~/spamassassin.taint.org/devel/ .  This
@@ -34,6 +38,10 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 - ensure the required code and data is available for the build scripts:
   see above.
+
+- ensure your PATH is correct:
+
+    PATH=$HOME/perl584/bin:$HOME/sabuildtools/bin:$PATH
 
 - edit lib/Mail/SpamAssassin.pm and comment the $IS_DEVEL_BUILD
   line.   Ensure the correct version number is present in $VERSION
