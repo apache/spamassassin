@@ -62,6 +62,8 @@ user_awl_sql_password
 
 user_awl_sql_table
 
+user_awl_sql_override_username
+
 see C<Mail::SpamAssassin::Conf> for more information.
 
 
@@ -133,9 +135,11 @@ sub new_checker {
   my $dbh = DBI->connect($dsn, $dbuser, $dbpass, {'PrintError' => 0});
 
   if(!$dbh) {
-    dbg("auto-whitelist: sql-based unable to connect to database");
+    dbg("auto-whitelist: sql-based unable to connect to database ($dsn)");
     return undef;
   }
+
+  dbg("auto-whitelist: sql-based connected to $dsn");
 
   $self = { 'main'      => $main,
             'dsn'       => $dsn,
@@ -143,7 +147,19 @@ sub new_checker {
             'tablename' => $main->{conf}->{user_awl_sql_table},
           };
 
-  dbg("auto-whitelist: sql-based connected to $dsn");
+  if ($main->{conf}->{user_awl_sql_override_username}) {
+    $self->{_username} = $main->{conf}->{user_awl_sql_override_username};
+  }
+  else {
+    $self->{_username} = $main->{username};
+
+    # Need to make sure that a username is set, so just in case there is
+    # no username set in main, set one here.
+    unless ($self->{_username}) {
+      $self->{_username} = "GLOBAL";
+    }
+  }
+  dbg("auto-whitelist: sql-based using username: ".$self->{_username});
 
   return bless ($self, $class);
 }
@@ -176,12 +192,10 @@ sub get_addr_entry {
 
   return $entry unless ($email && $ip);
 
-  my $username = $self->{main}->{username};
-
   my $sql = "SELECT count, totscore FROM $self->{tablename}
               WHERE username = ? AND email = ? AND ip = ?";
   my $sth = $self->{dbh}->prepare($sql);
-  my $rc = $sth->execute($username, $email, $ip);
+  my $rc = $sth->execute($self->{_username}, $email, $ip);
 
   if (!$rc) { # there was an error, but try to go on
     my $err = $self->{dbh}->errstr;
@@ -236,15 +250,13 @@ sub add_score {
   
   return $entry unless ($email && $ip);
 
-  my $username = $self->{main}->{username};
-  
   if ($entry->{exists_p}) { # entry already exists, so just update
     my $sql = "UPDATE $self->{tablename} SET count = count + 1,
                                              totscore = totscore + ?
                 WHERE username = ? AND email = ? AND ip = ?";
     
     my $sth = $self->{dbh}->prepare($sql);
-    my $rc = $sth->execute($score, $username, $email, $ip);
+    my $rc = $sth->execute($score, $self->{_username}, $email, $ip);
     
     if (!$rc) {
       my $err = $self->{dbh}->errstr;
@@ -258,7 +270,7 @@ sub add_score {
   else { # no entry yet, so insert a new entry
     my $sql = "INSERT INTO $self->{tablename} (username,email,ip,count,totscore) VALUES (?,?,?,?,?)";
     my $sth = $self->{dbh}->prepare($sql);
-    my $rc = $sth->execute($username,$email,$ip,1,$score);
+    my $rc = $sth->execute($self->{_username},$email,$ip,1,$score);
     if (!$rc) {
       my $err = $self->{dbh}->errstr;
       dbg("auto-whitelist: sql-based add_score: SQL error: $err");
@@ -289,22 +301,17 @@ sub remove_entry {
 
   return unless ($email && $ip);
 
-  my $username = $self->{main}->{username};
-
-  my $sql;
-  my @args;
+  my $sql = "DELETE FROM $self->{tablename} WHERE username = ? AND email = ?";
+  my @args = ($self->{_username}, $email);
 
   # when $ip is equal to none then attempt to delete all entries
   # associated with address
   if ($ip eq 'none') {
-    $sql = "DELETE FROM $self->{tablename} WHERE username = ? AND email = ?";
-    @args = ($username, $email);
     dbg("auto-whitelist: sql-based remove_entry: removing all entries matching $email");
   }
   else {
-    $sql = "DELETE FROM $self->{tablename}
-             WHERE username = ? AND email = ? AND ip = ?";
-    @args = ($username, $email, $ip);
+    $sql .= " AND ip = ?";
+    push(@args, $ip);
     dbg("auto-whitelist: sql-based remove_entry: removing single entry matching ".$entry->{addr});
   }
 
