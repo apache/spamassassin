@@ -17,11 +17,12 @@
 # Check that networking is up.
 [ ${NETWORKING} = "no" ] && exit 0
 
+# Set default spamd configuration.
+SPAMDOPTIONS="-d -c -m5 -H"
+
 # Source spamd configuration.
 if [ -f /etc/sysconfig/spamassassin ] ; then
-        . /etc/sysconfig/spamassassin
-else
-        SPAMDOPTIONS="-d -c -m5 -H"
+	. /etc/sysconfig/spamassassin
 fi
 
 [ -f /usr/bin/spamd -o -f /usr/local/bin/spamd ] || exit 0
