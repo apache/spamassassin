@@ -1311,7 +1311,7 @@ sub do_body_tests {
            foreach ( @_ ) {
              '.$self->hash_line_for_rule($rulename).'
              if ('.$pat.') { 
-                $self->got_body_pattern_hit (q{'.$rulename.'}); 
+                $self->got_pattern_hit (q{'.$rulename.'}, "BODY: "); 
                 '. $self->ran_rule_debug_code ($rulename,"body-text regex", 2) . '
 		# Ok, we hit, stop now.
 		last;
@@ -1544,7 +1544,7 @@ sub do_body_uri_tests {
        foreach ( @_ ) {
          '.$self->hash_line_for_rule($rulename).'
          if ('.$pat.') { 
-            $self->got_uri_pattern_hit (q{'.$rulename.'});
+            $self->got_pattern_hit (q{'.$rulename.'}, "URI: ");
             '. $self->ran_rule_debug_code ($rulename,"uri test", 4) . '
          }
        }
@@ -1620,7 +1620,7 @@ sub do_rawbody_tests {
        foreach ( @_ ) {
          '.$self->hash_line_for_rule($rulename).'
          if ('.$pat.') { 
-            $self->got_body_pattern_hit (q{'.$rulename.'});
+            $self->got_pattern_hit (q{'.$rulename.'}, "RAW: ");
             '. $self->ran_rule_debug_code ($rulename,"body_pattern_hit", 8) . '
          }
        }
@@ -1683,7 +1683,7 @@ sub do_full_tests {
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
         '.$self->hash_line_for_rule($rulename).'
         if ($$fullmsgref =~ '.$pat.') {
-          $self->got_body_pattern_hit (q{'.$rulename.'});
+          $self->got_pattern_hit (q{'.$rulename.'}, "FULL: ");
           '. $self->ran_rule_debug_code ($rulename,"full-text regex", 16) . '
         }
       }
@@ -1998,23 +1998,13 @@ sub run_rbl_eval_tests {
 
 ###########################################################################
 
-sub got_body_pattern_hit {
-  my ($self, $rulename) = @_;
+sub got_pattern_hit {
+  my ($self, $rulename, $prefix) = @_;
 
   # only allow each test to hit once per mail
   return if (defined $self->{tests_already_hit}->{$rulename});
 
-  $self->got_hit ($rulename, 'BODY: ');
-}
-
-sub got_uri_pattern_hit {
-  my ($self, $rulename) = @_;
-
-  # only allow each test to hit once per mail
-  # TODO: Move this into the rule matcher
-  return if (defined $self->{tests_already_hit}->{$rulename});
-
-  $self->got_hit ($rulename, 'URI: ');
+  $self->got_hit ($rulename, $prefix);
 }
 
 ###########################################################################
