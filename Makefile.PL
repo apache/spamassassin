@@ -136,7 +136,7 @@ $mm_version          = $ExtUtils::MakeMaker::VERSION;
 $mm_knows_destdir    = $ExtUtils::MakeMaker::Recognized_Att_Keys{DESTDIR};
 $mm_has_good_destdir = $mm_version >= 6.11;
 # Add DESTDIR hack only if it's requested (and necessary)
-$mm_needs_destdir    = $opt{'destdir'} && !$mm_has_destdir;
+$mm_needs_destdir    = $opt{'destdir'} && !$mm_has_good_destdir;
 $mm_has_destdir      = $mm_knows_destdir || $mm_needs_destdir;
 push(@ATT_KEYS, 'DESTDIR') if $mm_needs_destdir;
 
