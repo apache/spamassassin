@@ -245,3 +245,12 @@ header T_DNS_FROM_AHBL_RHSBL	eval:check_rbl_envfrom('ahbl-rhs2', 'rhsbl.ahbl.org
 describe T_DNS_FROM_AHBL_RHSBL	Envelope sender listed in dnsbl.ahbl.org
 tflags T_DNS_FROM_AHBL_RHSBL	net
 
+# FTC tag for sexually explicit content
+header T_SUBJECT_SEXUAL_1	Subject =~ /sexual(?:ly)?.{0,2}explicit/i
+header T_SUBJECT_SEXUAL_2	Subject =~ /[s5][e3\xE8-\xEB]x[u\xB5\xF9-\xFC][a4\xE0-\xE6@][l!|1](?:[l!|1]y)?.{0,2}[e3\xE8-\xEB]xp[l!|1][i1!|l\xEC-\xEF]c[i1!|l\xEC-\xEF]t/i
+header T_SUBJECT_SEXUAL_3	Subject =~ /[s5].?[e3\xE8-\xEB].?x.?[u\xB5\xF9-\xFC].?[a4\xE0-\xE6@].?[l!|1].?(?:[l!|1].?y.?)?.{0,2}[e3\xE8-\xEB].?x.?p.?[l!|1].?[i1!|l\xEC-\xEF].?c.?[i1!|l\xEC-\xEF].?t/i
+
+# try final IP address only - suggestion from Spamhaus
+header T_RCVD_IN_XBL		eval:check_rbl('sblxbl-firsttrusted', 'sbl-xbl.spamhaus.org.', '127.0.0.[456]')
+describe T_RCVD_IN_XBL		Received from a relay in Spamhaus XBL
+tflags T_RCVD_IN_XBL		net
