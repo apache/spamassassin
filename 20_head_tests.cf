@@ -349,6 +349,12 @@ describe FORGED_YAHOO_RCVD	'From' yahoo.com does not match 'Received' headers
 header FORGED_JUNO_RCVD		eval:check_for_forged_juno_received_headers()
 describe FORGED_JUNO_RCVD	'From' juno.com does not match 'Received' headers
 
+header GENUINE_EBAY_RCVD        eval:check_for_from_domain_in_received_headers('ebay.com', 'true')
+describe GENUINE_EBAY_RCVD	Message from eBay
+
+header FORGED_EBAY_RCVD         eval:check_for_from_domain_in_received_headers('ebay.com', 'false')
+describe FORGED_EBAY_RCVD	'From' ebay.com does not match 'Received' headers
+
 header FORGED_GW05_RCVD		eval:check_for_forged_gw05_received_headers()
 describe FORGED_GW05_RCVD	Forged 'by gw05' 'Received:' header found
 
