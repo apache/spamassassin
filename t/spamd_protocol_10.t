@@ -22,10 +22,13 @@ q{ GTUBE }, 'symbolshit',
 start_spamd("-L");
 
 my $data = "";
-while (<DATA>) {
+open (GTUBE, "data/spam/gtube.eml") || die $!;
+foreach (<GTUBE>) {
   s/\r?\n?$/\n/;
+  print "GTUBE: $_";
   $data .= $_;
 }
+close (GTUBE);
 
 my $out;
 
@@ -76,7 +79,7 @@ sub run_symbols {
   $data = "";
   while (<$socket>) {
     s/\r?\n?$/\n/;
-    print;
+    print "READ:  $_";
     $data .= $_;
   }
 
@@ -87,18 +90,8 @@ sub run_symbols {
 
 sub sockwrite {
   my $data = shift;
-  # warn "writing: [$data]\n";
   print $socket $data;
+  $data =~ s/^/WRITE: /mg;
+  print $data;
 }
-
-__DATA__
-Received: from root by <snipped> 
-To: pookey@pengus.net
-Subject: test
-Message-Id: <E1914yj-0007JP-00@twiggy.linux-srv.anlx.net>
-From: root <root@pengus.net>
-Date: Thu, 03 Apr 2003 14:42:05 +0100
-
-testing.  Let's get GTUBE in here:
-XJS*C4JDBQADN1.NSBN3*2IDNEN*GTUBE-STANDARD-ANTI-UBE-TEST-EMAIL*C.34X
 
