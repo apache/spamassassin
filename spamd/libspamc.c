@@ -451,7 +451,7 @@ static int _message_filter(const struct sockaddr *addr,
     }
 
     /* Now, read from spamd */
-    for(len=1; len<8192; len++){
+    for(len=0; len<8192; len++) {
 	if(flags&SPAMC_USE_SSL) {
 #ifdef SPAMC_SSL
 	  i=SSL_read(ssl, buf+len, 1);
