@@ -210,22 +210,20 @@ header RCVD_IN_BSP_OTHER	eval:check_rbl_txt('bsp-untrusted', 'sa-other.bondedsen
 describe RCVD_IN_BSP_OTHER	Sender is in Bonded Sender Program (other relay)
 tflags RCVD_IN_BSP_OTHER	net nice
 
-# SenderBase provides information about senders
-# http://www.senderbase.org/dnsresponses.html
+# SenderBase information <http://www.senderbase.org/dnsresponses.html>
+# these are experimental example rules
+
 # sa.senderbase.org for SpamAssassin queries
 # query.senderbase.org for other queries
 header __SENDERBASE eval:check_rbl_txt('sb', 'sa.senderbase.org.')
 tflags __SENDERBASE net
 
-# S23 = domain daily magnitude
-# S25 = date of first message from this domain
+# S23 = domain daily magnitude, S25 = date of first message from this domain
 header SB_NEW_BULK		eval:check_rbl_sub('sb', 'sb:S23 > 6.2 && (time - S25 < 120*86400)')
 describe SB_NEW_BULK		Sender domain is new and very high volume
 tflags SB_NEW_BULK		net
 
-# S5 = category
-# S40 = IP daily magnitude
-# S41 = IP monthly magnitude
+# S5 = category, S40 = IP daily magnitude, S41 = IP monthly magnitude
 # note: accounting for rounding, "> 0.3" means at least a 59% volume spike
 header SB_NSP_VOLUME_SPIKE	eval:check_rbl_sub('sb', 'sb:S5 =~ /NSP/ && S41 > 3.8 && S40 - S41 > 0.3')
 describe SB_NSP_VOLUME_SPIKE	Sender IP hosted at NSP has a volume spike
