@@ -81,14 +81,7 @@ eval {
              'lint'                              => \$opt{'lint'},
 	     'debug-level|debug|D:s'             => \$opt{'debug-level'},
 	     'version|V'                         => \$opt{'version'},
-	     'help|h|?'                          => \$opt{'help'},
-
-
-             # NOTE: ignored for backwards compatibility. will be stripped
-             # in a future release.
-	     'pipe|P'    => sub { warn "The -P option has been removed.\n" },
-	     'F=i'       => sub { warn "The -F option has been removed.\n" },
-	     'add-from!' => sub { warn "The --add-from option has been removed.\n" },
+	     'help|h|?'                          => \$opt{'help'}
   ) or usage(0, "Unknown option!");
   if (defined $opt{'help'}) { usage(0, "For more information read the spamassassin man page"); }
   if (defined $opt{'version'}) {
