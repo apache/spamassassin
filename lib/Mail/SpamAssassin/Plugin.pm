@@ -354,6 +354,21 @@ using the public APIs on this object.
 
 =back
 
+=item $plugin->autolearn_discriminator ( { options ... } )
+
+Control whether a just-scanned message should be learned as either
+spam or ham.   This method should return one of C<1> to learn
+the message as spam, C<0> to learn as ham, or C<undef> to not
+learn from the message at all.
+
+=over 4
+
+=item permsgstatus
+
+The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
+
+=back
+
 =item $plugin->autolearn ( { options ... } )
 
 Signals that a message is about to be auto-learned as either ham or spam.
