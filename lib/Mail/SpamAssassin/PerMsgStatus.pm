@@ -36,6 +36,8 @@ use strict;
 eval "use bytes";
 
 use Text::Wrap qw();
+use POSIX qw(strftime);
+use Sys::Hostname;
 
 use Mail::SpamAssassin::EvalTests;
 use Mail::SpamAssassin::AutoWhitelist;
@@ -68,6 +70,7 @@ sub new {
     'subtest_names_hit' => [ ],
     'tests_already_hit' => { },
     'hdr_cache'         => { },
+    'headers_to_add'	=> { },
     'rule_errors'       => 0,
     'disable_auto_learning' => 0,
   };
@@ -421,11 +424,17 @@ sub rewrite_as_spam {
   my $original = $self->{msg}->get_pristine();
 
   # This is the new message.
-  my $newmsg = "";
+  # jm: add a SpamAssassin Received header to note markup time etc.
+  # emulates the fetchmail style.
+  my $newmsg = "Received: from localhost [127.0.0.1] by ".hostname."\n".
+	"\twith SpamAssassin (". Mail::SpamAssassin::Version()." ".
+	    $Mail::SpamAssassin::SUB_VERSION . ");\n".
+	"\t". strftime ("%a, %d %b %Y %H:%M:%S %z", localtime)."\n";
 
   # remove first line if it is "From "
   if ($original =~ s/^(From (.*?)\n)//s) {
-    $newmsg .= $1;
+    # jm: surely do not add it again? we wind up with a bad header
+    #$newmsg .= $1;
   }
 
   # the SpamAssassin report
@@ -465,18 +474,18 @@ sub rewrite_as_spam {
   # MIME boundary
   my $boundary = "----------=_" . sprintf("%08X.%08X",time,int(rand(2 ** 32)));
 
+  # ensure it's unique, so we can't be attacked this way
+  while ($original =~ /^\Q${boundary}\E$/m) {
+    $boundary .= "/".sprintf("%08X",int(rand(2 ** 32)));
+  }
+
   # determine whether Content-Disposition should be "attachment" or "inline"
   my $disposition;
   my $ct = $self->{msg}->get_header("Content-Type");
   if (defined $ct && $ct ne '' && $ct !~ m{text/plain}i) {
     $disposition = "attachment";
+    $report .= $self->{conf}->{unsafe_report_template};
     # if we wanted to defang the attachment, this would be the place
-    $report .= <<"EOM";
-The original message did not contain plain text and may be unsafe to
-open with some email clients.  If you wish to view it, it may be safer
-to save it to a file and open it with an editor.
-
-EOM
   }
   else {
     $disposition = "inline";
@@ -494,9 +503,10 @@ Content-Disposition: inline
 Content-Transfer-Encoding: 7bit
 
 $report
+
 --$boundary
 Content-Type: message/rfc822
-Content-Description: spamassassin original message
+Content-Description: original message before SpamAssassin
 Content-Disposition: $disposition
 Content-Transfer-Encoding: 8bit
 
@@ -531,6 +541,13 @@ sub rewrite_headers {
       $report =~ s/^\s*/  /gm;	# Ensure each line begins with whitespace.
       $self->{msg}->put_header ("X-Spam-Report", $report);
     }
+  }
+
+  # now add any test-specific markup headers (X-Pyzor etc.)
+  foreach my $hdr (keys %{$self->{headers_to_add}}) {
+    my $text = $self->{headers_to_add}->{$hdr};
+    chomp $text;		# just in case
+    $self->{msg}->put_header ($hdr, $text);
   }
 
   $self->{msg}->get_mail_object;

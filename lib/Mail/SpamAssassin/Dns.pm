@@ -584,7 +584,7 @@ sub dcc_lookup {
     if ($response =~ /^(X-DCC.*): (.*)$/) {
       $left  = $1;
       $right = $2;
-      $self->{msg}->put_header($left, $right);
+      $self->{headers_to_add}->{$left} = $right;
     }
   }
  
@@ -707,9 +707,9 @@ sub pyzor_lookup {
   # moved this around a bit; no point in testing RE twice (jm)
   if ($self->{conf}->{pyzor_add_header}) {
     if ($pyzor_whitelisted) {
-      $self->{msg}->put_header("X-Pyzor", "Whitelisted.");
+      $self->{headers_to_add}->{'X-Pyzor'} = "Whitelisted.";
     } else {
-      $self->{msg}->put_header("X-Pyzor", "Reported $pyzor_count times.");
+      $self->{headers_to_add}->{'X-Pyzor'} = "Reported $pyzor_count times.";
     }
   }
 

@@ -70,7 +70,17 @@ sub get_body {
   die "unimplemented base method";
 }
 
+sub get_pristine {
+  my ($self) = @_;
+  die "unimplemented base method";
+}
+
 sub replace_body {
+  my ($self, $aryref) = @_;
+  die "unimplemented base method";
+}
+
+sub replace_original_message {
   my ($self, $aryref) = @_;
   die "unimplemented base method";
 }

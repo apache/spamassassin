@@ -106,6 +106,7 @@ sub new {
 
   $self->{required_hits} = 5.0;
   $self->{report_template} = '';
+  $self->{unsafe_report_template} = '';
   $self->{terse_report_template} = '';
   $self->{spamtrap_template} = '';
 
@@ -139,7 +140,7 @@ sub new {
   $self->{spam_level_char} = '*';
   $self->{subject_tag} = '*****SPAM*****';
   $self->{report_safe} = 1;
-  $self->{use_terse_report} = 1;
+  $self->{use_terse_report} = 0;
   $self->{skip_rbl_checks} = 0;
   $self->{dns_available} = "test";
   $self->{check_mx_attempts} = 2;
@@ -569,11 +570,11 @@ some headers and no changes will be made to the body.
       $self->{report_safe} = $1+0; next;
     }
 
-=item use_terse_report { 0 | 1 }   (default: 1)
+=item use_terse_report { 0 | 1 }   (default: 0)
 
-By default, SpamAssassin uses a short report format.  Disabling this uses
-a longer format which includes all the information in the normal one,
-with the addition of some explanations and formatting.
+By default, SpamAssassin uses a long report format, explaining what
+happened to the mail message, for newbie users.   If you would prefer
+shorter reports, set this to C<1>.
 
 =cut
 
@@ -963,6 +964,31 @@ Clear the report template.
 
     if (/^clear[-_]report[-_]template$/) {
       $self->{report_template} = ''; next;
+    }
+
+=item unsafe-report ...some text for a report...
+
+Set the report template which is attached to spam mail messages which contain a
+non-text/plain part.  See the C<10_misc.cf> configuration file in
+C</usr/share/spamassassin> for an example.
+
+Each C<unsafe-report> line appends to the existing template, so use
+C<clear-report-template> to restart.
+
+=cut
+
+    if (/^unsafe[-_]report\b\s*(.*?)$/) {
+      $self->{unsafe_report_template} .= $1."\n"; next;
+    }
+
+=item clear_unsafe_report_template
+
+Clear the unsafe_report template.
+
+=cut
+
+    if (/^clear[-_]unsafe[-_]report[-_]template$/) {
+      $self->{unsafe_report_template} = ''; next;
     }
 
 =item terse_report ...some text for a report...

@@ -59,6 +59,18 @@ terse-report ---- End of SpamAssassin results
 #            ......................................................................
 
 ###########################################################################
+
+# Unsafe-for-viewing message report template.
+#
+#             ......................................................................
+clear-unsafe-report-template
+unsafe-report The original message did not contain plain text, and may be unsafe to
+unsafe-report open with some email clients; in particular, it may contain a virus,
+unsafe-report or confirm that your address can receive spam.  If you wish to view
+unsafe-report it, it may be safer to save it to a file and open it with an editor.
+#             ......................................................................
+
+###########################################################################
 # Database configuration options.
 #
 # user_scores_dsn MUST be in the form:
@@ -112,7 +124,7 @@ ok_languages            all
 # rewrite_subject       0
 # report_safe           1
 # subject_tag           *****SPAM*****
-# use_terse_report      1
+# use_terse_report      0
 # skip_rbl_checks       0
 # check_mx_attempts     2
 # check_mx_delay        5
