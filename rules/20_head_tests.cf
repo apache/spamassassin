@@ -146,8 +146,9 @@ describe RCVD_IN_RELAYS_ORDB_ORG Received via a relay in relays.ordb.org
 header RCVD_IN_OSIRUSOFT_COM	eval:check_rbl('relay', 'relays.osirusoft.com.')
 describe RCVD_IN_OSIRUSOFT_COM	Received via a relay in relays.osirusoft.com
 
-header RCVD_IN_ORBZ		eval:check_rbl('relay', 'inputs.orbz.org.')
-describe RCVD_IN_ORBZ		Received via a relay in inputs.orbz.org
+# ORBZ is indifinitely suspended
+#header RCVD_IN_ORBZ		eval:check_rbl('relay', 'inputs.orbz.org.')
+#describe RCVD_IN_ORBZ		Received via a relay in inputs.orbz.org
 
 header RCVD_IN_VISI		eval:check_rbl('relay', 'relays.visi.com.')
 describe RCVD_IN_VISI		Received via a relay in relays.visi.com
@@ -160,9 +161,8 @@ describe RCVD_IN_RFCI		Received via a relay in ipwhois.rfc-ignorant.org
 #header RCVD_IN_5_10	 eval:check_rbl('relay', 'blackholes.five-ten-sg.com.')
 #describe RCVD_IN_5_10	 Received via a relay in blackholes.five-ten-sg.com
 
-# ORBS is offline indefinitely
-#header RCVD_IN_ORBS		eval:check_rbl('relay', 'orbs.dorkslayers.com.')
-#describe RCVD_IN_ORBS		Received via a relay in orbs.dorkslayers.com
+header RCVD_IN_ORBS		eval:check_rbl('relay', 'orbs.dorkslayers.com.')
+describe RCVD_IN_ORBS		Received via a relay in orbs.dorkslayers.com
 
 # X prefix is so that these are run after RCVD_IN_*. tests are run in
 # alphanumerically-sorted order.  (These used to be Osirusoft.com-specific, but
