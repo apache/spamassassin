@@ -368,7 +368,7 @@ sub _check_for_forged_received {
                hostname_to_domain ($_->{lc_helo});
              } @{$self->{relays_untrusted}};
  
-  for (my $i = 1; $i < $self->{num_relays_untrusted}; $i++) {
+  for (my $i = 0; $i < $self->{num_relays_untrusted}; $i++) {
     next if (!defined $by[$i] || $by[$i] !~ /^\w+(?:[\w.-]+\.)+\w+$/);
 
     if (defined ($from[$i]) && defined($fromip[$i])) {
