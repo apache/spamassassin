@@ -78,7 +78,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 $VERSION = "2.21";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.92 2002/06/11 03:50:03 hughescr Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.93 2002/06/14 22:28:35 hughescr Exp $';
 
 sub Version { $VERSION; }
 
@@ -232,6 +232,8 @@ sub check {
   my $msg = Mail::SpamAssassin::PerMsgStatus->new($self, $mail);
   chomp($TIMELOG->{mesgid} = ($mail_obj->get("Message-Id") || 'nomsgid'));
   $TIMELOG->{mesgid} =~ s#<(.*)>#$1#;
+  # Message-Id is used for a filename on disk, so we can't have '/' in it.
+  $TIMELOG->{mesgid} =~ s#/#-#g;
   timelog("Created message object, checking message", "msgcheck", 1);
   $msg->check();
   timelog("Done checking message", "msgcheck", 2);
@@ -525,8 +527,11 @@ sub compile_now {
 
   # note: this may incur network access. Good.  We want to make sure
   # as much as possible is preloaded!
-  my @testmsg = ("From: ignore\@compiling.spamassassin.taint.org\n",
-  			"\n", "I need to make this message body somewhat long so TextCat preloads\n"x20);
+  # Timelog uses the Message-ID for the filename on disk, so let's set that
+  # to a value easy to recognize. It'll show when spamd was restarted -- Marc
+  my @testmsg = ("From: ignore\@compiling.spamassassin.taint.org\n", 
+    "Message-Id:  <".time."\@spamassassin_spamd_init>\n", "\n",
+    "I need to make this message body somewhat long so TextCat preloads\n"x20);
 
   dbg ("ignore: test message to precompile patterns and load modules");
   $self->init($use_user_prefs);
@@ -875,6 +880,13 @@ sub timelog {
 
   if (defined($deltaslot) and ($deltaslot eq "SAfull") and defined($wheredelta) and ($wheredelta eq 1)) {
     $tl->{'start'}=$now;
+    # Because spamd is long running, we need to close and re-open the log file
+    if ($tl->{flushedlogs}) {
+	$tl->{flushedlogs}=0;
+	$tl->{mesgid}="";
+	@{$tl->{keeplogs}} = ();
+	close(LOG);
+    }
   } 
 
   if (defined $wheredelta) {
@@ -902,7 +914,7 @@ sub timelog {
 
     $tl->{flushedlogs}=1;
     dbg("Flushing logs to $file", "timelog", -2);
-    open (LOG, ">>$file") or warn("Can't open file: $!");
+    open (LOG, ">>$file") or warn("Can't open $file: $!");
 
     while (defined ($_ = shift(@{$tl->{keeplogs}})))
     {
@@ -918,10 +930,11 @@ sub timelog {
 # Only the first argument is needed, and it can be a reference to a list if
 # you want
 sub dbg {
-  my ($msg, $codepath, $level) = @_;
   my $dbg=$Mail::SpamAssassin::DEBUG;
 
-  return if (not $dbg->{enabled});
+  return unless $dbg->{enabled};
+
+  my ($msg, $codepath, $level) = @_;
 
   $msg=join('',@{$msg}) if (ref $msg);
 

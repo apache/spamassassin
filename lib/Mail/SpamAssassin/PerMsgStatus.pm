@@ -136,7 +136,7 @@ sub check {
     $self->do_head_eval_tests();
     timelog("Finished head eval tests", "headevaltest", 2);
 
-    timelog('Starting RBL tests (will wait up to $self->{conf}->{dns_timeout} secs before giving up)', "rblblock", 1);
+    timelog("Starting RBL tests (will wait up to $self->{conf}->{rbl_timeout} secs before giving up)", "rblblock", 1);
     # This time we want to harvest the DNS results -- Marc
     $self->do_rbl_eval_tests(1);
     # And now we can compute rules that depend on those results
