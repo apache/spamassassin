@@ -45,9 +45,6 @@ describe CLICK_BELOW		Asks you to click below
 body CLICK_TO_REMOVE_1		/click here to be (?:permanently )?(?:removed|deleted)/i
 describe CLICK_TO_REMOVE_1	Click to be removed
 
-body BUGGY_CGI			/Below is the result of your feedback form/
-describe BUGGY_CGI		Broken CGI script message
-
 body SENT_IN_COMPLIANCE		/(?:e.?mail|message) .{0,10}sen[dt] (?:to you )?in (?:\w{1,10} )?compliance (?:of|with)/i
 describe SENT_IN_COMPLIANCE	Claims compliance with spam regulations
 body PARA_A_2_C_OF_1618		/Paragraph *.a.{0,10}2.{0,10}C\. of S\. 1618/i
