@@ -473,48 +473,44 @@ checked) quarantine directory.'
       $self->{required_hits} = $1+0.0; next;
     }
 
-=item score SYMBOLIC_TEST_NAME n.nn
+=item score SYMBOLIC_TEST_NAME n.nn [ n.nn n.nn n.nn ]
 
-Assign a score to a given test.  Scores can be positive or negative real
-numbers or integers.  C<SYMBOLIC_TEST_NAME> is the symbolic name used by
-SpamAssassin as a handle for that test; for example, 'FROM_ENDS_IN_NUMS'.
+Assign scores (the number of points for a hit) to a given test. Scores can
+be positive or negative real numbers or integers. C<SYMBOLIC_TEST_NAME> is
+the symbolic name used by SpamAssassin for that test; for example,
+'FROM_ENDS_IN_NUMS'.
+
+If only one valid score is listed, then that score is always used for a
+test.
+
+If four valid scores are listed, then the score that is used depends on how
+SpamAssassin is being used. The first score is used when both Bayes and
+network tests are disabled. The second score is used when Bayes is disabled,
+but network tests are enabled. The third score is used when Bayes is enabled
+and network tests are disabled. The fourth score is used when Bayes is
+enabled and network tests are enabled.
 
 Note that test names which begin with '__' are reserved for meta-match
 sub-rules, and are not scored or listed in the 'tests hit' reports.
 
-The default score is 1.0, or 0.01 for tests whose names begin with 'T_'
-(this is used to indicate a rule under test).
+If no score is given for a test, the default score is 1.0, or 0.01 for
+tests whose names begin with 'T_' (this is used to indicate a rule under
+test).
 
 =cut
 
-    if (/^score\s+(\S+)\s+(\-*[\d\.]+)$/) {
-      $self->{scoreset}->[0]->{$1} = $2+0.0;
-      $self->{scoreset}->[1]->{$1} = $2+0.0;
-      $self->{scoreset}->[2]->{$1} = $2+0.0;
-      $self->{scoreset}->[3]->{$1} = $2+0.0;
-      next;
+  if (my ($rule, $scores) = /^score\s+(\S+)\s+(.*)$/) {
+    my @scores = ($scores =~ /(\-*[\d\.]+)(?:\s+|$)/g);
+    if (scalar @scores == 4) {
+      for my $index (0..3) {
+	$self->{scoreset}->[$index]->{$rule} = $scores[$index] + 0.0;
+      }
     }
-
-=item scores SYMBOLIC_TEST_NAME n.nn n.nn n.nn n.nn
-
-Assign scores to a given test. Scores can be positive or negative real
-numbers or integers. C<SYMBOLIC_TEST_NAME> is the symbolic name used
-by SpamAssassin as a handle for that test; for example,
-'FROM_ENDS_IN_NUMS'.
-
-The first score listed is used when both Bayes and network tests are
-disabled. The second score is used when Bayes is disabled, but network
-tests are enabled. The third score is used when Bayes is enabled and
-network tests are disabled. The fourth score is used when Bayes is
-enabled and network tests are enabled.
-
-=cut
-
-  if (/^scores\s+(\S+)\s+(\-*[\d\.]+)\s+(\-*[\d\.]+)\s+(\-*[\d\.]+)\s+(\-*[\d\.]+)/) {
-    $self->{scoreset}->[0]->{$1} = $2+0.0;
-    $self->{scoreset}->[1]->{$1} = $3+0.0;
-    $self->{scoreset}->[2]->{$1} = $4+0.0;
-    $self->{scoreset}->[3]->{$1} = $5+0.0;
+    elsif (scalar @scores > 0) {
+      for my $index (0..3) {
+	$self->{scoreset}->[$index]->{$rule} = $scores[0] + 0.0;
+      }
+    }
     next;
   }
 
