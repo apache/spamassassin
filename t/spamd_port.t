@@ -8,7 +8,7 @@ use Test; BEGIN { plan tests => 4 };
 
 %patterns = (
 
-q{ Subject: *****SPAM***** There yours for FREE!}, 'subj',
+q{ Subject: There yours for FREE!}, 'subj',
 q{ X-Spam-Status: Yes, hits=}, 'status',
 q{ X-Spam-Flag: YES}, 'flag',
 
