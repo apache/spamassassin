@@ -13,6 +13,7 @@ for ext in tar.bz2 tar.gz zip ; do
   for fxt in '' .asc .md5 .sha1 ; do
     rm -f $RELDIR/$DISTVNAME.$ext$fxt
     cp -p $DEVDIR/$DISTVNAME.$ext$fxt $RELDIR || exit $?
+    rm -f $DEVDIR/$DISTVNAME.$ext$fxt
   done
 done
 
