@@ -392,6 +392,9 @@ sub readlogs {
     if ($isspam) {
       if ($opt_o) {
         $hmapstr = '
+          if (!exists $hmap_spam{$r}) {
+            $hmap_spam{$r} = "";
+          }
           vec ($hmap_spam{$r}, $num_spam, 1) = 1;
         ';
       }
@@ -406,6 +409,9 @@ sub readlogs {
     } else {
       if ($opt_o) {
         $hmapstr = '
+          if (!exists $hmap_ham{$r}) {
+            $hmap_ham{$r} = "";
+          }
           vec ($hmap_ham{$r}, $num_ham, 1) = 1;
         ';
       }
@@ -477,7 +483,7 @@ sub _print_overlap_ratios {
   foreach my $full (sort { $b <=> $a } keys %$hash) {
     my $ratio = $full * 100;
 
-    last if ($ratio < 50);     # 50% cutoff
+    last if ($ratio < 30);     # 30% cutoff
     my $rules = _prettify_overlap_rules($r1, $hash->{$full});
     next if ($rules eq '');
     printf "  overlap %s: %3d%% %s\n", $type, $ratio, $rules;
