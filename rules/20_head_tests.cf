@@ -53,6 +53,9 @@ describe FROM_HAS_MIXED_NUMS	From: contains numbers mixed in with letters
 header FROM_HAS_MIXED_NUMS3	From:addr =~ /^[a-z]+\d+[a-z]+\d+[a-z]+\w*\@/i
 describe FROM_HAS_MIXED_NUMS3	From: contains numbers mixed in with letters
 
+header FROM_BLANK_NAME		From =~ /(?:\s|^)"" <\S+>/i
+describe FROM_BLANK_NAME	From: contains empty name
+
 # Faked addresses tend to come from big public sites.  Stats show that
 # 5 digits is enough to get a 1.0 s/o ratio; 4 is too low (probably due
 # to folks called "jmason2002@yahoo.com" for example).
