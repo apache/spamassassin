@@ -1049,12 +1049,18 @@ sub do_awl_tests {
     $self->{auto_whitelist} = Mail::SpamAssassin::AutoWhitelist->new($self->{main});
 
     my $meanscore = $self->{auto_whitelist}->check_address($_);
+    my $delta = 0;
 
     dbg("AWL active, pre-score: ".$self->{hits}.", mean: ".($meanscore||'undef'));
 
     if(defined($meanscore))
     {
-	$self->{hits} += ($meanscore - $self->{hits})*$self->{main}->{conf}->{auto_whitelist_factor};
+	$delta = ($meanscore - $self->{hits})*$self->{main}->{conf}->{auto_whitelist_factor};
+    }
+
+    if($delta != 0)
+    {
+	$self->_handle_hit("AWL",$delta,"AWL: ","Auto-whitelist adjustment");
     }
 
     dbg("Post AWL score: ".$self->{hits});
@@ -1128,6 +1134,24 @@ sub clear_test_state {
   $self->{test_log_msgs} = '';
 }
 
+sub _handle_hit {
+    my ($self, $rule, $score, $area, $desc) = @_;
+
+    $score = sprintf("%2.1f",$score);
+    $self->{hits} += $score;
+    $self->{test_names_hit} .= $rule.',';
+
+    if ($self->{conf}->{use_terse_report}) {
+	$self->{test_logs} .= sprintf ("* % 2.1f -- %s%s\n%s",
+				       $score, $area, $desc, $self->{test_log_msgs});
+    } else {
+	$self->{test_logs} .= sprintf ("%-18s %s%s\n%s",
+				       "Hit! (".$score." point".($score == 1 ? "":"s").")",
+				       $area, $desc, $self->{test_log_msgs});
+    }
+}
+
+
 sub handle_hit {
   my ($self, $rule, $area, $deffallbackdesc) = @_;
 
@@ -1136,18 +1160,8 @@ sub handle_hit {
   $desc ||= $rule;
 
   my $score = $self->{conf}->{scores}->{$rule};
-  $self->{hits} += $score;
 
-  $self->{test_names_hit} .= $rule.",";
-
-  if ($self->{conf}->{use_terse_report}) {
-    $self->{test_logs} .= sprintf ("* % 2.1f -- %s%s\n%s",
-                          $score, $area, $desc, $self->{test_log_msgs});
-  } else {
-    $self->{test_logs} .= sprintf ("%-18s %s%s\n%s",
-                          "Hit! (".$score." point".($score == 1 ? "":"s").")",
-                          $area, $desc, $self->{test_log_msgs});
-  }
+  $self->_handle_hit($rule, $score, $area, $desc);
 }
 
 sub got_hit {
