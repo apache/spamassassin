@@ -28,11 +28,15 @@ sub sa_t_init {
     $perl_path = $Config{perlpath};
     $perl_path =~ s|/[^/]*$|/$^X|;
   }
+
+  $perl_path .= " -T" if !defined($ENV{'TEST_PERL_TAINT'}) or $ENV{'TEST_PERL_TAINT'} ne 'no';
+  $perl_path .= " -w" if !defined($ENV{'TEST_PERL_WARN'})  or $ENV{'TEST_PERL_WARN'}  ne 'no';
+
   $scr = $ENV{'SCRIPT'};
-  $scr ||= "$perl_path -T -w ../spamassassin";
+  $scr ||= "$perl_path ../spamassassin";
 
   $spamd = $ENV{'SPAMD_SCRIPT'};
-  $spamd ||= "$perl_path -T -w ../spamd/spamd -x";
+  $spamd ||= "$perl_path ../spamd/spamd -x";
 
   $spamc = $ENV{'SPAMC_SCRIPT'};
   $spamc ||= "../spamd/spamc";
