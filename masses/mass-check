@@ -8,8 +8,7 @@ use Mail::SpamAssassin::NoMailAudit;
 #use Mail::Audit;
 #use Mail::Internet;
 
-$cffile = '../rules';
-if (-d "rules") { $cffile = "rules"; }
+$cffile = '../rules/50_scores.cf';
 
 if (defined $ARGV[0] && $ARGV[0] eq '-c') {
   shift; $cffile = $ARGV[0]; shift;

@@ -75,6 +75,8 @@ body SUPERLONG_LINE		/^[^<]{199,}$/m
 describe SUPERLONG_LINE		Contains a line >=199 characters long
 body ASCII_FORM_ENTRY		/[^<][A-Za-z][A-Za-z]+.*?\s+_{30,}/
 describe ASCII_FORM_ENTRY	Contains an ASCII-formatted form
+full PRINT_OUT_AND_FAX		/print\s+out\s+and\s+fax/i
+describe PRINT_OUT_AND_FAX	Contains words 'print out and fax'
 
 body AMAZING			/AMAZING/
 describe AMAZING		Contains word 'AMAZING'
