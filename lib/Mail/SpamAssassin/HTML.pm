@@ -64,7 +64,7 @@ my %attributes = map {; $_ => 1 }
 
 # elements that change text style
 my %elements_text_style = map {; $_ => 1 }
-  qw( body font table tr th td big small basefont marquee ),
+  qw( body font table tr th td big small basefont marquee span ),
 ;
 
 # elements that insert whitespace
@@ -92,6 +92,7 @@ $ok_attributes{table}{$_} = 1 for qw( bgcolor );
 $ok_attributes{td}{$_} = 1 for qw( bgcolor );
 $ok_attributes{th}{$_} = 1 for qw( bgcolor );
 $ok_attributes{tr}{$_} = 1 for qw( bgcolor );
+$ok_attributes{span}{$_} = 1 for qw( style );
 
 sub new {
   my ($class) = @_;
@@ -140,8 +141,9 @@ sub html_end {
       $info->{cleaned} = \@tmp;
       # list out the URLs for debugging ...
       if (Mail::SpamAssassin::dbg_check('uri')) {
+        dbg("uri: html uri found, $uri");
         foreach my $nuri (@tmp) {
-          dbg("uri: uri found, $nuri");
+          dbg("uri: cleaned html uri, $nuri");
         }
       }
     }
@@ -250,7 +252,6 @@ sub parse {
   $self->{closed_body} = 0;
   $self->{closed_extra} = 0;
   $self->{text} = [];		# rendered text
-  $self->{text_invisible} = '';	# vec of invisibility state in $self->{text}
 
   $self->{length} += $1 if (length($text) =~ m/^(\d+)$/);	# untaint
 
@@ -449,7 +450,6 @@ sub close_tag {
   }
 }
 
-# body, font, table, tr, th, td, big, small
 sub text_style {
   my ($self, $tag, $attr, $num) = @_;
 
@@ -504,6 +504,39 @@ sub text_style {
 	# relative font size
 	$new{size} = $self->{basefont} + $1;
       }
+      elsif ($tag eq "span" && $name eq "style") {
+        my $style = $new{style} = $attr->{style};
+	my @parts = split(/;/, $style);
+	foreach (@parts) {
+	  if (/\s*(background-)?color:\s*([^;]+)\s*/i) {
+	    my $whcolor = $1 ? 'bgcolor' : 'fgcolor';
+	    my $value = lc $2;
+
+	    if ($value =~ /rgb/) {
+	      $value =~ tr/0-9,//cd;
+	      my @rgb = split(/,/, $value);
+	      splice @rgb, 3;
+	      for(my $i=0; $i<3; $i++) {
+	        if (!defined $rgb[$i]) {
+	          $_ = 0;
+	        }
+	        elsif ($rgb[$i] > 255) {
+	          $rgb[$i] = 255;
+                }
+	      }
+
+              $new{$whcolor} = sprintf("#%02x%02x%02x", @rgb);
+            }
+	    else {
+	      $new{$whcolor} = name_to_rgb($value);
+	    }
+	  }
+	  elsif (/\s*display:\s*none\b/i) {
+	    $new{display} = 'none';
+            $self->put_results(span_invisible => 1);
+          }
+	}
+      }
       else {
 	if ($name eq "bgcolor") {
 	  # overwrite with hex value, $new{bgcolor} is set below
@@ -540,6 +573,7 @@ sub html_font_invisible {
 
   my $fg = $self->{text_style}[-1]->{fgcolor};
   my $bg = $self->{text_style}[-1]->{bgcolor};
+  my $display = $self->{text_style}[-1]->{display};
 
   # invisibility
   if (substr($fg,-6) eq substr($bg,-6)) {
@@ -570,6 +604,11 @@ sub html_font_invisible {
 	return 1;
       }
     }
+  }
+
+  # <span style="display: none">
+  if ($display && lc $display eq 'none') {
+    return 1;
   }
 
   return 0;
@@ -699,6 +738,11 @@ sub display_text {
   my $text = shift;
   my %display = @_;
 
+  # Unless it's specified to be invisible, then it's not invisible. ;)
+  if (!exists $display{invisible}) {
+    $display{invisible} = 0;
+  }
+
   if ($display{whitespace}) {
     # trim trailing whitespace from previous element if it was not whitespace
     if (@{ $self->{text} } &&
@@ -788,6 +832,7 @@ sub html_text {
 
   if ($invisible_for_bayes) {
     $self->display_text($text, invisible => 1);
+    $self->put_results(invisible_text => 1);
   }
   else {
     $self->display_text($text);

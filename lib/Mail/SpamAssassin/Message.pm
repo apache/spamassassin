@@ -794,6 +794,10 @@ sub get_rendered_body_text_array {
   my @parts = $self->find_parts(qr/^(?:text|message)\b/i,1);
   return $self->{text_rendered} unless @parts;
 
+  # the html metadata may have already been set, so let's not bother if it's
+  # already been done.
+  my $html_needs_setting = !exists $self->{metadata}->{html};
+
   # Go through each part
   my $text = $self->get_header ('subject') || '';
   for(my $pt = 0 ; $pt <= $#parts ; $pt++ ) {
@@ -808,8 +812,12 @@ sub get_rendered_body_text_array {
       $text .= $rnd;
 
       # TVD - if there are multiple parts, what should we do?
-      # right now, just use the last one ...
-      $self->{metadata}->{html} = $p->{html_results} if ( $type eq 'text/html' );
+      # right now, just use the last one.  we may need to give some priority
+      # at some point, ie: use text/html rendered if it exists, or
+      # text/plain rendered as html otherwise.
+      if ($html_needs_setting && $type eq 'text/html') {
+        $self->{metadata}->{html} = $p->{html_results};
+      }
     }
     else {
       $text .= $p->decode();
@@ -846,6 +854,10 @@ sub get_visible_rendered_body_text_array {
   my @parts = $self->find_parts(qr/^(?:text|message)\b/i,1);
   return $self->{text_visible_rendered} unless @parts;
 
+  # the html metadata may have already been set, so let's not bother if it's
+  # already been done.
+  my $html_needs_setting = !exists $self->{metadata}->{html};
+
   # Go through each part
   my $text = $self->get_header ('subject') || '';
   for(my $pt = 0 ; $pt <= $#parts ; $pt++ ) {
@@ -858,6 +870,14 @@ sub get_visible_rendered_body_text_array {
     if ( defined $rnd ) {
       # Only text/* types are rendered ...
       $text .= $rnd;
+
+      # TVD - if there are multiple parts, what should we do?
+      # right now, just use the last one.  we may need to give some priority
+      # at some point, ie: use text/html rendered if it exists, or
+      # text/plain rendered as html otherwise.
+      if ($html_needs_setting && $type eq 'text/html') {
+        $self->{metadata}->{html} = $p->{html_results};
+      }
     }
     else {
       $text .= $p->decode();
@@ -888,6 +908,10 @@ sub get_invisible_rendered_body_text_array {
   my @parts = $self->find_parts(qr/^(?:text|message)\b/i,1);
   return $self->{text_invisible_rendered} unless @parts;
 
+  # the html metadata may have already been set, so let's not bother if it's
+  # already been done.
+  my $html_needs_setting = !exists $self->{metadata}->{html};
+
   # Go through each part
   my $text = '';
   for(my $pt = 0 ; $pt <= $#parts ; $pt++ ) {
@@ -900,6 +924,14 @@ sub get_invisible_rendered_body_text_array {
     if ( defined $rnd ) {
       # Only text/* types are rendered ...
       $text .= $rnd;
+
+      # TVD - if there are multiple parts, what should we do?
+      # right now, just use the last one.  we may need to give some priority
+      # at some point, ie: use text/html rendered if it exists, or
+      # text/plain rendered as html otherwise.
+      if ($html_needs_setting && $type eq 'text/html') {
+        $self->{metadata}->{html} = $p->{html_results};
+      }
     }
   }
 
