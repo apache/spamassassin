@@ -1436,7 +1436,8 @@ sub check_for_unique_subject_id {
         || /[!\?]\s*(\d{4,}|\w+(-\w+)+)\s*$/
 
         # 9095IPZK7-095wsvp8715rJgY8-286-28 and similar
-        || /\b(\w{7,}-\w{7,}(-\w+)*)\s*$/
+	# excluding 'Re:', etc and the first word
+        || /(?:\w{2,3}:\s)?\w+\s+(\w{7,}-\w{7,}(-\w+)*)\s*$/
 
         # #30D7 and similar
         || /\s#\s*([a-f0-9]{4,})\s*$/
