@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.500 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.501 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -232,13 +232,13 @@ tflags T_RCVD_IN_OPM_ROUTER net
 header T_RCVD_IN_OPM_HTTP_POST		rbleval:check_rbl_sub('opm', '16')
 tflags T_RCVD_IN_OPM_HTTP_POST net
 
-# fiveten - many blacklists, but only the bulk one performs well
+# fiveten - many blacklists, the bulk one performs well
 # transfers: yes, most of the slave servers allow zone transfers
 # url: http://blackholes.five-ten-sg.com/
 # pay-to-use: no
 # delist: email address contact provided
-header __RCVD_IN_FIVETEN	rbleval:check_rbl('fiveten', 'blackholes.five-ten-sg.com.')
-tflags __RCVD_IN_FIVETEN net
+header RCVD_IN_FIVETEN	rbleval:check_rbl('fiveten', 'blackholes.five-ten-sg.com.')
+tflags RCVD_IN_FIVETEN net
 # bulk mailers that don't require confirmed opt-in from their customers,
 # or that have have allowed known spammers to become clients.
 header T_RCVD_IN_FIVETEN_BULK	rbleval:check_rbl_sub('fiveten', '127.0.0.4')
