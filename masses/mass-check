@@ -85,6 +85,7 @@ use Mail::SpamAssassin;
 use Getopt::Long;
 use POSIX qw(strftime);
 use constant HAS_TIME_PARSEDATE => eval { require Time::ParseDate; };
+use Config;
 
 # default settings
 $opt_c = "$FindBin::Bin/../rules";
@@ -148,7 +149,8 @@ if (open(TESTING, "$opt_c/70_testing.cf")) {
 }
 my $log_header = "# mass-check results from $who\@$where, on $when\n" .
 		 "# M:SA version ".$spamtest->Version()."\n" .
-		 "# SVN revision: $revision\n";
+		 "# SVN revision: $revision\n" .
+		 "# Perl version: $] on $Config{archname}\n";
 my $host = $ENV{'HOSTNAME'} || $ENV{'HOST'} || `hostname` || 'localhost';
 chomp $host;
 
