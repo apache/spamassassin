@@ -284,12 +284,12 @@ sub wanted {
   my $tests = join(",", sort(grep(length,$status->get_names_of_tests_hit(),$status->get_names_of_subtests_hit())));
   my $extra = join(",", @extra);
 
-#  if (defined $opt_rewrite) {
-#    $status->rewrite_mail();
-#    open(REWRITE, "> " . ($opt_rewrite ? $opt_rewrite : "/tmp/out"));
-#    print REWRITE $status->get_full_message_as_text();
-#    close(REWRITE);
-#  }
+  if (defined $opt_rewrite) {
+    my $mail = $status->rewrite_mail();
+    open(REWRITE, "> " . ($opt_rewrite ? $opt_rewrite : "/tmp/out"));
+    print REWRITE $mail->get_pristine();
+    close(REWRITE);
+  }
 
   $id =~ s/\s/_/g;
 
