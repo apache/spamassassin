@@ -308,6 +308,8 @@ B<spamassassin> B<-d> < I<mailmessage> > <output>
 
 B<spamassassin> B<-r> [B<-w> I<addr>] < I<mailmessage>
 
+B<spamassassin> B<-k> [B<-w> I<addr>] < I<mailmessage>
+
 B<spamassassin> B<-W>|B<-R> < I<mailmessage>
 
 Options:
@@ -388,26 +390,29 @@ automatically before submission.  The support modules for DCC, Razor
 and/or Pyzor must be installed for spam to be reported to each service.
 
 The message will also be submitted to SpamAssassin's learning systems;
-currently this is the internal Bayesian statistical-filtering system
-(the BAYES rules).
+currently this is the internal Bayesian statistical-filtering system (the BAYES
+rules).   (Note that if you I<only> want to perform statistical learning, and
+do not want to report mail to a third-party server, you should use the
+C<sa-learn> command directly instead.)
 
 =item B<-k>, B<--revoke>
 
-Revoke this message.  This will revoke the mail message read
-from STDIN from various spam-blocker databases.  Currently, these are Vipul's
-Razor ( http://razor.sourceforge.net/ ).
+Revoke this message.  This will revoke the mail message read from STDIN from
+various spam-blocker databases.  Currently, these are Vipul's Razor (
+http://razor.sourceforge.net/ ).
 
-Support for the Distributed Checksum Clearinghouse 
-( http://www.rhyolite.com/anti-spam/dcc/ ), and Pyzor is not currently
-available.
+Revocation support for the Distributed Checksum Clearinghouse (
+http://www.rhyolite.com/anti-spam/dcc/ ), and Pyzor is not currently available.
 
 If the message contains SpamAssassin markup, this will be stripped out
 automatically before submission.  The support modules for Razor must be
 installed for spam to be revoked from the service.
 
-The message will also be submitted to SpamAssassin's learning systems;
-currently this is the internal Bayesian statistical-filtering system
-(the BAYES rules).
+The message will also be submitted as 'ham' (non-spam) to SpamAssassin's
+learning systems; currently this is the internal Bayesian statistical-filtering
+system (the BAYES rules).   (Note that if you I<only> want to perform
+statistical learning, and do not want to report mail to a third-party server,
+you should use the C<sa-learn> command directly instead.)
 
 =item B<--lint>
 
@@ -681,6 +686,7 @@ be set.
 
 =head1 SEE ALSO
 
+sa-learn(1)
 Mail::SpamAssassin(3)
 Mail::SpamAssassin::Conf(3)
 Mail::Audit(3)
