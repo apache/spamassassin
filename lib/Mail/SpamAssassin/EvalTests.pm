@@ -499,7 +499,7 @@ sub check_for_forged_yahoo_received_headers {
         || $self->{relays_untrusted_str} =~ /^[^\]]+ rdns=\S+\.yahoo\.com /))
             { return 0; }
 
-  if ($rcvd =~ /by web\S+\.mail\.yahoo\.com via HTTP/) { return 0; }
+  if ($rcvd =~ /by web\S+\.mail\S*\.yahoo\.com via HTTP/) { return 0; }
   if ($rcvd =~ /by smtp\S+\.yahoo\.com with SMTP/) { return 0; }
   my $IP_ADDRESS = IP_ADDRESS;
   if ($rcvd =~
