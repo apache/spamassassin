@@ -373,12 +373,33 @@ header T_HELO_OPTONLINE X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S+\.dyn\.opton
 # 12-218-225-223.client.mchsi.com [12.218.225.223]
 
 # bug 2992: Proposed new rules, Martin Radford
-header T_RCVD_DOUBLE_IP		Received =~ /from \[\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\] by \d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3} with/
-describe T_RCVD_DOUBLE_IP	Bulk email fingerprint (double IP) found
+header RCVD_DOUBLE_IP_SPAM	Received =~ /from \[\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\] by \d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3} with/
+describe RCVD_DOUBLE_IP_SPAM	Bulk email fingerprint (double IP) found
 
-# looser variants
-header T_RCVD_DOUBLE_IP_A	Received =~ /\b(?:from|by)\b.{1,4}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b.{1,4}\b(?:by|from)\b.{1,4}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b/i
-header T_RCVD_DOUBLE_IP_B	Received =~ /\b(?:from|by)\b.{1,4}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b.{1,4}\b(?:by|from)\b.{1,4}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b.{1,4}\bwith\b/i
+# some looser variants
+header __DOUBLE_IP_LOOSE_1	Received =~ /\b(?:from|by)\b.{1,4}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b.{1,4}\b(?:by|from)\b.{1,4}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b/i
+meta RCVD_DOUBLE_IP_LOOSE_1	(!RCVD_DOUBLE_IP_SPAM && __DOUBLE_IP_LOOSE_1)
+describe RCVD_DOUBLE_IP_LOOSE_1	Received: by and from are both IP addresses
+
+header __DOUBLE_IP_LOOSE_2	Received =~ /\b(?:from|by)\b.{1,4}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b(?!\.).{1,4}\b(?:by|from)\b.{1,4}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b(?!\.)/i
+meta RCVD_DOUBLE_IP_LOOSE_2	(!RCVD_DOUBLE_IP_SPAM && __DOUBLE_IP_LOOSE_2)
+describe RCVD_DOUBLE_IP_LOOSE_2	Received: by and from are both IP addresses
+
+header __DOUBLE_IP_LOOSE_3	Received =~ /\b(?:from|by)\b.{1,4}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b(?![.-]).{1,4}\b(?:by|from)\b.{1,4}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b(?![.-])/i
+meta RCVD_DOUBLE_IP_LOOSE_3	(!RCVD_DOUBLE_IP_SPAM && __DOUBLE_IP_LOOSE_3)
+describe RCVD_DOUBLE_IP_LOOSE_3	Received: by and from are both IP addresses
+
+header __DOUBLE_IP_LOOSE_4	Received =~ /\b(?:from|by)\b.{1,4}\b\d{1,3}[.-]\d{1,3}[.-]\d{1,3}[.-]\d{1,3}(?<!127\.0\.0\.1)\b.{1,4}\b(?:by|from)\b.{1,4}\b\d{1,3}[.-]\d{1,3}[.-]\d{1,3}[.-]\d{1,3}(?<!127\.0\.0\.1)\b/i
+meta RCVD_DOUBLE_IP_LOOSE_4	(!RCVD_DOUBLE_IP_SPAM && __DOUBLE_IP_LOOSE_4)
+describe RCVD_DOUBLE_IP_LOOSE_4	Received: by and from are both IP addresses
+
+header __DOUBLE_IP_LOOSE_5	Received =~ /\b(?:from|by)\b.{1,4}\b\d{1,3}[._-]\d{1,3}[._-]\d{1,3}[._-]\d{1,3}(?<!127\.0\.0\.1)\b.{1,4}\b(?:by|from)\b.{1,4}\b\d{1,3}[._-]\d{1,3}[._-]\d{1,3}[._-]\d{1,3}(?<!127\.0\.0\.1)\b/i
+meta RCVD_DOUBLE_IP_LOOSE_5	(!RCVD_DOUBLE_IP_SPAM && __DOUBLE_IP_LOOSE_5)
+describe RCVD_DOUBLE_IP_LOOSE_5	Received: by and from are both IP addresses
+
+header __DOUBLE_IP_LOOSE_6	Received =~ /\b(?:from|by)\b.{1,4}\b\d{1,3}\D\d{1,3}\D\d{1,3}\D\d{1,3}(?<!127\.0\.0\.1)\b.{1,4}\b(?:by|from)\b.{1,4}\b\d{1,3}\D\d{1,3}\D\d{1,3}\D\d{1,3}(?<!127\.0\.0\.1)\b/i
+meta RCVD_DOUBLE_IP_LOOSE_6	(!RCVD_DOUBLE_IP_SPAM && __DOUBLE_IP_LOOSE_6)
+describe RCVD_DOUBLE_IP_LOOSE_6	Received: by and from are both IP addresses
 
 header T_MIME_BOUND_DIGITS15	Content-Type =~ /boundary=\"\d{15,}\"/
 describe T_MIME_BOUND_DIGITS15	MIME boundary contains all digits
