@@ -1767,8 +1767,8 @@ sub _handle_hit {
 	$self->{test_logs} .= sprintf ("* % 2.1f -- %s%s\n%s",
 				       $score, $area, $desc, $self->{test_log_msgs});
     } else {
-	$self->{test_logs} .= sprintf ("%-18s %s%s\n%s",
-				       "Hit! (".$score." point".($score == 1 ? "":"s").")",
+	$self->{test_logs} .= sprintf ("%-18s %-14s%s%s\n%s",
+				       $rule,"($score points)",
 				       $area, $desc, $self->{test_log_msgs});
     }
 }
