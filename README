@@ -10,6 +10,13 @@ part (ensuring the original message is completely preserved and easier to
 recover).  If you do not want to modify the body of incoming spam, use the
 "report_safe" option.
 
+Please note that the use of the following commandline parameters for
+spamassassin and spamd have been deprecated!  They will still work in
+the 2.5x series (a warning will be displayed), but they will be removed
+in the next major release.  If you currently use these flags, please
+remove them.  The flags are:	--add-from, --pipe, -F, -P
+
+
 
 Welcome to SpamAssassin!
 ------------------------
