@@ -370,6 +370,10 @@ describe T_TERRA_ES	Contains images or links to pages hosted at 'terra.es'
 uri T_INFO_TLD			/^(?:https?:\/\/|mailto:)[^\/]+\.info(?:\/|$)/i
 describe T_INFO_TLD		Contains a URL in the INFO top-level domain    
 
+header T_RCVD_IN_BOGUSMX	rbleval:check_rbl_from_host('rfci-bmx', 'bogusmx.rfc-ignorant.org.')
+describe T_RCVD_IN_BOGUSMX	Received via a relay in BogusMX, http://www.rfc-ignorant.org/
+tflags T_RCVD_IN_BOGUSMX	net
+
 # bug 2071
 body            T_GEVALIACOFFEE           /\bGevalia (?:Coffee|Kaffe)\b/i
 describe        T_GEVALIACOFFEE           Selling Gevalia Coffee
