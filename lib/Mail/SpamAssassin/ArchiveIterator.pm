@@ -748,25 +748,12 @@ sub message_array {
     }
 
     # interleave ordered spam and ham
-    if (@h && @s > @h) {
-      my $num = int(scalar(@s)/scalar(@h));
-      while(@s && @h) {
-        push @messages, (splice @s, 0, $num), (splice @h, 0, 1);
+    if (@s && @h) {
+      my $ratio = @s / @h;
+      while (@s && @h) {
+	push @messages, (@s / @h > $ratio) ? (shift @s) : (shift @h);
       }
     }
-    elsif (@s && @h > @s) {
-      my $num = int(scalar(@h)/scalar(@s));
-      while(@s && @h) {
-        push @messages, (splice @s, 0, 1), (splice @h, 0, $num);
-      }
-    }
-    else {
-      # This is infrequent unless --head or --tail is used ...
-      while(@s && @h) {
-        push @messages, (shift @s), (shift @h);
-      }
-    }
-
     # push the rest onto the end
     push @messages, @s, @h;
   }
