@@ -218,6 +218,9 @@ sub new {
         if (!@message || (defined $boundary && $message[0] =~ /^--\Q$boundary\E(?:--|\s*$)/)) {
 	  # No body or no separator before mime boundary is invalid
           $self->{'missing_head_body_separator'} = 1;
+	  
+	  # we *have* to go back through again to make sure we catch the last
+	  # header, so fake a separator and loop again.
 	  unshift(@message, "\n");
         }
       }
