@@ -522,15 +522,15 @@ tflags T_RCVD_IN_WIREHUB_PROXIES net
 # delist: automatic expiry, no fee, retested on request (free)
 header __RCVD_IN_OPM			rbleval:check_rbl('opm2', 'opm.blitzed.org.')
 tflags __RCVD_IN_OPM net
-header T_RCVD_IN_OPM_WINGATE		rblreseval:check_rbl_results_for('opm2', '1')
+header T_RCVD_IN_OPM_WINGATE		rbleval:check_rbl_sub('opm2', '1')
 tflags T_RCVD_IN_OPM_WINGATE net
-header T_RCVD_IN_OPM_SOCKS		rblreseval:check_rbl_results_for('opm2', '2')
+header T_RCVD_IN_OPM_SOCKS		rbleval:check_rbl_sub('opm2', '2')
 tflags T_RCVD_IN_OPM_SOCKS net
-header T_RCVD_IN_OPM_HTTP_CONNECT	rblreseval:check_rbl_results_for('opm2', '4')
+header T_RCVD_IN_OPM_HTTP_CONNECT	rbleval:check_rbl_sub('opm2', '4')
 tflags T_RCVD_IN_OPM_HTTP_CONNECT net
-header T_RCVD_IN_OPM_ROUTER		rblreseval:check_rbl_results_for('opm2', '8')
+header T_RCVD_IN_OPM_ROUTER		rbleval:check_rbl_sub('opm2', '8')
 tflags T_RCVD_IN_OPM_ROUTER net
-header T_RCVD_IN_OPM_HTTP_POST		rblreseval:check_rbl_results_for('opm2', '16')
+header T_RCVD_IN_OPM_HTTP_POST		rbleval:check_rbl_sub('opm2', '16')
 tflags T_RCVD_IN_OPM_HTTP_POST net
 
 # fiveten - many blacklists, but only the bulk one performs well
@@ -542,41 +542,41 @@ header __FIVETEN	rbleval:check_rbl('fiveten', 'blackholes.five-ten-sg.com.')
 tflags __FIVETEN net
 # bulk mailers that don't require confirmed opt-in from their customers,
 # or that have have allowed known spammers to become clients.
-header T_RCVD_IN_FIVETEN_BULK	rblreseval:check_rbl_results_for('fiveten', '127.0.0.4')
+header T_RCVD_IN_FIVETEN_BULK	rbleval:check_rbl_sub('fiveten', '127.0.0.4')
 tflags T_RCVD_IN_FIVETEN_BULK net
 # retest all of the rest (since rblreseval wasn't used before)
-header T_RCVD_IN_FIVETEN_SPAM	rblreseval:check_rbl_results_for('fiveten', '127.0.0.2')
+header T_RCVD_IN_FIVETEN_SPAM	rbleval:check_rbl_sub('fiveten', '127.0.0.2')
 tflags T_RCVD_IN_FIVETEN_SPAM net
-header T_RCVD_IN_FIVETEN_DIALUP	rblreseval:check_rbl_results_for('fiveten', '127.0.0.3')
+header T_RCVD_IN_FIVETEN_DIALUP	rbleval:check_rbl_sub('fiveten', '127.0.0.3')
 tflags T_RCVD_IN_FIVETEN_DIALUP net
-header T_RCVD_IN_FIVETEN_MULTISTAGE	rblreseval:check_rbl_results_for('fiveten', '127.0.0.5')
+header T_RCVD_IN_FIVETEN_MULTISTAGE	rbleval:check_rbl_sub('fiveten', '127.0.0.5')
 tflags T_RCVD_IN_FIVETEN_MULTISTAGE net
-header T_RCVD_IN_FIVETEN_SINGLESTAGE	rblreseval:check_rbl_results_for('fiveten', '127.0.0.6')
+header T_RCVD_IN_FIVETEN_SINGLESTAGE	rbleval:check_rbl_sub('fiveten', '127.0.0.6')
 tflags T_RCVD_IN_FIVETEN_SINGLESTAGE net
-header T_RCVD_IN_FIVETEN_SPAMSUPPORT	rblreseval:check_rbl_results_for('fiveten', '127.0.0.7')
+header T_RCVD_IN_FIVETEN_SPAMSUPPORT	rbleval:check_rbl_sub('fiveten', '127.0.0.7')
 tflags T_RCVD_IN_FIVETEN_SPAMSUPPORT net
-header T_RCVD_IN_FIVETEN_WEBFORM	rblreseval:check_rbl_results_for('fiveten', '127.0.0.8')
+header T_RCVD_IN_FIVETEN_WEBFORM	rbleval:check_rbl_sub('fiveten', '127.0.0.8')
 tflags T_RCVD_IN_FIVETEN_WEBFORM net
-header T_RCVD_IN_FIVETEN_MISC	rblreseval:check_rbl_results_for('fiveten', '127.0.0.9')
+header T_RCVD_IN_FIVETEN_MISC	rbleval:check_rbl_sub('fiveten', '127.0.0.9')
 tflags T_RCVD_IN_FIVETEN_MISC net
-header T_RCVD_IN_FIVETEN_KLEZ	rblreseval:check_rbl_results_for('fiveten', '127.0.0.10')
+header T_RCVD_IN_FIVETEN_KLEZ	rbleval:check_rbl_sub('fiveten', '127.0.0.10')
 tflags T_RCVD_IN_FIVETEN_KLEZ net
-header T_RCVD_IN_FIVETEN_TCPA	rblreseval:check_rbl_results_for('fiveten', '127.0.0.11')
+header T_RCVD_IN_FIVETEN_TCPA	rbleval:check_rbl_sub('fiveten', '127.0.0.11')
 tflags T_RCVD_IN_FIVETEN_TCPA net
-header T_RCVD_IN_FIVETEN_FREE	rblreseval:check_rbl_results_for('fiveten', '127.0.0.12')
+header T_RCVD_IN_FIVETEN_FREE	rbleval:check_rbl_sub('fiveten', '127.0.0.12')
 tflags T_RCVD_IN_FIVETEN_FREE net
 # should probably get notfirsthop etc. to work at any stage
 # (how about an optional third argument?)
 # Apr 22 2003 jm: eh? what's wrong with notfirsthop?  works for me (tm)
 header __FIVE10		rbleval:check_rbl('five10-notfirsthop', 'blackholes.five-ten-sg.com.')
 tflags __FIVE10 net
-header T_RCVD_IN_FIVETEN_DIALUP_NFH	rblreseval:check_rbl_results_for('five10-notfirsthop', '127.0.0.3')
+header T_RCVD_IN_FIVETEN_DIALUP_NFH	rbleval:check_rbl_sub('five10-notfirsthop', '127.0.0.3')
 tflags T_RCVD_IN_FIVETEN_DIALUP_NFH net
 
 # some additional osirusoft tests, needs more work
 # all osirusoft tests maybe a bad idea, osirusoft web site seems defunct
-header T_X_OSIRU_OPT_IN		rblreseval:check_rbl_results_for('osirusoft', '127.0.0.7')
-header T_X_OSIRU_OPEN_PROXY	rblreseval:check_rbl_results_for('osirusoft', '127.0.0.9')
+header T_X_OSIRU_OPT_IN		rbleval:check_rbl_sub('osirusoft', '127.0.0.7')
+header T_X_OSIRU_OPEN_PROXY	rbleval:check_rbl_sub('osirusoft', '127.0.0.9')
 tflags T_X_OSIRU_OPT_IN net
 tflags T_X_OSIRU_OPEN_PROXY net
 # repeats?
@@ -594,17 +594,17 @@ tflags T_RCVD_IN_OSSOCKS net
 # delist: $50 fee for T_RCVD_IN_SORBS_SPAM, others are retested on request (free)
 header T_RCVD_IN_SORBS	rbleval:check_rbl('sorbs', 'dnsbl.sorbs.net.')
 tflags T_RCVD_IN_SORBS net
-header T_RCVD_IN_SORBS_HTTP	rblreseval:check_rbl_results_for('sorbs', '127.0.0.2')
+header T_RCVD_IN_SORBS_HTTP	rbleval:check_rbl_sub('sorbs', '127.0.0.2')
 tflags T_RCVD_IN_SORBS_HTTP net
-header T_RCVD_IN_SORBS_MISC	rblreseval:check_rbl_results_for('sorbs', '127.0.0.3')
+header T_RCVD_IN_SORBS_MISC	rbleval:check_rbl_sub('sorbs', '127.0.0.3')
 tflags T_RCVD_IN_SORBS_MISC net
-header T_RCVD_IN_SORBS_SMTP	rblreseval:check_rbl_results_for('sorbs', '127.0.0.4')
+header T_RCVD_IN_SORBS_SMTP	rbleval:check_rbl_sub('sorbs', '127.0.0.4')
 tflags T_RCVD_IN_SORBS_SMTP net
-header T_RCVD_IN_SORBS_SOCKS	rblreseval:check_rbl_results_for('sorbs', '127.0.0.5')
+header T_RCVD_IN_SORBS_SOCKS	rbleval:check_rbl_sub('sorbs', '127.0.0.5')
 tflags T_RCVD_IN_SORBS_SOCKS net
-header T_RCVD_IN_SORBS_SPAM	rblreseval:check_rbl_results_for('sorbs', '127.0.0.6')
+header T_RCVD_IN_SORBS_SPAM	rbleval:check_rbl_sub('sorbs', '127.0.0.6')
 tflags T_RCVD_IN_SORBS_SPAM net
-header T_RCVD_IN_SORBS_WEB	rblreseval:check_rbl_results_for('sorbs', '127.0.0.7')
+header T_RCVD_IN_SORBS_WEB	rbleval:check_rbl_sub('sorbs', '127.0.0.7')
 tflags T_RCVD_IN_SORBS_WEB net
 
 # OK, a whole batch of faked-HELO detection rules.  These work by checking

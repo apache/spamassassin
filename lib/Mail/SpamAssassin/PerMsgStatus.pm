@@ -50,13 +50,10 @@ use constant HAS_MIME_BASE64 =>		eval { require MIME::Base64; };
 use constant MAX_BODY_LINE_LENGTH =>	2048;
 
 use vars qw{
-  @ISA $base64alphabet $RBL_PASS_LAUNCH_QUERIES $RBL_PASS_HARVEST_RESULTS
+  @ISA $base64alphabet
 };
 
 @ISA = qw();
-
-$RBL_PASS_LAUNCH_QUERIES	= 1;
-$RBL_PASS_HARVEST_RESULTS	= 2;
 
 ###########################################################################
 
@@ -131,13 +128,10 @@ sub check {
   {
     # If you run timelog from within specified rules, prefix the message with
     # "Rulename -> " so that it's easy to pick out details from the overview
-    # -- Marc
     timelog("Launching RBL queries in the background", "rblbg", 1);
 
     # Here, we launch all the DNS RBL queries and let them run while we
-    # inspect the message -- Marc
-
-    $self->{rbl_pass} = $RBL_PASS_LAUNCH_QUERIES;
+    # inspect the message
     $self->run_rbl_eval_tests ($self->{conf}->{rbl_evals});
 
     timelog("Finished launching RBL queries in the background", "rblbg", 22);
@@ -188,12 +182,10 @@ sub check {
     timelog("Starting RBL tests (will wait up to ".$self->{conf}->{rbl_timeout}
 		." secs before giving up)", "rblblock", 1);
 
-    # This time we want to harvest the DNS results -- Marc
-    $self->{rbl_pass} = $RBL_PASS_HARVEST_RESULTS;
-    $self->run_rbl_eval_tests ($self->{conf}->{rbl_evals});
+    # harvest the DNS results
+    $self->harvest_dnsbl_queries();
 
-    # And now we can compute rules that depend on those results
-    $self->run_rbl_eval_tests ($self->{conf}->{rbl_res_evals});
+    # finish the DNS results
     $self->rbl_finish();
 
     timelog("Finished all RBL tests", "rblblock", 2);
@@ -2143,7 +2135,7 @@ sub run_rbl_eval_tests {
 
     my $result;
     eval {
-       $result = $self->$function(@args);
+       $result = $self->$function($rulename, @args);
     };
 
     if ($@) {
@@ -2151,15 +2143,6 @@ sub run_rbl_eval_tests {
 		"\t($@)\n";
       $self->{rule_errors}++;
       next;
-    }
-
-    if ($self->{rbl_pass} == $RBL_PASS_HARVEST_RESULTS) {
-      if ($result) {
-	$self->got_hit ($rulename, "RBL: ");
-	dbg("Ran run_rbl_eval_test rule $rulename ======> got hit", "rulesrun", 64) if $debugenabled;
-      } else {
-	#dbg("Ran run_rbl_eval_test rule $rulename but did not get hit", "rulesrun", 64) if $debugenabled;
-      }
     }
   }
 }

@@ -126,137 +126,132 @@ BEGIN {
 
 ###########################################################################
 
+# TODO: $server will be used for tracking per-server failures
 sub do_rbl_lookup {
-  my ($self, $set, $type, $dom, $ip, $found) = @_;
+  my ($self, $rule, $set, $type, $server, $host) = @_;
 
-  return $found if $found;
+  $self->{rbl_launch} = time if !defined $self->{rbl_launch};
 
-  # add these as tmp items on $self, to save passing around as args
-  $self->{rbl_set} = $set;
-  $self->{rbl_dom} = $dom;
-  $self->{rbl_type} = $type;
-  $self->{rbl_ip} = $ip;
-
-  if (defined $self->{dnscache}->{$type}->{$dom}->{result}) {
-    dbg("rbl: found $dom in our DNS cache. Yeah!", "rbl", -1);
-    return $self->handle_dnsbl_results();
-  }
-  elsif (!defined $self->{dnscache}->{$type}->{$dom}->{bgsock}) {
-    $self->launch_dnsbl_query();
-  }
-  elsif ($self->{rbl_pass} ==
-	 $Mail::SpamAssassin::PerMsgStatus::RBL_PASS_LAUNCH_QUERIES)
-  {
-    dbg("rbl: second query for $dom ignored, we have one pending", "rbl", -1);
-  }
-  elsif ($self->{rbl_pass} ==
-	 $Mail::SpamAssassin::PerMsgStatus::RBL_PASS_HARVEST_RESULTS)
-  {
-    if ($self->wait_for_dnsbl_results()) {
-      return $self->handle_dnsbl_results();
-    }
+  if (defined $self->{dnscache}->{$type}->{$host}->{bgsock}) {
+    # additional query for host, we have one pending
+    push @{$self->{dnscache}->{$type}->{$host}->{rules}}, $rule;
+    push @{$self->{dnscache}->{$type}->{$host}->{sets}}, $set;
   }
   else {
-    warn "oops! unknown RBL pass $self->{rbl_pass}";
+    # first query for host
+    $self->launch_dnsbl_query($rule, $set, $type, $host);
   }
+}
 
-  return 0;
+# TODO: these are constant so they should only be added once at startup
+sub register_rbl_subtest {
+  my ($self, $rule, $set, $subtest) = @_;
+  $self->{dnspost}->{$set}->{$subtest} = $rule;
 }
 
 ###########################################################################
 
 sub launch_dnsbl_query {
-  my ($self) = @_;
+  my ($self, $rule, $set, $type, $host) = @_;
 
-  my $dom = $self->{rbl_dom};
-  my $type = $self->{rbl_type};
-  dbg("rbl: launching DNS $type query for $dom in background", "rbl", -1);
+  dbg("rbl: launching DNS $type query for $host in background", "rbl", -1);
 
-  $self->{dnscache}->{$type}->{$dom}->{bgsock} =
-      $self->{res}->bgsend($dom, $type);
-  $self->{dnscache}->{$type}->{$dom}->{launchtime} = time;
+  my $query = $self->{dnscache}->{$type}->{$host};
+
+  $query->{bgsock} = $self->{res}->bgsend($host, $type);
+  $query->{launch} = time;
+  push @{$self->{dnscache}->{$type}->{$host}->{rules}}, $rule;
+  push @{$self->{dnscache}->{$type}->{$host}->{sets}}, $set;
 }
 
 ###########################################################################
 
-sub wait_for_dnsbl_results {
-  my ($self) = @_;
+sub process_dnsbl_result {
+  my ($self, $query) = @_;
 
-  my $dom = $self->{rbl_dom};
-  my $type = $self->{rbl_type};
-  dbg("rbl: waiting for result on $dom", "rbl", -1);
-  timelog("rbl: Waiting for result on $dom", "rbl", 1);
+  my $packet = $self->{res}->bgread($query->{bgsock});
 
-  my $bgsock;
-  $bgsock=\$self->{dnscache}->{$type}->{$dom}->{bgsock};
-
-  my $maxwait=$self->{conf}->{rbl_timeout};
-  
-  while (!$self->{res}->bgisready($$bgsock)) {
-    last if (time - $self->{dnscache}->{$type}->{$dom}->{launchtime} > $maxwait);
-    sleep 1;
-  }
-
-  if (!$self->{res}->bgisready($$bgsock)) {
-    timelog("rbl: Timeout on $dom", "rbl", 2);
-    dbg("rbl: query for $dom timed out after $maxwait seconds", "rbl", -1);
-    undef($$bgsock);
-    return 0;
-  }
-  else {
-    dbg("rbl: query returned for $dom", "rbl", -1);
-    my $packet = $self->{res}->bgread($$bgsock);
-    undef($$bgsock);
-
-    my @addr = ();
-    my @txt = ();
-
-    foreach my $ansitem ($packet->answer) {
-      dbg("rbl: $type query for $dom yielded: ".$ansitem->rdatastr, "rbl", -2);
-
-      if ($ansitem->type eq 'A') {
-	push(@addr, $ansitem->rdatastr);
-      }
-      elsif ($ansitem->type eq 'TXT') {
-	my $txt = $ansitem->rdatastr;
-	$txt =~ s/^\"//; $txt =~ s/\"$//;
-	push(@txt, $txt);
+  foreach my $ansitem ($packet->answer) {
+    # TODO: there are some CNAME returns, not sure what they represent
+    # nor whether they should be counted
+    next if ($ansitem->type ne 'A' && $ansitem->type ne 'TXT');
+    for my $rule (@{$query->{rules}}) {
+      if (!defined $self->{tests_already_hit}->{$rule}) {
+	$self->got_hit($rule, "RBL: ");
       }
     }
-    if ($type eq 'A') {
-      $self->{dnscache}->{$type}->{$dom}->{result} = \@addr;
-    }
-    elsif ($type eq 'TXT') {
-      $self->{dnscache}->{$type}->{$dom}->{result} = \@txt;
+    for my $set (@{$query->{sets}}) {
+      $self->process_dnsbl_set($set, $ansitem->rdatastr);
     }
   }
-  return 1;
 }
 
-###########################################################################
+sub process_dnsbl_set {
+  my ($self, $set, $rdatastr) = @_;
 
-sub handle_dnsbl_results {
+  while (my ($subtest, $rule) = each %{ $self->{dnspost}->{$set} }) {
+    next if defined $self->{tests_already_hit}->{$rule};
+
+    # exact substr (usually IP address)
+    if ($subtest eq $rdatastr) {
+      $self->got_hit($rule, "RBL: ");
+    }
+    # bitmask
+    elsif ($subtest =~ /^\d+$/) {
+      if ($rdatastr =~ m/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/ &&
+	  Mail::SpamAssassin::Util::my_inet_aton($rdatastr) & $subtest)
+      {
+	$self->got_hit($rule, "RBL: ");
+      }
+    }
+    # regular expression
+    elsif ($rdatastr =~ /\Q$subtest\E/) {
+      $self->got_hit($rule, "RBL: ");
+    }
+  }
+}
+
+sub harvest_dnsbl_queries {
   my ($self) = @_;
 
-  my $dom = $self->{rbl_dom};
-  my $type = $self->{rbl_type};
-  my @result = @{$self->{dnscache}->{$type}->{$dom}->{result}};
+  return if !defined $self->{rbl_launch};
 
-  if (scalar @result <= 0) {
-    timelog("rbl: no $type match for $dom", "rbl", 2);
-    return 0;
+  my $timeout = $self->{conf}->{rbl_timeout} + $self->{rbl_launch};
+  my $ready = 1;
+  my @waiting = (values %{ $self->{dnscache}->{A} },
+		 values %{ $self->{dnscache}->{TXT} });
+  my @left;
+
+  @waiting = grep { defined $_->{bgsock} } @waiting;
+
+  while ($ready && @waiting) {
+    my $rin = '';
+    @left = ();
+    for my $query (@waiting) {
+      if ($self->{res}->bgisready($query->{bgsock})) {
+	$query->{finish} = time;
+	$self->process_dnsbl_result($query);
+      }
+      else {
+	vec($rin, fileno($query->{bgsock}), 1) = 1 unless @left;
+	push(@left, $query);
+      }
+    }
+    last unless @left;
+    my $time = time;
+    last if $time >= $timeout;
+    @waiting = @left;
+    if (@left == 1) {
+      $ready = select($rin, undef, undef, ($timeout - $time));
+    }
+    else {
+      sleep 1;
+    }
   }
-
-  my $set = $self->{rbl_set};
-  my $ip = $self->{rbl_ip};
-  foreach my $result (@result) {
-    $self->test_log ("RBL $type check: found ".$dom.", type: ".$result);
-    dbg("rbl: $type check found $dom, type: $result", "rbl", -2);
-    $self->{$set}->{'rbl_IN_'.$type.'s_found'} .= $result.' ';
+  # TODO: add real timeout code
+  for my $query (@left) {
+    undef $query->{bgsock};
   }
-
-  timelog("rbl: $type match on $dom", "rbl", 2);
-  return 1;
 }
 
 ###########################################################################
@@ -264,13 +259,12 @@ sub handle_dnsbl_results {
 sub rbl_finish {
   my ($self) = @_;
 
-  delete $self->{rbl_set};
-  delete $self->{rbl_dom};
-  delete $self->{rbl_type};
-  delete $self->{rbl_ip};
+  delete $self->{rbl_launch};
   delete $self->{dnscache}->{A};
   delete $self->{dnscache}->{TXT};
   delete $self->{dnscache};
+  # TODO: do not remove this since it can be retained!
+  delete $self->{dnspost};
 }
 
 ###########################################################################

@@ -1079,7 +1079,7 @@ sub check_lots_of_cc_lines {
 ###########################################################################
 
 sub check_rbl_backend {
-  my ($self, $set, $rbl_domain, $type) = @_;
+  my ($self, $rule, $set, $rbl_server, $type) = @_;
   local ($_);
 
   # First check that DNS is available, if not do not perform this check
@@ -1090,7 +1090,7 @@ sub check_rbl_backend {
   # How many IPs max you check in the received lines
   my $checklast=$self->{conf}->{num_check_received} - 1;
   
-  dbg ("checking RBL $rbl_domain, set $set", "rbl", -1);
+  dbg ("checking RBL $rbl_server, set $set", "rbl", -1);
 
   my @fullips = map { $_->{ip} } @{$self->{relays_untrusted}};
   return 0 unless (scalar @fullips > 0);
@@ -1144,88 +1144,37 @@ sub check_rbl_backend {
   }
   dbg("But only inspecting the following IPs: ".join(", ", @ips), "rbl", -3);
 
-  if (!defined $self->{$set}->{rbl_IN_As_found}) {
-    $self->{$set}->{rbl_IN_As_found} = ' ';
-    $self->{$set}->{rbl_IN_TXTs_found} = ' ';
-  }
-
-  my $found = 0;
-
-  # First check that DNS is available. If not, do not perform this check.
-  # Stop after the first positive.
   eval {
-    my $i=0;
-    my ($b1,$b2,$b3,$b4);
     foreach my $ip (@ips) {
-      $i++;
-      # Some of the matches in other zones, like a DUL match on a first hop 
-      # may be negated by another rule, so preventing a match in two zones
-      # is better done with a Z_FUDGE_foo rule that uses check_both_rbl_results
-      # and sets a negative score to compensate 
-      # It's also useful to be able to flag mail that went through an IP that
-      # is on two different blacklists  -- Marc
-      #
-      # Apr  7 2003 jm: I don't see how this is a good idea. :(
-      # if ($already_matched_in_other_zones =~ / \Q${ip}\E /) {
-      # dbg("Skipping $ip, already matched in other zones for $set", "rbl", -1);
-      # next;
-      # }
-
       next unless ($ip =~ /(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/);
-      ($b1, $b2, $b3, $b4) = ($1, $2, $3, $4);
-
-      $found = $self->do_rbl_lookup ($set, $type,
-				     "$b4.$b3.$b2.$b1.".$rbl_domain, $ip,
-				     $found);
-      dbg("Got $found on $ip (item $i)", "rbl", -3);
+      $self->do_rbl_lookup($rule, $set, $type, $rbl_server,
+			   "$4.$3.$2.$1.$rbl_server");
     }
   };
 
-  dbg("Check_rbl returning $found", "rbl", -3);
-  $found;
+  # note that results are not handled here, hits are handled directly
+  # as DNS responses are harvested
+  return 0;
 }
 
 sub check_rbl {
-  my ($self, $set, $rbl_domain) = @_;
-  $self->check_rbl_backend ($set, $rbl_domain, 'A');
+  my ($self, $rule, $set, $rbl_server) = @_;
+  $self->check_rbl_backend ($rule, $set, $rbl_server, 'A');
 }
 
 sub check_rbl_txt {
-  my ($self, $set, $rbl_domain) = @_;
-  $self->check_rbl_backend ($set, $rbl_domain, 'TXT');
+  my ($self, $rule, $set, $rbl_server) = @_;
+  $self->check_rbl_backend ($rule, $set, $rbl_server, 'TXT');
 }
 
-###########################################################################
+# run for first message 
+sub check_rbl_sub {
+  my ($self, $rule, $set, $subtest) = @_;
 
-sub check_rbl_results_for {
-  my ($self, $set, $addr) = @_;
-
-  dbg ("checking RBL results in set $set for $addr", "rbl", -1);
   return 0 if $self->{conf}->{skip_rbl_checks};
   return 0 unless $self->is_dns_available();
-  return 0 unless defined ($self->{$set});
-  return 0 unless defined ($self->{$set}->{rbl_IN_As_found});
 
-  # note: IN_As cannot be !undef without IN_TXTs existing too
-  my $inas = $self->{$set}->{rbl_IN_As_found} . ' ' .
-	     $self->{$set}->{rbl_IN_TXTs_found};
-
-  if ($addr =~ /^\d+$/) {
-    # bitmask
-    my @matches = ($inas =~ m/($IP_ADDRESS)/og);
-    return scalar grep { Mail::SpamAssassin::Util::my_inet_aton($_) & $addr } @matches;
-  }
-  elsif ($addr =~ /$IP_ADDRESS/) {
-    # IP address
-    my @matches = ($inas =~ m/($IP_ADDRESS)/og);
-    return scalar grep { $_ eq $addr } @matches;
-  }
-  else {
-    # regular expression
-    return ($inas =~ /$addr/);
-  }
-
-  return 0;
+  $self->register_rbl_subtest($rule, $set, $subtest);
 }
 
 ###########################################################################
