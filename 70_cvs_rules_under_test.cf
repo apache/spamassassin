@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.598 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.599 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -184,4 +184,9 @@ describe T_FORGED_RCVD_NET_HELO	Host HELO'd using the wrong IP network
 
 header T_NO_RDNS_DOTCOM_HELO	eval:check_for_no_rdns_dotcom_helo()
 describe T_NO_RDNS_DOTCOM_HELO	Host HELO'd as a big ISP, but had no rDNS
+
+# replace __OUTLOOK_MUA, http://bugzilla.spamassassin.org/show_bug.cgi?id=1717
+header __OUTLOOK2003_MUA        X-Mailer =~ /Outlook, Build 11\.0\./
+header __OUTLOOK_MSGID_3        MESSAGEID =~ /^<\!\~\!/m                             
+meta T_FORGED_MUA_OUTLOOK         (__OUTLOOK_MUA && !__OUTLOOK2003_MUA && !__UNUSABLE_MSGID && !(__OUTLOOK_MSGID_1 || __OUTLOOK_MSGID_2 || __IMS_MSGID || __OUTLOOK_MSGID_3))
 
