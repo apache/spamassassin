@@ -112,8 +112,10 @@ use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/oi);
 	dbg("PATH included '$dir', which isn't a directory, dropping.");
 	next;
       }
-      elsif (($stat[2]&2) == 1) {
-        # We could be more paranoid and check all of the parent directories as well
+      elsif (($stat[2]&2) != 0) {
+        # World-Writable directories are considered insecure.
+        # We could be more paranoid and check all of the parent directories as well,
+        # but it's good for now.
 	dbg("PATH included '$dir', which is world writable, dropping.");
 	next;
       }
