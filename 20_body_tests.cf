@@ -709,5 +709,5 @@ describe COPY_ACCURATELY        Common pyramid scheme phrase (1)
 body     SEE_FOR_YOURSELF       /See (?:for|it) yourself/i
 describe SEE_FOR_YOURSELF       See for yourself
 
-body DOUBLE_CAPSWORD		/(\b[A-Z]{3,}\b).*\1/
+body DOUBLE_CAPSWORD		/\b([A-Z]{3,})\b.*\b\1\b/
 describe DOUBLE_CAPSWORD	A word in all caps repeated on the line

@@ -46,6 +46,7 @@ test DOUBLE_CAPSWORD ok		FREE hello FREE
 test DOUBLE_CAPSWORD ok		EXTRA EXTRA EXTRA
 test DOUBLE_CAPSWORD fail	BONUS bonus
 test DOUBLE_CAPSWORD fail	I think therefore I am
+test DOUBLE_CAPSWORD fail       AND THIS IS MY HAND
 test FROM_ENDS_IN_NUMS     ok   matt1234@sergeant.org
 test FROM_ENDS_IN_NUMS     fail matt@sergeant.org
 test FROM_STARTS_WITH_NUMS     ok   1234matt@sergeant.org
@@ -54,3 +55,4 @@ test FORGED_YAHOO_RCVD fail by mf1.lng.yahoo.com (8.11.1/8.11.1) id g3SDfPH19426
 test NUMERIC_HTTP_ADDR ok http://123456789/foo/bar
 test			SPAM_REDIRECTOR ok http://rd.yahoo.com/?http://somesite.com/
 test			SPAM_REDIRECTOR ok http://wwp.icq.com/?http://anothersite.com/
+
