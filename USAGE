@@ -96,6 +96,10 @@ If you want to use SpamAssassin site-wide:
     http://spamassassin.org/sitewide.html .  You will probably want to use
     'spamd' (see below).
 
+  - PLEASE let your users know how to turn it off!   This is our #1 tech
+    support query, and the users are usually pretty frustrated once it
+    reaches that stage.
+
   - Note that procmail users adding spamc to /etc/procmailrc should 
     add the line 'DROPPRIVS=yes' at the top of the file.
 
