@@ -9,6 +9,7 @@ use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Dns;
 use Mail::SpamAssassin::Locales;
 use Mail::SpamAssassin::PhraseFreqs;
+use Mail::SpamAssassin::TextCat;
 use Time::Local;
 use strict;
 
@@ -852,6 +853,9 @@ sub check_for_faraway_charset {
   $type ||= $self->get ('Content-type');
 
   my @locales = $self->get_my_locales();
+
+  return 0 if grep { $_ eq "all" } @locales;
+
   $type = get_charset_from_ct_line ($type);
 
   if (defined $type &&
@@ -892,6 +896,9 @@ sub check_for_faraway_charset_in_body {
     my $type = $1;
 
     my @locales = $self->get_my_locales();
+
+    return 0 if grep { $_ eq "all" } @locales;
+
     $type = get_charset_from_ct_line ($type);
     if (defined $type &&
       !Mail::SpamAssassin::Locales::is_charset_ok_for_locales
@@ -912,6 +919,9 @@ sub check_for_faraway_charset_in_headers {
   my $hdr;
 
   my @locales = $self->get_my_locales();
+
+  return 0 if grep { $_ eq "all" } @locales;
+
   for my $h (qw(From Subject)) {
 # Can't use just get() because it un-mime header
     my @hdrs = $self->{msg}->get_header ($h);
@@ -944,7 +954,7 @@ sub get_my_locales {
   $lang ||= $ENV{'LANGUAGE'};
   $lang ||= $ENV{'LC_MESSAGES'};
   $lang ||= $ENV{'LANG'};
-  push (@locales, $lang);
+  push (@locales, $lang) if defined($lang);
   return @locales;
 }
 
@@ -1023,7 +1033,7 @@ sub _check_date_diff {
   my $time = $self->_parse_rfc822_date ($date);
 
   # parse_rfc822_date failed
-  return if (! $time);
+  return if ($time == -1);
 
   # use second date. otherwise fetchmail Received: hdrs will screw it up
   my @rcvddatestrs = ($rcvd =~ /\s.?\d+ \S\S\S \d+ \d+:\d+:\d+ \S+/g);
@@ -1031,7 +1041,7 @@ sub _check_date_diff {
   foreach $rcvd (@rcvddatestrs) {
     dbg ("trying Received header date for real time: $rcvd");
     $rcvd = $self->_parse_rfc822_date ($rcvd);
-    if ($rcvd) {
+    if ($rcvd != -1) {
       push (@rcvddates, $rcvd);
     }
   }
@@ -1078,7 +1088,7 @@ sub _parse_rfc822_date {
     $dd = $1; $mon = $2; $yyyy = $3;
   } else {
     dbg ("time cannot be parsed: $date");
-    return 0;
+    return -1;
   }
 
   if (defined $yyyy && $yyyy < 100) {
@@ -1124,7 +1134,7 @@ sub _parse_rfc822_date {
 
   if ($@) {
     dbg ("time cannot be parsed: $date, $yyyy-$mmm-$dd $hh:$mm:$ss");
-    return 0;
+    return -1;
   }
 
   if ($tzoff =~ /([-+])(\d\d)(\d\d)$/)	# convert to seconds difference
@@ -1223,6 +1233,38 @@ sub check_for_num_yelling_lines {
     $self->check_for_yelling($body);
     
     return ($self->{num_yelling_lines} >= $threshold);
+}
+
+sub check_language {
+  my ($self) = @_;
+
+  my @languages = split (' ', $self->{conf}->{ok_languages});
+
+  return 0 if grep { $_ eq "all" } @languages;
+
+  my $body = $self->get_decoded_stripped_body_text_array();
+  $body = join ("\n", @$body);
+  $body =~ s/^Subject://i;
+
+  # need about 256 bytes for reasonably accurate match (experimentally derived)
+  return 0 if (length($body) < 256);
+
+  my @matches = Mail::SpamAssassin::TextCat::classify($self, $body);
+  # not able to get a match, assume it's okay
+  if (! @matches) {
+    return 0;
+  }
+
+  # see if any matches are okay
+  foreach my $match (@matches) {
+    $match =~ s/\..*//;
+    foreach my $language (@languages) {
+      if ($match eq $language) {
+	return 0;
+      }
+    }
+  }
+  return 1;
 }
 
 ###########################################################################
