@@ -501,7 +501,7 @@ main(int argc, char *argv[])
     m.priv = NULL;
     m.max_len = max_size;
     m.timeout = timeout;
-    m.is_spam = EX_NOHOST;	// default err code if can't reach the daemon
+    m.is_spam = EX_NOHOST;	/* default err code if can't reach the daemon */
 #ifdef _WIN32
     setmode(STDIN_FILENO, O_BINARY);
     setmode(STDOUT_FILENO, O_BINARY);
