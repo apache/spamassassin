@@ -454,9 +454,6 @@ describe X_PRECEDENCE_REF	Message has X-Precedence-Ref header
 describe X_SERV_HOST_PRESENT	Message has X-ServerHost header
 describe X_STORMPOST_TO		Message has X-Stormpost-To header
 
-header   MIME_ODD_CASE		ALL =~ /\nMiME-Version: /s
-describe MIME_ODD_CASE		MiME-Version header (oddly capitalized)
-
 header   __HAS_MIMEOLE          exists:X-MimeOLE
 header   __HAS_MSMAIL_PRI       exists:X-MSMail-Priority
 header   __HAS_SQUIRRELMAIL_IN_MAILER	X-Mailer =~ /SquirrelMail\b/
