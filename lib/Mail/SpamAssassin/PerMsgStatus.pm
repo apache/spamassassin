@@ -2316,10 +2316,12 @@ use Fcntl;
 # thanks to http://www2.picante.com:81/~gtaylor/autobuse/ for this
 # code.
 sub secure_tmpfile {
-  my $tmpdir = '/tmp';
-  if (defined $ENV{'TMPDIR'}) { $tmpdir = $ENV{'TMPDIR'}; }
-  $tmpdir = Mail::SpamAssassin::Util::untaint_file_path ($tmpdir);
+  my $tmpdir = File::Spec->tmpdir();
+  if (!$tmpdir) {
+    die "cannot write to a temporary directory! set TMP or TMPDIR in env";
+  }
 
+  $tmpdir = Mail::SpamAssassin::Util::untaint_file_path ($tmpdir);
   my $template = $tmpdir."/sa.$$.";
 
   my $reportfile;
