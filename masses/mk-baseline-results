@@ -1,10 +1,11 @@
 #!/bin/sh
 
-if [ $# -gt 0 ] ; then
-  ./logs-to-c $* || exit 1
-# else assume we're using the default ruleset
+SCORESET=0
+if [ "x$1" != "x" ]; then
+ SCORESET=$1
 fi
-make evolve || exit 1
+
+make evolve SCORESET=$SCORESET || exit 1
 
 version=`( cd .. ; ./build/get_version )`
 
