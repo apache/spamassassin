@@ -1891,7 +1891,7 @@ Define a header eval test.  C<name_of_eval_method> is the name of
 a method on the C<Mail::SpamAssassin::EvalTests> object.  C<arguments>
 are optional arguments to the function call.
 
-=item header SYMBOLIC_TEST_NAME rbleval:check_rbl('set', 'zone')
+=item header SYMBOLIC_TEST_NAME eval:check_rbl('set', 'zone')
 
 Check a DNSBL (DNS blacklist), also known as RBLs (realtime blacklists).  This
 will retrieve Received headers from the mail, parse the IP addresses, select
@@ -1933,24 +1933,29 @@ This is accomplished by naming the set 'foo-lastuntrusted'.
 
 =back
 
-=item header SYMBOLIC_TEST_NAME rbleval:check_rbl_txt('set', 'zone')
+=item header SYMBOLIC_TEST_NAME eval:check_rbl_txt('set', 'zone')
 
 Same as check_rbl(), except querying using IN TXT instead of IN A records.
 If the zone supports it, it will result in a line of text describing
 why the IP is listed, typically a hyperlink to a database entry.
 
+=item header SYMBOLIC_TEST_NAME eval:check_rbl_sub('set', 'subrule')
+
+Create a subrule for 'set'.  If you want to look up a multi-meaning zone
+like relays.osirusoft.com, you can then query the results from that zone
+using the zone ID from the original query.  The subrule may either be an
+IPv4 dotted address for RBLs that return multiple A records or a
+non-negative decimal number to specify a bitmask for RBLs that return a
+single A record containing a bitmask of results.
+
 =cut
-    if (/^header\s+(\S+)\s+rbleval:(.*)$/) {
-      $self->add_test ($1, $2, TYPE_RBL_EVALS);
-      next;
-    }
-    if (/^header\s+(\S+)\s+eval:(.*)$/) {
+    if (/^header\s+(\S+)\s+(?:rbl)?eval:(.*)$/) {
       my ($name, $fn) = ($1, $2);
 
       if ($fn =~ /^check_rbl/) {
-	dbg ("deprecated: 'eval:check_rbl...(..)', use rbleval instead: $_");
 	$self->add_test ($name, $fn, TYPE_RBL_EVALS);
-      } else {
+      }
+      else {
 	$self->add_test ($name, $fn, TYPE_HEAD_EVALS);
       }
       next;

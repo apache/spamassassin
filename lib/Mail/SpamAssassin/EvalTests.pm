@@ -1237,6 +1237,12 @@ sub check_rbl_sub {
   $self->register_rbl_subtest($rule, $set, $subtest);
 }
 
+# backward compatibility
+sub check_rbl_results_for {
+  #warn "check_rbl_results_for() is deprecated, use check_rbl_sub()\n";
+  check_rbl_sub(@_);
+}
+
 # check a RBL if a message is Habeas SWE
 sub check_rbl_swe {
   my ($self, $rule, $set, $rbl_server, $subtest) = @_;
