@@ -209,7 +209,6 @@ my $error_before_reaper;
 
 sub REAPER {
     $error_before_reaper = $!;  # take a copy before cleanupchildren()
-    cleanupchildren;            # may reset errno
     $SIG{CHLD} = \&REAPER;
 }
 
@@ -241,7 +240,9 @@ for ( ; 1; close Client)
       # perl 5.8.0, and some other platforms with -m.
       if ($! == &Errno::EINTR || $error_before_reaper == &Errno::EINTR) {
         warn "accept interrupted: $! $error_before_reaper";
+        cleanupchildren;
         next;
+
       } else {
         die "accept failed: $! $error_before_reaper";
       }
@@ -801,7 +802,7 @@ sub cleanupchildren {
 use POSIX 'setsid';
 sub daemonize
 {
-    $0 = join(' ', $0, @ARGV) unless($opt{'debug'});; # pretty command line in ps
+    $0 = join(' ', $0, @ARGV) unless($opt{'debug'}); # pretty command line in ps
     chdir '/' or die "Can't chdir to '/': $!";
     $SIG{__WARN__} = sub { logmsg($_[0]); };
     open STDIN,'/dev/null' or die "Can't read '/dev/null': $!";

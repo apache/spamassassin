@@ -370,6 +370,7 @@ int message_filter(const struct sockaddr *addr, char *username, int flags, struc
     if((i=try_to_connect(addr, &sock))!=EX_OK){
         free(buf);
         free(m->out); m->out=m->msg; m->out_len=m->msg_len;
+        close(sock);
         return i;
     }
 
@@ -384,6 +385,7 @@ int message_filter(const struct sockaddr *addr, char *username, int flags, struc
         if(i<0){
             free(buf);
             free(m->out); m->out=m->msg; m->out_len=m->msg_len;
+            close(sock);
             return EX_IOERR;
         }
         if(i==0){
@@ -392,6 +394,7 @@ int message_filter(const struct sockaddr *addr, char *username, int flags, struc
                 /* Nope, communication error */
                 free(buf);
                 free(m->out); m->out=m->msg; m->out_len=m->msg_len;
+                close(sock);
                 return EX_IOERR;
             }
             break;
@@ -402,6 +405,7 @@ int message_filter(const struct sockaddr *addr, char *username, int flags, struc
                 syslog(LOG_ERR, "spamd responded with bad string '%s'", buf);
                 free(buf);
                 free(m->out); m->out=m->msg; m->out_len=m->msg_len;
+                close(sock);
                 return EX_PROTOCOL;
             }
             header_read=-1;
@@ -420,6 +424,7 @@ int message_filter(const struct sockaddr *addr, char *username, int flags, struc
                 if(i<=0){
                     free(buf);
                     free(m->out); m->out=m->msg; m->out_len=m->msg_len;
+                    close(sock);
                     return (i<0)?EX_IOERR:EX_PROTOCOL;
                 }
                 if(buf[len]=='\n'){
@@ -434,12 +439,14 @@ int message_filter(const struct sockaddr *addr, char *username, int flags, struc
                         }
                         m->out_len=snprintf(m->out, m->max_len+EXPANSION_ALLOWANCE, "%.1f/%.1f\n", m->score, m->threshold);
                         m->is_spam=strcasecmp("true", is_spam)?EX_NOTSPAM:EX_ISSPAM;
+                        close(sock);
                         return EX_OK;
                     } else {
                         /* Not check-only, better be Content-length */
                         if(sscanf(buf, "Content-length: %d", &expected_len)!=1){
                             free(buf);
                             free(m->out); m->out=m->msg; m->out_len=m->msg_len;
+                            close(sock);
                             return EX_PROTOCOL;
                         }
                     }
@@ -449,6 +456,7 @@ int message_filter(const struct sockaddr *addr, char *username, int flags, struc
                         /* Nope, bail. */
                         free(buf);
                         free(m->out); m->out=m->msg; m->out_len=m->msg_len;
+                        close(sock);
                         return EX_PROTOCOL;
                     }
 
@@ -462,21 +470,25 @@ int message_filter(const struct sockaddr *addr, char *username, int flags, struc
     if(flags&SPAMC_CHECK_ONLY){
         /* We should have gotten headers back... Damnit. */
         free(m->out); m->out=m->msg; m->out_len=m->msg_len;
+        close(sock);
         return EX_PROTOCOL;
     }
 
     len=full_read(sock, m->out+m->out_len, m->max_len+EXPANSION_ALLOWANCE+1-m->out_len, m->max_len+EXPANSION_ALLOWANCE+1-m->out_len);
     if(len+m->out_len>m->max_len+EXPANSION_ALLOWANCE){
         free(m->out); m->out=m->msg; m->out_len=m->msg_len;
+        close(sock);
         return EX_TOOBIG;
     }
     m->out_len+=len;
 
     shutdown(sock, SHUT_RD);
+    close(sock);
 
     if(m->out_len!=expected_len){
         syslog(LOG_ERR, "failed sanity check, %d bytes claimed, %d bytes seen", expected_len, m->out_len);
         free(m->out); m->out=m->msg; m->out_len=m->msg_len;
+        close(sock);
         return EX_PROTOCOL;
     }
 

@@ -50,6 +50,7 @@ use vars	qw{
 	$type_rawbody_tests $type_rawbody_evals 
 	$type_uri_tests $type_uri_evals
 	$type_rbl_evals $type_rbl_res_evals $type_meta_tests
+        $VERSION
 };
 
 @ISA = qw();
@@ -67,6 +68,8 @@ $type_uri_evals  = 110;
 $type_rbl_evals  = 120;
 $type_rbl_res_evals  = 121;
 $type_meta_tests = 122;
+
+$VERSION = 'bogus';     # avoid CPAN.pm picking up version strings later
 
 ###########################################################################
 

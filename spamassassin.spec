@@ -29,11 +29,10 @@ Release: %{release}
 License: Artistic
 URL: http://spamassassin.org/
 Source: http://spamassassin.org/released/Mail-SpamAssassin-%{real_version}.tar.gz
-Requires: perl >= 5.004
 Buildroot: %{_tmppath}/%{name}-root
 Prefix: %{_prefix}
 Prereq: /sbin/chkconfig
-Requires: perl >= 5.004 perl(Pod::Usage) perl(HTML::Parser)
+Requires: perl-Mail-SpamAssassin = %{version}-%{release}
 Distribution: SpamAssassin
 
 %define __find_provides /usr/lib/rpm/find-provides.perl
@@ -65,6 +64,7 @@ poczty.
 Summary:        Miscleanous tools for SpamAssassin
 Summary(pl):    Przeró¿ne narzêdzia zwi±zane z SpamAssassin
 Group:          Applications/Mail
+Requires: perl-Mail-SpamAssassin = %{version}-%{release}
 
 %description tools
 Miscleanous tools from various authors, distributed with SpamAssassin.
@@ -77,6 +77,7 @@ Przeró¿ne narzêdzia, dystrybuowane razem z SpamAssassin. Zobacz
 %package -n perl-Mail-SpamAssassin
 Summary:        %{pdir}::%{pnam} -- SpamAssassin e-mail filter Perl modules
 Summary(pl):    %{pdir}::%{pnam} -- modu³y Perla filtru poczty SpamAssassin
+Requires: perl >= 5.004 perl(Pod::Usage) perl(HTML::Parser)
 # PLD version:
 #Group:          Development/Languages/Perl
 # Red Hat version:
@@ -161,6 +162,9 @@ if [ $1 = 0 ]; then
 fi
 
 %changelog
+
+* Wed Sep 11 2002 Justin Mason <jm-spec@jmason.org>
+- spamassassin RPM now requires perl-Mail-SpamAssassin; from Theo
 
 * Tue Sep 03 2002 Theo Van Dinter <felicity@kluge.net>
 - added INSTALL to documentation files

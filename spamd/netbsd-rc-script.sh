@@ -31,7 +31,7 @@ command="@PREFIX@/bin/spamd"
 pidfile="/var/run/${name}.pid"
 sig_stop="TERM"
 command_args="-d -r ${pidfile}"
-spamd_flags="-c -a"
+spamd_flags="-H -c -a"
 
 INTERPRETER_SUPPORT=@INTERPRETER_SUPPORT@
 
