@@ -276,3 +276,10 @@ rawbody T_BAYESBUSTER_LINE_12	/^([a-z]{3,} ){12,}<[Bb][Rr]>$/
 rawbody T_BAYESBUSTER_LINE_15	/^([a-z]{3,} ){15,}<[Bb][Rr]>$/
 rawbody T_BAYESBUSTER_LINE_15I	/^([a-z]{3,} ){15,}<br>$/i
 
+# XBL is the Exploits Block List: http://www.spamhaus.org/xbl/
+# contains data from the CBL, probably supercedes that.
+header T_RCVD_IN_XBL      eval:check_rbl_txt('xbl', 'xbl.spamhaus.org.')
+describe T_RCVD_IN_XBL    Received via a relay in Spamhaus XBL
+tflags T_RCVD_IN_XBL      net
+score T_RCVD_IN_XBL       1
+
