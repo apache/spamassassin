@@ -102,12 +102,12 @@ sub _parse {
 
     # note: no eval'd code should be loaded before the SECURITY line below.
     #
-    if (/^whitelist_from\s+(.+)\s*$/) {
+    if (/^whitelist[-_]from\s+(.+)\s*$/) {
       $self->add_to_addrlist ($self->{whitelist_from},
       	$self->{whitelist_from_doms}, split (' ', $1)); next;
     }
 
-    if (/^blacklist_from\s+(.+)\s*$/) {
+    if (/^blacklist[-_]from\s+(.+)\s*$/) {
       $self->add_to_addrlist ($self->{blacklist_from},
       	$self->{blacklist_from_doms}, split (' ', $1)); next;
     }
@@ -116,7 +116,7 @@ sub _parse {
       $self->{descriptions}->{$1} = $2; next;
     }
 
-    if (/^required_hits\s+(\S+)$/) {
+    if (/^required[-_]hits\s+(\S+)$/) {
       $self->{required_hits} = $1+0; next;
     }
 
@@ -124,7 +124,7 @@ sub _parse {
       $self->{scores}->{$1} = $2+0.0; next;
     }
 
-    if (/^clear-report-template$/) {
+    if (/^clear[-_]report[-_]template$/) {
       $self->{report_template} = ''; next;
     }
 
@@ -132,15 +132,15 @@ sub _parse {
       $self->{report_template} .= $1."\n"; next;
     }
 
-    if (/^clear-terse-report-template$/) {
+    if (/^clear[-_]terse[-_]report[-_]template$/) {
       $self->{terse_report_template} = ''; next;
     }
 
-    if (/^terse-report\b\s*(.*?)$/) {
+    if (/^terse[-_]report\b\s*(.*?)$/) {
       $self->{terse_report_template} .= $1."\n"; next;
     }
 
-    if (/^clear-spamtrap-template$/) {
+    if (/^clear[-_]spamtrap[-_]template$/) {
       $self->{spamtrap_template} = ''; next;
     }
 
@@ -148,31 +148,31 @@ sub _parse {
       $self->{spamtrap_template} .= $1."\n"; next;
     }
 
-    if (/^auto_report_threshold\s+(\d+)$/) {
+    if (/^auto[-_]report[-_]threshold\s+(\d+)$/) {
       $self->{auto_report_threshold} = $1+0; next;
     }
 
-    if (/^rewrite_subject\s+(\d+)$/) {
+    if (/^rewrite[-_]subject\s+(\d+)$/) {
       $self->{rewrite_subject} = $1+0; next;
     }
 
-    if (/^report_header\s+(\d+)$/) {
+    if (/^report[-_]header\s+(\d+)$/) {
       $self->{report_header} = $1+0; next;
     }
 
-    if (/^use_terse_report\s+(\d+)$/) {
+    if (/^use[-_]terse[-_]report\s+(\d+)$/) {
       $self->{use_terse_report} = $1+0; next;
     }
 
-    if (/^defang_mime\s+(\d+)$/) {
+    if (/^defang[-_]mime\s+(\d+)$/) {
       $self->{defang_mime} = $1+0; next;
     }
 
-    if (/^skip_rbl_checks\s+(\d+)$/) {
+    if (/^skip[-_]rbl[-_]checks\s+(\d+)$/) {
       $self->{skip_rbl_checks} = $1+0; next;
     }
 
-    if (/^ok_locales\s+(.+)$/) {
+    if (/^ok[-_]locales\s+(.+)$/) {
       $self->{ok_locales} = $1; next;
     }
 
@@ -199,17 +199,17 @@ sub _parse {
       $self->add_test ($1, $2, $type_full_tests); next;
     }
 
-    if (/^razor-config\s*(.*)\s*$/) {
+    if (/^razor[-_]config\s*(.*)\s*$/) {
       $self->{razor_config} = $1; next;
     }
 
-    if (/^user_scores_dsn\s+(\S+)$/) {
+    if (/^user[-_]scores[-_]dsn\s+(\S+)$/) {
       $self->{user_scores_dsn} = $1; next;
     }
-    if(/^user_scores_sql_username\s+(\S+)$/) {
+    if(/^user[-_]scores[-_]sql[-_]username\s+(\S+)$/) {
       $self->{user_scores_sql_username} = $1; next;
     }
-    if(/^user_scores_sql_password\s+(\S+)$/) {
+    if(/^user[-_]scores[-_]sql[-_]password\s+(\S+)$/) {
       $self->{user_scores_sql_password} = $1; next;
     }
 
