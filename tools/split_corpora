@@ -12,15 +12,16 @@ use FileHandle;
 
 sub usage {
   print STDERR "split-corpora [-n num_buckets] [-p outfile_prefix] ".
-    "folder1 ....\n";
+	"[-l max_messages] ".
+	"folder1 ....\n";
   exit(1);
 } # usage()
 
 ###########
 
-our ($opt_n, $opt_p, $opt_h);
+our ($opt_n, $opt_p, $opt_h, $opt_l);
 
-getopt('n:p:h');
+getopt('n:p:l:h');
 
 usage() if ($opt_h);
 
@@ -44,9 +45,14 @@ foreach my $bucket (1 .. $num_buckets) {
 
 my $current_bucket = 0;
 
-my $iter = new Mail::SpamAssassin::ArchiveIterator();
+my $iter = new Mail::SpamAssassin::ArchiveIterator({ });
 $iter->set_function(\&wanted);
-$iter->run(@IN_FILES);
+my $messagecount = 0;
+
+eval {
+  $iter->run(@IN_FILES);
+};
+die $@ unless ($@ =~ /HITLIMIT/);
 
 foreach my $fh (@bucket_fhs) {
   $fh->close();
@@ -55,7 +61,9 @@ foreach my $fh (@bucket_fhs) {
 #############################################
 
 sub wanted {
-  my ($msd_id, $data_ref) = @_;
+  my ($msg_id, $data_ref) = @_;
+
+  if ($messagecount++ > $opt_l) { die 'HITLIMIT'; }
 
   # Make sure message can be used for outputing mbox format
   if ($data_ref->[0] !~ /^From \S+ +... ... /) {
