@@ -1087,7 +1087,7 @@ sub check_rbl {
       $i++;
       # Some of the matches in other zones, like a DUL match on a first hop 
       # may be negated by another rule, so preventing a match in two zones
-      # is better done with a Z_FUDGE_foo rule that users check_both_rbl_results
+      # is better done with a Z_FUDGE_foo rule that uses check_both_rbl_results
       # and sets a negative score to compensate 
       # It's also useful to be able to flag mail that went through an IP that
       # is on two different blacklists  -- Marc
@@ -1529,61 +1529,192 @@ sub check_for_shifted_date {
 	  ($max eq 'undef' || $self->{date_diff} < (3600 * $max)));
 }
 
-sub _check_date_diff {
-  my ($self) = @_;
-  local ($_);
+sub received_within_months {
+  # filters out some false positives in old corpus mail - Allen
+  my($self,$min,$max) = @_;
 
-  $self->{date_diff} = 0;
+  unless (exists($self->{date_received})) {
+    $self->_check_date_received();
+  }
+  my $diff = time() - $self->{date_received};
 
-  my @received = grep(/\S/, split(/\n/, $self->get ('Received')));
-  # if we have no Received: headers, chances are we're archived mail
-  # with a limited set of headers
-  return if (! @received);
+  # 365.2425 * 24 * 60 * 60 = 31556952 = seconds in year (including leap)
+
+  if (((! defined($min)) || ($min eq 'undef') ||
+       ($diff >= (31556952 * ($min/12)))) &&
+      ((! defined($max)) || ($max eq 'undef') ||
+       ($diff < (31556952 * ($max/12))))) {
+    return 1;
+  } else {
+    return 0;
+  }
+}
+
+sub _get_date_header_time {
+  my $self = $_[0];
 
   # a Resent-Date: header takes precedence over any Date: header
-  my $date = $self->get ('Resent-Date');
-  if (!defined $date || $date eq '') {
-    $date = $self->get ('Date');
+  my $date = $self->get('Resent-Date');
+  my $time;
+  if (defined($date) && length($date)) {
+    chomp($date);
+    $time = $self->_parse_rfc822_date($date);
   }
-  # just return since there's already a good test for this
-  return if (!defined $date || $date eq '');
+  unless (defined($time)) {
+    $date = $self->get('Date');
+    if (defined($date) && length($date)) {
+      chomp($date);
+      $time = $self->_parse_rfc822_date($date);
+    }
+  }
+  if (defined($time)) {
+    $self->{date_header_time} = $time;
+  } else {
+    $self->{date_header_time} = undef;
+  }
+}
 
-  chomp ($date);
-  my $time = $self->_parse_rfc822_date ($date);
+sub _get_received_header_times {
+  my $self = $_[0];
 
-  # parse_rfc822_date failed
-  return if !defined($time);
+  $self->{received_header_times} = [ () ];
+  $self->{received_fetchmail_time} = undef;
+
+  my(@received);
+  my $received = $self->get('Received');
+  if (defined($received) && length($received)) {
+    @received = grep {$_ =~ m/\S/} (split(/\n/,$received));
+  }
+  # if we have no Received: headers, chances are we're archived mail
+  # with a limited set of headers
+  unless (scalar(@received)) {
+    return;
+  }
 
   # handle fetchmail headers
-  my @local;
-  if ($received[0] =~ /\bfrom (?:localhost\s|(\S+ ){1,2}\S*\b127\.0\.0\.1\b)|qmail \d+ invoked by uid \d+/) {
+  my(@local);
+  if (($received[0] =~
+      m/\bfrom (?:localhost\s|(?:\S+ ){1,2}\S*\b127\.0\.0\.1\b)/) ||
+      ($received[0] =~ m/qmail \d+ invoked by uid \d+/)) {
     push @local, (shift @received);
   }
-  if (@received && $received[0] =~ /\bby localhost with \w+ \(fetchmail-[\d.]+/) {
+  if (scalar(@received) &&
+      ($received[0] =~ m/\bby localhost with \w+ \(fetchmail-[\d.]+/)) {
     push @local, (shift @received);
-  }
-  elsif (@local) {
+  } elsif (scalar(@local)) {
     unshift @received, (shift @local);
   }
 
-  my @diffs;
-  for my $rcvd (@received) {
-    if ($rcvd =~ /(\s.?\d+ \S\S\S \d+ \d+:\d+:\d+ \S+)/) {
-      $rcvd = $1;
-      dbg ("trying Received header date for real time: $rcvd", "datediff", -2);
-      $rcvd = $self->_parse_rfc822_date($rcvd);
-      if (defined($rcvd)) {
-	my $diff = $time - $rcvd;
-	dbg ("time_t from date=$time, rcvd=$rcvd, diff=$diff", "datediff", -2);
-	push(@diffs, $diff);
+  my $rcvd;
+
+  if (scalar(@local)) {
+    my(@fetchmail_times);
+    foreach $rcvd (@local) {
+      if ($rcvd =~ m/(\s.?\d+ \S\S\S \d+ \d+:\d+:\d+ \S+)/) {
+	my $date = $1;
+	dbg ("trying Received fetchmail header date for real time: $date",
+	     "datediff", -2);
+	my $time = $self->_parse_rfc822_date($date);
+	if (defined($time) && (time() >= $time)) {
+	  dbg ("time_t from date=$time, rcvd=$date", "datediff", -2);
+	  push @fetchmail_times, $time;
+	}
+      }
+    }
+    if (scalar(@fetchmail_times) > 1) {
+      $self->{received_fetchmail_time} =
+       (sort {$b <=> $a} (@fetchmail_times))[0];
+    } elsif (scalar(@fetchmail_times)) {
+      $self->{received_fetchmail_time} = $fetchmail_times[0];
+    }
+  }
+
+  my(@header_times);
+  foreach $rcvd (@received) {
+    if ($rcvd =~ m/(\s.?\d+ \S\S\S \d+ \d+:\d+:\d+ \S+)/) {
+      my $date = $1;
+      dbg ("trying Received header date for real time: $date", "datediff", -2);
+      my $time = $self->_parse_rfc822_date($date);
+      if (defined($time)) {
+	dbg ("time_t from date=$time, rcvd=$date", "datediff", -2);
+	push @header_times, $time;
       }
     }
   }
 
-  if (! @diffs) {
-    dbg ("no dates found in Received headers, returning", "datediff", -1);
-    return;
+  if (scalar(@header_times)) {
+    $self->{received_header_times} = [ @header_times ];
+  } else {
+    dbg ("no dates found in Received headers", "datediff", -1);
   }
+}
+
+sub _check_date_received {
+  my $self = $_[0];
+
+  my(@dates_poss);
+
+  $self->{date_received} = 0;
+
+  unless (exists($self->{date_header_time})) {
+    $self->_get_date_header_time();
+  }
+
+  if (defined($self->{date_header_time})) {
+    push @dates_poss, $self->{date_header_time};
+  }
+
+  unless (exists($self->{received_header_times})) {
+    $self->_get_received_header_times();
+  }
+  my(@received_header_times) = @{ $self->{received_header_times} };
+  if (scalar(@received_header_times)) {
+    push @dates_poss, $received_header_times[0];
+  }
+  if (defined($self->{received_fetchmail_time})) {
+    push @dates_poss, $self->{received_fetchmail_time};
+  }
+
+  if (defined($self->{date_header_time}) && scalar(@received_header_times)) {
+    unless (exists($self->{date_diff})) {
+      $self->_check_date_diff();
+    }
+    push @dates_poss, $self->{date_header_time} - $self->{date_diff};
+  }
+
+  if (scalar(@dates_poss)) {	# use median
+    $self->{date_received} = (sort {$b <=> $a}
+			      (@dates_poss))[int($#dates_poss/2)];
+    dbg("Date chosen from message: " .
+	scalar(localtime($self->{date_received})), "datediff", -2);
+  } else {
+    dbg("no dates found in message", "datediff", -1);
+  }
+}
+
+sub _check_date_diff {
+  my $self = $_[0];
+
+  $self->{date_diff} = 0;
+
+  unless (exists($self->{date_header_time})) {
+    $self->_get_date_header_time();
+  }
+
+  unless (defined($self->{date_header_time})) {
+    return;			# already have tests for this
+  }
+
+  unless (exists($self->{received_header_times})) {
+    $self->_get_received_header_times();
+  }
+  my(@header_times) = @{ $self->{received_header_times} };
+
+  unless (scalar(@header_times)) {
+    return;			# archived mail?
+  }
+
+  my(@diffs) = map {$self->{date_header_time} - $_} (@header_times);
 
   # if the last Received: header has no difference, then we choose to
   # exclude it
@@ -2521,8 +2652,8 @@ sub check_messageid_not_usable {
   $_ = $self->get ("Received");
   return 1 if /\/CWT\/DCE\)/;
 
-  # remainder left for Dan who owns bug 1172 ;)  Dan, suggest
-  # received_within_months('6','undef') as per Allen's patch
+  # too old; older versions of clients used different formats
+  return 1 unless ($self->received_within_months('6','undef'));
 
   return 0;
 }
