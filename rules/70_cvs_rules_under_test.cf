@@ -86,15 +86,26 @@ score T_ADCLICK                 2.0
 header T_FORGED_MX_HOTMAIL      Received =~ /^from mx\d+\.hotmail\.com /m
 score T_FORGED_MX_HOTMAIL       2.0
 
-body T_POSTCARD			/send a postcard to Unsubscribe/
-describe T_POSTCARD		Send a postcard to unsubscribe
-score T_POSTCARD		3.0
+# bug 1022: MGM_POSTCARD #1
+body T_UNSUBSCRIBE_POSTCARD	/send a postcard to Unsubscribe/
+describe T_UNSUBSCRIBE_POSTCARD	Send a postcard to unsubscribe
+score T_UNSUBSCRIBE_POSTCARD	2.0
+
+# bug 1022: MGM_POSTCARD #2 original
+body T_UNSUBSCRIBE_POSTAL	/(?:Send(ing)? a (?:postal mail|postcard) to (?:Unsubscribe|Customer ?Service|remove)|unsubscribe by (?:postal mail|postcard))/i
+describe T_UNSUBSCRIBE_POSTAL	Send real mail to unsubscribe
+score T_UNSUBSCRIBE_POSTAL	2.0
+
+# bug 1022: MGM_POSTCARD #2 small change
+body T_UNSUBSCRIBE_POSTAL2	/(?:Send(ing)? a (?:postal mail|postcard) to (?:Unsubscribe|Customer ?Service|remov(?:e|al))|unsubscribe by (?:postal mail|postcard))/i
+describe T_UNSUBSCRIBE_POSTAL2	Send real mail to unsubscribe
+score T_UNSUBSCRIBE_POSTAL2	2.0
 
 # quinlan: this is not any better on my corpus, but I figured it was
 # worth a shot
-body T_UNSUBSCRIBE_WTF		/(?:(?:unsubscribe|remov[ae]).{0,16}\b(?:letter|postcard|fax)|\b(?:letter|postcard|fax).{0,16}(?:unsubscribe|remov[ae]))/i
+body T_UNSUBSCRIBE_WTF		/(?:(?:customer ?service|unsubscribe|remov[ae]).{0,16}\b(?:postal mail|letter|postcard|fax)|\b(?:postal mail|letter|postcard|fax).{0,16}(?:customer ?service|unsubscribe|remov[ae]))/i
 describe T_UNSUBSCRIBE_WTF	Send a postcard/letter/fax to unsubscribe
-score T_UNSUBSCRIBE_WTF		3.0
+score T_UNSUBSCRIBE_WTF		2.0
 
 # results for quinlan:
 # 0.333    1.023    0.000    1.00    0.77    1.00  T_RATWARE_CDO
@@ -115,6 +126,10 @@ score T_RATWARE_EMWAC		1.0
 header T_RATWARE_THEBAT		X-Mailer =~ /The Bat/
 describe T_RATWARE_THEBAT	Sent from "The Bat"
 score T_RATWARE_THEBAT		1.0
+
+# intended to replace URGENT_BIZ
+body T_URGENT_BIZ		/URGENT.{0,16}(?:ASSISTANCE|BUSINESS|BUY|CONFIDENTIAL|NOTICE|PROPOSAL)/i
+describe T_URGENT_BIZ		Contains URGENT matter
 
 # Needs testing
 body T_QUOTE_TWICE_1            /^> >\s/
