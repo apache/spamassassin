@@ -116,6 +116,7 @@ score EARNINGS			     1.0
 score EARN_PER_WEEK                  4.339
 score EASY_TERMS		     1.0
 score EJACULATION                    3.601
+score EMAIL_ATTRIBUTION              -1
 score EMAIL_MARKETING                0.259
 score EXCHANGE_SERVER                -2
 score EXCUSE_1                       2.329
@@ -549,8 +550,8 @@ score GENUINE_EBAY_RCVD		   -10.0
 # Compensation for common false positives.
 
 score BALANCE_FOR_LONG		    -2.0
-score UNIFIED_PATCH		    -5.0
-score DIFF_C_PATCH		    -5.0
+score PATCH_CONTEXT_DIFF	    -5.0
+score PATCH_UNIFIED_DIFF	    -5.0
 score BUGZILLA_BUG		    -2.0
 score DEBIAN_BTS_BUG		    -4.0
 score MAILMAN_CONFIRM               -4.0
