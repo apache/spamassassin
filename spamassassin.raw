@@ -127,6 +127,8 @@ EOVERSION
 #
 use Mail::SpamAssassin::NoMailAudit;
 my $mail = Mail::SpamAssassin::NoMailAudit->new ();
+# our version allows us to turn on and off the 'From ' line at the top.
+if ($opt_P || $opt_t) { $mail->{add_From_line} = 0; }
 
 # For Mail::Audit users -- this is the magic. Just create a Mail::SpamAssassin
 # object like this, then run the check() method as below; if it returns a
