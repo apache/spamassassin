@@ -3,6 +3,8 @@ require 5.005;
 use Config;
 use ExtUtils::MakeMaker;
 
+my $mycflags = '';		# this is a good place to put -g etc.
+
 
 sub MY::libscan {
   my($self,$path) = @_;
@@ -71,7 +73,7 @@ sub MY::postamble {
 qq{
 
 CFCC		= $Config{cc}
-CFCCFLAGS	= $Config{ccflags}
+CFCCFLAGS	= $Config{ccflags} $mycflags
 CFOPTIMIZE	= $Config{optimize}
 CFLIBS		= $Config{libs}
 CFLDFLAGS	= $Config{ldflags}
