@@ -2,6 +2,7 @@
 #
 # Translation by Olivier Nicole <on at cs.ait.ac dot th>,
 #   Asian Institute of Technology, Bangkok, Thaïlande
+#   & Maxime Ritter <airmax at netlibre dot info>
 #
 # Please don't modify this file as your changes will be overwritten with
 # the next update. Use @@LOCAL_RULES_DIR@@/local.cf instead.
@@ -18,20 +19,150 @@ lang fr report
 lang fr report Analyze détaillée du contenu:   (_HITS_ points, _REQD_ points requis)
 lang fr report _SUMMARY_
 lang fr report ---------------- Fin des résultats de SpamAssassin -------------------
+#                 ......................................................................
+lang fr clear-spamtrap-template
+lang fr spamtrap Subject: Adresse plus utilisée / address is no longer available  
+lang fr spamtrap [English version follows]
+lang fr spamtrap [-----------------------]
+lang fr spamtrap [ce message a été généré automatiquement]
+lang fr spamtrap 
+lang fr spamtrap Veuillez que cette adresse mél n'est plus utilisé, et qu'a
+lang fr spamtrap actuelle ne recoit que des spams. En conséquence, tout mail
+lang fr spamtrap envoyé à cet adresse est rajouté à diverses systÃ¨mes de 
+lang fr spamtrap lutte contre les spams, puis automatiquement supprimé.
+lang fr spamtrap
+lang fr spamtrap Si vous souhaiter le propriêtaire de cette adresse e-mail,
+lang fr spamtrap veuillez vous procurer sa nouvelle adresse e-mail, 
+lang fr spamtrap éventuellement au moyen d'une recherche sur le web. 
+lang fr spamtrap 
+lang fr spamtrap [-- Signé : SpamAssassin, filtre de mails]
+lang fr spamtrap 
+lang fr spamtrap [-----------------------]
+lang fr spamtrap [this message has been automatically generated]
+lang fr spamtrap 
+lang fr spamtrap Please note that this address is no longer in use, and nowadays
+lang fr spamtrap receives nothing but unsolicited commercial mail.  Accordingly,
+lang fr spamtrap any mail sent to it is added to several spam-tracking databases,
+lang fr spamtrap then automatically deleted.
+lang fr spamtrap
+lang fr spamtrap If you genuinely want to contact the owner of the address, please
+lang fr spamtrap re-check your contact lists, or search the web, to find their
+lang fr spamtrap current e-mail address.
+lang fr spamtrap 
+lang fr spamtrap The mail you sent is reproduced in full below, for resending to
+lang fr spamtrap the correct address.  Sorry for the inconvenience!
+lang fr spamtrap 
+lang fr spamtrap [-- Signed: the SpamAssassin mail filter]
+lang fr spamtrap 
+#                 ......................................................................
+
 lang fr clear-terse-report-template
 lang fr terse-report ---- Début des résultats de SpamAssassin
 lang fr terse-report _HITS_ points, _REQD_ points requis ;
 lang fr terse-report _SUMMARY_
 lang fr terse-report ---- Fin des résultats de SpamAssassin
+
+#                     ......................................................................
+lang fr clear-unsafe-report-template
+lang fr unsafe-report Le message original n'étant pas au format text brut, il est peut-etre
+lang fr unsafe-report malsain de l'ouvrir avec votre client email ; en particulier il 
+lang fr unsafe-report pourrait contenir un virus, ou confirmer que votre adresse email
+lang fr unsafe-report peut recevoir des spams. Si vous souhaiter le message, il est 
+lang fr unsafe-report conseillé de l'enregistrer, puis de le lire avec un éditeur de texte.
+#                     ......................................................................
+
+####################
+# 20_anti_ratware.cf
+lang fr describe USER_AGENT_PINE 	En-tête Message-Id indiquant un MUA non-spammeur (Pine)
+lang fr describe USER_AGENT_MUTT 	En-tête User-Agent provennant d'un MUA non-spammeur (Mutt)
+lang fr describe USER_AGENT_MOZILLA_UA 	En-tête User-Agent provennant d'un MUA non-spammeur (Mozilla)
+lang fr describe USER_AGENT_MOZILLA_XM 	En-tête X-Mailer provennant d'un MUA non-spammeur Netscape)
+lang fr describe USER_AGENT_MACOE 	En-tête User-Agent provennant d'un MUA non-spammeur Outlook Express)
+lang fr describe USER_AGENT_ENTOURAGE 	En-tête User-Agent provennant d'un MUA non-spammeur (Entourage)
+lang fr describe USER_AGENT_KMAIL 	En-tête User-Agent provennant d'un MUA non-spammeur (KMail)
+lang fr describe USER_AGENT_IMP 	En-tête User-Agent provennant d'un MUA non-spammeur (IMP)
+lang fr describe USER_AGENT_TONLINE 	En-tête X-Mailer provennant d'un MUA non-spammeur (T-Offline)
+lang fr describe USER_AGENT_APPLEMAIL 	En-tête X-Mailer provennant d'un MUA non-spammeur (Apple Mail)
+lang fr describe USER_AGENT_GNUS_UA 	En-tête User-Agent provennant d'un MUA non-spammeur (Gnus)
+lang fr describe USER_AGENT_GNUS_XM 	En-tête X-Mailer provennant d'un MUA non-spammeur (Gnus)
+lang fr describe USER_AGENT_VM 		En-tête X-Mailer provennant d'un MUA non-spammeur (VM)
+lang fr describe USER_AGENT_MSN 	En-têtes indiquants un mail valide provenant de MSN
+lang fr describe USER_AGENT_FORTE 	En-tête X-Mailer provennant d'un MUA non spammeur MUA (Forte)
+lang fr describe USER_AGENT_XIMIAN 	En-tête indiquants un MUA non-spammeur (Ximian)
+
+##################
+# 20_body_tests.cf 
+lang fr describe GTUBE			Generic Test for Unsolicited Bulk Email
+lang fr describe RAZOR_CHECK		Ce mèl est dans la liste de Razor, voir http://razor.sf.net/
+lang fr describe RAZOR2_CHECK	        Listé dans Razor2, voir http://razor.sf.net/
+lang fr describe RAZOR2_CF_RANGE_01_10  Razor2 donne un indice de confiance entre 1 et 10
+lang fr describe RAZOR2_CF_RANGE_11_20  Razor2 donne un indice de confiance entre 11 et 20
+lang fr describe RAZOR2_CF_RANGE_21_30  Razor2 donne un indice de confiance entre 21 et 30
+lang fr describe RAZOR2_CF_RANGE_31_40  Razor2 donne un indice de confiance entre 31 et 40
+lang fr describe RAZOR2_CF_RANGE_41_50  Razor2 donne un indice de confiance entre 41 et 50
+lang fr describe RAZOR2_CF_RANGE_51_60  Razor2 donne un indice de confiance entre 51 et 60
+lang fr describe RAZOR2_CF_RANGE_61_70  Razor2 donne un indice de confiance entre 61 et 70
+lang fr describe RAZOR2_CF_RANGE_71_80  Razor2 donne un indice de confiance entre 71 et 80
+lang fr describe RAZOR2_CF_RANGE_81_90  Razor2 donne un indice de confiance entre 81 et 90
+lang fr describe RAZOR2_CF_RANGE_91_100 Razor2 donne un indice de confiance entre 91 et 100
+lang fr describe DCC_CHECK		Ce mèl est dans la liste de DCC : http://www.rhyolite.com/anti-spam/dcc/dcc-tree/dcc.html
+lang fr describe PYZOR_CHECK		Listé dans Pyzor, voir http://pyzor.sf.net/
+lang fr describe REMOVE_IN_QUOTES       Contient des instructions pour se retirer de la liste
+lang fr describe __BILL_1618		Mentionne probablement, l'article du sénat US 1618 (article anti-spam)
+lang fr describe ANTISPAM_BILL		Mentionne très probablement, une loi anti-spam
+lang fr describe CLICK_TO_REMOVE_2      Demande de cliquer sur un lien pour être retiré de la liste
+lang fr describe CARRIAGE_RETURNS       Message contennant plein de caractères ^M (retour chariot)
+lang fr describe ASCII_FORM_ENTRY	Contient un formulaire en mise en page en ASCII
+lang fr describe TRACKER_ID		Contient un numéro d'identification
+lang fr describe MARKUP_RAND            RAND trouvé, spammeur ayant oublié de lancer le générateur d'ID aléatoires
+lang fr describe MARKUP_SSPL            SSPL trouvé, spammeur ayant oublié de lancer le générateur d'ID aléatoires 
+lang fr describe LARGE_HEX		Le mèl contient une grande portion en hexadécimal
+lang fr describe LINES_OF_YELLING	Contient une ligne entière en MAJUSCULES
+lang fr describe LINES_OF_YELLING_2	Contient 2 lignes entières en MAJUSCULES
+lang fr describe LINES_OF_YELLING_3	Contient 3 lignes entières en MAJUSCULES
+lang fr describe WEIRD_QUOTING		Utilisation excessive de symboles de citations	
+lang fr describe BASE64_ENC_TEXT        Le texte du message est encodé en Base64
+lang fr describe MIME_EXCESSIVE_QP      Trop d'encodage 'quoted-printable' dans le corps
+lang fr describe MIME_HTML_NO_CHARSET 	Message en HTML ne précisant pas le jeu de caractères  
+lang fr describe MIME_LONG_LINE_QP      Ligne de 'Quoted-printable' supérieure à 76 caractères
+lang fr describe MIME_MISSING_BOUNDARY  Manquent les limites de sections MIME
+lang fr describe MICROSOFT_EXECUTABLE   Message incluant un éxécutable Microsoft  
+lang fr describe MIME_SUSPECT_NAME    	Le nom du fichier MIME ne correspond pas a son contenu 
+lang fr describe CHARSET_FARAWAY        Mèl rédigé avec des caractères étrangers
+lang fr describe MIME_CHARSET_FARAWAY   MIME character indiquant des caractères étrangers
+lang fr describe UNDESIRED_LANGUAGE_BODY	Le mèl est rédigé dans une langue non choisie
+lang fr describe BODY_8BITS             Le corps du mél contient des caractères 8-bits consécutifs
+
+###############
+# 20_ratware.cf
+lang fr describe FORGED_MUA_MUTT	En-têtes falsifiés prétendants que le mél a été envoyé avec mutt
+
+#############
+# 23_bayes.cf
+lang fr describe BAYES_00	L'algorythme Bayesian a évalué la proba d'être un spam entre 0 and 1%
+lang fr describe BAYES_01	L'algorythme Bayesian a évalué la proba d'être un spam entre 1 and 10%
+lang fr describe BAYES_10	L'algorythme Bayesian a évalué la proba d'être un spam entre 10 and 20%
+lang fr describe BAYES_20	L'algorythme Bayesian a évalué la proba d'être un spam entre 20 and 30%
+lang fr describe BAYES_30	L'algorythme Bayesian a évalué la proba d'être un spam entre 30 and 40%
+lang fr describe BAYES_40	L'algorythme Bayesian a évalué la proba d'être un spam entre 40 and 44%
+lang fr describe BAYES_44	L'algorythme Bayesian a évalué la proba d'être un spam entre 44 and 50%
+lang fr describe BAYES_50	L'algorythme Bayesian a évalué la proba d'être un spam entre 50 and 56%
+lang fr describe BAYES_56	L'algorythme Bayesian a évalué la proba d'être un spam entre 56 and 60%
+lang fr describe BAYES_60	L'algorythme Bayesian a évalué la proba d'être un spam entre 60 and 70%
+lang fr describe BAYES_70	L'algorythme Bayesian a évalué la proba d'être un spam entre 70 and 80%
+lang fr describe BAYES_80	L'algorythme Bayesian a évalué la proba d'être un spam entre 80 and 90%
+lang fr describe BAYES_90	L'algorythme Bayesian a évalué la proba d'être un spam entre 90 and 99%
+lang fr describe BAYES_99	L'algorythme Bayesian a évalué la proba d'être un spam entre 99 and 100%
+
+
+
 lang fr describe ADDRESSES_ON_CD    Les adresse sur cédérom ne servent qu'aux spameurs
 lang fr describe ADVERT_CODE        Le Subject: contient l'identificateur 'ADV'
 lang fr describe AMAZING            Contient le mot 'AMAZING'
 lang fr describe AOL_USERS_LINK     Contient un lien a cliquer pour les utilisateurs d'AOL
-lang fr describe ASCII_FORM_ENTRY   Contient un formulaire en mis en page en ASCII
 lang fr describe ASKS_BILLING_ADDRESS   Réclame une adresse de facturation
 lang fr describe AUTO_EMAIL_REMOVAL     Contient la formule 'Auto Email Removal'
 lang fr describe BAD_HELO_WARNING       Faux nom utilise dans la command SMTP HELO
-lang fr describe BASE64_ENC_TEXT        Le texte du message est encodé en Base64
 lang fr describe BE_AMAZED              Contient la formule 'be amazed'
 lang fr describe BILLION_DOLLARS        Parle de million/milliard de dollars
 lang fr describe BILL_1618              Revendique la conformité avec l'arrêt du sénat 1816
@@ -40,19 +171,17 @@ lang fr describe BULK_EMAIL     Contient la formule 'bulk email'
 lang fr describe CALL_NOW       Offre de téléphoner tout de suite
 lang fr describe CASHCASHCASH   Contient au moins trois $ à la suite
 lang fr describe CBYI            Contient le mot 'CBYI'
-lang fr describe CHARSET_FARAWAY        Mèl rédigé avec des caractères étrangers
 lang fr describe CHARSET_FARAWAY_BODY   Corps du mèl rédigé avec des caractères étrangers
 lang fr describe CHARSET_FARAWAY_HEADERS Entête du mèl rédigé avec des caractères étrangers
 lang fr describe CHECK_OR_MONEY_ORDER   Contient la formule 'check or money order'
 lang fr describe CLICK_BELOW    Demande de cliquer là ou en dessous
 lang fr describe CLICK_HERE_LINK        Demande de cliquer sur un lien
-lang fr describe CLICK_TO_REMOVE_2      Demande de cliquer sur un lien pour être retiré de la liste
 lang fr describe COMMUNIGATE    Envoyé par le programme de spam CommuniGate
 lang fr describe CTYPE_JUST_HTML        Le corps du mèl est uniquement en format HTML
 lang fr describe CYBER_FIRE_POWER       Fait référence a l'outil de spam Cyber FirePower!
 lang fr describe DEAR_FRIEND    Contient la formule 'Dear somebody'
 #lang fr describe DIFF_C_PATCH   Contient quelque chose qui ressemble au contenu de la commande 'diff -c'
-lang fr describe DIRECT_EMAIL   Contient la formule 'direct emai
+lang fr describe DIRECT_EMAIL   Contient la formule 'direct email'
 lang fr describe EARN_PER_WEEK          Propose de gangner quelquechose chaque semaine
 lang fr describe EGP_HTML_BANNER        Contient la bannière EGP, ce n'est pas du spam
 #lang fr describe EMAIL_HARVEST           Contient la formule 'email harvest'
@@ -115,7 +244,6 @@ lang fr describe IN_REP_TO      Contient l'entête In-Reply-To:
 lang fr describe JAVASCRIPT     Contient du code JavaScript
 lang fr describe JODY   Contient le témoignage de 'ma femme Jody'
 lang fr describe KIFF   Contient la formule 'temple kiff'
-lang fr describe LARGE_HEX      Le mèl contient une grande portion en hexadécimal
 lang fr describe LIMITED_TIME_ONLY      Le mèl propose une ofrre a durée limitée
 #lang fr describe LINE_OF_YELLING        Contient une LIGNE EN MAJUSCULES
 lang fr describe LOTS_OF_CC_LINES       Contient de nombreux entêtes CC:
@@ -163,7 +291,6 @@ lang fr describe PRODUCED_AND_SENT_OUT  Contient une formule mentionnant que ce 
 lang fr describe PROFITS        Contient le mot 'PROFIT' en majuscules
 lang fr describe PURE_PROFIT    Contient la formule 'pure profit'
 lang fr describe Q_FOR_SELLER   L'entête Subject: est une question issue d'eBay
-lang fr describe RAZOR_CHECK    Ce mèl est dans la liste de Razor, voir http://razor.sf.net/
 lang fr describe RCVD_IN_BL_SPAMCOP_NET Ce mèl a été reçu par l'intermédiaire d'un relai qui figure dans la liste bl.spamcom.net
 lang fr describe RCVD_IN_DUL    Ce mèl a été reçu par l'intermédiaire d'un relai qui figure dans la liste dialup, voir http://www.mail-abuse.org/
 lang fr describe RCVD_IN_ORBS   Ce mèl a été reçu par l'intermédiaire d'un relai qui figure dans la liste orbs.dorkslayers.com
@@ -175,7 +302,6 @@ lang fr describe RCVD_IN_RFCI   Ce mèl a été reçu par l'intermédiaire d'un relai
 lang fr describe RCVD_IN_RSS    Ce mèl a été reçu par l'intermédiaire d'un relai qui figure dans la liste RSS, voir http://www.mail-abuse.org/
 lang fr describe RELAYING_FRAME Une <FRAME> HTML tente de charger une page qui ne figure pas dans le mèl
 lang fr describe REMOVAL_INSTRUCTIONS   Contient des instructions pour se retirer de la liste
-lang fr describe REMOVE_IN_QUOTES       Contient des instructions pour se retirer de la liste
 lang fr describe REMOVE_PAGE    Contient une URL pointant sur une page de nom 'remove'
 lang fr describe REMOVE_SUBJ    Contient des instructions pour se retirer de la liste
 lang fr describe REPLY_REMOVE_SUBJECT   Contient des instructions pour se retirer de la liste
@@ -210,12 +336,11 @@ lang fr describe TONER  Contient la formule 'toner cartridge'
 lang fr describe TO_EMPTY       L'entête To: est vide
 lang fr describe TO_NO_USER             L'entête To: ne contient pas de nom de destinataire avant le @
 lang fr describe TRACE_BY_SSN   Offre d'identifier quelqu'un grâce au numéro de sécutité sociale
-lang fr describe TRACKER_ID     Contient un numéro d'identification
 lang fr describe UCE_MAIL_ACT       Mentionne la conformité a l'arrêté anti-SPAM 'UCE-Mail Act'
 lang fr describe UNDISC_RECIPS   Le champ To: contient une adresse 'Undisclosed-Recipients:' valide
 lang fr describe UNIVERSITY_DIPLOMAS    Fait référence à des diplômes universitaires
 lang fr describe UNSUB_PAGE     Contient un lien vers une page web appelée 'unsubscribe'
-lang fr describe UNSUB_SCRIPT   Contient un lien vers un sript CGI appelé 'unsubscribe'
+lang fr describe UNSUB_SCRIPT   Contient un lien vers un script CGI appelé 'unsubscribe'
 lang fr describe URGENT_BIZ             Contient la formule 'urgent business'
 lang fr describe USER_IN_ALL_SPAM_TO    Le destinataire est dans la liste all_spam_to
 lang fr describe USER_IN_BLACKLIST      L'expéditeur est sur la liste noire du destinataire
@@ -241,15 +366,11 @@ lang fr describe X_PMFLAGS_PRESENT      Contient l'entête X-PMFLAGS: en majuscul
 lang fr describe X_PRIORITY_HIGH        L'entête X-Priority: défini une priorité élevée
 lang fr describe YAHOO_MSGID_ADDED      L'entête message-Id: a été ajouté par Yahoo, c'est bon
 lang fr describe YOUR_INCOME    Mentionne vos revenus
-lang fr describe DCC_CHECK          Ce mèl est dans la liste de DCC : http://www.rhyolite.com/anti-spam/dcc/dcc-tree/dcc.html
 #lang fr describe SPAM_PHRASES_040	Le score des phrases de spam est suérieur à 40
 lang fr describe BIG_FONT               Utilise une taille de caractères supérieure ou égale a +2 ou 3
 lang fr describe NO_COST                Propose un produit ou un service à un coût nul
 lang fr describe CALL_FREE		Contient un numéro de téléphone gratuit
 lang fr describe INVESTOR_SPEC_SHEET	Fait référence à "Investor Spec Sheet"
-lang fr describe LINES_OF_YELLING        Contient une ligne entière en MAJUSCULES
-lang fr describe LINES_OF_YELLING_2     Contient 2 lignes entières en MAJUSCULE
-lang fr describe LINES_OF_YELLING_3     Contient  lignes entières en MAJUSCULES
 lang fr describe DOMAIN_BODY		Fait référence à l'enregistrement de nouveaux noms de domaine Internet
 lang fr describe PENIS_ENLARGE2		Contient des information sur l'accroissementd e la taille du pénis
 lang fr describe EJACULATION            Contient des information pour augmenter l'éjaculation
@@ -315,7 +436,6 @@ lang fr describe KOREAN_UCE_SUBJECT	L'entête Subject: contient des caractères co
 lang fr describe DEAR_EMAIL		Le mèl commence par la formule 'Cher adresse@mèl'
 lang fr describe INCREASE_SOMETHING	Le mèl contient des instructions pour accroitre ventes ou trafic
 lang fr describe MIME_MISSING_BOUNDARY	Il manque une frontière de section MIME
-lang fr describe UNDESIRED_LANGUAGE_BODY	Le mèl est rédigé dans une langue non choisie
 lang fr describe ORDER_NOW          Le mèl vous encourage à passer une commande
 lang fr describe DATE_YEAR_ZERO_FIRST	L'entête Date: contient une année commeçant par 0
 lang fr describe RCVD_IN_DSBL          Reçu par l'intermédiaire d'un relai référencé par list.dsbl.org
