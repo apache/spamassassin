@@ -681,7 +681,7 @@ sub html_tests {
     $html{bgcolor} = 1 if $attr->{bgcolor} !~ /^\#ffffff$/i;
   }
   if ($tag eq "font" && exists $attr->{size}) {
-    $html{big_font} = 1 if (($attr->{size} =~ /^(\d+)/ && $1 > 3) ||
+    $html{big_font} = 1 if (($attr->{size} =~ /^\s*(\d+)/ && $1 >= 3) ||
 			    ($attr->{size} =~ /\+(\d+)/ && $1 > 1));
   }
   if ($tag eq "img" && exists $attr->{src} && $attr->{src} =~ /\?/) {
