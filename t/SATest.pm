@@ -6,6 +6,7 @@ package main;
 use Cwd;
 use Config;
 use File::Path;
+use File::Copy;
 
 # Set up for testing. Exports (as global vars):
 # out: $home: $HOME env variable
@@ -38,13 +39,19 @@ sub sa_t_init {
   $spamdport = 48373;		# whatever
   $spamd_cf_args = "-C ../rules";
 
-  $scr_cf_args = "-C ../rules -p ../rules/user_prefs.template";
+  $scr_cf_args = "-C ../rules -p log/test_default.cf";
   $scr_pref_args = "";
   $scr_test_args = "";
 
   (-f "t/test_dir") && chdir("t");        # run from ..
   rmtree ("log");
   mkdir ("log", 0755);
+
+  copy ("../rules/user_prefs.template", "log/test_default.cf")
+	or die "user prefs copy failed";
+  open (PREFS, ">>log/test_default.cf");
+  print PREFS "bayes_path ./log/user_state/bayes\n";
+  close PREFS;
 
   $home = $ENV{'HOME'};
   $home ||= $ENV{'WINDIR'} if (defined $ENV{'WINDIR'});
