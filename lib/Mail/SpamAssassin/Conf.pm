@@ -130,7 +130,7 @@ sub _parse {
       $self->{scores}->{$1} = $2+0.0; next;
     }
 
-    if (/^report\s*(.*?)$/) {
+    if (/^report\b\s*(.*?)$/) {
       $report_template .= $1."\n"; next;
     }
 
