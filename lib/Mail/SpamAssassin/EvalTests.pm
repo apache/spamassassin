@@ -2132,13 +2132,16 @@ sub _check_mime_header {
     # MIME_SUSPECT_NAME triggered here
     $name =~ s/.*\.//;
     $ctype =~ s@/(x-|vnd\.)@/@;
-    if (   ($name =~ /^html?$/ && $ctype !~ m@^text/(?:html|xml|plain)@)
-	|| ($name =~ /^jpe?g$/ && $ctype !~ m@^image/p?jpe?g@
-	    && $ctype !~ m@^application/mac-binhex@)
-	|| ($name eq "pdf" && $ctype ne "application/pdf")
-	|| ($name eq "gif" && $ctype ne "image/gif"
-	    && $ctype !~ m@^application/mac-binhex@)
-	|| ($name eq "txt" && $ctype !~ m@^text/@)	# text/english is OK
+
+    if (((($name eq "txt") || ($name =~ /^[px]?html?$/) ||
+	  ($name eq "xml")) &&
+	 ($ctype !~
+	  m@^text/(?:plain|[px]?html?|english|sgml|xml|enriched|richtext)@) &&
+	 ($ctype !~ m@^message/external-body@)) # RFC-Editor emails...
+	|| ((($name =~ /^(?:jpe?g|tiff?)$/) || ($name eq "gif") ||
+	     ($name eq "png"))
+	    && ($ctype !~ m@^image/@)
+	    && ($ctype !~ m@^application/mac-binhex@))
 	|| ($name eq "vcf" && $ctype ne "text/vcard")
 	|| ($name =~ /^(?:bat|com|exe|pif|scr|swf|vbs)$/
 	    && $ctype !~ m@^application/@)
