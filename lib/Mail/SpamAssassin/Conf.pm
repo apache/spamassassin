@@ -2050,7 +2050,8 @@ tests, are run in priority order. The default test priority is 0 (zero).
 These settings differ from the ones above, in that they are considered 'more
 privileged' -- even more than the ones in the B<PRIVILEGED SETTINGS> section.
 No matter what C<allow_user_rules> is set to, these can never be set from a
-user's C<user_prefs> file.
+user's C<user_prefs> file when spamc/spamd is being used.  However, all
+settings can be used by local programs run directly by the user.
 
 =over 4
 

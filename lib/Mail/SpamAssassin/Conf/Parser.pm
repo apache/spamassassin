@@ -102,7 +102,8 @@ Set to 1 if this setting requires 'allow_user_rules' when run from spamd.
 =item is_admin
 
 Set to 1 if this setting can only be set in the system-wide config when run
-from spamd.
+from spamd.  (All settings can be used by local programs run directly by the
+user.)
 
 =item is_frequent
 
