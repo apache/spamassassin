@@ -178,17 +178,39 @@ sub readrules {
 }
 
 sub lintrules {
-  my %warned = ();
+  my %possible_renames = ();
   foreach my $rule (@rulesfound) {
-    if (defined $descfile{$rule} && !defined ($rulefile{$rule})) {
-      next if $warned{"desc_no_rule_".$descfile{$rule}};
-      print "warning: $rule has description, but no rule: $descfile{$rule}\n";
-      $warned{"desc_no_rule_".$descfile{$rule}} = 1;
+    my $match = $rule;
+    $match =~ s/_[^_]+$//gs;    # trim last word, usually used for multi-matches
+    $match =~ s/[^A-Z]+//gs;    # trim numbers etc.
+
+    if (defined ($rulefile{$rule}) && $possible_renames{$match} !~ / \Q$rule\E\b/) {
+      $possible_renames{$match} .= " ".$rule;
     }
-    if (defined $score{$rule} && !defined ($rulefile{$rule})) {
-      next if $warned{"score_no_rule_".$descfile{$rule}};
-      print "warning: $rule has score, but no rule: $scorefile{$rule}\n";
-      $warned{"score_no_rule_".$descfile{$rule}} = 1;
+    $possible_rename_matches{$rule} = $match;
+  }
+
+  foreach my $rule (@rulesfound) {
+    my $f = $descfile{$rule};
+    my $warned = 0;
+
+    if (defined $f && !defined ($rulefile{$rule})) {
+      print "warning: $rule has description, but no rule: $f\n";
+      $warned++;
+    }
+
+    my $f = $scorefile{$rule};
+    if (defined $f && !defined ($rulefile{$rule})) {
+      print "warning: $rule has score, but no rule: $f\n";
+      $warned++;
+    }
+
+    my $r = $possible_rename_matches{$rule};
+    if ($warned && defined $r) {
+      my $matches = $possible_renames{$r};
+      if ($matches ne '') {
+        print "warning: (possible renamed rule?$matches)\n";
+      }
     }
   }
 }
