@@ -225,14 +225,7 @@ sub check {
   $self->{is_spam} = $self->is_spam();
 
   my $report;
-  if ($self->{conf}->{use_terse_report}) {
-    $report = $self->{conf}->{terse_report_template};
-    $report =~ s/_SUMMARY_/_SUMMARYT_/g; # Backwards compatibility
-  } else {
-    $report = $self->{conf}->{report_template};
-    $report =~ s/_SUMMARY_/_SUMMARYL_/g; # Backwards compatibility
-  }
-
+  $report = $self->{conf}->{report_template};
   $report ||= '(no report template found)';
 
   $report = $self->_replace_tags($report);
@@ -746,12 +739,17 @@ sub _process_header {
   $hdr_data = $self->_replace_tags($hdr_data);
 
   if ($self->{conf}->{fold_headers} ) {
-    my $hdr = "$hdr_name: $hdr_data";
-    $Text::Wrap::columns = 79;
-    $Text::Wrap::huge = 'overflow';
-    $Text::Wrap::break = '[\s,]';
-    $hdr = Text::Wrap::wrap('',"\t",$hdr);
-    return (split (/: /, $hdr, 2))[1]; # just return the data part
+    if ($hdr_data =~ /\n/) {
+      $hdr_data =~ s/\s*\n\s*/\n\t/g;
+      return $hdr_data;
+    } else {
+      my $hdr = "$hdr_name: $hdr_data";
+      $Text::Wrap::columns = 79;
+      $Text::Wrap::huge = 'overflow';
+      $Text::Wrap::break = '[\s,]';
+      $hdr = Text::Wrap::wrap('',"\t",$hdr);
+      return (split (/: /, $hdr, 2))[1]; # just return the data part
+    }
   } else {
     $hdr_data =~ s/\n/ /g; # Can't have newlines in headers, unless folded
     return $hdr_data;
@@ -833,12 +831,6 @@ sub _replace_tags {
 
 	  PREVIEW => sub { my $self = shift; $self->get_content_preview() },
 
-	  TERSE => sub {
-	    my $self = shift;
-	    my $hdr = $self->{conf}->{terse_report_template};
-	    $hdr =~ s/_SUMMARY_/_SUMMARYT_/; # backwards compat
-	    return $self->_replace_tags($hdr);
-	  },
 	);
 
 sub _get_tag {
@@ -2293,9 +2285,9 @@ sub _handle_hit {
     }
 
     # save both summaries
-    $self->{tag_data}->{SUMMARYT} .= sprintf ("* %s -- %s%s\n%s",
-				       $score, $area, $desc, ($self->{test_log_msgs}->{TERSE} || ''));
-    $self->{tag_data}->{SUMMARYL} .= sprintf ("%s %-22s %s%s\n%s",
+    $self->{tag_data}->{REPORT} .= sprintf ("* %s %s (%s%s)\n%s",
+				       $rule, $score, $area, $desc, ($self->{test_log_msgs}->{TERSE} || ''));
+    $self->{tag_data}->{SUMMARY} .= sprintf ("%s %-22s %s%s\n%s",
 				       $score, $rule, $area, $desc,
 				       ($self->{test_log_msgs}->{LONG} || ''));
     $self->{test_log_msgs} = ();	# clear test logs
@@ -2336,10 +2328,8 @@ sub test_log {
 sub _test_log_line {
   my ($self, $msg) = @_;
 
-# save for both SUMMARYT and SUMMARYL
-
-  $self->{test_log_msgs}->{TERSE} .= sprintf ("%9s [%s]\n", "", $msg);
-  if (length($msg) > 49) {
+  $self->{test_log_msgs}->{TERSE} .= sprintf ("[%s]\n", $msg);
+  if (length($msg) > 47) {
     $self->{test_log_msgs}->{LONG} .= sprintf ("%78s\n", "[$msg]");
   } else {
     $self->{test_log_msgs}->{LONG} .= sprintf ("%27s [%s]\n", "", $msg);

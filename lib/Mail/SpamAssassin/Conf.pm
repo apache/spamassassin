@@ -63,10 +63,9 @@ optional, and the default is shown below.
  _DCCR_            DCC's results
  _PYZOR_           Pyzor results
  _LANGUAGES_       possible languages of mail
- _TERSE_           terse report (as specified by the terse-report options)
  _PREVIEW_         content preview
- _SUMMARYT_        summary of tests hit for terse report
- _SUMMARYL_        summary of tests hit for standard report
+ _REPORT_          report of tests hits (in terse format, ideal for in headers)
+ _SUMMARY_         summary of tests hit for standard report
  _CONTACTADDRESS_  contents of the 'report_contact' setting
 
 =head1 USER PREFERENCES
@@ -143,7 +142,6 @@ sub new {
   $self->{report_charset} = '';
   $self->{report_template} = '';
   $self->{unsafe_report_template} = '';
-  $self->{terse_report_template} = '';
   $self->{spamtrap_template} = '';
 
   $self->{num_check_received} = 9;
@@ -167,7 +165,6 @@ sub new {
   $self->{subject_tag} = '*****SPAM*****';
   $self->{report_safe} = 1;
   $self->{report_contact} = 'the administrator of that system';
-  $self->{use_terse_report} = 0;
   $self->{skip_rbl_checks} = 0;
   $self->{dns_available} = "test";
   $self->{check_mx_attempts} = 2;
@@ -767,19 +764,6 @@ some headers and no changes will be made to the body.
       $self->{report_safe} = $1+0; next;
     }
 
-=item use_terse_report { 0 | 1 }   (default: 0)
-
-By default, SpamAssassin uses a long report format, explaining what
-happened to the mail message, for newbie users.   If you would prefer
-shorter reports, set this to C<1>.
-
-=cut
-
-    if (/^use_terse_report\s+(\d+)$/) {
-      $self->{use_terse_report}=$1+0;
-      next;
-    }
-
 =item skip_rbl_checks { 0 | 1 }   (default: 0)
 
 By default, SpamAssassin will run RBL checks.  If your ISP already does this
@@ -1150,35 +1134,6 @@ Clear the unsafe_report template.
 
     if (/^clear_unsafe_report_template$/) {
       $self->{unsafe_report_template} = ''; next;
-    }
-
-=item terse_report ...some text for a report...
-
-Set the report template which is attached to spam mail messages, for the
-terse-report format.  See the C<10_misc.cf> configuration file in
-C</usr/share/spamassassin> for an example.
-
-The terse-report format is also represented by the _TERSE_ tag for use
-in headers.
-
-=cut
-
-    if (/^terse_report\b\s*(.*?)$/) {
-      my $report = $1;
-      if ( $report =~ /^"(.*?)"$/ ) {
-        $report = $1;
-      }
-      $self->{terse_report_template} .= "$report\n"; next;
-    }
-
-=item clear_terse_report_template
-
-Clear the terse-report template.
-
-=cut
-
-    if (/^clear_terse_report_template$/) {
-      $self->{terse_report_template} = ''; next;
     }
 
 =item spamtrap ...some text for spamtrap reply mail...
@@ -1619,24 +1574,18 @@ version. (Use the add_header option to customize headers.)
 By default, mail tagged as spam includes a report, either in the
 headers or in an attachment (report_safe). If you set this to option
 to C<1>, the report will be included in the B<X-Spam-Report> header,
-even if the message is not tagged as spam. Note that the report text
-B<always> states that the mail is spam, since normally the report is
-only added if the mail B<is> spam, although you can change the text of
-the report with the terse_report option explained below.
-
-This can be useful if you want to know what rules the mail triggered, and why
-it was not tagged as spam.  See also B<always_add_headers>.
+even if the message is not tagged as spam.
 
 This option is deprecated as of version 2.60. Please use the
 add_header option instead:
 
-add_header Report ham _TERSE_
+add_header Report ham _REPORT_
 
 =cut
 
   if (/^always_add_report\s+(\d+)$/) {
     if ($1 == 1) {
-      $self->{headers_ham}->{"Report"} = "_TERSE_";
+      $self->{headers_ham}->{"Report"} = "_REPORT_";
     }
     next;
   }
@@ -1730,6 +1679,54 @@ add_header Pyzor all _PYZOR_
       }
       next;
     }
+
+=item use_terse_report { 0 | 1 }   (default: 0)
+
+By default, SpamAssassin uses a long report format, explaining what
+happened to the mail message, for newbie users.   If you would prefer
+shorter reports, set this to C<1>.
+
+This option is deprecated. Longer reports are used by default, with
+the report_safe option. If you wish to use a shorter report in the
+headers of spam messages, use the following option:
+
+add_header Report spam _REPORT_
+
+=cut
+
+    if (/^use_terse_report\s+(\d+)$/) {
+      if($1 == 1) {
+	$self->{headers_spam}->{"Report"} = "_REPORT_";
+      }
+      next;
+    }
+
+
+=item terse_report ...some text for a report...
+
+Set the report template which is attached to spam mail messages, for the
+terse-report format.  See the C<10_misc.cf> configuration file in
+C</usr/share/spamassassin> for an example.
+
+This option is deprecated and does nothing.
+
+=cut
+
+    if (/^terse_report\b\s*(.*?)$/) {
+      next;
+    }
+
+=item clear_terse_report_template
+
+Clear the terse-report template. Deprecated.
+
+=cut
+
+    if (/^clear_terse_report_template$/) {
+      next;
+    }
+
+
 
 ###########################################################################
     # SECURITY: no eval'd code should be loaded before this line.
