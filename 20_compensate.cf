@@ -214,3 +214,8 @@ header   MAILER_DAEMON          From =~ /mailer.?daemon\@/i
 describe MAILER_DAEMON          From the mailer daemon
 tflags   MAILER_DAEMON          nice
 
+# spamassassin@davidgreenaway.com (David Greenaway)
+body     FORGOTTEN_PASSWORD     /[fF]org[oe]t.{0,25}[pP]assword/
+describe FORGOTTEN_PASSWORD     Contains a password retrieval system
+score    FORGOTTEN_PASSWORD     -2.0
+
