@@ -209,8 +209,9 @@ sub new {
 	# boundary defined, use it.  Since there could be multiple
 	# content-type headers in a message, the last one will be the one we
 	# should use, so just keep updating as they come in.
-        if ($header =~ /^content-type:\s*(\S.*)$/is) {
-	  my($type,$temp_boundary) = Mail::SpamAssassin::Util::parse_content_type($1);
+        if ($header =~ /^Content-Type:/i) {
+	  my ($type, $temp_boundary) =
+	    Mail::SpamAssassin::Util::parse_content_type($header);
 	  $boundary = $temp_boundary if (defined $temp_boundary);
 	}
 
