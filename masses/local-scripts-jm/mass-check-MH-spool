@@ -47,7 +47,7 @@ for maildir in $MAILDIRS ; do
     then
       echo "./mass-check $args $folder >> spam.local" >> commands.sh
     else
-      echo "./mass-check --nokillfile $args $folder >> nonspam.local" >> commands.sh
+      echo "./mass-check $args $folder >> nonspam.local" >> commands.sh
     fi
   done
 done
