@@ -98,13 +98,13 @@ sub is_razor_available {
   my ($self) = @_;
   my $razor_avail = 0;
 
-  eval '
-    use Razor::Client;
-    use Razor::Signature; 
-    use Razor::String;
+  eval {
+    require Razor::Client;
+    require Razor::Signature; 
+    require Razor::String;
     $razor_avail = 1;
     1;
-  ';
+  };
 
   dbg ("is Razor available? $razor_avail");
 
