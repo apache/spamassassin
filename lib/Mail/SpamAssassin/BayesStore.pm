@@ -19,6 +19,7 @@ use vars qw{
   @DBNAMES @DB_EXTENSIONS
   $NSPAM_MAGIC_TOKEN $NHAM_MAGIC_TOKEN $LAST_EXPIRE_MAGIC_TOKEN
   $NTOKENS_MAGIC_TOKEN $OLDEST_TOKEN_AGE_MAGIC_TOKEN
+  $SCANCOUNT_BASE_MAGIC_TOKEN 
 };
 
 @ISA = qw();
@@ -47,6 +48,10 @@ use vars qw{
 # auto-forgetting for refiled mails:
 # [seen]  6. a list of Message-IDs of messages already learnt from. values
 # are 's' for learnt-as-spam, 'h' for learnt-as-ham.
+#
+# and another, called [scancount] to model the scan-count for expiry.
+# This is not a database.  Instead it increases by one byte for each
+# message scanned (note: scanned, not learned).
 
 @DBNAMES = qw(toks seen);
 
@@ -60,6 +65,9 @@ $NHAM_MAGIC_TOKEN = '**NHAM';
 $OLDEST_TOKEN_AGE_MAGIC_TOKEN = '**OLDESTAGE';
 $LAST_EXPIRE_MAGIC_TOKEN = '**LASTEXPIRE';
 $NTOKENS_MAGIC_TOKEN = '**NTOKENS';
+$SCANCOUNT_BASE_MAGIC_TOKEN = '**SCANBASE';
+
+use constant MAX_SIZE_FOR_SCAN_COUNT_FILE => 5000;
 
 ###########################################################################
 
@@ -93,19 +101,7 @@ sub read_db_configs {
   # for now, we just set these settings statically.
   my $conf = $self->{bayes}->{main}->{conf};
 
-  # Should we use the number of scans that have occured for expiration, or the
-  # time elapsed?  number of scans works better for 10fcv runs, but requires
-  # another file to be used to store the messagecount, which will slow things
-  # down considerably.
-  #
-  $self->{use_scan_count_for_expiry} = $conf->{bayes_expiry_use_scan_count};
-
-  # Expire tokens that have not been accessed in this many days?
-  # (Requires use_scan_count_for_expiry be 0.)
-  $self->{expiry_days} = $conf->{bayes_expiry_days};
-
   # Expire tokens that have not been accessed in this many messages?
-  # (Requires use_scan_count_for_expiry be 1.)
   $self->{expiry_count} = $conf->{bayes_expiry_scan_count};
 
   # Minimum desired database size?  Expiry will not shrink the
@@ -153,6 +149,7 @@ sub tie_db_readonly {
 		 (oct ($main->{conf}->{bayes_file_mode}) & 0666)
        or goto failed_to_tie;
   }
+  $self->{scan_count_little_file} = $path.'_msgcount';
   return 1;
 
 failed_to_tie:
@@ -209,6 +206,7 @@ sub tie_db_writable {
        or goto failed_to_tie;
   }
   umask $umask;
+  $self->{scan_count_little_file} = $path.'_msgcount';
 
   # ensure we count 1 mailbox learnt as an event worth marking,
   # expiry-wise
@@ -274,16 +272,9 @@ sub expire_old_tokens_trapped {
   if (!$self->expiry_due() && !$self->{bayes}->{main}->{learn_force_expire})
 				{ return 0; }
 
-  my $too_old;
-  if (!$self->{use_scan_count_for_expiry}) {
-    $too_old = $self->time_t_to_atime
-			(time - ($self->{expiry_days} * 24 * 60 * 60));
-  } else {
-    # testing mode only
-    $too_old = $self->scan_count_get();
-    $too_old = ($too_old < $self->{expiry_count} ?
+  my $too_old = $self->scan_count_get();
+  $too_old = ($too_old < $self->{expiry_count} ? 
 				0 : $too_old - $self->{expiry_count});
-  }
 
   my $deleted = 0;
   my $kept = 0;
@@ -352,11 +343,7 @@ sub expire_old_tokens_trapped {
   $deleted -= $reprieved;
 
   # and add the magic tokens
-  if (!$self->{use_scan_count_for_expiry}) {
-    $new_toks{$LAST_EXPIRE_MAGIC_TOKEN} = time();
-  } else {
-    $new_toks{$LAST_EXPIRE_MAGIC_TOKEN} = $self->scan_count_get();
-  }
+  $new_toks{$LAST_EXPIRE_MAGIC_TOKEN} = $self->scan_count_get();
   $new_toks{$OLDEST_TOKEN_AGE_MAGIC_TOKEN} = $oldest;
   $new_toks{$NSPAM_MAGIC_TOKEN} = $self->{db_toks}->{$NSPAM_MAGIC_TOKEN};
   $new_toks{$NHAM_MAGIC_TOKEN} = $self->{db_toks}->{$NHAM_MAGIC_TOKEN};
@@ -418,20 +405,10 @@ sub expiry_due {
   my $last = $self->{db_toks}->{$LAST_EXPIRE_MAGIC_TOKEN} || 0;
   my $oldest = $self->{db_toks}->{$OLDEST_TOKEN_AGE_MAGIC_TOKEN} || 0;
 
-  if (!$self->{use_scan_count_for_expiry}) {
-    my $limit = $self->{expiry_days} * 24 * 60 * 60;
-    my $now = time();
-    if ($now - $last > $limit/2 && $now - $oldest > $limit) {
-      return 1;
-    }
-
-  } else {
-    # testing mode only
-    my $limit = $self->{expiry_count};
-    my $now = $self->scan_count_get();
-    if ($now - $last > $limit/2 && $now - $oldest > $limit) {
-      return 1;
-    }
+  my $limit = $self->{expiry_count};
+  my $now = $self->scan_count_get();
+  if ($now - $last > $limit/2 && $now - $oldest > $limit) {
+    return 1;
   }
 
   0;
@@ -528,11 +505,7 @@ sub add_touches_to_journal {
 
 sub expiry_now {
   my ($self) = @_;
-  if (!$self->{use_scan_count_for_expiry}) {
-    $self->time_t_to_atime (time);
-  } else {
-    $self->scan_count_get();
-  }
+  $self->scan_count_get();
 }
 
 ###########################################################################
@@ -663,26 +636,78 @@ sub get_journal_filename {
 sub scan_count_get {
   my ($self) = @_;
 
-  if (!$self->{use_scan_count_for_expiry}) { return 0; }
-
-  my $main = $self->{bayes}->{main};
-  my $path = $main->sed_path ($main->{conf}->{bayes_path})."_msgcount";
-  my $count = 0;
-  if (open (COUNT, "<".$path)) {
-    $count = <COUNT> + 0; close COUNT;
-  }
+  my $count = $self->{db_toks}->{$SCANCOUNT_BASE_MAGIC_TOKEN};
+  $count ||= 0;
+  my $path = $self->{scan_count_little_file};
+  $count += (-s $path);
   $count;
 }
 
 sub scan_count_increment {
   my ($self) = @_;
 
-  if (!$self->{use_scan_count_for_expiry}) { return 0; }
+  my $path = $self->{scan_count_little_file};
 
-  my $main = $self->{bayes}->{main};
-  my $path = $main->sed_path ($main->{conf}->{bayes_path})."_msgcount";
-  my $count = $self->scan_count_get();
-  open (OUT, ">".$path); print OUT ($count+1); close OUT;
+  # Use filesystem-level append operations.  These are very fast, and
+  # on a local disk on UNIX at least, guaranteed not to overwrite another
+  # process' changes.   Note that, if they do clobber someone else's
+  # ".", this is not a big deal; it'll just take a tiny bit longer to
+  # perform an expiry.  Not a serious failure mode, so don't worry about
+  # it ;)
+
+  open (OUT, ">>".$path) or warn "cannot append to $path\n";
+  print OUT "."; close OUT or warn "cannot append to $path\n";
+
+  # note the tiny race cond between close above, and this -s.  Again, if we
+  # miss a . or two, it won't make much of a difference.
+  if (-s $path > MAX_SIZE_FOR_SCAN_COUNT_FILE) {
+    unlink ($path);
+    $self->scan_count_increment_big_counter();
+  }
+
+  1;
+}
+
+# once every MAX_SIZE_FOR_SCAN_COUNT_FILE scans, we need to perform a write on
+# the locked db to update the "big counter".  This method does that.
+#
+sub scan_count_increment_big_counter {
+  my ($self) = @_;
+
+  # ensure we return back to the lock-status we were at afterwards...
+  my $need_to_retie_ro = 0;
+  my $need_to_untie = 0;
+  if (!$self->{already_tied}) {
+    $need_to_untie = 1;
+  } elsif (!$self->{is_locked}) {
+    $need_to_retie_ro = 1;
+  }
+
+  eval {
+    local $SIG{'__DIE__'};      # do not run user die() traps in here
+
+    $self->tie_db_writable();
+
+    my $count = $self->{db_toks}->{$SCANCOUNT_BASE_MAGIC_TOKEN};
+    $count ||= 0;
+    $count += MAX_SIZE_FOR_SCAN_COUNT_FILE;
+    $self->{db_toks}->{$SCANCOUNT_BASE_MAGIC_TOKEN} = $count;
+  };
+
+  my $failure;
+  if ($@) {             # if we died, untie the dbs.
+    my $failure = $@;
+  }
+
+  if ($need_to_untie || $need_to_retie_ro) {
+    $self->{store}->untie_db();
+  }
+  if ($need_to_retie_ro) {
+    $self->{store}->tie_db_readonly();
+  }
+
+  if ($failure) { die $failure; }
+
   1;
 }
 
