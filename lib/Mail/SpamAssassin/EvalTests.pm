@@ -1342,7 +1342,7 @@ sub check_rbl_backend {
       # specified some third-party relays as trusted.  Also, don't use
       # @originating; those headers are added by a phase of relaying through
       # a server like Hotmail, which is not going to be in dialup lists anyway.
-      @ips = $self->ip_list_uniq_and_strip_reserved (@fullexternal);
+      @ips = $self->ip_list_uniq_and_strip_reserved(@fullexternal);
       if (scalar @ips > 1) { pop @ips; }
     }
     # If name is foo-firsttrusted, check only the Received header just
