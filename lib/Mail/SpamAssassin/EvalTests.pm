@@ -1997,6 +1997,27 @@ sub check_language {            # UNDESIRED_LANGUAGE_BODY
   return 1;
 }
 
+sub check_for_body_8bits {
+  my ($self, $body) = @_;
+
+  my @languages = split (' ', $self->{conf}->{ok_languages});
+
+  for (@languages) {
+    return 0 if $_ eq "all";
+    # this list is initially conservative, it includes any language with
+    # a common n-gram sequence of 2+ consecutive bytes matching [\x80-\xff]
+    # here are the one more likely to be removed: cs=czech, et=estonian,
+    # fi=finnish, hi=hindi, is=icelandic, pt=portuguese, tr=turkish,
+    # uk=ukrainian, vi=vietnamese
+    return 0 if /^(?:am|ar|be|bg|cs|el|et|fa|fi|he|hi|hy|is|ja|ka|ko|mr|pt|ru|ta|th|tr|uk|vi|yi|zh)$/;
+  }
+
+  foreach my $line (@$body) {
+    return 1 if $line =~ /[\x80-\xff]{8,}/;
+  }
+  return 0;
+}
+
 sub check_signature {
   my ($self, $full, $min, $max, $blank) = @_;
 
@@ -2189,7 +2210,10 @@ sub _check_attachments {
   # Note: We don't use rawbody because it removes MIME parts.  Instead,
   # we get the raw unfiltered body.  We must not change any lines and
   # we might see some SpamAssassin mark-up.
-  for (@{$self->{msg}->get_body()}) {
+  foreach my $line (@{$self->{msg}->get_body()}) {
+    $_ = $line;		# copy to preserve originals
+    s/\r$//;		# trim CRs, we don't want them
+
     if (/^--/) {
       foreach my $boundary (@boundary) {
 	if (/^--$boundary$/) {
