@@ -656,6 +656,7 @@ sub rewrite_as_spam {
   foreach my $header (keys %{$self->{conf}->{headers_spam}} ) {
     my $data = $self->{conf}->{headers_spam}->{$header};
     my $line = $self->_process_header($header,$data) || "";
+    $line = $self->qp_encode_header($line);
     $newmsg .= "X-Spam-$header: $line\n" # add even if empty
   }
 
@@ -784,6 +785,7 @@ sub rewrite_headers {
 
   while ( my($header, $data) = each %{$self->{conf}->{$addition}} ) {
     my $line = $self->_process_header($header,$data) || "";
+    $line = $self->qp_encode_header($line);
     push(@pristine_headers, "X-Spam-$header: $line\n");
   }
 
@@ -791,8 +793,31 @@ sub rewrite_headers {
   return join('', $mbox, @pristine_headers, "\n", $self->{msg}->get_pristine_body());
 }
 
-sub _process_header {
+sub qp_encode_header {
+  my ($self, $text) = @_;
 
+  # do nothing unless there's an 8-bit char
+  return $text unless ($text =~ /[\x80-\xff]/);
+
+  my $cs = 'ISO-8859-1';
+  if ($self->{report_charset}) {
+    $cs = $self->{report_charset};
+  }
+
+  my @hexchars = split('', '0123456789abcdef');
+  my $ord;
+  $text =~ s{([\x80-\xff])}{
+		$ord = ord $1;
+		'='.$hexchars[($ord & 0xf0) >> 4].$hexchars[$ord & 0x0f]
+	}ges;
+
+  $text = '=?'.$cs.'?Q?'.$text.'?=';
+
+  dbg ("encoding header in $cs: $text");
+  return $text;
+}
+
+sub _process_header {
   my ($self, $hdr_name, $hdr_data) = @_;
 
   $hdr_data = $self->_replace_tags($hdr_data);

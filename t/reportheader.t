@@ -27,7 +27,7 @@ q{ Uses a dotted-decimal IP address in URL }, 'dotteddec',
 
 tstprefs ("
         $default_cf_lines
-        use_terse_report 0
+        report_safe 0
 	");
 
 sarun ("-L -t < data/spam/001", \&patterns_run_cb);
