@@ -48,8 +48,6 @@ package Mail::SpamAssassin;
 use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::ConfSourceSQL;
 use Mail::SpamAssassin::PerMsgStatus;
-use Mail::SpamAssassin::Reporter;
-use Mail::SpamAssassin::Replier;
 use Mail::SpamAssassin::NoMailAudit;
 
 use File::Basename;
@@ -78,7 +76,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 $VERSION = "2.40";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.104 2002/07/26 14:27:41 jmason Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.105 2002/07/27 11:24:57 msquadrat Exp $';
 
 sub Version { $VERSION; }
 
@@ -284,13 +282,15 @@ been listed there.
 =cut
 
 sub report_as_spam {
-  my ($self, $mail_obj, $options) = @_;
+  my ($self, $mail, $options) = @_;
   local ($_);
 
   $self->init(1);
-  my $mail = $self->encapsulate_mail_object ($mail_obj);
-  my $msg = Mail::SpamAssassin::Reporter->new($self, $mail, $options);
-  $msg->report ();
+  $mail = $self->encapsulate_mail_object ($mail);
+
+  require Mail::SpamAssassin::Reporter;
+  $mail = Mail::SpamAssassin::Reporter->new($self, $mail, $options);
+  $mail->report ();
 }
 
 ###########################################################################
@@ -371,11 +371,13 @@ sender of the reply message.
 =cut
 
 sub reply_with_warning {
-  my ($self, $mail_obj, $replysender) = @_;
+  my ($self, $mail, $replysender) = @_;
   $self->init(1);
-  my $mail = $self->encapsulate_mail_object ($mail_obj);
-  my $msg = new Mail::SpamAssassin::Replier ($self, $mail);
-  $msg->reply ($replysender);
+  $mail = $self->encapsulate_mail_object ($mail);
+
+  require Mail::SpamAssassin::Replier;
+  $mail = Mail::SpamAssassin::Replier->new ($self, $mail);
+  $mail->reply ($replysender);
 }
 
 ###########################################################################
