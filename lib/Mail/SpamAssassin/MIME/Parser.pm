@@ -360,7 +360,7 @@ sub _decode_body {
 	raw_headers => $part_msg->{raw_headers},
   };
   $opts->{name} = $name if $name;
-  $opts->{rendered} = _render_text($decoded) if $type =~ m/^text/i;
+  $opts->{rendered} = _render_text($type, $decoded) if $type =~ m/^text/i;
 
   $msg->add_body_part( $type, $opts );
 }
@@ -429,15 +429,18 @@ sub html_near_start {
 }
 
 sub _render_text {
-  my ($decoded) = @_;
+  my ($type, $decoded) = @_;
 
   my $text = join('', @{ $decoded });
 
-  # render text/plain as text/html based on a heuristic which simulates
-  # a certain common mail client
-  if ($text =~ m/^(.{0,18}?<(?:$Mail::SpamAssassin::HTML::re_start)(?:\s.{0,18}?)?>)/ois &&
-      html_near_start($1))
-  {
+  # render text/html always, or any other text part as text/html based
+  # on a heuristic which simulates a certain common mail client
+  if ( $type =~ m@^text/html$@i ||
+      ($type =~ m@^text/@i &&
+        $text =~ m/^(.{0,18}?<(?:$Mail::SpamAssassin::HTML::re_start)(?:\s.{0,18}?)?>)/ois &&
+	html_near_start($1)
+      )
+     ) {
     my $html = Mail::SpamAssassin::HTML->new();		# object
     my $html_rendered = $html->html_render($text);	# rendered text
     my $html_results = $html->get_results();		# needed in eval tests
