@@ -33,6 +33,10 @@ on the subject at:
 
   http://radio.weblogs.com/0101454/stories/2002/09/16/spamDetection.html
 
+And the chi-square probability combiner as described here:
+
+  http://www.linuxjournal.com/print.php?sid=6467
+
 The results are incorporated into SpamAssassin as the BAYES_* rules.
 
 =head1 METHODS

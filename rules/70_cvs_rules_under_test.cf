@@ -457,6 +457,37 @@ header T_HELO_DYNAMIC_ADELPHIA X-Spam-Relays-Untrusted =~ / helo=[a-z]{2}-\S+-\d
 # pD9E4F89F.dip.t-dialin.net [217.228.248.159]
 header T_HELO_DYNAMIC_DIALIN X-Spam-Relays-Untrusted =~ / helo=[a-z][A-F0-9]+\.dip\./
 
+# TODO:
+# port-212-202-77-203.reverse.qsc.de [212.202.77.203]
+# Computer-udp135632uds.union01.nj.comcast.net [68.39.99.32]
+# lns-vlq-11-62-147-186-141.adsl.proxad.net [62.147.186.141]
+# pD9E62653.dip.t-dialin.net [217.230.38.83]
+# g1u3v7.cpe.net.cable.rogers.com [24.230.206.35]
+# h00096b2fb5ff.ne.client2.attbi.com [24.34.132.193]
+# c-67-164-133-216.client.comcast.net [67.164.133.216]
+# d53-64-35-171.nap.wideopenwest.com [64.53.171.35]
+# CM-vina5-168-207.cm.vtr.net [200.104.168.207]
+# h234n2fls32o895.telia.com [217.208.73.234]
+# vaise-1-82-67-44-166.fbx.proxad.net [82.67.44.166]
+# cpe-069-132-010-017.carolina.rr.com [69.132.10.17]
+# 200-171-228-6.customer.telesp.net.br [200.171.228.6]
+# wiley-170-10231.roadrunner.nf.net [205.251.210.249]
+# modemcable090.28-201-24.mc.videotron.ca [24.201.28.90]
+# CM-anto1-98-153.cm.vtr.net [200.104.98.153]
+# 80-218-47-160.dclient.hispeed.ch [80.218.47.160]
+# adsl-64-170-53-19.dsl.lsan03.pacbell.net [64.170.53.19]
+# ool-18be1aaf.dyn.optonline.net [24.190.26.175]
+# catv-506237d8.miskcatv.broadband.hu [80.98.55.216]
+# dsl-200-95-109-107.prod-infinitum.com.mx [200.95.109.107]
+# user-0can22v.cable.mindspring.com [24.171.136.95]
+# fgwcq@74.67-201-80.adsl.skynet.be [80.201.67.74]
+# lnngmi06edg01-xdata2-a3.lnngmi.tds.net [134.215.229.67]
+# cdm-68-226-239-16.laft.cox-internet.com [68.226.239.16]
+# adsl-68-248-121-117.dsl.applwi.ameritech.net [68.248.121.117]
+# pool-151-203-32-68.bos.east.verizon.net [151.203.32.68]
+# 12-218-225-223.client.mchsi.com [12.218.225.223]
+
+
 # bug 2992: Proposed new rules, Martin Radford
 header T_RCVD_DOUBLE_IP		Received =~ /from \[\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\] by \d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3} with HTTP;/
 describe T_RCVD_DOUBLE_IP	Bulk email fingerprint (double IP) found
@@ -489,10 +520,22 @@ describe T_MSGID_SPAM_3_7	Message-ID has known spammer pattern
 header T_MSGID_EVIL_SPAM_1	MESSAGEID =~ /<[a-z\d][a-z\d\$-]+[a-z\d]\@[a-z\d][a-z\d.]+[a-z\d]>/
 header T_MSGID_EVIL_SPAM_2	MESSAGEID =~ /<[a-z\d][a-z\d\$-]{10,29}[a-z\d]\@[a-z\d][a-z\d.]{3,12}[a-z\d]>/
 
+# some simple subject rules to catch a persistent spammer
 header T_SUBJ_XANAX		Subject =~ /x.{0,2}a.{0,2}n.{0,2}a.{0,2}x/i
 header T_SUBJ_VALIUM		Subject =~ /v.{0,2}a.{0,2}l.{0,2}i.{0,2}u.{0,2}m/i
 header T_SUBJ_VIAGRA		Subject =~ /v.{0,2}i.{0,2}a.{0,2}g.{0,2}r.{0,2}a/i
 header T_SUBJ_VICODIN		Subject =~ /v.{0,2}i.{0,2}c.{0,6}d.{0,2}i.{0,2}n/i
 header T_SUBJ_SOMA		Subject =~ /s.{0,2}o.{0,2}m.{0,2}a/i
 header T_SUBJ_PHENTER		Subject =~ /p.{0,2}h.{0,6}t.{0,2}e.{0,2}r.{0,2}m/i
+
+# No legit mailer claims that their mailserver has no name.
+# However, one build of the T_MSGID_EVIL_SPAM_1 ratware does.
+header T_RCVD_BY_IP	Received =~ /from \S+ \[\S+\] by [0-9\.]+ with ESMTP id/
+
+# this ratware forges dates in 2002!  Also a T_MSGID_EVIL_SPAM_1
+# variant
+header T_RCVD_ESMTP_IN_TIMEWARP	Received =~ /with ESMTP id <\d+-\d+>; \S\S\S, *\d+ \S\S\S 2002 \d\d:\d\d:\d\d [-+]/
+
+# partial messages; currently-theoretical attack
+header T_FRAGMENTED_MESSAGE	Content-Type =~ /message\/partial/i
 
