@@ -85,13 +85,13 @@ use vars qw{
   @site_rules_path
 };
 
-$VERSION = "2.61";              # update after release
-#$IS_DEVEL_BUILD = 1;            # change for release versions
+$VERSION = "2.62";              # update after release
+$IS_DEVEL_BUILD = 1;            # change for release versions
 
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.212.2.1 2003/12/09 06:30:29 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.212.2.2 2003/12/09 06:56:51 jmason Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
