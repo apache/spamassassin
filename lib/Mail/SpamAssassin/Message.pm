@@ -161,12 +161,6 @@ sub new {
 	}
     }
 
-    # There's no body on this message?!?  Fake the separator and mark the behavior!
-    if (!@message) {
-      $self->{'missing_head_body_separator'} = 1;
-      push(@message, "\n");
-    }
-
     # Store the non-modified headers in a scalar
     $self->{'pristine_headers'} .= $last;
 
@@ -230,6 +224,13 @@ sub new {
 
     # Ok, we found the header/body blank line ...
     last if ($last =~ /^\r?$/m);
+
+    # There's no body on this message?!?  Fake the separator and mark the behavior!
+    if (!@message) {
+      $self->{'missing_head_body_separator'} = 1;
+      push(@message, "\n");
+      next;
+    }
 
     # Alternately, if a multipart mime boundary is found in the header area,
     # aka it's malformed, exit out as well and treat it as part of the body.
