@@ -650,7 +650,7 @@ sub forget_trapped {
 sub get_msgid {
   my ($self, $msg) = @_;
 
-  my $msgid = $msg->get("Message-Id");
+  my $msgid = $msg->get_header("Message-Id");
   if (!defined $msgid) { $msgid = time.".$$\@sa_generated"; }
 
   # remove \r and < and > prefix/suffixes
@@ -675,7 +675,7 @@ sub get_body_from_msg {
 
   if (!defined $body) {
     # why?!
-    warn "failed to get body for ".$self->{msg}->get("Message-Id")."\n";
+    warn "failed to get body for ".$self->{msg}->get_header("Message-Id")."\n";
     return [ ];
   }
 
