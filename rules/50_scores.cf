@@ -742,9 +742,14 @@ score TARJETA_VERDE_ES               1.000
 score REPLY_WITH_QUOTES              -1.0
 score USER_AGENT_GNUS_UA             -1.0
 score USER_AGENT_GNUS_XM             -1.0
-score T_MIME_BOUND_DASH_DIGIT        1.0
-score T_MIME_BOUND_MANY_HEX          1.0
-score T_MIME_BOUND_TEP               1.0
+score MIME_BOUND_DASH_DIGIT          1.0
+score MIME_BOUND_MANY_HEX            1.0
+score MIME_BOUND_TEP                 1.0
+score FORGED_MX_HOTMAIL              2.0
+score RCVD_BY_QVES_COM               3.0
+score RATWARE_EMWAC                  1.0
+score SOME_BREAKTHROUGH              0.5
+score SELECTED_YOU                   0.5
 
 # End of GA-evolved scores.
 
