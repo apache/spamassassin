@@ -1599,7 +1599,7 @@ sub handle_user_sql {
 
 sub handle_user_ldap {
   my $username = shift;
-  dbg("spamd: enetring handle_user_ldap($username)");
+  dbg("spamd: entering handle_user_ldap($username)");
   $spamtest->load_scoreonly_ldap($username);
   $spamtest->signal_user_changed(
     {
