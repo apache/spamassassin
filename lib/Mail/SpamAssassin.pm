@@ -32,7 +32,7 @@ filtering using the user's own mail user-agent application.
 
 This module implements a Mail::Audit plugin, allowing SpamAssassin to be used
 in a Mail::Audit filter.  If you wish to use a command-line filter tool,
-try the L<spamassassin> tool provided.
+try the C<spamassassin> or C<spamd> tools provided.
 
 SpamAssassin also includes support for reporting spam messages to collaborative
 filtering databases, such as Vipul's Razor ( http://razor.sourceforge.net/ ).

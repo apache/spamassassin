@@ -362,7 +362,7 @@ sub rewrite_as_non_spam {
 
 If this mail message has a high enough hit score, report it to spam-tracking
 services straight away, without waiting for user confirmation.  See the
-documentation for L<spamassassin>'s C<-r> switch for details on what
+documentation for C<spamassassin>'s C<-r> switch for details on what
 spam-tracking services are used.
 
 =cut

@@ -36,7 +36,7 @@ WriteMakefile(
 	      },
 
     'clean' => { FILES =>
-	'pod2html* spamassassin spamd/spamc spamd/spamd'
+	'pod2htm* spamassassin spamd/spamc spamd/spamd'
     },
 
     'AUTHOR' => 'Justin Mason <jm@jmason.org>',
@@ -57,6 +57,8 @@ sub MY::install {
 sub MY::postamble {
 q{
 
+EXTRAPODS = spamd/spamc.pod
+
 pm_to_blib: spamassassin
 
 spamassassin: spamassassin.raw
@@ -73,12 +75,12 @@ inst_cfs: spamassassin.cf spamassassin.prefs
 
 text_html_doc: $(MAN1PODS) $(MAN3PODS)
 	-mkdir doc
-	for f in $(MAN1PODS) ; do pod2html $$f > doc/$$f.html ; done
-	for f in $(MAN1PODS) ; do pod2text $$f > doc/$$f.txt ; done
-	for f in $(MAN3PODS) ; do pod2html $$f > doc/`echo $$f | sed \
-	  	-e 's/lib\///' -e 's/\//::/g' -e 's/\.pm//'`.html ; done
-	for f in $(MAN3PODS) ; do pod2text $$f > doc/`echo $$f | sed \
-	  	-e 's/lib\///' -e 's/\//::/g' -e 's/\.pm//'`.txt ; done
+	for f in $(MAN1PODS) $(MAN3PODS) $(EXTRAPODS) ; do \
+	      pod2html $$f > doc/`echo $$f | perl -pe \
+	  	's/(lib|spamd)\///; s/\//::/g; s/\.(pod|pm)//;'`.html ; \
+	      pod2text $$f > doc/`echo $$f | perl -pe \
+	  	's/(lib|spamd)\///; s/\//::/g; s/\.(pod|pm)//;'`.txt ; \
+	done
 
 };
 }
