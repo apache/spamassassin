@@ -75,9 +75,9 @@ const char *PROTOCOL_VERSION="SPAMC/1.2";
 
 void print_usage(void)
 {
-  printf("Usage: spamc [-d host] [-p port] [-c] [-f] [-h]\n");
+  printf("Usage: spamc [-d addr] [-p port] [-c] [-f] [-h]\n");
   printf("-c: check only - print score/threshold and exit code set to 0 if message is not spam, 1 if spam\n");
-  printf("-d host: specify host to connect to  [default: localhost] or UNIX socket [no default]\n");
+  printf("-d addr: specify host to connect to  [default: localhost] or UNIX socket path [default: ./socket]\n");
   printf("-f: fallback safely - in case of comms error, dump original message unchanges instead of setting exitcode\n");
   printf("-h: print this help message\n");
   printf("-o: use UNIX socket\n");
@@ -467,7 +467,12 @@ int process_message(const char *hostname, int port, char *username, int max_size
   {
     struct sockaddr_un addr;
     addr.sun_family = AF_UNIX;
-    strncpy (addr.sun_path, hostname, 100);
+    if(strcmp(hostname,"127.0.0.1"))
+    {
+       strncpy(addr.sun_path, "./socket", 10);
+    } else {
+       strncpy (addr.sun_path, hostname, 100);
+    }
     exstatus = try_to_connect ((const struct sockaddr *) &addr, &mysock, 1);
   }
   else
