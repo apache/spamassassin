@@ -86,7 +86,7 @@ sub new {
 
   # after parsing, tests are refiled into these hashes for each test type.
   # this allows e.g. a full-text test to be rewritten as a body test in
-  # the user's ~/.spamassassin/user_prefs file.
+  # the user's ~/.spamassassin.cf file.
   $self->{body_tests} = { };
   $self->{uri_tests}  = { };
   $self->{uri_evals}  = { }; # not used/implemented yet
@@ -577,7 +577,7 @@ for you, set this to 1.
       $self->{skip_rbl_checks} = $1+0; next;
     }
 
-=item check_mx_attempts n       (default: 2)
+=item check_mx_attempts n	(default: 2)
 
 By default, SpamAssassin checks the From: address for a valid MX this many
 times, waiting 5 seconds each time.
