@@ -43,7 +43,7 @@ describe SLIGHTLY_UNSAFE_JAVASCRIPT	JavaScript code which can easily be executed
 rawbody HTML_WITH_BGCOLOR	/<body [^>]*bgcolor[=3d\"\'\#]+[0-9a-e][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]/is
 describe HTML_WITH_BGCOLOR	HTML mail with non-white background
 
-rawbody  BIG_FONT               /<\s*FONT\s[^>]*size\s*=(3D(\d{2,}|\+[23456789]|[3456789])|\s*["'](\d{2,}|\+[23456789]|[3456789]))/is
+rawbody  BIG_FONT               /<\s*FONT\s[^>]*size\s*=(?:3D(?:\d{2,}|\+[23456789]|[3456789])|\s*["'](?:\d{2,}|\+[23456789]|[3456789]))/is
 describe BIG_FONT               FONT Size +2 and up or 3 and up
 test BIG_FONT      fail    <font size=3D2>
 test BIG_FONT      ok      <font size=3D+2>
@@ -122,7 +122,7 @@ body FULL_REFUND		/FULL REFUND/i
 describe FULL_REFUND		Offers a full refund
 body FOR_FREE			/\bfor FREE\b/i
 describe FOR_FREE		No such thing as a free lunch (1)
-body ONE_HUNDRED_PC_FREE	/(?:100%|completely|totally|absolutely) FREE/i
+body ONE_HUNDRED_PC_FREE	/\b(?:100%|completely|totally|absolutely) FREE/i
 describe ONE_HUNDRED_PC_FREE	No such thing as a free lunch (2)
 body NO_COST                    /\bno (?:cost|charge)\b/i
 describe NO_COST                No such thing as a free lunch (3)
@@ -138,7 +138,7 @@ body CASHCASHCASH		/\${3,}/
 describe CASHCASHCASH		Contains at least 3 dollar signs in a row
 body CALL_NOW			/CALL NOW/i
 describe CALL_NOW		Urges you to call now
-body CALL_FREE			/(?:call|dial|toll free).{1,15}8(?:00|88|77|66|55|44|33|22)[\)\s-]*[\dA-Z]+[\s-]?[\dA-Z]+/i
+body CALL_FREE			/\b(?:call|dial|toll free).{1,15}8(?:00|88|77|66|55|44|33|22)[\)\s-]*[\dA-Z]+[\s-]?[\dA-Z]+/i
 describe CALL_FREE		Contains a tollfree number
 body ONLINE_BIZ_OPS		/online business opportunities/i
 describe ONLINE_BIZ_OPS		Wants you to do business online
@@ -182,7 +182,7 @@ describe ADDRESSES_ON_CD	Only thing addresses on CD are useful for is SPAM
 body SHOES_GUY			/(?:\b(?:Lingui|Guilin)\b.{1,30}){2,}/i
 describe SHOES_GUY		Want some shoes?
 
-body EXCUSE_1			/(?:You (?:were sent|have received|are receiving)|You're receiving).{0,15}(?:message|e-?mail)s? because/i
+body EXCUSE_1			/\b(?:You (?:were sent|have received|are receiving)|You're receiving).{0,15}(?:message|e-?mail)s? because/i
 describe EXCUSE_1		Gives a lame excuse about why you were sent this SPAM
 body EXCUSE_2			/If you did not opt.in/i
 describe EXCUSE_2		Claims you actually asked for this SPAM
@@ -194,7 +194,7 @@ body EXCUSE_5			/that your email address is removed/i
 describe EXCUSE_5		Claims you can be removed from the list
 
 # strange pattern because otherwise it matches the std. majordomo line
-body EXCUSE_6			/(?:wish to|click to|To) remove yourself/i
+body EXCUSE_6			/\b(?:wish to|click to|To) remove yourself/i
 describe EXCUSE_6		Claims you can be removed from the list
 
 body EXCUSE_7			/you (?:wish|want|would like|desire) to be removed/i
@@ -270,17 +270,17 @@ test     PORN_3      fail       Hot lesbo xxxx
 test     PORN_3      fail       Hot lesbians
 
 # (contrib: skod)
-body PORN_6			/(?:\d+\+? xxx pictures|xxx photos?)/i
+body PORN_6			/\b(?:\d+\+? xxx pictures|xxx photos?)/i
 describe PORN_6			Uses words and phrases which indicate porn (6)
 
 body PORN_7			/Free XXX/i
 describe PORN_7			Uses words and phrases which indicate porn (7)
 
-body PORN_8			/(?:video|movie|teen|ware|mp3)z/
+body PORN_8			/\b(?:video|movie|teen|ware|mp3)z/
 describe PORN_8			Uses words and phrases which indicate porn (8)
 
 # Words which will almost never be seen outside of porn spam
-body     PORN_9                 /(?:sex|gay|slut|whore|\bcum|f.ck|adult|xxx)[ -]?fest|\bcum[ -]?shot|\bcum[ -]?dumpster/i
+body     PORN_9                 /\b(?:sex|gay|slut|whore|\bcum|f.ck|adult|xxx)[ -]?fest|\bcum[ -]?shot|\bcum[ -]?dumpster/i
 describe PORN_9                 Uses words and phrases which indicate porn (9)
 
 test     PORN_9       ok        sex-fest
@@ -288,7 +288,7 @@ test     PORN_9       ok        cum-dumpster
 test     PORN_9       fail      talcum-dumpster
 
 # Words which mainly show up in porn spam
-body     PORN_10                /\blolita|\bslut|\bwhore|(?:[^x]|\b)xxx(?:[^x]|\b)|\bporn|\b(?:Asian|Japanese|oriental)\s+(?:girls|schoolgirls)\b|\bbabes\b|gang[ -]?bang|\bskank|\btits\b|\btitties\b|\bpussy\b|\bpussies\b|\bbi(?!-)\b|free pics/i
+body     PORN_10                /\b(?:lolita|slut|whore|(?:[^x]|\b)xxx(?:[^x]|\b)|porn|(?:Asian|Japanese|oriental)\s+(?:girls|schoolgirls)\b|babes\b|gang[ -]?bang|skank|tits\b|titties\b|pussy\b|pussies\b|bi(?!-)\b|free pics/i
 describe PORN_10                Uses words and phrases which indicate porn (10)
 
 test     PORN_10      ok        Lolita
@@ -298,7 +298,7 @@ test     PORN_10      fail      xxxx
 
 # Words which often show up in spam, but also show up somewhat often in
 # non-spam
-body     PORN_11                /hard[ -]?core|web[ -]?cam|\bamateur\b/i
+body     PORN_11                /\b(?:hard[ -]?core|web[ -]?cam|amateur\b)/i
 describe PORN_11                Uses words and phrases which indicate porn (11)
 
 test     PORN_11      ok        hard-core
@@ -311,7 +311,7 @@ test     PORN_11      fail      proamateur
 # compensate for only matching two terms, so as to not generate too many
 # false positives, there can only be up to seven characters between terms,
 # rather than the 15 for PORN_3; it also uses a shorter list of terms.
-body     PORN_12                /(?:lolita|xxx|sex|slut|whore|hottest|hard-?core|horn|virgin|naught|web.?cam|le[sz]|skank|tit|puss|adult|fuck)/i and /(?:(?:\blolita|(?:[^x]|\b)xxx(?:[^x]|\b)|\bsex|\bslut|\bwhore|\bhottest\b|hard-?core|\bhorny\b|\bhorniest\b|\bvirgin|\bnaughty\b|\bnaughtiest\b|\bweb.?cam|\ble[sz]b(?:ian|o)|\bskank|\btits\b|\btitties\b|\bpussy\b|\bpussies\b|\badult\b|\bfuck).{0,7}){2,}/i
+body     PORN_12                /\b(?:lolita|xxx|sex|slut|whore|hottest|hard-?core|horn|virgin|naught|web.?cam|le[sz]|skank|tit|puss|adult|fuck)/i and /(?:(?:\blolita|(?:[^x]|\b)xxx(?:[^x]|\b)|\bsex|\bslut|\bwhore|\bhottest\b|hard-?core|\bhorny\b|\bhorniest\b|\bvirgin|\bnaughty\b|\bnaughtiest\b|\bweb.?cam|\ble[sz]b(?:ian|o)|\bskank|\btits\b|\btitties\b|\bpussy\b|\bpussies\b|\badult\b|\bfuck).{0,7}){2,}/i
 describe PORN_12                Uses words and phrases which indicate porn (12)
 
 test     PORN_12      ok        sluts and whores
@@ -326,7 +326,7 @@ test     PORN_13      ok        must be over 18
 test     PORN_13      fail      must be at least 13
 
 # Like PORN_11, but phrases which are *really* likely to show up in non-porn
-body     PORN_14                /\bpics\b|\byears? old\b|\bmy name'?s\b|\bmy name is\b/i
+body     PORN_14                /\b(?:pics\b|years? old\b|my name'?s\b|my name is\b)/i
 describe PORN_14                Uses words and phrases which indicate porn (14)
 
 test     PORN_14     ok         I am 18 years old
@@ -373,7 +373,7 @@ body ASKS_BILLING_ADDRESS       /\bbilling address\b/i
 describe ASKS_BILLING_ADDRESS   Asks for a billing address
 
 # (contrib: WW)
-body CYBER_FIRE_POWER           /(?:by|for) Cyber FirePower\!/
+body CYBER_FIRE_POWER           /\b(?:by|for) Cyber FirePower\!/
 describe CYBER_FIRE_POWER       mentions Cyber FirePower!, a spam-tool
 
 # converted to use eval method by Matthew Cline
@@ -484,13 +484,13 @@ describe PENIS_ENLARGE		Information on getting a larger penis
 body PENIS_ENLARGE2		/\bpenis\b.{0,50}\b(?:add\b|enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b)/i
 describe PENIS_ENLARGE2		Information on getting a larger penis
 
-body     EJACULATION            /(?:increase|improve).{0,10}ejaculation/i
+body     EJACULATION            /\b(?:increase|improve).{0,10}ejaculation/i
 describe EJACULATION            Increase your ejaculation!
 
-body     IMPOTENCE              /(?:impotence (?:problem|cure|solution)|Premature Ejaculation|erectile dysfunction)/i
+body     IMPOTENCE              /\b(?:impotence (?:problem|cure|solution)|Premature Ejaculation|erectile dysfunction)/i
 describe IMPOTENCE              Impotence cure
 
-body WORK_AT_HOME		/(?:WORK|(?:MAKE|EARN).{1,10}(?:MONEY|\$+|BUCKS|CASH)).{1,10}(?:AT|FROM) (?:YOUR )?HOME/i
+body WORK_AT_HOME		/\b(?:WORK|(?:MAKE|EARN).{1,10}(?:MONEY|\$+|BUCKS|CASH)).{1,10}(?:AT|FROM) (?:YOUR )?HOME/i
 describe WORK_AT_HOME		Information on how to work at home (1)
 
 body HOME_EMPLOYMENT		/HOME.{0,10}(?: EMPLOYMENT|WORKER|BUSINESS)/i
@@ -549,7 +549,7 @@ describe CHARSET_FARAWAY_BODY	Character set indicates foreign language body
 body NIGERIAN_SCAM		/BASED ON INFORMATION GATHERED ABOUT YOU, WE BELIEVE\s*YOU WOULD BE IN A POSITION TO HELP US IN TRANSFER/i
 describe NIGERIAN_SCAM		Nigerian scam, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
 
-body NIGERIAN_SCAM_2 /(?:(?:bank|government|republic).{1,10}(?:nigeria|sierra leone|zimbabwe|botswana)|(?:nigeria|sierra leone|zimbabwe|botswana).{1,10}(?:national|government|embassy|chamber|bank|petroleum))/i
+body NIGERIAN_SCAM_2 /\b(?:(?:bank|government|republic).{1,10}(?:nigeria|sierra leone|zimbabwe|botswana)|(?:nigeria|sierra leone|zimbabwe|botswana).{1,10}(?:national|government|embassy|chamber|bank|petroleum))/i
 describe NIGERIAN_SCAM_2	Mutated Nigerian scams, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
 
 body NIGERIAN_SCAM_4 /\b(wife|widow|son|husband)\b.{0,60}\b(?:Abacha|Kabila|Sekou?|Stojiljkovic|Bangura)\b/i
@@ -612,7 +612,7 @@ describe KIFF			Contains "Temple Kiff"
 body CBYI			/CBYI/
 describe CBYI			Contains "CBYI"
 
-body JODY			/(?:My wife, Jody|Mi esposa, Jody)/
+body JODY			/\b(?:My wife, Jody|Mi esposa, Jody)/
 describe JODY			Contains "My wife, Jody" testimonial
 
 body GENTLE_FEROCITY		/Gentle Ferocity/i
@@ -621,7 +621,7 @@ describe GENTLE_FEROCITY	Contains "Gentle Ferocity"
 body VJESTIKA			/Vjestika Aphrodisia/i
 describe VJESTIKA		Contains "Vjestika Aphrodisia"
 
-body TONER			/(?:toner|ink|fax|copier)\scartridge/i
+body TONER			/\b(?:toner|ink(?:[-\s]*jet)?|fax|copier)[-\s]+cartridge/i
 describe TONER			Contains "Toner Cartridge"
 
 body CASINO			/casino/i
@@ -652,7 +652,7 @@ body EGP_HTML_BANNER            /^<!-- \|\*\*\|begin egp html banner/
 describe EGP_HTML_BANNER        non-spam EGP banner found
 
 # contrib: thelton /at/ donet.com
-body GREAT_OFFER                /(?:offer expires|see full offer for details|great offer)/i
+body GREAT_OFFER                /\b(?:offer expires|see full offer for details|great offer)/i
 describe GREAT_OFFER            Trying to offer you something
 
 body SUBJ_2_CREDIT              /subject to credit approval/i
@@ -670,7 +670,7 @@ describe COPY_DVDS              Containts 'Copy DVDs'
 body URGENT_BIZ                 /URGENT BUSINESS/i
 describe URGENT_BIZ             Containts 'URGENT BUSINESS'
 
-body EARN_PER_WEEK              /(?:earn|make).{1,20}\d\d\d+.{1,30}(?:per week|per month|weekly|monthly)/i
+body EARN_PER_WEEK              /\b(?:earn|make).{1,20}\d\d\d+.{1,30}(?:per week|per month|weekly|monthly)/i
 describe EARN_PER_WEEK          Contains 'earn $something per week'
 
 # contrib: Wayne A Tucker
@@ -699,7 +699,7 @@ describe SIGNATURE_DELIM        Standard signature delimiter present
 body     READ_TO_END            /read this (?:e-?mail )?to the end/i
 describe READ_TO_END            You'd better read all of this spam!
 
-body     DONT_DELETE            /(?:don'?t delete this|do not delete)/i
+body     DONT_DELETE            /\b(?:don'?t delete this|do not delete)/i
 describe DONT_DELETE            Don't delete me!  Nooooo!!!!
 
 body     REAL_THING             /the real thing/i
