@@ -158,17 +158,20 @@ sub get_rendered_body_text_array {
   for(my $pt = 0 ; $pt <= $#parts ; $pt++ ) {
     my $p = $parts[$pt];
 
+    # put a blank line between parts ...
+    $text .= "\n" if ( $text );
+
     my($type, $rnd) = $p->rendered(); # decode this part
     if ( defined $rnd ) {
       # Only text/* types are rendered ...
-      $text .= $text ? "\n$rnd" : $rnd;
+      $text .= $rnd;
 
       # TVD - if there are multiple parts, what should we do?
       # right now, just use the last one ...
       $self->{html} = $p->{html_results} if ( $type eq 'text/html' );
     }
     else {
-      $text .= $text ? "\n".$p->decode() : $p->decode();
+      $text .= $p->decode();
     }
   }
 
@@ -189,29 +192,16 @@ sub get_decoded_body_text_array {
   my ($self) = @_;
 
   if (defined $self->{text_decoded}) { return $self->{text_decoded}; }
-
   $self->{text_decoded} = [ ];
-  local ($_);
 
   # Find all parts which are leaves
-  my @parts = $self->{msg}->find_parts(qr/./,1);
+  my @parts = $self->{msg}->find_parts(qr/^(?:text|message)\b/i,1);
   return $self->{text_decoded} unless @parts;
 
   # Go through each part
   for(my $pt = 0 ; $pt <= $#parts ; $pt++ ) {
-    my $p = $parts[$pt];
-
-    # For below, we really only care about textual parts
-    if ( $p->{'type'} !~ /^(?:text|message)\b/i ) {
-      # remove this part from our array
-      splice @parts, $pt--, 1;
-      next;
-    }
-
-    $p->decode(); # decode this part
     push(@{$self->{text_decoded}}, "\n") if ( @{$self->{text_decoded}} );
-    push(@{$self->{text_decoded}},
-      map { split_into_array_of_short_lines($_) } @{$p->{'decoded'}} );
+    push(@{$self->{text_decoded}}, split_into_array_of_short_lines($parts[$pt]->decode()));
   }
 
   return $self->{text_decoded};
