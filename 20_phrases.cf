@@ -553,8 +553,14 @@ body CENTS_ON_DOLLAR	        /\bcents on the dollar\b/i
 describe CENTS_ON_DOLLAR	Cents on the Dollar
 
 # seems like we vastly reduce FPs on this one with a small change or two
-body DIET			/\b(?:(?:without|no) (?:exercis(?:e|ing)|dieting)|weight.?loss|(?:extra|lose|lost|losing).{0,10}(?:pounds|weight|inches|lbs)|burn.{1,10}fat)\b/i
-describe DIET			Lose Weight Spam
+body DIET_1		/\b(?:(?:without|no) (?:exercis(?:e|ing)|dieting)|weight.?loss|(?:extra|lose|lost|losing).{0,10}(?:pounds|weight|inches|lbs)|burn.{1,10}fat)\b/i
+describe DIET_1		Lose Weight Spam
+
+body DIET_2		/\blo+se.{1,10}\d+.{1,3}(?:lb|pound|kg|kilo)/i
+describe DIET_2		Describes weight loss
+
+body DIET_3		/(?:Body Fat Loss|Loss of body fat|lose.{1,10}body fat)/i
+describe DIET_3		Describes body fat loss
 
 body LONG_DISTANCE	        /\b(?:Unlimited|per minute|free).{1,9}Long Distance/i
 describe LONG_DISTANCE		Long Distance Phone Offer
@@ -816,12 +822,6 @@ describe NIGERIAN_BODY_GOVT_3	Message body has many indications of Nigerian scam
 # ho ho ho
 body WALAA			/instructions and walaa\b/i
 describe WALAA			Illiterate spammer cannot spell 'voila'
-
-body		LOSEWEIGHT	/\blo+se.{1,10}\d+.{1,3}(?:lb|pound|kg|kilo)/i
-describe	LOSEWEIGHT	Describes weight loss
-
-body		LOSEBODYFAT	/(?:Body Fat Loss|Loss of body fat|lose.{1,10}body fat)/i
-describe	LOSEBODYFAT	Describes body fat loss
 
 body SEE_FOR_YOURSELF		/See (?:for|it|it for) yourself\b/i
 describe SEE_FOR_YOURSELF       See for yourself 
