@@ -78,7 +78,7 @@ sub check_for_from_mx {
     return 0;
   }
 
-  if ($self->{conf}->{check_mx_attempts) < 1) {
+  if ($self->{conf}->{check_mx_attempts} < 1) {
     return 0;
   }
 
