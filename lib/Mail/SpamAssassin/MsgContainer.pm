@@ -38,6 +38,7 @@ use strict;
 use MIME::Base64;
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::HTML;
+use Mail::SpamAssassin::MsgMetadata;
 use MIME::Base64;
 use MIME::QuotedPrint;
 
@@ -55,7 +56,7 @@ sub new {
   my $self = {
     headers		=> {},
     raw_headers		=> {},
-    metadata		=> {},
+    meta_strings	=> {},
     body_parts		=> [],
     header_order	=> [],
     already_parsed	=> 1,
@@ -585,13 +586,26 @@ sub get_pristine_body {
 
 # ---------------------------------------------------------------------------
 
+sub extract_message_metadata {
+  my ($self, $main) = @_;
+
+  # do this only once
+  if ($self->{already_extracted_metadata}) { return; }
+  $self->{already_extracted_metadata} = 1;
+
+  $self->{metadata} = Mail::SpamAssassin::MsgMetadata->new($self);
+  $self->{metadata}->extract ($self, $main);
+}
+
+# ---------------------------------------------------------------------------
+
 =item $str = get_metadata($hdr)
 
 =cut
 
 sub get_metadata {
   my ($self, $hdr) = @_;
-  $self->{metadata}->{$hdr};
+  $self->{meta_strings}->{$hdr};
 }
 
 =item put_metadata($hdr, $text)
@@ -600,7 +614,7 @@ sub get_metadata {
 
 sub put_metadata {
   my ($self, $hdr, $text) = @_;
-  $self->{metadata}->{$hdr} = $text;
+  $self->{meta_strings}->{$hdr} = $text;
 }
 
 =item delete_metadata($hdr)
@@ -609,7 +623,7 @@ sub put_metadata {
 
 sub delete_metadata {
   my ($self, $hdr) = @_;
-  delete $self->{metadata}->{$hdr};
+  delete $self->{meta_strings}->{$hdr};
 }
 
 =item $str = get_all_metadata()
@@ -620,10 +634,23 @@ sub get_all_metadata {
   my ($self) = @_;
 
   my @ret = ();
-  foreach my $key (sort keys %{$self->{metadata}}) {
-    push (@ret, $key, ": ", $self->{metadata}->{$key}, "\n");
+  foreach my $key (sort keys %{$self->{meta_strings}}) {
+    push (@ret, $key, ": ", $self->{meta_strings}->{$key}, "\n");
   }
   return join ("", @ret);
+}
+
+# ---------------------------------------------------------------------------
+
+=item finish()
+
+Clean up an object so that it can be destroyed.
+
+=cut
+
+sub finish {
+  my ($self) = @_;
+  $self->{metadata}->finish();
 }
 
 # ---------------------------------------------------------------------------

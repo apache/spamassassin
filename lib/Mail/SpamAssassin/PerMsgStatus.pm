@@ -55,11 +55,8 @@ use Text::Wrap ();
 use Mail::SpamAssassin::EvalTests;
 use Mail::SpamAssassin::AutoWhitelist;
 use Mail::SpamAssassin::Conf;
-use Mail::SpamAssassin::Received;
 use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::MsgContainer;
-
-use constant MAX_BODY_LINE_LENGTH =>        2048;
 
 use vars qw{
   @ISA
@@ -140,19 +137,7 @@ sub check {
     $self->{conf}->set_score_set ($set|2);
   }
 
-  # pre-chew Received headers
-  $self->parse_received_headers();
-
-  # and identify the language (if we're going to do that), before we
-  # run any Bayes tests, so they can use that as a token
-  {
-    my $decoded = $self->get_decoded_stripped_body_text_array();
-    $self->_check_language ($decoded);
-    undef $decoded;                # this is cached anyway for the main set
-  }
-
-  # allow plugins to add more metadata, read the stuff that's there, etc.
-  $self->{main}->call_plugins ("parsed_metadata", { permsgstatus => $self });
+  $self->extract_message_metadata();
 
   {
     # Here, we launch all the DNS RBL queries and let them run while we
@@ -1000,114 +985,37 @@ sub finish {
 }
 
 ###########################################################################
+
+sub extract_message_metadata {
+  my ($self) = @_;
+
+  $self->{msg}->extract_message_metadata($self->{main});
+
+  foreach my $item (qw(
+	relays_trusted relays_trusted_str num_relays_trusted
+	relays_untrusted relays_untrusted_str num_relays_untrusted
+	))
+  {
+    $self->{$item} = $self->{msg}->{metadata}->{$item};
+  }
+
+  $self->{tag_data}->{RELAYSTRUSTED} = $self->{relays_trusted_str};
+  $self->{tag_data}->{RELAYSUNTRUSTED} = $self->{relays_untrusted_str};
+  $self->{tag_data}->{LANGUAGES} = $self->{msg}->{metadata}->{"X-Languages"};
+
+  # allow plugins to add more metadata, read the stuff that's there, etc.
+  $self->{main}->call_plugins ("parsed_metadata", { permsgstatus => $self });
+}
+
+###########################################################################
 # Non-public methods from here on.
 
 sub get_decoded_body_text_array {
-  my ($self) = @_;
-
-  if (defined $self->{decoded_body_text_array}) { return $self->{decoded_body_text_array}; }
-
-  local ($_);
-
-  $self->{decoded_body_text_array} = [ ];
-  $self->{found_encoding_base64} = 0;
-  $self->{found_encoding_quoted_printable} = 0;
-
-  # Find all parts which are leaves
-  my @parts = $self->{msg}->find_parts(qr/./,1);
-  return $self->{decoded_body_text_array} unless @parts;
-
-  # Go through each part
-  for(my $pt = 0 ; $pt <= $#parts ; $pt++ ) {
-    my $p = $parts[$pt];
-
-    # Mark if there's a part with base64 or qp encoding.  If we've already found at least one of each,
-    # don't bother looking for anymore of them.
-    unless ( $self->{found_encoding_base64} && $self->{found_encoding_quoted_printable} ) {
-      my $cte = $p->get_header ('Content-Transfer-Encoding');
-      if (defined $cte && $cte =~ /quoted-printable/i) {
-        $self->{found_encoding_quoted_printable} = 1;
-      }
-      elsif (defined $cte && $cte =~ /base64/i) {
-        $self->{found_encoding_base64} = 1;
-      }
-    }
-
-    # For below, we really only care about textual parts
-    if ( $p->{'type'} !~ /^(?:text|message)\b/i ) {
-      # remove this part from our array
-      splice @parts, $pt--, 1;
-      next;
-    }
-
-    $p->decode(); # decode this part
-    push(@{$self->{decoded_body_text_array}}, "\n") if ( @{$self->{decoded_body_text_array}} );
-    push(@{$self->{decoded_body_text_array}},
-      map { $self->split_into_array_of_short_lines($_) } @{$p->{'decoded'}} );
-  }
-
-  return $self->{decoded_body_text_array};
+  return $_[0]->{msg}->{metadata}->get_decoded_body_text_array();
 }
 
-sub split_into_array_of_short_lines {
-  my $self = shift;
-
-  my @result = ();
-  foreach my $line (split (/^/m, $_[0])) {
-    while (length ($line) > MAX_BODY_LINE_LENGTH) {
-      push (@result, substr($line, 0, MAX_BODY_LINE_LENGTH));
-      substr($line, 0, MAX_BODY_LINE_LENGTH) = '';
-    }
-    push (@result, $line);
-  }
-  @result;
-}
-
-
-###########################################################################
-
-# this really wants to get the rendered version ...
 sub get_decoded_stripped_body_text_array {
-  my ($self) = @_;
-
-  if (defined $self->{decoded_stripped_body_text_array}) { return $self->{decoded_stripped_body_text_array}; }
-
-  local ($_);
-
-  $self->{decoded_stripped_body_text_array} = [];
-
-  # Find all parts which are leaves
-  my @parts = $self->{msg}->find_parts(qr/^(?:text|message)\b/i,1);
-  return $self->{decoded_stripped_body_text_array} unless @parts;
-
-  # Go through each part
-  my $text = $self->get('subject') || '';
-  for(my $pt = 0 ; $pt <= $#parts ; $pt++ ) {
-    my $p = $parts[$pt];
-
-    my($type, $rnd) = $p->rendered(); # decode this part
-    if ( defined $rnd ) {
-      # Only text/* types are rendered ...
-      $text .= $text ? "\n$rnd" : $rnd;
-
-      # TVD - if there are multiple parts, what should we do?
-      # right now, just use the last one ...
-      $self->{html} = $p->{html_results} if ( $type eq 'text/html' );
-    }
-    else {
-      $text .= $text ? "\n".$p->decode() : $p->decode();
-    }
-  }
-
-  # whitespace handling (warning: small changes have large effects!)
-  $text =~ s/\n+\s*\n+/\f/gs;                # double newlines => form feed
-  $text =~ tr/ \t\n\r\x0b\xa0/ /s;        # whitespace => space
-  $text =~ tr/\f/\n/;                        # form feeds => newline
-
-  my @textary = $self->split_into_array_of_short_lines ($text);
-  $self->{decoded_stripped_body_text_array} = \@textary;
-
-  return $self->{decoded_stripped_body_text_array};
+  return $_[0]->{msg}->{metadata}->get_decoded_body_text_array();
 }
 
 ###########################################################################

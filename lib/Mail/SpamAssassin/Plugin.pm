@@ -214,10 +214,31 @@ sub check_start {
 }
 
 # ---------------------------------------------------------------------------
+=item $plugin->extract_metadata ( { options ... } )
+
+Signals that a message is being mined for metadata.  Some plugins may wish
+to add their own metadata as well.
+
+=over 4
+
+=item msg
+
+The C<Mail::SpamAssassin::MsgContainer> object for this message.
+
+=back
+
+=cut
+
+sub extract_metadata {
+  my ($self, $opts) = @_;
+  return 0;	# implemented by subclasses, no-op by default
+}
+
+# ---------------------------------------------------------------------------
 =item $plugin->parsed_metadata ( { options ... } )
 
 Signals that a message's metadata has been parsed, and can now be
-accessed, or supplemented, by the plugin.
+accessed by the plugin.
 
 =over 4
 

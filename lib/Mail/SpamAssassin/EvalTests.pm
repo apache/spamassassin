@@ -2252,35 +2252,14 @@ sub _check_language {
     return $self->{undesired_language_body};
   }
 
+  $self->{undesired_language_body} = 0;
   my @languages = split (' ', $self->{conf}->{ok_languages});
 
-  # map of languages that are very often mistaken for another, perhaps with
-  # more than 0.02% false positives, we only map if length is < 2048 bytes
-  my %mistakable = ('sco' => 'en');
-
   if (grep { $_ eq "all" } @languages) {
-    $self->{undesired_language_body} = 0;
     return $self->{undesired_language_body};
   }
 
-  $body = join ("\n", @{$body});
-  $body =~ s/^Subject://i;
-
-  # need about 256 bytes for reasonably accurate match (experimentally derived)
-  if (length($body) < 256)
-  {
-    dbg("Message too short for language analysis");
-    $self->{undesired_language_body} = 0;
-    return $self->{undesired_language_body};
-  }
-
-  my @matches = Mail::SpamAssassin::TextCat::classify($self, $body);
-
-  # save matches for possible insertion into headers, etc.
-  $self->{tag_data}->{LANGUAGES} = join(', ', @matches);
-
-  # add to metadata, too, so Bayes gets to take a look
-  $self->{msg}->put_metadata ("X-Languages", $self->{tag_data}->{LANGUAGES});
+  my @matches = @{$self->{msg}->{metadata}->{textcat_matches}};
 
   # not able to get a match, assume it's okay
   if (! @matches) {
@@ -2288,14 +2267,18 @@ sub _check_language {
     return $self->{undesired_language_body};
   }
 
+  # map of languages that are very often mistaken for another, perhaps with
+  # more than 0.02% false positives
+  my %mistakable = ('sco' => 'en');
+
   # see if any matches are okay
   foreach my $match (@matches) {
     $match =~ s/\..*//;
-    if (length($body) < 2048 && exists $mistakable{$match}) {
+    if (exists $mistakable{$match}) {
       $match = $mistakable{$match};
     }
     foreach my $language (@languages) {
-      if (length($body) < 2048 && exists $mistakable{$language}) {
+      if (exists $mistakable{$language}) {
 	$language = $mistakable{$language};
       }
       if ($match eq $language) {

@@ -460,14 +460,7 @@ sub tokenize_line {
 sub tokenize_headers {
   my ($self, $msg) = @_;
 
-  my $hdrs = $msg->get_all_headers();
-
-  # jm: do not learn additional metadata (X-Languages, X-Relays-Untrusted)
-  # until we can generate that while running sa-learn. TODO
-  #
-  # if ($msg->can ("get_all_metadata")) {
-  # $hdrs .= $msg->get_all_metadata();
-  # }
+  my $hdrs = $msg->get_all_headers() . $msg->get_all_metadata();
 
   my %parsed = ();
 
@@ -677,6 +670,8 @@ sub learn {
     return if $ignore;
   }
 
+  $msg->extract_message_metadata ($self->{main});
+
   my $body = $self->get_body_from_msg ($msg);
   my $ret;
 
@@ -798,6 +793,8 @@ sub forget {
 
   if (!$self->{conf}->{use_bayes}) { return; }
   if (!defined $msg) { return; }
+
+  $msg->extract_message_metadata ($self->{main});
   my $body = $self->get_body_from_msg ($msg);
   my $ret;
 

@@ -41,16 +41,21 @@
 package Mail::SpamAssassin::Received;
 1;
 
-package Mail::SpamAssassin::PerMsgStatus;
-
+package Mail::SpamAssassin::MsgMetadata;
 use strict;
 use bytes;
 
 use Mail::SpamAssassin::Dns;
+use Mail::SpamAssassin::PerMsgStatus;
 
 use vars qw{
-  $LOCALHOST $CCTLDS_WITH_SUBDELEGATION
+  $LOCALHOST $CCTLDS_WITH_SUBDELEGATION $IP_ADDRESS $IPV4_ADDRESS
+  $IP_IN_RESERVED_RANGE
 };
+
+$IPV4_ADDRESS = $Mail::SpamAssassin::PerMsgStatus::IPV4_ADDRESS;
+$IP_ADDRESS = $Mail::SpamAssassin::PerMsgStatus::IP_ADDRESS;
+$IP_IN_RESERVED_RANGE = $Mail::SpamAssassin::PerMsgStatus::IP_IN_RESERVED_RANGE;
 
 $LOCALHOST = qr{(?:
 		  localhost(?:\.localdomain|)|
@@ -74,11 +79,11 @@ use constant SLOW_TRUST_BASED_ON_HELO_MXES => 0;
 # ---------------------------------------------------------------------------
 
 sub parse_received_headers {
-  my ($self) = @_;
+  my ($self, $msg) = @_;
 
   $self->{relays} = [ ];
 
-  my $hdrs = $self->get('Received');
+  my $hdrs = $msg->get_header('Received');
   $hdrs ||= '';
 
   $hdrs =~ s/\n[ \t]+/ /gs;
@@ -299,20 +304,17 @@ sub parse_received_headers {
   # so protect against that here.  These will not appear in the final
   # message; they're just used internally.
 
-#  if ($self->{msg}->can ("delete_header")) {
-#    $self->{msg}->delete_header ("X-Spam-Relays-Trusted");
-#    $self->{msg}->delete_header ("X-Spam-Relays-Untrusted");
-#
-#    if ($self->{msg}->can ("put_metadata")) {
-#      $self->{msg}->put_metadata ("X-Spam-Relays-Trusted",
-#				$self->{relays_trusted_str});
-#      $self->{msg}->put_metadata ("X-Spam-Relays-Untrusted",
-#				$self->{relays_untrusted_str});
-#    }
-#  }
-
-  $self->{tag_data}->{RELAYSTRUSTED} = $self->{relays_trusted_str};
-  $self->{tag_data}->{RELAYSUNTRUSTED} = $self->{relays_untrusted_str};
+  if ($self->{msg}->can ("delete_header")) {
+    $self->{msg}->delete_header ("X-Spam-Relays-Trusted");
+    $self->{msg}->delete_header ("X-Spam-Relays-Untrusted");
+ 
+    if ($self->{msg}->can ("put_metadata")) {
+      $self->{msg}->put_metadata ("X-Spam-Relays-Trusted",
+			$self->{relays_trusted_str});
+      $self->{msg}->put_metadata ("X-Spam-Relays-Untrusted",
+			$self->{relays_untrusted_str});
+    }
+  }
 
   # be helpful; save some cumbersome typing
   $self->{num_relays_trusted} = scalar (@{$self->{relays_trusted}});
@@ -1134,6 +1136,8 @@ sub is_in_subdelegated_cctld {
   my ($domain) = @_;
   return ($domain =~ /\.${CCTLDS_WITH_SUBDELEGATION}$/);
 }
+
+sub dbg { Mail::SpamAssassin::dbg(@_); }
 
 # ---------------------------------------------------------------------------
 
