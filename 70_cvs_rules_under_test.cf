@@ -64,10 +64,6 @@ body T_HTML_TAG_EXISTS_FORM     eval:html_tag_exists('form')
 body T_HTML_FORM_HIDDEN_EMAIL1	eval:html_test('t_form_hidden_email1')
 body T_HTML_FORM_HIDDEN_EMAIL2	eval:html_test('t_form_hidden_email2')
 
-# HTML web bugs replacements
-body T_HTML_WEB_BUGS_BACKGROUND	eval:html_test('web_bugs_background')
-body T_HTML_WEB_BUGS_SRC	eval:html_test('web_bugs_src')
-
 # replacements
 # %%% HTML_JAVASCRIPT
 # %%% HTML_JAVASCRIPT_UNSAFE
@@ -77,10 +73,6 @@ body T_HTML_EVENT_UNSAFE	eval:html_test('t_html_event_unsafe')
 
 # a new JAVASCRIPT rule
 body T_HTML_WIN_FOCUS		eval:html_test('window_focus')
-
-# possible replacement/supplement for FROM_BTAMAIL
-# %%% FROM_BTAMAIL
-header T_BTAMAIL_HEADER		ALL =~ /btamail\.net\.cn/i
 
 # spam URLs containing "china"
 header T_CHINA_HEADER		ALL =~ /\@china\.com/i
