@@ -54,6 +54,13 @@ sub new {
 
 # ---------------------------------------------------------------------------
 
+sub create_new {
+  my ($self, @args) = @_;
+  return Mail::SpamAssassin::NoMailAudit->new(@args);
+}
+
+# ---------------------------------------------------------------------------
+
 sub get_mail_object {
   my ($self) = @_;
   return $self;
