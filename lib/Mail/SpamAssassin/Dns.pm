@@ -570,6 +570,7 @@ sub dcc_lookup {
     $self->{conf}->{dcc_options} =~ /^([^\;\'\"\0]+)$/;
     my $opts = $1; $opts ||= '';
 
+    dbg("DCC command: ".join(' ', $path, "-H", $opts, "< '$tmpf'", "2>&1"),'dcc',1);
     my $pid = open(DCC, join(' ', $path, "-H", $opts, "< '$tmpf'", "2>&1", '|')) || die "$!\n";
     chomp($response = <DCC>);
     close DCC;
@@ -695,6 +696,7 @@ sub pyzor_lookup {
     $self->{conf}->{pyzor_options} =~ /^([^\;\'\"\0]+)$/;
     my $opts = $1; $opts ||= '';
  
+    dbg("Pyzor command: ".join(' ', $path, $opts, "check", "< '$tmpf'", "2>&1"),'pyzor',1);
     my $pid = open(PYZOR, join(' ', $path, $opts, "check", "< '$tmpf'", "2>&1", '|')) || die "$!\n";
     chomp($response = <PYZOR>);
     close PYZOR;
