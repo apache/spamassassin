@@ -64,9 +64,10 @@ usage: mass-check [options] target ...
   Just left over functions we should remove at some point:
   --bayes       report score from Bayesian classifier
 
-  sample-based learning
+  options used during score generation process
   --learn=N     learn N% of messages as spam or ham
- 
+  --reuse       reuse network checks if X-Spam-Status: is present in messages
+
   non-option arguments are used as target names (mail files and folders),
   the target format is: <class>:<format>:<location>
   <class>       is "spam" or "ham"
@@ -83,11 +84,13 @@ use vars qw($opt_c $opt_p $opt_f $opt_j $opt_n $opt_o $opt_all $opt_bayes
 	    $opt_mid $opt_net $opt_nosort $opt_progress $opt_showdots
 	    $opt_spamlog $opt_tail $opt_rules $opt_restart $opt_loguris
 	    $opt_logmem $opt_after $opt_before $opt_rewrite $opt_deencap
-	    $opt_learn
-	    $total_messages $statusevery);
+	    $opt_learn $opt_reuse
+	    $total_messages $statusevery
+	    %reuse);
 
 use FindBin;
 use lib "$FindBin::Bin/../lib";
+use lib "$FindBin::Bin/tmp";
 eval "use bytes";
 use Mail::SpamAssassin::ArchiveIterator;
 use Mail::SpamAssassin;
@@ -95,6 +98,9 @@ use Getopt::Long;
 use POSIX qw(strftime);
 use constant HAS_TIME_PARSEDATE => eval { require Time::ParseDate; };
 use Config;
+
+# for reuse, score set doesn't matter
+require "rules.pl";
 
 # default settings
 $opt_c = "$FindBin::Bin/../rules";
@@ -109,7 +115,7 @@ GetOptions("c=s", "p=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug:s",
 	   "hamlog=s", "head=i", "loghits", "mh", "mid", "ms", "net",
 	   "progress", "rewrite:s", "showdots", "spamlog=s", "tail=i",
 	   "rules=s", "restart=i", "after=s", "before=s", "loguris",
-	   "deencap=s", "logmem", "learn=i",
+	   "deencap=s", "logmem", "learn=i", "reuse",
 	   "dir" => sub { $opt_format = "dir"; },
 	   "file" => sub { $opt_format = "file"; },
 	   "mbox" => sub { $opt_format = "mbox"; },
@@ -302,6 +308,19 @@ sub wanted {
 
   # remove SpamAssassin markup, if present and the mail was spam
   my $header = $ma->get_header("Received");
+  my $x_spam_status;
+  if ($opt_reuse) {
+    # get X-Spam-Status: header for rule hit resue
+    $x_spam_status = $ma->get_header("X-Spam-Status");
+  }
+  # previous hits
+  my @previous;
+  if ($x_spam_status) {
+    $x_spam_status =~ s/,\s+/,/gs;
+    if ($x_spam_status =~ m/tests=(.*)(?:\s|$)/g) {
+      push @previous, split(/,/, $1);
+    }
+  }
   if ($header && $header =~ /\bwith SpamAssassin\b/) {
     if (!$opt_deencap || message_should_be_deencapped($ma)) {
       my $new_ma = $spamtest->parse($spamtest->remove_spamassassin_markup($ma), 1);
@@ -330,9 +349,17 @@ sub wanted {
 
   # sample-based learning
   if ($opt_learn > 0) {
-    # should be changed to be deterministic
-    if (rand(100) < $opt_learn) {
-      my $spam;
+    my $spam;
+    # spam learned as ham = 0.05%
+    if ($class eq 's' && rand(100) < 0.05) {
+      $spam = 0;
+    }
+    # ham learned as spam = 0.01%
+    elsif ($class eq 'h' && rand(100) < 0.01) {
+      $spam = 1;
+    }
+    # spam/ham learned correctly
+    elsif (rand(100) < $opt_learn) {
       if ($class eq 's') {
 	$spam = 1;
       }
@@ -342,6 +369,8 @@ sub wanted {
       else {
 	die "unknown class, learning failed";
       }
+    }
+    if (defined $spam) {
       my $result = ($spam ? "spam" : "ham");
       my $status = $spamtest->learn($ma, undef, $spam, 0);
       $learned = $status->did_learn();
@@ -393,8 +422,22 @@ sub wanted {
     $extra = '';
   } else {
     $yorn = $status->is_spam() ? 'Y' : '.';
+    # don't bother adjusting scores for reuse
     $score = $status->get_score();
-    $tests = join(",", sort(grep(length,$status->get_names_of_tests_hit(),$status->get_names_of_subtests_hit())));
+    # list of tests hit
+    my @tests;
+    push @tests, split(/,/, $status->get_names_of_tests_hit());
+    push @tests, split(/,/, $status->get_names_of_subtests_hit());
+    # hit reuse
+    if ($x_spam_status) {
+      # generate mapping of hits to remove hits that are marked as skip
+      @tests = grep { !$reuse{$_}->{skip} } @tests;
+      # add hits from previous
+      for (@previous) {
+	push(@tests, $reuse{$_}->{reuse}) if $reuse{$_}->{reuse};
+      }
+    }
+    $tests = join(",", sort(@tests));
     $extra = join(",", @extra);
   }
 
