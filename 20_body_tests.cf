@@ -1030,7 +1030,7 @@ describe LONG_DISTANCE		Long Distance Phone Offer
 body REVERSE_AGING		/reverses? aging/i
 describe REVERSE_AGING		Reverses Aging
 
-body HAIR_LOSS			/(?:thining|restore|grow|new) hair|hair loss/i
+body HAIR_LOSS			/(?:thinn?ing|restore|grow|new) hair|hair loss/i
 describe HAIR_LOSS		Cures Baldness
 
 body CABLE_CONVERTER		/cable converter/i
@@ -1090,7 +1090,7 @@ describe ONLY_COST		Only Costs $0.00
 body SAVE_BUCKS			/save \$/i
 describe SAVE_BUCKS		Save $0.00
 
-body FINANCIAL			/financial(ly) free/i
+body FINANCIAL			/financial(?:ly|) free/i
 describe FINANCIAL 		Financial Freedom
 
 body FORWARD_LOOKING		/contains forward-looking statements/i
