@@ -222,21 +222,23 @@ sub _check_spf {
 
   my ($result, $comment);
   my $timeout = 5;
+  my $oldalarm;
 
   eval {
     local $SIG{ALRM} = sub { die "__alarm__\n" };
-    alarm($timeout);
+    $oldalarm = alarm($timeout);
     ($result, $comment) = $query->result();
-    alarm(0);
+    alarm $oldalarm;
   };
 
-  alarm 0;
+  my $err = $@;
 
-  if ($@) {
-    if ($@ =~ /^__alarm__$/) {
+  if ($err) {
+    alarm $oldalarm;
+    if ($err =~ /^__alarm__$/) {
       dbg("spf: lookup timed out after $timeout seconds");
     } else {
-      warn("spf: lookup failed: $@\n");
+      warn("spf: lookup failed: $err\n");
     }
     return 0;
   }

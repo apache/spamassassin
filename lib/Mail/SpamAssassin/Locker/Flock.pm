@@ -67,6 +67,8 @@ sub safe_lock {
   dbg("locker: safe_lock: $$ created $lock_file");
 
   my $unalarmed = 0;
+  my $oldalarm = 0;
+
   # use a SIGALRM-based timer -- more efficient than second-by-second
   # sleeps
   eval {
@@ -74,11 +76,12 @@ sub safe_lock {
     dbg("locker: safe_lock: $$ trying to get lock on $path with $max_retries timeout");
 
     # max_retries is basically seconds! so use it for the timeout
-    alarm($max_retries);
+    $oldalarm = alarm $max_retries;
 
     # HELLO!?! IO::File doesn't have a flock() method?!
     if (flock ($fh, LOCK_EX)) {
-      alarm(0) and $unalarmed = 1; # avoid calling alarm(0) twice
+      alarm $oldalarm;
+      $unalarmed = 1; # avoid calling alarm(0) twice
 
       dbg("locker: safe_lock: $$ link to $lock_file: link ok");
       $is_locked = 1;
@@ -94,12 +97,14 @@ sub safe_lock {
     }
   };
 
-  $unalarmed or alarm(0); # if we die'd above, need to reset here
-  if ($@) {
-    if ($@ =~ /alarm/) {
+  my $err = $@;
+
+  $unalarmed or alarm $oldalarm; # if we die'd above, need to reset here
+  if ($err) {
+    if ($err =~ /alarm/) {
       dbg("locker: safe_lock: $$ timed out after $max_retries seconds");
     } else {
-      die "locker: safe_lock: $$ " . $@;
+      die "locker: safe_lock: $$ $err";
     }
   }
 

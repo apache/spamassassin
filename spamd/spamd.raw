@@ -82,6 +82,7 @@ my %resphash = (
   EX_PROTOCOL    => 76,    # remote error in protocol
   EX_NOPERM      => 77,    # permission denied
   EX_CONFIG      => 78,    # configuration error
+  EX_TIMEOUT     => 79,    # read timeout
 );
 
 *dbg = \&Mail::SpamAssassin::dbg;
@@ -189,6 +190,8 @@ GetOptions(
   'ssl'                      => \$opt{'ssl'},
   'syslog-socket=s'          => \$opt{'syslog-socket'},
   'syslog|s=s'               => \$opt{'syslog'},
+  'timeout-tcp|T=i'          => \$opt{'timeout-tcp'},
+  'timeout-child|t=i'        => \$opt{'timeout-child'},
   'user-config'              => \$opt{'user-config'},
   'username|u=s'             => \$opt{'username'},
   'version|V'                => \$opt{'version'},
@@ -515,6 +518,8 @@ my $current_user;
 
 my $client;               # used for the client connection ...
 my $childlimit;           # max number of kids allowed
+my $timeout_tcp;          # socket timeout (connect->headers), 0=no timeout
+my $timeout_child;        # processing timeout (headers->finish), 0=no timeout
 my $clients_per_child;    # number of clients each child should process
 my %children = ();        # current children
 
@@ -532,9 +537,21 @@ if ( defined $opt{'max-conn-per-child'} ) {
   $clients_per_child = undef if ( $clients_per_child < 1 );
 }
 
+if (defined $opt{'timeout-tcp'}) {
+  $timeout_tcp = $opt{'timeout-tcp'};
+  $timeout_tcp = undef if ($timeout_tcp < 1);
+}
+
+if (defined $opt{'timeout_child'}) {
+  $timeout_child = $opt{'timeout_child'};
+  $timeout_child = undef if ($timeout_child < 1);
+}
+
 # Set some "sane" limits for defaults
 $childlimit        ||= 5;
 $clients_per_child ||= 200;
+$timeout_child     ||= 300;
+$timeout_tcp       ||= 30;
 
 # ensure scaling parameters are logical
 if ($opt{'min-children'} < 1) {
@@ -551,7 +568,6 @@ if ($opt{'max-spare'} < $opt{'min-spare'}) {
   # http://httpd.apache.org/docs-2.0/mod/prefork.html#maxspareservers
   $opt{'max-spare'} = $opt{'min-spare'}+1;
 }
-
 
 my $dontcopy = 1;
 if ( $opt{'create-prefs'} ) { $dontcopy = 0; }
@@ -699,11 +715,6 @@ if ( $opt{'socketpath'} ) {
     if (!chown $uid, $gid, $path) {
       die "Could not chown $path to $uid/$gid: $! ($@)";
     }
-  }
-
-  # sanity check!
-  if (!-S $path) {
-    die "Could not find newly-created UNIX socket (2) on $path: $! ($@)\n";
   }
 
   if (!chmod $mode, $path) {    # make sure everybody can talk to it
@@ -1053,8 +1064,22 @@ sub accept_a_conn {
     }
   }
 
-  # send the request to the child process
-  local ($_) = $client->getline;
+  local ($_);
+  eval {
+    Mail::SpamAssassin::Util::trap_sigalrm_fully(sub {
+                          die "tcp timeout";
+                        });
+    alarm $timeout_tcp if ($timeout_tcp);
+    # send the request to the child process
+    $_ = $client->getline;
+  };
+  alarm 0;
+
+  if ($@) {
+    service_timeout("($timeout_tcp second socket timeout reading input from client)");
+    $client->close;
+    return 0;
+  }
 
   if ( !defined $_ ) {
     protocol_error("(closed before headers)");
@@ -1080,7 +1105,21 @@ sub accept_a_conn {
   # message that we need to filter.
 
   elsif (/(PROCESS|CHECK|SYMBOLS|REPORT|REPORT_IFSPAM) SPAMC\/(.*)/) {
-    check( $1, $2, $start, $remote_hostname, $remote_hostaddr );
+    my $method = $1;
+    eval {
+      Mail::SpamAssassin::Util::trap_sigalrm_fully(sub {
+                          die "child processing timeout";
+                        });
+      alarm $timeout_child if ($timeout_child);
+      check($method, $2, $start, $remote_hostname, $remote_hostaddr);
+    };
+    alarm 0;
+
+    if ($@) {
+      service_timeout("($timeout_child second timeout while trying to $method)");
+      $client->close();
+      return 1;
+    }
   }
 
   # Looks like a client is just seeing if we're alive.
@@ -1435,6 +1474,13 @@ sub service_unavailable_error {
   syswrite( $client,
             "SPAMD/1.0 $resphash{$resp} Service Unavailable: $err\r\n" );
   logmsg("service unavailable: $err");
+}
+
+sub service_timeout {
+  my ($err) = @_;
+  my $resp = "EX_TIMEOUT";
+  print $client "SPAMD/1.0 $resphash{$resp} Timeout: $err\r\n";
+  logmsg("timeout: $err");
 }
 
 ###########################################################################
@@ -2378,6 +2424,19 @@ accomplished by the master process coordinating the activities of the children.
 This switch will disable this scaling algorithm, and the behaviour seen in
 versions 3.0.0 and 3.0.1 will be used instead, where all processes receive an
 equal load and no scaling takes place.
+
+=item B<--timeout-tcp>=I<number>
+
+This option specifies the number of seconds to wait for headers from a
+client (spamc) before closing the connection.  The minimum value is C<1>, 
+the default value is C<30>, and a value of C<0> will disable socket
+timeouts completely.
+
+=item B<--timeout-child>=I<number>
+
+This option specifies the number of seconds to wait for a spamd child to
+to process or check a message.  The minimum value is C<1>, the default 
+value is C<300>, and a value of C<0> will disable child timeouts completely.
 
 =item B<-H> I<directory>, B<--helper-home-dir>=I<directory>
 

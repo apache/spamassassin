@@ -480,11 +480,14 @@ sub dccifd_lookup {
   }
 
   $self->enter_helper_run_mode();
+  my $oldalarm = 0;
 
   eval {
-    local $SIG{ALRM} = sub { die "alarm\n" };
+    # safe to use $SIG{ALRM} here instead of Util::trap_sigalrm_fully(),
+    # since there are no killer regexp hang dangers here
+    local $SIG{ALRM} = sub { die "__alarm__\n" };
 
-    alarm($timeout);
+    $oldalarm = alarm $timeout;
 
     my $sock = IO::Socket::UNIX->new(Type => SOCK_STREAM,
       Peer => $sockpath) || dbg("dcc: failed to open socket") && die;
@@ -520,18 +523,22 @@ sub dccifd_lookup {
     }
 
     dbg("dcc: dccifd got response: $response");
+    alarm $oldalarm;
   };
-  alarm(0); # if we die'd above, need to reset here
 
+  # do NOT reinstate $oldalarm here; we may already have done that in
+  # the success case.  leave it to the error handler below
+  my $err = $@;
   $self->leave_helper_run_mode();
 
-  if ($@) {
+  if ($err) {
+    alarm $oldalarm;
     $response = undef;
-    if ($@ =~ /alarm/) {
+    if ($err =~ /__alarm__/) {
       dbg("dcc: dccifd check timed out after $timeout secs.");
       return 0;
     } else {
-      warn("dcc: dccifd -> check skipped: $! $@");
+      warn("dcc: dccifd -> check skipped: $! $err");
       return 0;
     }
   }
@@ -588,12 +595,15 @@ sub dcc_lookup {
   # use a temp file here -- open2() is unreliable, buffering-wise,
   # under spamd. :(
   my $tmpf = $self->create_fulltext_tmpfile($fulltext);
+  my $oldalarm = 0;
 
   eval {
+    # safe to use $SIG{ALRM} here instead of Util::trap_sigalrm_fully(),
+    # since there are no killer regexp hang dangers here
     local $SIG{ALRM} = sub { die "__alarm__\n" };
     local $SIG{PIPE} = sub { die "__brokenpipe__\n" };
 
-    alarm($timeout);
+    $oldalarm = alarm $timeout;
 
     # Note: not really tainted, these both come from system conf file.
     my $path = Mail::SpamAssassin::Util::untaint_file_path ($self->{conf}->{dcc_path});
@@ -633,22 +643,25 @@ sub dcc_lookup {
 
     dbg("dcc: got response: $response");
 
-    alarm(0);
     $self->cleanup_kids($pid);
+    alarm $oldalarm;
   };
 
-  alarm 0;
+  # do NOT reinstate $oldalarm here; we may already have done that in
+  # the success case.  leave it to the error handler below
+  my $err = $@;
   $self->leave_helper_run_mode();
 
-  if ($@) {
-    if ($@ =~ /^__alarm__$/) {
+  if ($err) {
+    alarm $oldalarm;
+    if ($err =~ /^__alarm__$/) {
       dbg("dcc: check timed out after $timeout secs.");
-    } elsif ($@ =~ /^__brokenpipe__$/) {
+    } elsif ($err =~ /^__brokenpipe__$/) {
       dbg("dcc: check failed: broken pipe");
-    } elsif ($@ eq "no response\n") {
+    } elsif ($err eq "no response\n") {
       dbg("dcc: check failed: no response");
     } else {
-      warn("dcc: check failed: $@\n");
+      warn("dcc: check failed: $err\n");
     }
     return 0;
   }
@@ -728,12 +741,15 @@ sub pyzor_lookup {
   # use a temp file here -- open2() is unreliable, buffering-wise,
   # under spamd. :(
   my $tmpf = $self->create_fulltext_tmpfile($fulltext);
+  my $oldalarm = 0;
 
   eval {
+    # safe to use $SIG{ALRM} here instead of Util::trap_sigalrm_fully(),
+    # since there are no killer regexp hang dangers here
     local $SIG{ALRM} = sub { die "__alarm__\n" };
     local $SIG{PIPE} = sub { die "__brokenpipe__\n" };
 
-    alarm($timeout);
+    $oldalarm = alarm $timeout;
 
     # Note: not really tainted, this comes from system conf file.
     my $path = Mail::SpamAssassin::Util::untaint_file_path ($self->{conf}->{pyzor_path});
@@ -761,23 +777,26 @@ sub pyzor_lookup {
       die("pyzor: internal error\n");
     }
 
-    alarm(0);
     $self->cleanup_kids($pid);
+    alarm $oldalarm;
   };
 
-  alarm 0;
+  # do NOT reinstate $oldalarm here; we may already have done that in
+  # the success case.  leave it to the error handler below
+  my $err = $@;
   $self->leave_helper_run_mode();
 
-  if ($@) {
-    chomp $@;
-    if ($@ eq "__alarm__") {
+  if ($err) {
+    alarm $oldalarm;
+    chomp $err;
+    if ($err eq "__alarm__") {
       dbg("pyzor: check timed out after $timeout secs.");
-    } elsif ($@ eq "__brokenpipe__") {
+    } elsif ($err eq "__brokenpipe__") {
       dbg("pyzor: check failed: broken pipe");
-    } elsif ($@ eq "no response") {
+    } elsif ($err eq "no response") {
       dbg("pyzor: check failed: no response");
     } else {
-      warn("pyzor: check failed: $@\n");
+      warn("pyzor: check failed: $err\n");
     }
     return 0;
   }

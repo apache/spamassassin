@@ -150,12 +150,13 @@ sub dcc_report {
   # use a temp file here -- open2() is unreliable, buffering-wise,
   # under spamd. :(
   my $tmpf = $self->create_fulltext_tmpfile(\$fulltext);
+  my $oldalarm = 0;
 
   eval {
     local $SIG{ALRM} = sub { die "__alarm__\n" };
     local $SIG{PIPE} = sub { die "__brokenpipe__\n" };
 
-    alarm $timeout;
+    $oldalarm = alarm $timeout;
 
     # Note: not really tainted, these both come from system conf file.
     my $path = Mail::SpamAssassin::Util::untaint_file_path ($self->{conf}->{dcc_path});
@@ -171,20 +172,23 @@ sub dcc_report {
     my @ignored = <DCC>;
     $self->close_pipe_fh (\*DCC);
 
-    alarm(0);
     waitpid ($pid, 0);
+    alarm $oldalarm;
   };
 
-  alarm 0;
+  my $err = $@;
+
+  # do not call alarm $oldalarm here, that *may* have already taken place
   $self->leave_helper_run_mode();
  
-  if ($@) {
-    if ($@ =~ /^__alarm__$/) {
+  if ($err) {
+    alarm $oldalarm;  # reinstate the one we missed
+    if ($err =~ /^__alarm__$/) {
       dbg("reporter: DCC report timed out after $timeout seconds");
-   } elsif ($@ =~ /^__brokenpipe__$/) {
+    } elsif ($err =~ /^__brokenpipe__$/) {
       dbg("reporter: DCC report failed: broken pipe");
     } else {
-      warn("reporter: DCC report failed: $@\n");
+      warn("reporter: DCC report failed: $err\n");
     }
     return 0;
   }
@@ -201,12 +205,13 @@ sub pyzor_report {
   # use a temp file here -- open2() is unreliable, buffering-wise,
   # under spamd. :(
   my $tmpf = $self->create_fulltext_tmpfile(\$fulltext);
+  my $oldalarm = 0;
 
   eval {
     local $SIG{ALRM} = sub { die "__alarm__\n" };
     local $SIG{PIPE} = sub { die "__brokenpipe__\n" };
 
-    alarm $timeout;
+    $oldalarm = alarm $timeout;
 
     # Note: not really tainted, this comes from system conf file.
     my $path = Mail::SpamAssassin::Util::untaint_file_path ($self->{conf}->{pyzor_path});
@@ -223,20 +228,23 @@ sub pyzor_report {
     my @ignored = <PYZOR>;
     $self->close_pipe_fh (\*PYZOR);
 
-    alarm(0);
+    alarm $oldalarm;
     waitpid ($pid, 0);
   };
 
-  alarm 0;
+  my $err = $@;
+
+  # do not call alarm $oldalarm here, that *may* have already taken place
   $self->leave_helper_run_mode();
 
-  if ($@) {
-    if ($@ =~ /^__alarm__$/) {
+  if ($err) {
+    alarm $oldalarm;
+    if ($err =~ /^__alarm__$/) {
       dbg("reporter: pyzor report timed out after $timeout seconds");
-    } elsif ($@ =~ /^__brokenpipe__$/) {
+    } elsif ($err /^__brokenpipe__$/) {
       dbg("reporter: pyzor report failed: broken pipe");
     } else {
-      warn("reporter: pyzor report failed: $@\n");
+      warn("reporter: pyzor report failed: $err\n");
     }
     return 0;
   }
