@@ -41,7 +41,7 @@ sub check_PERL {
     $plver = sprintf("%i.%i.%i", split(/[._]/, $plver[5]), 0);
   }
 
-  push(@meta, 'override') if $pl ne $vars{'PERL'};
+  push(@meta, 'override') if $vars{'PERL'} and $pl ne $vars{'PERL'};
   return($pl, $plver, @meta);
 }
 
