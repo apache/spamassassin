@@ -924,6 +924,7 @@ sub get_decoded_stripped_body_text_array {
   $self->{html}{image_area} = 0;
   $self->{html}{shouting} = 0;
   $self->{html}{max_shouting} = 0;
+  $self->{html}{max_shouting2} = 0;
 
   # do HTML conversions if necessary
   if ($text =~ m/<(?:$re_strict|$re_loose|!--|!doctype)(?:\s|>)/ois) {
