@@ -67,7 +67,6 @@ my %freq_ham = ();
 my $num_spam = 0;
 my $num_ham = 0;
 my %ranking = ();
-my %infogain = ();
 my $ok_lang = '';
 
 readscores($cffile);
@@ -161,59 +160,9 @@ foreach my $test (keys %freq_spam, keys %freq_ham) {
   #$rank = log($rank+0.001);
 
   # new system: allows a few more 99% hitters into the first page
-  #my $rank = (($soratio**3) * 2000) + ($fsadj*3);
+  my $rank = (($soratio**3) * 2000) + ($fsadj*3);
 
-  #$ranking{$test} = $rank;
-  #$rank_hi = $rank if ($rank > $rank_hi);
-  #$rank_lo = $rank if ($rank < $rank_lo);
-
-  # new new system:
-  # from "Learning to Filter Unsolicited Commercial E-Mail": determine
-  # the information gain IG(X, C) of the Boolean attributes (ie. the rules).
-  # Measures "the average reduction in the entropy of C (classification)
-  # given the value of X (the rule)".  Makes a good ranking measure here.
-  #
-  #             sum                                    P(X = x ^ C = c)
-  # IG(X,C) = x in [0, 1]    P(X = x ^ C = c) . log2( ------------------- )
-  #           c in [Ch, Cs]                           P(X = x) . P(C = c)
-  #
-  my $safe_nspam = $num_spam || 0.0000001;
-  my $safe_nham = $num_ham || 0.0000001;
-  my $num_all = ($num_spam+$num_ham);
-  my $safe_all = $num_all || 0.0000001;
-  my $f_all = $fs+$fn;
-
-  my $px0 = (($num_all - $f_all) / $safe_all);         # P(X = 0)
-  my $px1 = ($f_all / $safe_all);                      # P(X = 1)
-  my $pccs = ($num_spam / $safe_all);                  # P(C = Cs)
-  my $pcch = ($num_ham / $safe_all);                   # P(C = Ch)
-  my $px1ccs = ($fs / $safe_nspam);                   # P(X = 1 ^ C = Cs)
-  my $px1cch = ($fn / $safe_nham);                    # P(X = 1 ^ C = Ch)
-  my $px0ccs = (($num_spam - $fs) / $safe_nspam);     # P(X = 0 ^ C = Cs)
-  my $px0cch = (($num_ham - $fn) / $safe_nham);       # P(X = 0 ^ C = Ch)
-  my $safe_px0_dot_pccs = ($px0 * $pccs) || 0.00000001;
-  my $safe_px0_dot_pcch = ($px0 * $pcch) || 0.00000001;
-  my $safe_px1_dot_pccs = ($px1 * $pccs) || 0.00000001;
-  my $safe_px1_dot_pcch = ($px1 * $pcch) || 0.00000001;
-
-  sub log2 { return log($_[0]) / 0.693147180559945; } # log(2) = 0.6931...
-
-  my $safe_px0ccs = ($px0ccs || 0.0000001);
-  my $safe_px0cch = ($px0cch || 0.0000001);
-  my $safe_px1ccs = ($px1ccs || 0.0000001);
-  my $safe_px1cch = ($px1cch || 0.0000001);
-  my $infogain = ( $px0ccs * log2($safe_px0ccs / $safe_px0_dot_pccs) ) +
-                  ( $px0cch * log2($safe_px0cch / $safe_px0_dot_pcch) ) +
-                  ( $px1ccs * log2($safe_px1ccs / $safe_px1_dot_pccs) ) +
-                  ( $px1cch * log2($safe_px1cch / $safe_px1_dot_pcch) );
-
-  $infogain{$test} = $infogain;
-
-  my $rank = $infogain;
   $ranking{$test} = $rank;
-
-
-  # track highs and lows to normalize in next step
   $rank_hi = $rank if ($rank > $rank_hi);
   $rank_lo = $rank if ($rank < $rank_lo);
 }
