@@ -133,7 +133,7 @@ mkdir -p %{buildroot}/etc/mail/spamassassin
 
 %files 
 %defattr(-,root,root)
-%doc README Changes sample-nonspam.txt sample-spam.txt spamd/README.spamd INSTALL
+%doc README Changes sample-nonspam.txt sample-spam.txt spamd/README.spamd INSTALL CONTRIB_CERT COPYRIGHT INSTALL.VMS License TRADEMARK USAGE
 %attr(755,root,root) %{_bindir}/*
 %attr(644,root,root) %{_includedir}/*
 %attr(644,root,root) %{_libdir}/*.so
