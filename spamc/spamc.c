@@ -87,36 +87,42 @@ char **exec_argv;
 
 static int timeout = 600;
 
+static void
+usg(char *str)
+{
+  fprintf (stderr, str);
+}
+
 void print_usage(void)
 {
-    printf("Usage: spamc [options] [-e command [args]] < message\n");
-    printf("Options:\n");
-    printf("  -B                  Assume input is a single BSMTP-formatted message.\n");
-    printf("  -c                  Just print the summary line and set an exit code.\n");
-    printf("  -d host             Specify host to connect to.\n"
+    usg("Usage: spamc [options] [-e command [args]] < message\n");
+    usg("Options:\n");
+    usg("  -B                  Assume input is a single BSMTP-formatted message.\n");
+    usg("  -c                  Just print the summary line and set an exit code.\n");
+    usg("  -d host             Specify host to connect to.\n"
            "                      [default: localhost]\n");
-    printf("  -e command [args]   Pipe the output to the given command instead of stdout.\n"
+    usg("  -e command [args]   Pipe the output to the given command instead of stdout.\n"
            "                      This must be the last option.\n");
-    printf("  -h                  Print this help message and exit.\n");
-    printf("  -H                  Randomize IP addresses for the looked-up hostname.\n");
-    printf("  -p port             Specify port for connection to spamd.\n"
+    usg("  -h                  Print this help message and exit.\n");
+    usg("  -H                  Randomize IP addresses for the looked-up hostname.\n");
+    usg("  -p port             Specify port for connection to spamd.\n"
            "                      [default: 783]\n");
-    printf("  -r                  Print full report for messages identified as spam.\n");
-    printf("  -R                  Print full report for all messages.\n");
-    printf("  -s size             Specify maximum message size, in bytes.\n"
+    usg("  -r                  Print full report for messages identified as spam.\n");
+    usg("  -R                  Print full report for all messages.\n");
+    usg("  -s size             Specify maximum message size, in bytes.\n"
            "                      [default: 250k]\n");
 #ifdef SPAMC_SSL
-    printf("  -S                  Use SSL to talk to spamd.\n");
+    usg("  -S                  Use SSL to talk to spamd.\n");
 #endif
-    printf("  -t timeout          Timeout in seconds for communications to spamd.\n"
+    usg("  -t timeout          Timeout in seconds for communications to spamd.\n"
            "                      [default: 600]\n");
-    printf("  -u username         User for spamd to process this message under.\n");
+    usg("  -u username         User for spamd to process this message under.\n");
 #ifndef _WIN32
-    printf("  -U path             Connect to spamd via UNIX domain sockets.\n");
+    usg("  -U path             Connect to spamd via UNIX domain sockets.\n");
 #endif
-    printf("  -x                  Don't fallback safely.\n");
-    printf("  -y                  Just print the names of the tests hit.\n");
-    printf("\n");
+    usg("  -x                  Don't fallback safely.\n");
+    usg("  -y                  Just print the names of the tests hit.\n");
+    usg("\n");
 }
 
 int
