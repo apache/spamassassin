@@ -603,7 +603,11 @@ sub dccifd_lookup {
     $sock->getline() || dbg("failed read status") && die;
     $sock->getline() || dbg("failed read multistatus") && die;
 
-    my @null = $sock->getlines() || dbg("failed read header") && die; # get all of the output
+    my @null = $sock->getlines();
+    if ( $#null == -1 ) {
+      dbg("failed read header");
+      die;
+    }
 
     # The first line will be the header we want to look at
     chomp($response = shift @null);
@@ -708,6 +712,11 @@ sub dcc_lookup {
     my $pid = open(DCC, join(' ', $path, "-H", $opts, "< '$tmpf'", "2>&1", '|')) || die "$!\n";
     my @null = <DCC>;
     close DCC;
+
+    if ( $#null == -1 ) {
+      dbg("failed read header");
+      die;
+    }
 
     # The first line will be the header we want to look at
     chomp($response = shift @null);
