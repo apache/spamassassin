@@ -519,6 +519,7 @@ sub spawn {
     }
     # else I'm the child -- go spawn
 
+    close Server;
     open(STDIN,  "<&Client")   || die "can't dup client to stdin";
     open(STDOUT, ">&Client")   || die "can't dup client to stdout";
     exit &$coderef();
