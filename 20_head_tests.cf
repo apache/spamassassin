@@ -45,6 +45,8 @@ header TO_ADDRESS_EQ_REAL	To =~ /^\s*"([^"@]+\@[^"@]+)"\s+<\1>\s*$/i
 describe TO_ADDRESS_EQ_REAL	To: repeats address as real name
 # The "From" equiv is already set up as FROM_NAME_EQ_FROM_ADDR.
 
+# NOTE: this is what 100% valid undisclosed-recipients mails look like.
+# If this gets a high score, that's a bug!
 header UNDISC_RECIPS		To =~ /^undisclosed-recipients?:\s*;$/
 describe UNDISC_RECIPS		Valid-looking To "undisclosed-recipients"
 
