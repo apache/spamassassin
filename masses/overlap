@@ -64,8 +64,6 @@ print "COUNT\tPAIR/A\tPAIR/B\tA,B\n";
 
 foreach $k (sort { $pair{$b} <=> $pair{$a} } keys %pair) {
     my ($a, $b) = split(/ /, $k);
-    next unless $solo{$a};
-    next unless $solo{$b};
     my $a_pct = $pair{$k} / $solo{$a};
     my $b_pct = $pair{$k} / $solo{$b};
     if ($opt_a) {
@@ -90,14 +88,12 @@ sub read_file {
     while(<FILE>) {
 	next if /^#/;
 	if (/^[Y.]\s+-?\d+\s+\S+\s+(\S+)/) {
-	    my @tests = sort (split(/,/, $1));
+	    my @tests = split(/,/, $1);
 	    @tests = grep { !/^T_/ } @tests if $opt_t;
-	    for (my $i = 0; $i <= $#tests; $i++) {
-		$solo{$tests[$i]}++;
-		for (my $j = ($i + 1); $j <= $#tests; $j++) {
-		    next if $i == $j;
-		    $pair{$tests[$i] . " " . $tests[$j]}++;
-		}
+	    my $i = 0;
+	    for my $a (@tests) {
+		$solo{$a}++;
+		$pair{"$a $_"}++ for @tests[(++$i) .. $#tests];
 	    }
 	}
 	else {
