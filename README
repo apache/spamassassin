@@ -165,8 +165,13 @@ If you're using procmail:
   - add the following lines to ~/.procmailrc, at the top of the file
     before any existing recipes:
 
-      :0f
+      :0fw
       | spamassassin -P
+
+      :0e
+      {
+	 EXITCODE=$?
+      }
 
       :0:  
       * ^Subject:.*\*\*\*\*SPAM\*\*\*\*
