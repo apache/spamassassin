@@ -153,12 +153,6 @@ describe REPLY_TO_EMPTY		Reply-To: is empty
 header ALL_CAPS_HEADER		ALL =~ /\n(?:TO|FROM|SUBJECT|DATE):/s
 describe ALL_CAPS_HEADER	Header with all capitals found
 
-header X_EM_VER_PRESENT		X-Em-Version =~ /\S/
-describe X_EM_VER_PRESENT	Found an X-Em-Version: header
-
-header X_PMFLAGS_PRESENT	X-PMFLAGS =~ /\S/
-describe X_PMFLAGS_PRESENT	Found an X-PMFLAGS: (all caps) header
-
 header X_UIDL_SPAMSIGN		X-UIDL =~ /[^\s\x21-\x7E]/
 describe X_UIDL_SPAMSIGN	X-UIDL: header contains invalid chars
 
@@ -240,9 +234,9 @@ describe RCVD_IN_DUL		Received from dialup, see http://www.mail-abuse.org/dul/
 header RCVD_IN_BL_SPAMCOP_NET	eval:check_rbl('spamcop', 'bl.spamcop.net.')
 describe RCVD_IN_BL_SPAMCOP_NET	Received via a relay in bl.spamcop.net
 
-# don't include From:!  Many UNIX MTA's get false positives otherwise
-# ditto for Reply-To:, some list software inserts Received and Reply-To hdrs
-header FORGED_RCVD_FOUND	ALL =~ /\nSubject:.*\nReceived: /s
+# don't add headers without testing for false positives (usually Unix MTAs and
+# list software) and especially don't add From:, Reply-To:, Date:, Message-ID:
+header FORGED_RCVD_FOUND	ALL =~ /\n(?:To|Importance|Content-Transfer-Encoding|Content-Type|Subject|X-Mailer|X-MSMail-Priority|X-Sender):.*\nReceived: /s
 describe FORGED_RCVD_FOUND	Possibly-forged 'Received:' header found
 
 header YR_MEMBERSHIP_EXCH	Subject =~ /Your Membership Exchange/
@@ -272,9 +266,6 @@ describe FORGED_JUNO_RCVD	'From' juno.com does not match 'Received' headers
 
 header FORGED_GW05_RCVD		eval:check_for_forged_gw05_received_headers()
 describe FORGED_GW05_RCVD	Forged 'by gw05' 'Received:' header found
-
-header CHARSET_FARAWAY		eval:check_for_faraway_charset()
-describe CHARSET_FARAWAY	Character set indicates a foreign language
 
 header NONEXISTENT_CHARSET	Content-Type =~ /charset=.?DEFAULT/
 describe NONEXISTENT_CHARSET	Character set doesn't exist
@@ -383,9 +374,6 @@ describe USER_IN_ALL_SPAM_TO    User is listed in 'all_spam_to'
 header ORDER_STATUS             Subject =~ / order\b/i
 describe ORDER_STATUS           Subject looks like order info
 
-header IN_REP_TO		In-Reply-To =~ /\S/
-describe IN_REP_TO		'In-Reply-To' line found
-
 header GAPPY_SUBJECT            Subject =~ /\b(?:[a-z][-_\.\,\:\;\'\~\s]{1,3}){4,}/i
 describe GAPPY_SUBJECT          'Subject' contains G.a.p.p.y-T.e.x.t
 
@@ -400,38 +388,44 @@ describe MAJORDOMO              From Majordomo
 header   PLEASE_READ            Subject =~ /please read/i
 describe PLEASE_READ            Please read this!  Please oh please oh please!
 
-header   X_AUTH_WARNING         X-Authentication-Warning =~ /./
-describe X_AUTH_WARNING         X-Authentication-Warning header exists
+header   X_NOT_PRESENT		ALL !~ /\nX-/s
+describe X_NOT_PRESENT		Message has no X- headers
 
-header   DATE_WARNING           Date-warning =~ /./
-describe DATE_WARNING           Date-warning header exists
-
-# X-MailingID and X-ServerHost seem to only be used by a single
-# spamming software, and are found together in the same message
-header   X_MAIL_ID_PRESENT     X-MailingID =~ /./
-describe X_MAIL_ID_PRESENT     Found an X-MailingID header
-
-header   X_SERV_HOST_PRESENT   X-ServerHost =~ /./
-describe X_SERV_HOST_PRESENT   Found an X-ServerHost header
-
-header   X_NOT_PRESENT         ALL !~ /\nX-/s
-describe X_NOT_PRESENT         Message has no X- headers
-
-header   X_X_PRESENT           X-x =~ /./
-describe X_X_PRESENT           Found an X-x header
-
-header   X_ENC_PRESENT         X-Encoding =~ /./
-describe X_ENC_PRESENT         Found an X-Encoding header
+### header existence tests (description is added automatically)
 
 # X-Fix example: NTMail fixed non RFC822 compliant EMail message
-header   X_FIX_PRESENT         X-Fix =~ /./
-describe X_FIX_PRESENT         Found an X-Fix header
+#
+# X-PMFLAGS is all caps
+#
+# Headers that seem to only be used by a single spamming software and
+# are found together in the same message:
+# 1. X-MailingID and X-ServerHost
+# 2. X-EM-Registration and X-EM-Version
+# 3. X-Stormpost-To and X-List-Unsubscribe
+
+header CRON_ENV			exists:X-Cron-Env
+header DATE_WARNING		exists:Date-warning
+header IN_REP_TO		exists:In-Reply-To
+header X_ANTIABUSE		exists:X-AntiAbuse
+header X_AUTH_WARNING		exists:X-Authentication-Warning
+header X_EM_REGISTRATION	exists:X-EM-Registration
+header X_EM_VER_PRESENT		exists:X-EM-Version
+header X_ENC_PRESENT		exists:X-Encoding
+header X_ESMTP			exists:x-esmtp
+header X_FIX_PRESENT		exists:X-Fix
+header X_LIST_HOST		exists:X-List-Host
+header X_LIST_UNSUBSCRIBE	exists:X-List-Unsubscribe
+header X_MAIL_ID_PRESENT	exists:X-MailingID
+header X_MESSAGE_ID		exists:X-Message-Id
+header X_PMFLAGS_PRESENT	exists:X-PMFLAGS
+header X_PRECEDENCE_REF		exists:X-Precedence-Ref
+header X_SERV_HOST_PRESENT	exists:X-ServerHost
+header X_SMTPEXP_VERSION	exists:X-SMTPExp-Version
+header X_STORMPOST_TO		exists:X-Stormpost-To
+header X_X_PRESENT		exists:X-x
 
 header   MIME_ODD_CASE         ALL =~ /\nMiME-Version: /s
 describe MIME_ODD_CASE         MiME-Version header (oddly capitalized)
 
 header   OE_PI                 X-Mailer =~ /OutLook Express 3\.14159/
 describe OE_PI                 X-Mailer contains 'OutLook Express 3.14159'
-
-header CRON_ENV					ALL =~ /\nX-Cron-Env:/s
-describe CRON_ENV				Looks like a CRON job report
