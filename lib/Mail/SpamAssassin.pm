@@ -215,6 +215,54 @@ sub report_as_spam {
 
 ###########################################################################
 
+=item $f->add_all_header_address_to_whitelist ($mail)
+
+Given a mail message, find as many addresses in the usual headers (To,
+Cc, From etc.) and add them to the automatic whitelist database.
+
+=cut
+
+sub add_all_header_address_to_whitelist {
+  my ($self, $mail_obj) = @_;
+
+  $self->init(1);
+  my $mail = $self->encapsulate_mail_object ($mail_obj);
+  my $list = Mail::SpamAssassin::AutoWhitelist->new($self);
+
+  my $addrlist = ' ';
+  foreach my $header (qw(To From Cc Reply-To Sender
+  				Errors-To Mail-Followup-To))
+  {
+    my @hdrs = $mail->get_header ($header);
+    if ($#hdrs < 0) { next; }
+    $addrlist .= join (" ", @hdrs);
+  }
+
+  $addrlist =~ s/[\r\n]+/ , /gs;
+  $addrlist =~ s/\s\"[^\"]+\"\s/ , /gs;	# remove names
+  $addrlist =~ s/\([^\)]+\)/ , /gs;	# same
+
+  %done = ();
+  foreach $_ (split (/\s*,\s*/, $addrlist)) {
+    next if ($_ !~ /\S/);
+
+    s/^.*?<(.+)>\s*$/$1/g               # Foo Blah <jm@foo>
+        or s/^(.+)\s\(.*?\)\s*$/$1/g;   # jm@foo (Foo Blah)
+
+    if (!/^\S+\@\S+$/) { dbg ("wierd address, ignored: $_"); next; }
+
+    next if defined ($done{$_});
+    $done{$_} = 1;
+
+    dbg ("adding known-good address to whitelist: $_");
+    $list->add_known_good_address ($_);
+  }
+
+  $list->finish();
+}
+
+###########################################################################
+
 =item $f->reply_with_warning ($mail, $replysender)
 
 Reply to the sender of a mail, encapsulated in a C<Mail::Audit> object,
@@ -347,6 +395,24 @@ sub load_scoreonly_sql {
   my $src = Mail::SpamAssassin::ConfSourceSQL->new ($self);
   $src->load($username);
 }
+
+
+###########################################################################
+
+=item $f->set_persistent_address_list_factory ($factoryobj)
+
+Set the persistent address list factory, used to create objects for the
+automatic whitelist algorithm's persistent-storage back-end.  See
+C<Mail::SpamAssassin::PersistentAddrList> for the API these factory objects
+must implement, and the API the objects they produce must implement.
+
+=cut
+
+sub set_persistent_address_list_factory {
+  my ($self, $fac) = @_;
+  $self->{pers_addr_list_factory} = $fac;
+}
+
 ###########################################################################
 
 =item $f->compile_now ()

@@ -63,6 +63,7 @@ Options:
   -e               Exit with a non-zero exit code for spam messages
   -t               only testing; pipe message through and add extra report
   -r               mail message is verified as spam, report it
+  -W               add all addresses in mail header (from stdin) to whitelist
   -w fromaddr	   send a warning mail back to the sender of the message,
                    notifying them that their message has been marked as spam
 		   (only useful if -r is used)
@@ -84,14 +85,15 @@ EOUSAGE
 
 use vars qw{
   $opt_t $opt_c $opt_p $opt_h $opt_V $opt_D $opt_r $opt_P $opt_w $opt_l
-  $opt_d $opt_L $opt_e
+  $opt_d $opt_L $opt_e $opt_W
 };
 
 eval {
   require Mail::SpamAssassin;
   require Mail::SpamAssassin::MyMailAudit;
+  require Mail::SpamAssassin::DirBasedAddrList;
 
-  getopts ('tc:p:hVDrPw:l:dL') or usage();
+  getopts ('tc:p:hVDrPw:l:dLW') or usage();
 
   if (defined $opt_h) { usage(); }
   if (defined $opt_V) {
@@ -142,6 +144,15 @@ EOVERSION
     if ($opt_w) {
       $spamtest->reply_with_warning ($mail, $opt_w);
     }
+    $mail->ignore();		# will exit
+  }
+
+# create a factory for the persistent address list
+  my $addrlistfactory = Mail::SpamAssassin::DirBasedAddrList->new();
+  $spamtest->set_persistent_address_list_factory ($addrlistfactory);
+
+  if ($opt_W) {
+    $spamtest->add_all_header_address_to_whitelist ($mail);
     $mail->ignore();		# will exit
   }
 
@@ -235,6 +246,11 @@ http://razor.sourceforge.net/ ).
 
 If the message contains SpamAssassin markup, this will be stripped out
 automatically before submission.
+
+=item B<-W>
+
+Add all email addresses, in the headers of the mail message read
+from STDIN, to the automatic whitelist.
 
 =item B<-w> I<fromaddr>
 

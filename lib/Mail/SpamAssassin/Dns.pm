@@ -172,6 +172,7 @@ sub razor_lookup {
     require Razor::Client;
     require Razor::Agent;
     local ($^W) = 0;		# argh, warnings in Razor
+    local ($/);			# argh, bugs in Razor
 
     my $rc = Razor::Client->new ($config, %options);
     die "undefined Razor::Client\n" if (!$rc);
