@@ -204,6 +204,8 @@ sub check {
       $self->do_full_eval_tests($priority, \$fulltext);
     }
 
+    # finished running rules
+    delete $self->{current_rule_name};
     undef $decoded;
     undef $bodytext;
     undef $fulltext;
@@ -1107,6 +1109,20 @@ sub finish {
   foreach(keys %{$self}) {
     delete $self->{$_};
   }
+}
+
+=item $name = $status->get_current_eval_rule_name()
+
+Return the name of the currently-running eval rule.  C<undef> is
+returned if no eval rule is currently being run.  Useful for plugins
+to determine the current rule name while inside an eval test function
+call.
+
+=cut
+
+sub get_current_eval_rule_name {
+  my ($self) = @_;
+  return $self->{current_rule_name};
 }
 
 ###########################################################################
@@ -2130,6 +2146,10 @@ sub run_eval_tests {
 	dbg ("no method found for eval test $function");
       }
     }
+
+    # let plugins get the name of the rule that's currently being
+    # run
+    $self->{current_rule_name} = $rulename;
 
     eval {
       $result = $self->$function(@args);

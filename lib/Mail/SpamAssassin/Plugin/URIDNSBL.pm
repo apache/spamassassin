@@ -11,7 +11,6 @@ those IP addresses.  This is quite effective.
 
   loadplugin    Mail::SpamAssassin::Plugin::URIDNSBL
   uridnsbl	URIBL_SBLXBL    sbl-xbl.spamhaus.org.   TXT
-  urirhsbl	URIBL_SURBL     sc.surbl.org.           A
 
 =head1 CONFIGURATION
 
@@ -22,7 +21,7 @@ those IP addresses.  This is quite effective.
 Specify a lookup.  C<NAME_OF_RULE> is the name of the rule to be
 used, C<dnsbl_zone> is the zone to look up IPs in, and C<lookuptype>
 is the type of lookup (B<TXT> or B<A>).   Note that you must also
-define a header-eval rule calling C<check_uridnsbl> to use this.
+define a header-eval rule calling C<check_uridnsbl()> to use this.
 
 Example:
 
@@ -35,13 +34,37 @@ Example:
 Specify a RHSBL-style domain lookup.  C<NAME_OF_RULE> is the name of the rule
 to be used, C<rhsbl_zone> is the zone to look up domain names in, and
 C<lookuptype> is the type of lookup (B<TXT> or B<A>).   Note that you must also
-define a header-eval rule calling C<check_uridnsbl> to use this.
+define a header-eval rule calling C<check_uridnsbl()> to use this.
 
 An RHSBL zone is one where the domain name is looked up, as a string; e.g. a
 URI using the domain C<foo.com> will cause a lookup of C<foo.com.uriblzone.net>.
 Note that hostnames are stripped from the domain used in the URIBL lookup,
 so the domain C<foo.bar.com> will look up C<bar.com.uriblzone.net>, and
 C<foo.bar.co.uk> will look up C<bar.co.uk.uriblzone.net>.
+
+Example:
+
+  urirhsbl        URIBL_RHSBL    rhsbl.example.org.   TXT
+
+=item urirhssub NAME_OF_RULE rhsbl_zone lookuptype subtest
+
+Specify a RHSBL-style domain lookup with a sub-test.  C<NAME_OF_RULE> is the
+name of the rule to be used, C<rhsbl_zone> is the zone to look up domain names
+in, and C<lookuptype> is the type of lookup (B<TXT> or B<A>).
+
+C<subtest> is the sub-test to run against the returned data.  The sub-test may
+either be an IPv4 dotted address for RHSBLs that return multiple A records, a
+non-negative decimal number to specify a bitmask for RHSBLs that return a
+single A record containing a bitmask of results, or (if none of the preceding
+options seem to fit) a regular expression.
+
+Note that, as with C<urirhsbl>, you must also define a header-eval rule calling
+C<check_uridnsbl()> to use this.
+
+Example:
+
+  urirhssub   URIBL_RHSBL_4    rhsbl.example.org.   A    127.0.0.4
+  urirhssub   URIBL_RHSBL_8    rhsbl.example.org.   A    8
 
 =item uridnsbl_timeout N		(default: 2)
 
@@ -169,7 +192,9 @@ sub parsed_metadata {
   }
 
   # and query
-  foreach my $dom (keys %domlist) {
+  my @doms = keys %domlist;
+  dbg ("URIDNSBL: domains to query: ".join(' ',@doms));
+  foreach my $dom (@doms) {
     $self->query_domain ($scanstate, $dom);
   }
 
@@ -203,6 +228,26 @@ sub parse_config {
 	zone => $zone, type => $type,
         is_rhsbl => 1
       };
+    }
+    return $Mail::SpamAssassin::Plugin::INHIBIT_CALLBACKS;
+  }
+  elsif ($key eq 'urirhssub') {
+    if ($opts->{value} =~ /^(\S+)\s+(\S+)\s+(\S+)\s+(\S+)$/) {
+      my $rulename = $1;
+      my $zone = $2;
+      my $type = $3;
+      my $subrule = $4;
+
+      $opts->{conf}->{uridnsbls}->{$rulename} = {
+	zone => $zone, type => $type,
+        is_rhsbl => 1, is_subrule => 1
+      };
+
+      $opts->{conf}->{uridnsbl_subs}->{$zone} ||= { };
+      $opts->{conf}->{uridnsbl_subs}->{$zone}->{$subrule} = {
+        rulename => $rulename
+      };
+
     }
     return $Mail::SpamAssassin::Plugin::INHIBIT_CALLBACKS;
   }
@@ -396,28 +441,71 @@ sub lookup_single_dnsbl {
 				$self->{res}->bgsend ($item, $qtype));
   $ent->{obj} = $obj;
   $ent->{rulename} = $rulename;
+  $ent->{zone} = $dnsbl;
   $scanstate->{pending_lookups}->{$key} = $ent;
 }
 
 sub complete_dnsbl_lookup {
   my ($self, $scanstate, $ent, $dnsblip) = @_;
 
+  my $scan = $scanstate->{scanner};
+  my $conf = $scan->{conf};
+  my @subtests = ();
+  my $rulename = $ent->{rulename};
+  my $rulecf = $conf->{uridnsbls}->{$rulename};
+
   my $packet = $self->{res}->bgread($ent->{sock});
   $self->close_ent_socket ($ent);
   my @answer = $packet->answer;
-  foreach my $rr (@answer) {
-    my $str = $rr->string;
+  foreach my $rr (@answer)
+  {
+    next if ($rr->type ne 'A' && $rr->type ne 'TXT');
+
+    my $rdatastr = $rr->rdatastr;
     my $dom = $ent->{obj}->{dom};
-    my $rulename = $ent->{rulename};
 
-    $str =~ s/\s+/  /gs;	# long whitespace => short
-    dbg ("URIDNSBL: domain \"$dom\" listed ($rulename): $str");
+    if (!$rulecf->{is_subrule}) {
+      # this zone is a simple rule, not a set of subrules
+      $self->got_dnsbl_hit ($scanstate, $ent, $rdatastr, $dom, $rulename);
+    }
+    else {
+      my $uridnsbl_subs = $conf->{uridnsbl_subs}->{$ent->{zone}};
+      foreach my $subtest (keys (%{$uridnsbl_subs}))
+      {
+        my $subrulename = $uridnsbl_subs->{$subtest}->{rulename};
 
-    if (!defined $scanstate->{hits}->{$rulename}) {
-      $scanstate->{hits}->{$rulename} = { };
-    };
-    $scanstate->{hits}->{$rulename}->{$dom} = 1;
+        if ($subtest eq $rdatastr) {
+          $self->got_dnsbl_hit ($scanstate, $ent, $rdatastr, $dom, $subrulename);
+        }
+        # bitmask
+        elsif ($subtest =~ /^\d+$/) {
+          if ($rdatastr =~ m/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/ &&
+              Mail::SpamAssassin::Util::my_inet_aton($rdatastr) & $subtest)
+          {
+            $self->got_dnsbl_hit ($scanstate, $ent, $rdatastr, $dom, $subrulename);
+          }
+        }
+        # regular expression
+        else {
+          if ($rdatastr =~ /${subtest}/) {
+            $self->got_dnsbl_hit($scanstate, $ent, $rdatastr, $dom, $subrulename);
+          }
+        }
+      }
+    }
   }
+}
+
+sub got_dnsbl_hit {
+  my ($self, $scanstate, $ent, $str, $dom, $rulename) = @_;
+
+  $str =~ s/\s+/  /gs;	# long whitespace => short
+  dbg ("URIDNSBL: domain \"$dom\" listed ($rulename): $str");
+
+  if (!defined $scanstate->{hits}->{$rulename}) {
+    $scanstate->{hits}->{$rulename} = { };
+  };
+  $scanstate->{hits}->{$rulename}->{$dom} = 1;
 }
 
 # ---------------------------------------------------------------------------
