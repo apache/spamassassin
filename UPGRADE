@@ -9,11 +9,16 @@ Note for Users Upgrading to SpamAssassin 3.0.0
   modules as they may have changed from old versions.  The INSTALL
   document has the modules and version requirements listed.
 
+- See http://wiki.apache.org/spamassassin/UpgradeTo300 for a
+  supplementary list of upgrade notes.  It will be updated with any
+  upgrade notes not captured in this document.
+
 - SpamAssassin 3.0.0 has a significantly different API (Application Program
   Interface) from the 2.x series of code.  This means that if you use
   SpamAssassin through a third-party utility (milter, etc,) you need to make
   sure you have an updated version which supports 3.0.0.  See
-  http://wiki.apache.org/spamassassin/UpgradeTo300 for a detailed list.
+  http://wiki.apache.org/spamassassin/UpgradeTo300 for information about
+  third-party software.
 
 - The --auto-whitelist, --whitelist and -a options for "spamd" and
   "spamassassin" to turn on the auto-whitelist have been removed and
@@ -109,8 +114,6 @@ Note for Users Upgrading to SpamAssassin 3.0.0
   internal version representation is now "x.yyyzzz" instead of "x.yz"
   which could cause issues if "require_version 3.00" is expected to work
   (it won't, it needs to be "require_version 3.000000").
-
-  http://wiki.apache.org/spamassassin/UpgradeTo300 has a more detailed list.
 
 
 Note for Users Upgrading from SpamAssassin 2.5x
