@@ -168,9 +168,13 @@ sub get_header {
   if (!wantarray) {
       # If there is no header like that, return undef
       if (scalar(@entries) < 1 ) { return undef; }
-      foreach my $entry (@entries)
-      {
-	  if($entry->{count} > 0) { return $entry->{0}; }
+      foreach my $entry (@entries) {
+	  if($entry->{count} > 0) {
+	    my $ret = $entry->{0};
+            $ret =~ s/^\s+//;
+            $ret =~ s/\n\s+/ /g;
+	    return $ret;
+	  }
       }
       return undef;
 
@@ -182,7 +186,12 @@ sub get_header {
       # loop through each entry and collect all the individual matching lines
       foreach my $entry (@entries)
       {
-	  foreach my $i (0 .. ($entry->{count}-1)) { push (@ret, $entry->{$i}); }
+	  foreach my $i (0 .. ($entry->{count}-1)) {
+		my $ret = $entry->{$i};
+                $ret =~ s/^\s+//;
+                $ret =~ s/\n\s+/ /g;
+	  	push (@ret, $ret);
+          }
       }
 
       return @ret;
