@@ -40,7 +40,7 @@ The following commands are defined as of protocol 1.2:
 CHECK         --  Just check if the passed message is spam or not and reply as
                   described below
 
-SYMBOLS       --  Check if message is spam or not, and return score plus list 
+SYMBOLS       --  Check if message is spam or not, and return score plus list
                   of symbols hit
 
 REPORT        --  Check if message is spam or not, and return score plus report
@@ -48,15 +48,15 @@ REPORT        --  Check if message is spam or not, and return score plus report
 REPORT_IFSPAM --  Check if message is spam or not, and return score plus report
                   if the message is spam
 
-SKIP          --  Ignore this message -- client opened connection then changed 
+SKIP          --  Ignore this message -- client opened connection then changed
                   its mind
 
 PING          --  Return a confirmation that spamd is alive.
 
-PROCESS       --  Process this message as described above and return modified 
+PROCESS       --  Process this message as described above and return modified
                   message
 
-                  
+
 CHECK command returns just a header (terminated by "\r\n\r\n") with the first
 line as for PROCESS (ie a response code and message), and then a header called
 "Spam:" with value of either "True" or "False", then a semi-colon, and then the
@@ -107,6 +107,6 @@ response, like this:
 
 	SPAMD/1.2 0 PONG
 
-This facility may be useful for monitoring programs which wish to check that 
+This facility may be useful for monitoring programs which wish to check that
 the daemon is alive and providing at least a basic response within a reasonable
 time frame.
