@@ -995,9 +995,9 @@ Set the report template which is attached to spam mail messages.  See the
 C<10_misc.cf> configuration file in C</usr/share/spamassassin> for an
 example.
 
-If you change this, try to keep it under 76 columns (inside the the dots
-below).  Each C<report> line appends to the existing template, so use
-C<clear_report_template> to restart.
+If you change this, try to keep it under 78 columns. Each C<report>
+line appends to the existing template, so use C<clear_report_template>
+to restart.
 
 The following template items are supported, and will be filled out by
 SpamAssassin:

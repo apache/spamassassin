@@ -2218,11 +2218,17 @@ sub _handle_hit {
     push(@{$self->{test_names_hit}}, $rule);
     $area ||= '';
 
+    if ($score >= 10 || $score <= -10) {
+      $score = sprintf("%- 4f", $score);
+    } else {
+      $score = sprintf("% 3.1f", $score);
+    }
+
     if ($self->{conf}->{use_terse_report}) {
-	$self->{test_logs} .= sprintf ("* % 2.1f -- %s%s\n%s",
+	$self->{test_logs} .= sprintf ("* %s -- %s%s\n%s",
 				       $score, $area, $desc, $self->{test_log_msgs});
     } else {
-        $self->{test_logs} .= sprintf ("% 2.1f %-20s %s%s\n%s",
+        $self->{test_logs} .= sprintf ("%s %-20s %s%s\n%s",
 				       $score, $rule, $area, $desc,
 				       $self->{test_log_msgs});
     }
@@ -2266,7 +2272,7 @@ sub _test_log_line {
   if ($self->{conf}->{use_terse_report}) {
     $self->{test_log_msgs} .= sprintf ("%9s [%s]\n", "", $msg);
   } else {
-    $self->{test_log_msgs} .= sprintf ("%26s [%s]\n", "", $msg);
+    $self->{test_log_msgs} .= sprintf ("%78s\n", "[$msg]");
   }
 }
 
