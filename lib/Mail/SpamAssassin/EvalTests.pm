@@ -1407,8 +1407,7 @@ sub partial_rfc_2369 {
   return 0 if exists $count{'List-Help'};
 
   # List-Unsubscribe without much else (spammer mind trick)
-  my @count = keys %count;
-  return (exists $count{'List-Unsubscribe'} && keys %count < 2);
+  return (exists $count{'List-Unsubscribe'} && scalar keys %count < 2);
 }
   
 ###########################################################################
