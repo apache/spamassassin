@@ -720,7 +720,7 @@ describe NO_DISSAPOINTMENT      You won't be dissapointed.
 body     SERIOUS_ONLY           /Serious [IE]nquiries Only/i
 describe SERIOUS_ONLY           Serious Enquiries Only.
 
-body     RISK_FREE              /\b(?:risk[- ]free|no[ -]risk)/i
+body     RISK_FREE              /\b(?:risk[ -]free|no[ -]risk)/i
 describe RISK_FREE              Risk free.  Suuurreeee....
 
 # "seen on TV", "seen on ABC/NBC/etc", "seen on XYZ TV", or
@@ -759,15 +759,14 @@ test NUMERIC_COMMENT     fail  Something <!-- A comment --> and more
 body OFFSHORE_SCAM		/offshore .{0,20}(?:credit card|companies|accounts?|financ|website)/i
 describe OFFSHORE_SCAM		Off Shore Scams
 
-body VACATION_SCAM
-/(?:free|mini-?|dream|special).{0,10}vacation|vacation (?:offer|promotion|package|for two|getaway)/i
+body VACATION_SCAM		/(?:free|mini-?|dream|special).{0,10}vacation|vacation (?:offer|promotion|package|for two|getaway)/i
 describe VACATION_SCAM		Vacation Offers
 
 body WHY_PAY_MORE		/why pay more/i
 describe WHY_PAY_MORE		Why Pay More?
 
-body CONGRATULATIONS		/congratulations/i
-describe CONGRATULATIONS	Congratulations - you been scammed!
+body CONGRATULATIONS		/congratulations! you/i
+describe CONGRATULATIONS	Congratulations - you've been scammed?
 
 body SIGN_UP			/free sign up|sign up today/i
 describe SIGN_UP		Sign up Free Today
@@ -809,10 +808,10 @@ body FREE_INVESTMENT		/free investment/i
 describe FREE_INVESTMENT	Free Investment 
 
 body INVESTMENT			/investment decision/i
-describe INVESTMENT		/Investment Stuff
+describe INVESTMENT		Investment Decision
 
 body FREE_TRIAL			/free trial/i
-describe FREE_TRIAL		Try it for FREE!
+describe FREE_TRIAL		Free Trial
 
 body FREE_MEMBERSHIP		/free membership/i
 describe FREE_MEMBERSHIP	Free Membership
@@ -868,8 +867,8 @@ describe LIFE_INSURANCE		No Examination life Insurance
 body SEARCH_ENGINE		/(?:submit|traffic|top).{0.10} search engines?|site ranking/i
 describe SEARCH_ENGINE		Search Engine Site Ranking
 
-body OPPORTUNITY		/opportunity (?:pass|of a lifetime|is knocking|for you)|(?:investment|unique) opportunity/i
-describe OPPOPTUNITY		What a deal!
+body OPPORTUNITY_2		/opportunity (?:pass|of a lifetime|is knocking|for you)|(?:investment|unique) opportunity/i
+describe OPPOPTUNITY_2		Oppurtunity of a lifetime?!
 
 body MORE_TRAFFIC		/more (?:internet|web) traffic/i
 describe MORE_TRAFFIC		More Internet Traffic
@@ -899,7 +898,7 @@ body NO_FORMS			/no .{0,9}forms/i
 describe NO_FORMS		No Claim Forms
 
 body NO_REFUND			/no refund/i
-describe NO_REFUND		They keep your money
+describe NO_REFUND		They keep your money -- No Refund!
 
 body NO_GIMMICK			/no gimmick/i
 describe NO_GIMMICK		No Gimmick
@@ -912,9 +911,6 @@ describe INITIAL_INVEST		Requires Initial Investment
 
 body NO_INVENTORY		/no inventory/i
 describe NO_INVENTORY		No Inventory
-
-body NO_RISK			/no risk|risk free/i
-describe NO_RISK		No Risk
 
 body BUY_DIRECT			/buy direct/i
 describe BUY_DIRECT		Buy Direct
@@ -976,9 +972,6 @@ describe INCOME			Additional Income
 body EARNINGS			/potential (?:earnings|income)|income potential/i
 describe EARNINGS		Potential Earnings
 
-body SEE_FOR_YOURSELF		/see for yourself/i
-describe SEE_FOR_YOURSELF	See For Yourself
-
 body THE_BEST_RATE		/the best rate/i
 describe THE_BEST_RATE		The best Rate
 
@@ -986,13 +979,13 @@ body BEST_PRICE			/best price/i
 describe BEST_PRICE		Best Prices
 
 body WE_PROMISE_YOU		/we promise .{0,9}you/i
-describe WE_PROMISE_YOU		Promise you anything!
+describe WE_PROMISE_YOU		Promise you ...!
 
 body OUTSTANDING_VALUE		/outstanding value/i
 describe OUTSTANDING_VALUE	Outstanding Value
 
-body AMAZING			/amazing (?:product|rates)/i
-describe AMAZING		Amazing Stuff
+body AMAZING_STUFF		/amazing (?:product|rates)/i
+describe AMAZING_STUFF		Amazing Stuff
 
 body CASH_BONUS			/cash bonus/i
 describe CASH_BONUS		Cash Bonus
@@ -1022,9 +1015,9 @@ body COUPON			/off coupon/i
 describe COUPON			Offers Coupon
 
 body CANT_LIVE_WITHOUT		/can.{0,4} live without/i
-descrive CANT_LIVE_WITHOUT	I can live without
+describe CANT_LIVE_WITHOUT	Can't live without?
 
-body NAME_BRAND			/(?:famous name|major) brand|brand[- ]name/i
+body NAME_BRAND			/(?:famous name|major) brand|brand[ -]name/i
 describe NAME_BRAND		Name Brand
 
 body DIET			/no diet|weight loss (?:program|offer)|(?:extra|lose).{0,9} (?:pounds|weight)|burn fat/i
@@ -1049,14 +1042,14 @@ describe LUXURY_CAR		Luxury Car
 body PROTECT_ASSETS		/(?:judgement|lein|divorce|seizure) proof/i
 describe PROTECT_ASSETS		Protect Assets
 
-body BREAKTHROUGH		/(?:revolutionary|medical) breakthrough/i
-describe BREAKTHROUGH		Breakthrough
+body BREAKTHROUGH_2		/(?:revolutionary|medical) breakthrough/i
+describe BREAKTHROUGH_2		Breakthrough
 
 body WRINKLES			/wrinkle reduction/i
 describe WRINKLES		Removes Wrinkles
 
 body HARD_CASH			/hard cash/i
-describe HARD_CASH		Cash is soft
+describe HARD_CASH		Is cash really hard?
 
 body BIG_BUCKS			/big bucks/i
 describe BIG_BUCKS		They are all the same size
@@ -1081,9 +1074,6 @@ describe WINNING		Who really wins?
 
 body PROMOTION			/special promotion/i
 describe PROMOTION		Special Promotion
-
-body PENNIES_A_DAY		/pennies a day/i
-describe PENNIES_A_DAY		Pennies a Day
 
 body HIDDEN_CHARGES		/hidden charges/i
 describe HIDDEN_CHARGES		Talks about Hidden Charges
@@ -1142,8 +1132,8 @@ describe BEEN_TURNED_DOWN	Have you been turned down?
 body ONE_TIME			/one time (?:charge|investment)/i
 describe ONE_TIME		Only rip you once
 
-body COMPTETE			/compete for your business/i
-describe COMPTETE		Compete for your business
+body COMPETE			/compete for your business/i
+describe COMPETE		Compete for your business
 
 body CANCEL			/cancel at any time/i
 describe CANCEL			Cancel at any time!
@@ -1155,10 +1145,10 @@ body CHANGE_TERMS		/terms and conditions/i
 describe CHANGE_TERMS		They can change the terms and conditions
 
 body RESERVES_RIGHT		/reserves the right/i
-describe RESERVES_RIGHT		Reserves the right to screw you
+describe RESERVES_RIGHT		Reserves the right (to screw you?)
 
 body NO_COMBINE			/with any other offer/i
-describe NO_COMBINE		/Can not be combined with any other offer
+describe NO_COMBINE		Can not be combined with any other offer
 
 body NEW_CUSTOMER		/new customers only/i
 describe NEW_CUSTOMER		New Customers Only
@@ -1190,7 +1180,7 @@ describe SPY_ON_FRIENDS		/Investigate your Friends!
 body DIG_UP_INFO		/dig up information/i
 describe DIG_UP_INFO		Dig up Dirt on Friends
 
-body MLM			/MLM|multi[- ]level[- ]marketing/i
+body MLM			/MLM|multi[ -]level[ -]marketing/i
 describe MLM			Multi Level Marketing
 
 body UNCLAIMED_MONEY		/unclaimed (?:funds|money)/i
