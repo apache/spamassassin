@@ -130,7 +130,8 @@ my %makefile = (
 	'spamd/spamc$(EXE_EXT) spamd/libspamc.so spamd/spamd doc '.
 	'spamd/sslspamc$(EXE_EXT) spamd/libsslspamc.so '.
 	'binaries.mk config.h config.status config.cache config.log '.
-	'qmail/qmail-spamc t/do_razor t/do_razor1 t/do_razor2 '
+	'autom4te.cache qmail/qmail-spamc'.
+	't/do_razor t/do_razor1 t/do_razor2 t/log'
     },
 
     'AUTHOR' => 'Justin Mason <jm@jmason.org>',
@@ -140,18 +141,25 @@ my %makefile = (
 
 );
 
-# MakeMaker prior to 5.45 doesn't support PM_FILTER, so we have to implement it ourselves
-if($mm_version < 5.45) {
+# MakeMaker prior to 5.46 doesn't support PM_FILTER, so we have to
+# implement it ourselves. Also bear in mind that MakeMaker (5.45) from
+# Perl 5.6.1 supports that option while the one from 5.6.0 doesn't; they
+# do have the same version though! See bug 1652.
+my $pm_filter = $mm_version > 5.45 || ($mm_version == 5.45 && $] > 5.006);
+
+if(!$pm_filter) {
 warn <<ITSALLSOSTUPID;
 
-Your version of ExtUtils::MakeMaker is a pre-5.45. We need to include a
-nasty workaround to make it work with our make routines. You will get
-loads of warnings and it is very likely to break at various places.
+Your version of ExtUtils::MakeMaker does not support PM_FILTER.
+We need to include a nasty workaround to make it work with our make
+routines. You will get loads of warnings and it is very likely to break
+at various places.
 
 *Please* consider updating to a version later than 5.45. It's available
 on CPAN <http://search.cpan.org/search?module=ExtUtils::MakeMaker>.
 
-Hint: Perl 5.6.1 and older ship good versions of ExtUtils::MakeMaker;
+Hint: Perl 5.6.1 and later ship good versions of ExtUtils::MakeMaker
+by default.
 
 If anything breaks while building Mail::SpamAssassin, please file a bug
 at <http://bugzilla.spamassassin.org>.
@@ -184,13 +192,13 @@ for (my $v = 1; $v <= 2; $v++) {
 
   if (!defined($do)) {
     if ($v == 1) {
-      $do = ! eval { require Razor::Client };
+      $do = eval { require Razor::Client };
     }
     elsif ($v == 2) {
-      $do = ! eval { require Razor2::Client::Agent };
+      $do = eval { require Razor2::Client::Agent };
     }
 
-    if (!$do) {
+    if ($do) {
       prompt("Run Razor v${v} tests (these may fail due to network problems)? (y/n)", 'n') =~ /^(.)/;
       $do = $1;
     }
@@ -282,7 +290,7 @@ FIXBANG		= -Msharpbang \
 
 SPAMC_SOURCES = spamd/spamc.c qmail/qmail-spamc.c spamd/libspamc.c spamd/utils.c
 
-# . ($mm_version < 5.45 ? q#
+# . (!$pm_filter ? q#
 pm_to_blib: $(TO_INST_PM)
 	@ $(PERL) "-I$(INST_ARCHLIB)" "-I$(INST_LIB)" \
 	"-I$(PERL_ARCHLIB)" "-I$(PERL_LIB)" -Ibuild \

@@ -41,6 +41,7 @@ use vars qw{
   $MIN_SPAM_CORPUS_SIZE_FOR_BAYES
   $MIN_HAM_CORPUS_SIZE_FOR_BAYES
   %HEADER_NAME_COMPRESSION
+  $OPPORTUNISTIC_LOCK_VALID
 };
 
 @ISA = qw();
@@ -153,6 +154,9 @@ use constant TOKENIZE_LONG_TOKENS_AS_SKIPS => 1;
 $MIN_SPAM_CORPUS_SIZE_FOR_BAYES = 200;
 $MIN_HAM_CORPUS_SIZE_FOR_BAYES = 200;
 
+# How many seconds should the opportunistic_expire lock be valid?
+$OPPORTUNISTIC_LOCK_VALID = 300;
+
 # Should we use the Robinson f(w) equation from
 # http://radio.weblogs.com/0101454/stories/2002/09/16/spamDetection.html ?
 # It gives better results, in that scores are more likely to distribute
@@ -199,6 +203,7 @@ sub new {
   my $self = {
     'main'              => $main,
     'log_raw_counts'	=> 0,
+    'conf'		=> $main->{conf},
 
     # Off. See comment above cached_probs_get().
     #'cached_probs'	=> { },
@@ -217,7 +222,22 @@ sub new {
 
 sub finish {
   my $self = shift;
+  if (!$self->{main}->{conf}->{use_bayes}) { return; }
   $self->{store}->untie_db();
+}
+
+###########################################################################
+
+sub sanity_check_is_untied {
+  my $self = shift;
+
+  # do a sanity check here.  Wierd things happen if we remain tied
+  # after compiling; for example, spamd will never see that the
+  # number of messages has reached the bayes-scanning threshold.
+  if ($self->{store}->{already_tied} || $self->{store}->{is_locked}) {
+    warn "SpamAssassin: oops! still tied/locked to bayes DBs, untie'ing\n";
+    $self->{store}->untie_db();
+  }
 }
 
 ###########################################################################
@@ -303,6 +323,8 @@ sub tokenize_line {
   foreach my $token (split) {
     $token =~ s/^[-'"\.,]+//;        # trim non-alphanum chars at start or end
     $token =~ s/[-'"\.,]+$//;        # so we don't get loads of '"foo' tokens
+
+    next if ( $token =~ /^\*\*[A-Z]+$/ ); # skip false magic tokens
 
     # *do* keep 3-byte tokens; there's some solid signs in there
     my $len = length($token);
@@ -532,11 +554,12 @@ sub learn {
   eval {
     local $SIG{'__DIE__'};	# do not run user die() traps in here
 
-    $self->{store}->tie_db_writable();
-    $ret = $self->learn_trapped ($isspam, $msg, $body);
+    if ($self->{store}->tie_db_writable()) {
+      $ret = $self->learn_trapped ($isspam, $msg, $body);
 
-    if (!$self->{main}->{learn_caller_will_untie}) {
-      $self->{store}->untie_db();
+      if (!$self->{main}->{learn_caller_will_untie}) {
+        $self->{store}->untie_db();
+      }
     }
   };
 
@@ -605,11 +628,12 @@ sub forget {
   eval {
     local $SIG{'__DIE__'};	# do not run user die() traps in here
 
-    $self->{store}->tie_db_writable();
-    $ret = $self->forget_trapped ($msg, $body);
+    if ($self->{store}->tie_db_writable()) {
+      $ret = $self->forget_trapped ($msg, $body);
 
-    if (!$self->{main}->{learn_caller_will_untie}) {
-      $self->{store}->untie_db();
+      if (!$self->{main}->{learn_caller_will_untie}) {
+        $self->{store}->untie_db();
+      }
     }
   };
 
@@ -635,9 +659,12 @@ sub forget_trapped {
     } elsif ($seen eq 'h') {
       $isspam = 0;
     } else {
-      dbg ("forget: message $msgid not learnt, ignored");
+      dbg ("forget: message $msgid seen entry is neither ham nor spam, ignored");
       return;
     }
+  } else {
+    dbg ("forget: message $msgid not learnt, ignored");
+    return;
   }
 
   if ($isspam) {
@@ -801,19 +828,23 @@ sub check_for_cached_probs_invalidated {
   return 0;
 }
 
-sub is_available {
+# Check to make sure we can tie() the DB, and we have enough entries to do a scan
+sub is_scan_available {
   my $self = shift;
 
+  return 0 unless $self->{main}->{conf}->{use_bayes};
   return 0 unless $self->{store}->tie_db_readonly();
 
   my ($ns, $nn) = $self->{store}->nspam_nham_get();
 
   if ($ns < $MIN_SPAM_CORPUS_SIZE_FOR_BAYES) {
     dbg("debug: Only $ns spam(s) in Bayes DB < $MIN_SPAM_CORPUS_SIZE_FOR_BAYES");
+    $self->{store}->untie_db();
     return 0;
   }
   if ($nn < $MIN_HAM_CORPUS_SIZE_FOR_BAYES) {
     dbg("debug: Only $nn ham(s) in Bayes DB < $MIN_HAM_CORPUS_SIZE_FOR_BAYES");
+    $self->{store}->untie_db();
     return 0;
   }
 
@@ -826,22 +857,14 @@ sub is_available {
 sub scan {
   my ($self, $msg, $body) = @_;
 
-  if (!$self->{main}->{conf}->{use_bayes}) { goto skip; }
-  if (!$self->{store}->tie_db_readonly()) { goto skip; }
+  if ( !$self->is_scan_available() ) {
+    goto skip;
+  }
 
   my ($ns, $nn) = $self->{store}->nspam_nham_get();
 
   if ($self->{log_raw_counts}) {
     $self->{raw_counts} = " ns=$ns nn=$nn ";
-  }
-
-  if ($ns < $MIN_SPAM_CORPUS_SIZE_FOR_BAYES) {
-    dbg ("spam corpus too small ($ns < $MIN_SPAM_CORPUS_SIZE_FOR_BAYES), skipping");
-    goto skip;
-  }
-  if ($nn < $MIN_HAM_CORPUS_SIZE_FOR_BAYES) {
-    dbg ("ham corpus too small ($nn < $MIN_HAM_CORPUS_SIZE_FOR_BAYES), skipping");
-    goto skip;
   }
 
   dbg ("bayes corpus size: nspam = $ns, nham = $nn");
@@ -927,21 +950,27 @@ sub scan {
   $self->{store}->add_touches_to_journal();
   $self->{store}->scan_count_increment();
 
-  # handle expiry and journal syncing
-  if ($self->{store}->expiry_due()) {
-    dbg ("expiration is due: expiring old tokens now...");
-    $self->{store}->sync_journal();
-    $self->{store}->expire_old_tokens();
-    dbg ("expiration done");
-  }
-
+  $self->opportunistic_expire();
   $self->{store}->untie_db();
-
   return $score;
 
 skip:
   dbg ("bayes: not scoring message, returning 0.5");
+  $self->{store}->untie_db() if ( $self->{store}->{already_tied} );
   return 0.5;           # nice and neutral
+}
+
+sub opportunistic_expire {
+  my($self) = @_;
+
+  # Is an expire or journal sync running?
+  my $running_expire = $self->{store}->get_running_expire_tok();
+  if ( defined $running_expire && $running_expire+$OPPORTUNISTIC_LOCK_VALID > time() ) { return; }
+
+  # handle expiry and journal syncing
+  if ($self->{store}->expiry_due()) {
+    $self->sync();
+  }
 }
 
 ###########################################################################

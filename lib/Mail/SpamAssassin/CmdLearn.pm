@@ -24,14 +24,13 @@ sub cmdline_run {
   %opt = ();
 
   Getopt::Long::Configure(qw(bundling no_getopt_compat
-                         no_auto_abbrev no_ignore_case));
+                         permute no_auto_abbrev no_ignore_case));
 
   GetOptions(
 	     'spam'				=> sub { $isspam = 1; },
 	     'ham|nonspam'			=> sub { $isspam = 0; },
 	     'rebuild'				=> \$rebuildonly,
 	     'forget'				=> \$forget,
-             'whitelist-factory=s'              => \$opt{'whitelist-factory'},
              'config-file|C=s'                  => \$opt{'config-file'},
              'prefs-file|p=s'                   => \$opt{'prefs-file'},
 
@@ -45,9 +44,6 @@ sub cmdline_run {
 	     'learnprob=f'			=> \$opt{'learnprob'},
 	     'randseed=i'			=> \$opt{'randseed'},
 
-             'auto-whitelist|a'                 => \$opt{'auto-whitelist'},
-             'bias-scores|b'                    => \$opt{'bias-scores'},
-
              'debug-level|D'                    => \$opt{'debug-level'},
              'version|V'                        => \$opt{'version'},
              'help|h|?'                         => \$opt{'help'},
@@ -55,10 +51,7 @@ sub cmdline_run {
 	     'dir'			=> sub { $opt{'format'} = 'dir'; },
 	     'file'			=> sub { $opt{'format'} = 'file'; },
 	     'mbox'			=> sub { $opt{'format'} = 'mbox'; },
-
-	     'single'			=> sub {
-		  $opt{'format'} = 'file'; push (@ARGV, '-');
-	      },
+	     'single'			=> sub { $opt{'format'} = 'single'; },
 
 	     '<>'			=> \&target,
   ) or usage(0, "Unknown option!");
@@ -68,8 +61,17 @@ sub cmdline_run {
     print "SpamAssassin version " . Mail::SpamAssassin::Version() . "\n";
     exit 0;
   }
+
+  if ($opt{'force-expire'}) {
+    $rebuildonly=1;
+  }
   if ( !defined $isspam && !defined $rebuildonly && !defined $forget ) {
     usage(0, "Please select either --spam, --ham, --forget, or --rebuild");
+  }
+
+  if (defined($opt{'format'}) && $opt{'format'} eq 'single') {
+    $opt{'format'} = 'file';
+    push (@ARGV, '-');
   }
 
   # create the tester factory
@@ -87,9 +89,8 @@ sub cmdline_run {
   $spamtest->init (1);
 
   $spamtest->init_learner({
-      use_whitelist     => $opt{'auto-whitelist'},
-      bias_scores       => $opt{'bias-scores'},
       force_expire	=> $opt{'force-expire'},
+      wait_for_lock	=> 1,
       caller_will_untie	=> 1
   });
 

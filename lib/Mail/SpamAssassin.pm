@@ -85,8 +85,8 @@ use vars qw{
   @site_rules_path
 };
 
-$VERSION = "2.50";              # update after release
-$IS_DEVEL_BUILD = 1;            # change for release versions
+$VERSION = "2.53";              # update after release
+#$IS_DEVEL_BUILD = 1;            # change for release versions
 
 # Create the hash so that it really points to something, otherwise we can't
 # get a reference to it -- Marc
@@ -94,7 +94,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.172 2003/02/14 21:10:01 felicity Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.174.2.15 2003/03/30 03:26:39 jmason Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -258,6 +258,9 @@ sub new {
 
   $self->{save_pattern_hits} ||= 0;
 
+  # Make sure that we clean $PATH if we're tainted
+  Mail::SpamAssassin::Util::clean_path_in_taint_mode();
+
   # this could probably be made a little faster; for now I'm going
   # for slow but safe, by keeping in quotes
   if (Mail::SpamAssassin::Util::am_running_on_windows()) {
@@ -386,10 +389,18 @@ method.
 
 =over 4
 
-=item use_whitelist
+=item caller_will_untie
 
-Whether or not to add addresses to the automatic whitelist while learning.
-(optional, default 0)
+Whether or not the code calling this method will take care of untie'ing
+from the Bayes databases (by calling C<finish_learner()>) (optional, default 0).
+
+=item force_expire
+
+Should an expiration run be forced to occur immediately? (optional, default 0).
+
+=item wait_for_lock
+
+Whether or not to wait a long time for locks to complete (optional, default 0).
 
 =back
 
@@ -399,9 +410,9 @@ sub init_learner {
   my $self = shift;
   my $opts = shift;
   dbg ("Initialising learner");
-  if ($opts->{use_whitelist}) { $self->{learn_with_whitelist} = 1; }
   if ($opts->{force_expire}) { $self->{learn_force_expire} = 1; }
   if ($opts->{caller_will_untie}) { $self->{learn_caller_will_untie} = 1; }
+  if ($opts->{wait_for_lock}) { $self->{learn_wait_for_lock} = 1; }
   1;
 }
 
@@ -479,7 +490,7 @@ sub signal_user_changed {
   $self->{bayes_scanner} = new Mail::SpamAssassin::Bayes ($self);
 
   $set |= 1 unless $self->{local_tests_only};
-  $set |= 2 if $self->{bayes_scanner}->is_available();
+  $set |= 2 if $self->{bayes_scanner}->is_scan_available();
 
   $self->{conf}->set_score_set ($set);
 
@@ -706,7 +717,7 @@ sub add_all_addresses_to_blacklist {
 
   my @addrlist = ();
   my @hdrs = $mail->get_header ('From');
-  if ($#hdrs > 0) {
+  if ($#hdrs >= 0) {
     push (@addrlist, $self->find_all_addrs_in_line (join (" ", @hdrs)));
   }
 
@@ -778,7 +789,9 @@ sub remove_spamassassin_markup {
       if ( $msg[$i] =~ /^\s*$/ ) {    # end of mime header
 
         # Ok, we found the encapsulated piece ...
-        if ( $ct eq "message/rfc822" && $cd eq $self->{'encapsulated_content_description'} )
+	if ($ct =~ m@(?:message/rfc822|text/plain);\s+x-spam-type=original@ ||
+	    ($ct eq "message/rfc822" &&
+	     $cd eq $self->{'encapsulated_content_description'}))
         {
           splice @msg, 1, $i;
             ;    # remove the front part, leave the 'From ' header.
@@ -805,7 +818,7 @@ sub remove_spamassassin_markup {
 
       # Ok, we're in the mime header ...  Capture the appropriate headers...
       $flag = 1;
-      if ( $msg[$i] =~ /^Content-Type:\s+(\S+)/i ) {
+      if ( $msg[$i] =~ /^Content-Type:\s+(.+?)\s*$/i ) {
         $ct = $1;
       }
       elsif ( $msg[$i] =~ /^Content-Description:\s+(.+?)\s*$/i ) {
@@ -1006,6 +1019,8 @@ sub compile_now {
     Mail::SpamAssassin::ConfSourceSQL::load_modules();
   }
 
+  $self->{bayes_scanner}->sanity_check_is_untied();
+
   1;
 }
 
@@ -1104,7 +1119,7 @@ sub init {
 
   my $set = 0;
   $set |= 1 unless $self->{local_tests_only};
-  $set |= 2 if $self->{bayes_scanner}->is_available();
+  $set |= 2 if $self->{bayes_scanner}->is_scan_available();
 
   $self->{conf}->set_score_set ($set);
 

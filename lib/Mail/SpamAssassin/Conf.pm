@@ -365,7 +365,7 @@ set of headers:
 e.g.
 
   whitelist_from joe@example.com fred@example.com
-  whitelist_from simon@example.com
+  whitelist_from *@example.com
 
 =cut
 
@@ -378,11 +378,13 @@ e.g.
 Used to override a default whitelist_from entry, so for example a distribution
 whitelist_from can be overriden in a local.cf file, or an individual user can
 override a whitelist_from entry in their own C<user_prefs> file.
+The specified email address has to match exactly the address previously
+used in a whitelist_from line.
 
 e.g.
 
   unwhitelist_from joe@example.com fred@example.com
-  unwhitelist_from *@amazon.com
+  unwhitelist_from *@example.com
 
 =cut
 
@@ -390,17 +392,18 @@ e.g.
       $self->remove_from_addrlist ('whitelist_from', split (' ', $1)); next;
     }
 
-=item whitelist_from_rcvd lists.sourceforge.net sourceforge.net
+=item whitelist_from_rcvd addr@lists.sourceforge.net sourceforge.net
 
 Use this to supplement the whitelist_from addresses with a check against the
 Received headers. The first parameter is the address to whitelist, and the
-second is a domain to match in the Received headers.  This does not
-allow globbing, and must be followed by a numeric IP address in brackets.
+second is a domain to match in the Received headers.  This domain does not
+allow globbing, and must be followed by a numeric IP address in brackets
+in the Received headers.
 
 e.g.
 
   whitelist_from_rcvd joe@example.com  example.com
-  whitelist_from_rcvd axkit.org        sergeant.org
+  whitelist_from_rcvd *@axkit.org      sergeant.org
 
 =cut
 
@@ -415,15 +418,17 @@ Used to override a default whitelist_from_rcvd entry, so for example a
 distribution whitelist_from_rcvd can be overriden in a local.cf file,
 or an individual user can override a whitelist_from_rcvd entry in
 their own C<user_prefs> file.
+The specified email address has to match exactly the address previously
+used in a whitelist_from_rcvd line.
 
 e.g.
 
   unwhitelist_from_rcvd joe@example.com fred@example.com
-  unwhitelist_from_rcvd amazon.com
+  unwhitelist_from_rcvd *@axkit.org
 
 =cut
 
-    if (/^unwhitelist_from\s+(.+)$/) {
+    if (/^unwhitelist_from_rcvd\s+(.+)$/) {
       $self->remove_from_addrlist_rcvd('whitelist_from_rcvd', split (' ', $1));
       next;
     }
@@ -643,13 +648,20 @@ score for this message. _REQD_ will be replaced with the threshold.
       $self->{subject_tag} = $1; next;
     }
 
-=item report_safe { 0 | 1 }	(default: 1)
+=item report_safe { 0 | 1 | 2 }	(default: 1)
 
 if this option is set to 1, if an incoming message is tagged as spam,
 instead of modifying the original message, SpamAssassin will create a
 new report message and attach the original message as a message/rfc822
 MIME part (ensuring the original message is completely preserved, not
 easily opened, and easier to recover).
+
+If this option is set to 2, then original messages will be attached with
+a content type of text/plain instead of message/rfc822.  This setting
+may be required for safety reasons on certain broken mail clients that
+automatically load attachments without any action by the user.  This
+setting may also make it somewhat more difficult to extract or view the
+original message.
 
 If this option is set to 0, incoming spam is only modified by adding
 some headers and no changes will be made to the body.
@@ -742,9 +754,9 @@ if you want to allow any language.  The default setting is C<all>.
 
 =item fy	frisian
 
-=item ga	irish
+=item ga	irish gaelic
 
-=item gd	scots
+=item gd	scottish gaelic
 
 =item he	hebrew
 
@@ -829,11 +841,14 @@ if you want to allow any language.  The default setting is C<all>.
 =item zh	chinese
 
 =back
-example:
 
-  ok_languages all		(allow all languages)
-  ok_languages en		(only allow English)
-  ok_languages en ja zh		(English, Japanese and Chinese)
+examples:
+
+  ok_languages all         (allow all languages)
+  ok_languages en          (only allow English)
+  ok_languages en ja zh    (allow English, Japanese, and Chinese)
+
+Note: if there are multiple ok_languages lines, only the last one is used.
 
 =cut
 
@@ -886,10 +901,13 @@ Chinese (both simplified and traditional)
 
 =back
 
-example:
+examples:
 
-  ok_locales all		(allow all character sets)
-  ok_locales ja ru th zh	(penalise Chinese messages)
+  ok_locales all         (allow all locales)
+  ok_locales en          (only allow English)
+  ok_locales en ja zh    (allow English, Japanese, and Chinese)
+
+Note: if there are multiple ok_locales lines, only the last one is used.
 
 =cut
 
@@ -958,7 +976,7 @@ to make it clear what's been added, and allow other filters to B<remove>
 spamfilter modifications, so you lose 6 columns right there. Also note that the
 first line of the report must start with 4 dashes, for the same reason. Each
 C<report> line appends to the existing template, so use
-C<clear-report-template> to restart.
+C<clear_report_template> to restart.
 
 The following template items are supported, and will be filled out by
 SpamAssassin:
@@ -1000,7 +1018,7 @@ non-text/plain part.  See the C<10_misc.cf> configuration file in
 C</usr/share/spamassassin> for an example.
 
 Each C<unsafe-report> line appends to the existing template, so use
-C<clear-report-template> to restart.
+C<clear_unsafe_report_template> to restart.
 
 =cut
 
@@ -1297,6 +1315,10 @@ You can however specify your own list by specifying
 
 dns_available test: server1.tld server2.tld server3.tld
 
+Please note, the DNS test queries for MX records so if you specify your
+own list of servers, please make sure to choose the one(s) which has an
+associated MX record.
+
 =cut
 
     if (/^dns_available\s+(yes|no|test|test:\s+.+)$/) {
@@ -1425,78 +1447,6 @@ server load. It is not recommended.
       $self->{allow_user_rules} = $1+0; 
       dbg( ($self->{allow_user_rules} ? "Allowing":"Not allowing") . " user rules!"); next;
     }
-
-# If you think, this is complex, you should have seen the four previous
-# implementations that I scratched :-)
-# Once you understand this, you'll see it's actually quite flexible -- Marc
-
-=item dialup_codes { "domain1" => "127.0.x.y", "domain2" => "127.0.a.b" }
-
-Default:
-{ "dialups.mail-abuse.org." => "127.0.0.3", 
-# For DUL + other codes, we ignore that it's on DUL
-  "rbl-plus.mail-abuse.org." => "127.0.0.2",
-  "relays.osirusoft.com." => "127.0.0.3" };
-
-WARNING!!! When passing a reference to a hash, you need to put the whole hash in
-one line for the parser to read it correctly (you can check with 
-C<< spamassassin -D < mesg >>)
-
-Set this to what your RBLs return for dialup IPs
-It is used by dialup-firsthop and relay-firsthop rules so that you can match
-DUL codes and compensate DUL checks with a negative score if the IP is a dialup
-IP the mail originated from and it was properly relayed by a hop before reaching
-you (hopefully not your secondary MX :-)
-The trailing "-firsthop" is magic, it's what triggers the RBL to only be run
-on the originating hop
-The idea is to not penalize (or penalize less) people who properly relayed
-through their ISP's mail server
-
-Here's an example showing the use of Osirusoft and MAPS DUL, as well as the use
-of check_two_rbl_results to compensate for a match in both RBLs
-
-header RCVD_IN_DUL		rbleval:check_rbl('dialup', 'dialups.mail-abuse.org.')
-describe RCVD_IN_DUL		Received from dialup, see http://www.mail-abuse.org/dul/
-score RCVD_IN_DUL		4
-
-header X_RCVD_IN_DUL_FH		rbleval:check_rbl('dialup-firsthop', 'dialups.mail-abuse.org.')
-describe X_RCVD_IN_DUL_FH	Received from first hop dialup, see http://www.mail-abuse.org/dul/
-score X_RCVD_IN_DUL_FH		-3
-
-header RCVD_IN_OSIRUSOFT_COM    rbleval:check_rbl('osirusoft', 'relays.osirusoft.com.')
-describe RCVD_IN_OSIRUSOFT_COM  Received via an IP flagged in relays.osirusoft.com
-
-header X_OSIRU_SPAM_SRC         rbleval:check_rbl_results_for('osirusoft', '127.0.0.4')
-describe X_OSIRU_SPAM_SRC       DNSBL: sender is Confirmed Spam Source, penalizing further
-score X_OSIRU_SPAM_SRC          3.0
-
-header X_OSIRU_SPAMWARE_SITE    rbleval:check_rbl_results_for('osirusoft', '127.0.0.6')
-describe X_OSIRU_SPAMWARE_SITE  DNSBL: sender is a Spamware site or vendor, penalizing further
-score X_OSIRU_SPAMWARE_SITE     5.0
-
-header X_OSIRU_DUL_FH		rbleval:check_rbl('osirusoft-dul-firsthop', 'relays.osirusoft.com.')
-describe X_OSIRU_DUL_FH		Received from first hop dialup listed in relays.osirusoft.com
-score X_OSIRU_DUL_FH		-1.5
-
-header Z_FUDGE_DUL_MAPS_OSIRU	rblreseval:check_two_rbl_results('osirusoft', "127.0.0.3", 'dialup', "127.0.0.3")
-describe Z_FUDGE_DUL_MAPS_OSIRU	Do not double penalize for MAPS DUL and Osirusoft DUL
-score Z_FUDGE_DUL_MAPS_OSIRU	-2
-
-header Z_FUDGE_RELAY_OSIRU	rblreseval:check_two_rbl_results('osirusoft', "127.0.0.2", 'relay', "127.0.0.2")
-describe Z_FUDGE_RELAY_OSIRU	Do not double penalize for being an open relay on Osirusoft and another DNSBL
-score Z_FUDGE_RELAY_OSIRU	-2
-
-header Z_FUDGE_DUL_OSIRU_FH	rblreseval:check_two_rbl_results('osirusoft-dul-firsthop', "127.0.0.3", 'dialup-firsthop', "127.0.0.3")
-describe Z_FUDGE_DUL_OSIRU_FH	Do not double compensate for MAPS DUL and Osirusoft DUL first hop dialup
-score Z_FUDGE_DUL_OSIRU_FH	1.5
-
-=cut
-
-    if (/^dialup_codes\s+(.*)$/) {
-	$self->{dialup_codes} = eval $1;
-	next;
-    }
-
 
     if ($scoresonly) { dbg("Checking privileged commands in user config"); }
 
@@ -1987,6 +1937,78 @@ systems.  Default: C<spamassassin>.
     if(/^user_scores_sql_field_scope\s+(\S+)$/) {
       $self->{user_scores_sql_field_scope} = $1; next;
     }
+
+# If you think, this is complex, you should have seen the four previous
+# implementations that I scratched :-)
+# Once you understand this, you'll see it's actually quite flexible -- Marc
+
+=item dialup_codes { "domain1" => "127.0.x.y", "domain2" => "127.0.a.b" }
+
+Default:
+  { "dialups.mail-abuse.org." => "127.0.0.3", 
+  # For DUL + other codes, we ignore that it's on DUL
+    "rbl-plus.mail-abuse.org." => "127.0.0.2",
+    "relays.osirusoft.com." => "127.0.0.3" };
+
+WARNING!!! When passing a reference to a hash, you need to put the whole hash
+in one line for the parser to read it correctly (you can check with
+C<spamassassin -D &lt; mesg>).
+
+Set this to what your RBLs return for dialup IPs
+It is used by dialup-firsthop and relay-firsthop rules so that you can match
+DUL codes and compensate DUL checks with a negative score if the IP is a dialup
+IP the mail originated from and it was properly relayed by a hop before reaching
+you (hopefully not your secondary MX :-)
+The trailing "-firsthop" is magic, it's what triggers the RBL to only be run
+on the originating hop
+The idea is to not penalize (or penalize less) people who properly relayed
+through their ISP's mail server
+
+Here's an example showing the use of Osirusoft and MAPS DUL, as well as the use
+of check_two_rbl_results to compensate for a match in both RBLs:
+
+ header RCVD_IN_DUL		rbleval:check_rbl('dialup', 'dialups.mail-abuse.org.')
+ describe RCVD_IN_DUL		Received from dialup, see http://www.mail-abuse.org/dul/
+ score RCVD_IN_DUL		4
+
+ header X_RCVD_IN_DUL_FH	rbleval:check_rbl('dialup-firsthop', 'dialups.mail-abuse.org.')
+ describe X_RCVD_IN_DUL_FH	Received from first hop dialup, see http://www.mail-abuse.org/dul/
+ score X_RCVD_IN_DUL_FH		-3
+
+ header RCVD_IN_OSIRUSOFT_COM   rbleval:check_rbl('osirusoft', 'relays.osirusoft.com.')
+ describe RCVD_IN_OSIRUSOFT_COM Received via an IP flagged in relays.osirusoft.com
+
+ header X_OSIRU_SPAM_SRC        rbleval:check_rbl_results_for('osirusoft', '127.0.0.4')
+ describe X_OSIRU_SPAM_SRC      DNSBL: sender is Confirmed Spam Source, penalizing further
+ score X_OSIRU_SPAM_SRC         3.0
+
+ header X_OSIRU_SPAMWARE_SITE   rbleval:check_rbl_results_for('osirusoft', '127.0.0.6')
+ describe X_OSIRU_SPAMWARE_SITE DNSBL: sender is a Spamware site or vendor, penalizing further
+ score X_OSIRU_SPAMWARE_SITE    5.0
+
+ header X_OSIRU_DUL_FH		rbleval:check_rbl('osirusoft-dul-firsthop', 'relays.osirusoft.com.')
+ describe X_OSIRU_DUL_FH	Received from first hop dialup listed in relays.osirusoft.com
+ score X_OSIRU_DUL_FH		-1.5
+
+ header Z_FUDGE_DUL_MAPS_OSIRU	rblreseval:check_two_rbl_results('osirusoft', "127.0.0.3", 'dialup', "127.0.0.3")
+ describe Z_FUDGE_DUL_MAPS_OSIRU Do not double penalize for MAPS DUL and Osirusoft DUL
+ score Z_FUDGE_DUL_MAPS_OSIRU	-2
+
+ header Z_FUDGE_RELAY_OSIRU	rblreseval:check_two_rbl_results('osirusoft', "127.0.0.2", 'relay', "127.0.0.2")
+ describe Z_FUDGE_RELAY_OSIRU	Do not double penalize for being an open relay on Osirusoft and another DNSBL
+ score Z_FUDGE_RELAY_OSIRU	-2
+ 
+ header Z_FUDGE_DUL_OSIRU_FH	rblreseval:check_two_rbl_results('osirusoft-dul-firsthop', "127.0.0.3", 'dialup-firsthop', "127.0.0.3")
+ describe Z_FUDGE_DUL_OSIRU_FH	Do not double compensate for MAPS DUL and Osirusoft DUL first hop dialup
+ score Z_FUDGE_DUL_OSIRU_FH	1.5
+ 
+=cut
+
+    if (/^dialup_codes\s+(.*)$/) {
+	$self->{dialup_codes} = eval $1;
+	next;
+    }
+
 
 ###########################################################################
 

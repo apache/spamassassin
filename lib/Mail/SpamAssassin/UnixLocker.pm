@@ -33,13 +33,14 @@ sub new {
 # Locking code adapted from code by Alexis Rosen <alexis@panix.com>
 # by Kelsey Cummings <kgc@sonic.net>, with mods by jm and quinlan
 
-use constant LOCK_MAX_AGE => 300;	# seconds 
-use constant LOCK_MAX_RETRIES => 30;	# average 1 per second
+use constant LOCK_MAX_AGE => 600;	# seconds 
 
 sub safe_lock {
-  my ($self, $path) = @_;
+  my ($self, $path, $max_retries) = @_;
   my $is_locked = 0;
   my @stat;
+
+  $max_retries ||= 30;
 
   my $lock_file = "$path.lock";
   my $lock_tmp = Mail::SpamAssassin::Util::untaint_file_path
@@ -54,7 +55,7 @@ sub safe_lock {
   autoflush LTMP 1;
   dbg("lock: $$ created $lock_tmp");
 
-  for (my $retries = 0; $retries < LOCK_MAX_RETRIES; $retries++) {
+  for (my $retries = 0; $retries < $max_retries; $retries++) {
     if ($retries > 0) {
       select(undef, undef, undef, (rand(1.0) + 0.5));
     }
@@ -80,12 +81,12 @@ sub safe_lock {
       # we got a stale lock, break it
       dbg("lock: $$ breaking stale $lock_file: age=" .
 	  (defined $lock_age ? $lock_age : "undef") . " now=$now");
-      unlink $lock_file;
+      unlink $lock_file || warn "lock: $$ unlink of lock file $lock_file failed: $!\n";
     }
   }
 
   close(LTMP);
-  unlink $lock_tmp;
+  unlink $lock_tmp || warn "lock: $$ unlink of temp lock $lock_tmp failed: $!\n";
 
   return $is_locked;
 }

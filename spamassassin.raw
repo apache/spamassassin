@@ -320,7 +320,7 @@ Options:
  -d, --remove-markup               Remove spam reports from a message
  -C file, --config-file=file       Path to standard configuration dir
  -p prefs, --prefs-file=file       Set user preferences file
- -x, --nouser-config               Disable user config files
+ -x, --nocreate-prefs              Don't create user preferences file
  -e, --exit-code                   Exit with a non-zero exit code if the
                                    tested message was spam
  -l filename, --log-to-mbox=file   Log messages to a mbox file
@@ -500,9 +500,9 @@ hit, use:
 
         spamassassin -D rulesrun=255
 
-=item B<-x>, B<--nouser-config>
+=item B<-x>, B<--nocreate-prefs>
 
-Disable per-user configuration files.
+Disable creation of user preferences file.
 
 =item B<-M> I<factory>, B<--whitelist-factory>=I<factory>
 
@@ -532,10 +532,20 @@ The rule base, text templates, and rule description text are loaded from the
 configuration files.
 
 By default, configuration data is loaded from the first existing directory in:
-F</usr/local/share/spamassassin>;F</usr/share/spamassassin>;F<./rules>;F<../rules>
+F<@@DEF_RULES_DIR@@>;
+F<@@PREFIX@@/share/spamassassin>;
+F</usr/local/share/spamassassin>;
+F</usr/share/spamassassin>.
 
 The configuration data in the first existing directory in:
-F</usr/local/etc/spamassassin>;F</usr/pkg/etc/spamassassin>;F</usr/etc/spamassassin>;F</etc/mail/spamassassin>;F</etc/spamassassin>
+F<@@LOCAL_RULES_DIR@@>;
+F<@@PREFIX@@/etc/mail/spamassassin>;
+F<@@PREFIX@@/etc/spamassassin>;
+F</usr/local/etc/spamassassin>;
+F</usr/pkg/etc/spamassassin>;
+F</usr/etc/spamassassin>;
+F</etc/mail/spamassassin>;
+F</etc/spamassassin>
 are used to override any values which had already been set
 
 Spamassassin will read *.cf in these directories, in alphanumeric order within each directory
@@ -544,13 +554,19 @@ Spamassassin will read *.cf in these directories, in alphanumeric order within e
 The user preferences (such as scores to attach to each rule), are loaded from
 the file specified in the B<-p> argument.  If this is not specified,
 F<~/.spamassassin/user_prefs> is used if it exists.  C<spamassassin> will create this
-file if it does not exist, using F<user_prefs.template> as a template.  This file will be looked for in 
-F</etc/spamassassin/user_prefs.template>;F</usr/local/share/spamassassin/user_prefs.template>;F</usr/share/spamassassin/user_prefs.template>
+file if it does not exist, using F<user_prefs.template> as a template.  This file will be looked for in: 
+F<@@LOCAL_RULES_DIR@@>;
+F<@@PREFIX@@/etc/mail/spamassassin>;
+F<@@PREFIX@@/share/spamassassin>;
+F</etc/spamassassin>;
+F</etc/mail/spamassassin>;
+F</usr/local/share/spamassassin>;
+F</usr/share/spamassassin>.
 
 =head1 TAGGING
 
 The following two sections detail the tagging that takes place for
-spam messages, first of all, and for non-spam messages.
+messages.
 
 Note that if you use the B<-t> argument, all mails will be tagged
 as if they are spam messages.
@@ -595,10 +611,7 @@ the filter status.
 
 Set to C<YES>.
 
-=item X-Spam-Report: header for spam mails
-
-The SpamAssassin report is added to the mail header if
-the C<report_header 1> configuration option is given.
+=item X-Spam-Report: header
 
 =item spam mail body text
 
@@ -607,7 +620,7 @@ if the message is marked as spam.
 
 =back
 
-=head2 TAGGING FOR NON-SPAM MAILS
+=head2 TAGGING FOR HAM (NON-SPAM) MAILS
 
 =over 4
 
