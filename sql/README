@@ -11,8 +11,11 @@ for them to update their $HOME/.spamassassin/user_prefs file.  It is also quite
 common for users listed in /etc/passwd to not have a home directory, therefore,
 the only way to have their own local settings would be through an RDBMS system.
 
-Note that this will NOT look for test rules, only local scores, whitelist_from(s),
-required_score, and auto_report_threshold.
+Note that this will NOT look for test rules, only local scores,
+whitelist_from(s), required_score, and auto_report_threshold.
+
+In addition, any config options marked as Admin Only will NOT be parsed from
+SQL preferences.
 
 SpamAssassin will check the global configuration file (ie. any file matching
 /etc/mail/spamassassin/*.cf) for the following settings:
