@@ -494,14 +494,14 @@ header __MSGID_ESPAM		Message-ID =~ /<[a-z\d][a-z\d\$-]{10,29}[a-z\d]\@[a-z\d][a
 # eliminate hex runs
 header __MSGID_IDIOM_0		Message-ID =~ /\b[a-f\d]{8}/
 header __MSGID_IDIOM_1		Message-ID =~ /\b[a-f\d]{8}\b/
-header __MSGID_IDIOM_2		Message-ID =~ /\b[a-f\d]{12}\b/
+header __MSGID_IDIOM_2		Message-ID =~ /\b(?:[a-f\d]{12}|[a-f\d]{8})\b/
 # eliminate digit runs
 header __MSGID_IDIOM_3		Message-ID =~ /\d{8}/
 header __MSGID_IDIOM_4		Message-ID =~ /\d{10}/
 header __MSGID_IDIOM_5		Message-ID =~ /\b\d{8}/
 # eliminate plausible hostnames
 header __MSGID_IDIOM_6		Message-ID =~ /\@\D{2,}>/
-header __MSGID_IDIOM_7		Message-ID =~ /\@(?:.*\b)?\D{2,}>/
+header __MSGID_IDIOM_7		Message-ID =~ /\@(?:\D{2,}|(?:\d{1,3}\.){3}\d{1,3})>/
 header __MSGID_IDIOM_8		Message-ID =~ /\@(?:[a-z\d]+\.)?\D{2,}>/
 meta T_MSGID_EVIL_1	(__MSGID_ESPAM && !__MSGID_IDIOM_0)
 meta T_MSGID_EVIL_2	(__MSGID_ESPAM && !__MSGID_IDIOM_1)
