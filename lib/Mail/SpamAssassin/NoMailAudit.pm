@@ -57,7 +57,7 @@ sub read_text_array_from_stdin {
 
   my @ary = ();
   while (<STDIN>) {
-    /^From / and next;        # avoid the #1 M:A bug ;)
+    /^From / and $self->{from_line} = $_;
     push (@ary, $_);
     /^$/ and last;
   }
@@ -170,7 +170,12 @@ sub put_header {
 sub get_all_headers {
   my ($self) = @_;
 
-  my @lines = ();
+  if (!defined $self->{from_line}) {
+    $self->{from_line} = "From spamassassin\@localhost  ".
+    		(scalar localtime(time))."\n";
+  }
+
+  my @lines = ($self->{from_line});
   foreach my $hdrcode (@{$self->{header_order}}) {
     $hdrcode =~ /^([^:]+):(\d+)$/ or next;
 
