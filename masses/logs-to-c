@@ -377,7 +377,7 @@ sub read_ranges {
     }
     unless ($mutable_tests{$t} || $scores{$t}) {
       $ignored_rule{$t} = 1;
-  }
+    }
     $index_to_rule[$count] = $t;
     $count++;
   }
@@ -399,6 +399,7 @@ sub read_ranges {
       if ($allrules{$t}->{tflags} =~ m/\buserconf\b/i) {
 	next;
       } elsif ($range_lo{$t} == $range_hi{$t}) {
+	$scores{$t} = $range_lo{$t};
 	next;
       }
       if (($scores{$t} == 1) && ($allrules{$t}->{tflags} =~ m/\bnice\b/i)) {
