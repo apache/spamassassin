@@ -95,7 +95,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.149 2002/12/21 19:53:42 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.150 2002/12/21 22:48:00 felicity Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -835,6 +835,7 @@ sub compile_now {
   my $encapped = $self->encapsulate_mail_object ($mail);
   my $status = Mail::SpamAssassin::PerMsgStatus->new($self, $encapped,
                         { disable_auto_learning => 1 } );
+  $status->word_is_in_dictionary("aba"); # load triplets.txt into memory
   $status->check();
   $status->finish();
 
