@@ -408,12 +408,6 @@ describe MANY_FROMS		'From' contains more than one address
 # *so* many spams come from here.
 header FROM_BTAMAIL		From =~ /\@btamail.net.cn/i
 describe FROM_BTAMAIL		From an address @btamail.net.cn
-# ditto
-header FROM_UGETMORE		From =~ /\@ugetmore4less.net/i
-describe FROM_UGETMORE		From an address @ugetmore4less.net
-# here, too
-header FROM_TOPICA		From =~ /\@(?:\w\.)*email-publisher.com/i
-describe FROM_TOPICA		From an address @email-publisher.com
 
 header USER_IN_BLACKLIST	eval:check_from_in_blacklist()
 describe USER_IN_BLACKLIST	From: address is in the user's black-list
