@@ -142,6 +142,10 @@ sub new {
   $self->{dcc_add_header} = 0;
   $self->{dcc_timeout} = 10;
 
+  $self->{pyzor_max} = 20;
+  $self->{pyzor_add_header} = 0;
+  $self->{pyzor_timeout} = 10;
+
   $self->{whitelist_from} = { };
   $self->{blacklist_from} = { };
 
@@ -883,6 +887,48 @@ the results
     if (/^dcc[-_]timeout\s*(\d+)\s*$/) {
       $self->{dcc_timeout} = $1+0; next;
     }
+
+
+=item pyzor_max NUMBER
+
+Pyzor is a system similar to Razor.  This option sets how often a message's
+body checksum must have been reported to the Pyzor server before SpamAssassin
+will consider the Pyzor check as matched.
+
+The default is 20.
+
+=cut
+
+    if (/^pyzor[-_]max\s+(\d+)/) {
+      $self->{pyzor_max} = $1+0; next;
+    }
+
+=item pyzor_add_header { 0 | 1 }   (default: 0)
+
+Pyzor processing creates a message header containing the statistics for the
+message.  This option sets whether SpamAssassin will add the heading to
+messages it processes.
+
+The default is to not add the header.
+
+=cut
+
+    if (/^pyzor[-_]add[-_]header\s+(\d+)$/) {
+      $self->{pyzor_add_header} = $1+0; next;
+    }
+
+=item pyzor_timeout n              (default: 10)
+
+How many seconds you wait for pyzor to complete before you go on without 
+the results
+
+=cut
+
+    if (/^pyzor[-_]timeout\s*(\d+)\s*$/) {
+      $self->{pyzor_timeout} = $1+0; next;
+    }
+
+
 
 
 =item num_check_received { integer }   (default: 2)

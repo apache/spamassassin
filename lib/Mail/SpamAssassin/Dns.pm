@@ -525,6 +525,131 @@ sub dcc_lookup {
   return 0;
 }
 
+sub is_pyzor_available {
+  my ($self) = @_;
+  my (@resp);
+
+  if ($self->{main}->{local_tests_only}) {
+    dbg ("local tests only, ignoring Pyzor");
+    return 0;
+  }
+
+# patch from Ryan Cleary: a pipe open() doesn't allow for you to easily check
+# whether the command succeeded, so my patch first calls system(), then only
+# does an open() if the system() succeeds.  (
+# http://www.hughes-family.org/bugzilla/show_bug.cgi?id=507 )
+#
+  if (system("pyzor ping>/dev/null 2>&1")) {
+    dbg ("Pyzor is not available: system failed");
+    return 0;
+  }
+
+  # jm: this could still fail
+  if (!open(PyzorHDL, "pyzor ping 2>&1 |")) {
+    dbg ("Pyzor is not available: open failed");
+    return 0;
+  }
+  
+  @resp = <PyzorHDL>;
+  close PyzorHDL;
+  dbg ("Pyzor is available: ".join(" ", @resp));
+  return 1;
+}
+
+use Symbol qw(gensym);
+
+sub pyzor_lookup {
+  my ($self, $fulltext) = @_;
+  my $response = undef;
+  my $pyzor_count;
+  my $pyzor_whitelisted;
+  my $timeout=$self->{conf}->{pyzor_timeout};
+
+  $pyzor_count = 0;
+  $pyzor_whitelisted = 0;
+
+  if ($self->{main}->{local_tests_only}) {
+    dbg ("local tests only, ignoring Pyzor");
+    return 0;
+  }
+
+  timelog("Pyzor -> Starting test ($timeout secs max)", "pyzor", 1);
+
+  eval {
+    my ($pyzorin, $pyzorout, $pid);
+
+    local $SIG{ALRM} = sub { die "alarm\n" };
+    local $SIG{PIPE} = sub { die "brokenpipe\n" };
+
+    alarm($timeout);
+
+    $pyzorin = gensym();
+    $pyzorout = gensym();
+
+    $pid = open2($pyzorout, $pyzorin, 'pyzor check 2>&1');
+
+    print $pyzorin $$fulltext;
+    
+    close ($pyzorin);
+
+    $response = <$pyzorout>;
+        
+    dbg("Pyzor: got response: $response");
+
+    waitpid ($pid, 0);
+
+    alarm(0);
+  };
+
+  if ($@) {
+    $response = undef;
+    if ($@ =~ /alarm/) {
+      dbg ("Pyzor check timed out after 10 secs.");
+      timelog("Pyzor -> interrupted after $timeout secs", "pyzor", 2);
+      return 0;
+    } elsif ($@ =~ /brokenpipe/) {
+      dbg ("Pyzor -> check failed - Broken pipe.");
+      timelog("Pyzor check failed, broken pipe", "pyzor", 2);
+      return 0;
+    } else {
+      warn ("Pyzor -> check skipped: $! $@");
+      timelog("Pyzor check skipped", "pyzor", 2);
+      return 0;
+    }
+  }
+
+  # made regexp a little more forgiving (jm)
+  if ($response =~ /^\S+\t.*?\t(\d+)\t(\d+)\s*$/) {
+    $pyzor_whitelisted = $2+0;
+    if ($pyzor_whitelisted == 0) {
+      $pyzor_count = $1+0;
+    }
+
+  } else {
+    # warn on failures to parse (jm)
+    dbg ("Pyzor: couldn't grok response \"$response\"");
+  }
+
+  # moved this around a bit; no point in testing RE twice (jm)
+  if ($self->{conf}->{pyzor_add_header}) {
+    if ($pyzor_whitelisted) {
+      $self->{msg}->put_header("X-Pyzor", "Whitelisted.");
+    } else {
+      $self->{msg}->put_header("X-Pyzor", "Reported $pyzor_count times.");
+    }
+  }
+
+  if ($pyzor_count >= $self->{conf}->{pyzor_max}) {
+    dbg ("Pyzor: Listed! $pyzor_count of $self->{conf}->{pyzor_max} and whitelist is $pyzor_whitelisted");
+    timelog("Pyzor -> got hit", "pyzor", 2);
+    return 1;
+  }
+  
+  timelog("Pyzor -> no match", "pyzor", 2);
+  return 0;
+}
+
+
 ###########################################################################
 
 sub load_resolver {
