@@ -1146,13 +1146,13 @@ sub check_rbl {
       # It's also useful to be able to flag mail that went through an IP that
       # is on two different blacklists  -- Marc
       #next if ($already_matched_in_other_zones =~ / ${ip} /);
-      if ($already_matched_in_other_zones =~ / ${ip} /) {
+      if ($already_matched_in_other_zones =~ / \Q${ip}\E /) {
 	dbg("Skipping $ip, already matched in other zones for $set", "rbl", -1);
 	next;
       }
       next unless ($ip =~ /(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/);
      ($b1, $b2, $b3, $b4) = ($1, $2, $3, $4);
-      
+
       # By default, we accept any return on an RBL
       undef $dialupreturn;
       
