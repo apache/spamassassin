@@ -30,20 +30,6 @@ $KNOWN_BAD_DIALUP_RANGES = q(
 $CCTLDS_WITH_LOTS_OF_OPEN_RELAYS = qr{(?:kr|cn|cl|ar|hk|il|th|tw|sg|za|tr|ma|ua|in|pe)};
 $ROUND_THE_WORLD_RELAYERS = qr{(?:net|com|ca)};
 
-# Porn words will each be prefixed with "\b" but not suffixed so as to pick up word ending variations.
-# if you want \b on the end, be sure to add it yourself.
-@PORN_WORDS = (qr(\blolita)i,  qr(\bcum)i, qr(\borg[iy])i, qr(\bwild)i, qr(\bfuck)i, qr(\bteen)i,
-qr(\baction)i, qr(\bspunk)i, qr(\bpuss)i, qr(\bsuck)i, qr(\bhot)i,
-qr(\bvoyeur)i, qr(\ble[sz]b(?:ian|o))i, qr(\banal\b)i, qr(\binterr?acial)i, qr(\basian)i,
-qr(\bamateur)i, qr(\bsex+)i, qr(\bslut)i, qr(\bexplicit)i, qr(\bxxx(?:[^x]|\b))i, qr(\blive)i,
-qr(\blick)i, qr(\bsuck)i, qr(\bdorm)i, qr(\bwebcam)i, qr(\bass\b)i, qr(\bschoolgirl)i,
-qr(\bstrip)i, qr(\bhorn[yi])i, qr(\berotic)i, qr(\boral)i, qr(\bpenis)i, qr(\bhard.?core)i,
-qr(\bblow.?job)i, qr(\bnast[yi])i, qr(\bporn)i, qr(\bwhore)i, qr(\bnaked)i,
-qr(\bnude)i, qr(\bvirgin)i, qr(\bnaught[yi])i, qr(\bgirl)i, qr(\bceleb)i, qr(\bbabe)i,
-qr(\badult)i, qr(\bskank)i, qr(\btits?)i, qr(\btitties)i
-);
-
-
 # Here's how that RE was determined... relay rape by country (as of my
 # spam collection on Dec 12 2001):
 #
@@ -59,6 +45,23 @@ qr(\badult)i, qr(\bskank)i, qr(\btits?)i, qr(\btitties)i
 # http://www.isc.org/ds/WWW-200107/. I used both hostcount and domain counts
 # for figuring this. any ccTLD with > about 40000 domains is left out of this
 # regexp.  Then I threw in some unscientific seasoning to taste. ;)
+
+
+# Porn words will each be prefixed with "\b" but not suffixed so as to pick up word ending variations.
+# if you want \b on the end, be sure to add it yourself.
+@PORN_WORDS = (qr(\blolita)i,  qr(\bcum)i, qr(\borg[iy])i, qr(\bwild)i, qr(\bfuck)i,
+qr(\bteen)i, qr(\bspunk)i, qr(\bpuss)i, qr(\bsuck)i, qr(\bhot\b)i,
+qr(\bhottest\b)i, qr(\bhott[iy])i,
+qr(\bvoyeur)i, qr(\ble[sz]b(?:ian|o))i, qr(\banal\b)i, qr(\binterr?acial)i, qr(\basian)i,
+qr(\bamateur)i, qr(\bsex+)i, qr(\bslut)i, qr(\bexplicit)i, qr(\bxxx(?:[^x]|\b))i,
+qr(\blick)i, qr(\bsuck)i, qr(\bdorm)i, qr(\bwebcam)i, qr(\bass\b)i, qr(\bschoolgirl)i,
+qr(\bstrip)i, qr(\bhorn[yi])i, qr(\berotic)i, qr(\boral)i, qr(\bpenis)i, qr(\bhard.?core)i,
+qr(\bblow.?job)i, qr(\bnast[yi])i, qr(\bporn)i, qr(\bwhore)i, qr(\bnaked)i,
+qr(\bnude)i, qr(\bvirgin)i, qr(\bnaught[yi])i, qr(\bgirl)i, qr(\bceleb)i, qr(\bbabe)i,
+qr(\badult)i, qr(\bskank)i, qr(\btits?\b)i, qr(\btitties)i,
+# jm: catch "s*x", "f*ck" etc.
+qr(\bs[\*\.\-\?]ck)i, qr(\bf[\*\.\-\?]ck)i, qr(\bs[\*\.\-\?]x\b)i
+);
 
 ###########################################################################
 # HEAD TESTS:
@@ -1408,7 +1411,10 @@ sub porn_word_test {
     my ($self, $fulltext) = @_;
     my $hits = 0;
     foreach my $pat (@PORN_WORDS) {
-        $hits++ if ($$fulltext =~ /$pat/);
+        if ($$fulltext =~ /$pat/) {
+          $hits++;
+          #dbg ("porn word test: found $pat");
+        }
         return 1 if ($hits == 3);
     }
     return 0;
