@@ -1,4 +1,4 @@
-# $Id: Parser.pm,v 1.3 2003/09/24 21:33:33 felicity Exp $
+# $Id: Parser.pm,v 1.4 2003/09/24 22:01:12 felicity Exp $
 
 package Mail::SpamAssassin::MIME::Parser;
 use strict;
@@ -375,7 +375,7 @@ sub decode {
   if ( lc( $msg->header('content-transfer-encoding') ) eq 'quoted-printable' ) {
     dbg("decoding QP file\n");
     my @output =
-      split ( /^/m, MIME::QuotedPrint::decode_qp( join ( "", @{$body} ) ) );
+      map { s/\r\n/\n/; $_; } split ( /^/m, MIME::QuotedPrint::decode_qp( join ( "", @{$body} ) ) );
 
     my $type = $msg->header('content-type');
     my ($filename) =
@@ -398,7 +398,7 @@ sub decode {
     }
 
     # If it's a type text or message, split it into an array of lines
-    $output = [ split(/^/m, $output->[0]) ] if ( $type =~ m@^(?:text|message)/@ );
+    $output = [ map { s/\r\n/\n/; $_; } split(/^/m, $output->[0]) ] if ( $type =~ m@^(?:text|message)/@ );
 
     return $type, $output, $filename;
   }
