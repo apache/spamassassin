@@ -411,6 +411,7 @@ describe NONEXISTENT_CHARSET	Character set doesn't exist
 
 header CHARSET_FARAWAY_HEADERS	eval:check_for_faraway_charset_in_headers()
 describe CHARSET_FARAWAY_HEADERS A foreign language charset used in headers
+tflags CHARSET_FARAWAY_HEADERS	userconf
 
 header X_MAILER_GIBBERISH	X-Mailer =~ /^[A-Fa-f0-9\.]{48,}$/
 describe X_MAILER_GIBBERISH	'X-Mailer' line contains gibberish
@@ -420,8 +421,6 @@ describe X_PRIORITY_HIGH	Sent with 'X-Priority' set to high
 
 header X_MSMAIL_PRIORITY_HIGH	X-Msmail-Priority =~ /^High/
 describe X_MSMAIL_PRIORITY_HIGH	Sent with 'X-Msmail-Priority' set to high
-
-
 
 header MSG_ID_ADDED_BY_MTA	Message-Id =~ / \(added by (?!postmaster\@wanadoo\.fr)/
 describe MSG_ID_ADDED_BY_MTA	'Message-Id' was added by a relay
