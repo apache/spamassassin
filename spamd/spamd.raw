@@ -228,7 +228,7 @@ sub REAPER {
     $error_before_reaper = $!;  # take a copy before cleanupchildren()
     # do this silently; dbg() might do a syscall more tricky than
     # print().  syscalls in sig handlers == not good by POSIX
-    while ( my $kid = waitpid(-1, &WNOHANG) > 0 ) {
+    while ( waitpid(-1, &WNOHANG) > 0 ) {
         $extrapid++;
     }
     $SIG{CHLD} = \&REAPER;
