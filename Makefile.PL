@@ -166,7 +166,7 @@ my %makefile = (
 
     'MAN1PODS' => {
         'spamassassin'     => '$(INST_MAN1DIR)/spamassassin.$(MAN1EXT)',
-        'spamassassin-script.pod' => '$(INST_MAN1DIR)/spamassassin-script.$(MAN1EXT)',
+        'spamassassin-run.pod' => '$(INST_MAN1DIR)/spamassassin-run.$(MAN1EXT)',
         'sa-learn'         => '$(INST_MAN1DIR)/sa-learn.$(MAN1EXT)',
         'sa-update'        => '$(INST_MAN1DIR)/sa-update.$(MAN1EXT)',
         'spamc/spamc.pod'  => '$(INST_MAN1DIR)/spamc.$(MAN1EXT)',
