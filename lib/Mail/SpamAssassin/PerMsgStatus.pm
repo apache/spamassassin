@@ -1713,13 +1713,24 @@ sub do_awl_tests {
     local $_ = lc $self->get('From:addr');
     return 0 unless /\S/;
 
+    my $rcvd = $self->get('Received');
+    my $origip;
+
+    if ($rcvd =~ /^.*[^\d](\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/s) {
+      $origip = $1;
+    } elsif (defined $rcvd && $rcvd =~ /\S/) {
+      $rcvd =~ s/\s+/ /gs;
+      dbg ("failed to find originating IP in '$rcvd'");
+    }
+
     # Create the AWL object, then check
     $self->{auto_whitelist} = Mail::SpamAssassin::AutoWhitelist->new($self->{main});
 
-    my $meanscore = $self->{auto_whitelist}->check_address($_);
+    my $meanscore = $self->{auto_whitelist}->check_address($_, $origip);
     my $delta = 0;
 
-    dbg("AWL active, pre-score: ".$self->{hits}.", mean: ".($meanscore||'undef'));
+    dbg("AWL active, pre-score: ".$self->{hits}.", mean: ".($meanscore||'undef').
+                        ", originating-ip: ".($origip||'undef'));
 
     if(defined($meanscore))
     {
