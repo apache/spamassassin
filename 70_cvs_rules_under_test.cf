@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.641 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.642 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -232,4 +232,9 @@ header T_FROM_EUDORA            From:addr =~ /\@eudora\.com/i
 # will be pretty safe.  (lower rule as a baseline to see if we miss much)
 header T_FROM_DELPHI		From:addr =~ /\d[^\@]+\d[^\@]+\@delphi\.com/i
 header T_FROM_DELPHI_BASIC	From:addr =~ /\@delphi\.com/i
+
+body T_RANDO_MIZE		/\$RAN[DOMI]*\s+[DOMI]*ZE/
+
+# yet another open Yahoo! redirector
+uri T_YAHOO_REDIR		/^http:\/\/srd\.yahoo\.com\//i
 
