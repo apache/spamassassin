@@ -233,14 +233,161 @@ if ($opt{'ssl'}) {
   }
 }
 
-# This can be changed on the command line with the -s flag; special cases:
+
+### Begin initialization of logging ########################
+
+# The syslog facility can be changed on the command line with the
+# --syslog flag. Special cases are:
 # * A log facility of 'stderr' will log to STDERR
 # * " "   "        "  'null' disables all logging
-my $log_facility = $opt{'syslog'}        || 'mail';
-my $log_socket   = $opt{'syslog-socket'} || 'unix';
-$log_facility = 'stderr' if $log_socket eq   'none';
-$log_facility = 'null'   if $log_facility eq 'stderr' # don't duplicate log
-                            and $opt{'debug'};        # messages in debug mode
+# * " "   "        "  'file' logs to the file "spamd.log"
+# * Any facility containing non-word characters is interpreted as the name
+#   of a specific logfile
+my $log_facility  =    $opt{'syslog'}         || 'mail';
+# The socket to log over can be changed on the command line with the
+# --syslog-socket flag. Logging to any file handler (either a specific log
+# file or STDERR) is internally represented by a socket 'file', no logging
+# at all is 'none'. The latter is different from --syslog-socket=none which
+# gets mapped to --syslog=stderr and such --syslog-socket=file. An internal
+# socket of 'none' means as much as --syslog=null. Sounds complicated? It is.
+# But it works.
+my $log_socket    = lc($opt{'syslog-socket'}) || 'unix';
+# This is the default log file; it can be changed on the command line
+# via a --syslog flag containing non-word characters.
+my $log_file      = "spamd.log";
+
+# A specific log file was given (--syslog=/path/to/file).
+if ($log_facility =~ /\W/) {
+  $log_file       = $log_facility;
+  $log_socket     = 'file';
+}
+# The generic log file was requested (--syslog=file).
+elsif (lc($log_facility) eq 'file') {
+  $log_socket     = 'file';
+}
+# The casing is kept only if the facility specified a file.
+else {
+  $log_facility = lc($log_facility);
+}
+# Either above or at the command line the socket was set
+# to 'file' (--syslog-socket=file).
+if ($log_socket eq 'file') {
+  $log_facility   = 'file';
+}
+# The socket 'none' (--syslog-socket=none) historically
+# represents logging to STDERR.
+elsif ($log_socket eq 'none') {
+  $log_facility   = 'stderr';
+}
+# Either above or at the command line the facility was set
+# to 'stderr' (--syslog=stderr).
+if ($log_facility eq 'stderr') {
+  $log_socket     = 'file';
+}
+
+# Logging via syslog is requested. Falling back to INET and then STDERR
+# if opening a UNIX socket fails.
+if ($log_socket ne 'file' and $log_facility ne 'null') {
+  warn "trying to connect to syslog/${log_socket}...\n" if $opt{'debug'};
+  eval {
+    defined(setlogsock($log_socket)) || die $!;
+    # The next call is required to actually open the socket.
+    # FIXME: mss: wouldn't a openlog('spamd', 'cons,pid,ndelay', $log_facility); be better?
+    syslog('debug', "%s", "spamd starting");
+  };
+  my $err = $@;
+  chomp($err);
+
+  # Solaris sometimes doesn't support UNIX-domain syslog sockets apparently;
+  # same is true for perl 5.6.0 build on an early version of Red Hat 7!
+  # In that case we try it with INET.
+  if ($err and $log_socket ne 'inet') {
+    warn "connection failed: $err\n" .
+         "trying to connect to syslog/inet...\n"  if $opt{'debug'};
+    eval {
+      defined(setlogsock('inet')) || die $!;
+      syslog('debug', "%s", "spamd starting");
+      syslog('debug', "%s", "failed to setlogsock(${log_socket}): $err");
+      syslog('debug', "%s", "falling back to inet (you might want to use --syslog-socket=inet)");
+    };
+    $log_socket   = 'inet' unless $@;
+  }
+
+  # fall back to stderr if all else fails
+  if ($@) {
+    warn "failed to setlogsock(${log_socket}): $err\n" .
+         "reporting logs to stderr\n";
+    $log_facility = 'stderr';
+  } else {
+    warn "no error connecting to syslog/${log_socket}\n" if $opt{'debug'};
+  }
+}
+# The user wants to log to some file -- open it on STDLOG. Falling back to STDERR
+# if opening the file fails.
+elsif ($log_facility eq 'file') {
+  unless(open(STDLOG, ">> $log_file")) {
+    warn "failed to open logfile ${log_file}: $!\n" .
+         "reporting logs to stderr\n";
+    $log_facility = 'stderr';
+  }
+}
+
+# Either one of the above failed ot logging to STDERR is explicitly requested --
+# make STDLOG a dup so we don't have to handle so many special cases later on.
+if ($log_facility eq 'stderr') {
+  open(STDLOG, ">&STDERR") || die "Can't duplicate stderr: $!\n";
+  $log_socket     = 'file';
+}
+
+warn "logging enabled:\n" .
+        "\tfacility: ${log_facility}\n" .
+        "\tsocket:   ${log_socket}\n" .
+        "\toutput:   " . (
+          $log_facility eq 'file'   ? ${log_file} :
+          $log_facility eq 'stderr' ? 'stderr'    :
+          $log_facility eq 'null'   ? 'debug'     :
+                                      'syslog'
+        ) . "\n" if $opt{'debug'};
+
+# Don't duplicate log messages in debug mode.
+if ($log_facility eq 'stderr' and $opt{'debug'}) {
+  warn "logging to stderr disabled: already debugging to stderr\n";
+  $log_facility   = 'null';
+}
+# Either above or at the command line all logging was disabled (--syslog=null).
+if ($log_facility eq 'null') {
+  $log_socket     = 'none';
+}
+
+# Close the logfile on exit.
+END {
+  close(STDLOG) if $log_socket eq 'file';
+}
+
+# The code above was quite complicated. Make sure everything fits together.
+# These combinations are allowed:
+#   * socket = file
+#      ^ ^-> facility = stderr
+#      '---> facility = file
+#   * socket = none
+#      ^-> facility = null
+#   * socket = (unix|inet|...)
+#      --> facility = (mail|daemon|...)
+die "fatal: internal error while setting up logging: values don't match:\n" .
+    "\targuments:\n" .
+      "\t\t--syslog=$opt{'syslog'} --syslog-socket=$opt{'syslog-socket'}\n" .
+    "\tvalues:\n" .
+      "\t\tfacility: ${log_facility}\n" .
+      "\t\tsocket:   ${log_socket}\n" .
+      "\t\tfile:     ${log_file}\n" .
+    "\tplease report to http://bugzilla.spamassassin.org -- thank you\n"
+  if ($log_socket eq 'file' and ($log_facility ne 'stderr' and $log_facility ne 'file'))
+  or (($log_facility eq 'stderr' or $log_facility eq 'file') and $log_socket ne 'file')
+  or ($log_socket eq 'none' and $log_facility ne 'null')
+  or ($log_facility eq 'null' and $log_socket ne 'none');
+
+### End initialization of logging ##########################
+
 
 # REIMPLEMENT: if $log_socket is none, fall back to log_facility 'stderr'.
 # If log_fac is stderr and $opt{'debug'}, set log_fac to 'null' to avoid
@@ -294,28 +441,6 @@ my $spamtest = Mail::SpamAssassin->new({
 
 # Do whitelist later in tmp dir. Side effect: this will be done as -u user.
 
-if ($log_facility ne 'stderr') {
-  eval {
-    setlogsock($log_socket);
-    syslog('debug', "spamd starting");  # required to actually open the socket
-  };
-
-  # Solaris sometimes doesn't support UNIX-domain syslog sockets apparently;
-  # same is true for perl 5.6.0 build on an early version of Red Hat 7!
-  if ($@) {
-    eval {
-      setlogsock('inet');
-      syslog('debug', "spamd starting");
-    };
-    $log_socket = 'inet' unless $@;
-  }
-
-  # fall back to stderr if all else fails
-  if ($@) {
-    warn "failed to setlogsock(${log_socket}) on this platform; reporting logs to stderr\n";
-    $log_facility = 'stderr';
-  }
-}
 
 my($port, $addr, $proto);
 my($listeninfo);             # just for reporting
@@ -486,9 +611,11 @@ while (1) {
 
     if ($got_sighup) {
       defined($opt{'pidfile'}) and unlink($opt{'pidfile'});
-  
+
       # leave Client fds active, and do not kill children; they can still
       # service clients until they exit.  But restart the listener anyway.
+      # And close the logfile, so the new instance can reopen it.
+      close(STDLOG) if $log_facility eq 'file';
       chdir($ORIG_CWD) || die "spamd restart failed: chdir failed: ${ORIG_CWD}: $!\n";
       exec ($ORIG_ARG0, @ORIG_ARGV);
       # should not get past that...
@@ -1187,6 +1314,7 @@ sub create_default_cf_if_needed {
     }
 }
 
+
 sub logmsg
 {
   # install a new handler for SIGPIPE -- this signal has been
@@ -1200,42 +1328,56 @@ sub logmsg
 
   warn "logmsg: $msg\n" if $opt{'debug'};
 
+  # log to file:
+  #   bug 1360 <http://bugzilla.spamassassin.org/show_bug.cgi?id=1360>
+  #   enable logging to a file via --syslog=file or --syslog=/path/to/file
   # log to STDERR:
-  # bug 605: http://bugzilla.spamassassin.org/show_bug.cgi?id=605
-  # more efficient for daemontools if --syslog=stderr is used
-  if ($log_facility eq 'stderr') {
-    print STDERR "$msg\n";
+  #   bug 605  <http://bugzilla.spamassassin.org/show_bug.cgi?id=605>
+  #   more efficient for daemontools if --syslog=stderr is used
+  if ($log_socket eq 'file') {
+    my @date = reverse((gmtime(time))[0 .. 5]);
+    $date[0] += 1900;
+    $date[1] +=    1;
+    syswrite(STDLOG,
+      sprintf("%04d-%02d-%02d %02d:%02d:%02d [%s] %s: %s\n",
+                @date,
+                $$,
+                'i',
+                $msg
+      )
+    );
   }
   # log to syslog (if logging isn't disabled completely via 'null')
-  elsif ($log_facility ne 'null') {
+  elsif ($log_socket ne 'none') {
     openlog('spamd', 'cons,pid', $log_facility);
 
     eval { syslog('info', "%s", $msg); };
 
     if ($@) {
-      warn "syslog() failed, try using --syslog-socket switch ($@)\n";
-    }
+      if ($main::SIGPIPE_RECEIVED) {
+        # SIGPIPE received when writing to syslog -- close and reopen
+        # the log handle, then try again.
+        closelog();
+        openlog('spamd', 'cons,pid', $log_facility);
+        syslog('info', "%s", $msg);
 
-    if ($main::SIGPIPE_RECEIVED) {
-      # SIGPIPE recieved when writing to syslog -- close and reopen
-      # the log handle, then try again.
+        # now report what happend
+        $msg = "SIGPIPE received - reopening log socket";
+        warn "logmsg: $msg\n" if $opt{'debug'};
+        syslog('warning', "%s", $msg);
 
-      closelog();
-      openlog('spamd', 'cons,pid', $log_facility);
-      syslog('info', "%s", $msg);
+        # if we've received multiple sigpipes, logging is probably
+        # still broken.
+        if ($main::SIGPIPE_RECEIVED > 1) {
+          warn "logging failure: multiple SIGPIPEs received\n";
+        }
 
-      # now report what happend
-      $msg = "SIGPIPE received - reopening log socket";
-      warn "logmsg: $msg\n" if $opt{'debug'};
-      syslog('warning', "%s", $msg);
-
-      # if we've received multiple sigpipes, logging is probably
-      # still broken.
-      if ($main::SIGPIPE_RECEIVED > 1) {
-        warn "logging failure: multiple SIGPIPEs received\n";
+        $main::SIGPIPE_RECEIVED = 0;
       }
-
-      $main::SIGPIPE_RECEIVED = 0;
+      else {
+        warn "syslog() failed: $@\n" .
+             "try using --syslog-socket={unix,inet} or --syslog=file\n";
+      }
     }
   }
 
@@ -1247,6 +1389,7 @@ sub kill_handler
     my ($sig) = @_;
     logmsg "server killed by SIG$sig, shutting down";
     $server->close;
+
     defined($opt{'pidfile'}) and unlink($opt{'pidfile'});
 
     # the UNIX domain socket
@@ -1599,8 +1742,23 @@ Currently, use of this without B<-u> is not supported.
 =item B<-s> I<facility>, B<--syslog>=I<facility>
 
 Specify the syslog facility to use (default: mail).  If C<stderr> is specified,
-output will be written to stderr.  This is useful if you're running C<spamd>
-under the C<daemontools> package.
+output will be written to stderr. (This is useful if you're running C<spamd>
+under the C<daemontools> package.) With a I<facility> of C<file>, all output
+goes to spamd.log. I<facility> is interpreted as a file name to log to if it
+contains any characters except a-z and 0-9. C<null> disables logging completely
+(used internally).
+
+Examples:
+	spamd -s mail                 # use syslog, facility mail (default)
+	spamd -s ./mail               # log to file ./mail
+	spamd -s stderr 2>/dev/null   # log to stderr, throw messages away
+	spamd -s null                 # the same as above
+	spamd -s file                 # log to file ./spamd.log
+	spamd -s /var/log/spamd.log   # log to file /var/log/spamd.log
+
+If logging to a file is enabled and that log file is rotated, the spamd server
+must be restartet with a SIGHUP. (If the log file is just truncated, this is
+not needed but still recommended.)
 
 =item B<--syslog-socket>=I<type>
 
@@ -1612,6 +1770,8 @@ Some platforms, or versions of perl, are shipped with dysfunctional versions of
 the B<Sys::Syslog> package which do not support some socket types, so you may
 need to set this.  If you get error messages regarding B<__PATH_LOG> or similar
 from spamd, try changing this setting.
+
+The socket type C<file> is used internally and should not be specified.
 
 =item B<-u> I<username>, B<--username>=I<username>
 
