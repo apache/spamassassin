@@ -198,8 +198,13 @@ Whitelist and blacklist addresses are now file-glob-style patterns, so
 C<friend@somewhere.com>, C<*@isp.com>, or C<*.domain.net> will all work.
 Regular expressions are not used for security reasons.
 
-Multiple addresses per line is OK.  Multiple C<whitelist_from> lines is also
+Multiple addresses per line, separated by spaces, is OK.  Multiple C<whitelist_from> lines is also
 OK.
+
+eg.
+whitelist_from joe@example.com fred@example.com
+whitelist_from simon@example.com
+
 
 =cut
 
