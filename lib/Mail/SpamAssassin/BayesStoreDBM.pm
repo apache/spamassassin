@@ -101,7 +101,7 @@ sub new {
 
   $self->{supported_db_version} = 2;
 
-  $self->{already_ties} = 0;
+  $self->{already_tied} = 0;
   $self->{is_locked} = 0;
   $self->{string_to_journal} = '';
 
@@ -761,11 +761,12 @@ sub dump_db_toks {
 
   my $magic_re = $self->get_magic_re($self->{db_version});
 
-  foreach my $tok (keys %{$self->{db_toks}}) {
+  while( my($tok, $tokvalue) = each %{$self->{db_toks}}) {
     next if ($tok =~ /$magic_re/); # skip magic tokens
     next if (defined $regex && ($tok !~ /$regex/o));
 
-    my ($ts, $th, $atime) = $self->tok_get ($tok);
+    # We have the value already, so just unpack it.
+    my ($ts, $th, $atime) = $self->tok_unpack ($tokvalue);
     
     my $prob = $self->{bayes}->compute_prob_for_token($tok, $vars[1], $vars[2],
 						      $ts, $th, $atime);
@@ -1101,6 +1102,7 @@ sub tok_put {
   $ts ||= 0;
   $th ||= 0;
 
+  # get_magic_re could be used here, but it'll be overkill for this function
   if ( $tok =~ /^\015\001\007\011\003/ ) { # magic token?  Ignore it!
     return;
   }
