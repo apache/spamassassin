@@ -24,9 +24,56 @@ SIZE extension in your BSMTP file will cause many problems).
 
 =item B<-c>
 
-Just check if the message is spam or not.  Set process exitcode to 1 is
+Just check if the message is spam or not.  Set process exitcode to 1 if
 message is spam, 0 if not spam or processing failure occurs.  Will print
 score/threshold to stdout (as ints) or 0/0 if there was an error.
+
+=item B<-d> I<host>
+
+In TCP/IP mode, connect to spamd server on given host (default: localhost). 
+
+If I<host> resolves to multiple addresses, then spamc will fail-over to the 
+other addresses, if the first one cannot be connected to.
+
+=item B<-e> I<command> I<[args]>
+
+Instead of writing to stdout, pipe the output to I<command>'s standard input.
+Note that there is a very slight chance mail will be lost here, because if the
+fork-and-exec fails there's no place to put the mail message.
+
+Note that this must be the LAST command line option, as everything after the
+B<-e> is taken as arguments to the command (it's like I<rxvt> or I<xterm>).
+
+=item B<-f>
+
+Cause spamc to safe-failover if it can't connect to spamd -- what this means
+is that in case spamc fails to connect to spamd, it will not return with an
+exitcode set but dump the original message to stdout instead. This allows
+the message to be delivered, albeit unscanned for spam.  Without this flag,
+connection failures to spamd will cause message delivery failures.
+
+Even with this flag set however, if spamc connects successfully, and then
+encounters an error at a later stage of communication, it will still return
+an exitcode.
+
+This switch is obsolete and now defaults to B<on>.  This flag is accepted 
+though for backwards-compatibility.  B<-x> can be used to tell spamc to use 
+an exit-code which will cause the message to be re-queued by the MTA instead.
+
+=item B<-h>
+
+Print this help message and terminate without action.
+
+=item B<-H>
+
+For TCP/IP sockets, randomize the IP addresses returned from a DNS name
+lookup (when more than one IP is returned). This provides for a kind of
+hostname-base load balancing.
+
+=item B<-p> I<port>
+
+In TCP/IP mode, connect to spamd server listening on given port 
+(default: 783).
 
 =item B<-r>
 
@@ -42,70 +89,26 @@ in this format:
 Just output the SpamAssassin report text to stdout, for all messages.
 See B<-r> for details of the output format used.
 
-=item B<-y>
+=item B<-s> I<max_size>
 
-Just output the names of the tests hit to stdout, on one line, separated
-by commas.
+Set the maximum message size which will be sent to spamd -- any bigger than
+this threshold and the message will be returned unprocessed (default: 250k).
+If spamc gets handed a message bigger than this, it won't be passed to spamd.
 
-=item B<-d> I<host>
-
-Connect to spamd server on given host.  If I<host> resolves to multiple
-addresses, then spamc will fail-over to the other addresses, if the first one
-cannot be connected to.
-
-=item B<-e> I<command> I<[args]>
-
-Instead of writing to stdout, pipe the output to I<command>'s standard input.
-Note that there is a very slight chance mail will be lost here, because if the
-fork-and-exec fails there's no place to put the mail message.
-
-Note that this must be the LAST command line option, as everything after the
-B<-e> is taken as arguments to the command (it's like I<rxvt> or I<xterm>).
-
-=item B<-f>
-
-Cause spamc to safe-failover if it can't connect to spamd -- what this means
-is that in case spamc fails to connect to spamd, it will not return with an
-exitcode set, it will instead dump the original message to stdout, allowing
-the message to be delivered, albeit unscanned for spam.  Without this flag,
-connection failures to spamd will cause message delivery failures.
-
-Even with this flag set however, if spamc connects successfully, and then
-encounters an error at a later stage of communication, it will still return
-an exitcode.
-
-This now defaults to B<on>.  This flag is accepted though for
-backwards-compatibility.  B<-x> can be used to tell spamc to use an
-exit-code which will cause the message to be re-queued by the MTA instead.
-
-=item B<-h>
-
-Print this help message and terminate without action.
+The size is specified in bytes, and if you send it a negative number, things 
+are quite likely to break very hard.
 
 =item B<-S>
 
 If spamc was built with support for SSL, encrypt data to and from the
 spamd process with SSL; spamd must support SSL as well.
 
-
-=item B<-p> I<port>
-
-Connect to spamd server listening on given port.
-
-=item B<-s> I<max_size>
-
-Set the maximum message size which will be sent to spamd -- any bigger than
-this threshold and the message will be returned unprocessed.  Note that the
-default size is 250k, so if spamc gets handed a message bigger than this, it
-won't be passed to spamd.  The size is specified in bytes, and if you send it a
-negative number, things are quite likely to break very hard.
-
 =item B<-t> I<timeout>
 
-Set the timeout for spamc-to-spamd communications.  If spamd takes longer than
-this many seconds to reply to a message, spamc will abort the connection and
-treat this as a failure to connect; in other words the message will be
-returned unprocessed.  
+Set the timeout for spamc-to-spamd communications (default: 600, 0 disables).
+If spamd takes longer than this many seconds to reply to a message, spamc 
+will abort the connection and treat this as a failure to connect; in other 
+words the message will be returned unprocessed.  
 
 =item B<-u> I<username>
 
@@ -113,6 +116,11 @@ This argument has been semi-obsoleted.  To have spamd use per-user-config
 files, run spamc as the user whose config files spamd should load.  If you're
 running spamc as some other user, though, (eg. root, mail, nobody, cyrus, etc.)
 then you can still use this flag.
+
+=item B<-U> I<socketpath>
+
+Connect to C<spamd> via UNIX domain socket I<socketpath> instead of a
+TCP/IP connection.
 
 =item B<-x>
 
@@ -137,16 +145,10 @@ as follows:
     EX_NOPERM       77  permission denied
     EX_CONFIG       78  configuration error
 
-=item B<-U> I<socketpath>
+=item B<-y>
 
-Connect to C<spamd> via UNIX domain socket I<socketpath> instead of a
-TCP/IP connection.
-
-=item B<-H>
-
-For TCP/IP sockets, randomize the IP addresses returned from a DNS name
-lookup (when more than one IP is returned). This provides for a kind of
-hostname-base load balancing.
+Just output the names of the tests hit to stdout, on one line, separated
+by commas.
 
 =back
 

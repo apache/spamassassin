@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
 #ifdef _WIN32
 #include <io.h>
 #include <fcntl.h>
@@ -88,34 +89,33 @@ static int timeout = 600;
 
 void print_usage(void)
 {
-    printf("Usage: spamc [options] < message\n\n");
-    printf
-	("-B: BSMTP mode - expect input to be a single SMTP-formatted message\n");
-    printf
-	("-c: check only - print score/threshold and exit code set to 0 if message is not spam, 1 if spam\n");
-    printf("-r: report if spam - print report for spam messages\n");
-    printf("-R: report - print report for all messages\n");
-    printf("-y: symbols - print only the names of the tests hit\n");
-    printf("-d host: specify host to connect to  [default: localhost]\n");
-    printf
-	("-e command [args]: Command to output to instead of stdout. MUST BE THE LAST OPTION.\n");
-    printf
-	("-f: fallback safely - in case of comms error, dump original message unchanges instead of setting exitcode\n");
-    printf("-h: print this help message\n");
-    printf("-p port: specify port for connection [default: 783]\n");
-    printf
-	("-s size: specify max message size, any bigger and it will be returned w/out processing [default: 250k]\n");
+    printf("Usage: spamc [options] [-e command [args]] < message\n");
+    printf("Options:\n");
+    printf("  -B                  Assume input is a single BSMTP-formatted message.\n");
+    printf("  -c                  Just print the summary line and set an exit code.\n");
+    printf("  -d host             Specify host to connect to.\n"
+           "                      [default: localhost]");
+    printf("  -e command [args]   Pipe the output to the given command instead of stdout.\n"
+           "                      This must be the last option.\n");
+    printf("  -h                  Print this help message and exit.\n");
+    printf("  -H                  Randomize IP addresses for the looked-up hostname.\n");
+    printf("  -p port             Specify port for connection to spamd.\n"
+           "                      [default: 783\n");
+    printf("  -r                  Print full report for messages identified as spam.\n");
+    printf("  -R                  Print full report for all messages.\n");
+    printf("  -s size             Specify maximum message size, in bytes.\n"
+           "                      [default: 250k]\n");
 #ifdef SPAMC_SSL
-    printf("-S: use SSL to talk to spamd\n");
+    printf("  -S                  Use SSL to talk to spamd.\n");
 #endif
-    printf
-	("-u username: specify the username for spamd to process this message under\n");
-    printf
-	("-x: don't fallback safely - in a comms error, exit with a TEMPFAIL error code\n");
-    printf
-	("-t: timeout in seconds to read from spamd. 0 disables. [default: 600]\n\n");
-    printf("-H: randomize the IP addresses in the looked-up hostname\n");
-    printf("-U path: use UNIX domain socket with path\n");
+    printf("  -t timeout          Timeout in seconds for communications to spamd.\n"
+           "                      [default: 600]\n");
+    printf("  -u username         User for spamd to process this message under.\n");
+#ifndef _WIN32
+    printf("  -U path             Connect to spamd via UNIX domain sockets.\n");
+#endif
+    printf("  -x                  Don't fallback safely.\n");
+    printf("  -y                  Just print the names of the tests hit.\n");
 }
 
 int
