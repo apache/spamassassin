@@ -390,7 +390,7 @@ sub is_dcc_available {
 # does an open() if the system() succeeds.  (
 # http://www.hughes-family.org/bugzilla/show_bug.cgi?id=507 )
 #
-  if (!system("dccproc -V >/dev/null 2>&1")) {
+  if (system("dccproc -V >/dev/null 2>&1")) {
     dbg ("DCC is not available: system failed");
     return 0;
   }
