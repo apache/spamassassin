@@ -857,7 +857,7 @@ sub get_decoded_stripped_body_text_array {
   # do HTML conversions if necessary
   $self->{html} = {};
   $self->{html}{ratio} = 0;
-  if (($text =~ m/<.*>/s) || ($text =~ m/\&[-_a-zA-Z0-9]+;/s)) {
+  if ($text =~ m/<\s*[a-z:!][a-z:\d_-]*(?:\s.*?)?\s*>/is) {
     my $raw = length($text);
 
     $self->{html_text} = [];
