@@ -178,6 +178,8 @@ use constant BODY_TOKENIZE_LONG_TOKENS_AS_SKIPS => 1;
   'Organization'	=> '*o',
   'Organisation'        => '*o',
   'Content-Type'	=> '*c',
+  'X-Spam-Relays-Trusted' => '*RT',
+  'X-Spam-Relays-Untrusted' => '*RU',
 );
 
 # How many seconds should the opportunistic_expire lock be valid?
