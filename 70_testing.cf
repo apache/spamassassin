@@ -35,6 +35,9 @@ header T_FRAGMENTED_MESSAGE	Content-Type =~ /message\/partial/i
 body T_SA_MARKED_UP     /Spam detection software, running on the system /
 
 # more general template rule to try
+# this seems to be evolving into two types of exclusions:
+# - freely changeable fields like Subject:, To:, Cc:, and From:
+# - fields that have binary garbage that may match
 header __HEADER_TEMPLATE	ALL =~ /%[A-Z][A-Z_-]+[^%A-Za-z_-]/
 header __UIDL_TEMPLATE_LIKE	X-UIDL =~ /%[A-Z][A-Z_-]+[^%A-Za-z_-]/
 header __XFACE_TEMPLATE_LIKE	X-Face =~ /%[A-Z][A-Z_-]+[^%A-Za-z_-]/
@@ -43,6 +46,10 @@ header __FROM_TEMPLATE_LIKE	From =~ /%[A-Z][A-Z_-]+[^%A-Za-z_-]/
 header __SUBJECT_TEMPLATE_LIKE	Subject =~ /%[A-Z][A-Z_-]+[^%A-Za-z_-]/
 meta T_HAS_TEMPLATE_0		__HEADER_TEMPLATE
 meta T_HAS_TEMPLATE_1		(__HEADER_TEMPLATE && !__UIDL_TEMPLATE_LIKE && !__XFACE_TEMPLATE_LIKE && !__TOCC_TEMPLATE_LIKE && !__FROM_TEMPLATE_LIKE && !__SUBJECT_TEMPLATE_LIKE)
+# check Message-IDs sure and In-Reply-To for both Message-ID and name
+header __REF_TEMPLATE_LIKE	References =~ /%[A-Z][A-Z_-]+[^%A-Za-z_-]/
+header __REP_TEMPLATE_LIKE	In-Reply-To =~ /%[A-Z][A-Z_-]+[^%A-Za-z_-]/
+header __MID_TEMPLATE_LIKE	MESSAGEID =~ /%[A-Z][A-Z_-]+[^%A-Za-z_-]/
 
 ########################################################################
 
@@ -129,19 +136,6 @@ header T_FAKE_HELO_MAIL_COM_DOM2  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=(?:(?
 # worth it?
 body T_SAVE_BUCKS		/\bsave \$/i
 
-# concept: you have a choice + something great
-body T_SPECIAL_BY_CHOICE_0	/\b(?:wish|want|question|unsubscrib\w+|discontinue|remove).{0,64}\b(?:gift|offer|special|promotion|coupon|discount|reward)/i
-body T_SPECIAL_BY_CHOICE_1	/\b(?:wish|want|question|unsub\w+|discontinue|remove).{0,64}\b(?:gift|offer|special|promotion|coupon|discount|reward)/i
-# A-F change "discontinue" to "continue"
-body T_SPECIAL_BY_CHOICE_A	/\b(?:wish|want|question|unsubscrib\w+|continue|remove).{0,64}\b(?:gift|offer|special|promotion|coupon|discount|reward)/i
-body T_SPECIAL_BY_CHOICE_B	/\b(?:wish|want|question|unsub\w+|continue|remove).{0,64}\b(?:gift|offer|special|promotion|coupon|discount|reward)/i
-# C-D drop "want"
-body T_SPECIAL_BY_CHOICE_C	/\b(?:wish|question|unsubscrib\w+|continue|remove).{0,64}\b(?:gift|offer|special|promotion|coupon|discount|reward)/i
-body T_SPECIAL_BY_CHOICE_D	/\b(?:wish|question|unsub\w+|continue|remove).{0,64}\b(?:gift|offer|special|promotion|coupon|discount|reward)/i
-# E-F drop "offer"
-body T_SPECIAL_BY_CHOICE_E	/\b(?:wish|want|question|unsubscrib\w+|continue|remove).{0,64}\b(?:gift|special|promotion|coupon|discount|reward)/i
-body T_SPECIAL_BY_CHOICE_F	/\b(?:wish|want|question|unsub\w+|continue|remove).{0,64}\b(?:gift|special|promotion|coupon|discount|reward)/i
-
 # removed some old ones
 header T_MANY_MX_5	From:addr =~ /\@mx\d{2,4}\..{1,20}\./i
 header T_MANY_MX_7	From:addr =~ /\@\w\d+\..{1,30}\./i
@@ -159,6 +153,46 @@ header T_MANY_MX_18	From:addr =~ /\@\w{0,4}\d+\..*\./i
 header T_MANY_MX_19	From:addr =~ /\@\w{1,4}\d+\..*\./i
 header T_MANY_MX_20	From:addr =~ /\@\w{0,5}\d+\..*\./i
 header T_MANY_MX_21	From:addr =~ /\@\w{1,5}\d+\..*\./i
+#
+header T_MANY_MX_22	From:addr =~ /\@\w\d{2,}\..*\./i
+header T_MANY_MX_23	From:addr =~ /\@\w*\d{2,}\..*\./i
+header T_MANY_MX_24	From:addr =~ /\@\w+\d{2,}\..*\./i
+header T_MANY_MX_25	From:addr =~ /\@\w?\d{2,}\..*\./i
+header T_MANY_MX_26	From:addr =~ /\@\w{0,2}\d{2,}\..*\./i
+header T_MANY_MX_27	From:addr =~ /\@\w{1,2}\d{2,}\..*\./i
+header T_MANY_MX_28	From:addr =~ /\@\w{0,3}\d{2,}\..*\./i
+header T_MANY_MX_29	From:addr =~ /\@\w{1,3}\d{2,}\..*\./i
+header T_MANY_MX_30	From:addr =~ /\@\w{0,4}\d{2,}\..*\./i
+header T_MANY_MX_31	From:addr =~ /\@\w{1,4}\d{2,}\..*\./i
+header T_MANY_MX_32	From:addr =~ /\@\w{0,5}\d{2,}\..*\./i
+header T_MANY_MX_33	From:addr =~ /\@\w{1,5}\d{2,}\..*\./i
+#
+header T_MANY_MX_34	ALL =~ /\@\w\d+\..*\./i
+header T_MANY_MX_35	ALL =~ /\@\w*\d+\..*\./i
+header T_MANY_MX_36	ALL =~ /\@\w+\d+\..*\./i
+header T_MANY_MX_37	ALL =~ /\@\w?\d+\..*\./i
+header T_MANY_MX_38	ALL =~ /\@\w{0,2}\d+\..*\./i
+header T_MANY_MX_39	ALL =~ /\@\w{1,2}\d+\..*\./i
+header T_MANY_MX_40	ALL =~ /\@\w{0,3}\d+\..*\./i
+header T_MANY_MX_41	ALL =~ /\@\w{1,3}\d+\..*\./i
+header T_MANY_MX_42	ALL =~ /\@\w{0,4}\d+\..*\./i
+header T_MANY_MX_43	ALL =~ /\@\w{1,4}\d+\..*\./i
+header T_MANY_MX_44	ALL =~ /\@\w{0,5}\d+\..*\./i
+header T_MANY_MX_45	ALL =~ /\@\w{1,5}\d+\..*\./i
+#
+header T_MANY_MX_46	ALL =~ /\@\w\d{2,}\..*\./i
+header T_MANY_MX_47	ALL =~ /\@\w*\d{2,}\..*\./i
+header T_MANY_MX_48	ALL =~ /\@\w+\d{2,}\..*\./i
+header T_MANY_MX_49	ALL =~ /\@\w?\d{2,}\..*\./i
+header T_MANY_MX_50	ALL =~ /\@\w{0,2}\d{2,}\..*\./i
+header T_MANY_MX_51	ALL =~ /\@\w{1,2}\d{2,}\..*\./i
+header T_MANY_MX_52	ALL =~ /\@\w{0,3}\d{2,}\..*\./i
+header T_MANY_MX_53	ALL =~ /\@\w{1,3}\d{2,}\..*\./i
+header T_MANY_MX_54	ALL =~ /\@\w{0,4}\d{2,}\..*\./i
+header T_MANY_MX_55	ALL =~ /\@\w{1,4}\d{2,}\..*\./i
+header T_MANY_MX_56	ALL =~ /\@\w{0,5}\d{2,}\..*\./i
+header T_MANY_MX_57	ALL =~ /\@\w{1,5}\d{2,}\..*\./i
+
 # dip at length of 5, so stop here
 
 # Updated test rules for fraud, uses existing rules and updated rules
