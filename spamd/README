@@ -1,6 +1,5 @@
-Spamassassin Daemon
+SpamAssassin Daemon
 ===================
-
 
 The purpose of this program is to provide a daemonized version of the
 spamassassin executable.  The goal is improving throughput performance for
@@ -8,35 +7,48 @@ automated mail checking.  This document is a brief synopsis of how spamc/spamd
 work, and how to use them effectively.
 
 
-Spamd
------
+The Server: spamd
+-----------------
 
-Spamd is the workhorse of the spamc/spamd pair -- it loads an instance of the
+spamd is the workhorse of the spamc/spamd pair -- it loads an instance of the
 spamassassin filters, and then listens as a daemon for incoming requests to
 process messages.  By default, spamd listens on port 783, but this is
-specifiable on the command line.  When spamd receives a connection, it spawns a
-child to handle the request.  The child will expect to read an email message
-from the network socket, which should then be closed for writing on the other
-end (so spamd receives an EOF).  spamd will then use SA to rewrite the message,
-and dump the processed message back to the socket before closing the
-connection.  The child process then dies.  In theory, this child-forking should
-be quite efficient, since on most OSes the fork will not actually copy any
-memory until the child attempts to write to a memory page, and then only the
-dirty page(s) will be copied.  This means the entire perl engine and the SA
-regular expressions, etc. will only be loaded once and then be reused by all
-the children, saving a lot of overhead.
+specifiable on the command line.
 
-Spamc
------
+/*
+ * FIXME: The following paragraph(s) have to be updated as childs are now 
+ *        pre-spawned
+ */
+When spamd receives a connection, it spawns a child to handle the request.
+The child will expect to read an email message from the network socket, which 
+should then be closed for writing on the other end (so spamd receives an EOF).  
+spamd will then use SA to rewrite the message, and dump the processed message 
+back to the socket before closing the connection.  The child process then dies.
 
-Spamc is the client half of the pair.  It should be used in place of
+In theory, this child-forking should be quite efficient, since on most OSes 
+the fork will not actually copy any memory until the child attempts to write 
+to a memory page, and then only the dirty page(s) will be copied.  This means 
+the entire perl engine and the SA regular expressions, etc. will only be 
+loaded once and then be reused by all the children, saving a lot of overhead.
+
+
+The Client: spamc
+-----------------
+
+spamc is the client half of the pair.  It should be used in place of
 'spamassassin' in scripts to process mail.  It will read the mail from
 stdin, and spool it to its connection to spamd, then read the result back and
-print it to stdout.  Spamc has extremely low overhead in loading, so it should
+print it to stdout.  spamc has extremely low overhead in loading, so it should
 be much faster to load than the whole spamassassin program (and a perl VM).
+
 
 Installation
 ------------
+
+/*
+ * FIXME: This chapter has to be updated, 'make install' works, more init 
+ *        scripts
+ */
 
 Simply copy the two executables to where you want them.  Then, configure your
 system to run spamd in the background, and where your mailer invokes
@@ -44,6 +56,7 @@ system to run spamd in the background, and where your mailer invokes
 
 There's a Red Hat/Mandrake-style startup script called 'spamassassin'
 in this directory, suitable for installation in /etc/rc.d/init.d .
+
 
 Security
 --------
@@ -53,10 +66,11 @@ which passes through it , you may want to keep security in mind. Depending
 on the nature of your set-up. If you are installing it on a site-wide
 basis at least some caution is advisable. 
 
-System-level security
+
+System-Level Security
 ---------------------
 
-Spamd has the facility to run as a non-root user, this has potential security
+spamd has the facility to run as a non-root user, this has potential security
 payoffs. If a fault is found in spamd or spamassassin code, any third party
 linked-libraries or imported perl modules there is the potential for abuse of
 both the running uid of spamd, and the uid of the username supplied by spamc
@@ -84,6 +98,7 @@ readable, and Razor will try to write to a log file in
 to be useful; it allows you to set a 'helper home directory' that will be
 used as $HOME when external helpers like Razor, Pyzor and DCC are run.
 
+
 The Bayesian Classifier
 -----------------------
 
@@ -102,6 +117,7 @@ We have implemented an auto-learning algorithm (option
 and low-scoring (options 'bayes_auto_learn_threshold_spam' and
 'bayes_auto_learn_threshold_nonspam') mails to improve classification
 efficiency.
+
 
 Security And User-Spoofing Clients
 ----------------------------------
@@ -144,7 +160,7 @@ using an SSL-enabled spamc (see 'SSL Support' below).
 Performance
 -----------
 
-So how much faster is this than just using 'spamassassin'?  Well, on my 400MHz
+So how much faster is this than just using 'spamassassin'? Well, on my 400MHz
 K6-2 mail server, spamassassin process a 11689 byte message in about 3.36
 seconds, spamc/spamd processes the same message in about 0.86 seconds, or about
 4 times faster.  With bigger messages, the difference is less pronounced; a
@@ -168,6 +184,23 @@ peak activity periods, with load average around 15, more than 13 spamd
 processes running or sleeping, and many other amavis and sendmail processes
 active, the total memory used was around 350MB, plus about 200MB on swap.'
 
+
+Shared Library
+--------------
+
+spamc can now be used as libspamc.so; simply run "make spamd/libspamc.so" at
+the top level.  Thanks to Liam Widdowson <liam@inodes.org> for this patch.
+
+
+SSL Support
+-----------
+
+If you have the OpenSSL headers and libraries installed, you can build an
+SSL-enabled version of spamc or the spamc shared library by running "make
+spamd/sslspamc" or "make spamd/libsslspamc.so".  Thanks to Nate
+<nate@cs.wisc.edu> for this patch.
+
+
 Bugs
 ----
 
@@ -190,120 +223,3 @@ or install a different version of perl which supports setuid() calls.
 The default perl binary in FreeBSD had a similar issue when attempting
 to change the real uid.  This has been worked around, but there could
 be an issue such as the one in Mac OS X that we have not yet heard about.
-
-Network Protocol
-----------------
-
-The protocol for communication between spamc/spamd is somewhat HTTP like.  The
-conversation looks like:
-
-               spamc --> PROCESS SPAMC/1.2
-               spamc --> Content-length: <size>
-  (optional)   spamc --> User: <username>
-               spamc --> \r\n [blank line]
-               spamc --> --message sent here--
-
-               spamd --> SPAMD/1.1 0 EX_OK
-               spamd --> Content-length: <size>
-               spamd --> \r\n [blank line]
-               spamd --> --processed message sent here--
-
-After each side is done writing, it shuts down its side of the connection.
-
-The first line from spamc is the command for spamd to execute (PROCESS a
-message is the command in protocol<=1.2) followed by the protocol version.
-
-The first line of the response from spamd is the protocol version (note this is
-SPAMD here, where it was SPAMC on the other side) followed by a response code
-from sysexits.h followed by a response message string which describes the error
-if there was one.  If the response code is not 0, then the processed message
-will not be sent, and the socket will be closed after the first line is sent.
-
-Commands
-
-The following commands are defined as of protocol 1.2:
-
-CHECK         --  Just check if the passed message is spam or not and reply as described below
-
-SYMBOLS       --  Check if message is spam or not, and return score plus list of symbols hit
-
-REPORT        --  Check if message is spam or not, and return score plus report
-
-REPORT_IFSPAM --  Check if message is spam or not, and return score plus report if the message is spam
-
-SKIP          --  Ignore this message -- client opened connection then changed its mind
-
-PING          --  Return a confirmation that spamd is alive.
-
-PROCESS       --  Process this message as described above and return modified message
-
-CHECK command returns just a header (terminated by "\r\n\r\n") with the first
-line as for PROCESS (ie a response code and message), and then a header called
-"Spam:" with value of either "True" or "False", then a semi-colon, and then the
-score for this message, " / " then the threshold.  So the entire response looks
-like either:
-
-SPAMD/1.1 0 EX_OK
-Spam: True ; 15 / 5
-
-
-or
-
-SPAMD/1.1 0 EX_OK
-Spam: False ; 2 / 5
-
-
-
-
-SYMBOLS command returns the same as CHECK, followed by a line listing all the
-rule names, separated by commas.  Note that some versions of the protocol
-terminate this line with "\r\n", and some do not, due to an oversight; so
-clients should be flexible on whether or not a CR-LF pair follows
-the symbol text, and how many CR-LFs there are.
-
-REPORT command returns the same as CHECK, followed immediately by the report
-generated by spamd:
-
-SPAMD/1.1 0 EX_OK
-Spam: False ; 2 / 5
-
-This mail is probably spam.  The original message has been attached
-along with this report, so you can recognize or block similar unwanted
-mail in future.  See http://spamassassin.apache.org/tag/ for more details.
-[....]
-
-
-Note that the superfluous-score/threshold-line bug that appeared in
-SpamAssassin 2.5x is fixed.
-
-Clients should be flexible on whether or not a CR-LF pair follows
-the report text, and how many CR-LFs there are.
-
-REPORT_IFSPAM returns the same as REPORT if the message is spam, or nothing at
-all if the message is non-spam.
-
-The PING command does not actually trigger any spam checking, and (as with
-SKIP) no additional input is expected. It returns a simple confirmation
-response, like this:
-
-SPAMD/1.2 0 PONG
-
-This facility may be useful for monitoring programs which wish to check that 
-the daemon is alive and providing at least a basic response within a reasonable
-time frame.
-
-
-Shared Library
---------------
-
-spamc can now be used as libspamc.so; simply run "make spamd/libspamc.so" at
-the top level.  Thanks to Liam Widdowson <liam@inodes.org> for this patch.
-
-SSL Support
------------
-
-If you have the OpenSSL headers and libraries installed, you can build an
-SSL-enabled version of spamc or the spamc shared library by running "make
-spamd/sslspamc" or "make spamd/libsslspamc.so".  Thanks to Nate
-<nate@cs.wisc.edu> for this patch.
-
