@@ -295,6 +295,9 @@ sub learn {
       isspam => $isspam
     });
 
+  # bug 3704: temporarily override learn's ability to re-learn a message
+  my $orig_learner = $self->{main}->init_learner({ "no_relearn" => 1 });
+
   eval {
     my $learnstatus = $self->{main}->learn ($self->{msg}, undef, $isspam, 0);
     $learnstatus->finish();
@@ -307,6 +310,9 @@ sub learn {
       $self->{main}->{bayes_scanner}->sanity_check_is_untied();
     }
   };
+
+  # reset learner options to their original values
+  $self->{main}->init_learner($orig_learner);
 
   if ($@) {
     dbg("learn: auto-learning failed: $@");
