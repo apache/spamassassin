@@ -886,13 +886,13 @@ sub get_decoded_stripped_body_text_array {
 
    my $ctype = $self->{msg}->get_header ('Content-Type');
    $ctype = '' unless ( defined $ctype );
- 
+
    # if it's a multipart MIME message, skip the MIME-definition stuff
    my $boundary;
    if ( $ctype =~ /\bboundary\s*=\s*["']?(.*?)["']?(?:;|$)/i ) {
      $boundary = $1;
    }
- 
+
   my $text = "Subject: " . $self->get('subject', '') . "\n\n";
   my $lastwasmime = 0;
   foreach $_ (@{$bodytext}) {
@@ -942,8 +942,6 @@ sub get_decoded_stripped_body_text_array {
   $text =~ s/[ \t\n\r\x0b\xa0]+/ /gs;	# whitespace => space
   $text =~ s/\f/\n/gs;			# form feeds => newline
 
-#  print STDERR "@@@" . $text . "###";
-  
   my @textary = split (/^/, $text);
   return \@textary;
 }
