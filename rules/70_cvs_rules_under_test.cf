@@ -304,6 +304,22 @@ body T_HTML_CONSEC_IMGS19       eval:html_max_consec_imgs('100')
 
 #---------------------------------------------------------
 
+meta T_HTML_NUM_IMGS01B         (T_HTML_NUM_IMGS01 && !FROM_EGROUPS)
+meta T_HTML_NUM_IMGS02B         (T_HTML_NUM_IMGS02 && !FROM_EGROUPS)
+
+meta T_HTML_CONSEC_IMGS01B      (T_HTML_CONSEC_IMGS01 && !FROM_EGROUPS)
+
+meta T_HTML_IMAGE_AREA03B       (T_HTML_IMAGE_AREA03 && !FROM_EGROUPS)
+meta T_HTML_IMAGE_AREA04B       (T_HTML_IMAGE_AREA04 && !FROM_EGROUPS)
+meta T_HTML_IMAGE_AREA05B       (T_HTML_IMAGE_AREA05 && !FROM_EGROUPS)
+meta T_HTML_IMAGE_AREA06B       (T_HTML_IMAGE_AREA06 && !FROM_EGROUPS)
+
+# HTML_50_70 with at least 3 IMG tags
+body __T_HTML_NUM_IMGS_3        eval:html_num_imgs('3')
+meta T_HTML_50_70_IMGS3         (HTML_50_70 && __T_HTML_NUM_IMGS_3)
+
+#---------------------------------------------------------
+
 score T_HTML_IMAGE_AREA01        0.01
 score T_HTML_IMAGE_AREA02        0.01
 score T_HTML_IMAGE_AREA03        0.01
@@ -364,6 +380,15 @@ score T_HTML_CONSEC_IMGS16       0.01
 score T_HTML_CONSEC_IMGS17       0.01
 score T_HTML_CONSEC_IMGS18       0.01
 score T_HTML_CONSEC_IMGS19       0.01
+
+score T_HTML_NUM_IMGS01B         0.01
+score T_HTML_NUM_IMGS02B         0.01
+score T_HTML_CONSEC_IMGS01B      0.01
+score T_HTML_IMAGE_AREA03B       0.01
+score T_HTML_IMAGE_AREA04B       0.01
+score T_HTML_IMAGE_AREA05B       0.01
+score T_HTML_IMAGE_AREA06B       0.01
+score T_HTML_50_70_IMGS3         0.01
 
 ####################################################################
 
