@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.620 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.621 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -20,4 +20,8 @@
 
 # http://bugzilla.spamassassin.org/show_bug.cgi?id=2088
 ###header T_RATWARE_MIME_844412	Content-Type =~ /boundary="[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"/
+
+# http://bugzilla.spamassassin.org/show_bug.cgi?id=2087
+###header T_RATWARE_OE_DM	X-Mailer =~ /^Microsoft Outlook Express [\d\.]+ DM$/
+
 
