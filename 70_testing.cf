@@ -175,12 +175,6 @@ meta T_META_25	(HTML_MESSAGE && NO_REAL_NAME)
 meta T_META_26	(MIME_BASE64_NO_NAME && MIME_BASE64_TEXT)
 meta T_META_27	(MIME_BOUND_NEXTPART && NO_REAL_NAME)
 
-# bug 2618 (already closed bug)
-# add \b around current rule
-body T_OPTING_OUT_CAPS		/\b(?-i:O)pt.?(?-i:O)ut\b/i
-# try \b around a rule deleted at some point
-body T_OPTING_IN_CAPS		/\b(?-i:O)pt.?(?-i:I)n\b/i
-
 # testing for Jeff, do not use!!!
 ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
 urirhsbl URIBL_MP fraud.rhs.mailpolice.com.   A

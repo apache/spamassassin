@@ -71,7 +71,7 @@ body BILLION_DOLLARS		/[BM]ILLION DOLLAR/
 describe BILLION_DOLLARS	Talks about lots of money
 body OPTING_OUT			/\bopt-out\b/
 describe OPTING_OUT		Talks about opting out (lowercase version)
-body OPTING_OUT_CAPS		/(?-i:O)pt.?(?-i:O)ut/i
+body OPTING_OUT_CAPS		/\b(?-i:O)pt.?(?-i:O)ut\b/i
 describe OPTING_OUT_CAPS	Talks about opting out (capitalized version)
 
 body MILLION_EMAIL		/million (?:\w+ )?(?:e-?mail )?addresses/i
