@@ -501,6 +501,7 @@ main(int argc, char *argv[])
     int result;
     int ret;
     int learntype = 0;
+    int islearned = 0;
 
     transport_init(&trans);
 
@@ -560,7 +561,12 @@ main(int argc, char *argv[])
 
 	if (ret == EX_OK) {
 
-	    ret = message_filter(&trans, username, learntype, flags, &m);
+ 	    if (flags & SPAMC_LEARN) {
+	      ret = message_learn(&trans, username, flags, &m, learntype, &islearned);
+	    }
+	    else {
+	      ret = message_filter(&trans, username, flags, &m);
+	    }
 
 	    free(username); username = NULL;
 	    
@@ -569,7 +575,7 @@ main(int argc, char *argv[])
 		get_output_fd(&out_fd);
 
 		if (flags & SPAMC_LEARN) {
-		    if (m.is_learned == 1) {
+		    if (islearned == 1) {
   		        printf("Message successfully un/learned\n");
 		    }
 		    else {

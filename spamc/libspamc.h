@@ -139,8 +139,6 @@ struct message
     int out_len;		/* Output from spamd. Either the filtered
 				   message, or the check-only response. Or else,
 				   a pointer to msg above. */
-    int is_learned;	        /* Output from spamd. Gives state
-				   about learn resp. unlearn process */
 
     /* these members added in SpamAssassin version 2.60: */
     struct libspamc_private_message *priv;
@@ -210,8 +208,16 @@ long message_write(int out_fd, struct message *m);
  * failover, more than one host is defined, but if there is only one there,
  * no failover is done.
  */
-int message_filter(struct transport *tp, const char *username, int learntype,
+int message_filter(struct transport *tp, const char *username,
 		   int flags, struct message *m);
+
+/* Process the message through the spamd learn, making as many connection
+ * attempts as are implied by the transport structure. To make this do
+ * failover, more than one host is defined, but if there is only one there,
+ * no failover is done.
+ */
+int message_learn(struct transport *tp, const char *username, int flags,
+		  struct message *m, int learntype, int *islearned);
 
 /* Dump the message. If there is any data in the message (typically, m->type
  * will be MESSAGE_ERROR) it will be message_writed. Then, fd_in will be piped
@@ -222,7 +228,7 @@ void message_dump(int in_fd, int out_fd, struct message *m);
 /* Do a message_read->message_filter->message_write sequence, handling errors
  * appropriately with dump_message or appropriate CHECK_ONLY output. Returns
  * EX_OK or EX_ISSPAM/EX_NOTSPAM on success, some error EX on error. */
-int message_process(struct transport *trans, char *username, int learntype, int max_size,
+int message_process(struct transport *trans, char *username, int max_size,
 		    int in_fd, int out_fd, const int flags);
 
 /* Cleanup the resources we allocated for storing the message. Call after
@@ -230,7 +236,7 @@ int message_process(struct transport *trans, char *username, int learntype, int 
 void message_cleanup(struct message *m);
 
 /* Aug 14, 2002 bj: This is now legacy, don't use it. */
-int process_message(struct transport *tp, char *username, int learntype,
+int process_message(struct transport *tp, char *username,
 		    int max_size, int in_fd, int out_fd,
 		    const int check_only, const int safe_fallback);
 
