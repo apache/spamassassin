@@ -364,6 +364,7 @@ body DIRECT_EMAIL		/direct e-*mail/i
 body MASS_EMAIL			/mass e-*mail/i
 body EMAIL_MARKETING		/e-*mail marketing/i
 body PRODUCED_AND_SENT_OUT	/This a.?d is produced and sent out by/
+body INCREASE_TRAFFIC		/increase.* traffic/i
 
 # this one gets a few false positives
 body SOCIAL_SEC_NUMBER		/social security (?:number|record)/i
@@ -864,6 +865,7 @@ score VERY_SUSP_CC_RECIPS            3.0
 score VERY_SUSP_RECIPS               3.0
 score X_MAILER_GIBBERISH             3.2
 score X_MSMAIL_PRIORITY_HIGH         1.4
+score INCREASE_TRAFFIC		     1.4
 score REMOVAL_INSTRUCTIONS	     2.0
 score X_PRIORITY_HIGH                1.4
 score YR_MEMBERSHIP_EXCH             4.0
