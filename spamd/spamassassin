@@ -1,11 +1,12 @@
 #!/bin/sh
 #
-# spamassassion This script starts and stops the spamd daemon
+# spamassassin This script starts and stops the spamd daemon
 #
 # chkconfig: 2345 80 30
 #
 # description: spamd is a daemon process which uses SpamAssassin to check
-#              email messages for SPAM.  It is normally called by spamc from a MDA
+#              email messages for SPAM.  It is normally called by spamc
+#	       from a MDA.
 
 # Source function library.
 . /etc/rc.d/init.d/functions
