@@ -74,6 +74,8 @@ extern char *optarg;
 #define EX__MAX 200 
 #endif
 
+static const int DO_CONNECT_DEBUG_SYSLOGS = 1;
+
 static const int ESC_PASSTHROUGHRAW = EX__MAX+666;
 
 /* set EXPANSION_ALLOWANCE to something more than might be
@@ -106,6 +108,8 @@ try_to_connect (const struct sockaddr *argaddr, struct hostent *hent,
   struct sockaddr_in addrbuf, *addr;
   struct in_addr inaddrlist[256];
 
+  int i; char dbgbuf[2048]; int dbgbuflen = 0;		// DBG
+
   /* NOTE: do not call syslog() (unless you are about to return) before
    * we take a copy of the h_addr_list.
    */
@@ -124,6 +128,14 @@ try_to_connect (const struct sockaddr *argaddr, struct hostent *hent,
     memset (inaddrlist, 0, sizeof(inaddrlist));
 
     for (hostnum=0; hent->h_addr_list[hostnum] != 0; hostnum++) {
+      dbgbuflen += snprintf (dbgbuf+dbgbuflen, 2047-dbgbuflen,
+	          "[%d %lx: %d.%d.%d.%d]",
+		  hostnum, hent->h_addr_list[hostnum],
+		  hent->h_addr_list[hostnum][0],
+		  hent->h_addr_list[hostnum][1],
+		  hent->h_addr_list[hostnum][2],
+		  hent->h_addr_list[hostnum][3]);
+
       if (hostnum > 255) {
 	syslog (LOG_ERR, "too many address in hostent (%d), ignoring others",
 	                    hostnum);
@@ -136,13 +148,34 @@ try_to_connect (const struct sockaddr *argaddr, struct hostent *hent,
 	return EX_SOFTWARE;
       }
 
+      dbgbuflen += snprintf (dbgbuf+dbgbuflen, 2047-dbgbuflen,
+		  "[%d: %d.%d.%d.%d] ", sizeof (struct in_addr),
+		  hent->h_addr_list[hostnum][0],
+		  hent->h_addr_list[hostnum][1],
+		  hent->h_addr_list[hostnum][2],
+		  hent->h_addr_list[hostnum][3]);
+
       memcpy ((void *) &(inaddrlist[hostnum]),
 		(void *) hent->h_addr_list[hostnum],
 		sizeof (struct in_addr));
     }
+
+    if (DO_CONNECT_DEBUG_SYSLOGS) {
+      syslog (LOG_DEBUG, "dbg: %d %s", hostnum, dbgbuf); dbgbuflen = 0;
+    }
+  }
+
+
+  if (DO_CONNECT_DEBUG_SYSLOGS) {
+    for (i = 0; i < hostnum; i++) {
+      syslog (LOG_DEBUG, "dbg: host addr %d/%d = %lx at %lx",
+		  i, hostnum, inaddrlist[i].s_addr, &(inaddrlist[i]));
+    }
   }
 
   hent = NULL; /* cannot use hent after this point, syslog() may overwrite it */
+
+  if (DO_CONNECT_DEBUG_SYSLOGS) { syslog (LOG_DEBUG, "dbg: socket"); }
 
   if(-1 == (mysock = socket(PF_INET,SOCK_STREAM,0)))
   {
@@ -165,6 +198,8 @@ try_to_connect (const struct sockaddr *argaddr, struct hostent *hent,
     }
   }
   
+  if (DO_CONNECT_DEBUG_SYSLOGS) { syslog (LOG_DEBUG, "dbg: setsockopt"); }
+
 #ifdef USE_TCP_NODELAY
   /* TODO: should this be up above the connect()? */
   value = 1;		/* make this explicit! */
@@ -187,8 +222,15 @@ try_to_connect (const struct sockaddr *argaddr, struct hostent *hent,
 #endif
 
   for (numloops=0; numloops < MAX_CONNECT_RETRIES; numloops++) {
+    if (DO_CONNECT_DEBUG_SYSLOGS) {
+      syslog (LOG_DEBUG, "dbg: connect() to spamd %d", numloops);
+    }
     if (argaddr != NULL) {
       addr = (struct sockaddr_in *) argaddr;     /* use the one provided */
+      if (DO_CONNECT_DEBUG_SYSLOGS) {
+	syslog (LOG_DEBUG, "dbg: using argaddr");
+      }
+
     } else {
       /* cycle through the addrs in hent */
       memset(&addrbuf, 0, sizeof(addrbuf));
@@ -201,13 +243,29 @@ try_to_connect (const struct sockaddr *argaddr, struct hostent *hent,
 	return EX_SOFTWARE;
       }
 
+      if (DO_CONNECT_DEBUG_SYSLOGS) {
+	syslog (LOG_DEBUG, "dbg: cpy addr %d/%d at %lx",
+		numloops%hostnum, hostnum, &(inaddrlist[numloops % hostnum]));
+      }
+
       memcpy (&addrbuf.sin_addr, &(inaddrlist[numloops % hostnum]),
                         sizeof(addrbuf.sin_addr));
       addr = &addrbuf;
+
+      if (DO_CONNECT_DEBUG_SYSLOGS) {
+	syslog (LOG_DEBUG, "dbg: conn addr %d/%d = %lx",
+	    numloops%hostnum, hostnum, addrbuf.sin_addr.s_addr);
+      }
+
     }
 
-    syslog (LOG_DEBUG, "dbg: connect() to spamd at %s", inet_ntoa(((struct sockaddr_in *)addr)->sin_addr));
+    syslog (LOG_DEBUG, "dbg: connect() to spamd at %s",
+		inet_ntoa(((struct sockaddr_in *)addr)->sin_addr));
     status = connect(mysock,(const struct sockaddr *) addr, sizeof(*addr));
+    if (DO_CONNECT_DEBUG_SYSLOGS) {
+      syslog (LOG_DEBUG, "dbg: connect() to spamd at %s done",
+	  inet_ntoa(((struct sockaddr_in *)addr)->sin_addr));
+    }
 
     if (status < 0)
     {
@@ -468,7 +526,9 @@ static int _message_filter(const struct sockaddr *addr,
 
     libspamc_timeout = m->timeout;
 
-    if((i=try_to_connect(addr, (struct hostent *) hent, hent_port, &sock))!=EX_OK){
+    if((i=try_to_connect(addr, (struct hostent *) hent,
+			hent_port, &sock)) != EX_OK)
+    {
         free(m->out); m->out=m->msg; m->out_len=m->msg_len;
         return i;
     }
