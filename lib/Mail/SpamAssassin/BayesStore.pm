@@ -248,6 +248,7 @@ sub tie_db_writable {
   }
   elsif ( !$found ) { # new DB, make sure we know that ...
     $self->{db_version} = $self->{db_toks}->{$DB_VERSION_MAGIC_TOKEN} = DB_VERSION;
+    $self->{db_toks}->{$NTOKENS_MAGIC_TOKEN} = 0; # no tokens in the db ...
   }
 
   return 1;
@@ -1149,10 +1150,10 @@ sub tok_put {
 
     $self->{db_toks}->{$tok} = $self->tok_pack ($ts, $th, $atime);
 
-    if ( $atime > $self->{db_toks}->{$NEWEST_TOKEN_AGE_MAGIC_TOKEN} ) {
+    if ( !defined($self->{db_toks}->{$NEWEST_TOKEN_AGE_MAGIC_TOKEN}) || $atime > $self->{db_toks}->{$NEWEST_TOKEN_AGE_MAGIC_TOKEN} ) {
       $self->{db_toks}->{$NEWEST_TOKEN_AGE_MAGIC_TOKEN} = $atime;
     }
-    if ( $atime < $self->{db_toks}->{$OLDEST_TOKEN_AGE_MAGIC_TOKEN} ) {
+    if ( !defined($self->{db_toks}->{$OLDEST_TOKEN_AGE_MAGIC_TOKEN}) || $atime < $self->{db_toks}->{$OLDEST_TOKEN_AGE_MAGIC_TOKEN} ) {
       $self->{db_toks}->{$OLDEST_TOKEN_AGE_MAGIC_TOKEN} = $atime;
     }
   }
