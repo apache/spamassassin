@@ -1,4 +1,85 @@
 ------------------------------------------------------------------------
+r43318 | quinlan | 2004-09-04 04:22:59 +0000 (Sat, 04 Sep 2004) | 2 lines
+
+remove Sender ID mention from announcement :-(
+
+------------------------------------------------------------------------
+r43317 | felicity | 2004-09-04 04:05:44 +0000 (Sat, 04 Sep 2004) | 1 line
+
+bug 3238: allow people to zero-pad the _SCORE_ tag if they want.  adds some backward compatibility with 2.x, etc.
+------------------------------------------------------------------------
+r43314 | felicity | 2004-09-04 03:12:06 +0000 (Sat, 04 Sep 2004) | 1 line
+
+bug 3743: have the child reaper deal with multiple children if necessary, also have the restart handler wait for the specific pid to exit instead of any generic pid.
+------------------------------------------------------------------------
+r43313 | jm | 2004-09-04 03:02:23 +0000 (Sat, 04 Sep 2004) | 1 line
+
+bug 3711: doco fix: correct the read_scoreonly_config() POD documentation to reflect that it no longer is just scores.
+------------------------------------------------------------------------
+r43310 | jm | 2004-09-04 02:43:52 +0000 (Sat, 04 Sep 2004) | 1 line
+
+bug 3625: syslog-ng sometimes forks from inside syslog() when syslogd is restarted, causing a SIGCHLD, which calls syslog(), and therefore causes an infinite loop of respawning spamds.  work around this.
+------------------------------------------------------------------------
+r43309 | felicity | 2004-09-04 02:05:39 +0000 (Sat, 04 Sep 2004) | 1 line
+
+bug 3698: remove unused function decoded_mime_bit from PMS
+------------------------------------------------------------------------
+r37426 | felicity | 2004-09-02 21:18:01 +0000 (Thu, 02 Sep 2004) | 1 line
+
+bug 3742: fixes the bug introduced in rc2 via bug 3731.  'untie attempted while 1 inner references still exist'
+------------------------------------------------------------------------
+r37261 | parker | 2004-08-31 20:54:43 +0000 (Tue, 31 Aug 2004) | 1 line
+
+since several web interfaces now exist point folks at the wiki for information
+------------------------------------------------------------------------
+r37223 | felicity | 2004-08-30 22:30:50 +0000 (Mon, 30 Aug 2004) | 1 line
+
+bug 3737: more doco updates, UPGRADE implied spamd's -P option was deprecated, but only for spamassassin.  also merged 'these commmandline options are deprecated' sections.
+------------------------------------------------------------------------
+r37222 | felicity | 2004-08-30 22:23:45 +0000 (Mon, 30 Aug 2004) | 1 line
+
+move spamd's P option next to the paranoid option since they're aliases, makes it clearer
+------------------------------------------------------------------------
+r37221 | felicity | 2004-08-30 22:22:13 +0000 (Mon, 30 Aug 2004) | 1 line
+
+added doco that the UPGRADE doc is likely not complete and custom configurations should be double-checked to be valid in the new version
+------------------------------------------------------------------------
+r37218 | felicity | 2004-08-30 21:41:44 +0000 (Mon, 30 Aug 2004) | 1 line
+
+update MANIFEST...
+------------------------------------------------------------------------
+r37217 | felicity | 2004-08-30 21:40:35 +0000 (Mon, 30 Aug 2004) | 1 line
+
+bug 3735: deal with parsing messages that themselves have a content-type of message/rfc822.  add in a test mail and appropriately mimeparse.t modifications to test that we properly deal with multi-level message/rfc822 encodings.
+------------------------------------------------------------------------
+r37183 | felicity | 2004-08-30 01:35:13 +0000 (Mon, 30 Aug 2004) | 1 line
+
+make the require_version doc a little clearer
+------------------------------------------------------------------------
+r37182 | felicity | 2004-08-30 00:12:52 +0000 (Mon, 30 Aug 2004) | 1 line
+
+doco update
+------------------------------------------------------------------------
+r37139 | felicity | 2004-08-28 01:30:07 +0000 (Sat, 28 Aug 2004) | 1 line
+
+3.0 release doco update
+------------------------------------------------------------------------
+r37138 | felicity | 2004-08-28 01:05:36 +0000 (Sat, 28 Aug 2004) | 1 line
+
+prep for 3.0.0rc3 devel
+------------------------------------------------------------------------
+r37136 | felicity | 2004-08-28 01:02:45 +0000 (Sat, 28 Aug 2004) | 1 line
+
+prepare for 3.0.0-rc2 release
+------------------------------------------------------------------------
+r37133 | felicity | 2004-08-27 20:43:49 +0000 (Fri, 27 Aug 2004) | 1 line
+
+more build updates -- gpgsign is in ~/sabuildtools/bin, not ~/bin ...
+------------------------------------------------------------------------
+r37132 | felicity | 2004-08-27 20:36:47 +0000 (Fri, 27 Aug 2004) | 1 line
+
+update more build docs
+------------------------------------------------------------------------
 r37130 | jm | 2004-08-27 20:16:39 +0000 (Fri, 27 Aug 2004) | 1 line
 
 oops, I'd forgotten to check in the SAME fixes from minotaur.   here's some parts of what I did that are still worthwhile with Theo's changes
