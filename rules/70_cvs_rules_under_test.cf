@@ -538,10 +538,9 @@ describe T_X_HTML_TAG_FOUND	Found a non-standard tag ('x-html')
 header T_HTML_ALL_CAPS		Content-Type =~ /TEXT\/HTML/
 describe T_HTML_ALL_CAPS	Content type is "TEXT/HTML" in all caps
 
-full __CTYPE_HTML_ONLY	eval:check_for_text_html_only()
-meta T_CTYPE_JUST_HTML	( !__RCVD_BY_HOTMAIL && __CTYPE_HTML_ONLY )
-
-# version written using _check_attachments
-body __CTYPE_HTML_ONLY2	eval:check_for_mime_html_text_only()
-meta T_CTYPE_JUST_HTML2	( !__RCVD_BY_HOTMAIL && __CTYPE_HTML_ONLY2 )
+# possible replacement for our current CTYPE_JUST_HTML
+# looks for messages with either text/html ctype or all mime parts that
+# are just text/html
+body __CTYPE_HTML_ONLY	eval:check_for_mime_html_text_only()
+meta T_CTYPE_JUST_HTML	( !__RCVD_BY_HOTMAIL && __CTYPE_HTML_ONLY2 )
 
