@@ -1213,7 +1213,7 @@ sub do_head_tests {
 
   # note: we do this only once for all head pattern tests.  Only
   # eval tests need to use stuff in here.
-  $self->clear_test_state();
+  $self->{test_log_msgs} = '';	# clear test state
 
   dbg ("running header regexp tests; score so far=".$self->{hits});
 
@@ -1318,7 +1318,7 @@ sub do_body_tests {
 
   dbg ("running body-text per-line regexp tests; score so far=".$self->{hits});
 
-  $self->clear_test_state();
+  $self->{test_log_msgs} = '';	# clear test state
   if ( defined &Mail::SpamAssassin::PerMsgStatus::_body_tests
        && !$self->{conf}->{user_rules_to_compile} ) {
     # ok, we've compiled this before. Or have we?
@@ -1531,7 +1531,7 @@ sub do_body_uri_tests {
   dbg ("running uri tests; score so far=".$self->{hits});
   my @uris = $self->get_uri_list();
 
-  $self->clear_test_state();
+  $self->{test_log_msgs} = '';	# clear test state
   if ( defined &Mail::SpamAssassin::PerMsgStatus::_body_uri_tests
        && !$self->{conf}->{user_rules_to_compile} ) {
     # ok, we've compiled this before.
@@ -1618,7 +1618,7 @@ sub do_rawbody_tests {
 
   dbg ("running raw-body-text per-line regexp tests; score so far=".$self->{hits});
 
-  $self->clear_test_state();
+  $self->{test_log_msgs} = '';	# clear test state
   if ( defined &Mail::SpamAssassin::PerMsgStatus::_rawbody_tests
        && !$self->{conf}->{user_rules_to_compile} ) {
     # ok, we've compiled this before.
@@ -1705,7 +1705,7 @@ sub do_full_tests {
   
   dbg ("running full-text regexp tests; score so far=".$self->{hits});
 
-  $self->clear_test_state();
+  $self->{test_log_msgs} = '';	# clear test state
 
   if (defined &Mail::SpamAssassin::PerMsgStatus::_full_tests
        && !$self->{conf}->{user_rules_to_compile} ) {
@@ -2022,7 +2022,7 @@ sub run_eval_tests {
     my $evalsub = $evalhash->{$rulename};
 
     my $result;
-    $self->clear_test_state();
+    $self->{test_log_msgs} = '';	# clear test state
 
     @args = ();
     if (scalar @extraevalargs >= 0) { push (@args, @extraevalargs); }
@@ -2072,7 +2072,7 @@ sub run_rbl_eval_tests {
     my $evalsub = $evalhash->{$rulename};
 
     my $result;
-    $self->clear_test_state();
+    $self->{test_log_msgs} = '';	# clear test state
 
     @args = ();
     $evalsub =~ s/\s*\((.*?)\)\s*$//;
@@ -2125,12 +2125,12 @@ sub got_uri_pattern_hit {
 
 ###########################################################################
 
-# note: only eval tests should store state in here; pattern tests do
-# not.
-sub clear_test_state {
-  my ($self) = @_;
-  $self->{test_log_msgs} = '';
-}
+# note: only eval tests should store state in $self->{test_log_msgs};
+# pattern tests do not.
+#
+# the clearing of the test state is now inlined as:
+#
+# $self->{test_log_msgs} = '';	# clear test state
 
 sub _handle_hit {
     my ($self, $rule, $score, $area, $desc) = @_;
