@@ -964,7 +964,7 @@ to make it clear what's been added, and allow other filters to B<remove>
 spamfilter modifications, so you lose 6 columns right there. Also note that the
 first line of the report must start with 4 dashes, for the same reason. Each
 C<report> line appends to the existing template, so use
-C<clear-report-template> to restart.
+C<clear_report_template> to restart.
 
 The following template items are supported, and will be filled out by
 SpamAssassin:
@@ -1006,7 +1006,7 @@ non-text/plain part.  See the C<10_misc.cf> configuration file in
 C</usr/share/spamassassin> for an example.
 
 Each C<unsafe-report> line appends to the existing template, so use
-C<clear-report-template> to restart.
+C<clear_unsafe_report_template> to restart.
 
 =cut
 
