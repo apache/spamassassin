@@ -28,9 +28,8 @@ int nn, ny, yn, yy;	// simple number of y/n diagnoses
 //
 float nnscore, nyscore, ynscore, yyscore;
 
-int bestnn, bestny, bestyn, bestyy;
-int progiter = 0;
-float nybias = 5.0;
+float nybias	= 5.0;
+int sleepTime	= 0;		// time to sleep between gens
 
 float float_num_spam;
 float float_num_nonspam;
@@ -160,6 +159,7 @@ objective(GAGenome & c)
 {
   GARealGenome &genome = (GARealGenome &) c;
   counthits(genome);
+  if (sleepTime) { usleep(sleepTime); }
 
   // old old version; just use the # of messages
   // return ((float) yn + (ny * nybias));
@@ -169,6 +169,8 @@ objective(GAGenome & c)
   //return (float) ((yn / (float) num_spam)
     		//+ ((ny * nybias) / (float) num_nonspam));
 
+  // new version: similar to above, but penalise scores that
+  // are way off.
   return (float) ((ynscore / float_num_spam)
       		+ ((nyscore * nybias) / float_num_nonspam));
 }
@@ -189,25 +191,6 @@ write_to_file (GARealGenome &genome, const char *fname) {
 }
 
 // ---------------------------------------------------------------------------
-
-/*
-void
-my_initializer (GAGenome &c)
-{
-  GARealGenome &gnm = (GARealGenome &) c;
-  int i, numchngd, idx;
-  float diff;
-
-  numchngd = rand() % 100;
-
-  for (i = 0; i < numchngd; i++) {
-    idx = rand() % gnm.length();
-    diff = (float) ((rand() % 40) - 20) / 10.0;
-    printf ("mv %d %d: %f\n", i, idx, diff);
-    gnm[idx] = bestscores[idx] + diff;
-  }
-}
-*/
 
 void
 fill_allele_set (GARealAlleleSetArray *setary)
@@ -232,7 +215,7 @@ fill_allele_set (GARealAlleleSetArray *setary)
 void usage () {
   cerr << "usage: evolve -s size [args]\n"
     << "\n"
-    << "  -z sleeptime = time to sleep between gens (0 default)\n"
+    << "  -z sleeptime = time to sleep between gens, msecs (0 default)\n"
     << "  -s size = population size (300 recommended)\n"
     << "  -b nybias = bias towards false negatives (5.0 default)\n"
     << "\n"
@@ -255,7 +238,6 @@ main (int argc, char **argv) {
   int justCount = 0;
   int npops	= 5;		// num pops (for deme mode)
   int popsize	= 0;		// population size
-  int sleepTime	= 0;		// time to sleep between gens
   int generations = 1500;	// generations to run
   float pconv	= 1.00;		// threshhold for when we have converged
   int nconv	= 300;		// how many gens back to check for convergence
@@ -387,8 +369,6 @@ main (int argc, char **argv) {
 	write_to_file (genome, "tmp/results.in_progress");
       }
     }
-
-    if (sleepTime) { sleep(sleepTime); }
   }
   cout << endl;
 
