@@ -153,10 +153,12 @@ sub _get_or_create_header_object {
 # ---------------------------------------------------------------------------
 
 sub _get_header_list {
-    my ($self, $hdr) = @_;
+  my ($self, $hdr) = @_;
+
   # OK, we want to do a case-insensitive match here on the header name
   # So, first I'm going to pick up an array of the actual capitalizations used:
-  my @cap_hdrs = grep(lc($_) eq lc($hdr), keys(%{$self->{headers}}));
+  my $lchdr = lc $hdr;
+  my @cap_hdrs = grep(lc($_) eq $lchdr, keys(%{$self->{headers}}));
 
   # And now pick up all the entries into a list
   my @entries = map($self->{headers}->{$_},@cap_hdrs);
