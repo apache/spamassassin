@@ -433,7 +433,7 @@ body T_RUDE_MUA_4	/not support the display of HTML. Please view this message in 
 body T_RUDE_MUA_5	/You must have a HTML capable browser to view this email/i
 body T_RUDE_MUA_6	/Your mailer do not support HTML messages. Switch to a better mailer/i
 body T_RUDE_MUA_7	/Votre lecteur d'email doit accepter le HTML/i
-rawbody T_RUDE_MUA_8	/<!-- You need an e-mail client capable of viewing HTML to view this message./i
+body T_RUDE_MUA_8	eval:html_text_match('comment', 'You need an e-mail client capable of viewing HTML to view this message')
 
 # some header rules
 header T_ORG_MIME_TOOLS		Organization =~ /MIME-tools/
