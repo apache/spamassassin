@@ -17,28 +17,69 @@ my $spamtest = new Mail::SpamAssassin ({
 });
 
 foreach my $folder (@ARGV) {
+  if (-d $folder && -f "$folder/1") {		# it's an MH folder
+    mass_check_mh_folder($folder);
+  } elsif (-f $folder) {
+    mass_check_mailbox($folder);
+  }
+}
+
+sub mass_check_mh_folder {
+  my $folder = shift;
   my @files = <$folder/[0-9]*>;
 
   foreach my $mail (sort sortbynum @files) {
     open (STDIN, "<$mail");
     my $ma = Mail::Audit->new();
-    $ma->{noexit} = 1;
-
-    my $status = $spamtest->check ($ma);
-    $status->rewrite_mail ();
-
-    $_ = $ma->get ("X-Spam-Status");
-    /^(\S+), hits=(\S+) required=\S+ tests=(.+)\s*$/s;
-
-    my $yorn = $status->is_spam();
-    my $hits = $status->get_hits();
-    my $tests = $status->get_names_of_tests_hit();
-
-    $ma = undef;		# clean 'em up
-    $status = undef;
-
-    printf "%s %2d %s %s\n",
-		      ($yorn ? 'Y' : '.'),
-		      $hits, $mail, $tests;
+    docheck ($mail, $ma);
   }
+}
+
+sub mass_check_mailbox {
+  my $folder = shift;
+
+  open (MBOX, "<$folder") or warn "open $folder failed $@";
+  while (<MBOX>) { /^From (\S+)  ... .../ and last; }
+
+  while (!eof MBOX) {
+    my $tmpf = "/tmp/mass-check.$$";
+    open (MSG, ">$tmpf");
+    my $msgid = undef;
+    while (<MBOX>) {
+      /^Message-I[dD]: (.*)\s*$/ and $msgid = $1;
+      /^From (\S+)  ... .../ and last; print MSG;
+    }
+    close MSG;
+
+    next unless defined ($msgid);
+    $msgid =~ s/[^-_<>A-Za-z0-9\.\,\:\=\+\@]/_/gs;	# make safe
+
+    open (STDIN, "<$tmpf");
+    my $ma = Mail::Audit->new();
+    docheck ($msgid, $ma);
+  }
+  close MBOX;
+}
+
+sub docheck {
+  my $id = shift;
+  my $ma = shift;
+
+  $ma->{noexit} = 1;
+  my $status = $spamtest->check ($ma);
+  $status->rewrite_mail ();
+
+  $_ = $ma->get ("X-Spam-Status");
+  /^(\S+), hits=(\S+) required=\S+ tests=(.+)\s*$/s;
+
+  my $yorn = $status->is_spam();
+  my $hits = $status->get_hits();
+  my $tests = $status->get_names_of_tests_hit();
+
+  $ma = undef;		# clean 'em up
+  $status = undef;
+
+  printf "%s %2d %s %s\n",
+		    ($yorn ? 'Y' : '.'),
+		    $hits, $id, $tests;
 }

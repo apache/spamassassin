@@ -1,0 +1,198 @@
+#!/usr/bin/perl -w
+
+my @unmutated_tests = qw(
+BALANCE_FOR_LONG
+OSIRU_CONFIRMED_SPAM_SOURCE
+OSIRU_SPAMWARE_SITE
+RCVD_IN_BL_SPAMCOP_NET
+RCVD_IN_OSIRUSOFT_COM
+RCVD_IN_DUL
+RCVD_IN_RBL
+RCVD_IN_RELAYS_ORBS_ORG
+RCVD_IN_RSS
+RCVD_IN_RELAYS_ORDB_ORG
+SIRCAM_SIGNATURE
+USER_IN_WHITELIST
+  );
+
+my $threshold = 5;
+my $iterlimit = 0;
+
+my %is_spam = ();
+my %tests_hit = ();
+
+print "Reading per-message hit stat logs and scores...\n";
+my $total;
+readlogs();
+
+my $scores;
+readscores();
+my $origscores = $scores;
+
+print "Writing logs and current scores as C code...\n";
+
+system ("rm -rf tmp; mkdir tmp");
+writescores_c();
+writetests_c();
+exit 0;
+
+
+sub readlogs {
+  my $count = 0;
+  foreach my $file ("spam.log", "nonspam.log") {
+    open (IN, "<$file");
+
+    while (<IN>) {
+      /^.\s+(\d+)\s+(\S+)\s*(\S*)/ or next;
+      my $hits = $1;
+      my @tests = split (/,/, $3);
+
+      # $prevhits{$count} = $hits;
+      $tests_hit{$count} = \@tests;
+
+      if ($file eq "spam.log") {
+	$is_spam{$count} = 1;
+      } else {
+	$is_spam{$count} = 0;
+      }
+      $count++;
+    } 
+    close IN;
+  }
+  $total = $count;
+}
+
+
+sub readscores {
+  $scores = { };
+
+  open (IN, "<../spamassassin.cf");
+  while (<IN>) {
+    s/#.*$//g; s/^\s+//; s/\s+$//;
+
+    if (/^(header|body|full)\s+(\S+)\s+/) {
+      $scores->{$2} ||= 1;
+    } elsif (/^score\s+(\S+)\s+(.+)$/) {
+      $scores->{$1} = $2;
+    }
+  }
+  close IN;
+}
+
+sub writescores_c {
+  %is_mutatable = ();
+  foreach my $t (@unmutated_tests) { $is_mutatable{$t} = 0; }
+  my $size = (scalar keys %{$scores}) + 1;
+
+  open (OUT, ">tmp/scores.h");
+  print OUT "
+
+int num_scores = $size;
+unsigned char is_mutatable[$size];
+float bestscores[$size];
+float scores[$size];
+char *score_names[$size];
+
+void loadscores (void) {
+
+";
+  my $count = 0;
+  foreach my $name (sort keys %{$scores}) {
+    if (!defined $is_mutatable{$name}) { $is_mutatable{$name} = 1; }
+
+    print OUT 
+    " bestscores[$count] = ".$scores->{$name}.";", "\t",
+    " is_mutatable[$count] = ".$is_mutatable{$name}.";", "\t",
+    " score_names[$count] = \"".$name."\";\n";
+
+    $score_c_index{$name} = $count;
+    $count++;
+  }
+
+  print OUT "\n}\n";
+  close OUT;
+}
+
+sub writetests_c {
+  my $file;
+
+  # figure out max hits per message
+  my $max_hits_per_msg = 0;
+  for ($file = 0; $file < $total; $file++) {
+    my $hits = scalar @{$tests_hit{$file}} + 1;
+    if ($hits > $max_hits_per_msg) { $max_hits_per_msg = $hits; }
+  }
+
+  open (TOP, ">tmp/tests.h");
+  print TOP "
+
+int num_tests = $total;
+int max_hits_per_msg = $max_hits_per_msg;
+unsigned char num_tests_hit[$total];
+unsigned char is_spam[$total];
+unsigned short tests_hit[$total][$max_hits_per_msg];
+
+";
+  $_ = join ('', <DATA>);
+  print TOP $_;
+  close TOP;
+
+  open (DAT, ">tmp/tests.data");
+
+  for ($file = 0; $file < $total; $file++)
+  {
+    my $num_tests_hit = scalar @{$tests_hit{$file}};
+
+    print DAT ".".$file."\n";
+    print DAT "n".$num_tests_hit."\n";
+    print DAT "s".$is_spam{$file}."\n";
+
+    my $count = 0;
+    foreach my $test (@{$tests_hit{$file}}) {
+      if (!defined $score_c_index{$test}) {
+	warn "test with no C index: $test\n";
+      }
+      print DAT "t".$score_c_index{$test}."\n";
+      $count++;
+      if ($count >= $max_hits_per_msg) {
+	die "Need to increase \$max_hits_per_msg";
+      }
+    }
+  }
+  close DAT;
+}
+
+__DATA__
+
+void loadtests (void) {
+  FILE *fin = fopen ("tmp/tests.data", "r");
+  char buf[256];
+  int file = 0;
+  int tnum = 0;
+
+  while (fgets (buf, 255, fin) != NULL) {
+    char cmd;
+    long arg;
+
+    cmd = (char) *buf;
+    arg = strtol (buf+1, NULL, 10);
+
+    if (cmd == '.') {
+      file = arg;
+
+    } else if (cmd == 'n') {
+      tnum = 0;
+      num_tests_hit[file] = arg;
+
+    } else if (cmd == 's') {
+      is_spam[file] = arg;
+
+    } else if (cmd == 't') {
+      tests_hit[file][tnum] = arg; tnum++;
+    }
+  }
+  fclose(fin);
+
+  printf ("Read test results for %d messages.\n", file+1);
+}
+
