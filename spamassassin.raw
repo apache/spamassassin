@@ -240,7 +240,6 @@ my $spamtest = new Mail::SpamAssassin(
 );
 
 if ( $opt{'lint'} ) {
-  $spamtest->debug_diagnostics();
   my $res = $spamtest->lint_rules();
   warn "lint: $res issues detected.  please rerun with debug enabled for more information.\n" if ($res);
   exit $res ? 1: 0;
