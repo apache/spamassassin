@@ -46,6 +46,19 @@ Received: from asterix.laurier.org (lns-p19-8-82-65-66-244.adsl.proxad.net [82.6
 },
 q{
 
+
+Received: from cs.helsinki.fi ([::ffff:218.11.152.141]) by mail.cs.helsinki.fi 
+        with esmtp; Mon, 18 Aug 2003 15:37:48 +0300
+Received: from m165.4superdeals.biz (softdnserr [::ffff:64.235.238.165]) by 
+        mail.cs.helsinki.fi with esmtp; Sun, 17 Aug 2003 19:30:42 +0300
+
+} => q{
+
+  [ ip=218.11.152.141 rdns=cs.helsinki.fi helo= by=mail.cs.helsinki.fi ident= envfrom= ] [ ip=64.235.238.165 rdns= helo=m165.4superdeals.biz by=mail.cs.helsinki.fi ident= envfrom= ]
+
+},
+q{
+
 Received: from hotmail.com (bay1-f95.bay1.hotmail.com [65.54.245.95]) by Daffy.timing.com; 
 Received: from mail pickup service by hotmail.com with Microsoft SMTPSVC;
         Tue, 16 Mar 2004 18:12:31 -0800

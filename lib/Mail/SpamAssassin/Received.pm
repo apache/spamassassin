@@ -639,10 +639,16 @@ sub parse_received_line {
     # Received: from umr-mail7.umr.edu (umr-mail7.umr.edu [131.151.1.64]) via ESMTP by mrelay1.cc.umr.edu (8.12.1/) id h06GHYLZ022481; Mon, 6 Jan 2003 10:17:34 -0600
     # Received: from Agni (localhost [::ffff:127.0.0.1]) (TLS: TLSv1/SSLv3, 168bits,DES-CBC3-SHA) by agni.forevermore.net with esmtp; Mon, 28 Oct 2002 14:48:52 -0800
     # Received: from gandalf ([4.37.75.131]) (authenticated bits=0) by herald.cc.purdue.edu (8.12.5/8.12.5/herald) with ESMTP id g9JLefrm028228 for <spamassassin-talk@lists.sourceforge.net>; Sat, 19 Oct 2002 16:40:41 -0500 (EST)
+    # Received: from bushinternet.com (softdnserr [::ffff:61.99.99.67]) by mail.cs.helsinki.fi with esmtp; Fri, 22 Aug 2003 12:25:41 +0300
     if (/^from (\S+) \((\S+) \[(${IP_ADDRESS})\]\).*? by (\S+) /) { # sendmail
-      $mta_looked_up_dns = 1;
-      $helo = $1; $rdns = $2; $ip = $3; $by = $4; goto enough;
+      if ($2 eq 'softdnserr') {
+        $mta_looked_up_dns = 0; # bug 2326: couriertcpd
+      } else {
+        $mta_looked_up_dns = 1; $rdns = $2;
+      }
+      $helo = $1; $ip = $3; $by = $4; goto enough;
     }
+
     if (/^from (\S+) \(\[(${IP_ADDRESS})\]\).*? by (\S+) /) {
       $mta_looked_up_dns = 1;
       $helo = $1; $ip = $2; $by = $3; goto enough;
