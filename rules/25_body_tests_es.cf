@@ -17,7 +17,7 @@ lang es describe REMOVE_ES_01         Claims you can be removed in Spanish
 lang es body REMOVE_ES_02             /(?:Para ser (?:elimina|removi)do|Si quieres? salir|Para eliminarse) del? (?:nuestra|esta|mailing) ?lista?,? (?:sera removido|responda el mail|solo tienes? que marcar|enviar un ?e-?mail)/i
 lang es describe REMOVE_ES_02           Claims you can be removed in Spanish
 
-lang es body REMOVE_ES_03             /(?:Si|o)(?: U(?:ste)?d\.?)? deseas? (?:que le (?:borre|remova|elimine)mos|ser (?:borra|removi|elimina)do|recalcar tus ganas de eliminarte) (?:por favor |de (?:cualquier listado futuro,?|(?:la|nuestra) (?:lista(?: de (?:(?:e-?)?mail|correo))?|base de datos)),? )?(?:s.lo )?(?:por favor|responda|env.(?:ar?|e(?:nos)?) (?:un )?(?:e-?)?mail|haga)/i
+lang es body REMOVE_ES_03             /(?:Si|o)(?: U(?:ste)?d\.?)? deseas? (?:que le (?:borre|remova|elimine)mos|ser (?:borra|removi|elimina)do|recalcar tus ganas de eliminarte) (?:por favor |de (?:cualquier listado futuro,?|(?:la|nuestra|esta) (?:lista(?: de (?:(?:e-?)?mail|correo))?|base de datos)),? )?(?:s.lo )?(?:por favor|responda|env.(?:ar?|e(?:nos)?).? (?:(?:simplemente|un) )?(?:e-?)?mail|haga)/i
 lang es describe REMOVE_ES_03           Claims you can be removed in Spanish
 
 lang es body REMOVE_ES_04             /(?:si desea|para) no recibir mas (?:nuestras promocione|mensaje)s/i
@@ -129,5 +129,7 @@ lang es describe NO_MAS_MAIL_1_ES	No nos envían más spam... seguro que no.
 lang es body NO_MAS_MAIL_2_ES		/Usted recibirá este mensaje por única vez/
 lang es describe NO_MAS_MAIL_2_ES	No recibirá este spam otra vez... seguro que no.
 
+lang es body COLECTOR_DE_MAILS_ES	/Las direcciones electronicas han sido tomadas de lugares publicos/
+lang es describe COLECTOR_DE_MAILS_ES	Las direcciones fueron obtenidas de internet.
 # vim: set ai! tw=255:
 
