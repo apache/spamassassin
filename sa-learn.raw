@@ -95,7 +95,8 @@ Note that I<globbing> in the mail folder names is supported; in other words,
 listing a folder name as C<*> will scan every folder that matches.
 
 SpamAssassin remembers which mail messages it's learnt already, and will not
-re-learn those messages again, unless you use the B<--forget> option.
+re-learn those messages again, unless you use the B<--forget> option.   Messages
+learnt as spam will have SpamAssassin markup removed, on the fly.
 
 If you make a mistake and scan a mail as ham when it is spam, or vice
 versa, simply rerun this command with the correct classification, and the
