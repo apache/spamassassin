@@ -775,6 +775,11 @@ sub lookup_ptr {
     return undef;
   }
 
+  if ($dom =~ /^${IP_IN_RESERVED_RANGE}/) {
+    dbg ("IP is reserved, not looking up PTR");
+    return undef;
+  }
+
   dbg ("looking up PTR record for '$dom'");
   my $name = '';
 

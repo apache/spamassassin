@@ -1,4 +1,4 @@
-# $Id: Received.pm,v 1.7 2003/04/08 00:17:12 jmason Exp $
+# $Id: Received.pm,v 1.8 2003/04/08 01:59:27 jmason Exp $
 
 # ---------------------------------------------------------------------------
 
@@ -14,8 +14,7 @@
 # There's another type of Received header: the semi-trusted one.  This is the
 # header added by *our* MX, at the boundary of trust; we can trust the IP
 # address (and possibly rDNS) in this header, but that's about it; HELO name is
-# untrustworthy.  The contents of this header are added to the marked-up
-# message for scanning by Bayes or by rules.
+# untrustworthy.  We just use this internally for now.
 
 # ---------------------------------------------------------------------------
 
@@ -109,13 +108,14 @@ sub parse_received_headers {
   chop ($self->{relays_untrusted_str});	# remove trailing ws
 
   # now pick out the first untrusted relay for use as the semi-trusted
-  # relay string.
-  if (scalar @{$self->{relays_untrusted}} > 0) {
-    $self->{relays_semitrusted_str} =
-			$self->{relays_untrusted}->[0]->{as_string};
-  } else {
-    $self->{relays_semitrusted_str} = '';
-  }
+  # relay string.  TODO: commented, since I think we can do this in
+  # regexps easily enough.
+  # if (scalar @{$self->{relays_untrusted}} > 0) {
+  # $self->{relays_semitrusted_str} =
+  # $self->{relays_untrusted}->[0]->{as_string};
+  # } else {
+  # $self->{relays_semitrusted_str} = '';
+  # }
 
   # OK, we've now split the relay list into trusted and untrusted.
 
@@ -125,14 +125,15 @@ sub parse_received_headers {
   if ($self->{msg}->can ("delete_header")) {
     $self->{msg}->delete_header ("X-SA-Relays-Trusted");
     $self->{msg}->delete_header ("X-SA-Relays-Untrusted");
-    $self->{msg}->delete_header ("X-SA-Relays-Semitrusted");
+    # $self->{msg}->delete_header ("X-SA-Relays-Semitrusted");
+
     if ($self->{msg}->can ("put_header")) {
       $self->{msg}->put_header ("X-SA-Relays-Trusted",
 				  $self->{relays_trusted_str});
       $self->{msg}->put_header ("X-SA-Relays-Untrusted",
 				  $self->{relays_untrusted_str});
-      $self->{msg}->put_header ("X-SA-Relays-Semitrusted",
-				  $self->{relays_semitrusted_str});
+      # $self->{msg}->put_header ("X-SA-Relays-Semitrusted",
+				# $self->{relays_semitrusted_str});
     }
   }
 
@@ -222,10 +223,16 @@ sub parse_received_line {
       goto enough;
     }
 
+    # sendmail:
     # Received: from mail1.insuranceiq.com (host66.insuranceiq.com [65.217.159.66] (may be forged)) by dogma.slashnull.org (8.11.6/8.11.6) with ESMTP id h2F0c2x31856 for <jm@jmason.org>; Sat, 15 Mar 2003 00:38:03 GMT
+    # Received: from BAY0-HMR08.adinternal.hotmail.com (bay0-hmr08.bay0.hotmail.com [65.54.241.207]) by dogma.slashnull.org (8.11.6/8.11.6) with ESMTP id h2DBpvs24047 for <webmaster@efi.ie>; Thu, 13 Mar 2003 11:51:57 GMT
+    # Received: from ran-out.mx.develooper.com (IDENT:qmailr@one.develooper.com [64.81.84.115]) by dogma.slashnull.org (8.11.6/8.11.6) with SMTP id h381Vvf19860 for <jm-cpan@jmason.org>; Tue, 8 Apr 2003 02:31:57 +0100
     # from rev.net (natpool62.rev.net [63.148.93.62] (may be forged)) (authenticated) by mail.rev.net (8.11.4/8.11.4) with ESMTP id h0KKa7d32306 for <spamassassin-talk@lists.sourceforge.net>
     if (/^from (\S+) \((\S+) \[(${IP_ADDRESS})\].*\) by (\S+) \(/) {
-      $rdns= $2; $ip = $3; $helo = $1; $by = $4; goto enough;
+      $helo = $1; $rdns = $2; $ip = $3; $by = $4;
+      $rdns =~ s/^IDENT:([^\@]+)\@// and $ident = $1; # remove IDENT lookups
+      $rdns =~ s/^([^\@]+)\@// and $ident = $1;	# remove IDENT lookups
+      goto enough;
     }
 
     # Received: from localhost (unknown [127.0.0.1])
@@ -279,17 +286,6 @@ sub parse_received_line {
     if (/^from (\S+) \[(${IP_ADDRESS})\] by (\S+) \[(\S+)\] with /) {
       $helo = $1; $ip = $2;
       $by = $4; # use the IP addr for "by", more useful?
-      goto enough;
-    }
-
-    # Received: from BAY0-HMR08.adinternal.hotmail.com
-    # (bay0-hmr08.bay0.hotmail.com [65.54.241.207]) by dogma.slashnull.org
-    # (8.11.6/8.11.6) with ESMTP id h2DBpvs24047 for <webmaster@efi.ie>;
-    # Thu, 13 Mar 2003 11:51:57 GMT
-    if (/^from (\S+) \((\S+) \[(${IP_ADDRESS})\]\) by (\S+) \(/) {
-      # very similar to postfix, but actually sendmail.
-      $helo = $1; $rdns = $2; $ip = $3; $by = $4;
-      $rdns =~ s/([^\@]+)\@//g and $ident = $1;	# remove IDENT lookups
       goto enough;
     }
 
