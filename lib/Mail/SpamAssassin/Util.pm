@@ -781,6 +781,14 @@ sub uri_list_canonify {
     # Make a copy so we don't trash the original
     my $nuri = $uri;
 
+    if ($nuri !~ /^[a-z0-9_-]+:/i) {    # no scheme?
+      $nuri = "http://".$nuri;          # assume HTTP, as a web browser would
+      # TODO: should we be sensitive to the type of attribute ("href", etc.)
+      # this appears in?  IMO, no, since as far as I can see it doesn't
+      # make any difference; most browsers/MUAs will assume a default
+      # of HTTP.
+    }
+
     # http:www.foo.biz -> http://www.foo.biz
     $nuri =~ s#^(https?:)/{0,2}#$1//#i;
 
