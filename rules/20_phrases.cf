@@ -62,14 +62,12 @@ describe CLICK_TO_REMOVE_1	Click to be removed
 
 body SENT_IN_COMPLIANCE		/(?:e.?mail|message) .{0,10}sen[dt] (?:to you )?in (?:\w{1,10} )?compliance (?:of|with)/i
 describe SENT_IN_COMPLIANCE	Claims compliance with spam regulations
-body BILL_1618			/Bill.{0,10}1618.{0,10}TITLE.{0,10}(?:III|\#3)/i
-describe BILL_1618		Claims compliance with Senate Bill 1618
-body UNDER_BILL_1618		/Under Bill s.?1618/i
-describe UNDER_BILL_1618	Claims compliance with Senate Bill 1618
+body BILL_1618			/\bs\W{0,4}1618\b/i
+describe BILL_1618		Possible mention of bill 1618 (anti-spam bill)
 body BILL_SECTION		/SECTION.{0,10}301/i
 describe BILL_SECTION		Claims compliance with spam regulations
-body FURTHER_TRANSMISSIONS      /further transmissions to you by the sender/i
-describe FURTHER_TRANSMISSIONS  Claims compliance with spam regulations
+body FURTHER_TRANSMISSIONS	/further transmissions to you by the sender/i
+describe FURTHER_TRANSMISSIONS	Claims compliance with spam regulations
 
 body GUARANTEE			/\bGUARANTEE\b/
 describe GUARANTEE		Contains word 'guarantee' in all-caps
