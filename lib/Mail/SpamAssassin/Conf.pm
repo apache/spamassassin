@@ -2007,7 +2007,49 @@ Define a test.  C<SYMBOLIC_TEST_NAME> is a symbolic test name, such as
 Appending C<:raw> to the header name will inhibit decoding of quoted-printable
 or base-64 encoded strings.
 
-There are several special pseudo-headers:
+Appending C<:addr> to the header name will cause everything except
+the first email address to be removed from the header.  For example,
+all of the following will result in "example@foo":
+
+=over 4
+
+=item example@foo
+
+=item example@foo (Foo Blah)
+
+=item example@foo, example@bar
+
+=item display: example@foo (Foo Blah), example@bar ;
+
+=item Foo Blah <example@foo>
+
+=item "Foo Blah" <example@foo>
+
+=item "'Foo Blah'" <example@foo>
+
+=back
+
+Appending C<:name> to the header name will cause everything except
+the first real name to be removed from the header.  For example,
+all of the following will result in "Foo Blah"
+
+=over 4
+
+=item example@foo (Foo Blah)
+
+=item example@foo (Foo Blah), example@bar
+
+=item display: example@foo (Foo Blah), example@bar ;
+
+=item Foo Blah <example@foo>
+
+=item "Foo Blah" <example@foo>
+
+=item "'Foo Blah'" <example@foo>
+
+=back
+
+There are several special pseudo-headers that can be specified:
 
 =over 4
 
