@@ -1,4 +1,4 @@
-# $Id: Received.pm,v 1.38 2003/11/24 05:18:33 jmason Exp $
+# $Id: Received.pm,v 1.39 2003/12/09 06:15:53 jmason Exp $
 
 # ---------------------------------------------------------------------------
 
@@ -812,6 +812,12 @@ sub parse_received_line {
       $ip = $1; $by = $2;
     }
 
+    # Received: from ironport.com (10.1.1.5) by a50.ironport.com with ESMTP; 01 Apr 2003 12:00:51 -0800
+    # note: must be before 'Content Technologies SMTPRS' rule, cf. bug 2787
+    if (/^from (\S+) \((${IP_ADDRESS})\) by (\S+) with /) {
+      $helo = $1; $ip = $2; $by = $3; goto enough;
+    }
+
     # Received: from scv3.apple.com (scv3.apple.com) by mailgate2.apple.com (Content Technologies SMTPRS 4.2.1) with ESMTP id <T61095998e1118164e13f8@mailgate2.apple.com>; Mon, 17 Mar 2003 17:04:54 -0800
     if (/^from (\S+) \((\S+)\) by (\S+) \(/) {
       $helo = $1; $rdns = $2; $by = $3; goto enough;
@@ -864,11 +870,6 @@ sub parse_received_line {
     # Tue, 1 Apr 2003 15:04:55 +0100
     if (/^from \[(${IP_ADDRESS})\] by (\S+) \(MailGate /) {
       $ip = $1; $by = $2; goto enough;
-    }
-
-    # Received: from ironport.com (10.1.1.5) by a50.ironport.com with ESMTP; 01 Apr 2003 12:00:51 -0800
-    if (/^from (\S+) \((${IP_ADDRESS})\) by (\S+) with /) {
-      $helo = $1; $ip = $2; $by = $3; goto enough;
     }
 
     # Received: from jmason.org (unverified [195.218.107.131]) by ni-mail1.dna.utvinternet.net <B0014212518@ni-mail1.dna.utvinternet.net>; Tue, 11 Feb 2003 12:18:12 +0000
