@@ -24,7 +24,7 @@ sub cmdline_run {
   %opt = ();
 
   Getopt::Long::Configure(qw(bundling no_getopt_compat
-                         no_auto_abbrev no_ignore_case));
+                         permute no_auto_abbrev no_ignore_case));
 
   GetOptions(
 	     'spam'				=> sub { $isspam = 1; },
@@ -55,10 +55,7 @@ sub cmdline_run {
 	     'dir'			=> sub { $opt{'format'} = 'dir'; },
 	     'file'			=> sub { $opt{'format'} = 'file'; },
 	     'mbox'			=> sub { $opt{'format'} = 'mbox'; },
-
-	     'single'			=> sub {
-		  $opt{'format'} = 'file'; push (@ARGV, '-');
-	      },
+	     'single'			=> sub { $opt{'format'} = 'single'; },
 
 	     '<>'			=> \&target,
   ) or usage(0, "Unknown option!");
@@ -68,8 +65,17 @@ sub cmdline_run {
     print "SpamAssassin version " . Mail::SpamAssassin::Version() . "\n";
     exit 0;
   }
+
+  if ($opt{'force-expire'}) {
+    $rebuildonly=1;
+  }
   if ( !defined $isspam && !defined $rebuildonly && !defined $forget ) {
     usage(0, "Please select either --spam, --ham, --forget, or --rebuild");
+  }
+
+  if (defined($opt{'format'}) && $opt{'format'} eq 'single') {
+    $opt{'format'} = 'file';
+    push (@ARGV, '-');
   }
 
   # create the tester factory

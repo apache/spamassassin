@@ -26,7 +26,7 @@ sub new {
 
 ###########################################################################
 
-use constant LOCK_MAX_AGE => 300;       # seconds 
+use constant LOCK_MAX_AGE => 600;       # seconds 
 use constant LOCK_MAX_RETRIES => 30;    # average 1 per second
 
 sub safe_lock {
