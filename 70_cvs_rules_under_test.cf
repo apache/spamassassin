@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.581 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.582 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -17,20 +17,6 @@
 # distribution for more details.
 #
 ###########################################################################
-
-# quinlan: I worked at a company that used CorporateTime which very annoyingly
-# always used an ISO-8859-1 encoded header even when the Subject: did not have
-# a non-ASCII character.  I think other false positives are likely due to
-# similarly broken software.
-# jm: I notice that all my FPs are gw'd thru IMS; let's try that.
-header __SUBJ_BASE64			Subject:raw =~ /=\?[^\?]+\?B\?/
-header __SUBJ_QP			Subject:raw =~ /=\?[^\?]+\?Q\?/
-header __SUBJ_HAS_NON_ASCII		Subject =~ /[\x00-\x06\x0e-\x1f\x80-\xff]/
-header __RCVD_IMS			Received =~ /Internet\s+Mail\s+Service/
-meta T_UNNECESSARY_SUBJ_B64_ENCODING	(__SUBJ_BASE64 && !__SUBJ_HAS_NON_ASCII && !__RCVD_IMS)
-meta T_UNNECESSARY_SUBJ_QP_ENCODING	(__SUBJ_QP && !__SUBJ_HAS_NON_ASCII && !__RCVD_IMS)
-describe T_UNNECESSARY_SUBJ_B64_ENCODING Subject encoded to hide from filters (B64)
-describe T_UNNECESSARY_SUBJ_QP_ENCODING Subject encoded to hide from filters (QP)
 
 # A new spamware creates invalid Date stamps, using printf ("%d:%d:%d").
 # Catch it here (assuming one of the above doesn't catch it anyway).
@@ -266,6 +252,36 @@ body T_HTML_PUSH_HERE	eval:html_eval('anchor_text', '=~ /(?:push|go)\s(?:here|th
 header __T_MAC_EUDORA_MUA         X-Mailer =~ /Eudora for (?:Macintosh|Mac OS X)/
 header __PALM_EUDORA_MUA	X-Mailer =~ /^Eudora \d+.\d+ for PalmOS\b/
 meta T_FORGED_MUA_EUDORA          (__EUDORA_MUA && !__EUDORA_MSGID && !__UNUSABLE_MSGID && !__HAS_X_LOOP && !__HAS_X_MAILING_LIST && !__T_MAC_EUDORA_MUA && !__PALM_EUDORA_MUA && !__OLD_EUDORA1 && !(__OLD_EUDORA2 && !__QUALCOMM))
+
+body T_HTML_COMMENT_CENTER	eval:html_test('t_comment_in_center')
+body T_HTML_COMMENT_LI		eval:html_test('t_comment_in_li')
+body T_HTML_COMMENT_IMG		eval:html_test('t_comment_in_img')
+body T_HTML_COMMENT_A		eval:html_test('t_comment_in_a')
+body T_HTML_COMMENT_SHOUT0	eval:html_test('t_comment_in_shouting_0')
+body T_HTML_COMMENT_SHOUT1	eval:html_test('t_comment_in_shouting_1')
+body T_HTML_COMMENT_SHOUT2	eval:html_test('t_comment_in_shouting_2')
+# meta versions
+meta T_HTML_COMMENT_WRONG0	(T_HTML_COMMENT_CENTER + T_HTML_COMMENT_LI + T_HTML_COMMENT_IMG + T_HTML_COMMENT_A + T_HTML_COMMENT_SHOUT0 > 1)
+meta T_HTML_COMMENT_WRONG1	(T_HTML_COMMENT_CENTER + T_HTML_COMMENT_LI + T_HTML_COMMENT_IMG + T_HTML_COMMENT_A + T_HTML_COMMENT_SHOUT0 > 2)
+meta T_HTML_COMMENT_WRONG2	(T_HTML_COMMENT_CENTER + T_HTML_COMMENT_LI + T_HTML_COMMENT_IMG + T_HTML_COMMENT_A > 1)
+meta T_HTML_COMMENT_WRONG3	(T_HTML_COMMENT_CENTER + T_HTML_COMMENT_LI + T_HTML_COMMENT_IMG + T_HTML_COMMENT_A > 2)
+
+body T_HTML_DECLARATION_HTML	eval:html_test('t_declaration_in_html')
+body T_HTML_DECLARATION_HEAD	eval:html_test('t_declaration_in_head')
+body T_HTML_DECLARATION_BODY	eval:html_test('t_declaration_in_body')
+body T_HTML_DECLARATION_CENTER	eval:html_test('t_declaration_in_center')
+body T_HTML_DECLARATION_SHOUT0	eval:html_test('t_declaration_in_shouting_0')
+body T_HTML_DECLARATION_SHOUT1	eval:html_test('t_declaration_in_shouting_1')
+body T_HTML_DECLARATION_SHOUT2	eval:html_test('t_declaration_in_shouting_2')
+# meta versions
+meta T_HTML_DECLARATION_WRONG0	(T_HTML_DECLARATION_HTML + T_HTML_DECLARATION_HEAD + T_HTML_DECLARATION_BODY + T_HTML_DECLARATION_CENTER + T_HTML_DECLARATION_SHOUT0 > 1)
+meta T_HTML_DECLARATION_WRONG1	(T_HTML_DECLARATION_HTML + T_HTML_DECLARATION_HEAD + T_HTML_DECLARATION_BODY + T_HTML_DECLARATION_CENTER + T_HTML_DECLARATION_SHOUT0 > 2)
+meta T_HTML_DECLARATION_WRONG2	(T_HTML_DECLARATION_HTML + T_HTML_DECLARATION_HEAD + T_HTML_DECLARATION_BODY + T_HTML_DECLARATION_CENTER > 1)
+meta T_HTML_DECLARATION_WRONG3	(T_HTML_DECLARATION_HTML + T_HTML_DECLARATION_HEAD + T_HTML_DECLARATION_BODY + T_HTML_DECLARATION_CENTER > 2)
+meta T_HTML_DECLARATION_WRONG4	(T_HTML_DECLARATION_HTML + T_HTML_DECLARATION_BODY + T_HTML_DECLARATION_CENTER + T_HTML_DECLARATION_SHOUT0 > 1)
+meta T_HTML_DECLARATION_WRONG5	(T_HTML_DECLARATION_HTML + T_HTML_DECLARATION_BODY + T_HTML_DECLARATION_CENTER + T_HTML_DECLARATION_SHOUT0 > 2)
+meta T_HTML_DECLARATION_WRONG6	(T_HTML_DECLARATION_HTML + T_HTML_DECLARATION_BODY + T_HTML_DECLARATION_CENTER > 1)
+meta T_HTML_DECLARATION_WRONG7	(T_HTML_DECLARATION_HTML + T_HTML_DECLARATION_BODY + T_HTML_DECLARATION_CENTER > 2)
 
 ######################################################################
 
