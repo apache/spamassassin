@@ -48,14 +48,13 @@
 # ifndef EX__MAX
 # define EX__MAX 77
 # endif
-
-extern char *optarg;
 #endif
 
 /* don't def in_addr_t for Digital UNIX or IRIX, they have it in netinet/in.h */
 #if (defined(__sun__) && defined(__sparc__) && !defined(__svr4__)) /* SunOS */ \
      || (defined(hpux) || defined(__hpux)) /* HPUX */
 typedef unsigned long	in_addr_t;	/* base type for internet address */
+extern char *optarg;
 #endif
 
 #ifndef INADDR_NONE
