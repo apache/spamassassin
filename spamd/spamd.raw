@@ -122,6 +122,7 @@ GetOptions(
   'help|h'                   => \$opt{'help'},
   'listen-ip|ip-address|i=s' => \$opt{'listen-ip'},
   'max-children|m=i'         => \$opt{'max-children'},
+  'max-conn-per-child=i'     => \$opt{'max-conn-per-child'},
   'port|p=i'                 => \$opt{'port'},
   'sql-config!'              => \$opt{'sql-config'},
   'ldap-config!'             => \$opt{'ldap-config'},
@@ -435,12 +436,17 @@ my $clients_per_child;    # number of clients each child should process
 my %children = ();        # current children
 
 if ( defined $opt{'max-children'} ) {
-  ( $childlimit, $clients_per_child ) = split ( /[,:]/, $opt{'max-children'} );
+  $childlimit = $opt{'max-children'};
 
   # Make sure that the values are at least 1
-  $childlimit = undef if ( defined $childlimit && $childlimit < 1 );
-  $clients_per_child = undef
-    if ( defined $clients_per_child && $clients_per_child < 1 );
+  $childlimit = undef if ( $childlimit < 1 );
+}
+
+if ( defined $opt{'max-conn-per-child'} ) {
+  $clients_per_child = $opt{'max-conn-per-child'};
+
+  # Make sure that the values are at least 1
+  $clients_per_child = undef if ( $clients_per_child < 1 );
 }
 
 # Set some "sane" limits for defaults
@@ -1622,7 +1628,7 @@ Options:
  -h, --help                         Print usage message.
  -i ipaddr, --listen-ip=ipaddr,...  Listen on the IP ipaddr (default: 127.0.0.1)
  -p port, --port                    Listen on specified port (default: 783)
- -m num:msgs, --max-children        Allow maximum num children (default: 5, 1000)
+ -m num, --max-children             Allow maximum num children (default: 5)
  -q, --sql-config                   Enable SQL config (only useful with -x)
  -Q, --setuid-with-sql              Enable SQL config (only useful with -x,
                                     enables use of -H)
@@ -1899,9 +1905,9 @@ network tests.  Works the same as the C<-L> flag to C<spamassassin(1)>.
 Die on user errors (for the user passed from spamc) instead of falling back to
 user I<nobody> and using the default configuration.
 
-=item B<-m> I<number> [ , I<number> ] , B<--max-children>=I<number>[ , I<number> ]
+=item B<-m> I<number> , B<--max-children>=I<number>
 
-The first number specifies the maximum number of children to spawn.
+This option specifies the maximum number of children to spawn.
 Spamd will spawn that number of children, then sleep in the background
 until a child dies, wherein it will go and spawn a new child.
 
@@ -1912,7 +1918,9 @@ The minimum value is C<1>, the default value is C<5>.
 Please note that there is a OS specific maximum of connections that can be
 queued (Try C<perl -MSocket -e'print SOMAXCONN'> to find this maximum).
 
-The second number specifies the maximum number of connections each child
+=item B<--max-conn-per-child>=I<number>
+
+This option specifies the maximum number of connections each child
 should process before dying and letting the master spamd process spawn
 a new child.  The minimum value is C<1>, the default value is C<1000>.
 
