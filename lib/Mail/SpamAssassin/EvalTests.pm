@@ -359,7 +359,7 @@ sub check_for_faraway_charset_in_body {
   {
     my $type = $1;
     my $locale = $ENV{'LANG'};
-    if ($type =~ /[\"](.+?)[\"]/i || $type =~ /^(\S+?)/i) {
+    if ($type =~ /[\"](.+?)[\"]/i || $type =~ /^(\S+)/i) {
       if (!Mail::SpamAssassin::Locales::is_charset_ok_for_locale ($1, $locale)) {
 	return 1;
       }
