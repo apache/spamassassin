@@ -323,6 +323,23 @@ e.g.
       $self->add_to_addrlist ('whitelist_from', split (' ', $1)); next;
     }
 
+=item unwhitelist_from add@ress.com
+
+Used to override a default whitelist_from entry, so for example a distribution whitelist_from
+can be overriden in a local.cf file, or an individual user can override a whitelist_from entry
+in their own C<user_prefs> file.
+
+e.g.
+
+  unwhitelist_from joe@example.com fred@example.com
+  unwhitelist_from *@amazon.com
+
+=cut
+
+    if (/^unwhitelist[-_]from\s+(.+)$/) {
+      $self->remove_from_addrlist ('whitelist_from', split (' ', $1)); next;
+    }
+
 =item whitelist_from_rcvd lists.sourceforge.net sourceforge.net
 
 Use this to supplement the whitelist_from addresses with a check against the
@@ -341,21 +358,23 @@ e.g.
       next;
     }
 
-=item unwhitelist_from add@ress.com
+=item unwhitelist_from_rcvd add@ress.com
 
-Used to override a default whitelist_from entry, so for example a distribution whitelist_from
-can be overriden in a local.cf file, or an individual user can override a whitelist_from entry
-in their own C<user_prefs> file.
+Used to override a default whitelist_from_rcvd entry, so for example a
+distribution whitelist_from_rcvd can be overriden in a local.cf file,
+or an individual user can override a whitelist_from_rcvd entry in
+their own C<user_prefs> file.
 
 e.g.
 
-  unwhitelist_from joe@example.com fred@example.com
-  unwhitelist_from *@amazon.com
+  unwhitelist_from_rcvd joe@example.com fred@example.com
+  unwhitelist_from_rcvd amazon.com
 
 =cut
 
     if (/^unwhitelist[-_]from\s+(.+)$/) {
-      $self->remove_from_addrlist ('whitelist_from', split (' ', $1)); next;
+      $self->remove_from_addrlist_rcvd('whitelist_from_rcvd', split (' ', $1));
+      next;
     }
 
 =item blacklist_from add@ress.com
@@ -1816,6 +1835,13 @@ sub remove_from_addrlist {
   
   foreach my $addr (@addrs) {
 	delete($self->{$singlelist}->{$addr});
+  }
+}
+
+sub remove_from_addrlist_rcvd {
+  my ($self, $listname, @addrs) = @_;
+  foreach my $addr (@addrs) {
+    delete($self->{$listname}->{$addr});
   }
 }
 
