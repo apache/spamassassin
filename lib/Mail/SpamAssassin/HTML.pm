@@ -847,13 +847,11 @@ sub html_tests {
       {
 	$self->{html}{html_event} = 1;
       }
-      if (/\bon(?:blur|contextmenu|focus|load|resize|submit|unload)\b/i &&
+      if (/\bon(?:contextmenu|load|resize|submit|unload)\b/i &&
 	  $attr->{$_})
       {
 	$self->{html}{html_event_unsafe} = 1;
         if ($attr->{$_} =~ /\.open\s*\(/) { $self->{html}{window_open} = 1; }
-        if ($attr->{$_} =~ /\.blur\s*\(/) { $self->{html}{window_blur} = 1; }
-        if ($attr->{$_} =~ /\.focus\s*\(/) { $self->{html}{window_focus} = 1; }
       }
     }
   }
@@ -963,8 +961,6 @@ sub html_text {
       $self->{html}{html_event_unsafe} = 1;
     }
     if ($text =~ /\.open\s*\(/) { $self->{html}{window_open} = 1; }
-    if ($text =~ /\.blur\s*\(/) { $self->{html}{window_blur} = 1; }
-    if ($text =~ /\.focus\s*\(/) { $self->{html}{window_focus} = 1; }
     return;
   }
 
@@ -1018,8 +1014,6 @@ sub html_comment {
       $self->{html}{html_event_unsafe} = 1;
     }
     if ($text =~ /\.open\s*\(/) { $self->{html}{window_open} = 1; }
-    if ($text =~ /\.blur\s*\(/) { $self->{html}{window_blur} = 1; }
-    if ($text =~ /\.focus\s*\(/) { $self->{html}{window_focus} = 1; }
     return;
   }
 
