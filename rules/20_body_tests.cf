@@ -646,3 +646,48 @@ describe EVITE			Claw back some for evite
 body     SIGNATURE_DELIM        /^-- $/
 describe SIGNATURE_DELIM        Standard signature delimiter present  
 
+body     READ_TO_END            /read this (?:e-?mail )?to the end/i
+describe READ_TO_END            You'd better read all of this spam!
+
+body     DONT_DELETE            /(?:don'?t delete this|do not delete)/i
+describe DONT_DELETE            Don't delete me!  Nooooo!!!!
+
+body     REAL_THING             /the real thing/i
+describe REAL_THING             It's the real thing, baby!
+
+body     ALL_NATURAL            /\b(?:100%|completely|totally|all) natural/i
+describe ALL_NATURAL            Spam is 100% natural?!
+
+body     MONEY_BACK             /money back guarantee/i
+describe MONEY_BACK             Money back guarantee.
+
+body     NO_CATCH               /there is no catch/i
+describe NO_CATCH               There is no catch.
+
+body     NO_OBLIGATION          /no obligation/i
+describe NO_OBLIGATION          There is no obligation.
+
+body     NO_DISSAPOINTMENT      /You won'?t be diss?app?ointed/i
+describe NO_DISSAPOINTMENT      You won't be dissapointed.
+
+body     SERIOUS_ONLY           /Serious [IE]nquiries Only/i
+describe SERIOUS_ONLY           Serious Enquiries Only.
+
+body     RISK_FREE              /risk free/i
+describe RISK_FREE              Risk free.  Suuurreeee....
+
+# "seen on TV", "seen on ABC/NBC/etc", "seen on XYZ TV", or
+# "seen on:"
+body     AS_SEEN_ON             /seen on\b\s*(?:TV|ABC|NBC|CBS|CNN|Oprah|USA Today|48 Hours|New York Times|\w+\s+TV|:)/i
+describe AS_SEEN_ON             As seen on national TV!
+
+body     NOT_INTENDED           /not intended for residents ?(:of|in)/i
+describe NOT_INTENDED           Not intended for residents of XYZ.
+
+# This phrase appears in many pyramid scheme mails in which
+# "My Wife Jody" testimonials are absent
+body     COPY_ACCURATELY        /copy.{1,10}name.{1,10}address.{1,10}ACCURATELY/i
+describe COPY_ACCURATELY        Common pyramid scheme phrase (1)
+
+body     SEE_FOR_YOURSELF       /See (?:for|it) yourself/i
+describe SEE_FOR_YOURSELF       See for yourself
