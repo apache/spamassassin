@@ -1547,7 +1547,8 @@ sub get_uri_list {
 
     # deal with redirectors, push the redirect uri onto the uri array
     # so this loop deals with that one independently
-    $nuri =~ m{^https?://.+?(https?://.+)$} && push(@uris, $1);
+    #looks like an infinite loop to me
+    #$nuri =~ m{^https?://.+?(https?://.+)$} && push(@uris, $1);
   }
 
   # remove duplicates
