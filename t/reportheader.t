@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spam");
-use Test; BEGIN { plan tests => 23 };
+use Test; BEGIN { plan tests => 25 };
 
 # ---------------------------------------------------------------------------
 
