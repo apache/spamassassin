@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.86 2003/05/17 03:40:53 quinlan Exp $
+# $Id: HTML.pm,v 1.87 2003/05/18 01:36:42 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -447,9 +447,51 @@ sub html_tests {
       ($tag =~ /^(?:body|table|tr|td|th)$/ && 
        exists $attr->{background} && ($_ = $attr->{background})))
   {
-    if (/\?/ || (/[a-f\d]{12,}/i && ! /\.(?:jpe?g|gif|png)$/i && !/^cid:/))
+    if (/\?/ || (/[a-f\d]{12,}/i && !/\.(?:jpe?g|gif|png)$/i && !/^cid:/))
     {
       $self->{html}{web_bugs} = 1;
+    }
+    if (/\?/ || (/\b[a-f\d]{4,}\b/i && !/\.(?:jpe?g|gif|png|bmp)$/i && !/^cid:/))
+    {
+      $self->{html}{t_web_bugs0} = 1;
+    }
+    if (/\?/ || (/\b[a-f\d]{6,}\b/i && !/\.(?:jpe?g|gif|png|bmp)$/i && !/^cid:/))
+    {
+      $self->{html}{t_web_bugs1} = 1;
+    }
+    if (/\?/ || (/\b[a-f\d]{8,}\b/i && !/\.(?:jpe?g|gif|png|bmp)$/i && !/^cid:/))
+    {
+      $self->{html}{t_web_bugs2} = 1;
+    }
+    if (/\?/ || (/\b[a-f\d]{12,}\b/i && !/\.(?:jpe?g|gif|png|bmp)$/i && !/^cid:/))
+    {
+      $self->{html}{t_web_bugs3} = 1;
+    }
+    if (/\?/ || (!/\.(?:jpe?g|gif|png|bmp)$/i && !/^cid:/))
+    {
+      $self->{html}{t_web_bugs4} = 1;
+    }
+    if (/\?/ || (!/\.(?:jpe?g|gif|png|bmp)\b/i && !/^cid:/))
+    {
+      $self->{html}{t_web_bugs5} = 1;
+    }
+    if (/\.(?:pl|cgi|php|asp|jsp|cfm)\b/i) {
+      $self->{html}{'t_image_web_bugs_any0'} = 1;
+    }
+    if (/\.(?:aspx?|pl|php[34]?|jsp|cfm|cgi)\b/i) {
+      $self->{html}{'t_image_web_bugs_any1'} = 1;
+    }
+    if (/\?/ && /\.(?:pl|cgi|php|asp|jsp|cfm)\b/i) {
+      $self->{html}{'t_image_web_bugs_any2'} = 1;
+    }
+    if (/\?/ && /\.(?:aspx?|pl|php[34]?|jsp|cfm|cgi)\b/i) {
+      $self->{html}{'t_image_web_bugs_any3'} = 1;
+    }
+    if (/\?/ || /\.(?:pl|cgi|php|asp|jsp|cfm)\b/i) {
+      $self->{html}{'t_image_web_bugs_any4'} = 1;
+    }
+    if (/\?/ || /\.(?:aspx?|pl|php[34]?|jsp|cfm|cgi)\b/i) {
+      $self->{html}{'t_image_web_bugs_any5'} = 1;
     }
   }
   if ($tag eq "img" && exists $attr->{width} && exists $attr->{height}) {
