@@ -166,7 +166,7 @@ if ($opt_u) {
     }
     $> = $uuid;		# effective uid
     $< = $uuid;		# real uid. we now cannot setuid anymore
-    if ($> != $uuid) {
+    if ($> != $uuid and $> != ($uuid-2**32)) {
 	die "fatal: setuid to uid $uuid failed\n";
     }
 
@@ -282,13 +282,13 @@ for ( ; ($paddr = accept(Client,Server)) ; close Client)
                         $current_user = $1;
                         if ($opt_x)
                         {
-			    if ($opt_q) {
-				handle_user_sql($1);
-			    }
+			               if ($opt_q) {
+				              handle_user_sql($current_user);
+			               }
                         }
-			else
+               			else
                         {
-                            handle_user($1);
+                            handle_user($current_user);
                         }
                     }
 		    if (/^Content-length: ([0-9]*)\r\n/i) {
@@ -307,7 +307,7 @@ for ( ; ($paddr = accept(Client,Server)) ; close Client)
 		    "not found, or set to root.  Fall back to nobody.";
 		my $uid = getpwnam('nobody');
                $> = $uid;
-               if ( !defined($uid) || $> != $uid ) {
+               if ( !defined($uid) || ($> != $uid and $> != ($uid-2**32))) {
                    logmsg "fatal: setuid to nobody failed";
                    die;
                }
@@ -396,12 +396,12 @@ for ( ; ($paddr = accept(Client,Server)) ; close Client)
                         if ($opt_x)
                         {
 			    if ($opt_q) {
-				handle_user_sql($1);
+				handle_user_sql($current_user);
 			    }
                         }
 			else
                         {
-                            handle_user($1);
+                            handle_user($current_user);
                         }
                     }
 		    if (/^Content-length: ([0-9]*)\r\n/i) {
@@ -420,7 +420,7 @@ for ( ; ($paddr = accept(Client,Server)) ; close Client)
 		    "not found, or set to root.  Fall back to nobody.";
 		my $uid = getpwnam('nobody');
                $> = $uid;
-               if ( !defined($uid) || $> != $uid ) {
+               if ( !defined($uid) || ($> != $uid and $> != ($uid-2**32))) {
                    logmsg "fatal: setuid to nobody failed";
                    die;
                }
@@ -556,10 +556,14 @@ sub handle_user
 
     if ($setuid_to_user) {
 	$> = $uid;
-       if ( !defined($uid) || $> != $uid ) {
+       if ( !defined($uid) || ($> != $uid and $> != ($uid-2**32))) {
            logmsg "fatal: setuid to $username failed";
 	    die;		# make it fatal to avoid security breaches
 	}
+	else
+	{
+	   logmsg "info: setuid to $username succeeded";
+    }
     }
 
     #
