@@ -27,21 +27,28 @@ SPAMASSASSIN RELEASE PROCEDURE
     make clean ; perl Makefile.PL < /dev/null ; make
     ./spamassassin -L -t < sample-nonspam.txt | grep X-Spam-
 
+  Verify that the X-Spam-* headers use the correct version string,
+  without an SVN revision number (those are only for dev builds).
+
 - create the Changes file.  There are two options here:
 
   - For releases on a maintainance branch (e.g. 3.0.1, .2, etc.):
 
-    TZ=UTC svn log --non-interactive --stop-on-copy > Changes
+      TZ=UTC svn log --non-interactive --stop-on-copy > Changes
 
     This will output all of the changes since the .0 release in the current
     branch.
 
   - For releases on the trunk (e.g. a .0 release):
 
-    TZ=UTC svn log -r HEAD:5810 --non-interactive --stop-on-copy > Changes
+      TZ=UTC svn log -r HEAD:5810 --non-interactive --stop-on-copy > Changes
 
     r5810 was the start of the 3.0.0 work; replace with the correct rev
     number for the point you want to start at.
+
+- run "make distcheck" to ensure all files are included in the
+  distribution that should be, and to ensure all files that are listed
+  in the MANIFEST also exist in SVN.
 
 - run "make disttest" to ensure all tests pass once the distribution
   is fully packaged.
@@ -60,12 +67,20 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 	svn commit -m "X.YZ RELEASED"
 
-- SVN tag the release files.  This is done using "svn copy", ie:
+- SVN tag the release files.  This is done using "svn copy".
+  For a maintainance release (x.y.1, x.y.2):
 
-  repo=https://svn.apache.org/repos/asf/incubator/spamassassin
-  svn copy -m "creating tag for release 2.62" \
+    repo=https://svn.apache.org/repos/asf/incubator/spamassassin
+    svn copy -m "creating tag for release 2.62" \
 	$repo/branches/b2_6_0 \
 	$repo/tags/spamassassin_release_2_6_2
+
+  For a trunk release (x.y.0):
+
+    repo=https://svn.apache.org/repos/asf/incubator/spamassassin
+    svn copy -m "creating tag for release 3.0.0" \
+	$repo/trunk \
+	$repo/tags/spamassassin_release_3_0_0
 
   This will do a completely server-side tagging (which is the same as
   a branch really) of whatever the latest branch revision to be the new
@@ -75,13 +90,13 @@ SPAMASSASSIN RELEASE PROCEDURE
   tree (e.g. 2.x1, 2.x2), you don't need to branch; for major updates
   (2.x0) you should use a new development branch, off HEAD.
 
-  svn copy https://svn.apache.org/repos/asf/incubator/spamassassin/trunk \
-           https://svn.apache.org/repos/asf/incubator/spamassassin/branches/b2_6_0
+    repo=https://svn.apache.org/repos/asf/incubator/spamassassin
+    svn copy $repo/trunk \
+           $repo/branches/b3_0_0
 
   "trunk" is SVN's concept of head.  Typically, our branches are named
-  for their minor version number.  In the example above, b2_6_0 is the
-  branch for the stable 2.6x releases.  b3_0_0 would be the branch for
-  the stable 3.0.x releases, etc.
+  for their minor version number.  In the example above, b3_0_0 is the
+  branch for the stable 3.0.x releases.
 
 - In the new development codeline, edit lib/Mail/SpamAssassin.pm, bump the
   $VERSION line to the correct version, and uncomment the $IS_DEVEL_BUILD
