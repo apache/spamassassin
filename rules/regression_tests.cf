@@ -24,8 +24,6 @@ test FROM_STARTS_WITH_NUMS     ok   1234matt@sergeant.org
 test FROM_STARTS_WITH_NUMS     fail matt@sergeant.org
 test FORGED_YAHOO_RCVD fail by mf1.lng.yahoo.com (8.11.1/8.11.1) id g3SDfPH19426
 test NUMERIC_HTTP_ADDR ok http://123456789/foo/bar
-test PGP_SIGNATURE_2 ok Content-Type: multipart/signed; micalg=pgp-sha1;protocol="application/pgp-signature"; boundary="n8g4imXOkfNTN/H1"
-test PGP_SIGNATURE_2 fail Content-Type: text/plain; charset=us-ascii
 #test SEARCH_ENGINE_PROMO ok	evaluated for FREE for its keyword placement in the top twenty major search engines
 
 test US_DOLLARS fail $-$NFbMF$K!"A49q$+$iLd$$9g$o$;$,;&E~$7$F$$$^$9!#
@@ -65,9 +63,6 @@ test __OBFUSCATING_COMMENT fail   Not a <!-- problem --> here
 test __OBFUSCATING_COMMENT fail   or<!--problem--> here
 test __OBFUSCATING_COMMENT fail   This <tag><!-- neither --></tag> I hope
 
-test FROM_EGROUPS  ok           sentto-2537484-52529-1020428367-Sxm=olswang.com@returns.groups.yahoo.com
-test FROM_EGROUPS  fail         spammer@returns.groups.yahoo.com
-
 test HIDE_WIN_STATUS ok <a href=foo onMouseOver="window.status='bar';>
 test HIDE_WIN_STATUS fail attributes like href=foo onMouseOver="window.status='bar'"
 test HIDE_WIN_STATUS fail attributes like href=foo onMouseOver="flashiness"
@@ -87,13 +82,6 @@ test HTML_WIN_OPEN fail The window.open() function
 test HTML_WIN_BLUR ok <script> win=window.open("http://foo/") win.blur() window.focus() </script>
 test HTML_WIN_BLUR ok <body onload='win=window.open("http://foo/"); win.blur()'>
 test HTML_WIN_BLUR fail The win.blur() function
-
-test EMAIL_ATTRIBUTION ok At 15:43 2/26/2002 +0000, Rich Webster wrote:
-test EMAIL_ATTRIBUTION ok On Tue, 2001-12-04 at 04:45, Matthew Cline wrote:
-test EMAIL_ATTRIBUTION ok foo@bar.com writes:
-test EMAIL_ATTRIBUTION ok --- In FruityGroup@y..., hopefuldreamer13@a... wrote:
-test EMAIL_ATTRIBUTION fail foo@bar.com writed:
-test EMAIL_ATTRIBUTION fail wrote:
 
 test BAD_CREDIT ok   no credit checks
 test BAD_CREDIT ok   reestablish credit
