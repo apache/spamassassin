@@ -747,3 +747,5 @@ describe MIME_HEADER_CTYPE_ONLY 'Content-Type' found without required MIME heade
 header WITH_LC_SMTP		Received =~ /\swith\ssmtp;\s/
 describe WITH_LC_SMTP		Received line contains spam-sign (lowercase smtp)
 
+header FROM_NO_LOWER		From !~ /[a-z]/
+
