@@ -18,7 +18,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("rcvd_parser");
-use Test; BEGIN { plan tests => 26 };
+use Test; BEGIN { plan tests => 28 };
 
 
 use strict;
@@ -42,6 +42,17 @@ Received: from asterix.laurier.org (lns-p19-8-82-65-66-244.adsl.proxad.net [82.6
 } => q{
 
 [ ip=213.228.0.129 rdns=postfix3-2.free.fr helo=postfix3-2.free.fr by=totor.example.net ident=foobar envfrom= ] [ ip=82.65.66.244 rdns=lns-p19-8-82-65-66-244.adsl.proxad.net helo=asterix.laurier.org by=postfix3-2.free.fr ident= envfrom= ]
+
+},
+q{
+
+Received: from klqe.net (unknown [192.168.50.50])
+        by mail.dropinsolutions.com (Postfix) with ESMTP
+        id 62F9114047; Sun, 15 Feb 2004 14:29:04 -0500 (EST)
+
+} => q{
+
+[ ip=192.168.50.50 rdns= helo=klqe.net by=mail.dropinsolutions.com ident= envfrom= ]
 
 },
 q{
