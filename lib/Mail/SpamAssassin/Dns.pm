@@ -1220,15 +1220,15 @@ sub is_dns_available {
   if (defined $Net::DNS::VERSION) {
     if (Mail::SpamAssassin::Util::am_running_on_windows()) {
       if ($Net::DNS::VERSION < 0.46) {
-	dbg("Net::DNS version is $Net::DNS::VERSION, but need 0.46 for Win32",
-	    "dnsavailable", -1);
+	warn("Net::DNS version is $Net::DNS::VERSION, but need 0.46 for Win32",
+	     "dnsavailable", -1);
 	return $IS_DNS_AVAILABLE;
       }
     }
     else {
       if ($Net::DNS::VERSION < 0.34) {
-	dbg("Net::DNS version is $Net::DNS::VERSION, but need 0.34",
-	    "dnsavailable", -1);
+	warn("Net::DNS version is $Net::DNS::VERSION, but need 0.34",
+	     "dnsavailable", -1);
 	return $IS_DNS_AVAILABLE;
       }
     }
