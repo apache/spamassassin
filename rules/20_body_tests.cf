@@ -474,16 +474,6 @@ rawbody FRONTPAGE		/FrontPage.Editor/
 describe FRONTPAGE		Frontpage used to create the message
 
 ###########################################################################
-# not quite spam, but dangerous/irritating nonetheless, and easy to catch.
-
-full SIRCAM_SIGNATURE		/Content-Disposition: attachment;\s+filename=.[^\n]+\.\S\S\S\.(bat|com|lnk|pif)./s
-describe SIRCAM_SIGNATURE	SECURITY: The Sircam worm
-
-# contrib: skod
-full BADTRANS_WORM              /Content-ID: <EA4DMGBP9p>/
-describe BADTRANS_WORM          SECURITY: The BadTrans worm, see http://securityresponse.symantec.com/avcenter/venc/data/w32.badtrans.b@mm.html
-
-###########################################################################
 # Compensation for signs that the mail is friendly.
 
 body BALANCE_FOR_LONG		eval:check_for_very_long_text()
