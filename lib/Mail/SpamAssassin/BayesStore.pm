@@ -19,7 +19,7 @@ use vars qw{
   @DBNAMES @DB_EXTENSIONS
   $NSPAM_MAGIC_TOKEN $NHAM_MAGIC_TOKEN $LAST_EXPIRE_MAGIC_TOKEN
   $NTOKENS_MAGIC_TOKEN $OLDEST_TOKEN_AGE_MAGIC_TOKEN
-  $SCANCOUNT_BASE_MAGIC_TOKEN 
+  $SCANCOUNT_BASE_MAGIC_TOKEN $RUNNING_EXPIRE_MAGIC_TOKEN
 };
 
 @ISA = qw();
@@ -66,6 +66,7 @@ $OLDEST_TOKEN_AGE_MAGIC_TOKEN = '**OLDESTAGE';
 $LAST_EXPIRE_MAGIC_TOKEN = '**LASTEXPIRE';
 $NTOKENS_MAGIC_TOKEN = '**NTOKENS';
 $SCANCOUNT_BASE_MAGIC_TOKEN = '**SCANBASE';
+$RUNNING_EXPIRE_MAGIC_TOKEN = '**RUNNINGEXPIRE';
 
 use constant MAX_SIZE_FOR_SCAN_COUNT_FILE => 5000;
 
@@ -276,8 +277,13 @@ sub expire_old_tokens {
 sub expire_old_tokens_trapped {
   my ($self, $opts) = @_;
 
-  if (!$self->expiry_due() && !$self->{bayes}->{main}->{learn_force_expire})
-				{ return 0; }
+  # Flag that we're doing work
+  $self->set_running_expire_tok();
+
+  if (!$self->expiry_due() && !$self->{bayes}->{main}->{learn_force_expire}) {
+    $self->remove_running_expire_tok();
+    return 0;
+  }
 
   my $too_old = $self->scan_count_get();
   $too_old = ($too_old < $self->{expiry_count} ? 
@@ -317,7 +323,8 @@ sub expire_old_tokens_trapped {
 	  || $tok eq $LAST_EXPIRE_MAGIC_TOKEN
 	  || $tok eq $NTOKENS_MAGIC_TOKEN
 	  || $tok eq $OLDEST_TOKEN_AGE_MAGIC_TOKEN
-	  || $tok eq $SCANCOUNT_BASE_MAGIC_TOKEN);
+	  || $tok eq $SCANCOUNT_BASE_MAGIC_TOKEN
+	  || $tok eq $RUNNING_EXPIRE_MAGIC_TOKEN);
 
     my ($ts, $th, $atime) = $self->tok_get ($tok);
 
@@ -342,8 +349,9 @@ sub expire_old_tokens_trapped {
       }
     }
 
-    if ($showdots && (($kept + $deleted) % 1000) == 0) {
-      print STDERR ".";
+    if ((($kept + $deleted) % 1000) == 0) {
+      if ($showdots) { print STDERR "."; }
+      $self->set_running_expire_tok();
     }
   }
 
@@ -369,7 +377,7 @@ sub expire_old_tokens_trapped {
   @deleted_toks = ();		# free 'em up
   $deleted -= $reprieved;
 
-  # and add the magic tokens
+  # and add the magic tokens.  don't add the expire_running token.
   $new_toks{$SCANCOUNT_BASE_MAGIC_TOKEN} = $self->{db_toks}->{$SCANCOUNT_BASE_MAGIC_TOKEN};
   $new_toks{$LAST_EXPIRE_MAGIC_TOKEN} = $self->scan_count_get();
   $new_toks{$OLDEST_TOKEN_AGE_MAGIC_TOKEN} = $oldest;
@@ -391,10 +399,8 @@ sub expire_old_tokens_trapped {
     }
   }
 
-  # ok, once that's done we can re-tie.  Call untie_db() first so
-  # we unlock correctly etc. first
+  # Call untie_db() first so we unlock correctly etc. first
   $self->untie_db();
-  $self->tie_db_writable();
 
   my $done = time();
 
@@ -485,6 +491,21 @@ sub nspam_nham_get {
   my $ns = $self->{db_toks}->{$NSPAM_MAGIC_TOKEN};
   my $nn = $self->{db_toks}->{$NHAM_MAGIC_TOKEN};
   ($ns || 0, $nn || 0);
+}
+
+sub get_running_expire_tok {
+  my ($self) = @_;
+  return $self->{db_toks}->{$RUNNING_EXPIRE_MAGIC_TOKEN};
+}
+
+sub set_running_expire_tok {
+  my ($self) = @_;
+  $self->{db_toks}->{$RUNNING_EXPIRE_MAGIC_TOKEN} = time();
+}
+
+sub remove_running_expire_tok {
+  my ($self) = @_;
+  delete $self->{db_toks}->{$RUNNING_EXPIRE_MAGIC_TOKEN};
 }
 
 ###########################################################################
@@ -585,6 +606,9 @@ sub sync_journal {
 sub sync_journal_trapped {
   my ($self, $opts, $path) = @_;
 
+  # Flag that we're doing work
+  $self->set_running_expire_tok();
+
   my $started = time();
   my $count = 0;
   my $total_count = 0;
@@ -636,6 +660,7 @@ sub sync_journal_trapped {
 
     if ((++$count % 1000) == 0) {
       if ($showdots) { print STDERR "."; }
+      $self->set_running_expire_tok();
     }
   }
 

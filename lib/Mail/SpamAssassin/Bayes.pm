@@ -39,6 +39,7 @@ use vars qw{
   $IGNORED_HDRS
   $MARK_PRESENCE_ONLY_HDRS
   %HEADER_NAME_COMPRESSION
+  $OPPORTUNISTIC_LOCK_VALID
 };
 
 @ISA = qw();
@@ -145,6 +146,9 @@ use constant TOKENIZE_LONG_TOKENS_AS_SKIPS => 1;
   'Organisation'        => '*o',
   'Content-Type'	=> '*c',
 );
+
+# How many seconds should the opportunistic_expire lock be valid?
+$OPPORTUNISTIC_LOCK_VALID = 300;
 
 # Should we use the Robinson f(w) equation from
 # http://radio.weblogs.com/0101454/stories/2002/09/16/spamDetection.html ?
@@ -937,11 +941,7 @@ sub scan {
   $self->{store}->add_touches_to_journal();
   $self->{store}->scan_count_increment();
 
-  # handle expiry and journal syncing
-  if ($self->{store}->expiry_due()) {
-    $self->sync();
-  }
-
+  $self->opportunistic_expire();
   $self->{store}->untie_db();
   return $score;
 
@@ -949,6 +949,19 @@ skip:
   dbg ("bayes: not scoring message, returning 0.5");
   $self->{store}->untie_db() if ( $self->{store}->{already_tied} );
   return 0.5;           # nice and neutral
+}
+
+sub opportunistic_expire {
+  my($self) = @_;
+
+  # Is an expire or journal sync running?
+  my $running_expire = $self->{store}->get_running_expire_tok();
+  if ( defined $running_expire && $running_expire+$OPPORTUNISTIC_LOCK_VALID > time() ) { return; }
+
+  # handle expiry and journal syncing
+  if ($self->{store}->expiry_due()) {
+    $self->sync();
+  }
 }
 
 ###########################################################################
