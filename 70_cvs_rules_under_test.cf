@@ -58,16 +58,6 @@ describe T_HTML_WITHOUT_HTML_1	Claims to be HTML, but there is no HTML text
 meta T_HTML_WITHOUT_HTML_2	(__MIME_HTML && !HTML_MESSAGE)
 describe T_HTML_WITHOUT_HTML_2	Claims to be HTML, but there is no HTML text
 
-# Jul  3 2002 jm: modified PENIS_ENLARGE patterns: removed "add", replaced with "inches",
-# because that seems to be another typical word in the pattern.
-# Feb 11 2003 jm: removed "PP" from pattern, since "pp. 234-237" is std usage
-# in academic circles.  I don't think the hit-rate will be affected. ;)
-# bug: http://www.hughes-family.org/bugzilla/show_bug.cgi?id=1471
-body T_PENIS_ENLARGE		/\b(?:enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b|\binches\b).{0,50}\b(?:penis|male organ|pee[ -]?pee|dick|sc?hlong|wh?anger|breast)/i
-describe T_PENIS_ENLARGE		Information on getting a larger penis or breasts
-body T_PENIS_ENLARGE2		/\b(?:penis|male organ|pee[ -]?pee|dick|sc?hlong|wh?anger|breast).{0,50}\b(?:enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b|\binches\b)/i
-describe T_PENIS_ENLARGE2		Information on getting a larger penis or breasts (2)
-
 # 2003-02-23: quinlan
 # bug 1376: HTML without <!DOCTYPE> from mailers that always use <!DOCTYPE>
 #
@@ -112,13 +102,10 @@ meta T_FAKED_THEBAT		(__THEBAT_MUA && __MIME_HTML_ONLY)
 # Apr  1 2003 jm: constantcontact is a spamtool, also used in legit mailouts
 # by a Java company :(
 #
-header T_EXECUTIVECALIBER		ALL =~ /\bexecutivecaliber\.ws\b/i
+# 2003-05-05 quinlan: reduced to shorter list of high S/O rules that hit
+# more than just me, not sure if any are worth it
 header T_CONSTANTCONTACT		ALL =~ /\bconstantcontact\.com\b/i
 header T_ROVING_COM			ALL =~ /\broving\.com\b/i
-uri T_EXECUTIVECALIBER_URL		/\bexecutivecaliber\.ws\b/i
-uri T_CONSTANTCONTACT_URL		/\bconstantcontact\.com\b/i
-uri T_CCPROD_ROVING_COM_URL		/\bccprod\.roving\.com\b/i
-uri T_ROVING_COM_URL			/\broving\.com\b/i
 uri T_RS6_NET_URL			/\brs6\.net\b/i
 
 # bug 1394, possible replacement for ORDER_NOW
@@ -363,44 +350,6 @@ meta T_MIME_HTML_NO_BODY_TAG	MIME_HTML_ONLY && !__TAG_EXISTS_BODY
 # but we'll try this anyway
 meta T_MIME_HTML_NO_MAJOR_TAG	MIME_HTML_ONLY && !__TAG_EXISTS_HTML && !__TAG_EXISTS_BODY
 
-# quinlan: 2003-04-14
-# 1x1 images
-body T_HTML_IMAGE_WEB_BUGS_1	eval:html_test('t_image_web_bugs_1')
-body T_HTML_IMAGE_WEB_BUGS_2	eval:html_test('t_image_web_bugs_2')
-body T_HTML_IMAGE_WEB_BUGS_3	eval:html_test('t_image_web_bugs_3')
-body T_HTML_IMAGE_WEB_BUGS_4	eval:html_test('t_image_web_bugs_4')
-body T_HTML_IMAGE_WEB_BUGS_5	eval:html_test('t_image_web_bugs_5')
-body T_HTML_IMAGE_WEB_BUGS_6	eval:html_test('t_image_web_bugs_6')
-body T_HTML_IMAGE_WEB_BUGS_7	eval:html_test('t_image_web_bugs_7')
-body T_HTML_IMAGE_WEB_BUGS_8	eval:html_test('t_image_web_bugs_8')
-body T_HTML_IMAGE_WEB_BUGS_9	eval:html_test('t_image_web_bugs_9')
-body T_HTML_IMAGE_WEB_BUGS_10	eval:html_test('t_image_web_bugs_10')
-body T_HTML_IMAGE_WEB_BUGS_11	eval:html_test('t_image_web_bugs_11')
-body T_HTML_IMAGE_WEB_BUGS_6B	eval:html_test('t_image_web_bugs_6b')
-body T_HTML_IMAGE_WEB_BUGS_7B	eval:html_test('t_image_web_bugs_7b')
-body T_HTML_IMAGE_WEB_BUGS_8B	eval:html_test('t_image_web_bugs_8b')
-body T_HTML_IMAGE_WEB_BUGS_9B	eval:html_test('t_image_web_bugs_9b')
-body T_HTML_IMAGE_WEB_BUGS_10B	eval:html_test('t_image_web_bugs_10b')
-body T_HTML_IMAGE_WEB_BUGS_11B	eval:html_test('t_image_web_bugs_11b')
-# both web bugs rules
-meta T_HTML_WEB_BUGS_PLUS_1	(T_HTML_IMAGE_WEB_BUGS_1 && HTML_WEB_BUGS)
-meta T_HTML_WEB_BUGS_PLUS_2	(T_HTML_IMAGE_WEB_BUGS_2 && HTML_WEB_BUGS)
-meta T_HTML_WEB_BUGS_PLUS_3	(T_HTML_IMAGE_WEB_BUGS_3 && HTML_WEB_BUGS)
-meta T_HTML_WEB_BUGS_PLUS_4	(T_HTML_IMAGE_WEB_BUGS_4 && HTML_WEB_BUGS)
-meta T_HTML_WEB_BUGS_PLUS_5	(T_HTML_IMAGE_WEB_BUGS_5 && HTML_WEB_BUGS)
-meta T_HTML_WEB_BUGS_PLUS_6	(T_HTML_IMAGE_WEB_BUGS_6 && HTML_WEB_BUGS)
-meta T_HTML_WEB_BUGS_PLUS_7	(T_HTML_IMAGE_WEB_BUGS_7 && HTML_WEB_BUGS)
-meta T_HTML_WEB_BUGS_PLUS_8	(T_HTML_IMAGE_WEB_BUGS_8 && HTML_WEB_BUGS)
-meta T_HTML_WEB_BUGS_PLUS_9	(T_HTML_IMAGE_WEB_BUGS_9 && HTML_WEB_BUGS)
-meta T_HTML_WEB_BUGS_PLUS_10	(T_HTML_IMAGE_WEB_BUGS_10 && HTML_WEB_BUGS)
-meta T_HTML_WEB_BUGS_PLUS_11	(T_HTML_IMAGE_WEB_BUGS_11 && HTML_WEB_BUGS)
-meta T_HTML_WEB_BUGS_PLUS_6B	(T_HTML_IMAGE_WEB_BUGS_6B && HTML_WEB_BUGS)
-meta T_HTML_WEB_BUGS_PLUS_7B	(T_HTML_IMAGE_WEB_BUGS_7B && HTML_WEB_BUGS)
-meta T_HTML_WEB_BUGS_PLUS_8B	(T_HTML_IMAGE_WEB_BUGS_8B && HTML_WEB_BUGS)
-meta T_HTML_WEB_BUGS_PLUS_9B	(T_HTML_IMAGE_WEB_BUGS_9B && HTML_WEB_BUGS)
-meta T_HTML_WEB_BUGS_PLUS_10B	(T_HTML_IMAGE_WEB_BUGS_10B && HTML_WEB_BUGS)
-meta T_HTML_WEB_BUGS_PLUS_11B	(T_HTML_IMAGE_WEB_BUGS_11B && HTML_WEB_BUGS)
-
 # 2003-02-23: quinlan
 # Message-Id: format tests
 # hotmail
@@ -433,20 +382,6 @@ describe T_FORGED_MUA_EUDORA_FROM Forged mail pretending to be from Eudora (by F
 # Catches spams sent by illiterate spammer ("secks", "whoarez" etc.)
 header T_RATWARE_MIZSPEELING	eval:check_for_mizspeeling_ratware()
 describe T_RATWARE_MIZSPEELING	Sent using spammer tool (mizspeeling)
-
-# new version
-# Apr 22 2003 jm: not so good.  stick with the old one I say
-# 0.061   0.2360   0.0000    1.000   0.97    0.01  T_NIGERIAN_SUBJECT2
-# 0.087   0.5827   0.0000    1.000   0.96    0.01  T_NIGERIAN_SUBJECT2:jm
-# 0.040   0.0729   0.0000    1.000   0.94    0.01  T_NIGERIAN_SUBJECT2:lan
-# 0.034   0.0831   0.0000    1.000   0.93    0.01  T_NIGERIAN_SUBJECT2:quinlan
-# 0.022   0.0660   0.0000    1.000   0.97    0.01  T_NIGERIAN_SUBJECT2:rODbegbie
-# 0.065   0.2536   0.0000    1.000   0.97    2.40  NIGERIAN_SUBJECT2
-# 0.090   0.6051   0.0000    1.000   0.96    2.40  NIGERIAN_SUBJECT2:jm
-# 0.040   0.0729   0.0000    1.000   0.94    2.40  NIGERIAN_SUBJECT2:lan
-# 0.047   0.1163   0.0000    1.000   0.93    2.40  NIGERIAN_SUBJECT2:quinlan
-# 0.017   0.0495   0.0000    1.000   0.97    2.40  NIGERIAN_SUBJECT2:rODbegbie
-header T_NIGERIAN_SUBJECT2	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*(?:request\s+(?:for\s+)?)?(?:very )?urgent\s+(?:(?:and|&)\s+(?:(?:completely|100\%)\s+))?(?:confidential|assistance|business|attention|reply|responses?|help)\b/i
 
 # quinlan: entire corpus, then last 2000 spam and 2000 ham:
 # 18.125  36.2000   0.0500    0.999   0.95    0.01  T_RCVD_IN_MONKEYS_UPL
@@ -614,19 +549,13 @@ meta T_OBFUSCATING_COMMENT9C	__T_OBFUSCATING_COMMENT9 && __MIME_HTML
 meta T_OBFUSCATING_COMMENT9D	__T_OBFUSCATING_COMMENT9 && (HTML_MESSAGE || __MIME_HTML)
 
 # more for bug 1769
-header T_GAPPY_SUBJECT		Subject =~ /\b(?:[a-z][\W]{1,3}){4,}/i
-body T_SEE_FOR_YOURSELF		/See (?:for|it|it for) yourself\b/i
+header T_GAPPY_SUBJECT_01	Subject =~ /\b(?:[a-z][\W]{1,3}){4,}/i
+header T_GAPPY_SUBJECT_02	Subject =~ /\b(?:[a-z][\W]{1,3}){5,}/i
+header T_GAPPY_SUBJECT_03	Subject =~ /\b(?:[a-z][\W]{1,4}){4,}/i
+header T_GAPPY_SUBJECT_04	Subject =~ /\b(?:[a-z][\W]{1,4}){5,}/i
 
 uri T_YAHOO_REDIRECTOR		/^http:\/\/rd\.yahoo\.com/i
 describe T_YAHOO_REDIRECTOR	Uses commonly-spammed redirector URL
-
-# case-insenstive version
-uri T_USERPASS			m{https?://[^/\s]+?(?::[^/\s]+?)?\@}i
-
-# bugs 1416 and 1769, possible replacements for AS_SEEN_ON
-body T_AS_SEEN_ON_1		/seen on\b\s*(?:T\.?V\.?|ABC|NBC|CBS|CNN|Oprah|USA Today|48 Hours|New York Times|\w+\s+T\.?V\.?|:)/i
-body T_AS_SEEN_ON_2		/seen [oi]n\b\s*(?:TV|ABC|NBC|CBS|CNN|Oprah|USA Today|48 Hours|(The )?New York Times|\w+\s+TV|:)/i
-body T_AS_SEEN_ON_3		/seen [oi]n\b\s*(?:T\.?V\.?|ABC|NBC|CBS|CNN|Oprah|USA Today|48 Hours|(The )?New York Times|\w+\s+T\.?V\.?|:)/i
 
 # http://marc.theaimsgroup.com/?l=spamassassin-talk&m=105203882531351&w=2
 header T_RATWARE_X_SCANNER	X-Scanner =~ /^: /

@@ -301,12 +301,14 @@ describe HR_3113                Mentions Spam law "H.R. 3113"
 body UCE_MAIL_ACT               /Unsolicited Commercial Electronic Mail Act/
 describe UCE_MAIL_ACT           Mentions Spam Law "UCE-Mail Act"
 
-# Jul  3 2002 jm: modified PENIS_ENLARGE patterns: removed "add", replaced with "inches",
-# because that seems to be another typical word in the pattern.
-body PENIS_ENLARGE		/\b(?:enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b|\binches\b).{0,50}\b(?:penis|male organ|P[ -]?P\b|pee[ -]?pee|dick|sc?hlong|wh?anger|breast)/i
+# Jul 3 2002 jm: modified PENIS_ENLARGE patterns: removed "add", replaced with
+# "inches", because that seems to be another typical word in the pattern.
+# Feb 11 2003 jm: removed "PP" from pattern, since "pp. 234-237" is std usage
+# in academic circles.  I don't think the hit-rate will be affected. ;)
+body PENIS_ENLARGE		/\b(?:enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b|\binches\b).{0,50}\b(?:penis|male organ|pee[ -]?pee|dick|sc?hlong|wh?anger|breast)/i
 describe PENIS_ENLARGE		Information on getting a larger penis or breasts
 
-body PENIS_ENLARGE2		/\b(?:penis|male organ|P[ -]?P\b|pee[ -]?pee|dick|sc?hlong|wh?anger|breast).{0,50}\b(?:enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b|\binches\b)/i
+body PENIS_ENLARGE2		/\b(?:penis|male organ|pee[ -]?pee|dick|sc?hlong|wh?anger|breast).{0,50}\b(?:enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b|\binches\b)/i
 describe PENIS_ENLARGE2		Information on getting a larger penis or breasts (2)
 
 body     IMPOTENCE              /\b(?:impotence (?:problem|cure|solution)|Premature Ejaculation|erectile dysfunction)/i
@@ -456,10 +458,9 @@ describe SERIOUS_ONLY           Serious Enquiries Only
 body     RISK_FREE              /\b(?:risk[ -]free|no[ -]risk)/i
 describe RISK_FREE              Risk free.  Suuurreeee....
 
-# "seen on TV", "seen on ABC/NBC/etc", "seen on XYZ TV", or
-# "seen on:"
-body     AS_SEEN_ON             /seen on\b\s*(?:TV|ABC|NBC|CBS|CNN|Oprah|USA Today|48 Hours|New York Times|\w+\s+TV|:)/i
-describe AS_SEEN_ON             As seen on national TV!
+# "seen on TV", "seen on ABC/NBC/etc", "seen on XYZ TV", or "seen on:"
+body AS_SEEN_ON			/seen on\b\s*(?:T\.?V\.?|ABC|NBC|CBS|CNN|Oprah|USA Today|48 Hours|New York Times|\w+\s+T\.?V\.?|:)/i
+describe AS_SEEN_ON		As seen on national TV!
 
 body     NOT_INTENDED           /not intended for residents (?:of|in)\b/i
 describe NOT_INTENDED           Not intended for residents of somewhere or other
@@ -469,8 +470,8 @@ describe NOT_INTENDED           Not intended for residents of somewhere or other
 body     COPY_ACCURATELY        /copy.{1,10}name.{1,10}address.{1,10}ACCURATELY\b/i
 describe COPY_ACCURATELY        Common pyramid scheme phrase (1)
 
-body     SEE_FOR_YOURSELF       /See (?:for|it) yourself\b/i
-describe SEE_FOR_YOURSELF       See for yourself
+body SEE_FOR_YOURSELF		/See (?:for|it|it for) yourself\b/i
+describe SEE_FOR_YOURSELF	See for yourself
 
 body ORDER_NOW                  /\border (?:now|soon|fast|quickly|while)\b/i
 describe ORDER_NOW              Encourages you to waste no time in ordering
