@@ -2380,7 +2380,8 @@ The test requires training before it can be used.
 =item noautolearn
 
 The test will explicitly be ignored when calculating the score for
-learning systems.
+learning systems.  For more information about tflags and the interaction
+with autolearning, please see the C<bayes_auto_learn> documentation.
 
 =back
 
