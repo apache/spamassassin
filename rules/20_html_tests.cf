@@ -131,12 +131,16 @@ body HTML_IMAGE_ONLY_12		eval:html_image_only('0800','1200')
 body HTML_IMAGE_ONLY_16		eval:html_image_only('1200','1600')
 body HTML_IMAGE_ONLY_20		eval:html_image_only('1600','2000')
 body HTML_IMAGE_ONLY_24		eval:html_image_only('2000','2400')
+body HTML_IMAGE_ONLY_28		eval:html_image_only('2400','2800')
+body HTML_IMAGE_ONLY_32		eval:html_image_only('2800','3200')
 describe HTML_IMAGE_ONLY_04	HTML: images with 0-400 bytes of words
 describe HTML_IMAGE_ONLY_08	HTML: images with 400-800 bytes of words
 describe HTML_IMAGE_ONLY_12	HTML: images with 800-1200 bytes of words
 describe HTML_IMAGE_ONLY_16	HTML: images with 1200-1600 bytes of words
 describe HTML_IMAGE_ONLY_20	HTML: images with 1600-2000 bytes of words
 describe HTML_IMAGE_ONLY_24	HTML: images with 2000-2400 bytes of words
+describe HTML_IMAGE_ONLY_28	HTML: images with 2400-2800 bytes of words
+describe HTML_IMAGE_ONLY_32	HTML: images with 2800-3200 bytes of words
 
 # HTML_IMAGE_RATIO - more image area than text (ratio)
 body HTML_IMAGE_RATIO_02	eval:html_image_ratio('0.000','0.002')
