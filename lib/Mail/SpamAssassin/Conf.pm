@@ -2118,7 +2118,8 @@ Define a raw-body pattern test.  C<pattern> is a Perl regular expression.
 
 The 'raw body' of a message is the raw data inside all textual parts.
 The text will be decoded from base64 or quoted-printable encoding,
-but HTML tags and line breaks will still be present.
+but HTML tags and line breaks will still be present.   The pattern
+will be applied line-by-line.
 
 =item rawbody SYMBOLIC_TEST_NAME eval:name_of_eval_method([args])
 
