@@ -299,7 +299,7 @@ ignore it.
         warn "configuration file \"$self->{currentfile}\" requires version ".
                 "$req_version of SpamAssassin, but this is code version ".
                 "$Mail::SpamAssassin::VERSION. Maybe you need to use ".
-                "the -c switch, or remove the old config files? ".
+                "the -C switch, or remove the old config files? ".
                 "Skipping this file";
         $skipfile = 1;
         $self->{errors}++;
