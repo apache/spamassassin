@@ -188,24 +188,24 @@ body T_HTML_COMMENT_NO_ALPHANUM	eval:html_test('comment_no_alphanum')
 meta T_HTML_COMMENT_NO_ALPHANUM2	T_HTML_COMMENT_NO_ALPHANUM && !__MOZILLA_MUA
 
 # RFC2822 violations
-header T_HEADER_COUNT_BAD_DATE		eval:check_header_count_range('Date','2','999')
-header T_HEADER_COUNT_BAD_FROM		eval:check_header_count_range('From','2','999')
-header T_HEADER_COUNT_BAD_SENDER	eval:check_header_count_range('Sender','2','999')
-header T_HEADER_COUNT_BAD_REPLYTO	eval:check_header_count_range('Reply-To','2','999')
-header T_HEADER_COUNT_BAD_MESSAGEID	eval:check_header_count_range('Message-Id','2','999')
-header T_HEADER_COUNT_BAD_INREPLYTO	eval:check_header_count_range('In-Reply-To','2','999')
-header T_HEADER_COUNT_BAD_REFERENCES	eval:check_header_count_range('References','2','999')
-header T_HEADER_COUNT_BAD_SUBJECT	eval:check_header_count_range('Subject','2','999')
+#header T_HEADER_COUNT_BAD_DATE		eval:check_header_count_range('Date','2','999')
+#header T_HEADER_COUNT_BAD_FROM		eval:check_header_count_range('From','2','999')
+#header T_HEADER_COUNT_BAD_SENDER	eval:check_header_count_range('Sender','2','999')
+#header T_HEADER_COUNT_BAD_REPLYTO	eval:check_header_count_range('Reply-To','2','999')
+#header T_HEADER_COUNT_BAD_MESSAGEID	eval:check_header_count_range('Message-Id','2','999')
+#header T_HEADER_COUNT_BAD_INREPLYTO	eval:check_header_count_range('In-Reply-To','2','999')
+#header T_HEADER_COUNT_BAD_REFERENCES	eval:check_header_count_range('References','2','999')
+#header T_HEADER_COUNT_BAD_SUBJECT	eval:check_header_count_range('Subject','2','999')
 # multiple To/Cc/Bcc headers are obsolete in RFC 2822, but they are still
 # frequently used and RFC 2822 says they should still be supported.  Cc:
 # generates many false positives.
-header T_HEADER_COUNT_BAD_TO		eval:check_header_count_range('To','2','999')
-header T_HEADER_COUNT_BAD_CC		eval:check_header_count_range('Cc','2','999')
-header T_HEADER_COUNT_BAD_BCC		eval:check_header_count_range('Bcc','2','999')
+#header T_HEADER_COUNT_BAD_TO		eval:check_header_count_range('To','2','999')
+#header T_HEADER_COUNT_BAD_CC		eval:check_header_count_range('Cc','2','999')
+#header T_HEADER_COUNT_BAD_BCC		eval:check_header_count_range('Bcc','2','999')
 # There doesn't seem to be a RFC restriction, but these should only show up
 # once in ham
 header T_HEADER_COUNT_BAD_CTYPE		eval:check_header_count_range('Content-Type','2','999')
-header T_HEADER_COUNT_BAD_CTE		eval:check_header_count_range('Content-Transfer-Encoding','2','999')
+#header T_HEADER_COUNT_BAD_CTE		eval:check_header_count_range('Content-Transfer-Encoding','2','999')
 
 body T_BLANK_LINE_RATIO_01_00_02	eval:check_blank_line_ratio('0','2')
 body T_BLANK_LINE_RATIO_01_02_04	eval:check_blank_line_ratio('2','4')

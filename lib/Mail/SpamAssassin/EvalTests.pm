@@ -2698,7 +2698,8 @@ sub check_messageid_not_usable {
 # Return true if the count of $hdr headers are within the given range
 sub check_header_count_range {
   my ($self, $hdr, $min, $max) = @_;
-  my @hdrs = $self->{msg}->get_header ($hdr);
+  my %uniq = ();
+  my @hdrs = grep(!$uniq{$_}++, $self->{msg}->get_header ($hdr));
   return ( scalar @hdrs >= $min && scalar @hdrs <= $max );
 }
 
