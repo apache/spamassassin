@@ -23,6 +23,10 @@ use POSIX qw(:sys_wait_h);
 use POSIX qw(setsid);
 use Errno;
 
+sub spawn;  # forward declaration
+sub logmsg; # forward declaration
+sub cleanupchildren; # forward declaration
+
 my %resphash = (
 		EX_OK          => 0,  # no problems
 		EX_USAGE       => 64, # command line usage error
@@ -56,6 +60,7 @@ GetOptions(
 	'max-children|m=i' => \$opt{'max-children'},
 	'port|p=i' => \$opt{'port'},
 	'sql-config!' => \$opt{'sql-config'}, 'q' => \$opt{'sql-config'},
+        'setuid-with-sql' => \$opt{'setuid-with-sql'}, 'Q' => \$opt{'setuid-with-sql'},
 	'virtual-config|V=s' => \$opt{'virtual-config'},
 	'pidfile|r=s' => \$opt{'pidfile'},
 	'syslog|s=s' => \$opt{'syslog'},
@@ -90,19 +95,10 @@ else
 }
 
 # This can be changed on the command line with the -s flag
-my $log_facility;
-if($opt{'syslog'})
-{
-    $log_facility = $opt{'syslog'};
-}
-else
-{
-    $log_facility = 'mail';
-}
+my $log_facility = $opt{'syslog'} || 'mail';
 
 my $dontcopy = 1;
 if ($opt{'create-prefs'}) { $dontcopy = 0; }
-
 
 my $extrapid = 5000;
 $extrapid = $opt{'max-children'} if defined($opt{'max-children'}) && $opt{'max-children'} > 0;
@@ -126,10 +122,6 @@ my $spamtest = Mail::SpamAssassin->new({
 });
 
 # Do whitelist later in tmp dir. Side effect: this will be done as -u user.
-
-sub spawn;  # forward declaration
-sub logmsg; # forward declaration
-sub cleanupchildren;
 
 my $socktype = 'unix';
 if ($Config{'archname'} =~ /solaris/) {
@@ -229,7 +221,8 @@ if ($opt{'debug'}) {
     warn "server started on port $port (running version ".Mail::SpamAssassin::Version().")\n";
     warn "server pid: $$\n";
 }
-logmsg "server started on port $port (running version ".Mail::SpamAssassin::Version().")";
+
+logmsg ("server started on port $port (running version ".Mail::SpamAssassin::Version().")");
 
 for ( ; 1; close Client)
 {
@@ -325,15 +318,16 @@ for ( ; 1; close Client)
                         $current_user = $1;
                         if (!$opt{'user-config'})
                         {
-			               if ($opt{'sql-config'}) {
-				              handle_user_sql($current_user);
-			               } elsif ($opt{'virtual-config'}) {
-				              handle_virtual_user($current_user);
-			               }
-                        }
-               			else
-                        {
-                            handle_user($current_user);
+                          if ($opt{'sql-config'}) {
+                            handle_user_sql($current_user);
+                          } elsif ($opt{'virtual-config'}) {
+                            handle_virtual_user($current_user);
+                          } elsif ($opt{'setuid-with-sql'}) {
+                            handle_user_setuid_with_sql($current_user);
+                            $setuid_to_user = 1; #to benefit from any paranoia.
+                          }
+                        } else {
+                          handle_user($current_user);
                         }
                     }
 		    if (/^Content-length: ([0-9]*)\r\n/i) {
@@ -469,15 +463,16 @@ for ( ; 1; close Client)
                         $current_user = $1;
                         if (!$opt{'user-config'})
                         {
-			    if ($opt{'sql-config'}) {
-				handle_user_sql($current_user);
-			    } elsif ($opt{'virtual-config'}) {
-				handle_virtual_user($current_user);
-			    }
-                        }
-			else
-                        {
-                            handle_user($current_user);
+                          if ($opt{'sql-config'}) {
+                            handle_user_sql($current_user);
+                          } elsif ($opt{'virtual-config'}) {
+                            handle_virtual_user($current_user);
+                          } elsif ($opt{'setuid-with-sql'}) {
+                            handle_user_setuid_with_sql($current_user);
+                            $setuid_to_user = 1; #to benefit from any paranoia.
+                          }
+                        } else {
+                          handle_user($current_user);
                         }
                     }
 		    if (/^Content-length: ([0-9]*)\r\n/i) {
@@ -719,6 +714,34 @@ sub handle_user_sql
     return 1;
 }
 
+sub handle_user_setuid_with_sql
+{
+    my $username = shift;
+    my ($name,$pwd,$uid,$gid,$quota,$comment,$gcos,$dir,$etc) = getpwnam($username);
+
+    if ( !$spamtest->{'paranoid'} && !defined($uid) ) {
+       #if we are given a username, but can't look it up,
+       #Maybe NIS is down? lets break out here to allow
+       #them to get 'defaults' when we are not running paranoid.
+       logmsg "handle_user() -> unable to find user [$username]!\n";
+       return 0;
+    }
+
+    if ($setuid_to_user) {
+       $> = $uid;
+       if ( !defined($uid) || ($> != $uid and $> != ($uid-2**32))) {
+           logmsg "fatal: setuid to $username failed";
+          die;         # make it fatal to avoid security breaches
+        }
+       else
+       {
+          logmsg "info: setuid to $username succeeded, reading scores from SQL.";
+        }
+    }
+    $spamtest->load_scoreonly_sql ($username);
+    return 1;
+}
+
 sub create_default_cf_if_needed {
     my ($cf_file, $username, $userdir) = @_;
 
@@ -866,6 +889,8 @@ Options:
  -m num, --max-children num         Allow maximum num children
  -p port, --port                    Listen on specified port (default: 783)
  -q, --sql-config                   Enable SQL config (only useful with -x)
+ -Q, --setuid-with-sql              Enable SQL config (only useful with -x,
+                                    enables use of -a and -H)
  -V, --virtual-config=dir           Enable Virtual configs (needs -x)
  -r pidfile, --pidfile              Write the process id to pidfile
  -s facility, --syslog=facility     Specify the syslog facility (default: mail)
@@ -928,6 +953,13 @@ Turn on SQL lookups even when per-user config files have been disabled
 with B<-x>. this is useful for spamd hosts which don't have user's
 home directories but do want to load user preferences from an SQL
 database.
+
+=item B<-Q>, B<--setuid-with-sql>
+
+Turn on SQL lookups even when per-user config files have been disabled
+with B<-x> and also setuid to the user.  This is useful for spamd hosts
+which want to load user preferences from an SQL database but also wish to
+support the use of B<-a> (AWL) and B<-H> (Helper home directories.)
 
 =item B<-V>, B<--virtual-config>=I<directory>
 
