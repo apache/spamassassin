@@ -27,7 +27,9 @@ require_version @@VERSION@@
 ###########################################################################
 
 body BAYES_00           eval:check_bayes('0.00', '0.01')
-body BAYES_01           eval:check_bayes('0.01', '0.10')
+body BAYES_01           eval:check_bayes('0.01', '0.02')
+body BAYES_02           eval:check_bayes('0.02', '0.05')
+body BAYES_05           eval:check_bayes('0.05', '0.10')
 body BAYES_10           eval:check_bayes('0.10', '0.20')
 body BAYES_20           eval:check_bayes('0.20', '0.30')
 body BAYES_30           eval:check_bayes('0.30', '0.40')
@@ -42,11 +44,15 @@ body BAYES_56           eval:check_bayes('0.56', '0.60')
 body BAYES_60           eval:check_bayes('0.60', '0.70')
 body BAYES_70           eval:check_bayes('0.70', '0.80')
 body BAYES_80           eval:check_bayes('0.80', '0.90')
-body BAYES_90           eval:check_bayes('0.90', '0.99')
+body BAYES_90           eval:check_bayes('0.90', '0.95')
+body BAYES_95           eval:check_bayes('0.95', '0.98')
+body BAYES_98           eval:check_bayes('0.98', '0.99')
 body BAYES_99           eval:check_bayes('0.99', '1.00')
 
 tflags BAYES_00         nice learn
 tflags BAYES_01         nice learn
+tflags BAYES_02         nice learn
+tflags BAYES_05         nice learn
 tflags BAYES_10         nice learn
 tflags BAYES_20         nice learn
 tflags BAYES_30         nice learn
@@ -58,10 +64,14 @@ tflags BAYES_60         learn
 tflags BAYES_70         learn
 tflags BAYES_80         learn
 tflags BAYES_90         learn
+tflags BAYES_95         learn
+tflags BAYES_98         learn
 tflags BAYES_99         learn
 
 describe BAYES_00	Bayesian spam probability is 0 to 1%
-describe BAYES_01	Bayesian spam probability is 1 to 10%
+describe BAYES_01	Bayesian spam probability is 1 to 2%
+describe BAYES_02	Bayesian spam probability is 2 to 5%
+describe BAYES_05	Bayesian spam probability is 5 to 10%
 describe BAYES_10	Bayesian spam probability is 10 to 20%
 describe BAYES_20	Bayesian spam probability is 20 to 30%
 describe BAYES_30	Bayesian spam probability is 30 to 40%
@@ -72,6 +82,8 @@ describe BAYES_56	Bayesian spam probability is 56 to 60%
 describe BAYES_60	Bayesian spam probability is 60 to 70%
 describe BAYES_70	Bayesian spam probability is 70 to 80%
 describe BAYES_80	Bayesian spam probability is 80 to 90%
-describe BAYES_90	Bayesian spam probability is 90 to 99%
+describe BAYES_90	Bayesian spam probability is 90 to 95%
+describe BAYES_95	Bayesian spam probability is 95 to 98%
+describe BAYES_98	Bayesian spam probability is 98 to 99%
 describe BAYES_99	Bayesian spam probability is 99 to 100%
 
