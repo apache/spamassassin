@@ -42,8 +42,6 @@ header FAKE_HELO_EMAIL_COM	eval:check_for_rdns_helo_mismatch("email\.com","email
 describe FAKE_HELO_EMAIL_COM	Host HELO did not match rDNS: email.com
 header FAKE_HELO_CARAMAIL	eval:check_for_rdns_helo_mismatch("caramail\.com","caramail\.com")
 describe FAKE_HELO_CARAMAIL	Host HELO did not match rDNS: caramail.com
-header FAKE_HELO_ATTBI		eval:check_for_rdns_helo_mismatch("attbi\.com","attbi\.com")
-describe FAKE_HELO_ATTBI	Host HELO did not match rDNS: attbi.com
 header FAKE_HELO_BIGFOOT	eval:check_for_rdns_helo_mismatch("bigfoot\.com","bigfoot\.com")
 describe FAKE_HELO_BIGFOOT	Host HELO did not match rDNS: bigfoot.com
 header FAKE_HELO_EUDORAMAIL	eval:check_for_rdns_helo_mismatch("eudoramail\.com","eudoramail\.com")
@@ -56,6 +54,7 @@ header FAKE_HELO_LYCOS		eval:check_for_rdns_helo_mismatch("lycos\S*","lycos\.com
 describe FAKE_HELO_LYCOS	Host HELO did not match rDNS: lycos.com
 header FAKE_HELO_JUNO		eval:check_for_rdns_helo_mismatch("(?:untd|juno)\.com","juno\.com")
 describe FAKE_HELO_JUNO		Host HELO did not match rDNS: juno.com
+header FAKE_HELO_YAHOO		eval:check_for_rdns_helo_mismatch("yahoo\.com","yahoo\.com")
+describe FAKE_HELO_YAHOO	Host HELO did not match rDNS: yahoo.com
 header FAKE_HELO_YAHOO_CA	eval:check_for_rdns_helo_mismatch("yahoo\.ca","yahoo\.ca")
 describe FAKE_HELO_YAHOO_CA	Host HELO did not match rDNS: yahoo.ca
-
