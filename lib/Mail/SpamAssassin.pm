@@ -91,7 +91,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.131 2002/10/09 14:18:52 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.132 2002/10/19 02:03:14 quinlan Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -111,8 +111,8 @@ $HOME_URL = "http://spamassassin.org/";
 # version installed.  Unless you can come up with a fix for this that
 # allows "make test" to work, don't change this.
 @default_rules_path = (
-	'./rules',
-	'../rules',
+	'./rules',		# REMOVEFORINST
+	'../rules',		# REMOVEFORINST
         '__def_rules_dir__',
         '__prefix__/share/spamassassin',
         '/usr/local/share/spamassassin',
