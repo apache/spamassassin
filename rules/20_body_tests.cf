@@ -1,5 +1,5 @@
 # SpamAssassin rules file: tests.
-# $Id: 20_body_tests.cf,v 1.238 2002/08/23 04:45:04 hughescr Exp $
+# $Id: 20_body_tests.cf,v 1.239 2002/08/26 16:53:35 msquadrat Exp $
 # 
 # note: body tests are run with long lines, so be sure to limit the
 # size of searches; use ".{0,30}" instead of ".*" to avoid huge
@@ -9,19 +9,19 @@
 require_version 2.40
 
 full RAZOR_CHECK	eval:check_razor1()
-describe RAZOR_CHECK	Listed in Razor1, see http://razor.sourceforge.net/
+describe RAZOR_CHECK	Listed in Razor v1, see http://razor.sf.net/
 tflags RAZOR_CHECK	net
 
 full RAZOR2_CHECK	eval:check_razor2()
-describe RAZOR2_CHECK	Listed in Razor2, see http://razor.sourceforge.net/
+describe RAZOR2_CHECK	Listed in Razor v2, see http://razor.sf.net/
 tflags RAZOR2_CHECK	net
 
 full DCC_CHECK		eval:check_dcc()
-describe DCC_CHECK	Listed in DCC, see http://www.rhyolite.com/anti-spam/dcc/dcc-tree/dcc.html
+describe DCC_CHECK	Listed in DCC, see http://rhyolite.com/anti-spam/dcc/
 tflags DCC_CHECK	net
 
 full PYZOR_CHECK	eval:check_pyzor()
-describe PYZOR_CHECK	Listed in Pyzor, see http://pyzor.sourceforge.net/
+describe PYZOR_CHECK	Listed in Pyzor, see http://pyzor.sf.net/
 tflags PYZOR_CHECK	net
 
 ###########################################################################
