@@ -834,7 +834,7 @@ sub _get_tag {
 	  );
 
   if (exists $tags{$tag}) {
-      return $tags{$tag}(@_);
+      return $tags{$tag}->(@_);
   } elsif ($self->{tag_data}->{$tag}) {
     return $self->{tag_data}->{$tag};
   } else {
