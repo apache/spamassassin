@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.511 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.512 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -264,6 +264,10 @@ header T_RCVD_IN_SORBS_SPAM	rbleval:check_rbl_sub('sorbs', '127.0.0.6')
 tflags T_RCVD_IN_SORBS_SPAM net
 header T_RCVD_IN_SORBS_WEB	rbleval:check_rbl_sub('sorbs', '127.0.0.7')
 tflags T_RCVD_IN_SORBS_WEB net
+header T_RCVD_IN_SORBS_BLOCK	rbleval:check_rbl_sub('sorbs', '127.0.0.8')
+tflags T_RCVD_IN_SORBS_BLOCK net
+header T_RCVD_IN_SORBS_ZOMBIE	rbleval:check_rbl_sub('sorbs', '127.0.0.9')
+tflags T_RCVD_IN_SORBS_ZOMBIE net
 
 # bug 1017: domain-based blacklists, experimental
 # dsn.rfc-ignorant.org
