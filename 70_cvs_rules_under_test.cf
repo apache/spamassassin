@@ -42,14 +42,14 @@ meta T_INVALID_DATE_HMS	(__POSS_INVALID_DATE_TIME && !__DATE_TIME_VALID && !__XM
 describe T_INVALID_DATE_HMS	Date header does not use valid HH:MM:SS formatting
 
 # possible replacement for INVALID_DATE.
-header __INVALID_DATE		Date !~ /^\s*(?:(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun), )?[0-3 ]?[0-9] (?:Jan|Feb|Ma[ry]|Apr|Ju[nl]|Aug|Sep|Oct|Nov|Dec) (?:[12][901]?[0-9]{2} [0-2][0-9](?:\:[0-5][0-9]){1,2} (?:[+-][0-9]{4}|UT|[A-Z]{2,3}T)(?:\s+\(.*\))?\s*$/ [if-unset: Wed, 31 Jul 2002 16:41:57 +0200]
-header __XM_FOXMAIL           X-Mailer =~ /FoxMail/
-header __XM_EARTHLINK         X-Mailer =~ /EarthLink MailBox \d\.\d/
-meta T_INVALID_DATE_2		(__INVALID_DATE && !__XM_FOXMAIL && !__XM_EARTHLINK)
-describe T_INVALID_DATE_2	Invalid Date: header (not RFC 2822)
+#header __INVALID_DATE		Date !~ /^\s*(?:(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun), )?[0-3 ]?[0-9] (?:Jan|Feb|Ma[ry]|Apr|Ju[nl]|Aug|Sep|Oct|Nov|Dec) (?:[12][901]?[0-9]{2} [0-2][0-9](?:\:[0-5][0-9]){1,2} (?:[+-][0-9]{4}|UT|[A-Z]{2,3}T)(?:\s+\(.*\))?\s*$/ [if-unset: Wed, 31 Jul 2002 16:41:57 +0200]
+#header __XM_FOXMAIL           X-Mailer =~ /FoxMail/
+#header __XM_EARTHLINK         X-Mailer =~ /EarthLink MailBox \d\.\d/
+#meta T_INVALID_DATE_2		(__INVALID_DATE && !__XM_FOXMAIL && !__XM_EARTHLINK)
+#describe T_INVALID_DATE_2	Invalid Date: header (not RFC 2822)
 
 # Wierd.  Can only assume this is caused by PEBKAC on the sending side...
-header T_SEZ_HTML_BUT_NOT	(MIME_HTML_ONLY && !HTML_MESSAGE)
+meta T_SEZ_HTML_BUT_NOT	(MIME_HTML_ONLY && !HTML_MESSAGE)
 describe T_SEZ_HTML_BUT_NOT	Claims to be HTML, but is actually plain text
 
 # Jul  3 2002 jm: modified PENIS_ENLARGE patterns: removed "add", replaced with "inches",
