@@ -3328,4 +3328,21 @@ sub check_unresolved_template {
 
 ###########################################################################
 
+sub check_numeric_http {
+  my ($self) = @_;
+
+  my $IP_ADDRESS = IPV4_ADDRESS;
+  my $IP_IN_RESERVED_RANGE = IP_IN_RESERVED_RANGE;
+  for my $uri ($self->get_uri_list()) {
+    if ($uri =~ m{^https?://[^/?]*\b($IP_ADDRESS)\b}i &&
+	$1 !~ /^$IP_IN_RESERVED_RANGE/)
+    {
+      return 1;
+    }
+  }
+  return 0;
+}
+
+###########################################################################
+
 1;
