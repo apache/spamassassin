@@ -105,7 +105,7 @@ describe BUGGY_CGI_PT		Broken Portuguese CGI script message
 
 # these are now full tests instead of body tests, to catch QP-encoded
 # split lines
-body SENT_IN_COMPLIANCE		/message .{0,10}sen(?:d|t) in compliance (?:of|with)/i
+body SENT_IN_COMPLIANCE		/message .{0,10}sen[dt] in compliance (?:of|with)/i
 describe SENT_IN_COMPLIANCE	Claims compliance with SPAM regulations
 body PARA_A_2_C_OF_1618		/Paragraph .a.{0,10}2.{0,10}C. of S. 1618/i
 describe PARA_A_2_C_OF_1618	Claims compliance with senate bill 1618
@@ -218,7 +218,8 @@ body EXCUSE_5			/that your email address is removed/i
 describe EXCUSE_5		Claims you can be removed from the list
 
 # strange pattern because otherwise it matches the std. majordomo line
-body EXCUSE_6			/\b(?:wish to|click to|To) remove yourself/i
+# pls note the comment above. DO NOT just put "to" in the first group!
+body EXCUSE_6			/\b(?:wish to|click to) remove yourself/i
 describe EXCUSE_6		Claims you can be removed from the list
 
 body EXCUSE_7			/you (?:wish|want|would like|desire) to be removed/i
@@ -235,7 +236,7 @@ body EXCUSE_13			/mail was sent to you because /i
 describe EXCUSE_13		Gives an excuse for why message was sent
 body EXCUSE_14			/you (?:do not|no longer) wish to receive/i
 describe EXCUSE_14		Tells you how to stop further SPAM
-body EXCUSE_15			/this (?:|e?-?mail|message) (?:is|was) (?:not|never) (?:spam|(?:sent |)unsolicited)/i
+body EXCUSE_15			/this\s*(?:e?-?mail|message)? (?:is|was) (?:not|never) (?:spam|(?:sent )?unsolicited)/i
 describe EXCUSE_15		Claims to be legitimate email
 body EXCUSE_16			/received this.{1,10}in error/i
 describe EXCUSE_16		I wonder how many emails they sent in error...
@@ -399,7 +400,7 @@ body CLICK_BELOW		/click .{0,30}(?:here|below)/is
 describe CLICK_BELOW		Asks you to click below
 
 # (contrib: skod)
-body PRINT_FORM_SIGNATURE	/Sign(?:ature)?(?:\s*here|\s*please)?:.{0,30}___*/i
+body PRINT_FORM_SIGNATURE	/Sign(?:ature)?\s*(?:here|please)?:.{0,30}___*/i
 describe PRINT_FORM_SIGNATURE	Asks you for your signature on a form
 
 # (contrib: skod)
@@ -421,7 +422,7 @@ describe PREST_NON_ACCREDITED	'Prestigious Non-Accredited Universities'
 body NEW_DOMAIN_EXTENSIONS	/new\s*domain\s*extension/i
 describe NEW_DOMAIN_EXTENSIONS	Possible registry spammer
 
-body DOMAIN_BODY		/\s(?:\.|dot\s+)(?:info|biz|name)\b/i
+body DOMAIN_BODY		/\s(?:\.|dot\s+)(?:info|biz|name)\s/i
 describe DOMAIN_BODY		Domain registration spam body
 
 # (contrib: WW)
@@ -577,7 +578,7 @@ describe KIFF			Contains "Temple Kiff"
 body CBYI			/CBYI/
 describe CBYI			Contains "CBYI"
 
-body JODY			/\b(?:My wife, Jody|Mi esposa, Jody)/
+body JODY			/\b(?:My wife|Mi esposa), Jody/
 describe JODY			Contains "My wife, Jody" testimonial
 
 body GENTLE_FEROCITY		/Gentle Ferocity/i
@@ -820,7 +821,7 @@ describe LIFE_INSURANCE		No Examination life Insurance
 #body SEARCH_ENGINE	        /\b(?:(?:submit|traffic|top).{0.10} search engines?|site ranking)\b/i
 #describe SEARCH_ENGINE		Search Engine Site Ranking
 
-body SEARCH_ENGINE_PROMO        /\b(?:(?:submitt?|list)(?:ed|ing|s)?|place(?:d|ment))\b.{0,15}\b(?:in|to).{0,15}\b(?:search(?:ing|)\s*(?:engine|site)|director(?:y|ies))s?\b/is
+body SEARCH_ENGINE_PROMO        /\b(?:(?:submitt?|list)(?:ed|ing|s)?|place(?:d|ment))\b.{0,15}\b(?:in|to).{0,15}\b(?:search(?:ing)?\s*(?:engine|site)|director(?:y|ies))s?\b/is
 describe SEARCH_ENGINE_PROMO    Discusses search engine listings
 
 body OPPORTUNITY_2		/\b(?:opportunity (?:pass|of a lifetime|is knocking|for you)|(?:investment|unique) opportunity)\b/i
@@ -964,7 +965,7 @@ describe COUPON			Offers Coupon
 body CANT_LIVE_WITHOUT	        /\bcan.{0,4} live without\b/i
 describe CANT_LIVE_WITHOUT	Can't live without?
 
-body NAME_BRAND		        /\b(?:famous name brand|major brand)/i
+body NAME_BRAND		        /\b(?:famous name|major) brand/i
 describe NAME_BRAND		Name Brand
 
 body DIET		        /\b(?:(?:without|no) (?:exercis|diet)ing|weight loss|(?:extra|lose|lost|losing).{0,9} (?:pounds|weight|inches)|burn.{1,10}fat)\b/i
@@ -1045,7 +1046,7 @@ describe ONLY_COST		Only $$$
 body SAVE_BUCKS		        /\bsave \$/i
 describe SAVE_BUCKS		Save $$$
 
-body FINANCIAL		        /\bfinancial(?:ly|) free/i
+body FINANCIAL		        /\bfinancial(?:ly)? free/i
 describe FINANCIAL 		Financial Freedom
 
 body FORWARD_LOOKING	        /\bcontains forward-looking statements\b/i
@@ -1054,7 +1055,7 @@ describe FORWARD_LOOKING	Stock Disclaimer Statement
 body DISCLAIMER		        /\bdisclaimer\b/i
 describe DISCLAIMER		Message contains disclaimer
 
-body SATISFACTION	        /\bsatisfaction .{0,9}gauranteed|not .{0,9}satisfied\b/i
+body SATISFACTION	        /\bsatisfaction .{0,9}g(?:ua|au)ranteed|not .{0,9}satisfied\b/i
 describe SATISFACTION		Satisfaction Guaranteed
 
 body PRIZE		        /\bclaim.{0,9} prize/i
@@ -1182,7 +1183,7 @@ describe SEX_FEST               Possible porn - Porn Fest
 body LIVE_PORN                  /\blive .{0,9}(?:fuck(?:ing)?|sex|naked|girls?|virgins?|teens?|porno?)\b/i
 describe LIVE_PORN              Possible porn - Live Porn
 
-body HARDCORE_PORN              /\bhard[ -]?core .{0,9}(?:teen|virgin|cheerleader|amat[eu][eu]r)|\bextreme hardcore/i
+body HARDCORE_PORN              /\bhard[ -]?core .{0,9}(?:teen|virgin|cheerleader|amat(?:eu|ue)r)|\bextreme hardcore/i
 describe HARDCORE_PORN          Possible porn - Hardcore Porn
 
 body HOT_NASTY          /\b(?:horny|nasty|hot|wild|young|horniest|nastiest|hottest|wildest|youngest|naughty|dirtiest|slutty|kinky|lusty|extreme|xxx+)\b.{0,9}\b(?:virgin|asian|cheerleader|sex|selection|fuck|fucking|anal\b|lesb(?:ian|o)|incest|chicks?|pics|movies|video|gay\b|porn|hardcore|schoolgirls|amateur|slut|adult|cum|xxx|sites?|hotties|shit)/i
@@ -1271,7 +1272,7 @@ describe HIDDEN_ASSETS          'Hidden' assets
 body SAVE_THOUSANDS             /\bsave (?:thousands|millions)\b/i
 describe SAVE_THOUSANDS         Save big money
 
-body REFINANCE_YOUR_HOME        /\brefinance your (?:current|) (?:home|house)\b/i
+body REFINANCE_YOUR_HOME        /\brefinance your (?:current)? (?:home|house)\b/i
 describe REFINANCE_YOUR_HOME    "Refinance your home"
 
 body MARKETING_PARTNERS         /marketing partner|partner site/i
