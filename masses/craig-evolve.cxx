@@ -14,16 +14,18 @@
 double evaluate(PGAContext *, int, int);
 int    myMutation(PGAContext *, int, int, double);
 int    GetIntegerParameter(char *query);
+void dump(FILE *);
 void WriteString(PGAContext *ctx, FILE *fp, int p, int pop);
 void showSummary(PGAContext *ctx);
 
 const double threshold = 5.0;
-double nybias = 15.0;
+double nybias = 10.0;
 const int exhaustive_eval = 1;
 
 const double mutation_rate = 0.01;
-const double mutation_noise = 1.0;
-const double regression_coefficient = 0.5;
+const double mutation_noise = 0.5;
+const double regression_coefficient = 0.75;
+const double SCORE_CAP = 3.0;
 
 const double crossover_rate = 0.65;
 
@@ -40,9 +42,10 @@ void init_data()
   if (rank == 0) {
     loadtests();
     loadscores();
+    nybias = nybias*((double)num_spam)/((double)num_nonspam);
+    printf("nybias normalized to %f\n",nybias);
   }
 
-  nybias = nybias*((double)num_spam)/((double)num_nonspam);
   MPI_Bcast(num_tests_hit, num_tests, MPI_CHAR, 0, MPI_COMM_WORLD);
   MPI_Bcast(&nybias, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Bcast(is_spam, num_tests, MPI_CHAR, 0, MPI_COMM_WORLD);
@@ -70,7 +73,7 @@ int main(int argc, char **argv) {
 
      PGASetPopSize(ctx, pop_size);
 
-     //PGASetNumReplaceValue(ctx, replace_num);
+     PGASetNumReplaceValue(ctx, replace_num);
 
      //PGASetMutationOrCrossoverFlag(ctx, PGA_TRUE);
 
@@ -94,6 +97,11 @@ int main(int argc, char **argv) {
      {
        for(int p=0; p<pop_size; p++)
        {
+	 if(is_mutatable[i])
+	 {
+            if(bestscores[i] > SCORE_CAP) bestscores[i] = SCORE_CAP;
+	    else if(bestscores[i] < -SCORE_CAP) bestscores[i] = -SCORE_CAP;
+	 }
 	 PGASetRealAllele(ctx, p, PGA_NEWPOP, i, bestscores[i]);
        }
      }
@@ -143,7 +151,7 @@ double score_msg(PGAContext *ctx, int p, int pop, int i)
     {
       // False positive
       ga_ny++;
-      nyscore += msg_score; // Each false positive means nyscore += more than 0
+      nyscore += msg_score; // Each false positive means nyscore += more than 5
     }
     else
     {
@@ -197,7 +205,7 @@ int myMutation(PGAContext *ctx, int p, int pop, double mr) {
 	// Regress towards it...
 	gene_sum = (1.0-regression_coefficient)*gene_sum+regression_coefficient*PGAGetRealAllele(ctx, p, pop, i);
 	// Set this gene in this allele to be the average, plus some gaussian noise
-	//if(gene_sum > 4.0) gene_sum = 4.0; else if(gene_sum < -4.0) gene_sum = -4.0;
+	if(gene_sum > SCORE_CAP) gene_sum = SCORE_CAP; else if(gene_sum < -SCORE_CAP) gene_sum = -SCORE_CAP;
 	PGASetRealAllele(ctx, p, pop, i, PGARandomGaussian(ctx, gene_sum, mutation_noise));
 	count++;
       }
@@ -254,7 +262,7 @@ void showSummary(PGAContext *ctx)
     }
     else if(0 == PGAGetGAIterValue(ctx) % 5)
     {
-      printf(".");
+      printf("%d",(PGAGetGAIterValue(ctx)/5)%10);
     }
   }
 }
