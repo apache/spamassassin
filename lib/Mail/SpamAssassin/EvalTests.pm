@@ -16,6 +16,7 @@ use vars qw{
 	$KNOWN_BAD_DIALUP_RANGES
 	$CCTLDS_WITH_LOTS_OF_OPEN_RELAYS
 	$ROUND_THE_WORLD_RELAYERS
+	@PORN_WORDS
 };
 
 # persistent spam sources. These are not in the RBL though :(
@@ -26,6 +27,20 @@ $KNOWN_BAD_DIALUP_RANGES = q(
 # sad but true. sort it out, sysadmins!
 $CCTLDS_WITH_LOTS_OF_OPEN_RELAYS = qr{(?:kr|cn|cl|ar|hk|il|th|tw|sg|za|tr|ma|ua|in|pe)};
 $ROUND_THE_WORLD_RELAYERS = qr{(?:net|com|ca)};
+
+# Porn words will each be prefixed with "\b" but not suffixed so as to pick up word ending variations.
+# if you want \b on the end, be sure to add it yourself.
+@PORN_WORDS = ('lolita',  'cum', 'org[iy]', 'wild', 'fuck', 'teen',
+'action', 'spunk', 'puss', 'suck', 'hot',
+'voyeur', 'le[sz]b(?:ian|o)', 'anal\b', 'interr?acial', 'asian',
+'amateur', 'sex+', 'slut', 'explicit', 'xxx(?:\b|[^x])', 'live',
+'celebrity', 'lick', 'suck', 'dorm', 'webcam', 'ass\b', 'schoolgirl',
+'strip', 'horn[yi]', 'erotic', 'oral', 'penis', 'hard.?core',
+'blow.?job', 'nast[yi]', 'porn', 'whore', 'naked',
+'nude', 'virgin', 'naught[yi]', 'girl', 'celeb', 'babe',
+'adult', 'skank', 'tits?', 'titties'
+);
+
 
 # Here's how that RE was determined... relay rape by country (as of my
 # spam collection on Dec 12 2001):
@@ -1004,6 +1019,18 @@ sub subject_missing {
 # BODY TESTS:
 ###########################################################################
 
+
+sub porn_word_test {
+    my ($self, $fulltext) = @_;
+    my $hits = 0;
+    my $word;
+    foreach $word (@PORN_WORDS) {
+        $hits++ if $$fulltext =~ /\b$word/i;
+        return 1 if $hits == 3;
+    }
+    return 0;
+}
+
 sub check_for_very_long_text {
   my ($self, $body) = @_;
 
@@ -1085,7 +1112,7 @@ sub check_for_base64_enc_text {
 
   # If the message itself is base64-encoded, return positive
   my $cte = $self->get('Content-Transfer-Encoding');
-  if ( defined $cte && $cte =~ /^\s*base64/i && 
+  if ( defined $cte && $cte =~ /^\s*base64/i &&
         ($self->get('content-type') =~ /text\//i) ) {
   	return 1;
   }
