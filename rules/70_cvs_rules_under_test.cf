@@ -7,7 +7,7 @@
 #
 # I suggest adding a prefix to rules in this file, "T_" -- this
 # helps identify probationary rules in test output.
-# $Id: 70_cvs_rules_under_test.cf,v 1.27 2002/08/23 04:45:04 hughescr Exp $
+# $Id: 70_cvs_rules_under_test.cf,v 1.28 2002/08/28 14:28:25 msquadrat Exp $
 
 ######################################################################
 
@@ -16,3 +16,7 @@ header MAILER_DAEMON		From =~ /^(?:Mail Delivery \w+ )?<?mailer.?daemon\@\S+>?(?
 describe MAILER_DAEMON		From the Mailer-Daemon
 tflags MAILER_DAEMON		nice
 score MAILER_DAEMON		-1.0
+
+header T_TRAFFICMAGNET		From:addr =~ /\@trafficmagnet\.(?:net|com)/i
+describe T_TRAFFICMAGNET	Search engine scam from a well known spamhaus
+score T_TRAFFICMAGNET		3.0
