@@ -63,7 +63,7 @@ describe BUGGY_CGI_PT		Broken Portuguese CGI script message
 
 # these are now full tests instead of body tests, to catch QP-encoded
 # split lines
-body SENT_IN_COMPLIANCE		/message .{0,10}sen(?:d|t) in compliance (?:of|with)/
+body SENT_IN_COMPLIANCE		/message .{0,10}sen(?:d|t) in compliance (?:of|with)/i
 describe SENT_IN_COMPLIANCE	Claims compliance with SPAM regulations
 body PARA_A_2_C_OF_1618		/Paragraph .a.{0,10}2.{0,10}C. of S. 1618/i
 describe PARA_A_2_C_OF_1618	Claims compliance with senate bill 1618
@@ -94,18 +94,18 @@ body PRINT_OUT_AND_FAX		/print\s+out\s+and\s+fax/i
 describe PRINT_OUT_AND_FAX	Contains words 'print out and fax'
 
 body AMAZING			/AMAZING/
-describe AMAZING		Contains word 'AMAZING'
+describe AMAZING		Contains word 'AMAZING' in all-caps
 body GUARANTEE			/GUARANTEE/
 describe GUARANTEE		Contains word 'guarantee' in all-caps
 body PROFITS			/PROFITS/
 describe PROFITS		Contains word 'profits' in all-caps
-body NO_QS_ASKED		/NO QUESTIONS ASKED/
+body NO_QS_ASKED		/NO QUESTIONS ASKED/i
 describe NO_QS_ASKED		Doesn't ask any questions
-body FULL_REFUND		/FULL REFUND/
+body FULL_REFUND		/FULL REFUND/i
 describe FULL_REFUND		Offers a full refund
-body FOR_FREE			/for FREE/
+body FOR_FREE			/for FREE/i
 describe FOR_FREE		No such thing as a free lunch
-body ONE_HUNDRED_PC_FREE	/100% FREE/
+body ONE_HUNDRED_PC_FREE	/100% FREE/i
 describe ONE_HUNDRED_PC_FREE	No such thing as a free lunch
 body ONE_HUNDRED_PC_GUAR	/100% GUARANTEED/i
 describe ONE_HUNDRED_PC_GUAR	One hundred percent guaranteed
@@ -133,7 +133,7 @@ body MASS_EMAIL			/mass e-*mail/i
 describe MASS_EMAIL		Talks about mass email
 body EMAIL_MARKETING		/e-*mail marketing/i
 describe EMAIL_MARKETING	Talks about email marketing
-body PRODUCED_AND_SENT_OUT	/This a.?d is produced and sent out by/
+body PRODUCED_AND_SENT_OUT	/This a.?d is produced and sent out by/i
 describe PRODUCED_AND_SENT_OUT	Tells you it's an ad
 body INCREASE_TRAFFIC		/increase.{1,15} traffic\b/i
 describe INCREASE_TRAFFIC	Instructions on how to boost traffic
@@ -175,12 +175,12 @@ body EXCUSE_5			/that your email address is removed/i
 describe EXCUSE_5		Claims you can be removed from the list
 
 # strange pattern because otherwise it matches the std. majordomo line
-body EXCUSE_6			/(?:wish to|click to|To) remove yourself/
+body EXCUSE_6			/(?:wish to|click to|To) remove yourself/i
 describe EXCUSE_6		Claims you can be removed from the list
 
 body EXCUSE_7			/you (?:wish|want|would like|desire) to be removed/i
 describe EXCUSE_7		Claims you can be removed from the list
-body EXCUSE_8			/requests to be taken off our mailing list/
+body EXCUSE_8			/requests to be taken off our mailing list/i
 describe EXCUSE_8		Claims you can be removed from the list
 body EXCUSE_9			/If you do.{0,3}n.{0,3}t (?:want|wish|care) to receive emails (?:on this subject|in the future)/i
 describe EXCUSE_9		Claims you can be removed from the list
@@ -198,7 +198,7 @@ body EXCUSE_14			/you (?:do not|no longer) wish to receive/i
 describe EXCUSE_14		Tells you how to stop further SPAM
 body EXCUSE_15			/this (?:|e?-?mail|message )(?:is|was) (?:not|never) (?:spam|(?:sent |)unsolicited)/i
 describe EXCUSE_15		Claims to be legitimate email
-body EXCUSE_16			/received this.{1,10}in error/
+body EXCUSE_16			/received this.{1,10}in error/i
 describe EXCUSE_16		I wonder how many emails they sent in error...
 body EXCUSE_17			/received.{0,15} by mistake/i
 describe EXCUSE_17		Suspect you might have received the message by mistake
@@ -255,7 +255,7 @@ describe PORN_7			Uses words and phrases which indicate porn (7)
 body PORN_8			/(?:video|movie|teen|ware|mp3)z/
 describe PORN_8			Uses words and phrases which indicate porn (8)
 
-body SEXY_PICS                  /sexy pictures/
+body SEXY_PICS                  /sexy pictures/i
 describe SEXY_PICS              Sexy pictures
 
 rawbody TRACKER_ID		/^\W{4,6} (?:[a-z]{10,}|[A-Z]{10,}) \W{4,6}\s*$/
@@ -263,9 +263,9 @@ describe TRACKER_ID		Incorporates a tracking ID number
 
 body OPPORTUNITY		/OPPORTUNITY/
 describe OPPORTUNITY		Gives information about an opportunity
-body PURE_PROFIT		/PURE PROFIT/
+body PURE_PROFIT		/PURE PROFIT/i
 describe PURE_PROFIT		Profit is dirty, not pure
-body STOCK_PICK			/STOCK PICK/
+body STOCK_PICK			/STOCK PICK/i
 describe STOCK_PICK		Offers a stock pick
 body STOCK_ALERT		/stock alert/i
 describe STOCK_ALERT		Offers a stock alert
@@ -335,7 +335,7 @@ body FOR_INSTANT_ACCESS		/INSTANT ACCESS/i
 describe FOR_INSTANT_ACCESS	Instant Access button
 
 # (contrib: skod)
-body NO_SELLING			/absolutely NO selling/
+body NO_SELLING			/absolutely NO selling/i
 describe NO_SELLING		Claims not to be selling anything
 
 # (contrib: skod)
@@ -413,7 +413,7 @@ describe MORTGAGE_RATES		Information on mortgage rates
 body TAKE_ACTION_NOW		/take action now!/i
 describe TAKE_ACTION_NOW	Tells you to 'take action now!'
 
-body THE_FOLLOWING_FORM		/the following form\b/
+body THE_FOLLOWING_FORM		/the following form\b/i
 describe THE_FOLLOWING_FORM	Asks you to fill out a form
 
 # suggested by Nick Rothwell
@@ -536,7 +536,7 @@ describe BE_AMAZED		Apparently, you'll be amazed
 body ITS_EFFECTIVE		/\bit's effective\b/i
 describe ITS_EFFECTIVE		Something claims to be effective
 
-body RESISTANCE_IS_FUTILE	/Replying to this email will not unsubscribe you./
+body RESISTANCE_IS_FUTILE	/Replying to this email will not unsubscribe you./i
 describe RESISTANCE_IS_FUTILE	Resistance to this spam is futile
 
 body MAILMAN_CONFIRM            /We have received a request .*subscription of your email address.* to the .* mailing list/
@@ -555,13 +555,13 @@ describe SUBJ_2_CREDIT          Contains 'subject to credit approval'
 body DEAR_SOMEBODY              /Dear [A-Z][a-z]+/
 describe DEAR_SOMEBODY          Contains 'Dear Somebody'
 
-body GAPPY_TEXT                 /(?:[a-z][-_\.\,\:\;\'\~]{1,3}){5,}/i
+body GAPPY_TEXT                 /\b(?:[a-z][-_\.\,\:\;\'\~\s]{1,3}){5,}/i
 describe GAPPY_TEXT             Contains 'G.a.p.p.y-T.e.x.t'
 
 body COPY_DVDS                  /copy.{1,20}dvd/i
 describe COPY_DVDS              Containts 'Copy DVDs'
 
-body URGENT_BIZ                 /URGENT BUSINESS/
+body URGENT_BIZ                 /URGENT BUSINESS/i
 describe URGENT_BIZ             Containts 'URGENT BUSINESS'
 
 body EARN_PER_WEEK              /earn.{1,20}\d\d\d+.{1,30}per week/i
