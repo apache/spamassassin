@@ -78,7 +78,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 $VERSION = "2.40";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.103 2002/07/25 19:22:17 msquadrat Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.104 2002/07/26 14:27:41 jmason Exp $';
 
 sub Version { $VERSION; }
 
@@ -823,41 +823,31 @@ sub encapsulate_mail_object {
     return $class->new($mail_obj);
   }
 
-  if (!defined $self->{mail_audit_supports_encapsulation}) {
-    # test Mail::Audit for new-style encapsulation of the Mail::Internet
-    # message object.
-    my ($hdr, $val);
-    foreach my $hdrtest (qw(From To Subject Message-Id Date Sender)) {
-      $val = $mail_obj->get ($hdrtest);
-      if (defined $val) { $hdr = $hdrtest; last; }
-    }
+  # new versions of Mail::Audit can have one of 2 different base classes. URGH.
+  # we can tell which class, by querying the is_mime() method.  Support for
+  # MIME::Entity contributed by Andrew Wilson <andrew@rivendale.net>.
+  #
+  my $ismime = 0;
 
-    if (!defined $val) {                  # ah, just make one up
-      $hdr = 'X-SpamAssassin-Test-Header'; $val = 'x';
-    }
+  $self->{mail_audit_supports_encapsulation} = 0;
 
-    # now try using one of the new methods...
-    eval { $mail_obj->replace_header ($hdr, $val); };
+  if ($mail_obj->can ("is_mime")) {
+    $self->{mail_audit_supports_encapsulation} = 1;
+    $ismime = $mail_obj->is_mime();
 
-    if ($@)
-    {
-      dbg ("using Mail::Audit exposed-message-object code");
-      $self->{mail_audit_supports_encapsulation} = 0;
-    } else {
-      dbg ("using Mail::Audit message-encapsulation code");
-      $self->{mail_audit_supports_encapsulation} = 1;
-    }
+  } elsif ($mail_obj->can ("replace_header")) {
+    $self->{mail_audit_supports_encapsulation} = 1;
   }
 
-  if ($self->{mail_audit_supports_encapsulation}) {
+  if ($ismime) {
+    require Mail::SpamAssassin::EncappedMIME;
+    return  Mail::SpamAssassin::EncappedMIME->new($mail_obj);
+  } elsif ($self->{mail_audit_supports_encapsulation}) {
     require Mail::SpamAssassin::EncappedMessage;
-    # warning: Changed indirect object syntax here because of new() function 
-    # above which may bite us in the foot some time. See Damian Conway's book for details
-    return Mail::SpamAssassin::EncappedMessage->new($mail_obj);
-
+    return  Mail::SpamAssassin::EncappedMessage->new($mail_obj);
   } else {
     require Mail::SpamAssassin::ExposedMessage;
-    return Mail::SpamAssassin::ExposedMessage->new($mail_obj);
+    return  Mail::SpamAssassin::ExposedMessage->new($mail_obj);
   }
 }
 
