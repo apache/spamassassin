@@ -42,6 +42,7 @@ use Sys::Hostname;
 use Mail::SpamAssassin::EvalTests;
 use Mail::SpamAssassin::AutoWhitelist;
 use Mail::SpamAssassin::HTML;
+use Mail::SpamAssassin::Received;
 use Mail::SpamAssassin::Util;
 
 use constant HAS_MIME_BASE64 => eval { require MIME::Base64; };
@@ -120,6 +121,9 @@ sub check {
     dbg("debug: Scoreset $set but Bayes is available, switching scoresets");
     $self->{conf}->set_score_set ($set|2);
   }
+
+  # pre-chew Received headers
+  $self->parse_received_headers();
 
   {
     # If you run timelog from within specified rules, prefix the message with
