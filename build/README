@@ -160,16 +160,8 @@ SPAMASSASSIN RELEASE PROCEDURE
         cp ~/site/released/Mail-SpamAssassin-$version.* \
             /www/www.apache.org/dist/spamassassin/source
 
-        (
-          cd /www/www.apache.org/dist/spamassassin
-          ln -s source/Mail-SpamAssassin-$version.* .
-
-          for ext in {tar.bz2,tar.gz,zip}{,.asc,.md5,.sha1} ; do
-            rm -f Mail-SpamAssassin-current.$ext
-            ln -s Mail-SpamAssassin-$version.$ext \
-                    Mail-SpamAssassin-current.$ext
-          done
-        )
+        cd /www/www.apache.org/dist/spamassassin
+        ln -s source/Mail-SpamAssassin-$version.* .
 
         chmod -R g+w /www/www.apache.org/dist/spamassassin
 
