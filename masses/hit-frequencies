@@ -22,12 +22,12 @@ getopts("fm:M:X:l:L:pxhc:at:s:");
 
 use vars qw {
   $opt_f $opt_m $opt_M $opt_X $opt_p $opt_x $opt_h $opt_l $opt_L $opt_c
-  $opt_a $opt_t $opt_s
+  $opt_a $opt_t $opt_s 
 };
 
 sub usage {
   die "hit-frequencies [-c rules dir] [-f] [-m RE] [-M RE] [-X RE] [-l LC]
-                [-s SC] [-a] [-p] [-x] [spam log] [ham log]
+                [-s SC] [-a] [-p] [-x] [-g] [spam log] [ham log]
 
     -c p   use p as the rules directory
     -f     falses. count only false-negative or false-positive matches
@@ -40,6 +40,7 @@ sub usage {
     -a     display all tests
     -p     percentages. implies -x
     -x     extended output, with S/O ratio and scores
+    -g     use Information Gain ranking
     -s SC  which scoreset to use
 
     options -l and -L are mutually exclusive.
@@ -67,6 +68,7 @@ my %freq_ham = ();
 my $num_spam = 0;
 my $num_ham = 0;
 my %ranking = ();
+my %infogain = ();
 my $ok_lang = '';
 
 readscores($cffile);
@@ -96,10 +98,10 @@ my $hdr_ham = $num_ham;
 if ($opt_p) {
   if ($opt_f) {
     printf "%7s %7s %7s  %6s  %6s  %6s  %s\n",
-  	"OVERALL%", "FNEG%", "FPOS%", "S/O", "RANK", "SCORE", "NAME";
+  	"OVERALL%", "FNEG%", "FPOS%", "S/O", "IG", "SCORE", "NAME";
   } else {
     printf "%7s %7s  %7s  %6s  %6s  %6s  %s\n",
-  	"OVERALL%", "SPAM%", "HAM%", "S/O", "RANK", "SCORE", "NAME";
+  	"OVERALL%", "SPAM%", "HAM%", "S/O", "IG", "SCORE", "NAME";
   }
   printf "%7d  %7d  %7d  %7.3f %6.2f  %6.2f  (all messages)\n",
   	$hdr_all, $hdr_spam, $hdr_ham,
@@ -114,7 +116,7 @@ if ($opt_p) {
 
 } elsif ($opt_x) {
   printf "%7s %7s  %7s  %6s  %6s %6s  %s\n",
-  	"OVERALL%", "SPAM%", "HAM%", "S/O", "RANK", "SCORE", "NAME";
+  	"OVERALL%", "SPAM%", "HAM%", "S/O", "IG", "SCORE", "NAME";
   printf "%7d  %7d  %7d  %7.3f %6.2f %6.2f  (all messages)\n",
   	$hdr_all, $hdr_spam, $hdr_ham,
         soratio ($num_spam,$num_ham), 0, 0;
@@ -154,24 +156,74 @@ foreach my $test (keys %freq_spam, keys %freq_ham) {
 
   # now, given the S/O ratio (0.0 to 1.0) and match%s (0.0 to 100.0),
   # come up with a ranking.
+  my $rank;
 
   # old system
-  #my $rank = $soratio * ($fsadj / (($fnadj || 0.0008) * 10));
+  #$rank = $soratio * ($fsadj / (($fnadj || 0.0008) * 10));
   #$rank = log($rank+0.001);
 
   # new system: allows a few more 99% hitters into the first page
-  my $rank = (($soratio**3) * 2000) + ($fsadj*3);
+  # $rank = (($soratio**3) * 2000) + ($fsadj*3);
+  # 
+  # $ranking{$test} = $rank;
+  # $rank_hi = $rank if ($rank > $rank_hi);
+  # $rank_lo = $rank if ($rank < $rank_lo);
 
-  $ranking{$test} = $rank;
-  $rank_hi = $rank if ($rank > $rank_hi);
-  $rank_lo = $rank if ($rank < $rank_lo);
+  {
+    # New new system: from "Learning to Filter Unsolicited Commercial E-Mail",
+    # Ion Androutsopoulos et al: determine the information gain IG(X, C) of the
+    # Boolean attributes (ie. the rules). Measures "the average reduction in
+    # the entropy of C (classification) given the value of X (the rule)". Makes
+    # a good ranking measure with a proper statistical basis. ;)
+    #
+    # Still would like to get an entropy measure in, too.
+    #
+    #             sum                                    P(X = x ^ C = c)
+    # IG(X,C) = x in [0, 1]    P(X = x ^ C = c) . log2( ------------------- )
+    #           c in [Ch, Cs]                           P(X = x) . P(C = c)
+    #
+    my $safe_nspam = $num_spam || 0.0000001;
+    my $safe_nham = $num_ham || 0.0000001;
+
+    my $num_all = ($num_spam+$num_ham);
+    my $safe_all = $num_all || 0.0000001;
+    my $f_all = $fs+$fn;
+
+    my $px0 = (($num_all - $f_all) / $safe_all);         # P(X = 0)
+    my $px1 = ($f_all / $safe_all);                      # P(X = 1)
+    my $pccs = ($num_spam / $safe_all);                  # P(C = Cs)
+    my $pcch = ($num_ham / $safe_all);                   # P(C = Ch)
+    my $px1ccs = ($fs / $safe_nspam);                   # P(X = 1 ^ C = Cs)
+    my $px1cch = ($fn / $safe_nham);                    # P(X = 1 ^ C = Ch)
+    my $px0ccs = (($num_spam - $fs) / $safe_nspam);     # P(X = 0 ^ C = Cs)
+    my $px0cch = (($num_ham - $fn) / $safe_nham);       # P(X = 0 ^ C = Ch)
+    my $safe_px0_dot_pccs = ($px0 * $pccs) || 0.00000001;
+    my $safe_px0_dot_pcch = ($px0 * $pcch) || 0.00000001;
+    my $safe_px1_dot_pccs = ($px1 * $pccs) || 0.00000001;
+    my $safe_px1_dot_pcch = ($px1 * $pcch) || 0.00000001;
+
+    sub log2 { return log($_[0]) / 0.693147180559945; } # log(2) = 0.6931...
+
+    my $safe_px0ccs = ($px0ccs || 0.0000001);
+    my $safe_px0cch = ($px0cch || 0.0000001);
+    my $safe_px1ccs = ($px1ccs || 0.0000001);
+    my $safe_px1cch = ($px1cch || 0.0000001);
+    my $infogain = ( $px0ccs * log2($safe_px0ccs / $safe_px0_dot_pccs) ) +
+                    ( $px0cch * log2($safe_px0cch / $safe_px0_dot_pcch) ) +
+                    ( $px1ccs * log2($safe_px1ccs / $safe_px1_dot_pccs) ) +
+                    ( $px1cch * log2($safe_px1cch / $safe_px1_dot_pcch) );
+
+    $ranking{$test} = $infogain;
+  }
 }
 
-# now normalise the rankings to [0, 1]
-$rank_hi -= $rank_lo;
-foreach $test (@tests) {
-  $ranking{$test} = $rank_hi == 0 ? 0.001 : ($ranking{$test} - $rank_lo) / $rank_hi;
-}
+# {
+# # now normalise the rankings to [0, 1]
+# $rank_hi -= $rank_lo;
+# foreach $test (@tests) {
+# $ranking{$test} = $rank_hi == 0 ? 0.001 : ($ranking{$test} - $rank_lo) / $rank_hi;
+# }
+# }
 
 foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
   next unless (exists $rules{$test});           # only valid tests
