@@ -1,16 +1,18 @@
 #!/usr/bin/perl -w
 
 use Getopt::Std;
-getopts("xp");
+getopts("xpf");
 
 sub usage {
-  die "hit-frequencies [-x] [-p] [spam log] [nonspam log]
+  die "hit-frequencies [-x] [-p] [-f] [spam log] [nonspam log]
   
     -x: extended output, with S:N ratio and scores
     -p: percentages. implies -x
+    -f: falses. count only false-negative or false-positive matches
 
     if either the spam or and nonspam logs are unspecified, the defaults
-    are \"spam.log\" and \"nonspam.log\"
+    are \"spam.log\" and \"nonspam.log\" in the cwd.
+
 ";
 }
 
@@ -31,8 +33,13 @@ my $hdr_spam = $num_spam;
 my $hdr_nonspam = $num_nonspam;
 
 if ($opt_p) {
-  printf "%7s  %7s  %7s  %6s  %6s  %s\n",
+  if ($opt_f) {
+    printf "%7s  %7s  %7s %6s  %6s  %s\n",
+  	"OVERALL%", "FNEG%", "FPOS%", "S/O", "SCORE", "NAME";
+  } else {
+    printf "%7s  %7s  %7s %6s  %6s  %s\n",
   	"OVERALL%", "SPAM%", "NONSPAM%", "S/O", "SCORE", "NAME";
+  }
   printf "%7d  %7d  %7d  %6.2f  %6.2f  (all messages)\n",
   	$hdr_all, $hdr_spam, $hdr_nonspam, snratio ($num_spam,$num_nonspam), 0;
 
@@ -105,24 +112,41 @@ sub readlogs {
     my $isspam = 0; ($file eq $spam) and $isspam = 1;
 
     while (<IN>) {
-      /^.\s+-?(\d+)\s+(\S+)\s*(\S*)/ or next;
+      /^(.)\s+(-?\d+)\s+(\S+)\s*(\S*)/ or next;
+      my $caught = ($1 eq 'Y');
+      my $hits = $2;
+      $_ = $4; s/,,+/,/g;
 
       if ($isspam) {
-	$num_spam++;
+        if ($opt_f) {
+          if (!$caught) { $num_spam++; }
+        } else {
+          $num_spam++;
+        }
       } else {
-	$num_nonspam++;
+        if ($opt_f) {
+          if ($caught) { $num_nonspam++; }
+        } else {
+          $num_nonspam++;
+        }
       }
-      my $hits = $1;
 
-      $_ = $3; s/,,+/,/g;
       my @tests = split (/,/, $_);
       foreach my $t (@tests) {
 	next if ($t eq '');
 	$freq{$t}++;
 	if ($isspam) {
-	  $freq_spam{$t}++;
+          if ($opt_f) {
+            if (!$caught) { $freq_spam{$t}++; }
+          } else {
+            $freq_spam{$t}++;
+          }
 	} else {
-	  $freq_nonspam{$t}++;
+          if ($opt_f) {
+            if ($caught) { $freq_nonspam{$t}++; }
+          } else {
+            $freq_nonspam{$t}++;
+          }
 	}
       }
     } 
