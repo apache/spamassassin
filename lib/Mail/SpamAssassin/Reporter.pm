@@ -155,8 +155,6 @@ sub is_dcc_available {
   }
 
   if (!open(DCCHDL, "dccproc -V 2>&1 |")) {
-    @resp = <DCCHDL>;
-    close DCCHDL;
     dbg ("DCC is not available");
     return 0;
   } 
