@@ -739,6 +739,10 @@ sub check_for_sender_no_reverse {
 
   my @received = grep(/\S/, split(/\n/, $self->get ('Received')));
 
+  # Ignore received lines like "(qmail 12345 invoked by uid 789)"
+  @received = grep(/\bfrom\b.*\bby\b/s, @received);
+
+  # Sender recveived header is the last in the sequence
   my $sender_rcvd = $received[$#received];
 
   # Ignore if the from host is domainless (has no dot)
