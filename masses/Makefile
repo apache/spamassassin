@@ -8,6 +8,8 @@ PLATFORM = linux
 # Pick where you have PGApack installed
 PGAPATH = pgapack
 
+# What rule scoreset are we using?
+SCORESET = 0
 
 #### Should be no need to modify below this line
 
@@ -38,13 +40,13 @@ evolve: tmp/tests.h craig-evolve.c
 	strip evolve
 
 tmp/tests.h: tmp/.created tmp/ranges.data logs-to-c
-	./logs-to-c
+	./logs-to-c --scoreset=$(SCORESET)
 
 tmp/ranges.data: tmp/.created freqs score-ranges-from-freqs
-	./score-ranges-from-freqs < freqs
+	./score-ranges-from-freqs ../rules $(SCORESET) < freqs
 
 freqs: spam.log ham.log
-	./hit-frequencies -x -p > freqs
+	./hit-frequencies -x -p -s $(SCORESET) > freqs
 
 tmp/.created:
 	-mkdir tmp
