@@ -28,7 +28,7 @@ describe SPAM_PHRASES_100	spam-phrase score is over 100
 
 body REMOVE_SUBJ		/remove.{1,15}subject/i
 describe REMOVE_SUBJ		List removal information
-body SUBJ_REMOVE		/\w.*subject.{1,15}remove/i
+body SUBJ_REMOVE		/\w.{0,80}subject.{1,15}remove/i
 describe SUBJ_REMOVE		List removal information
 body REPLY_REMOVE_SUBJECT	/reply.{1,15}remove.{1,15}subject/i
 describe REPLY_REMOVE_SUBJECT	List removal information
