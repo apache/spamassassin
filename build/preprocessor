@@ -53,7 +53,6 @@ foreach (keys %ENV) {
   $defines{$_} = $ENV{$_};
 }
 
-
 foreach (@ARGV) {
   if    (/^-M([a-z]+)$/)       { $modules{$1} = 1; }
   elsif (/^-D([A-Z_]+)=(.*)$/) { $defines{$1} = $2; }
@@ -70,9 +69,8 @@ foreach (@ARGV) {
 # by just ignoring that switch.
 $mode = undef unless $mode;
 
-my $l = 1;
-my $fname;
 if (defined ($indir) && defined ($outdir) && scalar @infiles > 0) {
+  my $fname;
   while ($fname = shift @infiles) {
     my $in = File::Spec->catfile ($indir, $fname);
     my $out = File::Spec->catfile ($outdir, $fname);
@@ -107,11 +105,14 @@ sub read_defs {
 
 sub do_file {
   my ($in, $out) = @_;
-  open (STDIN, "<$in")  or die "Cannot open $in: $!";
-  open (OUT,   ">$out") or die "Cannot open $out: $!";
-  select OUT;
-  do_stdin();
-  close STDIN; close OUT;
+ 
+  open (FOOIN,  "<$in")  or die "Cannot open $in: $!";
+  open (FOOOUT, ">$out") or die "Cannot open $out: $!";
+  
+  do_it();
+  
+  close (FOOIN);
+  close (FOOOUT);
 
   if (defined $mode) {
     chmod (oct $mode, $out) or die "Cannot chmod $mode $out: $!";
@@ -119,6 +120,17 @@ sub do_file {
 }
 
 sub do_stdin {
+  open (FOOIN,  "<&STDIN")  or die "Cannot dup stdin: $!";
+  open (FOOOUT, ">&STDOUT") or die "Cannot dup stdout: $!";
+
+  do_it();
+
+  close (FOOIN);
+  close (FOOOUT);
+}
+
+
+sub do_it {
   # The perlpath can be overwritten via -DPERL_BIN=<perlpath>
   my $perl   = $Config{'perlpath'};
   if($defines{'PERL_BIN'} && ($defines{PERL_BIN} ne 'this')) {
@@ -149,7 +161,8 @@ sub do_stdin {
     $perl_version = sprintf("%i.%03i%03i", $v[0] || 0, $v[1] || 0, $v[2] || 0);
   }
 
-  while (<STDIN>) {
+  my $l = 1;
+  while (<FOOIN>) {
     $_ = pack("C0A*", $_);	# turn off UTF8-ness
 
     # Conditional compiling
@@ -163,7 +176,10 @@ sub do_stdin {
     # Variable replacement
     if ($modules{'vars'}) {
       # Replace all @@VARS@@
-      s/\@\@([A-Z][A-Z0-9_]*)\@\@/$defines{$1}/g;
+      while (/\@\@([A-Z][A-Z0-9_]*)\@\@/) {
+        my $d = $defines{$1} || '';
+        s/\@\@$1\@\@/$d/g;
+      }
     }
 
     # Sharpbang (#!) replacement (see also ExtUtils::MY->fixin)
@@ -171,7 +187,8 @@ sub do_stdin {
       s/^#!.*perl.*$/#!${perl}${perl_taint}${perl_warn}/;
     }
 
-    print;
+    print FOOOUT $_;
     $l++;
   }
 }
+
