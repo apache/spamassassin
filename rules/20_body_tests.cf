@@ -122,8 +122,9 @@ describe S_1618			Claims compliance with senate bill 1618
 body SECTION_301		/SECTION.{0,10}301/i
 describe SECTION_301		Claims compliance with SPAM regulations
 
-body EU_EMAIL_OPTOUT		/EU (?:e-?mail opt.?out|e.?commerce) directive/i
-describe EU_EMAIL_OPTOUT	Claims compliance with SPAM regulations
+#   0.000    0.000    0.000    0.00    1.80  EU_EMAIL_OPTOUT (no matches)
+#body EU_EMAIL_OPTOUT		/EU (?:e-?mail opt.?out|e.?commerce) directive/i
+#describe EU_EMAIL_OPTOUT	Claims compliance with SPAM regulations
 
 #  0.00     0.00     0.00    0.00    1.00  EU_200_32_CE (no matches)
 #body EU_200_32_CE		/Directive 200.32.CE/i
@@ -203,8 +204,10 @@ describe ONE_TIME_MAILING	'one time mailing' doesn't mean it isn't spam
 body SOCIAL_SEC_NUMBER		/social security (?:number|record)/i
 describe SOCIAL_SEC_NUMBER	Talks about social security numbers
 
-body LASER_PRINTER		/LASER PRINTER SUPPLIES/
-describe LASER_PRINTER		Discusses laser printer supplies
+#   0.000    0.000    0.000    0.00    3.90  LASER_PRINTER (no matches)
+#body LASER_PRINTER		/LASER PRINTER SUPPLIES/
+#describe LASER_PRINTER		Discusses laser printer supplies
+
 body ADDRESSES_ON_CD		/addresses on cd/i
 describe ADDRESSES_ON_CD	Only thing addresses on CD are useful for is SPAM
 
@@ -419,10 +422,6 @@ describe NEW_DOMAIN_EXTENSIONS	Possible registry spammer
 body DOMAIN_BODY		/\s(?:\.|dot\s+)(?:info|biz|name)\s/i
 describe DOMAIN_BODY		Domain registration spam body
 
-# (contrib: WW)
-body CLICK_TO_REMOVE_MAILTO        /\bclick to.{0,30}remove.{0,50}mailto:/is
-describe CLICK_TO_REMOVE_MAILTO    Click-to-remove with mailto: found
-
 body CLICK_TO_REMOVE_2          /mailto:.{0,50}click.{0,50}remove/is
 describe CLICK_TO_REMOVE_2      Click-to-remove with mailto: found beforehand
 
@@ -529,8 +528,9 @@ describe CHARSET_FARAWAY_BODY	Character set indicates foreign language body
 body UNDESIRED_LANGUAGE_BODY		eval:check_language()
 describe UNDESIRED_LANGUAGE_BODY	Written in an undesired language
 
-body NIGERIAN_SCAM		/BASED ON INFORMATION GATHERED ABOUT YOU, WE BELIEVE\s*YOU WOULD BE IN A POSITION TO HELP US IN TRANSFER/i
-describe NIGERIAN_SCAM		Nigerian scam, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
+#   0.000    0.000    0.000    0.00    1.00  NIGERIAN_SCAM (no matches)
+#body NIGERIAN_SCAM		/BASED ON INFORMATION GATHERED ABOUT YOU, WE BELIEVE\s*YOU WOULD BE IN A POSITION TO HELP US IN TRANSFER/i
+#describe NIGERIAN_SCAM		Nigerian scam, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
 
 body NIGERIAN_SCAM_2  /\b(?:(?:bank|government|republic).{1,15}(?:nigeria|sierra(-| )leone|zimbabwe|botswana|ivoire?|ivory|angola|gabon|lome|benin|africa)|(?:nigeria|sierra(-¦ )leone|zimbabwe|botswana|ivoire?|ivory|angola|gabon|lome|benin|africa).{0,15}(?:national|government|embassy|chamber|bank|petroleum|electric|gold|diamond))/i
 describe NIGERIAN_SCAM_2      Mutated Nigerian 419 scams, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
