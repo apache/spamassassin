@@ -85,9 +85,6 @@ describe WEIRD_PORT		Uses non-standard port number for HTTP
 uri USERPASS                    m{https?://[^/\s]+?(?::[^/\s]+?)?\@}
 describe USERPASS               URL contains username and (optional) password
 
-uri WWW_AUTOREMOVE_COM		/autoremove\.com/i   
-describe WWW_AUTOREMOVE_COM	Frequent Spam content
-
 uri URI_IS_POUND		m{\#$}
 describe URI_IS_POUND		Filename is just a '\#'; probably a JS trick
 
@@ -109,7 +106,7 @@ describe DAILY_PXE		Spam URL pattern, DailyPromotions server link
 uri E_MAILPROMO_URL		/\be-mailpromo\.net/
 describe E_MAILPROMO_URL	Includes a link to a likely spammer domain
 
-uri BARGAIN_URL			/bargains?\.(?:com|biz)/
+uri BARGAIN_URL			/bargain([sz]|-\S+)?\.(?:com|biz)/
 describe BARGAIN_URL		Includes a link to a likely spammer domain
 
 uri URI_PXLG			m{http://(?:www\.)?pxlg\.com}i
