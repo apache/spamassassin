@@ -63,12 +63,12 @@ sub new {
 
   # are network tests enabled?
   if ($mailsaobject->{local_tests_only}) {
-    $self->{dcc_available} = 0;
+    $self->{dcc_disabled} = 1;
     dbg("dcc: local tests only, disabling DCC");
   }
   else {
-    $self->{dcc_available} = 1;
-    dbg("dcc: network tests on, attempting DCC");
+    $self->{dcc_disabled} = 0;
+    dbg("dcc: network tests on, registering DCC");
   }
 
   $self->register_eval_rule("check_dcc");
@@ -269,8 +269,7 @@ sub get_dcc_interface {
 
   if (!$self->{main}->{conf}->{use_dcc}) {
     dbg("dcc: use_dcc option not enabled, disabling DCC");
-    $self->{dcc_interface} = "disabled";
-    $self->{dcc_available} = 0;
+    $self->{dcc_disabled} = 1;
   }
   elsif ($self->is_dccifd_available()) {
     $self->{dcc_interface} = "dccifd";
@@ -280,16 +279,15 @@ sub get_dcc_interface {
   }
   else {
     dbg("dcc: no dccifd or dccproc found, disabling DCC");
-    $self->{dcc_interface} = "none";
-    $self->{dcc_available} = 0;
+    $self->{dcc_disabled} = 1;
   }
 }
 
 sub check_dcc {
   my ($self, $permsgstatus, $full) = @_;
 
+  return 0 if $self->{dcc_disabled};
   $self->get_dcc_interface() unless $self->{dcc_interface};
-  return 0 unless $self->{dcc_available};
 
   # First check if there's already a X-DCC header with value of "bulk"
   # and short-circuit if there is -- someone upstream might already have
@@ -552,8 +550,7 @@ sub dccproc_lookup {
 sub plugin_report {
   my ($self, $options) = @_;
 
-  return unless $self->{dcc_available};
-  return unless $self->{main}->{conf}->{use_dcc};
+  return if $self->{dcc_disabled};
 
   if (!$self->{options}->{dont_report_to_dcc} && $self->is_dccproc_available())
   {
