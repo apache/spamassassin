@@ -773,13 +773,17 @@ sub get_msgid {
     # where N is MIN(1024 bytes, 1/2 of body length)
     #
     my $date = $msg->get_header("Date");
+    $date = "None" if ( !defined $date || $date eq '' ); # No Date?
 
     my @rcvd = $msg->get_header("Received");
     my $rcvd = $rcvd[$#rcvd];
+    $rcvd = "None" if ( !defined $rcvd || $rcvd eq '' ); # No Received?
 
     my $body = $msg->get_pristine_body();
-    my $keep = ( length $body > 2048 ? 1024 : int(length($body) / 2) );
-    substr($body, $keep) = '';
+    if ( length($body) > 64 ) { # Small Body?
+      my $keep = ( length $body > 2048 ? 1024 : int(length($body) / 2) );
+      substr($body, $keep) = '';
+    }
 
     $msgid = sha1($date."\000".$rcvd."\000".$body).'@sa_generated';
   }
