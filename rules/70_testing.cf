@@ -404,43 +404,28 @@ meta T_REPTO_QUOTE_QUALCOMM		__REPTO_QUOTE && __ANY_QUALCOMM_MUA
 meta T_REPTO_QUOTE_SQUIRRELMAIL		__REPTO_QUOTE && __HAS_SQUIRRELMAIL_IN_MAILER
 meta T_REPTO_QUOTE_MSN			__REPTO_QUOTE && __USER_AGENT_MSN
 
-# bug 3896
-uri T_URI_3896_1	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{6,}\.info\/\?\S{20,}/i
-uri T_URI_3896_2	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{6,}\.biz\/\?\S{20,}/i
-uri T_URI_3896_3	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{6,}\.info\/\S{20,}/i
-uri T_URI_3896_4	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{6,}\.biz\/\S{20,}/i
-uri T_URI_3896_5	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{4,}\.info\/\?\S{20,}/i
-uri T_URI_3896_6	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{4,}\.biz\/\?\S{20,}/i
-uri T_URI_3896_7	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{4,}\.info\/\S{20,}/i
-uri T_URI_3896_8	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{4,}\.biz\/\S{20,}/i
-uri T_URI_3896_9	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{8,}\.info\/\?\S{20,}/i
-uri T_URI_3896_10	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{8,}\.biz\/\?\S{20,}/i
-uri T_URI_3896_11	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{8,}\.info\/\S{20,}/i
-uri T_URI_3896_12	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{8,}\.biz\/\S{20,}/i
-uri T_URI_3896_13	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{6,}\.info\/\?\S{15,}/i
-uri T_URI_3896_14	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{6,}\.biz\/\?\S{15,}/i
-uri T_URI_3896_15	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{6,}\.info\/\S{15,}/i
-uri T_URI_3896_16	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{6,}\.biz\/\S{15,}/i
-uri T_URI_3896_17	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{4,}\.info\/\?\S{15,}/i
-uri T_URI_3896_18	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{4,}\.biz\/\?\S{15,}/i
-uri T_URI_3896_19	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{4,}\.info\/\S{15,}/i
-uri T_URI_3896_20	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{4,}\.biz\/\S{15,}/i
-uri T_URI_3896_21	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{8,}\.info\/\?\S{15,}/i
-uri T_URI_3896_22	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{8,}\.biz\/\?\S{15,}/i
-uri T_URI_3896_23	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{8,}\.info\/\S{15,}/i
-uri T_URI_3896_24	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{8,}\.biz\/\S{15,}/i
-uri T_URI_3896_25	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{6,}\.info\/\?\S{25,}/i
-uri T_URI_3896_26	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{6,}\.biz\/\?\S{25,}/i
-uri T_URI_3896_27	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{6,}\.info\/\S{25,}/i
-uri T_URI_3896_28	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{6,}\.biz\/\S{25,}/i
-uri T_URI_3896_29	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{4,}\.info\/\?\S{25,}/i
-uri T_URI_3896_30	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{4,}\.biz\/\?\S{25,}/i
-uri T_URI_3896_31	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{4,}\.info\/\S{25,}/i
-uri T_URI_3896_32	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{4,}\.biz\/\S{25,}/i
-uri T_URI_3896_33	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{8,}\.info\/\?\S{25,}/i
-uri T_URI_3896_34	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{8,}\.biz\/\?\S{25,}/i
-uri T_URI_3896_35	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{8,}\.info\/\S{25,}/i
-uri T_URI_3896_36	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{8,}\.biz\/\S{25,}/i
+# bug 3896: URIs in various TLDs, other than 3rd level www
+uri T_URI_NO_WWW_BIZ_1	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{7,}\.biz\/\S{15,}/i
+uri T_URI_NO_WWW_INFO_1	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{7,}\.info\/\S{15,}/i
+# change \w to [^.]
+uri T_URI_NO_WWW_BIZ_2	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.[^.]{7,}\.biz\/\S{15,}/i
+uri T_URI_NO_WWW_INFO_2	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.[^.]{7,}\.info\/\S{15,}/i
+# looks kinda like CGI
+uri T_URI_NO_WWW_BIZ_CGI_1	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{7,}\.biz\/(?=\S{15,})\S*\?/i
+uri T_URI_NO_WWW_INFO_CGI_1	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{7,}\.info\/(?=\S{15,})\S*\?/i
+# change \w to [^.]
+uri T_URI_NO_WWW_BIZ_CGI_2	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.[^.]{7,}\.biz\/(?=\S{15,})\S*\?/i
+uri T_URI_NO_WWW_INFO_CGI_2	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.[^.]{7,}\.info\/(?=\S{15,})\S*\?/i
+# CGI at beginning
+uri T_URI_NO_WWW_BIZ_CGI_START_1	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{7,}\.biz\/\?\S{15,}/i
+uri T_URI_NO_WWW_INFO_CGI_START_1	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{7,}\.info\/\?\S{15,}/i
+uri T_URI_NO_WWW_BIZ_CGI_START_2	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.[^.]{7,}\.biz\/\?\S{15,}/i
+uri T_URI_NO_WWW_INFO_CGI_START_2	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.[^.]{7,}\.info\/\?\S{15,}/i
+# any domain
+uri T_URI_NO_WWW_ANY_CGI_START_34_1	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{7,}\.[a-z]{3,4}\/\?\S{15,}/i
+uri T_URI_NO_WWW_ANY_CGI_START_34_2	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.[^.]{7,}\.[a-z]{3,4}\/\?\S{15,}/i
+uri T_URI_NO_WWW_ANY_CGI_START_2_1	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.\w{7,}\.\w+\.[a-z]{2}\/\?\S{15,}/i
+uri T_URI_NO_WWW_ANY_CGI_START_2_2	/^(?:https?:\/\/)[^\/]+(?<!\/www)\.[^.]{7,}\.\w+\.[a-z]{2}\/\?\S{15,}/i
 
 ########################################################################
 
