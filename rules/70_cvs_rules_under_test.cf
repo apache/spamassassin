@@ -340,14 +340,6 @@ body T_HTML_BADTAGS_70_80	eval:html_range('t_bad_tag_ratio','0.70','0.80')
 body T_HTML_BADTAGS_80_90	eval:html_range('t_bad_tag_ratio','0.80','0.90')
 body T_HTML_BADTAGS_90_100	eval:html_range('t_bad_tag_ratio','0.90','1.00')
 
-# HTML bad tag count
-body T_HTML_BADTAGS_GT_0	eval:html_range('t_bad_tag_count','0','4')
-body T_HTML_BADTAGS_GT_4	eval:html_range('t_bad_tag_count','4','8')
-body T_HTML_BADTAGS_GT_8	eval:html_range('t_bad_tag_count','8','16')
-body T_HTML_BADTAGS_GT_16	eval:html_range('t_bad_tag_count','16','32')
-body T_HTML_BADTAGS_GT_32	eval:html_range('t_bad_tag_count','32','64')
-body T_HTML_BADTAGS_GT_64	eval:html_range('t_bad_tag_count','64','inf')
-
 # HTML bad tag percentage for unique tags
 body T_HTML_BADTAGS_U_00_10	eval:html_range('t_bad_tag_unique_ratio','0.00','0.10')
 body T_HTML_BADTAGS_U_10_20	eval:html_range('t_bad_tag_unique_ratio','0.10','0.20')
@@ -359,14 +351,6 @@ body T_HTML_BADTAGS_U_60_70	eval:html_range('t_bad_tag_unique_ratio','0.60','0.7
 body T_HTML_BADTAGS_U_70_80	eval:html_range('t_bad_tag_unique_ratio','0.70','0.80')
 body T_HTML_BADTAGS_U_80_90	eval:html_range('t_bad_tag_unique_ratio','0.80','0.90')
 body T_HTML_BADTAGS_U_90_100	eval:html_range('t_bad_tag_unique_ratio','0.90','1.00')
-
-# HTML bad tag count for unique tags
-body T_HTML_BADTAGS_U_GT_0	eval:html_range('t_bad_tag_unique_count','0','4')
-body T_HTML_BADTAGS_U_GT_4	eval:html_range('t_bad_tag_unique_count','4','8')
-body T_HTML_BADTAGS_U_GT_8	eval:html_range('t_bad_tag_unique_count','8','16')
-body T_HTML_BADTAGS_U_GT_16	eval:html_range('t_bad_tag_unique_count','16','32')
-body T_HTML_BADTAGS_U_GT_32	eval:html_range('t_bad_tag_unique_count','32','64')
-body T_HTML_BADTAGS_U_GT_64	eval:html_range('t_bad_tag_unique_count','64','inf')
 
 # more portable replacement for RCVD_NUMERIC_HELO that doesn't rely on
 # Received headers using "helo=" prefix
