@@ -31,8 +31,13 @@ while (<>) {
 
   } elsif (/^describe\s+(\S+)\s+(.+)$/) {
 
-    # use the test's "native" locale
-    if ($lang eq '' || $lang{$1} eq $lang) {
+    # no locale; overrides any other desc
+    if ($lang eq '') {
+      $desc{$1} = $2;
+    }
+
+    # uses the test's "native" locale
+    if ($lang{$1} eq $lang) {
       if (!defined $desc{$1}) { $desc{$1} = $2; }
     }
 
