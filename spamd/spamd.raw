@@ -297,7 +297,7 @@ vec($readvec, $server->fileno, 1) = 1;
 
 while (1) {
     if (defined $client) { $client->close; }	# paranoia vs fd leaks
-    cleanupchildren;			# some platforms leave zombies otherwise
+    cleanupchildren();			# some platforms leave zombies otherwise
 
     my $n = select(my $rd=$readvec, undef, undef, undef);
     next if ($n == -1 && $! == &Errno::EINTR);
@@ -988,6 +988,7 @@ sub cleanupchildren {
   # may be required on some platforms even though we use SIG{CHLD} = 'IGNORE'.
   # cf. mail from Stefan Seiz <talklists@index-s.de>, Fri, 27 Dec 2002 17:32:54
   # <BA323F46.19AF5%talklists@index-s.de> noting it on MacOS X Server 10.1.5.
+  my $kid;
   do {
     $kid = waitpid(-1,&WNOHANG);
   } until $kid == -1;
