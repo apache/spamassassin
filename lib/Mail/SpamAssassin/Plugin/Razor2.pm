@@ -29,6 +29,11 @@ filtering network based on user submissions of spam.  Detection is done
 with signatures that efficiently spot mutating spam content and user
 input is validated through reputation assignments.
 
+Note that Razor2 is disabled by default in C<init.pre> because it is not
+available for unlimited free use.  It is currently free for personal
+use, subject to capacity constraints.  See the Cloudmark SpamNet Service
+Policy for more details.
+
 See http://razor.sourceforge.net/ for more information about Razor.
 
 =over 4
@@ -84,19 +89,15 @@ sub set_config {
   my ($self, $conf) = @_;
   my @cmds = ();
 
-=item use_razor2 (0|1)		(default: 0)
+=item use_razor2 (0|1)		(default: 1)
 
 Whether to use Razor2, if it is available.
-
-Razor2 is disabled by default because it is not available for unlimited
-free use.  It is currently free for personal use, subject to capacity
-constraints.  See the Cloudmark SpamNet Service Policy for more details.
 
 =cut
 
   push(@cmds, {
     setting => 'use_razor2',
-    default => 0,
+    default => 1,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });
 

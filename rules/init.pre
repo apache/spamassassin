@@ -38,7 +38,11 @@ loadplugin Mail::SpamAssassin::Plugin::Pyzor
 
 # Razor2 - perform Razor2 message checks.
 #
-loadplugin Mail::SpamAssassin::Plugin::Razor2
+# Razor2 is disabled here because it is not available for unlimited free
+# use.  It is currently free for personal use, subject to capacity
+# constraints.  See the Cloudmark SpamNet Service Policy for more details.
+#
+#loadplugin Mail::SpamAssassin::Plugin::Razor2
 
 # SpamCop - perform SpamCop message reporting.
 #
@@ -54,6 +58,7 @@ loadplugin Mail::SpamAssassin::Plugin::SpamCop
 #loadplugin Mail::SpamAssassin::Plugin::MSExec
 
 # AWL - do auto-whitelist checks
+#
 loadplugin Mail::SpamAssassin::Plugin::AWL
 
 # AutoLearnThreshold - threshold-based discriminator for Bayes auto-learning
