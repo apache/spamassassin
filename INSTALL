@@ -15,6 +15,7 @@ If you are using a UNIX machine with all database files on local disks,
 and no sharing of those databases across NFS filesystems, you can use a
 more efficient, but non-NFS-safe, locking mechanism.   Do this by adding
 the line "lock_method flock" to the /etc/mail/spamassassin/local.cf file.
+This is strongly recommended if you're not using NFS.
 
 The --auto-whitelist and -a options for "spamd" and "spamassassin" to
 turn on the auto-whitelist have been removed and replaced by the

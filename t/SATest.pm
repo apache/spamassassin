@@ -366,7 +366,8 @@ sub start_spamd {
 
     if (open (IN, "<${spamd_stderr}")) {
       while (<IN>) {
-	/Address already in use/ and $retries = 0;
+        # Yes, DO retry on this error. I'm getting test failures otherwise
+        # /Address already in use/ and $retries = 0;
 	/server pid: (\d+)/ and $spamd_pid = $1;
 	$spamdlog .= $_;
       }

@@ -24,6 +24,7 @@ use Mail::SpamAssassin::Locker;
 use Mail::SpamAssassin::Util;
 use File::Spec;
 use Time::Local;
+use Fcntl qw(:DEFAULT :flock);
 
 use vars qw{
   @ISA
@@ -45,6 +46,9 @@ sub new {
 #
 # Locking code adapted from code by Alexis Rosen <alexis@panix.com>
 # by Kelsey Cummings <kgc@sonic.net>, with mods by jm and quinlan
+#
+# A good implementation of Alexis' code, for reference, is here:
+# http://mail-index.netbsd.org/netbsd-bugs/1996/04/17/0002.html
 
 use constant LOCK_MAX_AGE => 600;	# seconds 
 
@@ -55,10 +59,13 @@ sub safe_lock {
 
   $max_retries ||= 30;
 
-  my $hname = Mail::SpamAssassin::Util::fq_hostname();
   my $lock_file = "$path.lock";
+  my $hname = Mail::SpamAssassin::Util::fq_hostname();
   my $lock_tmp = Mail::SpamAssassin::Util::untaint_file_path
-					("$path.lock.$hname.$$");
+                                      ($path.".lock.".$hname.".".$$);
+
+  # keep this for unlocking
+  $self->{lock_tmp} = $lock_tmp;
 
   my $umask = umask 077;
   if (!open(LTMP, ">$lock_tmp")) {
@@ -79,7 +86,7 @@ sub safe_lock {
       last;
     }
     # link _may_ return false even if the link _is_ created
-    @stat = stat($lock_tmp);
+    @stat = lstat($lock_tmp);
     if ($stat[3] > 1) {
       dbg("lock: $$ link to $lock_file: stat ok");
       $is_locked = 1;
@@ -87,7 +94,7 @@ sub safe_lock {
     }
     # check age of lockfile ctime
     my $now = ($#stat < 11 ? undef : $stat[10]);
-    @stat = stat($lock_file);
+    @stat = lstat($lock_file);
     my $lock_age = ($#stat < 11 ? undef : $stat[10]);
     if (!defined($lock_age) || ($now - $lock_age) > LOCK_MAX_AGE) {
       # we got a stale lock, break it
@@ -100,6 +107,15 @@ sub safe_lock {
   close(LTMP);
   unlink ($lock_tmp) || warn "lock: $$ unlink of temp lock $lock_tmp failed: $!\n";
 
+  # record this for safe unlocking
+  if ($is_locked) {
+    @stat = lstat($lock_file);
+    my $lock_ctime = ($#stat < 11 ? undef : $stat[10]);
+
+    $self->{lock_ctimes} ||= { };
+    $self->{lock_ctimes}->{$path} = $lock_ctime;
+  }
+
   return $is_locked;
 }
 
@@ -108,8 +124,74 @@ sub safe_lock {
 sub safe_unlock {
   my ($self, $path) = @_;
 
-  unlink ("$path.lock") || warn "unlock: $$ unlink failed: $path.lock\n";
-  dbg("unlock: $$ unlink $path.lock");
+  my $lock_file = "$path.lock";
+  my $lock_tmp = $self->{lock_tmp};
+  if (!$lock_tmp) {
+    dbg("unlock: $$ $path.lock never locked");
+    return;
+  }
+
+  # 1. Build a temp file and stat that to get an idea of what the server
+  # thinks the current time is (our_tmp.st_ctime).  note: do not use time()
+  # directly because the server's clock may be out of sync with the client's.
+
+  my @stat_ourtmp;
+  sysopen(LTMP, $lock_tmp, O_CREAT|O_WRONLY|O_EXCL, 0700);
+  autoflush LTMP 1;
+  print LTMP "\n";
+
+  if (!(@stat_ourtmp = stat(LTMP)) || (scalar(@stat_ourtmp) < 11)) {
+    warn "unlock: $$ failed to create lock tmpfile $lock_tmp";
+    close LTMP; unlink $lock_tmp;
+    return;
+  }
+ 
+  my $ourtmp_ctime = $stat_ourtmp[10]; # paranoia
+  if (!defined $ourtmp_ctime) {
+    die "stat failed on $lock_tmp";
+  }
+
+  close LTMP; unlink $lock_tmp;
+
+  # 2. If the ctime hasn't been modified, unlink the file and return. If the
+  # lock has expired, sleep the usual random interval before returning. If we # didn't sleep, there could be a race if the caller immediately tries to
+  # relock the file.
+
+  my $lock_ctime = $self->{lock_ctimes}->{$path};
+  if (!defined $lock_ctime) {
+    warn "unlock: $$ no ctime recorded for $lock_file";
+    return;
+  }
+
+  my @stat_lock = lstat ($lock_file);
+  my $now_ctime = $stat_lock[10];
+
+  if (defined $now_ctime && $now_ctime == $lock_ctime) 
+  {
+    # things are good: the ctimes match so it was our lock
+    unlink ($lock_file) || warn "unlock: $$ unlink failed: $lock_file\n";
+    dbg("unlock: $$ unlink $lock_file");
+
+    if ($ourtmp_ctime >= $lock_ctime + LOCK_MAX_AGE) {
+      # the lock has expired, so sleep a bit; use some randomness
+      # to avoid race conditions.
+      dbg("unlock: $$ lock expired on $lock_file expired safely; sleeping");
+      my $i; for ($i = 0; $i < 5; $i++) {
+        $self->jittery_one_second_sleep();
+      }
+    }
+    return;
+  }
+
+  # 4. Either ctime has been modified, or the entire lock file is missing.
+  # If the lock should still be ours, based on the ctime of the temp
+  # file, warn it was stolen. If not, then our lock is expired and
+  # someone else has grabbed the file, so warn it was lost.
+  if ($ourtmp_ctime < $lock_ctime + LOCK_MAX_AGE) {
+    warn "unlock: $$ lock on $lock_file was stolen";
+  } else {
+    warn "unlock: $$ lock on $lock_file was lost due to expiry";
+  }
 }
 
 ###########################################################################
@@ -121,7 +203,15 @@ sub refresh_lock {
 
   # this could arguably read the lock and make sure the same process
   # owns it, but this shouldn't, in theory, be an issue.
-  utime time, time, "$path.lock";
+  # TODO: in NFS, it definitely may be one :(
+
+  my $lock_file = "$path.lock";
+  utime time, time, $lock_file;
+
+  # update the lock_ctimes entry
+  my @stat = lstat($lock_file);
+  my $lock_ctime = ($#stat < 11 ? undef : $stat[10]);
+  $self->{lock_ctimes}->{$path} = $lock_ctime;
 
   dbg("refresh: $$ refresh $path.lock");
 }
