@@ -1,5 +1,6 @@
 #!/usr/bin/perl -w
 
+# my $automcdir = "/home/jm/ftp/spamassassin/masses/rule-qa/automc";
 my $automcdir = "/home/automc/svn/spamassassin/masses/rule-qa/automc";
 
 use CGI;
@@ -274,7 +275,7 @@ sub rule_anchor {
 
 sub sub_freqs_head_line {
   my ($str) = @_;
-  $str = "<em><tt>$str</tt></em><br/>";
+  $str = "<em><tt>".($str || '')."</tt></em><br/>";
   return $str;
 }
 
