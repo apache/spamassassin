@@ -47,13 +47,15 @@ sa-learn-nonspam - train spamassassin with nonspam data
 =head1 SYNOPSIS
 
 B<sa-learn-nonspam> [options] --file I<message>
+
 B<sa-learn-nonspam> [options] --mbox I<mailbox>
+
 B<sa-learn-nonspam> [options] --dir I<directory>
 
 Options:
 
  -f file, --folders=file           Read list of files/directories from file
- --dir                             Learn a directory of RFC 822 formatted files
+ --dir                             Learn a directory of RFC 822 files
  --file                            Learn a file in RFC 822 format
  --mbox                            Learn a file in mbox format
  --showdots                        Show progress using dots
