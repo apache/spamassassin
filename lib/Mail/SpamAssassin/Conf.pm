@@ -517,16 +517,17 @@ be blacklisted.  Same format as C<blacklist_from>.
 
 =item rewrite_header { subject | from | to } STRING
 
-By default, suspected tag will not have the C<Subject>, C<From> or
-C<To> lines tagged to indicate spam. By setting this option, the
-header will be tagged with C<STRING> to indicate that a message is
-spam. For the From or To headers, this will take the form of an RFC
-2822 comment following the address in parantheses. For the Subject
-header, this will be prepended to the original subject. Note that you
-should only use the _REQD_ and _SCORE_ tags when rewriting the Subject
-header unless C<report_safe> is 0. Otherwise, you will not be able to
-remove the SpamAssassin markup. Parentheses are not permitted in
-STRING. (They will be converted to square brackets.)
+By default, suspected spam messages will not have the C<Subject>,
+C<From> or C<To> lines tagged to indicate spam. By setting this option,
+the header will be tagged with C<STRING> to indicate that a message is
+spam. For the From or To headers, this will take the form of an RFC 2822
+comment following the address in parantheses. For the Subject header,
+this will be prepended to the original subject. Note that you should
+only use the _REQD_ and _SCORE_ tags when rewriting the Subject header
+unless C<report_safe> is 0. Otherwise, you may not be able to remove
+the SpamAssassin markup via the normal methods.  Parentheses are not
+permitted in STRING if rewriting the From or To headers. (They will be
+converted to square brackets.)
 
 =cut
 
@@ -539,7 +540,9 @@ STRING. (They will be converted to square brackets.)
 
       # We only deal with From, Subject, and To ...
       if ($hdr =~ /^(?:From|Subject|To)$/) {
-        $string =~ tr/()/[]/;
+	if ($hdr ne 'Subject') {
+          $string =~ tr/()/[]/;
+	}
         $self->{rewrite_header}->{$hdr} = $string;
         return;
       }
