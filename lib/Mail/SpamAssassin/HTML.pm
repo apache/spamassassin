@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.35 2002/10/12 11:17:58 quinlan Exp $
+# $Id: HTML.pm,v 1.36 2002/10/19 02:24:16 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -9,7 +9,7 @@ use HTML::Parser 3.00 ();
 use strict;
 
 use vars qw{
-  $re_loose $re_strict
+  $re_loose $re_strict $events
 };
 
 # HTML decoding TODOs
@@ -18,6 +18,9 @@ use vars qw{
 # elements defined by the HTML 4.01 and XHTML 1.0 DTDs (do not change them!)
 $re_loose = 'applet|basefont|center|dir|font|frame|frameset|iframe|isindex|menu|noframes|s|strike|u';
 $re_strict = 'a|abbr|acronym|address|area|b|base|bdo|big|blockquote|body|br|button|caption|cite|code|col|colgroup|dd|del|dfn|div|dl|dt|em|fieldset|form|h1|h2|h3|h4|h5|h6|head|hr|html|i|img|input|ins|kbd|label|legend|li|link|map|meta|noscript|object|ol|optgroup|option|p|param|pre|q|samp|script|select|small|span|strong|style|sub|sup|table|tbody|td|textarea|tfoot|th|thead|title|tr|tt|ul|var';
+
+# loose list of HTML events
+$events = 'on(?:activate|afterupdate|beforeactivate|beforecopy|beforecut|beforedeactivate|beforeeditfocus|beforepaste|beforeupdate|blur|change|click|contextmenu|controlselect|copy|cut|dblclick|deactivate|errorupdate|focus|focusin|focusout|help|keydown|keypress|keyup|load|losecapture|mousedown|mouseenter|mouseleave|mousemove|mouseout|mouseover|mouseup|mousewheel|move|moveend|movestart|paste|propertychange|readystatechange|reset|resize|resizeend|resizestart|select|submit|timeerror|unload)';
 
 sub html_tag {
   my ($self, $tag, $attr, $num) = @_;
@@ -166,16 +169,28 @@ sub html_tests {
   if ($tag eq "script") {
     $self->{html}{javascript} = 1;
   }
-  if ($tag eq "script" && exists $attr->{language}) {
-    $self->{html}{t_javascript} = 1 if $attr->{language} =~ /javascript/i;
-  }
-  if ($tag =~ /^(?:body|frame)$/) {
+  ### START TEST CODE
+  if ($tag =~ /^(?:a|body|div|input|form|td|layer|area|img)$/i) {
     for (keys %$attr) {
-      if (/^on(?:Load|UnLoad|BeforeUnload)$/i)
+      if (/\b$events\b/io)
+      {
+	$self->{html}{t_html_event} = 1;
+      }
+      if (/\bon(?:blur|contextmenu|focus|load|resize|submit|unload)\b/i)
+      {
+	$self->{html}{t_html_event_unsafe} = 1;
+      }
+    }
+  }
+  ### END TEST CODE
+  if ($tag =~ /^(?:a|body|div|input|form|td|layer|area|img)$/) {
+    for (keys %$attr) {
+      if (/\bon(?:blur|contextmenu|focus|load|resize|submit|unload)\b/i)
       {
 	$self->{html}{javascript_very_unsafe} = 1;
         if ($attr->{$_} =~ /\.open\s*\(/) { $self->{html}{window_open} = 1; }
         if ($attr->{$_} =~ /\.blur\s*\(/) { $self->{html}{window_blur} = 1; }
+        if ($attr->{$_} =~ /\.focus\s*\(/) { $self->{html}{window_focus} = 1; }
       }
     }
   }
@@ -350,8 +365,19 @@ sub html_text {
 
   if (exists $self->{html_inside}{script} && $self->{html_inside}{script} > 0)
   {
+    ### TEST CODE
+    if ($text =~ /\b($events)\b/io)
+    {
+      $self->{html}{t_html_event} = 1;
+    }
+    if ($text =~ /\bon(?:blur|contextmenu|focus|load|resize|submit|unload)\b/)
+    {
+      $self->{html}{t_html_event_unsafe} = 1;
+    }
+    ### END TEST CODE
     if ($text =~ /\.open\s*\(/) { $self->{html}{window_open} = 1; }
     if ($text =~ /\.blur\s*\(/) { $self->{html}{window_blur} = 1; }
+    if ($text =~ /\.focus\s*\(/) { $self->{html}{window_focus} = 1; }
     return;
   }
 
