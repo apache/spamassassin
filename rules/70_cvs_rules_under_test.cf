@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.490 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.491 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -235,8 +235,8 @@ tflags T_RCVD_IN_OPM_HTTP_POST net
 # url: http://blackholes.five-ten-sg.com/
 # pay-to-use: no
 # delist: email address contact provided
-header __FIVETEN	rbleval:check_rbl('fiveten', 'blackholes.five-ten-sg.com.')
-tflags __FIVETEN net
+header __RCVD_IN_FIVETEN	rbleval:check_rbl('fiveten', 'blackholes.five-ten-sg.com.')
+tflags __RCVD_IN_FIVETEN net
 # bulk mailers that don't require confirmed opt-in from their customers,
 # or that have have allowed known spammers to become clients.
 header T_RCVD_IN_FIVETEN_BULK	rbleval:check_rbl_sub('fiveten', '127.0.0.4')
@@ -265,10 +265,10 @@ tflags T_RCVD_IN_FIVETEN_FREE net
 
 # some additional osirusoft tests, needs more work
 # all osirusoft tests maybe a bad idea, osirusoft web site seems defunct
-header T_X_OSIRU_OPT_IN		rbleval:check_rbl_sub('osirusoft', '127.0.0.7')
-header T_X_OSIRU_OPEN_PROXY	rbleval:check_rbl_sub('osirusoft', '127.0.0.9')
-tflags T_X_OSIRU_OPT_IN net
-tflags T_X_OSIRU_OPEN_PROXY net
+header T_RCVD_IN_OSIRU_OPT_IN		rbleval:check_rbl_sub('osirusoft', '127.0.0.7')
+header T_RCVD_IN_OSIRU_OPEN_PROXY	rbleval:check_rbl_sub('osirusoft', '127.0.0.9')
+tflags T_RCVD_IN_OSIRU_OPT_IN net
+tflags T_RCVD_IN_OSIRU_OPEN_PROXY net
 # repeats?
 header T_RCVD_IN_OSSRC	rbleval:check_rbl('ossrc', 'spamsources.relays.osirusoft.com.')
 tflags T_RCVD_IN_OSSRC net
@@ -295,8 +295,8 @@ tflags T_RCVD_IN_SORBS_WEB net
 
 # bug 1017: domain-based blacklists, experimental
 # dsn.rfc-ignorant.org
-header T_FROM_IN_RFCI_DSN	rbleval:check_rbl_from_host('rfci-dsn', 'dsn.rfc-ignorant.org.')
-tflags T_FROM_IN_RFCI_DSN net
+header T_DNS_FROM_RFCI_DSN	rbleval:check_rbl_from_host('rfci-dsn', 'dsn.rfc-ignorant.org.')
+tflags T_DNS_FROM_RFCI_DSN net
 
 # give rule a reprieve
 header T_RCVD_IN_RELAYS_ORDB_ORG	rbleval:check_rbl('ordb', 'relays.ordb.org.')
