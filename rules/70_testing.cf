@@ -428,3 +428,40 @@ meta T_RATWARE_MS_HASH_2 __MSGID_MS_HASH_HOST && !__MIMEOLE_MS
 
 #  0.058   0.0662   0.0000    1.000   0.40    0.01  T_AUTO_MARKET
 body T_AUTO_MARKET /\bAutomated Marketing\b/i
+
+# use ReplaceTags
+ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
+body T_INT_AFFORDABLE2	/(?!affordable)<A><F><F><O><R><D><A><B><L><E>/i
+body T_INT_ANXIETY2	/(?!anxiety)<A><N><X><I><E><T><Y>/i
+body T_INT_BILLION2	/(?!billion)<B><I><L><L><I><O><N>/i
+body T_INT_CELEBREX2	/(?!celebrex)<C><E><L><E><B><R><E><X>/i
+body T_INT_CIALIS2	/(?!cialis)<C><I><A><L><I><S>/i
+body T_INT_CREDIT2	/(?!credit)<C><R><E><D><I><T>/i
+body T_INT_ERECT2	/(?!erection)<E><R><E><C><T><I><O><N>/i
+body T_INT_FREE2	/(?!free)<F><R><E><E>/i
+body T_INT_HUNDREDS2	/(?!hundreds)<H><U><N><D><R><E><D><S>/i
+body T_INT_LEVITRA2	/(?!levitra)<L><E><V><I><T><R><A>/i
+body T_INT_MILF2	/(?!milf)<M><I><L><F>/i
+body T_INT_MILLION2	/(?!million)<M><I><L><L><I><O><N>/i
+body T_INT_MONEY2	/(?!money)<M><O><N><E><Y>/i
+body T_INT_MORTGAGE2	/(?!mortgage)<M><O><R><T><G><A><G><E>/i
+body T_INT_OBLIGATION2	/(?!obligation)<O><B><L><I><G><A><T><I><O><N>/i
+body T_INT_OFFERS2	/(?!offers)<O><F><F><E><R><S>/i
+body T_INT_PENIS2	/(?!penis)<P><E><N><I><S>/i
+body T_INT_PHARMACY2	/(?!pharmacy)<P><H><A><R><M><A><C><Y>/i
+body T_INT_PHENT2	/(?!phentermine)<P><H><E><N><T><E><R><M><I><N><E>/i
+body T_INT_PRESCRIPT2	/(?!prescription)<P><R><E><S><C><R><I><P><T><I><O><N>/i
+body T_INT_PROFIT2	/(?!profit)<P><R><O><F><I><T>/i
+body T_INT_REFINANCE2	/(?!refinance)<R><E><F><I><N><A><N><C><E>/i
+body T_INT_ROLEX2	/(?!rolex)<R><O><L><E><X>/i
+body T_INT_SOFTWARE2	/(?!software)<S><O><F><T><W><A><R><E>/i
+body T_INT_THOUSANDS2	/(?!thousands)<T><H><O><U><S><A><N><D><S>/i
+body T_INT_VALIUM2	/(?!valium)<V><A><L><I><U><M>/i
+body T_INT_VIAGRA2	/(?!viagra)<V><I><A><G><R><A>/i
+body T_INT_VICODIN2	/(?!vicodin)<V><I><C><O><D><I><N>/i
+body T_INT_VIOXX2	/(?!vioxx)<V><I><O><X><X>/i
+body T_INT_XANAX2	/(?!xanax)<X><A><N><A><X>/i
+body T_INT_PILLS2	/(?!pills)<P><I><L><L><S>/i
+body T_INT_PRICES2	/(?!prices)<P><R><I><C><E><S>/i
+replace_rules T_INT_AFFORDABLE2 T_INT_ANXIETY2 T_INT_BILLION2 T_INT_CELEBREX2 T_INT_CIALIS2 T_INT_CREDIT2 T_INT_ERECT2 T_INT_FREE2 T_INT_HUNDREDS2 T_INT_LEVITRA2 T_INT_MILF2 T_INT_MILLION2 T_INT_MONEY2 T_INT_MORTGAGE2 T_INT_OBLIGATION2 T_INT_OFFERS2 T_INT_PENIS2 T_INT_PHARMACY2 T_INT_PHENT2 T_INT_PRESCRIPT2 T_INT_PROFIT2 T_INT_REFINANCE2 T_INT_ROLEX2 T_INT_SOFTWARE2 T_INT_THOUSANDS2 T_INT_VALIUM2 T_INT_VIAGRA2 T_INT_VICODIN2 T_INT_VIOXX2 T_INT_XANAX2 T_INT_PILLS2 T_INT_PRICES2
+endif

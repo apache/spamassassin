@@ -1,0 +1,59 @@
+# SpamAssassin - ReplaceTags configuration
+#
+# Please don't modify this file as your changes will be overwritten with
+# the next update. Use @@LOCAL_RULES_DIR@@/local.cf instead.
+# See 'perldoc Mail::SpamAssassin::Conf' for details.
+#
+# <@LICENSE>
+# Copyright 2004 Apache Software Foundation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+#
+###########################################################################
+
+# Requires the Mail::SpamAssassin::Plugin::ReplaceTags plugin be loaded.
+
+ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
+
+replace_tag	A	[gra\@\xc0\xc1\xc2\xc3\xc4\xc5\xc6\xe4\xe3\xe2\xe0\xe1\xe2\xe3\xe4\xe5\xe60o]
+replace_tag	B	[b8]
+replace_tag	C	[kc\xc7\xe7@]
+replace_tag	D	[d\xd0]
+replace_tag	E	[e3\xc8\xc9\xca\xcb\xe8\xe9\xea\xeb\xa4]
+replace_tag	F	[f]
+replace_tag	G	[gk]
+replace_tag	H	[h]
+replace_tag	I	[il\|\!1y\?\xcc\xcd\xce\xcf\xec\xed\xee\xef]
+replace_tag	J	[j]
+replace_tag	K	[k]
+replace_tag	L	[il\|\!1\xa3]
+replace_tag	M	[m]
+replace_tag	N	[n\xd1\xf1]
+replace_tag	O	[go0\xd2\xd3\xd4\xd5\xd6\xd8\xf0\xf2\xf3\xf4\xf5\xf6\xf8]
+replace_tag	P	[p\xfek]
+replace_tag	Q	[q]
+replace_tag	R	[r]
+replace_tag	S	[sz\xa6\xa7]
+replace_tag	T	[t]
+replace_tag	U	[uv\xb5\xd9\xda\xdb\xdc\xfc\xfb\xfa\xf9\xfd]
+replace_tag	V	(?:[vu]|\\\/)
+replace_tag	W	[wv]
+replace_tag	X	[x\xd7]
+replace_tag	Y	[y\xff\xfd\xa5j]
+replace_tag	Z	[zs]
+replace_tag	IMG	(?:jpe?g|gif|png)
+replace_tag	SP	[\s\d\_\-\*\$\%\(\)\,\.\:\;\?\!\}\{\[\]\|\/\?\^\#\~\xa1\<B4>\`\'\+]
+replace_tag	CUR	[\$\xa5\xa3\xa4\xa2]
+
+endif   # Mail::SpamAssassin::Plugin::ReplaceTags
