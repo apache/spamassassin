@@ -104,3 +104,57 @@ meta NIGERIAN_BODY_GOVT_3	((__NIGERIAN_CODE_CONDUCT + __NIGERIAN_CIV_SERVICE + _
 describe NIGERIAN_BODY_GOVT_3	Message body has many indications of Nigerian scam
 
 ###########################################################################
+
+# Updated test rules for fraud, uses existing rules and updated rules
+body __T_FRAUD_92	/youre? country/i
+body __T_FRAUD_110	/the total sum/i
+body __T_FRAUD_2	/\bass?ylum\b/i
+body __T_FRAUD_102	/foreign (?:offshore )?(?:bank|account)/i
+body __T_FRAUD_144	/\bnext of kin\b/i
+body __T_FRAUD_235	/(?:international|luckyday|overseas stake|promo|world) lott(?:o|ery)/i
+body __T_FRAUD_258	/computer ballot system/i
+body __T_FRAUD_113	/win cash/i
+body __T_FRAUD_44	/(?:may i first|to) introduce my ?self/i
+body __T_FRAUD_81	/as the beneficiary/i
+body __T_FRAUD_58	/\bcongo\b/i
+body __T_FRAUD_259	/drawn	?from.{0,10}\d{2,3},?\d{3}/i
+body __T_FRAUD_149	/as a minister/i
+body __T_FRAUD_236	/lott(?:o|ery) (?:co,?ordinator|international)/i
+body __T_FRAUD_249	/bequest/i
+body __T_FRAUD_125	/(?:white|black|zimbabwean) farmers?/i
+body __T_FRAUD_252	/modalit(?:y|ies)/i
+body __T_FRAUD_132	/(?:who was a|as a|an? honest|you being a|to any) foreigner/i
+body __T_FRAUD_227	/(?:negotiate|reasonable|acc?or?ding|certain|agg?ree).{1,20}percentage/i
+body __T_FRAUD_100	/(?:claim|concerning) (?:the|this) money/i
+body __T_FRAUD_26	/charity organization/i
+body __T_FRAUD_88	/remains unclaimed/i
+body __T_FRAUD_16	/land dispute/i
+body __T_FRAUD_240	/award notification/i
+body __T_FRAUD_157	/god gives .{1,10}second chance/i
+body __T_FRAUD_46	/i am contacting you/i
+body __T_FRAUD_133	/foreign (?:business partner|customer)/i
+body __T_FRAUD_228	/percentage.{1,10}(?:indicat|previous|involved)/i
+body __T_FRAUD_120	/letter of authority/i
+body __T_FRAUD_114	/you are.{0,8}winner/i
+body __T_FRAUD_142	/my late (?:husband|wife|brother|uncle|aunt|father|mother) (?:is|[hw]a[ds])\b/i
+body __T_FRAUD_94	/(?:huge|substantial) amount of m[o0]ney/i
+body __T_FRAUD_146	/the (?:wife|heir) (?:to|of)\b/i
+body __T_FRAUD_96	/(?:will share the money|your share.{1,10}(?:shall|sum|total|money|funds))/i
+body __T_FRAUD_41	/prize award dept/i
+body __T_FRAUD_216	/reliable person/i
+body __T_FRAUD_137	/fiduciary agent/i
+body __T_FRAUD_82	/compliments? of the season/i
+body __T_FRAUD_251	/magnanimity/i
+body __T_FRAUD_19	/political crisis/i
+body __T_FRAUD_254	/\bnumbered time\b/i
+body __T_FRAUD_241	/urgent and(?: very)? (?:profitable|confidential) business propos(?:al|ition)/i
+body __T_FRAUD_35	/international court of justice/i
+body __T_FRAUD_217	/secrecy and confidentiality/i
+body __T_FRAUD_221	/(?:the importance of|utmost) secrecy/i
+body __T_FRAUD_124	/vital documents/i
+body __T_FRAUD_18	/over-invoice/i
+body __T_FRAUD_42	/(?:finance|holding|securit(?:ies|y)) (?:company|firm|storage house)/i
+body __T_FRAUD_31	/embassy/i
+body __T_FRAUD_115	/your share shall be\b/i
+body __T_FRAUD_3	/assassinate/i
+body __T_FRAUD_220	/\bto assure you\b/i
