@@ -23,6 +23,13 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 - cvs commit -m "ready to release"
 
+- run cvs2cl.pl to generate the Changes file, like so:
+
+  cvs2cl.pl -f Changes -l "-d'>2002-06-18'" -rb2_5_0
+
+  replace b2_5_0 with the name of the branch you're on, or remove
+  the entire -rb2_5_0 arg if you're on HEAD.
+
 - run "./build/update_stable" to build the tar.gz files
 
 - by default, they're written to ~/spamassassin.taint.org/released/ .
@@ -31,6 +38,10 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 - test the tar.gz and zip files!  redo until they work!! ;)
 
+- CVS commit the release files, including 'Changes':
+
+	cvs commit -m "X.YZ RELEASED"
+
 - CVS tag the release files:
 
         cvs tag spamassassin_release_X_Y_Z
@@ -38,10 +49,10 @@ SPAMASSASSIN RELEASE PROCEDURE
   (where X_Y_Z == 2_4_0 or whatever version you're working on.)
 
 - Now, start the new development codebase.  For minor updates of a 2.x
-  tree (e.g. 2.x.1, 2.x.2), you don't need to branch; for major updates
-  (2.x.0) you should use a new development branch, off HEAD.
+  tree (e.g. 2.x1, 2.x2), you don't need to branch; for major updates
+  (2.x0) you should use a new development branch, off HEAD.
 
-        TODO: command to do this
+	[todo: command to do this]
 
 - In the new development codeline, edit lib/Mail/SpamAssassin.pm, bump the
   $VERSION line to the correct version, and uncomment the $IS_DEVEL_BUILD
@@ -49,10 +60,46 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 - then, commit the new version number to the new branch:
 
-        cvs commit -m "starting new release track"
+        cvs commit -m "X.YN devel cycle started"
 
+	(where X.YN is the new version number)
 
+- edit SpamAssassin site through WebMake, change released_version item
+  at top of file to be X.YZ, then run "webmake" or hit "Build Fully"
+  in the Web interface
 
-lastmod: Sep  3 2002 jm 
+- wait for mirrors to update ;)  Or, if you're jm, run
+
+  ~/lib/html_spamassassin_put.rsync
+
+- upload to CPAN at http://pause.cpan.org/
+
+  ( https://pause.perl.org/pause/authenquery?ACTION=add_uri )
+
+- Before doing the next step, run through the Changes file, and write up a
+  quick summary of the important changes in human-readable format.  This
+  should be less than 600 chars to fit into Freshmeat's format, and
+  to be easily understandable.
+
+- announce to Freshmeat at http://freshmeat.net/
+
+  ( http://freshmeat.net/add-release/14876/ may work )
+
+- announce on SpamAssassin new site: http://news.spamassassin.org/
+
+  ( http://news.spamassassin.org/modules.php?op=modload&name=Submit_News&file=index )
+
+- announce on Sourceforge.net: http://www.sourceforge.net/ 
+
+  ( http://sourceforge.net/news/submit.php?group_id=25457 )
+
+- announce on SpamAssassin-Talk, SpamAssassin-Devel, and
+  SpamAssassin-Announce.  Be sure to include the MD5 checksums
+  in this mail, so paranoid folks can check the tarball's integrity.
+
+- Approve the posting to SpamAssassin-Announce (the list admins
+  will get a mail indicating how to do this.)
+
+lastmod: Mar 20 2003 jm 
 
 // vim:tw=74:
