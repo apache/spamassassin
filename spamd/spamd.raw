@@ -323,7 +323,7 @@ for ( $waitedpid = 0;
 		$was_it_spam = 'clean message';
 	    }
 	    $current_user ||= '(unknown)';
-	    logmsg "$was_it_spam for $current_user:$> in ".
+	    logmsg "$was_it_spam ($msg_score/$msg_threshold) for $current_user:$> in ".
 		sprintf("%3d", time - $start) ." seconds.\n";
 
 	    $status->finish();	# added by jm to allow GC'ing
