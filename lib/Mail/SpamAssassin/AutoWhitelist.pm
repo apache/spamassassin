@@ -58,21 +58,15 @@ sub check_address {
 
   $self->{entry} = undef;
 
-  if (defined $origip) {
+  # could not find an IP address to use, could be localhost mail
+  if (!defined $origip) {
+    $origip = 'none';
+  } else {
     $origip =~ s/\.\d{1,3}\.\d{1,3}$//gs;
-    $origip =~ s/[\000\;\'\"\!\|]/_/gs;	# paranoia
-    $self->{entry} = $self->{checker}->get_addr_entry ($addr."|ip=".$origip);
   }
 
-  if (!defined $self->{entry} || $self->{entry}->{count} == 0) {
-    # fall back to more general style, no IP address
-    my $noip = $self->{checker}->get_addr_entry ($addr);
-
-    if (defined $noip && $noip->{count} != 0) {
-      # it's defined and it has entries, use that
-      $self->{entry} = $noip;
-    }
-  }
+  $origip =~ s/[\000\;\'\"\!\|]/_/gs;	# paranoia
+  $self->{entry} = $self->{checker}->get_addr_entry ($addr."|ip=".$origip);
 
   if(!defined $self->{entry}->{count}) { return undef; }
   if($self->{entry}->{count} == 0) { return undef; }
