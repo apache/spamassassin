@@ -604,9 +604,13 @@ sub do_head_tests {
   dbg ("running header regexp tests; score so far=".$self->{hits});
 
   my ($rulename, $rule);
+  my $evalstr = '';
+
+  # note: we do this only once for all head pattern tests.  Only
+  # eval tests need to use stuff in here.
+  $self->clear_test_state();
+
   while (($rulename, $rule) = each %{$self->{conf}->{head_tests}}) {
-    my $hit = 0;
-    $self->clear_test_state();
     next if ($self->{conf}->{scores}->{$rulename} == 0.0);
 
     my $def = '';
@@ -617,13 +621,15 @@ sub do_head_tests {
     $_ = $self->get ($hdrname, $def);
     # warn "JMD $pat $def $hdrname $_\n";
 
-    if (!eval 'if ($_ '.$testtype.'~ '.$pat.') { $hit = 1; } 1;') {
-      warn "Failed to run $rulename SpamAssassin test, skipping:\n".
-      		"\t$rule ($@)\n";
-      next;
-    }
+    $evalstr .= '
+      if (q['.$_.'] '.$testtype.'~ '.$pat.') {
+	$self->got_hit (q{'.$rulename.'}, q{});
+      }
+    ';
+  }
 
-    if ($hit) { $self->got_hit ($rulename, ''); }
+  if (!eval $evalstr.'1;') {
+    warn "Failed to run header SpamAssassin tests, skipping some: $@\n";
   }
 }
 
@@ -645,7 +651,7 @@ sub do_body_tests {
   }
 
   # generate the loop that goes through each line...
-  $evalstr = 'foreach $_ (@{$textary}) { study; '.$evalstr.'; }';
+  $evalstr = 'foreach $_ (@{$textary}) { '.$evalstr.'; }';
 
   # and run it.
   if (!eval $evalstr.'1;') {
@@ -672,7 +678,7 @@ sub do_full_tests {
   }
 
   # and run it.
-  # study $$fullmsgref;
+  study $$fullmsgref;
   if (!eval $evalstr.'; 1;') {
     warn "Failed to run full SpamAssassin tests, skipping:\n".
 	      "\t($@)\n";
@@ -741,6 +747,8 @@ sub got_body_pattern_hit {
 
 ###########################################################################
 
+# note: only eval tests should store state in here; pattern tests do
+# not.
 sub clear_test_state {
   my ($self) = @_;
   $self->{test_log_msgs} = '';

@@ -247,6 +247,10 @@ sub word_is_in_dictionary {
   local ($_);
 
   $word =~ tr/A-Z/a-z/;
+  $word =~ s/^\s+//;
+  $word =~ s/\s+$//;
+  return 0 if ($word =~ /[^a-z]/);
+
   if (!open (DICT, "</usr/dict/words") &&
   	!open (DICT, "</usr/share/dict/words"))
   {
@@ -254,6 +258,10 @@ sub word_is_in_dictionary {
     return 1;		# fail safe
   }
 
+  # use DICT as a file, rather than making a hash; keeps memory
+  # usage down, and the OS should cache the file contents anyway
+  # if the system has enough memory.
+  #
   while (<DICT>) {
     chop; if ($word eq $_) { close DICT; return 1; }
   }
