@@ -670,10 +670,11 @@ sub check_for_bad_helo2 {
 
     $from_host =~ /([^.]+\.[^.]+$)/;
     my $from_domain = $1;
+    $from_domain ||= '';
 
     $helo_host =~ /([^.]+\.[^.]+$)/;
     my $helo_domain = $1;
-
+    $helo_domain ||= '';
 
     if ($from_domain ne $helo_domain) {
       dbg("Received: from and by hosts '$from_host' same, but " .
