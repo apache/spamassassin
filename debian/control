@@ -2,12 +2,12 @@ Source: spamassassin
 Section: mail
 Priority: optional
 Maintainer: Duncan Findlay <duncf@debian.org>
-Build-Depends: debhelper (>> 4.0.0), perl (>= 5.6.0-16)
+Build-Depends: debhelper (>= 4.1.13), perl (>= 5.6.0-16), po-debconf (>= 0.5.0)
 Standards-Version: 3.5.7
 
 Package: spamassassin
 Architecture: all
-Depends: ${perl:Depends}, debconf (>= 1.2.9), libhtml-parser-perl, spamc (>= 2.30)
+Depends: ${perl:Depends}, ${misc:Depends}, libhtml-parser-perl, spamc (>= 2.30)
 Recommends: libnet-dns-perl, libmailtools-perl
 Suggests: razor
 Provides: libmail-spamassassin-perl
