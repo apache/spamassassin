@@ -33,9 +33,9 @@ tflags RCVD_IN_OSIRU    net
 
 # the X prefixes were originally needed to ensure that these rules were
 # run last, but ordering is not necessary now.
-header RCVD_IN_OSIRU_OPEN_RELAY	rbleval:check_rbl_sub('osirusoft', '127.0.0.2')
-describe RCVD_IN_OSIRU_OPEN_RELAY	DNSBL: sender is Confirmed Open Relay
-tflags RCVD_IN_OSIRU_OPEN_RELAY	net
+header RCVD_IN_OSIRU_OR	rbleval:check_rbl_sub('osirusoft', '127.0.0.2')
+describe RCVD_IN_OSIRU_OR	DNSBL: sender is Confirmed Open Relay
+tflags RCVD_IN_OSIRU_OR	net
 
 header RCVD_IN_OSIRU_DUL		rbleval:check_rbl('osirusoft-notfirsthop', 'relays.osirusoft.com.', '127.0.0.3')
 describe RCVD_IN_OSIRU_DUL		DNSBL: sender ip address in in a dialup block
@@ -45,9 +45,9 @@ header RCVD_IN_OSIRU_SPAM_SRC		rbleval:check_rbl_sub('osirusoft', '127.0.0.4')
 describe RCVD_IN_OSIRU_SPAM_SRC	DNSBL: sender is Confirmed Spam Source
 tflags RCVD_IN_OSIRU_SPAM_SRC         net
 
-header RCVD_IN_OSIRU_SPAMWARE_SITE	rbleval:check_rbl_sub('osirusoft', '127.0.0.6')
-describe RCVD_IN_OSIRU_SPAMWARE_SITE	DNSBL: sender is a Spamware site or vendor
-tflags RCVD_IN_OSIRU_SPAMWARE_SITE    net
+header RCVD_IN_OSIRU_SPAMWARE	rbleval:check_rbl_sub('osirusoft', '127.0.0.6')
+describe RCVD_IN_OSIRU_SPAMWARE	DNSBL: sender is a Spamware site or vendor
+tflags RCVD_IN_OSIRU_SPAMWARE    net
 
 # ---------------------------------------------------------------------------
 
@@ -95,12 +95,12 @@ describe RCVD_IN_RFCI		Received via a relay in ipwhois.rfc-ignorant.org
 tflags RCVD_IN_RFCI             net
 
 header HABEAS_VIOLATOR		rbleval:check_rbl_swe('hil', 'hil.habeas.com.')
-describe HABEAS_VIOLATOR	On Habeas Infringer List and using Habeas warrant mark
+describe HABEAS_VIOLATOR	Has Habeas warrant mark and on Infringer List
 tflags HABEAS_VIOLATOR		net
 
 # bondedsender.org provides an RBL-style whitelist for trusted relays
 header RCVD_IN_BONDEDSENDER	rbleval:check_rbl('bondedsender', 'query.bondedsender.org.')
-describe RCVD_IN_BONDEDSENDER	Bonded sender, see http://www.bondedsender.org/referred.html
+describe RCVD_IN_BONDEDSENDER	See http://www.bondedsender.org/referred.html
 tflags RCVD_IN_BONDEDSENDER	net nice
 
 # ---------------------------------------------------------------------------
@@ -114,18 +114,18 @@ tflags RCVD_IN_BL_SPAMCOP_NET   net
 
 # NOTE: commercial tests, see README file for details
 header RCVD_IN_MAPS_RBL		rbleval:check_rbl('rbl', 'blackholes.mail-abuse.org.')
-describe RCVD_IN_MAPS_RBL	Received via RBLed relay, see http://www.mail-abuse.org/rbl/
+describe RCVD_IN_MAPS_RBL	Relay in RBL, see http://www.mail-abuse.org/rbl/
 tflags RCVD_IN_MAPS_RBL		net
 
 header RCVD_IN_MAPS_RSS		rbleval:check_rbl('rss', 'relays.mail-abuse.org.')
-describe RCVD_IN_MAPS_RSS	Received via RSSed relay, see http://www.mail-abuse.org/rss/
+describe RCVD_IN_MAPS_RSS	Relay in RSS, see http://www.mail-abuse.org/rss/
 tflags RCVD_IN_MAPS_RSS		net
 
 header RCVD_IN_MAPS_DUL		rbleval:check_rbl('dialup-notfirsthop', 'dialups.mail-abuse.org.')
-describe RCVD_IN_MAPS_DUL	Received from dialup, see http://www.mail-abuse.org/dul/
+describe RCVD_IN_MAPS_DUL	Relay in DUL, see http://www.mail-abuse.org/dul/
 tflags RCVD_IN_MAPS_DUL		net
 
 header RCVD_IN_MAPS_NML		rbleval:check_rbl('nml', 'nonconfirm.mail-abuse.org.')
-describe RCVD_IN_MAPS_NML	Received via non-confirming mailing host, see http://www.mail-abuse.org/nml/
+describe RCVD_IN_MAPS_NML	Relay in NML, see http://www.mail-abuse.org/nml/
 tflags RCVD_IN_MAPS_NML		net
 

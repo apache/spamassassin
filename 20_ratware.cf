@@ -18,63 +18,63 @@
 ###########################################################################
 
 header RATWARE_EGROUPS		X-Mailer =~ /eGroups Message Poster/
-describe RATWARE_EGROUPS	Bulk email software fingerprint (eGroups) found in headers
+describe RATWARE_EGROUPS	Bulk email fingerprint (eGroups) found
 header RATWARE_HASH_2		X-Mailer =~ /^[A-Za-z0-9\._]{16,}$/
-describe RATWARE_HASH_2		Bulk email software fingerprint (hash 2) found in headers
+describe RATWARE_HASH_2		Bulk email fingerprint (hash 2) found
 header RATWARE_HASH_2_V2        X-Mailer =~ /^[A-Za-z0-9\._]{14,}$/
-describe RATWARE_HASH_2_V2      Bulk email software fingerprint (hash 2 v2) found in headers
+describe RATWARE_HASH_2_V2      Bulk email fingerprint (hash 2 v2) found
 header RATWARE_JPFREE		X-Mailer =~ /jpfree Group Mail Express/
-describe RATWARE_JPFREE		Bulk email software fingerprint (jpfree) found in headers
+describe RATWARE_JPFREE		Bulk email fingerprint (jpfree) found 
 header RATWARE_VC_IPA		X-Mailer =~ /2\.0-b55-VC_IPA/
-describe RATWARE_VC_IPA		Bulk email software fingerprint (VC_IPA) found in headers
+describe RATWARE_VC_IPA		Bulk email fingerprint (VC_IPA) found
 
 # Note that the tests which look at the "ALL" pseudoheader are slower than
 # the specific header.
 header RATWARE_GR		X-Mailer =~ /GRMessageQueue/
-describe RATWARE_GR		Bulk email software fingerprint (GRMessageQueue) found in headers
+describe RATWARE_GR		Bulk email fingerprint (GRMessageQueue) found
 header RATWARE_OE_PI		X-Mailer =~ /Out[Ll]ook Express 3\.14159/
 describe RATWARE_OE_PI		X-Mailer contains "OutLook Express 3.14159"
 # 100% overlap with X-Stormpost-To: header, but seems wise to leave it in
 header RATWARE_STORM		X-Mailer =~ /StormPost/
-describe RATWARE_STORM		Bulk email software fingerprint (StormPost) found in headers
+describe RATWARE_STORM		Bulk email fingerprint (StormPost) found
 uri RATWARE_STORM_URI		m{http://\S+/sp/t\.pl\?id=\d+:\d+}i
-describe RATWARE_STORM_URI	Bulk email software fingerprint (StormPost) found in headers
+describe RATWARE_STORM_URI	Bulk email fingerprint (StormPost) found
 header RATWARE_JIXING		X-Mailer =~ /JiXing .{0,30}Design By JohnnieHuang/
-describe RATWARE_JIXING		Bulk email software fingerprint (JiXing) found in headers
+describe RATWARE_JIXING		Bulk email fingerprint (JiXing) found
 header RATWARE_SCREWUP_1	X-Mailer =~ /^X-Mailer: /
-describe RATWARE_SCREWUP_1	Bulk email software fingerprint (screwup 1) found in headers
+describe RATWARE_SCREWUP_1	Bulk email fingerprint (screwup 1) found
 header RATWARE_MMAILER		X-Mailer =~ /MMailer v3\.0/
-describe RATWARE_MMAILER	Bulk email software fingerprint (MMailer) found in headers
+describe RATWARE_MMAILER	Bulk email fingerprint (MMailer) found in headers
 header RATWARE_OE_MALFORMED	X-Mailer =~ /^Microsoft Outlook Express \d(?:\.\d+){3} \w+$/
-describe RATWARE_OE_MALFORMED	X-Mailer contains malformed Outlook Express version
+describe RATWARE_OE_MALFORMED	X-Mailer has malformed Outlook Express version
 header RATWARE_EVAMAIL		X-Mailer =~ /EVAMAIL/
-describe RATWARE_EVAMAIL	Bulk email software fingerprint (EVAMAIL) found in headers
+describe RATWARE_EVAMAIL	Bulk email fingerprint (EVAMAIL) found
 header RATWARE_SCREWUP_2	X-Mailer =~ /^: /
-describe RATWARE_SCREWUP_2	Bulk email software fingerprint (screwup 2) found in headers
+describe RATWARE_SCREWUP_2	Bulk email fingerprint (screwup 2) found
 header RATWARE_IMKTG		ALL =~ /Internet Marketing/
-describe RATWARE_IMKTG		Bulk email software fingerprint (IMktg) found in headers
+describe RATWARE_IMKTG		Bulk email fingerprint (IMktg) found
 header RATWARE_XMAILER		X-Mailer =~ /{%xmailer%}/
-describe RATWARE_XMAILER	Bulk email software fingerprint (xmailer tag) found in headers
+describe RATWARE_XMAILER	Bulk email fingerprint (xmailer tag) found
 header RATWARE_POWERC		X-Mailer =~ /PowerCampaign/
-describe RATWARE_POWERC		Bulk email software fingerprint (PowerCampaign) found in headers
+describe RATWARE_POWERC		Bulk email fingerprint (PowerCampaign) found
 header RATWARE_DIFFOND		ALL =~ /DiffondiCool/
-describe RATWARE_DIFFOND	Bulk email software fingerprint (DiffondiCool) found in headers
+describe RATWARE_DIFFOND	Bulk email fingerprint (DiffondiCool) found
 header RATWARE_CHARSET		X-Mailer =~ /\Qcharset(89)\E/
-describe RATWARE_CHARSET	Bulk email software fingerprint (charset) found in headers
+describe RATWARE_CHARSET	Bulk email fingerprint (charset) found
 header RATWARE_CHARSET_V2       X-Mailer =~ /^normal \W \W\s*charset.*=\"/
-describe RATWARE_CHARSET_V2 	Bulk email software fingerprint (charset 2) found in headers
+describe RATWARE_CHARSET_V2 	Bulk email fingerprint (charset 2) found
 header RATWARE_CARETOP		X-Mailer =~ /Caretop 2604/
-describe RATWARE_CARETOP	Bulk email software fingerprint (Caretop) found in headers
+describe RATWARE_CARETOP	Bulk email fingerprint (Caretop) found
 header RATWARE_LC_OUTLOOK	X-Mailer =~ /^outlook$/
-describe RATWARE_LC_OUTLOOK	Bulk email software fingerprint ("outlook") found in headers
+describe RATWARE_LC_OUTLOOK	Bulk email fingerprint ("outlook") found
 header RATWARE_EMWAC		Received =~ /EMWAC SMTPRS/
-describe RATWARE_EMWAC		Bulk email software fingerprint ("EMWAC SMTPRS") found in headers
+describe RATWARE_EMWAC		Bulk email fingerprint ("EMWAC SMTPRS") found
 header RATWARE_BANG_HASH        X-Mailer =~ /!.*\#.*\*/
-describe RATWARE_BANG_HASH 	Bulk email software fingerprint (bang-hash) found in headers
+describe RATWARE_BANG_HASH 	Bulk email fingerprint (bang-hash) found
 header RATWARE_FLOAT            X-Mailer =~ /^\d\.\d\d/
-describe RATWARE_FLOAT 		Bulk email software fingerprint (float) found in headers
+describe RATWARE_FLOAT 		Bulk email fingerprint (float) found
 header RATWARE_DIRECT_EMAIL		X-Mailer =~ /Direct Email/i
-describe RATWARE_DIRECT_EMAIL	Bulk email software fingerprint (Direct Email) found in headers
+describe RATWARE_DIRECT_EMAIL	Bulk email fingerprint (Direct Email) found
 
 ###########################################################################
 # Now, detect forgeries of real MUAs
@@ -138,7 +138,7 @@ header __AOL8_FROM		From =~ /^\S+\@aol\.com$/
 header __AOL8_RCVD		Received =~ /^from \S+\@aol\.com by\s+imo-\S+\.mx\.aol\.com\s+\(mail_out_\S+\)\s+id\s+\S+\s+\(\d+\)\s+for\s+<\S+\@\S+>;\s+/m
 
 meta FORGED_MUA_AOL_FROM	(__AOL8_MUA && !__AOL8_FROM)
-describe FORGED_MUA_AOL_FROM	Forged mail pretending to be from AOL 8.0 (by From)
+describe FORGED_MUA_AOL_FROM	Forged mail pretending to be from AOL 8 (by From)
 
 # From private mail with developers.  Some top tips here!
 header __THEBAT_MUA		X-Mailer =~ /The Bat!/
@@ -148,10 +148,10 @@ header __CTYPE_HAS_BOUNDARY	Content-Type =~ /boundary/i
 header __BAT_BOUNDARY		Content-Type =~ /boundary=\"?-{10}/
 meta FORGED_MUA_THEBAT		(__THEBAT_MUA && !__UNUSABLE_MSGID && !__BAT_MSGID)
 meta FORGED_MUA_THEBAT_CS	(__THEBAT_MUA && __CTYPE_CHARSET_QUOTED)
-meta FORGED_MUA_THEBAT_BOUND	(__THEBAT_MUA && __CTYPE_HAS_BOUNDARY && !__BAT_BOUNDARY)
-describe FORGED_MUA_THEBAT	Forged mail pretending to be from The Bat! (mid)
-describe FORGED_MUA_THEBAT_CS	Forged mail pretending to be from The Bat! (charset)
-describe FORGED_MUA_THEBAT_BOUND Forged mail pretending to be from The Bat! (boundary)
+meta FORGED_MUA_THEBAT_BOUN	(__THEBAT_MUA && __CTYPE_HAS_BOUNDARY && !__BAT_BOUNDARY)
+describe FORGED_MUA_THEBAT	Mail pretending to be from The Bat! (mid)
+describe FORGED_MUA_THEBAT_CS	Mail pretending to be from The Bat! (charset)
+describe FORGED_MUA_THEBAT_BOUN Mail pretending to be from The Bat! (boundary)
 
 meta FORGED_OUTLOOK_HTML	(__OUTLOOK_MUA && __MIME_HTML_ONLY)
 describe FORGED_OUTLOOK_HTML	Outlook can't send HTML message only
@@ -208,6 +208,6 @@ describe RATWARE_X_SCANNER	Has X-Scanner header
 
 header __RATWARE_EXISCAN	X-Scanner =~ /exiscan/
 header __RATWARE_ANTIABUSE	X-AntiAbuse =~ /Originator.Caller UID.GID - \[\d \d\] \/ \[\d \d\]/
-meta RATWARE_EXISCAN_FORGERY	(__RATWARE_EXISCAN && __RATWARE_ANTIABUSE && __HAS_MSMAIL_PRI)
-describe RATWARE_EXISCAN_FORGERY	Headers indicate forged Exiscan message
+meta RATWARE_EXISCAN_FORGED	(__RATWARE_EXISCAN && __RATWARE_ANTIABUSE && __HAS_MSMAIL_PRI)
+describe RATWARE_EXISCAN_FORGED	Headers indicate forged Exiscan message
 

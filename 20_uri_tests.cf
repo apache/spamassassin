@@ -98,7 +98,7 @@ uri CHINA_URL			/(?:freehost|yada)china\.com/i
 describe CHINA_URL		Frequent Spam content
 
 uri MAILTO_TO_B2BMAIL		/^mailto:[^\s\@]{1,20}\@b2b-?mail\./is
-describe MAILTO_TO_B2BMAIL	Includes a link to a likely spammer email address (b2b-mail)
+describe MAILTO_TO_B2BMAIL	Includes a link to a likely spammer email address
 
 uri DAILY_PL			/\/logic\/[a-z]{2}\.pl/
 describe DAILY_PL		Spam URL pattern, DailyPromotions redirect link
@@ -107,7 +107,7 @@ uri DAILY_PXE			/http:\/\/(?:pxe|fx)\./i
 describe DAILY_PXE		Spam URL pattern, DailyPromotions server link
 
 uri E_MAILPROMO_URL		/\be-mailpromo\.net/
-describe E_MAILPROMO_URL	Includes a link to a likely spammer domain (e-mailpromo.net)
+describe E_MAILPROMO_URL	Includes a link to a likely spammer domain
 
 uri BARGAIN_URL			/bargains?\.(?:com|biz)/
 describe BARGAIN_URL		Includes a link to a likely spammer domain

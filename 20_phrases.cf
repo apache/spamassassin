@@ -141,7 +141,7 @@ body ADDRESSES_ON_CD		/addresses on cd/i
 describe ADDRESSES_ON_CD	Only thing addresses on CD are useful for is spam
 
 body EXCUSE_1			/\b(?:You (?:were sent|have received|are receiving)|You're receiving).{0,15}(?:message|e-?mail)s? because/i
-describe EXCUSE_1		Gives a lame excuse about why you were sent this spam
+describe EXCUSE_1		Gives a lame excuse about why spam was sent
 body EXCUSE_2			/If you did not opt.in/i
 describe EXCUSE_2		Claims you actually asked for this spam
 body EXCUSE_3			/to (?:be removed|be deleted|no longer receive th(?:is|ese) messages?) (?:from|send|reply|[e-]*mail)/i
@@ -304,10 +304,10 @@ describe UCE_MAIL_ACT           Mentions Spam Law "UCE-Mail Act"
 # Feb 11 2003 jm: removed "PP" from pattern, since "pp. 234-237" is std usage
 # in academic circles.  I don't think the hit-rate will be affected. ;)
 body PENIS_ENLARGE		/\b(?:enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b|\binches\b).{0,50}\b(?:penis|male organ|pee[ -]?pee|dick|sc?hlong|wh?anger|breast)/i
-describe PENIS_ENLARGE		Information on getting a larger penis or breasts
+describe PENIS_ENLARGE		Information on getting larger penis or breasts
 
 body PENIS_ENLARGE2		/\b(?:penis|male organ|pee[ -]?pee|dick|sc?hlong|wh?anger|breast).{0,50}\b(?:enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b|\binches\b)/i
-describe PENIS_ENLARGE2		Information on getting a larger penis or breasts (2)
+describe PENIS_ENLARGE2		Information on getting larger penis or breasts (2)
 
 body     IMPOTENCE              /\b(?:impotence (?:problem|cure|solution)|Premature Ejaculation|erectile dysfunction)/i
 describe IMPOTENCE              Impotence cure
@@ -353,8 +353,8 @@ describe THE_FOLLOWING_FORM	Asks you to fill out a form
 
 # this works best as rawbody
 # do not add "subscribe", "unsubscribe", or "help"
-rawbody MAILTO_WITH_SUBJ_REMOVE		/mailto:.{0,64}\@.{0,64}\?subject=(?:\"|3D)*(?:remove?|delete|please.?(?:delete|remove|unsubscribe)|abuse|off\b|stop|take.?me.?off)/i
-describe MAILTO_WITH_SUBJ_REMOVE	mailto URI includes removal text
+rawbody MAILTO_SUBJ_REMOVE		/mailto:.{0,64}\@.{0,64}\?subject=(?:\"|3D)*(?:remove?|delete|please.?(?:delete|remove|unsubscribe)|abuse|off\b|stop|take.?me.?off)/i
+describe MAILTO_SUBJ_REMOVE	mailto URI includes removal text
 
 # include the \n\n so we don't match mailto's in the headers!  Some list software
 # uses these to handle auto-subscribe/unsubscribe features
@@ -368,17 +368,17 @@ describe AOL_USERS_LINK		Includes a link for AOL users to click
 # (contrib: WW) (jm: tweaked to match again)
 
 body US_DOLLARS			/\b(?:\d{1,3})?Million\b.{0,40}\b(?:(?:United States?|Canadian) Dollar?s?|US(?:D|\$)|U\.? ?S\.? Dollar)/i
-describe US_DOLLARS		Nigerian scam key phrase (million dollars)
+describe US_DOLLARS		Talks about a million dollars
 
 # to still match all test cases
 body US_DOLLARS_2               /\s(?:\$|US\$|usd?).?\d{2,3}(?:\.\d)?.?(?:m|millions?)\b/i
-describe US_DOLLARS_2           Nigerian scam key phrase ($NNN.N m/USDNNN.N m/US$NN.N m)
+describe US_DOLLARS_2           Talks about money ($NNN.N m/USDNNN.N m/US$NN.N m)
 
 body US_DOLLARS_3               /(?:\$|usd).?\d{1,3}[,.]\d{3}[,.]\d{3}(?:[,.]\d\d)?/i
-describe US_DOLLARS_3           Nigerian scam key phrase ($NN,NNN,NNN.NN)
+describe US_DOLLARS_3           Talks about millions of dollars ($NN,NNN,NNN.NN)
 
 body MILLION_USD              	/Million\b.{0,40}\b(?:United States? Dollars?|USD)/i
-describe MILLION_USD 		Nigerian scam key phrase (millions of dollars)
+describe MILLION_USD 		Talks about millions of dollars
 
 rawbody FRONTPAGE		/FrontPage.Editor/
 describe FRONTPAGE		Frontpage used to create the message
@@ -896,8 +896,8 @@ rawbody SPAM_FORM_INPUT         /<input name=.{0,5}submit.{0,99} Submit By E-Mai
 describe SPAM_FORM_INPUT        Form for verifying email address
 body INTL_EXEC_GUILD            /International Executive Guild/
 describe INTL_EXEC_GUILD        Well known spam senders
-body IN_ACCORDANCE_WITH_LAWS    /has been sent in accordance with/
-describe IN_ACCORDANCE_WITH_LAWS Claims to be in accordance with some Spam law
+body IN_ACCORDANCE_WITH    /has been sent in accordance with/
+describe IN_ACCORDANCE_WITH Claims to be in accordance with some Spam law
 
 body CHANGE_TERMS               /\bstrictly based on the following terms and conditions\b/i
 describe CHANGE_TERMS           Terms and conditions
@@ -930,7 +930,7 @@ body EARN_MONEY			/\b(?:earn|make|making|made|received?|discounted)\s+(?:up\s+to
 describe EARN_MONEY		Message talks about earning money
 
 body OBSCURED_EMAIL             /^\w+\^\S+\(\w{2,3}\b/m
-describe OBSCURED_EMAIL         Message seems to contain obscured email address (rot13)
+describe OBSCURED_EMAIL         Message seems to contain rot13ed email address
 
 body OUR_AFFILIATE_PARTNERS     /our affiliate partners/i
 describe OUR_AFFILIATE_PARTNERS Mentions their affiliate partners
@@ -938,8 +938,8 @@ describe OUR_AFFILIATE_PARTNERS Mentions their affiliate partners
 body OUR_COMPENSATION           /our (?:full )?compensation/i
 describe OUR_COMPENSATION	Mentions their full compensation
 
-body OUR_OVERWHELMING_GROWTH		/our overwhelming growth/i
-describe OUR_OVERWHELMING_GROWTH	Mentions their overwhelming growth
+body OVERWHELMING_GROWTH		/our overwhelming growth/i
+describe OVERWHELMING_GROWTH	Mentions their overwhelming growth
 
 body OUR_STRICT_ANTI		/our strict anti/i
 describe OUR_STRICT_ANTI	Mentions their strict antipathy on something
@@ -1011,7 +1011,7 @@ body __NIGERIAN_STRICT_CONF	/\b(?:strictest confidence|utmost secrecy)\b/i
 body __NIGERIAN_HONESTY		/\btransparent honesty\b/i
 body __NIGERIAN_DISBURSE	/\bdisburs/i
 meta NIGERIAN_BODY_GOVT_3	((__NIGERIAN_CODE_CONDUCT + __NIGERIAN_CIV_SERVICE + __NIGERIAN_HONESTY + __NIGERIAN_TOP_SECRET + __NIGERIAN_STRICT_CONF + __NIGERIAN_DISBURSE) >= 3)
-describe NIGERIAN_BODY_GOVT_3	Message body has multiple indications of Nigerian scam
+describe NIGERIAN_BODY_GOVT_3	Message body has many indications of Nigerian scam
 
 # ho ho ho
 body WALAA			/instructions and walaa\b/i
