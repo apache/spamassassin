@@ -1,14 +1,19 @@
 #!/usr/bin/perl
+use Getopt::Std;
+getopt('t');
 
 my @tests = @ARGV;
 
 my $sub = '
         while (<STDIN>) {
+	  /\btime=(\d+)/;
+	  if ( !defined $opt{t} || $1 < $opt_t ) {
 ';
 foreach my $test (@tests) {
           $sub .= q{ s/\b\Q}.$test.q{\E\b//g; };
 }
 $sub .= '
+	  }
           s/,,+/,/g; s/,+$//; s/ ,/ /; print;
         }
 ';
