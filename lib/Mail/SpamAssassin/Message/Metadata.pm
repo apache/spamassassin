@@ -52,10 +52,9 @@ use strict;
 use bytes;
 
 use Mail::SpamAssassin;
+use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::TextCat;
 use Mail::SpamAssassin::Message::Metadata::Received;
-
-use constant MAX_BODY_LINE_LENGTH =>        2048;
 
 =item new()
 
