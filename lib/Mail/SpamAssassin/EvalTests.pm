@@ -1745,19 +1745,15 @@ sub received_within_months {
 sub _get_date_header_time {
   my $self = $_[0];
 
-  # a Resent-Date: header takes precedence over any Date: header
-  my $date = $self->get('Resent-Date');
   my $time;
-  if (defined($date) && length($date)) {
-    chomp($date);
-    $time = Mail::SpamAssassin::Util::parse_rfc822_date($date);
-  }
-  if (!defined($time)) {
-    $date = $self->get('Date');
+  # a Resent-Date: header takes precedence over any Date: header
+  for my $header ('Resent-Date', 'Date') {
+    my $date = $self->get($header);
     if (defined($date) && length($date)) {
       chomp($date);
       $time = Mail::SpamAssassin::Util::parse_rfc822_date($date);
     }
+    last if defined($time);
   }
   if (defined($time)) {
     $self->{date_header_time} = $time;
@@ -2151,13 +2147,15 @@ sub check_for_num_yelling_lines {
   return ($self->{num_yelling_lines} >= $threshold);
 }
 
-sub check_language {            # UNWANTED_LANGUAGE_BODY
+# UNWANTED_LANGUAGE_BODY
+sub check_language {
   my ($self, $body) = @_;
   $self->_check_language();
   return $self->{undesired_language_body};
 }
 
-sub _check_language {            # UNWANTED_LANGUAGE_BODY
+# UNWANTED_LANGUAGE_BODY
+sub _check_language {
   my ($self, $body) = @_;
 
   if (defined $self->{undesired_language_body}) {
@@ -3252,6 +3250,16 @@ sub html_message {
   return (exists $self->{html}{elements} &&
 	  ($self->{html}{elements} >= 8 ||
 	   $self->{html}{elements} >= $self->{html}{tags} / 2));
+}
+
+sub html_title {
+  my ($self, undef, $expr) = @_;
+  for my $title (@{ $self->{html}{t_title} }) {
+    if (defined $title && eval "qq{\Q$title\E} $expr") {
+      return 1;
+    }
+  }
+  return 0;
 }
 
 sub html_range {
