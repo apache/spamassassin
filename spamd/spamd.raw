@@ -739,15 +739,16 @@ sub cleanupchildren {
 use POSIX 'setsid';
 sub daemonize
 {
-    $0 = join(' ', $0, @ARGV); # pretty command line in ps
+    $0 = join(' ', $0, @ARGV) unless($opt{'debug'}); # pretty command line in ps
     chdir '/' or die "Can't chdir to '/': $!";
-	$SIG{__WARN__} = sub { logmsg($_[0]); };
+    $SIG{__WARN__} = sub { logmsg($_[0]); };
     open STDIN,'/dev/null' or die "Can't read '/dev/null': $!";
     open STDOUT,'>/dev/null' or die "Can't write '/dev/null': $!";
     defined(my $pid=fork) or die "Can't fork: $!";
     exit if $pid;
     setsid or die "Can't start new session: $!";
     open STDERR,'>&STDOUT' or die "Can't duplicate stdout: $!";
+    Mail::SpamAssassin::dbg('daemonized.');
 
     if(defined($opt{'pidfile'})) {
        open PIDF,">$opt{'pidfile'}" or warn "Can't open PID file: $!";
@@ -759,7 +760,8 @@ sub daemonize
 my @allowed_nets;
 sub set_allowed_ip {
     foreach (@_){
-        warn "Allowing connections from '$_'.\n";
+        # don't warn here: it'll go not STDERR, not syslog
+        #warn "Allowing connections from '$_'.\n";
         my ($ip, $bits) = m#^\s*(\d+\.\d+\.\d+\.\d+)(?:/(\d+))?\s*$#
                 or die "illegal network address given: '$_'.  Aborting.\n";
         defined $bits or $bits = 32;
