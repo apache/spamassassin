@@ -989,7 +989,6 @@ sub check_for_forged_gw05_received_headers {
 
 sub check_for_content_type_just_html {
   my ($self) = @_;
-  local ($_);
 
   my $rcv = $self->get ('Received');
   my $ctype = $self->get ('Content-Type');
@@ -1009,7 +1008,6 @@ sub check_for_faraway_charset {
   my ($self, $body) = @_;
 
   my $type = $self->get ('Content-Type');
-  $type ||= $self->get ('Content-type');
 
   my @locales = $self->get_my_locales();
 
@@ -1538,6 +1536,29 @@ sub check_for_mime_excessive_qp {
   return ($length != 0 && ($qp > ($length / 20)));
 }
 
+###########################################################################
+# MIME/uuencode attachment tests
+# This should really be done during decoding of MIME and uuencoded files.
+###########################################################################
+
+sub check_for_mime_base64_encoded_text {
+  my ($self) = @_;
+
+  if (!exists $self->{mime_base64_encoded_text}) {
+    $self->_check_attachments;
+  }
+  return $self->{mime_base64_encoded_text};
+}
+
+sub check_for_mime_html_no_charset {
+  my ($self) = @_;
+
+  if (!exists $self->{mime_html_no_charset}) {
+    $self->_check_attachments;
+  }
+  return $self->{mime_html_no_charset};
+}
+
 sub check_for_mime_missing_boundary {
   my ($self) = @_;
 
@@ -1574,88 +1595,138 @@ sub check_for_microsoft_executable {
   return $self->{microsoft_executable};
 }
 
-# This should really be done during decoding of MIME and uuencoded files.
+sub _check_mime_header {
+  my ($self, $ctype, $cte, $cd, $charset, $name) = @_;
+
+  if ($ctype =~ /^text/ &&
+      $cte =~ /base64/ &&
+      !($cd && $cd =~ /^(?:attachment|inline)/))
+  {
+    $self->{mime_base64_encoded_text} = 1;
+  }
+
+  if ($ctype =~ /^text\/html/ &&
+      !(defined($charset) && $charset) &&
+      !($cd && $cd =~ /^(?:attachment|inline)/))
+  {
+    $self->{mime_html_no_charset} = 1;
+  }
+
+  if ($name && $ctype ne "application/octet-stream") {
+    $name =~ s/.*\.//;
+    $ctype =~ s@/(x-|vnd\.)@/@;
+    if (   ($name =~ /^html?$/ && $ctype ne "text/html")
+	|| ($name =~ /^jpe?g$/ && $ctype ne "image/jpeg")
+	|| ($name eq "pdf" && $ctype ne "application/pdf")
+	|| ($name eq "gif" && $ctype ne "image/gif")
+	|| ($name eq "txt" && $ctype ne "text/plain")
+	|| ($name eq "vcf" && $ctype ne "text/vcard")
+	|| ($name =~ /^(?:bat|com|exe|pif|scr|swf|vbs)$/ && $ctype !~ m@^application/@)
+	|| ($name eq "doc" && $ctype !~ m@^application/.*word$@)
+	|| ($name eq "ppt" && $ctype !~ m@^application/.*(?:powerpoint|ppt)$@)
+	|| ($name eq "xls" && $ctype !~ m@^application/.*excel$@)
+       )
+    {
+       $self->{mime_suspect_name} = 1;
+    }
+  }
+}
+
 sub _check_attachments {
   my ($self) = @_;
 
-  my @boundary;
-  my %count;
-  my $ctype;
-  my $name;
-  my $previous = 'undef';
+  my $previous = 'undef';	# the previous line
 
+  # MIME status
+  my $where = 0;		# 0 = nowhere, 1 = header, 2 = body
+  my @boundary;			# list of MIME boundaries
+  my %state;			# state of each MIME part
+
+  # MIME header information
+  my $ctype;			# Content-Type
+  my $cte;			# Content-Transfer-Encoding
+  my $cd;			# Content-Disposition
+  my $charset;			# charset
+  my $name;			# name or filename
+
+  # regular expressions
+  my $re_boundary = qr/\bboundary\s*=\s*["']?(.*?)["']?(?:;|$)/i;
+  my $re_charset = qr/\bcharset\s*=\s*["']?(.*?)["']?(?:;|$)/i;
+  my $re_name = qr/name\s*=\s*["']?(.*?)["']?(?:;|$)/i;
+  my $re_ctype = qr/^Content-Type:\s*(.+?)(?:;|\s|$)/i;
+  my $re_cte = qr/^Content-Transfer-Encoding:\s*(.+)/i;
+  my $re_cd = qr/^Content-Disposition:\s*(.+)/i;
+
+  # results
   $self->{microsoft_executable} = 0;
+  $self->{mime_base64_encoded_text} = 0;
+  $self->{mime_html_no_charset} = 0;
   $self->{mime_long_line_qp} = 0;
   $self->{mime_missing_boundary} = 0;
   $self->{mime_suspect_name} = 0;
 
-  # boundaries in header
   $ctype = $self->get('Content-Type');
-  if ($ctype =~ /\bboundary\s*=\s*["']?(.*?)["']?(?:;|$)/i) {
+  if ($ctype =~ /$re_boundary/) {
     push (@boundary, "\Q$1\E");
   }
-  $ctype = 0;
+  if ($ctype =~ /^text\//i) {
+    $cte = $self->get('Content-Transfer-Encoding');
+    if ($cte =~ /base64/i) {
+      $self->{mime_base64_encoded_text} = 1;
+    }
+  }
 
   # Note: We don't use rawbody because it removes MIME parts.  Instead,
   # we get the raw unfiltered body.  We must not change any lines.
-  foreach my $line (@{$self->{msg}->get_body()}) {
-    if ($line =~ /^--/) {
+  for (@{$self->{msg}->get_body()}) {
+    if (/^--/) {
       foreach my $boundary (@boundary) {
-	if ($line =~ /^--$boundary$/) {
-	  $count{$boundary} = 1;
+	if (/^--$boundary$/) {
+	  $state{$boundary} = 1;
+	  $ctype = $cte = $cd = $charset = $name = 0;
+	  $where = 1;
 	}
-	if ($line =~ /^--$boundary--$/) {
-	  $count{$boundary}--;
+	if (/^--$boundary--$/) {
+	  $state{$boundary}--;
+	  $where = 0;
 	}
       }
     }
-    elsif ($line =~ /^Content-[Tt]ype: (\S+?\/\S+?)(?:\;|\s|$)/) {
-      $ctype = lc($1);
-      $ctype =~ s@/(x-|vnd\.)@/@;
+    if ($where == 2) {
+      if ($previous =~ /^$/ && /^TVqQAAMAAAAEAAAA/) {
+	$self->{microsoft_executable} = 1;
+      }
+      if ($self->{mime_html_no_charset} &&
+	  $ctype =~ /^text\/html/ &&
+	  /charset=/i)
+      {
+	$self->{mime_html_no_charset} = 0;
+      }
+    }
+    if ($where == 1) {
+      if (/^$/) {
+	$where = 2;
+	$self->_check_mime_header($ctype, $cte, $cd, $charset, $name);
+      }
+      if (/$re_boundary/) { push(@boundary, "\Q$1\E"); }
+      if (/$re_charset/) { $charset = lc($1); }
+      if (/$re_name/) { $name = lc($1); }
+      if (/$re_ctype/) { $ctype = lc($1); }
+      elsif (/$re_cte/) { $cte = lc($1); }
+      elsif (/$re_cd/) { $cd = lc($1); }
     }
     if ($self->{found_encoding_quoted_printable} &&
-	length($line) > 77 && $line =~ /\=[0-9A-Fa-f]{2}/) {
+	length > 77 && /\=[0-9A-Fa-f]{2}/)
+    {
       $self->{mime_long_line_qp} = 1;
     }
-    if ($ctype) {
-      if ($line =~ /^$/) {
-	$ctype = 0;
-      }
-      elsif ($line =~ /\bboundary\s*=\s*["']?(.*?)["']?(?:;|$)/i) {
-        push (@boundary, "\Q$1\E");
-      }
-      if ($ctype ne "application/octet-stream" &&
-	  $line =~ /name=(".*"|\S+)(?:\;|\s|$)/i) {
-	my $name = $1;
-	$name =~ s/.*\.//;	# look at just the extension
-	$name =~ s/"//g;	# remove quotes
-	$name = lc($name);
-	if (  ($name =~ /^html?$/ && $ctype ne "text/html")
-	   || ($name =~ /^jpe?g$/ && $ctype ne "image/jpeg")
-	   || ($name eq "pdf" && $ctype ne "application/pdf")
-	   || ($name eq "gif" && $ctype ne "image/gif")
-	   || ($name eq "txt" && $ctype ne "text/plain")
-	   || ($name eq "vcf" && $ctype ne "text/vcard")
-	   || ($name =~ /^(?:bat|com|exe|pif|scr|swf|vbs)$/ && $ctype !~ m@^application/@)
-	   || ($name eq "doc" && $ctype !~ m@^application/.*word$@)
-	   || ($name eq "ppt" && $ctype !~ m@^application/.*(?:powerpoint|ppt)$@)
-	   || ($name eq "xls" && $ctype !~ m@^application/.*excel$@)
-	   )
-	{
-	  $self->{mime_suspect_name} = 1;
-	}
-      }
+    if ($previous =~ /^begin [0-7]{3} ./ && /^M35J0``,````\$````/) {
+      $self->{microsoft_executable} = 1;
     }
-    if ($previous =~ /^$/) {
-      $self->{microsoft_executable} = 1 if $line =~ /^TVqQAAMAAAAEAAAA/;
-    }
-    elsif ($previous =~ /^begin [0-7]{3} .*/) {
-      $self->{microsoft_executable} = 1 if $line =~ /^M35J0``,````\$````/;
-    }
-    $previous = $line;
+    $previous = $_;
   }
-  foreach my $boundary (keys %count) {
-    if ($count{$boundary} != 0) {
+  foreach my $str (keys %state) {
+    if ($state{$str} != 0) {
       $self->{mime_missing_boundary} = 1;
       last;
     }
@@ -1729,32 +1800,6 @@ sub check_dcc {
   # parts etc.)
   my $full = $self->get_full_message_as_text();
   return $self->dcc_lookup (\$full);
-}
-
-sub check_for_base64_enc_text {
-  my ($self, $fulltext) = @_;
-
-  # If the message itself is base64-encoded, return positive
-  my $cte = $self->get('Content-Transfer-Encoding');
-  if ( defined $cte && $cte =~ /^\s*base64/i &&
-        ($self->get('content-type') =~ /text\//i) ) {
-  	return 1;
-  }
-
-  if ($$fulltext =~ /\n\n.{0,100}(
-    	\nContent-Type:\s*text\/.{0,200}
-	\nContent-Transfer-Encoding:\s*base64.*?
-	\n\n)/isx)
-  {
-    my $otherhdrs = $1;
-    if ($otherhdrs =~ /^Content-Disposition: (?:attachment|inline)/im) {
-      return 0;		# text attachments are OK
-    } else {
-      return 1;		# no Content-Disp: header found, it's bad
-    }
-  }
-
-  return 0;
 }
 
 ###########################################################################
