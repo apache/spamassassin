@@ -44,23 +44,23 @@ Usage: spamd [options]
 
 Options:
 
+    -a            Use per-user auto-whitelists.
+    -c            Create user preferences files if they do not already exist
+    -d		  Daemonize, detach from parent process
     -h            Print this usage message and exit
-    -L            Use local tests only (no DNS or other network lookups)
-    -A host,...   Set list of authorized ip addresses which can connect to this server
-    (defaults to 127.0.0.1 only)
     -i ipaddr     Listen on the specified IP address (defaults to 127.0.0.1,
 						      use 0.0.0.0 to listen on all available addresses)
     -p port       Listen on the specific port (otherwise default is port 783)
-    -u username   Run as named user, instead of running setuid to spamc user
-    -d		  Daemonize, detach from parent process
-    -x            Disable user config files
     -q            Enable SQL config (only useful with -x)
+    -s facility   Specify the syslog facility (default: mail)
+    -u username   Run as named user, instead of running setuid to spamc user
+    -x            Disable user config files
+    -A host,...   Set list of authorized ip addresses which can connect to this server
+    (defaults to 127.0.0.1 only)
+    -D            Print debugging messages
+    -L            Use local tests only (no DNS or other network lookups)
     -P            Die upon user errors (does not exist or user = root) instead of
                   running as 'nobody' with defaults.
-    -s            Specify the syslog facility (default: mail)
-    -D            Print debugging messages
-    -c            Create user preferences files if they do not already exist
-    -a            Use per-user auto-whitelists.
 
 EOUSAGE
     exit $resphash{EX_USAGE};
@@ -84,7 +84,7 @@ use vars qw{
     };
 
 
-getopts('hdLxqp:A:s:Du:Pcai:') or usage();
+getopts('acdhi:p:qs:u:xA:DLP') or usage();
 
 $opt_h and usage();
 
@@ -560,97 +560,105 @@ sub kill_handler
 
 =head1 NAME
 
-    spamd - daemonized version of spamassassin
+spamd - daemonized version of spamassassin
 
-    =head1 SYNOPSIS
+=head1 SYNOPSIS
 
-    spamd [options]
+spamd [options]
 
-    =head1 OPTIONS
+=head1 OPTIONS
 
-    =over
+=over
 
-    =item B<-c>
+=item B<-a>
 
-    Create user preferences files if they don't exist (default: don't)
+Use per-user auto-whitelists.  These will automatically create a list of senders whose messages are to be considered non-spam by monitoring the total number of received messages which weren't tagged as spam from that sender.  Once a threshold is exceeded, further messages from that sender will be given a non-spam bonus (in case you correspond with people who occasionally swear in their emails)
 
-    =item B<-d>
+=item B<-c>
 
-    Detach from starting process and run in background (daemonize)
+Create user preferences files if they don't exist (default: don't)
 
-    =item B<-D>
+=item B<-d>
 
-    Print debugging messages
+Detach from starting process and run in background (daemonize)
 
-    =item B<-h>
+=item B<-h>
 
-    Print a brief help message, then exit without further action
+Print a brief help message, then exit without further action
 
-    =item B<-L>
+=item B<-i> I<ipaddress>
 
-    Perform only local tests on all mail.  In other words, skip DNS and other
-    network tests.  Works the same as the C<-L> flag to C<spamassassin(1)>
+Tells spamd to listen on the specified IP address [defaults to 127.0.0.1].  Use 0.0.0.0 to listen on all interfaces.
 
-    =item B<-A> I<host,...>
+=item B<-p> I<port>
 
-    Specify a list of authorized hosts which can connect to this spamd instance.
-    The list is one of valid IP addresses, separated by commas.  By default, connections are only accepted from localhost
+Optionally specifies the port number for the server to listen on.
 
-    =item B<-p> I<port>
+=item B<-q>
 
-    Optionally specifies the port number for the server to listen on.
+Turn on SQL lookups even when per-user config files have been disabled
+with B<-x>. this is useful for spamd hosts which don't have user's
+home directories but do want to load user preferences from an SQL
+database.
 
-    =item B<-P>
+=item B<-s> I<facility>
 
-    Die on user errors (for the user passed from spamc) instead of falling back to user I<nobody> and using the default configuration
+Specify the syslog facility to use (default: mail)
 
-    =item B<-s> I<facility>
+=item B<-u> I<username>
 
-    Specify the syslog facility to use (default: mail)
+Run as the named user.  The alternative, default behaviour is to setuid() to
+the user running C<spamc>, if C<spamd> is running as root
 
-    =item B<-u> I<username>
+=item B<-x>
 
-    Run as the named user.  The alternative, default behaviour is to setuid() to
-    the user running C<spamc>, if C<spamd> is running as root
+Turn off per-user config files.  All users will just get the default
+configuration
 
-    =item B<-x>
+=item B<-A> I<host,...>
 
-    Turn off per-user config files.  All users will just get the default
-    configuration
+Specify a list of authorized hosts which can connect to this spamd instance.
+The list is one of valid IP addresses, separated by commas.  By default, connections are only accepted from localhost
 
-    =item B<-q>
+=item B<-D>
 
-    Turn on SQL lookups even when per-user config files have been disabled
-    with B<-x>. this is useful for spamd hosts which don't have user's
-    home directories but do want to load user preferences from an SQL
-    database.
+Print debugging messages
 
-    =back
+=item B<-L>
 
-    =head1 DESCRIPTION
+Perform only local tests on all mail.  In other words, skip DNS and other
+network tests.  Works the same as the C<-L> flag to C<spamassassin(1)>
 
-    The purpose of this program is to provide a daemonized version of the
-    spamassassin executable.  The goal is improving throughput performance for
-    automated mail checking.
+=item B<-P>
 
-    This is intended to be used alongside C<spamc>, a fast, low-overhead C client
-    program.
+Die on user errors (for the user passed from spamc) instead of falling back to user I<nobody> and using the default configuration
 
-    See the README file in the C<spamd> directory of the SpamAssassin distribution
-    for more details.
+=back
 
-    =head1 SEE ALSO
+=head1 DESCRIPTION
 
-    spamc(1)
-    spamassassin(1)
+The purpose of this program is to provide a daemonized version of the
+spamassassin executable.  The goal is improving throughput performance for
+automated mail checking.
+
+This is intended to be used alongside C<spamc>, a fast, low-overhead C client
+program.
+
+See the README file in the C<spamd> directory of the SpamAssassin distribution
+for more details.
+
+=head1 SEE ALSO
+
+spamc(1)
+spamassassin(1)
 Mail::SpamAssassin(3)
 
-    =head1 AUTHOR
+=head1 AUTHOR
 
-    Craig R Hughes E<lt>craig@hughes-family.orgE<gt>
+Craig R Hughes E<lt>craig@hughes-family.orgE<gt>
 
-    =head1 PREREQUISITES
+=head1 PREREQUISITES
 
-    C<Mail::SpamAssassin>
+C<Mail::SpamAssassin>
 
-    =cut
+=cut

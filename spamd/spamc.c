@@ -72,13 +72,14 @@ const char *PROTOCOL_VERSION="SPAMC/1.2";
 
 void print_usage(void)
 {
-  printf("Usage: spamc [-d host] [-p port] [-c|-f] [-h]\n");
-  printf("-d host: specify host to connect to  [default: localhost]\n");
-  printf("-p port: specify port for connection [default: 783]\n");
-  printf("-f: fallback safely - in case of comms error, dump original message unchanges instead of setting exitcode\n");
-  printf("-s size: specify max message size, any bigger and it will be returned w/out processing [default: 250k]\n");
+  printf("Usage: spamc [-d host] [-p port] [-c] [-f] [-h]\n");
   printf("-c: check only - print score/threshold and exit code set to 0 if message is not spam, 1 if spam\n");
+  printf("-d host: specify host to connect to  [default: localhost]\n");
+  printf("-f: fallback safely - in case of comms error, dump original message unchanges instead of setting exitcode\n");
   printf("-h: print this help message\n");
+  printf("-p port: specify port for connection [default: 783]\n");
+  printf("-s size: specify max message size, any bigger and it will be returned w/out processing [default: 250k]\n");
+  printf("-u username: specify the username for spamd to process this message under\n");
 }
 
 
@@ -496,7 +497,7 @@ void read_args(int argc, char **argv, char **hostname, int *port, int *max_size,
 {
   int opt;
 
-  while(-1 != (opt = getopt(argc,argv,"cd:p:u:hfs:")))
+  while(-1 != (opt = getopt(argc,argv,"cd:fhp:s:u:")))
   {
     switch(opt)
     {
