@@ -105,6 +105,8 @@ GetOptions(
   # will be stripped in future release
   'add-from!' => sub { warn "The --add-from option has been removed\n" },
   'F=i'       => sub { warn "The -F option has been removed\n" },
+  'S'       => sub { warn "The -S option has been removed\n" },
+  'stop-at-threshold!'       => sub { warn "The --stop-at-threshold option has been removed\n" },
 
 ) or pod2usage(-exitval => $resphash{'EX_USAGE'}, -verbose => 0);
 @ARGV = @OLD_ARGV;
