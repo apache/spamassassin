@@ -20,12 +20,6 @@ use strict;
 use bytes;
 use Fcntl;
 
-# tell AnyDBM_File to prefer DB_File, if possible.
-# BEGIN { @AnyDBM_File::ISA = qw(DB_File GDBM_File NDBM_File SDBM_File); }
-# off until 3.0; there's lots of existing AWLs out there this breaks.
-
-use AnyDBM_File;
-
 use Mail::SpamAssassin::PersistentAddrList;
 use Mail::SpamAssassin::Util;
 
@@ -61,6 +55,9 @@ sub new_checker {
 
   my $path;
 
+  my $dbm_module = Mail::SpamAssassin::Util::first_available_module
+			(qw(DB_File GDBM_File NDBM_File SDBM_File));
+
   my $umask = umask 0;
   if(defined($main->{conf}->{auto_whitelist_path})) # if undef then don't worry -- empty hash!
   {
@@ -72,7 +69,7 @@ sub new_checker {
       $self->{locked_file} = $path;
       $self->{is_locked} = 1;
       dbg("Tie-ing to DB file R/W in $path");
-      tie %{$self->{accum}},"AnyDBM_File",$path,
+      tie %{$self->{accum}},$dbm_module,$path,
 		  O_RDWR|O_CREAT,   #open rw w/lock
 		  (oct ($main->{conf}->{auto_whitelist_file_mode}) & 0666)
 	 or goto failed_to_tie;
@@ -80,7 +77,7 @@ sub new_checker {
     } else {
       $self->{is_locked} = 0;
       dbg("Tie-ing to DB file R/O in $path");
-      tie %{$self->{accum}},"AnyDBM_File",$path,
+      tie %{$self->{accum}},$dbm_module,$path,
 		  O_RDONLY,         #open ro w/o lock
 		  (oct ($main->{conf}->{auto_whitelist_file_mode}) & 0666)
 	 or goto failed_to_tie;

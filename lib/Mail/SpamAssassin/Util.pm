@@ -628,6 +628,34 @@ sub URLEncode {
 
 ###########################################################################
 
+=item $module = first_available_module (@module_list)
+
+Return the first module that can be successfully loaded with C<require>
+from the list.  Returns C<undef> if none are available.
+
+Used to replace C<AnyDBM_File>, like so:
+
+  my $module = Mail::SpamAssassin::Util::first_available_module
+                        (qw(DB_File GDBM_File NDBM_File SDBM_File));
+  tie %hash, $module, $path, [... args];
+
+Note that C<SDBM_File> is guaranteed to be present, since it comes
+with Perl.
+
+=cut
+
+sub first_available_module {
+  my (@packages) = @_;
+  foreach my $mod (@packages) {
+    if (eval 'require '.$mod.'; 1; ') {
+      return $mod;
+    }
+  }
+  undef;
+}
+
+###########################################################################
+
 # thanks to http://www2.picante.com:81/~gtaylor/autobuse/ for this
 # code.
 sub secure_tmpfile {
