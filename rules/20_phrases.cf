@@ -96,7 +96,7 @@ describe STRONG_BUY		Tells you about a strong buy
 body WE_HONOR_ALL		/\b(?:honou?r|respect)(?: all)? remov(?:e|al) requests?\b/i
 describe WE_HONOR_ALL		Claims to honor removal requests
 
-body STOCK_ALERT		/stock alert/i
+body STOCK_ALERT		/\bstock alert/i
 describe STOCK_ALERT		Offers a alert about a stock
 body MICRO_CAP_WARNING		/Investing in micro-cap securities is highly speculative/i
 describe MICRO_CAP_WARNING	SEC-mandated penny-stock warning
