@@ -540,11 +540,11 @@ sub rewrite_as_spam {
   my $report = $self->{report};
 
   # get original headers
-  my $from = $self->{msg}->get_header("From");
-  my $to = $self->{msg}->get_header("To");
-  my $cc = $self->{msg}->get_header("Cc");
-  my $subject = $self->{msg}->get_header("Subject");
-  my $msgid = $self->{msg}->get_header('Message-Id');
+  my $from = $self->{msg}->get_header("From", 0);
+  my $to = $self->{msg}->get_header("To", 0);
+  my $cc = $self->{msg}->get_header("Cc", 0);
+  my $subject = $self->{msg}->get_header("Subject", 0);
+  my $msgid = $self->{msg}->get_header('Message-Id', 0);
   if ($self->{conf}->{rewrite_subject}) {
     $subject ||= '';
     my $tag = $self->{conf}->{subject_tag};
