@@ -242,7 +242,10 @@ sub-rules, and are not scored or listed in the 'tests hit' reports.
 Used to specify addresses which send mail that is often tagged (incorrectly) as
 spam; it also helps if they are addresses of big companies with lots of
 lawyers.  This way, if spammers impersonate them, they'll get into big trouble,
-so it doesn't provide a shortcut around SpamAssassin.
+so it doesn't provide a shortcut around SpamAssassin.  If you want to whitelist
+your own domain, be aware that spammers will often impersonate the domain of
+the recipient.  The recommended solution is to instead use
+C<whitelist_from_rcvd> as explained below.
 
 Whitelist and blacklist addresses are now file-glob-style patterns, so
 C<friend@somewhere.com>, C<*@isp.com>, or C<*.domain.net> will all work.
