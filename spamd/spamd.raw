@@ -495,13 +495,13 @@ sub check {
         my $msg_resp_length = length($msg_resp);
         if($version >= 1.2) # Spamc protocol 1.2 means it accepts content-length
 	{
-	    print "SPAMD/1.1 $resphash{$resp} $resp\r\n",
+	    print STDOUT "SPAMD/1.1 $resphash{$resp} $resp\r\n",
 	   		 "Content-length: $msg_resp_length\r\n\r\n",
 	    $msg_resp;
         }
         else # Earlier than 1.2 didn't accept content-length
         {
-	    print "SPAMD/1.0 $resphash{$resp} $resp\r\n", $msg_resp;
+	    print STDOUT "SPAMD/1.0 $resphash{$resp} $resp\r\n", $msg_resp;
 	}
     }
     else		# $method eq 'CHECK' et al
@@ -518,9 +518,9 @@ sub check {
 	    $response_header .= "Spam: $response_spam_status ; $msg_score / $msg_threshold";
 	}
 
-	print $response_header, "\r\n\r\n";
-	print $status->get_names_of_tests_hit,"\r\n" if ($method eq "SYMBOLS");
-	print $status->get_report,"\r\n" if ($method eq "REPORT" or ($method eq "REPORT_IFSPAM" and $status->is_spam));
+	print STDOUT $response_header, "\r\n\r\n";
+	print STDOUT $status->get_names_of_tests_hit,"\r\n" if ($method eq "SYMBOLS");
+	print STDOUT $status->get_report,"\r\n" if ($method eq "REPORT" or ($method eq "REPORT_IFSPAM" and $status->is_spam));
     }
 
     logmsg "$was_it_spam ($msg_score/$msg_threshold) for $current_user:$> in ".
@@ -533,7 +533,7 @@ sub protocol_error {
     local $_ = shift;
 
     my $resp = "EX_PROTOCOL";
-    print "SPAMD/1.0 $resphash{$resp} Bad header line: $_\r\n";
+    print STDOUT "SPAMD/1.0 $resphash{$resp} Bad header line: $_\r\n";
     logmsg "bad protocol: header error: $_";
 }
 
@@ -579,6 +579,12 @@ sub spawn {
     close Server;
     open(STDIN,  "<&Client")   || die "can't dup client to stdin";
     open(STDOUT, ">&Client")   || die "can't dup client to stdout";
+
+    # redirect default output to STDERR (/dev/null), so that noise from
+    # Razor etc. will not be output as headers and
+    # thereby cause protocol failures.
+    select STDERR;
+
     exit &$coderef();
 }
 
