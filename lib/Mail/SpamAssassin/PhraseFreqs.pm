@@ -40,9 +40,9 @@ sub check_phrase_freqs {
   # 2000 chars will score 1/2 as much to compensate for having more phrases
   #
   my $msg_len_factor;
-  if(length($text) > 500) { $msg_len_factor = 1000 / length($text); }
-  # avoid division by zero
-  else { $msg_len_factor = 500; }
+  if(length($text) > 1000) { $msg_len_factor = 1000 / length($text); }
+  # avoid division by zero and set max factor to 1
+  else { $msg_len_factor = 1; }
 
   # print "words found: $text\n";
 
