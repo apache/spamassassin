@@ -31,7 +31,7 @@ BEGIN {
   eval { require Time::HiRes };
   Time::HiRes->import( qw(time) ) unless $@;
 }
-
+eval "use bytes";	# turn off UTF-8
 
 sub spawn;  # forward declaration
 sub logmsg; # forward declaration
@@ -317,7 +317,6 @@ for ( ; 1; close Client)
 
 	# First request line off stream
         local $_ = <STDIN>;
-	$_ = pack("C0A*", $_);      # turn off UTF8-ness
 
 	if (!defined $_) {
 	    protocol_error ("(closed before headers)");
@@ -371,7 +370,6 @@ sub check {
 	while(1)
 	{
 	    $_ = <STDIN>;
-	    $_ = pack("C0A*", $_);      # turn off UTF8-ness
 	    if(!defined $_)
 	    {
 		protocol_error ("(EOF during headers)");
@@ -437,8 +435,6 @@ sub check {
     my $in_header = 1;
     my $msgid;
     for (<STDIN>) {
-	$_ = pack("C0A*", $_);      # turn off UTF8-ness
-
 	if ($in_header) {
 	    if (/^$/) {
 		$in_header = 0;
