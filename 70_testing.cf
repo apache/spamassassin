@@ -479,3 +479,8 @@ describe T_SPOOF_OURI	 	URL has items in odd places
 header    T_SARE_SUB_DOLLARS    Subject =~ /^\s*(?:\w+ )?(?:\w+: )?\$\d+\s*$/
 describe  T_SARE_SUB_DOLLARS    Subject is dollar sign and numerics only
 
+# http://bugzilla.spamassassin.org/show_bug.cgi?id=2016
+rawbody __INTERRUPTUS           /(?:[a-zA-Z0-9]<[\/ ]{0,2}?(?!br)(?!p)(?!sup)(?!li)(?!b)(?!i)(?!option)(?!a (?:href|name))(?:\b|!--)[^>]{0,64}?>[a-zA-Z0-9].{0,64}){3}/i
+meta T_INTERRUPTUS              MIME_HTML_ONLY && __INTERRUPTUS
+describe T_INTERRUPTUS          Hypertextus Interruptus - HTML-obfuscated text
+
