@@ -325,7 +325,7 @@ describe HTML_NONELEMENT_70_80	70% to 80% of HTML elements are non-standard
 describe HTML_NONELEMENT_80_90	80% to 90% of HTML elements are non-standard
 describe HTML_NONELEMENT_90_100	90% to 100% of HTML elements are non-standard
 
-body HTML_TITLE_EMPTY		eval:html_eval('title_text', '!~ /\S/s')
+body HTML_TITLE_EMPTY		eval:html_title('!~ /\S/s')
 describe HTML_TITLE_EMPTY	HTML title contains no text
 
 body HTML_TITLE_UNTITLED	eval:html_eval('title_text', '=~ /Untitled/i')
