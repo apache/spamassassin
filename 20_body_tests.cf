@@ -77,8 +77,6 @@ describe REMOVE_IN_QUOTES	List removal information
 body DISCONTINUE		/\"discontinue\".{1,15}no further notices/i
 describe DISCONTINUE		List removal information
 
-body REMOVE_CLICK		/click here to be (?:permanently )?(?:removed|deleted)/i
-describe REMOVE_CLICK		Click to be removed
 body REMOVE_FROM_LIST		/to be removed from (?:the|my|our) (?:mailing|e.?mail|opt[ -]?in)? ?list/i
 describe REMOVE_FROM_LIST	To be removed from list
 body REMOVE_RESPECT		/(?:respect|honou?r) all removal requests/i
@@ -87,6 +85,23 @@ describe REMOVE_RESPECT		We respect all removal requests
 # bug 1022: MGM_POSTCARD #2 original
 body REMOVE_POSTAL		/(?:Send(?:ing|) a (?:postal mail|postcard) to (?:Unsubscribe|Customer ?Service|remove)|unsubscribe by (?:postal mail|postcard))/i
 describe REMOVE_POSTAL		Send real mail to be unsubscribed
+
+###########################################################################
+# CLICK rules
+# note HTML_LINK_CLICK* rules in HTML parser section
+
+body CLICK_BELOW_CAPS		/CLICK\s.{0,30}(?:HERE|BELOW)/s
+describe CLICK_BELOW_CAPS	Asks you to click below (in capital letters)
+
+body __CLICK_BELOW		/click\s.{0,30}(?:here|below)/is
+meta CLICK_BELOW		(__CLICK_BELOW && !CLICK_BELOW_CAPS)
+describe CLICK_BELOW		Asks you to click below
+
+body CLICK_TO_REMOVE_1		/click here to be (?:permanently )?(?:removed|deleted)/i
+describe CLICK_TO_REMOVE_1	Click to be removed
+
+body CLICK_TO_REMOVE_2		/mailto:.{0,50}click.{0,50}remove/is
+describe CLICK_TO_REMOVE_2	Click-to-remove with mailto: found beforehand
 
 ###########################################################################
 # HTML parser tests
@@ -262,6 +277,12 @@ describe HTML_IMAGE_RATIO_14	HTML has a low ratio of text to image area
 
 body HTML_JAVASCRIPT		eval:html_test('javascript')
 describe HTML_JAVASCRIPT	JavaScript code
+
+body HTML_LINK_CLICK_HERE	eval:html_eval('anchor_text', '=~ /click\s+here/i')
+describe HTML_LINK_CLICK_HERE	HTML link text says "click here"
+
+body HTML_LINK_CLICK_CAPS	eval:html_eval('anchor_text', '=~ /CLICK/')
+describe HTML_LINK_CLICK_CAPS	HTML link text says "CLICK"
 
 # many spammers seem to do this nowadays (and probably track
 # their customers with it).  (contrib: WW)
@@ -620,16 +641,6 @@ tflags MIME_SUSPECT_NAME userconf
 # match some gibberish produced by quoted-printable encoding of HTML, often
 # in the middle of a HTML "attribute=value" pair.
 
-
-rawbody CLICK_HERE_LINK         /click\s+here.{0,100}<\/a>/is
-describe CLICK_HERE_LINK	Tells you to click on a URL
-rawbody CLICK_HERE_CAPS_LINK    /CLICK\s+HERE.{0,100}<\/[aA]>/s
-describe CLICK_HERE_CAPS_LINK	Tells you to click on a URL (in caps)
-body CLICK_BELOW		/click\s.{0,30}(?:here|below)/is
-describe CLICK_BELOW		Asks you to click below
-body CLICK_BELOW_CAPS		/CLICK\s.{0,30}(?:HERE|BELOW)/s
-describe CLICK_BELOW_CAPS	Asks you to click below (in caps)
-
 # (contrib: skod)
 body PRINT_FORM_SIGNATURE	/Sign(?:ature)?\s*(?:here|please)?:.{0,30}___*/i
 describe PRINT_FORM_SIGNATURE	Asks you for your signature on a form
@@ -655,9 +666,6 @@ describe NEW_DOMAIN_EXTENSIONS	Possible registry spammer
 
 body DOMAIN_BODY		/(?:\s|^)(?:\.|dot\s+)(?:info|biz|name)\b|(?:\s|^)\.\w+ domain/mi
 describe DOMAIN_BODY		Domain registration spam body
-
-body CLICK_TO_REMOVE_2          /mailto:.{0,50}click.{0,50}remove/is
-describe CLICK_TO_REMOVE_2      Click-to-remove with mailto: found beforehand
 
 # (contrib: climent)
 
@@ -1508,9 +1516,6 @@ describe ANOTHER_NET_AD         Tells you it's an ad
 
 body CHANGE_TERMS               /\bstrictly based on the following terms and conditions\b/i
 describe CHANGE_TERMS           Terms and conditions
-
-body CLICK_TO_REMOVE_3          /http:.{0,50}action=remove/is
-describe CLICK_TO_REMOVE_3      Click-to-remove with PHP/ASP action found
 
 body     DONT_DELETE            /\b(?:don'?t delete this|do not delete)/i
 describe DONT_DELETE            Don't delete me!  Nooooo!!!!
