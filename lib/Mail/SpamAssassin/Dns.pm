@@ -528,20 +528,22 @@ sub is_dccifd_available {
     return 0;
   }
 
-  my $dcchome = $self->{conf}->{dcc_home};
-  my $dccifd_path = $self->{conf}->{dcc_dccifd_path};
+  my $dcchome = $self->{conf}->{dcc_home}        || '';
+  my $dccifd  = $self->{conf}->{dcc_dccifd_path} || '';
 
-  if ( !$dccifd_path && $dcchome && -S "$dcchome/dccifd" && -w _ && -r _ ) {
-    $dccifd_path = "$dcchome/dccifd";
-    $self->{conf}->{dcc_dccifd_path} = $dccifd_path;
+  if (!$dccifd && ($dcchome && -S "$dcchome/dccifd")) {
+    $dccifd   = "$dcchome/dccifd";
   }
 
-  unless ( $dccifd_path && -S "$dccifd_path" && -w _ && -r _ ) {
-    dbg ("DCCifd is not available.");
+  unless ($dccifd && -S $dccifd && -w _ && -r _ ) {
+    dbg ("DCCifd is not available: no r/w dccifd socket found.");
     return 0;
   }
 
-  dbg ("DCCifd is available: $dccifd_path");
+  # Remember any found dccifd socket
+  $self->{conf}->{dcc_dccifd_path} = $dccifd;
+
+  dbg ("DCCifd is available: ".$self->{conf}->{dcc_dccifd_path});
   return 1;
 }
 
@@ -554,21 +556,23 @@ sub is_dcc_available {
   }
   if (!$self->{conf}->{use_dcc}) { return 0; }
 
-  my $dcchome = $self->{conf}->{dcc_home};
+  my $dcchome = $self->{conf}->{dcc_home} || '';
   my $dccproc = $self->{conf}->{dcc_path} || '';
 
-  if ( $dcchome && !$dccproc && -x "$dcchome/bin/dccproc" ) {
-	$dccproc = "$dcchome/bin/dccproc";
+  if (!$dccproc && ($dcchome && -x "$dcchome/bin/dccproc")) {
+    $dccproc  = "$dcchome/bin/dccproc";
+  }
+  unless ($dccproc) {
+    $dccproc  = Mail::SpamAssassin::Util::find_executable_in_env_path('dccproc');
   }
 
-  unless ($dccproc) {
-    $dccproc = Mail::SpamAssassin::Util::find_executable_in_env_path('dccproc');
-    if ($dccproc) { $self->{conf}->{dcc_path} = $dccproc; }
-  }
   unless ($dccproc && -x $dccproc) {
-    dbg ("DCC is not available: dccproc not found");
+    dbg ("DCC is not available: no executable dccproc found.");
     return 0;
   }
+
+  # Remember any found dccproc
+  $self->{conf}->{dcc_path} = $dccproc;
 
   dbg ("DCC is available: ".$self->{conf}->{dcc_path});
   return 1;
