@@ -48,6 +48,9 @@ To install as non-root, do something like this:
 	make
 	make install
 
+If you are running AFS, you may also need to specify INSTALLSITELIB and
+SITELIBEXP.
+
 This will install the SpamAssassin modules and rules into the ~/sausr
 and ~/saetc directories off your home directory.
 
