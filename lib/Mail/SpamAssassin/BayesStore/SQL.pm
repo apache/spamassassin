@@ -1173,6 +1173,13 @@ sub cleanup {
 
 =head2 get_magic_re
 
+public instance get_magic_re (String)
+
+Description:
+This method returns a regexp which indicates a magic token.
+
+Unused in SQL implementation.
+
 =cut
 
 sub get_magic_re {
@@ -1300,16 +1307,16 @@ sub backup_database {
     return 0;
   }
 
-  my $rc = $sth->execute($self->{_username});
+  my $rc = $sth->execute($self->{_userid});
 
   unless ($rc) {
     dbg("bayes: backup_database: SQL Error: ".$self->{_dbh}->errstr());
     return 0;
   }
 
-  while (my ($token, $spam_count, $ham_count, $atime) = $sth->fetchrow_array()) {
-    $token = pack("H*", $token);
-    print "t\t$spam_count, $ham_count, $atime, $token\n";
+  while (my @values = $sth->fetchrow_array()) {
+    $values[3] = unpack("H*", $values[3]);
+    print "t\t" . join("\t", @values) . "\n";
   }
 
   $sth->finish();
@@ -1321,7 +1328,7 @@ sub backup_database {
     return 0;
   }
 
-  $rc = $sth->execute($self->{_username});
+  $rc = $sth->execute($self->{_userid});
 
   unless ($rc) {
     dbg("bayes: backup_database: SQL Error: ".$self->{_dbh}->errstr());
