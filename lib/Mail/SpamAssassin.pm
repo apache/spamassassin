@@ -684,7 +684,7 @@ sub report_as_spam {
 
   require Mail::SpamAssassin::Reporter;
   $mail = Mail::SpamAssassin::Reporter->new($self, $mail, $options);
-  $mail->report ();
+  $mail->report();
 }
 
 ###########################################################################

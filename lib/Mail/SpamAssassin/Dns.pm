@@ -642,7 +642,7 @@ sub is_dns_available {
     my $result = $self->lookup_ns($domain);
     if(defined $result && scalar @$result > 0) {
       if ( $result ) {
-        dbg("dns: NS lookup of $domain succeeded => Dns available (set dns_available to hardcode)");
+        dbg("dns: NS lookup of $domain succeeded => DNS available (set dns_available to override)");
         $IS_DNS_AVAILABLE = 1;
         last;
       }
