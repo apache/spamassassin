@@ -14,6 +14,8 @@ use strict;
 use bytes;
 use Carp;
 
+use constant HAS_RAZOR2_CLIENT_AGENT => eval { require Razor2::Client::Agent; };
+
 use vars qw{
   $KNOWN_BAD_DIALUP_RANGES $IP_IN_RESERVED_RANGE
   @EXISTING_DOMAINS $IS_DNS_AVAILABLE $VERSION
@@ -171,6 +173,8 @@ sub process_dnsbl_result {
 
   my $packet = $self->{res}->bgread($query->{bgsock});
 
+  return if !defined $packet;
+
   foreach my $ansitem ($packet->answer) {
     # TODO: there are some CNAME returns, not sure what they represent
     # nor whether they should be counted
@@ -279,14 +283,13 @@ sub is_razor2_available {
   if (!$self->{conf}->{use_razor2}) { return 0; }
 
   # Use Razor2 if it's available, Razor1 otherwise
-  eval { require Razor2::Client::Agent; };
-  if ($@) {
-    dbg("Razor2 is not available", "razor", -1);
-    return 0;
-  }
-  else {
+  if (HAS_RAZOR2_CLIENT_AGENT) {
     dbg("Razor2 is available", "razor", -1);
     return 1;
+  }
+  else {
+    dbg("Razor2 is not available", "razor", -1);
+    return 0;
   }
 }
 
@@ -299,11 +302,7 @@ sub razor2_lookup {
   return $self->{razor2_result} if ( defined $self->{razor2_result} );
   $self->{razor2_result} = 0;
 
-  if ($self->{main}->{local_tests_only}) {
-    dbg ("local tests only, ignoring Razor2", "razor", -1);
-    return 0;
-  }
-  if (!$self->{conf}->{use_razor2}) { return 0; }
+  # this test covers all aspects of availability
   if (!$self->is_razor2_available()) { return 0; }
 
   timelog("Razor2 -> Starting razor test ($timeout secs max)", "razor", 1);
@@ -520,12 +519,14 @@ sub dcc_lookup {
 
     dbg("DCC command: ".join(' ', $path, "-H", $opts, "< '$tmpf'", "2>&1"),'dcc',-1);
     my $pid = open(DCC, join(' ', $path, "-H", $opts, "< '$tmpf'", "2>&1", '|')) || die "$!\n";
-    chomp($response = <DCC>);
+    $response = <DCC>;
     close DCC;
 
-    unless (defined($response)) { # yes, this is possible
-      die ("no response\n");
+    unless (defined($response)) {
+      die ("no response\n");	# yes, this is possible
     }
+
+    chomp $response;
 
     dbg("DCC: got response: $response");
 
@@ -540,9 +541,12 @@ sub dcc_lookup {
     if ($@ =~ /^__alarm__$/) {
       dbg ("DCC -> check timed out after $timeout secs.");
       timelog("DCC interrupted after $timeout secs", "dcc", 2);
-   } elsif ($@ =~ /^__brokenpipe__$/) {
+    } elsif ($@ =~ /^__brokenpipe__$/) {
       dbg ("DCC -> check failed: Broken pipe.");
       timelog("DCC check failed, broken pipe", "dcc", 2);
+    } elsif ($@ eq "no response\n") {
+      dbg ("DCC -> check failed: no response");
+      timelog("DCC check failed, no response", "dcc", 2);
     } else {
       warn ("DCC -> check failed: $@\n");
       timelog("DCC check failed", "dcc", 2);
@@ -649,12 +653,14 @@ sub pyzor_lookup {
  
     dbg("Pyzor command: ".join(' ', $path, $opts, "check", "< '$tmpf'", "2>&1"),'pyzor',-1);
     my $pid = open(PYZOR, join(' ', $path, $opts, "check", "< '$tmpf'", "2>&1", '|')) || die "$!\n";
-    chomp($response = <PYZOR>);
+    $response = <PYZOR>;
     close PYZOR;
 
-    unless (defined($response)) { # this is possible for DCC, let's be on the safe side
-      die ("no response\n");
+    unless (defined($response)) {
+      die ("no response\n");	# yes, this is possible
     }
+
+    chomp $response;
 
     dbg("Pyzor: got response: $response");
 
@@ -672,6 +678,9 @@ sub pyzor_lookup {
     } elsif ($@ =~ /^__brokenpipe__$/) {
       dbg ("Pyzor -> check failed: Broken pipe.");
       timelog("Pyzor check failed, broken pipe", "pyzor", 2);
+    } elsif ($@ eq "no response\n") {
+      dbg ("Pyzor -> check failed: no response");
+      timelog("Pyzor check failed, no response", "pyzor", 2);
     } else {
       warn ("Pyzor -> check failed: $@\n");
       timelog("Pyzor check failed", "pyzor", 2);
