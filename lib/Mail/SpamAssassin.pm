@@ -94,7 +94,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.161 2003/01/14 22:55:47 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.162 2003/01/14 23:03:30 felicity Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -491,6 +491,16 @@ can be:
 =item dont_report_to_razor
 
 Inhibits reporting of the spam to Razor; useful if you know it's already
+been listed there.
+
+=item dont_report_to_dcc
+
+Inhibits reporting of the spam to DCC; useful if you know it's already
+been listed there.
+
+=item dont_report_to_pyzor
+
+Inhibits reporting of the spam to Pyzor; useful if you know it's already
 been listed there.
 
 =back
