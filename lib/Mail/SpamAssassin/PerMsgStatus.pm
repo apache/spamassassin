@@ -1307,6 +1307,8 @@ sub do_body_tests {
              if ('.$pat.') { 
                 $self->got_body_pattern_hit (q{'.$rulename.'}); 
                 '. $self->ran_rule_debug_code ($rulename,"body-text regex", 2) . '
+		# Ok, we hit, stop now.
+		last;
              }
            }
     }
