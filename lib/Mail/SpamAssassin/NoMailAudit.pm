@@ -115,7 +115,7 @@ sub parse_headers {
       $self->{from_line} = $_;
       next;
 
-    } elsif (/^([^\x00-\x1f\x7f-\xff :]+):\s*(.*)$/) {
+    } elsif (/^([^\x00-\x20\x7f-\xff:]+):(.*)$/) {
       $hdr = $1; $val = $2;
       $val =~ s/\r+//gs;          # trim CRs, we don't want them
       $entry = $self->_get_or_create_header_object ($hdr);
@@ -123,7 +123,7 @@ sub parse_headers {
 
     } else {
       $hdr = "X-Mail-Format-Warning";
-      $val = "Bad RFC822 header formatting in $_";
+      $val = "Bad RFC2822 header formatting in $_";
       $entry = $self->_get_or_create_header_object ($hdr);
       $entry->{added} = 1;
     }
