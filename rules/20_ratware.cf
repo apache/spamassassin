@@ -132,7 +132,7 @@ header __ANY_QUALCOMM_MUA	X-Mailer =~ /\bQUALCOMM\b/
 header __EUDORA_MSGID		MESSAGEID =~ /^<(?:\d\d?\.){4,5}\d{14}\.[a-f0-9]{8}\@\S+>$/m
 header __HAS_X_LOOP		exists:X-Loop
 header __HAS_X_MAILING_LIST	exists:X-Mailing-List
-meta FORGED_MUA_EUDORA		(__EUDORA_MUA && !__EUDORA_MSGID && !__UNUSABLE_MSGID && !__HAS_X_LOOP && !__HAS_X_MAILING_LIST && !__MAC_EUDORA_MUA && !__PALM_EUDORA_MUA && !__OLD_EUDORA1 && !(__OLD_EUDORA2 && !__QUALCOMM))
+meta FORGED_MUA_EUDORA		(__EUDORA_MUA && !__EUDORA_MSGID && !__UNUSABLE_MSGID && !__HAS_X_LOOP && !__HAS_X_MAILING_LIST && !__MAC_EUDORA_MUA && !__PALM_EUDORA_MUA && !__OLD_EUDORA1 && !(__OLD_EUDORA2 && !__ANY_QUALCOMM_MUA))
 describe FORGED_MUA_EUDORA	Forged mail pretending to be from Eudora
 
 # Mar 26 2003 jm: AOL MUAs add a Received line, and do not use "real names" in
