@@ -1,5 +1,7 @@
 #!/usr/bin/perl -w
 
+our $BZ_URI = 'http://bugzilla.spamassassin.org';
+
 our $ALLOWED_NEEDSMCERS = qr/^
         jm\@jmason\.org
         |quinlan\@pathname\.com
@@ -55,7 +57,7 @@ sub main {
 sub get_bug_list {
   $mech->get (
   
-'http://bugzilla.spamassassin.org/buglist.cgi?long_desc_type=allwordssubstr&long_desc=NEEDSMC&bug_file_loc_type=allwordssubstr&bug_status=NEW&bug_status=ASSIGNED&bug_status=REOPENED'
+$BZ_URI.'/buglist.cgi?long_desc_type=allwordssubstr&long_desc=NEEDSMC&bug_file_loc_type=allwordssubstr&bug_status=NEW&bug_status=ASSIGNED&bug_status=REOPENED'
 
     );
 
@@ -311,6 +313,11 @@ sub process_comment_for_needsmc {
 
     print "bug $ctx->{bugnum} cmt $cmt->{cmtnum}: needs-mc on $done already done\n";
   }
+  elsif ($text =~ /^Created an attachment \(id=(\d+)\)/)
+  {
+    my $att = get_rules_from_attachment($ctx, $cmt, $1);
+    read_cmt_rules_from_text($ctx, $cmt, $att);
+  }
   elsif ($text =~ /{{{/) #}}}
   {
     # remove all text bits -- outside of {{{ ... }}} markers
@@ -396,3 +403,10 @@ sub read_cmt_rules_from_text {
     print "bug $ctx->{bugnum} cmt $cmt->{cmtnum}: code: \n".$ruletext;
   }
 }
+
+sub get_rules_from_attachment {
+  my ($ctx, $cmt, $id) = @_;
+  $mech->get ( $BZ_URI.'/attachment.cgi?id='.$id ); 
+  return $mech->content();
+}
+
