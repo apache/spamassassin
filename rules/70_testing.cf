@@ -721,3 +721,7 @@ describe T_RCVD_ILLEGAL_IP  Received contains illegal IP address
 # bug 2017
 rawbody T_IMG_ENDS_IN_SLASH /<img [^>]*src=[\"\']http:\/\/[^\"\'>]+\/[\"\']/i
 
+# Once is happenstance, twice is coincidence, the third time it's enemy action
+body T_HTML_IMG_ENDS_SLASH	eval:html_text('img_src', '=~ m{/$}')
+body T_HTML_WEB_BUGS		eval:html_text('img_src', '=~ /\.(?:pl|cgi|php|asp|jsp|cfm)\b/i')
+describe T_HTML_WEB_BUGS	Image tag intended to identify you

@@ -886,6 +886,9 @@ sub html_tests {
       $self->examine_text_style ($1, $2);
     }
   }
+  if ($tag eq "img") {
+    push @{ $self->{html}{img_src} }, $attr->{src} if exists $attr->{src};
+  }
   if ($tag eq "img" && exists $attr->{width} && exists $attr->{height}) {
     my $width = 0;
     my $height = 0;
