@@ -1,4 +1,4 @@
-# $Id: regression_tests.cf,v 1.20 2002/09/04 18:36:50 jmason Exp $
+# $Id: regression_tests.cf,v 1.21 2002/09/05 09:26:38 zelgadis Exp $
 #
 test BIG_FONT      fail    <font size=3D2>
 test BIG_FONT      ok      <font size=3D+2>
@@ -252,4 +252,12 @@ test NIGERIAN_SCAM_8 ok VLAJKO STOJILJKOVIC, one of the people indicted at the H
 
 test SPAM_REDIRECTOR ok http://rd.yahoo.com/?http://somesite.com/
 test SPAM_REDIRECTOR ok http://wwp.icq.com/?http://anothersite.com/
+
+
+test EMAIL_ATTRIBUTION ok At 15:43 2/26/2002 +0000, Rich Webster wrote:
+test EMAIL_ATTRIBUTION ok On Tue, 2001-12-04 at 04:45, Matthew Cline wrote:
+test EMAIL_ATTRIBUTION ok foo@bar.com writes:
+test EMAIL_ATTRIBUTION ok --- In FruityGroup@y..., hopefuldreamer13@a... wrote:
+test EMAIL_ATTRIBUTION fail foo@bar.com writed:
+test EMAIL_ATTRIBUTION fail wrote:
 
