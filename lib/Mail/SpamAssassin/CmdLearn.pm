@@ -69,7 +69,7 @@ sub cmdline_run {
     usage(0, "Please select either --spam, --ham, --forget, or --rebuild");
   }
 
-  if ($opt{'format'} eq 'single') {
+  if (defined($opt{'format'}) && $opt{'format'} eq 'single') {
     $opt{'format'} = 'file';
     push (@ARGV, '-');
   }
