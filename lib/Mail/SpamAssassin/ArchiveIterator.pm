@@ -262,6 +262,15 @@ sub receive_date {
 
 ############################################################################
 
+# a1=class a1=format L=date a*=mail
+sub index_pack {
+  return pack("a1a1La*", @_);
+}
+
+sub index_unpack {
+  return unpack("a1a1La*", $_[0]);
+}
+
 sub scan_directory {
   my ($self, $class, $folder) = @_;
 
@@ -277,7 +286,8 @@ sub scan_directory {
 
   foreach my $mail (@files) {
     if ($self->{opt_n}) {
-      $self->{$class}->{"$class" . "f" . "$mail"} = $no++;
+      $self->{$class}->{index_pack($class, "f", $no, $mail)} = $no;
+      $no++;
       next;
     }
     my $header;
@@ -287,7 +297,8 @@ sub scan_directory {
       $header .= $_;
     }
     close(INPUT);
-    $self->{$class}->{"$class" . "f" . "$mail"} = $self->receive_date($header);
+    my $date = $self->receive_date($header);
+    $self->{$class}->{index_pack($class, "f", $date, $mail)} = $date;
   }
 }
 
@@ -295,7 +306,8 @@ sub scan_file {
   my ($self, $class, $mail) = @_;
 
   if ($self->{opt_n}) {
-    $self->{$class}->{"$class" . "f" . "$mail"} = $no++;
+    $self->{$class}->{index_pack($class, "f", $no, $mail)} = $no;
+    $no++;
     return;
   }
   my $header;
@@ -305,7 +317,8 @@ sub scan_file {
     $header .= $_;
   }
   close(INPUT);
-  $self->{$class}->{"$class" . "f" . "$mail"} = $self->receive_date($header);
+  my $date = $self->receive_date($header);
+  $self->{$class}->{index_pack($class, "f", $date, $mail)} = $date;
 }
 
 sub scan_mailbox {
@@ -343,8 +356,8 @@ sub scan_mailbox {
       $where = tell INPUT;
     }
     if ($header) {
-      $self->{$class}->{"$class" . "m" . "$folder.$offset"} =
-	  ($self->{opt_n} ? $no++ : $self->receive_date($header));
+      my $t = ($self->{opt_n} ? $no++ : $self->receive_date($header));
+      $self->{$class}->{index_pack($class, "m", $t, "$folder.$offset")} = $t;
     }
   }
   close INPUT;
@@ -355,19 +368,18 @@ sub scan_mailbox {
 sub run_message {
   my ($self, $msg) = @_;
 
-  my $format = substr($msg, 1, 1);
-  my $where = substr($msg, 2);
+  my (undef, $format, $date, $mail) = index_unpack($msg);
 
   if ($format eq "f") {
-    return $self->run_file($where);
+    return $self->run_file($mail, $date);
   }
   elsif ($format eq "m") {
-    return $self->run_mailbox($where);
+    return $self->run_mailbox($mail, $date);
   }
 }
 
 sub run_file {
-  my ($self, $where) = @_;
+  my ($self, $where, $date) = @_;
 
   mail_open($where) or return;
   # skip too-big mails
@@ -378,11 +390,11 @@ sub run_file {
   my @msg = (<INPUT>);
   close INPUT;
 
-  &{$self->{wanted_sub}}($where, \@msg);
+  &{$self->{wanted_sub}}($where, $date, \@msg);
 }
 
 sub run_mailbox {
-  my ($self, $where) = @_;
+  my ($self, $where, $date) = @_;
 
   my ($file, $offset) = ($where =~ m/(.*)\.(\d+)$/);
   my @msg;
@@ -404,7 +416,7 @@ sub run_mailbox {
     push (@msg, $_);
   }
   close INPUT;
-  &{$self->{wanted_sub}}("$file.$offset", \@msg);
+  &{$self->{wanted_sub}}("$file.$offset", $date, \@msg);
 }
 
 ############################################################################
