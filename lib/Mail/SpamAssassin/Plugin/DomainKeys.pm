@@ -36,8 +36,8 @@ use strict;
 use warnings;
 use bytes;
 
-use Mail::DomainKeys::Message;
-use Mail::DomainKeys::Policy;
+# Have to do this so that RPM doesn't find these as required perl modules
+BEGIN { require Mail::DomainKeys::Message; require Mail::DomainKeys::Policy; }
 
 # Make the main dbg() accessible in our package w/o an extra function
 *dbg=\&Mail::SpamAssassin::Plugin::dbg;
