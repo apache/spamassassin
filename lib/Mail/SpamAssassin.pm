@@ -934,7 +934,9 @@ sub remove_spamassassin_markup {
   $hdrs =~ s/\r//gs;
 
   # unfold SA added headers, but not X-Spam-Prev headers ...
+  $hdrs = "\n".$hdrs;   # simplifies regexp below
   1 while $hdrs =~ s/(\nX-Spam-(?!Prev).+?)\n[ \t]+(\S.*\n)/$1 $2/g;
+  $hdrs =~ s/^\n//;
 
 ###########################################################################
   # Backward Compatibilty, pre 3.0.x.
@@ -985,7 +987,9 @@ sub remove_spamassassin_markup {
   }
 
   # remove any other X-Spam headers we added, will be unfolded
+  $hdrs = "\n".$hdrs;   # simplifies regexp below
   1 while $hdrs =~ s/\nX-Spam-.*\n/\n/g;
+  $hdrs =~ s/^\n//;
 
   # Put the whole thing back together ...
   return join ('', $mbox, $hdrs, $body);

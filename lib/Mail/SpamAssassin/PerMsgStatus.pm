@@ -916,13 +916,36 @@ sub rewrite_no_report_safe {
       $addition = 'headers_spam';
   }
 
+  # Break the pristine header set up into two blocks; "pre" is the stuff that
+  # we want to ensure comes before any SpamAssassin markup headers, like the
+  # Return-Path header (see bug 3409).
+  #
+  # "post" is all the rest of the message headers, placed after the
+  # SpamAssassin markup hdrs. Once one of those headers is seen, all further
+  # headers go into that set; it's assumed that it's an old copy of the
+  # header, or attempted spoofing, if it crops up halfway through the
+  # headers.
+
+  my $new_hdrs_pre = '';
+  my $new_hdrs_post = '';
+  foreach my $hdr (@pristine_headers) {
+    if ($new_hdrs_post eq '' && $hdr =~ /^Return-[pP]ath:/) {
+      $new_hdrs_pre .= $hdr;
+    } else {
+      $new_hdrs_post .= $hdr;
+    }
+  }
+
+  # use string appends to put this back together -- I finally benchmarked it.
+  # join() is 56% of the speed of just using string appends. ;)
   while (my ($header, $data) = each %{$self->{conf}->{$addition}}) {
     my $line = $self->_process_header($header,$data) || "";
     $line = $self->qp_encode_header($line);
-    push(@pristine_headers, "X-Spam-$header: $line\n");
+    $new_hdrs_pre .= "X-Spam-$header: $line\n";
   }
 
-  return join('', @pristine_headers, $separator, $self->{msg}->get_pristine_body());
+  return $new_hdrs_pre.$new_hdrs_post.$separator.
+            $self->{msg}->get_pristine_body();
 }
 
 sub qp_encode_header {
