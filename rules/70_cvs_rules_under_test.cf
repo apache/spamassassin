@@ -68,6 +68,9 @@ describe T_ADMANMAIL		Contains URL of frequent spam site
 body T_THIS_AINT_SPAM		/This.{0,30}is.{1,10}not?.{0,15}spam/is
 describe T_THIS_AINT_SPAM	Claims "This is not spam"
 
+# similar to THIS_AINT_SPAM, but probably should be a separate rule
+body T_CANNOT_BE_SPAM		/cannot be considered spam/i
+
 # variations of new rule
 # original version (non-optimal number of FPs, but probably good enough)
 body T_EXCUSE_24_V1		/you(?:'ve|'re| have| are)? receiv(?:ed|ing) this (?:e.?mail|advertisement) (?:by either|because)/i
@@ -90,16 +93,17 @@ header T_LOSE_WEIGHT		Subject =~ /(?:lose .{0,16}(?:weight|pounds|lbs)|weight.lo
 body T_BURNING_FAT		/aging while burning fat/i
 
 # replacement for REFINANCE_YOUR_HOME (current version has spacing mistake)
-body T_REFINANCE_YOUR_HOME        /\brefinance your(?: current)? (?:home|house)\b/i
+body T_REFINANCE_YOUR_HOME	/\brefinance your(?: current)? (?:home|house)\b/i
 
 # replacement for REMOVE_FROM_LIST (current version has spacing mistake)
 body T_REMOVE_FROM_LIST		/to be removed from (?:the|my|our) (?:mailing|e.?mail|opt[ -]?in)? ?list/i
 
-# [:^print:] is supposedly 5.6 specific, so this will have to do
-# probably need to tie this to ok_languages or ok_locales so it doesn't
-# trigger on certain character sets
-body T_UNPRINTABLE_V1		/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\xff]{8,}/
-rawbody T_UNPRINTABLE_V2	/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\xff]{8,}/
+# possible replacement for SENT_IN_COMPLIANCE
+body T_SENT_IN_COMPLIANCE	/(?:e.?mail|message) .{0,10}sen[dt] (?:to you )?in (?:\w{1,10} )?compliance (?:of|with)/i
+
+# one or both of these may need to factor in ok_languages or ok_locales
+body T_UNPRINTABLE		/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]{3,}/
+body T_HIGHBIT			/[\x80-\xff]{8,}/
 
 # it's BANG, not PLING (Brits!)
 # single word versions
@@ -137,8 +141,6 @@ body T_BANG_FREEDOM_C		/\b(?-i:F)reedom!/
 body T_BANG_GUARANTEED_C	/\b(?-i:G)uaranteed?\!/i
 body T_BANG_QUOTE_C		/\b(?-i:Q)uotes?\!/i
 
-body T_HTML_FIRST_TEXT		eval:html_first_text()
-
 ###########################################################################
 # quinlan: I converted almost 2000 postfix anti-spam rules into SA format,
 # tested many permutations of each, refined some into better rules, and
@@ -155,13 +157,6 @@ header T_Q_ADV_GAPPY		Subject =~ /\bA\s+D\s+V\b/i
 header T_Q_FIND_OUT_ANY1 	Subject =~ /Find Out Any/i
 body T_Q_FIND_OUT_ANY2		/Find Out Anything About Anyone/i
 
-# similar to THIS_AINT_SPAM
-body T_Q_OKAY1			/cannot be considered spam/i
-# similar to SENT_IN_COMPLIANCE
-body T_Q_OKAY2			/sent (?:to you )?in compliance (?:with|of)/i
-# similar to various 1618 rules
-body T_Q_OKAY3			/Under Bill s.?1618/i
-
 body T_Q_ONETIME1		/One[- ]?Time Mail/i
 body T_Q_ONETIME2		/this is a one[- ]?time (?:e-?mail|mailing|offer)/i
 body T_Q_ONETIME3		/Never Receive Another Mailing/i
@@ -171,12 +166,10 @@ header T_Q_DOUBLE_YOUR 		Subject =~ /Double Your/i
 header T_Q_FOR_ONLY 		Subject =~ /For Only/i
 header T_Q_FREE_INSTANT 	Subject =~ /Free Instant/i
 header T_Q_INKJET_PITCH		Subject =~ /inkjet cartridges/i
-header T_Q_LIFE_INSURANCE	Subject =~ /Life Insurance/i
 header T_Q_NOW_ONLY		Subject =~ /\bNow Only/i
 header T_Q_RIPPED		Subject =~ /Ripped & Strong/i
 # overlaps with SAVINGS
 header T_Q_SAVE_PERCENT		Subject =~ /save (?:[6-9]\d%|up to \d+%)/i
-header T_Q_VIAGRA_SUBJECT	Subject =~ /Viagra/i
 header T_Q_YOUR_DEBT		Subject =~ /Your (?:Bills|Debt|Credit)/i
 header T_Q_YOUR_FAMILY		Subject =~ /Your Family/i
 header T_Q_YOUR_OWN		Subject =~ /Your Own/i
@@ -186,7 +179,6 @@ body T_Q_CREDIT_BODY		/Accept Credit Cards/i
 body T_Q_FREE_ADULT		/Free Adult/i
 body T_Q_FREE_MEMBERSHIP	/FREE MEMBERSHIP/i
 body T_Q_HOME_LOANS		/Home Loans/i
-body T_Q_INVALUABLE		/Invaluable Marketing Information/i
 body T_Q_LOCATE_ASSETS		/Locate Hidden Assets/i
 body T_Q_MILLION_EMAIL		/Million (?:\w+ )?(?:E-?mail )?Addresses/i
 # do not pluralize next rule
