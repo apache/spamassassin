@@ -376,32 +376,9 @@ header T_HELO_OPTONLINE X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S+\.dyn\.opton
 header T_RCVD_DOUBLE_IP		Received =~ /from \[\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\] by \d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3} with/
 describe T_RCVD_DOUBLE_IP	Bulk email fingerprint (double IP) found
 
-# looser double IP - looks like a killer rule, test some more variants
-# 34.306  43.5801   0.0791    0.998   0.98    0.01  T_RCVD_DOUBLE_IP_1A
-
-# either order
-header T_RCVD_DOUBLE_IP_1A	Received =~ /\b(?:from|by)\b.{1,2}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b.{1,2}\b(?:by|from)\b.{1,2}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b/i
-header T_RCVD_DOUBLE_IP_1B	Received =~ /\b(?:from|by)\b.{1,3}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b.{1,3}\b(?:by|from)\b.{1,3}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b/i
-header T_RCVD_DOUBLE_IP_1C	Received =~ /\b(?:from|by)\b.{1,4}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b.{1,4}\b(?:by|from)\b.{1,4}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b/i
-header T_RCVD_DOUBLE_IP_1D	Received =~ /\b(?:from|by)\b.{0,2}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b.{0,2}\b(?:by|from)\b.{0,2}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b/i
-header T_RCVD_DOUBLE_IP_1E	Received =~ /\b(?:from|by)\b.{0,3}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b.{0,3}\b(?:by|from)\b.{0,3}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b/i
-header T_RCVD_DOUBLE_IP_1F	Received =~ /\b(?:from|by)\b.{0,4}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b.{0,4}\b(?:by|from)\b.{0,4}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b/i
-
-# from-by
-header T_RCVD_DOUBLE_IP_2A	Received =~ /\bfrom\b.{1,2}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b.{1,2}\bby\b.{1,2}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b/i
-header T_RCVD_DOUBLE_IP_2B	Received =~ /\bfrom\b.{1,3}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b.{1,3}\bby\b.{1,3}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b/i
-header T_RCVD_DOUBLE_IP_2C	Received =~ /\bfrom\b.{1,4}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b.{1,4}\bby\b.{1,4}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b/i
-header T_RCVD_DOUBLE_IP_2D	Received =~ /\bfrom\b.{0,2}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b.{0,2}\bby\b.{0,2}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b/i
-header T_RCVD_DOUBLE_IP_2E	Received =~ /\bfrom\b.{0,3}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b.{0,3}\bby\b.{0,3}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b/i
-header T_RCVD_DOUBLE_IP_2F	Received =~ /\bfrom\b.{0,4}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b.{0,4}\bby\b.{0,4}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b/i
-
-# by-from
-header T_RCVD_DOUBLE_IP_3A	Received =~ /\bby\b.{1,2}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b.{1,2}\bfrom\b.{1,2}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b/i
-header T_RCVD_DOUBLE_IP_3B	Received =~ /\bby\b.{1,3}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b.{1,3}\bfrom\b.{1,3}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b/i
-header T_RCVD_DOUBLE_IP_3C	Received =~ /\bby\b.{1,4}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b.{1,4}\bfrom\b.{1,4}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b/i
-header T_RCVD_DOUBLE_IP_3D	Received =~ /\bby\b.{0,2}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b.{0,2}\bfrom\b.{0,2}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b/i
-header T_RCVD_DOUBLE_IP_3E	Received =~ /\bby\b.{0,3}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b.{0,3}\bfrom\b.{0,3}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b/i
-header T_RCVD_DOUBLE_IP_3F	Received =~ /\bby\b.{0,4}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b.{0,4}\bfrom\b.{0,4}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b/i
+# looser variants
+header T_RCVD_DOUBLE_IP_A	Received =~ /\b(?:from|by)\b.{1,4}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b.{1,4}\b(?:by|from)\b.{1,4}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b/i
+header T_RCVD_DOUBLE_IP_B	Received =~ /\b(?:from|by)\b.{1,4}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b.{1,4}\b(?:by|from)\b.{1,4}\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b.{1,4}\bwith\b/i
 
 header T_MIME_BOUND_DIGITS15	Content-Type =~ /boundary=\"\d{15,}\"/
 describe T_MIME_BOUND_DIGITS15	MIME boundary contains all digits
@@ -567,20 +544,3 @@ body T_HTML_TEXT_CONTRAST_26	eval:html_test('text_contrast_26')
 body T_HTML_TEXT_CONTRAST_28	eval:html_test('text_contrast_28')
 body T_HTML_TEXT_CONTRAST_30	eval:html_test('text_contrast_30')
 body T_HTML_TEXT_CONTRAST_32	eval:html_test('text_contrast_32')
-body T_HTML_TEXT_CONTRAST_34	eval:html_test('text_contrast_34')
-body T_HTML_TEXT_CONTRAST_36	eval:html_test('text_contrast_36')
-body T_HTML_TEXT_CONTRAST_38	eval:html_test('text_contrast_38')
-body T_HTML_TEXT_CONTRAST_40	eval:html_test('text_contrast_40')
-body T_HTML_TEXT_CONTRAST_42	eval:html_test('text_contrast_42')
-body T_HTML_TEXT_CONTRAST_44	eval:html_test('text_contrast_44')
-body T_HTML_TEXT_CONTRAST_46	eval:html_test('text_contrast_46')
-body T_HTML_TEXT_CONTRAST_48	eval:html_test('text_contrast_48')
-body T_HTML_TEXT_CONTRAST_50	eval:html_test('text_contrast_50')
-body T_HTML_TEXT_CONTRAST_52	eval:html_test('text_contrast_52')
-body T_HTML_TEXT_CONTRAST_54	eval:html_test('text_contrast_54')
-body T_HTML_TEXT_CONTRAST_56	eval:html_test('text_contrast_56')
-body T_HTML_TEXT_CONTRAST_58	eval:html_test('text_contrast_58')
-body T_HTML_TEXT_CONTRAST_60	eval:html_test('text_contrast_60')
-body T_HTML_TEXT_CONTRAST_62	eval:html_test('text_contrast_62')
-body T_HTML_TEXT_CONTRAST_64	eval:html_test('text_contrast_64')
-
