@@ -674,6 +674,8 @@ C<Mail::SpamAssassin>
 
 C<Mail::SpamAssassin::PerMsgStatus>
 
+http://wiki.apache.org/spamassassin/PluginWritingTips
+
 http://bugzilla.spamassassin.org/show_bug.cgi?id=2163
 
 =cut
