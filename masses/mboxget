@@ -25,7 +25,24 @@ use strict;
 my $prog = $0;
 $prog =~ s@.*/@@;
 
-foreach my $where (@ARGV) {
+my @inputs;
+push @inputs, @ARGV;
+
+if (!@inputs) {
+  while (<>) {
+    if (/^[Y.]\s+-?\d+\s+(\S+)\s+\S+$/) {
+      # mass-check format
+      push @inputs, $1;
+    }
+    else {
+      next if /^#/;
+      chomp;
+      push @inputs, $_;
+    }
+  }
+}
+
+foreach my $where (@inputs) {
   my ($file, $offset) = ($where =~ m/(.*?)(?:\.(\d+))?$/);
   open(INPUT, $file) || die("$prog: open $file failed: $!\n");
   if ($offset) {
