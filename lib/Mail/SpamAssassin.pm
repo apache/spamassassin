@@ -254,8 +254,9 @@ sub add_all_header_address_to_whitelist {
     next if defined ($done{$_});
     $done{$_} = 1;
 
-    dbg ("adding known-good address to whitelist: $_");
-    $list->add_known_good_address ($_);
+    if ($list->add_known_good_address ($_)) {
+      print "SpamAssassin auto-whitelist: adding address: $_\n";
+    }
   }
 
   $list->finish();
