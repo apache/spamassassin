@@ -3122,7 +3122,7 @@ sub same_class_c {
 
 # note using IPv4 addresses for now due to empty strings matching IP_ADDRESS
 # due to bug in pure IPv6 address regular expression
-sub check_for_helo_both_mismatch {
+sub helo_both_mismatch {
   my ($self, @opt) = @_;
   my $IP_ADDRESS = IPV4_ADDRESS;
   my $IP_IN_RESERVED_RANGE = IP_IN_RESERVED_RANGE;
@@ -3132,18 +3132,18 @@ sub check_for_helo_both_mismatch {
 
   foreach my $relay (@{$self->{relays_untrusted}}) {
     # is HELO usable?
-    next if $relay->{helo} !~ m/^$IP_ADDRESS$/ ||
-	($opt{helo_reserved} && $relay->{helo} =~ /^$IP_IN_RESERVED_RANGE/);
+    next unless $relay->{helo} =~ m/^$IP_ADDRESS$/;
+    next unless $opt{helo_any} || $relay->{helo} !~ /^$IP_IN_RESERVED_RANGE/;
     # compare HELO with IP
     return 1 if ($relay->{ip} =~ m/^$IP_ADDRESS$/ &&
-		 !($opt{ip_reserved} &&
-		   $relay->{ip} =~ m/^$IP_IN_RESERVED_RANGE/) &&
+		 ($opt{ip_any} ||
+		  $relay->{ip} !~ m/^$IP_IN_RESERVED_RANGE/) &&
 		 $relay->{helo} ne $relay->{ip} &&
 		 !same_class_c($relay->{helo}, $relay->{ip}));
     # compare HELO with RDNS
     return 1 if ($relay->{rdns} =~ m/^$IP_ADDRESS$/ &&
-		 !($opt{rdns_reserved} &&
-		   $relay->{rdns} =~ m/^$IP_IN_RESERVED_RANGE/) &&
+		 ($opt{rdns_any} ||
+		  $relay->{rdns} !~ m/^$IP_IN_RESERVED_RANGE/) &&
 		 $relay->{helo} ne $relay->{rdns} &&
 		 !same_class_c($relay->{helo}, $relay->{rdns}));
   }
@@ -3153,7 +3153,7 @@ sub check_for_helo_both_mismatch {
 
 # note using IPv4 addresses for now due to empty strings matching IP_ADDRESS
 # due to bug in pure IPv6 address regular expression
-sub check_for_helo_ip_mismatch {
+sub helo_ip_mismatch {
   my ($self, @opt) = @_;
   my $IP_ADDRESS = IPV4_ADDRESS;
   my $IP_IN_RESERVED_RANGE = IP_IN_RESERVED_RANGE;
@@ -3163,12 +3163,12 @@ sub check_for_helo_ip_mismatch {
 
   foreach my $relay (@{$self->{relays_untrusted}}) {
     # is HELO usable?
-    next if $relay->{helo} !~ m/^$IP_ADDRESS$/ ||
-	($opt{helo_reserved} && $relay->{helo} =~ /^$IP_IN_RESERVED_RANGE/);
+    next unless $relay->{helo} =~ m/^$IP_ADDRESS$/;
+    next unless $opt{helo_any} || $relay->{helo} !~ /^$IP_IN_RESERVED_RANGE/;
     # compare HELO with IP
     return 1 if ($relay->{ip} =~ m/^$IP_ADDRESS$/ &&
-		 !($opt{ip_reserved} &&
-		   $relay->{ip} =~ m/^$IP_IN_RESERVED_RANGE/) &&
+		 ($opt{ip_any} ||
+		  $relay->{ip} !~ m/^$IP_IN_RESERVED_RANGE/) &&
 		 $relay->{helo} ne $relay->{ip} &&
 		 !same_class_c($relay->{helo}, $relay->{ip}));
   }
@@ -3178,7 +3178,7 @@ sub check_for_helo_ip_mismatch {
 
 # note using IPv4 addresses for now due to empty strings matching IP_ADDRESS
 # due to bug in pure IPv6 address regular expression
-sub check_for_helo_rdns_mismatch {
+sub helo_rdns_mismatch {
   my ($self, @opt) = @_;
   my $IP_ADDRESS = IPV4_ADDRESS;
   my $IP_IN_RESERVED_RANGE = IP_IN_RESERVED_RANGE;
@@ -3188,12 +3188,12 @@ sub check_for_helo_rdns_mismatch {
 
   foreach my $relay (@{$self->{relays_untrusted}}) {
     # is HELO usable?
-    next if $relay->{helo} !~ m/^$IP_ADDRESS$/ ||
-	($opt{helo_reserved} && $relay->{helo} =~ /^$IP_IN_RESERVED_RANGE/);
+    next unless $relay->{helo} =~ m/^$IP_ADDRESS$/;
+    next unless $opt{helo_any} || $relay->{helo} !~ /^$IP_IN_RESERVED_RANGE/;
     # compare HELO with RDNS
     return 1 if ($relay->{rdns} =~ m/^$IP_ADDRESS$/ &&
-		 !($opt{rdns_reserved} &&
-		   $relay->{rdns} =~ m/^$IP_IN_RESERVED_RANGE/) &&
+		 ($opt{rdns_any} ||
+		  $relay->{rdns} !~ m/^$IP_IN_RESERVED_RANGE/) &&
 		 $relay->{helo} ne $relay->{rdns} &&
 		 !same_class_c($relay->{helo}, $relay->{rdns}));
   }
