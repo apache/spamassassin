@@ -27,6 +27,11 @@ implement a Mail::Audit plugin, allowing SpamAssassin to be used in a
 Mail::Audit filter or (possibly at some point) in a spam-protection proxy
 POP/IMAP server.
 
+In addition, Craig Hughes has contributed "spamd", a daemonized version of
+SpamAssassin, which runs persistently.  Using "spamc", a lightweight C
+client, this allows an MTA to process large volumes of mail through
+SpamAssassin without having to fork/exec a perl interpreter for each one.
+
 SpamAssassin lives at http://spamassassin.taint.org/ or in CPAN, and is
 distributed under Perl's Artistic license.
 
@@ -104,19 +109,9 @@ skipped.
     filtering network.  Razor is currently in prototype, so it's not yet
     available from CPAN -- you have to download it from the URL above.
 
-    Note that Razor itself requires several perl modules; at the time of
-    writing, these are Persistence::Object::Simple, Digest::SHA1,
-    Time::HiRes, Net::Ping, and Mail::Internet:
-
-	perl -MCPAN -e shell
-	o conf prerequisites_policy ask
-	install Persistence::Object::Simple
-	install Net::Ping
-	install Time::HiRes
-	install Digest::SHA1
-	install Mail::Internet			[this may already be installed]
-	quit
-
+    Razor has a large number of dependencies on CPAN modules.  Feel
+    free to skip installing it, if this makes you nervous; SpamAssassin
+    will still work very well without it.
 
 
 Using SpamAssassin
@@ -144,10 +139,6 @@ Steps to take for every installation:
     SpamAssassin report anyway.  This is a side-effect of the "-t" (test)
     switch.  However, there should be less than 5 hits accumulated; when
     the "-t" switch is not in use, the report text would not be added.
-
-    (Also, if you use Perl 5.6, there may be a warning from Perl's -w
-    switch about a deprecated usage in Net::DNS; this is totally harmless,
-    but ugly.  Until Net::DNS is fixed this is unavoidable. :( )
 
     If the commands do not work, DO NOT PROCEED TO THE NEXT STEP, as you
     will lose mail!
@@ -218,7 +209,7 @@ Other installation notes:
     spamassassin with the "-r" option to report the message in question as
     "verified spam".  This will add it to Vipul's Razor
     (http://razor.sourceforge.net/), a collaborative spam filtering
-    network.
+    network, if you've installed the Razor modules.
 
       spamassassin -r < spam-message
 
