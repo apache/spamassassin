@@ -285,7 +285,8 @@ sub get_dcc_interface {
     $self->{dcc_interface} = "dccproc";
   }
   else {
-    dbg("dcc: no dccifd or dccproc found, disabling DCC");
+    dbg("dcc: dccifd and dccproc are not available, disabling DCC");
+    $self->{dcc_interface} = "none";
     $self->{dcc_disabled} = 1;
   }
 }
@@ -299,8 +300,8 @@ sub check_dcc {
     return 1;
   }
 
-  return 0 if $self->{dcc_disabled};
   $self->get_dcc_interface() unless $self->{dcc_interface};
+  return 0 if $self->{dcc_disabled};
 
   if ($$full eq '') {
     dbg("dcc: empty message, skipping dcc check");
