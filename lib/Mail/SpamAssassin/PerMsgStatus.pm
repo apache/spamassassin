@@ -172,7 +172,8 @@ sub check {
     # Do meta rules second-to-last
     $self->do_meta_tests();
 
-    # TODO: call learn() here, before adding Bayes points
+    # auto-learning
+    $self->learn();
 
     # add points from Bayes, before adjusting the AWL
     $self->{hits} += $self->{learned_hits};
@@ -240,7 +241,20 @@ sub learn {
   if (!$self->{conf}->{auto_learn}) { return; }
   if ($self->{disable_auto_learning}) { return; }
 
-  return;	# not impled yet
+  my $isspam;
+  if ($self->{hits} < $self->{conf}->{auto_learn_threshold_nonspam}) {
+    $isspam = 0;
+  } elsif ($self->{hits} > $self->{conf}->{auto_learn_threshold_spam}) {
+    $isspam = 1;
+  } else {
+    return;
+  }
+
+  dbg ("auto-learning from this message. is spam? $isspam");
+  my $learnstatus = $self->{main}->learn ($self->{msg},
+                        $self->get("Message-Id"), $isspam, 0);
+  $learnstatus->finish();
+  $self->{main}->finish_learner();	# for now
 }
 
 ###########################################################################
@@ -2005,7 +2019,10 @@ sub _handle_hit {
     $score = sprintf("%2.1f",$score);
 
     my $tflags = $self->{conf}->{tflags}->{$rule}; $tflags ||= '';
-    if ($tflags =~ /\blearn\b/i) {
+
+    # ignore 'learn' or 'userconf' rules, when considering score for
+    # Bayesian auto-learning
+    if ($tflags =~ /\b(?:learn|userconf)\b/i) {
       $self->{learned_hits} += $score;
     } else {
       $self->{hits} += $score;

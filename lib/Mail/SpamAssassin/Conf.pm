@@ -131,7 +131,9 @@ sub new {
   $self->{auto_whitelist_file_mode} = '0600';	# as string, with --x bits
   $self->{auto_whitelist_factor} = 0.5;
 
-  $self->{auto_learn} = 0;
+  $self->{auto_learn} = 1;
+  $self->{auto_learn_threshold_nonspam} = -2.0;
+  $self->{auto_learn_threshold_spam} = 15.0;
 
   $self->{rewrite_subject} = 0;
   $self->{spam_level_stars} = 1;
@@ -879,16 +881,18 @@ Chinese (both simplified and traditional)
 
 =item auto_whitelist_factor n	(default: 0.5, range [0..1])
 
-How much towards the long-term mean for the sender to regress a message.  Basically,
-the algorithm is to track the long-term mean score of messages for the sender (C<mean>),
-and then once we have otherwise fully calculated the score for this message (C<score>),
-we calculate the final score for the message as:
+How much towards the long-term mean for the sender to regress a message.
+Basically, the algorithm is to track the long-term mean score of messages for
+the sender (C<mean>), and then once we have otherwise fully calculated the
+score for this message (C<score>), we calculate the final score for the
+message as:
 
 C<finalscore> = C<score> +  (C<mean> - C<score>) * C<factor>
 
-So if C<factor> = 0.5, then we'll move to half way between the calculated score and the mean.
-If C<factor> = 0.3, then we'll move about 1/3 of the way from the score toward the mean.
-C<factor> = 1 means just use the long-term mean; C<factor> = 0 mean just use the calculated score.
+So if C<factor> = 0.5, then we'll move to half way between the calculated
+score and the mean.  If C<factor> = 0.3, then we'll move about 1/3 of the way
+from the score toward the mean.  C<factor> = 1 means just use the long-term
+mean; C<factor> = 0 mean just use the calculated score.
 
 =cut
     if (/^auto[-_]whitelist[-_]factor\s+(.*)$/) {
@@ -899,12 +903,37 @@ C<factor> = 1 means just use the long-term mean; C<factor> = 0 mean just use the
 
 Whether SpamAssassin should automatically feed high-scoring mails (or
 low-scoring mails, for non-spam) into its learning systems.  The only learning
-system supported currently, is a naive Bayesian classifier.
+system supported currently is a naive-Bayesian-style classifier.
+
+Note that tests with tflags set to 'learn' (the Bayesian rules) or 'userconf'
+(user whitelisting rules) are ignored for the purposes of auto-training.
 
 =cut
 
     if (/^auto[-_]learn\s+(.*)$/) {
       $self->{auto_learn} = $1+0; next;
+    }
+
+=item auto_learn_threshold_nonspam n.nn	(default -2.0)
+
+The score threshold below which a mail has to score, to be fed into
+SpamAssassin's learning systems automatically as a non-spam message.
+
+=cut
+
+    if (/^auto[-_]learn[-_]threshold[-_]nonspam\s+(.*)$/) {
+      $self->{auto_learn_threshold_nonspam} = $1+0; next;
+    }
+
+=item auto_learn_threshold_spam n.nn	(default 15.0)
+
+The score threshold above which a mail has to score, to be fed into
+SpamAssassin's learning systems automatically as a spam message.
+
+=cut
+
+    if (/^auto[-_]learn[-_]threshold[-_]spam\s+(.*)$/) {
+      $self->{auto_learn_threshold_spam} = $1+0; next;
     }
 
 =item describe SYMBOLIC_TEST_NAME description ...
