@@ -19,7 +19,7 @@ report mail in future.  See http://spamassassin.org/tag/ for more details.
 report 
 report Content preview:  _PREVIEW_
 report 
-report Content analysis details:   (_HITS_ hits, _REQD_ required)
+report Content analysis details:   (_HITS_ points, _REQD_ required)
 report _SUMMARY_
 #      ......................................................................
 
@@ -30,7 +30,7 @@ report _SUMMARY_
 #            ......................................................................
 clear_terse_report_template
 terse_report ---- Start SpamAssassin results
-terse_report _HITS_ hits, _REQD_ required;
+terse_report _HITS_ points, _REQD_ required;
 terse_report _SUMMARY_
 terse_report ---- End of SpamAssassin results
 #            ......................................................................
