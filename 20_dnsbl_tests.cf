@@ -191,9 +191,9 @@ describe DNS_FROM_RFCI_DSN	From: sender listed in dsn.rfc-ignorant.org
 tflags DNS_FROM_RFCI_DSN	net
 
 # another domain-based blacklist
-header RCVD_IN_AHBL_RHSBL	eval:check_rbl_from_host('ahbl-rhs', 'rhsbl.ahbl.org.')
-describe RCVD_IN_AHBL_RHSBL	From: sender listed in dnsbl.ahbl.org
-tflags RCVD_IN_AHBL_RHSBL	net
+header DNS_FROM_AHBL_RHSBL	eval:check_rbl_from_host('ahbl-rhs', 'rhsbl.ahbl.org.')
+describe DNS_FROM_AHBL_RHSBL	From: sender listed in dnsbl.ahbl.org
+tflags DNS_FROM_AHBL_RHSBL	net
 
 # sa-hil.habeas.com for SpamAssassin queries
 # hil.habeas.com for other queries
