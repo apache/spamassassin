@@ -206,9 +206,8 @@ sub parsed_metadata {
   }
 
   # and query
-  my @doms = keys %domlist;
-  dbg("uridnsbl: domains to query: ".join(' ',@doms));
-  foreach my $dom (@doms) {
+  dbg("uridnsbl: domains to query: ".join(' ',@shortlist));
+  foreach my $dom (@shortlist) {
     $self->query_domain ($scanstate, $dom);
   }
 
