@@ -1,4 +1,4 @@
-# $Id: Parser.pm,v 1.16 2003/10/01 04:39:48 felicity Exp $
+# $Id: Parser.pm,v 1.17 2003/10/01 05:31:56 felicity Exp $
 
 package Mail::SpamAssassin::MIME::Parser;
 use strict;
@@ -103,6 +103,12 @@ sub parse {
   }
 
   # Parse out the body ...
+  # the actual ABNF, BTW:
+  # boundary := 0*69<bchars> bcharsnospace
+  # bchars := bcharsnospace / " "
+  # bcharsnospace :=    DIGIT / ALPHA / "'" / "(" / ")" / "+" /"_"
+  #               / "," / "-" / "." / "/" / ":" / "=" / "?"
+  #
   my ($boundary) =
     $msg->header('content-type') =~ /boundary\s*=\s*["']?([^"';]+)["']?/i;
   $self->_parse_body( $msg, $msg, $boundary, \@message );
@@ -153,11 +159,23 @@ sub _parse_body {
 sub _parse_multipart_alternate {
   my($self, $msg, $_msg, $boundary, $body ) = @_;
 
+  $boundary ||= '';
   dbg("m/a got boundary: $boundary\n");
 
-  # ignore preamble per RFC 1521
-  while ( my $line = shift @{$body} ) {
-    last if $line =~ /^\-\-\Q$boundary\E$/;
+  # ignore preamble per RFC 1521, unless there's no boundary ...
+  if ( $boundary ) {
+    my $line;
+    my $tmp_line = @{$body};
+    for ($line=0; $line < $tmp_line; $line++) {
+      last if $body->[$line] =~ /^\-\-\Q$boundary\E$/;
+    }
+
+    # Found a boundary, ignore the preamble
+    if ( $line < $tmp_line ) {
+      splice @{$body}, 0, $line+1;
+    }
+
+    # Else, there's no boundary, so leave the whole part...
   }
 
   my $in_body = 0;
@@ -168,13 +186,20 @@ sub _parse_multipart_alternate {
 
   my $line_count = @{$body};
   foreach ( @{$body} ) {
-    if ( --$line_count == 0 || /^\-\-\Q$boundary\E/ ) {
+    if ( --$line_count == 0 || ($boundary && /^\-\-\Q$boundary\E/) ) {
       dbg("m/a got end of section\n");
 
       # end of part
       my $line = $_;
 
       # per rfc 1521, the CRLF before the boundary is part of the boundary ...
+      # NOTE: The CRLF preceding the encapsulation line is conceptually
+      # attached to the boundary so that it is possible to have a part
+      # that does not end with a CRLF (line break). Body parts that must
+      # be considered to end with line breaks, therefore, must have two
+      # CRLFs preceding the encapsulation line, the first of which is part
+      # of the preceding body part, and the second of which is part of the
+      # encapsulation boundary.
       if ($part_array) {
         chomp( $part_array->[ scalar @{$part_array} - 1 ] );
         splice @{$part_array}, -1
@@ -183,7 +208,7 @@ sub _parse_multipart_alternate {
         $self->_decode_body( $msg, $part_msg, $boundary, $part_array );
       }
 
-      last if $line =~ /^\-\-\Q$boundary\E\-\-$/;
+      last if ($boundary && $line =~ /^\-\-\Q$boundary\E\-\-$/);
       $in_body  = 0;
       $part_msg = Mail::SpamAssassin::MIME->new();
       undef $part_array;
@@ -223,11 +248,23 @@ sub _parse_multipart_alternate {
 sub _parse_multipart_mixed {
   my($self, $msg, $_msg, $boundary, $body) = @_;
 
-  dbg("m/m Got boundary: $boundary\n");
+  $boundary ||= '';
+  dbg("m/m got boundary: $boundary\n");
 
-  # ignore preamble per RFC 1521
-  while ( my $line = shift @{$body} ) {
-    last if $line =~ /^\-\-\Q$boundary\E$/;
+  # ignore preamble per RFC 1521, unless there's no boundary ...
+  if ( $boundary ) {
+    my $line;
+    my $tmp_line = @{$body};
+    for ($line=0; $line < $tmp_line; $line++) {
+      last if $body->[$line] =~ /^\-\-\Q$boundary\E$/;
+    }
+
+    # Found a boundary, ignore the preamble
+    if ( $line < $tmp_line ) {
+      splice @{$body}, 0, $line+1;
+    }
+
+    # Else, there's no boundary, so leave the whole part...
   }
 
   my $part_msg =
@@ -239,13 +276,20 @@ sub _parse_multipart_mixed {
 
   my $line_count = @{$body};
   foreach ( @{$body} ) {
-    if ( --$line_count == 0 || /^\-\-\Q$boundary\E/ ) {
+    if ( --$line_count == 0 || ($boundary && /^\-\-\Q$boundary\E/) ) {
 
       # end of part
       dbg("Got end of MIME section: $_\n");
       my $line = $_;
 
       # per rfc 1521, the CRLF before the boundary is part of the boundary ...
+      # NOTE: The CRLF preceding the encapsulation line is conceptually
+      # attached to the boundary so that it is possible to have a part
+      # that does not end with a CRLF (line break). Body parts that must
+      # be considered to end with line breaks, therefore, must have two
+      # CRLFs preceding the encapsulation line, the first of which is part
+      # of the preceding body part, and the second of which is part of the
+      # encapsulation boundary.
       if ($part_array) {
         chomp( $part_array->[ scalar @{$part_array} - 1 ] );
         splice @{$part_array}, -1
@@ -258,7 +302,7 @@ sub _parse_multipart_mixed {
         $self->_parse_body( $msg, $part_msg, $p_boundary, $part_array );
       }
 
-      last if $line =~ /^\-\-\Q${boundary}\E\-\-$/;
+      last if ($boundary && $line =~ /^\-\-\Q${boundary}\E\-\-$/);
       $in_body  = 0;
       $part_msg = Mail::SpamAssassin::MIME->new();
       undef $part_array;
