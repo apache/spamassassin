@@ -493,35 +493,6 @@ sub get_full_message_as_text {
 
 ###########################################################################
 
-=item $status->handle_auto_report ()
-
-If this mail message has a high enough hit score, report it to spam-tracking
-services straight away, without waiting for user confirmation.  See the
-documentation for C<spamassassin>'s C<-r> switch for details on what
-spam-tracking services are used.
-
-=cut
-
-sub handle_auto_report {
-  my ($self) = @_;
-
-  dbg ("auto-report? score=".$self->{hits}.
-  			" threshold=".$self->{conf}->{auto_report_threshold});
-
-  if ($self->{hits} >= $self->{conf}->{auto_report_threshold}) {
-    dbg ("score is high enough to automatically report this as spam");
-
-    my $testshit = $self->get_names_of_tests_hit();
-
-    my $opts = { };
-    if ($testshit =~ /RAZOR_CHECK/) { $opts->{dont_report_to_razor} = 1; }
-
-    $self->{main}->report_as_spam ($self->{msg}->get_mail_object, $opts);
-  }
-}
-
-###########################################################################
-
 =item $status->finish ()
 
 Indicate that this C<$status> object is finished with, and can be destroyed.

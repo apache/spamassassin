@@ -94,7 +94,6 @@ sub new {
   $self->{regression_tests} = { };
 
   $self->{required_hits} = 5.0;
-  $self->{auto_report_threshold} = 25.0;
   $self->{report_template} = '';
   $self->{terse_report_template} = '';
   $self->{spamtrap_template} = '';
@@ -252,18 +251,6 @@ be an integer or a real number.
 
     if (/^required[-_]hits\s+(\S+)$/) {
       $self->{required_hits} = $1+0.0; next;
-    }
-
-=item auto_report_threshold n.nn   (default: 30)
-
-How many hits before a mail is automatically reported to blacklisting services
-like Razor.  Be very careful with this; you really should manually verify the
-spamminess of a mail before reporting it.
-
-=cut
-
-    if (/^auto[-_]report[-_]threshold\s+(\S+)$/) {
-      $self->{auto_report_threshold} = $1+0; next;
     }
 
 =item score SYMBOLIC_TEST_NAME n.nn
