@@ -162,17 +162,16 @@ sub new {
     }
 
     # Store the non-modified headers in a scalar
-    $self->{'pristine_headers'} .= $current;
+    # if missing_head_body_separator is set, this is the last run through, to
+    # deal with the last header in the message.
+    unless ($self->{'missing_head_body_separator'}) {
+      $self->{'pristine_headers'} .= $current;
 
-    # Check for missing head/body separator and deal appropriately
-    if ($current !~ /^\r?$/) {
-      if (!@message) {
-	# No body is invalid
+      # Check for missing head/body separator and deal appropriately
+      if (!@message || (defined $boundary && $message[0] =~ /^--\Q$boundary\E(?:--|\s*$)/)) {
+	# No body or no separator before mime boundary is invalid
         $self->{'missing_head_body_separator'} = 1;
-      }
-      elsif (defined $boundary && $message[0] =~ /^--\Q$boundary\E(?:--|\s*$)/) {
-        # No separator before the body is invalid
-        $self->{'missing_head_body_separator'} = 1;
+	unshift(@message, "\n");
       }
     }
 
@@ -226,8 +225,8 @@ sub new {
       }
     }
 
-    # Ok, we found the header/body blank line or the header ends with this line...
-    last if ($current =~ /^\r?$/ || $self->{'missing_head_body_separator'});
+    # Ok, we found the header/body blank line ...
+    last if ($current =~ /^\r?$/);
 
     # not a continuation...
     $header = $current;
