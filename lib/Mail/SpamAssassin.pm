@@ -94,7 +94,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.134 2002/10/22 19:11:10 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.135 2002/10/30 13:18:08 jmason Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -388,8 +388,43 @@ Finish learning.
 
 sub finish_learner {
   my $self = shift;
-  my $opts = shift;
   $self->{bayes_scanner}->finish();
+  1;
+}
+
+=item $f->signal_user_changed ( [ { opt => val, ... } ] )
+
+Signals that the current user has changed (possibly using C<setuid>), meaning
+that SpamAssassin should close any per-user databases it has open, and re-open
+using ones appropriate for the new user.  You may pass the following
+attribute-value pairs to this method:
+
+=over 4
+
+=item user_dir
+
+A directory to use as a 'home directory' for the current user's data,
+overriding the system default.  This directory must be readable and writable by
+the process.
+
+=back
+
+=cut
+
+sub signal_user_changed {
+  my $self = shift;
+  my $opts = shift;
+
+  dbg ("user has changed");
+
+  if (defined $opts && $opts->{user_dir}) {
+    $self->{user_dir} = $opts->{user_dir};
+  }
+
+  # reopen bayes dbs for this user
+  $self->{bayes_scanner}->finish();
+  $self->{bayes_scanner} = new Mail::SpamAssassin::Bayes ($self);
+
   1;
 }
 
@@ -863,28 +898,12 @@ sub init {
     $fname ||= $self->first_existing_path (@site_rules_path);
     $self->{config_text} .= $self->read_cf ($fname, 'site rules dir');
 
-    if (-f "$fname/languages") {
-	$self->{languages_filename} = "$fname/languages";
-    }
-
     if ( $use_user_pref != 0 ) {
-      $self->create_dotsa_dir_if_needed();
-
-      my $old_prefs_name = $self->first_existing_path ('~/.spamassassin.cf');
-      if (!-f $old_prefs_name) { $old_prefs_name = undef; }
+      $self->get_and_create_userstate_dir();
 
       # user prefs file
       $fname = $self->{userprefs_filename};
-
-      if (!defined $fname) {
-        $fname ||= $self->first_existing_path (@default_userprefs_path);
-
-        if (defined $old_prefs_name && -f $old_prefs_name) {
-          dbg ("migrating $old_prefs_name to $fname");
-          rename ($old_prefs_name, $fname) or
-                        warn "rename $old_prefs_name to $fname failed: $!\n";
-        }
-      }
+      $fname ||= $self->first_existing_path (@default_userprefs_path);
 
       if (defined $fname) {
         if (!-f $fname && !$self->create_default_prefs($fname)) {
@@ -941,49 +960,53 @@ sub read_cf {
   return $txt;
 }
 
-sub create_dotsa_dir_if_needed {
-  my ($self,$userdir) = @_;
+sub get_and_create_userstate_dir {
+  my ($self) = @_;
 
   # user state directory
   my $fname = $self->{userstate_dir};
   $fname ||= $self->first_existing_path (@default_userstate_dir);
-  #
+
   # If vpopmail is enabled then set fname to virtual homedir
   #
-  if (defined $userdir) {
-    $fname = "$userdir/.spamassassin";
+  if (defined $self->{user_dir}) {
+    $fname = File::Spec->catdir ($self->{user_dir}, ".spamassassin");
   }
 
   if (defined $fname && !$self->{dont_copy_prefs}) {
     dbg ("using \"$fname\" for user state dir");
-
-    if (!-d $fname) {
-      # not being able to create the *dir* is not worth a warning at all times
-      mkpath ($fname, 0, 0700) or dbg ("mkdir $fname failed: $!\n");
-    }
   }
+
+  if (!-d $fname) {
+    # not being able to create the *dir* is not worth a warning at all times
+    mkpath ($fname, 0, 0700) or dbg ("mkdir $fname failed: $!\n");
+  }
+  $fname;
 }
 
-=item $f->create_default_prefs ()
+=item $f->create_default_prefs ($filename, $username [ , $userdir ] )
 
-Copy default prefs file into home directory for later use and modification.
+Copy default preferences file into home directory for later use and
+modification, if it does not already exist and C<dont_copy_prefs> is
+not set.
 
 =cut
 
 sub create_default_prefs {
-  #
   # $userdir will only exist if vpopmail config is enabled thru spamd
   # Its value will be the virtual user's maildir
   #
   my ($self,$fname,$user,$userdir) = @_;
 
+  if ($userdir && $userdir ne $self->{user_dir}) {
+    warn "oops! user_dirs don't match! '$userdir' vs '$self->{user_dir}'";
+  }
+
   if (!$self->{dont_copy_prefs} && !-f $fname)
   {
-    #
     # Pass on the value of $userdir for virtual users in vpopmail
     # otherwise it is empty and the user's normal homedir is used
-    #
-    $self->create_dotsa_dir_if_needed($userdir);
+    $self->get_and_create_userstate_dir();
 
     # copy in the default one for later editing
     my $defprefs = $self->first_existing_path
@@ -1002,8 +1025,7 @@ sub create_default_prefs {
     }
 
     if (copy ($defprefs, $fname)) {
-      if ( $< == 0 && $> == 0 && defined $user) {
-	# chown it
+      if ( $< == 0 && $> == 0 && defined $user) {	# chown it
 	my ($uid,$gid) = (getpwnam($user))[2,3];
 	unless (chown $uid, $gid, $fname) {
 	   warn "Couldn't chown $fname to $uid:$gid for $user: $!\n";
@@ -1026,32 +1048,33 @@ sub create_default_prefs {
 
 sub expand_name ($) {
   my ($self, $name) = @_;
-  my $home = $ENV{'HOME'} || '';
+  my $home = $self->{user_dir} || $ENV{HOME} || '';
 
   if ($^O =~ /mswin|(?<!bs)dos|os2/oi) {
-	  my $userprofile = $ENV{'USERPROFILE'} || '';
+    my $userprofile = $ENV{USERPROFILE} || '';
 
-	  return $userprofile if ($userprofile && $userprofile =~ m/^[a-z]\:[\/\\]/oi);
-	  return $userprofile if ($userprofile =~ m/^\\\\/o);
+    return $userprofile if ($userprofile && $userprofile =~ m/^[a-z]\:[\/\\]/oi);
+    return $userprofile if ($userprofile =~ m/^\\\\/o);
 
-	  return $home if ($home && $home =~ m/^[a-z]\:[\/\\]/oi);
-	  return $home if ($home =~ m/^\\\\/o);
+    return $home if ($home && $home =~ m/^[a-z]\:[\/\\]/oi);
+    return $home if ($home =~ m/^\\\\/o);
 
-	  return '';
-  }
-  else {
-	  return $home if ($home && $home =~ /\//o);
-	  return (getpwnam($name))[7] if ($name ne '');
-	  return (getpwuid($>))[7];
+    return '';
+  } else {
+    return $home if ($home && $home =~ /\//o);
+    return (getpwnam($name))[7] if ($name ne '');
+    return (getpwuid($>))[7];
   }
 }
 
 sub sed_path {
   my ($self, $path) = @_;
   return undef if (!defined $path);
+
   $path =~ s/__local_rules_dir__/$self->{LOCAL_RULES_DIR} || ''/ges;
   $path =~ s/__def_rules_dir__/$self->{DEF_RULES_DIR} || ''/ges;
   $path =~ s{__prefix__}{$self->{PREFIX} || $Config{prefix} || '/usr'}ges;
+  $path =~ s{__userstate__}{$self->get_and_create_userstate_dir()}ges;
   $path =~ s/^\~([^\/]*)/$self->expand_name($1)/es;
   $path;
 }
