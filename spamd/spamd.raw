@@ -390,7 +390,7 @@ my $already_done_syslog_failure_warning;
 # Logging via syslog is requested. Falling back to INET and then STDERR
 # if opening a UNIX socket fails.
 if ( $log_socket ne 'file' and $log_facility ne 'null' ) {
-  warn "trying to connect to syslog/${log_socket}...\n" if defined $opt{'debug'};
+  dbg("logger: trying to connect to syslog/${log_socket}...\n");
   eval {
     defined( setlogsock($log_socket) ) || die $!;
 
@@ -405,10 +405,8 @@ if ( $log_socket ne 'file' and $log_facility ne 'null' ) {
   # same is true for perl 5.6.0 build on an early version of Red Hat 7!
   # In that case we try it with INET.
   if ( $err and $log_socket ne 'inet' ) {
-    if ( defined $opt{'debug'} ) {
-      warn "connection failed: $err\n";
-      warn "trying to connect to syslog/inet...\n";
-    }
+    dbg("logger: connection to syslog/${log_socket} failed: $err\n"
+              . "trying to connect to syslog/inet...");
     eval {
       defined( setlogsock('inet') ) || die $!;
       openlog_for_spamd();
@@ -422,12 +420,12 @@ if ( $log_socket ne 'file' and $log_facility ne 'null' ) {
 
   # fall back to stderr if all else fails
   if ($@) {
-    warn "failed to setlogsock(${log_socket}): $err\n"
-      . "reporting logs to stderr\n";
+    dbg("logger: failed to setlogsock(${log_socket}): $err\n"
+              . "reporting logs to stderr");
     $log_facility = 'stderr';
   }
   else {
-    warn "no error connecting to syslog/${log_socket}\n" if defined $opt{'debug'};
+    dbg("logger: successfully connected to syslog/${log_socket}");
   }
 }
 
@@ -448,7 +446,7 @@ if ( $log_facility eq 'stderr' ) {
   $log_socket = 'file';
 }
 
-warn "logging enabled:\n"
+dbg("logger: enabled with:\n"
   . "\tfacility: ${log_facility}\n"
   . "\tsocket:   ${log_socket}\n"
   . "\toutput:   "
@@ -458,12 +456,11 @@ warn "logging enabled:\n"
   : $log_facility eq 'null'   ? 'debug'
   : 'syslog'
   )
-  . "\n"
-  if defined $opt{'debug'};
+);
 
 # Don't duplicate log messages in debug mode.
-if ( $log_facility eq 'stderr' and defined $opt{'debug'} ) {
-  warn "logging to stderr disabled: already debugging to stderr\n";
+if ( $log_facility eq 'stderr' and @DEBUG ) {
+  dbg("logger: facility stderr disabled: already debugging to stderr.");
   $log_facility = 'null';
 }
 
@@ -667,7 +664,7 @@ if ( $opt{'socketpath'} ) {
       die "spamd already running on $path, exiting\n";
     }
     else {
-      dbg("spamd: removing stale socket file $path");
+      dbg("daemon: removing stale socket file $path");
       unlink $path;
     }
   }
@@ -677,7 +674,7 @@ if ( $opt{'socketpath'} ) {
     Type   => SOCK_STREAM,
     Listen => SOMAXCONN,
   );
-  warn("creating UNIX socket:\n" . join("\n", map { "\t$_: " . (defined $socket{$_} ? $socket{$_} : "(undef)") } sort keys %socket) . "\n") if defined $opt{'debug'};
+  dbg("daemon: creating UNIX socket:\n" . join("\n", map { "\t$_: " . (defined $socket{$_} ? $socket{$_} : "(undef)") } sort keys %socket));
   $server = new IO::Socket::UNIX(%socket)
          || die "Could not create UNIX socket on $path: $! ($@)\n";
 
@@ -734,7 +731,7 @@ elsif ( $opt{'ssl'} ) {
     SSL_key_file    => $opt{'server-key'},
     SSL_cert_file   => $opt{'server-cert'}
   );
-  warn("creating SSL socket:\n" . join("\n", map { "\t$_:  " . (defined $socket{$_} ? $socket{$_} : "(undef)") } sort keys %socket) . "\n") if defined $opt{'debug'};
+  dbg("daemon: creating SSL socket:\n" . join("\n", map { "\t$_:  " . (defined $socket{$_} ? $socket{$_} : "(undef)") } sort keys %socket));
   $server = new IO::Socket::SSL(%socket)
          || die "Could not create SSL socket on $addr:$port: $! ($@)\n";
 }
@@ -747,7 +744,7 @@ else {
     ReuseAddr => 1,
     Listen    => SOMAXCONN
   );
-  warn("creating INET socket:\n" . join("\n", map { "\t$_: " . (defined $socket{$_} ? $socket{$_} : "(undef)") } sort keys %socket) . "\n") if defined $opt{'debug'};
+  dbg("daemon: creating INET socket:\n" . join("\n", map { "\t$_: " . (defined $socket{$_} ? $socket{$_} : "(undef)") } sort keys %socket));
   $server = new IO::Socket::INET(%socket)
          || die "Could not create INET socket on $addr:$port: $! ($@)\n";
 }
@@ -826,14 +823,11 @@ $backchannel->set_selector(\$select_mask);
 
 # log server started, but processes watching the log to wait for connect
 # should wait until they see the pid, after signal handlers are in place
-if ( defined $opt{'debug'} ) {
-  warn "server started on $listeninfo (running version "
-    . Mail::SpamAssassin::Version() . ")\n";
-}
-
-logmsg( "server started on $listeninfo (running version "
-    . Mail::SpamAssassin::Version()
-    . ")" );
+# FIXME: two calls are one too much
+dbg("info: server started on $listeninfo (running version "
+    . Mail::SpamAssassin::Version() . ")" );
+logmsg("server started on $listeninfo (running version "
+    . Mail::SpamAssassin::Version() . ")" );
 
 # Fork off our children.
 for ( 1 .. $childlimit ) {
@@ -853,10 +847,7 @@ if (defined $opt{'pidfile'}) {
 
 # now allow waiting processes to connect, if they're watching the log.
 # The test suite does this!
-
-if ( defined $opt{'debug'} ) {
-  warn "server pid: $$\n";
-}
+dbg("info: server pid: $$\n");
 
 if ($scaling) {
   $scaling->set_server_fh($server);
@@ -1461,7 +1452,7 @@ sub auth_ident {
   my $username = shift;
   my $ident_username = ident_lookup( $client, $opt{'ident-timeout'} );
   my $dn = $ident_username || 'NONE';    # display name
-  warn "ident_username = $dn, spamc_username = $username\n" if defined $opt{'debug'};
+  dbg("ident: ident_username = $dn, spamc_username = $username\n");
   if ( $username ne $ident_username ) {
     logmsg( "fatal: ident username ($dn) does not match "
         . "spamc username ($username)" );
@@ -1615,7 +1606,7 @@ sub handle_user_sql {
 
 sub handle_user_ldap {
   my $username = shift;
-  dbg("spamd: entering handle_user_ldap($username)");
+  dbg("ldap: entering handle_user_ldap($username)");
   $spamtest->load_scoreonly_ldap($username);
   $spamtest->signal_user_changed(
     {
@@ -1753,7 +1744,7 @@ sub logmsg {
   $msg =~ s/[\r\n]+$//;       # remove any trailing newlines
   $msg =~ s/[\x00-\x1f]/_/g;  # replace all other control chars with underscores
 
-  warn "logmsg: $msg\n" if defined $opt{'debug'};
+  dbg("log: $msg\n");
 
   # log to file:
   #   bug 1360 <http://bugzilla.spamassassin.org/show_bug.cgi?id=1360>
@@ -1836,7 +1827,7 @@ sub check_syslog_sigpipe {
 
     # now report what happend
     $msg = "SIGPIPE received, reopening log socket";
-    warn "logmsg: $msg\n" if defined $opt{'debug'};
+    dbg("log: $msg");
     syslog( 'warning', "%s", $msg );
 
     # if we've received multiple sigpipes, logging is probably
@@ -1921,7 +1912,7 @@ sub restart_handler {
       unlink($opt{'socketpath'}) || warn "Can't unlink $opt{'socketpath'}: $!\n";
     }
 
-    warn "server socket closed\n" if defined $opt{'debug'};
+    dbg("info: Server socket closed");
   }
   $got_sighup = 1;
 }
@@ -1929,7 +1920,7 @@ sub restart_handler {
 sub daemonize {
 
   # Pretty command line in ps
-  $0 = join ( ' ', $ORIG_ARG0, @ORIG_ARGV ) unless ( defined $opt{'debug'} );
+  $0 = join (' ', $ORIG_ARG0, @ORIG_ARGV) unless @DEBUG;
 
   # Be a nice daemon and chdir() to the root so we don't block any unmount attempts
   chdir '/' or die "Can't chdir to /: $!\n";
@@ -1949,7 +1940,7 @@ sub daemonize {
   # Now we can redirect the errors, too.
   open STDERR, '>&STDOUT' or die "Can't duplicate stdout: $!\n";
 
-  dbg('spamd: daemonized.');
+  dbg('daemon: daemonized.');
 }
 
 sub set_allowed_ip {
@@ -1980,7 +1971,7 @@ sub preload_modules_with_tmp_homedir {
 
   my $tmpsadir = File::Spec->catdir( $tmphome, ".spamassassin" );
 
-  dbg("spamd: Preloading modules with HOME=$tmphome");
+  dbg("daemon: Preloading modules with HOME=$tmphome");
 
   mkdir( $tmphome,  0700 ) or die "fatal: Can't create $tmphome: $!";
   mkdir( $tmpsadir, 0700 ) or die "fatal: Can't create $tmpsadir: $!";
