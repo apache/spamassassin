@@ -825,8 +825,8 @@ sub enter_helper_run_mode {
 
   dbg ("entering helper-app run mode");
   $self->{old_slash} = $/;              # Razor pollutes this
-  $self->{old_env_home} = $ENV{'HOME'};
-  if (defined $self->{main}->{home_dir_for_helpers}) {
+  $self->{old_env_home} = $ENV{'HOME'}; # can be 'undef', e.g. spamd has no HOME
+  if (exists $self->{main}->{home_dir_for_helpers}) {
     $ENV{'HOME'} = $self->{main}->{home_dir_for_helpers};
   }
 }
@@ -836,7 +836,7 @@ sub leave_helper_run_mode {
 
   dbg ("leaving helper-app run mode");
   $/ = $self->{old_slash};
-  if (defined $self->{old_env_home}) {
+  if (exists $self->{old_env_home}) {
     $ENV{'HOME'} = $self->{old_env_home};
   }
 }
