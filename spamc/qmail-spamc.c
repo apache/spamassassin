@@ -1,5 +1,5 @@
 /*
- * This code is copyright (c) 2002-2003 by John Peacock
+ * Copyright 2002-2003 by John Peacock
  *
  * <@LICENSE>
  * Copyright 2004 Apache Software Foundation

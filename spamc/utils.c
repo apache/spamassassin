@@ -1,6 +1,6 @@
 /*
- * This code is copyright 2001 by Craig Hughes
- * Portions copyright 2002 by Brad Jorsch
+ * Copyright 2001 by Craig Hughes
+ * Portions Copyright 2002 by Brad Jorsch
  *
  * <@LICENSE>
  * Copyright 2004 Apache Software Foundation

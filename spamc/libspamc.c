@@ -1,6 +1,8 @@
 /*
- * This code is copyright 2001 by Craig Hughes
- * Portions copyright 2002 by Brad Jorsch
+ * Copyright 2001-2002 by Craig Hughes
+ * Conversion to a thread-safe shared library Copyright 2002 by Liam Widdowson
+ * Portions Copyright 2002 by Brad Jorsch
+ * Windows adaption Copyright 2004 by Sidney Markowitz
  *
  * <@LICENSE>
  * Copyright 2004 Apache Software Foundation
