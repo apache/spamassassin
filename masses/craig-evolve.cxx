@@ -27,8 +27,8 @@ const double regression_coefficient = 0.5;
 
 const double crossover_rate = 0.65;
 
-const int pop_size = 200;
-const int replace_num = 50;
+const int pop_size = 20;
+const int replace_num = 5;
 
 const int maxiter = 50000;
 
@@ -169,15 +169,15 @@ double evaluate(PGAContext *ctx, int p, int pop)
   {
     tot_score += score_msg(ctx,p,pop,i);
   }
-   yyscore = log(yyscore);
-   ynscore = log(ynscore);
-   nyscore = log(nyscore);
-   nnscore = log(nnscore);
 
+  double logyn,logny;
+  if(nyscore>3) logny = log(nyscore); else logny = 0;
+  if(ynscore>3) logyn = log(ynscore); else logyn = 0;
+  
   return  /*min false-neg*/(double)ga_yn +
 	  /*weighted min false-pos*/((double)ga_ny)*nybias +
-	  /*min score(false-pos)*/((double)nyscore)*nybias +
-	  /*max score(false-neg)*/(-(double)ynscore);
+	  /*min score(false-pos)*/logny*nybias +
+	  /*max score(false-neg)*/-logyn;
 }
 
 /*
