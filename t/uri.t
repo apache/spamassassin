@@ -90,6 +90,15 @@ ok(try_canon(['http://rd.yahoo.com/?http:/www.spamassassin.org'],
    'http:/www.spamassassin.org',
    ]));
 
+ok(try_canon(['http://images.google.ca/imgres?imgurl=gmib.free.fr/viagra.jpg&imgrefurl=http://www.google.com/url?q=http://www.google.com/url?q=%68%74%74%70%3A%2F%2F%77%77%77%2E%65%78%70%61%67%65%2E%63%6F%6D%2F%6D%61%6E%67%65%72%33%32'],
+   [
+   'http://images.google.ca/imgres?imgurl=gmib.free.fr/viagra.jpg&imgrefurl=http://www.google.com/url?q=http://www.google.com/url?q=%68%74%74%70%3A%2F%2F%77%77%77%2E%65%78%70%61%67%65%2E%63%6F%6D%2F%6D%61%6E%67%65%72%33%32',
+   'http://images.google.ca/imgres?imgurl=gmib.free.fr/viagra.jpg&imgrefurl=http://www.google.com/url?q=http://www.google.com/url?q=http://www.expage.com/manger32',
+   'http://www.expage.com/manger32',
+   'http://www.google.com/url?q=http://www.expage.com/manger32',
+   'http://www.google.com/url?q=http://www.google.com/url?q=http://www.expage.com/manger32',
+   ]));
+
 ##############################################
 
 sub try {
