@@ -18,7 +18,7 @@ my $spamtest = Mail::SpamAssassin->new({
     dont_copy_prefs => 1,
     local_tests_only => 1,
     stop_at_threshold => 0,
-    debug => 0,
+#    debug => 1,
     paranoid => 0,
 });
 
