@@ -290,6 +290,12 @@ $opt{'auto-whitelist'} and eval
 };
 
 Mail::SpamAssassin::Util::clean_path_in_taint_mode();
+
+# restart handling.  do this here before compile_now() as that may
+# take a while.
+my $got_sighup;
+$SIG{HUP} = \&restart_handler;
+
 preload_modules_with_tmp_homedir();
 
 # Note: we now use a set of fds to track children, as using SIGCHLD
@@ -324,6 +330,21 @@ while (1) {
     cleanupchildren();			# some platforms leave zombies otherwise
 
     my $n = select(my $rd=$readvec, undef, undef, undef);
+
+    if ($got_sighup) {
+      defined($opt{'pidfile'}) and unlink($opt{'pidfile'});
+  
+      # leave Client fds active, and do not kill children; they can still
+      # service clients until they exit.  But restart the listener anyway.
+
+      # untaint the path to the binary
+      my $cmd = $0; $cmd =~ /^(.*)$/; $cmd = $1;
+  
+      exec ($cmd, @ARGV);
+      # should not get past that...
+      die "spamd restart failed: exec failed: ".join (' ', $cmd, @ARGV).": $!";
+    }
+
     next if ($n == -1 && $! == &Errno::EINTR);
     die "select failed: $!" if ($n <= 0);
 
@@ -982,6 +1003,17 @@ sub kill_handler
     $server->close;
     defined($opt{'pidfile'}) and unlink($opt{'pidfile'});
     exit 0;
+}
+
+sub restart_handler {
+    my ($sig) = @_;
+    logmsg "server hit by SIG$sig, restarting";
+
+    if (!eof Server) {
+      shutdown (Server, 2);
+      close Server;
+    }
+    $got_sighup = 1;
 }
 
 use POSIX 'setsid';
