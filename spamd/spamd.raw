@@ -23,6 +23,12 @@ use Sys::Syslog qw(:DEFAULT setlogsock);
 use POSIX qw(:sys_wait_h);
 use POSIX qw(setsid);
 use Errno;
+# Load Time::HiRes if it's available
+BEGIN {
+  eval { require Time::HiRes };
+  Time::HiRes->import( qw(time) ) unless $@;
+}
+
 
 my %resphash = (
 		EX_OK          => 0,  # no problems
@@ -436,7 +442,7 @@ for ( ; 1; close Client)
 	    print $status->get_report,"\r\n" if ($method eq "REPORT" or $method eq "REPORT_IFSPAM" and $status->is_spam);
 	    $current_user ||= '(unknown)';
 	    logmsg "$was_it_spam ($msg_score/$msg_threshold) for $current_user:$> in ".
-		sprintf("%3d", time - $start) ." seconds, $actual_length bytes.\n";
+		sprintf("%.1f", time - $start) ." seconds, $actual_length bytes.\n";
 
 	    $status->finish();	# added by jm to allow GC'ing
 	}
@@ -574,7 +580,7 @@ for ( ; 1; close Client)
             my $msg_threshold = sprintf("%.1f",$status->get_required_hits);
 	    $current_user ||= '(unknown)';
 	    logmsg "$was_it_spam ($msg_score/$msg_threshold) for $current_user:$> in ".
-		sprintf("%3d", time - $start) ." seconds, $actual_length bytes.\n";
+	        sprintf("%.1f", time - $start) ." seconds, $actual_length bytes.\n";
 
 	    $status->finish();	# added by jm to allow GC'ing
 	}
@@ -762,7 +768,7 @@ sub logmsg
       print STDERR join("",@_) . "\n";
       return;
     }
-    
+
     openlog('spamd','cons,pid',$log_facility);
     my $str = join ('', @_);
     syslog('info', '%s', $str);
