@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.503 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.504 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -436,3 +436,4 @@ body __NIGERIAN_BODY_47             /\bgive\s+you .{0,15}(?:fund|money|total|sum
 
 meta T_NIGERIAN_BODY	( __NIGERIAN_BODY_1 + __NIGERIAN_BODY_2 + __NIGERIAN_BODY_3 + __NIGERIAN_BODY_5 + __NIGERIAN_BODY_6 + __NIGERIAN_BODY_7 + __NIGERIAN_BODY_8 + __NIGERIAN_BODY_9 + __NIGERIAN_BODY_10 + __NIGERIAN_BODY_11 + __NIGERIAN_BODY_12 + __NIGERIAN_BODY_13 + __NIGERIAN_BODY_14 + __NIGERIAN_BODY_15 + __NIGERIAN_BODY_16 + __NIGERIAN_BODY_17 + __NIGERIAN_BODY_18 + __NIGERIAN_BODY_19 + __NIGERIAN_BODY_20 + __NIGERIAN_BODY_21 + __NIGERIAN_BODY_22 + __NIGERIAN_BODY_25 + __NIGERIAN_BODY_26 + __NIGERIAN_BODY_27 + __NIGERIAN_BODY_28 + __NIGERIAN_BODY_29 + __NIGERIAN_BODY_30 + __NIGERIAN_BODY_31 + __NIGERIAN_BODY_32 + __NIGERIAN_BODY_33 + __NIGERIAN_BODY_34 + __NIGERIAN_BODY_35 + __NIGERIAN_BODY_36 + __NIGERIAN_BODY_37 + __NIGERIAN_BODY_38 + __NIGERIAN_BODY_39 + __NIGERIAN_BODY_40 + __NIGERIAN_BODY_41 + __NIGERIAN_BODY_42 + __NIGERIAN_BODY_43 + __NIGERIAN_BODY_44 + __NIGERIAN_BODY_45 + __NIGERIAN_BODY_46 + __NIGERIAN_BODY_47 ) > 1
 
+body 		T_REVERSE_AGING 		/\breverse.{1,5}aging\b/i
