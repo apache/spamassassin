@@ -1071,6 +1071,8 @@ conf__install:
 	-$(MKPATH) $(B_CONFDIR)
 	$(PERL) -MFile::Spec -MFile::Copy \
 	  -e "copy(q{rules/local.cf}, q{$(B_CONFDIR)/local.cf}) unless -f q{$(B_CONFDIR)/local.cf};"
+	$(PERL) -MFile::Spec -MFile::Copy \
+	  -e "copy(q{rules/init.pre}, q{$(B_CONFDIR)/init.pre}) unless -f q{$(B_CONFDIR)/init.pre};"
 
 data__install:
 	-$(MKPATH) $(B_DATADIR)
