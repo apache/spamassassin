@@ -35,15 +35,6 @@ sub new {
   $self->{headers} = { };
   $self->{header_order} = [ ];
 
-  # an option: SpamAssassin can set this appropriately.
-  # undef means 'figure it out yourself'.
-  $self->{add_From_line} = $opts{add_From_line};
-
-  # default: always add it
-  if (!defined $self->{add_From_line}) {
-    $self->{add_From_line} = 1;
-  }
-
   bless ($self, $class);
 
   # data may be filehandle (default stdin) or arrayref
@@ -212,113 +203,7 @@ sub get_all_headers {
   my @lines = ();
   # warn "JMD".join (' ', caller);
 
-  if (!defined ($self->{add_From_line}) || $self->{add_From_line} == 1) {
-    my $from = $self->{from_line};
-    if (!defined $from) {
-      my $f = $self->get_header("From") || '';
-      chomp ($f);
-
-      #warn "$f";
-      #warn "---";
-
-      $f =~ tr/\n/ /s;                            # unwrap the line
-      $f =~ s/^\s*(.*?)\s*$/$1/;                  # and remove leading and trailing spaces
-
-      #warn "$f";
-      #warn "---";
-
-      if ($f) {
-        my $p = -1;                               # position of block opening
-        my $s = '';                               # closing block seperator; either a quote or a bracket
-        my $n = 0;                                # deepness of nesting (only for brackets)
-        for (my $i = 0; $i < length($f); $i++) {
-          my $c = substr($f, $i, 1);
-          #warn "$f, $i, $c, $p, $s, $n";
-          if ($p == -1) {
-            if ($c eq '"' or $c eq '(') {         # find next block opening
-              $s = $c eq '(' ? ')' : '"';
-              $p = $i;
-            }
-            elsif ($c eq ',') {                   # begin of next address;
-              substr($f, $i) = '';                # look at the first one only
-              last;                               # and break here
-            }
-          }
-          else {
-            if ($c eq '(') {                      # a nested block is opened
-              $n++;
-            }
-            elsif ($c eq '\\') {                  # the next character is escaped,
-              $i++;                               # so skip it
-              next;
-            }
-            elsif ($c eq $s) {                    # block closing;
-              if ($n and $s eq ')') {             # it's a nested block
-                $n--;
-                next;
-              }
-              else {                              # it's no nested block,
-                substr($f, $p, $i - $p + 1) = ''; # so remove it
-                $i = $p - 1;                      # and proceed where it started
-                $p = -1;
-                next;
-              }
-            }
-          }
-        }
-        if ($p > -1) {                            # block not closed,
-          substr($f, $p) = '';                    # so remove till the end
-        }
-      }
-      $f =~ s/^\s*(.*?)\s*$/$1/;                  # remove leading and trailing spaces again
-
-      #warn "$f";
-      #warn "---";
-
-      if ($f) {
-        my $p = index($f, '<');
-        if ($p > -1) {                            # seems like we've got angle brackets
-          substr($f, 0, $p + 1) = '';             # remove everything in front
-          $p = index($f, '>');
-          if ($p > -1) {
-            $f = substr($f, 0, $p);               # get the contents
-            if ($f =~ /\s/) {                     # address contains spaces;
-              $f = '';                            # illegal address
-            }
-          }
-          else {                                  # no closing angle bracket;
-            $f = '';                              # illegal address
-          }
-        }
-        else {                                    # no angle bracket,
-          $f =~ s/\s.*//;                         # so remove everything except the first token
-        }
-      }
-
-      #warn "$f";
-      #warn "---";
-
-      if ($f) {
-        my $p = index($f, '@');
-        if (   $p == 0                            # we either lost the local part,
-            or $p == length($f) - 1               # or the domain
-            or $p != rindex($f, '@')) {           # or it contains more than one @;
-          $f = '';                                # illegal address anyway
-        }
-      }
-
-      unless ($f) {                               # we lost the address;
-        $f = 'spamassassin@localhost';            # use a default one
-      }
-
-      #warn "$f";
-      #warn "---";
-
-      $from = "From $f  ".(scalar localtime(time))."\n";
-    }
-    unshift (@lines, $from);
-  }
-
+  push(@lines, $self->{from_line}) if ( defined $self->{from_line} );
   foreach my $hdrcode (@{$self->{header_order}}) {
     $hdrcode =~ /^([^:]+):(\d+)$/ or next;
 
@@ -423,25 +308,6 @@ sub print {
 sub accept {
   my $self = shift;
   my $file = shift;
-
-  # determine location of mailspool
-  if (!defined $file) {
-  if ($ENV{'MAIL'}) {
-    $file = $ENV{'MAIL'};
-  } elsif (-d "/var/spool/mail/") {
-    $file = "/var/spool/mail/" . getpwuid($>);
-  } elsif (-d "/var/mail/") {
-    $file = "/var/mail/" . getpwuid($>);
-  } else {
-    die('Could not determine mailspool location for your system.  Try setting $MAIL in the environment.');
-  }
-  }
-
-  # some bits of code from Mail::Audit here:
-
-  if (exists $self->{accept}) {
-    return $self->{accept}->();
-  }
 
   # we don't support maildir or qmail here yet. use the real Mail::Audit
   # for those.
