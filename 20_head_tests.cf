@@ -66,9 +66,6 @@ describe SUBJ_ENDS_IN_SPACE	Subject ends with lots of white space
 header SUBJ_ALL_CAPS		eval:subject_is_all_caps()
 describe SUBJ_ALL_CAPS		Subject is all capitals
 
-header SUBJ_MISSING		Subject !~ /\S/
-describe SUBJ_MISSING		Subject: is empty or missing
-
 # (allow this test to pass if there's no Message-Id header)
 header MSGID_HAS_NO_AT		Message-Id !~ /\@/ [if-unset: NO@MSGID]
 describe MSGID_HAS_NO_AT	Message-Id has no @ sign
@@ -82,9 +79,6 @@ describe MSGID_CHARS_SPAM	Message-Id has characters indicating spam
 
 header MSGID_CHARS_WEIRD	Message-Id =~ /["=\\~]/
 describe MSGID_CHARS_WEIRD	Message-Id has characters often found in spam
-
-header INVALID_MSGID		Message-Id !~ /^<(?:[a-zA-Z0-9.!\#$%&'*\+\/=?\^_{}|~-]+|\".+\")\@(?:[a-zA-Z0-9.-]+|\[\d{1,3}(?:\.\d{1,3}){3}\])>(?:\s*\(.*\))?\s*$/ [if-unset: <NO@MSGID>]
-describe INVALID_MSGID		Message-Id is not valid, according to RFC 2822
 
 header INVALID_DATE		Date !~ /^\s*(?:(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun), )?[0-3 ]?[0-9] (?:Jan|Feb|Ma[ry]|Apr|Ju[nl]|Aug|Sep|Oct|Nov|Dec) (?:[12][901])?[0-9]{2} [0-2][0-9](?:\:[0-5][0-9]){1,2} (?:[+-][0-9]{4}|UT|[A-Z]{2,3}T)(?:\s+\(.*\))?\s*$/ [if-unset: Wed, 31 Jul 2002 16:41:57 +0200]
 describe INVALID_DATE		Invalid Date: header (not RFC 2822)
@@ -108,8 +102,9 @@ describe DATE_IN_PAST_12_24	Date: is 12 to 24 hours before Received: date
 header DATE_IN_PAST_24_48	eval:check_for_shifted_date('-48', '-24')
 describe DATE_IN_PAST_24_48	Date: is 24 to 48 hours before Received: date
 
-header DATE_IN_PAST_48_96	eval:check_for_shifted_date('-96', '-48')
-describe DATE_IN_PAST_48_96	Date: is 48 to 96 hours before Received: date
+# an oddly-bad hit-rate for this one.  probably quite recoverable...
+#header DATE_IN_PAST_48_96	eval:check_for_shifted_date('-96', '-48')
+#describe DATE_IN_PAST_48_96	Date: is 48 to 96 hours before Received: date
 
 header DATE_IN_PAST_96_XX	eval:check_for_shifted_date('undef', '-96')
 describe DATE_IN_PAST_96_XX	Date: is 96 hours or more before Received: date
@@ -173,18 +168,17 @@ describe FORGED_AOL_RCVD	Received forged, contains fake AOL relays
 header FROM_AND_TO_SAME_1	eval:check_for_from_to_same('exact_both')
 describe FROM_AND_TO_SAME_1	From and To the same (1)
 
-header FROM_AND_TO_SAME_2	eval:check_for_from_to_same('exact_none')
-describe FROM_AND_TO_SAME_2	From and To are same (2)
+#header FROM_AND_TO_SAME_2	eval:check_for_from_to_same('exact_none')
+#describe FROM_AND_TO_SAME_2	From and To are same (2)
 
 header FROM_AND_TO_SAME_3	eval:check_for_from_to_same('rough_both')
 describe FROM_AND_TO_SAME_3	From and To are same (3)
 
-
 header FROM_AND_TO_SAME_5	eval:check_for_from_to_same('rough_to')
 describe FROM_AND_TO_SAME_5	From and To are same (5)
 
-header FROM_AND_TO_SAME_6	eval:check_for_from_to_same('rough_none')
-describe FROM_AND_TO_SAME_6	From and To are same (6)
+#header FROM_AND_TO_SAME_6	eval:check_for_from_to_same('rough_none')
+#describe FROM_AND_TO_SAME_6	From and To are same (6)
 
 header BAD_HELO_WARNING		eval:check_for_bad_helo()
 describe BAD_HELO_WARNING	Fake name used in SMTP HELO command
@@ -333,21 +327,8 @@ header RCVD_IN_DUL_FH		rbleval:check_rbl('dialup-firsthop', 'dialups.mail-abuse.
 describe RCVD_IN_DUL_FH	Received from first hop dialup, see http://www.mail-abuse.org/dul/
 tflags RCVD_IN_DUL_FH           net
 
-# don't add headers without testing for false positives (usually Unix MTAs and
-# list software) and especially don't add From:, Reply-To:, Date:, Message-ID:
-#
-# Jul 11 2002 jm: removed some headers, as it now gets a 5:1
-# false-positive-to-spam ratio!  headers: Content-Transfer-Encoding,
-# Content-Type, X-Mailer, X-Sender.  v important to test this against a good
-# corpus of mailing list hosts like Yahoo, or webmail systems.
-# Also, securityfocus lists hit this if "To" is included.
-#
-header FORGED_RCVD_FOUND	ALL =~ /\n(?:Importance|Subject|X-MSMail-Priority):.*\nReceived: /s
-describe FORGED_RCVD_FOUND	Possibly-forged 'Received:' header found
-
 header FORGED_RCVD_TRAIL	eval:check_for_forged_received_trail()
 describe FORGED_RCVD_TRAIL	trail of Received: headers seems to be forged
-
 
 # obsolete; hotmail have changed their header format.
 #header FROM_FORGED_HOTMAIL	From =~ /^[^"]+\S+\@hotmail\.com/i
@@ -470,10 +451,9 @@ describe GAPPY_SUBJECT          'Subject' contains G.a.p.p.y-T.e.x.t
 #
 # not spammish: X-EM-Registration, X-EM-Version, X-Antiabuse, X-List-Host,
 # X-Message-Id
+# bad FP rate: Comment, Date-warning
 
 # these headers have very high correlation with spam
-header COMMENT			exists:Comment
-header DATE_WARNING		exists:Date-warning
 header X_ENC_PRESENT		exists:X-Encoding
 header X_ESMTP			exists:x-esmtp
 header X_LIBRARY		exists:X-Library
@@ -562,32 +542,16 @@ describe SAVINGS             Subject talks about savings
 # MIME boundary tests; spam tools use distinctive patterns.
 header MIME_BOUND_HASHES	Content-type =~ /boundary=\"\#{10}\"/
 describe MIME_BOUND_HASHES	Spam tool pattern in MIME boundary
-header MIME_BOUND_DIGITS_1	Content-Type =~ /boundary=\"----------=_\d{10}-\d{4}-\d{2}\"/
-describe MIME_BOUND_DIGITS_1	Spam tool pattern in MIME boundary
-header MIME_BOUND_DIGITS_2	Content-Type =~ /boundary=\"----------=_\d{10}-\d{5}-\d\"/
-describe MIME_BOUND_DIGITS_2	Spam tool pattern in MIME boundary
-header MIME_BOUND_DIGITS_3	Content-Type =~ /boundary=\"----0{63}\"/
-describe MIME_BOUND_DIGITS_3	Spam tool pattern in MIME boundary
 header MIME_BOUND_DIGITS_4	Content-Type =~ /boundary=\"_----------=_\d{18}\"/
 describe MIME_BOUND_DIGITS_4	Spam tool pattern in MIME boundary
-header MIME_BOUND_DIGITS_5	Content-Type =~ /boundary=\"\d-\d{9}-\d{10}=:\d{5}\"/
-describe MIME_BOUND_DIGITS_5	Spam tool pattern in MIME boundary
 header MIME_BOUND_DIGITS_7	Content-Type =~ /boundary=\d{9}\.\d{13}/
 describe MIME_BOUND_DIGITS_7	Spam tool pattern in MIME boundary
 header MIME_BOUND_HEX_24	Content-Type =~ /boundary=\"[\dA-F]{24}\"/
 describe MIME_BOUND_HEX_24	Spam tool pattern in MIME boundary
 header MIME_BOUND_MA		Content-Type =~ /boundary=\"----=_[a-zA-Z0-9]{8}_[a-zA-Z0-9]{8}_MA\"/
 describe MIME_BOUND_MA		Spam tool pattern in MIME boundary
-header MIME_BOUND_SEP1		Content-Type =~ /boundary=\"--==--==_Separator1\"/
-describe MIME_BOUND_SEP1	Spam tool pattern in MIME boundary
-header MIME_BOUND_HEX14		Content-Type =~ /boundary=\"==[0-9a-f]{14}\"/
-describe MIME_BOUND_HEX14	Spam tool pattern in MIME boundary
 header MIME_BOUND_OPTIN		Content-Type =~ /boundary=\"[A-F\d]{8}-[A-F\d]{4}-[A-F\d]{4}-[A-F\d]{4}-[A-F\d]{12}OPTIN\"/
 describe MIME_BOUND_OPTIN	Spam tool pattern in MIME boundary
-header MIME_BOUND_EQS_DASHES	Content-Type =~ /boundary=\"==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==\"/
-describe MIME_BOUND_EQS_DASHES	Spam tool pattern in MIME boundary
-header MIME_BOUND_MIME_BOUND	Content-Type =~ /boundary=\"MIME_BOUNDARY-\d{4}-\d-\d{10}\"/
-describe MIME_BOUND_MIME_BOUND	Spam tool pattern in MIME boundary
 header MIME_BOUND_MAIL_BOUND	Content-Type =~ /boundary=\"____MAIL_BOUNDARY____\"/
 describe MIME_BOUND_MAIL_BOUND	Spam tool pattern in MIME boundary
 
@@ -600,9 +564,6 @@ describe MICROSOFT		A "microsoft" header was found
 header FROM_HAS_MIXED_NUMS2        From =~ /\w{2,}\d{4,}[a-z]{1,2}\d{2,}\@/i
 describe FROM_HAS_MIXED_NUMS2 From address matches known spammer format
 
-header MAY_BE_FORGED            Received =~ /\(may be forged\)/i
-describe MAY_BE_FORGED          'Received:' has 'may be forged' warning
-
 header DATE_MISSING             Date =~ /^UNSET$/ [if-unset: UNSET]
 describe DATE_MISSING           Missing Date: header
 
@@ -610,35 +571,14 @@ describe DATE_MISSING           Missing Date: header
 header POST_IN_RCVD             Received =~ / Post\.(?:sk|cz)/  
 describe POST_IN_RCVD           Received contains fake 'Post.cz' hostname
 
-header FROM_TOPICA              From =~ /\@(?:\w\.)*email-publisher\.com/i
-describe FROM_TOPICA            From an address @email-publisher.com
-
-header FORGED_EBAY_RCVD         eval:check_for_from_domain_in_received_headers('ebay.com', 'false')
-describe FORGED_EBAY_RCVD       'From' ebay.com does not match 'Received' headers
-
 header FROM_MALFORMED           From !~ /(?:\"[^\"]+\"|\S+)\@\S+\.\S+|<\S+(?:\!\S+)+>/ [if-unset: unset@unset.unset]
 describe FROM_MALFORMED         From: has a malformed address
-
-header FROM_MISSING             From =~ /^UNSET$/ [if-unset: UNSET]
-describe FROM_MISSING           Missing From: header
-
-header OUTLOOK_UNDISC_RECIPS    To =~ /<Undisclosed-Recipient:;>/
-describe OUTLOOK_UNDISC_RECIPS  MS-Outlook-style To "<Undisclosed-Recipient:;>"
-
-header   PLEASE_READ            Subject =~ /please read/i
-describe PLEASE_READ            Please read this!  Please oh please oh please!
 
 header SHORT_RECEIVED_LINE      Received =~ /\S{120,}/s
 describe SHORT_RECEIVED_LINE    'Received:' contains huge hostname
 
-header   SUSPECT_LIST_HEADERS   eval:suspect_list_headers()
-describe SUSPECT_LIST_HEADERS   Mailing list headers are suspicious
-
 header TO_INVESTORS             To =~ /\bInvestors\@/
 describe TO_INVESTORS           To: non-existent 'Investors' address
-
-header TO_LOCALPART_EQ_REAL     To =~ /^\s*(\"?)([\w%\+\-=_\.]+)\1\s*<\2\@[\w%\+\-=_\.]+>/i
-describe TO_LOCALPART_EQ_REAL   To: repeats local-part as real name
 
 header TO_MALFORMED             To !~ /(?:(?:\"[^\"]+\"|\S+)\@\S+\.\S+|undisclosed-recipients:|<\S+(?:\!\S+){1,}>|^\s*$)/ [if-unset: unset@unset.unset]
 describe TO_MALFORMED           To: has a malformed address
