@@ -922,8 +922,6 @@ sub get_decoded_stripped_body_text_array {
   $self->{html}{ratio} = 0;
   $self->{html}{total_image_area} = 0;
   $self->{html}{num_imgs}         = 0;
-  $self->{html}{consec_imgs}      = 0;
-  $self->{html}{max_consec_imgs}  = 0;
   $self->{html}{min_img_ratio}    = "inf";
   $self->{html}{max_img_ratio}    = -1;
 

@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.49 2002/12/12 02:34:17 quinlan Exp $
+# $Id: HTML.pm,v 1.50 2002/12/13 10:23:11 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -263,12 +263,6 @@ sub html_tests {
 
   if ($tag eq "img") {
       $self->{html}{num_imgs}++;
-
-      $self->{html}{consec_imgs}++;
-
-      if ($self->{html}{consec_imgs} > $self->{html}{max_consec_imgs}) {
-          $self->{html}{max_consec_imgs} = $self->{html}{consec_imgs};
-      }
   }
 
   if ($tag eq "img" && exists $attr->{width} && exists $attr->{height}) {
@@ -316,11 +310,6 @@ sub html_tests {
 
 sub html_text {
   my ($self, $text) = @_;
-
-  if ($text =~ /\S/) {
-    # measuring consecutive image tags with no intervening text
-    $self->{html}{consec_imgs} = 0;
-  }
 
   if (exists $self->{html_inside}{a} && $self->{html_inside}{a} > 0) {
     $self->{html}{anchor_text} .= " $text";
