@@ -362,19 +362,6 @@ body T_NO_SCRIP_NEEDED		/no.{1,10}P(?:er|re)scription.{1,10}(?:needed|require|ne
 
 ########################################################################
 
-header T_FROM_DOMAIN_NOVOWEL	From =~ /\@\S*[bcdfghjklmnpqrstvwxyz]{7}/i
-header T_FROM_NAME_NOVOWEL	From =~ /[bcdfghjklmnpqrstvwxyz]{7}\S*\@/i
-header T_FROM_NAME_HEX		From =~ /[0-9a-f]{11}\S*\@/i
-header T_FROM_NAME_DIGITS	From =~ /\d{11}\S*\@/i
-uri T_URI_DIGITS_05		m%^https?://[^/?]*\b\d{5,}\b%i
-uri T_URI_DIGITS_06		m%^https?://[^/?]*\b\d{6,}\b%i
-uri T_URI_HEX_05		m%^https?://[^/?]*\b[0-9a-f]{5,}\b%i
-uri T_URI_HEX_06		m%^https?://[^/?]*\b[0-9a-f]{6,}\b%i
-uri T_URI_NOVOWEL_06		m%^https?://[^/?]*[bcdfghjklmnpqrstvwxyz]{6}%i
-uri T_URI_NOVOWEL_07		m%^https?://[^/?]*[bcdfghjklmnpqrstvwxyz]{7}%i
-
-########################################################################
-
 # bug 4054: contributions from Maxime Ritter (airmax.cf)
 
 # only works on full, may be better to check in Message object for this
