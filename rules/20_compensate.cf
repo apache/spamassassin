@@ -1,5 +1,5 @@
 # SpamAssassin rules file: compensation for common false positives.
-# $Id: 20_compensate.cf,v 1.49.2.6 2002/09/02 21:34:48 jmason Exp $
+# $Id: 20_compensate.cf,v 1.49.2.7 2002/09/04 13:37:03 jmason Exp $
 ###########################################################################
 # Header compensation tests
 
@@ -275,12 +275,10 @@ tflags NOSPAM_INC             nice
 header ORDER_STATUS             Subject =~ / order\b/i
 describe ORDER_STATUS           Subject looks like order info
 tflags ORDER_STATUS             nice
-score ORDER_STATUS -1.0         
 
 body HOTMAIL_FOOTER4            /Join the world's largest e-mail service with MSN Hotmail\./
 describe HOTMAIL_FOOTER4        Common footer for Hotmail
 tflags HOTMAIL_FOOTER4          nice
-score HOTMAIL_FOOTER4           -1.0
 
 header MAILER_DAEMON            From =~ /^(?:Mail Delivery \w+ )?<?mailer.?daemon\@\S+>?(?: \(Mail Delivery \w+\))?$/i
 describe MAILER_DAEMON          From the Mailer-Daemon
@@ -290,13 +288,11 @@ tflags MAILER_DAEMON            nice
 header   FAILURE_NOTICE_1       Subject =~ /^(?:failure notice|returned mail:|Delivery Status Notification|Undeliverable:)/i
 describe FAILURE_NOTICE_1       Mailer daemon failure notice (1)
 tflags   FAILURE_NOTICE_1       nice
-score FAILURE_NOTICE_1          -1.0
 
 #   0.534    0.593    0.499    0.54   -1.00  FWD_MSG
 header FWD_MSG                  Subject =~ /Fwd:\s/
 describe FWD_MSG                Forwarded email
 tflags FWD_MSG                  nice
-score   FWD_MSG                 -1.0
 test FWD_MSG ok Subject: Fwd: Dracula
 test FWD_MSG ok Subject: [landho] Fwd: tell rod
 test FWD_MSG fail Subject: Fwd:Pure Opt-In for half the price
@@ -306,42 +302,34 @@ test FWD_MSG fail Subject: Re: RE: FWD: search results        .       .       .
 body MAILBITS_EMAIL             /This is a free service provided by MailBits\.com\./
 describe MAILBITS_EMAIL         recommended page from MailBits.com
 tflags MAILBITS_EMAIL           nice
-score MAILBITS_EMAIL            -1.0
 
 #   0.923    0.447    1.137    0.28   -0.97  MIME_NULL_BLOCK
 body MIME_NULL_BLOCK            /This message is in MIME format/
 describe MIME_NULL_BLOCK        Correct for MIME 'null block'
 tflags MIME_NULL_BLOCK  nice         
 lang fr describe MIME_NULL_BLOCK        Bloc vide pour un message au format MIME
-score MIME_NULL_BLOCK                -0.975
 
 #   0.000    0.000    0.000    0.00   -1.00  MSN_FOOTER2
-score MSN_FOOTER2               -1.0
 body MSN_FOOTER2                /Remove my e-mail address from Gaming Zone /
 describe MSN_FOOTER2            Common footer for MSN
 tflags MSN_FOOTER2              nice
-score MSN_FOOTER2           -1.0
 
 #   0.307    0.301    0.311    0.49   -1.00  SUBJECT_HAS_DATE
 header SUBJECT_HAS_DATE         Subject =~ /1?\d[-\/][1-3]?\d[-\/](?:20)?0\d/
 describe SUBJECT_HAS_DATE       Subject contains a date
 tflags SUBJECT_HAS_DATE         nice
-score SUBJECT_HAS_DATE          -1.0
 
 #   0.002    0.001    0.003    0.22   -1.00  TRACK_NUMBER
 body     TRACK_NUMBER           /\bassign.{1,100}\b(?:ticket|tracking) number/i
 describe TRACK_NUMBER           Talks about tracking numbers
 tflags   TRACK_NUMBER           nice
-score TRACK_NUMBER           -1.0
 
 header OUTLOOK_FW_MSG         Subject =~ /\[?F[Ww]:\s/
 describe OUTLOOK_FW_MSG         Forwarded email (Outlook style)
 tflags OUTLOOK_FW_MSG           nice
-score   OUTLOOK_FW_MSG          -0.3
 
 #   0.041    0.057    0.031    0.65   -1.00  PRIVACY_STATEMENT
 body     PRIVACY_STATEMENT      /\bPRIVACY STATEMENT\b/i
 describe PRIVACY_STATEMENT      Contains a Privacy Statement
 tflags   PRIVACY_STATEMENT      nice
-score PRIVACY_STATEMENT           -1.0
 

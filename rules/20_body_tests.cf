@@ -1,5 +1,5 @@
 # SpamAssassin rules file: tests.
-# $Id: 20_body_tests.cf,v 1.237.2.8 2002/09/03 19:54:05 quinlan Exp $
+# $Id: 20_body_tests.cf,v 1.237.2.9 2002/09/04 13:37:02 jmason Exp $
 # 
 # note: body tests are run with long lines, so be sure to limit the
 # size of searches; use ".{0,30}" instead of ".*" to avoid huge
@@ -1367,24 +1367,20 @@ describe BALANCE_FOR_LONG_20K   Message text is over 20K in size
 body BALANCE_FOR_LONG_20K       eval:check_for_very_long_text('20000')
 describe BALANCE_FOR_LONG_20K   Message text is over 20K in size  
 tflags BALANCE_FOR_LONG_20K     nice  
-score BALANCE_FOR_LONG_20K -1.0 
 #
 #   0.111    0.099    0.118    0.46   -1.00  BALANCE_FOR_LONG_40K
 describe BALANCE_FOR_LONG_40K   Message text is over 40K in size
 body BALANCE_FOR_LONG_40K       eval:check_for_very_long_text('40000')
 describe BALANCE_FOR_LONG_40K   Message text is over 40K in size  
 tflags BALANCE_FOR_LONG_40K     nice
-score BALANCE_FOR_LONG_40K -1.0 
 
 #   0.038    0.048    0.031    0.61    1.00  BIG_BUCKS
 body BIG_BUCKS                  /\bbig bucks\b/i 
 describe BIG_BUCKS Big Bucks
-score BIG_BUCKS                      1.0
 
 #  0.01     0.01     0.00    0.77    1.00  CHANGE_TERMS (low matches)
 body CHANGE_TERMS               /\bstrictly based on the following terms and conditions\b/i
 describe CHANGE_TERMS           Terms and conditions
-score CHANGE_TERMS                   1.0
 
 #   0.000    0.001    0.000    1.00    1.00  CLICK_TO_REMOVE_3
 body CLICK_TO_REMOVE_3          /http:.{0,50}action=remove/is
@@ -1394,17 +1390,14 @@ describe CLICK_TO_REMOVE_3      Click-to-remove with PHP/ASP action found
 body     DONT_DELETE            /\b(?:don'?t delete this|do not delete)/i
 describe DONT_DELETE            Don't delete me!  Nooooo!!!!
 lang fr describe DONT_DELETE            Contient une formule incitant é ne pas détruire ce message
-score DONT_DELETE                    1.565
 
 #   0.000    0.000    0.000    0.00    1.00  EU_200_32_CE
 lang fr describe EU_200_32_CE   Revendique la conformité avec l'arrêt européen 200.32.CE
-score EU_200_32_CE                   1.0
 body EU_200_32_CE               /Directive 200.32.CE/i
 describe EU_200_32_CE           Claims compliance with SPAM regulations
 
 #   0.001    0.000    0.001    0.00    1.80  EU_EMAIL_OPTOUT
 lang fr describe EU_EMAIL_OPTOUT        Revendique la conformité avec l'arrêt européen sur le spam
-score EU_EMAIL_OPTOUT                1.8
 body EU_EMAIL_OPTOUT            /EU (?:e-?mail opt.?out|e.?commerce) directive/i
 describe EU_EMAIL_OPTOUT        Claims compliance with SPAM regulations
 #
@@ -1418,7 +1411,6 @@ describe EXCUSE_8               Claims you can be removed from the list
 body     FAILURE_NOTICE_2       /\b(?:Delivery to the following recipients failed|This Message was undeliverable|The following addresses had permanent fatal errors|did not reach the following recipient)\b/i
 describe FAILURE_NOTICE_2       Mailer daemon failure notice (2)
 tflags   FAILURE_NOTICE_2       nice
-score FAILURE_NOTICE_2          -1.0
 #
 
 #   0.000    0.000    0.000    0.00    1.00  FILTERED_BY_WORLDREMOVE
@@ -1428,7 +1420,6 @@ describe FILTERED_BY_WORLDREMOVE Claims to listen to some removal request list
 # 0.01     0.01     0.01    0.58    1.00  FREE_HOSTING (low matches)
 body FREE_HOSTING               /(?-i:F)ree hosting/i
 describe FREE_HOSTING           Contains 'free hosting' with capitals
-score FREE_HOSTING                   1.0
 body FREE_HOSTING               /\bfree hosting\b/i
 describe FREE_HOSTING           Free Hosting
 
@@ -1453,12 +1444,10 @@ describe HTML_COMMENT_UNIQUE_ID Contains a comment with nothing but unique ID
 #   0.000    0.001    0.000    1.00    1.00  INCREDIBLE
 body INCREDIBLE                 /\bincredible secrets\b/i
 describe INCREDIBLE             Things incredible
-score INCREDIBLE                     1.0
 
 lang de describe NIGERIAN_SCAM            Nigerianischer Betrugsversuch, siehe http://www.snopes2.com/inboxer/scams/nigeria.htm
 lang es describe NIGERIAN_SCAM          Nigerian scam, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
 lang fr describe NIGERIAN_SCAM  Mentionne les combines nigériennes, voir http://www.snopes2.com/inboxer/scams/nigeria.htm
-score NIGERIAN_SCAM                  1.0
 body NIGERIAN_SCAM              /BASED ON INFORMATION GATHERED ABOUT YOU, WE BELIEVE\s*YOU WOULD BE IN A POSITION TO HELP US IN TRANSFER/i
 describe NIGERIAN_SCAM          Nigerian scam, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
 
