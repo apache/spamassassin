@@ -39,7 +39,7 @@ use AnyDBM_File;
 
 use vars qw{ @ISA @DBNAMES
   $IGNORED_HDRS
-  @FLAG_PRESENCE_HDRS
+  $MARK_PRESENCE_ONLY_HDRS
   $MIN_SPAM_CORPUS_SIZE_FOR_BAYES
   $MIN_HAM_CORPUS_SIZE_FOR_BAYES
   %HEADER_NAME_COMPRESSION
@@ -59,6 +59,8 @@ $IGNORED_HDRS = qr{(?: Sender			# misc noise
 
 		  |Received	# handled specially
 
+		  |Subject      # not worth a tiny gain vs. to db size increase
+
 		  # Date: can provide invalid cues if your spam corpus is
 		  # older/newer than nonspam
 		  |Date	
@@ -76,11 +78,11 @@ $IGNORED_HDRS = qr{(?: Sender			# misc noise
 		  |X-Spam-Report |X-Spam-Flag |X-RBL-Warning
 		  |X-MDaemon-Deliver-To |X-Virus-Scanned |X-Spam-hits |X-Spam
 		  |X-Spam-Score |X-Mass-Check-Id |X-Pyzor
+		  |X-Filtered-BY |X-Scanner
 
 		  # some noisy Outlook headers that add no good clues:
-		  |Content-Class |Thread-Index
+		  |Content-Class |Thread-Index |Thread-Topic
 		  |X-OriginalArrivalTime |X-Originalarrivaltime
-		  |X-Face |X-Filtered-BY
 
 		  # Annotations from IMAP, POP, and MH:
 		  |Status |Content-Length
@@ -88,10 +90,11 @@ $IGNORED_HDRS = qr{(?: Sender			# misc noise
 		  |Replied |Forwarded
 		)}x;
 
-# Note the presence or absence of some headers.  by default the PRESENT/ABSENT
-# token this generates will exist alongside the tokens in the header; if you
-# don't want to see tokens from these headers *at all* except for the
-# PRESENT/ABSENT token, add them to IGNORED_HDRS too.  This is off by default.
+# Note only the presence of these headers, in order to reduce the
+# hapaxen they generate.
+$MARK_PRESENCE_ONLY_HDRS = qr{(?: X-Face
+		  |X-(?:Gnupg|GnuPG|GPG|PGP)-?(?:Key|)-?Fingerprint
+	        )}x;
 
 # tweaks tested as of Nov 18 2002 by jm: see SpamAssassin-devel list archives
 # for results.  The winners are now the default settings.
@@ -110,7 +113,6 @@ use constant TOKENIZE_LONG_TOKENS_AS_SKIPS => 1;
   'Message-Id' => '*m',
   'Message-ID' => '*M',
   'Received' => '*r',
-  'Subject' => '*s',
   'User-Agent' => '*u',
   'References' => '*f',
   'In-Reply-To' => '*i',
@@ -151,7 +153,7 @@ use constant PROB_BOUND_UPPER => 0.999;
 # we have 5 databases for efficiency.  To quote Matt:
 # > need five db files though to make it real fast:
 # [probs] 1. ngood and nbad (two entries, so could be a flat file rather 
-# than a db file).	(now 2 entries in db_probs)
+# than a db file).	(now 2 entries in db_toks)
 # [toks]  2. good token -> number seen
 # [toks]  3. bad token -> number seen (both are packed into 1 entry in 1 db)
 # [probs]  4. Consolidated good token -> probability
@@ -161,13 +163,17 @@ use constant PROB_BOUND_UPPER => 0.999;
 # > Then as you test a new mail, you just need to pull the probability
 # > direct from 4 and 5, and generate the overall probability. A simple and
 # > very fast operation. 
+#
 # jm: we use probs as overall probability. <0.5 = ham, >0.5 = spam
+# Now, in fact, probs does not map token=>prob; instead it maps
+# hamcount:spamcount => prob, which keeps the db size down.
+#
 # also, added a new one to support forgetting, auto-learning, and
 # auto-forgetting for refiled mails:
 # [seen]  6. a list of Message-IDs of messages already learnt from. values
 # are 's' for learnt-as-spam, 'h' for learnt-as-ham.
 
-@DBNAMES = qw(toks probs seen);
+@DBNAMES = qw(toks seen);
 
 $NSPAM_MAGIC_TOKEN = '**NSPAM';
 $NHAM_MAGIC_TOKEN = '**NHAM';
@@ -201,14 +207,16 @@ sub tie_db_readonly {
   return 1 if ($self->{already_tied} && $self->{is_locked} == 0);
   $self->{already_tied} = 1;
 
+  $self->read_db_configs();
+
   if (!defined($main->{conf}->{bayes_path})) {
     dbg ("bayes_path not defined");
     return 0;
   }
 
   my $path = $main->sed_path ($main->{conf}->{bayes_path});
-  if (!-f $path.'_probs') {
-    dbg ("bayes: no dbs present, cannot scan");
+  if (!-f $path.'_toks') {
+    dbg ("bayes: no dbs present, cannot scan: ${path}_toks");
     return 0;
   }
 
@@ -239,6 +247,8 @@ sub tie_db_writable {
   # (locked/unlocked) as before.
   return 1 if ($self->{already_tied} && $self->{is_locked} == 1);
   $self->{already_tied} = 1;
+
+  $self->read_db_configs();
 
   if (!defined($main->{conf}->{bayes_path})) {
     dbg ("bayes_path not defined");
@@ -309,6 +319,21 @@ failed_to_tie:
   return 0;
 }
 
+sub read_db_configs {
+  my ($self) = @_;
+
+  # TODO: at some stage, this may be useful to read config items which
+  # control database bloat, like
+  #
+  # - use of hapaxes
+  # - use of case-sensitivity
+  # - more midrange-hapax-avoidance tactics when parsing headers (future)
+  # 
+  # for now, we just set these settings statically.
+
+  $self->{use_hapaxes} = 1;
+}
+
 ###########################################################################
 
 sub untie_db {
@@ -363,10 +388,15 @@ sub tokenize_line {
   my $isbody = $_[3];
 
   # include quotes, .'s and -'s for URIs, and [$,]'s for Nigerian-scam strings,
-  # and ISO-8859-15 alphas.  DO split on @'s, so username and domains in
-  # mail addrs are separate tokens.
+  # and ISO-8859-15 alphas.  Do not split on @'s; better results keeping it.
   # Some useful tokens: "$31,000,000" "www.clock-speed.net"
   tr/-A-Za-z0-9,\@_'"\$.\241-\377 / /cs;
+
+  # DO split on "..." or "--" or "---"; common formatting error resulting in
+  # hapaxes.  Keep the separator itself as a token, though, as long ones can
+  # be good spamsigns.
+  s/(\w)(\.{3,6})(\w)/$1 $2 $3/gs;
+  s/(\w)(\-{2,6})(\w)/$1 $2 $3/gs;
 
   if (IGNORE_TITLE_CASE) {
     if ($isbody) {
@@ -450,27 +480,16 @@ sub tokenize_headers {
 
     # special tokenization for some headers:
     if ($hdr =~ /^(?:|X-|Resent-)Message-I[dD]$/) {
-      # try to split Message-ID segments on probable ID boundaries. Note that
-      # Outlook message-ids seem to contain a server identifier ID in the last
-      # 8 bytes before the @.  Make sure this becomes its own token, it's a
-      # great spam-sign for a learning system!  Be sure to split on ".".
-      $val =~ s/[^_A-Za-z0-9]/ /g;
+      $val = $self->pre_chew_message_id ($val);
     }
     elsif ($hdr eq 'Received') {
-      # Thanks to Dan for these.  Trim out "useless" tokens; sendmail-ish IDs
-      # and valid-format RFC-822/2822 dates
-      $val =~ s/\bid [a-zA-Z0-9]{7,20}\b//g;
-      $val =~ s/(?:(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun),\s)?
-		[0-3\s]?[0-9]\s
-		(?:Jan|Feb|Ma[ry]|Apr|Ju[nl]|Aug|Sep|Oct|Nov|Dec)\s
-		(?:19|20)?[0-9]{2}\s
-		[0-2][0-9](?:\:[0-5][0-9]){1,2}\s
-		(?:\s*\(|\)|\s*(?:[+-][0-9]{4})|\s*(?:UT|[A-Z]{2,3}T))*
-		//gx;
-
-      # also these: they turn out as the most common tokens, but with a
-      # prob of about .5.  waste of space!
-      $val =~ s/\s(?:with|from|for|SMTP|ESMTP)\s/ /g;
+      $val = $self->pre_chew_received ($val);
+    }
+    elsif ($hdr eq 'Content-Type') {
+      $val = $self->pre_chew_content_type ($val);
+    }
+    elsif ($hdr =~ /^${MARK_PRESENCE_ONLY_HDRS}$/i) {
+      $val = "1"; # just mark the presence, they create lots of hapaxen
     }
 
     # replace hdr name with "compressed" version if possible
@@ -487,6 +506,82 @@ sub tokenize_headers {
   }
 
   return %parsed;
+}
+
+sub pre_chew_content_type {
+  my ($self, $val) = @_;
+
+  # hopefully this will retain good bits without too many hapaxen
+  if ($val =~ s/boundary=[\"\'](.*?)[\"\']/ /ig) {
+    my $boundary = $1;
+    $boundary =~ s/[a-fA-F0-9]/H/gs;
+    # break up blocks of separator chars so they become their own tokens
+    $boundary =~ s/([-_\.=]+)/ $1 /gs;
+    $val .= $boundary;
+  }
+  $val;
+}
+
+sub pre_chew_message_id {
+  my ($self, $val) = @_;
+  # we can (a) get rid of a lot of hapaxen and (b) increase the token
+  # specificity by pre-parsing some common formats.
+
+  # Outlook Express format:
+  $val =~ s/<([0-9a-f]{4})[0-9a-f]{4}[0-9a-f]{4}\$
+           ([0-9a-f]{4})[0-9a-f]{4}\$
+           ([0-9a-f]{8})\@(\S+)>/ OEA$1 OEB$2 OEC$3 $4 /gx;
+
+  # Exim:
+  $val =~ s/<[A-Za-z0-9]{7}-[A-Za-z0-9]{6}-0[A-Za-z0-9]\@//;
+
+  # Sendmail:
+  $val =~ s/<20\d\d[01]\d[0123]\d[012]\d[012345]\d[012345]\d\.
+           [A-F0-9]{10,12}\@//gx;
+
+  # try to split Message-ID segments on probable ID boundaries. Note that
+  # Outlook message-ids seem to contain a server identifier ID in the last
+  # 8 bytes before the @.  Make sure this becomes its own token, it's a
+  # great spam-sign for a learning system!  Be sure to split on ".".
+  $val =~ s/[^_A-Za-z0-9]/ /g;
+  $val;
+}
+
+sub pre_chew_received {
+  my ($self, $val) = @_;
+
+  # Thanks to Dan for these.  Trim out "useless" tokens; sendmail-ish IDs
+  # and valid-format RFC-822/2822 dates
+
+  $val =~ s/\swith\sSMTP\sid\sg[\dA-Z]{10,12}\s/ /gs;  # Sendmail
+  $val =~ s/\swith\sESMTP\sid\s[\dA-F]{10,12}\s/ /gs;  # Sendmail
+  $val =~ s/\bid\s[a-zA-Z0-9]{7,20}\b/ /gs;    # Sendmail
+  $val =~ s/\bid\s[A-Za-z0-9]{7}-[A-Za-z0-9]{6}-0[A-Za-z0-9]/ /gs; # exim
+
+  $val =~ s/(?:(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun),\s)?
+           [0-3\s]?[0-9]\s
+           (?:Jan|Feb|Ma[ry]|Apr|Ju[nl]|Aug|Sep|Oct|Nov|Dec)\s
+           (?:19|20)?[0-9]{2}\s
+           [0-2][0-9](?:\:[0-5][0-9]){1,2}\s
+           (?:\s*\(|\)|\s*(?:[+-][0-9]{4})|\s*(?:UT|[A-Z]{2,3}T))*
+           //gx;
+
+  # IPs: break down to nearest /24, to reduce hapaxes -- EXCEPT for
+  # IPs in the 10 and 192.168 ranges, they gets lots of significant tokens
+  # (on both sides)
+  $val =~ s{(\b|[^\d])(\d{1,3}\.)(\d{1,3}\.)(\d{1,3})(\.\d{1,3})(\b|[^\d])}{
+           if ($2 eq '10' || ($2 eq '192' && $3 eq '168')) {
+             $1.$2.$3.$4.$5.$6;
+           } else {
+             $1.$2.$3.$4.$6;
+           }
+         }gex;
+
+  # trim these: they turn out as the most common tokens, but with a
+  # prob of about .5.  waste of space!
+  $val =~ s/\b(?:with|from|for|SMTP|ESMTP)\b/ /g;
+
+  $val;
 }
 
 ###########################################################################
@@ -532,15 +627,15 @@ sub learn_trapped {
     }
   }
 
-  if ($isspam) {
-    $self->{db_probs}->{$NSPAM_MAGIC_TOKEN}++;
-  } else {
-    $self->{db_probs}->{$NHAM_MAGIC_TOKEN}++;
-  }
-  my $ns = $self->{db_probs}->{$NSPAM_MAGIC_TOKEN};
-  my $nn = $self->{db_probs}->{$NHAM_MAGIC_TOKEN};
+  my $ns = $self->{db_toks}->{$NSPAM_MAGIC_TOKEN};
+  my $nn = $self->{db_toks}->{$NHAM_MAGIC_TOKEN};
   $ns ||= 0;
   $nn ||= 0;
+
+  if ($isspam) { $ns++; } else { $nn++; }
+
+  $self->{db_toks}->{$NSPAM_MAGIC_TOKEN} = $ns;
+  $self->{db_toks}->{$NHAM_MAGIC_TOKEN} = $nn;
 
   my ($wc, @tokens) = $self->tokenize ($msg, $body);
   my %seen = ();
@@ -551,26 +646,9 @@ sub learn_trapped {
     my ($ts, $th) = tok_unpack ($self->{db_toks}->{$_});
     if ($isspam) { $ts++; } else { $th++; }
     $self->{db_toks}->{$_} = tok_pack ($ts, $th);
-
-    # if we don't have both corpora, skip generating probabilities.
-    # we can't get useful results without both.
-    next if ($nn == 0 || $ns == 0);
-    if ($self->{main}->{bayes_on_the_fly_recalc}) {
-      $self->compute_prob_for_token ($_, $ns, $nn);
-    }
   }
 
   $self->{db_seen}->{$msgid} = ($isspam ? 's' : 'h');
-
-  # do this costly operation once every 500 mails
-  # TODO: come up with a time-based recalc operation instead
-  if ($ns != 0 && $nn != 0 && (($ns+$nn) % 500) == 0) {
-    $self->recompute_all_probs();
-
-    # next, dump all dbs to disk. they will be reloaded on next operation.
-    # this should help keep memory down
-    $self->untie_db();
-  }
 }
 
 ###########################################################################
@@ -616,18 +694,18 @@ sub forget_trapped {
     }
   }
 
-  my $ns = $self->{db_probs}->{$NSPAM_MAGIC_TOKEN};
-  my $nn = $self->{db_probs}->{$NHAM_MAGIC_TOKEN};
+  my $ns = $self->{db_toks}->{$NSPAM_MAGIC_TOKEN};
+  my $nn = $self->{db_toks}->{$NHAM_MAGIC_TOKEN};
   $ns ||= 0;
   $nn ||= 0;
 
   # protect against going negative
   if ($isspam) {
     $ns--; if ($ns < 0) { $ns = 0; }
-    $self->{db_probs}->{$NSPAM_MAGIC_TOKEN} = $ns;
+    $self->{db_toks}->{$NSPAM_MAGIC_TOKEN} = $ns;
   } else {
     $nn--; if ($nn < 0) { $nn = 0; }
-    $self->{db_probs}->{$NHAM_MAGIC_TOKEN} = $nn;
+    $self->{db_toks}->{$NHAM_MAGIC_TOKEN} = $nn;
   }
 
   my ($wc, @tokens) = $self->tokenize ($msg, $body);
@@ -644,30 +722,12 @@ sub forget_trapped {
 
     if ($ts == 0 && $th == 0) {
       delete $self->{db_toks}->{$_};
-      delete $self->{db_probs}->{$_};
     } else {
       $self->{db_toks}->{$_} = tok_pack ($ts, $th);
-    }
-
-    # if we don't have both corpora, skip generating probabilities.
-    # we can't get useful results without both.
-    next if ($nn == 0 || $ns == 0);
-    if ($self->{main}->{bayes_on_the_fly_recalc}) {
-      $self->compute_prob_for_token ($_, $ns, $nn);
     }
   }
 
   delete $self->{db_seen}->{$msgid};
-
-  # do this costly operation once every 500 mails, or if we've forgotten
-  # the last ham/spam
-  if ($ns != 0 && $nn != 0 && (($ns+$nn) % 500) == 0) {
-    $self->recompute_all_probs();
-
-    # next, dump all dbs to disk. they will be reloaded on next operation.
-    # this should help keep memory down
-    $self->untie_db();
-  }
 }
 
 ###########################################################################
@@ -715,80 +775,15 @@ sub get_body_from_msg {
 
 sub recompute_all_probs {
   my ($self) = @_;
-  my $ret;
-
-  eval {
-    local $SIG{'__DIE__'};	# do not run user die() traps in here
-
-    $self->tie_db_writable();
-    $ret = $self->recompute_all_probs_trapped ();
-  };
-
-  if ($@) {		# if we died, untie the dbs.
-    my $failure = $@;
-    $self->untie_db();
-    die $failure;
-  }
-
-  return $ret;
+  return 0;
 }
 
-# this function is trapped by the wrapper above.
-#
-# TODO: BTW, this would be faster if we create a totally-new DB file instead of
-# using the existing one, since we will typically visit 99.99% of the entries
-# in the DB anyway.  However we cannot simply unlink() at the start of the fn,
-# as any reader processes will then not have Bayes scoring until we've completed.
-# Instead we should create a "new" db in parallel, then rename() it in once
-# we've finished.
-
-sub recompute_all_probs_trapped {
-  my ($self) = @_;
-
-  my $start = time;
-
-  my $ns = $self->{db_probs}->{$NSPAM_MAGIC_TOKEN};
-  my $nn = $self->{db_probs}->{$NHAM_MAGIC_TOKEN};
-  $ns ||= 0;
-  $nn ||= 0;
-  if ($nn == 0 || $ns == 0) {
-    dbg("bayes: 0 messages in spam ($ns) or ham ($nn) corpus, not recomputing");
-    goto done;
-  }
-
-  # TODO: allow this to be turned off -- would be a big win for
-  # large sites using spamd with bayes db per-user
-  $self->{use_hapaxes} = 1;
-
-  my $probstotal = 0;
-  my $count = 0;
-
-  dbg("bayes: recomputing all probabilities for $ns spam msgs and $nn ham msgs...");
-
-  my %done = ();
-  foreach my $token (keys %{$self->{db_toks}}) {
-    next if (exists $done{$token}); $done{$token}=1;
-    my $prob = $self->compute_prob_for_token ($token, $ns, $nn);
-    if (defined $prob) { $probstotal += $prob; }
-    $count++;
-  }
-
-  # for debugging, let's see this figure
-  dbg ("bayes: computed Robinson x = ".($count ? ($probstotal / $count) : 0));
-
-done:
-  my $now = time;
-  dbg ("bayes: recomputed all probabilities for ".(scalar keys %done).
-        " tokens in ".($now - $start)." seconds");
-  $self->untie_db();
-  1;
-}
-
+# compute the probability that that token is spammish
 sub compute_prob_for_token {
   my ($self, $token, $ns, $nn) = @_;
 
-  # precompute the probability that that token is spammish
   my ($s, $n) = tok_unpack ($self->{db_toks}->{$token});
+  return if ($s == 0 && $n == 0);
 
   if (!USE_ROBINSON_FX_EQUATION_FOR_LOW_FREQS) {
     return if ($s + $n < 10);      # ignore low-freq tokens
@@ -804,7 +799,7 @@ sub compute_prob_for_token {
 
   if ($ratios == 0 && $ration == 0) {
     warn "oops? ratios == ration == 0";
-    $prob = 0.5;
+    return 0.5;
   } else {
     $prob = ($ratios) / ($ration + $ratios);
   }
@@ -817,7 +812,7 @@ sub compute_prob_for_token {
 		  (ROBINSON_S_CONSTANT + $robn);
   }
 
-  $self->{db_probs}->{$token} = pack ('f', $prob);
+  #$self->{db_probs}->{"$s:$n"} = pack ('f', $prob);
   return $prob;
 }
 
@@ -837,8 +832,8 @@ sub scan {
 
   if (!$self->tie_db_readonly()) { goto skip; }
 
-  my $ns = $self->{db_probs}->{$NSPAM_MAGIC_TOKEN};
-  my $nn = $self->{db_probs}->{$NHAM_MAGIC_TOKEN};
+  my $ns = $self->{db_toks}->{$NSPAM_MAGIC_TOKEN};
+  my $nn = $self->{db_toks}->{$NHAM_MAGIC_TOKEN};
   $ns ||= 0;
   $nn ||= 0;
 
@@ -863,12 +858,10 @@ sub scan {
     else {
       $seen{$_} = 1;
 
-      $pw = $self->{db_probs}->{$_};
+      $pw = $self->compute_prob_for_token ($_, $ns, $nn);
       if (!defined $pw) { (); }	# exit map()
       
       else {
-	$pw = unpack ('f', $pw);
-
 	# enforce (max PROB_BOUND_LOWER (min PROB_BOUND_UPPER (score))) as per
 	# Graham; it allows a majority of spam clues to override 1 or 2
 	# very-strong nonspam clues.

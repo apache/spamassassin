@@ -39,6 +39,7 @@ sub cmdline_run {
 
              'stopafter'                        => \$opt{'stopafter'},
 	     'learnprob=f'			=> \$opt{'learnprob'},
+	     'randseed=i'			=> \$opt{'randseed'},
 
              'auto-whitelist|a'                 => \$opt{'auto-whitelist'},
              'bias-scores|b'                    => \$opt{'bias-scores'},
@@ -74,6 +75,10 @@ sub cmdline_run {
 
   $messagelimit = $opt{'stopafter'};
   $learnprob = $opt{'learnprob'};
+
+  if (defined $opt{'randseed'}) {
+    srand ($opt{'randseed'});
+  }
 
   # run this lot in an eval block, so we can catch die's and clear
   # up the dbs.
