@@ -279,6 +279,7 @@ for ( ; ($paddr = accept(Client,Server)) ; close Client)
 
                     if (/^User: (.*)\r\n/)
                     {
+                        $current_user = $1;
                         if ($opt_x)
                         {
 			    if ($opt_q) {
@@ -391,6 +392,7 @@ for ( ; ($paddr = accept(Client,Server)) ; close Client)
 
                     if (/^User: (.*)\r\n/)
                     {
+                        $current_user = $1;
                         if ($opt_x)
                         {
 			    if ($opt_q) {
@@ -531,7 +533,6 @@ sub handle_user
 {
     my $username = shift;
 
-    $current_user = $username;
     #
     # If vpopmail config enabled then look up userinfo for vpopmail uid
     # as defined by $opt_u
@@ -584,8 +585,8 @@ sub handle_user
 
 sub handle_user_sql
 {
-    $current_user = shift;
-    $spamtest->load_scoreonly_sql ($current_user);
+    my $username = shift;
+    $spamtest->load_scoreonly_sql ($username);
     return 1;
 }
 
