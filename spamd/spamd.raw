@@ -615,7 +615,7 @@ sub check {
             my($header, $value) = split(/:\s*/, $line, 2);
             if (!defined $value)
             {
-                protocol_error($line);
+		protocol_error("(header not in 'Name: value' format)");
                 return 1;
             }
             $header = lc($header);
@@ -629,11 +629,11 @@ sub check {
             # only need to do the SQL lookup if $opt{'sql-config'} IS
             # true.  (I got that wrong the first time.)
 
-            if ($header eq 'user')
+            if ($header eq 'User')
             {
-                if ($value !~ /^([\x20-\x7F]+)$/) # any 7bit char except ctrls
+                if ($value !~ /^([\x20-\xFF]+)$/)
                 {
-                    protocol_error($line);
+                   protocol_error ("(User header contains control chars)");
                     return 1;
                 }
 
@@ -657,14 +657,14 @@ sub check {
                   }
                 }
             }
-            elsif ($header eq 'content-length')
+	    elsif ($header eq 'Content-length')
             {
-                if ($value !~ /^(\d+)$/)
-                {
-                    protocol_error($line);
-                    return 1;
-                }
-                $expected_length = $1;
+		if ($value !~ /^(\d+)$/)
+		{
+		    protocol_error ("(Content-Length contains non-numeric bytes)");
+		    return 1;
+		}
+		$expected_length = $1;
             }
         }
     }
