@@ -29,14 +29,12 @@ describe NIGERIAN_SUBJECT2	Subject is indicative of a Nigerian spam
 
 body __NIGERIAN_BODY_1		/\b(?:financial|confiden(?:tial|ce)|safe|mutual|secret|success|risk-?free|details|business).{1,30}\btransaction\b/i
 body __NIGERIAN_BODY_2		/\btransaction\b.{1,30}\b(?:magnitude|diplomatic|strict|absolute|secret|confiden(?:tial|ce)|guarantee)/i
-body __NIGERIAN_BODY_3		/BASED ON INFORMATION GATHERED ABOUT YOU, WE BELIEVE\s*YOU WOULD BE IN A POSITION TO HELP US IN TRANSFER/i
 body __NIGERIAN_BODY_5		/\bpoisoned (?:to death )?by his business associate/i
 body __NIGERIAN_BODY_7		/\bU\.?S\.?(?:D\.?)?\s*(?:\$\s*)?(?:\d+,\d+,\d+|\d+\.\d+\.\d+|\d+(?:\.\d+)?\s*milli?on)/i
 body __NIGERIAN_BODY_8		/\b(?:You may be sur?prised to receive this letter from me|this (?:letter|mail) (?:(?:may|will) come to you as|will be) a sur?prise)\b/i
 body __NIGERIAN_BODY_9		/\bthe .{1,10} son of\b/i
 body __NIGERIAN_BODY_10		/\burgent and(?: very)? (?:profitable|confidential) business (?:proposal|proposition)\b/i
 body __NIGERIAN_BODY_13		/\byour(?: private)? (?:tele)?phone (?:and|&) fax Numbers?\b/i
-body __NIGERIAN_BODY_14		/\bthe importance of Secrecy\b/i
 body __NIGERIAN_BODY_15		/\bmodalities\b/i
 body __NIGERIAN_BODY_17		/\bWRITING THIS LETTER TO SOLICIT\b/i
 body __NIGERIAN_BODY_19		/\bMY PROPOSAL IS ACCEPTABLE\b/i
@@ -52,11 +50,9 @@ body __NIGERIAN_BODY_30		/\bfavou?rable response\b/i
 body __NIGERIAN_BODY_32		/\blocate(?: .{1,20})? extended relative/i
 body __NIGERIAN_BODY_33		/\bhonest cooperation\b/i
 body __NIGERIAN_BODY_34		/\b(?:wife|son|brother|daughter) of the late\b/i
-body __NIGERIAN_BODY_35		/\bintuitive confidence/i
 body __NIGERIAN_BODY_36		/\battached to ticket number\b/i
 body __NIGERIAN_BODY_37		/\ball funds will be returned\b/i
 body __NIGERIAN_BODY_38		/\b(?:International\b.{1,15}\bLottery|lottery\b.{1,15}\binternational)\b/i
-body __NIGERIAN_BODY_40		/\bsend .{1,30}\byour telefax Numbers?\b/i
 body __NIGERIAN_BODY_41		/(?:government|bank) of nigeria/i
 body __NIGERIAN_BODY_42		/nigerian? (?:national|government)/i
 body __NIGERIAN_BODY_43         /\blate .{0,15}(?:father|wife|husband|general|president|daughter|son|minister).{0,20}(?:wealthy|treasure|deposit|money|left|property|known|\$|US)/i
@@ -80,7 +76,6 @@ body __T_FRAUD_113	/win cash/i
 body __T_FRAUD_44	/(?:may i first|to) introduce my ?self/i
 body __T_FRAUD_81	/as the beneficiary/i
 body __T_FRAUD_58	/\bcongo\b/i
-body __T_FRAUD_259	/drawn	?from.{0,10}\d{2,3},?\d{3}/i
 body __T_FRAUD_149	/as a minister/i
 body __T_FRAUD_236	/lott(?:o|ery) (?:co,?ordinator|international)/i
 body __T_FRAUD_249	/bequest/i
@@ -111,13 +106,11 @@ body __T_FRAUD_251	/magnanimity/i
 body __T_FRAUD_19	/political crisis/i
 body __T_FRAUD_254	/\bnumbered time\b/i
 body __T_FRAUD_241	/urgent and(?: very)? (?:profitable|confidential) business propos(?:al|ition)/i
-body __T_FRAUD_35	/international court of justice/i
 body __T_FRAUD_217	/secrecy and confidentiality/i
 body __T_FRAUD_221	/(?:the importance of|utmost) secrecy/i
 body __T_FRAUD_124	/vital documents/i
 body __T_FRAUD_18	/over-invoice/i
 body __T_FRAUD_42	/(?:finance|holding|securit(?:ies|y)) (?:company|firm|storage house)/i
 body __T_FRAUD_31	/embassy/i
-body __T_FRAUD_115	/your share shall be\b/i
 body __T_FRAUD_3	/assassinate/i
 body __T_FRAUD_220	/\bto assure you\b/i
