@@ -2440,6 +2440,36 @@ user's C<user_prefs> file.
 
 =over 4
 
+=item version_tag string
+
+This tag is appended to the SA version in the X-Spam-Status header. You should
+include it when modify your ruleset, especially if you plan to distribute it.
+A good choice for I<string> is your last name or your initials followed by a
+number which you increase with each change.
+
+The version_tag will be lowercased, and any non-alphanumeric or period
+character will be replaced by an underscore.
+
+e.g.
+
+  version_tag myrules1    # version=2.41-myrules1
+
+=cut
+
+  push (@cmds, {
+    setting => 'version_tag',
+    is_admin => 1,
+    code => sub {
+      my ($self, $key, $value, $line) = @_;
+      my $tag = lc($value);
+      $tag =~ tr/a-z0-9./_/c;
+      foreach (@Mail::SpamAssassin::EXTRA_VERSION) {
+        if($_ eq $tag) { $tag = undef; last; }
+      }
+      push(@Mail::SpamAssassin::EXTRA_VERSION, $tag) if($tag);
+    }
+  });
+
 =item test SYMBOLIC_TEST_NAME (ok|fail) Some string to test against
 
 Define a regression testing string. You can have more than one regression test
@@ -3035,35 +3065,6 @@ version.  So 3.0.0 is C<3.000000>, and 3.4.80 is C<3.004080>.
   push (@cmds, {
     setting => 'require_version',
     code => sub {
-    }
-  });
-
-=item version_tag string
-
-This tag is appended to the SA version in the X-Spam-Status header. You should
-include it when modify your ruleset, especially if you plan to distribute it.
-A good choice for I<string> is your last name or your initials followed by a
-number which you increase with each change.
-
-The version_tag will be lowercased, and any non-alphanumeric or period
-character will be replaced by an underscore.
-
-e.g.
-
-  version_tag myrules1    # version=2.41-myrules1
-
-=cut
-
-  push (@cmds, {
-    setting => 'version_tag',
-    code => sub {
-      my ($self, $key, $value, $line) = @_;
-      my $tag = lc($value);
-      $tag =~ tr/a-z0-9./_/c;
-      foreach (@Mail::SpamAssassin::EXTRA_VERSION) {
-        if($_ eq $tag) { $tag = undef; last; }
-      }
-      push(@Mail::SpamAssassin::EXTRA_VERSION, $tag) if($tag);
     }
   });
 
