@@ -271,8 +271,10 @@ try_to_connect (const struct sockaddr *argaddr, struct hostent *hent,
 
     }
 
+#ifdef DO_CONNECT_DEBUG_SYSLOGS
     syslog (LOG_DEBUG, "dbg: connect() to spamd at %s",
 		inet_ntoa(((struct sockaddr_in *)addr)->sin_addr));
+#endif
     status = connect(mysock,(const struct sockaddr *) addr, sizeof(*addr));
 
 #ifdef DO_CONNECT_DEBUG_SYSLOGS
