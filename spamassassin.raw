@@ -79,7 +79,7 @@ eval {
 	     'add-to-blacklist' => \$opt{'add-to-blacklist'},
 	     'add-from!' => \$opt{'add-from'}, 'F=i' => \$opt{'add-from'},
 	     'warning-from|w=s' => \$opt{'warning-from'},
-	     'log-to-mbox!' => \$opt{'log-to-mbox'}, 'l' => \$opt{'log-to-mbox'},
+	     'log-to-mbox|l=s' => \$opt{'log-to-mbox'},
 	     'local!' => \$opt{'local'}, 'L' => \$opt{'local'},
 	     'stop-at-threshold!' => \$opt{'stop-at-threshold'}, 'S' => \$opt{'stop-at-threshold'},
 	     'remove-markup|despamassassinify|d' => \$opt{'remove-markup'},
