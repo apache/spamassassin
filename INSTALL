@@ -1,4 +1,20 @@
 
+Important Note For Users Upgrading From Earlier Versions
+--------------------------------------------------------
+
+SpamAssassin no longer includes code to handle local mail delivery, as it
+was not reliable enough, compared to procmail.  So now, if you relied on
+spamassassin to write the mail into your mail folder, you'll have to
+change your setup to use procmail as detailed below.
+
+If you used spamassassin to filter your mail and then something else wrote
+it into a folder for you, then you should be fine.
+
+Also note that SpamAssassin now uses Berkeley DB files for it's
+auto-whitelist database by default; on some platforms, you may find
+that your old auto-whitelist is now ignored.
+
+
 Installing SpamAssassin
 -----------------------
 
@@ -293,9 +309,9 @@ If you use KMail:
 
 
 
-If you're using procmail:
+If you use procmail, or haven't decided on any of the above examples:
 
-  - Make a backup of your .procmailrc (if it exists).
+  - Make a backup of your .procmailrc (if you already have one).
 
       cp ~/.procmailrc ~/.procmailrc.bak
 
@@ -317,38 +333,11 @@ If you're using procmail:
 If you want to use SpamAssassin site-wide:
 
   - take a look at the notes on the website, at
-    http://spamassassin.org/sitewide.html .  You may want to use
+    http://spamassassin.org/sitewide.html .  You will probably want to use
     'spamd' (see below).
 
-
-
-If you don't use any mail filter just yet, and want to let SpamAssassin
-handle local mail delivery:
-
-  - **BEFORE YOU DO THIS** consider using procmail instead (see above),
-    it's recommended for this situation, and less bugs have been reported
-    with it.  Notably, use of SpamAssassin with an NFS-mounted mail spool
-    is **NOT SAFE**.  Please use procmail!
-
-  - Make a backup of your .forward (if it exists).
-
-      cp ~/.forward ~/.forward.bak
-
-  - Change your ~/.forward file so it reads like this:
-
-      "| spamassassin || exit 75"
-
-  - Send yourself a mail message, and ensure it gets to you.  If it does
-    not, copy your old backed-up .forward file back into place and ask
-    your sysadmin for help!  Here's commands to do that:
-
-      cp ~/.forward.bak ~/.forward
-      echo "Help!" | mail root
-
-  - Send yourself sample-spam.txt and make sure it gets tagged:
-
-      /usr/sbin/sendmail yourusername < sample-spam.txt
-
+  - Note that procmail users adding spamc to /etc/procmailrc should 
+    add the line 'DROPPRIVS=yes' at the top of the file.
 
 
 
