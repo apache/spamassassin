@@ -199,9 +199,12 @@ eval {
 
     my $addrlistfactory;
     if ($opt{'whitelist-factory'}) {
+      $opt{'whitelist-factory'} =~ /^([_A-Za-z0-9:]+)$/;
+      my $factory = $1;
+
       eval '
-        require '.$opt{'whitelist-factory'}.';
-        $addrlistfactory = '.$opt{'whitelist-factory'}.'->new();
+        require '.$factory.';
+        $addrlistfactory = '.$factory.'->new();
       ';
       if ($@) { warn $@; undef $addrlistfactory; }
 

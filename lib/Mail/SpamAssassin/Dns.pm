@@ -468,6 +468,7 @@ sub is_dcc_available {
 
   my $dccproc = $self->{conf}->{dcc_path} || '';
   unless ($dccproc) {
+    Mail::SpamAssassin::clean_path_in_taint_mode();
     foreach my $path (File::Spec->path()) {
       $dccproc = File::Spec->catfile ($path, 'dccproc');
       if (-x $dccproc) {
@@ -516,9 +517,13 @@ sub dcc_lookup {
 
     alarm($timeout);
 
-    my $pid = open(DCC, join(' ',
-                        $self->{conf}->{dcc_path}, '-H', 
-                        $self->{conf}->{dcc_options}, '< \''.$tmpf.'\' 2>&1 |'));
+    $self->{conf}->{dcc_path} =~ /^([^\;\'\"\0]+)$/;
+    my $untainted = $1;
+    $self->{conf}->{dcc_options} =~ /^([^\;\'\"\0]+)$/;
+    my $opts = $1;
+
+    my $pid = open(DCC, join(' ', $untainted, '-H',
+				$opts, '< \''.$tmpf.'\' 2>&1 |'));
     $response = <DCC>;
     close DCC;
 
@@ -594,6 +599,7 @@ sub is_pyzor_available {
 
   my $pyzor = $self->{conf}->{pyzor_path} || '';
   unless ($pyzor) {
+    Mail::SpamAssassin::clean_path_in_taint_mode();
     foreach my $path (File::Spec->path()) {
       $pyzor = File::Spec->catfile ($path, 'pyzor');
       if (-x $pyzor) {
@@ -640,8 +646,10 @@ sub pyzor_lookup {
 
     alarm($timeout);
 
-    my $pid = open(PYZOR, join(' ',
-                    $self->{conf}->{pyzor_path}, 'check < \''.$tmpf.'\' 2>&1 |'));
+    $self->{conf}->{pyzor_path} =~ /^([^\;\'\"\0]+)$/;
+    my $untainted = $1;
+
+    my $pid = open(PYZOR, join(' ', $untainted,'check < \''.$tmpf.'\' 2>&1 |'));
     $response = <PYZOR>;
     close PYZOR;
     dbg("Pyzor: got response: $response");
@@ -839,15 +847,21 @@ sub enter_helper_run_mode {
   $self->{old_slash} = $/;              # Razor pollutes this
   $self->{old_env_home} = $ENV{'HOME'}; # can be 'undef', e.g. spamd has no HOME
 
+  Mail::SpamAssassin::clean_path_in_taint_mode();
+
   if (defined $self->{main}->{home_dir_for_helpers}
              && $self->{main}->{home_dir_for_helpers})
   {
-    $ENV{'HOME'} = $self->{main}->{home_dir_for_helpers};
+    $self->{main}->{home_dir_for_helpers} =~ /^([^\;\'\"\0]+)$/;
+    $ENV{'HOME'} = $1;
   }
   else {
     # use spamd -u user's home dir
     my $hd = (getpwuid($>))[7];
-    $ENV{'HOME'} = $hd if defined $hd;
+    if (defined $hd) { 
+      $hd =~ /^([^\;\'\"\0]+)$/;		# untaint this
+      $ENV{'HOME'} = $1;
+    }
   }
 }
 

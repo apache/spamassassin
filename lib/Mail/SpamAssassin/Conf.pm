@@ -967,6 +967,8 @@ Clear the spamtrap template.
 
 This option tells SpamAssassin specifically where to find the C<dccproc>
 client instead of relying on SpamAssassin to find it in the current PATH.
+Note that if I<taint mode> is enabled in the Perl interpreter, you should
+use this, as the current PATH will have been cleared.
 
 =cut
 
@@ -1033,6 +1035,8 @@ the results
 
 This option tells SpamAssassin specifically where to find the C<pyzor> client
 instead of relying on SpamAssassin to find it in the current PATH.
+Note that if I<taint mode> is enabled in the Perl interpreter, you should
+use this, as the current PATH will have been cleared.
 
 =cut
 

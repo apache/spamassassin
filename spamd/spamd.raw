@@ -232,9 +232,15 @@ $opt{'auto-whitelist'} and eval
 $spamtest->compile_now(0);	# ensure all modules etc. are loaded
 $/ = "\n";			# argh, Razor resets this!  Bad Razor!
 
+# untaint $ENV{HOME}
+$ENV{HOME} =~ /^([^\;\'\"\0]+)$/; $ENV{HOME} = $1;
+
 unlink <$ENV{HOME}/.spamassassin/*>,<$ENV{HOME}/*>;
 rmdir "$ENV{HOME}/.spamassassin";
 rmdir $ENV{HOME};
+
+Mail::SpamAssassin::clean_path_in_taint_mode();
+
 system "/bin/rm -Rf /tmp/spamassassin-$$";
 delete $ENV{'HOME'};
 

@@ -50,6 +50,9 @@ sub new_checker {
   {
       $path = $main->sed_path ($main->{conf}->{auto_whitelist_path});
 
+      # untaint
+      $path =~ /^([-_\/\\\:A-Za-z0-9 \.]+)$/; $path = $1;
+
       #NFS Safe Lockng (I hope!)
       #Attempt to lock the dbfile, using NFS safe locking 
       #Locking code adapted from code by Alexis Rosen <alexis@panix.com>
@@ -58,6 +61,9 @@ sub new_checker {
       my $lock_tmp = $lock_file . '.' . $self->{hostname} . '.'. $$;
       my $max_lock_age = 300; #seconds 
       my $lock_tries = 30;
+
+      # untaint the name of the lockfile
+      $lock_tmp =~ /^([-_\/\\\:A-Za-z0-9 \.]+)$/; $lock_tmp = $1;
 
       open(LTMP, ">$lock_tmp") || die "Cannot create tmp lockfile $lock_file : $!\n";
       my $old_fh = select(LTMP);
