@@ -199,6 +199,30 @@ That can be found as C<$plugin-E<gt>{main}-E<gt>{conf}>.   This allows per-user 
 system-wide configuration to be dealt with correctly, with per-user overriding
 system-wide.
 
+=item $plugin->"finish_parsing_end" ( { options ... } )
+
+Signals that the configuration parsing has just finished, and SpamAssassin
+is nearly ready to check messages.
+
+C<options> is a reference to a hash containing these options:
+
+=over 4
+
+=item line
+
+=item conf
+
+The C<Mail::SpamAssassin::Conf> object on which the configuration
+data should be stored.
+
+=back
+
+Note: there are no guarantees that the internal data structures of
+SpamAssassin will not change from release to release.  In particular to
+this plugin hook, if you modify the rules data structures in a
+third-party plugin, all bets are off until such time that an API is
+present for modifying that configuration data.
+
 =item $plugin->signal_user_changed ( { options ... } )
 
 Signals that the current user has changed for a new one.
