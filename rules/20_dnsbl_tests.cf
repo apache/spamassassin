@@ -187,7 +187,7 @@ tflags RCVD_IN_DSBL		net
 ########################################################################
 
 # another domain-based blacklist
-header DNS_FROM_AHBL_RHSBL	eval:check_rbl_from_host('ahbl', 'rhsbl.ahbl.org.')
+header DNS_FROM_AHBL_RHSBL	eval:check_rbl_envfrom('ahbl', 'rhsbl.ahbl.org.')
 describe DNS_FROM_AHBL_RHSBL	From: sender listed in dnsbl.ahbl.org
 tflags DNS_FROM_AHBL_RHSBL	net
 
