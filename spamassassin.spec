@@ -60,7 +60,7 @@ fi
 %files -f %{name}-%{version}-filelist
 %defattr(-,root,root)
 /etc/mail/spamassassin
-%doc README Changes TODO sample-nonspam.txt sample-spam.txt spamd/README doc
+%doc README Changes TODO sample-nonspam.txt sample-spam.txt spamd/README.spamd doc
 %config(noreplace) %{initdir}/spamassassin
 
 %clean
