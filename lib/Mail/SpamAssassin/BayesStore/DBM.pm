@@ -745,7 +745,6 @@ sub token_expiration {
       for my $ext ($self->DB_EXTENSIONS) {
         my $newf = $tmpdbname.$ext;
         my $oldf = $path.'_toks'.$ext;
-	print "--> $newf -- $oldf\n";
         next unless (-f $newf);
         if (!rename ($newf, $oldf)) {
 	  warn "bayes: rename $newf to $oldf failed: $!\n";
