@@ -1881,7 +1881,7 @@ sub _check_signature {
   my ($body) = ($$full =~ /.*?\n\n(.*)/s);
 
   # signature must follow one non-whitespace character
-  if ($body =~ /\S\s*\n-- \n((.*\n){1,15}?)\s*\Z/m) {
+  if (defined($body) && $body =~ /\S\s*\n-- \n((.*\n){1,15}?)\s*\Z/m) {
     my $signature = $1;
 
     if ($signature =~ /\n\s*\n\s*\S/m) {
