@@ -76,6 +76,12 @@ DNS timeout applied for DNSBL lookups on IPs found in the Received headers.
 
 The maximum number of domains to look up.
 
+=item uridnsbl_skip_domain domain1 domain2 ...
+
+Specify a domain, or a number of domains, which should be skipped for the
+URIBL checks.  This is very useful to specify very common domains which are
+not going to be listed in URIBLs.
+
 =back
 
 =cut
@@ -126,6 +132,7 @@ sub new {
   # set default config settings
   $samain->{conf}->{uridnsbl_timeout} =		3;
   $samain->{conf}->{uridnsbl_max_domains} =	20;
+  $samain->{conf}->{uridnsbl_skip_domains} =	{};
   return $self;
 }
 
@@ -178,7 +185,14 @@ sub parsed_metadata {
   my %domlist = ( );
   foreach my $uri ($scanner->get_uri_list()) {
     my $dom = Mail::SpamAssassin::Util::uri_to_domain($uri);
-    if ($dom) { $domlist{$dom} = 1; }
+    if ($dom) {
+      if (exists $scanner->{main}->{conf}->{uridnsbl_skip_domains}->{$dom}) {
+        dbg("URIDNSBL: found domain $dom in skip list");
+      }
+      else {
+        $domlist{$dom} = 1;
+      }
+    }
   }
 
   # trim down to a limited number - pick randomly
@@ -253,6 +267,12 @@ sub parse_config {
   }
   elsif ($key eq 'uridnsbl_timeout') {
     $opts->{conf}->{uridnsbl_timeout} = $opts->{value};
+    $self->inhibit_further_callbacks(); return 1;
+  }
+  elsif ($key eq 'uridnsbl_skip_domain') {
+    foreach my $domain (split(/\s+/, $opts->{value})) {
+      $opts->{conf}->{uridnsbl_skip_domains}->{lc $domain} = 1;
+    }
     $self->inhibit_further_callbacks(); return 1;
   }
   return 0;
@@ -335,8 +355,7 @@ sub query_domain {
   if ($dom =~ /^\d+\.\d+\.\d+\.\d+$/) { 
     $self->lookup_dnsbl_for_ip ($scanstate, $obj, $dom);
   }
-  else
-  {
+  else {
     # look up the domain in the RHSBL subset
     my $cf = $scanstate->{active_rules_rhsbl};
     foreach my $rulename (keys %{$cf}) {
