@@ -144,7 +144,9 @@ sub load_with_ldap {
       $conf .= $v."\n";
     }
   }
+  $main->{conf}->{main} = $main;
   $main->{conf}->parse_scores_only($conf);
+  delete $main->{conf}->{main};
   return;
 }
 

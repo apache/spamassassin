@@ -152,7 +152,9 @@ sub load_with_dbi {
                $text .= "$row[0]\t$row[1]\n";
             }
             if($text ne '') {
-            	$main->{conf}->parse_scores_only(join('',$text));
+	      $main->{conf}->{main} = $main;
+	      $main->{conf}->parse_scores_only(join('',$text));
+	      delete $main->{conf}->{main};
             }
             $sth->finish();
          } else { die "SQL Error: $sql\n".$sth->errstr."\n"; }
