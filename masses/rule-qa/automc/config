@@ -1,14 +1,17 @@
 
-TOP=/home/jm/ftp/spamassassin/automc
-MCTMP=/home/jm/ftp/spamassassin/automc/tmp
-SADIR=/home/jm/ftp/spamassassin
+TOP=/home/automc/svn/spamassassin/masses/rule-qa/automc
+MCTMP=/home/automc/tmp/automc
+SADIR=/home/automc/svn/spamassassin
 
 USERNAME=automasschecker@jmason.org
-PASSWORD_FILE=/home/jm/ftp/spamassassin/automc/passwd.cf
+BZ_PASSWORD_FILE=/home/automc/.bz_passwd.cf
 
-RULEQA_URL=http://localhost/ruleqa
+SVN_USERNAME=jm
+# SVN_PASSWORD_FILE=/home/automc/.svn_passwd.cf
+
+RULEQA_URL=http://bugzilla.spamassassin.org/ruleqa
 
 # these must match what's in ~/.corpus
-html=/home/jm/ctest/html
-tagtime=/home/jm/ctest/tagtime
+html=/home/automc/corpus/html
+tagtime=/home/automc/corpus/tagtime
 

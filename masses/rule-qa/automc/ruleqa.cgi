@@ -1,6 +1,6 @@
 #!/usr/bin/perl -w
 
-my $automcdir = "/home/jm/ftp/spamassassin/automc";
+my $automcdir = "/home/automc/svn/spamassassin/masses/rule-qa/automc";
 
 use CGI;
 use strict;
