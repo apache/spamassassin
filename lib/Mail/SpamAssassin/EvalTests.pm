@@ -1521,7 +1521,7 @@ sub message_is_habeas_swe {
   my ($self) = @_;
 
   my $all = $self->get('ALL');
-  if ($all =~ /\n(X-Habeas-SWE-1:.{0,512}X-Habeas-SWE-9:[^\n]{0,64}\n)/s) {
+  if ($all =~ /\n(X-Habeas-SWE-1:.{0,512}X-Habeas-SWE-9:[^\n]{0,64}\n)/si) {
     my $text = $1;
     $text =~ tr/A-Z/a-z/;
     $text =~ tr/\/ //d;
