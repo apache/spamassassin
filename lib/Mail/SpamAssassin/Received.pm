@@ -1,4 +1,4 @@
-# $Id: Received.pm,v 1.26 2003/06/24 20:34:52 jmason Exp $
+# $Id: Received.pm,v 1.27 2003/08/21 00:48:46 jmason Exp $
 
 # ---------------------------------------------------------------------------
 
@@ -227,8 +227,22 @@ sub lookup_all_ips {
   my ($self, $hostname) = @_;
 
   my ($name,$aliases,$addrtype,$length,@addrs) = gethostbyname ($hostname);
+  my @moreaddrs;
+
+  # bug 2324: this fails if the user has an /etc/hosts entry for that
+  # hostname; force a DNS lookup by appending a dot, but only if there's
+  # a domain in the hostname (ie. it really is likely to be in external DNS).
+  # use both sets of addrs, as the /etc/hosts data is usable anyway for
+  # internal relaying.
+  if ($hostname =~ /\./) {
+    ($name,$aliases,$addrtype,$length,@moreaddrs) = gethostbyname ($hostname.".");
+  }
+
   my @ips = ();
-  foreach my $addr (@addrs) {
+  my %seenaddr = ();
+  foreach my $addr (@addrs, @moreaddrs) {
+    next if ($seenaddr{$addr});
+    $seenaddr{$addr} = 1;
     my ($a,$b,$c,$d) = unpack('C4', $addr);
     push (@ips, "$a.$b.$c.$d");
   }
