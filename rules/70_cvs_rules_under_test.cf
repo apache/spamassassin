@@ -107,7 +107,13 @@ body T_THIS_AINT_SPAM             /This.{0,30}is.{1,10}not?.{0,15}spam/is
 describe T_THIS_AINT_SPAM         Claims "This is not spam"
 
 # possible replacement for GAPPY_SUBJECT
-header T_GAPPY_SUBJECT	Subject =~ /\b(?:[a-z][-_. ]{1,3}){4,}/i
+header T_GAPPY_SUBJECT		Subject =~ /\b(?:[a-z][-_. ]{1,3}){4,}/i
+
+# possible replacement for CONSOLIDATE_DEBT
+body T_CONSOLIDATE_DEBT		/(?:consolidate .{0,9} (?:debt|credit|bills)|debt[ -]?(?:consolidation|elimination))/i
+
+# possible replacement for EXCUSE_FUTURE
+body T_EXCUSE_FUTURE		/to be removed from.{0,20}(?:mailings|offers)/i
 
 ###########################################################################
 # quinlan: I converted almost 2000 postfix anti-spam rules into SA format,
@@ -151,13 +157,14 @@ rawbody T_Q_PROGRAM_FILE	/name=\".*\.(?:asd|bat|chm|com|dll|exe|hta|lnk|js|jse|o
 header T_Q_RATWARE_ENTITY	X-Mailer =~ /MIME-tools.*Entity/i
 
 # this works best as rawbody
+# similar to MAILTO_WITH_SUBJ_REMOVE and MAILTO_WITH_SUBJ
+# do not add "subscribe", "unsubscribe", or "help"
 rawbody T_Q_REMOVE_URL		/mailto:.*\@.*\?subject=(?:"|3D)*(?:remove?|delete|please.?(?:delete|remove|unsubscribe)|abuse|off\b|stop|take.?me.?off)/i
 
 body T_Q_REMOVE1		/(?:respect|honou?r) all removal requests/i
 body T_Q_REMOVE3		/click here to be (?:permanently )?(?:removed|deleted)/i
 body T_Q_REMOVE4		/If you no longer wish to receive/i
 body T_Q_REMOVE5		/to be removed from (?:the|my|our) (?:mailing|e.?mail|opt[ -]?in)? list/i
-body T_Q_REMOVE6		/to be removed from.{0,99}(?:mailings|offers)/i
 
 body T_Q_WEGOTYOU1		/because (?:you're|you (?:are )?)(?:registered|.{0,20}\bopt.{0,3}in)/i
 body T_Q_WEGOTYOU2		/you(?:'ve|'re| have| are)? receiv(?:ed|ing) this (?:e.?mail|advertisement) (?:by either|because)/i
@@ -188,7 +195,6 @@ header T_Q_YOUR_PENIS_V2	Subject =~ /Your (?:Penis|Dick|Sc?hlong)/i
 body T_Q_UNPRINTABLE		/[[:^print:]]{8,}/
 body T_Q_CREDIT_BODY		/Accept Credit Cards/i
 body T_Q_BURNING_FAT		/Aging While Burning Fat/i
-body T_Q_CONSOLIDATE_DEBT	/(?:Debt[ -]?Consolidation|Consolidate (?:Debt|Bills))/i
 body T_Q_FREE_ADULT		/Free Adult/i
 body T_Q_FREE_MEMBERSHIP	/FREE MEMBERSHIP/i
 body T_Q_GUARANTEED_BANG	/GUARANTEED!/i
