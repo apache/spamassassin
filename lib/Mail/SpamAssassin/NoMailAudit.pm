@@ -46,12 +46,11 @@ sub new {
 
   bless ($self, $class);
 
-  # data may be filehandle (default stdin) or arrayref
-  $opts{data} ||= *STDIN;
-
-  $self->{textarray} = defined fileno $opts{data} ?
-                       [ readline $opts{data} ]   :
-                       $opts{data};
+  if (defined $opts{'data'}) {
+    $self->{textarray} = $opts{data};
+  } else {
+    $self->{textarray} = [ <STDIN> ];
+  }
 
   $self->parse_headers();
   return $self;
