@@ -1490,21 +1490,31 @@ sub kill_handler {
   # the UNIX domain socket
   defined( $opt{'socketpath'} ) and unlink( $opt{'socketpath'} );
 
-  $SIG{CHLD} = 'IGNORE';    # we're going to kill our children
+  $SIG{CHLD} = 'DEFAULT';    # we're going to kill our children
   kill 'INT' => keys %children;
   exit 0;
 }
 
 # takes care of dead children
 sub child_handler {
+  my ($sig) = @_;
   $SIG{CHLD} = \&child_handler;    # reset as necessary
   my $pid = wait;                  # reap the child
   delete $children{$pid};          # remove the child out of the pool
+  logmsg("server hit by SIG$sig, pid $pid");
 }
 
 sub restart_handler {
   my ($sig) = @_;
   logmsg("server hit by SIG$sig, restarting");
+
+  $SIG{CHLD} = 'DEFAULT';    # we're going to kill our children
+  foreach (keys %children) {
+    kill 'INT' => $_;
+    my $pid = wait;
+    logmsg("child $pid killed successfully");
+  }
+  %children = ();
 
   unless ( $server->eof ) {
     $server->shutdown(2);
@@ -1516,10 +1526,6 @@ sub restart_handler {
     warn "server socket closed\n" if $opt{'debug'};
   }
   $got_sighup = 1;
-
-  $SIG{CHLD} = 'IGNORE';    # we're going to kill our children
-  kill 'INT' => keys %children;
-  %children = ();
 }
 
 sub daemonize {
