@@ -1,4 +1,4 @@
-# $Id: regression_tests.cf,v 1.23 2002/09/09 04:42:46 zelgadis Exp $
+# $Id: regression_tests.cf,v 1.24 2002/09/09 04:54:38 zelgadis Exp $
 #
 test BIG_FONT      fail    <font size=3D2>
 test BIG_FONT      ok      <font size=3D+2>
@@ -272,4 +272,9 @@ test NEW_DOMAIN_EXTENSIONS ok   new .NAME domain extension
 test NEW_DOMAIN_EXTENSIONS ok   New TLD Extension
 test NEW_DOMAIN_EXTENSIONS ok   new extension
 test NEW_DOMAIN_EXTENSIONS fail newt extension
-test NEW_DOMAIN_EXTENSIONS fail renex extension
+test NEW_DOMAIN_EXTENSIONS fail renew extension
+
+test DOMAIN_BODY ok   Get .BIZ while it's hot!
+test DOMAIN_BODY ok   .info
+test DOMAIN_BODY ok   Get new .us domains
+test DOMAIN_BODY fail www.fobar.biz
