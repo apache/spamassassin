@@ -1788,9 +1788,24 @@ sub do_meta_tests {
   # Go through each rule and figure out what we need to do
   foreach $rulename (@metas) {
     my $rule   = $self->{conf}->{meta_tests}->{$rulename};
-    my @tokens =
-      $rule =~ m/([\w\.\[][\w\.\*\?\+\[\^\]]+|[\(\)]|\|\||\&\&|>=?|<=?|==|!=|!|[\+\-\*\/]|\d+)/g;
     my $token;
+
+    # Lex the rule into tokens using a rather simple RE method ...
+    my @tokens =
+      $rule =~ m/(
+      	[\w\.\[][\w\.\*\?\+\[\^\]]+|		# Rule Name
+	[\(\)]|					# Parens
+	\|\||					# Boolean OR
+	\&\&|					# Boolean AND
+	\^|					# Boolean XOR
+	!|					# Boolean NOT
+	>=?|					# GT or EQ
+	<=?|					# LT or EQ
+	==|					# EQ
+	!=|					# NEQ
+	[\+\-\*\/]|				# Mathematical Operator
+	\d+					# A Number
+      )/gx;
 
     # Set the rule blank to start
     $meta{$rulename} = "";
