@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.618 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.619 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -17,10 +17,4 @@
 # distribution for more details.
 #
 ###########################################################################
-
-# still need to check for cost, policies, etc.
-# URL: http://www.fabel.dk/relay/
-header T_RCVD_IN_FABEL		rbleval:check_rbl('fabel', 'spamsources.fabel.dk.')
-describe T_RCVD_IN_FABEL	Received via a relay in spamsources.fabel.dk
-tflags T_RCVD_IN_FABEL net
 
