@@ -701,6 +701,30 @@ Here are some examples (these are the defaults in 2.60):
       next;
     }
 
+=item remove_header { spam | ham | all } header_name
+
+Headers can be removed from the specified type of messages (spam, ham,
+or "all" to remove from either).  All headers begin with C<X-Spam->
+(so C<header_name> will be appended to C<X-Spam->).
+
+See also C<clear_headers> for removing all the headers at once.
+
+=cut
+
+    if (/^remove_header\s+(ham|spam|all)\s+([A-Za-z0-9_-]+)\s*$/) {
+      my ($type, $name) = ($1, $2);
+
+      next if ( $name eq "Checker-Version" );
+
+      if (($type eq "ham") || ($type eq "all")) {
+	delete $self->{headers_ham}->{$name};
+      }
+      if (($type eq "spam") || ($type eq "all")) {
+	delete $self->{headers_spam}->{$name};
+      }
+      next;
+    }
+
 =item clear_headers
 
 Clear the list of headers to be added to messages.  You may use this
