@@ -40,14 +40,14 @@ Distribution: SpamAssassin
 %define __find_requires /usr/lib/rpm/find-requires.perl
 
 %description
-SpamAssassin provides you with a way to reduce if not completely eliminate
-Unsolicited Commercial Email (SPAM) from your incoming email.  It can
-be invoked by a MDA such as sendmail or postfix, or can be called from
-a procmail script, .forward file, etc.  It uses a genetic-algorithm
-evolved scoring system to identify messages which look spammy, then
-adds headers to the message so they can be filtered by the user's mail
-reading software.  This distribution includes the spamd/spamc components
-which create a server that considerably speeds processing of mail.
+SpamAssassin provides you with a way to reduce, if not completely eliminate,
+Unsolicited Commercial Email (or "spam") from your incoming email.  It can be
+invoked by a MDA such as sendmail or postfix, or can be called from a procmail
+script, .forward file, etc.  It uses a genetic-algorithm-evolved scoring system
+to identify messages which look spammy, then adds headers to the message so
+they can be filtered by the user's mail reading software.  This distribution
+includes the spamd/spamc components which considerably speeds processing of
+mail.
 
 %description -l pl
 SpamAssassin udostêpnia Ci mo¿liwo¶æ zredukowania, je¶li nie
@@ -62,13 +62,13 @@ uruchomienie serwera, co znacznie przyspieszy proces przetwarzania
 poczty.
 
 %package tools
-Summary:        Miscleanous tools for SpamAssassin
+Summary:        Miscellaneous tools and documentation for SpamAssassin
 Summary(pl):    Przeró¿ne narzêdzia zwi±zane z SpamAssassin
 Group:          Applications/Mail
 
 %description tools
-Miscleanous tools from various authors, distributed with SpamAssassin.
-See /usr/share/doc/SpamAssassin-tools-*/.
+Miscleanous tools and documentation from various authors, distributed
+with SpamAssassin.  See /usr/share/doc/SpamAssassin-tools-*/.
 
 %description tools -l pl
 Przeró¿ne narzêdzia, dystrybuowane razem z SpamAssassin. Zobacz
@@ -104,8 +104,9 @@ aplikacji do czytania poczty.
 %setup -q -n %{pdir}-%{pnam}-%{real_version}
 
 %build
-%{__perl} Makefile.PL PREFIX=%{_prefix} SYSCONFDIR=%{_sysconfdir}
+%{__perl} Makefile.PL PREFIX=%{_prefix} SYSCONFDIR=%{_sysconfdir} < /dev/null
 %{__make} 
+%{__make} spamd/libspamc.so
 # make test
 
 %install
@@ -115,7 +116,10 @@ aplikacji do czytania poczty.
         INSTALLMAN3DIR=%buildroot/%{_mandir}/man3 \
 	LOCAL_RULES_DIR=%buildroot/%{_sysconfdir}/mail/spamassassin
 install -d %buildroot/%{initdir}
+install -d %buildroot/%{_includedir}
 install -m 0755 spamd/redhat-rc-script.sh %buildroot/%{initdir}/spamassassin
+install -m 0644 spamd/libspamc.so %buildroot/%{_libdir}
+install -m 0644 spamd/libspamc.h %buildroot/%{_includedir}/libspamc.h
 
 mkdir -p %{buildroot}/etc/mail/spamassassin
 
@@ -125,6 +129,8 @@ mkdir -p %{buildroot}/etc/mail/spamassassin
 %defattr(-,root,root)
 %doc README Changes sample-nonspam.txt sample-spam.txt spamd/README.spamd doc INSTALL
 %attr(755,root,root) %{_bindir}/*
+%attr(644,root,root) %{_includedir}/*
+%attr(644,root,root) %{_libdir}/*.so
 %config(noreplace) %attr(755,root,root) %{initdir}/spamassassin
 %{_mandir}/man1/*
 
@@ -161,6 +167,13 @@ if [ $1 = 0 ]; then
 fi
 
 %changelog
+
+* Tue Sep 11 2002 Justin Mason <jm-spec@jmason.org>
+- merged Michael Brown's libspamc support into 2.50 specfile
+- made "perl Makefile.PL" read from /dev/null to avoid interactivity issues
+
+* Mon Sep 10 2002 Michael Brown <michaelb@opentext.com>
+- Added building, installation and packaging of libspamc.{h,so}
 
 * Tue Sep 03 2002 Theo Van Dinter <felicity@kluge.net>
 - added INSTALL to documentation files

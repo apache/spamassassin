@@ -4,6 +4,7 @@
  * The text of this license is included in the SpamAssassin distribution in the file named "License"
  */
 
+#include "../config.h"
 #include "libspamc.h"
 #include "utils.h"
 

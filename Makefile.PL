@@ -71,6 +71,7 @@ WriteMakefile(
                         'HTML::Parser' => 3.0,
                         'Text::Wrap' => 0,
                         'Time::Local' => 0,
+                        'Errno' => 0,
                   },
 
     'dist' => {
