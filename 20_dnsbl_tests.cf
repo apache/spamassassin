@@ -121,29 +121,32 @@ tflags RCVD_IN_SORBS_DUL	net
 # pay-to-use: no
 # delist: automatic expiry, no fee, retested on request (free)
 
-header __RCVD_IN_OPM		eval:check_rbl('opm', 'opm.blitzed.org.')
-describe __RCVD_IN_OPM		Received via a relay in opm.blitzed.org
-tflags __RCVD_IN_OPM		net
+# 2004-03-31: OPM now included in Spamhaus XBL, so no need to perform
+# duplicate lookups.
 
-header RCVD_IN_OPM_WINGATE	eval:check_rbl_sub('opm', '1')
-describe RCVD_IN_OPM_WINGATE	OPM: sender is open WinGate proxy
-tflags RCVD_IN_OPM_WINGATE	net
-
-header RCVD_IN_OPM_SOCKS	eval:check_rbl_sub('opm', '2')
-describe RCVD_IN_OPM_SOCKS	OPM: sender is open SOCKS proxy
-tflags RCVD_IN_OPM_SOCKS	net
-
-header RCVD_IN_OPM_HTTP		eval:check_rbl_sub('opm', '4')
-describe RCVD_IN_OPM_HTTP	OPM: sender is open HTTP CONNECT proxy
-tflags RCVD_IN_OPM_HTTP		net
-
-header RCVD_IN_OPM_ROUTER	eval:check_rbl_sub('opm', '8')
-describe RCVD_IN_OPM_ROUTER	OPM: sender is open router proxy
-tflags RCVD_IN_OPM_ROUTER	net
-
-header RCVD_IN_OPM_HTTP_POST	eval:check_rbl_sub('opm', '16')
-describe RCVD_IN_OPM_HTTP_POST	OPM: sender is open HTTP POST proxy
-tflags RCVD_IN_OPM_HTTP_POST	net
+# header __RCVD_IN_OPM		eval:check_rbl('opm', 'opm.blitzed.org.')
+# describe __RCVD_IN_OPM	Received via a relay in opm.blitzed.org
+# tflags __RCVD_IN_OPM		net
+# 
+# header RCVD_IN_OPM_WINGATE	eval:check_rbl_sub('opm', '1')
+# describe RCVD_IN_OPM_WINGATE	OPM: sender is open WinGate proxy
+# tflags RCVD_IN_OPM_WINGATE	net
+# 
+# header RCVD_IN_OPM_SOCKS	eval:check_rbl_sub('opm', '2')
+# describe RCVD_IN_OPM_SOCKS	OPM: sender is open SOCKS proxy
+# tflags RCVD_IN_OPM_SOCKS	net
+# 
+# header RCVD_IN_OPM_HTTP	eval:check_rbl_sub('opm', '4')
+# describe RCVD_IN_OPM_HTTP	OPM: sender is open HTTP CONNECT proxy
+# tflags RCVD_IN_OPM_HTTP	net
+# 
+# header RCVD_IN_OPM_ROUTER	eval:check_rbl_sub('opm', '8')
+# describe RCVD_IN_OPM_ROUTER	OPM: sender is open router proxy
+# tflags RCVD_IN_OPM_ROUTER	net
+# 
+# header RCVD_IN_OPM_HTTP_POST	eval:check_rbl_sub('opm', '16')
+# describe RCVD_IN_OPM_HTTP_POST OPM: sender is open HTTP POST proxy
+# tflags RCVD_IN_OPM_HTTP_POST	net
 
 # ---------------------------------------------------------------------------
 # Spamhaus XBL+SBL
