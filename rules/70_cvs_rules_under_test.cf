@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.487 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.488 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -149,14 +149,13 @@ meta T_MIME_HTML_NO_MAJOR_TAG	MIME_HTML_ONLY && !__TAG_EXISTS_HTML && !__TAG_EXI
 
 # 2003-02-23: quinlan
 # Message-Id: format tests
-# hotmail
-header T_MSGID_ADDED_BY_HOTMAIL_1	Message-Id =~ /<MC\d{1,2}-F{1,2}\w{21,22}\@\S*hotmail\.com>/
-header T_MSGID_ADDED_BY_HOTMAIL_2	Message-Id =~ /<[A-Z]{2}\d{1,2}-F{1,2}\w{21,22}\@\S*hotmail\.com>/
+# hotmail (this rule makes me nervous, I wonder if any of us gets
+# enough hotmail ham to get a good score for it)
+header T_MSGID_ADDED_BY_HOTMAIL	Message-Id =~ /<MC\d{1,2}-F{1,2}\w{21,22}\@\S*hotmail\.com>/
 # 13 hexadecimal digits instead of 12
 header T_MSGID_OUTLOOK_HEX	Message-Id =~ /<[a-f0-9]{13}\$[a-f0-9]{8}\$[a-f0-9]{8}\@/
 # this one high correlation with ratware "EMWAC SMTPRS"
 header T_MSGID_B_DIGITS		Message-Id =~ /<B\d{10}\@/
-
 # pretty good spamware sign, looks like it uses random numbers with no padding
 #   Message-Id: <\d{1,3}\.\d{1,6}\.\d{1,6}@\S+>h
 #   usually also has INVALID_DATE and NO_REAL_NAME
@@ -179,11 +178,6 @@ describe T_FORGED_IMS_CTYPE	Forged mail pretending to be from IMS (boundary)
 header __EUD_STYLE_FROM		From =~ /^(?:[^\"][^']+[^\"]|\".*\'.*\") <[^>]+>$/
 meta T_FORGED_MUA_EUDORA_FROM	(__ANY_QUALCOMM_MUA && !__EUD_STYLE_FROM && !__VIA_FROM_MANGLER)
 describe T_FORGED_MUA_EUDORA_FROM Forged mail pretending to be from Eudora (by From)
-
-# Thanks to Brian J. Peterson for this
-# Catches spams sent by illiterate spammer ("secks", "whoarez" etc.)
-header T_RATWARE_MIZSPEELING	eval:check_for_mizspeeling_ratware()
-describe T_RATWARE_MIZSPEELING	Sent using spammer tool (mizspeeling)
 
 # quinlan: entire corpus, then last 2000 spam and 2000 ham:
 # 18.125  36.2000   0.0500    0.999   0.95    0.01  T_RCVD_IN_MONKEYS_UPL
@@ -316,8 +310,6 @@ tflags T_FROM_IN_RFCI_DSN net
 # require checking only the last untrusted line, rather than all of them.
 #
 header T_FAKE_HELO_YAHOO	eval:check_for_rdns_helo_mismatch("yahoo\.com","yahoo\.com")
-header T_FAKE_HELO_NETSCAPE	eval:check_for_rdns_helo_mismatch("netscape\.net","netscape\.net")
-header T_FAKE_HELO_YAHOO_CO_UK	eval:check_for_rdns_helo_mismatch("yahoo\.co\.uk","yahoo\.co\.uk")
 header T_FAKE_HELO_NETSCAPE_COM	eval:check_for_rdns_helo_mismatch("(?:netscape|netcenter|aol)\.(?:com|net)","netscape\.com")
 
 # http://marc.theaimsgroup.com/?l=spamassassin-talk&m=105203882531351&w=2
@@ -330,9 +322,6 @@ meta T_RATWARE_EXISCAN_FORGERY	(__RATWARE_EXISCAN && __RATWARE_ANTIABUSE && __HA
 # also, References headers have a format
 header T_RATWARE_BAD_REFS	References =~ /^[^<]\S+\$\S+\@\S+[^>]$/
 
-# Gecko ver is 8 digits: "Gecko/20011019"
-header T_RATWARE_BAD_GECKO	User-Agent =~ /Gecko\/(?:\d{1,7}|\d{9,})(?:\s|$)/
-
 # hmm, interesting.   Ensure the MUA is using consistent priorities.
 # http://www3.cds.ne.jp/~marimo/oka/research/em/data0002.html
 header __X_PRI_HI		X-Priority =~ /^[12]/
@@ -344,10 +333,6 @@ header __X_MSPRI_LO		X-Msmail-Priority =~ /^Low/
 meta T_X_PRI_MISMATCH_HI	(__X_PRI_HI && __HAS_MSMAIL_PRI && !__X_MSPRI_HI)
 meta T_X_PRI_MISMATCH_MD	(__X_PRI_MD && __HAS_MSMAIL_PRI && !__X_MSPRI_MD)
 meta T_X_PRI_MISMATCH_LO	(__X_PRI_LO && __HAS_MSMAIL_PRI && !__X_MSPRI_LO)
-
-# bug 1757
-body T_HELLO_ADDRESS		/(?:Hi|Hello|Dear)[, ]?.{0,30}@\S/i
-describe T_HELLO_ADDRESS	Greets you by address, not by name
 
 # bug 1756
 body T_GENERIC_VIAGRA		/Generic Viagra/
@@ -369,9 +354,6 @@ describe T_YAHOO_REDIRECTOR_1	Uses commonly-spammed redirector URL
 uri T_YAHOO_REDIRECTOR_2	/^https?:\/\/rd\.yahoo\.com/i
 describe T_YAHOO_REDIRECTOR_2	Uses commonly-spammed redirector URL
 
-uri T_ASIAN_LINKS			/(?:^https?\:\/\/|^mailto\:).{0,20}\.(?:kr|jp)\//i
-describe T_ASIAN_LINKS		Links to Korea, Japan, etc.
-
 uri T_BIZ_LINKS			/(?:^https?\:\/\/|^mailto\:).{0,20}\.bi?z/i
 describe T_BIZ_LINKS		Links to .biz .bz
 
@@ -386,9 +368,6 @@ describe T_SEX_BANNED_LINKS	Links to Sex Sites
 
 uri T_SEX_PHRASE_LINKS	/(?:^https?\:\/\/|^mailto\:).{0,20}(?:bimbos|farmsex|porn.*mail|girls4u|cumslut)/i
 describe T_SEX_PHRASE_LINKS	Links with Sex Phrases
-
-uri T_PHRASE_COMBO_LINKS	/(?:^https?\:\/\/|^mailto\:).(?:free|hot|cash|money|click|track|gold|platinum|bargain|prize|save).{0,15}(?:click|track|cash|money|offer|deal|card|quotes|promo)/i
-describe T_PHRASE_COMBO_LINKS	Links containing suspicious phrase combinations 
 
 uri T_SUSPICIOUS_LINKS	/(?:^https?\:\/\/|^mailto\:).{0,25}(?:poker\.net|get-deal|bargain[zs\-]|clicks|spree|members\=|lotto|offer[sz]|4you)/i
 describe T_SUSPICIOUS_LINKS	Links containing suspicious phrases
@@ -432,14 +411,8 @@ describe	T_GREATGIFT		This spam makes a great gift!
 body 		T_WEHAVEASOLUTION		/We have a solution/i
 describe	T_WEHAVEASOLUTION		Claims to have a solution
 
-body		T_WSDOMAIN		/YourDomain\.ws/i
-describe	T_WSDOMAIN		Selling ".ws" domains
-
 rawbody		T_PUSHHERELINK		/<a[^>]*>[^<]*((push|go)\s(here|this) |cease.{1,10}mail)[^<]*<\/a>/i
 describe	T_PUSHHERELINK		Link asks you to "push here" or "go here" or "cease mail" or the like
-
-rawbody		T_MULTIPLEIMAGES		/<a[^>]*>[^<]*<img[^>]*>[^>]*<\/a>.*<a [^>]*>[^<]*<img[^>]*>[^>]*<\/a>.*<a[^>]*>[^<]*<img[^>]*>[^>]*<\/a>/si
-describe	T_MULTIPLEIMAGES		Contains 3 or more hyperlinked images
 
 uri 		T_OFFER888 		/Offer888/i
 uri 		T_PERMISSIONPASS 		/PermissionPass/i
