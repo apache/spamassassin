@@ -128,12 +128,12 @@ sub new {
   # Go through all the headers of the message
   my $header = '';
   my $boundary;
-  while ( my $last = shift @message ) {
-    if ( $last =~ /^From\s/ ) {
+  while ( my $current = shift @message ) {
+    if ( $current =~ /^From\s/ ) {
 	# mbox formated mailbox
-	$self->{'mbox_sep'} = $last;
+	$self->{'mbox_sep'} = $current;
 	next;
-    } elsif ($last =~ MBX_SEPARATOR) {
+    } elsif ($current =~ MBX_SEPARATOR) {
 	# Munge the mbx message separator into mbox format as a sort of
 	# de facto portability standard in SA's internals.  We need to
 	# to this so that Mail::SpamAssassin::Util::parse_rfc822_date
@@ -162,12 +162,26 @@ sub new {
     }
 
     # Store the non-modified headers in a scalar
-    $self->{'pristine_headers'} .= $last;
+    $self->{'pristine_headers'} .= $current;
+
+    # Check for missing head/body separator and deal appropriately
+    if ($current !~ /^\r?$/) {
+      if (!@message) {
+	# No body is invalid
+        $self->{'missing_head_body_separator'} = 1;
+        push(@message, "\n");
+      }
+      elsif (defined $boundary && $message[0] =~ /^--\Q$boundary\E(?:--|\s*$)/) {
+        # No separator before the body is invalid
+        $self->{'missing_head_body_separator'} = 1;
+	unshift(@message, "\n");
+      }
+    }
 
     # NB: Really need to figure out special folding rules here!
-    if ( $last =~ /^[ \t]+/ ) {                    # if its a continuation
+    if ( $current =~ /^[ \t]+/ ) {                    # if its a continuation
       if ($header) {
-        $header .= $last;                            # fold continuations
+        $header .= $current;                            # fold continuations
 
 	# If we're currently dealing with a content-type header, and there's a
 	# boundary defined, use it.  Since there could be multiple
@@ -175,13 +189,8 @@ sub new {
 	# should use, so just keep updating as they come in.
         if ($header =~ /^content-type:\s*(\S.*)$/is) {
 	  my($type,$temp_boundary) = Mail::SpamAssassin::Util::parse_content_type($1);
-	  $boundary = $temp_boundary if ($type =~ /^multipart/ && defined $temp_boundary);
+	  $boundary = $temp_boundary if (defined $temp_boundary);
 	}
-
-	# Go onto the next header line, unless the next line is a
-	# multipart mime boundary, where we know we're going to stop
-	# below, so drop through for final header processing.
-        next unless (defined $boundary && $message[0] =~ /^--\Q$boundary\E(?:--|\s*$)/);
       }
       else {
 	# There was no previous header and this is just "out there"?
@@ -214,30 +223,16 @@ sub new {
 	# should use, so just keep updating as they come in.
         if (lc $key eq 'content-type') {
 	  my($type,$temp_boundary) = Mail::SpamAssassin::Util::parse_content_type($value);
-	  $boundary = $temp_boundary if ($type =~ /^multipart/ && defined $temp_boundary);
+	  $boundary = $temp_boundary if (defined $temp_boundary);
 	}
       }
     }
 
-    # not a continuation...
-    $header = $last;
-
     # Ok, we found the header/body blank line ...
-    last if ($last =~ /^\r?$/m);
+    last if ($current =~ /^\r?$/);
 
-    # There's no body on this message?!?  Fake the separator and mark the behavior!
-    if (!@message) {
-      $self->{'missing_head_body_separator'} = 1;
-      push(@message, "\n");
-      next;
-    }
-
-    # Alternately, if a multipart mime boundary is found in the header area,
-    # aka it's malformed, exit out as well and treat it as part of the body.
-    if (defined $boundary && $message[0] =~ /^--\Q$boundary\E(?:--|\s*$)/) {
-      $self->{'missing_head_body_separator'} = 1;
-      last;
-    }
+    # not a continuation...
+    $header = $current;
   }
 
   # Store the pristine body for later -- store as a copy since @message

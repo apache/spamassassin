@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 
 BEGIN {
   if (-e 't/test_dir') { # if we are running "t/rule_tests.t", kluge around ...
@@ -20,7 +20,7 @@ use Test;
 use SATest; sa_t_init("missing_hb_separator");
 use Mail::SpamAssassin;
 
-plan tests => 2;
+plan tests => 3;
 
 # initialize SpamAssassin
 my $sa = Mail::SpamAssassin->new({
@@ -33,11 +33,18 @@ my $sa = Mail::SpamAssassin->new({
 });
 $sa->init(0); # parse rules
 
-my @msg = ( "Subject: foo bar\n" );
-my $mail = $sa->parse(\@msg, 1);
-my $status = $sa->check($mail);
+my @msg;
+my $mail;
+my $status;
+my $result;
 
-my $result = 0;
+#####
+
+@msg = ("Content-Type: text/plain; boundary=--foo\n");
+$mail = $sa->parse(\@msg, 1);
+$status = $sa->check($mail);
+
+$result = 0;
 foreach (@{$status->{test_names_hit}}) {
   $result = 1 if ($_ eq 'MISSING_HB_SEP');
 }
@@ -47,12 +54,31 @@ ok ( $result );
 $status->finish();
 $mail->finish();
 
+#####
 
-$result = 1;
-push(@msg, "\n");
+@msg = ("Content-Type: text/plain;\n"," boundary=--foo\n");
 $mail = $sa->parse(\@msg, 1);
 $status = $sa->check($mail);
 
+$result = 0;
+foreach (@{$status->{test_names_hit}}) {
+  $result = 1 if ($_ eq 'MISSING_HB_SEP');
+}
+
+ok ( $result );
+
+$status->finish();
+$mail->finish();
+
+#####
+
+# A normal message, should not trigger
+
+@msg = ("Content-Type: text/plain; boundary=--foo\n","\n","--foo\n");
+$mail = $sa->parse(\@msg, 1);
+$status = $sa->check($mail);
+
+$result = 1;
 foreach (@{$status->{test_names_hit}}) {
   $result = 0 if ($_ eq 'MISSING_HB_SEP');
 }
