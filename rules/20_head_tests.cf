@@ -10,11 +10,11 @@ describe FROM_ENDS_IN_NUMS	From: ends in numbers
 header FROM_HAS_MIXED_NUMS	From =~ /\d+[a-z]+\d+\S*@/i
 describe FROM_HAS_MIXED_NUMS	From: contains numbers mixed in with letters
 
-# (contrib: David Hull)
-header FROM_NO_USER		From =~ /(?:^\@|<\@| \@|<>)/ [if-unset: unset@unset.unset]
+# (contrib: David Hull - fixed to support "foo @ foo . com" <foo@foo.com>)
+header FROM_NO_USER		From =~ /(?:^\@|<\@| \@[^<]*$|<>)/ [if-unset: unset@unset.unset]
 describe FROM_NO_USER		From: has no local-part before @ sign
 
-header TO_NO_USER		To =~ /(?:^\@|<\@| \@|<>)/ [if-unset: unset@unset.unset]
+header TO_NO_USER		To =~ /(?:^\@|<\@| \@[^<]*$|<>)/ [if-unset: unset@unset.unset]
 describe TO_NO_USER		To: has no local-part before @ sign
 
 header TO_MALFORMED		To !~ /(?:(?:\"[^\"]+\"|\S+)\@\S+\.\S+|undisclosed-recipients:)/ [if-unset: unset@unset.unset]
