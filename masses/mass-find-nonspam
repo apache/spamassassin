@@ -1,0 +1,76 @@
+#!/usr/bin/perl -w
+
+my $killfile_message_ids = qr{(?:
+    <\d\d\d\d\S+\@dev\.lifetimetv\.com>
+    |<\d+\.\S+\@fmail..\.real-net\.net>
+    |<3D53A59C000A4029\@mta3n\.bluewin\.ch>
+    |<\S+JavaMail\._accucast\@ecacmail01\.hsn\.com>
+)}x;
+
+my $killfile_receiveds = qr{(?:
+    from\s\S+\s\S+\sby\s(?:anclsmtp\d\d|myfamlsmtp\d\d)\.myfamily\.com
+    |for :include:\S+/MapQuest/
+    |for <spamistehsuk\@spamtraps\.taint\.org>          # unreliable
+    |for <postmaster_neto.net\@spamtraps\.taint\.org>   # unreliable
+    |for <fortress\S*\@shangri-la\.dropbear\.id\.au>
+)}x;
+
+my $killfile_froms = qr{(?:
+    <listsupport\@internet\.com>
+    |<journal\@wrox\.com>
+    |<burpeeseed\@List\.burpee\.com>
+    |<preferredcustomer\@photoworks\.com>
+    |<proedigitaldigest\@proe\.com>
+    |<subscriptions\@mcafee\.com>
+    |<news\@real-net\.net>
+    |<Online.*\@newsletter\.online\.com>
+    |<no-reply\@no-more-viruses-please\.com>
+    |<Joke-Of-The-Day-return-.*\@mta03\.optamail\.com>
+    |<Cooking\.com\.\S+\@mail\.cooking\.com>
+    |<cio\@UPDATE\.CIO\.COM>
+    |<DirectTV\S+\@vmadmin.com>
+)}x;
+
+###########################################################################
+
+use lib "lib";
+use lib "../lib";
+use Mail::ArchiveIterator;
+use Mail::SpamAssassin::NoMailAudit;
+
+# flush buffer immediately so if mass-check fails or stops we don't get a corrupt line
+$|++;
+
+my $iter = new Mail::ArchiveIterator ({
+  });
+
+$iter->set_function (\&wanted);
+$iter->run (@ARGV);
+
+#foreach my $from (sort {$count{$b} <=> $count{$a}} keys %count) {
+#print "$count{$from}   $from $lastsubject{$from}  $lastid{$from}\n";
+#}
+exit;
+
+###########################################################################
+
+sub wanted {
+  my ($id, $dataref) = @_;
+
+  my $ma = Mail::SpamAssassin::NoMailAudit->new ('data' => $dataref);
+  my $from = $ma->get_header ("From");
+  return unless defined($from);
+
+  if ($from =~ /${killfile_froms}/o
+    || $ma->get_header ("Message-Id") =~ /${killfile_message_ids}/o
+    || $ma->get_header ("Received") =~ /${killfile_receiveds}/)
+  {
+    print "$id\n";
+  }
+
+  #chomp $from;
+  #$count{$from}++;
+  #chomp ($lastsubject{$from} = $ma->get_header("Subject"));
+  #chomp ($lastid{$from} = $id);
+}
+
