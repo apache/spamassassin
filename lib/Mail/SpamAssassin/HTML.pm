@@ -382,7 +382,13 @@ sub target_uri {
 sub push_uri {
   my ($self, $uri) = @_;
 
-  my $target = target_uri($self->{html}{base_href} || "", $uri || "");
+  $uri ||= '';
+
+  # URIs don't have leading/trailing whitespace ...
+  $uri =~ s/^\s+//;
+  $uri =~ s/\s+$//;
+
+  my $target = target_uri($self->{html}{base_href} || "", $uri);
   push @{$self->{html}{uri}}, $target if $target;
 }
 
