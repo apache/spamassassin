@@ -1,4 +1,4 @@
-# $Id: Received.pm,v 1.39 2003/12/09 06:15:53 jmason Exp $
+# $Id: Received.pm,v 1.40 2003/12/17 07:08:44 jmason Exp $
 
 # ---------------------------------------------------------------------------
 
@@ -1010,6 +1010,8 @@ enough:
   if ($rdns =~ /^unknown$/i) {
     $rdns = '';		# some MTAs seem to do this
   }
+
+  $envfrom =~ s/^\s*<*//gs; $envfrom =~ s/>*\s*$//gs;
 
   # ensure invalid chars are stripped.  Replace with '!' to flag their
   # presence, though.

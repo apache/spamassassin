@@ -3151,7 +3151,9 @@ sub _check_spf {
   my $query;
   eval {
     require Mail::SPF::Query;
-    $query = Mail::SPF::Query->new (ip => $ip, sender => $sender, helo => $helo);
+    $query = Mail::SPF::Query->new (ip => $ip, sender => $sender, helo => $helo,
+		debug => $Mail::SpamAssassin::DEBUG->{rbl}
+	      );
   };
 
   if ($@) {
@@ -3160,6 +3162,8 @@ sub _check_spf {
   }
 
   my ($result, $comment) = $query->result();
+  $result ||= 'softfail';
+  $comment ||= '';
   $comment =~ s/\s+/ /gs;	# no newlines please
 
   if ($result eq 'pass') {
@@ -3171,13 +3175,7 @@ sub _check_spf {
   }
 
   if ($self->{spf_fail} || $self->{spf_softfail}) {
-    $self->{spf_failure_comment} = "SPF forgery: $comment";
-    # there's a nice webpage at http://spf.pobox.com/why which provides
-    # a very nice explanation of why something might have failed; e.g.
-    # http://spf.pobox.com/why?sender=demospf%40jmason.org&ip=10.1.1.1
-    # maybe we should use that. we could nick the code from qpsmtpd;
-    # http://cvs.perl.org/viewcvs/qpsmtpd/plugins/sender_permitted_from?rev=1.4&content-type=text/vnd.viewcvs-markup
-    # TODO.
+    $self->{spf_failure_comment} = "SPF failed: $comment";
   }
 
   dbg ("SPF: query for $sender/$ip/$helo: result: $result, comment: $comment");
