@@ -1,6 +1,6 @@
 
-RESCORING SURVEY README
------------------------
+RESCORING SURVEY: HOW TO TAKE PART
+----------------------------------
 
 The tools in this directory are used to optimise the scoring system used for
 incoming mails, using a genetic algorithm to search for optimal values.
@@ -52,12 +52,12 @@ Here's what to do:
 	./mass-check ~/Mail/work >> nonspam.log
 	./mass-check ~/Mail/foo >> nonspam.log
 
-    This is a *lot* faster than the more paranoid incoming-mail checks, since
-    it runs without doing DNS or Razor lookups and without forking
-    subprocesses.  However it can still take a while for large numbers of
-    messages.
+    This is a *lot* faster than the standard, more paranoid incoming-mail
+    checks, since it runs without doing DNS or Razor lookups and without
+    forking subprocesses.  However it can still take a while for large numbers
+    of messages.
 
-  - and run it for the spam folders:
+  - next, run it for the spam folder(s), if you have any:
 
 	: > spam.log
 	./mass-check ~/Mail/spam >> spam.log
@@ -72,8 +72,8 @@ Here's what to do:
     optimising the test scores until the maximum correct diagnoses
     are made.
 
-    As you can see, there's no indication what the mail is about -- so I
-    can't infringe your privacy!
+    As you can see, there's no indication what the mail is about -- so your
+    privacy is protected.
 
   - gzip them:
   
@@ -130,9 +130,22 @@ evolve.cxx :
   to build.  Alternatively just mail the data files to me and I'll run
   evolve for all of us ;)
 
+
+hit-frequencies :
+
+  Analyses the log files and computes how often each test hits, overall,
+  for spam mails and for non-spam.
+
+
+mk-baseline-results :
+
+  Compute results for the baseline scores (read from ../spamassassin.cf).
+
+
 continual_evolve.sh :
 
-  Continually runs the evolver, saving its results into separate files.
+  Continually runs the evolver, saving each run's best genome (and its results)
+  into separate files named "result.n" where n starts at 1 and counts up.
   Handy for running overnight.
 
 
