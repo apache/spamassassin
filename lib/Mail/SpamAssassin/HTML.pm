@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.91 2003/05/26 06:08:50 felicity Exp $
+# $Id: HTML.pm,v 1.92 2003/05/26 19:39:01 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -370,7 +370,8 @@ sub html_tests {
       {
 	$self->{html}{html_event} = 1;
       }
-      if (/\bon(?:blur|contextmenu|focus|load|resize|submit|unload)\b/i && $attr->{$_} )
+      if (/\bon(?:blur|contextmenu|focus|load|resize|submit|unload)\b/i &&
+	  $attr->{$_})
       {
 	$self->{html}{html_event_unsafe} = 1;
         if ($attr->{$_} =~ /\.open\s*\(/) { $self->{html}{window_open} = 1; }
@@ -546,7 +547,7 @@ sub html_comment {
   $self->{html}{comment_egp} = 1 if $text =~ /\S+begin egp html banner\S+/;
   $self->{html}{comment_saved_url} = 1 if $text =~ /<!-- saved from url=\(\d{4}\)/;
   $self->{html}{comment_sky} = 1 if $text =~ /SKY-(?:Email-Address|Database|Mailing|List)/;
-  $self->{html}{total_comment_length} += length($text) + 7;	# 7 = "<!--" + "-->"
+  $self->{html}{total_comment_length} += length($text) + 7; # "<!--" + "-->"
 
   if (exists $self->{html_inside}{script} && $self->{html_inside}{script} > 0)
   {
