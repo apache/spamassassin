@@ -1169,7 +1169,16 @@ sub leave_helper_run_mode {
   dbg("info: leaving helper-app run mode");
   $/ = $self->{old_slash};
   %ENV = %{$self->{old_env}};
-  $SIG{CHLD} = $self->{old_sigchld_handler};
+
+  if (defined $self->{old_sigchld_handler}) {
+    $SIG{CHLD} = $self->{old_sigchld_handler};
+  } else {
+    # if SIGCHLD has never been explicitly set, it's returned as undef.
+    # however, when *setting* SIGCHLD, using undef(%) or assigning to an
+    # undef value produces annoying 'Use of uninitialized value in scalar
+    # assignment' warnings.  That's silly.  workaround:
+    $SIG{CHLD} = 'DEFAULT';
+  }
 }
 
 # note: this must be called before leave_helper_run_mode() is called,
