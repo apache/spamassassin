@@ -867,6 +867,9 @@ sub remove_spamassassin_markup {
   # deal with rewritten headers w/out X-Spam-Prev- versions ...
   $self->init(1);
   foreach my $header ( keys %{$self->{conf}->{rewrite_header}} ) {
+    # let the 3.0 decoding do it...
+    next if ($hdrs =~ /^X-Spam-Prev-$header:/im);
+
     dbg ("Removing markup in $header");
     if ($header eq 'Subject') {
       my $tag = $self->{conf}->{rewrite_header}->{'Subject'};
@@ -876,7 +879,7 @@ sub remove_spamassassin_markup {
       $tag =~ s/_REQD_/\\d{2}\\.\\d{2}/g;
       1 while $hdrs =~ s/^Subject: ${tag} /Subject: /gm;
     } else {
-      $hdrs =~ s/^(${header}: .*?)\t\([^)]*\)$/$1/gm;
+      $hdrs =~ s/^(${header}:[ \t].*?)\t\([^)]*\)$/$1/gm;
     }
   }
 
@@ -887,12 +890,12 @@ sub remove_spamassassin_markup {
 ###########################################################################
 
   # 3.0 version -- revert from X-Spam-Prev to original ...
-  while ($hdrs =~ s/^X-Spam-Prev-(([^:]+:)\s*(?:.*\n(?:\s+\S.*\n)*))//mg) {
+  while ($hdrs =~ s/^X-Spam-Prev-(([^:]+:)[ \t]*.*\n(?:\s+\S.*\n)*)//m) {
     my($hdr, $name) = ($1,$2);
 
     # If the rewritten version doesn't exist, we should deal with it anyway...
-    unless ($hdrs =~ s/^$name\s*(?:.*\n(?:\s+\S.*\n)*)$/$hdr\n/m) {
-      $hdrs =~ s/\n\n/\n$hdr\n\n/;
+    unless ($hdrs =~ s/^$name[ \t]*.*\n(?:\s+\S.*\n)*/$hdr/m) {
+      $hdrs =~ s/\n\n/\n$hdr\n/;
     }
   }
 

@@ -781,22 +781,21 @@ sub rewrite_no_report_safe {
       # Deal with header rewriting
       foreach ( @pristine_headers ) {
         # if we're not going to do a rewrite, skip this header!
-        next if (!/^(?:From|Subject|To):/i || !exists $self->{conf}->{rewrite_header}->{$_});
+        next if (!/^(From|Subject|To):/i);
+	my $hdr = ucfirst(lc($1));
+	next if (!exists $self->{conf}->{rewrite_header}->{$hdr});
 
 	# pop the original version onto the end of the header array
 	push(@pristine_headers, "X-Spam-Prev-$_");
 
-	# prep the rewrite of the original
-        my($header, $value) = %{$self->{conf}->{rewrite_header}};
-
 	# Figure out the rewrite piece
-        my $tag = $self->_replace_tags($value);
+        my $tag = $self->_replace_tags($self->{conf}->{rewrite_header}->{$hdr});
         $tag =~ s/\n/ /gs;
 
 	# The tag should be a comment for this header ...
-	$tag = "($tag)" if ( $header =~ /^(?:From|To)$/ );
+	$tag = "($tag)" if ( $hdr =~ /^(?:From|To)$/ );
 
-        s/^([^:]+:[ ]*)(?:\Q${tag}\E )?/$1${tag} /i;
+        s/^([^:]+:[ \t]*)(?:\Q${tag}\E )?/$1${tag} /i;
       }
 
       $addition = 'headers_spam';
