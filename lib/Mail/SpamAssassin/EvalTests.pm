@@ -381,16 +381,20 @@ sub _check_for_forged_received {
         }
       }
     }
-    dbg ("forged-HELO: from=$from[$i] helo=$helo[$i] by=$by[$i]");
+
+    my $frm = $from[$i];
+    my $hlo = $helo[$i];
+    my $by = $by[$i];
+
+    dbg ("forged-HELO: from=".(defined $frm ? $frm : "(undef)").
+			" helo=".(defined $hlo ? $hlo : "(undef)").
+			" by=".(defined $by ? $by : "(undef)"));
 
     # note: this code won't catch IP-address HELOs, but we already have
     # a separate rule for that anyway.
 
-    my $by = $by[$i];
     next unless ($by =~ /^\w+(?:[\w.-]+\.)+\w+$/);
 
-    my $frm = $from[$i];
-    my $hlo = $helo[$i];
     if (defined($hlo) && defined($frm)
 		&& $hlo =~ /^\w+(?:[\w.-]+\.)+\w+$/
 		&& $frm =~ /^\w+(?:[\w.-]+\.)+\w+$/
