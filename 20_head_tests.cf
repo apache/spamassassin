@@ -279,6 +279,10 @@ header RCVD_IN_RFCI		rbleval:check_rbl('rfci', 'ipwhois.rfc-ignorant.org.')
 describe RCVD_IN_RFCI		Received via a relay in ipwhois.rfc-ignorant.org
 tflags RCVD_IN_RFCI             net
 
+header HABEAS_HIL		rbleval:check_rbl('hil', 'hil.habeas.com.')
+describe HABEAS_HIL		Sender is on www.habeas.com Habeas Infringer List
+tflags HABEAS_HIL		net
+
 
 # NOTE: commercial test, see README file for details
 header RCVD_IN_BL_SPAMCOP_NET	rbleval:check_rbl('spamcop', 'bl.spamcop.net.')
