@@ -65,8 +65,8 @@ WriteMakefile(
 	      },
 
     'clean' => { FILES =>
-	'pod2htm* spamassassin spamd/spamc spamd/spamd doc '.
-        'binaries.mk spamd/libspamc.so'
+	'pod2htm* spamassassin spamd/spamc spamd/libspamc.so spamd/spamd doc '.
+	'binaries.mk config.h config.status config.cache config.log'
     },
 
     'AUTHOR' => 'Justin Mason <jm@jmason.org>',
