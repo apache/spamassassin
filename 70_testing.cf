@@ -719,5 +719,5 @@ header T_RCVD_ILLEGAL_IP    Received =~ /[\s\(\[\:\=](?:(?:[01257]|22[3-9]|23[0-
 describe T_RCVD_ILLEGAL_IP  Received contains illegal IP address
 
 # bug 2017
-rawbody T_IMG_ENDS_IN_SLASH /<img [^>]*src=\"http://[^\">]+\/\"/i
+rawbody T_IMG_ENDS_IN_SLASH /<img [^>]*src=[\"\']http:\/\/[^\"\'>]+\/[\"\']/i
 
