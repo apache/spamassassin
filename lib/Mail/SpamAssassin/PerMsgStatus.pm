@@ -2005,22 +2005,8 @@ sub do_meta_tests {
     my $token;
 
     # Lex the rule into tokens using a rather simple RE method ...
-    my @tokens =
-      $rule =~ m/(
-	\w+|	        	                # Rule Name
-	[\(\)]|					# Parens
-	\|\||					# Boolean OR
-	\&\&|					# Boolean AND
-	\^|					# Boolean XOR
-	!|					# Boolean NOT
-	>=?|					# GT or EQ
-	<=?|					# LT or EQ
-	==|					# EQ
-	!=|					# NEQ
-	[\+\-\*\/]|				# Mathematical Operator
-	[\?:]|                                  # ? : Operator
-	\d+					# A Number
-      )/gx;
+    my $lexer = ARITH_EXPRESSION_LEXER;
+    my @tokens = ($rule =~ m/$lexer/g);
 
     # Set the rule blank to start
     $meta{$rulename} = "";
@@ -2107,7 +2093,7 @@ EOT
   eval $evalstr;
 
   if ($@) {
-    warn "Failed to run header SpamAssassin tests, skipping some: $@\n";
+    warn "Failed to run meta SpamAssassin tests, skipping some: $@\n";
     $self->{rule_errors}++;
   }
   else {

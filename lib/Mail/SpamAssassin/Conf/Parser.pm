@@ -244,10 +244,11 @@ sub parse {
         if (scalar @if_stack > 0) {
           my $cond = pop @if_stack;
 
-          if ($cond->{type} eq 'ifplugin') {
+          if ($cond->{type} eq 'if') {
             warn "unclosed 'if' in ".
-                  $self->{currentfile}.": ifplugin ".$cond->{plugin}."\n";
-          } else {
+                  $self->{currentfile}.": if ".$cond->{conditional}."\n";
+          }
+          else {
             die "unknown 'if' type: ".$cond->{type}."\n";
           }
 
@@ -275,18 +276,14 @@ sub parse {
     }
 
     if ($key eq 'ifplugin') {
-      push (@if_stack, {
-          type => 'ifplugin',
-          plugin => $value,
-          skip_parsing => $skip_parsing
-        });
+      $self->handle_conditional ($key, "plugin ($value)",
+                        \@if_stack, \$skip_parsing);
+      next;
+    }
 
-      if ($conf->{plugins_loaded}->{$value}) {
-        # leave $skip_parsing as-is; we may not be parsing anyway in this block.
-        # in other words, support nested 'if's and 'require_version's
-      } else {
-        $skip_parsing = 1;
-      }
+    if ($key eq 'if') {
+      $self->handle_conditional ($key, $value,
+                        \@if_stack, \$skip_parsing);
       next;
     }
 
@@ -389,6 +386,58 @@ failed_line:
   $self->set_default_scores();
 
   delete $self->{scoresonly};
+}
+
+sub handle_conditional {
+  my ($self, $key, $value, $if_stack_ref, $skip_parsing_ref) = @_;
+  my $conf = $self->{conf};
+
+  my $lexer = ARITH_EXPRESSION_LEXER;
+  my @tokens = ($value =~ m/($lexer)/g);
+
+  my $eval = '';
+  my $bad = 0;
+  foreach my $token (@tokens) {
+    if ($token =~ /^(\W+|[\-\+\d\.]+)$/) {
+      $eval .= $1." ";          # note: untaints!
+    }
+    elsif ($token eq 'plugin') {
+      # replace with method call
+      $eval .= "\$self->cond_clause_plugin_loaded";
+    }
+    elsif ($token eq 'version') {
+      $eval .= $Mail::SpamAssassin::VERSION." ";
+    }
+    elsif ($token =~ /^(\w[\w\:]+)$/) { # class name
+      $eval .= "\"$1\" ";       # note: untaints!
+    }
+    else {
+      $bad++; warn "unparseable chars in 'if $value': '$token'\n";
+    }
+  }
+
+  if ($bad) {
+    $conf->{errors}++;
+    return -1;
+  }
+
+  push (@{$if_stack_ref}, {
+      type => 'if',
+      conditional => $value,
+      skip_parsing => $$skip_parsing_ref
+    });
+
+  if (eval $eval) {
+    # leave $skip_parsing as-is; we may not be parsing anyway in this block.
+    # in other words, support nested 'if's and 'require_version's
+  } else {
+    $$skip_parsing_ref = 1;
+  }
+}
+
+# functions supported in the "if" eval:
+sub cond_clause_plugin_loaded {
+  return $_[0]->{conf}->{plugins_loaded}->{$_[1]};
 }
 
 # Let's do some linting here ...
