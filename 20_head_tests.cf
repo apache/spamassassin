@@ -530,7 +530,7 @@ header USER_AGENT		exists:User-Agent
 header X_AUTH_WARNING		exists:X-Authentication-Warning
 header X_LOOP			exists:X-Loop
 header X_MAILING_LIST		exists:X-Mailing-List
-
+header X_ACCEPT_LANG            exists:X-Accept-Language
 
 header   MIME_ODD_CASE		ALL =~ /\nMiME-Version: /s
 describe MIME_ODD_CASE		MiME-Version header (oddly capitalized)
@@ -558,3 +558,4 @@ describe KNOWN_MAILING_LIST     Email came from some known mailing list software
 
 header   EXCHANGE_SERVER        X-Mailer =~ /Internet Mail Service \([\d\.]+\)/
 describe EXCHANGE_SERVER        Came via Internet Mail Service plugin
+
