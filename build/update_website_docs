@@ -6,6 +6,7 @@ vers=3.0.x
 find . -name '.#*' -print | xargs rm -f # delete old CVS files
 
 [ -d $WEBDIR/full/$vers ] || mkdir -p $WEBDIR/full/$vers
+perl Makefile.PL < /dev/null
 make; make text_html_doc 
 
 rm -rf $WEBDIR/full/dist
