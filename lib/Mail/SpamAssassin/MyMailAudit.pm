@@ -1,4 +1,4 @@
-# $Id: MyMailAudit.pm,v 1.1 2001/10/25 07:48:55 jmason Exp $
+# $Id: MyMailAudit.pm,v 1.2 2001/10/27 09:04:31 jmason Exp $
 
 package Mail::SpamAssassin::MyMailAudit;
 
@@ -40,5 +40,8 @@ sub new {
     }
     return $self;
 }
+
+# argh, avoid a "used only once" warning
+sub _never_called_shutup_lint { print LOG; }
 
 1;

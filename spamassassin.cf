@@ -195,6 +195,9 @@ describe YR_MEMBERSHIP_EXCH	Subject contains 'Your Membership Exchange'
 header FROM_FORGED_HOTMAIL	From =~ /^[^"]+\S+\@hotmail\.com/i
 describe FROM_FORGED_HOTMAIL	Forged From: line claiming to be from hotmail.com
 
+header DIFFERENT_REPLY_TO	eval:check_for_spam_reply_to()
+describe DIFFERENT_REPLY_TO	Reply-To: massively different from From: or To:
+
 header LOTS_OF_CC_LINES		eval:check_lots_of_cc_lines()
 describe LOTS_OF_CC_LINES	Lots and lots of Cc: headers
 
@@ -261,6 +264,7 @@ full S_1618			/S..{0,10}1618.{0,10}-.{0,10}SECTION.{0,10}301/i
 full SECTION_301		/SECTION.{0,10}301/
 
 body POPLAUNCH			/StealthLaunch PopLaunch.\s/
+body CHECK_OR_MONEY_ORDER	/check or money order/i
 
 body NUMERIC_HTTP_ADDR		/http\:\/\/\d+\//is
 body NORMAL_HTTP_TO_IP		/http\:\/\/\d+\.\d+\.\d+\.\d+\//is
