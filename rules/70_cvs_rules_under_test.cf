@@ -725,3 +725,5 @@ describe T_YAHOO_REDIRECTOR	Uses commonly-spammed redirector URL
 uri T_BZ_TLD			/^http:\/\/[^\/]+\.bz(?:\/|$)/i
 describe T_BZ_TLD		Contains a URL in the BZ top-level domain
 
+# case-insenstive version
+uri T_USERPASS			m{https?://[^/\s]+?(?::[^/\s]+?)?\@}i
