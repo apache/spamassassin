@@ -111,14 +111,14 @@ sub parse_received_headers {
   while (defined ($relay = shift @{$self->{relays}}))
   {
     # trusted_networks matches?
-    if ($in_trusted && $did_user_specify_trust && !$trusted->contains_ip ($relay->{ip}))
+    if ($in_trusted && $did_user_specify_trust && !$relay->{auth} && !$trusted->contains_ip ($relay->{ip}))
     {
       $in_trusted = 0;		# we're in deep water now
     }
 
     # internal_networks matches?
     if ($did_user_specify_internal) {
-      if (!$internal->contains_ip ($relay->{ip})) {
+      if (!$relay->{auth} && !$internal->contains_ip ($relay->{ip})) {
 	$in_internal = 0;
       }
     } else {
@@ -370,6 +370,7 @@ sub parse_received_line {
   my $IP_ADDRESS = IP_ADDRESS;
   my $IP_IN_RESERVED_RANGE = IP_IN_RESERVED_RANGE;
   my $LOCALHOST = LOCALHOST;
+  my $auth = '';
 
   # Received: (qmail 27981 invoked by uid 225); 14 Mar 2003 07:24:34 -0000
   # Received: (qmail 84907 invoked from network); 13 Feb 2003 20:59:28 -0000
@@ -385,6 +386,17 @@ sub parse_received_line {
   # try to catch unique message identifier
   if (/\sid\s+<?([^\s<>;]{3,})/) {
     $id = $1;
+  }
+
+  # try to catch authenticated message identifier
+  # the first one works for Sendmail, MDaemon, some webmail servers, and others
+  # with ESMTPA, ESMTPSA, LMTPA, LMTPSA should cover RFC 3848 compliant MTAs
+  # with ASMTP (Authenticated SMTP) is used by Earthlink, Exim 4.34, and others
+  # with HTTP should only be authenticated webmail sessions
+  if (/^from .*?(\]\)|\)\]) .*?\(.*?authenticated.*?\).*? by/) {
+    $auth = 'Sendmail';
+  } elsif (/ by .*? with (ESMTPA|ESMTPSA|LMTPA|LMTPSA|ASMTP|HTTP) /i) {
+    $auth = $1;
   }
 
   if (/^from /) {
@@ -1087,7 +1099,8 @@ enough:
     ident => $ident,
     envfrom => $envfrom,
     lc_by => (lc $by),
-    lc_helo => (lc $helo)
+    lc_helo => (lc $helo),
+    auth => $auth
   };
 
   # perform rDNS check if MTA has not done it for us.
@@ -1127,7 +1140,7 @@ enough:
   # of entries must be preserved, so that regexps that assume that
   # e.g. "ip" comes before "helo" will still work.
   #
-  my $asstr = "[ ip=$ip rdns=$rdns helo=$helo by=$by ident=$ident envfrom=$envfrom intl=0 id=$id ]";
+  my $asstr = "[ ip=$ip rdns=$rdns helo=$helo by=$by ident=$ident envfrom=$envfrom intl=0 id=$id auth=$auth ]";
   dbg ("received-header: parsed as $asstr");
   $relay->{as_string} = $asstr;
 
