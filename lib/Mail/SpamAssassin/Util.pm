@@ -32,7 +32,7 @@ use File::Spec;
 use Time::Local;
 use Sys::Hostname (); # don't import hostname() into this namespace!
 
-
+use constant HAS_MIME_BASE64 => eval { require MIME::Base64; };
 use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/oi);
 
 ###########################################################################
