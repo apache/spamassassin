@@ -191,11 +191,12 @@ Select alternative whitelist factory module.
 		type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
 	       });
 
-=item auto_whitelist_path /path/to/file	(default: ~/.spamassassin/auto-whitelist)
+=item auto_whitelist_path /path/filename (default: ~/.spamassassin/auto-whitelist)
 
-Automatic-whitelist directory or file.  By default, each user has their own, in
-their C<~/.spamassassin> directory with mode 0700, but for system-wide
-SpamAssassin use, you may want to share this across all users.
+This is the automatic-whitelist directory and filename.  By default, each user
+has their own whitelist database in their C<~/.spamassassin> directory with
+mode 0700.  For system-wide SpamAssassin use, you may want to share this
+across all users, although that is not recommended.
 
 =cut
 
@@ -203,7 +204,16 @@ SpamAssassin use, you may want to share this across all users.
 		setting => 'auto_whitelist_path',
 		is_admin => 1,
 		default => '__userstate__/auto-whitelist',
-		type => $Mail::SpamAssassin::Conf::CONF_TYPE_STRING
+		code => sub {
+		  my ($self, $key, $value, $line) = @_;
+		  unless (defined $value) {
+		    return $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE;
+		  }
+		  if (-d $value) {
+		    return $Mail::SpamAssassin::Conf::INVALID_VALUE;
+		  }
+		  $self->{auto_whitelist_path} = $value;
+		}
 	       });
 
 =item auto_whitelist_db_modules Module ...	(default: see below)
