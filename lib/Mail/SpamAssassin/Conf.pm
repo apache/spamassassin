@@ -2107,13 +2107,12 @@ general running of SpamAssassin.
     }
   });
 
-=item bayes_path /path/to/file	(default: ~/.spamassassin/bayes)
+=item bayes_path /path/filename	(default: ~/.spamassassin/bayes)
 
-Partial filename path (this is not a directory name) for Bayes probabilities
-databases.  Several databases will be created, with this as the base, with
-C<_toks>, C<_seen>, etc. appended to this filename.  The default setting
-results in files called C<~/.spamassassin/bayes_seen>,
-C<~/.spamassassin/bayes_toks>, etc.
+This is the directory and filename for Bayes databases.  Several databases
+will be created, with this as the base directory and filename, with C<_toks>,
+C<_seen>, etc. appended to the base.  The default setting results in files
+called C<~/.spamassassin/bayes_seen>, C<~/.spamassassin/bayes_toks>, etc.
 
 By default, each user has their own in their C<~/.spamassassin> directory with
 mode 0700/0600.  For system-wide SpamAssassin use, you may want to reduce disk
@@ -2131,8 +2130,6 @@ more effective with individual user databases.
       unless (defined $value) {
 	return $MISSING_REQUIRED_VALUE;
       }
-      # not sure if we should test this here or in bayes, but bayes_path
-      # is used in a lot of places, so this is here
       if (-d $value) {
 	return $INVALID_VALUE;
       }
@@ -2385,7 +2382,7 @@ This is the password used to connect to the LDAP server.
     type => $CONF_TYPE_STRING
   });
 
-=item loadplugin PluginModuleName [/path/to/module.pm]
+=item loadplugin PluginModuleName [/path/module.pm]
 
 Load a SpamAssassin plugin module.  The C<PluginModuleName> is the perl module
 name, used to create the plugin object itself.
