@@ -26,11 +26,6 @@
 #
 ###########################################################################
 
-# reminder: develop these after 2.60
-# low hit rate
-#  0.093   0.1201   0.0000    1.000   0.93    0.01  T_SPRINTF_5X
-full T_SPRINTF_5X	/[^-][A-F1-9][A-F0-9]{5,7}-[A-F1-9][A-F0-9]{5,7}-[A-F1-9][A-F0-9]{5,7}-[A-F1-9][A-F0-9]{5,7}-[A-F1-9][A-F0-9]{5,7}[^-]/
-
 # replacements for PORN_4; split out sub-patterns as some are more FP-prone
 # than others.
 uri T_PORN_URL_SEX	/^https?:\/\/[\w\.-]*(?<!es|ba)(?<!dle|sus)sex(?!press)[\w-]*\./
@@ -54,24 +49,26 @@ header T_RCVD_IN_XBL_NFH_2	eval:check_rbl_txt('xbl-notfirsthop', 'xbl.spamhaus.o
 describe T_RCVD_IN_XBL_NFH_2	Received via a relay in Spamhaus XBL
 tflags T_RCVD_IN_XBL_NFH_2	net
 
+########################################################################
 # SPF support.  "pass" is nice, "fail" is bad, "softfail" is bad, but
 # not as bad as "fail".
-header T_SPF_PASS	eval:check_for_spf_pass()
-tflags T_SPF_PASS	net nice
-score T_SPF_PASS	-0.1
-header T_SPF_FAIL	eval:check_for_spf_fail()
-tflags T_SPF_FAIL	net
-score T_SPF_FAIL	0.2
-header T_SPF_SOFTFAIL	eval:check_for_spf_softfail()
-tflags T_SPF_SOFTFAIL	net
-score T_SPF_SOFTFAIL	0.1
 
-header T_SPF_HELO_PASS	eval:check_for_spf_helo_pass()
-tflags T_SPF_HELO_PASS	net nice
-score T_SPF_HELO_PASS	-0.1
-header T_SPF_HELO_FAIL	eval:check_for_spf_helo_fail()
-tflags T_SPF_HELO_FAIL	net
-score T_SPF_HELO_FAIL	0.2
+header T_SPF_PASS		eval:check_for_spf_pass()
+tflags T_SPF_PASS		net nice
+score T_SPF_PASS		-0.1
+header T_SPF_FAIL		eval:check_for_spf_fail()
+tflags T_SPF_FAIL		net
+score T_SPF_FAIL		0.2
+header T_SPF_SOFTFAIL		eval:check_for_spf_softfail()
+tflags T_SPF_SOFTFAIL		net
+score T_SPF_SOFTFAIL		0.1
+
+header T_SPF_HELO_PASS		eval:check_for_spf_helo_pass()
+tflags T_SPF_HELO_PASS		net nice
+score T_SPF_HELO_PASS		-0.1
+header T_SPF_HELO_FAIL		eval:check_for_spf_helo_fail()
+tflags T_SPF_HELO_FAIL		net
+score T_SPF_HELO_FAIL		0.2
 header T_SPF_HELO_SOFTFAIL	eval:check_for_spf_helo_softfail()
 tflags T_SPF_HELO_SOFTFAIL	net
 score T_SPF_HELO_SOFTFAIL	0.1

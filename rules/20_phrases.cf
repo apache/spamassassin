@@ -265,10 +265,6 @@ describe UNIVERSITY_DIPLOMAS	University Diplomas
 body PREST_NON_ACCREDITED	/prestigi?ous\b.{0,20}\bnon-accredited\b.{0,20}\buniversities/i
 describe PREST_NON_ACCREDITED	'Prestigious Non-Accredited Universities'
 
-# (contrib: skod)
-body NEW_DOMAIN_EXTENSIONS	/\bnew .{0,15}\bextension/i
-describe NEW_DOMAIN_EXTENSIONS	Possible registry spammer
-
 body DOMAIN_BODY		/(?:\s|^)(?:\.|dot\s+)(?:info|biz|name)\b|(?:\s|^)\.\w+ domain/mi
 describe DOMAIN_BODY		Domain registration spam body
 
