@@ -883,8 +883,6 @@ score RCVD_IN_OPM 0 4.295 0 0.001
 score RCVD_IN_NJABL 0 0.968 0 0.001
 score X_NJABL_OPEN_PROXY 0 0.866 0 0.001
 score X_NJABL_DIALUP 0 0.205 0 0.001
-# note: RCVD_IN_NJABL has low score, as the X_NJABL rules decipher
-# its results
 
 # ok_languages and ok_locales
 
@@ -893,7 +891,7 @@ score CHARSET_FARAWAY_HEADERS 2.060
 score HTML_CHARSET_FARAWAY 0.500
 score MIME_CHARSET_FARAWAY 2.450
 score UNDESIRED_LANGUAGE_BODY 3.970
-score BODY_8BITS 0
+score BODY_8BITS 1.500
 
 # highly generic tests for viruses that are scored just high enough to run
 
@@ -903,8 +901,8 @@ score MIME_SUSPECT_NAME 0.100
 # Habeas scores
 
 score HABEAS_SWE -6.400 -6.300 -6.400 -6.400
-score HABEAS_HIL 4.000 0 4.000 4.000
-score HABEAS_VIOLATOR 8.000 0 8.000 8.000
+score HABEAS_HIL 4.000
+score HABEAS_VIOLATOR 8.000
 
 # unscored by default -- commercial services.  If you pay for these,
 # give them a score so they will be checked.
@@ -912,11 +910,11 @@ score HABEAS_VIOLATOR 8.000 0 8.000 8.000
 # 0.5 to 1.0 is probably good for the DUL scores
 # 1.5 to 2.0 is probably good for the rest
 
-score RCVD_IN_BL_SPAMCOP_NET 0.000
-score RCVD_IN_DUL 0.000
-score RCVD_IN_DUL_FH 0.000
-score RCVD_IN_RBL 0
-score RCVD_IN_RSS 0
+score RCVD_IN_BL_SPAMCOP_NET	0
+score RCVD_IN_DUL		0
+score RCVD_IN_DUL_FH		0
+score RCVD_IN_RBL		0
+score RCVD_IN_RSS		0
 
 ###########################################################################
 # Compensation for common false positives.
