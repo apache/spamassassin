@@ -1,22 +1,10 @@
 # SpamAssassin user preferences file.
 #
-# Format:
-#
-#   required_hits n
-#		(how many hits are required to tag a mail as spam.)
-#
-#   auto_report_threshold n
-#		(spams with this many hits or more, will be reported
-#		as spam straightaway without requiring human verification.)
-#
-#   score SYMBOLIC_TEST_NAME n
-#		(if this is omitted, 1 is used as a default score.
-#		Set the score to 0 to ignore the test.)
-#
-# # starts a comment, whitespace is not significant.
-#
-###########################################################################
-
+#* Note: this file is never read by SpamAssassin.  Instead, it will be copied
+#* to a user's home directory, allowing them to perform personalised
+#* customisation.  If you want to make changes to the site-wide defaults,
+#* modify /etc/spamassassin.cf instead.
+#* 
 ###########################################################################
 # First of all, the generally useful stuff; thresholds and the whitelist
 # of addresses which, for some reason or another, often trigger false
@@ -80,4 +68,6 @@ ok_locales		en
 # read from the installed "spamassassin.cf" file, but you can override them
 # here.  To see the list of tests and their default scores, go to
 # http://spamassassin.taint.org/tests.html .
+#
+#   score SYMBOLIC_TEST_NAME n
 

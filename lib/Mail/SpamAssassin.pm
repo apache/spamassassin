@@ -575,7 +575,15 @@ sub create_default_prefs {
     # copy in the default one for later editing
     my $defprefs = $self->first_existing_path
 			(@Mail::SpamAssassin::default_prefs_path);
-    use File::Copy;
+    
+    open (IN, "<$defprefs") or warn "cannot open $defprefs";
+    open (OUT, ">$fname") or warn "cannot write to $fname";
+    while (<IN>) {
+      /^\#\* / and next;
+      print OUT;
+    }
+    close OUT;
+    close IN;
 
     if (copy ($defprefs, $fname)) {
       if ( $< == 0 && $> == 0 && defined $user) {
