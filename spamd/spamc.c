@@ -48,9 +48,8 @@ int read_message(int in, int out)
   char buf[8192];
   float version; int response=EX_OK;
 
-  /* jm: changed to 8190 for paranoia, since we use "bytes+1" below.
-   * Never hurts to leave a byte spare as well ;) */
-  for(bytes=0;bytes<8190;bytes++)
+  /* ch: Just call me Mr. Livingontheedge ;) fixed your bytes+1 kludge below too */
+  for(bytes=0;bytes<8192;bytes++)
   {
     if(read(in,&buf[bytes],1) == 0) /* read header one byte at a time */
     {
@@ -60,7 +59,7 @@ int read_message(int in, int out)
     }
     if('\n' == buf[bytes])
     {
-      buf[bytes+1] = '\0';	/* terminate the string */
+      buf[bytes] = '\0';	/* terminate the string */
       if(2 != sscanf(buf,"SPAMD/%f %d %*s",&version,&response))
       {
 	syslog (LOG_ERR, "spamd responded with bad string '%s'", buf);
