@@ -1309,7 +1309,7 @@ sub tok_unpack {
   $value ||= 0;
 
   my ($packed, $atime);
-  if ( $self->{db_version} == 1 || $self->{db_version} == 2 ) {
+  if ( $self->{db_version} == 2 || $self->{db_version} == 1 ) {
     ($packed, $atime) = unpack("CV", $value);
   }
   elsif ( $self->{db_version} == 0 ) {
