@@ -82,13 +82,13 @@ install-indep: build-indep
 	dh_clean -k
 	dh_installdirs -i
 
-	$(MAKE) install PREFIX=$(CURDIR)/debian/$(packagei)/usr LOCAL_RULES_DIR="debian/$(packagei)/etc/spamassassin"
+	$(MAKE) install PREFIX=$(CURDIR)/debian/$(packagei)/usr LOCAL_RULES_DIR="debian/$(packagei)/etc/spamassassin" DEF_RULES_DIR="debian/$(packagei)/etc/spamassassin"
 
 # Get rid of SPAMC stuff.
 
 	rm debian/$(packagei)/usr/bin/spamc debian/$(packagei)/usr/share/man/man1/spamc.1p
 
-	cp spamproxy/README debian/$(packagei)/usr/share/doc/$(packagei)/README.spamproxy
+	#cp spamproxy/README debian/$(packagei)/usr/share/doc/$(packagei)/README.spamproxy
 	cp sql/README debian/$(packagei)/usr/share/doc/$(packagei)/README.sql
 
 	cp debian/logcheck debian/$(packagei)/etc/logcheck/ignore.d.server/spamassassin
@@ -100,13 +100,13 @@ install-indep: build-indep
 	 > debian/$(packagei)/usr/share/man/man8/spamd.8
 	rm debian/$(packagei)/usr/share/man/man1/spamd.1p
 
-	sed 's#SPAMPROXYD 1#SPAMPROXYD 8#' \
-	 debian/$(packagei)/usr/share/man/man1/spamproxyd.1p \
-	 > debian/$(packagei)/usr/share/man/man8/spamproxyd.8
-	rm debian/$(packagei)/usr/share/man/man1/spamproxyd.1p
+#	sed 's#SPAMPROXYD 1#SPAMPROXYD 8#' \
+#	 debian/$(packagei)/usr/share/man/man1/spamproxyd.1p \
+#	 > debian/$(packagei)/usr/share/man/man8/spamproxyd.8
+#	rm debian/$(packagei)/usr/share/man/man1/spamproxyd.1p
 
 	mv debian/$(packagei)/usr/bin/spamd debian/$(packagei)/usr/sbin/
-	mv debian/$(packagei)/usr/bin/spamproxyd debian/$(packagei)/usr/sbin/
+	#mv debian/$(packagei)/usr/bin/spamproxyd debian/$(packagei)/usr/sbin/
 
 	-rmdir -p debian/$(packagei)/usr/lib/perl5
 
