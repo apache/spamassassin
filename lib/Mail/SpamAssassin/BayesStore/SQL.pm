@@ -63,6 +63,7 @@ sub new {
   my $self = $class->SUPER::new(@_);
 
   $self->{supported_db_version} = 3;
+  $self->{db_writable_p} = 0;
 
   if (!$self->{bayes}->{conf}->{bayes_sql_dsn}) {
     dbg("bayes: invalid config, must set bayes_sql_dsn config variable.\n");
@@ -110,9 +111,37 @@ so that they can begin using the database immediately.
 sub tie_db_readonly {
   my ($self) = @_;
 
-  my $ret = $self->tie_db_writable();
+  return 0 unless (HAS_DBI);
 
-  return $ret;
+  if ($self->{_dbh}) {
+    # already connected, but connection has now become readonly
+    $self->{db_writable_p} = 0;
+    return 1;
+  }
+
+  my $main = $self->{bayes}->{main};
+
+  $self->read_db_configs();
+
+  return 0 unless ($self->_connect_db());
+
+  my $db_ver = $self->_get_db_version();
+  $self->{db_version} = $db_ver;
+  dbg("bayes: found bayes db version ".$self->{db_version});
+
+  if ( $db_ver != $self->DB_VERSION ) {
+    warn("bayes: Database version $db_ver is different than we understand (".$self->DB_VERSION."), aborting!");
+    $self->untie_db();
+    return 0;
+  }
+
+  unless ($self->_initialize_db()) {
+    dbg("bayes: database entry for ".$self->{_username}." not found");
+    $self->untie_db();
+    return 0;
+  }
+
+  return 1;
 }
 
 =head2 tie_db_writable
@@ -131,27 +160,18 @@ sub tie_db_writable {
 
   return 0 unless (HAS_DBI);
 
-  return 1 if ($self->{_dbh}); # already connected
+  if ($self->{_dbh}) {
+    # already connected, but now it will be writable
+    $self->{db_writable_p} = 1;
+    return 1;
+  }
 
   my $main = $self->{bayes}->{main};
 
   $self->read_db_configs();
 
-  # Turn off PrintError and explicitly set AutoCommit to off
-  my $dbh = DBI->connect($self->{_dsn}, $self->{_dbuser}, $self->{_dbpass},
-			 {'PrintError' => 0, 'AutoCommit' => 1});
+  return 0 unless ($self->_connect_db());
 
-  if (!$dbh) {
-    dbg("bayes: Unable to connect to database: ".DBI->errstr());
-    return 0;
-  }
-  else {
-    dbg("bayes: Database connection established");
-  }
-
-  $self->{_dbh} = $dbh;
-
-  # If the DB version is one we don't understand, abort!
   my $db_ver = $self->_get_db_version();
   $self->{db_version} = $db_ver;
   dbg("bayes: found bayes db version ".$self->{db_version});
@@ -162,11 +182,13 @@ sub tie_db_writable {
     return 0;
   }
 
-  unless ($self->_initialize_db()) {
+  unless ($self->_initialize_db(1)) {
     dbg("bayes: unable to initialize database for ".$self->{_username}." user, aborting!");
     $self->untie_db();
     return 0;
   }
+
+  $self->{db_writable_p} = 1;
 
   return 1;
 }
@@ -185,6 +207,8 @@ sub untie_db {
   my ($self) = @_;
 
   return unless (defined($self->{_dbh}));
+
+  $self->{db_writable_p} = 0;
 
   $self->{_dbh}->disconnect();
   $self->{_dbh} = undef;
@@ -1237,7 +1261,18 @@ could causes the database to be inconsistent for the given user.
 sub clear_database {
   my ($self) = @_;
 
-  $self->tie_db_writable();
+  # We want to open readonly first, because if they don't already have
+  # a db entry, we want to avoid creating one, just to delete it in a few secs
+  if ($self->tie_db_readonly()) {
+    # Ok, they must have had a db entry, so now make the connection writable
+    $self->tie_db_writable();
+  }
+  else {
+    # If we were unable to create a readonly connection then they must
+    # not have a db entry, so no need to clear.
+    # But it should be considered a success.
+    return 1;
+  }
 
   return 0 unless (defined($self->{_dbh}));
 
@@ -1368,10 +1403,6 @@ sub restore_database {
     return 0;
   }
 
-  return 0 unless ($self->tie_db_writable());
-
-  return 0 unless (defined($self->{_dbh}));
-
   # This is the critical phase (moving sql around), so don't allow it
   # to be interrupted.
   local $SIG{'INT'} = 'IGNORE';
@@ -1379,12 +1410,10 @@ sub restore_database {
   local $SIG{'TERM'} = 'IGNORE';
 
   unless ($self->clear_database()) {
-    dbg("bayes: Database now in inconsistent state for ".$self->{_username});
     return 0;
   }
 
-  unless ($self->_initialize_db()) {
-    dbg("bayes: Unable to re-initialize database for ".$self->{_username});
+  unless ($self->tie_db_writable()) {
     return 0;
   }
 
@@ -1525,19 +1554,17 @@ sub restore_database {
   }
 
   if ($error_p) {
-    dbg("bayes: Error(s) while attempting to load $filename, correct and Re-Run");
-
+    dbg("bayes: Error(s) while attempting to load $filename, clearing database, correct and Re-Run");
     $self->clear_database();
-
-    dbg("bayes: Database now in inconsistent state for ".$self->{_username});
     return 0;
   }
 
-  unless ($self->nspam_nham_change($num_spam, $num_ham)) {
-    dbg("bayes: Error updating num spam and num ham.");
-    $self->clear_database();
-    dbg("bayes; Database now in inconsistent state for ".$self->{_username});
-    return 0;
+  if ($num_spam || $num_ham) {
+    unless ($self->nspam_nham_change($num_spam, $num_ham)) {
+      dbg("bayes: Error updating num spam and num ham, clearing database.");
+      $self->clear_database();
+      return 0;
+    }
   }
 
   dbg("bayes: Parsed $line_count lines.");
@@ -1548,8 +1575,71 @@ sub restore_database {
   return 1;
 }
 
+=head2 db_readable
+
+public instance (Boolean) db_readable()
+
+Description:
+This method returns a boolean value indicating if the database is in a
+readable state.
+
+=cut
+
+sub db_readable {
+  my ($self) = @_;
+
+  # if there's a database handle, we can read...
+  return defined $self->{_dbh};
+}
+
+=head2 db_writable
+
+public instance (Boolean) db_writeable()
+
+Description:
+This method returns a boolean value indicating if the database is in a
+writable state.
+
+=cut
+
+sub db_writable {
+  my ($self) = @_;
+
+  return (defined $self->{_dbh} && $self->{db_writable_p})
+}
 
 =head1 Private Methods
+
+=head2 _connect_db
+
+private instance (Boolean) _connect_db ()
+
+Description:
+This method connects to the SQL database.
+
+=cut
+
+sub _connect_db {
+  my ($self) = @_;
+
+  $self->{_dbh} = undef;
+
+  # Turn off PrintError and explicitly set AutoCommit to off
+  my $dbh = DBI->connect($self->{_dsn}, $self->{_dbuser}, $self->{_dbpass},
+                        {'PrintError' => 0, 'AutoCommit' => 1});
+
+  if (!$dbh) {
+    dbg("bayes: Unable to connect to database: ".DBI->errstr());
+    return 0;
+  }
+  else {
+    dbg("bayes: Database connection established");
+  }
+
+  $self->{_dbh} = $dbh;
+
+ return 1;
+}
 
 =head2 _get_db_version
 
@@ -1592,7 +1682,7 @@ sub _get_db_version {
 
   return $version;
 }
- 
+
 =head2 _initialize_db
 
 private instance (Boolean) _initialize_db ()
@@ -1604,7 +1694,7 @@ initialized. If not then it will perform this initialization.
 =cut
 
 sub _initialize_db {
-  my ($self) = @_;
+  my ($self, $create_entry_p) = @_;
 
   return 0 unless (defined($self->{_dbh}));
 
@@ -1634,6 +1724,9 @@ sub _initialize_db {
     $sthselect->finish();
     return 1;
   }
+
+  # Do not create an entry for this user unless we were specifically asked to
+  return 0 unless ($create_entry_p);
 
   # For now let the database setup the other variables as defaults
   my $sqlinsert = "INSERT INTO bayes_vars (username) VALUES (?)";
@@ -1993,21 +2086,6 @@ sub _get_num_lowfreq {
   $sth->finish();
 
   return $num_lowfreq;
-}
-
-sub db_readable {
-  my($self) = @_;
-
-  # if there's a database handle, we can read...
-  return defined $self->{_dbh};
-}
-
-sub db_writable {
-  my($self) = @_;
-
-  # since in the SA SQL code, there is no difference between R/O and
-  # R/W access, we just care if we have DB access.
-  return defined $self->{_dbh};
 }
 
 sub dbg { Mail::SpamAssassin::dbg (@_); }
