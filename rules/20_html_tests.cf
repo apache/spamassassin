@@ -205,6 +205,9 @@ describe HTML_TAG_BALANCE_BODY	HTML has unbalanced "body" tags
 body HTML_TAG_BALANCE_HEAD	eval:html_tag_balance('head', '!= 0')
 describe HTML_TAG_BALANCE_HEAD	HTML has unbalanced "head" tags
 
+body HTML_TAG_EXIST_BGSOUND	eval:html_tag_exists('bgsound')
+describe HTML_TAG_EXIST_BGSOUND	HTML has "bgsound" tag
+
 body HTML_TAG_EXIST_MARQUEE	eval:html_tag_exists('marquee')
 describe HTML_TAG_EXIST_MARQUEE	HTML has "marquee" tag
 
@@ -282,6 +285,15 @@ describe HTML_SHORT_CENTER	HTML is very short with CENTER tag
 
 body HTML_TITLE_EMPTY		eval:html_text_not_match('title', '(?s)\S')
 describe HTML_TITLE_EMPTY	HTML title contains no text
+
+body __MIME_ATTACHMENT		eval:check_for_mime('mime_attachment')
+
+body __HTML_TITLE_120		eval:html_text_match('title', '.{120}')
+meta HTML_TITLE_LONG		__HTML_TITLE_120 && !__MIME_ATTACHMENT
+describe HTML_TITLE_LONG	HTML title is very long
+
+body __HTML_TITLE_SUBJ_DIFF	eval:html_title_subject_ratio('3.5')
+meta HTML_TITLE_SUBJ_DIFF	__HTML_TITLE_SUBJ_DIFF && !__MIME_ATTACHMENT
 
 body HTML_TITLE_UNTITLED	eval:html_text_match('title', '(?i)(?:untitled|new page \d+)')
 describe HTML_TITLE_UNTITLED	HTML title contains "Untitled"

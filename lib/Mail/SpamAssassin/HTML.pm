@@ -606,9 +606,6 @@ sub html_tests {
       $height = $1;
       $height *= 6 if (defined $2 && $2 eq "%");
     }
-    if ($width <= 0 || $height <= 0) {
-      $self->put_results(image_size_zero => 1);
-    }
     # guess size
     $width = 200 if $width <= 0;
     $height = 200 if $height <= 0;
