@@ -63,7 +63,7 @@ Mail::SpamAssassin - Spam detector and markup engine
 
 =head1 SYNOPSIS
 
-  my $mail = Mail::SpamAssassin::NoMailAudit->new();
+  my $mail = Mail::SpamAssassin::MsgParser->parse();
 
   my $spamtest = Mail::SpamAssassin->new();
   my $status = $spamtest->check ($mail);
@@ -111,7 +111,7 @@ require 5.006_001;
 use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::ConfSourceSQL;
 use Mail::SpamAssassin::PerMsgStatus;
-use Mail::SpamAssassin::NoMailAudit;
+use Mail::SpamAssassin::MsgParser;
 use Mail::SpamAssassin::Bayes;
 
 use File::Basename;
@@ -636,7 +636,7 @@ Otherwise identical to C<$f->check()> above.
 sub check_message_text {
   my $self = shift;
   my @lines = split (/^/m, $_[0]);
-  my $mail_obj = Mail::SpamAssassin::NoMailAudit->new ('data' => \@lines);
+  my $mail_obj = Mail::SpamAssassin::MsgParser->parse (\@lines);
   return $self->check ($mail_obj);
 }
 
@@ -682,7 +682,7 @@ sub report_as_spam {
 
   # Let's make sure the markup was removed first ...
   my @msg = split (/^/m, $self->remove_spamassassin_markup($mail));
-  $mail = Mail::SpamAssassin::NoMailAudit->new ('data' => \@msg);
+  $mail = Mail::SpamAssassin::MsgParser->parse (\@msg);
 
   # learn as spam if enabled
   if ( $self->{conf}->{bayes_learn_during_report} ) {
@@ -726,7 +726,7 @@ sub revoke_as_spam {
 
   # Let's make sure the markup was removed first ...
   my @msg = split (/^/m, $self->remove_spamassassin_markup($mail));
-  $mail = Mail::SpamAssassin::NoMailAudit->new ('data' => \@msg);
+  $mail = Mail::SpamAssassin::MsgParser->parse (\@msg);
 
   # learn as nonspam
   $self->learn ($mail, undef, 0, 0);
@@ -1116,7 +1116,7 @@ sub compile_now {
   dbg ("ignore: test message to precompile patterns and load modules");
   $self->init($use_user_prefs);
 
-  my $mail = Mail::SpamAssassin::NoMailAudit->new(data => \@testmsg);
+  my $mail = Mail::SpamAssassin::MsgParser->parse(\@testmsg);
   my $status = Mail::SpamAssassin::PerMsgStatus->new($self, $mail,
                         { disable_auto_learning => 1 } );
   $status->word_is_in_dictionary("aba"); # load triplets.txt into memory
@@ -1159,7 +1159,7 @@ sub lint_rules {
   $self->init(1);
   $self->{syntax_errors} += $self->{conf}->{errors};
 
-  my $mail = Mail::SpamAssassin::NoMailAudit->new(data => \@testmsg);
+  my $mail = Mail::SpamAssassin::MsgParser->parse(\@testmsg);
   my $status = Mail::SpamAssassin::PerMsgStatus->new($self, $mail,
                         { disable_auto_learning => 1 } );
   $status->check();

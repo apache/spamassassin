@@ -1,6 +1,6 @@
 =head1 NAME
 
-Mail::SpamAssassin::MIME::Parser - parse, decode, and render MIME body parts
+Mail::SpamAssassin::MsgParser - parse, decode, and render MIME body parts
 
 =head1 SYNOPSIS
 
@@ -17,21 +17,21 @@ standard text format, suitable for use in SpamAssassin.
 
 =cut
 
-package Mail::SpamAssassin::MIME::Parser;
+package Mail::SpamAssassin::MsgParser;
 use strict;
 
 use Mail::SpamAssassin;
-use Mail::SpamAssassin::MIME;
+use Mail::SpamAssassin::MsgContainer;
 
 =item parse()
 
-Unlike most modules, Mail::SpamAssassin::MIME::Parser will not return an
-object of the same type, but rather a Mail::SpamAssassin::MIME object.
-To use it, simply call C<Mail::SpamAssassin::MIME::Parser->parse($msg)>,
+Unlike most modules, Mail::SpamAssassin::MsgParser will not return an
+object of the same type, but rather a Mail::SpamAssassin::MsgContainer object.
+To use it, simply call C<Mail::SpamAssassin::MsgParser->parse($msg)>,
 where $msg is a scalar with the entire contents of the mesage.
 
 The procedure used to parse a message is recursive and ends up generating
-a tree of M::SA::MIME objects.  parse() will generate the parent node
+a tree of M::SA::MsgContainer objects.  parse() will generate the parent node
 of the tree, then pass the body of the message to _parse_body() which begins
 the recursive process.
 
@@ -41,6 +41,7 @@ This is the only public method available!
 
 sub parse {
   my($self,$message) = @_;
+  $message ||= \*STDIN;
 
   dbg("---- MIME PARSER START ----");
 
@@ -64,7 +65,7 @@ sub parse {
   shift @message if ( @message > 0 && $message[0] =~ /^From\s/ );
 
   # Generate the main object and parse the appropriate MIME-related headers into it.
-  my $msg = Mail::SpamAssassin::MIME->new();
+  my $msg = Mail::SpamAssassin::MsgContainer->new();
   my $header = '';
 
   # Go through all the headers of the message
@@ -180,7 +181,7 @@ sub _parse_multipart {
     # Else, there's no boundary, so leave the whole part...
   }
 
-  my $part_msg = Mail::SpamAssassin::MIME->new();    # prepare a new tree node
+  my $part_msg = Mail::SpamAssassin::MsgContainer->new();    # prepare a new tree node
   my $in_body = 0;
   my $header;
   my $part_array;
@@ -214,7 +215,7 @@ sub _parse_multipart {
 
       # make sure we start with a new clean node
       $in_body  = 0;
-      $part_msg = Mail::SpamAssassin::MIME->new();
+      $part_msg = Mail::SpamAssassin::MsgContainer->new();
       undef $part_array;
       undef $header;
 

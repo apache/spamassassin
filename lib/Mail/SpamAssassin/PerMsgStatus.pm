@@ -67,7 +67,7 @@ Mail::SpamAssassin::PerMsgStatus - per-message status (spam or not-spam)
     'rules_filename'      => '/etc/spamassassin.rules',
     'userprefs_filename'  => $ENV{HOME}.'/.spamassassin.cf'
   });
-  my $mail = Mail::SpamAssassin::NoMailAudit->new();
+  my $mail = Mail::SpamAssassin::MsgParser->parse();
 
   my $status = $spamtest->check ($mail);
   if ($status->is_spam()) {
@@ -101,6 +101,7 @@ use Mail::SpamAssassin::HTML;
 use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Received;
 use Mail::SpamAssassin::Util;
+use Mail::SpamAssassin::MsgParser;
 
 use constant MAX_BODY_LINE_LENGTH =>        2048;
 
@@ -750,7 +751,7 @@ $original
 EOM
   
   my @lines = split (/^/m,  $newmsg);
-  return Mail::SpamAssassin::NoMailAudit->new(data => \@lines);
+  return Mail::SpamAssassin::MsgParser->parse(\@lines);
 }
 
 sub rewrite_headers {
@@ -792,7 +793,7 @@ sub rewrite_headers {
   }
 
   push(@pristine_headers, "\n", split (/^/m, $self->{msg}->get_pristine_body()));
-  return Mail::SpamAssassin::NoMailAudit->new(data => \@pristine_headers);
+  return Mail::SpamAssassin::MsgParser->parse(\@pristine_headers);
 }
 
 sub _process_header {
@@ -1295,7 +1296,7 @@ sub get {
     my $getraw = ($hdrname eq 'ALL' || $hdrname =~ s/:raw$//);
 
     if ($hdrname eq 'ALL') {
-      $_ = $self->{msg}->get_all_headers();
+      $_ = $self->{msg}->get_all_headers($getraw);
     }
     # EnvelopeFrom: the SMTP MAIL FROM: addr
     elsif ($hdrname eq 'EnvelopeFrom') {
@@ -1306,22 +1307,22 @@ sub get {
     }
     # ToCc: the combined recipients list
     elsif ($hdrname eq 'ToCc') {
-      $_ = join ("\n", $self->{msg}->get_header ('To'));
+      $_ = join ("\n", $self->{msg}->get_header ('To', $getraw));
       if ($_ ne '') {
         chop $_;
         $_ .= ", " if /\S/;
       }
-      $_ .= join ("\n", $self->{msg}->get_header ('Cc'));
+      $_ .= join ("\n", $self->{msg}->get_header ('Cc', $getraw));
       undef $_ if $_ eq '';
     }
     # MESSAGEID: handle lists which move the real message-id to another
     # header for resending.
     elsif ($hdrname eq 'MESSAGEID') {
       $_ = join ("\n", grep { defined($_) && length($_) > 0 }
-                $self->{msg}->get_header ('X-Message-Id'),
-                $self->{msg}->get_header ('Resent-Message-Id'),
-                $self->{msg}->get_header ('X-Original-Message-ID'), # bug 2122
-                $self->{msg}->get_header ('Message-Id'));
+                $self->{msg}->get_header ('X-Message-Id', $getraw),
+                $self->{msg}->get_header ('Resent-Message-Id', $getraw),
+                $self->{msg}->get_header ('X-Original-Message-ID', $getraw), # bug 2122
+                $self->{msg}->get_header ('Message-Id', $getraw));
     }
     # untrusted relays list, as string
     elsif ($hdrname eq 'X-Spam-Relays-Untrusted') {
@@ -1333,7 +1334,7 @@ sub get {
     }
     # a conventional header
     else {
-      my @hdrs = $self->{msg}->get_header ($hdrname);
+      my @hdrs = $self->{msg}->get_header ($hdrname, $getraw);
       if ($#hdrs >= 0) {
         $_ = join ('', @hdrs);
       }
@@ -1354,9 +1355,6 @@ sub get {
         chomp; s/\r?\n//gs;
         s/^[\'\"]*(.*?)[\'\"]*\s*<.+>\s*$/$1/g # Foo Blah <jm@foo>
             or s/^.+\s\((.*?)\)\s*$/$1/g;           # jm@foo (Foo Blah)
-      }
-      elsif (!$getraw) {
-        $_ = $self->mime_decode_header ($_);
       }
     }
     $self->{hdr_cache}->{$request} = $_;
@@ -2372,8 +2370,8 @@ sub get_envelope_from {
   # cannot trust any Envelope-From headers, since they're likely to be
   # incorrect fetchmail guesses.
 
-  if ($self->get ("X-Sender")) {
-    my $rcvd = $self->get ("Received");
+  if ($self->get ("X-Sender", 1)) {
+    my $rcvd = $self->get ("Received", 1);
     if ($rcvd =~ /\(fetchmail/) {
       dbg ("X-Sender and fetchmail signatures found, cannot trust envelope-from");
       return undef;
@@ -2381,13 +2379,13 @@ sub get_envelope_from {
   }
 
   # procmailrc notes this, amavisd are adding it, we recommend it
-  if ($envf = $self->get ("X-Envelope-From")) { goto ok; }
+  if ($envf = $self->get ("X-Envelope-From", 1)) { goto ok; }
 
   # qmail, new-inject(1)
-  if ($envf = $self->get ("Envelope-Sender")) { goto ok; }
+  if ($envf = $self->get ("Envelope-Sender", 1)) { goto ok; }
 
   # Postfix, sendmail, also mentioned in RFC821
-  if ($envf = $self->get ("Return-Path")) { goto ok; }
+  if ($envf = $self->get ("Return-Path", 1)) { goto ok; }
 
   # give up.
   return undef;

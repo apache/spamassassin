@@ -3623,8 +3623,8 @@ sub multipart_alternative_difference {
 sub _multipart_alternative_difference {
   my($self) = @_;
 
-  my @ma = $self->{msg}->{mime_parts}->find_parts(qr@^multipart/alternative\b@i);
-  my @content = $self->{msg}->{mime_parts}->content_summary();
+  my @ma = $self->{msg}->find_parts(qr@^multipart/alternative\b@i);
+  my @content = $self->{msg}->content_summary();
 
   $self->{madiff} = 0;
 

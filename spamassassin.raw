@@ -64,7 +64,7 @@ my %opt = ( 'create-prefs' => 1);
 
 eval {
   require Mail::SpamAssassin;
-  require Mail::SpamAssassin::NoMailAudit;
+  require Mail::SpamAssassin::MsgParser;
 
   # gnu_getopt is not available in Getopt::Long 2.24, see bug 732
   # gnu_compat neither.
@@ -123,9 +123,8 @@ eval {
 
   my $mail;
 
-  use Mail::SpamAssassin::NoMailAudit;
   if (!$opt{'lint'} && !$doing_address_only_whitelisting) {
-    $mail = Mail::SpamAssassin::NoMailAudit->new ();
+    $mail = Mail::SpamAssassin::MsgParser->parse ();
   }
 
 # create the tester factory

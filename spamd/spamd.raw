@@ -25,7 +25,7 @@ use IO::Handle;
 use IO::Pipe;
 
 use Mail::SpamAssassin;
-use Mail::SpamAssassin::NoMailAudit;
+use Mail::SpamAssassin::MsgParser;
 use Mail::SpamAssassin::NetSet;
 
 use Getopt::Long;
@@ -731,9 +731,7 @@ sub check {
       "."
     );
 
-    my $mail = Mail::SpamAssassin::NoMailAudit->new (
-      data => \@msglines
-    );
+    my $mail = Mail::SpamAssassin::MsgParser->parse (\@msglines);
 
     # Check length if we're supposed to
     if($expected_length && ($actual_length != $expected_length)) {

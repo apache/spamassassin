@@ -64,7 +64,7 @@ use bytes;
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::ArchiveIterator;
-use Mail::SpamAssassin::NoMailAudit;
+use Mail::SpamAssassin::MsgParser;
 use Mail::SpamAssassin::PerMsgLearner;
 
 use Getopt::Long;
@@ -334,13 +334,13 @@ sub wanted {
 					{ die 'HITLIMIT'; }
 
   $messagecount++;
-  my $ma = Mail::SpamAssassin::NoMailAudit->new ('data' => $dataref);
+  my $ma = Mail::SpamAssassin::MsgParser->parse ($dataref);
 
   if ($ma->get ("X-Spam-Checker-Version")) {
     my $newtext = $spamtest->remove_spamassassin_markup($ma);
     my @newtext = split (/^/m, $newtext);
     $dataref = \@newtext;
-    $ma = Mail::SpamAssassin::NoMailAudit->new ('data' => $dataref);
+    $ma = Mail::SpamAssassin::MsgParser->parse ($dataref);
   }
 
   $ma->{noexit} = 1;

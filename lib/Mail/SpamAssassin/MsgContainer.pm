@@ -59,7 +59,7 @@
 # University of Illinois, Urbana-Champaign.
 # </@LICENSE>
 
-package Mail::SpamAssassin::MIME;
+package Mail::SpamAssassin::MsgContainer;
 use strict;
 use MIME::Base64;
 use Mail::SpamAssassin;
@@ -72,6 +72,7 @@ use MIME::QuotedPrint;
 sub new {
   my $class = shift;
   $class = ref($class) || $class;
+  my %opts = @_;
 
   my $self = {
     headers		=> {},
@@ -79,6 +80,10 @@ sub new {
     body_parts		=> [],
     header_order	=> [],
     };
+
+  foreach ( 'noexit' ) {
+    $self->{$_} = $opts{$_} if ( exists $opts{$_} );
+  }
 
   bless($self,$class);
 
@@ -367,6 +372,91 @@ sub _decode_header {
   return $header;
 }
 
+
+sub get_pristine_header {
+  my ($self, $hdr) = @_;
+  
+  return $self->{pristine_headers} unless $hdr;
+  my(@ret) = $self->{pristine_headers} =~ /^(?:$hdr:[ ]+(.*\n(?:\s+\S.*\n)*))/mig;
+  if (@ret) {
+    return wantarray ? @ret : $ret[-1];
+  }
+  else {
+    return $self->get_header($hdr);
+  }
+}
+
+#sub get { shift->get_header(@_); }
+sub get_header {
+  my ($self, $hdr, $raw) = @_;
+  $raw ||= 0;
+
+  # And now pick up all the entries into a list
+  # This is assumed to include a newline at the end ...
+  # This is also assumed to have removed continuation bits ...
+  my @hdrs;
+  if ( $raw ) {
+    @hdrs = map { s/\r?\n\s+/ /g; $_; } $self->raw_header($hdr);
+  }
+  else {
+    @hdrs = map { "$_\n" } $self->header($hdr);
+  }
+
+  if (wantarray) {
+    return @hdrs;
+  }
+  else {
+    return $hdrs[-1];
+  }
+}
+
+#sub header { shift->get_all_headers(@_); }
+sub get_all_headers {
+  my ($self, $raw) = @_;
+  $raw ||= 0;
+
+  my %cache = ();
+  my @lines = ();
+
+  foreach ( @{$self->{header_order}} ) {
+    push(@lines, "$_: ".($self->get_header($_,$raw))[$cache{$_}++]);
+  }
+
+  if (wantarray) {
+    return @lines;
+  } else {
+    return join ('', @lines);
+  }
+}
+
+#sub body { return shift->get_body(@_); }
+sub get_body {
+  my ($self) = @_;
+  my @ret = split(/^/m, $self->{pristine_body});
+  return \@ret;
+}
+
+# ---------------------------------------------------------------------------
+
+sub get_pristine {
+  my ($self) = @_;
+  return $self->{pristine_headers} . $self->{pristine_body};
+}
+
+sub get_pristine_body {
+  my ($self) = @_;
+  return $self->{pristine_body};
+}
+
+sub as_string {
+  my ($self) = @_;
+  return $self->get_all_headers(1) . "\n" . $self->{pristine_body};
+}
+
+sub ignore {
+  my ($self) = @_;
+  exit (0) unless $self->{noexit};
+}
 
 sub dbg { Mail::SpamAssassin::dbg (@_); }
 

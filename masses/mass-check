@@ -120,7 +120,7 @@ use lib "$FindBin::Bin/../lib";
 eval "use bytes";
 use Mail::SpamAssassin::ArchiveIterator;
 use Mail::SpamAssassin;
-use Mail::SpamAssassin::NoMailAudit;
+use Mail::SpamAssassin::MsgParser;
 use Getopt::Long;
 use POSIX qw(strftime);
 use constant HAS_TIME_PARSEDATE => eval { require Time::ParseDate; };
@@ -286,7 +286,7 @@ sub wanted {
   my ($id, $time, $dataref) = @_;
   my $out;
 
-  my $ma = Mail::SpamAssassin::NoMailAudit->new('data' => $dataref);
+  my $ma = Mail::SpamAssassin::MsgParser->parse($dataref);
   $ma->{noexit} = 1;
 
   # remove SpamAssassin markup, if present and the mail was spam
@@ -295,7 +295,7 @@ sub wanted {
     my $newtext = $spamtest->remove_spamassassin_markup($ma);
     my @newtext = split (/^/m, $newtext);
     $dataref = \@newtext;
-    $ma = Mail::SpamAssassin::NoMailAudit->new ('data' => $dataref);
+    $ma = Mail::SpamAssassin::MsgParser->parse ($dataref);
   }
 
   my $status = $spamtest->check($ma);
