@@ -21,6 +21,9 @@
 #include <arpa/inet.h>
 #include "libspamc.h"
 
+#define MAX_CONNECT_RETRIES 3
+#define CONNECT_RETRY_SLEEP 1
+
 /* RedHat 5.2 doesn't define Shutdown 2nd Parameter Constants */
 /* KAM 12-4-01 */
 #ifndef SHUT_RD
@@ -351,12 +354,14 @@ try_to_connect (const struct sockaddr *addr, int *sockptr, struct spamc_context 
 #ifdef USE_TCP_NODELAY
   int value;
 #endif
-  int mysock;
+  int mysock = -1;
+  int status = -1;
   int origerr;
+  int numloops;
 
   if(-1 == (mysock = socket(PF_INET,SOCK_STREAM,0)))
   {
-    origerr = errno;	/* take a copy before syslog() */
+    origerr = errno;    /* take a copy before syslog() */
     syslog (LOG_ERR, "socket() to spamd failed: %m");
     switch(origerr)
     {
@@ -376,6 +381,7 @@ try_to_connect (const struct sockaddr *addr, int *sockptr, struct spamc_context 
   }
   
 #ifdef USE_TCP_NODELAY
+  /* TODO: should this be up above the connect()? */
   value = 1;		/* make this explicit! */
   if(-1 == setsockopt(mysock,0,TCP_NODELAY,&value,sizeof(value)))
   {
@@ -394,35 +400,47 @@ try_to_connect (const struct sockaddr *addr, int *sockptr, struct spamc_context 
   }
 #endif
 
-  if(connect(mysock,(const struct sockaddr *) addr, sizeof(*addr)) < 0)
-  {
-    origerr = errno;	/* take a copy before syslog() */
-    syslog (LOG_ERR, "connect() to spamd failed: %m");
-    switch(origerr)
+  for (numloops=0; numloops < MAX_CONNECT_RETRIES; numloops++) {
+    status = connect(mysock,(const struct sockaddr *) addr, sizeof(*addr));
+
+    if (status < 0)
     {
-    case EBADF:
-    case EFAULT:
-    case ENOTSOCK:
-    case EISCONN:
-    case EADDRINUSE:
-    case EINPROGRESS:
-    case EALREADY:
-    case EAFNOSUPPORT:
-      return EX_SOFTWARE;
-    case ECONNREFUSED:
-    case ETIMEDOUT:
-    case ENETUNREACH:
-      return EX_UNAVAILABLE;
-    case EACCES:
-      return EX_NOPERM;
-    default:
-      return EX_SOFTWARE;
+      origerr = errno;        /* take a copy before syslog() */
+      syslog (LOG_ERR, "connect() to spamd at %s failed, retrying (%d/%d): %m",
+                        inet_ntoa(((struct sockaddr_in *)addr)->sin_addr),
+                        numloops+1, MAX_CONNECT_RETRIES);
+      sleep(1);
+
+    } else {
+      *sockptr = mysock;
+      return EX_OK;
     }
   }
-
-  *sockptr = mysock;
-
-  return EX_OK;
+ 
+  /* failed, even with a few retries */
+  syslog (LOG_ERR, "connection attempt to spamd aborted after %d retries",
+       MAX_CONNECT_RETRIES);
+ 
+  switch(origerr)
+  {
+   case EBADF:
+   case EFAULT:
+   case ENOTSOCK:
+   case EISCONN:
+   case EADDRINUSE:
+   case EINPROGRESS:
+   case EALREADY:
+   case EAFNOSUPPORT:
+     return EX_SOFTWARE;
+   case ECONNREFUSED:
+   case ETIMEDOUT:
+   case ENETUNREACH:
+     return EX_UNAVAILABLE;
+   case EACCES:
+     return EX_NOPERM;
+   default:
+     return EX_SOFTWARE;
+  }
 }
 
 int process_message(const char *hostname, int port, char *username, int max_size,
