@@ -7,16 +7,16 @@
 # Whitelist and blacklist addresses are now file-glob-style patterns, so
 # "friend@somewhere.com", "*@isp.com", or "*.domain.net" will all work.
 
-whitelist_from_rcvd	billing@networksolutions.com        networksolutions.com
-whitelist_from_rcvd	hostmaster@internic.net             internic.net
-whitelist_from_rcvd	support@register.com                register.com
-whitelist_from_rcvd	nytdirect@nytimes.com               nytimes.com
-whitelist_from_rcvd	petitions@petitiononline.com        petitiononline.com
+whitelist_from_rcvd  billing@networksolutions.com           networksolutions.com
+whitelist_from_rcvd  hostmaster@internic.net                internic.net
+whitelist_from_rcvd  support@register.com                   register.com
+whitelist_from_rcvd  nytdirect@nytimes.com                  nytimes.com
+whitelist_from_rcvd  petitions@petitiononline.com           petitiononline.com
 
 whitelist_from_rcvd  *@*.amazon.com                         amazon.com
-whitelist_from_rcvd  *@amazon.co.uk                         amazon.co.uk
-whitelist_from_rcvd  *@*.amazon.co.uk                       amazon.co.uk
-whitelist_from_rcvd	*@ora.com		            oreilly.com
+whitelist_from_rcvd  *@amazon.co.uk                         amazon.com
+whitelist_from_rcvd  *@*.amazon.co.uk                       amazon.com
+whitelist_from_rcvd  *@ora.com		                    oreilly.com
 whitelist_from_rcvd  *@*.ora.com                            oreilly.com
 whitelist_from_rcvd  *@walmart.com                          walmart.com
 whitelist_from_rcvd  *@bn.com                               bn.com
@@ -34,4 +34,7 @@ whitelist_from_rcvd  *@mailer.whitehat.com                     whitehat.com
 whitelist_from_rcvd  *@mediaunspun.imakenews.net               imakenews.com
 whitelist_from_rcvd  *@spamex.com                              spamex.com
 
-whitelist_from_rcvd  *@lists.sourceforge.net  sourceforge.net
+whitelist_from_rcvd  *@*.eff.org                            ctsg.com
+
+whitelist_from_rcvd  *@lists.sourceforge.net                sourceforge.net
+
