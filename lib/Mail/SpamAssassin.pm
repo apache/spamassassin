@@ -224,13 +224,21 @@ sub remove_spamassassin_markup {
 
   $self->init();
   my $mail = $self->encapsulate_audit ($audit);
-
   my $hdrs = $mail->get_all_headers();
+
+  # remove DOS line endings
+  $hdrs =~ s/\r//gs;
+
+  # de-break lines on SpamAssassin-modified headers.
+  $hdrs =~ s/(\n(?:X-Spam|Subject)[^\n]+?)\n[ \t]+/$1 /gs;
 
   # reinstate the old content type
   if ($hdrs =~ /^X-Spam-Prev-Content-Type: /m) {
     $hdrs =~ s/\nContent-Type: [^\n]*?\n/\n/gs;
-    $hdrs =~ s/\nX-Spam-Prev-(Content-Type: [^\n]*?\n)/\n$1/gs;
+    $hdrs =~ s/\nX-Spam-Prev-(Content-Type: [^\n]*\n)/\n$1/gs;
+
+    # remove embedded spaces where they shouldn't be; a common problem
+    $hdrs =~ s/(Content-Type: .*?boundary=\".*?) (.*?\".*?\n)/$1$2/gs;
   }
 
   # remove the headers we added
@@ -246,6 +254,8 @@ sub remove_spamassassin_markup {
   my $inreport = 0;
   foreach $_ (@{$mail->get_body()})
   {
+    s/\r?$//;	# DOS line endings
+
     if (/^SPAM: ----/ && $inreport == 0) {
       # we've just entered a report.  If there's a blank line before the
       # report, get rid of it...
