@@ -430,7 +430,7 @@ sub razor2_lookup {
       $response = undef;
       if ( $@ =~ /alarm/ ) {
           dbg("razor2 check timed out after $timeout secs.");
-        } elsif ($@ =~ /could not connect/) {
+        } elsif ($@ =~ /(?:could not connect|network is unreachable)/) {
           # make this a dbg(); SpamAssassin will still continue,
           # but without Razor checking.  otherwise there may be
           # DSNs and errors in syslog etc., yuck
