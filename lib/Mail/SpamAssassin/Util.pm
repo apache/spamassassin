@@ -368,6 +368,37 @@ sub time_to_rfc822_date {
 
 ###########################################################################
 
+# Some base64 decoders will remove intermediate "=" characters, others
+# will stop decoding on the first "=" character, this one translates "="
+# characters to null.
+sub base64_decode {
+  local $_ = shift;
+
+  s/\s+//g;
+  if (HAS_MIME_BASE64 && (length($_) % 4 == 0) &&
+      m|^(?:[A-Za-z0-9+/=]{2,}={0,2})$|s)
+  {
+    # only use MIME::Base64 when the XS and Perl are both correct and quiet
+    s/=([^=])/A$1/g;
+    return MIME::Base64::decode_base64($_);
+  }
+  tr|A-Za-z0-9+/=||cd;			# remove non-base64 characters
+  s/=+$//;				# remove terminating padding
+  tr|A-Za-z0-9+/=| -_`|;		# translate to uuencode
+  s/.$// if (length($_) % 4 == 1);	# unpack cannot cope with extra byte
+
+  my $length;
+  my $out = '';
+  while ($_) {
+    $length = (length >= 84) ? 84 : length;
+    $out .= unpack("u", chr(32 + $length * 3/4) . substr($_, 0, $length, ''));
+  }
+
+  return $out;
+}
+
+###########################################################################
+
 sub portable_getpwuid {
   if (defined &Mail::SpamAssassin::Util::_getpwuid_wrapper) {
     return Mail::SpamAssassin::Util::_getpwuid_wrapper(@_);
