@@ -1073,9 +1073,8 @@ sub scan {
 
   my $msgatime = $self->receive_date(scalar $msg->get_all_headers(0,1));
 
-  # If the message atime comes back as being more than 1 day in the
-  # future, something's messed up and we should revert to current time as
-  # a safety measure.
+  # If the message atime comes back as being in the future, something's
+  # messed up and we should revert to current time as a safety measure.
   #
   $msgatime = time if ( $msgatime > time );
 
