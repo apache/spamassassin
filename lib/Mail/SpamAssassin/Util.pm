@@ -94,10 +94,10 @@ use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/oi);
     return if ($cleaned_taint_path++);
     return unless am_running_in_taint_mode();
 
-    dbg("util: running in taint mode, removing unsafe env vars, and resetting PATH");
+    dbg("util: taint mode: deleting unsafe environment variables, resetting PATH");
 
     if (RUNNING_ON_WINDOWS) {
-      dbg("util: running on a Windows-esque platform, skipping PATH cleaning");
+      dbg("util: running on Win32, skipping PATH cleaning");
       return;
     }
 
