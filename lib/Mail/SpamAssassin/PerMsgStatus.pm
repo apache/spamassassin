@@ -743,12 +743,13 @@ sub _process_header {
       $hdr_data =~ s/\s*\n\s*/\n\t/g;
       return $hdr_data;
     } else {
-      my $hdr = "$hdr_name: $hdr_data";
+      my $hdr = "$hdr_name!!$hdr_data";
+      # use '!!' instead of ': ' so it doesn't wrap on the space
       $Text::Wrap::columns = 79;
-      $Text::Wrap::huge = 'overflow';
+      $Text::Wrap::huge = 'wrap';
       $Text::Wrap::break = '[\s,]';
       $hdr = Text::Wrap::wrap('',"\t",$hdr);
-      return (split (/: /, $hdr, 2))[1]; # just return the data part
+      return (split (/!!/, $hdr, 2))[1]; # just return the data part
     }
   } else {
     $hdr_data =~ s/\n/ /g; # Can't have newlines in headers, unless folded
@@ -799,7 +800,7 @@ sub _get_tag {
 	    STARS => sub {
 	      my $arg = (shift || "*");
 	      my $length = int($self->{hits});
-	      $length = 100 if $length > 100;
+	      $length = 50 if $length > 50;
 	      return $arg x $length;
 	    },
 

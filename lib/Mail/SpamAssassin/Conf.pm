@@ -53,7 +53,7 @@ optional, and the default is shown below.
  _BAYES_           bayes score
  _AWL_             AWL modifier
  _DATE_            rfc-2822 date of scan
- _STARS(*)_        score represented in terms of * (any character can be chosen)
+ _STARS(*)_        one * (use any character) for each score point (50 at most)
  _RELAYSTRUSTED_   relays used and deemed to be trusted
  _RELAYSUNTRUSTED_ relays used that can not be trusted
  _AUTOLEARN_       autolearn status ("ham", "no", "spam")
