@@ -492,7 +492,7 @@ sub dotlock_lock {
   my $lockfile = $file.".lock";
   my $locktmp = $file.".lk.$$.".time();
   my $gotlock = 0;
-  my $retrylimit = 10;
+  my $retrylimit = 30;
 
   if (!sysopen (LOCK, $locktmp, O_WRONLY | O_CREAT | O_EXCL, 0644)) {
     #die "lock $file failed: create $locktmp: $!";
@@ -505,7 +505,8 @@ sub dotlock_lock {
 
   for ($retries = 0; $retries < $retrylimit; $retries++) {
     if ($retries > 0) {
-      my $sleeptime = $retries > 12 ? 60 : 5*$retries;
+      my $sleeptime = 2*$retries;
+      if ($sleeptime > 60) { $sleeptime = 60; }         # max 1 min
       sleep ($sleeptime);
     }
 
