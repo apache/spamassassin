@@ -941,6 +941,12 @@ sub get_decoded_stripped_body_text_array {
   $text =~ tr/\f/\n/;			# form feeds => newline
 
   my @textary = split (/^/, $text);
+
+  # add any URIs we discovered while parsing...
+  if (!defined $Mail::SpamAssassin::Bayes::TST_INHIBIT_URIS_IN_BODY_TEXT) {
+  push (@textary, $self->get_uri_list());
+  }
+
   return \@textary;
 }
 
@@ -1375,12 +1381,12 @@ my $domain      = qq<(?:$domain_ref|$domain_lit)>;
 # Finally, the address-spec regex (more or less)
 my $Addr_spec_re   = qr<$local_part\s*\@\s*$domain>o;
 
-sub do_body_uri_tests {
-  my ($self, $textary) = @_;
+sub get_uri_list {
+  my ($self) = @_;
+
+  my $textary = $self->get_decoded_body_text_array();
   my ($rulename, $pat, @uris);
   local ($_);
-
-  dbg ("running uri tests; score so far=".$self->{hits});
 
   my $base_uri = $self->{html}{base_href} || "http://";
   my $text;
@@ -1430,7 +1436,18 @@ sub do_body_uri_tests {
     }
   }
 
+  $self->{uri_list} = \@uris;
   dbg("uri tests: Done uriRE");
+  return @{$self->{uri_list}};
+}
+
+sub do_body_uri_tests {
+  my ($self, $textary) = @_;
+  my ($rulename, $pat);
+  local ($_);
+
+  dbg ("running uri tests; score so far=".$self->{hits});
+  my @uris = $self->get_uri_list();
 
   $self->clear_test_state();
   if ( defined &Mail::SpamAssassin::PerMsgStatus::_body_uri_tests
