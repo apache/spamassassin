@@ -78,3 +78,34 @@
 # meta T_NIGERIAN_BODY_GOVT_4	((__NIGERIAN_CODE_CONDUCT + __NIGERIAN_CIV_SERVICE + __NIGERIAN_HONESTY + __NIGERIAN_TOP_SECRET + __NIGERIAN_STRICT_CONF + __NIGERIAN_DISBURSE) >= 4)
 # meta T_NIGERIAN_BODY_GOVT_3	((__NIGERIAN_CODE_CONDUCT + __NIGERIAN_CIV_SERVICE + __NIGERIAN_HONESTY + __NIGERIAN_TOP_SECRET + __NIGERIAN_STRICT_CONF + __NIGERIAN_DISBURSE) >= 3)
 
+# 2003-02-23: quinlan
+# bug 1376: HTML mails without <!DOCTYPE>
+# 1. ways to find <!doctype> declaration
+rawbody __HTML_DOCTYPE		/<\!doctype/i
+body __HTML_TAG_EXISTS_DOCTYPE	eval:html_tag_exists('!doctype')
+# 2. mailers that reliably use <!doctype> declaration
+header __HTML_DOCTYPE_MUA	X-Mailer =~ /\b(?:Internet Mail Service|Microsoft Outlook (?:Express|CWS|IMO))\b/
+# 3. ways to detect HTML
+# HTML_MESSAGE
+header __HTML_CTYPE_HEADER	Content-Type =~ /text\/html/i
+rawbody __HTML_CTYPE_BODY	/^Content-Type:\s*text\/html/i
+meta __HTML_CTYPE		(__HTML_CTYPE_HEADER || __HTML_CTYPE_BODY)
+body __MIME_HTML		eval:check_for_mime_html()
+# 4. test variations
+meta T_HTML_NO_DOCTYPE_01	(MIME_HTML_ONLY && HTML_MESSAGE && __HTML_DOCTYPE_MUA && !__HTML_DOCTYPE)
+meta T_HTML_NO_DOCTYPE_02	(MIME_HTML_ONLY && HTML_MESSAGE && __HTML_DOCTYPE_MUA && !__HTML_TAG_EXISTS_DOCTYPE)
+meta T_HTML_NO_DOCTYPE_03	(MIME_HTML_ONLY && __HTML_DOCTYPE_MUA && !__HTML_DOCTYPE)
+meta T_HTML_NO_DOCTYPE_04	(MIME_HTML_ONLY && __HTML_DOCTYPE_MUA && !__HTML_TAG_EXISTS_DOCTYPE)
+meta T_HTML_NO_DOCTYPE_05	(__HTML_CTYPE && HTML_MESSAGE && __HTML_DOCTYPE_MUA && !__HTML_DOCTYPE)
+meta T_HTML_NO_DOCTYPE_06	(__HTML_CTYPE && __HTML_DOCTYPE_MUA && !__HTML_DOCTYPE)
+meta T_HTML_NO_DOCTYPE_07	(__HTML_CTYPE_HEADER && HTML_MESSAGE && __HTML_DOCTYPE_MUA && !__HTML_DOCTYPE)
+meta T_HTML_NO_DOCTYPE_08	(__HTML_CTYPE_HEADER && HTML_MESSAGE && __HTML_DOCTYPE_MUA && !__HTML_TAG_EXISTS_DOCTYPE)
+meta T_HTML_NO_DOCTYPE_09	(__HTML_CTYPE_HEADER && __HTML_DOCTYPE_MUA && !__HTML_DOCTYPE)
+meta T_HTML_NO_DOCTYPE_10	(__HTML_CTYPE_HEADER && __HTML_DOCTYPE_MUA && !__HTML_TAG_EXISTS_DOCTYPE)
+meta T_HTML_NO_DOCTYPE_11	(__MIME_HTML && HTML_MESSAGE && __HTML_DOCTYPE_MUA && !__HTML_DOCTYPE)
+meta T_HTML_NO_DOCTYPE_12	(__MIME_HTML && __HTML_DOCTYPE_MUA && !__HTML_DOCTYPE)
+
+# 2003-02-23: quinlan
+# bug 1533: new Received: header forgery tests using HELO
+header T_FORGED_RCVD_HELO	eval:check_for_forged_received_helo()
+header T_RCVD_NUMERIC_HELO	Received =~ /helo[= ]\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/i
