@@ -1,4 +1,4 @@
-# $Id: Received.pm,v 1.25 2003/06/12 02:31:52 felicity Exp $
+# $Id: Received.pm,v 1.26 2003/06/24 20:34:52 jmason Exp $
 
 # ---------------------------------------------------------------------------
 
@@ -144,15 +144,36 @@ sub parse_received_headers {
 	$inferred_as_trusted = 1;
       }
 
-      # if one of the IP addrs for the 'by' host is in a reserved net range,
-      # it's not on the public internet.
+      # if *all* of the IP addrs for the 'by' host are in a reserved net range,
+      # it's not on the public internet.  Note that we should still stop if
+      # only *some* of the IPs are reserved; this can happen for multi-homed
+      # gateway hosts.  For example
+      #
+      #   PRIVATE NET    A          B    INTERNET
+      #     scanner <---> gateway_MX <---> internet
+      #
+      # Interface A would be on a reserved net, but B would have a "public" IP
+      # address.  Same can happen if the scanner runs on the gateway-MX, since
+      # lookup_all_ips() will return [ public_IP_addr, 127.0.0.1 ] as the list
+      # of addresses, and 127.0.0.1 is a "reserved" address. (bug 2113)
+
       else {
 	my @ips = $self->lookup_all_ips ($relay->{by});
+	my $found_non_rsvd = 0;
 	foreach my $ip (@ips) {
-	  if ($ip =~ /${IP_IN_RESERVED_RANGE}/o) {
+	  next if ($ip =~ /^${LOCALHOST}$/o);
+
+	  if ($ip !~ /${IP_IN_RESERVED_RANGE}/o) {
+	    dbg ("received-header: 'by' ".$relay->{by}." has public IP $ip");
+	    $found_non_rsvd = 1;
+	  } else {
 	    dbg ("received-header: 'by' ".$relay->{by}." has reserved IP $ip");
-	    $inferred_as_trusted = 1;
 	  }
+	}
+
+	if (!$found_non_rsvd) {
+	  dbg ("received-header: 'by' ".$relay->{by}." has no public IPs");
+	  $inferred_as_trusted = 1;
 	}
       }
 
