@@ -119,7 +119,7 @@ Currently this is left to Razor to decide.
 sub adie {
   my $msg = shift;
   alarm 0;
-  die $msg;
+  die $msg if (defined $msg);
 }
 
 sub razor2_access {
