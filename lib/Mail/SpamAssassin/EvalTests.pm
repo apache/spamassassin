@@ -43,7 +43,14 @@ $ROUND_THE_WORLD_RELAYERS = qr{(?:net|com|ca)};
 # for figuring this. any ccTLD with > about 40000 domains is left out of this
 # regexp.  Then I threw in some unscientific seasoning to taste. ;)
 
-$IP_ADDRESS = qr/(?:\b|[^\d])\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?:\b|[^\d])/;
+# an IP address. TODO: ipv6
+$IP_ADDRESS = qr/\b
+		  (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
+		  (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
+		  (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
+		  (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)
+		  \b/x;
+
 $WORD_OBFUSCATION_CHARS = '*_.,/|-+=';
 
 ###########################################################################
