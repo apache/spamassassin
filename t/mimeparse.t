@@ -77,6 +77,14 @@ my %files = (
 	  '05c9e1f1f3638a5191542b0c278debe38ac98a83',
 	  'e6e71e824aec0e204367bfdc9a9e227039f42815'
 	],
+
+	"$prefix/t/data/nice/mime9" => [
+	  join("\n",'multipart/mixed','text/plain','message/rfc822,message/rfc822,multipart/mixed,multipart/alternative,text/plain,text/html,image/jpeg'),
+	  '5cdcabdb89c5fbb3a5e0c0473599668927045d9c',
+	  'f80584aff917e03d54663422918b58e4689cf993',
+	  '0228600472b0820b3b326d9d7842eef3af811cb2',
+	  '0b9fb462ad496d926ef65db0da8da451d7815ab6',
+	],
 );
 
 my $numtests = 0;
@@ -92,10 +100,14 @@ foreach my $k ( sort keys %files ) {
   close(INP);
 
   my $res = join("\n",$mail->content_summary());
-  #print "---\n$res\n---\n";
+# print "---\n$res\n---\n";
   ok( $res eq shift @{$files{$k}} );
   if ( @{$files{$k}} ) {
     my @parts = $mail->find_parts(qr/./,1);
+
+#    my $i = 0;
+#    foreach (@parts) { print "> $i ",$parts[$i]->{type},"\n"; $i++; }
+
     foreach ( @{$files{$k}} ) {
       $res = 1;
       if ( $_ ne '' ) {
@@ -105,7 +117,7 @@ foreach my $k ( sort keys %files ) {
 	else {
 	  $res = Digest::SHA1::sha1_hex($parts[0]->decode());
 	}
-	#print ">> $res\n";
+#	print ">> ",$parts[0]->{'type'}," = $res\n";
         $res = $res eq $_;
       }
       ok ( $res );

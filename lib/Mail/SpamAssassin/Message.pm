@@ -555,25 +555,39 @@ sub _parse_normal {
   $part_msg->{'boundary'} = $boundary;
   $part_msg->{'name'} = $filename if $filename;
 
-  $msg->add_body_part($part_msg);
-
   # If this part is a message/* part, and the parent isn't also a
   # message/* part (ie: the main part) go ahead and parse into a tree.
-  if ($part_msg->{'type'} =~ /^message\b/i && $msg->{'type'} ne $part_msg->{'type'}) {
+  if ($part_msg->{'type'} =~ /^message\b/i) {
     # Get the part ready...
     my $message = $part_msg->decode();
+    my $msg_obj = Mail::SpamAssassin::Message->new({message=>$message, parsenow=>1});
 
     if ($message) {
-      $part_msg->add_body_part(
-        Mail::SpamAssassin::Message->new({message=>$message, parsenow=>1})
-      );
+      # main message is a message/* part ...
+      if ($msg == $part_msg) {
+        $msg->add_body_part($msg_obj);
+      }
+      else {
+        # Add the new part as a child to the parent
+        # NOTE: if the message only has this one part, we'll be recursive so delete
+        # the body_parts list appropriately.
+        $msg->add_body_part($part_msg);
+
+        $part_msg->add_body_part($msg_obj);
+      }
     }
 
     return;
   }
 
+  # Add the new part as a child to the parent
+  # NOTE: if the message only has this one part, we'll be recursive so delete
+  # the body_parts list appropriately.
+  $msg->add_body_part($part_msg);
+
   # now that we've added the leaf node, let's go ahead and kill
-  # body_parts (used for sub-trees).  it could end up being recursive,
+  # body_parts (used for sub-trees).  there's no point for a leaf to have it,
+  # and if the main and child parts are the same, we'll end up being recursive,
   # and well, let's avoid that. ;)
   #
   # BTW: please leave this after add_body_parts() since it'll add it back.
