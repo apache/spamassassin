@@ -264,8 +264,9 @@ sub razor_lookup {
 
       if ($rc) {
         my %opt = (
-          debug      => $Mail::SpamAssassin::DEBUG,
-          foreground => 1
+            debug      => ($Mail::SpamAssassin::DEBUG->{enabled} and
+                 $Mail::SpamAssassin::DEBUG->{razor} < -2), 
+	    foreground => 1
         );
         $rc->{opt} = \%opt;
         $rc->do_conf() or die $rc->errstr;
