@@ -174,14 +174,6 @@ describe EXCUSE_24		Claims you wanted this ad
 body EXCUSE_REMOVE		/to be removed from.{0,20}(?:mailings|offers)/i
 describe EXCUSE_REMOVE		Talks about how to be removed from mailings
 
-# jm: keep this case-sensitive, otherwise it FP's
-body VIAGRA			/VIAGRA/
-describe VIAGRA			Plugs Viagra
-
-# NB: Made it also match "Herbal V" - a viagra alternative
-body HERBAL_VIAGRA              /\bherbal v(?:iagra)?\b/i
-describe HERBAL_VIAGRA          Plugs "Herbal Viagra"
-
 body TARGETED                   /\btargeted (?:traffic|e-?mail|internet|leads?)\b/i
 describe TARGETED               Targeted Traffic / Email Addresses
 
@@ -680,15 +672,6 @@ describe ITS_LEGAL              Claims to be Legal
 body FREE_GRANT                 /\b(?:free|government) (?-i:G)rants?\b/i
 describe FREE_GRANT             Free Grant Money
 
-body VIAGRA_ONLINE              /\bviagra .{0,25}(?:express|online|overnight)/i
-describe VIAGRA_ONLINE          Fast Viagra Delivery
-
-body VIAGRA_COMBO               /\bviagra .{0,15}(?:phentermine|xenical|tenuate|zyban|propecia)\b/i
-describe VIAGRA_COMBO           Viagra and other drugs
-
-body ONLINE_PHARMACY		/\bonline pharmacy|\b(?:drugs|medications) online/i
-describe ONLINE_PHARMACY	Online Pharmacy
-
 body CONFIDENTIAL_ORDER		/confidential.{0,9} order/i
 describe CONFIDENTIAL_ORDER	Confidentiality on all orders
 
@@ -840,11 +823,5 @@ describe	LOSEWEIGHT	Describes weight loss
 body		LOSEBODYFAT	/(?:Body Fat Loss|Loss of body fat|lose.{1,10}body fat)/i
 describe	LOSEBODYFAT	Describes body fat loss
 
-body		GENERIC_VIAGRA	/Generic Viagra/
-describe	GENERIC_VIAGRA	Mentions Generic Viagra
-
 body SEE_FOR_YOURSELF		/See (?:for|it|it for) yourself\b/i
 describe SEE_FOR_YOURSELF       See for yourself 
-
-body DEEP_DISC_MEDS		/\bdeep discount med(?:s|ications)\b/i
-describe DEEP_DISC_MEDS		Deep discount medications
