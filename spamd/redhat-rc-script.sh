@@ -54,6 +54,7 @@ case "$1" in
        ;;
   status)
 	status spamd
+	RETVAL=$?
 	;;
   *)
 	echo "Usage: $0 {start|stop|restart|status|condrestart}"
