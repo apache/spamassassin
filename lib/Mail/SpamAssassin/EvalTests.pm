@@ -3361,4 +3361,26 @@ sub check_domain_ratio {
 
 ###########################################################################
 
+sub check_for_http_redirector {
+  my($self) = @_;
+
+  foreach ( $self->get_uri_list() ) {
+    while (s{^https?://([^/:\?]+).+?(https?://([^/:\?]+).+)$}{$2}g) {
+      my($redir, $dest) = ($1,$3);
+      foreach ($redir,$dest) {
+	# Strip down to domain.tld
+        s/^(?:.+\.)([^.]+\.[^.]+)$/$1/;
+	# make sure we do things case-insensitively
+	$_ = lc $_;
+      }
+      next if ( $redir eq $dest );
+      dbg("redirect: found $redir to $dest, flagging");
+      return 1;
+    }
+  }
+  return 0;
+}
+
+###########################################################################
+
 1;
