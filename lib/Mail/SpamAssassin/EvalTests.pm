@@ -2161,6 +2161,10 @@ sub check_language {            # UNDESIRED_LANGUAGE_BODY
 
   my @languages = split (' ', $self->{conf}->{ok_languages});
 
+  # map of languages that are very often mistaken for another, perhaps with
+  # more than 0.02% false positives, we only map if length is < 2048 bytes
+  my %mistakable = ('sco' => 'en');
+
   return 0 if grep { $_ eq "all" } @languages;
 
   $body = join ("\n", @{$body});
@@ -2182,7 +2186,13 @@ sub check_language {            # UNDESIRED_LANGUAGE_BODY
   # see if any matches are okay
   foreach my $match (@matches) {
     $match =~ s/\..*//;
+    if (length($body) < 2048 && exists $mistakable{$match}) {
+      $match = $mistakable{$match};
+    }
     foreach my $language (@languages) {
+      if (length($body) < 2048 && exists $mistakable{$language}) {
+	$language = $mistakable{$language};
+      }
       if ($match eq $language) {
 	return 0;
       }
@@ -2338,13 +2348,16 @@ sub _check_mime_header {
 
   if (!$name &&
       $cte =~ /base64/ &&
-      $charset =~ /\b(?:us-ascii|iso-8859-(?:[12349]|1[0345])|windows-(?:1250|1252))\b/)
+      $charset =~ /\b(?:us-ascii|iso-8859-(?:[12349]|1[0345])|windows-(?:125[0247]))\b/)
   {
     $self->{t_mime_base64_latin} = 1;
   }
 
-  if ($cte =~ /base64/ && $charset =~ /iso-8859/) {
-    $self->{t_mime_base64_iso_8859} = 1;
+  if (!($name && $cd =~ /attachment/) &&
+      $cte =~ /base64/ &&
+      $charset =~ /\b(?:us-ascii|iso-8859-(?:[12349]|1[0345])|windows-(?:125[0247]))\b/)
+  {
+    $self->{t_mime_base64_latin2} = 1;
   }
 
   if ($cte =~ /quoted-printable/ && $cd =~ /inline/ && !$charset) {
@@ -2439,8 +2452,8 @@ sub _check_attachments {
   $self->{t_mime_base64_count} = 0;
   $self->{t_mime_base64_encoded_text} = 0;
   $self->{t_mime_base64_illegal} = 0;
-  $self->{t_mime_base64_iso_8859} = 0;
   $self->{t_mime_base64_latin} = 0;
+  $self->{t_mime_base64_latin2} = 0;
   $self->{t_mime_base64_short_lines} = 0;
   $self->{t_mime_base64_without_name} = 0;
   $self->{t_mime_qp_count} = 0;
