@@ -31,6 +31,8 @@ fi
 cd $tree/masses
 
 if [ "$1" = "update" ]; then
+	# random sleep
+	perl -e 'sleep int(rand(300));'
 	# update
 	cd ..
 	set +e
