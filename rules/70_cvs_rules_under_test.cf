@@ -4,23 +4,56 @@
 # It should not be distributed; if the rules have good stats
 # after a mass-check or two, then fold them into the distributed
 # rules files.
+#
+# I suggest adding a prefix to rules in this file, "T_" -- this
+# helps identify probationary rules in test output.
 
-body DOMAIN_4U2         /[\@\.]\S*(?:4u|u2|2u|you2|4you|2you|foryou)\S*\.(?:net|com|org)\b/
-describe DOMAIN_4U2     Domain name containing "4u", "u2" or variants.
+body T_DOMAIN_4U2         /[\@\.]\S*(?:4u|u2|2u|you2|4you|2you|foryou)\S*\.(?:net|com|org)\b/
+describe T_DOMAIN_4U2     Domain name containing "4u", "u2" or variants.
 
-body USER_4U2           /\b\S*(?:4u|u2|2u|you2|4you|2you|foryou)\S*\@\S*\.(?:net|com|org)\b/
-describe USER_4U2       Local part containing "4u", "u2" or variants.
+body T_USER_4U2           /\b\S*(?:4u|u2|2u|you2|4you|2you|foryou)\S*\@\S*\.(?:net|com|org)\b/
+describe T_USER_4U2       Local part containing "4u", "u2" or variants.
 
 header FROM_4U2         From =~ /4u|u2|2u|you2|4you|2you|foryou/i
-describe FROM_4U2       From contains "4u", "u2" or variants.
+describe T_FROM_4U2       From contains "4u", "u2" or variants.
 
 # bug 680
-body MEMBER_2           /\b(?:free|special|paid|dear|gold|opt.in|valued|because you are an?|be a|becoming a|sent to) .{0,9}members?\b/i
-describe MEMBER_2       Being a Member
+body T_MEMBER_2           /\b(?:free|special|paid|dear|gold|opt.in|valued|because you are an?|be a|becoming a|sent to) .{0,9}members?\b/i
+describe T_MEMBER_2       Being a Member
 
 # bug 637
 # more specific FROM_HAS_MIXED_NUMS, less FPs
 header FROM_HAS_MIXED_NUMS2        From =~ /\w{2,}\d{4,}[a-z]{1,2}\d{2,}\@/i
 description FROM_HAS_MIXED_NUMS2 From address matches known spammer format
 
+# bug 510. modified so that descs don't trigger the tests
+body T_GET_PAID                   /get (?-i:P)aid/i  
+describe T_GET_PAID               Contains 'get paid' with capitals
+
+body T_GET_STARTED_NOW            /get started (?-i:N)ow/i  
+describe T_GET_STARTED_NOW        Contains 'Get started now' with capitals
+
+body T_GET_IT_NOW                 /get it (?-i:N)ow/i  
+describe T_GET_IT_NOW             Contains 'Get it now' with capitals
+
+body T_FREE_ACCESS                /(?-i:F)ree access/i  
+describe T_FREE_ACCESS            Contains 'free access' with capitals
+
+body T_FREE_PREVIEW               /(?-i:F)ree preview/i  
+describe T_FREE_PREVIEW           Contains 'free preview' with capitals
+
+body T_FREE_TICKETS               /(?-i:F)ree ticket/i  
+describe T_FREE_TICKETS           Contains 'free tickets' with capitals
+
+body T_FREE_INSTALL               /(?-i:F)ree installation/i  
+describe T_FREE_INSTALL           Contains 'free installation' with capitals
+
+body T_FREE_SAMPLE                /(?-i:F)ree sample/i  
+describe T_FREE_SAMPLE            Contains 'free sample' with capitals
+
+body T_FREE_HOSTING               /(?-i:F)ree hosting/i  
+describe T_FREE_HOSTING           Contains 'free hosting' with capitals
+
+body T_FREE_WEBSITE               /(?-i:F)ree web/i  
+describe T_FREE_WEBSITE           Contains 'free website' with capitals
 
