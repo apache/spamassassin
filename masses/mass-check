@@ -102,6 +102,7 @@ my $log_header = "# mass-check results from $who\@$where, on $when\n" .
 		 "# M:SA version ".$spamtest->Version()."\n" .
 		 '# CVS tag: $Name:  $' . "\n";
 my $host = $ENV{'HOSTNAME'} || $ENV{'HOST'} || `hostname` || 'localhost';
+chomp $host;
 
 if ($opt_o) {
   autoflush STDOUT 1;
@@ -181,12 +182,12 @@ sub wanted {
     push(@extra, "bayes=" . $status->{bayes_score});
   }
   if ($opt_mid) {
-    my $msgid = $ma->get_header("Message-Id") ||
+    my $mid = $ma->get_header("Message-Id") ||
 	"<$id\@$host.masses.spamassasin.org>";
-    $msgid =~ s/^\s*//s;
-    $msgid =~ s/\s*$//s;
-    $msgid =~ s/[\s,]/./gs;
-    push(@extra, "msgid=$msgid");
+    $mid =~ s/^\s*//s;
+    $mid =~ s/\s*$//s;
+    $mid =~ s/[\s,]/./gs;
+    push(@extra, "mid=$mid");
   }
 
   my $yorn = $status->is_spam() ? 'Y' : '.';
@@ -233,12 +234,12 @@ sub logkilled {
   my $from = $ma->get_header("From") || 'undef';
   my $to = $ma->get_header("To") || 'undef';
   my $subj = $ma->get_header("Subject") || 'undef';
-  my $msgid = $ma->get_header("Message-Id") || 'undef';
+  my $mid = $ma->get_header("Message-Id") || 'undef';
   chomp ($from);
   chomp ($to);
   chomp ($subj);
-  chomp ($msgid);
-  return "# skipped killfiled message ($reason): from=$from to=$to subj=$subj msgid=$msgid id=$id\n";
+  chomp ($mid);
+  return "# skipped killfiled message ($reason): from=$from to=$to subj=$subj mid=$mid id=$id\n";
 }
 
 ###########################################################################
