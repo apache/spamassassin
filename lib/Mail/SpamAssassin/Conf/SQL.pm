@@ -153,7 +153,7 @@ sub load_with_dbi {
             my @row;
             my $text = '';
             while(@row = $sth->fetchrow_array()) {
-               $text .= "$row[0]\t$row[1]\n";
+               $text .= (defined($row[0]) ? $row[0] : '') . "\t" . (defined($row[1]) ? $row[1] : '')  . "\n";
             }
             if($text ne '') {
 	      $main->{conf}->{main} = $main;
