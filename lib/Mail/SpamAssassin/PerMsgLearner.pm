@@ -80,8 +80,7 @@ sub learn_spam {
   # use the real message-id here instead of mass-check's idea of an "id",
   # as we may deliver the msg into another mbox format but later need
   # to forget it's training.
-  $self->{bayes_scanner}->learn (1, $self->{msg}->get("Message-Id"),
-	$self->get_body());
+  $self->{bayes_scanner}->learn (1, $self->{msg});
 }
 
 ###########################################################################
@@ -93,8 +92,7 @@ sub learn_ham {
     $self->{main}->add_all_addresses_to_whitelist ($self->{msg});
   }
 
-  $self->{bayes_scanner}->learn (0, $self->{msg}->get("Message-Id"),
-	$self->get_body());
+  $self->{bayes_scanner}->learn (0, $self->{msg});
 }
 
 ###########################################################################
@@ -106,24 +104,7 @@ sub forget {
     $self->{main}->remove_all_addresses_from_whitelist ($self->{msg});
   }
 
-  $self->{bayes_scanner}->forget ($self->{msg}->get("Message-Id"),
-	$self->get_body());
-}
-
-###########################################################################
-
-sub get_body {
-  my ($self) = @_;
-
-  my $permsgstatus =
-        Mail::SpamAssassin::PerMsgStatus->new($self->{main}, $self->{msg});
-  my $body = $permsgstatus->get_decoded_stripped_body_text_array();
-  if (!defined $body) {
-    warn "failed to get body for ".$self->{msg}->get("Message-Id").
-			", skipping\n";
-    return;
-  }
-  return $body;
+  $self->{bayes_scanner}->forget ($self->{msg});
 }
 
 ###########################################################################

@@ -10,8 +10,7 @@ use vars qw( %h $k $v @DBNAMES) ;
 
 @DBNAMES = qw(count toks_ham toks_spam probs);
 
-#my $path = $ENV{HOME}."/.spamassassin/bayes";	# is this right?
-my $path = $ENV{HOME}."/ftp/bayes";	# is this right?
+my $path = $ENV{HOME}."/.spamassassin/bayes";
 
 foreach my $dbname (@DBNAMES) {
   my $name = $path.'_'.$dbname;
@@ -26,10 +25,16 @@ for my $key (@k) {
   next if (exists $seen{$key});
   $seen{$key} = 1;
 
-  printf ("%3.3f %8d %8d   %s\n",
-        unpack ('f', $h{db_probs}->{$key}),
-		$h{db_toks_spam}->{$key},
-                $h{db_toks_ham}->{$key}, $key);
+  my $prob = $h{db_probs}->{$key};
+  if (defined $prob) {
+    $prob = unpack ('f', $prob);
+  } else {
+    $prob = 0.5;
+  }
+
+  my $sp = $h{db_toks_spam}->{$key}; $sp ||= 0;
+  my $ns = $h{db_toks_ham}->{$key};  $ns ||= 0;
+  printf ("%3.3f %8d %8d   %s\n", $prob, $sp, $ns, $key);
 }
 
 foreach my $dbname (@DBNAMES) {

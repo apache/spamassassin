@@ -37,6 +37,7 @@ BEGIN { @AnyDBM_File::ISA = qw(DB_File GDBM_File NDBM_File SDBM_File); }
 use AnyDBM_File;
 
 use vars qw{ @ISA @DBNAMES
+  @TOKENIZE_HDRS
   $MIN_SPAM_CORPUS_SIZE_FOR_BAYES
   $MIN_HAM_CORPUS_SIZE_FOR_BAYES
   $USE_ROBINSON_FX_EQUATION_FOR_LOW_FREQS
@@ -46,6 +47,10 @@ use vars qw{ @ISA @DBNAMES
 };
 
 @ISA = qw();
+
+# Which headers should we scan for tokens?  Don't use all of them,
+# as it's easy to pick up spurious clues from some.
+@TOKENIZE_HDRS = qw(From To Content-Type X-Mailer User-Agent);
 
 # How big should the corpora be before we allow scoring using Bayesian
 # tests?
@@ -63,7 +68,7 @@ $ROBINSON_S_CONSTANT = 0.45;
 
 # How many of the most significant tokens should we use for the p(w)
 # calculation?
-$N_SIGNIFICANT_TOKENS = 100;
+$N_SIGNIFICANT_TOKENS = 50;
 
 # Should we ignore tokens very close to the middle ground?  This value
 # is anecdotally effective.
@@ -116,23 +121,25 @@ sub tie_db_readonly {
 
   # return if we've already tied to the db's, using the same mode
   # (locked/unlocked) as before.
-  return if ($self->{already_tied} && $self->{is_locked} == 0);
+  return 1 if ($self->{already_tied} && $self->{is_locked} == 0);
   $self->{already_tied} = 1;
 
   if (!defined($main->{conf}->{bayes_path})) {
+    dbg ("bayes_path not defined");
     return 0;
   }
 
   my $path = $main->sed_path ($main->{conf}->{bayes_path});
   if (!-f $path.'_count') {
-    dbg ("No bayes dbs present, cannot scan");
+    dbg ("bayes: no dbs present, cannot scan");
     return 0;
   }
 
   foreach my $dbname (@DBNAMES) {
     my $name = $path.'_'.$dbname;
     my $db_var = 'db_'.$dbname;
-    dbg("Tie-ing to DB file R/O $name");
+    dbg("bayes: tie-ing to DB file R/O $name");
+    untie %{$self->{$db_var}} if (tied %{$self->{$db_var}});
     tie %{$self->{$db_var}},"AnyDBM_File",$name, O_RDONLY,
 		 (oct ($main->{conf}->{bayes_file_mode}) & 0666)
        or goto failed_to_tie;
@@ -150,10 +157,11 @@ sub tie_db_writable {
 
   # return if we've already tied to the db's, using the same mode
   # (locked/unlocked) as before.
-  return if ($self->{already_tied} && $self->{is_locked} == 1);
+  return 1 if ($self->{already_tied} && $self->{is_locked} == 1);
   $self->{already_tied} = 1;
 
   if (!defined($main->{conf}->{bayes_path})) {
+    dbg ("bayes_path not defined");
     return 0;
   }
 
@@ -174,7 +182,7 @@ sub tie_db_writable {
   select($old_fh);
 
   for (my $i = 0; $i < $lock_tries; $i++) {
-    dbg("$$ Trying to get lock on $path pass $i");
+    dbg("bayes: $$ trying to get lock on $path pass $i");
     print LTMP $self->{hostname}.".$$\n";
     if ( link ($lock_tmp,$lock_file) ) {
       $self->{is_locked} = 1;
@@ -192,7 +200,7 @@ sub tie_db_writable {
       my $now = (stat($lock_tmp))[10];
       if ($lock_age < $now - $max_lock_age) {
 	#we got a stale lock, break it
-	dbg("$$ Breaking Stale Lockfile!");
+	dbg("bayes: $$ breaking stale lockfile!");
 	unlink "$lock_file";
       }
       sleep(1);
@@ -204,7 +212,8 @@ sub tie_db_writable {
   foreach my $dbname (@DBNAMES) {
     my $name = $path.'_'.$dbname;
     my $db_var = 'db_'.$dbname;
-    dbg("Tie-ing to DB file R/W $name");
+    dbg("bayes: tie-ing to DB file R/W $name");
+    untie %{$self->{$db_var}} if (tied %{$self->{$db_var}});
     tie %{$self->{$db_var}},"AnyDBM_File",$name, O_RDWR|O_CREAT,
 		 (oct ($main->{conf}->{bayes_file_mode}) & 0666)
        or goto failed_to_tie;
@@ -213,7 +222,7 @@ sub tie_db_writable {
 
 failed_to_tie:
   unlink($self->{lock_file}) ||
-     dbg ("Couldn't unlink " . $self->{lock_file} . ": $!\n");
+     dbg ("bayes: couldn't unlink " . $self->{lock_file} . ": $!\n");
 
   warn "Cannot open bayes_path $path R/W: $!\n";
   return 0;
@@ -223,18 +232,18 @@ failed_to_tie:
 
 sub untie_db {
   my $self = shift;
-  dbg("Bayes: untie-ing and destroying lockfile.");
+  dbg("bayes: untie-ing");
 
   foreach my $dbname (@DBNAMES) {
     my $db_var = 'db_'.$dbname;
-    dbg ("untie-ing $db_var");
+    dbg ("bayes: untie-ing $db_var");
     untie %{$self->{$db_var}};
   }
 
   if ($self->{is_locked}) {
-    dbg ("Bayes: files locked, breaking lock.");
+    dbg ("bayes: files locked, breaking lock.");
     unlink($self->{lock_file}) ||
-        dbg ("Couldn't unlink " . $self->{lock_file} . ": $!\n");
+        dbg ("bayes: couldn't unlink " . $self->{lock_file} . ": $!\n");
     $self->{is_locked} = 0;
   }
 
@@ -260,15 +269,25 @@ sub finish {
 # one date period and nonspam from another!
 
 sub tokenize {
-  my ($self, $body) = @_;
+  my ($self, $msg, $body) = @_;
   my $wc = 0;
   my @tokens = ();
+  my @hdrs = ();
 
-  for (@{$body}) {
+  # TODO: should we prefix header-tokens, e.g. with "H:", so they don't
+  # modify probs for body-tokens?
+  foreach my $hdr (@TOKENIZE_HDRS) {
+    $_ = $msg->get_header ($hdr);
+    next unless (defined($_) && $_ ne '');
+    push (@hdrs, $_);
+  }
+
+  for (@{$body}, @hdrs) {
     tr/A-Z/a-z/;
 
     # include quotes, .'s and -'s for URIs, and [$,]'s for Nigerian-scam strings,
-    # and ISO-8859-15 alphas.
+    # and ISO-8859-15 alphas.  DO split on @'s, so username and domains in
+    # mail addrs are separate tokens.
     # Some useful tokens: "$31,000,000" "www.clock-speed.net"
     tr/-a-z0-9,_'"\$.\250\270\300-\377 / /cs;
 
@@ -289,12 +308,13 @@ sub tokenize {
 ###########################################################################
 
 sub learn {
-  my ($self, $isspam, $msgid, $body) = @_;
+  my ($self, $isspam, $msg) = @_;
 
-  if (!defined $body) { return; }
+  if (!defined $msg) { return; }
+  my $body = $self->get_body_from_msg ($msg);
   $self->tie_db_writable();
 
-  $msgid = canonicalize_msgid ($msgid);
+  my $msgid = $self->get_msgid ($msg);
   my $seen = $self->{db_seen}->{$msgid};
   if (defined ($seen)) {
     if (($seen eq 's' && $isspam) || ($seen eq 'h' && !$isspam)) {
@@ -304,7 +324,7 @@ sub learn {
       warn ("db_seen corrupt: value='$seen' for $msgid. ignored");
     } else {
       dbg ("$msgid: already learnt as opposite, forgetting first");
-      $self->forget ($msgid, $body);
+      $self->forget ($msg);
     }
   }
 
@@ -318,7 +338,7 @@ sub learn {
   $ns ||= 0;
   $nn ||= 0;
 
-  my ($wc, @tokens) = $self->tokenize ($body);
+  my ($wc, @tokens) = $self->tokenize ($msg, $body);
   for (@tokens) {
     if ($isspam) {
       $self->{db_toks_spam}->{$_}++;
@@ -347,12 +367,13 @@ sub learn {
 ###########################################################################
 
 sub forget {
-  my ($self, $msgid, $body) = @_;
+  my ($self, $msg) = @_;
 
-  if (!defined $body) { return; }
+  if (!defined $msg) { return; }
+  my $body = $self->get_body_from_msg ($msg);
   $self->tie_db_writable();
 
-  $msgid = canonicalize_msgid ($msgid);
+  my $msgid = $self->get_msgid ($msg);
   my $seen = $self->{db_seen}->{$msgid};
   my $isspam;
   if (defined ($seen)) {
@@ -380,14 +401,26 @@ sub forget {
     $self->{db_count}->{'nham'} = $nn;
   }
 
-  my ($wc, @tokens) = $self->tokenize ($body);
+  my ($wc, @tokens) = $self->tokenize ($msg, $body);
   for (@tokens) {
     if ($isspam) {
-      my $count = $self->{db_toks_spam}->{$_} - 1;
-      $self->{db_toks_spam}->{$_} = ($count < 0 ? 0 : $count);
+      my $count = $self->{db_toks_spam}->{$_};
+      $count = (!defined $count ? 0 : ($count <= 1 ? 0 : $count-1));
+      if ($count == 0) {
+	delete $self->{db_toks_spam}->{$_};
+	delete $self->{db_probs}->{$_};
+      } else {
+	$self->{db_toks_spam}->{$_} = $count;
+      }
     } else {
-      my $count = $self->{db_toks_ham}->{$_} - 1;
-      $self->{db_toks_ham}->{$_} = ($count < 0 ? 0 : $count);
+      my $count = $self->{db_toks_ham}->{$_};
+      $count = (!defined $count ? 0 : ($count <= 1 ? 0 : $count-1));
+      if ($count == 0) {
+	delete $self->{db_toks_ham}->{$_};
+	delete $self->{db_probs}->{$_};
+      } else {
+	$self->{db_toks_ham}->{$_} = $count;
+      }
     }
 
     # if we don't have both corpora, skip generating probabilities.
@@ -411,8 +444,10 @@ sub forget {
 
 ###########################################################################
 
-sub canonicalize_msgid {
-  my $msgid = shift;
+sub get_msgid {
+  my ($self, $msg) = @_;
+
+  my $msgid = $msg->get("Message-Id");
   if (!defined $msgid) { $msgid = time.".$$\@sa_generated"; }
 
   # remove \r and < and > prefix/suffixes
@@ -420,6 +455,28 @@ sub canonicalize_msgid {
   $msgid =~ s/^<//; $msgid =~ s/>.*$//g;
 
   $msgid;
+}
+
+sub get_body_from_msg {
+  my ($self, $msg) = @_;
+
+  if (!ref $msg) {
+    # I have no idea why this seems to happen. TODO
+    warn "msg not a ref: '$msg'";
+    return [ ];
+  }
+  my $permsgstatus =
+        Mail::SpamAssassin::PerMsgStatus->new($self->{main}, $msg);
+  my $body = $permsgstatus->get_decoded_stripped_body_text_array();
+  $permsgstatus->finish();
+
+  if (!defined $body) {
+    # why?!
+    warn "failed to get body for ".$self->{msg}->get("Message-Id")."\n";
+    return [ ];
+  }
+
+  return $body;
 }
 
 ###########################################################################
@@ -430,7 +487,6 @@ sub canonicalize_msgid {
 sub recompute_all_probs {
   my ($self) = @_;
 
-  dbg ("bayes: recomputing all probabilities");
   my $start = time;
 
   $self->tie_db_writable();
@@ -438,10 +494,15 @@ sub recompute_all_probs {
   my $nn = $self->{db_count}->{'nham'};
   $ns ||= 0;
   $nn ||= 0;
-  if ($nn == 0 || $ns == 0) { goto done; }
+  if ($nn == 0 || $ns == 0) {
+    dbg("bayes: 0 messages in spam ($ns) or ham ($nn) corpus, not recomputing");
+    goto done;
+  }
 
   my $probstotal = 0;
   my $count = 0;
+
+  dbg("bayes: recomputing all probabilities for $ns spam msgs and $nn ham msgs...");
 
   my %done = ();
   foreach my $token (keys %{$self->{db_toks_spam}}, keys %{$self->{db_toks_ham}})
@@ -499,7 +560,7 @@ sub compute_prob_for_token {
 sub precompute_robinson_constants {
   my $self = shift;
 
-  $self->{robinson_x} = 0.5;	#TODO
+  $self->{robinson_x} = 0.5;	#TODO - use computed one?
   # precompute this here for speed
   $self->{robinson_s_dot_x} = ($self->{robinson_x} * $ROBINSON_S_CONSTANT);
 }
@@ -508,7 +569,7 @@ sub precompute_robinson_constants {
 # Finally, the scoring function for testing mail.
 
 sub scan {
-  my ($self, $body) = @_;
+  my ($self, $msg, $body) = @_;
 
   if (!$self->tie_db_readonly()) { goto skip; }
 
@@ -528,7 +589,7 @@ sub scan {
 
   dbg ("bayes corpus size: nspam = $ns, nham = $nn");
 
-  my ($wc, @tokens) = $self->tokenize ($body);
+  my ($wc, @tokens) = $self->tokenize ($msg, $body);
   my %pw = map {
     my $pw = $self->{db_probs}->{$_};
 
