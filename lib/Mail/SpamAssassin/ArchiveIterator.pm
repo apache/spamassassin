@@ -101,13 +101,40 @@ sub run {
     my @pid = ();
     my $messages;
 
+    # Have some kids ...
     $self->start_children($self->{opt_j}, \@child, \@pid, $select);
 
-    # message-array
-    ($MESSAGES,$messages) = $self->message_array(\@targets);
-    #warn ">> total: $MESSAGES\n";
+    # Prep a temp file for messages to run
+    my $tmpf;
+    ($tmpf, $self->{messageh}) = Mail::SpamAssassin::Util::secure_tmpfile();
+    unlink $tmpf;
 
-    # feed childen
+    # Prep to have child labor results ...
+    my $io = IO::Socket->new();
+    my($child,$parent) = $io->socketpair(AF_UNIX,SOCK_STREAM,PF_UNSPEC);
+
+    # Have a child figure out what we should be doing ...
+    if ( $tmpf = fork() ) { # parent
+      close($parent);
+      chomp($MESSAGES = readline $child);
+      waitpid($tmpf, 0);
+      close($child);
+    }
+    elsif ( defined $tmpf ) { # child
+      close($child);
+      select $parent;
+      print $self->message_array(\@targets),"\n";
+      exit;
+    }
+    else {
+      die "fork() failed!: $!";
+    }
+
+    # Ok, we now have a temp file with the messages to process ...
+    seek ($self->{messageh}, 0, 0);
+    undef $io;
+
+    # feed childen, make them work for it, repeat.
     while ($select->count()) {
       foreach my $socket ($select->can_read()) {
 	my $result = '';
@@ -262,15 +289,13 @@ sub message_array {
     }
     push @messages, (splice @s), (splice @h);
   }
-  my $tmpf;
-  ($tmpf, $self->{messageh}) = Mail::SpamAssassin::Util::secure_tmpfile();
-  unlink $tmpf;
+
   my $count = scalar @messages;
   my $message;
   while ($message = shift @messages) {
     print { $self->{messageh} } "$message\n";
   }
-  seek ($self->{messageh}, 0, 0);
+
   return $count;
 }
 
@@ -306,6 +331,9 @@ sub start_children {
     elsif (defined $pid->[$i]) {
       my $result;
       my $line;
+
+      close $self->{messageh} if ( defined $self->{messageh} );
+
       close $child->[$i];
       select($parent);
       $| = 1;	# print to parent by default, turn off buffering
