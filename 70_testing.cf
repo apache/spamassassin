@@ -95,64 +95,7 @@ describe T_TELESPRLY            Spam passed through known spam relay domain
 
 ##########################################################################
 
-# bug 3570
-# anti-phishing rules, will probably have a low hit-rate
-#
-#  0.057   0.0698   0.0000    1.000   0.55    0.01  T_FORGED_EBAY
-#  0.047   0.0573   0.0000    1.000   0.54    0.01  T_FORGED_CITI
-#  0.034   0.0412   0.0000    1.000   0.52    0.01  T_FORGED_SUNTRUST
-#  0.016   0.0191   0.0000    1.000   0.49    0.01  T_FORGED_ABOUT
-#  0.009   0.0112   0.0000    1.000   0.48    0.01  T_FORGED_PAYPAL
-
-header   __RCVD_PAYPAL		Received =~ /\.paypal\.com\b/i
-header   __FROM_PAYPAL		From =~ /[\@\.]paypal\.com\b/i
-uri      __URI_PAYPAL		m{^https?://.{0,32}\bpaypal\.com\b}i
-meta     T_FORGED_PAYPAL	(__FROM_PAYPAL && __URI_PAYPAL && !__RCVD_PAYPAL)
-describe T_FORGED_PAYPAL	Message appears to be forged, (paypal.com)
-
-header   __RCVD_EBAY		Received =~ /(?:email)?[^\s@]ebay\.com\b/i
-header   __FROM_EBAY		From =~ /\@(?:email)?ebay\.com\b/i
-uri      __URI_EBAY		m{^https?://.{0,32}\bebay\.com\b}i
-meta     T_FORGED_EBAY		(__FROM_EBAY && __URI_EBAY && !__RCVD_EBAY)
-describe T_FORGED_EBAY		Message appears to be forged, (ebay.com)
-
-header   __RCVD_CITIBNK		Received =~ /\b(?:citi(?:bank|cards|corp|bankcards)|acxiom|c2it)\.com\b/i
-header   __FROM_CITIBNK		From =~ /\bciti(?:bank)?\.com\b/i
-uri      __URI_CITIBNK		m{^https?://.{0,32}\bciti(?:bank)?\.com\b}i
-meta     T_FORGED_CITI		(__FROM_CITIBNK && __URI_CITIBNK && !__RCVD_CITIBNK)
-describe T_FORGED_CITI		Message appears to be forged, (citibank.com)
-
-header   __RCVD_SUNTRUST	Received =~ /\.suntrust\.com\b/i
-header   __FROM_SUNTRUST	From =~ /[\@\.]suntrust\.com\b/i
-uri      __URI_SUNTRUST		m{^https?://.{0,32}\bsuntrust\.com\b}i
-meta     T_FORGED_SUNTRUST	(__FROM_SUNTRUST && __URI_SUNTRUST && !__RCVD_SUNTRUST)
-describe T_FORGED_SUNTRUST	Message appears to be forged, (suntrust.com)
-
-header   __RCVD_ABOUT_COM	Received =~ /\babout\.com\b/i
-header   __FROM_ABOUT_COM	From =~ /\babout\.com\b/i
-uri      __URI_ABOUT_COM	m{^https?://.{0,32}\babout\.com\b}i
-meta     T_FORGED_ABOUT		(!__RCVD_ABOUT_COM && __FROM_ABOUT_COM && !__URI_ABOUT_COM)
-describe T_FORGED_ABOUT		Message appears to be forged, (about.com)
-
-##########################################################################
-
-# http://bugzilla.spamassassin.org/show_bug.cgi?id=3645
-header    T_SARE_SUB_DOLLARS    Subject =~ /^\s*(?:\w+ )?(?:\w+: )?\$\d+\s*$/
-describe  T_SARE_SUB_DOLLARS    Subject is dollar sign and numerics only
-
-# http://bugzilla.spamassassin.org/show_bug.cgi?id=2016
-rawbody T_INTERRUPTUS           /(?:[a-zA-Z0-9]<[\/ ]{0,2}?(?!br)(?!p)(?!sup)(?!li)(?!b)(?!i)(?!option)(?!a (?:href|name))(?:\b|!--)[^>]{0,64}?>[a-zA-Z0-9].{0,64}){3}/i
-describe T_INTERRUPTUS          Hypertextus Interruptus - HTML-obfuscated text
-
-########################################################################
-
 body T_NORMAL_HTTP_TO_IP	eval:check_numeric_http()
-
-########################################################################
-
-# bug 2004 - trivial rules
-rawbody T_HTML_FONT_SIZE_0PX	/<font\b[^>]+0px/i
-rawbody T_HTML_FONT_COLOR_WHITE	/<font\b[^>]+white/i
 
 ########################################################################
 
@@ -178,31 +121,21 @@ meta T_NO_RCVD        (!__NO_RCVD)
 # not expecting any hits on this (yet)
 uri T_HIGH_CODEPAGE_URI         /^https?:\/\/[^\/]*\&\#(?:\d{4,}|[3456789]\d\d);/i
 
-# bug 3013: poss replacements for RATWARE_HASH_2 and _2_V2
-header T_RATWARE_HASH_2_A       X-Mailer =~ /^(?!com)(?!OpenGroupware)[A-Za-z0-9_\.]{16,}$/
-header T_RATWARE_HASH_2_V2_A    X-Mailer =~ /^(?!com)(?!OpenGroupware)[A-Za-z0-9_\.]{14,}$/
-header T_RATWARE_HASH_2_B       X-Mailer =~ /^[A-Za-z0-9_]{16,}$/
-header T_RATWARE_HASH_2_V2_B    X-Mailer =~ /^[A-Za-z0-9_]{14,}$/
-header T_RATWARE_HASH_2_C       X-Mailer =~ /^[A-Za-z0-9]{16,}$/
-header T_RATWARE_HASH_2_V2_C    X-Mailer =~ /^[A-Za-z0-9]{14,}$/
 
-uri T_HTML_JS_0			/^javascript:/i
-uri T_HTML_JS_1			/^\s*javascript:/i
-uri T_HTML_JS_2			/^javascript:.*;/is
-uri T_HTML_JS_3			/^\s*javascript:.*;/is
-
-uri T_HTML_JS_LONG_040		/^javascript:.{40}/is
-uri T_HTML_JS_LONG_080		/^javascript:.{80}/is
-uri T_HTML_JS_LONG_120		/^javascript:.{120}/is
-uri T_HTML_JS_LONG_160		/^javascript:.{160}/is
-uri T_HTML_JS_LONG_200		/^javascript:.{200}/is
-
-uri T_HTML_JS_EXPR_1		/^javascript:.*;/is
-uri T_HTML_JS_EXPR_2		/^javascript:.*;.*;/is
-uri T_HTML_JS_EXPR_3		/^javascript:.*;.*;.*;/is
-uri T_HTML_JS_EXPR_4		/^javascript:.*;.*;.*;.*;/is
-uri T_HTML_JS_EXPR_5		/^javascript:.*;.*;.*;.*;.*;/is
-
+########################################################################
+# tvd: these are unusable, results from total nightly run:
+#  0.198   0.2394   0.0500    0.827   0.56    0.01  T_HTML_SCRIPT_LONG_120
+#  0.117   0.1412   0.0278    0.836   0.55    0.01  T_HTML_SCRIPT_EXPR_3
+#  0.048   0.0556   0.0204    0.732   0.49    0.01  T_HTML_SCRIPT_EXPR_4
+#  0.761   0.8444   0.4608    0.647   0.48    0.01  T_HTML_SCRIPT_0
+#  0.467   0.5306   0.2350    0.693   0.48    0.01  T_HTML_SCRIPT_LONG_080
+#  0.725   0.7982   0.4590    0.635   0.47    0.01  T_HTML_SCRIPT_EXPR_1
+#  0.725   0.7982   0.4590    0.635   0.47    0.01  T_HTML_SCRIPT_1
+#  0.691   0.7559   0.4571    0.623   0.47    0.01  T_HTML_SCRIPT_LONG_040
+#  0.013   0.0149   0.0083    0.641   0.46    0.01  T_HTML_SCRIPT_EXPR_5
+#  0.050   0.0510   0.0463    0.524   0.44    0.01  T_HTML_SCRIPT_LONG_160
+#  0.028   0.0254   0.0352    0.419   0.43    0.01  T_HTML_SCRIPT_LONG_200
+#  0.285   0.2838   0.2878    0.496   0.40    0.01  T_HTML_SCRIPT_EXPR_2
 body T_HTML_SCRIPT_0		eval:html_text_match('script', '.')
 body T_HTML_SCRIPT_1		eval:html_text_match('script', ';')
 
@@ -217,6 +150,7 @@ body T_HTML_SCRIPT_EXPR_2	eval:html_text_match('script', ';.*;')
 body T_HTML_SCRIPT_EXPR_3	eval:html_text_match('script', ';.*;.*;')
 body T_HTML_SCRIPT_EXPR_4	eval:html_text_match('script', ';.*;.*;.*;')
 body T_HTML_SCRIPT_EXPR_5	eval:html_text_match('script', ';.*;.*;.*;.*;')
+########################################################################
 
 header T_NUMINTERUPTUS		Subject =~ /\b[a-z]{2,}\d+[a-z]{2,}/i
 header T_CRAZYCASE		Subject =~ /\b[a-z]{2,}[A-Z]+[a-z]{2,}/
@@ -264,9 +198,6 @@ body T_INT_PRICES	eval:check_obfu_word('prices')
 
 # these don't hit a lot, but it's a definite obfuscation technique
 uri T_HTTP_BAD_HOST_CHAR	m@^https?://[^/]*[\000-\037\200-\377]@i
-
-#  0.091   0.1027   0.0000    1.000   0.10    0.01  T_RATWARE_HASH_3
-header T_RATWARE_HASH_3 Message-ID =~ /^<\d{8}[a-zA-Z0-9]{14}@/
 
 # use ReplaceTags
 ifplugin Mail::SpamAssassin::Plugin::ReplaceTags

@@ -27,9 +27,9 @@
 
 header RATWARE_EGROUPS		X-Mailer =~ /eGroups Message Poster/
 describe RATWARE_EGROUPS	Bulk email fingerprint (eGroups) found
-header RATWARE_HASH_2		X-Mailer =~ /^[A-Za-z0-9\._]{16,}$/
+header RATWARE_HASH_2           X-Mailer =~ /^[A-Za-z0-9_]{16,}$/
 describe RATWARE_HASH_2		Bulk email fingerprint (hash 2) found
-header RATWARE_HASH_2_V2	X-Mailer =~ /^[A-Za-z0-9\._]{14,}$/
+header RATWARE_HASH_2_V2        X-Mailer =~ /^[A-Za-z0-9_]{14,}$/
 describe RATWARE_HASH_2_V2	Bulk email fingerprint (hash 2 v2) found
 header RATWARE_JPFREE		X-Mailer =~ /jpfree Group Mail Express/
 describe RATWARE_JPFREE		Bulk email fingerprint (jpfree) found

@@ -153,3 +153,6 @@ describe LONGWORDS	Long string of long words
 
 body HTTPS_IP_MISMATCH	eval:check_https_ip_mismatch()
 describe HTTPS_IP_MISMATCH	IP to HTTPS link found in HTML
+
+rawbody INTERRUPTUS           /(?:[a-zA-Z0-9]<[\/ ]{0,2}?(?!br)(?!p)(?!sup)(?!li)(?!b)(?!i)(?!option)(?!a (?:href|name))(?:\b|!--)[^>]{0,64}?>[a-zA-Z0-9].{0,64}){3}/i
+describe INTERRUPTUS          Message looks to contain HTML-interrupted text
