@@ -9,10 +9,10 @@
 # helps identify probationary rules in test output.
 
 # http://www.hughes-family.org/bugzilla/show_bug.cgi?id=678
-body T_DOMAIN_4U2         /[\@\.]\S*(?:4u|u2|2u|you2|4you|2you|foryou)\S*\.(?:net|com|org)\b/
+body T_DOMAIN_4U2         /[\@\.]\S{0,20}(?:4u|u2|2u|you2|4you|2you|foryou)\S{1,20}\.(?:net|com|org)\b/
 describe T_DOMAIN_4U2     Domain name containing "4u", "u2" or variants.
 
-body T_USER_4U2           /\b\S*(?:4u|u2|2u|you2|4you|2you|foryou)\S*\@\S*\.(?:net|com|org)\b/
+body T_USER_4U2           /\b\S{0,20}(?:4u|u2|2u|you2|4you|2you|foryou)\S{1,20}\@\S{1,20}\.(?:net|com|org)\b/
 describe T_USER_4U2       Local part containing "4u", "u2" or variants.
 
 #  0.00     0.00     0.00    0.00    1.00  T_FROM_4U2 (no matches)
@@ -88,7 +88,7 @@ body T_APPLY_ONLINE               /\bapply (?-i:O)nline/i
 describe T_APPLY_ONLINE           Apply Online
 
 # http://www.hughes-family.org/bugzilla/show_bug.cgi?id=610
-body T_SALE                       /sales?  (?:price|system|department|technology|ends|today)|\b(?:on|summer|movie|clearance|for|your|increase|super|losing|return|business|airfare) (?-i:S)ales?/i
+body T_SALE                       /\bsales? (?:price|system|department|technology|ends|today)|\b(?:on|summer|movie|clearance|for|your|increase|super|losing|return|business|airfare) (?-i:S)ales?/i
 describe T_SALE                   Stuff on Sale
 
 # http://www.hughes-family.org/bugzilla/show_bug.cgi?id=649
