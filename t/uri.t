@@ -21,7 +21,7 @@ use Mail::SpamAssassin;
 use Mail::SpamAssassin::HTML;
 use Mail::SpamAssassin::Util;
 
-plan tests => 63;
+plan tests => 75;
 
 ##############################################
 
@@ -49,6 +49,9 @@ ok ($urimap{'http://66.92.69.221/'});
 ok ($urimap{'http://66.92.69.222/'});
 ok ($urimap{'http://66.92.69.223/'});
 ok ($urimap{'http://66.92.69.224/'});
+ok ($urimap{'spamassassin.org'});
+ok (!$urimap{'CUMSLUTS.'});
+ok (!$urimap{'CUMSLUTS..VIRGIN'});
 
 ##############################################
 
@@ -70,6 +73,7 @@ sub try_domains {
 }
 
 ok(try_domains('javascript:{some crap}', undef));
+# mailtos are now ignored by uri_to_domain (bug 4201)
 ok(try_domains('mailto:nobody@example.com', undef));
 ok(try_domains('http://66.92.69.221/', '66.92.69.221'));
 ok(try_domains('http://www.spamassassin.org:8080/lists.html', 'spamassassin.org'));
@@ -80,6 +84,14 @@ ok(try_domains('http:/%77%77%77.spamassassin.org/lists.html', undef));
 ok(try_domains('http:/www.spamassassin.org/lists.html', 'spamassassin.org'));
 ok(try_domains('http:www.spamassassin.org/lists.html', 'spamassassin.org'));
 ok(try_domains('http://kung.pao.com.cn', 'pao.com.cn'));
+ok(try_domains('kung.pao.com.cn', 'pao.com.cn'));
+ok(try_domains('kung-pao.com.cn', 'kung-pao.com.cn'));
+ok(try_domains('username:password@www.spamassassin.org/lists.html', 'spamassassin.org'));
+ok(try_domains('spamassassin.org', 'spamassassin.org'));
+ok(try_domains('SPAMASSASSIN.ORG', 'spamassassin.org'));
+ok(try_domains('WWW.SPAMASSASSIN.ORG', 'spamassassin.org'));
+ok(try_domains('spamassassin.txt', undef));
+ok(try_domains('longer.url.but.not.spamassassin.txt', undef));
 
 ##############################################
 
@@ -137,6 +149,13 @@ ok(try_canon(['http://images.google.ca/imgres?imgurl=gmib.free.fr/viagra.jpg&img
 ok(try_canon(["http://www.kl\nuge.n\net/"],
   ['http://www.kluge.net/']
   ));
+
+ok(try_canon([
+   'http%3A//ebg&vosxfov.com%2Eget%72xspecials%2Enet/b/Tr3f0amG'
+   ], [
+   'http%3A//ebg&vosxfov.com%2Eget%72xspecials%2Enet/b/Tr3f0amG',
+   'http://ebg&vosxfov.com.getrxspecials.net/b/Tr3f0amG'
+   ]));
 
 ##############################################
 
@@ -199,3 +218,4 @@ ok(try($base, "g?y/../x", "http://a/b/c/g?y/../x"));
 ok(try($base, "g#s/./x", "http://a/b/c/g#s/./x"));
 ok(try($base, "g#s/../x", "http://a/b/c/g#s/../x"));
 ok(try($base, "http:g", "http://a/b/c/g"));
+
