@@ -69,7 +69,7 @@ use vars	qw{
 @ISA = qw();
 
 $VERSION = "2.20";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.74 2002/03/19 22:28:20 hughescr Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.75 2002/03/26 01:28:29 hughescr Exp $';
 
 sub Version { $VERSION; }
 
@@ -349,6 +349,12 @@ sub remove_spamassassin_markup {
 
     # remove embedded spaces where they shouldn't be; a common problem
     $hdrs =~ s/(Content-Type: .*?boundary=\".*?) (.*?\".*?\n)/$1$2/gs;
+  }
+
+  # reinstate the old content transfer encoding
+  if ($hdrs =~ /^X-Spam-Prev-Content-Transfer-Encoding: /m) {
+    $hdrs =~ s/\nContent-Transfer-Encoding: [^\n]*?\n/\n/gs;
+    $hdrs =~ s/\nX-Spam-Prev-(Content-Transfer-Encoding: [^\n]*\n)/\n$1/gs;
   }
 
   # remove the headers we added
