@@ -1058,6 +1058,12 @@ sub cleanupchildren {
   # may be required on some platforms even though we use SIG{CHLD} = 'IGNORE'.
   # cf. mail from Stefan Seiz <talklists@index-s.de>, Fri, 27 Dec 2002 17:32:54
   # <BA323F46.19AF5%talklists@index-s.de> noting it on MacOS X Server 10.1.5.
+
+  # causes a warning on recent linux kernels (cf:
+  # http://bugzilla.spamassassin.org/show_bug.cgi?id=1536 ), so don't do
+  # this if we're on a known-good OS which will *not* leave dead kids.
+  return if ($^O =~ /linux/);
+
   my $kid;
   do {
     $kid = waitpid(-1,&WNOHANG);
