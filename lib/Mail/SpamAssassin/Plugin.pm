@@ -332,6 +332,102 @@ The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
 
 =back
 
+=item $plugin->bayes_learn ( { options ... } )
+
+Called at the end of a bayes learn operation.
+
+This phase is the best place to map the raw (original) token value
+to the SHA1 hashed value.
+
+=over 4
+
+=item toksref
+
+Reference to hash returned by call to tokenize.  The hash takes the
+format of:
+{
+  'SHA1 Hash Value' => { 'raw_token' => 'raw (original) value' }
+}
+
+=item isspam
+
+Boolean value stating what flavor of message the tokens represent, if
+true then message was specified as spam, false is nonspam.  Note, when
+function is scan then isspam value is not valid.
+
+=item msgid
+
+Generated message id of the message just learned.
+
+=item msgatime
+
+Received date of the current message or current time if received date
+could not be determined.  In addition, if the receive date is more than
+24 hrs into the future it will be reset to current datetime.
+
+=back
+
+=item $plugin->bayes_forget ( { options ... } )
+
+Called at the end of a bayes forget operation.
+
+=over 4
+
+=item toksref
+
+Reference to hash returned by call to tokenize.  See bayes_learn
+documentation for additional information on the format.
+
+=item isspam
+
+Boolean value stating what flavor of message the tokens represent, if
+true then message was specified as spam, false is nonspam.  Note, when
+function is scan then isspam value is not valid.
+
+=item msgid
+
+Generated message id of the message just forgotten.
+
+=back
+
+=item $plugin->bayes_scan ( { options ... } )
+
+Called at the end of a bayes scan operation.  NOTE: Will not be
+called in case of error or if the message is otherwise skipped.
+
+=over 4
+
+=item toksref
+
+Reference to hash returned by call to tokenize.  See bayes_learn
+documentation for additional information on the format.  If the token
+was found in the database it will contain some additional information:
+
+{
+  'SHA1 Hash Value' => { 'raw_token' => 'raw (original) value',
+                         'pw' => 'calculated probability',
+                         'spam_count' => 'Total number of spam msgs w/ token',
+                         'ham_count' => 'Total number of ham msgs w/ token',
+                         'atime' => 'Atime value for token in database'
+                       }
+}
+
+=item score
+
+Score calculated for this particular message.
+
+=item msgatime
+
+Calculated atime of the message just learned, note it may have been adjusted
+if it was determined to be too far into the future.
+
+=item significant_tokens
+
+Array ref of the tokens found to be significant in determining the score for
+this message.
+
+=back
+
 =item $plugin->finish ()
 
 Called when the C<Mail::SpamAssassin> object is destroyed.

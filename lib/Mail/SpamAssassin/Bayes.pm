@@ -826,6 +826,13 @@ sub learn_trapped {
 
   $self->{store}->seen_put ($msgid, ($isspam ? 's' : 'h'));
   $self->{store}->cleanup();
+
+  $self->{main}->call_plugins("bayes_learn", { toksref => $tokens,
+					       isspam => $isspam,
+					       msgid => $msgid,
+					       msgatime => $msgatime,
+					     });
+
   dbg("bayes: Learned '$msgid', atime: $msgatime");
 
   1;
@@ -931,6 +938,12 @@ sub forget_trapped {
 
   $self->{store}->seen_delete ($msgid);
   $self->{store}->cleanup();
+
+  $self->{main}->call_plugins("bayes_forget", { toksref => $tokens,
+						isspam => $isspam,
+						msgid => $msgid,
+					      });
+
   1;
 }
 
@@ -1180,6 +1193,7 @@ sub scan {
   my $msgdata = $self->get_msgdata_from_permsgstatus ($permsgstatus);
 
   my $msgtokens = $self->tokenize($msg, $msgdata);
+
   my $tokensdata = $self->{store}->tok_get_all(keys %{$msgtokens});
 
   my %pw;
@@ -1279,6 +1293,12 @@ sub scan {
   if ($self->{log_raw_counts}) {
     print "#Bayes-Raw-Counts: $self->{raw_counts}\n";
   }
+
+  $self->{main}->call_plugins("bayes_scan", { toksref => $msgtokens,
+					      score => $score,
+					      msgatime => $msgatime,
+					      significant_tokens => \@touch_tokens,
+					    });
 
 skip:
   if (!defined $score) {
