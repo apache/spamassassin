@@ -164,7 +164,8 @@ if ($opt_t) {				# support -t
   exit;
 }
 
-$mail->accept();
+my $where = $ENV{'MAIL'} || $ENV{'DEFAULT'} || undef;
+$mail->accept($where);
 exit;
 
 sub sed_path {
