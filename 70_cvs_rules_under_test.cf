@@ -139,6 +139,16 @@ header T_SPF_SOFTFAIL	eval:check_for_spf_softfail()
 tflags T_SPF_SOFTFAIL	net
 score T_SPF_SOFTFAIL	0.1
 
+header T_SPF_HELO_PASS	eval:check_for_spf_helo_pass()
+tflags T_SPF_HELO_PASS	net nice
+score T_SPF_HELO_PASS	-0.1
+header T_SPF_HELO_FAIL	eval:check_for_spf_helo_fail()
+tflags T_SPF_HELO_FAIL	net
+score T_SPF_HELO_FAIL	0.2
+header T_SPF_HELO_SOFTFAIL	eval:check_for_spf_helo_softfail()
+tflags T_SPF_HELO_SOFTFAIL	net
+score T_SPF_HELO_SOFTFAIL	0.1
+
 # Not good, esp. considering how *slow* it runs..
 # 17.640   4.1041  29.0741    0.124   0.69   -0.10  T_ALL_RELAYS_NEAR_MXES
 # However, combined with SBL it might work out useful...
@@ -354,6 +364,9 @@ describe T_HTML_FONT_TINY	HTML has a tiny font
 # Received headers using "helo=" prefix
 header T_RCVD_NUMERIC_HELO	X-Spam-Relays-Untrusted =~ / helo=\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3} /
 describe T_RCVD_NUMERIC_HELO	Received: contains an IP address used for HELO
+# same but not for first line
+header T_RCVD_NUMERIC_HELO_NOTFIRST	X-Spam-Relays-Untrusted =~ / helo=\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3} .+\[/
+describe T_RCVD_NUMERIC_HELO_NOTFIRST	Received: contains an IP address used for HELO (not first line)
 
 # If the Message-Id claims to be added by one ISP, there should be a Received
 # header which mentions that ISP.
@@ -391,3 +404,8 @@ body T_MPART_ALT_DIFF_96      eval:multipart_alternative_difference('96', '100')
 body T_MPART_ALT_DIFF_97      eval:multipart_alternative_difference('97', '100')
 body T_MPART_ALT_DIFF_98      eval:multipart_alternative_difference('98', '100')
 body T_MPART_ALT_DIFF_99      eval:multipart_alternative_difference('99', '100')
+
+# 0 nonspam hits, hundreds of spam hits.  Serious problems there
+uri T_TERRA_ES		/terra\.es\//i
+describe T_TERRA_ES	Contains images or links to pages hosted at 'terra.es'
+
