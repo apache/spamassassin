@@ -209,6 +209,7 @@ sub _parse {
   foreach (split (/\n/, $_[1])) {
     s/^\s+|\s+$//g;  # remove leading and trailing spaces (including newlines)
     s/(?<!\\)#.*$//; # remove comments
+    s/\s+$//g;       # remove spaces before comments
     next unless($_); # skip empty lines
 
     # handle i18n

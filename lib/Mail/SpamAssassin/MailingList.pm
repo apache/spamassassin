@@ -1,4 +1,4 @@
-# $Id: MailingList.pm,v 1.7 2002/08/16 16:26:22 jmason Exp $
+# $Id: MailingList.pm,v 1.8 2002/08/17 16:06:16 jmason Exp $
 
 # Eval Tests to detect genuine mailing lists.
 
@@ -25,7 +25,7 @@ sub detect_mailing_list {
 sub detect_ml_ezmlm {
     my ($self) = @_;
     return 0 unless $self->get('mailing-list') =~ /ezmlm$/;
-    return 0 unless $self->get('precedence') eq 'bulk';
+    return 0 unless $self->get('precedence') eq "bulk\n";
     return 0 unless $self->get('list-post') =~ /^<mailto:/;
     return 0 unless $self->get('list-help') =~ /^<mailto:/;
     return 0 unless $self->get('list-unsubscribe') =~ /<mailto:[a-zA-Z\.-]+-unsubscribe\@/;
@@ -45,7 +45,7 @@ sub detect_ml_ezmlm {
 sub detect_ml_mailman {
     my ($self) = @_;
     return 0 unless $self->get('x-mailman-version') =~ /^\d/;
-    return 0 unless $self->get('precedence') eq 'bulk';
+    return 0 unless $self->get('precedence') eq "bulk\n";
     return 0 unless $self->get('list-id');
     return 0 unless $self->get('list-help') =~ /^<mailto:/;
     return 0 unless $self->get('list-post') =~ /^<mailto:/;
@@ -70,7 +70,6 @@ sub detect_ml_mailman {
 sub detect_ml_sympa {
     my ($self) = @_;
     return 0;
-    return 1;
 }
 
 # Lyris
