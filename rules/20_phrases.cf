@@ -85,10 +85,10 @@ body DEAR_SOMETHING		/\bDear (?:IT\W|Internet|candidate|sirs?|madam|investor|tra
 describe DEAR_SOMETHING		Contains 'Dear (something)'
 body BILLION_DOLLARS		/[BM]ILLION DOLLAR/
 describe BILLION_DOLLARS	Talks about lots of money
-body OPT_OUT			/\bopt-out\b/
-describe OPT_OUT		Talks about opting out (lowercase version)
-body OPT_OUT_CAPS		/(?-i:O)pt.?(?-i:O)ut/i
-describe OPT_OUT_CAPS		Talks about opting out (capitalized version)
+body OPTING_OUT			/\bopt-out\b/
+describe OPTING_OUT		Talks about opting out (lowercase version)
+body OPTING_OUT_CAPS		/(?-i:O)pt.?(?-i:O)ut/i
+describe OPTING_OUT_CAPS	Talks about opting out (capitalized version)
 body DIRECT_EMAIL		/direct e-*mail\b/i
 describe DIRECT_EMAIL		Talks about direct email
 
