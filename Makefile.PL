@@ -158,6 +158,7 @@ my %makefile = (
     # the executable as the value.
     'EXE_FILES' => {
       'sa-filter.raw'    => 'sa-filter',
+      'spamassassin.raw'    => 'spamassassin',
       'sa-learn.raw'     => 'sa-learn',
       'sa-update.raw'    => 'sa-update',
       'spamc/spamc.c'    => 'spamc/spamc$(EXE_EXT)',
@@ -207,7 +208,7 @@ my %makefile = (
     },
 
     'clean' => { FILES => join(' ' =>
-        'sa-filter', 'sa-learn', 'sa-update',
+        'sa-filter', 'sa-learn', 'sa-update', 'spamassassin',
         
         'spamd/spamd',
 
@@ -1097,6 +1098,9 @@ FIXBANG		= -Msharpbang \
 sa-filter: sa-filter.raw
 	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -i$? -o$@
 
+spamassassin: spamassassin.raw
+	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -i$? -o$@
+
 sa-learn: sa-learn.raw
 	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -i$? -o$@
 
@@ -1154,8 +1158,8 @@ qmail/qmail-spamc$(EXE_EXT): spamc/qmail-spamc$(EXE_EXT)
 
 
 bin__install: $(INST_SCRIPT)/sa-filter
-	$(RM_F) $(B_SCRIPTDIR)/spamassassin
-	$(SYMLINK) $(INST_SCRIPT)/sa-filter $(B_SCRIPTDIR)/spamassassin
+        # $(RM_F) $(B_SCRIPTDIR)/spamassassin
+        # $(SYMLINK) $(INST_SCRIPT)/sa-filter $(B_SCRIPTDIR)/spamassassin
 
 conf__install:
 	-$(MKPATH) $(B_CONFDIR)
