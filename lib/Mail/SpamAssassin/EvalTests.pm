@@ -91,13 +91,14 @@ sub check_for_forged_hotmail_received_headers {
   # Received: from hotmail.com (f135.law8.hotmail.com [216.33.241.135])
   # spammers do not ;)
 
-  if ($rcvd =~ /from hotmail.com/
-  	&& $rcvd !~ /from \S*hotmail.com \(\S+\.hotmail\.com /)
-  {
-    return 1;
-  } else {
-    return 0;
-  }
+  if ($rcvd !~ /from hotmail.com/) { return 0; }
+
+  $rcvd =~ s/\s+/ /gs;		# just spaces, simplify the regexp
+
+  if ($rcvd =~ /from \S*hotmail.com \(\S+\.hotmail(?:\.msn|)\.com /) { return 0; }
+  if ($rcvd =~ /from \S+ by \S+\.hotmail(?:\.msn|)\.com with HTTP\;/) { return 0; }
+
+  return 1;
 }
 
 ###########################################################################

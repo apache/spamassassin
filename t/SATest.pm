@@ -143,7 +143,11 @@ sub start_spamd {
     }
 
     sleep 1;
-    if ($retries-- <= 0) { warn "spamd start failed"; return 0; }
+    if ($retries-- <= 0) {
+      warn "spamd start failed";
+      warn "\n\nMaybe you need to kill a running spamd process?\n\n";
+      return 0;
+    }
   }
 
   1;
