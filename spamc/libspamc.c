@@ -24,7 +24,7 @@
 #include <stdio.h>
 #include <string.h>
 #ifdef _WIN32
-/* simple macro that works for single strings without %m */
+#define snprintf _snprintf
 #define vsnprintf _vsnprintf
 #define strcasecmp stricmp
 #define sleep Sleep
@@ -209,10 +209,10 @@ static int opensocket(int flags, int type, int *psock)
 		 */
 #ifndef _WIN32
 	origerr = errno;	/* take a copy before syslog() */
-	libspamc_log(flags, LOG_ERR, "socket(%s) to spamd failed: %m", typename);
+	libspamc_log(flags, LOG_ERR, "socket(%s) to spamd failed: %s", typename, strerror(origerr));
 #else
 	origerr = WSAGetLastError();
-	printf("socket(%s) to spamd failed: %d\n", typename, origerr);
+	libspamc_log(flags, LOG_ERR, "socket(%s) to spamd failed: %d", typename, origerr);
 #endif
 
 	switch (origerr) {
@@ -256,12 +256,11 @@ static int opensocket(int flags, int type, int *psock)
 	    case ENOTSOCK:
 	    case ENOPROTOOPT:
 	    case EFAULT:
-#ifndef _WIN32
 		libspamc_log(flags, LOG_ERR,
-		       "setsockopt(TCP_NODELAY) failed: %m", origerr);
+#ifndef _WIN32
+		       "setsockopt(TCP_NODELAY) failed: %s", strerror(origerr));
 #else
-		fprintf(stderr,
-			"setsockopt(TCP_NODELAY) failed: %d\n", origerr);
+		       "setsockopt(TCP_NODELAY) failed: %d", origerr);
 #endif
 		closesocket(*psock);
 		return EX_SOFTWARE;
@@ -326,8 +325,8 @@ static int try_to_connect_unix(struct transport *tp, int *sockptr)
 	return EX_OK;
     }
 
-    libspamc_log(tp->flags, LOG_ERR, "connect(AF_UNIX) to spamd %s failed: %m",
-	   addrbuf.sun_path);
+    libspamc_log(tp->flags, LOG_ERR, "connect(AF_UNIX) to spamd %s failed: %s",
+	   addrbuf.sun_path, strerror(origerr));
     closesocket(mysock);
 
     return translate_connect_errno(origerr);
@@ -396,13 +395,13 @@ static int try_to_connect_tcp(const struct transport *tp, int *sockptr)
 #ifndef _WIN32
 	    origerr = errno;
 	    libspamc_log(tp->flags, LOG_ERR,
-		   "connect(AF_INET) to spamd at %s failed, retrying (#%d of %d): %m",
-		   ipaddr, numloops + 1, MAX_CONNECT_RETRIES);
+		   "connect(AF_INET) to spamd at %s failed, retrying (#%d of %d): %s",
+		   ipaddr, numloops + 1, MAX_CONNECT_RETRIES, strerror(origerr));
 #else
 	    origerr = WSAGetLastError();
-	    fprintf(stderr,
-		    "connect(AF_INET) to spamd at %s failed, retrying (#%d of %d): %d\n",
-		    ipaddr, numloops + 1, MAX_CONNECT_RETRIES, origerr);
+	    libspamc_log(tp->flags, LOG_ERR,
+		   "connect(AF_INET) to spamd at %s failed, retrying (#%d of %d): %d",
+		   ipaddr, numloops + 1, MAX_CONNECT_RETRIES, origerr);
 #endif
 	    closesocket(mysock);
 
@@ -1181,8 +1180,6 @@ int transport_setup(struct transport *tp, int flags)
     struct hostent *hp = 0;
     char **addrp;
 
-    tp->flags = flags;
-
 #ifdef _WIN32
     // Start Winsock up
     WSADATA wsaData;
@@ -1193,6 +1190,8 @@ int transport_setup(struct transport *tp, int flags)
     }
 
 #endif
+
+    tp->flags = flags;
 
     assert(tp != 0);
 
@@ -1314,7 +1313,11 @@ libspamc_log (int flags, int level, char *msg, ...)
     } else {
         vsnprintf(buf, LOG_BUFSIZ, msg, ap);
         buf[LOG_BUFSIZ] = '\0';     /* ensure termination */
+#ifndef _WIN32
         syslog (level, "%s", buf);
+#else
+        fprintf (stderr, "%s\n", buf);
+#endif
     }
 
     va_end(ap);
