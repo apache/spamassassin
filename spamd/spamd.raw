@@ -345,17 +345,16 @@ while (1) {
 
     my $start = time;
 
-    my($port,$iaddr) = sockaddr_in($client->peername);
-    my $name = gethostbyaddr($iaddr,AF_INET);
+    my($port, $iaddr) = sockaddr_in($client->peername);
+    my $name = gethostbyaddr($iaddr, AF_INET);
 
-    if (ip_is_allowed(inet_ntoa($iaddr))) {
-	logmsg "connection from $name [",
-			inet_ntoa($iaddr),"] at port $port";
+    my $ip = inet_ntoa($iaddr);
+    if (ip_is_allowed($ip)) {
+        logmsg("connection from $name [$ip] at port $port");
     } else {
-	logmsg "unauthorized connection from $name [",
-			inet_ntoa($iaddr),"] at port $port";
-	$client->close;
-	next;
+        logmsg("unauthorized connection from $name [$ip] at port $port");
+        $client->close;
+        next;
     }
 
     spawn sub {
@@ -484,28 +483,30 @@ sub check {
     my $in_header = 1;
     my $msgid;
     while ($_ = $client->getline()) {
-	if ($in_header) {
-	    if (/^$/) {
-		$in_header = 0;
-		$msgid = '(unknown)' unless($msgid);
-	    }
-	    elsif (/^Message-Id:\s+(.*)$/i) {
-		$msgid = $1;
-		while($msgid =~ s/\([^\(\)]*\)//) {};    # remove comments and
-		$msgid =~ s/^\s+|\s+$//g;                # leading and trailing spaces
-		$msgid =~ s/\s.*$/(...)/;                # keep only the first token
-	    }
-	}
-	push(@msglines, $_);
-	$actual_length += length;
-	last if ($actual_length == $expected_length);
+        if ($in_header) {
+           if (/^$/) {
+                 $in_header = 0;
+                 $msgid = '(unknown)' unless($msgid);
+            }
+            elsif (/^Message-Id:\s+(.*?)\s*$/i) {
+                $msgid = $1;
+                while($msgid =~ s/\([^\(\)]*\)//) {};    # remove comments and
+                $msgid =~ s/^\s+|\s+$//g;                # leading and trailing spaces
+                $msgid =~ s/\s.*$/(...)/;                # keep only the first token
+            }
+        }
+        push(@msglines, $_);
+        $actual_length += length;
+        last if ($actual_length == $expected_length);
     }
 
     $current_user ||= '(unknown)';
-    logmsg (($method eq 'PROCESS') ? 'processing' : 'checking')
-		. " message $msgid for $current_user:$>"
-		. ($expected_length ? ", expecting $expected_length bytes" : "")
-		. ".";
+    logmsg(
+      ($method eq 'PROCESS' ? 'processing' : 'checking') .
+      " message $msgid for $current_user:$>" .
+      ($expected_length ? ", expecting $expected_length bytes" : "") .
+      "."
+    );
 
     my $mail = Mail::SpamAssassin::NoMailAudit->new (
 			data => \@msglines
