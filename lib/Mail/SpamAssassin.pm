@@ -1605,20 +1605,25 @@ sub copy_config {
     if (!$i) {
       $dest->{$k} = $v;
     }
-    elsif ($i eq 'SCALAR' || $i eq 'ARRAY' || $i eq 'HASH') {
-      # It's a reference, so make a recursive copy
-      $dest->{$k} = Storable::dclone($v);
-    }
     elsif ($k =~ /^(internal|trusted)_networks$/) {
       # these are objects, but have a single hash array of interest
       # it may not exist though, so deal with it appropriately.
+
+      # if it exists and is defined, copy it to the destination
       if ($v->{nets}) {
         # just copy the nets reference over ...
         $dest->{$k}->{nets} = Storable::dclone($v->{nets});
       }
       else {
-	# this gets tricky...  the value is false, or doesn't exist,
-	# so we need to either delete or undef depending on the destination
+	# this gets a little tricky...
+	#
+	# If $dest->{$k} doesn't exist, we're copying from the
+	# config to a backup.  So make a note that we want to delete
+	# any configured nets by setting to undef.
+	#
+	# If $dest->{$k} does exist, we're copying back to the config
+	# from the backup, so delete {nets}.
+
         if (exists $dest->{$k}) {
 	  delete $dest->{$k}->{nets};
 	}
@@ -1627,7 +1632,16 @@ sub copy_config {
         }
       }
     }
+    elsif ($i eq 'SCALAR' || $i eq 'ARRAY' || $i eq 'HASH') {
+      # IMPORTANT: DO THIS BEFORE AFTER EVERYTHING ELSE!
+      # If we don't do this at the end, any "special" object handling
+      # will be screwed.
+
+      # Make a recursive copy of the reference.
+      $dest->{$k} = Storable::dclone($v);
+    }
 #    else {
+#      # throw a warning for debugging -- should never happen in normal usage
 #      warn ">> $k, $i\n";
 #    }
   }
