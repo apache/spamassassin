@@ -911,18 +911,6 @@ body T_FREE_WEBSITE               /(?-i:F)ree web/i
 describe T_FREE_WEBSITE           Contains 'free website' with capitals
 #
 #
-#   0.000    0.000    0.000    0.00    1.00  T_FROM_ISO885915
-header T_FROM_ISO885915		From:raw =~ /=\?ISO-8859-15?\?q\?(?:[a-z]*=[A-F][0-9A-F][a-z]*)+\?=/i
-describe T_FROM_ISO885915	From contains encoded ISO-8859-1(5) characters
-tflags T_FROM_ISO885915		nice
-#
-#
-#   0.000    0.000    0.000    0.00    1.00  T_SUBJ_ISO885915
-header T_SUBJ_ISO885915		Subject:raw =~ /=\?ISO-8859-15?\?q\?(?:[a-z]*=[A-F][0-9A-F][a-z]*)+\?=/i
-describe T_SUBJ_ISO885915	Subject contains encoded ISO-8859-1(5) characters
-tflags T_SUBJ_ISO885915		nice
-#
-#
 #   0.004    0.000    0.006    0.00    1.00  T_MEMBER_2
 #
 #
@@ -1057,3 +1045,8 @@ lang fr describe YR_MEMBERSHIP_EXCH     L'entête Subject: contient 'your members
 lang pl describe YR_MEMBERSHIP_EXCH	Temat zawiera 'Your Membership Exchange'
 score YR_MEMBERSHIP_EXCH             4.2
 
+# replaced with MULTIPART_SIGNED
+header PGP_SIGNATURE            Content-Type =~ /protocol=.?application\/pgp-signature.?;/i
+describe PGP_SIGNATURE          Contains a PGP-signed message (signature attached)
+tflags PGP_SIGNATURE            nice
+score PGP_SIGNATURE             -3

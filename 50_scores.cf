@@ -1,5 +1,5 @@
 # SpamAssassin rules file: scores.
-# $Id: 50_scores.cf,v 1.202 2002/08/23 10:02:27 hughescr Exp $
+# $Id: 50_scores.cf,v 1.203 2002/08/24 18:39:51 msquadrat Exp $
 ###########################################################################
 # Default scores.   Note that if a test is named in the files, but a score is
 # not assigned here, the default score will be set to 1.
@@ -169,6 +169,7 @@ score FROM_AND_TO_SAME_6             1.4
 score FROM_BTAMAIL                   3.516
 score FROM_ENDS_IN_NUMS              0.382
 score FROM_HAS_MIXED_NUMS            2.578
+score FROM_ISO885915                 -0.5
 score FROM_NO_USER                   1.471
 score FROM_STARTS_WITH_NUMS          4.388
 score FRONTPAGE                      4.429
@@ -309,7 +310,8 @@ score PENIS_ENLARGE                  1.283
 score PENIS_ENLARGE2                 4.319
 score PENNIES_A_DAY                  2.943
 score PGP_MESSAGE                    -3.135
-score PGP_SIGNATURE                  -3.135
+score MULTIPART_SIGNED               -3.135
+score PGP_OLD_SIGNATURE              -3.135
 score PHONE_CANCER		     1.0
 score PLING_PLING                    0.763
 score PORN_4                         1.391
@@ -381,6 +383,7 @@ score SUBJ_ENDS_IN_SPACE             2
 score SUBJ_FULL_OF_8BITS             4.298
 score SUBJ_HAS_SPACES                4.043
 score SUBJ_HAS_UNIQ_ID               2.542
+score SUBJ_ISO885915                 -0.5
 score SUBJ_REMOVE                    0.323
 score SUPPLIES_LIMITED		     1.0
 score SUSPICIOUS_RECIPS              0.213
