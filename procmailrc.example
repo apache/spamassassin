@@ -2,11 +2,16 @@
 #
 # Pipe the mail through spamassassin (replace 'spamassassin' with 'spamc'
 # if you use the spamc/spamd combination)
+#
 # The condition line ensures that only messages smaller than 250 kB
 # (250 * 1024 = 256000 bytes) are processed by SpamAssassin. Most spam
 # isn't bigger than a few k and working with big messages can bring
 # SpamAssassin to its knees.
-:0fw
+#
+# The lock file ensures that only 1 spamassassin invocation happens
+# at 1 time, to keep the load down.
+#
+:0fw: spamassassin.lock
 * < 256000
 | spamassassin
 
