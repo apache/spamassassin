@@ -59,3 +59,8 @@ loadplugin Mail::SpamAssassin::Plugin::AWL
 # AutoLearnThreshold - threshold-based discriminator for Bayes auto-learning
 #
 loadplugin Mail::SpamAssassin::Plugin::AutoLearnThreshold
+
+# MIMEHeader - apply regexp rules against MIME headers in the message
+#
+loadplugin Mail::SpamAssassin::Plugin::MIMEHeader
+
