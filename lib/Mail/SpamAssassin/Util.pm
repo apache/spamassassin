@@ -410,7 +410,7 @@ sub qp_decode {
   local $_ = shift;
 
   s/\=\r?\n//gs;
-  s/\=([0-9A-F]{2})/chr(hex($1))/ge;
+  s/\=([0-9a-fA-F]{2})/chr(hex($1))/ge;
   return $_;
 }
 
