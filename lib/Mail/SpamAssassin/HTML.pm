@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.77 2003/04/12 03:44:46 quinlan Exp $
+# $Id: HTML.pm,v 1.78 2003/04/15 02:31:53 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -472,6 +472,21 @@ sub html_tests {
     if ($width > 0 && $height > 0) {
       my $area = $width * $height;
       $self->{html}{image_area} += $area;
+    }
+    if ($width < 2 && $height < 2) {
+      $self->{html}{t_image_web_bugs_1} = 1;
+    }
+    if ($width + $height < 4) {
+      $self->{html}{t_image_web_bugs_2} = 1;
+    }
+    if ($width <= 2 && $height <= 2) {
+      $self->{html}{t_image_web_bugs_3} = 1;
+    }
+    if ($width <= 3 && $height <= 3) {
+      $self->{html}{t_image_web_bugs_4} = 1;
+    }
+    if ($width <= 4 && $height <= 4) {
+      $self->{html}{t_image_web_bugs_5} = 1;
     }
   }
   if ($tag eq "form" && exists $attr->{action}) {
