@@ -1049,7 +1049,6 @@ sub scan {
   }
 
   my %seen = ();
-  my $pw;
 
   my $msgatime = $self->receive_date(scalar $msg->get_all_headers(0,1));
 
@@ -1057,7 +1056,7 @@ sub scan {
   # future, something's messed up and we should revert to current time as
   # a safety measure.
   #
-  $msgatime = time if ( $msgatime - time > 86400 );
+  $msgatime = time if ( $msgatime > time );
 
   my %pw = map {
     if ($seen{$_}) {
@@ -1065,7 +1064,7 @@ sub scan {
     } else {
       $seen{$_} = 1;
       # warn "JMD bayes token found: '$_'\n";
-      $pw = $self->compute_prob_for_token ($_, $ns, $nn);
+      my $pw = $self->compute_prob_for_token ($_, $ns, $nn);
       if (!defined $pw) {
 	();		# exit map()
       } else {
@@ -1073,6 +1072,13 @@ sub scan {
       }
     }
   } @tokens;
+
+  # If none of the tokens were found in the DB, we're going to skip
+  # this message...
+  if (!keys %pw) {
+    dbg ("cannot use bayes on this message; none of the tokens were found in the database");
+    goto skip;
+  }
 
   # now take the $count most significant tokens and calculate probs using
   # Robinson's formula.
@@ -1092,11 +1098,6 @@ sub scan {
     $self->{store}->tok_touch ($_, $msgatime);
 
     dbg ("bayes token '$_' => $pw");
-  }
-
-  if ($#sorted < 0) {
-    dbg ("cannot use bayes on this message; db not initialised yet");
-    goto skip;
   }
 
   if (REQUIRE_SIGNIFICANT_TOKENS_TO_SCORE > 0 && 
