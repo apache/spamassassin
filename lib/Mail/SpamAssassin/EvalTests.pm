@@ -3168,7 +3168,14 @@ sub html_test {
 
 sub html_eval {
   my ($self, undef, $test, $expr) = @_;
-  return exists $self->{html}{$test} && eval "qq{\Q$self->{html}{$test}\E} $expr";
+
+  # workaround bug 3320: wierd perl bug where additional, very explicit
+  # untainting into a new var is required.
+  my $tainted = $self->{html}{$test};
+  return unless defined($tainted);
+  $tainted =~ /^(.*)$/; my $val = $1;
+
+  return eval "qq{\Q$val\E} $expr";
 }
 
 sub html_text {
