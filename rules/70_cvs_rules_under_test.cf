@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.514 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.515 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -141,10 +141,6 @@ describe T_FORGED_IMS_CTYPE	Forged mail pretending to be from IMS (boundary)
 header __EUD_STYLE_FROM		From =~ /^(?:[^\"][^']+[^\"]|\".*\'.*\") <[^>]+>$/
 meta T_FORGED_MUA_EUDORA_FROM	(__ANY_QUALCOMM_MUA && !__EUD_STYLE_FROM && !__VIA_FROM_MANGLER)
 describe T_FORGED_MUA_EUDORA_FROM Forged mail pretending to be from Eudora (by From)
-
-header T_RCVD_IN_MONKEYS_UPL	rbleval:check_rbl_txt('relay', 'proxies.relays.monkeys.com.')
-describe T_RCVD_IN_MONKEYS_UPL	Received via a relay in proxies.relays.monkeys.com.
-tflags T_RCVD_IN_MONKEYS_UPL net
 
 # mixed list, still need to check for cost, policies, etc.
 header T_RCVD_IN_DNSBLINFO	rbleval:check_rbl('dnsblinfo', 'spamsources.dnsbl.info.')
