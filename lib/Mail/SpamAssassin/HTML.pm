@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.43 2002/12/09 08:42:52 quinlan Exp $
+# $Id: HTML.pm,v 1.44 2002/12/10 00:11:16 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -287,10 +287,10 @@ sub html_tests {
       $height *= 6 if (defined $2 && $2 eq "%");
     }
     if ($width > 0 && $height > 0) {
-      my $area = $attr->{width} * $attr->{height};
+      my $area = $width * $height;
       $self->{html}{total_image_area} += $area;
 
-      my $ratio = ($attr->{width} + 0.0) / ($attr->{height} + 0.0);
+      my $ratio = ($width + 0.0) / ($height + 0.0);
 
       $self->{html}{min_img_ratio} = $ratio
 	  if ($self->{html}{min_img_ratio} eq "inf" || $ratio < $self->{html}{min_img_ratio});
