@@ -58,7 +58,7 @@ else
 # This needs to have 50_scores.cf in place first ...
 echo "[gen validation results]"
 ./logs-to-c --spam=SPBASE/spam-validate.log \
-	--nonspam=NSBASE/ham-validate.log \
+	--ham=NSBASE/ham-validate.log \
 	--count --cffile=../rules --scoreset=$SCORESET | tee gen-$NAME.validate
 
 echo "[STATISTICS file generation]"

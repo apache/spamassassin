@@ -18,9 +18,9 @@
 
 use Getopt::Long;
 use vars qw($opt_cffile $opt_count $opt_lambda $opt_threshold
-		$opt_spam $opt_nonspam);
+		$opt_spam $opt_ham);
 
-GetOptions("cffile=s", "count", "lambda=f", "threshold=f", "spam=s", "nonspam=s", "scoreset=i");
+GetOptions("cffile=s", "count", "lambda=f", "threshold=f", "spam=s", "ham=s", "scoreset=i");
 my $argcffile = $opt_cffile;
 
 my $justcount = 0;
@@ -30,7 +30,7 @@ my $threshold = 5;
 if (defined $opt_threshold) { $threshold = $opt_threshold; }
 
 $opt_spam ||= 'spam.log';
-$opt_nonspam ||= 'ham.log';
+$opt_ham ||= 'ham.log';
 $opt_scoreset = 0 if ( !defined $opt_scoreset );
 
 my $nybias = 10;
@@ -53,14 +53,14 @@ use vars qw(%rules %allrules);
 readscores();
 
 print "Reading per-message hit stat logs and scores...\n";
-my ($num_tests, $num_spam, $num_nonspam);
+my ($num_tests, $num_spam, $num_ham);
 my ($ga_yy, $ga_ny, $ga_yn, $ga_nn, $yyscore, $ynscore, $nyscore, $nnscore);
 
 readlogs();
 read_ranges();
 
 if ($justcount) {
-  $nybias = $nybias*($num_spam / $num_nonspam);
+  $nybias = $nybias*($num_spam / $num_ham);
   evaluate();
 } else {
   print "Writing logs and current scores as C code...\n";
@@ -71,14 +71,14 @@ exit 0;
 
 sub readlogs {
   my $count = 0;
-  $num_spam = $num_nonspam = 0;
+  $num_spam = $num_ham = 0;
 
   if ($justcount) {
     $ga_yy = $ga_ny = $ga_yn = $ga_nn = 0;
     $yyscore = $ynscore = $nyscore = $nnscore = 0.0;
   }
 
-  foreach my $file ($opt_spam, $opt_nonspam) {
+  foreach my $file ($opt_spam, $opt_ham) {
     open (IN, "<$file");
 
     while (<IN>) {
@@ -124,7 +124,7 @@ sub readlogs {
           $is_spam{$count} = 1;
         }
       } else {
-	$num_nonspam++;
+	$num_ham++;
         if ($justcount) {
           if ($score >= $threshold) {
 #print "$score -- $foo";
@@ -274,7 +274,7 @@ sub writetests_c {
 int num_tests = $num_tests;
 int num_nondup = $num_nondup;
 int num_spam = $num_spam;
-int num_nonspam = $num_nonspam;
+int num_ham = $num_ham;
 int max_hits_per_msg = $max_hits_per_msg;
 unsigned char num_tests_hit[$num_nondup];
 unsigned char is_spam[$num_nondup];
@@ -439,21 +439,21 @@ sub evaluate {
    my $fnrate = ($ga_yn / $num_tests) * 100.0;
 
    printf ("\n# SUMMARY for threshold %3.1f:\n", $threshold);
-   printf "# Correctly non-spam: %6d  %4.2f%%  (%4.2f%% of non-spam corpus)\n", $ga_nn,
-       ($ga_nn /  $num_tests) * 100.0, ($ga_nn /  $num_nonspam) * 100.0;
-   printf "# Correctly spam:     %6d  %4.2f%%  (%4.2f%% of spam corpus)\n" , $ga_yy,
-       ($ga_yy /  $num_tests) * 100.0, ($ga_yy /  $num_spam) * 100.0;
-   printf "# False positives:    %6d  %4.2f%%  (%4.2f%% of nonspam, %6.0f weighted)\n", $ga_ny,
-       $fprate, ($ga_ny /  $num_nonspam) * 100.0, $nyscore*$nybias;
-   printf "# False negatives:    %6d  %4.2f%%  (%4.2f%% of spam, %6.0f weighted)\n", $ga_yn,
-       $fnrate, ($ga_yn /  $num_spam) * 100.0, $ynscore;
+   printf "# Correctly non-spam: %6d  %4.2f%%\n",
+       $ga_nn, ($ga_nn /  $num_ham) * 100.0;
+   printf "# Correctly spam:     %6d  %4.2f%%\n",
+       $ga_yy, ($ga_yy /  $num_spam) * 100.0;
+   printf "# False positives:    %6d  %4.2f%%\n",
+       $ga_ny, ($ga_ny /  $num_ham) * 100.0;
+   printf "# False negatives:    %6d  %4.2f%%\n",
+       $ga_yn, ($ga_yn /  $num_spam) * 100.0;
 
   # convert to the TCR metrics used in the published lit
   my $nspamspam = $ga_yy;
   my $nspamlegit = $ga_yn;
   my $nlegitspam = $ga_ny;
   my $nlegitlegit = $ga_yn;
-  my $nlegit = $num_nonspam;
+  my $nlegit = $num_ham;
   my $nspam = $num_spam;
 
   my $werr = ($lambda * $nlegitspam + $nspamlegit)
@@ -557,4 +557,3 @@ void loadscores (void) {
 
   printf ("Read scores for %d tests.\n", num_scores);
 }
-
