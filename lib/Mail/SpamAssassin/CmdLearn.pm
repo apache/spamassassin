@@ -38,6 +38,7 @@ sub cmdline_run {
 	     'folders|f=s'			=> \$opt{'folders'},
              'showdots'                         => \$opt{'showdots'},
 	     'no-rebuild|norebuild'		=> \$opt{'norebuild'},
+	     'local|L'				=> \$opt{'local'},
 	     'force-expire'			=> \$opt{'force-expire'},
 
              'stopafter'                        => \$opt{'stopafter'},

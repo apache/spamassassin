@@ -63,6 +63,7 @@ Options:
  --mbox                            Learn a file in mbox format
  --showdots                        Show progress using dots
  --no-rebuild                      Skip building databases after scan
+ -L, --local                       Operate locally, no network accesses
  -C file, --config-file=file       Path to standard configuration dir
  -p prefs, --prefs-file=file       Set user preferences file
  -a, --auto-whitelist              Use auto-whitelists
@@ -120,6 +121,15 @@ Skip the slow rebuilding step which normally takes place after changing
 database entries.  If you plan to scan many folders in a batch, it is faster to
 use this switch and run B<sa-learn-rebuild> once all the folders have been
 scanned.
+
+=item B<-L>, B<--local>
+
+Do not perform any network accesses while learning details about the mail
+messages.  This will speed up the learning process, but may result in a
+slightly lower accuracy.
+
+Note that this is currently ignored, as current versions of SpamAssassin will
+not perform network access while learning; but future versions may.
 
 =back
 
