@@ -18,7 +18,7 @@ done
 
 
 # cp WebMake-${vers}-1.noarch.rpm WebMake-${vers}-1.src.rpm $WEBDIR/released
-( cd $RELDIR && cvs add -kb *SpamAssassin* )
+( cd $RELDIR && svn add *SpamAssassin* )
 
 set +x
 echo
