@@ -524,39 +524,38 @@ sub get_raw_body_text_array {
     return $self->{body_text_array};
   }
 
-  # we run into a perl bug if the lines are astronomically long (probably due
-  # to lots of regexp backtracking); so cut short any individual line over 2048
-  # bytes in length.  This can wreck HTML totally -- but IMHO the only reason a
-  # luser would use 2048-byte lines is to crash filters, anyway.
-  #
-  my $body = $self->{msg}->get_body();
-  my @ret;
-  @$body = map {
-    @ret = ();
-    while (length ($_) > 1024) {
-      push (@ret, substr($_, 0, 1024));
-      $_ = substr($_, 1024);
-    }
-    ($_, @ret);
-  } @$body;
-
-  if ($ctype !~ /boundary="(.*)"/)
-  {
-    $self->{body_text_array} = $body;
-    return $self->{body_text_array};
+  # if it's a multipart MIME message, skip non-text parts and
+  # just assemble the body array from the text bits.
+  my $multipart_boundary;
+  my $end_boundary;
+  if ($ctype =~ /boundary="(.*)"/) {
+    $multipart_boundary = "--$1\n";
+    $end_boundary = "--$1--\n";
   }
 
-  # else it's a multipart MIME message. Skip non-text parts and
-  # just assemble the body array from the text bits.
-
+  # we build up our own copy from the Mail::Audit message-body array
+  # reference, skipping MIME parts. this should help keep down in-memory
+  # text size.
+  my $bodyref = $self->{msg}->get_body();
   $self->{body_text_array} = [ ];
-  my $multipart_boundary = "--$1\n";
-  my $end_boundary = "--$1--\n";
 
-  my $line = 0;
-  while (defined ($_ = $body->[$line++]))
+  my $line;
+  for ($line = 0; defined($_ = $bodyref->[$line]); $line++)
   {
+    # we run into a perl bug if the lines are astronomically long (probably due
+    # to lots of regexp backtracking); so cut short any individual line over 2048
+    # bytes in length.  This can wreck HTML totally -- but IMHO the only reason a
+    # luser would use 2048-byte lines is to crash filters, anyway.
+
+    while (length ($_) > 1024) {
+      push (@{$self->{body_text_array}}, substr($_, 0, 1024));
+      substr($_, 0, 1024) = '';
+    }
+
     push (@{$self->{body_text_array}}, $_);
+
+    next unless defined ($multipart_boundary);
+    # MIME-only from here on.
 
     if (/^Content-Transfer-Encoding: /) {
       if (/quoted-printable/) {
@@ -567,7 +566,7 @@ sub get_raw_body_text_array {
     }
 
     if ($multipart_boundary eq $_) {
-      while (defined ($_ = $body->[$line++])) {
+      while (defined ($_ = $bodyref->[$line++])) {
 	last if (/^$/);
 
 	if (/^Content-[Tt]ype: (text\/\S+|multipart\/alternative)/) {
@@ -580,7 +579,7 @@ sub get_raw_body_text_array {
       last unless defined $_;
 
       # skip this attachment, it's non-text.
-      while (defined ($_ = $body->[$line++])) {
+      while (defined ($_ = $bodyref->[$line++])) {
 	if ($end_boundary eq $_) { last; }
 	if ($multipart_boundary eq $_) { $line--; last; }
       }

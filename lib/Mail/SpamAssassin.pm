@@ -76,8 +76,6 @@ $HOME_URL = "http://spamassassin.taint.org/";
 $DEBUG = 0;
 
 @default_rules_path = qw(
-        ./spamassassin.cf
-        ../spamassassin.cf
         __installsitelib__/spamassassin.cf
 	__installvendorlib__/spamassassin.cf
 );
@@ -86,12 +84,12 @@ $DEBUG = 0;
         /etc/spamassassin.cf
         /etc/mail/spamassassin.cf
         /usr/local/etc/spamassassin.cf
+  	./spamassassin.cf
+  	../spamassassin.cf
 );
     
 @default_prefs_path = qw(
         /etc/spamassassin.prefs
-        ./spamassassin.prefs 
-        ../spamassassin.prefs
         __installsitelib__/spamassassin.prefs
 	__installvendorlib__/spamassassin.prefs
 );
