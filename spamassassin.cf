@@ -1206,6 +1206,7 @@ whitelist_from	*@ora-info.ora.com		# O'Reilly
 whitelist_from  *@walmart.com
 whitelist_from  *@bn.com
 whitelist_from  *@yahoo-inc.com
+whitelist_from  monty@roscom.com
 
 ###########################################################################
 # Automatic-whitelist directory, for the default directory-based whitelist
@@ -1223,4 +1224,32 @@ whitelist_from  *@yahoo-inc.com
 # use this for a system-wide whitelist:
 # auto_whitelist_path        /var/spool/spamassassin/auto-whitelist
 # auto_whitelist_file_mode   0777
+
+###########################################################################
+# Default prefs values: users can override these in their 
+# ~/.spamassassin.prefs files.
+
+# How many hits before a mail is considered spam.
+required_hits           5
+
+# How many hits before a mail is automatically reported to blacklisting
+# services like Razor.  Be very careful with this; you really should manually
+# verify the spamminess of a mail before reporting it.
+auto_report_threshold   30
+
+# Mail using languages used in these country codes will not be marked
+# as being possibly spam in a foreign language.
+#
+ok_locales              en
+
+# Some common prefs settings can be set here, to take effect site-wide
+# unless the user override them. See the .prefs file for explanations.
+
+# rewrite_subject       1
+# report_header         0
+# use_terse_report      0
+# defang_mime           1
+# skip_rbl_checks       0
+# check_mx_attempts     3
+# check_mx_delay        5
 
