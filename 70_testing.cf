@@ -461,4 +461,7 @@ header T_BAD_ENC_HEADER		ALL =~ /=\?[^?\s]+\?[^?\s]\?[^?]*\s/
 header T_BAD_ENC_HEADER2	ALL =~ /=\?[^?\s]+\?[^?\s]\?\s*[^?]*\s(?!\?=)/
 
 # 1.886   2.1553   0.0000    1.000   1.00    0.01  T_RATWARE_EFROM
+# parkerm had legit FPs for mails using SRS
 header T_RATWARE_EFROM	eval:check_ratware_envelope_from()
+header T_RATWARE_EFROM2	eval:check_ratware_envelope_from2()
+header T_RATWARE_EFROM4	eval:check_ratware_envelope_from4()
