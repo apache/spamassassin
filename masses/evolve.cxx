@@ -17,9 +17,6 @@ extern "C" {
 #include "tmp/tests.h"
 }
 
-// Objective function and initializer declarations.
-void initializer(GAGenome &);
-
 // ---------------------------------------------------------------------------
 
 int threshold = 5;	// threshold of spam vs. non-spam
@@ -193,6 +190,45 @@ write_to_file (GARealGenome &genome, const char *fname) {
 
 // ---------------------------------------------------------------------------
 
+/*
+void
+my_initializer (GAGenome &c)
+{
+  GARealGenome &gnm = (GARealGenome &) c;
+  int i, numchngd, idx;
+  float diff;
+
+  numchngd = rand() % 100;
+
+  for (i = 0; i < numchngd; i++) {
+    idx = rand() % gnm.length();
+    diff = (float) ((rand() % 40) - 20) / 10.0;
+    printf ("mv %d %d: %f\n", i, idx, diff);
+    gnm[idx] = bestscores[idx] + diff;
+  }
+}
+*/
+
+void
+fill_allele_set (GARealAlleleSetArray *setary)
+{
+  float hi, lo;
+  int i;
+
+  for (i = 0; i < num_scores; i++) {
+    if (is_mutatable[i]) {
+      hi = range_hi[i];
+      lo = range_lo[i];
+    } else {
+      hi = bestscores[i];
+      lo = bestscores[i];
+    }
+    setary->add (lo, hi);
+  }
+}
+
+// ---------------------------------------------------------------------------
+
 void usage () {
   cerr << "usage: evolve -s size [args]\n"
     << "\n"
@@ -284,12 +320,11 @@ main (int argc, char **argv) {
   GARandomSeed();	// use time ^ $$
 
   // allow scores from -0.5 to 4.0 inclusive, in jumps of 0.1
-  GARealAlleleSet alleles (0.1, 4.0, 0.1,
-      		GAAllele::INCLUSIVE, GAAllele::INCLUSIVE);
+  GARealAlleleSetArray allelesetarray;
+  fill_allele_set (&allelesetarray);
+  GARealGenome genome(allelesetarray, objective);
 
-  GARealGenome genome(num_scores, alleles, objective);
-
-  // use the default random initialiser, the default
+  // use our score-perturbing initialiser, the default
   // gaussian mutator, and crossover.
 
   // don't let the genome change its length
@@ -297,6 +332,9 @@ main (int argc, char **argv) {
 
   // steady-state seems to give best results
   GASteadyStateGA ga(genome);
+
+  // incremental, faster but not as good
+  //GAIncrementalGA ga(genome);
 
   //GADemeGA ga(genome);
   //ga.nPopulations(npops);

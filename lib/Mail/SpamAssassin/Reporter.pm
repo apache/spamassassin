@@ -52,7 +52,6 @@ sub is_razor_available {
   my ($self) = @_;
   
   eval {
-    require Razor::Signature; 
     require Razor::Client;
   };
   if ($@) {
@@ -82,7 +81,6 @@ sub razor_report {
 
   eval {
     require Razor::Client;
-    require Razor::Signature;
     local ($^W) = 0;            # argh, warnings in Razor
 
     my $rc = Razor::Client->new ($config, %options);

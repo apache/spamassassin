@@ -274,6 +274,13 @@ describe USER_IN_BLACKLIST	From: address is in the user's black-list
 header MISSING_HEADERS		eval:check_for_missing_headers()
 describe MISSING_HEADERS	Missing one of From:, To: or Date: headers
 
+# (contrib: skod)
+# modified by jm to remove bulk_mailer, matches on a mailing list I'm on
+header RATWARE ALL =~ /(?:4\.\.72\.1712\.3|ACE Contact Manager|Aristotle Mail|Avalanche|Calypso|clansoft|Cognigen|Cold Fusion|Cyber-Bomber|Crescent|DiffondiCool|Dynamic Mail Server|CTMailer|E-Broadcaster|E-mail Magnet|Ellipse Bulk Emailer|EmailBlaster|Emailer.Platinum|eMerge|Extractor|Floodgate|FlashSend|Goldrush|Group Mail|Internet Marketing|Mailcast|MailKing|MassE-Mail|massmail\.pl|Matchmaker|NetMailer|News Breaker|pop3.report|RamoMail|Ready Aim|Shopping.Planet|Stalker.s|TBBS\/TIGER|TOO BAD|TotalMailTURBO Mail|V3,1,6,1|V3,1,2,0|V3,2,2,0|V.null.\.1712\.3|WindoZ|WinNT.s.Blat|WorldMerge|YMR)/
+
+describe RATWARE 		Bulk email software fingerprints found in headers
+score RATWARE			2.0
+
 ###########################################################################
 
 full RAZOR_CHECK		eval:check_razor()
@@ -289,7 +296,10 @@ body REMOVE_IN_QUOTES		/\"remove\"/i
 body JAVASCRIPT			/<SCRIPT.*LANGUAGE.*JavaScript/i
 body REALLY_UNSAFE_JAVASCRIPT	/<body .*onLoad/i
 body SLIGHTLY_UNSAFE_JAVASCRIPT	/on(?:Blur|Error|KeyDown|KeyUp|Load|MouseOver|Resize|Unload)/i
-body HTML_WITH_BGCOLOR		/<body .*bgcolor=\S+/i
+
+body HTML_WITH_BGCOLOR		/<body .*bgcolor[=3d\"\'\#]+[0-9a-e][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]/i
+describe HTML_WITH_BGCOLOR	HTML mail with non-white background
+
 body SPAM_FORM			/CHANGE EMAIL ADDRESS IN ACTION OF FORM/
 body SPAM_FORM_RETURN		/return validate_form/
 body SPAM_FORM_INPUT		/<input name=.*submit type=.*submit value=.*" *Submit By E-Mail *">/i
@@ -371,14 +381,18 @@ body EXCUSE_6			/(?:wish to|click to|To) remove yourself/
 body EXCUSE_7			/you (?:wish|want|would like|desire) to be removed/i
 body EXCUSE_8			/requests to be taken off our mailing list/
 body EXCUSE_9		/If you do.*n.*t (?:want|wish|care) to receive emails (?:on this subject|in the future)/i
-body EXCUSE_10			/if you (?:want|wish|care) not to (?:be contacted again|receive any\s*more solicitations)/i
+
+body EXCUSE_10			/if you (?:(?:want|wish|care|prefer) not to |(?:don't|do not) (?:want|wish|care) to )(?:be contacted again|receive (any)?\s*(?:more|future|further) (?:e?-?mail|messages?|offers|solicitations))/i
+describe EXCUSE_10		"if you do not wish to receive any more"
+
 body EXCUSE_11			/you.*(?:name|mail).*(?:was|were).*list/i
-body EXCUSE_12			/this (?:e?-?mail|message) has reached you in error/i
+body EXCUSE_12			/this (?:e?-?mail|message) (?:has reached|was sent to) you in error/i
 body EXCUSE_13			/mail was sent to you because /i
 body EXCUSE_14			/you do not wish to receive further /i
 body EXCUSE_15			/this is not (?:spam|unsolicited)/i
 body EXCUSE_16			/have received this (?:e?-?mail|message) in error[, ]* or/
 body EXCUSE_17			/received .* by mistake/i
+body EXCUSE_18			/we do not (?:spam|send unsolicited)/i
 
 body GREEN_EXCUSE_1	/using email instead can significantly reduce this/i
 body GREEN_EXCUSE_2	/the trees, save the planet, use email!/i
@@ -401,7 +415,18 @@ body PORN_1			/\bbarely\b.*\blegal\b/i
 body PORN_2			/\bwild\b.*\bhardcore\b/i
 
 # updated by: skod
-body PORN_3			/(?:(?:\bcum|\borgy\b|\bwild|\bfuck|\bteen|\baction\b|\bspunk\b|\bpussy\b|\bpussies\b|\bsuck\b|\bsucking\b|\bhot\b|\bhottest\b).*){3,}/i
+body PORN_3			/(?:(?:\bcum|\borgy\b|\bwild|\bfuck|\bteen|\baction\b|\bspunk\b|\bpussy\b|\bpussies\b|\bsuck\b|\bsucking\b|\bhot\b|\bhottest\b|\bvoyeur\b\|\blesbian\b|\banal\b).*){3,}/i
+
+body PORN_4 	/http:\/\/[\w\.]*(?:xxx|sex|anal|slut|pussy|cum|nympho|suck|porn|hardcore|taboo|whore|voyeur|lesbian|gurlpages|naughty|kooloffer)\w*\./
+describe PORN_4			Suspected porn URL
+
+# (contrib: skod)
+body PORN_5			/SEX STARVED NYMPHOMANIAC/i
+describe PORN_5			Nymphomaniacs? Indeed!
+
+# (contrib: skod)
+body PORN_6			/(?:\d+\+? xxx pictures|xxx photos?)/i
+describe PORN_6			XXX pictures mentioned
 
 body TRACKER_ID			/^\W{4,6} (?:[a-z]{10,}|[A-Z]{10,}) \W{4,6}\s*$/
 
@@ -455,6 +480,43 @@ full JUST_MAILED_PAGE		/\n\n.{0,160}<!-- saved from url=/s
 full CLICK_HERE_LINK		/click here.{0,100}<\/a>/is
 full CLICK_BELOW		/click below/is
 
+# (contrib: skod)
+body HALF_PRICE_OFFER		/Half Price Offer/i
+describe HALF_PRICE_OFFER	"Half price offer" sounds pretty spammish...
+
+# (contrib: skod)
+body MURKOWSKI_CRUFT		/www\.senate\.gov\/~?murkowski/
+describe MURKOWSKI_CRUFT	Old Murkowski disclaimer
+
+# (contrib: skod)
+body PRINT_FORM_SIGNATURE	/Sign(ature)?(?:\s*here|\s*please)?:.*___*/i
+
+# (contrib: skod)
+body MAIL_IN_ORDER_FORM		/Mail-in Order Form/i
+describe MAIL_IN_ORDER_FORM	Contains mail-in order form
+
+# (contrib: skod)
+body FOR_INSTANT_ACCESS		/FOR INSTANT ACCESS CLICK HERE/i
+describe FOR_INSTANT_ACCESS	Instant Access button
+
+# (contrib: skod)
+body NO_SELLING			/absolutely NO selling/
+
+# (contrib: skod)
+body UNIVERSITY_DIPLOMAS	/UNIVERSITY DIPLOMAS/
+describe UNIVERSITY_DIPLOMAS	You know that they'll be back...
+
+# (contrib: skod)
+body NEW_DOMAIN_EXTENSIONS	/new\s*domain\s*extension/i
+describe NEW_DOMAIN_EXTENSIONS	Possible registry spammer
+
+# (contrib: skod)
+full MONSTERHUT			/monsterhut.com/
+describe MONSTERHUT		mentions monsterhut.com
+
+# (contrib: skod)
+body EMAIL_HARVEST		/email harvest/
+
 # (contrib: WW)
 full CLICK_TO_REMOVE_MAILTO     /\bclick to remove\b.{0,50}mailto:.{0,20}\@.+\..+/is
 describe CLICK_TO_REMOVE_MAILTO Click-to-remove with mailto: found
@@ -487,16 +549,19 @@ body WORK_AT_HOME		/WORK AT HOME/
 
 body HOME_EMPLOYMENT		/HOME EMPLOYMENT/
 
+# suggested by Nick Rothwell
+body HUNZA_DIET_BREAD		/HUNZA DIET BREAD/
+
 full A_HREF_TO_IP		/href[3D=\s\"\']*http:\/\/\d+\.\d+\.\d+\.\d+\:?\d*\//is
 describe A_HREF_TO_IP		Link to an IP-address instead of a named host
 
 full A_HREF_TO_REMOVE		/href[3D=\s\"\']*\S+(?:unsubscribe|remove)/i
 describe A_HREF_TO_REMOVE	Link to a URL containing "remove"
 
-body REMOVE_SCRIPT		/http:\/\/.*cgi.*\/(?:unsubscribe|remove)\./
+body REMOVE_SCRIPT		/https?:\/\/.*cgi.*\/(?:unsubscribe|remove)\./
 describe REMOVE_SCRIPT		URL of CGI script called "remove"
 
-body REMOVE_PAGE		/http:\/\/[^\/]+\/(?:unsubscribe|remove)/
+body REMOVE_PAGE		/https?:\/\/[^\/]+\/(?:unsubscribe|remove)/
 describe REMOVE_PAGE		URL of page called "remove"
 
 # include the \n\n so we don't match mailto's in the headers!  Some list software
@@ -530,6 +595,10 @@ describe CHARSET_FARAWAY_BODY	Character set indicates foreign language body
 
 full NIGERIAN_SCAM		/BASED ON INFORMATION GATHERED ABOUT YOU, WE BELIEVE\s*YOU WOULD BE IN A POSITION TO HELP US IN TRANSFER/
 describe NIGERIAN_SCAM		Nigerian scam, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
+
+# (contrib: skod)
+body NIGERIAN_SCAM_2		/(?:Government of Nigeria|NIGERIA NATIONAL)/
+describe NIGERIAN_SCAM_2	Mutated Nigerian scams
 
 body UNNEEDED_HTML_ENCODING	/font=3E/i
 describe UNNEEDED_HTML_ENCODING	Unneeded encoding of HTML tags
@@ -609,7 +678,7 @@ score DIGITAL_FX1                    1.7
 score DIRECT_EMAIL                   1.2
 score EMAIL_MARKETING                3.1
 score EXCUSE_1                       2.5
-score EXCUSE_10                      1.0
+score EXCUSE_10                      2.0
 score EXCUSE_11                      1.5
 score EXCUSE_12                      1.2
 score EXCUSE_13                      2.3
@@ -684,7 +753,7 @@ score PENIS_ENLARGE                  2.8
 score POPLAUNCH                      3.7
 score PORN_1                         3.4
 score PORN_2                         1.3
-score PORN_3                         0.7
+score PORN_3                    2.3
 score POST_IN_RCVD                   1.3
 score PRINT_FORM_SIGNATURE           1.1
 score PRODUCED_AND_SENT_OUT          3.2
@@ -734,6 +803,19 @@ score X_EM_VER_PRESENT               2.8
 score X_MAILER_GIBBERISH             3.7
 score X_PRIORITY_HIGH                1.1
 score YR_MEMBERSHIP_EXCH             2.4
+score EMAIL_HARVEST		2.0
+score MONSTERHUT		2.0
+score NEW_DOMAIN_EXTENSIONS  	1.0
+score UNIVERSITY_DIPLOMAS	2.0
+score NO_SELLING		2.0
+score FOR_INSTANT_ACCESS	1.0
+score PORN_5			3.0
+score MAIL_IN_ORDER_FORM	2.0
+score PRINT_FORM_SIGNATURE      1.1
+score MURKOWSKI_CRUFT		3
+score HUNZA_DIET_BREAD		2
+score HALF_PRICE_OFFER		1
+score NIGERIAN_SCAM_2		2.0
 
 # some manually-tweaked scores
 score X_MSMAIL_PRIORITY_HIGH         1.0
@@ -755,6 +837,7 @@ score WEB4PORNO_URL                  3.1
 score WE_HATE_SPAM                   3.0
 score INVALID_MSGID		     3.0
 score MSGID_HAS_NO_HOST		     4.0
+score MISSING_HEADERS		     2.0
 score MSGID_SPAMSIGN_1               4.0
 
 # End of GA-evolved scores.
@@ -777,8 +860,8 @@ score SUBJ_HAS_Q_MARK                0.1
 score RAZOR_CHECK		     3.0
 score RCVD_IN_RELAYS_ORDB_ORG	     2.0
 score RCVD_IN_OSIRUSOFT_COM	     2.0
-score OSIRU_CONFIRMED_SPAM_SOURCE    3.0
-score OSIRU_SPAMWARE_SITE	     5.0
+score X_OSIRU_SPAM_SRC		    3.0
+score X_OSIRU_SPAMWARE_SITE	     5.0
 
 # unscored by default -- commercial services.  If you pay for these,
 # give them a score so they will be checked.
