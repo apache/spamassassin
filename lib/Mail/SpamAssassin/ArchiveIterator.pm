@@ -37,7 +37,133 @@ use vars qw {
 
 my @ISA = qw($MESSAGES);
 
+=head1 NAME
+
+Mail::SpamAssassin::ArchiveIterator - find and process messages one at a time
+
+=head1 SYNOPSIS
+
+  my $iter = new Mail::SpamAssassin::ArchiveIterator(
+    { 
+      'opt_j'   => 0,
+      'opt_n'   => 1,
+      'opt_all' => 1,
+    }
+  );
+
+  $iter->set_functions( \&wanted, sub { } );
+
+  eval { $iter->run(@ARGV); };
+
+  sub wanted {
+    my($class, $filename, $recv_date, $msg_array) = @_;
+
+
+    ...
+  }
+
+=head1 DESCRIPTION
+
+The Mail::SpamAssassin::ArchiveIterator module will go through a set of mbox
+files, maildir directories, and mbx directories and generate a list of
+messages.  It will then call the wanted and results functions appropriately
+per message.
+
+=head1 METHODS
+
+=over 4
+
+=cut
+
+
 ###########################################################################
+
+=item $item = new Mail::SpamAssassin::ArchiveIterator( [ { opt => val, ... } ] )
+
+Constructs a new C<Mail::SpamAssassin::ArchiveIterator> object.  You may
+pass the following attribute-value pairs to the constructor.  The pairs are
+optional unless otherwise noted.
+
+=over 4
+
+=item opt_all
+
+Typically messages over 250k are skipped by ArchiveIterator.  Use this option
+to keep from skipping messages based on size.
+
+=item opt_j (required)
+
+Specifies how many messages should be run at the same time, as well as the
+method with which to scan for the messages.
+
+If the value is 0, the list of messages will be kept in memory, and
+only 1 message at a time will be processed by the wanted subroutine.
+Restarting is not allowed.
+
+If the value is 1, the list of messages will be kept in a temporary file,
+and only 1 message at a time will be processed by the wanted subroutine.
+Restarting is not allowed.  A child process will be forked to determine the
+list of messages.
+
+If the value is 2 or higher, the list of messages will be kept in a
+temporary file, and the process will split into a parent/child mode.
+The option value number of children will be forked off and each child will
+process messages via the wanted subroutine in parallel.  Restarting is
+allowed.  A separate child process will be forked to determine the list
+of messages.
+
+=item opt_n
+
+ArchiveIterator is typically used to simulate ham and spam moving through
+SpamAssassin.  By default, the list of messages is sorted by received date so
+that the mails can be passed through in order.  If opt_n is true, the sorting
+will not occur.  This is useful if you don't care about the order of the
+messages.
+
+=item opt_restart
+
+If set to a positive integer value, children processes (see opt_j w/ value 2
+or higher above) will restart after the option value number of messages, in
+total, have been processed.
+
+=item opt_head
+
+Only use the first N ham and N spam (or if the value is -N, only use the first
+N total messages regardless of class).
+
+=item opt_tail
+
+Only use the last N ham and N spam (or if the value is -N, only use the last
+N total messages regardless of class).
+
+=item opt_before
+
+Only use messages which are received after the given time_t value.
+Negative values are an offset from the current time, e.g. -86400 =
+last 24 hours; or as parsed by Time::ParseDate (e.g. '-6 months')
+
+=item opt_after
+
+Same as opt_before, except the messages are only used if after the given
+time_t value.
+
+=item wanted_sub
+
+Reference to a subroutine which will process message data.  Usually set
+via set_functions().  The routine will be passed 4 values: class (scalar),
+filename (scalar), received date (scalar), and message content (array
+reference, one message line per element).
+
+=item result_sub
+
+Reference to a subroutine which will process the results of the wanted_sub
+for each message processed.  Usually set via set_functions().
+The routine will be passed 3 values: class (scalar), result (scalar, returned
+from wanted_sub), and received date (scalar).
+
+=back
+
+=cut
 
 sub new {
   my $class = shift;
@@ -55,6 +181,13 @@ sub new {
 
 ###########################################################################
 
+=item set_functions( \&wanted_sub, \&result_sub )
+
+Sets the subroutines used for message processing (wanted_sub), and result
+reporting.  For more information, see I<new()> above.
+
+=cut
+
 sub set_functions {
   my ($self, $wanted, $result) = @_;
   $self->{wanted_sub} = $wanted;
@@ -62,6 +195,43 @@ sub set_functions {
 }
 
 ###########################################################################
+
+=item run ( @target_paths )
+
+Generates the list of messages to process, then runs each message through the
+configured wanted subroutine.  Files which have a name ending in C<.gz> or
+C<.bz2> will be properly uncompressed via call to C<gzip -dc> and C<bzip2 -dc>
+respectively.
+
+The target_paths array is expected to be one element per path in the following
+format: class:format:raw_location
+
+=over 4
+
+=item class
+
+Either 'h' for ham or 's' for spam.  If the class is longer than 1 character,
+it will be truncated.  If blank, 'h' is default.
+
+=item format
+
+Specifies the format of the raw_location.  C<dir> is a maildir formatted
+directory (one message per file), C<file> a file with a single message,
+C<mbox> an mbox formatted file, or C<mbx> for an mbx formatted directory.
+
+C<detect> can also be used; assumes C<file> for STDIN and anything that is not
+a directory, or C<directory> otherwise.
+
+=item raw_location
+
+Path to file or directory.  Can be "-" for STDIN.  File globbing is allowed
+using the standard csh-style globbing (see C<perldoc -f glob>).  C<~> at the
+front of the value will be replaced by the C<HOME> environment variable.
+Escaped whitespace is protected as well.
+
+=back
+
+=cut
 
 sub run {
   my ($self, @targets) = @_;
@@ -733,3 +903,13 @@ sub fix_globs {
 ############################################################################
 
 1;
+
+__END__
+
+=back
+
+=head1 SEE ALSO
+
+C<Mail::SpamAssassin>
+C<spamassassin>
+C<mass-check>
