@@ -69,11 +69,10 @@ describe MAILTO_TO_REMOVE	Includes a 'remove' email address
 uri JAVASCRIPT_URI		/^javascript:/i
 describe JAVASCRIPT_URI		Javascript protocol in a URI
 
-# allow port 80, that's the HTTP port after all, so not wierd ;)
-# Dilbert does this for some reason.
+# allow ports 80 and 443 which are http and https, respectively
 # we don't want to hit http://www.cnn.com:USArticle1840@www.liquidshirts.com/
 # though, which actually doesn't have a weird port in it.
-uri WEIRD_PORT			m{https?://[^/\s]+?:(?:[^8][^0]|\d|\d\d\d+)(?:/|\s|$)}
+uri WEIRD_PORT			m{https?://[^/\s]+?:\d+(?<!:80)(?<!:443)(?<!:8080)(?:/|\s|$)}
 describe WEIRD_PORT		Uses non-standard port number for HTTP
 
 # looks for a username and (optional) password in an url
