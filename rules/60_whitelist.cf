@@ -6,6 +6,9 @@
 #
 # Whitelist and blacklist addresses are now file-glob-style patterns, so
 # "friend@somewhere.com", "*@isp.com", or "*.domain.net" will all work.
+#
+# Please do not add unmoderated public mailing lists here.  They are
+# too easily abused by spammers.
 
 whitelist_from_rcvd  billing@networksolutions.com           networksolutions.com
 whitelist_from_rcvd  hostmaster@internic.net                internic.net
@@ -38,10 +41,9 @@ whitelist_from_rcvd  *@spamex.com                              spamex.com
 
 whitelist_from_rcvd  *@*.eff.org                            ctsg.com
 
-whitelist_from_rcvd  *@lists.sourceforge.net                sourceforge.net
+whitelist_from_rcvd  *enotify@usenix.org                    voyager.usenix.org
 
 # sender of Cringley newsletter
 whitelist_from_rcvd *@bdcimail.com                          mailcontrol.bellevuedata.com
 # internet.com lists
 whitelist_from_rcvd listsupport@internet.com                lyris.net
-
