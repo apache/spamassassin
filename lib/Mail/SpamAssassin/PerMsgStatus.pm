@@ -433,7 +433,7 @@ sub rewrite_as_spam {
     " ($Mail::SpamAssassin::SUB_VERSION)"
   );
 
-  # defang HTML mail; change it to text-only.
+  # defang spam messages to be less dangerous (html -> text, etc.)
   if ($self->{conf}->{defang_mime}) {
     my $ct = $srcmsg->get_header ("Content-Type");
 
@@ -448,6 +448,13 @@ sub rewrite_as_spam {
     if (defined $cte && $cte ne '' && $cte !~ /7bit/i) {
       $self->{msg}->replace_header ("Content-Transfer-Encoding", "7bit");
       $self->{msg}->replace_header ("X-Spam-Prev-Content-Transfer-Encoding", $cte);
+    }
+
+    my $rrt = $srcmsg->get_header ("Return-Receipt-To");
+
+    if (defined $rrt && $rrt ne '') {
+      $self->{msg}->delete_header ("Return-Receipt-To");
+      $self->{msg}->replace_header ("X-Spam-Prev-Return-Receipt-To", $rrt);
     }
   }
 
@@ -2103,7 +2110,7 @@ sub clean_spamassassin_headers {
   my ($self) = @_;
 
   # attempt to restore original headers
-  for my $hdr (('Content-Transfer-Encoding', 'Content-Type')) {
+  for my $hdr (('Content-Transfer-Encoding', 'Content-Type', 'Return-Receipt-To')) {
     my $prev = $self->{msg}->get_header ("X-Spam-Prev-$hdr");
     if (defined $prev && $prev ne '') {
       $self->{msg}->replace_header ($hdr, $prev);

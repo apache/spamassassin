@@ -91,7 +91,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.127 2002/09/26 17:15:00 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.128 2002/10/01 19:44:56 felicity Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -504,6 +504,11 @@ sub remove_spamassassin_markup {
   if ($hdrs =~ /^X-Spam-Prev-Content-Transfer-Encoding: /m) {
     $hdrs =~ s/\nContent-Transfer-Encoding: [^\n]*?\n/\n/gs;
     $hdrs =~ s/\nX-Spam-Prev-(Content-Transfer-Encoding: [^\n]*\n)/\n$1/gs;
+  }
+
+  # reinstate the return-receipt-to header
+  if ($hdrs =~ /^X-Spam-Prev-Return-Receipt-To: /m) {
+    $hdrs =~ s/\nX-Spam-Prev-(Return-Receipt-To: [^\n]*\n)/\n$1/gs;
   }
 
   # remove the headers we added
