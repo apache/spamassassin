@@ -88,6 +88,7 @@ Mail::SpamAssassin::Util::am_running_in_taint_mode();
 
 # First untaint the environment -- need to do this before Cwd::cwd(), else
 # it will croak.
+Mail::SpamAssassin::Util::clean_path_in_taint_mode();
 Mail::SpamAssassin::Util::untaint_var(\%ENV);
 
 # The zeroth argument will be replaced in daemonize().
@@ -425,8 +426,6 @@ $opt{'auto-whitelist'} and eval
   my $addrlistfactory = Mail::SpamAssassin::DBBasedAddrList->new();
   $spamtest->set_persistent_address_list_factory ($addrlistfactory);
 };
-
-Mail::SpamAssassin::Util::clean_path_in_taint_mode();
 
 # restart handling.  do this here before compile_now() as that may
 # take a while.
