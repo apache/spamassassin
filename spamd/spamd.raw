@@ -1040,9 +1040,12 @@ sub check {
 
   # add a summary "result:" line, based on mass-check format
   my @extra;
-  push(@extra, "scantime=".$scantime, "size=$actual_length", "mid=$msgid");
+  push(@extra, "scantime=".$scantime, "size=$actual_length");
+  {
+    my $safe = $msgid; $safe =~ s/[\x00-\x20\s,]/_/gs; push(@extra, "mid=$safe");
+  }
   if ($rmsgid) {
-    push(@extra, "rmid=$msgid");
+    my $safe = $rmsgid; $safe =~ s/[\x00-\x20\s,]/_/gs; push(@extra, "rmid=$safe");
   }
   if (defined $status->{bayes_score}) {
     push(@extra, "bayes=".$status->{bayes_score});
