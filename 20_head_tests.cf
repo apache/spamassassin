@@ -88,6 +88,9 @@ describe ADVERT_CODE		Subject: contains advertising tag
 header FRIEND_AT_PUBLIC	To =~ /(yourdomain|you|your|public).(com|org|net)/i
 describe FRIEND_AT_PUBLIC	sent to you@you.com or similar
 
+header DOMAIN_SUBJECT		Subject =~ /(\s(\.|dot\s+)(info|biz|name)|domain)\b.*(extension|info|regist(ry|ration|er)|submission)/i
+describe DOMAIN_SUBJECT		Subject: domain registration spam subject
+
 header TO_EMPTY			To =~ /^(?:\@|\s*$)/ [if-unset: UNSET]
 describe TO_EMPTY		To: is empty
 
@@ -324,3 +327,6 @@ describe IN_REP_TO		'In-Reply-To' line found
 header GAPPY_SUBJECT            Subject =~ /(?:[a-z][-_\.\,\:\;\'\~]{1,3}){5,}/i
 describe GAPPY_SUBJECT          'Subject' contains G.a.p.p.y-T.e.x.t
 
+# This is a Bugzilla bug status report e-mail and probably OK
+header BUGZILLA_BUG		Subject =~ /\[Bug \d+\]/
+describe BUGZILLA_BUG		Looks like a Bugzilla bug

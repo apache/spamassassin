@@ -397,9 +397,12 @@ describe PREST_NON_ACCREDITED	'Prestigious Non-Accredited Universities'
 body NEW_DOMAIN_EXTENSIONS	/new\s*domain\s*extension/i
 describe NEW_DOMAIN_EXTENSIONS	Possible registry spammer
 
+body DOMAIN_BODY		/\s(\.|dot\s+)(info|biz|name)\s/i
+describe DOMAIN_BODY		Domain registration spam body
+
 # (contrib: skod)
 rawbody MONSTERHUT		/monsterhut.com/
-describe MONSTERHUT		mentions monsterhut.com
+describe MONSTERHUT		Mentions monsterhut.com
 
 # (contrib: skod)
 body EMAIL_HARVEST		/email harvest/
@@ -423,7 +426,7 @@ body REMOVAL_INSTRUCTIONS	/REMOVAL INSTRUCTIONS/i
 describe REMOVAL_INSTRUCTIONS	Gives instructions for removal from list
 
 # (contrib: WW)
-body THIS_AINT_SPAM             /This.{0,30}is not spam/is
+body THIS_AINT_SPAM             /This.{0,30}is not (?:a )?spam/is
 describe THIS_AINT_SPAM         Claims "This is not spam"
 
 # (contrib: WW)
