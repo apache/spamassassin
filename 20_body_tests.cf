@@ -342,7 +342,7 @@ body EXCUSE_11			/you.{0,15}(?:name|mail).{0,15}(?:was|were).{0,15}list/i
 describe EXCUSE_11		Claims you were on a list
 body EXCUSE_12			/this (?:e?-?mail|message) (?:(?:has )?reached|was sent to) you in error/i
 describe EXCUSE_12		Nobody's perfect
-body EXCUSE_13			/mail was sent to you because /i
+body EXCUSE_13			/mail was sent to you because\b/i
 describe EXCUSE_13		Gives an excuse for why message was sent
 body EXCUSE_14			/you (?:do not|no longer) wish to receive/i
 describe EXCUSE_14		Tells you how to stop further spam
@@ -1444,7 +1444,7 @@ describe NIGERIAN_SCAM          Nigerian scam, cf http://www.snopes2.com/inboxer
 body NO_SELLING                 /absolutely NO selling/i
 describe NO_SELLING             Claims not to be selling anything
 
-body POPLAUNCH                  /StealthLaunch PopLaunch.\s/
+body POPLAUNCH                  /StealthLaunch PopLaunch\b/
 describe POPLAUNCH              spam software: PopLaunch
 
 body PSYCHIC                    /\b(?:caring|gifted|experienced) psychic/i
@@ -1456,7 +1456,7 @@ describe SIGNIFICANT            Significant Savings
 body SLASH_PRICE                /\bslash.{0,2} price/i
 describe SLASH_PRICE            Slashed Price
 
-body THIS_AINT_JUNK             /This.{0,30}is not (?:a )?junk (?:email)?/is
+body THIS_AINT_JUNK             /This.{0,30}is not (?:a )?junk(?: email)?/is
 describe THIS_AINT_JUNK         Claims "This is not junk email"
 
 body WEALTH                     /\bachieve .{0,15}wealth\b/i

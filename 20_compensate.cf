@@ -107,11 +107,11 @@ tflags YAHOO_MSGID_ADDED        nice
 # Body compensation tests
 ###########################################################################
 
-body HOTMAIL_FOOTER1             /Send and receive Hotmail on your mobile device: /
+body HOTMAIL_FOOTER1             /Send and receive Hotmail on your mobile device\b/
 describe HOTMAIL_FOOTER1        Common footer for Hotmail
 tflags HOTMAIL_FOOTER1		nice
 
-body HOTMAIL_FOOTER2            /Get your FREE download of MSN Explorer at /
+body HOTMAIL_FOOTER2            /Get your FREE download of MSN Explorer at\b/
 describe HOTMAIL_FOOTER2        Common footer for Hotmail
 tflags HOTMAIL_FOOTER2		nice
 
@@ -119,11 +119,11 @@ body HOTMAIL_FOOTER3            /Get Your Private, Free E-mail from MSN Hotmail 
 describe HOTMAIL_FOOTER3        Common footer for Hotmail
 tflags HOTMAIL_FOOTER3		nice
 
-body HOTMAIL_FOOTER5            /Chat with friends online, try MSN Messenger: /
+body HOTMAIL_FOOTER5            /Chat with friends online, try MSN Messenger\b/
 describe HOTMAIL_FOOTER5        Common footer for Hotmail
 tflags HOTMAIL_FOOTER5		nice
 
-body MSN_FOOTER1                /MSN Photos is the easiest way to share and print your photos: /
+body MSN_FOOTER1                /MSN Photos is the easiest way to share and print your photos\b/
 describe MSN_FOOTER1            Common footer for MSN
 tflags MSN_FOOTER1		nice
 
@@ -153,7 +153,7 @@ rawbody EGP_HTML_BANNER         /^<!-- \S+begin egp html banner/
 describe EGP_HTML_BANNER        non-spam Yahoo! Groups banner found
 tflags EGP_HTML_BANNER		nice
 
-body MAILMAN_CONFIRM            /We have received a request .*subscription of your email address.* to the .* mailing list/
+body MAILMAN_CONFIRM            /^We have received a request from \S+ for subscription of your email address, \S+, to the \S+ mailing list\./
 describe MAILMAN_CONFIRM        A MailMan confirm-your-address message
 tflags MAILMAN_CONFIRM		nice
 
