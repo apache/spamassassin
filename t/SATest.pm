@@ -57,7 +57,7 @@ sub sa_t_init {
     ";
   close PREFS;
 
-  mkdir "log/user_state";
+  mkdir("log/user_state",0755);
 
   $home = $ENV{'HOME'};
   $home ||= $ENV{'WINDIR'} if (defined $ENV{'WINDIR'});
