@@ -94,7 +94,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.169 2003/02/13 13:21:52 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.170 2003/02/14 19:04:05 jmason Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -273,15 +273,7 @@ sub new {
   $self->{encapsulated_content_description} = 'original message before SpamAssassin';
 
   if (!defined $self->{username}) {
-    eval {
-      # use effective uid in case we're setuid
-      $self->{username} = (getpwuid ($>))[0];
-    };
-    if ($@) {
-      # failed to call getpwuid(); platform may not support it!
-      dbg ("getpwuid() failed! using 'unknown' as username");
-      $self->{username} = 'unknown';
-    }
+    $self->{username} = (Mail::SpamAssassin::Util::portable_getpwuid ($>))[0];
   }
 
   $self;
