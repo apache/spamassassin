@@ -160,8 +160,12 @@ print "\n", $out;
 sub generate_scores {
   my ($name, @scores) = @_;
 
-  my $isnet = ($rules{$name}->{tflags} =~ /\bnet\b/);
-  my $islearn = ($rules{$name}->{tflags} =~ /\blearn\b/);
+  my $isnet = 0;
+  my $islearn = 0;
+  if (defined $rules{$name}->{tflags}) {
+    $isnet = ($rules{$name}->{tflags} =~ /\bnet\b/);
+    $islearn = ($rules{$name}->{tflags} =~ /\blearn\b/);
+  }
 
   # Set defaults if not already set
   $scores[0] ||= 0;
