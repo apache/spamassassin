@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.78 2003/04/15 02:31:53 quinlan Exp $
+# $Id: HTML.pm,v 1.79 2003/04/20 09:12:03 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -472,15 +472,42 @@ sub html_tests {
     if ($width > 0 && $height > 0) {
       my $area = $width * $height;
       $self->{html}{image_area} += $area;
-    }
-    if ($width < 2 && $height < 2) {
-      $self->{html}{t_image_web_bugs_1} = 1;
+      if ($area <= 2) {
+	$self->{html}{t_image_web_bugs_6} = 1;
+	$self->{html}{t_image_web_bugs_6b} = 1;
+      }
+      if ($area <= 4) {
+	$self->{html}{t_image_web_bugs_7} = 1;
+	$self->{html}{t_image_web_bugs_7b} = 1;
+      }
+      if ($area <= 6) {
+	$self->{html}{t_image_web_bugs_8} = 1;
+	$self->{html}{t_image_web_bugs_8b} = 1;
+      }
+      if ($area <= 8) {
+	$self->{html}{t_image_web_bugs_9} = 1;
+	$self->{html}{t_image_web_bugs_9b} = 1;
+      }
+      if ($area <= 10) {
+	$self->{html}{t_image_web_bugs_10} = 1;
+	$self->{html}{t_image_web_bugs_10b} = 1;
+      }
+      if ($area <= 12) {
+	$self->{html}{t_image_web_bugs_11} = 1;
+	$self->{html}{t_image_web_bugs_11b} = 1;
+      }
     }
     if ($width + $height < 4) {
       $self->{html}{t_image_web_bugs_2} = 1;
     }
     if ($width <= 2 && $height <= 2) {
       $self->{html}{t_image_web_bugs_3} = 1;
+      $self->{html}{t_image_web_bugs_6b} = 1;
+      $self->{html}{t_image_web_bugs_7b} = 1;
+      $self->{html}{t_image_web_bugs_8b} = 1;
+      $self->{html}{t_image_web_bugs_9b} = 1;
+      $self->{html}{t_image_web_bugs_10b} = 1;
+      $self->{html}{t_image_web_bugs_11b} = 1;
     }
     if ($width <= 3 && $height <= 3) {
       $self->{html}{t_image_web_bugs_4} = 1;
