@@ -7,8 +7,12 @@ vers=`build/get_version`
 build/update_devel
 
 # build/mkrpm
-cp $WEBDIR/devel/Mail-SpamAssassin-$vers.tar.gz $WEBDIR/released/Mail-SpamAssassin-$vers.tar.gz
-cp $WEBDIR/devel/Mail-SpamAssassin-$vers.zip $WEBDIR/released/Mail-SpamAssassin-$vers.zip
+
+for ext in tar.gz zip tar.gz.md5 zip.md5 ; do
+  cp $WEBDIR/devel/Mail-SpamAssassin-$vers.$ext \
+       $WEBDIR/released/Mail-SpamAssassin-$vers.$ext
+done
+
 # cp WebMake-${vers}-1.noarch.rpm WebMake-${vers}-1.src.rpm $WEBDIR/released
 ( cd $WEBDIR/released && cvs add -kb *SpamAssassin* )
 
