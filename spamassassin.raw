@@ -86,16 +86,6 @@ EOVERSION
 # my $mail = Mail::Audit->new();
 
 # 2.
-# Workaround Mail::Audit start.  No longer needed, since
-# Mail::SpamAssassin::NoMailAudit provides the Mail::Audit features
-# we need more efficiently and reliably.
-#
-#my @msglines = (<STDIN>);
-#pre_chew_for_mail_audit (\@msglines);
-#require Mail::SpamAssassin::MyMailAudit;
-#my $mail = Mail::SpamAssassin::MyMailAudit->new ( data => \@msglines );
-
-# 3.
 # No use of Mail::Audit at all, apart from the accept(), reject() and
 # resend() methods (which are proxied transparently).  Lovely.
 #
