@@ -13,7 +13,7 @@ BEGIN {
 
 };
 
-exit unless HAS_SPFQUERY;
+exit unless (TEST_ENABLED && HAS_SPFQUERY);
 
 # ---------------------------------------------------------------------------
 
