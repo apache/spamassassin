@@ -567,17 +567,25 @@ sub parse_received_line {
       goto enough;
     }
 
-    # sendmail:
-    # Received: from mail1.insuranceiq.com (host66.insuranceiq.com [65.217.159.66] (may be forged)) by dogma.slashnull.org (8.11.6/8.11.6) with ESMTP id h2F0c2x31856 for <jm@jmason.org>; Sat, 15 Mar 2003 00:38:03 GMT
-    # Received: from BAY0-HMR08.adinternal.hotmail.com (bay0-hmr08.bay0.hotmail.com [65.54.241.207]) by dogma.slashnull.org (8.11.6/8.11.6) with ESMTP id h2DBpvs24047 for <webmaster@efi.ie>; Thu, 13 Mar 2003 11:51:57 GMT
-    # Received: from ran-out.mx.develooper.com (IDENT:qmailr@one.develooper.com [64.81.84.115]) by dogma.slashnull.org (8.11.6/8.11.6) with SMTP id h381Vvf19860 for <jm-cpan@jmason.org>; Tue, 8 Apr 2003 02:31:57 +0100
-    # from rev.net (natpool62.rev.net [63.148.93.62] (may be forged)) (authenticated) by mail.rev.net (8.11.4/8.11.4) with ESMTP id h0KKa7d32306 for <spamassassin-talk@lists.sourceforge.net>
-    if (/^from (\S+) \((\S+) \[(${IP_ADDRESS})\].*\) by (\S+) \(/) {
-      $mta_looked_up_dns = 1;
-      $helo = $1; $rdns = $2; $ip = $3; $by = $4;
-      $rdns =~ s/^IDENT:([^\@]+)\@// and $ident = $1; # remove IDENT lookups
-      $rdns =~ s/^([^\@]+)\@// and $ident = $1;	# remove IDENT lookups
-      goto enough;
+    # MiB: 2003/11/29 Some qmail-ldap headers may be misinterpreted as sendmail-headers
+    #      resulting in a messed-up interpretation. We have to skip sendmail tests
+    #      if we find evidence that this is a qmail-ldap header.
+    #
+    unless (/^from .* by \S+ \(qmail-\S+\) with /) {
+      #
+      # sendmail:
+      # Received: from mail1.insuranceiq.com (host66.insuranceiq.com [65.217.159.66] (may be forged)) by dogma.slashnull.org (8.11.6/8.11.6) with ESMTP id h2F0c2x31856 for <jm@jmason.org>; Sat, 15 Mar 2003 00:38:03 GMT
+      # Received: from BAY0-HMR08.adinternal.hotmail.com (bay0-hmr08.bay0.hotmail.com [65.54.241.207]) by dogma.slashnull.org (8.11.6/8.11.6) with ESMTP id h2DBpvs24047 for <webmaster@efi.ie>; Thu, 13 Mar 2003 11:51:57 GMT
+      # Received: from ran-out.mx.develooper.com (IDENT:qmailr@one.develooper.com [64.81.84.115]) by dogma.slashnull.org (8.11.6/8.11.6) with SMTP id h381Vvf19860 for <jm-cpan@jmason.org>; Tue, 8 Apr 2003 02:31:57 +0100
+      # from rev.net (natpool62.rev.net [63.148.93.62] (may be forged)) (authenticated) by mail.rev.net (8.11.4/8.11.4) with ESMTP id h0KKa7d32306 for <spamassassin-talk@lists.sourceforge.net>
+      #
+      if (/^from (\S+) \((\S+) \[(${IP_ADDRESS})\].*\) by (\S+) \(/) {
+        $mta_looked_up_dns = 1;
+        $helo = $1; $rdns = $2; $ip = $3; $by = $4;
+        $rdns =~ s/^IDENT:([^\@]+)\@// and $ident = $1; # remove IDENT lookups
+        $rdns =~ s/^([^\@]+)\@// and $ident = $1;	# remove IDENT lookups
+        goto enough;
+      }
     }
 
     # Received: from 4wtgRl (kgbxn@[211.244.147.115]) by dogma.slashnull.org (8.11.6/8.11.6) with SMTP id h8BBsUJ18848; Thu, 11 Sep 2003 12:54:31 +0100
@@ -655,10 +663,10 @@ sub parse_received_line {
     #
     if (/^from \S+( \(HELO \S+\))? \((\S+\@)?\[?${IP_ADDRESS}\]?\)( \(envelope-sender <\S+>\))? by \S+( \(.+\))* with (.* )?(SMTP|QMQP)/) {
 
-       if (/^from (\S+) \(HELO (\S+)\) \((\S+)\@\[?(${IP_ADDRESS})\]?\)( \(envelope-sender <\S+>\))? by (\S+)/) {
+       if (/^from (\S+) \(HELO \[?([^ \[\(\)\]]+)\]?\) \((\S+)\@\[?(${IP_ADDRESS})\]?\)( \(envelope-sender <\S+>\))? by (\S+)/) {
           $rdns = $1; $helo = $2; $ident = $3; $ip = $4; $by = $6;
        }
-       elsif (/^from (\S+) \(HELO (\S+)\) \(\[?(${IP_ADDRESS})\]?\)( \(envelope-sender <\S+>\))? by (\S+)/) {
+       elsif (/^from (\S+) \(HELO \[?([^ \[\(\)\]]+)\]?\) \(\[?(${IP_ADDRESS})\]?\)( \(envelope-sender <\S+>\))? by (\S+)/) {
           $rdns = $1; $helo = $2; $ip = $3; $by = $5;
        }
        elsif (/^from (\S+) \((\S+)\@\[?(${IP_ADDRESS})\]?\)( \(envelope-sender <\S+>\))? by (\S+)/) {
@@ -675,6 +683,8 @@ sub parse_received_line {
        # rDNS, or qmail was called by a daemon that didn't gave the rDNS information.
        if ($rdns ne "unknown") {
           $mta_looked_up_dns = 1;
+       } else {
+          $rdns = '';
        }
        goto enough;
 
