@@ -69,7 +69,7 @@ use vars	qw{
 @ISA = qw();
 
 $VERSION = "2.0";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.55 2002/01/14 06:04:16 jmason Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.56 2002/01/15 03:39:11 jmason Exp $';
 
 sub Version { $VERSION; }
 
@@ -571,13 +571,13 @@ sub read_cf {
 
   if (-d $fname) {
     foreach my $file ($self->get_cf_files_in_dir ($fname)) {
-      open (IN, "<".$file) or warn "cannot open \"$file\"\n";
+      open (IN, "<".$file) or warn "cannot open \"$file\": $!\n", next;
       $txt .= join ('', <IN>);
       close IN;
     }
 
-  } elsif (-f $fname && -s _) {
-    open (IN, "<".$fname) or warn "cannot open \"$fname\"\n";
+  } elsif (-f $fname && -s _ && -r _) {
+    open (IN, "<".$fname) or warn "cannot open \"$fname\": $!\n";
     $txt = join ('', <IN>);
     close IN;
   }
