@@ -1,0 +1,15 @@
+#!/bin/sh
+
+cd /home/jm/ftp/spamassassin/automc ; . config
+exec > LOG.after 2>&1
+set -x
+
+$SADIR/masses/rule-qa/corpus-hourly
+
+today=`date +"%Y%m%d"`
+mkdir -p $html/$today
+cp $html/*.* $html/$today
+date
+
+./post-comments
+date

@@ -1,0 +1,23 @@
+#!/bin/sh
+
+cd /home/jm/ftp/spamassassin/automc ; . config
+exec > LOG.before 2>&1
+set -x
+
+# ensure we're running after 0850 UTC, because cron can't
+if TZ=UTC date | egrep -q '^... ... .. (07|09):'; then
+  exit
+fi
+
+rm -rf $MCTMP; mkdir -p $MCTMP
+
+./scrape-bugzilla
+cp 70_scraped.cf ../rules
+(
+  cd ../rules
+  echo svn commit --file $MCTMP/commit.msg 70_scraped.cf
+)
+
+# update the "tagtime" file
+touch /home/jm/ctest/tagtime
+
