@@ -372,14 +372,27 @@ score DCC_CHECK              2.0
 
 score RCVD_IN_RELAYS_ORDB_ORG	     2.0
 score RCVD_IN_OSIRUSOFT_COM	     2.0
+score X_OSIRU_DUL_FH		    -1.5
 score X_OSIRU_SPAM_SRC		     3.0
 score X_OSIRU_SPAMWARE_SITE	     5.0
-score ROUND_THE_WORLD		     3.0
 score RCVD_IN_RFCI		     0.5
 score RCVD_IN_ORBS                   1.0
 score RCVD_IN_DSBL                   3.0
 score RCVD_IN_MULTIHOP_DSBL          1.0
-score RCVD_IN_UNCONFIRMED_DSBL      0.5
+score RCVD_IN_UNCONFIRMED_DSBL       0.5
+
+# The fudge scores below expect that you use the following scores for MAPS
+#score RCVD_IN_VARBL		     4.5
+#score RCVD_IN_RSS		     2.0
+#score RCVD_IN_DUL		     2.0
+#score RCVD_IN_DUL_FH		    -1.5
+
+score FUDGE_DUL_MAPS_OSIRU          -2.0
+score FUDGE_RELAY_OSIRU		    -2.0
+score FUDGE_OSIRU_FH		     1.5
+score FUDGE_MULTIHOP_RELAY	    -1.0
+
+score ROUND_THE_WORLD		     3.0
 
 # the ok_language configuration option will need to be set correctly
 # across each corpus for this score to be GA evolved
