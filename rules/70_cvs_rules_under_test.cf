@@ -366,3 +366,6 @@ body T_MPART_ALT_DIFF_99      eval:multipart_alternative_difference('99', '100')
 uri T_TERRA_ES		/terra\.es\//i
 describe T_TERRA_ES	Contains images or links to pages hosted at 'terra.es'
 
+# bug 2957
+uri T_INFO_TLD			/^(?:https?:\/\/|mailto:)[^\/]+\.info(?:\/|$)/i
+describe T_INFO_TLD		Contains a URL in the INFO top-level domain    
