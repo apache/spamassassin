@@ -2,13 +2,21 @@
 
 . /usr/share/debconf/confmodule
 
-db_get spamassassin/upgrade/2.42 || true
+db_get spamassassin/upgrade/2.42u || true
 if [ "$RET" = "Yes" ] ; then
-    db_set spamassassin/upgrade/2.42 "No" || true
+    db_set spamassassin/upgrade/2.42u "No" || true
     rm /etc/spamassassin/[1-6][0-9]_*.cf || true
     rm /etc/spamassassin/triplets.txt || true
     rm /etc/spamassassin/languages || true
 fi
+db_get spamassassin/upgrade/2.42m || true
+if [ "$RET" = "Yes" ] ; then
+    db_set spamassassin/upgrade/2.42m "No" || true
+    rm /etc/spamassassin/[1-6][0-9]_*.cf || true
+    rm /etc/spamassassin/triplets.txt || true
+    rm /etc/spamassassin/languages || true
+fi
+
 
 db_stop
 
