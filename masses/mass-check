@@ -99,12 +99,6 @@ use POSIX qw(strftime);
 use constant HAS_TIME_PARSEDATE => eval { require Time::ParseDate; };
 use Config;
 
-if (! -f "$FindBin::Bin/tmp/rules.pl") {
-  system("cd $FindBin::Bin; make tmp/rules.pl");
-}
-# note: for reuse, score set doesn't matter
-require "rules.pl";
-
 # default settings
 $opt_c = "$FindBin::Bin/../rules";
 $opt_p = "$FindBin::Bin/spamassassin";
@@ -113,6 +107,12 @@ $opt_net = 0;
 $opt_hamlog = "ham.log";
 $opt_spamlog = "spam.log";
 $opt_learn = 0;
+
+if (! -f "$FindBin::Bin/tmp/rules.pl") {
+  system("cd $FindBin::Bin; perl parse-rules-for-masses -d $opt_c");
+}
+# note: for reuse, score set doesn't matter
+require "rules.pl";
 
 GetOptions("c=s", "p=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug:s",
 	   "hamlog=s", "head=i", "loghits", "mh", "mid", "ms", "net",
