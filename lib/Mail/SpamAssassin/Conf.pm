@@ -170,7 +170,7 @@ sub new {
   $self->{bayes_path} = "__userstate__/bayes";
   $self->{bayes_file_mode} = "0700";
   $self->{bayes_use_hapaxes} = 1;
-  $self->{bayes_use_chi2_combining} = 0;
+  $self->{bayes_use_chi2_combining} = 1;
   $self->{bayes_expiry_min_db_size} = 100000;
   $self->{bayes_expiry_scan_count} = 5000;
   $self->{bayes_ignore_headers} = [ ];
@@ -1916,7 +1916,7 @@ increases database size by about a factor of 8 to 10.
       $self->{bayes_use_hapaxes} = $1; next;
     }
 
-=item bayes_use_chi2_combining		(default: 0)
+=item bayes_use_chi2_combining		(default: 1)
 
 Should the Bayesian classifier use chi-squared combining, instead of
 Robinson/Graham-style naive Bayesian combining?  Chi-squared produces
