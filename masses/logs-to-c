@@ -3,7 +3,7 @@
 use Getopt::Long;
 use vars qw($opt_cffile $opt_count $opt_lambda $opt_threshold);
 
-GetOptions("cffile=s", "count", "lambda=s", "threshold=s");
+GetOptions("cffile=s", "count", "lambda=f", "threshold=f");
 my $argcffile = $opt_cffile;
 
 my $justcount = 0;
@@ -26,6 +26,8 @@ if ($opt_lambda) { $lambda = $opt_lambda; }
 my %is_spam = ();
 my %tests_hit = ();
 my %mutable_tests = ();
+
+use vars qw(%rules %allrules);
 
 readscores();
 
@@ -123,16 +125,13 @@ sub readscores {
   print "Reading scores from \"$argcffile\"...\n";
   system ("./parse-rules-for-masses -d \"$argcffile\"") and die;
   require "./tmp/rules.pl";
+  %allrules = %rules;           # ensure it stays global
 }
 
 sub writescores_c {
-  my $size = (scalar keys %scores); # adding 100 here makes the GA take a lot longer since the genome's 100 genes longer! plus messes up scores output - crh
-
-  open (DAT, ">tmp/scores.data");
-  print DAT "N$size\n";
-
-  my $count = 0;
-  foreach my $name (sort keys %scores) {
+  my $output = '';
+  my $size = 0;
+  foreach my $name (@index_to_rule) {
     # jm: now, score-ranges-from-freqs has tflags to work from, so
     # it will always list all mutable tests.
     if (!defined $mutable_tests{$name}) {
@@ -146,17 +145,23 @@ sub writescores_c {
       #$range_hi{$name} ||= 1.5;
     }
 
-    print DAT ".".$count."\n";
-    print DAT "n".$name."\n";
-    print DAT "b".$scores{$name}."\n";
-    print DAT "m".$mutable_tests{$name}."\n";
-    print DAT "l".$range_lo{$name}."\n";
-    print DAT "h".$range_hi{$name}."\n";
+    if ($ignored_rule{$name}) { next; }
 
-    $score_c_index{$name} = $count;
-    $count++;
+    if ($size != $rule_to_index{$name}) {
+      warn "oops: size != rule_to_index{$name}: $size $rule_to_index{$name}";
+    }
+
+    $output .= ".".$size."\n".
+                "n".$name."\n".
+                "b".$scores{$name}."\n".
+                "m".$mutable_tests{$name}."\n".
+                "l".$range_lo{$name}."\n".
+                "h".$range_hi{$name}."\n";
+    $size++;
   }
 
+  open (DAT, ">tmp/scores.data");
+  print DAT "N$size\n", $output;
   close DAT;
 
   open (OUT, ">tmp/scores.h");
@@ -215,12 +220,17 @@ unsigned short tests_hit[$num_tests][$max_hits_per_msg];
     foreach my $test (@{$tests_hit{$file}}) {
       if ($test eq '') { next; }
 
-      if (!defined $score_c_index{$test}) {
+      if ($ignored_rule{$test}) {
+        warn "ignored rule $test got a hit in $file!\n";
+        next;
+      }
+
+      if (!defined $rule_to_index{$test}) {
 	warn "test with no C index: $test\n";
       }
 
       $num_tests_hit++;
-      $out .= "t".$score_c_index{$test}."\n";
+      $out .= "t".$rule_to_index{$test}."\n";
 
       if ($num_tests_hit >= $max_hits_per_msg) {
 	die "Need to increase \$max_hits_per_msg";
@@ -241,15 +251,33 @@ sub read_ranges {
   open (IN, "<tmp/ranges.data")
   	or die "need to run score-ranges-from-freqs first!";
 
+  my $count = 0;
   while (<IN>) {
     /^(\S+) (\S+) (\d+) (\S+)$/ or next;
     my $t = $4;
     $range_lo{$t} = $1+0;
     $range_hi{$t} = $2+0;
     my $mut = $3+0;
+
+    if ($t =~ /^__/) { $ignored_rule{$t} = 1; next; }
+    if ($range_lo{$t} == 0.0 && $range_hi{$t} == 0.0) {
+      #warn "ignored rule: score and range == 0: $t\n";
+      $ignored_rule{$t} = 1; next;
+    }
+
+    $ignored_rule{$t} = 0;
+    $index_to_rule[$count] = $t; $rule_to_index{$t} = $count++;
+
     if (!$mut) { $mutable_tests{$t} = 0; } else { $mutable_tests{$t} = 1; }
   }
   close IN;
+
+  # catch up on the ones missed; seems to be userconf or 0-hitters mostly.
+  foreach my $t (sort keys %allrules) {
+    next if (exists ($rule_to_index{$t}) || $ignored_rule{$t});
+    if ($t =~ /^__/) { $ignored_rule{$t} = 1; next; }
+    $index_to_rule[$count] = $t; $rule_to_index{$t} = $count++;
+  }
 }
 
 sub evaluate {
