@@ -118,7 +118,7 @@ sub mbox_search {
 
 sub handle {
   my $msgp = shift;
-  print STDOUT @$msgp, "\n";
+  print STDOUT "From nobody\@nowhere  Wed Aug 21 12:41:07 2002\n", @$msgp, "\n";
 }
 
 sub mywarn {

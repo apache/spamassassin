@@ -193,6 +193,52 @@ It's also worth noting that training with a very very small quantity of
 non-spam, will produce atrocious results.  You should aim to train with at
 least the same amount (or more if possible!) of non-spam data than spam.
 
+On an on-going basis, it's best to keep training the filter to make
+sure it has fresh data to work from.  There are various ways to do
+this:
+
+=over 4
+
+=item 1. Supervised learning
+
+This means keeping a copy of all or most of your mail, separated into spam
+and nonspam piles, and periodically re-training using those.  It produces
+the best results, but requires more work from you, the user.
+
+(An easy way to do this, by the way, is to create a new folder for
+'deleted' messages, and instead of deleting them from other folders,
+simply move them in there instead.  Then keep all spam in a separate
+folder and never delete it.  As long as you remember to move misclassified
+mails into the correct folder set, it's easy enough to keep up to date.)
+
+=item 2. Unsupervised learning from Bayesian classification
+
+Another way to train is to chain the results of the Bayesian classifier
+back into the training, so it reinforces its own decisions.  This is only
+safe if you then retrain it based on any errors you discover.
+
+SpamAssassin does not support this method, due to experimental results
+which strongly indicate that it does not work well, and since Bayes is
+only one part of the resulting score presented to the user (while Bayes
+may have made the wrong decision about a mail, it may have been overridden
+by another system).
+
+=item 3. Unsupervised learning from SpamAssassin rules
+
+Also called 'auto-learning' in SpamAssassin.  Based on statistical
+analysis of the SpamAssassin success rates, we can automatically train the
+Bayesian database with a certain degree of confidence that our training
+data is accurate.
+
+It should be supplemented with some supervised training in addition, if
+possible.
+
+This will be turned on by setting the SpamAssassin configuration parameter
+C<auto_learn> to 1; note, however, that it is not supported in the current
+version of SpamAssassin.
+
+=back
+
 =head1 OPTIONS
 
 =over 4
@@ -251,6 +297,9 @@ sa-learn-nonspam(1)
 sa-learn-rebuild(1)
 sa-forget(1)
 http:///www.paulgraham.com, "A Plan For Spam"
+
+http://www.bgl.nu/~glouis/bogofilter/test6000.html, discussion of various Bayes
+training regimes, including 'train on error' and unsupervised training
 
 =head1 AUTHOR
 

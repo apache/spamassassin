@@ -128,7 +128,8 @@ sub wanted {
 
   my $yorn = $status->is_spam();
   my $hits = $status->get_hits();
-  my $tests = $status->get_names_of_tests_hit();
+  my $tests = $status->get_names_of_tests_hit().','.
+		$status->get_names_of_subtests_hit();
 
   $tests = join(',', sort(split(/,/, $tests)));
 
