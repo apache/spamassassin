@@ -485,8 +485,12 @@ tflags T_RCVD_IN_MONKEYS_FORMMAIL net
 # 18.125  36.2000   0.0500    0.999   0.95    0.01  T_RCVD_IN_MONKEYS_UPL
 #  7.766  19.0844   0.0678    0.996   0.94    0.01  T_RCVD_IN_MONKEYS_UPL
 header T_RCVD_IN_MONKEYS_UPL	rbleval:check_rbl_txt('relay', 'proxies.relays.monkeys.com.')
-describe T_RCVD_IN_MONKEYS_UPL Received via a relay in proxies.relays.monkeys.com.
+describe T_RCVD_IN_MONKEYS_UPL	Received via a relay in proxies.relays.monkeys.com.
 tflags T_RCVD_IN_MONKEYS_UPL net
+# just an experiment
+header T_RCVD_IN_MONKEYS_UPL2	rbleval:check_rbl('relay2', 'proxies.relays.monkeys.com.')
+describe T_RCVD_IN_MONKEYS_UPL2	Received via a relay in proxies.relays.monkeys.com.
+tflags T_RCVD_IN_MONKEYS_UPL2 net
 
 # new "-notfirsthop" logic
 # quinlan: entire corpus, then last 2000 spam and 2000 ham:
@@ -573,7 +577,7 @@ tflags T_RCVD_IN_OSSOCKS net
 # url: http://www.dnsbl.sorbs.net/
 # pay-to-use: no
 # delist: $50 fee for T_RCVD_IN_SORBS_SPAM, others are retested on request (free)
-header T_RCVD_IN_SORBS	rbleval:check_rbl_txt('sorbs', 'dnsbl.sorbs.net.')
+header T_RCVD_IN_SORBS	rbleval:check_rbl('sorbs', 'dnsbl.sorbs.net.')
 tflags T_RCVD_IN_SORBS net
 header T_RCVD_IN_SORBS_HTTP	rbleval:check_rbl_results_for('sorbs', '127.0.0.2')
 tflags T_RCVD_IN_SORBS_HTTP net
