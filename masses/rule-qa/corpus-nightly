@@ -38,7 +38,7 @@ if [ "$1" = "update" ]; then
 		if cvs -z3 update -dP -r CURRENT_CORPORA_SUBMIT_VERSION; then
 			break;
 		fi
-		if [ $retry -eq 64 ]; do
+		if [ $retry -eq 64 ]; then
 			exit 1
 		fi
 		sleep $(( 60 * $retry ))
