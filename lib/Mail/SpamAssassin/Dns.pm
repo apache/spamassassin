@@ -206,7 +206,7 @@ sub process_dnsbl_set {
       $self->dnsbl_hit($rule, $question, $answer);
     }
     # senderbase
-    elsif ($set =~ /^senderbase/) {
+    elsif ($subtest =~ s/^sb://) {
       $rdatastr =~ s/^"?\d+-//;
       $rdatastr =~ s/"$//;
       my %sb = ($rdatastr =~ m/(?:^|\|)(\d+)=([^|]+)/g);

@@ -184,12 +184,12 @@ tflags RCVD_IN_BSP_OTHER	net nice
 # http://www.senderbase.org/dnsresponses.html
 # sa.senderbase.org for SpamAssassin queries
 # query.senderbase.org for other queries
-header __SENDERBASE eval:check_rbl_txt('senderbase', 'sa.senderbase.org.')
+header __SENDERBASE eval:check_rbl_txt('sb', 'sa.senderbase.org.')
 tflags __SENDERBASE net
 
 # S23 = domain daily magnitude
 # S25 = date of first message from this domain
-header SB_NEW_BULK		eval:check_rbl_sub('senderbase', 'S23 > 6.2 && (time - S25 < 120*86400)')
+header SB_NEW_BULK		eval:check_rbl_sub('sb', 'sb:S23 > 6.2 && (time - S25 < 120*86400)')
 describe SB_NEW_BULK		Sender domain is new and very high volume
 tflags SB_NEW_BULK		net
 
@@ -197,14 +197,14 @@ tflags SB_NEW_BULK		net
 # S40 = IP daily magnitude
 # S41 = IP monthly magnitude
 # note: accounting for rounding, "> 0.3" means at least a 59% volume spike
-header SB_NSP_VOLUME_SPIKE	eval:check_rbl_sub('senderbase', 'S5 =~ /NSP/ && S41 > 4.2 && S40 - S41 > 0.3')
+header SB_NSP_VOLUME_SPIKE	eval:check_rbl_sub('sb', 'sb:S5 =~ /NSP/ && S41 > 3.8 && S40 - S41 > 0.3')
 describe SB_NSP_VOLUME_SPIKE	Sender IP hosted at NSP has a volume spike
 tflags SB_NSP_VOLUME_SPIKE	net
 
 # S2 = organization daily magnitude
 # S9 = IP addresses used by this organization
 # note: this rule does not work as well on older mail
-header SB_HIGH_VOLUME_PER_IP	eval:check_rbl_sub('senderbase', '(S2 / S9) > 5.00')
+header SB_HIGH_VOLUME_PER_IP	eval:check_rbl_sub('sb', 'sb:(S2 / S9) > 5.00')
 describe SB_HIGH_VOLUME_PER_IP	Sender organization has high volume per IP
 tflags SB_HIGH_VOLUME_PER_IP	net
 

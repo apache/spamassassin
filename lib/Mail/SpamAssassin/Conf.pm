@@ -2128,50 +2128,62 @@ Define a header eval test.  C<name_of_eval_method> is the name of
 a method on the C<Mail::SpamAssassin::EvalTests> object.  C<arguments>
 are optional arguments to the function call.
 
-=item header SYMBOLIC_TEST_NAME eval:check_rbl('set', 'zone')
+=item header SYMBOLIC_TEST_NAME eval:check_rbl('set', 'zone' [, 'sub-test'])
 
-Check a DNSBL (DNS blacklist), also known as RBLs (realtime blacklists).  This
-will retrieve Received headers from the mail, parse the IP addresses, select
-which ones are 'untrusted' based on the C<trusted_networks> logic, and query
-that blacklist.  There's a few things to note:
+Check a DNSBL (a DNS blacklist or whitelist).  This will retrieve Received:
+headers from the message, extract the IP addresses, select which ones are
+'untrusted' based on the C<trusted_networks> logic, and query that DNSBL
+zone.  There's a few things to note:
 
 =over 4
 
-=item Duplicated or reserved IPs
+=item duplicated or reserved IPs
 
-These are stripped, and the DNSBLs will not be queried for them.  Reserved IPs
-are those listed in <http://www.iana.org/assignments/ipv4-address-space>,
-<http://duxcw.com/faq/network/privip.htm>, or
-<http://duxcw.com/faq/network/autoip.htm>.
+Duplicated IPs are only queried once and reserved IPs are not queried.
+Reserved IPs are those listed in
+<http://www.iana.org/assignments/ipv4-address-space>,
+<http://duxcw.com/faq/network/privip.htm>,
+<http://duxcw.com/faq/network/autoip.htm>, or
+<ftp://ftp.rfc-editor.org/in-notes/rfc3330.txt>
 
-=item The first argument, 'set'
+=item the 'set' argument
 
-This is used as a 'zone ID'.  If you want to look up a multi-meaning zone like
-relays.osirusoft.com, you can then query the results from that zone using it;
+This is used as a 'zone ID'.  If you want to look up a multiple-meaning zone
+like NJABL or SORBS, you can then query the results from that zone using it;
 but all check_rbl_sub() calls must use that zone ID.
 
-Also, if an IP gets a hit in one lookup in a zone using that ID, any further
-hits in other rules using that zone ID will *not* be added to the score.
+Also, if more than one IP address gets a DNSBL hit for a particular rule, it
+does not affect the score because rules only trigger once per message.
 
-=item Selecting all IPs except for the originating one
+=item the 'zone' argument
 
-This is accomplished by naming the set 'foo-notfirsthop'.  Useful for querying
-against DNS lists which list dialup IP addresses; the first hop may be a
-dialup, but as long as there is at least one more hop, via their outgoing
-SMTP server, that's legitimate, and so should not gain points.  If there
-is only one hop, that will be queried anyway, as it should be relaying
-via its outgoing SMTP server instead of sending directly to your MX.
+This is the root zone of the DNSBL, ending in a period.
 
-=item Selecting IPs by whether they are trusted
+=item the 'sub-test' argument
+
+This optional argument behaves the same as the sub-test argument in
+C<check_rbl_sub()> below.
+
+=item selecting all IPs except for the originating one
+
+This is accomplished by placing '-notfirsthop' at the end of the set name.
+This is useful for querying against DNS lists which list dialup IP
+addresses; the first hop may be a dialup, but as long as there is at least
+one more hop, via their outgoing SMTP server, that's legitimate, and so
+should not gain points.  If there is only one hop, that will be queried
+anyway, as it should be relaying via its outgoing SMTP server instead of
+sending directly to your MX (mail exchange).
+
+=item selecting IPs by whether they are trusted
 
 When checking a 'nice' DNSBL (a DNS whitelist), you cannot trust the IP
-addresses in Received headers that were not added by trusted relays.  To test
-the first IP address that can be trusted, name the set 'foo-firsttrusted'.
-That should test the IP address of the relay that connected to the most remote
-trusted relay.
+addresses in Received headers that were not added by trusted relays.  To
+test the first IP address that can be trusted, place '-firsttrusted' at the
+end of the set name.  That should test the IP address of the relay that
+connected to the most remote trusted relay.
 
-In addition, you can test all untrusted IP addresses by naming the set
-'foo-untrusted'.
+In addition, you can test all untrusted IP addresses by placing '-untrusted'
+at the end of the set name.
 
 Note that this requires that SpamAssassin know which relays are trusted.  For
 simple cases, SpamAssassin can make a good estimate.  For complex cases, you
@@ -2192,7 +2204,12 @@ like relays.osirusoft.com, you can then query the results from that zone
 using the zone ID from the original query.  The sub-test may either be an
 IPv4 dotted address for RBLs that return multiple A records or a
 non-negative decimal number to specify a bitmask for RBLs that return a
-single A record containing a bitmask of results.
+single A record containing a bitmask of results, a SenderBase test
+beginning with "sb:", or (if none of the preceding options seem to fit) a
+regular expression.
+
+Note: the set name must be exactly the same for as the main query rule,
+including selections like '-notfirsthop' appearing at the end of the set name.
 
 =cut
 
