@@ -231,15 +231,23 @@ body     FORGOTTEN_PASSWORD     /[fF]org[oe]t.{0,25}[pP]assword/
 describe FORGOTTEN_PASSWORD     Contains a password retrieval system
 tflags   FORGOTTEN_PASSWORD     nice
 
-body     PRIVACY_STATEMENT      /PRIVACY STATEMENT/i
+body     PRIVACY_STATEMENT      /\bPRIVACY STATEMENT\b/i
 describe PRIVACY_STATEMENT      Contains a Privacy Statement
 tflags   PRIVACY_STATEMENT      nice
 
-body     REG_THANKS             /Thank you for registering/i
+body     REG_THANKS             /\bThank you for registering\b/i
 describe REG_THANKS             Something about registration
 tflags   REG_THANKS             nice
 
-body     ACCOUNT_CLICK          /account.{1,100}click/i
+body     ACCOUNT_CLICK          /\baccount.{1,100}click/i
 describe ACCOUNT_CLICK          Click to perform an action on an account
 tflags   ACCOUNT_CLICK          nice
+
+body     TRACK_NUMBER           /\bassign.{1,100}\b(?:ticket|tracking) number/i
+describe TRACK_NUMBER           Talks about tracking numbers
+tflags   TRACK_NUMBER           nice
+
+body     AUTO_RESP              /\bauto.{1,100}(?:response|reply)/i
+describe AUTO_RESP              Talks about automatic responses
+tflags   AUTO_RESP              nice
 
