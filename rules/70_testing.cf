@@ -136,12 +136,18 @@ body T_HTML_LINK_OPT_OUT	eval:html_text_match('anchor', '(?i)opt.?out')
 # linked image in a short document
 body __HTML_LINK_IMAGE		eval:html_text_match('anchor', '<img>')
 body __HTML_LENGTH_1024		eval:html_eval('length', '< 1024')
+body __HTML_LENGTH_1536		eval:html_eval('length', '< 1536')
 body __HTML_LENGTH_2048		eval:html_eval('length', '< 2048')
+body __HTML_LENGTH_2650		eval:html_eval('length', '< 2650')
+body __HTML_LENGTH_3072		eval:html_eval('length', '< 3072')
 body __HTML_LENGTH_4096		eval:html_eval('length', '< 4096')
-meta HTML_LINK_IMAGE_512	__HTML_LENGTH_512 && __HTML_LINK_IMAGE
-meta HTML_LINK_IMAGE_1024	__HTML_LENGTH_1024 && __HTML_LINK_IMAGE
-meta HTML_LINK_IMAGE_2048	__HTML_LENGTH_2048 && __HTML_LINK_IMAGE
-meta HTML_LINK_IMAGE_4096	__HTML_LENGTH_4096 && __HTML_LINK_IMAGE
+meta T_HTML_LINK_IMAGE_512	__HTML_LENGTH_512 && __HTML_LINK_IMAGE
+meta T_HTML_LINK_IMAGE_1024	__HTML_LENGTH_1024 && __HTML_LINK_IMAGE
+meta T_HTML_LINK_IMAGE_1536	__HTML_LENGTH_1536 && __HTML_LINK_IMAGE
+meta T_HTML_LINK_IMAGE_2048	__HTML_LENGTH_2048 && __HTML_LINK_IMAGE
+meta T_HTML_LINK_IMAGE_2650	__HTML_LENGTH_2650 && __HTML_LINK_IMAGE
+meta T_HTML_LINK_IMAGE_3072	__HTML_LENGTH_3072 && __HTML_LINK_IMAGE
+meta T_HTML_LINK_IMAGE_4096	__HTML_LENGTH_4096 && __HTML_LINK_IMAGE
 
 body T_HTML_EXTRA_CLOSE_06	eval:html_range('closed_extra_ratio', '0.06', 'inf')
 body T_HTML_EXTRA_CLOSE_07	eval:html_range('closed_extra_ratio', '0.07', 'inf')
@@ -354,8 +360,8 @@ header    T_SARE_SUB_DOLLARS    Subject =~ /^\s*(?:\w+ )?(?:\w+: )?\$\d+\s*$/
 describe  T_SARE_SUB_DOLLARS    Subject is dollar sign and numerics only
 
 # http://bugzilla.spamassassin.org/show_bug.cgi?id=2016
-rawbody INTERRUPTUS           /(?:[a-zA-Z0-9]<[\/ ]{0,2}?(?!br)(?!p)(?!sup)(?!li)(?!b)(?!i)(?!option)(?!a (?:href|name))(?:\b|!--)[^>]{0,64}?>[a-zA-Z0-9].{0,64}){3}/i
-describe INTERRUPTUS          Hypertextus Interruptus - HTML-obfuscated text
+rawbody T_INTERRUPTUS           /(?:[a-zA-Z0-9]<[\/ ]{0,2}?(?!br)(?!p)(?!sup)(?!li)(?!b)(?!i)(?!option)(?!a (?:href|name))(?:\b|!--)[^>]{0,64}?>[a-zA-Z0-9].{0,64}){3}/i
+describe T_INTERRUPTUS          Hypertextus Interruptus - HTML-obfuscated text
 
 ##########################################################################
 
