@@ -562,6 +562,21 @@ tflags __FIVETEN net
 # or that have have allowed known spammers to become clients.
 header T_RCVD_IN_FIVETEN_BULK	rblreseval:check_rbl_results_for('fiveten', '127.0.0.4')
 tflags T_RCVD_IN_FIVETEN_BULK net
+# retest all of the rest (since rblreseval wasn't used before)
+header T_RCVD_IN_FIVETEN_SPAM	rblreseval:check_rbl_results_for('fiveten', '127.0.0.2')
+header T_RCVD_IN_FIVETEN_DIALUP	rblreseval:check_rbl_results_for('fiveten', '127.0.0.3')
+header T_RCVD_IN_FIVETEN_MULTISTAGE	rblreseval:check_rbl_results_for('fiveten', '127.0.0.5')
+header T_RCVD_IN_FIVETEN_SINGLESTAGE	rblreseval:check_rbl_results_for('fiveten', '127.0.0.6')
+header T_RCVD_IN_FIVETEN_SPAMSUPPORT	rblreseval:check_rbl_results_for('fiveten', '127.0.0.7')
+header T_RCVD_IN_FIVETEN_WEBFORM	rblreseval:check_rbl_results_for('fiveten', '127.0.0.8')
+header T_RCVD_IN_FIVETEN_MISC	rblreseval:check_rbl_results_for('fiveten', '127.0.0.9')
+header T_RCVD_IN_FIVETEN_KLEZ	rblreseval:check_rbl_results_for('fiveten', '127.0.0.10')
+header T_RCVD_IN_FIVETEN_TCPA	rblreseval:check_rbl_results_for('fiveten', '127.0.0.11')
+header T_RCVD_IN_FIVETEN_FREE	rblreseval:check_rbl_results_for('fiveten', '127.0.0.12')
+# should probably get notfirsthop etc. to work at any stage
+# (how about an optional third argument?)
+header __FIVE10		rblreseval:check_rbl('five10-notfirsthop', 'blackholes.five-ten-sg.com.')
+header T_RCVD_IN_FIVETEN_DIALUP_NFH	rblreseval:check_rbl_results_for('five10-notfirsthop', '127.0.0.3')
 
 # some additional osirusoft tests, needs more work
 # all osirusoft tests maybe a bad idea, osirusoft web site seems defunct
