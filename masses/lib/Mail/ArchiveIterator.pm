@@ -211,13 +211,12 @@ sub mass_check_mailbox {
 
     if (! $self->{opt_all} && scalar @msg > 1000) { next; }	# too big
 
-    # switch to a fork-based model to save RAM
-    if ($self->{opt_fork} && fork()) { wait; next; }
-
     $msgid ||= "(undef)";
     $msgid = "$folder:$msgid";	# so we can find it again
     $msgid =~ s/\s/_/gs;	# make safe
 
+    # switch to a fork-based model to save RAM
+    if ($self->{opt_fork} && fork()) { wait; next; }
     $self->visit_a_mail ($msgid, \@msg);
     if ($self->{opt_fork}) { exit; }
   }
