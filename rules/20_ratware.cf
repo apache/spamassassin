@@ -158,7 +158,7 @@ header __IMS_HTML_RCVD		Received =~ /\bby \S+ with Internet Mail Service .(?:[67
 meta FORGED_IMS_HTML		(__IMS_MUA && MIME_HTML_ONLY && !(__IMS_HTML_BUILDS && __IMS_HTML_RCVD))
 describe FORGED_IMS_HTML	IMS can't send HTML message only
 
-meta FORGED_THEBAT_HTML		(__THEBAT_MUA && MIME_HTML_ONLY)
+meta FORGED_THEBAT_HTML		(__THEBAT_MUA_V1 && MIME_HTML_ONLY)
 describe FORGED_THEBAT_HTML	The Bat! can't send HTML message only
 
 # bug 1561
