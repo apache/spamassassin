@@ -50,9 +50,7 @@ sub new_checker {
   {
     $path = $main->sed_path ($main->{conf}->{auto_whitelist_path});
 
-    if ($main->{locker}->safe_lock
-			($main->{conf}->{auto_whitelist_lock_timeout}, $path))
-    {
+    if ($main->{locker}->safe_lock ($path)) {
       $self->{locked_file} = $path;
       $self->{is_locked} = 1;
       dbg("Tie-ing to DB file R/W in $path");
