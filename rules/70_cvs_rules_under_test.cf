@@ -82,6 +82,10 @@ uri T_ADCLICK                   m,\Qhttp://www.adclick.ws/p\E,
 describe T_ADCLICK              Contains adclick URL
 score T_ADCLICK                 2.0
 
+# real hotmail outgoings use 'mc1-s3.law16...' or 'f206..' etc.
+header T_FORGED_MX_HOTMAIL      Received =~ /^from mx\d+\.hotmail\.com /m
+score T_FORGED_MX_HOTMAIL       2.0
+
 body T_POSTCARD			/send a postcard to Unsubscribe/
 describe T_POSTCARD		Send a postcard to unsubscribe
 score T_POSTCARD		3.0
@@ -109,21 +113,4 @@ score T_RATWARE_EMWAC		1.0
 header T_RATWARE_THEBAT		X-Mailer =~ /The Bat/
 describe T_RATWARE_THEBAT	Sent from "The Bat"
 score T_RATWARE_THEBAT		1.0
-
-# theory: more nonspam than spam contains ads from mainstream ad co's ;) (jm)
-uri T_AD_DOUBLECLICK      m,\Qhttp://ad.doubleclick.net/ad/\E,
-tflags T_AD_DOUBLECLICK   nice
-score T_AD_DOUBLECLICK    -1.0
-uri T_AD_MSADS_NET        m,\Qhttp://global.msads.net/ads/\E,
-tflags T_AD_MSADS_NET   nice
-score T_AD_MSADS_NET    -1.0
-uri T_AD_ADS_COM_COM      m,\Qhttp://ads.com.com/\E,
-tflags T_AD_ADS_COM_COM   nice
-score T_AD_ADS_COM_COM    -1.0
-uri T_AD_ZDNET            m,\Qhttp://www.zdnet.com/include/ads/\E,
-tflags T_AD_ZDNET   nice
-score T_AD_ZDNET    -1.0
-uri T_ZD_BURSTNET         m,\Qhttp://www.burstnet.com/ads/\E,
-tflags T_AD_BURSTNET   nice
-score T_AD_BURSTNET    -1.0
 

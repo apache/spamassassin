@@ -510,7 +510,7 @@ describe VAR_REF_IN_RECEIVED    Received contains a $variable reference
 # the real services never HELO as 'foo.com', instead 'mail.foo.com' or
 # something like that.  Note: be careful when expanding this... legit dotcom
 # HELOers include: hotmail.com, drizzle.com, lockergnome.com.
-header RCVD_FAKE_HELO_DOTCOM    Received =~ /^from (msn|yahoo|yourwebsite|lycos|excite|aol|localhost|koreanmail|allexecs|mydomain|juno|eudoramail|compuserve|desertmail)\.com \(/
+header RCVD_FAKE_HELO_DOTCOM    Received =~ /^from (?:msn|yahoo|yourwebsite|lycos|excite|cs|aol|localhost|koreanmail|allexecs|mydomain|juno|eudoramail|compuserve|desertmail)\.com \(/m
 describe RCVD_FAKE_HELO_DOTCOM  Received contains a faked HELO hostname
 
 header USERNAME_IN_SUBJECT      eval:check_for_to_in_subject(3)
