@@ -6,14 +6,18 @@ use Test;
 
 use constant TEST_ENABLED => (-e 't/do_net');
 use constant HAS_SPFQUERY => eval { require Mail::SPF::Query; };
+# See <http://bugzilla.spamassassin.org/show_bug.cgi?id=3806>
+use constant IS_SOLARIS   => $^O eq 'solaris';
+
+use constant DO_RUN       => TEST_ENABLED && HAS_SPFQUERY && !IS_SOLARIS;
 
 BEGIN {
   
-  plan tests => ((TEST_ENABLED && HAS_SPFQUERY) ? 2 : 0);
+  plan tests => (DO_RUN ? 2 : 0);
 
 };
 
-exit unless (TEST_ENABLED && HAS_SPFQUERY);
+exit unless (DO_RUN);
 
 # ---------------------------------------------------------------------------
 
