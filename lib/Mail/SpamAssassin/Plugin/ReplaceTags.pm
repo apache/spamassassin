@@ -36,7 +36,7 @@ SpamAssasin; it is not guaranteed to work with other versions of SpamAssassin.
   replace_tag	G	[gk]
   replace_tag	I	[il\|\!1y\?\xcc\xcd\xce\xcf\xec\xed\xee\xef]
   replace_tag	R	[r3]
-  replace_tag	V	[v\\\/wu]
+  replace_tag	V	(?:[vu]|\\\/)
   replace_tag	SP	[\s~_-]
 
   body		VIAGRA_OBFU	/(?!viagra)<V>+<SP>*<I>+<SP>*<A>+<SP>*<G>+<SP>*<R>+<SP>*<A>+/i
