@@ -81,6 +81,7 @@ sub new {
   $self->{descriptions} = { };
   $self->{test_types} = { };
   $self->{scoreset} = [ {}, {}, {}, {} ];
+  $self->{scoreset_current} = 0;
   $self->set_score_set (0);
   $self->{tflags} = { };
 
@@ -222,7 +223,13 @@ sub parse_rules {
 sub set_score_set {
   my ($self, $set) = @_;
   $self->{scores} = $self->{scoreset}->[$set];
+  $self->{scoreset_current} = $set;
   dbg("Score set $set chosen.");
+}
+
+sub get_score_set {
+  my($self) = @_;
+  return $self->{scoreset_current};
 }
 
 sub _parse {
