@@ -23,7 +23,9 @@ cp $tmp/dprof.{spam,nonspam} $nowdir
 
 
 # add sonic data
-
+son=spamassassin.sonic.net
+rsync -vrze ssh $son:ftp/spamassassin/masses/spam.sonic spam.sonic
+rsync -vrze ssh $son:ftp/spamassassin/masses/nonspam.sonic nonspam.sonic
 if [ -f nonspam.sonic ] ; then
   cat spam.sonic >> spam.local
   cat nonspam.sonic >> nonspam.local

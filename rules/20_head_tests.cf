@@ -560,3 +560,6 @@ describe LOSE_POUNDS            Subject talks about losing pounds
 header EXTRA_MPART_TYPE         Content-Type =~ /(?:\s*multipart\/)?.* type=/i
 describe EXTRA_MPART_TYPE       Message with extraneous Content-type:...type= header
 
+header TO_RECIP_MARKER          To =~ /\#recipient\#/
+describe TO_RECIP_MARKER        To header contains '#recipient#' marker
+
