@@ -28,9 +28,15 @@ tstprefs ("
 ok (sarun ("-L -t < data/spam/001", \&patterns_run_cb));
 ok_all_patterns();
 
-ok ($matched_output =~ /^                            name and this/m);
-ok ($matched_output =~ /^                            with one simple/m);
+# ffs!  Text::Wrap uses different wrapping algorithms between the version
+# bundled with perl 5.6.1 and perl 5.8.4... try to deal with all possible
+# wrappings here, just make sure that words from intermediate lines
+# do show up on lines that != the first
 
+$matched_output =~ s/\t/        /gs; # expand tabs
+
+ok ($matched_output =~ /^                            .{0,60}very very/m);
+ok ($matched_output =~ /^                            .{0,60}keystroke!/m);
 
 tstprefs ("
         $default_cf_lines
@@ -45,7 +51,9 @@ tstprefs ("
 ok (sarun ("-L -t < data/spam/001", \&patterns_run_cb));
 ok_all_patterns();
 
-ok ($matched_output =~ /^\s+\*      rule name and this is a very /m);
-ok ($matched_output =~ /^\s+\*      wasted paper! Delete with one /m);
+$matched_output =~ s/\t/        /gs; # expand tabs
+
+ok ($matched_output =~ /^\s+\*      .{0,60}very very/m);
+ok ($matched_output =~ /^\s+\*      .{0,60}keystroke!/m);
 
 
