@@ -1097,7 +1097,8 @@ sub do_head_tests {
   dbg ("running header regexp tests; score so far=".$self->{hits});
 
   # speedup code provided by Matt Sergeant
-  if (defined &Mail::SpamAssassin::PerMsgStatus::_head_tests) {
+  if (defined &Mail::SpamAssassin::PerMsgStatus::_head_tests
+       && !$self->{conf}->{user_rules_to_compile} ) {
       Mail::SpamAssassin::PerMsgStatus::_head_tests($self);
       return;
   }
@@ -1372,7 +1373,8 @@ sub do_body_uri_tests {
   dbg("uri tests: Done uriRE");
   
   $self->clear_test_state();
-  if ( defined &Mail::SpamAssassin::PerMsgStatus::_body_uri_tests ) {
+  if ( defined &Mail::SpamAssassin::PerMsgStatus::_body_uri_tests
+       && !$self->{conf}->{user_rules_to_compile} ) {
     # ok, we've compiled this before.
     Mail::SpamAssassin::PerMsgStatus::_body_uri_tests($self, @uris);
     return;
@@ -1457,7 +1459,8 @@ sub do_rawbody_tests {
   dbg ("running raw-body-text per-line regexp tests; score so far=".$self->{hits});
 
   $self->clear_test_state();
-  if ( defined &Mail::SpamAssassin::PerMsgStatus::_rawbody_tests ) {
+  if ( defined &Mail::SpamAssassin::PerMsgStatus::_rawbody_tests
+       && !$self->{conf}->{user_rules_to_compile} ) {
     # ok, we've compiled this before.
     Mail::SpamAssassin::PerMsgStatus::_rawbody_tests($self, @$textary);
     return;
@@ -1543,7 +1546,8 @@ sub do_full_tests {
 
   $self->clear_test_state();
 
-  if (defined &Mail::SpamAssassin::PerMsgStatus::_full_tests) {
+  if (defined &Mail::SpamAssassin::PerMsgStatus::_full_tests
+       && !$self->{conf}->{user_rules_to_compile} ) {
       Mail::SpamAssassin::PerMsgStatus::_full_tests($self, $fullmsgref);
       return;
   }
@@ -1707,7 +1711,8 @@ sub do_meta_tests {
     dbg ("running meta tests; score so far=".$self->{hits});
 
     # speedup code provided by Matt Sergeant
-    if (defined &Mail::SpamAssassin::PerMsgStatus::_meta_tests) {
+    if (defined &Mail::SpamAssassin::PerMsgStatus::_meta_tests
+       && !$self->{conf}->{user_rules_to_compile} ) {
         Mail::SpamAssassin::PerMsgStatus::_meta_tests($self);
         return;
     }
