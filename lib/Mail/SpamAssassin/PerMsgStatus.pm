@@ -129,7 +129,7 @@ sub check {
   # to see if we should go from {0,1} to {2,3}.  We of course don't need
   # to do this switch if we're already using bayes ... ;)
   my $set = $self->{conf}->get_score_set();
-  if ( ($set & 2) == 0 && $self->{main}->{bayes_scanner}->is_scan_available() ) {
+  if (($set & 2) == 0 && $self->{main}->{bayes_scanner}->is_scan_available()) {
     dbg("debug: Scoreset $set but Bayes is available, switching scoresets");
     $self->{conf}->set_score_set ($set|2);
   }
@@ -276,7 +276,7 @@ sub learn {
   # autolearn on and it gets really wierd.  - tvd
   my $score = 0;
   my $orig_scoreset = $self->{conf}->get_score_set();
-  if ( ($orig_scoreset & 2) == 0 ) { # we don't need to recompute
+  if (($orig_scoreset & 2) == 0) { # we don't need to recompute
     dbg ("auto-learn: currently using scoreset $orig_scoreset.  no need to recompute.");
     $score = $self->{score};
   }
@@ -344,7 +344,7 @@ sub learn {
   eval {
     my $learnstatus = $self->{main}->learn ($self->{msg}, undef, $isspam, 0);
     $learnstatus->finish();
-    if ( $learnstatus->did_learn() ) {
+    if ($learnstatus->did_learn()) {
       $self->{auto_learn_status} = $isspam ? "spam" : "ham";
     }
     $self->{main}->finish_learner();        # for now
@@ -367,7 +367,7 @@ sub get_nonlearn_nonuserconf_points {
   my $tflags = $self->{conf}->{tflags};
   my $points = 0;
 
-  foreach my $test ( @{$self->{test_names_hit}} )
+  foreach my $test (@{$self->{test_names_hit}})
   {
     # ignore tests with 0 score in this scoreset,
     # or if the test is a learning or userconf test
@@ -693,7 +693,7 @@ sub rewrite_report_safe {
   $newmsg .= "Date: $date" if $date;
   $newmsg .= "Message-Id: $msgid" if $msgid;
 
-  foreach my $header (keys %{$self->{conf}->{headers_spam}} ) {
+  foreach my $header (keys %{$self->{conf}->{headers_spam}}) {
     my $data = $self->{conf}->{headers_spam}->{$header};
     my $line = $self->_process_header($header,$data) || "";
     $line = $self->qp_encode_header($line);
@@ -703,12 +703,12 @@ sub rewrite_report_safe {
   if (defined $self->{conf}->{report_safe_copy_headers}) {
     my %already_added = map { $_ => 1 } qw/from to cc subject date message-id/;
 
-    foreach my $hdr ( @{$self->{conf}->{report_safe_copy_headers}} ) {
-      next if ( exists $already_added{lc $hdr} );
+    foreach my $hdr (@{$self->{conf}->{report_safe_copy_headers}}) {
+      next if exists $already_added{lc $hdr};
       my @hdrtext = $self->{msg}->get_pristine_header($hdr);
       $already_added{lc $hdr}++;
 
-      if ( lc $hdr eq "received" ) { # add Received at the top ...
+      if (lc $hdr eq "received") { # add Received at the top ...
           my $rhdr = "";
           foreach (@hdrtext) {
             $rhdr .= "$hdr: $_";
@@ -716,7 +716,7 @@ sub rewrite_report_safe {
           $newmsg = "$rhdr$newmsg";
       }
       else {
-        foreach ( @hdrtext ) {
+        foreach (@hdrtext) {
           $newmsg .= "$hdr: $_";
         }
       }
@@ -800,7 +800,7 @@ sub rewrite_no_report_safe {
 
   if($self->{is_spam}) {
       # Deal with header rewriting
-      foreach ( @pristine_headers ) {
+      foreach (@pristine_headers) {
         # if we're not going to do a rewrite, skip this header!
         next if (!/^(From|Subject|To):/i);
 	my $hdr = ucfirst(lc($1));
@@ -814,7 +814,7 @@ sub rewrite_no_report_safe {
         $tag =~ s/\n/ /gs;
 
 	# The tag should be a comment for this header ...
-	$tag = "($tag)" if ( $hdr =~ /^(?:From|To)$/ );
+	$tag = "($tag)" if ($hdr =~ /^(?:From|To)$/);
 
         s/^([^:]+:[ \t]*)(?:\Q${tag}\E )?/$1${tag} /i;
       }
@@ -822,7 +822,7 @@ sub rewrite_no_report_safe {
       $addition = 'headers_spam';
   }
 
-  while ( my($header, $data) = each %{$self->{conf}->{$addition}} ) {
+  while (my ($header, $data) = each %{$self->{conf}->{$addition}}) {
     my $line = $self->_process_header($header,$data) || "";
     $line = $self->qp_encode_header($line);
     push(@pristine_headers, "X-Spam-$header: $line\n");
@@ -861,11 +861,12 @@ sub _process_header {
   $hdr_data = $self->_replace_tags($hdr_data);
   $hdr_data =~ s/(?:\r?\n)+$//; # make sure there are no trailing newlines ...
 
-  if ($self->{conf}->{fold_headers} ) {
+  if ($self->{conf}->{fold_headers}) {
     if ($hdr_data =~ /\n/) {
       $hdr_data =~ s/\s*\n\s*/\n\t/g;
       return $hdr_data;
-    } else {
+    }
+    else {
       my $hdr = "X-Spam-$hdr_name!!$hdr_data";
       # use '!!' instead of ': ' so it doesn't wrap on the space
       $Text::Wrap::columns = 79;
@@ -874,7 +875,8 @@ sub _process_header {
       $hdr = Text::Wrap::wrap('',"\t",$hdr);
       return (split (/!!/, $hdr, 2))[1]; # just return the data part
     }
-  } else {
+  }
+  else {
     $hdr_data =~ s/\n/ /g; # Can't have newlines in headers, unless folded
     return $hdr_data;
   }
@@ -1421,7 +1423,7 @@ sub do_body_tests {
   ($clean_priority = $priority) =~ s/-/neg/;
 
   $self->{test_log_msgs} = ();        # clear test state
-  if ( defined &{'Mail::SpamAssassin::PerMsgStatus::_body_tests_'.$clean_priority}
+  if (defined &{'Mail::SpamAssassin::PerMsgStatus::_body_tests_'.$clean_priority}
        && !$doing_user_rules) {
     no strict "refs";
     &{'Mail::SpamAssassin::PerMsgStatus::_body_tests_'.$clean_priority}($self, @$textary);
@@ -1448,7 +1450,7 @@ sub do_body_tests {
     $evalstr2 .= '
     sub '.$rulename.'_body_test {
            my $self = shift;
-           foreach ( @_ ) {
+           foreach (@_) {
              '.$self->hash_line_for_rule($rulename).'
              if ('.$pat.') { 
                 $self->got_pattern_hit (q{'.$rulename.'}, "BODY: "); 
@@ -1686,7 +1688,7 @@ sub do_body_uri_tests {
     $evalstr2 .= '
     sub '.$rulename.'_uri_test {
        my $self = shift;
-       foreach ( @_ ) {
+       foreach (@_) {
          '.$self->hash_line_for_rule($rulename).'
          if ('.$pat.') { 
             $self->got_pattern_hit (q{'.$rulename.'}, "URI: ");
@@ -1774,7 +1776,7 @@ sub do_rawbody_tests {
     $evalstr2 .= '
     sub '.$rulename.'_rawbody_test {
        my $self = shift;
-       foreach ( @_ ) {
+       foreach (@_) {
          '.$self->hash_line_for_rule($rulename).'
          if ('.$pat.') { 
             $self->got_pattern_hit (q{'.$rulename.'}, "RAW: ");
@@ -1935,7 +1937,7 @@ sub do_meta_tests {
   ($clean_priority = $priority) =~ s/-/neg/;
 
   # speedup code provided by Matt Sergeant
-  if ( defined &{'Mail::SpamAssassin::PerMsgStatus::_meta_tests_'.$clean_priority}
+  if (defined &{'Mail::SpamAssassin::PerMsgStatus::_meta_tests_'.$clean_priority}
        && !$doing_user_rules) {
     no strict "refs";
     &{'Mail::SpamAssassin::PerMsgStatus::_meta_tests_'.$clean_priority}($self);
@@ -1943,7 +1945,7 @@ sub do_meta_tests {
     return;
   }
 
-  my ( %rule_deps, %setup_rules, %meta, $rulename );
+  my (%rule_deps, %setup_rules, %meta, $rulename);
   my $evalstr = '';
 
   # Get the list of meta tests
@@ -1982,7 +1984,7 @@ sub do_meta_tests {
     foreach $token (@tokens) {
 
       # Numbers can't be rule names
-      if ( $token =~ /^(?:\W+|\d+)$/ ) {
+      if ($token =~ /^(?:\W+|\d+)$/) {
         $meta{$rulename} .= "$token ";
       }
       else {
@@ -1990,8 +1992,8 @@ sub do_meta_tests {
         $setup_rules{$token}=1;
 
         # If the token is another meta rule, add it as a dependency
-        push ( @{ $rule_deps{$rulename} }, $token )
-          if ( exists $self->{conf}{meta_tests}->{$priority}->{$token} );
+        push (@{ $rule_deps{$rulename} }, $token)
+          if (exists $self->{conf}{meta_tests}->{$priority}->{$token});
       }
     }
   }
@@ -2011,23 +2013,23 @@ sub do_meta_tests {
     my %metas = map { $_ => 1 } @metas; # keep a small cache for fast lookups
 
     # Go through each meta rule we haven't done yet
-    for ( my $i = 0 ; $i <= $#metas ; $i++ ) {
+    for (my $i = 0 ; $i <= $#metas ; $i++) {
 
       # If we depend on meta rules that haven't run yet, skip it
-      next if ( grep( $metas{$_}, @{ $rule_deps{ $metas[$i] } } ) );
+      next if (grep( $metas{$_}, @{ $rule_deps{ $metas[$i] } }));
 
       # Add this meta rule to the eval line
       $evalstr .= '  if ('.$meta{$metas[$i]}.') { $self->got_hit (q#'.$metas[$i].'#, ""); }'."\n";
       splice @metas, $i--, 1;    # remove this rule from our list
     }
-  } while ( $#metas != $count && $#metas > -1 ); # run until we can't go anymore
+  } while ($#metas != $count && $#metas > -1); # run until we can't go anymore
 
   # If there are any rules left, we can't solve the dependencies so complain
   my %metas = map { $_ => 1 } @metas; # keep a small cache for fast lookups
   foreach $rulename (@metas) {
     $self->{rule_errors}++; # flag to --lint that there was an error ...
     dbg( "Excluding meta test $rulename; unsolved meta dependencies: "
-        . join ( ", ", grep($metas{$_},@{ $rule_deps{$rulename} }) ) );
+        . join(", ", grep($metas{$_},@{ $rule_deps{$rulename} })));
   }
 
   if (defined &{'_meta_tests_'.$clean_priority}) {
@@ -2338,11 +2340,11 @@ sub get_envelope_from {
 
   # WARNING: a lot of list software adds an X-Sender for the original env-from
   # (including Yahoo! Groups).  Unfortunately, fetchmail will pick it up and
-  # reuse it as the env-from for *its* delivery -- even though the list software
-  # had used a different env-from in the intervening delivery.   Hence, if this
-  # header is present, and there's a fetchmail sig in the Received lines, we
-  # cannot trust any Envelope-From headers, since they're likely to be
-  # incorrect fetchmail guesses.
+  # reuse it as the env-from for *its* delivery -- even though the list
+  # software had used a different env-from in the intervening delivery.  Hence,
+  # if this header is present, and there's a fetchmail sig in the Received
+  # lines, we cannot trust any Envelope-From headers, since they're likely to
+  # be incorrect fetchmail guesses.
 
   if ($self->get ("X-Sender") =~ /\@/) {
     my $rcvd = join (' ', $self->get ("Received"));

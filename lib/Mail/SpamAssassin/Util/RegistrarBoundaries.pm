@@ -617,7 +617,7 @@ sub split_domain {
   ($hostname, $domain);
 }
 
-=item $domain = trim_domain ($fqdn)
+=item $domain = trim_domain($fqdn)
 
 Cut a fully-qualified hostname into the hostname part and the domain
 part, returning just the domain.
@@ -631,7 +631,7 @@ Examples:
 
 sub trim_domain {
   my ($domain) = @_;
-  my ($host, $dom) = split_domain ($domain);
+  my ($host, $dom) = split_domain($domain);
   return $dom;
 }
 

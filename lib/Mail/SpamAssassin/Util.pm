@@ -750,7 +750,7 @@ sub uri_to_domain {
   # keep IPs intact
   if ($uri !~ /^\d+\.\d+\.\d+\.\d+$/) { 
     # get rid of hostname part of domain, understanding delegation
-    $uri = Mail::SpamAssassin::Util::RegistrarBoundaries::trim_domain ($uri);
+    $uri = Mail::SpamAssassin::Util::RegistrarBoundaries::trim_domain($uri);
   }
   
   # domains don't have whitespace
