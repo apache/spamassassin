@@ -251,7 +251,7 @@ describe KOREAN_UCE_SUBJECT	Subject: contains Korean unsolicited email tag
 
 ###########################################################################
 
-header FRIEND_AT_PUBLIC		To =~ /(?:yourdomain|you|your|(?<!re)public)\.(?:com|org|net)/i
+header FRIEND_AT_PUBLIC		To =~ /[\@\.](?:yourdomain|you|your|(?<!re)public)\.(?:com|org|net)/i
 describe FRIEND_AT_PUBLIC	sent to you@you.com or similar
 
 header FRIEND_PUBLIC		ALL =~ /^(?:to|cc|from):.*friend\@public\.com/im
