@@ -1103,6 +1103,7 @@ sub compute_declassification_distance {
   my $disc_max_0 = $discrim < 0 ? 0 : $discrim;
   my $dd_exact = ( 1.0 - 1e-6 + ( -$b + sqrt( $disc_max_0 ) ) / ( 2*$a ) ) - $na;
 
+  # This shouldn't be necessary.  Should not be < 1
   return $dd_exact < 1 ? 1 : int($dd_exact);
 }
 
