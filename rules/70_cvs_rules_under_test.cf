@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.630 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.631 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -96,4 +96,9 @@ header T_RCVD_IN_CBL	eval:check_rbl_txt('cbl', 'cbl.abuseat.org.')
 describe T_RCVD_IN_CBL	Received via a relay in cbl.abuseat.org
 tflags T_RCVD_IN_CBL	net
 score T_RCVD_IN_CBL	0.1
+
+# try out new versions of username in subject ...
+# "user@domain.com" in the subject, case insensitive
+header T_USERNAME_IN_SUBJECT      eval:check_for_to_in_subject(1)
+describe T_USERNAME_IN_SUBJECT    To: address listed in Subject:
 

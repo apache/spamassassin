@@ -2666,15 +2666,23 @@ sub check_for_fake_aol_relay_in_rcvd {
 ###########################################################################
 
 sub check_for_to_in_subject {
-  my ($self) = @_;
+  my ($self, $test) = @_;
 
-  my $to = $self->get('To:addr');
-  return 0 unless $to; # no To:?
+  my $full_to = $self->get('To:addr');
+  return 0 unless $full_to; # no To:?
+  my $to = $full_to;
   $to =~ s/\@.*$//; # just the username please
 
   my $subject = $self->get('Subject');
 
-  return ($subject =~ /^\s*\Q$to\E,\S/);       # "user,\S" case sensitive
+  my $return = $subject =~ /^\s*\Q$to\E,\S/;       # "user,\S" case sensitive
+
+  if ( $test && !$return ) { # test versions
+    if ( $test == 1 ) {
+      $return = $subject =~ /\b\Q$full_to\E\b/i;   # "user@domain.com"
+    }
+  }
+  return $return;
 }
 
 ###########################################################################
