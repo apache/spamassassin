@@ -24,7 +24,7 @@ tstlocalrules ("
 
 rmtree ("log/virtualconfig/testuser", 0, 1);
 mkpath ("log/virtualconfig/testuser", 0, 0755);
-open (OUT, ">log/virtualconfig/testuser/.spamassassin/user_prefs");
+open (OUT, ">log/virtualconfig/testuser/user_prefs");
 print OUT "
 	header MYFOO Content-Transfer-Encoding =~ /quoted-printable/
 ";

@@ -206,7 +206,11 @@ The new user's username.
 
 =item user_dir
 
-The new user's storage directory.
+The new user's home directory. (equivalent to C<~>.)
+
+=item userstate_dir
+
+The new user's storage directory. (equivalent to C<~/.spamassassin>.)
 
 =back
 

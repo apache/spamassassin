@@ -2318,9 +2318,13 @@ The supported locking systems for C<type> are as follows:
 ###########################################################################
     # SECURITY: no eval'd code should be loaded before this line.
     #
-    if ($scoresonly && !$self->{allow_user_rules}) { goto failed_line; }
 
-    if ($scoresonly) { dbg("Checking privileged commands in user config"); }
+    if ($scoresonly) {
+      if (!$self->{allow_user_rules}) {
+        goto failed_line;
+      }
+      dbg("Checking privileged commands in user config");
+    }
 
 =back
 

@@ -1298,7 +1298,7 @@ sub handle_virtual_config_dir {
     $dir =~ s/\%\%/\%/g;
 
     $userdir   = $dir;
-    $prefsfile = $dir . '/.spamassassin/user_prefs';
+    $prefsfile = $dir . '/user_prefs';
 
     # Log that the default configuration is being used for a user.
     logmsg("Using default config for $username: $prefsfile");
@@ -1315,6 +1315,7 @@ sub handle_virtual_config_dir {
   $spamtest->signal_user_changed(
     {
       username => $username,
+      userstate_dir => $userdir,
       user_dir => $userdir
     }
   );
@@ -1847,9 +1848,10 @@ restricted to:
 All others will be replaced by underscores (C<_>).
 
 This path must be a writable directory.  It will be created if it does not
-already exist.  If a file called B<user_prefs> exists in this directory, it
-will be loaded as the user's preferences.  The auto-whitelist and/or Bayes
-databases for that user will be stored in this directory.
+already exist.  If a file called B<user_prefs> exists in this directory (note:
+B<not> in a C<.spamassassin> subdirectory!), it will be loaded as the user's
+preferences.  The auto-whitelist and/or Bayes databases for that user will be
+stored in this directory.
 
 Note that this B<requires> that B<-x> is used, and cannot be combined with
 SQL- or LDAP-based configuration.

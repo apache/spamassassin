@@ -550,7 +550,14 @@ The username of the user.  This will be used for the C<username> attribute.
 
 A directory to use as a 'home directory' for the current user's data,
 overriding the system default.  This directory must be readable and writable by
-the process.
+the process.  Note that the resulting C<userstate_dir> will be the
+C<.spamassassin> subdirectory of this dir.
+
+=item userstate_dir
+
+A directory to use as a directory for the current user's data, overriding the
+system default.  This directory must be readable and writable by the process.
+The default is C<user_dir/.spamassassin>.
 
 =back
 
@@ -569,6 +576,9 @@ sub signal_user_changed {
   if (defined $opts && $opts->{user_dir}) {
     $self->{user_dir} = $opts->{user_dir};
   }
+  if (defined $opts && $opts->{userstate_dir}) {
+    $self->{userstate_dir} = $opts->{userstate_dir};
+  }
 
   # reopen bayes dbs for this user
   $self->{bayes_scanner}->finish();
@@ -581,7 +591,8 @@ sub signal_user_changed {
 
   $self->call_plugins ("signal_user_changed", {
 		username => $self->{username},
-		userdir => $self->{user_dir},
+		userstate_dir => $self->{userstate_dir},
+		user_dir => $self->{user_dir},
 	      });
 
   1;
@@ -1315,15 +1326,17 @@ sub read_cf {
 sub get_and_create_userstate_dir {
   my ($self) = @_;
 
-  # user state directory
-  my $fname = $self->{userstate_dir};
-  $fname ||= $self->first_existing_path (@default_userstate_dir);
+  my $fname;
 
   # If vpopmail is enabled then set fname to virtual homedir
   #
   if (defined $self->{user_dir}) {
     $fname = File::Spec->catdir ($self->{user_dir}, ".spamassassin");
+  } elsif (defined $self->{userstate_dir}) {
+    $fname = $self->{userstate_dir};
   }
+
+  $fname ||= $self->first_existing_path (@default_userstate_dir);
 
   if (defined $fname && !$self->{dont_copy_prefs}) {
     dbg ("using \"$fname\" for user state dir");
