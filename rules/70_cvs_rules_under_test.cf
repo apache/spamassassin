@@ -472,6 +472,8 @@ header T_HELO_DYNAMIC_HEXIP X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=0x[a-f0-9]{
 header T_HELO_DYNAMIC_SPLIT_IP X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\d+\.\S+\d+\D\d+\D\d+\D/
 # YahooBB219173000034.bbtec.net [219.173.0.34]
 header T_HELO_DYNAMIC_YAHOOBB X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=YahooBB/i
+# ool-18be1aaf.dyn.optonline.net [24.190.26.175]
+header T_HELO_OPTONLINE X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S+\.dyn\.optonline\.net/
 
 # TODO:
 # port-212-202-77-203.reverse.qsc.de [212.202.77.203]
@@ -492,7 +494,6 @@ header T_HELO_DYNAMIC_YAHOOBB X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=YahooBB/i
 # CM-anto1-98-153.cm.vtr.net [200.104.98.153]
 # 80-218-47-160.dclient.hispeed.ch [80.218.47.160]
 # adsl-64-170-53-19.dsl.lsan03.pacbell.net [64.170.53.19]
-# ool-18be1aaf.dyn.optonline.net [24.190.26.175]
 # catv-506237d8.miskcatv.broadband.hu [80.98.55.216]
 # dsl-200-95-109-107.prod-infinitum.com.mx [200.95.109.107]
 # user-0can22v.cable.mindspring.com [24.171.136.95]
