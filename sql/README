@@ -7,13 +7,13 @@ here is to have a web application (PHP/perl/ASP/etc.) that will allow users to
 be able to update their local preferences on how SpamAssassin will filter their
 e-mail.  The most common use for a system like this would be for users to be
 able to update the white list of addresses (whitelist_from) without the need
-for them to update their $HOME/.spamassasin.cf file.  It is also quite common
-for users listed in /etc/passwd to not have a home directory, therefore, the
-only way to have their own local settings would be through an RDMS system.
+for them to update their $HOME/.spamassassin/user_prefs file.  It is also quite
+common for users listed in /etc/passwd to not have a home directory,
+therefore, the only way to have their own local settings would be through an
+RDBMS system.
 
-SpamAssassin will check the global configuration file (normally
-/etc/spamassassin.cf or /usr/local/lib/perl5/site-perl/<VER>/spamassassin.cf)
-for the following settings:
+SpamAssassin will check the global configuration file (ie. any file matching
+/etc/mail/spamassassin/*.cf) for the following settings:
 
 user_scores_dsn			DBI:driver:database:hostname[:port]
 user_scores_sql_username	dbusername
@@ -38,6 +38,25 @@ If the user_scores_dsn option does not exist, SpamAssassin will not attempt
 to use an SQL for retrieving users' preferences. Note that this will NOT look
 for test rules, only local scores, whitelist_from(s), required_hits, and
 auto_report_threshold.
+
+Requirements
+------------
+
+In order for SpamAssassin to work with your SQL database, you must have
+the perl DBI module installed, AS WELL AS the DBD driver/module for your
+specific database.  For example, if using MySQL as your RDBMS, you must have
+the Msql-Mysql module installed.  Check CPAN for the latest versions of DBI 
+and your database driver/module. 
+
+We are currently using:
+
+DBI-1.20
+Msql-Mysql-modules-1.2219
+perl v5.6.1
+
+But older versions should work fine as the SQL code in SpamAssassin is as 
+simple as could be.
+
 
 Database Schema
 ---------------
@@ -74,7 +93,42 @@ spamc/spamd in order for this to work, and the current username must be passed
 to spamd.  This can be done from spamc using the following .procmailrc recipe:
 
 :0wf
-| /usr/local/bin/spamc -u $LOGNAME
+| /usr/local/bin/spamc -f
+
+(watch out; spamc could be installed as /usr/bin/spamc instead.)
+If you are using this from /etc/procmailrc, you must include DROPPRIVS=yes 
+before spamc.  An example /etc/procmailrc:
+
+DROPPRIVS=yes
+
+:0fw
+| /usr/local/bin/spamc -f
+
+:0e
+{
+        EXITCODE=$?
+}
+
+Testing SpamAssassin/SQL
+------------------------
+
+To test your SQL setup, and debug any possible problems, you should start
+spamd with the -D option, which will keep spamd in the foreground, and will
+output debug message to the terminal. You should then test spamd with a
+message by calling spamc.  You can use the sample-spam.txt file with the
+following command:
+
+cat sample-spam.txt | spamc
+
+Watch the debug output from spamd and look for the following debug line:
+
+retrieving prefs for <username> from SQL server
+
+If you do not see the above text, then the SQL query was not successful, and
+you should see any error messages reported. <username> should be the user
+that was passed to spamd and is usually the user executing spamc.
+
+
 
 This has only been tested using MySQL as the RDMS, but it has been written
 with the utmost simplicity using DBI, and any database driver that conforms
