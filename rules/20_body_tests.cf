@@ -135,8 +135,8 @@ body CASHCASHCASH		/\${3,}/
 describe CASHCASHCASH		Contains at least 3 dollar signs in a row
 body CALL_NOW			/CALL NOW/
 describe CALL_NOW		Urges you to call now
-body CALL_FREE			/(?:call|dial).{1,15}8(?:00|88|77)[\s-][\dA-Z]+[\s-]?[\dA-Z]+/i
-describe CALL_888		Contains an 800-, 877- or 888- phone number
+body CALL_FREE			/(?:call|dial).{1,15}8(?:00|88|77|66|55|44|33|22)[\s-][\dA-Z]+[\s-]?[\dA-Z]+/i
+describe CALL_FREE		Contains a tollfree number
 body ONLINE_BIZ_OPS		/online business opportunities/i
 describe ONLINE_BIZ_OPS		Wants you to do business online
 body BILLION_DOLLARS		/[BM]ILLION DOLLAR/
