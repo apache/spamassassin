@@ -43,7 +43,7 @@ if ($args{srcdir}) {
 
 
 # On everything but native Windows (!= cygwin) we use autoconf.
-unless (!RUNNING_ON_NATIVE_WINDOWS)
+unless (RUNNING_ON_NATIVE_WINDOWS)
 {
   print join(' ', @args) . "\n";
   exec @args;
