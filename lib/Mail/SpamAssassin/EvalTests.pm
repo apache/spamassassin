@@ -3120,9 +3120,18 @@ sub multipart_alternative_difference {
   return 0;
 }
 
+sub multipart_alternative_difference_count {
+  my ($self, $fulltext, $ratio, $minhtml) = @_;
+  $self->_multipart_alternative_difference() unless (exists $self->{madiff});
+  return 0 unless $self->{madiff_html} > $minhtml;
+  return(($self->{madiff_text} / $self->{madiff_html}) > $ratio);
+}
+
 sub _multipart_alternative_difference {
   my ($self) = @_;
   $self->{madiff} = 0;
+  $self->{madiff_html} = 0;
+  $self->{madiff_text} = 0;
 
   # Find all multipart/alternative parts in the message
   my @ma = $self->{msg}->find_parts(qr@^multipart/alternative\b@i);
@@ -3182,6 +3191,10 @@ sub _multipart_alternative_difference {
     # How many HTML tokens do we have at the start?
     my $orig = keys %html;
     next if ($orig == 0);
+
+    $self->{madiff_html} = $orig;
+    $self->{madiff_text} = keys %text;
+    dbg('eval: text words: ' . $self->{madiff_text} . ', html words: ' . $self->{madiff_html});
 
     # If the token appears at least as many times in the text part as
     # in the html part, remove it from the list of html tokens.
