@@ -336,9 +336,12 @@ sub rewrite_as_spam {
 
   # First, rewrite the subject line.
   if ($self->{conf}->{rewrite_subject}) {
+    $_ = $srcmsg->get_header ("Subject");
+    $_ ||= $srcmsg->get_header ("SUBJECT");     # not really legal, but...
+    $_ ||= '';
+
     my $tag = $self->{conf}->{subject_tag};
-    $_ = $srcmsg->get_header ("Subject"); $_ ||= '';
-    s/^/${tag} /g;
+    s/^(?:\Q${tag}\E |)/${tag} /g;
     $self->{msg}->replace_header ("Subject", $_);
   }
 

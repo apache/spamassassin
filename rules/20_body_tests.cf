@@ -397,21 +397,21 @@ rawbody CLICK_TO_REMOVE_2       /href.{0,50}mailto:.{0,50}click.{0,50}remove/is
 describe CLICK_TO_REMOVE_2      Click-to-remove with mailto: found beforehand
 
 # (contrib: WW, mod by David Hull)
-body TO_BE_REMOVED_REPLY        /\bto\b.{0,60}\bremove.{0,60}\breply\b/is
+body TO_BE_REMOVED_REPLY        /\bto\b.{0,20}\bremove.{0,20}\breply\b/is
 describe TO_BE_REMOVED_REPLY    Says: "to be removed, reply via email" or similar
 
-body TO_UNSUB_REPLY		/\bto\b.{0,60}\bunsubscribe.{0,60}\breply\b/is
+body TO_UNSUB_REPLY		/\bto\b.{0,20}\bunsubscribe.{0,20}\breply\b/is
 describe TO_UNSUB_REPLY		Says: "to unsubscribe, reply via email" or similar
 
 body REMOVAL_INSTRUCTIONS	/REMOVAL INSTRUCTIONS/i
 describe REMOVAL_INSTRUCTIONS	Gives instructions for removal from list
 
 # (contrib: WW)
-body THIS_AINT_SPAM             /This.{0,60}is not SPAM/is
+body THIS_AINT_SPAM             /This.{0,30}is not spam/is
 describe THIS_AINT_SPAM         Claims "This is not spam"
 
 # (contrib: WW)
-body WE_HATE_SPAM               /We .{0,60}oppose the use of SPAM/is
+body WE_HATE_SPAM               /We .{0,30}oppose the use of SPAM/is
 describe WE_HATE_SPAM           Says "We strongly oppose the use of SPAM email"
 
 # (contrib: WW)
@@ -454,6 +454,9 @@ describe UNSUB_SCRIPT		URL of CGI script called "unsubscribe"
 
 rawbody UNSUB_PAGE		/https?:\/\/[^\/]+\/unsubscribe/
 describe UNSUB_PAGE		URL of page called "unsubscribe"
+
+rawbody A_HREF_TO_OPT_OUT	/href[3D=\s\"\']*\S+opt(?:-in|-out|in|out)/i
+describe A_HREF_TO_OPT_OUT	Link to a URL containing "opt-in" or "opt-out"
 
 rawbody A_HREF_TO_REMOVE	/href[3D=\s\"\']*\S+remove/i
 describe A_HREF_TO_REMOVE	Link to a URL containing "remove"
@@ -594,4 +597,14 @@ describe RESISTANCE_IS_FUTILE	Resistance to this spam is futile
 
 body MAILMAN_CONFIRM            /We have received a request .*subscription of your email address.* to the .* mailing list/
 describe MAILMAN_CONFIRM        A MailMan confirm-your-address message
+
+# contrib: thelton /at/ donet.com
+body GREAT_OFFER                /(?:offer expires|see full offer for details|great offer)/i
+describe GREAT_OFFER            Trying to offer you something
+
+body SUBJ_2_CREDIT              /subject to credit approval/i
+describe SUBJ_2_CREDIT          Contains 'subject to credit approval'
+
+body DEAR_SOMEBODY              /Dear [A-Z][a-z]+/
+describe DEAR_SOMEBODY          Contains 'Dear Somebody'
 
