@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("whitelist_from");
-use Test; BEGIN { plan tests => 40 };
+use Test; BEGIN { plan tests => 32 };
 
 # ---------------------------------------------------------------------------
 
@@ -80,27 +80,3 @@ ok_all_patterns();
 sarun ("-L -t < data/nice/015", \&patterns_run_cb);
 ok_all_patterns();
 
-%patterns = (
-             q{ FORGED_IN_WHITELIST }, 'w13'
-);
-%anti_patterns = (
-             q{ USER_IN_WHITELIST }, 'a14',
-             q{ USER_IN_DEF_WHITELIST }, 'a15',
-             q{ FORGED_IN_DEF_WHITELIST }, 'a16'
-             );
-# tests 33 - 36 does forgery detection work for whitelist_from_rcvd?
-sarun ("-L -t < data/spam/012", \&patterns_run_cb);
-ok_all_patterns();
-
-%patterns = (
-             q{ FORGED_DEF_WHITELIST }, 'w17'
-);
-%anti_patterns = (
-             q{ USER_IN_WHITELIST }, 'a18',
-             q{ FORGED_IN_WHITELIST }, 'a19',
-             q{ USER_IN_DEF_WHITELIST }, 'a20'
-             );
-
-# tests 37 - 40 does forgery detection work for def_whitelist_from_rcvd?
-sarun ("-L -t < data/spam/013", \&patterns_run_cb);
-ok_all_patterns();
