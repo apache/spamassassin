@@ -987,12 +987,10 @@ Examples:
 
 sub split_domain {
   my ($domain) = @_;
-
-  # turn "host.dom.ain" into "dom.ain".
   my $hostname = '';
 
   if ($domain) {
-    my $partsreqd;
+    my $partsreqd = 2;	# default to domain.tld
 
     # www..spamassassin.org -> www.spamassassin.org
     $domain =~ tr/././s;
@@ -1001,17 +999,20 @@ sub split_domain {
     $domain =~ s/^\.+//;
     $domain =~ s/\.+$//;
 
-    if ($domain =~ /${FOUR_LEVEL_DOMAINS}/io)     # Fire-Dept.CI.Los-Angeles.CA.US
-    { $partsreqd = 5; }
-    elsif ($domain =~ /${THREE_LEVEL_DOMAINS}/io) # demon.co.uk
-    { $partsreqd = 4; }
-    elsif ($domain =~ /${TWO_LEVEL_DOMAINS}/io)   # co.uk
-    { $partsreqd = 3; }
-    else                                          # com
-    { $partsreqd = 2; }
-
-    # drop any hostname parts, if we can.
+    # Split scalar domain into components
     my @domparts = split (/\./, $domain);
+
+    # Look for a sub-delegated TLD
+    # use @domparts to skip trying to match on TLDs that can't possibly
+    # match, but keep in mind that the hostname can be blank, so 4TLD needs 4,
+    # 3TLD needs 3, 2TLD needs 2 ...
+    #
+    if (@domparts >= 4 && $domain =~ /(?:\.|^)${FOUR_LEVEL_DOMAINS}$/io)     # Fire-Dept.CI.Los-Angeles.CA.US
+    { $partsreqd = 5; }
+    elsif (@domparts >= 3 && $domain =~ /(?:\.|^)${THREE_LEVEL_DOMAINS}$/io) # demon.co.uk
+    { $partsreqd = 4; }
+    elsif (@domparts >= 2 && $domain =~ /(?:\.|^)${TWO_LEVEL_DOMAINS}$/io)   # co.uk
+    { $partsreqd = 3; }
 
     if (@domparts >= $partsreqd) {
       # reset the domain to the last $partsreqd parts
