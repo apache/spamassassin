@@ -38,6 +38,7 @@ WriteMakefile(
 	    'spamassassin' => '$(INST_MAN1DIR)/spamassassin.$(MAN1EXT)',
 	    'spamd/spamc.pod' => '$(INST_MAN1DIR)/spamc.$(MAN1EXT)',
 	    'spamd/spamd' => '$(INST_MAN1DIR)/spamd.$(MAN1EXT)',
+	    'spamproxy/spamproxyd' => '$(INST_MAN1DIR)/spamproxyd.$(MAN1EXT)',
     },
 
     'PL_FILES' => '',
