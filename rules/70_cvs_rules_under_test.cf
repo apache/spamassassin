@@ -113,8 +113,12 @@ header   T_SENDER_NO_REVERSE    eval:check_for_sender_no_reverse()
 describe T_SENDER_NO_REVERSE    No reverse lookup for sender's IP
 
 # test for weird double quoting in the body
-# updated last on 12/24 - quinlan
-body T_BODY_QUOTES	/[\042\047\222\223\224\262\263\271]{2}\S{0,16}[\042\222\223\224\262\263\271]{2}/
+body T_BODY_QUOTES_A1	/[\042\222\223\224\262\263\271]{2}\S{0,16}[\042\222\223\224\262\263\271]{2}/
+body T_BODY_QUOTES_B1	/[\042\047\222\223\224\262\263\271]{2}\S{0,16}[\042\047\222\223\224\262\263\271]{2}/
+body T_BODY_QUOTES_C1	/[\047\222\223\224\262\263\271]{2}\S{0,16}[\047\222\223\224\262\263\271]{2}/
+body T_BODY_QUOTES_A2	/(?:[\042\222\223\224\262\263\271]){2}\S{0,16}(?:[\042\222\223\224\262\263\271]){2}/
+body T_BODY_QUOTES_B2	/(?:[\042\047\222\223\224\262\263\271]){2}\S{0,16}(?:[\042\047\222\223\224\262\263\271]){2}/
+body T_BODY_QUOTES_C2	/(?:[\047\222\223\224\262\263\271]){2}\S{0,16}(?:[\047\222\223\224\262\263\271]){2}/
 
 # small improvement on NORMAL_HTTP_TO_IP
 # adds "http://foo@210.192.111.79/" which is used in spam sometimes
