@@ -167,19 +167,19 @@ describe HTML_IMAGE_AREA_07	HTML has 7-8 kilopixels of images
 describe HTML_IMAGE_AREA_08	HTML has 8-9 kilopixels of images
 describe HTML_IMAGE_AREA_09	HTML has over 9 kilopixels of images
 
-# HTML_IMAGE_ONLY - not much text with images (absolute)
-body HTML_IMAGE_ONLY_02		eval:html_image_only('0000','0200')
-body HTML_IMAGE_ONLY_04		eval:html_image_only('0200','0400')
-body HTML_IMAGE_ONLY_06		eval:html_image_only('0400','0600')
-body HTML_IMAGE_ONLY_08		eval:html_image_only('0600','0800')
-body HTML_IMAGE_ONLY_10		eval:html_image_only('0800','1000')
-body HTML_IMAGE_ONLY_12		eval:html_image_only('1000','1200')
-describe HTML_IMAGE_ONLY_02	HTML: images with 0-200 bytes of words
-describe HTML_IMAGE_ONLY_04	HTML: images with 200-400 bytes of words
-describe HTML_IMAGE_ONLY_06	HTML: images with 400-600 bytes of words
-describe HTML_IMAGE_ONLY_08	HTML: images with 600-800 bytes of words
-describe HTML_IMAGE_ONLY_10	HTML: images with 800-1000 bytes of words
-describe HTML_IMAGE_ONLY_12	HTML: images with 1000-1200 bytes of words
+# HTML_IMAGE_ONLY - not much raw HTML with images (absolute)
+body HTML_IMAGE_ONLY_04		eval:html_image_only('0000','0400')
+body HTML_IMAGE_ONLY_08		eval:html_image_only('0400','0800')
+body HTML_IMAGE_ONLY_12		eval:html_image_only('0800','1200')
+body HTML_IMAGE_ONLY_16		eval:html_image_only('1200','1600')
+body HTML_IMAGE_ONLY_20		eval:html_image_only('1600','2000')
+body HTML_IMAGE_ONLY_24		eval:html_image_only('2000','2400')
+describe HTML_IMAGE_ONLY_04	HTML: images with 0-400 bytes of words
+describe HTML_IMAGE_ONLY_08	HTML: images with 400-800 bytes of words
+describe HTML_IMAGE_ONLY_12	HTML: images with 800-1200 bytes of words
+describe HTML_IMAGE_ONLY_16	HTML: images with 1200-1600 bytes of words
+describe HTML_IMAGE_ONLY_20	HTML: images with 1600-2000 bytes of words
+describe HTML_IMAGE_ONLY_24	HTML: images with 2000-2400 bytes of words
 
 # HTML_IMAGE_RATIO - more image area than text (ratio)
 body HTML_IMAGE_RATIO_02	eval:html_image_ratio('0.000','0.002')
@@ -312,6 +312,20 @@ describe HTML_NONELEMENT_60_70	60% to 70% of HTML elements are non-standard
 describe HTML_NONELEMENT_70_80	70% to 80% of HTML elements are non-standard
 describe HTML_NONELEMENT_80_90	80% to 90% of HTML elements are non-standard
 describe HTML_NONELEMENT_90_100	90% to 100% of HTML elements are non-standard
+
+# short HTML messages with certain attributes
+body HTML_SHORT_LENGTH		eval:html_eval('length', '< 170')
+describe HTML_SHORT_LENGTH	HTML is extremely short
+
+body __HTML_LENGTH_512		eval:html_eval('length', '< 512')
+body __COMMENT_EXISTS		eval:html_text('comment', '=~ /<!.*?>/')
+meta HTML_SHORT_COMMENT		(__HTML_LENGTH_512 && __COMMENT_EXISTS)
+describe HTML_SHORT_COMMENT	HTML is very short with HTML comments
+
+body __HTML_LENGTH_384		eval:html_eval('length', '< 384')
+body __TAG_EXISTS_CENTER	eval:html_tag_exists('center')
+meta HTML_SHORT_CENTER		(__HTML_LENGTH_384 && __TAG_EXISTS_CENTER)
+describe HTML_SHORT_CENTER	HTML is very short with CENTER tag
 
 body HTML_TITLE_EMPTY		eval:html_text('title', '!~ /\S/s')
 describe HTML_TITLE_EMPTY	HTML title contains no text
