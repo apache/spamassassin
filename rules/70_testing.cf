@@ -402,3 +402,18 @@ rawbody T_HTML_FONT_COLOR_WHITE	/<font\b[^>]+white/i
 # case matters for this one
 uri T_URI_UPPER_LOWER_A	m{(?i:https?)://([A-Z][a-z]+\.){2,}[A-Za-z\d-]+\.[a-z]{2,4}\b}
 uri T_URI_UPPER_LOWER_B	m{(?i:https?)://([A-Z][a-z]+\.){2,}[A-Za-z\d-]+\.[a-z]{2,4}(?:[?/]|$)}
+
+# another one
+body T_VISIT_BEFORE_LINK_1	m{(?:visit us).{0,5}http://}i
+body T_VISIT_BEFORE_LINK_2	m{(?:click here).{0,5}http://}i
+body T_VISIT_BEFORE_LINK_3	m{(?:it at).{0,5}http://}i
+body T_VISIT_BEFORE_LINK_4	m{(?:it here).{0,5}http://}i
+body T_VISIT_BEFORE_LINK_5	m{(?:please visit).{0,5}http://}i
+body T_VISIT_BEFORE_LINK_6	m{(?:here now).{0,5}http://}i
+body T_VISIT_BEFORE_LINK_7	m{(?:message link).{0,5}http://}i
+body T_VISIT_BEFORE_LINK_8	m{(?:corporate intro).{0,5}http://}i
+body T_VISIT_BEFORE_LINK_9	m{(?:proceed here).{0,5}http://}i
+
+# just a test...
+body T_ORANGES_AND_SPAM_POST	/[a-z]{3,},? Fl(?:orida)? (?:33|32|34)\d{3}\b/i
+body T_ORANGES_AND_SPAM_TELE	/\b1?\D{0,2}(?:239|305|321|352|386|407|561|727|754|772|786|813|850|863|904|941|954)\D{0,2}\d{3}\D{0,2}\d{4}\b/
