@@ -80,14 +80,187 @@ program or perldoc(1).
 
 =head1 WEB SITES
 
-    SpamAssassin web site     http://spamassassin.apache.org/
-    SpamAssassin wiki         http://wiki.apache.org/spamassassin/
+    SpamAssassin web site:     http://spamassassin.apache.org/
+    Wiki-based documentation:  http://wiki.apache.org/spamassassin/
 
 =head1 USER MAILING LIST
 
 A users mailing list exists where other experienced users are often able
 to help and provide tips and advice.  Subscription instructions are
 located on the SpamAssassin web site.
+
+=head1 CONFIGURATION FILES
+
+The SpamAssassin rule base, text templates, and rule description text
+are loaded from configuration files.
+
+Default configuration data is loaded from the first existing directory
+in:
+
+=over 4
+
+=item @@DEF_RULES_DIR@@
+
+=item @@PREFIX@@/share/spamassassin
+
+=item /usr/local/share/spamassassin
+
+=item /usr/share/spamassassin
+
+=back
+
+Site-specific configuration data is used to override any values which had
+already been set.  This is loaded from the first existing directory in:
+
+=over 4
+
+=item @@LOCAL_RULES_DIR@@
+
+=item @@PREFIX@@/etc/mail/spamassassin
+
+=item @@PREFIX@@/etc/spamassassin
+
+=item /usr/local/etc/spamassassin
+
+=item /usr/pkg/etc/spamassassin
+
+=item /usr/etc/spamassassin
+
+=item /etc/mail/spamassassin
+
+=item /etc/spamassassin
+
+=back
+
+From those two directories, SpamAssassin will first read files ending in
+".pre" in lexical order and then it will read files ending in ".cf" in
+lexical order (most files begin with two numbers to make the sorting
+order obvious).
+
+In other words, it will read F<10_misc.cf> before F<50_scores.cf> and
+F<20_body_tests.cf> before F<20_head_tests.cf>.  Options in later files
+will override earlier files.
+
+Individual user preferences are loaded from the location specified on
+the C<sa-filter>, C<sa-learn>, or C<spamd> command line (see respective
+manual page for details).  If the location is not specified,
+F<~/.spamassassin/user_prefs> is used if it exists.  SpamAssassin will
+create that file if it does not already exist, using
+F<user_prefs.template> as a template.  That file will be looked for in:
+
+=over 4
+
+=item @@LOCAL_RULES_DIR@@
+
+=item @@PREFIX@@/etc/mail/spamassassin
+
+=item @@PREFIX@@/share/spamassassin
+
+=item /etc/spamassassin
+
+=item /etc/mail/spamassassin
+
+=item /usr/local/share/spamassassin
+
+=item /usr/share/spamassassin
+
+=back
+
+=head1 TAGGING
+
+The following two sections detail the default tagging and markup that
+takes place for messages when running C<sa-filter> or C<spamc> with
+C<spamd> in the default configuration.
+
+=head2 TAGGING FOR SPAM MAILS
+
+By default, all messages with a calculated score of 5.0 or more are
+tagged as spam.
+
+If an incoming message is tagged as spam, instead of modifying the
+original message, SpamAssassin will create a new report message and
+attach the original message as a message/rfc822 MIME part (ensuring the
+original message is completely preserved and easier to recover).
+
+The new report message inherits the following headers (if they are
+present) from the original spam message:
+
+=over 4
+
+=item From: header
+
+=item To: header
+
+=item Cc: header
+
+=item Subject: header
+
+=item Date: header
+
+=item Message-ID: header
+
+=back
+
+The above headers can be modified if the relevant C<rewrite_header>
+option is given (see C<Mail::SpamAssassin::Conf> for more information).
+
+By default these message headers are added to spam:
+
+=over 4
+
+=item X-Spam-Flag: header
+
+Set to C<YES>.
+
+=back
+
+The headers that added are fully configurable via the C<add_header>
+option (see C<Mail::SpamAssassin::Conf> for more information).
+
+=over 4
+
+=item spam mail body text
+
+The SpamAssassin report is added to top of the mail message body,
+if the message is marked as spam.
+
+=back
+
+=head2 DEFAULT TAGGING FOR ALL MAILS
+
+These headers are added to all messages, both spam and ham (non-spam).
+
+=over 4
+
+=item X-Spam-Checker-Version: header
+
+The version and subversion of SpamAssassin and the host where
+SpamAssassin was run.
+
+=item X-Spam-Level: header
+
+A series of "*" charactes where each one represents a full score point.
+
+=item X-Spam-Status: header
+
+A string, C<(Yes|No), score=nn required=nn tests=xxx,xxx
+autolearn=(ham|spam|no|unavailable|failed)> is set in this header to
+reflect the filter status.  For the first word, "Yes" means spam and
+"No" means ham (non-spam).
+
+=back
+
+The headers that added are fully configurable via the C<add_header>
+option (see C<Mail::SpamAssassin::Conf> for more information).
+
+=head1 INSTALLATION
+
+The B<sa-filter> command is part of the B<Mail::SpamAssassin> Perl module.
+Install this as a normal Perl module, using C<perl -MCPAN -e shell>, or by
+hand.
+
+For further details on how to install, please read the C<INSTALL> file
+from the SpamAssassin distribution.
 
 =head1 DEVELOPER DOCUMENTATION
 
