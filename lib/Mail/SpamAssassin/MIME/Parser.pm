@@ -1,4 +1,4 @@
-# $Id: Parser.pm,v 1.11 2003/09/30 16:12:28 felicity Exp $
+# $Id: Parser.pm,v 1.12 2003/09/30 22:48:50 felicity Exp $
 
 package Mail::SpamAssassin::MIME::Parser;
 use strict;
@@ -83,15 +83,12 @@ sub parse {
     $last =~ s/\r\n/\n/;
     chomp($last);
 
-    last if ( $last =~ /^$/m );
-
     # NB: Really need to figure out special folding rules here!
     if ( $last =~ s/^[ \t]+// ) {                    # if its a continuation
       $header .= " $last";                           # fold continuations
       next;
     }
 
-    # not a continuation...
     if ($header) {
       my ( $key, $value ) = split ( /:\s*/, $header, 2 );
       if ( $key =~ /^content-type(?:-encoding)?$/i ) {
@@ -99,7 +96,10 @@ sub parse {
       }
     }
 
+    # not a continuation...
     $header = $last;
+
+    last if ( $last =~ /^$/m );
   }
 
   # Parse out the body ...
