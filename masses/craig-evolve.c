@@ -98,7 +98,7 @@ int main(int argc, char **argv) {
 //#ifndef USE_MPI
     int arg;
 
-    while ((arg = getopt (argc, argv, "b:s:C")) != -1) {
+    while ((arg = getopt (argc, argv, "b:r:s:C")) != -1) {
       switch (arg) {
         case 'b':
           nybias = atof(optarg);
