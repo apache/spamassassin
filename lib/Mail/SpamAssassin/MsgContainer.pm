@@ -301,20 +301,17 @@ sub rendered {
       # some tests done after rendering
       my $r = $self->{html_results}; # temporary reference for brevity
       my $space = 0;
-      $r->{non_uri_len} = 0;
+      $r->{html_length} = 0;
       for my $line (@lines) {
         $line = pack ('C0A*', $line);
         $space += ($line =~ tr/ \t\n\r\x0b\xa0/ \t\n\r\x0b\xa0/);
-        $r->{non_uri_len} += length($line);
-        for my $uri ($line =~ m/\b(URI:\S+)/g) {
-          $r->{non_uri_len} -= length($uri);
-        }
+        $r->{html_length} += length($line);
       }
-      $r->{non_space_len} = $r->{non_uri_len} - $space;
-      $r->{ratio} = ($raw - $r->{non_uri_len}) / $raw;
-      if (exists $r->{total_comment_length} && $r->{non_uri_len} > 0) {
+      $r->{non_space_len} = $r->{html_length} - $space;
+      $r->{ratio} = ($raw - $r->{html_length}) / $raw;
+      if (exists $r->{total_comment_length} && $r->{html_length} > 0) {
         $r->{total_comment_ratio} = 
-	    $r->{total_comment_length} / $r->{non_uri_len};
+	    $r->{total_comment_length} / $r->{html_length};
       }
       if (exists $r->{elements} && exists $r->{tags}) {
 	$r->{bad_tag_ratio} = ($r->{tags} - $r->{elements}) / $r->{tags};

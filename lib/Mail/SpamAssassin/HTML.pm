@@ -159,8 +159,6 @@ sub html_tag {
   $self->{html}{"inside_$tag"} += $num;
   $self->{html}{"inside_$tag"} = 0 if $self->{html}{"inside_$tag"} < 0;
 
-  push @{$self->{html}{order}}, ($num > 0 ? "" : "/") . $tag;
-
   if ($tag =~ /^(?:body|table|tr|th|td)$/) {
     $self->html_bgcolor($tag, $attr, $num);
   }
@@ -174,11 +172,6 @@ sub html_tag {
     $self->html_tests($tag, $attr, $num);
 
     $self->{html_last_tag} = $tag;
-  }
-  if ($num == -1) {
-    if ($tag eq "a") {
-      $self->{html}{anchor_unclickable}++ if $self->{html}{anchor_empty};
-    }
   }
 
   if ($tag =~ /^(?:b|i|u|strong|em|big|center|h\d)$/) {
@@ -205,33 +198,131 @@ sub html_format {
   }
 }
 
+sub parse_uri {
+  my ($u) = @_;
+  my %u;
+  ($u{scheme}, $u{authority}, $u{path}, $u{query}, $u{fragment}) =
+    $u =~ m|^(?:([^:/?#]+):)?(?://([^/?#]*))?([^?#]*)(?:\?([^#]*))?(?:#(.*))?|;
+  return %u;
+}
+
+# resolving relative URIs as defined in RFC 2396 (steps from section 5.2)
+sub push_uri {
+  my ($self, $uri) = @_;
+
+  return unless defined $uri;
+
+  # step 1
+  my %uri = parse_uri($uri);
+
+  # step 2
+  if (!$uri{path} && !$uri{scheme} && !$uri{authority} && !$uri{query}) {
+    return;
+  }
+
+  my $base = $self->{html}{base_href};
+
+  if (!defined $base || !$base) {
+    push @{$self->{html}{uri}}, $uri;
+    return;
+  }
+
+  my %base = parse_uri($base);	# don't need to parse base until here
+
+  # step 3
+  if (!$uri{scheme}) {
+    $uri{scheme} = $base{scheme};
+  }
+
+  # step 4
+  if ($uri{authority}) {
+    goto result;
+  }
+  else {
+    $uri{authority} = $base{authority};
+  }
+
+  # step 5
+  if ($uri{path} =~ m@^/@) {
+    goto result;
+  }
+
+  # step 6
+  my $buffer;
+  # a)
+  $buffer = $base{path};
+  $buffer =~ s@(?<=/)[^/]*$@@;
+  # b)
+  $buffer .= $uri{path};
+  # c)
+  $buffer =~ s@^\./@@g;
+  $buffer =~ s@(?<=/)\./@@g;
+  # d)
+  $buffer =~ s@^\.$@@g;
+  $buffer =~ s@(?<=/)\.$@@g;
+  # e) and f)
+  $buffer =~ s@[^/]+/\.\.($|/)@@g;	# maybe wrong
+  # g) - do nothing
+  $uri{path} = $buffer;
+
+ result:
+  # step 7
+  my $result = "";
+  if ($uri{scheme}) {
+    $result .= $uri{scheme} . ":";
+  }
+  else {
+    # this block is not part of the RFC
+    # TODO: figure out what MUAs actually do with unschemed URIs
+    # maybe look at URI::Heuristic
+    if ($uri{authority} =~ /^www\d*\./i) {
+      # some spammers are using unschemed URIs to escape filters
+      $result .= "http:";
+    }
+    elsif ($uri{authority} =~ /^ftp\d*\./i) {
+      $result .= "ftp:";
+    }
+  }
+  if ($uri{authority}) {
+    $result .= "//" . $uri{authority};
+  }
+  $result .= $uri{path};
+  if ($uri{query}) {
+    $result .= "?" . $uri{query};
+  }
+  if ($uri{fragment}) {
+    $result .= "#" . $uri{fragment};
+  }
+  push @{$self->{html}{uri}}, $result;
+}
+
 sub html_uri {
   my ($self, $tag, $attr, $num) = @_;
   my $uri;
 
   # ordered by frequency of tag groups
   if ($tag =~ /^(?:body|table|tr|td)$/) {
-    push @{$self->{html_text}}, "URI:$uri " if $uri = $attr->{background};
+    $self->push_uri($attr->{background});
   }
   elsif ($tag =~ /^(?:a|area|link)$/) {
-    push @{$self->{html_text}}, "URI:$uri " if $uri = $attr->{href};
+    $self->push_uri($attr->{href});
   }
   elsif ($tag =~ /^(?:img|frame|iframe|embed|script)$/) {
-    push @{$self->{html_text}}, "URI:$uri " if $uri = $attr->{src};
+    $self->push_uri($attr->{src});
   }
   elsif ($tag eq "form") {
-    push @{$self->{html_text}}, "URI:$uri " if $uri = $attr->{action};
+    $self->push_uri($attr->{action});
   }
   elsif ($tag eq "base") {
     if ($uri = $attr->{href}) {
       # use <BASE HREF="URI"> to turn relative links into absolute links
 
       # even if it is a base URI, handle like a normal URI as well
-      push @{$self->{html_text}}, "URI:$uri ";
+      $self->push_uri($uri);
 
       # a base URI will be ignored by browsers unless it is an absolute
       # URI of a standard protocol
-      if ($uri =~ m@^(?:ftp|https?)://@i) {
+      if ($uri =~ m@^(?:https?|ftp)://@i) {
 	# remove trailing filename, if any; base URIs can have the
 	# form of "http://foo.com/index.html"
 	$uri =~ s@^([a-z]+://[^/]+/.*?)[^/\.]+\.[^/\.]{2,4}$@$1@i;
@@ -643,12 +734,7 @@ sub html_tests {
   {
     $self->{html}{charsets} .= exists $self->{html}{charsets} ? " $1" : $1;
   }
-  if ($tag eq "img") {
-    # might as well always clear this here
-    $self->{html}{anchor_empty} = 0;
-  }
 
-  $self->{html}{anchor_empty} = 1 if ($tag eq "a" && exists $attr->{href});
   $self->{html}{anchor_text} ||= "" if ($tag eq "a");
 }
 
@@ -666,7 +752,6 @@ sub html_text {
 
   if (exists $self->{html}{"inside_a"} && $self->{html}{"inside_a"} > 0) {
     $self->{html}{anchor_text} .= " $text";
-    $self->{html}{anchor_empty} = 0;
   }
 
   if (exists $self->{html}{"inside_script"} && $self->{html}{"inside_script"} > 0)

@@ -1452,7 +1452,6 @@ sub get_uri_list {
   my ($rulename, $pat, @uris);
   local ($_);
 
-  my $base_uri = $self->{html}{base_href} || "http://";
   my $text;
 
   for (@$textary) {
@@ -1462,11 +1461,7 @@ sub get_uri_list {
 
       $uri =~ s/^<(.*)>$/$1/;
       $uri =~ s/[\]\)>#]$//;
-      $uri =~ s/^URI://i;
 
-      # Does the uri start with "http://", "mailto:", "javascript:" or
-      # such?  If not, we probably need to put the base URI in front
-      # of it.
       if ($uri !~ /^${schemeRE}:/io) {
         # If it's a hostname that was just sitting out in the
         # open, without a protocol, and not inside of an HTML tag,
@@ -1481,9 +1476,6 @@ sub get_uri_list {
           push (@uris, $uri);
           $uri = "ftp://$uri";
         }
-        else {
-          $uri = "${base_uri}$uri";
-        }
       }
 
       # warn("Got URI: $uri\n");
@@ -1492,12 +1484,16 @@ sub get_uri_list {
     while (/($Addr_spec_re)/go) {
       my $uri = $1;
 
-      $uri =~ s/^URI://i;
       $uri = "mailto:$uri";
 
       #warn("Got URI: $uri\n");
       push @uris, $uri;
     }
+  }
+
+  # get URIs from HTML parsing
+  if (defined $self->{html}{uri}) {
+    push @uris, @{ $self->{html}{uri} };
   }
 
   # Make sure we catch bad encoding tricks ...
