@@ -921,6 +921,12 @@ _handle_spamd_header (struct message *m, int flags, char *buf, int len)
 	    m->out_len=snprintf (m->out, m->max_len+EXPANSION_ALLOWANCE,
 			"%.1f/%.1f\n", m->score, m->threshold);
 	}
+	else if ((flags & SPAMC_REPORT_IFSPAM && m->is_spam == EX_ISSPAM)
+		|| (flags & SPAMC_REPORT))
+	{
+	    m->out_len=snprintf (m->out, m->max_len+EXPANSION_ALLOWANCE,
+			"%.1f/%.1f\n", m->score, m->threshold);
+	}
 	return EX_OK;
 
     } else if(sscanf(buf, "Content-length: %d", &m->content_length) == 1) {
@@ -1072,6 +1078,14 @@ int message_filter(struct transport *tp, const char *username,
 	if (m->content_length < 0) {
 	    /* should have got a length too. */
 	    failureval = EX_PROTOCOL; goto failure;
+	}
+
+	/* have we already got something in the buffer (e.g. REPORT and
+         * REPORT_IFSPAM both create a line from the "Spam:" hdr)?  If
+	 * so, add the size of that so our sanity check passes.
+	 */
+	if (m->out_len > 0) {
+	    m->content_length += m->out_len;
 	}
 
 	if (flags&SPAMC_USE_SSL) {
