@@ -85,10 +85,6 @@ header Q_FOR_SELLER             Subject =~ /Question.*(?:for|to|from eBay).*(?:s
 describe Q_FOR_SELLER           Subject is an eBay question
 tflags Q_FOR_SELLER		nice
 
-header SUBJECT_IS_LIST          Subject =~ /\blist\b/i
-describe SUBJECT_IS_LIST        Subject contains newsletter header (list)
-tflags SUBJECT_IS_LIST		nice
-
 header SUBJECT_IS_IN_REVIEW     Subject =~ /\bin review\b/i
 describe SUBJECT_IS_IN_REVIEW   Subject contains newsletter header (in review)
 tflags SUBJECT_IS_IN_REVIEW	nice
