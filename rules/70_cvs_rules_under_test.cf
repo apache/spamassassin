@@ -504,6 +504,27 @@ meta T_LISTPROC2		T_LISTPROC1 && __FROM_LISTPROC && (__REPLY_LISTPROC || __SENDE
 score T_LISTPROC2		-0.01
 tflags T_LISTPROC2		nice
 
+# bug 1010
+uri T_SUPER_BARGAINS_URL	/\bsuper-bargains\.com/
+uri T_FANTASTIC_BARGAIN_URL	/\bfantastic-bargain\.com/
+uri T_KAVKAZCENTER_URL		/\bkavkazcenter\.com/
+uri T_FINESTOFFERS_URL		/\bfinestoffers\.com/
+uri T_AEOPUBLISHING_URL		/\baeopublishing\.com/
+uri T_SKY08_URL			/\bsky08\.com/
+uri T_E_MAILPROMO_URL		/\be-mailpromo\.net/
+uri T_MARINEDIGITAL_URL		/\bmarinedigital\.com/
+uri T_ITSREMARKABLE_URL		/\bitsremarkable\.com/
+#
+uri T_SUPER_BARGAINS_MAILTO	/mailto:\S+[.@]super-bargains\.com/
+uri T_FANTASTIC_BARGAIN_MAILTO	/mailto:\S+[.@]fantastic-bargain\.com/
+uri T_KAVKAZCENTER_MAILTO	/mailto:\S+[.@]kavkazcenter\.com/
+uri T_FINESTOFFERS_MAILTO	/mailto:\S+[.@]finestoffers\.com/
+uri T_AEOPUBLISHING_MAILTO	/mailto:\S+[.@]aeopublishing\.com/
+uri T_SKY08_MAILTO		/mailto:\S+[.@]sky08\.com/
+uri T_E_MAILPROMO_MAILTO	/mailto:\S+[.@]e-mailpromo\.net/
+uri T_MARINEDIGITAL_MAILTO	/mailto:\S+[.@]marinedigital\.com/
+uri T_ITSREMARKABLE_MAILTO	/mailto:\S+[.@]itsremarkable\.com/
+
 header T_WITH_LC_SMTP		Received =~ /\swith\ssmtp;\s/
 describe T_WITH_LC_SMTP		Received line contains spam-sign (lowercase smtp)
 
