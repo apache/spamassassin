@@ -504,3 +504,128 @@ meta T_LONGWORDS_6	(__LONGWORDS_D || __LONGWORDS_C)
 # tvd: 6.754   6.8409   0.0000    1.000   1.00    0.01  T_MISSING_SUBJECT
 header	__HAS_SUBJECT		exists:Subject
 meta	T_MISSING_SUBJECT	!__HAS_SUBJECT
+
+# short raw HTML length
+# these are used below
+body T_HTML_LENGTH_32		eval:html_eval('length', '< 32')
+body T_HTML_LENGTH_64		eval:html_eval('length', '< 64')
+body T_HTML_LENGTH_128		eval:html_eval('length', '< 128')
+body T_HTML_LENGTH_256		eval:html_eval('length', '< 256')
+body T_HTML_LENGTH_384		eval:html_eval('length', '< 384')
+body T_HTML_LENGTH_512		eval:html_eval('length', '< 512')
+body T_HTML_LENGTH_1024		eval:html_eval('length', '< 1024')
+# probe a bit more in the sweet spot between 128 and 256
+body T_HTML_LENGTH_130		eval:html_eval('length', '< 130')
+body T_HTML_LENGTH_140		eval:html_eval('length', '< 140')
+body T_HTML_LENGTH_150		eval:html_eval('length', '< 150')
+body T_HTML_LENGTH_160		eval:html_eval('length', '< 160')
+body T_HTML_LENGTH_170		eval:html_eval('length', '< 170')
+body T_HTML_LENGTH_180		eval:html_eval('length', '< 180')
+body T_HTML_LENGTH_180		eval:html_eval('length', '< 180')
+body T_HTML_LENGTH_190		eval:html_eval('length', '< 190')
+body T_HTML_LENGTH_200		eval:html_eval('length', '< 200')
+body T_HTML_LENGTH_210		eval:html_eval('length', '< 210')
+body T_HTML_LENGTH_220		eval:html_eval('length', '< 220')
+body T_HTML_LENGTH_230		eval:html_eval('length', '< 230')
+body T_HTML_LENGTH_240		eval:html_eval('length', '< 240')
+body T_HTML_LENGTH_250		eval:html_eval('length', '< 250')
+
+# rules combining short length with some element that is not
+# typical of short raw HTML
+
+body __HTML_COMMENT1		eval:html_text('comment', '=~ /<!.*?>/')
+meta T_HTML_SHORT_COMMENT1_32	T_HTML_LENGTH_32 && __HTML_COMMENT1
+meta T_HTML_SHORT_COMMENT1_64	T_HTML_LENGTH_64 && __HTML_COMMENT1
+meta T_HTML_SHORT_COMMENT1_128	T_HTML_LENGTH_128 && __HTML_COMMENT1
+meta T_HTML_SHORT_COMMENT1_256	T_HTML_LENGTH_256 && __HTML_COMMENT1
+meta T_HTML_SHORT_COMMENT1_384	T_HTML_LENGTH_384 && __HTML_COMMENT1
+meta T_HTML_SHORT_COMMENT1_512	T_HTML_LENGTH_512 && __HTML_COMMENT1
+meta T_HTML_SHORT_COMMENT1_1024	T_HTML_LENGTH_1024 && __HTML_COMMENT1
+
+body __HTML_COMMENT2		eval:html_text('comment', '=~ /<!(?!doctype).*?>/i')
+meta T_HTML_SHORT_COMMENT2_32	T_HTML_LENGTH_32 && __HTML_COMMENT2
+meta T_HTML_SHORT_COMMENT2_64	T_HTML_LENGTH_64 && __HTML_COMMENT2
+meta T_HTML_SHORT_COMMENT2_128	T_HTML_LENGTH_128 && __HTML_COMMENT2
+meta T_HTML_SHORT_COMMENT2_256	T_HTML_LENGTH_256 && __HTML_COMMENT2
+meta T_HTML_SHORT_COMMENT2_384	T_HTML_LENGTH_384 && __HTML_COMMENT2
+meta T_HTML_SHORT_COMMENT2_512	T_HTML_LENGTH_512 && __HTML_COMMENT2
+meta T_HTML_SHORT_COMMENT2_1024	T_HTML_LENGTH_1024 && __HTML_COMMENT2
+
+body __TAG_EXISTS_IMG		eval:html_tag_exists('img')
+meta T_HTML_SHORT_IMG_32	T_HTML_LENGTH_32 && __TAG_EXISTS_IMG
+meta T_HTML_SHORT_IMG_64	T_HTML_LENGTH_64 && __TAG_EXISTS_IMG
+meta T_HTML_SHORT_IMG_128	T_HTML_LENGTH_128 && __TAG_EXISTS_IMG
+meta T_HTML_SHORT_IMG_256	T_HTML_LENGTH_256 && __TAG_EXISTS_IMG
+meta T_HTML_SHORT_IMG_384	T_HTML_LENGTH_384 && __TAG_EXISTS_IMG
+meta T_HTML_SHORT_IMG_512	T_HTML_LENGTH_512 && __TAG_EXISTS_IMG
+meta T_HTML_SHORT_IMG_1024	T_HTML_LENGTH_1024 && __TAG_EXISTS_IMG
+
+body __TAG_EXISTS_CENTER	eval:html_tag_exists('center')
+meta T_HTML_SHORT_CENTER_32	T_HTML_LENGTH_32 && __TAG_EXISTS_CENTER
+meta T_HTML_SHORT_CENTER_64	T_HTML_LENGTH_64 && __TAG_EXISTS_CENTER
+meta T_HTML_SHORT_CENTER_128	T_HTML_LENGTH_128 && __TAG_EXISTS_CENTER
+meta T_HTML_SHORT_CENTER_256	T_HTML_LENGTH_256 && __TAG_EXISTS_CENTER
+meta T_HTML_SHORT_CENTER_384	T_HTML_LENGTH_384 && __TAG_EXISTS_CENTER
+meta T_HTML_SHORT_CENTER_512	T_HTML_LENGTH_512 && __TAG_EXISTS_CENTER
+meta T_HTML_SHORT_CENTER_1024	T_HTML_LENGTH_1024 && __TAG_EXISTS_CENTER
+
+meta T_HTML_SHORT_BODY_32	T_HTML_LENGTH_32 && __TAG_EXISTS_BODY
+meta T_HTML_SHORT_BODY_64	T_HTML_LENGTH_64 && __TAG_EXISTS_BODY
+meta T_HTML_SHORT_BODY_128	T_HTML_LENGTH_128 && __TAG_EXISTS_BODY
+meta T_HTML_SHORT_BODY_256	T_HTML_LENGTH_256 && __TAG_EXISTS_BODY
+meta T_HTML_SHORT_BODY_384	T_HTML_LENGTH_384 && __TAG_EXISTS_BODY
+meta T_HTML_SHORT_BODY_512	T_HTML_LENGTH_512 && __TAG_EXISTS_BODY
+meta T_HTML_SHORT_BODY_1024	T_HTML_LENGTH_1024 && __TAG_EXISTS_BODY
+
+meta T_HTML_SHORT_HTML_32	T_HTML_LENGTH_32 && __TAG_EXISTS_HTML
+meta T_HTML_SHORT_HTML_64	T_HTML_LENGTH_64 && __TAG_EXISTS_HTML
+meta T_HTML_SHORT_HTML_128	T_HTML_LENGTH_128 && __TAG_EXISTS_HTML
+meta T_HTML_SHORT_HTML_256	T_HTML_LENGTH_256 && __TAG_EXISTS_HTML
+meta T_HTML_SHORT_HTML_384	T_HTML_LENGTH_384 && __TAG_EXISTS_HTML
+meta T_HTML_SHORT_HTML_512	T_HTML_LENGTH_512 && __TAG_EXISTS_HTML
+meta T_HTML_SHORT_HTML_1024	T_HTML_LENGTH_1024 && __TAG_EXISTS_HTML
+
+body __TAG_EXISTS_BR		eval:html_tag_exists('br')
+meta T_HTML_SHORT_BR_32		T_HTML_LENGTH_32 && __TAG_EXISTS_BR
+meta T_HTML_SHORT_BR_64		T_HTML_LENGTH_64 && __TAG_EXISTS_BR
+meta T_HTML_SHORT_BR_128	T_HTML_LENGTH_128 && __TAG_EXISTS_BR
+meta T_HTML_SHORT_BR_256	T_HTML_LENGTH_256 && __TAG_EXISTS_BR
+meta T_HTML_SHORT_BR_384	T_HTML_LENGTH_384 && __TAG_EXISTS_BR
+meta T_HTML_SHORT_BR_512	T_HTML_LENGTH_512 && __TAG_EXISTS_BR
+meta T_HTML_SHORT_BR_1024	T_HTML_LENGTH_1024 && __TAG_EXISTS_BR
+
+body __TAG_EXISTS_A		eval:html_tag_exists('a')
+meta T_HTML_SHORT_A_32		T_HTML_LENGTH_32 && __TAG_EXISTS_A
+meta T_HTML_SHORT_A_64		T_HTML_LENGTH_64 && __TAG_EXISTS_A
+meta T_HTML_SHORT_A_128		T_HTML_LENGTH_128 && __TAG_EXISTS_A
+meta T_HTML_SHORT_A_256		T_HTML_LENGTH_256 && __TAG_EXISTS_A
+meta T_HTML_SHORT_A_384		T_HTML_LENGTH_384 && __TAG_EXISTS_A
+meta T_HTML_SHORT_A_512		T_HTML_LENGTH_512 && __TAG_EXISTS_A
+meta T_HTML_SHORT_A_1024	T_HTML_LENGTH_1024 && __TAG_EXISTS_A
+
+# HTML with very few tags
+body T_HTML_TAGS_2		eval:html_eval('tags', '< 2')
+body T_HTML_TAGS_4		eval:html_eval('tags', '< 4')
+body T_HTML_TAGS_8		eval:html_eval('tags', '< 8')
+body T_HTML_TAGS_10		eval:html_eval('tags', '< 10')
+body T_HTML_TAGS_12		eval:html_eval('tags', '< 12')
+body T_HTML_TAGS_14		eval:html_eval('tags', '< 14')
+body T_HTML_TAGS_16		eval:html_eval('tags', '< 16')
+body T_HTML_TAGS_32		eval:html_eval('tags', '< 32')
+body T_HTML_TAGS_64		eval:html_eval('tags', '< 64')
+
+# possible replacements for HTML_IMAGE_ONLY
+# these use raw HTML length rather than rendered word length
+body T_HTML_IMAGE_ONLY2_02	eval:html_image_only2('0000','0200')
+body T_HTML_IMAGE_ONLY2_04	eval:html_image_only2('0200','0400')
+body T_HTML_IMAGE_ONLY2_06	eval:html_image_only2('0400','0600')
+body T_HTML_IMAGE_ONLY2_08	eval:html_image_only2('0600','0800')
+body T_HTML_IMAGE_ONLY2_10	eval:html_image_only2('0800','1000')
+body T_HTML_IMAGE_ONLY2_12	eval:html_image_only2('1000','1200')
+
+body T_HTML_IMAGE_ONLY3_02	eval:html_image_only3('0000','0200')
+body T_HTML_IMAGE_ONLY3_04	eval:html_image_only3('0200','0400')
+body T_HTML_IMAGE_ONLY3_06	eval:html_image_only3('0400','0600')
+body T_HTML_IMAGE_ONLY3_08	eval:html_image_only3('0600','0800')
+body T_HTML_IMAGE_ONLY3_10	eval:html_image_only3('0800','1000')
+body T_HTML_IMAGE_ONLY3_12	eval:html_image_only3('1000','1200')
