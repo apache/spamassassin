@@ -277,8 +277,8 @@ body     AUTO_RESP              /\bauto.{1,100}(?:response|reply)/i
 describe AUTO_RESP              Talks about automatic responses
 tflags   AUTO_RESP              nice
 
-header ORDER_CONFIRM            Subject =~ /\border\b.{0,20}\bconfirm/i
-describe ORDER_CONFIRM          Your order is confirmed!  I hope you like it.
-tflags ORDER_CONFIRM            nice
+#header ORDER_CONFIRM            Subject =~ /\border\b.{0,20}\bconfirm/i
+#describe ORDER_CONFIRM          Your order is confirmed!  I hope you like it.
+#tflags ORDER_CONFIRM            nice
 
 
