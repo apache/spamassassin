@@ -516,3 +516,9 @@ describe T_FORGED_IMS_CTYPE	Forged mail pretending to be from IMS (boundary)
 header __EUD_STYLE_FROM		From =~ /^[^\"].+[^\"] <[^>]+>$/
 meta T_FORGED_MUA_EUDORA_FROM	(__ANY_QUALCOMM_MUA && !__EUD_STYLE_FROM && !__VIA_FROM_MANGLER)
 describe T_FORGED_MUA_EUDORA_FROM Forged mail pretending to be from Eudora (by From)
+
+# Thanks to Brian J. Peterson for this
+# Catches spams sent by illiterate spammer ("secks", "whoarez" etc.)
+header T_RATWARE_MIZSPEELING	eval:check_for_mizspeeling_ratware()
+describe T_RATWARE_MIZSPEELING	Sent using spammer tool (mizspeeling)
+
