@@ -197,7 +197,7 @@ describe EXCUSE_6		Claims you can be removed from the list
 body EXCUSE_7			/you (?:wish|want|would like|desire) to be removed/i
 describe EXCUSE_7		Claims you can be removed from the list
 
-body EXCUSE_10			/if you (?:(?:want|wish|care|prefer) not to |(?:don't|do not) (?:want|wish|care) to )(?:be contacted again|receive (any)?\s*(?:more|future|further)\b.{1,10}\b(?:e?-?mail|messages?|offers|solicitations))/i
+body EXCUSE_10			/if you (?:(?:want|wish|care|prefer) not to |do ?n[o']t (?:want|wish|care) to )(?:be contacted again|receive (?:any ?)?(?:more|future|further)\b.{1,10}\b(?:e?-?mail|message|offer|solicitation)s?)/i
 describe EXCUSE_10		"if you do not wish to receive any more"
 
 body EXCUSE_11			/you.{0,15}(?:name|mail).{0,15}(?:was|were).{0,15}list/i
@@ -368,7 +368,7 @@ body CLICK_BELOW		/click .{0,30}(?:here|below)/is
 describe CLICK_BELOW		Asks you to click below
 
 # (contrib: skod)
-body PRINT_FORM_SIGNATURE	/Sign(ature)?(?:\s*here|\s*please)?:.{0,30}___*/i
+body PRINT_FORM_SIGNATURE	/Sign(?:ature)?(?:\s*here|\s*please)?:.{0,30}___*/i
 describe PRINT_FORM_SIGNATURE	Asks you for your signature on a form
 
 # (contrib: skod)
@@ -390,7 +390,7 @@ describe PREST_NON_ACCREDITED	'Prestigious Non-Accredited Universities'
 body NEW_DOMAIN_EXTENSIONS	/new\s*domain\s*extension/i
 describe NEW_DOMAIN_EXTENSIONS	Possible registry spammer
 
-body DOMAIN_BODY		/\s(\.|dot\s+)(info|biz|name)\s/i
+body DOMAIN_BODY		/\s(?:\.|dot\s+)(?:info|biz|name)\b/i
 describe DOMAIN_BODY		Domain registration spam body
 
 # (contrib: WW)
@@ -508,10 +508,10 @@ describe NIGERIAN_SCAM		Nigerian scam, cf http://www.snopes2.com/inboxer/scams/n
 body NIGERIAN_SCAM_2 /\b(?:(?:bank|government|republic).{1,10}(?:nigeria|sierra leone|zimbabwe|botswana)|(?:nigeria|sierra leone|zimbabwe|botswana).{1,10}(?:national|government|embassy|chamber|bank|petroleum))/i
 describe NIGERIAN_SCAM_2	Mutated Nigerian scams, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
 
-body NIGERIAN_SCAM_4 /\b(wife|widow|son|husband)\b.{0,60}\b(?:Abacha|Kabila|Sekou?|Stojiljkovic|Bangura)\b/i
+body NIGERIAN_SCAM_4 /\b(?:wife|widow|son|husband)\b.{0,60}\b(?:Abacha|Kabila|Sekou?|Stojiljkovic|Bangura)\b/i
 describe NIGERIAN_SCAM_4        Nigerian widow needs your help, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
 
-body NIGERIAN_SCAM_5 /\b(?:Abacha|Kabila|Sekou?|Stojiljkovic|Bangura)\b.{0,60}\b(wife|widow|son|husband)\b/i
+body NIGERIAN_SCAM_5 /\b(?:Abacha|Kabila|Sekou?|Stojiljkovic|Bangura)\b.{0,60}\b(?:wife|widow|son|husband)\b/i
 describe NIGERIAN_SCAM_5        Nigerian widow needs your help, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
 
 body NIGERIAN_SCAM_6 /\b(?:late|former|past|new|Nigerian|military)\b.{0,20}\bhead of state/i
@@ -645,7 +645,7 @@ describe RISK_FREE              Risk free.  Suuurreeee....
 body     AS_SEEN_ON             /seen on\b\s*(?:TV|ABC|NBC|CBS|CNN|Oprah|USA Today|48 Hours|New York Times|\w+\s+TV|:)/i
 describe AS_SEEN_ON             As seen on national TV!
 
-body     NOT_INTENDED           /not intended for residents ?(:of|in)\b/i
+body     NOT_INTENDED           /not intended for residents (?:of|in)\b/i
 describe NOT_INTENDED           Not intended for residents of XYZ.
 
 # This phrase appears in many pyramid scheme mails in which
