@@ -199,6 +199,12 @@ header RCVD_IN_BONDEDSENDER	rbleval:check_rbl('bondedsender', 'query.bondedsende
 describe RCVD_IN_BONDEDSENDER	See http://www.bondedsender.org/referred.html
 tflags RCVD_IN_BONDEDSENDER	net nice
 
+# DynaBlocker: block SMTP connections from dynamic dial-up IP ranges.
+# URL: http://basic.wirehub.nl/dynablocker.html
+header RCVD_IN_DYNABLOCK	rbleval:check_rbl_txt('dynablock-notfirsthop', 'dynablock.easynet.nl.')
+describe RCVD_IN_DYNABLOCK	Sent from dynamic IP address to remote relay
+tflags RCVD_IN_DYNABLOCK	net
+
 # ---------------------------------------------------------------------------
 
 # NOTE: semi-commercial test, see README file for details
