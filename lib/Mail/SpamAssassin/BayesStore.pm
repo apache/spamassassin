@@ -570,6 +570,7 @@ sub sync_journal {
 
   my $started = time();
   my $count = 0;
+  my $total_count = 0;
 
   my $showdots = $opts->{showdots};
 
@@ -587,6 +588,7 @@ sub sync_journal {
 
     if ($self->tie_db_writable()) {
       while (<JOURNAL>) {
+        $total_count++;
         if (/^t (\d+) (.*)$/) {
 	  $tokens{$2} = $1+0;
 #        } elsif (/^c (-?\d+) (-?\d+) (\d+) (.*)$/) {
@@ -605,7 +607,7 @@ sub sync_journal {
       while( my($k,$v) = each %tokens ) {
         $self->tok_touch_token ($v, $k);
 
-        if ($showdots && ($count++ % 1000) == 0) {
+        if ($showdots && (++$count % 1000) == 0) {
           print STDERR ".";
         }
       }
@@ -635,7 +637,7 @@ sub sync_journal {
 
   my $done = time();
   my $msg = ("synced Bayes databases from journal in ".($done - $started).
-	" seconds: $count unique entries");
+        " seconds: $count unique entries ($total_count total entries)");
 
   if ($opts->{verbose}) {
     print $msg,"\n";
