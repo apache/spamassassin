@@ -723,9 +723,11 @@ sub spawn {
     # handle $clients_per_child connections, then die in "old" age...
     for ( my $i = 0 ; $i < $clients_per_child ; $i++ ) {
 
+      my $died_legitimately = 0;
+
       # use a large eval scope to catch die()s and ensure they
       # don't kill the server.
-      eval {
+      if (!eval {
         $client = $server->accept();
 
         # Bah!
@@ -741,7 +743,9 @@ sub spawn {
             next;
           }
           else {
-            die "accept failed: $!";
+            logmsg("accept failed: $!");
+            $died_legitimately = 1;
+            die("accept failed: $!");   # propagate
           }
         }
 
@@ -814,8 +818,16 @@ sub spawn {
         # Close out our connection to the client ...
         $client->close;
 
-        # end of eval.  trap die()s here:
-      } or logmsg("error: $@ $!, continuing");
+      })    # end of eval.  die() trap:
+      {
+        # was there a good reason to die?
+        if ($died_legitimately) {
+          die("fatal error; respawning server");
+        }
+
+        # else carry on
+        logmsg("error: $@ $!, continuing");
+      }
 
       # if we changed UID during processing, change back!
       if ( $> != $< and $> != ( $< - 2**32 ) ) {
