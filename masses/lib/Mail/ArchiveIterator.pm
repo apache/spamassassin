@@ -195,7 +195,7 @@ sub mass_check_mailbox {
     $count++;
 
     while (<MBOX>) {
-      /^Message-[Ii][Dd]: (.*)\s*$/ and $msgid = $1;
+      /^Message-Id: (.*?)\s*$/i and $msgid = $1;
       /^X-Spam-Status: .* tests=(.*)$/ and $hits = $1;
 
       if (/^$/) {
@@ -210,6 +210,8 @@ sub mass_check_mailbox {
     }
 
     if (! $self->{opt_all} && scalar @msg > 1000) { next; }	# too big
+
+    next unless(@msg);		# skip "empty" messages (From...\nFrom...)
 
     $msgid ||= "(undef)";
     $msgid = "$folder:$msgid";	# so we can find it again
