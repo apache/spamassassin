@@ -89,6 +89,7 @@ eval {
 	     'pipe|P'    => sub { warn "The -P option has been removed.\n" },
 	     'F=i'       => sub { warn "The -F option has been removed.\n" },
 	     'add-from!' => sub { warn "The --add-from option has been removed.\n" },
+	     'stop-at-threshold|S' => sub { warn "The -S option has been removed.\n" },
   ) or usage(0, "Unknown option!");
   if (defined $opt{'help'}) { usage(0, "For more information read the spamassassin man page"); }
   if (defined $opt{'version'}) {
