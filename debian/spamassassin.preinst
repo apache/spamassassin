@@ -2,49 +2,8 @@
 
 . /usr/share/debconf/confmodule
 
-# I hate debhelper, especially dh_link
-# Fixing stuff I broke before (in 2.11-1 and 2.11-2)
+# Make sure debconf runs before the postinst
 
-if [ -h /etc/logcheck/ignore.d.paranoid ] ; then
-	rm /etc/logcheck/ignore.d.paranoid
-	mkdir /etc/logcheck/ignore.d.paranoid
-fi
-
-if [ -h /etc/logcheck/ignore.d.workstation ] ; then
-	rm /etc/logcheck/ignore.d.workstation
-	mkdir /etc/logcheck/ignore.d.workstation
-fi
-
-if [ -h /etc/logcheck/ignore.d.server/spamassassin ] ; then
-	rm /etc/logcheck/ignore.d.server/spamassassin
-fi
-
-PROMPT_CANCEL="0"
-
-# Copy of spamassassin.config
-if [ "$2" ] ; then # Upgrading!
-    if `dpkg --compare-versions "$2" lt 2.40-1` ; then
-	db_input critical spamassassin/upgrade/2.40 && PROMPT_CANCEL="1"
-        # Critical since mailing this to someone may not work!
-    fi
-    if `dpkg --compare-versions "$2" lt 2.42-1` ; then
-	if [ -e /etc/spamassassin/20_body_tests.cf ] ; then
-	    db_input medium spamassassin/upgrade/2.42 || true
-	fi
-    fi
-fi
-
-if [ "$PROMPT_CANCEL" = "1" ] ; then
-    db_fset spamassassin/upgrade/cancel seen false || true
-    db_set spamassassin/upgrade/cancel "Continue" || true
-    db_input critical spamassassin/upgrade/cancel || true
-fi
-# End copy
-
-db_get spamassassin/upgrade/cancel || true
-if [ "$RET" = "Cancel" ] ; then
-    db_set spamassassin/upgrade/cancel "Continue" || true
-    false
-fi
+db_stop
 
 #DEBHELPER#

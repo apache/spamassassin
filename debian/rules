@@ -68,10 +68,13 @@ clean:
 
 	dh_clean
 
+debian/po/templates.pot: debian/spamassassin.templates
+	debconf-updatepo
+
 # Spamassassin ONLY
 
 build-indep: build-indep-stamp
-build-indep-stamp: configure
+build-indep-stamp: configure debian/po/templates.pot
 
 	dh_testdir
 
@@ -98,8 +101,6 @@ install-indep: build-indep
 #	cp spamproxy/README debian/$(packagei)/usr/share/doc/$(packagei)/README.spamproxy
 	cp sql/README debian/$(packagei)/usr/share/doc/$(packagei)/README.sql
 
-	cp debian/logcheck debian/$(packagei)/etc/logcheck/ignore.d.server/spamassassin
-	cp debian/logcheck debian/$(packagei)/etc/logcheck/ignore.d.workstation/spamassassin
 	cp debian/logcheck debian/$(packagei)/etc/logcheck/ignore.d.paranoid/spamassassin
 
 	cp debian/65_debian.cf debian/$(packagei)/usr/share/spamassassin/65_debian.cf
@@ -144,7 +145,7 @@ binary-indep: build-indep install-indep
 # dpkg 1.10 or 1.11, I'm told.)
 
 build-arch: build-arch-stamp
-build-arch-stamp: configure
+build-arch-stamp: configure debian/po/templates.pot
 
 	dh_testdir
 

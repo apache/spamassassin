@@ -1,6 +1,4 @@
-spamd.*: connection from localhost
-spamd.*: connection from .*127.0.0.1
-spamd.*: clean message
-spamd.*: identified spam
-spamd.*: info: setuid to .* succeeded
-spamd.*: processing message .* for [[:alnum:]]+:[0-9]+\.
+^\w{3} [ :0-9]{11} [._[:alnum:]-]+ spamd\[[0-9]+\]: info: setuid to \w+ succeeded $
+^\w{3} [ :0-9]{11} [._[:alnum:]-]+ spamd\[[0-9]+\]: processing message <.+> for \w+:[0-9]+\. $
+^\w{3} [ :0-9]{11} [._[:alnum:]-]+ spamd\[[0-9]+\]: connection from [._[:alnum:]-]+ \[[.0-9]+\] at port [0-9]+ $
+^\w{3} [ :0-9]{11} [._[:alnum:]-]+ spamd\[[0-9]+\]: (clean message|identified spam) \([-0-9.]+/[-0-9.]+\) for \w+:[0-9]+ in [0-9.]+ seconds, [0-9]+ bytes\. $
