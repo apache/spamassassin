@@ -24,6 +24,7 @@
 #                        the -D switch. Empty/undefined variables are removed.
 #   sharpbang            Does some sharpbang (#!) replacement. See code below.
 
+eval "use bytes";
 use Config;
 use File::Spec;
 
