@@ -438,6 +438,14 @@ header T_GAPPY_SUBJECT_01	Subject =~ /\b(?:[a-z][\W]{1,3}){4,}/i
 header T_GAPPY_SUBJECT_02	Subject =~ /\b(?:[a-z][\W]{1,3}){5,}/i
 header T_GAPPY_SUBJECT_03	Subject =~ /\b(?:[a-z][\W]{1,4}){4,}/i
 header T_GAPPY_SUBJECT_04	Subject =~ /\b(?:[a-z][\W]{1,4}){5,}/i
+header T_GAPPY_SUBJECT_05	Subject =~ /\b(?:[a-z][\W]{1,5}){4,}/i
+header T_GAPPY_SUBJECT_06	Subject =~ /\b(?:[a-z][\W]{1,5}){5,}/i
+header T_GAPPY_SUBJECT_07	Subject =~ /\b(?:[a-z][\W]{1,6}){4,}/i
+header T_GAPPY_SUBJECT_08	Subject =~ /\b(?:[a-z][\W]{1,6}){5,}/i
+header T_GAPPY_SUBJECT_09	Subject =~ /\b(?:[a-z][\W]{1,3}){3,}/i
+header T_GAPPY_SUBJECT_10	Subject =~ /\b(?:[a-z][\W]{1,4}){3,}/i
+header T_GAPPY_SUBJECT_11	Subject =~ /\b(?:[a-z][\W]{1,5}){3,}/i
+header T_GAPPY_SUBJECT_12	Subject =~ /\b(?:[a-z][\W]{1,6}){3,}/i
 
 uri T_YAHOO_REDIRECTOR		/^http:\/\/rd\.yahoo\.com/i
 describe T_YAHOO_REDIRECTOR	Uses commonly-spammed redirector URL
