@@ -199,7 +199,7 @@ That can be found as C<$plugin-E<gt>{main}-E<gt>{conf}>.   This allows per-user 
 system-wide configuration to be dealt with correctly, with per-user overriding
 system-wide.
 
-=item $plugin->"finish_parsing_end" ( { options ... } )
+=item $plugin->finish_parsing_end ( { options ... } )
 
 Signals that the configuration parsing has just finished, and SpamAssassin
 is nearly ready to check messages.
