@@ -6,6 +6,7 @@ package Mail::SpamAssassin::Dns;
 package Mail::SpamAssassin::PerMsgStatus;
 
 use Mail::SpamAssassin::Conf;
+use File::Spec;
 use IO::Socket;
 use IPC::Open2;
 use Carp;
@@ -389,9 +390,9 @@ sub razor_lookup {
     close OLDOUT;
   }
 
-  if ((defined $response) && ($response+0)) { 
+  if ((defined $response) && ($response+0)) {
       timelog("Razor -> Finished razor test: confirmed spam", "razor", 2);
-      return 1; 
+      return 1;
   }
   timelog("Razor -> Finished razor test: not known spam", "razor", 2);
   return 0;
@@ -406,22 +407,28 @@ sub is_dcc_available {
     return 0;
   }
 
-# patch from Ryan Cleary: a pipe open() doesn't allow for you to easily check
-# whether the command succeeded, so my patch first calls system(), then only
-# does an open() if the system() succeeds.  (
-# http://www.hughes-family.org/bugzilla/show_bug.cgi?id=507 )
-#
-  if (system("dccproc -V >/dev/null 2>&1")) {
-    dbg ("DCC is not available: system failed");
+  my $dccproc = $self->{conf}->{dcc_path} || '';
+  unless ($dccproc) {
+    foreach my $path (File::Spec->path()) {
+      $dccproc = File::Spec->catfile ($path, 'dccproc');
+      if (-x $dccproc) {
+        dbg ("DCC was found at $dccproc");
+        $self->{conf}->{dcc_path} = $dccproc;
+        last;
+      }
+    }
+  }
+  unless (-x $dccproc) {
+    dbg ("DCC is not available: dccproc not found");
     return 0;
   }
 
   # jm: this could still fail
-  if (!open(DCCHDL, "dccproc -V 2>&1 |")) {
+  if (!open(DCCHDL, "$dccproc -V 2>&1 |")) {
     dbg ("DCC is not available: open failed");
     return 0;
   }
-  
+
   @resp = <DCCHDL>;
   close DCCHDL;
   dbg ("DCC is available: ".join(" ", @resp));
@@ -460,7 +467,7 @@ sub dcc_lookup {
     $dccin = gensym();
     $dccout = gensym();
 
-    $pid = open2($dccout, $dccin, 'dccproc -H '.$self->{conf}->{dcc_options}.' 2>&1');
+    $pid = open2($dccout, $dccin, join(' ', $self->{conf}->{dcc_path}, '-H', $self->{conf}->{dcc_options}, '2>&1'));
 
     print $dccin $$fulltext;
     
@@ -538,22 +545,28 @@ sub is_pyzor_available {
     return 0;
   }
 
-# patch from Ryan Cleary: a pipe open() doesn't allow for you to easily check
-# whether the command succeeded, so my patch first calls system(), then only
-# does an open() if the system() succeeds.  (
-# http://www.hughes-family.org/bugzilla/show_bug.cgi?id=507 )
-#
-  if (system("pyzor ping>/dev/null 2>&1")) {
-    dbg ("Pyzor is not available: system failed");
+  my $pyzor = $self->{conf}->{pyzor_path} || '';
+  unless ($pyzor) {
+    foreach my $path (File::Spec->path()) {
+      $pyzor = File::Spec->catfile ($path, 'pyzor');
+      if (-x $pyzor) {
+        dbg ("Pyzor was found at $pyzor");
+        $self->{conf}->{pyzor_path} = $pyzor;
+        last;
+      }
+    }
+  }
+  unless (-x $pyzor) {
+    dbg ("Pyzor is not available: pyzor not found");
     return 0;
   }
 
   # jm: this could still fail
-  if (!open(PyzorHDL, "pyzor ping 2>&1 |")) {
+  if (!open(PyzorHDL, "$pyzor ping 2>&1 |")) {
     dbg ("Pyzor is not available: open failed");
     return 0;
   }
-  
+
   @resp = <PyzorHDL>;
   close PyzorHDL;
   dbg ("Pyzor is available: ".join(" ", @resp));
@@ -590,7 +603,7 @@ sub pyzor_lookup {
     $pyzorin = gensym();
     $pyzorout = gensym();
 
-    $pid = open2($pyzorout, $pyzorin, 'pyzor check 2>&1');
+    $pid = open2($pyzorout, $pyzorin, join(' ', $self->{conf}->{pyzor_path}, 'check', '2>&1'));
 
     print $pyzorin $$fulltext;
     
