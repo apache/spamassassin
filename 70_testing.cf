@@ -70,16 +70,6 @@ header T_ALL_TRUSTED		eval:check_all_trusted()
 describe T_ALL_TRUSTED		Did not pass through any untrusted hosts
 tflags T_ALL_TRUSTED		nice
 
-# some tests to catch long lines of random dictionary words
-# this could be slow, being a rawbody rule, but if it works well maybe
-# we should consider a way to spot these kinds of auto-generated
-# text patterns efficiently...
-# quinlan: I think the unique word tests might do a better job of this,
-#          this seems very specific to one spamware program.
-rawbody T_BAYESBUSTER_LINE_12	/^([a-z]{3,} ){12,}<[Bb][Rr]>$/
-rawbody T_BAYESBUSTER_LINE_15	/^([a-z]{3,} ){15,}<[Bb][Rr]>$/
-rawbody T_BAYESBUSTER_LINE_15I	/^([a-z]{3,} ){15,}<br>$/i
-
 # reported by Kurtis Rader, bug 2890
 uri T_MSN_REDIR		m{^https?://shopping\.msn\.com/trackurl\.aspx\?}i
 describe T_MSN_REDIR	Has MSN Redirect URI
@@ -143,6 +133,42 @@ meta T_LONGWORDS_1 LONGWORDS_A + LONGWORDS_B + LONGWORDS_C + LONGWORDS_D == 1
 meta T_LONGWORDS_2 LONGWORDS_A + LONGWORDS_B + LONGWORDS_C + LONGWORDS_D == 2
 meta T_LONGWORDS_3 LONGWORDS_A + LONGWORDS_B + LONGWORDS_C + LONGWORDS_D == 3
 meta T_LONGWORDS_4 LONGWORDS_A + LONGWORDS_B + LONGWORDS_C + LONGWORDS_D == 4
+
+# second way
+body T_LONGWORDS2_A	/\b(?:[a-z]{8,}\s+){6}/
+body T_LONGWORDS2_B	/\b(?:[a-z]{7,}\s+){7}/
+body T_LONGWORDS2_C	/\b(?:[a-z]{6,}\s+){8}/
+body T_LONGWORDS2_D	/\b(?:[a-z]{5,}\s+){9}/
+# just a thought...
+meta T_LONGWORDS2_1 LONGWORDS2_A + LONGWORDS2_B + LONGWORDS2_C + LONGWORDS2_D == 1
+meta T_LONGWORDS2_2 LONGWORDS2_A + LONGWORDS2_B + LONGWORDS2_C + LONGWORDS2_D == 2
+meta T_LONGWORDS2_3 LONGWORDS2_A + LONGWORDS2_B + LONGWORDS2_C + LONGWORDS2_D == 3
+meta T_LONGWORDS2_4 LONGWORDS2_A + LONGWORDS2_B + LONGWORDS2_C + LONGWORDS2_D == 4
+
+# third way
+body T_LONGWORDS3_A	/\b(?:[a-z]{8,}\s+){7}/
+body T_LONGWORDS3_B	/\b(?:[a-z]{7,}\s+){8}/
+body T_LONGWORDS3_C	/\b(?:[a-z]{6,}\s+){9}/
+body T_LONGWORDS3_D	/\b(?:[a-z]{5,}\s+){10}/
+# just a thought...
+meta T_LONGWORDS3_1 LONGWORDS3_A + LONGWORDS3_B + LONGWORDS3_C + LONGWORDS3_D == 1
+meta T_LONGWORDS3_2 LONGWORDS3_A + LONGWORDS3_B + LONGWORDS3_C + LONGWORDS3_D == 2
+meta T_LONGWORDS3_3 LONGWORDS3_A + LONGWORDS3_B + LONGWORDS3_C + LONGWORDS3_D == 3
+meta T_LONGWORDS3_4 LONGWORDS3_A + LONGWORDS3_B + LONGWORDS3_C + LONGWORDS3_D == 4
+
+# some tests to catch long lines of random dictionary words
+# this could be slow, being a rawbody rule, but if it works well maybe
+# we should consider a way to spot these kinds of auto-generated
+# text patterns efficiently...
+# quinlan: I think the unique word tests might do a better job of this,
+#          this seems very specific to one spamware program.
+# it also seems to overlap a lot with LONGWORDS
+rawbody T_BAYESBUSTER_LINE_12	/^([a-z]{3,} ){12,}<[Bb][Rr]>$/
+rawbody T_BAYESBUSTER_LINE_15	/^([a-z]{3,} ){15,}<[Bb][Rr]>$/
+rawbody T_BAYESBUSTER_LINE_12I	/^([a-z]{3,} ){12,}<br>$/i
+rawbody T_BAYESBUSTER_LINE_15I	/^([a-z]{3,} ){15,}<br>$/i
+rawbody T_BAYESBUSTER_LINE_12S	/^(\S{3,} ){12,}<br>$/i
+rawbody T_BAYESBUSTER_LINE_15S	/^(\S{3,} ){15,}<br>$/i
 
 # partial messages; currently-theoretical attack
 # unsurprisingly this hits 0/0 right now.  But should we promote it anyway
