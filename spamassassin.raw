@@ -354,12 +354,13 @@ Test mode.  Pipe message through and add extra report.
 =item B<-r>, B<--report>
 
 Report this message as verified spam.  This will submit the mail message read
-from STDIN to various spam-blocker databases, such as Vipul's Razor (
+from STDIN to various spam-blocker databases.  Currently, these are Vipul's Razor (
 http://razor.sourceforge.net/ ) and the Distributed Checksum Clearinghouse (
 http://www.rhyolite.com/anti-spam/dcc/ ).
 
 If the message contains SpamAssassin markup, this will be stripped out
-automatically before submission.
+automatically before submission.  The support modules for DCC and Razor
+must be installed for spam to be reported to each service.
 
 =item B<-W>, B<--add-to-whitelist>
 
