@@ -212,10 +212,6 @@ describe MIME_DEFICIENT_QP	Deficient quoted-printable encoding in body
 rawbody RATWARE_HASH_DASH	/[a-z\d]+-([a-z\d]{16}-)+[a-z\d]+(?-i:l)\d+/i
 describe RATWARE_HASH_DASH	Contains a hashbuster in Send-Safe format
 
-rawbody  __OBFUSCATING_COMMENT2 /[^\s>]<![^-].{0,64}?[^-]>[^\s<]/
-meta     OBFUSCATING_COMMENT2	__OBFUSCATING_COMMENT2 && MIME_HTML_ONLY
-describe OBFUSCATING_COMMENT2	HTML comments which obfuscate text (2)
-
 # duncf
 body EMAIL_ROT13     /\b[a-z(\]-]+\^[a-z-]+\([a-z]{2,3}\b/
 describe EMAIL_ROT13 Body contains a ROT13-encoded email address
