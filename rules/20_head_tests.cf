@@ -67,6 +67,9 @@ describe INVALID_DATE_NO_TZ	Invalid Date: header (no timezone)
 header INVALID_DATE_TZ_ABSURD	Date =~ /[-+](?:1[4-9]\d\d|[2-9]\d\d\d)$/
 describe INVALID_DATE_TZ_ABSURD	Invalid Date: header (timezone does not exist)
 
+header INVALID_DATE_ODD_MONTH	Date =~ /\d+ [^A-Z]{3,} \d\d\d\d/i
+describe INVALID_DATE_ODD_MONTH Invalid Date: header (wierd month)
+
 header DATE_IN_FUTURE		eval:check_for_forward_date()
 describe DATE_IN_FUTURE		Date: is in the future or unparseable
 
