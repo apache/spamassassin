@@ -168,10 +168,22 @@ body EVITE                      /(?:evite\.citysearch\.com|evite\.com)/
 describe EVITE                  Claw back some for Evite
 tflags EVITE		        nice
 
-# Has a proper .sig - probably clean
-body     SIGNATURE_DELIM        /^-- $/
-describe SIGNATURE_DELIM        Standard signature delimiter present
-tflags SIGNATURE_DELIM		nice
+# signature tests
+full SIGNATURE_SHORT_DENSE	eval:check_signature('1', '7', '0')
+describe SIGNATURE_SHORT_DENSE	Short signature present (no empty lines)
+tflags SIGNATURE_SHORT_DENSE	nice
+
+full SIGNATURE_SHORT_SPARSE	eval:check_signature('1', '7', '1')
+describe SIGNATURE_SHORT_SPARSE	Short signature present (empty lines)
+tflags SIGNATURE_SHORT_SPARSE	nice
+
+full SIGNATURE_LONG_DENSE	eval:check_signature('8', '15', '0')
+describe SIGNATURE_LONG_DENSE	Long signature present (no empty lines)
+tflags SIGNATURE_LONG_DENSE	nice
+
+full SIGNATURE_LONG_SPARSE	eval:check_signature('8', '15', '1')
+describe SIGNATURE_LONG_SPARSE	Long signature present (empty lines)
+tflags SIGNATURE_LONG_SPARSE	nice
 
 body EGP_HTML_BANNER            /^<!-- \S+begin egp html banner/
 describe EGP_HTML_BANNER        non-spam EGP banner found

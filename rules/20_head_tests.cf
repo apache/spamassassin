@@ -514,8 +514,8 @@ describe MISSING_OUTLOOK_NAME	Message looks like Outlook, but isn't
 header   PRIORITY_NO_NAME	eval:priority_no_name()
 describe PRIORITY_NO_NAME	Message has priority setting, but no X-Mailer
 
-header   PARTIAL_RFC_2369	eval:partial_rfc_2369()
-describe PARTIAL_RFC_2369	not compliant with RFC 2369 or otherwise fishy
+header   SUSPECT_LIST_HEADERS	eval:suspect_list_headers()
+describe SUSPECT_LIST_HEADERS	Mailing list headers are suspicious
 
 header SUBJ_FREE_CAP		Subject =~ /\bFRE{2,}\b/
 describe SUBJ_FREE_CAP		Subject contains the word 'FREE'

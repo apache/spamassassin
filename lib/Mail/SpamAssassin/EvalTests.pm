@@ -850,7 +850,7 @@ sub check_for_unique_subject_id {
 
   my $id = 0;
   if (/[-_\.\s]{7,}([-a-z0-9]{4,})$/
-	|| /\s{10,}(\S+)$/
+	|| /\s{10,}(?:\S\s)?(\S+)$/
 	|| /\s{3,}[-:\#\(\[]+([-a-z0-9]{4,})[\]\)]+$/
 	|| /\s{3,}[:\#\(\[]*([a-f0-9]{4,})[\]\)]*$/
 	|| /\s{3,}[-:\#]([a-z0-9]{5,})$/
@@ -1431,14 +1431,16 @@ sub priority_no_name {
   return ($priority && !$mailer);
 }
 
-sub partial_rfc_2369 {
+# This test was originally based on RFC 2369 compliance.  However, the
+# Mailing-List header was added so that Yahoo!Groups mails would not be
+# matched.
+sub suspect_list_headers {
   my ($self) = @_;
 
-  # Jul  3 2002 jm: added Mailing-List so Yahoo!Groups mails aren't hit
   my $all = $self->get('ALL');
   my @headers = ('List-Help', 'List-Subscribe', 'List-Unsubscribe',
 		 'List-Post', 'List-Owner', 'List-Archive',
-                 'Mailing-List');
+		 'Mailing-List');
   my %count;
 
   foreach my $header (@headers) {
@@ -1631,6 +1633,40 @@ sub check_language {
     }
   }
   return 1;
+}
+
+sub check_signature {
+  my ($self, $full, $min, $max, $blank) = @_;
+
+  if (!exists $self->{signature_lines}) {
+    $self->_check_signature($full);
+  }
+  return (($self->{signature_lines} >= $min) &&
+	  ($self->{signature_lines} <= $max) &&
+	  ($self->{signature_blank} == $blank));
+}
+
+
+sub _check_signature {
+  my ($self, $full) = @_;
+
+  $self->{signature_blank} = 0;
+  $self->{signature_lines} = 0;
+
+  # remove headers
+  my ($body) = ($$full =~ /.*?\n\n(.*)/s);
+
+  # signature must follow one non-whitespace character
+  if ($body =~ /\S\s*\n-- \n((.*\n){1,15}?)\s*\Z/m) {
+    my $signature = $1;
+
+    if ($signature =~ /\n\s*\n\s*\S/m) {
+      $self->{signature_blank} = 1;
+    }
+    if ($signature =~ /\S/m) {
+      $self->{signature_lines} = ($signature =~ tr/\n/\n/);
+    }
+  }
 }
 
 ###########################################################################
