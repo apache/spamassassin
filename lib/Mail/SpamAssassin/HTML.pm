@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.26 2002/10/07 02:32:02 quinlan Exp $
+# $Id: HTML.pm,v 1.27 2002/10/07 04:45:32 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -326,6 +326,12 @@ sub html_tests {
     }
     if (exists $attr->{value} && $attr->{value} =~ /\S+\@\S+/) {
       $self->{html}{input_value_email} = 1;
+    }
+    if (exists $attr->{value} && $attr->{value} =~ /(?:remove|unsub)/i) {
+      $self->{html}{input_value_unsubscribe} = 1;
+    }
+    if (exists $attr->{value} && $attr->{value} =~ /(?<!un)subscrib/i) {
+      $self->{html}{input_value_subscribe} = 1;
     }
   }
   if ($tag =~ /^i?frame$/) {
