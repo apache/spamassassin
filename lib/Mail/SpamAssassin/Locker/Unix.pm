@@ -60,9 +60,9 @@ sub safe_lock {
   my $lock_tmp = Mail::SpamAssassin::Util::untaint_file_path
 					("$path.lock.$hname.$$");
 
-  my $umask = 077;
+  my $umask = umask 077;
   if (!open(LTMP, ">$lock_tmp")) {
-      umask $umask;
+      umask $umask; # just in case
       die "lock: $$ cannot create tmp lockfile $lock_tmp for $lock_file: $!\n";
   }
   umask $umask;

@@ -677,7 +677,7 @@ sub secure_tmpfile {
   }
 
   my $reportfile;
-  my $umask = 0;
+  my $umask = umask 077;
   do {
     # we do not rely on the obscurity of this name for security...
     # we use a average-quality PRG since this is all we need

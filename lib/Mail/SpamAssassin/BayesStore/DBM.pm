@@ -854,12 +854,16 @@ sub cleanup {
   # use append mode, write atomically, then close, so simultaneous updates are
   # not lost
   my $conf = $self->{bayes}->{main}->{conf};
+
+  # set the umask to the inverse of what we want ...
   my $umask = umask(0777 - (oct ($conf->{bayes_file_mode}) & 0666));
+
   if (!open (OUT, ">>".$path)) {
     warn "cannot write to $path, Bayes db update ignored: $!\n";
     umask $umask; # reset umask
     return;
   }
+  umask $umask; # reset umask
 
   # do not use print() here, it will break up the buffer if it's >8192 bytes,
   # which could result in two sets of tokens getting mixed up and their
@@ -897,7 +901,6 @@ sub cleanup {
   if (!close OUT) {
     warn "cannot write to $path, Bayes db update ignored\n";
   }
-  umask $umask; # reset umask
 
   $self->{string_to_journal} = '';
 }
