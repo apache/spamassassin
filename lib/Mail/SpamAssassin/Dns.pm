@@ -633,12 +633,9 @@ sub dccifd_lookup {
     return 0;
   }
 
-  if ($self->{conf}->{dcc_add_header}) {
-    if ($response =~ /^(X-DCC.*): (.*)$/) {
-      $left  = $1;
-      $right = $2;
-      $self->{headers_to_add}->{$left} = $right;
-    }
+  if ($response =~ /^X-DCC-(.*)-Metrics: (.*)$/) {
+    $self->{tag_data}->{DCCB} = $1;
+    $self->{tag_data}->{DCCR} = $2;
   }
  
   $response =~ s/many/999999/ig;
