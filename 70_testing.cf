@@ -551,11 +551,6 @@ describe T_HTML_COMMENT_TAG	HTML comment probably contains HTML tag
 header T_FAKED_IP_IN_RCVD	Received =~ /from [-0-9a-z\._]+_\[\d+\.\d+\.\d+\.\d+\] /i
 describe T_FAKED_IP_IN_RCVD	Received: contains a name with a faked IP-address
 
-# replaces VIAGRA
-# Cialis needs a leading \b
-body T_DRUG_ED_CAPS	/(?:\bCIALIS|LEVITRA|VIAGRA)/
-describe T_DRUG_ED_CAPS	Mentions an E.D. drug
-
 # Should catch Atriks, for one
 uri T_LONG_HOSTNAME_20		/^https?:\/\/[a-z0-9]{20,24}\./i
 uri T_LONG_HOSTNAME_25		/^https?:\/\/[a-z0-9]{25,29}\./i
