@@ -145,6 +145,7 @@ header T_ADDR_NUMS_BIGSITE_2	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@(?:a
 rawbody __MIME_FARAWAY_CHARSET	eval:check_for_mime_faraway_charset()
 body __HIGHBITS			/(?:[\x80-\xff].?){4,}/
 meta T_MIME_FARAWAY_CHARSET	(__MIME_FARAWAY_CHARSET && __HIGHBITS)
+tflags T_MIME_FARAWAY_CHARSET userconf
 
 ########################################################################
 # bug 1106: forged MUAs
