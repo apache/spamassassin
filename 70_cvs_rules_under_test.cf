@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.494 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.495 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -409,3 +409,28 @@ describe	T_PUSHHERELINK		Link asks you to "push here" or "go here" or "cease mai
 
 uri 		T_DOLLARMACHINE 		/dollar.?machine/i
 uri 		T_HITBOX 			/hitbox\.com/i
+
+# From: SpamTalk <SpamTalk@US.NET56.net>
+body T_NRALA		/never receive any letters again/i
+describe T_NRALA	disclaims future contacts
+body T_ONEMSG		/a one time message/i
+describe T_ONEMSG	talks about a one time message
+body T_ATAKEN		/address was taken from the open resources/i
+describe T_ATAKEN	talks about where address was harvested
+body T_LOOKS2HELP	/I am looking to help/i
+describe T_LOOKS2HELP	talks about being a samaritan
+body T_RSIMM		/really succeed in making money/i
+describe T_RSIMM	talks about making money
+body T_IMREAL		/I am a real person/i
+describe T_IMREAL	claims non-pseudoness of existance
+body T_NOHYPE		/this is no hype/i
+describe T_NOHYPE	claims non-hype content
+body T_HONESTCUZ	/an honest offer because/i
+describe T_HONESTCUZ	lies to you about what is being touted
+body T_STRUGGLE		/like to struggle/i
+describe T_STRUGGLE	proclaims familiarty with struggling
+body T_NGAWHERE		/and not get anywhere/i
+describe T_NGAWHERE	rambles about not getting anywhere
+body T_DN2BIZ		/get down to business/i
+describe T_DN2BIZ	implores get down to business
+
