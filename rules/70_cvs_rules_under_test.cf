@@ -514,7 +514,7 @@ tflags __FIVETEN net
 # or that have have allowed known spammers to become clients.
 header T_RCVD_IN_FIVETEN_BULK	rbleval:check_rbl_sub('fiveten', '127.0.0.4')
 tflags T_RCVD_IN_FIVETEN_BULK net
-# retest all of the rest (since rblreseval wasn't used before)
+# retest all of the rest (since check_rbl_sub wasn't used before)
 header T_RCVD_IN_FIVETEN_SPAM	rbleval:check_rbl_sub('fiveten', '127.0.0.2')
 tflags T_RCVD_IN_FIVETEN_SPAM net
 header T_RCVD_IN_FIVETEN_DIALUP	rbleval:check_rbl_sub('fiveten', '127.0.0.3')

@@ -65,8 +65,6 @@ use constant TYPE_URI_TESTS     => 0x0010;
 use constant TYPE_URI_EVALS     => 0x0011;
 use constant TYPE_META_TESTS    => 0x0012;
 use constant TYPE_RBL_EVALS     => 0x0013;
-# UNUSED => 0x0014
-use constant TYPE_RBL_RES_EVALS => 0x0015;
 
 $VERSION = 'bogus';     # avoid CPAN.pm picking up version strings later
 
@@ -1558,7 +1556,7 @@ are those listed in <http://www.iana.org/assignments/ipv4-address-space>,
 
 This is used as a 'zone ID'.  If you want to look up a multi-meaning zone like
 relays.osirusoft.com, you can then query the results from that zone using it;
-but all check_rbl_results_for() calls must use that zone ID.
+but all check_rbl_sub() calls must use that zone ID.
 
 Also, if an IP gets a hit in one lookup in a zone using that ID, any further
 hits in other rules using that zone ID will *not* be added to the score.
@@ -1589,11 +1587,6 @@ why the IP is listed, typically a hyperlink to a database entry.
 =cut
     if (/^header\s+(\S+)\s+rbleval:(.*)$/) {
       $self->add_test ($1, $2, TYPE_RBL_EVALS);
-      $self->{user_rules_to_compile} = 1 if $scoresonly;
-      next;
-    }
-    if (/^header\s+(\S+)\s+rblreseval:(.*)$/) {
-      $self->add_test ($1, $2, TYPE_RBL_RES_EVALS);
       $self->{user_rules_to_compile} = 1 if $scoresonly;
       next;
     }
@@ -2111,9 +2104,6 @@ sub finish_parsing {
 	}
 	elsif ($type == TYPE_RBL_EVALS) {
 	  $self->{rbl_evals}->{$name} = \@args;
-	}
-	elsif ($type == TYPE_RBL_RES_EVALS) {
-	  $self->{rbl_res_evals}->{$name} = \@args;
 	}
 	elsif ($type == TYPE_RAWBODY_EVALS) {
 	  $self->{rawbody_evals}->{$name} = \@args;
