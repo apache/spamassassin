@@ -545,7 +545,7 @@ This is a multi-part message in MIME format.
 --$boundary
 Content-Type: text/plain
 Content-Disposition: inline
-Content-Transfer-Encoding: 7bit
+Content-Transfer-Encoding: 8bit
 
 $report
 
