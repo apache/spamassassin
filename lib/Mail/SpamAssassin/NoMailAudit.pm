@@ -313,6 +313,11 @@ sub get_pristine {
   return join ('', $self->{headers_pristine}, @{ $self->{textarray} });
 }
 
+sub get_pristine_body {
+  my ($self) = @_;
+  return join ('', @{ $self->{textarray} });
+}
+
 sub as_string {
   my ($self) = @_;
   return join ('', $self->get_all_headers(), "\n",

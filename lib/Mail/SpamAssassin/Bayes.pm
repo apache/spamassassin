@@ -33,6 +33,7 @@ use bytes;
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::BayesStore;
 use Mail::SpamAssassin::PerMsgStatus;
+use Mail::SpamAssassin::SHA1 qw(sha1);
 
 use vars qw{
   @ISA
@@ -767,7 +768,21 @@ sub get_msgid {
   my ($self, $msg) = @_;
 
   my $msgid = $msg->get_header("Message-Id");
-  if (!defined $msgid) { $msgid = time.".$$\@sa_generated"; }
+  if ( !defined $msgid || $msgid eq '' ) { # generate a best effort unique id
+    # Use sha1(Date:, last received: and top N bytes of body)
+    # where N is MIN(1024 bytes, 1/2 of body length)
+    #
+    my $date = $msg->get_header("Date");
+
+    my @rcvd = $msg->get_header("Received");
+    my $rcvd = $rcvd[$#rcvd];
+
+    my $body = $msg->get_pristine_body();
+    my $keep = ( length $body > 2048 ? 1024 : int(length($body) / 2) );
+    substr($body, $keep) = '';
+
+    $msgid = sha1($date."\000".$rcvd."\000".$body).'@sa_generated';
+  }
 
   # remove \r and < and > prefix/suffixes
   chomp $msgid;
