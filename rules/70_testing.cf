@@ -282,22 +282,15 @@ meta T_REPTO_QUOTE_YAHOO1		__REPTO_QUOTE && __FROM_YAHOO_COM
 meta T_REPTO_QUOTE_YAHOO2		__REPTO_QUOTE && __AT_YAHOO_MSGID
 meta T_REPTO_QUOTE_YAHOO3		__REPTO_QUOTE && (__FROM_YAHOO_COM || __AT_YAHOO_MSGID)
 
-# bug 3896: URIs in various TLDs, other than 3rd level www
-# nearly done rules
-uri URI_NO_WWW_INFO_CGI_1	/^https?:\/\/[^\/]+(?<!\/www)\.[^.]{7,}\.info\/(?=\S{15,})\S*\?/i
-uri URI_NO_WWW_BIZ_CGI_1	/^https?:\/\/[^\/]+(?<!\/www)\.[^.]{7,}\.biz\/(?=\S{15,})\S*\?/i
-# any TLD except .info and .biz
-uri URI_NO_WWW_ANY_CGI_1A	/^https?:\/\/[^\/]+(?<!\/www)\.[^.]{7,}\.(?!biz|info)[a-z]{2,4}\/\?\S{14,}/i
-# any ending except .info and .biz
-uri URI_NO_WWW_ANY_CGI_1B	/^https?:\/\/[^\/]+(?<!\/www)\.[^.]{7,}\.(?!biz|info)[a-z][^.]+\/\?\S{14,}/i
+########################################################################
 
-# but try making https?:// optional
-uri URI_NO_WWW_INFO_CGI_2	/^(?:https?:\/\/)?[^\/]+(?<!\/www)\.[^.]{7,}\.info\/(?=\S{15,})\S*\?/i
-uri URI_NO_WWW_BIZ_CGI_2	/^(?:https?:\/\/)?[^\/]+(?<!\/www)\.[^.]{7,}\.biz\/(?=\S{15,})\S*\?/i
-# any TLD except .info and .biz
-uri URI_NO_WWW_ANY_CGI_2A	/^(?:https?:\/\/)?[^\/]+(?<!\/www)\.[^.]{7,}\.(?!biz|info)[a-z]{2,4}\/\?\S{14,}/i
-# any ending except .info and .biz
-uri URI_NO_WWW_ANY_CGI_2B	/^(?:https?:\/\/)?[^\/]+(?<!\/www)\.[^.]{7,}\.(?!biz|info)[^.]+\/\?\S{14,}/i
+# bug 3896: URIs in various TLDs, other than 3rd level www
+# baseline
+uri T_URI_NO_WWW_ANY_CGI	/^(?:https?:\/\/)?[^\/]+(?<!\/www)\.[^.]{7,}\.[^.]{7,}\.(?!biz|info)[a-z]{2,4}\/\?\S{14,}/i
+# fourth-level not starting with www, various lengths
+uri T_URI_NO_WWW_ANY_CGI_3	/^(?:https?:\/\/)?[^\/]+(?<!\/www)\.[^.]{3,}\.[^.]{3,}\.(?!biz|info)[a-z]{2,4}\/\?\S{14,}/i
+uri T_URI_NO_WWW_ANY_CGI_5	/^(?:https?:\/\/)?[^\/]+(?<!\/www)\.[^.]{5,}\.[^.]{5,}\.(?!biz|info)[a-z]{2,4}\/\?\S{14,}/i
+uri T_URI_NO_WWW_ANY_CGI_7	/^(?:https?:\/\/)?[^\/]+(?<!\/www)\.[^.]{7,}\.[^.]{7,}\.(?!biz|info)[a-z]{2,4}\/\?\S{14,}/i
 
 ########################################################################
 
