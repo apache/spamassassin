@@ -293,6 +293,7 @@ if ($log_socket ne 'file' and $log_facility ne 'null') {
     defined(setlogsock($log_socket)) || die $!;
     # The next call is required to actually open the socket.
     # FIXME: mss: wouldn't a openlog('spamd', 'cons,pid,ndelay', $log_facility); be better?
+    # jm: no, it's unportable.  if I recall correctly some perls will die
     syslog('debug', "%s", "spamd starting");
   };
   my $err = $@;
@@ -325,7 +326,7 @@ if ($log_socket ne 'file' and $log_facility ne 'null') {
 # The user wants to log to some file -- open it on STDLOG. Falling back to STDERR
 # if opening the file fails.
 elsif ($log_facility eq 'file') {
-  unless(open(STDLOG, ">> $log_file")) {
+  unless(open(STDLOG, ">>$log_file")) {
     warn "failed to open logfile ${log_file}: $!\n" .
          "reporting logs to stderr\n";
     $log_facility = 'stderr';
