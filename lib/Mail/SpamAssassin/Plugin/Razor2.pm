@@ -62,8 +62,8 @@ sub new {
     }
   }
 
-  $self->register_eval_rule ("check_razor2");
-  $self->register_eval_rule ("check_razor2_range");
+  $self->register_eval_rule("check_razor2");
+  $self->register_eval_rule("check_razor2_range");
 
   $self->set_config($mailsaobject->{conf});
 
@@ -76,8 +76,9 @@ sub set_config {
 
 =item use_razor2 (0|1)		(default: 1)
 
-How many seconds you wait for razor to complete before you go on without
-the results
+Whether to use Razor2, if it is available.  Razor2 is used to check
+message signatures over the network against Vipul's Razor collaborative
+filtering network.
 
 =cut
 
@@ -422,7 +423,7 @@ sub check_razor2_range {
   }
 
   if ($permsgstatus->{razor2_cf_score} >= $min && $permsgstatus->{razor2_cf_score} <= $max) {
-    $permsgstatus->test_log(sprintf ("cf: %3d", $permsgstatus->{razor2_cf_score}));
+    $permsgstatus->test_log(sprintf("cf: %3d", $permsgstatus->{razor2_cf_score}));
     return 1;
   }
 
