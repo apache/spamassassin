@@ -546,39 +546,11 @@ else {
     || die "Could not create INET socket: $! $@\n";
 }
 
-my $spamtest = Mail::SpamAssassin->new(
-  {
-    dont_copy_prefs      => $dontcopy,
-    rules_filename       => ( $opt{'configpath'} || 0 ),
-    site_rules_filename  => ( $opt{'siteconfigpath'} || 0 ),
-    local_tests_only     => ( $opt{'local'} || 0 ),
-    debug                => ( $opt{'debug'} || 0 ),
-    paranoid             => ( $opt{'paranoid'} || 0 ),
-    home_dir_for_helpers => (
-      defined $opt{'home_dir_for_helpers'}
-      ? $opt{'home_dir_for_helpers'}
-      : $orighome
-    ),
-    PREFIX          => $PREFIX,
-    DEF_RULES_DIR   => $DEF_RULES_DIR,
-    LOCAL_RULES_DIR => $LOCAL_RULES_DIR
-  }
-);
-
-preload_modules_with_tmp_homedir();
-
-# If we're going to be switching users in check(), let's backup the
-# fresh configuration now for later restoring ...
-my %conf_backup = ();
-if ($setuid_to_user) {
-  $spamtest->copy_config(undef, \%conf_backup) ||
-    die "error returned from copy_config, no Storable module?\n";
-}
-
 if ( defined $opt{'pidfile'} ) {
   $opt{'pidfile'} =
     Mail::SpamAssassin::Util::untaint_file_path( $opt{'pidfile'} );
 }
+
 # support non-root use (after we bind to the port)
 if ( $opt{'username'} ) {
   my ( $uuid, $ugid ) = ( getpwnam( $opt{'username'} ) )[ 2, 3 ];
@@ -614,6 +586,28 @@ if ( $opt{'username'} ) {
 
 }
 
+my $spamtest = Mail::SpamAssassin->new(
+  {
+    dont_copy_prefs      => $dontcopy,
+    rules_filename       => ( $opt{'configpath'} || 0 ),
+    site_rules_filename  => ( $opt{'siteconfigpath'} || 0 ),
+    local_tests_only     => ( $opt{'local'} || 0 ),
+    debug                => ( $opt{'debug'} || 0 ),
+    paranoid             => ( $opt{'paranoid'} || 0 ),
+    home_dir_for_helpers => (
+      defined $opt{'home_dir_for_helpers'}
+      ? $opt{'home_dir_for_helpers'}
+      : $orighome
+    ),
+    PREFIX          => $PREFIX,
+    DEF_RULES_DIR   => $DEF_RULES_DIR,
+    LOCAL_RULES_DIR => $LOCAL_RULES_DIR
+  }
+);
+
+# If we need Storable, and it's not installed, alert now before we daemonize.
+die "Required module Storable not found!\n"
+  if ($setuid_to_user && !$spamtest->_is_storable_available());
 
 ## DAEMONIZE! ##
 
@@ -627,6 +621,20 @@ if ( defined $opt{'pidfile'} && open PIDF, ">$opt{'pidfile'}" ) {
 else {
   warn "Can't write to PID file: $!\n";
 }
+
+# should be done post-daemonize such that any files created by this
+# process are written with the right ownership and everything.
+preload_modules_with_tmp_homedir();
+
+# If we're going to be switching users in check(), let's backup the
+# fresh configuration now for later restoring ...  MUST be placed after
+# the M::SA creation.
+my %conf_backup = ();
+if ($setuid_to_user) {
+  $spamtest->copy_config(undef, \%conf_backup) ||
+    die "error returned from copy_config, no Storable module?\n";
+}
+
 
 # restart handling.  do this here before compile_now() as that may
 # take a while.
