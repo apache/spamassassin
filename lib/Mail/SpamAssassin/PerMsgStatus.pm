@@ -166,7 +166,8 @@ sub check {
   }
 
   dbg ("is spam? score=".$self->{hits}.
-  			" required=".$self->{conf}->{required_hits});
+  			" required=".$self->{conf}->{required_hits}.
+                        " tests=".$self->get_names_of_tests_hit());
   $self->{is_spam} = ($self->{hits} >= $self->{conf}->{required_hits});
 
   if ($self->{conf}->{use_terse_report}) {
