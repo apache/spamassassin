@@ -27,6 +27,19 @@ default.
 scanner processes will be run in parallel.  Previously, there was no
 default limit unless you specified the "-m" switch when starting spamd.
 
+The Bayesian storage modules have been completely re-written and now
+include Berkeley DB (DBM) storage as well has SQL based storage (see
+sql/README.bayes for more information).  In addition, a new format has
+been introduced for the bayes database that stores tokens in fixed
+length hashes.  All DBM databases should be automatically converted to
+this new format the first time they are opened for write.  You can
+manually perform the upgrade by running "sa-learn --sync" from the
+command line.
+
+The sa-learn --rebuild command has been deprecated, please use
+sa-learn --sync instead.  The --rebuild option will remain temporarily
+for backwards compatability.
+
 Users of SpamAssassin versions earlier than 2.50 should note that
 the default tagging behavior has changed.  If an incoming message is
 tagged as spam, instead of modifying the original message, SpamAssassin
@@ -78,10 +91,10 @@ itself, you will want to do something like this when upgrading:
 - run "sa-learn --rebuild", this will sync your journal.  if you skip this
   step, any data from the journal will be lost when the DB is upgraded.
 - install DB_File module if necessary
-- upgrade SA to 2.6x
+- upgrade SA to 3.0.0
 - if you were using another database module previously, run
   "sa-learn --import" to migrate the data into new DB_File files
-- run "sa-learn --rebuild", this will cause the db format to be upgraded.
+- run "sa-learn --sync", this will cause the db format to be upgraded.
   if you want to make sure everything runs correctly, you can add the "-D"
   option.
 - test the new database by running some sample mails through SpamAssassin,
