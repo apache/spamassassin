@@ -136,7 +136,7 @@ lines:
 below lines.  If you already have a .procmailrc file, add the lines to the
 top of your .procmailrc file:
 
-:0fw
+:0fw: spamassassin.lock
 | /home/user/sausr/bin/spamassassin
 
 The above line filters all incoming mail through SpamAssassin and tags
