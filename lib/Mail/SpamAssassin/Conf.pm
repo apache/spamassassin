@@ -303,8 +303,9 @@ sub new {
   $self->{pyzor_timeout} = 10;
   $self->{pyzor_options} = '';
 
-  $self->{use_bayes} = 1;
-  $self->{bayes_auto_learn} = 1;
+  $self->{use_bayes} = 1;		# Bayes Master On/Off Switch
+  $self->{use_bayes_rules} = 1;		# Disable BAYES_* rules
+  $self->{bayes_auto_learn} = 1;	# Disable Bayes autolearning
   $self->{bayes_auto_learn_threshold_nonspam} = 0.1;
   $self->{bayes_auto_learn_threshold_spam} = 12.0;
   $self->{bayes_learn_to_journal} = 0;
@@ -1970,12 +1971,26 @@ the results
 
 =item use_bayes ( 0 | 1 )		(default: 1)
 
-Whether to use the naive-Bayesian-style classifier built into SpamAssassin.
+Whether to use the naive-Bayesian-style classifier built into
+SpamAssassin.  This is a master on/off switch for all Bayes-related
+operations.
 
 =cut
 
     if ( $key eq 'use_bayes' ) {
       $self->{use_bayes} = $value+0; next;
+    }
+
+=item use_bayes_rules ( 0 | 1 )		(default: 1)
+
+Whether to use rules using the naive-Bayesian-style classifier built
+into SpamAssassin.  This allows you to disable the rules while leaving
+auto and manual learning enabled.
+
+=cut
+
+    if ( $key eq 'use_bayes_rules' ) {
+      $self->{use_bayes_rules} = $value+0; next;
     }
 
 =item skip_rbl_checks { 0 | 1 }   (default: 0)
