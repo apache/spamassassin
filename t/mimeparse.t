@@ -66,6 +66,17 @@ my %files = (
 	  'a0f062b1992b25de8607df1b829d29ede5687126'
 	],
 
+	"$prefix/t/data/spam/badmime.txt" => [
+	  join("\n",'multipart/alternative','text/plain','text/html'),
+	  'fe56ab5c4b0199cd2811871adc89cf2a9a3d9748',
+	  '2e7fea381fe9f0b34f947ddb7a38b81ece68605d'
+	],
+
+	"$prefix/t/data/spam/badmime2.txt" => [
+	  join("\n",'multipart/alternative','text/plain','text/html'),
+	  '05c9e1f1f3638a5191542b0c278debe38ac98a83',
+	  'e6e71e824aec0e204367bfdc9a9e227039f42815'
+	],
 );
 
 my $numtests = 0;
@@ -87,7 +98,12 @@ foreach my $k ( sort keys %files ) {
     foreach ( @{$files{$k}} ) {
       $res = 1;
       if ( $_ ne '' ) {
-	$res = Mail::SpamAssassin::SHA1::SHA1($parts[0]->decode());
+	if ( !defined $parts[0] ) {
+	  $res = '';
+	}
+	else {
+	  $res = Mail::SpamAssassin::SHA1::SHA1($parts[0]->decode());
+	}
 	#print ">> $res\n";
         $res = $res eq $_;
       }
