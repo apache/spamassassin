@@ -13,6 +13,7 @@ use Test; BEGIN { plan tests => 1 };
 );
 
 tstprefs ("
+        $default_cf_lines
 	whitelist-to procmail*
 	");
 
