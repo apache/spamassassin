@@ -225,7 +225,7 @@ sub readscores {
   }
   close IN;
   for (@ignore_rules) {
-      $score->{$_} = 0;
+      $scores->{$_} = 0;
   }
 
   $scores;
