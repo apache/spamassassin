@@ -62,7 +62,7 @@ use vars	qw{
 
 @ISA = qw();
 
-$VERSION = "1.0";
+$VERSION = "1.1";
 sub Version { $VERSION; }
 
 $HOME_URL = "http://spamassassin.taint.org/";
