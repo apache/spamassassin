@@ -115,7 +115,13 @@ override the settings for C<rules_filename> and C<userprefs_filename>.
 
 =item local_tests_only
 
-If set to 1, no tests that require internet access will be performed.
+If set to 1, no tests that require internet access will be performed. (default:
+0)
+
+=item dont_copy_prefs
+
+If set to 1, the user preferences file will not be created if it doesn't
+already exist. (default: 0)
 
 =back
 
@@ -294,6 +300,29 @@ sub remove_spamassassin_markup {
 }
 
 ###########################################################################
+
+=item $f->read_scoreonly_config ($filename)
+
+Read a configuration file and parse only scores from it.  This is used
+to safely allow multi-user daemons to read per-user config files
+without having to use C<setuid()>.
+
+=cut
+
+sub read_scoreonly_config {
+  my ($self, $filename) = @_;
+
+  if (!open(IN,"<$filename")) {
+    warn "read_scoreonly_config: cannot open \"$filename\"\n";
+    return;
+  }
+  my $text = join ('',<IN>);
+  close IN;
+
+  $self->{conf}->parse_scores_only ($text);
+}
+
+###########################################################################
 # non-public methods.
 
 sub init {
@@ -323,7 +352,7 @@ sub init {
       $fname = $self->first_existing_path (@default_userprefs_path);
       dbg ("using \"$fname\" for user prefs file");
 
-      if (!-f $fname) {
+      if (!$self->{dont_copy_prefs} && !-f $fname) {
 	# copy in the default one for later editing
 
 	my $defprefs = $self->first_existing_path
@@ -349,7 +378,9 @@ sub init {
   $self->{conf}->parse_rules ($self->{config_text});
   $self->{conf}->finish_parsing ();
 
-  # TODO -- open DNS cache etc.
+  delete $self->{config_text};
+
+  # TODO -- open DNS cache etc. if necessary
 }
 
 ###########################################################################

@@ -35,7 +35,10 @@ sub report {
 
   my $text = $self->{main}->remove_spamassassin_markup ($self->{msg});
 
-  if (!$self->{options}->{dont_report_to_razor} && $self->is_razor_available()) {
+  if (!$self->{main}->{local_tests_only}
+  	&& !$self->{options}->{dont_report_to_razor}
+	&& $self->is_razor_available())
+  {
     if ($self->razor_report($text)) {
       dbg ("SpamAssassin: spam reported to Razor.");
     }

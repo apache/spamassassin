@@ -18,17 +18,25 @@ extern "C" {
 }
 
 // Objective function and initializer declarations.
-float objective(GAGenome &);
 void initializer(GAGenome &);
 
 // ---------------------------------------------------------------------------
 
-int threshold = 5;		// threshold of spam vs. non-spam
+int threshold = 5;	// threshold of spam vs. non-spam
 
-int nn, ny, yn, yy;
+int nn, ny, yn, yy;	// simple number of y/n diagnoses
+
+// These floats are the same as above, but massively-y or massively-n scores
+// count extra.  This encourages clear decisions about spam or not.
+//
+float nnscore, nyscore, ynscore, yyscore;
+
 int bestnn, bestny, bestyn, bestyy;
 int progiter = 0;
 float nybias = 5.0;
+
+float float_num_spam;
+float float_num_nonspam;
 
 // ---------------------------------------------------------------------------
 
@@ -74,6 +82,7 @@ void counthitsfromscores (void) {
   int i;
 
   nn = ny = yn = yy = 0;
+  nnscore = nyscore = ynscore = yyscore = 0.0;
 
   for (file = 0; file < num_tests; file++) {
     float score;
@@ -84,17 +93,23 @@ void counthitsfromscores (void) {
       hits += score;
     }
 
+    // divide by 50 so we get e.g.
+    // 1.01 for a positive spam 
     if (is_spam[file]) {
       if (hits > threshold) {
 	yy++;
+	yyscore += ((hits - threshold) / 50.0) + 1.0;
       } else {
 	yn++;
+	ynscore += ((hits - threshold) / 50.0) + 1.0;
       }
     } else {
       if (hits > threshold) {
 	ny++;
+	nyscore += ((threshold - hits) / 50.0) + 1.0;
       } else {
 	nn++;
+	nnscore += ((threshold - hits) / 50.0) + 1.0;
       }
     }
   }
@@ -123,6 +138,30 @@ void counthits (GARealGenome &genome) {
   }
 
   counthitsfromscores();
+}
+
+// ---------------------------------------------------------------------------
+
+// add up all the incorrect diagnoses, and use that as the fitness
+// score.  Since we're trying to minimise the objective, this should
+// work OK -- we want it to be as low as possible.
+//
+float
+objective(GAGenome & c)
+{
+  GARealGenome &genome = (GARealGenome &) c;
+  counthits(genome);
+
+  // old old version; just use the # of messages
+  // return ((float) yn + (ny * nybias));
+
+  // old version: use the proportion of messages to messages in the
+  // correct category.
+  //return (float) ((yn / (float) num_spam)
+    		//+ ((ny * nybias) / (float) num_nonspam));
+
+  return (float) ((ynscore / float_num_spam)
+      		+ ((nyscore * nybias) / float_num_nonspam));
 }
 
 // ---------------------------------------------------------------------------
@@ -211,6 +250,9 @@ main (int argc, char **argv) {
   loadscores ();
   loadtests ();
 
+  float_num_spam = (float) num_spam;
+  float_num_nonspam = (float) num_nonspam;
+
   if (justCount) {
     cout << "Counts for current genome:" << endl;
 
@@ -229,7 +271,7 @@ main (int argc, char **argv) {
 
   GARandomSeed();	// use time ^ $$
 
-  // allow scores from 0.1 to 4.0 inclusive, in jumps of 0.1
+  // allow scores from -0.5 to 4.0 inclusive, in jumps of 0.1
   GARealAlleleSet alleles (0.1, 4.0, 0.1,
       		GAAllele::INCLUSIVE, GAAllele::INCLUSIVE);
 
@@ -302,24 +344,5 @@ main (int argc, char **argv) {
   write_to_file (genome, "results.evolved");
   cout << "Scores for this genome written to \"results.evolved\"." << endl;
   return 0;
-}
-
-// add up all the incorrect diagnoses, and use that as the fitness
-// score.  Since we're trying to minimise the objective, this should
-// work OK -- we want it to be as low as possible.
-//
-float
-objective(GAGenome & c)
-{
-  GARealGenome &genome = (GARealGenome &) c;
-  counthits(genome);
-
-  // old version; just use the # of messages
-  // return ((float) yn + (ny * nybias));
-
-  // new version: use the proportion of messages to messages in the
-  // correct category.
-  return (float) ((yn / (float) num_spam)
-    		+ ((ny * nybias) / (float) num_nonspam));
 }
 

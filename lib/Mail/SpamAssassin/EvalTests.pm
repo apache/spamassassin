@@ -7,6 +7,7 @@ package Mail::SpamAssassin::PerMsgStatus;
 
 use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Dns;
+use Mail::SpamAssassin::Locales;
 use IO::Socket;
 use Carp;
 use strict;
@@ -45,7 +46,7 @@ sub check_for_from_mx {
   # Try 5 times to protect against temporary outages.  sleep between checks
   # to give the DNS a chance to recover.
   for my $i (1..5) {
-    my @mx = mx ($self->{res}, $_);
+    my @mx = Net::DNS::mx ($self->{res}, $_);
     if (scalar @mx >= 0) { return 0; }
     sleep 5;
   }
@@ -308,6 +309,64 @@ sub check_for_spam_reply_to {
   if ($ratio1 > 2.0 && $ratio2 > 2.0) { return 1; }
 
   return 0;
+}
+
+###########################################################################
+
+sub check_for_forged_gw05_received_headers {
+  my ($self) = @_;
+  local ($_);
+
+  my $rcv = $self->get ('Received');
+
+  # e.g.
+  # Received: from mail3.icytundra.com by gw05 with ESMTP; Thu, 21 Jun 2001 02:28:32 -0400
+  my ($h1, $h2) = ($rcv =~ 
+  	m/\nfrom\s(\S+)\sby\s(\S+)\swith\sESMTP\;\s+\S\S\S,\s+\d+\s+\S\S\S\s+
+			\d\d\d\d\s+\d\d:\d\d:\d\d\s+[-+]*\d\d\d\d\n$/xs);
+
+  if (defined ($h1) && defined ($h2) && $h2 !~ /\./) {
+    return 1;
+  }
+
+  0;
+}
+
+###########################################################################
+
+sub check_for_faraway_charset {
+  my ($self) = @_;
+
+  my $type = $self->get ('Content-Type');
+  $type ||= $self->get ('Content-type');
+  my $locale = $ENV{'LANG'};
+
+  if ($type =~ /^.*charset=[\"](.+?)[\"]/i || $type =~ /^.*charset=(\S+?)/i) {
+    if (!Mail::SpamAssassin::Locales::is_charset_ok_for_locale ($1, $locale)) {
+      return 1;
+    }
+  }
+
+  0;
+}
+
+sub check_for_faraway_charset_in_body {
+  my ($self, $fulltext) = @_;
+
+  if ($$fulltext =~ /\n\n.*\n
+  		Content-Type:\s.{0,100}charset=([^\n]+?)\n
+		/isx)
+  {
+    my $type = $1;
+    my $locale = $ENV{'LANG'};
+    if ($type =~ /[\"](.+?)[\"]/i || $type =~ /^(\S+?)/i) {
+      if (!Mail::SpamAssassin::Locales::is_charset_ok_for_locale ($1, $locale)) {
+	return 1;
+      }
+    }
+  }
+
+  0;
 }
 
 ###########################################################################
