@@ -10,8 +10,11 @@ sub sortbynum {
   ($anum <=> $bnum);
 }
 
+$rulesfile = "../spamassassin.cf";
+if (-f "spamassassin.cf") { $rulesfile = "spamassassin.cf"; }
+
 my $spamtest = new Mail::SpamAssassin ({
-  'rules_filename'      => "../spamassassin.cf",
+  'rules_filename'      => $rulesfile,
   'userprefs_filename'  => "../spamassassin.prefs",
   'local_tests_only'    => 1
 });

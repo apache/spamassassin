@@ -33,9 +33,7 @@ float nybias = 5.0;
 // ---------------------------------------------------------------------------
 
 void printhits (FILE *fout) {
-  if (num_tests == 0) {
-    num_tests = 1;
-  }
+  if (num_tests == 0) { num_tests = 1; }
 
   fprintf (fout, "Correctly non-spam: %6d  %3.2f%%\n",
         nn, (nn / (float) num_tests) * 100.0);
@@ -54,9 +52,8 @@ void printhits (FILE *fout) {
 void writescores (FILE *fout) {
   int i;
 
-  for (i = 0; i < num_scores; i++) {
-    fprintf (fout, "score %-30s %2.1f\n",
-		score_names[i], scores[i]);
+  for (i = 0; i < num_scores-1; i++) {
+    fprintf (fout, "score %-30s %2.1f\n", score_names[i], scores[i]);
   }
 }
 

@@ -97,8 +97,11 @@ describe PLING_PLING		Subject has lots of exclamation marks
 header SUBJ_HAS_UNIQ_ID		eval:check_for_unique_subject_id()
 describe SUBJ_HAS_UNIQ_ID	Subject contains a unique ID number
 
-header UNDISC_RECIPS		To =~ /Undisclosed.*Recipients/i
-describe UNDISC_RECIPS		To "Undisclosed.Recipients" or similar
+header UNDISC_RECIPS		To =~ /^undisclosed-recipients?:\s*;$/
+describe UNDISC_RECIPS		Valid-looking To "undisclosed-recipients"
+
+header FAKED_UNDISC_RECIPS	To =~ /Undisclosed.*Recipient\S*@/i
+describe FAKED_UNDISC_RECIPS	Faked To "Undisclosed-Recipients"
 
 header SUBJ_ALL_CAPS		Subject =~ /^[A-Z0-9\W]{4,}[^a-z]+$/
 describe SUBJ_ALL_CAPS		Subject is all capitals
@@ -129,6 +132,9 @@ describe TO_EMPTY		To: is empty
 
 header REPLY_TO_EMPTY		Reply-To =~ /^(?:\@|\s*$)/ [if-unset: UNSET]
 describe REPLY_TO_EMPTY		Reply-To: is empty
+
+header ALL_CAPS_SUBJECT		ALL =~ /\nSUBJECT: /s
+describe ALL_CAPS_SUBJECT	SUBJECT: header found
 
 header X_EM_VER_PRESENT		X-Em-Version =~ /\S/
 describe X_EM_VER_PRESENT	Found an X-Em-Version: header
@@ -180,7 +186,7 @@ describe RCVD_IN_DUL		Received from a dialup IP, see http://www.mail-abuse.org/d
 header RCVD_IN_BL_SPAMCOP_NET	eval:check_rbl('bl.spamcop.net.')
 describe RCVD_IN_BL_SPAMCOP_NET	Received via a relay in bl.spamcop.net
 
-header FORGED_RCVD_FOUND	ALL =~ /\n(?:Date|Subject|From):.*\nReceived: .*\n\n/s
+header FORGED_RCVD_FOUND	ALL =~ /\n(?:Date|Subject|From|Reply-To):.*\nReceived: /s
 describe FORGED_RCVD_FOUND	Possibly-forged 'Received:' header found
 
 header YR_MEMBERSHIP_EXCH	Subject =~ /Your Membership Exchange/
@@ -257,7 +263,7 @@ body NUMERIC_HTTP_ADDR		/http\:\/\/\d+\//is
 body NORMAL_HTTP_TO_IP		/http\:\/\/\d+\.\d+\.\d+\.\d+\//is
 body LONG_NUMERIC_HTTP_ADDR	/http\:\/\/000\d+/is
 
-body SUPERLONG_LINE		/.{199,}/
+body SUPERLONG_LINE		/^[^<]{199,}$/m
 body ASCII_FORM_ENTRY		/[A-Za-z][A-Za-z]+.*\s+_{30,}/
 
 body AMAZING			/AMAZING/
@@ -395,6 +401,10 @@ describe BALANCE_FOR_LONG	Message text is over 500 lines long
 header USER_IN_WHITELIST	eval:check_from_in_whitelist()
 describe USER_IN_WHITELIST	From: address is in the user's white-list
 
+# the idea is that most legit newsletters will claim their copyright; spammers
+# do not seem to for some reason.  (Kevin Dangoor)
+body COPYRIGHT_CLAIMED		/copyright.*all rights reserved./i
+
 ###########################################################################
 # not quite spam, but dangerous/irritating nonetheless. Sircam worms etc.
 
@@ -409,139 +419,122 @@ describe SIRCAM_SIGNATURE	SECURITY: message contains the Sircam worm
 # algorithm to determine the optimum scores which resulted in minimum false
 # positives or negatives.
 
-score ADVERT_CODE 3.5
-score AMAZING 2.8
-score ANOTHER_NET_AD 0.3
-score AOL_USERS_LINK 0.3
-score ASCII_FORM_ENTRY 2.1
-score ASKS_BILLING_ADDRESS 0.0
-score A_HREF_TO_IP 0.9
-score A_HREF_TO_REMOVE 1.0
-score BASE64_ENC_TEXT 4.4
-score BILLION_DOLLARS 2.2
-score BILL_1618 0.5
-score BRAND_NEW_PAGER 2.5
-score BUGGY_CGI 4.7
-score BUGGY_CGI_DE 2.6
-score BUGGY_CGI_DE_2 0.8
-score BULK_EMAIL 0.8
-score CALL_1_800 1.0
-score CALL_888 3.2
-score CALL_NOW 2.6
-score CASHCASHCASH 1.0
-score CLICK_BELOW 4.7
-score CLICK_HERE_LINK 2.5
-score CORRUPT_MSGID 3.0
-score CYBER_FIRE_POWER 4.0
-score DEAR_FRIEND 0.7
-score DIGITAL_FX1 1.4
-score DIRECT_EMAIL 0.0
-score EMAIL_MARKETING 2.5
-score EXCUSE_1 4.7
-score EXCUSE_10 4.8
-score EXCUSE_11 2.5
-score EXCUSE_12 0.5
-score EXCUSE_13 3.6
-score EXCUSE_14 3.3
-score EXCUSE_15 2.8
-score EXCUSE_2 4.2
-score EXCUSE_3 2.5
-score EXCUSE_4 4.8
-score EXCUSE_5 2.7
-score EXCUSE_6 0.2
-score EXCUSE_7 1.7
-score EXCUSE_8 1.0
-score FILTERED_BY_WORLDREMOVE 2.4
-score FORGED_HOTMAIL_RCVD 3.6
-score FORM_W_MAILTO_ACTION 2.4
-score FOR_FREE 1.2
-score FREE_CONSULTATION 3.3
-score FREE_PRIORITY_MAIL 4.3
-score FRIEND_AT_PUBLIC 4.2
-score FROM_AND_TO_SAME 0.8
-score FROM_ENDS_IN_NUMS 1.1
-score FROM_FORGED_HOTMAIL 2.2
-score FROM_NAME_EQ_FROM_ADDR 4.2
-score FULL_REFUND 1.1
-score GREEN_EXCUSE_1 1.6
-score GREEN_EXCUSE_2 0.1
-score GUARANTEE 1.8
-score HTML_WITH_BGCOLOR 0.9
-score INCREASE_SALES 2.9
-score INTERNET_TERROR_RANT 0.0
-score INTL_EXEC_GUILD 1.2
-score INVALID_DATE 3.3
-score INVALID_DATE_NO_TZ 4.2
-score JAVASCRIPT 2.5
-score JUST_MAILED_PAGE 1.8
-score KNOWN_BAD_DIALUPS 1.4
-score LASER_PRINTER 1.4
-score LIMITED_TIME_ONLY 3.2
-score LONG_NUMERIC_HTTP_ADDR 1.7
-score LOTS_OF_CC_LINES 4.9
-score MAILTO_LINK 0.2
-score MAILTO_TO_SPAM_ADDR 1.5
-score MAILTO_WITH_SUBJ 1.8
-score MAILTO_WITH_SUBJ_REMOVE 2.0
-score MANY_FROMS 4.7
-score MASS_EMAIL 0.0
-score MAY_BE_FORGED 0.6
-score MDAEMON_2_7_4 2.4
-score MONEY_MAKING 3.2
-score MSGID_HAS_NO_AT 0.0
-score NORMAL_HTTP_TO_IP 3.0
-score NO_QS_ASKED 4.3
-score NO_REAL_NAME 2.6
-score NUMERIC_HTTP_ADDR 3.2
-score ONLINE_BIZ_OPS 3.1
-score OPPORTUNITY 4.3
-score OPT_IN 0.6
-score OSIRU_SPAMWARE_SITE 5.0
-score PARA_A_2_C_OF_1618 1.6
-score PENIS_ENLARGE 0.8
-score PLING 1.2
-score PLING_PLING 0.7
-score POPLAUNCH 1.5
-score PORN_1 1.4
-score PORN_2 3.8
-score PORN_3 0.0
-score POST_IN_RCVD 2.7
-score PRODUCED_AND_SENT_OUT 2.1
-score PROFITS 0.7
-score PURE_PROFIT 2.6
-score REALLY_UNSAFE_JAVASCRIPT 0.7
-score REMOVAL_INSTRUCTIONS 4.3
-score REMOVE_IN_QUOTES 0.2
-score REMOVE_SUBJ 1.7
-score REPLY_REMOVE_SUBJECT 0.4
-score REPLY_TO_EMPTY 1.9
-score SECTION_301 2.5
-score SENT_IN_COMPLIANCE 0.0
-score SHORT_RECEIVED_LINE 0.2
-score SIRCAM_SIGNATURE 10.0
-score SLIGHTLY_UNSAFE_JAVASCRIPT 0.1
-score SPAM_FORM 0.4
-score SPAM_FORM_INPUT 2.5
-score SPAM_FORM_RETURN 0.6
-score SUBJ_ALL_CAPS 1.2
-score SUBJ_ENDS_IN_Q_MARK 0.1
-score SUBJ_FULL_OF_8BITS 4.8
-score SUBJ_HAS_Q_MARK 1.4
-score SUBJ_HAS_UNIQ_ID 1.2
-score SUBJ_REMOVE 0.0
-score SUPERLONG_LINE 0.0
-score S_1618 3.5
-score TO_EMPTY 4.6
-score TRACKER_ID 2.0
-score UNDISC_RECIPS 2.3
-score WANTS_CREDIT_CARD 0.0
-score WEB_BUGS 0.2
-score WE_HONOR_ALL 3.3
-score X_EM_VER_PRESENT 4.2
-score X_MAILER_GIBBERISH 3.7
-score X_MSMAIL_PRIORITY_HIGH 0.3
-score X_PRIORITY_HIGH 2.5
-score YR_MEMBERSHIP_EXCH 4.7
+# Start of GA-evolved scores...
+
+score ADVERT_CODE                    3.2
+score AMAZING                        1.6
+score ANOTHER_NET_AD                 2.3
+score ASCII_FORM_ENTRY               1.8
+score A_HREF_TO_IP                   0.8
+score A_HREF_TO_REMOVE               1.1
+score BASE64_ENC_TEXT                4.9
+score BILLION_DOLLARS                3.0
+score BILL_1618                      1.0
+score BRAND_NEW_PAGER                0.4
+score BUGGY_CGI                      4.9
+score BULK_EMAIL                     4.1
+score CALL_1_800                     0.5
+score CALL_888                       3.4
+score CALL_NOW                       2.4
+score CASHCASHCASH                   1.5
+score CLICK_BELOW                    2.4
+score CLICK_HERE_LINK                2.2
+score CYBER_FIRE_POWER               3.0
+score DEAR_FRIEND                    0.9
+score EMAIL_MARKETING                1.2
+score EXCUSE_1                       2.6
+score EXCUSE_10                      4.5
+score EXCUSE_11                      1.1
+score EXCUSE_12                      0.5
+score EXCUSE_13                      2.8
+score EXCUSE_14                      0.6
+score EXCUSE_15                      2.3
+score EXCUSE_2                       0.5
+score EXCUSE_3                       2.2
+score EXCUSE_4                       1.8
+score EXCUSE_5                       3.1
+score EXCUSE_6                       1.3
+score EXCUSE_7                       3.9
+score EXCUSE_8                       4.7
+score FILTERED_BY_WORLDREMOVE        3.6
+score FORGED_HOTMAIL_RCVD            4.7
+score FORM_W_MAILTO_ACTION           3.6
+score FOR_FREE                       3.1
+score FREE_CONSULTATION              4.2
+score FRIEND_AT_PUBLIC               4.7
+score FROM_AND_TO_SAME               0.3
+score FROM_ENDS_IN_NUMS              1.6
+score FROM_FORGED_HOTMAIL            2.0
+score FROM_NAME_EQ_FROM_ADDR         4.8
+score FULL_REFUND                    3.8
+score GREEN_EXCUSE_1                 4.7
+score GREEN_EXCUSE_2                 1.8
+score GUARANTEE                      1.7
+score HTML_WITH_BGCOLOR              0.6
+score INCREASE_SALES                 2.0
+score INTL_EXEC_GUILD                1.1
+score INVALID_DATE                   2.7
+score INVALID_DATE_NO_TZ             3.9
+score JAVASCRIPT                     3.2
+score JUST_MAILED_PAGE               0.9
+score KNOWN_BAD_DIALUPS              2.3
+score LASER_PRINTER                  1.7
+score LIMITED_TIME_ONLY              4.0
+score LONG_NUMERIC_HTTP_ADDR         1.6
+score LOTS_OF_CC_LINES               2.7
+score MAILTO_LINK                    0.1
+score MAILTO_TO_SPAM_ADDR            1.3
+score MAILTO_WITH_SUBJ               1.8
+score MAILTO_WITH_SUBJ_REMOVE        3.4
+score MANY_FROMS                     4.5
+score MAY_BE_FORGED                  0.5
+score MDAEMON_2_7_4                  3.8
+score MONEY_MAKING                   3.3
+score NORMAL_HTTP_TO_IP              2.3
+score NO_QS_ASKED                    1.6
+score NO_REAL_NAME                   2.9
+score NUMERIC_HTTP_ADDR              3.8
+score OPPORTUNITY                    3.3
+score OPT_IN                         1.4
+score PARA_A_2_C_OF_1618             1.4
+score PENIS_ENLARGE                  0.5
+score PLING                          0.4
+score PLING_PLING                    1.4
+score POPLAUNCH                      3.9
+score PORN_2                         4.5
+score POST_IN_RCVD                   0.6
+score PRODUCED_AND_SENT_OUT          4.3
+score PROFITS                        0.9
+score PURE_PROFIT                    3.3
+score REALLY_UNSAFE_JAVASCRIPT       0.9
+score REMOVAL_INSTRUCTIONS           4.2
+score REMOVE_IN_QUOTES               0.3
+score REMOVE_SUBJ                    1.7
+score REPLY_REMOVE_SUBJECT           0.7
+score REPLY_TO_EMPTY                 1.4
+score SECTION_301                    4.2
+score SHORT_RECEIVED_LINE            0.1
+score SLIGHTLY_UNSAFE_JAVASCRIPT     0.5
+score SPAM_FORM                      3.5
+score SPAM_FORM_RETURN               2.4
+score SUBJ_ALL_CAPS                  0.4
+score SUBJ_ENDS_IN_Q_MARK            0.5
+score SUBJ_FULL_OF_8BITS             4.7
+score SUBJ_HAS_Q_MARK                1.6
+score SUBJ_HAS_UNIQ_ID               1.8
+score S_1618                         1.2
+score TO_EMPTY                       4.7
+score TRACKER_ID                     0.3
+score UNDISC_RECIPS                  2.0
+score WEB_BUGS                       0.5
+score WE_HONOR_ALL                   3.2
+score X_EM_VER_PRESENT               4.8
+score X_MAILER_GIBBERISH             4.4
+score X_MSMAIL_PRIORITY_HIGH         0.5
+score X_PRIORITY_HIGH                2.8
+score YR_MEMBERSHIP_EXCH             4.9
+
+# End of GA-evolved scores.
 
 
 # some non-GA-generated scores: either network tests or occuring with
@@ -561,6 +554,7 @@ score SHOES_GUY			5.0
 score EXCUSE_9			2.0
 score FILL_OUT_HERE		2.0
 score RELAYING_FRAME		5.0
+score SUPERLONG_LINE		1.0
 
 # unscored by default -- commercial services.  If you pay for these,
 # give them a score so they will be checked.
@@ -575,6 +569,7 @@ score RCVD_IN_BL_SPAMCOP_NET	0.0
 
 score BALANCE_FOR_LONG		-2.0
 score USER_IN_WHITELIST		-5.0
+score COPYRIGHT_CLAIMED		-2.0
 
 ###########################################################################
 # Some not-quite-spam scores; block common virii with these.  (it's feature
