@@ -41,7 +41,7 @@ sub report {
   my $text = $self->{main}->remove_spamassassin_markup ($self->{msg});
 
   if ($self->is_razor_available()) {
-    if ($self->razor_report('razor.vipul.net:2702', $text)) {
+    if ($self->razor_report($text)) {
       dbg ("SpamAssassin: spam reported to Razor.");
     }
   }
@@ -56,7 +56,7 @@ sub is_razor_available {
 
   eval '
     use Razor::Signature; 
-    use Razor::String;
+    use Razor::Client;
     $razor_avail = 1;
     1;
   ';
@@ -67,45 +67,24 @@ sub is_razor_available {
 }
 
 sub razor_report {
-  my ($self, $site, $fulltext) = @_;
+  my ($self, $fulltext) = @_;
 
-  my @msg = split (/\n/, $fulltext);
-
-  $site =~ /^(\S+):(\d+)$/;
-  my $Rserver = $1;
-  my $Rport   = $2;
-  my $sock = new IO::Socket::INET PeerAddr => $Rserver,
-                                  PeerPort => $Rport,
-                                  Proto    => 'tcp';
-  if (!$sock) {
-    dbg ("failed to connect to Razor server $Rserver:$Rport, ignoring Razor");
-    return 0;
-  }
-
-  my $sig = 'x';
-  my $response = '';
+  my @msg = split (/^/m, $fulltext);
+  my $config = $self->{conf}->{razor_config};
+  my %options = (
+    # 'debug'	=> 1
+  );
+  my $response;
 
   eval q{
-    use Razor::String;
+    use Razor::Client;
     use Razor::Signature; 
-
-    $sig = Razor::Signature->hash (\@msg);
-    undef @msg;         # no longer needed
-
-    my %message;
-    $message{'key'} = $sig;
-    $message{'action'} = "report";
-    my $str = Razor::String::hash2str ( {%message} );
-
-    $sock->autoflush;
-    print $sock "$str\n.\n";
-    $response = join ('', <$sock>);
+    my $client = new Razor::Client ($config, %options);
+    $response = $client->report ([@msg]);
     dbg ("Razor: spam reported, response is \"$response\".");
-    undef $sock;
+  1;} or warn "razor-report failed: $! $@";
 
-  1;} or warn "razor check failed: $! $@";
-
-  if ($response =~ /Accepted $sig/) { return 1; }
+  if ($response) { return 1; }
   return 0;
 }
 

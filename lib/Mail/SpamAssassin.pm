@@ -406,6 +406,14 @@ sub dbg {
   if ($Mail::SpamAssassin::DEBUG > 0) { warn "debug: ".join('',@_)."\n"; }
 }
 
+# sa_die -- used to die with a useful exit code.
+
+sub sa_die {
+  my $exitcode = shift;
+  warn @_;
+  exit $exitcode;
+}
+
 1;
 __END__
 

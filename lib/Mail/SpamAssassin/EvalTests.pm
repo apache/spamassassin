@@ -275,10 +275,10 @@ sub check_for_very_long_text {
 ###########################################################################
 
 sub check_razor {
-  my ($self, $fulltext, $site) = @_;
+  my ($self, $fulltext) = @_;
 
   return 0 unless ($self->is_razor_available());
-  return $self->razor_lookup ($site, $fulltext);
+  return $self->razor_lookup ($fulltext);
 }
 
 sub check_for_base64_enc_text {

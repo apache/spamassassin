@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 
 use Getopt::Std;
 
@@ -51,7 +51,7 @@ sub usage {
   my $ver = Mail::SpamAssassin::Version();
   my $rules = join ("\n\t\t\t\t", @Mail::SpamAssassin::default_rules_path);
   my $prefs = join ("\n\t\t\t\t", @Mail::SpamAssassin::default_userprefs_path);
-  die <<EOUSAGE;
+  warn <<EOUSAGE;
 
 Usage: spamassassin [option ...] < mailmessage
        spamassassin -P [option ...] < mailmessage > output
@@ -77,30 +77,32 @@ Options:
 Version: $ver      Home: http://spamassassin.taint.org/
 
 EOUSAGE
+  exit 64;		# == EX_USAGE
 }
 
-
-require Mail::SpamAssassin;
-require Mail::Audit;
 
 use vars qw{
   $opt_t $opt_c $opt_p $opt_h $opt_V $opt_D $opt_r $opt_P $opt_w $opt_l
   $opt_d $opt_L
 };
 
-getopts ('tc:p:hVDrPw:l:dL') or usage();
+eval {
+  require Mail::SpamAssassin;
+  require Mail::Audit;
 
-if (defined $opt_h) { usage(); }
-if (defined $opt_V) {
-  my $ver = Mail::SpamAssassin::Version();
-  print <<EOVERSION;
+  getopts ('tc:p:hVDrPw:l:dL') or usage();
+
+  if (defined $opt_h) { usage(); }
+  if (defined $opt_V) {
+    my $ver = Mail::SpamAssassin::Version();
+    print <<EOVERSION;
 SpamAssassin version $ver
 EOVERSION
-  exit 0;
-}
+    exit 0;
+  }
 
 # standard Mail::Audit start
-my $mail = Mail::Audit->new();
+  my $mail = Mail::Audit->new();
 
 # For Mail::Audit users -- this is the magic. Just create a Mail::SpamAssassin
 # object like this, then run the check() method as below; if it returns a
@@ -112,61 +114,68 @@ my $mail = Mail::Audit->new();
 # (This implementation does other stuff though, such as -t support; ignore that
 # stuff.)
 
-# finally, now that we've found the configuration, start testing the message...
-my $spamtest = new Mail::SpamAssassin ({
-  'rules_filename'	=> $opt_c,
-  'userprefs_filename'	=> $opt_p,
-  'local_tests_only'	=> $opt_L,
-  'debug'		=> $opt_D
-});
+# create the tester factory
+  my $spamtest = new Mail::SpamAssassin ({
+    'rules_filename'	=> $opt_c,
+    'userprefs_filename' => $opt_p,
+    'local_tests_only'	=> $opt_L,
+    'debug'		=> $opt_D
+  });
 
 # handle logging of received mails
-if ($opt_l) {
-  $mail->{noexit} = 1;
-  $mail->accept ($opt_l);
-  $mail->{noexit} = 0;
-}
+  if ($opt_l) {
+    $mail->{noexit} = 1;
+    $mail->accept ($opt_l);
+    $mail->{noexit} = 0;
+  }
 
 # handle removing reports
-if ($opt_d) {
-  print $spamtest->remove_spamassassin_markup ($mail);
-  $mail->ignore();		# will exit
-}
+  if ($opt_d) {
+    print $spamtest->remove_spamassassin_markup ($mail);
+    $mail->ignore();		# will exit
+  }
 
 # handle unconditional reportage
-if ($opt_r) {
-  $spamtest->report_as_spam ($mail);
-  if ($opt_w) {
-    $spamtest->reply_with_warning ($mail, $opt_w);
+  if ($opt_r) {
+    $spamtest->report_as_spam ($mail);
+    if ($opt_w) {
+      $spamtest->reply_with_warning ($mail, $opt_w);
+    }
+    $mail->ignore();		# will exit
   }
-  $mail->ignore();		# will exit
-}
 
 # not reporting? OK, do checks instead.  Create a status object which
 # holds details of the message's spam/not-spam status.
-my $status = $spamtest->check ($mail);
-$status->rewrite_mail ();
-$status->handle_auto_report ();
+  my $status = $spamtest->check ($mail);
+  $status->rewrite_mail ();
+  $status->handle_auto_report ();
 
-if ($opt_t) {
-  # add the spam report to the end of the body as well, if testing.
-  my $lines = $mail->{obj}->body();
-  push (@{$lines}, split (/$/, $status->get_report()));
-  $mail->{obj}->body ($lines);
-}
+  if ($opt_t) {
+    # add the spam report to the end of the body as well, if testing.
+    my $lines = $mail->{obj}->body();
+    push (@{$lines}, split (/$/, $status->get_report()));
+    $mail->{obj}->body ($lines);
+  }
 
 # if we're piping it, deliver it to stdout.
-if ($opt_t || $opt_P) {
-  $mail->{obj}->print (\*STDOUT);
-  exit;
-}
+  if ($opt_t || $opt_P) {
+    $mail->{obj}->print (\*STDOUT);
+    exit;
+  }
 
 # else, store it to the mail spool (thx to Mail::Audit)
 # $MAIL: std on unix
 # $DEFAULT: set by procmail
-my $where = $ENV{'MAIL'} || $ENV{'DEFAULT'} || undef;
-$mail->accept($where);
-exit;
+  my $where = $ENV{'MAIL'} || $ENV{'DEFAULT'} || undef;
+  $mail->accept($where);
+  exit;
+};
+
+if ($@) {	
+  # eval failed; we died somewhere in there.
+  warn $@;
+  exit 70;		# == EX_SOFTWARE in sysexits.h. caught by MTA
+}
 
 
 
