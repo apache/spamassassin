@@ -566,8 +566,7 @@ sub dcc_lookup {
     $self->{conf}->{dcc_options} =~ /^([^\;\'\"\0]+)$/;
     my $opts = $1;
 
-    my $pid = open(DCC, join(' ', $path, '-H',
-				$opts, '< \''.$tmpf.'\' 2>&1 |'));
+    my $pid = open(DCC, join(' ', $path, "-H", $opts, "< '$tmpf.'", "2>&1", '|')) || die "$!\n";
     $response = <DCC>;
     close DCC;
 
@@ -581,24 +580,24 @@ sub dcc_lookup {
 
   if ($@) {
     $response = undef;
-    if ($@ =~ /alarm/) {
-      dbg ("DCC check timed out after 10 secs.");
-      timelog("DCC -> interrupted after $timeout secs", "dcc", 2);
+    if ($@ eq 'alarm') {
+      dbg ("DCC -> check timed out after $timeout secs.");
+      timelog("DCC interrupted after $timeout secs", "dcc", 2);
       return 0;
-    } elsif ($@ =~ /brokenpipe/) {
-      dbg ("DCC -> check failed - Broken pipe.");
-      timelog("dcc check failed, broken pipe", "dcc", 2);
+    } elsif ($@ eq 'brokenpipe') {
+      dbg ("DCC -> check failed: Broken pipe.");
+      timelog("DCC check failed, broken pipe", "dcc", 2);
       return 0;
     } else {
-      warn ("DCC -> check skipped: $! $@");
-      timelog("dcc check skipped", "dcc", 2);
+      warn ("DCC -> check failed: $@\n");
+      timelog("DCC check failed", "dcc", 2);
       return 0;
     }
   }
 
-  if (!defined $response || $response !~ /^X-DCC/) {
-    dbg ("DCC -> check failed - no X-DCC returned (did you create a map file?): $response");
-    timelog("dcc check failed", "dcc", 2);
+  if (!defined($response) || $response !~ /^X-DCC/) {
+    dbg ("DCC -> check failed: no X-DCC returned (did you create a map file?): $response");
+    timelog("DCC check failed", "dcc", 2);
     return 0;
   }
 
@@ -688,7 +687,7 @@ sub pyzor_lookup {
     # Note: not really tainted, this comes from system conf file.
     my $path = Mail::SpamAssassin::Util::untaint_file_path ($self->{conf}->{pyzor_path});
 
-    my $pid = open(PYZOR, join(' ', $path, 'check < \''.$tmpf.'\' 2>&1 |'));
+    my $pid = open(PYZOR, join(' ', $path, "check", "< '$tmpf'", "2>&1", '|')) || die "$!\n";
     $response = <PYZOR>;
     close PYZOR;
     dbg("Pyzor: got response: $response");
@@ -701,17 +700,17 @@ sub pyzor_lookup {
 
   if ($@) {
     $response = undef;
-    if ($@ =~ /alarm/) {
-      dbg ("Pyzor check timed out after 10 secs.");
-      timelog("Pyzor -> interrupted after $timeout secs", "pyzor", 2);
+    if ($@ eq 'alarm') {
+      dbg ("Pyzor -> check timed out after $timeout secs.");
+      timelog("Pyzor interrupted after $timeout secs", "pyzor", 2);
       return 0;
-    } elsif ($@ =~ /brokenpipe/) {
-      dbg ("Pyzor -> check failed - Broken pipe.");
+    } elsif ($@ eq 'brokenpipe') {
+      dbg ("Pyzor -> check failed: Broken pipe.");
       timelog("Pyzor check failed, broken pipe", "pyzor", 2);
       return 0;
     } else {
-      warn ("Pyzor -> check skipped: $! $@");
-      timelog("Pyzor check skipped", "pyzor", 2);
+      warn ("Pyzor -> check failed: $@\n");
+      timelog("Pyzor check failed", "pyzor", 2);
       return 0;
     }
   }
