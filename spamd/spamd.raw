@@ -1599,6 +1599,8 @@ sub logmsg {
   $msg =~ s/[\r\n]+$//;       # remove any trailing newlines
   $msg =~ s/[\x00-\x1f]/_/g;  # replace all other control chars with underscores
 
+  warn "logmsg: $msg\n" if $opt{'debug'};
+
   # log to file:
   #   bug 1360 <http://bugzilla.spamassassin.org/show_bug.cgi?id=1360>
   #   enable logging to a file via --syslog=file or --syslog=/path/to/file
