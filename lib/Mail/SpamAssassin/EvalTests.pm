@@ -66,11 +66,11 @@ sub check_for_from_mx {
 
   # Try 3 times to protect against temporary outages.  sleep between checks
   # to give the DNS a chance to recover.
-  for my $i (1..3) {
+  for my $i (1..$self->{conf}->{check_mx_attempts}) {
     my @mx = Net::DNS::mx ($self->{res}, $from);
     dbg ("DNS MX records found: ".scalar (@mx));
     if (scalar @mx > 0) { return 0; }
-    sleep 5;
+    if ($i < $self->{conf}->{check_mx_attempts}) {sleep $self->{conf}->{check_mx_delay}; };
   }
 
   return 1;

@@ -62,6 +62,8 @@ sub new {
   $self->{use_terse_report} = 0;
   $self->{defang_mime} = 1;
   $self->{skip_rbl_checks} = 0;
+  $self->{check_mx_attempts} = 2;
+  $self->{check_mx_delay} = 5;
   $self->{ok_locales} = '';
 
   $self->{whitelist_from} = { };
@@ -204,6 +206,14 @@ sub _parse {
 
     if (/^skip[-_]rbl[-_]checks\s+(\d+)$/) {
       $self->{skip_rbl_checks} = $1+0; next;
+    }
+
+    if (/^check[-_]mx[-_]attempts\s+(\S+)$/) {
+      $self->{check_mx_attempts} = $1+0; next;
+    }
+
+    if (/^check[-_]mx[-_]delay\s+(\S+)$/) {
+      $self->{check_mx_delay} = $1+0; next;
     }
 
     if (/^ok[-_]locales\s+(.+)$/) {
