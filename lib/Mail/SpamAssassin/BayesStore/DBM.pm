@@ -157,7 +157,7 @@ sub tie_db_readonly {
 
   # If the DB version is one we don't understand, abort!
   if ( $self->_check_db_version() != 0 ) {
-    dbg("bayes: bayes db version ".$self->{db_version}." is not able to be used, aborting!");
+    warn("bayes: bayes db version ".$self->{db_version}." is not able to be used, aborting!");
     $self->untie_db();
     return 0;
   }
@@ -302,7 +302,7 @@ sub _upgrade_db {
 
   # If the DB is a newer version that we know what to do with ... abort!
   if ( $verschk == 1 ) {
-    dbg("bayes: bayes db version ".$self->{db_version}." is newer than we understand, aborting!");
+    warn("bayes: bayes db version ".$self->{db_version}." is newer than we understand, aborting!");
     return 0;
   }
 
@@ -1527,7 +1527,7 @@ sub restore_database {
   }
 
   unless ($db_version == 2 || $db_version == 3) {
-    dbg("bayes: Database Version $db_version is unsupported, must be version 2 or 3.");
+    warn("bayes: Database Version $db_version is unsupported, must be version 2 or 3.");
     untie %new_toks;
     untie %new_seen;
     unlink $tmptoksdbname;
