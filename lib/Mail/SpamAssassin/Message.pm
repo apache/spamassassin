@@ -125,61 +125,86 @@ sub new {
     @message = split ( /^/m, $message );
   }
 
+  return $self unless @message;
+
+  # Pull off mbox and mbx separators
+  if ( $message[0] =~ /^From\s/ ) {
+    # mbox formated mailbox
+    $self->{'mbox_sep'} = shift @message;
+  } elsif ($message[0] =~ MBX_SEPARATOR) {
+    $_ = shift @message;
+
+    # Munge the mbx message separator into mbox format as a sort of
+    # de facto portability standard in SA's internals.  We need to
+    # to this so that Mail::SpamAssassin::Util::parse_rfc822_date
+    # can parse the date string...
+    if (/([\s|\d]\d)-([a-zA-Z]{3})-(\d{4})\s(\d{2}):(\d{2}):(\d{2})/) {
+      # $1 = day of month
+      # $2 = month (text)
+      # $3 = year
+      # $4 = hour
+      # $5 = min
+      # $6 = sec
+      my @arr = localtime(timelocal($6,$5,$4,$1,$MONTH{lc($2)}-1,$3));
+      my $address;
+      foreach (@message) {
+  	if (/From:\s[^<]+<([^>]+)>/) {
+  	    $address = $1;
+  	    last;
+  	} elsif (/From:\s([^<^>]+)/) {
+  	    $address = $1;
+  	    last;
+  	}
+      }
+      $self->{'mbox_sep'} = "From $address $DAY_OF_WEEK[$arr[6]] $2 $1 $4:$5:$6 $3\n";
+    }
+  }
+
   # Go through all the headers of the message
   my $header = '';
   my $boundary;
   while ( my $current = shift @message ) {
-    if ( $current =~ /^From\s/ ) {
-	# mbox formated mailbox
-	$self->{'mbox_sep'} = $current;
-	next;
-    } elsif ($current =~ MBX_SEPARATOR) {
-	# Munge the mbx message separator into mbox format as a sort of
-	# de facto portability standard in SA's internals.  We need to
-	# to this so that Mail::SpamAssassin::Util::parse_rfc822_date
-	# can parse the date string...
-	if (/([\s|\d]\d)-([a-zA-Z]{3})-(\d{4})\s(\d{2}):(\d{2}):(\d{2})/o) {
-	    # $1 = day of month
-	    # $2 = month (text)
-	    # $3 = year
-	    # $4 = hour
-	    # $5 = min
-	    # $6 = sec
-	    my @arr = localtime(timelocal($6,$5,$4,$1,$MONTH{lc($2)}-1,$3));
-	    my $address;
-	    foreach (@message) {
-		if (/From:\s[^<]+<([^>]+)>/) {
-		    $address = $1;
-		    last;
-		} elsif (/From:\s([^<^>]+)/) {
-		    $address = $1;
-		    last;
-		}
-	    }
-	    $self->{'mbox_sep'} = "From $address $DAY_OF_WEEK[$arr[6]] $2 $1 $4:$5:$6 $3\n";
-	    next;
-	}
-    }
-
-    # Store the non-modified headers in a scalar
-    # if missing_head_body_separator is set, this is the last run through, to
-    # deal with the last header in the message.
     unless ($self->{'missing_head_body_separator'}) {
       $self->{'pristine_headers'} .= $current;
-
-      # Check for missing head/body separator and deal appropriately
-      if (!@message || (defined $boundary && $message[0] =~ /^--\Q$boundary\E(?:--|\s*$)/)) {
-	# No body or no separator before mime boundary is invalid
-        $self->{'missing_head_body_separator'} = 1;
-	unshift(@message, "\n");
-      }
     }
 
     # NB: Really need to figure out special folding rules here!
-    if ( $current =~ /^[ \t]+/ ) {                    # if its a continuation
+    if ( $current =~ /^[ \t]+\S/ ) {
+      # append continuations if there's a header in process
       if ($header) {
-        $header .= $current;                            # fold continuations
+        $header .= $current;
+      }
+    }
+    else {
+      # Ok, there's a header here, let's go ahead and add it in.
+      if ($header) {
+        # Yes, the /s is needed to match \n too.
+        my ($key, $value) = split (/:\s*(?=.)/s, $header, 2);
 
+        # If it's not a valid header (aka: not in the form "foo: bar"), skip it.
+        if (defined $value) {
+	  # limit the length of the pairs we store
+	  if (length($key) > MAX_HEADER_KEY_LENGTH) {
+	    $key = substr($key, 0, MAX_HEADER_KEY_LENGTH);
+	    $self->{'truncated_header'} = 1;
+	  }
+	  if (length($value) > MAX_HEADER_VALUE_LENGTH) {
+	    $value = substr($value, 0, MAX_HEADER_VALUE_LENGTH);
+	    $self->{'truncated_header'} = 1;
+	  }
+          $self->header($key, $value);
+        }
+      }
+
+      # not a continuation...
+      $header = $current;
+    }
+
+    if ($header) {
+      if ($header =~ /^\r?$/) {
+        last;
+      }
+      else {
 	# If we're currently dealing with a content-type header, and there's a
 	# boundary defined, use it.  Since there could be multiple
 	# content-type headers in a message, the last one will be the one we
@@ -188,48 +213,17 @@ sub new {
 	  my($type,$temp_boundary) = Mail::SpamAssassin::Util::parse_content_type($1);
 	  $boundary = $temp_boundary if (defined $temp_boundary);
 	}
-      }
 
-      # we'll just ignore if there's no header already set, for now.
-
-      next;
-    }
-
-    # Ok, there's a header here, let's go ahead and add it in.
-    if ($header) {
-      # Yes, the /s is needed to match \n too.
-      my ($key, $value) = split (/:\s*(?=.)/s, $header, 2);
-
-      # If it's not a valid header (aka: not in the form "foo: bar"), skip it.
-      if (defined $value) {
-	# limit the length of the pairs we store
-	if (length($key) > MAX_HEADER_KEY_LENGTH) {
-	  $key = substr($key, 0, MAX_HEADER_KEY_LENGTH);
-	  $self->{'truncated_header'} = 1;
-	}
-	if (length($value) > MAX_HEADER_VALUE_LENGTH) {
-	  $value = substr($value, 0, MAX_HEADER_VALUE_LENGTH);
-	  $self->{'truncated_header'} = 1;
-	}
-        $self->header($key, $value);
-
-	# If we're currently dealing with a content-type header, and there's a
-	# boundary defined, use it.  Since there could be multiple
-	# content-type headers in a message, the last one will be the one we
-	# should use, so just keep updating as they come in.
-        if (lc $key eq 'content-type') {
-	  my($type,$temp_boundary) = Mail::SpamAssassin::Util::parse_content_type($value);
-	  $boundary = $temp_boundary if (defined $temp_boundary);
-	}
+        # Check for missing head/body separator
+        if (!@message || (defined $boundary && $message[0] =~ /^--\Q$boundary\E(?:--|\s*$)/)) {
+	  # No body or no separator before mime boundary is invalid
+          $self->{'missing_head_body_separator'} = 1;
+	  unshift(@message, "\n");
+        }
       }
     }
-
-    # Ok, we found the header/body blank line ...
-    last if ($current =~ /^\r?$/);
-
-    # not a continuation...
-    $header = $current;
   }
+  undef $header;
 
   # Store the pristine body for later -- store as a copy since @message
   # will get modified below
