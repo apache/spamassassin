@@ -738,34 +738,35 @@ sub _build_status_line {
   my ($self) = @_;
   my $line;
 
-  $line  = ($self->is_spam() ? "Yes, " : "No, ");
-  $line .= sprintf("hits=%2.1f required=%2.1f\n",
-             $self->{hits}, $self->{conf}->{required_hits});
+  # Prepare Text::Wrap
+  $Text::Wrap::columns   = 74;
+  $Text::Wrap::huge      = 'overflow';
+  $Text::Wrap::break     = '(?<=,)';
 
-  if($_ = $self->get_names_of_tests_hit()) {
-    if ( $self->{conf}->{fold_headers} ) { # Fold the headers!
-      $Text::Wrap::columns   = 74;
-      $Text::Wrap::huge      = 'overflow';
-      $Text::Wrap::break     = '(?<=,)';
-      $line .= Text::Wrap::wrap("\ttests=", "\t      ", $_) . "\n";
-    }
-    else {
-      $line .= "\ttests=$_";
-    }
-  } else {
-    $line .= "\ttests=none\n";
-  }
+  # Add summary (flag & hits)
+  $line  = sprintf("%s, hits=%2.1f required=%2.1f\n",
+             $self->is_spam() ? "Yes" : "No",
+             $self->{hits}, $self->{conf}->{required_hits}
+           );
 
+  # Add list of tests hit
+  $line .= Text::Wrap::wrap("\ttests=", "\t      ", 
+             $self->get_names_of_tests_hit() || "none"
+           ) . "\n";
+
+  # Add autolearn status and version
+  $line .= "\t";
   if ( defined $self->{auto_learn_status} ) {
-    $line .= "\tautolearn=";
-    $line .= $self->{auto_learn_status} ? "spam" : "ham";
+    $line .= sprintf("autolearn=%s ", 
+               $self->{auto_learn_status} ? "spam" : "ham"
+             );
   }
+  $line .= sprintf("version=%s", Mail::SpamAssassin::Version());
 
-  $line .= "\tversion=" . Mail::SpamAssassin::Version();
-
-  # If the configuration says no folded headers, unfold what we have.
+  # If the configuration says no folded headers, unfold what we have
   if ( ! $self->{conf}->{fold_headers} ) {
-    $line =~ s/\s+/ /g;
+    $line =~ s/\n\t\s+//g;  # unfold the list of tests first
+    $line =~ s/\n\t/ /g;    # unfold all other lines
   }
 
   return $line;
