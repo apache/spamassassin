@@ -4,6 +4,7 @@ package Mail::SpamAssassin::Dns;
 package Mail::SpamAssassin::PerMsgStatus;
 
 use Mail::SpamAssassin::Conf;
+use Mail::SpamAssassin::PerMsgStatus;
 use File::Spec;
 use IO::Socket;
 use IPC::Open2;
@@ -109,100 +110,169 @@ BEGIN {
 ###########################################################################
 
 sub do_rbl_lookup {
-  my ($self, $set, $dom, $ip, $found, $dialupreturn, $needresult) = @_;
-  my $socket;
-  my @addr=();
-  my $maxwait=$self->{conf}->{rbl_timeout};
+  my ($self, $set, $usetxt, $dom, $ip, $found) = @_;
+
   return $found if $found;
 
-  my $gotdialup=0;
-  my $domainonly;
-  ($domainonly = $dom) =~ s/^\d+\.\d+\.\d+\.\d+.//;
-  $domainonly =~ s/\.?$/./;
+  # add these as tmp items on $self, to save passing around as args
+  $self->{rbl_set} = $set;
+  $self->{rbl_dom} = $dom;
+  $self->{rbl_usetxt} = $usetxt;
+  $self->{rbl_ip} = $ip;
 
   if (defined $self->{dnscache}->{rbl}->{$dom}->{result}) {
-    dbg("Found $dom in our DNS cache. Yeah!", "rbl", -1);
-    @addr = @{$self->{dnscache}->{rbl}->{$dom}->{result}};
-  } elsif (not defined $self->{dnscache}->{rbl}->{$dom}->{socket}) {
-    dbg("Launching DNS query for $dom in the background", "rbl", -1);
-    $self->{dnscache}->{rbl}->{$dom}->{socket}=$self->{res}->bgsend($dom);
-    $self->{dnscache}->{rbl}->{$dom}->{time}=time;
-    return 0;
-  } elsif (not $needresult) {
-    dbg("Second batch query for $dom, ignoring since we have one pending", "rbl", -1);
-    return 0;
+    dbg("rbl: found $dom in our DNS cache. Yeah!", "rbl", -1);
+    return $self->handle_dnsbl_results();
+
+  } elsif (!defined $self->{dnscache}->{rbl}->{$dom}->{bgsock}) {
+    $self->launch_dnsbl_query();
+
+  } elsif ($self->{rbl_pass} ==
+	    $Mail::SpamAssassin::PerMsgStatus::RBL_PASS_LAUNCH_QUERIES)
+  {
+    dbg("rbl: second query for $dom ignored, we have one pending", "rbl", -1);
+
+  } elsif ($self->{rbl_pass} ==
+	    $Mail::SpamAssassin::PerMsgStatus::RBL_PASS_HARVEST_RESULTS)
+  {
+    if ($self->wait_for_dnsbl_results()) {
+      return $self->handle_dnsbl_results();
+    }
+
   } else {
-    timelog("RBL -> Waiting for result on $dom", "rbl", 1);
-    $socket=\$self->{dnscache}->{rbl}->{$dom}->{socket};
-    
-    while (not $self->{res}->bgisready($$socket)) {
-      last if (time - $self->{dnscache}->{rbl}->{$dom}->{time} > $maxwait);
-      sleep 1;
-    }
-
-    if (not $self->{res}->bgisready($$socket)) {
-      timelog("RBL -> Timeout on $dom", "rbl", 2);
-      dbg("Query for $dom timed out after $maxwait seconds", "rbl", -1);
-      undef($$socket);
-      return 0;
-    } else {
-      my $packet = $self->{res}->bgread($$socket);
-      undef($$socket);
-      foreach $_ ($packet->answer) {
-	dbg("Query for $dom yielded: ".$_->rdatastr, "rbl", -2);
-	if ($_->type eq "A") {
-	  push(@addr, $_->rdatastr);
-	}
-      }
-      $self->{dnscache}->{rbl}->{$dom}->{result} = \@addr;
-    }
+    warn "oops! unknown RBL pass $self->{rbl_pass}";
   }
 
-  if (@addr) {
-    foreach my $addr (@addr) {
-
-      # 127.0.0.2 is the traditional boolean indicator, don't log it
-      # 127.0.0.3 now also means "is a dialup IP" (only if set is dialup
-      # -- Marc)
-      if ($addr ne '127.0.0.2' and 
-	      not ($addr eq '127.0.0.3' and $set =~ /^dialup/)) {
-	$self->test_log ("RBL check: found ".$dom.", type: ".$addr);
-      } else {
-	$self->test_log ("RBL check: found ".$dom);
-      }
-      dbg("RBL check: found $dom, type: $addr", "rbl", -2);
-
-      $self->{$set}->{rbl_IN_As_found} .= $addr.' ';
-      $self->{$set}->{rbl_matches_found} .= $ip.' ';
-
-      # If $dialupreturn is a reference to a hash, we were told to ignore
-      # dialup IPs, let's see if we have a match
-      if ($dialupreturn) {
-	my $toign;
-	dbg("Checking dialup_codes for $addr as a DUL code for $domainonly", "rbl", -2);
-
-	foreach $toign (keys %{$dialupreturn}) {
-	  dbg("Comparing against $toign/".$dialupreturn->{$toign}, "rbl", -3);
-	  $toign =~ s/\.?$/./;
-	  if ($domainonly eq $toign and $addr eq $dialupreturn->{$toign}) {
-	    dbg("Got $addr in $toign for $ip, good, we'll take it", "rbl", "-3");
-	    $gotdialup=1;  
-	    last;
-	  }
-	}
-
-	if (not $gotdialup) {
-	  dbg("Ignoring return $addr for $ip, not known as dialup for $domainonly in dialup_code variable", "rbl", -2);
-	  next;
-	}
-      }
-
-      timelog("RBL -> match on $dom", "rbl", 2);
-      return 1;
-    }
-  }
-  timelog("RBL -> No match on $dom", "rbl", 2);
   return 0;
+}
+
+###########################################################################
+
+sub launch_dnsbl_query {
+  my ($self) = @_;
+
+  my $dom = $self->{rbl_dom};
+  dbg("rbl: launching DNS query for $dom in the background", "rbl", -1);
+
+  $self->{dnscache}->{rbl}->{$dom}->{bgsock} =
+	      $self->{res}->bgsend($dom, ($self->{rbl_usetxt} ? 'TXT' : 'A'));
+  $self->{dnscache}->{rbl}->{$dom}->{launchtime} = time;
+}
+
+###########################################################################
+
+sub wait_for_dnsbl_results {
+  my ($self) = @_;
+
+  my $dom = $self->{rbl_dom};
+  dbg("rbl: waiting for result on $dom", "rbl", -1);
+  timelog("rbl: Waiting for result on $dom", "rbl", 1);
+
+  my $bgsock;
+  $bgsock=\$self->{dnscache}->{rbl}->{$dom}->{bgsock};
+
+  my $maxwait=$self->{conf}->{rbl_timeout};
+  
+  while (!$self->{res}->bgisready($$bgsock)) {
+    last if (time - $self->{dnscache}->{rbl}->{$dom}->{launchtime} > $maxwait);
+    sleep 1;
+  }
+
+  if (!$self->{res}->bgisready($$bgsock)) {
+    timelog("rbl: Timeout on $dom", "rbl", 2);
+    dbg("rbl: query for $dom timed out after $maxwait seconds", "rbl", -1);
+    undef($$bgsock);
+    return 0;
+
+  } else {
+    dbg("rbl: query returned for $dom", "rbl", -1);
+    my $packet = $self->{res}->bgread($$bgsock);
+    undef($$bgsock);
+
+    my @addr = ();
+    my @txt = ();
+
+    foreach my $ansitem ($packet->answer) {
+      dbg("rbl: query for $dom yielded: ".$ansitem->rdatastr, "rbl", -2);
+
+      if ($ansitem->type eq "A") {
+	push(@addr, $ansitem->rdatastr);
+
+      } elsif ($ansitem->type eq "TXT") {
+	my $txt = $ansitem->rdatastr;
+	$txt =~ s/^\"//; $txt =~ s/\"$//;
+	push(@txt, $txt);
+	push(@addr, '127.0.0.2');
+      }
+    }
+
+    # IN A and IN TXT results.  Note that an IN TXT will never *not* be
+    # accompanied by an IN A; we generate 127.0.0.2 IN A results artificially
+    # if we receive an IN TXT result.
+
+    $self->{dnscache}->{rbl}->{$dom}->{result} = \@addr;
+    $self->{dnscache}->{rbl}->{$dom}->{result_txt} = \@txt;
+  }
+  return 1;
+}
+
+###########################################################################
+
+sub handle_dnsbl_results {
+  my ($self) = @_;
+
+  my $dom = $self->{rbl_dom};
+  my @addr = @{$self->{dnscache}->{rbl}->{$dom}->{result}};
+  my @txt = @{$self->{dnscache}->{rbl}->{$dom}->{result_txt}};
+
+  if (scalar @addr <= 0) {
+    timelog("rbl: no match on $dom", "rbl", 2);
+    return 0;
+  }
+
+  my $set = $self->{rbl_set};
+  my $ip = $self->{rbl_ip};
+  foreach my $addr (@addr) {
+    my $txt = pop (@txt);
+
+    # 127.0.0.2 is the traditional boolean indicator, don't log it
+    # 127.0.0.3 now also means "is a dialup IP" (only if set is dialup
+    # -- Marc)
+    if (defined $txt) {
+      $self->test_log ("RBL check: found ".$dom.":");
+      $self->test_log ("\"".$txt."\"");
+
+    } elsif ($addr ne '127.0.0.2' and 
+	    !($addr eq '127.0.0.3' and $set =~ /^dialup/))
+    {
+      $self->test_log ("RBL check: found ".$dom.", type: ".$addr);
+
+    } else {
+      $self->test_log ("RBL check: found ".$dom);
+    }
+
+    dbg("rbl: check found $dom, type: $addr", "rbl", -2);
+
+    $self->{$set}->{rbl_IN_As_found} .= $addr.' ';
+    $self->{$set}->{rbl_IN_TXTs_found} .= $txt.' ';
+    $self->{$set}->{rbl_matches_found} .= $ip.' ';
+  }
+
+  timelog("rbl: match on $dom", "rbl", 2);
+  return 1;
+}
+
+###########################################################################
+
+sub rbl_finish {
+  my ($self) = @_;
+
+  delete $self->{rbl_set};
+  delete $self->{rbl_dom};
+  delete $self->{rbl_usetxt};
+  delete $self->{rbl_ip};
+  delete $self->{dnscache}->{rbl};		# TODO: make it persistent?
+  delete $self->{dnscache};
 }
 
 ###########################################################################

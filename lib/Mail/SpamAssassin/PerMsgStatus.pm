@@ -45,15 +45,18 @@ use Mail::SpamAssassin::HTML;
 use Mail::SpamAssassin::Received;
 use Mail::SpamAssassin::Util;
 
-use constant HAS_MIME_BASE64 => eval { require MIME::Base64; };
+use constant HAS_MIME_BASE64 =>		eval { require MIME::Base64; };
 
-use constant MAX_BODY_LINE_LENGTH => 2048;
+use constant MAX_BODY_LINE_LENGTH =>	2048;
 
 use vars qw{
-  @ISA $base64alphabet
+  @ISA $base64alphabet $RBL_PASS_LAUNCH_QUERIES $RBL_PASS_HARVEST_RESULTS
 };
 
 @ISA = qw();
+
+$RBL_PASS_LAUNCH_QUERIES	= 1;
+$RBL_PASS_HARVEST_RESULTS	= 2;
 
 ###########################################################################
 
@@ -130,9 +133,13 @@ sub check {
     # "Rulename -> " so that it's easy to pick out details from the overview
     # -- Marc
     timelog("Launching RBL queries in the background", "rblbg", 1);
+
     # Here, we launch all the DNS RBL queries and let them run while we
     # inspect the message -- Marc
-    $self->do_rbl_eval_tests(0);
+
+    $self->{rbl_pass} = $RBL_PASS_LAUNCH_QUERIES;
+    $self->run_rbl_eval_tests ($self->{conf}->{rbl_evals});
+
     timelog("Finished launching RBL queries in the background", "rblbg", 22);
 
     timelog("Starting head tests", "headtest", 1);
@@ -178,11 +185,17 @@ sub check {
     $self->do_head_eval_tests();
     timelog("Finished head eval tests", "headevaltest", 2);
 
-    timelog("Starting RBL tests (will wait up to $self->{conf}->{rbl_timeout} secs before giving up)", "rblblock", 1);
+    timelog("Starting RBL tests (will wait up to ".$self->{conf}->{rbl_timeout}
+		." secs before giving up)", "rblblock", 1);
+
     # This time we want to harvest the DNS results -- Marc
-    $self->do_rbl_eval_tests(1);
+    $self->{rbl_pass} = $RBL_PASS_HARVEST_RESULTS;
+    $self->run_rbl_eval_tests ($self->{conf}->{rbl_evals});
+
     # And now we can compute rules that depend on those results
-    $self->do_rbl_res_eval_tests();
+    $self->run_rbl_eval_tests ($self->{conf}->{rbl_res_evals});
+    $self->rbl_finish();
+
     timelog("Finished all RBL tests", "rblblock", 2);
 
     # Do meta rules second-to-last
@@ -818,6 +831,8 @@ sub finish {
   if (exists $self->{main}->{bayes_scanner}) {
     $self->{main}->{bayes_scanner}->finish();
   }
+
+  $self->rbl_finish();
 
   delete $self->{body_text_array};
   delete $self->{main};
@@ -1853,17 +1868,6 @@ EOT
 
 ###########################################################################
 
-sub do_rbl_eval_tests {
-  my ($self, $needresult) = @_;
-  $self->run_rbl_eval_tests ($self->{conf}->{rbl_evals}, $needresult);
-}
-
-sub do_rbl_res_eval_tests {
-  my ($self) = @_;
-  # run_rbl_eval_tests doesn't process check returns unless you set needresult
-  $self->run_rbl_eval_tests ($self->{conf}->{rbl_res_evals}, 1);
-}
-
 sub do_head_eval_tests {
   my ($self) = @_;
   $self->run_eval_tests ($self->{conf}->{head_evals}, '');
@@ -2112,7 +2116,7 @@ sub run_eval_tests {
 ###########################################################################
 
 sub run_rbl_eval_tests {
-  my ($self, $evalhash, $needresult) = @_;
+  my ($self, $evalhash) = @_;
   my ($rulename, $pat, @args);
   local ($_);
 
@@ -2124,34 +2128,32 @@ sub run_rbl_eval_tests {
   my $debugenabled = $Mail::SpamAssassin::DEBUG->{enabled};
 
   while (my ($rulename, $test) = each %{$evalhash}) {
-    next unless ($self->{conf}->{scores}->{$rulename});
-    my $score = $self->{conf}{scores}{$rulename};
-    my $result;
+    my $score = $self->{conf}->{scores}->{$rulename};
+    next unless $score;
 
     $self->{test_log_msgs} = '';	# clear test state
 
     my ($function, @args) = @{$test};
 
+    my $result;
     eval {
-       $result = $self->$function(@args, $needresult);
+       $result = $self->$function(@args);
     };
 
-    # A run with $job eq 0 is just to start DNS queries
-    if ($needresult eq 1)
-    {
-	if ($@) {
-	  warn "Failed to run $rulename RBL SpamAssassin test, skipping:\n".
-		    "\t($@)\n";
-          $self->{rule_errors}++;
-	  next;
-	}
+    if ($@) {
+      warn "Failed to run $rulename RBL SpamAssassin test, skipping:\n".
+		"\t($@)\n";
+      $self->{rule_errors}++;
+      next;
+    }
 
-	if ($result) {
-	    $self->got_hit ($rulename, "RBL: ");
-	    dbg("Ran run_rbl_eval_test rule $rulename ======> got hit", "rulesrun", 64) if $debugenabled;
-	} else {
-            #dbg("Ran run_rbl_eval_test rule $rulename but did not get hit", "rulesrun", 64) if $debugenabled;
-	}
+    if ($self->{rbl_pass} == $RBL_PASS_HARVEST_RESULTS) {
+      if ($result) {
+	$self->got_hit ($rulename, "RBL: ");
+	dbg("Ran run_rbl_eval_test rule $rulename ======> got hit", "rulesrun", 64) if $debugenabled;
+      } else {
+	#dbg("Ran run_rbl_eval_test rule $rulename but did not get hit", "rulesrun", 64) if $debugenabled;
+      }
     }
   }
 }
@@ -2339,24 +2341,6 @@ sub generic_base64_decode {
 }
 
 ###########################################################################
-
-sub work_out_local_domain {
-  my ($self) = @_;
-
-  # TODO -- if needed.
-
-  # my @rcvd = $self->{msg}->get_header ("Received");
-
-# from dogma.slashnull.org (dogma.slashnull.org [212.17.35.15]) by
-    # mail.netnoteinc.com (Postfix) with ESMTP id 3E010114097 for
-    # <jm@netnoteinc.com>; Thu, 19 Apr 2001 07:28:53 +0000 (Eire)
- # (from jm@localhost) by dogma.slashnull.org (8.9.3/8.9.3) id
-    # IAA28324 for jm@netnoteinc.com; Thu, 19 Apr 2001 08:28:53 +0100
- # from gaganan.com ([211.51.69.106]) by dogma.slashnull.org
-    # (8.9.3/8.9.3) with SMTP id IAA28319 for <jm@jmason.org>; Thu,
-    # 19 Apr 2001 08:28:50 +0100
-
-}
 
 sub dbg { Mail::SpamAssassin::dbg (@_); }
 sub timelog { Mail::SpamAssassin::timelog (@_); }

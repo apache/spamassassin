@@ -1014,6 +1014,6 @@ score BAYES_99 0.001 0.001 4.300 2.791
 #tflags X_MAILING_LIST           nice
 #score X_MAILING_LIST -0.001 -0.001 -0.001 -3.101
 
-#header X_OSIRU_DUL_FH		rbleval:check_rbl('osirusoft-dul-firsthop', 'relays.osirusoft.com.')
-#describe X_OSIRU_DUL_FH		Received from first hop dialup listed in relays.osirusoft.com
-#tflags X_OSIRU_DUL_FH           net nice
+# header RCVD_IN_VISI		rbleval:check_rbl('relay', 'relays.visi.com.')
+# describe RCVD_IN_VISI		Received via a relay in relays.visi.com
+# tflags RCVD_IN_VISI             net

@@ -1133,8 +1133,8 @@ sub check_lots_of_cc_lines {
 
 ###########################################################################
 
-sub check_rbl {
-  my ($self, $set, $rbl_domain, $needresult) = @_;
+sub _check_rbl {
+  my ($self, $set, $rbl_domain, $use_txt_query) = @_;
   local ($_);
 
   # First check that DNS is available, if not do not perform this check
@@ -1180,6 +1180,7 @@ sub check_rbl {
 
   if (!defined $self->{$set}->{rbl_IN_As_found}) {
     $self->{$set}->{rbl_IN_As_found} = ' ';
+    $self->{$set}->{rbl_IN_TXTs_found} = ' ';
     $self->{$set}->{rbl_matches_found} = ' ';
   }
 
@@ -1191,7 +1192,6 @@ sub check_rbl {
   eval {
     my $i=0;
     my ($b1,$b2,$b3,$b4);
-    my $dialupreturn;
     foreach my $ip (@ips) {
       $i++;
       # Some of the matches in other zones, like a DUL match on a first hop 
@@ -1208,32 +1208,23 @@ sub check_rbl {
       next unless ($ip =~ /(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/);
      ($b1, $b2, $b3, $b4) = ($1, $2, $3, $4);
 
-      # By default, we accept any return on an RBL
-      undef $dialupreturn;
-      
-      # foo-firsthop are special rule names that only match on the
-      # first Received line (used to give a negative score to counter the
-      # normal dialup rule and not penalize people who relayed through their
-      # ISP) -- Marc
-      # By default this rule won't get run unless it's the first hop IP
-      if ($set =~ /-firsthop$/) {
-	if ($#ips>0 and $i == $#ips + 1) {
-	  dbg("Set dialupreturn on $ip for first hop", "rbl", -2);
-	  $dialupreturn=$self->{conf}->{dialup_codes};
-	  die "$self->{conf}->{dialup_codes} undef" if (!defined $dialupreturn);
-	} else {
-	  dbg("Not running firsthop rule against middle hop or direct dialup IP connection (ip $ip)", "rbl", -2);
-	  next;
-	}
-      }
-      
-      $found = $self->do_rbl_lookup ($set, "$b4.$b3.$b2.$b1.".$rbl_domain, $ip, $found, $dialupreturn, $needresult);
+      $found = $self->do_rbl_lookup ($set, $use_txt_query, "$b4.$b3.$b2.$b1.".$rbl_domain, $ip, $found);
       dbg("Got $found on $ip (item $i)", "rbl", -3);
     }
   };
 
   dbg("Check_rbl returning $found", "rbl", -3);
   $found;
+}
+
+sub check_rbl {
+  my ($self, $set, $rbl_domain) = @_;
+  $self->_check_rbl ($set, $rbl_domain, 0);
+}
+
+sub check_rbl_txt {
+  my ($self, $set, $rbl_domain) = @_;
+  $self->_check_rbl ($set, $rbl_domain, 1);
 }
 
 ###########################################################################
@@ -1247,7 +1238,9 @@ sub check_rbl_results_for {
   return 0 unless defined ($self->{$set});
   return 0 unless defined ($self->{$set}->{rbl_IN_As_found});
 
-  my $inas = ' '.$self->{$set}->{rbl_IN_As_found}.' ';
+  # note: IN_As cannot be !undef without IN_TXTs existing too
+  my $inas = ' '.$self->{$set}->{rbl_IN_As_found}.' '.
+		 $self->{$set}->{rbl_IN_TXTs_found}.' ';
   if ($inas =~ / ${addr} /) { return 1; }
 
   return 0;
@@ -1265,8 +1258,11 @@ sub check_two_rbl_results {
   return 0 unless defined ($self->{$set1}->{rbl_IN_As_found});
   return 0 unless defined ($self->{$set2}->{rbl_IN_As_found});
 
-  my $inas1 = ' '.$self->{$set1}->{rbl_IN_As_found}.' ';
-  my $inas2 = ' '.$self->{$set2}->{rbl_IN_As_found}.' ';
+  # note: IN_As cannot be !undef without IN_TXTs existing too
+  my $inas1 = ' '.$self->{$set1}->{rbl_IN_As_found}.' '.
+		  $self->{$set1}->{rbl_IN_TXTs_found}.' ';
+  my $inas2 = ' '.$self->{$set2}->{rbl_IN_As_found}.' '.
+		  $self->{$set2}->{rbl_IN_TXTs_found}.' ';
   if ($inas1 =~ / ${addr1} / and $inas2 =~ / ${addr2} /) { return 1; }
 
   return 0;
