@@ -550,21 +550,65 @@ sub word_is_in_dictionary {
 sub get_address_commonality_ratio {
   my ($self, $addr1, $addr2) = @_;
 
-  my %counts = ();
-  map { $counts{$_}++; } split (//, lc $addr1);
-  map { $counts{$_}++; } split (//, lc $addr2);
 
-  my $foundonce = 0;
-  my $foundtwice = 0;
-  foreach my $char (keys %counts) {
-    if ($counts{$char} == 1) { $foundonce++; next; }
-    if ($counts{$char} == 2) { $foundtwice++; next; }
+  # Ignore "@" and ".".  "@" will always be the same in both, and the
+  # number of "." will almost always be the same
+  $addr1 =~ s/[\@\.]//g;
+  $addr2 =~ s/[\@\.]//g;
+
+  my %counts1 = ();
+  my %counts2 = ();
+
+  map { $counts1{$_}++; } split (//, lc $addr1);
+  map { $counts2{$_}++; } split (//, lc $addr2);
+
+  my $different = 0;
+  my $same      = 0;
+  my $unique    = 0;
+  my $char;
+  my @chars     = keys %counts1;
+
+  # Extract unique characters, and make the two hashes have the same
+  # set of keys
+  foreach $char (@chars) {
+    if (!defined ($counts2{$char})) {
+      $unique += $counts1{$char};
+      delete ($counts1{$char});
+    }
   }
 
-  $foundtwice ||= 1.0;
-  my $ratio = ($foundonce / $foundtwice);
+  @chars = keys %counts2;
 
-  #print "addrcommonality: $foundonce $foundtwice $addr1/$addr2 $ratio\n";
+  foreach $char (@chars) {
+    if (!defined ($counts1{$char})) {
+      $unique += $counts2{$char};
+      delete ($counts2{$char});
+    }
+  }
+
+  # Hashes now have identical sets of keys; count the differences
+  # between the values.
+  @chars = keys %counts1;
+
+  foreach $char (@chars) {
+    my $count1 = $counts1{$char} || 0.0;
+    my $count2 = $counts2{$char} || 0.0;
+
+    if ($count1 == $count2) {
+      $same += $count1;
+    }
+    else {
+      $different += abs($count1 - $count2);
+    }
+  }
+
+  $different += $unique / 2.0;
+
+  $same ||= 1.0;
+  my $ratio = $different / $same;
+
+  #print STDERR "addrcommonality $addr1/$addr2($different<$unique>/$same)"
+  # . " = $ratio\n";
 
   return $ratio;
 }
