@@ -791,8 +791,6 @@ score DNS_FROM_RFC_ABUSE 0 0.135 0 0.454
 score DNS_FROM_RFC_BOGUSMX 0 1.099 0 1.701
 score DNS_FROM_RFC_POST 0 1.470 0 0.687
 score DNS_FROM_RFC_WHOIS 0 0.502 0 0.001
-score SB_NEW_BULK 0 0.724 0 0.690
-score SB_NSP_VOLUME_SPIKE 0 0.662 0 0.255
 score URIBL_SBL 0 0.765 0 1.723
 score URIBL_SC_SURBL 0 3.831 0 3.752
 score URIBL_WS_SURBL 0 0.652 0 1.823
@@ -856,6 +854,11 @@ score RCVD_IN_BSP_TRUSTED 0 -4.3 0 -4.3
 # Habeas: http://www.habeas.com/
 score HABEAS_INFRINGER 0 16.0 0 16.0
 score HABEAS_USER 0 -8.0 0 -8.0
+
+# SenderBase -- experimental
+score __SENDERBASE 0
+score SB_NEW_BULK 0
+score SB_NSP_VOLUME_SPIKE 0
 
 # Hashcash
 ifplugin Mail::SpamAssassin::Plugin::Hashcash
