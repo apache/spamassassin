@@ -1,6 +1,6 @@
 #!/bin/bash
 WEBDIR=$HOME/spamassassin.taint.org
-vers=2.7x
+vers=3.0.x
 find . -name '.#*' -print | xargs rm -f # delete old CVS files
 
 [ -d $WEBDIR/full/$vers ] || mkdir -p $WEBDIR/full/$vers
