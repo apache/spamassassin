@@ -6,9 +6,10 @@
 # which is included as the file named "License"            #
 ############################################################
 
-my $DEF_RULES_DIR = '@@DEF_RULES_DIR@@';  # substituted at install time
-my $LOCAL_RULES_DIR = '@@LOCAL_RULES_DIR@@';  # substituted at install time
-use lib '@@INSTALLSITELIB@@'; # substituted at install time
+my $PREFIX = '@@PREFIX@@';  # substituted at 'make' time
+my $DEF_RULES_DIR = '@@DEF_RULES_DIR@@';  # substituted at 'make' time
+my $LOCAL_RULES_DIR = '@@LOCAL_RULES_DIR@@';  # substituted at 'make' time
+use lib '@@INSTALLSITELIB@@'; # substituted at 'make' time
 
 use lib '../lib';	# added by jm for use inside the distro
 use strict;
@@ -70,6 +71,7 @@ GetOptions(
 	'virtual-config|V=s' => \$opt{'virtual-config'},
 	'pidfile|r=s' => \$opt{'pidfile'},
 	'syslog|s=s' => \$opt{'syslog'},
+	'syslog-socket=s' => \$opt{'syslog-socket'},
 	'username|u=s' => \$opt{'username'},
 	'vpopmail!' => \$opt{'vpopmail'}, 'v' => \$opt{'vpopmail'},
 	'configpath|C=s' => \$opt{'configpath'},
@@ -123,17 +125,34 @@ my $spamtest = Mail::SpamAssassin->new({
     debug => ($opt{'debug'} || 0),
     paranoid => ($opt{'paranoid'} || 0),
     home_dir_for_helpers => (defined $opt{'home_dir_for_helpers'} ? $opt{'home_dir_for_helpers'} : $orighome),
+    PREFIX => $PREFIX,
     DEF_RULES_DIR => $DEF_RULES_DIR,
     LOCAL_RULES_DIR => $LOCAL_RULES_DIR
 });
 
 # Do whitelist later in tmp dir. Side effect: this will be done as -u user.
 
-my $socktype = 'unix';
-if ($Config{'archname'} =~ /solaris/) {
-  $socktype = 'inet';   # doesn't support UNIX-domain syslog sockets apparently
+if ($log_facility ne 'stderr') {
+  eval {
+    setlogsock('unix');
+    syslog('debug', 'spamd starting');  # required to actually open the socket
+  };
+
+  # Solaris sometimes doesn't support UNIX-domain syslog sockets apparently;
+  # same is true for perl 5.6.0 build on an early version of Red Hat 7!
+  if ($@) {
+    eval {
+      setlogsock('inet');
+      syslog('debug', 'spamd starting');
+    };
+  }
+
+  # fall back to stderr if all else fails
+  if ($@) {
+    warn "failed to setlogsock() on this platform; reporting logs to stderr\n";
+    $log_facility = 'stderr';
+  }
 }
-setlogsock($socktype) unless $log_facility eq 'stderr';
 
 my $port = $opt{'port'} || 783;
 my $addr = gethostbyname($opt{'listen-ip'} || '127.0.0.1');
@@ -207,12 +226,11 @@ my $error_before_reaper;
 
 sub REAPER {
     $error_before_reaper = $!;  # take a copy before cleanupchildren()
+    # do this silently; dbg() might do a syscall more tricky than
+    # print().  syscalls in sig handlers == not good by POSIX
     while ( my $kid = waitpid(-1, &WNOHANG) > 0 ) {
         $extrapid++;
-#        Mail::SpamAssassin::dbg("cleaned up kid $kid, pool=$extrapid");
-#        Something tells me we shouldn't call stuff in a sighandler.
-    }   # Don't let people tell you this isn't needed!
-
+    }
     $SIG{CHLD} = \&REAPER;
 }
 
@@ -788,8 +806,15 @@ sub logmsg
     }
 
     openlog('spamd','cons,pid',$log_facility);
-    syslog('info',"@_");
-    if ($opt{'debug'}) { warn "logmsg: @_\n"; }
+    my $str = join ('', @_);
+    if ($opt{'debug'}) { warn "logmsg: $str\n"; }
+
+    eval {
+      syslog('info', '%s', $str);
+    };
+    if ($@) {
+      warn "syslog() failed, try using --syslog-socket switch ($@)\n";
+    }
 
     if ($main::SIGPIPE_RECEIVED) {
        # SIGPIPE recieved when writing to syslog - this has been
@@ -798,12 +823,12 @@ sub logmsg
 
        closelog();
        openlog('spamd','cons,pid',$log_facility);
-       syslog('info',"@_");
+       syslog('info', '%s', $str);
 
        # now report what happend
        my $msg = "SIGPIPE received - reopening log socket";
        if ($opt{'debug'}) { warn "logmsg: $msg\n"; }
-       syslog('warning', $msg);
+       syslog('warning', '%s', $msg);
 
        # if we've received multiple sigpipes, logging is probably
        # still broken.
@@ -907,6 +932,7 @@ Options:
  -V, --virtual-config=dir           Enable Virtual configs (needs -x)
  -r pidfile, --pidfile              Write the process id to pidfile
  -s facility, --syslog=facility     Specify the syslog facility (default: mail)
+ --syslog-socket=type               How to connect to syslogd (default: unix)
  -u username, --username=username   Run as username
  -v, --vpopmail                     Enable vpopmail config
  -x, --nouser-config                Disable user config files
@@ -1003,6 +1029,17 @@ own maildir.
 Specify the syslog facility to use (default: mail).  If C<stderr> is specified,
 output will be written to stderr.  This is useful if you're running C<spamd>
 under the C<daemontools> package.
+
+=item B<--syslog-socket>=I<type>
+
+Specify how spamd should send messages to syslogd.  The options are C<unix>,
+C<inet> or C<none>.   The default is to try C<unix> first, falling back to
+C<inet> if perl detects errors in its C<unix> support.
+
+Some platforms, or versions of perl, are shipped with dysfunctional versions of
+the B<Sys::Syslog> package which do not support some socket types, so you may
+need to set this.  If you get error messages regarding B<__PATH_LOG> or similar
+from spamd, try changing this setting.
 
 =item B<-u> I<username>, B<--username>=I<username>
 

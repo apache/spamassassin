@@ -178,7 +178,8 @@ sub razor_report {
     if ($@) {
       if ( $@ =~ /alarm/ ) {
         dbg("razor2 report timed out after $timeout secs.");
-      }
+      } elsif ($@ =~ /could not connect/) {
+        dbg("razor2 report could not connect to any servers");
       else {
         warn "razor2 report failed: $! $@";
       }
