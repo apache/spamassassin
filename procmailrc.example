@@ -25,13 +25,12 @@ probably-spam
 
 # Work around procmail bug: any output on stderr will cause the "F" in "From"
 # to be dropped.  This will re-add it.
-:0 H
-* ! ^From[ ]
-* ^rom[ ] 
+:0
+* ^^rom[ ]
 {
   LOG="*** Dropped F off From_ header! Fixing up. "
   
   :0 fhw
-  | sed -e 's/^rom /From /'
+  | sed -e '1s/^/F/'
 }
 

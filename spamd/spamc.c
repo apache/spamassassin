@@ -103,7 +103,7 @@ read_args(int argc, char **argv, char **hostname, int *port, int *max_size, char
         for(i=0, j=optind-1; j<argc; i++, j++){
             exec_argv[i]=argv[j];
         }
-        argv[opt]=NULL;
+        exec_argv[i]=NULL;
         return EX_OK;
       }
     case 'p':
