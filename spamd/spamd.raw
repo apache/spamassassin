@@ -233,7 +233,7 @@ $opt{'daemonize'} and daemonize();
 # support non-root use (after we bind to the port)
 my $setuid_to_user = 0;
 if ($opt{'username'}) {
-  my $uuid = getpwnam($opt{'username'});
+  my ($uuid,$ugid) = (getpwnam($opt{'username'}))[2,3];
   if (!defined $uuid || $uuid == 0) {
     die "fatal: cannot run as nonexistent user or root with -u option\n";
   }
@@ -243,7 +243,12 @@ if ($opt{'username'}) {
     chown $uuid, -1, $opt{'pidfile'}
       || die "fatal: could not chown '$opt{'pidfile'}' to uid $uuid\n";
   }
+  
+  # Change GID
+  $) = "$ugid $ugid"; # effective gid
+  $( = $ugid; # real gid
 
+  # Change UID
   $> = $uuid;   # effective uid
   $< = $uuid;   # real uid. we now cannot setuid anymore
   if ($> != $uuid and $> != ($uuid-2**32)) {
@@ -467,8 +472,9 @@ sub check {
         }
         logmsg "Still running as root: user not specified with -u, ".
 	     "not found, or set to root.  Fall back to nobody.";
-        my $uid = getpwnam('nobody');
-        $> = $uid;
+        my ($uid,$gid) = (getpwnam('nobody'))[2,3];
+	$) = "$gid $gid"; # eGID
+        $> = $uid; # eUID
         if ( !defined($uid) || ($> != $uid and $> != ($uid-2**32))) {
             logmsg "fatal: setuid to nobody failed";
 	    die;
@@ -694,7 +700,8 @@ sub handle_user
     }
 
     if ($setuid_to_user) {
-	$> = $uid;
+	$) = "$gid $gid"; # change eGID
+	$> = $uid; # change eUID
         if ( !defined($uid) || ($> != $uid and $> != ($uid-2**32))) {
             logmsg "fatal: setuid to $username failed";
 	    die;		# make it fatal to avoid security breaches
@@ -820,7 +827,8 @@ sub handle_user_setuid_with_sql
     }
 
     if ($setuid_to_user) {
-       $> = $uid;
+       $) = "$gid $gid"; # change eGID
+       $> = $uid; # change eUID
        if ( !defined($uid) || ($> != $uid and $> != ($uid-2**32))) {
            logmsg "fatal: setuid to $username failed";
           die;         # make it fatal to avoid security breaches
