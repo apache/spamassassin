@@ -1,5 +1,5 @@
 # SpamAssassin rules file: compensation for common false positives.
-# $Id: 20_compensate.cf,v 1.62 2002/09/04 22:01:47 quinlan Exp $
+# $Id: 20_compensate.cf,v 1.63 2002/09/05 09:26:38 zelgadis Exp $
 ###########################################################################
 # Header compensation tests
 
@@ -219,9 +219,26 @@ body DISCLAIMER_LEGALESE        /This e?-?mail.{1,20}confidential.{1,20}legally 
 describe DISCLAIMER_LEGALESE    Contains what looks like an 'E-Mail Disclaimer'
 tflags DISCLAIMER_LEGALESE	nice
 
-body EMAIL_ATTRIBUTION		/^"?\w.{4,} (?:wrote|writes):$/
+# The regexp begins with "(?:\"|--- )?" because, in addition to
+# possibly begining with a double quote, it might also begin with
+# "--- ", which is used by the Yahoo! groups web form when
+# doing attribution.
+#
+# The regexp ends with "\s*(?:$|>)" rather than "$" because, by
+# the time the "body" tests are done, this:
+#
+#   foo@bar.com writes:
+#   > blah blah blah
+#
+# becomes
+#
+#   foo@bar.com writes: > blah blah blah
+#
+body EMAIL_ATTRIBUTION         /^(?:\"|--- )?\w.{4,80} (?:wrote|writes):\s*(?:$|>)/
 describe EMAIL_ATTRIBUTION	Contains what looks like an email attribution
 tflags EMAIL_ATTRIBUTION	nice
+
+
 
 rawbody QUOTED_EMAIL_TEXT	/^>+ +.{60,72}$/
 describe QUOTED_EMAIL_TEXT	Contains what looks like a quoted email text
