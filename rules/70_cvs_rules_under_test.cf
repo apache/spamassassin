@@ -913,3 +913,9 @@ tflags T_USER_AGENT_PMMAIL   nice
 
 # Bug 1133
 header T_BAD_HELO2           eval:check_for_bad_helo2()
+
+# thx to vince.delvecchio@analog.com for the legwork on the negative
+# lookbehinds here; saved a lot of work for us. (bug 1035)  if this
+# gets good freqs vs PORN_4, replace that with this.
+uri T_PORN_4_FIX  /^https?:\/\/[\w\.-]*(?:xxx|(?<!es)(?<!dle|sus)sex|anal(?!og|y[sz])|slut|pussy|cum|nympho|suck|porn|hard-?core|taboo|whore|voyeur|lesbian|gurlpages|naughty|lolita|(?<!thir|four|eigh|nine)(?<!fif|six)(?<!seven)teen|schoolgirl|kooloffer|erotic|lust(?!(?<=illust)(?:rat|rious)|(?<=clust)er)|panty|panties)[\w-]*\./
+

@@ -10,7 +10,12 @@ use Fcntl;
 use AnyDBM_File ;
 use vars qw( %h $k $v ) ;
 
-my $db = $ENV{HOME}."/.spamassassin/auto-whitelist";	# is this right?
+my $db;
+if ($#ARGV == -1) {
+  $db = $ENV{HOME}."/.spamassassin/auto-whitelist";
+} else {
+  $db = $ARGV[0];
+}
 
 tie %h, "AnyDBM_File",$db, O_RDONLY,0600
       or die "Cannot open file $db: $!\n";
