@@ -21,6 +21,7 @@ package Mail::SpamAssassin::PerMsgStatus;
 
 use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::PerMsgStatus;
+use Mail::SpamAssassin::Constants qw(:ip);
 use File::Spec;
 use IO::Socket;
 use IPC::Open2;
@@ -984,8 +985,8 @@ sub lookup_ptr {
     return undef;
   }
 
-  if ($dom =~ /^${Mail::SpamAssassin::IP_IN_RESERVED_RANGE}/) {
-    dbg ("IP is reserved, not looking up PTR");
+  if ($dom =~ IP_IN_RESERVED_RANGE) {
+    dbg ("IP is reserved, not looking up PTR: $dom");
     return undef;
   }
 

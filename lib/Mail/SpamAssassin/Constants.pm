@@ -1,10 +1,5 @@
 # Constants used in many parts of the SpamAssassin codebase.
 #
-# Note that these are added to the "Mail::SpamAssassin" package,
-# for brevity.  Also note that they are scalars, not constants in
-# the "use constant" sense; perl does not permit cross-package use
-# of "use constant" constants.  This is arguably a perl bug.
-#
 # TODO! we need to reimplement parts of the RESERVED regexp!
 
 # <@LICENSE>
@@ -23,13 +18,36 @@
 # limitations under the License.
 # </@LICENSE>
 
-package Mail::SpamAssassin;
+package Mail::SpamAssassin::Constants;
 
 use vars qw (
-  $IPV4_ADDRESS $IP_ADDRESS $IP_IN_RESERVED_RANGE $LOCALHOST
+	@BAYES_VARS @IP_VARS
 );
 
+use base qw( Exporter );
 
+@IP_VARS = qw(
+	IP_IN_RESERVED_RANGE LOCALHOST IPV4_ADDRESS IP_ADDRESS
+);
+@BAYES_VARS = qw(
+	DUMP_MAGIC DUMP_TOKEN DUMP_BACKUP 
+);
+
+%EXPORT_TAGS = (
+	bayes => [ @BAYES_VARS ],
+        ip => [ @IP_VARS ],
+        all => [ @BAYES_VARS, @IP_VARS ],
+);
+
+@EXPORT_OK = ( @BAYES_VARS, @IP_VARS );
+
+# BAYES_VARS
+use constant DUMP_MAGIC  => 1;
+use constant DUMP_TOKEN  => 2;
+use constant DUMP_SEEN   => 4;
+use constant DUMP_BACKUP => 8;
+
+# IP_VARS
 # ---------------------------------------------------------------------------
 # Initialize a regexp for reserved IPs, i.e. ones that could be
 # used inside a company and be the first or second relay hit by
@@ -54,7 +72,7 @@ use vars qw (
 # **REIMPLEMENT**: This needs to be extended to re-include the ranges
 # from the RFCs and documents above.
 #
-$IP_IN_RESERVED_RANGE = qr{^(?:
+use constant IP_IN_RESERVED_RANGE => qr{^(?:
   192\.168|                        # 192.168/16:       Private Use
   10|                              # 10/8:             Private Use
   172\.(?:1[6-9]|2[0-9]|3[01])|    # 172.16-172.31/16: Private Use
@@ -79,7 +97,7 @@ $IP_IN_RESERVED_RANGE = qr{^(?:
 # ---------------------------------------------------------------------------
 # match the various ways of saying "localhost".
 # 
-$LOCALHOST = qr/
+use constant LOCALHOST => qr/
 		    (?:
 		      # as a string
 		      localhost(?:\.localdomain)?
@@ -101,7 +119,7 @@ $LOCALHOST = qr/
 # ---------------------------------------------------------------------------
 # an IP address, in IPv4 format only.
 #
-$IPV4_ADDRESS = qr/\b
+use constant IPV4_ADDRESS => qr/\b
 		    (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
                     (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
                     (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
@@ -112,7 +130,7 @@ $IPV4_ADDRESS = qr/\b
 # an IP address, in IPv4, IPv4-mapped-in-IPv6, or IPv6 format.  NOTE: cannot
 # just refer to $IPV4_ADDRESS, due to perl bug reported in nesting qr//s. :(
 #
-$IP_ADDRESS = qr/
+use constant IP_ADDRESS => qr/
 		    (?:
 		      \b(?<!:)	# ensure no "::" IPv4 marker before this one
 		      # plain IPv4, as above

@@ -47,6 +47,7 @@ use bytes;
 
 use Mail::SpamAssassin::Dns;
 use Mail::SpamAssassin::PerMsgStatus;
+use Mail::SpamAssassin::Constants qw(:ip);
 
 use vars qw{
 };
@@ -202,9 +203,9 @@ sub parse_received_headers {
 	my $found_non_rsvd = 0;
 	my $found_rsvd = 0;
 	foreach my $ip (@ips) {
-	  next if ($ip =~ /^${Mail::SpamAssassin::LOCALHOST}$/o);
+	  next if ($ip =~ /^LOCALHOST$/o);
 
-	  if ($ip !~ /${Mail::SpamAssassin::IP_IN_RESERVED_RANGE}/o) {
+	  if ($ip !~ /IP_IN_RESERVED_RANGE/o) {
 	    dbg ("received-header: 'by' ".$relay->{by}." has public IP $ip");
 	    $found_non_rsvd = 1;
 	  } else {
@@ -364,7 +365,7 @@ sub parse_received_line {
   my $ident = '';
   my $envfrom = '';
   my $mta_looked_up_dns = 0;
-  my $IP_ADDRESS = $Mail::SpamAssassin::IP_ADDRESS;
+  my $IP_ADDRESS = IP_ADDRESS;
 
   # Received: (qmail 27981 invoked by uid 225); 14 Mar 2003 07:24:34 -0000
   # Received: (qmail 84907 invoked from network); 13 Feb 2003 20:59:28 -0000
@@ -1052,7 +1053,7 @@ enough:
   dbg ("received-header: parsed as $asstr");
   $relay->{as_string} = $asstr;
 
-  my $isrsvd = ($ip =~ /${Mail::SpamAssassin::IP_IN_RESERVED_RANGE}/o);
+  my $isrsvd = ($ip =~ /IP_IN_RESERVED_RANGE/o);
   $relay->{ip_is_reserved} = $isrsvd;
 
   # add it to an internal array so Eval tests can use it
