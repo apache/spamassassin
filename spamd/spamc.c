@@ -5,7 +5,7 @@
  * "License".
  */
 
-#include "../config.h"
+#include "config.h"
 #include "libspamc.h"
 #include "utils.h"
 

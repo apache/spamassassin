@@ -36,9 +36,6 @@ require 5.005;
 #   perl Makefile.PL PREFIX=/tmp/build/usr SYSCONFDIR=/tmp/build/etc \
 #                       INST_PREFIX=/usr INST_SYSCONFDIR=/etc
 #
-# You can also override the automatic ./configure step by just
-# running that yourself first. But this should not be necessary.
-#
 # The Razor prompt ("run Razor 2 tests?") can be overridden by setting
 # RUN_RAZOR2_TESTS to "y" or "n".
 #
@@ -133,8 +130,9 @@ my %makefile = (
 	'pod2htm* spamassassin sa-learn '.
 	'spamd/spamc$(EXE_EXT) spamd/libspamc.so spamd/spamd doc '.
 	'spamd/libsslspamc.so '.
-	'binaries.mk config.h config.status config.cache config.log '.
-	'autom4te.cache qmail/qmail-spamc'.
+	'spamd/binaries.mk spamd/config.h spamd/config.status '.
+	'spamd/config.cache spamd/config.log '.
+	'spamd/autom4te.cache qmail/qmail-spamc'.
 	't/do_razor2 t/log'
     },
 
@@ -327,26 +325,26 @@ spamd/spamd: spamd/spamd.raw
 	$(PERL) build/preprocessor $(FIXBYTES) $(FIXVARS) $(FIXBANG) -i$? -o$@
 	$(CHMOD) $(PERM_RWX) $@
 
-spamd/libspamc.so: binaries.mk $(SPAMC_SOURCES)
-	$(MAKE) -f binaries.mk $@
+spamd/libspamc.so: spamd/binaries.mk $(SPAMC_SOURCES)
+	$(MAKE) -f spamd/binaries.mk $@
 
-spamd/libspamc.dll: binaries.mk $(SPAMC_SOURCES)
-	$(MAKE) -f binaries.mk $@
+spamd/libspamc.dll: spamd/binaries.mk $(SPAMC_SOURCES)
+	$(MAKE) -f spamd/binaries.mk $@
 
-spamd/spamc$(EXE_EXT): binaries.mk $(SPAMC_SOURCES)
-	$(MAKE) -f binaries.mk $@
+spamd/spamc$(EXE_EXT): spamd/binaries.mk $(SPAMC_SOURCES)
+	$(MAKE) -f spamd/binaries.mk $@
 
-spamd/libsslspamc.so: binaries.mk $(SPAMC_SOURCES)
-	$(MAKE) -f binaries.mk $@
+spamd/libsslspamc.so: spamd/binaries.mk $(SPAMC_SOURCES)
+	$(MAKE) -f spamd/binaries.mk $@
 
-spamd/libsslspamc.dll: binaries.mk $(SPAMC_SOURCES)
-	$(MAKE) -f binaries.mk $@
+spamd/libsslspamc.dll: spamd/binaries.mk $(SPAMC_SOURCES)
+	$(MAKE) -f spamd/binaries.mk $@
 
-qmail/qmail-spamc: binaries.mk $(SPAMC_SOURCES)
-	$(MAKE) -f binaries.mk $@
+qmail/qmail-spamc: spamd/binaries.mk $(SPAMC_SOURCES)
+	$(MAKE) -f spamd/binaries.mk $@
 
-binaries.mk: configure
-	./configure --enable-ssl=$(ENABLE_SSL)
+spamd/binaries.mk: spamd/configure
+	cd spamd; ./configure --enable-ssl=$(ENABLE_SSL)
 
 inst_cfs: $(PKG_LOCAL_RULES_DIR) $(PKG_LOCAL_RULES_DIR)/local.cf
 	$(MKPATH) $(PKG_DEF_RULES_DIR)
