@@ -16,11 +16,11 @@ use constant ONE_BYTE_HHH       => 0x07;        # 00000111
 
 use vars qw{
     %h $k $v @DBNAMES
-    $opt_dbpath $opt_min_hits
+    $opt_dbpath $opt_min_hits $opt_max_hits
   };
 
 use Getopt::Long;
-GetOptions("dbpath=s", "min-hits=i");
+GetOptions("dbpath=s", "min-hits=i", "max-hits=i");
 
 @DBNAMES = qw(toks probs);
 
@@ -56,6 +56,7 @@ for my $key ( keys(%{$h{db_toks}}) ) {
   $th ||= 0;
 
   next if ($opt_min_hits && (($ts + $th) < $opt_min_hits));
+  next if ($opt_max_hits && (($ts + $th) > $opt_max_hits));
   printf ("%3.3f %8d %8d   %s\n", $prob, $ts, $th, $key);
 }
 
