@@ -2,7 +2,7 @@ require 5.005;
 
 my $DEF_RULES_DIR	= '$(DESTDIR)$(PREFIX)/share/spamassassin';
 
-my $LOCAL_RULES_DIR	= '/etc/mail/spamassassin';
+my $LOCAL_RULES_DIR	= '$(DESTDIR)/etc/mail/spamassassin';
 
 my $MYCFLAGS		= '';		# this is a good place to put -g etc.
 
@@ -44,13 +44,12 @@ WriteMakefile(
 	    'spamproxy/spamproxyd' => '$(INST_MAN1DIR)/spamproxyd.$(MAN1EXT)',
     },
 
-    'PL_FILES' => '',
+    'PL_FILES' => { },
 
     'PMLIBDIRS' => [ 'lib' ],
 
     'PREREQ_PM' => {
                         'File::Copy' => 0,
-                        'Time::HiRes' => 0,
                   },
 
     'dist' => {
@@ -131,17 +130,17 @@ $(DEF_RULES_DIR)/user_prefs.template: rules/user_prefs.template
 	$(CP) rules/user_prefs.template $(DEF_RULES_DIR)/user_prefs.template
 
 $(LOCAL_RULES_DIR)/local.cf: rules/local.cf
-	[ -f $(LOCAL_RULES_DIR)/local.cf ] || $(CP) rules/local.cf $(LOCAL_RULES_DIR)/local.cf
-
-migrate_cfs:
-	[ ! -f /etc/spamassassin.cf ] || $(MV) /etc/spamassassin.cf /etc/mail/spamassassin/migrated.cf
-	[ ! -f /etc/mail/spamassassin.cf ] || $(MV) /etc/mail/spamassassin.cf /etc/mail/spamassassin/migrated.cf
+        if [ "$(PREFIX)" = "/usr" -a ! -f $(LOCAL_RULES_DIR)/local.cf ] ; then \
+          $(CP) rules/local.cf $(LOCAL_RULES_DIR)/local.cf ; \
+        else true ; fi
 
 $(DEF_RULES_DIR):
 	mkdir -p $(DEF_RULES_DIR)
 
 $(LOCAL_RULES_DIR):
-	mkdir -p $(LOCAL_RULES_DIR)
+        if [ "$(PREFIX)" = "/usr" -a ! -d $(LOCAL_RULES_DIR) ] ; then \
+          mkdir -p $(LOCAL_RULES_DIR) ; \
+        else true ; fi
 
 doc:
 	mkdir -p doc
