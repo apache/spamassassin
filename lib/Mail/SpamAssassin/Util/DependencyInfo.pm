@@ -99,6 +99,7 @@ my @OPTIONAL_MODULES = (
 },
 {
   module => 'Net::SMTP',
+  alt_name => 'libnet',
   version => '0.00',
   desc => 'Used when manually reporting spam to SpamCop with "spamassassin -r".',
 },
@@ -110,13 +111,14 @@ my @OPTIONAL_MODULES = (
 },
 {
   module => 'IP::Country::Fast',
+  alt_name => 'IP::Country',
   version => '0.00',
   desc => 'Used by the RelayCountry plugin (not enabled by default) to determine
   the domain country codes of each relay in the path of an email.',
 },
 {
-  module => 'Razor::Client::Agent',
-  alt_name => 'Razor',
+  module => 'Razor2::Client::Agent',
+  alt_name => 'Razor2',
   version => '2.61',
   desc => 'Used to check message signatures against Vipul\'s Razor collaborative
   filtering network. Razor has a large number of dependencies on CPAN
