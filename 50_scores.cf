@@ -531,7 +531,7 @@ score    OBFUSCATING_COMMENT    2.0
 
 score SUBJECT_HAS_DATE          -1.0
 score FROM_NEWS_LIST            -0.5
-score FROM_US_PHONE             -5.0
+score FROM_US_PHONE             -0.5
 score SUBJECT_IS_NEWS           -0.1
 score SUBJECT_FREQ              -1.0
 score SUBJECT_MONTH             -0.5
@@ -569,9 +569,9 @@ score FORGOTTEN_PASSWORD        -2.0
 score REG_THANKS                -1.0
 score ACCOUNT_CLICK             -1.0
 score TRACK_NUMBER              -1.0
-score KNOWN_MAILING_LIST        -5
-score KNOWN_MOD_MAILING_LIST    -10
-score LISTBUILDER               -5
+score KNOWN_MAILING_LIST        -2.5
+score KNOWN_MOD_MAILING_LIST    -10.0
+score LISTBUILDER               -1.0
 
 score USER_AGENT_PINE           -1.0
 score USER_AGENT_MUTT           -1.0
