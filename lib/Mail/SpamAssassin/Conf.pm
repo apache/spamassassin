@@ -263,14 +263,32 @@ Multiple addresses per line, separated by spaces, is OK.  Multiple C<whitelist_f
 OK.
 
 eg.
-whitelist_from joe@example.com fred@example.com
-whitelist_from simon@example.com
 
+  whitelist_from joe@example.com fred@example.com
+  whitelist_from simon@example.com
 
 =cut
 
     if (/^whitelist[-_]from\s+(.+)\s*$/) {
       $self->add_to_addrlist ('whitelist_from', split (' ', $1)); next;
+    }
+
+=item whitelist_from_rcvd lists.sourceforge.net sourceforge.net
+
+Use this to supplement the whitelist_from addresses with a check against the
+Received headers. The first parameter is the address to whitelist, and the
+second is a domain to match in the received headers.
+
+e.g.
+
+  whitelist_from_rcvd joe@example.com  example.com
+  whitelist_from_rcvd axkit.org        sergeant.org
+
+=cut
+
+    if (/^whitelist[-_]from[-_]rcvd\s+(\S+)\s+(\S+)\s*$/) {
+      $self->add_to_addrlist_rcvd ('whitelist_from_rcvd', $1, $2);
+      next;
     }
 
 =item unwhitelist_from add@ress.com
@@ -1516,6 +1534,17 @@ sub add_to_addrlist {
     $re =~ s/\*/\.\*/g;				# "*" -> "any string"
     $self->{$singlelist}->{$addr} = qr/^${re}$/;
   }
+}
+
+sub add_to_addrlist_rcvd {
+  my ($self, $listname, $addr, $domain) = @_;
+  
+  my $re = lc $addr;
+  $re =~ s/[\000\\\(]/_/gs;			# paranoia
+  $re =~ s/([^\*_a-zA-Z0-9])/\\$1/g;		# escape any possible metachars
+  $re =~ s/\*/\.\*/g;				# "*" -> "any string"
+  $self->{$listname}->{$addr}{re} = qr/^${re}$/;
+  $self->{$listname}->{$addr}{domain} = $domain;
 }
 
 sub remove_from_addrlist {
