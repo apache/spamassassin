@@ -446,16 +446,16 @@ header USER_IN_WHITELIST	eval:check_from_in_whitelist()
 describe USER_IN_WHITELIST	From: address is in the user's white-list
 tflags USER_IN_WHITELIST        userconf
 
-
-# bad test: no hits
-#header DATE_MISSING		Date =~ /^UNSET$/ [if-unset: UNSET]
-#describe DATE_MISSING		Missing Date: header
-
 # Steve Linford via Charlie Watts: good test!
 header __RCVD_BY_HOTMAIL        Received =~ / by hotmail\.com /
 header __CTYPE_IS_HTML          Content-Type =~ /^text\/html\b/
 meta CTYPE_JUST_HTML		(!__RCVD_BY_HOTMAIL && __CTYPE_IS_HTML)
 describe CTYPE_JUST_HTML	HTML-only mail, with no text version
+
+# noticed this implied in passing in Dan's CVS messages. ;)  no nonspam hits
+# but only a small number of spam ones, for me.
+header HTML_ALL_CAPS   		Content-Type =~ /TEXT\/HTML/
+describe HTML_ALL_CAPS		Content type is "TEXT/HTML" in all caps
 
 # this variant is local, using the Received hdr itself...
 header ROUND_THE_WORLD_LOCAL	eval:check_for_round_the_world_received_helo()
@@ -599,8 +599,13 @@ describe VAR_REF_IN_RECEIVED    Received contains a $variable reference
 # the real services never HELO as 'foo.com', instead 'mail.foo.com' or
 # something like that.  Note: be careful when expanding this... legit dotcom
 # HELOers include: hotmail.com, drizzle.com, lockergnome.com.
-header RCVD_FAKE_HELO_DOTCOM    Received =~ /^from (?:msn|yahoo|yourwebsite|lycos|excite|cs|aol|localhost|koreanmail|allexecs|mydomain|juno|eudoramail|compuserve|desertmail)\.com \(/m
+header RCVD_FAKE_HELO_DOTCOM    Received =~ /^from (?:msn|yahoo|yourwebsite|lycos|excite|cs|aol|localhost|koreanmail|allexecs|mydomain|juno|eudoramail|compuserve|desertmail|excite|caramail)\.com \(/m
 describe RCVD_FAKE_HELO_DOTCOM  Received contains a faked HELO hostname
+
+# catch spammers who HELO as a host at a big site (aol, hotmail etc.) but whose
+# rDNS lists them at some dialup ISP or another.
+header RCVD_FAKE_HELO_DOTCOM_2        eval:check_for_fake_dotcom_helo()
+describe RCVD_FAKE_HELO_DOTCOM_2      Received contains a faked HELO hostname (2)
 
 header USERNAME_IN_SUBJECT      eval:check_for_to_in_subject(3)
 describe USERNAME_IN_SUBJECT    To: username at front of subject
