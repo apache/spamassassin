@@ -59,7 +59,7 @@ sub new {
   my $self = $class->SUPER::new($mailsaobject);
   bless ($self, $class);
 
-  # DCC is not available
+  # are network tests enabled?
   if ($mailsaobject->{local_tests_only}) {
     $self->{dcc_available} = 0;
     dbg("dcc: local tests only, disabling DCC");
@@ -84,8 +84,7 @@ sub set_config {
 
 =item use_dcc (0|1)		(default: 1)
 
-Whether to use DCC, if it is available.  DCC is used to check message
-signatures over the network against the Distributed Checksum Clearinghouse.
+Whether to use DCC, if it is available.
 
 =cut
 
@@ -118,7 +117,7 @@ This option sets how often a message's body/fuz1/fuz2 checksum must have been
 reported to the DCC server before SpamAssassin will consider the DCC check as
 matched.
 
-As nearly all DCC clients are auto-reporting these checksums you should set
+As nearly all DCC clients are auto-reporting these checksums, you should set
 this to a relatively high value, e.g. C<999999> (this is DCC's MANY count).
 
 The default is C<999999> for all these options.
@@ -194,7 +193,7 @@ use this, as the current PATH will have been cleared.
 =item dcc_options options
 
 Specify additional options to the dccproc(8) command. Please note that only
-[A-Z -] is allowed for security reasons.
+characters in the range [0-9A-Za-z ,._/-] are allowed for security reasons.
 
 The default is C<-R>.
 
@@ -206,7 +205,7 @@ The default is C<-R>.
     default => '-R',
     code => sub {
       my ($self, $key, $value, $line) = @_;
-      if ($value !~ /^([A-Z -]+)/) {
+      if ($value !~ m{^([0-9A-Za-z ,._/-]+)$}) {
 	return $Mail::SpamAssassin::Conf::INVALID_VALUE;
       }
       $self->{dcc_options} = $1;
@@ -252,7 +251,7 @@ sub is_dccproc_available {
   }
 
   unless ($dccproc && -x $dccproc) {
-    dbg("dcc: dccproc is not available: no executable dccproc found");
+    dbg("dcc: dccproc is not available: no dccproc executable found");
     return 0;
   }
 
@@ -353,8 +352,7 @@ sub dccifd_lookup {
 
     my @null = $sock->getlines();
     if (!@null) {
-      dbg("dcc: failed read header");
-      die;
+      die("dcc: failed read header");
     }
 
     # the first line will be the header we want to look at
@@ -449,13 +447,10 @@ sub dccproc_lookup {
 
     $oldalarm = alarm $timeout;
 
-    # Note: not really tainted, these both come from system conf file.
+    # note: not really tainted, this came from system configuration file
     my $path = Mail::SpamAssassin::Util::untaint_file_path($self->{main}->{conf}->{dcc_path});
 
-    my $opts = '';
-    if ($self->{main}->{conf}->{dcc_options} =~ /^([^\;\'\"\0]+)$/) {
-      $opts = $1;
-    }
+    my $opts = $self->{main}->{conf}->{dcc_options} || '';
 
     dbg("dcc: opening pipe: " . join(' ', $path, "-H", $opts, "< $tmpf"));
 
@@ -465,6 +460,7 @@ sub dccproc_lookup {
 
     my @null = <DCC>;
     close DCC;
+
     if (!@null) {
       dbg("dcc: failed read header");
       die;
@@ -497,8 +493,9 @@ sub dccproc_lookup {
 
   if ($err) {
     alarm $oldalarm;
+    chomp $err;
     if ($err =~ /^__alarm__$/) {
-      dbg("dcc: check timed out after $timeout secs.");
+      dbg("dcc: check timed out after $timeout seconds");
     } elsif ($err =~ /^__brokenpipe__$/) {
       dbg("dcc: check failed: broken pipe");
     } elsif ($err eq "no response\n") {
