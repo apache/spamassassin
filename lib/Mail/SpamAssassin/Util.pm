@@ -23,85 +23,74 @@ use Sys::Hostname;
 use File::Spec;
 use Time::Local;
 
-use constant CAN_USE_SELECT_FOR_MS_SLEEP => 1;
+BEGIN { $HOSTNAME = hostname(); }
 
 use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/oi);
 
 ###########################################################################
-
 # NFS-safe locking (I hope!):
 # Attempt to create a file lock, using NFS-safe locking techniques.
 #
 # Locking code adapted from code by Alexis Rosen <alexis@panix.com>
 # by Kelsey Cummings <kgc@sonic.net>, with scattered mods by jm
-#
+
+use constant LOCK_MAX_AGE => 300;	# seconds 
+use constant LOCK_MAX_RETRIES => 30;	# average 1 per second
+
 sub safe_lock {
   my ($path) = @_;
-
-  $HOSTNAME ||= hostname();
-  my $lock_file = $path.'.lock';
-  my $lock_tmp = $lock_file . '.' . $HOSTNAME . '.'. $$;
-  my $max_lock_age = 300;	# seconds 
+  my $lock_file = "$path.lock";
+  my $lock_tmp = untaint_file_path("$path.lock.$HOSTNAME.$$");
   my $is_locked = 0;
-  my @s;
-  $lock_tmp = untaint_file_path ($lock_tmp);
+  my @stat;
 
-  open(LTMP, ">".$lock_tmp) or
-	  die "Cannot create tmp lockfile $lock_tmp for $lock_file: $!\n";
-  dbg ("lock: created $lock_tmp");
+  open(LTMP, ">$lock_tmp") or
+      die "cannot create tmp lockfile $lock_tmp for $lock_file: $!\n";
+  autoflush LTMP 1;
+  dbg("lock: created $lock_tmp");
 
-  my $old_fh = select(LTMP); $|=1; select($old_fh);
-
-  my $lock_tries = 60;
-
-  for (my $i = 0; $i < $lock_tries; $i++) {
-    dbg("lock: $$ trying to get lock on $path pass $i");
-    print LTMP $HOSTNAME.".$$\n";
-
-    if ( link ($lock_tmp,$lock_file) ) {
-      dbg ("lock: link to $lock_file ok");
+  for (my $retries = 0; $retries < LOCK_MAX_RETRIES; $retries++) {
+    if ($retries > 0) {
+      my $sleep = rand(1.0) + 0.5;
+      select(undef, undef,undef, $sleep);
+    }
+    print LTMP "$HOSTNAME.$$\n";
+    dbg("lock: $$ trying to get lock on $path with $retries retries");
+    if (link($lock_tmp, $lock_file)) {
+      dbg("lock: link to $lock_file: link ok");
       $is_locked = 1;
       last;
     }
-
-    #link _may_ return false even if the link _is_ created
-    if ( (stat($lock_tmp))[3] > 1 ) {
-      dbg ("lock: link to $lock_file: stat ok");
+    # link _may_ return false even if the link _is_ created
+    @stat = stat($lock_tmp);
+    if ($stat[3] > 1) {
+      dbg("lock: link to $lock_file: stat ok");
       $is_locked = 1;
       last;
     }
-
-    #check to see how old the lockfile is
-    @s = stat($lock_file); my $lock_age = ($#s < 11 ? undef : $s[10]);
-    @s = stat($lock_tmp);  my $now = ($#s < 11 ? undef : $s[10]);
-
-    if (!defined($lock_age) || $lock_age < $now - $max_lock_age) {
-      #we got a stale lock, break it
-      dbg("lock: breaking stale lockfile: age=".(defined $lock_age?$lock_age:"undef")." now=$now");
+    # check to see how old the lockfile is
+    my $now = ($#stat < 11 ? undef : $stat[10]);
+    @stat = stat($lock_file);
+    my $lock_age = ($#stat < 11 ? undef : $stat[10]);
+    if (!defined($lock_age) || ($now - $lock_age) > LOCK_MAX_AGE) {
+      # we got a stale lock, break it
+      dbg("lock: breaking stale $lock_file: age=" .
+	  (defined $lock_age ? $lock_age : "undef") . " now=$now");
       unlink $lock_file;
     }
-
-    sa_usleep (1.5 + (rand (2.0) - 1.0));
   }
 
   close(LTMP);
-  unlink($lock_tmp);
-  dbg ("lock: unlinked $lock_tmp");
+  unlink $lock_tmp;
 
-  if ($is_locked) {
-    return $lock_file;
-  } else {
-    return undef;
-  }
+  return $is_locked;
 }
 
-sub sa_usleep {
-  my ($secs) = @_;	# can be a float
-  if (CAN_USE_SELECT_FOR_MS_SLEEP) {
-    select(undef, undef, undef, $secs);
-  } else {			# if win32 can't do that
-    sleep (int ($secs + 0.5));	# round up
-  }
+sub safe_unlock {
+  my ($path) = @_;
+
+  unlink "$path.lock";
+  dbg("unlock: unlink $path.lock");
 }
 
 ###########################################################################

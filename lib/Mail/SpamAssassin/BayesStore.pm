@@ -180,9 +180,8 @@ sub tie_db_writable {
 
   my $path = $main->sed_path ($main->{conf}->{bayes_path});
 
-  my $lock_file = Mail::SpamAssassin::Util::safe_lock ($path);
-  if (defined $lock_file) {
-    $self->{lock_file} = $lock_file;
+  if (Mail::SpamAssassin::Util::safe_lock ($path)) {
+    $self->{locked_file} = $path;
     $self->{is_locked} = 1;
   } else {
     warn "Cannot open bayes_path $path R/W: $!\n";
@@ -207,9 +206,10 @@ sub tie_db_writable {
   return 1;
 
 failed_to_tie:
-  unlink($self->{lock_file}) ||
-     dbg ("bayes: couldn't unlink " . $self->{lock_file} . ": $!\n");
-
+  if ($self->{is_locked}) {
+    Mail::SpamAssassin::Util::safe_unlock($self->{locked_file});
+    $self->{is_locked} = 0;
+  }
   warn "Cannot open bayes_path $path R/W: $!\n";
   return 0;
 }
@@ -228,8 +228,7 @@ sub untie_db {
 
   if ($self->{is_locked}) {
     dbg ("bayes: files locked, breaking lock.");
-    unlink($self->{lock_file}) ||
-        dbg ("bayes: couldn't unlink " . $self->{lock_file} . ": $!\n");
+    Mail::SpamAssassin::Util::safe_unlock($self->{locked_file});
     $self->{is_locked} = 0;
   }
 
