@@ -10,10 +10,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <fcntl.h>
 #include <syslog.h>
 #include <sysexits.h>
-#include <errno.h>
 #include <time.h>
 #include <signal.h>
 #include <sys/types.h>
@@ -24,30 +22,11 @@
 #include <arpa/inet.h>
 #include <pwd.h>
 
-/* RedHat 5.2 doesn't define Shutdown 2nd Parameter Constants */
-/* KAM 12-4-01 */
-#ifndef SHUT_RD
-#define SHUT_RD (0)   /* No more receptions.  */
-#endif
-#ifndef SHUT_WR
-#define SHUT_WR (1)   /* No more receptions or transmissions.  */
-#endif
-#ifndef SHUT_RDWR
-#define SHUT_RDWR (2) /* No more receptions or transmissions.  */
-#endif
-
 /* SunOS 4.1.4 patch from Tom Lipkis <tal@pss.com> */
 #if (defined(__sun__) && defined(__sparc__) && !defined(__svr4__)) /* SunOS */ \
      || (defined(__sgi))  /* IRIX */ \
      || (defined(__osf__)) /* Digital UNIX */ \
      || (defined(hpux) || defined(__hpux)) /* HPUX */
-# ifndef h_errno
-# define h_errno errno
-# endif
-
-# ifndef EX__MAX
-# define EX__MAX 77
-# endif
 
 extern char *optarg;
 #endif
@@ -56,18 +35,6 @@ int SAFE_FALLBACK=-1; /* default to on now - CRH */
 
 int CHECK_ONLY=0;
 
-static const int ESC_PASSTHROUGHRAW = EX__MAX+666;
-
-/* set EXPANSION_ALLOWANCE to something more than might be
-   added to a message in X-headers and the report template */
-static const int EXPANSION_ALLOWANCE = 16384;
-
-/* set NUM_CHECK_BYTES to number of bytes that have to match at beginning and end
-   of the data streams before and after processing by spamd */
-static const int NUM_CHECK_BYTES = 32;
-
-/* Set the protocol version that this spamc speaks */
-static const char *PROTOCOL_VERSION="SPAMC/1.2";
 
 void print_usage(void)
 {

@@ -8,12 +8,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <fcntl.h>
 #include <syslog.h>
 #include <sysexits.h>
 #include <errno.h>
 #include <time.h>
-#include <signal.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -21,7 +19,6 @@
 #include <netinet/tcp.h>
 #include <netdb.h>
 #include <arpa/inet.h>
-#include <pwd.h>
 #include "libspamc.h"
 
 /* RedHat 5.2 doesn't define Shutdown 2nd Parameter Constants */
@@ -72,8 +69,10 @@ static const int ESC_PASSTHROUGHRAW = EX__MAX+666;
 static const int EXPANSION_ALLOWANCE = 16384;
 
 /* set NUM_CHECK_BYTES to number of bytes that have to match at beginning and end
-   of the data streams before and after processing by spamd */
-static const int NUM_CHECK_BYTES = 32;
+   of the data streams before and after processing by spamd 
+   Aug  7 2002 jm: no longer seems to be used
+   static const int NUM_CHECK_BYTES = 32;
+ */
 
 /* Set the protocol version that this spamc speaks */
 static const char *PROTOCOL_VERSION="SPAMC/1.2";
@@ -211,11 +210,11 @@ static int read_message(int in, int out, int max_size, struct spamc_context *ctx
   float score,threshold;
   float version;
   int response=EX_OK;
-  char* out_buf;
+  unsigned char *out_buf;
   size_t out_index=0;
   int expected_length=0;
 
-  out_buf = malloc(max_size+EXPANSION_ALLOWANCE);
+  out_buf = (unsigned char *) malloc(max_size+EXPANSION_ALLOWANCE);
 
   for(bytes=0;bytes<8192;bytes++)
   {
