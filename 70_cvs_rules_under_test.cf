@@ -74,15 +74,16 @@ header T_KOREAN_UCE_SUBJECT	Subject:raw =~ /\?B\?KLGksO0p/
 
 header T_DATE_DOUBLE_DASH	Date =~ /:\d\d --\d\d\d\d$/
 
-header T_RCVD_IN_SORBS_BADCONF	eval:check_rbl_sub('sorbs', '127.0.0.11')
-describe T_RCVD_IN_SORBS_BADCONF SORBS: sender uses invalid DNS A or MX records
-tflags T_RCVD_IN_SORBS_BADCONF	net
-score T_RCVD_IN_SORBS_BADCONF	0.1
+header __RCVD_IN_SORBS_RHSBL	eval:check_rbl_from_host('sorbsrhs', 'rhsbl.sorbs.net.')
+tflags __RCVD_IN_SORBS_RHSBL	net
 
-header T_RCVD_IN_SORBS_NOMAIL	eval:check_rbl_sub('sorbs', '127.0.0.12')
+header T_RCVD_IN_SORBS_BADCONF	eval:check_rbl_sub('sorbsrhs', '127.0.0.11')
+describe T_RCVD_IN_SORBS_BADCONF	SORBS: sender uses invalid DNS A or MX records
+tflags T_RCVD_IN_SORBS_BADCONF	net
+
+header T_RCVD_IN_SORBS_NOMAIL	eval:check_rbl_sub('sorbsrhs', '127.0.0.12')
 describe T_RCVD_IN_SORBS_NOMAIL	SORBS: sender is not expected to send mail
 tflags T_RCVD_IN_SORBS_NOMAIL	net
-score T_RCVD_IN_SORBS_NOMAIL	0.1
 
 # SPF support.  "pass" is nice, "fail" is bad, "softfail" is bad, but
 # not as bad as "fail".
@@ -295,22 +296,6 @@ header T_XORIGIP_INVALID	X-Originating-IP =~ /[^\[\]\s\.\d]/
 rawbody T_BAYESBUSTER_LINE_12	/^([a-z]{3,} ){12,}<[Bb][Rr]>$/
 rawbody T_BAYESBUSTER_LINE_15	/^([a-z]{3,} ){15,}<[Bb][Rr]>$/
 rawbody T_BAYESBUSTER_LINE_15I	/^([a-z]{3,} ){15,}<br>$/i
-
-# XBL+SBL
-header __RCVD_IN_SBL_XBL	eval:check_rbl_txt('sblxbl', 'sbl-xbl.spamhaus.org.')
-describe __RCVD_IN_SBL_XBL	Received via a relay in Spamhaus SBL+XBL
-tflags __RCVD_IN_SBL_XBL	net
-
-# SBL replacement
-header T_RCVD_IN_SBL	eval:check_rbl_sub('sblxbl', '(?i)/sbl')
-describe T_RCVD_IN_SBL	Received via a relay in Spamhaus SBL
-tflags T_RCVD_IN_SBL	net
-
-# XBL is the Exploits Block List: http://www.spamhaus.org/xbl/
-# contains data from the CBL, probably supercedes that.
-header T_RCVD_IN_XBL	eval:check_rbl_sub('sblxbl', '(?i)/xbl')
-describe T_RCVD_IN_XBL	Received via a relay in Spamhaus XBL
-tflags T_RCVD_IN_XBL	net
 
 # reported by Kurtis Rader, bug 2890
 uri T_MSN_REDIR		/^http:\/\/shopping\.msn\.com\/trackurl\.aspx\?/i
