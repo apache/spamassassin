@@ -320,8 +320,7 @@ sub lookup_all_ips {
   foreach my $addr (@addrs) {
     next if ($seenaddr{$addr});
     $seenaddr{$addr} = 1;
-    my ($a,$b,$c,$d) = unpack('C4', $addr);
-    push (@ips, "$a.$b.$c.$d");
+    push (@ips, $addr);
   }
   return @ips;
 }
