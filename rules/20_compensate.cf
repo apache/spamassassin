@@ -264,7 +264,7 @@ body     REG_THANKS             /\bThank you for registering\b/i
 describe REG_THANKS             Something about registration
 tflags   REG_THANKS             nice
 
-body     ACCOUNT_CLICK          /\baccount.{1,100}click/i
+body     ACCOUNT_CLICK          /\baccount.{1,50}click/i
 describe ACCOUNT_CLICK          Click to perform an action on an account
 tflags   ACCOUNT_CLICK          nice
 
