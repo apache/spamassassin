@@ -1115,6 +1115,19 @@ Empty the list of internal networks.
     }
   });
 
+=item always_trust_envelope_sender ( 0 | 1 )   (default: 0)
+
+Trust the envelope sender even if the message has been passed through one or
+more trusted relays.
+
+=cut
+
+  push (@cmds, {
+    setting => 'always_trust_envelope_sender',
+    default => 0,
+    type => $CONF_TYPE_BOOL
+  });
+
 =item skip_rbl_checks ( 0 | 1 )   (default: 0)
 
 By default, SpamAssassin will run RBL checks.  If your ISP already does this

@@ -333,7 +333,7 @@ sub _get_sender {
   else {
     # We cannot use the env-from data, since it went through 1 or more relays 
     # since the untrusted sender and they may have rewritten it.
-    if ($scanner->{num_relays_trusted} > 0) {
+    if ($scanner->{num_relays_trusted} > 0 && !$scanner->{conf}->{always_trust_envelope_sender}) {
       dbg("spf: relayed through one or more trusted relays, cannot use header-based Envelope-From, skipping");
       return;
     }
