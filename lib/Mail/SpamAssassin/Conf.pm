@@ -104,6 +104,7 @@ sub new {
   $self->{regression_tests} = { };
 
   $self->{required_hits} = 5.0;
+  $self->{report_charset} = '';
   $self->{report_template} = '';
   $self->{unsafe_report_template} = '';
   $self->{terse_report_template} = '';
@@ -959,6 +960,20 @@ The test requires training before it can be used.
       next;     # ignored in SpamAssassin modules
     }
 
+
+=item report_charset CHARSET		(default: unset)
+
+Set the MIME Content-Type charset used for the text/plain report which
+is attached to spam mail messages.
+
+=back
+
+=cut
+
+    if (/^report_charset\s*(.*)$/) {
+      $self->{report_charset} = $1; next;
+    }
+
 =item report ...some text for a report...
 
 Set the report template which is attached to spam mail messages.  See the
@@ -966,11 +981,7 @@ C<10_misc.cf> configuration file in C</usr/share/spamassassin> for an
 example.
 
 If you change this, try to keep it under 76 columns (inside the the dots
-below).  Bear in mind that EVERY line will be prefixed with "SPAM: " in order
-to make it clear what's been added, and allow other filters to B<remove>
-spamfilter modifications, so you lose 6 columns right there. Also note that the
-first line of the report must start with 4 dashes, for the same reason. Each
-C<report> line appends to the existing template, so use
+below).  Each C<report> line appends to the existing template, so use
 C<clear_report_template> to restart.
 
 The following template items are supported, and will be filled out by
