@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.582 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.583 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -22,27 +22,18 @@
 # Catch it here (assuming one of the above doesn't catch it anyway).
 # NOTE: __XM_BAD_DATE_MUAS is used below
 header __DATE_TIME_INVALID	Date =~ /\s(?!\d\d:\d\d:\d\d)\d{1,2}:\d{1,2}:\d{1,2}\s/
-header __XM_BAD_DATE_MUAS	X-Mailer =~ /(?:FoxMail|EMUmail|TFS Secure Messaging|sendEmail|EarthLink MailBox \d\.\d)/i
+header __XM_BAD_DATE_MUAS	X-Mailer =~ /(?:FoxMail|EMUmail|TFS Secure Messaging|sendEmail|EarthLink MailBox \d\.\d|THOR \d\.\d)/i
 meta T_INVALID_DATE_HMS		(__DATE_TIME_INVALID && !__XM_BAD_DATE_MUAS)
 describe T_INVALID_DATE_HMS	Date header does not use valid HH:MM:SS formatting
 
 # possible replacement for INVALID_DATE.
 # NOTE: uses __XM_BAD_DATE_MUAS from above
-# rfc822:                       date-time =          [ day-of-week "," ]         (day / obs-day)                 month                           (year / obs-year)   hour ":" minute [ ":" second ]       (zone / obs-zone)          [ comment ]
+# rfc822: date-time = [ day-of-week "," ] (day / obs-day) month
+#         (year / obs-year) hour ":" minute [ ":" second ] (zone / obs-zone)
+#         [ comment ]
 header __INVALID_DATE		Date !~ /^\s*(?:(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun), )?[0-3 ]?[0-9] (?:Jan|Feb|Ma[ry]|Apr|Ju[nl]|Aug|Sep|Oct|Nov|Dec) (?:19|20)?[0-9]{2} [0-2][0-9](?:\:[0-5][0-9]){1,2} (?:[+-][0-9]{4}|UT|[A-Z]{2,3}T)(?:\s+\(.*\))?\s*$/ [if-unset: Mon, 24 Feb 2003 09:30 +0100 (mss)]
 meta T_INVALID_DATE_2		(__INVALID_DATE && !__XM_BAD_DATE_MUAS)
 describe T_INVALID_DATE_2	Invalid Date: header (not RFC 2822)
-
-# 2003-02-25: quinlan
-# Whee... more HTML tests!
-# Note: these use __MIME_HTML, we might need to exempt MIME attachments from
-# that rule
-# Apr 22 2003 jm: removed __TAG_EXISTS_DIV from OUTLOOK, as 'MS Exchange
-# Server version 6.0.4630.0' does not insert that, causing FPs
-# my FPs for this should hopefully be fixed now
-# ... place with brother rule in 20_ratware.cf
-header __ANY_QUALCOMM_MUA	X-Mailer =~ /^QUALCOMM\b/
-meta T_FORGED_QUALCOMM_TAGS	(__ANY_QUALCOMM_MUA && __MIME_HTML && !__TAG_EXISTS_HTML)
 
 ###########################################################################
 
@@ -284,10 +275,6 @@ meta T_HTML_DECLARATION_WRONG6	(T_HTML_DECLARATION_HTML + T_HTML_DECLARATION_BOD
 meta T_HTML_DECLARATION_WRONG7	(T_HTML_DECLARATION_HTML + T_HTML_DECLARATION_BODY + T_HTML_DECLARATION_CENTER > 2)
 
 ######################################################################
-
-# a new ratware-forgery format
-header T_LC_ESMTP_RCVD    Received =~ /^from (?:(?:unknown|\d+\.\d+\.\d+\.\d+) \(\S+\)|\[\d+\.\d+\.\d+\.\d+\]) by \S+ with (?:esmtp|local|smtp); /m
-describe T_LC_ESMTP_RCVD  Forged 'esmtp'-type Received header
 
 # bug 1426
 # AOL users' From never includes a real name
