@@ -1466,7 +1466,7 @@ chart of queries remaining versus the effective timeout in seconds:
 
 In addition, whenever the effective timeout is lowered due to additional query
 results returning, the remaining queries are always given at least one more
-second before timing out, but the wait time will never exceed the timeout.
+second before timing out, but the wait time will never exceed rbl_timeout.
 
 For example, if 20 queries are made at the beginning of a message check and 16
 queries have returned (leaving 20%), the remaining 4 queries must finish
