@@ -34,9 +34,8 @@ my $sa = Mail::SpamAssassin->new({
 $sa->init(0); # parse rules
 
 open (IN, "<data/spam/001");
-my @lines = <IN>;
+my $mail = $sa->parse(\*IN);
 close IN;
-my $mail = $sa->parse(\@lines);
 my $msg = Mail::SpamAssassin::PerMsgStatus->new($sa, $mail);
 
 my $decoded_pre = join ('||', @{$msg->get_decoded_body_text_array()});
@@ -68,4 +67,3 @@ if ($stripped_pre eq $stripped_post) {
   print "stripped: pre=".$stripped_pre." post=".$stripped_post."\n\n";
   ok (0);
 }
-
