@@ -73,6 +73,16 @@ http://spamassassin.org/ , and install that, like so:
 	make
 	make install				[as root]
 
+SunOS Note
+----------
+
+Under SunOS, snprintf is not defined.  A library containing a SunOS
+version of snprintf is included in contrib/snp.tar.gz, and that should be
+useable for building SA.  If you're a SunOS user and do this, and would
+like to document the process for others, please send the docs to the SA
+maintainer to amend these basic directions.
+
+
 Installing SpamAssassin for Personal Use (Not System-Wide)
 ----------------------------------------------------------------
 
