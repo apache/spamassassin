@@ -437,6 +437,10 @@ describe CLICK_TO_REMOVE_MAILTO    Click-to-remove with mailto: found
 body CLICK_TO_REMOVE_2          /mailto:.{0,50}click.{0,50}remove/is
 describe CLICK_TO_REMOVE_2      Click-to-remove with mailto: found beforehand
 
+# (contrib: climent)
+body CLICK_TO_REMOVE_3		/http:.{0,50}action=remove/is
+describe CLICK_TO_REMOVE_3	Click-to-remove with PHP/ASP action found
+
 # (contrib: WW, mod by David Hull)
 body TO_BE_REMOVED_REPLY        /\bto\b.{0,20}\bremove.{0,20}\breply\b/is
 describe TO_BE_REMOVED_REPLY    Says: "to be removed, reply via email" or similar
