@@ -187,7 +187,7 @@ describe FORGED_GW05_RCVD	Forged 'by gw05' 'Received:' header found
 header CHARSET_FARAWAY		eval:check_for_faraway_charset()
 describe CHARSET_FARAWAY	Character set indicates a foreign language
 
-header NONEXISTENT_CHARSET	Content-Type =~ /charset="DEFAULT/
+header NONEXISTENT_CHARSET	Content-Type =~ /charset=.?DEFAULT/
 describe NONEXISTENT_CHARSET	Character set doesn't exist
 
 header X_MAILER_GIBBERISH	X-Mailer =~ /^[A-Fa-f0-9\.]{48,}$/
