@@ -31,8 +31,8 @@ require_version @@VERSION@@
 ###########################################################################
 
 # jm: keep this case-sensitive, otherwise it FP's
-body VIAGRA			/VIAGRA/
-describe VIAGRA			Plugs Viagra
+body DRUG_ED_CAPS		/(?:\bCIALIS|LEVITRA|VIAGRA)/
+describe DRUG_ED_CAPS		Mentions an E.D. drug
 
 body HERBAL_VIAGRA              /\bherbal v(?:iagra)?\b/i
 describe HERBAL_VIAGRA          Plugs "Herbal Viagra"
