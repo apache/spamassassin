@@ -84,13 +84,13 @@ sub parse {
   #
   my ($boundary) =
     $msg->header('content-type') =~ /boundary\s*=\s*["']?([^"';]+)["']?/i;
-  $self->_parse_body( $msg, $msg, $boundary, \@message );
+  $self->_parse_body( $msg, $msg, $boundary, \@message, 1 );
 
   return $msg;
 }
 
 sub _parse_body {
-  my($self, $msg, $_msg, $boundary, $body) = @_;
+  my($self, $msg, $_msg, $boundary, $body, $initial) = @_;
 
   # CRLF -> LF
   for ( @{$body} ) {
@@ -111,11 +111,25 @@ sub _parse_body {
   }
   elsif ( $type =~ /^multipart\/alternative/i ) {
     dbg("Parse multipart/alternative");
-    $self->_parse_multipart_alternate( $msg, $_msg, $boundary, $body );
+    if ( $initial ) {
+      $self->_parse_multipart_mixed( $msg, $_msg, $boundary, $body );
+    }
+    else {
+      my $part_msg = Mail::SpamAssassin::MIME->new();
+      $self->_parse_multipart_alternate( $part_msg, $_msg, $boundary, $body );
+      $msg->add_body_part( $type, { "mime-parts" => $part_msg, } );
+    }
   }
   elsif ( $type =~ /^multipart\//i ) {
     dbg("Parse $type");
-    $self->_parse_multipart_mixed( $msg, $_msg, $boundary, $body );
+    if ( $initial ) {
+      $self->_parse_multipart_mixed( $msg, $_msg, $boundary, $body );
+    }
+    else {
+      my $part_msg = Mail::SpamAssassin::MIME->new();
+      $self->_parse_multipart_mixed( $part_msg, $_msg, $boundary, $body );
+      $msg->add_body_part( $type, { "mime-parts" => $part_msg, } );
+    }
   }
   else {
     dbg("Regular attachment");
@@ -185,6 +199,7 @@ sub _parse_multipart_alternate {
       $in_body  = 0;
       $part_msg = Mail::SpamAssassin::MIME->new();
       undef $part_array;
+      undef $header;
       next;
     }
 
@@ -272,13 +287,14 @@ sub _parse_multipart_mixed {
           $part_msg->header('content-type') =~
           /boundary\s*=\s*["']?([^"';]+)["']?/i;
         $p_boundary ||= $boundary;
-        $self->_parse_body( $msg, $part_msg, $p_boundary, $part_array );
+        $self->_parse_body( $msg, $part_msg, $p_boundary, $part_array, 0 );
       }
 
       last if ($boundary && $line =~ /^\-\-\Q${boundary}\E\-\-$/);
       $in_body  = 0;
       $part_msg = Mail::SpamAssassin::MIME->new();
       undef $part_array;
+      undef $header;
       next;
     }
 
@@ -352,6 +368,8 @@ sub _decode_body {
 
   my ($type, $decoded, $name) = $self->_decode($part_msg, $body);
 
+  dbg("decoded attachment type: $type");
+
   my $opts = {
   	decoded => $decoded,
 	raw => $body,
@@ -360,7 +378,7 @@ sub _decode_body {
 	raw_headers => $part_msg->{raw_headers},
   };
   $opts->{name} = $name if $name;
-  $opts->{rendered} = _render_text($type, $decoded) if $type =~ m/^text/i;
+  $opts->{rendered} = _render_text($type, $decoded) if $type =~ /^text/i;
 
   $msg->add_body_part( $type, $opts );
 }
