@@ -32,21 +32,21 @@ tflags MAJORDOMO		nice
 header CRON_ENV                 exists:X-Cron-Env
 header IN_REP_TO                exists:In-Reply-To
 header REFERENCES               exists:References
-header RESENT_TO                exists:Resent-To
 header USER_AGENT               exists:User-Agent
 header X_AUTH_WARNING           exists:X-Authentication-Warning
 header X_LOOP                   exists:X-Loop
 header X_MAILING_LIST           exists:X-Mailing-List
 header X_ACCEPT_LANG            exists:X-Accept-Language
+header RESENT_TO                exists:Resent-To
 tflags CRON_ENV                 nice
 tflags IN_REP_TO                nice
 tflags REFERENCES               nice
-tflags RESENT_TO                nice
 tflags USER_AGENT               nice
 tflags X_AUTH_WARNING           nice
 tflags X_LOOP                   nice
 tflags X_MAILING_LIST           nice
 tflags X_ACCEPT_LANG            nice
+tflags RESENT_TO                nice
 
 header PGP_SIGNATURE_2          Content-Type =~ /protocol=.?application\/pgp-signature.?;/i
 describe PGP_SIGNATURE_2        Contains a PGP-signed message (signature attached)
