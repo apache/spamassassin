@@ -1014,10 +1014,6 @@ score BAYES_99 0.001 0.001 4.300 2.791
 #tflags X_MAILING_LIST           nice
 #score X_MAILING_LIST -0.001 -0.001 -0.001 -3.101
 
-#header T_RCVD_IN_MONKEYS_FORMMAIL	rbleval:check_rbl_txt('relay', 'formmail.relays.monkeys.com.')
-#describe T_RCVD_IN_MONKEYS_FORMMAIL	Received via a relay in formmail.relays.monkeys.com.
-#tflags T_RCVD_IN_MONKEYS_FORMMAIL net
-
 # new "-notfirsthop" logic
 #header T_RCVD_IN_PDL		rbleval:check_rbl('pdl-notfirsthop', 'dialups.visi.com.')
 #tflags T_RCVD_IN_PDL		net
