@@ -350,3 +350,9 @@ describe QUALIFY_FOR_THIS	Qualify for this special...
 
 body MALE_ENHANCE	/male enhancement/i
 describe MALE_ENHANCE	Message talks about enhancing men
+
+body PRICES_ARE_AFFORDABLE	/\baffordable .{0,10}prices\b/i
+describe PRICES_ARE_AFFORDABLE	Message says that prices aren't too expensive
+
+body REPLICA_ROLEX /\breplica.{1,20}rolex/i
+describe REPLICA_ROLEX	Message talks about a replica watch
