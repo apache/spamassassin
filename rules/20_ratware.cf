@@ -7,41 +7,21 @@
 # the next update. Use @@LOCAL_RULES_DIR@@/local.cf instead.
 # See 'perldoc Mail::SpamAssassin::Conf' for details.
 #
-# Note that the tests which look at the "ALL" pseudoheader are quite
-# the specific header, as that's much quicker.
-#
 ###########################################################################
 
-#   0.614    1.480    0.090    0.94    2.00  RATWARE_EGROUPS
-#   0.347    0.904    0.010    0.99    2.00  RATWARE_HASH_2
-#   0.141    0.366    0.004    0.99    2.00  RATWARE_JPFREE
-#   0.149    0.366    0.018    0.95    2.00  RATWARE_GROUPMAIL
-#   0.074    0.197    0.000    1.00    2.00  RATWARE_VC_IPA
-#   0.064    0.168    0.001    0.99    2.00  RATWARE_GR
-#   0.059    0.156    0.000    1.00    3.00  RATWARE_OE_PI
-#   0.056    0.148    0.000    1.00    2.00  RATWARE_STORM
-#   0.055    0.147    0.000    1.00    2.00  RATWARE_JIXING
-#   0.054    0.143    0.000    1.00    2.00  RATWARE_SCREWUP_1
-#   0.041    0.109    0.000    1.00    2.00  RATWARE_MMAILER
-#   0.045    0.117    0.001    0.99    1.00  RATWARE_OE_MALFORMED
-#   0.038    0.102    0.000    1.00    2.00  RATWARE_EVAMAIL
-#   0.041    0.107    0.001    0.99    2.00  RATWARE_SCREWUP_2
-#   0.026    0.070    0.000    1.00    2.00  RATWARE_IMKTG
-#   0.025    0.067    0.000    1.00    2.00  RATWARE_XMAILER
-#   0.013    0.035    0.000    1.00    2.00  RATWARE_POWERC
-#   0.008    0.022    0.000    1.00    2.00  RATWARE_DIFFOND
-#   0.005    0.012    0.000    1.00    2.00  RATWARE_CHARSET
-#   0.004    0.010    0.000    1.00    2.00  RATWARE_CARETOP
-#   0.002    0.006    0.000    1.00    2.00  RATWARE_LC_OUTLOOK
-#   0.001    0.003    0.000    1.00    1.00  RATWARE_39
 header RATWARE_EGROUPS		X-Mailer =~ /eGroups Message Poster/
 describe RATWARE_EGROUPS	Bulk email software fingerprint (eGroups) found in headers
 header RATWARE_HASH_2		X-Mailer =~ /^[A-Za-z0-9\._]{16,}$/
 describe RATWARE_HASH_2		Bulk email software fingerprint (hash 2) found in headers
+header RATWARE_HASH_2_V2        X-Mailer =~ /^[A-Za-z0-9\._]{14,}$/
+describe RATWARE_HASH_2_V2      Bulk email software fingerprint (hash 2 v2) found in headers
 header RATWARE_JPFREE		X-Mailer =~ /jpfree Group Mail Express/
 describe RATWARE_JPFREE		Bulk email software fingerprint (jpfree) found in headers
 header RATWARE_VC_IPA		X-Mailer =~ /2\.0-b55-VC_IPA/
 describe RATWARE_VC_IPA		Bulk email software fingerprint (VC_IPA) found in headers
+
+# Note that the tests which look at the "ALL" pseudoheader are slower than
+# the specific header.
 header RATWARE_GROUPMAIL	ALL =~ /Group Mail/
 describe RATWARE_GROUPMAIL	Bulk email software fingerprint (Group Mail) found in headers
 header RATWARE_GR		X-Mailer =~ /GRMessageQueue/
@@ -72,6 +52,8 @@ header RATWARE_DIFFOND		ALL =~ /DiffondiCool/
 describe RATWARE_DIFFOND	Bulk email software fingerprint (DiffondiCool) found in headers
 header RATWARE_CHARSET		X-Mailer =~ /\Qcharset(89)\E/
 describe RATWARE_CHARSET	Bulk email software fingerprint (charset) found in headers
+header RATWARE_CHARSET_V2       X-Mailer =~ /^normal \W \W\s*charset.*=\"/
+describe RATWARE_CHARSET_V2 	Bulk email software fingerprint (charset 2) found in headers
 header RATWARE_CARETOP		X-Mailer =~ /Caretop 2604/
 describe RATWARE_CARETOP	Bulk email software fingerprint (Caretop) found in headers
 header RATWARE_LC_OUTLOOK	X-Mailer =~ /^outlook$/
@@ -80,6 +62,18 @@ header RATWARE_V3161		ALL =~ /V3,1,6,1/
 describe RATWARE_V3161		Bulk email software fingerprint (V3161) found in headers
 header RATWARE_EMWAC		Received =~ /EMWAC SMTPRS/
 describe RATWARE_EMWAC		Bulk email software fingerprint ("EMWAC SMTPRS") found in headers
+header RATWARE_BANG_HASH        X-Mailer =~ /!.*\#.*\*/
+describe RATWARE_BANG_HASH 	Bulk email software fingerprint (bang-hash) found in headers
+header RATWARE_FLOAT            X-Mailer =~ /^\d\.\d\d/
+describe RATWARE_FLOAT 		Bulk email software fingerprint (float) found in headers
+
+###########################################################################
+# Now, detect forgeries of real MUAs
+
+# Dec 17 2002 jm: this means "message ID is either too old or has been
+# rewritten by a gateway".  Made into an eval test since meta tests cannot
+# (yet) chain from other meta tests.
+header __UNUSABLE_MSGID         eval:check_messageid_not_usable()
 
 # The Bat! forgeries
 header __THEBAT_MUA             X-Mailer =~ /The Bat!/
@@ -89,4 +83,42 @@ describe FORGED_MUA_THEBAT      Forged mail pretending to be from The Bat!
 
 # forgeries of MSN Explorer.  See "20_anti_ratware.cf" for the meta subrules
 meta FORGED_MUA_MSN		(__USER_AGENT_MSN && (!__HAS_XOAT || !__HAS_XOIP))
+
+# AOL
+header __AOL_MUA                X-Mailer =~ /\bAOL\b/
+header __AOL_MSGID              MESSAGEID =~ /^<[0-9a-f]{1,3}\.[0-9a-f]{6,8}\.[0-9a-f]{8}\@aol.com>$/m             
+meta FORGED_MUA_AOL             (__AOL_MUA && !__UNUSABLE_MSGID && !__AOL_MSGID)
+describe FORGED_MUA_AOL         Forged mail pretending to be from AOL
+
+# Internet Mail Service
+header __IMS_MUA                X-Mailer =~ /Internet Mail Service/
+header __IMS_MSGID              MESSAGEID =~ /^<[A-F\d]{36,40}\@\S+>$/m
+meta FORGED_MUA_IMS             (__IMS_MUA && !__UNUSABLE_MSGID && !__IMS_MSGID)
+describe FORGED_MUA_IMS         Forged mail pretending to be from IMS
+
+# Outlook
+# Note: this uses __IMS_MSGID from above
+header __OUTLOOK_MUA            X-Mailer =~ /\bOutlook\b(?! IMO| Express Mac)/
+header __OUTLOOK_MSGID_1        MESSAGEID =~ /^<[0-9a-f]{12}\$[0-9a-f]{8}\$[0-9a-f]{8}\@\S+>$/m
+header __OUTLOOK_MSGID_2        MESSAGEID =~ /^<(?:OE[0-9A-Za-z]{25}|DAV[0-9A-Za-z]{24})\@hotmail\.com>$/m
+meta FORGED_MUA_OUTLOOK         (__OUTLOOK_MUA && !__UNUSABLE_MSGID && !(__OUTLOOK_MSGID_1 || __OUTLOOK_MSGID_2 || __IMS_MSGID))
+describe FORGED_MUA_OUTLOOK     Forged mail pretending to be from MS Outlook
+
+# Outlook IMO (Internet Mail Only)
+header __OIMO_MUA               X-Mailer =~ /Outlook IMO/
+header __OIMO_MSGID             MESSAGEID =~ /^<[A-P]{26}A[AB]\.[-_\w.]+\@\S+>$/m
+meta FORGED_MUA_OIMO            (__OIMO_MUA && !__OIMO_MSGID && !__UNUSABLE_MSGID)
+describe FORGED_MUA_OIMO        Forged mail pretending to be from MS Outlook IMO
+
+# QUALCOMM Eudora
+header __EUDORA_MUA             X-Mailer =~ /\b(?:QUALCOMM|Eudora)\b/
+header __MAC_EUDORA_MUA         X-Mailer =~ /Eudora for Macintosh/
+header __OLD_EUDORA1            X-Mailer =~ /Eudora\s+Pro\s+Version\s+[1-4]\.\b/
+header __OLD_EUDORA2            X-Mailer =~ /\bEudora\s+(?:(?:Pro|Light)\s+)?Version\s+[1-4]\.\b/
+header __QUALCOMM               X-Mailer =~ /\bQUALCOMM\b/
+header __EUDORA_MSGID           MESSAGEID =~ /^<(?:\d\d?\.){4,5}\d{14}\.[a-f0-9]{8}\@\S+>$/m
+# Note: uses X_LOOP and X_MAILING_LIST as subrules
+meta FORGED_MUA_EUDORA          (__EUDORA_MUA && !__EUDORA_MSGID && !__UNUSABLE_MSGID && !X_LOOP && !X_MAILING_LIST && !__MAC_EUDORA_MUA && !__OLD_EUDORA1 && !(__OLD_EUDORA2 && !__QUALCOMM))
+describe FORGED_MUA_EUDORA      Forged mail pretending to be from Eudora
+
 

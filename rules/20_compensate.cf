@@ -162,6 +162,12 @@ header PGP_SIGNATURE_2		Content-Type =~ /protocol=.?application\/pgp-signature.?
 describe PGP_SIGNATURE_2	Contains a PGP-signed message (signature attached)
 tflags PGP_SIGNATURE_2		nice
 
+header __SMIME_SIGNED_HDR       Content-Type =~ /multipart\/signed;.*protocol=/i
+full __SMIME_SIGNED_BODY        /\nContent-Type: application\/x-pkcs7-signature;/
+meta SMIME_SIGNATURE            (__SMIME_SIGNED_HDR && __SMIME_SIGNED_BODY)
+describe SMIME_SIGNATURE        Contains an S/MIME-signed message
+tflags SMIME_SIGNATURE          nice
+
 rawbody PATCH_UNIFIED_DIFF	/^\@\@ [-+0-9]+,[0-9]+ [-+0-9]+,[0-9]+ \@\@$/
 describe PATCH_UNIFIED_DIFF	Contains what looks like a patch from diff -u
 tflags PATCH_UNIFIED_DIFF	nice

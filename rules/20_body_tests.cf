@@ -1087,9 +1087,6 @@ describe DRASTIC_REDUCED	Drastically Reduced
 body DO_IT_TODAY        /\b(?:join|register|order|apply) .{0,10}(?-i:T)oday\b/i
 describe DO_IT_TODAY		Do it Today
 
-body ACT_NOW		        /\b(?:act.{0,4} now|do.{0,5} hesitate|start now)\b/i
-describe ACT_NOW		Act Now! Don't Hesitate!
-
 body WHY_WAIT		        /\b(?:why wait|what are you waiting for)\b/i
 describe WHY_WAIT		What are you waiting for
 
@@ -1416,6 +1413,12 @@ describe PORN_15 		Possible porn - various types of feline
 body PORN_16                    /(?:nasty|teen|dir(?:ty|iest)?|little).{0,16}\bsluts?/i 
 describe PORN_16 		Possible porn - nasty, dirty, little etc.
 
+body LOTS_OF_STUFF              /\b(?:\d{1,3}[,\.])+\d{3}.{0,20}\b(?:pics|pictures|images|photos|movies)/i         
+describe LOTS_OF_STUFF          Thousands or millions of pics/movies/etc
+
+body DISGUISE_PORN              /\b(c[*0]cks?|d[1*]cks?|h[0*]rny|b[1*]tch(?:es)|f[*0]ckk?ed|p[*]ssy|p[*]ssies)\b/i
+describe DISGUISE_PORN          Attempts to disguise porn words
+
 
 ##################
 # End Porn Rules #
@@ -1648,6 +1651,9 @@ describe OUR_STRICT_ANTI	Mentions their strict antipathy on something
 body OUR_PUBLICATIONS		/our website (?:and|or) publications/i
 describe OUR_PUBLICATIONS	Mentions their website and/or publications
 
+body OUR_PRIVACY_POLICY         /our privacy policy can be found/i
+describe OUR_PRIVACY_POLICY 	Mentions where their privacy policy is
+
 body CELL_PHONE_BOOST		/(?:(?:boost|antenna|reception).{0,32}(?:cell|mobile|phone|cord.?less)|(?:cell|mobile|phone|cord.?less).{0,32}(?:boost|antenna|reception))/i
 describe CELL_PHONE_BOOST	Talks about cell-phone signal improvement
 
@@ -1673,4 +1679,17 @@ describe BANG_QUOTE            	Talks about quotes with an exclamation!
 
 body INTL_DRIVERS_LICENSE	/international driver'?s license/i
 describe INTL_DRIVERS_LICENSE	International driving license
+
+body ACT_NOW_CAPS               /A(?i:ct) N(?i:ow)/
+describe ACT_NOW_CAPS		Talks about 'acting now' with capitals
+body START_NOW_CAPS             /S(?i:tart now)/
+describe START_NOW_CAPS 	Talks about 'starting now' with capitals
+body WORRY_FREE                 /worry free/i
+describe WORRY_FREE             No Worries, Mate
+body EXPERTS_SHOW_HOW           /experts show you how/i
+describe EXPERTS_SHOW_HOW       Talks about 'experts' showing you how
+body ENHANCE_WEBSITE            /E(?i:nhance any) W(?i:ebsite)/
+describe ENHANCE_WEBSITE        Talks about 'enhancing any website'
+body INCREASE_SEX               /increased?.{0,9}(?:sex|stamina)/i
+describe INCREASE_SEX 		Talks about a bigger drive for sex
 
