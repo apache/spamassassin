@@ -39,6 +39,7 @@ package Mail::SpamAssassin::Plugin::Razor2;
 
 # Make the main dbg() accessible in our package w/o an extra function
 *dbg=\&Mail::SpamAssassin::Plugin::dbg;
+*info=\&Mail::SpamAssassin::Plugin::info;
 
 use Mail::SpamAssassin::Plugin;
 use strict;
@@ -339,11 +340,11 @@ sub plugin_report {
 
   if ($self->razor2_access($options->{text}, 'report')) {
     $options->{report}->{report_available} = 1;
-    dbg('reporter: spam reported to Razor');
+    info('reporter: spam reported to Razor');
     $options->{report}->{report_return} = 1;
   }
   else {
-    dbg('reporter: could not report spam to Razor');
+    info('reporter: could not report spam to Razor');
   }
 }
 

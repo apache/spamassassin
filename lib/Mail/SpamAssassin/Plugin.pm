@@ -96,6 +96,7 @@ package Mail::SpamAssassin::Plugin;
 
 # Make the main dbg() accessible in our package w/o an extra function
 *dbg=\&Mail::SpamAssassin::dbg;
+*info=\&Mail::SpamAssassin::info;
 
 use Mail::SpamAssassin;
 
@@ -664,6 +665,16 @@ sub inhibit_further_callbacks {
 
 Output a debugging message C<$message>, if the SpamAssassin object is running
 with debugging turned on.
+
+I<NOTE:> This function is not available in the package namespace
+of general plugins and can't be called via $self->dbg().  If a
+plugin wishes to output debug information, it should call
+C<Mail::SpamAssassin::Plugin::dbg($msg)>.
+
+=item info($message)
+
+Output an informational message C<$message>, if the SpamAssassin object
+is running with informational messages turned on.
 
 I<NOTE:> This function is not available in the package namespace
 of general plugins and can't be called via $self->dbg().  If a
