@@ -265,9 +265,9 @@ describe T_INDYLIB       Uses spam-only version of Indy library
 
 ##########################################################################
 
-body	T_EMPTY_URI_SRC		eval:html_test('blank_uri')
-body	T_EMPTY_URI_SRC_IMG	eval:html_text_match('blank_uri', '^img$')
-body	T_EMPTY_URI_SRC_IFRAME	eval:html_text_match('blank_uri', '^iframe$')
+body	T_HTML_EMPTY_URI	eval:html_test('blank_uri')
+body	T_HTML_EMPTY_URI_IMG	eval:html_text_match('blank_uri', '^img$')
+body	T_HTML_EMPTY_URI_IFRAME	eval:html_text_match('blank_uri', '^iframe$')
 
 # bug 3186
 uri T_BIZ_TLD		/^(?:https?:\/\/|mailto:)[^\/]+\.biz(?![-a-z0-9])/i
