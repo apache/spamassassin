@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.617 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.618 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -17,10 +17,6 @@
 # distribution for more details.
 #
 ###########################################################################
-
-# some dial-up lists that seem decent, worth testing some more
-header T_RCVD_IN_DUN_DNSRBL rbleval:check_rbl('dun-notfirsthop', 'dun.dnsrbl.net.')
-tflags T_RCVD_IN_DUN_DNSRBL net
 
 # still need to check for cost, policies, etc.
 # URL: http://www.fabel.dk/relay/
