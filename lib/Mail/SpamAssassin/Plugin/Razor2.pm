@@ -95,7 +95,7 @@ filtering network.
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });
 
-=item razor_timeout n		(default: 10)
+=item razor_timeout n		(default: 5)
 
 How many seconds you wait for razor to complete before you go on without
 the results
@@ -104,7 +104,7 @@ the results
 
   push(@cmds, {
     setting => 'razor_timeout',
-    default => 10,
+    default => 5,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });
 

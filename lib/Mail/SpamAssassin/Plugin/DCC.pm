@@ -94,7 +94,7 @@ Whether to use DCC, if it is available.
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL,
   });
 
-=item dcc_timeout n		(default: 10)
+=item dcc_timeout n		(default: 5)
 
 How many seconds you wait for DCC to complete, before scanning continues
 without the DCC results.
@@ -103,7 +103,7 @@ without the DCC results.
 
   push (@cmds, {
     setting => 'dcc_timeout',
-    default => 10,
+    default => 5,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC,
   });
 
