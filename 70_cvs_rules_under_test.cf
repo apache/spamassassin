@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.595 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.596 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -152,8 +152,12 @@ uri T_SUSPICIOUS_LINKS_10	m@(?:^https?://|^mailto:).{0,25}4you@i
 
 ######
 
-body T_HTML_PUSH_HERE		eval:html_eval('anchor_text', '=~ /(?:push|go)\s(?:here|this)|cease.{1,10}mail/i')
-describe T_HTML_PUSH_HERE	Link asks you to "push here" or the like
+body T_HTML_PUSH_HERE_1		eval:html_eval('anchor_text', '=~ /(?:push|go)\s(?:here|this)|cease.{1,10}mail/i')
+body T_HTML_PUSH_HERE_2		eval:html_eval('anchor_text', '=~ /cease.{1,10}mail/i')
+body T_HTML_PUSH_HERE_3		eval:html_eval('anchor_text', '=~ /push\s*here/i')
+body T_HTML_PUSH_HERE_4		eval:html_eval('anchor_text', '=~ /push\s+here/i')
+body T_HTML_PUSH_HERE_5		eval:html_eval('anchor_text', '=~ /push.{1,10}here/i')
+describe T_HTML_PUSH_HERE	Link asks you to "push here" or similar
 
 ######################################################################
 
