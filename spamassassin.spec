@@ -1,7 +1,7 @@
 %define name spamassassin
 %define real_name Mail-SpamAssassin
-%define version 1.4
-%define real_version 1.4
+%define version 1.5
+%define real_version 1.5
 %define release 1
 %define initdir %{_initrddir}
 
@@ -12,9 +12,9 @@ Release: %{release}
 License: Artistic
 Group: Networking/Mail
 URL: http://spamassassin.taint.org/
-Source: http://spamassassin.taint.org/devel/Mail-SpamAssassin-1.4.tar.gz
+Source: http://spamassassin.taint.org/devel/Mail-SpamAssassin-%{real_version}.tar.gz
 Requires: perl >= 5.004
-BuildRequires:	perl-devel
+# BuildRequires:	perl-devel
 Buildroot: %{_tmppath}/%{name}-root
 Prefix: %{_prefix}
 Prereq: /sbin/chkconfig
@@ -27,21 +27,24 @@ SpamAssassin provides you with a way to reduce if not completely eliminate Unsol
 
 %build
 %{__perl} Makefile.PL PREFIX=%{prefix}
-%make OPTIMIZE="$RPM_OPT_FLAGS" PREFIX=%{prefix}
+make OPTIMIZE="$RPM_OPT_FLAGS" PREFIX=%{prefix}
 #%make test
 
 %install
 rm -rf %buildroot
 %makeinstall PREFIX=%buildroot/%{prefix} INSTALLMAN1DIR=%buildroot/%{prefix}/share/man/man1
 install -d %buildroot/%{initdir}
-install -m 0755 spamd/spamassassin %buildroot/%{initdir}
+install -m 0755 spamd/redhat-rc-script.sh %buildroot/%{initdir}/spamassassin
 
 %files
 %defattr(-,root,root)
-%doc README ChangeLog TODO sample-nonspam.txt sample-spam.txt spamd/README
+%doc README Changes TODO sample-nonspam.txt sample-spam.txt spamd/README
 %config(noreplace) %initdir/*
 %{prefix}/share/man
-%{_libdir}/perl5/man/*/*
+#
+# jm: this doesn't work on RH7.1
+# %{_libdir}/perl5/man/*/*
+#
 %{perl_sitearch}/../Mail
 %{perl_sitearch}/auto/Mail
 
