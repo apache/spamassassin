@@ -217,6 +217,8 @@ my %makefile = (
 
         'doc', 'pod2htm*',
 
+	'version.env',
+
         't/bayessql.cf', 't/do_net', 't/log', 't/sql_based_whitelist.cf',
       )
 
@@ -882,6 +884,13 @@ sub MY::constants {
     # Store the assignment string if necessary.
     set_EQ_from_line($line);
 
+    # Store a nicer version string for later use.
+    if (line_has_macro_def($line, 'VERSION')) {
+      get_macro('VERSION') =~ /^(\d)\.(\d\d\d)_?(\d\d\d)/;
+      set_macro('VERSION_COOL', join(".", $1*1, $2*1, $3*1));
+      $line .= "\n" . macro_def('VERSION_COOL');
+    }
+
     # Add some "dummy" (PERL|SITE|VENDOR)PREFIX macros for later use (only if
     # necessary for old EU::MMs of course)
     if (line_has_macro_def($line, 'PREFIX')) {
@@ -1004,6 +1013,32 @@ sub MY::constants {
   return join("\n", @code);
 }
 
+# Override some vars in the dist section.
+sub MY::dist {
+  my $self = shift;
+  my @code = split(/\n/, $self->SUPER::dist(@_));
+  init_MY_globals($self);
+
+  foreach my $line (@code) {
+    # Skip comments
+    next if $line =~ /^\s*#/;
+     # Skip everything which isn't a var assignment.
+    next unless line_has_macro_def($line);
+
+    # Store the assignment string if necessary.
+    set_EQ_from_line($line);
+    
+    if (line_has_macro_def($line, 'DISTVNAME') && get_macro('VERSION_COOL')) {
+      set_macro('DISTVNAME', '$(DISTNAME)-$(VERSION_COOL)');
+      $line = macro_def('DISTVNAME');
+    }
+  }
+
+  clean_MY_globals($self);
+  return join("\n", @code);
+}
+      
+
 sub MY::postamble {
   my $self = shift;
   my $code = "";
@@ -1105,6 +1140,13 @@ made-doc-stamp: doc $(MAN1PODS) $(MAN3PODS) $(EXTRAPODS)
 	$(PERL) build/convert_pods_to_doc $(MAN1PODS) $(MAN3PODS) $(EXTRAPODS)
 	$(TOUCH) made-doc-stamp
 	$(RM_F) pod2htm*
+
+
+version.env: lib/Mail/SpamAssassin.pm Makefile
+	$(RM_F) $@
+	$(PERL) -Ilib -MMail::SpamAssassin -e 'printf("FULL_VERSION=%s\n", Mail::SpamAssassin::Version())' >> $@
+	$(ECHO) DIST_VERSION=$(VERSION_COOL) >> $@
+	$(ECHO) CPAN_VERSION=$(VERSION) >> $@
 
   EOD
 
