@@ -2,6 +2,8 @@
 ###########################################################################
 # Header compensation tests
 
+require_version 2.40
+
 header GENUINE_EBAY_RCVD        eval:check_for_from_domain_in_received_headers('ebay.com', 'true')
 describe GENUINE_EBAY_RCVD      Message from eBay
 tflags GENUINE_EBAY_RCVD	nice
