@@ -21,9 +21,9 @@
 my $prog = $0;
 $prog =~ s@.*/@@;
 
-use vars qw($opt_h $opt_f $opt_n);
+use vars qw($opt_h $opt_f $opt_i $opt_n);
 use Getopt::Std;
-getopts("hf:n:");
+getopts("hf:in:");
 
 sub usage {
     my $status = shift;
@@ -34,6 +34,7 @@ usage: $prog [options] [mbox folders]
 
  -h         print this help
  -f format  set printf string to format
+ -i         ignore leading data until reaching mbox separator
  -n n       set initial sequence number to n
 
 mboxsplit splits mbox folders into separate files.  If no mbox folders
@@ -54,16 +55,20 @@ if (! $opt_f) {
     $opt_f = "%d";
 }
 
-my $file_no = defined($opt_n) ? $opt_n : 1;
+my $file_no = defined($opt_n) ? $opt_n - 1 : 0;
 my $file_open = 0;
 
 while ($line = <>) {
     if ($file_open == 1 && $line =~ /^From /) {
 	close(OUTFILE);
-	$file_no = $file_no + 1;
+	$file_no++;
 	$file_open = 0;
     }
     if ($file_open == 0) {
+	if ($file_no == 0) {
+	    next if $opt_i && $line !~ /^From /;
+	    $file_no++;
+	}
 	open(OUTFILE, '>' . sprintf($opt_f, $file_no));
 	$file_open = 1;
     }
