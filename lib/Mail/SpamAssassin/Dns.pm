@@ -35,20 +35,28 @@ use vars qw{
   $KNOWN_BAD_DIALUP_RANGES @EXISTING_DOMAINS $IS_DNS_AVAILABLE $VERSION
 };
 
-# use very well-connected domains.
-# TODO! bbc.co.uk seems to have a very low TTL for me (900s); similarly:
-# cnn.com (487s).   ebay.com is the lowest of the rest though (3600s),
-# but that seems OK.
+# use very well-connected domains (fast DNS response, many DNS servers,
+# geographical distribution is a plus, TTL of at least 3600s)
 @EXISTING_DOMAINS = qw{
+  adelphia.net
   akamai.com
-  bbc.co.uk
-  cnn.com
+  apache.org
+  cingular.com
+  colorado.edu
+  comcast.net
   doubleclick.com
   ebay.com
-  etrade.com
+  gmx.net
   google.com
+  intel.com
   kernel.org
+  linux.org
+  mit.edu
+  motorola.com
   msn.com
+  sourceforge.net
+  sun.com
+  w3.org
   yahoo.com
 };
 
