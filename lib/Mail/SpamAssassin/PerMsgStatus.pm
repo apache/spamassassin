@@ -437,8 +437,24 @@ sub get_raw_body_text_array {
   $ctype ||=  $self->{msg}->get_header ('Content-type');
   $ctype ||=  '';
 
+  # we run into a perl bug if the lines are astronomically long (probably due
+  # to lots of regexp backtracking); so cut short any individual line over 2048
+  # bytes in length.  This can wreck HTML totally -- but IMHO the only reason a
+  # luser would use 2048-byte lines is to crash filters, anyway.
+  #
   my $body = $self->{msg}->get_body();
-  if ($ctype !~ /boundary="(.*)"/) {
+  my @ret;
+  @$body = map {
+    @ret = ();
+    while (length ($_) > 1024) {
+      push (@ret, substr($_, 0, 1024));
+      $_ = substr($_, 1024);
+    }
+    ($_, @ret);
+  } @$body;
+
+  if ($ctype !~ /boundary="(.*)"/)
+  {
     $self->{body_text_array} = $body;
     return $self->{body_text_array};
   }
@@ -450,7 +466,8 @@ sub get_raw_body_text_array {
   my $end_boundary = "--$1--\n";
 
   my $line = 0;
-  while (defined ($_ = $body->[$line++])) {
+  while (defined ($_ = $body->[$line++]))
+  {
     push (@{$self->{body_text_array}}, $_);
 
     if (/^Content-Transfer-Encoding: /) {
