@@ -1,4 +1,4 @@
-# $Id: regression_tests.cf,v 1.19 2002/09/02 18:24:15 jmason Exp $
+# $Id: regression_tests.cf,v 1.20 2002/09/04 18:36:50 jmason Exp $
 #
 test BIG_FONT      fail    <font size=3D2>
 test BIG_FONT      ok      <font size=3D+2>
@@ -216,11 +216,27 @@ test HTML_WIN_BLUR ok <script> win=window.open("http://foo/") win.blur() window.
 test HTML_WIN_BLUR ok <body onload='win=window.open("http://foo/"); win.blur()'>
 test HTML_WIN_BLUR fail The win.blur() function
 
-test __OUTLOOK_FW_MSG ok Subject: FW: White Stripes Tour!
-test __OUTLOOK_FW_MSG ok Subject: Fw: Thank you yourself
-test __OUTLOOK_FW_MSG fail Subject: Fwd: Dracula
-test __OUTLOOK_FW_MSG fail Subject: fw:                                       . qBQyzOWqKYggZT0oDJzp41nd
-test __OUTLOOK_FW_MSG fail Subject: FW:>Re: Spruce up your life!DGKJWI
+test OUTLOOK_FW_MSG ok Subject: FW: White Stripes Tour!
+test OUTLOOK_FW_MSG ok Subject: Fw: Thank you yourself
+test OUTLOOK_FW_MSG fail Subject: Fwd: Dracula
+test OUTLOOK_FW_MSG fail Subject: fw:                                       . qBQyzOWqKYggZT0oDJzp41nd
+test OUTLOOK_FW_MSG fail Subject: FW:>Re: Spruce up your life!DGKJWI
+
+test NIGERIAN_SCAM_11 ok I work in a bank at
+test NIGERIAN_SCAM_11 ok HAVE WORKED FOR A BANK
+
+test NIGERIAN_SCAM_12 ok the first son of
+test NIGERIAN_SCAM_12 ok the only son of
+test NIGERIAN_SCAM_12 ok AM THE ONLY MALE CHILD OF
+test NIGERIAN_SCAM_12 ok THE FIRST MALE CHILD OF
+test NIGERIAN_SCAM_12 ok the second son of
+test NIGERIAN_SCAM_12 ok As the eldest son of
+
+test NIGERIAN_SCAM_8 ok VLAJKO STOJILJKOVIC, one of the people indicted at the Hague War Crimes Tribunal in Hague
+
+test SPAM_REDIRECTOR ok http://rd.yahoo.com/?http://somesite.com/
+test SPAM_REDIRECTOR ok http://wwp.icq.com/?http://anothersite.com/
+
 
 test NIGERIAN_SCAM_11 ok I work in a bank at
 test NIGERIAN_SCAM_11 ok HAVE WORKED FOR A BANK
