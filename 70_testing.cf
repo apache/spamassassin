@@ -451,20 +451,18 @@ header T_SB_23_7_6_25_90 eval:check_rbl_sub('senderbase', 'S23 > 7.6 && (time - 
 header T_SB_23_7_6_25_120 eval:check_rbl_sub('senderbase', 'S23 > 7.6 && (time - S25 < 120*86400)')
 header T_SB_23_7_6_25_180 eval:check_rbl_sub('senderbase', 'S23 > 7.6 && (time - S25 < 180*86400)')
 
-# test 
-# jm: IMO, we should come up with a new way to test *just* the URIs in RHSBL
-# style, it would be *much* more efficient than doing NS and A lookups, and
-# would be harder for spammers to evade.
-# quinlan: it's practically a requirement for this blacklist:
-#   0.113   0.2091   0.0000    1.000   0.93    0.01  T_URIBL_SC_SURBL
+# demoted for further testing
+# results for recent email (last 4 days of spam, ham ranging in ages
+# from 0 to 10 months) seem not so great:
+
 ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
 
 uridnsbl_timeout 2
 
-urirhsbl T_URIBL_SC_SURBL	sc.surbl.org.	A
-header T_URIBL_SC_SURBL		eval:check_uridnsbl('T_URIBL_SC_SURBL')
-describe T_URIBL_SC_SURBL	Contains a URL listed in the SC SURBL blocklist
-tflags T_URIBL_SC_SURBL		net
+uridnsbl	T_URIBL_DSBL	list.dsbl.org.		TXT
+header		T_URIBL_DSBL	eval:check_uridnsbl('URIBL_DSBL')
+describe	T_URIBL_DSBL	Contains a URL listed in the DSBL blocklist
+tflags		T_URIBL_DSBL	net
 
 endif   # Mail::SpamAssassin::Plugin::URIDNSBL
 
