@@ -213,7 +213,7 @@ sub _parse {
     next unless($_); # skip empty lines
 
     # handle i18n
-    if (s/^lang\s+(\S+)\s+//) { next if ($1 !~ /^${lang}/); }
+    if (s/^lang\s+(\S+)\s+//) { next if ($lang !~ /^$1/); }
 
     # Versioning assertions
     if (/^file\s+start\s+(.+)\s*$/) { $currentfile = $1; next; }
