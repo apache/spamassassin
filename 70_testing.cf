@@ -794,3 +794,11 @@ header T_SUSPICIOUS_RECIPS_80	eval:similar_recipients('0.80','undef')
 
 header T_BAD_TIMEZONE_EST	ALL =~ /[+-]\d\d[30]0(?<!-0500|-0300|\+1000|\+1100) \(EST\)/
 header T_BAD_TIMEZONE_CST	ALL =~ /[+-]\d\d[30]0(?<!-0600|-0400|\+0800|\+0930) \(CST\)/
+header T_BAD_TIMEZONE_EST_2	ALL =~ /[+-]\d\d[30]0(?<!-0500|-0300|\+1000|\+1100) \(?EST\)?\b/
+header T_BAD_TIMEZONE_CST_2	ALL =~ /[+-]\d\d[30]0(?<!-0600|-0400|\+0800|\+0930) \(?CST\)?\b/
+header T_BAD_TIMEZONE_EST_3	ALL =~ /[+-]\d\d[30]0(?<!-0500|-0300|\+1000|\+1100) \(?EST\)?(?:\s|$)/
+header T_BAD_TIMEZONE_CST_3	ALL =~ /[+-]\d\d[30]0(?<!-0600|-0400|\+0800|\+0930) \(?CST\)?(?:\s|$)/
+header T_BAD_TIMEZONE_EST_4	ALL =~ /[+-]\d\d[30]0(?<!-0500|-0300|\+1000|\+1100) (?:\(?EST\)|EST\b)/
+header T_BAD_TIMEZONE_CST_4	ALL =~ /[+-]\d\d[30]0(?<!-0600|-0400|\+0800|\+0930) (?:\(?CST\)|CST\b)/
+header T_BAD_TIMEZONE_EST_5	ALL =~ /[+-]\d\d[30]0(?<!-0500|-0300|\+1000|\+1100) (?:\(?EST\)|EST(?:\s+|\b|$))/
+header T_BAD_TIMEZONE_CST_5	ALL =~ /[+-]\d\d[30]0(?<!-0600|-0400|\+0800|\+0930) (?:\(?CST\)|CST(?:\s+|\b|$))/
