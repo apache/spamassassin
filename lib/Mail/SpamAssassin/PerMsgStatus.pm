@@ -124,14 +124,13 @@ sub check {
     $self->do_head_eval_tests();
   }
 
-  $self->{required_hits} = $self->{conf}->{required_hits};
-  $self->{is_spam} = ($self->{hits} >= $self->{required_hits});
+  $self->{is_spam} = ($self->{hits} >= $self->{conf}->{required_hits});
 
   $_ = $self->{conf}->{report_template};
   $_ ||= '(no report template found)';
 
   s/_HITS_/$self->{hits}/gs;
-  s/_REQD_/$self->{required_hits}/gs;
+  s/_REQD_/$self->{conf}->{required_hits}/gs;
   s/_SUMMARY_/$self->{test_logs}/gs;
   s/_VER_/$Mail::SpamAssassin::VERSION/gs;
   s/_HOME_/$Mail::SpamAssassin::HOME_URL/gs;
@@ -197,7 +196,7 @@ return the number of hits required for a mail to be considered spam.
 
 sub get_required_hits {
   my ($self) = @_;
-  return $self->{required_hits};
+  return $self->{conf}->{required_hits};
 }
 
 ###########################################################################
@@ -336,7 +335,7 @@ sub rewrite_as_spam {
   # add some headers...
 
   $_ = sprintf ("Yes, hits=%d required=%d tests=%s",
-	$self->{hits}, $self->{required_hits}, $self->get_names_of_tests_hit());
+	$self->{hits}, $self->{conf}->{required_hits}, $self->get_names_of_tests_hit());
 
   $self->{msg}->put_header ("X-Spam-Status", $_);
   $self->{msg}->put_header ("X-Spam-Flag", 'YES');
@@ -376,7 +375,7 @@ sub rewrite_as_non_spam {
   $self->{test_names_hit} =~ s/,$//;
 
   $_ = sprintf ("No, hits=%d required=%d tests=%s",
-	$self->{hits}, $self->{required_hits}, $self->{test_names_hit});
+	$self->{hits}, $self->{conf}->{required_hits}, $self->{test_names_hit});
   $self->{msg}->put_header ("X-Spam-Status", $_);
   $self->{msg}->get_mail_object;
 }
