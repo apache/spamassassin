@@ -23,10 +23,29 @@ describe T_INVALID_MSGID	Message-Id is not valid, according to RFC 2822
 #  0.123    0.377    0.000    1.00    0.71    1.00  T_MIME_BOUND_TEP
 
 # This may need tweaking if new NextPart formats appear.
+# notes: original version
 header __NEXTPART_ALL		Content-Type =~ /NextPart/
 header __NEXTPART_NORMAL	Content-Type =~ /-{3}[-_]=_NextPart_[\dA-F]{3}(_[\dA-F]{3,8})?_[\dA-F]{8}.[\dA-F]{8}\b/
 meta T_MIME_BOUND_NEXTPART	(__NEXTPART_ALL && !__NEXTPART_NORMAL)
 score T_MIME_BOUND_NEXTPART	1.0
+
+# notes: original version made more picky
+header __NEXTPART_ALL2		Content-Type =~ /NextPart/
+header __NEXTPART_NORMAL2	Content-Type =~ /="(?:----_?=_)?NextPart_[\dA-F]{3}(_[\dA-F]{3,8})?_[\dA-F]{8}\.[\dA-F]{8}"/
+meta T_MIME_BOUND_NEXTPART2	(__NEXTPART_ALL2 && !__NEXTPART_NORMAL2)
+score T_MIME_BOUND_NEXTPART2	1.0
+
+# notes: original version made somewhat less picky
+header __NEXTPART_ALL3		Content-Type =~ /NextPart/
+header __NEXTPART_NORMAL3	Content-Type =~ /="(?:----_?=_)?NextPart(?:(?:_[\da-zA-Z]+){1,4}|_[\dA-F]{3}(_[\dA-F]{3,8})?_[\dA-F]{8}\.[\dA-F]{8})"/
+meta T_MIME_BOUND_NEXTPART3	(__NEXTPART_ALL3 && !__NEXTPART_NORMAL3)
+score T_MIME_BOUND_NEXTPART3	1.0
+
+# notes: original version made much less picky
+header __NEXTPART_ALL4		Content-Type =~ /NextPart/
+header __NEXTPART_NORMAL4	Content-Type =~ /="(?:----_?=_)?NextPart(?:_[\da-zA-Z]+){1,4}(?:\.[\dA-F]{8})?"/
+meta T_MIME_BOUND_NEXTPART4	(__NEXTPART_ALL4 && !__NEXTPART_NORMAL4)
+score T_MIME_BOUND_NEXTPART4	1.0
 
 header T_MIME_BOUND_DASH_DIGIT	Content-Type =~ /boundary="_-{10}=_\d{19,22}"/
 score T_MIME_BOUND_DASH_DIGIT	1.0
@@ -60,10 +79,6 @@ score T_SOME_BREAKTHROUGH	0.5
 #  0.193    0.592    0.000    1.00    0.74    0.50  T_SELECTED_YOU
 body T_SELECTED_YOU		/(?:you (?:have been|were) selected|we (?:have )?selected you)/i
 score T_SELECTED_YOU		0.5
-
-body T_HTML_TAG_EXISTS_TITLE		eval:html_tag_exists('title')
-describe T_HTML_TAG_EXISTS_TITLE	HTML has "title" tag
-score T_HTML_TAG_EXISTS_TITLE		0.5
 
 body T_HTML_UNTITLED_TITLE	eval:html_eval('title_text', '=~ /Untitled/i')
 describe T_HTML_UNTITLED_TITLE	HTML title contains "Untitled"
