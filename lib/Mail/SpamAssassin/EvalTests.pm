@@ -225,8 +225,16 @@ sub check_subject_for_lotsa_8bit_chars {
   # not be tagged on the second pass otherwise.
   s/\[\]\* //g;
 
-  my @highbits = /[\200-\377]/g; my $numhis = $#highbits+1;
-  my $numlos = length($_) - $numhis;
+  return 1 if ($self->are_more_high_bits_set ($_));
+  return 0;
+}
+
+sub are_more_high_bits_set { 
+  my ($self, $str) = @_;
+
+  my @highbits = ($str =~ /[\200-\377]/g);
+  my $numhis = $#highbits+1;
+  my $numlos = length($str) - $numhis;
 
   ($numlos <= $numhis && $numhis > 3);
 }
@@ -593,20 +601,21 @@ sub check_for_faraway_charset {
   my $type = $self->get ('Content-Type');
   $type ||= $self->get ('Content-type');
 
-  my @locales = split (' ', $self->{conf}->{ok_locales});
-
-  my $lang = $ENV{'LC_ALL'};
-  $lang ||= $ENV{'LANGUAGE'};
-  $lang ||= $ENV{'LC_MESSAGES'};
-  $lang ||= $ENV{'LANG'};
-  push (@locales, $lang);
-
+  my @locales = $self->get_my_locales();
   $type = get_charset_from_ct_line ($type);
+
   if (defined $type &&
     !Mail::SpamAssassin::Locales::is_charset_ok_for_locales
 		    ($type, @locales))
   {
-    return 1;
+    # sanity check.  Some charsets (e.g. koi8-r) include the ASCII
+    # 7-bit charset as well, so make sure we actually have a high
+    # number of 8-bit chars in the body text first.
+
+    my $body = $self->get_decoded_stripped_body_text_array();
+    if ($self->are_more_high_bits_set ($body)) {
+      return 1;
+    }
   }
 
   0;
@@ -620,9 +629,7 @@ sub check_for_faraway_charset_in_body {
 		/isx)
   {
     my $type = $1;
-    my @locales = split (' ', $self->{conf}->{ok_locales});
-    push (@locales, $ENV{'LANG'});
-
+    my @locales = $self->get_my_locales();
     $type = get_charset_from_ct_line ($type);
     if (defined $type &&
       !Mail::SpamAssassin::Locales::is_charset_ok_for_locales
@@ -638,9 +645,7 @@ sub check_for_faraway_charset_in_body {
 sub check_for_faraway_charset_in_headers {
   my ($self) = @_;
 
-  my @locales = split (' ', $self->{conf}->{ok_locales});
-  push (@locales, $ENV{'LANG'});
-
+  my @locales = $self->get_my_locales();
   for my $h (qw(From Subject)) {
     my $hdr = $self->get($h);
     while ($hdr =~ /=\?(.+?)\?.\?.*?\?=/g) {
@@ -654,8 +659,21 @@ sub check_for_faraway_charset_in_headers {
 sub get_charset_from_ct_line {
   my $type = shift;
   if ($type =~ /charset="([^"]+)"/i) { return $1; }
+  if ($type =~ /charset='([^']+)'/i) { return $1; }
   if ($type =~ /charset=(\S+)/i) { return $1; }
   return undef;
+}
+
+sub get_my_locales {
+  my ($self) = @_;
+
+  my @locales = split (' ', $self->{conf}->{ok_locales});
+  my $lang = $ENV{'LC_ALL'};
+  $lang ||= $ENV{'LANGUAGE'};
+  $lang ||= $ENV{'LC_MESSAGES'};
+  $lang ||= $ENV{'LANG'};
+  push (@locales, $lang);
+  return @locales;
 }
 
 ###########################################################################
