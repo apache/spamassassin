@@ -558,7 +558,11 @@ sub expire_old_tokens_trapped {
   # a new one instead.
   my $main = $self->{bayes}->{main};
   my $path = $main->sed_path ($main->{conf}->{bayes_path});
-  my $name = $path.'_toks.new';
+
+  # use a temporary PID-based suffix just in case another one was
+  # created previously by an interrupted expire
+  my $tmpsuffix = "expire$$";
+  my $tmpdbname = $path.'_toks.'.$tmpsuffix;
 
   my $magic_re = $self->get_magic_re(DB_VERSION);
 
@@ -685,11 +689,14 @@ sub expire_old_tokens_trapped {
     dbg("bayes: Can do estimation method for expiry, skipping first pass.");
   }
 
+  # clean out any leftover db copies from previous runs
+  for my $ext (@DB_EXTENSIONS) { unlink ($tmpdbname.$ext); }
+
   # use O_EXCL to avoid races (bonus paranoia, since we should be locked
   # anyway)
   my %new_toks;
   my $umask = umask 0;
-  tie %new_toks, "DB_File", $name, O_RDWR|O_CREAT|O_EXCL,
+  tie %new_toks, "DB_File", $tmpdbname, O_RDWR|O_CREAT|O_EXCL,
 	       (oct ($main->{conf}->{bayes_file_mode}) & 0666);
   umask $umask;
   my $oldest;
@@ -757,7 +764,7 @@ sub expire_old_tokens_trapped {
 
     # now rename in the new one.  Try several extensions
     for my $ext (@DB_EXTENSIONS) {
-      my $newf = $path.'_toks.new'.$ext;
+      my $newf = $tmpdbname.$ext;
       my $oldf = $path.'_toks'.$ext;
       next unless (-f $newf);
       if (!rename ($newf, $oldf)) {
