@@ -95,7 +95,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.153 2002/12/23 13:40:47 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.154 2002/12/23 14:08:40 felicity Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -244,6 +244,8 @@ sub new {
   $self->{save_pattern_hits} ||= 0;
 
   $self->{bayes_scanner} = new Mail::SpamAssassin::Bayes ($self);
+
+  $self->{encapsulated_content_description} = 'original message before SpamAssassin';
 
   $self;
 }
@@ -684,7 +686,7 @@ sub remove_spamassassin_markup {
       if ( $msg[$i] =~ /^\s*$/ ) {    # end of mime header
 
         # Ok, we found the encapsulated piece ...
-        if ( $ct eq "message/rfc822" && $cd eq "spamassassin original message" )
+        if ( $ct eq "message/rfc822" && $cd eq $self->{'encapsulated_content_description'} )
         {
           splice @msg, 1, $i;
             ;    # remove the front part, leave the 'From ' header.
