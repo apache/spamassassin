@@ -20,7 +20,8 @@ version=`( cd .. ; ./build/get_version )`
   echo "Results on test corpora at various alternative thresholds:"
   echo
 
-  for thresh in 5.5 6 6.5 7 8 9 10 12 15 ; do
+  # list a wide range of thresholds, so that we can make graphs later ;)
+  for thresh in -4 -3 -2 -1 0 1 2 3 4 4.5 5.5 6 6.5 7 8 9 10 12 15 17 20 ; do
     ./evolve -C -t $thresh | egrep '^#' | egrep -v '^# (Average|TOTAL)'
     echo
   done
@@ -40,6 +41,5 @@ version=`( cd .. ; ./build/get_version )`
 
   ( cd ../rules ; ls -l *.cf )
 
-) > ../rules/STATISTICS.txt
+)
 
-ls -l ../rules/STATISTICS.txt
