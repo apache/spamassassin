@@ -120,7 +120,7 @@ do {
 
 } while $r>56;
 
-sprintf "%.8x%.8x%.8x%.8x%.8x", $aa, $bb, $cc, $dd, $ee;
+sprintf "%.8x%.8x%.8x%.8x%.8x", $aa & 0xffffffff, $bb & 0xffffffff, $cc & 0xffffffff, $dd & 0xffffffff, $ee & 0xffffffff;
 }
 
 1;
