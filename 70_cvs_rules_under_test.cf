@@ -185,13 +185,6 @@ test T_VISIT_OUR_SITE  ok  Visit the sites of our major partners:
 # Dec 19 2002 jm: try out separation of "the", it seems to be FP-prone for me
 body T_VISIT_OUR_SITE_2 /\b(?:visit|enter)\s+(?:my|our|this)\s+(?:web\s*)?site/i
 
-# bug 878
-# seems to inserted with s1618 rules VERY heavily
-# 12/20 - not hit a lot, but no fps for anyone.  I added \b's around, if it looks good tomorrow I'll
-# promote it - tvd
-body T_WE_HATE_SPAM2 /\banti-spam policy\b/i
-describe T_WE_HATE_SPAM2 Spammer is against spam -- aren't we all?
-
 uri T_PXE_LOGIC /^http:\/\/(?:pxe|fx)\.[^\/]{1,50}\.com\/logic\/to\.pl\?/i
 test T_PXE_LOGIC ok http://pxe.highspeed-email.com/logic/to.pl?i=3399923cd33d
 describe T_PXE_LOGIC Spam URL pattern, usually made up domains
