@@ -59,10 +59,10 @@ sub new {
   $self->{skip_rbl_checks} = 0;
   $self->{ok_locales} = '';
 
-  $self->{whitelist_from} = [ ];
-  $self->{blacklist_from} = [ ];
-  $self->{whitelist_from_doms} = [ ];
-  $self->{blacklist_from_doms} = [ ];
+  $self->{whitelist_from} = { };
+  $self->{blacklist_from} = { };
+  $self->{whitelist_from_doms} = { };
+  $self->{blacklist_from_doms} = { };
 
   # this will hold the database connection params
   $self->{user_scores_dsn} = '';
@@ -262,9 +262,9 @@ sub add_to_addrlist {
 
   foreach my $addr (@addrs) {
     if ($addr =~ /^\*\@(\S+)/) {
-      push (@{$domlist}, $1);
+      $domlist{lc $1} = 1;
     } else {
-      push (@{$singlelist}, $addr);
+      $singlelist{lc $addr} = 1;
     }
   }
 }
