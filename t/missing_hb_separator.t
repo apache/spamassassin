@@ -20,7 +20,7 @@ use Test;
 use SATest; sa_t_init("missing_hb_separator");
 use Mail::SpamAssassin;
 
-plan tests => 3;
+plan tests => 8;
 
 # initialize SpamAssassin
 my $sa = Mail::SpamAssassin->new({
@@ -42,7 +42,7 @@ my $result;
 
 # make sure we catch w/out body, and that we catch the last header
 
-@msg = ("Content-Type: text/plain; boundary=--foo\n","X-Message-Info: foo\n");
+@msg = ("Content-Type: text/plain; boundary=foo\n","X-Message-Info: foo\n");
 $mail = $sa->parse(\@msg, 1);
 $status = $sa->check($mail);
 
@@ -52,6 +52,7 @@ foreach (@{$status->{test_names_hit}}) {
 }
 
 ok ( $result == 2 );
+ok ( $mail->{pristine_body} eq "" );
 
 $status->finish();
 $mail->finish();
@@ -61,7 +62,7 @@ $mail->finish();
 # we should also catch no separator before the mime part boundary, and the
 # last header
 
-@msg = ("Content-Type: text/plain;\n"," boundary=--foo\n","X-Message-Info: foo\n","--foo\n");
+@msg = ("Content-Type: text/plain;\n"," boundary=foo\n","X-Message-Info: foo\n","--foo\n");
 $mail = $sa->parse(\@msg, 1);
 $status = $sa->check($mail);
 
@@ -71,15 +72,34 @@ foreach (@{$status->{test_names_hit}}) {
 }
 
 ok ( $result == 2 );
+ok ( $mail->{pristine_body} eq "--foo\n" );
 
 $status->finish();
 $mail->finish();
 
 #####
 
+@msg = ("X-Message-Info: foo\n", "Content-Type: text/plain; boundary=foo\n","--foo\n");
+$mail = $sa->parse(\@msg, 1);
+$status = $sa->check($mail);
+
+$result = 0;
+foreach (@{$status->{test_names_hit}}) {
+  $result++ if ($_ eq 'MISSING_HB_SEP' || $_ eq 'X_MESSAGE_INFO');
+}
+
+ok ( $result == 2 );
+ok ( $mail->{pristine_body} eq "--foo\n" );
+
+$status->finish();
+$mail->finish();
+
+
+#####
+
 # A normal message, should not trigger
 
-@msg = ("Content-Type: text/plain; boundary=--foo\n","\n","--foo\n");
+@msg = ("Content-Type: text/plain;\n", " boundary=foo\n","\n","--foo\n");
 $mail = $sa->parse(\@msg, 1);
 $status = $sa->check($mail);
 
@@ -88,7 +108,8 @@ foreach (@{$status->{test_names_hit}}) {
   $result = 0 if ($_ eq 'MISSING_HB_SEP');
 }
 
-ok ( $result );
+ok ( $result && $mail->{pristine_body} eq "--foo\n" );
+ok ( $mail->{pristine_body} eq "--foo\n" );
 
 $status->finish();
 $mail->finish();
