@@ -117,6 +117,10 @@ sub new {
   $self->{ok_locales} = '';
   $self->{allow_user_rules} = 0;
 
+  $self->{dcc_body_max} = 999999;
+  $self->{dcc_fuz1_max} = 999999;
+  $self->{dcc_fuz2_max} = 999999;
+
   $self->{whitelist_from} = { };
   $self->{blacklist_from} = { };
 
@@ -560,20 +564,14 @@ The default is 999999 for all these options.
 
     if (/^dcc_body_max\s+(\d+)/) {
       $self->{dcc_body_max} = $1+0; next;
-    } else {
-      $self->{dcc_body_max} = 999999;
     }
 
     if (/^dcc_fuz1_max\s+(\d+)/) {
       $self->{dcc_fuz1_max} = $1+0; next;
-    } else {
-      $self->{dcc_fuz1_max} = 999999;
     }
 
     if (/^dcc_fuz2_max\s+(\d+)/) {
       $self->{dcc_fuz2_max} = $1+0; next;
-    } else {
-      $self->{dcc_fuz2_max} = 999999;
     }
 
 
