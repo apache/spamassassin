@@ -135,7 +135,12 @@ if ($Mail::SpamAssassin::VERSION ne '@@VERSION@@' && '@@VERSION@@' ne "\@\@VERSI
   die 'ERROR!  spamassassin script is v@@VERSION@@, but using modules v'.$Mail::SpamAssassin::VERSION."!\n";
 }
 
+# by default:
+# - create user preference files
+# - have ArchiveIterator detect the input message format (file vs dir)
+#
 my %opt = ( 'create-prefs' => 1, 'format' => 'detect' );
+
 my $doing_whitelist_operation = 0;
 my $count                     = 0;
 my @targets                   = ();
@@ -444,15 +449,15 @@ spamassassin - mail filter to identify spam using text analysis
 
 =head1 SYNOPSIS
 
-B<spamassassin> [options] < I<mailmessage> > I<output>
+B<spamassassin> [options] [ < I<mailmessage> | I<path> ... ]
 
-B<spamassassin> B<-d> < I<mailmessage> > <output>
+B<spamassassin> B<-d> [ < I<mailmessage> | I<path> ... ]
 
-B<spamassassin> B<-r> [B<-w> I<addr>] < I<mailmessage>
+B<spamassassin> B<-r> [B<-w> I<addr>] [ < I<mailmessage> | I<path> ... ]
 
-B<spamassassin> B<-k> [B<-w> I<addr>] < I<mailmessage>
+B<spamassassin> B<-k> [B<-w> I<addr>] [ < I<mailmessage> | I<path> ... ]
 
-B<spamassassin> B<-W>|B<-R> < I<mailmessage>
+B<spamassassin> B<-W>|B<-R> [ < I<mailmessage> | I<path> ... ]
 
 Options:
 
@@ -469,10 +474,8 @@ Options:
  -x, --nocreate-prefs              Don't create user preferences file
  -e, --exit-code                   Exit with a non-zero exit code if the
                                    tested message was spam
- --mbox [filename]                 read in messages from a mbox file, given
-                                   by 'filename' or STDIN otherwise.
- --mbx [filename]                  read in messages from a UW mbx file, given
-                                   by 'filename' or STDIN otherwise.
+ --mbox                            read in messages in mbox format
+ --mbx                             read in messages in UW mbx format
  -t, --test-mode                   Pipe message through and add extra
                                    report to the bottom
  --lint                            Lint the rule set: report syntax errors
@@ -502,6 +505,14 @@ SpamAssassin also includes support for reporting spam messages to collaborative
 filtering databases, such as Vipul's Razor ( http://razor.sourceforge.net/ ).
 
 The default tagging operations that take place are detailed in L</TAGGING>.
+
+By default, message(s) are read in from STDIN (< I<mailmessage>), or
+from specified files and maildir-formatted directories (I<path> ...)
+STDIN and files are assumed to be in I<file> format, with a single
+message per file.  Directories are assumed to be in I<maildir> format
+(http://en.wikipedia.org/wiki/Maildir), with the directories' files
+being a single message per file.  The options I<--mbox> and I<--mbx> can
+override the assumed format, see the appropriate OPTION information below.
 
 =head1 OPTIONS
 
@@ -633,7 +644,7 @@ not used; it is recommended that the minimum limit on fds be raised to at least
 Remove SpamAssassin markup (the "SpamAssassin results" report, X-Spam-Status
 headers, etc.) from the mail message.  The resulting message, which will be
 more or less identical to the original, pre-SpamAssassin input, will be output
-to stdout.
+to STDOUT.
 
 (Note: the message will not be exactly identical; some headers will be
 reformatted due to some features of the Mail::Internet package, but the body
@@ -667,16 +678,15 @@ hit, use:
 
 Disable creation of user preferences file.
 
-=item B<--mbox> [filename]
+=item B<--mbox>
 
-Specify that the input message(s) are in mbox format.  If I<filename> is
-given, messages will be read in from that file.  Otherwise, STDIN is used.
+Specify that the input message(s) are in mbox format.  mbox is a standard
+UNIX message folder format; see http://en.wikipedia.org/wiki/Mbox .
 
-=item B<--mbx> [filename]
+=item B<--mbx>
 
-Specify that the input message(s) are in UW .mbx format.  If I<filename> is
-given, messages will be read in from that file.  Otherwise, STDIN is used. mbx
-is the mailbox format used within the University of Washington's IMAP
+Specify that the input message(s) are in UW .mbx format.  mbx is
+the mailbox format used within the University of Washington's IMAP
 implementation; see http://www.washington.edu/imap/ .
 
 =back
