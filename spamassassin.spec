@@ -14,7 +14,6 @@ Group: Networking/Mail
 URL: http://spamassassin.org/
 Source: http://spamassassin.org/devel/Mail-SpamAssassin-%{real_version}.tar.gz
 Patch: spamassassin-migrate.patch
-Patch1: findbin.patch
 Requires: perl >= 5.004
 Buildroot: %{_tmppath}/%{name}-root
 Prefix: %{_prefix}
@@ -37,7 +36,6 @@ which create a server that considerably speeds processing of mail.
 %prep -q
 %setup -q -n %{real_name}-%{real_version}
 %patch -p1
-%patch1 -p1
 
 %build
 %{__perl} Makefile.PL PREFIX=%{prefix}
@@ -84,6 +82,9 @@ if [ -f /etc/mail/spamassassin.cf ]; then
 fi
 
 %changelog
+* Thu Jul 25 2002 Justin Mason <jm@jmason.org>
+- removed findbin patch, obsolete
+
 * Fri Apr 19 2002 Theo Van Dinter <felicity@kluge.net>
 - Updated for 2.20 release
 - made /etc/mail/spamassassin a config directory so local.cf doesn't get wiped out
