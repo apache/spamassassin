@@ -492,9 +492,11 @@ sub _parse_normal {
   $msg->add_body_part($part_msg);
 
   # Parse message/* parts into their own tree...
-  if ($part_msg->{'type'} =~ m@^message/@) {
-    my $childmsg = Mail::SpamAssassin::Message->new({message=>$body, parsenow=>1});
-    $part_msg->add_body_part($childmsg);
+  if ($part_msg->{'type'} =~ /^message\b/i) {
+    $part_msg->add_body_part(
+    	Mail::SpamAssassin::Message->new({message=>$body, parsenow=>1})
+    };
+
     return;
   }
 
