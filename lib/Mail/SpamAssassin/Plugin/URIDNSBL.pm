@@ -131,7 +131,7 @@ sub parsed_metadata {
   my %domlist = ( );
   foreach my $uri ($scanner->get_uri_list()) {
     my $dom = $self->uri_to_domain($scanstate, $uri);
-    $domlist{$dom} = 1;
+    if ($dom) { $domlist{$dom} = 1; }
   }
 
   # trim down to a limited number - pick randomly
