@@ -264,6 +264,9 @@ describe PORN_7			Uses words and phrases which indicate porn (7)
 body PORN_8			/(?:video|movie|teen|ware|mp3)z/
 describe PORN_8			Uses words and phrases which indicate porn (8)
 
+body SEXY_PICS                  /sexy pictures/
+describe SEXY_PICS              Sexy pictures
+
 rawbody TRACKER_ID		/^\W{4,6} (?:[a-z]{10,}|[A-Z]{10,}) \W{4,6}\s*$/
 describe TRACKER_ID		Incorporates a tracking ID number
 
