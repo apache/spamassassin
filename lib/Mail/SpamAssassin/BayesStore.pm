@@ -292,6 +292,9 @@ sub upgrade_db {
 
   dbg("bayes: detected bayes db format ".$self->{db_version}.", upgrading");
 
+  local $SIG{'INT'} = 'IGNORE';
+  local $SIG{'HUP'} = 'IGNORE';
+
   # since DB_File will not shrink a database (!!), we need to *create*
   # a new one instead.
   my $main = $self->{bayes}->{main};
@@ -442,6 +445,9 @@ sub untie_db {
 sub expire_old_tokens {
   my ($self, $opts) = @_;
   my $ret;
+
+  local $SIG{'INT'} = 'IGNORE';
+  local $SIG{'HUP'} = 'IGNORE';
 
   eval {
     local $SIG{'__DIE__'};	# do not run user die() traps in here
@@ -1018,6 +1024,9 @@ sub sync_journal {
 
   # if $path doesn't exist, or it's not a file, or is 0 bytes in length, return
   if ( !stat($path) || !-f _ || -z _ ) { return 0; }
+
+  local $SIG{'INT'} = 'IGNORE';
+  local $SIG{'HUP'} = 'IGNORE';
 
   eval {
     local $SIG{'__DIE__'};	# do not run user die() traps in here
