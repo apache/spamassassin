@@ -4,10 +4,7 @@ Mail::SpamAssassin - Mail::Audit spam detector plugin
 
 =head1 SYNOPSIS
 
-  my $spamtest = new Mail::SpamAssassin ({
-    'rules_filename'      => '/etc/spamassassin.rules',
-    'userprefs_filename'  => $ENV{HOME}.'/.spamassassin.cf'
-  });
+  my $spamtest = new Mail::SpamAssassin();
   my $mail = Mail::Audit->new();
 
   my $status = $spamtest->check ($mail);
@@ -95,6 +92,7 @@ sub new {
   $class = ref($class) || $class;
 
   my $self = shift;
+  if (!defined $self) { $self = { }; }
   bless ($self, $class);
 
   $self->{conf} = new Mail::SpamAssassin::Conf ($self);

@@ -35,21 +35,19 @@ sub check_for_from_mx {
   return 0 unless (/\@(\S+)/);
   $_ = $1;
 
-  $self->load_Net_DNS_Resolver();
-  my $found_mx = 0;
+  # return OK if Net:DNS is not available
+  return 0 unless $self->load_resolver();
 
-  eval q{
-    # First check that DNS is available, if not do not perform this check
-    # Try 5 times to protect against temporary outages
-    if ($self->{res}->mx ($EXISTING_DOMAIN)) {
-      for my $i (1..5) {
-	if ($self->{res}->mx ($_)) { $found_mx = 1; last; }
-	sleep 10;
-      }
-    }
-  1; } or $found_mx = 1;     # return OK if Net:DNS is not available
+  # First check that DNS is available, if not do not perform this check
+  return 0 unless $self->lookup_mx ($EXISTING_DOMAIN);
 
-  (!$found_mx);
+  # Try 5 times to protect against temporary outages
+  for my $i (1..5) {
+    if (mx ($self->{res}, $_)) { return 0; }
+    sleep 10;
+  }
+
+  return 1;
 }
 
 ###########################################################################
@@ -111,24 +109,26 @@ sub check_rbl {
   my @ips = ($rcv =~ /\[(\d+\.\d+\.\d+\.\d+)\]/g);
   return 0 unless ($#ips >= 0);
 
+  # return OK if Net:DNS is not available
+  return 0 unless $self->load_resolver();
+
+  # First check that DNS is available, if not do not perform this check
+  return 0 unless $self->lookup_mx ($EXISTING_DOMAIN);
+
   if ($#ips > 1) {
     @ips = @ips[$#ips-1 .. $#ips];        # only check the originating 2
   }
 
   init_rbl_check_reserved_ips();
-  $self->load_Net_DNS_Resolver();
   my $found = 0;
 
+  # First check that DNS is available, if not do not perform this check.
+  # Stop after the first positive.
   eval q{
-    # First check that DNS is available, if not do not perform this check.
-    # Stop after the first positive.
-    my @mx = $self->{res}->mx ($EXISTING_DOMAIN);
-    if ($#mx >= 0) {
-      foreach my $ip (@ips) {
-	next if ($ip =~ /${IP_IN_RESERVED_RANGE}/o);
-	next unless ($ip =~ /(\d+)\.(\d+)\.(\d+)\.(\d+)/);
-	$found = $self->do_rbl_lookup ("$4.$3.$2.$1.".$rbl_domain, $found);
-      }
+    foreach my $ip (@ips) {
+      next if ($ip =~ /${IP_IN_RESERVED_RANGE}/o);
+      next unless ($ip =~ /(\d+)\.(\d+)\.(\d+)\.(\d+)/);
+      $found = $self->do_rbl_lookup ("$4.$3.$2.$1.".$rbl_domain, $found);
     }
   };
 
@@ -204,12 +204,35 @@ sub check_for_very_long_text {
 
 ###########################################################################
 
-sub load_Net_DNS_Resolver {
+sub load_resolver {
   my ($self) = @_;
 
-  if (defined $self->{res}) { return; }
-  eval q{ use Net::DNS; $self->{res} = new Net::DNS::Resolver; 1; }
-  	or warn "eval failed: $@ $!\n";
+  if (defined $self->{res}) { return 1; }
+  $self->{no_resolver} = 1;
+
+  eval '
+    use Net::DNS;
+    $self->{res} = new Net::DNS::Resolver;
+    if (defined $self->{res}) {
+      $self->{no_resolver} = 0;
+    }
+    1;
+  ' or warn "eval failed: $@ $!\n";
+
+  return (!$self->{no_resolver});
+}
+
+sub lookup_mx {
+  my ($self, $dom) = @_;
+
+  return 0 unless $self->load_resolver();
+
+  eval '
+    if (mx ($self->{res}, $dom)) { return 1; }
+    1;
+  ' or die "MX lookup failed: $@ $!\n";
+
+  return 0;
 }
 
 1;

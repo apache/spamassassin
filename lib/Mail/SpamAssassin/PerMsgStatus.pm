@@ -68,6 +68,7 @@ sub new {
 
 sub check {
   my ($self) = @_;
+  local ($_);
 
   $self->do_head_tests();          # pretty quick, these ones
   $self->do_body_tests();          # a bit more expensive than the heads
