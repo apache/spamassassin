@@ -1099,9 +1099,11 @@ sub compute_declassification_distance {
   my $a = $Nb * ( 1 - $p );
   my $b = $Nb * ( $sx + $nb * ( 1 - $p ) - $p * $s ) - $p * $Na * $nb;
   my $c = $Na * $nb * ( $sx - $p * ( $s + $nb ) );
+  my $discrim = $b * $b - 4 * $a * $c;
+  my $disc_max_0 = $discrim < 0 ? 0 : $discrim;
+  my $dd_exact = ( 1.0 - 1e-6 + ( -$b + sqrt( $disc_max_0 ) ) / ( 2*$a ) ) - $na;
 
-  return int( 1.0 - 1e-6 + ( -$b + sqrt( $b * $b - 4 * $a * $c ) ) / ( 2 * $a ) )
-    - $na;
+  return $dd_exact < 1 ? 1 : int($dd_exact);
 }
 
 
