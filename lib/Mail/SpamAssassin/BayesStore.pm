@@ -232,8 +232,12 @@ sub untie_db {
 
   foreach my $dbname (@DBNAMES) {
     my $db_var = 'db_'.$dbname;
-    dbg ("bayes: untie-ing $db_var");
-    untie %{$self->{$db_var}};
+
+    if (exists $self->{$db_var}) {
+      dbg ("bayes: untie-ing $db_var");
+      untie %{$self->{$db_var}};
+      delete $self->{$db_var};
+    }
   }
 
   if ($self->{is_locked}) {
