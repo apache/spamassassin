@@ -123,9 +123,11 @@ sub mass_check_mh_folder {
     }
 
     # skip too-big mails
-    if (! $self->{opt_all} && -s STDIN > 250*1024) { close STDIN; next; }
+    if (! $self->{opt_all} && -s STDIN > 250*1024) {
+      warn "Skipping message, too large (>250k)";
+      return;
+    }
     my @msg = (<STDIN>);
-    close STDIN;
 
     $self->visit_a_mail ($mail, \@msg);
   }
@@ -156,9 +158,11 @@ sub mass_check_maildir {
     }
 
     # skip too-big mails
-    if (! $self->{opt_all} && -s STDIN > 250*1024) { close STDIN; next; }
+    if (! $self->{opt_all} && -s STDIN > 250*1024) {
+      warn "Skipping message, too large (>250k)";
+      return;
+    }
     my @msg = (<STDIN>);
-    close STDIN;
 
     $self->visit_a_mail ($mail, \@msg);
   }
