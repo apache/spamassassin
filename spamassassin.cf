@@ -56,6 +56,31 @@ report _SUMMARY_
 report -------------------- End of SpamAssassin results ---------------------
 #      ......................................................................
 
+###########################################################################
+# and now, a template for spam-trap responses.  If the first few lines
+# begin with "Xxxxxx: " where Xxxxxx is a header, they'll be used as
+# headers.
+
+spamtrap Subject: this address is no longer available
+
+spamtrap [this message has been automatically generated]
+spamtrap 
+spamtrap Please note that this address is no longer in use, and nowadays
+spamtrap receives nothing but unsolicited commercial mail.  Accordingly,
+spamtrap any mail sent to it is added to several spam-tracking databases,
+spamtrap then automatically deleted.
+spamtrap
+spamtrap If you genuinely want to contact the owner of the address, please
+spamtrap re-check your contact lists, or search the web, to find their
+spamtrap current e-mail address.
+spamtrap 
+spamtrap The mail you sent is reproduced in full below, for resending to
+spamtrap the correct address.  Sorry for the inconvenience!
+spamtrap 
+spamtrap [-- Signed: the SpamAssassin mail filter]
+spamtrap 
+
+###########################################################################
 
 header NO_REAL_NAME		From =~ /^\s*\<?\S+\@\S+\>?\s*$/
 describe NO_REAL_NAME		From: does not include a real name
@@ -250,6 +275,9 @@ full AOL_USERS_LINK		/AOL\s+Users\s+Click\s+Here/is
 
 body BALANCE_FOR_LONG		eval:check_for_very_long_text()
 describe BALANCE_FOR_LONG	Message text is over 500 lines long
+
+header USER_IN_WHITELIST	eval:check_from_in_whitelist()
+describe USER_IN_WHITELIST	From: address is in the user's white-list
 
 ###########################################################################
 # not quite spam, but dangerous/irritating nonetheless. Sircam worms etc.

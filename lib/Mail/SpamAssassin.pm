@@ -4,13 +4,17 @@ Mail::SpamAssassin - Mail::Audit spam detector plugin
 
 =head1 SYNOPSIS
 
-  my $spamtest = new Mail::SpamAssassin();
   my $mail = Mail::Audit->new();
 
+  my $spamtest = Mail::SpamAssassin->new();
   my $status = $spamtest->check ($mail);
+
   if ($status->is_spam ()) {
     $status->rewrite_mail ();
-    $mail->accept("caught_spam");
+    $mail->accept("spamfolder");
+
+  } else {
+    $mail->accept();		# to default incoming mailbox
   }
   ...
 
@@ -18,7 +22,7 @@ Mail::SpamAssassin - Mail::Audit spam detector plugin
 =head1 DESCRIPTION
 
 Mail::SpamAssassin is a Mail::Audit plugin to identify spam using text
-analysis.
+analysis and several internet-based realtime blacklists.
 
 Using its rule base, it uses a wide range of heuristic tests on mail headers
 and body text to identify "spam", also known as unsolicited commercial email.
@@ -27,8 +31,11 @@ Once identified, the mail can then be optionally tagged as spam for later
 filtering using the user's own mail user-agent application.
 
 This module implements a Mail::Audit plugin, allowing SpamAssassin to be used
-in a Mail::Audit filter.  In addition, a command-line filter tool is also
-provided.
+in a Mail::Audit filter.  If you wish to use a command-line filter tool,
+try the L<spamassassin> tool provided.
+
+SpamAssassin also includes support for reporting spam messages to collaborative
+filtering databases, such as Vipul's Razor ( http://razor.sourceforge.net/ ).
 
 =head1 METHODS
 
@@ -41,6 +48,7 @@ package Mail::SpamAssassin;
 use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::Reporter;
+use Mail::SpamAssassin::Replier;
 use Carp;
 use File::Basename;
 use File::Path;
@@ -54,7 +62,7 @@ use vars	qw{
 
 @ISA = qw();
 
-$VERSION = "0.3";
+$VERSION = "1.0";
 sub Version { $VERSION; }
 
 $HOME_URL = "http://spamassassin.taint.org/";
@@ -86,6 +94,12 @@ note that at least one of C<rules_filename>, C<userprefs_filename> or
 C<config_text> must be specified to provide configuration, otherwise
 SpamAssassin will not do anything!
 
+The L<spamassassin> command-line tool includes quite a lot of logic to find its
+configuration files in a variety of locations, so see its documentation for
+more details on how it loads its configuration.   (It is assumed that users of
+the C<Mail::SpamAssassin> module will wish to load a ''canned'' configuration,
+which is why the config-searching logic is not included here.)
+
 =back
 
 =cut
@@ -102,35 +116,6 @@ sub new {
 
   $self->{conf} = new Mail::SpamAssassin::Conf ($self);
   $self;
-}
-
-###########################################################################
-
-sub init {
-  my ($self) = @_;
-
-  if ($self->{_initted}) { return; }
-  $self->{_initted} = 1;
-
-  $self->{config_text} ||= '';
-
-  if (defined $self->{rules_filename}) {
-    open (IN, "<".$self->{rules_filename}) or
-		warn "cannot open \"$self->{rules_filename}\"\n";
-    $self->{config_text} .= join ('', <IN>);
-    close IN;
-  }
-
-  if (defined $self->{userprefs_filename}) {
-    open (IN, "<".$self->{userprefs_filename}) or
-		warn "cannot open \"$self->{userprefs_filename}\"\n";
-    $self->{config_text} .= join ('', <IN>);
-    close IN;
-  }
-
-  $self->{conf}->parse_rules ($self->{config_text});
-
-  # TODO -- open DNS cache etc.
 }
 
 ###########################################################################
@@ -178,6 +163,58 @@ sub report_as_spam {
   my $mail = $self->encapsulate_audit ($audit);
   my $msg = new Mail::SpamAssassin::Reporter ($self, $mail);
   $msg->report();
+}
+
+###########################################################################
+
+=item $f->reply_with_warning ($mail, $replysender)
+
+Reply to the sender of a mail, encapsulated in a C<Mail::Audit> object,
+explaining that their message has been added to spam-tracking databases
+and deleted.  To be used in conjunction with C<report_as_spam>.  The
+C<$replysender> argument should contain an email address to use as the
+sender of the reply message.
+
+=cut
+
+sub reply_with_warning {
+  my ($self, $audit, $replysender) = @_;
+  local ($_);
+
+  $self->init();
+  my $mail = $self->encapsulate_audit ($audit);
+  my $msg = new Mail::SpamAssassin::Replier ($self, $mail);
+  $msg->reply ($replysender);
+}
+
+###########################################################################
+# non-public methods.
+
+sub init {
+  my ($self) = @_;
+
+  if ($self->{_initted}) { return; }
+  $self->{_initted} = 1;
+
+  $self->{config_text} ||= '';
+
+  if (defined $self->{rules_filename}) {
+    open (IN, "<".$self->{rules_filename}) or
+		warn "cannot open \"$self->{rules_filename}\"\n";
+    $self->{config_text} .= join ('', <IN>);
+    close IN;
+  }
+
+  if (defined $self->{userprefs_filename}) {
+    open (IN, "<".$self->{userprefs_filename}) or
+		warn "cannot open \"$self->{userprefs_filename}\"\n";
+    $self->{config_text} .= join ('', <IN>);
+    close IN;
+  }
+
+  $self->{conf}->parse_rules ($self->{config_text});
+
+  # TODO -- open DNS cache etc.
 }
 
 ###########################################################################
