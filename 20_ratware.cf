@@ -153,14 +153,11 @@ describe FORGED_MUA_AOL_FROM	Forged mail pretending to be from AOL (by From)
 header __THEBAT_MUA		X-Mailer =~ /The Bat!/
 header __THEBAT_MUA_V1		X-Mailer =~ /^\QThe Bat! (v1.\E/
 header __THEBAT_MUA_V2		X-Mailer =~ /^\QThe Bat! (v2.\E/
-header __BAT_MSGID		MESSAGEID =~ /^<\d{2,12}\.\d{14}\@\S+>$/m
 header __CTYPE_CHARSET_QUOTED	Content-Type =~ /charset=\"/i
 header __CTYPE_HAS_BOUNDARY	Content-Type =~ /boundary/i
 header __BAT_BOUNDARY		Content-Type =~ /boundary=\"?-{10}/
-meta FORGED_MUA_THEBAT		(__THEBAT_MUA && !__UNUSABLE_MSGID && !__BAT_MSGID)
 meta FORGED_MUA_THEBAT_CS	(__THEBAT_MUA && __CTYPE_CHARSET_QUOTED)
 meta FORGED_MUA_THEBAT_BOUN	(__THEBAT_MUA && !__THEBAT_MUA_V2 && __CTYPE_HAS_BOUNDARY && !__BAT_BOUNDARY)
-describe FORGED_MUA_THEBAT	Mail pretending to be from The Bat! (mid)
 describe FORGED_MUA_THEBAT_CS	Mail pretending to be from The Bat! (charset)
 describe FORGED_MUA_THEBAT_BOUN Mail pretending to be from The Bat! (boundary)
 
