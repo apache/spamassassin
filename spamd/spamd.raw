@@ -135,7 +135,17 @@ spamd - daemonized version of spamassassin
 
 =head1 SYNOPSIS
 
-  spamd [port]
+spamd [port]
+
+=head1 OPTIONS
+
+=over
+
+=item I<port>
+
+Optionally specifies the port number for the server to listen on
+
+=back
 
 =head1 DESCRIPTION
 
@@ -151,9 +161,9 @@ for more details.
 
 =head1 SEE ALSO
 
-C<spamc>
-C<spamassassin>
-C<Mail::SpamAssassin>
+spamc(1)
+spamassassin(1)
+Mail::SpamAssassin(3)
 
 =head1 AUTHOR
 

@@ -69,8 +69,6 @@ sub MY::install {
 sub MY::postamble {
 q{
 
-EXTRAPODS = spamd/spamc.pod
-
 pm_to_blib: spamassassin
 
 spamassassin: spamassassin.raw
