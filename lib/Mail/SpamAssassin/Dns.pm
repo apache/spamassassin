@@ -12,7 +12,7 @@ use strict;
 
 use vars qw{
 	$KNOWN_BAD_DIALUP_RANGES $IP_IN_RESERVED_RANGE
-	$EXISTING_DOMAIN $IS_DNS_AVAILABLE
+	$EXISTING_DOMAIN $IS_DNS_AVAILABLE $VERSION
 };
 
 $EXISTING_DOMAIN = 'microsoft.com.';
@@ -20,6 +20,8 @@ $EXISTING_DOMAIN = 'microsoft.com.';
 $IP_IN_RESERVED_RANGE = undef;
 
 $IS_DNS_AVAILABLE = undef;
+
+$VERSION = 'bogus';     # avoid CPAN.pm picking up razor ver
 
 ###########################################################################
 
