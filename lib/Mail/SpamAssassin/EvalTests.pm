@@ -17,8 +17,7 @@ use Fcntl;
 
 use Time::Local;
 
-BEGIN { @AnyDBM_File::ISA = qw(DB_File GDBM_File NDBM_File SDBM_File); }
-use AnyDBM_File;
+use constant HAS_DB_FILE => eval { require DB_File; };
 
 use vars qw{
   $IP_ADDRESS
@@ -2844,13 +2843,18 @@ sub check_blank_line_ratio {
 
 sub check_access_database {
   my($self, $path) = @_;
+
+  if (!HAS_DB_FILE) {
+    return 0;
+  }
+
   my %access;
   my %ok = map { $_ => 1 } qw/ OK SKIP /;
   my %bad = map { $_ => 1 } qw/ REJECT ERROR DISCARD /;
 
   $path = $self->{main}->sed_path ($path);
   dbg("Tie-ing to DB file R/O in $path");
-  if ( tie %access,"AnyDBM_File",$path, O_RDONLY ) {
+  if ( tie %access,"DB_File",$path, O_RDONLY ) {
     my $rcvd = $self->get ('Received');
     my @lookfor = ();
 
