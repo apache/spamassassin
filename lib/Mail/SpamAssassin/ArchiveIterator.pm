@@ -617,8 +617,16 @@ sub fix_globs {
   # protect/escape spaces: ./Mail/My Letters => ./Mail/My\ Letters
   $path =~ s/([^\\])(\s)/$1\\$2/g;
 
-  # apply csh-style globs: ./corpus/*.mbox => er, you know what it does ;)
-  my @paths = glob $path;
+  my @paths;
+
+  if ($] < 5.006 && Mail::SpamAssassin::Util::am_running_in_taint_mode()) {
+    # glob is not allowed in taint-mode on 5.005
+    push(@paths, $path);
+  }
+  else {
+    # apply csh-style globs: ./corpus/*.mbox => er, you know what it does ;)
+    @paths = glob $path;
+  }
   return @paths;
 }
 

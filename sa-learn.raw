@@ -93,12 +93,13 @@ mean ham.
 Simply run this command once for each of your mail folders, and it will
 ''learn'' from the mail therein.
 
-Note that I<globbing> in the mail folder names is supported; in other words,
-listing a folder name as C<*> will scan every folder that matches.
+Note that I<globbing> in the mail folder names is supported (except when
+using perl 5.005 in taint-mode); in other words, listing a folder name
+as C<*> will scan every folder that matches.
 
 SpamAssassin remembers which mail messages it's learnt already, and will not
-re-learn those messages again, unless you use the B<--forget> option.   Messages
-learnt as spam will have SpamAssassin markup removed, on the fly.
+re-learn those messages again, unless you use the B<--forget> option.
+Messages learnt as spam will have SpamAssassin markup removed, on the fly.
 
 If you make a mistake and scan a mail as ham when it is spam, or vice
 versa, simply rerun this command with the correct classification, and the
@@ -173,8 +174,8 @@ First a high-level overview:
 
 I suggest several thousand of each, placed in SPAM and HAM directories or
 mailboxes.  Yes, you MUST hand-sort this - otherwise the results won't be much
-better than SpamAssassin on its own. Verify the spamminess/haminess of
-EVERY message.  You're urged to avoid using a publicly available corpus (sample) -
+better than SpamAssassin on its own. Verify the spamminess/haminess of EVERY
+message.  You're urged to avoid using a publicly available corpus (sample) -
 this must be taken from YOUR mail server, if it's to be statistically useful.
 Otherwise, the results may be pretty skewed.
 
