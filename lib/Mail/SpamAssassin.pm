@@ -87,11 +87,11 @@ $DEBUG = 0;
 @default_prefs_path = qw(
         __installsitelib__/spamassassin.prefs
         /etc/spamassassin.prefs
+        ./spamassassin.prefs 
+        ../spamassassin.prefs
 );
 
 @default_userprefs_path = qw(
-        ./spamassassin.prefs 
-        ../spamassassin.prefs
         ~/.spamassassin.cf
 );
 

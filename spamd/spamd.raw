@@ -85,8 +85,9 @@ else
 }
 
 my $spamtest = Mail::SpamAssassin->new({
-  local_tests_only=> $opt_L,
-  dont_copy_prefs => 1
+  dont_copy_prefs => 1,
+  local_tests_only => $opt_L,
+  debug => $opt_D
 });
 
 $spamtest->compile_now();	# ensure all modules etc. are loaded
