@@ -42,7 +42,7 @@ sub cmdline_run {
 	     'local|L'				=> \$opt{'local'},
 	     'force-expire'			=> \$opt{'force-expire'},
 
-             'stopafter'                        => \$opt{'stopafter'},
+             'stopafter=i'                      => \$opt{'stopafter'},
 	     'learnprob=f'			=> \$opt{'learnprob'},
 	     'randseed=i'			=> \$opt{'randseed'},
 
