@@ -1983,18 +1983,28 @@ Define a test.  C<SYMBOLIC_TEST_NAME> is a symbolic test name, such as
 'FROM_ENDS_IN_NUMS'.  C<header> is the name of a mail header, such as
 'Subject', 'To', etc.
 
-'ALL' can be used to mean the text of all the message's headers.
+Appending C<:raw> to the header name will inhibit decoding of quoted-printable
+or base-64 encoded strings.
 
-'ToCc' can be used to mean the contents of both the 'To' and 'Cc' headers.
+There are several special pseudo-headers:
 
-'EnvelopeFrom' is the address used in the 'MAIL FROM:' phase of the
-SMTP transaction that delivered this message, if this data has been
-made available by the SMTP server.
+=over 4
 
-'MESSAGEID' is a symbol meaning all Message-Id's found in the message; some
-mailing list software moves the I<real> Message-Id to 'Resent-Message-Id' or
-'X-Message-Id', then uses its own one in the 'Message-Id' header.  The value
+=item C<ALL> can be used to mean the text of all the message's headers.
+
+=item C<ToCc> can be used to mean the contents of both the 'To' and 'Cc'
+headers.
+
+=item C<EnvelopeFrom> is the address used in the 'MAIL FROM:' phase of the SMTP
+transaction that delivered this message, if this data has been made available
+by the SMTP server.
+
+=item C<MESSAGEID> is a symbol meaning all Message-Id's found in the message;
+some mailing list software moves the I<real> Message-Id to 'Resent-Message-Id'
+or 'X-Message-Id', then uses its own one in the 'Message-Id' header.  The value
 returned for this symbol is the text from all 3 headers, separated by newlines.
+
+=back
 
 C<op> is either C<=~> (contains regular expression) or C<!~> (does not contain
 regular expression), and C<pattern> is a valid Perl regular expression, with
