@@ -30,7 +30,15 @@
 
 int SAFE_FALLBACK=0;
 
-const int ESC_MSGTOOBIG = 666;
+const int ESC_PASSTHROUGHRAW = 666;
+
+/* set EXPANSION_ALLOWANCE to something more than might be
+   added to a message in X-headers and the report template */
+#define EXPANSION_ALLOWANCE 16384
+
+/* set NUM_CHECK_BYTES to number of bytes that have to match at beginning and end
+   of the data streams before and after processing by spamd */
+#define NUM_CHECK_BYTES 32
 
 char *msg_buf;
 int amount_read;
@@ -64,6 +72,7 @@ int dump_message(int in,int out)
 int send_message(int in,int out,char *username, int max_size)
 {
   size_t bytes;
+  int ret = EX_OK;
 
   if(NULL != username)
   {
@@ -81,27 +90,30 @@ int send_message(int in,int out,char *username, int max_size)
   if((bytes = read(in,msg_buf,max_size+1024)) > max_size)
   {
      /* Message is too big, so return so we can dump the message back out */
-     amount_read = bytes;
-     shutdown(out,SHUT_WR);
-     return ESC_MSGTOOBIG;
+     ret = ESC_PASSTHROUGHRAW;
+  } else
+  {
+    /* entire message is now in the buffer so one write is all we need */
+    write(out,msg_buf,bytes);
   }
 
-  do
-  {
-    write(out,msg_buf,bytes);
-  } while((bytes=read(in,msg_buf,8192)) > 0);
-
+  amount_read = bytes;
   shutdown(out,SHUT_WR);
-
-  return EX_OK;
+  return ret;
 }
 
-int read_message(int in, int out)
+int read_message(int in, int out, int max_size)
 {
   size_t bytes;
   int flag=0;
   char buf[8192];
-  float version; int response=EX_OK;
+  float version;
+  int response=EX_OK;
+  char* out_buf;
+  size_t out_index=0;
+
+  out_buf = malloc(max_size+EXPANSION_ALLOWANCE);
+
 
   /* ch: Just call me Mr. Livingontheedge ;) fixed your bytes+1 kludge below too */
   for(bytes=0;bytes<8192;bytes++)
@@ -109,7 +121,8 @@ int read_message(int in, int out)
     if(read(in,&buf[bytes],1) == 0) /* read header one byte at a time */
     {
       /* Read to end of message!  Must be because this is version <1.0 server */
-      write(out,buf,bytes); /* so write out the message */
+   memcpy(&out_buf[out_index], buf, bytes);
+   out_index += bytes;
       break; /* if we break here, the while loop below will never be entered and we'll return properly */
     }
     if('\n' == buf[bytes])
@@ -128,7 +141,8 @@ int read_message(int in, int out)
   if(!flag)
   {
     /* We never received a header, so it's a long message with version <1.0 server */
-    write(out,buf,bytes); /* so write out the message so far */
+ memcpy(&out_buf[out_index], buf, bytes);
+ out_index += bytes;
     /* Now we'll fall into the while loop if there's more message left. */
   }
 
@@ -136,11 +150,45 @@ int read_message(int in, int out)
   {
     while((bytes=read(in,buf,8192)) > 0)
     {
-      write(out,buf,bytes);
+   memcpy(&out_buf[out_index], buf, bytes);
+   out_index += bytes;
+   if (out_index >= max_size+EXPANSION_ALLOWANCE)
+   {
+    syslog (LOG_ERR, "spamd expanded message by more than %d bytes",
+                  EXPANSION_ALLOWANCE);
+    response = ESC_PASSTHROUGHRAW;
+    break;
     }
+  }
   }
 
   shutdown(in,SHUT_RD);
+
+  if (EX_OK == response)
+  {
+   /* Sanity check of results from spamd, which should */
+   /* preserve first and last n bytes of data */
+   /* Ideally don't compare more at the end than is is the original body, */
+   /* otherwise we'll be comparing header and/or spam report aded by spamd */
+   /* This code avoids searching for the start of the message body */
+   /* As a result messages shorter than the compare length are always */
+   /* passed through and not detected as spam */
+   if ((amount_read > 2*NUM_CHECK_BYTES) &&
+    (out_index > 2*NUM_CHECK_BYTES) &&
+    (memcmp(msg_buf, out_buf, NUM_CHECK_BYTES) == 0) &&
+    (memcmp(&msg_buf[amount_read - NUM_CHECK_BYTES],
+      &out_buf[out_index - NUM_CHECK_BYTES],
+      NUM_CHECK_BYTES) == 0))
+      {
+    write(out, out_buf, out_index);
+   } else
+   {
+    syslog (LOG_ERR, "failed sanity check, %d bytes in, %d bytes out",
+      amount_read, out_index);
+    response = ESC_PASSTHROUGHRAW;
+   }
+
+  }
 
   return response;
 }
@@ -265,15 +313,15 @@ int process_message(const char *hostname, int port, char *username, int max_size
   exstatus = try_to_connect ((const struct sockaddr *) &addr, &mysock);
   if (0 == exstatus)
   {
-    msg_buf = malloc(max_size);
+    msg_buf = malloc(max_size+1024);
     exstatus = send_message(STDIN_FILENO,mysock,username,max_size);
     if (0 == exstatus)
     {
-      exstatus = read_message(mysock,STDOUT_FILENO);
+      exstatus = read_message(mysock,STDOUT_FILENO,max_size);
     }
-    else if(ESC_MSGTOOBIG == exstatus)
+    if(ESC_PASSTHROUGHRAW == exstatus)
     {
-      /* Message was too big, so dump the buffer then bail */
+      /* Message was too big or corrupted, so dump the buffer then bail */
       write(STDOUT_FILENO,msg_buf,amount_read);
       dump_message(STDIN_FILENO,STDOUT_FILENO);
       exstatus = 0;
