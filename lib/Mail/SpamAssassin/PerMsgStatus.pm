@@ -1839,8 +1839,9 @@ sub do_meta_tests {
 
         $evalstr .= '
         if (' . $expr . ') {
-            $self->got_hit (q#'.$rulename.'#);
+            $self->got_hit (q#'.$rulename.'#, "");
         }
+
     ';
     }
 
@@ -2025,6 +2026,7 @@ sub _handle_hit {
     $score = sprintf("%2.1f",$score);
     $self->{hits} += $score;
     push(@{$self->{test_names_hit}}, $rule);
+    $area ||= '';
 
     if ($self->{conf}->{use_terse_report}) {
 	$self->{test_logs} .= sprintf ("* % 2.1f -- %s%s\n%s",
