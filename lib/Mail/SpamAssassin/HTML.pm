@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.75 2003/04/09 10:02:43 quinlan Exp $
+# $Id: HTML.pm,v 1.76 2003/04/11 07:33:31 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -339,22 +339,20 @@ sub html_font_invisible {
       my $g = ($g1 - $g2);
       my $b = ($b1 - $b2);
 
-      # weighted geometric distance
-      my $d1 = ((0.2126*$r)**2 + (0.7152*$g)**2 + (0.0722*$b)**2)**0.5;
-      # weighted color difference
-      my $d2 = (0.2126*abs($r) + 0.7152*abs($g) + 0.0722*abs($b));
+      # geometric distance weighted by brightness
+      # maximum distance is 191.151823601032
+      my $distance = ((0.2126*$r)**2 + (0.7152*$g)**2 + (0.0722*$b)**2)**0.5;
 
-      # scale to 0..765
-      $d1 *= (765/191.151823601032);
-      $d2 *= 3.0;
-
-      for (my $delta = 16; $delta <= 256; $delta += 16) {
-	if ($d1 < $delta) {
-	  $self->{html}{"t_font_invisible1_$delta"} = 1;
-	}
-	if ($d2 < $delta) {
-	  $self->{html}{"t_font_invisible2_$delta"} = 1;
-	}
+      # the text is very difficult to read if the distance is under 12
+      if ($distance < 12) {
+	$self->{html}{"t_font_near_invisible_12"} = 1;
+      }
+      # try a few last distances just to be sure
+      if ($distance < 14) {
+	$self->{html}{"t_font_near_invisible_14"} = 1;
+      }
+      if ($distance < 16) {
+	$self->{html}{"t_font_near_invisible_16"} = 1;
       }
     }
   }
