@@ -150,12 +150,6 @@ ssl_timeout_read (SSL *ssl, void *buf, int nbytes)
 {
   int nred;
 
-#ifndef SPAMC_SSL
-  UNUSED_VARIABLE(ssl);
-  UNUSED_VARIABLE(buf);
-  UNUSED_VARIABLE(nbytes);
-#endif
-
 #ifndef _WIN32
   sigfunc* sig;
 
@@ -166,11 +160,16 @@ ssl_timeout_read (SSL *ssl, void *buf, int nbytes)
 #endif
 
   do {
+
 #ifdef SPAMC_SSL
     nred = SSL_read (ssl, buf, nbytes);
 #else
+    UNUSED_VARIABLE(ssl);
+    UNUSED_VARIABLE(buf);
+    UNUSED_VARIABLE(nbytes);
     nred = 0;			/* never used */
 #endif
+
   } while(nred < 0 && errno == EWOULDBLOCK);
 
 #ifndef _WIN32
