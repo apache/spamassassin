@@ -163,6 +163,8 @@ sub new {
   # Mail::SpamAssassin module users who set that configuration setting,
   # to receive the correct values.
 
+  $self->{use_auto_whitelist} = 1;
+  $self->{auto_whitelist_factory} = "Mail::SpamAssassin::DBBasedAddrList";
   $self->{auto_whitelist_path} = "__userstate__/auto-whitelist";
   $self->{auto_whitelist_file_mode} = '0700';
   $self->{auto_whitelist_factor} = 0.5;
@@ -2284,6 +2286,35 @@ The default is C<-R>
 
     if (/^dcc_options\s+([A-Z -]+)/) {
       $self->{dcc_options} = $1; next;
+    }
+
+=item use_auto_whitelist ( 0 | 1 )		(default: 1)
+
+Whether to use auto-whitelists.  Auto-whitelists track the long-term
+average score for each sender and then shift the score of new messages
+toward that long-term average.  This can increase or decrease the score
+for messages, depending on the long-term behavior of the particular
+correspondent.
+
+For more information about the auto-whitelist system, please look at the
+the C<Automatic Whitelist System> section of the README file.  The
+auto-whitelist is not intended as a general-purpose replacement for static
+whitelist entries added to your config files.
+
+=cut
+
+    if (/^use_auto_whitelist\s+(\d+)$/) {
+      $self->{use_auto_whitelist} = $1; next;
+    }
+
+=item auto_whitelist_factory module (default: Mail::SpamAssassin::DBBasedAddrList)
+
+Select alternative whitelist factory module.
+
+=cut
+
+    if (/^auto_whitelist_factory\s+(.*)$/) {
+      $self->{auto_whitelist_factory} = $1; next;
     }
 
 =item auto_whitelist_path /path/to/file	(default: ~/.spamassassin/auto-whitelist)

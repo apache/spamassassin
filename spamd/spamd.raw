@@ -103,7 +103,6 @@ my $ORIG_CWD  = Mail::SpamAssassin::Util::untaint_var(Cwd::cwd());
 Getopt::Long::Configure ("bundling");
 GetOptions(
   'socketpath=s'                => \$opt{'socketpath'},
-  'auto-whitelist|whitelist|a'  => \$opt{'auto-whitelist'},
   'create-prefs!'               => \$opt{'create-prefs'},
     'c'                         => \$opt{'create-prefs'},
   'daemonize!'                  => \$opt{'daemonize'},
@@ -147,7 +146,7 @@ GetOptions(
   'F=i'                => sub { warn "The -F option has been removed\n" },
   'S'                  => sub { warn "The -S option has been removed\n" },
   'stop-at-threshold!' => sub { warn "The --stop-at-threshold option has been removed\n" },
-
+  'auto-whitelist|whitelist|a' => sub { warn "The -a option has been removed\n" },
 ) or pod2usage(-exitval => $resphash{'EX_USAGE'}, -verbose => 0);
 
 $opt{'help'} and pod2usage(-exitval => $resphash{'EX_USAGE'}, -verbose => 0, -message => 'For more details, use "man spamd"');
@@ -416,15 +415,6 @@ if ($opt{'username'}) {
     $setuid_to_user = 1;
   }
 }
-
-$opt{'auto-whitelist'} and eval
-{
-  require Mail::SpamAssassin::DBBasedAddrList;
-
-  # create a factory for the persistent address list
-  my $addrlistfactory = Mail::SpamAssassin::DBBasedAddrList->new();
-  $spamtest->set_persistent_address_list_factory ($addrlistfactory);
-};
 
 Mail::SpamAssassin::Util::clean_path_in_taint_mode();
 
@@ -1338,7 +1328,6 @@ spamd [options]
 
 Options:
 
- -a, --auto-whitelist, --whitelist  Use auto-whitelists
  -c, --create-prefs                 Create user preferences files
  -C path, --configpath=path         Path for default config files
  --siteconfigpath=path              Path for site configs (def: /etc/mail/spamassassin)
@@ -1349,7 +1338,7 @@ Options:
  -p port, --port                    Listen on specified port (default: 783)
  -q, --sql-config                   Enable SQL config (only useful with -x)
  -Q, --setuid-with-sql              Enable SQL config (only useful with -x,
-                                    enables use of -a and -H)
+                                    enables use of -H)
  -V, --virtual-config=dir           Enable Virtual configs (needs -x)
  --virtual-config-dir=dir           Enable pattern based Virtual configs (needs -x)
  -r pidfile, --pidfile              Write the process id to pidfile
@@ -1396,18 +1385,10 @@ current pid.
 
 Options of the long form can be shortened as long as they remain
 unambiguous.  (i.e. B<--dae> can be used instead of B<--daemonize>)
-Also, boolean options (like B<--auto-whitelist>) can be negated by
-adding I<--no> (B<--noauto-whitelist>), however, this is usually unnecessary.
+Also, boolean options (like B<--user-config>) can be negated by
+adding I<--no> (B<--nouser-config>), however, this is usually unnecessary.
 
 =over 4
-
-=item B<-a>, B<--auto-whitelist>, B<--whitelist>
-
-Use auto-whitelists.  Auto-whitelists track the long-term average score for
-each sender and then shift the score of new messages toward that long-term
-average.  This can increase or decrease the score for messages, depending on
-the long-term behavior of the particular correspondent.  See the README file
-for more details.
 
 =item B<-c>, B<--create-prefs>
 

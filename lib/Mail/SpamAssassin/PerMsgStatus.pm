@@ -182,12 +182,8 @@ sub check {
     # auto-learning
     $self->learn();
 
-    # add points from Bayes, before adjusting the AWL
+    # add points from learning systems (Bayes and AWL)
     $self->{hits} += $self->{learned_hits};
-
-    # Do AWL tests last, since these need the score to have already been
-    # calculated
-    $self->do_awl_tests();
   }
 
   $self->delete_fulltext_tmpfile();
@@ -262,7 +258,7 @@ sub learn {
     foreach my $test ( @{$self->{test_names_hit}} ) {
       # ignore tests with 0 score in this scoreset or if the test is a learning or userconf test
       next if ( $self->{conf}->{scores}->{$test} == 0 );
-      next if ( exists $self->{conf}->{tflags}->{$test} && $self->{conf}->{tflags}->{$test} =~ /\b(?:learn|userconf)\b/ );
+      next if ( exists $self->{conf}->{tflags}->{$test} && $self->{conf}->{tflags}->{$test} =~ /\bnoautolearn\b/ );
 
       $hits += $self->{conf}->{scores}->{$test};
     }
@@ -2001,75 +1997,6 @@ sub do_full_eval_tests {
 
 ###########################################################################
 
-sub do_awl_tests {
-    my($self) = @_;
-
-    return unless (defined $self->{main}->{pers_addr_list_factory});
-
-    local $_ = lc $self->get('From:addr');
-    return 0 unless /\S/;
-
-    # find the earliest usable "originating IP".  ignore reserved nets
-    my $origip;
-    foreach my $rly (reverse (@{$self->{relays_trusted}}, @{$self->{relays_untrusted}}))
-    {
-      next if ($rly->{ip_is_reserved});
-      if ($rly->{ip}) {
-	$origip = $rly->{ip}; last;
-      }
-    }
-
-    # Create the AWL object, catching 'die's
-    my $whitelist;
-    my $evalok = eval {
-      $whitelist = Mail::SpamAssassin::AutoWhitelist->new($self->{main});
-
-      # check
-      my $meanscore = $whitelist->check_address($_, $origip);
-      my $delta = 0;
-
-      dbg("AWL active, pre-score: ".$self->{hits}.", mean: ".($meanscore||'undef').
-                          ", originating-ip: ".($origip||'undef'));
-
-      if(defined($meanscore))
-      {
-          $delta = ($meanscore - $self->{hits}) * $self->{main}->{conf}->{auto_whitelist_factor};
-	  $self->{tag_data}->{AWL} = sprintf("%2.1f",$delta);
-	  # Save this for _AWL_ tag
-      }
-
-      # Update the AWL *before* adding the new score, otherwise
-      # early high-scoring messages are reinforced compared to
-      # later ones.  See
-      # http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=159704
-      #
-      if (!$self->{disable_auto_learning}) {
-        $whitelist->add_score($self->{hits});
-      }
-
-      # current AWL score changes with each hit
-      for my $set (0..3) {
-	$self->{conf}->{scoreset}->[$set]->{"AWL"} = sprintf("%0.3f", $delta);
-      }
-
-      if ($delta != 0) {
-	$self->_handle_hit("AWL",$delta,"AWL: ","Auto-whitelist adjustment");
-      }
-
-      dbg("Post AWL score: ".$self->{hits});
-      $whitelist->finish();
-      1;
-    };
-
-    if (!$evalok) {
-      dbg ("open of AWL file failed: $@");
-      # try an unlock, in case we got that far
-      eval { $whitelist->finish(); };
-    }
-}
-
-###########################################################################
-
 sub do_meta_tests {
   my ($self) = @_;
   local ($_);
@@ -2199,13 +2126,15 @@ sub run_eval_tests {
     # Score of 0, skip it.
     next unless ($self->{conf}->{scores}->{$rulename});
 
-    # If the rule is a net rule, and we're in a non-net enabled scoreset, skip it.
+    # If the rule is a net rule, and we're in a non-net scoreset, skip it.
     next if (exists $self->{conf}->{tflags}->{$rulename} &&
-      (($scoreset & 1) == 0) && $self->{conf}->{tflags}->{$rulename} =~ /\bnet\b/);
+	     (($scoreset & 1) == 0) &&
+	     $self->{conf}->{tflags}->{$rulename} =~ /\bnet\b/);
 
-    # If the rule is a learn rule, and we're in a non-learn enabled scoreset, skip it.
+    # If the rule is a bayes rule, and we're in a non-bayes scoreset, skip it.
     next if (exists $self->{conf}->{tflags}->{$rulename} &&
-      (($scoreset & 2) == 0) && $self->{conf}->{tflags}->{$rulename} =~ /\blearn\b/);
+	     (($scoreset & 2) == 0) &&
+	     $self->{conf}->{tflags}->{$rulename} =~ /\bbayes\b/);
 
     my $score = $self->{conf}{scores}{$rulename};
     my $result;
@@ -2309,9 +2238,8 @@ sub _handle_hit {
 
     my $tflags = $self->{conf}->{tflags}->{$rule}; $tflags ||= '';
 
-    # ignore 'learn' or 'userconf' rules, when considering score for
-    # Bayesian auto-learning
-    if ($tflags =~ /\b(?:learn|userconf)\b/i) {
+    # ignore 'noautolearn' rules when considering score for Bayes auto-learning
+    if ($tflags =~ /\bnoautolearn\b/i) {
       $self->{learned_hits} += $score;
     }
     else {

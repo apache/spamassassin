@@ -70,8 +70,6 @@ eval {
   # gnu_compat neither.
   Getopt::Long::Configure(qw(bundling no_getopt_compat no_auto_abbrev no_ignore_case));
   GetOptions(
-	     'whitelist-factory|M=s'             => \$opt{'whitelist-factory'},
-	     'auto-whitelist|a'                  => \$opt{'auto-whitelist'},
 	     'remove-from-whitelist|R'           => \$opt{'remove-from-whitelist'},
 	     'add-to-whitelist|W'                => \$opt{'add-to-whitelist'},
 	     'add-to-blacklist'                  => \$opt{'add-to-blacklist'},
@@ -102,6 +100,8 @@ eval {
 	     'F=i'       => sub { warn "The -F option has been removed.\n" },
 	     'add-from!' => sub { warn "The --add-from option has been removed.\n" },
 	     'stop-at-threshold|S' => sub { warn "The -S option has been removed.\n" },
+	     'whitelist-factory|M=s' => sub { warn "The -M option has been removed.\n" },
+	     'auto-whitelist|a' => sub { warn "The -a option has been removed.\n" },
   ) or usage(0, "Unknown option!");
   if (defined $opt{'help'}) { usage(0, "For more information read the spamassassin man page"); }
   if (defined $opt{'version'}) {
@@ -210,33 +210,6 @@ eval {
       $mail->ignore();          # will exit
   }
 
-  if ($opt{'auto-whitelist'} || $doing_whitelist_operation) {
-    # create a factory for the persistent address list.
-    # choose one of these implementations!
-    # The -M "Mail::SpamAssassin::ImplClassAddrList" flag can be used
-    # to switch between them.
-
-    my $addrlistfactory;
-    if ($opt{'whitelist-factory'}) {
-      $opt{'whitelist-factory'} =~ /^([_A-Za-z0-9:]+)$/;
-      my $factory = $1;
-
-      eval '
-        require '.$factory.';
-        $addrlistfactory = '.$factory.'->new();
-      ';
-      if ($@) { warn $@; undef $addrlistfactory; }
-
-    } else {
-
-      require Mail::SpamAssassin::DBBasedAddrList;
-      $addrlistfactory = Mail::SpamAssassin::DBBasedAddrList->new();
-
-    }
-
-    $spamtest->set_persistent_address_list_factory ($addrlistfactory);
-  };
-
   if ($@) { warn $@; }
 
   if ($doing_whitelist_operation) {
@@ -332,7 +305,6 @@ Options:
  -t, --test-mode                   Pipe message through and add extra
                                    report to the bottom
  --lint                            Lint the rule set: report syntax errors
- -a, --auto-whitelist              Use auto-whitelists (AWL)
  -W, --add-to-whitelist            Add addresses in mail to whitelist (AWL)
  --add-to-blacklist                Add addresses in mail to blacklist (AWL)
  -R, --remove-from-whitelist       Remove all addresses found in mail
@@ -340,7 +312,6 @@ Options:
  --add-addr-to-whitelist=addr      Add addr to whitelist (AWL)
  --add-addr-to-blacklist=addr      Add addr to blacklist (AWL)
  --remove-addr-from-whitelist=addr Remove addr from whitelist (AWL)
- -M, --whitelist-factory           Select whitelist factory (AWL)
  -D, --debug [area=n,...]          Print debugging messages
  -V, --version                     Print version
  -h, --help                        Print usage message
@@ -354,18 +325,6 @@ Options:
 The B<-P> parameter will cause SpamAssassin to pipe the output to STDOUT.
 This is now the default mode of operation, so this switch is obsolete,
 and should not be used anymore.
-
-=item B<-a>, B<--auto-whitelist>, B<--whitelist>
-
-Use auto-whitelists.  Auto-whitelists track the long-term average score for
-each sender and then shift the score of new messages toward that long-term
-average.  This can increase or decrease the score for messages, depending on
-the long-term behavior of the particular correspondent.
-
-For more information about the auto-whitelist system, please look
-at the the C<Automatic Whitelist System> section of the README file.
-The auto-whitelist is not intended as a general-purpose replacement for
-static whitelist entries added to your config files
 
 =item B<-e>, B<--error-code>, B<--exit-code>
 
@@ -527,10 +486,6 @@ hit, use:
 =item B<-x>, B<--nocreate-prefs>
 
 Disable creation of user preferences file.
-
-=item B<-M> I<factory>, B<--whitelist-factory>=I<factory>
-
-Select alternative whitelist factory.
 
 =back
 

@@ -338,9 +338,9 @@ describe RCVD_BY_QVES_COM	Sent by a known spamhaus (qves)
 header NONEXISTENT_CHARSET	Content-Type =~ /charset=.?DEFAULT/
 describe NONEXISTENT_CHARSET	Character set doesn't exist
 
-header CHARSET_FARAWAY_HEADER		eval:check_for_faraway_charset_in_headers()
+header CHARSET_FARAWAY_HEADER	eval:check_for_faraway_charset_in_headers()
 describe CHARSET_FARAWAY_HEADER	A foreign language charset used in headers
-tflags CHARSET_FARAWAY_HEADER		userconf
+tflags CHARSET_FARAWAY_HEADER	userconf
 
 header X_MAILER_GIBBERISH	X-Mailer =~ /^[A-Fa-f0-9\.]{48,}$/
 describe X_MAILER_GIBBERISH	'X-Mailer' line contains gibberish
@@ -357,18 +357,6 @@ describe MANY_FROMS		'From' contains more than one address
 # *so* many spams come from here.
 header BTAMAIL_HEADER		ALL =~ /\bbtamail\.net\.cn/i
 describe BTAMAIL_HEADER		Header contains an address from btamail.net.cn
-
-header USER_IN_BLACKLIST	eval:check_from_in_blacklist()
-describe USER_IN_BLACKLIST	From: address is in the user's black-list
-tflags USER_IN_BLACKLIST        userconf
-
-header USER_IN_WHITELIST	eval:check_from_in_whitelist()
-describe USER_IN_WHITELIST	From: address is in the user's white-list
-tflags USER_IN_WHITELIST        userconf nice
-
-header USER_IN_DEF_WHITELIST	eval:check_from_in_default_whitelist()
-describe USER_IN_DEF_WHITELIST	From: address is in the default white-list
-tflags USER_IN_DEF_WHITELIST    userconf nice
 
 # noticed this implied in passing in Dan's CVS messages. ;)  no nonspam hits
 # but only a small number of spam ones, for me.
@@ -398,22 +386,6 @@ describe VERY_SUSP_RECIPS	Very similar addresses in recipient list
 
 header SORTED_RECIPS		eval:sorted_recipients()
 describe SORTED_RECIPS		Recipient list is sorted by address
-
-header USER_IN_BLACKLIST_TO     eval:check_to_in_blacklist()
-describe USER_IN_BLACKLIST_TO   User is listed in 'blacklist_to'
-tflags USER_IN_BLACKLIST_TO     userconf nice
-
-header USER_IN_WHITELIST_TO     eval:check_to_in_whitelist()
-describe USER_IN_WHITELIST_TO   User is listed in 'whitelist_to'
-tflags USER_IN_WHITELIST_TO     userconf nice
-
-header USER_IN_MORE_SPAM_TO     eval:check_to_in_more_spam()
-describe USER_IN_MORE_SPAM_TO   User is listed in 'more_spam_to'
-tflags USER_IN_MORE_SPAM_TO     userconf nice
-
-header USER_IN_ALL_SPAM_TO      eval:check_to_in_all_spam()
-describe USER_IN_ALL_SPAM_TO    User is listed in 'all_spam_to'
-tflags USER_IN_ALL_SPAM_TO      userconf nice
 
 header GAPPY_SUBJECT		Subject =~ /\b(?:[a-z]([-_. =~\/:,*!\@\#\$\%\^&+;\"\'<>\\])\1{0,2}){4,}/i
 describe GAPPY_SUBJECT		Subject: contains G.a.p.p.y-T.e.x.t

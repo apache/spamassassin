@@ -916,6 +916,95 @@ sub check_from_in_default_whitelist {
 
 ###########################################################################
 
+sub check_from_in_auto_whitelist {
+    my ($self) = @_;
+
+    return unless $self->{main}->{conf}->{use_auto_whitelist};
+
+    if (!defined $self->{main}->{pers_addr_list_factory}) {
+      my $factory;
+      return unless $self->{main}->{conf}->{auto_whitelist_factory};
+      my $type = $self->{main}->{conf}->{auto_whitelist_factory};
+      if ($type =~ /^([_A-Za-z0-9:]+)$/) {
+	$type = $1;
+      }
+      else {
+	warn "illegal auto_whitelist_factory setting\n";
+	return;
+      }
+      eval '
+        require '.$type.';
+        $factory = '.$type.'->new();
+      ';
+      if ($@) { warn $@; undef $factory; }
+      $self->{main}->set_persistent_address_list_factory($factory);
+    }
+
+    local $_ = lc $self->get('From:addr');
+    return 0 unless /\S/;
+
+    # find the earliest usable "originating IP".  ignore reserved nets
+    my $origip;
+    foreach my $rly (reverse (@{$self->{relays_trusted}}, @{$self->{relays_untrusted}}))
+    {
+      next if ($rly->{ip_is_reserved});
+      if ($rly->{ip}) {
+	$origip = $rly->{ip}; last;
+      }
+    }
+
+    # Create the AWL object, catching 'die's
+    my $whitelist;
+    my $evalok = eval {
+      $whitelist = Mail::SpamAssassin::AutoWhitelist->new($self->{main});
+
+      # check
+      my $meanscore = $whitelist->check_address($_, $origip);
+      my $delta = 0;
+
+      dbg("AWL active, pre-score: " . $self->{hits} . ", mean: " .
+	  ($meanscore || 'undef') . ", IP: " . ($origip || 'undef'));
+
+      if (defined ($meanscore)) {
+        $delta = ($meanscore - $self->{hits}) * $self->{main}->{conf}->{auto_whitelist_factor};
+	$self->{tag_data}->{AWL} = sprintf("%2.1f",$delta);
+	# Save this for _AWL_ tag
+      }
+
+      # Update the AWL *before* adding the new score, otherwise
+      # early high-scoring messages are reinforced compared to
+      # later ones.  http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=159704
+      if (!$self->{disable_auto_learning}) {
+        $whitelist->add_score($self->{hits});
+      }
+
+      # current AWL score changes with each hit
+      for my $set (0..3) {
+	$self->{conf}->{scoreset}->[$set]->{"AWL"} = sprintf("%0.3f", $delta);
+      }
+
+      if ($delta != 0) {
+        $self->_handle_hit("AWL", $delta, "AWL: ",
+			   $self->{main}->{conf}->{descriptions}->{AWL});
+      }
+
+      dbg("Post AWL score: ".$self->{hits});
+      $whitelist->finish();
+      1;
+    };
+
+    if (!$evalok) {
+      dbg ("open of AWL file failed: $@");
+      # try an unlock, in case we got that far
+      eval { $whitelist->finish(); };
+    }
+
+    # test hit is above
+    return 0;
+}
+
+###########################################################################
+
 sub _check_whitelist_rcvd {
   my ($self, $list, $addr) = @_;
 
