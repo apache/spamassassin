@@ -22,7 +22,7 @@ q{ SHOULD_NOT_BE_CALLED }, 'should_not_be_called'
 );
 
 tstlocalrules ("
-	loadplugin myTestPlugin ../../data/testplugin.pm
+	loadplugin myTestPlugin data/testplugin.pm
 	ifplugin FooPlugin
 	  header SHOULD_NOT_BE_CALLED	eval:doesnt_exist()
 	endif
