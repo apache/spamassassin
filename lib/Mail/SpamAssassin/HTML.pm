@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.58 2002/12/19 19:04:49 jmason Exp $
+# $Id: HTML.pm,v 1.59 2002/12/20 11:25:31 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -354,6 +354,7 @@ sub html_comment {
 
   $self->{html}{comment_8bit} = 1 if $text =~ /[\x80-\xff]{3,}/;
   $self->{html}{comment_email} = 1 if $text =~ /\S+\@\S+/;
+  $self->{html}{comment_egp} = 1 if $text =~ /\S+begin egp html banner\S+/;
   $self->{html}{comment_saved_url} = 1 if $text =~ /<!-- saved from url=\(\d{4}\)/;
   $self->{html}{comment_sky} = 1 if $text =~ /SKY-(?:Email-Address|Database|Mailing|List)/;
 
