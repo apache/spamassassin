@@ -2,13 +2,32 @@
 Important Note For Users Upgrading From Earlier Versions
 --------------------------------------------------------
 
+2.6x will be the last major version to support versions of on-disk
+database systems via the AnyDBM_File interface, other than DB_File.  We
+*strongly* recommend that installers also install DB_File, since it is
+more resilient and requires less resources than the other on-disk database
+modules supported by Perl.  In particular, GDBM_File is very likely to
+crash due to shortcomings in that database format.
+
+SpamAssassin will still work without DB_File installed; but due to the
+shortcomings in these modules, we suggest you run without Bayes enabled,
+or in Bayes read-only mode.
+
+If you install DB_File and wish to import the old Bayes database data,
+there is an upgrade script in the "tools" directory called
+"sa-learn-upgrade-db" which will copy old entries from other formats, into
+a new DB_File file.
+
+
+Note For Users Upgrading From SpamAssassin 2.3x or 2.4x
+-------------------------------------------------------
+
 SpamAssassin no longer includes code to handle local mail delivery, as it
 was not reliable enough, compared to procmail.  So now, if you relied on
 spamassassin to write the mail into your mail folder, you'll have to
-change your setup to use procmail as detailed below.
-
-If you used spamassassin to filter your mail and then something else wrote
-it into a folder for you, then you should be fine.
+change your setup to use procmail as detailed below.  If you used
+spamassassin to filter your mail and then something else wrote it into a
+folder for you, then you should be fine.
 
 Support for versions of the optional Mail::Audit module before 1.9 is no
 longer included.
@@ -18,12 +37,6 @@ line) no longer takes place.  Instead the message is rewritten.
 
 Using Razor version 1 is no longer supported.  Please upgrade to Razor
 version 2.
-
-2.6x will be the last major version to support versions of on-disk
-database systems via the AnyDBM_File interface, other than DB_File.   We
-strongly recommend that installers also install DB_File, since it is more
-resilient and requires less resources than the other on-disk database
-modules supported by Perl.
 
 
 Installing or Upgrading SpamAssassin

@@ -367,17 +367,13 @@ qmail/qmail-spamc: spamd/binaries.mk $(SPAMC_SOURCES)
 spamd/binaries.mk: spamd/configure
 	cd spamd; ./configure --enable-ssl=$(ENABLE_SSL)
 
-inst_cfs: $(PKG_LOCAL_RULES_DIR) $(PKG_LOCAL_RULES_DIR)/local.cf
+inst_cfs:
+	-$(MKPATH) $(PKG_LOCAL_RULES_DIR)
+	$(PERL) -e "use File::Copy; (-f '$(PKG_LOCAL_RULES_DIR)/local.cf') or copy ('rules/local.cf', '$(PKG_LOCAL_RULES_DIR)/local.cf');"
 	$(MKPATH) $(PKG_DEF_RULES_DIR)
 	$(RM_RF) $(PKG_DEF_RULES_DIR)/*
 	$(PERL) build/preprocessor $(FIXVARS) -m$(PERM_RW) -Irules -O$(PKG_DEF_RULES_DIR) $(RULES)
 	$(CHMOD) $(PERM_RWX) $(PKG_DEF_RULES_DIR)
-
-$(PKG_LOCAL_RULES_DIR):
-	$(MKPATH) $@
-
-$(PKG_LOCAL_RULES_DIR)/local.cf: rules/local.cf
-	$(PERL) -e "use File::Copy; (-f '$@') or copy ('$?', '$@');"
 
 text_html_doc: made-doc-stamp
 	$(NOOP)
