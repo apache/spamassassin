@@ -35,6 +35,8 @@ use base qw( Exporter );
 # These are generic constants that may be used across several modules
 @SA_VARS = qw(
 	META_TEST_MIN_PRIORITY HARVEST_DNSBL_PRIORITY MBX_SEPARATOR
+	MAX_BODY_LINE_LENGTH MAX_HEADER_KEY_LENGTH MAX_HEADER_VALUE_LENGTH
+	MAX_HEADER_LENGTH
 );
 
 %EXPORT_TAGS = (
@@ -175,5 +177,17 @@ use constant MBX_SEPARATOR => qr/([\s|\d]\d-[a-zA-Z]{3}-\d{4}\s\d{2}:\d{2}:\d{2}
 # $2 = size of message in bytes (int)
 # $3 = message status - binary (hex)
 # $4 = message ID (hex)
+
+# ---------------------------------------------------------------------------
+# values used for internal message representations
+
+# maximum byte length of lines in the body
+use constant MAX_BODY_LINE_LENGTH => 2048;
+# maximum byte length of a header key
+use constant MAX_HEADER_KEY_LENGTH => 256;
+# maximum byte length of a header value including continued lines
+use constant MAX_HEADER_VALUE_LENGTH => 8192;
+# maximum byte length of entire header
+use constant MAX_HEADER_LENGTH => 65536;
 
 1;

@@ -153,8 +153,7 @@ sub check {
 
     my $bodytext = $self->get_decoded_body_text_array();
 
-    my $fulltext = join ('', $self->{msg}->get_all_headers(1), "\n",
-			 $self->{msg}->get_pristine_body());
+    my $fulltext = $self->{msg}->get_pristine();
 
     # use $bodytext here because $decoded is too stripped
     # TVD: leave it up to get_uri_list to do the right thing ...

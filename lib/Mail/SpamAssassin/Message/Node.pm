@@ -38,6 +38,7 @@ use strict;
 use bytes;
 
 use Mail::SpamAssassin;
+use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::HTML;
 use MIME::Base64;
 use MIME::QuotedPrint;
@@ -543,6 +544,8 @@ scalar context or both are returned in array context.
 
 =cut
 
+# TODO: this could be made much faster by only processing all headers
+# when called in array context, otherwise just do one header
 sub get_header {
   my ($self, $hdr, $raw) = @_;
   $raw ||= 0;
@@ -585,27 +588,46 @@ context, the headers are returned in a single scalar.
 
 =cut
 
+# build it and it will not bomb
 sub get_all_headers {
   my ($self, $raw, $include_mbox) = @_;
   $raw ||= 0;
   $include_mbox ||= 0;
 
-  my %cache = ();
   my @lines = ();
 
-  # we're guaranteed that get_header() will return a non-undef value here,
-  # so don't bother trying to deal with that possibility.
-  foreach ( @{$self->{header_order}} ) {
-    push(@lines, "$_: ".($self->get_header($_,$raw))[$cache{$_}++]);
+  # precalculate destination positions based on order of appearance
+  my $i = 0;
+  my %locations;
+  for my $k (@{$self->{header_order}}) {
+    push(@{$locations{lc($k)}}, $i++);
   }
+
+  # process headers in order of first appearance
+  my $header;
+  my $size = 0;
+  HEADER: for my $name (sort { $locations{$a}->[0] <=> $locations{$b}->[0] }
+			keys %locations)
+  {
+    # get all same-name headers and poke into correct position
+    my $positions = $locations{$name};
+    for my $contents ($self->get_header($name, $raw)) {
+      my $position = shift @{$positions};
+      $size += length($name) + length($contents) + 2;
+      if ($size > MAX_HEADER_LENGTH) {
+	$self->{'truncated_header'} = 1;
+	last HEADER;
+      }
+      $lines[$position] = $self->{header_order}->[$position] . ": $contents";
+    }
+  }
+
+  # skip undefined lines if we truncated
+  @lines = grep { defined $_ } @lines if $self->{'truncated_header'};
 
   splice @lines, 0, 0, $self->{mbox_sep} if ( $include_mbox && exists $self->{mbox_sep} );
 
-  if (wantarray) {
-    return @lines;
-  } else {
-    return join ('', @lines);
-  }
+  return wantarray ? @lines : join ('', @lines);
 }
 
 # ---------------------------------------------------------------------------

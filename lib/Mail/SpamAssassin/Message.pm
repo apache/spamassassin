@@ -54,8 +54,6 @@ use vars qw(@ISA);
 
 @ISA = qw(Mail::SpamAssassin::Message::Node);
 
-use constant MAX_BODY_LINE_LENGTH =>        2048;
-
 # ---------------------------------------------------------------------------
 
 =item new()
@@ -170,11 +168,21 @@ sub new {
 
     # Ok, there's a header here, let's go ahead and add it in.
     if ($header) {
-      my ( $key, $value ) = split ( /:\s*/, $header, 2 );
+      # Yes, the /s is needed to match \n too.
+      my ($key, $value) = split (/:\s*(?=.)/s, $header, 2);
 
       # If it's not a valid header (aka: not in the form "foo: bar"), skip it.
       if (defined $value) {
-        $self->header( $key, $value );
+	# limit the length of the pairs we store
+	if (length($key) > MAX_HEADER_KEY_LENGTH) {
+	  $key = substr($key, 0, MAX_HEADER_KEY_LENGTH);
+	  $self->{'truncated_header'} = 1;
+	}
+	if (length($value) > MAX_HEADER_VALUE_LENGTH) {
+	  $value = substr($value, 0, MAX_HEADER_VALUE_LENGTH);
+	  $self->{'truncated_header'} = 1;
+	}
+        $self->header($key, $value);
       }
     }
 
@@ -481,11 +489,11 @@ sub _parse_multipart {
     }
 
     if ($in_body) {
-      # we run into a perl bug if the lines are astronomically long (probably due
-      # to lots of regexp backtracking); so cut short any individual line over
-      # MAX_BODY_LINE_LENGTH bytes in length.  This can wreck HTML totally -- but
-      # IMHO the only reason a luser would use MAX_BODY_LINE_LENGTH-byte lines is
-      # to crash filters, anyway.
+      # we run into a perl bug if the lines are astronomically long (probably
+      # due to lots of regexp backtracking); so cut short any individual line
+      # over MAX_BODY_LINE_LENGTH bytes in length.  This can wreck HTML
+      # totally -- but IMHO the only reason a luser would use
+      # MAX_BODY_LINE_LENGTH-byte lines is to crash filters, anyway.
       while (length ($_) > MAX_BODY_LINE_LENGTH) {
         push (@{$part_array}, substr($_, 0, MAX_BODY_LINE_LENGTH)."\n");
         substr($_, 0, MAX_BODY_LINE_LENGTH) = '';
@@ -605,9 +613,9 @@ sub get_rendered_body_text_array {
   }
 
   # whitespace handling (warning: small changes have large effects!)
-  $text =~ s/\n+\s*\n+/\f/gs;                # double newlines => form feed
-  $text =~ tr/ \t\n\r\x0b\xa0/ /s;        # whitespace => space
-  $text =~ tr/\f/\n/;                        # form feeds => newline
+  $text =~ s/\n+\s*\n+/\f/gs;		# double newlines => form feed
+  $text =~ tr/ \t\n\r\x0b\xa0/ /s;	# whitespace => space
+  $text =~ tr/\f/\n/;			# form feeds => newline
   
   # warn "JMD $text";
 
@@ -803,9 +811,9 @@ sub get_all_metadata {
   }
   my @ret = ();
   foreach my $key (sort keys %{$self->{metadata}->{strings}}) {
-    push (@ret, $key, ": ", $self->{metadata}->{strings}->{$key}, "\n");
+    push (@ret, "$key: " . $self->{metadata}->{strings}->{$key} . "\n");
   }
-  return join ("", @ret);
+  return (wantarray ? @ret :  join('', @ret));
 }
 
 # ---------------------------------------------------------------------------
