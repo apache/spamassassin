@@ -168,7 +168,7 @@ describe ADDRESSES_ON_CD	Only thing addresses on CD are useful for is SPAM
 body SHOES_GUY			/(?:\b(?:Lingui|Guilin)\b.{1,30}){2,}/i
 describe SHOES_GUY		Want some shoes?
 
-body EXCUSE_1			/You (?:were sent|have received) this message because/i
+body EXCUSE_1			/(?:You (?:were sent|have received|are receiving)|You're receiving).{0,15}(?:message|e-?mail)s? because/i
 describe EXCUSE_1		Gives a lame excuse about why you were sent this SPAM
 body EXCUSE_2			/If you did not opt.in/i
 describe EXCUSE_2		Claims you actually asked for this SPAM
