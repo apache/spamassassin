@@ -177,17 +177,17 @@ sub mtime {
 ###########################################################################
 
 sub parse_scores_only {
-  my ($self, $rules) = @_;
-  $self->_parse ($rules, 1);
+  my ($self) = @_;
+  $self->_parse ($_[1], 1); # don't copy $rules!
 }
 
 sub parse_rules {
-  my ($self, $rules) = @_;
-  $self->_parse ($rules, 0);
+  my ($self) = @_;
+  $self->_parse ($_[1], 0); # don't copy $rules!
 }
 
 sub _parse {
-  my ($self, $rules, $scoresonly) = @_;
+  my ($self, undef, $scoresonly) = @_; # leave $rules in $_[1]
   local ($_);
 
   my $lang = $ENV{'LC_ALL'};
@@ -199,7 +199,7 @@ sub _parse {
   if ($lang eq 'C') { $lang = 'en_US'; }
   $lang =~ s/[\.\@].*$//;	# .utf8 or @euro
 
-  foreach $_ (split (/\n/, $rules)) {
+  foreach (split (/\r?\n/, $_[1])) {
     s/\r//g; s/(^|(?<!\\))\#.*$/$1/;
     s/^\s+//; s/\s+$//; /^$/ and next;
 
