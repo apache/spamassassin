@@ -295,3 +295,7 @@ describe MSGID_RATWARE1		Bulk email fingerprint found
 
 header RATWARE_BOUND_PIECE	Content-Type =~ /boundary=\"?--Piece/
 describe RATWARE_BOUND_PIECE	Bulk email fingerprint (piece boundary) found
+
+header __RATWARE_NAME_ID	eval:check_ratware_name_id()
+meta RATWARE_NAME_ID		__RATWARE_0_TZ_DATE && __RATWARE_NAME_ID
+describe RATWARE_NAME_ID	Bulk email fingerprint (msgid from) found
