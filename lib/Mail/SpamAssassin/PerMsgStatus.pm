@@ -674,7 +674,7 @@ sub get_decoded_body_text_array {
     my $lastlinelength = 0;
     my $b64lines = 0;
     foreach my $line (@{$textary}) {
-      if ($line =~ /[ \t]/) {  # base64 can't have whitespace on the line
+      if ($line =~ /[ \t]/ or $line =~ /^--/) {  # base64 can't have whitespace on the line or start --
         $_ = "";
         $foundb64 = 0;
         next;
