@@ -58,3 +58,4 @@ header FAKE_HELO_YAHOO		eval:check_for_rdns_helo_mismatch("yahoo\.com","yahoo\.c
 describe FAKE_HELO_YAHOO	Host HELO did not match rDNS: yahoo.com
 header FAKE_HELO_YAHOO_CA	eval:check_for_rdns_helo_mismatch("yahoo\.ca","yahoo\.ca")
 describe FAKE_HELO_YAHOO_CA	Host HELO did not match rDNS: yahoo.ca
+
