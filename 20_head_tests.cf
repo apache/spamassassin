@@ -24,6 +24,9 @@
 
 require_version @@VERSION@@
 
+header HEAD_LONG		eval:check_for_long_header()
+describe HEAD_LONG		Message headers are very long
+
 header NO_REAL_NAME		From =~ /^["\s]*\<?\S+\@\S+\>?\s*$/
 describe NO_REAL_NAME		From: does not include a real name
 
@@ -33,11 +36,13 @@ describe FROM_ENDS_IN_NUMS	From: ends in numbers
 header FROM_STARTS_WITH_NUMS	From =~ /^\d\d/
 describe FROM_STARTS_WITH_NUMS	From: starts with nums
 
-header FROM_HAS_MIXED_NUMS	From =~ /\d+[a-z]+\d+\S*\@/i
+# note: anchored for speed
+header FROM_HAS_MIXED_NUMS	From =~ /(?:^|\D)\d+[a-z]+\d+\S*\@/i
 describe FROM_HAS_MIXED_NUMS	From: contains numbers mixed in with letters
 
 # bug 637, more specific FROM_HAS_MIXED_NUMS, less FPs
-header FROM_HAS_MIXED_NUMS2	From =~ /\w{2,}\d{4,}[a-z]{1,2}\d{2,}\@/i
+# note: anchored for speed
+header FROM_HAS_MIXED_NUMS2	From =~ /(?:^|\W)\w{2,}\d{4,}[a-z]{1,2}\d{2,}\@/i
 describe FROM_HAS_MIXED_NUMS2	From address matches known spammer format
 
 # idea from Robert Menschel <RMSA@Menschel.net>
@@ -582,7 +587,8 @@ describe MIME_BOUND_RKFINDY     Spam tool pattern in MIME boundary (rfkindy)
 header TO_INVESTORS             To =~ /\bInvestors\@/
 describe TO_INVESTORS           To: non-existent 'Investors' address
 
-header TO_MALFORMED             To !~ /(?:(?:\"[^\"]+\"|\S+)\@\S+\.\S+|^\s*.+:\s*;|^\s*\"[^\"]+\":\s*;|^\s*\([^\)]*\)\s*$|<\S+(?:\!\S+){1,}>|^\s*$)/ [if-unset: unset@unset.unset]
+# note: the first alternation is anchored for speed
+header TO_MALFORMED             To !~ /(?:^|[^\S"])(?:(?:\"[^\"]+\"|\S+)\@\S+\.\S+|^\s*.+:\s*;|^\s*\"[^\"]+\":\s*;|^\s*\([^\)]*\)\s*$|<\S+(?:\!\S+){1,}>|^\s*$)/ [if-unset: unset@unset.unset]
 describe TO_MALFORMED           To: has a malformed address
 
 header SUBJ_HAS_TIME_ID         Subject =~ /\sTime[: ]+\d+:\d+:\d+ [AP]M\s*$/i

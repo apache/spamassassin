@@ -760,12 +760,15 @@ score YAHOO_SRD_REDIR 0.001
 
 # End of generated scores.
 
-# Scores for tests that are scored manually or with isolated rescore runs.  Most
-# are net tests, userconf tests, tests occuring with very low frequency, or
-# tests with many false positives.
+# Scores for tests that are scored manually or with isolated rescore runs.
+# Most are net tests, userconf tests, tests occuring with very low frequency,
+# or tests with many false positives.
 
-# GTUBE - Generic Test for Unsollicited Bulk Email
+# GTUBE - Generic Test for Unsolicited Bulk Email
 score GTUBE 1000.000
+
+# long header test
+score HEAD_LONG 2.5
 
 # HTML control test
 score HTML_MESSAGE 0.009 0.001 0.010 0.005
