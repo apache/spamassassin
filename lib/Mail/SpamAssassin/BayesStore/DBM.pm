@@ -23,7 +23,7 @@ use Fcntl;
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::BayesStore;
-use Mail::SpamAssassin::SHA1 qw(sha1);
+use Digest::SHA1 qw(sha1);
 use File::Basename;
 use File::Spec;
 use File::Path;

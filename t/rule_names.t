@@ -19,7 +19,7 @@ use strict;
 use SATest; sa_t_init("rule_names");
 use Test;
 use Mail::SpamAssassin;
-use Mail::SpamAssassin::SHA1;
+use Digest::SHA1;
 use vars qw(%patterns %anti_patterns);
 
 # initialize SpamAssassin
@@ -118,6 +118,6 @@ sub sha1_shuffle {
   my $i = shift;
   return map { $_->[0] }
          sort { $a->[1] cmp $b->[1] }
-         map { [$_, Mail::SpamAssassin::SHA1::sha1($_ . $i)] }
+         map { [$_, Digest::SHA1::sha1($_ . $i)] }
          @_;
 }

@@ -27,10 +27,10 @@ use Mail::SpamAssassin::Dns;
 use Mail::SpamAssassin::Locales;
 use Mail::SpamAssassin::MailingList;
 use Mail::SpamAssassin::PerMsgStatus;
-use Mail::SpamAssassin::SHA1 qw(sha1_hex);
 use Mail::SpamAssassin::TextCat;
 use Mail::SpamAssassin::Constants qw(:ip);
 
+use Digest::SHA1 qw(sha1_hex);
 use Fcntl;
 use File::Path;
 use Time::Local;

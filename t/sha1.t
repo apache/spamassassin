@@ -19,47 +19,18 @@ use strict;
 use Test;
 use Mail::SpamAssassin;
 
-use Mail::SpamAssassin::SHA1;
-use constant HAS_DIGEST_SHA1 => eval { require Digest::SHA1; };
+use Digest::SHA1;
 
 plan tests => 15;
 
 sub try {
   my ($data, $want) = @_;
 
-  # test our pure perl code
-  my $perl_sha1 = unpack("H*", Mail::SpamAssassin::SHA1::perl_sha1($data));
-
-  # test the fast version if we have it
-  my $digest_sha1;
-  if (HAS_DIGEST_SHA1) {
-    $digest_sha1 = Digest::SHA1::sha1_hex($data);
-  }
-
-  # test as it is going to be used by SpamAssassin, including hex conversion
-  my $sa_sha1_hex = Mail::SpamAssassin::SHA1::sha1_hex($data);
-
-  # and just to be really careful explicitly test sha1 too
-  my $sa_sha1 = unpack("H*", Mail::SpamAssassin::SHA1::sha1($data));
-
-  my $failure = 0;
-  if ($want ne $perl_sha1) {
-    print "Mail::SpamAssassin::SHA1:perl_sha1 mismatch\n";
-    $failure++;
-  }
-  if (HAS_DIGEST_SHA1 && $want ne $digest_sha1) {
+  if ($want ne Digest::SHA1::sha1_hex($data)) {
     print "Digest::SHA1 mismatch\n";
-    $failure++;
+    return 0;
   }
-  if ($want ne $sa_sha1_hex) {
-    print "Mail::SpamAssassin::SHA1::sha1_hex mismatch\n";
-    $failure++;
-  }
-  if ($want ne $sa_sha1) {
-    print "Mail::SpamAssassin::SHA1::sha1 mismatch\n";
-    $failure++;
-  }
-  return ! $failure;
+  return 1;
 }
 
 sub string {
