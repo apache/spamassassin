@@ -3,7 +3,7 @@
 # Warning: do not run this test on a live server; it will kill your
 # spamd children ;)
 
-my $RUN_THIS_TEST = 1;          # edit and set to 1 if you really want
+my $RUN_THIS_TEST = 0;          # edit and set to 1 if you really want
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_prefork_stress");
