@@ -328,7 +328,7 @@ sub mail_open {
     $expr = "$file";
   }
   if (!open (INPUT, $expr)) {
-    warn "unable to open $file: $@";
+    warn "unable to open $file: $!\n";
     return 0;
   }
   return 1;
