@@ -248,8 +248,8 @@ sub new {
     $self->{store} = $store;
   }
   else {
-    require Mail::SpamAssassin::BayesStoreDBM;
-    $self->{store} = Mail::SpamAssassin::BayesStoreDBM->new($self);
+    require Mail::SpamAssassin::BayesStore::DBM;
+    $self->{store} = Mail::SpamAssassin::BayesStore::DBM->new($self);
   }
 
   $self;

@@ -14,11 +14,11 @@ file.
 
 The directives required to turn on the SQL based bayesian storage are:
 
-bayes_store_module		   Mail::SpamAssassin::BayesStoreSQL
+bayes_store_module		   Mail::SpamAssassin::BayesStore::SQL
 
 This directive is used by the Bayes module to determine which storage
 module should be used.  If not set it will default to:
-Mail::SpamAssassin::BayesStoreDBM
+Mail::SpamAssassin::BayesStore::DBM
 
 bayes_sql_dsn			   DBI:driver:database:hostname[:port]
 bayes_sql_username		   dbusername
@@ -55,7 +55,7 @@ for your specific database.  For example, if using MySQL as your
 RDBMS, you must have the DBD::mysql module installed.  Check CPAN for
 the latest versions of DBI and your database driver/module. 
 
-The BayesStoreSQL module was tested with:
+The BayesStore::SQL module was tested with:
 
 DBI-1.38
 DBD-mysql-2.9002
@@ -73,7 +73,7 @@ included in to help in setting up your database.  The schemas contain
 the minimum tables and columns necessary to work with the code as
 written.  You are free to add other columns as needed for your local
 implementation.  Presently there is no way to override the table and
-column names used by the BayesStoreSQL code, this feature may be added
+column names used by the BayesStore::SQL code, this feature may be added
 in the future.
 
 Example setup of bayes tables for MySQL:
@@ -119,7 +119,7 @@ This code has been tested using MySQL as the RDMS, with basic tests
 against PostgreSQL and SQLite.  It does require a database that allows
 you to refer to a column on the right hand side of an expression (ie
 update foo set bar = bar + 1).  Any database driver that allows for
-that usage should work with the BayesStoreSQL code.  NOTE: You may
+that usage should work with the BayesStore::SQL code.  NOTE: You may
 find that some implementations do not provide a significant advantage
 over using the default DBM implementation.  If you find a driver that
 should work and has issues, please report them to the SADev list.

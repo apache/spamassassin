@@ -16,7 +16,7 @@
 
 =head1 NAME
 
-Mail::SpamAssassin::BayesStoreSQL - SQL Bayesian Storage Module Implementation
+Mail::SpamAssassin::BayesStore::SQL - SQL Bayesian Storage Module Implementation
 
 =head1 SYNOPSIS
 
@@ -26,7 +26,7 @@ This module implementes a SQL based bayesian storage module.
 
 =cut
 
-package Mail::SpamAssassin::BayesStoreSQL;
+package Mail::SpamAssassin::BayesStore::SQL;
 
 use strict;
 use bytes;
@@ -43,10 +43,10 @@ use constant HAS_DBI => eval { require DBI; };
 
 =head2 new
 
-public class (Mail::SpamAssassin::BayesStoreSQL) new (Mail::Spamassassin::Bayes $bayes)
+public class (Mail::SpamAssassin::BayesStore::SQL) new (Mail::Spamassassin::Bayes $bayes)
 
 Description:
-This methods creates a new instance of the Mail::SpamAssassin::BayesStoreSQL
+This methods creates a new instance of the Mail::SpamAssassin::BayesStore::SQL
 object.  It expects to be passed an instance of the Mail::SpamAssassin:Bayes
 object which is passed into the Mail::SpamAssassin::BayesStore parent object.
 

@@ -53,7 +53,7 @@ my $testuser = 'tstusr.'.$$.'.'.time();
 sa_t_init("bayes");
 
 tstlocalrules ("
-bayes_store_module Mail::SpamAssassin::BayesStoreSQL
+bayes_store_module Mail::SpamAssassin::BayesStore::SQL
 $dbconfig
 bayes_sql_override_username $testuser
 ");
@@ -170,7 +170,7 @@ sa_t_init('bayes'); # this wipes out what is there and begins anew
 
 # make sure we learn to a journal
 tstlocalrules ("
-bayes_store_module Mail::SpamAssassin::BayesStoreSQL
+bayes_store_module Mail::SpamAssassin::BayesStore::SQL
 $dbconfig
 bayes_min_spam_num 10
 bayes_min_ham_num 10

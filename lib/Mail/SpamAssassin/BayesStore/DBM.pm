@@ -14,7 +14,7 @@
 # limitations under the License.
 # </@LICENSE>
 
-package Mail::SpamAssassin::BayesStoreDBM;
+package Mail::SpamAssassin::BayesStore::DBM;
 
 use strict;
 use bytes;

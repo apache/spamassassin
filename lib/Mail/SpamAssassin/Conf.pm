@@ -1936,9 +1936,9 @@ this option to 0.
 
 =item bayes_sql_override_username
 
-Used by BayesStoreSQL storage implementation.
+Used by BayesStore::SQL storage implementation.
 
-If this options is set the BayesStoreSQL module will override the set username with
+If this options is set the BayesStore::SQL module will override the set username with
 the value given.  This could be useful for implementing global or group bayes databases.
 
 =cut
@@ -2621,7 +2621,7 @@ bayes storage mechanism.  It must conform to the published storage specification
 
 =item bayes_sql_dsn DBI::databasetype:databasename:hostname:port
 
-Used for BayesStoreSQL storage implementation.
+Used for BayesStore::SQL storage implementation.
 
 This option give the connect string used to connect to the SQL based Bayes storage.
 
@@ -2633,7 +2633,7 @@ This option give the connect string used to connect to the SQL based Bayes stora
 
 =item bayes_sql_username
 
-Used by BayesStoreSQL storage implementation.
+Used by BayesStore::SQL storage implementation.
 
 This option gives the username used by the above DSN.
 
@@ -2645,7 +2645,7 @@ This option gives the username used by the above DSN.
 
 =item bayes_sql_password
 
-Used by BayesStoreSQL storage implementation.
+Used by BayesStore::SQL storage implementation.
 
 This option gives the password used by the above DSN.
 
