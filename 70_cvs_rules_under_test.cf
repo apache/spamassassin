@@ -64,6 +64,7 @@ body T_HTML_MESSAGE		eval:html_message()
 score T_HTML_MESSAGE		0.0000001
 
 # HTML input form tests
+# T_HTML_TAG_EXISTS_FORM has about the same accuracy as HTML_MESSAGE
 body T_HTML_TAG_EXISTS_FORM     eval:html_tag_exists('form')
 body T_HTML_FORM_HIDDEN_EMAIL1	eval:html_test('t_form_hidden_email1')
 body T_HTML_FORM_HIDDEN_EMAIL2	eval:html_test('t_form_hidden_email2')
@@ -609,6 +610,7 @@ meta T_MULTI_FORGED             ((FORGED_AOL_RCVD + FORGED_HOTMAIL_RCVD + FORGED
 ###########################################################
 
 body T_HTML_TAG_EXISTS_CENTER    eval:html_tag_exists('center')
+# T_HTML_TAG_EXISTS_HX has about the same accuracy as HTML_MESSAGE
 body T_HTML_TAG_EXISTS_HX        eval:html_test('header_tag')
 
 body T_HTML_BIG_FONT_B           eval:html_test('big_font_B')
@@ -666,50 +668,6 @@ body T_HTML_MAIL_ONLY             /HTML only email, sorry/i
 uri T_HEX_HOST	/^https?:\/\/[^\/]*0x[0-9a-fA-F]{2}/
 describe T_HEX_HOST	Looks like an URL with obfuscated hex IP address
 score T_HEX_HOST	0.01
-
-# conservative version
-# only look for escaped 0-9, A-Z, a-z, other characters cause false positives
-uri T_EXCESSIVE_URI_ESCAPES_V1		m/%(?:3[0-9]|[46][1-9a-f]|[57][\da])/i
-describe T_EXCESSIVE_URI_ESCAPES_V1	Unnecessary %-escapes inside a URL
-score T_EXCESSIVE_URI_ESCAPES_V1	0.01
-
-# somewhat conservative version, look for 0-9, A-Z, a-z plus the 3 most common
-# non-letters that are highly indicative of spam: '|', '-', ';'
-uri T_EXCESSIVE_URI_ESCAPES_V2		m/%(?:2d|3[0-9b]|[46][1-9a-f]|[57][\dac])/i
-describe T_EXCESSIVE_URI_ESCAPES_V2	Unnecessary %-escapes inside a URL
-score T_EXCESSIVE_URI_ESCAPES_V2	0.01
-
-# less conservative version, look for 0-9, A-Z, a-z plus the 3 most common
-# non-letters that are highly indicative of spam: '|', '-', ';', '(', and ')'
-uri T_EXCESSIVE_URI_ESCAPES_V3		m/%(?:2[89d]|3[0-9b]|[46][1-9a-f]|[57][\dac])/i
-describe T_EXCESSIVE_URI_ESCAPES_V3	Unnecessary %-escapes inside a URL
-score T_EXCESSIVE_URI_ESCAPES_V3	0.01
-
-# T_EXCESSIVE_URI_ESCAPES_V2 except require two matches
-uri T_EXCESSIVE_URI_ESCAPES_V2_2X	m/(?:%(?:2d|3[0-9b]|[46][1-9a-f]|[57][\dac]).*){2}/i
-describe T_EXCESSIVE_URI_ESCAPES_V2_2X	Unnecessary %-escapes inside a URL
-score T_EXCESSIVE_URI_ESCAPES_V2_2X	0.01
-
-# T_EXCESSIVE_URI_ESCAPES_V3 except require three matches (to avoid hitting
-# matching parens
-uri T_EXCESSIVE_URI_ESCAPES_V3_3X	m/(?:%(?:2[89d]|3[0-9b]|[46][1-9a-f]|[57][\dac]).*){3}/i
-describe T_EXCESSIVE_URI_ESCAPES_V3_3X	Unnecessary %-escapes inside a URL
-score T_EXCESSIVE_URI_ESCAPES_V3_3X	0.01
-
-# T_EXCESSIVE_URI_ESCAPES_V1 except require protocol first
-uri T_EXCESSIVE_URI_ESCAPES_V1_P	m/^https?:\/\/\S*%(?:3[0-9]|[46][1-9a-f]|[57][\da])/i
-describe T_EXCESSIVE_URI_ESCAPES_V1_P	Unnecessary %-escapes inside a URL
-score T_EXCESSIVE_URI_ESCAPES_V1_P	0.01
-
-# T_EXCESSIVE_URI_ESCAPES_V2 except require protocol first
-uri T_EXCESSIVE_URI_ESCAPES_V2_P	m/^https?:\/\/\S*%(?:2d|3[0-9b]|[46][1-9a-f]|[57][\dac])/i
-describe T_EXCESSIVE_URI_ESCAPES_V2_P	Unnecessary %-escapes inside a URL
-score T_EXCESSIVE_URI_ESCAPES_V2_P	0.01
-
-# T_EXCESSIVE_URI_ESCAPES_V3 except require protocol first
-uri T_EXCESSIVE_URI_ESCAPES_V3_P	m/^https?:\/\/\S*%(?:2[89d]|3[0-9b]|[46][1-9a-f]|[57][\dac])/i
-describe T_EXCESSIVE_URI_ESCAPES_V3_P	Unnecessary %-escapes inside a URL
-score T_EXCESSIVE_URI_ESCAPES_V3_P	0.01
 
 # Most/all of these require that From addresses do not start with numbers.
 # let's see how this does... (jm)
