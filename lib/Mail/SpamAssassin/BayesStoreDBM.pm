@@ -375,8 +375,8 @@ sub _upgrade_db {
     # This is the critical phase (moving files around), so don't allow
     # it to be interrupted.
     local $SIG{'INT'} = 'IGNORE';
-    local $SIG{'HUP'} = 'IGNORE';
     local $SIG{'TERM'} = 'IGNORE';
+    local $SIG{'HUP'} = 'IGNORE' if (!Mail::SpamAssassin::Util::am_running_on_windows());
 
     # older versions used scancount, so kill the stupid little file ...
     my $msgc = $path.'_msgcount';
@@ -565,8 +565,8 @@ sub token_expiration {
   # it to be interrupted.  Scope the signal changes.
   {
     local $SIG{'INT'} = 'IGNORE';
-    local $SIG{'HUP'} = 'IGNORE';
     local $SIG{'TERM'} = 'IGNORE';
+    local $SIG{'HUP'} = 'IGNORE' if (!Mail::SpamAssassin::Util::am_running_on_windows());
 
     # now rename in the new one.  Try several extensions
     for my $ext (@DB_EXTENSIONS) {
@@ -980,8 +980,8 @@ sub _sync_journal_trapped {
   # it to be interrupted.
   {
     local $SIG{'INT'} = 'IGNORE';
-    local $SIG{'HUP'} = 'IGNORE';
     local $SIG{'TERM'} = 'IGNORE';
+    local $SIG{'HUP'} = 'IGNORE' if (!Mail::SpamAssassin::Util::am_running_on_windows());
 
     # retire the journal, so we can update the db files from it in peace.
     # TODO: use locking here
