@@ -8,8 +8,6 @@ describe NUMERIC_HTTP_ADDR  Uses a numeric IP address in URL
 uri NORMAL_HTTP_TO_IP   /^https?\:\/\/\d+\.\d+\.\d+\.\d+/is
 describe NORMAL_HTTP_TO_IP  Uses a dotted-decimal IP address in URL
 
-uri LONG_NUMERIC_HTTP_ADDR  /^https?\:\/\/000\d+/is
-describe LONG_NUMERIC_HTTP_ADDR Uses a long numeric IP address in URL
 
 uri HTTP_USERNAME_USED  /^https?\:\/\/[^\s\/]+\@/is
 describe HTTP_USERNAME_USED Uses a username in a URL
@@ -31,12 +29,8 @@ uri PORN_4  /^https?:\/\/[\w\.-]*(?:xxx|sex|anal|slut|pussy|cum|nympho|suck|porn
 describe PORN_4         URL uses words and phrases which indicate porn (4)
 
 # some frequently-advertised URLs
-uri WWW_REMOVEYOU_COM       /removeyou\.com/i
-describe WWW_REMOVEYOU_COM      Frequent SPAM content
 uri WWW_CLIK4YOU_COM        /clik4you\.com/i
 describe WWW_CLIK4YOU_COM       Frequent SPAM content
-uri STAINLESS_STEEL             /www.BuyStainlessOnline.com/i
-describe STAINLESS_STEEL        Stainless Steel Network Spam
 
 uri UNSUB_SCRIPT        /^https?:\/\/.*?cgi.*?(?:unsubscribe|remove)/i
 describe UNSUB_SCRIPT       URL of CGI script called "unsubscribe" or "remove"
@@ -67,12 +61,8 @@ uri JAVASCRIPT_URI	/^javascript:/i
 describe JAVASCRIPT_URI	Javascript protocol in a URI
 
 # off: very few hits (1 in last 6 months)
-#uri URI_IS_POUND	m{\#$}
-#describe URI_IS_POUND	Filename is just a '\#'; probably a JS trick
 
 uri      WEIRD_PORT             m{https?:\/\/[^/:\s]+:\d+}
 describe WEIRD_PORT             Uses non-standard port number for HTTP
 
-uri             SPAM_REDIRECTOR /https?\:.*(?:rd\.yahoo\.com|wwp\.icq\.com)/is
-describe        SPAM_REDIRECTOR Uses open redirection service
 

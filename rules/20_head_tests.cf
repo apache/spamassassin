@@ -19,15 +19,8 @@ describe FROM_HAS_MIXED_NUMS	From: contains numbers mixed in with letters
 header FROM_NO_USER		From =~ /(?:^\@|<\@| \@[^<]*$|<>)/ [if-unset: unset@unset.unset]
 describe FROM_NO_USER		From: has no local-part before @ sign
 
-# bad rule: about 2/3 false positives!
-#header FROM_NAME_NO_SPACES	From =~ /(^(?!=\?)\S{7,}\s*<\S+\@\S+>|\(\S{7,}\)$)/
-#describe FROM_NAME_NO_SPACES	From: no spaces in name
-
 header TO_NO_USER		To =~ /(?:^\@|<\@| \@[^<]*$|<>)/ [if-unset: unset@unset.unset]
 describe TO_NO_USER		To: has no local-part before @ sign
-
-header TO_MALFORMED		To !~ /(?:(?:\"[^\"]+\"|\S+)\@\S+\.\S+|undisclosed-recipients:|<\S+(?:\!\S+){1,}>|^\s*$)/ [if-unset: unset@unset.unset]
-describe TO_MALFORMED		To: has a malformed address
 
 header TO_HAS_SPACES            To:addr =~ /\s/
 describe TO_HAS_SPACES          To: address contains spaces
@@ -38,14 +31,10 @@ describe TO_EMPTY		To: is empty
 header REPLY_TO_EMPTY		Reply-To =~ /^\s*$/ [if-unset: UNSET]
 describe REPLY_TO_EMPTY		Reply-To: is empty
 
-header TO_LOCALPART_EQ_REAL     To =~ /^\s*(\"?)([\w%\+\-=_\.]+)\1\s*<\2\@[\w%\+\-=_\.]+>/i
-describe TO_LOCALPART_EQ_REAL   To: repeats local-part as real name
-
 # You don't want to let this match "'user@foo.bar'" <user@foo.bar>
 # (note single quotes) because some legitimate mailers seem to do that.
 header TO_ADDRESS_EQ_REAL	To =~ /^\s*"([^"@]+\@[^"@]+)"\s+<\1>\s*$/i
 describe TO_ADDRESS_EQ_REAL	To: repeats address as real name
-# The "From" equiv is already set up as FROM_NAME_EQ_FROM_ADDR.
 
 # NOTE: this is what 100% valid undisclosed-recipients mails look like.
 # If this gets a high score, that's a bug!
@@ -53,17 +42,9 @@ header UNDISC_RECIPS		To =~ /^undisclosed-recipients?:\s*;$/
 describe UNDISC_RECIPS		Valid-looking To "undisclosed-recipients"
 
 # also 100% valid
-header OUTLOOK_UNDISC_RECIPS	To =~ /<Undisclosed-Recipient:;>/
-describe OUTLOOK_UNDISC_RECIPS	MS-Outlook-style To "<Undisclosed-Recipient:;>"
 
 header FAKED_UNDISC_RECIPS	To =~ /undisclosed[_ ]*recipient(?:s[^:]|[^s])/i
 describe FAKED_UNDISC_RECIPS	Faked To "Undisclosed-Recipients"
-
-header FAKED_UNDISC_RECIPS_AT	To =~ /undisclosed-recipient: \@[a-z]/i
-describe FAKED_UNDISC_RECIPS_AT	Faked To "Undisclosed-Recipients" @ some address
-
-header FROM_MALFORMED		From !~ /(?:\"[^\"]+\"|\S+)\@\S+\.\S+|<\S+(?:\!\S+)+>/ [if-unset: unset@unset.unset]
-describe FROM_MALFORMED		From: has a malformed address
 
 header PLING_QUERY		Subject =~ /\?.*!|!.*\?/
 describe PLING_QUERY		Subject has exclamation mark and question mark
@@ -193,8 +174,6 @@ describe FROM_AND_TO_SAME_2	From and To are same (2)
 header FROM_AND_TO_SAME_3	eval:check_for_from_to_same('rough_both')
 describe FROM_AND_TO_SAME_3	From and To are same (3)
 
-header FROM_AND_TO_SAME_4	eval:check_for_from_to_same('rough_from')
-describe FROM_AND_TO_SAME_4	From and To are same (4)
 
 header FROM_AND_TO_SAME_5	eval:check_for_from_to_same('rough_to')
 describe FROM_AND_TO_SAME_5	From and To are same (5)
@@ -357,8 +336,6 @@ describe FORGED_RCVD_FOUND	Possibly-forged 'Received:' header found
 header FORGED_RCVD_TRAIL	eval:check_for_forged_received_trail()
 describe FORGED_RCVD_TRAIL	trail of Received: headers seems to be forged
 
-header YR_MEMBERSHIP_EXCH	Subject =~ /Your Membership Exchange/
-describe YR_MEMBERSHIP_EXCH	Subject contains 'Your Membership Exchange'
 
 # obsolete; hotmail have changed their header format.
 #header FROM_FORGED_HOTMAIL	From =~ /^[^"]+\S+\@hotmail\.com/i
@@ -368,8 +345,6 @@ header LOTS_OF_CC_LINES		eval:check_lots_of_cc_lines()
 describe LOTS_OF_CC_LINES	Lots and lots of Cc: headers
 
 # gets very bad FP rate
-#header FROM_NAME_EQ_FROM_ADDR	From =~ /^\s*"([^"@]+\@[^"@]+)"\s+<\1>\s*$/i
-#describe FROM_NAME_EQ_FROM_ADDR 'From:' address also used as sender's real name
 
 header FORGED_HOTMAIL_RCVD	eval:check_for_forged_hotmail_received_headers()
 describe FORGED_HOTMAIL_RCVD	Forged hotmail.com 'Received:' header found
@@ -383,8 +358,6 @@ describe FORGED_YAHOO_RCVD	'From' yahoo.com does not match 'Received' headers
 header FORGED_JUNO_RCVD		eval:check_for_forged_juno_received_headers()
 describe FORGED_JUNO_RCVD	'From' juno.com does not match 'Received' headers
 
-header FORGED_EBAY_RCVD         eval:check_for_from_domain_in_received_headers('ebay.com', 'false')
-describe FORGED_EBAY_RCVD	'From' ebay.com does not match 'Received' headers
 
 header FORGED_GW05_RCVD		eval:check_for_forged_gw05_received_headers()
 describe FORGED_GW05_RCVD	Forged 'by gw05' 'Received:' header found
@@ -404,11 +377,7 @@ describe X_PRIORITY_HIGH	Sent with 'X-Priority' set to high
 header X_MSMAIL_PRIORITY_HIGH	X-Msmail-Priority =~ /^High/
 describe X_MSMAIL_PRIORITY_HIGH	Sent with 'X-Msmail-Priority' set to high
 
-header SHORT_RECEIVED_LINE	Received =~ /\S{120,}/s
-describe SHORT_RECEIVED_LINE	'Received:' contains huge hostname
 
-header CORRUPT_MSGID		Message-Id =~ /\@Received: /
-describe CORRUPT_MSGID		'Message-Id' contains bits of Received header
 
 header MSG_ID_ADDED_BY_MTA	Message-Id =~ / \(added by /
 describe MSG_ID_ADDED_BY_MTA	'Message-Id' was added by a relay
@@ -434,8 +403,6 @@ header USER_IN_WHITELIST	eval:check_from_in_whitelist()
 describe USER_IN_WHITELIST	From: address is in the user's white-list
 tflags USER_IN_WHITELIST        userconf
 
-header FROM_MISSING		From =~ /^UNSET$/ [if-unset: UNSET]
-describe FROM_MISSING		Missing From: header
 
 # bad test: no hits
 #header DATE_MISSING		Date =~ /^UNSET$/ [if-unset: UNSET]
@@ -477,8 +444,6 @@ tflags USER_IN_ALL_SPAM_TO      userconf
 header GAPPY_SUBJECT            Subject =~ /\b(?:[a-z][-_\.\,\:\;\'\~\s]{1,3}){4,}/i
 describe GAPPY_SUBJECT          'Subject' contains G.a.p.p.y-T.e.x.t
 
-header   PLEASE_READ            Subject =~ /please read/i
-describe PLEASE_READ            Please read this!  Please oh please oh please!
 
 ### header existence tests (description is added automatically)
 
@@ -530,8 +495,6 @@ describe PRIORITY_NO_NAME	Message has priority setting, but no X-Mailer
 
 # commented out due to huge number of FPs, bug #689
 # is this test worth keeping for the future (multi-match or decision tree)?
-#header   SUSPECT_LIST_HEADERS	eval:suspect_list_headers()
-#describe SUSPECT_LIST_HEADERS	Mailing list headers are suspicious
 
 header SUBJ_FREE_CAP		Subject =~ /FRE{2,}|F.R.E.E\b/
 describe SUBJ_FREE_CAP		Subject contains "FREE" in CAPS
@@ -595,8 +558,6 @@ header MIME_BOUND_DIGITS_4	Content-Type =~ /boundary=\"_----------=_\d{18}\"/
 describe MIME_BOUND_DIGITS_4	Spam tool pattern in MIME boundary
 header MIME_BOUND_DIGITS_5	Content-Type =~ /boundary=\"\d-\d{9}-\d{10}=:\d{5}\"/
 describe MIME_BOUND_DIGITS_5	Spam tool pattern in MIME boundary
-header MIME_BOUND_DIGITS_6	Content-Type =~ /boundary=\"\d-\d{10}-\d{10}=:\d{5}\"/
-describe MIME_BOUND_DIGITS_6	Spam tool pattern in MIME boundary
 header MIME_BOUND_DIGITS_7	Content-Type =~ /boundary=\d{9}\.\d{13}/
 describe MIME_BOUND_DIGITS_7	Spam tool pattern in MIME boundary
 header MIME_BOUND_HEX_24	Content-Type =~ /boundary=\"[\dA-F]{24}\"/
@@ -619,3 +580,4 @@ describe MIME_BOUND_MAIL_BOUND	Spam tool pattern in MIME boundary
 # http://www.hughes-family.org/bugzilla/show_bug.cgi?id=699
 header MICROSOFT		exists:microsoft
 describe MICROSOFT		A "microsoft" header was found
+

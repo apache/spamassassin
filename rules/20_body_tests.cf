@@ -100,8 +100,6 @@ describe HTML_COMMENT_8BITS	HTML comment has 3 consecutive 8-bit characters
 body HTML_COMMENT_SAVED_URL	eval:html_test('comment_saved_url')
 describe HTML_COMMENT_SAVED_URL	HTML message is a saved web page
 
-body HTML_COMMENT_UNIQUE_ID	eval:html_test('comment_unique_id')
-describe HTML_COMMENT_UNIQUE_ID	Contains a comment with nothing but unique ID
 
 body HTML_FONT_COLOR_NOHASH	eval:html_test('font_color_nohash')
 describe HTML_FONT_COLOR_NOHASH	HTML font color is missing hash (#) character
@@ -193,18 +191,6 @@ describe HTML_WIN_BLUR		Javascript to move windows around
 
 body BUGGY_CGI			/Below is the result of your feedback form/
 describe BUGGY_CGI		Broken CGI script message
-body BUGGY_CGI_DE		/Neue Mail aus dem Fitzshop Briefkasten/i
-describe BUGGY_CGI_DE		Broken German CGI script message
-body BUGGY_CGI_DE_2		/Diese Mail wurde &uuml;bertragen von/i
-describe BUGGY_CGI_DE_2		Broken German CGI script message (2)
-body BUGGY_CGI_DE_3		/Diese Daten wurden Ihnen von Ihrem OnlineFormular/i
-describe BUGGY_CGI_DE_3		Broken German CGI script message (3)
-body BUGGY_CGI_ES		/Aqui esta el resultado de su formulario/i
-describe BUGGY_CGI_ES		Broken Spanish CGI script message
-body BUGGY_CGI_PT_2		/E-mail adicional do usuario. Enviado/i
-describe BUGGY_CGI_PT_2		Broken Portuguese CGI script message (2)
-body BUGGY_CGI_PT		/Abaixo o resultado do preenchimento do Formulario/
-describe BUGGY_CGI_PT		Broken Portuguese CGI script message
 
 # these are now full tests instead of body tests, to catch QP-encoded
 # split lines
@@ -221,19 +207,8 @@ describe SECTION_301		Claims compliance with SPAM regulations
 body HR_4176			/H\.?R\.? *4176.{0,10}SECTION.{0,10}101/i
 describe HR_4176		Claims compliance with House Bill 4176
 
-#   0.000    0.000    0.000    0.00    1.80  EU_EMAIL_OPTOUT (no matches)
-#body EU_EMAIL_OPTOUT		/EU (?:e-?mail opt.?out|e.?commerce) directive/i
-#describe EU_EMAIL_OPTOUT	Claims compliance with SPAM regulations
-
-#  0.00     0.00     0.00    0.00    1.00  EU_200_32_CE (no matches)
-#body EU_200_32_CE		/Directive 200.32.CE/i
-#describe EU_200_32_CE		Claims compliance with SPAM regulations
-
 body CHECK_OR_MONEY_ORDER	/check or money order/i
 describe CHECK_OR_MONEY_ORDER	Talk about a check or money order
-
-rawbody SUPERLONG_LINE		/^[^<\&]{199,}$/m
-describe SUPERLONG_LINE	        Contains a line >=199 characters long
 
 rawbody CARRIAGE_RETURNS	eval:check_carriage_returns()
 describe CARRIAGE_RETURNS	Message contains a lot of ^M characters
@@ -303,9 +278,6 @@ describe ONE_TIME_MAILING	'one time mailing' doesn't mean it isn't spam
 body SOCIAL_SEC_NUMBER		/social security (?:number|record)/i
 describe SOCIAL_SEC_NUMBER	Talks about social security numbers
 
-#   0.000    0.000    0.000    0.00    3.90  LASER_PRINTER (no matches)
-#body LASER_PRINTER		/LASER PRINTER SUPPLIES/
-#describe LASER_PRINTER		Discusses laser printer supplies
 
 body ADDRESSES_ON_CD		/addresses on cd/i
 describe ADDRESSES_ON_CD	Only thing addresses on CD are useful for is SPAM
@@ -365,8 +337,6 @@ body HERBAL_VIAGRA              /\bherbal v(?:iagra)?\b/i
 describe HERBAL_VIAGRA          Plugs "Herbal Viagra"
 
 # NB: Also seems to be a diabetes drug, so don't let it score high
-body VIGORA                     /\bVigora\b/
-describe VIGORA                 Some sort of viagra alternative
 
 body TARGETED                   /\btargeted (?:traffic|e-?mail|internet|leads?)\b/i
 describe TARGETED               Targeted Traffic / Email Addresses
@@ -505,13 +475,9 @@ body CLICK_TO_REMOVE_2          /mailto:.{0,50}click.{0,50}remove/is
 describe CLICK_TO_REMOVE_2      Click-to-remove with mailto: found beforehand
 
 # (contrib: climent)
-body CLICK_TO_REMOVE_3		/http:.{0,50}action=remove/is
-describe CLICK_TO_REMOVE_3	Click-to-remove with PHP/ASP action found
 
 # (contrib: WW, mod by David Hull)
 # offline, massive FP rate
-#body TO_BE_REMOVED_REPLY        /\bto\b.{0,20}\b(?:remove|unsubscribe|opt[ -]?out).{0,20}\b(?:reply|send)\b/is
-#describe TO_BE_REMOVED_REPLY    Says: "to be removed, reply via email" or similar
 
 body REMOVAL_INSTRUCTIONS	/\b(?:REMOVAL|UNSUBSCRIBE) INSTRUCTIONS/i
 describe REMOVAL_INSTRUCTIONS	Gives instructions for removal from list
@@ -597,51 +563,20 @@ body UNDESIRED_LANGUAGE_BODY		eval:check_language()
 describe UNDESIRED_LANGUAGE_BODY	Written in an undesired language
 tflags UNDESIRED_LANGUAGE_BODY          userconf
 
-#   0.000    0.000    0.000    0.00    1.00  NIGERIAN_SCAM (no matches)
-#body NIGERIAN_SCAM		/BASED ON INFORMATION GATHERED ABOUT YOU, WE BELIEVE\s*YOU WOULD BE IN A POSITION TO HELP US IN TRANSFER/i
-#describe NIGERIAN_SCAM		Nigerian scam, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
 
-body NIGERIAN_SCAM_2  /\b(?:(?:bank|government|republic).{1,15}(?:nigeria|sierra(-| )leone|zimbabwe|botswana|ivoire?|ivory|angola|gabon|lome|benin|africa)|(?:nigeria|sierra(-¦ )leone|zimbabwe|botswana|ivoire?|ivory|angola|gabon|lome|benin|africa).{0,15}(?:national|government|embassy|chamber|bank|petroleum|electric|gold|diamond))/i
-describe NIGERIAN_SCAM_2      Mutated Nigerian 419 scams, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
 
-body NIGERIAN_SCAM_4  /\b(?:wife|widow|married|son|husband|daughter)\b.{0,50}\b(?:Abacha|Kabila|Sekou?|Stojiljkovic|Bangura|Saro Wiwa|black Farmer|general|king|chief|president|leader)/i
-describe NIGERIAN_SCAM_4        Nigerian (4) widow needs your help, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
 
-body NIGERIAN_SCAM_5  /\b(?:Abacha|Kabila|Sekou?|Stojiljkovic|Bangura|Saro Wiwa|black Farmer|general|king|chief|president|leader)\b.{0,50}\b(?:wife|widow|married|son|husband|daughter)/i
-describe NIGERIAN_SCAM_5      Nigerian (5) widow needs your help, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
 
-body NIGERIAN_SCAM_6  /\b(?:late|former|new|past|Nigerian|military)\b.{0,20}\b(?:(head|minister)\b of \b(state|finance)|general|commander)\b/i
-describe NIGERIAN_SCAM_6      Mutated Nigerian 419 scams (6)
 
-body NIGERIAN_SCAM_7  /\b(?:late|former|past)\b.{0,40}\b(?:Abacha|Kabila|Sekou?|Stojiljkovic|Bangura)\b|\b(?:Abacha|Kabila|Sekou?|Stojiljkovic|Bangura)\b.{0,40}\b(?:late|former|past)\b/i
-describe NIGERIAN_SCAM_7        Mutated Nigerian 419 scams (7)
 
-body NIGERIAN_SCAM_8  /\b(?:Tribunal|War Crimes|Hague)\b.{0,60}\b(?:Vlajko|Stojiljkovic)\b|\b(?:Vlajko|Stojiljkovic)\b.{0,60}\b(?:Tribunal|War Crimes|Hague)\b/i
-describe NIGERIAN_SCAM_8      Mutated Nigerian 419 scams, Bosnian version (8)
 
-body NIGERIAN_SCAM_9  /\b(?:private|trust).{1,10}(?:security|banking|treasury).{1,10}(?:company|firm|sector)/i
-describe NIGERIAN_SCAM_9      Mutated Nigerian 419 scams (9)
 
-body NIGERIAN_SCAM_10 /\bnext[ ,-]of[ ,-]kin\b/i
-describe NIGERIAN_SCAM_10     Nigerian 419 scam key phrase (... kin)
 
-body NIGERIAN_SCAM_11 /\bwork(ed)? (in|for) a bank/i
-describe NIGERIAN_SCAM_11     Nigerian 419 scam key phrase (work ... bank)
 
-body NIGERIAN_SCAM_12 /\b(?:first|second|third|only|eldest|youngest).{1,10}(?:child|son|daughter)/i
-describe NIGERIAN_SCAM_12     Nigerian 419 scam key phrase (first ... son)
 
-body NIGERIAN_SCAM_13 /\b(?:gold|cocoa|diamond|oil).{0,10}(?:merchant|dealer)/i
-describe NIGERIAN_SCAM_13     Nigerian 419 scam key phrase (merchant)
 
-body NIGERIAN_SCAM_14 /\bfor(?:ei|ie)g?n.{1,10}(?:account|contractor|invest(?:or|ment)|partner|customer|assistan(?:t|ce)|national|firm)/i
-describe NIGERIAN_SCAM_14     'foreign' topics in Nigerian 419 scams
 
-body NIGERIAN_SCAM_15 /\b(?:esteem|mutual|confident|reputable|trust|sincer|honest|respect|virtue|reliable|grace|impressive|capab(?:le|ility)|humbly).{1,15}(?:person|business|proposition|relationship|nature|person|mind|assistanc|humility|peace|honesty|information|reliability|benefit|sincer|secret|worthy)/i
-describe NIGERIAN_SCAM_15     Introduction in Nigerian 419 scams
 
-body NIGERIAN_SCAM_16 /\b(plane|air|car|automobile|motor).{1,10}(crash|accident)/i
-describe NIGERIAN_SCAM_16     strange accidents in Nigerian 419 scams
 
 body NIGERIAN_TRANSACTION_1   /\b(?:financial|confiden(?:tial|ce)|safe(?:ty)?|mutual|secret|success(?:ful)?|risk-?free|details).{1,30}\btransaction\b/i
 describe NIGERIAN_TRANSACTION_1       illegal Nigerian transactions (1)
@@ -698,9 +633,6 @@ describe YOUR_INCOME		Doing something with my income
 body BE_AMAZED			/\bbe amazed\b/i
 describe BE_AMAZED		Apparently, you'll be amazed
 
-#  0.00     0.00     0.00    0.00    1.00  ITS_EFFECTIVE (no matches)
-#body ITS_EFFECTIVE		/\bit's effective\b/i
-#describe ITS_EFFECTIVE		Something claims to be effective
 
 body RESISTANCE_IS_FUTILE	/Replying to this email will not unsubscribe you./i
 describe RESISTANCE_IS_FUTILE	Resistance to this spam is futile
@@ -714,9 +646,6 @@ describe SUBJ_2_CREDIT          Contains 'subject to credit approval'
 
 body GAPPY_TEXT                 /\b(?:[a-z][-_\.\,\:\;\'\~\s]{1,3}){5,}/i
 describe GAPPY_TEXT             Contains 'G.a.p.p.y-T.e.x.t'
-
-body COPY_DVDS                  /copy.{1,20}dvd/i
-describe COPY_DVDS              Contains 'Copy DVDs'
 
 body URGENT_BIZ                 /URGENT BUSINESS/i
 describe URGENT_BIZ             Contains 'URGENT BUSINESS'
@@ -732,14 +661,10 @@ body FOR_JUST_SOME_AMT          /for (?:just|only) \$?\d+\.?\d*[^\.]*!/i
 describe FOR_JUST_SOME_AMT      Contains 'for only' some amount of cash
 
 # suggestion following Jason Haar
-body MIME_NULL_BLOCK		/This message is in MIME format/
-describe MIME_NULL_BLOCK	Correct for MIME 'null block'
 
 body     READ_TO_END            /read this (?:e-?mail )?to the end/i
 describe READ_TO_END            You'd better read all of this spam!
 
-body     DONT_DELETE            /\b(?:don'?t delete this|do not delete)/i
-describe DONT_DELETE            Don't delete me!  Nooooo!!!!
 
 body     ALL_NATURAL            /\b(?:100%|completely|totally|all) natural/i
 describe ALL_NATURAL            Spam is 100% natural?!
@@ -810,8 +735,6 @@ describe FREE_ACCESS		Free Access
 body FREE_LEADS			/\bfree leads\b/i
 describe FREE_LEADS		Free Leads
 
-body FREE_TICKETS		/\bfree ticket/i
-describe FREE_TICKETS		Free Tickets
 
 body OFFER			/\b(?:free|special|trial) offer/i
 describe OFFER			Free Offer
@@ -847,9 +770,6 @@ describe FREE_MEMBERSHIP	Free Membership
 #body FREE_FLAG		        /\bfree flag/i
 #describe FREE_FLAG		Free Flag
 
-# 0.01     0.01     0.01    0.58    1.00  FREE_HOSTING (low matches)
-#body FREE_HOSTING	        /\bfree hosting\b/i
-#describe FREE_HOSTING		Free Hosting
 
 body FREE_WEBSITE	        /\bfree website/i
 describe FREE_WEBSITE		Free Website
@@ -896,9 +816,6 @@ describe CREDITORS_CALLING 	Calling Creditors
 body REFINANCE		        /\brefinance.{0,6} home\b|\bhome loan\b/i
 describe REFINANCE		Refinance Home
 
-#  0.00     0.00     0.00    0.00    1.00  LIFE_INSURANCE (no matches)
-#body LIFE_INSURANCE	        /\blife insurance.{1,30}no.{1,15}exam/i
-#describe LIFE_INSURANCE		No Examination life Insurance
 
 #body SEARCH_ENGINE	        /\b(?:(?:submit|traffic|top).{0.10} search engines?|site ranking)\b/i
 #describe SEARCH_ENGINE		Search Engine Site Ranking
@@ -920,9 +837,6 @@ describe NO_PURCHASE		No Purchase Necessary
 #body NO_MIDDLEMAN	        /\bno middleman\b/i
 #describe NO_MIDDLEMAN		No Middleman
 
-#  0.00     0.00     0.00    0.00    1.00  NO_SPENDING (no matches)
-#body NO_SPENDING	        /\bno spending limits\b/i
-#describe NO_SPENDING		No Spending Limits
 
 body NO_STRINGS		        /\bno strings attached\b/i
 describe NO_STRINGS		No Strings Attached
@@ -957,9 +871,6 @@ describe NO_INVENTORY		No Inventory
 body BUY_DIRECT		        /\bbuy direct\b/i
 describe BUY_DIRECT		Buy Direct
 
-#  0.00     0.01     0.00    0.69    1.00  PRICES_WONT_LAST (low matches)
-#body PRICES_WONT_LAST	        /\bprices.{0,11} last\b/i
-#describe PRICES_WONT_LAST	Prices won't Last
 
 body DRASTIC_REDUCED	        /\bdrastic.{0,4} reduc/i
 describe DRASTIC_REDUCED	Drastically Reduced
@@ -979,8 +890,6 @@ describe SUPPLIES_LIMITED	Supplies are Limited
 body SECRET_RECORD	        /\bsecretly record/i
 describe SECRET_RECORD		Secretly Recorded
 
-body INCREDIBLE		        /\bincredible secrets\b/i
-describe INCREDIBLE		Things incredible
 
 body FIND_ANYTHING	        /\bfind out anything\b/i
 describe FIND_ANYTHING		Find out Anything
@@ -997,9 +906,6 @@ describe MARKETING		Direct Marketing
 body SAVE_MONEY		        /\bsave .{0,9}(?:money|thousands|millions|up to)\b/i
 describe SAVE_MONEY		Save big money
 
-#  0.00     0.00     0.00    0.00    1.00  BREAKTHROUGH (no matches)
-#body BREAKTHROUGH	        /\bbreakthrough price/i
-#describe BREAKTHROUGH		Breakthrough Pricing
 
 body GUARANTEED_STUFF	        /\bguarantee.{0,15}(?:income|money|monthly)\b/i
 describe GUARANTEED_STUFF	Guaranteed Stuff
@@ -1025,9 +931,6 @@ describe AMAZING_STUFF		Amazing Stuff
 body CASH_BONUS		        /\bcash bonus\b/i
 describe CASH_BONUS		Cash Bonus
 
-#  0.00     0.00     0.00    0.00    1.00  BONUS_PAYMENT (no matches)
-#body BONUS_PAYMENT	        /\bbonus payment/i
-#describe BONUS_PAYMENT		Bonus Payments
 
 body SHOPPING_SPREE	        /\bshopping spree\b/i
 describe SHOPPING_SPREE		Shopping Spree
@@ -1038,15 +941,10 @@ describe GIFT_CERTIFICATE	Gift Certificate
 body FANTASTIC		        /\bfantastic {0,9}(?:price|deal|saving)/i
 describe FANTASTIC		Fantastic Deal
 
-body SIGNIFICANT	        /\bsignificant savings\b/i
-describe SIGNIFICANT		Significant Savings
 
 body CENTS_ON_DOLLAR	        /\bcents on the dollar\b/i
 describe CENTS_ON_DOLLAR	Cents on the Dollar
 
-#  0.00     0.00     0.00    0.00    1.00  IRS (no matches)
-#body IRS		        /\bIRS .{0,15}secrets\b/i
-#describe IRS			IRS Scams
 
 body COUPON		        /\boff coupon/i
 describe COUPON			Offers Coupon
@@ -1075,8 +973,6 @@ describe CABLE_CONVERTER	Cable Converter
 body LUXURY_CAR		        /\bluxury car\b/i
 describe LUXURY_CAR		Luxury Car
 
-body BREAKTHROUGH_2	        /\b(?:revolutionary|medical) breakthrough\b/i
-describe BREAKTHROUGH_2		Breakthrough
 
 body WRINKLES		        /\bwrinkle reduction\b/i
 describe WRINKLES		Removes Wrinkles
@@ -1085,8 +981,6 @@ describe WRINKLES		Removes Wrinkles
 #body HARD_CASH		        /\bhard cash\b/i
 #describe HARD_CASH		Is cash really hard?
 
-body BIG_BUCKS		        /\bbig bucks\b/i
-describe BIG_BUCKS		Big Bucks
 
 body BUY_JUDGEMENTS	        /\b(?:purchase|collect|divorce)\b.{0,30}\bjudgements\b/i
 describe BUY_JUDGEMENTS		Buying judgements
@@ -1181,9 +1075,6 @@ describe COMPETE		Compete for your business
 body CANCEL		        /\bcancel at any time\b/i
 describe CANCEL			Cancel at any time!
 
-#  0.01     0.01     0.00    0.77    1.00  CHANGE_TERMS (low matches)
-#body CHANGE_TERMS	        /\bstrictly based on the following terms and conditions\b/i
-#describe CHANGE_TERMS		Terms and conditions
 
 body RESERVES_RIGHT	        /\breserves the right\b/i
 describe RESERVES_RIGHT		Reserves the right
@@ -1194,8 +1085,6 @@ describe NO_COMBINE		Can not be combined with any other offer
 body NEW_CUSTOMER	        /\bnew customers only\b/i
 describe NEW_CUSTOMER		New Customers Only
 
-body PSYCHIC		        /\b(?:caring|gifted|experienced) psychic/i
-describe PSYCHIC		Psychics Scam
 
 #  0.00     0.01     0.00    1.00    1.00  PHONE_CANCER (low matches)
 #body PHONE_CANCER	        /\bphone.{0,15}cancer\b/i
@@ -1207,9 +1096,6 @@ describe MEET_SINGLES		Meet Singles
 body JOIN_MILLIONS	        /\bjoin (?:millions|thousands)\b/i
 describe JOIN_MILLIONS		Join Millions of Americans
 
-#  0.00     0.00     0.00    0.00    1.00  BACKED_BY (no matches)
-#body BACKED_BY		        /\bbacked by [mb]illions\b/i
-#describe BACKED_BY		Backed by Billions
 
 body EXPECT_TO_EARN	        /\bexpect to earn|earn up to\b/i
 describe EXPECT_TO_EARN		Expect to earn
@@ -1217,9 +1103,6 @@ describe EXPECT_TO_EARN		Expect to earn
 body BE_BOSS		        /\byour own boss\b/i
 describe BE_BOSS		Be your own boss
 
-#  0.00     0.00     0.00    0.00    1.00  SPY_ON_FRIENDS (no matches)
-#body SPY_ON_FRIENDS	        /\binvestigat.{0.15} (?:friend|employee|neighbor)/i
-#describe SPY_ON_FRIENDS	        Investigate your Friends!
 
 body DIG_UP_INFO	        /\bdig up information\b/i
 describe DIG_UP_INFO		Dig up Dirt on Friends
@@ -1329,8 +1212,6 @@ describe PORN_PASSWORD          Possible porn - Porn Password
 
 # Jul 26 2002 jm: offline until we can figure out performance & effectiveness
 # problems
-#full PORN_3			eval:porn_word_test()
-#describe PORN_3		Possible porn - Uses words and phrases which indicate porn
 
 # (contrib: skod)
 body PORN_6			/\b(?:\d+\+? xxx pictures|xxx photos?)\b/i
@@ -1397,8 +1278,6 @@ describe FREE_INSTALL           Contains 'free installation' with capitals
 body FREE_PREVIEW               /(?-i:F)ree preview/i
 describe FREE_PREVIEW           Contains 'free preview' with capitals
 
-body FREE_HOSTING               /(?-i:F)ree hosting/i
-describe FREE_HOSTING           Contains 'free hosting' with capitals
 
 # http://www.hughes-family.org/bugzilla/show_bug.cgi?id=678
 body USER_4U2                   /\b\S{0,20}(?:[^0-9][42](?:yo)?u|for-*you)(?:[.-]\S{1,20})?\@\S{1,20}\.(?:net|com|org|info)\b/
