@@ -60,8 +60,10 @@ elsif ($opt_mn) {
 }
 
 $spamtest = new Mail::SpamAssassin ({
+  'debug'               => 0,
   'rules_filename'      => $cffile,
   'userprefs_filename'  => "$FindBin::Bin/spamassassin.prefs",
+  'userstate_dir'       => "$FindBin::Bin/spamassassin",
   'save_pattern_hits'   => $opt_loghits,
   'dont_copy_prefs'     => 1,
   'local_tests_only'    => 1,
@@ -92,7 +94,7 @@ if ($opt_f) {
 
 my $who = `id -un 2>/dev/null`; chop $who;
 my $where = `uname -n 2>/dev/null`; chop $where;
-my $when = `date`; chop $when;
+my $when = `date -u`; chomp $when;
 
 print "# mass-check results from $who\@$where, on $when\n";
 print "# M:SA version ".$spamtest->Version()."\n";
