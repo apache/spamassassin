@@ -697,6 +697,7 @@ sub html_text {
 sub html_comment {
   my ($self, $text) = @_;
 
+  $self->{html}{comment_text} .= "$text\n";
   $self->{html}{comment_8bit} = 1 if $text =~ /[\x80-\xff]{3,}/;
   $self->{html}{comment_email} = 1 if $text =~ /\S+\@\S+/;
   $self->{html}{comment_egp} = 1 if $text =~ /\S+begin egp html banner\S+/;
