@@ -510,3 +510,9 @@ meta T_PERCENT_RANDOM_7		(__PC_RND_HEADER_T7 || __PC_RND_RAWBODY_T7)
 header __PC_RND_HEADER_T8	ALL =~ /%RA?ND(?:OM)?(?:_|\b|[A-Z]{3})/i
 rawbody __PC_RND_RAWBODY_T8	/%RA?ND(?:OM)?(?:_|\b|[A-Z0-9@]{3})/i
 meta T_PERCENT_RANDOM_8		(__PC_RND_HEADER_T8 || __PC_RND_RAWBODY_T8)
+
+# bug 2196
+uri T_URI_USERNAME_TRICK_1	m{^https?://[a-z\d][a-z\d.-]+\.[a-z]{2,4}[^\s/]*\@}i
+describe T_URI_USERNAME_TRICK_1	Misleading username looks like a website name
+uri T_URI_USERNAME_TRICK_2	m{^https?://(?:[a-z\d](?:[a-z\d-]{0,61}[a-z\d])?(?:\.[a-z\d](?:[a-z\d-]{0,61}[a-z\d])?)*)\.[a-z]{2,4}[^\s/]*\@}i
+describe T_URI_USERNAME_TRICK_2	Misleading username looks like a website name
