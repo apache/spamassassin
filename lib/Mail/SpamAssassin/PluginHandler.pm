@@ -81,6 +81,15 @@ sub load_plugin {
 
   if ($@ || !$plugin) { warn "failed to create instance of plugin $package: $@\n"; }
 
+  # Don't load the same plugin twice!
+  foreach my $old_plugin (@{$self->{plugins}}) {
+    if (ref($old_plugin) eq ref($plugin)) {
+      warn "Plugin " . ref($old_plugin) . " already registered\n";
+      dbg("plugin: did not register $plugin, already registered");
+      return;
+    }
+  }
+
   if ($plugin) {
     $self->{main}->{plugins}->register_plugin ($plugin);
     $self->{main}->{conf}->load_plugin_succeeded ($plugin, $package, $path);
