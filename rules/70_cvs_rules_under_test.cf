@@ -475,3 +475,18 @@ body T_EXPERTS_SHOW_HOW		/experts show you how/i
 describe T_EXPERTS_SHOW_HOW	Experts show you how
 body T_ENHANCE_WEBSITE		/E(?i:nhance any) W(?i:ebsite)/
 describe T_ENHANCE_WEBSITE	Enhance any Website
+
+# old verion, low end for comparison
+body T_OLD_HTML_SHOUTING1            eval:html_range('max_shouting','0','1')
+body T_OLD_HTML_SHOUTING2            eval:html_range('max_shouting','1','2')
+
+# HTML shouting range
+body T_HTML_SHOUTING1		eval:html_range('max_shouting2','0','1')
+body T_HTML_SHOUTING2		eval:html_range('max_shouting2','1','2')
+body T_HTML_SHOUTING3		eval:html_range('max_shouting2','2','3')
+body T_HTML_SHOUTING4		eval:html_range('max_shouting2','3','4')
+body T_HTML_SHOUTING5		eval:html_range('max_shouting2','4','5')
+body T_HTML_SHOUTING6		eval:html_range('max_shouting2','5','6')
+body T_HTML_SHOUTING7		eval:html_range('max_shouting2','6','7')
+body T_HTML_SHOUTING8		eval:html_range('max_shouting2','7','8')
+body T_HTML_SHOUTING9		eval:html_range('max_shouting2','8')
