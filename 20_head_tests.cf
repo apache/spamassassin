@@ -532,6 +532,12 @@ describe SUBJ_FREE_CAP		Subject contains the word 'FREE'
 header VAR_REF_IN_RECEIVED      Received =~ /from \$\S+ \(/
 describe VAR_REF_IN_RECEIVED    Received contains a $variable reference
 
+# the real services never HELO as 'foo.com', instead 'mail.foo.com' or
+# something like that.  Note: be careful when expanding this... hotmail.com is
+# legit; so is lockergnome.com.
+header RCVD_FAKE_HELO_DOTCOM    Received =~ /^from (msn|yahoo|yourwebsite|lycos|excite|aol|drizzle|localhost|koreanmail|allexecs|mydomain|juno|eudoramail|compuserve|desertmail)\.com \(/
+describe RCVD_FAKE_HELO_DOTCOM  Received contains a faked HELO hostname
+
 header USERNAME_IN_SUBJECT      eval:check_for_to_in_subject(1)
 describe USERNAME_IN_SUBJECT    To: username at front of subject
 header USERNAME_IN_SUBJECT_2    eval:check_for_to_in_subject(2)
