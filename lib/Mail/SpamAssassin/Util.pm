@@ -1130,4 +1130,27 @@ sub helper_app_pipe_open_unix {
 
 ###########################################################################
 
+# As "perldoc perlvar" notes, in perl 5.8.0, the concept of "safe" signal
+# handling was added, which means that signals cannot interrupt a running OP.
+# unfortunately, a regexp match is a single OP, so a psychotic m// can
+# effectively "hang" the interpreter as a result, and a $SIG{ALRM} handler
+# will never get called.
+#
+# However, by using "unsafe" signals, we can still interrupt that -- and
+# POSIX::sigaction can create an unsafe handler on 5.8.x.   So this function
+# provides a portable way to do that.
+
+sub trap_sigalrm_fully {
+  my ($handler) = @_;
+  if ($] < 5.008) {
+    # signals are always unsafe, just use %SIG
+    $SIG{ALRM} = $handler;
+  } else {
+    # may be using "safe" signals with %SIG; use POSIX to avoid it
+    POSIX::sigaction POSIX::SIGALRM(), new POSIX::SigAction $handler;
+  }
+}
+
+###########################################################################
+
 1;

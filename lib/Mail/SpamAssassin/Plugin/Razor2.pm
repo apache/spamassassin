@@ -115,13 +115,6 @@ Currently this is left to Razor to decide.
   $conf->{parser}->register_commands(\@cmds);
 }
 
-# This is to reset the alarm before die() - spamd can die of a stray alarm!
-sub adie {
-  my $msg = shift;
-  alarm 0;
-  die $msg if (defined $msg);
-}
-
 sub razor2_access {
   my ($self, $fulltext, $type) = @_;
   my $timeout=$self->{main}->{conf}->{razor_timeout};
@@ -137,12 +130,16 @@ sub razor2_access {
   }
 
   Mail::SpamAssassin::PerMsgStatus::enter_helper_run_mode($self);
+  my $oldalarm = 0;
+
+  # note: adie() is obsolete as a result of $oldalarm; alarms will always
+  # be reset this way
 
     eval {
       local ($^W) = 0;    # argh, warnings in Razor
 
       local $SIG{ALRM} = sub { die "alarm\n" };
-      alarm $timeout;
+      $oldalarm = alarm $timeout;
 
       # everything's in the module!
       my $rc = Razor2::Client::Agent->new("razor-$type");
@@ -153,19 +150,19 @@ sub razor2_access {
 		   foreground => 1,
 		   config     => $self->{main}->{conf}->{razor_config}
         };
-        $rc->do_conf() or adie "$debug: " . $rc->errstr;
+        $rc->do_conf() or die "$debug: " . $rc->errstr;
 
         # Razor2 requires authentication for reporting
         my $ident;
 	if ($type ne 'check') {
 	  $ident = $rc->get_ident
-            or adie("reporter: razor2: $type requires authentication");
+            or die("reporter: razor2: $type requires authentication");
         }
 
         my @msg = ($fulltext);
         my $objects = $rc->prepare_objects( \@msg )
-          or adie "$debug: error in prepare_objects";
-        $rc->get_server_info() or adie $rc->errprefix("$debug: spamassassin");
+          or die "$debug: error in prepare_objects";
+        $rc->get_server_info() or die $rc->errprefix("$debug: spamassassin");
 
 	# let's reset the alarm since get_server_info() calls
 	# nextserver() which calls discover() which very likely will
@@ -173,7 +170,7 @@ sub razor2_access {
 	alarm $timeout;
 
         my $sigs = $rc->compute_sigs($objects)
-          or adie "$debug: error in compute_sigs";
+          or die "$debug: error in compute_sigs";
 
         # 
         # if mail isn't whitelisted, check it out
@@ -182,18 +179,18 @@ sub razor2_access {
         if ( $type ne 'check' || ! $rc->local_check($objects->[0]) ) {
           # provide a better error message when servers are unavailable,
           # than "Bad file descriptor Died".
-          $rc->connect() or adie "$debug: could not connect to any servers\n";
+          $rc->connect() or die "$debug: could not connect to any servers\n";
 
 	  # Talk to the Razor server and do work
           if ($type eq 'check') {
-            $rc->check($objects) or adie $rc->errprefix("$debug: spamassassin");
+            $rc->check($objects) or die $rc->errprefix("$debug: spamassassin");
 	  }
 	  else {
-            $rc->authenticate($ident) or adie($rc->errprefix("$debug: spamassassin"));
-            $rc->report($objects) or adie($rc->errprefix("$debug: spamassassin"));
+            $rc->authenticate($ident) or die($rc->errprefix("$debug: spamassassin"));
+            $rc->report($objects) or die($rc->errprefix("$debug: spamassassin"));
           }
 
-          $rc->disconnect() or adie $rc->errprefix("$debug: spamassassin");
+          $rc->disconnect() or die $rc->errprefix("$debug: spamassassin");
 
 	  # if we got here, we're done doing remote stuff, abort the alert
 	  alarm 0;
@@ -271,23 +268,27 @@ sub razor2_access {
         warn "$debug: undefined Razor2::Client::Agent\n";
       }
   
-      alarm 0;
+      # note: this may be a double-reset.  not a big deal though; the
+      # result should only be the extension of a preexisting timeout
+      # by < 1 sec.
+      alarm $oldalarm;
     };
 
-    alarm 0;    # just in case
-  
-    if ($@) {
-      if ( $@ =~ /alarm/ ) {
-          dbg("$debug: razor2 $type timed out after $timeout seconds");
-      } elsif ($@ =~ /(?:could not connect|network is unreachable)/) {
+    my $err = $@;
+
+    if ($err) {
+      alarm $oldalarm;    # just in case
+      if ( $err =~ /alarm/ ) {
+        dbg("$debug: razor2 $type timed out after $timeout seconds");
+      } elsif ($err =~ /(?:could not connect|network is unreachable)/) {
         # make this a dbg(); SpamAssassin will still continue,
         # but without Razor checking.  otherwise there may be
         # DSNs and errors in syslog etc., yuck
         dbg("$debug: razor2 $type could not connect to any servers");
-      } elsif ($@ =~ /timeout/i) {
+      } elsif ($err =~ /timeout/i) {
         dbg("$debug: razor2 $type timed out connecting to razor servers");
       } else {
-        warn("$debug: razor2 $type failed: $! $@");
+        warn("$debug: razor2 $type failed: $! $err");
       }
     }
 
