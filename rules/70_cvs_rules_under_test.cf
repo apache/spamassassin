@@ -473,23 +473,131 @@ describe T_RATWARE_MIZSPEELING	Sent using spammer tool (mizspeeling)
 # new version
 header T_NIGERIAN_SUBJECT2	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*(?:request\s+(?:for\s+)?)?(?:very )?urgent\s+(?:(?:and|&)\s+(?:(?:completely|100\%)\s+))?(?:confidential|assistance|business|attention|reply|responses?|help)\b/i
 
-
 # let's try rfg's DNSBLs, they seem to have been stable for a while now
+# quinlan: entire corpus, then last 2000 spam and 2000 ham:
+#  0.000   0.0000   0.0000    0.500   0.11    0.01  T_RCVD_IN_MONKEYS_FORMMAIL
+#  0.000   0.0000   0.0000    0.500   0.12    0.01  T_RCVD_IN_MONKEYS_FORMMAIL
 header T_RCVD_IN_MONKEYS_FORMMAIL	rbleval:check_rbl_txt('relay', 'formmail.relays.monkeys.com.')
 describe T_RCVD_IN_MONKEYS_FORMMAIL Received via a relay in formmail.relays.monkeys.com.
 tflags T_RCVD_IN_MONKEYS_FORMMAIL net
 
+# quinlan: entire corpus, then last 2000 spam and 2000 ham:
+# 18.125  36.2000   0.0500    0.999   0.95    0.01  T_RCVD_IN_MONKEYS_UPL
+#  7.766  19.0844   0.0678    0.996   0.94    0.01  T_RCVD_IN_MONKEYS_UPL
 header T_RCVD_IN_MONKEYS_UPL	rbleval:check_rbl_txt('relay', 'proxies.relays.monkeys.com.')
 describe T_RCVD_IN_MONKEYS_UPL Received via a relay in proxies.relays.monkeys.com.
 tflags T_RCVD_IN_MONKEYS_UPL net
 
 # new "-notfirsthop" logic
+# quinlan: entire corpus, then last 2000 spam and 2000 ham:
+#  0.309   0.7311   0.0226    0.970   0.85    0.01  T_RCVD_IN_PDL:quinlan
+#  0.225   0.4500   0.0000    1.000   0.90    0.01  T_RCVD_IN_PDL:quinlan
 header T_RCVD_IN_PDL		rbleval:check_rbl('pdl-notfirsthop', 'dialups.visi.com.')
 tflags T_RCVD_IN_PDL		net
 
+# quinlan: entire corpus, then last 2000 spam and 2000 ham:
+#  0.686   1.5620   0.0904    0.945   0.79    0.01  T_RCVD_IN_DYNABLOCK
+#  0.775   1.5000   0.0500    0.968   0.82    0.01  T_RCVD_IN_DYNABLOCK
 header T_RCVD_IN_DYNABLOCK	rbleval:check_rbl('dynablock-notfirsthop', 'dynablock.wirehub.net.')
 tflags T_RCVD_IN_DYNABLOCK	net
 
+# mixed list, still need to check for cost, policies, etc.
+header T_RCVD_IN_DEADBEEF	rbleval:check_rbl('deadbeef', 'bl.deadbeef.com.')
+header T_RCVD_IN_DNSBLINFO	rbleval:check_rbl('dnsblinfo', 'spamsources.dnsbl.info.')
+header T_RCVD_IN_DNSRBLSPAM	rbleval:check_rbl('dnsrblspam', 'spam.dnsrbl.net.')
+header T_RCVD_IN_DUINV	rbleval:check_rbl('duinv', 'duinv.aupads.org.')
+header T_RCVD_IN_GIPPER	rbleval:check_rbl('gipper', 'proxy.bl.gweep.ca.')
+header T_RCVD_IN_INTERSIL	rbleval:check_rbl('intersil', 'blackholes.intersil.net.')
+header T_RCVD_IN_RELAYS_KUNDENSERVER	rbleval:check_rbl('kundenserver', 'relays.bl.kundenserver.de.')
+header T_RCVD_IN_SPAMSOURCES_FABEL	rbleval:check_rbl('fabel', 'spamsources.fabel.dk.')
+header T_RCVD_IN_VOX_SCHPIDER_COM	rbleval:check_rbl('schpider', 'vox.schpider.com.')
+header T_RCVD_IN_WSFF		rbleval:check_rbl('wsff', 'will-spam-for-food.eu.org.')
+tflags T_RCVD_IN_DEADBEEF net
+tflags T_RCVD_IN_DNSBLINFO net
+tflags T_RCVD_IN_DNSRBLSPAM net
+tflags T_RCVD_IN_DUINV net
+tflags T_RCVD_IN_GIPPER net
+tflags T_RCVD_IN_INTERSIL net
+tflags T_RCVD_IN_RELAYS_KUNDENSERVER net
+tflags T_RCVD_IN_SPAMSOURCES_FABEL net
+tflags T_RCVD_IN_VOX_SCHPIDER_COM net
+tflags T_RCVD_IN_WSFF net
+
+# wirehub
+header T_RCVD_IN_WIREHUB_BH	rbleval:check_rbl('wirehub', 'blackholes.wirehub.net.')
+tflags T_RCVD_IN_WIREHUB_BH net
+header T_RCVD_IN_WIREHUB_PROXIES	rbleval:check_rbl('pbwn', 'proxies.blackholes.wirehub.net.')
+tflags T_RCVD_IN_WIREHUB_PROXIES net
+
+# OPM with sub-tests
+# transfers: axfr/ixfr for trusted sites
+# url: http://opm.blitzed.org/
+# pay-to-use: no
+# delist: automatic expiry, no fee, retested on request (free)
+header __RCVD_IN_OPM		rbleval:check_rbl('opm2', 'opm.blitzed.org.')
+tflags __RCVD_IN_OPM net
+header T_RCVD_IN_OPM_WINGATE		rbleval:check_rbl_results_for('opm2', '1')
+tflags T_RCVD_IN_OPM_WINGATE net
+header T_RCVD_IN_OPM_SOCKS		rbleval:check_rbl_results_for('opm2', '2')
+tflags T_RCVD_IN_OPM_SOCKS net
+header T_RCVD_IN_OPM_HTTP_CONNECT	rbleval:check_rbl_results_for('opm2', '4')
+tflags T_RCVD_IN_OPM_HTTP_CONNECT net
+header T_RCVD_IN_OPM_ROUTER		rbleval:check_rbl_results_for('opm2', '8')
+tflags T_RCVD_IN_OPM_ROUTER net
+header T_RCVD_IN_OPM_HTTP_POST	rbleval:check_rbl_results_for('opm2', '16')
+tflags T_RCVD_IN_OPM_HTTP_POST net
+
+# fiveten - many blacklists, but only the bulk one performs well
+# transfers: not specified, unknown
+# url: http://blackholes.five-ten-sg.com/
+# pay-to-use: no
+# delist: email address contact provided
+header __FIVETEN	rbleval:check_rbl('fiveten', 'blackholes.five-ten-sg.com.')
+tflags __FIVETEN net
+# bulk mailers that don't require confirmed opt-in from their customers,
+# or that have have allowed known spammers to become clients.
+header T_RCVD_IN_FIVETEN_BULK	rbleval:check_rbl_results_for('fiveten', '127.0.0.4')
+tflags T_RCVD_IN_FIVETEN_BULK net
+
+# some additional osirusoft tests, needs more work
+# all osirusoft tests maybe a bad idea, osirusoft web site seems defunct
+header T_RCVD_IN_OSRELAY	rbleval:check_rbl('osrelay', 'inputs.relays.osirusoft.com.')
+tflags T_RCVD_IN_OSRELAY net
+header T_RCVD_IN_OSSRC	rbleval:check_rbl('ossrc', 'spamsources.relays.osirusoft.com.')
+tflags T_RCVD_IN_OSSRC net
+header T_RCVD_IN_OSSOCKS	rbleval:check_rbl('ossocks', 'socks.relays.osirusoft.com.')
+tflags T_RCVD_IN_OSSOCKS net
+
+# SORBS
+# transfers: both axfr and ixfr available
+# url: http://www.dnsbl.sorbs.net/
+# pay-to-use: no
+# delist: $50 fee for T_RCVD_IN_SORBS_SPAM, others are retested on request (free)
+header T_RCVD_IN_SORBS	rbleval:check_rbl_txt('sorbs', 'dnsbl.sorbs.net.')
+tflags T_RCVD_IN_SORBS net
+header T_RCVD_IN_SORBS_HTTP	rbleval:check_rbl_results_for('sorbs', '127.0.0.2')
+tflags T_RCVD_IN_SORBS_HTTP net
+header T_RCVD_IN_SORBS_MISC	rbleval:check_rbl_results_for('sorbs', '127.0.0.3')
+tflags T_RCVD_IN_SORBS_MISC net
+header T_RCVD_IN_SORBS_SMTP	rbleval:check_rbl_results_for('sorbs', '127.0.0.4')
+tflags T_RCVD_IN_SORBS_SMTP net
+header T_RCVD_IN_SORBS_SOCKS	rbleval:check_rbl_results_for('sorbs', '127.0.0.5')
+tflags T_RCVD_IN_SORBS_SOCKS net
+header T_RCVD_IN_SORBS_SPAM	rbleval:check_rbl_results_for('sorbs', '127.0.0.6')
+tflags T_RCVD_IN_SORBS_SPAM net
+header T_RCVD_IN_SORBS_WEB	rbleval:check_rbl_results_for('sorbs', '127.0.0.7')
+tflags T_RCVD_IN_SORBS_WEB net
+
+# some Reynolds RBLs, may be a bad idea since they're in Australia
+# perhaps find a local mirror or maybe figure out what the source data is?
+header T_RCVD_IN_REYNOLDSOSRS	rbleval:check_rbl('reynoldsosrs', 'osrs.bl.reynolds.net.au.')
+tflags T_RCVD_IN_REYNOLDSOSRS net
+header T_RCVD_IN_REYNOLDSOSPS	rbleval:check_rbl('reynoldsosps', 'osps.bl.reynolds.net.au.')
+tflags T_RCVD_IN_REYNOLDSOSPS net
+header T_RCVD_IN_REYNOLDSOHPS	rbleval:check_rbl('reynoldsohps', 'ohps.bl.reynolds.net.au.')
+tflags T_RCVD_IN_REYNOLDSOHPS net
+header T_RCVD_IN_REYNOLDSWPB	rbleval:check_rbl('reynoldswpb', 'wpb.bl.reynolds.net.au.')
+tflags T_RCVD_IN_REYNOLDSWPB net
 
 # OK, a whole batch of faked-HELO detection rules.  These work by checking
 # for hosts HELOing in a certain domain, but without rDNS matching that.
