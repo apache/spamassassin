@@ -1,3 +1,47 @@
+2001-06-05 13:59  jmason
+
+	* spamassassin, spamassassin.prefs, lib/Mail/SpamAssassin/Conf.pm,
+	lib/Mail/SpamAssassin/PerMsgStatus.pm: added auto-reporting code
+
+2001-06-01 17:09  jmason
+
+	* spamassassin.cf: oops, forged received header support was not
+	great
+
+2001-05-31 13:23  jmason
+
+	* spamassassin.cf: fixed buglet in FORGED_RCVD_FOUND
+
+2001-05-31 13:21  jmason
+
+	* spamassassin.cf, spamassassin.prefs: avoided false positives from
+	mild javascript
+
+2001-05-31 13:17  jmason
+
+	* MANIFEST, spamassassin, spamassassin.cf, spamassassin.prefs,
+	lib/Mail/SpamAssassin/Dns.pm, lib/Mail/SpamAssassin/EvalTests.pm,
+	lib/Mail/SpamAssassin/PerMsgStatus.pm, t/forged_rcvd.t,
+	t/data/spam/002: added forged-received check, ALL header match
+
+2001-05-31 12:55  jmason
+
+	* lib/Mail/SpamAssassin/: Conf.pm, PerMsgStatus.pm: oops, missed
+	body tests
+
+2001-05-31 12:51  jmason
+
+	* spamassassin, spamassassin.cf, lib/Mail/SpamAssassin/Conf.pm,
+	lib/Mail/SpamAssassin/EvalTests.pm,
+	lib/Mail/SpamAssassin/PerMsgStatus.pm: added 'full' configuration
+	item
+
+2001-05-25 12:48  jmason
+
+	* Changes, spamassassin, spamassassin.cf, lib/Mail/SpamAssassin.pm:
+	added support for delivering to MAIL, DEFAULT etc. from Robert Klep
+	<robert /at/ ilse.nl>
+
 2001-05-22 15:06  jmason
 
 	* Changes, lib/Mail/SpamAssassin/Reporter.pm: bug in razor report

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-WEBDIR=/home/jm/public_html_spamassassin
+WEBDIR=/home/jm/spamassassin.taint.org
 
 vers=`build/get_version`
 
@@ -9,4 +9,5 @@ build/update_devel
 cp $WEBDIR/devel/Mail-SpamAssassin-$vers.tar.gz $WEBDIR/released/Mail-SpamAssassin-$vers.tar.gz
 cp $WEBDIR/devel/Mail-SpamAssassin-$vers.zip $WEBDIR/released/Mail-SpamAssassin-$vers.zip
 # cp WebMake-${vers}-1.noarch.rpm WebMake-${vers}-1.src.rpm $WEBDIR/released
+( cd $WEBDIR/released ; cvs add *SpamAssassin* )
 
