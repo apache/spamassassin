@@ -89,11 +89,20 @@ sub check_for_from_dns {
 sub _check_for_from_dns {
   my ($self) = @_;
 
-  my $from = $self->get ('Reply-To:addr');
-  if (!defined $from || $from !~ /\@\S+/) {
-    $from = $self->get ('From:addr');
+  my $from;
+  foreach $from ( $self->get('Reply-To:addr'), $self->get ('From:addr') ) {
+    next unless defined $from;
+
+    # bug 3366
+    $from =~ tr/././s;
+
+    if ($from =~ /\@(\S+\.\S+)/) {
+      $from = $1;
+      last;
+    }
+    undef $from;
   }
-  return 0 unless ($from =~ /\@(\S+)/);
+  return 0 unless (defined $from);
   $from = $1;
 
   # First check that DNS is available, if not do not perform this check
@@ -1071,7 +1080,9 @@ sub all_from_addrs {
     # FNs for things like whitelist_from.  Since all of these are From
     # headers, there should only be 1 address in each anyway, so use the
     # :addr code...
-    @addrs = grep { defined($_) && length($_) > 0 }
+    # bug 3366: some addresses come in as 'foo@bar...', which is invalid.
+    # so deal with the multiple periods.
+    @addrs = grep { defined($_) && length($_) > 0 } map { tr/././s; $_; }
         ($self->get ('From:addr'),                  # std
          $self->get ('Envelope-Sender:addr'),       # qmail: new-inject(1)
          $self->get ('Resent-Sender:addr'),         # procmailrc manpage
@@ -1079,6 +1090,10 @@ sub all_from_addrs {
          $self->get ('EnvelopeFrom:addr'));	    # SMTP envelope
     # http://www.cs.tut.fi/~jkorpela/headers.html is useful here
   }
+
+  # Remove duplicate addresses
+  my %addrs = map { $_ => 1 } @addrs;
+  @addrs = keys %addrs;
 
   dbg ("all '*From' addrs: ".join (" ", @addrs));
   $self->{all_from_addrs} = \@addrs;
