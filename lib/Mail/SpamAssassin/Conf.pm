@@ -197,8 +197,6 @@ sub new {
   $self->{user_scores_sql_password} = '';
   $self->{user_scores_sql_table} = 'userpref'; # Morgan - default to userpref for backwords compatibility
 
-  $self->{_unnamed_counter} = 'aaaaa';
-
   $self;
 }
 
@@ -1722,11 +1720,12 @@ C<user_prefs> file.
 
 =item test SYMBOLIC_TEST_NAME (ok|fail) Some string to test against
 
-Define a regression testing string. You can have more than one regression test string
-per symbolic test name. Simply specify a string that you wish the test to match.
+Define a regression testing string. You can have more than one regression test
+string per symbolic test name. Simply specify a string that you wish the test
+to match.
 
-These tests are only run as part of the test suite - they should not affect the general
-running of SpamAssassin.
+These tests are only run as part of the test suite - they should not affect the
+general running of SpamAssassin.
 
 =cut
 
@@ -1976,7 +1975,6 @@ failed_line:
 
 sub add_test {
   my ($self, $name, $text, $type) = @_;
-  if ($name eq '.') { $name = ($self->{_unnamed_counter}++); }
   $self->{tests}->{$name} = $text;
   $self->{test_types}->{$name} = $type;
   $self->{tflags}->{$name} ||= '';
