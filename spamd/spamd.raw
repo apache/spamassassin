@@ -2116,7 +2116,7 @@ sub kill_handler {
 sub child_handler {
   my ($sig) = @_;
 
-  unless ($main::INHIBIT_LOGGING_IN_SIGCHLD_HANDLER) {
+  unless (defined($sig) && $main::INHIBIT_LOGGING_IN_SIGCHLD_HANDLER) {
     logmsg("server hit by SIG$sig");
   }
 
