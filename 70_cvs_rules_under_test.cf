@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.633 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.634 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -123,3 +123,9 @@ header T_USERNAME_IN_SUBJECT2     eval:check_for_to_in_subject('2')
 describe T_USERNAME_IN_SUBJECT2   To: username listed in Subject: (ucfirst)
 header T_USERNAME_IN_SUBJECT3     eval:check_for_to_in_subject('3')
 describe T_USERNAME_IN_SUBJECT3   Full To: address listed at front of Subject:
+
+# Visi is back again.
+header T_RCVD_IN_RSL	 	rbleval:check_rbl_txt('rsl', 'relays.visi.com.')
+describe T_RCVD_IN_RSL		Received via a relay in RSL
+tflags T_RCVD_IN_RSL		net
+
