@@ -3,6 +3,22 @@
  * This program uses stochastic gradient descent to learn a scoreset for
  * SpamAssassin.  You'll need to run logs-to-c from spamassassin/masses to
  * generate the stuff in tmp.
+ *
+ * <@LICENSE>
+ * Copyright 2004 Apache Software Foundation
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ * 
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * </@LICENSE>
  */
 
 #include <stdio.h>
@@ -216,9 +232,9 @@ void write_weights (FILE * fp) {
 
 	for (i = 0; i < num_scores; i++) {
 		if ( is_mutatable[i] )  {
-			fprintf(fp, "score %-30s 0 %2.3f\n", score_names[i], weight_to_score(weights[i]));
+			fprintf(fp, "score %-30s %2.3f\n", score_names[i], weight_to_score(weights[i]));
 		} else {
-			fprintf(fp, "score %-30s 0 %2.3f # not mutable\n", score_names[i], range_lo[i]);
+			fprintf(fp, "score %-30s %2.3f # not mutable\n", score_names[i], range_lo[i]);
 		}
 	}
 }
