@@ -318,33 +318,17 @@ meta T_JS_FROMCHARCODE          (__JS_FROMCHARCODE && __JS_DOCWRITE)
 header __RCVD_IN_IADB		eval:check_rbl('iadb', 'iadb.isipp.com.')
 tflags __RCVD_IN_IADB		net nice
 
-header RCVD_IN_IADB_LISTED	eval:check_rbl_sub('iadb', '127.0.0.1')
-describe RCVD_IN_IADB_LISTED	Sender is in ISIPP IADB of trusted senders
-tflags RCVD_IN_IADB_LISTED	net nice
-
-header RCVD_IN_IADB_VOUCHED	eval:check_rbl_sub('iadb', '127.0.0.2')
-describe RCVD_IN_IADB_VOUCHED	Sender is a vouched sender in IADB
-tflags RCVD_IN_IADB_VOUCHED	net nice
-
-header RCVD_IN_IADB_SPF		eval:check_rbl_sub('iadb', '127.0.0.3')
-describe RCVD_IN_IADB_SPF	Sender is in IADB as a publisher of SPF records
-tflags RCVD_IN_IADB_SPF		net nice
+header T_RCVD_IN_IADB_LIST	eval:check_rbl_sub('iadb', '127.0.0.1')
+describe T_RCVD_IN_IADB_LIST	Sender is listed in ISIPP IADB
+tflags T_RCVD_IN_IADB_LIST	net nice
 
 # IADB trusted
-header __RCVD_IN_IADB_TR	eval:check_rbl('iadbtr-firsttrusted', 'iadb.isipp.com.')
-tflags __RCVD_IN_IADB_TR	net nice
+header __RCVD_IN_IADB_T		eval:check_rbl('iadbt-firsttrusted', 'iadb.isipp.com.')
+tflags __RCVD_IN_IADB_T		net nice
 
-header RCVD_IN_IADB_LISTED_TR	eval:check_rbl_sub('iadbtr', '127.0.0.1')
-describe RCVD_IN_IADB_LISTED_TR	Sender is in ISIPP IADB of trusted senders
-tflags RCVD_IN_IADB_LISTED_TR	net nice
-
-header RCVD_IN_IADB_VOUCH_TR	eval:check_rbl_sub('iadbtr', '127.0.0.2')
-describe RCVD_IN_IADB_VOUCH_TR	Sender is a vouched sender in IADB
-tflags RCVD_IN_IADB_VOUCH_TR	net nice
-
-header RCVD_IN_IADB_SPF_TR		eval:check_rbl_sub('iadbtr', '127.0.0.3')
-describe RCVD_IN_IADB_SPF_TR	Sender is in IADB as a publisher of SPF records
-tflags RCVD_IN_IADB_SPF_TR		net nice
+header T_RCVD_IN_IADB_LIST_T	eval:check_rbl_sub('iadbtr', '127.0.0.1')
+describe T_RCVD_IN_IADB_LIST_T	Sender is listed in ISIPP IADB
+tflags T_RCVD_IN_IADB_LIST_T	net nice
 
 # Bug 2168
 header T_BAD_MOZILLA_VERSION    User-Agent =~ /Mozilla\/5\.0\d\d/
