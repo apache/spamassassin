@@ -539,3 +539,6 @@ header T_RCVD_ESMTP_IN_TIMEWARP	Received =~ /with ESMTP id <\d+-\d+>; \S\S\S, *\
 # partial messages; currently-theoretical attack
 header T_FRAGMENTED_MESSAGE	Content-Type =~ /message\/partial/i
 
+# affiliateid, aff_id, aff_sub_id etc.
+uri T_URI_AFFILIATE		/aff\w+id=/i
+
