@@ -6,5 +6,5 @@ cd /home/jm/ftp/spamassassin
 export CVS_RSH=ssh
 
 cvs -z3 update -dP
-cvs tag -F CURRENT_CORPORA_SUBMIT_VERSION
+cvs rtag -F -a CURRENT_CORPORA_SUBMIT_VERSION 
 
