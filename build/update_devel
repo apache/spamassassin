@@ -14,7 +14,7 @@ make text_html_doc
 make distcheck
 
 echo "Creating 'Changes' file from CVS change log..."
-# cvs2cl.pl -f Changes
+cvs2cl.pl -f Changes
 
 rm -f Mail-SpamAssassin-$vers.tar.gz Mail-SpamAssassin-$vers.zip
 make tardist

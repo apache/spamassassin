@@ -5,6 +5,7 @@ WEBDIR=/home/jm/spamassassin.taint.org
 vers=`build/get_version`
 
 build/update_devel
+
 # build/mkrpm
 cp $WEBDIR/devel/Mail-SpamAssassin-$vers.tar.gz $WEBDIR/released/Mail-SpamAssassin-$vers.tar.gz
 cp $WEBDIR/devel/Mail-SpamAssassin-$vers.zip $WEBDIR/released/Mail-SpamAssassin-$vers.zip

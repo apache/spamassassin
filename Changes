@@ -1,3 +1,89 @@
+2001-09-05 02:23  jmason
+
+	* spamassassin.cf: latest code
+
+2001-08-31 08:34  jmason
+
+	* spamassassin.cf, spamassassin.prefs,
+	lib/Mail/SpamAssassin/EvalTests.pm: new rules to catch some stuff
+	it was missing
+
+2001-08-31 06:45  jmason
+
+	* spamassassin.raw, t/stripmarkup.t, t/data/spam/003: added support
+	for -d switch
+
+2001-08-31 06:41  jmason
+
+	* lib/Mail/: SpamAssassin.pm, SpamAssassin/Conf.pm,
+	SpamAssassin/Message.pm, SpamAssassin/PerMsgStatus.pm,
+	SpamAssassin/Reporter.pm: added support for -d switch
+
+2001-08-29 07:41  jmason
+
+	* lib/Mail/SpamAssassin/Replier.pm: added replier class
+
+2001-08-29 07:36  jmason
+
+	* MANIFEST, README, spamassassin.cf, spamassassin.prefs,
+	spamassassin.raw, lib/Mail/SpamAssassin.pm,
+	lib/Mail/SpamAssassin/Conf.pm, lib/Mail/SpamAssassin/EvalTests.pm,
+	lib/Mail/SpamAssassin/PerMsgStatus.pm: spamtrapping and whitelist
+	support
+
+2001-08-28 08:00  jmason
+
+	* spamassassin.cf, lib/Mail/SpamAssassin/PerMsgStatus.pm: fixed bug
+	from last checkin
+
+2001-08-28 07:32  jmason
+
+	* spamassassin.cf, lib/Mail/SpamAssassin/PerMsgStatus.pm: headers
+	are now returned as 'undef' if not set
+
+2001-08-27 08:52  jmason
+
+	* MANIFEST, MANIFEST.SKIP, Makefile.PL, fixpath.pl, spamassassin,
+	spamassassin.raw: fixed to use 'fixpath.pl' to add /usr/bin/perl
+	line
+
+2001-08-27 06:23  jmason
+
+	* spamassassin.cf, spamassassin.prefs,
+	lib/Mail/SpamAssassin/EvalTests.pm: added some tests for new
+	spammer tricks
+
+2001-08-21 02:26  jmason
+
+	* spamassassin.cf, spamassassin.prefs: added Sircam check
+
+2001-08-17 12:06  jmason
+
+	* README, spamassassin: added fix for config file-finding code from
+	David Hull (hull at paracel dot com); also added fix to README
+	suggested by David.
+
+2001-06-21 23:53  jmason
+
+	* t/forged_rcvd.t: hmm, tset turned off for now
+
+2001-06-21 18:40  jmason
+
+	* README: added test paragraph
+
+2001-06-21 16:33  jmason
+
+	* spamassassin.cf: changed ORBS check to ORDB check
+
+2001-06-11 15:00  jmason
+
+	* spamassassin.cf: added = before mailto:s in patterns
+
+2001-06-11 13:44  jmason
+
+	* Changes, spamassassin.cf, spamassassin.prefs, build/update_devel,
+	build/update_stable: updated build scripts
+
 2001-06-05 13:59  jmason
 
 	* spamassassin, spamassassin.prefs, lib/Mail/SpamAssassin/Conf.pm,
