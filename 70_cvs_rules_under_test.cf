@@ -366,3 +366,19 @@ score T_HTML_CONSEC_IMGS18       0.01
 score T_HTML_CONSEC_IMGS19       0.01
 
 ####################################################################
+
+header T_FROM_ENDS_IN_NUMS1       From =~ /\D\d\@/
+header T_FROM_ENDS_IN_NUMS2       From =~ /\D\d\d\@/
+header T_FROM_ENDS_IN_NUMS3       From =~ /\D\d\d\d\@/
+header T_FROM_ENDS_IN_NUMS4       From =~ /\D\d\d\d\d\@/
+header T_FROM_ENDS_IN_NUMS5       From =~ /\D\d\d\d\d\d\@/
+header T_FROM_ENDS_IN_NUMS6       From =~ /\d\d\d\d\d\d\@/
+
+score T_FROM_ENDS_IN_NUMS1       0.01
+score T_FROM_ENDS_IN_NUMS2       0.01
+score T_FROM_ENDS_IN_NUMS3       0.01
+score T_FROM_ENDS_IN_NUMS4       0.01
+score T_FROM_ENDS_IN_NUMS5       0.01
+score T_FROM_ENDS_IN_NUMS6       0.01
+
+############################################################
