@@ -561,3 +561,8 @@ uri T_LONG_HOSTNAME_20		/^https?:\/\/[a-z0-9]{20,24}\./i
 uri T_LONG_HOSTNAME_25		/^https?:\/\/[a-z0-9]{25,29}\./i
 uri T_LONG_HOSTNAME_30		/^https?:\/\/[a-z0-9]{30,40}\./i
 uri T_LONG_HOSTNAME_40		/^https?:\/\/[a-z0-9]{40,}\./i
+
+# bug 2809: PRIORITY_NO_NAME FPs on mails with no X-Mailer but with a User-Agent
+header __USER_AGENT             exists:User-Agent
+meta T_PRIORITY_NO_NAME         ((__HAS_X_PRIORITY || __HAS_MSMAIL_PRI) && !__HAS_X_MAILER && !__IS_EXCH && !__USER_AGENT)
+
