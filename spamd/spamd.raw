@@ -357,7 +357,7 @@ sub handle_user {
     $spamtest->read_scoreonly_config ($cf_file);
     $spamtest->load_scoreonly_sql ($username);
 
-    if(!defined($spamtest->{conf}->{auto_whitelist_path}))
+    if(!defined($spamtest->{conf}->{auto_whitelist_path}) or $spamtest->{conf}->{auto_whitelist_path} ~= m#/.spamassassin/auto_whitelist#)
     {
 	$spamtest->{conf}->{auto_whitelist_path} = "$dir/.spamassassin/auto_whitelist";
     }
