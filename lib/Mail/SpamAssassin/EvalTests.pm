@@ -628,7 +628,7 @@ sub check_for_content_type_just_html {
   # so we need to exclude that from the test.
   if ($rcv =~ / by hotmail.com /) { return 0; }
 
-  if ($ctype =~ /^text\/html\b/) { return 1; }
+  if ($ctype =~ /^text\/html;?\b/) { return 1; }
 
   0;
 }
