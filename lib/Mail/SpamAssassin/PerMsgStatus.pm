@@ -113,7 +113,6 @@ sub check {
       # warn "dbg ". join ("", @{$decoded}). "\n";
       $self->do_body_tests($decoded);
       $self->do_body_eval_tests($decoded);
-      # $self->do_body_uri_tests($decoded);
       undef $decoded;
     }
     timelog("Finished body tests", "bodytest", 2);
@@ -124,7 +123,7 @@ sub check {
       my $bodytext = $self->get_decoded_body_text_array();
       $self->do_rawbody_tests($bodytext);
       $self->do_rawbody_eval_tests($bodytext);
-      # NB: URI tests moved down here because "strip" removes too much
+      # NB: URI tests are here because "strip" removes too much
       $self->do_body_uri_tests($bodytext);
       undef $bodytext;
     }
@@ -815,23 +814,6 @@ sub get_decoded_body_text_array {
 
 ###########################################################################
 
-# A URI can be like:
-#
-#   href=foo.htm
-#   href = foo.htm
-#   href="foo.htm"
-#   href='foo.htm'
-#   href = 'foo.htm'
-#   href = ' foo.htm '
-#
-# and such.  Have to deal with all of it.
-#
-# Also, mail with non-Quoted-Printable encoding might still have the
-# "=3D" obfuscation trick, since many email clients will decode
-# QP escape codes regardless of where and when they occur.
-#
-my $URI_in_tag = qr/\s*=\s*["']?\s*([^'">\s]*)\s*["']?[^>]*/;
-
 sub get_decoded_stripped_body_text_array {
   my ($self) = @_;
   local ($_);
@@ -870,10 +852,6 @@ sub get_decoded_stripped_body_text_array {
   # Convert =xx and =\n into chars
   $text =~ s/=([a-fA-F0-9]{2})/chr(hex($1))/ge;
   $text =~ s/=\n//g;
-
-  # Get rid of "BASEURI:" in case spammers insert it raw to try to
-  # mess us up
-  $text =~ s/BASEURI://sg;
 
   # do HTML conversions if necessary
   $self->{html} = {};
@@ -1346,39 +1324,17 @@ sub do_body_uri_tests {
   local ($_);
 
   dbg ("running uri tests; score so far=".$self->{hits});
-  
-  my $text = join('', @$textary);
-  study $text;
-  # warn("spam: $text\n");
 
-  my $base_uri = "http://";
-  while ($text =~ /\G.*?(<$uriRe>|$uriRe)/gsoc) {
+  my $base_uri = $self->{html}{base_href} || "http://";
+  my $text;
+
+  for (@$textary) {
+    # NOTE: do not modify $_ in this loop
+    while (/\G.*?(<$uriRe>|$uriRe)/gsoc) {
       my $uri = $1;
 
       $uri =~ s/^<(.*)>$/$1/;
       $uri =~ s/[\]\)>#]$//;
-      #dbg("uri tests: found $uri");
-
-      # Use <BASE HREF="URI"> to turn relative links into
-      # absolute links.
-      #
-      # Even If it is a base URI, Leave $uri alone, and test it like a
-      # normal in case our munging of $base_uri messes something up
-      if ($uri =~ s/^BASEURI://i) {
-        # A base URI will be ignored by browsers unless it is an
-        # absolute URI of a standrd protocol
-        if ($uri =~ m{^(?:ftp|https?)://}i) {
-          $base_uri = $uri;
-
-          # Remove trailing filename, if any; base URIs can have the
-          # form of "http://foo.com/index.html"
-          $base_uri =~ s{^([a-z]+://[^/]+/.*?)[^/\.]+\.[^/\.]{2,4}$} {$1}i;
-
-          # Make sure it ends in a slash
-          $base_uri .= "/" unless($base_uri =~ m{/$});
-        } # if ($uri =~ m{^(?:ftp|https?)://})
-      } # if ($uri =~ s/^BASEURI://i)
-
       $uri =~ s/^URI://i;
 
       # Does the uri start with "http://", "mailto:", "javascript:" or
@@ -1405,20 +1361,24 @@ sub do_body_uri_tests {
 
       # warn("Got URI: $uri\n");
       push @uris, $uri;
+    }
+    pos = 0;
+    while (/\G.*?($Addr_spec_re)/gsoc) {
+      my $uri = $1;
+
+      $uri =~ s/^URI://i;
+      $uri = "mailto:$uri";
+
+      #warn("Got URI: $uri\n");
+      push @uris, $uri;
+    }
   }
 
   dbg("uri tests: Done uriRE");
   
-  pos $text = 0;
-  while ($text =~ /\G.*?($Addr_spec_re)/gsoc) {
-      my $uri = $1;
-      $uri =~ s/^URI://i;
-      $uri = "mailto:$uri";
-      #warn("Got URI: $uri\n");
-      push @uris, $uri;
+  for (@uris) {
+    print STDERR "uri $_\n";
   }
-
-
 
   $self->clear_test_state();
   if ( defined &Mail::SpamAssassin::PerMsgStatus::_body_uri_tests ) {
