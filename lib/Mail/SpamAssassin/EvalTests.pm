@@ -162,7 +162,7 @@ sub check_subject_for_lotsa_8bit_chars {
 sub check_for_missing_to_header {
   my ($self) = @_;
 
-  $hdr = $self->get ('To');
+  my $hdr = $self->get ('To');
   $hdr ||= $self->get ('Apparently-To');
   return 1 if ($hdr eq '');
 
