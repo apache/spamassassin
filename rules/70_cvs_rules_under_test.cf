@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.623 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.624 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -40,3 +40,27 @@
 # (time_t/4444)
 # header T_TIME_OVER_4444	ALL =~ /\D23[67][0-9][0-9][0-9]\D/
 
+# http://www.linux.or.jp/~ukai/l-u-spam/local.cf
+# header T_LJ_MISYOUDAKU Subject =~ /L\$>5Bz/
+# describe T_LJ_MISYOUDAKU Misyoudaku
+# header T_LJ_BANG_BANG Subject =~ /(!\*|\033\$[B@]).*(!\*|\033\([BJ]!)/
+# describe T_LJ_BANG_BANG !...!
+# header T_LJ_STAR Subject =~ /(\"\(|\*)/
+# describe T_LJ_STAR *
+# header T_LJ_KOUKOKU Subject =~ /9-9p/
+# describe T_LJ_KOUKOKU KOUKOKU
+# body T_LJ_HAISHINTEISHI /G\[\?\.(..)*(Dd;_|ITMW)/
+# describe T_LJ_HAISHINTEISHI Haishin Teishi
+# body T_LJ_KOUDOKUKAIJO /9XFI(..)*2r=\|/
+# describe T_LJ_KOUDOKUKAIJO Koudoku Kaijo
+# body T_LJ_MURYOU /L5NA/
+# describe T_LJ_MURYOU Muryou
+# header T_LJ_X_MAILER         X-Mailer =~ /(GpsMailer|SpireMail|IM2000 Version|Pinta Magazine|MultiMail|BSMTP DLL|E-Magazine|Direct Email|Achi-Kochi Mail|MagicalMail|InternetPost for Active Platform|Web Based Pronto)/
+# describe T_LJ_X_MAILER       spammer's choice of X-Mailer
+# header T_LJ_X_MAILER_U       X-MAILER =~ /Mail Explorer For Internet /
+# describe T_LJ_X_MAILER_U     spammer's choice of X-MAILER
+# header T_LJ_X_MAIL_AGENT     X-Mail-Agent =~ /(Extra Japan)/
+# describe T_LJ_X_MAIL_AGENT   spammer's choice of X-Mail-Agent
+# # also http://tlec.linux.or.jp/docs/user_prefs
+# meta T_LJ_MISYOUDAKUKOUKOKU T_LJ_MISYOUDAKU && T_LJ_KOUKOKU && T_LJ_STAR
+# describe T_LJ_MISYOUDAKUKOUKOKU T_LJ_MISYOUDAKU && T_LJ_KOUKOKU && T_LJ_STAR
