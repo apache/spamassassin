@@ -81,17 +81,23 @@ sub check_phrase_freqs {
 
   if (!defined($self->{phrase_score})) {
     _check_phrase_freqs($self, $body);
-
-    if ($self->{conf}->{detailed_phrase_score}) {
-      $self->test_log(sprintf ("phrase: %3d, hits: %s",
-                               $self->{phrase_score}, $self->{phrase_hits}));
-    } else {
-      $self->test_log(sprintf ("phrase: %3d"),
-                               $self->{phrase_score});
-    }
   }
-  return (($min == 0 || $self->{phrase_score} > $min) &&
-	  ($max eq "undef" || $self->{phrase_score} <= $max));
+  if (($min == 0 || $self->{phrase_score} > $min) &&
+      ($max eq "undef" || $self->{phrase_score} <= $max))
+  {
+      if ($self->{phrase_score}) {
+	  if ($self->{conf}->{detailed_phrase_score}) {
+	      $self->test_log(sprintf ("score: %d, hits: %s",
+				       $self->{phrase_score},
+				       $self->{phrase_hits}));
+	  }
+	  else {
+	      $self->test_log(sprintf ("score: %d", $self->{phrase_score}));
+	  }
+      }
+      return 1;
+  }
+  return 0;
 }
 
 ###########################################################################
