@@ -169,12 +169,10 @@ sub new {
       if (!@message) {
 	# No body is invalid
         $self->{'missing_head_body_separator'} = 1;
-        push(@message, "\n");
       }
       elsif (defined $boundary && $message[0] =~ /^--\Q$boundary\E(?:--|\s*$)/) {
         # No separator before the body is invalid
         $self->{'missing_head_body_separator'} = 1;
-	unshift(@message, "\n");
       }
     }
 
@@ -228,8 +226,8 @@ sub new {
       }
     }
 
-    # Ok, we found the header/body blank line ...
-    last if ($current =~ /^\r?$/);
+    # Ok, we found the header/body blank line or the header ends with this line...
+    last if ($current =~ /^\r?$/ || $self->{'missing_head_body_separator'});
 
     # not a continuation...
     $header = $current;
