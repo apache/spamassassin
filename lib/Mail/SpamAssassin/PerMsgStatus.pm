@@ -54,7 +54,6 @@ use Text::Wrap ();
 
 use Mail::SpamAssassin::EvalTests;
 use Mail::SpamAssassin::AutoWhitelist;
-use Mail::SpamAssassin::HTML;
 use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Received;
 use Mail::SpamAssassin::Util;
@@ -101,7 +100,6 @@ sub new {
   }
 
   # HTML parser stuff
-  $self->{html_mod} = Mail::SpamAssassin::HTML->new();
   $self->{html} = {};
 
   bless ($self, $class);
@@ -1003,6 +1001,7 @@ sub get_decoded_stripped_body_text_array {
       $text .= $text ? "\n$rnd" : $rnd;
 
       # TVD - if there are multiple parts, what should we do?
+      # right now, just use the last one ...
       $self->{html} = $p->{html_results} if ( $type eq 'text/html' );
     }
     else {
@@ -1477,6 +1476,11 @@ sub get_uri_list {
     # bug 2844
     # http://www.foo.biz?id=3 -> http://www.foo.biz/?id=3
     $uri =~ s/^(https?:\/\/[^\/\?]+)\?/$1\/?/;
+
+    # deal with encoding of chars ...
+    # this is just the set of printable chars, minus ' ' (aka: dec 33-126)
+    #
+    $uri =~ s/\&\#0*(3[3-9]|[4-9]\d|1[01]\d|12[0-6]);/sprintf "%c",$1/e;
 
     my($nuri, $unencoded, $encoded) = Mail::SpamAssassin::Util::URLEncode($uri);
     if ( $nuri ne $uri ) {

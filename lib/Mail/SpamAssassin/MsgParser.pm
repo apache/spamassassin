@@ -1,6 +1,24 @@
+# $Id: MIME.pm,v 1.8 2003/10/02 22:59:00 quinlan Exp $
+
+# <@LICENSE>
+# Copyright 2004 Apache Software Foundation
+# 
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# 
+#     http://www.apache.org/licenses/LICENSE-2.0
+# 
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+# </@LICENSE>
+
 =head1 NAME
 
-Mail::SpamAssassin::MsgParser - parse, decode, and render MIME body parts
+Mail::SpamAssassin::MsgParser - parse and store MIME formatted messages
 
 =head1 SYNOPSIS
 
@@ -11,7 +29,7 @@ an object with all of the MIME body parts included.  Those parts will
 be decoded as necessary, and text/html parts will be rendered into a
 standard text format, suitable for use in SpamAssassin.
 
-=head1 METHODS
+=head1 PUBLIC METHODS
 
 =over 4
 
@@ -27,17 +45,17 @@ use constant MAX_BODY_LINE_LENGTH =>        2048;
 
 =item parse()
 
-Unlike most modules, Mail::SpamAssassin::MsgParser will not return an
-object of the same type, but rather a Mail::SpamAssassin::MsgContainer object.
-To use it, simply call C<Mail::SpamAssassin::MsgParser->parse($msg)>,
-where $msg is a scalar with the entire contents of the mesage.
+Unlike most modules, Mail::SpamAssassin::MsgParser will not return
+an object of the same type, but rather a Mail::SpamAssassin::MsgContainer
+object.  To use it, simply call
+C<Mail::SpamAssassin::MsgParser->parse($msg)>, where $msg is either
+a scalar, an array reference, or a glob, with the entire contents
+of the mesage.
 
 The procedure used to parse a message is recursive and ends up generating
 a tree of M::SA::MsgContainer objects.  parse() will generate the parent node
 of the tree, then pass the body of the message to _parse_body() which begins
 the recursive process.
-
-This is the only public method available!
 
 =cut
 
@@ -110,6 +128,8 @@ sub parse {
   return $msg;
 }
 
+=head1 NON-PUBLIC METHODS
+
 =item _parse_body()
 
 _parse_body() passes the body part that was passed in onto the
@@ -157,7 +177,8 @@ sub _parse_body {
 
 =item _parse_multipart()
 
-Generate a root node, and for each child part call _parse_body().
+Generate a root node, and for each child part call _parse_body()
+to generate the tree.
 
 =cut
 
@@ -304,5 +325,6 @@ __END__
 =head1 SEE ALSO
 
 C<Mail::SpamAssassin>
+C<Mail::SpamAssassin::MsgContainer>
 C<spamassassin>
 

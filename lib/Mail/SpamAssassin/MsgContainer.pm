@@ -16,6 +16,23 @@
 # limitations under the License.
 # </@LICENSE>
 
+=head1 NAME
+
+Mail::SpamAssassin::MsgContainer - decode, render, and make available MIME message parts
+
+=head1 SYNOPSIS
+
+=head1 DESCRIPTION
+
+This module will encapsulate an email message and allow access to
+the various MIME message parts.
+
+=head1 PUBLIC METHODS
+
+=over 4
+
+=cut
+
 package Mail::SpamAssassin::MsgContainer;
 use strict;
 use MIME::Base64;
@@ -23,6 +40,10 @@ use Mail::SpamAssassin;
 use Mail::SpamAssassin::HTML;
 use MIME::Base64;
 use MIME::QuotedPrint;
+
+=item new()
+
+=cut
 
 # M::SA::MIME is an object method used to encapsulate a message's MIME part
 #
@@ -46,6 +67,10 @@ sub new {
 
   $self;
 }
+
+=item find_parts()
+
+=cut
 
 # Used to find any MIME parts whose simple content-type matches a given regexp
 # Searches it's own and any children parts.  Returns an array of MIME
@@ -78,6 +103,10 @@ sub find_parts {
 
   return @ret;
 }
+
+=item header()
+
+=cut
 
 # Store or retrieve headers from a given MIME object
 #
@@ -114,6 +143,10 @@ sub header {
   }
 }
 
+=item raw_header()
+
+=cut
+
 # Retrieve raw headers from a given MIME object
 #
 sub raw_header {
@@ -134,6 +167,10 @@ sub raw_header {
   }
 }
 
+=item add_body_part()
+
+=cut
+
 # Add a MIME child part to ourselves
 sub add_body_part {
   my($self, $part) = @_;
@@ -142,7 +179,7 @@ sub add_body_part {
   push @{ $self->{'body_parts'} }, $part;
 }
 
-=item _decode()
+=item decode()
 
 Decode base64 and quoted-printable parts.
 
@@ -195,14 +232,10 @@ sub decode {
   }
 }
 
-=item _html_near_start()
-
-Look at a text scalar and determine whether it should be rendered
-as text/html.  Based on a heuristic which simulates a certain common
-mail client.
-
-=cut
-
+# Look at a text scalar and determine whether it should be rendered
+# as text/html.  Based on a heuristic which simulates a certain
+# well-used/common mail client.
+# 
 sub _html_near_start {
   my ($pad) = @_;
 
@@ -269,6 +302,10 @@ sub rendered {
   return ($self->{'rendered_type'}, $self->{'rendered'});
 }
 
+=item content_summary()
+
+=cut
+
 # return an array with scalars describing mime parts
 sub content_summary {
   my($self, $recurse) = @_;
@@ -299,6 +336,10 @@ sub content_summary {
   }
 }
 
+=item delete_header()
+
+=cut
+
 sub delete_header {
   my($self, $hdr) = @_;
 
@@ -327,12 +368,8 @@ sub __decode_header {
   }
 }
 
-=item _decode_header()
-
-Decode base64 and quoted-printable in headers according to RFC2047.
-
-=cut
-
+# Decode base64 and quoted-printable in headers according to RFC2047.
+#
 sub _decode_header {
   my($header) = @_;
 
@@ -350,6 +387,10 @@ sub _decode_header {
   return $header;
 }
 
+=item get_pristine_header()
+
+=cut
+
 
 sub get_pristine_header {
   my ($self, $hdr) = @_;
@@ -364,7 +405,10 @@ sub get_pristine_header {
   }
 }
 
-#sub get { shift->get_header(@_); }
+=item get_header()
+
+=cut
+
 sub get_header {
   my ($self, $hdr, $raw) = @_;
   $raw ||= 0;
@@ -388,7 +432,10 @@ sub get_header {
   }
 }
 
-#sub header { shift->get_all_headers(@_); }
+=item get_all_headers()
+
+=cut
+
 sub get_all_headers {
   my ($self, $raw) = @_;
   $raw ||= 0;
@@ -407,7 +454,10 @@ sub get_all_headers {
   }
 }
 
-#sub body { return shift->get_body(@_); }
+=item get_body()
+
+=cut
+
 sub get_body {
   my ($self) = @_;
   my @ret = split(/^/m, $self->{pristine_body});
@@ -416,20 +466,36 @@ sub get_body {
 
 # ---------------------------------------------------------------------------
 
+=item get_pristine()
+
+=cut
+
 sub get_pristine {
   my ($self) = @_;
   return $self->{pristine_headers} . $self->{pristine_body};
 }
+
+=item get_pristine_body()
+
+=cut
 
 sub get_pristine_body {
   my ($self) = @_;
   return $self->{pristine_body};
 }
 
+=item as_string()
+
+=cut
+
 sub as_string {
   my ($self) = @_;
   return $self->get_all_headers(1) . "\n" . $self->{pristine_body};
 }
+
+=item ignore()
+
+=cut
 
 sub ignore {
   my ($self) = @_;

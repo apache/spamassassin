@@ -19,7 +19,6 @@ use strict;
 use Test;
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::MsgParser;
-#use Data::Dumper; $Data::Dumper::Indent=1;
 use vars qw($num_tests);
 
 $num_tests = 1;

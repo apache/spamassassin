@@ -12,6 +12,8 @@ BEGIN {
   plan tests => ((TEST_ENABLED && HAS_NET_DNS) ? 6 : 0),
 };
 
+exit unless (TEST_ENABLED && HAS_NET_DNS);
+
 # ---------------------------------------------------------------------------
 
 %patterns = (

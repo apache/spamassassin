@@ -367,6 +367,14 @@ sub _parse {
     # Simplifies regexps below...
     1 while s/^(\S+)\-(\S+)/$1_$2/g;
 
+    my($key, $value) = split(/\s+/, $_, 2);
+    $key = lc $key;
+    $value = '' unless ( defined $value );
+
+    # Do a better job untainting this info ...
+    $value =~ /^(.*)$/;
+    $value = $1;
+
 =head2 VERSION OPTIONS
 
 =over 4
@@ -380,8 +388,8 @@ ignore it.
 
 =cut
 
-    if (/^require_version\s+(.*)$/) {
-      my $req_version = $1;
+    if ( $key eq 'require_version' ) {
+      my $req_version = $value;
       $req_version =~ s/^\@\@VERSION\@\@$/$Mail::SpamAssassin::VERSION/;
       if ($Mail::SpamAssassin::VERSION != $req_version) {
         warn "configuration file \"$self->{currentfile}\" requires version ".
@@ -413,8 +421,8 @@ e.g.
 
 =cut
 
-    if(/^version_tag\s+(.*)$/) {
-      my $tag = lc($1);
+    if( $key eq 'version_tag' ) {
+      my $tag = lc($value);
       $tag =~ tr/a-z0-9./_/c;
       foreach (@Mail::SpamAssassin::EXTRA_VERSION) {
         if($_ eq $tag) {
@@ -463,8 +471,8 @@ e.g.
 
 =cut
 
-    if (/^whitelist_from\s+(.+)$/) {
-      $self->add_to_addrlist ('whitelist_from', split (' ', $1)); next;
+    if ( $key eq 'whitelist_from' ) {
+      $self->add_to_addrlist ('whitelist_from', split (/\s+/, $value)); next;
     }
 
 =item unwhitelist_from add@ress.com
@@ -482,8 +490,8 @@ e.g.
 
 =cut
 
-    if (/^unwhitelist_from\s+(.+)$/) {
-      $self->remove_from_addrlist ('whitelist_from', split (' ', $1)); next;
+    if ( $key eq 'unwhitelist_from' ) {
+      $self->remove_from_addrlist ('whitelist_from', split (/\s+/, $value)); next;
     }
 
 =item whitelist_from_rcvd addr@lists.sourceforge.net sourceforge.net
@@ -516,12 +524,12 @@ these are often targets for spammer spoofing.
 
 =cut
 
-    if (/^whitelist_from_rcvd\s+(\S+)\s+(\S+)$/) {
-      $self->add_to_addrlist_rcvd ('whitelist_from_rcvd', $1, $2);
+    if ( $key eq 'whitelist_from_rcvd' ) {
+      $self->add_to_addrlist_rcvd ('whitelist_from_rcvd', split(/\s+/, $value));
       next;
     }
-    if (/^def_whitelist_from_rcvd\s+(\S+)\s+(\S+)$/) {
-      $self->add_to_addrlist_rcvd ('def_whitelist_from_rcvd', $1, $2);
+    if ( $key eq 'def_whitelist_from_rcvd' ) {
+      $self->add_to_addrlist_rcvd ('def_whitelist_from_rcvd', split(/\s+/, $value));
       next;
     }
 
@@ -542,9 +550,9 @@ e.g.
 
 =cut
 
-    if (/^unwhitelist_from_rcvd\s+(.+)$/) {
-      $self->remove_from_addrlist_rcvd('whitelist_from_rcvd', split (' ', $1));
-      $self->remove_from_addrlist_rcvd('def_whitelist_from_rcvd', split (' ', $1));
+    if ( $key eq 'unwhitelist_from_rcvd' ) {
+      $self->remove_from_addrlist_rcvd('whitelist_from_rcvd', split (/\s+/, $value));
+      $self->remove_from_addrlist_rcvd('def_whitelist_from_rcvd', split (/\s+/, $value));
       next;
     }
 
@@ -555,8 +563,8 @@ non-spam, but which the user doesn't want.  Same format as C<whitelist_from>.
 
 =cut
 
-    if (/^blacklist_from\s+(.+)$/) {
-      $self->add_to_addrlist ('blacklist_from', split (' ', $1)); next;
+    if ( $key eq 'blacklist_from' ) {
+      $self->add_to_addrlist ('blacklist_from', split (/\s+/, $value)); next;
     }
 
 =item unblacklist_from add@ress.com
@@ -572,8 +580,8 @@ e.g.
 
 =cut
 
-    if (/^unblacklist_from\s+(.+)$/) {
-      $self->remove_from_addrlist ('blacklist_from', split (' ', $1)); next;
+    if ( $key eq 'unblacklist_from' ) {
+      $self->remove_from_addrlist ('blacklist_from', split (/\s+/, $value)); next;
     }
 
 
@@ -599,14 +607,14 @@ See above.
 
 =cut
 
-    if (/^whitelist_to\s+(.+)$/) {
-      $self->add_to_addrlist ('whitelist_to', split (' ', $1)); next;
+    if ( $key eq 'whitelist_to' ) {
+      $self->add_to_addrlist ('whitelist_to', split (/\s+/, $value)); next;
     }
-    if (/^more_spam_to\s+(.+)$/) {
-      $self->add_to_addrlist ('more_spam_to', split (' ', $1)); next;
+    if ( $key eq 'more_spam_to' ) {
+      $self->add_to_addrlist ('more_spam_to', split (/\s+/, $value)); next;
     }
-    if (/^all_spam_to\s+(.+)$/) {
-      $self->add_to_addrlist ('all_spam_to', split (' ', $1)); next;
+    if ( $key eq 'all_spam_to' ) {
+      $self->add_to_addrlist ('all_spam_to', split (/\s+/, $value)); next;
     }
 
 =item blacklist_to add@ress.com
@@ -617,8 +625,8 @@ be blacklisted.  Same format as C<blacklist_from>.
 
 =cut
 
-    if (/^blacklist_to\s+(.+)$/) {
-      $self->add_to_addrlist ('blacklist_to', split (' ', $1)); next;
+    if ( $key eq 'blacklist_to' ) {
+      $self->add_to_addrlist ('blacklist_to', split (/\s+/, $value)); next;
     }
 
 =back
@@ -640,8 +648,8 @@ choose to do so, only delete messages with an exceptionally high score such as
 
 =cut
 
-    if (/^required_hits\s+(\S+)$/) {
-      $self->{required_hits} = $1+0.0; next;
+    if ( $key eq 'required_hits' ) {
+      $self->{required_hits} = $value+0.0; next;
     }
 
 =item score SYMBOLIC_TEST_NAME n.nn [ n.nn n.nn n.nn ]
@@ -675,8 +683,8 @@ more than 22 characters.
 
 =cut
 
-  if (my ($rule, $scores) = /^score\s+(\S+)\s+(.*)$/) {
-    my @scores = ($scores =~ /(\-*[\d\.]+)(?:\s+|$)/g);
+  if ( $key eq 'score' ) {
+    my($rule, @scores) = split(/\s+/, $value);
     if (scalar @scores == 4) {
       for my $index (0..3) {
 	$self->{scoreset}->[$index]->{$rule} = $scores[$index] + 0.0;
@@ -711,9 +719,11 @@ STRING. (They will be converted to square brackets.)
 
 =cut
 
-    if (/^rewrite_header\s+(subject|from|to)\s+(.+)$/i) {
-      my $hdr = ucfirst(lc($1));
-      my $string = $2;
+    if ( $key eq 'rewrite_header' ) {
+      # could check $hdr to be /subject|from|to/, but rest of the
+      # code already handles that ...
+      my($hdr, $string) = split(/\s+/, $value, 2);
+      $hdr = ucfirst(lc($hdr));
       $string =~ tr/()/[]/;
       $self->{rewrite_header}->{$hdr} = $string;
       next;
@@ -731,8 +741,8 @@ long lines).
 
 =cut
 
-   if (/^fold_headers\s+(\d+)$/) {
-     $self->{fold_headers} = $1+0; next;
+   if ( $key eq 'fold_headers' ) {
+     $self->{fold_headers} = $value+0; next;
    }
 
 =item add_header { spam | ham | all } header_name string
@@ -767,6 +777,7 @@ Here are some examples (these are the defaults in 2.60):
 
 =cut
 
+    # easier to do RE here ...
     if (/^add_header\s+(ham|spam|all)\s+([A-Za-z0-9_-]+)\s+(.*?)\s*$/) {
       my ($type, $name, $line) = ($1, $2, $3);
       if ($line =~ /^"(.*)"$/) {
@@ -834,7 +845,7 @@ determine that SpamAssassin is running.
 
 =cut
 
-    if (/^clear_headers\s*$/) {
+    if ( $key eq 'clear_headers' ) {
       for my $name (keys %{ $self->{headers_ham} }) {
 	delete $self->{headers_ham}->{$name} if $name ne "Checker-Version";
       }
@@ -854,8 +865,8 @@ separated by spaces, or you can just use multiple lines.
 
 =cut
 
-   if (/^report_safe_copy_headers\s+(.+?)\s*$/) {
-     push(@{$self->{report_safe_copy_headers}}, split(/\s+/, $1));
+   if ( $key eq 'report_safe_copy_headers' ) {
+     push(@{$self->{report_safe_copy_headers}}, split(/\s+/, $value));
      next;
    }
 
@@ -882,8 +893,8 @@ B<report_safe> to 0.
 
 =cut
 
-    if (/^report_safe\s+(\d+)$/) {
-      $self->{report_safe} = $1+0;
+    if ( $key eq 'report_safe' ) {
+      $self->{report_safe} = $value+0;
       if (! $self->{report_safe}) {
 	$self->{headers_spam}->{"Report"} = "_REPORT_";
       }
@@ -897,8 +908,8 @@ is attached to spam mail messages.
 
 =cut
 
-    if (/^report_charset\s*(.*)$/) {
-      $self->{report_charset} = $1; next;
+    if ( $key eq 'report_charset' ) {
+      $self->{report_charset} = $value; next;
     }
 
 =item report ...some text for a report...
@@ -915,8 +926,8 @@ Tags can be included as explained above.
 
 =cut
 
-    if (/^report\b\s*(.*?)\s*$/) {
-      my $report = $1;
+    if ( $key eq 'report' ) {
+      my $report = $value;
       if ( $report =~ /^"(.*?)"$/ ) {
         $report = $1;
       }
@@ -930,7 +941,7 @@ Clear the report template.
 
 =cut
 
-    if (/^clear_report_template$/) {
+    if ( $key eq 'clear_report_template' ) {
       $self->{report_template} = ''; next;
     }
 
@@ -942,8 +953,8 @@ of the system the scanner is running on is also included.
 
 =cut
 
-    if (/^report_contact\s+(.*?)\s*$/) {
-      $self->{report_contact} = $1; next;
+    if ( $key eq 'report_contact' ) {
+      $self->{report_contact} = $value; next;
     }
 
 =item unsafe_report ...some text for a report...
@@ -959,8 +970,8 @@ Tags can be used in this template (see above for details).
 
 =cut
 
-    if (/^unsafe_report\b\s*(.*?)$/) {
-      my $report = $1;
+    if ( $key eq 'unsafe_report' ) {
+      my $report = $value;
       if ( $report =~ /^"(.*?)"$/ ) {
         $report = $1;
       }
@@ -974,7 +985,7 @@ Clear the unsafe_report template.
 
 =cut
 
-    if (/^clear_unsafe_report_template$/) {
+    if ( $key eq 'clear_unsafe_report_template' ) {
       $self->{unsafe_report_template} = ''; next;
     }
 
@@ -989,8 +1000,8 @@ Unfortunately tags can not be used with this option.
 
 =cut
 
-    if (/^spamtrap\s*(.*?)$/) {
-      my $report = $1;
+    if ( $key eq 'spamtrap' ) {
+      my $report = $value;
       if ( $report =~ /^"(.*?)"$/ ) {
         $report = $1;
       }
@@ -1003,7 +1014,7 @@ Clear the spamtrap template.
 
 =cut
 
-    if (/^clear_spamtrap_template$/) {
+    if ( $key eq 'clear_spamtrap_template' ) {
       $self->{spamtrap_template} = ''; next;
     }
 
@@ -1019,8 +1030,9 @@ length to no more than 50 characters.
 
 =cut
 
-    if (/^describe\s+(\S+)\s+(.*)$/) {
-      $self->{descriptions}->{$1} = $2; next;
+    if ( $key eq 'describe' ) {
+      my($k,$v) = split(/\s+/, $value, 2);
+      $self->{descriptions}->{$k} = $v; next;
     }
 
 =back
@@ -1193,8 +1205,8 @@ Select the languages to allow from the list below:
 
 =cut
 
-    if (/^ok_languages\s+(.+)$/) {
-      $self->{ok_languages} = $1; next;
+    if ( $key eq 'ok_languages' ) {
+      $self->{ok_languages} = $value; next;
     }
 
 =back
@@ -1247,8 +1259,8 @@ Select the locales to allow from the list below:
 
 =cut
 
-    if (/^ok_locales\s+(.+)$/) {
-      $self->{ok_locales} = $1; next;
+    if ( $key eq 'ok_locales' ) {
+      $self->{ok_locales} = $value; next;
     }
 
 =back
@@ -1263,8 +1275,8 @@ Whether to use DCC, if it is available.
 
 =cut
 
-    if (/^use_dcc\s+(\d+)$/) {
-      $self->{use_dcc} = $1; next;
+    if ( $key eq 'use_dcc' ) {
+      $self->{use_dcc} = $value+0; next;
     }
 
 =item dcc_timeout n              (default: 10)
@@ -1274,8 +1286,8 @@ the results
 
 =cut
 
-    if (/^dcc_timeout\s+(\d+)$/) {
-      $self->{dcc_timeout} = $1+0; next;
+    if ( $key eq 'dcc_timeout' ) {
+      $self->{dcc_timeout} = $value+0; next;
     }
 
 =item dcc_body_max NUMBER
@@ -1296,16 +1308,16 @@ The default is 999999 for all these options.
 
 =cut
 
-    if (/^dcc_body_max\s+(\d+)/) {
-      $self->{dcc_body_max} = $1+0; next;
+    if ( $key eq 'dcc_body_max' ) {
+      $self->{dcc_body_max} = $value+0; next;
     }
 
-    if (/^dcc_fuz1_max\s+(\d+)/) {
-      $self->{dcc_fuz1_max} = $1+0; next;
+    if ( $key eq 'dcc_fuz1_max' ) {
+      $self->{dcc_fuz1_max} = $value+0; next;
     }
 
-    if (/^dcc_fuz2_max\s+(\d+)/) {
-      $self->{dcc_fuz2_max} = $1+0; next;
+    if ( $key eq 'dcc_fuz2_max' ) {
+      $self->{dcc_fuz2_max} = $value+0; next;
     }
 
 
@@ -1315,8 +1327,8 @@ Whether to use Pyzor, if it is available.
 
 =cut
 
-    if (/^use_pyzor\s+(\d+)$/) {
-      $self->{use_pyzor} = $1; next;
+    if ( $key eq 'use_pyzor' ) {
+      $self->{use_pyzor} = $value+0; next;
     }
 
 =item pyzor_timeout n              (default: 10)
@@ -1326,8 +1338,8 @@ the results.
 
 =cut
 
-    if (/^pyzor_timeout\s+(\d+)$/) {
-      $self->{pyzor_timeout} = $1+0; next;
+    if ( $key eq 'pyzor_timeout' ) {
+      $self->{pyzor_timeout} = $value+0; next;
     }
 
 =item pyzor_max NUMBER
@@ -1340,8 +1352,8 @@ The default is 5.
 
 =cut
 
-    if (/^pyzor_max\s+(\d+)/) {
-      $self->{pyzor_max} = $1+0; next;
+    if ( $key eq 'pyzor_max' ) {
+      $self->{pyzor_max} = $value+0; next;
     }
 
 =item trusted_networks ip.add.re.ss[/mask] ...   (default: none)
@@ -1396,8 +1408,8 @@ then it's trusted
 
 =cut
 
-    if (/^trusted_networks\s+(.+)$/) {
-      foreach my $net (split (' ', $1)) {
+    if ( $key eq 'trusted_networks' ) {
+      foreach my $net (split (/\s+/, $value)) {
 	$self->{trusted_networks}->add_cidr ($net);
       }
       next;
@@ -1409,7 +1421,7 @@ Empty the list of trusted networks.
 
 =cut
 
-    if (/^clear_trusted_networks$/) {
+    if ( $key eq 'clear_trusted_networks' ) {
       $self->{trusted_networks} = Mail::SpamAssassin::NetSet->new(); next;
     }
 
@@ -1431,8 +1443,8 @@ SpamAssassin is running will be considered external.
 
 =cut
 
-    if (/^internal_networks\s+(.+)$/) {
-      foreach my $net (split (' ', $1)) {
+    if ( $key eq 'internal_networks' ) {
+      foreach my $net (split (/\s+/, $value)) {
 	$self->{internal_networks}->add_cidr ($net);
       }
       next;
@@ -1444,7 +1456,7 @@ Empty the list of internal networks.
 
 =cut
 
-    if (/^clear_internal_networks$/) {
+    if ( $key eq 'clear_internal_networks' ) {
       $self->{internal_networks} = Mail::SpamAssassin::NetSet->new(); next;
     }
 
@@ -1454,8 +1466,8 @@ Whether to use Razor version 2, if it is available.
 
 =cut
 
-    if (/^use_razor2\s+(\d+)$/) {
-      $self->{use_razor2} = $1; next;
+    if ( $key eq 'use_razor2' ) {
+      $self->{use_razor2} = $value+0; next;
     }
 
 =item razor_timeout n		(default: 10)
@@ -1465,8 +1477,8 @@ the results
 
 =cut
 
-    if (/^razor_timeout\s+(\d+)$/) {
-      $self->{razor_timeout} = $1; next;
+    if ( $key eq 'razor_timeout' ) {
+      $self->{razor_timeout} = $value+0; next;
     }
 
 =item use_bayes ( 0 | 1 )		(default: 1)
@@ -1475,8 +1487,8 @@ Whether to use the naive-Bayesian-style classifier built into SpamAssassin.
 
 =cut
 
-    if (/^use_bayes\s+(\d+)$/) {
-      $self->{use_bayes} = $1; next;
+    if ( $key eq 'use_bayes' ) {
+      $self->{use_bayes} = $value+0; next;
     }
 
 =item skip_rbl_checks { 0 | 1 }   (default: 0)
@@ -1486,8 +1498,8 @@ for you, set this to 1.
 
 =cut
 
-    if (/^skip_rbl_checks\s+(\d+)$/) {
-      $self->{skip_rbl_checks} = $1+0; next;
+    if ( $key eq 'skip_rbl_checks' ) {
+      $self->{skip_rbl_checks} = $value+0; next;
     }
 
 =item rbl_timeout n		(default: 15)
@@ -1512,8 +1524,8 @@ within 5 seconds of the beginning of the check or they will be timed out.
 
 =cut
 
-    if (/^rbl_timeout\s+(\d+)$/) {
-      $self->{rbl_timeout} = $1+0; next;
+    if ( $key eq 'rbl_timeout' ) {
+      $self->{rbl_timeout} = $value+0; next;
     }
 
 =item check_mx_attempts n	(default: 2)
@@ -1523,8 +1535,8 @@ times, waiting 5 seconds each time.
 
 =cut
 
-    if (/^check_mx_attempts\s+(\S+)$/) {
-      $self->{check_mx_attempts} = $1+0; next;
+    if ( $key eq 'check_mx_attempts' ) {
+      $self->{check_mx_attempts} = $value+0; next;
     }
 
 =item check_mx_delay n		(default: 5)
@@ -1533,8 +1545,8 @@ How many seconds to wait before retrying an MX check.
 
 =cut
 
-    if (/^check_mx_delay\s+(\S+)$/) {
-      $self->{check_mx_delay} = $1+0; next;
+    if ( $key eq 'check_mx_delay' ) {
+      $self->{check_mx_delay} = $value+0; next;
     }
 
 
@@ -1557,6 +1569,7 @@ associated MX record.
 
 =cut
 
+    # RE is easier for now ...
     if (/^dns_available\s+(yes|no|test|test:\s+.+)$/) {
       $self->{dns_available} = ($1 or "test"); next;
     }
@@ -1567,8 +1580,8 @@ Whether to use hashcash, if it is available.
 
 =cut
 
-    if (/^use_hashcash\s+(\d+)$/) {
-      $self->{use_hashcash} = $1; next;
+    if ( $key eq 'use_hashcash' ) {
+      $self->{use_hashcash} = $value+0; next;
     }
 
 =item hashcash_accept add@ress.com ...
@@ -1589,8 +1602,8 @@ C<hashcash_accept> lines is also OK.
 
 =cut
 
-    if (/^hashcash_accept\s+(.+)$/) {
-      $self->add_to_addrlist ('hashcash_accept', split (' ', $1)); next;
+    if ( $key eq 'hashcash_accept' ) {
+      $self->add_to_addrlist ('hashcash_accept', split (/\s+/, $value)); next;
     }
 
 =item hashcash_doublespend_path /path/to/file	(default: ~/.spamassassin/hashcash_seen)
@@ -1605,8 +1618,8 @@ suitable for sharing between multiple users.
 
 =cut
 
-    if (/^hashcash_doublespend_path\s+(.*)$/) {
-      $self->{hashcash_doublespend_path} = $1; next;
+    if ( $key eq 'hashcash_doublespend_path' ) {
+      $self->{hashcash_doublespend_path} = $value; next;
     }
 
 =item hashcash_doublespend_file_mode		(default: 0700)
@@ -1619,8 +1632,8 @@ not have any execute bits set (the umask is set to 111).
 
 =cut
 
-    if (/^hashcash_doublespend_file_mode\s+(.*)$/) {
-      $self->{hashcash_doublespend_file_mode} = $1; next;
+    if ( $key eq 'hashcash_doublespend_file_mode' ) {
+      $self->{hashcash_doublespend_file_mode} = $value+0; next;
     }
 
 =back
@@ -1646,8 +1659,8 @@ mean; C<factor> = 0 mean just use the calculated score.
 
 =cut
 
-    if (/^auto_whitelist_factor\s+(.*)$/) {
-      $self->{auto_whitelist_factor} = $1; next;
+    if ( $key eq 'auto_whitelist_factor' ) {
+      $self->{auto_whitelist_factor} = $value+0; next;
     }
 
 =item bayes_auto_learn ( 0 | 1 )      (default: 1)
@@ -1668,8 +1681,8 @@ likely that the message check and auto-train scores will be different.
 
 =cut
 
-    if (/^(?:bayes_)?auto_learn\s+(.*)$/) {
-      $self->{bayes_auto_learn} = $1+0; next;
+    if ( $key eq 'bayes_auto_learn' ) {
+      $self->{bayes_auto_learn} = $value+0; next;
     }
 
 =item bayes_auto_learn_threshold_nonspam n.nn	(default: 0.1)
@@ -1679,8 +1692,8 @@ SpamAssassin's learning systems automatically as a non-spam message.
 
 =cut
 
-    if (/^(?:bayes_)?auto_learn_threshold_nonspam\s+(.*)$/) {
-      $self->{bayes_auto_learn_threshold_nonspam} = $1+0; next;
+    if ( $key eq 'bayes_auto_learn_threshold_nonspam' ) {
+      $self->{bayes_auto_learn_threshold_nonspam} = $value+0; next;
     }
 
 =item bayes_auto_learn_threshold_spam n.nn	(default: 12.0)
@@ -1694,8 +1707,8 @@ working value for this option is 6.
 
 =cut
 
-    if (/^(?:bayes_)?auto_learn_threshold_spam\s+(.*)$/) {
-      $self->{bayes_auto_learn_threshold_spam} = $1+0; next;
+    if ( $key eq 'bayes_auto_learn_threshold_spam' ) {
+      $self->{bayes_auto_learn_threshold_spam} = $value+0; next;
     }
 
 =item bayes_ignore_header header_name
@@ -1712,8 +1725,8 @@ setting.  Example:
 
 =cut
 
-    if (/^bayes_ignore_header\s+(.*)$/) {
-      push (@{$self->{bayes_ignore_headers}}, $1); next;
+    if ( $key eq 'bayes_ignore_header' ) {
+      push (@{$self->{bayes_ignore_headers}}, $value); next;
     }
 
 =item bayes_min_ham_num			(Default: 200)
@@ -1726,12 +1739,12 @@ spam, but you can tune these up or down with these two settings.
 
 =cut
 
-    if (/^bayes_min_ham_num\s+(.*)$/) {
-      $self->{bayes_min_ham_num} = $1+0; next;
+    if ( $key eq 'bayes_min_ham_num' ) {
+      $self->{bayes_min_ham_num} = $value+0; next;
     }
 
-    if (/^bayes_min_spam_num\s+(.*)$/) {
-      $self->{bayes_min_spam_num} = $1+0; next;
+    if ( $key eq 'bayes_min_spam_num' ) {
+      $self->{bayes_min_spam_num} = $value+0; next;
     }
 
 =item bayes_learn_during_report         (Default: 1)
@@ -1742,8 +1755,8 @@ this option to 0.
 
 =cut
 
-    if (/^bayes_learn_during_report\s+(.*)$/) {
-      $self->{bayes_learn_during_report} = $1+0; next;
+    if ( $key eq 'bayes_learn_during_report' ) {
+      $self->{bayes_learn_during_report} = $value+0; next;
     }
 
 =back
@@ -1756,6 +1769,8 @@ this option to 0.
 By default, the subject lines of suspected spam will not be tagged.
 This can be enabled here, but should instead be done with the
 C<rewrite_header> option described above.
+
+The use of this option is deprecated.
 
 =cut
 
@@ -1912,6 +1927,8 @@ add_header all Pyzor _PYZOR_
       next;
     }
 
+##############
+
 =item pyzor_options [option ...]
 
 Additional options for the pyzor(1) command line.   Note that for security,
@@ -1919,6 +1936,7 @@ only characters in the ranges A-Z, a-z, 0-9, -, _ and / are permitted.
 
 =cut
 
+    # leave as RE for now?
     if (/^pyzor_options\s+([-A-Za-z0-9_\/ ]+)$/) {
       $self->{pyzor_options} = $1;
       next;
@@ -1941,8 +1959,8 @@ in a future version.  Please use the C<trusted_networks> option instead
 
 =cut
 
-    if (/^num_check_received\s+(\d+)$/) {
-      $self->{num_check_received} = $1+0; next;
+    if ( $key eq 'num_check_received' ) {
+      $self->{num_check_received} = $value+0; next;
     }
 
 ###########################################################################
@@ -1994,8 +2012,8 @@ existing system rule from a C<user_prefs> file with C<spamd>.
 
 =cut
 
-    if (/^allow_user_rules\s+(\d+)$/) {
-      $self->{allow_user_rules} = $1+0;
+    if ( $key eq 'allow_user_rules' ) {
+      $self->{allow_user_rules} = $value+0;
       dbg( ($self->{allow_user_rules} ? "Allowing":"Not allowing") . " user rules!"); next;
     }
 
@@ -2119,6 +2137,7 @@ single A record containing a bitmask of results.
 
 =cut
 
+    # easier as RE now
     if (/^header\s+(\S+)\s+(?:rbl)?eval:(.*)$/) {
       my ($name, $fn) = ($1, $2);
 
@@ -2135,8 +2154,8 @@ single A record containing a bitmask of results.
       $self->{descriptions}->{$1} = "Found a $2 header";
       next;
     }
-    if (/^header\s+(\S+)\s+(.*)$/) {
-      $self->add_test ($1, $2, TYPE_HEAD_TESTS);
+    if ( $key eq 'header' ) {
+      $self->add_test (split(/\s+/,$value,2), TYPE_HEAD_TESTS);
       next;
     }
 
@@ -2157,12 +2176,13 @@ Define a body eval test.  See above.
 
 =cut
 
+    # easier as RE right now
     if (/^body\s+(\S+)\s+eval:(.*)$/) {
       $self->add_test ($1, $2, TYPE_BODY_EVALS);
       next;
     }
-    if (/^body\s+(\S+)\s+(.*)$/) {
-      $self->add_test ($1, $2, TYPE_BODY_TESTS);
+    if ( $key eq 'body' ) {
+      $self->add_test (split(/\s+/,$value,2), TYPE_BODY_TESTS);
       next;
     }
 
@@ -2183,8 +2203,8 @@ points of the URI, and will also be faster.
 #      $self->add_test ($1, $2, TYPE_URI_EVALS);
 #      next;
 #    }
-    if (/^uri\s+(\S+)\s+(.*)$/) {
-      $self->add_test ($1, $2, TYPE_URI_TESTS);
+    if ( $key eq 'uri' ) {
+      $self->add_test (split(/\s+/,$value,2), TYPE_URI_TESTS);
       next;
     }
 
@@ -2202,12 +2222,13 @@ Define a raw-body eval test.  See above.
 
 =cut
 
+    # easier as RE now
     if (/^rawbody\s+(\S+)\s+eval:(.*)$/) {
       $self->add_test ($1, $2, TYPE_RAWBODY_EVALS);
       next;
     }
-    if (/^rawbody\s+(\S+)\s+(.*)$/) {
-      $self->add_test ($1, $2, TYPE_RAWBODY_TESTS);
+    if ( $key eq 'rawbody' ) {
+      $self->add_test (split(/\s+/,$value,2), TYPE_RAWBODY_TESTS);
       next;
     }
 
@@ -2225,12 +2246,13 @@ Define a full-body eval test.  See above.
 
 =cut
 
+    # easier as RE now
     if (/^full\s+(\S+)\s+eval:(.*)$/) {
       $self->add_test ($1, $2, TYPE_FULL_EVALS);
       next;
     }
-    if (/^full\s+(\S+)\s+(.*)$/) {
-      $self->add_test ($1, $2, TYPE_FULL_TESTS);
+    if ( $key eq 'full' ) {
+      $self->add_test (split(/\s+/,$value,2), TYPE_FULL_TESTS);
       next;
     }
 
@@ -2262,8 +2284,8 @@ ignore these for scoring.
 
 =cut
 
-    if (/^meta\s+(\S+)\s+(.*)$/) {
-      $self->add_test ($1, $2, TYPE_META_TESTS);
+    if ( $key eq 'meta' ) {
+      $self->add_test (split(/\s+/,$value,2), TYPE_META_TESTS);
       next;
     }
 
@@ -2298,8 +2320,9 @@ The test requires training before it can be used.
 
 =cut
 
-    if (/^tflags\s+(\S+)\s+(.+)$/) {
-      $self->{tflags}->{$1} = $2; next;
+    if ( $key eq 'tflags' ) {
+      my($k,$v) = split(/\s+/, $value, 2);
+      $self->{tflags}->{$k} = $v; next;
       next;     # ignored in SpamAssassin modules
     }
 
@@ -2330,6 +2353,7 @@ general running of SpamAssassin.
 
 =cut
 
+    # RE ...
     if (/^test\s+(\S+)\s+(ok|fail)\s+(.*)$/) {
       $self->add_regression_test($1, $2, $3); next;
     }
@@ -2341,8 +2365,8 @@ Currently this is left to Razor to decide.
 
 =cut
 
-    if (/^razor_config\s+(.*)$/) {
-      $self->{razor_config} = $1; next;
+    if ( $key eq 'razor_config' ) {
+      $self->{razor_config} = $value; next;
     }
 
 =item pyzor_path STRING
@@ -2354,8 +2378,8 @@ use this, as the current PATH will have been cleared.
 
 =cut
 
-    if (/^pyzor_path\s+(.+)$/) {
-      $self->{pyzor_path} = $1; next;
+    if ( $key eq 'pyzor_path' ) {
+      $self->{pyzor_path} = $value; next;
     }
 
 =item dcc_home STRING
@@ -2368,8 +2392,8 @@ is found in C<dcc_home>, it will use that interface that instead of C<dccproc>.
 
 =cut
 
-    if (/^dcc[-_]home\s+(.+)$/) {
-      $self->{dcc_home} = $1; next;
+    if ( $key eq 'dcc_home' ) {
+      $self->{dcc_home} = $value; next;
     }
 
 =item dcc_dccifd_path STRING
@@ -2380,8 +2404,8 @@ If a C<dccifd> socket is found, it will use it instead of C<dccproc>.
 
 =cut
 
-    if (/^dcc[-_]dccifd[-_]path\s+(.+)$/) {
-      $self->{dcc_dccifd_path} = $1; next;
+    if ( $key eq 'dcc_dccifd_path' ) {
+      $self->{dcc_dccifd_path} = $value; next;
     }
 
 =item dcc_path STRING
@@ -2393,8 +2417,8 @@ use this, as the current PATH will have been cleared.
 
 =cut
 
-    if (/^dcc_path\s+(.+)$/) {
-      $self->{dcc_path} = $1; next;
+    if ( $key eq 'dcc_path' ) {
+      $self->{dcc_path} = $value; next;
     }
 
 =item dcc_options options
@@ -2406,6 +2430,7 @@ The default is C<-R>
 
 =cut
 
+    # RE ...
     if (/^dcc_options\s+([A-Z -]+)/) {
       $self->{dcc_options} = $1; next;
     }
@@ -2425,8 +2450,8 @@ whitelist entries added to your config files.
 
 =cut
 
-    if (/^use_auto_whitelist\s+(\d+)$/) {
-      $self->{use_auto_whitelist} = $1; next;
+    if ( $key eq 'use_auto_whitelist' ) {
+      $self->{use_auto_whitelist} = $value+0; next;
     }
 
 =item auto_whitelist_factory module (default: Mail::SpamAssassin::DBBasedAddrList)
@@ -2435,8 +2460,8 @@ Select alternative whitelist factory module.
 
 =cut
 
-    if (/^auto_whitelist_factory\s+(.*)$/) {
-      $self->{auto_whitelist_factory} = $1; next;
+    if ( $key eq 'auto_whitelist_factory' ) {
+      $self->{auto_whitelist_factory} = $value; next;
     }
 
 =item auto_whitelist_path /path/to/file	(default: ~/.spamassassin/auto-whitelist)
@@ -2447,8 +2472,8 @@ SpamAssassin use, you may want to share this across all users.
 
 =cut
 
-    if (/^auto_whitelist_path\s+(.*)$/) {
-      $self->{auto_whitelist_path} = $1; next;
+    if ( $key eq 'auto_whitelist_path' ) {
+      $self->{auto_whitelist_path} = $value; next;
     }
 
 =item bayes_path /path/to/file	(default: ~/.spamassassin/bayes)
@@ -2466,8 +2491,8 @@ database per user.)
 
 =cut
 
-    if (/^bayes_path\s+(.*)$/) {
-      $self->{bayes_path} = $1; next;
+    if ( $key eq 'bayes_path' ) {
+      $self->{bayes_path} = $value; next;
     }
 
 =item auto_whitelist_file_mode		(default: 0700)
@@ -2480,8 +2505,8 @@ not have any execute bits set (the umask is set to 111).
 
 =cut
 
-    if (/^auto_whitelist_file_mode\s+(.*)$/) {
-      $self->{auto_whitelist_file_mode} = $1; next;
+    if ( $key eq 'auto_whitelist_file_mode' ) {
+      $self->{auto_whitelist_file_mode} = $value+0; next;
     }
 
 =item bayes_file_mode		(default: 0700)
@@ -2494,8 +2519,8 @@ not have any execute bits set (the umask is set to 111).
 
 =cut
 
-    if (/^bayes_file_mode\s+(.*)$/) {
-      $self->{bayes_file_mode} = $1; next;
+    if ( $key eq 'bayes_file_mode' ) {
+      $self->{bayes_file_mode} = $value+0; next;
     }
 
 =item bayes_use_hapaxes		(default: 1)
@@ -2506,8 +2531,8 @@ increases database size by about a factor of 8 to 10.
 
 =cut
 
-    if (/^bayes_use_hapaxes\s+(.*)$/) {
-      $self->{bayes_use_hapaxes} = $1; next;
+    if ( $key eq 'bayes_use_hapaxes' ) {
+      $self->{bayes_use_hapaxes} = $value+0; next;
     }
 
 =item bayes_use_chi2_combining		(default: 1)
@@ -2519,8 +2544,8 @@ in corpus size etc.
 
 =cut
 
-    if (/^bayes_use_chi2_combining\s+(.*)$/) {
-      $self->{bayes_use_chi2_combining} = $1; next;
+    if ( $key eq 'bayes_use_chi2_combining' ) {
+      $self->{bayes_use_chi2_combining} = $value+0; next;
     }
 
 =item bayes_journal_max_size		(default: 102400)
@@ -2532,8 +2557,8 @@ syncing will not occur.
 
 =cut
 
-    if (/^bayes_journal_max_size\s+(\d+)$/) {
-      $self->{bayes_journal_max_size} = $1; next;
+    if ( $key eq 'bayes_journal_max_size' ) {
+      $self->{bayes_journal_max_size} = $value+0; next;
     }
 
 =item bayes_expiry_max_db_size		(default: 150000)
@@ -2545,8 +2570,8 @@ equivalent to a 8Mb database file.
 
 =cut
 
-    if (/^bayes_expiry_max_db_size\s+(\d+)$/) {
-      $self->{bayes_expiry_max_db_size} = $1; next;
+    if ( $key eq 'bayes_expiry_max_db_size' ) {
+      $self->{bayes_expiry_max_db_size} = $value+0; next;
     }
 
 =item bayes_auto_expire       		(default: 1)
@@ -2557,8 +2582,8 @@ database surpasses the bayes_expiry_max_db_size value.
 
 =cut
 
-    if (/^bayes_auto_expire\s+(\d+)$/) {
-      $self->{bayes_auto_expire} = $1; next;
+    if ( $key eq 'bayes_auto_expire' ) {
+      $self->{bayes_auto_expire} = $value+0; next;
     }
 
 =item bayes_learn_to_journal  	(default: 0)
@@ -2571,8 +2596,8 @@ delay before the updates are actually committed to the Bayes database.
 
 =cut
 
-    if (/^bayes_learn_to_journal\s+(.*)$/) {
-      $self->{bayes_learn_to_journal} = $1+0; next;
+    if ( $key eq 'bayes_learn_to_journal' ) {
+      $self->{bayes_learn_to_journal} = $value+0; next;
     }
 
 =item user_scores_dsn DBI:databasetype:databasename:hostname:port
@@ -2582,8 +2607,8 @@ used to connect.  Example: C<DBI:mysql:spamassassin:localhost>
 
 =cut
 
-    if (/^user_scores_dsn\s+(\S+)$/) {
-      $self->{user_scores_dsn} = $1; next;
+    if ( $key eq 'user_scores_dsn' ) {
+      $self->{user_scores_dsn} = $value; next;
     }
 
 =item user_scores_sql_username username
@@ -2592,8 +2617,8 @@ The authorized username to connect to the above DSN.
 
 =cut
 
-    if(/^user_scores_sql_username\s+(\S+)$/) {
-      $self->{user_scores_sql_username} = $1; next;
+    if( $key eq 'user_scores_sql_username' ) {
+      $self->{user_scores_sql_username} = $value; next;
     }
 
 =item user_scores_sql_password password
@@ -2602,8 +2627,8 @@ The password for the database username, for the above DSN.
 
 =cut
 
-    if(/^user_scores_sql_password\s+(\S+)$/) {
-      $self->{user_scores_sql_password} = $1; next;
+    if( $key eq 'user_scores_sql_password' ) {
+      $self->{user_scores_sql_password} = $value; next;
     }
 
     # REIMPLEMENT: to allow integration with Horde's pref stuff.  allow setting
@@ -2621,6 +2646,7 @@ See C<Mail::SpamAssassin::Plugin> for more details on writing plugins.
 
 =cut
 
+    # leave as RE right now
     if (/^loadplugin\s+(\S+)\s+(\S+)$/) {
       $self->load_plugin ($1, $2); next;
     }
@@ -2639,6 +2665,23 @@ failed_line:
     $self->{errors}++;
   }
 
+  # All scoresets should have a score defined, so if this one doesn't,
+  # we should set a default...  Do this here instead of add_test
+  # because mostly 'score' occurs after the rule is specified, so why
+  # set the scores to default, then set them again at 'score'?
+  # 
+  while ( my($k,$v) = each %{$self->{tests}} ) {
+    if ( ! exists $self->{scores}->{$k} ) {
+      # T_ rules (in a testing probationary period) get low, low scores
+      my $set_score = ($k =~/^T_/) ? 0.01 : 1.0;
+
+      $set_score = -$set_score if ( $self->{tflags}->{$k} =~ /\bnice\b/ );
+      for my $index (0..3) {
+        $self->{scoreset}->[$index]->{$k} = $set_score;
+      }
+    }
+  }
+
   delete $self->{scoresonly};
 }
 
@@ -2651,17 +2694,6 @@ sub add_test {
 
   if ($self->{scoresonly}) {
     $self->{user_rules_to_compile}->{$type} = 1;
-  }
-
-  # All scoresets should have a score defined, so if the one we're in
-  # doesn't, we need to set them all.
-  # TODO? - nice tests should get negative scores
-  if ( ! exists $self->{scores}->{$name} ) {
-    # T_ rules (in a testing probationary period) get low, low scores
-    my $set_score = ($name =~/^T_/) ? 0.01 : 1.0;
-    for my $index (0..3) {
-      $self->{scoreset}->[$index]->{$name} = $set_score;
-    }
   }
 }
 
