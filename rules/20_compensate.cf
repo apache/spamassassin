@@ -181,11 +181,6 @@ body GROUPS_YAHOO_1             /^Your use of Yahoo! Groups is subject to http:\
 describe GROUPS_YAHOO_1         Yahoo! Groups message
 tflags GROUPS_YAHOO_1		nice
 
-# Evites trigger false positives
-body EVITE                      /(?:evite\.citysearch\.com|evite\.com)/
-describe EVITE                  Claw back some for Evite
-tflags EVITE		        nice
-
 # signature tests
 full SIGNATURE_SHORT_DENSE	eval:check_signature('1', '7', '0')
 describe SIGNATURE_SHORT_DENSE	Short signature present (no empty lines)
@@ -285,3 +280,13 @@ tflags   ACCOUNT_CLICK          nice
 #describe ORDER_CONFIRM          Your order is confirmed!  I hope you like it.
 #tflags ORDER_CONFIRM            nice
 
+###########################################################################
+# meta compensation tests
+###########################################################################
+
+header __EVITE_CTYPE		Content-Type =~ /(?:multipart\/alternative|text\/(?:plain|html));/
+header __EVITE_RCVD		Received =~ /(?:evite|citysearch)\.com/
+uri __EVITE_URI			/\.(?:evite|citysearch)\.com\/.*iid=[A-Z]{20}/
+meta EVITE			((__EVITE_RCVD && __EVITE_URI) || (__EVITE_CTYPE && (__EVITE_RCVD || __EVITE_URI)))
+describe EVITE			Message looks like an Evite
+tflags EVITE			nice
