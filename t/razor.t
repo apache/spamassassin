@@ -3,7 +3,7 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spam");
 
-use constant TEST_ENABLED => (-e 't/do_razor' || -e 'do_razor');
+use constant TEST_ENABLED => (-e 't/do_razor1' || -e 'do_razor1');
 use Test; BEGIN { plan tests => TEST_ENABLED ? 2 : 0 };
 exit unless TEST_ENABLED;
 
