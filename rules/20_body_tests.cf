@@ -1151,7 +1151,7 @@ describe SERIOUS_CASH		Serious cash
 #              PORN RULES                 #
 ###########################################
 
-body LARGE_COLLECTION           /\b(?:[0-9,]{5,9}\s|hundreds|thousands|millions|tons)\b.{0,15}\b(?:movies|video|xxx|celeb|streaming|live|pic|photo|images)\b/i
+body LARGE_COLLECTION           /\b(?:[0-9,]{5,9}\s|hundreds|thousands|millions|tons)\b.{0,15}\b(?:movies|videos?|xxx|celeb|streaming|live|pics?|photos?|images)\b/i
 describe LARGE_COLLECTION       Possible porn - Large Number of movies, pics
 
 body FREE_PORN                  /\bfree (?:porn|xxx|adult)/i
@@ -1169,17 +1169,17 @@ describe MEGA_SITE              Possible porn - Mega Porn
 body CUM_SHOT                   /\bcum[ -]?shots?\b/i
 describe CUM_SHOT               Possible porn - Cum Shot
 
-body BIG_BOOBS                  /\bbig boobs\b/i
-describe BIG_BOOBS              Possible porn - Big Boobs
+#body BIG_BOOBS                  /\bbig boobs\b/i
+#describe BIG_BOOBS              Possible porn - Big Boobs
 
-body ALL_CAP_PORN               /\b(?:ORGY|FUCKING|FETISH|WEBCAM|VOYEUR|ANAL|CUM)\b/
+body ALL_CAP_PORN               /\b(?:ORGY|FUCKING|FETISH|WEBCAM|VOYEUR|ANAL|CUM|SNATCH|COCK|CUNT|PORN)\b/
 describe ALL_CAP_PORN           Possible porn - in ALL CAPS
 
 body PAY_SITE                   /\bpay[ -]?sites?\b/i
 describe PAY_SITE               Possible porn - Pay Site
 
-body FARM_PORN                  /\b(?:farm|animal) .{0,9}(?:sex|fuck\S+|action)\b/i
-describe FARM_PORN              Possible porn - Sex with Animals
+#body FARM_PORN                  /\b(?:farm|animal)\b.{0,9}\b(?:sex\b|fuck|action\b|slut|porn)/i
+#describe FARM_PORN              Possible porn - Sex with Animals
 
 body SEX_FEST                   /\b(?:sex|gay|slut|whore|cum|f[\.\*u][\.\*c]k|suck|adult|xxx|teen)[ -]?fest\b/i
 describe SEX_FEST               Possible porn - Porn Fest
@@ -1188,41 +1188,38 @@ describe SEX_FEST               Possible porn - Porn Fest
 body LIVE_PORN                  /\blive .{0,9}(?:fuck(?:ing)?|sex|naked|girls?|virgins?|teens?|porno?)\b/i
 describe LIVE_PORN              Possible porn - Live Porn
 
-body LIVE_PORN_2                /\b(?:fuck(?:ing)|porno?)\b.{0,9}\blive\b/i
-describe LIVE_PORN_2            Possible porn - Live Porn (2)
-
 body HARDCORE_PORN              /\bhard[ -]?core .{0,9}(?:teen|virgin|cheerleader|amat[eu][eu]r)|\bextreme hardcore/i
 describe HARDCORE_PORN          Possible porn - Hardcore Porn
 
-body HOT_NASTY          /\b(?:horny|nasty|hot|wild|young|horniest|nastiest|hottest|wildest|youngest|naughty).{0,9}\b(?:virgin|asian|cheerleader|sex|selection|fuck|fucking|anal|lesbian|incest|chick|pics|movies|video|gay|porn|hardcore|schoolgirls|amat[eu][eu]r|slut|adult|cum|xxx|sites?)\b/i
+body HOT_NASTY          /\b(?:horny|nasty|hot|wild|young|horniest|nastiest|hottest|wildest|youngest|naughty|dirtiest|slutty|kinky|lusty|extreme|xxx+)\b.{0,9}\b(?:virgin|asian|cheerleader|sex|selection|fuck|fucking|anal\b|lesb(?:ian|o)|incest|chicks?|pics|movies|video|gay\b|porn|hardcore|schoolgirls|amateur|slut|adult|cum|xxx|sites?|hotties|shit)/i
 describe HOT_NASTY              Possible porn - Hot, Nasty, Wild, Young
 
-body BEST_PORN			/\b(?:best|biggest|largest) .{0,9}(?:virgins?|anal|lesbians?|incest|porno?|hardcore|sluts?|xxx+)\b/i
+body BEST_PORN			/\b(?:best|biggest|largest|most|free|ultimate)\b.{0,9}\b(?:virgins?|anal\b|lesbians?|incest|porno?|hardcore|sluts?|xxx+)/i
 describe BEST_PORN		Possible porn - Best, Largest Porn Collections
 
-body NASTY_GIRLS                /\b(?:horniest|nasiest|hottest|wildest) .{0,9}(?:girls|women|teen)/i
+body NASTY_GIRLS                /\b(?:horniest|nasty|nastiest|hottest|wildest|slutty|xxx+)\b.{0,9}\b(?:girl|women|teen|babe)/i
 describe NASTY_GIRLS            Possible porn - Nasty Girls
 
-body CAM_PORN                   /cam (?:girls|sex)\b|\b(?:hidden|voyeur|bathroom|shower|naughty) .{0,9}cam\b/i
-describe CAM_PORN               Possible porn - Sex on Camera
+#body CAM_PORN                   /cam (?:girls|sex)\b|\b(?:hidden|voyeur|bathroom|shower|naughty) .{0,9}cam\b/i
+#describe CAM_PORN               Possible porn - Sex on Camera
 
-body AMATEUR_PORN               /\bamat[eu][eu]r .{0,9}(?:sex|porn|star|sites?|college|babes|action|pics)|real amat[eu][eu]r/i
+body AMATEUR_PORN               /\bamateur .{0,9}(?:sex|porn|star|sites?|college|babes|action|pics|trash|gang|rape)|(?:real|best) amateur/i
 describe AMATEUR_PORN           Possible porn - Amateur Porn
 
-body CELEBRITY_PORN             /\bceleb.{0,15}(?:sex|porn|pics|caught|nude|exposed)\b/i
+body CELEBRITY_PORN             /\b(?:celebrity|celebrities|celebs).{0,15}(?:sex|porn|pics|caught|nude|exposed|content)|(?:steamy|hot|nude|shocking|free|hardcore) (?:celebrity|celebrities|celebs)\b/i
 describe CELEBRITY_PORN         Possible porn - Celebrity Porn
 
 body PORN_GALLERIES             /\bhuge galleries\b/i
 describe PORN_GALLERIES         Possible porn - Galleries of Pictures
 
-body UP_SKIRT                   /\bup[ -]?skirt\b/i
-describe UP_SKIRT               Possible porn - Up Skirt
+#body UP_SKIRT                   /\bup[ -]?skirt\b/i
+#describe UP_SKIRT               Possible porn - Up Skirt
 
 body ADULT_SITE                 /\badult.{0,9}(?:entertainment|sites?|industry|only|business|membership)/i
 describe ADULT_SITE             Possible porn - Adult Web Sites
 
-body UNCENSORED                 /\buncensored (?:pics|photo)/i
-describe UNCENSORED             Possible porn - Uncensored Photos
+#body UNCENSORED                 /\buncensored (?:pics|photo)/i
+#describe UNCENSORED             Possible porn - Uncensored Photos
 
 body MUST_BE_18                 /\bmust be (?:at least|over) 18\b/i
 describe MUST_BE_18             Possible porn - Must be 18
@@ -1230,11 +1227,14 @@ describe MUST_BE_18             Possible porn - Must be 18
 body INSTANT_ACCESS             /\binstant access\b/i
 describe INSTANT_ACCESS         Possible porn - Offers Instant Access
 
-body RAPE                       /\b(?:virgin|gang|teen|amat[eu][eu]r) rape|rape (?:sites?|sex)\b/i
+body RAPE                       /\b(?:virgin|gang|teen|amateur) rape|rape (?:sites?|sex)\b/i
 describe RAPE                   Possible porn - Rape
 
 body LESBIAN                    /\b(?:xxx|horny|hot|young) lesbian|lesbian (?:sites?|action|bitch)/i
 describe LESBIAN                Possible porn - Lesbian Site
+
+body  PORN_PASSWORD             /\bporn password/i
+describe PORN_PASSWORD          Possible porn - Porn Password
 
 # Jul 26 2002 jm: offline until we can figure out performance & effectiveness
 # problems
