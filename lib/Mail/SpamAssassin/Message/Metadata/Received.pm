@@ -68,14 +68,6 @@ sub parse_received_headers {
   # part of Mail::SpamAssassin::PerMsgStatus to avoid this crap!
   $self->{dns_pms} = Mail::SpamAssassin::PerMsgStatus->new($main, $msg);
 
-  $self->{relays} = [ ];
-
-  my @hdrs = $msg->get_header('Received');
-  foreach my $line (@hdrs) {
-    $line =~ s/\n[ \t]+/ /gs;
-    $self->parse_received_line ($line);
-  }
-
   $self->{relays_trusted} = [ ];
   $self->{num_relays_trusted} = 0;
   $self->{relays_trusted_str} = '';
@@ -87,7 +79,6 @@ sub parse_received_headers {
   # now figure out what relays are trusted...
   my $trusted = $main->{conf}->{trusted_networks};
   my $internal = $main->{conf}->{internal_networks};
-  my $relay;
   my $first_by;
   my $in_trusted = 1;
   my $in_internal = 1;
@@ -109,8 +100,11 @@ sub parse_received_headers {
   my $IP_IN_RESERVED_RANGE = IP_IN_RESERVED_RANGE;
   my $LOCALHOST = LOCALHOST;
 
-  while (defined ($relay = shift @{$self->{relays}}))
-  {
+  foreach my $line ( $msg->get_header('Received') ) {
+    $line =~ s/\n[ \t]+/ /gs;
+    my $relay = $self->parse_received_line ($line);
+    next unless $relay;
+
     # trusted_networks matches?
     if ($in_trusted && $did_user_specify_trust && !$trusted->contains_ip ($relay->{ip}))
     {
@@ -263,7 +257,6 @@ sub parse_received_headers {
       $self->{relays_untrusted_str} .= $relay->{as_string}." ";
     }
   }
-  delete $self->{relays};		# tmp, no longer needed
 
   # drop the temp PerMsgStatus object
   $self->{dns_pms}->finish();
@@ -1130,7 +1123,7 @@ enough:
   $relay->{ip_is_reserved} = $isrsvd;
 
   # add it to an internal array so Eval tests can use it
-  push (@{$self->{relays}}, $relay);
+  return $relay;
 }
 
 # restart the parse if we find a fetchmail marker or similar.
