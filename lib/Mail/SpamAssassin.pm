@@ -1657,7 +1657,7 @@ sub _dbg_info_helper {
 
   if ($facilities{all} || $facilities{$prefix} || $facilities{$facility}) {
     $message =~ s/\n+$//s;
-    $message =~ s/^/${prefix}: ${facility}:\t/mg;
+    $message =~ s/^/${prefix}: ${facility}: /mg;
     warn "$message\n";
   }
 }
