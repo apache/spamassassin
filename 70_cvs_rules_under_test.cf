@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.574 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.575 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -336,3 +336,7 @@ describe T_HAS_X_ORIG_HOST	Has an 'X-Originating-Host' header
 # Replace SATISFACTION with this if scores improve
 body T_SATISFACTION /\bsatisfaction .{0,9}g(?:ua|au)ranteed\b/i
 describe T_SATISFACTION             Satisfaction Guaranteed
+
+# bug 1687 HOME_EMPLOYMENT FPs (homes and businesses)
+body T_HOME_EMPLOYMENT              /home\b.{0,10}(?:\bemployment|worker|business\b)/i
+describe T_HOME_EMPLOYMENT  Information on how to work at home (2)
