@@ -4,6 +4,11 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("strip2");
 use Test; BEGIN { plan tests => 12 };
 
+warn "
+	If tests 8, 10, and 12 fail, it's because you did not apply
+	the patch to Mail::Audit in 'MailAudit.patch'.
+\n";
+
 # ---------------------------------------------------------------------------
 
 %patterns = (
