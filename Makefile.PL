@@ -359,7 +359,9 @@ else {
 $makefile{'macro'}{'RUN_NET_TESTS'} = yesno($opt{'run_net_tests'});
 
 if (HAS_DBI) {
-  $opt{'run_awl_sql_tests'} = prompt('Run SQL Based AutoWhitelist Tests (additional information required) (y/n)', "n");
+  $opt{'run_awl_sql_tests'} = prompt(
+    "Run SQL-based Auto-whitelist tests during 'make test' (additional\n".
+    "information required) (y/n)", "n");
   print "\n";
 
   $opt{'run_awl_sql_tests'} = bool($opt{'run_awl_sql_tests'});
@@ -387,7 +389,9 @@ else {
 }
 
 if (HAS_DBI) {
-  $opt{'run_bayes_sql_tests'} = prompt("Run Bayes SQL storage tests (additional information required)? (y/n)", 'n');
+  $opt{'run_bayes_sql_tests'} = prompt(
+    "Run Bayes SQL storage tests during 'make test' (additional\n".
+    "information required)? (y/n)", 'n');
   print "\n";
 
   $opt{'run_bayes_sql_tests'} = bool($opt{'run_bayes_sql_tests'});
