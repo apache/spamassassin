@@ -1,5 +1,5 @@
 # SpamAssassin rules file: scores.
-# $Id: 50_scores.cf,v 1.209 2002/08/30 23:31:45 quinlan Exp $
+# $Id: 50_scores.cf,v 1.210 2002/09/02 18:24:14 jmason Exp $
 ###########################################################################
 # Default scores.   Note that if a test is named in the files, but a score is
 # not assigned here, the default score will be set to 1.
@@ -194,7 +194,6 @@ score FREE_PORN                      0.670
 score FREE_PREVIEW                   0.960
 score FREE_QUOTE                     -0.212
 score FREE_SAMPLE                    3.154
-score FREE_TICKETS                   3.004
 score FREE_TRIAL                     1.003
 score FREE_WEBSITE                   -0.673
 score FRIEND_AT_PUBLIC               0.089
@@ -347,7 +346,6 @@ score MIME_BOUND_DIGITS_2            -0.512
 score MIME_BOUND_DIGITS_3            1.051
 score MIME_BOUND_DIGITS_4            2.455
 score MIME_BOUND_DIGITS_5            3.530
-score MIME_BOUND_DIGITS_6            0.939
 score MIME_BOUND_DIGITS_7            2.516
 score MIME_BOUND_HASHES              2.297
 score MIME_BOUND_HEX_24              2.505
@@ -579,7 +577,6 @@ score TO_NO_USER                     4.037
 score TO_RECIP_MARKER                4.638
 score TRACE_BY_SSN                   0.282
 score TRACKER_ID                     3.177
-score T_FREE_WEBSITE                 -1.014
 score UCE_MAIL_ACT                   2.189
 score UNCLAIMED_MONEY                2.736
 score UNDISC_RECIPS                  2.030
@@ -661,14 +658,11 @@ score YAHOO_MSGID_ADDED              0.683
 score YOUR_INCOME                    2.017
 score YOU_WON                        1.501
 score ALTA_BUSCADORES_ES             1.0
-score BUGGY_CGI_ES                   1.0
-score BUGGY_CGI_PT                   1.0
 score BUY_JUDGEMENTS                 1.0
 score CHANGE_TERMS                   1.0
 score CLICK_ES                       1.0
 score CLICK_TO_REMOVE_3              0.3
 score CONTRA_REEMBOLSO_ES            1.0
-score CORRUPT_MSGID                  1.7
 score CYBER_FIRE_POWER               1.0
 score DEJAR_DE_FUMAR_ES              1.0
 score DISCONTINUE                    1.0
@@ -802,7 +796,6 @@ score SIGNIFICANT                    0.3
 score SLASH_PRICE                    1.0
 score SPAM_FORM_ACTION               1.0
 score SPAM_FORM_INPUT                1.0
-score STAINLESS_STEEL                1.0
 score SUBSCRIBE_ES_01                1.0
 score TARJETA_VERDE_ES               1.0
 score THIS_AINT_JUNK                 1.0
@@ -813,7 +806,6 @@ score USER_AGENT_GNUS_UA             -1.0
 score WEALTH                         1.0
 score WEB4PORNO_URL                  1.0
 score WWW_AUTOREMOVE_COM             1.0
-score WWW_DIRECTFORCEMARKETING_COM   1.0
 score WWW_NETSITESFORFREE_NET        1.0
 score X_FIX_PRESENT                  1.0
 score YELLOWSUN                      1.0

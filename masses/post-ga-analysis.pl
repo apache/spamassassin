@@ -50,6 +50,7 @@ close(SPAM);
 
 while(<NONSPAM>)
 {
+    next if /^#/;
     /.\s+[-0-9]*\s+[^\s]+\s+([^\s]*)\s*$/;
     next unless defined($1);
 

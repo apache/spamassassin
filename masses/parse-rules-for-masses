@@ -28,6 +28,7 @@ if ($#rulesdirs < 0) {
 
 if (!defined $outputfile) {
   $outputfile = "./tmp/rules.pl";
+  mkdir ("tmp", 0755);
 }
 
 my $rules = { };

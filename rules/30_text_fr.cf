@@ -1,6 +1,6 @@
 # Traduction française d'Olivier Nicole <on@cs.ait.ac.th>
 # Asian Institute of Technology, Bangkok, Thaïlande
-# $Id: 30_text_fr.cf,v 1.27 2002/08/29 12:29:42 jmason Exp $
+# $Id: 30_text_fr.cf,v 1.28 2002/09/02 18:24:14 jmason Exp $
 
 lang fr clear-report-template
 lang fr report ---------------- Début des résultats de SpamAssassin -----------------
@@ -328,3 +328,23 @@ lang fr describe RCVD_IN_MULTIHOP_DSBL Reçu par l'intermédiaire d'un relai référ
 lang fr describe RCVD_IN_UNCONFIRMED_DSBL      Reçu par l'intermédiaire d'un relai référencé par unconfirmed.dsbl.org
 #lang fr describe OE_PI                 L'entête X-Mailer: contient 'OutLook Express 3.14159'
 lang fr describe PGP_SIGNATURE_2       Contient une signature PGP attachée au message
+lang fr describe DONT_DELETE            Contient une formule incitant é ne pas détruire ce message
+lang fr describe EU_200_32_CE   Revendique la conformité avec l'arrêt européen 200.32.CE
+lang fr describe EU_EMAIL_OPTOUT        Revendique la conformité avec l'arrêt européen sur le spam
+lang fr describe GREEN_EXCUSE_1 Prétend que le SPAM est bon pour l'environement
+lang fr describe GREEN_EXCUSE_2 Prétend que le SPAM est bon pour l'environement
+lang fr describe NIGERIAN_SCAM  Mentionne les combines nigériennes, voir http://www.snopes2.com/inboxer/scams/nigeria.htm
+
+lang fr describe FROM_MALFORMED L'entête From: contient une adresse malformée
+lang fr describe FROM_MISSING   L'entête From: est absent
+lang fr describe LONG_NUMERIC_HTTP_ADDR Contient une longue adresse IP numérique dans une URL
+lang fr describe PLEASE_READ            L'entête Subject vous incite à lire ce mèl
+lang fr describe SHORT_RECEIVED_LINE    Un entête Received: contient un très long nom de machine 
+lang fr describe SUPERLONG_LINE Contient une ligne de plus de 200 caractères
+lang fr describe TO_INVESTORS   L'entête To: est adressé à Inverstors
+lang fr describe TO_LOCALPART_EQ_REAL   Le nom de l'entête From: et l'adresse du destinataire sont équivalents
+lang fr describe TO_MALFORMED           L'entête To: contient une adresse mal formée
+lang fr describe WWW_REMOVEYOU_COM      Expression fréquement trouvée dans du spam
+lang fr describe YR_MEMBERSHIP_EXCH     L'entête Subject: contient 'your membership exchange'
+
+
