@@ -16,6 +16,8 @@
 # limitations under the License.
 # </@LICENSE>
 
+use strict;
+
 my $NUM_SCORESETS = 4;
 
 my ($scoreset,$oldscores,$newscores) = @ARGV;
@@ -26,6 +28,7 @@ if (!defined $newscores || $scoreset < 0 || $scoreset >= $NUM_SCORESETS ) {
 }
 
 system ("./parse-rules-for-masses -s $scoreset") and die;
+our %rules;
 if (-e "tmp/rules.pl") {
   # Note, the spaces need to stay in front of the require to work around a RPM 4.1 problem
   require "./tmp/rules.pl";
@@ -52,7 +55,9 @@ while (<STDIN>) {
 open (IN, "<$oldscores") or die "cannot open $oldscores";
 my $out = '';
 my $pre = '';
-my %seenscoreforrule = ();
+my %seenscoreforrule = (
+    'AWL' => 1,                 # dynamic rule, skip it
+);
 
 # read until '# Start of generated scores', removing scores from our
 # new list if we come across them.
@@ -68,6 +73,7 @@ while (<IN>) {
 }
 
 # now skip until '# End of generated scores'
+my %oldscores = ();
 while (<IN>) {
   if (/^\s*score\s+\S+/) {
     my($score,$name,@scores) = split;
@@ -92,7 +98,7 @@ while (<IN>) {
       $scores[$scoreset] = $gascorelines{$name};
 
       # Create new score line
-      $_ = join(" ","score",$name,generate_scores(@scores))."\n";
+      $_ = join(" ","score",$name,generate_scores($name, @scores))."\n";
     }
     delete $gascorelines{$name};
     $seenscoreforrule{$name} = 1;
@@ -107,6 +113,9 @@ foreach my $name (@gascoreorder) {
   $_ = $gascorelines{$name};
   next unless (defined ($_));
 
+  next if ($rules{$name}->{lang});          # "lang es" rules etc.
+  next if ($name eq 'AWL');                 # dynamic score
+
   # Use the old scores if they existed
   my @scores = ();
   @scores = @{$oldscores{$name}} if ( exists $oldscores{$name} );
@@ -117,7 +126,7 @@ foreach my $name (@gascoreorder) {
   $seenscoreforrule{$name} = 1;
 
   # Create new score line
-  print join(" ","score",$name,generate_scores(@scores)),"\n";
+  print join(" ","score",$name,generate_scores($name, @scores)),"\n";
 }
 
 # output any tests that were in the old scores file, but not in
@@ -127,36 +136,53 @@ foreach my $name (@gascoreorder) {
 foreach my $name (sort keys %oldscores) {
   delete $oldscores{$name};
   $seenscoreforrule{$name} = 1;
+  next if ($rules{$name}->{lang});          # "lang es" rules etc.
 
   # my @scores = @{$oldscores{$name}} if ( exists $oldscores{$name} );
   my @scores = (0, 0, 0, 0);
-  print join(" ","score",$name,generate_scores(@scores)),"\n";
+  print join(" ","score",$name,generate_scores($name, @scores)),"\n";
 }
 
 # now do the same for what's in tmp/rules.pl
 foreach my $name (sort keys %rules) {
   next if ($seenscoreforrule{$name});
   next if ($rules{$name}->{issubrule});
+  next if ($rules{$name}->{lang});          # "lang es" rules etc.
   delete $oldscores{$name};
 
   # my @scores = @{$oldscores{$name}} if ( exists $oldscores{$name} );
   my @scores = (0, 0, 0, 0);
-  print join(" ","score",$name,generate_scores(@scores)),"\n";
+  print join(" ","score",$name,generate_scores($name, @scores)),"\n";
 }
 
 print "\n", $out;
 
 sub generate_scores {
-  my (@scores) = @_;
+  my ($name, @scores) = @_;
+
+  my $isnet = ($rules{$name}->{tflags} =~ /\bnet\b/);
 
   # Set defaults if not already set
   $scores[0] ||= 0;
+
   my $flag = 1;
   for(my $i=1;$i<$NUM_SCORESETS;$i++) {
     $scores[$i] = $scores[0] unless defined $scores[$i];
     $flag = 0 if ( $scores[$i] != $scores[$i-1] );
   };
-  splice @scores, 1 if $flag;
+
+  # enforce rule/scoreset rules.
+  # net rules never have a non-zero score in sets 0 and 2
+  for(my $i=0;$i<$NUM_SCORESETS;$i++) {
+    if ($isnet && ($i & 1) == 0) {
+      $scores[$i] = 0;
+      $flag = 0 if ( $i > 0 && $scores[$i] != $scores[$i-1] );
+    }
+  }
+
+  if ($flag) {
+    splice @scores, 1;
+  }
 
   return @scores;
 }
