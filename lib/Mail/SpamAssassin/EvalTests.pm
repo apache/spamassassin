@@ -561,7 +561,7 @@ sub check_rbl {
   dbg ("checking RBL $rbl_domain, set $set");
 
   my $rcv = $self->get ('Received');
-  my @ips = ($rcv =~ /\[(\d+\.\d+\.\d+\.\d+)\]/g);
+  my @ips = ($rcv =~ /[\[\(](\d+\.\d+\.\d+\.\d+)[\]\)]/g);
   return 0 unless ($#ips >= 0);
 
   # First check that DNS is available, if not do not perform this check
