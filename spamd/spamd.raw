@@ -669,6 +669,7 @@ use POSIX 'setsid';
 sub daemonize
 {
     chdir '/' or die "Can't chdir to '/': $!";
+	$SIG{__WARN__} = sub { logmsg($_[0]); };
     open STDIN,'/dev/null' or die "Can't read '/dev/null': $!";
     open STDOUT,'>/dev/null' or die "Can't write '/dev/null': $!";
     defined(my $pid=fork) or die "Can't fork: $!";
