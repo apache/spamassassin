@@ -43,6 +43,8 @@ use Mail::SpamAssassin::HTML;
 
 use constant HAS_MIME_BASE64 => eval { require MIME::Base64; };
 
+use constant MAX_BODY_LINE_LENGTH => 2048;
+
 use vars qw{
   @ISA $base64alphabet
 };
@@ -712,14 +714,19 @@ sub get_raw_body_text_array {
   for ($line = 0; defined($_ = $bodyref->[$line]); $line++)
   {
     # we run into a perl bug if the lines are astronomically long (probably due
-    # to lots of regexp backtracking); so cut short any individual line over 4096
-    # bytes in length.  This can wreck HTML totally -- but IMHO the only reason a
-    # luser would use 4096-byte lines is to crash filters, anyway.
+    # to lots of regexp backtracking); so cut short any individual line over
+    # MAX_BODY_LINE_LENGTH bytes in length.  This can wreck HTML totally -- but
+    # IMHO the only reason a luser would use MAX_BODY_LINE_LENGTH-byte lines is
+    # to crash filters, anyway.
 
-    while (length ($_) > 4096) {
-      push (@{$self->{body_text_array}}, substr($_, 0, 4096));
-      substr($_, 0, 4096) = '';
+    while (length ($_) > MAX_BODY_LINE_LENGTH) {
+      push (@{$self->{body_text_array}}, substr($_, 0, MAX_BODY_LINE_LENGTH));
+      substr($_, 0, MAX_BODY_LINE_LENGTH) = '';
     }
+
+    # Note that all the parsing code below will, as a result, not operate on
+    # lines > MAX_BODY_LINE_LENGTH bytes; but that should be OK, given that
+    # lines of that length are not RFC-compliant anyway!
 
     # look for uuencoded text
     if ($uu_region == 0 && /^begin [0-7]{3} .*/) {
@@ -834,15 +841,14 @@ sub get_decoded_body_text_array {
 
     s/\r//;
     $_ = $self->generic_base64_decode ($_);
-    # print "decoded: $_\n";
-    my @ary = split (/^/, $_);
+    my @ary = $self->split_into_array_of_short_lines ($_);
     return \@ary;
 
   } elsif ($self->{found_encoding_quoted_printable}) {
     $_ = join ('', @{$textary});
     s/\=\r?\n//gs;
     s/\=([0-9A-F]{2})/chr(hex($1))/ge;
-    my @ary = split (/^/, $_);
+    my @ary = $self->split_into_array_of_short_lines ($_);
     return \@ary;
 
   } elsif ($self->{found_encoding_uuencode}) {
@@ -869,11 +875,25 @@ sub get_decoded_body_text_array {
       $_ .= $line;
     }
     s/\r//;
-    my @ary = split (/^/, $_);
+    my @ary = $self->split_into_array_of_short_lines ($_);
     return \@ary;
   } else {
     return $textary;
   }
+}
+
+sub split_into_array_of_short_lines {
+  my $self = shift;
+
+  my @result = ();
+  foreach my $line (split (/^/m, $_[0])) {
+    while (length ($line) > MAX_BODY_LINE_LENGTH) {
+      push (@result, substr($line, 0, MAX_BODY_LINE_LENGTH));
+      substr($line, 0, MAX_BODY_LINE_LENGTH) = '';
+    }
+    push (@result, $line);
+  }
+  @result;
 }
 
 ###########################################################################
@@ -966,7 +986,7 @@ sub get_decoded_stripped_body_text_array {
   $text =~ tr/ \t\n\r\x0b\xa0/ /s;	# whitespace => space
   $text =~ tr/\f/\n/;			# form feeds => newline
 
-  my @textary = split (/^/, $text);
+  my @textary = $self->split_into_array_of_short_lines ($text);
 
   return \@textary;
 }

@@ -1190,12 +1190,17 @@ sub check_for_unique_subject_id {
      )
   {
     $id = $1;
+    warn "JMD $id";
     # exempt online purchases
     if ($id =~ /\d{5,}/
 	&& /(?:item|invoice|order|number|confirmation).{1,6}\Q$id\E\s*$/)
     {
       $id = 0;
     }
+
+    # for the "foo-bar-baz" case, otherwise it won't
+    # be found in the dict:
+    $id =~ s/-//;
   }
 
   return ($id && !$self->word_is_in_dictionary($id));
@@ -1778,79 +1783,50 @@ sub message_is_habeas_swe {
 }
 
 ###########################################################################
-
-# This test was originally based on RFC 2369 compliance.  However, the
-# Mailing-List header was added so that Yahoo!Groups mails would not be
-# matched.  (Turned off as test gets bad S/O ratio -  Sep 17 2002 jm)
-
-# sub suspect_list_headers {
-#   my ($self) = @_;
-# 
-#   my $all = $self->get('ALL');
-#   my @headers = ('List-Help', 'List-Subscribe', 'List-Unsubscribe',
-# 		 'List-Post', 'List-Owner', 'List-Archive',
-# 		 'Mailing-List');
-#   my %count;
-# 
-#   foreach my $header (@headers) {
-#     while ($all =~ s/^$header://im) {
-#       $count{$header}++;
-#     }
-#   }
-# 
-#   # without RFC 2369 fields
-#   return 0 unless %count;
-# 
-#   # header appears more than once (violates RFC 2369)
-#   foreach my $count (values %count) {
-#     return 1 if $count > 1;
-#   }
-# 
-#   # List-Help field is used (good RFC 2369 practice)
-#   return 0 if exists $count{'List-Help'};
-# 
-#   # List-Unsubscribe without much else (spammer mind trick)
-#   return (exists $count{'List-Unsubscribe'} && scalar keys %count < 2);
-# }
-  
-###########################################################################
 # BODY TESTS:
 ###########################################################################
 
 sub check_for_uppercase {
   my ($self, $body, $min, $max) = @_;
+  local ($_);
 
   if (exists $self->{uppercase}) {
     return ($self->{uppercase} > $min && $self->{uppercase} <= $max);
   }
 
-  # examine lines in the body that have an intermediate space
-  my @lines = grep(/\S\s+\S/, @{$body});
+  # Dec 20 2002 jm: trade off some speed for low memory footprint, by
+  # iterating over the array computing sums, instead of joining the
+  # array into a giant string and working from that.
 
-  # strip out lingering base64 (currently possible for forwarded messages)
-  @lines = grep(!/^(?:[A-Za-z0-9+\/=]{60,76} ){2}/, @lines);
+  my $len = 0;
+  my $lower = 0;
+  my $upper = 0;
+  foreach (@{$body}) {
+    # examine lines in the body that have an intermediate space
+    next unless /\S\s+\S/;
+    # strip out lingering base64 (currently possible for forwarded messages)
+    next if /^(?:[A-Za-z0-9+\/=]{60,76} ){2}/;
 
-  # join lines together
-  $body = join('', @lines);
+    my $line = $_;	# copy so we don't muck up the original
+    # remove shift-JIS charset codes
+    $line =~ s/\x1b\$B.*\x1b\(B//gs;
 
-  # remove shift-JIS charset codes
-  $body =~ s/\x1b\$B.*\x1b\(B//gs;
+    $len += length($line);
+
+    # count numerals as lower case, otherwise 'date|mail' is spam
+    $lower += ($line =~ tr/a-z0-9//d);
+    $upper += ($line =~ tr/A-Z//);
+  }
 
   # report only on mails above a minimum size; otherwise one
   # or two acronyms can throw it off
-  if (length ($body) < 200) {
+  if ($len < 200) {
     $self->{uppercase} = 0;
     return 0;
   }
-
-  # count numerals as lower case, otherwise 'date|mail' is spam
-  my $lower = $body =~ tr/a-z0-9//d;
-  my $upper = $body =~ tr/A-Z//;
-
   if (($upper + $lower) == 0) {
     $self->{uppercase} = 0;
-  }
-  else {
+  } else {
     $self->{uppercase} = ($upper / ($upper + $lower)) * 100;
   }
 
@@ -1864,32 +1840,40 @@ sub check_for_yelling {
     return $self->{num_yelling_lines} > 0;
   }
 
-  # Make local copy of lines in the body that have some non-letters
-  my @lines = grep(/[^A-Za-z]/, @{$body});
+  # Dec 20 2002 jm: trade off some speed for low memory footprint, by
+  # iterating over the array computing sums, instead of joining the
+  # array into a giant string and working from that.
 
-  # Try to eliminate lines which might be newsletter section headers,
-  # which are often in all caps; we do this by removing most lines
-  # that start with whitespace.  However, some spam will match
-  # this as well, so keep lines which have "!" or "$$" (spam often
-  # has a yelling line indent with spaces, but surround by dollar
-  # signs), or a "." which appears to end a sentence.
-  @lines = grep(/^\S|!|\$\$|\.(?:\s|$)/, @lines);
+  my $num_lines = 0;
+  foreach my $line (@{$body}) {
+    # lines in the body that have some non-letters
+    next unless ($line =~ /[^A-Za-z]/);
 
-  foreach ( @lines ) {
+    # Try to eliminate lines which might be newsletter section headers,
+    # which are often in all caps; we do this by removing most lines
+    # that start with whitespace.  However, some spam will match
+    # this as well, so keep lines which have "!" or "$$" (spam often
+    # has a yelling line indent with spaces, but surround by dollar
+    # signs), or a "." which appears to end a sentence.
+    next unless ($line =~ /^\S|!|\$\$|\.(?:\s|$)/);
+
+    $_ = $line;		 # copy to preserve originals
+
     # Get rid of everything but upper AND lower case letters
     tr/A-Za-z \t//cd;
 
     # Remove leading and trailing whitespace
-    s/^\s+//;
-    s/\s+$//;
-  }
+    s/^\s+//; s/\s+$//;
 
-  # Now that we have a mixture of upper and lower case, see if it's
-  # 1) All upper case
-  # 2) 20 or more characters in length
-  # 3) Has at least one whitespace in it; we don't want to catch things
-  #    like lines of genetic data ("...AGTAGC...")
-  my $num_lines = scalar grep(/\s/, grep(/^[A-Z\s]{20,}$/, @lines) );
+    # Now that we have a mixture of upper and lower case, see if it's
+    # 1) All upper case
+    # 2) 20 or more characters in length
+    # 3) Has at least one whitespace in it; we don't want to catch things
+    #    like lines of genetic data ("...AGTAGC...")
+    if (/^[A-Z\s]{20,}$/ && /\s/) {
+      $num_lines++;
+    }
+  }
 
   $self->{num_yelling_lines} = $num_lines;
 
@@ -1934,6 +1918,7 @@ sub check_for_mime_excessive_qp {
     }
     elsif ($cte eq "quoted-printable") {
       $len += length($line);
+      # whoever wrote this next line is an evil hacker -- jm
       $qp += () = ($line =~ m/=(?:09|3[0-9ABCEF]|[2456][0-9A-F]|7[0-9A-E])/g);
       # tabs and spaces at end of encoded line are okay.  Also, multiple
       # whitespace at the end of a line are OK, like ">=20=20=20=20=20=20=20".
