@@ -95,13 +95,7 @@ sub add_score {
     return undef;		# no factory defined; we can't check
   }
 
-  # give long-running correspondents a chance to get out of the
-  # AWL blacklist by adding a factor for the count itself.
-  # 5 seems to allow folks who get (3,4,3,2,4,5,...) to dig
-  # themselves out, after 6 messages.
   $self->{entry}->{count} ||= 0;
-  $score = $score - ($self->{entry}->{count} * 5);
-
   $self->{checker}->add_score($self->{entry},$score);
 }
 
