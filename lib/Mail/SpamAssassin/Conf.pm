@@ -1601,7 +1601,7 @@ This can be useful for MUA rule creation.
 This is deprecated as of version 2.60. Please use the add_header
 option instead:
 
-add_header all Level _STARS(*)_
+add_header Level all _STARS(*)_
 
 =cut
 
@@ -1626,7 +1626,7 @@ X-Spam-Level: .......
 This is deprecated as of version 2.60. Please use the add_header
 option instead:
 
-add_header all Level _STARS(.)_
+add_header Level all _STARS(.)_
 
 =cut
 
@@ -1666,7 +1666,7 @@ The default is to not add the header.
 
 This option is deprecated. Please use the add_header option instead:
 
-add_header all Pyzor _PYZOR_
+add_header Pyzor all _PYZOR_
 
 =cut
 

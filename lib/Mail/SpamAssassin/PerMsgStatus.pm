@@ -745,6 +745,7 @@ sub _process_header {
     $hdr = Text::Wrap::wrap('',"\t",$hdr);
     return (split (/: /, $hdr, 2))[1]; # just return the data part
   } else {
+    $hdr_data =~ s/\n/ /g; # Can't have newlines in headers, unless folded
     return $hdr_data;
   }
 }
