@@ -14,6 +14,7 @@ use lib '@@INSTALLSITELIB@@'; # substituted at 'make' time
 use lib '../lib';	# added by jm for use inside the distro
 use strict;
 use Socket;
+use IO::Pipe;
 use Config;
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::NoMailAudit;
@@ -32,7 +33,6 @@ BEGIN {
 
 sub spawn;  # forward declaration
 sub logmsg; # forward declaration
-sub cleanupchildren; # forward declaration
 
 my %resphash = (
 		EX_OK          => 0,  # no problems
@@ -109,7 +109,8 @@ my $dontcopy = 1;
 if ($opt{'create-prefs'}) { $dontcopy = 0; }
 
 my $extrapid = 5000;
-$extrapid = $opt{'max-children'} if defined($opt{'max-children'}) && $opt{'max-children'} > 0;
+undef($opt{'max-children'}) unless defined($opt{'max-children'}) && $opt{'max-children'} > 0;
+$extrapid = $opt{'max-children'} if defined($opt{'max-children'});
 
 my $orighome;
 if (defined $ENV{'HOME'}) {
@@ -222,47 +223,71 @@ delete $ENV{'HOME'};
 
 my $current_user;
 my $paddr;
-my $error_before_reaper;
 
-sub REAPER {
-    $error_before_reaper = $!;  # take a copy before cleanupchildren()
-    # do this silently; dbg() might do a syscall more tricky than
-    # print().  syscalls in sig handlers == not good by POSIX
-    while ( waitpid(-1, &WNOHANG) > 0 ) {
-        $extrapid++;
-    }
-    $SIG{CHLD} = \&REAPER;
-}
-
-# only use REAPER if -m is used.
-if ($opt{'max-children'}) {$SIG{CHLD} = \&REAPER;}
-else {$SIG{CHLD} = 'IGNORE';}
-
+# Note: we now use a set of fds to track children, as using SIGCHLD
+# is unreliable on many versions of perl (sadly).  Thanks to
+# anomie /at/ users sourceforge net for the patch!
+$SIG{CHLD} = 'IGNORE';
 $SIG{INT} = \&kill_handler;
 $SIG{TERM} = \&kill_handler;
 
 # now allow waiting processes to connect, if they're watching the log.
 # The test suite does this!
 if ($opt{'debug'}) {
-    warn "server started on port $port (running version ".Mail::SpamAssassin::Version().")\n";
+    warn "server started on port $port (running version ".
+				Mail::SpamAssassin::Version().")\n";
     warn "server pid: $$\n";
 }
 
-logmsg ("server started on port $port (running version ".Mail::SpamAssassin::Version().")");
+logmsg ("server started on port $port (running version ".
+				Mail::SpamAssassin::Version().")");
+
+my $readvec = "";
+my %pipes = ();
+vec($readvec, fileno(Server), 1) = 1;
 
 for ( ; 1; close Client)
 {
-    $error_before_reaper = 0;
+    my $n = select(my $rd=$readvec, undef, undef, undef);
+    next if ($n == -1 && $! == &Errno::EINTR);
+    die "select failed: $!" if ($n <= 0);
+
+    if ($opt{'max-children'}) {
+      while (my ($kid, $pipe) = each %pipes) {
+        # Since the pipe is never written, it will only become readable when
+        # the other end closes it (on exit) so we could read the EOF. Thus, if
+        # the pipe is readable the kid has exited.
+        next unless vec($rd, $pipe->fileno(), 1);
+        vec($readvec, $pipe->fileno(), 1) = 0;
+        delete ($pipes{$kid});
+        $extrapid++;
+        Mail::SpamAssassin::dbg("cleaned up kid $kid, pool=$extrapid");
+
+        # We reaped a kid, so listen for connects again
+        vec($readvec, fileno(Server), 1) = 1;
+      }
+    }
+
+    if (vec($rd, fileno(Server), 1)) {
+      if ($opt{'max-children'} && $extrapid <= 0) {
+        # Since we can't accept any connects until we reap a kid, don't bother
+        # selecting on Server until we do so. We have to do this test here
+        # instead of in &spawn because we need the select loop to watch for
+        # kids.
+        vec($readvec, fileno(Server), 1) = 0;
+        logmsg "hit max-children limit (".$opt{'max-children'}."): waiting for some to exit";
+        next;
+      }
+
     $paddr = accept(Client,Server);
 
     if (!$paddr) {
       # this can happen when interrupted by SIGCHLD on Solaris,
       # perl 5.8.0, and some other platforms with -m.
-      if ($! == &Errno::EINTR || $error_before_reaper == &Errno::EINTR) {
-        cleanupchildren;
+      if ($! == &Errno::EINTR) {
         next;
       } else {
-        die "accept failed: $! $error_before_reaper";
+          die "accept failed: $!";
       }
     }
 
@@ -596,10 +621,7 @@ for ( ; 1; close Client)
 	    protocol_error ($_);
 	}
     };
-
-    # Clean up any defunct processes.  (Not sure if we still need this
-    # with our SIGCHLD handler, but best to keep it around anyway.)
-    cleanupchildren;
+    }
 }
 
 sub protocol_error {
@@ -618,26 +640,36 @@ sub spawn {
     }
 
     my $pid;
+    my $pipe;
 
-    cleanupchildren;
-    my $tries = 0;
-    while ($opt{'max-children'} && $extrapid <= 0) {
-      if ($tries++ > 0) { sleep (1); }
-      logmsg "hit max-children limit (".$opt{'max-children'}.
-                        "): waiting for some to exit";
-      cleanupchildren;
+    if ($opt{'max-children'}) {
+      $pipe=IO::Pipe->new();
+      if (!defined($pipe)) {
+        logmsg "pipe failed: $!";
+        return;
+      }
     }
 
     $extrapid--;
 
     if (!defined($pid = fork)) {
-       logmsg "cannot fork: $!";
-       $extrapid++;
-       return;
+      logmsg "cannot fork: $!";
+      $extrapid++;
+      return;
     } elsif ($pid) {
-       return; # I'm the parent
+      if ($opt{'max-children'}) {
+        $pipe->reader();
+        $pipes{$pid} = $pipe;
+        vec($readvec, $pipe->fileno(), 1) = 1;
+      }
+      return; # I'm the parent
     }
     # else I'm the child -- go spawn
+
+    if ($opt{'max-children'}) {
+      $pipe->writer();
+      %pipes = ();  # No point in keeping the other kid pipes, close them all
+    }
 
     close Server;
     open(STDIN,  "<&Client")   || die "can't dup client to stdin";
@@ -845,14 +877,6 @@ sub kill_handler
     close Server;
     defined($opt{'pidfile'}) and unlink($opt{'pidfile'});
     exit 0;
-}
-
-# Remember to change this in REAPER too if you change anything!
-sub cleanupchildren {
-    while ( my $kid = waitpid(-1, &WNOHANG) > 0 ) {
-        $extrapid++;
-        Mail::SpamAssassin::dbg("cleaned up kid $kid, pool=$extrapid");
-    }
 }
 
 use POSIX 'setsid';
@@ -1094,19 +1118,13 @@ user I<nobody> and using the default configuration.
 
 =item B<-m> I<number>, B<--max-children>=I<number>
 
-This option is not recommended -- see below.
-
 Specify a maximum number of children to spawn. Spamd will wait until another
 child finishes before forking again. Meanwhile, incoming connections will be
 queued.
 
-Use of this option is not recommended in most circumstances, as we have
-received reports of the perl interpreter dumping core.  It seems that some
-versions of Perl on some OSes have issues with tracking child processes and
-signal handling, which the perl interpreter to crash.
-
 Please note that there is a OS specific maximum of connections that can be
-queued (Try C<perl -MSocket -e'print SOMAXCONN'> to find this maximum).
+queued (Try C<perl -MSocket -e'print SOMAXCONN'> to find this maximum). Also,
+this option causes spamd to create an extra pipe for each child.
 
 =item B<-H> I<directory>, B<--helper-home-dir>=I<directory>
 
