@@ -1,0 +1,17 @@
+
+This directory provides a script used to perform "mass checks" of an MH mail
+spool (mine in particular ;).   It generates summary lines like this:
+
+Y  7 /home/jm/Mail/Sapm/1382 SUBJ_ALL_CAPS,SUPERLONG_LINE,SUBJ_FULL_OF_8BITS
+
+listing the path to the message, its score, and the tests that triggered on
+that mail.
+
+Using this info I can figure out which tests get good hits with few false
+positives, etc., and re-score the tests to optimise the ratio.
+
+It's generally only interesting if you *really* want to tweak your score
+settings, and at the moment it's MH or Maildir-only for now.  But it's
+here if you want it ;)
+
+--j.
