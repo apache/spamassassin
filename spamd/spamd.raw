@@ -588,8 +588,8 @@ sub check {
         if($method eq "REPORT" or
 		  ($method eq "REPORT_IFSPAM" and $status->is_spam))
 	{
-          $msg_resp = "$msg_score/$msg_threshold\r\n" . 
-				$status->{test_logs};
+	  # $msg_resp = $status->get_report();
+          $msg_resp = "$msg_score/$msg_threshold\r\n" . $status->get_report();
         }
         elsif($method eq "SYMBOLS") {
           $msg_resp = $status->get_names_of_tests_hit;
