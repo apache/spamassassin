@@ -497,17 +497,15 @@ tflags T_RCVD_IN_WIREHUB_PROXIES net
 # url: http://opm.blitzed.org/
 # pay-to-use: no
 # delist: automatic expiry, no fee, retested on request (free)
-header __RCVD_IN_OPM			rbleval:check_rbl('opm2', 'opm.blitzed.org.')
-tflags __RCVD_IN_OPM net
-header T_RCVD_IN_OPM_WINGATE		rbleval:check_rbl_sub('opm2', '1')
+header T_RCVD_IN_OPM_WINGATE		rbleval:check_rbl_sub('opm', '1')
 tflags T_RCVD_IN_OPM_WINGATE net
-header T_RCVD_IN_OPM_SOCKS		rbleval:check_rbl_sub('opm2', '2')
+header T_RCVD_IN_OPM_SOCKS		rbleval:check_rbl_sub('opm', '2')
 tflags T_RCVD_IN_OPM_SOCKS net
-header T_RCVD_IN_OPM_HTTP_CONNECT	rbleval:check_rbl_sub('opm2', '4')
+header T_RCVD_IN_OPM_HTTP_CONNECT	rbleval:check_rbl_sub('opm', '4')
 tflags T_RCVD_IN_OPM_HTTP_CONNECT net
-header T_RCVD_IN_OPM_ROUTER		rbleval:check_rbl_sub('opm2', '8')
+header T_RCVD_IN_OPM_ROUTER		rbleval:check_rbl_sub('opm', '8')
 tflags T_RCVD_IN_OPM_ROUTER net
-header T_RCVD_IN_OPM_HTTP_POST		rbleval:check_rbl_sub('opm2', '16')
+header T_RCVD_IN_OPM_HTTP_POST		rbleval:check_rbl_sub('opm', '16')
 tflags T_RCVD_IN_OPM_HTTP_POST net
 
 # fiveten - many blacklists, but only the bulk one performs well
