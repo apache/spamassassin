@@ -232,6 +232,14 @@ sub stop_spamd {
   } else {
     my $killed = kill (15, $spamd_pid);
     print ("Killed $killed spamd instances\n");
+
+    # wait for it to exit, before returning.
+    for my $waitfor (0 .. 5) {
+      if (kill (0, $spamd_pid) == 0) { last; }
+      print ("Waiting for spamd at pid $spamd_pid to exit...\n");
+      sleep 1;
+    }
+
     $spamd_pid = 0;
     return $killed;
   }
