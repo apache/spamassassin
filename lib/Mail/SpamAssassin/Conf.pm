@@ -1586,12 +1586,12 @@ are optional arguments to the function call.
     if (/^header\s+(\S+)\s+eval:(.*)$/) {
       my ($name,$rule) = ($1, $2);
       # Backward compatibility with old rule names -- Marc
-      $self->{user_rules_to_compile} = 1 if $scoresonly;
       if ($name =~ /^RCVD_IN/) {
-        $self->add_test ($name, $rule, TYPE_RBL_EVALS); next;
+        $self->add_test ($name, $rule, TYPE_RBL_EVALS);
       } else {
-        $self->add_test ($name, $rule, TYPE_HEAD_EVALS); next;
+        $self->add_test ($name, $rule, TYPE_HEAD_EVALS);
       }
+      $self->{user_rules_to_compile} = 1 if $scoresonly;
       next;
     }
     if (/^header\s+(\S+)\s+exists:(.*)$/) {
