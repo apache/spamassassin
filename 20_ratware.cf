@@ -304,3 +304,6 @@ header __MSGID_MS_HASH Message-ID =~ /^<[a-f0-9]{12}\$[a-f0-9]{8}\$[a-f0-9]{8}@/
 header __MIMEOLE_MS X-MIMEOLE =~ /^Produced By Microsoft MimeOLE/
 meta RATWARE_MS_HASH __MSGID_MS_HASH && !__MIMEOLE_MS
 describe RATWARE_MS_HASH	Bulk email fingerprint (msgid ms hash) found
+
+header RATWARE_EFROM	eval:check_ratware_envelope_from()
+describe RATWARE_EFROM	Bulk email fingerprint (envfrom) found
