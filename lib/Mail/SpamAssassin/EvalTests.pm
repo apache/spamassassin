@@ -48,10 +48,12 @@ $ROUND_THE_WORLD_RELAYERS = qr{(?:net|com|ca)};
 # regexp.  Then I threw in some unscientific seasoning to taste. ;)
 
 # an IP address. TODO: ipv6
-$IP_ADDRESS = qr/\b(?:1\d\d|2\d\d|\d\d|\d)\.
-		    (?:1\d\d|2\d\d|\d\d|\d)\.
-		    (?:1\d\d|2\d\d|\d\d|\d)\.
-		    (?:1\d\d|2\d\d|\d\d|\d)\b/x;
+$IP_ADDRESS = qr/\b
+		  (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
+		  (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
+		  (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
+		  (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)
+		  \b/x;
 
 $WORD_OBFUSCATION_CHARS = '*_.,/|-+=';
 
