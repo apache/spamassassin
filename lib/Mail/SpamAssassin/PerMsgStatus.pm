@@ -457,6 +457,13 @@ sub get_raw_body_text_array {
   $ctype ||=  $self->{msg}->get_header ('Content-type');
   $ctype ||=  '';
 
+  # if it's non-text, just return an empty body rather than the base64-encoded
+  # data.  If spammers start using images to spam, we'll block 'em then!
+  if ($ctype =~ /^(?:image\/|application\/|video\/)/) {
+    $self->{body_text_array} = [ ];
+    return $self->{body_text_array};
+  }
+
   # we run into a perl bug if the lines are astronomically long (probably due
   # to lots of regexp backtracking); so cut short any individual line over 2048
   # bytes in length.  This can wreck HTML totally -- but IMHO the only reason a
