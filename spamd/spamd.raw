@@ -1042,7 +1042,7 @@ sub check {
                              \$actual_length;     # is set or not.
   while ( $_ = $client->getline() ) {
     $actual_length += length($_);
-    last if $actual_length >= ${$final_length};
+    last if $actual_length > ${$final_length};
 
     push(@msglines, $_);    
   }
