@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.541 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.542 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -222,9 +222,6 @@ header T_RCVD_IN_OSIRU_OPT_IN		rbleval:check_rbl_sub('osirusoft', '127.0.0.7')
 header T_RCVD_IN_OSIRU_OPEN_PROXY	rbleval:check_rbl_sub('osirusoft', '127.0.0.9')
 tflags T_RCVD_IN_OSIRU_OPT_IN net
 tflags T_RCVD_IN_OSIRU_OPEN_PROXY net
-# repeats?
-header T_RCVD_IN_OSSRC	rbleval:check_rbl('ossrc', 'spamsources.relays.osirusoft.com.')
-tflags T_RCVD_IN_OSSRC net
 
 # SORBS
 # transfers: both axfr and ixfr available
