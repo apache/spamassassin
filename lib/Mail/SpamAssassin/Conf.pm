@@ -1278,9 +1278,9 @@ for you, set this to 1.
 
 =item rbl_timeout n		(default: 15)
 
-All RBL queries are made at the beginning of a check and we try to read the
+All DNS queries are made at the beginning of a check and we try to read the
 results at the end.  This value specifies the maximum period of time to wait
-for an RBL query.  If most of the RBL queries have succeeded for a particular
+for an DNS query.  If most of the DNS queries have succeeded for a particular
 message, then SpamAssassin will not wait for the full period to avoid wasting
 time on unresponsive server(s).  For the default 15 second timeout, here is a
 chart of queries remaining versus the effective timeout in seconds:
@@ -1301,31 +1301,6 @@ within 5 seconds of the beginning of the check or they will be timed out.
   push (@cmds, {
     setting => 'rbl_timeout',
     default => 15,
-    type => $CONF_TYPE_NUMERIC
-  });
-
-=item check_mx_attempts n	(default: 2)
-
-By default, SpamAssassin checks the From: address for a valid MX this many
-times, waiting 5 seconds each time.
-
-=cut
-
-  push (@cmds, {
-    setting => 'check_mx_attempts',
-    default => 2,
-    type => $CONF_TYPE_NUMERIC
-  });
-
-=item check_mx_delay n		(default: 5)
-
-How many seconds to wait before retrying an MX check.
-
-=cut
-
-  push (@cmds, {
-    setting => 'check_mx_delay',
-    default => 5,
     type => $CONF_TYPE_NUMERIC
   });
 
@@ -2197,7 +2172,7 @@ including selections like '-notfirsthop' appearing at the end of the set name.
       if ($value =~ /^(\S+)\s+(?:rbl)?eval:(.*)$/) {
         my ($name, $fn) = ($1, $2);
 
-        if ($fn =~ /^check_rbl/) {
+        if ($fn =~ /^check_(?:rbl|dns)/) {
           $self->{parser}->add_test ($name, $fn, $TYPE_RBL_EVALS);
         }
         else {
@@ -2410,7 +2385,7 @@ The test will be ignored when calculating the score for learning systems.
 
 =item priority SYMBOLIC_TEST_NAME n
 
-Assign a specific priority to a test.  All tests, except for RBL and Meta
+Assign a specific priority to a test.  All tests, except for DNS and Meta
 tests, are run in priority order. The default test priority is 0 (zero).
 
 =cut
