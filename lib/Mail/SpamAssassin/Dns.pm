@@ -893,7 +893,7 @@ sub is_pyzor_available {
 
 sub pyzor_lookup {
   my ($self, $fulltext) = @_;
-  my $response = undef;
+  my @response;
   my $pyzor_count;
   my $pyzor_whitelisted;
   my $timeout=$self->{conf}->{pyzor_timeout};
@@ -932,16 +932,18 @@ sub pyzor_lookup {
                 $tmpf, 1, $path, split(' ', $opts), "check");
     $pid or die "$!\n";
 
-    $response = <PYZOR>;
+    @response = <PYZOR>;
     close PYZOR;
 
-    unless (defined($response)) {
+    unless (@response) {
       die ("no response\n");	# yes, this is possible
     }
+    map { chomp } @response;
+    dbg("Pyzor: got response: " . join("\\n", @response));
 
-    chomp $response;
-
-    dbg("Pyzor: got response: $response");
+    if ($response[0] =~ /^Traceback/) {
+      die ("internal error\n");
+    }
 
     alarm(0);
     $self->cleanup_kids($pid);
@@ -951,11 +953,12 @@ sub pyzor_lookup {
   $self->leave_helper_run_mode();
 
   if ($@) {
-    if ($@ =~ /^__alarm__$/) {
+    chomp $@;
+    if ($@ eq "__alarm__") {
       dbg ("Pyzor -> check timed out after $timeout secs.");
-    } elsif ($@ =~ /^__brokenpipe__$/) {
+    } elsif ($@ eq "__brokenpipe__") {
       dbg ("Pyzor -> check failed: Broken pipe.");
-    } elsif ($@ eq "no response\n") {
+    } elsif ($@ eq "no response") {
       dbg ("Pyzor -> check failed: no response");
     } else {
       warn ("Pyzor -> check failed: $@\n");
@@ -964,7 +967,7 @@ sub pyzor_lookup {
   }
 
   # made regexp a little more forgiving (jm)
-  if ($response =~ /^\S+\t.*?\t(\d+)\t(\d+)\s*$/) {
+  if ($response[0] =~ /^\S+\t.*?\t(\d+)\t(\d+)\s*$/) {
     $pyzor_whitelisted = $2+0;
     if ($pyzor_whitelisted == 0) {
       $pyzor_count = $1+0;
@@ -972,7 +975,7 @@ sub pyzor_lookup {
 
   } else {
     # warn on failures to parse (jm)
-    dbg ("Pyzor: couldn't grok response \"$response\"");
+    dbg ("Pyzor: couldn't grok response \"$response[0]\"");
   }
 
   # moved this around a bit; no point in testing RE twice (jm)
