@@ -1939,11 +1939,11 @@ Same as check_rbl(), except querying using IN TXT instead of IN A records.
 If the zone supports it, it will result in a line of text describing
 why the IP is listed, typically a hyperlink to a database entry.
 
-=item header SYMBOLIC_TEST_NAME eval:check_rbl_sub('set', 'subrule')
+=item header SYMBOLIC_TEST_NAME eval:check_rbl_sub('set', 'sub-test')
 
-Create a subrule for 'set'.  If you want to look up a multi-meaning zone
+Create a sub-test for 'set'.  If you want to look up a multi-meaning zone
 like relays.osirusoft.com, you can then query the results from that zone
-using the zone ID from the original query.  The subrule may either be an
+using the zone ID from the original query.  The sub-test may either be an
 IPv4 dotted address for RBLs that return multiple A records or a
 non-negative decimal number to specify a bitmask for RBLs that return a
 single A record containing a bitmask of results.
