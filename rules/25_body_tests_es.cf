@@ -1,8 +1,15 @@
-# Maintainer: jesus climent <climent at users dot sourceforge dot net>
-
-# Leaving some of these without "lang es" because they show up in english language
-# inboxes
-# $Id: 25_body_tests_es.cf,v 1.31 2002/09/04 18:36:50 jmason Exp $
+# SpamAssassin rules file: Spanish body tests
+#
+# Maintainer: Jesus Climent <climent at users dot sourceforge dot net>
+#
+# Please don't modify this file as your changes will be overwritten with
+# the next update. Use @@LOCAL_RULES_DIR@@/local.cf instead.
+# See 'perldoc Mail::SpamAssassin::Conf' for details.
+#
+# Leaving some of these without "lang es" because they show up in English
+# language inboxes.
+#
+###########################################################################
 
 lang es body REMOVE_ES_01             /(?:Para no|Si (?:U(?:ste)?d\. )?no (?:deseas?|qui?er[ée]s)) (?:seguir )?recibi(?:r|endo) (?:en el futuro )?(?:ninguna otra|m.s|estos)?\s?(?:correos?|mensajes?|publicidad|informaci.n|ofertas?|(?:e-?)?mails? promocional(?:es)?)/
 lang es describe REMOVE_ES_01         Claims you can be removed in Spanish
