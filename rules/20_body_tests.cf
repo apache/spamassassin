@@ -33,7 +33,7 @@ rawbody JAVASCRIPT			/<SCRIPT/i
 describe JAVASCRIPT			JavaScript code
 rawbody REALLY_UNSAFE_JAVASCRIPT	/<(?:body|frame) [^>]*on(?:Load|UnLoad|BeforeUnload)/is
 describe REALLY_UNSAFE_JAVASCRIPT	Auto-executing JavaScript code
-rawbody SLIGHTLY_UNSAFE_JAVASCRIPT	/\bon(?:Blur|Chane|Focus|Error|Key(?:Press|Down|Up)|Mouse(?:Down|Up|Over|Move|Out)|Resize|Move|Scroll|Stop|Click)\b/i
+rawbody SLIGHTLY_UNSAFE_JAVASCRIPT	/\bon(?:Blur|Change|Focus|Error|Key(?:Press|Down|Up)|Mouse(?:Down|Up|Over|Move|Out)|Resize|Move|Scroll|Stop|Click)\b/i
 describe SLIGHTLY_UNSAFE_JAVASCRIPT	JavaScript code which can easily be executed
 
 rawbody HTML_WITH_BGCOLOR	/<body [^>]*bgcolor[=3d\"\'\#]+[0-9a-e][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]/is
