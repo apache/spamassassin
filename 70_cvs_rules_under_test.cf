@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.497 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.498 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -51,15 +51,21 @@ describe T_INVALID_DATE_2	Invalid Date: header (not RFC 2822)
 # Wierd.  Can only assume this is caused by PEBKAC on the sending side...
 meta T_HTML_WITHOUT_HTML	(__MIME_HTML && !HTML_MESSAGE)
 describe T_HTML_WITHOUT_HTML	Claims to be HTML, but there is no HTML text
+# more variations...
+meta T_HTML_WITHOUT_HTML_A	(__MIME_HTML && !HTML_MESSAGE && !__TAG_EXISTS_HTML)
+meta T_HTML_WITHOUT_HTML_B	(__MIME_HTML && !HTML_MESSAGE && !__TAG_EXISTS_BODY)
+meta T_HTML_WITHOUT_HTML_C	(__MIME_HTML && !HTML_MESSAGE && !(__TAG_EXISTS_HTML || __TAG_EXISTS_BODY))
+meta T_HTML_WITHOUT_HTML_D	(__MIME_HTML && !HTML_MESSAGE && !(__TAG_EXISTS_HTML && __TAG_EXISTS_BODY))
+meta T_HTML_WITHOUT_HTML_E	(__MIME_HTML && !__TAG_EXISTS_HTML)
+meta T_HTML_WITHOUT_HTML_F	(__MIME_HTML && !__TAG_EXISTS_BODY)
+meta T_HTML_WITHOUT_HTML_G	(__MIME_HTML && !(__TAG_EXISTS_HTML || __TAG_EXISTS_BODY))
+meta T_HTML_WITHOUT_HTML_H	(__MIME_HTML && !(__TAG_EXISTS_HTML && __TAG_EXISTS_BODY))
 
-# 2003-02-23: quinlan
-# bug 1376: HTML without <!DOCTYPE> from mailers that always use <!DOCTYPE>
-#
-# Note: some variations of this rule actually perform better, but they all
-# overlap 96-100% with MIME_HTML_ONLY whereas this variation adds real value
-# and has a high hit rate.
-body __HTML_TAG_EXISTS_DOCTYPE	eval:html_tag_exists('!doctype')
-meta T_MIME_HTML_NO_DOCTYPE	(__MIME_HTML && !__HTML_TAG_EXISTS_DOCTYPE)
+# no major tag rules
+meta T_MIME_HTML_NO_HTML_TAG	__MIME_HTML_ONLY && !__TAG_EXISTS_HTML
+# this is perhaps a bit overoptimized...
+meta T_MIME_HTML_NO_MAJOR_TAG1	MIME_HTML_ONLY && !(__TAG_EXISTS_HTML && __TAG_EXISTS_BODY)
+meta T_MIME_HTML_NO_MAJOR_TAG2	(__MIME_HTML_ONLY && !__TAG_EXISTS_HTML) || (MIME_HTML_ONLY && !__TAG_EXISTS_BODY)
 
 # 2003-05-15
 # possible replacements for current HTML_IMAGE_WEB_BUGS test
@@ -138,23 +144,6 @@ body T_BLANK_LINE_RATIO_04_80_100	eval:check_blank_line_ratio('80','100','4')
 
 header T_RATWARE_RCVD_BONUS_SPC	Received =~ /\) by  [a-zA-Z0-9]/
 describe T_RATWARE_RCVD_BONUS_SPC Received headers forged (extra spaces)
-
-# quinlan: How much better are these than MIME_HTML_ONLY?  I'm concerned
-# it's a bit too easy to create high S/O rules with MIME_HTML_ONLY
-meta T_MIME_HTML_NO_HTML_TAG	MIME_HTML_ONLY && !__TAG_EXISTS_HTML
-meta T_MIME_HTML_NO_BODY_TAG	MIME_HTML_ONLY && !__TAG_EXISTS_BODY
-# but we'll try this anyway
-meta T_MIME_HTML_NO_MAJOR_TAG	MIME_HTML_ONLY && !__TAG_EXISTS_HTML && !__TAG_EXISTS_BODY
-# another one...
-meta T_MIME_HTML_NO_MAJOR_TAG2	MIME_HTML_ONLY && !(__TAG_EXISTS_HTML && __TAG_EXISTS_BODY)
-
-# with __MIME_HTML_ONLY instead
-meta T_MIME_HTML_NO_HTML_TAG_B	__MIME_HTML_ONLY && !__TAG_EXISTS_HTML
-meta T_MIME_HTML_NO_BODY_TAG_B	__MIME_HTML_ONLY && !__TAG_EXISTS_BODY
-# but we'll try this anyway
-meta T_MIME_HTML_NO_MAJOR_TAG_B	__MIME_HTML_ONLY && !__TAG_EXISTS_HTML && !__TAG_EXISTS_BODY
-# another one...
-meta T_MIME_HTML_NO_MAJOR_TAG2_B	__MIME_HTML_ONLY && !(__TAG_EXISTS_HTML && __TAG_EXISTS_BODY)
 
 # 2003-02-23: quinlan
 # Message-Id: format tests
