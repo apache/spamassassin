@@ -1551,6 +1551,10 @@ SpamAssassin's learning systems automatically as a non-spam message.
 The score threshold above which a mail has to score, to be fed into
 SpamAssassin's learning systems automatically as a spam message.
 
+Note: SpamAssassin requires at least 3 points from the header, and 3
+points from the body to auto-learn as spam.  Therefore, the minimum
+working value for this option is 6.
+
 =cut
 
     if (/^(?:bayes_)?auto_learn_threshold_spam\s+(.*)$/) {
