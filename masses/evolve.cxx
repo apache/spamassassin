@@ -142,16 +142,17 @@ main (int argc, char **argv) {
   genome.resizeBehaviour (num_scores, num_scores);
 
   // steady-state seems to give best results
-  //GASteadyStateGA ga(genome);
-  //ga.set(gaNpopulationSize, popsize);   // population size
+  GASteadyStateGA ga(genome);
+  ga.set(gaNpopulationSize, popsize);   // population size
 
-  GADemeGA ga(genome);
-  ga.nPopulations(5);
-  ga.populationSize(100);
+  // alternatively, this uses multiple pops with migration
+  //GADemeGA ga(genome);
+  //ga.nPopulations(5);
+  //ga.populationSize(100);
 
   ga.minimize();		// we want to minimize the objective
 
-  // terminate once the scores converge enough
+  // terminate once the scores converge enough (DOESN'T SEEM TO WORK)
   //float pconv  = 0.8;          // threshhold for when we have converged
   //int nconv    = 50;            // how many generations back to look
   //ga.pConvergence(pconv);
