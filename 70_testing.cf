@@ -34,14 +34,6 @@
 # describe T_FORGED_DEF_WHITELIST   Forged From: is in default white-list
 # tflags T_FORGED_DEF_WHITELIST     userconf
 
-# testing for Jeff, do not use!!!
-ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
-urirhsbl T_URIBL_MP fraud.rhs.mailpolice.com.   A
-body     T_URIBL_MP eval:check_uridnsbl('URIBL_MP')
-describe T_URIBL_MP URI's domain appears in MailPolice fraud list
-tflags   T_URIBL_MP net
-endif	# Mail::SpamAssassin::Plugin::URIDNSBL
-
 ##########################################################################
 
 header   T_LEADINGPREP       From =~ /^(?:A|About|All|An|And|Any|As|At|Be|Best|Bulk|Cash|Earn|Easy|Fast|Find|For|Free|From|Get|Hi|Home|In|Instant|Is|It|Its|Limited|Lose|Love|Make|Need|New|No|Save|Sex|She|Special|Stock|Stop|Take|Test|There|This|To|Try|Want|We|What|Where|Why|You|Your)[_ ]/i
