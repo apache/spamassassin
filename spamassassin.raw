@@ -50,6 +50,7 @@ use lib '../lib';		# for testing in ./t
 sub usage {
   my $ver = Mail::SpamAssassin::Version();
   my $rules = join ("\n\t\t\t\t", @Mail::SpamAssassin::default_rules_path);
+  $rules = Mail::SpamAssassin->sed_path($rules);
   my $prefs = join ("\n\t\t\t\t", @Mail::SpamAssassin::default_userprefs_path);
   warn <<EOUSAGE;
 
@@ -74,7 +75,8 @@ Options:
   -L               Local tests only, do not do internet-based checks
   -S               Stop testing when spam threshold is reached
   -d		   Remove SpamAssassin reports from a mail message and print
-  -c config        configuration file
+  -c config        (deprecated) same as -C
+  -C config        configuration file
                    (default:	$rules )
   -p prefs         user preferences file
                    (default:	$prefs )
@@ -91,13 +93,14 @@ EOUSAGE
 use vars qw{
   $opt_t $opt_c $opt_p $opt_h $opt_V $opt_D $opt_r $opt_P $opt_w $opt_l
   $opt_d $opt_L $opt_e $opt_W $opt_M $opt_R $opt_F $opt_a $opt_S $opt_x
+  $opt_C
 };
 
 eval {
   require Mail::SpamAssassin;
   require Mail::SpamAssassin::NoMailAudit;
 
-  getopts ('atc:p:ehVDxrPw:l:dLSWRM:F:') or usage();
+  getopts ('atc:p:ehVDxrPw:l:dLSWRM:F:C:') or usage();
 
   if (defined $opt_h) { usage(); }
   if (defined $opt_V) {
@@ -144,7 +147,7 @@ my $mail = Mail::SpamAssassin::NoMailAudit->new ( add_From_line => $opt_F );
 
 # create the tester factory
   my $spamtest = new Mail::SpamAssassin ({
-    'rules_filename'	=> $opt_c,
+    'rules_filename'	=> $opt_C || $opt_c,
     'userprefs_filename' => $opt_p,
     'local_tests_only'	=> $opt_L,
     'stop_at_threshold' => $opt_S,

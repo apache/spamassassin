@@ -24,8 +24,9 @@ sub sa_t_init {
   $spamc ||= "../spamd/spamc";
 
   $spamdport = 48373;		# whatever
+  $spamd_cf_args = "-C ../rules";
 
-  $scr_cf_args = "-c ../rules -p ../rules/user_prefs.template";
+  $scr_cf_args = "-C ../rules -p ../rules/user_prefs.template";
   $scr_pref_args = "";
   $scr_test_args = "";
 
@@ -137,6 +138,9 @@ sub start_spamd {
   }
 
   my $spamdargs;
+  if($sdargs !~ /(?:-C\s*[^-]\S+)/) {
+    $sdargs = $spamd_cf_args . " ". $sdargs;
+  }
   if($sdargs !~ /(?:-p\s*[0-9]+|-o)/)
   {
     $spamdargs = "$spamd -D -p $spamdport $sdargs";
