@@ -9,8 +9,7 @@ use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Dns;
 use Mail::SpamAssassin::Locales;
 use Mail::SpamAssassin::AutoWhitelist;
-use IO::Socket;
-use Carp;
+use Time::Local;
 use strict;
 
 use vars qw{
@@ -594,6 +593,96 @@ gotone:
 
   dbg ("round-the-world: probably not");
   return 0;
+}
+
+###########################################################################
+
+sub check_for_forward_date {
+  my ($self) = @_;
+  local ($_);
+
+  my $date = $self->get ('Date'); chomp ($date);
+  my $time = $self->_parse_rfc822_date ($date);
+
+  my $rcvd = $self->get ('Received');
+  my $now;
+  if ($rcvd =~ / (\S\S\S, .?\d+ \S\S\S \d+ \d+:\d+:\d+ \S+)/) {
+    $rcvd = $1;
+    dbg ("using Received header date for real time: $rcvd");
+    $now = $self->_parse_rfc822_date ($rcvd);
+  } else {
+    dbg ("failed to find Received header date, using current system time");
+    $now = time();
+  }
+
+  my $diff = $now - $time; if ($diff < 0) { $diff = -$diff; }
+  dbg ("time_t from date=$time, rcvd=$now, diff=$diff");
+
+  if ($diff > (60 * 60 * 24 * 4)) {	# 4 days far enough?
+    dbg ("too far from current time, raising flag");
+    return 1;
+  }
+
+  0;
+}
+
+sub _parse_rfc822_date {
+  my ($self, $date) = @_;
+  local ($_);
+  my ($yyyy, $mmm, $dd, $hh, $mm, $ss, $mon, $tzoff);
+
+  # make it a bit easier to match
+  $_ = " $date "; s/, */ /gs; s/\s+/ /gs;
+
+  # now match it in parts.  Date part first:
+  if (s/ (\d+) ([A-Z][a-z][a-z]) (\d\d\d\d) / /) {
+    $dd = $1; $mon = $2; $yyyy = $3;
+  } elsif (s/ (\d+) ([A-Z][a-z][a-z]) (\d\d) / /) {
+    $dd = $1; $mon = $2; $yyyy = 2000 + $3;	# bizarre
+  }
+
+  # hh:mm:ss
+  if (s/ (\d\d):(\d\d):(\d\d) / /) {
+    $hh = $1; $mm = $2; $ss = $3;
+  }
+
+  # and timezone offset. if we can't parse non-numeric zones, that's OK
+  # as long as we don't worry about time diffs < 1 to 1.5 days.
+  if (s/ ([-+]\d\d\d\d) / /) {
+    $tzoff = $1;
+  }
+  $tzoff ||= '0000';
+
+  $hh ||= 0;
+  $mm ||= 0;
+  $ss ||= 0;
+
+  if (!defined $mmm && defined $mon) {
+    my @months = qw(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
+    my $i; for ($i = 0; $i < 12; $i++) {
+      if ($mon eq $months[$i]) { $mmm = $i+1; last; }
+    }
+  }
+
+  my $time;
+  eval {		# could croak
+    $time = timegm ($ss, $mm, $hh, $dd, $mmm-1, $yyyy);
+  };
+
+  if ($@) {
+    dbg ("time cannot be parsed: $date, $yyyy-$mmm-$dd $hh:$mm:$ss");
+    return 0;
+  }
+
+  $tzoff =~ /([-+])(\d\d)(\d\d)$/;	# convert to seconds difference
+  $tzoff = (($2 * 60) + $3) * 60;
+  if ($1 eq '-') {
+    $time -= $tzoff;
+  } else {
+    $time += $tzoff;
+  }
+
+  return $time;
 }
 
 ###########################################################################

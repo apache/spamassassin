@@ -63,6 +63,12 @@ describe INVALID_DATE		Invalid Date: header (has AM/PM)
 header INVALID_DATE_NO_TZ	Date =~ /^..., \d+ ... .... ..:..:..$/
 describe INVALID_DATE_NO_TZ	Invalid Date: header (no timezone)
 
+header INVALID_DATE_TZ_ABSURD	Date =~ /[-+]?(?:1[3-9]\d\d|[2-9]\d\d\d)$/
+describe INVALID_DATE_TZ_ABSURD	Invalid Date: header (timezone does not exist)
+
+header DATE_IN_FUTURE		eval:check_for_forward_date()
+describe DATE_IN_FUTURE		Date: is in the future or unparseable
+
 header SUBJ_HAS_Q_MARK		Subject =~ /\?.{2,}$/
 describe SUBJ_HAS_Q_MARK	Subject: contains a question mark
 
