@@ -107,7 +107,7 @@ sub razor_report {
   my $response;
 
   # razor also debugs to stdout. argh. fix it to stderr...
-  if ($Mail::SpamAssassin::DEBUG) {
+  if ($Mail::SpamAssassin::DEBUG->{enabled}) {
     open (OLDOUT, ">&STDOUT");
     open (STDOUT, ">&STDERR");
   }
@@ -129,7 +129,7 @@ sub razor_report {
 
       if ($rc) {
         my %opt = (
-          debug      => $Mail::SpamAssassin::DEBUG,
+          debug      => $Mail::SpamAssassin::DEBUG->{enabled},
           foreground => 1,
           config     => $self->{main}->{conf}->{razor_config}
         );
@@ -178,7 +178,7 @@ sub razor_report {
     my $config = $self->{main}->{conf}->{razor_config};
     $config ||= $self->{main}->sed_path ("~/razor.conf");
     my %options = (
-      'debug'     => $Mail::SpamAssassin::DEBUG
+      'debug'     => $Mail::SpamAssassin::DEBUG->{enabled}
     );
 
     eval {
@@ -216,7 +216,7 @@ sub razor_report {
 
   $/ = $oldslash;
 
-  if ($Mail::SpamAssassin::DEBUG) {
+  if ($Mail::SpamAssassin::DEBUG->{enabled}) {
     open (STDOUT, ">&OLDOUT");
     close OLDOUT;
   }
