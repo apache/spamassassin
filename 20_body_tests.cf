@@ -138,7 +138,7 @@ body CASHCASHCASH		/\${3,}/
 describe CASHCASHCASH		Contains at least 3 dollar signs in a row
 body CALL_NOW			/CALL NOW/i
 describe CALL_NOW		Urges you to call now
-body CALL_FREE			/\b(?:call|dial|toll free).{1,15}8(?:00|88|77|66|55|44|33|22)[\)\s-]*[\dA-Z]+[\s-]?[\dA-Z]+/i
+body CALL_FREE			/\b(?:call|dial|toll free|order).{1,15}8(?:00|88|77|66|55|44|33|22)[\)\s-]*[\dA-Z]+[\s-]?[\dA-Z]+/i
 describe CALL_FREE		Contains a tollfree number
 body ONLINE_BIZ_OPS		/online business opportunities/i
 describe ONLINE_BIZ_OPS		Wants you to do business online
@@ -545,6 +545,9 @@ describe BASE64_ENC_TEXT	Message text disguised using base-64 encoding
 
 full CHARSET_FARAWAY_BODY	eval:check_for_faraway_charset_in_body()
 describe CHARSET_FARAWAY_BODY	Character set indicates foreign language body
+
+full UNDESIRED_LANGUAGE_BODY		eval:check_language()
+describe UNDESIRED_LANGUAGE_BODY	Written in an undesired language
 
 body NIGERIAN_SCAM		/BASED ON INFORMATION GATHERED ABOUT YOU, WE BELIEVE\s*YOU WOULD BE IN A POSITION TO HELP US IN TRANSFER/i
 describe NIGERIAN_SCAM		Nigerian scam, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
