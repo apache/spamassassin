@@ -299,6 +299,12 @@ sub check_for_forged_received_trail {
       $from[$i] =~ s/.*\.(\S+\.\S+)$/$1/;
     }
 
+    # valid: bouncing around inside 1 machine, via the localhost interface.
+    # freshmeat newsletter does this.
+    if (defined ($from[$i]) && $from[$i] eq 'localhost.localdomain') {
+      $from[$i] = undef;
+    }
+
     if ($i > 0 && defined($by[$i]) && defined($from[$i - 1]) &&
 	($by[$i] ne $from[$i - 1]))
     {
@@ -2041,6 +2047,7 @@ sub check_for_fake_aol_relay_in_rcvd {
   # there's another set of spammers who generate fake hostnames to go with
   # it!
   if (/ rly-[a-z][a-z]\d\d\./i) {
+    return 0 if /\/AOL-\d+\.\d+\.\d+\)/;    # via AOL mail relay
     return 0 if /ESMTP id (?:RELAY|MAILRELAY|MAILIN)/; # AOLish
     return 1;
   }
