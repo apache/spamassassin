@@ -107,7 +107,7 @@ sub safe_unlock {
   my ($self, $path) = @_;
 
   if (!exists $self->{lock_fhs} || !defined $self->{lock_fhs}->{$path}) {
-    warn "unlock: $$ no lock handle for $path\n";
+    dbg ("unlock: $$ no lock handle for $path - already unlocked?");
     return;
   }
 
@@ -120,11 +120,15 @@ sub safe_unlock {
   dbg("unlock: $$ unlocked $path.lock");
 
   # do NOT unlink! this would open a race, whereby:
+  #
   # procA: ....unlock                           (unlocked lockfile)
   # procB:            lock                      (gets lock on lockfile)
   # procA:                 unlink               (deletes lockfile)
   # (procB's lock is now deleted as well!)
   # procC:                        create, lock  (gets lock on new file)
+  #
+  # both procB and procC would then think they had locks, and both
+  # would write to the database file.  this is bad.
   #
   # unlink ("$path.lock"); 
   #
