@@ -224,6 +224,10 @@ spamd [-L] [-p port] [-h]
 
 =over
 
+=item B<-A> I<host,...>
+
+Specify a list of authorized hosts which can connect to this spamd instance.  The list is one of valid IP addresses, separated by commas.
+
 =item B<-h>
 
 Print a brief help message, then exit without further action
