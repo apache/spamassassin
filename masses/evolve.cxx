@@ -232,6 +232,7 @@ fill_allele_set (GARealAlleleSetArray *setary)
 void usage () {
   cerr << "usage: evolve -s size [args]\n"
     << "\n"
+    << "  -z sleeptime = time to sleep between gens (0 default)\n"
     << "  -s size = population size (300 recommended)\n"
     << "  -b nybias = bias towards false negatives (5.0 default)\n"
     << "\n"
@@ -254,11 +255,12 @@ main (int argc, char **argv) {
   int justCount = 0;
   int npops	= 5;		// num pops (for deme mode)
   int popsize	= 0;		// population size
+  int sleepTime	= 0;		// time to sleep between gens
   int generations = 1500;	// generations to run
   float pconv	= 1.00;		// threshhold for when we have converged
   int nconv	= 300;		// how many gens back to check for convergence
 
-  while ((arg = getopt (argc, argv, "b:c:s:m:g:C")) != -1) {
+  while ((arg = getopt (argc, argv, "b:c:s:m:g:Cz:")) != -1) {
     switch (arg) {
       case 'b':
 	nybias = atof(optarg);
@@ -287,6 +289,10 @@ main (int argc, char **argv) {
       case 'g':
 	demeMode = 0;
 	generations = atoi(optarg);
+	break;
+
+      case 'z':
+	sleepTime = atoi(optarg);
 	break;
 
       case '?':
@@ -381,6 +387,8 @@ main (int argc, char **argv) {
 	write_to_file (genome, "tmp/results.in_progress");
       }
     }
+
+    if (sleepTime) { sleep(sleepTime); }
   }
   cout << endl;
 
