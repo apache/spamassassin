@@ -1086,3 +1086,6 @@ describe INCREASE_SEX 		Talks about a bigger drive for sex
 body BANG_GUARANTEE		/\bguaranteed?\!/i
 describe BANG_GUARANTEE		Something is emphatically guaranteed
 
+# seems to be inserted with s1618 rules VERY heavily
+body WE_HATE_SPAM /\banti-spam policy\b/i
+describe WE_HATE_SPAM Mailer is against spam -- aren't we all?
