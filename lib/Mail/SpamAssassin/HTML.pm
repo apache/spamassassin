@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.59 2002/12/20 11:25:31 quinlan Exp $
+# $Id: HTML.pm,v 1.60 2002/12/21 00:00:22 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -56,6 +56,9 @@ sub html_format {
   }
   elsif ($tag eq "br") {
     push @{$self->{html_text}}, "\n";
+  }
+  if ($tag eq "li" || $tag eq "td") {
+    push @{$self->{html_text}}, " ";
   }
   elsif ($tag eq "img" && exists $attr->{alt} && $attr->{alt} ne "") {
     push @{$self->{html_text}}, " $attr->{alt} ";
