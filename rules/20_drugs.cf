@@ -29,25 +29,32 @@
 require_version @@VERSION@@
 
 ###########################################################################
+# header rules
+
+header SUBJECT_DRUG_ED		Subject =~ /viagra/i
+describe SUBJECT_DRUG_ED	Subject includes "viagra"
+
+###########################################################################
+# body rules
 
 # jm: keep this case-sensitive, otherwise it FP's
 body DRUG_ED_CAPS		/(?:\bCIALIS|LEVITRA|VIAGRA)/
 describe DRUG_ED_CAPS		Mentions an E.D. drug
 
-body HERBAL_VIAGRA              /\bherbal v(?:iagra)?\b/i
-describe HERBAL_VIAGRA          Plugs "Herbal Viagra"
+body DRUG_ED_COMBO		/\bviagra .{0,15}(?:phentermine|xenical|tenuate|zyban|propecia)\b/i
+describe DRUG_ED_COMBO		Viagra and other drugs
 
-body VIAGRA_ONLINE              /\bviagra .{0,25}(?:express|online|overnight)/i
-describe VIAGRA_ONLINE          Fast Viagra Delivery
+body DRUG_ED_GENERIC		/Generic Viagra/
+describe DRUG_ED_GENERIC	Mentions Generic Viagra
 
-body VIAGRA_COMBO               /\bviagra .{0,15}(?:phentermine|xenical|tenuate|zyban|propecia)\b/i
-describe VIAGRA_COMBO           Viagra and other drugs
+body DRUG_ED_HERBAL		/\bherbal v(?:iagra)?\b/i
+describe DRUG_ED_HERBAL		Plugs "Herbal Viagra"
 
-body ONLINE_PHARMACY		/\bonline pharmacy|\b(?:drugs|medications) online/i
-describe ONLINE_PHARMACY	Online Pharmacy
-
-body GENERIC_VIAGRA		/Generic Viagra/
-describe GENERIC_VIAGRA		Mentions Generic Viagra
+body DRUG_ED_ONLINE		/\bviagra .{0,25}(?:express|online|overnight)/i
+describe DRUG_ED_ONLINE		Fast Viagra Delivery
 
 body DEEP_DISC_MEDS		/\bdeep discount med(?:s|ications)\b/i
 describe DEEP_DISC_MEDS		Deep discount medications
+
+body ONLINE_PHARMACY		/\bonline pharmacy|\b(?:drugs|medications) online/i
+describe ONLINE_PHARMACY	Online Pharmacy
