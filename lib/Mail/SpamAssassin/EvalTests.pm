@@ -1435,7 +1435,7 @@ sub message_from_debian_bts {
   my ($self)    = @_;
 
   my $all       = $self->get('ALL');
-  if ($all      =~ /^X-[[:alnum:]]+-PR-[[:alnum:]]+:\s+/m) {
+  if ($all      =~ /^X-\w+-PR-\w+:\s+/m) {
     return 1 if $all =~ /^Subject:\s+Bug#\d+: /m;
   }
   elsif ($all   =~ /^From:\s+owner\@/mi and
