@@ -45,8 +45,6 @@ use bytes;
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::HTML;
-use MIME::Base64;
-use MIME::QuotedPrint;
 
 =item new()
 
