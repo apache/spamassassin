@@ -240,6 +240,8 @@ sub spamcrun {
   %found = ();
   %found_anti = ();
   &checkfile ("$testname.out", $read_sub) if (defined $read_sub);
+
+  ($sa_exitcode == 0);
 }
 
 sub spamcrun_background {
