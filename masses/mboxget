@@ -26,9 +26,11 @@ my $prog = $0;
 $prog =~ s@.*/@@;
 
 foreach my $where (@ARGV) {
-  my ($file, $offset) = ($where =~ m/(.*)\.(\d+)$/);
+  my ($file, $offset) = ($where =~ m/(.*?)(?:\.(\d+))?$/);
   open(INPUT, $file) || die("$prog: open $file failed: $!\n");
-  seek(INPUT, $offset, 0) || die("$prog: seek $offset failed: $!\n");
+  if ($offset) {
+    seek(INPUT, $offset, 0) || die("$prog: seek $offset failed: $!\n");
+  }
   my $past = 0;
   while (<INPUT>) {
     if ($past) {
