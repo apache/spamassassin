@@ -44,32 +44,6 @@ report _SUMMARY_
 # _CONTACTADDRESS_ above if present)
 report_contact	@@CONTACT_ADDRESS@@
 
-
-###########################################################################
-# and now, a template for spam-trap responses.  If the first few lines
-# begin with "Xxxxxx: " where Xxxxxx is a header, they'll be used as
-# headers.
-
-clear_spamtrap_template
-spamtrap Subject: this address is no longer available
-
-spamtrap [this message has been automatically generated]
-spamtrap 
-spamtrap Please note that this address is no longer in use, and nowadays
-spamtrap receives nothing but unsolicited commercial mail.  Accordingly,
-spamtrap any mail sent to it is added to several spam-tracking databases,
-spamtrap then automatically deleted.
-spamtrap
-spamtrap If you genuinely want to contact the owner of the address, please
-spamtrap re-check your contact lists, or search the web, to find their
-spamtrap current e-mail address.
-spamtrap 
-spamtrap The mail you sent is reproduced in full below, for resending to
-spamtrap the correct address.  Sorry for the inconvenience!
-spamtrap 
-spamtrap [-- Signed: the SpamAssassin mail filter]
-spamtrap 
-
 ###########################################################################
 
 # Unsafe-for-viewing message report template.
