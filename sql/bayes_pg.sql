@@ -1,6 +1,6 @@
 
 CREATE TABLE bayes_expire (
-  id int(11) NOT NULL default '0',
+  id integer NOT NULL default '0',
   runtime integer NOT NULL default '0'
 );
 
@@ -15,14 +15,14 @@ CREATE TABLE bayes_global_vars (
 INSERT INTO bayes_global_vars VALUES ('VERSION','3');
 
 CREATE TABLE bayes_seen (
-  id int(11) NOT NULL default '0',
+  id integer NOT NULL default '0',
   msgid varchar(200) NOT NULL default '',
   flag character(1) NOT NULL default '',
   PRIMARY KEY  (id,msgid)
 );
 
 CREATE TABLE bayes_token (
-  id int(11) NOT NULL default '0',
+  id integer NOT NULL default '0',
   token char(200) NOT NULL default '',
   spam_count integer NOT NULL default '0',
   ham_count integer NOT NULL default '0',
