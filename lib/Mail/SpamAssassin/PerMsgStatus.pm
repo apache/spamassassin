@@ -1126,6 +1126,7 @@ sub get_decoded_stripped_body_text_array {
       my $space = ($before =~ tr/ \t\n\r\x0b\xa0/ \t\n\r\x0b\xa0/);
       $self->{html}{non_uri_len} = length($before);
       for my $line (@{$self->{html_text}}) {
+	$line = pack ('C0A*', $line);
 	$space += ($line =~ tr/ \t\n\r\x0b\xa0/ \t\n\r\x0b\xa0/);
 	$self->{html}{non_uri_len} += length($line);
         for my $uri ($line =~ m/\b(URI:\S+)/g) {
