@@ -181,12 +181,12 @@ sub add_body_part {
   push @{ $self->{'body_parts'} }, $part;
 }
 
-=item is_root()
+=item is_leaf()
 
 =cut
 
-sub is_root {
-  return ! exists $_[0]->{'raw'};
+sub is_leaf {
+  return exists $_[0]->{'raw'};
 }
 
 =item raw()

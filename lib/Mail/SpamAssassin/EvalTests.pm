@@ -2511,8 +2511,9 @@ sub _check_attachments {
 
     $self->_check_mime_header($ctype, $cte, $cd, $charset, $name);
 
-    # If we're in the root node of the MIME tree, let's skip the rest of the tests ...
-    if ( $p->is_root() ) {
+    # If we're not in a leaf node in the tree, there will be no raw
+    # section, so skip it.
+    if ( ! $p->is_leaf() ) {
       next;
     }
 
