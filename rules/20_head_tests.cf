@@ -119,6 +119,7 @@ header MSGID_OUTLOOK_INVALID	eval:check_outlook_message_id()
 describe MSGID_OUTLOOK_INVALID	Message-Id is fake (in Outlook Express format)
 
 # catches a few spams missed by MSGID_OUTLOOK_INVALID
+header __HAS_OUTLOOK_IN_MAILER	X-Mailer =~ /\bMSCRM\b|Microsoft (?:CDO|Outlook|Office Outlook)\b/
 meta MSGID_DOLLARS		(__OUTLOOK_DOLLARS_MSGID && !__HAS_OUTLOOK_IN_MAILER && !__UNUSABLE_MSGID)
 describe MSGID_DOLLARS		Message-Id has pattern used in spam
 
@@ -399,7 +400,6 @@ meta     MISSING_MIMEOLE	(__HAS_MSMAIL_PRI && !__HAS_MIMEOLE && !__HAS_SQUIRRELM
 describe MISSING_MIMEOLE	Message has X-MSMail-Priority, but no X-MimeOLE
 
 header __HAS_X_MAILER		exists:X-Mailer
-header __HAS_OUTLOOK_IN_MAILER	X-Mailer =~ /Microsoft (CDO|Outlook|Office Outlook)\b/
 
 header __IS_EXCH		X-MimeOLE =~ /Produced By Microsoft Exchange V/
 
