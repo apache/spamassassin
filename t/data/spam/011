@@ -19,12 +19,26 @@ Message-Id: <200210192141953.SM01220@217.125.101.38>
 </HEAD>
 <BODY>
 <P>
-Bu</ donkey >lk e-< nope >mail<br>
-10<b></b>0% GU<i></i>ARANTEED<br>
-ne< >ver rec<>eive an<? blah >other mai<!foo>ling<br>
+
+<H1>tests</H1>
+<!-- each line should have a different spam pattern -->
+
 ma<himum>il w<himum>as s<himum>ent t<himum>o y<himum>ou beca<himum>use<br>
-her</nothing>bal vi</nothing>agra<br>
-Unso< / argh >licited Com< / argh >mercial El< / argh >ectronic Ma< / argh >il A< / argh >ct<br>
+he<? blah >r<?xml pis>bal vi</nothing>agra<br>
+G</>UA</ >RA</ foo>NT</ bar >EE<br>
+10<b></b>0% NAT<i></i>URAL<br>
+for j<!-- comment -->ust p<!foo>enn<! bar>ies a da<!>y<br>
+
+<H1>anti-tests</H1>
+<!-- each line should really only test one non-obfuscation at a time -->
+
+OPPO<>RTUNITY<br>
+OPPO< >RTUNITY<br>
+OPPO< foo >RTUNITY<br>
+OPPO< /foo>RTUNITY<br>
+OPPO< /foo >RTUNITY<br>
+OPPO< / foo>RTUNITY<br>
+OPPO< / foo >RTUNITY<br>
 
 </BODY>
 </HTML>

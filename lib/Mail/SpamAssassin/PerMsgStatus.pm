@@ -1196,27 +1196,27 @@ sub get_decoded_stripped_body_text_array {
     my $before = substr($text, 0, length($1));
     $text = substr($text, length($1));
 
-    # Bug #1551: HTML declarations, like <!foo>, are being used by spammers
-    # for obfuscation, and they aren't stripped out by HTML::Parser.
-    # We have to strip these out *before* the parser is invoked, because
-    # otherwise a spammer could do "&lt;! body of message &gt;", which
-    # would get turned into "<! body of message >" by the parser, and then
-    # the whole body message would be stripped.
+    # NOTE: We *only* need to fix the rendering when we verify that it
+    # differs from what people see in their MUA.  Testing is best done with
+    # the most common MUAs and browsers, if you catch my drift.
 
-    # Also take care of things like < foo > or </ foo > or <>
+    # NOTE: HTML::Parser can cope with: <?xml pis>, <? with space>, so we
+    # don't need to fix them here.
 
-    # NOTE: HTML::Parser can cope with: <?xml pis>, <? with space>,
-    # so we don't need to fix them here.
+    # bug #1551: HTML declarations, like <!foo>, are being used by spammers
+    # for obfuscation, and they aren't stripped out by HTML::Parser prior to
+    # version 3.28.  We have to modify these out *before* the parser is
+    # invoked, because otherwise a spammer could do "&lt;! body of message
+    # &gt;", which would get turned into "<! body of message >" by the
+    # parser, and then the whole body message would be stripped.
 
-    $text =~
-      s{<(?:
-         !           # The start of either an HTML comment or declaration...
-         (?!--)[^>]* # But *not* followed by "--", so it isn't a comment...
+    # convert <!foo> to <!--foo-->
+    if ($HTML::Parser::VERSION < 3.28) { 
+      $text =~ s/<!((?!--|doctype)[^>]*)>/<!--$1-->/gsi;
+    }
 
-         |\s[^>]*    # < foo >
-         |/\s[^>]*   # </ foo >
-         |\s*        # <> or < >
-         )>}{}gsx;
+    # remove empty close tags: </>, </ >, </ foo>
+    $text =~ s/<\/(?:\s.*?)?>//gs;
 
     $self->{html_text} = [];
     $self->{html_last_tag} = 0;
