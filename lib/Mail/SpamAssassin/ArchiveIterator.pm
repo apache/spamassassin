@@ -141,6 +141,7 @@ sub run {
 	  chomp $line;
 	  if ($line eq "exit") {
 	    print { $parent[$i] } "END\n";
+	    close $parent[$i];
 	    exit;
 	  }
 	  $result = $self->run_message($line);
@@ -153,21 +154,30 @@ sub run {
       }
     }
     # feed childen
-    my $done = 0;
-    while (@messages || $done < $self->{opt_j}) {
+    while ($select->count()) {
       foreach my $socket ($select->can_read()) {
 	my $result;
 	my $line;
 	while ($line = readline $socket) {
-	  if ($line eq "END\n") {
-	    $done++;
-	    last;
-	  }
-	  if ($line =~ /^RESULT ([hs])/ || $line eq "START\n") {
-	    print { $socket } (@messages ? (shift @messages) : "exit") . "\n";
+	  if ($line =~ /^RESULT ([hs])/) {
+	    if ( @messages ) { # we still have messages, send one to child
+	      print { $socket } (shift @messages) . "\n";
+	    }
+	    else { # no more messages, so stop listening on this child
+	      $select->remove($socket);
+	    }
 	    if ($result) {
 	      chop $result;	# need to chop the \n before RESULT
-	      &{$self->{result_sub}}($1, $result) if defined($1);
+	      &{$self->{result_sub}}($1, $result);
+	    }
+	    last;
+	  }
+	  elsif ($line eq "START\n") {
+	    if ( @messages ) { # we still have messages, send one to child
+	      print { $socket } (shift @messages) . "\n";
+	    }
+	    else { # no more messages, so stop listening on this child
+	      $select->remove($socket);
 	    }
 	    last;
 	  }
@@ -177,7 +187,9 @@ sub run {
     }
     # reap children
     for (my $i = 0; $i < $self->{opt_j}; $i++) {
-      waitpid($pid[$i], 0);
+      print { $child[$i] } "exit\n"; # tell the child to die.
+      my $line = readline $child[$i]; # read its END statement.
+      waitpid($pid[$i], 0); # wait for the signal ...
     }
   }
 }
