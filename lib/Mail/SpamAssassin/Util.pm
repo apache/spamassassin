@@ -46,6 +46,7 @@ use Time::Local;
 use Sys::Hostname (); # don't import hostname() into this namespace!
 use Fcntl;
 use POSIX (); # don't import anything unless we ask explicitly!
+use Text::Wrap ();
 
 ###########################################################################
 
@@ -424,6 +425,49 @@ sub time_to_rfc822_date {
 
   sprintf("%s, %02d %s %4d %02d:%02d:%02d %s", $days[$localtime[6]], $localtime[3],
     $months[$localtime[4]], @localtime[5,2,1,0], local_tz());
+}
+
+###########################################################################
+
+# This is a wrapper for the Text::Wrap::wrap routine which makes its usage
+# a bit safer.  It accepts values for almost all options which can be set
+# in Text::Wrap.   All parameters are optional (leaving away the first one 
+# probably doesn't make too much sense though), either a missing or a false
+# value will fall back to the default.  Note that the parameter order and
+# default values aren't always the isame as in Text::Wrap itself.
+# 
+# The parameters are:
+#  1st:  The string to wrap.  Only one string is allowed (unlike the original
+#        wrap() routine).  (default: "")
+#  2nd:  The prefix to be put in front of all lines except the first one. 
+#        (default: "")
+#  3rd:  The prefix for the first line.  (default:  "")
+#  4th:  The number of columns available (no line will be longer than this
+#        parameter minus one).  See $Text::Wrap::columns.  (default:  77)
+#  5th:  Enable or disable overflow mode.  A false value is 'overflow', a
+#        true one 'wrap'; see $Text::Wrap::huge.  (default: 0)
+#  6th:  The sequence/expression to wrap at.  See $Text::Wrap::break
+#        (default: '\s');
+#  7th:  The string to join the lines again.  See $Text::Wrap::separator.
+#        (default: "\n")
+#  8th:  All tabs (except any in the prefix strings) are first replaced
+#        with 8 spaces.  This parameter controls if any 8-space sequence 
+#        is replaced with tabs again later.  See $Text::Wrap::unexpand but
+#        note that we use a different default value.  (default: 0)
+
+sub wrap {
+  local($Text::Wrap::columns)   = $_[3] || 77;
+  local($Text::Wrap::huge)      = $_[4] ? 'overflow' : 'wrap';
+  local($Text::Wrap::break)     = $_[5] || '\s';
+  local($Text::Wrap::separator) = $_[6] || "\n";
+  local($Text::Wrap::unexpand)  = $_[7] || 0;
+  # There's a die() in there which "shouldn't happen", but better be
+  # paranoid.  We'll return the unwrapped string if anything went wrong.
+  my $text = $_[0] || "";
+  eval {
+    $text = Text::Wrap::wrap($_[2] || "", $_[1] || "", $text);
+  };
+  return $text;
 }
 
 ###########################################################################

@@ -54,8 +54,6 @@ use warnings;
 use bytes;
 use Carp;
 
-use Text::Wrap ();
-
 use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::EvalTests;
 use Mail::SpamAssassin::AutoWhitelist;
@@ -606,9 +604,6 @@ few lines of the message body.
 sub get_content_preview {
   my ($self) = @_;
 
-  $Text::Wrap::columns   = 74;
-  $Text::Wrap::huge      = 'overflow';
-
   my $str = '';
   my $ary = $self->get_decoded_stripped_body_text_array();
   shift @{$ary};                # drop the subject line
@@ -629,21 +624,14 @@ sub get_content_preview {
   $str =~ s/[-_\*\.]{10,}//gs;
   $str =~ s/\s+/ /gs;
 
-  # be paranoid -- there's a die() in there
-  my $wrapped;
-  eval {
-    # add "Content preview:" ourselves, so that the text aligns
-    # correctly with the template -- then trim it off.  We don't
-    # have to get this *exactly* right, but it's nicer if we
-    # make a bit of an effort ;)
-    $wrapped = Text::Wrap::wrap ("Content preview:  ", "  ", $str);
-    if (defined $wrapped) {
-      $wrapped =~ s/^Content preview:\s+//gs;
-      $str = $wrapped;
-    }
-  };
+  # add "Content preview:" ourselves, so that the text aligns
+  # correctly with the template -- then trim it off.  We don't
+  # have to get this *exactly* right, but it's nicer if we
+  # make a bit of an effort ;)
+  $str = Mail::SpamAssassin::Util::wrap($str, "  ", "Content preview:  ", 75, 1);
+  $str =~ s/^Content preview:\s+//gs;
 
-  $str;
+  return $str;
 }
 
 ###########################################################################
@@ -978,12 +966,9 @@ sub _process_header {
       return $hdr_data;
     }
     else {
-      my $hdr = "X-Spam-$hdr_name!!$hdr_data";
       # use '!!' instead of ': ' so it doesn't wrap on the space
-      $Text::Wrap::columns = 79;
-      $Text::Wrap::huge = 'wrap';
-      $Text::Wrap::break = '(?<=[\s,])';
-      $hdr = Text::Wrap::wrap('',"\t",$hdr);
+      my $hdr = "X-Spam-$hdr_name!!$hdr_data";
+      $hdr = Mail::SpamAssassin::Util::wrap($hdr, "\t", "", 79, 0, '(?<=[\s,])');
       $hdr =~ s/^\t\n//gm;
       return (split (/!!/, $hdr, 2))[1]; # just return the data part
     }
