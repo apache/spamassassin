@@ -197,3 +197,29 @@ tflags BODY_8BITS		userconf
 
 rawbody MIME_DEFICIENT_QP	eval:check_for_mime('mime_qp_illegal')
 describe MIME_DEFICIENT_QP	Deficient quoted-printable encoding in body
+
+# Send-Safe ratware (from Alan Curry)
+# random alphanumerics, separated into groups of 16 by dashes (the first
+# and last group may be shorter), with a lowercase "l" and a number
+# appended. The final number is the length of the whole string not
+# including the dashes or the "l<number>".  Why? I have no idea.  It's
+# not a tracking code - the spamware does not save it locally.
+#
+# jm: it's specifically to throw off MIME base64 encoding, to evade AOL's
+# filters.
+#
+# http://groups.google.com/groups?selm=atp1ip0n22%40enews3.newsguy.com
+rawbody RATWARE_HASH_DASH	/[a-z\d]+-([a-z\d]{16}-)+[a-z\d]+(?-i:l)\d+/i
+describe RATWARE_HASH_DASH	Contains a hashbuster in Send-Safe format
+
+rawbody  __OBFUSCATING_COMMENT2 /[^\s>]<![^-].{0,64}?[^-]>[^\s<]/
+meta     OBFUSCATING_COMMENT2	__OBFUSCATING_COMMENT2 && MIME_HTML_ONLY
+describe OBFUSCATING_COMMENT2	HTML comments which obfuscate text (2)
+
+# duncf
+body EMAIL_ROT13     /\b[a-z(\]-]+\^[a-z-]+\((?:pbz|arg|bet|pn)\b/
+describe EMAIL_ROT13 Body contains a ROT13-encoded email address
+test EMAIL_ROT13 ok  qhabs^ebtref(pbz
+test EMAIL_ROT13 ok  zxrggyre^riv-vap(pbz
+test EMAIL_ROT13 fail	duncf-nospam@rogers.com
+

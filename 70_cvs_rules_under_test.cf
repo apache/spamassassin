@@ -67,22 +67,6 @@ describe T_PENIS_ENLARGE		Information on getting a larger penis or breasts
 body T_PENIS_ENLARGE2		/\b(?:penis|male organ|pee[ -]?pee|dick|sc?hlong|wh?anger|breast).{0,50}\b(?:enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b|\binches\b)/i
 describe T_PENIS_ENLARGE2		Information on getting a larger penis or breasts (2)
 
-# Feb 18 2003 jm: another Nigerian scam
-body T_NIGERIAN_SCAM_VIRTUE	/by virtue of its nature as being utterly confidential/i
-describe T_NIGERIAN_SCAM_VIRTUE	Contains Nigerian scam text (virtue of its nature)
-
-# Feb 18 2003 jm: try another combo.  I'm not sure __NIGERIAN_HONESTY is req'd.
-body __NIGERIAN_CODE_CONDUCT		/\bcode of conduct\b/i
-body __NIGERIAN_CIV_SERVICE		/\bcivil service\b/i
-body __NIGERIAN_TOP_SECRET		/\btop secret\b/i
-body __NIGERIAN_STRICT_CONF		/\b(?:strictest confidence|utmost secrecy)\b/i
-body __NIGERIAN_HONESTY		/\btransparent honesty\b/i
-body __NIGERIAN_DISBURSE		/\bdisburs/i
-meta T_NIGERIAN_BODY_GOVT_6	((__NIGERIAN_CODE_CONDUCT + __NIGERIAN_CIV_SERVICE + __NIGERIAN_HONESTY + __NIGERIAN_TOP_SECRET + __NIGERIAN_STRICT_CONF + __NIGERIAN_DISBURSE) >= 6)
-meta T_NIGERIAN_BODY_GOVT_5	((__NIGERIAN_CODE_CONDUCT + __NIGERIAN_CIV_SERVICE + __NIGERIAN_HONESTY + __NIGERIAN_TOP_SECRET + __NIGERIAN_STRICT_CONF + __NIGERIAN_DISBURSE) >= 5)
-meta T_NIGERIAN_BODY_GOVT_4	((__NIGERIAN_CODE_CONDUCT + __NIGERIAN_CIV_SERVICE + __NIGERIAN_HONESTY + __NIGERIAN_TOP_SECRET + __NIGERIAN_STRICT_CONF + __NIGERIAN_DISBURSE) >= 4)
-meta T_NIGERIAN_BODY_GOVT_3	((__NIGERIAN_CODE_CONDUCT + __NIGERIAN_CIV_SERVICE + __NIGERIAN_HONESTY + __NIGERIAN_TOP_SECRET + __NIGERIAN_STRICT_CONF + __NIGERIAN_DISBURSE) >= 3)
-
 # 2003-02-23: quinlan
 # some useful meta rule sub-elements
 body __MIME_HTML		eval:check_for_mime_html()
@@ -306,10 +290,9 @@ meta T_GOOD_LIST_HEADERS	(__LIST_UNSUBSCRIBE && __LIST_SUBSCRIBE && ((__LIST_HEL
 tflags T_GOOD_LIST_HEADERS	nice
 
 # more ratware
+# Mar 26 2003 jm: I don't think it is, actually!
 header T_RATWARE_POWERMTA	Received =~ /PowerMTA\(TM\)/
 describe T_RATWARE_POWERMTA	Bulk email software fingerprint (PowerMTA) found in headers
-# seems to be ratware
-header T_RCVD_AM_PM		Received =~ /; [A-Z][a-z][a-z], \d{1,2} \d{4} \d{1,2}:\d\d:\d\d [AP]M [+-]\d{4}/
 # stormpost signature
 uri T_RATWARE_STORMPOST_URI		m{http://\S+/sp/t\.pl\?id=\d+:\d+}i
 
@@ -321,15 +304,6 @@ header T_ID_X_LIST_UNSUBSCRIBE	X-List-Unsubscribe:addr =~ /\d{3}.*\d{3}.*\@/
 header __ID_REPLY_TO		Reply-To:addr =~ /\d{3}.*\d{3}.*\@/
 header __ID_RETURN_PATH		Return-path:addr =~ /\d{3}.*\d{3}.*\@/
 meta T_ID_UNIQUE		(T_ID_X_LIST_UNSUBSCRIBE && __ID_RETURN_PATH && __ID_REPLY_TO)
-
-# Send-Safe ratware (from Alan Curry)
-# random alphanumerics, separated into groups of 16 by dashes (the first
-# and last group may be shorter), with a lowercase "l" and a number
-# appended. The final number is the length of the whole string not
-# including the dashes or the "l<number>".  Why? I have no idea.  It's
-# not a tracking code - the spamware does not save it locally.
-# http://groups.google.com/groups?selm=atp1ip0n22%40enews3.newsguy.com
-rawbody T_RATWARE_HASH_DASH	/[a-z\d]+-([a-z\d]{16}-)+[a-z\d]+(?-i:l)\d+/i
 
 # quinlan: 2003-03-15
 # these all appear in the same low-scoring spammer for me, but they
@@ -363,12 +337,6 @@ header T_TO_FILENAME           To =~ /^<C:\\/
 
 # bug 1394, possible replacement for ORDER_NOW
 body T_ORDER_NOW                  /\border (?:now|soon|fast|quickly|while|today)\b/i
-
-# Matt Cline
-# 0.206   0.2631   0.0000    1.000   0.89    0.01  T_OBFUSCATING_COMMENT2
-rawbody  __OBFUSCATING_COMMENT2 /[^\s>]<![^-].{0,64}?[^-]>[^\s<]/
-meta     T_OBFUSCATING_COMMENT2 __OBFUSCATING_COMMENT2 && MIME_HTML_ONLY
-describe T_OBFUSCATING_COMMENT2 HTML comments which obfuscate text (2)
 
 # Matt Cline
 uri      T_HTTP_ENTITIES_HOST m{https?://[^\s\">/]*\&\#[\da-f]+}i
@@ -556,12 +524,6 @@ meta __USER_AGENT_XIMIAN	(__XIMIAN_MSGID && __XIMIAN_MUA)
 meta T_USER_AGENT_XIMIAN	__USER_AGENT_XIMIAN && !T_FORGED_USER_AGENT
 meta T_FORGED_MUA_XIMIAN	__XIMIAN_MUA && !__UNUSABLE_MSGID && !__USER_AGENT_XIMIAN
 
-# duncf
-body T_EMAIL_ROT13     /\b[a-z(\]-]+\^[a-z-]+\((?:pbz|arg|bet|pn)\b/
-test T_EMAIL_ROT13 ok  qhabs^ebtref(pbz
-test T_EMAIL_ROT13 ok  zxrggyre^riv-vap(pbz
-test T_EMAIL_ROT13 fail	duncf@rogers.com
-
 # bug 1561
 # stronger version of USER_AGENT_APPLEMAIL
 # Apple Mail doesn't send text/html at all (unless it's an attachment)
@@ -621,13 +583,6 @@ meta T_HTML_COMMENT_RATIO_70_80_HTML_MESSAGE		__HTML_COMMENT_RATIO_70_80 && HTML
 meta T_HTML_COMMENT_RATIO_80_90_HTML_MESSAGE		__HTML_COMMENT_RATIO_80_90 && HTML_MESSAGE
 meta T_HTML_COMMENT_RATIO_90_100_HTML_MESSAGE		__HTML_COMMENT_RATIO_90_100 && HTML_MESSAGE
 
-# a new spamware tool; catch it
-header T_FORGED_RCVD_FROM_NUM	Received =~ /from \S+ \(\d+ \[/
-describe T_FORGED_RCVD_FROM_NUM	Received headers forged (numeric hostname)
-
-header T_RATWARE_EMPTY_HELO	Received =~ /from  \(\) by /
-describe T_RATWARE_EMPTY_HELO	Received headers forged (empty HELO)
-
 header T_RATWARE_RCVD_BONUS_SPC	Received =~ /\) by  [a-zA-Z0-9]/
 describe T_RATWARE_RCVD_BONUS_SPC Received headers forged (extra spaces)
 
@@ -679,60 +634,27 @@ header T_MSGID_HEX_DIGITS	Message-Id =~ /<[A-F0-9]{11}\@/
 # looks like spam
 header T_MSGID_THREESIXSIX	Message-Id =~ /<\d{3}\.\d{6}\.\d{6}\@\S+>/
 
-# via private mail with Mark Delany; thx Mark!
-header T_FORGED_YAHOO_RCVD_SMTP    Received =~ /from smtp(?:\d{1,2}|\d{4,})\.mail(?:\.[^\.]+|)\.yahoo\.com /
-describe T_FORGED_YAHOO_RCVD_SMTP  Received: contains forged Yahoo! SMTP server hostname
-
 # http://www.ritlabs.com/the_bat/spammer.html notes: 'There are clues that make
 # it obvious that the spam message didn't come from The Bat!. For one thing, it
 # has an "X-MSMail-Priority: Normal" header. The Bat! doesn't use this.'
 #
 # quinlan: this doesn't seem to catch all FORGED_MUA_THEBAT mail, but is a
 # good addition, so I renamed it.
+# jm: may not be worth the bother, since we now have 3 other 1.0-s/o
+# Bat-forgery rules
 #
 meta T_RATWARE_NOT_THEBAT	(__THEBAT_MUA && __HAS_MSMAIL_PRI)
 describe T_RATWARE_NOT_THEBAT	Forged mail pretending to be from The Bat!
 
 # NOTE: uses __ANY_OUTLOOK_MUA.  This catches Send-Safe and a few others
-header __OL_STYLE_FROM		From =~ /^\".*\" <\S+>$/
+header __OL_STYLE_FROM		From =~ /\".*\" <.+>/
 meta T_FORGED_MUA_OUTLOOK_FROM	(__ANY_OUTLOOK_MUA && !__OL_STYLE_FROM)
 describe T_FORGED_MUA_OUTLOOK_FROM Forged mail pretending to be from Outlook (by From)
-
-# let's see if this works... AOL MUAs add a Received line, and do not use
-# "real names" in From or To headers, as far as I can see.
-header __AOL8_MUA		X-Mailer =~ /AOL [78]\.\d for Windows/
-header __AOL8_FROM		From =~ /^\S+\@aol\.com$/
-header __AOL8_TO		To =~ /^\S+\@\S+\.\S+$/
-header __AOL8_RCVD		Received =~ /^from \S+\@aol\.com by\s+imo-\S+\.mx\.aol\.com\s+\(mail_out_\S+\)\s+id\s+\S+\s+\(\d+\)\s+for\s+<\S+\@\S+>;\s+/m
-
-meta T_FORGED_MUA_AOL_FROM	(__AOL8_MUA && !__AOL8_FROM)
-describe T_FORGED_MUA_AOL_FROM	Forged mail pretending to be from AOL 8.0 (by From)
-meta T_FORGED_MUA_AOL_TO	(__AOL8_MUA && !__AOL8_TO)
-describe T_FORGED_MUA_AOL_TO	Forged mail pretending to be from AOL 8.0 (by To)
-meta T_FORGED_MUA_AOL_RCVD	(__AOL8_MUA && !__AOL8_RCVD)
-describe T_FORGED_MUA_AOL_RCVD	Forged mail pretending to be from AOL 8.0 (by Received)
-
-meta T_USER_AGENT_AOL8		(__AOL8_MUA && __AOL8_FROM && __AOL8_RCVD && __AOL8_TO)
-describe T_USER_AGENT_AOL8	User-Agent header indicates a non-spam MUA (AOL 8)
-tflags T_USER_AGENT_AOL8	nice
-
-# From private mail with developers.  Some top tips here!
-header __BAT_MSGID		MESSAGEID =~ /^<\d{2,12}\.\d{14}\@\S+>$/
-header __CTYPE_IS_FOLDED	Content-Type =~ /\n/
-header __CTYPE_CHARSET_QUOTED	Content-Type =~ /charset=\"/i
-header __CTYPE_HAS_BOUNDARY	Content-Type =~ /boundary/i
-header __BAT_BOUNDARY		Content-Type =~ /boundary=\"?-{10}/
-meta T_FORGED_BAT_MSGID		(__THEBAT_MUA && !__UNUSABLE_MSGID && !__BAT_MSGID)
-meta T_FORGED_BAT_CTYPE_NL	(__THEBAT_MUA && __CTYPE_IS_FOLDED)
-meta T_FORGED_BAT_CHARSET	(__THEBAT_MUA && __CTYPE_CHARSET_QUOTED)
-meta T_FORGED_BAT_BOUNDARY	(__THEBAT_MUA && __CTYPE_HAS_BOUNDARY && !__BAT_BOUNDARY)
-describe T_FORGED_BAT_MSGID	Forged mail pretending to be from The Bat! (1)
-describe T_FORGED_BAT_CTYPE_NL	Forged mail pretending to be from The Bat! (2)
-describe T_FORGED_BAT_CHARSET	Forged mail pretending to be from The Bat! (3)
-describe T_FORGED_BAT_BOUNDARY	Forged mail pretending to be from The Bat! (4)
 
 # NOTE: uses __ANY_IMS_MUA from above
 header __IMS_BOUNDARY		Content-Type =~ /\n\s+boundary=\"----_=_NextPart_[\dA-F]+_[\dA-F]+.[\dA-F]+\"/s
 meta T_FORGED_IMS_CTYPE		(__ANY_IMS_MUA && !__IMS_BOUNDARY)
 describe T_FORGED_IMS_CTYPE	Forged mail pretending to be from IMS (boundary)
+
+
 
