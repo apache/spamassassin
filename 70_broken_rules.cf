@@ -95,6 +95,8 @@
 #
 #body DEAR_EMAIL			/\bDear [A-Za-z0-9_-]+\@/
 #describe DEAR_EMAIL		Dear you@you.com?
+#test DEAR_EMAIL ok Dear duncf@rogers.com,
+#test DEAR_EMAIL fail Dear Duncan!
 #
 ## this one gets a few false positives
 #body SOCIAL_SEC_NUMBER		/social security (?:number|record)/i
@@ -109,6 +111,15 @@
 ## detect "mort$age", but not "mortgage"
 #body MORTGAGE_OBFU	        /mor[tga\$]*\$[ga\$]*e/i
 #describe MORTGAGE_OBFU 	        Attempt at obfuscating the word "mortgage"
+#test MORTGAGE_OBFU ok  Mort$a$e
+#test MORTGAGE_OBFU ok  Mor$gage
+#test MORTGAGE_OBFU ok  Mort$age
+#test MORTGAGE_OBFU ok  Mortga$e
+#test MORTGAGE_OBFU fail Mortsa$e
+#test MORTGAGE_OBFU fail Morlage
+#test MORTGAGE_OBFU fail mortgage
+#test MORTGAGE_OBFU fail mortgage$
+#test MORTGAGE_OBFU fail mortgage$
 #
 #body INTERNET_TERROR_RANT       /At the time of this mailing.{9,50}legitimate return email address.{100,299}internet terrorists/i
 #describe INTERNET_TERROR_RANT   Cyber FirePower! rant about losing dropboxes
@@ -116,6 +127,11 @@
 ## jm: use {2,3} to avoid matching iso-2022-jp charset items. split into US_DOLLARS_4
 #body US_DOLLARS_4               /\s(?:\$|US\$|usd?).?\d{1,3}\.\d+.?(?:m|millions?)\b/i
 #describe US_DOLLARS_4           Nigerian scam key phrase ($NNN.N m/USDNNN.N m/US$NN.N m)
+#test US_DOLLARS_4 fail JP charset test: this should not match: $1 $
+#test US_DOLLARS_4 fail JP charset test: this should not match: $1$
+#test US_DOLLARS_4 fail $-$NFbMF$K!"A49q$+$iLd$$9g$o$;$,;&E~$7$F$$$^$9!#
+#test US_DOLLARS_4 ok of US$8.5 million (Eight
+#test US_DOLLARS_4 ok of US8.5 millions (Eight
 #
 #body OFFER_EXPIRE	        /\boffer expires\b/i
 #describe OFFER_EXPIRE		Offer Expires
