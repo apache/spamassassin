@@ -41,8 +41,8 @@ describe PLING_PLING            Subject has lots of exclamation marks
 
 ##############################################################################
 
-meta T_NIGERIAN_BODY	(( __NIGERIAN_BODY_.+ + ) > 1)
-describe T_NIGERIAN_BODY	Message body indicates a Nigerian spam
+meta NIGERIAN_BODY	(( __NIGERIAN_BODY_.+ + ) > 1)
+describe NIGERIAN_BODY	Message body indicates a Nigerian spam
 body __NIGERIAN_BODY_1	/\b(?:financial|confiden(?:tial|ce)|safe(?:ty)?|mutual|secret|success(?:ful)?|risk-?free|details|business).{1,30}\btransaction\b/i
 body __NIGERIAN_BODY_2	/\btransaction\b.{1,30}\b(?:magnitude|diplomatic|strict|absolute|secret|confiden(?:tial|ce)|guarantee)/i
 body __NIGERIAN_BODY_3	/BASED ON INFORMATION GATHERED ABOUT YOU, WE BELIEVE\s*YOU WOULD BE IN A POSITION TO HELP US IN TRANSFER/i
@@ -75,8 +75,8 @@ body __NIGERIAN_BODY_32 /\blocate(?: .{1,20})? extended relative/i
 body __NIGERIAN_BODY_33 /\bhonest cooperation\b/i
 
 
-meta T_NIGERIAN_SUBJECT	(__NIGERIAN_SUBJECT.+ +) > 0
-describe T_NIGERIAN_SUBJECT	Subject is indicitive of a Nigerian spam
+meta NIGERIAN_SUBJECT	(__NIGERIAN_SUBJECT.+ +) > 0
+describe NIGERIAN_SUBJECT	Subject is indicitive of a Nigerian spam
 header __NIGERIAN_SUBJECT1	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*(?:(?:very )?URGENT|ATTENTION)\s*$/i
 header __NIGERIAN_SUBJECT2	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*(?:very )?urgent\s+(?:(?:and|&)\s+)?(?:confidential|assistance|business|attention|reply|response|help)\b/i
 header __NIGERIAN_SUBJECT3	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*your assistance\b/i
