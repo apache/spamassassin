@@ -73,9 +73,6 @@ body T_HTML_JAVASCRIPT		eval:html_test('t_javascript')
 # possible replacement/supplement for FROM_BTAMAIL
 header T_BTAMAIL_HEADER		ALL =~ /btamail\.net\.cn/i
 
-# bug 1108
-header T_HEADER_ALL_CAPS	eval:header_all_caps()
-
 # bug 1106
 header __OUTLOOK_EXCEPT_IMO	X-Mailer =~ /Microsoft Outlook(?! IMO)/
 header __OUTLOOK_MSGID		Message-Id =~ /^<[0-9a-f]{12,12}\$[0-9a-f]{8,8}\$[0-9a-f]{8,8}\@.{1,50}>$/
