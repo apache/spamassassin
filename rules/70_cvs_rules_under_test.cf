@@ -843,3 +843,24 @@ header T_MSGID_OUTLOOK_TIME 	eval:check_outlook_timestamp_token()
 header T_RCVD_FAKE_HELO_DOTCOM_2	eval:check_for_fake_dotcom_helo()
 describe T_RCVD_FAKE_HELO_DOTCOM_2	Faked HELO-as-dotcom found
 
+# Matt Cline, Bug #1220
+body T_FOR_FREE                   /\bfor FREE\b/i
+body T_COMPLETELY_FREE            /\b(?:100%|completely|totally|absolutely) Free/i
+body T_SAVE_UP_TO                 /\bSave up to\b/i
+body T_DO_IT_TODAY        /\b(?:join|register|order|apply) .{0,10}Today\b/i
+body T_GET_STARTED_NOW            /\bget started Now\b/i
+body T_GET_PAID                   /\bget Paid\b/i
+body T_FREE_GRANT                 /\b(?:free|government) Grants?\b/i
+body T_APPLY_FREE                 /Free Application|free application.{0,32}(?:today|minute|less than)/i
+body T_APPLY_ONLINE               /\bapply Online/i
+body T_FREE_INSTALL               /Free installation/i
+body T_FREE_PREVIEW               /Free preview/i
+body T_FREE_ACCESS                /Free access/i
+body T_FREE_SAMPLE                /Free sample/i
+body T_GET_IT_NOW         /get it Now/i
+body T_LOW_PRICE                  /\blow.{0,4} Price/i
+body T_SALE                       /\bsales? (?:price|system|department|technology|ends|today)|\b(?:on|summer|movie|clearance|for|your|increase|super|losing|return|business|airfare) Sales?/i
+
+body T_FREE_HOSTING2             /Free hosting/i
+body T_BANG_MORE2                /\bMore!/i
+body T_BANG_QUOTE2               /\bQuotes?\!/i
