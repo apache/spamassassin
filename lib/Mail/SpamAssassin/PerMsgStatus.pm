@@ -787,7 +787,7 @@ sub get_decoded_body_text_array {
   } elsif ($self->{found_encoding_quoted_printable}) {
     $_ = join ('', @{$textary});
     s/\=\r?\n//gs;
-    s/\=([0-9A-Fa-f]{2})/chr(hex($1))/ge;
+    s/\=([0-9A-F]{2})/chr(hex($1))/ge;
     my @ary = split (/^/, $_);
     return \@ary;
 
@@ -860,7 +860,7 @@ sub get_decoded_stripped_body_text_array {
   $text = pack("C0A*", $text);
 
   # Convert =xx and =\n into chars
-  $text =~ s/=([a-fA-F0-9]{2})/chr(hex($1))/ge;
+  $text =~ s/=([A-F0-9]{2})/chr(hex($1))/ge;
   $text =~ s/=\n//g;
 
   # reset variables used in HTML tests
@@ -1040,13 +1040,13 @@ sub decode_mime_bit {
       )
   {
     # keep 8-bit stuff. forget mapping charsets though
-    s/_/ /g; s/\=([0-9A-Fa-f]{2})/chr(hex($1))/ge;
+    s/_/ /g; s/\=([0-9A-F]{2})/chr(hex($1))/ge;
   }
 
   if ($encoding eq 'UTF-16')
   {
     # we just dump the high bits and keep the 8-bit chars.
-    s/_/ /g; s/=00//g; s/\=([0-9A-Fa-f]{2})/chr(hex($1))/ge;
+    s/_/ /g; s/=00//g; s/\=([0-9A-F]{2})/chr(hex($1))/ge;
   }
 
   return $_;
