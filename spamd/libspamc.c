@@ -271,6 +271,7 @@ int ret;
 	memset(&addrbuf, 0, sizeof addrbuf);
 	addrbuf.sun_family = AF_UNIX;
 	strncpy(addrbuf.sun_path, tp->socketpath, sizeof addrbuf.sun_path - 1);
+	addrbuf.sun_path[sizeof addrbuf.sun_path - 1] = '\0';
 
 #ifdef DO_CONNECT_DEBUG_SYSLOGS
 	syslog (DEBUG_LEVEL, "dbg: connect(AF_UNIX) to spamd at %s",
@@ -1046,11 +1047,12 @@ int message_filter(struct transport *tp, const char *username,
     failureval = _spamc_read_full_line (m, flags, ssl, sock, buf, &len, bufsiz);
     if (failureval != EX_OK) { goto failure; }
 
-    if(sscanf(buf, "SPAMD/%s %d %*s", versbuf, &response)!=2) {
+    if(sscanf(buf, "SPAMD/%18s %d %*s", versbuf, &response)!=2) {
 	syslog(LOG_ERR, "spamd responded with bad string '%s'", buf);
 	failureval = EX_PROTOCOL; goto failure;
     }
 
+    versbuf[19] = '\0';
     version = _locale_safe_string_to_float (versbuf, 20);
     if (version < 1.0) {
 	syslog(LOG_ERR, "spamd responded with bad version string '%s'", versbuf);
@@ -1316,13 +1318,16 @@ char           **addrp;
 		 * This gets them out of the resolver's static area and
 		 * means we won't ever walk all over the list with other
 		 * calls.
-		 *
-		 * ==TODO: check that we don't copy more than we have room for
 		 */
 		tp->nhosts = 0;
 
 		for (addrp = hp->h_addr_list; *addrp; addrp++)
 		{
+			if (tp->nhosts >= TRANSPORT_MAX_HOSTS-1) {
+				syslog (LOG_ERR, "hit limit of %d hosts, ignoring remainder", TRANSPORT_MAX_HOSTS-1);
+				break;
+			}
+
 			memcpy(&tp->hosts[tp->nhosts], *addrp,
 				sizeof tp->hosts[0]);
 

@@ -102,6 +102,8 @@ struct message {
 #define	TRANSPORT_TCP	    0x02	/* standard TCP socket	 */
 #define TRANSPORT_UNIX	    0x03	/* UNIX domain socket	 */
 
+#define TRANSPORT_MAX_HOSTS 256		/* max hosts we can failover between */
+
 struct transport {
 	int		type;
 
@@ -110,7 +112,7 @@ struct transport {
 
 	unsigned short	port;		/* for TCP sockets              */
 
-	struct in_addr	hosts[256];
+	struct in_addr	hosts[TRANSPORT_MAX_HOSTS];
 	int		nhosts;
 };
 

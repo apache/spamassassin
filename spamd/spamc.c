@@ -240,13 +240,14 @@ void get_output_fd(int *fd){
     exit(EX_OSERR);
 }
 
-int main(int argc, char **argv){
+int main (int argc, char **argv) {
   int max_size = 250*1024;
   const char *username = NULL;
   int ret;
   struct message m;
   int out_fd;
   struct transport trans;
+  int result;
 
   transport_init(&trans);
 
@@ -285,6 +286,7 @@ int main(int argc, char **argv){
     }
     memset(userbuf, 0, sizeof userbuf);
     strncpy(userbuf, curr_user->pw_name, sizeof userbuf - 1);
+    userbuf[sizeof userbuf - 1] = '\0';
     username = userbuf;
   }
 
@@ -314,21 +316,32 @@ int main(int argc, char **argv){
       goto FAIL;
     }
 
-    if((flags&SPAMC_CHECK_ONLY) && m.is_spam!=EX_TOOBIG) return m.is_spam;
-    return ret;
+    result = m.is_spam;
+    if ((flags&SPAMC_CHECK_ONLY) && result != EX_TOOBIG) {
+      message_cleanup (&m);
+      return result;
+    } else {
+      message_cleanup (&m);
+      return ret;
+    }
 
 FAIL:
     get_output_fd(&out_fd);
 
-    if((flags&SPAMC_CHECK_ONLY) && m.is_spam!=EX_TOOBIG) {
+    result = m.is_spam;
+    if((flags&SPAMC_CHECK_ONLY) && result != EX_TOOBIG) {
 	/* probably, the write to stdout failed; we can still report exit code */
-	return m.is_spam;
+	message_cleanup (&m);
+	return result;
 
     } else if(flags&SPAMC_CHECK_ONLY || flags&SPAMC_REPORT || flags&SPAMC_REPORT_IFSPAM) {
         full_write(out_fd, "0/0\n", 4);
+	message_cleanup (&m);
         return EX_NOTSPAM;
+
     } else {
         message_dump(STDIN_FILENO, out_fd, &m);
+	message_cleanup (&m);
         if (ret == EX_TOOBIG) {
           return 0;
         } else if (flags & SPAMC_SAFE_FALLBACK) {
