@@ -65,12 +65,17 @@ Database Schema
 The database must contain a table named by 'user_scores_sql_table' (default
 setting: "userpref") with at least three fields:
 
-  username varchar(8)	  # this is the username whose e-mail is being filtered
+  username varchar(100)	  # this is the username whose e-mail is being filtered
   preference varchar(30)  # the preference (whitelist_from, required_hits, etc.)
   value varchar(100)	  # the value of the named preference
 
 You can add as many other fields you wish as long as the above three fields are
 contained in the table.
+
+Note that you can either use just the mail recipient's username for the
+"username" field, in which case a varchar(8) should suffice.  Alternatively,
+you can use the entire recipient's email address, e.g. "user@example.com", and
+use the full varchar(100).
 
 Included is a default table that can be safely used in your own setup.  To
 use the default table, you must first create a database, and a username/password
@@ -82,7 +87,7 @@ mysql -h <hostname> -u <username> -p <password> databasename < spamassasin.sql
 This will create the following table:
 
 CREATE TABLE userpref (
-  username varchar(8) default NOT NULL,
+  username varchar(100) default NOT NULL,
   preference varchar(30) default NOT NULL,
   value varchar(100) default NOT NULL,
   prefid int(11) NOT NULL auto_increment,
