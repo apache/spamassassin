@@ -911,7 +911,8 @@ sub enter_helper_run_mode {
   if ($self->{main}->{home_dir_for_helpers}) {
     $newhome = $self->{main}->{home_dir_for_helpers};
   } else {
-    $newhome = (getpwuid($>))[7];	# use spamd -u user's home dir
+    # use spamd -u user's home dir
+    $newhome = (Mail::SpamAssassin::Util::portable_getpwuid ($>))[7];
   }
 
   if ($newhome) {

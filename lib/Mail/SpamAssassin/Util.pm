@@ -245,6 +245,39 @@ sub parse_rfc822_date {
 
 ###########################################################################
 
+sub portable_getpwuid {
+  my ($uid) = @_;
+  my @ret;
+
+  if (!RUNNING_ON_WINDOWS) {
+    eval {
+      # use effective uid in case we're setuid
+      @ret = (getpwuid ($>))[0];
+    };
+    if (!$@) {
+      return @ret;
+    }
+  }
+
+  # failed to call getpwuid(); platform may not support it!
+  dbg ("getpwuid() failed! using 'unknown' as username");
+
+  return (
+    'unknown',		# name,
+    'x',		# passwd,
+    $uid,		# uid,
+    0,			# gid,
+    '',			# quota,
+    '',			# comment,
+    '',			# gcos,
+    '/',		# dir,
+    '',			# shell,
+    '',			# expire
+  );
+}
+
+###########################################################################
+
 sub dbg { Mail::SpamAssassin::dbg (@_); }
 
 1;
