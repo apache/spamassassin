@@ -815,7 +815,7 @@ sub _check_received_helos {
     my $rcvd = $self->{relays_untrusted}->[$i];
 
     # Ignore where IP is in reserved IP space
-    next if ($rcvd->{ip} =~ /${IP_IN_RESERVED_RANGE}/o);
+    next if ($rcvd->{ip_is_reserved});
 
     my $from_host = $rcvd->{rdns};
     my $helo_host = $rcvd->{helo};
@@ -929,10 +929,8 @@ sub check_for_sender_no_reverse {
   # Ignore if the from host is domainless (has no dot)
   return 0 unless ($srcvd->{rdns} =~ /\./);
 
-  my $from = $srcvd->{rdns};
-  my $ip   = $srcvd->{ip};
-
-  return 0 if ($ip =~ /${IP_IN_RESERVED_RANGE}/o);
+  # Ignore if the from host is from a reserved IP range
+  return 0 if ($srcvd->{ip_is_reserved});
 
   return 1;
 } # check_for_sender_no_reverse()

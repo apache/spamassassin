@@ -1,4 +1,4 @@
-# $Id: Received.pm,v 1.24 2003/06/11 00:10:46 jmason Exp $
+# $Id: Received.pm,v 1.25 2003/06/12 02:31:52 felicity Exp $
 
 # ---------------------------------------------------------------------------
 
@@ -131,7 +131,7 @@ sub parse_received_headers {
 
       # if the 'from' IP addr is in a reserved net range, it's not on
       # the public internet.
-      if ($relay->{ip} =~ /${IP_IN_RESERVED_RANGE}/o) {
+      if ($relay->{ip_is_reserved}) {
 	dbg ("received-header: 'from' ".$relay->{ip}." has reserved IP");
 	$inferred_as_trusted = 1;
       }
@@ -827,7 +827,7 @@ enough:
   $relay->{as_string} = $asstr;
 
   my $isrsvd = ($ip =~ /${IP_IN_RESERVED_RANGE}/o);
-  $relay->{ip_is_reserved} = $rdns;
+  $relay->{ip_is_reserved} = $isrsvd;
 
   # add it to an internal array so Eval tests can use it
   push (@{$self->{relays}}, $relay);
