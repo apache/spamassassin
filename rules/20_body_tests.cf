@@ -390,10 +390,10 @@ body EMAIL_HARVEST		/email harvest/
 describe EMAIL_HARVEST		Email harvest leads to SPAM for thanksgiving
 
 # (contrib: WW)
-rawbody CLICK_TO_REMOVE_MAILTO     /\bclick to.{0,30}remove.{0,50}mailto:/is
+body CLICK_TO_REMOVE_MAILTO        /\bclick to.{0,30}remove.{0,50}mailto:/is
 describe CLICK_TO_REMOVE_MAILTO    Click-to-remove with mailto: found
 
-rawbody CLICK_TO_REMOVE_2       /href.{0,50}mailto:.{0,50}click.{0,50}remove/is
+body CLICK_TO_REMOVE_2          /mailto:.{0,50}click.{0,50}remove/is
 describe CLICK_TO_REMOVE_2      Click-to-remove with mailto: found beforehand
 
 # (contrib: WW, mod by David Hull)
@@ -460,15 +460,6 @@ describe THE_FOLLOWING_FORM	Asks you to fill out a form
 # suggested by Nick Rothwell
 body HUNZA_DIET_BREAD		/HUNZA/i
 describe HUNZA_DIET_BREAD	Offers a tasty-sounding dietary product
-
-rawbody A_HREF_TO_UNSUB		/href[3D=\s\"\']*\S+unsubscribe/i
-describe A_HREF_TO_UNSUB	Link to a URL containing "unsubscribe"
-
-rawbody A_HREF_TO_OPT_OUT	/href[3D=\s\"\']*\S+opt(?:-in|-out|in|out)/i
-describe A_HREF_TO_OPT_OUT	Link to a URL containing "opt-in" or "opt-out"
-
-rawbody A_HREF_TO_REMOVE	/href[3D=\s\"\']*\S+remove/i
-describe A_HREF_TO_REMOVE	Link to a URL containing "remove"
 
 # include the \n\n so we don't match mailto's in the headers!  Some list software
 # uses these to handle auto-subscribe/unsubscribe features
