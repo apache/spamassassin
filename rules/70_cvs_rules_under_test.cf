@@ -90,13 +90,6 @@ body T_PORN_16			/(?:nasty|teen|dir(?:ty|iest)?|little).{0,16}\bsluts?/i
 # 419 spam, group/merge with other Nigeria rules
 body T_MILLION_USD		/Million\b.{0,40}\b(?:United States? Dollars?|USD)/i
 
-# to replace CHARSET_FARAWAY_BODY
-# %%% CHARSET_FARAWAY_BODY
-rawbody __MIME_FARAWAY_CHARSET	eval:check_for_mime_faraway_charset()
-body __HIGHBITS			/(?:[\x80-\xff].?){4,}/
-meta T_MIME_FARAWAY_CHARSET	(__MIME_FARAWAY_CHARSET && __HIGHBITS)
-tflags T_MIME_FARAWAY_CHARSET userconf
-
 ########################################################################
 
 header __CD			exists:Content-Disposition

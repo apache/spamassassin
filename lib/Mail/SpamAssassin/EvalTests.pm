@@ -1383,42 +1383,6 @@ sub check_for_faraway_charset {
   0;
 }
 
-sub check_for_faraway_charset_in_body {
-  my ($self, $fulltext) = @_;
-
-  my $content_type = $self->get('Content-Type');
-  $content_type = '' unless defined $content_type;
-  $content_type =~ /\bboundary\s*=\s*["']?(.*?)["']?(?:;|$)/i
-    or return 0; # No message sections to check
-  my $boundary = "\Q$1\E";
-
-  # Grab the whole mime body part
-  my($mimebody) = ($$fulltext =~ /^(--$boundary\n.*
-                                  ^--$boundary--\n)/smx);
-
-  if (defined $mimebody) {
-    foreach my $section ( split(/^--${boundary}\n/m, $mimebody) ) {
-      my($header,$sampleofbody) = split(/\n\s*\n/, $section, 2);
-      next unless defined $header;
-
-      if ( $header =~ /^Content-Type:\s(.{0,100}charset=[^\n]+)/msi ) {
-        my $type = $1;
-
-        my @locales = $self->get_my_locales();
-
-        return 0 if grep { $_ eq "all" } @locales;
-
-        $type = get_charset_from_ct_line ($type);
-        return 1 if (defined $type &&
-          !Mail::SpamAssassin::Locales::is_charset_ok_for_locales($type, @locales) &&
-          $self->are_more_high_bits_set ($sampleofbody));
-      }
-    }
-  }
-
-  0;
-}
-
 sub check_for_faraway_charset_in_headers {
   my ($self) = @_;
   my $hdr;
