@@ -35,7 +35,7 @@ sub cmdline_run {
 
 	     'folders|f=s'			=> \$opt{'folders'},
              'showdots'                         => \$opt{'showdots'},
-	     'no-rebuild'			=> \$opt{'norebuild'},
+	     'no-rebuild|norebuild'		=> \$opt{'norebuild'},
 	     'force-expire'			=> \$opt{'force-expire'},
 
              'stopafter'                        => \$opt{'stopafter'},
