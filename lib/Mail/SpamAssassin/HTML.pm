@@ -559,6 +559,11 @@ sub html_tests {
       $self->examine_text_style($1, $2);
     }
   }
+  # image inside of an anchor
+  # XXX - test code
+  if ($tag eq "img" && exists $self->{inside}{a} && $self->{inside}{a} > 0) {
+    $self->{anchor}->[$self->{anchor_index}] .= " <img> ";
+  }
   if ($tag eq "img" && exists $attr->{width} && exists $attr->{height}) {
     my $width = 0;
     my $height = 0;
@@ -598,6 +603,10 @@ sub html_tests {
   if ($tag eq "a") {
     $self->{anchor_index}++;
     $self->{anchor}->[$self->{anchor_index}] = "";
+    # XXX - test code
+    if (!exists $attr->{href} || $attr->{href} !~ /\S/) {
+      $self->put_results(t_anchor_empty_href => 1);
+    }
   }
   if ($tag eq "title") {
     $self->{title_index}++;
