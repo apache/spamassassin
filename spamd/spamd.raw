@@ -620,12 +620,14 @@ die "Required module Storable not found!\n"
 $opt{'daemonize'} and daemonize();
 
 # Make the pidfile ...
-if ( defined $opt{'pidfile'} && open PIDF, ">$opt{'pidfile'}" ) {
-  print PIDF "$$\n";
-  close PIDF;
-}
-else {
-  warn "Can't write to PID file: $!\n";
+if (defined $opt{'pidfile'}) {
+  if (open PIDF, ">$opt{'pidfile'}") {
+    print PIDF "$$\n";
+    close PIDF;
+  }
+  else {
+    warn "Can't write to PID file: $!\n";
+  }
 }
 
 # should be done post-daemonize such that any files created by this
