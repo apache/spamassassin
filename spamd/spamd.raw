@@ -116,7 +116,7 @@ sub spawn;  # forward declaration
 sub logmsg; # forward declaration
 sub cleanupchildren;
 
-setlogsock('unix');
+setlogsock('unix') unless $log_facility eq 'stderr';
 
 my $port = $opt{'port'} || 783;
 my $addr = gethostbyname($opt{'listen-ip'} || '127.0.0.1');
@@ -664,6 +664,13 @@ sub logmsg
 {
     my $old = $SIG{'PIPE'};
     $SIG{'PIPE'} = sub { $main::SIGPIPE_RECEIVED++; };
+
+    # bug 605: http://bugzilla.spamassassin.org/show_bug.cgi?id=605
+    # more efficient for daemontools if --syslog=stderr is used
+    if($log_facility eq 'stderr') {
+      print STDERR join("",@_) . "\n";
+      return;
+    }
     
     openlog('spamd','cons,pid',$log_facility);
     syslog('info',"@_");
@@ -860,7 +867,9 @@ own maildir.
 
 =item B<-s> I<facility>, B<--syslog>=I<facility>
 
-Specify the syslog facility to use (default: mail).
+Specify the syslog facility to use (default: mail).  If C<stderr> is specified,
+output will be written to stderr.  This is useful if you're running C<spamd>
+under the C<daemontools> package.
 
 =item B<-u> I<username>, B<--username>=I<username>
 
