@@ -625,7 +625,7 @@ above headers added/modified.
 sub rewrite_mail {
   my ($self) = @_;
 
-  my $mbox = $self->{msg}->get_mbox_seperator() || '';
+  my $mbox = $self->{msg}->get_mbox_separator() || '';
   if ($self->{is_spam} && $self->{conf}->{report_safe}) {
     return $mbox.$self->rewrite_report_safe();
   }
