@@ -194,6 +194,10 @@ header __OUTLOOK_MSGID_3	Message-Id =~ /^<DAV[0-9A-Za-z]{24}\@hotmail\.com>$/
 meta T_FORGED_MUA_OUTLOOK	(__OUTLOOK_MUA && !(__OUTLOOK_MSGID_1 || __OUTLOOK_MSGID_2 || __OUTLOOK_MSGID_3))
 describe T_FORGED_MUA_OUTLOOK	Forged mail pretending to be from Outlook
 score T_FORGED_MUA_OUTLOOK	1.0
+# bug #1143, trying second proposed solution
+# note: this uses part of the T_FORGED_MUA_IMS rule
+header __IMS_MSGID		Message-Id =~ /^<[A-F\d]{36,40}\@\S+>$/
+meta T_FORGED_MUA_OUTLOOK2	(__OUTLOOK_MUA && !(__OUTLOOK_MSGID_1 || __OUTLOOK_MSGID_2 || __OUTLOOK_MSGID_3 || __IMS_MSGID))
 
 # Outlook IMO (Internet Mail Only)
 header __OIMO_MUA		X-Mailer =~ /Outlook IMO/
