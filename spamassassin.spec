@@ -159,6 +159,17 @@ if [ $1 = 0 ]; then
 fi
 
 %changelog
+* Tue Oct 15 2002 Theo Van Dinter <felicity@kluge.net> -1
+- updated to 2.43
+
+* Sat Oct 05 2002 Theo Van Dinter <felicity@kluge.net> -3
+- fixed some small typos in the spec file
+
+* Fri Oct 04 2002 Theo Van Dinter <felicity@kluge.net> -2
+- small bug where 2.42 still called itself 2.42-cvs
+
+* Fri Oct 04 2002 Theo Van Dinter <felicity@kluge.net> -1
+- updated to SA 2.42
 
 * Wed Sep 11 2002 Justin Mason <jm-spec@jmason.org>
 - spamassassin RPM now requires perl-Mail-SpamAssassin; from Theo
