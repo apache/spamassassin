@@ -1,0 +1,28 @@
+#!/usr/bin/perl
+
+if ( $^O eq "solaris" ) {
+	local $/ ="";
+	open(PRD, "/usr/platform/`uname -i`/sbin/prtdiag|") || die "Can't run prtdiag:$!";
+	while(<PRD>) {
+		last if /= CPUs =/;
+	}
+	chop($_ = <PRD>); # get the cpu listing, chop the blank line \n
+	close(PRD);
+
+	s/^.+?-\n//s; # trim to only the list of cpus
+	print tr/\n/\n/,"\n"; # how many are there?
+}
+elsif ( $^O eq "linux" ) {
+	open(CPU,"</proc/cpuinfo") || die "Can't read /proc/cpuinfo:$!";
+	print scalar grep(/^processor\s+:/,<CPU>),"\n";
+	close(CPU);
+}
+elsif ( $^O eq "darwin" ) {
+	open(CPU,"/usr/sbin/sysctl -n hw.ncpu|") || die "Can't read sysctl:$!";
+	print <CPU>;
+	close(CPU);
+}
+else {
+	warn "Unknown platform, just saying 1 CPU!\n";
+	print "1\n";
+}
