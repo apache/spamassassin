@@ -6,6 +6,18 @@ use Test; BEGIN { plan tests => 2 };
 
 # ---------------------------------------------------------------------------
 
+my $razor_not_available = 0;
+
+eval {
+	require Razor::Client;
+};
+
+if ($@) {
+	$razor_not_available = "Razor is not installed.";
+}
+
+
+
 %patterns = (
 
 q{ Listed in Razor }, 'spam',
@@ -13,7 +25,7 @@ q{ Listed in Razor }, 'spam',
 );
 
 sarun ("-t < data/spam/001", \&patterns_run_cb);
-ok_all_patterns();
+skip_all_patterns($razor_not_available);
 
 %patterns = ();
 %anti_patterns = (
@@ -23,4 +35,4 @@ q{ Listed in Razor }, 'nonspam',
 );
 
 sarun ("-t < data/nice/001", \&patterns_run_cb);
-ok_all_patterns();
+skip_all_patterns($razor_not_available);
