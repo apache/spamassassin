@@ -983,8 +983,6 @@ The test requires training before it can be used.
 Set the MIME Content-Type charset used for the text/plain report which
 is attached to spam mail messages.
 
-=back
-
 =cut
 
     if (/^report_charset\s*(.*)$/) {
