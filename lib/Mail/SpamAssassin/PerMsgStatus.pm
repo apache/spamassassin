@@ -341,10 +341,11 @@ sub get_report {
 
 =item $status->rewrite_mail ()
 
-Rewrite the mail message.  This will add headers, and possibly body text, to
-reflect its spam or not-spam status.
+Rewrite the mail message.  This will at minimum add headers, and at
+maximum mime encapsulate the message text, to reflect its spam or
+not-spam status.
 
-The modifications made are as follows:
+The possible modifications are as follows:
 
 =over 4
 
@@ -367,31 +368,30 @@ reflect the filter status.  The keys in this string are as follows:
 
 =item tests=... The symbolic names of tests which were triggered.
 
-=back
-
-=item X-Spam-Flag: header for spam mails
-
-Set to C<YES>.
-
-=item Content-Type: header for spam mails
-
-Set to C<text/plain>, in order to defang HTML mail or other active
-content that could "call back" to the spammer.
-
-=item X-Spam-Checker-Version: header for spam mails
-
-Set to the version number of the SpamAssassin checker which tested the mail.
-
-=item spam mail body text
-
-The SpamAssassin report is added to top of the mail message body
-if the message is marked as spam.
+=item version=... The version of SpamAssassin which made the change
 
 =item X-Spam-Status: header for non-spam mails
 
 A string, C<No, hits=nn required=nn tests=...> is set in this header to reflect
 the filter status.  The keys in this string are the same as for spam mails (see
 above).
+
+=item X-Spam-Flag: header for spam mails
+
+Set to C<YES>.
+
+=item X-Spam-Checker-Version: header for spam mails
+
+Set to the version number of the SpamAssassin checker which tested the mail.
+
+=item spam message with report_safe
+
+If report_safe is set to true (1), then spam messages are encapsulated
+into their own message/rfc822 MIME attachment without any modifications
+being made.
+
+If report_safe is set to false (0), then the message will only have the
+above headers added/modified.
 
 =back
 
