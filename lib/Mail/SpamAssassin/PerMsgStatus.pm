@@ -1077,8 +1077,12 @@ sub get_decoded_stripped_body_text_array {
   # do HTML conversions if necessary
   if ($text =~ m/<(?:$re_strict|$re_loose|!--|!doctype)(?:\s|>)/ois) {
     my $raw = length($text);
-    my $before = substr($text, 0, $-[0]);
-    $text = substr($text, $-[0]);
+
+    # NOTE: do another match instead of using $-[0]; not supported
+    # under old perls
+    $text =~ m/^(.*?)<(?:$re_strict|$re_loose|!--|!doctype)(?:\s|>)/ois;
+    my $before = substr($text, 0, length($1));
+    $text = substr($text, length($1));
 
     $self->{html_text} = [];
     $self->{html_last_tag} = 0;
