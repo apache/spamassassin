@@ -1368,7 +1368,7 @@ my $domain_lit  = qq<$open_br(?:$dtext|$quoted_pair)*$close_br>;
 my $domain      = qq<(?:$domain_ref|$domain_lit)>;
 
 # Finally, the address-spec regex (more or less)
-my $Addr_spec_re   = qr<\b$local_part\s*\@\s*$domain>o;
+my $Addr_spec_re   = qr<$local_part\s*\@\s*$domain>o;
 
 sub do_body_uri_tests {
   my ($self, $textary) = @_;
@@ -1437,11 +1437,12 @@ sub do_body_uri_tests {
 
   dbg("uri tests: Done uriRE");
   
+  pos $text = 0;
   while ($text =~ /\G.*?($Addr_spec_re)/gsoc) {
       my $uri = $1;
       $uri =~ s/^URI://i;
       $uri = "mailto:$uri";
-      # warn("Got URI: $uri\n");
+      warn("Got URI: $uri\n");
       push @uris, $uri;
   }
 
