@@ -1555,6 +1555,24 @@ sub _parse_rfc822_date {
 
 ###########################################################################
 
+sub header_all_caps {
+  my ($self) = @_;
+
+  my $all;
+  $all = $self->get('ALL');
+  $all =~ s/\n\s+/ /g;
+
+  for (split(/\n/, $all)) {
+    next if /^X-WSS-ID:/;	# skip certain headers
+    next unless /:.*\S/;	# at least one non-space after colon
+    s/[^a-zA-Z]//g;		# only look at letters
+    return 1 if ($_ && ($_ eq uc($_)));
+  }
+  return 0;
+}
+
+###########################################################################
+
 sub subject_is_all_caps {
    my ($self) = @_;
    my $subject = $self->get('Subject');

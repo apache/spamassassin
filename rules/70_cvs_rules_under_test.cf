@@ -73,6 +73,9 @@ body T_HTML_JAVASCRIPT		eval:html_test('t_javascript')
 # possible replacement/supplement for FROM_BTAMAIL
 header T_BTAMAIL_HEADER		ALL =~ /btamail\.net\.cn/i
 
+# bug 1108
+header T_HEADER_ALL_CAPS	eval:header_all_caps()
+
 ###########################################################################
 
 body T_BANG_BOSS		/\bboss!/i
