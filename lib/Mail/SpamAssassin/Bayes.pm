@@ -183,6 +183,7 @@ use constant ADD_INVIZ_TOKENS_NO_PREFIX => 0;
   'From'		=> '*F',
   'Reply-To'		=> '*R',
   'Return-Path'		=> '*p',
+  'Return-path'		=> '*rp',
   'X-Mailer'		=> '*x',
   'X-Authentication-Warning' => '*a',
   'Organization'	=> '*o',
