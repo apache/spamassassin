@@ -176,7 +176,7 @@ sub html_tag {
   $self->{html}{"inside_$tag"} = 0 if $self->{html}{"inside_$tag"} < 0;
 
   # TODO: cover other changes
-  if ($tag =~ /^(?:body|font|table|tr|th|td|big|small|basefont)$/) {
+  if ($tag =~ /^(?:body|font|table|tr|th|td|big|small|basefont|marquee)$/) {
     $self->text_style($tag, $attr, $num);
   }
 
@@ -724,6 +724,36 @@ sub text_style {
   }
 }
 
+sub color_hue {
+  my ($color) = @_;
+
+  if ($color =~ /^\#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i) {
+    my ($h, $s, $v) = rgb_to_hsv(hex($1), hex($2), hex($3));
+    if (!defined $h) {
+      return "gray" unless ($v == 0 || $v == 255);
+    }
+    elsif ($h < 30 || $h >= 330) {
+      return "red";
+    }
+    elsif ($h < 90) {
+      return "yellow";
+    }
+    elsif ($h < 150) {
+      return "green";
+    }
+    elsif ($h < 210) {
+      return "cyan";
+    }
+    elsif ($h < 270) {
+      return "blue";
+    }
+    elsif ($h < 330) {
+      return "magenta";
+    }
+  }
+  return "hue_unknown";
+}
+
 sub html_font_color_tests {
   my ($self, $c) = @_;
 
@@ -733,33 +763,7 @@ sub html_font_color_tests {
   if ($c !~ /^\#?[0-9a-f]{6}$/ && !exists $html_color{$c}) {
     $self->{html}{font_color_name} = 1;
   }
-  if ($c =~ /^\#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/) {
-    my ($h, $s, $v) = rgb_to_hsv(hex($1), hex($2), hex($3));
-    if (!defined($h)) {
-      $self->{html}{font_gray} = 1 unless ($v == 0 || $v == 255);
-    }
-    elsif ($h < 30 || $h >= 330) {
-      $self->{html}{font_red} = 1;
-    }
-    elsif ($h < 90) {
-      $self->{html}{font_yellow} = 1;
-    }
-    elsif ($h < 150) {
-      $self->{html}{font_green} = 1;
-    }
-    elsif ($h < 210) {
-      $self->{html}{font_cyan} = 1;
-    }
-    elsif ($h < 270) {
-      $self->{html}{font_blue} = 1;
-    }
-    elsif ($h < 330) {
-      $self->{html}{font_magenta} = 1;
-    }
-  }
-  else {
-    $self->{html}{font_color_unknown} = 1;
-  }
+  $self->{html}{"font_" . color_hue($c)} = 1;
 }
 
 sub html_font_invisible {
