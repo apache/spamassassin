@@ -71,6 +71,7 @@ use constant DUMP_BACKUP => 8;
 #   CYMRU = <http://www.cymru.com/Documents/bogon-list.html>
 #
 # Last update
+#   2004-11-16 Theo Van Dinter - 71/8 and 72/8 allocated
 #   2004-07-23 Daniel Quinlan - added CYMRU source, sorted, many updates
 #   2004-05-22 Daniel Quinlan - removed 58/8 and 59/8
 #   2004-03-08 Justin Mason - reimplemented removed code
@@ -95,7 +96,7 @@ use constant IP_IN_RESERVED_RANGE => qr{^(?:
   3[1679]|			   # 031/8, 036/8, 037/8, 039/8: IANA Reserved
   4[129]|			   # 041/8, 042/8, 049/8: IANA Reserved
   50|				   # 050/8:            IANA Reserved
-  7[1-9]|			   # 071-079/8:        IANA Reserved
+  7[3-9]|			   # 073-079/8:        IANA Reserved
   89|				   # 089/8:            IANA Reserved
   9[0-9]|			   # 090-099/8:        IANA Reserved
   1[01][0-9]|			   # 100-119/8:        IANA Reserved
