@@ -1,4 +1,201 @@
 ------------------------------------------------------------------------
+r36447 | parker | 2004-08-16 05:29:08 +0000 (Mon, 16 Aug 2004) | 1 line
+
+Bug 3331: Adds hooks to Plugin API for bayes_scan, bayes_learn and bayes_forget that passes in hashed and raw token values, amoung other things.  Useful for creating the hashed to raw token value map that people may want.
+------------------------------------------------------------------------
+r36445 | quinlan | 2004-08-16 05:14:27 +0000 (Mon, 16 Aug 2004) | 2 lines
+
+bug 3687: BAYES rule names no longer match ranges
+
+------------------------------------------------------------------------
+r36444 | quinlan | 2004-08-16 05:12:26 +0000 (Mon, 16 Aug 2004) | 2 lines
+
+trivial removal: deleted rules
+
+------------------------------------------------------------------------
+r36426 | quinlan | 2004-08-16 02:01:46 +0000 (Mon, 16 Aug 2004) | 2 lines
+
+bug 3631: update reserved IP list
+
+------------------------------------------------------------------------
+r36425 | quinlan | 2004-08-16 02:01:08 +0000 (Mon, 16 Aug 2004) | 2 lines
+
+bug 3676: clean up scores (removes/comments out unused code)
+
+------------------------------------------------------------------------
+r36424 | quinlan | 2004-08-16 01:15:15 +0000 (Mon, 16 Aug 2004) | 2 lines
+
+make tabs consistent so proposed patch will apply nicely
+
+------------------------------------------------------------------------
+r36423 | quinlan | 2004-08-16 00:14:41 +0000 (Mon, 16 Aug 2004) | 2 lines
+
+comment
+
+------------------------------------------------------------------------
+r36406 | felicity | 2004-08-15 05:34:26 +0000 (Sun, 15 Aug 2004) | 1 line
+
+bug 3684: relative scores didn't work at all.  if we see (score), mark that it's a relative score and remove the parens to avoid an eval call.
+------------------------------------------------------------------------
+r36405 | felicity | 2004-08-15 05:30:05 +0000 (Sun, 15 Aug 2004) | 1 line
+
+bug 3685: for rawbody and uri rules, we can stop processing a rule when it gets one hit.  provides a slight (~0.3%) speed increase overall.
+------------------------------------------------------------------------
+r36365 | felicity | 2004-08-13 19:38:23 +0000 (Fri, 13 Aug 2004) | 1 line
+
+small doco change: we don't use .spamassassin.cf anywhere
+------------------------------------------------------------------------
+r36315 | jm | 2004-08-13 02:28:51 +0000 (Fri, 13 Aug 2004) | 1 line
+
+doco: revert back to what was there before; last change didn't make much sense
+------------------------------------------------------------------------
+r36313 | jm | 2004-08-13 02:21:59 +0000 (Fri, 13 Aug 2004) | 1 line
+
+doco: update AUTHORS and BUGS sections; now we have no bugs, of course ;)
+------------------------------------------------------------------------
+r36311 | jm | 2004-08-13 02:19:50 +0000 (Fri, 13 Aug 2004) | 1 line
+
+doco: update build process so it should work when we release to www.apache.org
+------------------------------------------------------------------------
+r36277 | jm | 2004-08-12 06:56:24 +0000 (Thu, 12 Aug 2004) | 1 line
+
+trivial: MANIFEST was out of date, missing NOTICE and a masses script
+------------------------------------------------------------------------
+r36276 | jm | 2004-08-12 06:53:18 +0000 (Thu, 12 Aug 2004) | 1 line
+
+bug 3674: add new 'if version' command and generalise the 'if' conditional
+------------------------------------------------------------------------
+r36275 | quinlan | 2004-08-12 06:52:09 +0000 (Thu, 12 Aug 2004) | 2 lines
+
+bug 3630: tweak text to match Apache License 2.0 better
+
+------------------------------------------------------------------------
+r36272 | quinlan | 2004-08-12 05:45:22 +0000 (Thu, 12 Aug 2004) | 2 lines
+
+bug 3494: rewrite NO_DNS_FOR_FROM to use DNS-in-background code
+
+------------------------------------------------------------------------
+r36268 | jm | 2004-08-12 04:16:41 +0000 (Thu, 12 Aug 2004) | 1 line
+
+trivial fix: allow RULES to be overridden when building masses
+------------------------------------------------------------------------
+r36207 | felicity | 2004-08-11 04:21:37 +0000 (Wed, 11 Aug 2004) | 1 line
+
+added documentation for header name:addr and :name
+------------------------------------------------------------------------
+r36189 | felicity | 2004-08-10 22:05:44 +0000 (Tue, 10 Aug 2004) | 1 line
+
+bug 3669: strip newlines off headers before the bayes tokenizer runs.  also fixes debug display issue.
+------------------------------------------------------------------------
+r36155 | quinlan | 2004-08-10 04:07:46 +0000 (Tue, 10 Aug 2004) | 2 lines
+
+add NOTICE file
+
+------------------------------------------------------------------------
+r36151 | quinlan | 2004-08-10 03:17:00 +0000 (Tue, 10 Aug 2004) | 2 lines
+
+minor formatting changes
+
+------------------------------------------------------------------------
+r36136 | jm | 2004-08-09 22:56:37 +0000 (Mon, 09 Aug 2004) | 1 line
+
+trivial fix: use the claimed value of a hashcash token instead of the computed value, if claimed < computed.  more deterministic this way.  suggestion from Adam Back
+------------------------------------------------------------------------
+r36135 | jm | 2004-08-09 22:52:24 +0000 (Mon, 09 Aug 2004) | 1 line
+
+trivial fix: OUR_AFFILIATE_PARTNERS had score 0 in new scores, so html_obfu.t failed as a result.
+------------------------------------------------------------------------
+r36133 | hstern | 2004-08-09 22:27:18 +0000 (Mon, 09 Aug 2004) | 8 lines
+
+* 50_scores.cf
+* STATISTICS-set1.txt
+* STATISTICS-set2.txt
+* STATISTICS-set3.txt
+* STATISTICS.txt
+  Generated scores for 3.0 RC1.  May need some final manual tweaking.
+
+
+------------------------------------------------------------------------
+r36128 | quinlan | 2004-08-09 20:19:31 +0000 (Mon, 09 Aug 2004) | 2 lines
+
+bug 3627: rewrite to fix various bugs and improve things in general
+
+------------------------------------------------------------------------
+r36122 | hstern | 2004-08-09 17:48:34 +0000 (Mon, 09 Aug 2004) | 6 lines
+
+* config.set0
+* config.set2
+* config.set3
+  Saved parameters used to train classifier for SpamAssasin 3.0 release.
+
+
+------------------------------------------------------------------------
+r36121 | hstern | 2004-08-09 17:47:08 +0000 (Mon, 09 Aug 2004) | 4 lines
+
+* runGA
+  Saved the training and test sets, as per Justin's request.
+
+
+------------------------------------------------------------------------
+r36119 | hstern | 2004-08-09 17:17:47 +0000 (Mon, 09 Aug 2004) | 6 lines
+
+ * validate-model
+ * model-statistics
+   Added a display of some statistics about the generated model (mean error
+   rates, etc.)
+
+
+------------------------------------------------------------------------
+r36093 | quinlan | 2004-08-09 06:10:35 +0000 (Mon, 09 Aug 2004) | 2 lines
+
+documentation: now using a 1 FP in 2500 ham target
+
+------------------------------------------------------------------------
+r36075 | sidney | 2004-08-08 00:07:19 +0000 (Sun, 08 Aug 2004) | 1 line
+
+documentation change: clarify perldoc about trusted_networks and internal_networks
+------------------------------------------------------------------------
+r36054 | quinlan | 2004-08-07 00:41:25 +0000 (Sat, 07 Aug 2004) | 2 lines
+
+just some trivial formatting
+
+------------------------------------------------------------------------
+r36053 | quinlan | 2004-08-07 00:35:41 +0000 (Sat, 07 Aug 2004) | 2 lines
+
+fix some obvious bugs and see where that gets us
+
+------------------------------------------------------------------------
+r36032 | quinlan | 2004-08-06 09:14:41 +0000 (Fri, 06 Aug 2004) | 2 lines
+
+fix another warning
+
+------------------------------------------------------------------------
+r36031 | quinlan | 2004-08-06 09:09:45 +0000 (Fri, 06 Aug 2004) | 2 lines
+
+trivial fix for warning
+
+------------------------------------------------------------------------
+r36026 | jm | 2004-08-06 07:35:59 +0000 (Fri, 06 Aug 2004) | 1 line
+
+trivial patch: replace the hashcash v1 stamp in hashcash.t with a brand-new v1 stamp that doesn't include my email address ;)
+------------------------------------------------------------------------
+r35749 | quinlan | 2004-08-05 17:45:19 +0000 (Thu, 05 Aug 2004) | 2 lines
+
+trivial fix for henry (definitely safe, hopefully works)
+
+------------------------------------------------------------------------
+r35723 | jm | 2004-08-05 04:02:57 +0000 (Thu, 05 Aug 2004) | 1 line
+
+bug 3657: support hashcash v1 tokens, and fix bug with '%u' tokens in hashcash_accept.  (also minor build doc fix)
+------------------------------------------------------------------------
+r35720 | jm | 2004-08-05 03:24:11 +0000 (Thu, 05 Aug 2004) | 1 line
+
+3.0.0-rc1 devel cycle started
+------------------------------------------------------------------------
+r35716 | jm | 2004-08-05 03:13:24 +0000 (Thu, 05 Aug 2004) | 1 line
+
+Preparing to release 3.0.0-pre4
+------------------------------------------------------------------------
 r35715 | jm | 2004-08-05 03:10:43 +0000 (Thu, 05 Aug 2004) | 1 line
 
 bug 3662: fix masses scripts to do sane things with mutable/nonmutable tests.  adds zeroing of bayes rules in nonbayes scoresets; returns to the pre-2.50 situation of using the location in the scores file as the indicator as to whether a rule's score is mutable or not. this is more reliable than the 2.6x situation where some rules outside of the 'generated' section were still being mutable, while some were not, and bugs kept changing their status from mutable to not.

@@ -10,15 +10,13 @@ SPAMASSASSIN DEVELOPMENT SNAPSHOT PROCEDURE
 
 - ensure the required code and data is available for the build scripts:
 
-    ~/sabuildtools
-    ~/sasigningkey
-    ~/perl584
+    $HOME/sabuildtools
 
-  All can be copied from ~jm on minotaur if required.
+  All can be copied (or symlinked) from ~jm on minotaur if required.
 
-- ensure your PATH is correct:
+- ensure your PATH is correct, with the right perl FIRST in the path:
 
-    PATH=$HOME/perl584/bin:$HOME/sabuildtools/bin:$PATH
+    PATH=$HOME/sabuildtools/perl584/bin:$HOME/sabuildtools/bin:$PATH
 
 - run "./build/update_devel" to build the tar.gz files
 
@@ -39,9 +37,9 @@ SPAMASSASSIN RELEASE PROCEDURE
 - ensure the required code and data is available for the build scripts:
   see above.
 
-- ensure your PATH is correct:
+- ensure your PATH is correct, with the right perl FIRST in the path:
 
-    PATH=$HOME/perl584/bin:$HOME/sabuildtools/bin:$PATH
+    PATH=$HOME/sabuildtools/perl584/bin:$HOME/sabuildtools/bin:$PATH
 
 - edit lib/Mail/SpamAssassin.pm and comment the $IS_DEVEL_BUILD
   line.   Ensure the correct version number is present in $VERSION
