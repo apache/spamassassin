@@ -189,14 +189,11 @@ describe T_BLANKNAME    Sender has blanked out name
 header    T_COPYDVD           Subject =~ /(?:c[o0]py dvd|dvd.{1,15}c[o0]py|dvd magic)/i
 describe  T_COPYDVD           Subject mentions copying DVDs
 
-
-
 header    T_GETPAID      Subject =~ /[g6][\W_]?[e3\*\xC8-\xCB\xE8-\xEB][\W_]?t p[\W_]?[a4\*\@\xC0-\xC5\xAA\xE0-\xE5][\W_]?[il1:\|\*\xCC-\xCF\xEC-\xEF][\W_]?[d\xD0]/i
 describe  T_GETPAID      Subject mentions getting paid for something
 
 header    T_MAKEMONEY            Subject =~ /(?:(?:save|make)[ -].{0,15}money[ -](?:in|on)|(?:free|grant|saving|with our|(?:claim|keep) your) money|money machine)/i
 describe  T_MAKEMONEY            Subject mentions money in phrase that implies spam
-
 
 header    T_WORTHCASH        Subject =~ /\b(?:Worth|Win|take|extra|earn|dollars|Short|need|claim|free|get|opinions?|surveys?)\b.{0,15}(?:fast)?(?:C[a\@]sh|M[0o]ney)\b/i
 describe  T_WORTHCASH        Subject mentions something is worth cash
@@ -286,12 +283,8 @@ body	T_EMPTY_URI_SRC		eval:html_test('blank_uri')
 body	T_EMPTY_URI_SRC_IMG	eval:html_text_match('blank_uri', '^img$')
 body	T_EMPTY_URI_SRC_IFRAME	eval:html_text_match('blank_uri', '^iframe$')
 
-# can only be from "form"
-
 # bug 3186
 uri T_BIZ_TLD		/^(?:https?:\/\/|mailto:)[^\/]+\.biz(?![-a-z0-9])/i
-
-# catch mails with redirector looking pieces associated with it.
 
 ##########################################################################
 
