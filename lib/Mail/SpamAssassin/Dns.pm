@@ -448,9 +448,8 @@ sub razor2_lookup {
 	          my $tmp = $cf->{resp}->[$response];
 	      	  my $tmpcf = $tmp->{cf} || 0; # Part confidence
 	      	  my $tmpct = $tmp->{ct} || 0; # Part contested?
-		  my $tmpsk = $tmp->{skipme} || 0; # skip?
 		  my $engine = $cf->{sent}->[$response]->{e};
-	          dbg("Found Razor2 part: part=$part engine=$engine ct=$tmpct cf=$tmpcf skipme=$tmpsk");
+	          dbg("Found Razor2 part: part=$part engine=$engine ct=$tmpct cf=$tmpcf");
 	          $self->{razor2_cf_score} = $tmpcf if ( !$tmpct && $tmpcf > $self->{razor2_cf_score} );
 	        }
 	      }
