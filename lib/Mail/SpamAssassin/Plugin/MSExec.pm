@@ -59,7 +59,7 @@ sub check_microsoft_executable {
       $name = lc $name;
 
       # file extension indicates an executable ...
-      return 1 if ($name =~ /\.(?:scr|bat|com|pif|exe)$/);
+      return 1 if ($name =~ /\.(?:ade|adp|asx|bas|bat|chm|cmd|com|cpl|crt|dll|exe|hlp|hta|inf|ins|isp|js|jse|lnk|mda|mdb|mde|mdt|mdw|mdz|msc|msi|msp|mst|nws|ops|pcd|pif|prf|reg|scf|scr\??|sct|shb|shs|shm|swf|url|vb|vbe|vbs|vbx|vxd|wsc|wsf|wsh)$/);
 
       # base64 attached executable ...
       my $cte = lc $p->get_header('content-transfer-encoding') || '';
