@@ -262,7 +262,8 @@ sub expire_old_tokens {
 
   $self->untie_db();
   if ($err) {		# if we died, untie the dbs.
-    die $err;
+    warn "bayes expire_old_tokens: $err\n";
+    return 0;
   }
   $ret;
 }
@@ -307,7 +308,8 @@ sub expire_old_tokens_trapped {
 	  || $tok eq $NHAM_MAGIC_TOKEN
 	  || $tok eq $LAST_EXPIRE_MAGIC_TOKEN
 	  || $tok eq $NTOKENS_MAGIC_TOKEN
-	  || $tok eq $OLDEST_TOKEN_AGE_MAGIC_TOKEN);
+	  || $tok eq $OLDEST_TOKEN_AGE_MAGIC_TOKEN
+	  || $tok eq $SCANCOUNT_BASE_MAGIC_TOKEN);
 
     my ($ts, $th, $atime) = $self->tok_get ($tok);
     if ($atime < $too_old) {
@@ -345,6 +347,7 @@ sub expire_old_tokens_trapped {
   $deleted -= $reprieved;
 
   # and add the magic tokens
+  $new_toks{$SCANCOUNT_BASE_MAGIC_TOKEN} = $self->{db_toks}->{$SCANCOUNT_BASE_MAGIC_TOKEN};
   $new_toks{$LAST_EXPIRE_MAGIC_TOKEN} = $self->scan_count_get();
   $new_toks{$OLDEST_TOKEN_AGE_MAGIC_TOKEN} = $oldest;
   $new_toks{$NSPAM_MAGIC_TOKEN} = $self->{db_toks}->{$NSPAM_MAGIC_TOKEN};
@@ -414,7 +417,7 @@ sub expiry_due {
 
   my $limit = $self->{expiry_count};
   my $now = $self->scan_count_get();
-  if ($now - $last > $limit/2 && $now - $oldest > $limit) {
+  if (($now - $last > $limit/2 && $now - $oldest > $limit) || ($now < $last)) {
     return 1;
   }
 
@@ -531,7 +534,10 @@ sub sync_journal {
   # retire the journal, so we can update the db files from it in peace.
   # TODO: use locking here
   my $retirepath = $path.".old";
-  rename ($path, $retirepath) or warn "rename failed $path to $retirepath\n";
+  if (!rename ($path, $retirepath)) {
+    warn "bayes: failed rename $path to $retirepath\n";
+    return 0;
+  }
 
   my $started = time();
   my $count = 0;
@@ -539,7 +545,13 @@ sub sync_journal {
   my $showdots = $opts->{showdots};
 
   # now read the retired journal
-  open (JOURNAL, "<".$retirepath) or warn "cannot read $retirepath";
+  if (!open (JOURNAL, "<".$retirepath)) {
+    warn "bayes: cannot open read $retirepath\n";
+    rename($retirepath,$path); # try to put it back if we can...
+    return 0;
+  }
+
+  my $ok_to_remove = 0;
   eval {
     local $SIG{'__DIE__'};	# do not run user die() traps in here
 
@@ -560,19 +572,29 @@ sub sync_journal {
           print STDERR ".";
         }
       }
+      $ok_to_remove = 1;
     }
   };
   my $err = $@;
 
+  if ($showdots) { print STDERR "\n"; }
+
   # ok, untie from write-mode, delete the retired journal
   $self->untie_db();
   close JOURNAL;
-  unlink ($retirepath);
+  if ($ok_to_remove) {
+    unlink ($retirepath);
+  }
+  else {
+    warn "bayes: Detected problem syncing journal, trying to rename $retirepath to $path\n";
+    rename($retirepath,$path) or warn "bayes: rename failed"; # try to put it back if we can...
 
-  if ($showdots) { print STDERR "\n"; }
-
-  # handle any errors that may have occurred
-  if ($err) { die $err; }
+    # handle any errors that may have occurred
+    if ($err) {
+      warn "bayes: $err\n";
+      return 0;
+    }
+  }
 
   my $done = time();
   my $msg = ("synced Bayes databases from journal in ".($done - $started).
@@ -697,8 +719,7 @@ sub scan_count_increment {
   # note the tiny race cond between close above, and this -s.  Again, if we
   # miss a . or two, it won't make much of a difference.
   if (-s $path > MAX_SIZE_FOR_SCAN_COUNT_FILE) {
-    unlink ($path);
-    $self->scan_count_increment_big_counter();
+    $self->scan_count_increment_big_counter() && unlink ($path);
   }
 
   1;
@@ -742,7 +763,10 @@ sub scan_count_increment_big_counter {
     $self->{store}->tie_db_readonly();
   }
 
-  if ($failure) { die $failure; }
+  if ($failure) {
+    warn "bayes scan_count_increment_big_counter: $failure\n";
+    return 0;
+  }
 
   1;
 }
