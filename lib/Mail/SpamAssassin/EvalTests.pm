@@ -1407,7 +1407,7 @@ sub partial_rfc_2369 {
 
   # List-Unsubscribe without much else (spammer mind trick)
   my @count = keys %count;
-  return (exists $count{'List-Unsubscribe'} && $#count < 2);
+  return (exists $count{'List-Unsubscribe'} && $#count < 1);
 }
   
 ###########################################################################
