@@ -400,11 +400,17 @@ The following template items are supported, and will be filled out by
 SpamAssassin:
 
 =over 4
+
 =item  _HITS_: the number of hits the message triggered
+
 =item  _REQD_: the required hits to be considered spam
+
 =item  _SUMMARY_: the full details of what hits were triggered
+
 =item  _VER_: SpamAssassin version
+
 =item  _HOME_: SpamAssassin home URL
+
 =back
 
 =cut
