@@ -154,38 +154,6 @@ tflags T_MIME_FARAWAY_CHARSET userconf
 body T_MIME_EXCESSIVE_BASE64		eval:check_for_mime_excessive_base64()
 describe T_MIME_EXCESSIVE_BASE64	base64 encoding without base64 header
 
-body T_MIME_EXCESSIVE_QP_V1_001	eval:check_for_mime_excessive_qp_v1('0.001')
-body T_MIME_EXCESSIVE_QP_V1_002	eval:check_for_mime_excessive_qp_v1('0.002')
-body T_MIME_EXCESSIVE_QP_V1_003	eval:check_for_mime_excessive_qp_v1('0.003')
-body T_MIME_EXCESSIVE_QP_V1_004	eval:check_for_mime_excessive_qp_v1('0.004')
-body T_MIME_EXCESSIVE_QP_V1_005	eval:check_for_mime_excessive_qp_v1('0.005')
-body T_MIME_EXCESSIVE_QP_V1_006	eval:check_for_mime_excessive_qp_v1('0.006')
-body T_MIME_EXCESSIVE_QP_V1_007	eval:check_for_mime_excessive_qp_v1('0.007')
-body T_MIME_EXCESSIVE_QP_V1_008	eval:check_for_mime_excessive_qp_v1('0.008')
-body T_MIME_EXCESSIVE_QP_V1_009	eval:check_for_mime_excessive_qp_v1('0.009')
-body T_MIME_EXCESSIVE_QP_V1_010	eval:check_for_mime_excessive_qp_v1('0.010')
-body T_MIME_EXCESSIVE_QP_V1_011	eval:check_for_mime_excessive_qp_v1('0.011')
-body T_MIME_EXCESSIVE_QP_V1_012	eval:check_for_mime_excessive_qp_v1('0.012')
-body T_MIME_EXCESSIVE_QP_V1_013	eval:check_for_mime_excessive_qp_v1('0.013')
-body T_MIME_EXCESSIVE_QP_V1_014	eval:check_for_mime_excessive_qp_v1('0.014')
-body T_MIME_EXCESSIVE_QP_V1_015	eval:check_for_mime_excessive_qp_v1('0.015')
-
-body T_MIME_EXCESSIVE_QP_V2_001	eval:check_for_mime_excessive_qp_v2('0.001')
-body T_MIME_EXCESSIVE_QP_V2_002	eval:check_for_mime_excessive_qp_v2('0.002')
-body T_MIME_EXCESSIVE_QP_V2_003	eval:check_for_mime_excessive_qp_v2('0.003')
-body T_MIME_EXCESSIVE_QP_V2_004	eval:check_for_mime_excessive_qp_v2('0.004')
-body T_MIME_EXCESSIVE_QP_V2_005	eval:check_for_mime_excessive_qp_v2('0.005')
-body T_MIME_EXCESSIVE_QP_V2_006	eval:check_for_mime_excessive_qp_v2('0.006')
-body T_MIME_EXCESSIVE_QP_V2_007	eval:check_for_mime_excessive_qp_v2('0.007')
-body T_MIME_EXCESSIVE_QP_V2_008	eval:check_for_mime_excessive_qp_v2('0.008')
-body T_MIME_EXCESSIVE_QP_V2_009	eval:check_for_mime_excessive_qp_v2('0.009')
-body T_MIME_EXCESSIVE_QP_V2_010	eval:check_for_mime_excessive_qp_v2('0.010')
-body T_MIME_EXCESSIVE_QP_V2_011	eval:check_for_mime_excessive_qp_v2('0.011')
-body T_MIME_EXCESSIVE_QP_V2_012	eval:check_for_mime_excessive_qp_v2('0.012')
-body T_MIME_EXCESSIVE_QP_V2_013	eval:check_for_mime_excessive_qp_v2('0.013')
-body T_MIME_EXCESSIVE_QP_V2_014	eval:check_for_mime_excessive_qp_v2('0.014')
-body T_MIME_EXCESSIVE_QP_V2_015	eval:check_for_mime_excessive_qp_v2('0.015')
-
 ########################################################################
 
 header __CD			exists:Content-Disposition
@@ -193,18 +161,14 @@ header __CT			exists:Content-Type
 header __CTE			exists:Content-Transfer-Encoding
 header __MIME_VERSION		exists:MIME-Version
 
-meta T_MIME_NO_VERSION_CD	(__CD && !__MIME_VERSION)
-meta T_MIME_NO_VERSION_CTE	(__CTE && !__MIME_VERSION)
-meta T_MIME_NO_VERSION_CTYPE	(__CT && !__MIME_VERSION)
-
-meta T_MIME_NO_VERSION_ALL	(__CD && __CTE && __CT && !__MIME_VERSION)
-meta T_MIME_NO_VERSION_ANY	((__CD || __CTE || __CT) && !__MIME_VERSION)
-meta T_MIME_NO_VERSION_CD_AND_CTE	(__CD && __CTE && !__MIME_VERSION)
-meta T_MIME_NO_VERSION_CD_OR_CTE	((__CD || __CTE) && !__MIME_VERSION)
-meta T_MIME_NO_VERSION_LONER	(__CD + __CTE + __CT + __MIME_VERSION == 1)
-meta T_MIME_NO_VERSION_TWO	((__CD + __CTE + __CT > 1) && !__MIME_VERSION)
-
+# best four variants so far
 meta T_MIME_NO_VERSION_ODD	((__CD + __CTE + __CT == 1) && !__MIME_VERSION)
+meta T_MIME_NO_VERSION_LONER	(__CD + __CTE + __CT + __MIME_VERSION == 1)
+meta T_MIME_NO_VERSION_CTYPE	(__CT && !__MIME_VERSION)
+meta T_MIME_NO_VERSION_ANY	((__CD || __CTE || __CT) && !__MIME_VERSION)
+# more test variants (not expected to do better)
+meta T_MIME_NO_VERSION_ODD0	((__CD + __CTE + __CT == 0) && !__MIME_VERSION)
+meta T_MIME_NO_VERSION_ODD2	((__CD + __CTE + __CT == 2) && !__MIME_VERSION)
 
 ########################################################################
 # bug 1106: forged MUAs
@@ -230,6 +194,11 @@ header __MOZILLA_MSGID		Message-Id =~ /^<[A-F\d]{8}\.[A-F\d]{6,8}\@\S+>$/
 meta T_FORGED_MUA_MOZILLA	(__MOZILLA_MUA && !__MOZILLA_MSGID)
 describe T_FORGED_MUA_MOZILLA	Forged mail pretending to be from Mozilla
 score T_FORGED_MUA_MOZILLA	1.0
+
+header __MOZILLA_WEB		X-Mailer =~ /\bvia\s+https?:\/\//i
+header __MOZILLA_MSGID2		Message-Id =~ /^<[A-F\d]{8}\.[A-F\d]{4,8}\@\S+>$/
+meta T_FORGED_MUA_MOZILLA2	(__MOZILLA_MUA && !__MOZILLA_MSGID2 && !__MOZILLA_WEB)
+meta T_FORGED_MUA_MOZILLA3	(__MOZILLA_MUA && !__MOZILLA_MSGID2)
 
 # Outlook
 header __OUTLOOK_MUA		X-Mailer =~ /\bOutlook\b(?! IMO)/

@@ -1923,73 +1923,13 @@ sub check_for_num_yelling_lines {
 }
 
 sub check_for_mime_excessive_qp {
-  my ($self) = @_;
-
-  return 0 unless $self->{found_encoding_quoted_printable};
-
-  # Note: We don't use rawbody because it removes MIME parts.  Instead,
-  # we get the raw unfiltered body.  We must not change any lines.
-  my $body = join('', @{$self->{msg}->get_body()});
-
-  my $len = length($body);
-
-  my $qp;
-  # count characters that should be literal (RFC 2045), hexadecimal values
-  # 21-3C and 3E-7E plus tabs (hexadecimal 09) and spaces (hexadecimal 20)
-  $qp = () = ($body =~ m/=(?:09|3[0-9ABCEF]|[2456][0-9A-F]|7[0-9A-E])/g);
-  # tabs and spaces at end of encoded line are okay
-  $qp-- while ($body =~ m/(?:=09|=20)\s*$/gm);
-
-  return ($len && ($qp > ($len / 100)));
-}
-
-sub check_for_mime_excessive_qp_v1 {
   my ($self, undef, $min) = @_;
 
-  if (exists $self->{mime_qp_ratio_v1}) {
-    return $self->{mime_qp_ratio_v1} >= $min;
+  if (exists $self->{mime_qp_ratio}) {
+    return $self->{mime_qp_ratio} >= $min;
   }
 
-  $self->{mime_qp_ratio_v1} = 0;
-
-  if ($self->{found_encoding_quoted_printable}) {
-    # Note: We don't use rawbody because it removes MIME parts.  Instead,
-    # we get the raw unfiltered body.  We must not change any lines.
-    my $body = join('', @{$self->{msg}->get_body()});
-
-    my $len = length($body);
-
-    my $qp;
-    # count characters that should be literal (RFC 2045), hexadecimal values
-    # 21-3C and 3E-7E plus tabs (hexadecimal 09) and spaces (hexadecimal 20)
-    $qp = () = ($body =~ m/=(?:09|3[0-9ABCEF]|[2456][0-9A-F]|7[0-9A-E])/g);
-    # tabs and spaces at end of encoded line are okay.  Also, multiple
-    # whitespace at the end of a line are OK, like
-    # ">=20=20=20=20=20=20=20".  Capture all of the trailing QP text,
-    # then split up each trailing sequence into individual hex values,
-    # *then* exclude the null strings caused by the null string before
-    # the first "=" in a string
-    my @trailing = ($body =~ m/((?:=09|=20)+)\s*$/gm);
-    @trailing = map {split/=/} @trailing;
-    @trailing = grep (!/^$/, @trailing);
-    $qp -= scalar(@trailing);
-
-    if ($len) {
-      $self->{mime_qp_ratio_v1} = $qp / $len;  
-    }
-  }
-
-  return $self->{mime_qp_ratio_v1} >= $min;
-}
-
-sub check_for_mime_excessive_qp_v2 {
-  my ($self, undef, $min) = @_;
-
-  if (exists $self->{mime_qp_ratio_v2}) {
-    return $self->{mime_qp_ratio_v2} >= $min;
-  }
-
-  $self->{mime_qp_ratio_v2} = 0;
+  $self->{mime_qp_ratio} = 0;
 
   my $cte = $self->get('Content-Transfer-Encoding');
   chomp($cte = defined($cte) ? lc($cte) : "");
@@ -2014,24 +1954,22 @@ sub check_for_mime_excessive_qp_v2 {
       $len += length($line);
       $qp += () = ($line =~ m/=(?:09|3[0-9ABCEF]|[2456][0-9A-F]|7[0-9A-E])/g);
       # tabs and spaces at end of encoded line are okay.  Also, multiple
-      # whitespace at the end of a line are OK, like
-      # ">=20=20=20=20=20=20=20".  Capture all of the trailing QP text,
-      # then split up each trailing sequence into individual hex values;
-      # subtract one for the null string before the first "=" at the
-      # begining of the string
+      # whitespace at the end of a line are OK, like ">=20=20=20=20=20=20=20".
+      # Capture all of the trailing QP text, then split up each trailing
+      # sequence into individual hex values; subtract one for the null string
+      # before the first "=" at the begining of the string
       my ($trailing) = ($line =~ m/((?:=09|=20)+)\s*$/gm);
       next unless ($trailing);
 
-      my @QPs = split(/=/, $trailing);
-      $qp -= scalar(@QPs) - 1;
+      $qp -= (length($trailing) / 3);
     }
   }
 
   if ($len) {
-    $self->{mime_qp_ratio_v2} = $qp / $len;  
+    $self->{mime_qp_ratio} = $qp / $len;  
   }
 
-  return $self->{mime_qp_ratio_v2} >= $min;
+  return $self->{mime_qp_ratio} >= $min;
 }
 
 # this test should probably be rolled into _check_attachments()
