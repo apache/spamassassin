@@ -14,16 +14,18 @@
 #
 ###########################################################################
 
-# Default template. Try to keep it under 76 columns (inside the the dots below).
+# Default template. Try to keep it under 78 columns (inside the the dots below).
 # Bear in mind that EVERY line will be prefixed with "SPAM: " in order to make
 # it clear what's been added, and allow other filters to *remove* spamfilter
 # modifications, so you lose 6 columns right there.
 #
-#      ......................................................................
+#      ........................................................................
 clear_report_template
-report This mail is probably spam.  The original message has been attached
-report along with this report, so you can recognize or block similar unwanted
-report mail in future.  See http://spamassassin.org/tag/ for more details.
+report Spam detection software (installed by you, your system administrator, or
+report your internet service provider) has identified an incoming email as
+report possible spam.  The original message has been attached to this report so
+report you can view it (if it isn't spam) or block similar future email.  If
+report you have any questions, see http://spamassassin.org/tag/ for details.
 report 
 report Content preview:  _PREVIEW_
 report 
