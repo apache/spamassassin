@@ -7,6 +7,7 @@ my $killfile_message_ids = qr{(?:
     |<\d+\.\S+\@fmail..\.real-net\.net>
     |<3D53A59C000A4029\@mta3n\.bluewin\.ch>
     |<\S+JavaMail\._accucast\@ecacmail01\.hsn\.com>
+    |<CA-.*\@cert\.org>
 )}x;
 
 my $killfile_receiveds = qr{(?:
@@ -16,6 +17,12 @@ my $killfile_receiveds = qr{(?:
     |for <postmaster_neto.net\@spamtraps\.taint\.org>   # unreliable
     |for <fortress\S*\@shangri-la\.dropbear\.id\.au>
     |by mailstrom\.vmadmin\.com \(\S+\) with SMTP id 
+    |by outgoing\.securityfocus\.com .Postfix.
+    |envelope-from security-advisories\@freebsd\.org
+    |envelope-from owner-announce\@hq\.lp\.org
+    |from abv-sfo\S+\.CNET\.COM
+    |for :include:\S+/MapQuest/
+    |from bounce\.winxpnews\.com
 )}x;
 
 my $killfile_froms = qr{(?:
@@ -31,8 +38,11 @@ my $killfile_froms = qr{(?:
     |<Joke-Of-The-Day-return-.*\@mta03\.optamail\.com>
     |<Cooking\.com\.\S+\@mail\.cooking\.com>
     |<cio\@UPDATE\.CIO\.COM>
-    |<DirectTV\S+\@vmadmin.com>
-    |<\S+\@icelandair.is>
+    |<DirectTV\S+\@vmadmin\.com>
+    |<\S+\@icelandair\.is>
+    |<\S+\@lists\.techtarget\.com>
+    |<gcn\@eletters\.gcn\.com>
+    |newsletter\@rp-online\.de
 )}x;
 
 ###########################################################################
@@ -58,6 +68,11 @@ exit;
 
 ###########################################################################
 
+sub get_or_empty {
+  my ($ma, $hdr) = @_;
+  my $str = $ma->get_header ($hdr); $str ||= ''; return $str;
+}
+
 sub wanted {
   my ($id, $dataref) = @_;
 
@@ -66,8 +81,8 @@ sub wanted {
   return unless defined($from);
 
   if ($from =~ /${killfile_froms}/o
-    || $ma->get_header ("Message-Id") =~ /${killfile_message_ids}/o
-    || $ma->get_header ("Received") =~ /${killfile_receiveds}/)
+    || get_or_empty($ma,"Message-Id") =~ /${killfile_message_ids}/o
+    || get_or_empty($ma,"Received") =~ /${killfile_receiveds}/)
   {
     print "$id\n";
   }
