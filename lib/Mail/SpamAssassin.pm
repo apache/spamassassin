@@ -165,8 +165,8 @@ sub check {
 =item $f->report_as_spam ($mail)
 
 Report a mail, encapsulated in a C<Mail::Audit> object, as human-verified spam.
-This will submit the mail message to live databases of spam, allowing other
-users to block this message.
+This will submit the mail message to live, collaborative, spam-blocker
+databases, allowing other users to block this message.
 
 =cut
 

@@ -223,6 +223,15 @@ section below.
 
 Test mode.
 
+=item -r
+
+Report this message as verified spam.  This will submit the mail message read
+from STDIN to various spam-blocker databases, such as Vipul's Razor (
+http://razor.sourceforge.net/ ).
+
+If the message contains SpamAssassin markup, this will be stripped out
+automatically before submission.
+
 =item -c config
 
 Read configuration from C<config>.  The default configuration file, if this is

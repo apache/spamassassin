@@ -2,7 +2,8 @@
 Welcome to SpamAssassin!
 ------------------------
 
-SpamAssassin is a mail filter to identify spam using text analysis.
+SpamAssassin is a mail filter which attempts to identify spam using text
+analysis.
 
 Using its rule base, it uses a wide range of heuristic tests on mail headers
 and body text to identify "spam", also known as unsolicited commercial email.
@@ -43,18 +44,38 @@ http://spamassassin.taint.org/ and install that like so:
 	make
 	make install		[as root]
 
-You will require the Mail::Audit module, and any modules it requires.   In
-addition, these modules will be used for some checks, if available.  If they
-are not available, SpamAssassin will still work, just not as effectively.
+You will require the Mail::Audit module, and any modules it requires.  Here's
+how to install this using CPAN.pm:
+
+	perl -MCPAN -e shell
+	install Mail::Audit
+	quit
+
+In addition, the following modules will be used for some checks, if available.
+If they are not available, SpamAssassin will still work, just not as
+effectively -- some of the spam-detection tests will have to be skipped.
 
   - Net::DNS	(from CPAN)
 
     Used to check the RBL, RSS, DUL etc. and perform MX checks.
 
+	perl -MCPAN -e shell
+	install Net::DNS
+	quit
+
   - Razor	http://razor.sourceforge.net/
 
     Used to check message signatures against Vipul's Razor collaborative
-    filtering network.
+    filtering network.  (Note that Razor itself requires several perl modules;
+    at the time of writing, these are Persistence::Object::Simple, Net::Daemon,
+    Digest::SHA1, and Mail::Internet).
+
+	perl -MCPAN -e shell
+	install Persistence::Object::Simple
+	install Net::Daemon
+	install Digest::SHA1
+	install Mail::Internet			[this may already be installed]
+	quit
 
 
 
@@ -107,6 +128,16 @@ If you don't:
       	cp ~/.forward.bak ~/.forward
 	echo "Help!" | mail root
 
+    - If you get spammed, it is helpful if you re-run spamassassin with the
+      "-r" option to report the message in question as "verified spam".  This
+      will add it to Vipul's Razor, a collaborative spam filtering network.
+
+	spamassassin -r < spam-message
+
+      If you use mutt as your mail reader, this macro will bind the X key
+      to report a spam message.
+
+	macro index X "| spamassassin -r"
 
 
 Customising

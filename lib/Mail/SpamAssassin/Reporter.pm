@@ -1,4 +1,4 @@
-=head1 NAME
+=head1 NON-PUBLIC CLASS NAME
 
 Mail::SpamAssassin::Reporter - report a message as spam
 
