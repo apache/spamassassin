@@ -194,9 +194,12 @@ if ($opt{'ssl'}) {
 
 # This can be changed on the command line with the -s flag; special cases:
 # * A log facility of 'stderr' will log to STDERR
+# * " "   "        "  'null' disables all logging
 my $log_facility = $opt{'syslog'}        || 'mail';
 my $log_socket   = $opt{'syslog-socket'} || 'unix';
-$log_facility = 'stderr' if $log_socket eq 'none';
+$log_facility = 'stderr' if $log_socket eq   'none';
+$log_facility = 'null'   if $log_facility eq 'stderr' # don't duplicate log
+                            and $opt{'debug'};        # messages in debug mode
 
 my $dontcopy = 1;
 if ($opt{'create-prefs'}) { $dontcopy = 0; }
@@ -561,6 +564,8 @@ while (1) {
       };
     }
 }
+
+
 
 sub check {
     my ($method, $version, $start) = @_;
@@ -1091,51 +1096,56 @@ sub fill_qmailu_cache {
 
 sub logmsg
 {
-    my $old = $SIG{'PIPE'};
-    $SIG{'PIPE'} = sub { $main::SIGPIPE_RECEIVED++; };
+  # install a new handler for SIGPIPE -- this signal has been
+  # found to occur with syslog-ng after syslog-ng restarts.
+  my $orig_sigpipe_handler = $SIG{'PIPE'};
+  $SIG{'PIPE'} = sub { $main::SIGPIPE_RECEIVED++; };
 
-    # bug 605: http://bugzilla.spamassassin.org/show_bug.cgi?id=605
-    # more efficient for daemontools if --syslog=stderr is used
-    if($log_facility eq 'stderr') {
-      print STDERR join("",@_) . "\n";
-      return;
-    }
+  my $msg = join(" ", @_);
+  chomp($msg);             # remove possible trailing newlines
 
-    openlog('spamd','cons,pid',$log_facility);
-    my $str = join ('', @_);
-    if ($opt{'debug'}) { warn "logmsg: $str\n"; }
+  warn "logmsg: $msg\n" if $opt{'debug'};
 
-    eval {
-      syslog('info', '%s', $str);
-    };
+  # log to STDERR:
+  # bug 605: http://bugzilla.spamassassin.org/show_bug.cgi?id=605
+  # more efficient for daemontools if --syslog=stderr is used
+  if ($log_facility eq 'stderr') {
+    print STDERR "$msg\n";
+  }
+  # log to syslog (if logging isn't disabled completely via 'null')
+  elsif ($log_facility ne 'null') {
+    openlog('spamd', 'cons,pid', $log_facility);
+
+    eval { syslog('info', "%s", $msg); };
+
     if ($@) {
       warn "syslog() failed, try using --syslog-socket switch ($@)\n";
     }
 
     if ($main::SIGPIPE_RECEIVED) {
-       # SIGPIPE recieved when writing to syslog - this has been
-       # found to occur with syslog-ng after syslog-ng restarts.
-       # Close and reopen the log handle, then try again.
+      # SIGPIPE recieved when writing to syslog -- close and reopen
+      # the log handle, then try again.
 
-       closelog();
-       openlog('spamd','cons,pid',$log_facility);
-       syslog('info', '%s', $str);
+      closelog();
+      openlog('spamd', 'cons,pid', $log_facility);
+      syslog('info', "%s", $msg);
 
-       # now report what happend
-       my $msg = "SIGPIPE received - reopening log socket";
-       if ($opt{'debug'}) { warn "logmsg: $msg\n"; }
-       syslog('warning', '%s', $msg);
+      # now report what happend
+      $msg = "SIGPIPE received - reopening log socket";
+      warn "logmsg: $msg\n" if $opt{'debug'};
+      syslog('warning', "%s", $msg);
 
-       # if we've received multiple sigpipes, logging is probably
-       # still broken.
-       if ($main::SIGPIPE_RECEIVED > 1) {
-           warn "logging failure: multiple SIGPIPEs received\n";
-       }
+      # if we've received multiple sigpipes, logging is probably
+      # still broken.
+      if ($main::SIGPIPE_RECEIVED > 1) {
+        warn "logging failure: multiple SIGPIPEs received\n";
+      }
 
-       $main::SIGPIPE_RECEIVED = 0;
+      $main::SIGPIPE_RECEIVED = 0;
     }
+  }
 
-    $SIG{'PIPE'} = $old if defined($old);
+  $SIG{'PIPE'} = $orig_sigpipe_handler if defined($orig_sigpipe_handler);
 }
 
 sub kill_handler
