@@ -31,6 +31,12 @@ describe HTTP_ESCAPED_HOST      Uses %-escapes inside a URL's hostname
 uri HTTP_CTRL_CHARS_HOST    /^https?\:\/\/[^\/\s]*[\x00-\x08\x0b\x0c\x0e-\x1f]/
 describe HTTP_CTRL_CHARS_HOST   Uses control sequences inside a URL's hostname
 
+# look for URI with escaped 0-9, A-Z, or a-z characters (other safe
+# characters are sometimes unnecessarily escaped in nonspam; requiring
+# "http" or "https" reduces false positives)
+uri HTTP_EXCESSIVE_ESCAPES	m/^https?:\/\/\S*%(?:3[0-9]|[46][1-9a-f]|[57][\da])/i
+describe HTTP_EXCESSIVE_ESCAPES	Completely unnecessary %-escapes inside a URL
+
 uri PORN_4  /^https?:\/\/[\w\.-]*(?:xxx|sex|anal|slut|pussy|cum|nympho|suck|porn|hard-?core|taboo|whore|voyeur|lesbian|gurlpages|naughty|lolita|teen|schoolgirl|kooloffer|erotic|lust|panty|panties)[\w-]*\./
 describe PORN_4         URL uses words and phrases which indicate porn (4)
 
