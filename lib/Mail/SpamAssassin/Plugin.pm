@@ -468,6 +468,46 @@ this message.
 
 =back
 
+=item $plugin->plugin_report ( { options ... } )
+
+Called if the message is to be reported as spam.
+
+=over 4
+
+=item report
+
+Reference to the Reporter object
+
+=item text
+
+Reference to a markup removed copy of the message in scalar format
+
+=item msg
+
+Reference to the original message object
+
+=back
+
+=item $plugin->plugin_revoke ( { options ... } )
+
+Called if the message is to be reported as ham (revokes a spam report).
+
+=over 4
+
+=item revoke
+
+Reference to the Reporter object
+
+=item text
+
+Reference to a markup removed copy of the message in scalar format
+
+=item msg
+
+Reference to the original message object
+
+=back
+
 =item $plugin->finish ()
 
 Called when the C<Mail::SpamAssassin> object is destroyed.
