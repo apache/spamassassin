@@ -1193,7 +1193,10 @@ sub tok_sync_counters {
   my ($ts, $th, $oldatime) = $self->tok_get ($tok);
   $ts += $ds; if ($ts < 0) { $ts = 0; }
   $th += $dh; if ($th < 0) { $th = 0; }
-  $atime = $oldatime if ( $atime == 0 ); # this usually happens from a forget
+
+  # Don't roll the atime of tokens backwards ...
+  $atime = $oldatime if ( $oldatime > $atime );
+
   $self->tok_put ($tok, $ts, $th, $atime);
 }
 
