@@ -548,7 +548,7 @@ sub dcc_lookup {
   }
   if (!$self->{conf}->{use_dcc}) { return 0; }
 
-  timelog("DCC -> Starting test ($timeout secs max)", "dcc", 1);
+  timelog("DCC -> Starting check ($timeout secs max)", "dcc", 1);
   $self->enter_helper_run_mode();
 
   # use a temp file here -- open2() is unreliable, buffering-wise,
@@ -580,6 +580,7 @@ sub dcc_lookup {
     waitpid ($pid, 0);
   };
 
+  alarm 0;
   $self->leave_helper_run_mode();
 
   if ($@) {
@@ -629,7 +630,7 @@ sub dcc_lookup {
     return 1;
   }
   
-  timelog("DCC -> no match", "dcc", 2);
+  timelog("DCC -> check had no match", "dcc", 2);
   return 0;
 }
 
@@ -672,7 +673,7 @@ sub pyzor_lookup {
   }
   if (!$self->{conf}->{use_pyzor}) { return 0; }
 
-  timelog("Pyzor -> Starting test ($timeout secs max)", "pyzor", 1);
+  timelog("Pyzor -> Starting check ($timeout secs max)", "pyzor", 1);
   $self->enter_helper_run_mode();
 
   # use a temp file here -- open2() is unreliable, buffering-wise,
@@ -687,7 +688,6 @@ sub pyzor_lookup {
 
     # Note: not really tainted, this comes from system conf file.
     my $path = Mail::SpamAssassin::Util::untaint_file_path ($self->{conf}->{pyzor_path});
-
     my($opts) = ($self->{conf}->{pyzor_options} =~ /^([^\;\'\"\0]+)$/);
  
     my $pid = open(PYZOR, join(' ', $path, $opts, "check", "< '$tmpf'", "2>&1", '|')) || die "$!\n";
@@ -704,6 +704,7 @@ sub pyzor_lookup {
     waitpid ($pid, 0);
   };
 
+  alarm 0;
   $self->leave_helper_run_mode();
 
   if ($@) {
