@@ -514,7 +514,7 @@ above).
 
 Set to C<YES>.
 
-=item X-Spam-Checker-Version: header for spam mails
+=item X-Spam-Checker-Version: header for all mails
 
 Set to the version number of the SpamAssassin checker which tested the mail.
 
@@ -660,15 +660,16 @@ sub rewrite_headers {
 
   # add headers?  always for spam, only if requested for nonspam
   if ( $self->{is_spam} || $self->{main}->{conf}->{always_add_headers} == 1) {
-    $self->{msg}->put_header ("X-Spam-Checker-Version",
-			      "SpamAssassin " . Mail::SpamAssassin::Version() .
-			      " ($Mail::SpamAssassin::SUB_VERSION)");
-
     $self->{msg}->put_header ("X-Spam-Status", $self->_build_status_line());
     if($self->{main}->{conf}->{spam_level_stars} == 1) {
       $self->{msg}->put_header("X-Spam-Level", $self->{main}->{conf}->{spam_level_char} x int($self->{hits}));
     }
   }
+
+  # always add version (bug 1342)
+  $self->{msg}->put_header ("X-Spam-Checker-Version",
+			    "SpamAssassin " . Mail::SpamAssassin::Version() .
+			    " ($Mail::SpamAssassin::SUB_VERSION)");
 
   # add version & report headers if spam, or if always_report is on
   if ($self->{is_spam} || $self->{main}->{conf}->{always_add_report}) {
