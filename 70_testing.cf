@@ -134,37 +134,15 @@ describe        T_GEVALIACOFFEE           Selling Gevalia Coffee
 
 # bug 2970: Bob Menschel's "longwords" rules
 # describe LONGWORDS Long string of long words
-body     T_RM_BPT_LONGWORDS_5_6_A /\b(?:[a-z]{5,}\s+){6}/
-body     T_RM_BPT_LONGWORDS_5_7_A /\b(?:[a-z]{5,}\s+){7}/
-body     T_RM_BPT_LONGWORDS_5_8_A /\b(?:[a-z]{5,}\s+){8}/
-body     T_RM_BPT_LONGWORDS_5_9_A /\b(?:[a-z]{5,}\s+){9}/
-body     T_RM_BPT_LONGWORDS_5_10_A /\b(?:[a-z]{5,}\s+){10}/
-body     T_RM_BPT_LONGWORDS_6_6_A /\b(?:[a-z]{6,}\s+){6}/
-body     T_RM_BPT_LONGWORDS_6_7_A /\b(?:[a-z]{6,}\s+){7}/
-body     T_RM_BPT_LONGWORDS_6_8_A /\b(?:[a-z]{6,}\s+){8}/
-body     T_RM_BPT_LONGWORDS_6_9_A /\b(?:[a-z]{6,}\s+){9}/
-body     T_RM_BPT_LONGWORDS_6_10_A /\b(?:[a-z]{6,}\s+){10}/
-body     T_RM_BPT_LONGWORDS_7_6_A /\b(?:[a-z]{7,}\s+){6}/
-body     T_RM_BPT_LONGWORDS_7_7_A /\b(?:[a-z]{7,}\s+){7}/
-body     T_RM_BPT_LONGWORDS_7_8_A /\b(?:[a-z]{7,}\s+){8}/
-body     T_RM_BPT_LONGWORDS_7_9_A /\b(?:[a-z]{7,}\s+){9}/
-body     T_RM_BPT_LONGWORDS_7_10_A /\b(?:[a-z]{7,}\s+){10}/
-body     T_RM_BPT_LONGWORDS_8_6_A /\b(?:[a-z]{8,}\s+){6}/
-body     T_RM_BPT_LONGWORDS_8_7_A /\b(?:[a-z]{8,}\s+){7}/
-body     T_RM_BPT_LONGWORDS_8_8_A /\b(?:[a-z]{8,}\s+){8}/
-body     T_RM_BPT_LONGWORDS_8_9_A /\b(?:[a-z]{8,}\s+){9}/
-body     T_RM_BPT_LONGWORDS_8_10_A /\b(?:[a-z]{8,}\s+){10}/
-body     T_RM_BPT_LONGWORDS_9_6_A /\b(?:[a-z]{9,}\s+){6}/
-body     T_RM_BPT_LONGWORDS_9_7_A /\b(?:[a-z]{9,}\s+){7}/
-body     T_RM_BPT_LONGWORDS_9_8_A /\b(?:[a-z]{9,}\s+){8}/
-body     T_RM_BPT_LONGWORDS_9_9_A /\b(?:[a-z]{9,}\s+){9}/
-body     T_RM_BPT_LONGWORDS_9_10_A /\b(?:[a-z]{9,}\s+){10}/
-body     T_RM_BPT_LONGWORDS_10_6_A /\b(?:[a-z]{10,}\s+){6}/
-body     T_RM_BPT_LONGWORDS_10_7_A /\b(?:[a-z]{10,}\s+){7}/
-body     T_RM_BPT_LONGWORDS_10_8_A /\b(?:[a-z]{10,}\s+){8}/
-body     T_RM_BPT_LONGWORDS_10_9_A /\b(?:[a-z]{10,}\s+){9}/
-body     T_RM_BPT_LONGWORDS_10_10_A /\b(?:[a-z]{10,}\s+){10}/
-
+body T_LONGWORDS_A	/\b(?:[a-z]{8,}\s+){6}/
+body T_LONGWORDS_B	/\b(?:[a-z]{7,}\s+){8}/
+body T_LONGWORDS_C	/\b(?:[a-z]{6,}\s+){9}/
+body T_LONGWORDS_D	/\b(?:[a-z]{5,}\s+){10}/
+# just a thought...
+meta T_LONGWORDS_1 LONGWORDS_A + LONGWORDS_B + LONGWORDS_C + LONGWORDS_D == 1
+meta T_LONGWORDS_2 LONGWORDS_A + LONGWORDS_B + LONGWORDS_C + LONGWORDS_D == 2
+meta T_LONGWORDS_3 LONGWORDS_A + LONGWORDS_B + LONGWORDS_C + LONGWORDS_D == 3
+meta T_LONGWORDS_4 LONGWORDS_A + LONGWORDS_B + LONGWORDS_C + LONGWORDS_D == 4
 
 # partial messages; currently-theoretical attack
 # unsurprisingly this hits 0/0 right now.  But should we promote it anyway
