@@ -531,14 +531,7 @@ uri T_URI_DIGITS2_10_AC	m%^https?://\b[^/?]*\d{10,}\b%i
 
 # bug 4054: contributions from Maxime Ritter (airmax.cf)
 
-full __ISO_VALID_FULL		/charset=\"?iso-(?:8859-\d{1,2}|2022-(?:jp|kr))\b/i
-full __ISO_CHARSET_FULL		/charset=\"?iso-\S+-\S+\b/i
-meta T_BAD_ISO_CHARSET_FULL	(__ISO_CHARSET_FULL && !__ISO_VALID_FULL)
-
-header __ISO_VALID_HEAD		ALL =~ /charset=\"?iso-(?:8859-\d{1,2}|2022-(?:jp|kr))\b/i
-header __ISO_CHARSET_HEAD	ALL =~ /charset=\"?iso-\S+-\S+\b/i
-meta T_BAD_ISO_CHARSET_HEAD	(__ISO_CHARSET_HEAD && !__ISO_VALID_HEAD)
-
-header __ISO_VALID_CTYPE	Content-Type =~ /charset=\"?iso-(?:8859-\d{1,2}|2022-(?:jp|kr))\b/i
-header __ISO_CHARSET_CTYPE	Content-Type =~ /charset=\"?iso-\S+-\S+\b/i
-meta T_BAD_ISO_CHARSET_CTYPE	(__ISO_CHARSET_CTYPE && !__ISO_VALID_CTYPE)
+# only works on full, may be better to check in Message object for this
+full __ISO_VALID		/charset=\"?iso-(?:8859-\d{1,2}|2022-(?:jp|kr))\b/i
+full __ISO_CHARSET		/charset=\"?iso-\S+-\S+\b/i
+meta T_BAD_ISO_CHARSET		(__ISO_CHARSET && !__ISO_VALID)
