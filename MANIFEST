@@ -48,6 +48,7 @@ lib/Mail/SpamAssassin/Locales.pm
 lib/Mail/SpamAssassin/Locker.pm
 lib/Mail/SpamAssassin/MailingList.pm
 lib/Mail/SpamAssassin/MsgContainer.pm
+lib/Mail/SpamAssassin/MsgMetadata.pm
 lib/Mail/SpamAssassin/MsgParser.pm
 lib/Mail/SpamAssassin/NetSet.pm
 lib/Mail/SpamAssassin/PerMsgLearner.pm
@@ -97,6 +98,7 @@ masses/parse-rules-for-masses
 masses/perceptron.c
 masses/post-ga-analysis.pl
 masses/rewrite-cf-with-new-scores
+masses/rule-dev/maildir-scan-headers
 masses/rule-qa/README.nightly
 masses/rule-qa/corpus-hourly
 masses/rule-qa/corpus-nightly
@@ -114,6 +116,7 @@ masses/uniq-scores
 ninjabutton.png
 procmailrc.example
 rules/10_misc.cf
+rules/10_plugins.cf
 rules/20_anti_ratware.cf
 rules/20_body_tests.cf
 rules/20_compensate.cf
@@ -258,6 +261,7 @@ t/plugin.t
 t/razor2.t
 t/recips.t
 t/reportheader.t
+t/reportheader_8bit.t
 t/rule_tests.t
 t/sha1.t
 t/spam.t
@@ -284,6 +288,7 @@ t/sql_based_whitelist.t
 t/strip2.t
 t/stripmarkup.t
 t/test_dir
+t/uri.t
 t/utf8.t
 t/whitelist_addrs.t
 t/whitelist_to.t
@@ -300,8 +305,3 @@ tools/speedtest
 tools/split_corpora
 tools/test_extract
 tools/triplets.pl
-t/reportheader_8bit.t
-t/uri.t
-masses/rule-dev/maildir-scan-headers
-lib/Mail/SpamAssassin/MsgMetadata.pm
-rules/10_plugins.cf
