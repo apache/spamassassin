@@ -1516,6 +1516,19 @@ sub message_from_debian_bts {
   return 0;
 }
 
+sub message_is_habeas_swe {
+  my ($self) = @_;
+
+  my $all = $self->get('ALL');
+  if ($all =~ /\n(X-Habeas-SWE-1:.*X-Habeas-SWE-9:[^\n]*)\n/s) {
+    my $text = $1;
+    $text =~ tr/A-Z/a-z/;
+    $text =~ tr/ \///d;
+    return (unpack("%32C*", $text) == 41501);
+  }
+  return 0;
+}
+
 ###########################################################################
 
 # This test was originally based on RFC 2369 compliance.  However, the
