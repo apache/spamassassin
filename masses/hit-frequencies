@@ -27,8 +27,19 @@ my $num_spam = 0;
 my $num_nonspam = 0;
 my %ranking = ();
 
-readlogs();
 readscores();
+
+foreach my $key (keys %rules) {
+  if ($rules{$key}->{lang} ne '') {
+    # todo: do we want to keep lang-specific freqs?
+    delete $rules{$key} ; next;
+  }
+
+  $freq_spam{$key} = 0;
+  $freq_nonspam{$key} = 0;
+}
+
+readlogs();
 
 my $hdr_all = $num_spam + $num_nonspam;
 my $hdr_spam = $num_spam;
@@ -66,12 +77,12 @@ if ($opt_p) {
 my %done = ();
 my @tests = ();
 foreach my $test (keys %freq_spam, keys %freq_nonspam) {
-  next if ($test =~ /^__/);
+  next unless (exists $rules{$test});           # only valid tests
+  next if ($rules{$test}->{issubrule});
 
   next if $done{$test}; $done{$test} = 1;
   push (@tests, $test);
 
-  if (!defined $tflags{$test}) { $tflags{$test} = ''; }
   my $fs = $freq_spam{$test}; $fs ||= 0;
   my $fn = $freq_nonspam{$test}; $fn ||= 0;
   my $fsadj = $num_spam == 0 ? 0 : ($fs / ($num_spam)) * 100.0;
@@ -79,7 +90,7 @@ foreach my $test (keys %freq_spam, keys %freq_nonspam) {
 
   my $soratio = $soratio{$test} = soratio ($fsadj, $fnadj);
   my $matched = $fsadj;
-  if ($tflags{$test} =~ /nice/) {
+  if ($rules{$test}->{tflags} =~ /nice/) {
     $soratio = 1.0 - $soratio;
     $matched = $fnadj;
   }
@@ -97,14 +108,16 @@ foreach my $test (keys %freq_spam, keys %freq_nonspam) {
 }
 
 foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
-  next if ($test =~ /^__/);
+  next unless (exists $rules{$test});           # only valid tests
+  next if ($rules{$test}->{issubrule});
 
   my $fs = $freq_spam{$test}; $fs ||= 0;
   my $fn = $freq_nonspam{$test}; $fn ||= 0;
   my $fa = $fs+$fn;
 
   next if ($opt_m && $test !~ m/$opt_m/);	# match certain tests
-  next if ($tflags{$test} =~ /net/);		# ignore net tests
+  next if ($rules{$test}->{tflags} =~ /net/);   # not net tests
+  next if ($rules{$test}->{tflags} =~ /userconf/); # or userconf
 
   # adjust based on corpora sizes (and cvt to % while we're at it)
   my $fsadj = $num_spam == 0 ? 0 : ($fs / ($num_spam)) * 100.0;
@@ -122,15 +135,14 @@ foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
   if (!defined $soratio) {
     $soratio{$test} = soratio ($fsadj, $fnadj);
   }
-  $score{$test} ||= 1.0;
 
   if ($opt_p) {
     printf "%7.3f  %7.3f  %7.3f  %6.2f  %6.2f  %s\n",
-  	$fa, $fs, $fn, $soratio, $score{$test}, $test;
+  	$fa, $fs, $fn, $soratio, $scores{$test}, $test;
 
   } elsif ($opt_x) {
     printf "%7d  %7d  %7d  %6.2f  %6.2f  %s\n",
-  	$fa, $fs, $fn, $soratio, $score{$test}, $test;
+  	$fa, $fs, $fn, $soratio, $scores{$test}, $test;
 
   } else {
     printf "%10d  %10d  %10d  %s\n", $fa, $fs, $fn, $test;
@@ -194,26 +206,8 @@ sub readlogs {
 
 
 sub readscores {
-  my @files = <../rules/[0-9]*.cf>;
-  my $file;
-  foreach $file (@files) {
-  open (IN, "<$file");
-  while (<IN>) {
-    s/#.*$//g; s/^\s+//; s/\s+$//;
-
-    if (/^(header|rawbody|body|full|uri|meta)\s+(\S+)\s+/) {
-      $freq_spam{$2} ||= 0;
-      $freq_nonspam{$2} ||= 0;
-      $tflags{$2} ||= '';
-      $score{$2} ||= 1.0;
-    } elsif (/^tflags\s+(\S+)\s+(.+)$/) {
-      $tflags{$1} = $2;
-    } elsif (/^score\s+(\S+)\s+(.+)$/) {
-      $score{$1} = $2;
-    }
-  }
-  close IN;
-  }
+  system ("./parse-rules-for-masses") and die;
+  require "./tmp/rules.pl";
 }
 
 sub soratio {

@@ -26,20 +26,8 @@ while (<IN>) {
 if ($muta == 0) { $skipped_scores{$name} = $base; }
 close IN;
 
-my %validrule = ();
-foreach my $file (<../rules/*.cf>) {
-  open (IN, "<$file");
-  while (<IN>) {
-    s/#.*$//g; s/^\s+//; s/\s+$//; next if /^$/;
-    s/^lang\s+(\S+)\s+//;
-    if (/^(header|rawbody|body|full|uri|meta)\s+(\S+)\s+/) {
-      my ($type, $name) = ($1, $2);
-      next if ($name =~ /^__/);
-      $validrule{$name} = 1;
-    }
-  }
-  close IN;
-}
+system ("./parse-rules-for-masses") and die;
+require "./tmp/rules.pl";
 
 # now read the evolved scores
 my @gascoreorder = ();
@@ -48,7 +36,7 @@ open (STDIN, "<$newscores") or die "cannot open $newscores";
 while (<STDIN>) {
   /^score\s+(\S+)\s/ or next;
   my $name = $1;
-  next unless (defined $validrule{$name});
+  next unless (exists ($rules{$name}) && $rules{$name}->{issubrule} == 0);
   next if ($name =~ /^__/);
   next if (defined $skipped_scores{$name});
   next if ($name eq '(null)');	# er, oops ;)
@@ -67,7 +55,7 @@ while (<IN>) {
   if (/^\s*score\s+(\S+)\s/) {
     delete $skipped_scores{$1};
     delete $gascorelines{$1};
-    next unless (defined $validrule{$name});
+    next unless (exists ($rules{$name}) && $rules{$name}->{issubrule} == 0);
   }
   $pre .= $_;
   /^# Start of GA-evolved scores/ and last;
@@ -86,7 +74,7 @@ while (<IN>) {
   if (/^\s*score\s+(\S+)\s/) {
     my $name = $1;
 
-    next unless (defined $validrule{$name});
+    next unless (exists ($rules{$name}) && $rules{$name}->{issubrule} == 0);
     if (defined $gascorelines{$name}) {
       $_ = $gascorelines{$name};
     }
@@ -100,7 +88,7 @@ close IN;
 # finally, make a string of the scores that were not in either list
 my $missing = '';
 foreach my $name (sort keys %skipped_scores) {
-  next unless (defined $validrule{$name});
+  next unless (exists ($rules{$name}) && $rules{$name}->{issubrule} == 0);
   $missing .= sprintf ("score %-30s %3.1f\n", $name, $skipped_scores{$name});
 }
 
