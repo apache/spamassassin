@@ -1,4 +1,9 @@
 AC_INIT
+AC_ARG_ENABLE(ssl,
+	AC_HELP_STRING([--enable-ssl],
+		[build spamc with ssl support ('yes'/'no', default is 'no')]),
+	[sa_ssl_enabled=${enableval:-no}],
+	[sa_ssl_enabled=${enableval:-no}])
 AC_CONFIG_SRCDIR([Makefile.PL])
 AC_CONFIG_HEADER(config.h)
 
@@ -41,8 +46,24 @@ fi
 dnl ----------------------------------------------------------------------
 
 AC_CHECK_LIB(socket, socket)
-AC_CHECK_LIB(crypto, CRYPTO_lock)
-AC_CHECK_LIB(ssl, SSL_CTX_free,,,-lcrypto)
+
+SSLLIBS=""
+SSLCFLAGS=""
+if test yes = "$sa_ssl_enabled"; then
+	AC_CHECK_LIB(crypto, CRYPTO_lock,[SSLLIBS="-lcrypto $SSLLIBS"])
+	AC_CHECK_LIB(ssl, SSL_CTX_free,[SSLLIBS="-lssl $SSLLIBS"],,-lcrypto)
+
+	# before defining SPAMC_SSL check that all its requirements are
+	# actually available
+	if test yes = "$ac_cv_header_openssl_crypto_h" && \
+	   test yes = "$ac_cv_lib_crypto_CRYPTO_lock" && \
+	   test yes = "$ac_cv_lib_ssl_SSL_CTX_free"; then
+		SSLCFLAGS="-DSPAMC_SSL"
+	else
+		AC_MSG_ERROR([Cannot use SSL; libraries or header files are missing.
+You may try using 'configure --disable-ssl'.])
+	fi
+fi
 AC_CHECK_LIB(inet, connect)
 AC_CHECK_LIB(nsl, t_accept)
 AC_CHECK_LIB(dl, dlopen)
@@ -125,6 +146,8 @@ dnl ----------------------------------------------------------------------
 # we cheat, since we *know* we have Perl installed ;)
 CCDLFLAGS=`perl -e 'use Config; print $Config::Config{ccdlflags}'`
 LDDLFLAGS=`perl -e 'use Config; print $Config::Config{lddlflags}'`
+AC_SUBST([SSLLIBS])
+AC_SUBST([SSLCFLAGS])
 AC_SUBST(CCDLFLAGS)
 AC_SUBST(LDDLFLAGS)
 AC_SUBST(HAVE_SHUT_RD)

@@ -84,7 +84,9 @@ Print this help message and terminate without action.
 
 =item B<-S>
 
-Encrypt data to and from the spamd server with SSL.
+If spamc was built with support for SSL, encrypt data to and from the
+spamd process with SSL; spamd must support SSL as well.
+
 
 =item B<-p> I<port>
 

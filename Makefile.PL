@@ -16,6 +16,7 @@ require 5.005;
 # INST_SITELIB	       +  $(INSTALLSITELIB)
 #
 # RUN_RAZOR2_TESTS        (prompt if Razor 2 found)
+# ENABLE_SSL           *  'no'
 #
 # PERL_BIN             *  current path to Perl
 # PERL_VERSION         *  current Perl version
@@ -40,6 +41,9 @@ require 5.005;
 # The Razor prompt ("run Razor 2 tests?") can be overridden by setting
 # RUN_RAZOR2_TESTS to "y" or "n".
 #
+# Set ENABLE_SSL to "yes" if you want the ability to use encrypted
+# connections between spamc and spamd.
+#
 ###########################################################################
 
 use strict;
@@ -56,6 +60,7 @@ $ExtUtils::MakeMaker::Recognized_Att_Keys{'PKG_LOCAL_RULES_DIR'} = 1;
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'INST_SITELIB'} = 1;
 
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'RUN_RAZOR2_TESTS'} = 1;
+$ExtUtils::MakeMaker::Recognized_Att_Keys{'ENABLE_SSL'} = 1;
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'CONTACT_ADDRESS'} = 1;
 
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'PERL_BIN'} = 1;
@@ -126,7 +131,7 @@ my %makefile = (
     'clean' => { FILES =>
 	'pod2htm* spamassassin sa-learn '.
 	'spamd/spamc$(EXE_EXT) spamd/libspamc.so spamd/spamd doc '.
-	'spamd/sslspamc$(EXE_EXT) spamd/libsslspamc.so '.
+	'spamd/libsslspamc.so '.
 	'binaries.mk config.h config.status config.cache config.log '.
 	'autom4te.cache qmail/qmail-spamc'.
 	't/do_razor2 t/log'
@@ -261,6 +266,8 @@ sub MY::postamble {
     || $self->{LOCAL_RULES_DIR} || '$(SYSCONFDIR)/mail/spamassassin';
   my $localrulesdir = $self->{LOCAL_RULES_DIR} || '$(INST_SYSCONFDIR)/mail/spamassassin';
   my $instsitelib = $self->{INST_SITELIB} || '$(INSTALLSITELIB)';
+
+  my $enablessl = $self->{ENABLE_SSL} || 'no';
  
   my $perl_bin     = $self->{PERL_BIN}     || 'this';
   my $perl_warn    = $self->{PERL_WARN}    || 'auto';
@@ -278,6 +285,7 @@ DEF_RULES_DIR		= $defrulesdir
 PKG_LOCAL_RULES_DIR	= $pkglocalrulesdir
 LOCAL_RULES_DIR		= $localrulesdir
 INST_SITELIB		= $instsitelib
+ENABLE_SSL		= $enablessl
 CONTACT_ADDRESS		= $contactaddr
 
 PERL_BIN		= $perl_bin
@@ -337,14 +345,11 @@ spamd/libsslspamc.so: binaries.mk $(SPAMC_SOURCES)
 spamd/libsslspamc.dll: binaries.mk $(SPAMC_SOURCES)
 	$(MAKE) -f binaries.mk $@
 
-spamd/sslspamc$(EXE_EXT): binaries.mk $(SPAMC_SOURCES)
-	$(MAKE) -f binaries.mk $@
-
 qmail/qmail-spamc: binaries.mk $(SPAMC_SOURCES)
 	$(MAKE) -f binaries.mk $@
 
 binaries.mk: configure
-	./configure
+	./configure --enable-ssl=$(ENABLE_SSL)
 
 inst_cfs: $(PKG_LOCAL_RULES_DIR) $(PKG_LOCAL_RULES_DIR)/local.cf
 	$(MKPATH) $(PKG_DEF_RULES_DIR)

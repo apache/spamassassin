@@ -75,7 +75,9 @@ void print_usage(void)
   printf("-h: print this help message\n");
   printf("-p port: specify port for connection [default: 783]\n");
   printf("-s size: specify max message size, any bigger and it will be returned w/out processing [default: 250k]\n");
+#ifdef SPAMC_SSL
   printf("-S: use SSL to talk to spamd\n");
+#endif
   printf("-u username: specify the username for spamd to process this message under\n");
   printf("-x: don't fallback safely - in a comms error, exit with a TEMPFAIL error code\n");
   printf("-t: timeout in seconds to read from spamd. 0 disables. [default: 600]\n\n");
@@ -170,11 +172,13 @@ read_args(int argc, char **argv, int *max_size, const char **username,
 	*max_size = atoi(optarg);
 	break;
       }
+#ifdef SPAMC_SSL
     case 'S':
       {
 	flags |= SPAMC_USE_SSL;
 	break;
       }
+#endif
     case 't':
       {
 	timeout = atoi(optarg);
