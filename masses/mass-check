@@ -50,6 +50,7 @@ use Mail::SpamAssassin::ArchiveIterator;
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::NoMailAudit;
 use Getopt::Long;
+use POSIX qw(strftime);
 
 # default settings
 $opt_c = "$FindBin::Bin/../rules";
@@ -104,6 +105,14 @@ my $log_header = "# mass-check results from $who\@$where, on $when\n" .
 my $host = $ENV{'HOSTNAME'} || $ENV{'HOST'} || `hostname` || 'localhost';
 chomp $host;
 
+my $num_progresses = 10;
+my $spamcount = 0;
+my $hamcount = 0;
+my $time_lastmsg = 0;
+
+my $progdist = (1.0 / $num_progresses);
+my $nextprog = 0.0;
+
 if ($opt_o) {
   autoflush STDOUT 1;
   print STDOUT $log_header;
@@ -125,6 +134,10 @@ my $iter = new Mail::SpamAssassin::ArchiveIterator({
 	'opt_tail' => $opt_tail,
 });
 
+if (!$opt_showdots) {
+  my $now = localtime(time);
+  printf STDERR "status: pre-scanning and sorting. now: %s\n", $now;
+}
 $iter->set_functions(\&wanted, \&result);
 $iter->run(@targets);
 print STDERR "\n" if ($opt_showdots);
@@ -148,14 +161,17 @@ sub target  {
 sub result {
   my ($class, $result) = @_;
 
-  if ($opt_o) {
-    print STDOUT $result;
-  }
-  elsif ($class eq "s") {
-    print SPAM $result;
+  if ($class eq "s") {
+    if ($opt_o) { print STDOUT $result; } else { print SPAM $result; }
+    $spamcount++;
   }
   elsif ($class eq "h") {
-    print HAM $result;
+    if ($opt_o) { print STDOUT $result; } else { print HAM $result; }
+    $hamcount++;
+  }
+
+  if (!$opt_showdots) {
+    progress();
   }
 }
 
@@ -230,8 +246,11 @@ sub wanted {
   undef $ma;		# clean 'em up
   undef $status;
 
-  print STDERR '.' if ($opt_showdots);
+  if ($opt_showdots) {
+    print STDERR '.';
+  }
 
+  $time_lastmsg = $time;
   return $out;
 }
 
@@ -247,6 +266,21 @@ sub logkilled {
   chomp ($subj);
   chomp ($mid);
   return "# skipped killfiled message ($reason): from=$from to=$to subj=$subj mid=$mid id=$id\n";
+}
+
+sub progress {
+  my $progress = ($spamcount + $hamcount) /
+	($Mail::SpamAssassin::ArchiveIterator::NUM_MESSAGES || 0.001);
+
+  if ($progress >= $nextprog) {
+    $nextprog += $progdist;
+
+    my $time = strftime "%Y-%m-%d", localtime($time_lastmsg);
+    my $now = localtime(time);
+
+    printf STDERR "status: %3.0f%% ham: %4d spam: %4d msgtime: %s now: %s\n",
+	$progress * 100, $hamcount, $spamcount, $time, $now;
+  }
 }
 
 ###########################################################################
