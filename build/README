@@ -21,20 +21,12 @@ SPAMASSASSIN RELEASE PROCEDURE
 - edit lib/Mail/SpamAssassin.pm and comment the $IS_DEVEL_BUILD
   line.
 
-- cvs commit -m "ready to release"
+- create the Changes file
 
-- run cvs2cl to generate the Changes file, like so.  For maint branches:
+	TZ=UTC svn log --non-interactive --stop-on-copy
 
-  TZ=UTC ./build/cvs2cl-branch -f Changes -l "-d'>2002-06-18'" --branch b2_5_0
-
-  for HEAD:
-
-  TZ=UTC ./build/cvs2cl-branch -f Changes -l "-d'>2002-06-18'" --branch HEAD
-  
-  Note that this requires 'cvs2cl-branch' in the 'build' subdir, since
-  there are bugs in std cvs2cl.pl that otherwise result in revisions
-  on HEAD appearing in branches, if those revisions are in files created
-  after the branch was created.   (I hate cvs -- jm)
+  This will output all of the changes since the .0 release in the current
+  branch.
 
 - run "make disttest" to ensure all tests pass once the distribution
   is fully packaged.
@@ -49,21 +41,30 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 - test the tar.gz and zip files!  redo until they work!! ;)
 
-- CVS commit the release files, including 'Changes':
+- SVN commit the release files, including 'Changes':
 
-	cvs commit -m "X.YZ RELEASED"
+	svn commit -m "X.YZ RELEASED"
 
-- CVS tag the release files:
+- SVN tag the release files.  This is done using "svn copy", ie:
 
-        cvs tag spamassassin_release_X_Y_Z
+  svn copy https://svn.apache.org/repos/asf/incubator/spamassassin/branches/b2_6_0 \
+           https://svn.apache.org/repos/asf/incubator/spamassassin/tags/spamassassin_release_2_6_1
 
-  (where X_Y_Z == 2_4_0 or whatever version you're working on.)
+  This will do a completely server-side tagging (which is the same as
+  a branch really) of whatever the latest branch revision to be the new
+  base of the tag release.
 
 - Now, start the new development codebase.  For minor updates of a 2.x
   tree (e.g. 2.x1, 2.x2), you don't need to branch; for major updates
   (2.x0) you should use a new development branch, off HEAD.
 
-	[todo: command to do this]
+  svn copy https://svn.apache.org/repos/asf/incubator/spamassassin/trunk \
+           https://svn.apache.org/repos/asf/incubator/spamassassin/branches/b2_6_0
+
+  "trunk" is SVN's concept of head.  Typically, our branches are named
+  for their minor version number.  In the example above, b2_6_0 is the
+  branch for the stable 2.6x releases.  b3_0_0 would be the branch for
+  the stable 3.0.x releases, etc.
 
 - In the new development codeline, edit lib/Mail/SpamAssassin.pm, bump the
   $VERSION line to the correct version, and uncomment the $IS_DEVEL_BUILD
@@ -71,7 +72,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 - then, commit the new version number to the new branch:
 
-        cvs commit -m "X.YN devel cycle started"
+        svn commit -m "X.YN devel cycle started"
 
 	(where X.YN is the new version number)
 
@@ -111,6 +112,6 @@ SPAMASSASSIN RELEASE PROCEDURE
 - Approve the posting to SpamAssassin-Announce (the list admins
   will get a mail indicating how to do this.)
 
-lastmod: Aug 28 2003 jm
+lastmod: Jan 17 2004 tvd
 
 // vim:tw=74:
