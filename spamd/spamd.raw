@@ -1024,7 +1024,7 @@ sub check {
   if ( $opt{'sql-config'} && !defined($current_user) ) {
     unless ( handle_user_sql('nobody') ) {
       service_unavailable_error("Error fetching user preferences via SQL");
-      exit;
+      return 1;
     }
   }
 
@@ -1257,7 +1257,7 @@ sub got_user_header {
     if ( $opt{'sql-config'} ) {
       unless ( handle_user_sql($current_user) ) {
         service_unavailable_error("Error fetching user preferences via SQL");
-        exit;
+	return 1;
       }
     }
     elsif ( $opt{'ldap-config'} ) {
@@ -1269,7 +1269,7 @@ sub got_user_header {
     elsif ( $opt{'setuid-with-sql'} ) {
       unless ( handle_user_setuid_with_sql($current_user) ) {
         service_unavailable_error("Error fetching user preferences via SQL");
-        exit;
+	return 1;
       }
       $setuid_to_user = 1;    #to benefit from any paranoia.
     }
@@ -1283,7 +1283,7 @@ sub got_user_header {
     if ( $opt{'sql-config'} ) {
       unless ( handle_user_sql($current_user) ) {
         service_unavailable_error("Error fetching user preferences via SQL");
-        exit;
+	return 1;
       }
     }
   }
