@@ -131,6 +131,19 @@ sub register_rbl_subtest {
   $self->{dnspost}->{$set}->{$subtest} = $rule;
 }
 
+sub do_dns_lookup {
+  my ($self, $rule, $type, $host) = @_;
+
+  # only make a specific query once
+  if (!defined $self->{dnspending}->{$type}->{$host}->[BGSOCK]) {
+    dbg("dns: launching DNS $type query for $host in background", "rbl", -1);
+    $self->{rbl_launch} = time;
+    $self->{dnspending}->{$type}->{$host}->[BGSOCK] =
+	$self->{res}->bgsend($host, $type);
+  }
+  push @{$self->{dnspending}->{$type}->{$host}->[RULES]}, $rule;
+}
+
 ###########################################################################
 
 sub dnsbl_hit {
@@ -176,6 +189,19 @@ sub process_dnsbl_result {
   return if !defined $packet;
 
   my $question = ($packet->question)[0];
+
+  # NO_DNS_FOR_FROM
+  if ($self->{sender_host} &&
+      $question->qname eq $self->{sender_host} &&
+      $question->qtype =~ /^(?:A|MX)$/ &&
+      $packet->header->rcode =~ /^(?:NXDOMAIN|SERVFAIL)$/ &&
+      ++$self->{sender_host_fail} == 2)
+  {
+    for my $rule (@{$query->[RULES]}) {
+      $self->got_hit($rule, "DNS: ");
+    }
+  }
+  # DNSBL tests are here
   foreach my $answer ($packet->answer) {
     # track all responses
     $self->dnsbl_uri($question, $answer);
@@ -257,6 +283,7 @@ sub harvest_dnsbl_queries {
 
   my $timeout = $self->{conf}->{rbl_timeout} + $self->{rbl_launch};
   my @waiting = (values %{ $self->{dnspending}->{A} },
+		 values %{ $self->{dnspending}->{MX} },
 		 values %{ $self->{dnspending}->{TXT} });
   my @left;
   my $total;
@@ -290,9 +317,15 @@ sub harvest_dnsbl_queries {
   dbg("RBL: success for " . ($total - @left) . " of $total queries", "rbl", 0);
   # timeouts
   for my $query (@left) {
-    my $sets = join(",", @{$query->[SETS]});
+    my $string = '';
+    if (defined @{$query->[SETS]}) {
+      $string = join(",", grep defined, @{$query->[SETS]});
+    }
+    elsif (defined @{$query->[RULES]}) {
+      $string = join(",", grep defined, @{$query->[RULES]});
+    }
     my $delay = time - $self->{rbl_launch};
-    dbg("RBL: timeout for $sets after $delay seconds", "rbl", 0);
+    dbg("DNS: timeout for $string after $delay seconds", "rbl", 0);
     undef $query->[BGSOCK];
   }
   # register hits

@@ -76,64 +76,6 @@ $CHARSETS_LIKELY_TO_FP_AS_CAPS = qr{[-_a-z0-9]*(?:
 # HEAD TESTS:
 ###########################################################################
 
-sub check_for_from_dns {
-  my ($self) = @_;
-
-  if (!defined ($self->{checked_for_from_dns})) {
-    $self->{checked_for_from_dns} = $self->_check_for_from_dns();
-  }
-
-  return $self->{checked_for_from_dns};
-}
-
-sub _check_for_from_dns {
-  my ($self) = @_;
-
-  my $from;
-  foreach $from ($self->get('Reply-To:addr'), $self->get('From:addr')) {
-    next unless defined $from;
-
-    # bug 3366
-    $from =~ tr/././s;
-
-    if ($from =~ /\@(\S+\.\S+)/) {
-      $from = $1;
-      last;
-    }
-    undef $from;
-  }
-  return 0 unless (defined $from);
-  $from = $1;
-
-  # First check that DNS is available, if not do not perform this check
-  return 0 unless $self->is_dns_available();
-  $self->load_resolver();
-
-  if ($from eq 'compiling.spamassassin.taint.org') {
-    # only used when compiling
-    return 0;
-  }
-
-  if ($self->{conf}->{check_mx_attempts} < 1) {
-    return 0;
-  }
-
-  # Try check_mx_attempts times to protect against temporary outages.
-  # sleep between checks to give the DNS a chance to recover.
-  for my $i (1 .. $self->{conf}->{check_mx_attempts}) {
-    return 0 if ($self->lookup_mx_exists ($from));
-    return 0 if ($self->lookup_a ($from));
-    if ($i < $self->{conf}->{check_mx_attempts}) {
-      sleep $self->{conf}->{check_mx_delay};
-    }
-  }
-
-  $self->set_server_failed_to_respond_for_domain($from);
-  return 1;
-}
-
-###########################################################################
-
 # From and To have same address, but are not exactly the same and
 # neither contains intermediate spaces.
 sub check_for_from_to_same {
@@ -1467,6 +1409,50 @@ sub check_rbl_envfrom {
   $self->load_resolver();
   for my $host (keys %hosts) {
     $self->do_rbl_lookup($rule, $set, 'A', $rbl_server, "$host.$rbl_server");
+  }
+}
+
+sub check_dns_sender {
+  my ($self, $rule) = @_;
+
+  my $host;
+  for my $from ($self->get('EnvelopeFrom:addr')) {
+    next unless defined $from;
+
+    $from =~ tr/././s;		# bug 3366
+    if ($from =~ /\@(\S+\.\S+)/) {
+      $host = lc($1);
+      last;
+    }
+  }
+  return 0 unless defined $host;
+
+  # First check that DNS is available, if not do not perform this check
+  # TODO: need a way to skip DNS checks as a whole in configuration
+  return 0 unless $self->is_dns_available();
+  $self->load_resolver();
+
+  if ($host eq 'compiling.spamassassin.taint.org') {
+    # only used when compiling
+    return 0;
+  }
+
+  dbg ("checking A and MX for host $host", "rbl", -1);
+
+  $self->do_dns_lookup($rule, 'A', $host);
+  $self->do_dns_lookup($rule, 'MX', $host);
+
+  # cache name of host for later checking
+  $self->{sender_host} = $host;
+
+  return 0;
+}
+
+# interface called by SPF plugin
+sub check_for_from_dns {
+  my ($self) = @_;
+  if (defined $self->{sender_host_fail}) {
+    return ($self->{sender_host_fail} == 2); # both MX and A need to fail
   }
 }
 
