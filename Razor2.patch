@@ -1,14 +1,15 @@
 This information is originally from http://www.ijs.si/software/amavisd/
 (Thanks to amavisd-new, Mark Martinec, and Vivek Khera!)
 
-If SpamAssassin is configured to call Vipul's Razor 2.22 to 2.34, it
-fails because Razor2 is not quite taint-safe.  It fails because reading
-its config file (routine read_file in Razor2/Client/Config.pm) produces
-tainted values.  Razor2/Client/Core.pm has a similar problem.
+If SpamAssassin is configured to call Vipul's Razor 2.22 or higher
+(until at least 2.36), it fails because Razor2 is not quite taint-safe.
+It fails because reading its config file (routine read_file in
+Razor2/Client/Config.pm) produces tainted values.  Razor2/Client/Core.pm
+has a similar problem.
 
-To apply: cd to the directory /usr/{lib,share}/perl5/.../Razor2
-(wherever Client/Config.pm and Client/Core.pm are located) and apply the
-patch directly with:
+To apply: cd to the directory /usr/{lib,share}/perl5/.../Razor2 (wherever
+Client/Config.pm and Client/Core.pm are located) and apply the patch
+directly with:
 
   patch -p0 < patchfile
 

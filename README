@@ -22,8 +22,12 @@ Please note that the use of the following commandline parameters for
 spamassassin and spamd have been deprecated!  They will still work in
 the 2.6x series (a warning will be displayed), but they will be removed
 in the next major release.  If you currently use these flags, please
-remove them.  The flags are:	--add-from, --pipe, -F, -P
+remove them.  The flags are: --add-from, --pipe, -F, -P
 
+Finally, SpamAssassin now runs in "taint mode" by default for improved
+security.  If you have Razor2 turned on and are using Vipul's Razor 2.22
+or higher (until at least 2.36), you will need to apply a small patch.
+The instructions are located in the Razor2.patch file.
 
 
 Welcome to SpamAssassin!
@@ -84,7 +88,6 @@ Questions regarding SpamAssassin should be sent to the mailing list:
 <spamassassin-talk /at/ lists /dot/ sourceforge /dot/ net>.
 
 
-
 Installing SpamAssassin
 -----------------------
 
@@ -137,7 +140,7 @@ default locations that SpamAssassin will look at the end.
 
   - $USER_HOME/.spamassassin/user_prefs:
 
-  	User preferences file.  If it does not exist, one of the 
+  	User preferences file.  If it does not exist, one of the
 	default prefs file from above will be copied here for the
 	user to edit later, if they wish.
 
