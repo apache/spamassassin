@@ -318,7 +318,24 @@ body T_BEST_PORN /\b(?:best|biggest|largest|most|free|ultimate)\b.{0,9}\b(?:virg
 
 # bug 3439
 uri	T_EMPTY_URI		/^$/
-body	T_EMPTY_URI_HREF	eval:html_test('blank_href')
-body	T_EMPTY_URI_SRC		eval:html_test('blank_src')
-body	T_EMPTY_URI_ACTION	eval:html_test('blank_action')
-body	T_EMPTY_URI_BG		eval:html_test('blank_background')
+
+meta	T_EMPTY_URI_HREF	T_EMPTY_URI_HREF_A || T_EMPTY_URI_HREF_AREA || T_EMPTY_URI_HREF_LINK
+body	T_EMPTY_URI_HREF_A	eval:html_text_match('blank_uri', '^a$')
+body	T_EMPTY_URI_HREF_AREA	eval:html_text_match('blank_uri', '^area$')
+body	T_EMPTY_URI_HREF_LINK	eval:html_text_match('blank_uri', '^link$')
+
+meta	T_EMPTY_URI_BG		T_EMPTY_URI_BG_BODY || T_EMPTY_URI_BG_TABLE || T_EMPTY_URI_BG_TD || T_EMPTY_URI_BG_TR
+body	T_EMPTY_URI_BG_BODY	eval:html_text_match('blank_uri', '^body$')
+body	T_EMPTY_URI_BG_TABLE	eval:html_text_match('blank_uri', '^table$')
+body	T_EMPTY_URI_BG_TD	eval:html_text_match('blank_uri', '^td$')
+body	T_EMPTY_URI_BG_TR	eval:html_text_match('blank_uri', '^tr$')
+
+meta	T_EMPTY_URI_SRC		T_EMPTY_URI_SRC_IMG || T_EMPTY_URI_SRC_FRAME || T_EMPTY_URI_SRC_IFRAME || T_EMPTY_URI_SRC_EMBED || T_EMPTY_URI_SRC_SCRIPT
+body	T_EMPTY_URI_SRC_IMG	eval:html_text_match('blank_uri', '^img$')
+body	T_EMPTY_URI_SRC_FRAME	eval:html_text_match('blank_uri', '^frame$')
+body	T_EMPTY_URI_SRC_IFRAME	eval:html_text_match('blank_uri', '^iframe$')
+body	T_EMPTY_URI_SRC_EMBED	eval:html_text_match('blank_uri', '^embed$')
+body	T_EMPTY_URI_SRC_SCRIPT	eval:html_text_match('blank_uri', '^script$')
+
+# can only be from "form"
+body	T_EMPTY_URI_ACTION	eval:html_text_match('blank_uri', '^form$')
