@@ -920,6 +920,15 @@ sub parse_received_line {
   # make this localhost-specific, so we know it's safe to ignore
   if (/^from \S+ \(\S+\@${LOCALHOST}\) by \S+ \(/) { return; }
 
+  # from paul (helo=felix) by felix.peema.org with local-esmtp (Exim 4.43)
+  # id 1Ccq0j-0002k2-Lk; Fri, 10 Dec 2004 19:01:01 +0000
+  # Exim doco says this is local submission, cf switch -oMr
+  if (/^from \S+ \S+ by \S+ with local-e?smtp /) { return; }
+
+  # from 127.0.0.1 (AVG SMTP 7.0.299 [265.6.8]); Wed, 05 Jan 2005 15:06:48
+  # -0800
+  if (/^from 127\.0\.0\.1 \(AVG SMTP \S+ \[\S+\]\); /) { return; }
+
   # from qmail-scanner-general-admin@lists.sourceforge.net by alpha by uid 7791 with qmail-scanner-1.14 (spamassassin: 2.41. Clear:SA:0(-4.1/5.0):. Processed in 0.209512 secs)
   if (/^from \S+\@\S+ by \S+ by uid \S+ /) { return; }
 
@@ -944,6 +953,10 @@ sub parse_received_line {
 
   # Received: from (AUTH: e40a9cea) by vqx.net with esmtp (courier-0.40) for <asrg@ietf.org>; Mon, 03 Mar 2003 14:49:28 +0000
   if (/^from \(AUTH: (\S+)\) by (\S+) with /) { return; }
+
+  # from localhost (localhost [[UNIX: localhost]]) by home.barryodonovan.com
+  # (8.12.11/8.12.11/Submit) id iBADHRP6011034; Fri, 10 Dec 2004 13:17:27 GMT
+  if (/^from localhost \(localhost \[\[UNIX: localhost\]\]\) by /) { return; }
 
   # Received: Message by Barricade wilhelm.eyp.ee with ESMTP id h1I7hGU06122 for <spamassassin-talk@lists.sourceforge.net>; Tue, 18 Feb 2003 09:43:16 +0200
   if (/^Message by /) {
