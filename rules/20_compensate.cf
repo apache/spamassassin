@@ -195,7 +195,7 @@ body EMAIL_ATTRIBUTION         /^(?:\"|--- )?\w.{4,80} (?:wrote|writes):\s*(?:$|
 describe EMAIL_ATTRIBUTION	Contains what looks like an email attribution
 tflags EMAIL_ATTRIBUTION	nice
 
-rawbody QUOTED_EMAIL_TEXT	/^>+ +.{60,72}$/
+rawbody QUOTED_EMAIL_TEXT       /^>+\s+.{60,72}$/
 describe QUOTED_EMAIL_TEXT	Contains what looks like a quoted email text
 tflags QUOTED_EMAIL_TEXT	nice
 

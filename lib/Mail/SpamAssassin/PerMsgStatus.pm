@@ -1198,7 +1198,14 @@ sub do_head_tests {
     my ($hdrname, $testtype, $pat) =
         $rule =~ /^\s*(\S+)\s*(\=|\!)\~\s*(\S.*?\S)\s*$/;
 
+    if (!defined $pat) {
+      warn "invalid rule: $rulename\n";
+      $self->{rule_errors}++;
+      next;
+    }
+
     if ($pat =~ s/\s+\[if-unset:\s+(.+)\]\s*$//) { $def = $1; }
+
     $hdrname =~ s/#/[HASH]/g;		# avoid probs with eval below
     $def =~ s/#/[HASH]/g;
 
@@ -1332,8 +1339,9 @@ EOT
   # and run it.
   eval $evalstr;
   if ($@) {
-      warn("Failed to compile body SpamAssassin tests, skipping:\n".
+    warn("Failed to compile body SpamAssassin tests, skipping:\n".
 	      "\t($@)\n");
+    $self->{rule_errors}++;
   }
   else {
     Mail::SpamAssassin::PerMsgStatus::_body_tests($self, @$textary);
@@ -1524,8 +1532,9 @@ EOT
   # and run it.
   eval $evalstr;
   if ($@) {
-      warn("Failed to compile URI SpamAssassin tests, skipping:\n".
+    warn("Failed to compile URI SpamAssassin tests, skipping:\n".
           "\t($@)\n");
+    $self->{rule_errors}++;
   }
   else {
     Mail::SpamAssassin::PerMsgStatus::_body_uri_tests($self, @uris);
@@ -1610,8 +1619,9 @@ EOT
   # and run it.
   eval $evalstr;
   if ($@) {
-      warn("Failed to compile body SpamAssassin tests, skipping:\n".
+    warn("Failed to compile body SpamAssassin tests, skipping:\n".
 	      "\t($@)\n");
+    $self->{rule_errors}++;
   }
   else {
     Mail::SpamAssassin::PerMsgStatus::_rawbody_tests($self, @$textary);

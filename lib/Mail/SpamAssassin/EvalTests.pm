@@ -619,7 +619,7 @@ sub check_for_bad_helo {
 
 telling_truth:
   dbg ("fake_helo: relayer was telling the truth in HELO");
-  return 0;             # relayer was fibbing
+  return 0;             # relayer was not fibbing
 }
 
 ###########################################################################
@@ -658,19 +658,48 @@ sub _check_received_helos {
     # $from_host and $by_host regexps are "([\w.-]+)" to exclude
     # things like "[1.2.3.4]"; we don't deal with numeric-only
     # addresses
-    next unless $received[$i] =~
-      /from ([\w.-]+) \(([\w.-]+\.[\w.-]+).* by ([\w.-]+)/;
+    my $from_host;
+    my $helo_host;
+    my $by_host;
 
-    # I'm pretty sure from and HELO were the wrong way around here.  e.g.  in
-    # "from lycos.co.uk (newwww-37.st1.spray.net [212.78.202.47]) by
-    # outmail-3.st1.spray.net", the HELO is 'lycos.co.uk', NOT
-    # 'newwww-37.st1.spray.net' -- the latter is from reverse DNS, and is
-    # therefore trustworthy, whereas HELO is not.  (Nov 12 2002 jm) So
-    # accordingly, I've changed the order of $from_host and $helo_host below.
+    # TODO: Use Allen's Received-parser code.  Allen, these regexps
+    # may help
 
-    my $from_host = $2;
-    my $helo_host = $1;
-    my $by_host   = $3;
+    if ($received[$i] =~
+		/from ([-\w.]+\.[-\w.]+) \(\S+ helo=([-\w.]+)\) by ([-\w.]+)/)
+    {
+      # Exim: from ns.egenix.com ([217.115.138.139] helo=www.egenix.com) by
+      # mail.python.org with esmtp (Exim 4.05) id 1829w0-0007uf-00; Thu, 17 Oct
+      # 2002 08:39:28 -0400
+      $from_host = $1; $helo_host = $2; $by_host = $3;
+    }
+    elsif ($received[$i] =~
+		/from ([-\w.]+\.[-\w.]+) \(HELO ([-\w.]+)\) \(\S+\) by ([-\w.]+)/)
+    {
+      # qmail: from 64-251-145-11-cablemodem-roll.fidnet.com (HELO gabriels)
+      # (64.251.145.11) by three.fidnet.com with SMTP; 4 Dec 2002 16:01:35 -0000
+      $from_host = $1; $helo_host = $2; $by_host = $3;
+    }
+    elsif ($received[$i] =~
+		/from ([-\w.]+\.[-\w.]+) \(\[\S+\]\).* by ([-\w.]+)/)
+    {
+      # Received: from ralph.jamiemccarthy.com ([65.88.171.80]) by red.harvee.home
+      # (8.11.6/8.11.6) with ESMTP id gB4KuQ130187 for <zzzzzzzz@tb.tf>;
+      # Wed, 4 Dec 2002 15:56:27 -0500   [helo = from == good]
+      $from_host = $helo_host = $1; $by_host = $2;
+    }
+    elsif ($received[$i] =~
+		/from ([-\w.]+) \(([-\w.]+\.[-\w.]+).* by ([-\w.]+)/)
+    {
+      # I'm pretty sure from and HELO were the wrong way around here.  e.g.  in
+      # "from lycos.co.uk (newwww-37.st1.spray.net [212.78.202.47]) by
+      # outmail-3.st1.spray.net", the HELO is 'lycos.co.uk', NOT
+      # 'newwww-37.st1.spray.net' -- the latter is from reverse DNS, and is
+      # therefore trustworthy, whereas HELO is not.  (Nov 12 2002 jm) So
+      # accordingly, I've changed the order of $from_host and $helo_host below.
+      $helo_host = $1; $from_host = $2; $by_host = $3;
+    }
+    next unless defined($helo_host);
 
     # Check for a faked dotcom HELO, e.g.
     # Received: from mx02.hotmail.com (www.sucasita.com.mx [148.223.251.99])...
@@ -687,7 +716,7 @@ sub _check_received_helos {
 		|cs\.com|aol\.com|msn\.com|yahoo\.com|drizzle\.com)$/ix)
     {
       my $dom = $1;
-      if ($from_host !~ /(?:\.|^)${dom}$/i) {
+      if ($from_host !~ /^${IP_ADDRESS}$/ && $from_host !~ /(?:\.|^)${dom}$/i) {
 	dbg ("Received: faked dotcom HELO: from=$from_host HELO=$helo_host");
 	$self->{faked_dotcom_helo} = 1;
       }

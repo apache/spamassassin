@@ -274,6 +274,8 @@ body SECTION_301		/SECTION.{0,10}301/i
 describe SECTION_301		Claims compliance with spam regulations
 body HR_4176			/H\.?R\.? *4176.{0,10}SECTION.{0,10}101/i
 describe HR_4176		Claims compliance with House Bill 4176
+body FURTHER_TRANSMISSIONS      /further transmissions to you by the sender/i
+describe FURTHER_TRANSMISSIONS  Claims compliance with spam regulations
 
 body CHECK_OR_MONEY_ORDER	/check or money order/i
 describe CHECK_OR_MONEY_ORDER	Talk about a check or money order
@@ -539,13 +541,14 @@ tflags MIME_SUSPECT_NAME userconf
 # match some gibberish produced by quoted-printable encoding of HTML, often
 # in the middle of a HTML "attribute=value" pair.
 
-rawbody CLICK_HERE_LINK		/click here.{0,100}<\/a>/is
+
+rawbody CLICK_HERE_LINK         /click\s+here.{0,100}<\/a>/is
 describe CLICK_HERE_LINK	Tells you to click on a URL
-rawbody CLICK_HERE_CAPS_LINK	/CLICK HERE.{0,100}<\/[aA]>/s
+rawbody CLICK_HERE_CAPS_LINK    /CLICK\s+HERE.{0,100}<\/[aA]>/s
 describe CLICK_HERE_CAPS_LINK	Tells you to click on a URL (in caps)
-body CLICK_BELOW		/click .{0,30}(?:here|below)/is
+body CLICK_BELOW		/click\s.{0,30}(?:here|below)/is
 describe CLICK_BELOW		Asks you to click below
-body CLICK_BELOW_CAPS		/CLICK .{0,30}(?:HERE|BELOW)/s
+body CLICK_BELOW_CAPS		/CLICK\s.{0,30}(?:HERE|BELOW)/s
 describe CLICK_BELOW_CAPS	Asks you to click below (in caps)
 
 # (contrib: skod)
@@ -641,6 +644,21 @@ describe MORTGAGE_PITCH		Looks like mortgage pitch
 
 body MORTGAGE_RATES		/Mortgage rates/i
 describe MORTGAGE_RATES		Information on mortgage rates
+
+body MORTGAGE_WAITING           /mortgage companies make you wait/i
+describe MORTGAGE_WAITING       Something about waiting for mortgages
+
+body MORTGAGE_NETWORK           /will be transmitted to our network of mortgage specialists/i
+describe MORTGAGE_NETWORK       Something about a mortgage network
+
+body HELPED_FINANCE             /you helped me finance a new home and I got a very good deal/i
+describe HELPED_FINANCE         A dodgy mortgage testimonial
+
+body FALLING_INTEREST           /falling interest/i
+describe FALLING_INTEREST	Interest rates
+
+body ORDER_REPORT               /order report .\s?\d from/i
+describe ORDER_REPORT           Order a report from someone
 
 # detect "mort$age", but not "mortgage"
 body MORTGAGE_OBFU	        /mor[tga\$]*\$[ga\$]*e/i
@@ -916,11 +934,11 @@ describe CONSOLIDATE_DEBT	Consolidate debt, credit, or bills
 body CREDITORS_CALLING	        /\bcreditors calling\b/i
 describe CREDITORS_CALLING 	Calling Creditors
 
-body REFINANCE		        /\brefinance.{0,6} home\b|\bhome loans?\b/i
-describe REFINANCE		Refinance Home
+body REFINANCE_YOUR_HOME	/\brefinance your(?: current)? (?:home|house)\b/i
+describe REFINANCE_YOUR_HOME	Home refinancing
 
-#body SEARCH_ENGINE	        /\b(?:(?:submit|traffic|top).{0.10} search engines?|site ranking)\b/i
-#describe SEARCH_ENGINE		Search Engine Site Ranking
+body REFINANCE_NOW              /time to refinance|refinanc\w{1,3}\b.{0,16}\bnow\b/i
+describe REFINANCE_NOW          Home refinancing
 
 body SEARCH_ENGINE_PROMO        /\b(?:(?:submitt?|list)(?:ed|ing|s)?|place(?:d|ment))\b.{1,30}\b(?:in|to)[\s_-]+.{0,30}\b(?:search(?:ing)?\s*(?:engine|site)|director(?:y|ie))s?\b/is
 describe SEARCH_ENGINE_PROMO    Discusses search engine listings
@@ -928,17 +946,8 @@ describe SEARCH_ENGINE_PROMO    Discusses search engine listings
 body OPPORTUNITY_2		/\b(?:opportunity (?:pass|of a lifetime|is knocking|for you)|(?:investment|unique) opportunity)\b/i
 describe OPPORTUNITY_2		Opportunity - What a deal!
 
-#  0.00     0.00     0.00    0.00    1.00  MORE_TRAFFIC (no matches)
-#body MORE_TRAFFIC	        /\bmore (?:internet|web) traffic\b/i
-#describe MORE_TRAFFIC		More Internet Traffic
-
 body NO_PURCHASE	        /\bno purchase\b/i
 describe NO_PURCHASE		No Purchase Necessary
-
-#  0.00     0.00     0.00    0.00    1.00  NO_MIDDLEMAN (no matches)
-#body NO_MIDDLEMAN	        /\bno middleman\b/i
-#describe NO_MIDDLEMAN		No Middleman
-
 
 body NO_STRINGS		        /\bno strings attached\b/i
 describe NO_STRINGS		No Strings Attached
@@ -1077,11 +1086,6 @@ describe LUXURY_CAR		Luxury Car
 
 body WRINKLES		        /\bwrinkle reduction\b/i
 describe WRINKLES		Removes Wrinkles
-
-#  0.01     0.01     0.01    0.29    1.00  HARD_CASH (low matches)
-#body HARD_CASH		        /\bhard cash\b/i
-#describe HARD_CASH		Is cash really hard?
-
 
 body BUY_JUDGEMENTS	        /\b(?:purchase|collect|divorce)\b.{0,30}\bjudgements\b/i
 describe BUY_JUDGEMENTS		Buying judgements
@@ -1334,9 +1338,6 @@ describe HIDDEN_ASSETS          'Hidden' assets
 body SAVE_THOUSANDS             /\bsave (?:thousands|millions)\b/i
 describe SAVE_THOUSANDS         Save big money
 
-body REFINANCE_YOUR_HOME	/\brefinance your(?: current)? (?:home|house)\b/i
-describe REFINANCE_YOUR_HOME	"Refinance your home"
-
 body MARKETING_PARTNERS         /marketing partner|partner site/i
 describe MARKETING_PARTNERS     Claims you registered with some kind of partner
 
@@ -1440,35 +1441,27 @@ describe IN_ACCORDANCE_WITH_LAWS Claims to be in accordance with some Spam law
 body ANOTHER_NET_AD             /Another Internet Ad campaign produced/
 describe ANOTHER_NET_AD         Tells you it's an ad
 
-#  0.01     0.01     0.00    0.77    1.00  CHANGE_TERMS (low matches)
 body CHANGE_TERMS               /\bstrictly based on the following terms and conditions\b/i
 describe CHANGE_TERMS           Terms and conditions
 
-#   0.000    0.001    0.000    1.00    1.00  CLICK_TO_REMOVE_3
 body CLICK_TO_REMOVE_3          /http:.{0,50}action=remove/is
 describe CLICK_TO_REMOVE_3      Click-to-remove with PHP/ASP action found
 
-#   0.035    0.048    0.027    0.64    1.56  DONT_DELETE
 body     DONT_DELETE            /\b(?:don'?t delete this|do not delete)/i
 describe DONT_DELETE            Don't delete me!  Nooooo!!!!
 lang fr describe DONT_DELETE            Contient une formule incitant é ne pas détruire ce message
 
-#   0.000    0.000    0.000    0.00    1.00  EU_200_32_CE
 lang fr describe EU_200_32_CE   Revendique la conformité avec l'arrêt européen 200.32.CE
 body EU_200_32_CE               /Directive 200.32.CE/i
 describe EU_200_32_CE           Claims compliance with spam regulations
 
-#   0.001    0.000    0.001    0.00    1.80  EU_EMAIL_OPTOUT
 lang fr describe EU_EMAIL_OPTOUT        Revendique la conformité avec l'arrêt européen sur le spam
 body EU_EMAIL_OPTOUT            /EU (?:e-?mail opt.?out|e.?commerce) directive/i
 describe EU_EMAIL_OPTOUT        Claims compliance with spam regulations
 #
-#
-#   0.000    0.000    0.000    0.00    1.00  EXCUSE_8
 body EXCUSE_8                   /requests to be taken off our mailing list/i
 describe EXCUSE_8               Claims you can be removed from the list
 
-#
 #   0.140    0.203    0.102    0.67   -1.00  FAILURE_NOTICE_2
 body     FAILURE_NOTICE_2       /\b(?:Delivery to the following recipients failed|This Message was undeliverable|The following addresses had permanent fatal errors|did not reach the following recipient)\b/i
 describe FAILURE_NOTICE_2       Mailer daemon failure notice (2)
