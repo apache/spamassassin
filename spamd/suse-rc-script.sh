@@ -30,6 +30,10 @@
 # Warning: The SuSE Boot Concept has changed with SuSE 8.0. More information
 #          is available at <http://sdb.suse.de/en/sdb/html/mmj_network80.html>
 #
+# Note:    The SuSE {start,kill,check}proc utils can't handle perl scripts
+#          which change there $0 -- like spamd. So I implemented my own
+#          routines which rely on the existence of the pid file.
+#
 ### BEGIN INIT INFO
 # Provides:       spamd
 # Required-Start: $remote_fs $syslog $network
@@ -57,10 +61,13 @@ for p in local/sbin local/bin sbin bin; do
 done
 test -x $SPAMD_BIN || exit 5
 
+# This is where the pid file is put
+test -z "$SPAMD_PID"        && SPAMD_PID=/var/run/spamd.pid
+
 # Some options
 test "$SPAMD_AWL" == "yes"  && SPAMD_OPTS="$SPAMD_OPTS -a"
 test "$SPAMD_NICE" == "yes" && SPAMD_NICE=5
-test -n "$SPAMD_NICE"       && SPAMD_NICE="-n $SPAMD_NICE"
+test -n "$SPAMD_NICE"       && SPAMD_NICE="nice -n $SPAMD_NICE"
 
 # Shell functions sourced from /etc/rc.status:
 #      rc_check         check and set local and overall rc status
@@ -91,25 +98,128 @@ rc_reset
 # with force-reload (in case signalling is not supported) are
 # considered a success.
 
+function my_getpid()
+# reads the pid from $SPAMD_PID and prints the pid if there's still
+# a process running with that pid.
+#  returns:
+#    0  spamd running at the printed pid
+#    1  some unspecified error occured
+#    4  couldn't access a file
+#   10  found a pid but no process running there
+#   11  found a pid but it wasn't spamd running there
+{
+  # does the pid file exist and is it readable?
+  test -f $SPAMD_PID         \
+    -a -r $SPAMD_PID         || return 4
+
+  # get the pid owning the pid file
+  pid=`cat $SPAMD_PID 2>/dev/null`
+  test -n "$pid"             || return 1
+
+  # ok, found a pid, print it
+  echo $pid
+
+  # is there any process running at that pid?
+  test -d /proc/$pid         || return 10
+
+  cmd=`cat /proc/$pid/cmdline 2>/dev/null | cut -d' ' -f1`
+  test -n "$cmd"             || return 1
+
+  # is that a spamd or what?
+  test $cmd = $SPAMD_BIN     || return 11
+  return 0
+}
+
+function my_startproc()
+# returns:
+#  LSB compliant values, cf. man startproc
+{
+  # does the pid file already exist?
+  if [ -e $SPAMD_PID ]; then
+    # get the pid or return 
+    pid=`my_getpid`
+    err=$?
+   
+    # no stale pid file?
+    test $err -lt 10         && return $err
+
+    # must be a stale pid file then, remove it
+    rm -f $SPAMD_PID
+    test -e $SPAMD_PID       && return 4
+  fi
+
+  test -x $1                 || return 5
+
+  # now call spamd
+  $SPAMD_NICE $*
+  return $?
+}
+
+function my_killproc()
+# parameters:
+#  $1 may hold a signal from kill -l; -TERM is the default
+#
+# returns:
+#  LSB compliant values, cf. man killproc
+{
+  # if pid file doesn't exist, spamd isn't running
+  test -e $SPAMD_PID         || return 7
+
+  # try to find the pid
+  pid=`my_getpid`
+  err=$?
+
+  # wasn't spamd running or did any other error occur?
+  test $err -ge 10           && return 7
+  test $err -ne  0           && return $err
+
+  if [ -n "$1" ]; then
+    sig=$1
+  else
+    sig=-TERM
+  fi
+
+  # send the signal
+  kill $sig $pid 2>/dev/null || return 1
+
+  return 0
+}
+
+function my_checkproc()
+# returns:
+#  LSB compliant values, cf. man checkproc
+{
+  test -e $SPAMD_PID         || return 3
+
+  my_getpid >/dev/null
+  err=$?
+
+  test $err -eq  0           && return 0
+  test $err -ge 10           && return 1
+  return 102
+}
+
+
+
 case "$1" in
     start)
 	echo -n "Starting spamd"
-	## Start daemon with startproc(8). If this fails
+	## Start daemon with my_startproc. If this fails
 	## the echo return value is set appropriate.
 
 	# NOTE: startproc return 0, even if service is 
 	# already running to match LSB spec.
-	startproc $SPAMD_NICE $SPAMD_BIN -d -r /var/run/spamd.pid $SPAMD_OPTS
+	my_startproc $SPAMD_BIN -d -r $SPAMD_PID $SPAMD_OPTS
 
 	# Remember status and be verbose
 	rc_status -v
 	;;
     stop)
 	echo -n "Shutting down spamd"
-	## Stop daemon with killproc(8) and if this fails
+	## Stop daemon with my_killproc and if this fails
 	## set echo the echo return value.
 
-	killproc -TERM spamd
+	my_killproc -TERM
 
 	# Remember status and be verbose
 	rc_status -v
@@ -127,6 +237,7 @@ case "$1" in
 	## Stop the service and regardless of whether it was
 	## running or not, start it again.
 	$0 stop
+	sleep 1
 	$0 start
 
 	# Remember status and be quiet
@@ -147,8 +258,7 @@ case "$1" in
 
 	# If it supports signalling:
 	echo -n "Reload service spamd"
-	killproc -HUP $SPAMD_BIN
-	touch /var/run/spamd.pid
+	my_killproc -HUP
 	rc_status -v
 	
 	## Otherwise if it does not support reload:
@@ -157,7 +267,7 @@ case "$1" in
 	;;
     status)
 	echo -n "Checking for spamd: "
-	## Check status with checkproc(8), if process is running
+	## Check status with my_checkproc, if process is running
 	## checkproc will return with exit status 0.
 
 	# Status has a slightly different for the status command:
@@ -167,14 +277,14 @@ case "$1" in
 	# 3 - service not running
 
 	# NOTE: checkproc returns LSB compliant status values.
-	checkproc $SPAMD_BIN
+	my_checkproc
 	rc_status -v
 	;;
     probe)
 	## Optional: Probe for the necessity of a reload,
 	## give out the argument which is required for a reload.
 
-	test /etc/mail/spamassassin/local.cf -nt /var/run/spamd.pid && echo force-reload
+	test /etc/mail/spamassassin/local.cf -nt $SPAMD_PID && echo force-reload
 	;;
     *)
 	echo "Usage: $0 {start|stop|status|try-restart|restart|force-reload|reload|probe}"
@@ -182,3 +292,4 @@ case "$1" in
 	;;
 esac
 rc_exit
+
