@@ -101,6 +101,12 @@ header RCVD_IN_SORBS_ZOMBIE	eval:check_rbl_sub('sorbs', '127.0.0.9')
 describe RCVD_IN_SORBS_ZOMBIE	SORBS: sender is on a hijacked network
 tflags RCVD_IN_SORBS_ZOMBIE	net
 
+# Dynablock used to be at easynet.nl; closed down there, but reopened
+# by SORBS.
+header RCVD_IN_DYNABLOCK        eval:check_rbl('sorbs-notfirsthop', 'dnsbl.sorbs.net.', '127.0.0.10')
+describe RCVD_IN_DYNABLOCK      Sent directly from dynamic IP address
+tflags RCVD_IN_DYNABLOCK        net
+
 # ---------------------------------------------------------------------------
 # OPM (recommended, supports TXT queries, but A queries needed for sub-tests)
 # transfers: axfr/ixfr for trusted sites
@@ -181,12 +187,6 @@ tflags RCVD_IN_BSP_OTHER	net nice
 # test.senderbase.org for everything else (until SenderBase is in production)
 #header __SENDERBASE eval:check_rbl_txt('senderbase', 'sa.senderbase.org.')
 #tflags __SENDERBASE net
-
-# DynaBlocker: block SMTP connections from dynamic dial-up IP ranges.
-# URL: http://basic.wirehub.nl/dynablocker.html
-header RCVD_IN_DYNABLOCK	eval:check_rbl_txt('dynablock-notfirsthop', 'dynablock.easynet.nl.')
-describe RCVD_IN_DYNABLOCK	Sent directly from dynamic IP address
-tflags RCVD_IN_DYNABLOCK	net
 
 # ---------------------------------------------------------------------------
 # NOTE: donation tests, see README file for details
