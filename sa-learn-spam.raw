@@ -72,13 +72,7 @@ Simply run this command once for each of your mail folders, and it will
 as spam when it is non-spam, simply rescan it correctly and the mistake
 will be corrected.
 
-SpamAssassin remembers which mail messages it's learnt already, and will not
-re-learn those messages again, unless you use the C<sa-forget> command.
-
-Once the scan finishes, the probabilities database will be rebuilt; this can
-take around a minute to complete, so be patient.
-
-(Note: this command is not present in a released version of SpamAssassin yet.)
+See B<sa-learn-nonspam> for more details.
 
 =head1 OPTIONS
 

@@ -61,6 +61,13 @@ Options:
 -V, --version                     Print version
 -h, --help                        Print usage message
 
+=head1 DESCRIPTION
+
+Given a set of mail messages which SpamAssassin has previously 'learnt' from,
+this command will tell it to 'forget' about those mails.
+
+See B<sa-learn-nonspam> for more details.
+
 =head1 OPTIONS
 
 =over 4
@@ -91,11 +98,6 @@ Produce diagnostic output.
 Select alternative whitelist factory.
 
 =back
-
-=head1 DESCRIPTION
-
-Given a set of mail messages which SpamAssassin has previously 'learnt' from,
-this command will tell it to 'forget' about those mails.
 
 =head1 INSTALLATION
 
