@@ -432,9 +432,10 @@ updated in the C<bayes_toks> database.
 
 =head1 EXPIRATION
 
-Since SpamAssassin auto-learns, the Bayes database files could increase
-perpetually until they fill your disk or you run out of memory.  To control
-this, SpamAssassin performs journal syncronization and bayes expiration.
+Since SpamAssassin can auto-learn messages, the Bayes database files
+could increase perpetually until they fill your disk.  To control this,
+SpamAssassin performs journal syncronization and bayes expiration
+periodically when certain criteria (listed below) are met.
 
 SpamAssassin can sync the journal and expire the DB tokens either
 manually or opportunistically.  A journal sync is due if I<--rebuild>
@@ -460,11 +461,11 @@ or if all of the following are true (opportunistic):
 
 =item - the last expire was attempted at least 12hrs ago
 
-=item - bayes_expiry_max_db_size does not equal 0 (means don't expire)
+=item - bayes_auto_expire does not equal 0
 
-=item - number of tokens in the DB is > bayes_expiry_max_db_size
+=item - the number of tokens in the DB is > 100,000
 
-=item - number of tokens in the DB is > 100,000
+=item - the number of tokens in the DB is > bayes_expiry_max_db_size
 
 =item - at least a 12 hr difference between the oldest and newest token atimes
 
@@ -538,17 +539,22 @@ benefit isn't worth the effort.  more tokens need to be learned.
 
 =back
 
-If the expire run gets past this point, we'll do the expire.  A
-new DB is created since the DB modules don't shrink the DB file
-when tokens are removed.  So we do the "create new, migrate old to
-new, remove old, rename new" shuffle.
+If the expire run gets past this point, it will continue to the end.
+A new DB is created since the majority of DB libraries don't shrink the
+DB file when tokens are removed.  So we do the "create new, migrate old
+to new, remove old, rename new" shuffle.
 
 =head2 EXPIRY RELATED CONFIGURATION SETTINGS
 
 =over 4
 
-=item C<bayes_expiry_max_db_size> is part of the SpamAssassin
-configuration.  The default value is 150,000, which is roughly
+=item C<bayes_auto_expire> is used to specify whether or not SpamAssassin
+ought to opportunistically attempt to expire the Bayes databaase.
+The default is 1 (yes).
+
+=item C<bayes_expiry_max_db_size> specifies both the auto-expire token
+count point, as well as the resulting number of tokens after expiry
+as described above.  The default value is 150,000, which is roughly
 equivalent to a 8Mb database file if you're using DB_File.
 
 =item C<bayes_journal_max_size> specifies how large the Bayes
