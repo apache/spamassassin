@@ -37,6 +37,7 @@ use vars qw{
 
 # use very well-connected domains
 @EXISTING_DOMAINS = qw{
+  akamai.com
   bbc.co.uk
   cnn.com
   doubleclick.com
@@ -46,7 +47,6 @@ use vars qw{
   kernel.org
   msn.com
   yahoo.com
-  akamai.com
 };
 
 $IS_DNS_AVAILABLE = undef;
