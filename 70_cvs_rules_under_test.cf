@@ -243,6 +243,12 @@ meta __USER_AGENT_XIMIAN	(__XIMIAN_MSGID && __XIMIAN_MUA && !__UNUSABLE_MSGID)
 meta T_USER_AGENT_XIMIAN	__USER_AGENT_XIMIAN && !T_FORGED_USER_AGENT
 meta T_FORGED_MUA_XIMIAN	__XIMIAN_MUA && !__USER_AGENT_XIMIAN
 
+# duncf
+body EMAIL_ROT13     /\b[a-z(\]-]+\^[a-z-]+\((?:pbz|arg|bet|pn)\b/
+test EMAIL_ROT13 ok  qhabs^ebtref(pbz
+test EMAIL_ROT13 ok  zxrggyre^riv-vap(pbz
+test EMAIL_ROT13 fail	duncf@rogers.com
+
 # bug 1561
 # stronger version of USER_AGENT_APPLEMAIL
 # Apple Mail doesn't send text/html at all (unless it's an attachment)
