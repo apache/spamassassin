@@ -3,34 +3,12 @@
 # This is purely used to generate a page on the website; it's not intended
 # to be distributed or installed.
 
-my $tmpl = q{
-  <tr __BGCOLOR__><td><strong>
-
-  __TYPE__
-
-  </strong></td><td>
-  <font size=-1>
-
-  __DESCRIPTION__
-
-  </font>
-  </td><td>
-  <font size=-1>
-
-  __NAME__
-
-  </font>
-  </td><td>
-
-  __SCORE__
-
-  </td></tr>
-};
+my $tmpl = q{<tr __BGCOLOR__><td><strong>__TYPE__</strong></td><td><font size=-1>__DESCRIPTION__</font></td><td><font size=-1>__NAME__</font></td><td>__SCORE__</td></tr>};
 
 while (<>) {
   s/#.*$//g; s/^\s+//; s/\s+$//;
 
-  if (/^(header|body|full|describe)\s+(\S+)\s+(.+)$/) {
+  if (/^(header|body|rawbody|uri|full|describe)\s+(\S+)\s+(.+)$/) {
     if (!defined $test{$2}) {
       push (@testnames, $2);
       $type{$2} = $1;
