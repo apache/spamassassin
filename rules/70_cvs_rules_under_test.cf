@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.552 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.553 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -292,25 +292,16 @@ describe	T_PUSHHERELINK		Link asks you to "push here" or "go here" or "cease mai
 
 # bug 1734: replacement rules
 # bwaaaah!
-header T_FROM_OFFERS_01		From:addr =~ /\@\S*offer(?!sen)/i
-header T_FROM_OFFERS_02		From:addr =~ /\@\S*offer(?!sen\b)/i
-header T_FROM_OFFERS_03		From:addr =~ /\@\S*offer(?!s[eo]n)/i
-header T_FROM_OFFERS_04		From:addr =~ /\@\S*offer(?!s[eo]n\b)/i
-header T_FROM_OFFERS_05		From:addr =~ /\@\S*offers?(?:\b|[^a-z])/i
-header T_FROM_OFFERS_06		From:addr =~ /\@\S*(?:(?<!h)offer(?!s)|offers(?![eo]n))/i
-header T_FROM_OFFERS_07		From:addr =~ /\@\S*(?:(?<![hk])offer(?!s)|offers(?![eo]n))/i
-header T_FROM_OFFERS_08		From:addr =~ /\@\S*(?:(?<![hkd])offer(?!s)|offers(?![eo]n))/i
-header T_FROM_OFFERS_09		From:addr =~ /\@\S*(?:(?<![hkdt])offer(?!s)|offers(?![eo]n))/i
-# next one is perhaps the safest one here
-header T_FROM_OFFERS_10		From:addr =~ /\@\S*(?:(?<![aceghhklmnorstuyz]h|[ginr]k|[irs]c|[ln]d|[pt]r|s[tw]|oi)offer(?!s)|offers(?![eo]n))/i
-header T_FROM_OFFERS_11		From:addr =~ /\@\S*offer(?!sen)/i
-header T_FROM_OFFERS_12		From:addr =~ /\@\S*offer(?!sen\b)/i
-header T_FROM_OFFERS_13		From:addr =~ /\@\S*offers?(?:\b|[^a-z])/i
-header T_FROM_OFFERS_14		From:addr =~ /\@\S*(?:(?<!h)offer(?!s)|offers(?!en))/i
-header T_FROM_OFFERS_15		From:addr =~ /\@\S*(?:(?<![hk])offer(?!s)|offers(?!en))/i
-header T_FROM_OFFERS_16		From:addr =~ /\@\S*(?:(?<![hkd])offer(?!s)|offers(?!en))/i
-header T_FROM_OFFERS_17		From:addr =~ /\@\S*(?:(?<![hkdt])offer(?!s)|offers(?!en))/i
-header T_FROM_OFFERS_18		From:addr =~ /\@\S*(?:(?<![aceghhklmnorstuyz]h|[ginr]k|[irs]c|[ln]d|[pt]r|s[tw]|oi)offer(?!s)|offers(?!en))/i
+header T_FROM_OFFERS_01		From:addr =~ /\@\S*offers(?!en)/i
+header T_FROM_OFFERS_02		From:addr =~ /\@\S*offers(?!en\b)/i
+header T_FROM_OFFERS_03		From:addr =~ /\@\S*offers(?![eo]n)/i
+header T_FROM_OFFERS_04		From:addr =~ /\@\S*offers(?![eo]n\b)/i
+header T_FROM_OFFERS_05		From:addr =~ /\@\S*offers(?:\b|[^a-z])/i
+header T_FROM_OFFERS_06		From:addr =~ /\@\S*offers(?:\b|[^a-z])/i
+header T_FROM_OFFERS_07		From:addr =~ /\@\S*offers(?!en)(?:\b|.)/i
+header T_FROM_OFFERS_08		From:addr =~ /\@\S*offers(?!en\b)(?:\b|.)/i
+header T_FROM_OFFERS_09		From:addr =~ /\@\S*offers(?![eo]n)(?:\b|.)/i
+header T_FROM_OFFERS_10		From:addr =~ /\@\S*offers(?![eo]n\b)(?:\b|.)/i
 
 # bug 1914:
 # tvd - t_see_for_yourself gets the same hit rate, t_try_for_yourself
