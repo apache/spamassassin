@@ -77,7 +77,7 @@ printf ("%3.3f %8d %8d %8d  %s\n", 0.0, 0, $oa, 0, 'non-token data: oldest age')
 
 printf ("%3.3f %8d %8d %8d  %s\n", 0.0, 0, $sb, 0,
 			'non-token data: current scan-count');
-printf ("%3.3f %8d %8d %8d  %s\n", 0.0, 0, 0, 0,
+printf ("%3.3f %8d %8d %8d  %s\n", 0.0, 0, $le, 0,
 			'non-token data: last expiry scan-count');
 
 my %seen = ();
