@@ -510,6 +510,24 @@ sub check_for_forged_gw05_received_headers {
 
 ###########################################################################
 
+sub check_for_content_type_just_html {
+  my ($self) = @_;
+  local ($_);
+
+  my $rcv = $self->get ('Received');
+  my $ctype = $self->get ('Content-Type');
+
+  # HotMail uses this unfortunately for it's "rich text" control,
+  # so we need to exclude that from the test.
+  if ($rcv =~ / by hotmail.com /) { return 0; }
+
+  if ($ctype =~ /^text\/html\b/) { return 1; }
+
+  0;
+}
+
+###########################################################################
+
 sub check_for_faraway_charset {
   my ($self) = @_;
 
