@@ -120,6 +120,7 @@ sub new {
   $self->{dcc_body_max} = 999999;
   $self->{dcc_fuz1_max} = 999999;
   $self->{dcc_fuz2_max} = 999999;
+  $self->{dcc_add_header} = 0;
 
   $self->{whitelist_from} = { };
   $self->{blacklist_from} = { };
@@ -572,6 +573,20 @@ The default is 999999 for all these options.
 
     if (/^dcc_fuz2_max\s+(\d+)/) {
       $self->{dcc_fuz2_max} = $1+0; next;
+    }
+
+=item dcc_add_header { 0 | 1 }   (default: 0)
+
+DCC processing creates a message header containing the statistics for the
+message.  This option sets whether SpamAssassin will add the heading to
+messages it processes.
+
+The default is to not add the header.
+
+=cut
+
+    if (/^dcc_add_header\s+(\d+)$/) {
+      $self->{dcc_add_header} = $1+0; next;
     }
 
 

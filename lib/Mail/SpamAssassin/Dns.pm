@@ -251,6 +251,8 @@ sub dcc_lookup {
   my ($self, $fulltext) = @_;
   my $response = undef;
   my %count;
+  my $left;
+  my $right;
 
   $count{body} = 0;
   $count{fuz1} = 0;
@@ -317,6 +319,14 @@ sub dcc_lookup {
   }
   if ($response =~ /Fuz2=(\d+)/) {
     $count{fuz2} = $1+0;
+  }
+
+  if ($self->{conf}->{dcc_add_header}) {
+    if ($response =~ /^(X-DCC.*): (.*)$/) {
+      $left  = $1;
+      $right = $2;
+      $self->{msg}->put_header($left, $right);
+    }
   }
 
   if ($count{body} >= $self->{conf}->{dcc_body_max} || $count{fuz1} >= $self->{conf}->{dcc_fuz1_max} || $count{fuz2} >= $self->{conf}->{dcc_fuz2_max}) {
