@@ -307,6 +307,7 @@ for ( $waitedpid = 0;
 	    my @msglines = (<STDIN>);
 	    my $actual_length = length (join '', @msglines);
 	    my $mail = Mail::SpamAssassin::NoMailAudit->new ( data => \@msglines );
+            $mail->{add_From_line} = 0;
 
 	    # Check length if we're supposed to
 	    if($expected_length)
@@ -408,6 +409,7 @@ for ( $waitedpid = 0;
 	    my @msglines = (<STDIN>);
 	    my $actual_length = length (join '', @msglines);
 	    my $mail = Mail::SpamAssassin::NoMailAudit->new ( data => \@msglines );
+            $mail->{add_From_line} = 0;
 
 	    # Check length if we're supposed to
 	    if($expected_length)
