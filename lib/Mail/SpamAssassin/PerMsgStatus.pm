@@ -202,6 +202,9 @@ sub check {
       $self->do_full_tests($priority, \$fulltext);
       $self->do_full_eval_tests($priority, \$fulltext);
 
+      # rundump($self->{main});
+
+
       # we may need to call this more often than once through the loop, but
       # it needs to be done at least once, either at the beginning or the end.
       $self->{main}->call_plugins ("check_tick", { permsgstatus => $self });
@@ -1759,6 +1762,7 @@ sub get_uri_list {
   local ($_);
 
   my $text;
+  my $uri_count = 0;
 
   for (@$textary) {
     # NOTE: do not modify $_ in this loop
@@ -1786,6 +1790,7 @@ sub get_uri_list {
 
       # warn("uri: got URI: $uri\n");
       push @uris, $uri;
+      last if (scalar @uris > 200);
     }
     while (/($Addr_spec_re)/go) {
       my $uri = $1;
@@ -1794,6 +1799,7 @@ sub get_uri_list {
 
       #warn("uri: got URI: $uri\n");
       push @uris, $uri;
+      last if (scalar @uris > 200);
     }
   }
 
@@ -1803,6 +1809,10 @@ sub get_uri_list {
     push @uris, @{ $self->{msg}->{metadata}->{html}->{uri} };
   }
 
+  # trim to a sane, limited number of urls
+  if (scalar @uris > 200) {
+    @uris = splice (@uris, 200);
+  }
   @uris = Mail::SpamAssassin::Util::uri_list_canonify(@uris);
 
   # get domain list
@@ -2600,6 +2610,24 @@ sub delete_fulltext_tmpfile {
     $self->{fulltext_tmpfile} = undef;
   }
 }
+
+
+our $dumpcount = 0;
+# sub rundump {
+# my $spamtest = shift;
+# $dumpcount++;
+# warn "dumping to dumps/dump.$$.$dumpcount\n";
+# system ("mkdir -p dumps");
+# local (*OLDERR);
+# open (OLDERR, ">&STDERR");
+# open (STDERR, ">dumps/dump.$$.$dumpcount");
+# use Devel::Peek;
+# Dump ($spamtest, 9999);
+# close STDERR;
+# open (STDERR, ">&OLDERR");
+# # use Devel::Size qw(size total_size); warn "JMD ".total_size($self);
+# }
+
 
 ###########################################################################
 
