@@ -24,11 +24,16 @@ BEGIN {
   if (-e $bin.'/lib/Mail/SpamAssassin.pm'
         || !-e '@@INSTALLSITELIB@@/Mail/SpamAssassin.pm')
   {
-    # These are common paths where the SA libs might be found.
-    if ( -e $bin.'/blib/lib/Mail/SpamAssassin.pm' ) { # doing "make test" ??
-      unshift(@INC, $bin.'/blib/lib');
+    # Firstly, are we running "make test" in the "t" dir?  the test files
+    # *need* to use 'blib', so that 'use bytes' is removed for pre-5.6 perls
+    # beforehand by the preproc.  However, ./spamassassin does not, as the
+    # preproc will have stripped out the "use rule files from cwd" code from
+    # Mail::SpamAssassin.  So we want to use blib just for the t scripts.
+    if ( $bin eq '../' && -e '../blib/lib/Mail/SpamAssassin.pm' ) {
+      unshift(@INC, '../blib/lib');
     }
     else {
+      # These are common paths where the SA libs might be found.
       foreach (qw(lib ../lib/site_perl
                   ../lib/spamassassin ../share/spamassassin/lib))
       {
