@@ -97,7 +97,6 @@ int send_message(int in,int out,char *username, int max_size)
   if((bytes = read(in,msg_buf,max_size+1024)) > max_size)
   {
     /* Message is too big, so return so we can dump the message back out */
-    free(msg_buf);
     ret = ESC_PASSTHROUGHRAW;
   } else
   {
