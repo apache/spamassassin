@@ -182,9 +182,9 @@ sub check {
     }
 
     # and do full tests: first with entire, full, undecoded message
-    # still skip application/image attachments though
+    # use get_all_headers instead of 
     {
-      my $fulltext = join ('', $self->{msg}->get_all_headers(), "\n",
+      my $fulltext = join ('', $self->{msg}->get_all_headers(1), "\n",
                                 $self->{msg}->get_pristine_body());
       $self->do_full_tests(\$fulltext);
       $self->do_full_eval_tests(\$fulltext);
