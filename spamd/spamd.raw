@@ -44,23 +44,25 @@ Usage: spamd [options]
 
 Options:
 
-    -a            Use per-user auto-whitelists.
-    -c            Create user preferences files if they do not already exist
-    -d		  Daemonize, detach from parent process
-    -h            Print this usage message and exit
-    -i ipaddr     Listen on the specified IP address (defaults to 127.0.0.1,
-						      use 0.0.0.0 to listen on all available addresses)
-    -p port       Listen on the specific port (otherwise default is port 783)
-    -q            Enable SQL config (only useful with -x)
-    -s facility   Specify the syslog facility (default: mail)
-    -u username   Run as named user, instead of running setuid to spamc user
-    -x            Disable user config files
-    -A host,...   Set list of authorized ip addresses which can connect to this server
-    (defaults to 127.0.0.1 only)
-    -D            Print debugging messages
-    -L            Use local tests only (no DNS or other network lookups)
-    -P            Die upon user errors (does not exist or user = root) instead of
+  -a              Use per-user auto-whitelists.
+  -c              Create user preferences files if they do not already exist
+  -d		  Daemonize, detach from parent process
+  -h              Print this usage message and exit
+  -i ipaddr       Listen on the specified IP address (default: 127.0.0.1,
+                  use 0.0.0.0 to listen on all available addresses)
+  -p port         Listen on the specific port (default: 783)
+  -q              Enable SQL config (only useful with -x)
+  -s facility     Specify the syslog facility (default: mail)
+  -u username     Run as named user, instead of running setuid to spamc user
+  -x              Disable user config files
+  -A host,...     Set list of authorized ip addresses which can connect to this
+                  server (default: 127.0.0.1)
+  -D              Print debugging messages
+  -L              Use local tests only (no DNS or other network lookups)
+  -P              Die upon user errors (does not exist or user = root) instead of
                   running as 'nobody' with defaults.
+  -F 0|1          remove/add 'From ' line at start of output (default: 1)
+
 
 EOUSAGE
     exit $resphash{EX_USAGE};
@@ -68,11 +70,10 @@ EOUSAGE
 
 use vars qw{
     $opt_d $opt_h $opt_L $opt_p $opt_A $opt_x $opt_s $opt_D $opt_u
-	$opt_P $opt_c $opt_a $opt_i $opt_q
-    };
+    $opt_P $opt_c $opt_a $opt_i $opt_q $opt_F
+};
 
-
-getopts('acdhi:p:qs:u:xA:DLP') or usage();
+getopts('acdhi:p:qs:u:xA:DLPF:') or usage();
 
 $opt_h and usage();
 
@@ -292,8 +293,10 @@ for ( $waitedpid = 0;
 	    # Now read in message
 	    my @msglines = (<STDIN>);
 	    my $actual_length = length (join '', @msglines);
-	    my $mail = Mail::SpamAssassin::NoMailAudit->new ( data => \@msglines );
-            $mail->{add_From_line} = 0;
+	    my $mail = Mail::SpamAssassin::NoMailAudit->new (
+                                data => \@msglines,
+                                add_From_line => $opt_F
+                         );
 
 	    # Check length if we're supposed to
 	    if($expected_length)
@@ -394,8 +397,10 @@ for ( $waitedpid = 0;
 	    # Now read in message
 	    my @msglines = (<STDIN>);
 	    my $actual_length = length (join '', @msglines);
-	    my $mail = Mail::SpamAssassin::NoMailAudit->new ( data => \@msglines );
-            $mail->{add_From_line} = 0;
+	    my $mail = Mail::SpamAssassin::NoMailAudit->new (
+                                data => \@msglines,
+                                add_From_line => $opt_F
+                         );
 
 	    # Check length if we're supposed to
 	    if($expected_length)
@@ -572,23 +577,29 @@ spamd [options]
 
 =item B<-a>
 
-Use per-user auto-whitelists.  These will automatically create a list of senders whose messages are to be considered non-spam by monitoring the total number of received messages which weren't tagged as spam from that sender.  Once a threshold is exceeded, further messages from that sender will be given a non-spam bonus (in case you correspond with people who occasionally swear in their emails)
+Use per-user auto-whitelists.  These will automatically create a list of
+senders whose messages are to be considered non-spam by monitoring the total
+number of received messages which weren't tagged as spam from that sender.
+Once a threshold is exceeded, further messages from that sender will be given a
+non-spam bonus (in case you correspond with people who occasionally swear in
+their emails).
 
 =item B<-c>
 
-Create user preferences files if they don't exist (default: don't)
+Create user preferences files if they don't exist (default: don't).
 
 =item B<-d>
 
-Detach from starting process and run in background (daemonize)
+Detach from starting process and run in background (daemonize).
 
 =item B<-h>
 
-Print a brief help message, then exit without further action
+Print a brief help message, then exit without further action.
 
 =item B<-i> I<ipaddress>
 
-Tells spamd to listen on the specified IP address [defaults to 127.0.0.1].  Use 0.0.0.0 to listen on all interfaces.
+Tells spamd to listen on the specified IP address [defaults to 127.0.0.1].  Use
+0.0.0.0 to listen on all interfaces.
 
 =item B<-p> I<port>
 
@@ -603,22 +614,23 @@ database.
 
 =item B<-s> I<facility>
 
-Specify the syslog facility to use (default: mail)
+Specify the syslog facility to use (default: mail).
 
 =item B<-u> I<username>
 
 Run as the named user.  The alternative, default behaviour is to setuid() to
-the user running C<spamc>, if C<spamd> is running as root
+the user running C<spamc>, if C<spamd> is running as root.
 
 =item B<-x>
 
 Turn off per-user config files.  All users will just get the default
-configuration
+configuration.
 
 =item B<-A> I<host,...>
 
 Specify a list of authorized hosts which can connect to this spamd instance.
-The list is one of valid IP addresses, separated by commas.  By default, connections are only accepted from localhost
+The list is one of valid IP addresses, separated by commas.  By default,
+connections are only accepted from localhost (127.0.0.1).
 
 =item B<-D>
 
@@ -627,11 +639,18 @@ Print debugging messages
 =item B<-L>
 
 Perform only local tests on all mail.  In other words, skip DNS and other
-network tests.  Works the same as the C<-L> flag to C<spamassassin(1)>
+network tests.  Works the same as the C<-L> flag to C<spamassassin(1)>.
 
 =item B<-P>
 
-Die on user errors (for the user passed from spamc) instead of falling back to user I<nobody> and using the default configuration
+Die on user errors (for the user passed from spamc) instead of falling back to
+user I<nobody> and using the default configuration.
+
+=item B<-F> I<0 | 1>
+
+Ensure that the output email message either always starts with a 'From ' line
+(I<1>) for UNIX mbox format, or ensure that this line is stripped from the
+output (I<0>).  (default: 1)
 
 =back
 

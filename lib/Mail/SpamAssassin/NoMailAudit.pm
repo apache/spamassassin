@@ -37,7 +37,12 @@ sub new {
 
   # an option: SpamAssassin can set this appropriately.
   # undef means 'figure it out yourself'.
-  $self->{add_From_line} = undef;
+  $self->{add_From_line} = $opts{add_From_line};
+
+  # default: always add it
+  if (!defined $self->{add_From_line}) {
+    $self->{add_From_line} = 1;
+  }
 
   bless ($self, $class);
 
