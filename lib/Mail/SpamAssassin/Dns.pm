@@ -161,7 +161,7 @@ sub razor_lookup {
   my $response = undef;
   my $config = $self->{conf}->{razor_config};
   my %options = (
-    # 'debug'	=> 1
+    'debug'	=> $Mail::SpamAssassin::DEBUG
   );
 
   eval {
@@ -169,11 +169,14 @@ sub razor_lookup {
     require Razor::Signature; 
     local ($^W) = 0;		# argh, warnings in Razor
 
+    my $rc = Razor::Client->new($config, %options);
+
     if ($Razor::Client::VERSION == "1.12") {
-      die ("razor version unsupported");
-      #TODO
+      my $respary = $rc->check ('spam' => \@msg);
+      for my $resp (@$respary) { $response .= $resp." "; }
+
     } else {
-      $response = Razor::Client->new($config, %options)->check (\@msg);
+      $response = $rc->check (\@msg);
     }
   };
 
@@ -185,8 +188,7 @@ sub razor_lookup {
     }
   }
 
-  if ($response) { return 1; }
-#exit;
+  if ($response+0) { return 1; }
   return 0;
 }
 
