@@ -429,6 +429,11 @@ operate.  Normally, SpamAssassin will try to detect whether you are connected
 to the net before doing these tests anyway, but for faster checks you may wish
 to use this.
 
+Note that SpamAssassin's network rules are run in parallel.  This can cause
+overhead in terms of the number of file descriptors required if B<--local> is
+not used; it is recommended that the minimum limit on fds be raised to at least
+256 for safety.
+
 =item B<-d>, B<--remove-markup>
 
 Remove SpamAssassin markup (the "SpamAssassin results" report, X-Spam-Status
