@@ -20,6 +20,9 @@ describe TO_NO_USER		To: has no local-part before @ sign
 header TO_MALFORMED		To !~ /(?:(?:\"[^\"]+\"|\S+)\@\S+\.\S+|undisclosed-recipients:)/ [if-unset: unset@unset.unset]
 describe TO_MALFORMED		To: has a malformed address
 
+header TO_LOCALPART_EQ_REAL     To =~ /^\s*(\"?)([\w%\+\-=_\.]+)\1\s*<\2\@[\w%\+\-=_\.]+>/i
+describe TO_LOCALPART_EQ_REAL   To: repeats local-part as real name
+
 header FROM_MALFORMED		From !~ /(?:\"[^\"]+\"|\S+)\@\S+\.\S+/ [if-unset: unset@unset.unset]
 describe FROM_MALFORMED		From: has a malformed address
 
@@ -44,7 +47,7 @@ describe FAKED_UNDISC_RECIPS	Faked To "Undisclosed-Recipients"
 header TO_INVESTORS		To =~ /\bInvestors\@/
 describe TO_INVESTORS		To: non-existent 'Investors' address
 
-header SUBJ_ALL_CAPS		Subject =~ /^[^[:lower:]]{6,}$/
+header SUBJ_ALL_CAPS		Subject =~ /^[^a-z]*$/
 describe SUBJ_ALL_CAPS		Subject is all capitals
 
 # (allow this test to pass if there's no Message-Id header)
