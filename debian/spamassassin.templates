@@ -1,6 +1,6 @@
 Template: spamassassin/upgrade/2.40
 Type: note
-_Description: spamassassin local delivery and spamproxyd deleted!
+Description: spamassassin local delivery and spamproxyd deleted!
  As of 2.40-1, spamproxyd has been removed from the spamassassin package.
  (This was an upstream decision) If you have been using spamproxyd, you may
  not wish to continue the installation. You will be given a chance to abort
@@ -13,9 +13,9 @@ _Description: spamassassin local delivery and spamproxyd deleted!
 
 Template: spamassassin/upgrade/2.42
 Type: select
-_Choices: Yes, No
+Choices: Yes, No
 Default: No
-_Description: Delete out of date config files in /etc/spamassassin?
+Description: Delete out of date config files in /etc/spamassassin?
  As of 2.42-1, rules files for spamassassin will be placed in
  /usr/share/spamassassin because of a tighter relationship between rule
  files and the version of spamassassin. You currently have rules files in
@@ -25,8 +25,8 @@ _Description: Delete out of date config files in /etc/spamassassin?
 
 Template: spamassassin/upgrade/cancel
 Type: select
-_Choices: Continue, Cancel
+Choices: Continue, Cancel
 Default: Continue
-_Description: There may be errors on the upgrade.
+Description: There may be errors on the upgrade.
  As previously indicated, you may experience errors after this upgrade. You
  may cancel now, and fix the problem, or you may continue.
