@@ -10,10 +10,10 @@ require 5.005;
 # INST_SYSCONFDIR      +  $SYSCONFDIR
 # PKG_DEF_RULES_DIR    *  $DEF_RULES_DIR or $(PREFIX)/share/spamassassin
 # DEF_RULES_DIR        +  $(INST_PREFIX)/share/spamassassin
-
 # PKG_LOCAL_RULES_DIR  *  $LOCAL_RULES_DIR
 #                         or $(SYSCONFDIR)/mail/spamassassin
 # LOCAL_RULES_DIR      +  $(INST_SYSCONFDIR)/mail/spamassassin
+# INST_SITELIB	       +  $(INSTALLSITELIB)
 # RUN_RAZOR1_TESTS        (prompt if Razor 1 found)
 # RUN_RAZOR2_TESTS        (prompt if Razor 2 found)
 #
@@ -50,6 +50,7 @@ $ExtUtils::MakeMaker::Recognized_Att_Keys{'DEF_RULES_DIR'} = 1;
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'PKG_DEF_RULES_DIR'} = 1;
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'LOCAL_RULES_DIR'} = 1;
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'PKG_LOCAL_RULES_DIR'} = 1;
+$ExtUtils::MakeMaker::Recognized_Att_Keys{'INST_SITELIB'} = 1;
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'RUN_RAZOR1_TESTS'} = 1;
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'RUN_RAZOR2_TESTS'} = 1;
 
@@ -202,6 +203,7 @@ sub MY::postamble {
   my $pkglocalrulesdir = $self->{PKG_LOCAL_RULES_DIR}
     || $self->{LOCAL_RULES_DIR} || '$(SYSCONFDIR)/mail/spamassassin';
   my $localrulesdir = $self->{LOCAL_RULES_DIR} || '$(INST_SYSCONFDIR)/mail/spamassassin';
+  my $instsitelib = $self->{INST_SITELIB} || '$(INSTALLSITELIB)';
 
 
 
@@ -215,6 +217,7 @@ PKG_DEF_RULES_DIR = $pkgdefrulesdir
 DEF_RULES_DIR	= $defrulesdir
 PKG_LOCAL_RULES_DIR = $pkglocalrulesdir
 LOCAL_RULES_DIR	= $localrulesdir
+INST_SITELIB = $instsitelib
 # . q#
 
 FIXVARS		= -Mvars \
@@ -222,7 +225,7 @@ FIXVARS		= -Mvars \
 		  -DPREFIX="$(INST_PREFIX)" \
 		  -DDEF_RULES_DIR="$(DEF_RULES_DIR)" \
 		  -DLOCAL_RULES_DIR="$(LOCAL_RULES_DIR)" \
-		  -DINSTALLSITELIB="$(SITELIBEXP)"
+# . qq#		  -DINSTALLSITELIB="\$(INST_SITELIB)"
 
 # . ($mm_version < 5.45 ? q#
 pm_to_blib: $(TO_INST_PM)
