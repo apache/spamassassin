@@ -545,9 +545,6 @@ describe PRIORITY_NO_NAME	Message has priority setting, but no X-Mailer
 header   PARTIAL_RFC_2369	eval:partial_rfc_2369()
 describe PARTIAL_RFC_2369	not compliant with RFC 2369 or otherwise fishy
 
-header   REPEATED_HEADER	eval:repeated_header()
-describe REPEATED_HEADER	A header appears more often than it should
-
 header PGP_SIGNATURE_2		Content-Type =~ /protocol=.?application\/pgp-signature.?;/i
 describe PGP_SIGNATURE_2	Contains a PGP-signed message (signature attached)
 

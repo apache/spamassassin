@@ -1410,23 +1410,6 @@ sub partial_rfc_2369 {
   return (exists $count{'List-Unsubscribe'} && $#count < 2);
 }
   
-sub repeated_header {
-  my ($self) = @_;
-
-  my $all = $self->get('ALL');
-  my %count;
-
-  while ($all =~ s/^(\S+)://m) {
-    my $header = lc($1);
-    $count{$header}++;
-  }
-  foreach my $header (keys %count) {
-    next if $header eq "received";
-    return 1 if $count{$header} > 1;
-  }
-  return 0;
-}
-
 ###########################################################################
 # BODY TESTS:
 ###########################################################################
