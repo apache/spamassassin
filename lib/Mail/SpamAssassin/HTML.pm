@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.60 2002/12/21 00:00:22 quinlan Exp $
+# $Id: HTML.pm,v 1.61 2002/12/28 23:07:53 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -237,12 +237,14 @@ sub html_tests {
   }
   if ($tag eq "font" && exists $attr->{face}) {
     #print STDERR "FONT " . $attr->{face} . "\n";
-    $self->{html}{font_face_caps} = 1 if $attr->{face} =~ /[A-Z]{3}/;
+    if ($attr->{face} =~ /[A-Z]{3}/ && $attr->{face} !~ /M[ST][A-Z]|ITC/) {
+      $self->{html}{font_face_caps} = 1;
+    }
     if ($attr->{face} !~ /^[a-z][a-z -]*[a-z](?:,\s*[a-z][a-z -]*[a-z])*$/i) {
       $self->{html}{font_face_bad} = 1;
     }
     for (split(/,/, lc($attr->{face}))) {
-      $self->{html}{font_face_odd} = 1 if ! /^\s*(?:arial|comic sans ms|courier new|geneva|helvetica|ms mincho|sans-serif|serif|tahoma|times new roman|verdana)\s*$/i;
+      $self->{html}{font_face_odd} = 1 if ! /^\s*(?:arial|arial black|courier new|geneva|helvetica|ms sans serif|sans serif|sans-serif|sans-serif;|serif|sunsans-regular|swiss|tahoma|times|times new roman|trebuchet|trebuchet ms|verdana)\s*$/i;
     }
   }
 
