@@ -94,7 +94,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.191 2003/06/06 21:01:32 felicity Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.192 2003/06/12 22:38:57 felicity Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -1192,7 +1192,7 @@ sub init {
       $fname ||= $self->first_existing_path (@default_userprefs_path);
 
       if (defined $fname) {
-        if (!-f $fname && !$self->create_default_prefs($fname)) {
+        if (!-f $fname && !$self->{dont_copy_prefs} && !$self->create_default_prefs($fname)) {
           warn "Failed to create default user preference file $fname\n";
         }
       }
