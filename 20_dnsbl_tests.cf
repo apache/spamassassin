@@ -21,7 +21,7 @@ require_version @@VERSION@@
 
 # ---------------------------------------------------------------------------
 # Multizone / Multi meaning BLs first.
-# 
+#
 # Note that currently TXT queries cannot be used for these, since the
 # DNSBLs do not return the A type (127.0.0.x) as part of the TXT reply.
 # Well, at least Osirusoft and NJABL don't, it seems, as of Apr 7 2003.
@@ -76,7 +76,7 @@ tflags RCVD_IN_NJABL_SPAM	net
 
 header RCVD_IN_NJABL_MULTI	rbleval:check_rbl_sub('njabl', '127.0.0.5')
 describe RCVD_IN_NJABL_MULTI	NJABL: sent through multi-stage open relay
-tflags RCVD_IN_NJABL_MULTI	net 
+tflags RCVD_IN_NJABL_MULTI	net
 
 header RCVD_IN_NJABL_CGI	rbleval:check_rbl_sub('njabl', '127.0.0.8')
 describe RCVD_IN_NJABL_CGI	NJABL: sender is an open formmail
@@ -130,18 +130,43 @@ describe RCVD_IN_SORBS_ZOMBIE	SORBS: sender is on a hijacked network
 tflags RCVD_IN_SORBS_ZOMBIE	net
 
 # ---------------------------------------------------------------------------
+# OPM (recommended, supports TXT queries, but A queries needed for sub-tests)
+# transfers: axfr/ixfr for trusted sites
+# url: http://opm.blitzed.org/
+# pay-to-use: no
+# delist: automatic expiry, no fee, retested on request (free)
+
+header RCVD_IN_OPM		rbleval:check_rbl('opm', 'opm.blitzed.org.')
+describe RCVD_IN_OPM		Received via a relay in opm.blitzed.org
+tflags RCVD_IN_OPM              net
+
+header RCVD_IN_OPM_WINGATE	rbleval:check_rbl_sub('opm', '1')
+describe RCVD_IN_OPM_WINGATE	OPM: sender is open WinGate proxy
+tflags RCVD_IN_OPM_WINGATE	net
+
+header RCVD_IN_OPM_SOCKS	rbleval:check_rbl_sub('opm', '2')
+describe RCVD_IN_OPM_SOCKS	OPM: sender is open SOCKS proxy
+tflags RCVD_IN_OPM_SOCKS	net
+
+header RCVD_IN_OPM_HTTP		rbleval:check_rbl_sub('opm', '4')
+describe RCVD_IN_OPM_HTTP	OPM: sender is open HTTP CONNECT proxy
+tflags RCVD_IN_OPM_HTTP		net
+
+header RCVD_IN_OPM_ROUTER	rbleval:check_rbl_sub('opm', '8')
+describe RCVD_IN_OPM_ROUTER	OPM: sender is open router proxy
+tflags RCVD_IN_OPM_ROUTER	net
+
+header RCVD_IN_OPM_HTTP_POST	rbleval:check_rbl_sub('opm', '16')
+describe RCVD_IN_OPM_HTTP_POST	OPM: sender is open HTTP POST proxy
+tflags RCVD_IN_OPM_HTTP_POST	net
+
+# ---------------------------------------------------------------------------
 # Now, single zone BLs follow:
 
 # SBL is the Spamhaus Block List: http://www.spamhaus.org/sbl/
 header RCVD_IN_SBL		rbleval:check_rbl_txt('sbl', 'sbl.spamhaus.org.')
 describe RCVD_IN_SBL		Received via a relay in Spamhaus Block List
 tflags RCVD_IN_SBL              net
-
-# http://www.blitzed.org/opm/ - a recommended open-proxies list
-# OPM supports TXT queries, but A queries are needed for sub-tests
-header RCVD_IN_OPM		rbleval:check_rbl('opm', 'opm.blitzed.org.')
-describe RCVD_IN_OPM		Received via a relay in opm.blitzed.org
-tflags RCVD_IN_OPM              net
 
 # DSBL catches open relays, badly-installed CGI scripts and open SOCKS and
 # HTTP proxies.  list.dsbl.org lists servers tested by "trusted" users,
