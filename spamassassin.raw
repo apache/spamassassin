@@ -309,7 +309,8 @@ The modifications made are as follows:
 
 =item Subject: header
 
-The string C<*****SPAM*****> is prepended to the subject.
+The string C<*****SPAM*****> is prepended to the subject,
+unless the C<rewrite_subject 0> configuration option is given.
 
 =item X-Spam-Status: header
 
@@ -320,6 +321,11 @@ the filter status.
 
 Set to C<YES>.
 
+=item X-Spam-Report: header for spam mails
+
+The SpamAssassin report is added to the mail header if
+the C<report_header = 1> configuration option is given.
+
 =item Content-Type: header
 
 Set to C<text/plain>, in order to defang HTML mail or other active
@@ -327,7 +333,9 @@ content that could "call back" to the spammer.
 
 =item spam mail body text
 
-The SpamAssassin report is added to top of the mail message body.
+The SpamAssassin report is added to top of the mail message body,
+unless the C<report_header 1> configuration option is given.
+
 
 =back
 
@@ -374,7 +382,7 @@ If you want to keep a copy of the mails, use something like this:
 It is suggested you familiarise yourself with how MTAs run programs specified
 in aliases, if you plan to do this; for one thing, B<spamassassin> will not run
 under your user id in this case.  If you are nervous about this, create a user
-for spamtrapping, and set up spamassassin in it's F<.forward> file.
+for spamtrapping, and set up spamassassin in its F<.forward> file.
 
 =head1 INSTALLATION
 
