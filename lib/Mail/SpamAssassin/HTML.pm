@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.64 2003/02/14 21:50:14 jmason Exp $
+# $Id: HTML.pm,v 1.64.2.1 2003/03/18 21:55:25 felicity Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -250,7 +250,7 @@ sub html_tests {
     }
   }
   if (exists($attr->{style})) {
-    if ($attr->{style} =~ /font(?:-size)?:\s*([\d\.]+)(p[tx])/i) {
+    if ($attr->{style} =~ /font(?:-size)?:\s*(\d+(?:\.\d*)?|\.\d+)(p[tx])/i) {
       my $size = $1+0;
       my $type = $2;
 
@@ -335,7 +335,7 @@ sub html_text {
   }
 
   if (exists $self->{html_inside}{style} && $self->{html_inside}{style} > 0) {
-    if ($text =~ /font(?:-size)?:\s*([\d\.]+)(p[tx])/i) {
+    if ($text =~ /font(?:-size)?:\s*(\d+(?:\.\d*)?|\.\d+)(p[tx])/i) {
       my $size = $1;
       my $type = $2;
 
@@ -380,7 +380,7 @@ sub html_comment {
   }
 
   if (exists $self->{html_inside}{style} && $self->{html_inside}{style} > 0) { 
-    if ($text =~ /font(?:-size)?:\s*([\d\.]+)(p[tx])/i) {
+    if ($text =~ /font(?:-size)?:\s*(\d+(?:\.\d*)?|\.\d+)(p[tx])/i) {
       my $size = $1;
       my $type = $2;
 
