@@ -182,7 +182,7 @@ void get_output_fd(int *fd){
 int main(int argc, char **argv){
   int port = 783;
   int max_size = 250*1024;
-  char *hostname = "127.0.0.1";
+  char *hostname = (char *) "127.0.0.1";
   char *username = NULL;
   struct passwd *curr_user;
   struct hostent hent;
@@ -224,7 +224,7 @@ int main(int argc, char **argv){
 FAIL:
     get_output_fd(&out_fd);
     if(flags&SPAMC_CHECK_ONLY){
-        full_write(out_fd, "0/0\n", 4);
+        full_write(out_fd, (unsigned char *) "0/0\n", 4);
         return EX_NOTSPAM;
     } else {
         message_dump(STDIN_FILENO, out_fd, &m);

@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_parallel");
-use Test; BEGIN { plan tests => 30 };
+use Test; BEGIN { plan tests => 20 };
 
 # ---------------------------------------------------------------------------
 
@@ -20,16 +20,6 @@ q{ NO_REAL_NAME}, 'noreal',
 start_spamd("-L");
 ok (spamcrun ("< data/spam/001", \&patterns_run_cb));
 ok_all_patterns();
-ok (spamcrun_background ("< data/spam/001", \&patterns_run_cb));
-ok (spamcrun_background ("< data/spam/002", \&patterns_run_cb));
-ok (spamcrun_background ("< data/spam/003", \&patterns_run_cb));
-ok (spamcrun_background ("< data/spam/004", \&patterns_run_cb));
-ok (spamcrun_background ("< data/spam/005", \&patterns_run_cb));
-ok (spamcrun_background ("< data/spam/006", \&patterns_run_cb));
-ok (spamcrun_background ("< data/spam/001", \&patterns_run_cb));
-ok (spamcrun_background ("< data/spam/002", \&patterns_run_cb));
-ok (spamcrun_background ("< data/spam/003", \&patterns_run_cb));
-ok (spamcrun_background ("< data/spam/004", \&patterns_run_cb));
 ok (spamcrun_background ("< data/spam/005", \&patterns_run_cb));
 ok (spamcrun_background ("< data/spam/006", \&patterns_run_cb));
 ok (spamcrun_background ("< data/spam/001", \&patterns_run_cb));

@@ -26,8 +26,8 @@
 #define SPAMC_RAW_MODE       0
 #define SPAMC_BSMTP_MODE     1
 
-#define SPAMC_SAFE_FALLBACK  1<<30
-#define SPAMC_CHECK_ONLY     1<<31
+#define SPAMC_SAFE_FALLBACK  1<<28
+#define SPAMC_CHECK_ONLY     1<<29
 
 /* Aug 14, 2002 bj: A struct for storing a message-in-progress */
 typedef enum {
