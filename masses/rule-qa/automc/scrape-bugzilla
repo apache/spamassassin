@@ -14,14 +14,15 @@ open (CF, "<config");
 my %conf; while(<CF>) { /^(\S+)=(\S+)/ and $conf{$1} = $2; }
 close CF;
 
-# use WWW::Mechanize;
-# my $mech = WWW::Mechanize->new( autocheck => 1);
-use WWW::Mechanize::Cached;
-my $mech = WWW::Mechanize::Cached->new( autocheck => 1);
+use WWW::Mechanize;
+my $mech = WWW::Mechanize->new( autocheck => 1);
+# use WWW::Mechanize::Cached;
+# my $mech = WWW::Mechanize::Cached->new( autocheck => 1);
 
 my %outputs = (
   allbugs => [ ],
-  messages => { }
+  messages => { },
+  rule_renames => { }
 );
 
 sub mywarn;
@@ -30,7 +31,7 @@ open (RULES, ">70_scraped.cf") or die "cannot write to output file";
 print RULES "# SpamAssassin rules file: bugzilla-scraped needs-mc rules\n",
             "# generated on ",(scalar localtime time),"\n\n";
 
-open (COMMIT, ">commit.msg") or die "cannot write to output file";
+open (COMMIT, ">".$conf{MCTMP}."/commit.msg") or die "cannot write to output file";
 print COMMIT "auto-mass-checks:\n\n";
 
 main();
@@ -73,11 +74,28 @@ sub get_bug_list {
   }
 }
 
+use HTML::Entities ();
+sub fixup_bugzilla_xml {
+  # BZ XML leaves some stuff unencoded - invalid XML!
+  my $in = shift;
+  return HTML::Entities::encode_numeric($in, "\200-\377");
+}
+
 sub do_bug {
   my ($mech, $resp, $bugnum) = @_;
   my $page = $mech->content();
 
-  my $xml = XMLin($page);
+  $page = fixup_bugzilla_xml ($page);
+
+  my $xml;
+  eval {
+    $xml = XMLin($page);
+  };
+  if ($@) {
+    warn "invalid XML? see stdout for document $@\n";
+    print $page; die;
+  }
+
   my $ctx = {
     bugnum => $bugnum,
     cmts_by_num => { },
@@ -120,6 +138,7 @@ sub do_bug {
   # and extract the code
   my $rulecf = '';
   my $foundrules = 0;
+  $ctx->{rules_seen_in_bug} = { };
   foreach my $cmt (@{$ctx->{cmts}}) {
     next unless ($cmt->{needsmc});
     my $cmtnum = $cmt->{cmtnum};
@@ -140,6 +159,7 @@ sub do_bug {
       next;
     }
 
+    $rules = fixup_rule_code ($ctx, $rules, $bug, $cmtnum);
     $rulecf .= "## MC: bug $bug cmt $cmtnum: start\n"
             .$rules."\n"
             ."## MC: bug $bug cmt $cmtnum: end\n\n";
@@ -172,29 +192,50 @@ sub validate_rule_code {
   return ($? >> 8 == 0);
 }
 
-sub add_rule_code {
-  my ($ctx, $cf) = @_;
+sub fixup_rule_code {
+  my ($ctx, $cf, $bug, $cmtnum) = @_;
+
+  my @oldnames = ();
+  my @newnames = ();
+  my %done = ();
 
   my @rulenames = ($cf =~ /^(?<!\#)\S+\s+([A-Z0-9_]+)\b/gim);
-  my %done = ();
-  my @names = ();
-
   foreach my $n (@rulenames) {
     next if (exists $done{$n}); undef $done{$n};
 
-    next if ($n eq 'MC');   # from the comments
-    next if ($n =~ /^__/);
+    next if ($n eq 'MC');   # a glitch, from the comments
 
-    if ($n !~ /^MC_/) {
-      $cf =~ s/\b${n}\b/MC_${n}/gs;
+    my $newname = $n;
+    my $rnd = int rand 999;
+
+    # ensure it's unique; we only need to add randomness if we have already
+    # seen a rule by that name
+    # OFF: could be a revision of a system rule.
+    # if (exists $ctx->{rules_seen_in_bug}{$newname}) { $newname .= "_".$rnd; }
+    # undef $ctx->{rules_seen_in_bug}{$newname};
+    $newname .= "_".$rnd;
+
+    if ($newname !~ /^__/) {
+      # ensure it has an "MC_" prefix (non-subrules only)
+      if ($newname !~ /^MC_/) {
+	$newname =~ s/^/MC_/;
+      }
     }
 
-    push (@names, $n);
+    $outputs{rule_renames}{$n} = "rule $newname bug $bug cmt $cmtnum";
+    $cf =~ s/\b${n}\b/${newname}/gs;
+    push (@newnames, $newname);
+    push (@oldnames, $n);
   }
 
-  print COMMIT join(' ', @names), "\n";
-  $ctx->{rulenames} = \@names;
+  $ctx->{rulenames} ||= [ ];
+  push (@{$ctx->{rulenames}}, @newnames);
+  return $cf;
+}
 
+sub add_rule_code {
+  my ($ctx, $cf) = @_;
+  print COMMIT join(' ', @{$ctx->{rulenames}}), "\n";
   print RULES $cf;
 }
 
@@ -257,6 +298,7 @@ sub process_comment {
   else {
     $cmt->{mcrules} ||= '';
     my $seenrules = 0;
+    my $lastwasrule = 0;
     foreach my $line (split(/^/m, $text)) {
       if ($line =~ 
   /^\s*(header|rawbody|body|full|meta|uri|score|describe|tflags)\s+(\S+)\s+(.*)$/
@@ -266,12 +308,27 @@ sub process_comment {
         my $name = $2;
         my $code = $3;
         $cmt->{mcrules} .= "$type $name $code\n";
+	$lastwasrule = 1;
         if (!$seenrules) {
           print "bug $ctx->{bugnum} cmt $cmt->{cmtnum}: rules inline\n";
           $seenrules++;
         }
       }
+      else {
+        if ($line =~ /\S/) {
+	  if ($lastwasrule) {
+	    # assume it's a continuation of the last line
+	    chop($cmt->{mcrules});
+	    $cmt->{mcrules} .= "$line\n";
+	  }
+	}
+	else {
+	  $lastwasrule = 0;
+ 	}
+      }
     }
+
+    print "bug $ctx->{bugnum} cmt $cmt->{cmtnum}: code: \n".$cmt->{mcrules};
   }
 }
 

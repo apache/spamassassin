@@ -1,6 +1,6 @@
 #!/bin/sh
 
-cd /home/jm/ftp/spamassassin/automc ; . config
+cd /home/automc/svn/spamassassin/masses/rule-qa/automc ; . config
 exec > LOG.before 2>&1
 set -x
 
@@ -9,15 +9,23 @@ if TZ=UTC date | egrep -q '^... ... .. (07|09):'; then
   exit
 fi
 
+PATH=$PATH:/usr/local/bin
 rm -rf $MCTMP; mkdir -p $MCTMP
 
 ./scrape-bugzilla
-cp 70_scraped.cf ../rules
+cp 70_scraped.cf $SADIR/rules
 (
-  cd ../rules
-  echo svn commit --file $MCTMP/commit.msg 70_scraped.cf
+  cd $SADIR/rules
+  svn commit \
+	--username $SVN_USERNAME \
+	--file $MCTMP/commit.msg 70_scraped.cf
 )
 
-# update the "tagtime" file
-touch /home/jm/ctest/tagtime
+# update the "tagtime" file; of course, we're not tagging, but it helps for
+# the corpus scripts
+touch $tagtime
+
+# and remove the flag file that indicates that the comment-posting step
+# should be inhibited later
+rm -f $MCTMP/comments-posted
 

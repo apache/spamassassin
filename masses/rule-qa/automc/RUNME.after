@@ -1,15 +1,22 @@
 #!/bin/sh
 
-cd /home/jm/ftp/spamassassin/automc ; . config
+cd /home/automc/svn/spamassassin/masses/rule-qa/automc ; . config
 exec > LOG.after 2>&1
 set -x
+
+PATH=$PATH:/usr/local/bin
 
 $SADIR/masses/rule-qa/corpus-hourly
 
 today=`date +"%Y%m%d"`
 mkdir -p $html/$today
-cp $html/*.* $html/$today
+cp -p $html/*.* $html/$today
 date
 
-./post-comments
+# only post the comments once, on the first time the results are read
+if [ ! -f $MCTMP/comments-posted ] ; then
+  ./post-comments
+  touch $MCTMP/comments-posted
+fi
+
 date
