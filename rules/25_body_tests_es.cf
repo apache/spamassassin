@@ -11,13 +11,13 @@
 #
 ###########################################################################
 
-lang es body REMOVE_ES_01             /(?:Para no|[sS]i (?:U(?:ste)?d\. )?no (?:deseas?|qui?er[ée]s)) (?:seguir )?reci[vb]i(?:r|endo) (?:en el futuro )?(?:ninguna otra|m.s|est(?:a|os))?\s?(?:correos?|mensajes?|publicidad|informaci.n|ofertas?|(?:e-?)?mails? promocional(?:es)?|avisos)/
+lang es body REMOVE_ES_01             /(?:Para no|[sS]i (?:U(?:ste)?d\. )?no (?:deseas?|qui?er[ée]s)) (?:seguir )?reci[vb]i(?:r|endo) (?:en el futuro )?(?:ninguna otra|m.s|nuestr[ao]s?|est[ao]s?)?\s?(?:correos?|mensajes?|publicidad|informaci.n|ofertas?|(?:e-?)?mails? promocional(?:es)?|avisos)/i
 lang es describe REMOVE_ES_01         Claims you can be removed in Spanish
 
 lang es body REMOVE_ES_02             /(?:Para ser (?:elimina|removi)do|Si quieres? salir|Para eliminarse) del? (?:nuestra|esta|mailing) ?lista?,? (?:sera removido|responda el mail|solo tienes? que marcar|enviar un ?e-?mail)/i
 lang es describe REMOVE_ES_02           Claims you can be removed in Spanish
 
-lang es body REMOVE_ES_03             /(?:Si|o)(?: U(?:ste)?d\.?)? deseas? (?:que le (?:borre|remova|elimine)mos|ser (?:borra|removi|elimina)do|recalcar tus ganas de eliminarte) (?:por favor |de (?:cualquier listado futuro,?|(?:la|nuestra|esta) (?:lista(?: de (?:(?:e-?)?mail|correo))?|base de datos)),? )?(?:s.lo )?(?:por favor|responda|env.(?:ar?|e(?:nos)?).? (?:(?:simplemente|un) )?(?:e-?)?mail|haga)/i
+lang es body REMOVE_ES_03             /(?:Si|o)(?: U(?:ste)?d\.?)? deseas? (?:que le (?:borre|remova|elimine)mos|ser (?:borra|removi|elimina)do|recalcar tus ganas de eliminarte) (?:por favor |de (?:cualquier listado futuro,?|(?:la|nuestra|esta) (?:lista(?: de (?:(?:e-?)?mail|correo))?|base de datos)),? )?(?:s.lo )?(?:por favor|responda|env.(?:ar?|e(?:nos)?).? (?:(?:simplemente|un) )?(?:e-?)?mail|haga|solicit[ae]|envi[ae])/i
 lang es describe REMOVE_ES_03           Claims you can be removed in Spanish
 
 lang es body REMOVE_ES_04             /(?:si desea|para) no recibir mas (?:nuestras promocione|mensaje)s/i
@@ -78,6 +78,12 @@ lang es body NORMATIVA_SPAM_ES		/(?:Bajo el Decreto .{2,3}S\.1618 titulo (?:III|
 lang es describe NORMATIVA_SPAM_ES	Clama cumplir con la normativa SPAM
 lang es score NORMATIVA_SPAM_ES	2.0
 
+lang es body LEY_CHILE_ES_01		/la legislaci.n chilena no contempla el env.o de publicidad por correo electr.nico/i
+lang es describe LEY_CHILE_ES_01	No existe legislación en Chile contra el SPAM
+
+lang es body LEY_CHILE_ES_02		/Este mensaje se env.a bajo la ley 19.628 de la Costituci.n de la Rep.blica de Chile/i
+lang es describe LEY_CHILE_ES_02	Clama cumplir con la legislación chilena
+
 lang es body TARJETA_VERDE_ES		/Consiga un permiso de residencia.{0,30}Tarjeta Verde/i
 lang es describe TARJETA_VERDE_ES	Inmigración legal (?) a los Estados Unidos
 
@@ -87,8 +93,8 @@ lang es describe PROMOCION_ES		Promocion especial.
 lang es body ALTA_BUSCADORES_ES		/alta en (?:mas de )?\d{2,4} buscadores hispanos/i
 lang es describe ALTA_BUSCADORES_ES	Alta en buscadores hispanos.
 
-lang es body EXCLAMACION_ES		/COMPRE|PROMOCI[OÓ]N|REALMENTE|INFORMESE|(?:CONTACTE|VISIT|RESPOND|ENVI|PID|COMPR|SOLICIT|CONSULT|ESCRIB|LLAM)[AE](?:NOS)?/
-lang es describe EXCLAMACION_ES		IMPERATIVOS EN MAYUSCULAS.
+lang es body EXCLAMACION_ES		/COMPRE|PROMOCI[OÓ]N|REALMENTE|INFORMESE|(?:CONTACTE|VISIT|RESPOND|ENVI|PID|COMPR|SOLICIT|CONSULT|ESCRIB|LLAM)[AE](?:NOS)?|OFERTAS/
+lang es describe EXCLAMACION_ES		IMPERATIVOS/EXCLAMACIONES EN MAYUSCULAS.
 
 lang es body PRESENTAMOS_ES		/[tl]e (?:ofrece|presenta|informa|informare)mos/i
 lang es describe PRESENTAMOS_ES		Presentación de un nuevo producto.
