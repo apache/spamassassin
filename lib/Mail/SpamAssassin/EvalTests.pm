@@ -2662,7 +2662,31 @@ sub check_for_to_in_subject {
   elsif ($test eq "user") {
     my $to = $full_to;
     $to =~ s/\@.*//;
-    return $subject =~ /^\s*\Q$to\E,\S/i;	# "user,\S" case insensitive
+    return $subject =~ /^\s*\Q$to\E,\s/i;	# "user,\s" case insensitive
+  }
+  return 0;
+}
+
+# bug 2954
+sub check_for_to_in_subject_bug_2954 {
+  my ($self, $test) = @_;
+
+  my $full_to = $self->get('To:addr');
+  return 0 unless $full_to;
+
+  my $subject = $self->get('Subject');
+
+  if ($test eq "address") {
+      # "user@domain.com"
+      return (($subject =~ /^\s*\Q$full_to\E[\.\,\-]+\s*\S/i) ||
+	      ($subject =~ /\S\s*[\.\,\-]+\Q$full_to\E(?:[\!\?\.]+)$/i));
+  }
+  elsif ($test eq "user") {
+    my $to = $full_to;
+    $to =~ s/\@.*//;
+    # "user,\S" case insensitive
+    return (($subject =~ /^\s*\Q$to\E[\.\,\-]+\s*\S/i) ||
+	    ($subject =~ /\S\s*[\.\,\-]+\Q$to\E(?:[\!\?\.]+)$/i));
   }
   return 0;
 }
