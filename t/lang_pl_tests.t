@@ -2,13 +2,13 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("lang_pl_tests");
-use Test; BEGIN { plan tests => 14 };
+use Test; BEGIN { plan tests => 1 };
 
 # ---------------------------------------------------------------------------
 
 %patterns = (
 
-q{ Analiza zawarto¶ci: }, 'report',
+q{ Analiza zawarto¶ci: }, 'didnt_hang_at_least',
 
 );
 

@@ -176,7 +176,10 @@ sub check {
   }
   $_ ||= '(no report template found)';
 
-  s/_HITS_/$self->{hits}/gs;
+  # avoid "0.199999999999 hits" ;)
+  my $hit = sprintf ("%1.2f", $self->{hits});
+  s/_HITS_/$hit/gs;
+
   s/_REQD_/$self->{conf}->{required_hits}/gs;
   s/_SUMMARY_/$self->{test_logs}/gs;
   s/_VER_/$Mail::SpamAssassin::VERSION/gs;
