@@ -502,7 +502,7 @@ sub check_for_forged_yahoo_received_headers {
   if ($rcvd =~ /by smtp\S+\.yahoo\.com with SMTP/) { return 0; }
   my $IP_ADDRESS = IP_ADDRESS;
   if ($rcvd =~
-      /from \[$IP_ADDRESS\] by \S+\.(?:groups|grp\.scd)\.yahoo\.com with NNFMP/) {
+      /from \[$IP_ADDRESS\] by \S+\.(?:groups|scd)\.yahoo\.com with NNFMP/) {
     return 0;
   }
 
