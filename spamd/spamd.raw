@@ -69,14 +69,13 @@ GetOptions(
 $opt{'help'} and pod2usage(-exitval => $resphash{'EX_USAGE'}, -verbose => 0, -message => 'For more details, use "man spamd"');
 
 # These can be changed on command line with -A flag
-my %allowed = ();
 if(@{$opt{'allowed-ip'}})
 {
-    %allowed = map { $_ => 1 } split /,/,join(',',@{$opt{'allowed-ip'}});
+    set_allowed_ip(split /,/,join(',',@{$opt{'allowed-ip'}}));
 }
 else
 {
-    %allowed = ( '127.0.0.1' => 1 );
+    set_allowed_ip('127.0.0.1');
 }
 
 # This can be changed on the command line with the -s flag
@@ -210,7 +209,7 @@ for ( ; ($paddr = accept(Client,Server)) ; close Client)
     my($port,$iaddr) = sockaddr_in($paddr);
     my $name = gethostbyaddr($iaddr,AF_INET);
 
-    if ($allowed{inet_ntoa($iaddr)} ) {
+    if (ip_is_allowed(inet_ntoa($iaddr))) {
 	logmsg "connection from $name [",
 	inet_ntoa($iaddr),"] at port $port";
     } else {
@@ -718,6 +717,31 @@ sub daemonize
     }
 }
 
+my @allowed_nets;
+sub set_allowed_ip {
+    foreach (@_){
+        warn "Allowing connections from '$_'.\n";
+        my ($ip, $bits) = m#^\s*(\d+\.\d+\.\d+\.\d+)(?:/(\d+))?\s*$#
+                or die "illegal network address given: '$_'.  Aborting.\n";
+        defined $bits or $bits = 32;
+        my $mask = 0xFFffFFff  ^ ((2 ** (32-$bits)) - 1);
+        push @allowed_nets, {
+            mask => $mask,
+            ip   => my_inet_aton($ip) & $mask,
+        };
+    }
+}
+sub ip_is_allowed {
+    my $ip = my_inet_aton($_[0]);
+    foreach my $net (@allowed_nets){
+        return 1 if ($ip & $net->{mask}) == $net->{ip};
+    }
+    0;
+}
+sub my_inet_aton { unpack("N", pack("C4", split(/\./, $_[0]))) }
+
+
+
 =head1 NAME
 
 spamd - daemonized version of spamassassin
@@ -838,9 +862,18 @@ configuration.
 
 =item B<-A> I<host,...>, B<--allowed-ips>=I<host,...>
 
-Specify a list of authorized hosts which can connect to this spamd instance.
-The list is one of valid IP addresses, separated by commas.  By default,
-connections are only accepted from localhost (127.0.0.1).
+Specify a list of authorized hosts or networks which can connect to this spamd
+instance. Single IP addresses can be given, or ranges of ip addresses in
+address/masklength format.  This option can be specified multiple times or can
+take a list of addresses separated by commas.  Examples:
+
+B<-A 10.11.12.13,10.11.12.14> -- only allow connections from 10.11.12.13 and
+10.11.12.14
+
+-B<A 10.200.300.0/24> -- allow connections from any machine in the range
+10.200.300.*
+
+By default, connections are only accepted from localhost [127.0.0.1].
 
 =item B<-D>, B<--debug>
 
