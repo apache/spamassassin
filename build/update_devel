@@ -18,7 +18,7 @@ echo $vers > $WEBDIR/latest_version
 rm -f Mail-SpamAssassin-$vers.tar.bz2 Mail-SpamAssassin-$vers.tar.gz Mail-SpamAssassin-$vers.zip
 make tardist
 make zipdist
-gzip -dc Mail-SpamAssassin-$vers.tar.gz | bzip2 -9c - > Mail-SpamAssassin-$vers.tar.bz2
+gzip -dc Mail-SpamAssassin-$minivers.tar.gz | bzip2 -9c - > Mail-SpamAssassin-$minivers.tar.bz2
 
 for ext in tar.bz2 tar.gz zip ; do
   if [ $minivers != $vers ] ; then
