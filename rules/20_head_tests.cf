@@ -337,8 +337,6 @@ describe FORGED_RCVD_TRAIL	trail of Received: headers seems to be forged
 header LOTS_OF_CC_LINES		eval:check_lots_of_cc_lines()
 describe LOTS_OF_CC_LINES	Lots and lots of Cc: headers
 
-# gets very bad FP rate
-
 header FORGED_HOTMAIL_RCVD	eval:check_for_forged_hotmail_received_headers()
 describe FORGED_HOTMAIL_RCVD	Forged hotmail.com 'Received:' header found
 
@@ -351,9 +349,16 @@ describe FORGED_YAHOO_RCVD	'From' yahoo.com does not match 'Received' headers
 header FORGED_JUNO_RCVD		eval:check_for_forged_juno_received_headers()
 describe FORGED_JUNO_RCVD	'From' juno.com does not match 'Received' headers
 
-
 header FORGED_GW05_RCVD		eval:check_for_forged_gw05_received_headers()
 describe FORGED_GW05_RCVD	Forged 'by gw05' 'Received:' header found
+
+# Sep 23 2002 jm: another spamhaus rule
+header RCVD_BY_QVES_COM		Received =~ /by email.qves.com with Microsoft/
+describe RCVD_BY_QVES_COM	Sent by a known spamhaus (qves)
+
+# real hotmail outgoings use 'mc1-s3.law16...' or 'f206..' etc.
+header FORGED_MX_HOTMAIL	Received =~ /^from mx\d+\.hotmail\.com /m
+describe FORGED_MX_HOTMAIL	Forged hotmail.com Received 'from mx' header
 
 header NONEXISTENT_CHARSET	Content-Type =~ /charset=.?DEFAULT/
 describe NONEXISTENT_CHARSET	Character set doesn't exist
