@@ -562,7 +562,7 @@ The default is 1 (yes).
 =item C<bayes_expiry_max_db_size> specifies both the auto-expire token
 count point, as well as the resulting number of tokens after expiry
 as described above.  The default value is 150,000, which is roughly
-equivalent to a 8Mb database file if you're using DB_File.
+equivalent to a 6Mb database file if you're using DB_File.
 
 =item C<bayes_journal_max_size> specifies how large the Bayes
 journal will grow before it is opportunistically synced.  The
