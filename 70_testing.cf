@@ -600,3 +600,7 @@ header __NORMAL_AUTHWARN     X-Authentication-Warning !~ /^(\S+\.\S+): /
 meta T_FAKED_AUTHWARN	     (__HAS_AUTHWARN && !__NORMAL_AUTHWARN)
 describe T_FAKED_AUTHWARN    'X-Authentication-Warning' looks faked
 
+header T_FAKED_AUTHWARN_2	X-Authentication-Warning !~ /^(\S+\.\S+): / [if-unset: host.example.net: foo owned process doing -bs]
+
+body T_HTML_COMMENT_TAG		eval:html_eval('comment_text', '=~ /<.*?>/')
+describe T_HTML_COMMENT_TAG	HTML comment probably contains HTML tag
