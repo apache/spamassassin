@@ -159,16 +159,9 @@ for ( $waitedpid = 0;
                         return 1;
                     }
                     if (/^\r\n/s) { last; }
-                    if((/^User: (.*)\r\n/) && (! $opt_x))
-                    {
-                        my $username = $1;
-                        my @pw = getpwnam($username);
-                        my $cf_file = $pw[7]."/.spamassassin.cf";
-
-			# jm: refactored into own sub
-			create_default_cf_if_needed ($cf_file, $username);
-			$spamtest->set_username ($username);
-			$spamtest->read_scoreonly_config ($cf_file);
+                    if((/^User: (.*)\r\n/) && (! $opt_x)) {
+		        # jm: refactored again ;)
+		        handle_user ($1);
                     }
                 }	
 	    }
@@ -235,6 +228,16 @@ sub spawn {
     open(STDIN,  "<&Client")   || die "can't dup client to stdin";
     open(STDOUT, ">&Client")   || die "can't dup client to stdout";
     exit &$coderef();
+}
+
+sub handle_user {
+    my $username = shift;
+    my @pw = getpwnam($username);
+    my $cf_file = $pw[7]."/.spamassassin.cf";
+
+    create_default_cf_if_needed ($cf_file, $username);
+    $spamtest->set_username ($username);
+    $spamtest->read_scoreonly_config ($cf_file);
 }
 
 sub create_default_cf_if_needed {
