@@ -65,8 +65,8 @@ score T_MSGID_GOOD_EXCHANGE	-1.0
 body T_THIS_AINT_SPAM		/This.{0,30}is.{1,10}not?.{0,15}spam/is
 describe T_THIS_AINT_SPAM	Claims "This is not spam"
 
-# this rule needs some tweaking to reduce FPs
-# original version
+# variations of new rule
+# original version (non-optimal number of FPs, but probably good enough)
 body T_EXCUSE_24_V1		/you(?:'ve|'re| have| are)? receiv(?:ed|ing) this (?:e.?mail|advertisement) (?:by either|because)/i
 # "more spam" version
 body T_EXCUSE_24_V2		/you(?:'ve|'re| have| are)? receiv(?:e|ed|ing) this (?:e.?mail|advertisement|offer|special|recurring|paid).{0,16}\b(?:by either|because)/i
@@ -74,6 +74,64 @@ body T_EXCUSE_24_V2		/you(?:'ve|'re| have| are)? receiv(?:e|ed|ing) this (?:e.?m
 body T_EXCUSE_24_V3		/you(?:'ve|'re| have)? receiv(?:e|ed|ing) this (?:e.?mail|advertisement|offer|special|recurring|paid).{0,16}\b(?:by either|because)/i
 # "more spam" version minus "email"
 body T_EXCUSE_24_V4		/you(?:'ve|'re| have| are)? receiv(?:e|ed|ing) this (?:advertisement|offer|special|recurring|paid).{0,16}\b(?:by either|because)/i
+
+# possible replacements for DIET
+# version 1: add possible variations
+body T_DIET_V1			/\b(?:(?:without(?: any)?|never|no).?(?:exercis(?:e|ing)|diet(?:ing|))|weight.?loss|(?:extra|los(?:[et]|ing)|burn|burning).{0,10}(?:pounds|weight|inches|lbs)|burn.{0,10}(?:fat|cellulose))\b/i
+# version 2: add only those variations seen in my corpus
+body T_DIET_V2		        /\b(?:(?:without|no) (?:exercis(?:e|ing)|dieting)|weight.?loss|(?:extra|lose|lost|losing).{0,10}(?:pounds|weight|inches|lbs)|burn.{1,10}fat)\b/i
+
+# less encompassing DIET variations (probably not worth keeping if
+# DIET can be upgraded
+header T_LOSE_WEIGHT		Subject =~ /(?:lose .{0,16}(?:weight|pounds|lbs)|weight.loss)/i
+body T_BURNING_FAT		/aging while burning fat/i
+
+# replacement for REFINANCE_YOUR_HOME (current version has spacing mistake)
+body T_REFINANCE_YOUR_HOME        /\brefinance your(?: current)? (?:home|house)\b/i
+
+# replacement for REMOVE_FROM_LIST (current version has spacing mistake)
+body T_REMOVE_FROM_LIST		/to be removed from (?:the|my|our) (?:mailing|e.?mail|opt[ -]?in)? ?list/i
+
+# [:^print:] is supposedly 5.6 specific, so this will have to do
+# probably need to tie this to ok_languages or ok_locales so it doesn't
+# trigger on certain character sets
+rawbody T_UNPRINTABLE		/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\xff]{8,}/
+
+# it's BANG, not PLING (Brits!)
+# single word versions
+body T_BANG_BOSS		/\bboss!/i
+body T_BANG_CARTOONS		/\bcartoons!/i
+body T_BANG_CYBERANALYSTS	/\bcyberanalysts!/i
+body T_BANG_EXERCISE		/\bexercise!/i
+body T_BANG_EXERCISER		/\bexerciser!/i
+body T_BANG_EXERCISES		/\bexercises!/i
+body T_BANG_FREEDOM		/\bfreedom!/i
+body T_BANG_GUARANTEED		/\bguaranteed!/i
+body T_BANG_MONEY		/\bmoney!/i
+body T_BANG_OFFERED		/\boffered!/i
+body T_BANG_OFFERS		/\boffers!/i
+body T_BANG_OPRAH		/\boprah!/i
+body T_BANG_QUOTE		/\bquote!/i
+body T_BANG_QUOTES		/\bquotes!/i
+body T_BANG_SLEEP		/\bsleep!/i
+body T_BANG_SLEEPING		/\bsleeping!/i
+body T_BANG_TRAFFIC		/\btraffic!/i
+body T_BANG_WORLD		/\bworld!/i
+body T_BANG_WORLDWIDE		/\bworldwide!/i
+# a few multi-word variants with no FPs for me (test separately and
+# use instead of single word versions if nobody has FP problems)
+body T_BANG_EXERCISE_X		/\bexercis(?:e|er|es)!/i
+body T_BANG_GUARANTEE_X		/guaranteed?\!/i
+# just 'offer!' has FPs for me
+body T_BANG_OFFER_X		/\boffer(?:ed|s)!/i
+body T_BANG_QUOTE_X		/\bquotes?\!/i
+body T_BANG_SLEEP_X		/\bsleep(?:ing)?\!/i
+body T_BANG_WORLD_X		/\bworld(?:wide)?\!/i
+# a few versions that are more case-sensitive
+body T_BANG_MORE_C		/\b(?-i:M)ore!/i
+body T_BANG_FREEDOM_C		/\b(?-i:F)reedom!/
+body T_BANG_GUARANTEED_C	/\b(?-i:G)uaranteed?\!/i
+body T_BANG_QUOTE_C		/\b(?-i:Q)uotes?\!/i
 
 ###########################################################################
 # quinlan: I converted almost 2000 postfix anti-spam rules into SA format,
@@ -87,10 +145,6 @@ body T_EXCUSE_24_V4		/you(?:'ve|'re| have| are)? receiv(?:e|ed|ing) this (?:adve
 
 body T_Q_THIS_IS_AN_AD		/this message is an advertisement/i
 header T_Q_ADV_GAPPY		Subject =~ /\bA\s+D\s+V\b/i
-
-body T_Q_APPLY_FREE		/(?-i:F)ree (?-i:A)pplication|free application.{0,32}(?:today|minute|less than)/i
-
-header T_Q_FRIEND_PUBLIC	ALL =~ /^(to|cc|from):.*friend\@public\.com/im
 
 header T_Q_FIND_OUT_ANY1 	Subject =~ /Find Out Any/i
 body T_Q_FIND_OUT_ANY2		/Find Out Anything About Anyone/i
@@ -112,9 +166,9 @@ header T_Q_FOR_ONLY 		Subject =~ /For Only/i
 header T_Q_FREE_INSTANT 	Subject =~ /Free Instant/i
 header T_Q_INKJET_PITCH		Subject =~ /inkjet cartridges/i
 header T_Q_LIFE_INSURANCE	Subject =~ /Life Insurance/i
-header T_Q_LOSE_WEIGHT		Subject =~ /(?:lose .{0,16}(?:weight|pounds|lbs)|weight.loss)/i
 header T_Q_NOW_ONLY		Subject =~ /\bNow Only/i
 header T_Q_RIPPED		Subject =~ /Ripped & Strong/i
+# overlaps with SAVINGS
 header T_Q_SAVE_PERCENT		Subject =~ /save (?:[6-9]\d%|up to \d+%)/i
 header T_Q_VIAGRA_SUBJECT	Subject =~ /Viagra/i
 header T_Q_YOUR_DEBT		Subject =~ /Your (?:Bills|Debt|Credit)/i
@@ -122,13 +176,9 @@ header T_Q_YOUR_FAMILY		Subject =~ /Your Family/i
 header T_Q_YOUR_OWN		Subject =~ /Your Own/i
 header T_Q_YOUR_PENIS		Subject =~ /Your Penis/i
 
-# UNPRINTABLE is supposedly 5.6 specific so it will need to be fixed/delayed
-body T_Q_UNPRINTABLE		/[[:^print:]]{8,}/
 body T_Q_CREDIT_BODY		/Accept Credit Cards/i
-body T_Q_BURNING_FAT		/Aging While Burning Fat/i
 body T_Q_FREE_ADULT		/Free Adult/i
 body T_Q_FREE_MEMBERSHIP	/FREE MEMBERSHIP/i
-body T_Q_GUARANTEED_BANG	/GUARANTEED!/i
 body T_Q_HOME_LOANS		/Home Loans/i
 body T_Q_INVALUABLE		/Invaluable Marketing Information/i
 body T_Q_LOCATE_ASSETS		/Locate Hidden Assets/i
@@ -138,7 +188,6 @@ body T_Q_PRODUCT_SERVICE	/PRODUCT or SERVICE/i
 # similar to OFFER, but fewer FPs
 body T_Q_RECEIVE_OFFER		/Receive Special Offer/i
 body T_Q_RECEIVE_EMAIL		/Receive Third Party Email/i
-body T_Q_REFINANCE_HOME		/Refinance Your Home/i
 body T_Q_YOUR_SIZE		/Your Penis Size/i
 ###########################################################################
 
