@@ -116,7 +116,7 @@ sub check {
   # to see if we should go from {0,1} to {2,3}.  We of course don't need
   # to do this switch if we're already using bayes ... ;)
   my $set = $self->{conf}->get_score_set();
-  if ( $set&2 && $self->{main}->{bayes_scanner}->is_available() ) {
+  if ( $set < 2 && $self->{main}->{bayes_scanner}->is_available() ) {
     $self->{conf}->set_score_set ($set|2);
   }
 
