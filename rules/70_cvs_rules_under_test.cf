@@ -10,14 +10,6 @@
 #
 ###########################################################################
 
-# S/O ratio from jm's corpus:
-#  19.618    0.000   20.413    0.00    0.96   -1.00  T_REPLY_WITH_QUOTES
-meta T_REPLY_WITH_QUOTES        (IN_REP_TO && QUOTED_EMAIL_TEXT)
-describe T_REPLY_WITH_QUOTES    Reply with quoted text
-score T_REPLY_WITH_QUOTES       -1.0
-tflags T_REPLY_WITH_QUOTES      nice
-
-
 # let's see how this does.  "real" earthlink mails contain all 3 headers
 head __X_EM_VERSION             exists:X-EM-Version
 head __X_EM_REGISTRATION        exists:X-EM-Registration

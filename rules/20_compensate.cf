@@ -221,6 +221,12 @@ meta EVITE			((__EVITE_RCVD && __EVITE_URI) || (__EVITE_CTYPE && (__EVITE_RCVD |
 describe EVITE			Message looks like an Evite
 tflags EVITE			nice
 
+meta REPLY_WITH_QUOTES		((IN_REP_TO + REFERENCES + EMAIL_ATTRIBUTION + QUOTED_EMAIL_TEXT) > 2)
+describe REPLY_WITH_QUOTES	Reply with quoted text
+tflags REPLY_WITH_QUOTES	nice
+
+###########################################################################
+
 # Till now no spammer told me where he's working at :o)
 #   -- Malte
 # freqs:  2.273    0.383    3.416    0.10    1.00  NOSPAM_INC
@@ -249,4 +255,3 @@ test FWD_MSG ok Subject: Fwd: Dracula
 test FWD_MSG ok Subject: [landho] Fwd: tell rod
 test FWD_MSG fail Subject: Fwd:Pure Opt-In for half the price
 test FWD_MSG fail Subject: Re: RE: FWD: search results        .       .       .
-
