@@ -81,6 +81,9 @@ sub readlogs {
 	  next;
 	}
 
+	# Make sure to skip any subrules!
+	next if ( $allrules{$tst}->{issubrule} );
+
         if ($justcount) {
           $score += $scores{$tst};
         } else {
