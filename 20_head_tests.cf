@@ -51,7 +51,7 @@ describe SUBJ_HAS_SPACES	Subject contains lots of white space
 header UNDISC_RECIPS		To =~ /^undisclosed-recipients?:\s*;$/
 describe UNDISC_RECIPS		Valid-looking To "undisclosed-recipients"
 
-header FAKED_UNDISC_RECIPS	To =~ /Undisclosed.*Recipient\S*@/i
+header FAKED_UNDISC_RECIPS	To =~ /Undisclosed.*Recipient(s[^:]|[^s])/i
 describe FAKED_UNDISC_RECIPS	Faked To "Undisclosed-Recipients"
 
 header TO_INVESTORS		To =~ /\bInvestors\@/
@@ -320,7 +320,6 @@ describe MISSING_HEADERS	Missing To: header
 # (contrib: skod)
 # modified by jm to remove bulk_mailer, matches on a mailing list I'm on
 header RATWARE ALL =~ /(?:4\.\.72\.1712\.3|ACE Contact Manager|Aristotle Mail|Avalanche|Calypso|clansoft|Cognigen|Cyber-Bomber|Crescent|DiffondiCool|Dynamic Mail Server|CTMailer|E-Broadcaster|E-mail Magnet|Ellipse Bulk Emailer|EmailBlaster|Emailer.Platinum|eMerge|Extractor|Floodgate|FlashSend|Goldrush|Group Mail|Internet Marketing|Mailcast|MailKing|MassE-Mail|massmail\.pl|Matchmaker|NetMailer|News Breaker|pop3.report|RamoMail|Ready Aim|Shopping.Planet|Stalker.s|TBBS\/TIGER|TOO BAD|TotalMailTURBO Mail|V3,1,6,1|V3,1,2,0|V3,2,2,0|V.null.\.1712\.3|WindoZ|WinNT.s.Blat|WorldMerge|YMR)/
-
 describe RATWARE 		Bulk email software fingerprints found in headers
 
 # contrib: Craig (total regexp wizardry here ;)
@@ -394,3 +393,6 @@ describe X_ENC_PRESENT         Found an X-Encoding header
 # X-Fix example: NTMail fixed non RFC822 compliant EMail message
 header   X_FIX_PRESENT         X-Fix =~ /./
 describe X_FIX_PRESENT         Found an X-Fix header
+
+header   MIME_ODD_CASE         ALL =~ /\nMiME-Version: /s
+describe MIME_ODD_CASE         MiME-Version header (oddly capitalized)
