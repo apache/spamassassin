@@ -16,8 +16,8 @@ Summary:        a spam filter for email which can be invoked from mail delivery 
 Summary(pl):    Filtr antyspamowy, przeznaczony dla programów dostarczaj±cych pocztê (MDA)
 
 Group:          Applications/Mail
-%define version 2.51
-%define real_version 2.51
+%define version 2.54
+%define real_version 2.54
 %define release 1
 
 %define name    spamassassin
@@ -133,7 +133,7 @@ mkdir -p %{buildroot}/etc/mail/spamassassin
 
 %files 
 %defattr(-,root,root)
-%doc README Changes sample-nonspam.txt sample-spam.txt spamd/README.spamd INSTALL CONTRIB_CERT COPYRIGHT INSTALL.VMS License TRADEMARK USAGE
+%doc README Changes sample-nonspam.txt sample-spam.txt spamd/README.spamd INSTALL
 %attr(755,root,root) %{_bindir}/*
 %attr(644,root,root) %{_includedir}/*
 %attr(644,root,root) %{_libdir}/*.so
@@ -167,6 +167,18 @@ if [ $1 = 0 ]; then
 fi
 
 %changelog
+* Thu Apr 03 2003 Theo Van Dinter <felicity@kluge.net> 2.54-1
+- updated to 2.54
+
+* Thu Apr 03 2003 Theo Van Dinter <felicity@kluge.net> 2.53-1
+- updated to 2.53
+
+* Mon Mar 24 2003 Theo Van Dinter <felicity@kluge.net> 2.52-1
+- updated to 2.52
+
+* Thu Mar 13 2003 Theo Van Dinter <felicity@kluge.net> 2.51-1
+- updated to 2.51
+
 * Tue Feb 25 2003 Theo Van Dinter <felicity@kluge.net> -3
 - changed "make install" call to properly set where the man pages go.
   Fixes oddities between MakeMaker and RPM.  <grumble>
