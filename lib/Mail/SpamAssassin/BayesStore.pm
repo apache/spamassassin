@@ -982,8 +982,9 @@ sub add_touches_to_journal {
   while ($writ < $nbytes) {
     my $len = syswrite (OUT, $self->{string_to_journal}, $nbytes-$writ);
 
-    if ($len < 0) {
+    if (!defined $len || $len < 0) {
       # argh, write failure, give up
+      $len = 0 unless ( defined $len );
       warn "write failed to Bayes journal $path ($len of $nbytes)!\n";
       last;
     }
