@@ -15,8 +15,6 @@
 # limitations under the License.
 # </@LICENSE>
 
-my $RUN_AS_SINGLE_PROCESS = 0;
-
 my $PREFIX          = '@@PREFIX@@';             # substituted at 'make' time
 my $DEF_RULES_DIR   = '@@DEF_RULES_DIR@@';      # substituted at 'make' time
 my $LOCAL_RULES_DIR = '@@LOCAL_RULES_DIR@@';    # substituted at 'make' time
@@ -855,11 +853,7 @@ sub spawn {
   sigprocmask( POSIX::SIG_BLOCK(), $sigset )
     or die "Can't block SIGINT for fork: $!\n";
 
-  if ($RUN_AS_SINGLE_PROCESS) {
-    $pid = 0;
-  } else {
-    die "fork: $!" unless defined( $pid = fork );
-  }
+  die "fork: $!" unless defined( $pid = fork );
 
   if ($pid) {
     ## PARENT
@@ -880,11 +874,9 @@ sub spawn {
     sigprocmask( POSIX::SIG_UNBLOCK(), $sigset )
       or die "Can't unblock SIGINT for fork: $!\n";
 
-    if (!$RUN_AS_SINGLE_PROCESS) {
-      # set process name where supported
-      # this will help make it clear via process listing which is child/parent
-      $0 = 'spamd child';
-    }
+    # set process name where supported
+    # this will help make it clear via process listing which is child/parent
+    $0 = 'spamd child';
 
     # handle $clients_per_child connections, then die in "old" age...
     for ( my $i = 0 ; $i < $clients_per_child ; $i++ ) {
@@ -929,7 +921,7 @@ sub spawn {
     }
 
     # If the child lives to get here, it will die ...  Muhaha.
-    exit unless $RUN_AS_SINGLE_PROCESS;
+    exit;
   }
 }
 
@@ -1652,7 +1644,6 @@ sub setup_parent_sig_handlers {
 
 # sig handlers: child processes
 sub setup_child_sig_handlers {
-  return if ($RUN_AS_SINGLE_PROCESS);
   # note: all the signals changed in setup_parent_sig_handlers() must
   # be reset to appropriate values here!
   $SIG{HUP} = $SIG{CHLD} = $SIG{INT} = $SIG{TERM} = 'DEFAULT';
