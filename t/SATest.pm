@@ -41,7 +41,7 @@ sub sa_t_init {
   $spamd_cf_args = "-C log/test_rules_copy";
 
   $scr_cf_args = "-C log/test_rules_copy";
-  $scr_pref_args = "";
+  $scr_pref_args = "-p log/test_default.cf";
   $scr_test_args = "";
   $set_test_prefs = 0;
   $default_cf_lines = "
@@ -65,6 +65,9 @@ sub sa_t_init {
   open (PREFS, ">>log/test_rules_copy/99_test_default.cf");
   print PREFS $default_cf_lines;
   close PREFS;
+
+  # create an empty .prefs file
+  open (PREFS, ">>log/test_default.cf"); close PREFS;
 
   mkdir("log/user_state",0755);
 
