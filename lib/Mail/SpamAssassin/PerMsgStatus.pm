@@ -241,6 +241,7 @@ sub learn {
   my ($self) = @_;
 
   if (!$self->{conf}->{auto_learn}) { return; }
+  if (!$self->{conf}->{use_bayes}) { return; }
   if ($self->{disable_auto_learning}) { return; }
 
   # require that hits be *both* above/below the auto_learn_threshold

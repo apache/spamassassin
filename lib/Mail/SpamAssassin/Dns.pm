@@ -217,6 +217,7 @@ sub is_razor1_available {
     dbg ("local tests only, ignoring Razor1", "razor", -1);
     return 0;
   }
+  if (!$self->{main}->{use_razor1}) { return 0; }
 
   eval { require Razor::Client; };
   
@@ -238,6 +239,7 @@ sub razor1_lookup {
     dbg ("local tests only, ignoring Razor1", "razor", -1);
     return 0;
   }
+  if (!$self->{main}->{use_razor1}) { return 0; }
 
   timelog("Razor1 -> Starting razor test ($timeout secs max)", "razor", 1);
   
@@ -329,6 +331,7 @@ sub is_razor2_available {
     dbg ("local tests only, ignoring Razor2", "razor", -1);
     return 0;
   }
+  if (!$self->{main}->{use_razor2}) { return 0; }
 
   # Use Razor2 if it's available, Razor1 otherwise
   eval { require Razor2::Client::Agent; };
@@ -355,6 +358,7 @@ sub razor2_lookup {
     dbg ("local tests only, ignoring Razor2", "razor", -1);
     return 0;
   }
+  if (!$self->{main}->{use_razor2}) { return 0; }
 
   timelog("Razor2 -> Starting razor test ($timeout secs max)", "razor", 1);
   
@@ -494,6 +498,7 @@ sub is_dcc_available {
     dbg ("local tests only, ignoring DCC");
     return 0;
   }
+  if (!$self->{main}->{use_dcc}) { return 0; }
 
   my $dccproc = $self->{conf}->{dcc_path} || '';
   unless ($dccproc) {
@@ -525,6 +530,7 @@ sub dcc_lookup {
     dbg ("local tests only, ignoring DCC");
     return 0;
   }
+  if (!$self->{main}->{use_dcc}) { return 0; }
 
   timelog("DCC -> Starting test ($timeout secs max)", "dcc", 1);
   $self->enter_helper_run_mode();
@@ -618,6 +624,7 @@ sub is_pyzor_available {
     dbg ("local tests only, ignoring Pyzor");
     return 0;
   }
+  if (!$self->{main}->{use_pyzor}) { return 0; }
 
   my $pyzor = $self->{conf}->{pyzor_path} || '';
   unless ($pyzor) {
@@ -647,6 +654,7 @@ sub pyzor_lookup {
     dbg ("local tests only, ignoring Pyzor");
     return 0;
   }
+  if (!$self->{main}->{use_pyzor}) { return 0; }
 
   timelog("Pyzor -> Starting test ($timeout secs max)", "pyzor", 1);
   $self->enter_helper_run_mode();

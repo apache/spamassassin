@@ -103,14 +103,7 @@ sub get_addr_entry {
   };
 
   $entry->{count} = $self->{accum}->{$addr} || 0;
-  $entry->{totscore} = $self->{accum}->{$addr.'|totscore'};
-
-  # if we had old-style AWL DB, ie no totscore, then just pretend we never saw this address before
-  if(!defined($entry->{totscore}))
-  {
-      $entry->{totscore} = 0;
-      $entry->{count} = 0;
-  }
+  $entry->{totscore} = $self->{accum}->{$addr.'|totscore'} || 0;
 
   dbg ("auto-whitelist (db-based): $addr scores ".$entry->{count}.'/'.$entry->{totscore});
   return $entry;
@@ -143,12 +136,17 @@ sub remove_entry {
   delete $self->{accum}->{$addr};
   delete $self->{accum}->{$addr.'|totscore'};
 
-  # try to delete any per-IP entries for this addr as well.
-  # could be slow...
-  my @keys = grep { /^\Q$addr\E\|ip=/ } keys %{$self->{accum}};
-  foreach my $key (@keys) {
-    delete $self->{accum}->{$key};
-    delete $self->{accum}->{$key.'|totscore'};
+  if ($addr =~ /^(.*)\|ip=none$/) {
+    # it doesn't have an IP attached.
+    # try to delete any per-IP entries for this addr as well.
+    # could be slow...
+    my $mailaddr = $1;
+    my @keys = grep { /^\Q${mailaddr}\E\|ip=\d+\.\d+$/ }
+					keys %{$self->{accum}};
+    foreach my $key (@keys) {
+      delete $self->{accum}->{$key};
+      delete $self->{accum}->{$key.'|totscore'};
+    }
   }
 }
 

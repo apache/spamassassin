@@ -118,8 +118,11 @@ sub new {
 
   $self->{num_check_received} = 2;
 
+  $self->{use_razor1} = 1;
+  $self->{use_razor2} = 1;
   $self->{razor_config} = undef;
   $self->{razor_timeout} = 10;
+
   $self->{rbl_timeout} = 30;
 
   # this will be sedded by implementation code, so ~ is OK.
@@ -152,6 +155,7 @@ sub new {
   $self->{fold_headers} = 1;
   $self->{always_add_headers} = 1;
 
+  $self->{use_dcc} = 1;
   $self->{dcc_path} = undef; # Browse PATH
   $self->{dcc_body_max} = 999999;
   $self->{dcc_fuz1_max} = 999999;
@@ -160,11 +164,13 @@ sub new {
   $self->{dcc_timeout} = 10;
   $self->{dcc_options} = '-R';
 
+  $self->{use_pyzor} = 1;
   $self->{pyzor_path} = undef; # Browse PATH
   $self->{pyzor_max} = 5;
   $self->{pyzor_add_header} = 0;
   $self->{pyzor_timeout} = 10;
 
+  $self->{use_bayes} = 1;
   $self->{bayes_path} = "__userstate__/bayes";
   $self->{bayes_file_mode} = "0700";	# as string, with --x bits
   $self->{bayes_use_hapaxes} = 1;
@@ -634,14 +640,18 @@ for you, set this to 1.
 
 =item ok_languages xx [ yy zz ... ]		(default: all)
 
-Which languages are considered OK to receive mail from.  Mail using
-character sets used by these languages will not be marked as possibly
-being spam in an undesired language.
+Which languages are considered OK to receive mail in.  SpamAssassin will try to
+detect the language used in the message text.
 
-The following languages are recognized.  In your configuration, you must
-use the language specifier located in the first column, not the English
-name for the language.  You may also specify "all" if your language is
-not listed or if you want to allow any language.
+Note that the language cannot always be recognized reliably.  In that case, no
+points will be assigned.
+
+The rule C<UNDESIRED_LANGUAGE_BODY> is triggered based on how this is set.
+
+The following languages are recognized.  In your configuration, you must use
+the language specifier located in the first column, not the English name for
+the language.  You may also specify C<all> if your language is not listed, or
+if you want to allow any language.  The default setting is C<all>.
 
 =over 4
 
@@ -775,9 +785,6 @@ not listed or if you want to allow any language.
 
 =back
 
-Note that the language cannot always be recognized.  In that case, no
-points will be assigned.
-
 =cut
 
     if (/^ok[-_]languages\s+(.+)$/) {
@@ -787,16 +794,25 @@ points will be assigned.
 =item ok_locales xx [ yy zz ... ]		(default: all)
 
 Which locales (country codes) are considered OK to receive mail from.  Mail
-using character sets used by languages in these countries, will not be marked
-as possibly being spam in a foreign language.
+using B<character sets> used by languages in these countries, will not be
+marked as possibly being spam in a foreign language.
 
-Note that all ISO-8859-* character sets, and Windows code page character sets,
-are always permitted by default anyway.
+If you receive lots of spam in foreign languages, and never get any non-spam in
+these languages, this may help.  Note that all ISO-8859-* character sets, and
+Windows code page character sets, are always permitted by default.
 
-If you wish SpamAssassin to block spam in foreign languages, set this to
-the locale which matches your preference, from the list below:
+Set this to C<all> to allow all character sets.  This is the default.
+
+The rules C<CHARSET_FARAWAY>, C<CHARSET_FARAWAY_BODY>, and
+C<CHARSET_FARAWAY_HEADERS> are triggered based on how this is set.
+
+Select the locales to allow from the list below:
 
 =over 4
+
+=item en
+
+Western character sets in general
 
 =item ja
 
@@ -992,6 +1008,27 @@ Clear the spamtrap template.
       $self->{spamtrap_template} = ''; next;
     }
 
+=item use_dcc ( 0 | 1 )		(default 1)
+
+Whether to use DCC, if it is available.
+
+=cut
+
+    if (/^use[-_]dcc\s+(\d+)$/) {
+      $self->{use_dcc} = $1; next;
+    }
+
+=item dcc_timeout n              (default: 10)
+
+How many seconds you wait for dcc to complete before you go on without 
+the results
+
+=cut
+
+    if (/^dcc[-_]timeout\s+(\d+)$/) {
+      $self->{dcc_timeout} = $1+0; next;
+    }
+
 =item dcc_body_max NUMBER
 
 =item dcc_fuz1_max NUMBER
@@ -1034,6 +1071,27 @@ The default is to not add the header.
 
     if (/^dcc[-_]add[-_]header\s+(\d+)$/) {
       $self->{dcc_add_header} = $1+0; next;
+    }
+
+=item use_pyzor ( 0 | 1 )		(default 1)
+
+Whether to use Pyzor, if it is available.
+
+=cut
+
+    if (/^use[-_]pyzor\s+(\d+)$/) {
+      $self->{use_pyzor} = $1; next;
+    }
+
+=item pyzor_timeout n              (default: 10)
+
+How many seconds you wait for Pyzor to complete before you go on without 
+the results.
+
+=cut
+
+    if (/^pyzor[-_]timeout\s+(\d+)$/) {
+      $self->{pyzor_timeout} = $1+0; next;
     }
 
 =item pyzor_max NUMBER
@@ -1083,67 +1141,26 @@ See dialup_codes for more details and an example
       $self->{num_check_received} = $1+0; next;
     }
 
-###########################################################################
-    # SECURITY: no eval'd code should be loaded before this line.
-    #
-    if ($scoresonly && !$self->{allow_user_rules}) { goto failed_line; }
 
-=back
+=item use_razor1 ( 0 | 1 )		(default 1)
 
-=head1 SETTINGS
-
-These settings differ from the ones above, in that they are considered
-'privileged'.  Only users running C<spamassassin> from their procmailrc's or
-forward files, or sysadmins editing a file in C</etc/mail/spamassassin>, can
-use them.   C<spamd> users cannot use them in their C<user_prefs> files, for
-security and efficiency reasons, unless allow_user_rules is enabled (and
-then, they may only add rules from below).
-
-=over 4
-
-=item allow_user_rules { 0 | 1 }		(default: 0)
-
-This setting allows users to create rules (and only rules) in their
-C<user_prefs> files for use with C<spamd>. It defaults to off, because
-this could be a severe security hole. It may be possible for users to
-gain root level access if C<spamd> is run as root. It is NOT a good
-idea, unless you have some other way of ensuring that users' tests are
-safe. Don't use this unless you are certain you know what you are
-doing. Furthermore, this option causes spamassassin to recompile all
-the tests each time it processes a message for a user with a rule in
-his/her C<user_prefs> file, which could have a significant effect on
-server load. It is not recommended.
+Whether to use Razor version 1, if it is available.
 
 =cut
 
-
-    if (/^allow[-_]user[-_]rules\s+(\d+)$/) {
-      $self->{allow_user_rules} = $1+0; 
-      dbg("Allowing user rules!"); next;
+    if (/^use[-_]razor1\s+(\d+)$/) {
+      $self->{use_razor1} = $1; next;
     }
 
-=item dcc_timeout n              (default: 10)
+=item use_razor2 ( 0 | 1 )		(default 1)
 
-How many seconds you wait for dcc to complete before you go on without 
-the results
+Whether to use Razor version 2, if it is available.
 
 =cut
 
-    if (/^dcc[-_]timeout\s+(\d+)$/) {
-      $self->{dcc_timeout} = $1+0; next;
+    if (/^use[-_]razor2\s+(\d+)$/) {
+      $self->{use_razor2} = $1; next;
     }
-
-=item pyzor_timeout n              (default: 10)
-
-How many seconds you wait for pyzor to complete before you go on without 
-the results
-
-=cut
-
-    if (/^pyzor[-_]timeout\s+(\d+)$/) {
-      $self->{pyzor_timeout} = $1+0; next;
-    }
-
 
 =item razor_timeout n		(default 10)
 
@@ -1154,6 +1171,16 @@ the results
 
     if (/^razor[-_]timeout\s+(\d+)$/) {
       $self->{razor_timeout} = $1; next;
+    }
+
+=item use_bayes ( 0 | 1 )		(default 1)
+
+Whether to use the naive-Bayesian-style classifier built into SpamAssassin.
+
+=cut
+
+    if (/^use[-_]bayes\s+(\d+)$/) {
+      $self->{use_bayes} = $1; next;
     }
 
 =item rbl_timeout n		(default 30)
@@ -1192,6 +1219,45 @@ How many seconds to wait before retrying an MX check.
 
 
 
+
+###########################################################################
+    # SECURITY: no eval'd code should be loaded before this line.
+    #
+    if ($scoresonly && !$self->{allow_user_rules}) { goto failed_line; }
+
+=back
+
+=head1 SETTINGS
+
+These settings differ from the ones above, in that they are considered
+'privileged'.  Only users running C<spamassassin> from their procmailrc's or
+forward files, or sysadmins editing a file in C</etc/mail/spamassassin>, can
+use them.   C<spamd> users cannot use them in their C<user_prefs> files, for
+security and efficiency reasons, unless allow_user_rules is enabled (and
+then, they may only add rules from below).
+
+=over 4
+
+=item allow_user_rules { 0 | 1 }		(default: 0)
+
+This setting allows users to create rules (and only rules) in their
+C<user_prefs> files for use with C<spamd>. It defaults to off, because
+this could be a severe security hole. It may be possible for users to
+gain root level access if C<spamd> is run as root. It is NOT a good
+idea, unless you have some other way of ensuring that users' tests are
+safe. Don't use this unless you are certain you know what you are
+doing. Furthermore, this option causes spamassassin to recompile all
+the tests each time it processes a message for a user with a rule in
+his/her C<user_prefs> file, which could have a significant effect on
+server load. It is not recommended.
+
+=cut
+
+
+    if (/^allow[-_]user[-_]rules\s+(\d+)$/) {
+      $self->{allow_user_rules} = $1+0; 
+      dbg("Allowing user rules!"); next;
+    }
 
 # If you think, this is complex, you should have seen the four previous
 # implementations that I scratched :-)
