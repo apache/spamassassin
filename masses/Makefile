@@ -1,6 +1,6 @@
 
 OPT = -O6
-GALIB =	./galib245
+GALIB =	/local2/galib245
 PGALIB = pgapack
 
 all:

@@ -33,6 +33,9 @@ SpamAssassin, which runs persistently.  Using "spamc", a lightweight C
 client, this allows an MTA to process large volumes of mail through
 SpamAssassin without having to fork/exec a perl interpreter for each one.
 
+Ian R. Justman has contributed "spamproxy", a spam-filtering SMTP proxy
+server.  This lives in the "spamproxy" directory.
+
 SpamAssassin lives at http://spamassassin.taint.org/ or in CPAN, and is
 distributed under the same license as Perl itself.
 
@@ -198,6 +201,9 @@ If you want to use SpamAssassin site-wide:
     http://spamassassin.taint.org/sitewide.html .  You may want to use
     'spamd' (see below).
 
+  - another option is Ian R. Justman's "spamproxy", a spam-filtering SMTP
+    proxy server.  This lives in the "spamproxy" directory.
+
 
 If you don't use any mail filter just yet, and want to let SpamAssassin
 handle local mail delivery using Mail::Audit:
@@ -228,6 +234,9 @@ handle local mail delivery using Mail::Audit:
       cp ~/.forward.bak ~/.forward
       echo "Help!" | mail root
 
+  - Send yourself sample-spam.txt and make sure it gets tagged:
+
+      /usr/sbin/sendmail yourusername < sample-spam.txt
 
 
 Other installation notes:
@@ -270,6 +279,10 @@ Other installation notes:
     'spamd' directory for more details.
 
 
+  - There's also Ian R. Justman's "spamproxy", a spam-filtering SMTP
+    proxy server.  This lives in the "spamproxy" directory.
+
+
   - Scores and other user preferences can now be loaded from an SQL
     database; see the 'sql' subdirectory for more details.
 
@@ -277,75 +290,52 @@ Other installation notes:
 Customising
 -----------
 
-When installing SpamAssassin, the configuration files defining the list of
-rules and the default user preferences are written to INSTALLSITELIB, or
-/usr/lib/perl5/site_perl/5.005 (or similar) on a typical UNIX system.
+These are the configuration files installed by SpamAssassin:
 
-Users who run "spamassassin" will receive a copy of the user preferences
-in their home directories as the file "~/.spamassassin.cf".  This allows
-them to edit their preferences and reweight the rules, or to increase or
-decrease the "line in the sand" at which point a mail is judged spam (or
-not).
+  - /usr/share/spamassassin/*.cf:
 
-Systems administrators can create the "/etc/spamassassin.cf" file to add
-new rules for all users on the system, or they can create
-"/etc/spamassassin.prefs" to set default preferences for their users.
-Note that the latter file is never read by SpamAssassin, just copied.  If
-you want to set site-wide preferences, use "/etc/spamassassin.cf".
+	Distributed configuration files, with all defaults.  Do not modify
+	these, as they are overwritten when you upgrade.
 
-The default config files installed by SpamAssassin are generally written
-into the site_perl directory; this may be
-"/usr/lib/perl5/site_perl/5.005", or similar.  This path changes,
-depending on your OS and the version of perl you have installed
-(unfortunately).
+  - /etc/mail/spamassassin/*.cf:
 
-These paths are pretty ugly, but since SpamAssassin uses Perl's
-Makefile-building system for portability and compatibility with CPAN,
-they're currently unavoidable.
-
-There is no difference in interpretation between the rules file and the
-preferences file, so users can add new rules for their own use in the
-"~/.spamassassin.cf" file, if they like -- as long as they're running
-SpamAssassin themselves, and not using the site-wide "spamd" filtering
-system.
-
-So, to summarise:
-
-  - __SITE_PERL_DIRECTORY__/spamassassin.cf:
-
-	Distributed configuration file, with all defaults.  Do not
-	modify this, as it is overwritten when you upgrade.
-
-  - /etc/spamassassin.cf:
-
-  	Site config file, for system admins to create, modify, and
+  	Site config files, for system admins to create, modify, and
 	add local rules and scores to.  Modifications here will be
-	added to the config loaded from the above file.
+	appended to the config loaded from the above directory.
 
-  - __SITE_PERL_DIRECTORY__/spamassassin.prefs:
+  - /usr/share/spamassassin/user_prefs.template:
 
-  	Distributed default preferences. Do not modify this, as it
-	is overwritten when you upgrade.
+	Distributed default user preferences. Do not modify this, as it is
+	overwritten when you upgrade.
 
-  - /etc/spamassassin.prefs:
+  - /etc/mail/user_prefs.template:
 
-	Site default preferences, for system admins to create, modify, and
-	set defaults for users preferences files.  Takes precedence over
-	the above prefs file, if it exists.   Do not put system-wide
-	settings in here; put them in /etc/spamassassin.cf instead.
-	This file is just a template, which will be copied to a user's
-	home directory for them to change.
+	Default user preferences, for system admins to create, modify, and
+	set defaults for users' preferences files.  Takes precedence over
+	the above prefs file, if it exists.
 
-  - $USER_HOME/.spamassassin.cf:
+	Do not put system-wide settings in here; put them in the
+	/etc/mail/spamassassin directory.  This file is just a template,
+	which will be copied to a user's home directory for them to
+	change.
+
+  - $USER_HOME/.spamassassin:
+
+  	User state directory.  Used to hold spamassassin state, such
+	as a per-user automatic whitelist, and the user's preferences
+	file.
+
+  - $USER_HOME/.spamassassin/user_prefs:
 
   	User preferences file.  If it does not exist, one of the 
 	default prefs file from above will be copied here for the
 	user to edit later, if they wish.
 
-  - $USER_HOME/.spamassassin:
-
-  	User state directory.  Used to hold spamassassin state, such
-	as a per-user automatic whitelist.
+	Unless you're using spamd, there is no difference in
+	interpretation between the rules file and the preferences file, so
+	users can add new rules for their own use in the
+	"~/.spamassassin.cf" file, if they like.  (spamd disables this for
+	security and increased speed.)
 
 
 Locali[sz]ation

@@ -76,7 +76,6 @@ sub parse_headers {
 
   $self->{headers} = { };
   $self->{header_order} = [ ];
-
   my ($prevhdr, $hdr, $val, $entry);
 
   while (defined ($_ = shift @{$self->{textarray}})) {
@@ -93,7 +92,7 @@ sub parse_headers {
 	next;
 
       } else {
-	$hdr = "X-Spam-Mail-Format-Warning";
+	$hdr = "X-Mail-Format-Warning";
 	$val = "No previous line for continuation: $_";
 	$entry = $self->_get_or_create_header_object ($hdr);
 	$entry->{added} = 1;
@@ -105,7 +104,7 @@ sub parse_headers {
       $entry->{original} = 1;
 
     } else {
-      $hdr = "X-Spam-Mail-Format-Warning";
+      $hdr = "X-Mail-Format-Warning";
       $val = "Bad RFC822 header formatting in $_";
       $entry = $self->_get_or_create_header_object ($hdr);
       $entry->{added} = 1;
@@ -316,5 +315,11 @@ sub _proxy_to_mail_audit {
 }
 
 # ---------------------------------------------------------------------------
+
+sub DESTROY {
+  my $self = shift;
+  delete $self->{textarray};
+  delete $self->{headers};
+}
 
 1;

@@ -50,10 +50,16 @@ sub report {
 
 sub is_razor_available {
   my ($self) = @_;
+
+  if ($self->{main}->{local_tests_only}) {
+    dbg ("local tests only, ignoring Razor");
+    return 0;
+  }
   
   eval {
     require Razor::Client;
   };
+
   if ($@) {
     dbg ( "Razor is not available" );
     return 0;
@@ -67,11 +73,12 @@ sub razor_report {
   my ($self, $fulltext) = @_;
 
   my @msg = split (/^/m, $fulltext);
+  my $timeout = 10;             # seconds
+  my $response;
   my $config = $self->{main}->{conf}->{razor_config};
   my %options = (
     'debug'     => $Mail::SpamAssassin::DEBUG
   );
-  my $response;
 
   # razor also debugs to stdout. argh. fix it to stderr...
   if ($Mail::SpamAssassin::DEBUG) {
@@ -83,7 +90,12 @@ sub razor_report {
 
   eval {
     require Razor::Client;
+    require Razor::Agent;
     local ($^W) = 0;            # argh, warnings in Razor
+    local ($/);                 # argh, bugs in Razor
+
+    local $SIG{ALRM} = sub { die "alarm\n" };
+    alarm 10;
 
     my $rc = Razor::Client->new ($config, %options);
     die "undefined Razor::Client\n" if (!$rc);
@@ -95,20 +107,25 @@ sub razor_report {
       $response = $rc->report (\@msg);
     }
 
+    alarm 0;
     dbg ("Razor: spam reported, response is \"$response\".");
   };
   
   if ($@) {
-    warn "razor-report failed: $! $@";
+    if ($@ =~ /alarm/) {
+      dbg ("razor report timed out after $timeout secs.");
+    } else {
+      warn "razor-report failed: $! $@";
+    }
     undef $response;
   }
+
+  $/ = $oldslash;
 
   if ($Mail::SpamAssassin::DEBUG) {
     open (STDOUT, ">&OLDOUT");
     close OLDOUT;
   }
-
-  $/ = $oldslash;
 
   if (defined($response) && $response+0) {
     return 1;

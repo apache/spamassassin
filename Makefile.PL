@@ -1,20 +1,18 @@
 require 5.005;
 
+my $DEF_RULES_DIR	= '$(PREFIX)/share/spamassassin';
+
+my $LOCAL_RULES_DIR	= '/etc/mail/spamassassin';
+
+my $MYCFLAGS		= '';		# this is a good place to put -g etc.
+
+###########################################################################
+
 use Config;
 use ExtUtils::MakeMaker;
 
-my $mycflags = '';		# this is a good place to put -g etc.
-
-# if (-d 'CVS' && !-f 'doc/spamassassin.html') {
-# print <<EOWARN;
-# 
-# Note: I see you have a 'CVS' directory.  SpamAssassin's MANIFEST file is set up
-# to deal with the distribution-tarball case, not the CVS case, so you may see a
-# warning about missing files, particularly in the 'doc' subdirectory.  This can
-# be safely ignored.
-# 
-# EOWARN
-# }
+# do this in perl, it's more portable
+my $rulesfiles = join (' ', map { s/rules.//; $_ } (<rules/*.cf>));
 
 sub MY::libscan {
   my($self,$path) = @_;
@@ -32,7 +30,8 @@ WriteMakefile(
     'NAME'	=> 'Mail::SpamAssassin',
     'VERSION_FROM' => 'lib/Mail/SpamAssassin.pm', # finds $VERSION
 
-    'EXE_FILES'	=> [ 'spamassassin', 'spamd/spamc', 'spamd/spamd' ],
+    'EXE_FILES'	=> [ 'spamassassin', 'spamd/spamc',
+    		'spamd/spamd', 'spamproxy/spamproxyd' ],
 
     'MAN1PODS' => {
 	    'spamassassin' => '$(INST_MAN1DIR)/spamassassin.$(MAN1EXT)',
@@ -56,7 +55,7 @@ WriteMakefile(
 	      },
 
     'clean' => { FILES =>
-	'pod2htm* spamassassin spamd/spamc spamd/spamd doc'
+	'pod2htm* spamassassin spamd/spamc spamd/spamd spamproxy/spamproxyd doc'
     },
 
     'AUTHOR' => 'Justin Mason <jm@jmason.org>',
@@ -82,11 +81,16 @@ sub MY::postamble {
 
 qq{
 
+RULES		= $rulesfiles
+
 CFCC		= $Config{cc}
-CFCCFLAGS	= $Config{ccflags} $mycflags
+CFCCFLAGS	= $Config{ccflags} $MYCFLAGS
 CFOPTIMIZE	= $Config{optimize}
 CFLIBS		= $Config{libs}
 CFLDFLAGS	= $Config{ldflags}
+
+DEF_RULES_DIR	= $DEF_RULES_DIR
+LOCAL_RULES_DIR	= $LOCAL_RULES_DIR
 
 }. q{
 
@@ -100,18 +104,38 @@ spamd/spamd: spamd/spamd.raw
 	$(PERL) fixpath.pl spamd/spamd.raw $@
 	$(CHMOD) $(PERM_RWX) $@
 
+spamproxy/spamproxyd: spamproxy/spamproxyd.raw
+	$(PERL) fixpath.pl spamproxy/spamproxyd.raw $@
+	$(CHMOD) $(PERM_RWX) $@
+
 spamd/spamc: spamd/spamc.c
 	$(CFCC) $(CFCCFLAGS) $(CFOPTIMIZE) spamd/spamc.c \
 			-o $@ $(CFLDFLAGS) $(CFLIBS)
 
-inst_cfs: spamassassin.cf spamassassin.prefs
-	$(CP) spamassassin.cf $(INSTALLSITELIB)/spamassassin.cf
-	$(CP) spamassassin.prefs $(INSTALLSITELIB)/spamassassin.prefs
+inst_cfs: $(LOCAL_RULES_DIR) $(DEF_RULES_DIR) $(DEF_RULES_DIR)/user_prefs.template $(LOCAL_RULES_DIR)/local.cf
+	for file in $(RULES) ; do \
+	  $(CP) rules/$$file $(DEF_RULES_DIR)/$$file; \
+	done
+
+$(DEF_RULES_DIR)/user_prefs.template: rules/user_prefs.template
+	$(CP) rules/user_prefs.template $(DEF_RULES_DIR)/user_prefs.template
+
+$(LOCAL_RULES_DIR)/local.cf: rules/local.cf
+	[ -f $(LOCAL_RULES_DIR)/local.cf ] || $(CP) rules/local.cf $(LOCAL_RULES_DIR)/local.cf
+
+$(DEF_RULES_DIR):
+	mkdir -p $(DEF_RULES_DIR)
+
+$(LOCAL_RULES_DIR):
+	mkdir -p $(LOCAL_RULES_DIR)
+
+doc:
+	mkdir -p doc
 
 text_html_doc: doc/.made
+	@true
 
-doc/.made: $(MAN1PODS) $(MAN3PODS)
-	-mkdir doc
+doc/.made: doc $(MAN1PODS) $(MAN3PODS)
 	for f in $(MAN1PODS) $(MAN3PODS) $(EXTRAPODS) ; do \
 	      pod2html $$f > doc/`echo $$f | perl -pe \
 	  	's/(lib|spamd)\///; s/\//::/g; s/\.(pod|pm)//;'`.html ; \
