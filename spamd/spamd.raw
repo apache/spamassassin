@@ -2323,6 +2323,10 @@ If logging to a file is enabled and that log file is rotated, the spamd server
 must be restarted with a SIGHUP. (If the log file is just truncated, this is
 not needed but still recommended.)
 
+Note that logging to a file does not use locking, so you cannot intermix
+logging from spamd and other processes into the same file.  If you want
+to mix logging like this, use syslog instead.
+
 =item B<--syslog-socket>=I<type>
 
 Specify how spamd should send messages to syslogd.  The options are C<unix>,
@@ -2334,7 +2338,8 @@ the B<Sys::Syslog> package which do not support some socket types, so you may
 need to set this.  If you get error messages regarding B<__PATH_LOG> or similar
 from spamd, try changing this setting.
 
-The socket type C<file> is used internally and should not be specified.
+The socket type C<file> is used internally and should not be specified.  Use
+the C<-s> switch instead.
 
 =item B<-u> I<username>, B<--username>=I<username>
 
