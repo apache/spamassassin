@@ -86,10 +86,6 @@ body MSN_GROUPS                 eval:check_for_msn_groups_headers()
 describe MSN_GROUPS             Came from MSN Communities
 tflags MSN_GROUPS               nice
 
-header NMS_CGI_NOT_BUGGY        X-Mailer =~ /^NMS FormMail\.pl.*v\d/
-describe NMS_CGI_NOT_BUGGY      Not Matt's Scripts formmail.pl
-tflags NMS_CGI_NOT_BUGGY	nice
-
 # some non-spam rules from http://www.darkmere.gen.nz/2002/0628.html
 header Q_FOR_SELLER             Subject =~ /Question.*(?:for|to|from eBay).*(?:seller|Member)/
 describe Q_FOR_SELLER           Subject is an eBay question
