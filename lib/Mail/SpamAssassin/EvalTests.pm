@@ -3192,16 +3192,6 @@ sub html_image_only2 {
 	  $self->{html}{length} <= $max);
 }
 
-sub html_image_only3 {
-  my ($self, undef, $min, $max) = @_;
-
-  return (exists $self->{html}{"inside_img"} &&
-	  exists $self->{html}{length} &&
-	  $self->{html}{length} > $min &&
-	  $self->{html}{length} <= $max &&
-	  $self->get('X-eGroups-Return') !~ /^sentto-.*\@returns\.groups\.yahoo\.com$/);
-}
-
 sub html_charset_faraway {
   my ($self) = @_;
 
