@@ -14,7 +14,7 @@ use Carp;
 use Mail::Audit;
 use Mail::SpamAssassin;
 my $spamtest = Mail::SpamAssassin->new({local_tests_only=>1});
-global %resphash = (
+my %resphash = (
     EX_OK => 0,
     EX_USAGE => 64, # command line usage error
     EX_DATAERR => 65, # data format error
