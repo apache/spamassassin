@@ -39,6 +39,7 @@ lib/Mail/SpamAssassin/Reporter.pm
 masses/README
 masses/continual_evolve.sh
 masses/evolve.cxx
+masses/craig-evolve.cxx
 masses/hit-frequencies
 masses/kill_continual_evolve.sh
 masses/logs-to-c
@@ -82,3 +83,5 @@ t/data/spam/004
 t/db_based_whitelist.t
 t/dir_based_whitelist.t
 tools/check_whitelist
+lib/Mail/SpamAssassin/NoMailAudit.pm
+t/spamd_maxsize.t

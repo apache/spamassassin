@@ -90,7 +90,7 @@ use vars qw{
 
 eval {
   require Mail::SpamAssassin;
-  require Mail::SpamAssassin::MyMailAudit;
+  require Mail::SpamAssassin::NoMailAudit;
 
   getopts ('tc:p:ehVDrPw:l:dLWM:') or usage();
 
@@ -103,12 +103,29 @@ EOVERSION
     exit 0;
   }
 
-# standard Mail::Audit start.  No longer used due to bugs in M:A.
-# my $mail = Mail::SpamAssassin::MyMailAudit->new();
+# 1.
+# Standard Mail::Audit start.  No longer used due to bugs in M:A, regarding
+# handling of slightly misformatted input.
+#
+# require Mail::Audit;
+# my $mail = Mail::Audit->new();
 
-my @msglines = (<STDIN>);
-pre_chew_for_mail_audit (\@msglines);
-my $mail = Mail::SpamAssassin::MyMailAudit->new ( data => \@msglines ); 
+# 2.
+# Workaround Mail::Audit start.  No longer needed, since
+# Mail::SpamAssassin::NoMailAudit provides the Mail::Audit features
+# we need more efficiently and reliably.
+#
+# my @msglines = (<STDIN>);
+# pre_chew_for_mail_audit (\@msglines);
+# require Mail::SpamAssassin::MyMailAudit;
+# my $mail = Mail::SpamAssassin::MyMailAudit->new ( data => \@msglines ); 
+
+# 3.
+# No use of Mail::Audit at all, apart from the accept(), reject() and
+# resend() methods (which are proxied transparently).  Lovely.
+#
+use Mail::SpamAssassin::NoMailAudit;
+my $mail = Mail::SpamAssassin::NoMailAudit->new ();
 
 # For Mail::Audit users -- this is the magic. Just create a Mail::SpamAssassin
 # object like this, then run the check() method as below; if it returns a

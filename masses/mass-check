@@ -1,8 +1,12 @@
 #!/usr/bin/perl
 
 use lib "../lib";
-use Mail::Internet;
 use Mail::SpamAssassin;
+
+use Mail::SpamAssassin::NoMailAudit;
+
+#use Mail::Audit;
+#use Mail::Internet;
 
 $cffile = '../spamassassin.cf';
 if (-f "spamassassin.cf") { $cffile = "spamassassin.cf"; }
@@ -64,7 +68,10 @@ sub mass_check_mh_tar_file {
       next if $mail =~ m#/$# or $mail =~ /cyrus\.(index|header|cache)/;
       my $msg_data = $tar->get_content($mail);
       my @msg = split("\r\n",$tar->get_content($mail));
-      my $ma = Mail::Audit->new(data => \@msg);
+
+      #my $ma = Mail::Audit->new(data => \@msg);
+      my $ma = Mail::SpamAssassin::NoMailAudit->new(data => \@msg);
+
       $mail =~ s/\s/_/g;
       docheck ($mail, $ma);
   }
@@ -92,7 +99,9 @@ sub mass_check_mh_folder {
     # skip too-big mails
     if (-s STDIN > 250*1024) { close STDIN; next; }
 
-    my $ma = Mail::Audit->new();
+    #my $ma = Mail::Audit->new();
+    my $ma = Mail::SpamAssassin::NoMailAudit->new();
+
     docheck ($mail, $ma);
   }
 }

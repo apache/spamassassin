@@ -25,8 +25,8 @@ as Vipul's Razor [1].
 The distribution provides "spamassassin", a command line tool to perform
 filtering, along with "Mail::SpamAssassin", a set of perl modules which
 implement a Mail::Audit plugin, allowing SpamAssassin to be used in a
-Mail::Audit filter or (possibly at some point) in a spam-protection proxy
-POP/IMAP server.
+Mail::Audit filter, spam-protection proxy SMTP or POP/IMAP server, or a
+variety of different spam-blocking scenarios.
 
 In addition, Craig Hughes has contributed "spamd", a daemonized version of
 SpamAssassin, which runs persistently.  Using "spamc", a lightweight C
@@ -67,8 +67,15 @@ http://spamassassin.taint.org/ , and install that, like so:
 	make
 	make install				[as root]
 
-You will require the Mail::Audit module, and any modules it requires.
-Here's how to install this using CPAN.pm:
+If you intend to let SpamAssassin handle local mail delivery to your mail
+spool file, or if you already use Mail::Audit, you will require the
+Mail::Audit module, and any modules it requires  (there's lots of them,
+unfortunately.)
+
+If you use procmail, or you plan to use 'spamd', you will *not* need
+these.
+
+Here's how to install them using CPAN.pm:
 
 	perl -MCPAN -e shell
 	o conf prerequisites_policy ask
@@ -112,8 +119,7 @@ Using SpamAssassin
 
 Steps to take for every installation:
 
-  - Install Mail::Audit and Mail::SpamAssassin on your mail server, as
-    above.
+  - Install Mail::SpamAssassin on your mail server, as above.
 
   - Test it:
 
