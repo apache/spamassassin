@@ -131,8 +131,9 @@ try_to_connect (const struct sockaddr *addr, int *sockptr)
     case EFAULT:
       syslog (LOG_ERR, "setsockopt() to spamd failed: %m");
       return EX_SOFTWARE;
+
     default:
-      /* ignored */
+      break;		/* ignored */
     }
   }
 
