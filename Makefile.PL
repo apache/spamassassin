@@ -349,7 +349,7 @@ binaries.mk: configure
 inst_cfs: $(PKG_LOCAL_RULES_DIR) $(PKG_LOCAL_RULES_DIR)/local.cf
 	$(MKPATH) $(PKG_DEF_RULES_DIR)
 	$(RM_RF) $(PKG_DEF_RULES_DIR)/*
-	$(PERL) build/preprocessor $(FIXVARS) -Irules -O$(PKG_DEF_RULES_DIR) $(RULES)
+	$(PERL) build/preprocessor $(FIXVARS) -m$(PERM_RW) -Irules -O$(PKG_DEF_RULES_DIR) $(RULES)
 	$(CHMOD) $(PERM_RWX) $(PKG_DEF_RULES_DIR)
 
 $(PKG_LOCAL_RULES_DIR):
