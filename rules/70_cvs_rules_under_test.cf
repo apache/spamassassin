@@ -248,3 +248,10 @@ uri T_PROMO_URL			/promo(?:|tion)s?\.(?:com|biz)/
 # bug 765, 12/23 -tvd
 body	ENTER_TO_LOSE		/\benter to win\b/i
 describe ENTER_TO_LOSE		Has 'enter to win' but you lose privacy.
+
+# bug 881, 12/23 -tvd
+# possible replacements for MARKETING_PARTNERS
+body T_MARKETING_PARTNERS  /(?:marketing|network) partner|partner site/i
+describe T_MARKETING_PARTNERS     Claims you registered with some kind of partner
+body T_MARKETING_PARTNERS_2  /(?:marketing|network) partner|partner (?:web)?site/i
+describe T_MARKETING_PARTNERS_2    Claims you registered with some kind of partner
