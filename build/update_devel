@@ -2,6 +2,8 @@
 # This script assumes it's being run from the root of the SA code tree
 set -x
 
+umask 002
+
 WEBDIR=$SA_WEBDIR
 test -n "$WEBDIR"  || WEBDIR=$HOME/site
 
@@ -73,5 +75,5 @@ rm -f $DISTVNAME.*
 
 # ( cd $DEVDIR && svn add *SpamAssassin* )
 
+chgrp -R spamassassin $DEVDIR $RELDIR
 ls -l $DEVDIR
-
