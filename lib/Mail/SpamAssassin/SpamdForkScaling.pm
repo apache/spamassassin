@@ -277,13 +277,15 @@ sub wait_for_orders {
   my $sock = $self->{backchannel}->get_parent_socket();
   while (1) {
     my $line = $sock->getline();
-    chomp $line if defined $line;
+    if (!defined($line)) {
+      die "empty order from parent";
+    }
+    chomp $line;
     if (index ($line, "A") == 0) {  # string starts with "A" = accept
       return PFORDER_ACCEPT;
     }
     else {
       die "unknown order from parent: '$line'";
-      return undef;
     }
   }
 }
