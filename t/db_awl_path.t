@@ -37,7 +37,7 @@ my $error = do {
 };
 
 print "# $error\n";
-ok($error, qr/Cannot create tmp lockfile/, "Check we get the right error back");
+ok($error, qr/cannot create tmp lockfile/, "Check we get the right error back");
 
 
 # and this mail should *not* be whitelisted as a result.
