@@ -1253,13 +1253,14 @@ sub scan {
     print "#Bayes-Raw-Counts: $self->{raw_counts}\n";
   }
 
+  $self->opportunistic_calls();
+
 skip:
   if (!defined $score) {
     dbg ("bayes: not scoring message, returning undef");
   }
 
   $self->{store}->cleanup();
-  $self->opportunistic_calls();
   $self->{store}->untie_db();
 
   $permsgstatus->{tag_data}{BAYESTCHAMMY} = $tcount_hammy;
