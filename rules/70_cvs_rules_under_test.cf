@@ -9,14 +9,14 @@
 # helps identify probationary rules in test output.
 
 # http://www.hughes-family.org/bugzilla/show_bug.cgi?id=678
-body T_DOMAIN_4U2         /[\@\.]\S{0,20}(?:4u|u2|2u|you2|4you|2you|foryou)\S{1,20}\.(?:net|com|org)\b/
+body T_DOMAIN_4U2         /[\@\.]\S{0,20}(?:[42](?:yo)?u|foryou|you2)\S{1,20}\.(?:net|com|org)\b/
 describe T_DOMAIN_4U2     Domain name containing "4u", "u2" or variants.
 
-body T_USER_4U2           /\b\S{0,20}(?:4u|u2|2u|you2|4you|2you|foryou)\S{1,20}\@\S{1,20}\.(?:net|com|org)\b/
+body T_USER_4U2           /\b\S{0,20}(?:[42](?:yo)?u|foryou|you2)\S{1,20}\@\S{1,20}\.(?:net|com|org)\b/
 describe T_USER_4U2       Local part containing "4u", "u2" or variants.
 
 #  0.00     0.00     0.00    0.00    1.00  T_FROM_4U2 (no matches)
-#header T_FROM_4U2         From =~ /4u|u2|2u|you2|4you|2you|foryou/i
+#header T_FROM_4U2         From =~ /[42](?:yo)?u|foryou|you2/i
 #describe T_FROM_4U2       From contains "4u", "u2" or variants.
 
 # bug 680
