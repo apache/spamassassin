@@ -31,6 +31,9 @@ Mail::SpamAssassin - Spam detector and markup engine
   }
   ...
 
+  $status->finish();
+  $mail->finish();
+
 
 =head1 DESCRIPTION
 
