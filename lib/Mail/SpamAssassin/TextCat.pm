@@ -14,7 +14,6 @@
 
 package Mail::SpamAssassin::TextCat;
 
-use warnings ;
 use strict;
 use vars qw($opt_a $opt_f $opt_t $opt_u);
 
