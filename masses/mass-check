@@ -95,9 +95,9 @@ $spamtest = new Mail::SpamAssassin ({
 $spamtest->compile_now(1);
 $spamtest->read_scoreonly_config("$FindBin::Bin/mass-check.cf");
 
-my $who = `id -un 2>/dev/null`; chop $who;
-my $where = `uname -n 2>/dev/null`; chop $where;
-my $when = `date -u`; chomp $when;
+my $who   = `id -un 2>/dev/null`;   chomp $who;
+my $where = `uname -n 2>/dev/null`; chomp $where;
+my $when  = `date -u`;              chomp $when;
 my $log_header = "# mass-check results from $who\@$where, on $when\n" .
 		 "# M:SA version ".$spamtest->Version()."\n" .
 		 '# CVS tag: $Name:  $' . "\n";
@@ -185,11 +185,15 @@ sub wanted {
     push(@extra, "bayes=" . $status->{bayes_score});
   }
   if ($opt_mid) {
-    my $mid = $ma->get_header("Message-Id") ||
-	"<$id\@$host.masses.spamassasin.org>";
-    $mid =~ s/^\s*//s;
-    $mid =~ s/\s*$//s;
-    $mid =~ s/[\s,]/./gs;
+    my $mid = $ma->get_header("Message-Id");
+    unless ($mid) {           # no Message-Id in mail...
+      $mid = $id;             # ... so build one from the id
+      $mid =~ s,^.*/,,;       # remove the path
+      $mid .= "." . time;     # add time
+      $mid = "<$mid\@$host.masses.spamassasin.org>";
+    }
+    $mid =~ s/^\s+|\s+$//sg;  # trim leading and trailing whitespaces
+    $mid =~ s/[\s:,\\]/_/sg;  # replace dangerous characters
     push(@extra, "mid=$mid");
   }
 
