@@ -26,7 +26,7 @@ case "$1" in
 	# Start daemon.
 	echo -n "Starting spamd: "
 	daemon spamd -d -c
-	RETVAL = $?
+	RETVAL=$?
 	touch /var/lock/spamd
 	echo
 	;;
@@ -34,7 +34,7 @@ case "$1" in
 	# Stop daemons.
 	echo -n "Shutting down spamd: "
 	killproc spamd
-	RETVAL = $?
+	RETVAL=$?
 	rm -f /var/lock/spamd
 	echo
 	;;
