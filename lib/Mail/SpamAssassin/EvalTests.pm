@@ -3330,8 +3330,9 @@ sub check_obfu_word {
   my $new = $word;
   $new =~ s/(\w)/${1}\\W+/g;
   $new =~ s/\\W\+$//;
+  $new =~ s/a/\[a@\]/gi;
   $new =~ s/o/\[o0\]/gi;
-  $new =~ s/i/\[i1\]/gi;
+  $new =~ s/i/\[i1|\]/gi;
   $new =~ s/l/\[l1|\]/gi;
   $new =~ s/v/(?:v|\\\/)/gi;
 
