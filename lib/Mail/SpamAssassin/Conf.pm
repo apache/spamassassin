@@ -95,8 +95,8 @@ sub parse_rules {
       $self->{required_hits} = $1+0; next;
     }
 
-    if (/^score\s+(\S+)\s+(\-*\d+)$/) {
-      $self->{scores}->{$1} = $2+0; next;
+    if (/^score\s+(\S+)\s+(\-*[\d\.]+)$/) {
+      $self->{scores}->{$1} = $2+0.0; next;
     }
 
     if (/^report\s*(.*)$/) {
@@ -125,7 +125,7 @@ sub add_test {
   if ($name eq '.') { $name = ($self->{unnamed_counter}++); }
   $self->{tests}->{$name} = $text;
   $self->{test_types}->{$name} = $type;
-  $self->{scores}->{$name} ||= 1;
+  $self->{scores}->{$name} ||= 1.0;
 }
 
 sub finish_parsing {

@@ -589,7 +589,7 @@ sub do_head_tests {
   while (($rulename, $rule) = each %{$self->{conf}->{head_tests}}) {
     my $hit = 0;
     $self->clear_test_state();
-    next if ($self->{conf}->{scores}->{$rulename} == 0);
+    next if ($self->{conf}->{scores}->{$rulename} == 0.0);
 
     my $def = '';
     my ($hdrname, $testtype, $pat) = 
@@ -620,7 +620,7 @@ sub do_body_tests {
   # build up the eval string...
   my $evalstr = '';
   while (($rulename, $pat) = each %{$self->{conf}->{body_tests}}) {
-    next if ($self->{conf}->{scores}->{$rulename} == 0);
+    next if ($self->{conf}->{scores}->{$rulename} == 0.0);
     $evalstr .= '
       if ('.$pat.') { $self->got_body_pattern_hit (q{'.$rulename.'}); }
     ';
@@ -740,7 +740,7 @@ sub handle_hit {
 
   $self->{test_names_hit} .= $rule.",";
 
-  $self->{test_logs} .= sprintf ("%-16s %s%s\n%s",
+  $self->{test_logs} .= sprintf ("%-18s %s%s\n%s",
 		"Hit! (".$score." point".($score == 1 ? "":"s").")",
 		$area, $desc, $self->{test_log_msgs});
 }
@@ -757,7 +757,7 @@ sub got_hit {
 
 sub test_log {
   my ($self, $msg) = @_;
-  $self->{test_log_msgs} .= sprintf ("%16s [%s]\n", "", $msg);
+  $self->{test_log_msgs} .= sprintf ("%18s [%s]\n", "", $msg);
 }
 
 ###########################################################################
