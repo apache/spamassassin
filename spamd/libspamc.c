@@ -405,7 +405,6 @@ static int _message_filter(const struct sockaddr *addr,
     if((i=try_to_connect(addr, hent, hent_port, &sock))!=EX_OK){
         free(buf);
         free(m->out); m->out=m->msg; m->out_len=m->msg_len;
-        close(sock);
         return i;
     }
 
