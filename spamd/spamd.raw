@@ -68,7 +68,7 @@ GetOptions(
 	'local!' => \$opt{'local'}, 'L' => \$opt{'local'},
 	'paranoid!' => \$opt{'paranoid'}, 'P' => \$opt{'paranoid'},
 	'stop-at-threshold!' => \$opt{'stop-at-threshold'}, 'S' => \$opt{'stop-at-threshold'},
-	'helper_home_dir|H:s' => \$opt{'home_dir_for_helpers'},
+	'helper-home-dir|H:s' => \$opt{'home_dir_for_helpers'},
 
         # will be stripped in future release
 	'add-from!' => sub { warn "The --add-from option has been removed\n" },
@@ -987,7 +987,7 @@ queued. Please note that there is a OS specific maximum of connections that
 can be queued. (Try C<perl -MSocket -e'print SOMAXCONN'> to find this
 maximum)
 
-=item B<-H> I<directory>
+=item B<-H> I<directory>, B<--helper-home-dir>=I<directory>
 
 Specify that external programs such as Razor, DCC, and Pyzor should have
 a HOME environment variable set to a specific directory.  The default
