@@ -91,6 +91,34 @@ sub finish_parsing_end {
 	next unless $opts->{conf}->{rules_to_replace}{$rule};
 
 	dbg("replacetags: replacing $rule: $re");
+
+	if ($re =~ s/${start}pre (.+?)${end}//) {
+	  my $pre_name = $1;
+	  if ($pre_name) {
+	    my $pre = $opts->{conf}->{replace_pre}->{$pre_name};
+	    if ($pre) {
+	      $re =~ s|($start.+?$end)|$pre$1|g;
+	    }
+	  }
+	}
+	if ($re =~ s/${start}inter (.+?)${end}//) {
+	  my $inter_name = $1;
+	  if ($inter_name) {
+	    my $inter = $opts->{conf}->{replace_inter}->{$inter_name};
+	    if ($inter) {
+	      $re =~ s|($start.+?$end)($start.+?$end)|$1$inter$2|g;
+	    }
+	  }
+	}
+	if ($re =~ s/${start}post (.+?)${end}//) {
+	  my $post_name = $1;
+	  if ($post_name) {
+	    my $post = $opts->{conf}->{replace_post}->{$post_name};
+	    if ($post) {
+	      $re =~ s|($start.+?$end)|$1$post|g;
+	    }
+	  }
+	}
 	while ($re =~ m|$start(.+?)$end|g) {
 	  my $tag_name = $1;
 
@@ -102,8 +130,10 @@ sub finish_parsing_end {
 	    }
 	  }
         }
+
 	# do the actual replacement
 	$opts->{conf}->{$type}->{$priority}->{$rule} = $re;
+
 	dbg("replacetags: replaced $rule: $re");
       }
     }
@@ -131,6 +161,42 @@ put them inside the rule itself for greater flexibility.
 
   push(@cmds, {
     setting => 'replace_tag',
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
+  });
+
+=item replace_pre tagname expression
+
+Assign a valid regular expression to tagname.  The expression will be
+placed before each tag that is replaced.
+
+=cut
+
+  push(@cmds, {
+    setting => 'replace_pre',
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
+  });
+
+=item replace_inter tagname expression
+
+Assign a valid regular expression to tagname.  The expression will be
+placed between each two immediately adjacent tags that are replaced.
+
+=cut
+
+  push(@cmds, {
+    setting => 'replace_inter',
+    type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
+  });
+
+=item replace_post tagname expression
+
+Assign a valid regular expression to tagname.  The expression will be
+placed after each tag that is replaced.
+
+=cut
+
+  push(@cmds, {
+    setting => 'replace_post',
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_HASH_KEY_VALUE,
   });
 
