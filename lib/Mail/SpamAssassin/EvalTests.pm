@@ -3291,10 +3291,11 @@ sub check_numeric_http {
         'a' => '[a@]',
         'e' => '[e3]',
         'o' => '[o0]',
-        'i' => '[il1|]',
-        'l' => '[l1|]',
+        'i' => '[il1|!]',
+        'l' => '[l1|!]',
         'u' => '[uv]',
         'v' => '(?:v|\\\/)',
+	'x' => '(?:x|><)',
   );
 
   sub check_obfu_word {
@@ -3314,7 +3315,7 @@ sub check_numeric_http {
 
         # turn "foo" into "f\W*o\W*o" to match interuptus
         if (@list) {
-          $new .= "$_\\W*";
+          $new .= $_.'{1,3}\W{0,3}';
         }
         else {
           # mad skillz yo
@@ -3364,9 +3365,11 @@ sub check_phish_mismatch {
   my ($self) = @_;
 
   while (my($k,$v) = each %{$self->{html}->{uri_anchor_index}}) {
-    next unless ($k =~ m%^https?:/*(?:[^@]+@)?[0-9.]+%i);
+    next if ($k !~ m%^https?:/*(?:[^\@/]+\@)?\d+\.\d+\.\d+\.\d+%i);
     foreach (@{$v}) {
-      return 1 if ($self->{html}->{anchor}->[$_] =~ m%^https:/*(?:[^@]+@)?\D%i);
+      $_ = $self->{html}->{anchor}->[$_];
+      next if (m%^https:/*(?:[^\@/]+\@)?\d+\.\d+\.\d+\.\d+%i);
+      return 1 if (m%https:%i);
     }
   }
 
