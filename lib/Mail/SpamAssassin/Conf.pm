@@ -65,6 +65,13 @@ sub new {
   $self->{whitelist_from_doms} = { };
   $self->{blacklist_from_doms} = { };
 
+  $self->{whitelist_to} = { };
+  $self->{whitelist_to_doms} = { };
+  $self->{more_spam_to} = { };
+  $self->{more_spam_to_doms} = { };
+  $self->{all_spam_to} = { };
+  $self->{all_spam_to_doms} = { };
+
   # this will hold the database connection params
   $self->{user_scores_dsn} = '';
   $self->{user_scores_sql_username} = '';
@@ -114,6 +121,26 @@ sub _parse {
       $self->add_to_addrlist ('blacklist_from',
       	'blacklist_from_doms', split (' ', $1)); next;
     }
+
+    ###############################################
+    # added by DJ
+    #
+    if (/^whitelist[-_]to\s+(.+)\s*$/) {
+      $self->add_to_addrlist ('whitelist_to',
+              'whitelist_to_doms', split (' ', $1)); next;
+    }
+
+    if (/^more[-_]spam[-_]to\s+(.+)\s*$/) {
+      $self->add_to_addrlist ('more_spam_to',
+              'more_spam_to_doms', split (' ', $1)); next;
+    }
+
+    if (/^all[-_]spam[-_]to\s+(.+)\s*$/) {
+      $self->add_to_addrlist ('all_spam_to',
+              'all_spam_to_doms', split (' ', $1)); next;
+    }
+
+    ###############################################
 
     if (/^describe\s+(\S+)\s+(.*)$/) {
       $self->{descriptions}->{$1} = $2; next;

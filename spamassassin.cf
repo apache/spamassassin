@@ -111,7 +111,7 @@ describe TO_NO_USER		To: has no local-part before @ sign
 header PLING			Subject =~ /\!/
 describe PLING			Subject has an exclamation mark
 
-header PLING_PLING		Subject =~ /\!\!+/
+header PLING_PLING		Subject =~ /\!\!\!+/
 describe PLING_PLING		Subject has lots of exclamation marks
 
 header SUBJ_HAS_UNIQ_ID		eval:check_for_unique_subject_id()
@@ -667,6 +667,18 @@ describe BALANCE_FOR_LONG	Message text is over 500 lines long
 header USER_IN_WHITELIST	eval:check_from_in_whitelist()
 describe USER_IN_WHITELIST	From: address is in the user's white-list
 
+###########################################################################
+# If they want spam let 'em have it! ;) - DJ
+
+header USER_IN_WHITELIST_TO	eval:check_to_in_whitelist()
+describe USER_IN_WHITELIST_TO	User is listed in 'whitelist_to'
+
+header USER_IN_MORE_SPAM_TO	eval:check_to_in_more_spam()
+describe USER_IN_MORE_SPAM_TO	User is listed in 'more_spam_to'
+
+header USER_IN_ALL_SPAM_TO	eval:check_to_in_all_spam()
+describe USER_IN_ALL_SPAM_TO	User is listed in 'all_spam_to'
+
 # the idea is that most legit newsletters will claim their copyright; spammers
 # do not seem to for some reason.  (Kevin Dangoor)
 body COPYRIGHT_CLAIMED		/copyright.*all rights reserved./i
@@ -941,6 +953,12 @@ score COPYRIGHT_CLAIMED		    -2.0
 score USER_IN_WHITELIST		    -100.0
 score A_FROM_IN_AUTO_WLIST	    -10.0
 score Q_FOR_SELLER		    -4.0
+
+# Not really false positives but the user wants spam!
+
+score USER_IN_WHITELIST_TO       -6.0  # they want some spam
+score USER_IN_MORE_SPAM_TO      -20.0  # they want more spam
+score USER_IN_ALL_SPAM_TO      -100.0  # they want all spam, go figure :)
 
 ###########################################################################
 # Some not-quite-spam scores; block common virii with these.  (it's feature
