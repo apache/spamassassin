@@ -300,6 +300,9 @@ sub word_is_in_dictionary {
   $word =~ s/\s+$//;
   return 0 if ($word =~ /[^a-z]/);
 
+  return 0 if ($word =~ /ing$/);	# amusing
+  return 0 if ($word =~ /nny$/);	# funny
+
   if (!open (DICT, "</usr/dict/words") &&
   	!open (DICT, "</usr/share/dict/words"))
   {
