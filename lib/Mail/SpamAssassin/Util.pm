@@ -576,8 +576,11 @@ sub parse_content_type {
   # white space, the white space must be presumed to have been added by
   # a gateway, and must be deleted.)"
   #
-  my ($boundary) = $ct =~ m!boundary\s*=\s*("[^"]*[^"\s]"|[^";\s]+)!i;
+  my ($boundary) = $ct =~ m!\bboundary\s*=\s*("[^"]*[^"\s]"|[^";\s]+)!i;
   $boundary =~ tr/"//d if ( defined $boundary ); # remove the double quotes ...
+
+  my($charset) = $ct =~ /\bcharset\s*=\s*["']?(.*?)["']?(?:;|$)/i;
+  my($name) = $ct =~ /name\s*=\s*["']?(.*?)["']?(?:;|$)/i;
 
   # Get the type out ...
   $ct =~ s/;.*$//;                    # strip everything after first semi-colon
@@ -585,7 +588,7 @@ sub parse_content_type {
   $ct =~ tr/\000-\040\177-\377\042\050\051\054\056\072-\077\100\133-\135//d;    # strip inappropriate chars
   $ct = lc $ct;
 
-  return wantarray ? ($ct,$boundary) : $ct;
+  return wantarray ? ($ct,$boundary,$charset,$name) : $ct;
 }
 
 ###########################################################################
