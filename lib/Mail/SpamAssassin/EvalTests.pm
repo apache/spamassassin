@@ -12,7 +12,6 @@ use Mail::SpamAssassin::MailingList;
 use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::SHA1 qw(sha1);
 use Mail::SpamAssassin::TextCat;
-use Mail::SpamAssassin::Util qw(parse_rfc822_date);
 use Time::Local;
 use strict;
 eval "use bytes";
@@ -1613,13 +1612,13 @@ sub _get_date_header_time {
   my $time;
   if (defined($date) && length($date)) {
     chomp($date);
-    $time = parse_rfc822_date($date);
+    $time = Mail::SpamAssassin::Util::parse_rfc822_date($date);
   }
   if (!defined($time)) {
     $date = $self->get('Date');
     if (defined($date) && length($date)) {
       chomp($date);
-      $time = parse_rfc822_date($date);
+      $time = Mail::SpamAssassin::Util::parse_rfc822_date($date);
     }
   }
   if (defined($time)) {
@@ -1671,7 +1670,7 @@ sub _get_received_header_times {
 	my $date = $1;
 	dbg ("trying Received fetchmail header date for real time: $date",
 	     "datediff", -2);
-	my $time = parse_rfc822_date($date);
+	my $time = Mail::SpamAssassin::Util::parse_rfc822_date($date);
 	if (defined($time) && (time() >= $time)) {
 	  dbg ("time_t from date=$time, rcvd=$date", "datediff", -2);
 	  push @fetchmail_times, $time;
@@ -1691,7 +1690,7 @@ sub _get_received_header_times {
     if ($rcvd =~ m/(\s.?\d+ \S\S\S \d+ \d+:\d+:\d+ \S+)/) {
       my $date = $1;
       dbg ("trying Received header date for real time: $date", "datediff", -2);
-      my $time = parse_rfc822_date($date);
+      my $time = Mail::SpamAssassin::Util::parse_rfc822_date($date);
       if (defined($time)) {
 	dbg ("time_t from date=$time, rcvd=$date", "datediff", -2);
 	push @header_times, $time;
@@ -2449,7 +2448,7 @@ sub check_outlook_timestamp_token {
   my $fudge = 250;
 
   $_ = $self->get ('Date');
-  $_ = parse_rfc822_date($_); $_ ||= 0;
+  $_ = Mail::SpamAssassin::Util::parse_rfc822_date($_); $_ ||= 0;
   my $expected = int (($_ * $x) + $y);
   my $diff = $timetoken - $expected;
   dbg("time token found: $timetoken expected (from Date): $expected: $diff");
@@ -2459,7 +2458,7 @@ sub check_outlook_timestamp_token {
   $_ = $self->get ('Received');
   /(\s.?\d+ \S\S\S \d+ \d+:\d+:\d+ \S+).*?$/;
   dbg("last date in Received: $1");
-  $_ = parse_rfc822_date($_); $_ ||= 0;
+  $_ = Mail::SpamAssassin::Util::parse_rfc822_date($_); $_ ||= 0;
   $expected = int (($_ * $x) + $y);
   $diff = $timetoken - $expected;
   dbg("time token found: $timetoken expected (from Received): $expected: $diff");
