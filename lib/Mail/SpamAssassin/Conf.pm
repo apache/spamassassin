@@ -2907,13 +2907,13 @@ optional, and the default is shown below.
  _AWLCOUNT_        Number of messages on which AWL modification is based
  _AWLPRESCORE_     Score before AWL
  _DATE_            rfc-2822 date of scan
- _STARS(*)_        one * (use any character) for each score point (note: this
-                   is limited to 50 'stars' to stay on the right side of the RFCs)
+ _STARS(*)_        one "*" (use any character) for each full score point
+                   (note: limited to 50 'stars')
  _RELAYSTRUSTED_   relays used and deemed to be trusted
  _RELAYSUNTRUSTED_ relays used that can not be trusted
  _AUTOLEARN_       autolearn status ("ham", "no", "spam", "disabled",
                    "failed", "unavailable")
- _TESTS(,)_        tests hit separated by , (or other separator)
+ _TESTS(,)_        tests hit separated by "," (or other separator)
  _TESTSSCORES(,)_  as above, except with scores appended (eg. AWL=-3.0,...)
  _DCCB_            DCC's "Brand"
  _DCCR_            DCC's results
