@@ -496,12 +496,6 @@ describe T_GAPPY_PORN_01           G.a.p.p.y - P.o.r.n
 body T_GAPPY_PORN_02                       /\b(?:s\.e\.x|p\.o\.r\.n|x\.x\.x|f\.u\.c\.k|p\.a\.r\.t\.y|t\.e\.e\.n|f\.u\.n|h\.o\.t)/i
 describe T_GAPPY_PORN_02           G.a.p.p.y - P.o.r.n
 
-
-
-# bug 1575
-header T_X_HEADER_PITCHID exists:X-Header-Pitchid
-describe T_X_HEADER_PITCHID Has X-Header-Pitchid header
-
 # bug 1743
 header T_WS_PHRASE                To =~ /\s*"\s"\s/
 describe T_WS_PHRASE              Phrase part of address is a space
