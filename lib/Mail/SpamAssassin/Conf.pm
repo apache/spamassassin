@@ -30,6 +30,9 @@ Whitespace in the files is not significant, but please note that starting a
 line with whitespace is deprecated, as we reserve its use for multi-line rule
 definitions, at some point in the future.
 
+Currently, each rule or configuration setting must fit on one-line; multi-line
+settings are not supported yet.
+
 Paths can use C<~> to refer to the user's home directory.
 
 Where appropriate, default values are listed in parentheses.
@@ -1848,7 +1851,8 @@ returned for this symbol is the text from all 3 headers, separated by newlines.
 
 C<op> is either C<=~> (contains regular expression) or C<!~> (does not contain
 regular expression), and C<pattern> is a valid Perl regular expression, with
-C<modifiers> as regexp modifiers in the usual style.
+C<modifiers> as regexp modifiers in the usual style.   Note that multi-line
+rules are not supported, even if you use C<x> as a modifier.
 
 If the C<[if-unset: STRING]> tag is present, then C<STRING> will
 be used if the header is not found in the mail message.
