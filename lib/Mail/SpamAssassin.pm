@@ -70,7 +70,6 @@ use Mail::SpamAssassin::ConfSourceSQL;
 use Mail::SpamAssassin::ConfSourceLDAP;
 use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::Message;
-use Mail::SpamAssassin::MsgParser;
 use Mail::SpamAssassin::Bayes;
 use Mail::SpamAssassin::PluginHandler;
 
@@ -302,99 +301,31 @@ sub new {
 
 ###########################################################################
 
-=item parse()
+=item parse($message, $parse_now)
 
-Parse will return a Mail::SpamAssassin::Message object.  To use it,
-simply call C<Mail::SpamAssassin->parse($msg)>, where $msg is either undef
-(will use STDIN), a scalar of the entire message, an array reference
-of the message with 1 line per array element, or a file glob with the
-entire contents of the message.
+Parse will return a Mail::SpamAssassin::Message object with just the
+headers parsed.  When calling this function, there are two optional
+parameters that can be passed in: $message is either undef (which will
+use STDIN), a scalar of the entire message, an array reference of the
+message with 1 line per array element, or a file glob which holds the
+entire contents of the message; and $parse_now, which specifies whether
+or not to create the MIME tree at parse time or later as necessary.
 
-This function will return a base Message object with just the headers
-being parsed.  M::SA::Message->find_parts() will end up doing a
-full recursive mime parse of the message as necessary.  That procedure is
-recursive and ends up generating a tree of M::SA::MsgNode objects.
-parse() will generate the parent node of the tree, then pass the body of
-the message to M::SA::MsgParser->parse_body() which begins the recursive
-process.
+The I<$parse_now> option, by default, is set to false (0).
+This allows SpamAssassin to not have to generate the tree of
+Mail::SpamAssassin::Message::Node objects and their related data if the
+tree is not going to be used.  This is handy, for instance, when running
+C<spamassassin -d>, which only needs the pristine header and body which
+is always parsed and stored by this function.
 
 =cut
 
-# NOTE: This function is allowed (in bad OO form) to modify the
-# Message object directly as Message doesn't really have a
-# constructor in the traditional OO way of things.
-
 sub parse {
-  my($self, $message) = @_;
-  $message ||= \*STDIN;
-
-  # protect it from abuse ...
-  local $_;
-
-  # Figure out how the message was passed to us, and deal with it.
-  my @message;
-  if (ref $message eq 'ARRAY') {
-     @message = @{$message};
-  }
-  elsif (ref $message eq 'GLOB') {
-    if (defined fileno $message) {
-      @message = <$message>;
-    }
-  }
-  else {
-    @message = split ( /^/m, $message );
-  }
-
-  # Generate the main object and parse the appropriate MIME-related headers into it.
-  my $msg = Mail::SpamAssassin::Message->new();
-  my $header = '';
-
-  # Go through all the headers of the message
-  while ( my $last = shift @message ) {
-    if ( $last =~ /^From\s/ ) {
-      $msg->{'mbox_sep'} = $last;
-      next;
-    }
-
-    # Store the non-modified headers in a scalar
-    $msg->{'pristine_headers'} .= $last;
-
-    # NB: Really need to figure out special folding rules here!
-    if ( $last =~ /^[ \t]+/ ) {                    # if its a continuation
-      $header .= $last;                            # fold continuations
-      next;
-    }
-
-    # Ok, there's a header here, let's go ahead and add it in.
-    if ($header) {
-      my ( $key, $value ) = split ( /:\s*/, $header, 2 );
-      $msg->header( $key, $value );
-    }
-
-    # not a continuation...
-    $header = $last;
-
-    # Ok, we found the header/body blank line ...
-    last if ( $last =~ /^\r?$/m );
-  }
-
-  # Store the pristine body for later -- store as a copy since @message
-  # will get modified below
-  $msg->{'pristine_body'} = join('', @message);
-
-  # CRLF -> LF
-  for ( @message ) {
-    s/\r\n/\n/;
-  }
-
-  # If the message does need to get parsed, save off a copy of the body
-  # in a format we can easily parse later so we don't have to rip from
-  # pristine_body ...
-  #
-  $msg->{'toparse'} = \@message;
-
+  my($self, $message, $parsenow) = @_;
+  my $msg = Mail::SpamAssassin::Message->new({message=>$message, parsenow=>$parsenow});
   return $msg;
 }
+
 
 ###########################################################################
 
@@ -490,7 +421,6 @@ sub check {
 
   $self->init(1);
   my $msg = Mail::SpamAssassin::PerMsgStatus->new($self, $mail_obj);
-  # Message-Id is used for a filename on disk, so we can't have '/' in it.
   $msg->check();
   $msg;
 }
@@ -683,23 +613,6 @@ sub signal_user_changed {
 	      });
 
   1;
-}
-
-###########################################################################
-
-=item $status = $f->check_message_text ($mailtext)
-
-Check a mail, encapsulated in a plain string, to determine if it is spam or
-not.
-
-Otherwise identical to C<$f->check()> above.
-
-=cut
-
-sub check_message_text {
-  my $self = shift;
-  my $mail_obj = $self->parse (shift);
-  return $self->check ($mail_obj);
 }
 
 ###########################################################################
@@ -1197,12 +1110,13 @@ sub compile_now {
   dbg ("ignore: test message to precompile patterns and load modules");
   $self->init($use_user_prefs);
 
-  my $mail = $self->parse(\@testmsg);
+  my $mail = $self->parse(\@testmsg, 1);
   my $status = Mail::SpamAssassin::PerMsgStatus->new($self, $mail,
                         { disable_auto_learning => 1 } );
   $status->word_is_in_dictionary("aba"); # load triplets.txt into memory
   $status->check();
   $status->finish();
+  $mail->finish();
 
   # load SQL modules now as well
   my $dsn = $self->{conf}->{user_scores_dsn};
@@ -1243,13 +1157,14 @@ sub lint_rules {
   $self->init(1);
   $self->{syntax_errors} += $self->{conf}->{errors};
 
-  my $mail = $self->parse(\@testmsg);
+  my $mail = $self->parse(\@testmsg, 1);
   my $status = Mail::SpamAssassin::PerMsgStatus->new($self, $mail,
                         { disable_auto_learning => 1 } );
   $status->check();
 
   $self->{syntax_errors} += $status->{rule_errors};
   $status->finish();
+  $mail->finish();
 
   return ($self->{syntax_errors});
 }

@@ -18,7 +18,7 @@
 
 =head1 NAME
 
-Mail::SpamAssassin::MsgNode - decode, render, and make available MIME message parts
+Mail::SpamAssassin::Message::Node - decode, render, and make available MIME message parts
 
 =head1 SYNOPSIS
 
@@ -33,7 +33,7 @@ the various MIME message parts.
 
 =cut
 
-package Mail::SpamAssassin::MsgNode;
+package Mail::SpamAssassin::Message::Node;
 use strict;
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::HTML;
@@ -47,7 +47,6 @@ use MIME::QuotedPrint;
 sub new {
   my $class = shift;
   $class = ref($class) || $class;
-  my %opts = @_;	# unused currently in MsgNode, used in Message
 
   my $self = {
     headers		=> {},

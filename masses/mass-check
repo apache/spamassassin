@@ -247,7 +247,7 @@ sub wanted {
   # remove SpamAssassin markup, if present and the mail was spam
   $_ = $ma->get_header ("X-Spam-Status");
   if (defined($_) && /^Yes,/) {
-    my $new_ma = $spamtest->parse ($spamtest->remove_spamassassin_markup($ma));
+    my $new_ma = $spamtest->parse ($spamtest->remove_spamassassin_markup($ma), 1);
     $ma->finish();
     $ma = $new_ma;
   }

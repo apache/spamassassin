@@ -18,7 +18,7 @@
 
 =head1 NAME
 
-Mail::SpamAssassin::MsgMetadata - extract metadata from a message
+Mail::SpamAssassin::Message::Metadata - extract metadata from a message
 
 =head1 SYNOPSIS
 
@@ -47,7 +47,7 @@ It is held in two forms:
 
 =cut
 
-package Mail::SpamAssassin::MsgMetadata;
+package Mail::SpamAssassin::Message::Metadata;
 use strict;
 use bytes;
 

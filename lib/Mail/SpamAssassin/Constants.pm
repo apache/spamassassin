@@ -29,6 +29,7 @@ use vars qw (
   $IPV4_ADDRESS $IP_ADDRESS $IP_IN_RESERVED_RANGE $LOCALHOST
 );
 
+
 # ---------------------------------------------------------------------------
 # Initialize a regexp for reserved IPs, i.e. ones that could be
 # used inside a company and be the first or second relay hit by

@@ -193,9 +193,8 @@ eval {
     # Make sure the message is clean first ...
     my $new_mail = $spamtest->parse ($spamtest->remove_spamassassin_markup ($mail));
     $mail->finish();
-    $mail = $new_mail;
 
-    if ( $spamtest->report_as_spam ($mail) ) {
+    if ( $spamtest->report_as_spam ($new_mail) ) {
       warn "Warning, unable to report spam\nFor more information, re-run with -D option to see debug output.\n";
     }
     exit(0);
@@ -206,9 +205,8 @@ eval {
     # Make sure the message is clean first ...
     my $new_mail = $spamtest->parse ($spamtest->remove_spamassassin_markup ($mail));
     $mail->finish();
-    $mail = $new_mail;
 
-    if ( $spamtest->revoke_as_spam ($mail) ) {
+    if ( $spamtest->revoke_as_spam ($new_mail) ) {
       warn "Warning, unable to revoke spam\nFor more information, re-run with -D option to see debug output.\n";
     }
     exit(0);

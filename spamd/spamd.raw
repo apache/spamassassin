@@ -826,15 +826,16 @@ sub check {
       "."
     );
 
-    my $mail = $spamtest->parse (\@msglines);
-
     # Check length if we're supposed to
     if($expected_length && ($actual_length != $expected_length)) {
         protocol_error ("(Content-Length mismatch: Expected $expected_length bytes, got $actual_length bytes)");
         return 1;
     }
 
-    # Now use copy-on-writed (hopefully) SA object
+    # Parse the input message
+    my $mail = $spamtest->parse (\@msglines, 1);
+
+    # Go ahead and check the message
     my $status = $spamtest->check($mail);
 
     my $msg_score = sprintf("%.1f",$status->get_score);

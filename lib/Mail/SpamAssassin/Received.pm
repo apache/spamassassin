@@ -41,7 +41,7 @@
 package Mail::SpamAssassin::Received;
 1;
 
-package Mail::SpamAssassin::MsgMetadata;
+package Mail::SpamAssassin::Message::Metadata;
 use strict;
 use bytes;
 
