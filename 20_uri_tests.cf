@@ -51,8 +51,14 @@ describe HTTP_EXCESSIVE_ESCAPES	Completely unnecessary %-escapes inside a URL
 
 # thx to vince.delvecchio@analog.com for the legwork on the negative
 # lookbehinds here; saved a lot of work for us (bug 1035), also see bug 1835
-uri PORN_4			/^https?:\/\/[\w\.-]*(?:xxx|(?<!es|ba)(?<!dle|sus)sex|anal(?!og|y[sz])|slut|pussy|(?<!cir)(?<!\bdo)cum(?!ul|be?r|b?en)|nympho|suck|porn|hard-?core|taboo|whore|voyeur|lesbian|gurlpages|naughty|lolita|(?<!thir|four|eigh|nine)(?<!fif|six)(?<!seven)teen(?!th)|schoolgirl|kooloffer|erotic|lust(?!(?<=illust)(?:rat|rious)|(?<=clust)er)|pant(?:y|ies))[\w-]*\./
-describe PORN_4			URL uses words/phrases which indicate porn
+uri PORN_URL_SEX                /^https?:\/\/[\w\.-]*(?<!es|ba)(?<!dle|sus)sex(?!press)[\w-]*\./i
+describe PORN_URL_SEX		URL uses words/phrases which indicate porn (sex)
+uri PORN_URL_SLUT               /^https?:\/\/[\w\.-]*slut[\w-]*\./i
+describe PORN_URL_SLUT		URL uses words/phrases which indicate porn (slut)
+uri PORN_URL_PANT               /^https?:\/\/[\w\.-]*pant(?:y|ies)[\w-]*\./i
+describe PORN_URL_PANT		URL uses words/phrases which indicate porn (panties)
+uri PORN_URL_MISC               /^https?:\/\/[\w\.-]*(?:porn|hard-?core|taboo|lesbian|naughty)[\w-]*\./i
+describe PORN_URL_MISC		URL uses words/phrases which indicate porn (taboo etc.)
 
 # some frequently-advertised URLs
 uri WWW_CLIK4YOU_COM		/clik4you\.com/i
