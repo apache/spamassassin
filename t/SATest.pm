@@ -18,14 +18,14 @@ sub sa_t_init {
   $scr ||= "../spamassassin";
 
   $spamd = $ENV{'SPAMD_SCRIPT'};
-  $spamd ||= "../spamd/spamd";
+  $spamd ||= "../spamd/spamd -x";
 
   $spamc = $ENV{'SPAMC_SCRIPT'};
   $spamc ||= "../spamd/spamc";
 
   $spamdport = 48373;		# whatever
 
-  $scr_cf_args = "-c ../rules";
+  $scr_cf_args = "-c ../rules -p ../rules/user_prefs.template";
   $scr_pref_args = "";
   $scr_test_args = "";
 
