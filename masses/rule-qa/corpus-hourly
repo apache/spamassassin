@@ -166,8 +166,14 @@ sub current {
 	    if ($class eq "NET") {
 		@ham = grep { -M "$_" < 10 } @ham;
 		@spam = grep { -M "$_" < 10 } @spam;
-		@ham = grep { $revision{$_} eq $revision } @ham;
-		@spam = grep { $revision{$_} eq $revision } @spam;
+		# find most common CVS revision
+		my %count;
+		for (@spam, @ham) {
+		    $count{$revision{$_}}++;
+		}
+		my @mode = sort { $count{$b} <=> $count{$a} } keys %count;
+		@spam = grep { $revision{$_} eq $mode[0] } @spam;
+		@ham = grep { $revision{$_} eq $mode[0] } @ham;
 	    }
 	    elsif ($age =~ /^(?:new|all)$/) {
 		@ham = grep { -M "$_" < -M $opt{tagtime} } @ham;
