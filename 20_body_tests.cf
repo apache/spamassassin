@@ -74,42 +74,10 @@ full PYZOR_CHECK	eval:check_pyzor()
 describe PYZOR_CHECK	Listed in Pyzor (http://pyzor.sf.net/)
 tflags PYZOR_CHECK	net
 
-###########################################################################
-
-body REMOVE_IN_QUOTES		/\"remove\"/i
-describe REMOVE_IN_QUOTES	List removal information
-
-body     __BILL_1618    /\D301\D+a\W*2\W*c\D+1618\D/i
-
-meta     ANTISPAM_BILL  REMOVE_IN_QUOTES && __BILL_1618
-describe ANTISPAM_BILL  Very likely mention of anti-spam bill
-
-###########################################################################
-# CLICK rules
-# note HTML_LINK_CLICK* rules in HTML parser section
-
-body CLICK_TO_REMOVE_2		/mailto:.{0,50}click.{0,50}remove/is
-describe CLICK_TO_REMOVE_2	Click-to-remove with mailto: found
-
-# fixed by ms to not allow entry field onto next line
-rawbody ASCII_FORM_ENTRY	/[^<][A-Za-z][A-Za-z]+.{1,15}?[\x09\x20]*_{30,}/
-describe ASCII_FORM_ENTRY	Contains an ASCII-formatted form
-
 # this seems to be the new fashion (as of Jul 5 2002).  base64-encoded parts need to
 # be stripped before this match
 body TRACKER_ID		/^[a-z0-9]{6,24}[-_a-z0-9]{12,36}[a-z0-9]{6,24}\s*\z/is
 describe TRACKER_ID	Incorporates a tracking ID number
-
-# heh heh heh... tags used to (presumably) generate those anti-Razor random
-# IDs.  Used by Send-Safe ratware, http://www.send-safe.com/
-body MARKUP_RAND                /\{%RAND%\}/
-describe MARKUP_RAND            RAND found, spammer tried to use a random-ID
-body MARKUP_SSPL                /SSPLTM/
-describe MARKUP_SSPL            SSPL found, spammer tried to use a random-ID
-
-# (contrib: Matt Sergeant)
-body LARGE_HEX  		/[0-9a-fA-F]{70,}/
-describe LARGE_HEX		Contains a large block of hexadecimal code
 
 # converted to use eval method by Matthew Cline
 body LINES_OF_YELLING		eval:check_for_yelling()
@@ -203,11 +171,11 @@ describe MPART_ALT_DIFF	HTML and text parts are different
 
 body CHARSET_FARAWAY		eval:check_for_faraway_charset()
 describe CHARSET_FARAWAY	Character set indicates a foreign language
-tflags CHARSET_FARAWAY          userconf
+tflags CHARSET_FARAWAY		userconf
 
-body UNWANTED_LANGUAGE_BODY		eval:check_language()
+body UNWANTED_LANGUAGE_BODY	eval:check_language()
 describe UNWANTED_LANGUAGE_BODY	Message written in an undesired language
-tflags UNWANTED_LANGUAGE_BODY          userconf
+tflags UNWANTED_LANGUAGE_BODY	userconf
 
 body BODY_8BITS			eval:check_for_body_8bits()
 describe BODY_8BITS		Body includes 8 consecutive 8-bit characters

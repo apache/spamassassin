@@ -36,20 +36,11 @@ body SUBJ_REMOVE		/\w.{0,40}subject.{1,15}remove/i
 describe SUBJ_REMOVE		List removal information
 body REPLY_REMOVE_SUBJECT	/reply.{1,15}remove.{1,15}subject/i
 describe REPLY_REMOVE_SUBJECT	List removal information
-body DISCONTINUE		/\"discontinue\".{1,15}no further notices/i
-describe DISCONTINUE		List removal information
 body REMOVE_FROM_LIST		/to be removed from (?:the|my|our) (?:mailing|e.?mail|opt[ -]?in)? ?list/i
 describe REMOVE_FROM_LIST	To be removed from list
 
 body REMOVE_REMOVAL_1WORD	/remov\S{0,64}remov/i
 describe REMOVE_REMOVAL_1WORD	List removal information
-
-body REMOVE_REMOVAL_2WORD	/remov\S{0,16}\s+\S{0,16}remov/i
-describe REMOVE_REMOVAL_2WORD	List removal information
-
-body __REMOVE_REMOVAL_NEAR	/remov(?:e|al).{0,16}remov(?:e|al)/i
-meta REMOVE_REMOVAL_NEAR	(__REMOVE_REMOVAL_NEAR && !REMOVE_REMOVAL_1WORD && !REMOVE_REMOVAL_2WORD)
-describe REMOVE_REMOVAL_NEAR	List removal information
 
 # bug 1022: MGM_POSTCARD #2 original
 body REMOVE_POSTAL		/(?:Send(?:ing|) a (?:postal mail|postcard) to (?:Unsubscribe|Customer ?Service|remove)|unsubscribe by (?:postal mail|postcard))/i
@@ -73,14 +64,10 @@ body SENT_IN_COMPLIANCE		/(?:e.?mail|message) .{0,10}sen[dt] (?:to you )?in (?:\
 describe SENT_IN_COMPLIANCE	Claims compliance with spam regulations
 body BILL_1618			/Bill.{0,10}1618.{0,10}TITLE.{0,10}(?:III|\#3)/i
 describe BILL_1618		Claims compliance with Senate Bill 1618
-body S_1618			/S\..{0,10}1618.{0,10}-.{0,10}SECTION.{0,10}301/i
-describe S_1618			Claims compliance with Senate Bill 1618
 body UNDER_BILL_1618		/Under Bill s.?1618/i
 describe UNDER_BILL_1618	Claims compliance with Senate Bill 1618
 body SECTION_301		/SECTION.{0,10}301/i
 describe SECTION_301		Claims compliance with spam regulations
-body HR_4176			/H\.?R\.? *4176.{0,10}SECTION.{0,10}101/i
-describe HR_4176		Claims compliance with House Bill 4176
 body FURTHER_TRANSMISSIONS      /further transmissions to you by the sender/i
 describe FURTHER_TRANSMISSIONS  Claims compliance with spam regulations
 
@@ -126,14 +113,8 @@ body OPT_OUT_CAPS		/(?-i:O)pt.?(?-i:O)ut/i
 describe OPT_OUT_CAPS		Talks about opting out (capitalized version)
 body DIRECT_EMAIL		/direct e-*mail\b/i
 describe DIRECT_EMAIL		Talks about direct email
-body MASS_EMAIL			/mass e-*mail/i
-describe MASS_EMAIL		Talks about mass email
 body EMAIL_MARKETING		/e-*mail marketing/i
 describe EMAIL_MARKETING	Talks about email marketing
-body PRODUCED_AND_SENT_OUT	/This a.?d is produced and sent out by/i
-describe PRODUCED_AND_SENT_OUT	Tells you it's an ad
-body INCREASE_SOMETHING		/\b(?:boost|increase|grow|larger|bigger|higher) (?:traffic|sales)\b/i
-describe INCREASE_SOMETHING	Instructions on how to increase something
 
 body NEVER_ANOTHER		/never receive another mailing/i
 describe NEVER_ANOTHER		"another mailing" will "never" be "received"
@@ -150,8 +131,6 @@ describe ADDRESSES_ON_CD	Addresses on CD are only useful for spam
 
 body EXCUSE_1			/\b(?:You (?:were sent|have received|are receiving)|You're receiving).{0,15}(?:message|e-?mail)s? because/i
 describe EXCUSE_1		Gives a lame excuse about why spam was sent
-body EXCUSE_2			/If you did not opt.in/i
-describe EXCUSE_2		Claims you actually asked for this spam
 body EXCUSE_3			/to (?:be removed|be deleted|no longer receive th(?:is|ese) messages?) (?:from|send|reply|[e-]*mail)/i
 describe EXCUSE_3		Claims you can be removed from the list
 body EXCUSE_4			/To Be Removed,? Please/i
@@ -180,13 +159,9 @@ body EXCUSE_15			/this\s*(?:e?-?mail|message)? (?:is|was) (?:not|never) (?:spam|
 describe EXCUSE_15		Claims to be legitimate email
 body EXCUSE_16			/received this.{1,10}in error/i
 describe EXCUSE_16		I wonder how many emails they sent in error
-body EXCUSE_18			/we do not (?:spam|send unsolicited)/i
-describe EXCUSE_18		Claims not to be spam
 
 body EXCUSE_19			/because (?:you're|you (?:are )?)(?:registered|.{0,20}\bopt.{0,3}in)/i
 describe EXCUSE_19		Claims you opted-in or registered
-body EXCUSE_20			/you registered at one of our/i
-describe EXCUSE_20		Claims you registered at their site
 body EXCUSE_21			/your e.?mail address was obtained/i
 describe EXCUSE_21		Claims address was obtained legitimately
 body EXCUSE_22			/you are receiving this special offer/i
@@ -202,9 +177,6 @@ describe EXCUSE_REMOVE		Talks about how to be removed from mailings
 # jm: keep this case-sensitive, otherwise it FP's
 body VIAGRA			/VIAGRA/
 describe VIAGRA			Plugs Viagra
-
-body NATURAL_VIAGRA             /\bnatural viagra\b/i
-describe NATURAL_VIAGRA         Plugs "Natural Viagra"
 
 # NB: Made it also match "Herbal V" - a viagra alternative
 body HERBAL_VIAGRA              /\bherbal v(?:iagra)?\b/i
@@ -223,14 +195,9 @@ describe WE_HONOR_ALL		Claims to honor removal requests
 
 # Jul  2 2002 jm: note that CommuniGate is *not* spam software, it's totally legit.
 # but beginning spammers often download a trial version and spam with it.
-body COMMUNIGATE		/transferred with a trial version of CommuniGate/
-describe COMMUNIGATE		Sent using a trial version of CommuniGate
 
 body OPPORTUNITY		/OPPORTUNITY/
 describe OPPORTUNITY		Gives information about an opportunity
-body PURE_PROFIT		/PURE PROFIT/i
-# this used to say 'Profit is dirty, not pure', but that's a bit extreme ;)
-describe PURE_PROFIT		Offers "pure" profit
 body STOCK_PICK			/STOCK PICK/i
 describe STOCK_PICK		Offers a picked stock
 body STOCK_ALERT		/stock alert/i
@@ -247,10 +214,6 @@ body SELECTED_YOU		/\b(?:you (?:have been|were) selected|\bwe (?:have )?selected
 describe SELECTED_YOU		They have selected you for something
 
 # (contrib: skod)
-body PRINT_FORM_SIGNATURE	/Sign(?:ature)?\s*(?:here|please)?:.{0,30}___*/i
-describe PRINT_FORM_SIGNATURE	Asks you for your signature on a form
-
-# (contrib: skod)
 body MAIL_IN_ORDER_FORM		/\b(?:Mail-in|secure|ez|credit.card|fax this) Order Form\b/i
 describe MAIL_IN_ORDER_FORM	Contains mail-in order form
 
@@ -264,9 +227,6 @@ describe UNIVERSITY_DIPLOMAS	University Diplomas
 
 body PREST_NON_ACCREDITED	/prestigi?ous\b.{0,20}\bnon-accredited\b.{0,20}\buniversities/i
 describe PREST_NON_ACCREDITED	'Prestigious Non-Accredited Universities'
-
-body DOMAIN_BODY		/(?:\s|^)(?:\.|dot\s+)(?:info|biz|name)\b|(?:\s|^)\.\w+ domain/mi
-describe DOMAIN_BODY		Domain registration spam body
 
 body REMOVAL_INSTRUCTIONS	/\b(?:REMOVAL|UNSUBSCRIBE) INSTRUCTIONS/i
 describe REMOVAL_INSTRUCTIONS	Gives instructions for removal from list
@@ -316,21 +276,9 @@ describe MORTGAGE_WAITING       Something about waiting for mortgages
 body MORTGAGE_NETWORK           /will be transmitted to our network of mortgage specialists/i
 describe MORTGAGE_NETWORK       Something about a mortgage network
 
-body HELPED_FINANCE             /you helped me finance a new home and I got a very good deal/i
-describe HELPED_FINANCE         A dodgy mortgage testimonial
-
-body FALLING_INTEREST           /falling interest/i
-describe FALLING_INTEREST	Interest rates
-
 body ORDER_REPORT               /order report .\s?\d from/i
 describe ORDER_REPORT           Order a report from someone
-
-body TAKE_ACTION_NOW		/take action now!/i
-describe TAKE_ACTION_NOW	Tells you to 'take action now!'
-
-body THE_FOLLOWING_FORM		/the following form\b/i
-describe THE_FOLLOWING_FORM	Asks you to fill out a form
-
+				    
 # this works best as rawbody
 # do not add "subscribe", "unsubscribe", or "help"
 rawbody MAILTO_SUBJ_REMOVE		/mailto:.{0,64}\@.{0,64}\?subject=(?:\"|3D)*(?:remove?|delete|please.?(?:delete|remove|unsubscribe)|abuse|off\b|stop|take.?me.?off)/i
@@ -360,24 +308,8 @@ describe MILLION_USD 		Talks about millions of dollars
 rawbody FRONTPAGE		/FrontPage.Editor/
 describe FRONTPAGE		Frontpage used to create the message
 
-# some very frequent spam subjects, based on statistical analysis
-body KIFF			/temple kiff/i
-describe KIFF			Contains "Temple Kiff"
-
-body CBYI			/CBYI/
-describe CBYI			Contains "CBYI"
-
 body JODY			/\b(?:My wife|Mi esposa), Jody/
 describe JODY			Contains "My wife, Jody" testimonial
-
-body GENTLE_FEROCITY		/Gentle Ferocity/i
-describe GENTLE_FEROCITY	Contains "Gentle Ferocity"
-
-body VJESTIKA			/Vjestika Aphrodisia/i
-describe VJESTIKA		Contains "Vjestika Aphrodisia"
-
-body TONER			/\b(?:toner|ink(?:[-\s]*jet)?|fax|copier)[-\s]+cartridge/i
-describe TONER			Contains "Toner Cartridge"
 
 body YOUR_INCOME		/\byour income\b/i
 describe YOUR_INCOME		Doing something with my income
@@ -481,14 +413,8 @@ describe RECEIVE_OFFER		Receive a special offer
 body OFFER			/\b(?:free|special|trial) offer/i
 describe OFFER			Free Offer
 
-body FREE_QUOTE		        /\bfree quote/i
-describe FREE_QUOTE		Free Quote
-
 body FREE_QUOTE_INSTANT		/free.{0,12}(?:(?:instant|express|online|no.?obligation).{0,4})+.{0,32}\bquote/i
 describe FREE_QUOTE_INSTANT	Free express or no-obligation quote
-
-body FREE_DVD		        /\bfree dvd/i
-describe FREE_DVD		Free DVD
 
 body FREE_INVESTMENT	        /\bfree investment/i
 describe FREE_INVESTMENT	Free Investment
@@ -510,9 +436,6 @@ describe NO_CREDIT_CHECK	No Credit Check
 
 body BANKRUPTCY		        /\b(?:avoid|past) bankruptcy\b/i
 describe BANKRUPTCY		Avoid Bankruptcy
-
-body CREDIT_BUREAU	        /\ball .{0,9}credit bureaus?\b/i
-describe CREDIT_BUREAU		Credit Bureaus
 
 body ACCEPT_CREDIT_CARDS	/\b(?:accept\b|are accepting).{1,15}credit cards?\b/i
 describe ACCEPT_CREDIT_CARDS	Accept Credit Cards
@@ -547,26 +470,17 @@ describe REFINANCE_YOUR_HOME	Home refinancing
 body REFINANCE_NOW              /time to refinance|refinanc\w{1,3}\b.{0,16}\bnow\b/i
 describe REFINANCE_NOW          Home refinancing
 
-body SEARCH_ENGINE_PROMO        /\b(?:(?:submitt?|list)(?:ed|ing|s)?|place(?:d|ment))\b.{1,30}\b(?:in|to)[\s_-]+.{0,30}\b(?:search(?:ing)?\s*(?:engine|site)|director(?:y|ie))s?\b/is
-describe SEARCH_ENGINE_PROMO    Discusses search engine listings
-
 body OPPORTUNITY_2		/\b(?:opportunity (?:pass|of a lifetime|is knocking|for you)|(?:investment|unique) opportunity)\b/i
 describe OPPORTUNITY_2		Opportunity - What a deal!
 
 body NO_PURCHASE	        /\bno purchase\b/i
 describe NO_PURCHASE		No Purchase Necessary
 
-body NO_STRINGS		        /\bno strings attached\b/i
-describe NO_STRINGS		No Strings Attached
-
 body NO_FEE		        /\bno .{0,12}fees?\b/i
 describe NO_FEE			No Fees
 
 body NO_MEDICAL		        /\bno medical exam/i
 describe NO_MEDICAL		No Medical Exams
-
-body NO_AGE		        /\bno age (?:restriction|limit)/i
-describe NO_AGE			No Age Restrictions
 
 body NO_FORMS		        /\bno .{0,9}forms\b/i
 describe NO_FORMS		No Claim Forms
@@ -595,12 +509,6 @@ describe DO_IT_TODAY		Do it Today
 body WHY_WAIT		        /\b(?:why wait|what are you waiting for)\b/i
 describe WHY_WAIT		What are you waiting for
 
-body SUPPLIES_LIMITED	        /\bsupplies are limited\b/i
-describe SUPPLIES_LIMITED	Supplies are Limited
-
-body SECRET_RECORD	        /\bsecretly record/i
-describe SECRET_RECORD		Secretly Recorded
-
 body USE_IDENTITY		/someone using your identity/i
 describe USE_IDENTITY		Someone using your identity
 
@@ -618,9 +526,6 @@ describe INVALUABLE_MARKETING	Invaluable marketing information
 
 body MARKET_SOLUTION	        /\bmarket.{0,9} solution/i
 describe MARKET_SOLUTION	Marketing Solutions
-
-body MARKETING		        /\bdirect marketing\b/i
-describe MARKETING		Direct Marketing
 
 body SAVE_MONEY		        /\bsave .{0,9}(?:money|thousands|millions|up to)\b/i
 describe SAVE_MONEY		Save big money
@@ -646,9 +551,6 @@ describe AMAZING_STUFF		Amazing Stuff
 body CASH_BONUS		        /\bcash bonus\b/i
 describe CASH_BONUS		Cash Bonus
 
-body SHOPPING_SPREE	        /\bshopping spree\b/i
-describe SHOPPING_SPREE		Shopping Spree
-
 body FANTASTIC		        /\bfantastic {0,9}(?:price|deal|saving)/i
 describe FANTASTIC		Fantastic Deal
 
@@ -670,9 +572,6 @@ describe HAIR_LOSS		Cures Baldness
 
 body CABLE_CONVERTER	        /\bcable (?:converter|descrambler)/i
 describe CABLE_CONVERTER	Cable Converter
-
-body LUXURY_CAR		        /\bluxury car\b/i
-describe LUXURY_CAR		Luxury Car
 
 body WRINKLES		        /\bwrinkle reduction\b/i
 describe WRINKLES		Removes Wrinkles
@@ -722,9 +621,6 @@ describe FORWARD_LOOKING	Stock Disclaimer Statement
 body SATISFACTION		/\bsatisfaction .{0,9}g(?:ua|au)ranteed\b/i
 describe SATISFACTION		Satisfaction Guaranteed
 
-body PRIZE		        /\bclaim.{0,9} prize/i
-describe PRIZE			Talks about prizes
-
 # Avoid an FP noted by NISHIJIMA Takanori: 'Japanese string sequence:
 # "Su" "Ku" "Na"  "I" "Ko" "Su" "To" "De" "Yo" "Ri" ...
 # (This string means, "More ...(ex. "productive" or "effective")
@@ -735,9 +631,6 @@ describe PRIZE			Talks about prizes
 body __HG_HORMONE		/\b(?:human growth hormone|(?-i:HGH)|H.G.H)\b/i
 meta HG_HORMONE			(!__ISO_2022_JP_DELIM && __HG_HORMONE)
 describe HG_HORMONE		Talks about hormones for human growth
-
-body EASY_TERMS		        /\beasy terms\b/i
-describe EASY_TERMS		Easy Terms
 
 body EXTRA_CASH		        /\bextra cash\b/i
 describe EXTRA_CASH		Offers Extra Cash
@@ -777,9 +670,6 @@ describe NOT_MLM		Apparently, NOT Multi Level Marketing
 
 body SERIOUS_CASH	        /\bserious cash\b/i
 describe SERIOUS_CASH		Serious cash
-
-body CHILD_SUPPORT              /\buncollected child support\b/i
-describe CHILD_SUPPORT          "Collect Child Support" Scam
 
 body ITS_LEGAL                  /\b(?:perfectly|absolutely|100%|totally) legal\b/i
 describe ITS_LEGAL              Claims to be Legal
@@ -828,8 +718,6 @@ body FREE_PREVIEW		/\bfree preview\b/i
 describe FREE_PREVIEW		Free Preview
 
 # http://www.hughes-family.org/bugzilla/show_bug.cgi?id=678
-body USER_4U2                   /\b\S{0,20}(?:[^0-9][42](?:yo)?u|for-*you)(?:[.-]\S{1,20})?\@\S{1,20}\.(?:net|com|org|info)\b/
-describe USER_4U2               Local part containing a "4u" variant
 body DOMAIN_4U2                 /[\@\.]\S{0,20}(?:[^0-9][42](?:yo)?u|for-*you)(?:[.-]\S{1,20})?\.(?:net|com|org|info)\b/
 describe DOMAIN_4U2             Domain name containing a "4u" variant
 
@@ -845,29 +733,16 @@ describe GET_IT_NOW		Contains 'Get it now' with capitals
 body LOW_PRICE                  /\blow.{0,4} (?-i:P)rice/i
 describe LOW_PRICE              Lowest Price
 
-body     EJACULATION            /\b(?:increase|improve|greater).{0,10}ejaculation/i
-describe EJACULATION            Increase your ejaculation!
-
 body TRACE_BY_SSN               /Trace anyone by social security number/i
 describe TRACE_BY_SSN           Talks about tracing by SSN
-body AUTO_EMAIL_REMOVAL         /Auto Email Removal/
-describe AUTO_EMAIL_REMOVAL     Claims auto-email removal
 body ONCE_IN_LIFETIME           /once in a lifetime opportunity/i
 describe ONCE_IN_LIFETIME       Once in a lifetime, apparently
 rawbody SAFEGUARD_NOTICE        /This safeguard is not inserted when using the registered version/s
 describe SAFEGUARD_NOTICE       Contains signature of unregistered spam tool
-body MORE_TRAFFIC               /\bmore (?:internet|web) traffic\b/i
-describe MORE_TRAFFIC           More Internet Traffic
 body NO_MIDDLEMAN               /\bno middleman\b/i
 describe NO_MIDDLEMAN           No Middleman
-body PHONE_CANCER               /\bphone.{0,15}cancer\b/i
-describe PHONE_CANCER           Cell Phone Cancer Scam
 body UNCLAIMED_MONEY            /\bunclaimed (?:funds|money|prizes?|rewards?)\b/i
 describe UNCLAIMED_MONEY        People just leave money laying around
-rawbody SPAM_FORM_INPUT         /<input name=.{0,5}submit.{0,99} Submit By E-Mail /i
-describe SPAM_FORM_INPUT        Form for verifying email address
-body INTL_EXEC_GUILD            /International Executive Guild/
-describe INTL_EXEC_GUILD        Well known spam senders
 
 body CHANGE_TERMS               /\bstrictly based on the following terms and conditions\b/i
 describe CHANGE_TERMS           Terms and conditions
@@ -875,23 +750,11 @@ describe CHANGE_TERMS           Terms and conditions
 body     DONT_DELETE            /\b(?:don'?t delete this|do not delete)/i
 describe DONT_DELETE            Don't delete me!  Nooooo!!!!
 
-body EXCUSE_8                   /requests to be taken off our mailing list/i
-describe EXCUSE_8               Claims you can be removed from the list
-
-body INCREDIBLE                 /\bincredible secrets\b/i
-describe INCREDIBLE             Things incredible
-
 body NO_SELLING                 /absolutely NO selling/i
 describe NO_SELLING             Claims not to be selling anything
 
-body PSYCHIC                    /\b(?:caring|gifted|experienced) psychic/i
-describe PSYCHIC                Psychics Scam
-
 body WEALTH                     /\bachieve .{0,15}wealth\b/i
 describe WEALTH                 Achieve Wealth
-
-rawbody MONSTERHUT              /monsterhut.com/
-describe MONSTERHUT             Mentions monsterhut.com
 
 rawbody MURKOWSKI_CRUFT         /www\.senate\.gov\/~?murkowski/
 describe MURKOWSKI_CRUFT        Old Murkowski disclaimer
@@ -908,17 +771,8 @@ describe OUR_AFFILIATE_PARTNERS Mentions their affiliate partners
 body OUR_COMPENSATION           /our (?:full )?compensation/i
 describe OUR_COMPENSATION	Mentions their full compensation
 
-body OVERWHELMING_GROWTH		/our overwhelming growth/i
-describe OVERWHELMING_GROWTH	Mentions their overwhelming growth
-
 body OUR_STRICT_ANTI		/our strict anti/i
 describe OUR_STRICT_ANTI	Mentions their strict antipathy on something
-
-body OUR_PUBLICATIONS		/our website (?:and|or) publications/i
-describe OUR_PUBLICATIONS	Mentions their website and/or publications
-
-body OUR_PRIVACY_POLICY         /our privacy policy can be found/i
-describe OUR_PRIVACY_POLICY 	Mentions where their privacy policy is
 
 body CELL_PHONE_BOOST		/\b(?:(?:boost|antenna|reception).{0,16}(?:cell|mobile|phone|cord.?less)|(?:cell|mobile|phone|cord.?less).{0,16}(?:boost|antenna|reception))/i
 describe CELL_PHONE_BOOST	Talks about cell-phone signal improvement
@@ -948,10 +802,6 @@ body START_NOW_CAPS             /S(?i:tart now)/
 describe START_NOW_CAPS 	Talks about 'starting now' with capitals
 body WORRY_FREE                 /worry free/i
 describe WORRY_FREE             No Worries, Mate
-body EXPERTS_SHOW_HOW           /experts show you how/i
-describe EXPERTS_SHOW_HOW       Talks about 'experts' showing you how
-body ENHANCE_WEBSITE            /E(?i:nhance any) W(?i:ebsite)/
-describe ENHANCE_WEBSITE        Talks about 'enhancing any website'
 body INCREASE_SEX               /increased?.{0,9}(?:sex|stamina)/i
 describe INCREASE_SEX 		Talks about a bigger drive for sex
 
@@ -965,9 +815,6 @@ describe WE_HATE_SPAM2		Mailer is against spam -- aren't we all?
 # similar to SAVE_UP_TO and SAVE_MONEY, but a little more generic
 body	UP_TO_OR_MORES		/up to \S+(?: \S+)? or more/i
 describe UP_TO_OR_MORES		Has generic 'up to X or more' noise
-
-body VERB_UP_TO_OR_MORES	/\b(?:add|lose|make|save) up to \S+(?: \S+)? or more/i
-describe VERB_UP_TO_OR_MORES	Has add/lose/make/save up to X or more
 
 # Feb 18 2003 jm: another Nigerian scam phrase
 body NIGERIAN_SCAM_VIRTUE	/by virtue of its nature as being utterly confidential/i
@@ -995,7 +842,6 @@ describe	LOSEBODYFAT	Describes body fat loss
 
 body		GENERIC_VIAGRA	/Generic Viagra/
 describe	GENERIC_VIAGRA	Mentions Generic Viagra
-
 
 body SEE_FOR_YOURSELF		/See (?:for|it|it for) yourself\b/i
 describe SEE_FOR_YOURSELF       See for yourself 

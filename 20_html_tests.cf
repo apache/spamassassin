@@ -355,13 +355,6 @@ describe HTML_COMMENT_RATIO	HTML comments are large percentage of message
 ###########################################################################
 # rawbody HTML tests
 
-rawbody SPAM_FORM		/CHANGE EMAIL ADDRESS IN ACTION OF FORM/
-describe SPAM_FORM		Form for changing email address
-rawbody SPAM_FORM_RETURN	/return validate_form/
-describe SPAM_FORM_RETURN	Form for checking email address
-rawbody SPAM_FORM_ACTION	/action="\&\#\d+;\&\#\d+;\&\#\d+;\&\#\d+;/i
-describe SPAM_FORM_ACTION	Obfuscated action attribute in HTML form
-
 rawbody HIDE_WIN_STATUS		/<[^>]+onMouseOver=[^>]+window\.status=/i
 describe HIDE_WIN_STATUS	Javascript to hide URLs in browser
 

@@ -32,7 +32,6 @@ test FROM_STARTS_WITH_NUMS     ok   1234matt@sergeant.org
 test FROM_STARTS_WITH_NUMS     fail matt@sergeant.org
 test FORGED_YAHOO_RCVD fail by mf1.lng.yahoo.com (8.11.1/8.11.1) id g3SDfPH19426
 test NUMERIC_HTTP_ADDR ok http://123456789/foo/bar
-#test SEARCH_ENGINE_PROMO ok	evaluated for FREE for its keyword placement in the top twenty major search engines
 
 test US_DOLLARS fail $-$NFbMF$K!"A49q$+$iLd$$9g$o$;$,;&E~$7$F$$$^$9!#
 test US_DOLLARS ok Twenty Million Five Hundred Thousand United States Dollars
@@ -95,14 +94,3 @@ test BAD_CREDIT ok   establish good credit
 test BAD_CREDIT ok   repair your credit
 test BAD_CREDIT fail NOTICE: Your credit card company may place the words "San Antonio"
 
-test NEW_DOMAIN_EXTENSIONS ok   new domain extension
-test NEW_DOMAIN_EXTENSIONS ok   new .NAME domain extension
-test NEW_DOMAIN_EXTENSIONS ok   New TLD Extension
-test NEW_DOMAIN_EXTENSIONS ok   new extension
-test NEW_DOMAIN_EXTENSIONS fail newt extension
-test NEW_DOMAIN_EXTENSIONS fail renew extension
-
-test DOMAIN_BODY ok   Get .BIZ while it's hot!
-test DOMAIN_BODY ok   .info
-test DOMAIN_BODY ok   Get new .us domains
-test DOMAIN_BODY fail www.fobar.biz
