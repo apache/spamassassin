@@ -144,6 +144,8 @@ body T_HTML_MESSAGE		eval:html_message()
 score T_HTML_MESSAGE		0.0000001
 
 # HTML input form tests (plus having an HTML form at all)
+# probable replacement for FORM_W_MAILTO_ACTION
+body T_HTML_FORM_ACTION_MAILTO	eval:html_test('form_action_mailto')
 body T_HTML_INPUT_TYPE_HIDDEN	eval:html_test('input_type_hidden')
 body T_HTML_INPUT_NAME_EMAIL	eval:html_test('input_name_email')
 body T_HTML_INPUT_VALUE_EMAIL	eval:html_test('input_value_email')
