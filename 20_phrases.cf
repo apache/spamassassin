@@ -589,8 +589,8 @@ describe RICH			If only it were that easy
 body YOU_WON                    /\byou(?:\'ve| have)? won[^\'\w]/i
 describe YOU_WON                Who really wins?
 
-body PROMOTION		        /\bspecial promotion\b/i
-describe PROMOTION		Contains 'Special Promotion'
+body SPECIAL_PRO		        /\bspecial promotion\b/i
+describe SPECIAL_PRO		Contains 'Special Promotion'
 
 body FREE_PASSWORD              /\bfree .{0,9}passwords?\b/i
 describe FREE_PASSWORD          Offers Free (often stolen) Passwords
