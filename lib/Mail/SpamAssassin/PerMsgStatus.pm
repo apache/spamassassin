@@ -2068,8 +2068,13 @@ sub do_awl_tests {
         $whitelist->add_score($self->{hits});
       }
 
-      if($delta != 0) {
-          $self->_handle_hit("AWL",$delta,"AWL: ","Auto-whitelist adjustment");
+      # current AWL score changes with each hit
+      for my $set (0..3) {
+	$self->{conf}->{scoreset}->[$set]->{"AWL"} = sprintf("%0.3f", $delta);
+      }
+
+      if ($delta != 0) {
+	$self->_handle_hit("AWL",$delta,"AWL: ","Auto-whitelist adjustment");
       }
 
       dbg("Post AWL score: ".$self->{hits});
@@ -2329,8 +2334,8 @@ sub _handle_hit {
     # Bayesian auto-learning
     if ($tflags =~ /\b(?:learn|userconf)\b/i) {
       $self->{learned_hits} += $score;
-
-    } else {
+    }
+    else {
       $self->{hits} += $score;
       if (!$self->{conf}->maybe_header_only ($rule)) {
 	$self->{body_only_hits} += $score;
@@ -2345,7 +2350,8 @@ sub _handle_hit {
 
     if ($score >= 10 || $score <= -10) {
       $score = sprintf("%4.0f", $score);
-    } else {
+    }
+    else {
       $score = sprintf("%4.1f", $score);
     }
 
