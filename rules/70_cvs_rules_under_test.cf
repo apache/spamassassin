@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.539 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.540 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -154,8 +154,6 @@ header T_RCVD_IN_EASYNET_DYNABLOCK	rbleval:check_rbl('dynablock-notfirsthop', 'd
 tflags T_RCVD_IN_EASYNET_DYNABLOCK net
 header T_RCVD_IN_EASYNET_BLACKHOLES	rbleval:check_rbl('easynet', 'blackholes.easynet.nl.')
 tflags T_RCVD_IN_EASYNET_BLACKHOLES net
-header T_RCVD_IN_EASYNET_PROXIES	rbleval:check_rbl('pben', 'proxies.blackholes.easynet.nl.')
-tflags T_RCVD_IN_EASYNET_PROXIES net
 
 # NJABL sub-tests
 header T_RCVD_IN_NJABL_SPAM_SRC	rbleval:check_rbl_sub('njabl', '127.0.0.4')
