@@ -82,13 +82,13 @@ body HTML_TABLE_THICK_BORD	eval:html_test('thick_border')
 describe HTML_TABLE_THICK_BORD	HTML table has thick border
 
 # HTML comment tests
-body HTML_COMMENT_SHORT		eval:html_text('comment', '=~ /<!(?!-).{0,6}>/')
+body HTML_COMMENT_SHORT		eval:html_text_match('comment', '<!(?!-).{0,6}>')
 describe HTML_COMMENT_SHORT	HTML comment is very short
 
 body HTML_COMMENT_SHOUTING	eval:html_test('comment_shouting')
 describe HTML_COMMENT_SHOUTING	HTML comment inside of "shouting" markup
 
-body HTML_COMMENT_SAVED_URL	eval:html_text('comment', '=~ /<!-- saved from url=\(\d{4}\)/')
+body HTML_COMMENT_SAVED_URL	eval:html_text_match('comment', '<!-- saved from url=\(\d{4}\)')
 describe HTML_COMMENT_SAVED_URL	HTML message is a saved web page
 
 # Comment is a spam sign when following <DIV>
@@ -170,13 +170,13 @@ describe HTML_IMAGE_RATIO_14	HTML has a low ratio of text to image area
 body HTML_JAVASCRIPT		eval:html_test('javascript')
 describe HTML_JAVASCRIPT	JavaScript code
 
-body HTML_LINK_PUSH_HERE	eval:html_text('anchor', '=~ /(?:push|go)\s*(?:here|this)/i')
+body HTML_LINK_PUSH_HERE	eval:html_text_match('anchor', '(?i)(?:push|go)\s*(?:here|this)')
 describe HTML_LINK_PUSH_HERE	HTML link text says "push here" or similar
 
-body HTML_LINK_CLICK_HERE	eval:html_text('anchor', '=~ /click\s*(?:here|this)/i')
+body HTML_LINK_CLICK_HERE	eval:html_text_match('anchor', '(?i)click\s*(?:here|this)')
 describe HTML_LINK_CLICK_HERE	HTML link text says "click here"
 
-body HTML_LINK_CLICK_CAPS	eval:html_text('anchor', '=~ /CLICK/')
+body HTML_LINK_CLICK_CAPS	eval:html_text_match('anchor', 'CLICK')
 describe HTML_LINK_CLICK_CAPS	HTML link text says "CLICK"
 
 # HTML obfuscation
@@ -290,7 +290,7 @@ body HTML_SHORT_LENGTH		eval:html_eval('length', '< 170')
 describe HTML_SHORT_LENGTH	HTML is extremely short
 
 body __HTML_LENGTH_512		eval:html_eval('length', '< 512')
-body __COMMENT_EXISTS		eval:html_text('comment', '=~ /<!.*?>/')
+body __COMMENT_EXISTS		eval:html_text_match('comment', '<!.*?>')
 meta HTML_SHORT_COMMENT		(__HTML_LENGTH_512 && __COMMENT_EXISTS)
 describe HTML_SHORT_COMMENT	HTML is very short with HTML comments
 
@@ -299,13 +299,13 @@ body __TAG_EXISTS_CENTER	eval:html_tag_exists('center')
 meta HTML_SHORT_CENTER		(__HTML_LENGTH_384 && __TAG_EXISTS_CENTER)
 describe HTML_SHORT_CENTER	HTML is very short with CENTER tag
 
-body HTML_TITLE_EMPTY		eval:html_text('title', '!~ /\S/s')
+body HTML_TITLE_EMPTY		eval:html_text_not_match('title', '(?s)\S')
 describe HTML_TITLE_EMPTY	HTML title contains no text
 
 body HTML_TITLE_EXTRA		eval:html_test('title_extra')
 describe HTML_TITLE_EXTRA	HTML has more than one title
 
-body HTML_TITLE_UNTITLED	eval:html_text('title', '=~ /untitled|new page \d+/i')
+body HTML_TITLE_UNTITLED	eval:html_text_match('title', '(?i)(?:untitled|new page \d+)')
 describe HTML_TITLE_UNTITLED	HTML title contains "Untitled"
 
 ###########################################################################
