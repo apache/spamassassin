@@ -547,7 +547,8 @@ _handle_spamd_header (struct message *m, int flags, char *buf, int len)
     if (sscanf(buf, "Spam: %5s ; %f / %f", is_spam, &m->score, &m->threshold) == 3)
     {
 	/* Format is "Spam: x; y / x" */
-	m->is_spam=strcasecmp("true", is_spam)? EX_NOTSPAM : EX_ISSPAM;
+       /* Feb 14 2004 ym: apparently, it is really easy to screw up with sscanf() parsing */
+	m->is_spam=strcasecmp("true", is_spam) == 0 ? EX_ISSPAM: EX_NOTSPAM;
 
 	if(flags&SPAMC_CHECK_ONLY) {
 	    m->out_len=snprintf (m->out, m->max_len+EXPANSION_ALLOWANCE,
@@ -677,12 +678,12 @@ static int _message_filter(const struct sockaddr *addr,
     len = 0;		/* overwrite those headers */
 
     if (flags&SPAMC_CHECK_ONLY) {
-	close(sock);
-	if (m->is_spam) {
+      close(sock);
+      if (m->is_spam == EX_TOOBIG) {
 	    /* We should have gotten headers back... Damnit. */
 	    failureval = EX_PROTOCOL; goto failure;
-	}
-
+      }
+      return EX_OK;
     } else {
 	if (m->content_length < 0) {
 	    /* should have got a length too. */
