@@ -84,27 +84,11 @@ describe POPLAUNCH		SPAM software
 body CHECK_OR_MONEY_ORDER	/check or money order/i
 describe CHECK_OR_MONEY_ORDER	Talk about a check or money order
 
-rawbody NUMERIC_HTTP_ADDR	/http\:\/\/\d{7,}/is
-describe NUMERIC_HTTP_ADDR	Uses a numeric IP address in URL
-rawbody NORMAL_HTTP_TO_IP	/http\:\/\/\d+\.\d+\.\d+\.\d+/is
-describe NORMAL_HTTP_TO_IP	Uses a dotted-decimal IP address in URL
-rawbody LONG_NUMERIC_HTTP_ADDR	/http\:\/\/000\d+/is
-describe LONG_NUMERIC_HTTP_ADDR	Uses a long numeric IP address in URL
-rawbody HTTP_USERNAME_USED	/http\:\/\/[^\s\/]+\@/is
-describe HTTP_USERNAME_USED	Uses a username in a URL
-rawbody HTTP_WITH_EMAIL_IN_URL	/http\:\/\/\S+=[-_\+a-z0-9\.]+\@[-_\+a-z0-9\.]+\.[-_\+a-z0-9]{2,3}(?:\&|\s)/
-describe HTTP_WITH_EMAIL_IN_URL	'remove' URL contains an email address
-rawbody HTTP_ESCAPED_HOST       /http\:\/\/[^\/]*%/
-describe HTTP_ESCAPED_HOST      Uses %-escapes inside a URL's hostname
-
-# note: do not match \r or \n
-rawbody HTTP_CTRL_CHARS_HOST    /http\:\/\/[^\/]*[\x00-\x08\x0b\x0c\x0e-\x1f]/
-describe HTTP_CTRL_CHARS_HOST   Uses control sequences inside a URL's hostname
-
 rawbody SUPERLONG_LINE		/^[^<]{199,}$/m
 describe SUPERLONG_LINE		Contains a line >=199 characters long
 
-rawbody ASCII_FORM_ENTRY	/[^<][A-Za-z][A-Za-z]+.{1,15}?\s+_{30,}/
+# fixed by ms to not allow entry field onto next line
+rawbody ASCII_FORM_ENTRY	/[^<][A-Za-z][A-Za-z]+.{1,15}?[\x09\x20]*_{30,}/
 describe ASCII_FORM_ENTRY	Contains an ASCII-formatted form
 body PRINT_OUT_AND_FAX		/print\s+out\s+and\s+fax/i
 describe PRINT_OUT_AND_FAX	Contains words 'print out and fax'
@@ -261,9 +245,6 @@ describe PORN_2			Uses words and phrases which indicate porn (2)
 body PORN_3			/(?:(?:\bcum|\borg[iy]|\bwild|fuck|\bteen|\baction\b|spunk|\bpussy\b|\bpussies\b|suck\b|sucking\b|\bhot\b|\bhottest\b|\bvoyeur|\ble[sz]b(?:ian|o)|\banal\b|\binterracial|\basian\b|\bamateur|\bsex+\b|\bslut|explicit|xxx[^x]|\blive\b|celebrity|\blick|\bsuck|\bdorm\b|webcam|\bass\b|\bschoolgirl\b|\bstrip|\bhorny\b|\bhorniest\b|\berotic|\boral\b|\bpenis\b|\bhardcore\b|\bblow[ -]*job|\bnast(?:y|iest)\b|\bporn).{0,15}){3,}/i
 describe PORN_3			Uses words and phrases which indicate porn (3)
 
-rawbody PORN_4 	/http:\/\/[\w\.]*(?:xxx|sex|anal|slut|pussy|cum|nympho|suck|porn|hardcore|taboo|whore|voyeur|lesbian|gurlpages|naughty|lolita|teen|schoolgirl|kooloffer|erotic)\w*\./
-describe PORN_4			Uses words and phrases which indicate porn (4)
-
 # (contrib: skod)
 body PORN_6			/(?:\d+\+? xxx pictures|xxx photos?)/i
 describe PORN_6			Uses words and phrases which indicate porn (6)
@@ -292,34 +273,6 @@ body MICRO_CAP_WARNING		/Investing in micro-cap securities is highly speculative
 describe MICRO_CAP_WARNING	SEC-mandated penny-stock warning -- thanks SEC
 body INVESTOR_SPEC_SHEET	/Investor Spec Sheet/i
 describe INVESTOR_SPEC_SHEET	Standard investment opportunity spam
-
-# some frequently-advertised URLs
-rawbody E_WEBHOSTCENTRAL_URL		/http:\/\/.*e-webhostcentral\.com/i
-describe E_WEBHOSTCENTRAL_URL		Frequent SPAM content
-rawbody FREEWEBHOSTINGCENTRAL		/http:\/\/.*freewebhostingcentral/i
-describe FREEWEBHOSTINGCENTRAL		Frequent SPAM content
-rawbody FREEWEBCO_NET_URL		/http:\/\/.*freewebco\.net/i
-describe FREEWEBCO_NET_URL		Frequent SPAM content
-rawbody 25FREEMEGS_URL			/http:\/\/.*25freemegs\.com/i
-describe 25FREEMEGS_URL			Frequent SPAM content
-rawbody WEB4PORNO_URL			/http:\/\/.*web4porno\.com/i
-describe WEB4PORNO_URL			Frequent SPAM content
-rawbody CLICKSFORMONEY_NET		/http:\/\/.*clicksformoney\.net/i
-describe CLICKSFORMONEY_NET		Frequent SPAM content
-rawbody YELLOWSUN			/yellowsun01\.com/i
-describe YELLOWSUN			Frequent SPAM content
-rawbody WWW_REMOVEYOU_COM		/http:\/\/.*removeyou\.com/i
-describe WWW_REMOVEYOU_COM		Frequent SPAM content
-rawbody WWW_AUTOREMOVE_COM		/http:\/\/.*autoremove\.com/i
-describe WWW_AUTOREMOVE_COM		Frequent SPAM content
-rawbody WWW_CLIK4YOU_COM		/http:\/\/.*clik4you\.com/i
-describe WWW_CLIK4YOU_COM		Frequent SPAM content
-rawbody WWW_DIRECTFORCEMARKETING_COM	/http:\/\/.*directforcemarketing\.com/i
-describe WWW_DIRECTFORCEMARKETING_COM	Frequent SPAM content
-rawbody WWW_TRAFFICWOW_NET		/http:\/\/.*trafficwow\.net/i
-describe WWW_TRAFFICWOW_NET     	Frequent SPAM content
-rawbody WWW_NETSITESFORFREE_NET		/http:\/\/.*netsitesforfree\.net/i
-describe WWW_NETSITESFORFREE_NET	Frequent SPAM content
 
 body FREE_CONSULTATION		/FREE CONSULTATION/i
 describe FREE_CONSULTATION	Offers a free consultation
@@ -352,7 +305,6 @@ describe LINES_OF_YELLING_2     2 WHOLE LINES OF YELLING DETECTED
 
 body     LINES_OF_YELLING_3     eval:check_for_num_yelling_lines("3")
 describe LINES_OF_YELLING_3     3 WHOLE LINES OF YELLING DETECTED
-
 
 ###########################################################################
 # some full-text matches; note the [3D=\s"']* bits of the patterns, which
@@ -471,42 +423,20 @@ describe HUNZA_DIET_BREAD	Offers a tasty-sounding dietary product
 rawbody A_HREF_TO_UNSUB		/href[3D=\s\"\']*\S+unsubscribe/i
 describe A_HREF_TO_UNSUB	Link to a URL containing "unsubscribe"
 
-rawbody UNSUB_SCRIPT		/https?:\/\/.*cgi.*\/unsubscribe\./
-describe UNSUB_SCRIPT		URL of CGI script called "unsubscribe"
-
-rawbody UNSUB_PAGE		/https?:\/\/[^\/]+\/unsubscribe/
-describe UNSUB_PAGE		URL of page called "unsubscribe"
-
 rawbody A_HREF_TO_OPT_OUT	/href[3D=\s\"\']*\S+opt(?:-in|-out|in|out)/i
 describe A_HREF_TO_OPT_OUT	Link to a URL containing "opt-in" or "opt-out"
 
 rawbody A_HREF_TO_REMOVE	/href[3D=\s\"\']*\S+remove/i
 describe A_HREF_TO_REMOVE	Link to a URL containing "remove"
 
-rawbody REMOVE_SCRIPT		/https?:\/\/.*cgi.*\/remove\./
-describe REMOVE_SCRIPT		URL of CGI script called "remove"
-
-rawbody REMOVE_PAGE		/https?:\/\/[^\/]+\/remove/
-describe REMOVE_PAGE		URL of page called "remove"
-
 # include the \n\n so we don't match mailto's in the headers!  Some list software
 # uses these to handle auto-subscribe/unsubscribe features
 rawbody MAILTO_LINK		/=[3D=\s"']*mailto:/is
 describe MAILTO_LINK		Includes a URL link to send an email
-rawbody MAILTO_WITH_SUBJ_REMOVE	/mailto:\S+\?subject=[3D=\s"']*remove/is
-describe MAILTO_WITH_SUBJ_REMOVE Includes a URL link to send an email with the subject 'remove'
-rawbody MAILTO_WITH_SUBJ	/mailto:\S+\?subject=/is
-describe MAILTO_WITH_SUBJ	Includes a link to send a mail with a subject
 rawbody FORM_W_MAILTO_ACTION	/action=[3D=\s"']*mailto:/is
 describe FORM_W_MAILTO_ACTION	Includes a form which will send an email
 body AOL_USERS_LINK		/AOL\s+Users\s+Click/is
 describe AOL_USERS_LINK		Includes a link for AOL users to click
-
-rawbody MAILTO_TO_SPAM_ADDR	/mailto:[a-z]+\d{2,}\@/is
-describe MAILTO_TO_SPAM_ADDR	Includes a link to a likely spammer email address
-
-rawbody MAILTO_TO_REMOVE	/remove\S*\@\S+\.\S\S/is
-describe MAILTO_TO_REMOVE	Includes a 'remove' email address
 
 rawbody WEB_BUGS		/<\s*img\s[^>]*src[^>]+\?/i
 describe WEB_BUGS		Image tag with an ID code to identify you
@@ -572,10 +502,6 @@ describe PGP_SIGNATURE		Contains a PGP-signed message
 # do not seem to for some reason.  (Kevin Dangoor)
 body COPYRIGHT_CLAIMED		/copyright.{0,100}all rights reserved/is
 describe COPYRIGHT_CLAIMED	Contains a claim of copyright
-
-# one spamhaus uses servers numbered like this:
-rawbody HTTP_NUMBER_WORD	/http\:\/\/(?:zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty)\./i
-describe HTTP_NUMBER_WORD	URL contains spamhaus signature: numbered servers
 
 # some very frequent spam subjects, based on statistical analysis
 body KIFF			/temple kiff/i
