@@ -226,6 +226,13 @@ score T_FORGED_MUA_THEBAT	1.0
 # somewhat reasonable S/O ratio
 header T_FROM_NO_LOWER		From !~ /[a-z]/
 
+# bug 1170: Here's another "good" UA (a package for (X)Emacs); for
+# examples, look at any recent email from me... -Allen
+# (add to 20_anti_ratware.cf if it works)
+header T_USER_AGENT_VM		X-Mailer =~ /^\s*VM\s+\d+\.\d+\s+under\s+.{0,30}?[Ee]macs\b/
+score T_USER_AGENT_VM		-0.5
+tflags T_USER_AGENT_VM		nice
+
 ###########################################################################
 
 body T_BANG_BOSS		/\bboss!/i
