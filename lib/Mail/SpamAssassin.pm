@@ -1831,6 +1831,9 @@ sub copy_config {
         }
       }
     }
+    elsif ($k eq 'scores') {
+      # this is dealt with below, but we need to ignore it for now
+    }
     elsif ($i eq 'SCALAR' || $i eq 'ARRAY' || $i eq 'HASH') {
       # IMPORTANT: DO THIS AFTER EVERYTHING ELSE!
       # If we don't do this at the end, any "special" object handling
@@ -1844,6 +1847,10 @@ sub copy_config {
 #      warn ">> $k, $i\n";
 #    }
   }
+
+  # deal with $conf->{scores}, it needs to be a reference into the scoreset
+  # hash array dealy
+  $dest->{scores} = $dest->{scoreset}->[$dest->{scoreset_current}];
 
   return 1;
 }
