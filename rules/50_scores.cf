@@ -550,9 +550,6 @@ score GENUINE_EBAY_RCVD		   -10.0
 ###########################################################################
 # Compensation for common false positives.
 
-score BALANCE_FOR_LONG		    -1.0
-score BALANCE_FOR_LONG_20K	    -1.0
-score BALANCE_FOR_LONG_40K	    -1.0
 score PATCH_CONTEXT_DIFF	    -5.0
 score PATCH_UNIFIED_DIFF	    -5.0
 score BUGZILLA_BUG		    -2.0
@@ -560,7 +557,6 @@ score DEBIAN_BTS_BUG		    -4.0
 score MAILMAN_CONFIRM               -4.0
 score EVITE			    -5.0
 score YAHOO_MSGID_ADDED             -2.4
-score ORDER_STATUS		    -3.0
 score Q_FOR_SELLER			-4.0
 
 
@@ -659,7 +655,6 @@ score PRIVACY_STATEMENT         -1.0
 score REG_THANKS                -1.0
 score ACCOUNT_CLICK             -1.0
 score TRACK_NUMBER              -1.0
-score AUTO_RESP                 -1.0
 score KNOWN_MAILING_LIST        -5
 score KNOWN_MOD_MAILING_LIST    -10
 score LISTBUILDER               -5
@@ -679,8 +674,6 @@ score USER_AGENT_KMAIL          -1.0
 score USER_AGENT_IMP            -1.0
 score USER_AGENT_AOL            -0.5
 score USER_AGENT_TONLINE        -1.0
-
-score ORDER_CONFIRM             -1.0
 
 # ratware scores
 score RATWARE_GROUPMAIL		2.0
