@@ -173,6 +173,10 @@ sub do_rbl_lookup {
 # them using a NAT firewall. These are listed in the RBL as invalid
 # originators -- which is true, if you receive the mail directly
 # from them; however we do not, so we should ignore them.
+# cf. http://www.iana.org/assignments/ipv4-address-space .
+#
+# Last update by Matt Kettler - mail to SpamAssassin-devel, Mon 12 Aug
+# 2002, msgid <5.1.0.14.0.20020812211512.00a33cc0@192.168.50.2>.
 #
 sub init_rbl_check_reserved_ips {
   return if defined ($IP_IN_RESERVED_RANGE);
@@ -193,13 +197,13 @@ sub init_rbl_check_reserved_ips {
                     58
                     59
                     60
-                    69
-                    [789][0-9]
+                    7[0-9]
+                    8[2-9]
+                    9[0-9]
                     1[01][0-9]
                     12[0-7]
                     197
-                    21[7-9]
-                    22[0-3]
+                    22[23]
                     24[0-9]
                     25[0-5]
                   ))
