@@ -256,8 +256,7 @@ sub html_format {
     push @{$self->{html_invisible_text}}, "\n";
     push @{$self->{html_text}}, "\n";
   }
-  # should probably add th and dt here
-  elsif ($tag =~ /^(?:li|td|dd)$/) {
+  elsif ($tag =~ /^(?:li|t[hd]|d[td])$/) {
     $self->display_text();
     push @{$self->{html_visible_text}}, " ";
     push @{$self->{html_invisible_text}}, " ";
