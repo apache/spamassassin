@@ -3272,7 +3272,8 @@ sub new {
   $self->{headers_ham}->{"Checker-Version"} =
                 $self->{headers_spam}->{"Checker-Version"};
 
-  # these are now unsettable by end-users; TODO: move out of Conf
+  # these should potentially be settable by end-users
+  # perhaps via plugin?
   $self->{num_check_received} = 9;
   $self->{bayes_expiry_pct} = 0.75;
   $self->{bayes_expiry_period} = 43200;
