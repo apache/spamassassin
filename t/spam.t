@@ -2,7 +2,7 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spam");
-use Test; BEGIN { plan tests => 23 };
+use Test; BEGIN { plan tests => 25 };
 
 # ---------------------------------------------------------------------------
 
@@ -11,6 +11,7 @@ use Test; BEGIN { plan tests => 23 };
 q{ Subject: *****SPAM***** There yours for FREE!}, 'subj',
 q{ X-Spam-Status: Yes, hits=}, 'status',
 q{ X-Spam-Flag: YES}, 'flag',
+q{ X-Spam-Level: **********}, 'stars',
 q{ Valid-looking To "undisclosed-recipients"}, 'undisc',
 q{ Subject has an exclamation mark}, 'apling',
 q{ From: ends in numbers}, 'endsinnums',

@@ -361,6 +361,10 @@ sub rewrite_as_spam {
 
   $self->{msg}->put_header ("X-Spam-Status", $_);
   $self->{msg}->put_header ("X-Spam-Flag", 'YES');
+  if($self->{main}->{conf}->{spam_level_stars} == 1) 
+  {
+      $self->{msg}->put_header("X-Spam-Level", "*"x int($self->{hits}));
+  }       
 
   $self->{msg}->put_header ("X-Spam-Checker-Version",
   	"SpamAssassin $Mail::SpamAssassin::VERSION ".
@@ -449,6 +453,10 @@ sub rewrite_as_non_spam {
 	$Mail::SpamAssassin::VERSION);
 
   $self->{msg}->put_header ("X-Spam-Status", $_);
+  if($self->{main}->{conf}->{spam_level_stars} == 1)
+  {
+	  $self->{msg}->put_header("X-Spam-Level", "*"x int($self->{hits}));
+  }
   $self->{msg}->get_mail_object;
 }
 
