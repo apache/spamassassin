@@ -645,6 +645,16 @@ sub rewrite_headers {
       $report =~ s/^\s*/  /gm;	# Ensure each line begins with whitespace.
       $self->{msg}->put_header ("X-Spam-Report", $report);
     }
+
+    if ($self->{conf}->{rewrite_subject}) {
+      my $subject = $self->{msg}->get_header("Subject") || '';
+      my $tag = $self->{conf}->{subject_tag};
+      $tag =~ s/_HITS_/sprintf("%05.2f", $self->{hits})/e;
+      $tag =~ s/_REQD_/sprintf("%05.2f", $self->{conf}->{required_hits})/e;
+      $subject =~ s/^(?:\Q${tag}\E |)/${tag} /g;
+      $subject =~ s/\n*$/\n/s;
+      $self->{msg}->replace_header("Subject", $subject);
+    }
   }
 
   # now add any test-specific markup headers (X-Pyzor etc.)
