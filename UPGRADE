@@ -16,6 +16,9 @@ Note for Users Upgrading to SpamAssassin 3.0.0
   "use_auto_whitelist" configuration option which is also now turned on by
   default.
 
+- The --virtual-config switch for spamd had to be dropped, due to licensing
+  issues.  It is replaced by the --virtual-config-dir switch.
+
 - The "rewrite_subject" configuration setting was deprecated and is now
   removed. Instead, using "rewrite_header Subject [your desired setting]".
   e.g.
