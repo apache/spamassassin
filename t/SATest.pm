@@ -333,6 +333,13 @@ sub patterns_run_cb {
     $_ = join ('', <IN>);
   }
 
+  # create default names == the pattern itself, if not specified
+  foreach my $pat (keys %patterns) {
+    if ($patterns{$pat} eq '') {
+      $patterns{$pat} = $pat;
+    }
+  }
+
   foreach my $pat (sort keys %patterns) {
     my $safe = pattern_to_re ($pat);
     # print "JMD $patterns{$pat}\n";
