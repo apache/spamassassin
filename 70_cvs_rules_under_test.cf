@@ -530,3 +530,13 @@ describe T_WALAA	Illiterate spammer cannot spell 'voila'
 # new version
 header T_NIGERIAN_SUBJECT2	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*(?:request\s+(?:for\s+)?)?(?:very )?urgent\s+(?:(?:and|&)\s+(?:(?:completely|100\%)\s+))?(?:confidential|assistance|business|attention|reply|responses?|help)\b/i
 
+
+# let's try rfg's DNSBLs, they seem to have been stable for a while now
+header T_RCVD_IN_MONKEYS_FORMMAIL	rbleval:check_rbl_txt('relay', 'formmail.relays.monkeys.com.')
+describe T_RCVD_IN_MONKEYS_FORMMAIL Received via a relay in formmail.relays.monkeys.com.
+tflags T_RCVD_IN_MONKEYS_FORMMAIL net
+
+header T_RCVD_IN_MONKEYS_UPL	rbleval:check_rbl_txt('relay', 'proxies.relays.monkeys.com.')
+describe T_RCVD_IN_MONKEYS_UPL Received via a relay in proxies.relays.monkeys.com.
+tflags T_RCVD_IN_MONKEYS_UPL net
+
