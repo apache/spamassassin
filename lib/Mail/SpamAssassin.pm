@@ -1031,7 +1031,7 @@ sub remove_spamassassin_markup {
       $tag =~ s/_REQD_/\\d{2}\\.\\d{2}/g;
       1 while $hdrs =~ s/^Subject: ${tag} /Subject: /gm;
     } else {
-      $hdrs =~ s/^(${header}: .*?)\t\([^)]\)$/$1/gm;
+      $hdrs =~ s/^(${header}: .*?)\t\([^)]*\)$/$1/gm;
     }
   }
 
