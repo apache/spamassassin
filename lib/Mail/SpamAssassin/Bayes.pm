@@ -1105,8 +1105,8 @@ sub scan {
     dbg ("bayes token '$_' => $pw");
   }
 
-  if (REQUIRE_SIGNIFICANT_TOKENS_TO_SCORE > 0 && 
-	$#sorted <= REQUIRE_SIGNIFICANT_TOKENS_TO_SCORE)
+  if (!@sorted || (REQUIRE_SIGNIFICANT_TOKENS_TO_SCORE > 0 && 
+	$#sorted <= REQUIRE_SIGNIFICANT_TOKENS_TO_SCORE))
   {
     dbg ("cannot use bayes on this message; not enough usable tokens found");
     goto skip;
