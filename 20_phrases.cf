@@ -32,8 +32,6 @@ body DISCONTINUE		/\"discontinue\".{1,15}no further notices/i
 describe DISCONTINUE		List removal information
 body REMOVE_FROM_LIST		/to be removed from (?:the|my|our) (?:mailing|e.?mail|opt[ -]?in)? ?list/i
 describe REMOVE_FROM_LIST	To be removed from list
-body REMOVE_RESPECT		/(?:respect|honou?r) all removal requests/i
-describe REMOVE_RESPECT		We respect all removal requests
 
 body REMOVE_REMOVAL_1WORD	/remov\S{0,64}remov/i
 describe REMOVE_REMOVAL_1WORD	List removal information
@@ -212,7 +210,7 @@ describe LIMITED_TIME_ONLY	Offers a limited time offer
 body STRONG_BUY			/strong buy/i
 describe STRONG_BUY		Tells you about a strong buy
 
-body WE_HONOR_ALL		/we (?:honou?r|respect)(?: all)? remov(?:e|al) requests/i
+body WE_HONOR_ALL		/\b(?:honou?r|respect)(?: all)? remov(?:e|al) requests?\b/i
 describe WE_HONOR_ALL		Claims to honor removal requests
 
 # Jul  2 2002 jm: note that CommuniGate is *not* spam software, it's totally legit.
