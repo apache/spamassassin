@@ -398,7 +398,7 @@ sub rewrite_as_spam {
   if ($self->{conf}->{defang_mime}) {
     my $ct = $srcmsg->get_header ("Content-Type");
 
-    if (defined $ct && $ct ne '' && $ct ne 'text/plain') {
+    if (defined $ct && $ct ne '' && $ct !~ m{text/plain}i) {
       $self->{msg}->replace_header ("Content-Type", "text/plain");
       $self->{msg}->replace_header ("X-Spam-Prev-Content-Type", $ct);
 
@@ -406,7 +406,7 @@ sub rewrite_as_spam {
 
     my $cte = $srcmsg->get_header ("Content-Transfer-Encoding");
 
-    if (defined $cte && $cte ne '' && $ct ne '7bit') {
+    if (defined $cte && $cte ne '' && $ct !~ /7bit/i) {
       $self->{msg}->replace_header ("Content-Transfer-Encoding", "7bit");
       $self->{msg}->replace_header ("X-Spam-Prev-Content-Transfer-Encoding", $cte);
     }
@@ -435,7 +435,7 @@ sub rewrite_as_spam {
 
     my $rep = $self->{report};
     my $cte = $self->{msg}->get_header ('Content-Transfer-Encoding');
-    if (defined $cte && $cte =~ /quoted-printable/) {
+    if (defined $cte && $cte =~ /quoted-printable/i) {
       $rep =~ s/=/=3D/gs;               # quote the = chars
     }
 
@@ -573,7 +573,7 @@ sub get_raw_body_text_array {
   $self->{found_encoding_quoted_printable} = 0;
 
   my $cte = $self->{msg}->get_header ('Content-Transfer-Encoding');
-  if (defined $cte && $cte =~ /quoted-printable/) {
+  if (defined $cte && $cte =~ /quoted-printable/i) {
     $self->{found_encoding_quoted_printable} = 1;
   } elsif (defined $cte && $cte =~ /base64/) {
     $self->{found_encoding_base64} = 1;
@@ -584,7 +584,7 @@ sub get_raw_body_text_array {
 
   # if it's non-text, just return an empty body rather than the base64-encoded
   # data.  If spammers start using images to spam, we'll block 'em then!
-  if ($ctype =~ /^(?:image\/|application\/|video\/)/) {
+  if ($ctype =~ /^(?:image\/|application\/|video\/)/i) {
     $self->{body_text_array} = [ ];
     return $self->{body_text_array};
   }
@@ -624,10 +624,10 @@ sub get_raw_body_text_array {
     next unless defined ($multipart_boundary);
     # MIME-only from here on.
 
-    if (/^Content-Transfer-Encoding: /) {
-      if (/quoted-printable/) {
+    if (/^Content-Transfer-Encoding: /i) {
+      if (/quoted-printable/i) {
 	$self->{found_encoding_quoted_printable} = 1;
-      } elsif (/base64/) {
+      } elsif (/base64/i) {
 	$self->{found_encoding_base64} = 1;
       }
     }
@@ -639,9 +639,9 @@ sub get_raw_body_text_array {
 
 	if (/^$/) { last; }
 
-	if (/^Content-[Tt]ype: (\S+?\/\S+?)(?:\;|\s|$)/) {
+	if (/^Content-Type: (\S+?\/\S+?)(?:\;|\s|$)/i) {
 	  $ctype = $1;
-	  if ($ctype =~ /^(text\/\S+|message\/\S+|multipart\/alternative)/) {
+	  if ($ctype =~ /^(text\/\S+|message\/\S+|multipart\/alternative)/i) {
 	    $ctypeistext = 1; next;
 	  } else {
 	    $ctypeistext = 0; next;
@@ -774,7 +774,7 @@ sub get_decoded_stripped_body_text_array {
 
     if ($lastwasmime) {
       /^$/ and $lastwasmime=0;
-      /Content-.*: / and next;
+      /Content-.*: /i and next;
       /^\s/ and next;
     }
 
