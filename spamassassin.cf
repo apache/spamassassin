@@ -135,6 +135,9 @@ describe UNDISC_RECIPS		Valid-looking To "undisclosed-recipients"
 header FAKED_UNDISC_RECIPS	To =~ /Undisclosed.*Recipient\S*@/i
 describe FAKED_UNDISC_RECIPS	Faked To "Undisclosed-Recipients"
 
+header TO_INVESTORS		To =~ /\bInvestors\@/
+describe TO_INVESTORS		To: non-existent 'Investors' address
+
 header SUBJ_ALL_CAPS		Subject =~ /^[A-Z0-9\W]{6,}[^a-z]+$/
 describe SUBJ_ALL_CAPS		Subject is all capitals
 
@@ -198,6 +201,9 @@ describe SUBJ_FULL_OF_8BITS	Subject is full of 8-bit characters
 
 header MDAEMON_2_7_4		Received =~ /with SMTP .MDaemon.v2.7.SP4.R./
 describe MDAEMON_2_7_4		Received via buggy SMTP server (MDaemon 2.7.4SP4R)
+
+header FAKED_IP_IN_RCVD		Received =~ /from [-0-9a-z_]+_\[\d+\.\d+\.\d+\.\d+\] /
+describe FAKED_IP_IN_RCVD	Received: contains a name with a faked IP-address
 
 header SMTPD_IN_RCVD		Received =~ /\(SMTPD32-\d+\..+\)/
 describe SMTPD_IN_RCVD		Received via SMTPD32 server (SMTPD32-n.n)
@@ -309,6 +315,9 @@ describe FROM_MISSING		Missing From: header
 header DATE_MISSING		Date =~ /^UNSET$/ [if-unset: UNSET]
 describe DATE_MISSING		Missing Date: header
 
+header ROUND_THE_WORLD		eval:check_for_round_the_world_received()
+describe ROUND_THE_WORLD	Received: says mail bounced all around the world
+
 # this is a quite common false positive, as it's legal to remove a To but leave
 # a CC. so don't score it high.
 header MISSING_HEADERS		eval:check_for_missing_to_header()
@@ -328,10 +337,10 @@ describe SUSPICIOUS_RECIPS      To: contains same domain at least 10 times
 header SUSPICIOUS_CC_RECIPS	Cc =~ /(@[-a-z0-9_.]+).*(?:\1.*){9,}/is
 describe SUSPICIOUS_CC_RECIPS	Cc: contains same domain at least 10 times
 
-header VERY_SUSP_RECIPS         To =~ /\b([a-z][a-z])[^@\s,]*(@[-a-z0-9_.]+).*(?:\1[^@]*\2.*){9,}/is
+header VERY_SUSP_RECIPS		To =~ /\b([a-z][a-z])[^@\s,]*((?>@[-a-z0-9_.]+))\b.*(?:\b\1[^@\s,]*\2.*\b){9,}/is
 describe VERY_SUSP_RECIPS       To: contains very similar addresses 10 times
 
-header VERY_SUSP_CC_RECIPS	Cc =~ /\b([a-z][a-z])[^@\s,]*(@[-a-z0-9_.]+).*(?:\1[^@]*\2.*){9,}/is
+header VERY_SUSP_CC_RECIPS	Cc =~ /\b([a-z][a-z])[^@\s,]*((?>@[-a-z0-9_.]+))\b.*(?:\b\1[^@\s,]*\2.*\b){9,}/is
 describe VERY_SUSP_CC_RECIPS	Cc: contains very similar addresses 10 times
 
 header Q_FOR_SELLER		Subject =~ /Question for seller/
@@ -426,6 +435,8 @@ body FULL_REFUND		/FULL REFUND/
 describe FULL_REFUND		Offers a full refund
 body FOR_FREE			/for FREE/
 describe FOR_FREE		No such thing as a free lunch
+body ONE_HUNDRED_PC_FREE	/100% FREE/
+describe ONE_HUNDRED_PC_FREE	No such thing as a free lunch
 body MONEY_MAKING		/money making/i
 describe MONEY_MAKING		Discusses money making
 body BULK_EMAIL			/bulk e-*mail/i
@@ -580,6 +591,9 @@ describe PORN_6			Uses words and phrases which indicate porn
 
 body PORN_7			/Free XXX/i
 describe PORN_7			Uses words and phrases which indicate porn
+
+body PORN_8			/(?:video|movie|teen|ware|mp3)z/
+describe PORN_8			Uses words and phrases which indicate porn
 
 body TRACKER_ID			/^\W{4,6} (?:[a-z]{10,}|[A-Z]{10,}) \W{4,6}\s*$/
 describe TRACKER_ID		Incorporates a tracking ID number
@@ -824,6 +838,10 @@ describe BALANCE_FOR_LONG	Message text is over 500 lines long
 header USER_IN_WHITELIST	eval:check_from_in_whitelist()
 describe USER_IN_WHITELIST	From: address is in the user's white-list
 
+body UNIFIED_PATCH		/^\@\@ [-+0-9]+,[0-9]+ [-+0-9]+,[0-9]+ \@\@$/
+
+body DIFF_C_PATCH		/^\*\*\* \S+    \S\S\S \S\S\S .\d \d\d:\d\d:\d\d \d+$/
+
 ###########################################################################
 # If they want spam let 'em have it! ;) - DJ
 
@@ -944,6 +962,7 @@ score FORGED_HOTMAIL_RCVD            2.5
 score FORGED_YAHOO_RCVD              4.0
 score FORM_W_MAILTO_ACTION           3.4
 score FOR_FREE                       1.9
+score ONE_HUNDRED_PC_FREE            1.9
 score FOR_INSTANT_ACCESS             2.8
 score FREEWEBCO_NET_URL              4.0
 score FREEWEBHOSTINGCENTRAL          3.4
@@ -1079,9 +1098,11 @@ score VIAGRA                         2.9
 score WANTS_CREDIT_CARD              0.1
 score WEB4PORNO_URL                  2.0
 score WEB_BUGS                       0.1
+score FAKED_IP_IN_RCVD               3.0
 score WE_HATE_SPAM                   2.4
 score WE_HONOR_ALL                   2.0
 score WORK_AT_HOME                   3.2
+score TO_INVESTORS                   2.0
 score WWW_AUTOREMOVE_COM             3.0
 score WWW_DIRECTFORCEMARKETING_COM   4.0
 score WWW_NETSITESFORFREE_NET        2.9
@@ -1116,6 +1137,7 @@ score RCVD_IN_RELAYS_ORDB_ORG	     2.0
 score RCVD_IN_OSIRUSOFT_COM	     2.0
 score X_OSIRU_SPAM_SRC		     3.0
 score X_OSIRU_SPAMWARE_SITE	     5.0
+score ROUND_THE_WORLD		     3.0
 
 # unscored by default -- commercial services.  If you pay for these,
 # give them a score so they will be checked.
@@ -1132,6 +1154,8 @@ score BALANCE_FOR_LONG		    -2.0
 score COPYRIGHT_CLAIMED		    -2.0
 score ORDER_STATUS		    -3.0
 score Q_FOR_SELLER		    -4.0
+score UNIFIED_PATCH		    -5.0
+score DIFF_C_PATCH		    -5.0
 score USER_IN_WHITELIST		    -100.0
 score A_FROM_IN_AUTO_WLIST	    -100.0
 

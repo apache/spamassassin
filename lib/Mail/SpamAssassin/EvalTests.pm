@@ -14,8 +14,9 @@ use Carp;
 use strict;
 
 use vars qw{
-	$KNOWN_BAD_DIALUP_RANGES $IP_IN_RESERVED_RANGE
-	$EXISTING_DOMAIN $IS_DNS_AVAILABLE
+	$KNOWN_BAD_DIALUP_RANGES
+
+	$CCTLDS_WITH_LOTS_OF_OPEN_RELAYS
 };
 
 # persistent spam sources. These are not in the RBL though :(
@@ -23,11 +24,24 @@ $KNOWN_BAD_DIALUP_RANGES = q(
     .da.uu.net .prod.itd.earthlink.net .pub-ip.psi.net .prserv.net
 );
 
-$EXISTING_DOMAIN = 'microsoft.com.';
+# sad but true. sort it out, sysadmins!
+$CCTLDS_WITH_LOTS_OF_OPEN_RELAYS = qr{(?:kr|cn|cl|ar|hk|us|il|th|tw|sg|za|tr|ma|ua|in)};
 
-$IP_IN_RESERVED_RANGE = undef;
-
-$IS_DNS_AVAILABLE = undef;
+# Here's how that RE was determined... relay rape by country (as of my
+# spam collection on Dec 12 2001):
+#
+#     10 in     10 ua     11 ma     11 tr     11 za     12 gr
+#     13 pl     14 se     15 hu     17 sg     19 dk     19 pt
+#     19 th     21 us     22 hk     24 il     26 ch     27 ar
+#     27 es     29 cz     32 cl     32 mx     37 nl     38 fr
+#     41 it     43 ru     59 au     62 uk     67 br     70 ca
+#    104 tw    111 de    123 jp    130 cn    191 kr
+#
+# However, since some ccTLDs just have more hosts/domains (skewing those
+# figures), I cut down this list using data from
+# http://www.isc.org/ds/WWW-200107/. I used both hostcount and domain counts
+# for figuring this. any ccTLD with > about 40000 domains is left out of this
+# regexp.  Then I threw in some unscientific seasoning to taste. ;)
 
 ###########################################################################
 # HEAD TESTS:
@@ -527,6 +541,43 @@ sub get_charset_from_ct_line {
   if ($type =~ /charset="([^"]+)"/i) { return $1; }
   if ($type =~ /charset=(\S+)/i) { return $1; }
   return undef;
+}
+
+###########################################################################
+
+sub check_for_round_the_world_received {
+  my ($self) = @_;
+  my ($relayer, $relayerip, $relay);
+
+  my $rcvd = $self->get ('Received');
+
+  # trad sendmail/postfix fmt:
+  # Received: from hitower.parkgroup.ru (unknown [212.107.207.26]) by
+  #     mail.netnoteinc.com (Postfix) with ESMTP id B8CAC11410E for
+  #     <me@netnoteinc.com>; Fri, 30 Nov 2001 02:42:05 +0000 (Eire)
+  # Received: from fmx1.freemail.hu ([212.46.197.200]) by hitower.parkgroup.ru
+  #     (Lotus Domino Release 5.0.8) with ESMTP id 2001113008574773:260 ;
+  #     Fri, 30 Nov 2001 08:57:47 +1000
+  if ($rcvd =~ /
+  	\nfrom\s(\S+\.${CCTLDS_WITH_LOTS_OF_OPEN_RELAYS})\s\(.{0,200}
+  	\nfrom\s(\S+)\s.{0,30}\[(\d+\.\d+\.\d+\.\d+)\]
+  /six) { $relay = $1; $relayer = $2; $relayerip = $3; goto gotone; }
+
+  return 0;
+
+gotone:
+  my $revdns = $self->lookup_ptr ($relayerip);
+
+  dbg ("round-the-world: mail relayed through $relay by ".	
+  	"$relayerip (HELO $relayer, rev DNS says $revdns");
+
+  if ($revdns =~ /\.(?:net|com|us|uk|ca)$/) {
+    dbg ("round-the-world: yep, I think so");
+    return 1;
+  }
+
+  dbg ("round-the-world: probably not");
+  return 0;
 }
 
 ###########################################################################
