@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.493 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.494 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -296,11 +296,6 @@ tflags T_RCVD_IN_SORBS_WEB net
 # dsn.rfc-ignorant.org
 header T_DNS_FROM_RFCI_DSN	rbleval:check_rbl_from_host('rfci-dsn', 'dsn.rfc-ignorant.org.')
 tflags T_DNS_FROM_RFCI_DSN net
-
-# give rule a reprieve
-header T_RCVD_IN_RELAYS_ORDB_ORG	rbleval:check_rbl('ordb', 'relays.ordb.org.')
-describe T_RCVD_IN_RELAYS_ORDB_ORG	Received via a relay in relays.ordb.org
-tflags T_RCVD_IN_RELAYS_ORDB_ORG net
 
 # DO NOT USE - DELETE BEFORE RELEASE: this is a test rule to verify that
 # we are testing at least one IP address per spam
