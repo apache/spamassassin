@@ -25,8 +25,9 @@ mv spam.log nonspam.log logs/old
 
 echo "
 
-scp dogma.slashnull.org:ftp/spamassassin/masses/spam.log spam.dogma
-scp dogma.slashnull.org:ftp/spamassassin/masses/nonspam.log nonspam.dogma
+dog=dogma.slashnull.org
+rsync -vrze ssh \$dog:ftp/spamassassin/masses/spam.log spam.dogma
+rsync -vrze ssh \$dog:ftp/spamassassin/masses/nonspam.log nonspam.dogma
 
 "
 
