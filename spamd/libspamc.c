@@ -100,8 +100,10 @@ try_to_connect (const struct sockaddr *argaddr, const struct hostent *hent,
   int status = -1;
   int origerr;
   int numloops;
-  int hent_hostnum = 0;
+  int hostnum = 0;
   struct sockaddr_in addrbuf, *addr;
+  char addrlistbuf[4096], **addrlist;
+  int addrlistlen = 0;
 
   /* only one set of connection targets can be used.  assert this */
   if (argaddr == NULL && hent == NULL) {
@@ -112,9 +114,26 @@ try_to_connect (const struct sockaddr *argaddr, const struct hostent *hent,
       return EX_SOFTWARE;
   }
 
+  /* take a copy of the h_addr_list part of the struct hostent */
   if (hent != NULL) {
-    for (hent_hostnum=1; hent->h_addr_list[hent_hostnum] != 0; hent_hostnum++) {}
+    for (hostnum=0; hent->h_addr_list[hostnum] != 0; hostnum++)
+    {
+      int siz = sizeof(*(hent->h_addr_list[hostnum]));
+
+      if (addrlistlen+siz >= 4096) {
+	syslog (LOG_ERR, "too many address in hostent, out of room! %d %d",
+		hostnum, addrlistlen);
+	return EX_SOFTWARE;
+      }
+
+      memcpy (addrlistbuf+addrlistlen,
+			hent->h_addr_list[hostnum], siz);
+      addrlist[hostnum] = (addrlistbuf+addrlistlen);
+      addrlistlen += siz;
+    }
   }
+
+  /* DO NOT use hent after this point, syslog() may overwrite it */
 
   if(-1 == (mysock = socket(PF_INET,SOCK_STREAM,0)))
   {
@@ -166,7 +185,7 @@ try_to_connect (const struct sockaddr *argaddr, const struct hostent *hent,
       memset(&addrbuf, 0, sizeof(addrbuf));
       addrbuf.sin_family=AF_INET;
       addrbuf.sin_port=htons(hent_port);
-      memcpy (&addrbuf.sin_addr, hent->h_addr_list[numloops % hent_hostnum],
+      memcpy (&addrbuf.sin_addr, addrlist[numloops % hostnum],
                         sizeof(addrbuf.sin_addr));
       addr = &addrbuf;
     }
