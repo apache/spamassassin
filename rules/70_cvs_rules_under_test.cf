@@ -476,6 +476,13 @@ uri T_PXE_LOGIC /^http:\/\/(?:pxe|fx)\.[^\/]{1,50}\.com\/logic\/to\.pl\?/i
 test T_PXE_LOGIC ok http://pxe.highspeed-email.com/logic/to.pl?i=3399923cd33d
 describe T_PXE_LOGIC Spam URL pattern, usually made up domains
 
+# mgm's rules for PXE above
+uri T_DAILY_PL			/\/logic\/[a-z]{2}\.pl/
+describe T_DAILY_PL		Spam URL pattern, DailyPromotions redirect link
+
+uri T_DAILY_PXE			/http:\/\/(?:pxe|fx)\./i
+describe T_DAILY_PXE		Spam URL pattern, DailyPromotions server link
+
 # Specific whitelisting for GradFinder.  They use the sender's own
 # From addr, so whitelist_from_rcvd won't cut it
 # bug 1241
@@ -496,4 +503,7 @@ header __SENDER_LISTPROC	Sender =~ /\blistproc\@/i
 meta T_LISTPROC2		T_LISTPROC1 && __FROM_LISTPROC && (__REPLY_LISTPROC || __SENDER_LISTPROC)
 score T_LISTPROC2		-0.01
 tflags T_LISTPROC2		nice
+
+header T_WITH_LC_SMTP		Received =~ /\swith\ssmtp;\s/
+describe T_WITH_LC_SMTP		Received line contains spam-sign (lowercase smtp)
 
