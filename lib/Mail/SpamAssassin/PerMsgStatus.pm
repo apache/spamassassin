@@ -910,9 +910,6 @@ sub get_decoded_stripped_body_text_array {
     $text .= $_;
   }
 
-  # turn off utf8-ness to fix a warn "bug" on 5.6.1
-  $text = pack("C0A*", $text);
-
   # Convert =xx and =\n into chars
   $text =~ s/=([A-F0-9]{2})/chr(hex($1))/ge;
   $text =~ s/=\n//g;
@@ -946,9 +943,7 @@ sub get_decoded_stripped_body_text_array {
     $hp->parse($text);
     $hp->eof;
 
-    # turn off utf8-ness to fix a warn "bug" on 5.6.1
-    $text = pack("C0A*", 
-	join('', $before, @{$self->{html_text}}));
+    $text = join('', $before, @{$self->{html_text}});
 
     if ($raw > 0) {
       my $space = ($before =~ tr/ \t\n\r\x0b\xa0/ \t\n\r\x0b\xa0/);
