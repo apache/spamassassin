@@ -54,7 +54,10 @@ my %resphash = (
 		);
 
 # defaults
-my %opt = ('user-config' => 1);
+my %opt = (
+	   'user-config' => 1,
+	   'ident-timeout' => 5.0,
+	  );
 
 my @OLD_ARGV = @ARGV;    # Getopt::Long tends to clear @ARGV
 Getopt::Long::Configure ("bundling");
@@ -82,6 +85,8 @@ GetOptions(
 	'paranoid!' => \$opt{'paranoid'}, 'P' => \$opt{'paranoid'},
 	'stop-at-threshold!' => \$opt{'stop-at-threshold'}, 'S' => \$opt{'stop-at-threshold'},
 	'helper-home-dir|H:s' => \$opt{'home_dir_for_helpers'},
+	'auth-ident' => \$opt{'auth-ident'},
+	'ident-timeout=f' => \$opt{'ident-timeout'},
 
         # will be stripped in future release
 	'add-from!' => sub { warn "The --add-from option has been removed\n" },
@@ -100,6 +105,18 @@ if(@{$opt{'allowed-ip'}})
 else
 {
     set_allowed_ip('127.0.0.1');
+}
+
+# ident-based spamc user authentication
+if ($opt{'auth-ident'}) {
+    eval { require Net::Ident };
+    if ($@) {
+	die "fatal: ident-based authentication requested, " .
+	    "but Net::Ident is unavailable.\n";
+    } else {
+	$opt{'ident-timeout'} = undef if $opt{'ident-timeout'} >= 0.0;
+	import Net::Ident qw(ident_lookup);
+    }
 }
 
 # This can be changed on the command line with the -s flag
@@ -389,6 +406,7 @@ sub check {
 	    if (/^User: (.*)\r\n/)
 	    {
 		$current_user = $1;
+		auth_ident($current_user) if $opt{'auth-ident'};
 		if (!$opt{'user-config'})
 		{
 		  if ($opt{'sql-config'}) {
@@ -576,6 +594,19 @@ sub spawn {
     open(STDIN,  "<&Client")   || die "can't dup client to stdin";
     open(STDOUT, ">&Client")   || die "can't dup client to stdout";
     exit &$coderef();
+}
+
+sub auth_ident
+{
+    my $username = shift;
+    my $ident_username = ident_lookup(\*STDIN, $opt{'ident-timeout'});
+    my $dn = $ident_username || 'NONE'; # display name
+    warn "ident_username = $dn, spamc_username = $username\n" if $opt{'debug'};
+    if ($username ne $ident_username) {
+	logmsg "fatal: ident username ($dn) does not match " .
+	    "spamc username ($username)";
+	exit 1;
+    }
 }
 
 sub handle_user
@@ -867,6 +898,8 @@ Options:
  -u username, --username=username   Run as username
  -v, --vpopmail                     Enable vpopmail config
  -x, --nouser-config                Disable user config files
+ --auth-ident                       Use ident to authenticate spamc user
+ --ident-timeout=timeout            Timeout for ident connections
  -A host,..., --allowed-ips=..,..   Limit ip addresses which can connect
  -D, --debug                        Print debugging messages
  -L, --local                        Use local tests only (no DNS)
@@ -1001,6 +1034,24 @@ the user running C<spamc>, if C<spamd> is running as root.
 
 Turn off(on) per-user config files.  All users will just get the default
 configuration.
+
+=item B<--auth-ident>
+
+Verify the username provided by spamc using ident.  This is only
+useful if connections are only allowed from trusted hosts (because an
+identd that lies is trivial to create) and if spamc REALLY SHOULD be
+running as the user it represents.  Connections are terminated
+immediately if authentication fails.  In this case, spamc will pass
+the mail through unchecked.  Failure to connect to an ident server,
+and response timeouts are considered authentication failures.  This
+requires that Net::Ident be installed.
+
+=item B<--ident-timeout>=I<timeout>
+
+Wait at most I<timeout> seconds for a response to ident queries.
+Authentication that takes long that I<timeout> seconds will fail, and
+mail will not be processed.  Setting this to 0.0 or less results in no
+timeout, which is STRONGLY discouraged.  The default is 5 seconds.
 
 =item B<-A> I<host,...>, B<--allowed-ips>=I<host,...>
 
