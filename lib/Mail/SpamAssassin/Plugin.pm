@@ -287,6 +287,20 @@ The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
 
 =back
 
+=item $plugin->check_post_learn ( { options ... } )
+
+Called after auto-learning may (or may not) have taken place.  If you
+wish to perform additional learning, whether or not auto-learning
+happens, this is the place to do it.
+
+=over 4
+
+=item permsgstatus
+
+The C<Mail::SpamAssassin::PerMsgStatus> context object for this scan.
+
+=back
+
 =item $plugin->check_end ( { options ... } )
 
 Signals that a message check operation has just finished, and the
