@@ -132,7 +132,7 @@ sub new {
   $self->{dns_available} = "test";
   $self->{check_mx_attempts} = 2;
   $self->{check_mx_delay} = 5;
-  $self->{ok_locales} = '';
+  $self->{ok_locales} = 'all';
   $self->{ok_languages} = '';
   $self->{allow_user_rules} = 0;
   $self->{user_rules_to_compile} = 0;
@@ -725,20 +725,17 @@ out
       $self->{rbl_timeout} = $1+0; next;
     }
 
-=item ok_locales xx [ yy zz ... ]		(default: en)
+=item ok_locales xx [ yy zz ... ]		(default: all)
 
 Which locales (country codes) are considered OK to receive mail from.  Mail
 using character sets used by languages in these countries, will not be marked
 as possibly being spam in a foreign language.
 
-SpamAssassin will try to determine the local locale, in order to determine
-which charsets should be allowed by default, but on some OSes it may not be
-able to do this effectively, requiring customisation.
+Note that all ISO-8859-* character sets, and Windows code page character sets,
+are always permitted by default anyway.
 
-All ISO-8859-* character sets, and Windows code page character sets, are
-already permitted by default.
-
-The following locales use additional character sets, and are supported:
+If you wish SpamAssassin to block spam in foreign languages, set this to
+the locale which matches your preference, from the list below:
 
 =over 4
 
@@ -763,10 +760,6 @@ Thai
 Chinese (both simplified and traditional)
 
 =back
-
-To simply allow all character sets through without giving them points, use
-
-	ok_locales	all
 
 =cut
 

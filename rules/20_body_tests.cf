@@ -426,15 +426,6 @@ describe WANTS_CREDIT_CARD      Asks for credit card details
 body ASKS_BILLING_ADDRESS       /\bbilling address\b/i
 describe ASKS_BILLING_ADDRESS   Asks for a billing address
 
-body UPPERCASE_25_50		eval:check_for_uppercase('25', '50')
-describe UPPERCASE_25_50	message body is 25-50% uppercase
-
-body UPPERCASE_50_75		eval:check_for_uppercase('50', '75')
-describe UPPERCASE_50_75	message body is 50-75% uppercase
-
-body UPPERCASE_75_100		eval:check_for_uppercase('75', '100')
-describe UPPERCASE_75_100	message body is 75-100% uppercase
-
 # converted to use eval method by Matthew Cline
 body LINES_OF_YELLING		eval:check_for_yelling()
 describe LINES_OF_YELLING        A WHOLE LINE OF YELLING DETECTED
@@ -1436,12 +1427,3 @@ describe MEMBER_2       Being a Member
 body GET_IT_NOW         /get it (?-i:N)ow/i
 describe GET_IT_NOW     Contains 'Get it now' with capitals
 
-###########################################################################
-# meta body tests
-###########################################################################
-
-body __THREE_DOLLARS		/\${3,}/
-body __ISO_2022_JP_DELIM	/\e\$B/
-
-meta CASHCASHCASH		(!__ISO_2022_JP_DELIM && __THREE_DOLLARS)
-describe CASHCASHCASH		Contains at least 3 dollar signs in a row
