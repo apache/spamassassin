@@ -253,7 +253,7 @@ sub razor2_access {
 	          }
 	        }
 	        else {
-		  push(@results, { part => $part, noreponse => 1 });
+		  push(@results, { part => $part, noresponse => 1 });
 	        }
 	        $part++;
 	      }
