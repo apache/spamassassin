@@ -18,6 +18,7 @@ use warnings ;
 use strict;
 use vars qw($opt_a $opt_f $opt_t $opt_u);
 
+my @lm;
 my $non_word_characters='0-9\s';
 
 # settings
@@ -51,12 +52,20 @@ sub classify {
 
   # create ngrams for input.
   my @unknown = create_lm($input);
-  # load model and count for each language.
   my $language = 0;
-  open(LM, $self->{main}->{languages_filename}) || die "cannot open languages: $!\n";
-  dbg("Loading languages file...");
-  while (<LM>) {
-    chomp;
+  if (! @lm) {
+    # load model for each language
+    dbg("Loading languages file...");
+    open(LM, $self->{main}->{languages_filename})
+	|| die "cannot open languages: $!\n";
+    while (<LM>) {
+      chomp;
+      push(@lm, $_);
+    }
+    close(LM);
+  }
+  # count for each language
+  for (@lm) {
     if (/^0 (.+)/) {
       my $new = $1;
 
@@ -83,7 +92,6 @@ sub classify {
       $ngram{$_} = $rang++;
     }
   }
-  close(LM);
   my @results = sort { $results{$a} <=> $results{$b} } keys %results;
 
   my $best = $results{$results[0]};
