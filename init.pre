@@ -52,3 +52,9 @@ loadplugin Mail::SpamAssassin::Plugin::SpamCop
 # executable file
 #
 #loadplugin Mail::SpamAssassin::Plugin::MSExec
+
+# DefaultAutoLearnDiscriminator - default discriminator for
+# Bayes auto-learning
+#
+loadplugin Mail::SpamAssassin::Plugin::DefaultAutoLearnDiscriminator
+
