@@ -56,6 +56,7 @@ $ExtUtils::MakeMaker::Recognized_Att_Keys{'PKG_LOCAL_RULES_DIR'} = 1;
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'INST_SITELIB'} = 1;
 
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'RUN_RAZOR2_TESTS'} = 1;
+$ExtUtils::MakeMaker::Recognized_Att_Keys{'CONTACT_ADDRESS'} = 1;
 
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'PERL_BIN'} = 1;
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'PERL_WARN'} = 1;
@@ -173,8 +174,7 @@ unless($Config{installman1dir}) {
   delete $makefile{MAN1PODS};
 }
 
-WriteMakefile(%makefile);
-
+my $contactaddr;
 
 #######################################################################
 
@@ -184,6 +184,20 @@ my $argv = join (' ', @ARGV);
 
 {
   my $do;
+
+  $do = ($argv =~ /\bCONTACT_ADDRESS=(\S+)/)[0];
+
+  if (!defined ($do)) {
+    my $url = prompt (
+      "What email address, or URL, should be used in the suspected-spam report\n".
+      "text, for users who want more information on your filter installation?\n".
+      "(ISPs, in particular, should change this to a local Postmaster address\n".
+      "or URL.)",
+      "http://spamassassin.org/tag/");
+    $do = $url;
+  }
+
+  $contactaddr = $do;
 
   $do = ($argv =~ /\bRUN_RAZOR2?_TESTS?=(.)/)[0];
 
@@ -206,6 +220,8 @@ my $argv = join (' ', @ARGV);
     open(FLAG, ">t/do_razor2") && close(FLAG);
   }
 }
+
+WriteMakefile(%makefile);
 
 
 #######################################################################
@@ -262,6 +278,7 @@ DEF_RULES_DIR		= $defrulesdir
 PKG_LOCAL_RULES_DIR	= $pkglocalrulesdir
 LOCAL_RULES_DIR		= $localrulesdir
 INST_SITELIB		= $instsitelib
+CONTACT_ADDRESS		= $contactaddr
 
 PERL_BIN		= $perl_bin
 PERL_WARN		= $perl_warn
@@ -274,7 +291,8 @@ FIXVARS		= -Mvars \
 		  -DPREFIX="$(INST_PREFIX)" \
 		  -DDEF_RULES_DIR="$(DEF_RULES_DIR)" \
 		  -DLOCAL_RULES_DIR="$(LOCAL_RULES_DIR)" \
-		  -DINSTALLSITELIB="$(INST_SITELIB)"
+		  -DINSTALLSITELIB="$(INST_SITELIB)" \
+		  -DCONTACT_ADDRESS="$(CONTACT_ADDRESS)"
 
 FIXBYTES	= -Mbytes \
 		  -DPERL_VERSION="$(PERL_VERSION)"

@@ -19,13 +19,15 @@
 # it clear what's been added, and allow other filters to *remove* spamfilter
 # modifications, so you lose 6 columns right there.
 #
+# CONTACT_ADDRESS, if it's visible in the template below, is replaced with
+# whatever the installer typed when running Makefile.PL.
 #      ........................................................................
 clear_report_template
 report Spam detection software (installed by you, your system administrator, or
 report your internet service provider) has identified an incoming email as
 report possible spam.  The original message has been attached to this report so
 report you can view it (if it isn't spam) or block similar future email.  If
-report you have any questions, see http://spamassassin.org/tag/ for details.
+report you have any questions, see @@CONTACT_ADDRESS@@ for details.
 report 
 report Content preview:  _PREVIEW_
 report 
