@@ -7,6 +7,7 @@ Mail::SpamAssassin::Plugin::Hashcash - perform hashcash verification tests
   loadplugin     Mail::SpamAssassin::Plugin::Hashcash
 
 =cut
+
 # <@LICENSE>
 # Copyright 2004 Apache Software Foundation
 #
@@ -67,6 +68,8 @@ sub parse_config {
   my $conf = $opts->{conf};
   my $key = $opts->{key};
   my $value = $opts->{value};
+
+=over 4
 
 =item use_hashcash { 1 | 0 }   (default: 1)
 
