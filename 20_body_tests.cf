@@ -421,11 +421,17 @@ describe HR_3113                Mentions Spam law "H.R. 3113"
 body UCE_MAIL_ACT               /Unsolicited Commercial Electronic Mail Act/
 describe UCE_MAIL_ACT           Mentions Spam Law "UCE-Mail Act"
 
-body PENIS_ENLARGE		/(?:(?:\bpenis\b|\benlarge).{0,50}){2,}/is
+body PENIS_ENLARGE		/\b(?:add\b|enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b).{0,50}\b:penis\b/i
 describe PENIS_ENLARGE		Information on getting a larger penis
 
-body PENIS_ENLARGE2		/(?:(?:\bpenis\b|\bincrease).{0,50}){2,}/is
+body PENIS_ENLARGE2		/\bpenis\b.{0,50}\b(?:add\b|enlarge|increase|grow|lengthen|larger\b|bigger\b|longer\b|thicker\b)/i
 describe PENIS_ENLARGE2		Information on getting a larger penis
+
+body     EJACULATION            /(?:increase|improve).{0,10}ejaculation/i
+describe EJACULATION            Increase your ejaculation!
+
+body     IMPOTENCE              /(?:impotence (?:problem|cure|solution)|Premature Ejaculation|erectile dysfunction)/i
+describe IMPOTENCE              Impotence cure
 
 body WORK_AT_HOME		/(?:WORK|MAKE (?:MONEY|\$+)) (?:AT|FROM) HOME/i
 describe WORK_AT_HOME		Information on how to work at home
