@@ -1,0 +1,108 @@
+#!/usr/bin/perl
+# autoconf wrapper (for Unix)/alternative (for Windows)
+
+
+use strict;
+use warnings;
+use Config;
+
+use File::Spec;
+use File::Copy;
+
+use Cwd qw(chdir);
+
+use constant RUNNING_ON_NATIVE_WINDOWS => ($^O =~ /^(mswin|dos|os2)/i);
+
+
+# Some nicer error messages.
+$SIG{__DIE__} = sub {
+  die join(': ', $0, @_);
+};
+
+
+# Build our argument list to call the real configure script later.
+our @args = (q{./configure});
+our %args;
+foreach (@ARGV) {
+  if (/^--([^=]+?)=["']?(.*?)["']?$/) {
+    $args{$1} = $2;
+  }
+  elsif (/^([^=]+?)=["']?(.*?)["']?$/) {
+    $ENV{$1} = $2;
+  }
+  # Don't include --srcdir because we'll change their on our own.
+  push(@args, $_) unless (/^--srcdir=/);
+}
+
+
+# Change to the source dir if one was given.
+if ($args{srcdir}) {
+  print "cd $args{srcdir}\n";
+  chdir($args{srcdir}) || die "Can't cd to `$args{srcdir}': $!";
+}
+
+
+# On everything but native Windows (!= cygwin) we use autoconf.
+unless (RUNNING_ON_NATIVE WINDOWS)
+{
+  print join(' ', @args) . "\n";
+  exec @args;
+  exit 127;
+}
+# For Windows we've got our own little autoconf :)
+else
+{
+  # These are the defaults for the Makefile.
+  my %env = (
+    CC             => 'cl',
+    CFLAGS         => '/DWIN32',
+    SSLCFLAGS      => '/DSPAMC_SSL',
+
+    LIBS           => 'ws32.lib',
+    SSLLIBS        => 'ssleay32.lib libeay32.lib',
+
+    SPAMC_FILES    => 'spamd/spamc.c spamd/getopt.c',
+    LIBSPAMC_FILES => 'spamd/libspamc.c spamd/utils.c',
+  );
+
+  # Enable SSL only if requested.
+  unless ($args{'enable-ssl'}) {
+    delete $env{SSLCFLAGS};
+    delete $env{SSLLIBS};
+  }
+  # Set every unset var in env to it's default value so the preprocessor
+  # gets it later on.
+  foreach (keys %env) {
+    $ENV{$_} = $env{$_} unless $ENV{$_};
+  }
+
+  # Now do the real work...
+  print "copy config.h.win config.h\n";
+  copy(q{config.h.win}, q{config.h}) || die "Can't copy `config.h.win' to `config.h': $!";
+
+  # We'll use our preprocessor for variable replacement in the Makefile.
+  # Note that variables are enclosed by *two* @s while autoconf uses only
+  # one.
+  @args = (
+    File::Spec->catfile(File::Spec->updir(), 'build', 'preprocessor'),
+    q{-Mvars},
+    q{-ibinaries.mk.win},
+    q{-obinaries.mk}
+  );
+  print join(' ', $Config{'perlpath'}, @args) . "\n";
+  {
+    # We now call the preprocessor in its own namespace (so it doesn't
+    # clobber the main namespace. Feed its ARGV and do some zeroth-argument
+    # tricks to get nicer error messages.
+    package preprocessor;
+    my $Z = $0;
+    $0    = $::args[0];
+    @ARGV = @::args[1 .. 3];
+    # Got to check for defined because the script returns shell error level!
+    unless (defined do $0) {
+      $0 = $Z;
+      die $@ ? $@ : "Can't exec `$::args[0]': $!";
+    }
+  }
+} #* RUNNING_ON_NATIVE_WINDOWS *#
+
