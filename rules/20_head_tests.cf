@@ -65,12 +65,6 @@ describe FAKED_UNDISC_RECIPS_AT	Faked To "Undisclosed-Recipients" @ some address
 header FROM_MALFORMED		From !~ /(?:\"[^\"]+\"|\S+)\@\S+\.\S+|<\S+(?:\!\S+)+>/ [if-unset: unset@unset.unset]
 describe FROM_MALFORMED		From: has a malformed address
 
-header PLING_PLING		Subject =~ /!!!/
-describe PLING_PLING		Subject has lots of exclamation marks
-
-header MANY_EXCLAMATIONS	Subject =~ /![^!]+!/
-describe MANY_EXCLAMATIONS	Subject has many exclamations
-
 header PLING_QUERY		Subject =~ /\?.*!|!.*\?/
 describe PLING_QUERY		Subject has exclamation mark and question mark
 
