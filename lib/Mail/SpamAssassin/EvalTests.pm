@@ -2722,30 +2722,19 @@ sub check_for_to_in_subject {
   my ($self, $test) = @_;
 
   my $full_to = $self->get('To:addr');
-  return 0 unless $full_to; # no To:?
-  my $to = $full_to;
-  $to =~ s/\@.*$//; # just the username please
+  return 0 unless $full_to;
 
   my $subject = $self->get('Subject');
 
-  my $return = $subject =~ /^\s*\Q$to\E,\S/;       # "user,\S" case sensitive
-
-  if ( defined $test ) { # test versions
-    if ( $test == 1 ) {
-      $return = $subject =~ /\b\Q$full_to\E\b/i;   # "user@domain.com"
-    }
-    elsif ( $test == 2 ) {
-      $to = ucfirst $to;
-      $return = $subject =~ /^\s*\Q$to\E,\S/;       # "user,\S" case sensitive (ucfirst)
-    }
-    elsif ( $test == 3 ) {
-      $return = $subject =~ /^\s*\Q$to\E,\S/i;       # "user,\S" case insensitive
-    }
-    elsif ( $test == 4 ) {
-      $return = $subject =~ /^\s*\Q$full_to\E\b/i;   # "user@domain.com"
-    }
+  if ($test eq "address") {
+    return $subject =~ /\b\Q$full_to\E\b/i;	# "user@domain.com"
   }
-  return $return;
+  elsif ($test eq "user") {
+    my $to = $full_to;
+    $to =~ s/\@.*//;
+    return $subject =~ /^\s*\Q$to\E,\S/i;	# "user,\S" case insensitive
+  }
+  return 0;
 }
 
 ###########################################################################
@@ -3260,58 +3249,6 @@ if (1 && $helo) {
   }
 
   dbg ("SPF: query for $sender/$ip/$helo: result: $result, comment: $comment");
-}
-
-###########################################################################
-
-sub check_for_all_relays_near_mxes {
-  my ($self) = @_;
-
-  return unless $self->is_dns_available();
-  return;
-
-  # Allow a max 15-second timeout to do this test, looking up all MX and
-  # A records.
-  # TODO: use the BGSOCK stuff in Dns, and start these along with the RBL
-  # queries.  May be pointless if the accuracy is poor though.
-
-  my $timeout = $self->{conf}->{rbl_timeout};
-  my $allmxesnear = 0;
-
-  eval {
-    local $SIG{ALRM} = sub { die "alarm\n" };
-    alarm($timeout);
-
-    foreach my $relay (@{$self->{relays_untrusted}}) {
-      if (!$self->mx_of_helo_near_ip ($relay->{helo}, $relay->{ip})) {
-	dbg ("helo $relay->{helo} is not near $relay->{ip}");
-	die "notnear";
-      } else {
-	dbg ("helo $relay->{helo} is near $relay->{ip}");
-      }
-    }
-
-    $allmxesnear = 1;	# completed without dying
-
-  };
-  alarm(0); # if we die'd above, need to reset here
-
-  if ($@) {
-    if ($@ =~ /alarm/) {
-      dbg ("all-MXes check timed out after $timeout secs.");
-    } elsif ($@ =~ /notnear/) {
-      # fine! just return
-    } else {
-      warn ("all-MXes -> check skipped: $! $@");
-    }
-    return 0;
-  }
-
-  # note: an empty @{$self->{relays_untrusted}} is fine -- it means
-  # either the message originating locally, or the trail was trusted
-  # all the way to the source.  Both are good news!
-
-  return 1;
 }
 
 ###########################################################################
