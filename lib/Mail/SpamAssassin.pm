@@ -818,26 +818,6 @@ sub add_all_addresses_to_blacklist {
 
 ###########################################################################
 
-=item $f->reply_with_warning ($mail, $replysender)
-
-Reply to the sender of a mail, encapsulated in a C<Mail::Audit> object,
-explaining that their message has been added to spam-tracking databases
-and deleted.  To be used in conjunction with C<report_as_spam>.  The
-C<$replysender> argument should contain an email address to use as the
-sender of the reply message.
-
-=cut
-
-sub reply_with_warning {
-  my ($self, $mail, $replysender) = @_;
-  $self->init(1);
-  $mail = $self->encapsulate_mail_object ($mail);
-
-  require Mail::SpamAssassin::Replier;
-  $mail = Mail::SpamAssassin::Replier->new ($self, $mail);
-  $mail->reply ($replysender);
-}
-
 ###########################################################################
 
 =item $text = $f->remove_spamassassin_markup ($mail)

@@ -76,7 +76,6 @@ eval {
 	     'remove-addr-from-whitelist=s'      => \$opt{'remove-addr-from-whitelist'},
 	     'add-addr-to-whitelist=s'           => \$opt{'add-addr-to-whitelist'},
 	     'add-addr-to-blacklist=s'           => \$opt{'add-addr-to-blacklist'},
-	     'warning-from|w=s'                  => \$opt{'warning-from'},
 	     'local-only|local|L'                => \$opt{'local'},
 	     'remove-markup|despamassassinify|d' => \$opt{'remove-markup'},
              'revoke|k'                          => \$opt{'revoke'},
@@ -102,6 +101,7 @@ eval {
 	     'stop-at-threshold|S' => sub { warn "The -S option has been removed.\n" },
 	     'whitelist-factory|M=s' => sub { warn "The -M option has been removed.\n" },
 	     'auto-whitelist|a' => sub { warn "The -a option has been removed.\n" },
+	     'warning-from|w=s' => sub { warn "The -w option has been removed.\n" },
   ) or usage(0, "Unknown option!");
   if (defined $opt{'help'}) { usage(0, "For more information read the spamassassin man page"); }
   if (defined $opt{'version'}) {
@@ -195,9 +195,6 @@ eval {
   if ($opt{'report'}) {
     if ( $spamtest->report_as_spam ($mail) ) {
       warn "Warning, unable to report spam\nFor more information, re-run with -D option to see debug output.\n";
-    }
-    if ($opt{'warning-from'}) {
-      $spamtest->reply_with_warning ($mail, $opt{'warning-from'});
     }
     $mail->ignore();		# will exit
   }
@@ -293,7 +290,6 @@ Options:
  -L, --local                       Local tests only (no online tests)
  -r, --report                      Report message as spam
  -k, --revoke                      Revoke message as spam
- -w addr, --warning-from=addr      Send a warning mail to sender from addr
  -d, --remove-markup               Remove spam reports from a message
  -C path, --configpath=path, --config-file=path	  Path to standard configuration dir
  -p prefs, --prefspath=file, --prefs-file=file    Set user preferences file
@@ -429,12 +425,6 @@ documentation for more information.
 Remove the named email address from the automatic whitelist.  Note that
 you must be running C<spamassassin> or C<spamd> with the B<-a> switch.
 See the B<-a> documentation for more information.
-
-=item B<-w> I<fromaddr>, B<--warning-from>=I<fromaddr>
-
-This flag is only useful in conjunction with B<-r>.  It will send a reply mail
-to the sender of the tested mail, notifying them that their message has been
-trapped as spam, from the address supplied in I<fromaddr>.  See L</SPAM TRAPPING>.
 
 =item B<-l> I<filename>, B<--log-to-mbox>=I<filename>
 
