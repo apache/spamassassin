@@ -3,12 +3,26 @@
 # iterate over mail archives, calling a function on each message.
 
 package Mail::SpamAssassin::ArchiveIterator;
+
 use strict;
+use IO::Select;
+use IO::Socket;
+use Mail::SpamAssassin::Util;
+
+use constant BIG_BYTES => 256*1024;	# 256k is a big email
+use constant BIG_LINES => BIG_BYTES/65;	# 65 bytes/line is a good approximation
+
 eval "use bytes";
 
-use vars qw{ @ISA };
+my $no;
+my $tz;
 
-@ISA = qw();
+BEGIN {
+  $no = 1;
+  $tz = local_tz();
+}
+
+my @ISA = qw();
 
 ###########################################################################
 
@@ -20,17 +34,26 @@ sub new {
   if (!defined $self) { $self = { }; }
   bless ($self, $class);
 
-  $self->{count} = 0;
+  if ($self->{opt_o}) {
+    autoflush STDOUT 1;
+    print STDOUT $self->{log_header};
+  }
+  else {
+    open(HAM, "> $self->{opt_hamlog}");
+    open(SPAM, "> $self->{opt_spamlog}");
+    autoflush HAM 1;
+    autoflush SPAM 1;
+    print HAM $self->{log_header};
+    print SPAM $self->{log_header};
+  }
+
+  $self->{s} = { };		# spam, of course
+  $self->{h} = { };		# ham, as if you couldn't guess
+
   $self;
 }
 
 ###########################################################################
-
-=item $iterator->set_function ( \&wanted );
-
-Set the visitor function.
-
-=cut
 
 sub set_function {
   my ($self, $fn) = @_;
@@ -39,227 +62,361 @@ sub set_function {
 
 ###########################################################################
 
-=item $iterator->run ("folderpath" [, ...] )
-
-Iterate over the named folders.  If no folders are named, B<('-')> is assumed;
-in other words, a single mail message on STDIN.
-
-=cut
-
 sub run {
-  my $self = shift;
+  my ($self, @targets) = @_;
 
   if (!defined $self->{wanted_sub}) {
     die "set_function never called";
   }
 
-  if ($#_ < 0) { @_ = ('-'); }
+  foreach my $target (@targets) {
+    my ($class, $format, $location) = split(/:/, $target, 3);
 
-  foreach my $folder (@_) {
-    if ($folder =~ /\.tar$/)
-    {
-	# it's an MH or Cyrus folder or Maildir in a tar file
-	require Archive::Tar;   # jm: require avoids warning
-	$self->mass_check_tar_file($folder);
+    $class = substr($class, 0, 1);
+    if ($format eq "dir") {
+      $self->scan_directory($class, $location);
     }
-    elsif (-d $folder && -d "$folder/cur" && -d "$folder/new" )
-    {
-      # Maildir!
-      $self->mass_check_maildir($folder);
+    elsif ($format eq "file") {
+      $self->scan_file($class, $location);
     }
-    elsif (-d $folder)
-    {
-      # it's an MH folder or a Cyrus mailbox
-      # not necessary to check this: just assume it's MH/Cyrus. if we
-      # do these conditions, a non-packed MH folder will be ignored silently
-      #($self->{opt_mh} || -f "$folder/1" || -f "$folder/1.gz" || -f "$folder/cyrus.index"))
-      $self->mass_check_mh_folder($folder);
-    }
-    elsif ($folder eq '-' || (-f $folder && $self->{opt_single}))
-    {
-      # single message (for testing that variables are cleared appropriately)
-      $self->mass_check_single($folder);
-    }
-    elsif (-f $folder) {
-      $self->mass_check_mailbox($folder);
+    elsif ($format eq "mbox") {
+      $self->scan_mailbox($class, $location);
     }
   }
-}
 
-sub mass_check_tar_file {
-  my $self = shift;
-  my $filename = shift;
-  my $tar = Archive::Tar->new();
-  $tar->read($filename);
-  my @files = $tar->list_files(['name']);
-  foreach my $mail (@files) {
-      next if $mail =~ m#/$# or $mail =~ /cyrus\.(index|header|cache)/;
-      my $msg_data = $tar->get_content($mail);
-      my @msg = split("\n",$tar->get_content($mail));
-      $mail =~ s/\s/_/g;
-
-      $self->visit_a_mail ($mail, \@msg);
+  my @messages;
+  if ($self->{opt_n}) {
+    my %both = (%{ $self->{s} }, %{$self->{h}});
+    undef $self->{s};
+    undef $self->{h};
+    @messages = sort({ $both{$a} <=> $both{$b} } keys %both);
+    splice(@messages, $self->{opt_head}) if $self->{opt_head};
+    splice(@messages, 0, -$self->{opt_tail}) if $self->{opt_tail};
   }
-}
-
-sub mass_check_mh_folder {
-  my $self = shift;
-  my $folder = shift;
-  opendir(DIR, $folder) || die "Can't open $folder dir: $!";
-  my @files = grep { -f }
-		map { "$folder/$_" }
-		grep { /^(?:[0-9]|[\da-f]{32}$)/ } readdir(DIR);
-  closedir(DIR);
-
-  @files = sortbynum(@files) if $self->{opt_sort};
-  splice(@files, $self->{opt_head}) if $self->{opt_head};
-  splice(@files, 0, -$self->{opt_tail}) if $self->{opt_tail};
-  foreach my $mail (@files)
-  {
-    open_folder ($mail) or next;
-
-    # skip too-big mails
-    if (! $self->{opt_all} && -s ARCFOLDER > 250*1024) { close ARCFOLDER; next; }
-    my @msg = (<ARCFOLDER>);
-    close ARCFOLDER;
-
-    $self->visit_a_mail ($mail, \@msg);
+  else {
+    my @s = sort({ $self->{s}->{$a} <=> $self->{s}->{$b} } keys %{$self->{s}});
+    undef $self->{s};
+    my @h = sort({ $self->{h}->{$a} <=> $self->{h}->{$b} } keys %{$self->{h}});
+    undef $self->{h};
+    splice(@s, $self->{opt_head}) if $self->{opt_head};
+    splice(@s, 0, -$self->{opt_tail}) if $self->{opt_tail};
+    splice(@h, $self->{opt_head}) if $self->{opt_head};
+    splice(@h, 0, -$self->{opt_tail}) if $self->{opt_tail};
+    while (@s && @h) {
+      push @messages, (shift @s);
+      push @messages, (shift @h);
+    }
+    push @messages, (splice @s), (splice @h);
   }
-}
 
-sub mass_check_maildir {
-  my $self = shift;
-  my $folder = shift;
-  opendir(CURDIR, "$folder/cur") || die "Can't open $folder/cur dir: $!";
-  opendir(NEWDIR, "$folder/new") || die "Can't open $folder/new dir: $!";
-  my @files;
-  push @files, grep { -f } map { "$folder/cur/$_" } readdir(CURDIR);
-  push @files, grep { -f } map { "$folder/new/$_" } readdir(NEWDIR);
-  closedir(CURDIR);
-  closedir(NEWDIR);
-
-  @files = sortbynum(@files) if $self->{opt_sort};
-  splice(@files, $self->{opt_head}) if $self->{opt_head};
-  splice(@files, 0, -$self->{opt_tail}) if $self->{opt_tail};
-  foreach my $mail (@files)
-  {
-    open_folder($mail) or next;
-
-    if (! $self->{opt_all} && -s ARCFOLDER > 250*1024) { close ARCFOLDER; next; }
-    my @msg = (<ARCFOLDER>);
-    close ARCFOLDER;
-
-    $self->visit_a_mail ($mail, \@msg);
+  if ($self->{opt_j} == 1) {
+    my $message;
+    my $class;
+    my $result;
+    while ($message = (shift @messages)) {
+      $class = substr($message, 0, 1);
+      $result = $self->run_message($message);
+      $self->log_result($class, $result) if $result;
+    }
   }
-}
+  elsif ($self->{opt_j} > 1) {
+    my $io = IO::Socket->new();
+    my $select = IO::Select->new();
+    my @child;
+    my @parent;
+    my @pid;
 
-sub mass_check_single {
-  my $self = shift;
-  my $folder = shift;
-
-  open_folder($folder) or return;
-
-  if (! $self->{opt_all} && -s ARCFOLDER > 250*1024) { close ARCFOLDER; next; }
-  my @msg = (<ARCFOLDER>);
-  close ARCFOLDER;
-
-  $self->visit_a_mail ($folder, \@msg);
-}
-
-sub mass_check_mailbox {
-  my $self = shift;
-  my $folder = shift;
-
-  open_folder($folder) or return;
-
-  while (<ARCFOLDER>) { /^From \S+ +... ... / and last; }
-
-  my $count = 0;
-  my $host  = $ENV{'HOSTNAME'} || $ENV{'HOST'} || `hostname` || 'localhost';
-
-  while (!eof ARCFOLDER) {
-    my @msg = ();
-    my $in_header = 1;
-    my $msgid = undef;
-    $count++;
-
-    while (<ARCFOLDER>) {
-      if (/^$/ && $in_header) {
-        $in_header = 0 ;
-
-        if (!defined ($msgid)) {
-          $msgid = sprintf('<no-msgid-in-msg-%06d@%s.masses.spamassasin.org>', $count, $host);
-          push (@msg, "Message-Id: $msgid\n");
-        }
+    # create children
+    for (my $i = 0; $i < $self->{opt_j}; $i++) {
+      ($child[$i],$parent[$i]) = $io->socketpair(AF_UNIX,SOCK_STREAM,PF_UNSPEC)
+	  or die "socketpair failed: $!";
+      if ($pid[$i] = fork) {
+	close $parent[$i];
+	$select->add($child[$i]);
+	next;
       }
-      if ($in_header) {
-        /^Message-Id: (.*?)\s*$/i        and $msgid = $1;
+      elsif (defined $pid[$i]) {
+	my $result;
+	my $line;
+	close $child[$i];
+	print { $parent[$i] } "START\n";
+	while ($line = readline $parent[$i]) {
+	  chomp $line;
+	  if ($line eq "exit") {
+	    print { $parent[$i] } "END\n";
+	    exit;
+	  }
+	  $result = $self->run_message($line);
+	  print { $parent[$i] } $result . "$line\n";
+	}
+	exit;
       }
-
-      /^From \S+ +... ... / and last;
-      push (@msg, $_);
+      else {
+	die "cannot fork: $!";
+      }
     }
-
-    next unless (@msg);                                 # skip empty,
-    next if (! $self->{opt_all} && $in_header);         # broken and
-    next if (! $self->{opt_all} && scalar @msg > 1000); # too big messages
-
-    $msgid ||= "(undef)";
-    $msgid = "$folder:$msgid";	# so we can find it again
-    $msgid =~ s/\s/_/gs;	# make safe
-
-    # switch to a fork-based model to save RAM
-    if ($self->{opt_fork} && fork()) { wait; next; }
-    $self->visit_a_mail ($msgid, \@msg);
-    if ($self->{opt_fork}) { exit; }
+    # feed childen
+    my $done = 0;
+    while (@messages || $done < $self->{opt_j}) {
+      foreach my $socket ($select->can_read()) {
+	my $result;
+	my $line;
+	while ($line = readline $socket) {
+	  if ($line eq "END\n") {
+	    $done++;
+	    last;
+	  }
+	  if ($line =~ /^([hs])/ || $line eq "START\n") {
+	    print { $socket } (@messages ? (shift @messages) : "exit") . "\n";
+	    $self->log_result($1, $result) if defined($1) && $result;
+	    last;
+	  }
+	  $result .= $line;
+	}
+      }
+    }
+    # reap children
+    for (my $i = 0; $i < $self->{opt_j}; $i++) {
+      waitpid($pid[$i], 0);
+    }
   }
-
-  close ARCFOLDER;
 }
 
 ############################################################################
 
-sub open_folder {
+sub mass_check_open {
   my ($file) = @_;
-
-  $file = untaint_file_path($file);
 
   my $expr;
   if ($file =~ /\.gz$/) {
-    $expr = "gunzip -cd '".$file."' |";
+    $expr = "gunzip -cd $file |";
   }
   elsif ($file =~ /\.bz2$/) {
-    $expr = "bzip2 -cd '".$file."' |";
-  }
-  elsif ($file eq '-') {
-    $expr = '-';		# == open STDIN
+    $expr = "bzip2 -cd $file |";
   }
   else {
-    $expr = '<'.$file;
+    $expr = "$file";
   }
-
-  if (!open (ARCFOLDER, $expr)) {
+  if (!open (INPUT, $expr)) {
     warn "unable to open $file: $@";
     return 0;
   }
   return 1;
 }
 
-############################################################################
+sub log_result {
+  my ($self, $class, $result) = @_;
 
-# copied from Mail::SpamAssassin::Util
-sub untaint_file_path {
-  my ($path) = @_;
-  return unless defined($path);
-  $path =~ /^([-_A-Za-z\xA0-\xFF 0-9\.\@\=\+\,\/\\\:]+)$/;
-  return $1;
+  if ($self->{opt_o}) {
+    print STDOUT $result;
+  }
+  elsif ($class eq "s") {
+    print SPAM $result;
+  }
+  elsif ($class eq "h") {
+    print HAM $result;
+  }
+}
+
+sub first_date {
+  my (@strings) = @_;
+
+  foreach my $string (@strings) {
+    my $time = parse_rfc822_date($string);
+    return $time if defined($time) && $time;
+  }
+  return undef;
+}
+
+sub receive_date {
+  my ($self, $header) = @_;
+
+  $header =~ s/\n[ \t]+/ /gs;	# fix continuation lines
+
+  my @rcvd = ($header =~ /^Received:(.*)/img);
+  my @local;
+  my $time;
+
+  if (@rcvd) {
+    if ($rcvd[0] =~ /qmail \d+ invoked by uid \d+/ ||
+	$rcvd[0] =~ /\bfrom (?:localhost\s|(?:\S+ ){1,2}\S*\b127\.0\.0\.1\b)/)
+    {
+      push @local, (shift @rcvd);
+    }
+    if (@rcvd && ($rcvd[0] =~ m/\bby localhost with \w+ \(fetchmail-[\d.]+/)) {
+      push @local, (shift @rcvd);
+    }
+    elsif (@local) {
+      unshift @rcvd, (shift @local);
+    }
+  }
+
+  if (@rcvd) {
+    $time = first_date(shift @rcvd);
+    return $time if defined($time);
+  }
+  if (@local) {
+    $time = first_date(@local);
+    return $time if defined($time);
+  }
+  if ($header =~ /^(?:From|X-From-Line:)\s+(.+)$/im) {
+    my $string = $1;
+    $string .= " $tz" unless $string =~ /(?:[-+]\d{4}|\b[A-Z]{2,4}\b)/;
+    $time = first_date($string);
+    return $time if defined($time);
+  }
+  if (@rcvd) {
+    $time = first_date(@rcvd);
+    return $time if defined($time);
+  }
+  if ($header =~ /^Resent-Date:\s*(.+)$/im) {
+    $time = first_date($1);
+    return $time if defined($time);
+  }
+  if ($header =~ /^Date:\s*(.+)$/im) {
+    $time = first_date($1);
+    return $time if defined($time);
+  }
+
+  return time;
 }
 
 ############################################################################
 
-sub sortbynum {
-    return map { $_->[0] }
-	sort { $a->[1] <=> $b->[1] } map { [$_, /\/(\d+).*$/] } @_;
+sub scan_directory {
+  my ($self, $class, $folder) = @_;
+
+  opendir(DIR, $folder) || die "Can't open $folder dir: $!";
+  my @files = grep { -f } map { "$folder/$_" } grep { /^\S+$/ } readdir(DIR);
+  closedir(DIR);
+
+  foreach my $mail (@files) {
+    if ($self->{opt_n}) {
+      $self->{$class}->{"$class" . "f" . "$mail"} = $no++;
+      next;
+    }
+    my $header;
+    mass_check_open($mail) or next;
+    while (<INPUT>) {
+      last if /^$/;
+      $header .= $_;
+    }
+    close(INPUT);
+    $self->{$class}->{"$class" . "f" . "$mail"} = $self->receive_date($header);
+  }
+}
+
+sub scan_file {
+  my ($self, $class, $mail) = @_;
+
+  if ($self->{opt_n}) {
+    $self->{$class}->{"$class" . "f" . "$mail"} = $no++;
+    return;
+  }
+  my $header;
+  mass_check_open($mail) or return;
+  while (<INPUT>) {
+    last if /^$/;
+    $header .= $_;
+  }
+  close(INPUT);
+  $self->{$class}->{"$class" . "f" . "$mail"} = $self->receive_date($header);
+}
+
+sub scan_mailbox {
+  my ($self, $class, $folder) = @_;
+
+  mass_check_open($folder) or return;
+
+  my $start = 0;		# start of a message
+  my $where = 0;		# current byte offset
+  my $first = '';		# first line of message
+  my $header = '';		# header text
+  my $in_header = 0;		# are in we a header?
+  while (!eof INPUT) {
+    my $offset = $start;	# byte offset of this message
+    my $header = $first;	# remember first line
+    while (<INPUT>) {
+      if ($in_header) {
+	if (/^$/) {
+	  $in_header = 0;
+	}
+	else {
+	  $header .= $_;
+	}
+      }
+      if (substr($_,0,5) eq "From ") {
+	$in_header = 1;
+	$first = $_;
+	$start = $where;
+	$where = tell INPUT;
+	last;
+      }
+      $where = tell INPUT;
+    }
+    if ($header) {
+      $self->{$class}->{"$class" . "m" . "$folder.$offset"} =
+	  ($self->{opt_n} ? $no++ : $self->receive_date($header));
+    }
+  }
+  close INPUT;
+}
+
+############################################################################
+
+sub run_message {
+  my ($self, $msg) = @_;
+
+  my $format = substr($msg, 1, 1);
+  my $where = substr($msg, 2);
+
+  if ($format eq "f") {
+    return $self->run_file($where);
+  }
+  elsif ($format eq "m") {
+    return $self->run_mailbox($where);
+  }
+}
+
+sub run_file {
+  my ($self, $where) = @_;
+
+  mass_check_open($where) or return;
+  # skip too-big mails
+  if (! $self->{opt_all} && -s INPUT > BIG_BYTES) {
+    close INPUT;
+    return;
+  }
+  my @msg = (<INPUT>);
+  close INPUT;
+
+  $self->visit_a_mail($where, \@msg);
+}
+
+sub run_mailbox {
+  my ($self, $where) = @_;
+
+  my ($file, $offset) = ($where =~ m/(.*)\.(\d+)$/);
+  my @msg;
+  mass_check_open($file) or return;
+  seek(INPUT,$offset,0);
+  my $past = 0;
+  while (<INPUT>) {
+    if ($past) {
+      last if substr($_,0,5) eq "From ";
+    }
+    else {
+      $past = 1;
+    }
+    # skip too-big mails
+    if (! $self->{opt_all} && @msg > BIG_LINES) {
+      close INPUT;
+      return;
+    }
+    push (@msg, $_);
+  }
+  close INPUT;
+  $self->visit_a_mail("$file.$offset", \@msg);
 }
 
 ############################################################################
@@ -267,7 +424,7 @@ sub sortbynum {
 sub visit_a_mail {
   my ($self, $mail, $dataref) = @_;
   my $sub = $self->{wanted_sub};
-  return &$sub ($mail, $dataref);
+  return &$sub($mail, $dataref);
 }
 
 ############################################################################
