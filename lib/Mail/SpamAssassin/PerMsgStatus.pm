@@ -784,7 +784,9 @@ sub do_full_tests {
   while (($rulename, $pat) = each %{$self->{conf}->{full_tests}}) {
     next unless ($self->{conf}->{scores}->{$rulename});
     $evalstr .= '
-      if ($$fullmsgref =~ '.$pat.') { $self->got_hit (q{'.$rulename.'}, q{}); }
+      if ($$fullmsgref =~ '.$pat.') {
+	$self->got_body_pattern_hit (q{'.$rulename.'});
+      }
     ';
   }
 
