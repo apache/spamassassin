@@ -64,24 +64,22 @@ sub readrules {
           my $issubrule = '0';
           if ($name =~ /^__/) { $issubrule = '1'; }
 
-          $rules->{$name} = {
-            name => $name,
-            type => $type,
-            lang => $lang,
-            issubrule => $issubrule,
-            tflags => ''
-          };
+          $rules->{$1} ||= { };
+          $rules->{$name}->{type} = $type;
+          $rules->{$name}->{lang} = $lang;
+          $rules->{$name}->{issubrule} = $issubrule;
+          $rules->{$name}->{tflags} = '';
 
         } elsif (/^describe\s+(\S+)\s+(.+)$/) {
-          if (!exists $rules->{$1}) { next; }     # need rule defined first
+          $rules->{$1} ||= { };
           $rules->{$1}->{describe} = $2;
 
         } elsif (/^tflags\s+(\S+)\s+(.+)$/) {
-          if (!exists $rules->{$1}) { next; }     # need rule defined first
+          $rules->{$1} ||= { };
           $rules->{$1}->{tflags} = $2;
 
         } elsif (/^score\s+(\S+)\s+(.+)$/) {
-          if (!exists $rules->{$1}) { next; }     # need rule defined first
+          $rules->{$1} ||= { };
           $rules->{$1}->{score} = $2;
         }
       }
@@ -90,6 +88,11 @@ sub readrules {
   }
 
   foreach my $rule (keys %{$rules}) {
+    if (!defined $rules->{$rule}->{type}) {
+      delete $rules->{$rule};   # no rule definition -> no rule
+      next;
+    }
+
     if (!defined $rules->{$rule}->{score}) {
       if ($rules->{$rule}->{tflags} =~ /nice/) {
         $rules->{$rule}->{score} = -1.0;

@@ -14,20 +14,18 @@ evolve: tmp/tests.h craig-evolve.c
 	$(CC) -Wall $(OPT) $(USE_MPI) -Dlinux -DWL=2 -DOPTIMIZE -L$(PGALIB)/lib/linux -I$(PGALIB)/include craig-evolve.c -o evolve -lpgaO -lm
 	strip evolve
 
-tmp/tests.h: tmp tmp/ranges.data logs-to-c
+tmp/tests.h: tmp/.created tmp/ranges.data logs-to-c
 	./logs-to-c
 
-tmp/ranges.data: tmp freqs score-ranges-from-freqs
+tmp/ranges.data: tmp/.created freqs score-ranges-from-freqs
 	./score-ranges-from-freqs < freqs
 
-tmp/rules.pl: tmp ../rules/50_scores.cf
-	./parse-rules-for-masses
-
-freqs: spam.log nonspam.log tmp/rules.pl
+freqs: spam.log nonspam.log
 	./hit-frequencies -x -p > freqs
 
-tmp:
+tmp/.created:
 	-mkdir tmp
+	touch tmp/.created
 
 clean:
 	rm -rf *.o evolve tmp freqs

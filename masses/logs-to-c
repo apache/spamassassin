@@ -9,10 +9,7 @@ my %is_spam = ();
 my %tests_hit = ();
 my %mutable_tests = ();
 
-my $tflags;
-my $scores;
 readscores();
-my $origscores = $scores;
 
 print "Reading per-message hit stat logs and scores...\n";
 my $total;
@@ -44,7 +41,7 @@ sub readlogs {
       my @tests = ();
       foreach my $tst (split (/,/, $_)) {
 	next if ($tst eq '');
-	if (!defined $scores->{$tst}) {
+	if (!defined $scores{$tst}) {
           #warn "unknown test in $file, ignored: $tst\n";
 	  next;
 	}
@@ -69,44 +66,20 @@ sub readlogs {
 
 
 sub readscores {
-  $tflags = { };
-  $scores = { };
-
-  my @files;
   if (!defined $argcffile) { $argcffile = "../rules"; }
-
-  if (-d $argcffile ) {
-    @files = <$argcffile/[0-9]*.cf>;
-  } else {
-    @files = ($argcffile);
-  }
-
-  foreach $cffile (@files) {
-  print "Reading scores from \"$cffile\"...\n";
-  open (IN, "<$cffile") or warn "cannot read $cffile\n";
-  while (<IN>) {
-    s/#.*$//g; s/^\s+//; s/\s+$//;
-
-    if (/^(header|body|rawbody|full|uri|meta)\s+(\S+)\s+/) {
-      $scores->{$2} ||= 1;
-    } elsif (/^score\s+(\S+)\s+(.+)$/) {
-      $scores->{$1} = $2;
-    } elsif (/^tflags\s+(\S+)\s+(.+)$/) {
-      $tflags->{$1} = $2;
-    }
-  }
-  close IN;
-  }
+  print "Reading scores from \"$argcffile\"...\n";
+  system ("./parse-rules-for-masses -d \"$argcffile\"") and die;
+  require "./tmp/rules.pl";
 }
 
 sub writescores_c {
-  my $size = (scalar keys %{$scores}); # adding 100 here makes the GA take a lot longer since the genome's 100 genes longer! plus messes up scores output - crh
+  my $size = (scalar keys %scores); # adding 100 here makes the GA take a lot longer since the genome's 100 genes longer! plus messes up scores output - crh
 
   open (DAT, ">tmp/scores.data");
   print DAT "N$size\n";
 
   my $count = 0;
-  foreach my $name (sort keys %{$scores}) {
+  foreach my $name (sort keys %scores) {
     # jm: now, score-ranges-from-freqs has tflags to work from, so
     # it will always list all mutable tests.
     if (!defined $mutable_tests{$name}) {
@@ -114,7 +87,7 @@ sub writescores_c {
     }
 
     if ($mutable_tests{$name} == 0) {
-      $range_lo{$name} = $range_hi{$name} = $scores->{$name};
+      $range_lo{$name} = $range_hi{$name} = $scores{$name};
     } else {
       #$range_lo{$name} ||= 0.1;
       #$range_hi{$name} ||= 1.5;
@@ -122,7 +95,7 @@ sub writescores_c {
 
     print DAT ".".$count."\n";
     print DAT "n".$name."\n";
-    print DAT "b".$scores->{$name}."\n";
+    print DAT "b".$scores{$name}."\n";
     print DAT "m".$mutable_tests{$name}."\n";
     print DAT "l".$range_lo{$name}."\n";
     print DAT "h".$range_hi{$name}."\n";
