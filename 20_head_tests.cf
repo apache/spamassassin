@@ -26,6 +26,15 @@ describe FROM_HAS_MIXED_NUMS	From: contains numbers mixed in with letters
 header ADDR_NUMS_AT_BIGSITE	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@(?:aol|bigfoot|compuserve|excite|hotmail|juno|prodigy|yahoo)\.(?:com|net|org)/mi
 describe ADDR_NUMS_AT_BIGSITE	Uses an address with lots of numbers, at a big ISP
 
+header __FROM_JUST_NUMBER       From:addr =~ /^\d+\@/
+header __FROM_PHONE             From:addr =~ /^\d{3}(?:[-.]?\d{3}[-.]?\d{4}|\d{7})\@/
+meta FROM_ALL_NUMS              (__FROM_JUST_NUMBER && !__FROM_PHONE)
+describe FROM_ALL_NUMS          From an address that is all numbers (non-phone)
+score FROM_ALL_NUMS             0.5
+
+describe FROM_OFFERS		From address is "at something-offers"
+header FROM_OFFERS		From:addr =~ /\@\S*offers/i
+
 # (contrib: David Hull - fixed to support "foo @ foo . com" <foo@foo.com>)
 header FROM_NO_USER		From =~ /(?:^\@|<\@| \@[^<]*$|<>)/ [if-unset: unset@unset.unset]
 describe FROM_NO_USER		From: has no local-part before @ sign
@@ -509,6 +518,8 @@ header X_FIX_PRESENT            exists:X-Fix
 header COMPLAIN_TO		exists:Complain-To
 header X_VMP_TEXT               exists:X-VMP-Text
 header X_GCMULTI                exists:X-GCMulti
+header X_MIME_KEY		exists:X-Mime-Key
+header MICROSOFT		exists:microsoft
 
 header   MIME_ODD_CASE		ALL =~ /\nMiME-Version: /s
 describe MIME_ODD_CASE		MiME-Version header (oddly capitalized)
@@ -643,10 +654,6 @@ describe MIME_BOUND_TEP		Spam tool pattern in MIME boundary
 header MIME_BOUND_RKFINDY       Content-Type =~ /boundary=\"=_NextPart_2rfkindysadvnqw3nerasdf\"/
 describe MIME_BOUND_RKFINDY     Spam tool pattern in MIME boundary (rfkindy)
 
-# http://www.hughes-family.org/bugzilla/show_bug.cgi?id=699
-header MICROSOFT		exists:microsoft
-describe MICROSOFT		A "microsoft" header was found
-
 # bug 637
 # more specific FROM_HAS_MIXED_NUMS, less FPs
 header FROM_HAS_MIXED_NUMS2        From =~ /\w{2,}\d{4,}[a-z]{1,2}\d{2,}\@/i
@@ -712,5 +719,4 @@ describe TO_TXT			Sent to a text file
 
 header CHINA_HEADER             ALL =~ /\@china\.com/i
 describe CHINA_HEADER           Involves 'china.com'
-
 

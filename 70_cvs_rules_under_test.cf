@@ -25,63 +25,37 @@ describe T_INVALID_MSGID	Message-Id is not valid, according to RFC 2822
 # quinlan: If this has a better S/O for others (all of my FPs are from the
 # same person), it should be an eval so this can be done properly: strip
 # comments on each Message-Id header, then use regular expression.
+# Dec 18 2002 jm: S/Os aren't much better for others, but I think we should
+# do it that way anyway.
 #
 header __MSGID_COMMENT		MESSAGEID =~ /\(.*\)/m
 meta T_INVALID_MSGID2		__HAS_MSGID && !(__VALID_MSGID || __MSGID_COMMENT)
 
-# results for quinlan
-#  0.245    0.727    0.013    0.98    0.57    0.50  T_FROM_ALL_NUMS
-header __FROM_JUST_NUMBER	From:addr =~ /^\d+\@/
-header __FROM_PHONE		From:addr =~ /^\d{3}(?:[-.]?\d{3}[-.]?\d{4}|\d{7})\@/
-meta T_FROM_ALL_NUMS		(__FROM_JUST_NUMBER && !__FROM_PHONE)
-describe T_FROM_ALL_NUMS	From an address that is all numbers (non-phone)
-score T_FROM_ALL_NUMS		0.5
-
-# Needs testing
-body T_QUOTE_TWICE_1		/^> >\s/
-describe T_QUOTE_TWICE_1	Contains twice quoted reply
-tflags T_QUOTE_TWICE_1		nice
-score T_QUOTE_TWICE_1		-1.0
-
 # this rule may need to factor in ok_languages or ok_locales
-body T_BODY_UNPRINTABLE		/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]{3,}/
+# Dec 18 2002 jm: ignore ^H
+body T_BODY_UNPRINTABLE		/[\x00-\x07\x0b\x0c\x0e-\x1f\x7f]{3,}/
 describe T_BODY_UNPRINTABLE	Body includes 3 consecutive unprintable characters
 
 # this rule may need to factor in ok_languages or ok_locales
+# Dec 18 2002 jm: but how? ;)  I reckon it's ready to be promoted otherwise
+# 3.467   9.5776   0.0357    0.996   0.97    0.01  T_BODY_8BITS
 body T_BODY_8BITS		/[\x80-\xff]{8,}/
 describe T_BODY_8BITS		Body includes 8 consecutive 8-bit characters
 
-# some body tests
+# some body tests.  Dec 18 2002 jm: promoted 6, suggest dropping the remainder for
+# low hitrate.
+#   0.053   0.0953   0.0297    0.762   0.43    0.01  T_BROADCAST_EMAIL (drop)
 body T_BROADCAST_EMAIL		/broadcast e.?mail/i
-body T_OUR_AFFILIATE_PARTNERS	/our affiliate partners/i
+#   0.022   0.0529   0.0040    0.930   0.78    0.01  T_OUR_BROADCAST_EMAIL (too low)
 body T_OUR_BROADCAST_EMAIL	/our broadcast e.?mail/i
-body T_OUR_COMPENSATION		/our (?:full )?compensation/i
-body T_OUR_OVERWHELMING_GROWTH	/our overwhelming growth/i
-body T_OUR_POLICY_ON_SELLING	/our policy on selling/i
+# 0.058   0.1588   0.0020    0.988   0.93    0.01  T_OUR_PRIVACY_POLICY
 body T_OUR_PRIVACY_POLICY	/our privacy policy can be found/i
+# 0.133   0.3529   0.0099    0.973   0.89    0.01  T_OUR_READERS
 body T_OUR_READERS		/our readers (?:to|with)/i
-body T_OUR_STRICT_ANTI		/our strict anti/i
-body T_OUR_PUBLICATIONS		/our website (?:and|or) publications/i
-# more body tests
-body T_CELL_PHONE_BOOST		/(?:boost|antenna|reception).{0,32}(?:cell|mobile|phone|cord.?less)|(?:cell|mobile|phone|cord.?less).{0,32}(?:boost|antenna|reception)/i
-body T_OFFERS_ETC		/(?:(?:wish|want|unsub|reward|receive|recurring|remove|permission|partner|further|future|e.?mail|continue|click).{0,64}){2}.{0,8}(?:specials?|offers?|coupons?|discounts?)\b/i
-
-# replacement
-# do not add "new" since there's non-spam about "new cell phone numbers"
-# separated into two rules since one seems to have a lot of
-# sourceforge list advertisement false positives
-# %%% FREE_CELL_PHONE
-body T_FREE_CELL_PHONE		/\b(?-i:F)ree\b.{0,24}(?:cell(?:ular)?|mobile).{0,4}phones?/i
 
 # dear user
+#   0.161   0.2894   0.0892    0.764   0.43    0.01  T_DEAR_USER
 body T_DEAR_USER		/dear(?: \w+)? user/i
-
-# new porn rules
-body T_PORN_15			/(?:college|eating|licking|spears|tight|wet|shaved|voyeur|young|teen(?:age)?).{0,16}pussy/i
-body T_PORN_16			/(?:nasty|teen|dir(?:ty|iest)?|little).{0,16}\bsluts?/i
-
-# 419 spam, group/merge with other Nigeria rules
-body T_MILLION_USD		/Million\b.{0,40}\b(?:United States? Dollars?|USD)/i
 
 ########################################################################
 
@@ -191,34 +165,21 @@ score T_FORGED_MUA_EUDORA4      1.0
 
 # this is the only To/Cc/From "no lower" version of this idea with a
 # somewhat reasonable S/O ratio
+# Dec 18 2002 jm: not bothered with this
+#   0.141   0.3423   0.0277    0.925   0.76    0.01  T_FROM_NO_LOWER
 header T_FROM_NO_LOWER		From !~ /[a-z]/
 
 ###########################################################################
 
-body T_BANG_BOSS		/\bboss!/i
-body T_BANG_CARTOONS		/\bcartoons!/i
-body T_BANG_CYBERANALYSTS	/\bcyberanalysts!/i
-body T_BANG_EXERCISE		/\bexercis(?:e|er|es)!/i
+#   2.067   4.7994   0.5331    0.900   0.71    0.01  T_BANG_GUARANTEE (iffy)
 body T_BANG_GUARANTEE		/\bguaranteed?\!/i
-body T_BANG_MONEY		/\bmoney!/i
-body T_BANG_MORE		/\b(?-i:M)ore!/i
-body T_BANG_OPRAH		/\boprah!/i
-body T_BANG_QUOTE		/\b(?-i:Q)uotes?\!/i
 
 ##################################################################
 
-# actually, this looks really good!  Dec  6 2002 jm: except for rod's
-# corpus ;)
-header T_FROM_OFFERS            From:addr =~ /offers\S*\@/i
-describe T_FROM_OFFERS          From address is "offers at something"
-header T_FROM_OFFERS_2          From:addr =~ /^offers/i
-header T_FROM_OFFERS_3          From:addr =~ /\@\S*offers/i
-
-# Nov 12 2002 jm: still not sure about this one. ALL.current reports
-# 0.108   0.4001   0.0062    0.985   0.93    1.00  T_IDENT_NOBODY
-# combined for all submitters.  too dangerous considering the amount
-# of daemons sending mail reports, running as root
-# Dec 17 2002 jm: looks like it's just 1 site doing it, maybe this will work
+# Dec 18 2002 jm:
+# 0.114   0.3105   0.0040    0.987   0.93    1.00  T_IDENT_NOBODY
+# pretty good, will promote it tomorrow once Allen's had a look at
+# excluding his FPs
 header __IDENT_NOBODY		Received =~ /ident[:=]nobody\b/i
 header __REGSITE_COM		Received =~ /\.registeredsite\.com\s/
 meta T_IDENT_NOBODY		(__IDENT_NOBODY && !__REGSITE_COM)
@@ -407,14 +368,7 @@ describe T_PROMOTE_YOUR_BUSINESS  Wants to help promote your business
 header T_X_BEENTHERE		exists:X-BeenThere
 describe T_X_BEENTHERE	X-BeenThere header exists
 
-# from bug 1206
-body		T_INTL_DRIVERS_LICENSE 	/international driver'?s license/i
-describe	T_INTL_DRIVERS_LICENSE 	International driving license
-
 # from bug 662
 header T_ADDR_FREE		From =~ /\b(?-i:F)ree(?-i:[ A-Z]).*</i
 describe T_ADDR_FREE		From Address contains FREE
 
-# from bug 1119
-header T_X_MIME_KEY        exists:X-Mime-Key
-describe T_X_MIME_KEY		X-Mime-Key header exists

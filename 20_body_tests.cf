@@ -833,6 +833,9 @@ describe US_DOLLARS_3           Nigerian scam key phrase ($NN,NNN,NNN.NN)
 body US_DOLLARS_4               /\s(?:\$|US\$|usd?).?\d{1,3}\.\d+.?(?:m|millions?)\b/i
 describe US_DOLLARS_4           Nigerian scam key phrase ($NNN.N m/USDNNN.N m/US$NN.N m)
 
+body MILLION_USD              	/Million\b.{0,40}\b(?:United States? Dollars?|USD)/i
+describe MILLION_USD 		Nigerian scam key phrase (millions of dollars)
+
 rawbody FRONTPAGE		/FrontPage.Editor/
 describe FRONTPAGE		Frontpage used to create the message
 
@@ -952,8 +955,11 @@ describe CONGRATULATIONS	Congratulations - you've been scammed?
 body SIGN_UP			/\b(?:free sign up|sign up today)\b/i
 describe SIGN_UP		Sign up Free Today
 
-body FREE_CELL_PHONE            /\bfree .{0,12}(?:cell(?:ular)?|mobile) phone|cell(?:ular)? phone for free/i
-describe FREE_CELL_PHONE	Free Cell Phone
+# do not add "new" since there's non-spam about "new cell phone numbers"
+# separated into two rules since one seems to have a lot of
+# sourceforge list advertisement false positives
+body FREE_CELL_PHONE          	/\b(?-i:F)ree\b.{0,24}(?:cell(?:ular)?|mobile).{0,4}phones?/i
+describe FREE_CELL_PHONE 	Talks about free mobile phones
 
 body FREE_LEADS			/\bfree leads\b/i
 describe FREE_LEADS		Free Leads
@@ -1406,6 +1412,16 @@ describe PORN_6			Possible Porn - XXX Photos
 body PORN_MEMBERSHIP            /\b(?:vip|adult|porn|x.rated) membership/i
 describe PORN_MEMBERSHIP        Possible Porn - Porn membership
 
+body PORN_GALLERIES             /\bhuge galleries\b/i
+describe PORN_GALLERIES         Possible porn - Galleries of Pictures
+
+body PORN_15                    /(?:college|eating|licking|spears|tight|wet|shaved|voyeur|young|teen(?:age)?).{0,16}pussy/i
+describe PORN_15 		Possible porn - various types of feline
+
+body PORN_16                    /(?:nasty|teen|dir(?:ty|iest)?|little).{0,16}\bsluts?/i 
+describe PORN_16 		Possible porn - nasty, dirty, little etc.
+
+
 ##################
 # End Porn Rules #
 ##################
@@ -1525,8 +1541,6 @@ body NO_MIDDLEMAN               /\bno middleman\b/i
 describe NO_MIDDLEMAN           No Middleman
 body PHONE_CANCER               /\bphone.{0,15}cancer\b/i
 describe PHONE_CANCER           Cell Phone Cancer Scam
-body PORN_GALLERIES             /\bhuge galleries\b/i
-describe PORN_GALLERIES         Possible porn - Galleries of Pictures
 body UNCLAIMED_MONEY            /\bunclaimed (?:funds|money|prizes?|rewards?)\b/i
 describe UNCLAIMED_MONEY        People just leave money laying around
 rawbody SPAM_FORM_INPUT         /<input name=.{0,5}submit.{0,99} Submit By E-Mail /i
@@ -1620,4 +1634,48 @@ describe EARN_MONEY		Message talks about earning money
 
 body OBSCURED_EMAIL             /^\w+\^\S+\(\w{2,3}\b/m
 describe OBSCURED_EMAIL         Message seems to contain obscured email address (rot13)
+
+body OUR_AFFILIATE_PARTNERS     /our affiliate partners/i
+describe OUR_AFFILIATE_PARTNERS Mentions their affiliate partners
+
+body OUR_COMPENSATION           /our (?:full )?compensation/i
+describe OUR_COMPENSATION	Mentions their full compensation
+
+body OUR_OVERWHELMING_GROWTH	/our overwhelming growth/i
+describe OUR_OVERWHELMING_GROWTH Mentions their overwhelming growth
+
+body OUR_POLICY_ON_SELLING	/our policy on selling/i
+describe OUR_POLICY_ON_SELLING	Mentions their policy on selling
+
+body OUR_STRICT_ANTI		/our strict anti/i
+describe OUR_STRICT_ANTI	Mentions their strict antipathy on something
+
+body OUR_PUBLICATIONS		/our website (?:and|or) publications/i
+describe OUR_PUBLICATIONS	Mentions their website and/or publications
+
+body CELL_PHONE_BOOST		/(?:(?:boost|antenna|reception).{0,32}(?:cell|mobile|phone|cord.?less)|(?:cell|mobile|phone|cord.?less).{0,32}(?:boost|antenna|reception))/i
+describe CELL_PHONE_BOOST	Talks about cell-phone signal improvement
+
+body OFFERS_ETC			/(?:(?:wish|want|unsub|reward|receive|recurring|remove|permission|partner|further|future|e.?mail|continue|click).{0,64}){2}.{0,8}(?:specials?|offers?|coupons?|discounts?)\b/i
+describe OFFERS_ETC		Stop with the offers, coupons, discounts etc!
+
+body BANG_BOSS        		/\bboss!/i
+describe BANG_BOSS        	Talks about your boss with an exclamation!
+body BANG_CARTOONS    		/\bcartoons!/i
+describe BANG_CARTOONS    	Talks about cartoons with an exclamation!
+body BANG_CYBERANALYSTS		/\bcyberanalysts!/i
+describe BANG_CYBERANALYSTS	Talks about cyberanalysts with an exclamation!
+body BANG_EXERCISE    		/\bexercis(?:e|er|es)!/i
+describe BANG_EXERCISE    	Talks about exercise with an exclamation!
+body BANG_MONEY      		/\bmoney!/i
+describe BANG_MONEY      	Talks about money with an exclamation!
+body BANG_MORE       		/\b(?-i:M)ore!/i
+describe BANG_MORE       	Talks about more with an exclamation!
+body BANG_OPRAH      		/\boprah!/i
+describe BANG_OPRAH      	Talks about Oprah with an exclamation!
+body BANG_QUOTE               	/\b(?-i:Q)uotes?\!/i
+describe BANG_QUOTE            	Talks about quotes with an exclamation!
+
+body INTL_DRIVERS_LICENSE	/international driver'?s license/i
+describe INTL_DRIVERS_LICENSE	International driving license
 
