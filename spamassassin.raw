@@ -2,8 +2,10 @@
 
 use File::Spec;
 
-$DEF_RULES_DIR = '@@DEF_RULES_DIR@@';  # substituted at install time
-$LOCAL_RULES_DIR = '@@LOCAL_RULES_DIR@@';  # substituted at install time
+my $DEF_RULES_DIR = '@@DEF_RULES_DIR@@';  # substituted at install time
+my $LOCAL_RULES_DIR = '@@LOCAL_RULES_DIR@@';  # substituted at install time
+
+use lib '@@INSTALLSITELIB@@';  # substituted at install time
 
 BEGIN {
   # Locate locally installed SA libraries *without* using FindBin, which generates
@@ -105,14 +107,14 @@ eval {
 
 # create the tester factory
   my $spamtest = new Mail::SpamAssassin ({
-    'rules_filename'	=> $opt{'config-file'},
-    'userprefs_filename' => $opt{'prefs-file'},
-    'local_tests_only'	=> $opt{'local'},
-    'stop_at_threshold' => $opt{'stop-at-threshold'},
-    'debug'             => defined($opt{'debug-level'}),
-    'dont_copy_prefs'   => ($opt{'create-prefs'} ? 0 : 1),
-    'DEF_RULES_DIR'     => $DEF_RULES_DIR,
-    'LOCAL_RULES_DIR'   => $LOCAL_RULES_DIR,
+    rules_filename	=> $opt{'config-file'},
+    userprefs_filename => $opt{'prefs-file'},
+    local_tests_only	=> $opt{'local'},
+    stop_at_threshold => $opt{'stop-at-threshold'},
+    debug             => defined($opt{'debug-level'}),
+    dont_copy_prefs   => ($opt{'create-prefs'} ? 0 : 1),
+    DEF_RULES_DIR     => $DEF_RULES_DIR,
+    LOCAL_RULES_DIR   => $LOCAL_RULES_DIR,
   });
 
 # set debug levels, if any specified (only useful for this command-line
