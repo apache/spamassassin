@@ -66,7 +66,7 @@ die "Net::CIDR::Lite module is required to use this script.  Aborting.\n".
 use strict;
 
 use vars qw{
-  $IP_ADDRESS $IP_IN_RESERVED_RANGE
+  $IP_ADDRESS $IP_PRIVATE
 };
 
 # an IP address, in IPv4, IPv4-mapped-in-IPv6, or IPv6 format.  NOTE: cannot
@@ -83,26 +83,12 @@ $IP_ADDRESS = qr/\b (?:IPv6:)? (?: (?:0*:0*:ffff:(?:0*:)?)? # IPv4-mapped-in-IPv
                     \:[a-f0-9]{0,4} \:[a-f0-9]{0,4} (?:\:[a-f0-9]{0,4})*
                   )\b/ix;
 
-$IP_IN_RESERVED_RANGE = qr{^(?:
+$IP_PRIVATE = qr{^(?:
   192\.168|                        # 192.168/16:              Private Use
   10|                              # 10/8:                    Private Use
   172\.(?:1[6-9]|2[0-9]|3[01])|    # 172.16-172.31/16:        Private Use
   169\.254|                        # 169.254/16:              Private Use (APIPA)
-  127|                             # 127/8:                   Private Use (local host)
-  [01257]|                         # 000-002/8, 005/8, 007/8: Reserved
-  2[37]|                           # 023/8, 027/8:            Reserved
-  3[179]|                          # 031/8, 037/8, 039/8:     Reserved
-  4[12]|                           # 041/8, 042/8:            Reserved
-  5[89]|                           # 058/8, 059/8:            Reserved
-  60|                              # 060/8:                   Reserved
-  7[0-9]|                          # 070-079/8:               Reserved
-  9[0-9]|                          #  -
-  1[01][0-9]|                      #  -
-  12[0-6]|                         # 126/8:                   Reserved
-  197|                             # 197/8:                   Reserved
-  22[23]|                          # 222/8, 223/8:            Reserved
-  24[0-9]|                         # 240-
-  25[0-5]                         # 255/8:                   Reserved
+  127                              # 127/8:                   Private Use (local host)
 )\.}x;
 
 use Getopt::Long;
@@ -136,7 +122,7 @@ while (<>) {
   my $ip = $1;
 
   next unless ($nham >= $opt_minham);	# has relayed >= n ham mails
-  next if ($ip =~ /$IP_IN_RESERVED_RANGE/o);
+  next if ($ip =~ /$IP_PRIVATE/o);
   $ip =~ s/[^0-9\.\:]/_/gs;	# sanitise!
 
   $ip =~ /^(.*)\.(\d+)/;
