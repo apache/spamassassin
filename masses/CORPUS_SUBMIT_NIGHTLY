@@ -31,15 +31,13 @@ using that tag.
 Run all your mass-check scripts into those logfiles.  This is up to you!
 
 
-Finally submit them to belphegore.  Replace "you" with the username
+Finally submit them to rsync.kluge.net.  Replace "you" with the username
 Craig gave you (ask him for one!), ditto for the password.
 
   RSYNC_PASSWORD="[whatever_craig_told_you_it_was]"
   export RSYNC_PASSWORD
-  rsync -CPcvzb ham.log \
-        you@belphegore.hughes-family.org::corpus/ham-you.log
-  rsync -CPcvzb spam.log \
-        you@belphegore.hughes-family.org::corpus/spam-you.log
+  rsync -CPcvzb ham.log you@rsync.kluge.net::corpus/ham-you.log
+  rsync -CPcvzb spam.log you@rsync.kluge.net::corpus/spam-you.log
 
 
 That's it.
