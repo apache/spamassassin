@@ -3237,22 +3237,9 @@ sub check_for_illegal_ip {
 
 ###########################################################################
 
-sub check_for_long_header {
-  my ($self) = @_;
-  return defined $self->{msg}->{'truncated_header'};
-}
-
-sub check_for_missing_hb_separator {
-  my ($self) = @_;
-  return defined $self->{msg}->{'missing_head_body_separator'};
-}
-sub check_for_missing_mime_hb_separator {
-  my ($self) = @_;
-  return defined $self->{msg}->{'missing_mime_head_body_separator'};
-}
-sub check_for_obsfw {
-  my ($self) = @_;
-  return defined $self->{msg}->{'obsolete_folding_whitespace'};
+sub check_msg_parse_flags {
+  my($self, $type) = @_;
+  return defined $self->{msg}->{$type};
 }
 
 ###########################################################################
