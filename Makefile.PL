@@ -5,6 +5,7 @@ sub MY::libscan {
   my($self,$path) = @_;
 
   return '' if ($path =~ /windows_install/
+  		|| $path =~ /fixpath/
                 );
 
   $path;
@@ -35,7 +36,7 @@ WriteMakefile(
 	      },
 
     'clean' => { FILES =>
-	'pod2html* '
+	'pod2html* spamassassin'
     },
 
     'AUTHOR' => 'Justin Mason <jm@jmason.org>',
@@ -55,6 +56,12 @@ sub MY::install {
 
 sub MY::postamble {
 q{
+
+pm_to_blib: spamassassin
+
+spamassassin: spamassassin.raw
+	$(PERL) fixpath.pl $< $@
+	$(CHMOD) $(PERM_RWX) $@
 
 inst_cfs: spamassassin.cf spamassassin.prefs
 	$(CP) spamassassin.cf $(INSTALLSITELIB)/spamassassin.cf
