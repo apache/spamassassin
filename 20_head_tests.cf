@@ -542,11 +542,6 @@ describe VAR_REF_IN_RECEIVED    Received contains a $variable reference
 header RCVD_FAKE_HELO_DOTCOM    Received =~ /^from (?:msn|yahoo|yourwebsite|lycos|excite|cs|aol|localhost|koreanmail|allexecs|mydomain|juno|eudoramail|compuserve|desertmail|excite|caramail)\.com \(/m
 describe RCVD_FAKE_HELO_DOTCOM  Received contains a faked HELO hostname
 
-# catch spammers who HELO as a host at a big site (aol, hotmail etc.) but whose
-# rDNS lists them at some dialup ISP or another.
-header RCVD_FAKE_HELO_DOTCOM2        eval:check_for_fake_dotcom_helo()
-describe RCVD_FAKE_HELO_DOTCOM2      Received contains a faked HELO hostname (2)
-
 header USERNAME_IN_SUBJECT	eval:check_for_to_in_subject()
 describe USERNAME_IN_SUBJECT	To: username at front of subject
 
@@ -740,4 +735,10 @@ header __X_PRI_HI               X-Priority =~ /^[12]/
 header __X_MSPRI_HI             X-Msmail-Priority =~ /^High/
 meta X_PRI_MISMATCH_HI        	(__X_PRI_HI && __HAS_MSMAIL_PRI && !__X_MSPRI_HI)
 describe X_PRI_MISMATCH_HI	'X-Priority' does not match 'X-MSMail-Priority'
+
+header FORGED_RCVD_NET_HELO	eval:check_for_forged_received_ip_helo()
+describe FORGED_RCVD_NET_HELO	Host HELO'd using the wrong IP network
+
+header NO_RDNS_DOTCOM_HELO	eval:check_for_no_rdns_dotcom_helo()
+describe NO_RDNS_DOTCOM_HELO	Host HELO'd as a big ISP, but had no rDNS
 
