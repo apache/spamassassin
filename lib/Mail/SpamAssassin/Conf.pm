@@ -553,6 +553,43 @@ Clear the spamtrap template.
       $self->{spamtrap_template} = ''; next;
     }
 
+=item dcc_body_max NUMBER
+
+=item dcc_fuz1_max NUMBER
+
+=item dcc_fuz2_max NUMBER
+
+DCC (Distributed Checksum Clearinghouse) is a system similar to Razor.
+This option sets how often a message's body/fuz1/fuz2 checksum must have been
+reported to the DCC server before SpamAssassin will consider the DCC check as
+matched.
+
+As nearly all DCC clients are auto-reporting these checksums you should set 
+this to a relatively high value, e.g. 999999 (this is DCC's MANY count).
+
+The default is 999999 for all these options.
+
+=cut
+
+    if (/^dcc_body_max\s+(\d+)/) {
+      $self->{dcc_body_max} = $1+0; next;
+    } else {
+      $self->{dcc_body_max} = 999999;
+    }
+
+    if (/^dcc_fuz1_max\s+(\d+)/) {
+      $self->{dcc_fuz1_max} = $1+0; next;
+    } else {
+      $self->{dcc_fuz1_max} = 999999;
+    }
+
+    if (/^dcc_fuz2_max\s+(\d+)/) {
+      $self->{dcc_fuz2_max} = $1+0; next;
+    } else {
+      $self->{dcc_fuz2_max} = 999999;
+    }
+
+
 ###########################################################################
     # SECURITY: no eval'd code should be loaded before this line.
     #
@@ -726,6 +763,21 @@ Currently this is the same value Razor itself uses: C<~/razor.conf>.
 
     if (/^razor[-_]config\s*(.*)\s*$/) {
       $self->{razor_config} = $1; next;
+    }
+
+=item dcc_options options
+
+Specify additional options to the dccproc(8) command. Please note that only
+[A-Z -] is allowed (security).
+
+The default is '-QR' (disables auto-reporting).
+
+=cut
+
+    if (/^dcc_options\s+[A-Z -]+/) {
+      $self->{dcc_options} = $1; next;
+    } else {
+      $self->{dcc_options} = '-QR';
     }
 
 =item auto_whitelist_path /path/to/file	(default: ~/.spamassassin/auto-whitelist)

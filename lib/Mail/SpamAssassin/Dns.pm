@@ -224,6 +224,105 @@ sub razor_lookup {
   return 0;
 }
 
+sub is_dcc_available {
+  my ($self) = @_;
+  my ($dcchdl);
+
+  if ($self->{main}->{local_tests_only}) {
+    dbg ("local tests only, ignoring DCC");
+    return 0;
+  }
+
+  if (!open($dcchdl, "dccproc -V 2>&1 |")) {
+    close $dcchdl;
+    dbg ("DCC is not available");
+    return 0;
+  } 
+  else {
+    close $dcchdl;
+    dbg ("DCC is available");
+    return 1;
+  }
+}
+
+sub dcc_lookup {
+  my ($self, $fulltext) = @_;
+  my $response = undef;
+  my %count = { };
+
+  $count{body} = 0;
+  $count{fuz1} = 0;
+  $count{fuz2} = 0;
+
+  if ($self->{main}->{local_tests_only}) {
+    dbg ("local tests only, ignoring DCC");
+    return 0;
+  }
+
+  eval {
+    use IPC::Open2;
+    my ($dccin, $dccout, $pid);
+
+    local $SIG{ALRM} = sub { die "alarm\n" };
+    local $SIG{PIPE} = sub { die "brokenpipe\n" };
+
+    alarm(10);
+
+    $pid = open2($dccout, $dccin, 'dccproc -H '.$self->{conf}->{dcc_options}.' 2>&1');
+
+    print $dccin $$fulltext;
+    
+    close ($dccin);
+
+    $response = <$dccout>;
+        
+    dbg("DCC: got response: $response");
+
+    waitpid ($pid, 0);
+
+    alarm(0);
+  };
+
+  if ($@) {
+    $response = undef;
+    if ($@ =~ /alarm/) {
+      dbg ("DCC check timed out after 10 secs.");
+      return 0;
+    } elsif ($@ =~ /brokenpipe/) {
+      dbg ("DCC check failed - Broken pipe.");
+      return 0;
+    } else {
+      warn ("DCC check skipped: $! $@");
+      return 0;
+    }
+  }
+
+  if ($response !~ /^X-DCC/) {
+    dbg ("DCC check failed - no X-DCC returned (did you create a map file?): $response");
+    return 0;
+  }
+ 
+  $response =~ s/many/999999/ig;
+  $response =~ s/ok\d?/0/ig;
+
+  if ($response =~ /Body=(\d+)/) {
+    $count{body} = $1+0;
+  }
+  if ($response =~ /Fuz1=(\d+)/) {
+    $count{fuz1} = $1+0;
+  }
+  if ($response =~ /Fuz2=(\d+)/) {
+    $count{fuz2} = $1+0;
+  }
+
+  if ($count{body} >= $self->{conf}->{dcc_body_max} || $count{fuz1} >= $self->{conf}->{dcc_fuz1_max} || $count{fuz2} >= $self->{conf}->{dcc_fuz2_max}) {
+    dbg ("DCC: Listed! BODY: $count{body} >= $self->{conf}->{dcc_body_max} FUZ1: $count{fuz1} >= $self->{conf}->{dcc_fuz1_max} FUZ2: $count{fuz2} >= $self->{conf}->{dcc_fuz2_max}");
+    return 1;
+  }
+  
+  return 0;
+}
+
 ###########################################################################
 
 sub load_resolver {
