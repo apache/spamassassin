@@ -455,7 +455,6 @@ describe RISK_FREE              Risk free.  Suuurreeee....
 
 # "seen on TV", "seen on ABC/NBC/etc", "seen on XYZ TV", or "seen on:"
 body AS_SEEN_ON			/seen on\b\s*(?:T\.?V\.?|ABC|NBC|CBS|CNN|Oprah|USA Today|48 Hours|New York Times|\w+\s+T\.?V\.?|:)/i
-                                /seen on\b\s*(?:T\.?V\.?|ABC|NBC|CBS|CNN|Oprah|USA Today|48 Hours|New York Times|\w+\s+TV|:)/i
 
 describe AS_SEEN_ON		As seen on national TV!
 
