@@ -456,3 +456,32 @@ describe T_SPECIAL_OFFER		Special Offer
 
 uri T_OFFER_URI			/^https?:\/\/.*?(?:offers?\.\w|[.\/]offer|offer=)/i 
 describe T_OFFER_URI		Offer in link address
+
+# bug 726
+body T_VISIT_OUR_SITE /\b(?:visit|enter)\s+(?:my|our|the|this)\s+(?:web\s*)?site/i
+describe T_VISIT_OUR_SITE         Wants you to visit a web site
+test T_VISIT_OUR_SITE  ok  Click below to enter our web site:
+test T_VISIT_OUR_SITE  ok  Visit Our Web Site and Learn The Facts
+test T_VISIT_OUR_SITE  ok  Just visit our site to learn how easy
+test T_VISIT_OUR_SITE  ok  Visit the sites of our major partners:
+# Dec 19 2002 jm: try out separation of "the", it seems to be FP-prone for me
+body T_VISIT_OUR_SITE_2 /\b(?:visit|enter)\s+(?:my|our|this)\s+(?:web\s*)?site/i
+
+# bug 878
+# seems to inserted with s1618 rules VERY heavily
+body WE_HATE_SPAM2 /anti-spam policy/i
+describe WE_HATE_SPAM2 Spammer is against spam -- aren't we all?
+
+uri T_PXE_LOGIC /^http:\/\/(?:pxe|fx)\.[^\/]{1,50}\.com\/logic\/to\.pl\?/i
+test T_PXE_LOGIC ok http://pxe.highspeed-email.com/logic/to.pl?i=3399923cd33d
+describe T_PXE_LOGIC Spam URL pattern, usually made up domains
+
+# Specific whitelisting for GradFinder.  They use the sender's own
+# From addr, so whitelist_from_rcvd won't cut it
+# bug 1241
+header __GRADF_MSGID	Message-ID =~ /\@gradfinder.com>$/
+header __GRADF_RCVD	Received =~ /from \S+ (\S+.friendfinder.com \[216\.34\./
+meta T_VIA_GRADFINDER	(__GRADF_RCVD && __GRADF_MSGID)
+tflags T_VIA_GRADFINDER	nice
+
+

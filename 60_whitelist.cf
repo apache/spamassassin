@@ -15,7 +15,6 @@
 #
 # Please do not add unmoderated public mailing lists here.  They are
 # too easily abused by spammers.
-#
 
 whitelist_from_rcvd  billing@networksolutions.com           networksolutions.com
 whitelist_from_rcvd  outbound-response@networksolutions.com networksolutions.com
@@ -69,4 +68,7 @@ whitelist_from_rcvd *@friendsreunited.co.uk                 friendsreunited.co.u
 
 # RFC Editor mails
 whitelist_from_rcvd rfc-editor@rfc-editor.org		    isi.edu
+
+# Verisign: bug 1056
+whitelist_from_rcvd *@*.nsi-direct.com		 	    e-dialog.com
 
