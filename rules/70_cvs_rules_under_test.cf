@@ -122,17 +122,7 @@ tflags T_NO_DNS_FOR_RECIPS_MANY		net
 body     T_AS_SEEN_ON             /seen on\b\s*(?:T\.?V\.?|ABC|NBC|CBS|CNN|Oprah|USA Today|48 Hours|New York Times|\w+\s+T\.?V\.?|:)/i
 
 # bug 1380
-meta T_FAKED_OUTLOOK		(__OUTLOOK_MUA && __MIME_HTML_ONLY)
-#describe FAKED_OUTLOOK		Outlook can't send HTML message only
-#lang fr describe FAKED_OUTLOOK	Outlook ne sait pas envoyer de mail en HTML pur sans texte brut.
-meta T_FAKED_AOL		(__AOL_MUA && __MIME_HTML_ONLY)
 meta T_FAKED_THEBAT		(__THEBAT_MUA && __MIME_HTML_ONLY)
-meta T_FAKED_IMS		(__IMS_MUA && __MIME_HTML_ONLY)
-
-# more ratware
-# Mar 26 2003 jm: I don't think it is, actually!
-header T_RATWARE_POWERMTA	Received =~ /PowerMTA\(TM\)/
-describe T_RATWARE_POWERMTA	Bulk email software fingerprint (PowerMTA) found in headers
 
 # quinlan: 2003-03-10, updated 2003-03-22
 # reply to a numbered address
@@ -149,6 +139,9 @@ meta T_ID_UNIQUE		(T_ID_X_LIST_UNSUBSCRIBE && __ID_RETURN_PATH && __ID_REPLY_TO)
 # overlap in others' results before committing anything
 #
 # quinlan: 2003-03-28: does ANYONE other than me have any hits for these?
+#
+# Apr  1 2003 jm: constantcontact is a spamtool, also used in legit mailouts
+# by a Java company :(
 #
 header T_EXECUTIVECALIBER		ALL =~ /\bexecutivecaliber\.ws\b/i
 header T_CONSTANTCONTACT		ALL =~ /\bconstantcontact\.com\b/i
@@ -169,15 +162,21 @@ meta T_HOTMAIL_FOOTER4		HOTMAIL_FOOTER4 && !T_ABUSED_HOTMAIL_FOOTER
 meta T_HOTMAIL_FOOTER5		HOTMAIL_FOOTER5 && !T_ABUSED_HOTMAIL_FOOTER
 
 # bug 1406, possible replacement for URI_IS_POUND
+# Apr  1 2003 jm: virtually useless hits.  I say let it die
 uri T_URI_IS_POUND		/^\#$/
 uri T_URI_ENDS_IN_POUND		/^[^?]+\#$/
 
 # bug 1336
 header T_TO_FILENAME           To =~ /^<C:\\/
 #describe TO_FILENAME         "To" header contains a filename
+# Apr  1 2003 jm: angle for a few more hits
+header T_TO_FILENAME_2         To =~ /<[CDEF]:/
 
 # bug 1394, possible replacement for ORDER_NOW
 body T_ORDER_NOW                  /\border (?:now|soon|fast|quickly|while|today)\b/i
+# Apr  1 2003 jm: not so good... more hits, but lower accuracy
+#  1.268   3.8907   0.0761    0.981   0.92    0.00  ORDER_NOW
+#  1.549   4.7343   0.1009    0.979   0.91    0.01  T_ORDER_NOW
 
 # Matt Cline
 uri      T_HTTP_ENTITIES_HOST m{https?://[^\s\">/]*\&\#[\da-f]+}i
@@ -465,37 +464,18 @@ header T_MSGID_B_DIGITS		Message-Id =~ /<B\d{10}\@/
 # looks like spam
 header T_MSGID_THREESIXSIX	Message-Id =~ /<\d{3}\.\d{6}\.\d{6}\@\S+>/
 
-# http://www.ritlabs.com/the_bat/spammer.html notes: 'There are clues that make
-# it obvious that the spam message didn't come from The Bat!. For one thing, it
-# has an "X-MSMail-Priority: Normal" header. The Bat! doesn't use this.'
-#
-# quinlan: this doesn't seem to catch all FORGED_MUA_THEBAT mail, but is a
-# good addition, so I renamed it.
-# jm: may not be worth the bother, since we now have 3 other 1.0-s/o
-# Bat-forgery rules
-#
-meta T_RATWARE_NOT_THEBAT	(__THEBAT_MUA && __HAS_MSMAIL_PRI)
-describe T_RATWARE_NOT_THEBAT	Forged mail pretending to be from The Bat!
-
 # NOTE: uses __ANY_OUTLOOK_MUA.  This catches Send-Safe and a few others
 header __OL_STYLE_FROM		From =~ /\".*\" <.+>/
-meta T_FORGED_MUA_OUTLOOK_FROM	(__ANY_OUTLOOK_MUA && !__OL_STYLE_FROM)
+header __VIA_FROM_MANGLER	Received =~ /iPlanet/
+meta T_FORGED_MUA_OUTLOOK_FROM	(__ANY_OUTLOOK_MUA && !__OL_STYLE_FROM && !__VIA_FROM_MANGLER)
 describe T_FORGED_MUA_OUTLOOK_FROM Forged mail pretending to be from Outlook (by From)
 
-# NOTE: uses __ANY_IMS_MUA from above
+# NOTE: uses __ANY_IMS_MUA from above, __CTYPE_HAS_BOUNDARY from 20_ratware.cf
 header __IMS_BOUNDARY		Content-Type =~ /\n\s+boundary=\"----_=_NextPart_[\dA-F]+_[\dA-F]+.[\dA-F]+\"/s
-meta T_FORGED_IMS_CTYPE		(__ANY_IMS_MUA && !__IMS_BOUNDARY)
+meta T_FORGED_IMS_CTYPE		(__ANY_IMS_MUA && __CTYPE_HAS_BOUNDARY && !__IMS_BOUNDARY)
 describe T_FORGED_IMS_CTYPE	Forged mail pretending to be from IMS (boundary)
 
-# NOTE: uses __ANY_QUALCOMM_MUA from above
+# NOTE: uses __ANY_QUALCOMM_MUA, __VIA_FROM_MANGLER from above
 header __EUD_STYLE_FROM		From =~ /^[^\"].+[^\"] <[^>]+>$/
-meta T_FORGED_MUA_EUDORA_FROM	(__ANY_QUALCOMM_MUA && !__EUD_STYLE_FROM)
+meta T_FORGED_MUA_EUDORA_FROM	(__ANY_QUALCOMM_MUA && !__EUD_STYLE_FROM && !__VIA_FROM_MANGLER)
 describe T_FORGED_MUA_EUDORA_FROM Forged mail pretending to be from Eudora (by From)
-
-# Mar 26 2003 jm: these actually got through in 2 FNs for me.
-header T_SQUASHED_FROM_1	From =~ /\"</
-header T_SQUASHED_FROM_2	From =~ />\(/
-
-# Mar 27 2003 jm: let's give it a try.  I've seen 1 spam with this
-header T_X_ORIG_IP_X2		ALL =~ /\nX-Originating-IP: .+\nX-Originating-IP: /is
-
