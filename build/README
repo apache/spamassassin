@@ -23,12 +23,13 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 - cvs commit -m "ready to release"
 
-- run cvs2cl to generate the Changes file, like so:
+- run cvs2cl to generate the Changes file, like so.  For maint branches:
 
-  ./build/cvs2cl-branch -f Changes -l "-d'>2002-06-18'" --branch b2_5_0
+  TZ=UTC ./build/cvs2cl-branch -f Changes -l "-d'>2002-06-18'" --branch b2_5_0
 
-  replace b2_5_0 with the name of the branch you're on, or remove the
-  entire arg if you're on HEAD.  
+  for HEAD:
+
+  TZ=UTC ./build/cvs2cl-branch -f Changes -l "-d'>2002-06-18'" --branch HEAD
   
   Note that this requires 'cvs2cl-branch' in the 'build' subdir, since
   there are bugs in std cvs2cl.pl that otherwise result in revisions
