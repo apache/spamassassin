@@ -543,7 +543,3 @@ header T_BAD_TIMEZONE_UTC_B_2	ALL =~ /[+-]\d\d[30]0(?<![+-]0000)\s+(?:\bUTC\b|\(
 header T_BAD_TIMEZONE_UTC_A_3	ALL =~ /[+-]\d\d[30]0(?<!\+0000)\s+(?:\bUTC\b(?![\w+-])|\(UTC\))/
 header T_BAD_TIMEZONE_UTC_B_3	ALL =~ /[+-]\d\d[30]0(?<![+-]0000)\s+(?:\bUTC\b(?![\w+-])|\(UTC\))/
 
-########################################################################
-
-header T_RCVD_IN_BSP_TRUSTED	eval:check_rbl_sub('senderbase-firsttrusted', 'S45 =~ /Y/')
-header T_RCVD_IN_BSP_OTHER	eval:check_rbl_sub('senderbase-untrusted', 'S45 =~ /Y/')
