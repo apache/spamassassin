@@ -145,7 +145,7 @@ sub check_for_forged_yahoo_received_headers {
 
   $rcvd =~ s/\s+/ /gs;		# just spaces, simplify the regexp
 
-  if ($rcvd =~ /from \S+ by web\S+\.mail\.yahoo\.com\;/) { return 0; }
+  if ($rcvd =~ /from \S+ by web\S+\.mail\.yahoo\.com\b/) { return 0; }
 
   return 1;
 }
