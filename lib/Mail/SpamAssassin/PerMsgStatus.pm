@@ -1358,7 +1358,7 @@ sub do_body_uri_tests {
         else {
           $uri = "${base_uri}$uri";
         }
-      } # if ($uri !~ /^[a-z]+:/i)
+      }
 
       # warn("Got URI: $uri\n");
       push @uris, $uri;

@@ -444,6 +444,18 @@ sub check_for_forged_yahoo_received_headers {
       /from \[$IP_ADDRESS\] by \S+\.(?:groups|grp\.scd)\.yahoo\.com with NNFMP/) {
     return 0;
   }
+
+  # used in "forward this news item to a friend" links.  There's no better
+  # received hdrs to match on, unfortunately.  I'm not sure if the next test is
+  # still useful, as a result.
+  #
+  # search for msgid <20020929140301.451A92940A9@xent.com>, subject "Yahoo!
+  # News Story - Top Stories", date Sep 29 2002 on
+  # <http://xent.com/pipermail/fork/> for an example.
+  #
+  if ($rcvd =~ /\bmailer\d+\.bulk\.scd\.yahoo\.com\b/
+                && $from =~ /\@reply\.yahoo\.com$/) { return 0; }
+
   if ($rcvd =~ /by \w+\.\w+\.yahoo\.com \(\d+\.\d+\.\d+\/\d+\.\d+\.\d+\) id \w+/) {
       # possibly sent from "mail this story to a friend"
       return 0;

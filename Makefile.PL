@@ -1,5 +1,5 @@
 use 5.005;
-use ExtUtils::MakeMaker 5.50;
+#use ExtUtils::MakeMaker 5.50;
 
 # RPM builders, or people building in their home dirs:
 # set PREFIX (default = /usr)
