@@ -1148,7 +1148,7 @@ sub _get_tag {
                   $line .= $arg . $test . "=" . $self->{conf}->{scores}->{$test};
                 }
               }
-              return $line;
+              return $line ? $line : 'none';
             },
 
             PREVIEW => sub { $self->get_content_preview() },
