@@ -209,7 +209,8 @@ These additional modules are required for SpamassAssin to run:
   - Storable             (from CPAN)
 
     This is a required module if you use spamd, and allow user
-    configurations to be used (ie: you don't use "-x" or "-u").
+    configurations to be used (ie: you don't use -x, -u, -q/--sql-config,
+    -Q/--setuid-with-sql, --ldap-config, or --setuid-with-ldap).
 
 
 Optional Additional Modules

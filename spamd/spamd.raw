@@ -465,6 +465,8 @@ my $setuid_to_user = (
 	(!$opt{'user-config'} && !($opt{'setuid-with-sql'}||$opt{'setuid-with-ldap'}))
 	) ? 0 : 1;
 
+my $copy_config_p = $setuid_to_user || $opt{'sql-config'} || $opt{'ldap-config'};
+
 my $current_user;
 
 my $client;               # used for the client connection ...
@@ -696,7 +698,7 @@ my $spamtest = Mail::SpamAssassin->new(
 
 # If we need Storable, and it's not installed, alert now before we daemonize.
 die "Required module Storable not found!\n"
-  if ($setuid_to_user && !$spamtest->_is_storable_available());
+  if ($copy_config_p && !$spamtest->_is_storable_available());
 
 ## DAEMONIZE! ##
 
@@ -714,8 +716,15 @@ $spamtest->finish_learner();
 # the M::SA creation.
 my %conf_backup = ();
 my %msa_backup = ();
+
 # if $clients_per_child == 1, there's no point in copying configs around
-if ($setuid_to_user && $clients_per_child > 1) {
+unless ($clients_per_child > 1) {
+  # unset $copy_config_p so we don't bother trying to copy things back
+  # after closing the connection
+  $copy_config_p = 0;
+}
+
+if ($copy_config_p) {
   foreach( 'username', 'user_dir', 'userstate_dir' ) {
     $msa_backup{$_} = $spamtest->{$_} if (exists $spamtest->{$_});
   }
@@ -849,7 +858,9 @@ sub spawn {
           logmsg("fatal: return setuid failed");
           die;           # make it fatal to avoid security breaches
         }
+      }
 
+      if ($copy_config_p) {
         while(my($k,$v) = each %msa_backup) {
           $spamtest->{$k} = $v;
         }
