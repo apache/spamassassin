@@ -326,6 +326,19 @@ sub read_scoreonly_config {
 # non-public methods.
 
 sub init {
+
+# crh: These were moved here from spamd, since they really should get loaded as part of initialization of the lib
+eval {
+  require Net::DNS;
+  require Net::DNS::Resolver;
+};
+
+eval {
+  require Razor::Client;
+  require Razor::Signature; 
+  require Razor::String;
+};
+
   my ($self) = @_;
 
   if ($self->{_initted}) { return; }
