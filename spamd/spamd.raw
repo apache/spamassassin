@@ -702,13 +702,19 @@ sub check {
     my @msglines;
     my $actual_length = 0;
     my $msgid;
+    my $rmsgid;
     while ($_ = $client->getline()) {
         if (($actual_length == 0) .. /^$/) {             # still in header
-            if (/^Message-Id:\s+(.*?)\s*$/i) {
-                $msgid = $1;
-                while($msgid =~ s/\([^\(\)]*\)//) {};    # remove comments and
-                $msgid =~ s/^\s+|\s+$//g;                # leading and trailing spaces
-                $msgid =~ s/\s.*$//;                     # keep only the first token
+            if (/^(Resent-)?Message-Id:\s+(.*?)\s*$/i) {
+                my $id = $2;
+                while($id =~ s/\([^\(\)]*\)//) {};    # remove comments and
+                $id =~ s/^\s+|\s+$//g;                # leading and trailing spaces
+                $id =~ s/\s.*$//;                     # keep only the first token
+                unless ($1) {
+                    $msgid  = $id;
+                } else {
+                    $rmsgid = $id;
+                }
             }
         }
         push(@msglines, $_);
@@ -720,7 +726,9 @@ sub check {
     $current_user ||= "(unknown)";
     logmsg(
       ($method eq 'PROCESS' ? "processing" : "checking") .
-      " message $msgid for $current_user:$>."
+      " message $msgid" . 
+      ($rmsgid ? " ($rmsgid)" : "" ) . 
+      " for ${current_user}:$>."
     );
 
     my $mail = Mail::SpamAssassin::NoMailAudit->new (
