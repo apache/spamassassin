@@ -99,54 +99,26 @@ sub check_for_from_mx {
 
 ###########################################################################
 
+# From and To have same address, but are not exactly the same and
+# neither contains intermediate spaces.
 sub check_for_from_to_same {
-  my ($self, $type) = @_;
-
-  if (! exists $self->{from_to_same}) {
-    $self->_check_from_to_same();
-  }
-  return ($self->{from_to_same} eq $type);
-}
-
-sub _check_from_to_same {
   my ($self) = @_;
-  my $addr_from = $self->get ('From:addr');
-  my $addr_to = $self->get ('To:addr');
-  my $hdr_from = $self->get ('From');
-  my $hdr_to = $self->get ('To');
 
+  my $hdr_from = $self->get('From');
+  my $hdr_to = $self->get('To');
+  return 0 if (!length($hdr_from) || !length($hdr_to) ||
+	       $hdr_from eq $hdr_to);
+
+  my $addr_from = $self->get('From:addr');
+  my $addr_to = $self->get('To:addr');
   # BUG: From:addr and To:addr sometimes contain whitespace
   $addr_from =~ s/\s+//g;
   $addr_to =~ s/\s+//g;
+  return 0 if (!length($addr_from) || !length($addr_to) ||
+	       $addr_from ne $addr_to);
 
-  if (!length($addr_from) || !length($addr_to) ||
-      !length($hdr_from) || !length($hdr_to) ||
-      ($addr_from ne $addr_to))
-  {
-    $self->{from_to_same} = "none";
-    return;
-  }
-
-  if ($hdr_from eq $hdr_to) {
-    $self->{from_to_same} = "exact";
-  }
-  else {
-    $self->{from_to_same} = "rough";
-  }
-
-  my $from_space = ($hdr_from =~ /^\s*\S+\s*$/);
-  my $to_space = ($hdr_to =~ /^\s*\S+\s*$/);
-  if ($from_space && $to_space) {
-    $self->{from_to_same} .= "_both";
-  }
-  elsif ($from_space) {
-    $self->{from_to_same} .= "_from";
-  }
-  elsif ($to_space) {
-    $self->{from_to_same} .= "_to";
-  }
-  else {
-    $self->{from_to_same} .= "_none";
+  if ($hdr_from =~ /^\s*\S+\s*$/ && $hdr_to =~ /^\s*\S+\s*$/) {
+    return 1;
   }
 }
 
