@@ -67,10 +67,14 @@ Spamd has the facility to run as a non-root user, this has potential security
 payoffs. If a fault is found in spamd or spamassassin code, any third party
 linked-libraries or imported perl modules there is the potential for abuse of
 both the running uid of spamd, and the uid of the username supplied by spamc
-(and this could be any user).   If you do not need to let your users define
-their own rules, maintain their own whitelists, or have non-world-readable
-home and ~/.spamassassin directories, then just set spamd up to run with
-the "-u username" option.
+(and this could be any user).
+
+If you do not need to let your users define their own rules, maintain their own
+whitelists, or have non-world-readable home and ~/.spamassassin directories,
+then just set spamd up to run with the "-u username" option.  Since spamd can
+use auto-whitelisting, which requires it maintain a database of email addresses
+on-disk, you should use a non-"root" but non-"nobody" user: "mailnull" or
+"mail" are good choices, or even create a "spamd" user.
 
 When run as root, spamd will change uid's to the user inoking spamc in 
 order to read and write to their configurations. This functionality

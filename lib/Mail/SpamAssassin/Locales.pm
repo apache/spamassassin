@@ -49,7 +49,7 @@ sub is_charset_ok_for_locales {
   return 1 if ($cs =~ /^UTF/);
   return 1 if ($cs =~ /^UCS/);
   return 1 if ($cs =~ /^CP125/);
-  return 1 if ($cs =~ /^WINDOWS125/);
+  return 1 if ($cs =~ /^WINDOWS/);      # argh, Windows
   return 1 if ($cs eq 'IBM852');
   return 1 if ($cs =~ /^UNICODE11UTF[78]/);	# wtf? never heard of it
   return 1 if ($cs eq 'XUNKNOWN'); # added by sendmail when converting to 8bit
