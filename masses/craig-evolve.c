@@ -32,14 +32,11 @@ void showSummary(PGAContext *ctx);
 
 float threshold = 5.0;
 float nybias = 5.0;
-const int exhaustive_eval = 1;
 
 const double mutation_rate = 0.01;
 const double mutation_noise = 0.5;
-const float regression_coefficient = 0.75;
 
 const float SCORE_CAP = 3.0;
-
 
 const double crossover_rate = 0.65;
 
