@@ -162,8 +162,8 @@ use constant MAP_HEADERS_MID => 1;
 use constant MAP_HEADERS_FROMTOCC => 1;
 use constant MAP_HEADERS_USERAGENT => 1;
 
-# tweaks under test right now
-use constant ADD_INVIZ_TOKENS_I_PREFIX => 0;
+# tweaks, see http://bugzilla.spamassassin.org/show_bug.cgi?id=3173#c26
+use constant ADD_INVIZ_TOKENS_I_PREFIX => 1;
 use constant ADD_INVIZ_TOKENS_NO_PREFIX => 0;
 
 # We store header-mined tokens in the db with a "HHeaderName:val" format.
