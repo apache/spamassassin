@@ -697,6 +697,22 @@ sub tok_touch {
   die "tok_touch: not implemanted\n";
 }
 
+=head2 tok_touch_all
+
+public instance (Boolean) tok_touch_all (\@ $tokens,
+                                         Time $atime)
+
+Description:
+This method does a mass update of the given list of tokens C<$tokens>, if the existing token
+atime is < C<$atime>.
+
+=cut
+
+sub tok_touch_all {
+  my ($self, $tokens, $atime) = @_;
+  die "tok_touch_all: not implemanted\n";
+}
+
 =head2 cleanup
 
 public instance (Boolean) cleanup ()

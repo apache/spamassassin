@@ -1196,6 +1196,8 @@ sub scan {
   my $tinfo_spammy = $permsgstatus->{bayes_token_info_spammy} = [];
   my $tinfo_hammy = $permsgstatus->{bayes_token_info_hammy} = [];
 
+  my @touch_tokens;
+
   for (sort {
               abs($pw{$b} - 0.5) <=> abs($pw{$a} - 0.5)
             } keys %pw)
@@ -1218,10 +1220,13 @@ sub scan {
     push (@sorted, $pw);
 
     # update the atime on this token, it proved useful
-    $self->{store}->tok_touch ($_, $msgatime);
+    push(@touch_tokens, $_);
 
     dbg ("bayes token '$raw_token' => $pw");
   }
+
+  # we don't really care about the return value here
+  $self->{store}->tok_touch_all(\@touch_tokens, $msgatime);
 
   if (!@sorted || (REQUIRE_SIGNIFICANT_TOKENS_TO_SCORE > 0 && 
 	$#sorted <= REQUIRE_SIGNIFICANT_TOKENS_TO_SCORE))

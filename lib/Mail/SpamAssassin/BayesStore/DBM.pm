@@ -961,6 +961,17 @@ sub tok_touch {
   $self->defer_update ("t $atime $encoded_tok");
 }
 
+sub tok_touch_all {
+  my ($self, $tokens, $atime) = @_;
+
+  foreach my $token (@{$tokens}) {
+    # we can't store the SHA1 binary value in the journal to convert it
+    # to a printable value that can be converted back later
+    my $encoded_tok = unpack("H*", $token);
+    $self->defer_update ("t $atime $encoded_tok");
+  }
+}
+
 sub defer_update {
   my ($self, $str) = @_;
   $self->{string_to_journal} .= "$str\n";

@@ -993,7 +993,67 @@ sub tok_touch {
   return 1;
 }
 
+=head2 tok_touch_all
+
+public instance (Boolean) tok_touch (\@ $tokens
+                                     String $atime)
+
+Description:
+This method does a mass update of the given list of tokens C<$tokens>, if the existing token
+atime is < C<$atime>.
+
+The assumption is that the tokens already exist in the database.
+
+We should never be touching more than N_SIGNIFICANT_TOKENS, so we can make
+some assumptions about how to handle the data (ie no need to batch like we
+do in tok_get_all)
+
 =cut
+
+sub tok_touch_all {
+  my ($self, $tokens, $atime) = @_;
+
+  return 0 unless (defined($self->{_dbh}));
+
+  my $sql = "UPDATE bayes_token SET atime = ? WHERE id = ? AND token IN (";
+
+  my @bindings = ($atime, $self->{_userid});
+  foreach my $token (@{$tokens}) {
+    $sql .= "?,";
+    push(@bindings, $token);
+  }
+  chop($sql); # get rid of trailing ,
+
+  $sql .= ") AND atime < ?";
+  push(@bindings, $atime);
+
+  my $rows = $self->{_dbh}->do($sql, undef, @bindings);
+
+  unless (defined($rows)) {
+    dbg("bayes: tok_touch: SQL Error: ".$self->{_dbh}->errstr());
+    return 0;
+  }
+
+  # if we didn't update a row then no need to update newest_token_age
+  return 1 if ($rows eq '0E0');
+
+  # need to check newest_token_age
+  # no need to check oldest_token_age since we would only update if the
+  # atime was newer than what is in the database
+  $sql = "UPDATE bayes_vars
+             SET newest_token_age = ?
+           WHERE id = ?
+             AND newest_token_age < ?";
+
+  $rows = $self->{_dbh}->do($sql, undef, $atime, $self->{_userid}, $atime);
+
+  unless (defined($rows)) {
+    dbg("bayes: tok_touch: SQL Error: ".$self->{_dbh}->errstr());
+    return 0;
+  }
+
+  return 1;
+}
 
 =head2 cleanup
 
