@@ -61,7 +61,7 @@ use vars qw{
 # an IP address, in IPv4, IPv4-mapped-in-IPv6, or IPv6 format.  NOTE: cannot
 # just refer to $IPV4_ADDRESS, due to perl bug reported in nesting qr//s. :(
 #
-$IP_ADDRESS = qr/\b (?:IPv6:|) (?: (?:0*:0*:ffff:(?:0*:|)|) # IPv4-mapped-in-IPv6
+$IP_ADDRESS = qr/\b (?:IPv6:)? (?: (?:0*:0*:ffff:(?:0*:)?)? # IPv4-mapped-in-IPv6
                     (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
                     (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.
                     (?:1\d\d|2[0-4]\d|25[0-5]|\d\d|\d)\.

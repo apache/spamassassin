@@ -369,7 +369,7 @@ sub _check_for_forged_received {
     next if (!defined $by[$i] || $by[$i] !~ /^\w+(?:[\w.-]+\.)+\w+$/);
 
     if (defined ($from[$i]) && defined($fromip[$i])) {
-      if ($from[$i] =~ /^localhost(?:\.localdomain|)$/) {
+      if ($from[$i] =~ /^localhost(?:\.localdomain)?$/) {
         if ($fromip[$i] eq '127.0.0.1') {
           # valid: bouncing around inside 1 machine, via the localhost
           # interface (freshmeat newsletter does this).  TODO: this
@@ -480,9 +480,9 @@ sub _check_for_forged_hotmail_received_headers {
 
   if ($self->gated_through_received_hdr_remover()) { return; }
 
-  if ($rcvd =~ /from \S*hotmail.com \(\S+\.hotmail(?:\.msn|)\.com[ \)]/ && $ip)
+  if ($rcvd =~ /from \S*hotmail.com \(\S+\.hotmail(?:\.msn)?\.com[ \)]/ && $ip)
                 { return; }
-  if ($rcvd =~ /from \S+ by \S+\.hotmail(?:\.msn|)\.com with HTTP\;/ && $ip)
+  if ($rcvd =~ /from \S+ by \S+\.hotmail(?:\.msn)?\.com with HTTP\;/ && $ip)
                 { return; }
   if ($rcvd =~ /from \[66\.218.\S+\] by \S+\.yahoo\.com/ && $ip)
                 { return; }

@@ -144,7 +144,7 @@ describe FORGED_MUA_OIMO	Forged mail pretending to be from MS Outlook IMO
 # updated to fix bugs 2047, 2598, 2654
 # NOTE: this is the *only* spammish Eudora MUA pattern that wasn't
 # ignored using __OLD_EUDORA1 and __OLD_EUDORA2 under previous rules.
-header __EUDORA_MUA             X-Mailer =~ /^QUALCOMM Windows Eudora (?:Pro |Light |)Version [3456]\./
+header __EUDORA_MUA             X-Mailer =~ /^QUALCOMM Windows Eudora (?:Pro |Light )?Version [3456]\./
 header __EUDORA_MSGID		MESSAGEID =~ /^<(?:\d\d?\.){3,5}\d{14}\.[a-f0-9]{8}\@\S+(?:\sport\s\d+)?>$/m
 header __HAS_X_LOOP		exists:X-Loop
 header __HAS_X_MAILING_LIST	exists:X-Mailing-List

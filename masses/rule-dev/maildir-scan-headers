@@ -70,7 +70,7 @@ sub do_file {
   $hdrs =~ s/(\n[ \t]+)/\\n /gs;	# folding
   $hdrs =~ s/\|/[pipe]/gs;		# pipe chars
 
-  my @ok = ($hdrs =~ /^(${wanted}:(?: .*|))$/gom);
+  my @ok = ($hdrs =~ /^(${wanted}:(?: .*)?)$/gom);
   if ($sort) { @ok = sort @ok; }
   $hdrs = join ("|", @ok);
 

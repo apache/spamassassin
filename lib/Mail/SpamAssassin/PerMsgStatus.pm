@@ -632,21 +632,21 @@ sub rewrite_report_safe {
     $subject ||= '';
     my $tag = $self->_replace_tags($self->{conf}->{rewrite_header}->{Subject});
     $tag =~ s/\n/ /gs; # strip tag's newlines
-    $subject =~ s/^(?:\Q${tag}\E |)/${tag} /g; # For some reason the tag may already be there!?
+    $subject =~ s/^(?:\Q${tag}\E )?/${tag} /g; # For some reason the tag may already be there!?
   }
 
   if ($self->{conf}->{rewrite_header}->{To}) {
     $to ||= '';
     my $tag = $self->_replace_tags($self->{conf}->{rewrite_header}->{To});
     $tag =~ s/\n/ /gs; # strip tag's newlines
-    $to =~ s/(?:\t\Q(${tag})\E|)$/\t(${tag})/
+    $to =~ s/(?:\t\Q(${tag})\E)?$/\t(${tag})/
   }
 
   if ($self->{conf}->{rewrite_header}->{From}) {
     $from ||= '';
     my $tag = $self->_replace_tags($self->{conf}->{rewrite_header}->{From});
     $tag =~ s/\n+//gs; # strip tag's newlines
-    $from =~ s/(?:\t\Q(${tag})\E|)$/\t(${tag})/
+    $from =~ s/(?:\t\Q(${tag})\E)?$/\t(${tag})/
   }
 
   # add report headers to message
@@ -848,7 +848,7 @@ sub _replace_tags {
   my $self = shift;
   my $text = shift;
 
-  $text =~ s/_(\w+?)(?:\((.*?)\)|)_/${\($self->_get_tag($1,$2 || ""))}/g;
+  $text =~ s/_(\w+?)(?:\((.*?)\))?_/${\($self->_get_tag($1,$2 || ""))}/g;
   return $text;
 }
 
