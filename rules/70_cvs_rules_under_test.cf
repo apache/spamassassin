@@ -106,6 +106,9 @@ tflags T_MSGID_GOOD_EXCHANGE      nice
 body T_THIS_AINT_SPAM             /This.{0,30}is.{1,10}not?.{0,15}spam/is
 describe T_THIS_AINT_SPAM         Claims "This is not spam"
 
+# possible replacement for GAPPY_SUBJECT
+header T_GAPPY_SUBJECT	Subject =~ /\b(?:[a-z][-_. ]{1,3}){4,}/i
+
 ###########################################################################
 # quinlan: I converted almost 2000 postfix anti-spam rules into SA format,
 # tested many permutations of each, refined some into better rules, and
@@ -117,11 +120,9 @@ describe T_THIS_AINT_SPAM         Claims "This is not spam"
 # - other numbered rules are just similar in concept
 
 body T_Q_THIS_IS_AN_AD		/this message is an advertisement/i
-header T_Q_ADV_GAPPY_V1		Subject =~ /A +D +V/i
-header T_Q_ADV_GAPPY_V2		Subject =~ /A D V/i
+header T_Q_ADV_GAPPY		Subject =~ /\bA\s+D\s+V\b/i
 
-body T_Q_APPLY_FREE_V1		/(?-i:F)ree (?-i:A)pplication|free application.{0,32}(?:today|minute|less than)/i
-body T_Q_APPLY_FREE_V2		/free application.{0,32}(?:today|minute|less than)/i
+body T_Q_APPLY_FREE		/(?-i:F)ree (?-i:A)pplication|free application.{0,32}(?:today|minute|less than)/i
 
 uri T_Q_BTAMAIL_URL		/btamail\.net\.cn/i
 header T_Q_FRIEND_PUBLIC	ALL =~ /^(to|cc|from):.*friend\@public\.com/im
@@ -136,81 +137,75 @@ body T_Q_MORTGAGE_PITCH		/mortgage (?:rates?|quotes?|approv(?:al|ed)|payment|int
 
 body T_Q_OKAY1			/cannot be considered spam/i
 body T_Q_OKAY2			/sent (?:to you )?in compliance (?:with|of)/i
-body T_Q_OKAY3			/Under Bill s.1618/i
+body T_Q_OKAY3			/Under Bill s.?1618/i
 
 body T_Q_ONETIME1		/One[- ]?Time Mail/i
 body T_Q_ONETIME2		/this is a one[- ]?time (?:e-?mail|mailing|offer)/i
 body T_Q_ONETIME3		/Never Receive Another Mailing/i
 
-body T_Q_OPT_IN1_V1		/(?-i:O)pt.?(?-i:I)n/i
-rawbody T_Q_OPT_IN1_V2		/(?-i:O)pt.?(?-i:I)n/i
+body T_Q_OPT_IN			/(?-i:O)pt.?(?-i:I)n/i
+body T_Q_OPT_OUT		/(?-i:O)pt.?(?-i:O)ut/i
 
-body T_Q_OPT_OUT1_V1		/(?-i:O)pt.?(?-i:O)ut/i
-rawbody T_Q_OPT_OUT1_V2		/(?-i:O)pt.?(?-i:O)ut/i
+rawbody T_Q_PROGRAM_FILE	/name=\".*\.(?:asd|bat|chm|com|dll|exe|hta|lnk|js|jse|ocx|pif|scr|shb|shm|shs|vb|vbe|vbs|vxd|wsf|wsh)\"/i
 
-rawbody T_Q_PROGRAM_FILE_V1	/name=\".*\.(?:asd|bat|chm|com|dll|exe|hta|lnk|js|jse|ocx|pif|scr|shb|shm|shs|vb|vbe|vbs|vxd|wsf|wsh)\"/i
-rawbody T_Q_PROGRAM_FILE_V2	/name=\"?.*\.(?:asd|bat|chm|com|dll|exe|hta|lnk|js|jse|ocx|pif|scr|shb|shm|shs|vb|vbe|vbs|vxd|wsf|wsh)\"?/i
+header T_Q_RATWARE_ENTITY	X-Mailer =~ /MIME-tools.*Entity/i
 
-header T_Q_RATWARE_ENTITY_V1	X-Mailer =~ /Entity/i
-header T_Q_RATWARE_ENTITY_V2	X-Mailer =~ /MIME-tools.*Entity/i
+# this works best as rawbody
+rawbody T_Q_REMOVE_URL		/mailto:.*\@.*\?subject=(?:"|3D)*(?:remove?|delete|please.?(?:delete|remove|unsubscribe)|abuse|off\b|stop|take.?me.?off)/i
 
 body T_Q_REMOVE1		/(?:respect|honou?r) all removal requests/i
-body T_Q_REMOVE2		/(usa\.net|hotmail\.com|yahoo\.com)\?subject=remove/i
 body T_Q_REMOVE3		/click here to be (?:permanently )?(?:removed|deleted)/i
 body T_Q_REMOVE4		/If you no longer wish to receive/i
-body T_Q_REMOVE5		/to be removed[,]* from (the|my|our) (mailing|email|e-mail)* *list/i
-body T_Q_REMOVE6		/to be removed[,]* from.*(mailings|offers)/i
-body T_Q_REMOVE7		/to be removed .*\@excite\.com/i
+body T_Q_REMOVE5		/to be removed from (?:the|my|our) (?:mailing|e.?mail|opt[ -]?in)? list/i
+body T_Q_REMOVE6		/to be removed from.*(?:mailings|offers)/i
 
-body T_Q_REMOVE_URL_V1		/mailto:.*\@.*\?subject=("|3D)?(?:remove?|delete|please.?(?:delete|remove|unsubscribe)|abuse|off\b|stop|take.?me.?off)/i
-uri T_Q_REMOVE_URL_V2		/mailto:.*\@.*\?subject=("|3D)?(?:remove?|delete|please.?(?:delete|remove|unsubscribe)|abuse|off\b|stop|take.?me.?off)/i
-rawbody T_Q_REMOVE_URL_V3	/mailto:.*\@.*\?subject=("|3D)*(?:remove?|delete|please.?(?:delete|remove|unsubscribe)|abuse|off\b|stop|take.?me.?off)/i
-
-body T_Q_WEGOTYOU1		/Because You Registered/i
-body T_Q_WEGOTYOU2		/You Have Received This Email By Either/i
+body T_Q_WEGOTYOU1		/because (?:you're|you (?:are )?)(?:registered|.{0,20}\bopt.{0,3}in)/i
+body T_Q_WEGOTYOU2		/you(?:'ve|'re| have| are)? receiv(?:ed|ing) this (?:e.?mail|advertisement) (?:by either|because)/i
 body T_Q_WEGOTYOU3		/You Registered At One Of Our/i
-body T_Q_WEGOTYOU4		/Your Email Address Was Obtained/i
+body T_Q_WEGOTYOU4		/Your e.?mail Address Was Obtained/i
 body T_Q_WEGOTYOU5		/You Are Receiving This Special Offer/i
 body T_Q_WEGOTYOU6		/You Have Provided Permission/i
 
-header T_Q_DOMAINS_CHEAP 	Subject =~ /(new extensions|domain names) now only \$\s*\d+/i
-header T_Q_AS_SEEN 		Subject =~ /As Seen/i
+header T_Q_DOMAINS_CHEAP	Subject =~ /(?:new extensions|domain names) now only \$\s*\d+/i
+header T_Q_AS_SEEN		Subject =~ /\bAs Seen/i
 header T_Q_BAD_CREDIT	 	Subject =~ /Bad Credit/i
 header T_Q_DOUBLE_YOUR 		Subject =~ /Double Your/i
 header T_Q_FOR_ONLY 		Subject =~ /For Only/i
 header T_Q_FREE_INSTANT 	Subject =~ /Free Instant/i
 header T_Q_INKJET_PITCH		Subject =~ /inkjet cartridges/i
 header T_Q_LIFE_INSURANCE	Subject =~ /Life Insurance/i
-header T_Q_LOSE_WEIGHT		Subject =~ /Lose .*(?:Pounds|Weight)/i
-header T_Q_NOW_ONLY		Subject =~ /Now Only/i
+header T_Q_LOSE_WEIGHT		Subject =~ /(?:lose .*(?:weight|pounds|lbs)|weight.loss)/i
+header T_Q_NOW_ONLY		Subject =~ /\bNow Only/i
 header T_Q_RIPPED		Subject =~ /Ripped & Strong/i
-header T_Q_SAVE_7		Subject =~ /Save 7/i
-header T_Q_SAVE_UP		Subject =~ /Save Up/i
-header T_Q_VIAGRA		Subject =~ /Viagra/i
-header T_Q_YOUR_DEBT		Subject =~ /Your (?:Bills|Debt)/i
+header T_Q_SAVE_PERCENT		Subject =~ /save (?:[6-9]\d%|up to \d+%)/i
+header T_Q_VIAGRA_SUBJECT	Subject =~ /Viagra/i
+header T_Q_YOUR_DEBT		Subject =~ /Your (?:Bills|Debt|Credit)/i
 header T_Q_YOUR_FAMILY		Subject =~ /Your Family/i
 header T_Q_YOUR_OWN		Subject =~ /Your Own/i
-header T_Q_YOUR_PENIS		Subject =~ /Your Penis/i
+header T_Q_YOUR_PENIS_V1	Subject =~ /Your Penis/i
+header T_Q_YOUR_PENIS_V2	Subject =~ /Your (?:Penis|Dick|Sc?hlong)/i
 
 body T_Q_UNPRINTABLE		/[[:^print:]]{8,}/
 body T_Q_CREDIT_BODY		/Accept Credit Cards/i
 body T_Q_BURNING_FAT		/Aging While Burning Fat/i
-body T_Q_CONSOLIDATE_DEBT	/Debt Consolidation/i
+body T_Q_CONSOLIDATE_DEBT	/(?:Debt[ -]?Consolidation|Consolidate (?:Debt|Bills))/i
 body T_Q_FREE_ADULT		/Free Adult/i
 body T_Q_FREE_MEMBERSHIP	/FREE MEMBERSHIP/i
 body T_Q_GUARANTEED_BANG	/GUARANTEED!/i
 body T_Q_HOME_LOANS		/Home Loans/i
 body T_Q_INVALUABLE		/Invaluable Marketing Information/i
 body T_Q_LOCATE_ASSETS		/Locate Hidden Assets/i
-body T_Q_MILLION_EMAIL		/Million Email Addresses/i
+body T_Q_MILLION_EMAIL		/Million (?:\w+ )?(?:E-?mail )?Addresses/i
 body T_Q_NOT_ADVISOR		/not a registered investment advisor/i
-body T_Q_PRODUCT_SERVICE	/PRODUCT or SERVICE/i
+body T_Q_PRODUCT_SERVICE_V1	/PRODUCT or SERVICE/i
+body T_Q_PRODUCT_SERVICE_V2	/PRODUCTS? or SERVICES?/i
 body T_Q_RECEIVE_OFFER		/Receive Special Offer/i
 body T_Q_RECEIVE_EMAIL		/Receive Third Party Email/i
 body T_Q_REFINANCE_HOME		/Refinance Your Home/i
 body T_Q_USE_IDENTITY		/Using Your Identity/i
 body T_Q_YOU_CAN_SEARCH		/You Can Search For Anyone/i
-body T_Q_YOUR_SIZE		/Your Penis Size/i
+body T_Q_YOUR_SIZE_V1		/Your Penis Size/i
+body T_Q_YOUR_SIZE_V2		/Your (?:Penis|Dick|Sc?hlong) Size/i
 ###########################################################################
 
 header FORGED_TELESP_RCVD       Received =~ /\.(?!br).. \(\d+-\d+-\d+-\d+\.dsl\.telesp\.net\.br /
