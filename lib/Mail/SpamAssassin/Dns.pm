@@ -168,15 +168,25 @@ sub razor_lookup {
     require Razor::Client;
     require Razor::Signature; 
     local ($^W) = 0;		# argh, warnings in Razor
-    $response = Razor::Client->new($config, %options)->check (\@msg);
+
+    if ($Razor::Client::VERSION == "1.12") {
+      die ("razor version unsupported");
+      #TODO
+    } else {
+      $response = Razor::Client->new($config, %options)->check (\@msg);
+    }
   };
 
   if ($@) {
-    warn ("$! $@") unless ($@ eq "timeout\n");
-    warn "razor check timed out after $timeout secs.\n";
+    if ($@ eq "timeout\n") {
+      warn "razor check timed out after $timeout secs.\n";
+    } else {
+      warn ("$! $@");
+    }
   }
 
   if ($response) { return 1; }
+#exit;
   return 0;
 }
 
