@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.30 2002/10/07 19:18:43 quinlan Exp $
+# $Id: HTML.pm,v 1.31 2002/10/08 23:45:52 felicity Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -316,7 +316,7 @@ sub html_tests {
           my $ratio = ($attr->{width} + 0.0) / ($attr->{height} + 0.0);
 
           $self->{html}{min_img_ratio} = $ratio
-            if ($ratio < $self->{html}{min_img_ratio});
+            if ($self->{html}{min_img_ratio} eq "inf" || $ratio < $self->{html}{min_img_ratio});
           $self->{html}{max_img_ratio} = $ratio
             if ($ratio > $self->{html}{max_img_ratio});
       }
