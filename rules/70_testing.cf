@@ -876,3 +876,7 @@ body __FRAUD_DSY	/\b(?:huge|enormous) (?:cash deposit|amount of money\b[^.]{0,99
 body __FRAUD_WDR	/\bprivate lawyer\b/i
 body __FRAUD_UUY	/\blegitimate business(?:es)?\b/i
 body __FRAUD_MLY	/\b(?:reply|respond)\b[^.]{0,50}\b(?:to|through)\b[^.]{0,50}\@\b/i
+
+# bug 2733
+body T_HTML_WEB_BUGS               eval:html_test('web_bugs_2')
+
