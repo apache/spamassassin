@@ -396,33 +396,6 @@ header T_MSGID_SHORT_DO_0_6	MESSAGEID =~ /\@.{0,6}>/
 header T_MSGID_SHORT_DO_0_7	MESSAGEID =~ /\@.{0,7}>/
 header T_MSGID_SHORT_DO_0_8	MESSAGEID =~ /\@.{0,8}>/
 
-# no To or Cc
-header __CC_UNSET	Cc =~ /^UNSET$/ [if-unset: UNSET]
-header __TO_UNSET	To =~ /^UNSET$/ [if-unset: UNSET]
-header __CC_EXISTS	exists:Cc
-header __TO_EXISTS	exists:To
-meta T_TO_CC_UNSET	__CC_UNSET && __TO_UNSET 
-meta T_TO_CC_NONE	!__CC_EXISTS && !__TO_EXISTS
-header T_TOCC_UNSET	ToCc =~ /^UNSET$/ [if-unset: UNSET]
-header __TOCC_EXISTS	exists:ToCc
-meta T_TOCC_NONE	!__TOCC_EXISTS
-# consider Bcc:
-header __BCC_EXISTS	exists:Bcc
-meta T_TO_CC_UNSET_NOBCC	T_TO_CC_UNSET && !__BCC_EXISTS
-meta T_TO_CC_NONE_NOBCC	T_TO_CC_NONE && !__BCC_EXISTS
-meta T_TOCC_UNSET_NOBCC	T_TOCC_UNSET && !__BCC_EXISTS
-meta T_TOCC_NONE_NOBCC	T_TOCC_NONE && !__BCC_EXISTS
-meta T_TO_CC_UNSET_XBCC	T_TO_CC_UNSET + __BCC_EXISTS == 1
-meta T_TO_CC_NONE_XBCC	T_TO_CC_NONE + __BCC_EXISTS == 1
-meta T_TOCC_UNSET_XBCC	T_TOCC_UNSET + __BCC_EXISTS == 1
-meta T_TOCC_NONE_XBCC	T_TOCC_NONE + __BCC_EXISTS == 1
-
-# X-Mailer rules
-header T_X_MAILER_SPAM_1	X-Mailer !~ m{[A-Z0-9.]} [if-unset: Foo 1.0]
-header T_X_MAILER_SPAM_2	X-Mailer !~ m{[A-Z0-9./]} [if-unset: Foo 1.0]
-header T_X_MAILER_SPAM_3	X-Mailer !~ m{[A-Z0-9.-]} [if-unset: Foo 1.0]
-header T_X_MAILER_SPAM_4	X-Mailer !~ m{[A-Z0-9./-]} [if-unset: Foo 1.0]
-
 # some testing work on case-sensitive names
 header T_HEADER_01	ALL =~ /\nAlternate-Recipient:/
 header T_HEADER_02	ALL =~ /\nAntivirus:/
@@ -460,7 +433,6 @@ header T_HEADER_33	ALL =~ /\nX-IP:/
 header T_HEADER_34	ALL =~ /\nX-JLH:/
 header T_HEADER_35	ALL =~ /\nX-L-C:/
 header T_HEADER_36	ALL =~ /\nX-LIDCode:/
-header T_HEADER_37	ALL =~ /\nX-MID:/
 header T_HEADER_38	ALL =~ /\nX-Mailid:/
 header T_HEADER_39	ALL =~ /\nX-MailingID:/
 header T_HEADER_40	ALL =~ /\nX-Message-flag:/
@@ -474,7 +446,6 @@ header T_HEADER_47	ALL =~ /\nX-Rec:/
 header T_HEADER_48	ALL =~ /\nX-SG4:/
 header T_HEADER_49	ALL =~ /\nX-SP-Track-ID:/
 header T_HEADER_50	ALL =~ /\nX-Spam:/
-header T_HEADER_51	ALL =~ /\nX-T2-Posting-ID:/
 header T_HEADER_52	ALL =~ /\nX-TID:/
 header T_HEADER_53	ALL =~ /\nX-Text-Classification:/
 header T_HEADER_54	ALL =~ /\nX-Tnz-Problem-Type:/
