@@ -111,16 +111,18 @@ describe BUGGY_CGI_PT		Broken Portuguese CGI script message
 
 # these are now full tests instead of body tests, to catch QP-encoded
 # split lines
-body SENT_IN_COMPLIANCE		/message .{0,10}sen[dt] in compliance (?:of|with)/i
+body SENT_IN_COMPLIANCE		/(e.?mail|message) .{0,10}sen[dt] in (\w{1,10} )?compliance (?:of|with)/i
 describe SENT_IN_COMPLIANCE	Claims compliance with SPAM regulations
-body PARA_A_2_C_OF_1618		/Paragraph .a.{0,10}2.{0,10}C. of S. 1618/i
-describe PARA_A_2_C_OF_1618	Claims compliance with senate bill 1618
-body BILL_1618			/Bill.{0,10}1618.{0,10}TITLE.{0,10}III/i
-describe BILL_1618		Claims compliance with senate bill 1618
+body PARA_A_2_C_OF_1618		/Paragraph *.a.{0,10}2.{0,10}C. of S. 1618/i
+describe PARA_A_2_C_OF_1618	Claims compliance with Senate Bill 1618
+body BILL_1618			/Bill.{0,10}1618.{0,10}TITLE.{0,10}(III|\#3)/i
+describe BILL_1618		Claims compliance with Senate Bill 1618
 body S_1618			/S..{0,10}1618.{0,10}-.{0,10}SECTION.{0,10}301/i
-describe S_1618			Claims compliance with senate bill 1618
+describe S_1618			Claims compliance with Senate Bill 1618
 body SECTION_301		/SECTION.{0,10}301/i
 describe SECTION_301		Claims compliance with SPAM regulations
+body HR_4176			/H\.?R\.? *4176.{0,10}SECTION.{0,10}101/i
+describe HR_4176		Claims compliance with House Bill 4176
 
 #   0.000    0.000    0.000    0.00    1.80  EU_EMAIL_OPTOUT (no matches)
 #body EU_EMAIL_OPTOUT		/EU (?:e-?mail opt.?out|e.?commerce) directive/i
@@ -135,6 +137,9 @@ describe CHECK_OR_MONEY_ORDER	Talk about a check or money order
 
 rawbody SUPERLONG_LINE		/^[^<\&]{199,}$/m
 describe SUPERLONG_LINE	        Contains a line >=199 characters long
+
+rawbody CARRIAGE_RETURNS	eval:check_carriage_returns()
+describe CARRIAGE_RETURNS	Message contains a lot of ^M characters
 
 # fixed by ms to not allow entry field onto next line
 rawbody ASCII_FORM_ENTRY	/[^<][A-Za-z][A-Za-z]+.{1,15}?[\x09\x20]*_{30,}/
