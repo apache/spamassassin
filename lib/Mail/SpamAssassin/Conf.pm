@@ -477,13 +477,13 @@ This can be useful for MUA rule creation.
 
 =item spam_level_char { x (some character, unquoted) }        (default: *)
 
-By default, the "X-Spam-Level" header will use a '*' character
-with its length equal to the score of the message.
+By default, the "X-Spam-Level" header will use a '*' character with its length
+equal to the score of the message. Some people don't like escaping *s though, 
+so you can set the character to anything with this option.
+
 In other words, for a message scoring 7.2 points with this option set to .
 
 X-Spam-Level: .......
-
-Some people don't like escaping *'s though, so you can set the character to anything with this option.
 
 =cut
 
