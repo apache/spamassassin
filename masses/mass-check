@@ -102,7 +102,6 @@ sub wanted {
   my $ma = Mail::SpamAssassin::NoMailAudit->new ('data' => $dataref);
 
   unless ($opt_nokillfile) {
-  print STDERR 'kill';
     # killfile for mass-checks
     $_ = $ma->get_header("Message-Id");
     if (defined($_) && /${killfile_message_ids}/os)
