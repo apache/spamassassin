@@ -1626,6 +1626,13 @@ sub check_for_uppercase {
   # remove shift-JIS charset codes
   $body =~ s/\x1b\$B.*\x1b\(B//gs;
 
+  # report only on mails above a minimum size; otherwise one
+  # or two acronyms can throw it off
+  if (length ($body) < 200) {
+    $self->{uppercase} = 0;
+    return 0;
+  }
+
   # count numerals as lower case, otherwise 'date|mail' is spam
   my $lower = $body =~ tr/a-z0-9//d;
   my $upper = $body =~ tr/A-Z//;
