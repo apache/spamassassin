@@ -878,7 +878,7 @@ sub MY::install {
 
   foreach (@code) {
     # Add our install targets as a dependency to all top-level install targets
-    s/^(install(?:_[a-z]+)?\s*::?\s*.*)$/$1 bin__install conf__install data__install/;
+    s/^(install(?:_[a-z]+)?\s*::?\s*.*)$/$1 conf__install data__install/;
 
     # Now do the DESTDIR hack, if necessary.
     next if !$mm_needs_destdir;
