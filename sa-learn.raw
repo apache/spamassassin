@@ -71,8 +71,6 @@ Options:
  -L, --local			   Operate locally, no network accesses
  -C file, --config-file=file       Path to standard configuration dir
  -p prefs, --prefs-file=file       Set user preferences file
- -a, --auto-whitelist              Use auto-whitelists
- --whitelist-factory               Select whitelist factory
  -D, --debug-level                 Print debugging messages
  -V, --version                     Print version
  -h, --help                        Print usage message
@@ -310,11 +308,6 @@ Forces an expiry run, regardless of whether it may be necessary or not.
 
 Forget a given message previously learnt.
 
-=item B<-a>, B<--auto-whitelist>
-
-Use auto-whitelists.  While learning, add addresses to the auto-whitelist
-as appropriate.
-
 =item B<-h>, B<--help>
 
 Print help message and exit.
@@ -330,10 +323,6 @@ Read user score preferences from I<prefs>.
 =item B<-D>, B<--debug-level>
 
 Produce diagnostic output.
-
-=item B<-M> I<factory>, B<--whitelist-factory>=I<factory>
-
-Select alternative whitelist factory.
 
 =item B<--no-rebuild>
 
