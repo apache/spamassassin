@@ -196,6 +196,13 @@ sub new {
   $self->{user_scores_sql_username} = '';
   $self->{user_scores_sql_password} = '';
   $self->{user_scores_sql_table} = 'userpref'; # Morgan - default to userpref for backwords compatibility
+# Michael 'Moose' Dinn, <dinn@twistedpair.ca>
+# For integration with Horde's preference storage
+# 20020831
+  $self->{user_scores_sql_field_username} = 'username';
+  $self->{user_scores_sql_field_preference} = 'preference';
+  $self->{user_scores_sql_field_value} = 'value';
+  $self->{user_scores_sql_field_scope} = 'spamassassin'; # probably shouldn't change this
 
   $self;
 }
@@ -1956,6 +1963,49 @@ The table user preferences are stored in, for the above DSN.
 =cut
     if(/^user_scores_sql_table\s+(\S+)$/) {
       $self->{user_scores_sql_table} = $1; next;
+    }
+
+# Michael 'Moose' Dinn <dinn@twistedpair.ca>
+# For integration with horde preferences system
+# 20020831
+
+=item user_scores_sql_field_username field_username
+
+The field that the username whose preferences you're looking up is stored in.
+Default: C<username>.
+
+=cut
+    if(/^user_scores_sql_field_username\s+(\S+)$/) {
+      $self->{user_scores_sql_field_username} = $1; next;
+    }
+
+=item user_scores_sql_field_preference field_preference
+
+The name of the preference that you're looking for.  Default: C<preference>.
+
+=cut
+    if(/^user_scores_sql_field_preference\s+(\S+)$/) {
+      $self->{user_scores_sql_field_preference} = $1; next;
+    }
+
+=item user_scores_sql_field_value field_value
+
+The name of the value you're looking for.  Default: C<value>.
+
+=cut
+    if(/^user_scores_sql_field_value\s+(\S+)$/) {
+      $self->{user_scores_sql_field_value} = $1; next;
+    }
+
+=item user_scores_sql_field_scope field_scope
+
+The 'scope' field. In Horde this makes the preference a single-module
+preference or a global preference. There's no real need to change it in other
+systems.  Default: C<spamassassin>.
+
+=cut
+    if(/^user_scores_sql_field_scope\s+(\S+)$/) {
+      $self->{user_scores_sql_field_scope} = $1; next;
     }
 
 ###########################################################################
