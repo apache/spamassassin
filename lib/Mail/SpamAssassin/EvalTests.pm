@@ -155,6 +155,9 @@ sub check_rbl {
     @ips = @ips[$#ips-1 .. $#ips];        # only check the originating 2
   }
 
+  if (!defined $self->{rbl_IN_As_found}) {
+    $self->{rbl_IN_As_found} = ' ';
+  }
   init_rbl_check_reserved_ips();
   my $found = 0;
 
@@ -169,6 +172,17 @@ sub check_rbl {
   };
 
   $found;
+}
+
+###########################################################################
+
+sub check_rbl_results_for {
+  my ($self, $addr) = @_;
+
+  my $inas = ' '.$self->{rbl_IN_As_found}.' ';
+  if ($inas =~ / ${addr} /) { return 1; }
+
+  return 0;
 }
 
 ###########################################################################
