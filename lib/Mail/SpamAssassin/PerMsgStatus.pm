@@ -664,7 +664,7 @@ sub html_tests {
 
   if ($tag eq "table" && exists $attr->{border} && $attr->{border} =~ /(\d+)/)
   {
-    $html{border} = $1 if !exists $html{border} || $html{border} < $1;
+    $html{thick_border} = 1 if $1 > 1;
   }
   if ($tag eq "script") {
     $html{javascript} = 1;
@@ -678,11 +678,37 @@ sub html_tests {
     }
   }
   if ($tag eq "body" && exists $attr->{bgcolor}) {
-    $html{bgcolor} = 1 if $attr->{bgcolor} !~ /^\#ffffff$/i;
+    $html{bgcolor} = lc($attr->{bgcolor});
+    $html{bgcolor} =~ s/^white$/#ffffff/;
+    $html{bgcolor} =~ s/^black$/#000000/;
+    $html{bgcolor_nonwhite} = 1 if $html{bgcolor} !~ /^\#ffffff$/;
   }
   if ($tag eq "font" && exists $attr->{size}) {
     $html{big_font} = 1 if (($attr->{size} =~ /^\s*(\d+)/ && $1 >= 3) ||
 			    ($attr->{size} =~ /\+(\d+)/ && $1 > 1));
+  }
+  if ($tag eq "font" && exists $attr->{color}) {
+    my $c = lc($attr->{color});
+    $html{font_color_nohash} = 1 if $c =~ /^[0-9a-f]{6}$/;
+    $html{font_color_gray} = 1 if ($c =~ /^\#?([0-9a-f]{2})\1{2}$/ &&
+				   $1 !~ /^(?:00|ff)$/);
+    $html{font_color_odd} = 1 if ($c =~ /^\#?[0-9a-f]{6}$/ &&
+				  $c !~ /^\#?(?:00|33|66|80|99|cc|ff){3}$/);
+    $html{font_color_name} = 1 if ($c !~ /^\#?[0-9a-f]{6}$/ &&
+				   $c !~ /^(?:navy|gray|red|white)$/);
+    $c =~ s/^white$/#ffffff/;
+    $c =~ s/^black$/#000000/;
+    $html{font_invisible} = 1 if (exists $html{bgcolor} &&
+				  substr($c,-6) eq substr($html{bgcolor},-6));
+  }
+  if ($tag eq "font" && exists $attr->{face}) {
+    $html{font_face_caps} = 1 if $attr->{face} =~ /[A-Z]{3}/;
+    if ($attr->{face} !~ /^[a-z][a-z -]*[a-z](?:,\s*[a-z][a-z -]*[a-z])*$/i) {
+      $html{font_face_bad} = 1;
+    }
+    for (split(/,/, lc($attr->{face}))) {
+      $html{font_face_odd} = 1 if ! /^\s*(?:arial|comic sans ms|courier new|geneva|helvetica|ms mincho|sans-serif|serif|tahoma|times new roman|verdana)\s*$/i;
+    }
   }
   if ($tag eq "img" && exists $attr->{src} && $attr->{src} =~ /\?/) {
     $html{web_bugs} = 1;
@@ -981,7 +1007,6 @@ sub get_decoded_stripped_body_text_array {
   # do HTML conversions if necessary
   undef %html;
   $html{ratio} = 0;
-  $html{border} = 0;
   if (($text =~ m/<.*>/s) || ($text =~ m/\&[-_a-zA-Z0-9]+;/s)) {
     my $raw = length($text);
 
