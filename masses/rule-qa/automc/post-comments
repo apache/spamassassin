@@ -10,7 +10,7 @@ open (CF, "<config");
 my %conf; while(<CF>) { /^(\S+)=(\S+)/ and $conf{$1} = $2; }
 close CF;
 
-our $USERNAME = $conf{USERNAME};
+our $USERNAME = $conf{BZ_USERNAME};
 our $BZ_PASSWORD_FILE = $conf{BZ_PASSWORD_FILE};
 our $SEND_DATA = 0;
 
@@ -91,28 +91,44 @@ sub do_bug {
 
   foreach my $key (sort keys %freqs_file) {
     my $file = $freqs_file{$key};
-    $comment .= "\nfreqs from \"$file\":\n".$freqs_hdr{$key};
+
+    # keep the comment in two buffers; one for the top part (freqs),
+    # one for the lower (metadata and links)
+    my $cmt2 = "freqs using data from \"$file\" as of ".
+                                    (scalar localtime time)."\n";
+
     foreach my $rule (@rulenames) {
       my $renamedata = $outputs->{rule_renames}{$rule};
+
+      # if (!defined $renamedata) {
+      # foreach my $oldname (keys %{$outputs->{rule_renames}}) {
+      # if ($outputs->{rule_renames}{$oldname} =~ /rule \Q$rule\E /) {
+      # $renamedata = $outputs->{rule_renames}{$oldname};
+      # } } }
+
       $renamedata =~ /^rule (\S+) bug (\S+) cmt (\S+)/;
 
       my $oldname = $1;
-      my $bugnum = $1;
-      my $cmtnum = $1;
+      my $bugnum = $2;
+      my $cmtnum = $3;
 
-      $comment .= "\n(rule $rule = $oldname from bug $bugnum comment $cmtnum)\n";
+      $cmt2 .= "\n$rule = $oldname from bug $bugnum comment $cmtnum\n";
       if (defined $freqs{$key}{$rule}) {
         $comment .= $freqs{$key}{$rule};
       } else {
         $comment .= "(could not find freqs for rule '$rule'/'$oldname')\n";
       }
-      $comment .= "full freqs: $conf{RULEQA_URL}?rule=$rule&date=$date\n";
+      $cmt2 .= "full freqs: $conf{RULEQA_URL}?rule=$rule&date=$date\n";
     }
+
+    $comment .= $cmt2;
   }
 
   if ($messages) {
     $comment .= "\n".$messages."\n";
   }
+
+  $comment .= $freqs_hdr{$key};
   $comment .= $boilerplate_footer;
 
   if (!$SEND_DATA) {

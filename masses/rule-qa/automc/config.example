@@ -1,0 +1,25 @@
+
+# the top-level directory for the automc stuff; ie. this dir
+TOP=/home/automc/svn/spamassassin/masses/rule-qa/automc
+
+# a writable directory where automc can store its state
+MCTMP=/home/automc/tmp/automc
+
+# where the SVN checkout of SpamAssassin is.  This must be writable
+# by the automc user
+SADIR=/home/automc/svn/spamassassin
+
+# username and password for bugzilla account to comment with
+BZ_USERNAME=automc@example.com
+BZ_PASSWORD_FILE=/home/automc/.bz_passwd.cf
+
+# SVN username to commit changes to "rules/70_scraped.cf" with
+SVN_USERNAME=automc
+
+# URL of the "ruleqa.cgi" script as installed
+RULEQA_URL=http://bugzilla.spamassassin.org/ruleqa
+
+# these must match what's in ~/.corpus, cf. "masses/rule-qa/README.nightly"
+html=/home/automc/corpus/html
+tagtime=/home/automc/corpus/tagtime
+

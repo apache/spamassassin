@@ -63,7 +63,14 @@ sub init {
 
 sub update {
     chdir $opt{corpus};
-    system "rsync -CPcvuzt --timeout=300 $opt{username}" . '@rsync.spamassassin.org::corpus/*.log .';
+
+    # allow non-running of rsync under some circumstances
+    if ($opt{rsync_command}) {
+      system $opt{rsync_command};
+    } else {
+      system "rsync -CPcvuzt --timeout=300 $opt{username}" . '@rsync.spamassassin.org::corpus/*.log .';
+    }
+
     if (-f "rsync.last") {
 	open(FIND, "find . -type f -newer rsync.last |");
 	my $files = "";
@@ -73,7 +80,7 @@ sub update {
 	close(FIND);
 	if (! $files) {
 	    print STDERR "no new corpus files\n";
-	    if (rand(24) > 1) {
+	    if (!$opt{always_update_html} && rand(24) > 1) {
 		exit 0;
 	    }
 	    else {
@@ -229,8 +236,10 @@ sub current {
 	    elsif ($age =~ /^(?:new|all|age)$/) {
 		@ham = grep { -M "$_" < -M $opt{tagtime} } @ham;
 		@spam = grep { -M "$_" < -M $opt{tagtime} } @spam;
-		@ham = grep { $revision{$_} eq $revision } @ham;
-		@spam = grep { $revision{$_} eq $revision } @spam;
+                if (!$opt{ignore_revisions}) {
+                  @ham = grep { $revision{$_} eq $revision } @ham;
+                  @spam = grep { $revision{$_} eq $revision } @spam;
+                }
 		print STDERR "ham: " . join(' ', @ham) . "\n";
 		print STDERR "spam: " . join(' ', @spam) . "\n";
 	    }

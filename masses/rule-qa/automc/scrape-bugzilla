@@ -228,9 +228,10 @@ sub fixup_rule_code {
     $newname .= "_".$rnd;
 
     if ($newname !~ /^__/) {
-      # ensure it has an "MC_" prefix (non-subrules only)
-      if ($newname !~ /^MC_/) {
-	$newname =~ s/^/MC_/;
+      # ensure it has an "T_MC_" prefix (non-subrules only)
+      if ($newname !~ /^T_MC_/) {
+        $newname =~ s/^T_//;    # remove optional "T_"
+        $newname =~ s/^/T_MC_/;
       }
     }
 
