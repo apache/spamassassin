@@ -33,27 +33,27 @@ mkdir $LOGDIR
 
 # Generate 90/10 split logs
 echo "[Generating 90/10 split ham]"
-mkdir NSBASE SPBASE
-cd NSBASE
-../tenpass/split-log-into-buckets-random 10 < ../ORIG/ham-$NAME.log > /dev/null
+mkdir $LOGDIR/NSBASE $LOGDIR/SPBASE
+cd $LOGDIR/NSBASE
+../../tenpass/split-log-into-buckets-random 10 < ../../ORIG/ham-$NAME.log > /dev/null
 cat split-[1-9].log > ham.log
 rm -f split-[1-9].log
 mv split-10.log ham-test.log
 
 echo "[Generating 90/10 split spam]"
 cd ../SPBASE
-../tenpass/split-log-into-buckets-random 10 < ../ORIG/spam-$NAME.log > /dev/null
+../../tenpass/split-log-into-buckets-random 10 < ../../ORIG/spam-$NAME.log > /dev/null
 cat split-[1-9].log > spam.log
 rm -f split-[1-9].log
 mv split-10.log spam-test.log
-cd ..
+cd ../..
 
 echo "[Setting up for gen run]"
 # Ok, setup for a run
-ln -s SPBASE/spam.log .
-ln -s NSBASE/ham.log .
-ln -s SPBASE/spam-test.log .
-ln -s NSBASE/ham-test.log .
+ln -s $LOGDIR/SPBASE/spam.log .
+ln -s $LOGDIR/NSBASE/ham.log .
+ln -s $LOGDIR/SPBASE/spam-test.log .
+ln -s $LOGDIR/NSBASE/ham-test.log .
 
 # try to find number of processors
 numcpus=`cpucount 2>/dev/null || egrep -c '^processor\b' /proc/cpuinfo 2>/dev/null || echo 1`
@@ -81,8 +81,8 @@ else
 
 # This needs to have 50_scores.cf in place first ...
 echo "[gen test results]"
-./logs-to-c --spam=SPBASE/spam-test.log \
-	--ham=NSBASE/ham-test.log \
+./logs-to-c --spam=spam-test.log \
+	--ham=ham-test.log \
 	--count --cffile=../rules --scoreset=$SCORESET | tee $LOGDIR/test
 
 echo "[STATISTICS file generation]"
