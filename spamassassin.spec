@@ -126,7 +126,7 @@ mkdir -p %{buildroot}/etc/mail/spamassassin
 
 %files 
 %defattr(-,root,root)
-%doc README Changes sample-nonspam.txt sample-spam.txt spamd/README.spamd INSTALL BUGS LICENSE TRADEMARK USAGE
+%doc README Changes sample-nonspam.txt sample-spam.txt spamd/README.spamd INSTALL BUGS LICENSE TRADEMARK USAGE sql
 %attr(755,root,root) %{_bindir}/*
 %attr(644,root,root) %{_includedir}/*
 %attr(644,root,root) %{_libdir}/*.so
@@ -135,7 +135,7 @@ mkdir -p %{buildroot}/etc/mail/spamassassin
 
 %files tools
 %defattr(644,root,root,755)
-%doc sql tools masses contrib
+%doc tools masses contrib
 
 %files -n perl-Mail-SpamAssassin
 %defattr(644,root,root,755)
@@ -172,102 +172,3 @@ fi
 if [ "$1" -ge "1" ]; then
     /sbin/service spamassassin condrestart > /dev/null 2>&1
 fi
-
-%changelog
-* Fri May 28 2004 Theo Van Dinter <felicity@kluge.net> 3.0.0-1
-- updated to 3.0.0
-
-* Sun Sep 28 2003 Theo Van Dinter <felicity@kluge.net> 2.61-1
-- updated to 2.61
-- allow builds of tar.gz or tar.bz2 via the --define "srcext .bz2" option
-- allow release to be overriden via the --define "release 1_rh8" option
-- allow CFLAGS to be modified in the usual method (RPM_OPT_FLAGS)
-- add more documentation files to be installed
-
-* Thu Sep 09 2003 Malte S. Stretz <spamassassin-contrib@msquadrat.de>
-- take advantage of the new simplified build system
-
-* Wed May 28 2003 Theo Van Dinter <felicity@kluge.net> 2.60-1
-- updated to 2.60
-
-* Thu Apr 03 2003 Theo Van Dinter <felicity@kluge.net> 2.54-1
-- updated to 2.54
-
-* Thu Apr 03 2003 Theo Van Dinter <felicity@kluge.net> 2.53-1
-- updated to 2.53
-
-* Mon Mar 24 2003 Theo Van Dinter <felicity@kluge.net> 2.52-1
-- updated to 2.52
-
-* Thu Mar 13 2003 Theo Van Dinter <felicity@kluge.net> 2.51-1
-- updated to 2.51
-
-* Tue Feb 25 2003 Theo Van Dinter <felicity@kluge.net> -3
-- changed "make install" call to properly set where the man pages go.
-  Fixes oddities between MakeMaker and RPM.  <grumble>
-
-* Tue Feb 25 2003 Theo Van Dinter <felicity@kluge.net> -2
-- put in a patch to fix dependency problems with RPM 4.1
-
-* Thu Feb 20 2003 Theo Van Dinter <felicity@kluge.net> 2.50-1
-- upgraded to real 2.50 release
-
-* Sun Feb 02 2003 Theo Van Dinter <felicity@kluge.net>
-- instead of us trying to do a restart, call service condrestart to do
-  it for us. :)
-
-* Wed Dec 18 2002 Justin Mason <jm-spec@jmason.org>
-- fixed specfile to work with Duncan's new Makefile.PL changes
-
-* Tue Sep 18 2002 Justin Mason <jm-spec@jmason.org>
-- merged 3-package system from b2_4_0 into 2.5x development
-
-* Tue Sep 11 2002 Justin Mason <jm-spec@jmason.org>
-- merged Michael Brown's libspamc support into 2.50 specfile
-- made "perl Makefile.PL" read from /dev/null to avoid interactivity issues
-
-* Mon Sep 10 2002 Michael Brown <michaelb@opentext.com>
-- Added building, installation and packaging of libspamc.{h,so}
-
-* Tue Sep 03 2002 Theo Van Dinter <felicity@kluge.net>
-- added INSTALL to documentation files
-- install man pages via _manpage macro to make things consistent
-- added perl requires statement
-- cleaned out some cruft
-- fixed "file listed twice" bug
-
-* Wed Aug 28 2002 Justin Mason <jm-spec@jmason.org>
-- merged code from PLD rpm, split into spamassassin, perl-Mail-SpamAssassin,
-  and spamassassin-tools rpms
-
-* Mon Jul 29 2002 Justin Mason <jm-spec@jmason.org>
-- removed migrate_cfs code, obsolete
-
-* Thu Jul 25 2002 Justin Mason <jm-spec@jmason.org>
-- removed findbin patch, obsolete
-
-* Fri Apr 19 2002 Theo Van Dinter <felicity@kluge.net>
-- Updated for 2.20 release
-- made /etc/mail/spamassassin a config directory so local.cf doesn't get wiped out
-- added a patch to remove findbin stuff
-
-* Wed Feb 27 2002 Craig Hughes <craig@hughes-family.org>
-- Updated for 2.1 release
-
-* Sat Feb 02 2002 Theo Van Dinter <felicity@kluge.net>
-- Updates for 2.01 release
-- Fixed rc file
-- RPM now buildable as non-root
-- fixed post_service errors
-- fixed provides to include perl modules
-- use file find instead of manually specifying files
-
-* Tue Jan 15 2002 Craig Hughes <craig@hughes-family.org>
-- Updated for 2.0 release
-
-* Wed Dec 05 2001 Craig Hughes <craig@hughes-family.org>
-- Updated for final 1.5 distribution.
-
-* Sun Nov 18 2001 Craig Hughes <craig@hughes-family.org>
-- first version of rpm.
-
