@@ -561,5 +561,5 @@ header T_SQUASHED_FROM_1	From =~ /\"</
 header T_SQUASHED_FROM_2	From =~ />\(/
 
 # Mar 27 2003 jm: let's give it a try.  I've seen 1 spam with this
-header T_X_ORIG_IP_X2		ALL =~ /\nX-Originating-IP: .+\nX-Originating-IP: /s
+header T_X_ORIG_IP_X2		ALL =~ /\nX-Originating-IP: .+\nX-Originating-IP: /is
 
