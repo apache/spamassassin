@@ -692,3 +692,20 @@ body T_BACKHAIR2_7_7		eval:html_test('backhair2_7_7')
 
 # spams that are assembled from a Javascript array
 rawbody T_JS_FROMCHARCODE	/String\.fromCharCode/
+
+# IADB
+header __RCVD_IN_IADB		eval:check_rbl('iadb', 'iadb.isipp.com.')
+tflags __RCVD_IN_IADB		net nice
+
+header RCVD_IN_IADB_LISTED	eval:check_rbl_sub('iadb', '127.0.0.1')
+describe RCVD_IN_IADB_LISTED	Sender is in ISIPP IADB of trusted senders
+tflags RCVD_IN_IADB_LISTED	net nice
+
+header RCVD_IN_IADB_VOUCHED	eval:check_rbl_sub('iadb', '127.0.0.2')
+describe RCVD_IN_IADB_VOUCHED	Sender is a vouched sender in IADB
+tflags RCVD_IN_IADB_VOUCHED	net nice
+
+header RCVD_IN_IADB_SPF		eval:check_rbl_sub('iadb', '127.0.0.3')
+describe RCVD_IN_IADB_SPF	Sender is in IADB as a publisher of SPF records
+tflags RCVD_IN_IADB_SPF		net nice
+
