@@ -2413,9 +2413,13 @@ sub _check_attachments {
   $self->{mime_qp_illegal} = 0;
   $self->{mime_qp_ratio} = 0;
   $self->{mime_suspect_name} = 0;
+  $self->{t_mime_base64_blanks} = 0;
   $self->{t_mime_base64_encoded_text} = 0;
+  $self->{t_mime_base64_illegal} = 0;
   $self->{t_mime_base64_iso_8859} = 0;
+  $self->{t_mime_base64_no_blank} = 0;
   $self->{t_mime_base64_without_name} = 0;
+  $self->{t_mime_base64_short_lines} = 0;
 
   # message headers
   $ctype = $self->get('Content-Type');
@@ -2458,6 +2462,17 @@ sub _check_attachments {
       if ($previous =~ /^$/ && /^TVqQAAMAAAAEAAAA/) {
 	$self->{microsoft_executable} = 1;
       }
+      if ($cte =~ /base64/ && $previous =~ /^\s*$/ && /^\s*$/) {
+	$self->{t_mime_base64_blanks} = 1;
+      }
+      if ($cte =~ /base64/ && (m@[^A-Za-z0-9+/=\n]@ || m/=[^=\s]/)) {
+	$self->{t_mime_base64_illegal} = 1;
+      }
+      if ($cte =~ /base64/ && m@^[A-Za-z0-9+/=]@ &&
+	  length($_) < 60 && length($previous) < 60)
+      {
+	$self->{t_mime_base64_short_lines} = 1;
+      }
       if ($self->{mime_html_no_charset} &&
 	  $ctype =~ /^text\/html/ &&
 	  /charset=/i)
@@ -2476,6 +2491,9 @@ sub _check_attachments {
       if (/$re_ctype/) { $ctype = lc($1); }
       elsif (/$re_cte/) { $cte = lc($1); }
       elsif (/$re_cd/) { $cd = lc($1); }
+      if ($cte =~ /base64/ && m@^[A-Za-z0-9/+=]{60,}@) {
+	$self->{t_mime_base64_no_blank} = 1;
+      }
     }
     if ($previous =~ /^begin [0-7]{3} ./ && /^M35J0``,````\$````/) {
       $self->{microsoft_executable} = 1;
