@@ -418,3 +418,7 @@ header T_HEADER_69	ALL =~ /\nX-rco:/
 header T_HEADER_70	ALL =~ /\nX-srk:/
 header T_HEADER_71	ALL =~ /\nX-tri:/
 header T_HEADER_72	ALL =~ /\nX-yd:/
+
+# bug 2004 - trivial rules
+rawbody T_HTML_FONT_SIZE_0PX	/<font\b[^>]+0px/i
+rawbody T_HTML_FONT_COLOR_WHITE	/<font\b[^>]+white/i
