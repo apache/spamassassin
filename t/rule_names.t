@@ -36,9 +36,6 @@ $sa->init(0); # parse rules
 # get rule names
 my @tests;
 while (my ($test, $type) = each %{ $sa->{conf}->{test_types} }) {
-
-  next if ($test =~ /^T_MC_/);      # not the nightly mass-check ones either
-
   push @tests, $test;
 }
 
@@ -53,8 +50,8 @@ for my $test (@tests) {
   # and are clearly not hitting due to rules being named poorly
   next if $test eq "UPPERCASE_75_100";
   next if $test eq "UNIQUE_WORDS";
-
-  next if ($test =~ /^T_MC_/);      # not the nightly mass-check ones either
+  # exempt the auto-generated nightly mass-check rules
+  next if $test =~ /^T_MC_/;
 
   $anti_patterns{"$test,"} = "P_" . $i++;
 }
@@ -69,9 +66,10 @@ onfail => sub {
 tstprefs ("
 	# set super low threshold, so always marked as spam
 	required_score -10000.0
-	# add a fake lexically final test so every other hit will always be
+	# add two fake lexically high tests so every other hit will always be
 	# followed by a comma in the X-Spam-Status header
 	body ZZZZZZZZ /./
+	body zzzzzzzz /./
 ");
 sarun ("-L < $mail", \&patterns_run_cb);
 ok_all_patterns();
