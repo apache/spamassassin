@@ -1,4 +1,4 @@
-# $Id: Received.pm,v 1.29 2003/09/10 04:54:29 felicity Exp $
+# $Id: Received.pm,v 1.29.2.1 2003/09/29 19:41:06 felicity Exp $
 
 # ---------------------------------------------------------------------------
 
@@ -572,10 +572,10 @@ sub parse_received_line {
     # Received: from customer254-217.iplannetworks.net (HELO AGAMENON) 
     # (baldusi@200.69.254.217 with plain) by smtp.mail.vip.sc5.yahoo.com with
     # SMTP; 11 Mar 2003 21:03:28 -0000
-    if (/^from (\S+) \(HELO (\S+)\) \((\S+) with \S+\) by (\S+) with /) {
+    if (/^from (\S+) \(HELO (\S+)\) \((\S+).*?\) by (\S+) with /) {
       $mta_looked_up_dns = 1;
       $rdns = $1; $helo = $2; $ip = $3; $by = $4;
-      $ip =~ s/([^\@]+)\@//g and $ident = $1;	# remove IDENT lookups
+      $ip =~ s/([^\@]*)\@//g and $ident = $1;	# remove IDENT lookups
       goto enough;
     }
 
@@ -706,6 +706,11 @@ sub parse_received_line {
     # Received: from [212.87.144.30] (account seiz [212.87.144.30] verified) by x.imd.net (CommuniGate Pro SMTP 4.0.3) with ESMTP-TLS id 5026665 for spamassassin-talk@lists.sourceforge.net; Wed, 15 Jan 2003 16:27:05 +0100
     if (/^from \[(${IP_ADDRESS})\] \([^\)]+\) by (\S+) /) {
       $ip = $1; $by = $2; goto enough;
+    }
+
+    # Received: from mtsbp606.email-info.net (?dXqpg3b0hiH9faI2OxLT94P/YKDD3rQ1?@64.253.199.166) by kde.informatik.uni-kl.de with SMTP; 30 Apr 2003 15:06:29
+    if (/^from (\S+) \((?:\S+\@)?(${IP_ADDRESS})\) by (\S+) with /) {
+      $rdns = $1; $ip = $2; $by = $3; goto enough;
     }
   }
 
