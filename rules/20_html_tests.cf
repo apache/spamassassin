@@ -325,3 +325,15 @@ rawbody __JS_DOCWRITE           /document\.write/
 meta JS_FROMCHARCODE            (__JS_FROMCHARCODE && __JS_DOCWRITE)
 describe JS_FROMCHARCODE        Document is built from a Javascript charcode array
 
+# rules to detect certain generally unnecessary encodings in HTML
+# tab, newline, space
+rawbody ENTITY_DEC_SPACE	/\&\#0*(?:9|10|32)\;/
+describe ENTITY_DEC_SPACE	HTML contains needlessly encoded spaces
+
+# A-Z, a-z, 0-9
+rawbody ENTITY_DEC_ALPHANUM	/\&\#0*(?:4[89]|5[0-7]|6[5-9][78]\d|9[0789]|1[01]\d|12[012])\;/
+describe ENTITY_DEC_ALPHANUM	HTML contains needlessly encoded characters
+
+# ! $ % ' ( ) , - . / : ; = ? @ _
+rawbody ENTITY_DEC_OTHER	/\&\#0*(?:3[3679]|4[014567]|5[89]|6[134]|95)\;/
+describe ENTITY_DEC_OTHER	HTML contains needlessly encoded punctuation
