@@ -110,9 +110,8 @@ describe DATE_IN_PAST_12_24	Date: is 12 to 24 hours before Received: date
 header DATE_IN_PAST_24_48	eval:check_for_shifted_date('-48', '-24')
 describe DATE_IN_PAST_24_48	Date: is 24 to 48 hours before Received: date
 
-# an oddly-bad hit-rate for this one.  probably quite recoverable...
-#header DATE_IN_PAST_48_96	eval:check_for_shifted_date('-96', '-48')
-#describe DATE_IN_PAST_48_96	Date: is 48 to 96 hours before Received: date
+header DATE_IN_PAST_48_96	eval:check_for_shifted_date('-96', '-48')
+describe DATE_IN_PAST_48_96	Date: is 48 to 96 hours before Received: date
 
 header DATE_IN_PAST_96_XX	eval:check_for_shifted_date('undef', '-96')
 describe DATE_IN_PAST_96_XX	Date: is 96 hours or more before Received: date
