@@ -46,10 +46,10 @@ describe LIVE_PORN              Possible porn - Live Porn
 body HARDCORE_PORN              /\bh[a\@]rd[ -]?core .{0,9}(?:teen|virgin|cheerleader|amat(?:eu|ue)r)|\bextreme h[a\@]rdcore/i
 describe HARDCORE_PORN          Possible porn - Hardcore Porn
 
-body HOT_NASTY			/\b(?=[dehklnswxy])(?:horny|nasty|hot|wild|young|horniest|nastiest|hottest|wildest|youngest|naughty|dirtiest|slutty|kinky|lusty|extreme|xxx+)\b.{0,9}\b(?=[acfghilmpsvx])(?:virgin|asian|cheerleader|sex|selection|fuck|fucking|anal\b|lesb(?:ian|o)|incest|chicks?|pics|movies|video|gay\b|porn|h[a\@]rdcore|schoolgirls|amateur|slut|adult|cum|xxx|sites?|hotties|shit)/i
+body HOT_NASTY			/\b(?=[dehklnswxy])(?:horny|nasty|hot|wild|young|horniest|nastiest|hottest|wildest|youngest|naughty|dirtiest|slutty|kinky|lusty|extreme|xxx+)\b.{0,9}\b(?=[acfghilmpsvx])(?:virgins?\b|asian|cheerleader|sex|selection|fuck|fucking|anal\b|lesb(?:ian|o)|incest|chicks?|pics|movies|video|gay\b|porn|h[a\@]rdcore|schoolgirls|amateur|slut|adult|cum\b|xxx|sites?|hotties|shit)/i
 describe HOT_NASTY		Possible porn - Hot, Nasty, Wild, Young
 
-body BEST_PORN			/\b(?:best|biggest|largest|most|free|ultimate)\b.{0,9}\b(?:virgins?|anal\b|lesbians?|incest|porno?|h[a\@]rdcore|sluts?|xxx+)/i
+body BEST_PORN			/\b(?:best|biggest|largest|most|free|ultimate)\b.{0,9}\b(?:virgins?\b|anal\b|lesbians?|incest|porno?|h[a\@]rdcore|sluts?|xxx+)/i
 describe BEST_PORN		Possible porn - Best, Largest, Most Porn
 
 body NASTY_GIRLS                /\b(?:horniest|nasty|nastiest|hottest|wildest|slutty|xxx+)\b.{0,9}\b(?:girl|women|teen|babe)/i
