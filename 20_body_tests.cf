@@ -433,11 +433,17 @@ describe EJACULATION            Increase your ejaculation!
 body     IMPOTENCE              /(?:impotence (?:problem|cure|solution)|Premature Ejaculation|erectile dysfunction)/i
 describe IMPOTENCE              Impotence cure
 
-body WORK_AT_HOME		/(?:WORK|MAKE (?:MONEY|\$+)) (?:AT|FROM) HOME/i
-describe WORK_AT_HOME		Information on how to work at home
+body WORK_AT_HOME		/(?:WORK|(?:MAKE|EARN).{1,10}(?:MONEY|\$+|BUCKS|CASH)).{1,10}(?:AT|FROM) (?:YOUR )?HOME/i
+describe WORK_AT_HOME		Information on how to work at home (1)
 
-body HOME_EMPLOYMENT		/HOME(?: EMPLOYMENT|WORKER)/i
-describe HOME_EMPLOYMENT	Information on how to work at home
+body HOME_EMPLOYMENT		/HOME.{0,10}(?: EMPLOYMENT|WORKER|BUSINESS)/i
+describe HOME_EMPLOYMENT	Information on how to work at home (2)
+
+body     NO_EXPERIENCE          /\bNo EXPERIENCE/i
+describe NO_EXPERIENCE          No experience needed!
+
+body     FREE_MONEY             /\b(:?fast|free|easy|big)\s*(?:money|\$+|bucks|cash)/i
+describe FREE_MONEY             Free money!
 
 body MORTGAGE_RATES		/Mortgage rates/i
 describe MORTGAGE_RATES		Information on mortgage rates
