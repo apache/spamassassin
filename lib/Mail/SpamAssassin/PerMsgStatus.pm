@@ -364,13 +364,11 @@ sub get_content_preview {
   my $str = '';
   my $ary = $self->get_decoded_stripped_body_text_array();
   my $numlines = 3;
-  while (length ($str) < 200) {
+  while (length ($str) < 200 && @{$ary} && $numlines-- > 0) {
     $str .= shift @{$ary};
-    if (--$numlines == 0) {
-      chomp ($str); $str .= " [...]\n"; last;
-    }
   }
   undef $ary;
+  chomp ($str); $str .= " [...]\n";
 
   # in case the last line was huge, trim it back to around 200 chars
   $str =~ s/^(.{,200}).*$/$1/gs;
