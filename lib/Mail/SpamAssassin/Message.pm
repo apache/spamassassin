@@ -541,7 +541,7 @@ sub get_rendered_body_text_array {
 
       # TVD - if there are multiple parts, what should we do?
       # right now, just use the last one ...
-      $self->{html} = $p->{html_results} if ( $type eq 'text/html' );
+      $self->{metadata}->{html} = $p->{html_results} if ( $type eq 'text/html' );
     }
     else {
       $text .= $p->decode();
