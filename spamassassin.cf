@@ -433,9 +433,9 @@ body ONLINE_BIZ_OPS		/online business opportunities/i
 describe ONLINE_BIZ_OPS		Wants you to do business online
 body BILLION_DOLLARS		/[BM]ILLION DOLLAR/
 describe BILLION_DOLLARS	Talks about lots of money
-body OPT_IN			/opt-in/i
+body OPT_IN			/\bopt-in\b/i
 describe OPT_IN			Talks about opting in
-body DIRECT_EMAIL		/direct e-*mail/i
+body DIRECT_EMAIL		/direct e-*mail\b/i
 describe DIRECT_EMAIL		Talks about direct email
 body MASS_EMAIL			/mass e-*mail/i
 describe MASS_EMAIL		Talks about mass email
@@ -443,7 +443,7 @@ body EMAIL_MARKETING		/e-*mail marketing/i
 describe EMAIL_MARKETING	Talks about email marketing
 body PRODUCED_AND_SENT_OUT	/This a.?d is produced and sent out by/
 describe PRODUCED_AND_SENT_OUT	Tells you it's an ad
-body INCREASE_TRAFFIC		/increase.* traffic/i
+body INCREASE_TRAFFIC		/increase.* traffic\b/i
 describe INCREASE_TRAFFIC	Instructions on how to boost traffic
 
 # contrib: Duncan
