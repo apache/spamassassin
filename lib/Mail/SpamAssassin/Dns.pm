@@ -266,7 +266,6 @@ sub process_dnsbl_set {
     else {
       my $test = qr/$subtest/;
       if ($rdatastr =~ /$test/) {
-	print STDERR "here for $rule $question $answer\n";
 	$self->dnsbl_hit($rule, $question, $answer);
       }
     }
