@@ -1250,7 +1250,9 @@ sub got_user_header {
   }
 
   $current_user = $1;
-  auth_ident($current_user) if $opt{'auth-ident'};
+  if ($opt{'auth-ident'} && !auth_ident($current_user)) {
+    return 1;
+  }
 
   if ( !$opt{'user-config'} ) {
     if ( $opt{'sql-config'} ) {
@@ -1323,8 +1325,9 @@ sub auth_ident {
   if ( $username ne $ident_username ) {
     logmsg( "fatal: ident username ($dn) does not match "
         . "spamc username ($username)" );
-    exit 1;
+    return 0;
   }
+  return 1;
 }
 
 sub handle_user {
