@@ -364,13 +364,16 @@ sub rewrite_as_spam {
 
   if ($self->{conf}->{report_header}) {
     my $report = $self->{report};
-    $report =~ s/^\s*\n//gm;	# Empty lines not allowed in header.
-    $report =~ s/^\s*/  /gm;	# Ensure each line begins with whitespace.
+    $report =~ s/(?:\n|^)\s*\n//gm;	# Empty lines not allowed in header.
+    $report =~ s/\n\s*/\n  /gm;	# Ensure each line begins with whitespace.
 
     if ($self->{conf}->{use_terse_report}) {
       # Strip the superfluous SPAM: messages if we're being terse.
       # The header can still be stripped without them.
-      $report =~ s/^  SPAM: /  /gm;
+      $report =~ s/^\s*SPAM: /  /gm;
+      # strip start and end lines
+      $report =~ s/^\s*----[^\n]+\n//gs;
+      $report =~ s/\s*\n  ----[^\n]+\s*$//gs;
     } else {
       $report = "Detailed Report\n" . $report;
     }
