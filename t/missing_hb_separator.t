@@ -40,32 +40,37 @@ my $result;
 
 #####
 
-@msg = ("Content-Type: text/plain; boundary=--foo\n");
+# make sure we catch w/out body, and that we catch the last header
+
+@msg = ("Content-Type: text/plain; boundary=--foo\n","X-Message-Info: foo\n");
 $mail = $sa->parse(\@msg, 1);
 $status = $sa->check($mail);
 
 $result = 0;
 foreach (@{$status->{test_names_hit}}) {
-  $result = 1 if ($_ eq 'MISSING_HB_SEP');
+  $result++ if ($_ eq 'MISSING_HB_SEP' || $_ eq 'X_MESSAGE_INFO');
 }
 
-ok ( $result );
+ok ( $result == 2 );
 
 $status->finish();
 $mail->finish();
 
 #####
 
-@msg = ("Content-Type: text/plain;\n"," boundary=--foo\n");
+# we should also catch no separator before the mime part boundary, and the
+# last header
+
+@msg = ("Content-Type: text/plain;\n"," boundary=--foo\n","X-Message-Info: foo\n","--foo\n");
 $mail = $sa->parse(\@msg, 1);
 $status = $sa->check($mail);
 
 $result = 0;
 foreach (@{$status->{test_names_hit}}) {
-  $result = 1 if ($_ eq 'MISSING_HB_SEP');
+  $result++ if ($_ eq 'MISSING_HB_SEP' || $_ eq 'X_MESSAGE_INFO');
 }
 
-ok ( $result );
+ok ( $result == 2 );
 
 $status->finish();
 $mail->finish();
