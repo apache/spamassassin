@@ -139,5 +139,6 @@ header T_UNCLOSED_BRACKET   ALL =~ /\[\d+\r?\n/s
 
 # A particularly persistent .tw spammer sending broken messages; gets past
 # my installation :( .  Happily, they always HELO with "0".
-header HELO_0     X-Spam-Relays-Untrusted =~ / helo=0 /
+header T_HELO_0     X-Spam-Relays-Untrusted =~ / helo=0 /
+
 
