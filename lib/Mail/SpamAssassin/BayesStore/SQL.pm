@@ -241,6 +241,11 @@ sub calculate_expire_delta {
 
   my $sth = $self->{_dbh}->prepare_cached($sql);
     
+  unless (defined($sth)) {
+    dbg("bayes: calculate_expire_delta: SQL Error: ".$self->{_dbh}->errstr());
+    return %delta;
+  }
+
   for (my $i = 1; $i <= $max_expire_mult; $i<<=1) {
     my $rc = $sth->execute($self->{_userid}, $newest_atime, $start * $i);
 
