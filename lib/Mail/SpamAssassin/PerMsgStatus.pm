@@ -1779,6 +1779,8 @@ sub get_uri_list {
   # the cache first. fyi.
   my $textary = $self->get_decoded_stripped_body_text_array();
 
+  $self->{redirect_num} = 0;
+
   my ($rulename, $pat, @uris);
   local ($_);
 
@@ -1832,6 +1834,10 @@ sub get_uri_list {
   # get domain list
   my %domains;
   for (@uris) {
+    # count redirection attempts and log it
+    if (my @http = m{\b(https?:/{0,2})}gi) {
+      $self->{redirect_num} = $#http if ($#http > $self->{redirect_num});
+    }
     my $domain = Mail::SpamAssassin::Util::uri_to_domain($_);
     $domains{$domain} = 1 if $domain;
   }
