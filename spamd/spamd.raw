@@ -452,7 +452,7 @@ if ( defined $opt{'max-conn-per-child'} ) {
 
 # Set some "sane" limits for defaults
 $childlimit        ||= 5;
-$clients_per_child ||= 1000;
+$clients_per_child ||= 200;
 
 
 my $dontcopy = 1;
@@ -1996,7 +1996,7 @@ queued (Try C<perl -MSocket -e'print SOMAXCONN'> to find this maximum).
 
 This option specifies the maximum number of connections each child
 should process before dying and letting the master spamd process spawn
-a new child.  The minimum value is C<1>, the default value is C<1000>.
+a new child.  The minimum value is C<1>, the default value is C<200>.
 
 =item B<-H> I<directory>, B<--helper-home-dir>=I<directory>
 
