@@ -67,6 +67,7 @@ sub parse_received_headers {
   # TODO! we need to get Dns.pm code into a class that is NOT
   # part of Mail::SpamAssassin::PerMsgStatus to avoid this crap!
   $self->{dns_pms} = Mail::SpamAssassin::PerMsgStatus->new($main, $msg);
+  $self->{is_dns_available} = $self->{dns_pms}->is_dns_available();
 
   $self->{relays_trusted} = [ ];
   $self->{num_relays_trusted} = 0;
@@ -156,7 +157,7 @@ sub parse_received_headers {
       # do we know what the IP addresses of the "by" host in the first
       # header is?  If not, set them from this header, since it's the
       # first one.  NOTE: this is a ref to an array, NOT a string.
-      if (!defined $first_by && $self->{dns_pms}->is_dns_available()) {
+      if (!defined $first_by && $self->{is_dns_available}) {
 	$first_by = [ $self->lookup_all_ips ($relay->{by}) ];
       }
 
@@ -170,7 +171,7 @@ sub parse_received_headers {
       # can we use DNS?  If not, we cannot use this algorithm, as we
       # cannot lookup hostnames. :(
       # Consider the first relay trusted, and all others untrusted.
-      if (!$self->{dns_pms}->is_dns_available()) {
+      if (!$self->{is_dns_available}) {
 	dbg("received-header: cannot use DNS, do not trust any hosts from here on");
       }
 
@@ -296,7 +297,7 @@ sub lookup_all_ips {
   my ($self, $hostname) = @_;
 
   # cannot use gethostbyname without DNS :(
-  if (!$self->{dns_pms}->is_dns_available()) {
+  if (!$self->{is_dns_available}) {
     return ();
   }
   
@@ -1086,7 +1087,7 @@ enough:
   # here may be movable too; no need to lookup trusted IPs all the time.
   #
   if ($rdns eq '') {
-    if (!$self->{dns_pms}->is_dns_available()) {
+    if (!$self->{is_dns_available}) {
       if ($mta_looked_up_dns) {
 	# we know the MTA always does lookups, so this means the host
 	# really has no rDNS (rather than that the MTA didn't bother
