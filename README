@@ -218,9 +218,12 @@ The mail-abuse.org tests are RCVD_IN_RBL, RCVD_IN_RSS, and RCVD_IN_DUL;
 the bl.spamcop.net test is called RCVD_IN_BL_SPAMCOP_NET.
 
 These are commercial services, so you need to pay money to use them.
+
 Having said that, the bl.spamcop.net service gets my recommendation as the
 most useful blacklisting DNS service I've found.  More information on it
-can be found at http://spamcop.net/bl.shtml .
+can be found at http://spamcop.net/bl.shtml .  It is available without
+being a customer of spamcop.net, although a donation is asked for.  See
+http://spamcop.net/fom-serve/cache/299.html for details.
 
 The mail-abuse.org tests are free for personal use, for now -- so if
 you're using SpamAssassin as a personal mail filter you may turn them on.
@@ -234,7 +237,7 @@ these lines to your ~/.spamassassin/user_prefs file:
     score RCVD_IN_RBL               10
     score RCVD_IN_RSS               1
     score RCVD_IN_DUL               1
-    score RCVD_IN_BL_SPAMCOP_NET    4
+    score RCVD_IN_BL_SPAMCOP_NET    3
 
 
 
