@@ -428,8 +428,9 @@ describe USER_IN_WHITELIST	From: address is in the user's white-list
 header FROM_MISSING		From =~ /^UNSET$/ [if-unset: UNSET]
 describe FROM_MISSING		Missing From: header
 
-header DATE_MISSING		Date =~ /^UNSET$/ [if-unset: UNSET]
-describe DATE_MISSING		Missing Date: header
+# bad test: no hits
+#header DATE_MISSING		Date =~ /^UNSET$/ [if-unset: UNSET]
+#describe DATE_MISSING		Missing Date: header
 
 # Steve Linford via Charlie Watts: good test!
 header CTYPE_JUST_HTML		eval:check_for_content_type_just_html()

@@ -420,9 +420,9 @@ describe THIS_AINT_SPAM         Claims "This is not spam"
 body WE_HATE_SPAM               /We .{0,30}oppose the use of SPAM/is
 describe WE_HATE_SPAM           Says "We strongly oppose the use of SPAM email"
 
-# (contrib: WW)
-body IN_ACCORDANCE_WITH_LAWS    /has been sent in accordance with/
-describe IN_ACCORDANCE_WITH_LAWS Claims to be in accordance with some Spam law
+# no hits
+#body IN_ACCORDANCE_WITH_LAWS    /has been sent in accordance with/
+#describe IN_ACCORDANCE_WITH_LAWS Claims to be in accordance with some Spam law
 
 body HR_3113                    /H\.\s*R\.\s*3113/is
 describe HR_3113                Mentions Spam law "H.R. 3113"
