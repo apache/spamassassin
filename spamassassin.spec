@@ -40,7 +40,7 @@ Distribution: SpamAssassin
 
 %description
 SpamAssassin provides you with a way to reduce, if not completely eliminate,
-Unsolicited Commercial Email (or "spam") from your incoming email.  It can be
+Unsolicited Bulk Email (or "spam") from your incoming email.  It can be
 invoked by a MDA such as sendmail or postfix, or can be called from a procmail
 script, .forward file, etc.  It uses a genetic-algorithm-evolved scoring system
 to identify messages which look spammy, then adds headers to the message so
@@ -51,7 +51,7 @@ mail.
 %description -l pl
 SpamAssassin udostêpnia Ci mo¿liwo¶æ zredukowania, je¶li nie
 kompletnego wyeliminowania Niezamawianej Komercyjnej Poczty
-(Unsolicited Commercial Email, spamu) z Twojej poczty. Mo¿e byæ
+(Unsolicited Bulk Email, spamu) z Twojej poczty. Mo¿e byæ
 wywo³ywany z MDA, np. Sendmaila czy Postfixa, lub z pliku ~/.forward
 itp. U¿ywa ogólnego algorytmu oceniania w celu identyfikacji
 wiadomo¶ci, które wygl±daj± na spam, po czym dodaje nag³ówki do
@@ -105,8 +105,10 @@ aplikacji do czytania poczty.
 %setup -q -n %{pdir}-%{pnam}-%{real_version}
 
 %build
-%{__perl} Makefile.PL PREFIX=%{_prefix} SYSCONFDIR=%{_sysconfdir} < /dev/null
-%{__make} 
+%{__perl} Makefile.PL INST_PREFIX=%{_prefix} INST_SYSCONFDIR=%{_sysconfdir} PREFIX=$RPM_BUILD_ROOT/%{_prefix} SYSCONFDIR=$RPM_BUILD_ROOT/%{_sysconfdir} < /dev/null
+# now override the PREFIX setting to not use %buildroot%. MakeMaker
+# does not have a better way to do this, it seems...
+%{__make} PREFIX=%{_prefix}
 %{__make} spamd/libspamc.so
 # make test
 
@@ -168,6 +170,9 @@ if [ $1 = 0 ]; then
 fi
 
 %changelog
+
+* Wed Dec 18 2002 Justin Mason <jm-spec@jmason.org>
+- fixed specfile to work with Duncan's new Makefile.PL changes
 
 * Tue Sep 18 2002 Justin Mason <jm-spec@jmason.org>
 - merged 3-package system from b2_4_0 into 2.5x development
