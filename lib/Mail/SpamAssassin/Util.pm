@@ -792,6 +792,40 @@ sub uri_list_canonify {
     $nuri =~ s/\&\#0*(3[3-9]|[4-9]\d|1[01]\d|12[0-6]);/sprintf "%c",$1/ge;
     $nuri =~ s/\&\#x0*(2[1-9]|[3-6][a-f0-9]|7[0-9a-e]);/sprintf "%c",hex($1)/gei;
 
+    # deal with wierd hostname parts
+    if ($nuri =~ /^(https?:\/\/)([^\/]+)(\.?\/.*)$/i) {
+      my ($proto, $host, $rest) = ($1,$2,$3);
+
+      # remove "www.fakehostname.com@" username part
+      $host =~ s/^[^\@]+\@//gs;
+
+      # deal with 'http://213.172.0x1f.13/'; decode encoded octets
+      if ($host =~ /^([0-9a-fx]*\.)([0-9a-fx]*\.)([0-9a-fx]*\.)([0-9a-fx]*)$/ix)
+      {
+        my (@chunk) = ($1,$2,$3,$4);
+        for my $octet (0 .. 3) {
+          $chunk[$octet] =~ s/^0x([0-9a-f][0-9a-f])/sprintf "%d",hex($1)/gei;
+        }
+        my $parsed = join ('', $proto, @chunk, $rest);
+        if ($parsed ne $nuri) { push(@nuris, $parsed); }
+      }
+
+      # "http://0x7f000001/"
+      if ($host =~ /^0x[0-9a-f]+$/i) {
+        $host =~ s/^0x([0-9a-f]+)/sprintf "%d",hex($1)/gei;
+        $host = decode_ulong_to_ip ($host);
+        my $parsed = join ('', $proto, $host, $rest);
+        push(@nuris, $parsed);
+      }
+
+      # "http://1113343453/"
+      if ($host =~ /^[0-9]+$/) {
+        $host = decode_ulong_to_ip ($host);
+        my $parsed = join ('', $proto, $host, $rest);
+        push(@nuris, $parsed);
+      }
+    }
+
     ($nuri) = Mail::SpamAssassin::Util::url_encode($nuri);
     if ($nuri ne $uri) {
       push(@nuris, $nuri);
@@ -810,6 +844,16 @@ sub uri_list_canonify {
   my %uris = map { $_ => 1 } @uris, @nuris;
 
   return keys %uris;
+}
+
+sub decode_ulong_to_ip {
+  my ($ulong) = @_;
+  my @octets = ();
+  unshift (@octets, $ulong & 0xff); $ulong >>= 8;
+  unshift (@octets, $ulong & 0xff); $ulong >>= 8;
+  unshift (@octets, $ulong & 0xff); $ulong >>= 8;
+  unshift (@octets, $ulong & 0xff);
+  return join (".", @octets);
 }
 
 ###########################################################################

@@ -21,7 +21,7 @@ use Mail::SpamAssassin;
 use Mail::SpamAssassin::HTML;
 use Mail::SpamAssassin::Util;
 
-plan tests => 57;
+plan tests => 62;
 
 ##############################################
 
@@ -41,7 +41,14 @@ close IN;
 my $msg = Mail::SpamAssassin::PerMsgStatus->new($sa, $mail);
 
 my @uris = $msg->get_uri_list();
-ok((@uris == 1) && ($uris[0] eq 'http://62.16.101.59/livesex.htm'));
+print "got URIs: ".join (", ", @uris)."\n";
+ok (@uris >= 5);
+my %urimap = map { $_ => 1 } @uris;
+ok ($urimap{'http://62.16.101.59/livesex.htm'});
+ok ($urimap{'http://66.92.69.221/'});
+ok ($urimap{'http://66.92.69.222/'});
+ok ($urimap{'http://66.92.69.223/'});
+ok ($urimap{'http://66.92.69.224/'});
 
 ##############################################
 
@@ -54,7 +61,12 @@ sub try_domains {
     return !defined $result;
   }
 
-  return $expect eq $result;
+  if ($expect eq $result) {
+    return 1;
+  } else {
+    warn "try_domains: failed! expect: '$expect' got: '$result'\n";
+    return 0;
+  }
 }
 
 ok(try_domains('javascript:{some crap}', undef));
