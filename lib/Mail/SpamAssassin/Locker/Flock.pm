@@ -50,7 +50,7 @@ sub safe_lock {
 
   $max_retries ||= 30;
 
-  my $lock_file = "$path.lock";
+  my $lock_file = "$path.mutex";
   my $umask = umask 077;
   my $fh = new IO::File();
 
@@ -117,7 +117,7 @@ sub safe_unlock {
   flock ($fh, LOCK_UN);
   $fh->close();
 
-  dbg("unlock: $$ unlocked $path.lock");
+  dbg("unlock: $$ unlocked $path.mutex");
 
   # do NOT unlink! this would open a race, whereby:
   #
@@ -130,9 +130,9 @@ sub safe_unlock {
   # both procB and procC would then think they had locks, and both
   # would write to the database file.  this is bad.
   #
-  # unlink ("$path.lock"); 
+  # unlink ("$path.mutex"); 
   #
-  # side-effect: we leave a .lock file around. but hey!
+  # side-effect: we leave a .mutex file around. but hey!
 }
 
 ###########################################################################
@@ -151,7 +151,7 @@ sub refresh_lock {
   $fh->print ("$$\n");
   $fh->flush ();
 
-  dbg("refresh: $$ refresh $path.lock");
+  dbg("refresh: $$ refresh $path.mutex");
 }
 
 ###########################################################################
