@@ -102,31 +102,8 @@ Note that you can upgrade SpamAssassin using these instructions, as long
 as you take care to read the caveats at the top of this file.   Upgrading
 will not delete your learnt Bayes data or local rule modifications.
 
-
-SunOS Note
-----------
-
-Under SunOS, snprintf is not defined.  A library containing a SunOS
-version of snprintf is available at
-http://SpamAssassin.org/released/contrib/ , and is usable for building SA.
-Mike Nolan <nolan AT naic dot edu> has built this, and here's his
-directions:
-
-
-  I built SpamAssassin under SunOS 4.1.3.  (...)
-
-  % gtar xzf snp.tar.gz
-  % cd snp
-  % gmake libsnp.a
-
-  OK, now go to the spamassassin directory, and compile:
-
-  % cd ..
-  % gcc -g -O2 spamd/spamc.c spamd/libspamc.c spamd/utils.c \
-          -o spamd/spamc -ldl -lnsl snp/libsnp.a -lm
-  % gmake
-  
-  Now you have spamc and spamd.
+If you're using SunOS 4.1.x, see
+http://wiki.spamassassin.org/w/BuildingOnSunOS4 for build tips.
 
 
 Note for Perl 5.8 Users (incl Red Hat 8)
