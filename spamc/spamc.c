@@ -401,6 +401,11 @@ get_output_fd(int *fd)
 int
 get_current_user(char **username)
 {
+    if (*username != NULL) {
+        *username = strdup(*username);
+	if (username == NULL)
+	    goto fail;
+    }
 #ifdef _WIN32
 
     return EX_OK;
@@ -475,11 +480,9 @@ main(int argc, char *argv[])
        goto finish;
    }
    
-   if (username == NULL) {
-       ret = get_current_user(&username);
-       if ( ret != EX_OK )
-           goto finish;
-   }
+   ret = get_current_user(&username);
+   if (ret != EX_OK)
+       goto finish;
        
    if ((flags & SPAMC_RANDOMIZE_HOSTS) != 0) {
 	/* we don't need strong randomness; this is just so we pick
