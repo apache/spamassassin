@@ -81,8 +81,6 @@ getopts('hdLxp:A:s:Du:P') or usage();
 
 $opt_h and usage();
 
-$opt_d and daemonize();
-
 # These can be changed on command line with -A flag
 my @allowed_clients;
 if($opt_A)
@@ -139,6 +137,8 @@ socket(Server, PF_INET, SOCK_STREAM, $proto)        || die "socket: $!";
 setsockopt(Server,SOL_SOCKET,SO_REUSEADDR,pack("l", 1)) || die "setsockopt: $!";
 bind(Server, sockaddr_in($port, INADDR_ANY))        || die "bind: $!";
 listen(Server,SOMAXCONN)                            || die "listen: $!";
+
+$opt_d and daemonize();
 
 # support non-root use (after we bind to the port)
 my $setuid_to_user = 0;
