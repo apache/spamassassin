@@ -9,7 +9,7 @@ use constant HAS_NET_DNS => eval { require Net::DNS; };
 use Test;
 
 BEGIN {
-  plan tests => ((TEST_ENABLED && HAS_NET_DNS) ? 16 : 0),
+  plan tests => ((TEST_ENABLED && HAS_NET_DNS) ? 22 : 0),
 };
 
 exit unless (TEST_ENABLED && HAS_NET_DNS);
@@ -44,6 +44,8 @@ my $bind = <<'EOF';
 14.35.17.212.dnsbltest          TXT     "whitelisted sender"
 ; RHS
 example.com.dnsbltest           A       127.0.0.2
+; SenderBase
+134.88.73.210.sb.dnsbltest	TXT	"0-0=1|1=Spammer Networks|2=7.2|3=7.1|4=1537186|6=1060085863|7=80|8=12288|9=129|20=yh6.|21=example.com|23=6.5|24=6.1|25=1080071572|40=6.3|41=6.1|45=N|49=1.00"
 
 EOF
 
@@ -57,19 +59,25 @@ EOF
  q{ <dns:14.35.17.212.dnsbltest.spamassassin.org> [127.0.0.1, 127.0.0.1] } => 'P_4',
  q{ <dns:226.149.120.193.dnsbltest.spamassassin.org> [127.0.0.1] } => 'P_5',
  q{ <dns:example.com.dnsbltest.spamassassin.org> [127.0.0.2] } => 'P_6',
- q{ DNSBL_TEST_TOP } => 'P_7',
- q{ DNSBL_TEST_WHITELIST } => 'P_8',
- q{ DNSBL_TEST_DYNAMIC } => 'P_9',
- q{ DNSBL_TEST_SPAM } => 'P_10',
- q{ DNSBL_TEST_RELAY } => 'P_11',
- q{ DNSBL_TXT_TOP } => 'P_12',
- q{ DNSBL_TXT_RE } => 'P_13',
- q{ DNSBL_RHS } => 'P_14',
+ q{ <dns:134.88.73.210.sb.dnsbltest.spamassassin.org?type=TXT> } => 'P_7',
+ q{ DNSBL_TEST_TOP } => 'P_8',
+ q{ DNSBL_TEST_WHITELIST } => 'P_9',
+ q{ DNSBL_TEST_DYNAMIC } => 'P_10',
+ q{ DNSBL_TEST_SPAM } => 'P_11',
+ q{ DNSBL_TEST_RELAY } => 'P_12',
+ q{ DNSBL_TXT_TOP } => 'P_13',
+ q{ DNSBL_TXT_RE } => 'P_14',
+ q{ DNSBL_RHS } => 'P_15',
+ q{ DNSBL_SB_TIME } => 'P_16',
+ q{ DNSBL_SB_FLOAT } => 'P_17',
+ q{ DNSBL_SB_STR } => 'P_18',
 );
 
 %anti_patterns = (
- q{ DNSBL_TEST_MISS } => 'P_15',
- q{ DNSBL_TXT_MISS } => 'P_16',
+ q{ DNSBL_TEST_MISS } => 'P_19',
+ q{ DNSBL_TXT_MISS } => 'P_20',
+ q{ DNSBL_SB_UNDEF } => 'P_21',
+ q{ DNSBL_SB_MISS } => 'P_22',
 );
 
 tstprefs("
@@ -121,6 +129,29 @@ tflags DNSBL_TXT_MISS	net
 header DNSBL_RHS	eval:check_rbl_from_host('r', 'dnsbltest.spamassassin.org.')
 describe DNSBL_RHS	DNSBL RHS match
 tflags DNSBL_RHS	net
+
+header __TEST_SENDERBASE	eval:check_rbl_txt('senderbase', 'sb.dnsbltest.spamassassin.org.')
+tflags __TEST_SENDERBASE	net
+
+header DNSBL_SB_TIME	eval:check_rbl_sub('senderbase', 'S6 == 1060085863 && S6 < time')
+describe DNSBL_SB_TIME	DNSBL SenderBase time
+tflags DNSBL_SB_TIME	net
+
+header DNSBL_SB_FLOAT	eval:check_rbl_sub('senderbase', 'S3 > 7.0 && S3 < 7.2')
+describe DNSBL_SB_FLOAT	DNSBL SenderBase floating point
+tflags DNSBL_SB_FLOAT	net
+
+header DNSBL_SB_STR	eval:check_rbl_sub('senderbase', 'S1 eq \"Spammer Networks\" && S49 !~ /Y/ && index(S21, \".com\") > 0')
+describe DNSBL_SB_STR	DNSBL SenderBase strings
+tflags DNSBL_SB_STR	net
+
+header DNSBL_SB_UNDEF	eval:check_rbl_sub('senderbase', 'S98 =~ /foo/ && S99 > 10')
+describe DNSBL_SB_UNDEF	DNSBL SenderBase undefined
+tflags DNSBL_SB_UNDEF	net
+
+header DNSBL_SB_MISS	eval:check_rbl_sub('senderbase', 'S2 < 3.0')
+describe DNSBL_SB_MISS	DNSBL SenderBase miss
+tflags DNSBL_SB_MISS	net
 ");
 
 sarun ("-t < data/spam/dnsbl.eml", \&patterns_run_cb);
