@@ -268,16 +268,16 @@ header RATWARE ALL =~ /(?:4\.\.72\.1712\.3|ACE Contact Manager|Aristotle Mail|Av
 describe RATWARE 		Bulk email software fingerprints found in headers
 
 # contrib: Craig (total regexp wizardry here ;)
-header SUSPICIOUS_RECIPS        To =~ /(@[-a-z0-9_.]+).*(?:\1.*){9,}/is
+header SUSPICIOUS_RECIPS        To =~ /(@[-a-z0-9_.]+){3,}.*(?:\1.*){9,}/is
 describe SUSPICIOUS_RECIPS      To: contains same domain at least 10 times
 
-header SUSPICIOUS_CC_RECIPS	Cc =~ /(@[-a-z0-9_.]+).*(?:\1.*){9,}/is
+header SUSPICIOUS_CC_RECIPS	Cc =~ /(@[-a-z0-9_.]+){3,}.*(?:\1.*){9,}/is
 describe SUSPICIOUS_CC_RECIPS	Cc: contains same domain at least 10 times
 
-header VERY_SUSP_RECIPS		To =~ /\b([a-z][a-z])[^@\s,]*((?>@[-a-z0-9_.]+))\b.*(?:\b\1[^@\s,]*\2.*\b){9,}/is
+header VERY_SUSP_RECIPS		To =~ /\b([a-z][a-z])[^@]{0,20}(@[-a-z0-9_\.]{0,30}).{0,30}?(?:\1[^@]*\2.{0,20}?){9,}/is
 describe VERY_SUSP_RECIPS       To: contains very similar addresses 10 times
 
-header VERY_SUSP_CC_RECIPS	Cc =~ /\b([a-z][a-z])[^@\s,]*((?>@[-a-z0-9_.]+))\b.*(?:\b\1[^@\s,]*\2.*\b){9,}/is
+header VERY_SUSP_CC_RECIPS	Cc =~ /\b([a-z][a-z])[^@]{0,20}(@[-a-z0-9_\.]{0,30}).{0,30}?(?:\1[^@]*\2.{0,20}?){9,}/is
 describe VERY_SUSP_CC_RECIPS	Cc: contains very similar addresses 10 times
 
 header Q_FOR_SELLER		Subject =~ /Question for seller/
