@@ -226,20 +226,19 @@ sub razor_lookup {
 
 sub is_dcc_available {
   my ($self) = @_;
-  my ($dcchdl);
 
   if ($self->{main}->{local_tests_only}) {
     dbg ("local tests only, ignoring DCC");
     return 0;
   }
 
-  if (!open($dcchdl, "dccproc -V 2>&1 |")) {
-    close $dcchdl;
+  if (!open(DCCHDL, "dccproc -V 2>&1 |")) {
+    close DCCHDL;
     dbg ("DCC is not available");
     return 0;
   } 
   else {
-    close $dcchdl;
+    close DCCHDL;
     dbg ("DCC is available");
     return 1;
   }
