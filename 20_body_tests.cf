@@ -1,5 +1,5 @@
 # SpamAssassin rules file: tests.
-# $Id: 20_body_tests.cf,v 1.242 2002/08/29 14:06:45 msquadrat Exp $
+# $Id: 20_body_tests.cf,v 1.243 2002/08/29 19:29:18 quinlan Exp $
 # 
 # note: body tests are run with long lines, so be sure to limit the
 # size of searches; use ".{0,30}" instead of ".*" to avoid huge
@@ -101,7 +101,6 @@ describe HTML_COMMENT_8BITS	HTML comment has 3 consecutive 8-bit characters
 body HTML_COMMENT_SAVED_URL	eval:html_test('comment_saved_url')
 describe HTML_COMMENT_SAVED_URL	HTML message is a saved web page
 
-
 body HTML_FONT_COLOR_NOHASH	eval:html_test('font_color_nohash')
 describe HTML_FONT_COLOR_NOHASH	HTML font color is missing hash (#) character
 
@@ -147,6 +146,33 @@ describe HTML_FONT_FACE_ODD	HTML font face is not a commonly used face
 body HTML_FONT_FACE_CAPS	eval:html_test('font_face_caps')
 describe HTML_FONT_FACE_CAPS	HTML font face has excess capital characters
 
+body HTML_TAG_BALANCE_A		eval:html_tag_balance('a', '< 0')
+describe HTML_TAG_BALANCE_A	HTML has excess "a" close tags
+
+body HTML_TAG_BALANCE_FONT	eval:html_tag_balance('font', '< 0')
+describe HTML_TAG_BALANCE_FONT	HTML has excess "font" close tags
+
+body HTML_TAG_BALANCE_HTML	eval:html_tag_balance('html', '!= 0')
+describe HTML_TAG_BALANCE_HTML	HTML has unbalanced "html" tags
+
+body HTML_TAG_BALANCE_BODY	eval:html_tag_balance('body', '!= 0')
+describe HTML_TAG_BALANCE_BODY	HTML has unbalanced "body" tags
+
+body HTML_TAG_BALANCE_HEAD	eval:html_tag_balance('head', '!= 0')
+describe HTML_TAG_BALANCE_HEAD	HTML has unbalanced "head" tags
+
+body HTML_TAG_BALANCE_TABLE	eval:html_tag_balance('table', '> 0')
+describe HTML_TAG_BALANCE_TABLE	HTML is missing "table" close tags
+
+body HTML_TAG_EXISTS_BASE	eval:html_tag_exists('base')
+describe HTML_TAG_EXISTS_BASE	HTML has "base" tags
+
+body HTML_TAG_EXISTS_PARAM	eval:html_tag_exists('param')
+describe HTML_TAG_EXISTS_PARAM	HTML has "param" tag
+
+body HTML_TAG_EXISTS_TBODY	eval:html_tag_exists('tbody')
+describe HTML_TAG_EXISTS_TBODY	HTML has "tbody" tag
+
 # many spammers seem to do this nowadays (and probably track
 # their customers with it).  (contrib: WW)
 body RELAYING_FRAME		eval:html_test('relaying_frame')
@@ -187,6 +213,9 @@ rawbody HTML_WIN_OPEN		/(?:<script>.{0,200}|<[^>]+)window\.open\s*\(/i
 describe HTML_WIN_OPEN		Javascript to open a new window
 rawbody HTML_WIN_BLUR		/(?:<script>.{0,200}|<[^>]+)\.blur\s*\(\s*\)/i
 describe HTML_WIN_BLUR		Javascript to move windows around
+
+rawbody HTML_TAG_MIXED_CASE	eval:check_for_mixed_case_html()
+describe HTML_TAG_MIXED_CASE	HTML tags are inconsistently capitalized
 
 ###########################################################################
 
