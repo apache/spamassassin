@@ -814,10 +814,8 @@ endif # Mail::SpamAssassin::Plugin::Hashcash
 # SPF
 #
 ifplugin Mail::SpamAssassin::Plugin::SPF
-score SPF_PASS                -0.001
 score SPF_FAIL                1.0
 score SPF_SOFTFAIL            0.5
-score SPF_HELO_PASS           -0.001
 score SPF_HELO_FAIL           1.0
 score SPF_HELO_SOFTFAIL       0.5
 endif # Mail::SpamAssassin::Plugin::SPF
