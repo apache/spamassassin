@@ -847,3 +847,10 @@ tflags T_USER_AGENT_PMMAIL   nice
 # Bug 1133
 header T_BAD_HELO2           eval:check_for_bad_helo2()
 
+# jm: thrown up by bayes.
+header T_X_INFO2		exists:X-Info2
+header T_X_VMP_TEXT		exists:X-VMP-Text
+header T_X_RMD_TEXT		exists:X-RMD-Text
+# might as well test it while we're here ;)
+header T_X_GCMULTI		exists:X-GCMulti
+
