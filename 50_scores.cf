@@ -25,77 +25,10 @@
 # not assigned here, the default score will be set to 1.
 
 # The following block of scores were generating using the mass-checking
-# scripts, and a genetic algorithm, to determine the optimum scores which
-# resulted in minimum false positives or negatives.  The default evolution
-# parameters are very strongly weighted against false positives.
-
-# Set 0
-# SUMMARY for threshold 5.0:
-# Correctly non-spam: 188867  34.75%  (99.84% of non-spam corpus)
-# Correctly spam:     333277  61.32%  (94.07% of spam corpus)
-# False positives:       307  0.06%  (0.16% of nonspam,  66695 weighted)
-# False negatives:     21022  3.87%  (5.93% of spam,  69566 weighted)
-# Average score for spam:  17.6    nonspam: 0.3
-# Average for false-pos:   5.8  false-neg: 3.3
-# TOTAL:              543473  100.00%
-# Set 0 Validation
-# SUMMARY for threshold 5.0:
-# Correctly non-spam:  20974  34.73%  (99.79% of non-spam corpus)
-# Correctly spam:      37076  61.40%  (94.18% of spam corpus)
-# False positives:        45  0.07%  (0.21% of nonspam,   5229 weighted)
-# False negatives:      2290  3.79%  (5.82% of spam,   7545 weighted)
-# TCR: 15.652485  SpamRecall: 94.183%  SpamPrec: 99.879%  FP: 0.07%  FN: 3.79%
-
-# Set 1
-# SUMMARY for threshold 5.0:
-# Correctly non-spam: 151197  30.53%  (99.92% of non-spam corpus)
-# Correctly spam:     335645  67.77%  (97.59% of spam corpus)
-# False positives:       115  0.02%  (0.08% of nonspam,  32441 weighted)
-# False negatives:      8303  1.68%  (2.41% of spam,  27884 weighted)
-# Average score for spam:  24.5    nonspam: 0.3
-# Average for false-pos:   6.2  false-neg: 3.4
-# TOTAL:              495260  100.00%
-# Set 1 Validation
-# SUMMARY for threshold 5.0:
-# Correctly non-spam:  16784  30.50%  (99.83% of non-spam corpus)
-# Correctly spam:      37349  67.87%  (97.73% of spam corpus)
-# False positives:        28  0.05%  (0.17% of nonspam,   3733 weighted)
-# False negatives:       867  1.58%  (2.27% of spam,   2904 weighted)
-# TCR: 37.950348  SpamRecall: 97.731%  SpamPrec: 99.925%  FP: 0.05%  FN: 1.58%
-
-# Set 2
-# SUMMARY for threshold 5.0:
-# Correctly non-spam: 188305  53.52%  (99.91% of non-spam corpus)
-# Correctly spam:     158249  44.98%  (96.87% of spam corpus)
-# False positives:       165  0.05%  (0.09% of nonspam,  17679 weighted)
-# False negatives:      5112  1.45%  (3.13% of spam,  14605 weighted)
-# Average score for spam:  19.7    nonspam: -4.3
-# Average for false-pos:   6.2  false-neg: 2.9
-# TOTAL:              351831  100.00%
-# Set 2 Validation
-# SUMMARY for threshold 5.0:
-# Correctly non-spam:  20916  53.50%  (99.88% of non-spam corpus)
-# Correctly spam:      17562  44.92%  (96.75% of spam corpus)
-# False positives:        25  0.06%  (0.12% of nonspam,   1392 weighted)
-# False negatives:       589  1.51%  (3.25% of spam,   1679 weighted)
-# TCR: 25.421569  SpamRecall: 96.755%  SpamPrec: 99.858%  FP: 0.06%  FN: 1.51%
-
-# Set 3
-# SUMMARY for threshold 5.0:
-# Correctly non-spam: 140024  46.61%  (99.96% of non-spam corpus)
-# Correctly spam:     158916  52.90%  (99.13% of spam corpus)
-# False positives:        63  0.02%  (0.04% of nonspam,   8171 weighted)
-# False negatives:      1400  0.47%  (0.87% of spam,   4008 weighted)
-# Average score for spam:  26.7    nonspam: -4.6
-# Average for false-pos:   5.7  false-neg: 2.9
-# TOTAL:              300403  100.00%
-# Set 3 Validation
-# SUMMARY for threshold 5.0:
-# Correctly non-spam:  15550  46.59%  (99.90% of non-spam corpus)
-# Correctly spam:      17648  52.87%  (99.08% of spam corpus)
-# False positives:        15  0.04%  (0.10% of nonspam,   1133 weighted)
-# False negatives:       164  0.49%  (0.92% of spam,    437 weighted)
-# TCR: 74.527197  SpamRecall: 99.079%  SpamPrec: 99.915%  FP: 0.04%  FN: 0.49%
+# scripts, and a perceptron to determine the optimum scores which
+# resulted in minimum false positives or negatives.  The scores are
+# weighted to produce roughly 1 false positive in 1000 non-spam messages
+# using the default threshold of 5.0.
 
 # Start of generated scores
 
