@@ -445,7 +445,7 @@ describe COMMUNIGATE		Sent using a trial version of CommuniGate
 
 # this seems to be the new fashion (as of Jul 5 2002).  base64-encoded parts need to
 # be stripped before this match
-body TRACKER_ID		/^[a-z0-9]{6,}[-_a-z0-9]{12,}[a-z0-9]{6,}\s*\z/is
+body TRACKER_ID		/^[a-z0-9]{6,24}[-_a-z0-9]{12,36}[a-z0-9]{6,24}\s*\z/is
 
 describe TRACKER_ID	Incorporates a tracking ID number
 
