@@ -26,6 +26,7 @@ use Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin::Util;
 
 use strict;
+use warnings;
 use bytes;
 use File::Spec;
 

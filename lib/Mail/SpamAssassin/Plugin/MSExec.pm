@@ -26,6 +26,7 @@ package Mail::SpamAssassin::Plugin::MSExec;
 
 use Mail::SpamAssassin::Plugin;
 use strict;
+use warnings;
 use bytes;
 
 use vars qw(@ISA);

@@ -32,6 +32,7 @@ use Fcntl;
 use File::Path;
 use File::Basename;
 use strict;
+use warnings;
 use bytes;
 
 use vars qw(@ISA);

@@ -27,6 +27,7 @@ package Mail::SpamAssassin::Plugin::SPF;
 
 use Mail::SpamAssassin::Plugin;
 use strict;
+use warnings;
 use bytes;
 
 use vars qw(@ISA);

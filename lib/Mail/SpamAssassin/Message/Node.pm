@@ -35,6 +35,7 @@ the various MIME message parts.
 
 package Mail::SpamAssassin::Message::Node;
 use strict;
+use warnings;
 use bytes;
 
 use Mail::SpamAssassin;

@@ -43,6 +43,7 @@ package Mail::SpamAssassin::Message::Metadata::Received;
 
 package Mail::SpamAssassin::Message::Metadata;
 use strict;
+use warnings;
 use bytes;
 
 use Mail::SpamAssassin::Dns;

@@ -25,6 +25,7 @@ interfaces.
 package Mail::SpamAssassin::Conf::LDAP;
 
 use strict;
+use warnings;
 use bytes;
 use Carp;
 

@@ -41,6 +41,7 @@ documentation for public interfaces.
 package Mail::SpamAssassin::AutoWhitelist;
 
 use strict;
+use warnings;
 use bytes;
 
 use Mail::SpamAssassin;

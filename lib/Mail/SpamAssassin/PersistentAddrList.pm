@@ -46,6 +46,7 @@ See C<Mail::SpamAssassin::DBBasedAddrList> for an example.
 package Mail::SpamAssassin::PersistentAddrList;
 
 use strict;
+use warnings;
 use bytes;
 
 use vars qw{

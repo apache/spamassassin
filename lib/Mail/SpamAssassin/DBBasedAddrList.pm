@@ -17,6 +17,7 @@
 package Mail::SpamAssassin::DBBasedAddrList;
 
 use strict;
+use warnings;
 use bytes;
 use Fcntl;
 

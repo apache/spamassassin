@@ -16,6 +16,7 @@ package Mail::SpamAssassin::Plugin::RelayCountry;
 
 use Mail::SpamAssassin::Plugin;
 use strict;
+use warnings;
 use bytes;
 
 use vars qw(@ISA);

@@ -20,6 +20,7 @@
 # - add URIs to list for faster URI testing
 
 use strict;
+use warnings;
 use bytes;
 
 package Mail::SpamAssassin::HTML;

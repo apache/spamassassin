@@ -21,6 +21,7 @@
 package Mail::SpamAssassin::Util;
 
 use strict;
+use warnings;
 use bytes;
 
 use vars qw (

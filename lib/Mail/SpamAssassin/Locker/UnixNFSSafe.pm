@@ -17,6 +17,7 @@
 package Mail::SpamAssassin::Locker::UnixNFSSafe;
 
 use strict;
+use warnings;
 use bytes;
 
 use Mail::SpamAssassin;

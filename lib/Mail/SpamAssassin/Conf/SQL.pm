@@ -41,6 +41,7 @@ interfaces.
 package Mail::SpamAssassin::Conf::SQL;
 
 use strict;
+use warnings;
 use bytes;
 use Carp;
 

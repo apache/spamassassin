@@ -43,6 +43,7 @@ the various MIME message parts and message metadata.
 
 package Mail::SpamAssassin::Message;
 use strict;
+use warnings;
 use bytes;
 
 use Mail::SpamAssassin;

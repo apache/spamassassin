@@ -28,6 +28,7 @@ use IPC::Open2;
 use POSIX ":sys_wait_h";
 
 use strict;
+use warnings;
 use bytes;
 use Carp;
 

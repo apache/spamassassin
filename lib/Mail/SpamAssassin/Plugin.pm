@@ -96,6 +96,7 @@ package Mail::SpamAssassin::Plugin;
 use Mail::SpamAssassin;
 
 use strict;
+use warnings;
 use bytes;
 
 use vars qw{
