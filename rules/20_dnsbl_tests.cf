@@ -64,6 +64,49 @@ describe RCVD_IN_NJABL_DIALUP	NJABL: sender is dialup that did non-local SMTP
 tflags RCVD_IN_NJABL_DIALUP	net
 
 # ---------------------------------------------------------------------------
+
+# SORBS
+# transfers: both axfr and ixfr available
+# url: http://www.dnsbl.sorbs.net/
+# pay-to-use: no
+# delist: $50 fee for T_RCVD_IN_SORBS_SPAM, others have free retest on request
+header RCVD_IN_SORBS		rbleval:check_rbl('sorbs', 'dnsbl.sorbs.net.')
+describe RCVD_IN_SORBS		SORBS: sender is listed in SORBS
+tflags RCVD_IN_SORBS		net
+
+header RCVD_IN_SORBS_HTTP	rbleval:check_rbl_sub('sorbs', '127.0.0.2')
+describe RCVD_IN_SORBS_HTTP	SORBS: sender is open HTTP proxy server
+tflags RCVD_IN_SORBS_HTTP	net
+
+header RCVD_IN_SORBS_MISC	rbleval:check_rbl_sub('sorbs', '127.0.0.3')
+describe RCVD_IN_SORBS_MISC	SORBS: sender is open proxy server
+tflags RCVD_IN_SORBS_MISC	net
+
+header RCVD_IN_SORBS_SMTP	rbleval:check_rbl_sub('sorbs', '127.0.0.4')
+describe RCVD_IN_SORBS_SMTP	SORBS: sender is open SMTP relay
+tflags RCVD_IN_SORBS_SMTP	net
+
+header RCVD_IN_SORBS_SOCKS	rbleval:check_rbl_sub('sorbs', '127.0.0.5')
+describe RCVD_IN_SORBS_SOCKS	SORBS: sender is open SOCKS proxy server
+tflags RCVD_IN_SORBS_SOCKS	net
+
+header RCVD_IN_SORBS_SPAM	rbleval:check_rbl_sub('sorbs', '127.0.0.6')
+describe RCVD_IN_SORBS_SPAM	SORBS: sender is a spam source
+tflags RCVD_IN_SORBS_SPAM	net
+
+header RCVD_IN_SORBS_WEB	rbleval:check_rbl_sub('sorbs', '127.0.0.7')
+describe RCVD_IN_SORBS_WEB	SORBS: sender is a abuseable web server
+tflags RCVD_IN_SORBS_WEB	net
+
+header RCVD_IN_SORBS_BLOCK	rbleval:check_rbl_sub('sorbs', '127.0.0.8')
+describe RCVD_IN_SORBS_BLOCK	SORBS: sender demands to never be tested
+tflags RCVD_IN_SORBS_BLOCK	net
+
+header RCVD_IN_SORBS_ZOMBIE	rbleval:check_rbl_sub('sorbs', '127.0.0.9')
+describe RCVD_IN_SORBS_ZOMBIE	SORBS: sender is on a hijacked network
+tflags RCVD_IN_SORBS_ZOMBIE	net
+
+# ---------------------------------------------------------------------------
 # Now, single zone BLs follow:
 
 # SBL is the Spamhaus Block List: http://www.spamhaus.org/sbl/
