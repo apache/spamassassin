@@ -272,7 +272,7 @@ sub progress {
   my ($time) = @_;
   my $messages = $Mail::SpamAssassin::ArchiveIterator::MESSAGES;
 
-  if (!int($total_count % ($messages / $updates))) {
+  if ($messages == $total_count || ($messages >= $updates && !int($total_count % ($messages / $updates)))) {
     my $time = strftime("%Y-%m-%d", localtime($time));
     my $now = strftime("%Y-%m-%d %X", localtime(time));
     printf STDERR "status: %3.0f%% ham: %-6d spam: %-6d date: %s now: %s\n",
