@@ -1,10 +1,11 @@
 #!/usr/bin/perl -w
 
-use Getopt::Long;
-use Pod::Usage;
-
 use lib 'lib';
 use lib '../lib';		# for testing in ./t
+
+# put use lines after 'use lib' lines
+use Getopt::Long;
+use Pod::Usage;
 
 sub usage {
     my ($verbose, $message) = @_;
