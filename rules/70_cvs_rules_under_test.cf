@@ -95,7 +95,8 @@ body T_REMOVE_FROM_LIST		/to be removed from (?:the|my|our) (?:mailing|e.?mail|o
 # [:^print:] is supposedly 5.6 specific, so this will have to do
 # probably need to tie this to ok_languages or ok_locales so it doesn't
 # trigger on certain character sets
-rawbody T_UNPRINTABLE		/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\xff]{8,}/
+body T_UNPRINTABLE_V1		/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\xff]{8,}/
+rawbody T_UNPRINTABLE_V2	/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\xff]{8,}/
 
 # it's BANG, not PLING (Brits!)
 # single word versions
