@@ -46,18 +46,26 @@ void printhits (FILE *fout) {
   fprintf (fout, "# SUMMARY:            %6d / %6d\n#\n",
       	ny, yn);
 
-  fprintf (fout, "# Correctly non-spam: %6d  %3.2f%%  (%3.2f%% overall)\n",
+  fprintf (fout,
+"# Correctly non-spam: %6d  %3.2f%%  (%3.2f%% overall, %6.0f adjusted)\n",
         nn, (nn / (float) num_nonspam) * 100.0,
-        (nn / (float) num_tests) * 100.0);
-  fprintf (fout, "# Correctly spam:     %6d  %3.2f%%  (%3.2f%% overall)\n",
+        (nn / (float) num_tests) * 100.0, nnscore);
+
+  fprintf (fout,
+"# Correctly spam:     %6d  %3.2f%%  (%3.2f%% overall, %6.0f adjusted)\n",
         yy, (yy / (float) num_spam) * 100.0,
-	(yy / (float) num_tests) * 100.0);
-  fprintf (fout, "# False positives:    %6d  %3.2f%%  (%3.2f%% overall)\n",
+	(yy / (float) num_tests) * 100.0, yyscore);
+
+  fprintf (fout,
+"# False positives:    %6d  %3.2f%%  (%3.2f%% overall, %6.0f adjusted)\n",
         ny, (ny / (float) num_nonspam) * 100.0,
-	(ny / (float) num_tests) * 100.0);
-  fprintf (fout, "# False negatives:    %6d  %3.2f%%  (%3.2f%% overall)\n",
+	(ny / (float) num_tests) * 100.0, nyscore);
+
+  fprintf (fout,
+"# False negatives:    %6d  %3.2f%%  (%3.2f%% overall, %6.0f adjusted)\n",
         yn, (yn / (float) num_spam) * 100.0,
-	(yn / (float) num_tests) * 100.0);
+	(yn / (float) num_tests) * 100.0, ynscore);
+
   fprintf (fout, "# TOTAL:              %6d  %3.2f%%\n#\n",
         num_tests, 100.0);
 }
@@ -98,18 +106,18 @@ void counthitsfromscores (void) {
     if (is_spam[file]) {
       if (hits > threshold) {
 	yy++;
-	yyscore += ((hits - threshold) / 50.0) + 1.0;
+	yyscore += ((threshold - hits) / 50.0) + 1.0;
       } else {
 	yn++;
-	ynscore += ((hits - threshold) / 50.0) + 1.0;
+	ynscore += ((threshold - hits) / 50.0) + 1.0;
       }
     } else {
       if (hits > threshold) {
 	ny++;
-	nyscore += ((threshold - hits) / 50.0) + 1.0;
+	nyscore += ((hits - threshold) / 50.0) + 1.0;
       } else {
 	nn++;
-	nnscore += ((threshold - hits) / 50.0) + 1.0;
+	nnscore += ((hits - threshold) / 50.0) + 1.0;
       }
     }
   }
