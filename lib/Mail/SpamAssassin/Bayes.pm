@@ -91,7 +91,7 @@ $IGNORED_HDRS = qr{(?: (?:X-)?Sender    # misc noise
   |X-AP-Spam-(?:Score|Status) |X-RIPE-Spam-Status
   |X-SpamCop-[^:]+
   |X-SMTPD |(?:X-)?Spam-Apparently-To
-  |SPAM
+  |SPAM |X-Perlmx-Spam
 
   # some noisy Outlook headers that add no good clues:
   |Content-Class |Thread-(?:Index|Topic)
