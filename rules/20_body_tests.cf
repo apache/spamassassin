@@ -79,7 +79,7 @@ describe DISCONTINUE		List removal information
 
 body REMOVE_CLICK		/click here to be (?:permanently )?(?:removed|deleted)/i
 describe REMOVE_CLICK		Click to be removed
-body REMOVE_FROM_LIST		/to be removed from (?:the|my|our) (?:mailing|e.?mail|opt[ -]?in)? list/i
+body REMOVE_FROM_LIST		/to be removed from (?:the|my|our) (?:mailing|e.?mail|opt[ -]?in)? ?list/i
 describe REMOVE_FROM_LIST	To be removed from list
 body REMOVE_RESPECT		/(?:respect|honou?r) all removal requests/i
 describe REMOVE_RESPECT		We respect all removal requests
@@ -260,9 +260,8 @@ describe LINK_TO_NO_SCHEME	Contains link without http:// prefix
 body BUGGY_CGI			/Below is the result of your feedback form/
 describe BUGGY_CGI		Broken CGI script message
 
-# these are now full tests instead of body tests, to catch QP-encoded
-# split lines
-body SENT_IN_COMPLIANCE		/(?:e.?mail|message) .{0,10}sen[dt] in (?:\w{1,10} )?compliance (?:of|with)/i
+# possible replacement for SENT_IN_COMPLIANCE
+body SENT_IN_COMPLIANCE		/(?:e.?mail|message) .{0,10}sen[dt] (?:to you )?in (?:\w{1,10} )?compliance (?:of|with)/i
 describe SENT_IN_COMPLIANCE	Claims compliance with spam regulations
 body PARA_A_2_C_OF_1618		/Paragraph *.a.{0,10}2.{0,10}C\. of S\. 1618/i
 describe PARA_A_2_C_OF_1618	Claims compliance with Senate Bill 1618
@@ -346,14 +345,19 @@ describe PRODUCED_AND_SENT_OUT	Tells you it's an ad
 body INCREASE_SOMETHING		/\b(?:boost|increase|grow|larger|bigger|higher) (?:traffic|sales)\b/i
 describe INCREASE_SOMETHING	Instructions on how to increase something
 
+body NEVER_ANOTHER		/never receive another mailing/i
+describe NEVER_ANOTHER		"never receive another mailing"
+
 # contrib: Duncan
 body ONE_TIME_MAILING		/this\b.{0,20}\b(?:one|1).time\b.{0,20}\b(?:(?:e-?)?mail|offer)/i
-describe ONE_TIME_MAILING	'one time mailing' doesn't mean it isn't spam
+describe ONE_TIME_MAILING	"one time mailing" doesn't mean it isn't spam
 
 # this one gets a few false positives
 body SOCIAL_SEC_NUMBER		/social security (?:number|record)/i
 describe SOCIAL_SEC_NUMBER	Talks about social security numbers
 
+body MILLION_EMAIL		/million (?:\w+ )?(?:e-?mail )?addresses/i
+describe MILLION_EMAIL		Get a million email addresses
 
 body ADDRESSES_ON_CD		/addresses on cd/i
 describe ADDRESSES_ON_CD	Only thing addresses on CD are useful for is spam
@@ -405,6 +409,8 @@ body EXCUSE_22			/you are receiving this special offer/i
 describe EXCUSE_22		Claims you're receiving this offer for a reason
 body EXCUSE_23			/you have provided permission/i
 describe EXCUSE_23		Claims you have provided permission
+body EXCUSE_24			/you(?:'ve|'re| have| are)? receiv(?:e|ed|ing) this (?:advertisement|offer|special|recurring|paid).{0,16}\b(?:by either|because)/i
+describe EXCUSE_24		Claims you received an ad because you wanted it
 
 body EXCUSE_REMOVE		/to be removed from.{0,20}(?:mailings|offers)/i
 describe EXCUSE_REMOVE		Talks about how to be removed from mailings
@@ -579,6 +585,9 @@ describe CLICK_TO_REMOVE_2      Click-to-remove with mailto: found beforehand
 
 body REMOVAL_INSTRUCTIONS	/\b(?:REMOVAL|UNSUBSCRIBE) INSTRUCTIONS/i
 describe REMOVAL_INSTRUCTIONS	Gives instructions for removal from list
+
+body CANNOT_BE_SPAM		/cannot be considered spam/i
+describe CANNOT_BE_SPAM		Claims "cannot be considered spam"
 
 # (contrib: WW)
 body THIS_AINT_SPAM             /This.{0,30}is not (?:a )?spam/is
@@ -840,6 +849,12 @@ describe FREE_ACCESS		Free Access
 body FREE_LEADS			/\bfree leads\b/i
 describe FREE_LEADS		Free Leads
 
+body RECEIVE_EMAIL		/receive third party email/i
+describe RECEIVE_EMAIL		Receive third party email
+
+# similar to OFFER, but fewer FPs
+body RECEIVE_OFFER		/receive special offer/i
+describe RECEIVE_OFFER		Receive a special offer
 
 body OFFER			/\b(?:free|special|trial) offer/i
 describe OFFER			Free Offer
@@ -889,7 +904,7 @@ describe BANKRUPTCY		Avoid Bankruptcy
 body CREDIT_BUREAU	        /\ball .{0,9}credit bureaus?\b/i
 describe CREDIT_BUREAU		Credit Bureaus
 
-body ACCEPT_CREDIT_CARDS        /\baccept.{1,15}credit cards?\b/i
+body ACCEPT_CREDIT_CARDS	/\b(?:accept\b|are accepting).{1,15}credit cards?\b/i
 describe ACCEPT_CREDIT_CARDS	Accept Credit Cards
 
 body BAD_CREDIT		        /\b(?:bad|poor|no\b|eliminate|repair|(?:re)?establish|damag).{0,10} (?:credit|debt)\b/i
@@ -916,9 +931,8 @@ describe CONSOLIDATE_DEBT	Consolidate debt, credit, or bills
 body CREDITORS_CALLING	        /\bcreditors calling\b/i
 describe CREDITORS_CALLING 	Calling Creditors
 
-body REFINANCE		        /\brefinance.{0,6} home\b|\bhome loan\b/i
+body REFINANCE		        /\brefinance.{0,6} home\b|\bhome loans?\b/i
 describe REFINANCE		Refinance Home
-
 
 #body SEARCH_ENGINE	        /\b(?:(?:submit|traffic|top).{0.10} search engines?|site ranking)\b/i
 #describe SEARCH_ENGINE		Search Engine Site Ranking
@@ -1056,7 +1070,8 @@ describe CANT_LIVE_WITHOUT	Can't live without?
 body NAME_BRAND		        /\b(?:famous name|major) brand/i
 describe NAME_BRAND		Name Brand
 
-body DIET		        /\b(?:(?:without|no) (?:exercis|diet)ing|weight loss|(?:extra|lose|lost|losing).{0,9} (?:pounds|weight|inches)|burn.{1,10}fat)\b/i
+# seems like we vastly reduce FPs on this one with a small change or two
+body DIET			/\b(?:(?:without|no) (?:exercis(?:e|ing)|dieting)|weight.?loss|(?:extra|lose|lost|losing).{0,10}(?:pounds|weight|inches|lbs)|burn.{1,10}fat)\b/i
 describe DIET			Lose Weight Spam
 
 body LONG_DISTANCE	        /\b(?:Unlimited|per minute|free).{1,9}Long Distance/i
@@ -1340,8 +1355,8 @@ describe HIDDEN_ASSETS          'Hidden' assets
 body SAVE_THOUSANDS             /\bsave (?:thousands|millions)\b/i
 describe SAVE_THOUSANDS         Save big money
 
-body REFINANCE_YOUR_HOME        /\brefinance your (?:current)? (?:home|house)\b/i
-describe REFINANCE_YOUR_HOME    "Refinance your home"
+body REFINANCE_YOUR_HOME	/\brefinance your(?: current)? (?:home|house)\b/i
+describe REFINANCE_YOUR_HOME	"Refinance your home"
 
 body MARKETING_PARTNERS         /marketing partner|partner site/i
 describe MARKETING_PARTNERS     Claims you registered with some kind of partner

@@ -38,17 +38,6 @@ describe T_QUOTE_TWICE_1	Contains twice quoted reply
 tflags T_QUOTE_TWICE_1		nice
 score T_QUOTE_TWICE_1		-1.0
 
-# Needs testing
-# Outlook Express has spaces around the text, Outlook doesn't
-# (jm comment: please add ^ anchor if possible.)
-body T_OUTLOOK_REPLY		/----- ?Original Message ?-----/s
-describe T_OUTLOOK_REPLY	Contains what looks like an outlook reply
-tflags T_OUTLOOK_REPLY		nice
-score T_OUTLOOK_REPLY		-1.0
-#
-# anchored version of T_OUTLOOK_REPLY
-# T_OUTLOOK_REPLY gets some FPs and matches messages that are replies to
-# replies
 header __ORIGINAL_MESSAGE_AGENT	X-Mailer =~ /\b(?:Microsoft Outlook|Internet Mail Service|Mozilla|AOL)\b/
 rawbody __ORIGINAL_MESSAGE_LINE	/^-{5,8} ?Original Message ?-{5,8}$/
 meta T_ORIGINAL_MESSAGE		(__ORIGINAL_MESSAGE_AGENT && __ORIGINAL_MESSAGE_LINE)
@@ -64,80 +53,9 @@ score T_MSGID_GOOD_EXCHANGE	-1.0
 uri T_ADMANMAIL			/^http:\/\/admanmail\.com\//
 describe T_ADMANMAIL		Contains URL of frequent spam site
 
-# Looks good, but should be tested first.  fixes current THIS_AINT_SPAM
-body T_THIS_AINT_SPAM		/This.{0,30}is.{1,10}not?.{0,15}spam/is
-describe T_THIS_AINT_SPAM	Claims "This is not spam"
-
-# similar to THIS_AINT_SPAM, but probably should be a separate rule
-body T_CANNOT_BE_SPAM		/cannot be considered spam/i
-
-# group with ONE_TIME_MAILING
-body T_NEVER_ANOTHER		/never receive another mailing/i
-
-# group these with other SUBJ_FOO rules
-header T_SUBJ_AS_SEEN		Subject =~ /\bAs Seen/i
-header T_SUBJ_DOUBLE_YOUR	Subject =~ /Double Your/i
-# high FP rate?
-header T_SUBJ_FOR_ONLY 		Subject =~ /For Only/i
-header T_SUBJ_FREE_INSTANT 	Subject =~ /Free Instant/i
-# high overlap with DOMAINS_CHEAP - maybe not worth keeping
-header T_SUBJ_NOW_ONLY		Subject =~ /\bNow Only/i
-header T_SUBJ_RIPPED		Subject =~ /Ripped & Strong/i
-header T_SUBJ_YOUR_DEBT		Subject =~ /Your (?:Bills|Debt|Credit)/i
-header T_SUBJ_YOUR_FAMILY	Subject =~ /Your Family/i
-header T_SUBJ_YOUR_OWN		Subject =~ /Your Own/i
-
-# seem good enough to stand on own
-body T_HOME_LOANS		/home loans/i
-body T_MILLION_EMAIL		/million (?:\w+ )?(?:e-?mail )?addresses/i
-# do not pluralize next rule
-body T_PRODUCT_SERVICE		/product or service/i
-# similar to OFFER, but fewer FPs
-body T_RECEIVE_OFFER		/receive special offer/i
-body T_RECEIVE_EMAIL		/receive third party email/i
-
-# variations of new rule
-# original version (non-optimal number of FPs, but probably good enough)
-body T_EXCUSE_24_V1		/you(?:'ve|'re| have| are)? receiv(?:ed|ing) this (?:e.?mail|advertisement) (?:by either|because)/i
-# "more spam" version
-body T_EXCUSE_24_V2		/you(?:'ve|'re| have| are)? receiv(?:e|ed|ing) this (?:e.?mail|advertisement|offer|special|recurring|paid).{0,16}\b(?:by either|because)/i
-# "more spam" version minus "you are"
-body T_EXCUSE_24_V3		/you(?:'ve|'re| have)? receiv(?:e|ed|ing) this (?:e.?mail|advertisement|offer|special|recurring|paid).{0,16}\b(?:by either|because)/i
-# "more spam" version minus "email"
-body T_EXCUSE_24_V4		/you(?:'ve|'re| have| are)? receiv(?:e|ed|ing) this (?:advertisement|offer|special|recurring|paid).{0,16}\b(?:by either|because)/i
-
-# possible replacements for DIET
-# version 1: add possible variations
-body T_DIET_V1			/\b(?:(?:without(?: any)?|never|no).?(?:exercis(?:e|ing)|diet(?:ing|))|weight.?loss|(?:extra|los(?:[et]|ing)|burn|burning).{0,10}(?:pounds|weight|inches|lbs)|burn.{0,10}(?:fat|cellulose))\b/i
-# version 2: add only those variations seen in my corpus
-body T_DIET_V2			/\b(?:(?:without|no) (?:exercis(?:e|ing)|dieting)|weight.?loss|(?:extra|lose|lost|losing).{0,10}(?:pounds|weight|inches|lbs)|burn.{1,10}fat)\b/i
-
-# less encompassing DIET variations (probably not worth keeping if
-# DIET can be upgraded
-header T_LOSE_WEIGHT		Subject =~ /(?:lose .{0,16}(?:weight|pounds|lbs)|weight.loss)/i
-body T_BURNING_FAT		/aging while burning fat/i
-
-# replacement for REFINANCE_YOUR_HOME (current version has spacing mistake)
-body T_REFINANCE_YOUR_HOME	/\brefinance your(?: current)? (?:home|house)\b/i
-
-# replacement for REMOVE_FROM_LIST (current version has spacing mistake)
-body T_REMOVE_FROM_LIST		/to be removed from (?:the|my|our) (?:mailing|e.?mail|opt[ -]?in)? ?list/i
-
-# possible replacement for SENT_IN_COMPLIANCE
-body T_SENT_IN_COMPLIANCE	/(?:e.?mail|message) .{0,10}sen[dt] (?:to you )?in (?:\w{1,10} )?compliance (?:of|with)/i
-
 # one or both of these may need to factor in ok_languages or ok_locales
 body T_UNPRINTABLE		/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]{3,}/
 body T_HIGHBIT			/[\x80-\xff]{8,}/
-
-# possible replacement for SAVINGS (fixes \b issue following %)
-header T_SAVINGS		Subject =~ /\bsave\s+(?:on\s+your|up\s+to|big|over|at\s+least|\d+\%|you)(?:\s|\b|$)/i
-
-# possible lower-FP replacement for ACCEPT_CREDIT_CARDS
-body T_ACCEPT_CREDIT_CARDS	/\b(?:accept\b|are accepting).{1,15}credit cards?\b/i
-
-# possible replacement for ADVERT_CODE2 (rather minor improvement)
-header T_ADVERT_CODE2		Subject =~ /\bA\s*D\s*V\b/i
 
 # HTML control -- HTML spam rules should all have better S/O than this
 body T_HTML_MESSAGE		eval:html_message()
@@ -162,62 +80,26 @@ body T_HTML_WEB_BUGS2		eval:html_test('t_web_bugs2')
 # possible improvements for HTML_JAVASCRIPT
 body T_HTML_JAVASCRIPT		eval:html_test('t_javascript')
 
+# possible replacement/supplement for FROM_BTAMAIL
+header T_BTAMAIL_HEADER		ALL =~ /btamail\.net\.cn/i
+
 ###########################################################################
 
-# it's BANG, not PLING (Brits!)
-# single word versions
 body T_BANG_BOSS		/\bboss!/i
 body T_BANG_CARTOONS		/\bcartoons!/i
 body T_BANG_CYBERANALYSTS	/\bcyberanalysts!/i
-body T_BANG_EXERCISE		/\bexercise!/i
-body T_BANG_EXERCISER		/\bexerciser!/i
-body T_BANG_EXERCISES		/\bexercises!/i
-body T_BANG_FREEDOM		/\bfreedom!/i
-body T_BANG_GUARANTEED		/\bguaranteed!/i
+body T_BANG_EXERCISE		/\bexercis(?:e|er|es)!/i
+body T_BANG_GUARANTEE		/\bguaranteed?\!/i
 body T_BANG_MONEY		/\bmoney!/i
-body T_BANG_OFFERED		/\boffered!/i
-body T_BANG_OFFERS		/\boffers!/i
+body T_BANG_MORE		/\b(?-i:M)ore!/i
+body T_BANG_OFFER		/\boffer(?:ed|s)!/i
 body T_BANG_OPRAH		/\boprah!/i
-body T_BANG_QUOTE		/\bquote!/i
-body T_BANG_QUOTES		/\bquotes!/i
-body T_BANG_SLEEP		/\bsleep!/i
-body T_BANG_SLEEPING		/\bsleeping!/i
-body T_BANG_TRAFFIC		/\btraffic!/i
-body T_BANG_WORLD		/\bworld!/i
-body T_BANG_WORLDWIDE		/\bworldwide!/i
-# a few multi-word variants with no FPs for me (test separately and
-# use instead of single word versions if nobody has FP problems)
-body T_BANG_EXERCISE_X		/\bexercis(?:e|er|es)!/i
-body T_BANG_GUARANTEE_X		/\bguaranteed?\!/i
-# just 'offer!' has FPs for me
-body T_BANG_OFFER_X		/\boffer(?:ed|s)!/i
-body T_BANG_QUOTE_X		/\bquotes?\!/i
-body T_BANG_SLEEP_X		/\bsleep(?:ing)?\!/i
-body T_BANG_WORLD_X		/\bworld(?:wide)?\!/i
-# a few versions that are more case-sensitive
-body T_BANG_MORE_C		/\b(?-i:M)ore!/i
-body T_BANG_FREEDOM_C		/\b(?-i:F)reedom!/
-body T_BANG_GUARANTEED_C	/\b(?-i:G)uaranteed?\!/i
-body T_BANG_QUOTE_C		/\b(?-i:Q)uotes?\!/i
+body T_BANG_QUOTE		/\b(?-i:Q)uotes?\!/i
 
 ###########################################################################
 
-# These seem to work well for me to find a "unique identifier" which happens
-# to be a rot13 email address, note that these don't actually test for rot13
-# encoding, they look for the obscuring of the "@" and "."  characters.
-body T_ROT13_EMAIL		/^(\w+\^\S+\(\S+)(?:\s+\#+\s+\1)?\s*$/m
-describe T_ROT13_EMAIL		Message has what looks like a ROT13 encoded email address
-
-body T_ROT13_EMAIL_2		/^(\w+\^\S+\(\S+)(?:\s+\#+\s+\1)?[\s\n]*\Z/m
-describe T_ROT13_EMAIL_2	Message has what looks like a ROT13 encoded email address
-
-body T_ROT13_EMAIL_3		/^(\w+\^\S+\(\S+)/m
-describe T_ROT13_EMAIL_3	Message has what looks like a ROT13 encoded email address
-
-# should have all the hits of T_ROT13_EMAIL_3 but perhaps be slightly less
-# prone to FPs
-body T_ROT13_EMAIL_4		/^\w+\^\S+\(\w{2,3}\b/m
-describe T_ROT13_EMAIL_4	Message has what looks like a ROT13 encoded email address
+body T_OBSCURED_EMAIL		/^\w+\^\S+\(\w{2,3}\b/m
+describe T_OBSCURED_EMAIL	Message seems to contain obscured email address (rot13)
 
 # mailman list reminder mails are getting tagged in 2.41, adding a rule to check for these
 header __FROM_MAILMAN_OWNER	From:addr =~ /^mailman-owner@/
@@ -546,6 +428,28 @@ score T_HTML_SHOUTING9            0.01
 
 
 ##################################################################
+# testing the HTML percentage range
+# this will be necessary if the HTML heuristics test is changed
+# (probably best to go with deciles, replacing HTML_XX_YY rules)
+
+body T_HTML_P1_00_20		eval:html_percentage('00','20')
+body T_HTML_P1_20_40		eval:html_percentage('20','40')
+body T_HTML_P1_40_60		eval:html_percentage('40','60')
+body T_HTML_P1_60_80		eval:html_percentage('60','80')
+body T_HTML_P1_80_100		eval:html_percentage('80','100')
+
+body T_HTML_P2_00_10		eval:html_percentage('00','10')
+body T_HTML_P2_10_20		eval:html_percentage('10','20')
+body T_HTML_P2_20_30		eval:html_percentage('20','30')
+body T_HTML_P2_30_40		eval:html_percentage('30','40')
+body T_HTML_P2_40_50		eval:html_percentage('40','50')
+body T_HTML_P2_50_60		eval:html_percentage('50','60')
+body T_HTML_P2_60_70		eval:html_percentage('60','70')
+body T_HTML_P2_70_80		eval:html_percentage('70','80')
+body T_HTML_P2_80_90		eval:html_percentage('80','90')
+body T_HTML_P2_90_100		eval:html_percentage('90','100')
+
+##################################################################
 
 body T_HTML_MAIL_ONLY             /HTML only email, sorry/i
 
@@ -556,6 +460,6 @@ score T_HEX_HOST	0.01
 
 # If we see % followed by 21-7e except 2[2356f], 3[a-f], and 40, they don't need escaping, suspicious...
 # This is pretty ugly, but I couldn't think of a better way to do it. :|
-uri T_HTTP_ESCAPED_URI_SUSPICIOUS	m@%(?:2[147-9a-eA-E]|3[0-9]|4[1-9a-fA-F]|[56][0-9a-fA-F]|7[0-9a-eA-E])@
+uri T_HTTP_ESCAPED_URI_SUSPICIOUS	m@%(?:2[147-9a-e]|3[0-9]|4[1-9a-f]|[56][0-9a-f]|7[0-9a-e])@i
 describe T_HTTP_ESCAPED_URI_SUSPICIOUS      Uses unnecessary %-escapes inside a URL's path
 score T_HTTP_ESCAPED_URI_SUSPICIOUS 0.01
