@@ -211,6 +211,13 @@ sub check {
 
   $self->delete_fulltext_tmpfile();
 
+  # Round the hits down to the nearest 0.1.  Technically, using int
+  # instead of a true floor function rounds up to the nearest 0.1 for
+  # negative numbers, but who really cares.
+  # Fixes bug http://bugzilla.spamassassin.org/show_bug.cgi?id=2607
+  $self->{hits} = int($self->{hits} * 10) / 10;
+
+  
   # Round the hits to 3 decimal places to avoid rounding issues
   # We assume required_hits to be properly rounded already.
   # add 0 to force it back to numeric representation instead of string.
