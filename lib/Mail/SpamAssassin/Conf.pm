@@ -207,16 +207,15 @@ sub _parse {
   my $skipfile = 0;
 
   foreach (split (/\n/, $_[1])) {
-    s/^\s+|\s+$//g;  # remove leading and trailing spaces (including newlines)
     s/(?<!\\)#.*$//; # remove comments
-    s/\s+$//g;       # remove spaces before comments
+    s/^\s+|\s+$//g;  # remove leading and trailing spaces (including newlines)
     next unless($_); # skip empty lines
 
     # handle i18n
-    if (s/^lang\s+(\S+)\s+//) { next if ($lang !~ /^$1/); }
+    if (s/^lang\s+(\S+)\s+//) { next if ($lang !~ /^$1/i); }
 
     # Versioning assertions
-    if (/^file\s+start\s+(.+)\s*$/) { $currentfile = $1; next; }
+    if (/^file\s+start\s+(.+)$/) { $currentfile = $1; next; }
     if (/^file\s+end/) {
       $currentfile = '(no file)';
       $skipfile = 0;
@@ -232,7 +231,7 @@ ignore it.
 
 =cut
 
-    if (/^require[-_]version\s+(.*)\s*$/) {
+    if (/^require[-_]version\s+(.*)$/) {
       my $req_version = $1 + 0.0;
       if ($Mail::SpamAssassin::VERSION != $req_version) {
         warn "configuration file \"$currentfile\" requires version ".
@@ -296,7 +295,7 @@ eg.
 
 =cut
 
-    if (/^whitelist[-_]from\s+(.+)\s*$/) {
+    if (/^whitelist[-_]from\s+(.+)$/) {
       $self->add_to_addrlist ('whitelist_from', split (' ', $1)); next;
     }
 
@@ -313,7 +312,7 @@ e.g.
 
 =cut
 
-    if (/^whitelist[-_]from[-_]rcvd\s+(\S+)\s+(\S+)\s*$/) {
+    if (/^whitelist[-_]from[-_]rcvd\s+(\S+)\s+(\S+)$/) {
       $self->add_to_addrlist_rcvd ('whitelist_from_rcvd', $1, $2);
       next;
     }
@@ -330,7 +329,7 @@ unwhitelist_from *@amazon.com
 
 =cut
 
-    if (/^unwhitelist[-_]from\s+(.+)\s*$/) {
+    if (/^unwhitelist[-_]from\s+(.+)$/) {
       $self->remove_from_addrlist ('whitelist_from', split (' ', $1)); next;
     }
 
@@ -341,7 +340,7 @@ non-spam, but which the user doesn't want.  Same format as C<whitelist_from>.
 
 =cut
 
-    if (/^blacklist[-_]from\s+(.+)\s*$/) {
+    if (/^blacklist[-_]from\s+(.+)$/) {
       $self->add_to_addrlist ('blacklist_from', split (' ', $1)); next;
     }
 
@@ -357,7 +356,7 @@ unblacklist_from *@spammer.com
 
 =cut
 
-    if (/^unblacklist[-_]from\s+(.+)\s*$/) {
+    if (/^unblacklist[-_]from\s+(.+)$/) {
       $self->remove_from_addrlist ('blacklist_from', split (' ', $1)); next;
     }
 
@@ -382,13 +381,13 @@ See above.
 
 =cut
 
-    if (/^whitelist[-_]to\s+(.+)\s*$/) {
+    if (/^whitelist[-_]to\s+(.+)$/) {
       $self->add_to_addrlist ('whitelist_to', split (' ', $1)); next;
     }
-    if (/^more[-_]spam[-_]to\s+(.+)\s*$/) {
+    if (/^more[-_]spam[-_]to\s+(.+)$/) {
       $self->add_to_addrlist ('more_spam_to', split (' ', $1)); next;
     }
-    if (/^all[-_]spam[-_]to\s+(.+)\s*$/) {
+    if (/^all[-_]spam[-_]to\s+(.+)$/) {
       $self->add_to_addrlist ('all_spam_to', split (' ', $1)); next;
     }
 
@@ -493,7 +492,7 @@ score for this message. _REQD_ will be replaced with the threshold.
 
 =cut
 
-    if (/^subject[-_]tag\s+(.+?)\s*$/) {
+    if (/^subject[-_]tag\s+(.+?)$/) {
       $self->{subject_tag} = $1; next;
     }
 
@@ -805,7 +804,7 @@ If C<factor> = 0.3, then we'll move about 1/3 of the way from the score toward t
 C<factor> = 1 means just use the long-term mean; C<factor> = 0 mean just use the calculated score.
 
 =cut
-    if (/^auto[-_]whitelist[-_]factor\s*(.*)\s*$/) {
+    if (/^auto[-_]whitelist[-_]factor\s*(.*)$/) {
       $self->{auto_whitelist_factor} = $1; next;
     }
 
@@ -880,7 +879,7 @@ SpamAssassin:
 
 =cut
 
-    if (/^report\b\s*(.*?)$/) {
+    if (/^report\b\s*(.*)$/) {
       $self->{report_template} .= $1."\n"; next;
     }
 
@@ -902,7 +901,7 @@ C</usr/share/spamassassin> for an example.
 
 =cut
 
-    if (/^terse[-_]report\b\s*(.*?)$/) {
+    if (/^terse[-_]report\b\s*(.*)$/) {
       $self->{terse_report_template} .= $1."\n"; next;
     }
 
@@ -990,7 +989,7 @@ the results
 
 =cut
 
-    if (/^dcc[-_]timeout\s*(\d+)\s*$/) {
+    if (/^dcc[-_]timeout\s*(\d+)$/) {
       $self->{dcc_timeout} = $1+0; next;
     }
 
@@ -1005,7 +1004,7 @@ The default is 5.
 
 =cut
 
-    if (/^pyzor[-_]max\s+(\d+)/) {
+    if (/^pyzor[-_]max\s+(\d+)$/) {
       $self->{pyzor_max} = $1+0; next;
     }
 
@@ -1030,7 +1029,7 @@ the results
 
 =cut
 
-    if (/^pyzor[-_]timeout\s*(\d+)\s*$/) {
+    if (/^pyzor[-_]timeout\s*(\d+)$/) {
       $self->{pyzor_timeout} = $1+0; next;
     }
 
@@ -1042,7 +1041,7 @@ the results
 
 =cut
 
-    if (/^razor[-_]timeout\s*(\d+)\s*$/) {
+    if (/^razor[-_]timeout\s*(\d+)$/) {
       $self->{razor_timeout} = $1; next;
     }
 
@@ -1397,7 +1396,7 @@ Currently this is the same value Razor itself uses: C<~/razor.conf>.
 
 =cut
 
-    if (/^razor[-_]config\s*(.*)\s*$/) {
+    if (/^razor[-_]config\s*(.*)$/) {
       $self->{razor_config} = $1; next;
     }
 
@@ -1410,7 +1409,7 @@ The default is '-R'
 
 =cut
 
-    if (/^dcc_options\s+[A-Z -]+/) {
+    if (/^dcc_options\s+([A-Z -]+)$/) {
       $self->{dcc_options} = $1; next;
     }
 
@@ -1422,7 +1421,7 @@ SpamAssassin use, you may want to share this across all users.
 
 =cut
 
-    if (/^auto[-_]whitelist[-_]path\s*(.*)\s*$/) {
+    if (/^auto[-_]whitelist[-_]path\s+(.*)$/) {
       $self->{auto_whitelist_path} = $1; next;
     }
 
@@ -1438,7 +1437,7 @@ needed, make the log directory chmod'ed 1777, and adjust later.
 
 =cut
 
-    if (/^timelog[-_]path\s*(.*)\s*$/) {
+    if (/^timelog[-_]path\s+(.*)$/) {
       $Mail::SpamAssassin::TIMELOG->{logpath}=$1; next;
     }
 
@@ -1449,7 +1448,7 @@ Make sure this has the relevant execute-bits set (--x), otherwise
 things will go wrong.
 
 =cut
-    if (/^auto[-_]whitelist[-_]file[-_]mode\s*(.*)\s*$/) {
+    if (/^auto[-_]whitelist[-_]file[-_]mode\s+(.*)$/) {
       $self->{auto_whitelist_file_mode} = $1; next;
     }
 
