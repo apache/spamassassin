@@ -667,8 +667,10 @@ this will free up some memory.
 
 sub finish_metadata {
   my ($self) = @_;
-  $self->{metadata}->finish();
-  delete $self->{metadata};
+  if ($self->{metadata}) {
+    $self->{metadata}->finish();
+    delete $self->{metadata};
+  }
 }
 
 =item finish()
@@ -679,7 +681,7 @@ Clean up an object so that it can be destroyed.
 
 sub finish {
   my ($self) = @_;
-  $self->{metadata}->finish();
+  $self->finish_metadata();
 }
 
 # ---------------------------------------------------------------------------
