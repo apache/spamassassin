@@ -102,9 +102,6 @@ sub run {
   }
   $MESSAGES = scalar(@messages);
 
-  # useful for logging; expose as package var
-  $NUM_MESSAGES = scalar @messages;
-
   if ($self->{opt_j} == 1) {
     my $message;
     my $class;
