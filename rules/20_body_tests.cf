@@ -486,15 +486,30 @@ describe BASE64_ENC_TEXT	Message text disguised using base-64 encoding
 full CHARSET_FARAWAY_BODY	eval:check_for_faraway_charset_in_body()
 describe CHARSET_FARAWAY_BODY	Character set indicates foreign language body
 
-body NIGERIAN_SCAM		/BASED ON INFORMATION GATHERED ABOUT YOU, WE BELIEVE\s*YOU WOULD BE IN A POSITION TO HELP US IN TRANSFER/
+body NIGERIAN_SCAM		/BASED ON INFORMATION GATHERED ABOUT YOU, WE BELIEVE\s*YOU WOULD BE IN A POSITION TO HELP US IN TRANSFER/i
 describe NIGERIAN_SCAM		Nigerian scam, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
 
 # (contrib: skod)
-body NIGERIAN_SCAM_2		/(?:Government of Nigeria|NIGERIAN? NATIONAL|Nigerian? Government)/
-describe NIGERIAN_SCAM_2	Mutated Nigerian scams
+body NIGERIAN_SCAM_2		/(?:Government of Nigeria|NIGERIAN? NATIONAL|Nigerian? Government|Federal Republic of Nigeria)/i
+describe NIGERIAN_SCAM_2	Mutated Nigerian scams, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
 
-body US_DOLLARS			/Million\b.{0,40}\b(?:United States Dollars|USD)/i
+body NIGERIAN_SCAM_3            /(?:Bank of Nigeria|Nigerian? National Petroleum)/i
+describe NIGERIAN_SCAM_3        Nigerian Bank or Petroleum scam, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
+
+body NIGERIAN_SCAM_4            /\b(wife|widow|son|husband)\b.{0,60}Sann?i Abacha/
+describe NIGERIAN_SCAM_4        Nigerian widow needs your help, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
+
+body NIGERIAN_SCAM_5            /Sann?i Abacha.{0,60}\b(wife|widow|son|husband)\b/
+describe NIGERIAN_SCAM_5        Nigerian widow needs your help, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
+
+body US_DOLLARS			/Million\b.{0,40}\b(?:United States Dollars|USD|U\. ?S\. Dollars)/i
 describe US_DOLLARS		Nigerian scam key phrase
+
+body US_DOLLARS_2               /(?:\$|usd)\d{2,3}(?:\.\d)?m\b/i
+describe US_DOLLARS_2           Nigerian scam key phrase ($NN.Nm/USDNN.Nm)
+
+body US_DOLLARS_3               /(?:\$|usd ?)\d{1,3},\d{3},\d{3}(?:\.\d\d)?/i
+describe US_DOLLARS_3           Nigerian scam key phrase ($NN,NNN,NNN.NN)
 
 rawbody UNNEEDED_HTML_ENCODING	/font=3E/i
 describe UNNEEDED_HTML_ENCODING	Unneeded encoding of HTML tags
