@@ -188,30 +188,37 @@ sub mass_check_mailbox {
   }
   while (<MBOX>) { /^From \S+ +... ... / and last; }
 
+  my $count = 0;
+  my $host  = $ENV{'HOSTNAME'} || $ENV{'HOST'} || `hostname` || 'localhost';
+
   while (!eof MBOX) {
     my @msg = ();
+    my $in_header = 1;
     my $msgid = undef;
     my $hits = '';
     $count++;
 
     while (<MBOX>) {
-      /^Message-Id: (.*?)\s*$/i and $msgid = $1;
-      /^X-Spam-Status: .* tests=(.*)$/ and $hits = $1;
+      if (/^$/ && $in_header) {
+        $in_header = 0 ;
 
-      if (/^$/) {
-	if (!defined ($msgid)) {
-	  $msgid = "<$count\@no_msgid_in_msg.taint.org>";
-	  push (@msg, "Message-Id: $msgid\n");
-	}
+        if (!defined ($msgid)) {
+          $msgid = sprintf('<no-msgid-in-msg-%06d@%s.masses.spamassasin.org>', $count, $host);
+          push (@msg, "Message-Id: $msgid\n");
+        }
+      }
+      if ($in_header) {
+        /^Message-Id: (.*?)\s*$/i        and $msgid = $1;
+        /^X-Spam-Status: .* tests=(.*)$/ and $hits  = $1;
       }
 
       /^From \S+ +... ... / and last;
       push (@msg, $_);
     }
 
-    if (! $self->{opt_all} && scalar @msg > 1000) { next; }	# too big
-
-    next unless(@msg);		# skip "empty" messages (From...\nFrom...)
+    next unless (@msg);                                 # skip empty,
+    next if (! $self->{opt_all} && $in_header);         # broken and
+    next if (! $self->{opt_all} && scalar @msg > 1000); # too big messages
 
     $msgid ||= "(undef)";
     $msgid = "$folder:$msgid";	# so we can find it again
