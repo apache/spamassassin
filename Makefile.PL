@@ -159,14 +159,14 @@ my %makefile = (
 
     'EXE_FILES'	=> [
         'spamassassin', 'sa-learn',
-        'spamd/spamc$(EXE_EXT)',
+        'spamc/spamc$(EXE_EXT)',
         'spamd/spamd', # must be the last one
     ],
 
     'MAN1PODS' => {
         'spamassassin'    => '$(INST_MAN1DIR)/spamassassin.$(MAN1EXT)',
         'sa-learn'        => '$(INST_MAN1DIR)/sa-learn.$(MAN1EXT)',
-        'spamd/spamc.pod' => '$(INST_MAN1DIR)/spamc.$(MAN1EXT)',
+        'spamc/spamc.pod' => '$(INST_MAN1DIR)/spamc.$(MAN1EXT)',
         'spamd/spamd'     => '$(INST_MAN1DIR)/spamd.$(MAN1EXT)',
     },
 
@@ -199,14 +199,21 @@ my %makefile = (
     },
 
     'clean' => { FILES => join(' ' =>
-        'doc', 'pod2htm*',
         'spamassassin', 'sa-learn',
-        'spamd/spamd', 'spamd/spamc$(EXE_EXT)',
-        'spamd/libspamc.so', 'spamd/libsslspamc.so',
-        'spamd/*.o', 'spamd/*.obj',
-        'spamd/binaries.mk', 'spamd/config.h', 'spamd/config.status',
-        'spamd/config.cache', 'spamd/config.log', 'spamd/autom4te.cache',
-        'qmail/qmail-spamc',
+
+        'spamd/spamd',
+
+        'spamc/spamc$(EXE_EXT)',
+        'spamc/qmail-spamc$(EXE_EXT)',
+        'spamc/*.o*', 'spamc/replace/*.o*',
+        'spamc/*.so',
+        'spamc/Makefile',
+        'spamc/config.h',
+        'spamc/config.status', 'spamc/config.cache', 'spamc/config.log', 'spamc/autom4te.cache',
+        'spamd/*spamc*', 'qmail',
+
+        'doc', 'pod2htm*',
+
         't/do_net', 't/log',
       )
     },
@@ -729,7 +736,7 @@ sub _set_macro_PERL_TAINT {
 sub _set_macro_PREPROCESS {
 
   return if get_macro('PREPROCESS');
-  set_macro('PREPROCESS', join(' ', macro_ref('PERL'), qq{build/preprocessor}));
+  set_macro('PREPROCESS', join(' ', macro_ref('PERLRUN'), qq{build/preprocessor}));
 }
 
 # This routine sets the value for CONFIGURE (spamc only).
@@ -741,7 +748,7 @@ sub _set_macro_PREPROCESS {
 sub _set_macro_CONFIGURE {
 
   return if get_macro('CONFIGURE');
-  set_macro('CONFIGURE', join(' ', macro_ref('PERL'), qq{build/configure}));
+  set_macro('CONFIGURE', join(' ', macro_ref('PERLRUN'), qq{spamc/configure.pl}));
 }
 
 
@@ -947,8 +954,6 @@ FIXBANG		= -Msharpbang \
 		  -DPERL_WARN="$(PERL_WARN)" \
 		  -DPERL_TAINT="$(PERL_TAINT)"
 
-SPAMC_SOURCES	= spamd/spamc.c spamd/libspamc.c spamd/utils.c qmail/qmail-spamc.c
-
 
 spamassassin: spamassassin.raw
 	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -i$? -o$@
@@ -957,23 +962,54 @@ sa-learn: sa-learn.raw
 	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -i$? -o$@
 
 
-spamd/binaries.mk:
-	$(CONFIGURE) --srcdir="spamd" --prefix="$(I_PREFIX)" --sysconfdir="$(I_SYSCONFDIR)" --datadir="$(I_DATADIR)" --enable-ssl="$(ENABLE_SSL)"
-
 spamd/spamd: spamd/spamd.raw
 	$(PREPROCESS) $(FIXBYTES) $(FIXVARS) $(FIXBANG) -m$(PERM_RWX) -i$? -o$@
 
-spamd/libspamc.so: spamd/binaries.mk $(SPAMC_SOURCES)
-	$(MAKE) -f spamd/binaries.mk $@
 
-spamd/spamc$(EXE_EXT): spamd/binaries.mk $(SPAMC_SOURCES)
-	$(MAKE) -f spamd/binaries.mk $@
+SPAMC_MAKEFILE  = spamc/Makefile
+MAKE_SPAMC      = $(MAKE) -f $(SPAMC_MAKEFILE)
+MAKE_SPAMC_OLD  = $(MAKE) SOURCE=$< TARGET=$@ spamc_has_moved
 
-spamd/libsslspamc.so: spamd/binaries.mk $(SPAMC_SOURCES)
-	$(MAKE) -f spamd/binaries.mk $@
+SPAMC_SRC       = spamc/spamc.c spamc/utils.c
+QSPAMC_SRC      = spamc/qmail-spamc.c spamc/utils.c
+LIBSPAMC_SRC    = spamc/libspamc.c spamc/utils.c
 
-qmail/qmail-spamc: spamd/binaries.mk $(SPAMC_SOURCES)
-	$(MAKE) -f spamd/binaries.mk $@
+$(SPAMC_MAKEFILE): $(SPAMC_MAKEFILE).in $(SPAMC_MAKEFILE).win
+	$(CONFIGURE) --prefix="$(I_PREFIX)" --sysconfdir="$(I_SYSCONFDIR)" --datadir="$(I_DATADIR)" --enable-ssl="$(ENABLE_SSL)"
+
+spamc_has_moved:
+	$(NOECHO) echo "***"
+	$(NOECHO) echo "*** spamc now has its own directory: $(TARGET) is $(SOURCE)"
+	$(NOECHO) echo "***"
+	$(PERL) -MFile::Spec -MFile::Copy \
+	  -e "copy(q{$(SOURCE)}, q{$(TARGET)});"
+
+spamc/libspamc.so: $(SPAMC_MAKEFILE) $(LIBSPAMC_SRC) 
+	$(MAKE_SPAMC) $@
+
+spamd/libspamc.so: spamc/libspamc.so
+	$(MAKE_SPAMC_OLD)
+
+spamc/libsslspamc.so: $(SPAMC_MAKEFILE) $(LIBSPAMC_SRC)
+	$(MAKE_SPAMC) $@
+
+spamd/libsslspamc.so: spamc/libsslspamc.so
+	$(MAKE_SPAMC_OLD)
+
+spamc/spamc$(EXE_EXT): $(SPAMC_MAKEFILE) $(SPAMC_SRC)
+	$(MAKE_SPAMC) $@
+
+spamd/spamc$(EXE_EXT): spamc/spamc$(EXE_EXT)
+	$(MAKE_SPAMC_OLD)
+	$(CHMOD) $(PERM_RWX) $@
+
+spamc/qmail-spamc$(EXE_EXT): $(SPAMC_MAKEFILE) $(QSPAMC_SRC)
+	$(MAKE_SPAMC) $@
+
+qmail/qmail-spamc$(EXE_EXT): spamc/qmail-spamc$(EXE_EXT)
+	$(MKPATH) qmail
+	$(MAKE_SPAMC_OLD)
+	$(CHMOD) $(PERM_RWX) $@
 
 
 conf__install:
@@ -997,6 +1033,7 @@ made-doc-stamp: doc $(MAN1PODS) $(MAN3PODS) $(EXTRAPODS)
 	$(PERL) build/convert_pods_to_doc $(MAN1PODS) $(MAN3PODS) $(EXTRAPODS)
 	$(TOUCH) made-doc-stamp
 	$(RM_F) pod2htm*
+
   EOD
 
   clean_MY_globals($self);

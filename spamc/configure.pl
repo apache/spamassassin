@@ -9,7 +9,7 @@ use warnings;
 use Config;
 
 use File::Copy;
-use File::Spec::Functions;
+use File::Spec::Functions qw(:ALL);
 
 use Cwd qw(chdir);
 
@@ -32,15 +32,15 @@ foreach (@ARGV) {
   elsif (/^([^=]+?)=["']?(.*?)["']?$/) {
     $ENV{$1} = $2;
   }
-  # Don't include --srcdir because we'll change their on our own.
-  push(@args, $_) unless (/^--srcdir=/);
 }
 
 
-# Change to the source dir if one was given.
-if ($args{srcdir}) {
-  print "cd $args{srcdir}\n";
-  chdir($args{srcdir}) || die "Can't cd to `$args{srcdir}': $!";
+# Change to the dir s file is in.
+my $srcdir;
+$srcdir = canonpath(catpath((splitpath($0))[0..1])) || curdir();
+if ($srcdir ne curdir()) {
+  print "cd $srcdir\n";
+  chdir($srcdir) || die "Can't cd to `$srcdir': $!";
 }
 
 
@@ -57,16 +57,16 @@ else
   # These are the defaults for the Makefile.
   my %env = (
     CC             => 'cl',
-    CFLAGS         => '/DWIN32',
+
+    WINCFLAGS      => '/DWIN32',
     SSLCFLAGS      => '/DSPAMC_SSL',
 
-    MAKEFILE       => 'binaries.mk',
-    SRCDIR         => $args{srcdir},
+    SRCDIR         =>  $srcdir,
 
-    LIBS           => 'ws2_32.lib',
+    WINLIBS        => 'ws2_32.lib',
     SSLLIBS        => 'ssleay32.lib libeay32.lib',
 
-    SPAMC_FILES    => 'spamc.c getopt.c',
+    SPAMC_FILES    => join(' ', 'spamc.c',catfile('replace', 'getopt.c')),
     LIBSPAMC_FILES => 'libspamc.c utils.c',
   );
 
@@ -91,8 +91,8 @@ else
   @args = (
     catfile(updir(), 'build', 'preprocessor'),
     q{-Mvars},
-    q{-ibinaries.mk.win},
-    q{-obinaries.mk}
+    q{-iMakefile.win},
+    q{-oMakefile}
   );
   print join(' ', $Config{'perlpath'}, @args) . "\n";
   {
@@ -108,6 +108,10 @@ else
       $0 = $Z;
       die $@ ? $@ : "Can't exec `$::args[0]': $!";
     }
+  }
+
+  if ($srcdir ne curdir()) {
+    print "cd " . updir() . "\n" for splitdir($srcdir);
   }
 } #* RUNNING_ON_NATIVE_WINDOWS *#
 

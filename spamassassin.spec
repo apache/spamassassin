@@ -61,7 +61,7 @@ invoked by a MDA such as sendmail or postfix, or can be called from a procmail
 script, .forward file, etc.  It uses a genetic-algorithm-evolved scoring system
 to identify messages which look spammy, then adds headers to the message so
 they can be filtered by the user's mail reading software.  This distribution
-includes the spamd/spamc components which considerably speeds processing of
+includes the spamc/spamc components which considerably speeds processing of
 mail.
 
 %description -l pl
@@ -72,7 +72,7 @@ wywo³ywany z MDA, np. Sendmaila czy Postfixa, lub z pliku ~/.forward
 itp. U¿ywa ogólnego algorytmu oceniania w celu identyfikacji
 wiadomo¶ci, które wygl±daj± na spam, po czym dodaje nag³ówki do
 wiadomo¶ci, umo¿liwiaj±c filtrowanie przez oprogramowanie u¿ytkownika.
-Ta dystrybucja zawiera programy spamd/spamc, umo¿liwiaj±ce
+Ta dystrybucja zawiera programy spamc/spamc, umo¿liwiaj±ce
 uruchomienie serwera, co znacznie przyspieszy proces przetwarzania
 poczty.
 
@@ -124,7 +124,7 @@ aplikacji do czytania poczty.
 CFLAGS="$RPM_OPT_FLAGS"; export CFLAGS
 %{__perl} Makefile.PL PREFIX=%{_prefix} SYSCONFDIR=%{_sysconfdir} DESTDIR=$RPM_BUILD_ROOT < /dev/null
 %{__make}
-%{__make} spamd/libspamc.so
+%{__make} spamc/libspamc.so
 
 %install
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
@@ -140,8 +140,8 @@ CFLAGS="$RPM_OPT_FLAGS"; export CFLAGS
 install -d %buildroot/%{initdir}
 install -d %buildroot/%{_includedir}
 install -m 0755 spamd/redhat-rc-script.sh %buildroot/%{initdir}/spamassassin
-install -m 0644 spamd/libspamc.so %buildroot/%{_libdir}
-install -m 0644 spamd/libspamc.h %buildroot/%{_includedir}/libspamc.h
+install -m 0644 spamc/libspamc.so %buildroot/%{_libdir}
+install -m 0644 spamc/libspamc.h %buildroot/%{_includedir}/libspamc.h
 
 mkdir -p %{buildroot}/etc/mail/spamassassin
 
@@ -149,7 +149,7 @@ mkdir -p %{buildroot}/etc/mail/spamassassin
 
 %files 
 %defattr(-,root,root)
-%doc README Changes sample-nonspam.txt sample-spam.txt spamd/README.spamd INSTALL BUGS COPYRIGHT LICENSE TRADEMARK USAGE Razor2.patch
+%doc README Changes sample-nonspam.txt sample-spam.txt spamd/README INSTALL BUGS COPYRIGHT LICENSE TRADEMARK USAGE Razor2.patch
 %attr(755,root,root) %{_bindir}/*
 %attr(644,root,root) %{_includedir}/*
 %attr(644,root,root) %{_libdir}/*.so

@@ -78,11 +78,14 @@ results.evolved
 rules/70_cvs_rules_under_test.cf
 rules/regression_tests.cf
 sa_with_mail_audit
-spamassassin
-spamd/libspamc.so
-spamd/spamc
-spamd/sslspamc
-spamd/spamd
+spamassassin(\.exe)?
+sa-learn(\.exe?)
+spamc/Makefile
+spamc/config\.(h|status|log)
+spamc/.*\.(so|o|obj)
+spamc/spamc(\.exe)?
+spamc/sslspamc(\.exe)?
+spamd/spamd(\.exe)?
 t/log/.*
 t/rule_tests.t
 testmails
@@ -99,7 +102,6 @@ masses/tmon.nonspam
 masses/dprof.spam
 masses/dprof.nonspam
 masses/jm-mass-check-rules/.*
-sa-learn
 o
 todo
 t/data/nice/cjk/.*

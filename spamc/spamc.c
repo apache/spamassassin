@@ -116,7 +116,7 @@ extern char *optarg;
 #endif
 
 #ifdef _WIN32
-#include "getopt.h"
+#include "replace/getopt.h"
 char* __progname = "spamc";
 #endif
 

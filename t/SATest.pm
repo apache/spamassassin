@@ -48,7 +48,7 @@ sub sa_t_init {
   $spamd ||= "$perl_path ../spamd/spamd -x";
 
   $spamc = $ENV{'SPAMC_SCRIPT'};
-  $spamc ||= "../spamd/spamc";
+  $spamc ||= "../spamc/spamc";
 
   $spamdport = $ENV{'SPAMD_PORT'};
   $spamdport ||= 48373;		# whatever

@@ -4242,7 +4242,7 @@ LDDLFLAGS=`perl -e 'use Config; print $Config::Config{lddlflags}'`
 
 
 
-          ac_config_files="$ac_config_files binaries.mk"
+          ac_config_files="$ac_config_files Makefile"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -4767,7 +4767,7 @@ for ac_config_target in $ac_config_targets
 do
   case "$ac_config_target" in
   # Handling of arguments.
-  "binaries.mk" ) CONFIG_FILES="$CONFIG_FILES binaries.mk" ;;
+  "Makefile" ) CONFIG_FILES="$CONFIG_FILES Makefile" ;;
   "config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
