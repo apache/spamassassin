@@ -123,4 +123,6 @@ done
 
 ./extract-results $LOGDIR/validate.* > $LOGDIR/validate
 
+./model-statistics $LOGDIR/validate
+
 exit 0
