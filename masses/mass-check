@@ -51,14 +51,14 @@ sub wanted {
   my $yorn = $status->is_spam();
   my $hits = $status->get_hits();
   my $tests = $status->get_names_of_tests_hit();
-  $status->finish();
-
-  undef $ma;		# clean 'em up
-  undef $status;
 
   printf "%s %2d %s %s\n",
 		    ($yorn ? 'Y' : '.'),
 		    $hits, $id, $tests;
+
+  $status->finish();
+  undef $ma;		# clean 'em up
+  undef $status;
 
 # system ("ps alxww | grep mass-check | grep perl | grep -v grep");#JMD
   if ($FORK) { exit; }

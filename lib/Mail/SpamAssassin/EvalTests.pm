@@ -621,7 +621,7 @@ sub check_for_forward_date {
 
   my $now;
 
-  if ($rcvd =~ / (\S\S\S, .?\d+ \S\S\S \d+ \d+:\d+:\d+ \S+)/) {
+  if ($rcvd =~ /\s(\S\S\S, .?\d+ \S\S\S \d+ \d+:\d+:\d+ \S+)/) {
     $rcvd = $1;
     dbg ("using Received header date for real time: $rcvd");
     $now = $self->_parse_rfc822_date ($rcvd);
