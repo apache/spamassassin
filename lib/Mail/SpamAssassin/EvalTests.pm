@@ -359,12 +359,10 @@ sub check_for_forged_received_ip_helo_big {
 sub _check_for_forged_received {
   my ($self) = @_;
 
+  $self->{mismatch_from} = 0;
   $self->{mismatch_helo} = 0;
   $self->{mismatch_ip_helo} = 0;
   $self->{mismatch_ip_helo_big} = 0;
-  $self->{mismatch_from} = 0;
-
-  my $ip_in_rsvd = \$Mail::SpamAssassin::Dns::IP_IN_RESERVED_RANGE;
 
   my @fromip = map { $_->{ip} } @{$self->{relays_untrusted}};
   # just pick up domains for these
@@ -426,7 +424,7 @@ sub _check_for_forged_received {
 	# allow private IP addrs here, could be a legit screwup
 	if ($hclassb && $fclassb && 
 		$hclassb ne $fclassb &&
-		$hlo !~ /${ip_in_rsvd}/o)
+		!($hlo =~ /${IP_IN_RESERVED_RANGE}/o))
 	{
 	  dbg ("forged-HELO: massive mismatch on IP-addr HELO: '$hlo' != '$fip'");
 	  $self->{mismatch_ip_helo_big}++;
