@@ -13,14 +13,12 @@
 #
 #      ......................................................................
 clear-report-template
-report -------------------- Start SpamAssassin results ----------------------
-report This mail is probably spam.  The original message has been altered
-report so you can recognise or block similar unwanted mail in future.
-report See http://spamassassin.org/tag/ for more details.
+report This mail is probably spam.  The original message has been attached
+report along with this report, so you can recognize or block similar unwanted
+report mail in future.  See http://spamassassin.org/tag/ for more details.
 report 
 report Content analysis details:   (_HITS_ hits, _REQD_ required)
 report _SUMMARY_
-report -------------------- End of SpamAssassin results ---------------------
 #      ......................................................................
 
 ###########################################################################
@@ -112,10 +110,9 @@ ok_languages            all
 # explanations.
 
 # rewrite_subject       0
-# report_header         1
+# report_safe           1
 # subject_tag           *****SPAM*****
 # use_terse_report      1
-# defang_mime           0
 # skip_rbl_checks       0
 # check_mx_attempts     2
 # check_mx_delay        5
