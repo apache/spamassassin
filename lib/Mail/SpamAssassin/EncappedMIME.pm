@@ -5,6 +5,7 @@ package Mail::SpamAssassin::EncappedMIME;
 
 use Carp;
 use strict;
+use bytes;
 
 use Mail::SpamAssassin::EncappedMessage;
 

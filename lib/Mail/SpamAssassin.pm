@@ -50,12 +50,11 @@ filtering databases, such as Vipul's Razor ( http://razor.sourceforge.net/ ).
 
 package Mail::SpamAssassin;
 use strict;
-eval "use bytes";
+use bytes;
 
 # We do our best to make SA run with any Perl downto 5.005. You might want to
-# read <http://www.perldoc.com/perl5.8.0/pod/perl56delta.html> if you plan to 
+# read <http://www.perldoc.com/perl5.8.0/pod/perl56delta.html> if you plan to
 # hack SA and are used to Perl 5.6+.
-# (jm: Matt's just saying that 'cos they use 5.005 in MessageLabs ;)
 use 5.005;
 
 use Mail::SpamAssassin::Conf;
@@ -70,7 +69,6 @@ use File::Spec 0.8;
 use File::Copy;
 use Cwd;
 use Config;
-use strict;
 
 # Load Time::HiRes if it's available
 BEGIN {
@@ -78,12 +76,13 @@ BEGIN {
   Time::HiRes->import( qw(time) ) unless $@;
 }
 
+
 use vars qw{
-	@ISA $VERSION $SUB_VERSION @EXTRA_VERSION $HOME_URL $DEBUG $TIMELOG
-        $IS_DEVEL_BUILD 
-	@default_rules_path @default_prefs_path
-	@default_userprefs_path @default_userstate_dir
-	@site_rules_path
+  @ISA $VERSION $SUB_VERSION @EXTRA_VERSION $IS_DEVEL_BUILD $HOME_URL
+  $DEBUG $TIMELOG
+  @default_rules_path @default_prefs_path
+  @default_userprefs_path @default_userstate_dir
+  @site_rules_path
 };
 
 $VERSION = "2.50";              # update after release
@@ -95,7 +94,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.159 2003/01/09 12:38:44 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.160 2003/01/09 23:51:51 msquadrat Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.

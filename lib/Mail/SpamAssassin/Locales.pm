@@ -1,11 +1,13 @@
 package Mail::SpamAssassin::Locales;
 
 use strict;
-eval "use bytes";
-use vars	qw{ %charsets_for_locale };
+use bytes;
+
+use vars qw{
+  %charsets_for_locale
+};
 
 ###########################################################################
-
 
 # A mapping of known country codes to frequent charsets used therein.
 # note that the ISO and CP charsets will already have been permitted,

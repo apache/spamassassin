@@ -2,6 +2,7 @@
 package Mail::SpamAssassin::AutoWhitelist;
 
 use strict;
+use bytes;
 
 use Mail::SpamAssassin;
 

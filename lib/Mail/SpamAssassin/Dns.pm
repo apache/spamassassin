@@ -1,5 +1,3 @@
-#
-
 package Mail::SpamAssassin::Dns;
 1;
 
@@ -11,31 +9,31 @@ use IO::Socket;
 use IPC::Open2;
 use POSIX ":sys_wait_h";        # sorry Craig ;)
 
-use Carp;
 use strict;
-eval "use bytes";
+use bytes;
+use Carp;
 
 use vars qw{
-	$KNOWN_BAD_DIALUP_RANGES $IP_IN_RESERVED_RANGE
-	@EXISTING_DOMAINS $IS_DNS_AVAILABLE $VERSION
+  $KNOWN_BAD_DIALUP_RANGES $IP_IN_RESERVED_RANGE
+  @EXISTING_DOMAINS $IS_DNS_AVAILABLE $VERSION
 };
 
 # don't lookup SpamAssassin.org -- use better-connected sites
 # instead ;)
 @EXISTING_DOMAINS = qw{
-                       kernel.org
-                       slashdot.org
-                       google.com
-                       google.de
-                       microsoft.com
-                       yahoo.com
-                       yahoo.de
-                       amazon.com
-                       amazon.de
-                       nytimes.com
-                       leo.org
-                       gwdg.de
-                    };
+  kernel.org
+  slashdot.org
+  google.com
+  google.de
+  microsoft.com
+  yahoo.com
+  yahoo.de
+  amazon.com
+  amazon.de
+  nytimes.com
+  leo.org
+  gwdg.de
+};
 
 # Initialize a regexp for reserved IPs, i.e. ones that could be
 # used inside a company and be the first or second relay hit by

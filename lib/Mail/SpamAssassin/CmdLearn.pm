@@ -1,18 +1,20 @@
 package Mail::SpamAssassin::CmdLearn;
 
 use strict;
-eval "use bytes";
+use bytes;
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::ArchiveIterator;
 use Mail::SpamAssassin::NoMailAudit;
 use Mail::SpamAssassin::PerMsgLearner;
+
 use Getopt::Long;
 use Pod::Usage;
 
-use vars qw($spamtest %opt $isspam $forget $messagecount $messagelimit
-	$rebuildonly $learnprob @targets
-	);
+use vars qw(
+  $spamtest %opt $isspam $forget $messagecount $messagelimit
+  $rebuildonly $learnprob @targets
+);
 
 ###########################################################################
 

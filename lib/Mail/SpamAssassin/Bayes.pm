@@ -28,13 +28,14 @@ The results are incorporated into SpamAssassin as the BAYES_* rules.
 package Mail::SpamAssassin::Bayes;
 
 use strict;
-eval "use bytes";
+use bytes;
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::BayesStore;
 use Mail::SpamAssassin::PerMsgStatus;
 
-use vars qw{ @ISA
+use vars qw{
+  @ISA
   $IGNORED_HDRS
   $MARK_PRESENCE_ONLY_HDRS
   $MIN_SPAM_CORPUS_SIZE_FOR_BAYES
@@ -49,70 +50,69 @@ use vars qw{ @ISA
 # *less* these well-known headers; that way we can pick up spammers' tracking
 # headers (which are obviously not well-known in advance!).
 
-$IGNORED_HDRS = qr{(?: Sender			# misc noise
-		  |Delivered-To |Delivery-Date
-		  |X-MIME-Autoconverted
+$IGNORED_HDRS = qr{(?: (?:X-)?Sender    # misc noise
+  |Delivered-To |Delivery-Date
+  |X-MIME-Auto[Cc]onverted |X-Converted-To-Plain-Text
 
-		  |Received	# handled specially
+  |Received     # handled specially
 
-		  |Subject      # not worth a tiny gain vs. to db size increase
+  |Subject      # not worth a tiny gain vs. to db size increase
 
-		  # Date: can provide invalid cues if your spam corpus is
-		  # older/newer than nonspam
-		  |Date	
+  # Date: can provide invalid cues if your spam corpus is
+  # older/newer than ham
+  |Date
 
-		  # List headers: ignore. a spamfiltering mailing list will
-		  # become a nonspam sign.
-		  |(?:X-)?List-(?:Archive|Help|Id|Owner|Post|Subscribe
-				|Unsubscribe|Host|Id|Manager|Admin|Comment
-				|Name|Url)
-		  |X-Mailman-Version |X-Beenthere
-		  |X-Original-Date |Mail-Followup-To
-		  |X-List|(?:X-)?Mailing-List
-		  |X-Converted-To-Plain-Text
-		  |X-eGroups-(?:Return|From)
-		  |X-MDMailing-List
-		  |X-XEmacs-List
-		  |X-Unsub(?:scribe)?
+  # List headers: ignore. a spamfiltering mailing list will
+  # become a nonspam sign.
+  |X-List|(?:X-)?Mailing-List
+  |(?:X-)?List-(?:Archive|Help|Id|Owner|Post|Subscribe
+    |Unsubscribe|Host|Id|Manager|Admin|Comment
+    |Name|Url)
+  |X-Unsub(?:scribe)?
+  |X-Mailman-Version |X-Been[Tt]here |X-Loop
+  |Mail-Followup-To
+  |X-eGroups-(?:Return|From)
+  |X-MDMailing-List
+  |X-XEmacs-List
 
-		  # gatewayed through mailing list (thanks to Allen Smith)
-		  |(?:X-)?Resent-(?:From|To|Date)
-		  |(?:X-)?Original-(?:From|To|Date)
+  # gatewayed through mailing list (thanks to Allen Smith)
+  |(?:X-)?Resent-(?:From|To|Date)
+  |(?:X-)?Original-(?:From|To|Date)
 
-		  # Spamfilter/virus-scanner headers: too easy to chain from
-		  # these
-		  |X-MailScanner |X-MailScanner-SpamCheck |X-Spam-Status
-		  |X-Spam-Level |X-Antispam |X-Spam-Checker-Version
-		  |X-Spam-Report |X-Spam-Flag |X-RBL-Warning
-		  |X-MDaemon-Deliver-To |X-Virus-Scanned |X-Spam-hits |X-Spam
-		  |X-Spam-Score |X-Mass-Check-Id |X-Pyzor
-		  |X-Filtered-BY |X-Scanner
-		  |X-AP-Spam-(?:Score|Status) |X-RIPE-Spam-Status
-		  |X-SpamCop-.+
-		  |X-Scanned-By |X-SMTPD |(?:X-)?Spam-Apparently-To
-		  |SPAM |X-DCC-\S{2,25}-Metrics
+  # Spamfilter/virus-scanner headers: too easy to chain from
+  # these
+  |X-MailScanner(?:-SpamCheck)?
+  |X-Spam(?:-(?:Status|Level|Flag|Report|Hits|Score|Checker-Version))?
+  |X-Antispam |X-RBL-Warning
+  |X-MDaemon-Deliver-To |X-Virus-Scanned
+  |X-Mass-Check-Id
+  |X-Pyzor |X-DCC-\S{2,25}-Metrics
+  |X-Filtered-B[Yy] |X-Scanned-By |X-Scanner
+  |X-AP-Spam-(?:Score|Status) |X-RIPE-Spam-Status
+  |X-SpamCop-[^:]+
+  |X-SMTPD |(?:X-)?Spam-Apparently-To
+  |SPAM
 
-		  # some noisy Outlook headers that add no good clues:
-		  |Content-Class |Thread-Index |Thread-Topic
-		  |X-OriginalArrivalTime |X-Originalarrivaltime
+  # some noisy Outlook headers that add no good clues:
+  |Content-Class |Thread-(?:Index|Topic)
+  |X-Original[Aa]rrival[Tt]ime
 
-		  # Annotations from IMAP, POP, and MH:
-		  |Status |Content-Length
-		  |Lines |X-UID	|X-UIDL
-		  |Replied |Forwarded
+  # Annotations from IMAP, POP, and MH:
+  |Status |Replied |Forwarded
+  |Lines |Content-Length
+  |X-UIDL?
 
-		  # Annotations from VM: (thanks to Allen Smith)
-		  |X-VM-(?:Bookmark|IMAP-Retrieved|Labels|Last-Modified
-			 |POP-Retrieved|Summary-Format|VHeader|v\d-Data
-			 |Message-Order)
+  # Annotations from VM: (thanks to Allen Smith)
+  |X-VM-(?:Bookmark|(?:POP|IMAP)-Retrieved|Labels|Last-Modified
+    Summary-Format|VHeader|v\d-Data|Message-Order)
 
-		)}x;
+)}x;
 
 # Note only the presence of these headers, in order to reduce the
 # hapaxen they generate.
 $MARK_PRESENCE_ONLY_HDRS = qr{(?: X-Face
-		  |X-(?:Gnupg|GnuPG|GPG|PGP)-?(?:Key|)-?Fingerprint
-	        )}x;
+  |X-(?:Gnu[Pp][Gg]|[GP]PG)(?:-Key)?-Fingerprint
+)}x;
 
 # tweaks tested as of Nov 18 2002 by jm: see SpamAssassin-devel list archives
 # for results.  The winners are now the default settings.
@@ -148,7 +148,7 @@ use constant TOKENIZE_LONG_TOKENS_AS_SKIPS => 1;
 $MIN_SPAM_CORPUS_SIZE_FOR_BAYES = 200;
 $MIN_HAM_CORPUS_SIZE_FOR_BAYES = 200;
 
-# Should we use the Robinson f(w) equation from 
+# Should we use the Robinson f(w) equation from
 # http://radio.weblogs.com/0101454/stories/2002/09/16/spamDetection.html ?
 # It gives better results, in that scores are more likely to distribute
 # into the <0.5 range for nonspam and >0.5 for spam.

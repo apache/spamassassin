@@ -22,14 +22,22 @@
 #                        by double at-signs, eg. @@VERSION@@. The values are
 #                        taken from the environment and can be overwritten with
 #                        the -D switch. Empty/undefined variables are removed.
-#   sharpbang            Does some sharpbang (#!) replacement. See code below.
+#   bytes                comments out each "use bytes" from the code if the 
+#                        code is built with Perl < 5.6.1. Ths pragma is used to 
+#                        force byte semantics rather than character semantics 
+#                        to work around Unicode bugs in Perl 5.8.0.
+#                        Uses PERL_VERSION (Watch out: You have to define old
+#                        Perls via eg. PERL_VERSION=5.5.30 (5.005_03))
+#   sharpbang            Does some sharpbang (#!) replacement. Uses PERL_BIN and
+#                        PERL_WARN.
 
-eval "use bytes";
+
 use Config;
 use File::Spec;
 
 my %modules = ();
 my %defines = ();
+
 my @infiles = ();
 my $indir;
 my $outdir;
@@ -41,11 +49,11 @@ foreach (keys %ENV) {
 foreach (@ARGV) {
   if    (/^-M([a-z]+)$/)       { $modules{$1} = 1; }
   elsif (/^-D([A-Z_]+)=(.*)$/) { $defines{$1} = $2; }
-  elsif (/^-i(.+)$/) { $infile = $1; }
-  elsif (/^-o(.+)$/) { $outfile = $1; }
-  elsif (/^-I(.+)$/) { $indir = $1; }
-  elsif (/^-O(.+)$/) { $outdir = $1; }
-  elsif (/^(.+)$/) { push (@infiles, $1); }
+  elsif (/^-i(.+)$/)           { $infile = $1; }
+  elsif (/^-o(.+)$/)           { $outfile = $1; }
+  elsif (/^-I(.+)$/)           { $indir = $1; }
+  elsif (/^-O(.+)$/)           { $outdir = $1; }
+  elsif (/^(.+)$/)             { push (@infiles, $1); }
 }
 
 my $l = 1;
@@ -71,22 +79,53 @@ else {
 
 sub do_file {
   my ($in, $out) = @_;
-  open (STDIN, "<$in") or die "cannot open $in";
-  open (OUT, ">$out") or die "cannot open $out"; select OUT;
+  open (STDIN, "<$in") or die "Cannot open $in: $!";
+  open (OUT, ">$out") or die "Cannot open $out: $!"; select OUT;
   do_stdin();
   close STDIN; close OUT;
 }
 
 sub do_stdin {
+  # The perlpath can be overwritten via -DPERL_BIN=<perlpath>
+  my $perl   = $Config{'perlpath'};
+  if($defines{'PERL_BIN'} && ($defines{PERL_BIN} ne 'this')) {
+    $perl = $defines{'PERL_BIN'};
+    unless(-x $perl) {
+      warn("No such PERL_BIN: $perl");
+    }
+  }
+
+  # If we're using a CVS build, add the -w switch to turn on warnings
+  my $perl_warn = -f 'CVS/Repository' ? ' -w' : '';
+  # The warnings can be overwritten via -DPERL_WARN=<1|0>
+  if ($defines{'PERL_WARN'} && ($defines{'PERL_WARN'} ne 'auto')) {
+    if ($defines{'PERL_WARN'} eq 'yes') {
+      $perl_warn = ' -w';
+    }
+    elsif ($defines{'PERL_WARN'} eq 'no') {
+      $perl_warn = '';
+    }
+    else {
+      warn("Unknown value '$defines{'PERL_WARN'}' for PERL_WARN; assuming 'auto'");
+    }
+  }
+
+  # Save the Perl Version
+  my $perl_version = $];
+  if ($defines{PERL_VERSION} && ($defines{PERL_VERSION} ne 'this')) {
+    my @v = split(/[^\d]+/, $defines{PERL_VERSION});
+    $perl_version = sprintf("%i.%03i%03i", $v[0] || 0, $v[1] || 0, $v[2] || 0);
+  }
+
   while (<STDIN>) {
     $_ = pack("C0A*", $_);	# turn off UTF8-ness
 
     # Conditional compiling
     if ($modules{'conditional'}) {
-      # Comment out lines carrying the REMOVEFORINST tag
-      if(/\bREMOVEFORINST\b/) {
+      # Comment out lines carrying the REMOVE_ON_BUILD or (deprecated) REMOVEFORINST tag
+      if(/\bREMOVE(?:FORINST|_ON_BUILD)\b/) {
         s/^(\s*)/$1#/;
-        s/REMOVEFORINST/REMOVEDBYINST/;
+        s/(?:##)?REMOVE(?:FORINST|_ON_BUILD)(?:##)?/##REMOVED_ON_BUILD##/;
       }
     }
 
@@ -96,19 +135,17 @@ sub do_stdin {
       s/\@\@([A-Z][A-Z0-9_]*)\@\@/$defines{$1}/g;
     }
 
+    # Comment out use bytes for old Perls
+    if ($modules{'bytes'} && ($perl_version < 5.006)) {
+      if(/^[^#]*\buse\s+bytes\b/) {
+        s/^(\s*)/$1#/;
+        s/$/\t##REMOVED_ON_BUILD##/;
+      }
+    }
+
     # Sharpbang (#!) replacement (see also ExtUtils::MY->fixin)
     if ($modules{'sharpbang'} && ($l == 1)) {
-      # The perlpath can be overwritten via -DPERL_BIN=<perlpath>
-      my $perl   = $defines{'PERL_BIN'} || $Config{'perlpath'};
-
-      # If we're using a CVS build, add the -w switch to turn on warnings
-      my $minusw = -f 'CVS/Repository' ? ' -w' : '';
-
-      # The warnings can be overwritten via -DPERL_WARN=<1|0>
-      if (defined $defines{'PERL_WARN'}) {
-        $minusw = $defines{'PERL_WARN'} ? ' -w' : '';
-      }
-      s/^#!.*perl.*$/#!${perl}${minusw}/;
+      s/^#!.*perl.*$/#!${perl}${perl_warn}/;
     }
 
     print;

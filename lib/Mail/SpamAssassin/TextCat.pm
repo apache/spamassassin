@@ -15,8 +15,11 @@
 package Mail::SpamAssassin::TextCat;
 
 use strict;
-eval "use bytes";
-use vars qw($opt_a $opt_f $opt_t $opt_u);
+use bytes;
+
+use vars qw(
+  $opt_a $opt_f $opt_t $opt_u
+);
 
 my @lm;
 my $non_word_characters='0-9\s';

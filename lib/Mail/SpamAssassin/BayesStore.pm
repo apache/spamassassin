@@ -1,8 +1,7 @@
-
 package Mail::SpamAssassin::BayesStore;
 
 use strict;
-eval "use bytes";
+use bytes;
 use Fcntl;
 
 BEGIN { @AnyDBM_File::ISA = qw(DB_File GDBM_File NDBM_File SDBM_File); }
@@ -15,7 +14,8 @@ use File::Spec;
 use File::Path;
 
 use vars qw{
-  @ISA @DBNAMES @DB_EXTENSIONS
+  @ISA
+  @DBNAMES @DB_EXTENSIONS
   $NSPAM_MAGIC_TOKEN $NHAM_MAGIC_TOKEN $LAST_EXPIRE_MAGIC_TOKEN
   $NTOKENS_MAGIC_TOKEN $OLDEST_TOKEN_AGE_MAGIC_TOKEN
 };

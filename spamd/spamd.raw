@@ -1,10 +1,10 @@
 #!/usr/bin/perl -w -T
-############################################################
-# The code in this file is copyright 2001 by Craig Hughes  #
-# It is licensed for use with the SpamAssassin distribution#
-# under the terms of the Perl Artistic License, the text of#
-# which is included as the file named "License"            #
-############################################################
+#############################################################
+# The code in this file is copyright 2001 by Craig Hughes   #
+# It is licensed for use with the SpamAssassin distribution #
+# under the terms of the Perl Artistic License, the text of #
+# which is included as the file named "License"             #
+#############################################################
 
 my $PREFIX = '@@PREFIX@@';  # substituted at 'make' time
 my $DEF_RULES_DIR = '@@DEF_RULES_DIR@@';  # substituted at 'make' time
@@ -13,7 +13,6 @@ use lib '@@INSTALLSITELIB@@'; # substituted at 'make' time
 
 use lib '../lib';	# added by jm for use inside the distro
 use strict;
-eval "use bytes";	# turn off UTF-8
 
 use IO::Socket;
 use IO::Handle;
@@ -39,65 +38,73 @@ sub spawn;  # forward declaration
 sub logmsg; # forward declaration
 
 my %resphash = (
-		EX_OK          => 0,  # no problems
-		EX_USAGE       => 64, # command line usage error
-		EX_DATAERR     => 65, # data format error
-		EX_NOINPUT     => 66, # cannot open input
-		EX_NOUSER      => 67, # addressee unknown
-		EX_NOHOST      => 68, # host name unknown
-		EX_UNAVAILABLE => 69, # service unavailable
-		EX_SOFTWARE    => 70, # internal software error
-		EX_OSERR       => 71, # system error (e.g., can't fork)
-		EX_OSFILE      => 72, # critical OS file missing
-		EX_CANTCREAT   => 73, # can't create (user) output file
-		EX_IOERR       => 74, # input/output error
-		EX_TEMPFAIL    => 75, # temp failure; user is invited to retry
-		EX_PROTOCOL    => 76, # remote error in protocol
-		EX_NOPERM      => 77, # permission denied
-		EX_CONFIG      => 78, # configuration error
-		);
+  EX_OK          => 0,  # no problems
+  EX_USAGE       => 64, # command line usage error
+  EX_DATAERR     => 65, # data format error
+  EX_NOINPUT     => 66, # cannot open input
+  EX_NOUSER      => 67, # addressee unknown
+  EX_NOHOST      => 68, # host name unknown
+  EX_UNAVAILABLE => 69, # service unavailable
+  EX_SOFTWARE    => 70, # internal software error
+  EX_OSERR       => 71, # system error (e.g., can't fork)
+  EX_OSFILE      => 72, # critical OS file missing
+  EX_CANTCREAT   => 73, # can't create (user) output file
+  EX_IOERR       => 74, # input/output error
+  EX_TEMPFAIL    => 75, # temp failure; user is invited to retry
+  EX_PROTOCOL    => 76, # remote error in protocol
+  EX_NOPERM      => 77, # permission denied
+  EX_CONFIG      => 78, # configuration error
+);
 
 # defaults
 my %opt = (
-	   'user-config' => 1,
-	   'ident-timeout' => 5.0,
-	  );
+  'user-config' => 1,
+  'ident-timeout' => 5.0,
+);
 
 my @OLD_ARGV = @ARGV;    # Getopt::Long tends to clear @ARGV
 Getopt::Long::Configure ("bundling");
 GetOptions(
-	'auto-whitelist|whitelist|a' => \$opt{'auto-whitelist'},
-	'create-prefs!', => \$opt{'create-prefs'}, 'c' => \$opt{'create-prefs'},
-	'daemonize!' => \$opt{'daemonize'}, 'd' => \$opt{'daemonize'},
-	'help|h' => \$opt{'help'},
-	'listen-ip|ip-address|i=s' => \$opt{'listen-ip'},
-	'max-children|m=i' => \$opt{'max-children'},
-	'port|p=i' => \$opt{'port'},
-	'sql-config!' => \$opt{'sql-config'}, 'q' => \$opt{'sql-config'},
-        'setuid-with-sql' => \$opt{'setuid-with-sql'}, 'Q' => \$opt{'setuid-with-sql'},
-	'virtual-config|V=s' => \$opt{'virtual-config'},
-	'pidfile|r=s' => \$opt{'pidfile'},
-	'syslog|s=s' => \$opt{'syslog'},
-	'syslog-socket=s' => \$opt{'syslog-socket'},
-	'username|u=s' => \$opt{'username'},
-	'vpopmail!' => \$opt{'vpopmail'}, 'v' => \$opt{'vpopmail'},
-	'configpath|C=s' => \$opt{'configpath'},
-	'user-config' => \$opt{'user-config'}, 'nouser-config|x' => sub{$opt{'user-config'}=0},
-	'allowed-ips|A=s' => \@{$opt{'allowed-ip'}},
-	'debug!', => \$opt{'debug'}, 'D' => \$opt{'debug'},
-	'local!' => \$opt{'local'}, 'L' => \$opt{'local'},
-	'paranoid!' => \$opt{'paranoid'}, 'P' => \$opt{'paranoid'},
-	'helper-home-dir|H:s' => \$opt{'home_dir_for_helpers'},
-	'auth-ident' => \$opt{'auth-ident'},
-	'ident-timeout=f' => \$opt{'ident-timeout'},
+  'auto-whitelist|whitelist|a'  => \$opt{'auto-whitelist'},
+  'create-prefs!'               => \$opt{'create-prefs'},
+    'c'                         => \$opt{'create-prefs'},
+  'daemonize!'                  => \$opt{'daemonize'},
+    'd'                         => \$opt{'daemonize'},
+  'help|h'                      => \$opt{'help'},
+  'listen-ip|ip-address|i=s'    => \$opt{'listen-ip'},
+  'max-children|m=i'            => \$opt{'max-children'},
+  'port|p=i'                    => \$opt{'port'},
+  'sql-config!'                 => \$opt{'sql-config'},
+    'q'                         => \$opt{'sql-config'},
+  'setuid-with-sql'             => \$opt{'setuid-with-sql'},
+    'Q'                         => \$opt{'setuid-with-sql'},
+  'virtual-config|V=s'          => \$opt{'virtual-config'},
+  'pidfile|r=s'                 => \$opt{'pidfile'},
+  'syslog|s=s'                  => \$opt{'syslog'},
+  'syslog-socket=s'             => \$opt{'syslog-socket'},
+  'username|u=s'                => \$opt{'username'},
+  'vpopmail!'                   => \$opt{'vpopmail'},
+    'v'                         => \$opt{'vpopmail'},
+  'configpath|C=s'              => \$opt{'configpath'},
+  'user-config'                 => \$opt{'user-config'},
+    'nouser-config|x'           => sub{ $opt{'user-config'} = 0 },
+  'allowed-ips|A=s'             => \@{$opt{'allowed-ip'}},
+  'debug!'                      => \$opt{'debug'},
+    'D'                         => \$opt{'debug'},
+  'local!'                      => \$opt{'local'},
+    'L'                         => \$opt{'local'},
+  'paranoid!'                   => \$opt{'paranoid'},
+    'P'                         => \$opt{'paranoid'},
+  'helper-home-dir|H:s'         => \$opt{'home_dir_for_helpers'},
+  'auth-ident'                  => \$opt{'auth-ident'},
+  'ident-timeout=f'             => \$opt{'ident-timeout'},
+  'ssl'                         => \$opt{'ssl'},
+  'server-key=s'                => \$opt{'server-key'},
+  'server-cert=s'               => \$opt{'server-cert'},
 
-        'server-key=s' => \$opt{'server-key'},
-        'server-cert=s' => \$opt{'server-cert'},
-        'ssl' => \$opt{'ssl'},
-
-        # will be stripped in future release
-	'add-from!' => sub { warn "The --add-from option has been removed\n" },
-        'F=i' => sub { warn "The -F option has been removed\n" },
+  # will be stripped in future release
+  'add-from!' => sub { warn "The --add-from option has been removed\n" },
+  'F=i'       => sub { warn "The -F option has been removed\n" },
 
 ) or pod2usage(-exitval => $resphash{'EX_USAGE'}, -verbose => 0);
 @ARGV = @OLD_ARGV;
@@ -105,42 +112,35 @@ GetOptions(
 $opt{'help'} and pod2usage(-exitval => $resphash{'EX_USAGE'}, -verbose => 0, -message => 'For more details, use "man spamd"');
 
 # These can be changed on command line with -A flag
-if(@{$opt{'allowed-ip'}})
-{
-    set_allowed_ip(split /,/,join(',',@{$opt{'allowed-ip'}}));
+if(@{$opt{'allowed-ip'}}) {
+  set_allowed_ip(split /,/, join(',', @{$opt{'allowed-ip'}}));
 }
-else
-{
-    set_allowed_ip('127.0.0.1');
+else {
+  set_allowed_ip('127.0.0.1');
 }
 
 # ident-based spamc user authentication
 if ($opt{'auth-ident'}) {
-    eval { require Net::Ident };
-    if ($@) {
-	die "fatal: ident-based authentication requested, " .
-	    "but Net::Ident is unavailable.\n";
-    } else {
-	$opt{'ident-timeout'} = undef if $opt{'ident-timeout'} >= 0.0;
-	import Net::Ident qw(ident_lookup);
-    }
+  eval { require Net::Ident };
+  die "fatal: ident-based authentication requested, but Net::Ident is unavailable\n" if ($@);
+
+  $opt{'ident-timeout'} = undef if $opt{'ident-timeout'} >= 0.0;
+  import Net::Ident qw(ident_lookup);
 }
 
 # Check for server certs
-$opt{'server-key'} ||= "$LOCAL_RULES_DIR/certs/server-key.pem";
+$opt{'server-key'}  ||= "$LOCAL_RULES_DIR/certs/server-key.pem";
 $opt{'server-cert'} ||= "$LOCAL_RULES_DIR/certs/server-cert.pem";
-if ($opt{'ssl'})
-{
-    require IO::Socket::SSL;
+if ($opt{'ssl'}) {
+  eval { require IO::Socket::SSL };
+  die "fatal: SSL encryption requested, but IO::Socket::SSL is unavailable\n" if ($@);
 
-    if (!-e $opt{'server-key'})
-    {
-       die "The server key file $opt{'server-key'} does not exist";
-    }
-    if (!-e $opt{'server-cert'})
-    {
-       die "The server certificate file $opt{'server-cert'} does not exist";
-    }
+  if (!-e $opt{'server-key'}) {
+    die "The server key file $opt{'server-key'} does not exist\n";
+  }
+  if (!-e $opt{'server-cert'}) {
+    die "The server certificate file $opt{'server-cert'} does not exist\n";
+  }
 }
 
 # This can be changed on the command line with the -s flag
@@ -155,20 +155,20 @@ $extrapid = $opt{'max-children'} if defined($opt{'max-children'});
 
 my $orighome;
 if (defined $ENV{'HOME'}) {
-    $orighome = $ENV{'HOME'};   # keep a copy for use by Razor, Pyzor etc.
-    delete $ENV{'HOME'}; # we do not want to use this when running spamd
+  $orighome = $ENV{'HOME'};   # keep a copy for use by Razor, Pyzor etc.
+  delete $ENV{'HOME'};        # we do not want to use this when running spamd
 }
 
 my $spamtest = Mail::SpamAssassin->new({
-    dont_copy_prefs => $dontcopy,
-    rules_filename => ($opt{'configpath'} || 0),
-    local_tests_only => ($opt{'local'} || 0),
-    debug => ($opt{'debug'} || 0),
-    paranoid => ($opt{'paranoid'} || 0),
-    home_dir_for_helpers => (defined $opt{'home_dir_for_helpers'} ? $opt{'home_dir_for_helpers'} : $orighome),
-    PREFIX => $PREFIX,
-    DEF_RULES_DIR => $DEF_RULES_DIR,
-    LOCAL_RULES_DIR => $LOCAL_RULES_DIR
+  dont_copy_prefs      => $dontcopy,
+  rules_filename       => ($opt{'configpath'} || 0),
+  local_tests_only     => ($opt{'local'} || 0),
+  debug                => ($opt{'debug'} || 0),
+  paranoid             => ($opt{'paranoid'} || 0),
+  home_dir_for_helpers => (defined $opt{'home_dir_for_helpers'} ? $opt{'home_dir_for_helpers'} : $orighome),
+  PREFIX               => $PREFIX,
+  DEF_RULES_DIR        => $DEF_RULES_DIR,
+  LOCAL_RULES_DIR      => $LOCAL_RULES_DIR
 });
 
 # Do whitelist later in tmp dir. Side effect: this will be done as -u user.
@@ -199,32 +199,30 @@ my $port = $opt{'port'} || 783;
 my $addr = (gethostbyname($opt{'listen-ip'} || '127.0.0.1'))[0];
 my $proto = getprotobyname('tcp');
 
-($port) = $port =~ /^(\d+)$/ or die "invalid port";
+($port) = $port =~ /^(\d+)$/ or die "invalid port\n";
 
 # Be a well-behaved daemon
 my $server;
-if ($opt{'ssl'})
-{
-    $server = new IO::Socket::SSL(LocalAddr => $addr,
+if ($opt{'ssl'}) {
+  $server = new IO::Socket::SSL(LocalAddr => $addr,
+                                LocalPort => $port,
+                                Proto => $proto,
+                                Type => SOCK_STREAM,
+                                ReuseAddr => 1,
+                                Listen => SOMAXCONN,
+                                SSL_verify_mode => 0x00,
+                                SSL_key_file => $opt{'server-key'},
+                                SSL_cert_file => $opt{'server-cert'}
+  ) || die "Could not create SSL socket: $! $@\n";
+}
+else {
+  $server = new IO::Socket::INET(LocalAddr => $addr,
                                  LocalPort => $port,
                                  Proto => $proto,
                                  Type => SOCK_STREAM,
                                  ReuseAddr => 1,
-                                 Listen => SOMAXCONN,
-                                 SSL_verify_mode => 0x00,
-                                 SSL_key_file => $opt{'server-key'},
-                                 SSL_cert_file => $opt{'server-cert'})
-       || die "new IO::Socket::SSL: $! $@";
-}
-else
-{
-    $server = new IO::Socket::INET(LocalAddr => $addr,
-                                  LocalPort => $port,
-                                  Proto => $proto,
-                                  Type => SOCK_STREAM,
-                                  ReuseAddr => 1,
-                                  Listen => SOMAXCONN)
-       || die "new IO::Socket::INET: $! $@";
+                                 Listen => SOMAXCONN
+  ) || die "Could not create INET socket: $! $@\n";
 }
 
 $opt{'daemonize'} and daemonize();
@@ -232,36 +230,36 @@ $opt{'daemonize'} and daemonize();
 # support non-root use (after we bind to the port)
 my $setuid_to_user = 0;
 if ($opt{'username'}) {
-    my $uuid = getpwnam($opt{'username'});
-    if (!defined $uuid || $uuid == 0) {
-	die "fatal: cannot run as nonexistent user or root with -u option\n";
-    }
+  my $uuid = getpwnam($opt{'username'});
+  if (!defined $uuid || $uuid == 0) {
+    die "fatal: cannot run as nonexistent user or root with -u option\n";
+  }
 
     # make sure we can unlink it later
-    if (defined $opt{'pidfile'}) {
-      chown $uuid, -1, $opt{'pidfile'}
-                or die "fatal: could not chown '$opt{'pidfile'}' to uid $uuid\n";
-    }
+  if (defined $opt{'pidfile'}) {
+    chown $uuid, -1, $opt{'pidfile'}
+      || die "fatal: could not chown '$opt{'pidfile'}' to uid $uuid\n";
+  }
 
-    $> = $uuid;		# effective uid
-    $< = $uuid;		# real uid. we now cannot setuid anymore
-    if ($> != $uuid and $> != ($uuid-2**32)) {
-	die "fatal: setuid to uid $uuid failed\n";
-    }
+  $> = $uuid;   # effective uid
+  $< = $uuid;   # real uid. we now cannot setuid anymore
+  if ($> != $uuid and $> != ($uuid-2**32)) {
+    die "fatal: setuid to uid $uuid failed\n";
+  }
 
 } elsif ($> == 0) {
-    if ( !$opt{'vpopmail'} ) {
-	$setuid_to_user = 1;
-    }
+  if ( !$opt{'vpopmail'} ) {
+    $setuid_to_user = 1;
+  }
 }
 
 $opt{'auto-whitelist'} and eval
 {
-    require Mail::SpamAssassin::DBBasedAddrList;
+  require Mail::SpamAssassin::DBBasedAddrList;
 
-    # create a factory for the persistent address list
-    my $addrlistfactory = Mail::SpamAssassin::DBBasedAddrList->new();
-    $spamtest->set_persistent_address_list_factory ($addrlistfactory);
+  # create a factory for the persistent address list
+  my $addrlistfactory = Mail::SpamAssassin::DBBasedAddrList->new();
+  $spamtest->set_persistent_address_list_factory ($addrlistfactory);
 };
 
 Mail::SpamAssassin::Util::clean_path_in_taint_mode();
@@ -271,19 +269,17 @@ preload_modules_with_tmp_homedir();
 # is unreliable on many versions of perl (sadly).  Thanks to
 # anomie /at/ users sourceforge net for the patch!
 $SIG{CHLD} = 'IGNORE';
-$SIG{INT} = \&kill_handler;
+$SIG{INT}  = \&kill_handler;
 $SIG{TERM} = \&kill_handler;
 
 # now allow waiting processes to connect, if they're watching the log.
 # The test suite does this!
 if ($opt{'debug'}) {
-    warn "server started on port $port (running version ".
-				Mail::SpamAssassin::Version().")\n";
-    warn "server pid: $$\n";
+  warn "server started on port $port (running version ". Mail::SpamAssassin::Version().")\n";
+  warn "server pid: $$\n";
 }
 
-logmsg ("server started on port $port (running version ".
-				Mail::SpamAssassin::Version().")");
+logmsg("server started on port $port (running version ". Mail::SpamAssassin::Version().")\n");
 
 my $current_user;
 my $client;

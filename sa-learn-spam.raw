@@ -1,6 +1,7 @@
 #!/usr/bin/perl -w -T
 
-eval "use bytes";
+use strict;
+
 use File::Spec;
 
 my $PREFIX = '@@PREFIX@@';  # substituted at 'make' time

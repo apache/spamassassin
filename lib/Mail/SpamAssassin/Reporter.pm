@@ -2,12 +2,12 @@
 
 package Mail::SpamAssassin::Reporter;
 
-use Carp;
 use strict;
-eval "use bytes";
+use bytes;
+use Carp;
 
-use vars	qw{
-  	@ISA $VERSION
+use vars qw{
+  @ISA $VERSION
 };
 
 @ISA = qw();

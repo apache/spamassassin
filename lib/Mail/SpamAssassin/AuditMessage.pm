@@ -1,16 +1,15 @@
 # Mail::SpamAssassin::AuditMessage - interface to Mail::Audit message text
-
 package Mail::SpamAssassin::AuditMessage;
 
-use Carp;
 use strict;
-eval "use bytes";
+use bytes;
+use Carp;
 
 use Mail::SpamAssassin::NoMailAudit;
 use Mail::SpamAssassin::Message;
 
-use vars        qw{
-        @ISA
+use vars qw{
+  @ISA
 };
 
 @ISA = qw(Mail::SpamAssassin::Message);

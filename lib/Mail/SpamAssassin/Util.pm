@@ -5,10 +5,15 @@
 package Mail::SpamAssassin::Util;
 
 use strict;
-eval "use bytes";
+use bytes;
 
-use vars qw (@ISA @EXPORT $HOSTNAME $AM_TAINTED);
+use vars qw (
+  @ISA @EXPORT
+  $HOSTNAME $AM_TAINTED
+);
+
 require Exporter;
+
 @ISA = qw(Exporter);
 @EXPORT = qw(local_tz);
 
