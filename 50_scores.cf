@@ -619,10 +619,9 @@ score YOU_WON 0.144 0.269 0 0.579
 # GTUBE - Generic Test for Unsolicited Bulk Email
 score GTUBE 1000.000
 
-# long header test
+# we dare you
 score HEAD_LONG 2.5
-
-# missing blank line between header and body
+score FRAGMENTED_MESSAGE 2.5
 score MISSING_HB_SEP 2.5
 
 # HTML control test
