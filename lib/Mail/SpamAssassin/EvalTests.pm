@@ -364,6 +364,7 @@ sub check_for_unique_subject_id {
 sub word_is_in_dictionary {
   my ($self, $word) = @_;
   local ($_);
+  local $/ = "\n";		# Ensure $/ is set appropriately
 
   # $word =~ tr/A-Z/a-z/;	# already done by this stage
   $word =~ s/^\s+//;
@@ -371,8 +372,8 @@ sub word_is_in_dictionary {
   return 0 if ($word =~ /[^a-z]/);
 
   # handle a few common "blah blah blah (comment)" styles
-  return 0 if ($word =~ /ing$/);	# amusing
-  return 0 if ($word =~ /nny$/);	# funny
+  return 1 if ($word =~ /ing$/);	# amusing
+  return 1 if ($word =~ /nny$/);	# funny
 
   if (!open (DICT, "</usr/dict/words") &&
   	!open (DICT, "</usr/share/dict/words"))

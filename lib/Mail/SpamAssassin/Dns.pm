@@ -168,6 +168,8 @@ sub razor_lookup {
     open (STDOUT, ">&STDERR");
   }
 
+  my $oldslash = $/;
+
   eval {
     require Razor::Client;
     require Razor::Agent;
@@ -201,6 +203,8 @@ sub razor_lookup {
       warn ("razor check skipped: $! $@");
     }
   }
+
+  $/ = $oldslash;		# argh! pollution!
 
   # razor also debugs to stdout. argh. fix it to stderr...
   if ($Mail::SpamAssassin::DEBUG) {

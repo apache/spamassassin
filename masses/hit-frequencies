@@ -2,12 +2,17 @@
 
 my %freq_spam = ();
 my %freq_nonspam = ();
+my $num_spam;
+my $num_nonspam;
 
 readlogs();
 readscores();
 
   printf "%10s  %10s  %10s  %s\n",
   	"OVERALL", "SPAM", "NONSPAM", "NAME";
+
+  printf "%10d  %10d  %10d  (all messages)\n",
+  	$num_spam + $num_nonspam, $num_spam, $num_nonspam;
 
 foreach my $test (sort { 
 		  (defined ($freq_spam{$b}) ? $freq_spam{$b} : 0) <=>
@@ -25,8 +30,16 @@ sub readlogs {
   foreach my $file ("spam.log", "nonspam.log") {
     open (IN, "<$file");
 
+    my $isspam = 0; ($file eq 'spam.log') and $isspam = 1;
+
     while (<IN>) {
       /^.\s+(\d+)\s+(\S+)\s*(\S*)/ or next;
+
+      if ($isspam) {
+	$num_spam++;
+      } else {
+	$num_nonspam++;
+      }
       my $hits = $1;
 
       $_ = $3; s/,,+/,/g;
@@ -34,7 +47,7 @@ sub readlogs {
       foreach my $t (@tests) {
 	next if ($t eq '');
 	$freq{$t}++;
-	if ($file eq "spam.log") {
+	if ($isspam) {
 	  $freq_spam{$t}++;
 	} else {
 	  $freq_nonspam{$t}++;

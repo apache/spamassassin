@@ -3,24 +3,40 @@
 my %freq_spam = ();
 my %freq_nonspam = ();
 
+my $num_spam;
+my $num_nonspam;
+
 while (<>) {
-  /^\s+(\d+)\s+(\d+)\s+(\d+)\s+(\S+)/ or next;
+  /^\s+(\d+)\s+(\d+)\s+(\d+)\s+(.+)\s*$/ or next;
+
   my $overall = $1+0;
   my $spam = $2+0;
   my $nonspam = $3+0;
   my $test = $4;
 
+  if ($test eq '(all messages)') {
+    $num_spam = $spam;
+    $num_nonspam = $nonspam;
+    next;
+  }
+
   $freq{$test} = $overall;
   $freq_spam{$test} = $spam;
   $freq_nonspam{$test} = $nonspam;
 
-  if ($nonspam == 0) {
-    $nonspam = 1;	# avoid / by 0
-    $spam *= 20;	# give the spam score a bonus to make up
-  }
-  my $ratio = $spam / $nonspam;
+  $mutatable{$test} = 1;
+  if ($spam + $nonspam < 5) {
+    $mutatable{$test} = 0;
+    $ratio{$test} = 0;
 
-  $ratio{$test} = $ratio;
+  } else {
+    if ($nonspam == 0) {
+      $nonspam = 1;	# avoid / by 0
+      $spam *= 20;	# give the spam score a bonus to make up
+    }
+    my $ratio = $spam / $nonspam;
+    $ratio{$test} = $ratio;
+  }
 }
 
 system ("mkdir tmp >/dev/null 2>&1");
@@ -30,6 +46,12 @@ foreach my $test (sort { $ratio{$b} <=> $ratio{$a} } keys %freq) {
   my $spam = $freq_spam{$test};
   my $nonspam = $freq_nonspam{$test};
   my $ratio = $ratio{$test};
+  my $mutatable = $mutatable{$test};
+
+  if (!$mutatable) {
+    printf OUT ("%3.1f %3.1f 0 $test\n", 0, 0);
+    next;
+  }
 
   if ($ratio > 200.0) { $ratio = 200.0; }	# set a ceiling
   if ($ratio < 1.0) { $ratio = 1.0; }		# and floor
@@ -39,9 +61,9 @@ foreach my $test (sort { $ratio{$b} <=> $ratio{$a} } keys %freq) {
   # for scores based on this.
   my ($lo, $hi) = ratio_in_200_to_range($ratio);
 
-  printf OUT ("%3.1f %3.1f $test\n", $lo, $hi);
-  printf "range: %3.1f %3.1f $test ($spam / $nonspam = $ratio)\n",
-  	$lo, $hi;
+  printf OUT ("%3.1f %3.1f 1 $test\n", $lo, $hi);
+  #printf "range: %3.1f %3.1f $test ($spam / $nonspam = $ratio)\n",
+  #$lo, $hi;
 }
 close OUT;
 exit;
