@@ -119,6 +119,14 @@ ok_locales              all
 # test, so it is set to "all" so the test will not be used by default.
 ok_languages            all
 
+# Mail which scores outside this range will be fed back into SpamAssassin's
+# learning system automatically, to train the Bayesian scanner.
+auto_learn_threshold_nonspam	-2
+auto_learn_threshold_spam	15
+
+# Set this to 0 to turn off auto-learning.
+auto_learn			1
+
 # Some common prefs settings can be set here, to take effect site-wide
 # unless the user override them. See the user_prefs.template file for
 # explanations.
