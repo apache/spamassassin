@@ -272,7 +272,7 @@ header T_SUSPECT_RECIPIENTS_5	eval:check_for_suspect_recipients('6','undef')
 body T_FIRE_BOSS         /\bfire your boss\b/i
 
 # bug 710
-body T_WINNER                     /\b(?:you(?:'re| are) a|lucky|big|next) winners?\b/i
+body T_WINNER                     /\b(?:you(?:'| a)re a|lucky|big|next) winners?\b/i
 describe T_WINNER                 Claims you are a winner
 
 body T_YOU_WON                    /\byou(?:'ve| have)? won(?!'|\w)/i
