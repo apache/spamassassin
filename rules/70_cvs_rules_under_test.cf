@@ -646,3 +646,29 @@ uri T_USERPASS			m{https?://[^/\s]+?(?::[^/\s]+?)?\@}i
 body T_AS_SEEN_ON_1		/seen on\b\s*(?:T\.?V\.?|ABC|NBC|CBS|CNN|Oprah|USA Today|48 Hours|New York Times|\w+\s+T\.?V\.?|:)/i
 body T_AS_SEEN_ON_2		/seen [oi]n\b\s*(?:TV|ABC|NBC|CBS|CNN|Oprah|USA Today|48 Hours|(The )?New York Times|\w+\s+TV|:)/i
 body T_AS_SEEN_ON_3		/seen [oi]n\b\s*(?:T\.?V\.?|ABC|NBC|CBS|CNN|Oprah|USA Today|48 Hours|(The )?New York Times|\w+\s+T\.?V\.?|:)/i
+
+# http://marc.theaimsgroup.com/?l=spamassassin-talk&m=105203882531351&w=2
+header T_RATWARE_X_SCANNER	X-Scanner =~ /^: /
+
+header __RATWARE_EXISCAN	X-Scanner =~ /exiscan/
+header __RATWARE_ANTIABUSE	X-AntiAbuse =~ /Originator.Caller UID.GID - \[\d \d\] \/ \[\d \d\]/
+meta T_RATWARE_EXISCAN_FORGERY	(__RATWARE_EXISCAN && __RATWARE_ANTIABUSE && __HAS_MSMAIL_PRI)
+
+# also, References headers have a format
+header T_RATWARE_BAD_REFS	References =~ /^[^<]\S+\$\S+\@\S+[^>]$/
+
+# Gecko ver is 8 digits: "Gecko/20011019"
+header T_RATWARE_BAD_GECKO	User-Agent =~ /Gecko\/(?:\d{1,7}|\d{9,})(?:\s|$)/
+
+# hmm, interesting.   Ensure the MUA is using consistent priorities.
+# http://www3.cds.ne.jp/~marimo/oka/research/em/data0002.html
+header __X_PRI_HI		X-Priority =~ /^[12]/
+header __X_PRI_MD		X-Priority =~ /^3/
+header __X_PRI_LO		X-Priority =~ /^[456789]/
+header __X_MSPRI_HI		X-Msmail-Priority =~ /^High/
+header __X_MSPRI_MD		X-Msmail-Priority =~ /^Normal/
+header __X_MSPRI_LO		X-Msmail-Priority =~ /^Low/
+meta T_X_PRI_MISMATCH_HI	(__X_PRI_HI && __HAS_MSMAIL_PRI && !__X_MSPRI_HI)
+meta T_X_PRI_MISMATCH_MD	(__X_PRI_MD && __HAS_MSMAIL_PRI && !__X_MSPRI_MD)
+meta T_X_PRI_MISMATCH_LO	(__X_PRI_LO && __HAS_MSMAIL_PRI && !__X_MSPRI_LO)
+
