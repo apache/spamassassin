@@ -11,12 +11,13 @@ those IP addresses.  This is quite effective.
 
   loadplugin    Mail::SpamAssassin::Plugin::URIDNSBL
   uridnsbl	URIBL_SBLXBL    sbl-xbl.spamhaus.org.   TXT
+  urirhsbl	URIBL_SURBL     sc.surbl.org.           A
 
 =head1 CONFIGURATION
 
 =over 4
 
-=item uridnsbl NAME_OF_RULE dnsbl_zore lookuptype
+=item uridnsbl NAME_OF_RULE dnsbl_zone lookuptype
 
 Specify a lookup.  C<NAME_OF_RULE> is the name of the rule to be
 used, C<dnsbl_zone> is the zone to look up IPs in, and C<lookuptype>
@@ -28,6 +29,19 @@ Example:
  uridnsbl        URIBL_SBLXBL    sbl-xbl.spamhaus.org.   TXT
  header          URIBL_SBLXBL    eval:check_uridnsbl('URIBL_SBLXBL')
  describe        URIBL_SBLXBL    Contains a URL listed in the SBL/XBL blocklist
+
+=item urirhsbl NAME_OF_RULE rhsbl_zone lookuptype
+
+Specify a RHSBL-style domain lookup.  C<NAME_OF_RULE> is the name of the rule
+to be used, C<rhsbl_zone> is the zone to look up domain names in, and
+C<lookuptype> is the type of lookup (B<TXT> or B<A>).   Note that you must also
+define a header-eval rule calling C<check_uridnsbl> to use this.
+
+An RHSBL zone is one where the domain name is looked up, as a string; e.g. a
+URI using the domain C<foo.com> will cause a lookup of C<foo.com.uriblzone.net>.
+Note that hostnames are stripped from the domain used in the URIBL lookup,
+so the domain C<foo.bar.com> will look up C<bar.com.uriblzone.net>, and
+C<foo.bar.co.uk> will look up C<bar.co.uk.uriblzone.net>.
 
 =item uridnsbl_timeout N		(default: 2)
 
@@ -120,9 +134,17 @@ sub parsed_metadata {
   };
 
   # only hit DNSBLs for active rules (defined and score != 0)
+  $scanstate->{active_rules_rhsbl} = { };
+  $scanstate->{active_rules_revipbl} = { };
   foreach my $rulename (keys %{$scanner->{conf}->{uridnsbls}}) {
     next unless ($scanner->{conf}->is_rule_active('head_evals',$rulename));
-    $scanstate->{active_rules}->{$rulename} = 1;
+
+    my $rulecf = $scanstate->{scanner}->{conf}->{uridnsbls}->{$rulename};
+    if ($rulecf->{is_rhsbl}) {
+      $scanstate->{active_rules_rhsbl}->{$rulename} = 1;
+    } else {
+      $scanstate->{active_rules_revipbl}->{$rulename} = 1;
+    }
   }
 
   $self->setup ($scanstate);
@@ -165,7 +187,21 @@ sub parse_config {
       my $type = $3;
 
       $opts->{conf}->{uridnsbls}->{$rulename} = {
-	zone => $zone, type => $type
+	zone => $zone, type => $type,
+        is_rhsbl => 0
+      };
+    }
+    return 1;
+  }
+  elsif ($key eq 'urirhsbl') {
+    if ($opts->{value} =~ /^(\S+)\s+(\S+)\s+(\S+)$/) {
+      my $rulename = $1;
+      my $zone = $2;
+      my $type = $3;
+
+      $opts->{conf}->{uridnsbls}->{$rulename} = {
+	zone => $zone, type => $type,
+        is_rhsbl => 1
       };
     }
     return 1;
@@ -209,7 +245,8 @@ sub check_post_dnsbl {
     dbg ("done waiting for URIDNSBL lookups to complete");
   }
 
-  foreach my $rulename (keys %{$scanstate->{active_rules}})
+  foreach my $rulename (keys %{$scanstate->{active_rules_revipbl}},
+                        keys %{$scanstate->{active_rules_rhsbl}})
   {
     $scan->clear_test_state();
 
@@ -252,7 +289,18 @@ sub query_domain {
 
   if ($dom =~ /^\d+\.\d+\.\d+\.\d+$/) { 
     $self->lookup_dnsbl_for_ip ($scanstate, $obj, $dom);
-  } else {
+  }
+  else
+  {
+    # look up the domain in the RHSBL subset
+    my $cf = $scanstate->{active_rules_rhsbl};
+    foreach my $rulename (keys %{$cf}) {
+      my $rulecf = $scanstate->{scanner}->{conf}->{uridnsbls}->{$rulename};
+      $self->lookup_single_dnsbl ($scanstate, $obj, $rulename,
+                          $dom, $rulecf->{zone}, $rulecf->{type});
+    }
+
+    # perform NS, A lookups to look up the domain in the non-RHSBL subset
     $self->lookup_domain_ns ($scanstate, $obj, $dom);
   }
 }
@@ -328,7 +376,7 @@ sub lookup_dnsbl_for_ip {
   $ip =~ /^(\d+)\.(\d+)\.(\d+)\.(\d+)$/;
   my $revip = "$4.$3.$2.$1";
 
-  my $cf = $scanstate->{active_rules};
+  my $cf = $scanstate->{active_rules_revipbl};
   foreach my $rulename (keys %{$cf}) {
     my $rulecf = $scanstate->{scanner}->{conf}->{uridnsbls}->{$rulename};
     $self->lookup_single_dnsbl ($scanstate, $obj, $rulename,
@@ -337,11 +385,11 @@ sub lookup_dnsbl_for_ip {
 }
 
 sub lookup_single_dnsbl {
-  my ($self, $scanstate, $obj, $rulename, $revip, $dnsbl, $qtype) = @_;
+  my ($self, $scanstate, $obj, $rulename, $lookupstr, $dnsbl, $qtype) = @_;
 
-  my $key = "DNSBL:".$dnsbl.":".$revip;
+  my $key = "DNSBL:".$dnsbl.":".$lookupstr;
   return if $scanstate->{pending_lookups}->{$key};
-  my $item = $revip.".".$dnsbl;
+  my $item = $lookupstr.".".$dnsbl;
 
   # dig $ip txt
   my $ent = $self->start_lookup ($scanstate, 'DNSBL',
