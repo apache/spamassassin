@@ -1818,6 +1818,38 @@ sub nonspace_length {
   return ($self->{nonspace} > $min && $self->{nonspace} <= $max);
 }
 
+# TESTING XXX this needs to be cleaned up, maybe moved to HTML.pm
+sub image_count_ratio {
+  my ($self, $body, $min, $max) = @_;
+
+  return 0 unless exists $self->{html}{num_imgs} && $self->{html}{num_imgs} > 0;
+
+  if (!exists $self->{nonspace}) {
+    nonspace_length($self, $body, 0, 0);
+  }
+
+  $self->{image_count_ratio} = $self->{nonspace} / $self->{html}{num_imgs};
+
+  return ($self->{image_count_ratio} > $min &&
+	  $self->{image_count_ratio} <= $max);
+}
+
+# TESTING XXX this needs to be cleaned up, maybe moved to HTML.pm
+sub image_area_ratio {
+  my ($self, $body, $min, $max) = @_;
+
+  return 0 unless exists $self->{html}{total_image_area} && $self->{html}{total_image_area};
+
+  if (!exists $self->{nonspace}) {
+    nonspace_length($self, $body, 0, 0);
+  }
+
+  $self->{image_area_ratio} = $self->{nonspace} / $self->{html}{total_image_area};
+
+  return ($self->{image_area_ratio} > $min &&
+	  $self->{image_area_ratio} <= $max);
+}
+
 sub check_for_uppercase {
   my ($self, $body, $min, $max) = @_;
 
