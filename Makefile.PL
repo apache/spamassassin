@@ -179,55 +179,51 @@ unless($Config{installman1dir}) {
   delete $makefile{MAN1PODS};
 }
 
-my $contactaddr;
-
 #######################################################################
 
 # what a PITA.  we can't get at MakeMaker's parsed args. do it ourselves,
 # again....
-my $argv = join (' ', @ARGV);
 
-{
-  my $do;
+my $contactaddr;
+my $runrazor;
 
-  $do = ($argv =~ /\bCONTACT_ADDRESS=(\S+)/)[0];
-
-  if (!defined ($do)) {
-    my $url = prompt (
-      "What email address, or URL, should be used in the suspected-spam report\n".
-      "text, for users who want more information on your filter installation?\n".
-      "(ISPs, in particular, should change this to a local Postmaster\n".
-      "address or URL.)\n".
-      "Default text:", "the administrator of that system");
-    $do = $url;
+for my $arg (@ARGV) {
+  if ($arg =~ /^CONTACT_ADDRESS=(.*)/) {
+    $contactaddr = $1;
   }
-
-  $contactaddr = $do;
-
-  $do = ($argv =~ /\bRUN_RAZOR2?_TESTS?=(.)/)[0];
-
-  if (!defined($do)) {
-    $do = eval { require Razor2::Client::Agent };
-
-    if (defined $do) {
-      prompt("Run Razor v2 tests (these may fail due to network problems)? (y/n)", 'n') =~ /^(.)/;
-      $do = $1;
-    }
-    else {
-      $do = '';
-    }
-  }
-  
-  $do =~ tr/y1/0/c;
- 
-  unlink("t/do_razor2"); 
-  if ($do) {
-    open(FLAG, ">t/do_razor2") && close(FLAG);
+  elsif ($arg =~ /^RUN_RAZOR2?_TESTS?=(.)/) {
+    $runrazor = $1;
   }
 }
 
-WriteMakefile(%makefile);
+if (!defined $contactaddr) {
+  $contactaddr = prompt(
+    "What email address or URL should be used in the suspected-spam report\n".
+    "text for users who want more information on your filter installation?\n".
+    "(In particular, ISPs should change this to a local Postmaster contact)\n".
+    "default text:", "the administrator of that system");
+}
 
+if (!defined $runrazor) {
+  $runrazor = eval { require Razor2::Client::Agent };
+
+  if ($runrazor) {
+    $runrazor = prompt(
+      "Run Razor v2 tests (these may fail due to network problems)? (y/n)",
+      'n');
+  }
+}  
+$runrazor = substr($runrazor, 0, 1);
+$runrazor =~ tr/y1/0/c;
+if ($runrazor) {
+  open(FLAG, "> t/do_razor2");
+  close(FLAG);
+}
+else {
+  unlink("t/do_razor2"); 
+}
+
+WriteMakefile(%makefile);
 
 #######################################################################
 
