@@ -18,16 +18,16 @@
 
 use FindBin;
 use Getopt::Std;
-getopts("fm:M:X:l:L:pxhc:at:s:");
+getopts("fm:M:X:l:L:pxhc:at:s:i");
 
 use vars qw {
   $opt_f $opt_m $opt_M $opt_X $opt_p $opt_x $opt_h $opt_l $opt_L $opt_c
-  $opt_a $opt_t $opt_s 
+  $opt_a $opt_t $opt_s $opt_i $sorting
 };
 
 sub usage {
   die "hit-frequencies [-c rules dir] [-f] [-m RE] [-M RE] [-X RE] [-l LC]
-                [-s SC] [-a] [-p] [-x] [spam log] [ham log]
+                [-s SC] [-a] [-p] [-x] [-i] [spam log] [ham log]
 
     -c p   use p as the rules directory
     -f     falses. count only false-negative or false-positive matches
@@ -41,6 +41,7 @@ sub usage {
     -p     percentages. implies -x
     -x     extended output, with S/O ratio and scores
     -s SC  which scoreset to use
+    -i     use IG (information gain) for ranking
 
     options -l and -L are mutually exclusive.
 
@@ -94,12 +95,13 @@ my $hdr_spam = $num_spam;
 my $hdr_ham = $num_ham;
 
 if ($opt_p) {
+  my $sorting = $opt_i ? "IG" : "RANK";
   if ($opt_f) {
     printf "%7s %7s %7s  %6s  %6s  %6s  %s\n",
-  	"OVERALL%", "FNEG%", "FPOS%", "S/O", "IG", "SCORE", "NAME";
+  	"OVERALL%", "FNEG%", "FPOS%", "S/O", $sorting, "SCORE", "NAME";
   } else {
     printf "%7s %7s  %7s  %6s  %6s  %6s  %s\n",
-  	"OVERALL%", "SPAM%", "HAM%", "S/O", "IG", "SCORE", "NAME";
+  	"OVERALL%", "SPAM%", "HAM%", "S/O", $sorting, "SCORE", "NAME";
   }
   printf "%7d  %7d  %7d  %7.3f %6.2f  %6.2f  (all messages)\n",
   	$hdr_all, $hdr_spam, $hdr_ham,
@@ -114,7 +116,7 @@ if ($opt_p) {
 
 } elsif ($opt_x) {
   printf "%7s %7s  %7s  %6s  %6s %6s  %s\n",
-  	"OVERALL%", "SPAM%", "HAM%", "S/O", "IG", "SCORE", "NAME";
+  	"OVERALL%", "SPAM%", "HAM%", "S/O", $sorting, "SCORE", "NAME";
   printf "%7d  %7d  %7d  %7.3f %6.2f %6.2f  (all messages)\n",
   	$hdr_all, $hdr_spam, $hdr_ham,
         soratio ($num_spam,$num_ham), 0, 0;
@@ -130,6 +132,11 @@ my %done = ();
 my @tests = ();
 my $rank_hi = 0;
 my $rank_lo = 9999999;
+
+# variables for wanted/unwanted RANK
+my %wanted;
+my %unwanted;
+
 foreach my $test (keys %freq_spam, keys %freq_ham) {
   next unless (exists $rules{$test});           # only valid tests
   next if (!$opt_a && $rules{$test}->{issubrule});
@@ -152,22 +159,10 @@ foreach my $test (keys %freq_spam, keys %freq_ham) {
     my $tmp = $fsadj; $fsadj = $fnadj; $fnadj = $tmp;
   }
 
-  # now, given the S/O ratio (0.0 to 1.0) and match%s (0.0 to 100.0),
-  # come up with a ranking.
-  my $rank;
+  if ($opt_i) {
+    # come up with a ranking
+    my $rank;
 
-  # old system
-  #$rank = $soratio * ($fsadj / (($fnadj || 0.0008) * 10));
-  #$rank = log($rank+0.001);
-
-  # new system: allows a few more 99% hitters into the first page
-  # $rank = (($soratio**3) * 2000) + ($fsadj*3);
-  # 
-  # $ranking{$test} = $rank;
-  # $rank_hi = $rank if ($rank > $rank_hi);
-  # $rank_lo = $rank if ($rank < $rank_lo);
-
-  {
     # New new system: from "Learning to Filter Unsolicited Commercial E-Mail",
     # Ion Androutsopoulos et al: determine the information gain IG(X, C) of the
     # Boolean attributes (ie. the rules). Measures "the average reduction in
@@ -183,7 +178,7 @@ foreach my $test (keys %freq_spam, keys %freq_ham) {
     my $safe_nspam = $num_spam || 0.0000001;
     my $safe_nham = $num_ham || 0.0000001;
 
-    my $num_all = ($num_spam+$num_ham);
+    my $num_all = ($num_spam + $num_ham);
     my $safe_all = $num_all || 0.0000001;
     my $f_all = $fs+$fn;
 
@@ -215,13 +210,45 @@ foreach my $test (keys %freq_spam, keys %freq_ham) {
     $rank_hi = $rank if ($rank > $rank_hi);
     $rank_lo = $rank if ($rank < $rank_lo);
   }
+  else {
+    # basic wanted/unwanted ranking
+    $wanted{$test} = $isnice ? $fn : $fs;
+    $unwanted{$test} = $isnice ? $fs : $fn;
+  }
+}
+
+# finish basic wanted/unwanted ranking
+if (! $opt_i) {
+  my @wanted = sort { $wanted{$a} <=> $wanted{$b} } keys %wanted;
+  my @unwanted = sort { $unwanted{$b} <=> $unwanted{$a} } keys %wanted;
+
+  my $position;
+  my $last;
+
+  $position = 0;
+  $last = undef;
+  for my $test (@wanted) {
+    $position++ if defined $last && $last != $wanted{$test};
+    $ranking{$test} += $position;
+    $last = $wanted{$test}
+  }
+
+  $position = 0;
+  $last = undef;
+  for my $test (@unwanted) {
+    $position++ if defined $last && $last != $unwanted{$test};
+    $ranking{$test} += $position;
+    $last = $unwanted{$test};
+    $rank_hi = $ranking{$test} if ($ranking{$test} > $rank_hi);
+    $rank_lo = $ranking{$test} if ($ranking{$test} < $rank_lo);
+  }
 }
 
 {
   # now normalise the rankings to [0, 1]
   $rank_hi -= $rank_lo;
   foreach $test (@tests) {
-  $ranking{$test} = $rank_hi == 0 ? 0.001 : ($ranking{$test} - $rank_lo) / ($rank_hi);
+    $ranking{$test} = $rank_hi == 0 ? 0.001 : ($ranking{$test} - $rank_lo) / ($rank_hi);
   }
 }
 
