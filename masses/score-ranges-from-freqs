@@ -1,0 +1,66 @@
+#!/usr/bin/perl -w
+
+my %freq_spam = ();
+my %freq_nonspam = ();
+
+while (<>) {
+  /^\s+(\d+)\s+(\d+)\s+(\d+)\s+(\S+)/ or next;
+  my $overall = $1+0;
+  my $spam = $2+0;
+  my $nonspam = $3+0;
+  my $test = $4;
+
+  $freq{$test} = $overall;
+  $freq_spam{$test} = $spam;
+  $freq_nonspam{$test} = $nonspam;
+
+  if ($nonspam == 0) {
+    $nonspam = 1;	# avoid / by 0
+    $spam *= 20;	# give the spam score a bonus to make up
+  }
+  my $ratio = $spam / $nonspam;
+
+  $ratio{$test} = $ratio;
+}
+
+open (OUT, ">tmp/ranges.data");
+foreach my $test (sort { $ratio{$b} <=> $ratio{$a} } keys %freq) {
+  my $overall = $freq{$test};
+  my $spam = $freq_spam{$test};
+  my $nonspam = $freq_nonspam{$test};
+  my $ratio = $ratio{$test};
+
+  if ($ratio > 200.0) { $ratio = 200.0; }	# set a ceiling
+  if ($ratio < 1.0) { $ratio = 1.0; }		# and floor
+
+  # now we have a number between 1.0 and 200.0 indicating how
+  # effective the test is. Come up with a reasonable range
+  # for scores based on this.
+  my ($lo, $hi) = ratio_in_200_to_range($ratio);
+
+  printf OUT ("%3.1f %3.1f $test\n", $lo, $hi);
+  printf ("range: %3.1f %3.1f $test ($spam / $nonspam = $ratio)\n",
+  	$lo, $hi);
+}
+close OUT;
+exit;
+
+sub ratio_in_200_to_range {
+  my $ratio = shift;
+
+  # the current algo maps 200.0 to a range between 2.0 and 4.0,
+  # and 1.0 to a range between 0.1 and 0.5.
+
+  my $hi_lo = 200 / 2.0;		# 50
+  my $hi_hi = 200 / 4.0;		# 25
+  my $lo_lo =   1 / 0.1;		# 10
+  my $lo_hi =   1 / 1.0;		# 1
+
+  my $lo_diff = abs($lo_lo - $hi_lo);	# 40
+  my $hi_diff = abs($lo_hi - $hi_hi);	# 24
+
+  my $lo = ($ratio / (($ratio/200) * $lo_diff + $lo_lo));
+  my $hi = ($ratio / (($ratio/200) * $hi_diff + $lo_hi));
+  ($lo, $hi);
+}
+

@@ -210,7 +210,8 @@ header RCVD_IN_BL_SPAMCOP_NET	eval:check_rbl('spamcop', 'bl.spamcop.net.')
 describe RCVD_IN_BL_SPAMCOP_NET	Received via a relay in bl.spamcop.net
 
 # don't include From:!  Many UNIX MTA's get false positives otherwise
-header FORGED_RCVD_FOUND	ALL =~ /\n(?:Subject|Reply-To):.*\nReceived: /s
+# ditto for Reply-To:, some list software inserts Received and Reply-To hdrs
+header FORGED_RCVD_FOUND	ALL =~ /\nSubject:.*\nReceived: /s
 describe FORGED_RCVD_FOUND	Possibly-forged 'Received:' header found
 
 header YR_MEMBERSHIP_EXCH	Subject =~ /Your Membership Exchange/
@@ -450,12 +451,12 @@ body FREE_CONSULTATION		/FREE CONSULTATION/i
 body INCREASE_SALES		/INCREASE SALES/i
 
 # (contrib: Matt Sergeant)
-body LARGE_HEX			/[0-9a-fA-F]{40,}/
+body LARGE_HEX			/^\s*[0-9a-fA-F]{40,}/
 score LARGE_HEX			2
 
 # somehow "/name.*\bcredit.?card\b/is" won't match, even if
 # it's there.  *boggle* (contrib: WW)
-body WANTS_CREDIT_CARD          /\bcredit.?card\b/i
+body WANTS_CREDIT_CARD          /\bcredit.?card\s+order/i
 describe WANTS_CREDIT_CARD      Asks for credit card details
 
 # (contrib: WW)
@@ -467,7 +468,8 @@ body CYBER_FIRE_POWER           /(?:by|for) Cyber FirePower\!/
 describe CYBER_FIRE_POWER       mentions Cyber FirePower!, a spam-tool
 
 # (contrib: WW)
-body LINE_OF_YELLING            /^(?:[A-Z0-9\$\.,\'\s]){40,}$/
+# modified by jm to stop it matching on all-space lines
+body LINE_OF_YELLING            /^[A-Z0-9\$\.,\'\!\?\s]{20,}[A-Z0-9\$\.,\'\!\?][A-Z0-9\$\.,\'\!\?\s]{20,}$/
 describe LINE_OF_YELLING        A WHOLE LINE OF YELLING DETECTED
 
 ###########################################################################
