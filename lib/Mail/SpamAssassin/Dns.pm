@@ -844,6 +844,8 @@ sub leave_helper_run_mode {
   $/ = $self->{old_slash};
   if (defined $self->{old_env_home}) {
     $ENV{'HOME'} = $self->{old_env_home};
+  } else {
+    delete $ENV{'HOME'};        # make sure it's unset
   }
 }
 
