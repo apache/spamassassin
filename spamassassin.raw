@@ -4,9 +4,11 @@
 use File::Spec;
 BEGIN {
   # Keep FindBin from croak()ing on STDERR and confusing MTAs.
-  local *STDERR;
-  open(STDERR, '>' . File::Spec->devnull()) || die $!;
-  require FindBin;
+  {
+    local *STDERR;
+    open(STDERR, '>' . File::Spec->devnull()) || die $!;
+    require FindBin;
+  }
 
   # These are common paths where the SA libs might be found.
   foreach (qw(lib ../lib ../lib/site_perl ../lib/spamassassin ../share/spamassassin/lib)) {
