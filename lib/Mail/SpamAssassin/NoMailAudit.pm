@@ -299,7 +299,7 @@ sub _proxy_to_mail_audit {
   my $method = shift;
   my $ret;
 
-  my @textary = split (/\n/s, $self->as_string());
+  my @textary = split (/^/m, $self->as_string());
 
   eval {
     require Mail::Audit;
