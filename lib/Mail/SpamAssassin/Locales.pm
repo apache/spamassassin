@@ -37,16 +37,16 @@ use vars	qw{ %charsets_for_locale };
 sub is_charset_ok_for_locale {
   my ($cs, $locale) = @_;
 
-  $cs = uc $cs; $cs =~ s/[^a-z0-9]//g; study $cs;
+  $cs = uc $cs; $cs =~ s/[^A-Z0-9]//g; study $cs;
 
   # always OK (the net speaks mostly roman charsets)
   return 1 if ($cs eq 'USASCII');
-  return 1 if ($cs =~ /^ISO8559/);
+  return 1 if ($cs =~ /^ISO8859/);
   return 1 if ($cs =~ /^ISO10646/);
   return 1 if ($cs =~ /^UTF/);
   return 1 if ($cs =~ /^UCS/);
-  return 1 if ($cs =~ /^CP125[0-7]/);
-  return 1 if ($cs =~ /^WINDOWS125[0-7]/);
+  return 1 if ($cs =~ /^CP125/);
+  return 1 if ($cs =~ /^WINDOWS125/);
   return 1 if ($cs eq 'IBM852');
 
   if (!defined($locale) || $locale eq 'C') { $locale = 'en'; }
