@@ -98,24 +98,19 @@ lang de describe EMAIL_ROT13 Eventuell ROT13-kodierte E-mail-Adresse im Text
 lang de describe BLANK_LINES_70_80 Nachrichtentext besteht zu 70-80% aus Leerzeilen
 lang de describe BLANK_LINES_80_90 Nachrichtentext besteht zu 80-90% aus Leerzeilen
 lang de describe BLANK_LINES_90_100 Nachrichtentext besteht zu 90-100% aus Leerzeilen
-lang de describe HABEAS_SWE Benutzt Markenzeichen von Habeas (http://www.habeas.com/)
-lang de describe RCVD_IN_NJABL Transportiert via Rechner in Liste von dnsbl.njabl.org
 lang de describe RCVD_IN_NJABL_RELAY NJABL: Senderechner als "Open Relay" bestätigt
 lang de describe RCVD_IN_NJABL_DIALUP NJABL: Senderechner nur temporär mit Internet verbunden
 lang de describe RCVD_IN_NJABL_SPAM NJABL: Senderechner ist bestätigter Spam-Versender
 lang de describe RCVD_IN_NJABL_MULTI NJABL: mehrfach über "open relay"-Rechner weitergeleitet
 lang de describe RCVD_IN_NJABL_CGI NJABL: gesendet über ein veraltetes und ungesichertes Webformular
 lang de describe RCVD_IN_NJABL_PROXY NJABL: Senderechner als "open proxy" gemeldet
-lang de describe RCVD_IN_SORBS Transportiert via Rechner in Liste von www.dnsbl.sorbs.net
 lang de describe RCVD_IN_SORBS_HTTP SORBS: Senderechner als "open HTTP proxy" gemeldet
 lang de describe RCVD_IN_SORBS_MISC SORBS: Senderechner als "open proxy" gemeldet
 lang de describe RCVD_IN_SORBS_SMTP SORBS: Senderechner ist ein ungesicherter Mail-Server
 lang de describe RCVD_IN_SORBS_SOCKS SORBS: Senderechner als "open SOCKS proxy" gemeldet
-lang de describe RCVD_IN_SORBS_SPAM SORBS Senderechner ist bekannter Spam-Versender
 lang de describe RCVD_IN_SORBS_WEB SORBS: Senderechner ist ein ungesicherter WWW-Server
 lang de describe RCVD_IN_SORBS_BLOCK Senderechner verweigert Tests durch SORBS
 lang de describe RCVD_IN_SORBS_ZOMBIE SORBS: Senderechner in Liste "entführter" Adressblöcke
-lang de describe RCVD_IN_OPM Transportiert via Rechner in Liste von opm.blitzed.org
 lang de describe RCVD_IN_OPM_WINGATE OPM: Senderechner als "open WinGate proxy" gemeldet
 lang de describe RCVD_IN_OPM_SOCKS OPM: Senderechner als "open SOCKS proxy" gemeldet
 lang de describe RCVD_IN_OPM_HTTP OPM: Senderechner als "open HTTP CONNECT proxy" gemeldet
@@ -134,22 +129,14 @@ lang de describe RCVD_IN_MAPS_RBL Transportiert via Rechner in Liste von http://
 lang de describe RCVD_IN_MAPS_DUL Transportiert via Rechner in Liste von http://www.mail-abuse.org/dul/
 lang de describe RCVD_IN_MAPS_RSS Transportiert via Rechner in Liste von http://www.mail-abuse.org/rss/
 lang de describe RCVD_IN_MAPS_NML Transportiert via Rechner in Liste von http://www.mail-abuse.org/nml/
-lang de describe FAKE_HELO_AOL HELO-Rechnernamen gehört nicht zu aol.com
-lang de describe FAKE_HELO_HOTMAIL HELO-Rechnernamen gehört nicht zu hotmail.com
-lang de describe FAKE_HELO_SHAW_CA HELO-Rechnernamen gehört nicht zu shaw.ca
-lang de describe FAKE_HELO_NETSCAPE_COM HELO-Rechnernamen gehört nicht zu netscape.com
 lang de describe FAKE_HELO_MSN HELO-Rechnernamen gehört nicht zu msn.com
-lang de describe FAKE_HELO_MAIL_RU HELO-Rechnernamen gehört nicht zu mail.ru
 lang de describe FAKE_HELO_MAIL_COM HELO-Rechnernamen gehört nicht zu mail.com
-lang de describe FAKE_HELO_FLASHMAIL HELO-Rechnernamen gehört nicht zu flashmail.com
 lang de describe FAKE_HELO_EMAIL_COM HELO-Rechnernamen gehört nicht zu email.com
 lang de describe FAKE_HELO_CARAMAIL HELO-Rechnernamen gehört nicht zu caramail.com
 lang de describe FAKE_HELO_EUDORAMAIL HELO-Rechnernamen gehört nicht zu eudoramail.com
 lang de describe FAKE_HELO_EXCITE HELO-Rechnernamen gehört nicht zu excite.com
 lang de describe FAKE_HELO_MAILCITY HELO-Rechnernamen gehört nicht zu mailcity.com
 lang de describe FAKE_HELO_LYCOS HELO-Rechnernamen gehört nicht zu lycos.com
-lang de describe FAKE_HELO_JUNO HELO-Rechnernamen gehört nicht zu juno.com
-lang de describe FAKE_HELO_YAHOO HELO-Rechnernamen gehört nicht zu yahoo.com
 lang de describe FAKE_HELO_YAHOO_CA HELO-Rechnernamen gehört nicht zu yahoo.ca
 lang de describe NO_REAL_NAME Kein vollständiger Name in Absendeadresse
 lang de describe FROM_ENDS_IN_NUMS Absenderadresse endet mit Ziffern im Benutzernamen
@@ -203,8 +190,6 @@ lang de describe DATE_IN_FUTURE_12_24 Absendezeit 12 bis 24 Stunden nach Datum i
 lang de describe DATE_IN_FUTURE_24_48 Absendezeit 24 bis 48 Stunden nach Datum in "Received"-Kopfzeilen
 lang de describe DATE_IN_FUTURE_48_96 Absendezeit 48 bis 96 Stunden nach Datum in "Received"-Kopfzeilen
 lang de describe DATE_IN_FUTURE_96_XX Absendezeit mehr als 96 Stunden nach Datum in "Received"-Kopfzeilen
-lang de describe ADVERT_CODE Betreff beginnt mit Werbungskennzeichnung
-lang de describe ADVERT_CODE2 Betreff enthält Werbungskennzeichnung
 lang de describe SUBJ_ILLEGAL_CHARS Betreff enthält zu viele ungültige Zeichen
 lang de describe FROM_ILLEGAL_CHARS Absendeadresse enthält zu viele ungültige Zeichen
 lang de describe HEAD_ILLEGAL_CHARS Kopfzeilen enthalten zu viele ungültige Zeichen
@@ -261,8 +246,6 @@ lang de describe X_PMFLAGS_PRESENT Enthält Kopfzeile "X-PMFLAGS"
 lang de describe X_PRECEDENCE_REF Enthält Kopfzeile "X-Precedence-Ref"
 lang de describe X_SERV_HOST_PRESENT Enthält Kopfzeile "X-ServerHost"
 lang de describe X_STORMPOST_TO Enthält Kopfzeile "X-Stormpost-To"
-lang de describe X_GCMULTI Enthält Kopfzeile "X-GCMulti"
-lang de describe X_MIME_KEY Enthält Kopfzeile "X-Mime-Key"
 lang de describe MIME_ODD_CASE Enthält Kopfzeile "MiME-Version" (seltsame Groß-/Kleinschreibung)
 lang de describe MISSING_MIMEOLE Kopfzeile "X-MSMail-Priority" aber kein "X-MimeOLE"
 lang de describe MISSING_OUTLOOK_NAME Sieht aus wie von MS Outlook erzeugt, ist es aber nicht
@@ -279,7 +262,6 @@ lang de describe SUB_HELLO Betreff beginnt mit "Hello"
 lang de describe SUBJ_LIFE_INSURANCE Betreff enthält "life insurance"
 lang de describe SUBJ_NOW_ONLY Betreff enthält "Now Only"
 lang de describe SUBJ_RIPPED Betreff enthält "Ripped & Strong"
-lang de describe SUBJECT_DRUG_ED Betreff enthält "viagra"
 lang de describe SUBJ_YOUR_DEBT Betreff dreht sich um Rechnungen oder Kredite
 lang de describe SUBJ_YOUR_FAMILY Betreff enthält "Your Family"
 lang de describe SUBJ_YOUR_OWN Betreff enthält "Your Own"
@@ -330,7 +312,6 @@ lang de describe MSGID_THREESIXSIX Kopfzeile "Message-ID" deutet auf Spam hin (3
 lang de describe X_PRI_MISMATCH_HI Kopfzeile "X-Priority" passt nicht zu "X-MSMail-Priority"
 lang de describe FORGED_RCVD_NET_HELO HELO-Identifikation mit falscher Netzwerkadresse
 lang de describe NO_RDNS_DOTCOM_HELO HELO-Identifikation als großer Provider, aber rDNS-Name inkorrekt
-lang de describe FAKED_HOTMAIL_DAV Absenderadresse passt nicht zu Kopfzeile "X-Originating-Email"
 lang de describe HTML_MESSAGE Nachricht enthält HTML
 lang de describe HTML_00_10 Nachricht enthält zwischen 0 und 10% HTML
 lang de describe HTML_10_20 Nachricht enthält zwischen 10 und 20% HTML
@@ -405,14 +386,10 @@ lang de describe HTML_TAG_BALANCE_HTML Anzahl "html"-Markierungen nicht ausgegli
 lang de describe HTML_TAG_BALANCE_BODY Anzahl "body"-Markierungen nicht ausgeglichen
 lang de describe HTML_TAG_BALANCE_HEAD Anzahl "head"-Markierungen nicht ausgeglichen
 lang de describe HTML_TAG_BALANCE_TABLE fehlender Tabellenabschluß in HTML-Nachricht
-lang de describe HTML_TAG_EXISTS_BASE HTML-Nachricht mit "base"-Markierung
-lang de describe HTML_TAG_EXISTS_PARAM HTML-Nachricht mit "param"-Markierung
-lang de describe HTML_TAG_EXISTS_TBODY HTML-Nachricht mit "tbody"-Markierung
 lang de describe HTML_TITLE_EMPTY HTML-Nachricht mit leerem Titel
 lang de describe HTML_TITLE_UNTITLED HTML-Nachricht mit Titel "Untitled"
 lang de describe HTML_CHARSET_FARAWAY Fremdsprachlicher Zeichensatz für HTML benutzt
 lang de describe HTML_MIME_NO_HTML_TAG Nachricht besteht nur aus HTML, hat aber kein "<html>"-Element
-lang de describe HTML_COMMENT_RATIO Nachricht besteht zu großem Prozentsatz aus HTML-Kommentaren
 lang de describe HIDE_WIN_STATUS Javascript-Anweisungen verstecken Hyperlinks
 lang de describe LINK_TO_NO_SCHEME Hyperlink ohne "http://"
 lang de describe OBFUSCATING_COMMENT HTML-Kommentar versucht Text zu verschleiern
@@ -438,7 +415,6 @@ lang de describe CLICK_BELOW Aufforderung zum Mausklick
 lang de describe CLICK_TO_REMOVE_1 Entfernung aus der Adresslist nur ein Mausklick entfernt
 lang de describe SENT_IN_COMPLIANCE Behauptet, den Vorschriften über Spam zu entsprechen
 lang de describe BILL_1618 Behauptet, dem US-Gesetzentwurf 1618 zu entsprechen
-lang de describe UNDER_BILL_1618 Behauptet, dem US-Gesetzentwurf 1618 zu entsprechen
 lang de describe BILL_SECTION Behauptet, den Vorschriften über Spam zu entsprechen
 lang de describe FURTHER_TRANSMISSIONS Behauptet, den Vorschriften über Spam zu entsprechen
 lang de describe NO_QS_ASKED Stellt keine weiteren Fragen...
@@ -485,7 +461,6 @@ lang de describe SELECTED_YOU Sie wurden auserwählt
 lang de describe MAIL_IN_ORDER_FORM Enthält ein Formular zur schriftlichen Bestellung
 lang de describe UNIVERSITY_DIPLOMAS Universitätsdiplome schnell und einfach...
 lang de describe PREST_NON_ACCREDITED Kaufen Sie Studienabschlüsse obskurer Universitäten
-lang de describe NEW_DOMAIN_EXTENSIONS Eventuell Spam bezüglich neuer Internet-Adressen
 lang de describe CANNOT_BE_SPAM Angeblich kann dies auf keinen Fall Spam sein...
 lang de describe THIS_IS_AN_AD Nachricht sagt selbst, dass es sich um Werbung handelt.
 lang de describe BODY_ENHANCEMENT Informationen zur Penis-/Brustvergrößerung (1)
@@ -610,7 +585,6 @@ lang de describe HIDDEN_ASSETS Finden Sie verstecktes Kapital Ihrer Schuldner
 lang de describe SAVE_THOUSANDS Sparen Sie eine Menge Geld
 lang de describe MARKETING_PARTNERS Angeblich haben Sie sich bei einem Partnerunternehmen registriert
 lang de describe PRIORITY_MAIL Bestellungen werden per Expressversand ausgeliefert
-lang de describe SAVE_ON_INSURANCE Man möchte Ihnen eine Versicherung verkaufen
 lang de describe STOP_SNORING Möchten Sie aufhören zu schnarchen?
 lang de describe APPLY_FREE Bewerben Sie sich unverbindlich
 lang de describe APPLY_ONLINE Bewerben Sie sich über das Internet
@@ -650,9 +624,7 @@ lang de describe NIGERIAN_BODY_GOVT_3 Nachrichtentext deutet auf nigerianischen 
 lang de describe WALAA "Voila", inkorrekt geschrieben
 lang de describe DIET_2 Verlieren Sie Gewicht
 lang de describe DIET_3 Werden Sie Fett los
-lang de describe RAVAGESOFAGING Das Alter macht uns alle nicht jünger...
 lang de describe DRUG_ED_GENERIC Viagra als billiges Nachahmerpräparat
-lang de describe BETTERMEMORY Für ein besseres Gedächtnis
 lang de describe FREE_PORN Eventuell Pornowerbung: Kostenlose Pornos
 lang de describe BARELY_LEGAL Eventuell Pornowerbung: knapp im erlaubten Alter
 lang de describe MEGA_SITE Eventuell Pornowerbung: Mega-Pornos
@@ -712,7 +684,6 @@ lang de describe HTTP_WITH_EMAIL_IN_URL "remove" Hyperlink enthält eine E-mail-A
 lang de describe HTTP_ESCAPED_HOST Benutzt %-Kodierung innerhalb des Hyperlinks
 lang de describe HTTP_CTRL_CHARS_HOST Benutzt CTRL/STRG-Sequenzen innerhalb des URL-Rechnernamens
 lang de describe HTTP_EXCESSIVE_ESCAPES Überflüssige %-Kodierung in Webadresse
-lang de describe PORN_4 Worte und Phrasen weisen auf Pornographie hin
 lang de describe IP_LINK_PLUS IP-Adresse (a.b.c.d) gefolgt von CGI-Programm
 lang de describe REMOVE_PAGE Hyperlink einer Seite, die "remove" heißt
 lang de describe MAILTO_WITH_SUBJ Hyperlink verschickt Nachricht mit vorgegebenen Betreff
@@ -727,9 +698,6 @@ lang de describe BARGAIN_URL Spamverdächtiger Hyperlink
 lang de describe BZ_TLD Hyperlink mit ".bz" am Ende
 lang de describe BIZ_TLD Hyperlink mit ".biz" am Ende
 lang de describe HTTP_ENTITIES_HOST Hyperlink verschleiert durch unnötige Kodierung
-lang de describe URI_DOLLARMACHINE Hyperlink mit "dollarmachine"
-lang de describe URI_HITBOX Nachricht enthält Hyperlink zu hitbox.com
-lang de describe YAHOO_REDIR Hyperlink mit Weiterleitung durch Yahoo
 lang de describe MORTGAGE_LINKS Hyperlink mit Bezug zu Hypotheken
 lang de describe URI_OFFERS Hyperlink zu Firmenangebot
 lang de describe URI_4YOU Hyperlink enthält "4you"
