@@ -669,3 +669,12 @@ body T_RAZOR2_RANGE_91_100	eval:check_razor2_range('91','100')
 #score T_RAZOR2_RANGE_71_80 1.6
 #score T_RAZOR2_RANGE_81_90 1.8
 #score T_RAZOR2_RANGE_91_100 2
+
+
+# bug 1207:
+header DOUBLE_SQUOTES_1 Subject =~ /''\w+''/
+describe DOUBLE_SQUOTES_1 Evading word tests with two single quotes
+header DOUBLE_SQUOTES_2 Subject =~ /''/
+describe DOUBLE_SQUOTES_2 Evading word tests with two single quotes
+header DOUBLE_SQUOTES_3 Subject =~ /''.{0,15}''/
+describe DOUBLE_SQUOTES_3 Evading word tests with two single quotes
