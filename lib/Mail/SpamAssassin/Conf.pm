@@ -243,14 +243,23 @@ sub _parse {
   my ($self, undef, $scoresonly) = @_; # leave $rules in $_[1]
   local ($_);
 
-  my $lang = $ENV{'LC_ALL'};
-  $lang ||= $ENV{'LANGUAGE'};
+  # Language selection:
+  # See http://www.gnu.org/manual/glibc-2.2.5/html_node/Locale-Categories.html
+  # and http://www.gnu.org/manual/glibc-2.2.5/html_node/Using-gettextized-software.html
+  my $lang = $ENV{'LANGUAGE'}; # LANGUAGE has the highest precedence but has a 
+  if ($lang) {                 # special format: The user may specify more than
+    $lang =~ s/:.*$//;         # one language here, colon separated. We use the 
+  }                            # first one only (lazy bums we are :o)
+  $lang ||= $ENV{'LC_ALL'};
   $lang ||= $ENV{'LC_MESSAGES'};
   $lang ||= $ENV{'LANG'};
-  $lang ||= 'C';
+  $lang ||= 'C';               # Nothing set means C/POSIX
 
-  if ($lang eq 'C') { $lang = 'en_US'; }
-  $lang =~ s/[\.\@].*$//;	# .utf8 or @euro
+  if ($lang =~ /^(C|POSIX)$/) {
+    $lang = 'en_US';           # Our default language
+  } else {
+    $lang =~ s/[@.+,].*$//;    # Strip codeset, modifier/audience, etc. 
+  }                            # (eg. .utf8 or @euro)
 
   my $currentfile = '(no file)';
   my $skipfile = 0;
