@@ -130,26 +130,26 @@ header DNSBL_RHS	eval:check_rbl_from_host('r', 'dnsbltest.spamassassin.org.')
 describe DNSBL_RHS	DNSBL RHS match
 tflags DNSBL_RHS	net
 
-header __TEST_SENDERBASE	eval:check_rbl_txt('senderbase', 'sb.dnsbltest.spamassassin.org.')
+header __TEST_SENDERBASE	eval:check_rbl_txt('sb', 'sb.dnsbltest.spamassassin.org.')
 tflags __TEST_SENDERBASE	net
 
-header DNSBL_SB_TIME	eval:check_rbl_sub('senderbase', 'S6 == 1060085863 && S6 < time')
+header DNSBL_SB_TIME	eval:check_rbl_sub('sb', 'sb:S6 == 1060085863 && S6 < time')
 describe DNSBL_SB_TIME	DNSBL SenderBase time
 tflags DNSBL_SB_TIME	net
 
-header DNSBL_SB_FLOAT	eval:check_rbl_sub('senderbase', 'S3 > 7.0 && S3 < 7.2')
+header DNSBL_SB_FLOAT	eval:check_rbl_sub('sb', 'sb:S3 > 7.0 && S3 < 7.2')
 describe DNSBL_SB_FLOAT	DNSBL SenderBase floating point
 tflags DNSBL_SB_FLOAT	net
 
-header DNSBL_SB_STR	eval:check_rbl_sub('senderbase', 'S1 eq \"Spammer Networks\" && S49 !~ /Y/ && index(S21, \".com\") > 0')
+header DNSBL_SB_STR	eval:check_rbl_sub('sb', 'sb:S1 eq \"Spammer Networks\" && S49 !~ /Y/ && index(S21, \".com\") > 0')
 describe DNSBL_SB_STR	DNSBL SenderBase strings
 tflags DNSBL_SB_STR	net
 
-header DNSBL_SB_UNDEF	eval:check_rbl_sub('senderbase', 'S98 =~ /foo/ && S99 > 10')
+header DNSBL_SB_UNDEF	eval:check_rbl_sub('sb', 'sb:S98 =~ /foo/ && S99 > 10')
 describe DNSBL_SB_UNDEF	DNSBL SenderBase undefined
 tflags DNSBL_SB_UNDEF	net
 
-header DNSBL_SB_MISS	eval:check_rbl_sub('senderbase', 'S2 < 3.0')
+header DNSBL_SB_MISS	eval:check_rbl_sub('sb', 'sb:S2 < 3.0')
 describe DNSBL_SB_MISS	DNSBL SenderBase miss
 tflags DNSBL_SB_MISS	net
 ");
