@@ -127,7 +127,6 @@ GetOptions(
   'setuid-with-sql'             => \$opt{'setuid-with-sql'},
   'setuid-with-ldap'            => \$opt{'setuid-with-ldap'},
     'Q'                         => \$opt{'setuid-with-sql'},
-  'virtual-config|V=s'          => \$opt{'virtual-config'},
   'virtual-config-dir=s'        => \$opt{'virtual-config-dir'},
   'pidfile|r=s'                 => \$opt{'pidfile'},
   'syslog|s=s'                  => \$opt{'syslog'},
@@ -171,7 +170,6 @@ foreach my $opt (qw(
     socketpath
     pidfile
     home_dir_for_helpers
-    virtual-config
   )) {
   $opt{$opt} = Mail::SpamAssassin::Util::untaint_file_path (
                  File::Spec->rel2abs($opt{$opt}) # rel2abs taints the new value!
@@ -992,8 +990,8 @@ sub got_user_header
       }	
     } elsif ($opt{'ldap-config'}) {
       handle_user_ldap($current_user);
-    } elsif ($opt{'virtual-config'} || $opt{'virtual-config-dir'}) {
-      handle_virtual_user($current_user);
+    } elsif ($opt{'virtual-config-dir'}) {
+      handle_virtual_config_dir($current_user);
     } elsif ($opt{'setuid-with-sql'}) {
       unless (handle_user_setuid_with_sql($current_user)) {
 	service_unavailable_error("Error fetching user preferences via SQL");
@@ -1188,63 +1186,42 @@ sub handle_user
 
 # Handle user configs without the necessity of having individual users or a
 # SQL/LDAP database.
-sub handle_virtual_user
+sub handle_virtual_config_dir
 {
-    my $username = shift;
+  my ($username) = @_;
 
-    # the virtual-config contains the path to a directory which will
-    # contain per-user preferences.
-    my $dir=$opt{'virtual-config-dir'};
-    my $userdir;
-    my $prefsfile;
+  my $dir=$opt{'virtual-config-dir'};
+  my $userdir;
+  my $prefsfile;
 
-    if (defined $dir) {
-        my $safename = $username;
-	$safename =~ s/[^-A-Za-z0-9\+_\.\,\@\=]/_/gs;
-	my $localpart = '';
-	my $domain = '';
-	if ($safename =~ /^(.*)\@(.*)$/) { $localpart = $1; $domain = $2; }
+  if (defined $dir) {
+    my $safename = $username;
+    $safename =~ s/[^-A-Za-z0-9\+_\.\,\@\=]/_/gs;
+    my $localpart = '';
+    my $domain = '';
+    if ($safename =~ /^(.*)\@(.*)$/) { $localpart = $1; $domain = $2; }
 
-	$dir =~ s/\%u/${safename}/g;
-	$dir =~ s/\%l/${localpart}/g;
-	$dir =~ s/\%d/${domain}/g;
+    $dir =~ s/\%u/${safename}/g;
+    $dir =~ s/\%l/${localpart}/g;
+    $dir =~ s/\%d/${domain}/g;
+    $dir =~ s/\%\%/\%/g;
 
-	$userdir = $dir;
-	$prefsfile = $dir.'/user_prefs';
-	# Log that the default configuration is being used for a user.
-	logmsg("Using default config for $username: $prefsfile");
+    $userdir = $dir;
+    $prefsfile = $dir.'/user_prefs';
+    # Log that the default configuration is being used for a user.
+    logmsg("Using default config for $username: $prefsfile");
+  }
 
-    } else {
-	$dir=$opt{'virtual-config'};
-        my $safename = $username; $safename =~ s/[^-A-Za-z0-9\+_\.\,\@\=]/_/gs;
-	$userdir = $dir.'/'.$safename;
-	$prefsfile = $dir.'/'.$safename.'.prefs';
+  if (-f $prefsfile) {
+    # Found a config, load it.
+    $spamtest->read_scoreonly_config($prefsfile);
+  }
 
-	# If the user file is not there, look for a default.prefs
-	if(! -f $prefsfile) {
-	    $prefsfile="$dir/default.prefs";
-	    # And if that isn't there, log that it's misconfigured.
-	    if(! -f $prefsfile) {
-		logmsg("Couldn't find a virtual directory or defaults "
-			. "for $username in $dir: $prefsfile");
-		return(0);
-	    } else {
-		# Log that the default configuration is being used for a user.
-		logmsg("Using default config for $username: $prefsfile");
-	    }
-	}
-    }
-
-    if (-f $prefsfile) {
-	# Found a config, load it.
-	$spamtest->read_scoreonly_config($prefsfile);
-    }
-
-    # assume that $userdir will be a writable directory we can
-    # use for AWL, Bayes dbs etc.
-    $spamtest->signal_user_changed ({ username => $username,
-					user_dir => $userdir });
-    return(1);
+  # assume that $userdir will be a writable directory we can
+  # use for AWL, Bayes dbs etc.
+  $spamtest->signal_user_changed ({ username => $username,
+                                      user_dir => $userdir });
+  return 1;
 }
 
 sub handle_user_sql {
@@ -1605,7 +1582,6 @@ Options:
  --ldap-config                      Enable LDAP config (only useful with -x)
  --setuid-with-ldap                 Enable LDAP config (only useful with -x,
                                     enables use of -a and -H)
- -V, --virtual-config=dir           Enable Virtual configs (needs -x)
  --virtual-config-dir=dir           Enable pattern based Virtual configs (needs -x)
  -r pidfile, --pidfile              Write the process id to pidfile
  -s facility, --syslog=facility     Specify the syslog facility (default: mail)
@@ -1718,11 +1694,8 @@ to C<--setuid-with-sql>, only it is using an LDAP server.
 =item B<--virtual-config-dir>=I<pattern>
 
 This option specifies where per-user preferences can be found for virtual
-users, for the B<-x> switch.  If this and the B<--virtual-config> switch are
-both used, this will take precedence.
-
-The I<pattern> is used as a base pattern for the directory name.  Any
-of the following escapes can be used:
+users, for the B<-x> switch. The I<pattern> is used as a base pattern for the
+directory name.  Any of the following escapes can be used:
 
 =over 4
 
@@ -1735,6 +1708,8 @@ sign.
 =item %d -- replaced with the 'domain' of the current username.  In other
 words, if the username is an email address, this is the part after the C<@>
 sign.
+
+=item %% -- replaced with a single percent sign (%).
 
 =back
 
@@ -1759,28 +1734,6 @@ SQL- or LDAP-based configuration.
 
 The pattern B<must> expand to an absolute directory when spamd is running
 daemonized (B<-d>).
-
-=item B<-V>=I<directory>, B<--virtual-config>=I<directory>
-
-This option specifies where per-user preferences can be found for virtual
-users, for the B<-x> switch.
-
-The files are in the format of B<I<username>.prefs>.  A B<default.prefs> file
-will be used if an individual user config is not found.
-
-The set of characters allowed in the virtual username for this path are
-restricted to:
-
-	A-Z a-z 0-9 - + _ . , @ =
-
-All others will be replaced by underscores (C<_>).
-
-Note that this B<requires> that B<-x> is used, and cannot be combined with
-SQL- or LDAP-based configuration.
-
-If a subdirectory is found in that directory, called B<I<username>>, and it is
-writable, it will be used to store auto-whitelist and/or Bayes databases for
-that user.
 
 =item B<-r> I<pidfile>, B<--pidfile>=I<pidfile>
 

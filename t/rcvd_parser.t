@@ -18,7 +18,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("rcvd_parser");
-use Test; BEGIN { plan tests => 21 };
+use Test; BEGIN { plan tests => 22 };
 
 
 use strict;
@@ -43,7 +43,8 @@ Received: from asterix.laurier.org (lns-p19-8-82-65-66-244.adsl.proxad.net [82.6
 
 [ ip=213.228.0.129 rdns=postfix3-2.free.fr helo=postfix3-2.free.fr by=totor.example.net ident=foobar envfrom= ] [ ip=82.65.66.244 rdns=lns-p19-8-82-65-66-244.adsl.proxad.net helo=asterix.laurier.org by=postfix3-2.free.fr ident= envfrom= ]
 
-}, q{
+},
+q{
 
 Received: from postfix3-2.free.fr (foobar@213.228.0.139) 
   by totor.example.net with SMTP; 14 Nov 2003 08:05:50 -0000 
@@ -54,7 +55,8 @@ Received: from asterix.laurier.org (lns-p19-8-82-65-66-244.adsl.proxad.net [82.6
 
 [ ip=213.228.0.139 rdns=postfix3-2.free.fr helo=postfix3-2.free.fr by=totor.example.net ident=foobar envfrom= ] [ ip=82.65.66.244 rdns=lns-p19-8-82-65-66-244.adsl.proxad.net helo=asterix.laurier.org by=postfix3-2.free.fr ident= envfrom= ]
 
-}, q{
+},
+q{
 
 Received: from unknown (HELO feux01a-isp) (213.199.4.210) 
   by totor.example.net with SMTP; 1 Nov 2003 07:05:19 -0000 
@@ -63,7 +65,8 @@ Received: from unknown (HELO feux01a-isp) (213.199.4.210)
 
 [ ip=213.199.4.210 rdns= helo=feux01a-isp by=totor.example.net ident= envfrom= ]
 
-}, q{
+},
+q{
 
 Received: from x1-6-00-04-bd-d2-e0-a3.k317.webspeed.dk (benelli@80.167.158.170) 
   by totor.example.net with SMTP; 5 Nov 2003 23:18:42 -0000 
@@ -72,7 +75,8 @@ Received: from x1-6-00-04-bd-d2-e0-a3.k317.webspeed.dk (benelli@80.167.158.170)
 
 [ ip=80.167.158.170 rdns=x1-6-00-04-bd-d2-e0-a3.k317.webspeed.dk helo=x1-6-00-04-bd-d2-e0-a3.k317.webspeed.dk by=totor.example.net ident=benelli envfrom= ]
 
-}, q{
+},
+q{
  
 Received: from adsl-207-213-27-129.dsl.lsan03.pacbell.net (HELO merlin.net.au) (Owner50@207.213.27.129) 
   by totor.example.net with SMTP; 10 Nov 2003 06:30:34 -0000
@@ -81,7 +85,8 @@ Received: from adsl-207-213-27-129.dsl.lsan03.pacbell.net (HELO merlin.net.au) (
 
 [ ip=207.213.27.129 rdns=adsl-207-213-27-129.dsl.lsan03.pacbell.net helo=merlin.net.au by=totor.example.net ident=Owner50 envfrom= ]
 
-}, q{
+},
+q{
 
 
 Received: from postfix3-2.free.fr (HELO machine.domain.com) 
@@ -92,7 +97,8 @@ Received: from postfix3-2.free.fr (HELO machine.domain.com)
 
 [ ip=213.228.20.149 rdns=postfix3-2.free.fr helo=machine.domain.com by=totor.example.net ident=foobar envfrom= ]
 
-}, q{
+},
+q{
 Received: from postfix3-2.free.fr (213.228.0.159) by totor.example.net 
   with SMTP; 14 Nov 2003 08:31:29 -0000 
  
@@ -100,7 +106,8 @@ Received: from postfix3-2.free.fr (213.228.0.159) by totor.example.net
 
 [ ip=213.228.0.159 rdns=postfix3-2.free.fr helo=postfix3-2.free.fr by=totor.example.net ident= envfrom= ]
 
-}, q{
+},
+q{
 Received: from postfix3-2.free.fr (foobar@213.228.0.169) by totor.example.net 
   with SMTP; 14 Nov 2003 08:31:29 -0000 
  
@@ -108,7 +115,8 @@ Received: from postfix3-2.free.fr (foobar@213.228.0.169) by totor.example.net
 
 [ ip=213.228.0.169 rdns=postfix3-2.free.fr helo=postfix3-2.free.fr by=totor.example.net ident=foobar envfrom= ]
 
-}, q{
+},
+  q{
 Received: from unknown (HELO machine.domain.com) (foobar@213.228.0.179) 
   by totor.example.net with SMTP; 14 Nov 2003 08:31:29 -0000 
  
@@ -116,7 +124,8 @@ Received: from unknown (HELO machine.domain.com) (foobar@213.228.0.179)
 
 [ ip=213.228.0.179 rdns= helo=machine.domain.com by=totor.example.net ident=foobar envfrom= ]
 
-}, q{
+},
+  q{
 Received: from unknown (HELO machine.domain.com) (213.228.0.189) 
   by totor.example.net with SMTP; 14 Nov 2003 08:31:29 -0000 
 
@@ -124,7 +133,8 @@ Received: from unknown (HELO machine.domain.com) (213.228.0.189)
 
 [ ip=213.228.0.189 rdns= helo=machine.domain.com by=totor.example.net ident= envfrom= ]
 
-}, q{
+},
+q{
  
 Received: from loki.komtel.net (212.7.146.145) 
   by totor.example.net with SMTP; 16 Nov 2003 04:53:54 -0000 
@@ -133,7 +143,8 @@ Received: from loki.komtel.net (212.7.146.145)
 
 [ ip=212.7.146.145 rdns=loki.komtel.net helo=loki.komtel.net by=totor.example.net ident= envfrom= ]
 
-}, q{
+},
+q{
  
 Received: from c66.169.197.134.ts46v-19.pkcty.ftwrth.tx.charter.com 
   (66.169.197.134) by totor.example.net with SMTP; 
@@ -142,7 +153,8 @@ Received: from c66.169.197.134.ts46v-19.pkcty.ftwrth.tx.charter.com
 
 [ ip=66.169.197.134 rdns=c66.169.197.134.ts46v-19.pkcty.ftwrth.tx.charter.com helo=c66.169.197.134.ts46v-19.pkcty.ftwrth.tx.charter.com by=totor.example.net ident= envfrom= ]
 
-}, q{
+},
+q{
 
 Received: from dyn-81-166-39-132.ppp.tiscali.fr (81.166.39.132) by cpmail.dk.tiscali.com (6.7.018)
         id 3FE6899B004FE7A4; Thu, 1 Jan 2004 05:28:49 +0100
@@ -151,7 +163,8 @@ Received: from dyn-81-166-39-132.ppp.tiscali.fr (81.166.39.132) by cpmail.dk.tis
 
 [ ip=81.166.39.132 rdns=dyn-81-166-39-132.ppp.tiscali.fr helo=dyn-81-166-39-132.ppp.tiscali.fr by=cpmail.dk.tiscali.com ident= envfrom= ]
 
-}, q{
+},
+q{
 
 Received: from unknown (HELO [81.64.159.45]) ([81.64.159.45]) 
           (envelope-sender <xyz@example.org>) 
@@ -160,9 +173,10 @@ Received: from unknown (HELO [81.64.159.45]) ([81.64.159.45])
 
 } => q{
 
-[ ip=81.64.159.45 rdns= helo=81.64.159.45 by=212.198.2.120 ident= envfrom=xyz@example.org ]
+[ ip=81.64.159.45 rdns= helo=!81.64.159.45! by=212.198.2.120 ident= envfrom=xyz@example.org ]
 
-}, q{
+},
+q{
 
 Received: (qmail 8363 invoked by uid 526); 3 Mar 2004 20:34:41 -0000
 Received: from advertisement@topofferz.net by blazing.fooooo.org by
@@ -182,7 +196,8 @@ Received: from mx10.topofferz.net (HELO ) (69.6.60.10)
 [ ip=69.6.60.10 rdns=mx10.topofferz.net helo= by=blazing.fooooo.org ident= envfrom= ]
 
 
-}, q{
+},
+q{
 
 Received: from email.com (unknown [222.32.65.3])
 	by eclectic.kluge.net (Postfix) with ESMTP id 33DC4416F20
@@ -192,7 +207,8 @@ Received: from email.com (unknown [222.32.65.3])
 
 [ ip=222.32.65.3 rdns= helo=email.com by=eclectic.kluge.net ident= envfrom= ]
 
-}, q{
+},
+q{
 
 Received: from kluge.net (unknown [222.156.78.32])
 	by eclectic.kluge.net (Postfix) with SMTP id CE1BA416F20
@@ -202,7 +218,8 @@ Received: from kluge.net (unknown [222.156.78.32])
 
 [ ip=222.156.78.32 rdns= helo=kluge.net by=eclectic.kluge.net ident= envfrom= ]
 
-}, q{
+},
+q{
 
 Received: from xjwrvjq (unknown [222.54.106.152])
 	by eclectic.kluge.net (Postfix) with SMTP id ED474416F20
@@ -212,7 +229,8 @@ Received: from xjwrvjq (unknown [222.54.106.152])
 
 [ ip=222.54.106.152 rdns= helo=xjwrvjq by=eclectic.kluge.net ident= envfrom= ]
 
-}, q{
+},
+q{
 
 Received: from localhost (localhost [127.0.0.1])
 	by radish.zzzz.org (Postfix) with ESMTP id 1398F5900D9
@@ -231,7 +249,8 @@ Received: from 83-70-48-2.bas2.dbn.dublin.eircom.net (HELO ?192.168.23.32?) (83.
 
 [ ip=159.134.118.16 rdns=mail00.svc.cra.dublin.eircom.net helo=mail00.svc.cra.dublin.eircom.net by=amgod.boxhost.net ident= envfrom= ] [ ip=83.70.48.2 rdns=83-70-48-2.bas2.dbn.dublin.eircom.net helo=?192.168.23.32? by=mail00.svc.cra.dublin.eircom.net ident= envfrom= ]
 
-}, q{
+},
+q{
 
 Received: from localhost (localhost [127.0.0.1])
 	by radish.jmason.org (Postfix) with ESMTP id 27B275900D9
@@ -253,7 +272,21 @@ Received: from localhost (wwwwww@localhost)
   
 [ ip=128.200.80.6 rdns=smtp3.es.uci.edu helo=smtp3.es.uci.edu by=amgod.boxhost.net ident= envfrom= ] [ ip=128.200.80.22 rdns=rigel.oac.uci.edu helo=rigel.oac.uci.edu by=smtp3.es.uci.edu ident= envfrom= ]
   
-});
+},
+q{
+
+Received: from pop.vip.sc5.yahoo.com [216.136.173.10]
+      by localhost with POP3 (fetchmail-5.9.13)
+      for pppppppppp@hhhhhhhhh.net (single-drop); Sun, 22 Feb 2004 20:46:25 -0600 (CST)
+Received: from 211.245.85.228  (EHLO ) (211.245.85.228)
+      by mta232.mail.scd.yahoo.com with SMTP; Sun, 25 Jan 2004 00:24:37 -0800
+
+} => q{
+ 
+  [ ip=211.245.85.228 rdns=211.245.85.228 helo= by=mta232.mail.scd.yahoo.com ident= envfrom= ]
+  
+}
+);
 
 tstprefs ("add_header all Relays _RELAYSUNTRUSTED_ _RELAYSTRUSTED_\n");
 

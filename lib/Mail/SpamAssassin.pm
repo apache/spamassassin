@@ -437,7 +437,9 @@ Otherwise identical to C<check()> above.
 sub check_message_text {
   my ($self, $mailtext) = @_;
   my $msg = $self->parse($mailtext, 1);
-  return $self->check($msg);
+  my $result = $self->check($msg);
+  $msg->finish_metadata();	# avoid GC leaks
+  return $result;
 }
 
 ###########################################################################

@@ -522,7 +522,7 @@ sub parse_received_line {
     # Received: from x71-x56-x24-5.webspeed.dk (HELO niels) (69.96.3.15) by la.mx.develooper.com (qpsmtpd/0.27-dev) with SMTP; Fri, 02 Jan 2004 19:26:52 -0800
     # Received: from sc8-sf-sshgate.sourceforge.net (HELO sc8-sf-netmisc.sourceforge.net) (66.35.250.220) by la.mx.develooper.com (qpsmtpd/0.27-dev) with ESMTP; Fri, 02 Jan 2004 14:44:41 -0800
     # Received: from mx10.topofferz.net (HELO ) (69.6.60.10) by blazing.arsecandle.org with SMTP; 3 Mar 2004 20:34:38 -0000
-    if (/^from (\S+) \(HELO (\S*)\) \((${IP_ADDRESS})\) by (\S+) \(qpsmtpd\/(\S+)\) with (ESMTP|SMTP)/) {
+    if (/^from (\S+) \((?:HELO|EHLO) (\S*)\) \((${IP_ADDRESS})\) by (\S+) \(qpsmtpd\/(\S+)\) with (ESMTP|SMTP)/) {
       $rdns = $1; $helo = $2; $ip = $3; $by = $4; goto enough;
     }
 
@@ -542,8 +542,9 @@ sub parse_received_line {
     # Received: from postfix3-2.free.fr (HELO machine.domain.com) (foobar@213.228.0.169) by totor.bouissou.net with SMTP; 14 Nov 2003 08:05:50 -0000
     #
     # "from (remote.rDNS|unknown)" is always there
-    # "(HELO machine.domain.com)" is there only if HELO differs from remote rDNS
-    #          HELO may be "" -- ie no string.
+    # "(HELO machine.domain.com)" is there only if HELO differs from remote rDNS.
+    # HELO may be "" -- ie no string. "HELO" may also be "EHLO".  HELO string
+    # may be an IP in fmt [1.2.3.4] -- do not strip [ and ], they are important.
     # "foobar@" is remote IDENT info, specified only if ident given by remote
     # Remote IP always appears between (parentheses), with or without IDENT@
     # "by local.system.domain.com" always appears
@@ -561,12 +562,13 @@ sub parse_received_line {
     #
     # Some others of the numerous qmail patches out there can also add variants of their own
     #
-    if (/^from \S+( \(HELO \S*\))? \((\S+\@)?\[?${IP_ADDRESS}\]?\)( \(envelope-sender <\S+>\))? by \S+( \(.+\))* with (.* )?(SMTP|QMQP)/) {
+    # Received: from 211.245.85.228  (EHLO ) (211.245.85.228) by mta232.mail.scd.yahoo.com with SMTP; Sun, 25 Jan 2004 00:24:37 -0800
+    if (/^from \S+( \((?:HELO|EHLO) \S*\))? \((\S+\@)?\[?${IP_ADDRESS}\]?\)( \(envelope-sender <\S+>\))? by \S+( \(.+\))* with (.* )?(SMTP|QMQP)/) {
 
-       if (/^from (\S+) \(HELO \[?([^ \[\(\)\]]*)\]?\) \((\S+)\@\[?(${IP_ADDRESS})\]?\)( \(envelope-sender <\S+>\))? by (\S+)/) {
+       if (/^from (\S+) \((?:HELO|EHLO) ([^ \(\)]*)\) \((\S+)\@\[?(${IP_ADDRESS})\]?\)( \(envelope-sender <\S+>\))? by (\S+)/) {
          $rdns = $1; $helo = $2; $ident = $3; $ip = $4; $by = $6;
        }
-       elsif (/^from (\S+) \(HELO \[?([^ \[\(\)\]]*)\]?\) \(\[?(${IP_ADDRESS})\]?\)( \(envelope-sender <\S+>\))? by (\S+)/) {
+       elsif (/^from (\S+) \((?:HELO|EHLO) ([^ \(\)]*)\) \(\[?(${IP_ADDRESS})\]?\)( \(envelope-sender <\S+>\))? by (\S+)/) {
          $rdns = $1; $helo = $2; $ip = $3; $by = $5;
        }
        elsif (/^from (\S+) \((\S+)\@\[?(${IP_ADDRESS})\]?\)( \(envelope-sender <\S+>\))? by (\S+)/) {
@@ -663,7 +665,7 @@ sub parse_received_line {
     # http://bugzilla.spamassassin.org/show_bug.cgi?id=2744#c14 :
     # Received: from unknown (HELO feux01a-isp) (213.199.4.210) by totor.bouissou.net with SMTP; 1 Nov 2003 07:05:19 -0000 
     # Received: from adsl-207-213-27-129.dsl.lsan03.pacbell.net (HELO merlin.net.au) (Owner50@207.213.27.129) by totor.bouissou.net with SMTP; 10 Nov 2003 06:30:34 -0000 
-    if (/^from (\S+) \(HELO ([^\)]*)\) \((\S+@)?\[?(${IP_ADDRESS})\]?\).* by (\S+) /)
+    if (/^from (\S+) \((?:HELO|EHLO) ([^\)]*)\) \((\S+@)?\[?(${IP_ADDRESS})\]?\).* by (\S+) /)
     {
       $mta_looked_up_dns = 1;
       $rdns = $1; $helo = $2; $ident = (defined $3) ? $3 : '';
@@ -707,7 +709,7 @@ sub parse_received_line {
 
     # Received: from smtp.greyware.com(208.14.208.51, HELO smtp.sff.net) by x.x.org via smap (V1.3)
     # id xma002908; Fri, 27 Feb 04 14:16:56 -0800
-    if (/^from (\S+)\((${IP_ADDRESS}), HELO (\S*)\) by (\S+) via smap /) {
+    if (/^from (\S+)\((${IP_ADDRESS}), (?:HELO|EHLO) (\S*)\) by (\S+) via smap /) {
       $mta_looked_up_dns = 1;
       $rdns = $1; $ip = $2; $helo = $3; $by = $4; goto enough;
     }
@@ -761,7 +763,7 @@ sub parse_received_line {
     # Received: from customer254-217.iplannetworks.net (HELO AGAMENON) 
     # (baldusi@200.69.254.217 with plain) by smtp.mail.vip.sc5.yahoo.com with
     # SMTP; 11 Mar 2003 21:03:28 -0000
-    if (/^from (\S+) \(HELO (\S*)\) \((\S+).*?\) by (\S+) with /) {
+    if (/^from (\S+) \((?:HELO|EHLO) (\S*)\) \((\S+).*?\) by (\S+) with /) {
       $mta_looked_up_dns = 1;
       $rdns = $1; $helo = $2; $ip = $3; $by = $4;
       $ip =~ s/([^\@]*)\@//g and $ident = $1;	# remove IDENT lookups
@@ -779,7 +781,7 @@ sub parse_received_line {
     # Received: from [192.168.1.104] (account nazgul HELO [192.168.1.104])
     # by somewhere.com (CommuniGate Pro SMTP 3.5.7) with ESMTP-TLS id 2088434;
     # Fri, 07 Mar 2003 13:05:06 -0500
-    if (/^from \[(${IP_ADDRESS})\] \(account \S+ HELO (\S*)\) by (\S+) \(/) {
+    if (/^from \[(${IP_ADDRESS})\] \(account \S+ (?:HELO|EHLO) (\S*)\) by (\S+) \(/) {
       $ip = $1; $helo = $2; $by = $3; goto enough;
     }
 
@@ -826,12 +828,12 @@ sub parse_received_line {
     }
 
     # Received: from [10.128.128.81]:50999 (HELO dfintra.f-secure.com) by fsav4im2 ([10.128.128.74]:25) (F-Secure Anti-Virus for Internet Mail 6.0.34 Release) with SMTP; Tue, 5 Mar 2002 14:11:53 -0000
-    if (/^from \[(${IP_ADDRESS})\]\S+ \(HELO (\S*)\) by (\S+) /) {
+    if (/^from \[(${IP_ADDRESS})\]\S+ \((?:HELO|EHLO) (\S*)\) by (\S+) /) {
       $ip = $1; $helo = $2; $by = $3; goto enough;
     }
 
     # Received: from 62.180.7.250 (HELO daisy) by smtp.altavista.de (209.228.22.152) with SMTP; 19 Sep 2002 17:03:17 +0000
-    if (/^from (${IP_ADDRESS}) \(HELO (\S*)\) by (\S+) /) {
+    if (/^from (${IP_ADDRESS}) \((?:HELO|EHLO) (\S*)\) by (\S+) /) {
       $ip = $1; $helo = $2; $by = $3; goto enough;
     }
 
@@ -998,7 +1000,9 @@ enough:
   $envfrom =~ s/^\s*<*//gs; $envfrom =~ s/>*\s*$//gs;
 
   # ensure invalid chars are stripped.  Replace with '!' to flag their
-  # presence, though.
+  # presence, though.  NOTE: this means "[1.2.3.4]" IP addr HELO
+  # strings, which are legit by RFC-2821, look like "!1.2.3.4!".
+  # still useful though.
   $ip =~ s/[\s\0\#\[\]\(\)\<\>\|]/!/gs;
   $rdns =~ s/[\s\0\#\[\]\(\)\<\>\|]/!/gs;
   $helo =~ s/[\s\0\#\[\]\(\)\<\>\|]/!/gs;
