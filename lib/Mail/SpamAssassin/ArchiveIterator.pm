@@ -77,7 +77,8 @@ sub run {
     die "set_functions never called";
   }
 
-  if ($self->{opt_j} == 0) { # sa-learn-style, all in memory, etc.
+  # non-forking model (generally sa-learn), everything in a single process
+  if ($self->{opt_j} == 0) {
     my $message;
     my $class;
     my $result;
@@ -92,42 +93,49 @@ sub run {
       &{$self->{result_sub}}($class, $result, $date) if $result;
     }
   }
-  else { # mass-check-style, keep minimum memory usage, allow fork(), etc.
+  # forking model (generally mass-check), avoid extended memory usage
+  else {
     my $tmpf;
     ($tmpf, $self->{messageh}) = Mail::SpamAssassin::Util::secure_tmpfile();
     unlink $tmpf;
     undef $tmpf;
 
-    # Have a child figure out what we should be doing ...
-    if ( $tmpf = fork() ) { # parent
+    # forked child process scans messages
+    if ($tmpf = fork()) {
+      # parent
       waitpid($tmpf, 0);
     }
-    elsif ( defined $tmpf ) { # child
+    elsif (defined $tmpf) {
+      # child
       $self->message_array(\@targets, $self->{messageh});
       exit;
     }
     else {
-      die "fork() failed!: $!";
+      die "cannot fork: $!";
     }
 
-    # Ok, we now have a temp file with the messages to process ...
+    # we now have a temp file with the messages to process
     seek ($self->{messageh}, 0, 0);
     $MESSAGES = $self->next_message();
 
-    # Only do 1 process, message list in a temp file, no restarting...
+    # only do 1 process, message list in a temp file, no restarting
     if ($self->{opt_j} == 1 && !defined $self->{opt_restart}) {
       my $message;
       my $class;
       my $result;
       my $messages;
+      my $total_count = 0;
 
-      while ($message = $self->next_message()) {
+      while (($MESSAGES > $total_count) && ($message = $self->next_message()))
+      {
         my ($class, undef, $date) = index_unpack($message);
         $result = $self->run_message($message);
         &{$self->{result_sub}}($class, $result, $date) if $result;
+	$total_count++;
       }
     }
-    else { # more than one process or one process with restarts
+    # more than one process or one process with restarts
+    else {
       my $select = IO::Select->new();
 
       my $total_count = 0;
@@ -136,42 +144,44 @@ sub run {
       my @pid = ();
       my $messages;
 
-      # Have some kids ...
+      # start children processes
       $self->start_children($self->{opt_j}, \@child, \@pid, $select);
 
-      # feed childen, make them work for it, repeat.
+      # feed childen, make them work for it, repeat
       while ($select->count()) {
         foreach my $socket ($select->can_read()) {
 	  my $result = '';
 	  my $line;
 	  while ($line = readline $socket) {
 	    if ($line =~ /^RESULT (.+)$/) {
-	      my($class,$type,$date) = index_unpack($1);
+	      my ($class,$type,$date) = index_unpack($1);
 	      #warn ">> RESULT: $class, $type, $date\n";
 
-	      if (defined $self->{opt_restart} && ($total_count % $self->{opt_restart}) == 0) {
+	      if (defined $self->{opt_restart} &&
+		  ($total_count % $self->{opt_restart}) == 0)
+	      {
 	        $needs_restart = 1;
 	      }
 
-	      # if messages remain, and we don't need to restart, send a message
+	      # if messages remain, and we don't need to restart, send message
 	      if (($MESSAGES > $total_count) && !$needs_restart) {
 	        print { $socket } $self->next_message() . "\n";
 	        $total_count++;
 	        #warn ">> recv: $MESSAGES $total_count\n";
 	      }
 	      else {
-	        # stop listening on this child since we're done with it.
+	        # stop listening on this child since we're done with it
 	        #warn ">> removeresult: $needs_restart $MESSAGES $total_count\n";
 	        $select->remove($socket);
 	      }
 
-	      # Deal with the result we got.
+	      # deal with the result we received
 	      if ($result) {
 	        chop $result;	# need to chop the \n before RESULT
 	        &{$self->{result_sub}}($class, $result, $date);
 	      }
 
-	      last; # this will get out of the read for this client
+	      last;	# this will avoid the read for this client
 	    }
 	    elsif ($line eq "START\n") {
 	      if ($MESSAGES > $total_count) {
@@ -186,10 +196,10 @@ sub run {
 	        $select->remove($socket);
 	      }
 
-	      last; # this will get out of the read for this client
+	      last;	# this will avoid the read for this client
 	    }
 	    else {
-	      # result line, remember it.
+	      # result line, remember it
 	      $result .= $line;
 	    }
 	  }
@@ -197,7 +207,7 @@ sub run {
           # some error happened during the read!
           if (!defined $line || !$line) {
             $needs_restart = 1;
-            warn "Got an undef from readline?!?  Restarting all children, probably lost some results. :(\n";
+            warn "readline failed, attempting to recover\n";
             $select->remove($socket);
           }
         }
@@ -206,7 +216,8 @@ sub run {
 
         # If there are still messages to process, and we need to restart
         # the children, and all of the children are idle, let's go ahead.
-        if ($needs_restart && $select->count() == 0 && ($MESSAGES > $total_count)) {
+        if ($needs_restart && $select->count == 0 && $MESSAGES > $total_count)
+	{
 	  $needs_restart = 0;
 
 	  #warn "debug: Needs restart, $MESSAGES total, $total_count done.\n";
@@ -221,7 +232,7 @@ sub run {
       $self->reap_children($self->{opt_j}, \@child, \@pid);
     }
 
-    # Ok, get rid of the tempfile now ...
+    # close tempfile so it will be unlinked
     close($self->{messageh});
   }
 }
@@ -229,7 +240,7 @@ sub run {
 ############################################################################
 
 sub message_array {
-  my($self, $targets, $fh) = @_;
+  my ($self, $targets, $fh) = @_;
 
   foreach my $target (@${targets}) {
     my ($class, $format, $rawloc) = split(/:/, $target, 3);
@@ -242,15 +253,13 @@ sub message_array {
       my $method;
 
       if ($format eq 'detect') {
-	#We need to detect what the format is.
-
-	if ($location eq '-' ||
-	    !(-d $location)) {
-	  #stdin is considered a file if not passed as mbox
+	# detect the format
+	if ($location eq '-' || !(-d $location)) {
+	  # stdin is considered a file if not passed as mbox
 	  $method = \&scan_file;
 	}
 	else {
-	  #It's a directory
+	  # it's a directory
 	  $method = \&scan_directory;
 	}
       }
@@ -270,7 +279,7 @@ sub message_array {
 	&{$method}($self, $class, $location);
       }
       else {
-	warn "Format $format unknown!";
+	warn "format $format unknown!";
       }
     }
   }
@@ -300,11 +309,11 @@ sub message_array {
     push @messages, (splice @s), (splice @h);
   }
 
-  if ( defined $fh ) {
+  if (defined $fh) {
     print { $fh } map { "$_\n" } scalar(@messages), @messages;
     return;
   }
-  
+
   return scalar(@messages), \@messages;
 }
 
@@ -316,7 +325,7 @@ sub next_message {
 }
 
 sub start_children {
-  my($self, $count, $child, $pid, $socket) = @_;
+  my ($self, $count, $child, $pid, $socket) = @_;
 
   my $io = IO::Socket->new();
   my $parent;
@@ -329,7 +338,7 @@ sub start_children {
       close $parent;
 
       # disable caching for parent<->child relations
-      my($old) = select($child->[$i]);
+      my ($old) = select($child->[$i]);
       $|++;
       select($old);
 
@@ -341,7 +350,7 @@ sub start_children {
       my $result;
       my $line;
 
-      close $self->{messageh} if ( defined $self->{messageh} );
+      close $self->{messageh} if defined $self->{messageh};
 
       close $child->[$i];
       select($parent);
@@ -367,10 +376,10 @@ sub start_children {
 }
 
 sub reap_children {
-  my($self, $count, $socket, $pid) = @_;
+  my ($self, $count, $socket, $pid) = @_;
 
-  # If the child died, sending it the exit will generate a SIGPIPE
-  # but we don't really care since the readline will go undef which is fine,
+  # If the child died, sending it the exit will generate a SIGPIPE, but we
+  # don't really care since the readline will go undef (which is fine),
   # then we do the waitpid which will finish it off.  So we end up in the
   # right state, in theory.
   local $SIG{'PIPE'} = 'IGNORE';
@@ -473,15 +482,10 @@ sub receive_date {
 sub message_is_useful_by_date  {
   my ($self, $date) = @_;
 
-  if (!$self->{opt_after}) { return 1; }	# not using that feature
+  return 1 if !$self->{opt_after};	# not using that feature
+  return 0 if !$date;			# undef or 0 date = unusable
 
-  if (!$date) { return 0; }			# undef or 0 date = unusable
-
-  if ($date <= $self->{opt_after}) {
-    return 0;
-  } else {
-    return 1;
-  }
+  return $date > $self->{opt_after};
 }
 
 ############################################################################
@@ -557,7 +561,7 @@ sub scan_mailbox {
   my @files;
 
   if ($folder ne '-' && -d $folder) {
-    #Got passed a directory of mboxen.
+    # passed a directory of mboxes
     $folder =~ s/\/\s*$//; #Remove trailing slash, if there
     opendir(DIR, $folder) || die "Can't open '$folder' dir: $!";
     while($_ = readdir(DIR)) {
@@ -566,7 +570,8 @@ sub scan_mailbox {
       }
     }
     closedir(DIR);
-  } else {
+  }
+  else {
     push(@files, $folder);
   }
 
@@ -607,7 +612,8 @@ sub scan_mailbox {
 	my $t;
 	if ($self->{opt_n}) {
 	  $t = $no++;
-	} else {
+	}
+	else {
 	  $t = $self->receive_date($header);
 	  next if !$self->message_is_useful_by_date($t);
 	}
