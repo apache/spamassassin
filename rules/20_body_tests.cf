@@ -420,8 +420,12 @@ full JUST_MAILED_PAGE           /\n\n\Q<!-- saved from url=(0022)http:\/\/intern
 describe JUST_MAILED_PAGE	Saved web page
 rawbody CLICK_HERE_LINK		/click here.{0,100}<\/a>/is
 describe CLICK_HERE_LINK	Tells you to click on a URL
+rawbody CLICK_HERE_CAPS_LINK	/CLICK HERE.{0,100}<\/[aA]>/s
+describe CLICK_HERE_CAPS_LINK	Tells you to click on a URL (in caps)
 body CLICK_BELOW		/click .{0,30}(?:here|below)/is
 describe CLICK_BELOW		Asks you to click below
+body CLICK_BELOW_CAPS		/CLICK .{0,30}(?:HERE|BELOW)/s
+describe CLICK_BELOW_CAPS	Asks you to click below (in caps)
 
 # (contrib: skod)
 body PRINT_FORM_SIGNATURE	/Sign(?:ature)?\s*(?:here|please)?:.{0,30}___*/i
@@ -1389,9 +1393,14 @@ describe HTML_TEXT_FFFF00  Contains HTML text in bright yellow
 rawbody HTML_TEXT_0000FF   /<font[^>]* color=['"]?0000ff/i
 describe HTML_TEXT_0000FF  Contains HTML text in blue
 
-rawbody HIDE_WIN_STATUS    /<[^>]+onMouseOver=[^>]+window.status=/
-describe HIDE_WIN_STATUS   Contains Javascript to hide URLs in browser
+rawbody HIDE_WIN_STATUS    /<[^>]+onMouseOver=[^>]+window\.status=/i
+describe HIDE_WIN_STATUS   Javascript to hide URLs in browser
 
-rawbody LINK_TO_NO_SCHEME /\s+href=['"]?www\./
+rawbody LINK_TO_NO_SCHEME /\s+href=['"]?www\./i
 describe LINK_TO_NO_SCHEME Contains link without http:// prefix
+
+rawbody HTML_WIN_OPEN      /(?:<script>.{0,200}|<[^>]+)window\.open\s*\(/i
+describe HTML_WIN_OPEN     Javascript to open a new window
+rawbody HTML_WIN_BLUR      /(?:<script>.{0,200}|<[^>]+)\.blur\s*\(\s*\)/i
+describe HTML_WIN_BLUR     Javascript to move windows around
 
