@@ -63,7 +63,7 @@ use Mail::SpamAssassin::NoMailAudit;
 
 use File::Basename;
 use File::Path;
-use File::Spec;
+use File::Spec 0.8;
 use File::Copy;
 use Cwd;
 use Config;
@@ -91,7 +91,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.115.2.5 2002/09/02 21:34:48 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.115.2.6 2002/09/03 11:16:17 msquadrat Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -1118,5 +1118,6 @@ as well as:
   http://spamassassin.org/
 
 =cut
+
 
 
