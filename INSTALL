@@ -197,6 +197,13 @@ These modules are required for spamassassin to run:
     This is a required module if you use spamd.  spamd logs information
     about scanned messages to syslog using this module.
 
+    Note: perl versions 5.003_07 and later should have Sys::Syslog already
+    installed.  You can easily test this by running:
+    perl -MSys::Syslog -e 1
+
+    If it generates an error, you need to install the module.  If the
+    command just returns, you should be ok.
+
 Optional Additional Modules
 ---------------------------
 
