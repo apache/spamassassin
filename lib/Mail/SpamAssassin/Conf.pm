@@ -128,6 +128,7 @@ sub new {
   $self->{use_terse_report} = 0;
   $self->{defang_mime} = 1;
   $self->{skip_rbl_checks} = 0;
+  $self->{dns_available} = "test";
   $self->{check_mx_attempts} = 2;
   $self->{check_mx_delay} = 5;
   $self->{ok_locales} = '';
@@ -416,6 +417,25 @@ Content-type header alone, set this to 0.
 
     if (/^defang[-_]mime\s+(\d+)$/) {
       $self->{defang_mime} = $1+0; next;
+    }
+
+=item dns_available { yes | test[: name1 name2...] | no }   (default: test)
+
+By default, SpamAssassin will query some default hosts on the internet to
+attempt to check if DNS is working on not. The problem is that it can introduce
+some delay if your network connection is down, and in some cases it can wrongly
+guess that DNS is unavailable because the test connections failed.
+SpamAssassin includes a default set of 13 servers, among which 3 are picked
+randomly.
+
+You can however specify your own list by specifying
+
+dns_available test: server1.tld server2.tld server3.tld
+
+=cut
+
+    if (/^dns[-_]available\s+(yes|no|test|test:\s+.+)$/) {
+      $self->{dns_available} = ($1 or "test"); next;
     }
 
 =item skip_rbl_checks { 0 | 1 }   (default: 0)
