@@ -451,10 +451,11 @@ static void _clear_message(struct message *m)
 
 static void _use_msg_for_out(struct message *m)
 {
+    if (m->outbuf)
 	free(m->outbuf);
-	m->outbuf = NULL;
-	m->out = m->msg;
-	m->out_len = m->msg_len;
+    m->outbuf = NULL;
+    m->out = m->msg;
+    m->out_len = m->msg_len;
 }
 
 static int _message_read_raw(int fd, struct message *m)
