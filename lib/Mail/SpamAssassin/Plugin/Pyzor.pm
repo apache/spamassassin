@@ -89,7 +89,7 @@ Whether to use Pyzor, if it is available.
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_BOOL
   });
 
-=item pyzor_timeout n		(default: 10)
+=item pyzor_timeout n		(default: 5)
 
 How many seconds you wait for Pyzor to complete, before scanning continues
 without the Pyzor results.
@@ -98,7 +98,7 @@ without the Pyzor results.
 
   push (@cmds, {
     setting => 'pyzor_timeout',
-    default => 10,
+    default => 5,
     type => $Mail::SpamAssassin::Conf::CONF_TYPE_NUMERIC
   });
 
