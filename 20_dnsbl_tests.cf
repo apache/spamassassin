@@ -195,6 +195,14 @@ header RCVD_IN_BL_SPAMCOP_NET	eval:check_rbl_txt('spamcop', 'bl.spamcop.net.')
 describe RCVD_IN_BL_SPAMCOP_NET	Received via a relay in bl.spamcop.net
 tflags RCVD_IN_BL_SPAMCOP_NET	net
 
+header RCVD_IN_CBL		eval:check_rbl_txt('cbl', 'cbl.abuseat.org.')
+describe RCVD_IN_CBL		Received via a relay in cbl.abuseat.org
+tflags RCVD_IN_CBL		net
+
+header RCVD_IN_RSL		eval:check_rbl_txt('rsl', 'relays.visi.com.')
+describe RCVD_IN_RSL		Received via a relay in RSL
+tflags RCVD_IN_RSL		net
+
 # ---------------------------------------------------------------------------
 # NOTE: commercial tests, see README file for details
 
