@@ -567,6 +567,13 @@ them this time around.  If the messages have already been filtered through
 SpamAssassin, the learner will ignore any modifications SpamAssassin may have
 made.
 
+=item B<--folders>=I<filename>, B<-f> I<filename>
+
+sa-learn will read in the list of folders from the specified file, one folder
+per line in the file.  If the folder is prefixed with C<ham:> or C<spam:>,
+sa-learn will learn that folder appropriately, otherwise the folders will be
+assumed to be of the type specified by B<--ham> or B<--spam>.
+
 =item B<--use-ignore>
 
 Don't learn the message if a from address matches configuration file
