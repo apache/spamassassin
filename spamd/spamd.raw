@@ -15,13 +15,7 @@ use Mail::Audit;
 use Mail::SpamAssassin;
 use Sys::Syslog qw(:DEFAULT setlogsock);
 use POSIX qw(setsid);
-
-my $spamtest = Mail::SpamAssassin->new({
-  # maybe turned on by a command-line arg?
-  #	local_tests_only=>1
-  dont_copy_prefs => 1
-});
-$spamtest->init();
+use Getopt::Std;
 
 
 my %resphash = (
@@ -43,11 +37,39 @@ my %resphash = (
     EX_CONFIG => 78, # configuration error
 );
 
+sub usage
+{
+    warn <<EOUSAGE;
+
+Usage: spamd [-L] [-p port]
+
+Options:
+
+    -h            Print this usage message and exit
+    -L            Use local tests only (no DNS or other network lookups)
+    -p port       Listen on the specific port (otherwise default is port 22874)
+
+EOUSAGE
+    exit $resphash{EX_USAGE};
+}
+
+use vars qw{ $opt_h $opt_L $opt_p };
+
+getopts('hLp:') or usage();
+
+$opt_h and usage();
+
+my $spamtest = Mail::SpamAssassin->new({
+  local_tests_only=> $opt_L,
+  dont_copy_prefs => 1
+});
+$spamtest->init();
+
 sub spawn;  # forward declaration
 setlogsock('unix');
 sub logmsg { openlog('spamd','cons,pid','mail'); syslog('info',"@_"); closelog(); }
 
-my $port = shift || 22874;
+my $port = $opt_p || 22874;
 my $proto = getprotobyname('tcp');
 
 ($port) = $port =~ /^(\d+)$/ or die "invalid port";
@@ -176,13 +198,21 @@ spamd - daemonized version of spamassassin
 
 =head1 SYNOPSIS
 
-spamd [port]
+spamd [-L] [-p port] [-h]
 
 =head1 OPTIONS
 
 =over
 
-=item I<port>
+=item B<-h>
+
+Print a brief help message, then exit without further action
+
+=item B<-L>
+
+Perform only local test on all mail.  In other words, skip DNS and other network test.  Works the same as the -L flag to C<spamassassin(1)>
+
+=item B<-p> I<port>
 
 Optionally specifies the port number for the server to listen on
 
@@ -215,4 +245,3 @@ Craig R Hughes E<lt>craig@hughes-family.orgE<gt>
 C<Mail::SpamAssassin>
 
 =cut
-
