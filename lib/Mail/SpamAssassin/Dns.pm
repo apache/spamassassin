@@ -177,7 +177,7 @@ sub dnsbl_hit {
     elsif ($question->string =~ m/^(\d+)\.(\d+)\.(\d+)\.(\d+)\.(\S+\w)/) {
       $log = "$4.$3.$2.$1 listed in $5";
     }
-    push @{$self->{dnsresult}->{$rule}}, $log;
+    $self->{dnsresult}->{$rule}->{$log} = 1;
   }
 }
 
@@ -285,7 +285,7 @@ sub harvest_dnsbl_queries {
   }
   # register hits
   while (my ($rule, $logs) = each %{ $self->{dnsresult} }) {
-    for my $log (@{$logs}) {
+    for my $log (keys %{$logs}) {
       $self->test_log($log) if $log;
     }
     if (!defined $self->{tests_already_hit}->{$rule}) {
