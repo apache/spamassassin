@@ -215,8 +215,7 @@ describe NO_QS_ASKED		Doesn't ask any questions
 body FULL_REFUND		/full refund|refunds? your money in full/i
 describe FULL_REFUND		Offers a full refund
 
-# note Marc Perkel's fix: require capital-F Free.  better -- less FPs
-body FOR_FREE			/\bfor (?-i:F)ree\b/i
+body FOR_FREE			/\bfor (?-i:FREE)\b/i
 describe FOR_FREE		No such thing as a free lunch (1)
 body COMPLETELY_FREE		/\b(?:100%|completely|totally|absolutely) (?-i:F)ree/i
 describe COMPLETELY_FREE	No such thing as a free lunch (2)
