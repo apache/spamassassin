@@ -116,16 +116,16 @@ header T_RCVD_NUMERIC_HELO	Received =~ /helo[= ]\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,
 # 2003-02-23: quinlan
 # bug 1529: Example of MIME_HTML_ONLY avoidance trick
 # testing ideas for misbalanced multipart/alternative parts
-body T_MULTIPART_TRICK_00_10	eval:check_for_mime_multipart_trick('.0','.1')
-body T_MULTIPART_TRICK_10_20	eval:check_for_mime_multipart_trick('.1','.2')
-body T_MULTIPART_TRICK_20_30	eval:check_for_mime_multipart_trick('.2','.3')
-body T_MULTIPART_TRICK_30_40	eval:check_for_mime_multipart_trick('.3','.4')
-body T_MULTIPART_TRICK_40_50	eval:check_for_mime_multipart_trick('.4','.5')
-body T_MULTIPART_TRICK_50_60	eval:check_for_mime_multipart_trick('.5','.6')
-body T_MULTIPART_TRICK_60_70	eval:check_for_mime_multipart_trick('.6','.7')
-body T_MULTIPART_TRICK_70_80	eval:check_for_mime_multipart_trick('.7','.8')
-body T_MULTIPART_TRICK_80_90	eval:check_for_mime_multipart_trick('.8','.9')
-body T_MULTIPART_TRICK_90_100	eval:check_for_mime_multipart_trick('.9','1.0')
+#body T_MULTIPART_TRICK_00_10	eval:check_for_mime_multipart_trick('.0','.1')
+#body T_MULTIPART_TRICK_10_20	eval:check_for_mime_multipart_trick('.1','.2')
+#body T_MULTIPART_TRICK_20_30	eval:check_for_mime_multipart_trick('.2','.3')
+#body T_MULTIPART_TRICK_30_40	eval:check_for_mime_multipart_trick('.3','.4')
+#body T_MULTIPART_TRICK_40_50	eval:check_for_mime_multipart_trick('.4','.5')
+#body T_MULTIPART_TRICK_50_60	eval:check_for_mime_multipart_trick('.5','.6')
+#body T_MULTIPART_TRICK_60_70	eval:check_for_mime_multipart_trick('.6','.7')
+#body T_MULTIPART_TRICK_70_80	eval:check_for_mime_multipart_trick('.7','.8')
+#body T_MULTIPART_TRICK_80_90	eval:check_for_mime_multipart_trick('.8','.9')
+#body T_MULTIPART_TRICK_90_100	eval:check_for_mime_multipart_trick('.9','1.0')
 
 # bug 1416, possible replacement for AS_SEEN_ON
 body     T_AS_SEEN_ON             /seen on\b\s*(?:T\.?V\.?|ABC|NBC|CBS|CNN|Oprah|USA Today|48 Hours|New York Times|\w+\s+T\.?V\.?|:)/i
