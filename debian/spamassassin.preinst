@@ -7,5 +7,17 @@ if [ -e /usr/share/debconf/confmodule ]; then
     db_stop
 fi
 
+# We're still getting some wierdness with symlinks
+# Bug 201324
+if [ -h /etc/logcheck/ignore.d.server/spamassassin ] ; then
+    rm -f /etc/logcheck/ignore.d.server/spamassassin
+fi
+if [ -h /etc/logcheck/ignore.d.workstation/spamassassin ] ; then
+    rm -f /etc/logcheck/ignore.d.workstation/spamassassin
+fi
+if [ -h /etc/logcheck/ignore.d.paranoid/spamassassin ] ; then
+    rm -f /etc/logcheck/ignore.d.paranoid/spamassassin
+fi
+
 
 #DEBHELPER#

@@ -1,6 +1,6 @@
 Template: spamassassin/upgrade/2.40
 Type: note
-Description: Major changes to SpamAssassin mail stream integration
+_Description: Major changes to SpamAssassin mail stream integration
  spamassassin now takes the -P argument by default to act as a pipe
  instead of doing local delivery. If you have been using spamassassin
  (without the -P argument) to do local delivery, you will need to fix
@@ -17,7 +17,7 @@ Description: Major changes to SpamAssassin mail stream integration
 
 Template: spamassassin/upgrade/2.40w
 Type: note
-Description: Major changes to SpamAssassin mail stream integration
+_Description: Major changes to SpamAssassin mail stream integration
  As of version 2.40-1, spamproxyd is no longer available. (This was an
  upstream decision) It appears that spamproxyd is running, therefore,
  it is likely that this will cause problems. You will need to find
@@ -34,11 +34,9 @@ Description: Major changes to SpamAssassin mail stream integration
 
 Template: spamassassin/upgrade/2.42m
 Type: select
-Choices: Yes, No
-Choices-fr.ISO-8859-15: Oui, Non
-Choices-pt_BR.ISO-8859-1: Sim, Não
+_Choices: Yes, No
 Default: No
-Description: Delete config files in /etc/spamassassin?
+_Description: Delete config files in /etc/spamassassin?
  As of 2.42-1, rules files for spamassassin will be placed in
  /usr/share/spamassassin because of a tighter relationship between
  rule files and the version of spamassassin. You currently have
@@ -49,11 +47,9 @@ Description: Delete config files in /etc/spamassassin?
 
 Template: spamassassin/upgrade/2.42u
 Type: select
-Choices: Yes, No
-Choices-fr.ISO-8859-15: Oui, Non
-Choices-pt_BR.ISO-8859-1: Sim, Não
+_Choices: Yes, No
 Default: No
-Description: Delete out of date config files in /etc/spamassassin?
+_Description: Delete out of date config files in /etc/spamassassin?
  As of 2.42-1, rules files for spamassassin will be placed in
  /usr/share/spamassassin because of a tighter relationship between
  rule files and the version of spamassassin. You have not modified
@@ -63,18 +59,8 @@ Description: Delete out of date config files in /etc/spamassassin?
 
 Template: spamassassin/upgrade/cancel
 Type: select
-Choices: Continue, Cancel
-Choices-fr.ISO-8859-15: Continuer, Abandonner
-Choices-pt_BR.ISO-8859-1: Continuar, Cancelar
+_Choices: Continue, Cancel
 Default: Continue
-Description: There may be errors on the upgrade.
+_Description: There may be errors on the upgrade.
  As previously indicated, you may experience errors after this upgrade. You
  may cancel now, and fix the problem, or you may continue.
-Description-fr.ISO-8859-15: Des erreurs sont possibles pendant la mise à jour.
- Comme cela a été signalé auparavant, vous pourriez être confronté à des
- erreurs lors de la mise à jour. Vous pouvez abandonner maintenant et
- corriger le problème ou continuer la mise à jour.
-Description-pt_BR.ISO-8859-1: Podem existir erros na atualização.
- Como indicado anteriormente, você pode encontrar erros depois desta
- atualização. Você pode cancelá-la agora e corrigir o problema ou pode
- continuar.

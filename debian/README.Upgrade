@@ -13,6 +13,27 @@ if you have changed scores in /etc/spamassassin/, you may wish to
 change them back, otherwise your scores may be skewed too high,
 resulting in false positives.
 
+spamd now supports UNIX-domain sockets. This is strongly recommended
+if spamd and spamc are running on the same server. Look at the
+--socketpath option for spamd and the -U option for spamc.
+
+SpamAssassin no longer uses AnyDBM_File to access its Bayes database,
+instead, DB_File is used. If your bayes database is not in dbm format,
+you will need to run 'sa-learn --import' before you can use bayes. To
+check what database format you are currently using, use the following
+command:
+ $ file ~/.spamassassin/bayes_{seen,toks}
+If the output does not contain "Berkeley DB", you are not using
+DB_File and you will need to run 'sa-learn --import'
+
+Before upgrading, it is best to run 'sa-learn --rebuild' to sync your
+Bayes journal with the database. Otherwise, your journal will be
+erased because of incompatibilities with the previous database.
+
+In order to properly use RBLs and other network tests, you will want
+to set the trusted_networks option. (The autodetection algorithm is
+not perfect.) Read man Mail::SpamAssassin::Conf for more info.
+
 Upgrading to 2.5x:
 ------------------
 

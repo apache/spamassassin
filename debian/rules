@@ -29,9 +29,6 @@ endif
 
 PERL = /usr/bin/perl
 
-PREFIX     = /usr
-SYSCONFDIR = /etc
-
 packagea = spamc
 packagei = spamassassin
 
@@ -43,9 +40,9 @@ configure-stamp:
 	dh_testdir
 
 	perl Makefile.PL INSTALLDIRS=vendor \
-	  PREFIX=$(PREFIX) SYSCONFDIR=$(SYSCONFDIR) \
-	  CONFDIR=$(SYSCONFDIR)/spamassassin \
-	  DESTDIR=$(CURDIR)/debian/$(packagei) < /dev/null
+	 DESTDIR=$(CURDIR)/debian/$(packagei) \
+	 CONFDIR=/etc/spamassassin \
+	 ENABLE_SSL=yes < /dev/null
 
 	touch configure-stamp
 
@@ -68,7 +65,7 @@ clean:
 	dh_clean
 
 debian/po/templates.pot: debian/spamassassin.templates
-	debconf-updatepo
+	-debconf-updatepo
 
 # Spamassassin ONLY
 
@@ -125,11 +122,11 @@ binary-indep: build-indep install-indep
 	dh_testdir -i
 	dh_testroot -i
 	dh_installdebconf -i
-	dh_installdocs -i
-	dh_installexamples -i
+	dh_installdocs -i -XCVS
+	dh_installexamples -i -XCVS
 	dh_installinit -i -- defaults 19
 	dh_installchangelogs Changes -i
-#	dh_link -i
+	dh_link -i
 	dh_compress -i
 	dh_fixperms -i
 	dh_installdeb -i
@@ -168,7 +165,7 @@ install-arch: build-arch
 binary-arch: build-arch install-arch
 	dh_testdir -a
 	dh_testroot -a
-	dh_installdocs -a
+	dh_installdocs -a -XCVS
 	dh_installman -a
 	dh_installchangelogs Changes -a
 	dh_strip -a

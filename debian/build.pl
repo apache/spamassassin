@@ -1,85 +1,117 @@
 #!/usr/bin/perl -w
 
-die 'Run from top level spamassassin directory' unless -d 'debian';
+# CVS Build script for SpamAssassin Debian packages
+# Options:
+# -d           Automatically build package
+# -e <email>   Set email to use in changelog
+# -f <name>    Set full name to use in changelog
 
 use lib 'lib';
 use Mail::SpamAssassin;
 use Getopt::Std;
+use POSIX;
+use strict;
 
-getopts('d'); # d = do it!
+our ($email, $name, %opts);
+getopts('de:f:', \%opts); # d = do it!
 
-our $opt_d;
-
-# Checking that everything is where we need it.
-warn 'You might want to set $EMAIL or $DEBEMAIL'
-    if !$ENV{EMAIL} && !$ENV{DEBEMAIL};
-
-warn 'You might want to set $DEBFULLNAME'
-    if !$ENV{DEBFULLNAME};
-
-die 'dch not available: run apt-get install devscripts' unless -x '/usr/bin/dch';
-
-die 'dpkg-buildpackage not available: run apt-get install dpkg-dev' unless -x '/usr/bin/dpkg-buildpackage';
-
-die 'debhelper not available: run apt-get install debhelper' unless -x '/usr/bin/dh_testroot';
-
-
-# Let's go.
-if (!-f 'changelog') {
-    system ("/bin/cp", "debian/changelog.in", "debian/changelog") == 0
-	or die "Couldn't copy, error $?";
+# check env
+sub check_environment {
+    if (! -x 'debian/rules') {
+	die 'Run from top level spamassassin CVS directory';
+    }
+    if (!$ENV{EMAIL} && !$ENV{DEBEMAIL} && !$opts{e}) {
+	warn 'No e-mail address specified. Using nobody@nowhere';
+    }
+    if(system("/usr/bin/dpkg-checkbuilddeps") != 0) {
+	die 'Build dependencies not satisfied, or dpkg-checkbuilddeps not available.';
+    }
 }
 
-my ($cvsversion, $oldversion, $datecode, $debianversion, $revisioncode);
+sub set_maintainer {
+    $email = undef;
+    $name = undef;
+    
+    if ($opts{e}) {
+	$email = $opts{e};
+    }
 
-$cvsversion = $Mail::SpamAssassin::VERSION;
-print "Current CVS version: $cvsversion\n";
+    if ($opts{f}) {
+	$name = $opts{f};
+    }
 
-$datecode = `date -u +%Y%m%d`;
-chomp $datecode;
+    return if (defined $name and defined $email);
 
-open (CHANGELOG, "debian/changelog");
-
-while (<CHANGELOG>) {
-    if (/spamassassin \((\d+\.\d+)pre(\d+.\d+)cvs(\d+)-(\d+)\) unstable;/) {
-	$oldversion = $1;
-	warn "Using current CVS version, not version from changelog" if $2 != $cvsversion;
-	if ($3 == $datecode) {
-	    $revisioncode = $4 + 1;
-	    print "Already built today, using revision $revisioncode\n";
-	} else {
-	    $revisioncode = 1;
+    if ($ENV{DEBEMAIL}) {
+	if ($ENV{DEBEMAIL} =~ /^(.*)\s+<(.*)>$/) {
+	    $name ||= $1;
+	    $email ||= $2;
 	}
-	last;
     }
-	 
-    if (/spamassassin \((\d+\.\d+)-\d\) (?:unstable|experimental); urgency=/) { # Should ignore cvs versions
-	$oldversion = $1;
-	print "Last Debian version: $oldversion\n";
-	$revisioncode = 1;
-	last;
+
+    return if (defined $name and defined $email);
+
+    if ($ENV{EMAIL}) {
+	if ($ENV{EMAIL} =~ /^(.*)\s+<(.*)>$/) {
+	    $name ||= $1;
+	    $email ||= $2;
+	}
+    }
+
+    return if (defined $name and defined $email);
+
+    # Don't bother looking up user's name from /etc/passwd
+    $name ||= 'Anonymous CVS Builder';
+    $email ||= 'nobody@nowhere';
+
+}
+
+sub get_version {
+    return Mail::SpamAssassin::Version();
+}
+
+sub update_changelog {
+    my ($datel, $dates);
+    my $version = get_version();
+    chomp($datel = `822-date`);
+    chomp($dates = `date +"%Y%m%d"`);
+    open OUT, '>debian/changelog';
+    print OUT <<EOF;
+spamassassin ($version+$dates-1) experimental; urgency=low
+
+  * CVS packaged version
+  * A changelog to previous versions is not included. Please see the
+    official Debian packages for changelog information.
+  
+ -- $name <$email>  $datel
+EOF
+    close OUT;
+}
+
+# Merge templates
+sub check_debconfpo {
+    if (! -x '/usr/bin/po2debconf') {
+	open IN, 'debian/spamassassin.templates';
+	open OUT, '>debian/spamassassin.templates.stripped';
+	while (<IN>) {
+	    s#^__?##;
+	    print OUT $_;
+	}
+	close IN;
+	close OUT;
+	rename 'debian/spamassassin.templates', 'debian/spamassassin.templates.orig';
+	rename 'debian/spamassassin.templates.stripped', 'debian/spamassassin.templates'
     }
 }
 
-close CHANGELOG;
-
-die "Can't determine old version\n" if !$oldversion;
-
-$debianversion = "${oldversion}pre${cvsversion}cvs${datecode}-${revisioncode}"; # Not pretty but informative
-
-print "Building debian version $debianversion\n";
-
-unlink "debian/changelog"; # We don't need accumulating changelogs!
-system ("/bin/cp", "debian/changelog.in", "debian/changelog") == 0
-  or die "Couldn't copy, error $?";
-
-system('/usr/bin/dch', "--newversion=$debianversion", 'Packaging from CVS') == 0 or die "system() error: $?";
-
-print "OK!\n";
-
-if ($opt_d) {
+sub doit {
     print "Trying to run dpkg-buildpackage\n";
     exec('/usr/bin/dpkg-buildpackage', '-rfakeroot', '-b');
     die "Exec failed! Error: $?";
 }
 
+check_environment();
+set_maintainer();
+update_changelog();
+check_debconfpo();
+doit() if $opts{d};

@@ -13,13 +13,13 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: spamassassin 2.54-3\n"
+"Project-Id-Version: PACKAGE VERSION\n"
 "POT-Creation-Date: 2003-05-17 16:49-0400\n"
-"PO-Revision-Date: 2003-05-22 07:30+0100\n"
-"Last-Translator: Christian Perrier <bubulle@debian.org>\n"
-"Language-Team: French <debian-l10n-french@lists.debian.org>\n"
+"PO-Revision-Date: 2003-09-13 16:07+0900\n"
+"Last-Translator: Kenshi Muto <kmuto@debian.org>\n"
+"Language-Team: Japanese <debian-japanese@lists.debian.org>\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=iso-8859-15\n"
+"Content-Type: text/plain; charset=EUC-JP\n"
 "Content-Transfer-Encoding: 8bit\n"
 
 #. Description
@@ -29,20 +29,12 @@ msgid ""
 "decision.) It appears that spamproxyd is not currently running; however, "
 "this check may not be totally accurate. If you do use spamproxyd, you will "
 "need to find an alternative, or download it from SpamAssassin CVS."
-msgstr ""
-"Depuis la version 2.40-1, spamproxyd n'est plus disponible (sur décision du "
-"mainteneur amont). En ce moment, il semble que spamproxyd ne soit pas en "
-"train de fonctionner. Cependant, la vérification effectuée n'est pas "
-"complètement fiable. Si vous utilisez bel et bien spamproxyd, vous devez "
-"trouver un autre mode de fonctionnement ou télécharger spamproxyd sur le CVS "
-"de SpamAssassin."
+msgstr "2.40-1 ¤Ç¤Ï¡¢spamproxyd ¤Ï¤â¤¦ÍøÍÑ¤Ç¤­¤Þ¤»¤ó (¤³¤ì¤Ï upstream ¤Î·èÄê¤Ë¤è¤ë¤â¤Î¤Ç¤¹)¡£spamproxyd ¤Ï¸½ºß¼Â¹Ô¤µ¤ì¤Æ¤¤¤Ê¤¤¤È»×¤ï¤ì¤Þ¤¹¡£¤·¤«¤·¡¢¤³¤Î¥Á¥§¥Ã¥¯¤Ï´°Á´¤ËÀµ³Î¤Ç¤¢¤ë¤È¤¤¤¦¤ï¤±¤Ç¤Ï¤¢¤ê¤Þ¤»¤ó¡£¤â¤· spamproxyd ¤ò»È¤¦¤Î¤Ç¤¢¤ì¤Ð¡¢ÊÌ¤Î¤â¤Î¤òÃµ¤¹¤«¡¢¤¢¤ë¤¤¤Ï SpamAssassin ¤Î CVS ¤«¤é¤½¤ì¤ò¥À¥¦¥ó¥í¡¼¥É¤¹¤ëÉ¬Í×¤¬¤¢¤ê¤Þ¤¹¡£"
 
 #. Description
 #: ../spamassassin.templates:20
 msgid "Major changes to SpamAssassin mail stream integration"
-msgstr ""
-"Changements importants pour l'intégration de SpamAssassin dans le flux de "
-"courrier"
+msgstr "SpamAssassin ¤Î¥á¡¼¥ë¥¹¥È¥ê¡¼¥àÅý¹ç¤Ç¤ÎÂç¤­¤ÊÊÑ¹¹"
 
 #. Description
 #: ../spamassassin.templates:20
@@ -52,13 +44,7 @@ msgid ""
 "likely that this will cause problems. You will need to find another way of "
 "calling spamassassin, or download spamproxyd from SpamAssassin CVS. (http://"
 "www.spamassassin.org for more information)"
-msgstr ""
-"Depuis la version 2.40-1, spamproxyd n'est plus disponible (sur décision du "
-"mainteneur amont). En ce moment, il semble que spamproxyd soit en train de "
-"fonctionner ce qui va probablement générer des dysfonctionnements. Vous "
-"devez utiliser une autre méthode pour lancer spamassassin ou télécharger "
-"spamproxyd sur le CVS de SpamAssassin. Veuillez consulter http://www."
-"spamassassin.org pour plus d'informations."
+msgstr "2.40-1 ¤Ç¤Ï¡¢spamproxyd ¤Ï¤â¤¦ÍøÍÑ¤Ç¤­¤Þ¤»¤ó (¤³¤ì¤Ï upstream ¤Î·èÄê¤Ë¤è¤ë¤â¤Î¤Ç¤¹)¡£spamproxyd ¤Ï¸½ºß¼Â¹Ô¤µ¤ì¤Æ¤¤¤ë¤è¤¦¤Ç¤¹¤¬¡¢¤³¤ì¤ÏÌäÂê¤ò°ú¤­µ¯¤³¤¹¤Ç¤·¤ç¤¦¡£spamassassin ¤ò¸Æ¤Ó½Ð¤¹ÊÌ¤ÎÊýË¡¤òÃµ¤¹¤«¡¢¤¢¤ë¤¤¤Ï SpamAssassin ¤Î CVS ¤«¤éspamproxyd ¤ò¥À¥¦¥ó¥í¡¼¥É¤¹¤ëÉ¬Í×¤¬¤¢¤ê¤Þ¤¹ (¾ÜºÙ¤Ë¤Ä¤¤¤Æ¤Ï http://www.spamassassin.org ¤ò»²¾È)¡£"
 
 #. Description
 #: ../spamassassin.templates:20
@@ -68,23 +54,17 @@ msgid ""
 "argument) to do local delivery, you will need to fix your mail stream "
 "manually. (If you are calling spamassassin via procmail, you can probably "
 "ignore this.)"
-msgstr ""
-"Spamassassin utilise désormais le commutateur -P par défaut afin d'être "
-"utilisé comme filtre (« pipe ») plutôt que comme agent local de distribution "
-"du courrier. Si, pour la distribution locale, vous utilisez spamassassin "
-"sans le commutateur -P, vous aurez à reconfigurer votre flux de courrier "
-"manuellement. Si vous utilisez spamassassin depuis procmail, vous pouvez "
-"sans risque ignorer cet avertissement."
+msgstr "spamassassin ¤Ï¸½ºß¡¢¥Ç¥Õ¥©¥ë¥È¤Ç¥í¡¼¥«¥ëÇÛÁ÷¤ò¹Ô¤¦Âå¤ï¤ê¤Ë¥Ñ¥¤¥×¤¹¤ë¤¿¤á¤Î -P °ú¿ô¤ò¼è¤ê¤Þ¤¹¡£spamassassin ¤ò¥í¡¼¥«¥ëÇÛÁ÷¤Ë (-P °ú¿ô¤Ê¤·¤Ç) »È¤Ã¤Æ¤¤¤ë¾ì¹ç¡¢¥á¡¼¥ë¥¹¥È¥ê¡¼¥à¤ò¼êÆ°¤Ç½¤Àµ¤¹¤ëÉ¬Í×¤¬¤¢¤ê¤Þ¤¹ (procmail ·ÐÍ³¤Ç spamassassin ¤ò¸Æ¤Ó½Ð¤·¤Æ¤¤¤ë¾ì¹ç¤Ë¤Ï¤ª¤½¤é¤¯¤³¤ì¤ÏÌµ»ë¤·¤Æ¤«¤Þ¤¤¤Þ¤»¤ó)¡£"
 
 #. Description
 #: ../spamassassin.templates:20
 msgid "You will be given an option to abort the installation."
-msgstr "Vous allez avoir une occasion d'interrompre l'installation."
+msgstr "¥¤¥ó¥¹¥È¡¼¥ë¤òÃæ»ß¤¹¤ë¤È¤¤¤¦ÁªÂò»è¤¬Í¿¤¨¤é¤ì¤Þ¤¹¡£"
 
 #. Description
 #: ../spamassassin.templates:39
 msgid "Delete config files in /etc/spamassassin?"
-msgstr "Supprimer les fichiers de configuration dans /etc/spamassassin ?"
+msgstr "/etc/spamassassin ¤Ë¤¢¤ëÀßÄê¥Õ¥¡¥¤¥ë¤òºï½ü¤·¤Þ¤¹¤«?"
 
 #. Description
 #: ../spamassassin.templates:39
@@ -95,25 +75,17 @@ msgid ""
 "spamassassin. Would you like all of these out of date configuration files to "
 "be deleted? If you don't, you will probably need to do this yourself, or you "
 "will get many warnings. If you do, you may lose some local changes."
-msgstr ""
-"Depuis la version 2.42-1, les fichiers de règles pour spamassassin sont "
-"placés dans /usr/share/spamassassin car ils sont plus directement dépendants "
-"de la version de spamassassin. Vous avez actuellement des fichiers de règles "
-"dans /etc/spamassassin. Voulez-vous effacer tous ces fichiers de "
-"configuration obsolètes ? Si vous refusez, vous aurez probablement à le "
-"faire vous-même sous peine de voir s'afficher de nombreux avertissements. Si "
-"vous acceptez, il est possible que certaines modifications locales soient "
-"perdues."
+msgstr "2.42-1 ¤Ç¤Ï¡¢spamassassin ¤Î¥ë¡¼¥ë¥Õ¥¡¥¤¥ë¤Ï¡¢¥ë¡¼¥ë¥Õ¥¡¥¤¥ë¤È spamassassin ¤Î¥Ð¡¼¥¸¥ç¥ó¤È¤Î´Ö¤Ë¶¯¤¤´Ø·¸¤¬¤¢¤ë¤³¤È¤«¤é /usr/share/spamassassin ¤ËÃÖ¤«¤ì¤Þ¤¹¡£/etc/spamassassin ¤ËÀßÄê¥Õ¥¡¥¤¥ë¤¬¸½ºßÂ¸ºß¤¹¤ë¤è¤¦¤Ç¤¹¡£¤³¤ì¤é¤Î²áµî¤ÎÀßÄê¥Õ¥¡¥¤¥ë¤¹¤Ù¤Æ¤òºï½ü¤·¤Þ¤¹¤«? ¤â¤·¤½¤¦¤·¤Ê¤¤¤Ê¤é¡¢¤ª¤½¤é¤¯¤³¤ì¤ò¤¢¤Ê¤¿¼«¿È¤Ç¹Ô¤¦É¬Í×¤¬¤¢¤ê¡¢¤¢¤ë¤¤¤ÏÂ¿¤¯¤Î·Ù¹ð¤ò¼õ¤±¼è¤ë¤³¤È¤Ë¤Ê¤ê¤Þ¤¹¡£ºï½ü¤¹¤ë¾ì¹ç¤Ë¤Ï¡¢¤¤¤¯¤Ä¤«¤Î¥í¡¼¥«¥ë¤ÎÊÑ¹¹¤ò¼º¤¦¤³¤È¤Ë¤Ê¤ê¤Þ¤¹¡£"
 
 #. Choices
 #: ../spamassassin.templates:50
 msgid "Yes, No"
-msgstr "Oui, Non"
+msgstr "¤Ï¤¤, ¤¤¤¤¤¨"
 
 #. Description
 #: ../spamassassin.templates:52
 msgid "Delete out of date config files in /etc/spamassassin?"
-msgstr "Supprimer les fichiers périmés dans /etc/spamassassin ?"
+msgstr "/etc/spamassassin ¤Ë¤¢¤ë²áµî¤ÎÀßÄê¥Õ¥¡¥¤¥ë¤òºï½ü¤·¤Þ¤¹¤«?"
 
 #. Description
 #: ../spamassassin.templates:52
@@ -124,31 +96,21 @@ msgid ""
 "lose any local changes. Would you like all out of date configuration files "
 "deleted? If you don't, you will probably need to do this yourself, or you "
 "will get many warnings."
-msgstr ""
-"Depuis la version 2.42-1, les fichiers de règles pour spamassassin sont "
-"placés dans /usr/share/spamassassin car ils sont plus directement dépendants "
-"de la version de spamassassin. Vous n'avez pas modifié ces fichiers et ne "
-"perdrez donc pas de modifications locales. Voulez-vous effacer tous les "
-"fichiers de configuration obsolètes ? Si vous refusez, vous aurez "
-"probablement à le faire vous-même sous peine de voir s'afficher de nombreux "
-"avertissements. "
+msgstr "2.42-1 ¤Ç¤Ï¡¢spamassassin ¤Î¥ë¡¼¥ë¥Õ¥¡¥¤¥ë¤Ï¡¢¥ë¡¼¥ë¥Õ¥¡¥¤¥ë¤È spamassassin ¤Î¥Ð¡¼¥¸¥ç¥ó¤È¤Î´Ö¤Ë¶¯¤¤´Ø·¸¤¬¤¢¤ë¤³¤È¤«¤é /usr/share/spamassassin ¤ËÃÖ¤«¤ì¤Þ¤¹¡£¤³¤ì¤é¤Î¥Õ¥¡¥¤¥ë¤òÊÑ¹¹¤·¤Æ¤¤¤Ê¤¤¤è¤¦¤Ê¤Î¤Ç¡¢¥í¡¼¥«¥ë¤ÎÊÑ¹¹¤¬¼º¤ï¤ì¤ë¤³¤È¤Ï¤¢¤ê¤Þ¤»¤ó¡£¤³¤ì¤é¤Î²áµî¤ÎÀßÄê¥Õ¥¡¥¤¥ë¤¹¤Ù¤Æ¤òºï½ü¤·¤Þ¤¹¤«? ¤â¤·¤½¤¦¤·¤Ê¤¤¤Ê¤é¡¢¤ª¤½¤é¤¯¤³¤ì¤ò¤¢¤Ê¤¿¼«¿È¤Ç¹Ô¤¦É¬Í×¤¬¤¢¤ê¡¢¤¢¤ë¤¤¤ÏÂ¿¤¯¤Î·Ù¹ð¤ò¼õ¤±¼è¤ë¤³¤È¤Ë¤Ê¤ê¤Þ¤¹¡£"
 
 #. Choices
 #: ../spamassassin.templates:62
 msgid "Continue, Cancel"
-msgstr "Continuer, Abandonner"
+msgstr "Â³¤±¤ë, ¥­¥ã¥ó¥»¥ë"
 
 #. Description
 #: ../spamassassin.templates:64
 msgid "There may be errors on the upgrade."
-msgstr "Des erreurs sont possibles pendant la mise à jour."
+msgstr "¹¹¿·»þ¤Ë¥¨¥é¡¼¤¬È¯À¸¤¹¤ë¤«¤â¤·¤ì¤Þ¤»¤ó¡£"
 
 #. Description
 #: ../spamassassin.templates:64
 msgid ""
 "As previously indicated, you may experience errors after this upgrade. You "
 "may cancel now, and fix the problem, or you may continue."
-msgstr ""
-"Comme cela a été signalé auparavant, vous pourriez être confronté à des "
-"erreurs lors de la mise à jour. Vous pouvez abandonner maintenant et "
-"corriger le problème ou continuer la mise à jour."
+msgstr "°ÊÁ°¤Ë¼¨¤·¤¿¤È¤ª¤ê¡¢¤³¤Î¹¹¿·¸å¤Ë¥¨¥é¡¼¤ò·Ð¸³¤¹¤ë¤«¤â¤·¤ì¤Þ¤»¤ó¡£º£¥­¥ã¥ó¥»¥ë¤·¤ÆÌäÂê¤ò½¤Àµ¤¹¤ë¤«¡¢Â³¤±¤ë¤³¤È¤¬¤Ç¤­¤Þ¤¹¡£"
