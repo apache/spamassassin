@@ -3,7 +3,7 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("dns");
 
-use constant TEST_ENABLED => (-e 't/do_net');
+use constant TEST_ENABLED => (-e 't/do_net' || -e 'do_net');
 use constant HAS_NET_DNS => eval { require Net::DNS; };
 
 use Test;
