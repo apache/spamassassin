@@ -2308,6 +2308,8 @@ sub _check_mime_header {
     $self->{mime_body_text_count}++;
   }
 
+  $self->{t_mime_base64_count}++ if $cte =~ /base64/;
+
   if ($ctype =~ /^text/ &&
       $cte =~ /base64/ &&
       !($cd && $cd =~ /^(?:attachment|inline)/))
@@ -2414,6 +2416,7 @@ sub _check_attachments {
   $self->{mime_qp_illegal} = 0;
   $self->{mime_qp_ratio} = 0;
   $self->{mime_suspect_name} = 0;
+  $self->{t_mime_base64_count} = 0;
   $self->{t_mime_base64_blanks} = 0;
   $self->{t_mime_base64_encoded_text} = 0;
   $self->{t_mime_base64_illegal} = 0;
