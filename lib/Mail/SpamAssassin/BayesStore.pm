@@ -610,6 +610,9 @@ sub expire_old_tokens_trapped {
 
     $newdelta = $start * $max_expire_mult;
   }
+  else { # use the estimation method
+    dbg("bayes: Can do estimation method for expiry, skipping first pass.");
+  }
 
   # use O_EXCL to avoid races (bonus paranoia, since we should be locked
   # anyway)
