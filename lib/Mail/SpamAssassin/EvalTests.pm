@@ -1151,9 +1151,12 @@ sub check_rbl {
   return 0 unless (scalar @fullips > 0);
 
   # Let's go ahead and trim away all Reserved ips (KLC)
+  # also uniq the list and strip dups. (jm)
   my @ips = ();
+  my %seen = ();
   foreach my $ip (@fullips) {
-    if (!($ip =~ /${IP_IN_RESERVED_RANGE}/o)) { push(@ips,$ip); }
+    next if (exists ($seen{$ip})); $seen{$ip} = 1;
+    if (!($ip =~ /${IP_IN_RESERVED_RANGE}/o)) { push(@ips, $ip); }
   }
 
   dbg("Got the following IPs: ".join(", ", @ips), "rbl", -3);
