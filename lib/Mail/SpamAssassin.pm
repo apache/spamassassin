@@ -979,7 +979,7 @@ sub remove_spamassassin_markup {
     }
   }
 
-  return $hdrs.join ('', @newbody);
+  return join ('', $hdrs, @newbody);
 }
 
 ###########################################################################

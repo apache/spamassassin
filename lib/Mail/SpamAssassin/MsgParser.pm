@@ -84,6 +84,7 @@ sub parse {
   # Generate the main object and parse the appropriate MIME-related headers into it.
   my $msg = Mail::SpamAssassin::MsgContainer->new();
   my $header = '';
+  $msg->{'pristine_headers'} = '';
 
   # Go through all the headers of the message
   while ( my $last = shift @message ) {
@@ -117,6 +118,11 @@ sub parse {
   # Store the pristine body for later -- store as a copy since @message will get modified below
   $msg->{'pristine_body'} = join('', @message);
 
+  # CRLF -> LF
+  for ( @message ) {
+    s/\r\n/\n/;
+  }
+
   # Figure out the boundary
   my ($boundary);
   ($msg->{'type'}, $boundary) = Mail::SpamAssassin::Util::parse_content_type($msg->header('content-type'));
@@ -149,11 +155,6 @@ doesn't have a root node which points at the actual root node ...)
 
 sub _parse_body {
   my($self, $msg, $_msg, $boundary, $body, $initial) = @_;
-
-  # CRLF -> LF
-  for ( @{$body} ) {
-    s/\r\n/\n/;
-  }
 
   # Figure out the simple content-type, or set it to text/plain
   my $type = $_msg->header('Content-Type') || 'text/plain; charset=us-ascii';
