@@ -217,7 +217,22 @@ sub new {
 
 sub finish {
   my $self = shift;
+  if (!$self->{conf}->{use_bayes}) { return; }
   $self->{store}->untie_db();
+}
+
+###########################################################################
+
+sub sanity_check_is_untied {
+  my $self = shift;
+
+  # do a sanity check here.  Wierd things happen if we remain tied
+  # after compiling; for example, spamd will never see that the
+  # number of messages has reached the bayes-scanning threshold.
+  if ($self->{store}->{already_tied} || $self->{store}->{is_locked}) {
+    warn "SpamAssassin: oops! still tied/locked to bayes DBs, untie'ing\n";
+    $self->{store}->untie_db();
+  }
 }
 
 ###########################################################################
@@ -532,11 +547,12 @@ sub learn {
   eval {
     local $SIG{'__DIE__'};	# do not run user die() traps in here
 
-    $self->{store}->tie_db_writable();
-    $ret = $self->learn_trapped ($isspam, $msg, $body);
+    if ($self->{store}->tie_db_writable()) {
+      $ret = $self->learn_trapped ($isspam, $msg, $body);
 
-    if (!$self->{main}->{learn_caller_will_untie}) {
-      $self->{store}->untie_db();
+      if (!$self->{main}->{learn_caller_will_untie}) {
+        $self->{store}->untie_db();
+      }
     }
   };
 
@@ -605,11 +621,12 @@ sub forget {
   eval {
     local $SIG{'__DIE__'};	# do not run user die() traps in here
 
-    $self->{store}->tie_db_writable();
-    $ret = $self->forget_trapped ($msg, $body);
+    if ($self->{store}->tie_db_writable()) {
+      $ret = $self->forget_trapped ($msg, $body);
 
-    if (!$self->{main}->{learn_caller_will_untie}) {
-      $self->{store}->untie_db();
+      if (!$self->{main}->{learn_caller_will_untie}) {
+        $self->{store}->untie_db();
+      }
     }
   };
 
@@ -801,19 +818,23 @@ sub check_for_cached_probs_invalidated {
   return 0;
 }
 
-sub is_available {
+# Check to make sure we can tie() the DB, and we have enough entries to do a scan
+sub is_scan_available {
   my $self = shift;
 
+  return 0 unless $self->{main}->{conf}->{use_bayes};
   return 0 unless $self->{store}->tie_db_readonly();
 
   my ($ns, $nn) = $self->{store}->nspam_nham_get();
 
   if ($ns < $MIN_SPAM_CORPUS_SIZE_FOR_BAYES) {
     dbg("debug: Only $ns spam(s) in Bayes DB < $MIN_SPAM_CORPUS_SIZE_FOR_BAYES");
+    $self->{store}->untie_db();
     return 0;
   }
   if ($nn < $MIN_HAM_CORPUS_SIZE_FOR_BAYES) {
     dbg("debug: Only $nn ham(s) in Bayes DB < $MIN_HAM_CORPUS_SIZE_FOR_BAYES");
+    $self->{store}->untie_db();
     return 0;
   }
 
@@ -826,22 +847,14 @@ sub is_available {
 sub scan {
   my ($self, $msg, $body) = @_;
 
-  if (!$self->{main}->{conf}->{use_bayes}) { goto skip; }
-  if (!$self->{store}->tie_db_readonly()) { goto skip; }
+  if ( !$self->is_scan_available() ) {
+    goto skip;
+  }
 
   my ($ns, $nn) = $self->{store}->nspam_nham_get();
 
   if ($self->{log_raw_counts}) {
     $self->{raw_counts} = " ns=$ns nn=$nn ";
-  }
-
-  if ($ns < $MIN_SPAM_CORPUS_SIZE_FOR_BAYES) {
-    dbg ("spam corpus too small ($ns < $MIN_SPAM_CORPUS_SIZE_FOR_BAYES), skipping");
-    goto skip;
-  }
-  if ($nn < $MIN_HAM_CORPUS_SIZE_FOR_BAYES) {
-    dbg ("ham corpus too small ($nn < $MIN_HAM_CORPUS_SIZE_FOR_BAYES), skipping");
-    goto skip;
   }
 
   dbg ("bayes corpus size: nspam = $ns, nham = $nn");
@@ -936,11 +949,11 @@ sub scan {
   }
 
   $self->{store}->untie_db();
-
   return $score;
 
 skip:
   dbg ("bayes: not scoring message, returning 0.5");
+  $self->{store}->untie_db() if ( $self->{store}->{already_tied} );
   return 0.5;           # nice and neutral
 }
 

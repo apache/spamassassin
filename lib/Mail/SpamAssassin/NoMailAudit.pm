@@ -154,17 +154,21 @@ sub _get_or_create_header_object {
 # ---------------------------------------------------------------------------
 
 sub _get_header_list {
-  my ($self, $hdr) = @_;
+  my ($self, $hdr, $header_name_only) = @_;
 
   # OK, we want to do a case-insensitive match here on the header name
   # So, first I'm going to pick up an array of the actual capitalizations used:
   my $lchdr = lc $hdr;
   my @cap_hdrs = grep(lc($_) eq $lchdr, keys(%{$self->{headers}}));
 
-  # And now pick up all the entries into a list
-  my @entries = map($self->{headers}->{$_},@cap_hdrs);
-
-  return @entries;
+  # If the request is just for the list of headers names that matched only ...
+  if ( defined $header_name_only && $header_name_only ) {
+    return @cap_hdrs;
+  }
+  else {
+    # return the values in each of the headers
+    return map($self->{headers}->{$_},@cap_hdrs);
+  }
 }
 
 sub get_pristine_header {
@@ -250,29 +254,21 @@ sub get_all_headers {
 sub replace_header {
   my ($self, $hdr, $text) = @_;
 
-  # Get all the headers that might match
-  my @entries = $self->_get_header_list($hdr);
+  # perhaps we should check $self->{header_order} and put the new version
+  # where the old one was?  This shouldn't be required anywhere though.
+  # tvd, 2003.02.23
 
-  # remove all of them if there's more than 1 line
-  if (scalar(@entries) >= 1) {
-    $self->delete_header ($hdr);
-  }
-
+  $self->delete_header ($hdr);
   return $self->put_header($hdr, $text);
 }
 
 sub delete_header {
   my ($self, $hdr) = @_;
 
-  if (defined $self->{headers}->{$hdr}) {
-    my @neworder = ();
-    foreach my $hdrcode (@{$self->{header_order}}) {
-      next if ($hdrcode =~ /^${hdr}:/);
-      push (@neworder, $hdrcode);
-    }
-    @{$self->{header_order}} = @neworder;
-
-    delete $self->{headers}->{$hdr};
+  # Delete all versions of the header, case insensitively
+  foreach my $dhdr ( $self->_get_header_list($hdr,1) ) {
+    @{$self->{header_order}} = grep(rindex($_,"$dhdr:",0) != 0, @{$self->{header_order}});
+    delete $self->{headers}->{$dhdr};
   }
 }
 

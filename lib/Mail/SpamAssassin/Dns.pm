@@ -359,6 +359,7 @@ sub razor2_lookup {
     return 0;
   }
   if (!$self->{conf}->{use_razor2}) { return 0; }
+  if (!$self->is_razor2_available()) { return 0; }
 
   timelog("Razor2 -> Starting razor test ($timeout secs max)", "razor", 1);
   

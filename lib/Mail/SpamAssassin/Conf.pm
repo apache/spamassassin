@@ -365,7 +365,7 @@ set of headers:
 e.g.
 
   whitelist_from joe@example.com fred@example.com
-  whitelist_from simon@example.com
+  whitelist_from *@example.com
 
 =cut
 
@@ -378,11 +378,13 @@ e.g.
 Used to override a default whitelist_from entry, so for example a distribution
 whitelist_from can be overriden in a local.cf file, or an individual user can
 override a whitelist_from entry in their own C<user_prefs> file.
+The specified email address has to match exactly the address previously
+used in a whitelist_from line.
 
 e.g.
 
   unwhitelist_from joe@example.com fred@example.com
-  unwhitelist_from *@amazon.com
+  unwhitelist_from *@example.com
 
 =cut
 
@@ -390,17 +392,18 @@ e.g.
       $self->remove_from_addrlist ('whitelist_from', split (' ', $1)); next;
     }
 
-=item whitelist_from_rcvd lists.sourceforge.net sourceforge.net
+=item whitelist_from_rcvd addr@lists.sourceforge.net sourceforge.net
 
 Use this to supplement the whitelist_from addresses with a check against the
 Received headers. The first parameter is the address to whitelist, and the
-second is a domain to match in the Received headers.  This does not
-allow globbing, and must be followed by a numeric IP address in brackets.
+second is a domain to match in the Received headers.  This domain does not
+allow globbing, and must be followed by a numeric IP address in brackets
+in the Received headers.
 
 e.g.
 
   whitelist_from_rcvd joe@example.com  example.com
-  whitelist_from_rcvd axkit.org        sergeant.org
+  whitelist_from_rcvd *@axkit.org      sergeant.org
 
 =cut
 
@@ -415,15 +418,17 @@ Used to override a default whitelist_from_rcvd entry, so for example a
 distribution whitelist_from_rcvd can be overriden in a local.cf file,
 or an individual user can override a whitelist_from_rcvd entry in
 their own C<user_prefs> file.
+The specified email address has to match exactly the address previously
+used in a whitelist_from_rcvd line.
 
 e.g.
 
   unwhitelist_from_rcvd joe@example.com fred@example.com
-  unwhitelist_from_rcvd amazon.com
+  unwhitelist_from_rcvd *@axkit.org
 
 =cut
 
-    if (/^unwhitelist_from\s+(.+)$/) {
+    if (/^unwhitelist_from_rcvd\s+(.+)$/) {
       $self->remove_from_addrlist_rcvd('whitelist_from_rcvd', split (' ', $1));
       next;
     }
@@ -643,13 +648,20 @@ score for this message. _REQD_ will be replaced with the threshold.
       $self->{subject_tag} = $1; next;
     }
 
-=item report_safe { 0 | 1 }	(default: 1)
+=item report_safe { 0 | 1 | 2 }	(default: 1)
 
 if this option is set to 1, if an incoming message is tagged as spam,
 instead of modifying the original message, SpamAssassin will create a
 new report message and attach the original message as a message/rfc822
 MIME part (ensuring the original message is completely preserved, not
 easily opened, and easier to recover).
+
+If this option is set to 2, then original messages will be attached with
+a content type of text/plain instead of message/rfc822.  This setting
+may be required for safety reasons on certain broken mail clients that
+automatically load attachments without any action by the user.  This
+setting may also make it somewhat more difficult to extract or view the
+original message.
 
 If this option is set to 0, incoming spam is only modified by adding
 some headers and no changes will be made to the body.
@@ -742,9 +754,9 @@ if you want to allow any language.  The default setting is C<all>.
 
 =item fy	frisian
 
-=item ga	irish
+=item ga	irish gaelic
 
-=item gd	scots
+=item gd	scottish gaelic
 
 =item he	hebrew
 
@@ -829,11 +841,14 @@ if you want to allow any language.  The default setting is C<all>.
 =item zh	chinese
 
 =back
-example:
 
-  ok_languages all		(allow all languages)
-  ok_languages en		(only allow English)
-  ok_languages en ja zh		(English, Japanese and Chinese)
+examples:
+
+  ok_languages all         (allow all languages)
+  ok_languages en          (only allow English)
+  ok_languages en ja zh    (allow English, Japanese, and Chinese)
+
+Note: if there are multiple ok_languages lines, only the last one is used.
 
 =cut
 
@@ -886,10 +901,13 @@ Chinese (both simplified and traditional)
 
 =back
 
-example:
+examples:
 
-  ok_locales all		(allow all character sets)
-  ok_locales ja ru th zh	(penalise Chinese messages)
+  ok_locales all         (allow all locales)
+  ok_locales en          (only allow English)
+  ok_locales en ja zh    (allow English, Japanese, and Chinese)
+
+Note: if there are multiple ok_locales lines, only the last one is used.
 
 =cut
 
@@ -958,7 +976,7 @@ to make it clear what's been added, and allow other filters to B<remove>
 spamfilter modifications, so you lose 6 columns right there. Also note that the
 first line of the report must start with 4 dashes, for the same reason. Each
 C<report> line appends to the existing template, so use
-C<clear-report-template> to restart.
+C<clear_report_template> to restart.
 
 The following template items are supported, and will be filled out by
 SpamAssassin:
@@ -1000,7 +1018,7 @@ non-text/plain part.  See the C<10_misc.cf> configuration file in
 C</usr/share/spamassassin> for an example.
 
 Each C<unsafe-report> line appends to the existing template, so use
-C<clear-report-template> to restart.
+C<clear_unsafe_report_template> to restart.
 
 =cut
 
@@ -1296,6 +1314,10 @@ randomly.
 You can however specify your own list by specifying
 
 dns_available test: server1.tld server2.tld server3.tld
+
+Please note, the DNS test queries for MX records so if you specify your
+own list of servers, please make sure to choose the one(s) which has an
+associated MX record.
 
 =cut
 
