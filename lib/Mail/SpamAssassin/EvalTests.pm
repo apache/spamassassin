@@ -1137,23 +1137,6 @@ sub check_for_forged_gw05_received_headers {
 
 ###########################################################################
 
-sub check_for_content_type_just_html {
-  my ($self) = @_;
-
-  my $rcv = $self->get ('Received');
-  my $ctype = $self->get ('Content-Type');
-
-  # HotMail uses this unfortunately for it's "rich text" control,
-  # so we need to exclude that from the test.
-  if ($rcv =~ / by hotmail.com /) { return 0; }
-
-  if ($ctype =~ /^text\/html;?\b/i) { return 1; }
-
-  0;
-}
-
-###########################################################################
-
 sub check_for_faraway_charset {
   my ($self, $body) = @_;
 
@@ -1506,34 +1489,6 @@ sub message_from_debian_bts {
 }
 
 ###########################################################################
-
-sub missing_mimeole {
-  my ($self) = @_;
-
-  my $mimeole = $self->get ('X-MimeOLE');
-  my $priority = $self->get ('X-MSMail-Priority');
-
-  return ($priority && !$mimeole);
-}
-
-sub missing_outlook_name {
-  my ($self) = @_;
-
-  my $mailer = $self->get ('X-Mailer');
-  my $mimeole = $self->get ('X-MimeOLE');
-  my $priority = $self->get ('X-MSMail-Priority');
-
-  return ($mimeole || $priority) && $mailer && $mailer !~ /Microsoft Outlook/;
-}
-
-sub priority_no_name {
-  my ($self) = @_;
-
-  my $priority = $self->get ('X-Priority') || $self->get ('X-MSMail-Priority');
-  my $mailer = $self->get ('X-Mailer');
-
-  return ($priority && !$mailer);
-}
 
 # This test was originally based on RFC 2369 compliance.  However, the
 # Mailing-List header was added so that Yahoo!Groups mails would not be
@@ -2065,8 +2020,6 @@ sub check_for_fake_aol_relay_in_rcvd {
 }
 
 ###########################################################################
-
-sub check_for_missing_headers { return 0; } # obsolete test
 
 sub check_for_to_in_subject {
   my ($self,$check) = @_;
