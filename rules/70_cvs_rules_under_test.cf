@@ -110,14 +110,6 @@ rawbody T_MIME_BASE64_ILLEGAL		eval:check_for_mime('t_mime_base64_illegal')
 rawbody T_MIME_BASE64_WITHOUT_NAME	eval:check_for_mime('t_mime_base64_without_name')
 rawbody T_MIME_QP_INLINE_NO_CHARSET	eval:check_for_mime('t_mime_qp_inline_no_charset')
 
-# 2003-03-02: quinlan
-header T_NO_DNS_FOR_RECIPS_ONE		eval:check_for_recips_dns('1','2')
-header T_NO_DNS_FOR_RECIPS_TWO		eval:check_for_recips_dns('2','3')
-header T_NO_DNS_FOR_RECIPS_MANY		eval:check_for_recips_dns('3','undef')
-tflags T_NO_DNS_FOR_RECIPS_ONE		net
-tflags T_NO_DNS_FOR_RECIPS_TWO		net
-tflags T_NO_DNS_FOR_RECIPS_MANY		net
-
 # bug 1416, possible replacement for AS_SEEN_ON
 body     T_AS_SEEN_ON             /seen on\b\s*(?:T\.?V\.?|ABC|NBC|CBS|CNN|Oprah|USA Today|48 Hours|New York Times|\w+\s+T\.?V\.?|:)/i
 

@@ -111,63 +111,6 @@ sub check_for_from_dns {
   return 1;
 }
 
-sub check_for_recips_dns {
-  my ($self, $min, $max) = @_;
-
-  if (!exists $self->{no_dns_recips_count}) {
-    $self->_check_for_recips_dns();
-  }
-
-  return (($min eq 'undef' || $self->{no_dns_recips_count} >= $min) &&
-	  ($max eq 'undef' || $self->{no_dns_recips_count} < $max));
-}
-
-# Note: also tried a range test using ratio to total addresses and ratio
-# to unique hosts, a simple count worked better
-sub _check_for_recips_dns {
-  my ($self) = @_;
-
-  $self->{no_dns_recips_count} = 0;
-
-  if ($self->{conf}->{check_mx_attempts} < 1 || !$self->is_dns_available()) {
-    return 0;
-  }
-
-  my @hosts;
-  for ('ToCc', 'Bcc') {
-    my $to = $self->get($_);	# get recipients
-    $to =~ s/\(.*?\)//g;	# strip out the (comments)
-    push(@hosts, ($to =~ m/\@(\w+(?:[\w.-]+\.)+\w+)/g));
-  }
-  return 0 unless @hosts;
-  my %hosts = map { lc, 1 } @hosts;
-
-  $self->load_resolver();
-
-  my $count = 0;
-  # Try check_mx_attempts times to protect against temporary outages.
-  # sleep between checks to give the DNS a chance to recover.
-  HOST: for my $host (keys %hosts) {
-    for my $i (1..$self->{conf}->{check_mx_attempts}) {
-      my @mx = Net::DNS::mx($self->{res}, $host);
-      dbg ("DNS MX records found: " . scalar(@mx));
-      next HOST if (scalar @mx > 0);
-
-      my $query = $self->{res}->search($host);
-      if ($query) {
-	foreach my $rr ($query->answer) {
-	  next HOST if ($rr->type eq "A");
-	}
-      }
-      if ($i < $self->{conf}->{check_mx_attempts}) {
-	sleep $self->{conf}->{check_mx_delay};
-      }
-    }
-    $count++;
-  }
-  $self->{no_dns_recips_count} = $count;
-}
-
 ###########################################################################
 
 # From and To have same address, but are not exactly the same and
