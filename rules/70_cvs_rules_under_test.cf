@@ -200,6 +200,8 @@ header __FROM_NO_LOWER		From !~ /[a-z]/
 header __FROM_EXISTS		exists:From
 meta T_NO_LOWER_FROM_1		(__FROM_NO_LOWER)
 meta T_NO_LOWER_FROM_2		(__FROM_NO_LOWER && __FROM_EXISTS)
+score T_NO_LOWER_FROM_1 0.01
+score T_NO_LOWER_FROM_2 0.01
 
 # bug 1108, To: and Cc: headers
 header __TO_NLA			To !~ /[a-z]/
@@ -239,6 +241,33 @@ meta T_NO_LOWER_TO_CC_ALL_E	(__CC_NLA && __CC_E) || (__TO_NLA && __TO_E)
 meta T_NO_LOWER_TO_CC_USER_E	(__CC_NLU && __CC_E) || (__TO_NLU && __TO_E)
 meta T_NO_LOWER_TO_CC_HOST_E	(__CC_NLH && __CC_E) || (__TO_NLH && __TO_E)
 meta T_NO_LOWER_TO_CC_EITHER_E	(((__CC_NLU || __CC_NLH) && __CC_E) || ((__TO_NLU || __TO_NLH) && __TO_E))
+
+# I'm dogfooding, so set scores low until FPs (undisclosed recips etc.) are
+# sorted out
+score T_NO_LOWER_TO_ALL		0.01
+score T_NO_LOWER_TO_USER	0.01
+score T_NO_LOWER_TO_HOST	0.01
+score T_NO_LOWER_TO_EITHER	0.01
+#
+score T_NO_LOWER_TOCC_ALL	0.01
+score T_NO_LOWER_TOCC_USER	0.01
+score T_NO_LOWER_TOCC_HOST	0.01
+score T_NO_LOWER_TOCC_EITHER	0.01
+#
+score T_NO_LOWER_TO_ALL_E	0.01
+score T_NO_LOWER_TO_USER_E	0.01
+score T_NO_LOWER_TO_HOST_E	0.01
+score T_NO_LOWER_TO_EITHER_E	0.01
+#
+score T_NO_LOWER_TOCC_ALL_E	0.01
+score T_NO_LOWER_TOCC_USER_E	0.01
+score T_NO_LOWER_TOCC_HOST_E	0.01
+score T_NO_LOWER_TOCC_EITHER_E	0.01
+#
+score T_NO_LOWER_TO_CC_ALL_E	0.01
+score T_NO_LOWER_TO_CC_USER_E	0.01
+score T_NO_LOWER_TO_CC_HOST_E	0.01
+score T_NO_LOWER_TO_CC_EITHER_E	0.01
 
 ###########################################################################
 
@@ -664,6 +693,7 @@ rawbody T_QUOTED_EMAIL_TEXT     /^>+\s+.{60,72}$/
 score T_CLICK_HERE_CAPS_LINK           0.634
 score T_QUOTED_EMAIL_TEXT              -0.2
 score T_CLICK_HERE_LINK                0.317
+tflags T_QUOTED_EMAIL_TEXT nice
 
 # Potentially FP-prone, especially if you talk about optics. but it
 # matches a few messages that don't get properly marked otherwise.
@@ -766,3 +796,25 @@ meta T_MSGID_S_1	( __T_MSGID_17 || __T_MSGID_10 || __T_MSGID_8 || __T_MSGID_20 |
 header T_MSGID_LYRIS	Message-Id =~ /^<LYRIS-\d+-\d+-\d{4}(?:\.\d{2}){2}-\d{2}(?:\.\d{2}){2}--\S+\@lyris\.net>/
 score T_MSGID_LYRIS -0.5
 tflags T_MSGID_LYRIS nice
+
+header T_MIME_BOUND_RKFINDY       Content-Type =~ /boundary=\"=_NextPart_2rfkindysadvnqw3nerasdf\"/
+describe T_MIME_BOUND_RKFINDY     Spam tool pattern in MIME boundary (rfkindy)
+score T_MIME_BOUND_RKFINDY        1.0
+
+header T_RCVD_IN_NJABL    rbleval:check_rbl('njabl', 'dnsbl.njabl.org.')
+describe T_RCVD_IN_NJABL  Received via a relay in dnsbl.njabl.org
+tflags T_RCVD_IN_NJABL    net
+score T_RCVD_IN_NJABL     0.1
+
+header T_X_NJABL_OPEN_PROXY    rbleval:check_rbl_results_for('njabl', '127.0.0.2')
+describe T_X_NJABL_OPEN_PROXY  NJABL: sender is proxy/relay/formmail/spam-source
+tflags T_X_NJABL_OPEN_PROXY    net
+score T_X_NJABL_OPEN_PROXY     2.0
+
+header T_X_NJABL_DIALUP    rbleval:check_rbl_results_for('njabl', '127.0.0.3')
+describe T_X_NJABL_DIALUP  NJABL: sender is on dialup/dynamic IP
+tflags T_X_NJABL_DIALUP    net
+score T_X_NJABL_DIALUP     0.5
+
+
+
