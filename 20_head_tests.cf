@@ -356,6 +356,10 @@ header RCVD_IN_DUL_FH		rbleval:check_rbl('dialup-firsthop', 'dialups.mail-abuse.
 describe RCVD_IN_DUL_FH	Received from first hop dialup, see http://www.mail-abuse.org/dul/
 tflags RCVD_IN_DUL_FH           net
 
+header RCVD_IN_NML		rbleval:check_rbl('nml', 'nonconfirm.mail-abuse.org.')
+describe RCVD_IN_NML		Received via RBLed relay, see http://www.mail-abuse.org/nml/
+tflags RCVD_IN_NML              net
+
 header RCVD_IN_NJABL		rbleval:check_rbl('njabl', 'dnsbl.njabl.org.')
 describe RCVD_IN_NJABL		Received via a relay in dnsbl.njabl.org
 tflags RCVD_IN_NJABL		net
