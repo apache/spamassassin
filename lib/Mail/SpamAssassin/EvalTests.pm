@@ -1477,14 +1477,19 @@ sub message_from_debian_bts {
   my ($self)    = @_;
 
   my $all       = $self->get('ALL');
+  # TODO: does this header always appear? can we skip messages that
+  # don't have it, for efficiency?
+  if ($self->get("Sender") !~ /Debian BTS/) {
+    if ($all   =~ /^From:\s+owner\@/mi &&
+          ($all =~ /^Subject:\s+Bug#\d+: /m || 
+           $all =~ /^Subject:\s+Processed/m))
+                          { return 1; }
+  }
+
   if ($all      =~ /^X-[A-Za-z0-9]+-PR-[MP][a-z]+: /m) { # X-Project-PR-(Message|Package)
     return 1 if $all =~ /^Subject:\s+Bug#\d+: /m;
   }
-  elsif ($all   =~ /^From:\s+owner\@/mi and
-	($all =~ /^Subject:\s+Bug#\d+: /m or
-	 $all =~ /^Subject:\s+Processed \(.*?\):/m)) {
-      return 1;
-  }
+
   return 0;
 }
 
