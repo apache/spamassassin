@@ -272,9 +272,8 @@ data is accurate.
 It should be supplemented with some supervised training in addition, if
 possible.
 
-This will be turned on by setting the SpamAssassin configuration parameter
-C<auto_learn> to 1; note, however, that it is not supported in the current
-version of SpamAssassin.
+This is the default, but can be turned off by setting the SpamAssassin
+configuration parameter C<auto_learn> to 0.
 
 =item 4. Mistake-based training
 
