@@ -4,9 +4,11 @@
 . config
 
 NAME="set$SCORESET"
+LOGDIR="gen-$NAME-$HAM_PREFERENCE-$THRESHOLD-$EPOCHS"
 
-# beware!
-svn revert ../rules/50_scores.cf
+if [ "$NOTE" != "" ]; then
+	LOGDIR="$LOGDIR-$NOTE"
+fi
 
 if [ ! -f "ORIG/ham-$NAME.log" -o ! -f "ORIG/spam-$NAME.log" ]; then
 	echo "Couldn't find logs for $NAME" >&2
@@ -14,73 +16,77 @@ if [ ! -f "ORIG/ham-$NAME.log" -o ! -f "ORIG/spam-$NAME.log" ]; then
 fi
 
 if [ "x$1" = "x" ]; then
+# This should be in here instead.  Prevents testing.
+svn revert ../rules/50_scores.cf
+
 echo "[Doing a scoreset $SCORESET score-generation run]"
 
 # Clean out old runs
 echo "[Cleaning up]"
-rm -rf spam-validate.log ham-validate.log spam.log ham.log \
+rm -rf spam-test.log ham-test.log spam.log ham.log \
 	NSBASE SPBASE tmp make.output freqs perceptron.scores \
-	gen-$NAME.out gen-$NAME.scores gen-$NAME.validate
+	$LOGDIR
 make clean >/dev/null
+
+# Create a directory to organize the logs with this group of settings
+mkdir $LOGDIR
 
 # Generate 90/10 split logs
 echo "[Generating 90/10 split ham]"
 mkdir NSBASE SPBASE
 cd NSBASE
-../tenpass/split-log-into-buckets 10 < ../ORIG/ham-$NAME.log > /dev/null
+../tenpass/split-log-into-buckets-random 10 < ../ORIG/ham-$NAME.log > /dev/null
 cat split-[1-9].log > ham.log
 rm -f split-[1-9].log
-mv split-10.log ham-validate.log
+mv split-10.log ham-test.log
 
 echo "[Generating 90/10 split spam]"
 cd ../SPBASE
-../tenpass/split-log-into-buckets 10 < ../ORIG/spam-$NAME.log > /dev/null
+../tenpass/split-log-into-buckets-random 10 < ../ORIG/spam-$NAME.log > /dev/null
 cat split-[1-9].log > spam.log
 rm -f split-[1-9].log
-mv split-10.log spam-validate.log
+mv split-10.log spam-test.log
 cd ..
 
 echo "[Setting up for gen run]"
 # Ok, setup for a run
 ln -s SPBASE/spam.log .
 ln -s NSBASE/ham.log .
-ln -s SPBASE/spam-validate.log .
-ln -s NSBASE/ham-validate.log .
+ln -s SPBASE/spam-test.log .
+ln -s NSBASE/ham-test.log .
 
 # try to find number of processors
 numcpus=`cpucount 2>/dev/null || egrep -c '^processor\b' /proc/cpuinfo 2>/dev/null || echo 1`
 
 echo "[Generating perceptron]"
 # Generate perceptron with full logs
-make -j $numcpus SCORESET=$SCORESET > make.output 2>&1
+make -j $numcpus SCORESET=$SCORESET > $LOGDIR/make.output 2>&1
 
-for threshold in 5.0 4.9 4.8 4.7 4.6 4.5 4.4 4.3 4.2 4.1 4.0; do
-	(
-	echo "[gen run start]"
-	pwd
-	date
-	./perceptron -t $threshold -p 2.0 -e 100
-	mv perceptron.scores gen-$NAME-$threshold.scores
-	echo "[gen run end]"
-	pwd
-	date
-	) | tee gen-$NAME-$threshold.out
-	svn revert ../rules/50_scores.cf
-	./rewrite-cf-with-new-scores $SCORESET ../rules/50_scores.cf gen-$NAME-$threshold.scores > /tmp/runGA.$$
-	mv /tmp/runGA.$$ ../rules/50_scores.cf
-	./fp-fn-statistics --ham ham-validate.log --spam spam-validate.log --scoreset $SCORESET > gen-$NAME-$threshold.statistics
-done
+(
+echo "[config]"
+cat config
+echo "[gen run start]"
+pwd
+date
+./perceptron -p $HAM_PREFERENCE -t $THRESHOLD -e $EPOCHS
+mv perceptron.scores $LOGDIR/scores
+echo "[gen run end]"
+) | tee $LOGDIR/log
+svn revert ../rules/50_scores.cf
+./rewrite-cf-with-new-scores $SCORESET ../rules/50_scores.cf $LOGDIR/scores > /tmp/runGA.$$
+mv /tmp/runGA.$$ ../rules/50_scores.cf
+./fp-fn-statistics --ham ham-test.log --spam spam-test.log --scoreset $SCORESET --fnlog $LOGDIR/false_negatives --fplog $LOGDIR/false_positives > $LOGDIR/test
 
 else
 
 # This needs to have 50_scores.cf in place first ...
-echo "[gen validation results]"
-./logs-to-c --spam=SPBASE/spam-validate.log \
-	--ham=NSBASE/ham-validate.log \
-	--count --cffile=../rules --scoreset=$SCORESET | tee gen-$NAME.validate
+echo "[gen test results]"
+./logs-to-c --spam=SPBASE/spam-test.log \
+	--ham=NSBASE/ham-test.log \
+	--count --cffile=../rules --scoreset=$SCORESET | tee $LOGDIR/test
 
 echo "[STATISTICS file generation]"
-./mk-baseline-results $SCORESET | tee gen-$NAME.statistics
+./mk-baseline-results $SCORESET | tee $LOGDIR/statistics
 fi
 
 exit 0

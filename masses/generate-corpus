@@ -1,0 +1,24 @@
+# Clean out the old build cache
+rm -rf vm-cache
+
+#find ~/spamassassin/corpus -mtime -7 -name \*.log |egrep -v -- -net | grep ham- | xargs cat > ORIG/ham-set0.log
+#find ~/spamassassin/corpus -mtime -7 -name \*.log |egrep -v -- -net | grep spam- | xargs cat > ORIG/spam-set0.log
+#find ~/spamassassin/corpus -mtime -7 -name \*.log |egrep -- -net | grep ham-  | xargs cat > ORIG/ham-set1.log
+#find ~/spamassassin/corpus -mtime -7 -name \*.log |egrep -- -net | grep spam-  | xargs cat > ORIG/spam-set1.log
+
+ln -s ham-set1.log ORIG/ham-set0.log
+ln -s spam-set1.log ORIG/spam-set0.log
+cat ~/spamassassin/corpus/submit-3.0.0-sets01/ham-*.log > ORIG/ham-set1.log
+cat ~/spamassassin/corpus/submit-3.0.0-sets01/spam-*.log > ORIG/spam-set1.log
+# Clean out the old build cache
+rm -rf vm-cache
+
+#find ~/spamassassin/corpus -mtime -7 -name \*.log |egrep -v -- -net | grep ham- | xargs cat > ORIG/ham-set0.log
+#find ~/spamassassin/corpus -mtime -7 -name \*.log |egrep -v -- -net | grep spam- | xargs cat > ORIG/spam-set0.log
+#find ~/spamassassin/corpus -mtime -7 -name \*.log |egrep -- -net | grep ham-  | xargs cat > ORIG/ham-set1.log
+#find ~/spamassassin/corpus -mtime -7 -name \*.log |egrep -- -net | grep spam-  | xargs cat > ORIG/spam-set1.log
+
+ln -s ham-set1.log ORIG/ham-set0.log
+ln -s spam-set1.log ORIG/spam-set0.log
+cat ~/spamassassin/corpus/submit-3.0.0-sets01/ham-*.log > ORIG/ham-set1.log
+cat ~/spamassassin/corpus/submit-3.0.0-sets01/spam-*.log > ORIG/spam-set1.log
