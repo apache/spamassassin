@@ -248,12 +248,6 @@ describe HTML_WIN_OPEN		Javascript to open a new window
 body HTML_WITH_BGCOLOR		eval:html_test('bgcolor_nonwhite')
 describe HTML_WITH_BGCOLOR	HTML mail with non-white background
 
-body HTML_TAG_BALANCE_A		eval:html_tag_balance('a', '< 0')
-describe HTML_TAG_BALANCE_A	HTML has excess "a" close tags
-
-body HTML_TAG_BALANCE_FONT	eval:html_tag_balance('font', '< 0')
-describe HTML_TAG_BALANCE_FONT	HTML has excess "font" close tags
-
 body HTML_TAG_BALANCE_HTML	eval:html_tag_balance('html', '!= 0')
 describe HTML_TAG_BALANCE_HTML	HTML has unbalanced "html" tags
 
