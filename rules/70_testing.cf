@@ -314,10 +314,6 @@ rawbody T_HTML_FONT_COLOR_WHITE	/<font\b[^>]+white/i
 
 ########################################################################
 
-# case matters for this one
-uri T_URI_UPPER_LOWER_A	m{(?i:https?)://([A-Z][a-z]+\.){2,}[A-Za-z\d-]+\.[a-z]{2,4}\b}
-uri T_URI_UPPER_LOWER_B	m{(?i:https?)://([A-Z][a-z]+\.){2,}[A-Za-z\d-]+\.[a-z]{2,4}(?:[?/]|$)}
-
 # just a test...
 body T_ORANGES_AND_SPAM_POST	/[a-z]{3,},? Fl(?:orida)? (?:33|32|34)\d{3}\b/i
 body T_ORANGES_AND_SPAM_TELE	/\b1?\D{0,2}(?:239|305|321|352|386|407|561|727|754|772|786|813|850|863|904|941|954)\D{0,2}\d{3}\D{0,2}\d{4}\b/
@@ -325,3 +321,8 @@ meta T_ORANGES_AND_SPAM_1	T_ORANGES_AND_SPAM_POST && T_ORANGES_AND_SPAM_TELE
 meta T_ORANGES_AND_SPAM_2	T_ORANGES_AND_SPAM_POST + T_ORANGES_AND_SPAM_TELE == 1
 meta T_ORANGES_AND_SPAM_3	T_ORANGES_AND_SPAM_POST && !T_ORANGES_AND_SPAM_TELE
 meta T_ORANGES_AND_SPAM_4	!T_ORANGES_AND_SPAM_POST && T_ORANGES_AND_SPAM_TELE
+
+# retest as case-sensitive vs. case-insensitive
+header T_X_MESSAGE_FLAG_1	ALL =~ /^X-Message-flag:/m
+header T_X_MESSAGE_FLAG_2	ALL =~ /^X-Message-flag:/mi
+header T_X_MESSAGE_FLAG_3	exists:X-Message-flag
