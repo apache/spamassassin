@@ -16,10 +16,6 @@ use Sys::Syslog qw(:DEFAULT setlogsock);
 use POSIX qw(setsid);
 use Getopt::Std;
 
-# change this to inlude the list of authorized client IP addresses.
-# TODO: cmdline args?
-my @allowed_clients = qw (127.0.0.1);
-
 my %resphash = (
     EX_OK => 0,
     EX_USAGE => 64, # command line usage error
@@ -49,17 +45,30 @@ Options:
 
     -h            Print this usage message and exit
     -L            Use local tests only (no DNS or other network lookups)
+    -A host,...   Set list of authorized ip addresses which can connect to this server
+                    (defaults to 127.0.0.1 only)
     -p port       Listen on the specific port (otherwise default is port 22874)
 
 EOUSAGE
     exit $resphash{EX_USAGE};
 }
 
-use vars qw{ $opt_h $opt_L $opt_p };
+use vars qw{ $opt_h $opt_L $opt_p $opt_A };
 
-getopts('hLp:') or usage();
+getopts('hLp:A:') or usage();
 
 $opt_h and usage();
+
+# These can be changed on command line with -A flag
+my @allowed_clients;
+if($opt_A)
+{
+    @allowed_clients = split /,/,$opt_A;
+}
+else
+{
+    @allowed_clients = qw (127.0.0.1);
+}
 
 my $spamtest = Mail::SpamAssassin->new({
   local_tests_only=> $opt_L,
