@@ -1,0 +1,89 @@
+
+Using SpamAssassin With An SQL Database
+---------------------------------------
+
+SpamAssassin can now load users' score files from an SQL database.  The concept
+here is to have a web application (PHP/perl/ASP/etc.) that will allow users to
+be able to update their local preferences on how SpamAssassin will filter their
+e-mail.  The most common use for a system like this would be for users to be
+able to update the white list of addresses (whitelist_from) without the need
+for them to update their $HOME/.spamassasin.cf file.  It is also quite common
+for users listed in /etc/passwd to not have a home directory, therefore, the
+only way to have their own local settings would be through an RDMS system.
+
+SpamAssassin will check the global configuration file (normally
+/etc/spamassassin.cf or /usr/local/lib/perl5/site-perl/<VER>/spamassassin.cf)
+for the following settings:
+
+user_scores_dsn			DBI:driver:database:hostname[:port]
+user_scores_sql_username	dbusername
+user_scores_sql_password	dbpassword
+
+The first option, user_scores_dsn, describes the data source name that will be
+used to create the connection to your SQL server.  It MUST be in the format
+as listed above.  <driver> should be the DBD driver that you have installed
+to access your database. <database> must be the name of the database that you
+created to store the user preference table. <hostname> is the name of the host
+that contains the SQL database server. <port> is the optional port number where
+your database server is listening.
+
+user_scores_dsn			DBI:mysql:spamassassin:localhost
+
+Would tell SpamAssassin to connect to the database named spamassassin using
+MySQL on the local server, and since <port> is omitted, the driver will use the
+default port number.  The other two required options tells SpamAssassin to use 
+the defined username and password to establish the connection.
+
+If the user_scores_dsn option does not exist, SpamAssassin will not attempt
+to use an SQL for retrieving users' preferences. Note that this will NOT look
+for test rules, only local scores, whitelist_from(s), required_hits, and
+auto_report_threshold.
+
+Database Schema
+---------------
+
+The database must contain a table named "userpref" with at least three fields:
+username varchar(8)	# this is the username whose e-mail is being filtered
+preference varchar(30) 	# the preference (whitelist_from, required_hits, etc.)
+value varchar(100)	# the value of the named preference
+
+You can add as many other fields you wish as long as the above three fields are
+contained in the table.
+
+Included is a default table that can be safely used in your own setup.  To
+use the default table, you must first create a database, and a username/password
+that can access that database.  To install the table, use the following 
+command:
+
+mysql -p <password> -u <username> -p<password> databasename < spamassasin.sql
+
+This will create the following table:
+
+CREATE TABLE userpref (
+  username varchar(8) default NOT NULL,
+  preference varchar(30) default NOT NULL,
+  value varchar(100) default NOT NULL,
+  prefid int(11) NOT NULL auto_increment,
+  PRIMARY KEY (prefid)
+) TYPE=MyISAM;
+
+Once you have created the database and added the table, just add the required
+lines to your global spamassassin.cf file.  Note that you must be running
+spamc/spamd in order for this to work, and the current username must be passed
+to spamd.  This can be done from spamc using the following .procmailrc recipe:
+
+:0wf
+| /usr/local/bin/spamc -u $LOGNAME
+
+This has only been tested using MySQL as the RDMS, but it has been written
+with the utmost simplicity using DBI, and any database driver that conforms
+to the DBI interface should work without problems.
+
+******
+NB:  This should be considered BETA, and the interface, schema, or overall
+operation of SQL support may change at any time with future releases of SA.
+******
+
+Please send any comments to jengland /at/ enetis.net
+
+Justin England
