@@ -131,6 +131,14 @@ describe SUBJ_ENDS_IN_Q_MARK	Subject: ends in a question mark
 header ADVERT_CODE		Subject =~ /(^\s*|\s+)ADV:/i
 describe ADVERT_CODE		Subject: contains advertising tag
 
+# KOREAN_UCE_SUBJECT tests for 8-bit characters, it will not catch a very small
+# percentage of Subject: headers containing the Korean unsolicited mail tag
+# that are encoded with quoted-printable or base64.  Rather than complicate
+# this rule, we will assume that MIME is decoded before this rule is evaluated,
+# even if that's not true yet.
+header KOREAN_UCE_SUBJECT	Subject =~ /[({[<] *(\xbc\xba\xc0\xce)?\xb1\xa4( *|\x2e)\xb0\xed *[)}\]>]/
+describe KOREAN_UCE_SUBJECT	Subject: contains Korean unsolicited email tag
+
 header FRIEND_AT_PUBLIC	To =~ /(yourdomain|you|your|public).(com|org|net)/i
 describe FRIEND_AT_PUBLIC	sent to you@you.com or similar
 
