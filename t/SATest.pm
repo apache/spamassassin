@@ -4,6 +4,7 @@
 package main;
 
 use Cwd;
+use Config;
 use File::Path;
 
 # Set up for testing. Exports (as global vars):
@@ -14,11 +15,22 @@ use File::Path;
 sub sa_t_init {
   my $tname = shift;
 
+  my $perl_path;
+  if ($config{PERL_PATH}) {
+    $perl_path = $config{PERL_PATH};
+  }
+  elsif ($^X =~ m|^/|) {
+    $perl_path = $^X;
+  }
+  else {
+    $perl_path = $Config{perlpath};
+    $perl_path =~ s|/[^/]*$|/$^X|;
+  }
   $scr = $ENV{'SCRIPT'};
-  $scr ||= "perl -w ../spamassassin";
+  $scr ||= "$perl_path -w ../spamassassin";
 
   $spamd = $ENV{'SPAMD_SCRIPT'};
-  $spamd ||= "../spamd/spamd -x";
+  $spamd ||= "$perl -w ../spamd/spamd -x";
 
   $spamc = $ENV{'SPAMC_SCRIPT'};
   $spamc ||= "../spamd/spamc";
@@ -332,6 +344,13 @@ sub skip_all_patterns {
 sub clear_pattern_counters {
   %found = ();
   %found_anti = ();
+}
+
+sub figure_out_perl_interpreter {
+  # this should return the path to the *current* perl interpreter,
+  # so if "make test" uses a specific interpreter, the scripts
+  # run by the .t's will use that one too.
+  return $Config{perlpath};
 }
 
 1;

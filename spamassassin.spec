@@ -126,8 +126,6 @@ mkdir -p %{buildroot}/etc/mail/spamassassin
 %doc README Changes sample-nonspam.txt sample-spam.txt spamd/README.spamd doc INSTALL
 %attr(755,root,root) %{_bindir}/*
 %config(noreplace) %attr(755,root,root) %{initdir}/spamassassin
-%config(noreplace) %{_sysconfdir}/mail/spamassassin
-%{_datadir}/spamassassin
 %{_mandir}/man1/*
 
 %files tools
@@ -137,6 +135,8 @@ mkdir -p %{buildroot}/etc/mail/spamassassin
 %files -n perl-Mail-SpamAssassin
 %defattr(644,root,root,755)
 %{perl_sitelib}/*
+%config(noreplace) %{_sysconfdir}/mail/spamassassin
+%{_datadir}/spamassassin
 %{_mandir}/man3/*
 
 %clean

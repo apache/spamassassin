@@ -1,5 +1,5 @@
 # SpamAssassin rules file: tests.
-# $Id: 20_head_tests.cf,v 1.162.2.16 2002/09/06 17:32:45 jmason Exp $
+# $Id: 20_head_tests.cf,v 1.162.2.17 2002/09/09 18:25:02 jmason Exp $
 ###########################################################################
 
 require_version 2.42
@@ -325,14 +325,15 @@ describe RCVD_IN_DUL_FH	Received from first hop dialup, see http://www.mail-abus
 tflags RCVD_IN_DUL_FH           net
 
 # don't add headers without testing for false positives (usually Unix MTAs and
-# list software) and especially don't add From:, Reply-To:, Date:, Message-ID:
+# list software) and especially don't add From:, To:, Reply-To:, Date:, Message-ID:
 #
 # Jul 11 2002 jm: removed some headers, as it now gets a 5:1
 # false-positive-to-spam ratio!  headers: Content-Transfer-Encoding,
 # Content-Type, X-Mailer, X-Sender.  v important to test this against a good
 # corpus of mailing list hosts like Yahoo, or webmail systems.
+# Also, securityfocus lists hit this.
 #
-header FORGED_RCVD_FOUND	ALL =~ /\n(?:To|Importance|Subject|X-MSMail-Priority):.*\nReceived: /s
+header FORGED_RCVD_FOUND	ALL =~ /\n(?:Importance|Subject|X-MSMail-Priority):.*\nReceived: /s
 describe FORGED_RCVD_FOUND	Possibly-forged 'Received:' header found
 
 header FORGED_RCVD_TRAIL	eval:check_for_forged_received_trail()

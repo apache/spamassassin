@@ -1,6 +1,6 @@
 #!/bin/sh
 
-cd /home/jm/ftp/b240/spamassassin/masses
+cd /home/jm/ftp/b240/masses
 
 mv spam.local alltime_spam.local nonspam.local logs/old
 
@@ -65,10 +65,13 @@ mv tmon.out ./tmon.spam
 # don't use --loghits, this is *huge* so it'd take forever
 
 date
-cp spam.local alltime_spam.local
+> alltime_spam.local
 # Aug 15 2002 jm: off for now
+#cp spam.local alltime_spam.local
 #for f in /local/cor/old/spam/* ; do
   #echo Checking $f: ; ./mass-check -c ../rules $f >> alltime_spam.local
 #done
+
+date
 
 echo "Done full scan"
