@@ -1836,11 +1836,11 @@ in corpus size etc.
 =item bayes_expiry_min_db_size		(default: 100000)
 
 What should be the minimum size of the Bayes tokens database?  The
-database will never be shrunk below this many entries. 100k entries
+database will never be shrunk below this many entries. 100000 entries
 is roughly equivalent to a 5Mb database file.
 
 =cut
-    if (/^bayes[-_]expiry[-_]min[-_]db[-_]size\s+(.*)$/) {
+    if (/^bayes[-_]expiry[-_]min[-_]db[-_]size\s+(\d+)$/) {
       $self->{bayes_expiry_min_db_size} = $1; next;
     }
 
