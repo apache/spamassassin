@@ -875,8 +875,8 @@ sub get {
 
   if ($getaddr) {
     chomp; s/\r?\n//gs;
-    s/^.*?<(.+)>\s*$/$1/g		# Foo Blah <jm@foo>
-    	or s/^(.+)\s\(.*?\)\s*$/$1/g;	# jm@foo (Foo Blah)
+    s/\(.*?\)//g;               # strip out the (comments)
+    s/^.*?<(.*?)>\s*$/$1/;      # "Foo Blah" <jm@foo> or <jm@foo>
 
   } elsif ($getname) {
     chomp; s/\r?\n//gs;
