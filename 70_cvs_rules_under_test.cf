@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.649 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.650 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -83,7 +83,7 @@ tflags T_SPF_PASS	net nice
 score T_SPF_PASS	-0.1
 header T_SPF_FAIL	eval:check_for_spf_fail()
 tflags T_SPF_FAIL	net
-score T_SPF_FAIL	0.1
+score T_SPF_FAIL	0.2
 header T_SPF_SOFTFAIL	eval:check_for_spf_softfail()
 tflags T_SPF_SOFTFAIL	net
 score T_SPF_SOFTFAIL	0.1
