@@ -40,6 +40,9 @@ describe USER_AGENT_AOL		X-Mailer header indicates a non-spam MUA (AOL)
 header USER_AGENT_TONLINE	X-Mailer   =~ /^T-Online (?:e|Web)Mail \d\.\d+$/
 describe USER_AGENT_TONLINE	X-Mailer header indicates a non-spam MUA (T-Offline)
 
+header USER_AGENT_APPLEMAIL	X-Mailer   =~ /^Apple Mail \(\d\.\d+\)$/
+describe USER_AGENT_APPLEMAIL	X-Mailer header indicates a non-spam MUA (Apple Mail)
+
 
 tflags USER_AGENT_PINE       nice
 tflags USER_AGENT_MUTT       nice
@@ -56,3 +59,4 @@ tflags USER_AGENT_KMAIL      nice
 tflags USER_AGENT_IMP        nice
 tflags USER_AGENT_AOL        nice
 tflags USER_AGENT_TONLINE    nice
+tflags USER_AGENT_APPLEMAIL  nice
