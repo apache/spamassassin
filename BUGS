@@ -14,11 +14,18 @@ http://bugzilla.spamassassin.org/show_bug.cgi?id=304 :
   the tests matched will not match what would happen without
   -S.
 
+http://bugzilla.spamassassin.org/show_bug.cgi?id=1478 :
 
   Razor support does not work on the Win32 platform,
   redirecting stdout and stderr incorrectly.  To work-around,
   set its score to 0 like so:   "score RAZOR2_CHECK 0"
 
+http://bugzilla.spamassassin.org/show_bug.cgi?id=1503 :
+
+  The Razor tests will fail if you have not run server discovery, due to a
+  failure to support "taint mode" inside the Razor code.
+
 
 (See http://bugzilla.spamassassin.org/ for the SpamAssassin bug tracking
-database.)
+database, and to report a bug.)
+

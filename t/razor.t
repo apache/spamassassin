@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use lib '.'; use lib 't';
-use SATest; sa_t_init("spam");
+use SATest; sa_t_init("razor");
 
 use constant TEST_ENABLED => (-e 't/do_razor1' || -e 'do_razor1');
 use Test; BEGIN { plan tests => TEST_ENABLED ? 2 : 0 };
