@@ -2463,6 +2463,10 @@ sub check_messageid_not_usable {
   $_ = $self->get ("List-Unsubscribe");
   return 1 if (/<mailto:(?:leave-\S+|\S+-unsubscribe)\@\S+>$/);
 
+  # Allen notes this as 'Wacky sendmail version?'
+  $_ = $self->get ("Received");
+  return 1 if /\/CWT\/DCE\)/;
+
   # remainder left for Dan who owns bug 1172 ;)  Dan, suggest
   # received_within_months('6','undef') as per Allen's patch
 
