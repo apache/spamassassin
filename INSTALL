@@ -226,6 +226,10 @@ skipped.
     Razor has a large number of dependencies on CPAN modules.  Feel free
     to skip installing it, if this makes you nervous; SpamAssassin will
     still work well without it.
+
+    Note that Razor support does not seem to work on Windows systems.
+    Win32 users should disable the Razor tests using "score RAZOR2_CHECK
+    0".
     
 
   - DCC    http://www.rhyolite.com/anti-spam/dcc/
