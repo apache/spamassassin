@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.71 2003/03/18 03:24:40 quinlan Exp $
+# $Id: HTML.pm,v 1.72 2003/04/02 08:24:45 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -37,6 +37,15 @@ sub html_tag {
     $self->html_tests($tag, $attr, $num);
 
     $self->{html_last_tag} = $tag;
+  }
+  elsif ($num == -1) {
+    # close colors
+    if ($tag ne "body" && defined $self->{html}{"bgcolor_$tag"}) {
+      undef $self->{html}{"bgcolor_$tag"};
+    }
+    if ($tag eq "font" && defined $self->{html}{color}) {
+      undef $self->{html}{color};
+    }
   }
 
   if ($tag =~ /^(?:b|i|u|strong|em|big|center|h\d)$/) {
@@ -190,10 +199,16 @@ sub html_tests {
       }
     }
   }
-  if ($tag eq "body" && exists $attr->{bgcolor}) {
-    $self->{html}{bgcolor} = lc($attr->{bgcolor});
-    $self->{html}{bgcolor} = name_to_rgb($self->{html}{bgcolor});
-    $self->{html}{bgcolor_nonwhite} = 1 if $self->{html}{bgcolor} !~ /^\#?ffffff$/;
+  # bgcolor handling
+  if (defined $self->{html}{"bgcolor_$tag"} && $tag ne "body") {
+    undef $self->{html}{"bgcolor_$tag"};
+  }
+  if (exists $attr->{bgcolor}) {
+    $self->{html}{"bgcolor_$tag"} = name_to_rgb(lc($attr->{bgcolor}));
+    if ($self->{html}{"bgcolor_$tag"} !~ /^\#?ffffff$/) {
+      $self->{html}{bgcolor_nonwhite} = 1;
+      $self->{html}{t_bgcolor_nonwhite_body} = 1 if $tag eq "body";
+    }
   }
   if ($tag eq "font" && exists $attr->{size}) {
     $self->{html}{big_font} = 1 if (($attr->{size} =~ /^\s*(\d+)/ && $1 > 3) ||
@@ -206,8 +221,41 @@ sub html_tests {
     $self->{html}{font_color_name} = 1 if ($c !~ /^\#?[0-9a-f]{6}$/ &&
 				   $c !~ /^(?:navy|gray|red|white)$/);
     $c = name_to_rgb($c);
-    $self->{html}{font_invisible} = 1 if (exists $self->{html}{bgcolor} &&
-                                substr($c,-6) eq substr($self->{html}{bgcolor},-6));
+    $self->{html}{color} = $c;
+    # invisible fonts
+    for my $where (("td", "th", "tr", "table", "body")) {
+      if (defined $self->{html}{"bgcolor_$where"} &&
+	  defined $self->{html_inside}{$where} &&
+	  $self->{html_inside}{$where} > 0)
+      {
+	if (substr($c,-6) eq substr($self->{html}{"bgcolor_$where"},-6)) {
+	  $self->{html}{font_invisible} = 1;
+	  for (my $delta = 16; $delta <= 256; $delta += 16) {
+	      $self->{html}{"t_font_invisible1_$delta"} = 1;
+	      $self->{html}{"t_font_invisible2_$delta"} = 1;
+	  }
+	}
+	elsif ($c =~ /^\#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/) {
+	  my ($r1, $g1, $b1) = (hex($1), hex($2), hex($3));
+	  if ($self->{html}{"bgcolor_$where"} =~
+	      /^\#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/)
+	  {
+	    my ($r2, $g2, $b2) = (hex($1), hex($2), hex($3));
+	    my $d1 = (($r1 - $r2)**2 + ($g1 - $g2)**2 + ($b1 - $b2)**2)**0.5;
+	    my $d2 = abs($r1 - $r2) + abs($g1 - $g2) + abs($b1 - $b2);
+	    for (my $delta = 16; $delta <= 256; $delta += 16) {
+	      if ($d1 < $delta) {
+		$self->{html}{"t_font_invisible1_$delta"} = 1;
+	      }
+	      if ($d2 < $delta) {
+		$self->{html}{"t_font_invisible2_$delta"} = 1;
+	      }
+	    }
+	  }
+	}
+	last;
+      }
+    }
     if ($c =~ /^\#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/) {
       my ($h, $s, $v) = rgb_to_hsv(hex($1), hex($2), hex($3));
       if (!defined($h)) {
