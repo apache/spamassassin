@@ -46,7 +46,6 @@ WriteMakefile(
 
     'PREREQ_PM' => {
                         'File::Copy' => 0,
-                        'Net::DNS' => 0,
                   },
 
     'dist' => {
