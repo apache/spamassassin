@@ -129,6 +129,9 @@ add_header all Level _STARS(*)_
 #        UNDISC_RECIPS autolearn=spam version=2.60-cvs
 add_header all Status "_YESNO_, hits=_HITS_ required=_REQD_ tests=_TESTS_ autolearn=_AUTOLEARN_ version=_VERSION_"
 
+# note that the X-Spam-Report: header is disabled when report_safe is on
+add_header spam Report _REPORT_
+
 ###########################################################################
 # Default prefs values: users can override these in their 
 # ~/.spamassassin/user_prefs files.
@@ -153,11 +156,9 @@ bayes_auto_learn_threshold_spam		12.0
 # Set this to 0 to turn off auto-learning.
 bayes_auto_learn			1
 
-# report_safe controls the markup of spam. If you set it to 0, you
-# will want to add a header to show the tests hit by a message marked
-# as spam. For your convenience, one is suggested below.
-# add_header spam Report _REPORT_
-# report_safe           1
+# report_safe controls the markup of spam. If you set it to 0, the message
+# body of spam messages will not be modified
+report_safe           1
 
 # Some common prefs settings can be set here, to take effect site-wide
 # unless the user override them. See the user_prefs.template file for
@@ -165,7 +166,6 @@ bayes_auto_learn			1
 
 # rewrite_subject       0
 # subject_tag           *****SPAM*****
-# use_terse_report      0
 # skip_rbl_checks       0
 # check_mx_attempts     2
 # check_mx_delay        5

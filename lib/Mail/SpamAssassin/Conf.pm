@@ -68,8 +68,8 @@ optional, and the default is shown below.
  _RBL_             full results for positive RBL queries in DNS URI format
  _LANGUAGES_       possible languages of mail
  _PREVIEW_         content preview
- _REPORT_          report of tests hits (in terse format, ideal for in headers)
- _SUMMARY_         summary of tests hit for standard report
+ _REPORT_          terse report of tests hits (for header reports)
+ _SUMMARY_         summary of tests hit for standard report (for body reports)
  _CONTACTADDRESS_  contents of the 'report_contact' setting
 
 =head1 USER PREFERENCES
@@ -236,23 +236,9 @@ sub new {
   $self->{user_scores_sql_field_scope} = 'spamassassin'; # probably shouldn't change this
 
   # for backwards compatibility, we need to set the default headers
-  # remove this except for X-Spam-Checker-Version for 2.70 (?)
-
-  # unfortunately this backwards compatibility isn't 100% functional.
-  # For example, if a user has the following config (consider user and
-  # site config...)
-  # always_add_headers 0
-  # always_add_headers 1
-  # Then the 2nd option will do nothing.
-
-  $self->{headers_spam}->{"Flag"} = "_YESNOCAPS_";
-  $self->{headers_spam}->{"Status"} = "_YESNO_, hits=_HITS_ required=_REQD_ tests=_TESTS_ autolearn=_AUTOLEARN_ version=_VERSION_";
-  $self->{headers_spam}->{"Level"} = "_STARS(*)_";
-  $self->{headers_spam}->{"Checker-Version"} = "SpamAssassin _VERSION_ (_SUBVERSION_) on _HOSTNAME_";
-
-  $self->{headers_ham}->{"Status"} = $self->{headers_spam}->{"Status"};
-  $self->{headers_ham}->{"Level"} = $self->{headers_spam}->{"Level"};
-  $self->{headers_ham}->{"Checker-Version"} = $self->{headers_spam}->{"Checker-Version"};
+  # remove this except for X-Spam-Checker-Version in 2.70
+  $self->add_default_spam_headers();	# always run this first
+  $self->add_default_ham_headers();	# always run this second
 
   $self;
 }
@@ -263,6 +249,24 @@ sub mtime {
 	$self->{mtime} = shift;
     }
     return $self->{mtime};
+}
+
+sub add_default_spam_headers {
+  my ($self) = @_;
+
+  $self->{headers_spam}->{"Flag"} = "_YESNOCAPS_";
+  $self->{headers_spam}->{"Status"} = "_YESNO_, hits=_HITS_ required=_REQD_ tests=_TESTS_ autolearn=_AUTOLEARN_ version=_VERSION_";
+  $self->{headers_spam}->{"Level"} = "_STARS(*)_";
+  $self->{headers_spam}->{"Checker-Version"} = "SpamAssassin _VERSION_ (_SUBVERSION_) on _HOSTNAME_";
+  $self->{headers_spam}->{"Report"} = "_REPORT_";
+}
+
+sub add_default_ham_headers {
+  my ($self) = @_;
+
+  $self->{headers_ham}->{"Status"} = $self->{headers_spam}->{"Status"};
+  $self->{headers_ham}->{"Level"} = $self->{headers_spam}->{"Level"};
+  $self->{headers_ham}->{"Checker-Version"} = $self->{headers_spam}->{"Checker-Version"};
 }
 
 ###########################################################################
@@ -825,8 +829,7 @@ original message.
 If this option is set to 0, incoming spam is only modified by adding
 some headers and no changes will be made to the body.
 
-Note: If report_safe is set to 0, X-Spam-Report will not be added by
-default unless use_terse_report is also set.
+Note: If report_safe is set to 0, then B<X-Spam-Report> is not added.
 
 =cut
 
@@ -1638,8 +1641,8 @@ this option to 0.
 =item always_add_headers { 0 | 1 }      (default: 1)
 
 By default, B<X-Spam-Status> and B<X-Spam-Level>) will be added to all
-messages scanned by SpamAssassin.  If you don't want to add the headers
-to non-spam, set this value to 0.  See also B<always_add_report>.
+messages scanned by SpamAssassin.  If you don't want to add those headers
+to non-spam, set this value to 0.
 
 This option is deprecated in version 2.60 and later.  It will be removed
 in a future version.  Instead, use the B<clear_headers> and
@@ -1653,26 +1656,32 @@ B<add_header> options to customize headers.
 	  delete $self->{headers_ham}->{$name} if $name ne "Checker-Version";
 	}
       }
+      else {
+	$self->add_default_ham_headers();
+      }
       next;
     }
 
 
 =item always_add_report { 0 | 1 }	(default: 0)
 
-By default, mail tagged as spam includes a report, either in the
-headers or in an attachment (report_safe). If you set this to option
-to C<1>, the report will be included in the B<X-Spam-Report> header,
-even if the message is not tagged as spam.
+When the B<report_safe> option is turned on, mail tagged as spam will
+include a report in a header named B<X-Spam-Report>.  If you set this option
+to C<1>, the report will always be included in the B<X-Spam-Report> header
+regardless of whether the mail is tagged as spam.
 
-This option is deprecated in version 2.60 and later.  It will be removed
-in a future version.  Please use the add_header option instead:
+This option is deprecated in version 2.60 and later.  It will be removed in
+a future version.  Please use the flexible B<add_header> option instead:
 
-add_header ham Report _REPORT_
+add_header all Report _REPORT_
 
 =cut
 
   if (/^always_add_report\s+(\d+)$/) {
-    if ($1 == 1) {
+    if ($1 == 0) {
+      delete $self->{headers_ham}->{"Report"};
+    }
+    else {
       $self->{headers_ham}->{"Report"} = "_REPORT_";
     }
     next;
@@ -1773,34 +1782,19 @@ add_header all Pyzor _PYZOR_
       next;
     }
 
-=item use_terse_report { 0 | 1 }   (default: 0)
+=item use_terse_report { 0 | 1 }   (default: 1)
 
-By default, SpamAssassin uses a long report format, explaining what
-happened to the mail message, for newbie users.   If you would prefer
-shorter reports, set this to C<1>.
-
-This option is deprecated in version 2.60 and later.  It will be removed
-in a future version.  Longer reports are used by default, with the
-report_safe option.  If you wish to use a shorter report in the headers
-of spam messages, use the following option:
-
-add_header spam Report _REPORT_
+This option is deprecated and does nothing.  It will be removed in a
+future version.
 
 =cut
 
     if (/^use_terse_report\s+(\d+)$/) {
-      if($1 == 1) {
-	$self->{headers_spam}->{"Report"} = "_REPORT_";
-      }
       next;
     }
 
 
 =item terse_report ...some text for a report...
-
-Set the report template which is attached to spam mail messages, for the
-terse-report format.  See the C<10_misc.cf> configuration file in
-C</usr/share/spamassassin> for an example.
 
 This option is deprecated and does nothing.  It will be removed in a
 future version.
@@ -1812,8 +1806,6 @@ future version.
     }
 
 =item clear_terse_report_template
-
-Clear the terse-report template.
 
 This option is deprecated and does nothing.  It will be removed in a
 future version.
@@ -2529,6 +2521,12 @@ sub regression_tests {
 # note: error 70 == SA_SOFTWARE
 sub finish_parsing {
   my ($self) = @_;
+
+  # disable X-Spam-Report: header if report_safe is turned on
+  if ($self->{report_safe}) {
+    delete $self->{headers_spam}->{"Report"};
+    delete $self->{headers_ham}->{"Report"};
+  }
 
   while (my ($name, $text) = each %{$self->{tests}}) {
     my $type = $self->{test_types}->{$name};

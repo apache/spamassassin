@@ -842,6 +842,8 @@ sub _get_tag {
 
 	    PREVIEW => sub { $self->get_content_preview() },
 
+	    REPORT => sub { return "\n" . $self->{tag_data}->{REPORT} },
+
 	  );
 
   if (exists $tags{$tag}) {
@@ -2346,10 +2348,10 @@ sub _handle_hit {
     }
 
     # save both summaries
-    $self->{tag_data}->{REPORT} .= sprintf ("* %s %-22s %s%s\n%s",
+    $self->{tag_data}->{REPORT} .= sprintf ("* %s %s %s%s\n%s",
 				       $score, $rule, $area, $desc,
 				       ($self->{test_log_msgs}->{TERSE} ?
-				        "*".(" "x29).$self->{test_log_msgs}->{TERSE} : '')
+				        "*      " . $self->{test_log_msgs}->{TERSE} : '')
 				   );
     $self->{tag_data}->{SUMMARY} .= sprintf ("%s %-22s %s%s\n%s",
 				       $score, $rule, $area, $desc,
