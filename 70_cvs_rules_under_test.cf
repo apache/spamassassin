@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.554 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.555 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -330,7 +330,20 @@ meta T_MIME_HTML_ONLY_MULTI_OTHER	(__CTYPE_MULTIPART_OTHER && __MIME_HTML_ONLY)
 header __MIMEOLE		X-MIMEOLE =~ /Produced By Microsoft MimeOLE/
 meta T_SUBJ_FULL_OF_8BITS	(SUBJ_FULL_OF_8BITS && !__MIMEOLE)
 
+# some baseline tests to start from scratch developing new 8BIT rules
+# first: simple 8-bit
+header T_SUBJ_8BIT	Subject:raw =~ /[\x80-\xff]/
+header T_FROM_8BIT	From:raw =~ /[\x80-\xff]/
+header T_TO_8BIT	To:raw =~ /[\x80-\xff]/
+header T_CC_8BIT	Cc:raw =~ /[\x80-\xff]/
+header T_TOCC_8BIT	ToCc:raw =~ /[\x80-\xff]/
+# check for illegal substrings (RFC 2045)
+header T_SUBJ_ILLEGAL	Subject:raw =~ /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\xff]/
+header T_FROM_ILLEGAL	From:raw =~ /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\xff]/
+header T_TO_ILLEGAL	To:raw =~ /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\xff]/
+header T_CC_ILLEGAL	Cc:raw =~ /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\xff]/
+header T_TOCC_ILLEGAL	ToCc:raw =~ /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\xff]/
+
 # a new ratware-forgery format
 header T_LC_ESMTP_RCVD    Received =~ /^from (?:unknown|\d+\.\d+\.\d+\.\d+) \(\S+\) by \S+ with esmtp; /
 describe T_LC_ESMTP_RCVD  Received header contains forged lowercase 'esmtp' relay  
-
