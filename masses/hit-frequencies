@@ -33,7 +33,7 @@ sub readlogs {
     my $isspam = 0; ($file eq 'spam.log') and $isspam = 1;
 
     while (<IN>) {
-      /^.\s+(\d+)\s+(\S+)\s*(\S*)/ or next;
+      /^.\s+-?(\d+)\s+(\S+)\s*(\S*)/ or next;
 
       if ($isspam) {
 	$num_spam++;
