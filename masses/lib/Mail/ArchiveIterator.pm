@@ -96,23 +96,19 @@ sub mass_check_tar_file {
 sub mass_check_open {
   my ($file) = @_;
 
+  my $expr;
   if ($file =~ /\.gz$/) {
-    if (!open (STDIN, "gunzip -cd $file |")) {
-      warn "gunzip $file failed: $@";
-      return 0;
-    }
+    $expr = "gunzip -cd $file |";
   }
   elsif ($file =~ /\.bz2$/) {
-    if (!open(STDIN, "bzip2 -cd $file |")) {
-      warn "bunzip2 $file failed: $@";
-      return 0;
-    }
+    $expr = "bzip2 -cd $file |";
   }
   else {
-    if (!open(STDIN, "<$file")) {
-      warn "open $file failed: $@";
-      return 0;
-    }
+    $expr = "<$file";
+  }
+  if (!open (STDIN, $expr)) {
+    warn "unable to open $file: $@";
+    return 0;
   }
   return 1;
 }
