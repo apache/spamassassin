@@ -489,18 +489,25 @@ describe T_MSGID_SPAM_3_7	Message-ID has known spammer pattern
 # letter: 2/3 (pick a-z) | 1/3 (pick 0-9)
 # 3-12 letters: 1/8 (pick .) | 7/12 (pick a-z) | 7/24 (pick 0-9)
 # letter: 2/3 (pick a-z) | 1/3 (pick 0-9)
-header T_MSGID_EVIL_SPAM_1	Message-ID =~ /<[a-z\d][a-z\d\$-]+[a-z\d]\@[a-z\d][a-z\d.]+[a-z\d]>/
-header T_MSGID_EVIL_SPAM_2	Message-ID =~ /<[a-z\d][a-z\d\$-]{10,29}[a-z\d]\@[a-z\d][a-z\d.]{3,12}[a-z\d]>/
-header __MSGID_IDIOM_1		Message-ID =~ /\b[a-f\d]{12}\b/
-header __MSGID_IDIOM_2		Message-ID =~ /\b[a-f\d]{8}\b/
-header __MSGID_IDIOM_3		Message-ID =~ /\d{10}/
-meta T_MSGID_EVIL_SPAM_3	(T_MSGID_EVIL_SPAM_2 && !__MSGID_IDIOM_1)
-meta T_MSGID_EVIL_SPAM_4	(T_MSGID_EVIL_SPAM_2 && !__MSGID_IDIOM_2)
-meta T_MSGID_EVIL_SPAM_5	(T_MSGID_EVIL_SPAM_2 && !__MSGID_IDIOM_3)
-meta T_MSGID_EVIL_SPAM_6	(T_MSGID_EVIL_SPAM_2 && !__MSGID_IDIOM_1 && !__MSGID_IDIOM_2)
-meta T_MSGID_EVIL_SPAM_7	(T_MSGID_EVIL_SPAM_2 && !__MSGID_IDIOM_1 && !__MSGID_IDIOM_3)
-meta T_MSGID_EVIL_SPAM_8	(T_MSGID_EVIL_SPAM_2 && !__MSGID_IDIOM_2 && !__MSGID_IDIOM_3)
-meta T_MSGID_EVIL_SPAM_9	(T_MSGID_EVIL_SPAM_2 && !__MSGID_IDIOM_1 && !__MSGID_IDIOM_2 && !__MSGID_IDIOM_3)
+header __MSGID_ESPAM		Message-ID =~ /<[a-z\d][a-z\d\$-]{10,29}[a-z\d]\@[a-z\d][a-z\d.]{3,12}[a-z\d]>/
+header __MSGID_IDIOM_0		Message-ID =~ /\b[a-f\d]{8}/
+header __MSGID_IDIOM_1		Message-ID =~ /\b[a-f\d]{8}\b/
+header __MSGID_IDIOM_2		Message-ID =~ /\b[a-f\d]{12}\b/
+header __MSGID_IDIOM_3		Message-ID =~ /\d{8}/
+header __MSGID_IDIOM_4		Message-ID =~ /\d{10}/
+header __MSGID_IDIOM_5		Message-ID =~ /\b\d{8}/
+meta T_MSGID_EVIL_1	(__MSGID_ESPAM && !__MSGID_IDIOM_0)
+meta T_MSGID_EVIL_2	(__MSGID_ESPAM && !__MSGID_IDIOM_1)
+meta T_MSGID_EVIL_3	(__MSGID_ESPAM && !__MSGID_IDIOM_2)
+meta T_MSGID_EVIL_4	(__MSGID_ESPAM && !__MSGID_IDIOM_0 && !__MSGID_IDIOM_3)
+meta T_MSGID_EVIL_5	(__MSGID_ESPAM && !__MSGID_IDIOM_0 && !__MSGID_IDIOM_4)
+meta T_MSGID_EVIL_6	(__MSGID_ESPAM && !__MSGID_IDIOM_0 && !__MSGID_IDIOM_5)
+meta T_MSGID_EVIL_7	(__MSGID_ESPAM && !__MSGID_IDIOM_1 && !__MSGID_IDIOM_3)
+meta T_MSGID_EVIL_8	(__MSGID_ESPAM && !__MSGID_IDIOM_1 && !__MSGID_IDIOM_4)
+meta T_MSGID_EVIL_9	(__MSGID_ESPAM && !__MSGID_IDIOM_1 && !__MSGID_IDIOM_5)
+meta T_MSGID_EVIL_10	(__MSGID_ESPAM && !__MSGID_IDIOM_2 && !__MSGID_IDIOM_3)
+meta T_MSGID_EVIL_11	(__MSGID_ESPAM && !__MSGID_IDIOM_2 && !__MSGID_IDIOM_4)
+meta T_MSGID_EVIL_12	(__MSGID_ESPAM && !__MSGID_IDIOM_2 && !__MSGID_IDIOM_5)
 
 # some simple subject rules to catch a persistent spammer
 header T_SUBJ_XANAX		Subject =~ /x.{0,2}a.{0,2}n.{0,2}a.{0,2}x/i
