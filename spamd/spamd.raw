@@ -39,7 +39,7 @@ use POSIX qw(setsid);
 use Errno;
 
 use Cwd ();
-use File::Spec;
+use File::Spec 0.8;
 use File::Path;
 
 # Load Time::HiRes if it's available
@@ -1247,13 +1247,15 @@ sub preload_modules_with_tmp_homedir {
   # that then breaks other things ...
   delete $ENV{'TMPDIR'} if ( !defined $ENV{'TMPDIR'} );
 
-  my $tmphome = File::Spec->catdir ($tmpdir, "spamassassin-$$");
+  my $tmphome = File::Spec->catdir ($tmpdir, "spamd-$$-init");
   $tmphome = Mail::SpamAssassin::Util::untaint_file_path ($tmphome);
 
   my $tmpsadir = File::Spec->catdir ($tmphome, ".spamassassin");
 
-  mkdir($tmphome, 0700) or die "fatal: Can't create $tmphome";
-  mkdir($tmpsadir, 0700) or die "fatal: Can't create $tmpsadir";
+  Mail::SpamAssassin::dbg("Preloading modules with HOME=$tmphome");
+
+  mkdir($tmphome, 0700)  or die "fatal: Can't create $tmphome: $!";
+  mkdir($tmpsadir, 0700) or die "fatal: Can't create $tmpsadir: $!";
   $ENV{HOME} = $tmphome;
 
   $spamtest->compile_now(0);	# ensure all modules etc. are loaded
@@ -1262,13 +1264,27 @@ sub preload_modules_with_tmp_homedir {
   # now clean up the stuff we just created, and make us taint-safe
   delete $ENV{HOME};
 
-  unlink "$tmpsadir/user_prefs";
-  rmdir $tmpsadir;
-  rmdir $tmphome;
-    
-  # if the dir still exists, throw a warning.
-  if (-d $tmphome) {            
-    warn "could not remove $tmphome!: $!\n";
+  # bug 2015, bug 2223: rmpath() is not taint safe, so we've got to implement
+  # our own poor man's rmpath. If it fails, we report only the first error.
+  my $err;
+  opendir (TMPDIR, $tmpsadir) or $err ||= "open $tmpsadir: $!";
+  unless ($err) {
+    foreach my $f (File::Spec->no_upwards (readdir (TMPDIR))) {
+      $f = Mail::SpamAssassin::Util::untaint_file_path (
+             File::Spec->catfile ($tmpsadir, $f)
+           );
+      unlink ($f)             or $err ||= "remove $f: $!";
+    }
+    closedir (TMPDIR)         or $err ||= "close $tmpsadir: $!";
+  }
+
+  rmdir ($tmpsadir)           or $err ||= "remove $tmpsadir: $!";
+  rmdir ($tmphome)            or $err ||= "remove $tmphome: $!";
+
+  # If the dir still exists, log a warning.
+  if (-d $tmphome) {
+    $err ||= "do something: $!";
+    warn "Failed to remove $tmphome: Could not $err\n";
   }
 }
 
