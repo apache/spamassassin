@@ -358,6 +358,8 @@ sub get_content_preview {
 
   my $str = '';
   my $ary = $self->get_decoded_stripped_body_text_array();
+  shift @{$ary};		# drop the subject line
+
   my $numlines = 3;
   while (length ($str) < 200 && @{$ary} && $numlines-- > 0) {
     $str .= shift @{$ary};
