@@ -131,6 +131,7 @@ sub razor_report {
   if ( !$@ ) {
     eval {
       local ($^W) = 0;    # argh, warnings in Razor
+      local %ENV;
 
       local $SIG{ALRM} = sub { die "alarm\n" };
       alarm $timeout;

@@ -366,6 +366,7 @@ sub razor2_lookup {
 
     eval {
       local ($^W) = 0;    # argh, warnings in Razor
+      local %ENV;
 
       require Razor2::Client::Agent;
 
