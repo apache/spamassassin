@@ -82,6 +82,7 @@ $DEBUG = 0;
 
 @site_rules_path = qw(
         /etc/spamassassin.cf
+        /etc/mail/spamassassin.cf
 );
     
 @default_prefs_path = qw(
@@ -424,6 +425,10 @@ sub init {
 
       $self->{config_text} .= $self->read_cf ($fname, 'user prefs');
     }
+  }
+
+  if ($self->{config_text} !~ /\S/) {
+    warn "No configuration text or files found! Please check your setup.\n";
   }
 
   $self->{conf}->parse_rules ($self->{config_text});
