@@ -8,11 +8,6 @@
 # lenient about the incoming message, in the spirit of the IETF dictum 'be
 # liberal in what you accept'.
 #
-# A regexp from Mail::Header is used.  Mail::Header is Copyright (c) 1995-2001
-# Graham Barr <gbarr@pobox.com>. All rights reserved.  This program is free
-# software; you can redistribute it and/or modify it under the same terms as
-# Perl itself.
-#
 package Mail::SpamAssassin::NoMailAudit;
 
 use strict;
@@ -115,7 +110,9 @@ sub parse_headers {
       $self->{from_line} = $_;
       next;
 
-    } elsif (/^([^\x00-\x20\x7f-\xff:]+):\s*(.*)$/s) {
+    } elsif (/^([\x31-\x39\x3B-\x7E]+):\s*(.*)$/s) {
+      # format of a header, as defined by RFC 2822 section 3.6.8;
+      # 'Any character except controls, SP, and ":".'
       $hdr = $1; $val = $2;
       $val =~ s/\r+//gs;          # trim CRs, we don't want them
       $entry = $self->_get_or_create_header_object ($hdr);

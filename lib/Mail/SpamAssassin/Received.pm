@@ -1,4 +1,4 @@
-# $Id: Received.pm,v 1.35 2003/11/15 02:58:12 jmason Exp $
+# $Id: Received.pm,v 1.36 2003/11/15 04:05:28 jmason Exp $
 
 # ---------------------------------------------------------------------------
 
@@ -414,6 +414,7 @@ sub parse_received_line {
   my $rdns = '';
   my $by = '';
   my $ident = '';
+  my $envfrom = '';
   my $mta_looked_up_dns = 0;
 
   # Received: (qmail 27981 invoked by uid 225); 14 Mar 2003 07:24:34 -0000
@@ -428,6 +429,11 @@ sub parse_received_line {
   # simply use simplistic regexps.
 
   if (/^from /) {
+    # try to catch enveloper senders
+    if (/envelope-(?:sender|from)[ =](\S+)\b/) {
+      $envfrom = $1;
+    }
+
     if (/Exim/) {
       # one of the HUGE number of Exim formats :(
       # This must be scriptable.
@@ -631,6 +637,37 @@ sub parse_received_line {
     if (/^from (\S+) \[(${IP_ADDRESS})\] by (\S+) with \S+ \(fetchmail/) {
       $self->found_pop_fetcher_sig();
       return;		# skip fetchmail handovers
+    }
+
+    # Let's try to support a few qmailish formats in one;
+    # http://bugzilla.spamassassin.org/show_bug.cgi?id=2744#c14 :
+    # Received: from unknown (HELO feux01a-isp) (213.199.4.210) by totor.bouissou.net with SMTP; 1 Nov 2003 07:05:19 -0000 
+    # Received: from adsl-207-213-27-129.dsl.lsan03.pacbell.net (HELO merlin.net.au) (Owner50@207.213.27.129) by totor.bouissou.net with SMTP; 10 Nov 2003 06:30:34 -0000 
+    if (/^from (\S+) \(HELO ([^\)]+)\) \((\S+@)?\[?(${IP_ADDRESS})\]?\).* by (\S+) /)
+    {
+      $mta_looked_up_dns = 1;
+      $rdns = $1; $helo = $2; $ident = $3; $ip = $4; $by = $5;
+      if ($ident !~ /\@$/) {
+	$by = $ip; $ip = $ident; undef $ident;
+      } else {
+	$ident =~ s/\@$//;
+      }
+      goto enough;
+    }
+
+    # Received: from x1-6-00-04-bd-d2-e0-a3.k317.webspeed.dk (benelli@80.167.158.170) by totor.bouissou.net with SMTP; 5 Nov 2003 23:18:42 -0000
+    if (/^from (\S+) \((\S+@)?\[?(${IP_ADDRESS})\]?\).* by (\S+) /)
+    {
+      $mta_looked_up_dns = 1;
+      # http://bugzilla.spamassassin.org/show_bug.cgi?id=2744 notes that
+      # if HELO == rDNS, qmail drops it.
+      $rdns = $1; $helo = $rdns; $ident = $2; $ip = $3; $by = $4;
+      if ($ident !~ /\@$/) {
+	$by = $ip; $ip = $ident; undef $ident;
+      } else {
+	$ident =~ s/\@$//;
+      }
+      goto enough;
     }
 
     # Received: from pl653.nas927.o-tokyo.nttpc.ne.jp (HELO kaik)
@@ -983,12 +1020,14 @@ enough:
   $helo =~ s/[\s\0\#\[\]\(\)\<\>\|]/!/gs;
   $by =~ s/[\s\0\#\[\]\(\)\<\>\|]/!/gs;
   $ident =~ s/[\s\0\#\[\]\(\)\<\>\|]/!/gs;
+  $envfrom =~ s/[\s\0\#\[\]\(\)\<\>\|]/!/gs;
 
   my $relay = {
     ip => $ip,
     by => $by,
     helo => $helo,
     ident => $ident,
+    envfrom => $envfrom,
     lc_by => (lc $by),
     lc_helo => (lc $helo)
   };
@@ -1030,7 +1069,7 @@ enough:
   # of entries must be preserved, so that regexps that assume that
   # e.g. "ip" comes before "helo" will still work.
   #
-  my $asstr = "[ ip=$ip rdns=$rdns helo=$helo by=$by ident=$ident intl=0 ]";
+  my $asstr = "[ ip=$ip rdns=$rdns helo=$helo by=$by ident=$ident envfrom=$envfrom intl=0 ]";
   dbg ("received-header: parsed as $asstr");
   $relay->{as_string} = $asstr;
 
