@@ -307,7 +307,7 @@ for ( ; 1; close Client)
         if (/SKIP SPAMC\/(.*)/)
 	{
 	    logmsg "skipped large message in ".
-		sprintf("%3d", time - $start) ." seconds.\n";
+		sprintf("%3d", time - $start) ." seconds.";
 	    return 0;
 
 	}
@@ -409,7 +409,7 @@ for ( ; 1; close Client)
             }
 
             logmsg "checking message $msgid for $current_user:$>" .
-              ($expected_length ? ", expecting $expected_length bytes" : "") . ".\n";
+              ($expected_length ? ", expecting $expected_length bytes" : "") . ".";
 
 	    my $mail = Mail::SpamAssassin::NoMailAudit->new (
                                 data => \@msglines
@@ -451,7 +451,7 @@ for ( ; 1; close Client)
 	    print $status->get_report,"\r\n" if ($method eq "REPORT" or $method eq "REPORT_IFSPAM" and $status->is_spam);
 	    $current_user ||= '(unknown)';
 	    logmsg "$was_it_spam ($msg_score/$msg_threshold) for $current_user:$> in ".
-		sprintf("%.1f", time - $start) ." seconds, $actual_length bytes.\n";
+		sprintf("%.1f", time - $start) ." seconds, $actual_length bytes.";
 
 	    $status->finish();	# added by jm to allow GC'ing
 	}
@@ -553,7 +553,7 @@ for ( ; 1; close Client)
             }
 
             logmsg "processing message $msgid for $current_user:$>" .
-              ($expected_length ? ", expecting $expected_length bytes" : "") . ".\n";
+              ($expected_length ? ", expecting $expected_length bytes" : "") . ".";
 
 	    my $mail = Mail::SpamAssassin::NoMailAudit->new (
                                 data => \@msglines
@@ -589,7 +589,7 @@ for ( ; 1; close Client)
             my $msg_threshold = sprintf("%.1f",$status->get_required_hits);
 	    $current_user ||= '(unknown)';
 	    logmsg "$was_it_spam ($msg_score/$msg_threshold) for $current_user:$> in ".
-	        sprintf("%.1f", time - $start) ." seconds, $actual_length bytes.\n";
+	        sprintf("%.1f", time - $start) ." seconds, $actual_length bytes.";
 
 	    $status->finish();	# added by jm to allow GC'ing
 	}
@@ -671,7 +671,7 @@ sub handle_user
 	#if we are given a username, but can't look it up,
 	#Maybe NIS is down? lets break out here to allow
 	#them to get 'defaults' when we are not running paranoid.
-	logmsg "handle_user() -> unable to find user [$userid]!\n";
+	logmsg "handle_user() -> unable to find user [$userid]!";
 	return 0;
     }
 
@@ -725,11 +725,11 @@ sub handle_virtual_user
 		# And if that isn't there, log that it's misconfigured.
 		if(! -f $file) {
 			logmsg("Couldn't find a virtual directory or defaults "
-				. "for $username in $dir\n");
+				. "for $username in $dir");
 			return(0);
 		} else {
 			# Log that the default configuration is being used for a user.
-			logmsg("Using default config for $username\n");
+			logmsg("Using default config for $username");
 		}
 	}
 
