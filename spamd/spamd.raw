@@ -10,6 +10,7 @@ use lib '../lib';	# added by jm for use inside the distro
 use strict;
 use Socket;
 use Carp;
+use Config;
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::NoMailAudit;
 use Sys::Syslog qw(:DEFAULT setlogsock);
@@ -119,7 +120,11 @@ sub spawn;  # forward declaration
 sub logmsg; # forward declaration
 sub cleanupchildren;
 
-setlogsock('unix') unless $log_facility eq 'stderr';
+my $socktype = 'unix';
+if ($Config{'archname'} =~ /solaris/) {
+  $socktype = 'inet';   # doesn't support UNIX-domain syslog sockets apparently
+}
+setlogsock($socktype) unless $log_facility eq 'stderr';
 
 my $port = $opt{'port'} || 783;
 my $addr = gethostbyname($opt{'listen-ip'} || '127.0.0.1');
