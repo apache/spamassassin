@@ -1189,8 +1189,11 @@ body DIG_UP_INFO	        /\bdig up information\b/i
 describe DIG_UP_INFO		Dig up Dirt on Friends
 
 # Marc Perkel: added "not"
-body MLM		        /\bnot (?:MLM|multi.level.marketing)\b/i
-describe MLM			Multi Level Marketing
+body MLM		        /\b(?:MLM|multi.level.marketing)\b/i
+describe MLM			Multi Level Marketing mentioned
+
+body NOT_MLM                    /\bnot (?:MLM|multi.level.marketing)\b/i
+describe NOT_MLM		Apparently, NOT Multi Level Marketing
 
 body UNCLAIMED_MONEY	        /\bunclaimed (?:funds|money)\b/i
 describe UNCLAIMED_MONEY	People just leave money laying around
