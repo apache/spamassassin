@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.90 2003/05/25 20:13:53 quinlan Exp $
+# $Id: HTML.pm,v 1.91 2003/05/26 06:08:50 felicity Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -370,7 +370,7 @@ sub html_tests {
       {
 	$self->{html}{html_event} = 1;
       }
-      if (/\bon(?:blur|contextmenu|focus|load|resize|submit|unload)\b/i)
+      if (/\bon(?:blur|contextmenu|focus|load|resize|submit|unload)\b/i && $attr->{$_} )
       {
 	$self->{html}{html_event_unsafe} = 1;
         if ($attr->{$_} =~ /\.open\s*\(/) { $self->{html}{window_open} = 1; }
