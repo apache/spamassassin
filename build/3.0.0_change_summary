@@ -16,8 +16,9 @@ Highlights of the release
    http://spf.pobox.com/) which is the basis for the forthcoming Sender-ID
    specification.
 
- - Web sites contained in the message body are checked against network
-   databases of domains that advertise with spam.
+ - Web site links contained in the message are checked against SURBL and
+   SBL.  SURBL and SBL track sites that advertise with spam, known spam
+   sources, and spam services.
 
  - The new 3.0 architecture allows third-parties to easily add plugin modules.
 
