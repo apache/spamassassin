@@ -256,9 +256,6 @@ describe YR_MEMBERSHIP_EXCH	Subject contains 'Your Membership Exchange'
 #header FROM_FORGED_HOTMAIL	From =~ /^[^"]+\S+\@hotmail\.com/i
 #describe FROM_FORGED_HOTMAIL	From: claims to be hotmail but not in their format
 
-header DIFFERENT_REPLY_TO	eval:check_for_spam_reply_to()
-describe DIFFERENT_REPLY_TO	Reply-To: massively different from From: or To:
-
 header LOTS_OF_CC_LINES		eval:check_lots_of_cc_lines()
 describe LOTS_OF_CC_LINES	Lots and lots of Cc: headers
 
