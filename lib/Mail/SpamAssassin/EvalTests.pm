@@ -8,9 +8,10 @@ package Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Dns;
 use Mail::SpamAssassin::Locales;
+use Mail::SpamAssassin::MailingList;
+use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::PhraseFreqs;
 use Mail::SpamAssassin::TextCat;
-use Mail::SpamAssassin::MailingList;
 use Time::Local;
 use strict;
 
@@ -1597,14 +1598,14 @@ sub check_for_uppercase {
 }
 
 sub check_for_yelling {
-    my ($self, $body) = @_;
+  my ($self, $body) = @_;
     
-    if (exists $self->{num_yelling_lines}) {
-        return $self->{num_yelling_lines} > 0;
-    }
+  if (exists $self->{num_yelling_lines}) {
+    return $self->{num_yelling_lines} > 0;
+  }
 
   # Make local copy of lines in the body that have some non-letters
-    my @lines = grep(/[^A-Za-z]/, @{$body});
+  my @lines = grep(/[^A-Za-z]/, @{$body});
 
   # Try to eliminate lines which might be newsletter section headers,
   # which are often in all caps; we do this by removing most lines
@@ -1615,45 +1616,45 @@ sub check_for_yelling {
   @lines = grep(/^\S|!|\$\$|\.(?:\s|$)/, @lines);
 
   # Get rid of everything but upper AND lower case letters
-    map (s/[^A-Za-z \t]//sg, @lines);
+  map (s/[^A-Za-z \t]//sg, @lines);
 
   # Remove leading and trailing whitespace
-    map (s/^\s+//, @lines);
-    map (s/\s+$//, @lines);
+  map (s/^\s+//, @lines);
+  map (s/\s+$//, @lines);
 
   # Now that we have a mixture of upper and lower case, see if it's
   # 1) All upper case
   # 2) 20 or more characters in length
   # 3) Has at least one whitespace in it; we don't want to catch things
   #    like lines of genetic data ("...AGTAGC...")
-    my $num_lines = scalar grep(/\s/, grep(/^[A-Z\s]{20,}$/, @lines) );
+  my $num_lines = scalar grep(/\s/, grep(/^[A-Z\s]{20,}$/, @lines) );
 
-    $self->{num_yelling_lines} = $num_lines;
+  $self->{num_yelling_lines} = $num_lines;
 
-    return ($num_lines > 0);
+  return ($num_lines > 0);
 }
 
 sub check_for_num_yelling_lines {
-    my ($self, $body, $threshold) = @_;
+  my ($self, $body, $threshold) = @_;
     
-    $self->check_for_yelling($body);
+  $self->check_for_yelling($body);
     
-    return ($self->{num_yelling_lines} >= $threshold);
+  return ($self->{num_yelling_lines} >= $threshold);
+}
+
+sub check_html_table_border_thick {
+  my ($self) = @_;
+
+  return ($Mail::SpamAssassin::PerMsgStatus::html_border > 1);
 }
 
 # A possibility for spotting heavy HTML spam and image-only spam
-# Submitted by Michael Moncur 7/26/2002, see bug #608, it uses both
-# $body and $rawbody so it needs to call get_decoded_body_text_array()
+# Submitted by Michael Moncur 7/26/2002, see bug #608
 sub check_html_percentage {
   my ($self, $body, $min, $max) = @_;
-  my $rawlength = 0;
-  my $bodylength = 0;
-  my $rawbody = $self->get_decoded_body_text_array();
-  map($rawlength += length($_), grep (! /^SPAM: /, @{$rawbody}));
-  map($bodylength += length($_), @{$body});
-  return 0 if $rawlength == 0;
-  my $htmlpercent = ($rawlength - $bodylength) / $rawlength * 100;
-  return ($htmlpercent > $min && $htmlpercent <= $max);
+
+  my $html_percent = $Mail::SpamAssassin::PerMsgStatus::html_ratio * 100;
+  return ($html_percent > $min && $html_percent <= $max);
 }
 
 sub check_for_mime_excessive_qp {
@@ -1976,9 +1977,6 @@ sub check_dcc {
 
 sub check_for_spam_phrases {
   return Mail::SpamAssassin::PhraseFreqs::check_phrase_freqs (@_);
-}
-sub check_for_spam_phrases_scoring {
-  return Mail::SpamAssassin::PhraseFreqs::extra_score_phrase_freqs (@_);
 }
 
 ###########################################################################
