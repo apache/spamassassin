@@ -64,13 +64,17 @@ foreach my $test (sort {
   my $fn = $freq_nonspam{$test}; $fn ||= 0;
   $score{$test} ||= 1.0;
 
+  # adjust based on corpora sizes (and cvt to % while we're at it)
+  my $fsadj = ($fs / ($num_spam)) * 100.0;
+  my $fnadj = ($fn / ($num_nonspam)) * 100.0;
+
   if ($opt_p) {
     $fa = ($fa / ($num_spam + $num_nonspam)) * 100.0;
-    $fs = ($fs / ($num_spam)) * 100.0;
-    $fn = ($fn / ($num_nonspam)) * 100.0;
+    $fs = $fsadj;
+    $fn = $fnadj;
   }
 
-  my $snratio = snratio ($freq_spam{$test}, $freq_nonspam{$test});
+  my $snratio = snratio ($fsadj, $fnadj);
 
   if ($opt_p) {
     printf "%7.2f  %7.2f  %7.2f  %6.2f  %6.2f  %s\n",
@@ -150,10 +154,13 @@ sub readscores {
 
 sub snratio {
   my ($s, $n) = @_;
+
+  $s ||= 0;
+  $n ||= 0;
+
   if ($s + $n > 0) {
       return $s / ($s + $n);
-  }
-  else {
+  } else {
       return 0;
   }
 }

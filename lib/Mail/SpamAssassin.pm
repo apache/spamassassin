@@ -78,7 +78,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 $VERSION = "2.40";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.101 2002/07/15 12:38:27 jmason Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.102 2002/07/18 15:18:39 jmason Exp $';
 
 sub Version { $VERSION; }
 
@@ -715,14 +715,17 @@ sub create_default_prefs {
     my $defprefs = $self->first_existing_path
 			(@Mail::SpamAssassin::default_prefs_path);
     
-    open (IN, "<$defprefs") or warn "cannot open $defprefs: $!";
-    open (OUT, ">$fname") or warn "cannot write to $fname: $!";
-    while (<IN>) {
-      /^\#\* / and next;
-      print OUT;
+    if (!open (IN, "<$defprefs")) {
+      warn "cannot open $defprefs: $!";
+    } else {
+      open (OUT, ">$fname") or warn "cannot write to $fname: $!";
+      while (<IN>) {
+        /^\#\* / and next;
+        print OUT;
+      }
+      close OUT;
+      close IN;
     }
-    close OUT;
-    close IN;
 
     if (copy ($defprefs, $fname)) {
       if ( $< == 0 && $> == 0 && defined $user) {
