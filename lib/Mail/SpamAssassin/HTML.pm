@@ -175,6 +175,11 @@ sub html_tag {
 
     $self->{html_last_tag} = $tag;
   }
+  if ($num == -1) {
+    if ($tag eq "a") {
+      $self->{html}{anchor_unclickable}++ if $self->{html}{anchor_empty};
+    }
+  }
 
   if ($tag =~ /^(?:b|i|u|strong|em|big|center|h\d)$/) {
     $self->{html}{shouting} += $num;
@@ -641,7 +646,12 @@ sub html_tests {
   {
     $self->{html}{charsets} .= exists $self->{html}{charsets} ? " $1" : $1;
   }
+  if ($tag eq "img") {
+    # might as well always clear this here
+    $self->{html}{anchor_empty} = 0;
+  }
 
+  $self->{html}{anchor_empty} = 1 if ($tag eq "a" && exists $attr->{href});
   $self->{html}{anchor_text} ||= "" if ($tag eq "a");
 }
 
@@ -659,6 +669,7 @@ sub html_text {
 
   if (exists $self->{html}{"inside_a"} && $self->{html}{"inside_a"} > 0) {
     $self->{html}{anchor_text} .= " $text";
+    $self->{html}{anchor_empty} = 0;
   }
 
   if (exists $self->{html}{"inside_script"} && $self->{html}{"inside_script"} > 0)

@@ -283,8 +283,8 @@ sub rendered {
     my $text = $self->decode();
     my $raw = length($text);
 
-    # render text/html always, or any other text|text/plain part as text/html based
-    # on a heuristic which simulates a certain common mail client
+    # render text/html always, or any other text|text/plain part as text/html
+    # based on a heuristic which simulates a certain common mail client
     if ( $raw > 0 && (
         $self->{'type'} =~ m@^text/html\b@i || (
         $self->{'type'} =~ m@^text(?:$|/plain)@i &&
@@ -293,38 +293,36 @@ sub rendered {
         )
        ) {
       $self->{'rendered_type'} = 'text/html';
-      my $html = Mail::SpamAssassin::HTML->new();		# object
+      my $html = Mail::SpamAssassin::HTML->new(); # object
       my @lines = @{$html->html_render($text)};
-      $self->{rendered} = join('', @{$html->html_render($text)});	# rendered text
-      $self->{html_results} = $html->get_results();		# needed in eval tests
+      $self->{rendered} = join('', @{$html->html_render($text)});
+      $self->{html_results} = $html->get_results(); # needed in eval tests
 
+      # some tests done after rendering
+      my $r = $self->{html_results}; # temporary reference for brevity
       my $space = 0;
-      $self->{html_results}{non_uri_len} = 0;
+      $r->{non_uri_len} = 0;
       for my $line (@lines) {
         $line = pack ('C0A*', $line);
         $space += ($line =~ tr/ \t\n\r\x0b\xa0/ \t\n\r\x0b\xa0/);
-        $self->{html_results}{non_uri_len} += length($line);
+        $r->{non_uri_len} += length($line);
         for my $uri ($line =~ m/\b(URI:\S+)/g) {
-          $self->{html_results}{non_uri_len} -= length($uri);
+          $r->{non_uri_len} -= length($uri);
         }
       }
-      $self->{html_results}{non_space_len} = $self->{html_results}{non_uri_len} - $space;
-      $self->{html_results}{ratio} = ($raw - $self->{html_results}{non_uri_len}) / $raw;
-      if (exists $self->{html_results}{total_comment_length} && $self->{html_results}{non_uri_len} > 0) {
-        $self->{html_results}{total_comment_ratio} = $self->{html_results}{total_comment_length} / $self->{html_results}{non_uri_len};
+      $r->{non_space_len} = $r->{non_uri_len} - $space;
+      $r->{ratio} = ($raw - $r->{non_uri_len}) / $raw;
+      if (exists $r->{total_comment_length} && $r->{non_uri_len} > 0) {
+        $r->{total_comment_ratio} = 
+	    $r->{total_comment_length} / $r->{non_uri_len};
       }
-      if (exists $self->{html_results}{elements} &&
-	  exists $self->{html_results}{tags})
-      {
-	$self->{html_results}{t_bad_tag_ratio} = ($self->{html_results}{tags} - $self->{html_results}{elements}) / $self->{html_results}{tags};
-	$self->{html_results}{t_bad_tag_count} = ($self->{html_results}{tags} - $self->{html_results}{elements});
-	$self->{html_results}{t_bad_tag_unique_ratio} = ($self->{html_results}{tags_seen} - $self->{html_results}{elements_seen}) / $self->{html_results}{tags_seen};
-	$self->{html_results}{t_bad_tag_unique_count} = ($self->{html_results}{tags_seen} - $self->{html_results}{elements_seen});
+      if (exists $r->{elements} && exists $r->{tags}) {
+	$r->{bad_tag_ratio} = ($r->{tags} - $r->{elements}) / $r->{tags};
+	$r->{non_element_ratio} =
+	    ($r->{tags_seen} - $r->{elements_seen}) / $r->{tags_seen};
       }
-      if (exists $self->{html_results}{tags} &&
-	  exists $self->{html_results}{obfuscation})
-      {
-	$self->{html_results}{obfuscation_ratio} = $self->{html_results}{obfuscation} / $self->{html_results}{tags};
+      if (exists $r->{tags} && exists $r->{obfuscation}) {
+	$r->{obfuscation_ratio} = $r->{obfuscation} / $r->{tags};
       }
     }
     else {

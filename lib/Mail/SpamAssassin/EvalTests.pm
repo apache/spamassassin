@@ -3357,14 +3357,6 @@ sub html_eval {
   return exists $self->{html}{$test} && eval "qq{\Q$self->{html}{$test}\E} $expr";
 }
 
-sub html_message {
-  my ($self) = @_;
-
-  return (exists $self->{html}{elements} &&
-	  ($self->{html}{elements} >= 8 ||
-	   $self->{html}{elements} >= $self->{html}{tags} / 2));
-}
-
 sub html_title {
   my ($self, undef, $expr) = @_;
   for my $title (@{ $self->{html}{t_title} }) {
