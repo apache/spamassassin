@@ -276,7 +276,7 @@ sub wanted {
   $messagecount++;
   my $ma = Mail::SpamAssassin::NoMailAudit->new ('data' => $dataref);
 
-  if ($ma->get ("X-Spam-Status")) {
+  if ($ma->get ("X-Spam-Checker-Version")) {
     my $newtext = $spamtest->remove_spamassassin_markup($ma);
     my @newtext = split (/^/m, $newtext);
     $dataref = \@newtext;
