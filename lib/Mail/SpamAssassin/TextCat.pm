@@ -21,7 +21,7 @@ use vars qw(
   $opt_a $opt_f $opt_t $opt_u
 );
 
-my @lm;
+my @nm;
 my $non_word_characters='0-9\s';
 
 # settings
@@ -50,48 +50,49 @@ sub classify {
   my ($self, $input) = @_;
   my %results;
   my $maxp = $opt_t;
-  my %ngram;
-  my $rang = 1;
 
   # create ngrams for input
   my @unknown = create_lm($input);
 
   # load language models once
-  if (! @lm) {
+  if (! @nm) {
+    my @lm;
+    my $ngram = {};
+    my $rang = 1;
     dbg("Loading languages file...");
     open(LM, $self->{main}->{languages_filename})
 	|| die "cannot open languages: $!\n";
     local $/ = undef;
     @lm = split(/\n/, <LM>);
     close(LM);
+    # create language ngram maps once
+    for (@lm) {
+      # look for end delimiter
+      if (/^0 (.+)/) {
+	$ngram->{"language"} = $1;
+	push(@nm, $ngram);
+	# reset for next language
+	$ngram = {};
+	$rang = 1;
+      }
+      else {
+	$ngram->{$_} = $rang++;
+      }
+    }
   }
 
   # test each language
-  for (@lm) {
-    # look for end delimiter
-    if (/^0 (.+)/) {
-      my $language = $1;
-      my $i = 0;
-      my $p = 0;
+  foreach my $ngram (@nm) {
+    my $language = $ngram->{"language"};
+    my $i = 0;
+    my $p = 0;
 
-      # compute result for language
-      foreach my $u (@unknown) {
-	if (exists($ngram{$u})) {
-	  $p = $p + abs($ngram{$u} - $i);
-	}
-	else {
-	  $p = $p + $maxp;
-	}
-	$i++;
-      }
-      $results{$language} = $p;
-      # reset for next language
-      %ngram = ();
-      $rang = 1;
+    # compute result for language
+    for (@unknown) {
+      $p += exists($ngram->{$_}) ? abs($ngram->{$_} - $i) : $maxp;
+      $i++;
     }
-    else {
-      $ngram{$_} = $rang++;
-    }
+    $results{$language} = $p;
   }
   my @results = sort { $results{$a} <=> $results{$b} } keys %results;
 
@@ -117,30 +118,30 @@ sub create_lm {
 
   ($_) = @_;
 
-  foreach my $word (split("[$non_word_characters]+")) {
-    $word = "\000" . $word . "\000";
-    my $len = length($word);
+  for (split("[$non_word_characters]+")) {
+    $_ = "\000" . $_ . "\000";
+    my $len = length($_);
     my $flen = $len;
     my $i;
     for ($i = 0; $i < $flen; $i++) {
       $len--;
-      $ngram{substr($word, $i, 1)}++;
-      ($len < 1) ? next : $ngram{substr($word, $i, 2)}++;
-      ($len < 2) ? next : $ngram{substr($word, $i, 3)}++;
-      ($len < 3) ? next : $ngram{substr($word, $i, 4)}++;
-      if ($len > 3) { $ngram{substr($word, $i, 5)}++ };
+      $ngram{substr($_, $i, 1)}++;
+      ($len < 1) ? next : $ngram{substr($_, $i, 2)}++;
+      ($len < 2) ? next : $ngram{substr($_, $i, 3)}++;
+      ($len < 3) ? next : $ngram{substr($_, $i, 4)}++;
+      if ($len > 3) { $ngram{substr($_, $i, 5)}++ };
     }
   }
 
   if ($opt_f > 0) {
-      # as suggested by Karel P. de Vos <k.vos@elsevier.nl> we speed
-      # up sorting by removing singletons, however I have very bad
-      # results for short inputs, this way
-      @sorted = sort { $ngram{$b} <=> $ngram{$a} }
-		     (grep { $ngram{$_} > $opt_f } keys %ngram);
+    # as suggested by Karel P. de Vos <k.vos@elsevier.nl> we speed
+    # up sorting by removing singletons, however I have very bad
+    # results for short inputs, this way
+    @sorted = sort { $ngram{$b} <=> $ngram{$a} }
+		   (grep { $ngram{$_} > $opt_f } keys %ngram);
   }
   else {
-      @sorted = sort { $ngram{$b} <=> $ngram{$a} } keys %ngram;
+    @sorted = sort { $ngram{$b} <=> $ngram{$a} } keys %ngram;
   }
   splice(@sorted, $opt_t) if (@sorted > $opt_t);
 
