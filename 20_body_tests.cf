@@ -78,7 +78,7 @@ describe POPLAUNCH		SPAM software
 body CHECK_OR_MONEY_ORDER	/check or money order/i
 describe CHECK_OR_MONEY_ORDER	Talk about a check or money order
 
-rawbody NUMERIC_HTTP_ADDR	/http\:\/\/\d{7,}(?:\/|\s|$)/is
+rawbody NUMERIC_HTTP_ADDR	/http\:\/\/\d{7,}/is
 describe NUMERIC_HTTP_ADDR	Uses a numeric IP address in URL
 rawbody NORMAL_HTTP_TO_IP	/http\:\/\/\d+\.\d+\.\d+\.\d+/is
 describe NORMAL_HTTP_TO_IP	Uses a dotted-decimal IP address in URL
