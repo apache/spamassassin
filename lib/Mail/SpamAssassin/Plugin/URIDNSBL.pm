@@ -215,7 +215,7 @@ sub parse_config {
 	zone => $zone, type => $type,
         is_rhsbl => 0
       };
-      return $Mail::SpamAssassin::Plugin::INHIBIT_CALLBACKS;
+      $self->inhibit_further_callbacks(); return 1;
     }
   }
   elsif ($key eq 'urirhsbl') {
@@ -228,7 +228,7 @@ sub parse_config {
 	zone => $zone, type => $type,
         is_rhsbl => 1
       };
-      return $Mail::SpamAssassin::Plugin::INHIBIT_CALLBACKS;
+      $self->inhibit_further_callbacks(); return 1;
     }
   }
   elsif ($key eq 'urirhssub') {
@@ -248,12 +248,12 @@ sub parse_config {
         rulename => $rulename
       };
 
-      return $Mail::SpamAssassin::Plugin::INHIBIT_CALLBACKS;
+      $self->inhibit_further_callbacks(); return 1;
     }
   }
   elsif ($key eq 'uridnsbl_timeout') {
     $opts->{conf}->{uridnsbl_timeout} = $opts->{value};
-    return $Mail::SpamAssassin::Plugin::INHIBIT_CALLBACKS;
+    $self->inhibit_further_callbacks(); return 1;
   }
   return 0;
 }
