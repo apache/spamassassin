@@ -13,6 +13,7 @@
 # --loghits     log the text hit for patterns (useful for debugging)
 # --showdots    print a dot for each scanned message
 # --bayes       report score from Bayesian classifier
+# --debug       report debugging information
 #
 # options for maildir and mh-style folders
 # --head=N      only check first N messages
@@ -25,7 +26,7 @@
 
 use vars qw($opt_c $opt_f $opt_fork $opt_all $opt_head $opt_mh $opt_ms $opt_mn
 	    $opt_single $opt_sort $opt_tail $opt_showdots $opt_nokillfile
-            $opt_bayes);
+            $opt_bayes $opt_debug);
 
 use FindBin;
 use lib "$FindBin::Bin/lib";
@@ -39,7 +40,7 @@ use Getopt::Long;
 $|++;
 
 GetOptions("c=s", "f=s", "fork", "all", "head=i", "mh", "ms", "mn", "single",
-        "sort", "tail=i", "loghits", "showdots", "nokillfile", "bayes");
+        "sort", "tail=i", "loghits", "showdots", "nokillfile", "bayes", "debug");
 
 if ($opt_nokillfile) {
   warn "mass-check --nokillfile switch is now obsolete, ignored.\n";
@@ -60,7 +61,7 @@ elsif ($opt_mn) {
 }
 
 $spamtest = new Mail::SpamAssassin ({
-  'debug'               => 0,
+  'debug'               => $opt_debug,
   'rules_filename'      => $cffile,
   'userprefs_filename'  => "$FindBin::Bin/spamassassin.prefs",
   'userstate_dir'       => "$FindBin::Bin/spamassassin",
