@@ -74,6 +74,11 @@ full PYZOR_CHECK	eval:check_pyzor()
 describe PYZOR_CHECK	Listed in Pyzor (http://pyzor.sf.net/)
 tflags PYZOR_CHECK	net
 
+# bug 2220. nice results
+meta DIGEST_MULTIPLE       RAZOR2_CHECK + DCC_CHECK + PYZOR_CHECK > 1
+describe DIGEST_MULTIPLE   Message hits more than one network digest check
+tflags DIGEST_MULTIPLE     net
+
 # this seems to be the new fashion (as of Jul 5 2002).  base64-encoded parts need to
 # be stripped before this match
 body TRACKER_ID		/^[a-z0-9]{6,24}[-_a-z0-9]{12,36}[a-z0-9]{6,24}\s*\z/is

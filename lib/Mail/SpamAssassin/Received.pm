@@ -960,8 +960,8 @@ sub parse_received_line {
 
   # ------------------------------------------------------------------------
   # FALL-THROUGH: OK, let's try some general patterns
-  if (/^from (\S+)[^-A-Za-z0-9\.]/) { $helo = $1; }
-  if (/^helo=(\S+)[^-A-Za-z0-9\.]/) { $helo = $1; }
+  if (/\bhelo=([-A-Za-z0-9\.]+)[^-A-Za-z0-9\.]/) { $helo = $1; }
+  elsif (/^from (\S+)[^-A-Za-z0-9\.]/) { $helo = $1; }
   if (/\[(${IP_ADDRESS})\]/) { $ip = $1; }
   if (/ by (\S+)[^-A-Za-z0-9\;\.]/) { $by = $1; }
   if ($ip && $by) { goto enough; }

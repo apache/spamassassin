@@ -18,7 +18,7 @@ if (-e 'test_dir') {            # running from test directory, not ..
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("rcvd_parser");
-use Test; BEGIN { plan tests => 29 };
+use Test; BEGIN { plan tests => 30 };
 
 
 use strict;
@@ -325,6 +325,22 @@ Received: from xjwrvjq (unknown [222.54.106.152])
 } => q{
 
 [ ip=222.54.106.152 rdns= helo=xjwrvjq by=eclectic.kluge.net ident= envfrom= ]
+
+},
+q{
+
+Received: from europa21.inetsiteworld.net (europa21.inetsiteworld.net [217.110.206.5])
+        by mx1.redhat.com (8.12.10/8.12.10) with SMTP id i28CUmST012272
+        for <fedora-list@redhat.com>; Mon, 8 Mar 2004 07:30:48 -0500
+Received: from SpamControl_operated_by_INetSiteWorld (localhost [127.0.0.1])
+        by europa21.inetsiteworld.net (8.12.9/8.12.7-jokey) with ESMTP id i28CNuck014319
+        for <fedora-list@redhat.com>; Mon, 8 Mar 2004 13:23:57 +0100
+Received: from 212.202.243.194 ([212.202.243.194] helo=blackstar) by
+  SpamControl_operated_by_INetSiteWorld ;  8 Mar 04 12:23:56 -0000
+
+} => q{
+
+  [ ip=217.110.206.5 rdns=europa21.inetsiteworld.net helo=europa21.inetsiteworld.net by=mx1.redhat.com ident= envfrom= ] [ ip=127.0.0.1 rdns=localhost helo=SpamControl_operated_by_INetSiteWorld by=europa21.inetsiteworld.net ident= envfrom= ] [ ip=212.202.243.194 rdns= helo=blackstar by=SpamControl_operated_by_INetSiteWorld ident= envfrom= ]
 
 },
 q{
