@@ -269,10 +269,6 @@ header RCVD_IN_RELAYS_ORDB_ORG	rbleval:check_rbl('relay', 'relays.ordb.org.')
 describe RCVD_IN_RELAYS_ORDB_ORG Received via a relay in relays.ordb.org
 tflags RCVD_IN_RELAYS_ORDB_ORG  net
 
-header RCVD_IN_VISI		rbleval:check_rbl('relay', 'relays.visi.com.')
-describe RCVD_IN_VISI		Received via a relay in relays.visi.com
-tflags RCVD_IN_VISI             net
-
 # SBL is the Spamhaus Block List: http://www.spamhaus.org/sbl/ .
 header RCVD_IN_SBL		rbleval:check_rbl('relay', 'sbl.spamhaus.org.')
 describe RCVD_IN_SBL		Received via SBLed relay, see http://www.spamhaus.org/sbl/
