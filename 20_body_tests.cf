@@ -94,6 +94,15 @@ describe BIG_FONT		FONT Size +2 and up or 3 and up
 body WEB_BUGS			eval:html_test('web_bugs')
 describe WEB_BUGS		Image tag with an ID code to identify you
 
+body HTML_COMMENT_8BITS		eval:html_test('comment_8bit')
+describe HTML_COMMENT_8BITS	HTML comment has 3 consecutive 8-bit characters
+
+body HTML_COMMENT_SAVED_URL	eval:html_test('comment_saved_url')
+describe HTML_COMMENT_SAVED_URL	HTML message is a saved web page
+
+body HTML_COMMENT_UNIQUE_ID	eval:html_test('comment_unique_id')
+describe HTML_COMMENT_UNIQUE_ID	Contains a comment with nothing but unique ID
+
 body HTML_FONT_COLOR_NOHASH	eval:html_test('font_color_nohash')
 describe HTML_FONT_COLOR_NOHASH	HTML font color is missing hash (#) character
 
@@ -165,9 +174,6 @@ rawbody SPAM_FORM_ACTION	/action="\&\#\d+;\&\#\d+;\&\#\d+;\&\#\d+;/i
 describe SPAM_FORM_ACTION       Obfuscated action attribute in HTML form
 rawbody SPAM_FORM_INPUT		/<input name=.{0,5}submit.{0,99} Submit By E-Mail /i
 describe SPAM_FORM_INPUT	Form for verifying email address
-
-rawbody NUMERIC_COMMENT         /<!--\d{3,}-->/
-describe NUMERIC_COMMENT        Contains a comment with nothing but a number in it
 
 rawbody  OBFUSCATING_COMMENT    /[^\s>]<!--.{0,12}?-->[^\s<]/
 describe OBFUSCATING_COMMENT    HTML comments which obfuscate text
@@ -460,8 +466,6 @@ describe MIME_SUSPECT_NAME	MIME filename does not match content
 # match some gibberish produced by quoted-printable encoding of HTML, often
 # in the middle of a HTML "attribute=value" pair.
 
-full JUST_MAILED_PAGE           /\n\n\Q<!-- saved from url=(0022)http:\/\/internet.e-mail -->\E\n/
-describe JUST_MAILED_PAGE	Saved web page
 rawbody CLICK_HERE_LINK		/click here.{0,100}<\/a>/is
 describe CLICK_HERE_LINK	Tells you to click on a URL
 rawbody CLICK_HERE_CAPS_LINK	/CLICK HERE.{0,100}<\/[aA]>/s
