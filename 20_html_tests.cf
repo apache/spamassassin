@@ -91,6 +91,10 @@ describe HTML_COMMENT_8BITS	HTML comment has 3 consecutive 8-bit chars
 body HTML_COMMENT_SAVED_URL	eval:html_eval('comment_text', '=~ /<!-- saved from url=\(\d{4}\)/')
 describe HTML_COMMENT_SAVED_URL	HTML message is a saved web page
 
+# Comment is a spam sign when following <DIV>
+body HTML_CONVERTED		eval:html_test('div_converted')
+describe HTML_CONVERTED		HTML conversion tool used by spam
+
 body HTML_EMBEDS		eval:html_test('embeds')
 describe HTML_EMBEDS		HTML with embedded plugin object
 
