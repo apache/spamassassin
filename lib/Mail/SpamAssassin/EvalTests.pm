@@ -700,7 +700,7 @@ sub check_for_from_domain_in_received_headers {
       return 0;
   }
 
-  my $rcvd = $self->{relays_untrusted_str};
+  my $rcvd = $self->{relays_trusted_str}.$self->{relays_untrusted_str};
 
   if ($rcvd =~ / rdns=\S*\b${domain} [^\]]*by=\S*\b${domain} /) {
       $self->{from_domain_in_received}->{$domain} = 1;
@@ -993,17 +993,30 @@ sub check_from_in_auto_whitelist {
 sub _check_whitelist_rcvd {
   my ($self, $list, $addr) = @_;
 
-  # we can only match this if we have at least 1 untrusted header
-  return unless ($self->{num_relays_untrusted} > 0);
-  my $lastunt = $self->{relays_untrusted}->[0];
-  my $rdns = $lastunt->{lc_rdns};
+  # we can only match this if we have at least 1 trusted or untrusted header
+  return unless ($self->{num_relays_untrusted}+$self->{num_relays_trusted} > 0);
+
+  my @relays = ();
+  # try the untrusted one first
+  if ($self->{num_relays_untrusted} > 0) {
+    @relays = $self->{relays_untrusted}->[0];
+  }
+  # then try the trusted ones; the user could have whitelisted a trusted
+  # relay, totally permitted
+  if ($self->{num_relays_trusted} > 0) {
+    push (@relays, @{$self->{relays_trusted}});
+  }
 
   $addr = lc $addr;
   foreach my $white_addr (keys %{$list}) {
     my $regexp = $list->{$white_addr}{re};
     my $domain = $list->{$white_addr}{domain};
-    if ($addr =~ /${regexp}/i && $rdns =~ /(?:^|\.)\Q${domain}\E$/) {
-      return 1;
+
+    if ($addr =~ /${regexp}/i) {
+      foreach my $lastunt (@relays) {
+	my $rdns = $lastunt->{lc_rdns};
+	if ($rdns =~ /(?:^|\.)\Q${domain}\E$/) { return 1; }
+      }
     }
   }
 
@@ -1210,34 +1223,37 @@ sub check_rbl_backend {
   return 0 if $self->{conf}->{skip_rbl_checks};
   return 0 unless $self->is_dns_available();
   $self->load_resolver();
-
-  # How many IPs max you check in the received lines
-  my $checklast=$self->{conf}->{num_check_received};
   
   dbg ("checking RBL $rbl_server, set $set", "rbl", -1);
 
+  # ok, make a list of all the IPs in the untrusted set
   my @fullips = map { $_->{ip} } @{$self->{relays_untrusted}};
+
+  # now, make a list of all the IPs in the external set, for use in
+  # notfirsthop testing.  this will often be more IPs than found
+  # in @fullips.
+  my @fullexternal = map {
+	(!$_->{internal}) ? ( $_->{ip} ) : ()
+      } @{$self->{relays_untrusted}};
+  push (@fullexternal, @fullips);	# add untrusted set too
 
   # Make sure a header significantly improves results before adding here
   # X-Sender-Ip: could be worth using (very low occurance for me)
   # X-Sender: has a very low bang-for-buck for me
-  my @originating;
+  my @originating = ();
   for my $header ('X-Originating-IP', 'X-Apparently-From') {
     my $str = $self->get($header);
     next unless defined $str;
     push (@originating, ($str =~ m/($IP_ADDRESS)/g));
   }
 
-  return 0 unless (scalar @fullips + scalar @originating > 0);
-
   # Let's go ahead and trim away all Reserved ips (KLC)
   # also uniq the list and strip dups. (jm)
-  my @ips = ();
-  my %seen = ();
-  foreach my $ip (@fullips) {
-    next if (exists ($seen{$ip})); $seen{$ip} = 1;
-    if (!($ip =~ /${IP_IN_RESERVED_RANGE}/o)) { push(@ips, $ip); }
-  }
+  my @ips = $self->ip_list_uniq_and_strip_reserved (@fullips);
+
+  # if there's no untrusted IPs, it means we trust all the open-internet
+  # relays, so we can return right now.
+  return 0 unless (scalar @ips + scalar @originating > 0);
 
   dbg("Got the following IPs: ".join(", ", @ips), "rbl", -3);
 
@@ -1247,14 +1263,21 @@ sub check_rbl_backend {
     # note that if there's only 1 IP in the untrusted set, do NOT pop the
     # list, since it'd remove that one, and a legit user is supposed to
     # use their SMTP server (ie. have at least 1 more hop)!
-    if ($set =~ /-notfirsthop$/) {
+    if ($set =~ /-notfirsthop$/)
+    {
+      # use the external IP set, instead of the trusted set; the user may have
+      # specified some third-party relays as trusted.  Also, don't use
+      # @originating; those headers are added by a phase of relaying through
+      # a server like Hotmail, which is not going to be in dialup lists anyway.
+      @ips = $self->ip_list_uniq_and_strip_reserved (@fullexternal);
       if (scalar @ips > 1) { pop @ips; }
     }
     # If name is foo-firsttrusted, check only the Received header just
     # after it enters our trusted networks; that's the only one we can
     # trust the IP address from (since our relay added that header).
     # And if name is foo-untrusted, check any untrusted IP address.
-    elsif ($set =~ /-(first|un)trusted$/) {
+    elsif ($set =~ /-(first|un)trusted$/)
+    {
       push(@ips, @originating);
       if ($1 eq "first") {
 	@ips = ( $ips[0] );
@@ -1263,19 +1286,17 @@ sub check_rbl_backend {
 	shift @ips;
       }
     }
-    else {
-      # create a new list to avoid undef errors
-      my @newips = ();
-      my $i; for ($i = 0; $i < $checklast; $i++) {
-	my $ip = pop @ips; last unless defined($ip);
-	push (@newips, $ip);
-      }
+    else
+    {
       # add originating IPs as untrusted IPs
-      for my $ip (@originating) {
-	next if (exists ($seen{$ip})); $seen{$ip} = 1;
-	if (!($ip =~ /${IP_IN_RESERVED_RANGE}/o)) { push(@newips, $ip); }
+      @ips = reverse $self->ip_list_uniq_and_strip_reserved (@ips, @originating);
+
+      # How many IPs max you check in the received lines
+      my $checklast=$self->{conf}->{num_check_received};
+
+      if (scalar @ips > $checklast) {
+	splice (@ips, $checklast);	# remove all others
       }
-      @ips = @newips;
     }
   }
   dbg("But only inspecting the following IPs: ".join(", ", @ips), "rbl", -3);
@@ -1352,6 +1373,18 @@ sub check_rbl_from_host {
   for my $host (keys %hosts) {
     $self->do_rbl_lookup($rule, $set, 'A', $rbl_server, "$host.$rbl_server");
   }
+}
+
+sub ip_list_uniq_and_strip_reserved {
+  my ($self, @origips) = @_;
+  my @ips = ();
+  my %seen = ();
+  foreach my $ip (@origips) {
+    next unless $ip;
+    next if (exists ($seen{$ip})); $seen{$ip} = 1;
+    if (!($ip =~ /${IP_IN_RESERVED_RANGE}/o)) { push(@ips, $ip); }
+  }
+  @ips;
 }
 
 ###########################################################################

@@ -1,4 +1,4 @@
-# $Id: Received.pm,v 1.33 2003/09/30 05:00:54 jmason Exp $
+# $Id: Received.pm,v 1.34 2003/11/15 02:44:49 jmason Exp $
 
 # ---------------------------------------------------------------------------
 
@@ -14,6 +14,11 @@
 # header added by *our* MX, at the boundary of trust; we can trust the IP
 # address (and possibly rDNS) in this header, but that's about it; HELO name is
 # untrustworthy.  We just use this internally for now.
+#
+# Finally, there's also 'internal_networks'.  These are the networks that you
+# control; your MXes should be included.  This way, if you specify a wide range
+# of trusted hosts, a mail that is relayed from a dynamic IP address via a
+# 'trusted' host will not hit RCVD_IN_DYNABLOCK.
 
 # ---------------------------------------------------------------------------
 
@@ -92,20 +97,47 @@ sub parse_received_headers {
 
   # now figure out what relays are trusted...
   my $trusted = $self->{conf}->{trusted_networks};
+  my $internal = $self->{conf}->{internal_networks};
   my $relay;
   my $first_by;
   my $in_trusted = 1;
+  my $in_internal = 1;
+
+  if ($trusted->get_num_nets() > 0 && $internal->get_num_nets() > 0) {
+    # good; we can use both reliably.
+  }
+  elsif ($trusted->get_num_nets() <= 0 && $internal->get_num_nets() > 0) {
+    $trusted = $internal;	# use 'internal' for 'trusted'
+  }
+  elsif ($trusted->get_num_nets() > 0 && $internal->get_num_nets() <= 0) {
+    # use 'trusted' for 'internal'; compatibility with SpamAssassin 2.60
+    $internal = $trusted;
+  }
+
   my $did_user_specify_trust = ($trusted->get_num_nets() > 0);
+  my $did_user_specify_internal = ($internal->get_num_nets() > 0);
 
   while (defined ($relay = shift @{$self->{relays}}))
   {
+    # trusted_networks matches?
     if ($in_trusted && $did_user_specify_trust && !$trusted->contains_ip ($relay->{ip}))
     {
       $in_trusted = 0;		# we're in deep water now
     }
 
-# OK, infer the handover, if we don't have real info.  Here's the
-# algorithm used (taken from Dan's mail):
+    # internal_networks matches?
+    if ($did_user_specify_internal) {
+      if (!$internal->contains_ip ($relay->{ip})) {
+	$in_internal = 0;
+      }
+    } else {
+      # if the user didn't specify it, assume we immediately transition
+      # to the external network (the internet) once we leave this host.
+      $in_internal = 0;
+    }
+
+# OK, infer the trusted/untrusted handover, if we don't have real info.
+# Here's the algorithm used (taken from Dan's mail):
 # 
 # Talking with Scott Banister (this was his idea) and Andrew Flury at
 # IronPort, we came up with an alternate and easier algorithm that doesn't
@@ -218,8 +250,18 @@ sub parse_received_headers {
       if (!$inferred_as_trusted) { $in_trusted = 0; }
     }
 
-    dbg ("received-header: relay ".$relay->{ip}." trusted? ".
-			($in_trusted ? "yes" : "no"));
+    dbg ("received-header: relay ".$relay->{ip}.
+	" trusted? ".($in_trusted ? "yes" : "no").
+	" internal? ".($in_internal ? "yes" : "no"));
+
+    if ($in_internal) {
+      $relay->{internal} = 1;
+    } else {
+      $relay->{internal} = 0;
+    }
+
+    # be sure to mark up the as_string version for users too
+    $relay->{as_string} =~ s/ intl=\d / intl=$relay->{internal} /;
 
     if ($in_trusted) {
       push (@{$self->{relays_trusted}}, $relay);
@@ -564,6 +606,12 @@ sub parse_received_line {
     if (/^from (\S+) \((\S+) \[(${IP_ADDRESS})\]\)(?: \(authenticated bits=\d+\)|) by (\S+) \(/) { # sendmail
       $mta_looked_up_dns = 1;
       $helo = $1; $rdns = $2; $ip = $3; $by = $4; goto enough;
+    }
+
+    # Received: from imo-m01.mx.aol.com ([64.12.136.4]) by eagle.glenraven.com
+    # via smtpd (for [198.85.87.98]) with SMTP; Wed, 08 Oct 2003 16:25:37 -0400
+    if (/^from (\S+) \(\[(${IP_ADDRESS})\]\) by (\S+) via smtpd \(/) {
+      $helo = $1; $ip = $2; $by = $3; goto enough;
     }
 
     # Received: from cabbage.jmason.org [127.0.0.1]
@@ -971,7 +1019,7 @@ enough:
   # of entries must be preserved, so that regexps that assume that
   # e.g. "ip" comes before "helo" will still work.
   #
-  my $asstr = "[ ip=$ip rdns=$rdns helo=$helo by=$by ident=$ident ]";
+  my $asstr = "[ ip=$ip rdns=$rdns helo=$helo by=$by ident=$ident intl=0 ]";
   dbg ("received-header: parsed as $asstr");
   $relay->{as_string} = $asstr;
 

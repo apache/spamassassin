@@ -225,6 +225,7 @@ sub new {
   $self->{all_spam_to} = { };
 
   $self->{trusted_networks} = Mail::SpamAssassin::NetSet->new();
+  $self->{internal_networks} = Mail::SpamAssassin::NetSet->new();
 
   # this will hold the database connection params
   $self->{user_scores_dsn} = '';
@@ -469,13 +470,13 @@ Received headers. The first parameter is the address to whitelist, and the
 second is a string to match the relay's rDNS.
 
 This string is matched against the reverse DNS lookup used during the handover
-from the untrusted internet to your trusted network's mail exchangers.  It can
+from the internet to your internal network's mail exchangers.  It can
 either be the full hostname, or the domain component of that hostname.  In
 other words, if the host that connected to your MX had an IP address that
 mapped to 'sendinghost.spamassassin.org', you should specify
 C<sendinghost.spamassassin.org> or just C<spamassassin.org> here.
 
-Note that this requires that C<trusted_networks> be correct.  For simple cases,
+Note that this requires that C<internal_networks> be correct.  For simple cases,
 it will be, but for a complex network, or if you're running with DNS checks off
 or with C<-L>, you may get better results by setting that parameter.
 
@@ -1354,6 +1355,9 @@ This operates additively, so a C<trusted_networks> line after another one
 will result in all those networks becoming trusted.  To clear out the
 existing entries, use C<clear_trusted_networks>.
 
+If C<trusted_networks> is not set and C<internal_networks> is, the value
+of C<internal_networks> will be used for this parameter.
+
 If you're running with DNS checks enabled, SpamAssassin includes code to
 infer your trusted networks on the fly, so this may not be necessary.
 (Thanks to Scott Banister and Andrew Flury for the inspiration for this
@@ -1395,6 +1399,41 @@ Empty the list of trusted networks.
 
     if (/^clear_trusted_networks$/) {
       $self->{trusted_networks} = Mail::SpamAssassin::NetSet->new(); next;
+    }
+
+=item internal_networks ip.add.re.ss[/mask] ...   (default: none)
+
+What networks or hosts are 'internal' in your setup.   B<Internal> means that
+relay hosts on these networks are considered to be MXes for your domain(s), or
+internal relays.  This uses the same format as C<trusted_networks>, above.
+
+This value is used when checking 'dial-up' or dynamic IP address blocklists, in
+order to detect direct-to-MX spamming.
+
+If C<trusted_networks> is set and C<internal_networks> is not, the value
+of C<trusted_networks> will be used for this parameter.
+
+If neither C<trusted_networks> or C<internal_networks> is set, no addresses
+will be considered local; in other words, any relays past the machine where
+SpamAssassin is running will be considered external.
+
+=cut
+
+    if (/^internal_networks\s+(.+)$/) {
+      foreach my $net (split (' ', $1)) {
+	$self->{internal_networks}->add_cidr ($net);
+      }
+      next;
+    }
+
+=item clear_internal_networks
+
+Empty the list of internal networks.
+
+=cut
+
+    if (/^clear_internal_networks$/) {
+      $self->{internal_networks} = Mail::SpamAssassin::NetSet->new(); next;
     }
 
 =item use_razor2 ( 0 | 1 )		(default: 1)
