@@ -97,22 +97,22 @@ sub do_rbl_lookup {
   my ($self, $rule, $set, $type, $server, $host, $subtest) = @_;
 
   # only make a specific query once
-  if (!defined $self->{dnscache}->{$type}->{$host}->[BGSOCK]) {
+  if (!defined $self->{dnspending}->{$type}->{$host}->[BGSOCK]) {
     dbg("rbl: launching DNS $type query for $host in background", "rbl", -1);
     $self->{rbl_launch} = time;
-    $self->{dnscache}->{$type}->{$host}->[BGSOCK] =
+    $self->{dnspending}->{$type}->{$host}->[BGSOCK] =
 	$self->{res}->bgsend($host, $type);
   }
 
   # always add set
-  push @{$self->{dnscache}->{$type}->{$host}->[SETS]}, $set;
+  push @{$self->{dnspending}->{$type}->{$host}->[SETS]}, $set;
 
   # sometimes match or always match
   if (defined $subtest) {
     $self->{dnspost}->{$set}->{$subtest} = $rule;
   }
   else {
-    push @{$self->{dnscache}->{$type}->{$host}->[RULES]}, $rule;
+    push @{$self->{dnspending}->{$type}->{$host}->[RULES]}, $rule;
   }
 }
 
@@ -232,8 +232,8 @@ sub harvest_dnsbl_queries {
   return if !defined $self->{rbl_launch};
 
   my $timeout = $self->{conf}->{rbl_timeout} + $self->{rbl_launch};
-  my @waiting = (values %{ $self->{dnscache}->{A} },
-		 values %{ $self->{dnscache}->{TXT} });
+  my @waiting = (values %{ $self->{dnspending}->{A} },
+		 values %{ $self->{dnspending}->{TXT} });
   my @left;
   my $total;
 
@@ -296,6 +296,7 @@ sub rbl_finish {
   my ($self) = @_;
 
   delete $self->{rbl_launch};
+  delete $self->{dnspending};
   delete $self->{dnscache};
   # TODO: do not remove this since it can be retained!
   delete $self->{dnspost};
@@ -904,8 +905,13 @@ sub load_resolver {
     if (defined $self->{res}) {
       $self->{no_resolver} = 0;
       $self->{res}->retry(1);		# If it fails, it fails
+      $self->{res}->retrans(0);		# If it fails, it fails
       $self->{res}->dnsrch(0);		# ignore domain search-list
       $self->{res}->defnames(0);	# don't append stuff to end of query
+      $self->{res}->tcp_timeout(3);	# timeout of 3 seconds only
+      $self->{res}->udp_timeout(3);	# timeout of 3 seconds only
+      $self->{res}->persistent_tcp(1);
+      $self->{res}->persistent_udp(1);
     }
     1;
   };   #  or warn "eval failed: $@ $!\n";
@@ -974,26 +980,71 @@ sub lookup_ptr {
   dbg ("looking up PTR record for '$dom'");
   my $name = '';
 
-  eval {
-        my $query = $self->{res}->search($dom);
-        if ($query) {
-	  foreach my $rr ($query->answer) {
-	    if ($rr->type eq "PTR") {
-	      $name = $rr->ptrdname; last;
-	    }
+  if (exists $self->{dnscache}->{PTR}->{$dom}) {
+    $name = $self->{dnscache}->{PTR}->{$dom};
+
+  } else {
+    eval {
+      my $query = $self->{res}->search($dom);
+      if ($query) {
+	foreach my $rr ($query->answer) {
+	  if ($rr->type eq "PTR") {
+	    $name = $rr->ptrdname; last;
 	  }
-        }
+	}
+      }
 
-  };
-  if ($@) {
-    dbg ("PTR lookup failed horribly, perhaps bad resolv.conf setting?");
-    return undef;
+      $name = $self->{dnscache}->{PTR}->{$dom} = $name;
+    };
+
+    if ($@) {
+      dbg ("PTR lookup failed horribly, perhaps bad resolv.conf setting?");
+      return undef;
+    }
   }
-
   dbg ("PTR for '$dom': '$name'");
 
   # note: undef is never returned, unless DNS is unavailable.
   return $name;
+}
+
+sub lookup_a {
+  my ($self, $name) = @_;
+
+  return undef unless $self->load_resolver();
+  if ($self->{main}->{local_tests_only}) {
+    dbg ("local tests only, not looking up A records");
+    return undef;
+  }
+
+  dbg ("looking up A records for '$name'");
+  my @addrs = ();
+
+  if (exists $self->{dnscache}->{A}->{$name}) {
+    my $addrptr = $self->{dnscache}->{A}->{$name};
+    @addrs = @{$addrptr};
+
+  } else {
+    eval {
+      my $query = $self->{res}->search($name);
+      if ($query) {
+	foreach my $rr ($query->answer) {
+	  if ($rr->type eq "A") {
+	    push (@addrs, $rr->address);
+	  }
+	}
+      }
+      $self->{dnscache}->{A}->{$name} = [ @addrs ];
+    };
+
+    if ($@) {
+      dbg ("A lookup failed horribly, perhaps bad resolv.conf setting?");
+      return undef;
+    }
+  }
+
+  dbg ("A records for '$name': ".join (' ', @addrs));
+  return @addrs;
 }
 
 sub is_dns_available {

@@ -3109,13 +3109,17 @@ sub check_for_spf_helo_softfail {
 sub _check_spf {
   my ($self, $ishelo) = @_;
 
+  return unless $self->is_dns_available();
+
   if ($ishelo) {
+    # SPF HELO-checking variant.  This isn't really SPF at all ;)
     $self->{spf_helo_checked} = 1;
     $self->{spf_helo_pass} = 0;
     $self->{spf_helo_fail} = 0;
     $self->{spf_helo_softfail} = 0;
     $self->{spf_helo_failure_comment} = undef;
   } else {
+    # "real" SPF; checking the envelope-from (where we can)
     $self->{spf_checked} = 1;
     $self->{spf_pass} = 0;
     $self->{spf_fail} = 0;
@@ -3123,45 +3127,7 @@ sub _check_spf {
     $self->{spf_failure_comment} = undef;
   }
 
-  return unless $self->is_dns_available();
-
-  my $lasthop;
-  my $use_helo = 0;
-  if ($self->{num_relays_trusted} > 0)
-  {
-    # we can't run the SPF test if the message has passed through
-    # 1 or more trusted relays -- since they may have changed
-    # the MAIL FROM: address, unfortunately (through .forwards).
-    # We may be lucky, though, and the outermost trusted relay recorded
-    # the envelope-from in the Received header.  Most don't, though.
-    # 
-    # The SPF Sender Rewriting Scheme, http://spf.pobox.com/srs.html ,
-    # will hopefully address this; we can detect if the sender has
-    # been rewritten, and if so figure out what the sender *was*.
-    #
-    # Alternatively -- we may be able to use the HELO data recorded
-    # in the Received headers... although this is cheating on the SPF
-    # rules a little.
-
-    $lasthop = $self->{relays_untrusted}->[0];
-
-    if ($lasthop->{envfrom}) {
-      # excellent, we can use this
-      dbg ("SPF: found Envelope-From in last untrusted Received header");
-    } else {
-      # fall back to using HELO
-      dbg ("SPF: came via >0 trusted relays, using HELO instead of Envelope-From");
-      $use_helo = 1;
-    }
-
-  } else {
-    # OK, we can use this and trust current Received headers and EnvFrom
-    $lasthop = $self->{relays_untrusted}->[0];
-  }
-  
-  # TODO: use HELOs to verify SPF_FAIL results; many .forwards break
-  # in this situation
-
+  my $lasthop = $self->{relays_untrusted}->[0];
   if (!defined $lasthop) {
     dbg ("SPF: message was delivered entirely via trusted relays, not required");
     return;
@@ -3178,32 +3144,36 @@ sub _check_spf {
     my @domparts = split (/\./, $helo);
     my $numparts = scalar @domparts;
 
+    # for the HELO variant, drop the first bit of the HELO (ie. turn
+    # "host.dom.ain" into "dom.ain".)
     if ($numparts > 0) {
       my $partsreqd = 2;
       if (Mail::SpamAssassin::Util::is_in_subdelegated_cctld ($helo)) {
         $partsreqd = 3;
       }
-
       if ($numparts >= $partsreqd) { $helo =~ s/^[^\.]+\.//; }
     }
 
   } else {
-    if ($use_helo) { return; }	# we can't use the env-from reliably
-
     dbg ("SPF: checking EnvelopeFrom");
     $sender = $lasthop->{envfrom};
-    if (!$sender) {
+
+    if ($sender) {
+      dbg ("SPF: found Envelope-From in last untrusted Received header");
+
+    } else {
       # we can (apparently) use whatever the current Envelope-From was,
       # from the Return-Path, X-Envelope-From, or whatever header.
       # it's better to get it from Received though, as that is updated
       # hop-by-hop.
       $sender = $self->get ("EnvelopeFrom");
     }
-  }
 
-  # if $sender is undef or "", that's OK; Mail::SPF::Query will use
-  # the HELO domain instead, which we can get from the Received headers.
-  # it's bending the SPF rules though...
+    if (!$sender) {
+      dbg ("SPF: cannot get Envelope-From, cannot use SPF");
+      return;
+    }
+  }
 
   if (!$ip || !$helo) {
     dbg ("SPF: cannot get IP or HELO, cannot use SPF");
@@ -3214,7 +3184,8 @@ sub _check_spf {
   eval {
     require Mail::SPF::Query;
     $query = Mail::SPF::Query->new (ip => $ip, sender => $sender, helo => $helo,
-		debug => $Mail::SpamAssassin::DEBUG->{rbl}
+		debug => $Mail::SpamAssassin::DEBUG->{rbl},
+		trusted => 1
 	      );
   };
 
@@ -3223,7 +3194,27 @@ sub _check_spf {
     return;
   }
 
-  my ($result, $comment) = $query->result();
+  my ($result, $comment);
+  my $timeout = 5;
+
+  eval {
+    local $SIG{ALRM} = sub { die "__alarm__\n" };
+    alarm($timeout);
+    ($result, $comment) = $query->result();
+    alarm(0);
+  };
+
+  alarm 0;
+
+  if ($@) {
+    if ($@ =~ /^__alarm__$/) {
+      dbg ("SPF: lookup timed out after $timeout secs.");
+    } else {
+      warn ("SPF: lookup failed: $@\n");
+    }
+    return 0;
+  }
+
   $result ||= 'softfail';
   $comment ||= '';
   $comment =~ s/\s+/ /gs;	# no newlines please

@@ -2135,8 +2135,8 @@ sub get_envelope_from {
   # cannot trust any Envelope-From headers, since they're likely to be
   # incorrect fetchmail guesses.
 
-  if ($self->get ("X-Sender", 1)) {
-    my $rcvd = $self->get ("Received", 1);
+  if ($self->get ("X-Sender") =~ /\@/) {
+    my $rcvd = join (' ', $self->get ("Received"));
     if ($rcvd =~ /\(fetchmail/) {
       dbg ("X-Sender and fetchmail signatures found, cannot trust envelope-from");
       return undef;
@@ -2144,13 +2144,13 @@ sub get_envelope_from {
   }
 
   # procmailrc notes this, amavisd are adding it, we recommend it
-  if ($envf = $self->get ("X-Envelope-From", 1)) { goto ok; }
+  if ($envf = $self->get ("X-Envelope-From")) { goto ok; }
 
   # qmail, new-inject(1)
-  if ($envf = $self->get ("Envelope-Sender", 1)) { goto ok; }
+  if ($envf = $self->get ("Envelope-Sender")) { goto ok; }
 
   # Postfix, sendmail, also mentioned in RFC821
-  if ($envf = $self->get ("Return-Path", 1)) { goto ok; }
+  if ($envf = $self->get ("Return-Path")) { goto ok; }
 
   # give up.
   return undef;

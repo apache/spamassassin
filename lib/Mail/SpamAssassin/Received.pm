@@ -298,21 +298,18 @@ sub lookup_all_ips {
     return ();
   }
   
-  my ($name,$aliases,$addrtype,$length,@addrs) = gethostbyname ($hostname);
-  my @moreaddrs;
+  my @addrs = $self->{dns_pms}->lookup_a ($hostname);
 
   # bug 2324: this fails if the user has an /etc/hosts entry for that
   # hostname; force a DNS lookup by appending a dot, but only if there's
   # a domain in the hostname (ie. it really is likely to be in external DNS).
   # use both sets of addrs, as the /etc/hosts data is usable anyway for
   # internal relaying.
-  if ($hostname =~ /\./) {
-    ($name,$aliases,$addrtype,$length,@moreaddrs) = gethostbyname ($hostname.".");
-  }
+  # NOW OFF: we now force DNS use through Net::DNS
 
   my @ips = ();
   my %seenaddr = ();
-  foreach my $addr (@addrs, @moreaddrs) {
+  foreach my $addr (@addrs) {
     next if ($seenaddr{$addr});
     $seenaddr{$addr} = 1;
     my ($a,$b,$c,$d) = unpack('C4', $addr);
