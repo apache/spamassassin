@@ -381,6 +381,30 @@ sub rewrite_as_non_spam {
   $self->{msg}->get_mail_object;
 }
 
+###########################################################################
+
+=item $messagestring = $status->get_full_message_as_text ()
+
+Returns the mail message as a string, including headers and raw body text.
+
+If the message has been rewritten using C<rewrite_mail()>, these changes
+will be reflected in the string.
+
+Note: this is simply a helper method which calls methods on the mail message
+object.  It is provided because Mail::Audit uses an unusual (ie. not quite
+intuitive) interface to do this, and it has been a common stumbling block for
+authors of scripts which use SpamAssassin.
+
+=cut
+
+sub get_full_message_as_text {
+  my ($self) = @_;
+  return join ("", $self->{msg}->get_all_headers(),
+			@{$self->{msg}->get_body()});
+}
+
+###########################################################################
+
 =item $status->handle_auto_report ()
 
 If this mail message has a high enough hit score, report it to spam-tracking
@@ -407,6 +431,8 @@ sub handle_auto_report {
     $self->{main}->report_as_spam ($self->{msg}->get_mail_object, $opts);
   }
 }
+
+###########################################################################
 
 =item $status->finish ()
 
