@@ -172,9 +172,6 @@ header NO_MX_FOR_FROM		eval:check_for_from_mx()
 describe NO_MX_FOR_FROM		No MX records for the From: domain
 tflags NO_MX_FOR_FROM           net
 
-header KNOWN_BAD_DIALUPS	eval:check_for_bad_dialup_ips()
-describe KNOWN_BAD_DIALUPS	Received via known spam-harbouring dialups
-
 header FORGED_AOL_RCVD	        eval:check_for_fake_aol_relay_in_rcvd()
 describe FORGED_AOL_RCVD	Received forged, contains fake AOL relays
 
@@ -396,9 +393,6 @@ describe X_PRIORITY_HIGH	Sent with 'X-Priority' set to high
 
 header X_MSMAIL_PRIORITY_HIGH	X-Msmail-Priority =~ /^High/
 describe X_MSMAIL_PRIORITY_HIGH	Sent with 'X-Msmail-Priority' set to high
-
-header MAY_BE_FORGED            Received =~ /\(may be forged\)/i
-describe MAY_BE_FORGED          'Received:' has 'may be forged' warning
 
 header SHORT_RECEIVED_LINE	Received =~ /\S{120,}/s
 describe SHORT_RECEIVED_LINE	'Received:' contains huge hostname
