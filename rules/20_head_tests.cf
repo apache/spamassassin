@@ -1,5 +1,5 @@
 # SpamAssassin rules file: tests.
-# $Id: 20_head_tests.cf,v 1.176 2002/09/04 18:52:50 jmason Exp $
+# $Id: 20_head_tests.cf,v 1.177 2002/09/09 18:53:05 jmason Exp $
 ###########################################################################
 
 require_version 2.50
@@ -331,8 +331,9 @@ tflags RCVD_IN_DUL_FH           net
 # false-positive-to-spam ratio!  headers: Content-Transfer-Encoding,
 # Content-Type, X-Mailer, X-Sender.  v important to test this against a good
 # corpus of mailing list hosts like Yahoo, or webmail systems.
+# Also, securityfocus lists hit this if "To" is included.
 #
-header FORGED_RCVD_FOUND	ALL =~ /\n(?:To|Importance|Subject|X-MSMail-Priority):.*\nReceived: /s
+header FORGED_RCVD_FOUND	ALL =~ /\n(?:Importance|Subject|X-MSMail-Priority):.*\nReceived: /s
 describe FORGED_RCVD_FOUND	Possibly-forged 'Received:' header found
 
 header FORGED_RCVD_TRAIL	eval:check_for_forged_received_trail()
