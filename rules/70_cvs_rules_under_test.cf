@@ -73,3 +73,7 @@ body     T_HTML_EMPTY_TITLE       eval:html_test('empty_title')
 describe T_HTML_EMPTY_TITLE       HTML title is empty
 score    T_HTML_EMPTY_TITLE       2.5
 
+# Sep 23 2002 jm: another spamhaus rule
+header T_QVES_COM               Received: =~ /by email.qves.com with Microsoft/
+describe T_QVES_COM             Sent by a known spamhaus (qves)
+score T_QVES_COM                3.0
