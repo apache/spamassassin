@@ -142,10 +142,30 @@ an additional line will be included noting this, like so:
 
 =item B<-x>
 
-Don't use the 'safe fallback' error-recovery method, which passes through the
+Disables the 'safe fallback' error-recovery method, which passes through the
 unaltered message if an error occurs.  Instead, exit with an error code, and
-let the MTA queue up the mails for a retry later.  The exit codes used are
-as follows:
+let the MTA queue up the mails for a retry later.  See also L<"EXIT CODES">.
+
+=item B<-y>
+
+Just output the names of the tests hit to stdout, on one line, separated
+by commas.
+
+=back
+
+=head1 EXIT CODES
+
+By default, spamc will use the 'safe fallback' error recovery method.  That 
+means, it will always exit with an exit code if C<0>, even if an error was 
+encountered.  If any error occurrs, it will simply pass through the unaltered 
+message.
+
+The B<-c> and B<-E> options modify this; instead, spamc will use an exit code
+of C<1> if the message is determined to be spam.
+
+If the C<-x> option is specified, 'safe fallback' will be disabled, and certain
+error conditions related to communication between spamc and spamd will result 
+in an error code.  The exit codes used are as follows:
 
     EX_USAGE        64  command line usage error
     EX_DATAERR      65  data format error       
@@ -162,26 +182,6 @@ as follows:
     EX_PROTOCOL     76  remote error in protocol
     EX_NOPERM       77  permission denied
     EX_CONFIG       78  configuration error
-
-=item B<-y>
-
-Just output the names of the tests hit to stdout, on one line, separated
-by commas.
-
-=back
-
-=head1 EXIT CODES
-
-By default, spamc will exit with an exit code of C<0> unless there is an
-unrecoverable error encountered during processing.
-
-The B<-c> and B<-E> options modify this; instead, spamc will use an exit code
-of C<1> if the message is determined to be spam.
-
-If the C<-x> option is specified, 'safe fallback' will be disabled, and certain
-error conditions related to communication between spamc and spamd will not
-result in an error code.  Instead, the message will be passed through
-unmodified and an exit code of C<0> will be returned.
 
 =head1 SEE ALSO
 
