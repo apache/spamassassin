@@ -317,6 +317,46 @@ describe T_RE_UC_3WORDS	Has Subject in form "Re: UPPERCASE, word word word"
 body T_HTML_FONT_TINY		eval:html_test('t_tiny_font')
 describe T_HTML_FONT_TINY	HTML has a tiny font
 
+# HTML bad tag percentage
+body T_HTML_BADTAGS_00_10	eval:html_range('t_bad_tag_ratio','0.00','0.10')
+body T_HTML_BADTAGS_10_20	eval:html_range('t_bad_tag_ratio','0.10','0.20')
+body T_HTML_BADTAGS_20_30	eval:html_range('t_bad_tag_ratio','0.20','0.30')
+body T_HTML_BADTAGS_30_40	eval:html_range('t_bad_tag_ratio','0.30','0.40')
+body T_HTML_BADTAGS_40_50	eval:html_range('t_bad_tag_ratio','0.40','0.50')
+body T_HTML_BADTAGS_50_60	eval:html_range('t_bad_tag_ratio','0.50','0.60')
+body T_HTML_BADTAGS_60_70	eval:html_range('t_bad_tag_ratio','0.60','0.70')
+body T_HTML_BADTAGS_70_80	eval:html_range('t_bad_tag_ratio','0.70','0.80')
+body T_HTML_BADTAGS_80_90	eval:html_range('t_bad_tag_ratio','0.80','0.90')
+body T_HTML_BADTAGS_90_100	eval:html_range('t_bad_tag_ratio','0.90','1.00')
+
+# HTML bad tag count
+body T_HTML_BADTAGS_GT_0	eval:html_range('t_bad_tag_count','0','4')
+body T_HTML_BADTAGS_GT_4	eval:html_range('t_bad_tag_count','4','8')
+body T_HTML_BADTAGS_GT_8	eval:html_range('t_bad_tag_count','8','16')
+body T_HTML_BADTAGS_GT_16	eval:html_range('t_bad_tag_count','16','32')
+body T_HTML_BADTAGS_GT_32	eval:html_range('t_bad_tag_count','32','64')
+body T_HTML_BADTAGS_GT_64	eval:html_range('t_bad_tag_count','64','inf')
+
+# HTML bad tag percentage for unique tags
+body T_HTML_BADTAGS_U_00_10	eval:html_range('t_bad_tag_unique_ratio','0.00','0.10')
+body T_HTML_BADTAGS_U_10_20	eval:html_range('t_bad_tag_unique_ratio','0.10','0.20')
+body T_HTML_BADTAGS_U_20_30	eval:html_range('t_bad_tag_unique_ratio','0.20','0.30')
+body T_HTML_BADTAGS_U_30_40	eval:html_range('t_bad_tag_unique_ratio','0.30','0.40')
+body T_HTML_BADTAGS_U_40_50	eval:html_range('t_bad_tag_unique_ratio','0.40','0.50')
+body T_HTML_BADTAGS_U_50_60	eval:html_range('t_bad_tag_unique_ratio','0.50','0.60')
+body T_HTML_BADTAGS_U_60_70	eval:html_range('t_bad_tag_unique_ratio','0.60','0.70')
+body T_HTML_BADTAGS_U_70_80	eval:html_range('t_bad_tag_unique_ratio','0.70','0.80')
+body T_HTML_BADTAGS_U_80_90	eval:html_range('t_bad_tag_unique_ratio','0.80','0.90')
+body T_HTML_BADTAGS_U_90_100	eval:html_range('t_bad_tag_unique_ratio','0.90','1.00')
+
+# HTML bad tag count for unique tags
+body T_HTML_BADTAGS_U_GT_0	eval:html_range('t_bad_tag_unique_count','0','4')
+body T_HTML_BADTAGS_U_GT_4	eval:html_range('t_bad_tag_unique_count','4','8')
+body T_HTML_BADTAGS_U_GT_8	eval:html_range('t_bad_tag_unique_count','8','16')
+body T_HTML_BADTAGS_U_GT_16	eval:html_range('t_bad_tag_unique_count','16','32')
+body T_HTML_BADTAGS_U_GT_32	eval:html_range('t_bad_tag_unique_count','32','64')
+body T_HTML_BADTAGS_U_GT_64	eval:html_range('t_bad_tag_unique_count','64','inf')
+
 # more portable replacement for RCVD_NUMERIC_HELO that doesn't rely on
 # Received headers using "helo=" prefix
 header T_RCVD_NUMERIC_HELO	X-Spam-Relays-Untrusted =~ / helo=\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3} /
