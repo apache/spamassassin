@@ -33,6 +33,7 @@ Requires: perl >= 5.004
 Buildroot: %{_tmppath}/%{name}-root
 Prefix: %{_prefix}
 Prereq: /sbin/chkconfig
+Requires: perl >= 5.004 perl(Pod::Usage) perl(HTML::Parser)
 Distribution: SpamAssassin
 
 %define __find_provides /usr/lib/rpm/find-provides.perl
@@ -103,15 +104,15 @@ aplikacji do czytania poczty.
 %setup -q -n %{pdir}-%{pnam}-%{real_version}
 
 %build
-%{__perl} Makefile.PL PREFIX=%{prefix} SYSCONFDIR=%{_sysconfdir}
+%{__perl} Makefile.PL PREFIX=%{_prefix} SYSCONFDIR=%{_sysconfdir}
 %{__make} 
 # make test
 
 %install
 [ "$RPM_BUILD_ROOT" != "/" ] && rm -rf $RPM_BUILD_ROOT
 %makeinstall PREFIX=%buildroot/%{_prefix} \
-	INSTALLMAN1DIR=%buildroot/%{_prefix}/share/man/man1 \
-	INSTALLMAN3DIR=%buildroot/%{_prefix}/share/man/man3 \
+        INSTALLMAN1DIR=%buildroot/%{_mandir}/man1 \
+        INSTALLMAN3DIR=%buildroot/%{_mandir}/man3 \
 	LOCAL_RULES_DIR=%buildroot/%{_sysconfdir}/mail/spamassassin
 install -d %buildroot/%{initdir}
 install -m 0755 spamd/redhat-rc-script.sh %buildroot/%{initdir}/spamassassin
@@ -120,21 +121,11 @@ mkdir -p %{buildroot}/etc/mail/spamassassin
 
 [ -x /usr/lib/rpm/brp-compress ] && /usr/lib/rpm/brp-compress
 
-find $RPM_BUILD_ROOT/usr -type f -print |
-        sed "s@^$RPM_BUILD_ROOT@@g" |
-        grep -v perllocal.pod |
-        grep -v "\.packlist" > %{name}-%{version}-filelist
-if [ "$(cat %{name}-%{version}-filelist)X" = "X" ] ; then
-    echo "ERROR: EMPTY FILE LIST"
-    exit -1
-fi
-
 %files 
 %defattr(-,root,root)
-%doc README Changes INSTALL sample-nonspam.txt sample-spam.txt spamd/README.spamd doc
+%doc README Changes sample-nonspam.txt sample-spam.txt spamd/README.spamd doc INSTALL
 %attr(755,root,root) %{_bindir}/*
-%attr(755,root,root) %{_sysconfdir}/rc.d/init.d/spamassassin
-%config(noreplace) %{initdir}/spamassassin
+%config(noreplace) %attr(755,root,root) %{initdir}/spamassassin
 %config(noreplace) %{_sysconfdir}/mail/spamassassin
 %config(noreplace) %{_datadir}/spamassassin
 %{_mandir}/man1/*
@@ -170,6 +161,13 @@ if [ $1 = 0 ]; then
 fi
 
 %changelog
+
+* Tue Sep 03 2002 Theo Van Dinter <felicity@kluge.net>
+- added INSTALL to documentation files
+- install man pages via _manpage macro to make things consistent
+- added perl requires statement
+- cleaned out some cruft
+- fixed "file listed twice" bug
 
 * Wed Aug 28 2002 Justin Mason <jm-spec@jmason.org>
 - merged code from PLD rpm, split into spamassassin, perl-Mail-SpamAssassin,
