@@ -63,6 +63,9 @@ describe SUBJECT_DRUG_GAP_X	Subject contains a gappy version of 'xanax'
 ###########################################################################
 # body rules
 
+body DRUG_DOSAGE		m{\$? *(?:\d|\.)+ *\$? *(?:\\|/|per) *d.?o.?s.?e}i
+describe DRUG_DOSAGE		Talks about price per dose
+
 # jm: keep this case-sensitive, otherwise it FP's
 body DRUG_ED_CAPS		/(?:\bCIALIS|LEVITRA|VIAGRA)/
 describe DRUG_ED_CAPS		Mentions an E.D. drug

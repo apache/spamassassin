@@ -200,14 +200,6 @@ body T_DOMAIN_RATIO_30	eval:check_domain_ratio('0.030')
 body T_DOMAIN_RATIO_31	eval:check_domain_ratio('0.031')
 body T_DOMAIN_RATIO_32	eval:check_domain_ratio('0.032')
 
-# Bug 3374
-body T_DRUG_DOLLAR_DOSE    m{\$?\s*(?:\d|\.)+\s*\$?\s*(?:\\|/|per)\s*d.?o.?s.?e}i
-describe T_DRUG_DOLLAR_DOSE		Message talks about price per dose
-lang nl describe T_DRUG_DOLLAR_DOSE	Heeft het over een prijs per dosis
-
-# Bug 3374 variant
-body T_DRUG_DOLLAR_DOSE_2    m{\$? *(?:\d|\.)+ *\$? *(?:\\|/|per) *d.?o.?s.?e}i
-
 # Bug 3349, rule written by yackley
 header T_FAKE_MS_XMIME X-MimeOLE =~ /mircosoft/i
 
