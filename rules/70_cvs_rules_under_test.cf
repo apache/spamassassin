@@ -732,8 +732,8 @@ score     T_HTML_LINK_UNSUB      0.01
 #
 # T_TOO_MANY_UA uses "regexp and operator": all of the tests matching
 # regexp /USER_AGENT.*/ will be strung together with "+" between them.
-meta T_TOO_MANY_UA	( (USER_AGENT.+ +) > 1) 
-meta T_UA_AND_XM	( USER_AGENT && __HAS_X_MAILER )
+#meta T_TOO_MANY_UA	( (USER_AGENT.+ +) > 1) 
+#meta T_UA_AND_XM	( USER_AGENT && __HAS_X_MAILER )
 #
 # quinlan: these might work better, but I have no hits (they should be
 # syntactically correct, though)
@@ -854,3 +854,9 @@ header T_X_RMD_TEXT		exists:X-RMD-Text
 # might as well test it while we're here ;)
 header T_X_GCMULTI		exists:X-GCMulti
 
+
+# potential replacement for USER_AGENT
+# it will get less hits, but should avoid hitting when USER_AGENT rules are also hit.
+header __USER_AGENT               exists:User-Agent
+meta T_USER_AGENT		( __USER_AGENT && (USER_AGENT.+ +) < 1 )
+tflags T_USER_AGENT               nice
