@@ -778,9 +778,6 @@ header T_IDENT_NOBODY		Received =~ /ident[:=]nobody\b/i
 describe T_IDENT_NOBODY		Message was sent by nobody
 score T_IDENT_NOBODY		1.0
 
-# %%% EXCUSE_10
-body T_EXCUSE_10			/if you (?:(?:want|wish|care|prefer) not to |do ?n[o']t (?:want|wish|care) to )(?:be contacted again|receive (?:any ?)?(?:more|future|further)\b.{1,10}\b(?:e?-?mail|message|offer|solicitation)s?|be included)/i
-
 body T_EXCUSE_25		/you have been included (?:mistakenly|by mistake)/i
 body T_LEAVE_ADDR		/leave your address/i
 
