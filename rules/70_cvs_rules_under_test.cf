@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.484 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.485 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -81,7 +81,6 @@ rawbody T_MIME_QP			eval:check_for_mime('t_mime_qp_count')
 
 # 2003-03-06: quinlan
 rawbody T_MIME_BASE64_ILLEGAL		eval:check_for_mime('t_mime_base64_illegal')
-rawbody T_MIME_BASE64_WITHOUT_NAME	eval:check_for_mime('t_mime_base64_without_name')
 rawbody T_MIME_QP_INLINE_NO_CHARSET	eval:check_for_mime('t_mime_qp_inline_no_charset')
 
 # quinlan: 2003-03-15

@@ -150,6 +150,9 @@ describe MIME_BASE64_BLANKS	Extra blank lines in base64 encoding
 rawbody MIME_BASE64_LATIN	eval:check_for_mime('mime_base64_latin')
 describe MIME_BASE64_LATIN	Latin alphabet text disguised using base64 encoding
 
+rawbody MIME_BASE64_NO_NAME	eval:check_for_mime('mime_base64_no_name')
+describe MIME_BASE64_NO_NAME	base64 attachment does not have a file name
+
 rawbody MIME_BASE64_TEXT	eval:check_for_mime('mime_base64_encoded_text')
 describe MIME_BASE64_TEXT	Message text disguised using base64 encoding
 

@@ -2168,7 +2168,7 @@ sub _check_mime_header {
   }
 
   if ($cte =~ /base64/ && !$name) {
-    $self->{t_mime_base64_without_name} = 1;
+    $self->{mime_base64_no_name} = 1;
   }
 
   if (!$name &&
@@ -2258,6 +2258,7 @@ sub _check_attachments {
   $self->{mime_base64_blanks} = 0;
   $self->{mime_base64_encoded_text} = 0;
   $self->{mime_base64_latin} = 0;
+  $self->{mime_base64_no_name} = 0;
   $self->{mime_body_html_count} = 0;
   $self->{mime_body_text_count} = 0;
   $self->{mime_faraway_charset} = 0;
@@ -2270,7 +2271,6 @@ sub _check_attachments {
   $self->{mime_suspect_name} = 0;
   $self->{t_mime_base64_count} = 0;
   $self->{t_mime_base64_illegal} = 0;
-  $self->{t_mime_base64_without_name} = 0;
   $self->{t_mime_qp_count} = 0;
 
   # message headers
