@@ -153,7 +153,13 @@ int full_read(int fd, char fdflag, void *vbuf, int min, int len)
 	thistime = fd_timeout_read(fd, fdflag, buf + total, len - total);
 
 	if (thistime < 0) {
-	    return -1;
+	    if (total >= min) {
+		/* error, but we read *some*.  return what we've read
+		 * so far and next read (if there is one) will return -1. */
+		return total;
+	    } else {
+		return -1;
+	    }
 	}
 	else if (thistime == 0) {
 	    /* EOF, but we didn't read the minimum.  return what we've read
@@ -175,7 +181,13 @@ int full_read_ssl(SSL * ssl, unsigned char *buf, int min, int len)
 	thistime = ssl_timeout_read(ssl, buf + total, len - total);
 
 	if (thistime < 0) {
-	    return -1;
+	    if (total >= min) {
+		/* error, but we read *some*.  return what we've read
+		 * so far and next read (if there is one) will return -1. */
+		return total;
+	    } else {
+		return -1;
+	    }
 	}
 	else if (thistime == 0) {
 	    /* EOF, but we didn't read the minimum.  return what we've read
