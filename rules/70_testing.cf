@@ -546,9 +546,12 @@ body T_HTML_TEXT_CONTRAST_30	eval:html_test('text_contrast_30')
 body T_HTML_TEXT_CONTRAST_32	eval:html_test('text_contrast_32')
 
 # bug 2164
+# You must be joking, can you say "unix pipes" and "regular expressions"?
 body T_PIPE_OBFU           /[a-z]\|[a-z]/i
 describe T_PIPE_OBFU       Words dis|guised with a pipe sym|bol
 
+# I was diff'ing the tree when I saw this rule, I predict it will
+# at least work better than T_PIPE_OBFU.  :-)
 body T_APOSTROPHE_OBFU     /[a-z][a-z][a-z]'[a-z][a-z][a-z]/i
 describe T_APOSTROPHE_OBFU Words dis'guised with an apos'trophe
 
