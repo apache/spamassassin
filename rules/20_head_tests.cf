@@ -191,6 +191,9 @@ describe MSGID_FROM_MTA_ID	Message-Id for external message added locally
 header MSGID_FROM_MTA_HOTMAIL	Message-Id =~ /<MC\d{1,2}-F{1,2}\w{21,22}\@\S*hotmail\.com>/
 describe MSGID_FROM_MTA_HOTMAIL	Message-Id was added by a hotmail.com relay
 
+header MSGID_LONG		MESSAGEID =~ /<.{160,}>|<.{140,}\@|\@.{55,}>/m
+describe MSGID_LONG		Message-ID is unusually long
+
 header MSGID_SHORT		MESSAGEID =~ /^.{1,15}$|<.{0,4}\@/m
 describe MSGID_SHORT		Message-ID is unusually short
 

@@ -87,6 +87,9 @@ describe DEEP_DISC_MEDS		Deep discount medications
 body ONLINE_PHARMACY		/\bonline pharmacy|\b(?:drugs|medications) online/i
 describe ONLINE_PHARMACY	Online Pharmacy
 
+body NO_PRESCRIPTION		/no.{1,10}P(?:er|re)scription.{1,10}(?:needed|require|necessary)/i
+describe NO_PRESCRIPTION	No prescription needed
+
 # too easy
 body VIA_GAP_GRA                /\bvia.gra\b/i
 describe VIA_GAP_GRA            Attempts to disguise the word 'viagra'
