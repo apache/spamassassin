@@ -267,7 +267,11 @@ sub tie_db_readonly {
   }
 
   my $path = $main->sed_path ($main->{conf}->{bayes_path});
-  if (!-f $path.'_toks') {
+  # try several common DB file endings
+  if (!-f $path.'_toks'
+	&& !-f $path.'_toks.dir'
+	&& !-f $path.'_toks.db')
+  {
     dbg ("bayes: no dbs present, cannot scan: ${path}_toks");
     return 0;
   }
