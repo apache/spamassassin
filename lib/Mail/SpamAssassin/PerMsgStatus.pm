@@ -177,23 +177,23 @@ sub rewrite_as_spam {
   my $mail = $self->{audit};
 
   # First, rewrite the subject line.
-  $_ = $mail->get ("Subject"); $_ ||= '';
+  $_ = $self->get_header ("Subject"); $_ ||= '';
   s/^/\*\*\*\*\*SPAM\*\*\*\*\* /g;
-  $mail->{obj}->head->replace ("Subject", $_);
+  $self->replace_header ("Subject", $_);
 
   # add some headers...
   $_ = sprintf ("Yes, hits=%d required=%d", $self->{hits},
         $self->{required_hits});
-  $mail->put_header ("X-Spam-Status", $_);
-  $mail->put_header ("X-Spam-Flag", 'YES');
+  $self->put_header ("X-Spam-Status", $_);
+  $self->put_header ("X-Spam-Flag", 'YES');
 
   # defang HTML mail; change it to text-only.
-  $mail->{obj}->head->replace ("Content-Type", "text/plain");
-  $mail->{obj}->head->delete ("Content-type");  # just in case
+  $self->replace_header ("Content-Type", "text/plain");
+  $self->delete_header ("Content-type"); 	# just in case
 
-  my $lines = $mail->{obj}->body();
+  my $lines = $self->get_body();
   unshift (@{$lines}, split (/$/, $self->{report}));
-  $mail->{obj}->body ($lines);
+  $self->replace_body ($lines);
   $mail;
 }
 
@@ -203,7 +203,7 @@ sub rewrite_as_non_spam {
 
   $_ = sprintf ("No, hits=%d required=%d", $self->{hits},
         $self->{required_hits});
-  $mail->put_header ("X-Spam-Status", $_);
+  $self->put_header ("X-Spam-Status", $_);
   $mail;
 }
 
@@ -216,13 +216,11 @@ sub get_body_text {
 
   if (defined $self->{body_text}) { return $self->{body_text}; }
 
-  my $head = $self->{audit}->{obj}->head();
-  my $body = $self->{audit}->{obj}->body();
-
-  my $ctype = $head->get ('Content-Type');
-  $ctype ||=  $head->get ('Content-type');
+  my $ctype = $self->get_header ('Content-Type');
+  $ctype ||=  $self->get_header ('Content-type');
   $ctype ||=  '';
 
+  my $body = $self->get_body();
   if ($ctype !~ /boundary="(.*)"/) {
     $self->{body_text} = $body;
     return $self->{body_text};
@@ -257,16 +255,53 @@ sub get_body_text {
 ###########################################################################
 
 sub get_header {
+  my ($self, $hdr) = @_;
+  my $mail = $self->{audit};
+  $mail->get ($hdr);
+}
+
+sub put_header {
+  my ($self, $hdr, $text) = @_;
+  my $mail = $self->{audit};
+  $mail->put_header ($hdr, $text);
+}
+
+sub replace_header {
+  my ($self, $hdr, $text) = @_;
+  my $mail = $self->{audit};
+  $mail->{obj}->head->replace ($hdr, $text);
+}
+
+sub delete_header {
+  my ($self, $hdr) = @_;
+  my $mail = $self->{audit};
+  $mail->{obj}->head->delete ($hdr);
+}
+
+sub get_body {
+  my ($self) = @_;
+  my $mail = $self->{audit};
+  $mail->{obj}->body();
+}
+
+sub replace_body {
+  my ($self, $aryref) = @_;
+  my $mail = $self->{audit};
+  $mail->{obj}->body ($aryref);
+}
+
+###########################################################################
+
+sub get {
   my ($self, $hdrname) = @_;
   local ($_);
 
   my $getaddr = 0;
   if ($hdrname =~ s/:addr$//) { $getaddr = 1; }
 
-  my $head = $self->{audit}->{obj}->head();
-  $_ = join ("\n", $head->get ($hdrname));
+  $_ = join ("\n", $self->get_header ($hdrname));
   if ($hdrname eq 'Message-Id' && (!defined($_) || $_ eq '')) {
-    $_ = join ("\n", $head->get ('Message-ID'));	# news-ish
+    $_ = join ("\n", $self->get_header ('Message-ID'));	# news-ish
   }
   $_ ||= '';
 
@@ -281,10 +316,6 @@ sub get_header {
 sub do_head_tests {
   my ($self) = @_;
   local ($_);
-
-  my $head = $self->{audit}->{obj}->head();
-
-  $self->work_out_local_domain ($head);
 
   my ($rulename, $rule);
   while (($rulename, $rule) = each %{$self->{conf}->{head_tests}}) {
@@ -310,20 +341,18 @@ sub do_head_eval_tests {
   my ($self) = @_;
   local ($_);
 
-  my $head = $self->{audit}->{obj}->head();
-
   my ($rulename, $evalsub, $args);
   while (($rulename, $evalsub) = each %{$self->{conf}->{head_evals}}) {
     $evalsub =~ s/\s*\((.*?)\)\s*$//;
     if (defined $1 && $1 ne '') {
-      $args = ', '.$1;
+      $args = $1;
     } else {
       $args = '';
     }
     
     $self->clear_test_state();
     my $result;
-    if (!eval '$result = $self->'.$evalsub.'($head'.$args.'); 1;')
+    if (!eval '$result = $self->'.$evalsub.'('.$args.'); 1;')
     {
       warn "Failed to run $rulename SpamAssassin test, skipping:\n".
       		"\t($@)\n";
@@ -345,7 +374,7 @@ sub do_body_tests {
     ';
   }
 
-  my $body = $self->{audit}->{obj}->body();
+  my $body = $self->get_body();
   while (($rulename, $evalsub) = each %{$self->{conf}->{body_evals}}) {
     $evalsub =~ s/\s*\((.*?)\)\s*$//;
     if (defined $1 && $1 ne '') {
@@ -426,11 +455,11 @@ sub test_log {
 ###########################################################################
 
 sub work_out_local_domain {
-  my ($self, $head) = @_;
+  my ($self) = @_;
 
   # TODO -- if needed.
 
-  # my @rcvd = $head->get ("Received");
+  # my @rcvd = $self->get_header ("Received");
   # print "JMD ".join (' ',@rcvd);
 
 # from dogma.slashnull.org (dogma.slashnull.org [212.17.35.15]) by

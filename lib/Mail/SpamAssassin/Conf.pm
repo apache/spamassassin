@@ -86,7 +86,7 @@ sub parse_rules {
       next;
     }
 
-    if (/^score\s+(\S+)\s+(\d+)$/) {
+    if (/^score\s+(\S+)\s+(\-*\d+)$/) {
       $self->{scores}->{$1} = $2+0;
       next;
     }

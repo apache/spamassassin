@@ -30,10 +30,10 @@ $IS_DNS_AVAILABLE = undef;
 ###########################################################################
 
 sub check_for_from_mx {
-  my ($self, $head) = @_;
+  my ($self) = @_;
   local ($_);
 
-  $_ = $self->get_header ('From');
+  $_ = $self->get ('From');
   return 0 unless (/\@(\S+)/);
   $_ = $1;
 
@@ -52,7 +52,7 @@ sub check_for_from_mx {
 ###########################################################################
 
 sub check_for_bad_dialup_ips {
-  my ($self, $head) = @_;
+  my ($self) = @_;
   local ($_);
 
   my $knownbad = $KNOWN_BAD_DIALUP_RANGES;
@@ -61,16 +61,16 @@ sub check_for_bad_dialup_ips {
   $knownbad =~ s/\./\\./g;
   $knownbad =~ s/\s+/\|/g;
 
-  $_ = $self->get_header ('Received');
+  $_ = $self->get ('Received');
   /${knownbad}/o;
 }
 
 ###########################################################################
 
 sub check_for_from_to_equivalence {
-  my ($self, $head) = @_;
-  my $from = $self->get_header ('From');
-  my $to = $self->get_header ('To');
+  my ($self) = @_;
+  my $from = $self->get ('From');
+  my $to = $self->get ('To');
 
   ($from eq $to);
 }
@@ -78,9 +78,9 @@ sub check_for_from_to_equivalence {
 ###########################################################################
 
 sub check_for_bad_helo {
-  my ($self, $head) = @_;
+  my ($self) = @_;
   local ($_);
-  $_ = $self->get_header ('X-Authentication-Warning');
+  $_ = $self->get ('X-Authentication-Warning');
 
   (/host \S+ \[(\S+)\] claimed to be.*\[(\S+)\]/i && $1 ne $2);
 }
@@ -88,9 +88,9 @@ sub check_for_bad_helo {
 ###########################################################################
 
 sub check_subject_for_lotsa_8bit_chars {
-  my ($self, $head) = @_;
+  my ($self) = @_;
   local ($_);
-  $_ = $self->get_header ('Subject');
+  $_ = $self->get ('Subject');
 
   my @highbits = /[\200-\377]/g; my $numhis = $#highbits+1;
   my $numlos = length($_) - $numhis;
@@ -101,9 +101,9 @@ sub check_subject_for_lotsa_8bit_chars {
 ###########################################################################
 
 sub check_rbl {
-  my ($self, $head, $rbl_domain) = @_;
+  my ($self, $rbl_domain) = @_;
   local ($_);
-  my $rcv = $self->get_header ('Received');
+  my $rcv = $self->get ('Received');
 
   my @ips = ($rcv =~ /\[(\d+\.\d+\.\d+\.\d+)\]/g);
   return 0 unless ($#ips >= 0);
