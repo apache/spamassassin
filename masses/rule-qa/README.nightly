@@ -36,7 +36,6 @@ means you can "corpus-nightly" any other time of day if you want).
 
 ------- start of cut text --------------
 0 1,2 * * * /home/corpus/scripts/corpus-tagtime
-10 1,2 * * * /home/corpus/scripts/corpus-nightly update >/home/corpus/log/nightly.update 2>&1
-20 0,12-23 * * * /home/corpus/scripts/corpus-nightly rsync >/home/corpus/log/nightly.rsync 2>&1
+10 1,2 * * * /home/corpus/scripts/corpus-nightly >/home/corpus/log/nightly 2>&1
 30 * * * * /home/corpus/scripts/corpus-hourly >/home/corpus/log/hourly 2>&1
 ------- end ----------------------------
