@@ -54,14 +54,17 @@ describe TO_INVESTORS		To: non-existent 'Investors' address
 header FROM_MALFORMED		From !~ /(?:\"[^\"]+\"|\S+)\@\S+\.\S+|<\S+(\!\S+){1,}>/ [if-unset: unset@unset.unset]
 describe FROM_MALFORMED		From: has a malformed address
 
-header PLING			Subject =~ /!/
-describe PLING			Subject has an exclamation mark
-
-header PLING_PLING		Subject =~ /!!!+/
+header PLING_PLING		Subject =~ /!!!/
 describe PLING_PLING		Subject has lots of exclamation marks
 
+header MANY_EXCLAMATIONS	Subject =~ /![^!]+!/
+describe MANY_EXCLAMATIONS	Subject has many exclamations
+
+header PLING_QUERY		Subject =~ /(?:\?.*!|!.*\?)/
+describe PLING_QUERY		Subject has exclamation mark and question mark
+
 header SUBJ_HAS_UNIQ_ID		eval:check_for_unique_subject_id()
-describe SUBJ_HAS_UNIQ_ID	Subject contains a unique ID number
+describe SUBJ_HAS_UNIQ_ID	Subject contains a unique ID
 
 header SUBJ_HAS_SPACES		Subject =~ /(?:\s{6,}|\t)/
 describe SUBJ_HAS_SPACES	Subject contains lots of white space
@@ -134,12 +137,6 @@ describe DATE_IN_FUTURE_48_96	Date: is 48 to 96 hours after Received: date
 
 header DATE_IN_FUTURE_96_XX	eval:check_for_shifted_date('96', 'undef')
 describe DATE_IN_FUTURE_96_XX	Date: is 96 hours or more after Received: date
-
-header SUBJ_HAS_Q_MARK		Subject =~ /\?.{2,}$/
-describe SUBJ_HAS_Q_MARK	Subject: contains a question mark
-
-header SUBJ_ENDS_IN_Q_MARK	Subject =~ /\?+\s*$/
-describe SUBJ_ENDS_IN_Q_MARK	Subject: ends in a question mark
 
 header ADVERT_CODE		Subject =~ /(^\s*|\s+)ADV([\s:-]|$)/i
 describe ADVERT_CODE		Subject: contains advertising tag
