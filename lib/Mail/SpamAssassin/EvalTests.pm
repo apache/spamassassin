@@ -2481,7 +2481,7 @@ sub _check_attachments {
       }
     }
     if ($where == 2) {
-      if ($previous =~ /^$/ && /^TV[pq]QAAMAAAAEAA[8A]A/) {
+      if ($previous =~ /^$/ && /^TV[pq]QAA[MI]AAAAEAA[8A]A/) {
 	$self->{microsoft_executable} = 1;
       }
       if ($cte =~ /base64/ && $previous =~ /^\s*$/ && /^\s*$/) {
