@@ -491,8 +491,29 @@ sub tok_get {
 sub nspam_nham_get {
   my ($self) = @_;
   my $ns = $self->{db_toks}->{$NSPAM_MAGIC_TOKEN};
+  if (!$ns || $ns =~ /\D/) { $ns = 0; }
   my $nn = $self->{db_toks}->{$NHAM_MAGIC_TOKEN};
-  ($ns || 0, $nn || 0);
+  if (!$nn || $nn =~ /\D/) { $nn = 0; }
+  ($ns, $nn);
+}
+
+sub get_magic_tokens {
+  my ($self) = @_;
+
+  my(@values) = (
+    $self->{db_toks}->{$NTOKENS_MAGIC_TOKEN},
+    $self->{db_toks}->{$LAST_EXPIRE_MAGIC_TOKEN},
+    $self->{db_toks}->{$OLDEST_TOKEN_AGE_MAGIC_TOKEN},
+  );
+  foreach ( @values ) {
+    if ( !$_ || $_ =~ /\D/ ) { $_ = 0; }
+  }
+
+  return (
+    $self->scan_count_get(),
+    $self->nspam_nham_get(),
+    @values
+  );
 }
 
 sub get_running_expire_tok {

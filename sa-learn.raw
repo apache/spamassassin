@@ -66,6 +66,8 @@ Options:
  --forget			   Forget a message
  --rebuild			   Rebuild the database if needed
  --force-expire			   Force an expiry run, rebuild every time
+ --dump [all|data|magic]           Display the contents of the Bayes database
+                                   Takes optional argument for what to display
  -f file, --folders=file           Read list of files/directories from file
  --dir                             Learn a directory of RFC 822 files
  --file                            Learn a file in RFC 822 format
@@ -311,6 +313,13 @@ Forces an expiry run, regardless of whether it may be necessary or not.
 =item B<--forget>
 
 Forget a given message previously learnt.
+
+=item B<--dump> I<option>
+
+Display the contents of the Bayes database.  Without an option or with
+the I<all> option, all magic tokens and data tokens will be displayed.
+I<magic> will only display magic tokens, and I<data> will only display
+the data tokens.
 
 =item B<-h>, B<--help>
 

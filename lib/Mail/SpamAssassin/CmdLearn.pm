@@ -47,6 +47,7 @@ sub cmdline_run {
              'debug-level|D:s'                  => \$opt{'debug-level'},
              'version|V'                        => \$opt{'version'},
              'help|h|?'                         => \$opt{'help'},
+	     'dump:s'			=> \$opt{'dump'},
 
 	     'dir'			=> sub { $opt{'format'} = 'dir'; },
 	     'file'			=> sub { $opt{'format'} = 'file'; },
@@ -65,8 +66,8 @@ sub cmdline_run {
   if ($opt{'force-expire'}) {
     $rebuildonly=1;
   }
-  if ( !defined $isspam && !defined $rebuildonly && !defined $forget ) {
-    usage(0, "Please select either --spam, --ham, --forget, or --rebuild");
+  if ( !defined $isspam && !defined $rebuildonly && !defined $forget && !defined $opt{'dump'} ) {
+    usage(0, "Please select either --spam, --ham, --forget, --rebuild, or --dump");
   }
 
   if (defined $opt{'format'} && $opt{'format'} eq 'single') {
@@ -87,6 +88,29 @@ sub cmdline_run {
   });
 
   $spamtest->init (1);
+
+  if (defined $opt{'dump'}) {
+    my($magic, $toks);
+
+    if ($opt{'dump'} eq 'all' || $opt{'dump'} eq '') {	# show us all tokens!
+      ($magic, $toks) = (1,1);
+    }
+    elsif ($opt{'dump'} eq 'magic') {		# show us magic tokens only
+      ($magic, $toks) = (1,0);
+    }
+    elsif ($opt{'dump'} eq 'data') {		# show us data tokens only
+      ($magic, $toks) = (0,1);
+    }
+    else {					# unknown option
+      warn "Unknown dump option '".$opt{'dump'}."'\n";
+      $spamtest->finish_learner();
+      return 1;
+    }
+
+    $spamtest->dump_bayes_db($magic, $toks);
+    $spamtest->finish_learner();
+    return 0;
+  }
 
   $spamtest->init_learner({
       force_expire	=> $opt{'force-expire'},

@@ -94,7 +94,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.183 2003/03/27 20:58:03 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.184 2003/04/04 19:28:43 felicity Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -513,6 +513,18 @@ Finish learning.
 sub finish_learner {
   my $self = shift;
   $self->{bayes_scanner}->finish();
+  1;
+}
+
+=item $f->dump_bayes_db()
+
+Dump the contents of the Bayes DB
+
+=cut
+
+sub dump_bayes_db {
+  my($self,@opts) = @_;
+  $self->{bayes_scanner}->dump_bayes_db(@opts);
   1;
 }
 
