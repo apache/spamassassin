@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.632 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.633 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -117,6 +117,9 @@ describe T_ALL_RELAYS_NEAR_MXES	All relays are near to their MXes
 
 # try out new versions of username in subject ...
 # "user@domain.com" in the subject, case insensitive
-header T_USERNAME_IN_SUBJECT      eval:check_for_to_in_subject(1)
-describe T_USERNAME_IN_SUBJECT    To: address listed in Subject:
-
+header T_USERNAME_IN_SUBJECT1     eval:check_for_to_in_subject('1')
+describe T_USERNAME_IN_SUBJECT1   Full To: address listed in Subject:
+header T_USERNAME_IN_SUBJECT2     eval:check_for_to_in_subject('2')
+describe T_USERNAME_IN_SUBJECT2   To: username listed in Subject: (ucfirst)
+header T_USERNAME_IN_SUBJECT3     eval:check_for_to_in_subject('3')
+describe T_USERNAME_IN_SUBJECT3   Full To: address listed at front of Subject:
