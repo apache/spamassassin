@@ -1,8 +1,3 @@
-=head1 NAME
-
-Mail::SpamAssassin::BayesStore - storage database for Bayesian probabilities
-
-=cut
 
 package Mail::SpamAssassin::BayesStore;
 
