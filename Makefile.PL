@@ -19,6 +19,8 @@ my $MYCFLAGS		= '';
 
 ###########################################################################
 
+$ExtUtils::MakeMaker::Recognized_Att_Keys{'SYSCONFDIR'} = 1;
+
 use Config;
 use ExtUtils::MakeMaker;
 
@@ -59,11 +61,15 @@ WriteMakefile(
 
     'PMLIBDIRS' => [ 'lib' ],
 
+    # be quite explicit about this; afaik CPAN.pm is sensible using this
     'PREREQ_PM' => {
                         'File::Spec' => 0,
                         'File::Copy' => 0,
                         'Pod::Usage' => 0,
                         'HTML::Parser' => 0,
+                        'Text::Wrap' => 0,
+                        'Time::Local' => 0,
+                        'Symbol' => 0,
                   },
 
     'dist' => {
