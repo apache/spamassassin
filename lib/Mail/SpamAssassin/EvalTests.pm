@@ -43,11 +43,12 @@ sub check_for_from_mx {
   return 0 unless $self->is_dns_available();
   $self->load_resolver();
 
-  # Try 5 times to protect against temporary outages.  sleep between checks
+  # Try 3 times to protect against temporary outages.  sleep between checks
   # to give the DNS a chance to recover.
-  for my $i (1..5) {
+  for my $i (1..3) {
     my @mx = Net::DNS::mx ($self->{res}, $from);
-    if (scalar @mx >= 0) { return 0; }
+    dbg ("DNS MX records found: ".scalar (@mx));
+    if (scalar @mx > 0) { return 0; }
     sleep 5;
   }
 
