@@ -455,31 +455,12 @@ describe T_RATWARE_MIZSPEELING	Sent using spammer tool (mizspeeling)
 # 0.017   0.0495   0.0000    1.000   0.97    2.40  NIGERIAN_SUBJECT2:rODbegbie
 header T_NIGERIAN_SUBJECT2	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*(?:request\s+(?:for\s+)?)?(?:very )?urgent\s+(?:(?:and|&)\s+(?:(?:completely|100\%)\s+))?(?:confidential|assistance|business|attention|reply|responses?|help)\b/i
 
-# let's try rfg's DNSBLs, they seem to have been stable for a while now
-# quinlan: entire corpus, then last 2000 spam and 2000 ham:
-#  0.000   0.0000   0.0000    0.500   0.11    0.01  T_RCVD_IN_MONKEYS_FORMMAIL
-#  0.000   0.0000   0.0000    0.500   0.12    0.01  T_RCVD_IN_MONKEYS_FORMMAIL
-header T_RCVD_IN_MONKEYS_FORMMAIL	rbleval:check_rbl_txt('relay', 'formmail.relays.monkeys.com.')
-describe T_RCVD_IN_MONKEYS_FORMMAIL	Received via a relay in formmail.relays.monkeys.com.
-tflags T_RCVD_IN_MONKEYS_FORMMAIL net
-# just an experiment
-header T_RCVD_IN_MONKEYS_FORMMAIL2	rbleval:check_rbl('relay2', 'formmail.relays.monkeys.com.')
-describe T_RCVD_IN_MONKEYS_FORMMAIL2	Received via a relay in formmail.relays.monkeys.com.
-tflags T_RCVD_IN_MONKEYS_FORMMAIL2 net
-
 # quinlan: entire corpus, then last 2000 spam and 2000 ham:
 # 18.125  36.2000   0.0500    0.999   0.95    0.01  T_RCVD_IN_MONKEYS_UPL
 #  7.766  19.0844   0.0678    0.996   0.94    0.01  T_RCVD_IN_MONKEYS_UPL
 header T_RCVD_IN_MONKEYS_UPL	rbleval:check_rbl_txt('relay', 'proxies.relays.monkeys.com.')
 describe T_RCVD_IN_MONKEYS_UPL	Received via a relay in proxies.relays.monkeys.com.
 tflags T_RCVD_IN_MONKEYS_UPL net
-
-# new "-notfirsthop" logic
-# quinlan: entire corpus, then last 2000 spam and 2000 ham:
-#  0.309   0.7311   0.0226    0.970   0.85    0.01  T_RCVD_IN_PDL:quinlan
-#  0.225   0.4500   0.0000    1.000   0.90    0.01  T_RCVD_IN_PDL:quinlan
-header T_RCVD_IN_PDL		rbleval:check_rbl('pdl-notfirsthop', 'dialups.visi.com.')
-tflags T_RCVD_IN_PDL		net
 
 # quinlan: entire corpus, then last 2000 spam and 2000 ham:
 #  0.686   1.5620   0.0904    0.945   0.79    0.01  T_RCVD_IN_DYNABLOCK
@@ -491,7 +472,6 @@ tflags T_RCVD_IN_DYNABLOCK	net
 header T_RCVD_IN_DEADBEEF	rbleval:check_rbl('deadbeef', 'bl.deadbeef.com.')
 header T_RCVD_IN_DNSBLINFO	rbleval:check_rbl('dnsblinfo', 'spamsources.dnsbl.info.')
 header T_RCVD_IN_DNSRBLSPAM	rbleval:check_rbl('dnsrblspam', 'spam.dnsrbl.net.')
-header T_RCVD_IN_DUINV	rbleval:check_rbl('duinv', 'duinv.aupads.org.')
 header T_RCVD_IN_GIPPER	rbleval:check_rbl('gipper', 'proxy.bl.gweep.ca.')
 header T_RCVD_IN_INTERSIL	rbleval:check_rbl('intersil', 'blackholes.intersil.net.')
 header T_RCVD_IN_RELAYS_KUNDENSERVER	rbleval:check_rbl('kundenserver', 'relays.bl.kundenserver.de.')
@@ -501,7 +481,6 @@ header T_RCVD_IN_WSFF		rbleval:check_rbl('wsff', 'will-spam-for-food.eu.org.')
 tflags T_RCVD_IN_DEADBEEF net
 tflags T_RCVD_IN_DNSBLINFO net
 tflags T_RCVD_IN_DNSRBLSPAM net
-tflags T_RCVD_IN_DUINV net
 tflags T_RCVD_IN_GIPPER net
 tflags T_RCVD_IN_INTERSIL net
 tflags T_RCVD_IN_RELAYS_KUNDENSERVER net
