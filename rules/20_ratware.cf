@@ -124,3 +124,5 @@ header __EUDORA_MSGID           MESSAGEID =~ /^<(?:\d\d?\.){4,5}\d{14}\.[a-f0-9]
 meta FORGED_MUA_EUDORA          (__EUDORA_MUA && !__EUDORA_MSGID && !__UNUSABLE_MSGID && !X_LOOP && !X_MAILING_LIST && !__MAC_EUDORA_MUA && !__OLD_EUDORA1 && !(__OLD_EUDORA2 && !__QUALCOMM))
 describe FORGED_MUA_EUDORA      Forged mail pretending to be from Eudora
 
+meta FORGED_MUA_MUTT		__USER_AGENT_MUTT && !__VALID_MUTT_MSGID
+describe FORGED_MUA_MUTT	Forged mail pretending to be sent from Mutt
