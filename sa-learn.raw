@@ -92,35 +92,35 @@ Getopt::Long::Configure(
 );
 
 GetOptions(
-  'spam'        => sub { $isspam = 1; },
-  'ham|nonspam' => sub { $isspam = 0; },
+  'forget'       => \$forget,
+  'ham|nonspam'  => sub { $isspam = 0; },
+  'spam'         => sub { $isspam = 1; },
   'sync|rebuild' => \$synconly,
-  'forget'  => \$forget,
 
   'configpath|config-file|config-dir|c|C=s' => \$opt{'configpath'},
   'prefspath|prefs-file|p=s'                => \$opt{'prefspath'},
   'siteconfigpath=s'                        => \$opt{'siteconfigpath'},
 
-  'folders|f=s'          => \$opt{'folders'},
-  'showdots'             => \$opt{'showdots'},
+  'folders|f=s'                         => \$opt{'folders'},
+  'force-expire|expire'                 => \$opt{'force-expire'},
+  'local|L'                             => \$opt{'local'},
   'no-sync|nosync|no-rebuild|norebuild' => \$opt{'nosync'},
-  'local|L'              => \$opt{'local'},
-  'force-expire|expire'  => \$opt{'force-expire'},
-  'use-ignores'          => \$opt{'use-ignores'},
+  'showdots'                            => \$opt{'showdots'},
+  'use-ignores'                         => \$opt{'use-ignores'},
 
-  'stopafter=i' => \$opt{'stopafter'},
   'learnprob=f' => \$opt{'learnprob'},
   'randseed=i'  => \$opt{'randseed'},
+  'stopafter=i' => \$opt{'stopafter'},
 
   'debug-level|D:s' => \$opt{'debug-level'},
-  'version|V'       => \$opt{'version'},
   'help|h|?'        => \$opt{'help'},
+  'version|V'       => \$opt{'version'},
 
   'dump:s' => \$opt{'dump'},
   'import' => \$opt{'import'},
 
-  'clear' => \$opt{'clear'},
-  'backup' => \$opt{'backup'},
+  'backup'    => \$opt{'backup'},
+  'clear'     => \$opt{'clear'},
   'restore=s' => \$opt{'restore'},
 
   'dir'    => sub { $opt{'old_format'} = 'dir'; },
