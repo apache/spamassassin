@@ -1,5 +1,5 @@
 # SpamAssassin rules file: scores.
-# $Id: 50_scores.cf,v 1.207 2002/08/28 17:33:18 jmason Exp $
+# $Id: 50_scores.cf,v 1.208 2002/08/29 12:29:44 jmason Exp $
 ###########################################################################
 # Default scores.   Note that if a test is named in the files, but a score is
 # not assigned here, the default score will be set to 1.
@@ -65,7 +65,7 @@ score CABLE_CONVERTER                -0.341
 score CALL_FREE                      -0.727
 score CALL_NOW                       4.421
 score CANCEL                         0.081
-score CANT_LIVE_WITHOUT              2.186
+score CANT_LIVE_WITHOUT              1.086
 score CARRIAGE_RETURNS               1.318
 score CASHCASHCASH                   2.170
 score CASH_BONUS                     4.457
@@ -114,7 +114,7 @@ score DATE_YEAR_ZERO_FIRST           3.195
 score DEAR_EMAIL                     0.208
 score DEAR_FRIEND                    2.738
 score DEAR_SOMEBODY                  -0.958
-score DEAR_SOMETHING                 3.318
+score DEAR_SOMETHING                 1.018
 score DEBIAN_BTS_BUG                 -4.226
 score DIET                           2.349
 score DIG_UP_INFO                    3.233
@@ -134,7 +134,7 @@ score EGP_HTML_BANNER                -1.582
 score EMAIL_ATTRIBUTION              -0.766
 score EMAIL_MARKETING                1.546
 score EXCHANGE_SERVER                -1.772
-score EXCUSE_1                       2.427
+score EXCUSE_1                       1.427
 score EXCUSE_10                      1.285
 score EXCUSE_11                      4.301
 score EXCUSE_12                      1.828
@@ -152,7 +152,7 @@ score EXCUSE_6                       0.231
 score EXCUSE_7                       2.632
 score EXCUSE_8                       3.208
 score EXCUSE_FUTURE                  1.654
-score EXPECT_TO_EARN                 2.358
+score EXPECT_TO_EARN                 1.058
 score EXTRA_CASH                     0.614
 score EXTRA_MPART_TYPE               2.239
 score FAILURE_NOTICE_1               -4.687
@@ -183,7 +183,7 @@ score FREE_CELL_PHONE                0.297
 score FREE_CONSULTATION              3.001
 score FREE_DVD                       -0.998
 score FREE_GRANT                     4.123
-score FREE_HOSTING                   3.638
+score FREE_HOSTING                   1.638
 score FREE_INSTALL                   3.365
 score FREE_INVESTMENT                4.415
 score FREE_LEADS                     3.099
@@ -262,7 +262,7 @@ score HTML_FONT_COLOR_GRAY           -0.624
 score HTML_FONT_COLOR_GREEN          3.194
 score HTML_FONT_COLOR_MAGENTA        3.480
 score HTML_FONT_COLOR_NAME           0.264
-score HTML_FONT_COLOR_NOHASH         2.217
+score HTML_FONT_COLOR_NOHASH         1.217
 score HTML_FONT_COLOR_RED            -1.201
 score HTML_FONT_COLOR_UNKNOWN        2.117
 score HTML_FONT_COLOR_UNSAFE         -0.518
@@ -278,7 +278,7 @@ score HTTP_CTRL_CHARS_HOST           3.396
 score HTTP_ESCAPED_HOST              3.785
 score HTTP_NUMBER_WORD               -3.057
 score HTTP_USERNAME_USED             3.019
-score HTTP_WITH_EMAIL_IN_URL         2.696
+score HTTP_WITH_EMAIL_IN_URL         1.696
 score IMPOTENCE                      4.174
 score INCOME                         2.811
 score INCREASE_SOMETHING             2.982
@@ -344,7 +344,7 @@ score MICROSOFT                      3.795
 score MICRO_CAP_WARNING              3.402
 score MIME_BOUND_DIGITS_1            2.907
 score MIME_BOUND_DIGITS_2            -0.512
-score MIME_BOUND_DIGITS_3            2.051
+score MIME_BOUND_DIGITS_3            1.051
 score MIME_BOUND_DIGITS_4            2.455
 score MIME_BOUND_DIGITS_5            3.530
 score MIME_BOUND_DIGITS_6            0.939
@@ -403,7 +403,7 @@ score NO_INVENTORY                   2.782
 score NO_INVESTMENT                  4.332
 score NO_OBLIGATION                  1.499
 score NO_PURCHASE                    1.236
-score NO_QS_ASKED                    2.599
+score NO_QS_ASKED                    1.099
 score NO_REAL_NAME                   -0.331
 score NO_REFUND                      3.115
 score NO_STRINGS                     1.185
@@ -512,7 +512,7 @@ score SENT_IN_COMPLIANCE             2.319
 score SERIOUS_CASH                   0.961
 score SERIOUS_ONLY                   1.412
 score SEX_FEST                       3.463
-score SHOPPING_SPREE                 3.301
+score SHOPPING_SPREE                 1.301
 score SIGNATURE_LONG_DENSE           -2.662
 score SIGNATURE_LONG_SPARSE          -2.077
 score SIGNATURE_SHORT_DENSE          -2.650
@@ -536,7 +536,7 @@ score SPAM_REDIRECTOR                0.233
 score STOCK_ALERT                    4.000
 score STOCK_PICK                     2.916
 score STOP_SNORING                   3.261
-score STRONG_BUY                     3.653
+score STRONG_BUY                     1.653
 score SUBJECT_FREQ                   -1.915
 score SUBJECT_HAS_DATE               -3.582
 score SUBJECT_IS_IN_REVIEW           -2.498
@@ -580,7 +580,6 @@ score TO_RECIP_MARKER                4.638
 score TRACE_BY_SSN                   0.282
 score TRACKER_ID                     3.177
 score T_FREE_WEBSITE                 -1.014
-score T_NASD_FINANCIAL               0.995
 score UCE_MAIL_ACT                   2.189
 score UNCLAIMED_MONEY                2.736
 score UNDISC_RECIPS                  2.030
@@ -588,7 +587,7 @@ score UNIVERSITY_DIPLOMAS            -3.077
 score UNLIMITED                      3.765
 score UNNEEDED_HTML_ENCODING         4.666
 score UNSECURED_CREDIT               1.804
-score UNSUB_PAGE                     2.044
+score UNSUB_PAGE                     1.044
 score UNSUB_SCRIPT                   1.800
 score UPPERCASE_25_50                1.847
 score UPPERCASE_50_75                1.292
@@ -667,7 +666,7 @@ score BUGGY_CGI_PT                   1.0
 score BUY_JUDGEMENTS                 1.0
 score CHANGE_TERMS                   1.0
 score CLICK_ES                       1.0
-score CLICK_TO_REMOVE_3              1.0
+score CLICK_TO_REMOVE_3              0.3
 score CONTRA_REEMBOLSO_ES            1.0
 score CORRUPT_MSGID                  1.7
 score CYBER_FIRE_POWER               1.0
@@ -799,7 +798,7 @@ score REMOVE_ES_05                   1.0
 score REMOVE_ES_06                   1.0
 score REMOVE_ES_07                   1.0
 score SHORT_RECEIVED_LINE            1.3
-score SIGNIFICANT                    1.0
+score SIGNIFICANT                    0.3
 score SLASH_PRICE                    1.0
 score SPAM_FORM_ACTION               1.0
 score SPAM_FORM_INPUT                1.0
@@ -904,6 +903,23 @@ score USER_IN_MORE_SPAM_TO           -20.0  # they want more spam
 score USER_IN_ALL_SPAM_TO            -100.0  # they want all spam, go figure :)
 
 ###########################################################################
+
+# Forced low, due to FPs:
+
+# 0.216    0.220    0.215    0.51   -1.14  ACCOUNT_CLICK (fn)
+# 0.160    0.164    0.158    0.51   -1.00  BALANCE_FOR_LONG_40K (fn)
+# 0.781    1.099    0.639    0.63   -1.00  BALANCE_FOR_LONG_20K (fn)
+# 1.261    1.991    0.934    0.68   -0.10  USER_AGENT_AOL (fn)
+# 9.230   14.962    6.663    0.69   -1.00  USER_AGENT_OE (fn)
+# 0.067    0.130    0.039    0.77   -1.00  PRIVACY_STATEMENT (fn)
+# 0.690    1.544    0.308    0.83   -1.00  USER_AGENT_THEBAT (fn)
+score ACCOUNT_CLICK                  -0.1
+score BALANCE_FOR_LONG_20K           -0.1
+score BALANCE_FOR_LONG_40K           -0.1
+score USER_AGENT_AOL                 -0.3
+score USER_AGENT_OE                  -0.3
+score PRIVACY_STATEMENT              -0.3
+score USER_AGENT_THEBAT              -0.3
 
 # Missed scores:
 
