@@ -1,4 +1,4 @@
-# $Id: MIME.pm,v 1.5 2003/09/29 04:03:35 felicity Exp $
+# $Id: MIME.pm,v 1.6 2003/10/01 03:18:18 felicity Exp $
 
 package Mail::SpamAssassin::MIME;
 use strict;
@@ -90,7 +90,7 @@ sub add_body_part {
     $part->{$k} = $v;
   }
 
-  $part->{parsed} = [] if ( $type eq "text/html" );
+  $part->{rendered} = [] if ( $type eq "text/html" );
   push @{ $self->{body_parts} }, $part;
 }
 
