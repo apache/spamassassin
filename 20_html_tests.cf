@@ -193,7 +193,10 @@ describe HTML_IMAGE_RATIO_14	HTML has a low ratio of text to image area
 body HTML_JAVASCRIPT		eval:html_test('javascript')
 describe HTML_JAVASCRIPT	JavaScript code
 
-body HTML_LINK_CLICK_HERE	eval:html_eval('anchor_text', '=~ /click\s+here/i')
+body HTML_LINK_PUSH_HERE	eval:html_eval('anchor_text', '=~ /(?:push|go)\s*(?:here|this)/i')
+describe HTML_LINK_PUSH_HERE	HTML link text says "push here" or similar
+
+body HTML_LINK_CLICK_HERE	eval:html_eval('anchor_text', '=~ /click\s*(?:here|this)/i')
 describe HTML_LINK_CLICK_HERE	HTML link text says "click here"
 
 body HTML_LINK_CLICK_CAPS	eval:html_eval('anchor_text', '=~ /CLICK/')
@@ -282,3 +285,9 @@ describe HIDE_WIN_STATUS	Javascript to hide URLs in browser
 
 rawbody LINK_TO_NO_SCHEME	/\s+href=['"]?www\./i
 describe LINK_TO_NO_SCHEME	Contains link without http:// prefix
+
+rawbody __OBFUSCATING_COMMENT_A	/\w(?:<![^>]*>)+\w/
+rawbody __OBFUSCATING_COMMENT_B	/[^\s>](?:<![^>]*>)+[^\s<]/
+meta OBFUSCATING_COMMENT	((__OBFUSCATING_COMMENT_A && HTML_MESSAGE) || (__OBFUSCATING_COMMENT_B && MIME_HTML_ONLY))
+describe OBFUSCATING_COMMENT	HTML comments which obfuscate text
+
