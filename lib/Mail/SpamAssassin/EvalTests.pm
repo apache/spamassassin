@@ -1138,7 +1138,7 @@ sub check_rbl_backend {
   $self->load_resolver();
 
   # How many IPs max you check in the received lines
-  my $checklast=$self->{conf}->{num_check_received} - 1;
+  my $checklast=$self->{conf}->{num_check_received};
   
   dbg ("checking RBL $rbl_server, set $set", "rbl", -1);
 
