@@ -26,7 +26,7 @@ ifeq ($(PLATFORM),macosx)
   PGALIB = $(PGAPATH)/lib/freebsd
   EXTRALIBS =
 else
-  OPT = -O9 -mcpu=athlon
+  OPT = -O9 #-mcpu=athlon
   PGALIB = $(PGAPATH)/lib/linux
   EXTRALIBS = -lm
 endif
