@@ -108,6 +108,8 @@ sub add_known_good_address {
     return undef;		# no factory defined; we can't check
   }
 
+  $addr = lc $addr;
+  $addr =~ s/[\000\;\'\"\!\|]/_/gs;	# paranoia
   my $entry = $self->{checker}->get_addr_entry ($addr);
 
   # remove any old entries (will remove per-ip entries as well)
@@ -135,6 +137,8 @@ sub add_known_bad_address {
     return undef;		# no factory defined; we can't check
   }
 
+  $addr = lc $addr;
+  $addr =~ s/[\000\;\'\"\!\|]/_/gs;	# paranoia
   my $entry = $self->{checker}->get_addr_entry ($addr);
 
   # remove any old entries (will remove per-ip entries as well)
@@ -157,6 +161,8 @@ sub remove_address {
     return undef;		# no factory defined; we can't check
   }
 
+  $addr = lc $addr;
+  $addr =~ s/[\000\;\'\"\!\|]/_/gs;	# paranoia
   my $entry = $self->{checker}->get_addr_entry ($addr);
 
   if ($entry->{count} > 0) {
