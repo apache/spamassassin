@@ -587,7 +587,6 @@ sub expand_name ($) {
   my $self = shift;
   my $name = shift;
   return (getpwnam($name))[7] if ($name ne '');
-  return $ENV{'HOME'} if defined $ENV{'HOME'};
   return (getpwuid($>))[7];
 }
 
