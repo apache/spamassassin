@@ -132,19 +132,19 @@ describe MSGID_OUTLOOK_TIME 	Message-Id is fake (in Outlook Express format)
 ###########################################################################
 
 header MSG_ID_ADDED_BY_MTA_SHORT	eval:mta_added_message_id('short')
-description MSG_ID_ADDED_BY_MTA_SHORT	Message-Id was added by a relay
+describe MSG_ID_ADDED_BY_MTA_SHORT	Message-Id was added by a relay
 
 header MSG_ID_ADDED_BY_MTA_LATER	eval:mta_added_message_id('later')
-description MSG_ID_ADDED_BY_MTA_LATER	Message-Id was added by a relay
+describe MSG_ID_ADDED_BY_MTA_LATER	Message-Id was added by a relay
 
 header MSG_ID_ADDED_BY_MTA_BACKUP	eval:mta_added_message_id('backup')
-description MSG_ID_ADDED_BY_MTA_BACKUP	Message-Id was added by a relay
+describe MSG_ID_ADDED_BY_MTA_BACKUP	Message-Id was added by a relay
 tflags MSG_ID_ADDED_BY_MTA_BACKUP	net
 
 header __MSG_ID_BEFORE_RECEIVED		ALL =~ /\nMessage-Id:.*\nReceived:/si
 header __MSG_ID_BEFORE_OKAY		Message-Id =~ /\@[a-z0-9.-]+\.(?:yahoo|wanadoo)(?:\.[a-z]{2,3}){1,2}>/
 meta MSG_ID_ADDED_BY_MTA_HEADER		(__MSG_ID_BEFORE_RECEIVED && !__MSG_ID_BEFORE_OKAY)
-description MSG_ID_ADDED_BY_MTA_HEADER	Message-Id was added by a relay
+describe MSG_ID_ADDED_BY_MTA_HEADER	Message-Id was added by a relay
 
 ###########################################################################
 
