@@ -280,6 +280,10 @@ Set to C<YES>.
 Set to C<text/plain>, in order to defang HTML mail or other active
 content that could "call back" to the spammer.
 
+=item X-Spam-SpamAssassin-Version: header for spam mails
+
+Set to the version number of the SpamAssassin checker which tested the mail.
+
 =item spam mail body text
 
 The SpamAssassin report is added to top of the mail message body,
@@ -341,6 +345,7 @@ sub rewrite_as_spam {
     # delete the SpamAssassin-added headers in the target message.
     $self->{msg}->delete_header ("X-Spam-Status");
     $self->{msg}->delete_header ("X-Spam-Flag");
+    $self->{msg}->delete_header ("X-Spam-SpamAssassin-Version");
     $self->{msg}->delete_header ("X-Spam-Prev-Content-Type");
   }
 
@@ -359,6 +364,8 @@ sub rewrite_as_spam {
 	$Mail::SpamAssassin::VERSION);
 
   $self->{msg}->put_header ("X-Spam-Status", $_);
+  $self->{msg}->put_header ("X-Spam-SpamAssassin-Version",
+  	"$Mail::SpamAssassin::VERSION ($Mail::SpamAssassin::SUB_VERSION)");
   $self->{msg}->put_header ("X-Spam-Flag", 'YES');
 
   # defang HTML mail; change it to text-only.
@@ -1119,6 +1126,7 @@ sub sa_die { Mail::SpamAssassin::sa_die (@_); }
 sub remove_unwanted_headers {
   my ($self) = @_;
   $self->{msg}->delete_header ("X-Spam-Status");
+  $self->{msg}->delete_header ("X-Spam-SpamAssassin-Version");
   $self->{msg}->delete_header ("X-Spam-Flag");
 }
 

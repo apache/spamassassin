@@ -60,7 +60,7 @@ use Cwd;
 use Config;
 
 use vars	qw{
-  	@ISA $VERSION $HOME_URL $DEBUG
+  	@ISA $VERSION $SUB_VERSION $HOME_URL $DEBUG
 	@default_rules_path @default_prefs_path
 	@default_userprefs_path @default_userstate_dir
 	@site_rules_path
@@ -68,34 +68,41 @@ use vars	qw{
 
 @ISA = qw();
 
-$VERSION = "1.6";
+$VERSION = "2.0";
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.48 2001/12/17 14:18:56 jmason Exp $';
+
 sub Version { $VERSION; }
 
 $HOME_URL = "http://spamassassin.taint.org/";
 
 $DEBUG = 0;
 
+#__installsitelib__/spamassassin.cf
+#__installvendorlib__/spamassassin.cf
 @default_rules_path = qw(
-        __installsitelib__/spamassassin.cf
-	__installvendorlib__/spamassassin.cf
+  	/usr/local/share/spamassassin
+  	/usr/share/spamassassin
 );
 
+#/etc/spamassassin.cf
+#/etc/mail/spamassassin.cf
+#/usr/local/etc/spamassassin.cf
 @site_rules_path = qw(
-        /etc/spamassassin.cf
-        /etc/mail/spamassassin.cf
-        /usr/local/etc/spamassassin.cf
-  	./spamassassin.cf
-  	../spamassassin.cf
+        /usr/local/etc/spamassassin
+  	/etc/mail/spamassassin
+  	/etc/spamassassin
+	./rules
+	../rules
 );
     
 @default_prefs_path = qw(
-        /etc/spamassassin.prefs
-        __installsitelib__/spamassassin.prefs
-	__installvendorlib__/spamassassin.prefs
+        /etc/spamassassin/user_prefs.template
+        /usr/local/share/spamassassin/user_prefs.template
+        /usr/share/spamassassin/user_prefs.template
 );
 
 @default_userprefs_path = qw(
-        ~/.spamassassin.cf
+        ~/.spamassassin/user_prefs
 );
 
 @default_userstate_dir = qw(
@@ -500,11 +507,11 @@ sub init {
     $self->{config_text} = '';
 
     my $fname = $self->first_existing_path (@default_rules_path);
-    $self->{config_text} .= $self->read_cf ($fname, 'default rules file');
+    $self->{config_text} .= $self->read_cf ($fname, 'default rules dir');
 
     $fname = $self->{rules_filename};
     $fname ||= $self->first_existing_path (@site_rules_path);
-    $self->{config_text} .= $self->read_cf ($fname, 'site rules file');
+    $self->{config_text} .= $self->read_cf ($fname, 'site rules dir');
 
     if ( $use_user_pref != 0 ) {
 
@@ -520,9 +527,18 @@ sub init {
 	}
       }
 
+      my $old_prefs_name = $self->first_existing_path ('~/.spamassassin.cf');
+      if (!-f $old_prefs_name) { $old_prefs_name = undef; }
+
       # user prefs file
       $fname = $self->{userprefs_filename};
       $fname ||= $self->first_existing_path (@default_userprefs_path);
+
+      if (defined $old_prefs_name && -f $old_prefs_name) {
+	dbg ("migrating $old_prefs_name to $fname");
+	rename ($old_prefs_name, $fname) or
+			warn "rename $old_prefs_name to $fname failed: $!\n";
+      }
 
       if (defined $fname) {
         if (!-f $fname && !$self->create_default_prefs($fname)) {
@@ -553,11 +569,20 @@ sub read_cf {
 
   dbg ("using \"$fname\" for $desc");
   my $txt = '';
-  if (-f $fname && -s _) {
+
+  if (-d $fname) {
+    foreach my $file ($self->get_cf_files_in_dir ($fname)) {
+      open (IN, "<".$file) or warn "cannot open \"$file\"\n";
+      $txt .= join ('', <IN>);
+      close IN;
+    }
+
+  } elsif (-f $fname && -s _) {
     open (IN, "<".$fname) or warn "cannot open \"$fname\"\n";
     $txt = join ('', <IN>);
     close IN;
   }
+
   return $txt;
 }
 
@@ -608,15 +633,13 @@ sub create_default_prefs {
 ###########################################################################
 
 sub expand_name ($) {
-  my $self = shift;
-  my $name = shift;
+  my ($self, $name) = @_;
   return (getpwnam($name))[7] if ($name ne '');
   return (getpwuid($>))[7];
 }
 
 sub sed_path {
-  my $self = shift;
-  my $path = shift;
+  my ($self, $path) = @_;
   return undef if (!defined $path);
   $path =~ s/__installsitelib__/$Config{installsitelib}/gs;
   $path =~ s/__installvendorlib__/$Config{installvendorlib}/gs;
@@ -632,6 +655,16 @@ sub first_existing_path {
     if (-e $path) { return $path; }
   }
   $path;
+}
+
+sub get_cf_files_in_dir {
+  my ($self, $dir) = @_;
+
+  opendir(SA_CF_DIR, $dir) or warn "cannot opendir $dir: $!\n";
+  my @cfs = grep { /\.cf$/ && -f "$dir/$_" } readdir(SA_CF_DIR);
+  closedir SA_CF_DIR;
+
+  return map { "$dir/$_" } sort { $a cmp $b } @cfs;	# sort numerically
 }
 
 ###########################################################################

@@ -176,11 +176,11 @@ sub razor_lookup {
     local ($^W) = 0;		# argh, warnings in Razor
     local ($/);			# argh, bugs in Razor
 
-    my $rc = Razor::Client->new ($config, %options);
-    die "undefined Razor::Client\n" if (!$rc);
-
     local $SIG{ALRM} = sub { die "alarm\n" };
     alarm 10;
+
+    my $rc = Razor::Client->new ($config, %options);
+    die "undefined Razor::Client\n" if (!$rc);
 
     if ($Razor::Client::VERSION >= 1.12) {
       my $respary = $rc->check ('spam' => \@msg);

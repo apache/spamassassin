@@ -1,11 +1,3 @@
 #!/bin/sh
 
-make clean
-
-# ./hit-frequencies | ./score-ranges-from-freqs
-
-./logs-to-c $*
-
-# make OPT= evolve
-
-./evolve -C > results.baseline
+./logs-to-c $* && ./evolve -C > results.baseline
