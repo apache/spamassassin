@@ -1225,8 +1225,10 @@ describe RAPE                   Possible porn - Rape
 body LESBIAN                    /\b(?:xxx|horny|hot|young) lesbian|lesbian (?:sites?|action|bitch)/i
 describe LESBIAN                Possible porn - Lesbian Site
 
-full PORN_3			eval:porn_word_test()
-describe PORN_3			Possible porn - Uses words and phrases which indicate porn
+# Jul 26 2002 jm: offline until we can figure out performance & effectiveness
+# problems
+#full PORN_3			eval:porn_word_test()
+#describe PORN_3		Possible porn - Uses words and phrases which indicate porn
 
 # (contrib: skod)
 body PORN_6			/\b(?:\d+\+? xxx pictures|xxx photos?)\b/i
