@@ -246,26 +246,29 @@ sub parse_rfc822_date {
 ###########################################################################
 
 sub portable_getpwuid {
-  my ($uid) = @_;
-  my @ret;
-
-  if (!RUNNING_ON_WINDOWS) {
-    eval {
-      # use effective uid in case we're setuid
-      @ret = (getpwuid ($>))[0];
-    };
-    if (!$@) {
-      return @ret;
-    }
+  if (defined &Mail::SpamAssassin::Util::_getpwuid_wrapper) {
+    return Mail::SpamAssassin::Util::_getpwuid_wrapper(@_);
   }
 
-  # failed to call getpwuid(); platform may not support it!
-  dbg ("getpwuid() failed! using 'unknown' as username");
+  if (!RUNNING_ON_WINDOWS) {
+    eval ' sub _getpwuid_wrapper { getpwuid(@_); } ';
+  } else {
+    dbg ("defining getpwuid() wrapper using 'unknown' as username");
+    eval ' sub _getpwuid_wrapper { fake_getpwuid(@_); } ';
+  }
 
+  if ($@) {
+    warn "Failed to define getpwuid() wrapper: $@\n";
+  } else {
+    return Mail::SpamAssassin::Util::_getpwuid_wrapper(@_);
+  }
+}
+
+sub fake_getpwuid {
   return (
     'unknown',		# name,
     'x',		# passwd,
-    $uid,		# uid,
+    $_[0],		# uid,
     0,			# gid,
     '',			# quota,
     '',			# comment,

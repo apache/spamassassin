@@ -493,7 +493,7 @@ sub get_content_preview {
 =item $status->rewrite_mail ()
 
 Rewrite the mail message.  This will at minimum add headers, and at
-maximum mime encapsulate the message text, to reflect its spam or
+maximum MIME-encapsulate the message text, to reflect its spam or
 not-spam status.
 
 The possible modifications are as follows:
@@ -1664,6 +1664,7 @@ sub do_body_uri_tests {
         '.$rulename.'_uri_test($self, @_); # call procedurally for speed
       }
     ';
+
     $evalstr2 .= '
     sub '.$rulename.'_uri_test {
        my $self = shift;
