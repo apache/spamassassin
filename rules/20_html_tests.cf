@@ -29,7 +29,7 @@ require_version @@VERSION@@
 # please sort these by eval type then name
 
 # HTML control test, HTML spam rules should all have better S/O than this
-body HTML_MESSAGE		eval:html_test('ratio')
+body HTML_MESSAGE		eval:html_test('html_message')
 describe HTML_MESSAGE		HTML included in message
 
 # the HTML percentage range
