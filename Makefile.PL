@@ -219,7 +219,7 @@ my %makefile = (
 
     },
 
-    'AUTHOR'   => 'Justin Mason <jm@jmason.org>',
+    'AUTHOR'   => 'SpamAssassin Project <spamassassin-dev@incubator.apache.org>',
     'ABSTRACT' => 'identify spam mail using text analysis',
 
     # We have only this Makefile.PL and this option keeps MakeMaker from
