@@ -62,8 +62,9 @@ sub replace_body {
   #
   if (eval { $self->{mail_object}->is_mime(); }) {
     my $newbody;
-    eval '
-      use MIME::Body;
+    # please leave the eval and use on the same line.  kluge around a bug in RPM 4.1.
+    # tvd - 2003.02.25
+    eval 'use MIME::Body;
       my $newbody = new MIME::Body::InCore ($aryref);
     ';
     die "MIME::Body::InCore ctor failed" unless defined ($newbody);

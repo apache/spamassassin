@@ -117,7 +117,7 @@ sub check {
   # to see if we should go from {0,1} to {2,3}.  We of course don't need
   # to do this switch if we're already using bayes ... ;)
   my $set = $self->{conf}->get_score_set();
-  if ( $set < 2 && $self->{main}->{bayes_scanner}->is_available() ) {
+  if ( $set < 2 && $self->{main}->{bayes_scanner}->is_scan_available() ) {
     $self->{conf}->set_score_set ($set|2);
   }
 
@@ -333,6 +333,10 @@ sub learn {
       $self->{auto_learn_status} = $isspam;
     }
     $self->{main}->finish_learner();	# for now
+
+    if (exists $self->{main}->{bayes_scanner}) {
+      $self->{main}->{bayes_scanner}->sanity_check_is_untied();
+    }
   };
 
   if ($@) {
@@ -578,10 +582,11 @@ sub rewrite_as_spam {
   # This is the new message.
   # jm: add a SpamAssassin Received header to note markup time etc.
   # emulates the fetchmail style.
-  my $newmsg = "Received: from localhost [127.0.0.1] by ".hostname."\n".
-	"\twith SpamAssassin (". Mail::SpamAssassin::Version()." ".
-	    $Mail::SpamAssassin::SUB_VERSION . ");\n".
-	"\t". strftime ("%a, %d %b %Y %H:%M:%S %z", localtime)."\n";
+  my $newmsg = "Received: from localhost [127.0.0.1] by " . hostname . "\n" .
+	"\twith SpamAssassin (" . Mail::SpamAssassin::Version() . " " .
+	    $Mail::SpamAssassin::SUB_VERSION . ");\n" .
+	"\t" . strftime("%a, %d %b %Y %H:%M:%S ", localtime) .
+	    Mail::SpamAssassin::Util::local_tz() . "\n";
 
   # remove first line if it is "From "
   if ($original =~ s/^(From (.*?)\n)//s) {
@@ -619,12 +624,15 @@ sub rewrite_as_spam {
   $newmsg .= "X-Spam-Flag: YES\n";
   $newmsg .= "X-Spam-Status: " . $self->_build_status_line() . "\n";
   if ($self->{main}->{conf}->{spam_level_stars} == 1) {
+    my $length = int($self->{hits});
+    if ( $length > 100 ) { $length = 100; }
+
     $newmsg .= "X-Spam-Level: " .
-      $self->{main}->{conf}->{spam_level_char} x int($self->{hits}) . "\n";
+      $self->{main}->{conf}->{spam_level_char} x $length . "\n";
   }
   $newmsg .= "X-Spam-Checker-Version: SpamAssassin " .
-    Mail::SpamAssassin::Version() . " " .
-    $Mail::SpamAssassin::SUB_VERSION . "\n";
+    Mail::SpamAssassin::Version() . " (" .
+    $Mail::SpamAssassin::SUB_VERSION . ")\n";
 
   # now add any test-specific markup headers (X-Pyzor etc.)
   foreach my $hdr (keys %{$self->{headers_to_add}}) {
@@ -653,7 +661,15 @@ sub rewrite_as_spam {
     $disposition = "inline";
   }
 
+  my $type = "message/rfc822";
+  $type = "text/plain" if $self->{conf}->{report_safe} > 1;
+
   my $description = $self->{main}->{'encapsulated_content_description'};
+
+  # Note: the message should end in blank line since mbox format wants
+  # blank line at end and messages may be concatenated!  In addition, the
+  # x-spam-type parameter is fixed since we will use it later to recognize
+  # original messages that can be extracted.
   $newmsg .= <<"EOM";
 MIME-Version: 1.0
 Content-Type: multipart/mixed; boundary="$boundary"
@@ -668,13 +684,14 @@ Content-Transfer-Encoding: 8bit
 $report
 
 --$boundary
-Content-Type: message/rfc822
+Content-Type: $type; x-spam-type=original
 Content-Description: $description
 Content-Disposition: $disposition
 Content-Transfer-Encoding: 8bit
 
 $original
 --$boundary--
+
 EOM
   
   my @lines = split (/^/m,  $newmsg);
@@ -690,7 +707,9 @@ sub rewrite_headers {
   if ( $self->{is_spam} || $self->{main}->{conf}->{always_add_headers} == 1) {
     $self->{msg}->put_header ("X-Spam-Status", $self->_build_status_line());
     if($self->{main}->{conf}->{spam_level_stars} == 1) {
-      $self->{msg}->put_header("X-Spam-Level", $self->{main}->{conf}->{spam_level_char} x int($self->{hits}));
+      my $length = int($self->{hits});
+      if ( $length > 100 ) { $length = 100; }
+      $self->{msg}->put_header("X-Spam-Level", $self->{main}->{conf}->{spam_level_char} x $length);
     }
   }
 
@@ -754,12 +773,14 @@ sub _build_status_line {
     $line .= "\ttests=none\n";
   }
 
+  $line .= "\t";
   if ( defined $self->{auto_learn_status} ) {
-    $line .= "\tautolearn=";
+    $line .= "autolearn=";
     $line .= $self->{auto_learn_status} ? "spam" : "ham";
+    $line .= " ";
   }
 
-  $line .= "\tversion=" . Mail::SpamAssassin::Version();
+  $line .= "version=" . Mail::SpamAssassin::Version();
 
   # If the configuration says no folded headers, unfold what we have.
   if ( ! $self->{conf}->{fold_headers} ) {
@@ -805,6 +826,10 @@ called to ensure Perl's garbage collection will clean up old status objects.
 
 sub finish {
   my ($self) = @_;
+
+  if (exists $self->{main}->{bayes_scanner}) {
+    $self->{main}->{bayes_scanner}->finish();
+  }
 
   delete $self->{body_text_array};
   delete $self->{main};
