@@ -77,7 +77,7 @@ $IGNORED_HDRS = qr{(?:
 		  |X-MDaemon-Deliver-To| X-Virus-Scanned
 		  |X-MIME-Autoconverted | Status |Content-Length
 		  |Lines |X-UID |Delivery-Date |X-Virus-Scanned
-		  |X-Spam-Hits |X-Spam |X-Spam-Score
+		  |X-Spam-hits |X-Spam |X-Spam-Score
 		)}x;
 
 # How big should the corpora be before we allow scoring using Bayesian
