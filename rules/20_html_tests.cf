@@ -261,7 +261,7 @@ describe HTML_CHARSET_FARAWAY	A foreign language charset used in HTML markup
 tflags HTML_CHARSET_FARAWAY	userconf
 
 meta HTML_MIME_NO_HTML_TAG	MIME_HTML_ONLY && !__TAG_EXISTS_HTML
-describe HTML_MIME_NO_HTML_TAG	HTML-only message, but there is HTML tag
+describe HTML_MIME_NO_HTML_TAG	HTML-only message, but there is no HTML tag
 
 body __HTML_COMMENT_RATIO	eval:html_range('total_comment_ratio','0.70','1.00')
 meta HTML_COMMENT_RATIO		__HTML_COMMENT_RATIO && MIME_HTML_ONLY
