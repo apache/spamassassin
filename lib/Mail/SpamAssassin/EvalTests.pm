@@ -604,6 +604,13 @@ sub check_for_forward_date {
   local ($_);
 
   my $date = $self->get ('Date');
+  my $rcvd = $self->get ('Received');
+
+  # if we have no Received: headers, chances are we're archived mail
+  # with a limited set of hdrs. return 0.
+  if (!defined $rcvd || $rcvd eq '') {
+    return 0;
+  }
 
   # don't barf here; just return an OK return value, as there's already
   # a good test for this.
@@ -612,8 +619,8 @@ sub check_for_forward_date {
   chomp ($date);
   my $time = $self->_parse_rfc822_date ($date);
 
-  my $rcvd = $self->get ('Received');
   my $now;
+
   if ($rcvd =~ / (\S\S\S, .?\d+ \S\S\S \d+ \d+:\d+:\d+ \S+)/) {
     $rcvd = $1;
     dbg ("using Received header date for real time: $rcvd");
