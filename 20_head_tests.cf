@@ -557,11 +557,8 @@ describe USERNAME_IN_SUBJECT_5  To: username at front of subject (5)
 header USERNAME_IN_SUBJECT_6    eval:check_for_to_in_subject(6)
 describe USERNAME_IN_SUBJECT_6  To: username at front of subject (6)
 
-header LOSE_POUNDS              Subject =~ /^Lose\s+\d+\s+pounds\s+in/i
+header LOSE_POUNDS              Subject =~ /\bLose .*(?:pounds|lbs|weight)/i
 describe LOSE_POUNDS            Subject talks about losing pounds
-
-header LOSE_POUNDS2             Subject =~ /^Lose .*(?:pounds|lbs|weight)/i
-describe LOSE_POUNDS2           Subject talks about losing pounds or lbs
 
 header EXTRA_MPART_TYPE         Content-Type =~ /(?:\s*multipart\/)?.* type=/i
 describe EXTRA_MPART_TYPE       Message with extraneous Content-type:...type= header
