@@ -91,31 +91,11 @@ $IGNORED_HDRS = qr{(?: Sender			# misc noise
 # token this generates will exist alongside the tokens in the header; if you
 # don't want to see tokens from these headers *at all* except for the
 # PRESENT/ABSENT token, add them to IGNORED_HDRS too.  This is off by default.
-#
-# to replace In-Reply-To et al with a header presence/absence token, add
-# this to IGNORED_HDRS above: "|In-Reply-To |References" and turn on
-# TRY_NOTE_HEADER_PRESENCE_ABSENCE.  But it does not seem to be a win.
-
-use constant TRY_NOTE_HEADER_PRESENCE_ABSENCE => 0;
-@FLAG_PRESENCE_HDRS = qw{
-		  From To Cc CC MIME-Version Content-Transfer-Encoding Date
-		  Subject Sender Reply-To Errors-To Return-Receipt-To
-		  Return-Path Content-Class Thread-Index X-OriginalArrivalTime
-		  X-Mailer User-Agent Content-Type X-Priority X-Msmail-Priority
-		  Importance X-Mimeole In-Reply-To References 
-		};
 
 # tweaks tested as of Nov 18 2002 by jm: see SpamAssassin-devel list archives
 # for results.  The winners are now the default settings.
-use constant TRY_IGNORE_TITLE_CASE_AT_START_OF_SENTENCE => 1;
-use constant TRY_IGNORE_TITLE_CASE_EVERYWHERE => 0;
-use constant TRY_DUP_TOKENS_AS_LOWERCASE => 0;
-use constant TRY_DUP_TOKENS_WITH_CASEI_PREFIX => 0;
-use constant TRY_KEEP_AT_SIGNS => 1;
-use constant TRY_KEEP_THIRD_RECEIVED => 0;
-use constant TOKENIZE_LONG_8BIT_SEQS_AS_TUPLES => 0;
-use constant TOKENIZE_LONG_8BIT_SEQS_AS_TUPLES_2 => 0;
-use constant TOKENIZE_LONG_8BIT_SEQS_AS_TUPLES_3 => 1;
+use constant IGNORE_TITLE_CASE => 1;
+use constant TOKENIZE_LONG_8BIT_SEQS_AS_TUPLES => 1;
 use constant TOKENIZE_LONG_TOKENS_AS_SKIPS => 1;
 
 # We store header-mined tokens in the db with a "HHeaderName:val" format.
@@ -385,13 +365,9 @@ sub tokenize_line {
   # and ISO-8859-15 alphas.  DO split on @'s, so username and domains in
   # mail addrs are separate tokens.
   # Some useful tokens: "$31,000,000" "www.clock-speed.net"
-  if (TRY_KEEP_AT_SIGNS) {
-    tr/-A-Za-z0-9,\@_'"\$.\241-\377 / /cs;
-  } else {
-    tr/-A-Za-z0-9,_'"\$.\241-\377 / /cs;
-  }
+  tr/-A-Za-z0-9,\@_'"\$.\241-\377 / /cs;
 
-  if (TRY_IGNORE_TITLE_CASE_AT_START_OF_SENTENCE) {
+  if (IGNORE_TITLE_CASE) {
     if ($isbody) {
       # lower-case Title Case at start of a full-stop-delimited line (as would
       # be seen in a Western language).
@@ -410,80 +386,33 @@ sub tokenize_line {
     next if $len < 3 ||
 	$token =~ /^(?:and|the|not|any|for|from|one|The|has|have)$/;
 
-    my $replacedigits = 1;
-
     if ($len > MAX_TOKEN_LENGTH) {
-      if (TOKENIZE_LONG_8BIT_SEQS_AS_TUPLES) {
-	if ($token =~ /[\xa0-\xff]/) {
-	  # Matt sez: "Could be asian? Autrijus suggested doing character ngrams,
-	  # but I'm doing tuples to keep the dbs small(er)."  Sounds like a plan
-	  # to me! (jm)
-	  while ($token =~ s/^(..?)//) {
-	    push (@{$self->{tokens}}, "8bit:$1"); $wc++;
-	  }
-	  next;
+      if (TOKENIZE_LONG_8BIT_SEQS_AS_TUPLES && $token =~ /[\xa0-\xff]{2}/) {
+	# Matt sez: "Could be asian? Autrijus suggested doing character ngrams,
+	# but I'm doing tuples to keep the dbs small(er)."  Sounds like a plan
+	# to me! (jm)
+	while ($token =~ s/^(..?)//) {
+	  push (@{$self->{tokens}}, "8bit:$1"); $wc++;
 	}
-      }
-      if (TOKENIZE_LONG_8BIT_SEQS_AS_TUPLES_2) {
-	if ($token =~ /[\xa0-\xff]{2}/) {
-	  # Matt sez: "Could be asian? Autrijus suggested doing character ngrams,
-	  # but I'm doing tuples to keep the dbs small(er)."  Sounds like a plan
-	  # to me! (jm)
-	  while ($token =~ s/^(..?)//) {
-	    push (@{$self->{tokens}}, "8bit:$1"); $wc++;
-	  }
-	  next;
-	}
-      }
-      if (TOKENIZE_LONG_8BIT_SEQS_AS_TUPLES_3) {
-	if ($token =~ /^[\xa0-\xff]{2}/) {
-	  # Matt sez: "Could be asian? Autrijus suggested doing character ngrams,
-	  # but I'm doing tuples to keep the dbs small(er)."  Sounds like a plan
-	  # to me! (jm)
-	  while ($token =~ s/^(..?)//) {
-	    push (@{$self->{tokens}}, "8bit:$1"); $wc++;
-	  }
-	  next;
-	}
+	next;
       }
 
       if (TOKENIZE_LONG_TOKENS_AS_SKIPS) {
-	# Spambayes trick via Matt: Just retain 7 chars and the length
-	# sk: stands for "skip".
-	$token = "sk:".substr($token, 0, 7)." ".$len;
-	$replacedigits = 0;
+	# Spambayes trick via Matt: Just retain 7 chars.  Do not retain
+	# the length, it does not help; see my mail to -devel of Nov 20 2002.
+	# "sk:" stands for "skip".
+	$token = "sk:".substr($token, 0, 7);
       }
     }
 
     $wc++;
-
-    if (TRY_IGNORE_TITLE_CASE_EVERYWHERE) {
-      if ($isbody) { # lowercase Title Case words anyway
-	$token =~ s/^([A-Z])([^A-Z]+)$/ (lc $1) . $2 /ge;
-      }
-    }
     push (@{$self->{tokens}}, $tokprefix.$token);
 
     # now do some token abstraction; in other words, make them act like
     # patterns instead of text copies.
 
-    # case...
-    if (TRY_DUP_TOKENS_AS_LOWERCASE) {
-      $token =~ tr/A-Z/a-z/;
-      push (@{$self->{tokens}}, $tokprefix.$token);
-    }
-
-    if (TRY_DUP_TOKENS_WITH_CASEI_PREFIX) {
-      if ($token =~ /[A-Z]/) {
-	$token =~ tr/A-Z/a-z/;
-	push (@{$self->{tokens}}, 'C:'.$tokprefix.$token);
-      } else {
-	push (@{$self->{tokens}}, 'C:'.$tokprefix.$token);
-      }
-    }
-
     # replace digits with 'N'...
-    if ($replacedigits && $token =~ /\d/) {
+    if ($token =~ /\d/) {
       $token =~ s/\d/N/gs; push (@{$self->{tokens}}, 'N:'.$tokprefix.$token);
     }
   }
@@ -507,32 +436,12 @@ sub tokenize_headers {
   # and now delete lines for headers we don't want (incl all Receiveds)
   $hdrs =~ s/^From \S+[^\n]+$//gim;
 
-  if (TRY_NOTE_HEADER_PRESENCE_ABSENCE) {
-    my @newhdrs = ();
-
-    foreach my $hdr (@FLAG_PRESENCE_HDRS) {
-      if ($hdrs =~ /^${hdr}: /m) {
-	push (@newhdrs, "\n", $hdr, ": PRESENT");
-      } else {
-	push (@newhdrs, "\n", $hdr, ": ABSENT");
-      }
-    }
-
-    $hdrs =~ s/^${IGNORED_HDRS}: [^\n]*$//gim;
-    $hdrs .= join ('', @newhdrs);
-
-  } else {
-    $hdrs =~ s/^${IGNORED_HDRS}: [^\n]*$//gim;
-  }
+  $hdrs =~ s/^${IGNORED_HDRS}: [^\n]*$//gim;
 
   # and re-add the last 2 received lines: usually a good source of
   # spamware tokens and HELO names.
   if ($#rcvdlines >= 0) { $hdrs .= "\n".$rcvdlines[$#rcvdlines]; }
   if ($#rcvdlines >= 1) { $hdrs .= "\n".$rcvdlines[$#rcvdlines-1]; }
-
-  if (TRY_KEEP_THIRD_RECEIVED) {
-    if ($#rcvdlines >= 2) { $hdrs .= "\n".$rcvdlines[$#rcvdlines-2]; }
-  }
 
   while ($hdrs =~ /^(\S+): ([^\n]*)$/gim) {
     my $hdr = $1;
