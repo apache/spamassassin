@@ -1032,9 +1032,28 @@ sub check {
     }
   }
 
-  logmsg( "$was_it_spam ($msg_score/$msg_threshold) for $current_user:$> in "
-      . sprintf( "%.1f", time - $start )
-      . " seconds, $actual_length bytes." );
+  my $scantime = sprintf( "%.1f", time - $start );
+
+  logmsg( "$was_it_spam ($msg_score/$msg_threshold) for $current_user:$> in"
+      . " $scantime seconds, $actual_length bytes." );
+
+  # add a summary "result:" line, based on mass-check format
+  my @extra;
+  push(@extra, "scantime=".$scantime, "size=$actual_length", "mid=$msgid");
+  if ($rmsgid) {
+    push(@extra, "rmid=$msgid");
+  }
+  if (defined $status->{bayes_score}) {
+    push(@extra, "bayes=".$status->{bayes_score});
+  }
+  push(@extra, "autolearn=".$status->get_autolearn_status());
+
+  my $yorn = $status->is_spam() ? 'Y' : '.';
+  my $score = $status->get_score();
+  my $tests = join(",", sort(grep(length,$status->get_names_of_tests_hit())));
+
+  logmsg( sprintf("result: %s %2d - %s %s", $yorn, $score,
+                        $tests, join(",", @extra) ));
 
   $status->finish();    # added by jm to allow GC'ing
   $mail->finish();

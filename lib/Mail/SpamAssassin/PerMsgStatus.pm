@@ -252,7 +252,8 @@ sub learn {
 
   if (!$self->{conf}->{bayes_auto_learn} ||
       !$self->{conf}->{use_bayes} ||
-      $self->{disable_auto_learning}) {
+      $self->{disable_auto_learning})
+  {
       $self->{auto_learn_status} = "disabled";
       return;
   }
@@ -462,6 +463,21 @@ sub get_required_score {
 sub get_required_hits {
   my ($self) = @_;
   return $self->{conf}->{required_score};
+}
+
+###########################################################################
+
+=item $num = $status->get_autolearn_status ()
+
+After a mail message has been checked, this method can be called.  It will
+return one of the following strings depending on whether the mail was
+auto-learned or not: "ham", "no", "spam", "disabled", "failed", "unavailable".
+
+=cut
+
+sub get_autolearn_status {
+  my ($self) = @_;
+  return ($self->{auto_learn_status} || "unavailable");
 }
 
 ###########################################################################
@@ -1008,9 +1024,7 @@ sub _get_tag {
               return $arg x $length;
             },
 
-            AUTOLEARN => sub {
-              return($self->{auto_learn_status} || "unavailable");
-            },
+            AUTOLEARN => sub { return $self->get_autolearn_status(); },
 
             TESTS => sub {
               my $arg = (shift || ',');
