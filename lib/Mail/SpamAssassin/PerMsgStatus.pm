@@ -166,10 +166,14 @@ sub check {
 
   $self->delete_fulltext_tmpfile();
 
+  # Round the hits to 3 decimal places to avoid rounding issues
+  # We assume required_hits to be properly rounded already.
+  $self->{hits} = sprintf "%0.3f", $self->{hits};
+  
   dbg ("is spam? score=".$self->{hits}.
-  			" required=".$self->{conf}->{required_hits}.
+                        " required=".$self->{conf}->{required_hits}.
                         " tests=".$self->get_names_of_tests_hit());
-  $self->{is_spam} = ($self->{hits} >= $self->{conf}->{required_hits});
+  $self->{is_spam} = $self->is_spam();
 
   if ($self->{conf}->{use_terse_report}) {
     $_ = $self->{conf}->{terse_report_template};
