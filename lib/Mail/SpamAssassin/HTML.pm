@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.48 2002/12/11 09:31:55 quinlan Exp $
+# $Id: HTML.pm,v 1.49 2002/12/12 02:34:17 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -190,8 +190,8 @@ sub html_tests {
     $self->{html}{bgcolor_nonwhite} = 1 if $self->{html}{bgcolor} !~ /^\#?ffffff$/;
   }
   if ($tag eq "font" && exists $attr->{size}) {
-    $self->{html}{big_font} = 1 if (($attr->{size} =~ /^\s*(\d+)/ && $1 >= 3) ||
-			    ($attr->{size} =~ /\+(\d+)/ && $1 > 1));
+    $self->{html}{big_font} = 1 if (($attr->{size} =~ /^\s*(\d+)/ && $1 > 3) ||
+			    ($attr->{size} =~ /\+(\d+)/ && $1 >= 1));
   }
   if ($tag eq "font" && exists $attr->{color}) {
     my $c = lc($attr->{color});
