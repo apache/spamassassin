@@ -30,7 +30,10 @@ loadplugin Mail::SpamAssassin::Plugin::SPF
 
 # DCC - perform DCC message checks.
 #
-loadplugin Mail::SpamAssassin::Plugin::DCC
+# DCC is disabled here because it is not open source.  See the DCC
+# license for more details.
+#
+#loadplugin Mail::SpamAssassin::Plugin::DCC
 
 # Pyzor - perform Pyzor message checks.
 #
