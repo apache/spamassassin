@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/perl -w
 
 =head1 NAME
 
@@ -52,6 +52,8 @@ but easier to read.
 
 =cut
 
+use strict;
+
 use vars qw{
   $IP_ADDRESS $IP_IN_RESERVED_RANGE
 };
@@ -101,7 +103,7 @@ usage: bayes_dump_to_trusted_networks [--minham n] [--rdns] [file]
 }
 
 use vars qw(
-                $opt_minham $opt_rdns $opt_help
+                $opt_minham $opt_rdns $opt_help 
         );
 
 GetOptions(
@@ -114,6 +116,7 @@ $opt_help and usage();
 $opt_rdns ||= 0;
 $opt_minham ||= 3;
 
+my %class_cs = ();
 while (<>) {
   my ($prob, $nspam, $nham, $atime, $tok) = split;
 
@@ -125,15 +128,52 @@ while (<>) {
   next if ($ip =~ /$IP_IN_RESERVED_RANGE/o);
   $ip =~ s/[^0-9\.\:]/_/gs;	# sanitise!
 
-  my $rdns = '';
-  if ($opt_rdns) {
-    my $host = `host $ip 2>&1`;
-    $host =~ s/^.* domain name pointer (.+)\s*$/$1/gm;
-    $host =~ s/\.$//;
-    $rdns = "\t# $host";
-  }
+  $ip =~ /^(.*)\.(\d+)/;
 
-  print "trusted_networks $ip$rdns\n";
+  if (defined $class_cs{$1}) {
+    $class_cs{$1} .= " ".$2;
+  } else {
+    $class_cs{$1} = $2;
+  }
 }
 
+use Net::CIDR::Lite;	# used to consolidate into CIDR ranges
+foreach my $class_c (sort {
+	classc2long($a) <=> classc2long($b)
+      } keys %class_cs)
+{
+  my $cidr = Net::CIDR::Lite->new;
+  foreach my $octet (split (' ', $class_cs{$class_c})) {
+    my $ip = "$class_c.$octet";
+    $cidr->add_ip ($ip);
+  }
+  $cidr->clean();
 
+  my @ips = $cidr->list();
+
+  foreach my $ip (@ips) {
+    my $rdns = '';
+    if ($ip =~ s/\/32$//) {
+      if ($opt_rdns) {
+	my $host = `host -W 1 $ip 2>&1`;
+	$host =~ s/^.* domain name pointer (\S+)\s*$/$1/gm;
+	$host =~ s/^.*not found: .*$/(no rdns)/gs;
+	$host =~ s/\s+/ /gs;	# (newlines)
+	$host =~ s/\.$//;
+	$rdns = "\t# $host";
+      }
+    } else {
+      if ($opt_rdns) {
+	$rdns = "\t# (range)";
+      }
+    }
+
+    print "trusted_networks $ip$rdns\n";
+  }
+}
+
+sub classc2long {
+  my $ip = shift;
+  ($ip =~ /^(\d+)\.(\d+)\.(\d+)$/) or return -1;
+  ($1 << 16) | ($2 << 8) | ($3);
+}
