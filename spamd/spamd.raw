@@ -771,7 +771,9 @@ while (1) {
   sleep;    # wait for a signal (ie: child's death)
 
   if ( defined $got_sighup ) {
-    defined( $opt{'pidfile'} ) and unlink( $opt{'pidfile'} );
+    if (defined($opt{'pidfile'})) {
+      unlink($opt{'pidfile'}) || warn "Can't unlink $opt{'pidfile'}: $!\n";
+    }
 
     # leave Client fds active, and do not kill children; they can still
     # service clients until they exit.  But restart the listener anyway.
@@ -1672,10 +1674,14 @@ sub kill_handler {
   logmsg("server killed by SIG$sig, shutting down");
   $server->close;
 
-  defined( $opt{'pidfile'} ) and unlink( $opt{'pidfile'} );
+  if (defined($opt{'pidfile'})) {
+    unlink($opt{'pidfile'}) || warn "Can't unlink $opt{'pidfile'}: $!\n";
+  }
 
   # the UNIX domain socket
-  defined( $opt{'socketpath'} ) and unlink( $opt{'socketpath'} );
+  if (defined($opt{'socketpath'})) {
+    unlink($opt{'socketpath'}) || warn "Can't unlink $opt{'socketpath'}: $!\n";
+  }
 
   $SIG{CHLD} = 'DEFAULT';    # we're going to kill our children
   kill 'INT' => keys %children;
@@ -1708,7 +1714,9 @@ sub restart_handler {
     $server->close;
 
     # the UNIX domain socket
-    defined( $opt{'socketpath'} ) and unlink( $opt{'socketpath'} );
+    if (defined($opt{'socketpath'})) {
+      unlink($opt{'socketpath'}) || warn "Can't unlink $opt{'socketpath'}: $!\n";
+    }
 
     warn "server socket closed\n" if $opt{'debug'};
   }
