@@ -17,15 +17,18 @@ while (<>) {
   my $lang ='';
   if (s/^lang\s+(\S+)\s+//) { $lang = $1; }
 
-  if (/^(header|body|rawbody|uri|full|describe)\s+(\S+)\s+(.+)$/) {
+  if (/^(header|body|rawbody|uri|full)\s+(\S+)\s+(.+)$/) {
     if (!defined $test{$2}) {
       push (@testnames, $2);
       $type{$2} = $1;
       $lang{$2} = $lang;
     }
     $test{$2} = $3;
-  }
-  if (/^score\s+(\S+)\s+(.+)$/) {
+
+  } elsif (/^describe\s+(\S+)\s+(.+)$/) {
+    if (!defined $desc{$2}) { $desc{$2} = $3; }
+
+  } elsif (/^score\s+(\S+)\s+(.+)$/) {
     $score{$1} = $2;
   }
 }
@@ -34,18 +37,19 @@ my $n = 0;
 foreach my $t (@testnames) {
   $n++;
   $_ = $tmpl;
-  $test = $test{$t};
+  my $desc = $desc{$t};
+  $desc ||= $test{$t};
 
-  $test =~ s,\|,| ,gs;		# allow line breaks on pipes
-  $test =~ s,\$,(dollar) ,gs;
-  $test = HTML::Entities::encode ($test);
+  $desc =~ s,\|,| ,gs;		# allow line breaks on pipes
+  $desc =~ s,\$,(dollar) ,gs;
+  $desc = HTML::Entities::encode ($desc);
 
   my $bgcolor = '';
   if ($n % 2 == 0) { $bgcolor = ' bgcolor=#ccffcc'; }
 
   s/__BGCOLOR__/$bgcolor/gs;
   s/__NAME__/$t/gs;
-  s/__DESCRIPTION__/$test/gs;
+  s/__DESCRIPTION__/$desc/gs;
   s/__TYPE__/$type{$t}/gs;
   s/__LANG__/$lang{$t}/gs;
   s/__SCORE__/$score{$t} or 1/ges;

@@ -42,6 +42,7 @@ tflags MAJORDOMO		nice
 
 header REFERENCES		References =~ /^(<(?:[a-zA-Z0-9.!\#\$%&'*\+\/=?\^_{}|~-]+|\".+\")\@(?:[a-zA-Z0-9.-]+|\[\d{1,3}(?:\.\d{1,3}){3}\])>\s*)+$/
 describe REFERENCES		Has a valid-looking References header
+tflags REFERENCES               nice
 
 # these headers have very low correlation with spam
 header CRON_ENV                 exists:X-Cron-Env
