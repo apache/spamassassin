@@ -722,93 +722,100 @@ sub spawn {
 
     # handle $clients_per_child connections, then die in "old" age...
     for ( my $i = 0 ; $i < $clients_per_child ; $i++ ) {
-      $client = $server->accept();
 
-      # Bah!
-      if ( !$client ) {
+      # use a large eval scope to catch die()s and ensure they
+      # don't kill the server.
+      eval {
+        $client = $server->accept();
 
-        # this can happen when interrupted by SIGCHLD on Solaris,
-        # perl 5.8.0, and some other platforms with -m.
-        if ( $! == &Errno::EINTR ) {
-          next;
+        # Bah!
+        if ( !$client ) {
+
+          # this can happen when interrupted by SIGCHLD on Solaris,
+          # perl 5.8.0, and some other platforms with -m.
+          if ( $! == &Errno::EINTR ) {
+            next;
+          }
+          elsif ( $! == 0 && $opt{'ssl'} ) {
+            logmsg( "SSL failure: " . &IO::Socket::SSL::errstr() );
+            next;
+          }
+          else {
+            die "accept failed: $!";
+          }
         }
-        elsif ( $! == 0 && $opt{'ssl'} ) {
-          logmsg( "SSL failure: " . &IO::Socket::SSL::errstr() );
-          next;
-        }
-        else {
-          die "accept failed: $!";
-        }
-      }
 
-      $client->autoflush(1);
+        $client->autoflush(1);
 
-      # keep track of start time
-      my $start = time;
+        # keep track of start time
+        my $start = time;
 
-      if ( $opt{'socketpath'} ) {
-        logmsg( "got connection over " . $opt{'socketpath'} );
-      }
-      else {
-        my ( $port, $ip ) = sockaddr_in( $client->peername );
-        my $name = gethostbyaddr( $ip, AF_INET );
-
-        $ip = inet_ntoa($ip);
-        $name ||= $ip;
-        if ( ip_is_allowed($ip) ) {
-          logmsg("connection from $name [$ip] at port $port");
+        if ( $opt{'socketpath'} ) {
+          logmsg( "got connection over " . $opt{'socketpath'} );
         }
         else {
-          logmsg("unauthorized connection from $name [$ip] at port $port");
+          my ( $port, $ip ) = sockaddr_in( $client->peername );
+          my $name = gethostbyaddr( $ip, AF_INET );
+
+          $ip = inet_ntoa($ip);
+          $name ||= $ip;
+          if ( ip_is_allowed($ip) ) {
+            logmsg("connection from $name [$ip] at port $port");
+          }
+          else {
+            logmsg("unauthorized connection from $name [$ip] at port $port");
+            $client->close;
+            next;
+          }
+        }
+
+        # send the request to the child process
+        local ($_) = $client->getline;
+
+        if ( !defined $_ ) {
+          protocol_error("(closed before headers)");
           $client->close;
           next;
         }
-      }
 
-      # send the request to the child process
-      local ($_) = $client->getline;
+        s/\r?\n//;
 
-      if ( !defined $_ ) {
-        protocol_error("(closed before headers)");
+        # It may be a SKIP message, meaning that the client (spamc)
+        # thinks it is too big to check.  So we don't do any real work
+        # in that case.
+
+        if (/SKIP SPAMC\/(.*)/) {
+          logmsg( "skipped large message in "
+              . sprintf( "%3d", time - $start )
+              . " seconds." );
+        }
+
+        # It might be a CHECK message, meaning that we should just check
+        # if it's spam or not, then return the appropriate response.
+        # If we get the PROCESS command, the client is going to send a
+        # message that we need to filter.
+
+        elsif (/(PROCESS|CHECK|SYMBOLS|REPORT|REPORT_IFSPAM) SPAMC\/(.*)/) {
+          check( $1, $2, $start );
+        }
+
+        # Looks like a client is just seeing if we're alive.
+
+        elsif (/PING SPAMC\/(.*)/) {
+          print $client "SPAMD/1.2 $resphash{EX_OK} PONG\r\n";
+        }
+
+        # If it was none of the above, then we don't know what it was.
+
+        else {
+          protocol_error($_);
+        }
+
+        # Close out our connection to the client ...
         $client->close;
-        next;
-      }
 
-      s/\r?\n//;
-
-      # It may be a SKIP message, meaning that the client (spamc)
-      # thinks it is too big to check.  So we don't do any real work
-      # in that case.
-
-      if (/SKIP SPAMC\/(.*)/) {
-        logmsg( "skipped large message in "
-            . sprintf( "%3d", time - $start )
-            . " seconds." );
-      }
-
-      # It might be a CHECK message, meaning that we should just check
-      # if it's spam or not, then return the appropriate response.
-      # If we get the PROCESS command, the client is going to send a
-      # message that we need to filter.
-
-      elsif (/(PROCESS|CHECK|SYMBOLS|REPORT|REPORT_IFSPAM) SPAMC\/(.*)/) {
-        check( $1, $2, $start );
-      }
-
-      # Looks like a client is just seeing if we're alive.
-
-      elsif (/PING SPAMC\/(.*)/) {
-        print $client "SPAMD/1.2 $resphash{EX_OK} PONG\r\n";
-      }
-
-      # If it was none of the above, then we don't know what it was.
-
-      else {
-        protocol_error($_);
-      }
-
-      # Close out our connection to the client ...
-      $client->close;
+        # end of eval.  trap die()s here:
+      } or logmsg("error: $@ $!, continuing");
 
       # if we changed UID during processing, change back!
       if ( $> != $< and $> != ( $< - 2**32 ) ) {
