@@ -1014,7 +1014,7 @@ sub check {
     $actual_length += length;
     last
       if ( defined($expected_length)
-      && ( $actual_length == $expected_length ) );
+      && ( $actual_length >= $expected_length ) );
   }
 
   $msgid        ||= "(unknown)";
