@@ -6,6 +6,8 @@
 #
 ###########################################################################
 # Header compensation tests
+#
+# Note: HTML compensation tests are in 20_body_tests.cf
 
 require_version @@VERSION@@
 
@@ -145,10 +147,6 @@ full SIGNATURE_LONG_SPARSE	eval:check_signature('8', '15', '1')
 describe SIGNATURE_LONG_SPARSE	Long signature present (empty lines)
 tflags SIGNATURE_LONG_SPARSE	nice
 
-rawbody EGP_HTML_BANNER         /^<!-- \S+begin egp html banner/
-describe EGP_HTML_BANNER        non-spam Yahoo! Groups banner found
-tflags EGP_HTML_BANNER		nice
-
 body MAILMAN_CONFIRM            /^We have received a request from \S+ for subscription of your email address, \S+, to the \S+ mailing list\./
 describe MAILMAN_CONFIRM        A MailMan confirm-your-address message
 tflags MAILMAN_CONFIRM		nice
@@ -258,7 +256,7 @@ test FWD_MSG ok Subject: [landho] Fwd: tell rod
 test FWD_MSG fail Subject: Fwd:Pure Opt-In for half the price
 test FWD_MSG fail Subject: Re: RE: FWD: search results        .       .       .
 
-header __ORIGL_MESSAGE_AGENT	X-Mailer =~ /\b(?:Microsoft Outlook|Internet Mail Service|Mozilla|AOL)\b/
+header __ORIG_MESSAGE_AGENT	X-Mailer =~ /\b(?:Microsoft Outlook|Internet Mail Service|Mozilla|AOL)\b/
 rawbody __ORIG_MESSAGE_LINE	/^-{5,8} ?Original Message ?-{5,8}$/
 meta ORIGINAL_MESSAGE		(__ORIG_MESSAGE_AGENT && __ORIG_MESSAGE_LINE)
 describe ORIGINAL_MESSAGE	Looks like a reply to a message

@@ -177,6 +177,10 @@ describe HTML_TABLE_THICK_BORDER	HTML table has thick border
 body HTML_COMMENT_EMAIL		eval:html_test('comment_email')
 describe HTML_COMMENT_EMAIL	HTML comment contains email address
 
+body HTML_COMMENT_EGP		eval:html_test('comment_egp')
+describe HTML_COMMENT_EGP	HTML comment contains non-spam Yahoo! Groups banner
+tflags HTML_COMMENT_EGP		nice
+
 body HTML_COMMENT_SKY		eval:html_test('comment_sky')
 describe HTML_COMMENT_SKY	HTML comment contains SKY database codes
 
