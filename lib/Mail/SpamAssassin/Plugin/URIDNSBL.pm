@@ -478,8 +478,8 @@ sub complete_lookups {
     elsif ($type eq 'DNSBL') {
       $self->complete_dnsbl_lookup ($scanstate, $ent, $val);
       my $totalsecs = (time - $ent->{obj}->{querystart});
-      dbg ("URIDNSBL: ".$ent->{obj}->{dom}." took ".
-		$totalsecs." seconds to look up");
+      dbg ("URIDNSBL: query for ".$ent->{obj}->{dom}." took ".
+		$totalsecs." seconds to look up ($val)");
     }
 
     $scanstate->{queries_completed}++;
