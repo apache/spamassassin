@@ -181,3 +181,20 @@ body T_OPTING_OUT_CAPS		/\b(?-i:O)pt.?(?-i:O)ut\b/i
 # try \b around a rule deleted at some point
 body T_OPTING_IN_CAPS		/\b(?-i:O)pt.?(?-i:I)n\b/i
 
+# testing for Jeff, do not use!!!
+ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
+urirhsbl URIBL_MP fraud.rhs.mailpolice.com.   A
+body     URIBL_MP eval:check_uridnsbl('URIBL_MP')
+describe URIBL_MP URI's domain appears in MailPolice fraud list
+tflags   URIBL_MP net
+score    URIBL_MP 2.0
+endif	# Mail::SpamAssassin::Plugin::URIDNSBL
+
+# bug 3680: empty anchor, some others
+body T_HTML_LINK_EMPTY_1	eval:html_text_match('anchor', '^$')
+body T_HTML_LINK_EMPTY_2	eval:html_text_match('anchor', '^\s*$')
+body T_HTML_LINK_PUSH_HERE	eval:html_text_match('anchor', '(?i)(?:push|go|cl[1l]ck)\s*(?:here|this)')
+body T_HTML_LINK_OPT		eval:html_text_match('anchor', '(?i)opt.?(?:out|in)')
+body T_HTML_LINK_OPT_OUT	eval:html_text_match('anchor', '(?i)opt.?out')
+body T_HTML_LINK_EMPTY_HREF  eval:html_test('t_anchor_empty_href')
+describe T_HTML_LINK_EMPTY_HREF  HTML anchor has empty or missing HREF value
