@@ -91,7 +91,6 @@ score DATE_IN_PAST_24_48 0 0.302 0.133 0.089
 score DATE_IN_PAST_48_96 0.034 0.257 0.222 0
 score DATE_IN_PAST_96_XX 0.505 1.082 0.979 1.360
 score DATE_SPAMWARE_Y2K 2.958 2.888 3.384 3.911
-score DCC_CHECK 0 1.373 0 2.169
 score DEAR_FRIEND 0.542 0.766 1.288 0.070
 score DEAR_SOMETHING 1.059 0.803 1.577 1.578
 score DEEP_DISC_MEDS 2.480 1.211 2.573 2.626
@@ -418,7 +417,6 @@ score PORN_URL_SEX 1.865 1.427 1.817 0.011
 score PORN_URL_SLUT 0.941 1.022 0.194 0.094
 score PREST_NON_ACCREDITED 1.520 1.394 1.607 1.901
 score PRIORITY_NO_NAME 1.455 1.185 1.836 1.097
-score PYZOR_CHECK 0 2.041 0 3.451
 score RATWARE_EGROUPS 2.180 2.701 2.552 2.805
 score RATWARE_GECKO_BUILD 0 0.826 0.784 1.385
 score RATWARE_HASH_2 0.039 0 0.085 0.037
@@ -656,6 +654,20 @@ score URIBL_WS_SURBL 0 0.539 0 1.462
 score URIBL_JP_SURBL 0 3 0 3
 # </gen:mutable>
 endif # Mail::SpamAssassin::Plugin::URIDNSBL
+
+# DCC
+ifplugin Mail::SpamAssassin::Plugin::DCC
+# <gen:mutable>
+score DCC_CHECK 0 1.373 0 2.169
+# </gen:mutable>
+endif # Mail::SpamAssassin::Plugin::DCC
+
+# Pyzor
+ifplugin Mail::SpamAssassin::Plugin::Pyzor
+# <gen:mutable>
+score PYZOR_CHECK 0 2.041 0 3.451
+# </gen:mutable>
+endif # Mail::SpamAssassin::Plugin::Pyzor
 
 # Razor2
 ifplugin Mail::SpamAssassin::Plugin::Razor2
