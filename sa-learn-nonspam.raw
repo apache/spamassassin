@@ -147,19 +147,31 @@ First a high-level overview:
 
 =item Build a significant sample of both spam and non-spam.
 
-I suggest several thousand of each, placed in SPAM and NONSPAM
-directories.  Yes, you MUST hand-sort this - otherwise the results won't
-be much better than SpamAssassin on its own. Verify the
-spamminess/nonspammiess of EVERY message. I urge you to avoid using a
-publicly available corpus (sample) - this must be taken from YOUR mail
-server, if it's to be statistically useful. Otherwise, the results may be
-pretty skewed.
+I suggest several thousand of each, placed in SPAM and NONSPAM directories or
+mailboxes.  Yes, you MUST hand-sort this - otherwise the results won't be much
+better than SpamAssassin on its own. Verify the spamminess/nonspammiess of
+EVERY message. I urge you to avoid using a publicly available corpus (sample) -
+this must be taken from YOUR mail server, if it's to be statistically useful.
+Otherwise, the results may be pretty skewed.
 
 =item Use the SpamAssassin tools (more below) B<sa-learn-spam> and
-B<sa-learn-nonspam> to teach SpamAssassin about these samples.
+B<sa-learn-nonspam> to teach SpamAssassin about these samples, like
+so:
+
+	sa-learn-spam /path/to/spam/folder
+	sa-learn-nonspam /path/to/nonspam/folder
+	...
 
 Let SpamAssassin proceed, learning stuff. When it find spam and non-spam
 it will add the "interesting tokens" to the database.
+
+=item Once you've learnt everything you want in this session, run
+B<sa-learn-rebuild> to put those changes into the production database.
+
+	sa-learn-rebuild
+
+This will probably take 30 seconds to several minutes to complete, depending on
+how much mail you trained with, and how fast your machine is.
 
 =item If you need SpamAssassin to forget about specific messages, use
 B<sa-forget>.
@@ -168,6 +180,8 @@ This can be applied to either spam or non-spam that has run through the
 B<sa-learn> processes. It's a bit of a hammer, really, lowering the
 weighting of the specific tokens in that message (only if that message has
 been processed before).
+
+=item Learning from single messages is 
 
 =head1 EFFECTIVE TRAINING
 
