@@ -107,6 +107,11 @@ sub increment_accumulator_for_entry {
   my $path = $entry->{accumulator_path};
   my $dir = dirname ($path);
 
+  if (-f $dir) {
+    warn "auto-whitelist: $dir is a file, not dir: deleting\n";
+    unlink ($dir);
+  }
+
   if (!-d $dir) {
     if (!mkpath ($dir, 0, $self->{mode})) {
       warn "auto-whitelist: mkpath $dir failed\n";

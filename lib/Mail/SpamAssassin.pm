@@ -69,7 +69,7 @@ use vars	qw{
 @ISA = qw();
 
 $VERSION = "2.0";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.56 2002/01/15 03:39:11 jmason Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.57 2002/01/15 04:30:12 jmason Exp $';
 
 sub Version { $VERSION; }
 
@@ -513,18 +513,7 @@ sub init {
     $self->{config_text} .= $self->read_cf ($fname, 'site rules dir');
 
     if ( $use_user_pref != 0 ) {
-
-      # user state directory
-      $fname = $self->{userstate_dir};
-      $fname ||= $self->first_existing_path (@default_userstate_dir);
-
-      if (defined $fname && !$self->{dont_copy_prefs}) {
-	dbg ("using \"$fname\" for user state dir");
-
-	if (!-d $fname) {
-	  mkpath ($fname, 0, 0700) or warn "mkdir $fname failed\n";
-	}
-      }
+      $self->create_dotsa_dir_if_needed();
 
       my $old_prefs_name = $self->first_existing_path ('~/.spamassassin.cf');
       if (!-f $old_prefs_name) { $old_prefs_name = undef; }
@@ -585,6 +574,22 @@ sub read_cf {
   return $txt;
 }
 
+sub create_dotsa_dir_if_needed {
+  my ($self) = @_;
+
+  # user state directory
+  my $fname = $self->{userstate_dir};
+  $fname ||= $self->first_existing_path (@default_userstate_dir);
+
+  if (defined $fname && !$self->{dont_copy_prefs}) {
+    dbg ("using \"$fname\" for user state dir");
+
+    if (!-d $fname) {
+      mkpath ($fname, 0, 0700) or warn "mkdir $fname failed\n";
+    }
+  }
+}
+
 =item $f->create_default_prefs ()
 
 Copy default prefs file into home directory for later use and modification.
@@ -596,6 +601,8 @@ sub create_default_prefs {
 
   if (!$self->{dont_copy_prefs} && !-f $fname)
   {
+    $self->create_dotsa_dir_if_needed();
+
     # copy in the default one for later editing
     my $defprefs = $self->first_existing_path
 			(@Mail::SpamAssassin::default_prefs_path);
