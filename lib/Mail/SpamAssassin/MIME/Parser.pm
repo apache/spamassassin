@@ -22,9 +22,6 @@ use strict;
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::MIME;
-use Mail::SpamAssassin::HTML;
-use MIME::Base64;
-use MIME::QuotedPrint;
 
 =item parse()
 
@@ -70,28 +67,34 @@ sub parse {
   my $msg = Mail::SpamAssassin::MIME->new();
   my $header = '';
 
+  # Go through all the headers of the message
   while ( my $last = shift @message ) {
+    # Store the non-modified headers in a scalar
     $msg->{'pristine_headers'} .= $last;
-    $last =~ s/\r?\n//;
 
     # NB: Really need to figure out special folding rules here!
-    if ( $last =~ s/^[ \t]+// ) {                    # if its a continuation
-      $header .= " $last";                           # fold continuations
+    if ( $last =~ /^[ \t]+/ ) {                    # if its a continuation
+      $header .= $last;                            # fold continuations
       next;
     }
 
+    # Ok, there's a header here, let's go ahead and add it in.
     if ($header) {
       my ( $key, $value ) = split ( /:\s*/, $header, 2 );
-      $msg->header( $key, $self->_decode_header($value), $value );
+      $msg->header( $key, $value );
     }
 
     # not a continuation...
     $header = $last;
 
-    last if ( $last =~ /^$/m );
+    # Ok, we found the header/body blank line ...
+    last if ( $last =~ /^\r?$/m );
   }
 
-  #$msg->{'pristine_body'} = \@message;
+  # Store the pristine body for later -- store as a copy since @message will get modified below
+  $msg->{'pristine_body'} = join('', @message);
+
+  # Figure out the boundary
   my ($boundary);
   ($msg->{'type'}, $boundary) = Mail::SpamAssassin::Util::parse_content_type($msg->header('content-type'));
   dbg("main message type: ".$msg->{'type'});
@@ -277,39 +280,6 @@ sub _parse_normal {
   # BTW: please leave this after add_body_parts() since it'll add it back.
   #
   delete $part_msg->{body_parts};
-}
-
-sub __decode_header {
-  my ( $encoding, $cte, $data ) = @_;
-
-  if ( $cte eq 'B' ) {
-    # base 64 encoded
-    return Mail::SpamAssassin::Util::base64_decode($data);
-  }
-  elsif ( $cte eq 'Q' ) {
-    # quoted printable
-    return Mail::SpamAssassin::Util::qp_decode($data);
-  }
-  else {
-    die "Unknown encoding type '$cte' in RFC2047 header";
-  }
-}
-
-=item _decode_header()
-
-Decode base64 and quoted-printable in headers according to RFC2047.
-
-=cut
-
-sub _decode_header {
-  my($self, $header) = @_;
-
-  return '' unless $header;
-  return $header unless $header =~ /=\?/;
-
-  $header =~
-    s/=\?([\w_-]+)\?([bqBQ])\?(.*?)\?=/__decode_header($1, uc($2), $3)/ge;
-  return $header;
 }
 
 sub dbg { Mail::SpamAssassin::dbg (@_); }

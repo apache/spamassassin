@@ -46,8 +46,8 @@ change your setup to use procmail as detailed below.  If you used
 spamassassin to filter your mail and then something else wrote it into a
 folder for you, then you should be fine.
 
-Support for versions of the optional Mail::Audit module before 1.9 is no
-longer included.
+Support for versions of the optional Mail::Audit module is no longer
+included.
 
 The default mode of tagging (which used to be ***SPAM*** in the subject
 line) no longer takes place.  Instead the message is rewritten.
@@ -387,28 +387,6 @@ skipped.
     Note that MIMEDefang users may need to set the 'pyzor_path'
     configuration setting, since MIMEDefang does not set a PATH by
     default.
-
-
-  - Mail::Audit, Mail::Internet, Net::SMTP        (from CPAN)
-
-    If you want to use SpamAssassin with Mail::Audit, you will (obviously)
-    require the Mail::Audit module, and any modules it requires (there's
-    lots of them, unfortunately).
-    
-    Additionally, Mail::Internet is required if you wish to use the
-    "-r/-w" options of the spamassassin program (reporting and replying,
-    for spam-trap mail accounts).
-
-    If you use procmail, KMail, 'spamassassin', or you plan to use
-    'spamd', you will *not* need these.
-
-    Here's how to install them using CPAN.pm:
-
-	perl -MCPAN -e shell
-	o conf prerequisites_policy ask
-	install Mail::Audit
-	quit
-
 
   - Net::Ident      (from CPAN)
 

@@ -71,15 +71,9 @@ package Mail::SpamAssassin::NoMailAudit;
 
 use strict;
 use bytes;
-use Fcntl qw(:DEFAULT :flock);
 
-use Mail::SpamAssassin::Message;
 use Mail::SpamAssassin::MIME;
 use Mail::SpamAssassin::MIME::Parser;
-
-@Mail::SpamAssassin::NoMailAudit::ISA = (
-  'Mail::SpamAssassin::Message'
-);
 
 # ---------------------------------------------------------------------------
 
@@ -87,217 +81,59 @@ sub new {
   my $class = shift;
   my %opts = @_;
 
-  my $self = $class->SUPER::new();
-
-  $self->{is_spamassassin_wrapper_object} = 1;
-  $self->{has_spamassassin_methods} = 1;
-  $self->{headers} = { };
-  $self->{header_order} = [ ];
+  my $self = {
+    mime_parts => Mail::SpamAssassin::MIME::Parser->parse($opts{'data'} || \*STDIN),
+  };
 
   bless ($self, $class);
-
-  # data may be filehandle (default stdin) or arrayref
-  my $data = $opts{data} || \*STDIN;
-
-  if (ref $data eq 'ARRAY') {
-    $self->{textarray} = $data;
-  } elsif (ref $data eq 'GLOB') {
-    if (defined fileno $data) {
-      $self->{textarray} = [ <$data> ];
-    }
-  }
-
-  # Parse the message for MIME parts
-  $self->{mime_parts} = Mail::SpamAssassin::MIME::Parser->parse($self->{textarray});
-
-  # Parse the message to get header information
-  $self->parse_headers();
   return $self;
 }
 
 # ---------------------------------------------------------------------------
 
-sub parse_headers {
-  my ($self) = @_;
-  local ($_);
-
-  $self->{headers} = { };
-  $self->{header_order} = [ ];
-  my ($prevhdr, $hdr, $val, $entry);
-
-  while (defined ($_ = shift @{$self->{textarray}})) {
-    # warn "parse_headers $_";
-    if (/^\r*$/) { last; }
-
-    $entry = $hdr = $val = undef;
-
-    if (/^\s/) {
-      if (defined $prevhdr) {
-	$hdr = $prevhdr; $val = $_;
-        $val =~ s/\r+\n/\n/gs;          # trim CRs, we don't want them
-	$entry = $self->{headers}->{$hdr};
-	$entry->{$entry->{count} - 1} .= $val;
-	next;
-
-      } else {
-	$hdr = "X-Mail-Format-Warning";
-	$val = "No previous line for continuation: $_";
-	$entry = $self->_get_or_create_header_object ($hdr);
-	$entry->{added} = 1;
-      }
-
-    } elsif (/^From /) {
-      $self->{from_line} = $_;
-      next;
-
-    } elsif (/^([\x21-\x39\x3B-\x7E]+):\s*(.*)$/s) {
-      # format of a header, as defined by RFC 2822 section 3.6.8;
-      # 'Any character except controls, SP, and ":".'
-      $hdr = $1; $val = $2;
-      $val =~ s/\r+//gs;          # trim CRs, we don't want them
-      $entry = $self->_get_or_create_header_object ($hdr);
-      $entry->{original} = 1;
-
-    } else {
-      $hdr = "X-Mail-Format-Warning";
-      $val = "Bad RFC2822 header formatting in $_";
-      $entry = $self->_get_or_create_header_object ($hdr);
-      $entry->{added} = 1;
-    }
-
-    $self->_add_header_to_entry ($entry, $hdr, $val);
-    $prevhdr = $hdr;
-  }
-}
-
-sub _add_header_to_entry {
-  my ($self, $entry, $hdr, $line, $order) = @_;
-
-  # Do a normal push if no specific order # is set.
-  $order ||= @{$self->{header_order}};
-
-  # ensure we have line endings
-  if ($line !~ /\n$/s) { $line .= "\n"; }
-
-  # Store this header
-  $entry->{$entry->{count}} = $line;
-
-  # Push the header and which count it is in header_order
-  splice @{$self->{header_order}}, $order, 0, $hdr.":".$entry->{count};
-
-  # Increase the count of this header type
-  $entry->{count}++;
-}
-
-sub _get_or_create_header_object {
-  my ($self, $hdr) = @_;
-
-  if (!defined $self->{headers}->{$hdr}) {
-    $self->{headers}->{$hdr} = {
-              'count' => 0,
-              'added' => 0,
-              'original' => 0
-    };
-  }
-  return $self->{headers}->{$hdr};
-}
-
-# ---------------------------------------------------------------------------
-
-sub _get_header_list {
-  my ($self, $hdr, $header_name_only) = @_;
-
-  # OK, we want to do a case-insensitive match here on the header name
-  # So, first I'm going to pick up an array of the actual capitalizations used:
-  my $lchdr = lc $hdr;
-  my @cap_hdrs = grep(lc($_) eq $lchdr, keys(%{$self->{headers}}));
-
-  # If the request is just for the list of headers names that matched only ...
-  if ( defined $header_name_only && $header_name_only ) {
-    return @cap_hdrs;
-  }
-  else {
-    # return the values in each of the headers
-    return map($self->{headers}->{$_},@cap_hdrs);
-  }
-}
-
 sub get_pristine_header {
   my ($self, $hdr) = @_;
+  
+  return $self->{mime_parts}->{pristine_headers} unless $hdr;
   my(@ret) = $self->{mime_parts}->{pristine_headers} =~ /^(?:$hdr:[ ]+(.*\n(?:\s+\S.*\n)*))/mig;
   if (@ret) {
-    return wantarray ? @ret : $ret[0];
+    return wantarray ? @ret : $ret[-1];
   }
   else {
     return $self->get_header($hdr);
   }
 }
 
+#sub get { shift->get_header(@_); }
 sub get_header {
   my ($self, $hdr) = @_;
 
   # And now pick up all the entries into a list
-  my @entries = $self->_get_header_list($hdr);
+  # This is assumed to include a newline at the end ...
+  # This is also assumed to have removed continuation bits ...
+  my @hdrs;
+  foreach ( $self->{'mime_parts'}->raw_header($hdr) ) {
+    s/\r?\n\s+/ /g;
+    push(@hdrs, $_);
+  }
 
-  if (!wantarray) {
-      # If there is no header like that, return undef
-      if (scalar(@entries) < 1 ) { return undef; }
-      foreach my $entry (@entries) {
-	  if($entry->{count} > 0) {
-	    my $ret = $entry->{0};
-            $ret =~ s/^\s+//;
-            $ret =~ s/\n\s+/ /g;
-	    return $ret;
-	  }
-      }
-      return undef;
-
-  } else {
-
-      if(scalar(@entries) < 1) { return ( ); }
-
-      my @ret = ();
-      # loop through each entry and collect all the individual matching lines
-      foreach my $entry (@entries)
-      {
-	  foreach my $i (0 .. ($entry->{count}-1)) {
-		my $ret = $entry->{$i};
-                $ret =~ s/^\s+//;
-                $ret =~ s/\n\s+/ /g;
-	  	push (@ret, $ret);
-          }
-      }
-
-      return @ret;
+  if (wantarray) {
+    return @hdrs;
+  }
+  else {
+    return $hdrs[-1];
   }
 }
 
-sub put_header {
-  my ($self, $hdr, $text, $order) = @_;
-
-  my $entry = $self->_get_or_create_header_object ($hdr);
-  $self->_add_header_to_entry ($entry, $hdr, $text, $order);
-  if (!$entry->{original}) { $entry->{added} = 1; }
-}
-
+#sub header { shift->get_all_headers(@_); }
 sub get_all_headers {
   my ($self) = @_;
 
+  my %cache = ();
   my @lines = ();
-  # warn "JMD".join (' ', caller);
 
-  push(@lines, $self->{from_line}) if ( defined $self->{from_line} );
-  foreach my $hdrcode (@{$self->{header_order}}) {
-    $hdrcode =~ /^([^:]+):(\d+)$/ or next;
-
-    my $hdr = $1;
-    my $num = $2;
-    my $entry = $self->{headers}->{$hdr};
-    next unless defined($entry);
-
-    my $text = $hdr.": ".$entry->{$num};
-    if ($text !~ /\n$/s) { $text .= "\n"; }
-    push (@lines, $text);
+  foreach ( @{$self->{mime_parts}->{header_order}} ) {
+    push(@lines, "$_: ".($self->get_header($_))[$cache{$_}++]);
   }
 
   if (wantarray) {
@@ -307,118 +143,38 @@ sub get_all_headers {
   }
 }
 
-sub replace_header {
-  my ($self, $hdr, $text) = @_;
-
-  # Figure out where the first case insensitive header of this name is stored.
-  # We'll use this to add the new header with the same case and in the order.
-  my($casehdr,$order) = ($hdr,undef);
-  my $lchdr = lc "$hdr:0"; # just lc it once
-
-  # Now find the header
-  for ( my $count = 0; $count <= @{$self->{header_order}}; $count++ ) {
-    next unless (lc $self->{header_order}->[$count] eq $lchdr);
-
-    # Remember where in the order the header is, and the case of said header.
-    $order = $count;
-    ($casehdr = $self->{header_order}->[$count]) =~ s/:\d+$//;
-
-    last;
-  }
-
-  # Remove all instances of this header
-  $self->delete_header ($hdr);
-
-  # Add the new header with correctly cased header and in the right place
-  return $self->put_header($casehdr, $text, $order);
-}
-
 sub delete_header {
   my ($self, $hdr) = @_;
-
-  # Delete all versions of the header, case insensitively
-  foreach my $dhdr ( $self->_get_header_list($hdr,1) ) {
-    @{$self->{header_order}} = grep( rindex($_,"$dhdr:",0) != 0, @{$self->{header_order}} );
-    delete $self->{headers}->{$dhdr};
-  }
+  $self->{mime_parts}->delete_header($hdr);
 }
 
+#sub body { return shift->get_body(@_); }
 sub get_body {
   my ($self) = @_;
-  return $self->{textarray};
-}
-
-sub replace_body {
-  my ($self, $aryref) = @_;
-  $self->{textarray} = $aryref;
+  my @ret = split(/^/m, $self->get_pristine_body());
+  return \@ret;
 }
 
 # ---------------------------------------------------------------------------
 
 sub get_pristine {
   my ($self) = @_;
-  return join ('', $self->{mime_parts}->{pristine_headers}, @{ $self->{textarray} });
+  return $self->{mime_parts}->{pristine_headers} . $self->{mime_parts}->{pristine_body};
 }
 
 sub get_pristine_body {
   my ($self) = @_;
-  return join ('', @{ $self->{textarray} });
+  return $self->{mime_parts}->{pristine_body};
 }
 
 sub as_string {
   my ($self) = @_;
-  return join ('', $self->get_all_headers(), "\n",
-                @{$self->get_body()});
-}
-
-sub replace_original_message {
-  my ($self, $data) = @_;
-
-  if (ref $data eq 'ARRAY') {
-    $self->{textarray} = $data;
-  } elsif (ref $data eq 'GLOB') {
-    if (defined fileno $data) {
-      $self->{textarray} = [ <$data> ];
-    }
-  }
-
-  $self->parse_headers();
-}
-
-# ---------------------------------------------------------------------------
-# Mail::Audit emulation methods.
-
-sub get { shift->get_header(@_); }
-sub header { shift->get_all_headers(@_); }
-
-sub body {
-  my ($self) = shift;
-  my $replacement = shift;
-
-  if (defined $replacement) {
-    $self->replace_body ($replacement);
-  } else {
-    return $self->get_body();
-  }
+  return $self->get_all_headers() . "\n" . $self->{mime_parts}->{pristine_body};
 }
 
 sub ignore {
   my ($self) = @_;
   exit (0) unless $self->{noexit};
-}
-
-# ---------------------------------------------------------------------------
-
-# does not need to be called it seems.  still, keep it here in case of
-# emergency.
-sub finish {
-  my $self = shift;
-  delete $self->{textarray};
-  foreach my $key (keys %{$self->{headers}}) {
-    delete $self->{headers}->{$key};
-  }
-  delete $self->{headers};
-  delete $self->{mail_object};
 }
 
 1;

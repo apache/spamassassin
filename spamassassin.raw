@@ -208,20 +208,17 @@ eval {
     $mail->ignore();		# will exit
   }
 
-# not reporting? OK, do checks instead.  Create a status object which
-# holds details of the message's spam/not-spam status.
+  # not reporting? OK, do checks instead.  Create a status object which
+  # holds details of the message's spam/not-spam status.
   my $status = $spamtest->check ($mail);
-  $status->rewrite_mail ();
+  $mail = $status->rewrite_mail ();
+
+  print $mail->get_pristine();
 
   if ($opt{'test-mode'}) {
-    # add the spam report to the end of the body as well, if testing.
-    my $lines = $mail->body();
-    push (@{$lines}, split (/$/, $status->get_report()));
-    $mail->body ($lines);
+    print $status->get_report();
   }
 
-# if we're piping it, deliver it to stdout.
-  print $mail->header(), "\n", join ('', @{$mail->body()});
   if (defined $opt{'error-code'} && $status->is_spam ()) { exit ($opt{'error-code'} || 5) ; }
   exit;
 
@@ -642,7 +639,6 @@ be set.
 sa-learn(1)
 Mail::SpamAssassin(3)
 Mail::SpamAssassin::Conf(3)
-Mail::Audit(3)
 Razor(3)
 
 =head1 BUGS
@@ -652,15 +648,6 @@ http://bugzilla.spamassassin.org/
 =head1 AUTHOR
 
 Justin Mason E<lt>jm /at/ jmason.orgE<gt>
-
-=head1 PREREQUISITES
-
-C<Mail::Audit>
-
-=head1 COREQUISITES
-
-C<Net::DNS>
-C<Razor>
 
 =cut
 

@@ -59,7 +59,7 @@
 
 =head1 NAME
 
-Mail::SpamAssassin - Mail::Audit spam detector plugin
+Mail::SpamAssassin - Spam detector and markup engine
 
 =head1 SYNOPSIS
 
@@ -69,7 +69,7 @@ Mail::SpamAssassin - Mail::Audit spam detector plugin
   my $status = $spamtest->check ($mail);
 
   if ($status->is_spam ()) {
-    $status->rewrite_mail ();
+    $mail = $status->rewrite_mail ();
   } else {
     ...
   }
@@ -78,23 +78,19 @@ Mail::SpamAssassin - Mail::Audit spam detector plugin
 
 =head1 DESCRIPTION
 
-Mail::SpamAssassin is a module to identify spam using text analysis and several
-internet-based realtime blacklists.
+Mail::SpamAssassin is a module to identify spam using several methods
+including text analysis, internet-based realtime blacklists, statistical
+analysis, and internet-based hashing algorithms.
 
 Using its rule base, it uses a wide range of heuristic tests on mail headers
-and body text to identify "spam", also known as unsolicited commercial email.
+and body text to identify "spam", also known as unsolicited bulk email.
 
-Once identified, the mail can then be optionally tagged as spam for later
-filtering using the user's own mail user-agent application.
+Once identified, the mail can then be tagged as spam for later filtering
+using the user's own mail user-agent application or at the mail transfer
+agent.
 
-This module also implements a Mail::Audit plugin, allowing SpamAssassin to be
-used in a Mail::Audit filter.  If you wish to use a command-line filter tool,
-try the C<spamassassin> or C<spamd> tools provided.
-
-Note that, if you're using Mail::Audit, the constructor for the Mail::Audit
-object must use the C<nomime> option, like so:
-
-        my $ma = new Mail::Audit ( nomime => 1 );
+If you wish to use a command-line filter tool, try the C<spamassassin>
+or C<spamd> tools provided.
 
 SpamAssassin also includes support for reporting spam messages to collaborative
 filtering databases, such as Vipul's Razor ( http://razor.sourceforge.net/ ).
@@ -417,8 +413,8 @@ sub add_meta_depends {
 
 =item $status = $f->check ($mail)
 
-Check a mail, encapsulated in a C<Mail::Audit> or
-C<Mail::SpamAssassin::Message> object, to determine if it is spam or not.
+Check a mail, encapsulated in a C<Mail::SpamAssassin::Message> object,
+to determine if it is spam or not.
 
 Returns a C<Mail::SpamAssassin::PerMsgStatus> object which can be
 used to test or manipulate the mail message.
@@ -435,8 +431,7 @@ sub check {
   local ($_);
 
   $self->init(1);
-  my $mail = $self->encapsulate_mail_object ($mail_obj);
-  my $msg = Mail::SpamAssassin::PerMsgStatus->new($self, $mail);
+  my $msg = Mail::SpamAssassin::PerMsgStatus->new($self, $mail_obj);
   # Message-Id is used for a filename on disk, so we can't have '/' in it.
   $msg->check();
   $msg;
@@ -446,8 +441,7 @@ sub check {
 
 =item $status = $f->learn ($mail, $id, $isspam, $forget)
 
-Learn from a mail, encapsulated in a C<Mail::Audit> or
-C<Mail::SpamAssassin::Message> object.
+Learn from a mail, encapsulated in a C<Mail::SpamAssassin::Message> object.
 
 If C<$isspam> is set, the mail is assumed to be spam, otherwise it will
 be learnt as non-spam.
@@ -478,8 +472,7 @@ sub learn {
 
   require Mail::SpamAssassin::PerMsgLearner;
   $self->init(1);
-  my $mail = $self->encapsulate_mail_object ($mail_obj);
-  my $msg = Mail::SpamAssassin::PerMsgLearner->new($self, $mail);
+  my $msg = Mail::SpamAssassin::PerMsgLearner->new($self, $mail_obj);
 
   if ($forget) {
     $msg->forget($id);
@@ -651,7 +644,7 @@ sub check_message_text {
 
 =item $f->report_as_spam ($mail, $options)
 
-Report a mail, encapsulated in a C<Mail::Audit> object, as human-verified spam.
+Report a mail, encapsulated in a C<Mail::SpamAssassin::Message> object, as human-verified spam.
 This will submit the mail message to live, collaborative, spam-blocker
 databases, allowing other users to block this message.
 
@@ -691,8 +684,6 @@ sub report_as_spam {
   my @msg = split (/^/m, $self->remove_spamassassin_markup($mail));
   $mail = Mail::SpamAssassin::NoMailAudit->new ('data' => \@msg);
 
-  $mail = $self->encapsulate_mail_object ($mail);
-
   # learn as spam if enabled
   if ( $self->{conf}->{bayes_learn_during_report} ) {
     $self->learn ($mail, undef, 1, 0);
@@ -707,7 +698,7 @@ sub report_as_spam {
 
 =item $f->revoke_as_spam ($mail, $options)
 
-Revoke a mail, encapsulated in a C<Mail::Audit> object, as human-verified ham
+Revoke a mail, encapsulated in a C<Mail::SpamAssassin::Message> object, as human-verified ham
 (non-spam).  This will revoke the mail message from live, collaborative,
 spam-blocker databases, allowing other users to block this message.
 
@@ -736,8 +727,6 @@ sub revoke_as_spam {
   # Let's make sure the markup was removed first ...
   my @msg = split (/^/m, $self->remove_spamassassin_markup($mail));
   $mail = Mail::SpamAssassin::NoMailAudit->new ('data' => \@msg);
-
-  $mail = $self->encapsulate_mail_object ($mail);
 
   # learn as nonspam
   $self->learn ($mail, undef, 0, 0);
@@ -855,10 +844,9 @@ sub add_all_addresses_to_blacklist {
   my $list = Mail::SpamAssassin::AutoWhitelist->new($self);
 
   $self->init(1);
-  my $mail = $self->encapsulate_mail_object ($mail_obj);
 
   my @addrlist = ();
-  my @hdrs = $mail->get_header ('From');
+  my @hdrs = $mail_obj->get_header ('From');
   if ($#hdrs >= 0) {
     push (@addrlist, $self->find_all_addrs_in_line (join (" ", @hdrs)));
   }
@@ -949,8 +937,7 @@ sub remove_spamassassin_markup {
     }
   }
 
-  my $mail = $self->encapsulate_mail_object ($mail_obj);
-  my $hdrs = $mail->get_all_headers();
+  my $hdrs = $mail_obj->get_all_headers();
 
   # remove DOS line endings
   $hdrs =~ s/\r//gs;
@@ -1001,7 +988,7 @@ sub remove_spamassassin_markup {
 
   my @newbody = ();
   my $inreport = 0;
-  foreach $_ (@{$mail->get_body()})
+  foreach $_ (@{$mail_obj->get_body()})
   {
     s/\r?$//;	# DOS line endings
 
@@ -1130,8 +1117,7 @@ sub compile_now {
   $self->init($use_user_prefs);
 
   my $mail = Mail::SpamAssassin::NoMailAudit->new(data => \@testmsg);
-  my $encapped = $self->encapsulate_mail_object ($mail);
-  my $status = Mail::SpamAssassin::PerMsgStatus->new($self, $encapped,
+  my $status = Mail::SpamAssassin::PerMsgStatus->new($self, $mail,
                         { disable_auto_learning => 1 } );
   $status->word_is_in_dictionary("aba"); # load triplets.txt into memory
   $status->check();
@@ -1174,8 +1160,7 @@ sub lint_rules {
   $self->{syntax_errors} += $self->{conf}->{errors};
 
   my $mail = Mail::SpamAssassin::NoMailAudit->new(data => \@testmsg);
-  my $encapped = $self->encapsulate_mail_object ($mail);
-  my $status = Mail::SpamAssassin::PerMsgStatus->new($self, $encapped,
+  my $status = Mail::SpamAssassin::PerMsgStatus->new($self, $mail,
                         { disable_auto_learning => 1 } );
   $status->check();
 
@@ -1472,56 +1457,22 @@ sub get_cf_files_in_dir {
 
 ###########################################################################
 
-sub encapsulate_mail_object {
-  my ($self, $mail_obj) = @_;
-
-  # first, check to see if this is not actually a Mail::Audit object;
-  # it could also be an already-encapsulated Mail::Audit wrapped inside
-  # a Mail::SpamAssassin::Message.
-  if ($mail_obj->{is_spamassassin_wrapper_object}) {
-    return $mail_obj;
-  }
-  
-  if ($self->{use_my_mail_class}) {
-    my $class = $self->{use_my_mail_class};
-    (my $file = $class) =~ s/::/\//g;
-    require "$file.pm";
-    return $class->new($mail_obj);
-  }
-
-  # new versions of Mail::Audit can have one of 2 different base classes. URGH.
-  # we can tell which class, by querying the is_mime() method.  Support for
-  # MIME::Entity contributed by Andrew Wilson <andrew@rivendale.net>.
-  #
-  my $ismime = 0;
-  if ($mail_obj->can ("is_mime")) { $ismime = $mail_obj->is_mime(); }
-
-  if ($ismime) {
-    require Mail::SpamAssassin::EncappedMIME;
-    return  Mail::SpamAssassin::EncappedMIME->new($mail_obj);
-  } else {
-    require Mail::SpamAssassin::EncappedMessage;
-    return  Mail::SpamAssassin::EncappedMessage->new($mail_obj);
-  }
-}
-
 sub find_all_addrs_in_mail {
   my ($self, $mail_obj) = @_;
 
   $self->init(1);
-  my $mail = $self->encapsulate_mail_object ($mail_obj);
 
   my @addrlist = ();
   foreach my $header (qw(To From Cc Reply-To Sender
   				Errors-To Mail-Followup-To))
   {
-    my @hdrs = $mail->get_header ($header);
+    my @hdrs = $mail_obj->get_header ($header);
     if ($#hdrs < 0) { next; }
     push (@addrlist, $self->find_all_addrs_in_line (join (" ", @hdrs)));
   }
 
   # find addrs in body, too
-  foreach my $line (@{$mail->get_body()}) {
+  foreach my $line (@{$mail_obj->get_body()}) {
     push (@addrlist, $self->find_all_addrs_in_line ($line));
   }
 
@@ -1602,12 +1553,8 @@ __END__
 
 =head1 PREREQUISITES
 
-C<Mail::Audit>
-C<Mail::Internet>
-
-=head1 COREQUISITES
-
-C<Net::DNS>
+C<HTML::Parser>
+C<Sys::Syslog>
 
 =head1 MORE DOCUMENTATION
 

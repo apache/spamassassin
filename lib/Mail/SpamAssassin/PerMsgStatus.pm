@@ -164,7 +164,7 @@ sub check {
   # TODO: change this to do whitelist/blacklists first? probably a plan
   # NOTE: definitely need AWL stuff last, for regression-to-mean of score
 
-  $self->clean_spamassassin_headers();
+  $self->{msg}->delete_header('X-Spam-.*');
   $self->{learned_hits} = 0;
   $self->{body_only_hits} = 0;
   $self->{head_only_hits} = 0;
@@ -586,14 +586,11 @@ sub rewrite_mail {
   my ($self) = @_;
 
   if ($self->{is_spam} && $self->{conf}->{report_safe}) {
-    $self->rewrite_as_spam();
+    return $self->rewrite_as_spam();
   }
   else {
-    $self->rewrite_headers();
+    return $self->rewrite_headers();
   }
-
-  # invalidate the header cache, we've changed some of them.
-  $self->{hdr_cache} = { };
 }
 
 # rewrite the entire message as spam (headers and body)
@@ -753,44 +750,49 @@ $original
 EOM
   
   my @lines = split (/^/m,  $newmsg);
-  $self->{msg}->replace_original_message(\@lines);
+  return Mail::SpamAssassin::NoMailAudit->new(data => \@lines);
 }
 
 sub rewrite_headers {
   my ($self) = @_;
 
+  # put the pristine headers into an array
+  my(@pristine_headers) = $self->{msg}->get_pristine_header() =~ /^([^:]+:[ ]+(?:.*\n(?:\s+\S.*\n)*))/mig;
+  my $addition = 'headers_ham';
+
   if($self->{is_spam}) {
-
       # Deal with header rewriting
-      foreach my $header (keys %{$self->{conf}->{rewrite_header}}) {
-        $_ = $self->{msg}->get_header($header);
-        my $tag = $self->_replace_tags($self->{conf}->{rewrite_header}->{$header});
+      while ( my($header, $value) = each %{$self->{conf}->{rewrite_header}}) {
+	unless ( $header =~ /^(?:Subject|From|To)$/ ) {
+	  dbg("rewrite: ignoring $header = $value");
+	  next;
+	}
+
+	# Figure out the rewrite piece
+        my $tag = $self->_replace_tags($value);
         $tag =~ s/\n/ /gs;
-        if ($header eq 'Subject') {
-          s/^(?:\Q${tag}\E |)/${tag} /;
-        }
-        elsif ($header =~ /From|To/) {
-          s/(?:\t\Q(${tag})\E|)$/\t(${tag})/;
-        }
-        $self->{msg}->replace_header($header,$_);
+
+	# The tag should be a comment for this header ...
+	$tag = "($tag)" if ( $header =~ /^(?:From|To)$/ );
+
+	# Go ahead and markup the headers
+	foreach ( @pristine_headers ) {
+	  # skip non-correct-header or headers that are already tagged
+	  next if ( !/^${header}:/i );
+          s/^([^:]+:[ ]*)(?:\Q${tag}\E )?/$1${tag} /i;
+	}
       }
 
-      # Deal with header adding
-      foreach my $header (keys %{$self->{conf}->{headers_spam}} ) {
-          my $data = $self->{conf}->{headers_spam}->{$header};
-          my $line = $self->_process_header($header,$data) || "";
-          $self->{msg}->put_header ("X-Spam-$header", $line);
-      }
-
-  } else {
-
-      foreach my $header (keys %{$self->{conf}->{headers_ham}} ) {
-          my $data = $self->{conf}->{headers_ham}->{$header};
-          my $line = $self->_process_header($header,$data) || "";
-          $self->{msg}->put_header ("X-Spam-$header", $line);
-      }
-
+      $addition = 'headers_spam';
   }
+
+  while ( my($header, $data) = each %{$self->{conf}->{$addition}} ) {
+    my $line = $self->_process_header($header,$data) || "";
+    push(@pristine_headers, "X-Spam-$header: $line\n");
+  }
+
+  push(@pristine_headers, "\n", split (/^/m, $self->{msg}->get_pristine_body()));
+  return Mail::SpamAssassin::NoMailAudit->new(data => \@pristine_headers);
 }
 
 sub _process_header {
@@ -903,28 +905,6 @@ sub _get_tag {
   } else {
     return "";
   }
-}
-
-###########################################################################
-
-=item $messagestring = $status->get_full_message_as_text ()
-
-Returns the mail message as a string, including headers and raw body text.
-
-If the message has been rewritten using C<rewrite_mail()>, these changes
-will be reflected in the string.
-
-Note: this is simply a helper method which calls methods on the mail message
-object.  It is provided because Mail::Audit uses an unusual (ie. not quite
-intuitive) interface to do this, and it has been a common stumbling block for
-authors of scripts which use SpamAssassin.
-
-=cut
-
-sub get_full_message_as_text {
-  my ($self) = @_;
-  return join ("", $self->{msg}->get_all_headers(), "\n",
-                        @{$self->{msg}->get_body()});
 }
 
 ###########################################################################
@@ -1355,7 +1335,7 @@ sub get {
     else {
       my @hdrs = $self->{msg}->get_header ($hdrname);
       if ($#hdrs >= 0) {
-        $_ = join ("\n", @hdrs);
+        $_ = join ('', @hdrs);
       }
       else {
         $_ = undef;
@@ -2422,34 +2402,6 @@ ok:
 
 sub dbg { Mail::SpamAssassin::dbg (@_); }
 sub sa_die { Mail::SpamAssassin::sa_die (@_); }
-
-###########################################################################
-
-sub clean_spamassassin_headers {
-  my ($self) = @_;
-
-  # attempt to restore original headers
-  for my $hdr (('Content-Transfer-Encoding', 'Content-Type', 'Return-Receipt-To')) {
-    my $prev = $self->{msg}->get_header ("X-Spam-Prev-$hdr");
-    if (defined $prev && $prev ne '') {
-      $self->{msg}->replace_header ($hdr, $prev);
-    }
-  }
-  # delete the SpamAssassin-added headers
-  $self->{msg}->delete_header ("X-Spam-Checker-Version");
-  $self->{msg}->delete_header ("X-Spam-Flag");
-  $self->{msg}->delete_header ("X-Spam-Level");
-  $self->{msg}->delete_header ("X-Spam-Prev-Content-Transfer-Encoding");
-  $self->{msg}->delete_header ("X-Spam-Prev-Content-Type");
-  $self->{msg}->delete_header ("X-Spam-Report");
-  $self->{msg}->delete_header ("X-Spam-Status");
-  foreach my $header (keys %{$self->{conf}->{headers_spam}} ) {
-    $self->{msg}->delete_header ("X-Spam-$header");
-  }
-  foreach my $header (keys %{$self->{conf}->{headers_ham}} ) {
-    $self->{msg}->delete_header ("X-Spam-$header");
-  }
-}
 
 ###########################################################################
 

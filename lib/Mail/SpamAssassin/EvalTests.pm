@@ -331,7 +331,8 @@ sub _mta_added_message_id {
   $self->{mta_added_message_id_later} = 0;
   $self->{mta_added_message_id_backup} = 0;
 
-  my @received = grep(/\S/, split(/\n/, $self->get('Received')));
+  # We may get headers with continuations in them, so deal with it ...
+  my @received = grep(/\S/, map { s/\r?\n\s+/ /g; $_; } $self->get('Received'));
   my $id = $self->get('Resent-Message-ID') || $self->get('Message-ID');
   return unless defined($id) && $id;
   my $local = 1;

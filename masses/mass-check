@@ -290,7 +290,7 @@ sub wanted {
   $ma->{noexit} = 1;
 
   # remove SpamAssassin markup, if present and the mail was spam
-  $_ = $ma->get ("X-Spam-Status");
+  $_ = $ma->get_header ("X-Spam-Status");
   if (defined($_) && /^Yes, hits=/) {
     my $newtext = $spamtest->remove_spamassassin_markup($ma);
     my @newtext = split (/^/m, $newtext);
@@ -328,12 +328,12 @@ sub wanted {
   my $tests = join(",", sort(grep(length,$status->get_names_of_tests_hit(),$status->get_names_of_subtests_hit())));
   my $extra = join(",", @extra);
 
-  if (defined $opt_rewrite) {
-    $status->rewrite_mail();
-    open(REWRITE, "> " . ($opt_rewrite ? $opt_rewrite : "/tmp/out"));
-    print REWRITE $status->get_full_message_as_text();
-    close(REWRITE);
-  }
+#  if (defined $opt_rewrite) {
+#    $status->rewrite_mail();
+#    open(REWRITE, "> " . ($opt_rewrite ? $opt_rewrite : "/tmp/out"));
+#    print REWRITE $status->get_full_message_as_text();
+#    close(REWRITE);
+#  }
 
   $id =~ s/\s/_/g;
 

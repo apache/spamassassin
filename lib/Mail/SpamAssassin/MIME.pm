@@ -63,6 +63,9 @@ package Mail::SpamAssassin::MIME;
 use strict;
 use MIME::Base64;
 use Mail::SpamAssassin;
+use Mail::SpamAssassin::HTML;
+use MIME::Base64;
+use MIME::QuotedPrint;
 
 # M::SA::MIME is an object method used to encapsulate a message's MIME part
 #
@@ -121,30 +124,26 @@ sub header {
   $key       =~ s/\s+$//;
 
   if (@_) {
-    my ( $decoded_value, $raw_value ) = @_;
-    $raw_value = $decoded_value unless defined $raw_value;
+    my $raw_value = shift;
     push @{ $self->{'header_order'} }, $rawkey;
-    if ( exists $self->{'headers'}{$key} ) {
-      push @{ $self->{'headers'}{$key} },     $decoded_value;
-      push @{ $self->{'raw_headers'}{$key} }, $raw_value;
+    if ( !exists $self->{'headers'}->{$key} ) {
+      $self->{'headers'}->{$key} = [];
+      $self->{'raw_headers'}->{$key} = [];
     }
-    else {
-      $self->{'headers'}{$key}     = [$decoded_value];
-      $self->{'raw_headers'}{$key} = [$raw_value];
-    }
-    return $self->{'headers'}{$key}[-1];
+
+    push @{ $self->{'headers'}->{$key} },     _decode_header($raw_value);
+    push @{ $self->{'raw_headers'}->{$key} }, $raw_value;
+
+    return $self->{'headers'}->{$key}->[-1];
   }
 
-  my $want = wantarray;
-  if ( defined($want) ) {
-    if ($want) {
-      return unless exists $self->{'headers'}{$key};
-      return @{ $self->{'headers'}{$key} };
-    }
-    else {
-      return '' unless exists $self->{'headers'}{$key};
-      return $self->{'headers'}{$key}[-1];
-    }
+  if (wantarray) {
+    return unless exists $self->{'headers'}->{$key};
+    return @{ $self->{'headers'}->{$key} };
+  }
+  else {
+    return '' unless exists $self->{'headers'}->{$key};
+    return $self->{'headers'}->{$key}->[-1];
   }
 }
 
@@ -159,12 +158,12 @@ sub raw_header {
   $key       =~ s/\s+$//;
 
   if (wantarray) {
-    return unless exists $self->{'raw_headers'}{$key};
-    return @{ $self->{'raw_headers'}{$key} };
+    return unless exists $self->{'raw_headers'}->{$key};
+    return @{ $self->{'raw_headers'}->{$key} };
   }
   else {
-    return '' unless exists $self->{'raw_headers'}{$key};
-    return $self->{'raw_headers'}{$key}[-1];
+    return '' unless exists $self->{'raw_headers'}->{$key};
+    return $self->{'raw_headers'}->{$key}->[-1];
   }
 }
 
@@ -316,6 +315,58 @@ sub content_summary {
     return $self->{'type'};
   }
 }
+
+sub delete_header {
+  my($self, $hdr) = @_;
+
+  foreach ( grep(/^${hdr}$/i, keys %{$self->{'headers'}}) ) {
+    delete $self->{'headers'}->{$_};
+    delete $self->{'raw_headers'}->{$_};
+  }
+  
+  my @neworder = grep(!/^${hdr}$/i, @{$self->{'header_order'}});
+  $self->{'header_order'} = \@neworder;
+}
+
+sub __decode_header {
+  my ( $encoding, $cte, $data ) = @_;
+
+  if ( $cte eq 'B' ) {
+    # base 64 encoded
+    return Mail::SpamAssassin::Util::base64_decode($data);
+  }
+  elsif ( $cte eq 'Q' ) {
+    # quoted printable
+    return Mail::SpamAssassin::Util::qp_decode($data);
+  }
+  else {
+    die "Unknown encoding type '$cte' in RFC2047 header";
+  }
+}
+
+=item _decode_header()
+
+Decode base64 and quoted-printable in headers according to RFC2047.
+
+=cut
+
+sub _decode_header {
+  my($header) = @_;
+
+  return '' unless $header;
+
+  # deal with folding and cream the newlines and such
+  $header =~ s/\n[ \t]+/\n /g;
+  $header =~ s/\r?\n//g;
+
+  return $header unless $header =~ /=\?/;
+
+  $header =~
+    s/=\?([\w_-]+)\?([bqBQ])\?(.*?)\?=/__decode_header($1, uc($2), $3)/ge;
+
+  return $header;
+}
+
 
 sub dbg { Mail::SpamAssassin::dbg (@_); }
 

@@ -342,17 +342,17 @@ sub parse_received_headers {
   # so protect against that here.  These will not appear in the final
   # message; they're just used internally.
 
-  if ($self->{msg}->can ("delete_header")) {
-    $self->{msg}->delete_header ("X-Spam-Relays-Trusted");
-    $self->{msg}->delete_header ("X-Spam-Relays-Untrusted");
-
-    if ($self->{msg}->can ("put_metadata")) {
-      $self->{msg}->put_metadata ("X-Spam-Relays-Trusted",
-				$self->{relays_trusted_str});
-      $self->{msg}->put_metadata ("X-Spam-Relays-Untrusted",
-				$self->{relays_untrusted_str});
-    }
-  }
+#  if ($self->{msg}->can ("delete_header")) {
+#    $self->{msg}->delete_header ("X-Spam-Relays-Trusted");
+#    $self->{msg}->delete_header ("X-Spam-Relays-Untrusted");
+#
+#    if ($self->{msg}->can ("put_metadata")) {
+#      $self->{msg}->put_metadata ("X-Spam-Relays-Trusted",
+#				$self->{relays_trusted_str});
+#      $self->{msg}->put_metadata ("X-Spam-Relays-Untrusted",
+#				$self->{relays_untrusted_str});
+#    }
+#  }
 
   $self->{tag_data}->{RELAYSTRUSTED} = $self->{relays_trusted_str};
   $self->{tag_data}->{RELAYSUNTRUSTED} = $self->{relays_untrusted_str};
