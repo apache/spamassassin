@@ -73,23 +73,28 @@ sub mass_check_all_folders {
   foreach my $folder (@_) {
     if ($folder =~ /.tar$/)
     {
-	# it's an MH or Cyrus folder in a tar file
+	# it's an MH or Cyrus folder or Maildir in a tar file
 	use Archive::Tar;
-	mass_check_mh_tar_file($sub, $folder);
+	mass_check_tar_file($sub, $folder);
     }
     elsif (-d $folder &&
 	  (-f "$folder/1" || -f "$folder/1.gz" || -f "$folder/cyrus.index"))
     {
       # it's an MH folder or a Cyrus mailbox
       mass_check_mh_folder($sub, $folder);
-
+    }
+    elsif (-d $folder && -d "$folder/cur" && -d "$folder/new" )
+    {
+      # Maildir!
+      mass_check_maildir($sub, $folder);
+   
     } elsif (-f $folder) {
       mass_check_mailbox($sub, $folder);
     }
   }
 }
 
-sub mass_check_mh_tar_file {
+sub mass_check_tar_file {
   my $sub = shift;
   my $filename = shift;
   my $tar = Archive::Tar->new();
@@ -98,7 +103,7 @@ sub mass_check_mh_tar_file {
   foreach my $mail (@files) {
       next if $mail =~ m#/$# or $mail =~ /cyrus\.(index|header|cache)/;
       my $msg_data = $tar->get_content($mail);
-      my @msg = split("\r\n",$tar->get_content($mail));
+      my @msg = split("\n",$tar->get_content($mail));
       $mail =~ s/\s/_/g;
       &$sub ($mail, \@msg);
   }
@@ -132,6 +137,36 @@ sub mass_check_mh_folder {
     &$sub ($mail, \@msg);
   }
 }
+
+sub mass_check_maildir {
+  my $sub = shift;
+  my $folder = shift;
+  my @files = <$folder/{cur,new}/*>;
+  foreach my $mail (@files)
+  {
+    # jm: commented size checks here; I can't see how they could be working,
+    # as "250_000" is not an int.  New size check implemented below
+
+    if ($mail =~ /\.gz$/) {
+      # next if `gunzip -c $mail|wc -c` > 250_000; #skip messages bigger than 250k
+      open (STDIN, "gunzip -cd $mail |") or warn "gunzip $mail failed: $@";
+    } elsif ($mail =~ /\.bz2$/) {
+      # next if `bzip2 -dc $mail|wc -c` > 250_000; #skip messages bigger than 250k
+      open (STDIN, "bzip2 -cd $mail |") or warn "bunzip2 $mail failed: $@";
+    } else {
+      # next if `wc -c $mail` > 250_000; #skip messages bigger than 250k
+      open (STDIN, "<$mail") or warn "open $mail failed: $@";
+    }
+
+    # skip too-big mails
+    if (-s STDIN > 250*1024) { close STDIN; next; }
+    my @msg = (<STDIN>);
+    close STDIN;
+
+    &$sub ($mail, \@msg);
+  }
+}
+
 
 sub mass_check_mailbox {
   my $sub = shift;
