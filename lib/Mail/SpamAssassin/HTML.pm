@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.13 2002/09/24 17:12:58 jmason Exp $
+# $Id: HTML.pm,v 1.14 2002/09/25 09:12:06 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -11,9 +11,9 @@ use HTML::Parser 3.00 ();
 
 sub html_tag {
   my ($self, $tag, $attr, $num) = @_;
-  
+
   $self->{html_inside}{$tag} += $num;
-  
+
   if ($num == 1) {
     $self->html_format($tag, $attr, $num);
     $self->html_uri($tag, $attr, $num);
@@ -219,23 +219,19 @@ sub html_tests {
   if ($tag =~ /^(?:object|embed)$/) {
     $self->{html}{embeds} = 1;
   }
+  if ($tag eq "title") {
+    $self->{html}{title_text} = "";
+  }
 }
 
 sub html_text {
   my ($self, $text) = @_;
 
-  if (exists $self->{html_inside}{title} &&
-      $self->{html_inside}{title} > 0) {
-      $self->{html}{has_title} = 1;
-      $self->{html}{empty_title}    = 1 if ($text =~ /^\s*$/s);
-      $self->{html}{untitled_title} = 1 if ($text =~ /Untitled/i);
-      #if ($text =~ /^\s*$/s) {
-      #    print STDERR "<$text>\n";
-      #}
-  }
-
   return if (exists $self->{html_inside}{script} && $self->{html_inside}{script} > 0);
   return if (exists $self->{html_inside}{style} && $self->{html_inside}{style} > 0);
+  if (exists $self->{html_inside}{title} && $self->{html_inside}{title} > 0) {
+    $self->{html}{title_text} .= $text;
+  }
   $text =~ s/\n// if $self->{html_last_tag} eq "br";
   push @{$self->{html_text}}, $text;
 }
@@ -274,6 +270,11 @@ sub html_tag_exists {
 sub html_test {
   my ($self, undef, $test) = @_;
   return $self->{html}{$test};
+}
+
+sub html_eval {
+  my ($self, undef, $test, $expr) = @_;
+  return exists $self->{html}{$test} && eval "qq{\Q$self->{html}{$test}\E} $expr";
 }
 
 1;
