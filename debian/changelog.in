@@ -1,3 +1,47 @@
+spamassassin (2.59pre2.60cvs20030619-1) experimental; urgency=low
+
+  * Pre-release 2.60 packages. Use at own risk! :-) (Hence, experimental)
+  * Also experimental since the scores in this release are very
+    sub-optimal. You will probably want to use a higher threshold, as
+    all the negative scoring tests have been removed.
+  * This upload is to facilitate the transition of maintenance (temporarily)
+    to Jesus Climent <jesus.climent@hispalinux.es> (Added to the
+    Uploaders: field)
+  * New upstream version includes:
+      Better rules to thwart new spam tactics (Closes: #192953)
+      Fix some bugs relating to autolearning (Closes: #191371)
+      Fix problem with reloading and syslog-ng (Closes: #191837)
+      More verbose error from spamassassin -r (Closes: #192133, #197881)
+      Improved configurability of headers (Closes: #178648, #193872)
+      Able to add charset to safe reports (Closes: #183810)
+  * Added a few more "default" options to spamd in /etc/default/spamassassin
+  * Fixed spamc's manpage to refer to spamd(8) not spamd(1) (Closes: #197880)
+  * Added doc on integrating spamassassin sitewide with Exim3 from
+    John Girash <girash@skyron.harvard.edu> (Closes: #196706)
+  * Added example configuration for gnus from Andreas Kneib 
+    <Andreas.Kneib@t-online.de> (Closes: #196557)
+  * Noted the perl5.6->perl5.8 upgrade bug in README.Debian
+
+ -- Duncan Findlay <duncf@debian.org>  Thu, 19 Jun 2003 21:02:34 -0400
+
+spamassassin (2.55-2) unstable; urgency=medium
+
+  * Really fix warnings in spamassassin.config (D'oh!)
+    (Closes: #194989, #195076, #195076, #195335)
+  * Set TMPDIR in init script (Closes: #195290)
+  * urgency=medium because 2.55-1 is 9 days old, and testing deserves 2.55
+    soon, and these changes are fairly simple
+  * Updated french debconf templates (Closes: #195011)
+
+ -- Duncan Findlay <duncf@debian.org>  Fri, 30 May 2003 23:57:06 -0400
+
+spamassassin (2.55-1) unstable; urgency=low
+
+  * New upstream release
+  * Fix warning in spamassassin.config (Closes: #193770)
+
+ -- Duncan Findlay <duncf@debian.org>  Tue, 20 May 2003 17:53:18 -0400
+
 spamassassin (2.54-3) unstable; urgency=low
 
   * Handle the possibility of debconf not being installed when

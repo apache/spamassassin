@@ -15,6 +15,9 @@ PIDFILE="/var/run/$NAME.pid"
 PNAME="spamd"
 DOPTIONS="-d --pidfile=$PIDFILE"
 
+export TMPDIR=/tmp
+# Apparently people have trouble if this isn't explicitly set...
+
 # Defaults - don't touch, edit /etc/default/spamassassin
 ENABLED=0
 OPTIONS=""
@@ -32,17 +35,22 @@ case "$1" in
 	echo -n "Starting $DESC: "
 	start-stop-daemon --start --pidfile $PIDFILE --name $PNAME \
 	    --oknodo --startas $DAEMON -- $OPTIONS $DOPTIONS
-
 	echo "$NAME."
 	;;
+
   stop)
 	echo -n "Stopping $DESC: "
-
 	start-stop-daemon --stop --pidfile $PIDFILE --name $PNAME --oknodo
-
 	echo "$NAME."
 	;;
-  restart|force-reload)
+
+  reload|force-reload)
+	echo -n "Reloading $DESC: "
+	start-stop-daemon --stop --pidfile $PIDFILE --signal HUP --name $PNAME
+	echo "$NAME."
+	;;
+
+  restart)
 	echo -n "Restarting $DESC: "
 	start-stop-daemon --stop --pidfile $PIDFILE --name $PNAME \
 	    --retry 5 --oknodo
@@ -51,9 +59,10 @@ case "$1" in
 
 	echo "$NAME."
 	;;
+
   *)
 	N=/etc/init.d/$SNAME
-	echo "Usage: $N {start|stop|restart|force-reload}" >&2
+	echo "Usage: $N {start|stop|restart|reload|force-reload}" >&2
 	exit 1
 	;;
 esac

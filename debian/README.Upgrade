@@ -1,4 +1,20 @@
-Upgrading to 2.50:
+Upgrading to 2.6x:
+------------------
+
+The header re-writing system has changed substantially, allowing for
+greater flexibility and customization of headers. Various other
+options have been added. Read man Mail::SpamAssassin::Conf for more
+info.
+
+Furthermore, many new rules and tests have been added, and old ones
+have been changed. Nearly all negatively scoring tests have been
+removed. In general, most other scores have been lowered slightly, so
+if you have changed scores in /etc/spamassassin/, you may wish to
+change them back, otherwise your scores may be skewed too high,
+resulting in false positives.
+
+Upgrading to 2.5x:
+------------------
 
 SpamAssassin now has a Bayesian Learner component to it. It is by
 default set to automatically learn from your incoming mail. (Messages

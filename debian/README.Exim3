@@ -1,0 +1,128 @@
+This file contains suggestions on how to get SpamAssassin working
+sitewide with Exim 3, submitted by John Girash
+<girash@skyron.harvard.edu>. Please note that this is not the easiest
+way to integrate spamassassin into your mail stream (simple procmail
+is; see procmailrc.example).
+
+Here's my writeup of how I got SpamAssassin working under exim3, including
+user-level mail filtering via an exim filter file.  Most credit goes to "dman"
+(formerly at <dman@dman.ddts.net>) for providing an earlier version of this
+document; I merely updated it for the more-current versions (exim 3.35-1 and
+spamassassin 2.53-1; I use Debian).
+
+Step 1 :
+Edit /etc/exim/exim.conf to include scanning (filtering) by spamassassin
+in the delivery of a message.  In the Transports section add the following
+(order is irrelevant, and you can omit the leading 2 spaces of each line):
+
+  # Spam Assassin 2.53 for exim3
+  #   Notes :
+  #   This pipes the message to exim using the BSMTP (batched SMTP)
+  #   protocol. This avoids any nasties with shell metacharacters in
+  #   addresses. Prior to giving the message back to itself, exim will
+  #   filter it through the 'spamc' command. As the message returns to exim,
+  #   the "received_protocol" set to "spam-scanned".
+
+  spamcheck:
+    driver = pipe
+
+    command = /usr/sbin/exim -oMr spam-scanned -bS
+    transport_filter = /usr/bin/spamc -u ${local_part}
+
+    bsmtp = all
+
+    home_directory = "/tmp"
+    current_directory = "/tmp"
+
+    # must use a privileged user to set $received_protocol on the way back in!
+    user = mail
+    group = mail
+
+    return_path_add = false
+
+    log_output = true
+    return_fail_output = true
+
+    prefix =
+    suffix =
+
+Insert the following at the top of the Directors section :
+
+  # Spam Assassin 2.53 for exim3
+  #   This director is used for any message that
+  #   * wasn't received from spamassassin (determined by $received_protocol)
+  #   * wasn't received via a pipe from a local user
+  #   * isn't already flagged (this is safe because the only flag that is
+  #      skipped is a positive flag; spammers can tag their spam for you,
+  #      but they can't tag it as being clean).#
+
+  spamcheck_director:
+
+    # do not use this director when verifying a local-part at SMTP-time
+    no_verify
+
+    condition = "${if and { {!def:h_X-Spam-Flag:} {!eq {$received_protocol}{spam-scanned}} {!eq {$received_protocol}{local}} } {1}{0}}"
+    driver = smartuser
+    transport = spamcheck
+
+Step 2:
+
+Edit /etc/default/spamassassin to start 'spamd' at boot time. I just
+left the "-m 10" in as Debian's defaults had, but removed the "-c"
+that would otherwise create user preferences files, as that's how dman
+had his set up.
+
+  # Change to one to enable spamd
+  ENABLED=1
+  OPTIONS="-m 10"
+
+Step 3:
+
+Start spamd as root :
+# /etc/init.d/spamassassin start
+
+That's it! Now SpamAssassin will check all your mail & put in header
+info stating whether or not SpamAssassin thinks any given message is
+spam or not. To achieve actual filtering, I do as dman says & use an
+exim filter file in my user account, i.e. a file named "~/.forward"
+that has as its first line "# Exim filter". The following is my full
+.forward file:
+
+  #   Exim filter   <<== do not edit or remove this line!
+  if
+    $h_X-Spam-Status: contains "Yes, hit"
+        or
+    "${if def:h_X-Spam-Flag {def}{undef}}" is "def"
+  then
+    save $home/Mail/junk/autospam.mai
+    finish
+  endif
+
+This dumps all messages tagged as spam into file
+~/Mail/junk/autospam.mai . You want to keep this around (as opposed to
+sending to /dev/null) because while SpamAssassin produces almost no
+false positives, it does produce some. I search on "Yes, hit" instead
+of just "Yes" because once SpamAssassin has read enough mail to start
+doing "Bayesian" filtering, it inserts the test name "BAYES" into the
+headers of most messages, whether spam or not.
+
+If you want your .forward file to also act like a traditional one and
+forward your mail to a different address, simply append the line
+"deliver address@machine.dom" to the end of the above, replacing
+address@machine.dom with the address of the new destination you want.
+
+dman says: "Note that because I skip scanning on messages with an
+X-Spam-Flag: header I must check for that in my filter. Otherwise a
+spammer could put the X-Spam-Flag: header in but omit the
+X-Spam-Status: header and slip past my filter. For details on what a
+filter file is and where it goes see sections 24.7 (specifically the
+'filter' option) and 50.3 of spect.txt and section 5 of filter.txt."
+(...I usually just do a google search myself.)
+
+Much thanks to dman <dman@dman.ddts.net>, whose similar document
+(http://dman.ddts.net/~dman/config_docs/exim3_spamassassin.html)
+regarding using exim3 with earlier versions of SpamAssassin (<=2.11)
+helped me to no end (and from which I borrow liberally here). He also
+thanks the following folks for helping him, so it seems proper to
+mention them here: * Nigel Metheringham, * Kevin Fleming and * Renee
+Brown.

@@ -1,31 +1,54 @@
-Please read README for instructions on setting up your .procmailrc file.  If
-you wish to use spamd (the Daemon version of spamassassin), please edit
-/etc/default/spamassassin.
+Upgrading from perl5.6:
+-----------------------
 
-spamc functions very similarly to spamassassin. The difference between
-the two is that spamassassin does its own processing, while spamc
-passes the mail off to the spamd daemon, to reduce the overhead of loading.
+There is a issue with DB_File that causes old Bayes databases and
+automatic whitelists to no longer be read with perl5.8.
+
+From the perl 5.8 changelog:
+
+  * NOTE: DB_File now uses libdb4.0 (previously libdb2). Any DB_File
+    databases created with earlier perl packages will need to be
+    upgraded before being used with the current module with the
+    db4.0_upgrade program (in the libdb4.0-util package, with HTML
+    docs in db4.0-doc).
+
+The fix is to delete your automatic whitelist and bayes dbs from
+~/.spamassassin/, or use the db4.0_upgrade program as explained above.
+
+Miscellaneous Notes
+-------------------
+
+Please read README for instructions on setting up your .procmailrc
+file. If you wish to use 'spamd' (the daemonized version of
+SpamAssassin), please edit /etc/default/spamassassin and read
+README.spamd.
+
+'spamc' functions very similarly to 'spamassassin'. The difference
+between the two is that 'spamassassin' does its own processing, while
+'spamc' passes the mail off to the spamd daemon, to reduce the
+overhead of loading.
 
 To add rules, change scores, edit the template, edit
-/etc/spamassassin/local.cf. Please don't touch the other files in
-/etc/spamassassin, as you will be prompted to overwrite them on upgrade.
-Configuration file details are available in the Mail::SpamAssassin::Conf man
-page.
+/etc/spamassassin/local.cf. Please don't touch the files in
+/usr/share/spamassassin, as you will be prompted to overwrite them on
+upgrade. Configuration file details are available in the
+Mail::SpamAssassin::Conf(3) man page.
 
 User-specific configuration is the automatically created
 ~/.spamassassin/user_prefs, which is copied from
-/etc/spamassassin/user_prefs.template.  It is automatically created whenever
-spamassassin is called, or when spamc is used with 'spamd -c'.
+/etc/spamassassin/user_prefs.template. It is automatically created
+whenever spamassassin is called, or when spamc is used with 'spamd
+-c'.
 
-SpamAssassin is compatible with Razor, an online spam database.  Get the
-package razor, maintained by Robert van der Meulen. Please note: you
-must register razor before reporting spam with spamassassin -r. (man
-razor-admin for more info.)
+SpamAssassin is compatible with Razor, an online spam database. Get
+the package razor, maintained by Robert van der Meulen. Please note:
+you must register razor before reporting spam with spamassassin -r.
+(man razor-admin for more info.)
 
 By default, spamassassin checks certain free RBLs. Other, commercial
 RBLs can easily be enabled. See the README for more information.
 
-Spamd may not be entirely secure!  Read README.spamd before running
+Spamd may not be entirely secure! Read README.spamd before running
 spamd.
 
 spamd is in /usr/sbin, not /usr/bin. (This differs from upstream)
@@ -41,8 +64,6 @@ been lucky until now (delivery was not very lock-safe) and you really
 should use procmail to deliver your mail (after filtering through
 spamassassin).
 
-For information on integrating spamassassin and exim, see
-http://dman.ddts.net/~dman/config_docs/exim3_spamassassin.html
+For information on integrating spamassassin and exim 3, read
+README.Exim3.
 
-Duncan Findlay
-duncf@debian.org
