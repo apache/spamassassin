@@ -93,8 +93,9 @@ use constant IP_IN_RESERVED_RANGE => qr{^(?:
   192\.0\.2|			   # 192.0.2/24:       Reserved (3330)
   198\.1[89]|			   # 198.18/15:        Reserved (3330)
   197|                             # 197/8:            IANA Reserved
-  223|                             # 223/8:            IANA Reserved
-  24[0-9]|                         # 240-
+  22[3-9]|                         # 223-239/8:        IANA Rsvd, Mcast
+  23[0-9]|                         # 230-239/8:        IANA Multicast
+  24[0-9]|                         # 240-249/8:        IANA Reserved
   25[0-5]			   # 255/8:            IANA Reserved
 )\.}ox;
 

@@ -840,6 +840,7 @@ sub html_font_invisible {
 
 sub html_tests {
   my ($self, $tag, $attr, $num) = @_;
+  local ($_);
 
   if ($tag eq "table" && exists $attr->{border} && $attr->{border} =~ /(\d+)/)
   {
