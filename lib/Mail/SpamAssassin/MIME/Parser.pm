@@ -1,4 +1,4 @@
-# $Id: Parser.pm,v 1.13 2003/10/01 01:39:19 felicity Exp $
+# $Id: Parser.pm,v 1.14 2003/10/01 01:49:42 felicity Exp $
 
 package Mail::SpamAssassin::MIME::Parser;
 use strict;
@@ -91,7 +91,7 @@ sub parse {
 
     if ($header) {
       my ( $key, $value ) = split ( /:\s*/, $header, 2 );
-      if ( $key =~ /^(?:MIME-Version|Content-)/i ) {
+      if ( $key =~ /^(?:MIME-Version|Lines|X-MIME|Content-)/i ) {
         $msg->header( $key, $self->decode_header($value), $value );
       }
     }
@@ -118,7 +118,7 @@ sub parse_body {
     s/\r\n/\n/;
   }
 
-  my $type = $_msg->header('Content-Type') || 'text/plain';
+  my $type = $_msg->header('Content-Type') || 'text/plain; charset=us-ascii';
 
   #    warn "Parsing message of type: $type\n";
 
