@@ -21,6 +21,7 @@ sub usage {
 usage: mass-check [options] target ...
  
   -c=file       set configuration/rules directory
+  -p=dir        set user-prefs directory
   -f=file       read list of targets from <file>
   -j=jobs       specify the number of processes to run simultaneously
   --net         turn on network checks!
@@ -67,7 +68,7 @@ ENDOFUSAGE
 
 ###########################################################################
 
-use vars qw($opt_c $opt_f $opt_j $opt_n $opt_o $opt_all $opt_bayes
+use vars qw($opt_c $opt_p $opt_f $opt_j $opt_n $opt_o $opt_all $opt_bayes
 	    $opt_debug $opt_format $opt_hamlog $opt_head $opt_loghits
 	    $opt_mid $opt_mh $opt_ms $opt_net $opt_nosort $opt_progress
 	    $opt_showdots $opt_spamlog $opt_tail $opt_rules $opt_restart
@@ -84,12 +85,13 @@ use constant HAS_TIME_PARSEDATE => eval { require Time::ParseDate; };
 
 # default settings
 $opt_c = "$FindBin::Bin/../rules";
+$opt_p = "$FindBin::Bin/spamassassin";
 $opt_j = 1;
 $opt_net = 0;
 $opt_hamlog = "ham.log";
 $opt_spamlog = "spam.log";
 
-GetOptions("c=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug",
+GetOptions("c=s", "p=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug",
 	   "hamlog=s", "head=i", "loghits", "mh", "mid", "ms", "net",
 	   "progress", "rewrite:s", "showdots", "spamlog=s", "tail=i",
 	   "rules=s", "restart=i", "after=s", "loguris",
@@ -116,9 +118,9 @@ if (scalar @targets == 0) { usage(); }
 $spamtest = new Mail::SpamAssassin ({
   'debug'              			=> $opt_debug,
   'rules_filename'     			=> $opt_c,
-  'userprefs_filename' 			=> "$FindBin::Bin/spamassassin/user_prefs",
-  'site_rules_filename'			=> "$FindBin::Bin/spamassassin/local.cf",
-  'userstate_dir'     			=> "$FindBin::Bin/spamassassin",
+  'userprefs_filename' 			=> "$opt_p/user_prefs",
+  'site_rules_filename'			=> "$opt_p/local.cf",
+  'userstate_dir'     			=> "$opt_p",
   'save_pattern_hits'  			=> $opt_loghits,
   'dont_copy_prefs'   			=> 1,
   'local_tests_only'   			=> $opt_net ? 0 : 1,
@@ -266,10 +268,10 @@ sub wanted {
 
   my @extra;
   if (defined($time)) {
-    push(@extra, "time=$time");
+    push(@extra, "time=".$time);
   }
   if ($status && defined $status->{bayes_score}) {
-    push(@extra, "bayes=" . $status->{bayes_score});
+    push(@extra, "bayes=".$status->{bayes_score});
   }
   if ($opt_mid) {
     my $mid = $ma->get_header("Message-Id");

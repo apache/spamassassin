@@ -4,27 +4,26 @@
 # work out efficiency.  This variant uses static thresholds that
 # model more closely what SpamAssassin uses for scoring.
 # 
-# usage: bayes-threshold spam.log nonspam.log [hamcutoff] [spamcutoff]
+# usage: bayes-threshold spam.log nonspam.log
 
 my $spam = $ARGV[0] || "spam.log";
 my $nonspam = $ARGV[1] || (-f "good.log" ? "good.log" : "nonspam.log");
 
-my $hamcutoff = ($ARGV[2]+0.0) || 0.30;
-my $spamcutoff = ($ARGV[3]+0.0) || 0.70;
+my $hamcutoff = 0.30;
+my $spamcutoff = 0.70;
 
 my $nbuckets = 50;
-
 my $range_lo = 0.00;
 my $range_hi = 1.00;
+my $step = 0.02;
+#my $step = ($range_hi - $range_lo) / $nbuckets;  # unusable - round errors!
+
+$hamcutoff += 0.0;
+$spamcutoff += 0.0;
 
 # shamelessly nicked from spambayes' testing infrastructure; a system to
 # compute the "cost" of a pair of thresholds and classifier.  I'm supporting
 # it here so our stats are (at least a little) comparable against theirs.
-#
-# Note that they use a different way to run 10PCV tests; they train with 1
-# bucket and test against 9, whereas the lit suggests doing the opposite,
-# which is what we do; so the stats may still be unportable due to us getting
-# better training and less testing.  TODO
 
 my $best_cutoff_fp_weight = 10.0;
 my $best_cutoff_fn_weight = 1.0;
@@ -33,11 +32,12 @@ my $best_cutoff_unsure_weight = 0.1;
 %bux_sp = ();
 %bux_ns = ();
 
-my $step = ($range_hi - $range_lo) / $nbuckets;
 my $i;
-for ($i = $range_lo; $i <= $range_hi; $i += $step) {
-  push (@buckets, $i);
-  $bux_ns{$i} = $bux_sp{$i} = 0;
+for ($i = 0; $i <= ($range_hi - $range_lo) / $step; $i++)
+{
+  my $lvl = $range_lo + ($i * $step);
+  push (@buckets, $lvl);
+  $bux_ns{$lvl} = $bux_sp{$lvl} = 0;
 }
 
 foreach my $file ($spam, $nonspam) {
@@ -48,6 +48,7 @@ foreach my $file ($spam, $nonspam) {
   while (<IN>) {
     /^(\.|Y)\s.+bayes=(\S+)$/ or next;
     my $score = $2+0;
+    if ($score == 1) { $score = 0.9999999999999; }
 
     my $bucket_id;
     foreach my $bucket (@buckets) {
@@ -56,6 +57,15 @@ foreach my $file ($spam, $nonspam) {
       }
     }
 
+    if (!defined $bucket_id) {
+      warn "no bucket for $score!";
+    }
+    if (!defined $bux_sp{$bucket_id}) {
+      warn "undef bucket at $bucket_id! (score=$bucket)";
+    }
+    if (!defined $bux_ns{$bucket_id}) {
+      warn "undef bucket at $bucket_id! (score=$bucket)";
+    }
     if ($isspam) {
       $bux_sp{$bucket_id}++;
     } else {
@@ -77,73 +87,99 @@ foreach my $bucket (@buckets) {
                         { $max_ns = $bux_ns{$bucket}; }
 }
 
-my %results = ();
+foreach my $cutoff (0.3, 0.2, 0.1, 0.04, 0.02) {
+  $hamcutoff = $cutoff;
+  $spamcutoff = 1.0 - $cutoff;
 
-{
-  {
-    my $fn = 0;
-    my $fp = 0;
-    my $unsure_sp = 0;
-    my $unsure_ns = 0;
-
-    for ($i = $range_lo; $i < $hamcutoff; $i += $step) {
-      $fn += $bux_sp{$i};
-    }
-    # total up the unsures (between hamcutoff and spamcutoff)
-    for ($i = $hamcutoff; $i <= $spamcutoff; $i += $step) {
-      $unsure_ns += $bux_ns{$i};
-      $unsure_sp += $bux_sp{$i};
-    }
-    for ($i = $spamcutoff; $i <= $range_hi; $i += $step) {
-      $fp += $bux_ns{$i};
-    }
-
-    my $cost = ($fp * $best_cutoff_fp_weight) 
-		+ ($fn * $best_cutoff_fn_weight)
-		+ ($unsure_ns * $best_cutoff_unsure_weight)
-		+ ($unsure_sp * $best_cutoff_unsure_weight);
-
-    $results{"$hamcutoff $spamcutoff"} = {
-      'hamcutoff' => $hamcutoff,
-      'spamcutoff'=> $spamcutoff,
-      'cost' => $cost,
-      'unsure_ns' => $unsure_ns,
-      'unsure_sp' => $unsure_sp,
-      'fp' => $fp,
-      'fn' => $fn
-    };
-  }
+  my %results = results_for_cutoff ($hamcutoff, $spamcutoff);
+  write_results (%results);
 }
 
-my $count = 10;
-foreach my $r (sort { $a->{cost} <=> $b->{cost} } values %results) {
-  printf "Threshold optimization for hamcutoff=%3.2f, spamcutoff=%3.2f: cost=\$%5.2f\n",
-		$r->{hamcutoff}, $r->{spamcutoff}, $r->{cost};
-  printf "Total ham:spam:   %d:%d\n", $tot_ns, $tot_sp;
+sub results_for_cutoff {
+  my %results = ();
 
-  printf "FP: %5d %5.3f%%    ", $r->{fp}, ($r->{fp}*100) / $tot_ns;
-  printf "FN: %5d %5.3f%%\n", $r->{fn}, ($r->{fn}*100) / $tot_sp;
+  my $fn = 0;
+  my $fp = 0;
+  my $unsure_sp = 0;
+  my $unsure_ns = 0;
 
-  my $unsure = $r->{unsure_ns} + $r->{unsure_sp};
-  printf "Unsure: %5d %5.3f%%     ", $unsure,
-				($unsure*100) / ($tot_sp+$tot_ns);
-  printf "(ham: %5d %5.3f%%    ", $r->{unsure_ns},
-				($r->{unsure_ns}*100) / ($tot_ns);
-  printf "spam: %5d %5.3f%%)\n", $r->{unsure_sp},
-				($r->{unsure_sp}*100) / ($tot_sp);
+  for ($i = $range_lo; $i < $hamcutoff; $i += $step) {
+    foreach my $bucket (@buckets) {
+      if ($i >= $bucket && $i < $bucket+$step) {
+        $fn += $bux_sp{$bucket};
+      }
+    }
+  }
+  # total up the unsures (between hamcutoff and spamcutoff)
+  for ($i = $hamcutoff; $i <= $spamcutoff; $i += $step) {
+    foreach my $bucket (@buckets) {
+      if ($i >= $bucket && $i < $bucket+$step) {
+        $unsure_ns += $bux_ns{$bucket};
+        $unsure_sp += $bux_sp{$bucket};
+      }
+    }
+  }
+  for ($i = $spamcutoff; $i <= $range_hi; $i += $step) {
+    foreach my $bucket (@buckets) {
+      if ($i >= $bucket && $i < $bucket+$step) {
+        $fp += $bux_ns{$bucket};
+      }
+    }
+  }
 
-  # for TCR calc, treat "unsures" as ham
-  # TODO: unsure_sp should probably be treated as spam, assuming
-  # it'll fall in the 5.0-6.0 score range
-  my $fn = $r->{unsure_sp} + $r->{fn};
-  my $fp = $r->{fp};
-  printf "TCRs:              l=1 %5.3f    l=5 %5.3f    l=9 %5.3f\n",
-    tcr ($tot_sp - $fn, $fn, $fp, $tot_ns - $fp, 1),
-    tcr ($tot_sp - $fn, $fn, $fp, $tot_ns - $fp, 5),
-    tcr ($tot_sp - $fn, $fn, $fp, $tot_ns - $fp, 9);
+  my $cost = ($fp * $best_cutoff_fp_weight) 
+              + ($fn * $best_cutoff_fn_weight)
+              + ($unsure_ns * $best_cutoff_unsure_weight)
+              + ($unsure_sp * $best_cutoff_unsure_weight);
 
-  print "\n";
-  last if ($count-- < 0);
+  $results{"$hamcutoff $spamcutoff"} = {
+    'hamcutoff' => $hamcutoff,
+    'spamcutoff'=> $spamcutoff,
+    'cost' => $cost,
+    'unsure_ns' => $unsure_ns,
+    'unsure_sp' => $unsure_sp,
+    'fp' => $fp,
+    'fn' => $fn
+  };
+
+  return %results;
+}
+
+sub write_results {
+  my (%results) = @_;
+  foreach my $r (values %results) {
+    printf "Threshold optimization for hamcutoff=%3.2f, spamcutoff=%3.2f: cost=\$%5.2f\n",
+                  $r->{hamcutoff}, $r->{spamcutoff}, $r->{cost};
+    printf "Total ham:spam:   %d:%d\n", $tot_ns, $tot_sp;
+
+    printf "FP: %5d %5.3f%%    ", $r->{fp}, ($r->{fp}*100) / $tot_ns;
+    printf "FN: %5d %5.3f%%\n", $r->{fn}, ($r->{fn}*100) / $tot_sp;
+
+    my $unsure = $r->{unsure_ns} + $r->{unsure_sp};
+    printf "Unsure: %5d %5.3f%%     ", $unsure,
+                                  ($unsure*100) / ($tot_sp+$tot_ns);
+    printf "(ham: %5d %5.3f%%    ", $r->{unsure_ns},
+                                  ($r->{unsure_ns}*100) / ($tot_ns);
+    printf "spam: %5d %5.3f%%)\n", $r->{unsure_sp},
+                                  ($r->{unsure_sp}*100) / ($tot_sp);
+
+    # for TCR calc, treat "unsures" as ham
+    # TODO: unsure_sp should probably be treated as spam, assuming
+    # it'll fall in the 5.0-6.0 score range
+    my $fn = $r->{unsure_sp} + $r->{fn};
+    my $fp = $r->{fp};
+    printf "TCRs:              l=1 %5.3f    l=5 %5.3f    l=9 %5.3f\n",
+      tcr ($tot_sp - $fn, $fn, $fp, $tot_ns - $fp, 1),
+      tcr ($tot_sp - $fn, $fn, $fp, $tot_ns - $fp, 5),
+      tcr ($tot_sp - $fn, $fn, $fp, $tot_ns - $fp, 9);
+
+    printf "SUMMARY: %3.2f/%3.2f  fp %5d fn %5d uh %5d us %5d    c %5.2f\n",
+          $r->{hamcutoff}, $r->{spamcutoff},
+          $r->{fp}, $r->{fn}, $r->{unsure_ns}, $r->{unsure_sp},
+          $r->{cost};
+
+    print "\n";
+  }
 }
 
 

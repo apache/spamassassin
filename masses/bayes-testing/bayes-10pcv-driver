@@ -24,6 +24,10 @@
 # the output of analysis of all scores and frequencies from the
 # bayes-thresholds script.
 
+# NOTE: by default you will need *AT LEAST* 2000 of either type to use
+# this, since bayes will not be activated without 200 messages in the db,
+# and each fold is run using 10% of the corpus -- and 2000/10 = 200.
+
 # CHANGE ME: the path to the version of SpamAssassin you are testing.
 SADIR=/home/jm/ftp/spamassassin
 
@@ -51,8 +55,12 @@ cp ../rules/50*.cf $tmpdir/rules
 
 # tell SpamAssassin to use this path for DBs
 # TODO: for tests of these settings, read from a test-specific file
-echo "bayes_path $tmpdir/dbs/bayes
-bayes_use_chi2_combining 1
+echo "
+
+bayes_path                $tmpdir/dbs/bayes
+bayes_use_chi2_combining  1
+bayes_auto_learn          0
+
 " > $tmpdir/rules/30bayes_path.cf
 # bayes_expiry_use_scan_count 0
 # bayes_expiry_scan_count 500
@@ -153,7 +161,7 @@ for bucket in 1 2 3 4 5 6 7 8 9 10 ; do
     time sa-learn --rebuild $learnargs --config-file=$tmpdir/rules
 
     echo "Dumping bayes DB..."
-    ( cd .. ; tools/check_bayes_db --dbpath=$tmpdir/dbs/bayes ) \
+    ( cd .. ; sa-learn --dump --dbpath=$tmpdir/dbs/bayes ) \
 	  > $rdir/bayes_db.dump
   fi
 
@@ -167,7 +175,9 @@ for bucket in 1 2 3 4 5 6 7 8 9 10 ; do
     : > $rdir/spam.log
     
     mkdir $rdir/testbuckets
-    ( cd .. ; tools/split_corpora -n 10 -p $rdir/testbuckets/ham \
+    (
+      cd ..
+      tools/split_corpora -n 10 -p $rdir/testbuckets/ham \
 			$rdir/hbuckettest
       tools/split_corpora -n 10 -p $rdir/testbuckets/spam \
 			$rdir/sbuckettest
@@ -175,24 +185,24 @@ for bucket in 1 2 3 4 5 6 7 8 9 10 ; do
 
     for subbucket in 1 2 3 4 5 6 7 8 9 10 ; do
       echo "Running mass-check on ham test-bucket $subbucket..."
-      time ./mass-check -c=$tmpdir/rules --showdots \
+      time ./mass-check -c=$tmpdir/rules -p=$tmpdir/rules --showdots \
 	    --bayes --mbox $rdir/testbuckets/ham.$subbucket \
 	    >> $rdir/nonspam.log
 
       echo "Running mass-check on spam test-bucket $subbucket..."
-      time ./mass-check -c=$tmpdir/rules --showdots \
+      time ./mass-check -c=$tmpdir/rules -p=$tmpdir/rules --showdots \
 	    --bayes --mbox $rdir/testbuckets/spam.$subbucket \
 	    >> $rdir/spam.log
     done
 
   else
     echo "Running mass-check on ham bucket..."
-    time ./mass-check -c=$tmpdir/rules --showdots \
+    time ./mass-check -c=$tmpdir/rules -p=$tmpdir/rules --showdots \
 	  --bayes --mbox $rdir/hbuckettest \
 	  > $rdir/nonspam.log
 
     echo "Running mass-check on spam bucket..."
-    time ./mass-check -c=$tmpdir/rules --showdots \
+    time ./mass-check -c=$tmpdir/rules -p=$tmpdir/rules --showdots \
 	  --bayes --mbox $rdir/sbuckettest \
 	  > $rdir/spam.log
   fi
@@ -205,6 +215,10 @@ for bucket in 1 2 3 4 5 6 7 8 9 10 ; do
   ./bayes-testing/bayes-thresholds \
 	$rdir/spam.log $rdir/nonspam.log \
 	> $rdir/thresholds
+
+  ./bayes-testing/bayes-static-thresholds \
+	$rdir/spam.log $rdir/nonspam.log \
+	> $rdir/thresholds.static
 
   # remove these, they're too big.
   rm -f $rdir/hbucketlearn $rdir/sbucketlearn $rdir/hbuckettest $rdir/sbuckettest
@@ -223,6 +237,9 @@ cat $results/bucket*/nonspam.log > $results/nonspam_all.log
 ./bayes-testing/bayes-thresholds \
 	$results/spam_all.log $results/nonspam_all.log \
 	> $results/thresholds_all
+./bayes-testing/bayes-static-thresholds \
+	$results/spam_all.log $results/nonspam_all.log \
+	> $results/thresholds.static
 
 echo "Done."
 ls -l $results

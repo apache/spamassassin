@@ -30,14 +30,116 @@ These are just guidelines (well, apart from the last one), so they can be
 bent slightly if needs be ;)
 
 
-ABOUT THE THRESHOLDS SCRIPT
----------------------------
+
+A SAMPLE LOG OF A BAYES 10FCV RUN
+---------------------------------
+
+
+First, I made the corpus to test with.
+
+  mkdir ch ; cp ~/Mail/deld/10* ch
+  mkdir cs ; cp ....spam... cs
+
+This is simply one-file-per-message, RFC-2822 format, as usual.
+
+Now, set the SADIR env var to where your SpamAssassin source tree
+can be found:
+
+  export SADIR=/home/jm/ftp/spamassassin
+
+Then split the test corpus into folds:
+
+  $SADIR/tools/split_corpora -n 10 -p cor/ham/bucket ch
+  $SADIR/tools/split_corpora -n 10 -p cor/spam/bucket cs
+
+That takes from "ch" and "cs" and generates mboxes containing 10%
+folds as "cor/ham/bucket{1,2,3,4,5,6,7,8,9,10}".
+
+I then created a set of items I wanted to test:
+
+  mkdir testdir
+  mkdir testdir/{base,bug3118} [...etc.]
+  cp ~/ftp/spamassassin/lib/Mail/SpamAssassin/Bayes.pm testdir/base/Bayes.pm
+  cp ~/ftp/spamassassin/lib/Mail/SpamAssassin/Bayes.pm testdir/bug3118/Bayes.pm
+
+In other words, created a directory for each test and copied Bayes.pm into
+each one.
+
+I then edited the "Bayes.pm" files in the testdirs to enable whatever tweaks
+I wanted to test.  "base" remains the same as current SVN, however, so
+it acts as a baseline.
+
+Finally I run the driver script:
+
+  sh -x $SADIR/masses/bayes-testing/run-multiple testdir/*
+
+That takes a long time, running through the dirs doing a 10-fold CV for
+each one.
+
+The results are written to each test-dir in a new directory "results", and
+looks like this:
+
+: jm 1204...; ls -l base/results/
+total 7028
+drwxrwxr-x    2 jm       jm           4096 Mar 12 02:41 bucket1
+drwxrwxr-x    2 jm       jm           4096 Mar 12 03:21 bucket10
+drwxrwxr-x    2 jm       jm           4096 Mar 12 02:46 bucket2
+drwxrwxr-x    2 jm       jm           4096 Mar 12 02:50 bucket3
+drwxrwxr-x    2 jm       jm           4096 Mar 12 02:54 bucket4
+drwxrwxr-x    2 jm       jm           4096 Mar 12 02:59 bucket5
+drwxrwxr-x    2 jm       jm           4096 Mar 12 03:03 bucket6
+drwxrwxr-x    2 jm       jm           4096 Mar 12 03:08 bucket7
+drwxrwxr-x    2 jm       jm           4096 Mar 12 03:12 bucket8
+drwxrwxr-x    2 jm       jm           4096 Mar 12 03:17 bucket9
+drwxrwxr-x    4 jm       jm           4096 Mar 12 03:17 config
+-rw-rw-r--    1 jm       jm           1401 Mar 12 03:21 hist_all
+-rw-rw-r--    1 jm       jm        4424927 Mar 12 03:21 nonspam_all.log
+-rw-rw-r--    1 jm       jm        2596942 Mar 12 03:21 spam_all.log
+-rw-rw-r--    1 jm       jm          86338 Mar 12 03:21 test.log
+-rw-rw-r--    1 jm       jm           1322 Mar 12 12:03 thresholds.static
+-rw-rw-r--    1 jm       jm           3192 Mar 12 03:21 thresholds_all
+
+The important items are:
+
+- thresholds.static: FP/FN/Unsure counts of the Bayes score distribution
+  across all messages.  See "THRESHOLDS SCRIPT" below.
+
+- hist_all: An ASCII-art histogram of the Bayes score distribution across all
+  messages.   Good to view differences at a glance; however nowadays our tweaks
+  all have much less effect than the "big ones" like hapax use or
+  case-sensitivity did, so not so useful anymore. See "THE HISTOGRAM" below.
+
+- thresholds_all: a version of the thresholds output that is optimized for
+  lowest "cost" figure, basically searched the entire score distribution for
+  optimal thresholds.   Nowadays we have chosen some static thresholds and they
+  work OK, so this isn't much use any more.
+
+- The "bucket*" dirs, and "nonspam_all.log" or "spam_all.log" can be discounted
+  unless you need to look into more details of why a run didn't work the way
+  you expected it would... they are there for debugging, basically.
+
+"thresholds.static" is by far the most important, containing the
+FP/FN figures for various points on the score distribution.  That's
+what needs to be used to compare different Bayes tweaks.
+
+
+THRESHOLDS SCRIPT
+-----------------
 
 The "thresholds" script is an emulation of the spambayes testing
 methodology:  it computes ham/spam hits across a corpus for each
 algorithm, then, by dividing those hits into FPs, FNs, and "unsure"s, and
 attaching a "cost" to each of those, it computes optimum spam and ham
 cutoff points.  (It also outputs TCRs.)
+
+Sample output:
+
+  Threshold optimization for hamcutoff=0.30, spamcutoff=0.70: cost=$804.50
+  Total ham:spam:   39987:23337
+  FP:     3 0.008%    FN:   360 1.543%
+  Unsure:  4145 6.546%     (ham:   193 0.483%    spam:  3952 16.934%)
+  TCRs:              l=1 5.408    l=5 5.393    l=9 5.378
+
 
 BTW, the idea of cutoffs is a spambayes one; the range
 
@@ -73,4 +175,68 @@ for good results, strong indicators first...
 We can then tweak the threshold-to-SpamAssassin-score mapping so that we
 maximise the output of the bayes rules in SpamAssassin score terms, by
 matching our score ranges to the ham_cutoff and spam_cutoff points.
+
+
+
+THE HISTOGRAM
+-------------
+
+
+A histogram from 'draw-bayes-histogram' looks like this:
+
+SCORE  NUMHIT   DETAIL     OVERALL HISTOGRAM  (. = ham, # = spam)
+0.000 (99.047%) ..........|.......................................................
+0.000 ( 0.977%) ##########|#
+0.040 ( 0.145%) ..        |
+0.040 ( 0.141%) ##        |
+0.080 ( 0.113%) .         |
+0.080 ( 0.056%) #         |
+0.120 ( 0.065%) .         |
+0.120 ( 0.069%) #         |
+0.160 ( 0.060%) .         |
+0.160 ( 0.086%) #         |
+0.200 ( 0.040%)           |
+0.200 ( 0.111%) ##        |
+0.240 ( 0.043%)           |
+0.240 ( 0.103%) ##        |
+0.280 ( 0.030%)           |
+0.280 ( 0.090%) #         |
+0.320 ( 0.050%) .         |
+0.320 ( 0.167%) ###       |
+0.360 ( 0.055%) .         |
+0.360 ( 0.184%) ###       |
+0.400 ( 0.048%) .         |
+0.400 ( 0.184%) ###       |
+0.440 ( 0.085%) .         |
+0.440 ( 0.548%) ########  |
+0.480 ( 0.195%) ..        |
+0.480 ( 9.860%) ##########|#######
+0.520 ( 0.010%)           |
+0.520 ( 2.031%) ##########|##
+0.560 ( 0.005%)           |
+0.560 ( 1.268%) ##########|#
+0.600 ( 0.003%)           |
+0.600 ( 1.157%) ##########|#
+0.640 ( 0.990%) ##########|#
+0.680 ( 0.005%)           |
+0.680 ( 1.011%) ##########|#
+0.720 ( 0.947%) ##########|#
+0.760 ( 1.033%) ##########|#
+0.800 ( 1.123%) ##########|#
+0.840 ( 1.307%) ##########|#
+0.880 ( 1.607%) ##########|#
+0.920 ( 2.554%) ##########|##
+0.960 ( 0.003%)           |
+0.960 (72.396%) ##########|#######################################################
+
+The format is:
+
+GROUP (PCT%)    ZOOM      | FULL
+
+the "GROUP" is the part of the [ 0.0, 1.0 ] range that the mails are
+falling into.   "PCT%" is the percentage of the corpus that fell into
+that range.  "FULL" is the scaled histogram of number of messages,
+so you can see at a glance what the proportions look like; and "ZOOM"
+is a "zoomed-in" view at the very bottom of the histogram, zoomed
+in by a factor of 10, for closer inspection.
 
