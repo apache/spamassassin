@@ -11,7 +11,7 @@ use constant HAS_NET_DNS => eval { require Net::DNS; };
 use constant IS_LINUX   => $^O eq 'linux';
 use constant AM_ROOT    => $< == 0;
 
-use constant DO_RUN     => TEST_ENABLED && HAS_SPFQUERY &&
+use constant DO_RUN     => TEST_ENABLED && HAS_NET_DNS &&
                                         !(AM_ROOT && !IS_LINUX);
 
 use Test;
