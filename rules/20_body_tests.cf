@@ -555,9 +555,6 @@ describe FRONTPAGE		Frontpage used to create the message
 body BALANCE_FOR_LONG		eval:check_for_very_long_text()
 describe BALANCE_FOR_LONG	Message text is over 500 lines long
 
-header USER_IN_WHITELIST	eval:check_from_in_whitelist()
-describe USER_IN_WHITELIST	From: address is in the user's white-list
-
 rawbody UNIFIED_PATCH		/^\@\@ [-+0-9]+,[0-9]+ [-+0-9]+,[0-9]+ \@\@$/
 describe UNIFIED_PATCH		Contains what looks like a patch from diff -u
 
