@@ -1215,17 +1215,6 @@ sub check_to_in_all_spam {
 
 ###########################################################################
 
-sub check_lots_of_cc_lines {
-  my ($self) = @_;
-  local ($_);
-  $_ = $self->get('Cc');
-  my @count = /\n/gs;
-  if ($#count > 20) { return 1; }
-  return 0;
-}
-
-###########################################################################
-
 sub check_rbl_backend {
   my ($self, $rule, $set, $rbl_server, $type, $subtest) = @_;
   local ($_);
@@ -2203,64 +2192,6 @@ sub check_for_uppercase {
   return ($self->{uppercase} > $min && $self->{uppercase} <= $max);
 }
 
-sub check_for_yelling {
-  my ($self, $body) = @_;
-    
-  if (exists $self->{num_yelling_lines}) {
-    return $self->{num_yelling_lines} > 0;
-  }
-  if ($self->body_charset_is_likely_to_fp()) {
-    $self->{num_yelling_lines} = 0; return 0;
-  }
-
-  # Dec 20 2002 jm: trade off some speed for low memory footprint, by
-  # iterating over the array computing sums, instead of joining the
-  # array into a giant string and working from that.
-
-  my $num_lines = 0;
-  foreach my $line (@{$body}) {
-    # lines in the body that have some non-letters
-    next unless ($line =~ /[^A-Za-z]/);
-
-    # Try to eliminate lines which might be newsletter section headers,
-    # which are often in all caps; we do this by removing most lines
-    # that start with whitespace.  However, some spam will match
-    # this as well, so keep lines which have "!" or "$$" (spam often
-    # has a yelling line indent with spaces, but surround by dollar
-    # signs), or a "." which appears to end a sentence.
-    next unless ($line =~ /^\S|!|\$\$|\.(?:\s|$)/);
-
-    $_ = $line;		 # copy to preserve originals
-
-    # Get rid of everything but upper AND lower case letters
-    tr/A-Za-z \t//cd;
-
-    # Remove leading and trailing whitespace
-    s/^\s+//; s/\s+$//;
-
-    # Now that we have a mixture of upper and lower case, see if it's
-    # 1) All upper case
-    # 2) 20 or more characters in length
-    # 3) Has at least one whitespace in it; we don't want to catch things
-    #    like lines of genetic data ("...AGTAGC...")
-    if (/^[A-Z\s]{20,}$/ && /\s/) {
-      $num_lines++;
-    }
-  }
-
-  $self->{num_yelling_lines} = $num_lines;
-
-  return ($num_lines > 0);
-}
-
-sub check_for_num_yelling_lines {
-  my ($self, $body, $threshold) = @_;
-    
-  $self->check_for_yelling($body);
-    
-  return ($self->{num_yelling_lines} >= $threshold);
-}
-
 # UNWANTED_LANGUAGE_BODY
 sub check_language {
   my ($self, $body) = @_;
@@ -2420,23 +2351,26 @@ sub _check_mime_header {
     $self->{mime_base64_no_name} = 1;
   }
 
-  if (!$name &&
-      $cte =~ /base64/ &&
-      $charset =~ /\b(?:us-ascii|iso-8859-(?:[12349]|1[0345])|windows-(?:125[0247]))\b/)
-  {
-    $self->{mime_base64_latin} = 1;
-  }
+  # MIME_BASE64_LATIN: now a zero-hitter
+  # if (!$name &&
+  # $cte =~ /base64/ &&
+  # $charset =~ /\b(?:us-ascii|iso-8859-(?:[12349]|1[0345])|windows-(?:125[0247]))\b/)
+  # {
+  # $self->{mime_base64_latin} = 1;
+  # }
 
-  if ($cte =~ /quoted-printable/ && $cd =~ /inline/ && !$charset) {
-    $self->{mime_qp_inline_no_charset} = 1;
-  }
+  # MIME_QP_NO_CHARSET: now a zero-hitter
+  # if ($cte =~ /quoted-printable/ && $cd =~ /inline/ && !$charset) {
+  # $self->{mime_qp_inline_no_charset} = 1;
+  # }
 
-  if ($ctype eq 'text/html' &&
-      !(defined($charset) && $charset) &&
-      !($cd && $cd =~ /^(?:attachment|inline)/))
-  {
-    $self->{mime_html_no_charset} = 1;
-  }
+  # MIME_HTML_NO_CHARSET: now a zero-hitter
+  # if ($ctype eq 'text/html' &&
+  # !(defined($charset) && $charset) &&
+  # !($cd && $cd =~ /^(?:attachment|inline)/))
+  # {
+  # $self->{mime_html_no_charset} = 1;
+  # }
 
   if ($charset =~ /[a-z]/i) {
     if (defined $self->{mime_html_charsets}) {
@@ -2503,19 +2437,19 @@ sub _check_attachments {
   $self->{mime_base64_blanks} = 0;
   $self->{mime_base64_count} = 0;
   $self->{mime_base64_encoded_text} = 0;
-  $self->{mime_base64_illegal} = 0;
-  $self->{mime_base64_latin} = 0;
+  # $self->{mime_base64_illegal} = 0;
+  # $self->{mime_base64_latin} = 0;
   $self->{mime_base64_no_name} = 0;
   $self->{mime_body_html_count} = 0;
   $self->{mime_body_text_count} = 0;
   $self->{mime_faraway_charset} = 0;
-  $self->{mime_html_no_charset} = 0;
+  # $self->{mime_html_no_charset} = 0;
   $self->{mime_missing_boundary} = 0;
   $self->{mime_multipart_alternative} = 0;
   $self->{mime_multipart_ratio} = 1.0;
   $self->{mime_qp_count} = 0;
-  $self->{mime_qp_illegal} = 0;
-  $self->{mime_qp_inline_no_charset} = 0;
+  # $self->{mime_qp_illegal} = 0;
+  # $self->{mime_qp_inline_no_charset} = 0;
   $self->{mime_qp_long_line} = 0;
   $self->{mime_qp_ratio} = 0;
   $self->{mime_suspect_name} = 0;
@@ -2556,14 +2490,15 @@ sub _check_attachments {
         if ($previous =~ /^\s*$/ && /^\s*$/) {
 	  $self->{mime_base64_blanks} = 1;
         }
-        if (m@[^A-Za-z0-9+/=\n]@ || /=[^=\s]/) {
-	  $self->{mime_base64_illegal} = 1;
-        }
+        # MIME_BASE64_ILLEGAL: now a zero-hitter
+        # if (m@[^A-Za-z0-9+/=\n]@ || /=[^=\s]/) {
+        # $self->{mime_base64_illegal} = 1;
+        # }
       }
 
-      if ($self->{mime_html_no_charset} && $ctype eq 'text/html' && defined $charset) {
-	$self->{mime_html_no_charset} = 0;
-      }
+      # if ($self->{mime_html_no_charset} && $ctype eq 'text/html' && defined $charset) {
+      # $self->{mime_html_no_charset} = 0;
+      # }
       if ($self->{mime_multipart_alternative} && $cd !~ /attachment/ &&
           ($ctype eq 'text/plain' || $ctype eq 'text/html')) {
 	$part_bytes[$part] += length;
@@ -2574,12 +2509,16 @@ sub _check_attachments {
 	  $self->{mime_qp_long_line} = 1;
         }
         $qp_bytes += length;
+
+        # MIME_QP_DEFICIENT: zero-hitter now
+
         # check for illegal substrings (RFC 2045), hexadecimal values 7F-FF and
         # control characters other than TAB, or CR and LF as parts of CRLF pairs
-        if (!$self->{mime_qp_illegal} && /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\xff]/)
-        {
-	  $self->{mime_qp_illegal} = 1;
-        }
+        # if (!$self->{mime_qp_illegal} && /[\x00-\x08\x0b\x0c\x0e-\x1f\x7f-\xff]/)
+        # {
+        # $self->{mime_qp_illegal} = 1;
+        # }
+
         # count excessive QP bytes
         if (index($_, '=') != -1) {
 	  # whoever wrote this next line is an evil hacker -- jm
