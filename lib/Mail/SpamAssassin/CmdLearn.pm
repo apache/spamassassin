@@ -11,7 +11,7 @@ use Getopt::Long;
 use Pod::Usage;
 
 use vars qw($spamtest %opt $isspam $forget $messagecount $messagelimit
-	$rebuildonly $learnprob
+	$rebuildonly $learnprob @targets
 	);
 
 ###########################################################################
@@ -35,9 +35,6 @@ sub cmdline_run {
 
              # arguments from mass-check.  don't add more unless you're
              # sure they're required!
-             'folders|f=s'                      => \$opt{'folders'},
-             'mh'                               => \$opt{'mh'},
-             'single|s'                         => \$opt{'single'},
              'showdots'                         => \$opt{'showdots'},
 	     'no-rebuild'			=> \$opt{'norebuild'},
 	     'force-expire'			=> \$opt{'force-expire'},
@@ -52,7 +49,11 @@ sub cmdline_run {
              'debug-level|D'                    => \$opt{'debug-level'},
              'version|V'                        => \$opt{'version'},
              'help|h|?'                         => \$opt{'help'},
-             #'<>'                               => \&add_folder,
+
+	     'dir'			=> sub { $opt{'format'} = 'dir'; },
+	     'file'			=> sub { $opt{'format'} = 'file'; },
+	     'mbox'			=> sub { $opt{'format'} = 'mbox'; },
+	     '<>'			=> \&target,
   ) or usage(0, "Unknown option!");
 
   if (defined $opt{'help'}) { usage(0, "For more information read the manual page"); }
@@ -103,18 +104,12 @@ sub cmdline_run {
     $SIG{TERM} = \&killed;
 
     my $iter = new Mail::SpamAssassin::ArchiveIterator ({
-	    'opt_mh' => $opt{mh},
-	    'opt_single' => $opt{single},
-      });
+	'opt_j' => 1,
+	'opt_n' => 1,
+	'opt_all' => 1,
+    });
 
-    my @targets = @ARGV;
-    if ($opt{folders}) {
-      open (F, $opt{folders}) || die $!;
-      push (@targets, map { chomp; $_ } <F>);
-      close (F);
-    }
-
-    $iter->set_function (\&wanted);
+    $iter->set_functions(\&wanted, sub { });
     $messagecount = 0;
 
     eval {
@@ -143,6 +138,17 @@ sub cmdline_run {
 sub killed {
   $spamtest->finish_learner();
   die "interrupted";
+}
+
+sub target  {
+  my ($target) = @_;
+  if (!defined($opt{'format'})) {
+    warn "please specify target type with --dir, --file, or --mbox\n";
+  }
+  else {
+    my $class = ($isspam ? "spam" : "ham");
+    push (@targets, "$class:" . $opt{'format'} . ":$target");
+  }
 }
 
 ###########################################################################

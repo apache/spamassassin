@@ -51,9 +51,9 @@ B<sa-learn-spam> --single < I<message>
 
 Options:
 
- -f folders, --folders=folders     List the folders to check
- --mh                              Check an MH directory
- -s, --single                      Check a single message
+ --dir                             Learn a directory of RFC 822 formatted files
+ --file                            Learn a file in RFC 822 format
+ --mbox                            Learn a file in mbox format
  --showdots                        Show progress using dots
  --no-rebuild                      Skip building databases after scan
  -C file, --config-file=file       Path to standard configuration dir
