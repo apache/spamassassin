@@ -198,7 +198,6 @@ sub new {
   $self->{pyzor_path} = undef; # Browse PATH
   $self->{pyzor_max} = 5;
   $self->{pyzor_timeout} = 10;
-  $self->{pyzor_options} = '';
 
   $self->{use_bayes} = 1;
   $self->{bayes_auto_learn} = 1;
@@ -1318,19 +1317,6 @@ The default is 5.
       $self->{pyzor_max} = $1+0; next;
     }
 
-
-
-=item pyzor_options options
-
-Specify options to the pyzor command. Please note that only
-[A-Za-z0-9 -/] is allowed (security).
-
-=cut
-
-    if (/^pyzor_options\s+([A-Za-z0-9 -\/]+)/) {
-      $self->{pyzor_options} = $1; next;
-    }
-
 =item trusted_networks ip.add.re.ss[/mask] ...   (default: none)
 
 What networks or hosts are 'trusted' in your setup.   B<Trusted> in this case
@@ -1701,30 +1687,6 @@ B<add_header> options to customize headers.
       next;
     }
 
-
-=item always_add_report { 0 | 1 }	(default: 0)
-
-When the B<report_safe> option is turned off, mail tagged as spam will
-include a report in a header named B<X-Spam-Report>.  If you set
-B<always_add_report> to C<1>, the report will also be included in the
-B<X-Spam-Report> header for non-spam mail.
-
-This option is deprecated in version 2.60 and later.  It will be removed in
-a future version.  Please use the flexible B<add_header> option instead:
-
-add_header all Report _REPORT_
-
-=cut
-
-  if (/^always_add_report\s+(\d+)$/) {
-    if ($1 == 0) {
-      delete $self->{headers_ham}->{"Report"};
-    }
-    else {
-      $self->{headers_ham}->{"Report"} = "_REPORT_";
-    }
-    next;
-  }
 
 =item spam_level_stars { 0 | 1 }        (default: 1)
 

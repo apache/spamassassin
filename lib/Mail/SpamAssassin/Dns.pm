@@ -850,9 +850,7 @@ sub pyzor_lookup {
     my $path = Mail::SpamAssassin::Util::untaint_file_path ($self->{conf}->{pyzor_path});
 
     my $opts = '';
-    if ( $self->{conf}->{pyzor_options} =~ /^([^\;\'\"\0]+)$/ ) {
-      $opts = $1;
-    }
+    #TODO pyzor_options
  
     dbg("Pyzor command: ".join(' ', $path, $opts, "check", "< '$tmpf'", "2>&1"),'pyzor',-1);
     my $pid = open(PYZOR, join(' ', $path, $opts, "check", "< '$tmpf'", "2>&1", '|')) || die "$!\n";
