@@ -216,46 +216,148 @@ sub init_rbl_check_reserved_ips {
 
 ###########################################################################
 
-sub is_razor_available {
+sub is_razor1_available {
   my ($self) = @_;
 
   if ($self->{main}->{local_tests_only}) {
-    dbg ("local tests only, ignoring Razor", "razor", -1);
+    dbg ("local tests only, ignoring Razor1", "razor", -1);
     return 0;
   }
 
-  # Use Razor2 if it's available, Razor1 otherwise
-eval { require Razor2::Client::Agent; };
-if ($@) {
-  dbg("Razor2 is not available", "razor", -1);
-}
-else {
-  dbg("Razor2 is available", "razor", -1);
-  return 1;
-}
-
-eval { require Razor::Client; };
+  eval { require Razor::Client; };
   
   if ($@) {
-    dbg ("Razor is not available", "razor", -1);
+    dbg ("Razor1 is not available", "razor", -1);
     return 0;
   }
   else {
-    dbg ("Razor is available", "razor", -1);
+    dbg ("Razor1 is available", "razor", -1);
     return 1;
   }
 }
 
-sub razor_lookup {
+sub razor1_lookup {
   my ($self, $fulltext) = @_;
   my $timeout=$self->{conf}->{razor_timeout};
 
   if ($self->{main}->{local_tests_only}) {
-    dbg ("local tests only, ignoring Razor", "razor", -1);
+    dbg ("local tests only, ignoring Razor1", "razor", -1);
     return 0;
   }
 
-  timelog("Razor -> Starting razor test ($timeout secs max)", "razor", 1);
+  timelog("Razor1 -> Starting razor test ($timeout secs max)", "razor", 1);
+  
+  my $response = undef;
+
+  # razor also debugs to stdout. argh. fix it to stderr...
+  if ($Mail::SpamAssassin::DEBUG) {
+    open (OLDOUT, ">&STDOUT");
+    open (STDOUT, ">&STDERR");
+  }
+
+  my $oldslash = $/;
+
+  {
+    eval {
+      require Razor::Client;
+      require Razor::Agent;
+      local ($^W) = 0;		# argh, warnings in Razor
+  
+      local $SIG{ALRM} = sub { die "alarm\n" };
+      alarm $timeout;
+  
+      my $config = $self->{conf}->{razor_config};
+      $config ||= $self->{main}->sed_path ("~/razor.conf");
+      my %options = (
+        'debug'	=> ($Mail::SpamAssassin::DEBUG->{enabled} and $Mail::SpamAssassin::DEBUG->{razor} < -2)
+      );
+
+      my $rc = Razor::Client->new ($config, %options);
+  
+      if ($rc) {
+        my $ver = $Razor::Client::VERSION;
+        my @msg = split (/^/m, $$fulltext);
+
+        if ($ver >= 1.12) {
+          my $respary = $rc->check ('spam' => \@msg);
+          # response can be "0" or "1". there can be many responses.
+          # so if we get 5 responses, and one of them's 1, we
+          # wind up with "00010", which +0 below turns to 10, ie. != 0.
+          for my $resp (@$respary) { $response .= $resp; }
+  
+        }
+        else {
+            $response = $rc->check (\@msg);
+        }
+      }
+      else {
+          warn "Problem while trying to load Razor1: $! $Razor::Client::errstr";
+      }
+      
+      alarm 0;
+    };
+  
+    alarm 0;    # just in case
+
+    if ($@) {
+      $response = undef;
+      if ($@ =~ /alarm/) {
+        dbg ("razor check timed out after $timeout secs.", "razor", -1);
+        timelog("Razor1 -> interrupted after $timeout secs", "razor", 2);
+      } else {
+        warn ("razor check skipped: $! $@");
+      }
+    }
+  }
+
+  $/ = $oldslash;		# argh! pollution!
+
+  # razor also debugs to stdout. argh. fix it to stderr...
+  if ($Mail::SpamAssassin::DEBUG) {
+    open (STDOUT, ">&OLDOUT");
+    close OLDOUT;
+  }
+
+  if ((defined $response) && ($response+0)) {
+      timelog("Razor1 -> Finished razor test: confirmed spam", "razor", 2);
+      return 1;
+  }
+  timelog("Razor1 -> Finished razor test: not known spam", "razor", 2);
+  return 0;
+}
+
+###########################################################################
+
+sub is_razor2_available {
+  my ($self) = @_;
+
+  if ($self->{main}->{local_tests_only}) {
+    dbg ("local tests only, ignoring Razor2", "razor", -1);
+    return 0;
+  }
+
+  # Use Razor2 if it's available, Razor1 otherwise
+  eval { require Razor2::Client::Agent; };
+  if ($@) {
+    dbg("Razor2 is not available", "razor", -1);
+    return 0;
+  }
+  else {
+    dbg("Razor2 is available", "razor", -1);
+    return 1;
+  }
+}
+
+sub razor2_lookup {
+  my ($self, $fulltext) = @_;
+  my $timeout=$self->{conf}->{razor_timeout};
+
+  if ($self->{main}->{local_tests_only}) {
+    dbg ("local tests only, ignoring Razor2", "razor", -1);
+    return 0;
+  }
+
+  timelog("Razor2 -> Starting razor test ($timeout secs max)", "razor", 1);
   
   my $response = undef;
 
@@ -268,10 +370,11 @@ sub razor_lookup {
   my $oldslash = $/;
 
   # Use Razor2 if it's available
-  eval { require Razor2::Client::Agent; };
-  if ( !$@ ) {
+  {
     eval {
       local ($^W) = 0;    # argh, warnings in Razor
+
+      require Razor2::Client::Agent;
 
       local $SIG{ALRM} = sub { die "alarm\n" };
       alarm $timeout;
@@ -329,58 +432,6 @@ sub razor_lookup {
         }
       }
   }
-  else {
-    eval {
-      require Razor::Client;
-      require Razor::Agent;
-      local ($^W) = 0;		# argh, warnings in Razor
-  
-      local $SIG{ALRM} = sub { die "alarm\n" };
-      alarm $timeout;
-  
-      my $config = $self->{conf}->{razor_config};
-      $config ||= $self->{main}->sed_path ("~/razor.conf");
-      my %options = (
-        'debug'	=> ($Mail::SpamAssassin::DEBUG->{enabled} and $Mail::SpamAssassin::DEBUG->{razor} < -2)
-      );
-
-      my $rc = Razor::Client->new ($config, %options);
-  
-      if ($rc) {
-        my $ver = $Razor::Client::VERSION;
-        my @msg = split (/^/m, $$fulltext);
-
-        if ($ver >= 1.12) {
-          my $respary = $rc->check ('spam' => \@msg);
-          # response can be "0" or "1". there can be many responses.
-          # so if we get 5 responses, and one of them's 1, we
-          # wind up with "00010", which +0 below turns to 10, ie. != 0.
-          for my $resp (@$respary) { $response .= $resp; }
-  
-        }
-        else {
-            $response = $rc->check (\@msg);
-        }
-      }
-      else {
-          warn "Problem while trying to load Razor: $! $Razor::Client::errstr";
-      }
-      
-      alarm 0;
-    };
-  
-    alarm 0;    # just in case
-
-    if ($@) {
-      $response = undef;
-      if ($@ =~ /alarm/) {
-        dbg ("razor check timed out after $timeout secs.", "razor", -1);
-        timelog("Razor -> interrupted after $timeout secs", "razor", 2);
-      } else {
-        warn ("razor check skipped: $! $@");
-      }
-    }
-  }
 
   $/ = $oldslash;		# argh! pollution!
 
@@ -391,12 +442,14 @@ sub razor_lookup {
   }
 
   if ((defined $response) && ($response+0)) {
-      timelog("Razor -> Finished razor test: confirmed spam", "razor", 2);
+      timelog("Razor2 -> Finished razor test: confirmed spam", "razor", 2);
       return 1;
   }
-  timelog("Razor -> Finished razor test: not known spam", "razor", 2);
+  timelog("Razor2 -> Finished razor test: not known spam", "razor", 2);
   return 0;
 }
+
+###########################################################################
 
 sub is_dcc_available {
   my ($self) = @_;

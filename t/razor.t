@@ -13,14 +13,14 @@ eval {
 };
 
 if ($@) {
-	$razor_not_available = "Razor is not installed.";
+	$razor_not_available = "Razor1 is not installed.";
 }
 
 
 
 %patterns = (
 
-q{ Listed in Razor }, 'spam',
+q{ Listed in Razor1 }, 'spam',
 
 );
 
@@ -30,7 +30,7 @@ skip_all_patterns($razor_not_available);
 %patterns = ();
 %anti_patterns = (
 
-q{ Listed in Razor }, 'nonspam',
+q{ Listed in Razor1 }, 'nonspam',
 
 );
 
