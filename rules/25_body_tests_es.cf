@@ -11,7 +11,7 @@
 #
 ###########################################################################
 
-lang es body REMOVE_ES_01             /(?:Para no|Si (?:U(?:ste)?d\. )?no (?:deseas?|qui?er[ée]s)) (?:seguir )?recibi(?:r|endo) (?:en el futuro )?(?:ninguna otra|m.s|estos)?\s?(?:correos?|mensajes?|publicidad|informaci.n|ofertas?|(?:e-?)?mails? promocional(?:es)?)/
+lang es body REMOVE_ES_01             /(?:Para no|Si (?:U(?:ste)?d\. )?no (?:deseas?|qui?er[ée]s)) (?:seguir )?recibi(?:r|endo) (?:en el futuro )?(?:ninguna otra|m.s|estos)?\s?(?:correos?|mensajes?|publicidad|informaci.n|ofertas?|(?:e-?)?mails? promocional(?:es)?|avisos)/
 lang es describe REMOVE_ES_01         Claims you can be removed in Spanish
 
 lang es body REMOVE_ES_02             /(?:Para ser (?:elimina|removi)do|Si quieres? salir|Para eliminarse) del? (?:nuestra|esta|mailing) ?lista?,? (?:sera removido|responda el mail|solo tienes? que marcar|enviar un ?e-?mail)/i
@@ -35,7 +35,7 @@ lang es describe REMOVE_ES_07		Claims you can opt-out
 lang es body SUBSCRIBE_ES_01		/Si usted desea Agregarse a nuestra base de datos/i
 lang es describe SUBSCRIBE_ES_01	If you want to subscribe...
 
-lang es body EXCUSE_ES_01             /est(?:o|e (?:mensaje|(?:e-?)mail)|a carta) no (?:es|(?:puede ser|se) considera(?:d[oa])?) .?SPAM.?,? (?:(?:puesto|ya) que|mientras)/i
+lang es body EXCUSE_ES_01             /est(?:o|e (?:correo|mensaje|(?:e-?)mail)|a carta) no (?:es|(?:puede ser|se) considera(?:d[oa])?) .?S[Pp][Aa][Mm].?,?(?:\(correo no deseado\))? (?:(?:puesto|ya) que|mientras)/i
 lang es describe EXCUSE_ES_01         Claims not to be spam in Spanish
 
 lang es body EXCUSE_ES_02             /Me he tomado la libertad de enviarle este mail por/i
@@ -93,7 +93,7 @@ lang es describe PRESENTAMOS_ES		Presentación de un nuevo producto.
 lang es body CONTRA_REEMBOLSO_ES	/(?:envios|pago) contra[r -]?reembolso/i
 lang es describe CONTRA_REEMBOLSO_ES	Pago contra reembolso.
 
-lang es body CLICK_ES			/ha(?:ga|z) click aqu. para/i
+lang es body CLICK_ES			/ha(?:ga|z|ciendo) click aqu. para/i
 lang es describe CLICK_ES		Haga click aqui.
 
 lang es body REGALO_ES			/[lt]e (?:regal|obsequi)amos/i
