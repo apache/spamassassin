@@ -55,8 +55,12 @@ sub new_checker {
 
   my $path;
 
-  my $dbm_module = Mail::SpamAssassin::Util::first_available_module
-			(qw(DB_File GDBM_File NDBM_File SDBM_File));
+  my @order = split (' ', $main->{conf}->{auto_whitelist_db_modules});
+  my $dbm_module = Mail::SpamAssassin::Util::first_available_module (@order);
+  if (!$dbm_module) {
+    die "Cannot find a usable DB package from auto_whitelist_db_modules: ".
+	$main->{conf}->{auto_whitelist_db_modules}."\n";
+  }
 
   my $umask = umask 0;
   if(defined($main->{conf}->{auto_whitelist_path})) # if undef then don't worry -- empty hash!

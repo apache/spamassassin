@@ -189,6 +189,7 @@ sub new {
   $self->{auto_whitelist_path} = "__userstate__/auto-whitelist";
   $self->{auto_whitelist_file_mode} = '0700';
   $self->{auto_whitelist_factor} = 0.5;
+  $self->{auto_whitelist_db_modules} = "DB_File GDBM_File NDBM_File SDBM_File";
 
   $self->{subject_tag} = '*****SPAM*****';
   $self->{rewrite_header} = { };
@@ -1659,6 +1660,24 @@ mean; C<factor> = 0 mean just use the calculated score.
 
     if ( $key eq 'auto_whitelist_factor' ) {
       $self->{auto_whitelist_factor} = $value+0; next;
+    }
+
+=item auto_whitelist_db_modules Module ...	(default: see below)
+
+What database modules should be used for the auto-whitelist storage database
+file.   The first named module that can be loaded from the perl include path
+will be used.  The format is:
+
+  PreferredModuleName SecondBest ThirdBest ...
+
+ie. a space-separated list of perl module names.  The default is:
+
+  DB_File GDBM_File NDBM_File SDBM_File
+
+=cut
+
+    if ( $key eq 'auto_whitelist_db_modules' ) {
+      $self->{auto_whitelist_db_modules} = $value; next;
     }
 
 =item bayes_auto_learn ( 0 | 1 )      (default: 1)
