@@ -1,4 +1,21 @@
 ------------------------------------------------------------------------
+r35715 | jm | 2004-08-05 03:10:43 +0000 (Thu, 05 Aug 2004) | 1 line
+
+bug 3662: fix masses scripts to do sane things with mutable/nonmutable tests.  adds zeroing of bayes rules in nonbayes scoresets; returns to the pre-2.50 situation of using the location in the scores file as the indicator as to whether a rule's score is mutable or not. this is more reliable than the 2.6x situation where some rules outside of the 'generated' section were still being mutable, while some were not, and bugs kept changing their status from mutable to not.
+------------------------------------------------------------------------
+r35714 | quinlan | 2004-08-05 03:08:40 +0000 (Thu, 05 Aug 2004) | 2 lines
+
+bug 3658: disable SenderBase
+
+------------------------------------------------------------------------
+r35713 | jm | 2004-08-05 03:07:57 +0000 (Thu, 05 Aug 2004) | 1 line
+
+oops, didn't mean to commit these yet
+------------------------------------------------------------------------
+r35712 | jm | 2004-08-05 03:06:01 +0000 (Thu, 05 Aug 2004) | 1 line
+
+Preparing to release 3.0.0-pre4
+------------------------------------------------------------------------
 r35708 | quinlan | 2004-08-05 01:27:22 +0000 (Thu, 05 Aug 2004) | 2 lines
 
 use proper name of license: Apache License, Version 2.0
