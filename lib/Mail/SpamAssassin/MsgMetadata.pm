@@ -24,7 +24,22 @@ Mail::SpamAssassin::MsgMetadata - extract metadata from a message
 
 =head1 DESCRIPTION
 
-This module will extract metadata from an email message.
+This class is tasked with extracting "metadata" from messages for use as
+Bayes tokens, fodder for eval tests, or other rules.  Metadata is
+supplemental data inferred from the message, like the examples below.
+
+It is held in two forms:
+
+1. as name-value pairs of strings, presented in mail header format.  For
+  example, "X-Language" => "en".  This is the general form for simple
+  metadata that's useful as Bayes tokens, can be added to marked-up
+  messages using "add_header", etc., such as the trusted-relay inference
+  and language detection.
+
+2. as more complex data structures on the $msg->{metadata} object.  This
+  is the form used for metadata like the HTML parse data, which is stored
+  there for access by eval rule code.   Because it's not simple strings,
+  it's not added as a Bayes token by default (Bayes needs simple strings).
 
 =head1 PUBLIC METHODS
 
@@ -48,9 +63,12 @@ use constant MAX_BODY_LINE_LENGTH =>        2048;
 sub new {
   my ($class, $msg) = @_;
   $class = ref($class) || $class;
+
   my $self = {
-    msg => $msg
+    msg =>		$msg,
+    strings =>		{ }
   };
+
   bless($self,$class);
   $self;
 }
@@ -99,8 +117,12 @@ sub check_language {
   $body = join ("\n", @{$body});
   $body =~ s/^Subject://i;
 
+  # note body text length, since the check_languages() eval rule also
+  # uses it
+  $self->{languages_body_len} = length($body);
+
   # need about 256 bytes for reasonably accurate match (experimentally derived)
-  if (length($body) < 256)
+  if ($self->{languages_body_len} < 256)
   {
     dbg("Message too short for language analysis");
     return;

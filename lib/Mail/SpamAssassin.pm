@@ -348,6 +348,11 @@ sub parse {
   my $header = '';
   $msg->{'pristine_headers'} = '';
 
+  # inform the node that it's a message root, so that it knows that
+  # it can have stuff that only root nodes have.  TODO: IMO, we should
+  # probably just have a subclass of MsgContainer for root nodes!
+  $msg->_set_is_root();
+
   # Go through all the headers of the message
   while ( my $last = shift @message ) {
     # Store the non-modified headers in a scalar

@@ -196,8 +196,8 @@ sub check {
     $self->{score} += $self->{learned_points};
   }
 
+  # delete temporary storage and memory allocation used during checking
   $self->delete_fulltext_tmpfile();
-
 
   # Round the score to 3 decimal places to avoid rounding issues
   # We assume required_score to be properly rounded already.
@@ -221,6 +221,7 @@ sub check {
 
   $report =~ s/\n*$/\n\n/s;
   $self->{report} = $report;
+  $self->{msg}->finish_metadata();
 
   $self->{main}->call_plugins ("check_end", { permsgstatus => $self });
 }

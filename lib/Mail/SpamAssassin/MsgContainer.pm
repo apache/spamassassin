@@ -56,7 +56,6 @@ sub new {
   my $self = {
     headers		=> {},
     raw_headers		=> {},
-    meta_strings	=> {},
     body_parts		=> [],
     header_order	=> [],
     already_parsed	=> 1,
@@ -70,6 +69,23 @@ sub new {
   bless($self,$class);
 
   $self;
+}
+
+=item _set_is_root()
+
+Non-Public function to inform this node that it's the root, and
+can hold stuff that only a root should do.
+
+(TODO: IMO, we should just have a subclass of MsgContainer for
+root nodes.)
+
+=cut
+
+sub _set_is_root {
+  my($self) = @_;
+
+  # create the metadata holder class
+  $self->{metadata} = Mail::SpamAssassin::MsgMetadata->new($self);
 }
 
 =item _do_parse()
@@ -589,11 +605,10 @@ sub get_pristine_body {
 sub extract_message_metadata {
   my ($self, $main) = @_;
 
-  # do this only once
+  # do this only once per message, it can be expensive
   if ($self->{already_extracted_metadata}) { return; }
   $self->{already_extracted_metadata} = 1;
 
-  $self->{metadata} = Mail::SpamAssassin::MsgMetadata->new($self);
   $self->{metadata}->extract ($self, $main);
 }
 
@@ -605,7 +620,7 @@ sub extract_message_metadata {
 
 sub get_metadata {
   my ($self, $hdr) = @_;
-  $self->{meta_strings}->{$hdr};
+  $self->{metadata}->{strings}->{$hdr};
 }
 
 =item put_metadata($hdr, $text)
@@ -614,7 +629,7 @@ sub get_metadata {
 
 sub put_metadata {
   my ($self, $hdr, $text) = @_;
-  $self->{meta_strings}->{$hdr} = $text;
+  $self->{metadata}->{strings}->{$hdr} = $text;
 }
 
 =item delete_metadata($hdr)
@@ -623,7 +638,7 @@ sub put_metadata {
 
 sub delete_metadata {
   my ($self, $hdr) = @_;
-  delete $self->{meta_strings}->{$hdr};
+  delete $self->{metadata}->{strings}->{$hdr};
 }
 
 =item $str = get_all_metadata()
@@ -634,13 +649,27 @@ sub get_all_metadata {
   my ($self) = @_;
 
   my @ret = ();
-  foreach my $key (sort keys %{$self->{meta_strings}}) {
-    push (@ret, $key, ": ", $self->{meta_strings}->{$key}, "\n");
+  foreach my $key (sort keys %{$self->{metadata}->{strings}}) {
+    push (@ret, $key, ": ", $self->{metadata}->{strings}->{$key}, "\n");
   }
   return join ("", @ret);
 }
 
 # ---------------------------------------------------------------------------
+
+=item finish_metadata()
+
+Destroys the metadata for this message.  Once a message has been
+scanned fully, the metadata is no longer required.   Destroying
+this will free up some memory.
+
+=cut
+
+sub finish_metadata {
+  my ($self) = @_;
+  $self->{metadata}->finish();
+  delete $self->{metadata};
+}
 
 =item finish()
 

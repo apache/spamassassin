@@ -2268,17 +2268,18 @@ sub _check_language {
   }
 
   # map of languages that are very often mistaken for another, perhaps with
-  # more than 0.02% false positives
+  # more than 0.02% false positives.  only used for text < 2048 bytes in
+  # length
   my %mistakable = ('sco' => 'en');
 
   # see if any matches are okay
   foreach my $match (@matches) {
     $match =~ s/\..*//;
-    if (exists $mistakable{$match}) {
+    if ($self->{languages_body_len} < 2048 && exists $mistakable{$match}) {
       $match = $mistakable{$match};
     }
     foreach my $language (@languages) {
-      if (exists $mistakable{$language}) {
+      if ($self->{languages_body_len} < 2048 && exists $mistakable{$language}) {
 	$language = $mistakable{$language};
       }
       if ($match eq $language) {
