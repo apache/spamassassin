@@ -88,7 +88,7 @@ install-indep: build-indep
 
 	rm debian/$(packagei)/usr/bin/spamc debian/$(packagei)/usr/share/man/man1/spamc.1p
 
-#	cp spamproxy/README debian/$(packagei)/usr/share/doc/$(packagei)/README.spamproxy
+	#cp spamproxy/README debian/$(packagei)/usr/share/doc/$(packagei)/README.spamproxy
 	cp sql/README debian/$(packagei)/usr/share/doc/$(packagei)/README.sql
 
 	cp debian/logcheck debian/$(packagei)/etc/logcheck/ignore.d.server/spamassassin
@@ -106,7 +106,7 @@ install-indep: build-indep
 #	rm debian/$(packagei)/usr/share/man/man1/spamproxyd.1p
 
 	mv debian/$(packagei)/usr/bin/spamd debian/$(packagei)/usr/sbin/
-#	mv debian/$(packagei)/usr/bin/spamproxyd debian/$(packagei)/usr/sbin/
+	#mv debian/$(packagei)/usr/bin/spamproxyd debian/$(packagei)/usr/sbin/
 
 	-rmdir -p debian/$(packagei)/usr/lib/perl5
 

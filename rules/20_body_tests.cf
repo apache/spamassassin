@@ -1,5 +1,5 @@
 # SpamAssassin rules file: tests.
-# $Id: 20_body_tests.cf,v 1.245 2002/09/03 20:06:44 quinlan Exp $
+# $Id: 20_body_tests.cf,v 1.246 2002/09/04 18:36:49 jmason Exp $
 # 
 # note: body tests are run with long lines, so be sure to limit the
 # size of searches; use ".{0,30}" instead of ".*" to avoid huge
@@ -12,11 +12,11 @@ require_version 2.41
 # Message digest tests
 
 full RAZOR_CHECK	eval:check_razor1()
-describe RAZOR_CHECK	Listed in Razor v1, see http://razor.sf.net/
+describe RAZOR_CHECK	Listed in Razor1, see http://razor.sf.net/
 tflags RAZOR_CHECK	net
 
 full RAZOR2_CHECK	eval:check_razor2()
-describe RAZOR2_CHECK	Listed in Razor v2, see http://razor.sf.net/
+describe RAZOR2_CHECK	Listed in Razor2, see http://razor.sf.net/
 tflags RAZOR2_CHECK	net
 
 full DCC_CHECK		eval:check_dcc()
@@ -1387,7 +1387,6 @@ describe INTL_EXEC_GUILD        Well known SPAM senders
 body IN_ACCORDANCE_WITH_LAWS    /has been sent in accordance with/
 describe IN_ACCORDANCE_WITH_LAWS Claims to be in accordance with some Spam law
 
-
 body ANOTHER_NET_AD             /Another Internet Ad campaign produced/
 describe ANOTHER_NET_AD         Tells you it's an ad
 
@@ -1418,12 +1417,15 @@ describe CLICK_TO_REMOVE_3      Click-to-remove with PHP/ASP action found
 #   0.035    0.048    0.027    0.64    1.56  DONT_DELETE
 body     DONT_DELETE            /\b(?:don'?t delete this|do not delete)/i
 describe DONT_DELETE            Don't delete me!  Nooooo!!!!
+lang fr describe DONT_DELETE            Contient une formule incitant é ne pas détruire ce message
 
 #   0.000    0.000    0.000    0.00    1.00  EU_200_32_CE
+lang fr describe EU_200_32_CE   Revendique la conformité avec l'arrêt européen 200.32.CE
 body EU_200_32_CE               /Directive 200.32.CE/i
 describe EU_200_32_CE           Claims compliance with SPAM regulations
 
 #   0.001    0.000    0.001    0.00    1.80  EU_EMAIL_OPTOUT
+lang fr describe EU_EMAIL_OPTOUT        Revendique la conformité avec l'arrêt européen sur le spam
 body EU_EMAIL_OPTOUT            /EU (?:e-?mail opt.?out|e.?commerce) directive/i
 describe EU_EMAIL_OPTOUT        Claims compliance with SPAM regulations
 #
@@ -1451,11 +1453,13 @@ describe FREE_HOSTING           Free Hosting
 
 
 #   0.000    0.001    0.000    1.00    1.00  GREEN_EXCUSE_1
+lang fr describe GREEN_EXCUSE_1 Prétend que le SPAM est bon pour l'environement
 body GREEN_EXCUSE_1             /using email instead can significantly reduce this/i
 describe GREEN_EXCUSE_1         Claims SPAM helps the environment
 #
 #
 #   0.000    0.001    0.000    1.00    1.00  GREEN_EXCUSE_2
+lang fr describe GREEN_EXCUSE_2 Prétend que le SPAM est bon pour l'environement
 body GREEN_EXCUSE_2             /the trees, save the planet, use email!/i
 describe GREEN_EXCUSE_2         Claims SPAM helps the environment
 #
@@ -1469,6 +1473,9 @@ describe HTML_COMMENT_UNIQUE_ID Contains a comment with nothing but unique ID
 body INCREDIBLE                 /\bincredible secrets\b/i
 describe INCREDIBLE             Things incredible
 
+lang de describe NIGERIAN_SCAM            Nigerianischer Betrugsversuch, siehe http://www.snopes2.com/inboxer/scams/nigeria.htm
+lang es describe NIGERIAN_SCAM          Nigerian scam, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
+lang fr describe NIGERIAN_SCAM  Mentionne les combines nigériennes, voir http://www.snopes2.com/inboxer/scams/nigeria.htm
 body NIGERIAN_SCAM              /BASED ON INFORMATION GATHERED ABOUT YOU, WE BELIEVE\s*YOU WOULD BE IN A POSITION TO HELP US IN TRANSFER/i
 describe NIGERIAN_SCAM          Nigerian scam, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
 
@@ -1495,6 +1502,8 @@ describe THIS_AINT_JUNK         Claims "This is not junk email"
 
 body TO_BE_REMOVED_REPLY        /\bto\b.{0,20}\b(?:remove|unsubscribe|opt[ -]?out).{0,20}\b(?:reply|send)\b/is
 describe TO_BE_REMOVED_REPLY    Says: "to be removed, reply via email" or similar
+lang de describe TO_BE_REMOVED_REPLY      Behauptet: "to be removed, reply via email" oder aehnliches
+lang es describe TO_BE_REMOVED_REPLY    Says: "to be removed, reply via email" or similar
 
 body WEALTH                     /\bachieve .{0,15}wealth\b/i
 describe WEALTH                 Achieve Wealth

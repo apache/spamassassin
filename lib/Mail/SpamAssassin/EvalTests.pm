@@ -75,7 +75,10 @@ $WORD_OBFUSCATION_CHARS = '*_.,/|-+=';
 sub check_for_from_mx {
   my ($self) = @_;
 
-  my $from = $self->get ('From:addr');
+  my $from = $self->get ('Reply-To:addr');
+  if (!defined $from || $from !~ /\@\S+/) {
+    $from = $self->get ('From:addr');
+  }
   return 0 unless ($from =~ /\@(\S+)/);
   $from = $1;
 
@@ -92,18 +95,22 @@ sub check_for_from_mx {
     return 0;
   }
 
-  # Try 3 times to protect against temporary outages.  sleep between checks
-  # to give the DNS a chance to recover.
+  # Try check_mx_attempts times to protect against temporary outages.
+  # sleep between checks to give the DNS a chance to recover.
   for my $i (1..$self->{conf}->{check_mx_attempts}) {
-    my @mx = Net::DNS::mx ($self->{res}, $from);
-    dbg ("DNS MX records found: ".scalar (@mx));
-    if (scalar @mx > 0) { return 0; }
+    my @mx = Net::DNS::mx($self->{res}, $from);
+    dbg ("DNS MX records found: " . scalar(@mx));
+    return 0 if (scalar @mx > 0);
 
-    # A records only for mail servers is perfectly OK.
-    my @a = $self->{res}->search ($from);
-    dbg ("DNS A records found: ".scalar (@a));
-    if (scalar @a > 0) { return 0; }
-
+    my $query = $self->{res}->search($from);
+    if ($query) {
+      my $count = 0;
+      foreach my $rr ($query->answer) {
+	$count++ if ($rr->type eq "A");
+      }
+      dbg ("DNS A records found: $count");
+      return 0 if ($count > 0);
+    }
     if ($i < $self->{conf}->{check_mx_attempts}) {sleep $self->{conf}->{check_mx_delay}; };
   }
 
@@ -1519,21 +1526,17 @@ sub message_from_debian_bts {
   return 0;
 }
 
-sub message_from_sf_bts {
-  my ($self)  = @_;
+sub message_is_habeas_swe {
+  my ($self) = @_;
 
-  my  $all    = $self->get('ALL');
-  
-  # These headers are always in exactly this order.
-  # Note: Spaces have to be escaped in /x mode
-  if ($all    =~ /\nTo:\ noreply\@sourceforge\.net
-                  \nFrom:\ noreply\@sourceforge\.net
-                  \nSubject:\ \[\ [A-Za-z0-9]+-Bugs-\d+\ \]\ [^\n]+
-                  \nMessage-Id:\ <[0-9A-Za-z]{7}-[0-9A-Za-z]{6}-[0-9]{2}\@[a-z]+-sf-web\d+\.sourceforge\.net>
-                  \n/mx) {
-    return 1;
+  my $all = $self->get('ALL');
+  if ($all =~ /\n(X-Habeas-SWE-1:.{0,512}X-Habeas-SWE-9:[^\n]{0,64}\n)/si) {
+    my $text = $1;
+    $text =~ tr/A-Z/a-z/;
+    $text =~ tr/ / /s;
+    $text =~ s/\/?>/\/>/;
+    return sha1($text) eq "42ab3d716380503f66c4d44017c7f37b04458a9a";
   }
-  
   return 0;
 }
 

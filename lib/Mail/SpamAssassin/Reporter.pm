@@ -69,6 +69,14 @@ sub report {
 ###########################################################################
 # non-public methods.
 
+# This is to reset the alarm before dieing - spamd can die of a stray alarm!
+
+sub adie {
+  my $msg = shift;
+  alarm 0;
+  die $msg;
+}
+
 sub is_razor_available {
   my ($self) = @_;
 
@@ -107,7 +115,7 @@ sub razor_report {
   my $response;
 
   # razor also debugs to stdout. argh. fix it to stderr...
-  if ($Mail::SpamAssassin::DEBUG) {
+  if ($Mail::SpamAssassin::DEBUG->{enabled}) {
     open (OLDOUT, ">&STDOUT");
     open (STDOUT, ">&STDERR");
   }
@@ -129,28 +137,28 @@ sub razor_report {
 
       if ($rc) {
         my %opt = (
-          debug      => $Mail::SpamAssassin::DEBUG,
+          debug      => $Mail::SpamAssassin::DEBUG->{enabled},
           foreground => 1,
           config     => $self->{main}->{conf}->{razor_config}
         );
         $rc->{opt} = \%opt;
-        $rc->do_conf() or die $rc->errstr;
+        $rc->do_conf() or adie($rc->errstr);
 
         # Razor2 requires authentication for reporting
         my $ident = $rc->get_ident
-          or die "Razor2 reporting requires authentication";
+          or adie ("Razor2 reporting requires authentication");
 
         my @msg     = ( \$fulltext );
         my $objects = $rc->prepare_objects( \@msg )
-          or die "error in prepare_objects";
-        $rc->get_server_info() or die $rc->errprefix("reportit");
+          or adie ("error in prepare_objects");
+        $rc->get_server_info() or adie $rc->errprefix("reportit");
         my $sigs = $rc->compute_sigs($objects)
-          or die "error in compute_sigs";
+          or adie ("error in compute_sigs");
 
-        $rc->connect() or die $rc->errprefix("reportit");
-        $rc->authenticate($ident) or die $rc->errprefix("reportit");
-        $rc->report($objects)     or die $rc->errprefix("reportit");
-        $rc->disconnect() or die $rc->errprefix("reportit");
+        $rc->connect() or adie ($rc->errprefix("reportit"));
+        $rc->authenticate($ident) or adie ($rc->errprefix("reportit"));
+        $rc->report($objects)     or adie ($rc->errprefix("reportit"));
+        $rc->disconnect() or adie ($rc->errprefix("reportit"));
         $response = $objects->[0]->{resp}->[0]->{res};
       }
       else {
@@ -178,7 +186,7 @@ sub razor_report {
     my $config = $self->{main}->{conf}->{razor_config};
     $config ||= $self->{main}->sed_path ("~/razor.conf");
     my %options = (
-      'debug'     => $Mail::SpamAssassin::DEBUG
+      'debug'     => $Mail::SpamAssassin::DEBUG->{enabled}
     );
 
     eval {
@@ -190,7 +198,7 @@ sub razor_report {
       alarm 10;
   
       my $rc = Razor::Client->new ($config, %options);
-      die "Problem while loading Razor: $!" if (!$rc);
+      adie ("Problem while loading Razor: $!") if (!$rc);
   
       my $ver = $Razor::Client::VERSION;
       if ($ver >= 1.12) {
@@ -216,7 +224,7 @@ sub razor_report {
 
   $/ = $oldslash;
 
-  if ($Mail::SpamAssassin::DEBUG) {
+  if ($Mail::SpamAssassin::DEBUG->{enabled}) {
     open (STDOUT, ">&OLDOUT");
     close OLDOUT;
   }

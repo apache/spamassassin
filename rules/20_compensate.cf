@@ -1,5 +1,5 @@
 # SpamAssassin rules file: compensation for common false positives.
-# $Id: 20_compensate.cf,v 1.59 2002/09/02 18:24:14 jmason Exp $
+# $Id: 20_compensate.cf,v 1.60 2002/09/04 18:36:49 jmason Exp $
 ###########################################################################
 # Header compensation tests
 
@@ -37,10 +37,6 @@ header DEBIAN_BTS_BUG           eval:message_from_debian_bts()
 describe DEBIAN_BTS_BUG         Looks like a Debian BTS bug
 tflags DEBIAN_BTS_BUG		nice
 
-header SOURCEFORGE_BUG		eval:message_from_sf_bts()
-describe SOURCEFORGE_BUG	Looks like a SourceForge bug
-tflags SOURCEFORGE_BUG		nice
-
 # give a negative score to Majordomo results.
 header   MAJORDOMO              Subject =~ /Majordomo (?:request )?results/
 describe MAJORDOMO              From Majordomo
@@ -65,6 +61,10 @@ tflags X_MAILING_LIST           nice
 tflags X_LOOP                   nice
 tflags X_ACCEPT_LANG            nice
 tflags RESENT_TO                nice
+
+header PGP_SIGNATURE_2          Content-Type =~ /protocol=.?application\/pgp-signature.?;/i
+describe PGP_SIGNATURE_2        Contains a PGP-signed message (signature attached)
+tflags PGP_SIGNATURE_2		nice
 
 # came from a known mailing list system -- but one which does *not* have built-in
 # (or working!) spam filtering.
@@ -124,7 +124,7 @@ tflags SUBJECT_MONTH		nice
 
 # a case-insensitive one; doesn't have "Apr" => "0% APR!" or "May" => "you may
 # want to check this out".
-header SUBJECT_MONTH_2          Subject =~ /\b(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|June?|July?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\b/i
+header SUBJECT_MONTH_2          Subject =~ /\b(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|April|June?|July?|Aug(?:ust)?|Sep(?:tember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\b/i
 describe SUBJECT_MONTH_2        Subject contains a month name - probable newsletter (2)
 tflags SUBJECT_MONTH_2		nice
 
@@ -195,17 +195,9 @@ body MAILMAN_CONFIRM            /We have received a request .*subscription of yo
 describe MAILMAN_CONFIRM        A MailMan confirm-your-address message
 tflags MAILMAN_CONFIRM		nice
 
-rawbody PGP_MESSAGE		/^-----BEGIN PGP (?:SIGNATURE|MESSAGE)-----$/
-describe PGP_MESSAGE		Contains a PGP signed or encrypted message
-tflags PGP_MESSAGE		nice
-
-header MULTIPART_SIGNED		Content-Type =~ /^multipart\/signed;/i
-describe MULTIPART_SIGNED	Contains a signed message (signature attached)
-tflags MULTIPART_SIGNED		nice
-
-header PGP_OLD_CTYPE		Content-Type =~ /^application\/pgp;/i
-describe PGP_OLD_CTYPE		Contains an obsolete form of PGP clearsigning
-tflags PGP_OLD_CTYPE		nice
+rawbody PGP_SIGNATURE           /-----BEGIN PGP SIGNATURE-----/
+describe PGP_SIGNATURE          Contains a PGP-signed message
+tflags PGP_SIGNATURE		nice
 
 # too many false matches, see bug #670
 #body BALANCE_FOR_LONG           eval:check_for_very_long_text('10000')
@@ -283,21 +275,61 @@ tflags NOSPAM_INC             nice
 header ORDER_STATUS             Subject =~ / order\b/i
 describe ORDER_STATUS           Subject looks like order info
 tflags ORDER_STATUS             nice
-score ORDER_STATUS -1.0         
 
 body HOTMAIL_FOOTER4            /Join the world's largest e-mail service with MSN Hotmail\./
 describe HOTMAIL_FOOTER4        Common footer for Hotmail
 tflags HOTMAIL_FOOTER4          nice
-score HOTMAIL_FOOTER4           -1.0
-
-header FROM_ISO885915		From:raw =~ /=\?ISO-8859-15?\?q\?(?:[a-z]*=[A-F][0-9A-F][a-z]*)+\?=/i
-describe FROM_ISO885915		From contains encoded ISO-8859-1(5) characters
-tflags FROM_ISO885915		nice
-header SUBJ_ISO885915		Subject:raw =~ /=\?ISO-8859-15?\?q\?(?:[a-z]*=[A-F][0-9A-F][a-z]*)+\?=/i
-describe SUBJ_ISO885915		Subject contains encoded ISO-8859-1(5) characters
-tflags SUBJ_ISO885915		nice
 
 header MAILER_DAEMON            From =~ /^(?:Mail Delivery \w+ )?<?mailer.?daemon\@\S+>?(?: \(Mail Delivery \w+\))?$/i
 describe MAILER_DAEMON          From the Mailer-Daemon
 tflags MAILER_DAEMON            nice
+
+#   0.149    0.221    0.105    0.68   -1.00  FAILURE_NOTICE_1
+header   FAILURE_NOTICE_1       Subject =~ /^(?:failure notice|returned mail:|Delivery Status Notification|Undeliverable:)/i
+describe FAILURE_NOTICE_1       Mailer daemon failure notice (1)
+tflags   FAILURE_NOTICE_1       nice
+
+#   0.534    0.593    0.499    0.54   -1.00  FWD_MSG
+header FWD_MSG                  Subject =~ /Fwd:\s/
+describe FWD_MSG                Forwarded email
+tflags FWD_MSG                  nice
+test FWD_MSG ok Subject: Fwd: Dracula
+test FWD_MSG ok Subject: [landho] Fwd: tell rod
+test FWD_MSG fail Subject: Fwd:Pure Opt-In for half the price
+test FWD_MSG fail Subject: Re: RE: FWD: search results        .       .       .
+
+#   0.002    0.005    0.000    1.00   -1.00  MAILBITS_EMAIL
+body MAILBITS_EMAIL             /This is a free service provided by MailBits\.com\./
+describe MAILBITS_EMAIL         recommended page from MailBits.com
+tflags MAILBITS_EMAIL           nice
+
+#   0.923    0.447    1.137    0.28   -0.97  MIME_NULL_BLOCK
+body MIME_NULL_BLOCK            /This message is in MIME format/
+describe MIME_NULL_BLOCK        Correct for MIME 'null block'
+tflags MIME_NULL_BLOCK  nice         
+lang fr describe MIME_NULL_BLOCK        Bloc vide pour un message au format MIME
+
+#   0.000    0.000    0.000    0.00   -1.00  MSN_FOOTER2
+body MSN_FOOTER2                /Remove my e-mail address from Gaming Zone /
+describe MSN_FOOTER2            Common footer for MSN
+tflags MSN_FOOTER2              nice
+
+#   0.307    0.301    0.311    0.49   -1.00  SUBJECT_HAS_DATE
+header SUBJECT_HAS_DATE         Subject =~ /1?\d[-\/][1-3]?\d[-\/](?:20)?0\d/
+describe SUBJECT_HAS_DATE       Subject contains a date
+tflags SUBJECT_HAS_DATE         nice
+
+#   0.002    0.001    0.003    0.22   -1.00  TRACK_NUMBER
+body     TRACK_NUMBER           /\bassign.{1,100}\b(?:ticket|tracking) number/i
+describe TRACK_NUMBER           Talks about tracking numbers
+tflags   TRACK_NUMBER           nice
+
+header OUTLOOK_FW_MSG         Subject =~ /\[?F[Ww]:\s/
+describe OUTLOOK_FW_MSG         Forwarded email (Outlook style)
+tflags OUTLOOK_FW_MSG           nice
+
+#   0.041    0.057    0.031    0.65   -1.00  PRIVACY_STATEMENT
+body     PRIVACY_STATEMENT      /\bPRIVACY STATEMENT\b/i
+describe PRIVACY_STATEMENT      Contains a Privacy Statement
+tflags   PRIVACY_STATEMENT      nice
 
