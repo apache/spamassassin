@@ -47,21 +47,27 @@ $ROUND_THE_WORLD_RELAYERS = qr{(?:net|com|ca)};
 # regexp.  Then I threw in some unscientific seasoning to taste. ;)
 
 
-# Porn words will each be prefixed with "\b" but not suffixed so as to pick up word ending variations.
-# if you want \b on the end, be sure to add it yourself.
-@PORN_WORDS = (qr(\blolita)i,  qr(\bcum)i, qr(\borg[iy])i, qr(\bwild)i, qr(\bfuck)i,
-qr(\bteen)i, qr(\bspunk)i, qr(\bpuss)i, qr(\bsuck)i, qr(\bhot\b)i,
+# Porn words will each be prefixed with "\b" but not suffixed so as to pick up
+# word ending variations.  if you want \b on the end, be sure to add it
+# yourself.
+@PORN_WORDS = (qr(\blolita\b)i,  qr(\bcum\b)i, qr(\borg[iy])i, qr(\bwild\b)i, qr(\bfuck)i,
+qr(\bspunk\b)i, qr(\bpuss[iy])i, qr(\bhot\b)i, qr(\bteen\b)i,
 qr(\bhottest\b)i, qr(\bhott[iy])i,
 qr(\bvoyeur)i, qr(\ble[sz]b(?:ian|o))i, qr(\banal\b)i, qr(\binterr?acial)i, qr(\basian)i,
-qr(\bamateur)i, qr(\bsex+)i, qr(\bslut)i, qr(\bexplicit)i, qr(\bxxx(?:[^x]|\b))i,
-qr(\blick)i, qr(\bsuck)i, qr(\bdorm)i, qr(\bwebcam)i, qr(\bass\b)i, qr(\bschoolgirl)i,
-qr(\bstrip)i, qr(\bhorn[yi])i, qr(\berotic)i, qr(\boral)i, qr(\bpenis)i, qr(\bhard.?core)i,
-qr(\bblow.?job)i, qr(\bnast[yi])i, qr(\bporn)i, qr(\bwhore)i, qr(\bnaked)i,
-qr(\bnude)i, qr(\bvirgin)i, qr(\bnaught[yi])i, qr(\bgirl)i, qr(\bcelebrity\b)i,
+qr(\bamateur)i, qr(\bsexx+\b)i, qr(\bslut)i, qr(\bexplicit\b)i, qr(\bxxx(?:[^x]|\b))i,
+qr(\blick)i, qr(\bsucking\b)i, qr(\bdorm\b)i, qr(\bwebcam\b)i, qr(\bass\b)i,
+qr(\bschoolgirl\b)i, qr(\bstripper\b)i, qr(\bstripping\b)i, qr(\bhorn[yi])i, qr(\berotic)i,
+qr(\boral\b)i, qr(\bpenis\b)i, qr(\bhard.?core\b)i, qr(\bblow.?job)i,
+qr(\bnasty\b)i, qr(\bnastiest\b)i, qr(\bporn\b)i, qr(\bwhore\b)i, qr(\bnaked\b)i,
+qr(\bnude\b)i, qr(\bvirgin\b)i, qr(\bnaught[yi])i, qr(\bgirl)i, qr(\bcelebrity\b)i,
 qr(\bcelebrities\b)i, qr(\bceleb\b)i, qr(\bbabes?\b)i,
-qr(\badult)i, qr(\bskank)i, qr(\btits?\b)i, qr(\btitties)i,
+qr(\badult\b)i, qr(\bskank\b)i, qr(\btits?\b)i, qr(\btitties\b)i,
 # jm: catch "s*x", "f*ck" etc.
 qr(\bs[\*\.\-\?]ck)i, qr(\bf[\*\.\-\?]ck)i, qr(\bs[\*\.\-\?]x\b)i
+
+# words to avoid, since they cause FPs: girl, teen, hot, suck, and "sex", believe
+# it or not!
+
 );
 
 ###########################################################################
@@ -1420,7 +1426,7 @@ sub porn_word_test {
     foreach my $pat (@PORN_WORDS) {
         if ($$fulltext =~ /$pat/) {
           $hits++;
-          #dbg ("porn word test: found $pat");
+          dbg ("porn word test: found $pat");
         }
         return 1 if ($hits == 3);
     }
