@@ -16,7 +16,11 @@ my $killfile_message_ids = qr{(?:
 my $killfile_receiveds = qr{(?:
     from\s\S+\s\S+\sby\s(?:anclsmtp\d\d|myfamlsmtp\d\d)\.myfamily\.com
     |\(envelope-from\snews\@mail\d\.globalscape\.com\)
-    |from\sivillage-\d+\.ivillage\.com
+    |from\sivillage-\d+\.ivillage\.com\s
+    |for\s<(?:KarenCedar|lorin.stein|fsg.publicity|richard.deitch|davidh)\@fsg\.com>
+    |for\s<(?:reekie)\@vineyard.net>
+    |from\sLLin\s\(llin\.hq\.cmp\.com
+    |from\sFDLN01\.fed\.com\s
     |\(envelope-from\sbounce-gozilla-newsletters-\S+\@pro\.netatlantic\.com\)
     |\(envelope-from\sdivx-return-\S+\@lists\.divx\.com\)
     |\(envelope-from\s<news\@zonelabs\.rsc02\.com>\)
