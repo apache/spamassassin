@@ -35,7 +35,7 @@ case "$1" in
 	daemon spamd $SPAMDOPTIONS
 	RETVAL=$?
         echo
-        [ $RETVAL = 0 ] && touch /var/lock/subsys/spamd
+        [ $RETVAL = 0 ] && touch /var/lock/subsys/spamassassin
         ;;
   stop)
         # Stop daemons.
@@ -43,14 +43,14 @@ case "$1" in
         killproc spamd
         RETVAL=$?
         echo
-        [ $RETVAL = 0 ] && rm -f /var/lock/subsys/spamd
+        [ $RETVAL = 0 ] && rm -f /var/lock/subsys/spamassassin
         ;;
   restart)
         $0 stop
         $0 start
         ;;
   condrestart)
-       [ -e /var/lock/subsys/spamd ] && $0 restart
+       [ -e /var/lock/subsys/spamassassin ] && $0 restart
        ;;
   status)
 	status spamd
