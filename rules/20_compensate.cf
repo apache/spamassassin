@@ -82,7 +82,7 @@ body MSN_GROUPS                 eval:check_for_msn_groups_headers()
 describe MSN_GROUPS             Came from MSN Communities
 tflags MSN_GROUPS               nice
 
-header NMS_CGI_NOT_BUGGY        X-Mailer =~ /^NMS FormMail.pl.*v\d/
+header NMS_CGI_NOT_BUGGY        X-Mailer =~ /^NMS FormMail\.pl.*v\d/
 describe NMS_CGI_NOT_BUGGY      Not Matt's Scripts formmail.pl
 tflags NMS_CGI_NOT_BUGGY	nice
 
@@ -128,7 +128,7 @@ header SUBJECT_MONTH_2          Subject =~ /\b(?:Jan(?:uary)?|Feb(?:ruary)?|Mar(
 describe SUBJECT_MONTH_2        Subject contains a month name - probable newsletter (2)
 tflags SUBJECT_MONTH_2		nice
 
-header FROM_EGROUPS             X-eGroups-Return =~ /^sentto-.*\@returns.groups.yahoo.com$/
+header FROM_EGROUPS             X-eGroups-Return =~ /^sentto-.*\@returns\.groups\.yahoo\.com$/
 describe FROM_EGROUPS           Appears to be from yahoo groups
 tflags FROM_EGROUPS		nice
 
@@ -137,7 +137,7 @@ tflags FROM_EGROUPS		nice
 
 
 # compensate for common false pos on above rule: Yahoo! webmail
-header YAHOO_MSGID_ADDED        ALL =~ /Message-Id: <\S+\.mail.yahoo.com>\nReceived: .*by \S+mail.yahoo.com via HTTP;/s
+header YAHOO_MSGID_ADDED        ALL =~ /Message-Id: <\S+\.mail\.yahoo\.com>\nReceived: .*by \S+mail\.yahoo\.com via HTTP;/s
 describe YAHOO_MSGID_ADDED      'Message-Id' was added by yahoo.com, that's OK
 tflags YAHOO_MSGID_ADDED        nice
 
