@@ -29,10 +29,6 @@ meta T_FROM_ALL_NUMS		(__FROM_JUST_NUMBER && !__FROM_PHONE)
 describe T_FROM_ALL_NUMS	From an address that is all numbers (non-phone)
 score T_FROM_ALL_NUMS		0.5
 
-# seems like the hit rate is a bit too low on this one
-uri T_ADCLICK_URL		m,\Qhttp://www.adclick.ws/p\E,
-describe T_ADCLICK_URL		Contains adclick URL
-
 # Needs testing
 body T_QUOTE_TWICE_1		/^> >\s/
 describe T_QUOTE_TWICE_1	Contains twice quoted reply
@@ -45,11 +41,6 @@ meta T_ORIGINAL_MESSAGE		(__ORIGINAL_MESSAGE_AGENT && __ORIGINAL_MESSAGE_LINE)
 describe T_ORIGINAL_MESSAGE	Looks like a reply to a message
 tflags T_ORIGINAL_MESSAGE	nice
 score T_ORIGINAL_MESSAGE	-1.0
-
-# avoid an FP; good ones have a hostname after the @
-header T_MSGID_GOOD_EXCHANGE	Message-Id =~ /^<[A-Z]{28}\.\S+\@\S+>$/
-tflags T_MSGID_GOOD_EXCHANGE	nice
-score T_MSGID_GOOD_EXCHANGE	-1.0
 
 # this rule may need to factor in ok_languages or ok_locales
 body T_BODY_UNPRINTABLE		/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]{3,}/
@@ -128,9 +119,6 @@ body T_PORN_16			/(?:nasty|teen|dir(?:ty|iest)?|little).{0,16}\bsluts?/i
 
 # 419 spam, group/merge with other Nigeria rules
 body T_MILLION_USD		/Million\b.{0,40}\b(?:United States? Dollars?|USD)/i
-
-# multiple spaces in subject lines, and other ways of embedding tracking codes
-header T_SUBJ_HAS_TIME_ID	Subject =~ /\sTime[: ]+\d+:\d+:\d+ [AP]M\s*$/i
 
 # faked addresses tend to come from big public sites
 #
@@ -415,20 +403,16 @@ meta T_HTML_50_70_IMGS3         (HTML_50_70 && __T_HTML_NUM_IMGS_3)
 
 ####################################################################
 
-header T_FROM_ENDS_IN_NUMS1       From =~ /\D\d\@/
-header T_FROM_ENDS_IN_NUMS2       From =~ /\D\d\d\@/
-header T_FROM_ENDS_IN_NUMS3       From =~ /\D\d\d\d\@/
-header T_FROM_ENDS_IN_NUMS4       From =~ /\D\d\d\d\d\@/
-header T_FROM_ENDS_IN_NUMS5       From =~ /\D\d\d\d\d\d\@/
-header T_FROM_ENDS_IN_NUMS6       From =~ /\d\d\d\d\d\d\@/
+# Nov 12 2002 jm: bad results without the commonly-forged domains.
+# lets try with those and see if we can get better
+header T_FROM_WEBMAIL_ENDS_IN_NUMS1       From =~ /\D\d\@(?:aol|msn|bigfoot|compuserve|excite|hotmail|juno|prodigy|yahoo)\.(?:com|net|org)/i
+header T_FROM_WEBMAIL_ENDS_IN_NUMS2       From =~ /\D\d\d\@(?:aol|msn|bigfoot|compuserve|excite|hotmail|juno|prodigy|yahoo)\.(?:com|net|org)/i
+header T_FROM_WEBMAIL_ENDS_IN_NUMS3       From =~ /\D\d\d\d\@(?:aol|msn|bigfoot|compuserve|excite|hotmail|juno|prodigy|yahoo)\.(?:com|net|org)/i
+header T_FROM_WEBMAIL_ENDS_IN_NUMS4       From =~ /\D\d\d\d\d\@(?:aol|msn|bigfoot|compuserve|excite|hotmail|juno|prodigy|yahoo)\.(?:com|net|org)/i
+header T_FROM_WEBMAIL_ENDS_IN_NUMS5       From =~ /\D\d\d\d\d\d\@(?:aol|msn|bigfoot|compuserve|excite|hotmail|juno|prodigy|yahoo)\.(?:com|net|org)/i
+header T_FROM_WEBMAIL_ENDS_IN_NUMS6       From =~ /\d\d\d\d\d\d\@(?:aol|msn|bigfoot|compuserve|excite|hotmail|juno|prodigy|yahoo)\.(?:com|net|org)/i
 
 ############################################################
-
-meta T_CONFIRMED_FORGED         (FORGED_RCVD_TRAIL && (FORGED_AOL_RCVD || FORGED_HOTMAIL_RCVD || FORGED_EUDORAMAIL_RCVD || FORGED_YAHOO_RCVD || FORGED_JUNO_RCVD || FORGED_GW05_RCVD || FORGED_MX_HOTMAIL))
-
-meta T_MULTI_FORGED             ((FORGED_AOL_RCVD + FORGED_HOTMAIL_RCVD + FORGED_EUDORAMAIL_RCVD + FORGED_YAHOO_RCVD + FORGED_JUNO_RCVD + FORGED_GW05_RCVD) > 1)
-
-###########################################################
 
 body T_HTML_TAG_EXISTS_CENTER    eval:html_tag_exists('center')
 # T_HTML_TAG_EXISTS_HX has about the same accuracy as HTML_MESSAGE
@@ -474,11 +458,6 @@ body T_HTML_P2_90_100		eval:html_percentage('90','100')
 
 body T_HTML_MAIL_ONLY             /HTML only email, sorry/i
 
-# Most/all of these require that From addresses do not start with numbers.
-# let's see how this does... (jm)
-header T_FROM_NUM_AT_WEBMAIL    From:addr =~ /^\d\S+\@(?:msn\.com|flashmail\.com|mailexcite\.com|prodigy\.net|yahoo\.\S+|hotmail\.com|eudoramail\.com|aol\.com|excite\.com|email\.com|earthlink\.net|geocities\.com|hknetmail\.com|angelfire\.com)/i
-describe T_FROM_NUM_AT_WEBMAIL  From address is webmail, but starts with a number
-
 # actually, this looks really good!
 header T_FROM_OFFERS            From:addr =~ /offers\S*\@/
 describe T_FROM_OFFERS          From address is "offers at something"
@@ -517,17 +496,18 @@ body     T_HTML_LINK_UNSUB      eval:html_eval('anchor_text', '=~/unsubscribe/i'
 # quinlan: these might work better, but I have no hits (they should be
 # syntactically correct, though)
 #
+# Nov 12 2002 jm: nothing but bad results in ALL.current. I recommend
+# drop 'em
+# 0.002   0.0000   0.0021    0.000   0.00    0.01  T_MANY_USER_AGENT
+# 0.012   0.0060   0.0145    0.292   0.02    0.01  T_MANY_X_MAILER
+#
 header T_MANY_X_MAILER		ALL =~ /(?:\nX-Mailer:.*){2}/si
 header T_MANY_USER_AGENT	ALL =~ /(?:\nUser-Agent:.*){2}/si
 
-# thanks to Jason Staples for this suggestion. Sendmail and other MTAs
-# will often query the ident server on a relay; Squid proxies should not be
-# sending mail.
-
-header T_IDENT_SQUID		Received =~ /ident[:=]squid\b/i
-describe T_IDENT_SQUID		Message was sent by a Squid HTTP proxy
-score T_IDENT_SQUID		1.0
-
+# Nov 12 2002 jm: still not sure about this one. ALL.current reports
+# 0.108   0.4001   0.0062    0.985   0.93    1.00  T_IDENT_NOBODY
+# combined for all submitters.  too dangerous considering the amount
+# of daemons sending mail reports, running as root
 header T_IDENT_NOBODY		Received =~ /ident[:=]nobody\b/i
 describe T_IDENT_NOBODY		Message was sent by nobody
 score T_IDENT_NOBODY		1.0
@@ -605,19 +585,14 @@ tflags T_USER_AGENT_PMMAIL   nice
 # Bug 1133
 header T_BAD_HELO2           eval:check_for_bad_helo2()
 
-# jm: thrown up by bayes.
-header T_X_INFO2		exists:X-Info2
-header T_X_VMP_TEXT		exists:X-VMP-Text
-header T_X_RMD_TEXT		exists:X-RMD-Text
-# might as well test it while we're here ;)
-header T_X_GCMULTI		exists:X-GCMulti
-
 ##############################################################################
 # bug 1163: image only test from mgm
 
 body __IMG_TAG			eval:html_tag_exists('img')
 uri __IMG_URI			/\.(?:gif|jpe?g|png)$/i
 
+# Nov 12 2002 jm: bet these would be a *whole* lot more efficient using
+# length() in an eval ;)
 body __TEXT_A025		/.{25}/i
 body __TEXT_A050		/.{50}/i
 body __TEXT_A075		/.{75}/i
@@ -736,6 +711,10 @@ meta T_IMAGE_ONLY_7_B_175_200	((__IMG_URI || __IMG_TAG) && __TEXT_B175 && ! __TE
 
 ##############################################################################
 
+# Nov 12 2002 jm: not keen on this.  many ISPs do not provide rDNS these
+# days as policy. stupid policy, but there we are. and SpamAssassin policy
+# is not to punish users with stupid ISPs...
+# 8.985  21.6423   4.5926    0.825   0.58    0.01  T_SENDER_NO_REVERSE
 header   T_SENDER_NO_REVERSE    eval:check_for_sender_no_reverse()
 describe T_SENDER_NO_REVERSE    No reverse lookup for sender's IP
 
@@ -829,3 +808,36 @@ body __AFRICAN_COUNTRY_51	/\bLagos\b/i
 body __AFRICAN_COUNTRY_52	/\bcape town\b/i
 
 ##############################################################################
+
+# Nov 12 2002 jm:
+# some meditation on outlookish Message-Id formats results in these.
+# easy ones first ;)
+
+header T_MSGID_NO_HOST		Message-Id =~ /\@>(?:$|\s)/
+
+header T_MSGID_OE_LONG_13	Message-Id =~ /<[a-f0-9]{13}\$[a-f0-9]{8}\$[a-f0-9]{8}\@/
+header T_MSGID_OE_LONG_14	Message-Id =~ /<[a-f0-9]{14}\$[a-f0-9]{8}\$[a-f0-9]{8}\@/
+header T_MSGID_OE_LONG_15	Message-Id =~ /<[a-f0-9]{15,}\$[a-f0-9]{8}\$[a-f0-9]{8}\@/
+
+# and now some substrings.  stats on my corpus are good, but these need
+# collated results from several to ensure they're not just what works for me.
+
+header T_MSGID_OE_SPAM_01BC 	Message-Id =~ /^<[a-f0-9]{4}(?:[^0]...|.[^1]..|..[^bc]|[^0123def])[a-f0-9]{4}\$[a-f0-9]{8}\$[a-f0-9]{8}\@/
+header T_MSGID_OE_SPAM_4651 	Message-Id =~ /^<[a-f0-9]{8}4651\$[a-f0-9]{8}\$[a-f0-9]{8}\@/
+header T_MSGID_OE_SPAM_4ZERO 	Message-Id =~ /^<[a-f0-9]{12}\$[a-f0-9]{8}\$0000[a-f0-9]{4}\@/
+# a specific, but prolific and hard-to-hit, spammer
+header T_MSGID_OE_SPAM_6B01 	Message-Id =~ /^<[a-f0-9]{12}\$[a-f0-9]{8}\$6b01a8c0\@/
+
+header T_MSGID_OE_HAM_D907 	Message-Id =~ /^<00(?:d9|07|02|0f|09|13|01|12|23|1f|16)[a-f0-9]{8}\$[a-f0-9]{8}\$[a-f0-9]{8}\@/
+header T_MSGID_OE_HAM_01BC 	Message-Id =~ /^<[a-f0-9]{4}01(?:b[def]|c[03])[a-f0-9]{4}\$[a-f0-9]{8}\$[a-f0-9]{8}\@/
+header T_MSGID_OE_HAM_3470 	Message-Id =~ /^<[a-f0-9]{8}3470\$[a-f0-9]{8}\$[a-f0-9]{8}\@/
+tflags T_MSGID_OE_HAM_D907	nice
+tflags T_MSGID_OE_HAM_01BC	nice
+tflags T_MSGID_OE_HAM_3470	nice
+
+# Nov 12 2002 jm: a test to catch spammers who HELO as a host at a big site
+# (aol, hotmail etc.) but whose rDNS lists them at some dialup ISP or another
+# ;)
+header T_RCVD_FAKE_HELO_DOTCOM_2	eval:check_for_fake_dotcom_helo()
+describe T_RCVD_FAKE_HELO_DOTCOM_2	Faked HELO-as-dotcom found
+
