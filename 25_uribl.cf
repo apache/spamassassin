@@ -27,6 +27,8 @@
 # which lists the zones to look up in advance.  The rules will
 # not hit unless each rule has a corresponding 'uridnsbl' line.
 
+ifplugin Mail::SpamAssassin::Plugins::URIDNSBL
+
 # URI-DNSBL lookups can take a *maximum* of this many seconds past the
 # normal DNSBL lookups.
 uridnsbl_timeout	2
@@ -46,4 +48,6 @@ tflags		URIBL_DSBL	net
 #header		URIBL_SORBS	eval:check_uridnsbl('URIBL_SORBS')
 #describe	URIBL_SORBS	Contains a URL listed in the SORBS blocklist
 #tflags		URIBL_SORBS	net
+
+endif   # Mail::SpamAssassin::Plugins::URIDNSBL
 
