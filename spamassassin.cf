@@ -85,6 +85,9 @@ describe TO_EMPTY		To: is empty
 header REPLY_TO_EMPTY		Reply-To =~ /^\@/
 describe REPLY_TO_EMPTY		Reply-To: is empty
 
+header X_EM_VER_PRESENT		X-Em-Version =~ /\S/
+describe X_EM_VER_PRESENT	Found an X-Em-Version: header
+
 header NO_MX_FOR_FROM		eval:check_for_from_mx()
 describe NO_MX_FOR_FROM		No MX records for the From: domain
 
@@ -136,7 +139,7 @@ body S_1618			/S.\s*1618\s*-\s*SECTION\s*301/i
 body SECTION_301		/SECTION\s*301/
 
 body NUMERIC_HTTP_ADDR		/http\:\/\/\d+\//i
-body SUPERLONG_LINE		/.{99,}/
+body SUPERLONG_LINE		/.{199,}/
 body ASCII_FORM_ENTRY		/[A-Za-z].* _{30,}/
 
 body AMAZING			/AMAZING/
@@ -187,4 +190,7 @@ body WE_HONOR_ALL		/We honor ALL remove requests/i
 body PORN_1			/\bbarely\b.*\blegal\b/i
 body PORN_2			/\bwild\b.*\bhardcore\b/i
 body PORN_3			/(?:(?:\bcum|\bteen|\baction\b|\bhot\b).*)+/i
+
+body TRACKER_ID			/^\s*\W{4,} \w{10,} \W{4,}\s*$/
+
 
