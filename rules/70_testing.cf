@@ -408,3 +408,7 @@ describe T_FRAUD_X6 Matches 6+ phrases commonly used in fraud spam
 # bug 3395
 header    T_YAHOO_MSGID_CAPS          Message-ID =~ /<[A-Z]+\@yahoo.com>/
 describe  T_YAHOO_MSGID_CAPS          Message-ID has all-caps@yahoo.com
+
+# bug 3396
+header    T_CT_BOUND_DDNUM        Content-Type =~ /boundary="--\d+"/
+describe  T_CT_BOUND_DDNUM	  Content-Type header has boundary in ratware form
