@@ -78,3 +78,8 @@ describe MAILTO_TO_REMOVE   Includes a 'remove' email address
 uri HTTP_NUMBER_WORD    /^https?:\/\/(?:zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty)\./i
 describe HTTP_NUMBER_WORD   URL contains spamhaus signature: numbered servers
 
+uri JAVASCRIPT_URI	/^javascript:/i
+describe JAVASCRIPT_URI	Javascript protocol in a URI
+
+uri URI_IS_POUND	/^\#$/
+describe URI_IS_POUND	URI is just a '#'; probably a JS trick
