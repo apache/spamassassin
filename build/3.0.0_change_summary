@@ -1,11 +1,30 @@
+*** THIS IS A PRE-RELEASE ONLY, NOT THE FINAL 3.0.0 RELEASE ***
 
-SpamAssassin 3.0.0 is released!  SpamAssassin 3.0.0 is the first major
-update of SpamAssassin since September 2003 (when the 2.60 series was
-started).
+SpamAssassin 3.0.0 is released!  SpamAssassin 3.0.0 is a major update
+and includes a number of new email and anti-spam technologies.
 
-SpamAssassin is a mail filter which uses advanced statistical
-and heuristic tests to identify spam (also known as unsolicited
-commercial/bulk email).
+SpamAssassin is a mail filter which uses advanced statistical and
+heuristic tests to identify spam (also known as unsolicited bulk email).
+
+Highlights of the release
+-------------------------
+
+ - SpamAssassin is now part of the Apache Software Foundation, bringing
+   an improved and clearer software license, the 2.0 version of the
+   Apache License.
+
+ - We added a new architecture which allows third-parties to easily add
+   plug-in modules.
+
+ - There is now SQL database support for both our Bayes and
+   auto-whitelist subsystem, allowing more large sites to easily deploy
+   SpamAssassin.
+
+ - A more accurate simulation of email reader behavior improves our
+   accuracy and is coupled with better detection and handling of spammer
+   techniques.
+
+ - SpamAssassin now has support for SPF (the Sender Policy Framework).
 
 Downloading
 -----------
