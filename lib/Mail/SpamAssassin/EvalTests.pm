@@ -2494,4 +2494,59 @@ sub check_bayes {
 
 }
 
+###########################################################################
+
+# valid Outlookish Message-Ids contain the top word of the system time
+# when the message was sent!
+# We can verify this, by decoding the Date header, extracting
+# the time token from the Message-Id, and comparing them.
+#
+sub check_outlook_timestamp_token {
+  my ($self) = @_;
+  local ($_);
+
+  my $id = $self->get ('MESSAGEID');
+  return 0 unless ($id =~ /^<[0-9a-f]{4}([0-9a-f]{8})\$[0-9a-f]{8}\$[0-9a-f]{8}\@/);
+
+  my $timetoken = hex($1);
+
+  # convert UNIX time_t to Windows FILETIME.  From MSDN:
+  #
+  #     LONGLONG ll = Int32x32To64(t, 10000000) + 116444736000000000;
+  #     pft->dwLowDateTime = (DWORD) ll;
+  #     pft->dwHighDateTime = ll >>32;
+  #
+  # IOW, ((tt * a) + b) / c = id .
+  # Now to avoid using any kind of LONGLONG data type, we do this:
+  #     => tt * (a/c) + (b/c) = id
+  #     let x = (a/c) = 0.0023283064365387
+  #     let y = (b/c) = 27111902.8329849
+  #
+  my $x = 0.0023283064365387;
+  my $y = 27111902.8329849;
+
+  # quite generous, but we just want to be in the right ballpark, so we
+  # can handle mostly-correct values OK, but catch random strings.
+  my $fudge = 200;
+
+  $_ = $self->get ('Date');
+  $_ = $self->_parse_rfc822_date($_); $_ ||= 0;
+  my $expected = int (($_ * $x) + $y);
+  my $diff = $timetoken - $expected;
+  dbg("time token found: $timetoken expected (from Date): $expected: $diff");
+  if (abs ($diff) < $fudge) { return 0; }
+
+  # also try last date in Received header, Date could have been rewritten
+  $_ = $self->get ('Received');
+  /(\s.?\d+ \S\S\S \d+ \d+:\d+:\d+ \S+).*?$/;
+  dbg("last date in Received: $1");
+  $_ = $self->_parse_rfc822_date($_); $_ ||= 0;
+  $expected = int (($_ * $x) + $y);
+  $diff = $timetoken - $expected;
+  dbg("time token found: $timetoken expected (from Received): $expected: $diff");
+  if (abs ($diff) < $fudge) { return 0; }
+
+  return 1;
+}
+
 1;
