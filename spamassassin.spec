@@ -15,8 +15,8 @@ Summary:        a spam filter for email which can be invoked from mail delivery 
 Summary(pl):    Filtr antyspamowy, przeznaczony dla programów dostarczaj±cych pocztê (MDA)
 
 Group:          Applications/Mail
-%define version 2.60
-%define real_version 2.60
+%define version 2.70
+%define real_version 2.70
 
 # Release number can be specified with rpmbuild --define 'rel SOMETHING' ...
 # If no such --define is used, the release number is 1.
@@ -119,6 +119,7 @@ aplikacji do czytania poczty.
 %setup -q -n %{pdir}-%{pnam}-%{real_version}
 
 %build
+CFLAGS="$RPM_OPT_FLAGS"; export CFLAGS
 %{__perl} Makefile.PL PREFIX=%{_prefix} SYSCONFDIR=%{_sysconfdir} DESTDIR=$RPM_BUILD_ROOT < /dev/null
 %{__make}
 %{__make} spamd/libspamc.so
@@ -146,7 +147,7 @@ mkdir -p %{buildroot}/etc/mail/spamassassin
 
 %files 
 %defattr(-,root,root)
-%doc README Changes sample-nonspam.txt sample-spam.txt spamd/README.spamd INSTALL
+%doc README Changes sample-nonspam.txt sample-spam.txt spamd/README.spamd INSTALL BUGS COPYRIGHT License TRADEMARK USAGE Razor2.patch
 %attr(755,root,root) %{_bindir}/*
 %attr(644,root,root) %{_includedir}/*
 %attr(644,root,root) %{_libdir}/*.so
@@ -194,6 +195,16 @@ if [ "$1" -ge "1" ]; then
 fi
 
 %changelog
+* Sun Sep 28 2003 Theo Van Dinter <felicity@kluge.net> 2.70-1
+- updated to 2.70
+
+* Sun Sep 28 2003 Theo Van Dinter <felicity@kluge.net> 2.61-1
+- updated to 2.61
+- allow builds of tar.gz or tar.bz2 via the --define "srcext .bz2" option
+- allow release to be overriden via the --define "release 1_rh8" option
+- allow CFLAGS to be modified in the usual method (RPM_OPT_FLAGS)
+- add more documentation files to be installed
+
 * Thu Sep 09 2003 Malte S. Stretz <spamassassin-contrib@msquadrat.de>
 - take advantage of the new simplified build system
 
