@@ -1912,23 +1912,25 @@ Options:
 
  -c, --create-prefs                 Create user preferences files
  -C path, --configpath=path         Path for default config files
- --siteconfigpath=path              Path for site configs (def: /etc/mail/spamassassin)
+ --siteconfigpath=path              Path for site configs
  -d, --daemonize                    Daemonize
  -h, --help                         Print usage message.
- -i [ipaddr], --listen-ip=ipaddr    Listen on the IP ipaddr (default: 127.0.0.1)
- -p port, --port                    Listen on specified port (default: 783)
- -m num, --max-children=num         Allow maximum num children (default: 5)
- --max-conn-per-child=num	    Maximum connections accepted by child before exiting
+ -i [ipaddr], --listen-ip=ipaddr    Listen on the IP ipaddr
+ -p port, --port                    Listen on specified port
+ -m num, --max-children=num         Allow maximum num children
+ --max-conn-per-child=num	    Maximum connections accepted by child 
+                                    before it is respawned
  -q, --sql-config                   Enable SQL config (only useful with -x)
  -Q, --setuid-with-sql              Enable SQL config (only useful with -x,
                                     enables use of -H)
  --ldap-config                      Enable LDAP config (only useful with -x)
  --setuid-with-ldap                 Enable LDAP config (only useful with -x,
                                     enables use of -a and -H)
- --virtual-config-dir=dir           Enable pattern based Virtual configs (needs -x)
+ --virtual-config-dir=dir           Enable pattern based Virtual configs
+                                    (needs -x)
  -r pidfile, --pidfile              Write the process id to pidfile
- -s facility, --syslog=facility     Specify the syslog facility (default: mail)
- --syslog-socket=type               How to connect to syslogd (default: unix)
+ -s facility, --syslog=facility     Specify the syslog facility
+ --syslog-socket=type               How to connect to syslogd
  -u username, --username=username   Run as username
  -v, --vpopmail                     Enable vpopmail config
  -x, --nouser-config                Disable user config files
@@ -1938,7 +1940,7 @@ Options:
  -D, --debug                        Print debugging messages
  -L, --local                        Use local tests only (no DNS)
  -P, --paranoid                     Die upon user errors
- -H dir, --helper-home-dir=dir	    Specify a different HOME directory, path optional
+ -H [dir], --helper-home-dir[=dir]  Specify a different HOME directory
  --ssl                              Run an SSL server
  --server-key keyfile               Specify an SSL keyfile
  --server-cert certfile             Specify an SSL certificate
