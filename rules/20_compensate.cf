@@ -246,6 +246,10 @@ body EMAIL_ATTRIBUTION		/^"?\w.{4,} (?:wrote|writes):$/
 describe EMAIL_ATTRIBUTION	Contains what looks like an email attribution
 tflags EMAIL_ATTRIBUTION	nice
 
+rawbody QUOTED_EMAIL_TEXT	/^>+ +.{60,72}$/
+describe QUOTED_EMAIL_TEXT	Contains what looks like a quoted email text
+tflags QUOTED_EMAIL_TEXT	nice
+
 # matt@nightrealms.com (Matthew Cline)
 header   FAILURE_NOTICE_1       Subject =~ /^(?:failure notice|returned mail:|Delivery Status Notification|Undeliverable:)/i
 describe FAILURE_NOTICE_1       Mailer daemon failure notice (1)
