@@ -514,6 +514,7 @@ sub patterns_run_cb {
   } else {
     $_ = join ('', <IN>);
   }
+  $matched_output = $_;
 
   # create default names == the pattern itself, if not specified
   foreach my $pat (keys %patterns) {
