@@ -806,6 +806,9 @@ sub html_font_invisible {
       if ($distance < 12) {
 	$self->{html}{"font_near_invisible"} = 1;
       }
+      for (my $contrast = 14; $contrast <= 64; $contrast += 2) {
+	$self->{html}{"text_contrast_$contrast"} = 1 if $distance < $contrast;
+      }
     }
   }
   return 1;
