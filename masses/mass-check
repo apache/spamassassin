@@ -134,6 +134,8 @@ sub wanted {
 
   $tests = join(',', sort(split(/,/, $tests)));
 
+  $id =~ s/\s/_/g;
+
   printf "%s %2d %s %s\n",
 		    ($yorn ? 'Y' : '.'),
 		    $hits, $id, $tests;
