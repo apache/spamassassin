@@ -32,3 +32,178 @@
 #describe MONTH_TRIAL		Month Trial Offer
 #body MEMBER_2			/\b(?:free|special|paid|dear|gold|opt.in|valued|because you are an?|be a|becoming a|sent to) .{0,9}members?\b/i
 #describe MEMBER_2		Being a Member
+
+# These were all removed for the 2.50 GA run.  Low scoring, etc.
+
+#body NAME_BRAND		        /\b(?:famous name|major) brand/i
+#describe NAME_BRAND		Name Brand
+#
+#body SIGN_UP			/\b(?:free sign up|sign up today)\b/i
+#describe SIGN_UP		Sign up Free Today
+#
+#body CANCEL		        /\bcancel at any time\b/i
+#describe CANCEL			Cancel at any time!
+#
+#body NO_COMBINE		        /\bwith any other offer/i
+#describe NO_COMBINE		Can not be combined with any other offer
+#
+#header X_SMTPEXP_REGISTRATION	exists:X-SMTPExp-Registration
+#header X_SMTPEXP_VERSION	exists:X-SMTPExp-Version
+#describe X_SMTPEXP_REGISTRATION	Message has X-SMTPExp-Registration header
+#describe X_SMTPEXP_VERSION	Message has X-SMTPExp-Version header
+#
+#body MEMBER			/\bmember (?:number|reward|value|benefit|rate|report|card|information)s?\b/i
+#describe MEMBER			Member Stuff
+#
+#header   EXCHANGE_SERVER        X-Mailer =~ /Internet Mail Service \([\d\.]+\)/
+#describe EXCHANGE_SERVER        Came via Internet Mail Service plugin
+#tflags EXCHANGE_SERVER		nice
+#
+#body     REG_THANKS             /\bThank you for registering\b/i
+#describe REG_THANKS             Something about registration
+#tflags   REG_THANKS             nice
+#
+#header SUBJ_ENDS_IN_SPACE	Subject =~ /(?:\s{6}|\t\s|\s\t)$/
+#describe SUBJ_ENDS_IN_SPACE	Subject ends with lots of white space
+#
+#header MSGID_CHARS_WEIRD	MESSAGEID =~ /["=\\~]/
+#describe MSGID_CHARS_WEIRD	Message-Id has characters often found in spam
+#
+#header ALL_CAPS_HEADER		ALL =~ /\n(?:TO|FROM|SUBJECT|DATE):/s
+#describe ALL_CAPS_HEADER	Header with all capitals found
+#
+#header MSG_ID_ADDED_BY_MTA	Message-Id =~ / \(added by (?!postmaster\@wanadoo\.fr)/
+#describe MSG_ID_ADDED_BY_MTA	'Message-Id' was added by a relay
+#
+#header FROM_MALFORMED           From !~ /(?:\"[^\"]+\"|\S+)\@\S+\.\S+|<\S+(?:\!\S+)+>/ [if-unset: unset@unset.unset]
+#describe FROM_MALFORMED         From: has a malformed address
+#
+#header SHORT_RECEIVED_LINE      Received =~ /\S{120,}/s
+#describe SHORT_RECEIVED_LINE    'Received:' contains huge hostname
+#
+#header YR_MEMBERSHIP_EXCH       Subject =~ /Your Membership Exchange/
+#describe YR_MEMBERSHIP_EXCH     Subject contains 'Your Membership Exchange'
+#
+#body PARA_A_2_C_OF_1618		/Paragraph *.a.{0,10}2.{0,10}C\. of S\. 1618/i
+#describe PARA_A_2_C_OF_1618	Claims compliance with Senate Bill 1618
+#
+#body CHECK_OR_MONEY_ORDER	/check or money order/i
+#describe CHECK_OR_MONEY_ORDER	Talk about a check or money order
+#
+#body DEAR_EMAIL			/\bDear [A-Za-z0-9_-]+\@/
+#describe DEAR_EMAIL		Dear you@you.com?
+#
+## this one gets a few false positives
+#body SOCIAL_SEC_NUMBER		/social security (?:number|record)/i
+#describe SOCIAL_SEC_NUMBER	Talks about social security numbers
+#
+#body EXCUSE_5			/that your email address is removed/i
+#describe EXCUSE_5		Claims you can be removed from the list
+#
+#body INVESTOR_SPEC_SHEET	/Investor Spec Sheet/i
+#describe INVESTOR_SPEC_SHEET	Standard investment opportunity spam
+#
+## detect "mort$age", but not "mortgage"
+#body MORTGAGE_OBFU	        /mor[tga\$]*\$[ga\$]*e/i
+#describe MORTGAGE_OBFU 	        Attempt at obfuscating the word "mortgage"
+#
+#body INTERNET_TERROR_RANT       /At the time of this mailing.{9,50}legitimate return email address.{100,299}internet terrorists/i
+#describe INTERNET_TERROR_RANT   Cyber FirePower! rant about losing dropboxes
+#
+## jm: use {2,3} to avoid matching iso-2022-jp charset items. split into US_DOLLARS_4
+#body US_DOLLARS_4               /\s(?:\$|US\$|usd?).?\d{1,3}\.\d+.?(?:m|millions?)\b/i
+#describe US_DOLLARS_4           Nigerian scam key phrase ($NNN.N m/USDNNN.N m/US$NN.N m)
+#
+#body OFFER_EXPIRE	        /\boffer expires\b/i
+#describe OFFER_EXPIRE		Offer Expires
+#
+#body INVESTMENT		        /\binvestment decision/i
+#describe INVESTMENT		Investment Decision
+#
+#body COUPON		        /\boff coupon/i
+#describe COUPON			Offers Coupon
+#
+#body CANT_LIVE_WITHOUT	        /\bcan.{0,4} live without\b/i
+#describe CANT_LIVE_WITHOUT	Can't live without?
+#
+#body GETAWAY		        /\bweekend getaway/i
+#describe GETAWAY		Weekend Getaway
+#
+#body GIVING_AWAY	        /\bgiving away\b/i
+#describe GIVING_AWAY		They're just giving it away!
+#
+#body CYBER_FIRE_POWER           /\b(?:by|for) Cyber FirePower\!/
+#describe CYBER_FIRE_POWER       mentions Cyber FirePower!, a spam-tool
+#
+#body ANOTHER_NET_AD             /Another Internet Ad campaign produced/
+#describe ANOTHER_NET_AD         Tells you it's an ad
+#
+#body EU_200_32_CE               /Directive 200.32.CE/i
+#describe EU_200_32_CE           Claims compliance with European spam regulations
+#
+#body FILTERED_BY_WORLDREMOVE		/filtered by WorldRemove/
+#describe FILTERED_BY_WORLDREMOVE	Claims to listen to some removal request list
+#
+#body FREE_HOSTING               /\bfree hosting\b/i
+#describe FREE_HOSTING           Free Hosting
+#
+#body GREEN_EXCUSE_1             /using email instead can significantly reduce this/i
+#describe GREEN_EXCUSE_1         Claims spam helps the environment
+#
+#body GREEN_EXCUSE_2             /the trees, save the planet, use email!/i
+#describe GREEN_EXCUSE_2         Claims spam helps the environment
+#
+#body POPLAUNCH                  /StealthLaunch PopLaunch\b/
+#describe POPLAUNCH              spam software: PopLaunch
+#
+#body SIGNIFICANT                /\bsignificant savings\b/i
+#describe SIGNIFICANT            Significant Savings
+#
+#body SLASH_PRICE                /\bslash.{0,2} price/i
+#describe SLASH_PRICE            Slashed Price
+#
+#body THIS_AINT_JUNK             /This.{0,30}is not (?:a )?junk(?: email)?/is
+#describe THIS_AINT_JUNK         Claims "This is not junk email"
+#
+#body OUR_POLICY_ON_SELLING	/our policy on selling/i
+#describe OUR_POLICY_ON_SELLING	Mentions their policy on selling
+#
+#body BANG_CARTOONS    		/\bcartoons!/i
+#describe BANG_CARTOONS    	Talks about cartoons with an exclamation!
+#
+#body BANG_CYBERANALYSTS		/\bcyberanalysts!/i
+#describe BANG_CYBERANALYSTS	Talks about cyberanalysts with an exclamation!
+#
+#header RATWARE_V3161		ALL =~ /V3,1,6,1/
+#describe RATWARE_V3161		Bulk email software fingerprint (V3161) found in headers
+#
+#uri LONG_NUMERIC_HTTP_ADDR	/^https?\:\/\/000\d+/is
+#describe LONG_NUMERIC_HTTP_ADDR	Uses a long numeric IP address in URL
+#
+## one spamhaus uses servers numbered like this:
+#uri HTTP_NUMBER_WORD		/^https?:\/\/(?:zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty)\./i
+#describe HTTP_NUMBER_WORD	URL contains spamhaus signature: numbered servers
+#
+#uri E_WEBHOSTCENTRAL_URL	/e-webhostcentral\.com/i
+#describe E_WEBHOSTCENTRAL_URL	Frequent SPAM content
+#
+#uri FREEMEGS_URL		/25freemegs\.com/i
+#describe FREEMEGS_URL		Frequent SPAM content   
+#
+#uri FREEWEBCO_NET_URL		/freewebco\.net/i
+#describe FREEWEBCO_NET_URL	Frequent SPAM content
+#
+#uri FREEWEBHOSTINGCENTRAL	/freewebhostingcentral/i   
+#describe FREEWEBHOSTINGCENTRAL	Frequent SPAM content  
+#
+#uri WEB4PORNO_URL		/web4porno\.com/i
+#describe WEB4PORNO_URL		Frequent SPAM content
+#
+#uri WWW_NETSITESFORFREE_NET		/netsitesforfree\.net/i
+#describe WWW_NETSITESFORFREE_NET	Frequent SPAM content
+#
+#uri WWW_REMOVEYOU_COM		/removeyou\.com/i
+#describe WWW_REMOVEYOU_COM	Frequent SPAM content
+#
+#uri YELLOWSUN			/yellowsun01\.com/i   
+#describe YELLOWSUN		Frequent SPAM content

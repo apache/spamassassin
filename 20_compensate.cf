@@ -24,9 +24,6 @@ header   APPROVED_BY            exists:Approved-By
 describe APPROVED_BY            Has an Approved-By moderated list header
 tflags APPROVED_BY		nice
 
-header   EXCHANGE_SERVER        X-Mailer =~ /Internet Mail Service \([\d\.]+\)/
-describe EXCHANGE_SERVER        Came via Internet Mail Service plugin
-tflags EXCHANGE_SERVER		nice
 
 # This is a Bugzilla bug status report e-mail and probably OK
 header BUGZILLA_BUG             eval:message_from_bugzilla()
@@ -214,9 +211,6 @@ body     FORGOTTEN_PASSWORD     /[fF]org[oe]t.{0,25}[pP]assword/
 describe FORGOTTEN_PASSWORD     Contains a password retrieval system
 tflags   FORGOTTEN_PASSWORD     nice
 
-body     REG_THANKS             /\bThank you for registering\b/i
-describe REG_THANKS             Something about registration
-tflags   REG_THANKS             nice
 
 ###########################################################################
 # meta compensation tests
