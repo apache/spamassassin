@@ -729,9 +729,9 @@ sub get_visible_rendered_body_text_array {
   }
 
   # whitespace handling (warning: small changes have large effects!)
-  $text =~ s/\n+\s*\n+/\f/gs;                # double newlines => form feed
-  $text =~ tr/ \t\n\r\x0b\xa0/ /s;        # whitespace => space
-  $text =~ tr/\f/\n/;                        # form feeds => newline
+  $text =~ s/\n+\s*\n+/\f/gs;		# double newlines => form feed
+  $text =~ tr/ \t\n\r\x0b\xa0/ /s;	# whitespace => space
+  $text =~ tr/\f/\n/;			# form feeds => newline
 
   my @textary = split_into_array_of_short_lines ($text);
   $self->{text_visible_rendered} = \@textary;
@@ -768,9 +768,9 @@ sub get_invisible_rendered_body_text_array {
   }
 
   # whitespace handling (warning: small changes have large effects!)
-  $text =~ s/\n+\s*\n+/\f/gs;                # double newlines => form feed
-  $text =~ tr/ \t\n\r\x0b\xa0/ /s;        # whitespace => space
-  $text =~ tr/\f/\n/;                        # form feeds => newline
+  $text =~ s/\n+\s*\n+/\f/gs;		# double newlines => form feed
+  $text =~ tr/ \t\n\r\x0b\xa0/ /s;	# whitespace => space
+  $text =~ tr/\f/\n/;			# form feeds => newline
 
   my @textary = split_into_array_of_short_lines ($text);
   $self->{text_invisible_rendered} = \@textary;
