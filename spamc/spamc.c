@@ -102,9 +102,9 @@ void
 print_version(void)
 {
     printf("%s version %s\n", "SpamAssassin Client", VERSION_STRING);
-    #ifdef SPAMC_SSL
+#ifdef SPAMC_SSL
     printf("  compiled with SSL support (%s)\n", OPENSSL_VERSION_TEXT);
-    #endif
+#endif
 }
 
 static void
@@ -154,9 +154,13 @@ print_usage(void)
     
     usg("  -x                  Don't fallback safely.\n");
     usg("  -l                  Log errors and warnings to stderr.\n");
+#ifndef _WIN32
     usg("  -e command [args]   Pipe the output to the given command instead\n"
         "                      of stdout. This must be the last option.\n");
+#endif
     usg("  -h                  Print this help message and exit.\n");
+    usg("  -V                  Print spamc version and exit.\n");
+    usg("  -f                  (Now default, ignored.)\n");
     usg("\n");
 }
 
@@ -221,7 +225,7 @@ read_args(int argc, char **argv,
 #endif
             case 'f':
             {
-                flags |= SPAMC_SAFE_FALLBACK;
+                /* obsolete, backwards compat */
                 break;
             }
             case 'l':
