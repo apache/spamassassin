@@ -1,3 +1,4155 @@
+2003-06-24 22:33  felicity
+
+	* rules/50_scores.cf: updated bayes scores to the 2.54 version, and
+	applied set 0 and set 1 to 2 and 3 scores with 0.86 multiplier.
+
+2003-06-24 21:34  jmason
+
+	* lib/Mail/SpamAssassin/Received.pm: bug 2113: fix to consider 1
+	public IP addr an indication of the untrusted boundary
+
+2003-06-24 20:23  quinlan
+
+	* rules/20_dnsbl_tests.cf: bug 2120: change hil.habeas.com to use
+	sa-hil.habeas.com
+
+2003-06-24 03:25  quinlan
+
+	* lib/Mail/SpamAssassin/Conf.pm, rules/10_misc.cf: fix bug 2119:
+	always_add_headers 0 broken also change order of firs two
+	add_headers arguments, improve documentation, and add "on
+	_HOSTNAME" to end of X-Spam-Checker-Version header
+
+2003-06-23 22:27  felicity
+
+	* rules/50_scores.cf: bug 2067: do a quick GA run to get the 2.60
+	scores in the correct ballpark
+
+2003-06-23 19:33  felicity
+
+	* lib/Mail/SpamAssassin/BayesStore.pm: bug 2121: journal writes
+	could get into a loop if syswrite fails to actually write the data
+	out (quota limit, disk out of space, etc,) because we were looking
+	for bytes_written to be < 0 for error, whereas it's actually undef.
+
+2003-06-23 16:21  felicity
+
+	* lib/Mail/SpamAssassin/Bayes.pm: bug 2117: undefined warnings if
+	the message was missing the Message-Id and either the Date or
+	Received header.  add code to deal with that.
+
+2003-06-23 05:34  quinlan
+
+	* lib/Mail/SpamAssassin/Dns.pm: bug 2118: use shorter _RBL_ URIs
+
+2003-06-22 08:33  quinlan
+
+	* INSTALL, lib/Mail/SpamAssassin/PerMsgStatus.pm, t/html_obfu.t,
+	t/data/spam/011: bug 1551: improve handling of comment obfuscation
+
+2003-06-22 02:58  jmason
+
+	* sa-learn.raw: added note about removing markup with sa-learn
+
+2003-06-22 02:20  jmason
+
+	* rules/: 20_head_tests.cf, 30_text_fr.cf, 30_text_sk.cf: bug 2104:
+	MSGID_SPAMSIGN_ZEROES reinstated over MSGID_OE_SPAM_4ZERO
+
+2003-06-21 06:35  quinlan
+
+	* t/data/spam/011: add some <br> tags for legibility and remove
+	some unused stuff
+
+2003-06-21 03:16  quinlan
+
+	* Makefile.PL: fix bug 2110: perl Makefile.PL CONTACT_ADDRESS="blah
+	blah blah" doesn't work
+
+2003-06-21 02:25  duncf
+
+	* debian/: README.Exim3, README.Upgrade, changelog.in, control,
+	rules, spamassassin.README.Debian, spamassassin.config,
+	spamassassin.default, spamassassin.examples, spamassassin.init,
+	examples/gnus: Updated debian packaging for 2.60
+
+2003-06-21 02:16  quinlan
+
+	* rules/: 70_broken_rules.cf, 70_cvs_rules_under_test.cf: move
+	T_RCVD_IN_FABEL to 70_broken.cf for now
+
+2003-06-21 01:55  quinlan
+
+	* rules/20_dnsbl_tests.cf: rename RCVD_IN_OSIRU_DUL to
+	RCVD_IN_OSIRU_DIALUP tweak a few descriptions
+
+2003-06-21 01:55  quinlan
+
+	* rules/: 30_text_sk.cf, 50_scores.cf: rename RCVD_IN_OSIRU_DUL to
+	RCVD_IN_OSIRU_DIALUP
+
+2003-06-21 01:53  quinlan
+
+	* rules/: 70_broken_rules.cf, 70_cvs_rules_under_test.cf: move
+	T_RCVD_IN_DUN_DNSRBL to 70_broken_rules.cf
+
+2003-06-21 01:22  quinlan
+
+	* rules/: 20_dnsbl_tests.cf, 70_cvs_rules_under_test.cf: promote
+	__SENDERBASE, but leave it commented out for now
+
+2003-06-20 20:45  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: remove T_YAHOO_REDIRECTOR and
+	T_RCVD_IN_BONDEDSENDER (keep using current BondedSender rule for
+	now)
+
+2003-06-20 18:54  felicity
+
+	* lib/Mail/SpamAssassin/PerMsgStatus.pm: bug 2092: The header
+	report _REPORT_ has a newline at the end of each line, but the
+	_process_header function expects the string to not have a newline
+	at the end as it adds one when putting the header into the message.
+	 Let's trim off trailing newlines from anything going through
+	_process_header.
+
+2003-06-20 04:25  quinlan
+
+	* masses/mass-check: make --rewrite option accept an optional
+	argument if you don't like /tmp/out
+
+2003-06-20 04:15  quinlan
+
+	* masses/mass-check: add --rewrite option change --these_rules to
+	--rules
+
+2003-06-19 21:50  quinlan
+
+	* rules/20_dnsbl_tests.cf: just spaces to tabs
+
+2003-06-19 19:46  quinlan
+
+	* lib/Mail/SpamAssassin/Dns.pm: just adding a single defined() test
+
+2003-06-19 19:20  felicity
+
+	* README, rules/20_dnsbl_tests.cf, rules/50_scores.cf: bug 1982:
+	add support for RBL+, disabled by default.
+
+2003-06-19 19:18  felicity
+
+	* lib/Mail/SpamAssassin/: Conf.pm, Dns.pm: bug 2086: Make it
+	possible for people (especially developers and people who will run
+	mass-check after 2.60 is released) to log real-time DNS responses.
+	
+	This is particularly important for SenderBase since SenderBase
+	results change from day-to-day, but it will also help us improve
+	our assessments (hit rate, false positives, etc.) of the current
+	set of RBL rules.
+
+2003-06-19 18:42  felicity
+
+	* lib/Mail/SpamAssassin/: Conf.pm, PerMsgStatus.pm: bug 2079:
+	_STARS_ was having problems when the message score was high and
+	causing folding to have issues.  change the header to max at 50
+	stars, modify how folding works so that the first word in the
+	header won't be folded (like 50 * chars...)
+
+2003-06-19 08:00  quinlan
+
+	* rules/20_html_tests.cf: rename HTML_FONT_INVISIBLE_N to
+	HTML_FONT_LOW_CONTRAST
+
+2003-06-19 04:06  zelgadis
+
+	* lib/Mail/SpamAssassin/PerMsgStatus.pm: Bug 1551: Move stripping
+	code to *before* the parser invocation, so that spammers can't
+	trick SA by using "&lt;" and "&gt;".
+
+2003-06-19 03:59  quinlan
+
+	* rules/: 70_broken_rules.cf, 70_cvs_rules_under_test.cf: move
+	T_FAKE_HELO_DELPHI and T_HAS_NUM_AT_DELPHI to broken (too few hits,
+	we can resurrect later if necessary)
+
+2003-06-19 03:53  quinlan
+
+	* rules/: 20_dnsbl_tests.cf, 70_cvs_rules_under_test.cf: promote
+	T_RCVD_IN_EASYNET_DYNABLOCK to RCVD_IN_DYNABLOCK (good results in  
+	my mini-GA run, clear upstream policy, etc.)
+
+2003-06-19 01:44  felicity
+
+	* spamd/libspamc.c: bug 2074: libspamc could potentially allow a
+	NULL character to overwrite another section of memory due to a
+	missized array not including enough space for the string NULL
+	terminator.
+
+2003-06-18 21:19  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: promote OPM subtests promote 3
+	of the 4 remaining URI tests broken rules: T_RCVD_IN_DUL_AUPADS,
+	T_RCVD_IN_INTERSIL,   T_RCVD_IN_VOX_SCHPIDER_COM,
+	T_RCVD_IN_DNSRBL*, T_RCVD_IN_EASYNET_BLACKHOLES,  
+	T_RCVD_IN_FIVETEN* remove HOST_EXCESSIVE_ESCAPES and
+	PATH_EXCESSIVE_ESCAPES - apparently, these   do not work so well on
+	some corpuses
+
+2003-06-18 21:18  quinlan
+
+	* rules/70_broken_rules.cf: broken rules: T_RCVD_IN_DUL_AUPADS,
+	T_RCVD_IN_INTERSIL, T_RCVD_IN_VOX_SCHPIDER_COM, T_RCVD_IN_DNSRBL*,
+	T_RCVD_IN_EASYNET_BLACKHOLES, T_RCVD_IN_FIVETEN*
+
+2003-06-18 21:16  quinlan
+
+	* rules/20_uri_tests.cf: add some URI tests from 70_cvs
+
+2003-06-18 21:15  quinlan
+
+	* rules/20_head_tests.cf: just adding some comments and tweaking
+	descriptions
+
+2003-06-18 21:14  quinlan
+
+	* rules/20_dnsbl_tests.cf: promote OPM subtests
+
+2003-06-18 03:44  duncf
+
+	* lib/Mail/SpamAssassin/Conf.pm: Bug 2080: add_header didnt allow
+	numbers
+
+2003-06-18 00:42  jmason
+
+	* rules/20_ratware.cf: bug 2077: incorrect use of MESSAGEID by
+	FORGED_MUA_THEBAT rule
+
+2003-06-17 21:59  jmason
+
+	* rules/: 20_head_tests.cf, 70_cvs_rules_under_test.cf: promoted
+	FAKED_HOTMAIL_DAV and HAS_X_ORIG_HOST
+
+2003-06-17 07:37  jmason
+
+	* rules/70_cvs_rules_under_test.cf: are we too late for a couple of
+	1.0 S/Os? ;)
+
+2003-06-17 04:43  duncf
+
+	* rules/30_text_fr.cf: bug 2042: More/better french translations.
+	The last 3 revisions of this file have been primarily done by
+	Michel Bouissou <michel@bouissou.net>
+
+2003-06-17 03:30  quinlan
+
+	* lib/Mail/SpamAssassin/: Conf.pm, Dns.pm: bug 1785: improvements
+	to RBL timeout code
+
+2003-06-16 22:01  duncf
+
+	* lib/Mail/SpamAssassin/PerMsgStatus.pm: Bug 2066: cleanup of tags
+	stuff
+
+2003-06-16 20:23  jmason
+
+	* rules/70_cvs_rules_under_test.cf: added 2 testing rules. 
+	probably not suitable for 2.60 but there for 2.70cvs
+
+2003-06-16 19:46  felicity
+
+	* sa-learn.raw, lib/Mail/SpamAssassin/ArchiveIterator.pm,
+	lib/Mail/SpamAssassin/CmdLearn.pm: bug 1646: from the bug messages:
+	
+	Make sa-learn's basic invocation look like:
+	
+	sa-learn [options] [file1..fileN]
+	
+	--mbox becomes an option, stating that the data is in mbox format. 
+	If not specified, the input source is presumed to be seperate
+	RFC822 messages.  --file becomes ignored for backwards
+	compatability --single becomes ignored for backwards compatability
+	--directory becomes ignored for backwards compatability
+	
+	If no files are specified, sa-learn awaits input on stdin.  If one
+	or more files are specified, sa-learn reads them as individual
+	messages (or mboxes if --mbox is present).  If one or more
+	directories are specified, sa-learn reads them as directories.
+
+2003-06-16 06:38  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: remove T_FORGED_MUA_EUDORA_FROM
+	(I think we have better rules) remove T_FORGED_MUA_OUTLOOK_FROM (I
+	think we have better rules) promote T_FAKE_HELO_NETSCAPE_COM to
+	FAKE_HELO_NETSCAPE_COM promote T_BIZ_LINKS_3 to BIZ_TLD and revise
+	BZ_TLD to be similar replace USERPASS with T_USERPASS remove
+	T_URI_LINK_AT_SIGN revise *ESCAPE* rules with new version remove
+	T_BANNED_LINKS4_11 rename remaining *LINKS* rules to more meaninful
+	names, these are   perhaps finally promotable
+
+2003-06-16 06:36  quinlan
+
+	* rules/20_fake_helo_tests.cf: promote T_FAKE_HELO_NETSCAPE_COM to
+	FAKE_HELO_NETSCAPE_COM
+
+2003-06-16 06:35  quinlan
+
+	* rules/20_uri_tests.cf: promote T_USERPASS to USERPASS promote
+	T_BIZ_LINKS_3 to BIZ_TLD and revise BZ_TLD as well promote
+	T_URI_OFFERS to URI_OFFERS purely cosmetic change to
+	HTTP_EXCESSIVE_ESCAPES (tested)
+
+2003-06-15 21:06  felicity
+
+	* lib/Mail/SpamAssassin/Dns.pm: bug 2062: new version to try to
+	avoid stupid "scalar context" error (which it's not, but ...)
+
+2003-06-15 17:34  felicity
+
+	* lib/Mail/SpamAssassin/Dns.pm: bug 2062: newer versions of DCC may
+	split their result over multiple headers, so change our code to
+	properly deal with that.
+
+2003-06-15 00:43  quinlan
+
+	* masses/rule-qa/: corpus-hourly, corpus-nightly: switch to
+	rsync.spamassassin.org
+
+2003-06-15 00:41  quinlan
+
+	* masses/rule-qa/corpus-hourly: nice 15 instead of nice 10 change
+	rsync server add NET.7day output file use most recent CVS revision
+	for NET instead of most common
+
+2003-06-15 00:40  quinlan
+
+	* masses/rule-qa/corpus-nightly: higher persistence-level of retry
+	code for "cvs update" increase start delay from rand(300) to
+	rand(600) use -j 8 instead of -j 6 remove update stuff, only upload
+	when done... other way was too confusing change rsync server to
+	rsync.kluge.net
+
+2003-06-15 00:38  quinlan
+
+	* masses/rule-qa/README.nightly: simplify cron job for new simpler
+	version of nightly script
+
+2003-06-14 21:42  quinlan
+
+	* lib/Mail/SpamAssassin/HTML.pm, rules/20_html_tests.cf,
+	rules/30_text_sk.cf: bug 2003: merge HTML_FONT_BIG_B into
+	HTML_FONT_BIG
+
+2003-06-14 21:35  quinlan
+
+	* rules/: 20_html_tests.cf, 30_text_fr.cf, 30_text_sk.cf: bug 2002:
+	fixed description for HTML_FONT_BIG
+
+2003-06-14 06:46  felicity
+
+	* rules/: 20_ratware.cf, 70_broken_rules.cf: bug 1760:
+	forged_mua_aol fps a bunch.  so move to broken for now and work on
+	fixing it in 2.70.
+
+2003-06-14 01:54  felicity
+
+	* rules/20_phrases.cf: this didn't commit for some reason.  odd. 
+	replaces US_DOLLARS with NA_DOLLARS
+
+2003-06-14 01:48  felicity
+
+	* rules/70_cvs_rules_under_test.cf: replace US_DOLLARS with
+	NA_DOLLARS
+
+2003-06-14 01:30  jmason
+
+	* lib/Mail/SpamAssassin/EvalTests.pm, rules/20_head_tests.cf,
+	rules/70_cvs_rules_under_test.cf: bug 1839: made FORGED_RCVD_TRAIL
+	into a meta subrule of CONFIRMED_FORGED; that gives us almost all
+	the spam hits, kills all the FPs, and it's now better than it was
+	with the old code. victory ;)
+
+2003-06-14 01:08  felicity
+
+	* lib/Mail/SpamAssassin/: Bayes.pm, NoMailAudit.pm: bug 1558: if
+	there is no message-id in the message we're trying to learn,
+	generate one based on the sha1() hash of the Date, the first add
+	(last listed) Received header, and the first N bytes of the body
+	(1k or 1/2 message length, whichever is smaller).
+
+2003-06-14 00:54  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: oops, I already promoted
+	T_BARGAIN_URL to BARGAIN_URL
+
+2003-06-14 00:51  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: promote T_FAKE_HELO_YAHOO to
+	FAKE_HELO_YAHOO promote T_HTML_LINK_PUSH_HERE to
+	HTML_LINK_PUSH_HERE some revisions of T_BIZ_LINKS split bizarro
+	T_STRANGE_CHAR_LINKS rule into the following rules:   T_USERPASS,
+	T_URI_LINK_AT_SIGN, T_HTTP_EXCESSIVE_ESCAPE* remove some more of
+	the lesser LINKS rules, remaining ones might be okay spin
+	T_SUSPICIOUS_LINKS_09 into T_OFFERS_URL spin T_SUSPICIOUS_LINKS_04
+	into T_BARGAIN_URL
+
+2003-06-14 00:46  quinlan
+
+	* rules/20_fake_helo_tests.cf: add newline
+
+2003-06-14 00:29  quinlan
+
+	* rules/20_meta_tests.cf: move OBFUSCATING_COMMENT to
+	20_html_tests.cf
+
+2003-06-14 00:28  quinlan
+
+	* rules/20_html_tests.cf: promote T_HTML_LINK_PUSH_HERE to
+	HTML_LINK_PUSH_HERE move OBFUSCATING_COMMENT to here
+
+2003-06-14 00:26  quinlan
+
+	* rules/20_uri_tests.cf: add newline
+
+2003-06-14 00:26  quinlan
+
+	* rules/20_fake_helo_tests.cf: remove FAKE_HELO_ATTBI promote
+	T_FAKE_HELO_YAHOO to FAKE_HELO_YAHOO
+
+2003-06-14 00:01  felicity
+
+	* lib/Mail/SpamAssassin/BayesStore.pm: when we reenabled learning
+	to journal, we didn't reenable msgid in journal.  it also turns out
+	that a write attempt to a r/o db doesn't cause an error (the msgid
+	update to seen would fail, but it wasn't actually generating an
+	error ...)
+
+2003-06-13 23:34  felicity
+
+	* lib/Mail/: SpamAssassin.pm, SpamAssassin/Bayes.pm,
+	SpamAssassin/Conf.pm: bug 2005: added a bayes_auto_learn_journal
+	option to allow autolearning to go into the journal instead of
+	always going for the db ...
+
+2003-06-13 23:09  felicity
+
+	* spamd/spamd.raw: it looks like File::Path isn't taint safe at
+	all, so the call to rmtree would fail constantly.  since there's
+	only 2 dirs and 1 file that we use temporarily, just remove them
+	manually.
+
+2003-06-13 22:53  felicity
+
+	* spamd/spamd.raw: bug 1704: turns out that File::Spec->tmpdir()
+	will set TMPDIR to undef if it's not already defined to anything. 
+	very lame.  I added a line to remove the undefined TMPDIR if that
+	situation occurs at spamd startup.
+
+2003-06-13 22:24  jmason
+
+	* lib/Mail/SpamAssassin/BayesStore.pm: added clearer scoping of
+	signal masks
+
+2003-06-13 22:20  jmason
+
+	* rules/: 20_phrases.cf, 30_text_de.cf, 30_text_es.cf,
+	30_text_fr.cf, 30_text_it.cf, 30_text_sk.cf: attempt to avoid a
+	description hitting a rule
+
+2003-06-13 22:18  felicity
+
+	* lib/Mail/SpamAssassin/Dns.pm: bug 2053: dccifd code didn't know
+	about new header format ...
+
+2003-06-13 21:38  duncf
+
+	* rules/30_text_fr.cf: bug 2042: more french description updates
+
+2003-06-13 21:17  jmason
+
+	* USAGE, rules/user_prefs.template: added note for MDaemon users;
+	removed some obsolete refs to 8-bit rules
+
+2003-06-13 21:03  felicity
+
+	* lib/Mail/SpamAssassin/BayesStore.pm: bug 2057: updated to
+	discussion about where the ignores should go.  added sigterm. 
+	found bug in upgradedb code (very minor)
+
+2003-06-13 16:27  felicity
+
+	* lib/Mail/SpamAssassin/BayesStore.pm: bug 2057: during critical
+	bayes work (expire, journal sync, upgrading), ignore sigint and
+	sighup.
+
+2003-06-13 14:15  felicity
+
+	* lib/Mail/SpamAssassin/ArchiveIterator.pm: bug 1959: solves the
+	possible mass-check "sit-n-spin" problem
+
+2003-06-13 05:28  duncf
+
+	* rules/30_text_fr.cf: bug 2042: updated french descriptions
+
+2003-06-13 03:38  felicity
+
+	* Makefile.PL, binaries.mk.in, configure, configure.in,
+	spamd/spamc.c, spamd/spamc.pod: bug 1773: add an ENABLE_SSL option
+	to Makefile.PL to be able to turn on or off (default) SSL support. 
+	instead of sslspamc, it's now "spamc -S" which is only valid if
+	ENABLE_SSL is set to on.
+
+2003-06-12 23:38  felicity
+
+	* lib/Mail/SpamAssassin.pm: bug 1780: we shouldn't call
+	create_default_prefs if the dont_copy_prefs option is set since
+	create_default_prefs will consider that a failure and return an
+	error code.
+
+2003-06-12 22:22  felicity
+
+	* lib/Mail/SpamAssassin/: UnixLocker.pm, Win32Locker.pm: bug 2054:
+	some unlinks could fail without spitting out a warning due to undef
+	values.
+
+2003-06-12 07:47  duncf
+
+	* tools/desc_length.pl: added script to check rule length and other
+	misc stuff
+
+2003-06-12 07:45  duncf
+
+	* rules/: 20_phrases.cf, 20_uri_tests.cf: a few more desc
+	shortenings
+
+2003-06-12 07:41  duncf
+
+	* rules/: 20_body_tests.cf, 20_dnsbl_tests.cf, 20_html_tests.cf,
+	20_phrases.cf, 20_porn.cf, 20_uri_tests.cf, 23_bayes.cf,
+	70_cvs_rules_under_test.cf: Bug 2050: test descriptions too long.
+
+2003-06-12 06:25  felicity
+
+	* lib/Mail/SpamAssassin/ArchiveIterator.pm: trying to deal better
+	with dead children ...
+
+2003-06-12 06:20  duncf
+
+	* t/reportheader.t: fix test for change to report_template
+
+2003-06-12 06:12  felicity
+
+	* lib/Mail/SpamAssassin/Dns.pm: bug 1704: should, hopefully, take
+	care of the undefined business.
+
+2003-06-12 05:34  duncf
+
+	* lib/Mail/SpamAssassin/Conf.pm,
+	lib/Mail/SpamAssassin/PerMsgStatus.pm, rules/10_misc.cf: Got rid of
+	terse_report and everything terse_report related.  Got rid of
+	_TERSE_ and moved _SUMMARYT_ to _REPORT_ and _SUMMARRY_ back to
+	_SUMMARYL_
+	
+	Basically, users should use the _REPORT_ tag in a header to display
+	a terse summary like terse_report did.
+	
+	Fixed folding of headers for headers with a \n in them.
+	
+	Probably something else. :-)
+
+2003-06-12 05:07  jmason
+
+	* spamassassin.raw: doco bug: unclear text
+
+2003-06-12 04:53  jmason
+
+	* Makefile.PL, lib/Mail/SpamAssassin/Conf.pm,
+	lib/Mail/SpamAssassin/PerMsgStatus.pm, rules/10_misc.cf: bug 1659:
+	support address in report revisited.   Now uses the 'hostname' idea
+	as discussed; report includes scanning hostname, and the default
+	contact address is 'the administrator of that machine' (sic).
+
+2003-06-12 04:21  jmason
+
+	* spamd/README.spamd: bug 1851: clean up doco a little
+
+2003-06-12 03:31  felicity
+
+	* lib/Mail/SpamAssassin/: EvalTests.pm, Received.pm: bug 2048:
+	replaced the appropriate IP_IN_RESERVED regexps with the more
+	standardized ip_in_reserved lookup from Received.pm...
+
+2003-06-12 03:21  felicity
+
+	* spamd/spamd.raw: bug 2015: spamd shouldn't call system(), so
+	since it was a last ditch attempt to remove a directory, I replaced
+	it with a warn.
+
+2003-06-12 03:00  felicity
+
+	* spamassassin.raw: bug 1714: added more descriptive text about the
+	AWL system and how it's not a replacement for the whitelist_from
+	config options
+
+2003-06-12 02:51  felicity
+
+	* lib/Mail/SpamAssassin/: Conf.pm, Dns.pm, EvalTests.pm: bug 1362:
+	add dccifd support
+
+2003-06-12 02:47  felicity
+
+	* lib/Mail/SpamAssassin/EvalTests.pm: bug 2040:
+	check_access_database should use the trusted_received stuff.
+
+2003-06-12 01:53  felicity
+
+	* spamd/spamd.raw: bug 2043: quoted directly from the bug:
+	
+	When spamd is run with --ssl, if it receives a connection that does
+	not successfully negotiate SSL then _all_ the spamd processes quit.
+	
+	The block starting on line 481 of spamd.raw wants to figure out why
+	the accept() call did not succeed. In the non-SSL world, !$client
+	is true only where an OS error happened. However, in the SSL world,
+	!$client can also happen where the SSL negotiation failed, which
+	does not imply an OS error and the consequent setting of errno.
+	
+	The attached patch detects this; if SSL is set and errno is zero,
+	then we log the fact that there must've been an SSL error, and we
+	don't allow ourselves to be die()d.
+
+2003-06-12 01:49  felicity
+
+	* lib/Mail/SpamAssassin/BayesStore.pm: bug 2046: old versions of
+	perl (5.005_02 at least) seem to require all three arguments to
+	syswrite which we weren't doing.
+
+2003-06-11 01:43  jmason
+
+	* lib/Mail/SpamAssassin/EvalTests.pm,
+	rules/70_cvs_rules_under_test.cf: bug 1839: T_FORGED_RCVD_TRAIL
+	re-added based on old code so we can compare side by side
+
+2003-06-11 01:29  quinlan
+
+	* lib/Mail/SpamAssassin/ArchiveIterator.pm: indentation changes
+
+2003-06-11 01:23  jmason
+
+	* lib/Mail/SpamAssassin/EvalTests.pm, rules/20_head_tests.cf,
+	rules/70_cvs_rules_under_test.cf: removed RCVD_FAKE_HELO_DOTCOM2,
+	replaced by FAKE_HELO rules; promoted successful no-rDNS and
+	wrong-IP-net helo rules
+
+2003-06-11 01:10  jmason
+
+	* lib/Mail/SpamAssassin/: EvalTests.pm, Received.pm:
+	IP_IN_RESERVED_MATCH was not matching correctly, fixed
+
+2003-06-10 23:26  quinlan
+
+	* rules/: 20_ratware.cf, 70_cvs_rules_under_test.cf: bug 1717:
+	Incorrect FORGED_MUA_OUTLOOK
+
+2003-06-10 23:23  felicity
+
+	* lib/Mail/SpamAssassin/ArchiveIterator.pm, masses/mass-check: fix
+	mass-check from the updates yesterday and such: - mass-check would
+	miss the results from all children after it decided to restart
+	them.  (ie: for n children and a setting of x for restart,
+	mass-check would lose n-1 results every x messages.)  oops.  -
+	disable caching of data in the sockets - fix the mass-check
+	progress date printing
+
+2003-06-10 22:11  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: revise HTML_LINK rules
+
+2003-06-10 18:15  felicity
+
+	* contrib/mbox-to-check: a script used by run-masses to spit out
+	the mbox files in the right format for mass-check
+
+2003-06-10 18:11  felicity
+
+	* contrib/: run-corpora, run-masses: Script examples for running
+	mass-checks and doing full corpus runs.
+
+2003-06-10 17:28  jmason
+
+	* lib/Mail/SpamAssassin/EvalTests.pm: added more headers checked
+	for whitelisting, thanks to Nancy McGough for the tip
+
+2003-06-10 06:36  jmason
+
+	* rules/70_cvs_rules_under_test.cf: bug 1717: exempt Outlook 2003
+	from FORGED_MUA_OUTLOOK
+
+2003-06-10 06:29  jmason
+
+	* lib/Mail/SpamAssassin/EvalTests.pm,
+	lib/Mail/SpamAssassin/Received.pm,
+	rules/70_cvs_rules_under_test.cf: bug 1990: RCVD_FAKE_HELO_DOTCOM_2
+	work.  added T_NO_RDNS_DOTCOM_HELO to catch hosts HELOing as a big
+	dot-com, with no reverse DNS
+
+2003-06-10 06:10  jmason
+
+	* rules/: 30_text_de.cf, 30_text_fr.cf, 30_text_it.cf: copied
+	translations for default whitelists
+
+2003-06-10 06:06  jmason
+
+	* lib/Mail/SpamAssassin/Conf.pm,
+	lib/Mail/SpamAssassin/EvalTests.pm,
+	lib/Mail/SpamAssassin/Received.pm, rules/20_head_tests.cf,
+	rules/50_scores.cf, rules/60_whitelist.cf: bug 846: default
+	whitelists not so easily forged anymore.  also added documentation
+	on the trusted_networks inference option
+
+2003-06-10 05:43  jmason
+
+	* masses/bayes-testing/bayes-static-thresholds: added
+	static-thresholds script used in recent tests
+
+2003-06-10 03:24  felicity
+
+	* lib/Mail/SpamAssassin/ArchiveIterator.pm, masses/mass-check:
+	trying to make mass-check less likely to blow up.  children are
+	forked pre-message loading, so they should take less memory. 
+	support having children die (via --restart #) after # of messages
+	have been processed to help deal with any memory leaks and the
+	like.
+
+2003-06-10 03:14  jmason
+
+	* lib/Mail/SpamAssassin/EvalTests.pm,
+	rules/70_cvs_rules_under_test.cf: let's try this again.  another
+	fix for FORGED_RCVD_TRAIL et al.   Also added T_FORGED_RCVD_IP_HELO
+	which I noticed during testing
+
+2003-06-10 03:05  felicity
+
+	* build/update_stable: modified gpg support
+
+2003-06-10 02:41  jmason
+
+	* build/update_stable, lib/Mail/SpamAssassin/Bayes.pm,
+	lib/Mail/SpamAssassin/EvalTests.pm,
+	lib/Mail/SpamAssassin/Message.pm,
+	lib/Mail/SpamAssassin/PerMsgStatus.pm,
+	lib/Mail/SpamAssassin/Received.pm: added prelim support for
+	GPG-signing to build/update_stable
+
+2003-06-09 22:43  felicity
+
+	* build/README: added GPG signature to the release procedure
+
+2003-06-09 22:20  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: T_HTML_PUSH_HERE* variants
+
+2003-06-09 21:02  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: remove T_RCVD_IN_DUL_BOFH
+	(worst of dial-up and dynamic DNSBLs)
+
+2003-06-09 20:57  quinlan
+
+	* rules/: 20_dnsbl_tests.cf, 70_cvs_rules_under_test.cf: promote
+	T_DNS_FROM_RFCI_DSN to DNS_FROM_RFCI_DSN
+
+2003-06-09 20:40  quinlan
+
+	* rules/: 20_dnsbl_tests.cf, 70_cvs_rules_under_test.cf: promote
+	T_RCVD_IN_OSIRU_OPEN_PROXY to RCVD_IN_OSIRU_OPEN_PROXY just delete
+	T_RCVD_IN_OSIRU_OPT_IN, it's worthless clean up the OSIRU rules
+	some
+
+2003-06-09 20:29  quinlan
+
+	* rules/: 20_dnsbl_tests.cf, 70_cvs_rules_under_test.cf: promote
+	NJABL sub-tests
+
+2003-06-09 20:26  felicity
+
+	* lib/Mail/SpamAssassin/Dns.pm: should run test_log _BEFORE_
+	got_hit (which calls handle_hit) ...
+
+2003-06-09 20:22  quinlan
+
+	* rules/: 20_dnsbl_tests.cf, 70_cvs_rules_under_test.cf: promote
+	T_RCVD_IN_SORBS* to RCVD_IN_SORBS*
+
+2003-06-09 20:21  quinlan
+
+	* rules/20_ratware.cf: fix FORGED_MUA_EUDORA
+
+2003-06-09 20:07  felicity
+
+	* lib/Mail/SpamAssassin/PerMsgStatus.pm: bug 2035: only handle_hit
+	should put stuff in the report summary because things like test_log
+	run before handle_hit, and therefore cause odd-looking results.
+
+2003-06-09 19:49  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: promote T_FORGED_MUA_EUDORA to
+	FORGED_MUA_EUDORA delete T_PUSHHERELINK since T_HTML_PUSH_HERE
+	looks more viable
+
+2003-06-09 19:49  quinlan
+
+	* rules/20_ratware.cf: promote T_FORGED_MUA_EUDORA to
+	FORGED_MUA_EUDORA
+
+2003-06-09 19:40  quinlan
+
+	* rules/: 20_ratware.cf, 70_cvs_rules_under_test.cf: replace
+	FORGED_MUA_AOL_FROM with T_AOL_FAKE_MAIL2 (better hit rate)
+
+2003-06-09 19:27  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: delete some lame MSGID rules
+
+2003-06-09 19:25  quinlan
+
+	* rules/: 20_ratware.cf, 70_cvs_rules_under_test.cf: promote
+	RATWARE_RCVD_BONUS_SPC delete T_INVALID_DATE_HMS and
+	T_INVALID_DATE_2 (exemptions barely help)
+
+2003-06-09 19:21  felicity
+
+	* spamd/utils.h: added new full_read_ssl function to utils.h as
+	prototype
+
+2003-06-09 18:52  quinlan
+
+	* lib/Mail/SpamAssassin/HTML.pm, rules/20_html_tests.cf,
+	rules/70_cvs_rules_under_test.cf: promote T_HTML_COMMENT_SHOUT1 to
+	HTML_COMMENT_SHOUTING, delete others
+
+2003-06-09 08:21  jmason
+
+	* rules/70_cvs_rules_under_test.cf: working on DAV rule
+
+2003-06-09 06:16  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: AOL rule revisions
+
+2003-06-09 05:58  quinlan
+
+	* rules/: 20_ratware.cf, 70_cvs_rules_under_test.cf: promote
+	RATWARE_RCVD_LC_ESMTP and FORGED_QUALCOMM_TAGS clean-up formatting
+	and tabs a bit
+
+2003-06-09 05:32  quinlan
+
+	* lib/Mail/SpamAssassin/HTML.pm, rules/70_cvs_rules_under_test.cf:
+	look for comments/declarations nested inside of certain tags
+
+2003-06-09 03:25  quinlan
+
+	* rules/20_phrases.cf: replace SATISFACTION with T_SATISFACTION
+	version
+
+2003-06-09 03:24  quinlan
+
+	* rules/20_body_tests.cf: add comment
+
+2003-06-09 03:24  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: some promotion and deletion
+
+2003-06-09 03:00  quinlan
+
+	* rules/: 20_body_tests.cf, 20_html_tests.cf, 20_meta_tests.cf,
+	20_ratware.cf, 70_cvs_rules_under_test.cf: bug 2034: replace
+	MIME_HTML_ONLY with __MIME_HTML_ONLY
+
+2003-06-08 09:11  jmason
+
+	* rules/: 20_head_tests.cf, 70_cvs_rules_under_test.cf: promoted
+	T_X_PRI_MISMATCH_HI
+
+2003-06-08 09:05  jmason
+
+	* rules/70_cvs_rules_under_test.cf: fixed bug in T_LC_ESMTP_RCVD
+
+2003-06-08 08:54  jmason
+
+	* rules/70_cvs_rules_under_test.cf: oh dear.  Hotmail DAV is a 1.0
+	spamsign for me.  let's see how it does for everyone else...
+
+2003-06-08 01:21  jmason
+
+	* lib/Mail/SpamAssassin/Received.pm: some work on forged-HELO stuff
+
+2003-06-08 01:10  jmason
+
+	* rules/70_cvs_rules_under_test.cf: remove T_HAS_X_ORIG_EMAIL, try
+	out a variant
+
+2003-06-08 00:52  jmason
+
+	* USAGE, rules/local.cf: updated some doco, and noted
+	trusted_networks param
+
+2003-06-08 00:45  jmason
+
+	* lib/Mail/SpamAssassin/Received.pm: fixed bugs
+
+2003-06-08 00:37  jmason
+
+	* lib/Mail/SpamAssassin/Received.pm: update comment
+
+2003-06-08 00:35  jmason
+
+	* lib/Mail/SpamAssassin/NetSet.pm: oops, bug if no trusted_networks
+	were set
+
+2003-06-08 00:34  jmason
+
+	* lib/Mail/SpamAssassin/: NetSet.pm, Received.pm: added
+	Received-header trust inference code
+
+2003-06-07 23:58  jmason
+
+	* spamd/spamd.raw: bug 2013: bring SQL checks into line with
+	documentation
+
+2003-06-07 23:52  jmason
+
+	* INSTALL: bug 1996: note about installing DB_File
+
+2003-06-07 08:04  duncf
+
+	* rules/70_cvs_rules_under_test.cf: bug 1687 HOME_EMPLOYMENT FPs
+
+2003-06-07 07:34  duncf
+
+	* rules/70_cvs_rules_under_test.cf: bug 1580: satisfaction too
+	broad
+
+2003-06-07 07:18  duncf
+
+	* spamd/spamd.raw: Bug 1511: Patch from Ed Henderson to fix
+	vpopmail stuff.
+
+2003-06-06 22:01  felicity
+
+	* lib/Mail/SpamAssassin.pm: bug 2030: if a message doesn't have a
+	message-id header, then 'spamassassin -r' would learn it as ham
+	instead of spam.  adds a 'scalar()' to the call so that a lack of
+	message-id will be ok.
+
+2003-06-06 21:20  quinlan
+
+	* lib/Mail/SpamAssassin/Dns.pm: bug 2026: DNS log inherited by DCC
+	check, I think this should fix it
+
+2003-06-06 04:28  jmason
+
+	* lib/Mail/SpamAssassin/Dns.pm: enclose URLs from TXT replies in
+	angle brackets, to ensure correct MUA display
+
+2003-06-05 23:00  duncf
+
+	* lib/Mail/SpamAssassin/: Conf.pm, PerMsgStatus.pm: Bug 2019: strip
+	newlines if headers arent folded; fix documentation errors
+
+2003-06-05 22:26  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: remove more LINKS rules (low
+	hit rate on 2 days of corpus results, I hope everyone's corpus is
+	up-to-date :-)
+
+2003-06-05 22:22  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: remove lowest tier of LINKS
+	rules (no renumbering)
+
+2003-06-05 22:15  quinlan
+
+	* rules/: 20_head_tests.cf, 70_cvs_rules_under_test.cf: replace
+	header 8-bit rules with illegal character rules reorganize
+	non-English ADV rules too
+
+2003-06-05 22:13  quinlan
+
+	* lib/Mail/SpamAssassin/EvalTests.pm: replace
+	check_subject_for_lotsa_8bit_chars and	
+	check_all_headers_for_8bit_chars with check_illegal_chars bug 2014:
+	Hotmail X-Originating-IP not included in DNSBL checks remove some
+	obsolete code from DNSBL code
+
+2003-06-04 03:16  duncf
+
+	* lib/Mail/SpamAssassin/PerMsgStatus.pm: and fix unintialized value
+	warnings
+
+2003-06-04 03:05  duncf
+
+	* lib/Mail/SpamAssassin/Conf.pm, lib/Mail/SpamAssassin/Dns.pm,
+	lib/Mail/SpamAssassin/EvalTests.pm,
+	lib/Mail/SpamAssassin/PerMsgStatus.pm,
+	lib/Mail/SpamAssassin/Received.pm, rules/10_misc.cf: bug 1473 made
+	the add_header option which should be used for _all_ configuration
+	of headers.
+	
+	_TAGS_ can be used with add_header and the report templates to add
+	interesting info into the reports
+	
+	To add a tag, change the documentation in Conf.pm, and either put
+	the info into  $self->{tag_data}->{TAG} or add a anonymous sub ref
+	to the hash %tags in PerMsgStatus.pm
+	
+	There is also a bit of backwards compatibility stuff involved here,
+	although some of it should be permanent (like default headers,
+	maybe).
+	
+	I did profile the code, and there doesn't seem to be much of a
+	change at all.
+
+2003-06-03 22:11  quinlan
+
+	* rules/: 20_head_tests.cf, 70_cvs_rules_under_test.cf: fix bug
+	274: replacement rule for FRIEND_AT_PUBLIC fix bug 1734:
+	replacement rule for FROM_OFFERS
+
+2003-06-03 19:41  felicity
+
+	* rules/70_cvs_rules_under_test.cf: no, I mean fix the damn rule.
+
+2003-06-03 19:40  felicity
+
+	* rules/70_cvs_rules_under_test.cf: fixed broken T_NA_DOLLARS rule.
+
+2003-06-03 04:51  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: renumber the "links" rules
+
+2003-06-03 04:33  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: second pass on 8bit rules
+
+2003-06-03 03:58  felicity
+
+	* rules/20_head_tests.cf: bug 1980, forgot to fix this dependency.
+
+2003-06-03 03:54  felicity
+
+	* rules/: 20_body_tests.cf, 20_compensate.cf, 20_dnsbl_tests.cf,
+	20_head_tests.cf, 20_html_tests.cf, 20_meta_tests.cf,
+	20_phrases.cf, 20_ratware.cf, 20_uri_tests.cf,
+	70_cvs_rules_under_test.cf: bug 1980: make all rules fit convention
+	I also added T_NA_DOLLARS to try to replace US_DOLLARS.  US_DOLLARS
+	and MILLION_USD overlap a lot, so try to seperate them.
+
+2003-06-03 03:31  jmason
+
+	* masses/: CORPUS_SUBMIT, CORPUS_SUBMIT_NIGHTLY: updated
+	instructions to use rsync.kluge.net
+
+2003-06-02 07:25  jmason
+
+	* rules/70_cvs_rules_under_test.cf: couple of test rules
+
+2003-06-02 05:21  felicity
+
+	* rules/: 20_head_tests.cf, 20_phrases.cf, 20_uri_tests.cf: fixing
+	up descriptions and such
+
+2003-06-02 04:06  felicity
+
+	* lib/Mail/SpamAssassin/PerMsgStatus.pm: found that the score as
+	shown in the report wasn't lining up properly if abs(score) >= 10. 
+	modified the layout to fix it.
+
+2003-06-01 21:17  felicity
+
+	* lib/Mail/SpamAssassin.pm: bug 1907: if SA is installed into a
+	non-standard location, and the modules are called by a third party
+	set of programs that don't pass in PREFIX, the modules will
+	probably not be able to figure out where the rules and such are. 
+	added a make-time PREFIX default setting to SA.pm such that if
+	PREFIX isn't passed in, the modules can at least make an educated
+	guess about where to find the rules and such.
+
+2003-06-01 20:25  felicity
+
+	* lib/Mail/SpamAssassin/NoMailAudit.pm: bug 1586: instead of just
+	sending in an array with 1 element per header line, support sending
+	in an array with 1 element per header (and let it include folded
+	strings, etc.)
+
+2003-06-01 20:04  felicity
+
+	* contrib/: spamcheck.py, spamd.py: updated version of spamcheck.py
+
+2003-06-01 18:39  felicity
+
+	* lib/Mail/SpamAssassin/ArchiveIterator.pm: bug 1959: try to clean
+	up mass-check's parallelization function to stop "going out to
+	lunch".
+
+2003-06-01 16:19  felicity
+
+	* rules/70_cvs_rules_under_test.cf: typo in new *links rule... :(
+
+2003-06-01 16:07  felicity
+
+	* rules/70_cvs_rules_under_test.cf: split banned and suspicious
+	links into seperate rules for each phrase
+
+2003-06-01 15:37  felicity
+
+	* lib/Mail/SpamAssassin/Conf.pm, rules/10_misc.cf: as discussed on
+	sa-talk, some documentation was out-of-date.
+
+2003-05-31 08:44  quinlan
+
+	* lib/Mail/SpamAssassin/PerMsgStatus.pm: bug 1833: rbl_finish()
+	called twice on each message
+
+2003-05-31 07:22  duncf
+
+	* rules/70_cvs_rules_under_test.cf: AOL rules...
+
+2003-05-31 03:35  duncf
+
+	* masses/extract-message-from-mbox: Added support for simply piping
+	mass-check results in (-m option). Added support for outputting
+	headers only (-H option)
+
+2003-05-31 03:07  quinlan
+
+	* lib/Mail/SpamAssassin/EvalTests.pm,
+	rules/70_cvs_rules_under_test.cf: new 8-bit rules!!!
+
+2003-05-30 21:14  quinlan
+
+	* rules/: 20_uri_tests.cf, 70_cvs_rules_under_test.cf: replace
+	PORN_4 with T_PORN_4
+
+2003-05-30 10:23  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: bug 274: add T_FRIEND_AT_PUBLIC
+
+2003-05-30 10:09  quinlan
+
+	* rules/: 20_body_tests.cf, 20_head_tests.cf, 50_scores.cf: shorten
+	some rule names
+
+2003-05-30 10:04  quinlan
+
+	* rules/: 20_head_tests.cf, 70_cvs_rules_under_test.cf: promote
+	T_MSGID_ADDED_BY_HOTMAIL to MSGID_FROM_MTA_HOTMAIL
+
+2003-05-30 09:43  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: T_PORN_4 for bug 1835
+
+2003-05-30 05:51  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: add baseline tests for
+	developing new 8bit and illegal character rules
+
+2003-05-30 01:02  jmason
+
+	* rules/70_cvs_rules_under_test.cf: oops, typo
+
+2003-05-30 00:19  jmason
+
+	* lib/Mail/SpamAssassin/EvalTests.pm: cleared up more
+	FORGED_RCVD_TRAIL fps
+
+2003-05-30 00:14  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: spin T_FROM_OFFERS*
+
+2003-05-30 00:07  felicity
+
+	* sa-learn.raw: modified the expiration docs a bit
+
+2003-05-29 22:04  jmason
+
+	* lib/Mail/SpamAssassin/EvalTests.pm: bug 1839: massive drop in
+	accuracy for FORGED_RCVD_TRAIL, fixed I think.
+
+2003-05-29 21:39  jmason
+
+	* lib/Mail/SpamAssassin/Bayes.pm,
+	lib/Mail/SpamAssassin/EvalTests.pm,
+	lib/Mail/SpamAssassin/Received.pm, lib/Mail/SpamAssassin/Util.pm,
+	rules/70_cvs_rules_under_test.cf: received header parser could not
+	deal with IPv6 or IPv4-mapped-in-IPv6 IP addresses, fixed (related
+	to bug 1765)
+
+2003-05-29 08:45  quinlan
+
+	* rules/20_meta_tests.cf: simplify a slow rule
+
+2003-05-29 08:18  jmason
+
+	* lib/Mail/SpamAssassin/Received.pm: trusted-to-untrusted network
+	transition was totally wrong
+
+2003-05-29 02:23  felicity
+
+	* sa-learn.raw, lib/Mail/SpamAssassin.pm,
+	lib/Mail/SpamAssassin/BayesStore.pm, lib/Mail/SpamAssassin/Conf.pm,
+	lib/Mail/SpamAssassin/PerMsgStatus.pm,
+	masses/lint-rules-from-freqs, rules/10_misc.cf, spamd/README.spamd:
+	replace auto_learn* with bayes_auto_learn*, but support the older
+	version for now.  add bayes_auto_expire to specify whether or not
+	autoexpire ought to run because max_db_size needs to be set for
+	manual expiry.
+
+2003-05-28 20:54  quinlan
+
+	* lib/Mail/SpamAssassin/EvalTests.pm: bug 1839: major drop in
+	accuracy for FORGED_RCVD_TRAIL, revert to last working version.  I
+	didn't have much luck getting the new version working with good
+	accuracy.
+
+2003-05-28 20:08  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: remove some rules
+
+2003-05-28 09:58  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: FROM_OFFERS additions
+
+2003-05-28 09:05  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: T_RCVD_IN_WSFF, we hardly knew
+	ye
+
+2003-05-28 08:24  felicity
+
+	* rules/20_body_tests.cf: added description for the BLANK_LINE
+	rules.
+
+2003-05-28 08:20  felicity
+
+	* MANIFEST: need to add these to the MANIFEST
+
+2003-05-28 07:52  felicity
+
+	* build/find_meta_missing_dependencies, rules/20_head_tests.cf,
+	rules/20_meta_tests.cf, rules/20_ratware.cf,
+	rules/70_cvs_rules_under_test.cf: solving missing meta dependencies
+	added script to find missing meta dependencies, bug 1979
+
+2003-05-28 07:44  jmason
+
+	* rules/70_cvs_rules_under_test.cf:  oops, typo
+
+2003-05-28 07:23  jmason
+
+	* rules/70_cvs_rules_under_test.cf: bug 1918: try out an exception
+	for MSOE-produced 8bit headers
+
+2003-05-28 07:20  felicity
+
+	* spamassassin.spec: updated for 2.60
+
+2003-05-28 07:19  felicity
+
+	* spamd/: libspamc.c, utils.c: bug 1751: fixed issues with SSL
+	discrepencies<sp?>
+
+2003-05-28 07:15  jmason
+
+	* lib/Mail/SpamAssassin/NetSet.pm, t/cidrs.t: ok, unit test code
+	moved out
+
+2003-05-28 06:41  quinlan
+
+	* lib/Mail/SpamAssassin/PerMsgStatus.pm: bug 1517: fix base64
+	decoding problem
+
+2003-05-28 04:26  duncf
+
+	* lib/Mail/SpamAssassin/CmdLearn.pm: Allow sa-learn --folders to
+	actually work, and support "targets"
+
+2003-05-28 03:49  quinlan
+
+	* rules/23_bayes.cf: shorten Bayes descriptions
+
+2003-05-28 03:32  felicity
+
+	* masses/: Makefile, lint-rules-from-freqs, runGA: runGA: script I
+	use to actually run the GA.  it automates the procedure, although
+	you do need to modify the script per scoreset right now.
+	
+	Makefile: added badfiles target, set athlon to be the default (my
+	system)
+	
+	lint-rules-from-freqs: bug 1978, check that all rule names are <=
+	22 chars, rule descriptions are <= 50 chars, and all rules have a
+	description.
+
+2003-05-28 02:56  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: remove T_URI_CASE_CHANGE and
+	T_HTTP_ESCAPED_DIRECTORY
+
+2003-05-28 01:35  quinlan
+
+	* lib/Mail/SpamAssassin/EvalTests.pm, rules/20_head_tests.cf,
+	rules/30_text_sk.cf, rules/50_scores.cf: name correction for
+	MSGID_OUTLOOK_INVALID
+
+2003-05-28 00:14  jmason
+
+	* rules/50_scores.cf, t/html_obfu.t, t/data/spam/011,
+	rules/50_scores.cf: oops, NATURAL_VIAGRA is disabled so make test
+	would fail under make disttest
+
+2003-05-27 23:42  jmason
+
+	* lib/Mail/SpamAssassin/EvalTests.pm,
+	lib/Mail/SpamAssassin/Locales.pm, rules/20_head_tests.cf: bug 1441:
+	cleared up some Chinese-charset FPs
+
+2003-05-27 23:40  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: few quick test rules
+
+2003-05-27 23:34  quinlan
+
+	* rules/: 20_body_tests.cf, 20_meta_tests.cf: move MIME_HTML* to
+	20_body_tests.cf to be with rest of MIME tests
+
+2003-05-27 23:11  jmason
+
+	* build/cvs2cl-branch, t/cidrs.t: adding some missed files
+
+2003-05-27 23:06  jmason
+
+	* MANIFEST, lib/Mail/SpamAssassin/PerMsgStatus.pm, t/html_obfu.t,
+	t/data/spam/011: bug 1551: HTML comment obfuscation; handle a few
+	more illegal obfuscatory styles that Outlook supports
+
+2003-05-27 21:12  jmason
+
+	* MANIFEST: updated MANIFEST
+
+2003-05-27 21:07  jmason
+
+	* MANIFEST, lib/Mail/SpamAssassin/Conf.pm,
+	lib/Mail/SpamAssassin/Received.pm, lib/Mail/SpamAssassin/Util.pm,
+	spamd/spamd.raw, lib/Mail/SpamAssassin/NetSet.pm: bug 1425:
+	trusted_networks should accept short CIDR specifications.  Also
+	refactored CIDR into a new class, in order to add unit tests, fixed
+	code to _work_ after adding and running tests ;), and fixed spamd
+	to share this code for -A option.
+
+2003-05-27 20:10  jmason
+
+	* Makefile.PL, build/preprocessor: bug 1977: make install depends
+	on umask; build/preprocessor now uses PERM_RW var from Makefile to
+	set modes for files installed
+
+2003-05-27 19:46  quinlan
+
+	* lib/Mail/SpamAssassin/EvalTests.pm: tweak MIME_MULTIPART_SHORT to
+	also catch empty text parts (no change on my corpus, but adds hit
+	for example from bug 1529)
+
+2003-05-27 18:57  quinlan
+
+	* rules/20_body_tests.cf, rules/70_cvs_rules_under_test.cf,
+	lib/Mail/SpamAssassin/EvalTests.pm: bug 1434: bug promote
+	T_MULTIPART_TRICK_D_00_01 to MIME_MULTIPART_SHORT
+
+2003-05-27 18:35  quinlan
+
+	* rules/20_dnsbl_tests.cf: just descriptions and formatting
+
+2003-05-27 08:24  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: remove T_RCVD_IN_OSSRC (not a
+	repeat, but doesn't add much beyond other spam-source RBLs,
+	especially RCVD_IN_OSIRU_SPAM_SRC)
+
+2003-05-27 07:15  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: remove
+	T_RCVD_IN_RELAYS_KUNDENSERVER (same deal, very high overlap with
+	other open relay RBLs)
+
+2003-05-27 07:12  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: removing
+	T_RCVD_IN_EASYNET_PROXIES (high overlap with other open proxy RBLs,
+	but it's getting harder to remove RBLs)
+
+2003-05-27 05:21  quinlan
+
+	* rules/: 20_body_tests.cf, 20_head_tests.cf, 30_text_sk.cf,
+	50_scores.cf, 70_broken_rules.cf: shorten some rule names and
+	convert "MSG_ID" to "MSGID"
+
+2003-05-27 05:05  jmason
+
+	* rules/70_cvs_rules_under_test.cf: couple of other HTML abuse
+	rules
+
+2003-05-27 05:00  jmason
+
+	* rules/70_cvs_rules_under_test.cf: fixed T_OBFUSCATING_BAD_TAG to
+	avoid some FPs
+
+2003-05-27 04:56  jmason
+
+	* rules/70_cvs_rules_under_test.cf: added T_OBFUSCATING_BAD_TAG to
+	catch my pet-hate spam tags
+
+2003-05-27 04:46  quinlan
+
+	* rules/20_head_tests.cf, lib/Mail/SpamAssassin/EvalTests.pm: bug
+	1919: nuking BAD_HELO_WARNING (very poor results)
+
+2003-05-27 02:52  felicity
+
+	* lib/Mail/SpamAssassin/PerMsgStatus.pm, rules/10_misc.cf:
+	rearrange report to meet new conventions
+
+2003-05-27 02:38  felicity
+
+	* lib/Mail/SpamAssassin/Conf.pm: added documentation about rule /
+	description name and length conventions
+
+2003-05-27 02:06  duncf
+
+	* lib/Mail/SpamAssassin/Conf.pm: Implement ""'s for other
+	templates.
+
+2003-05-27 01:51  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: T_RCVD_IN_ALL has served its
+	purpose
+
+2003-05-27 01:05  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: remove T_RCVD_IN_GIPPER (very
+	high overlap with SORBS and DSBL)
+
+2003-05-27 01:01  felicity
+
+	* rules/: 20_head_tests.cf, 70_cvs_rules_under_test.cf: promoted
+	new versions of FROM_NO_USER and TO_NO_USER hit rate doesn't change
+	in the nightly run, but does stop an FP as reported in bug 1758
+
+2003-05-27 00:53  felicity
+
+	* rules/: 20_head_tests.cf, 70_cvs_rules_under_test.cf: promoted
+	new TO_MALFORMED rule, the spam hit rate is a little lower, but the
+	fp rate is MUCH lower.
+
+2003-05-27 00:47  felicity
+
+	* rules/: 20_phrases.cf, 50_scores.cf, 70_cvs_rules_under_test.cf:
+	promoting new WE_HONOR_ALL, removing duplicate REMOVE_RESPECT
+
+2003-05-26 22:56  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: remove T_RCVD_IN_DNSBLINFO (95%
+	of hits also in SBL, only hit 0.6501% spam)
+
+2003-05-26 22:18  felicity
+
+	* lib/Mail/SpamAssassin/Conf.pm,
+	lib/Mail/SpamAssassin/PerMsgStatus.pm, rules/10_misc.cf: some more
+	cleanup of the verbose report.	added the ability for "report" to
+	specify the string in quotes if it needs front whitespace.
+
+2003-05-26 21:47  quinlan
+
+	* rules/: 20_uri_tests.cf, 70_cvs_rules_under_test.cf: promote
+	T_IP_LINK_PLUS to IP_LINK_PLUS
+
+2003-05-26 21:45  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: remove T_HTML_WITHOUT_HTML*
+
+2003-05-26 21:45  quinlan
+
+	* rules/20_html_tests.cf: no real change
+
+2003-05-26 21:36  quinlan
+
+	* rules/20_head_tests.cf: promote T_FROM_MIXED_ALPHANUM_08 to
+	FROM_HAS_MIXED_NUMS3
+
+2003-05-26 21:36  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: promote
+	T_FROM_MIXED_ALPHANUM_08 to FROM_HAS_MIXED_NUMS3 fix T_FROM_OFFERS*
+	(oops, mistake going from "grep -P" to SA)
+
+2003-05-26 21:26  felicity
+
+	* rules/: 20_head_tests.cf, 70_cvs_rules_under_test.cf: promote new
+	GAPPY_SUBJECT rule
+
+2003-05-26 21:24  quinlan
+
+	* rules/: 20_dnsbl_tests.cf, 30_text_de.cf, 30_text_es.cf,
+	30_text_fr.cf, 30_text_it.cf, 30_text_pl.cf, 30_text_sk.cf,
+	50_scores.cf: add "MAPS" to the rule names of MAPS RBL tests
+
+2003-05-26 21:07  quinlan
+
+	* lib/Mail/SpamAssassin/PerMsgStatus.pm: left justify logs
+	normally, right justify if they are too long
+
+2003-05-26 21:01  quinlan
+
+	* rules/: 20_meta_tests.cf, 70_cvs_rules_under_test.cf: promote
+	T_MULTIPART_HTML_ONLY_05 to MIME_HTML_ONLY_MULTI second pass on
+	T_MULTIPART_TRICK* (figure out which part of range to use)
+
+2003-05-26 20:39  quinlan
+
+	* lib/Mail/SpamAssassin/HTML.pm: 80 columns in a few places
+
+2003-05-26 09:16  quinlan
+
+	* lib/Mail/SpamAssassin/Dns.pm: tweak to remove duplicate test logs
+	(due to multi-RBLs that return multiple A records)
+
+2003-05-26 08:51  quinlan
+
+	* lib/Mail/SpamAssassin/PerMsgStatus.pm: removing
+	X-Spam-Check-Host, see bug 1473 for alternate solution
+
+2003-05-26 07:15  felicity
+
+	* INSTALL: bug 1816, clarify that Sys::Syslog is probably already
+	installed, and listed a method to check.
+
+2003-05-26 07:08  felicity
+
+	* lib/Mail/SpamAssassin/HTML.pm: bug 1405: <body onload=""> could
+	set off the HTML_EVENT_UNSAFE rule, even though it's an empty
+	value.	so add a check to see if there's any value before flagging
+	the rule.
+
+2003-05-26 06:41  felicity
+
+	* rules/60_whitelist.cf: added default whitelist for ntbugtraq. 
+	bug 1574
+
+2003-05-26 06:26  felicity
+
+	* rules/60_whitelist.cf: additional whitelist for efax.com, bug
+	1348.
+
+2003-05-26 06:21  felicity
+
+	* lib/Mail/SpamAssassin/Conf.pm,
+	lib/Mail/SpamAssassin/EvalTests.pm, rules/20_head_tests.cf,
+	rules/50_scores.cf: bug 883: create a blacklist_to to round out the
+	black/whitelist groups.
+
+2003-05-26 06:21  duncf
+
+	* lib/Mail/SpamAssassin/: Conf.pm, PerMsgStatus.pm: Prettier
+	prettified report format... right justify excess stuff
+
+2003-05-26 06:13  quinlan
+
+	* lib/Mail/SpamAssassin/Dns.pm: fix DNS test logging to work
+	correctly for repeated hits
+
+2003-05-26 05:42  duncf
+
+	* lib/Mail/SpamAssassin/PerMsgStatus.pm, rules/10_misc.cf: Bug
+	1493: prettify report format (make a table)
+
+2003-05-26 04:25  felicity
+
+	* lib/Mail/SpamAssassin/Reporter.pm: if there are no methods
+	available for reporting, say so with a warning.
+
+2003-05-26 03:33  felicity
+
+	* spamassassin.raw, lib/Mail/SpamAssassin/Reporter.pm: bug 1968:
+	some more verbose messages when reporting fails
+
+2003-05-26 01:39  quinlan
+
+	* lib/Mail/SpamAssassin/EvalTests.pm,
+	rules/70_cvs_rules_under_test.cf: bug 1434: look for
+	multipart/alternative that isn't
+
+2003-05-26 01:25  quinlan
+
+	* rules/20_html_tests.cf: tweak HTML_WEB_BUGS description remove
+	HTML_IMAGE_WEB_BUGS (no longer needed)
+
+2003-05-26 00:56  felicity
+
+	* t/reportheader.t: bug 1965: the text for the default report
+	changed, so our test for it failed.  doh.  updated with the new
+	string.
+
+2003-05-26 00:47  felicity
+
+	* rules/10_misc.cf: bug 1797: change unsafe_report to be more clear
+	about "did not contain plain text".
+
+2003-05-26 00:32  felicity
+
+	* spamd/spamd.raw: turns out exists doesn't work there for some
+	reason. :(
+
+2003-05-26 00:03  felicity
+
+	* rules/70_cvs_rules_under_test.cf: bug 1634: missed the Palm
+	version of Eudora ... <sigh> I think we should make new rules for
+	the Windows, Mac, and Palm versions of Eudora.	We're getting too
+	many exceptions to this rule.
+
+2003-05-25 23:58  felicity
+
+	* rules/70_cvs_rules_under_test.cf: bug 1634: FPs for Eudora for
+	Mac OS X.  Also found that a removed nice rule was a dependency for
+	the FORGED rule, so added it back in as such.
+
+2003-05-25 23:42  felicity
+
+	* spamd/spamd.raw: bug 1774: if spamd is run with -u, we should
+	change $ENV{'HOME'} appropriately so that Razor, Pyzor, etc, will
+	get the correct home directory (not the home directory from the
+	parent process...)
+
+2003-05-25 21:31  felicity
+
+	* lib/Mail/SpamAssassin/PerMsgStatus.pm: bug 1603: added a
+	X-Spam-Check-Host to the message headers to specify which host
+	marked up the mail.
+
+2003-05-25 21:13  quinlan
+
+	* rules/70_cvs_rules_under_test.cf, lib/Mail/SpamAssassin/HTML.pm:
+	upgrade HTML_WEB_BUGS to new version with much better HTML_MESSAGE
+	accuracy:   9.341  10.5488   1.7643    0.857   0.63    0.01 
+	HTML_WEB_BUGS:new  18.923  18.2034  23.4373    0.437   0.11    0.20
+	 HTML_WEB_BUGS:old remove HTML_IMAGE_WEB_BUGS (now adds more ham
+	than spam)
+
+2003-05-25 20:45  felicity
+
+	* rules/70_cvs_rules_under_test.cf: possible replacement for
+	GAPPY_SUBJECT.	7 works best for me, but we'll see how the nightly
+	results do.
+
+2003-05-25 17:54  felicity
+
+	* rules/: 20_head_tests.cf, 20_phrases.cf, 20_ratware.cf,
+	20_uri_tests.cf, 70_cvs_rules_under_test.cf: promoted some rules,
+	removed some bad rules ...
+
+2003-05-25 17:38  felicity
+
+	* rules/: 20_body_tests.cf, 20_meta_tests.cf,
+	70_cvs_rules_under_test.cf: promoted some rules ...
+
+2003-05-25 15:14  felicity
+
+	* rules/20_ratware.cf: bug 1822: "Outlook Mac" is sometimes
+	"Outlook for Mac".
+
+2003-05-25 04:05  felicity
+
+	* lib/Mail/SpamAssassin/EvalTests.pm: bug 1372: use the pristine
+	message instead of a possibly munged version for razor, dcc, and
+	pyzor.
+
+2003-05-25 03:57  felicity
+
+	* rules/70_cvs_rules_under_test.cf: possible replacements for
+	TO_MALFORMED T_TO_MALFORMED2 clears up most of my FPs (which were
+	at least 3x the valid hits)
+
+2003-05-25 03:44  felicity
+
+	* lib/Mail/SpamAssassin/Conf.pm: bug 1848: update the docs to
+	specify that the body rule type includes the subject header.
+
+2003-05-25 03:20  felicity
+
+	* rules/70_cvs_rules_under_test.cf: bug 1874: REMOVE_REQUEST and
+	WE_HONOR_ALL are very similar.	added a new rule which should at
+	least cover the same messages as both original rules.
+
+2003-05-25 01:43  felicity
+
+	* lib/Mail/SpamAssassin/EvalTests.pm: bug 1475: juno.com sends as
+	untd.com now, so add them into the forged re.
+
+2003-05-25 01:33  felicity
+
+	* rules/70_cvs_rules_under_test.cf: bug 1758: FROM_NO_USER was
+	matching when there was a '( some @ foo )' in the From header.
+
+2003-05-25 00:24  quinlan
+
+	* rules/70_broken_rules.cf: just making sure
+
+2003-05-25 00:20  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: delete T_RCVD_IN_MONKEYS_UPL
+	(NEVER PUT THIS RULE BACK INTO SA)
+
+2003-05-24 23:56  jmason
+
+	* Makefile.PL, rules/10_misc.cf: bug 1659: Makefile.PL asks for a
+	support address/URL
+
+2003-05-24 23:55  jmason
+
+	* lib/Mail/SpamAssassin/Conf.pm: fixed POD typo in Conf.pm
+
+2003-05-24 22:02  felicity
+
+	* lib/Mail/SpamAssassin/Conf.pm: bug 1762: make it more clear that
+	the whitelist_to settings will try to match the address anywhere as
+	a recipient in the header...
+
+2003-05-24 21:32  quinlan
+
+	* lib/Mail/: SpamAssassin.pm, SpamAssassin/Conf.pm: bug 1623: add
+	ham == non-spam
+
+2003-05-24 21:31  quinlan
+
+	* sa-learn.raw: URL tweak
+
+2003-05-24 20:50  felicity
+
+	* rules/70_cvs_rules_under_test.cf: bug 1914: new test version of
+	see_for_yourself
+
+2003-05-24 07:16  quinlan
+
+	* lib/Mail/SpamAssassin/Dns.pm: bug 1733: add initial SenderBase
+	support add back logging of TXT record DNSBL hits (goes into the
+	report) and also add logging support for A record DNSBL hits
+
+2003-05-24 07:14  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: bug 1733: add initial
+	SenderBase support also add some dialup blacklists to test
+
+2003-05-24 02:45  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: more SORBS tests (are fun)
+
+2003-05-24 01:12  quinlan
+
+	* rules/: 20_dnsbl_tests.cf, 30_text_sk.cf, 50_scores.cf,
+	70_broken_rules.cf, 70_cvs_rules_under_test.cf: revise NJABL rules
+
+2003-05-24 00:10  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: remove unneeded rule
+
+2003-05-24 00:00  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: bug 1734: replacement rules for
+	FROM_OFFERS
+
+2003-05-23 23:45  jmason
+
+	* USAGE, t/SATest.pm: USAGE: note that Razor requires registration,
+	and set default patterns for tests to make it easier to write them
+	;)
+
+2003-05-23 23:35  jmason
+
+	* rules/10_misc.cf: updated default report text as we finally
+	agreed way back on 10 Mar
+
+2003-05-23 23:10  quinlan
+
+	* lib/Mail/SpamAssassin/Conf.pm: bug 1953: lower rbl_timeout to 10
+	seconds
+
+2003-05-23 21:19  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: remove T_RCVD_IN_DEADBEEF add
+	some T_FROM_MIXED_ALPHANUM* variations remove all T_URI_CASE* rules
+	except for one (probably not good enough)
+
+2003-05-23 19:48  felicity
+
+	* spamd/spamd.raw: bug 1952: have spamd write the pid file whether
+	or not we're daemonized
+
+2003-05-23 19:19  felicity
+
+	* spamd/spamd.raw: bug 1952: spamd -r required -d as well.  added
+	documentation.
+
+2003-05-21 19:50  felicity
+
+	* rules/: 20_dnsbl_tests.cf, 50_scores.cf, 70_broken_rules.cf:
+	looks like orbs is down permanently.  removing from dnsbl list
+
+2003-05-21 13:44  felicity
+
+	* rules/: 20_html_tests.cf, 20_phrases.cf,
+	70_cvs_rules_under_test.cf: cleaning up the test rules a bit
+	promoted some, removed some others ...
+
+2003-05-21 10:20  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: name fix: RCVD_IN_FIVETEN to
+	T_RCVD_IN_FIVETEN add URI case change test rules add
+	T_HTTP_ESCAPED_DIRECTORY
+
+2003-05-20 07:10  jmason
+
+	* lib/Mail/SpamAssassin.pm: 2.56 devel cycle started
+
+2003-05-20 07:06  jmason
+
+	* Changes: ready for release
+
+2003-05-20 00:59  felicity
+
+	* lib/Mail/SpamAssassin/: Conf.pm, PerMsgStatus.pm: bug 1628: added
+	ability to specify headers that should be copied from the original
+	message when doing a report_safe encapsulation.
+
+2003-05-19 23:49  quinlan
+
+	* lib/Mail/SpamAssassin/HTML.pm,
+	lib/Mail/SpamAssassin/EvalTests.pm, rules/20_body_tests.cf,
+	rules/20_html_tests.cf, rules/30_text_fr.cf, rules/30_text_sk.cf,
+	rules/50_scores.cf, rules/70_broken_rules.cf,
+	rules/70_cvs_rules_under_test.cf: various rule renaming, revising
+	(test rules only), and promotion
+
+2003-05-19 23:34  felicity
+
+	* Changes, lib/Mail/SpamAssassin.pm: updated changes and devel flag
+	for 2.55 release
+
+2003-05-19 23:25  felicity
+
+	* lib/Mail/SpamAssassin/: Conf.pm, Conf.pm: bug 1929: looks like we
+	never specified that "score 0" disables a rule from running.
+
+2003-05-19 21:34  felicity
+
+	* rules/: 20_head_tests.cf, 30_text_fr.cf, 30_text_it.cf,
+	30_text_sk.cf, 50_scores.cf, 70_broken_rules.cf: removed
+	MSGID_CHARS_SPAM
+
+2003-05-19 21:26  felicity
+
+	* lib/Mail/SpamAssassin/PerMsgStatus.pm: removed incorrect
+	statement about safety zone around required_hits (no longer used)
+
+2003-05-19 20:48  felicity
+
+	* rules/70_cvs_rules_under_test.cf: bug 1899: new suggestion for
+	reverse_aging rule.
+
+2003-05-19 20:33  felicity
+
+	* lib/Mail/SpamAssassin/: Dns.pm, Received.pm: bug 1858: some
+	header additions weren't using X-Spam as the prefix, so a
+	"spamassassin -d" wouldn't remove them.  modified those headers to
+	be X-Spam prefixed.
+
+2003-05-19 19:46  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: add T_FROM_MIXED_ALPHANUM_* for
+	testing
+
+2003-05-19 09:17  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: change wirehub.net to
+	easynet.nl
+
+2003-05-19 08:53  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: rename __RCVD_IN_FIVETEN to
+	RCVD_IN_FIVETEN (let the GA set scores instead of worrying about
+	it)
+
+2003-05-19 04:41  quinlan
+
+	* lib/Mail/SpamAssassin/Conf.pm: bug 1617: add a charset header to
+	mime reports remove old documentation about "SPAM:" prefix from
+	"report" documentation
+
+2003-05-19 04:39  quinlan
+
+	* lib/Mail/SpamAssassin/PerMsgStatus.pm: bug 1617: add a charset
+	header to mime reports
+
+2003-05-19 04:27  felicity
+
+	* rules/: 50_scores.cf, 70_cvs_rules_under_test.cf: added some new
+	suggested rules, fixed razor2_cf_range scores
+
+2003-05-19 01:36  quinlan
+
+	* masses/rule-qa/corpus-hourly: use most common CVS revision
+	instead of current CVS revision for NET class
+
+2003-05-19 01:20  felicity
+
+	* spamassassin.raw, lib/Mail/SpamAssassin/Conf.pm,
+	spamassassin.raw, lib/Mail/SpamAssassin/Conf.pm: bug 1917: docs
+	still talk about 'spamassassin -c', which was deprecated for
+	'spamassassin -C' ...
+
+2003-05-19 01:18  felicity
+
+	* spamd/: spamd.raw, spamd.raw: bug 1905: in perl 5.005, mkdir
+	needs a umask parameter
+
+2003-05-19 01:12  felicity
+
+	* Makefile.PL: removed more obsolete razor stuff bug 1893: if
+	razor2 isn't installed, a warning could pop up from the undefined
+	reference
+
+2003-05-19 01:06  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: remove low-ranking rules
+
+2003-05-19 01:03  felicity
+
+	* Makefile.PL: bug 1893: a few warnings pop up if razor isn't
+	installed for testing.	simple cleanup.
+
+2003-05-19 01:01  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: I hate HTML email
+
+2003-05-19 00:59  quinlan
+
+	* rules/20_html_tests.cf: add description for HTML_COMMENT_RATIO
+	(and shorten prerequisite test name)
+
+2003-05-18 22:27  quinlan
+
+	* lib/Mail/SpamAssassin/HTML.pm, rules/70_cvs_rules_under_test.cf:
+	restore HTML area code (whoops) revisions to new web bug tests
+
+2003-05-18 15:48  felicity
+
+	* spamassassin.spec: updated spec file for 2.55
+
+2003-05-18 09:40  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: add some variations to
+	T_MIME_HTML_NO_*_TAG*
+
+2003-05-18 09:16  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: add some test phrases
+
+2003-05-18 04:39  quinlan
+
+	* rules/: 70_broken_rules.cf, 70_cvs_rules_under_test.cf: move
+	T_RCVD_IN_RELAYS_ORDB_ORG to 70_broken_rules.cf for good... low hit
+	rate, no sub rules, and low score in almost every mini-GA run
+
+2003-05-18 02:36  quinlan
+
+	* lib/Mail/SpamAssassin/HTML.pm, rules/70_cvs_rules_under_test.cf:
+	add some more test variations for web bugs
+
+2003-05-18 02:25  duncf
+
+	* debian/rules: Argh. More Debian packaging fixed.
+
+2003-05-18 02:21  duncf
+
+	* debian/rules: Argh. VENDORPREFIX annoys me
+
+2003-05-18 01:31  quinlan
+
+	* rules/50_scores.cf: remove old firsthop scores
+
+2003-05-18 00:11  duncf
+
+	* debian/: rules, rules: More woody build failures :-( This should
+	work now, I hope. Someone test please.
+
+2003-05-17 23:47  duncf
+
+	* debian/: changelog.in, spamassassin.preinst, changelog.in,
+	spamassassin.preinst: last fix... honestly! handles case where
+	debconf not installed
+
+2003-05-17 23:19  duncf
+
+	* debian/control: Forgot to change debian/control for woody compat.
+	Fixed
+
+2003-05-17 23:18  duncf
+
+	* debian/: control, examples/muttrc, po/POTFILES.in, po/fr.po,
+	po/pt_BR.po, po/templates.pot: Umm... fixed better packaging ;-)
+
+2003-05-17 23:14  duncf
+
+	* debian/: control, logcheck, rules, spamassassin.config,
+	spamassassin.dirs, spamassassin.postinst, spamassassin.preinst,
+	spamassassin.templates: Updated Debian packaging for 2.54, better
+	woody upgrade
+
+2003-05-17 22:59  duncf
+
+	* debian/po/fr.po: file fr.po was initially added on branch b2_5_0.
+
+2003-05-17 22:59  duncf
+
+	* debian/: control, logcheck, rules, spamassassin.config,
+	spamassassin.dirs, spamassassin.links, spamassassin.postinst,
+	spamassassin.postrm, spamassassin.preinst, spamassassin.templates,
+	examples/muttrc, po/fr.po, po/pt_BR.po, po/templates.pot: Debian
+	packaging for 2,54. Includes a good upgrade from 2.20-1woody
+
+2003-05-17 22:59  duncf
+
+	* debian/examples/muttrc: file muttrc was initially added on branch
+	b2_5_0.
+
+2003-05-17 21:16  quinlan
+
+	* masses/rule-qa/corpus-hourly: allow
+	CURRENT_CORPORA_WEEKLY_VERSION for network checks produce "all"
+	results for every class NET class is anything less than 10 days old
+	with same CVS revision fix some bugs
+
+2003-05-17 21:14  quinlan
+
+	* masses/rule-qa/corpus-nightly: add a random sleep to avoid
+	simultaneous checkout
+
+2003-05-17 18:03  felicity
+
+	* rules/: 20_body_tests.cf, 20_html_tests.cf,
+	70_cvs_rules_under_test.cf: rule cleanup and some promotion
+
+2003-05-17 08:10  quinlan
+
+	* rules/: 20_dnsbl_tests.cf, 30_text_de.cf, 30_text_es.cf,
+	30_text_fr.cf, 30_text_it.cf, 30_text_pl.cf, 30_text_sk.cf,
+	50_scores.cf, 70_broken_rules.cf, 70_cvs_rules_under_test.cf: first
+	pass on cleaning up DNS test names (get everything synchronized)
+
+2003-05-17 07:21  quinlan
+
+	* lib/Mail/SpamAssassin/Conf.pm: add TODO comment
+
+2003-05-17 06:51  quinlan
+
+	* lib/Mail/SpamAssassin/Conf.pm: remove backward compatibility hack
+	for old RBL tests (won't run now anyway)
+
+2003-05-17 04:40  quinlan
+
+	* lib/Mail/SpamAssassin/HTML.pm, rules/70_cvs_rules_under_test.cf:
+	quick second pass on T_HTML_IMAGE_WEB_BUGS*
+
+2003-05-17 03:55  quinlan
+
+	* lib/Mail/SpamAssassin/HTML.pm: fix warning
+
+2003-05-17 03:53  quinlan
+
+	* rules/: 70_broken_rules.cf, 70_cvs_rules_under_test.cf: add back
+	T_RCVD_IN_RELAYS_ORDB_ORG for further testing (made a mistake) add
+	T_RCVD_IN_ALL for testing of Received: header parsing and DNS code
+	(should get 100% on spam)
+
+2003-05-17 02:28  quinlan
+
+	* rules/: 20_dnsbl_tests.cf, 70_broken_rules.cf: move
+	RCVD_IN_RELAYS_ORDB_ORG to 70_broken_rules.cf: low hit rate, poor
+	GA results (both current and past), no sub-tests for RBL either
+
+2003-05-17 01:37  quinlan
+
+	* lib/Mail/SpamAssassin/EvalTests.pm: remove unused eval tests: 
+	check_carriage_returns(), check_signature(), and _check_signature()
+
+2003-05-16 23:54  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: pick one
+	T_MSGID_ADDED_BY_HOTMAIL rule bug 1757: remove T_HELLO_ADDRESS
+	(horrible results) removed T_ASIAN_LINKS, T_RATWARE_BAD_GECKO,
+	T_PHRASE_COMBO_LINKS,	T_WSDOMAIN, T_MULTIPLEIMAGES removed
+	T_FAKE_HELO rules with poor results using results from	 daf, jm,
+	lan, quinlan, rODbegbie, theo:	 0.031	 0.0587   0.0154    0.792  
+	0.48	0.01  T_FAKE_HELO_NETSCAPE   0.019   0.0232   0.0161   
+	0.590	0.20	0.01  T_FAKE_HELO_YAHOO_CO_UK
+
+2003-05-16 23:51  quinlan
+
+	* lib/Mail/SpamAssassin/EvalTests.pm: remove T_RATWARE_MIZSPEELING
+	(zero hits on all corpuses)
+
+2003-05-15 21:33  felicity
+
+	* t/spamd_protocol_10.t: new fix for 1909
+
+2003-05-15 21:17  felicity
+
+	* t/spamd_protocol_10.t: bug 1909: oops.  while fixing another bug,
+	I broke the seek call. <sigh>  should be fixed now. :)
+
+2003-05-15 21:04  felicity
+
+	* lib/Mail/: SpamAssassin.pm, SpamAssassin/Conf.pm: added
+	bayes_learn_during_report option to disable automatically learning
+	mails that are being reported.	depending on how one wants to train
+	the bayes system, this may be a good option to disable.
+
+2003-05-15 19:01  quinlan
+
+	* rules/70_cvs_rules_under_test.cf, lib/Mail/SpamAssassin/HTML.pm:
+	add some T_HTML_IMAGE_WEB_BUGS* tests (based on Darren Coleman's
+	test)
+
+2003-05-15 01:16  jmason
+
+	* INSTALL: updated with correct Razor info
+
+2003-05-14 19:14  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: changes to YAHOO_REDIR*
+
+2003-05-14 18:57  quinlan
+
+	* rules/20_body_tests.cf, rules/70_cvs_rules_under_test.cf,
+	lib/Mail/SpamAssassin/EvalTests.pm: promote
+	T_MIME_BASE64_WITHOUT_NAME to MIME_BASE64_NO_NAME
+
+2003-05-14 18:27  felicity
+
+	* spamd/redhat-rc-script.sh: bug 1915: didn't list condrestart as
+	an option under usage
+
+2003-05-14 08:27  quinlan
+
+	* masses/rule-qa/README.nightly: add a hint :-)
+
+2003-05-14 08:21  quinlan
+
+	* masses/rule-qa/corpus-hourly: add revision checking and fix a few
+	minor bugs
+
+2003-05-14 08:20  quinlan
+
+	* masses/rule-qa/corpus-nightly: fix a typo
+
+2003-05-14 08:08  quinlan
+
+	* rules/: 20_body_tests.cf, 30_text_de.cf, 30_text_es.cf,
+	30_text_fr.cf, 30_text_it.cf, 30_text_sk.cf, 50_scores.cf: rename
+	BASE64_ENC_TEXT to MIME_BASE64_TEXT
+
+2003-05-14 08:04  quinlan
+
+	* rules/20_dnsbl_tests.cf: add comment
+
+2003-05-14 08:04  quinlan
+
+	* lib/Mail/SpamAssassin/EvalTests.pm,
+	rules/70_cvs_rules_under_test.cf: promote T_MIME_BASE64_BLANKS to
+	MIME_BASE64_BLANKS
+
+2003-05-13 21:10  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: reduce versions of
+	T_MSGID_THREESIXSIX*
+
+2003-05-13 20:57  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: promote
+	T_OBFUSCATING_COMMENT_05B to replace OBFUSCATING_COMMENT and
+	OBFUSCATING_COMMENT2 remove T_GAPPY_SUBJECT* because none were any
+	better
+
+2003-05-13 20:54  quinlan
+
+	* rules/: 20_body_tests.cf, 20_meta_tests.cf: replace
+	OBFUSCATING_COMMENT with improved rule remove OBFUSCATING_COMMENT2
+
+2003-05-13 03:53  felicity
+
+	* sa-learn.raw, lib/Mail/SpamAssassin/BayesStore.pm: more
+	documentation changes for bayes sync/expire.  optimization in
+	journal_sync_due.
+
+2003-05-13 02:11  quinlan
+
+	* rules/: 20_head_tests.cf, 20_phrases.cf, 20_porn.cf,
+	20_ratware.cf: 100% overlap removals: ID_X_LIST_UNSUBSCRIBE,
+	FOR_INSTANT_ACCESS, RATWARE_GROUPMAIL add overlap-related comments
+	for RATWARE_STORM and X_LIST_UNSUBSCRIBE
+
+2003-05-13 01:43  quinlan
+
+	* masses/overlap: ignore extra fields at end of line improve
+	performance by only counting each pair once (the "-a" option should
+	only affect output and not add extra work to the inner loop)
+
+2003-05-13 01:37  jmason
+
+	* rules/20_head_tests.cf: removed MSGID_SPAMSIGN_ZEROES: totally
+	overlapping with MSGID_OE_SPAM_4ZERO
+
+2003-05-13 00:31  quinlan
+
+	* masses/mass-check: add CVS revision to log comment
+
+2003-05-13 00:11  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: add $Revision tag
+
+2003-05-12 21:55  felicity
+
+	* sa-learn.raw, lib/Mail/SpamAssassin/BayesStore.pm,
+	t/spamd_protocol_10.t: some doc reworking fixed some errors spewed
+	out by spamd_procotol_10
+
+2003-05-12 21:35  jmason
+
+	* lib/Mail/SpamAssassin/Bayes.pm: latest bayes tweaks: best results
+	checked in.  Robinson S constant reduced back down to 0.1; previous
+	good results were actually artifact of bad testing methodology;
+	this reduces FPs/FNs.  'chewing' of URIs and addresses in headers
+	and body, where hostnames are broken into domain components;
+	increases accuracy in general.
+
+2003-05-12 20:23  jmason
+
+	* lib/Mail/SpamAssassin.pm: 2.55 devel cycle started, not that
+	we'll need it of course ;)
+
+2003-05-12 20:20  jmason
+
+	* build/2.54_change_summary: 2.54 RELEASED
+
+2003-05-12 20:15  jmason
+
+	* build/tag_weekly_mc: weekly mass-check fixed
+
+2003-05-12 19:58  quinlan
+
+	* masses/rule-qa/README.nightly: few additions
+
+2003-05-12 19:52  quinlan
+
+	* masses/rule-qa/: README.nightly, corpus-hourly, corpus-nightly,
+	corpus-tagtime: nightly mass-check scripts and README
+
+2003-05-12 08:30  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: remove T_RCVD_IN_OSSOCKS (99%
+	of hits were in T_X_OSIRU_OPEN_PROXY)
+
+2003-05-12 08:27  quinlan
+
+	* rules/20_dnsbl_tests.cf: delete RCVD_IN_UNCONFIRMED_DSBL (97.8%
+	of the spam hits are in RCVD_IN_DSBL and it has 5.4% FPs vs. 0.4%
+	FPs for RCVD_IN_DSBL)
+
+2003-05-12 08:22  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: remove T_RCVD_IN_OSRELAY since
+	it duplicates X_OSIRU_OPEN_RELAY
+
+2003-05-12 07:25  quinlan
+
+	* lib/Mail/SpamAssassin/EvalTests.pm,
+	rules/70_cvs_rules_under_test.cf: improve speed/accuracy of
+	T_FROM_IN_RFCI_DSN
+
+2003-05-12 06:55  jmason
+
+	* lib/Mail/SpamAssassin/BayesStore.pm: minor tweak to avoid
+	fetching twice
+
+2003-05-12 05:22  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: remove T_FROM_IN_PIGS and
+	T_FROM_IN_DEADBEEF (poor results) tweak T_WS_PHRASE
+
+2003-05-12 03:39  felicity
+
+	* rules/70_cvs_rules_under_test.cf: needed to add tflags
+
+2003-05-12 02:21  quinlan
+
+	* rules/20_head_tests.cf: bug 1582: consistent false-positives for
+	SquirrelMail (die die die!)
+
+2003-05-12 01:27  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: more T_OBFUSCATING_COMMENT* -
+	tired of this yet?
+
+2003-05-12 01:05  quinlan
+
+	* lib/Mail/SpamAssassin/EvalTests.pm, rules/20_dnsbl_tests.cf,
+	rules/50_scores.cf: fix bug 1871: hil nil ril real
+
+2003-05-12 00:12  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: add some T_MSGID_THREESIXSIX
+	variants (missing about 27% of hits before)
+
+2003-05-11 23:28  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: remove T_X_HEADER_PITCHID
+
+2003-05-11 22:27  felicity
+
+	* rules/70_cvs_rules_under_test.cf: try to simplify/get better
+	results with razor2 range tests
+
+2003-05-11 21:50  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: various T_YAHOO_REDIR* rule
+	ideas
+
+2003-05-11 21:32  quinlan
+
+	* rules/: 70_cvs_rules_under_test.cf, 20_ratware.cf: promote
+	T_FORGED_THEBAT_HTML to FORGED_THEBAT_HTML
+
+2003-05-11 21:06  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: new T_OBFUSCATING_COMMENT*
+	tests new T_GAPPY_SUBJECT* tests
+
+2003-05-11 20:40  msquadrat
+
+	* rules/70_cvs_rules_under_test.cf: T_GAPPY_PORN is broken -- some
+	alternatives
+
+2003-05-11 18:02  felicity
+
+	* lib/Mail/SpamAssassin/BayesStore.pm, masses/mass-check:
+	mass-check needs to make sure that bayes will expire more often
+	then once every 12 hours since it's going to churn through stuff
+	fairly quickly.  added a flag to M::SA (passed in by mass-check) to
+	disable that check.
+
+2003-05-11 17:37  felicity
+
+	* lib/Mail/SpamAssassin/BayesStore.pm: more logic changes to the
+	expire code
+
+2003-05-11 07:03  felicity
+
+	* lib/Mail/SpamAssassin/Bayes.pm: stop dividing by 0 johnson!
+
+2003-05-11 06:59  felicity
+
+	* lib/Mail/SpamAssassin/BayesStore.pm: few more bug fixes
+
+2003-05-11 06:35  felicity
+
+	* lib/Mail/SpamAssassin/BayesStore.pm: added a bunch of debugging
+	statements to the expire area refixed 1888 added in some other
+	checks, useful for force expire where an expire won't occur.
+
+2003-05-11 05:22  jmason
+
+	* build/2.54_change_summary: file 2.54_change_summary was initially
+	added on branch b2_5_0.
+
+2003-05-11 05:22  jmason
+
+	* build/2.54_change_summary: change summary for 2.54 release
+
+2003-05-11 05:21  felicity
+
+	* sa-learn.raw, lib/Mail/SpamAssassin/Bayes.pm,
+	lib/Mail/SpamAssassin/CmdLearn.pm, tools/check_bayes_db: replaced
+	check_bayes_db since it only understand db format 0.  it now just
+	calls sa-learn with the --dump option, passing anything else along
+	with it.
+	
+	added the --dbpath and --regexp options from check_bayes_db to
+	sa-learn/CmdLearn.  They only have an effect via --dump.
+
+2003-05-11 05:19  jmason
+
+	* build/README, lib/Mail/SpamAssassin/Bayes.pm, build/README:
+	updated build README
+
+2003-05-11 05:17  jmason
+
+	* Changes, build/README, build/cvs2cl-branch: added cvs2cl-branch,
+	fixed Changes file
+
+2003-05-11 05:17  jmason
+
+	* build/cvs2cl-branch: file cvs2cl-branch was initially added on
+	branch b2_5_0.
+
+2003-05-11 04:38  felicity
+
+	* Changes: Updated for 2.54rc1
+
+2003-05-11 02:05  duncf
+
+	* lib/Mail/SpamAssassin.pm: Ready to release?
+
+2003-05-11 01:34  felicity
+
+	* rules/: 20_head_tests.cf, 30_text_de.cf, 30_text_fr.cf,
+	30_text_it.cf, 50_scores.cf, 70_broken_rules.cf: bug 1891:
+	RCVD_IN_VISI is no longer available
+
+2003-05-11 01:32  felicity
+
+	* rules/70_cvs_rules_under_test.cf: added rules for testing
+
+2003-05-11 01:29  felicity
+
+	* lib/Mail/SpamAssassin/BayesStore.pm: bug 1888: the expiry system
+	tries to figure out if the new expire is largely different from the
+	last expire.  if they are, there was probably a surge at some point
+	and it would make a bad estimation for this expire, so it'll
+	recompute atime delta.	but 0 is a valid last expire count (new
+	db), so we got a div by zero error. :(
+	
+	changed expiry_due to check for >100000 tokens.  if there were
+	exactly 100k tokens, and we did the expire, it would get confused
+	because to leave 100k tokens in the db (safety), we would want to
+	remove 0 tokens.
+	
+	if we couldn't find a good exponent to expire from in the first
+	pass, we'd return without removing the expiry_running flag.  it
+	would eventually time out, but if we know we're not expiring
+	anymore, we should remove it.
+	
+	had a stupid bug where expiry would expire to 100000 if it wanted
+	to keep more than 100k tokens.	teaches you to use the correct <>
+	symbol. ;) (it now says keep 100k if the "to expire to" point is <
+	100k, which is the correct logic...)
+	
+	added a "need to do first pass" check if the last expire count is
+	0.  whenever that happens, last atime delta should also be 0, and
+	that's already checked, but ...
+
+2003-05-10 23:40  jmason
+
+	* rules/70_broken_rules.cf: just removed VISI test, it's dead as a
+	dodo these days
+
+2003-05-10 04:51  felicity
+
+	* rules/70_cvs_rules_under_test.cf: removed unused header count
+	tests that didn't do so well
+
+2003-05-10 04:48  felicity
+
+	* rules/: 20_head_tests.cf, 70_cvs_rules_under_test.cf: promoting
+	rule
+
+2003-05-10 04:10  felicity
+
+	* rules/70_cvs_rules_under_test.cf: added a bunch of suggested
+	rules
+
+2003-05-10 03:50  felicity
+
+	* lib/Mail/SpamAssassin/Conf.pm: forgot to set the default value. 
+	haha.
+
+2003-05-10 01:46  felicity
+
+	* lib/Mail/SpamAssassin/CmdLearn.pm: bug 1887: sa-learn didn't
+	accept parameters to -D
+
+2003-05-10 01:28  felicity
+
+	* spamd/: spamd.raw, spamd.raw: bug 1818: spamd fails to create
+	~/.spamassassin when running setuid with sql
+
+2003-05-09 23:36  felicity
+
+	* lib/Mail/: SpamAssassin.pm, SpamAssassin/Bayes.pm,
+	SpamAssassin/BayesStore.pm, SpamAssassin/CmdLearn.pm,
+	SpamAssassin/Conf.pm: bug 1719: enable learning to journal.  jm did
+	this, but it was waiting for the 1881 fix.
+	
+	bug 1881: we will now learn to the journal instead of requiring the
+	db to be r/w.  however, msgids (the seen db) weren't updated by
+	journal learning.  added code to support learning and forgetting
+	(but don't do that, the code is actually disabled to forget to
+	journal).
+	
+	bug 1821: we decided on a new bayes format again.  this time it's
+	token atime is based on message received time.	this brought up a
+	whole bunch of issues, but mostly required new pack/unpack,
+	upgrade_db, expire, and a bunch of other changes.  while I was
+	milling about I fixed a few other random bugs.	I don't quite
+	remember what they are right now, so just assume everything's
+	peachy.
+
+2003-05-09 09:45  quinlan
+
+	* rules/: 20_ratware.cf, 70_cvs_rules_under_test.cf: rename a few
+	forgery rules to be more consistently named promote
+	T_HTML_FAKED_OUTLOOK to FORGED_OUTLOOK_TAGS fix
+	T_FORGED_THEBAT_HTML
+
+2003-05-09 09:15  quinlan
+
+	* rules/: 20_head_tests.cf, 20_phrases.cf, 70_broken_rules.cf,
+	70_cvs_rules_under_test.cf: promote DATE_SPAMWARE_Y2K - this rule
+	rocks promote T_ORDER_NOW to ORDER_NOW - barely perceptible
+	improvement move USER_AGENT rules to broken - may be gold in there
+	for forgeries
+
+2003-05-09 04:57  jmason
+
+	* spamd/: libspamc.c, libspamc.c: bug 1879: libspamc was closing
+	fds it didn't open
+
+2003-05-09 01:29  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: more T_GAPPY_SUBJECT_* rules
+
+2003-05-09 01:25  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: T_OBFUSCATING_COMMENT* - will
+	it ever end?
+
+2003-05-09 00:54  jmason
+
+	* spamd/README.spamd: bug 1799: doco updated to note protocol
+	change compared to 2.4x, 2.5x
+
+2003-05-09 00:48  quinlan
+
+	* lib/Mail/SpamAssassin/HTML.pm: remove
+	$self->{html}{comment_no_alphanum}
+
+2003-05-09 00:28  jmason
+
+	* spamd/: README.spamd, spamc.pod: bug 1799: doco updated to note
+	protocol change compared to 2.4x, 2.6x
+
+2003-05-08 22:47  felicity
+
+	* lib/Mail/SpamAssassin/BayesStore.pm: bug 1869: came up with a
+	kluge for the "tokens have 16-bit atime" problem.  if the expire
+	code detects that scancount is > 65535, reset all the counters to
+	an atime of 0.	it means one expire run doesn't actually expire
+	anything, but it should keep the useful tokens around instead of
+	the semi-random expire that was occuring in earlier versions.
+
+2003-05-08 22:42  jmason
+
+	* spamd/libspamc.c: bug 1762: sscanf should not use %f due to
+	locale issues
+
+2003-05-08 21:49  felicity
+
+	* rules/70_cvs_rules_under_test.cf: trim out some of the not so
+	good rules
+
+2003-05-08 20:03  jmason
+
+	* spamd/: libspamc.c, spamc.c: bug 1764: found a bug in
+	locale-independent float parsing code, fixed.  added unit tests for
+	same
+
+2003-05-08 07:41  jmason
+
+	* spamd/libspamc.c: bug 1799: REPORT and REPORT_IFSPAM was
+	inconsistent between 2.4x and 2.5x; now matching 2.4x again
+
+2003-05-08 04:41  jmason
+
+	* spamd/: spamd.raw, spamd.raw: bug 1802: REPORT_IFSPAM is
+	unhandled if message is ham
+
+2003-05-08 00:50  felicity
+
+	* rules/: STATISTICS-set1.txt, STATISTICS-set2.txt,
+	STATISTICS-set3.txt, STATISTICS.txt: bug 1589: generated
+	STATISTICS* files for the new GA run
+
+2003-05-07 23:23  felicity
+
+	* lib/Mail/SpamAssassin/: PerMsgStatus.pm, PerMsgStatus.pm: bug
+	1868: X-Spam-Checker-Version may or may not have parens depending
+	on if the message was considered spam or not.  Just add in the
+	parens...
+
+2003-05-07 22:16  jmason
+
+	* spamd/libspamc.c: bug 1764: %f in sscanf breaks version check due
+	to locale LC_NUMERIC setting
+
+2003-05-07 21:06  jmason
+
+	* spamd/spamd.raw, lib/Mail/SpamAssassin/Bayes.pm, spamd/spamd.raw:
+	bug 1725: spamd taint mode problem with ARGV fixed
+
+2003-05-07 13:38  felicity
+
+	* lib/Mail/SpamAssassin/BayesStore.pm: bug 1782: a potential but in
+	stdio could cause journal data to be corrupted by multiple writes
+	to the same area of the journal.  switch to using syswrite()
+	instead of just print (stdio) to help address this issue.
+
+2003-05-07 07:26  jmason
+
+	* lib/Mail/SpamAssassin/Bayes.pm: bug 1860: Bayes was not using
+	hapaxes
+
+2003-05-07 00:51  duncf
+
+	* rules/20_body_tests.cf: Fix to check ROT13 encoding of e-mail
+	address that don't end in .com .net .org or .ca. (Seeing how we're
+	internation and all... obviously)
+
+2003-05-06 14:14  felicity
+
+	* rules/: 20_meta_tests.cf, 50_scores.cf: bug 1589: spammers have
+	been targeting our nice rules to get themselves negative overall
+	scores.  ran the GA again to lower the nice rule scores.  this
+	should help deal with the forgeries.  also added a "TOO_MANY_MUA"
+	rule that will catch when multiple USER_AGENT rules hit.
+
+2003-05-06 13:33  felicity
+
+	* masses/score-ranges-from-freqs: don't use a system call when we
+	can just run mkdir allow learn rules to get larger scores some
+	cleanup
+
+2003-05-06 08:32  quinlan
+
+	* rules/: 20_phrases.cf, 70_cvs_rules_under_test.cf: promote
+	revised PENIS_ENLARGE, PENIS_ENLARGE2, AS_SEEN_ON, SEE_FOR_YOURSELF
+	promote new HTML_IMAGE_WEB_BUGS delete some lesser rules revisions
+	of T_GAPPY_SUBJECT (try to find something better, it was a good
+	idea)
+
+2003-05-06 08:27  quinlan
+
+	* rules/20_html_tests.cf: finish image_web_bugs rule
+
+2003-05-06 08:23  quinlan
+
+	* lib/Mail/SpamAssassin/HTML.pm: finish image_web_bugs rule
+
+2003-05-06 05:36  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: nearing closure on
+	T_OBFUSCATING_COMMENT*
+
+2003-05-05 22:36  jmason
+
+	* lib/Mail/SpamAssassin/Bayes.pm: additional fix for bayes
+
+2003-05-05 21:58  jmason
+
+	* sa-learn.raw, lib/Mail/SpamAssassin/Bayes.pm: oh... my... ghod.  
+	we've been ignoring hapaxes since the start of December :(
+
+2003-05-05 21:45  jmason
+
+	* rules/70_cvs_rules_under_test.cf: some new ratware testing rules
+
+2003-05-04 01:35  quinlan
+
+	* rules/: 20_dnsbl_tests.cf, 70_cvs_rules_under_test.cf: finish off
+	bug 1853: fix dialup tests to be -notfirsthop
+
+2003-05-03 09:44  quinlan
+
+	* lib/Mail/SpamAssassin/Dns.pm, lib/Mail/SpamAssassin/EvalTests.pm,
+	rules/70_cvs_rules_under_test.cf: bug 1853: allow primary RBL tests
+	to match only on certain responses
+
+2003-05-02 22:51  quinlan
+
+	* lib/Mail/SpamAssassin/Conf.pm, rules/20_dnsbl_tests.cf,
+	rules/70_cvs_rules_under_test.cf: remove rbl_res_evals
+
+2003-05-02 22:41  quinlan
+
+	* lib/Mail/SpamAssassin/HTML.pm, rules/70_cvs_rules_under_test.cf:
+	replace HTML_FONT_COLOR_NAME with T_HTML_FONT_COLOR_NAME
+
+2003-05-02 12:06  quinlan
+
+	* rules/: 20_dnsbl_tests.cf, 70_broken_rules.cf: move
+	RCVD_IN_MULTIHOP_DSBL to broken rules
+
+2003-05-02 10:26  quinlan
+
+	* rules/: 20_dnsbl_tests.cf, 70_cvs_rules_under_test.cf: OPM
+	supports TXT queries, but A queries are needed for sub-tests
+
+2003-05-02 07:31  jmason
+
+	* spamd/spamd.raw: match 2.4x REPORT format
+
+2003-05-02 07:25  jmason
+
+	* spamd/spamd.raw: bug 1799: REPORT should use local report
+	template, not default
+
+2003-05-02 07:19  jmason
+
+	* sa-learn.raw, spamassassin.raw: bug 1737: Bayes doco improved
+
+2003-05-02 02:25  jmason
+
+	* MANIFEST, lib/Mail/SpamAssassin/Bayes.pm, spamd/libspamc.c,
+	spamd/libspamc.h, spamd/spamc.c, spamd/spamc.pod, spamd/spamd.raw,
+	spamd/utils.c, spamd/utils.h, t/SATest.pm, t/spamd_unix.t: UNIX
+	domain socket support added to spamd/spamc, thanks to steve at
+	unixwiz dot net
+
+2003-05-01 21:53  jmason
+
+	* build/tag_nightly_mc: oops, logic bug in tagging script
+
+2003-04-30 22:50  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: more clean up of
+	T_OBFUSCATING_COMMENT*
+
+2003-04-30 21:33  quinlan
+
+	* lib/Mail/SpamAssassin/EvalTests.pm: add alternate
+	hostname_to_domain2() function add check_rbl_from() for checking
+	sender domains in domain-based RBLs
+
+2003-04-30 21:31  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: bug 1017: domain-based
+	blacklists (initially a few using sender addresses)
+
+2003-04-30 07:30  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: remove worst of
+	T_OBFUSCATING_COMMENT* variations
+
+2003-04-30 07:16  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: T_OBFUSCATING_COMMENT* - run
+	them all and let mass-check sort theem out
+
+2003-04-29 21:21  quinlan
+
+	* lib/Mail/SpamAssassin/Dns.pm: switch part of dnscache to be an
+	array instead of a hash update launch time for each DNS query (so
+	last one gets full timeout) some clean up of dnscache
+
+2003-04-29 00:59  jmason
+
+	* rules/20_uri_tests.cf: oops, avoid var-length lookbehind
+
+2003-04-29 00:56  jmason
+
+	* spamd/spamd.raw: try spamd change to avoid RH9 warning
+
+2003-04-29 00:53  jmason
+
+	* lib/Mail/SpamAssassin/EvalTests.pm: seems the misspelling ratware
+	can use 3-component hostnames as well
+
+2003-04-29 00:36  jmason
+
+	* lib/Mail/SpamAssassin/Conf.pm: enabled Chi^2-combining (aka
+	Fisher combining in bogofilterland)
+
+2003-04-29 00:35  jmason
+
+	* lib/Mail/SpamAssassin/Bayes.pm,
+	lib/Mail/SpamAssassin/EvalTests.pm, rules/20_uri_tests.cf,
+	tools/split_corpora: PORN_4: avoided FP on basex.com
+
+2003-04-28 23:44  quinlan
+
+	* lib/Mail/SpamAssassin/EvalTests.pm: fix bug 1827: warnings in
+	EvalTests::check_for_rdns_helo_mismatch
+
+2003-04-28 07:55  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: remove duplicate
+	__XM_BAD_DATE_MUAS consolidate T_AS_SEEN_ON
+
+2003-04-28 07:47  duncf
+
+	* tools/sa-stats.pl: Initial revisions of sa-stats.pl adapted from
+	suggestions in bug 1794
+
+2003-04-28 07:14  quinlan
+
+	* lib/Mail/SpamAssassin/Dns.pm: reduce number of times "require
+	Razor2::Client::Agent;" is evaluated remove unnecessary
+	prerequisite checks in razor2_lookup() fix some occasional warnings
+	in DNS, Razor, and DCC code
+
+2003-04-28 07:06  quinlan
+
+	* rules/: 70_broken_rules.cf, 70_cvs_rules_under_test.cf: move
+	T_RCVD_IN_MONKEYS_FORMMAIL, T_RCVD_IN_DUINV, T_RCVD_IN_PDL to
+	broken rules
+
+2003-04-28 02:38  jmason
+
+	* lib/Mail/SpamAssassin/: Bayes.pm, PerMsgStatus.pm: still getting
+	leftover locks after sa-learn --ham/spam.  now fixed
+
+2003-04-28 02:26  jmason
+
+	* tools/split_corpora: split_corpora was broken by ArchiveIterator
+	changes
+
+2003-04-27 04:14  felicity
+
+	* lib/Mail/SpamAssassin/BayesStore.pm: didn't need extra $db_ver
+	variable, just use $self->{db_version}
+
+2003-04-27 01:39  felicity
+
+	* lib/Mail/SpamAssassin/BayesStore.pm: thought of a bug where if
+	we're upgrading, and don't set $self->{db_version}, some functions
+	(like tok_unpack) will do the wrong thing.  so let's change it
+	while we're doing the upgrade and things will work as expected. :)
+
+2003-04-26 09:41  quinlan
+
+	* lib/Mail/SpamAssassin/Dns.pm, lib/Mail/SpamAssassin/EvalTests.pm,
+	lib/Mail/SpamAssassin/PerMsgStatus.pm, rules/20_dnsbl_tests.cf,
+	rules/70_cvs_rules_under_test.cf: bug 1824: rewrite of DNS test
+	engine
+
+2003-04-26 07:16  jmason
+
+	* MANIFEST, build/tag_nightly_mc, build/tag_weekly_mc: tagging;
+	added weekly version and sanity check to ensure we're running at
+	0859 UTC
+
+2003-04-24 12:17  felicity
+
+	* lib/Mail/SpamAssassin/BayesStore.pm: fixed bug where upgrading
+	the DB, and having the atime reset to last expire time would cause
+	oldest token to be incorrectly set.
+
+2003-04-24 06:10  felicity
+
+	* lib/Mail/SpamAssassin/BayesStore.pm: bug 1776: decided on atime
+	== msgcount, so re-enabled bayes r/w mode expire wasn't setting the
+	bayes db version, oops.  fixed.  a few other small cleanups
+
+2003-04-24 05:48  felicity
+
+	* t/spamd_utf8.t: bug 1708: UTF-8 locale was specified incorrectly
+	(glibc version)
+
+2003-04-23 15:41  felicity
+
+	* lib/Mail/SpamAssassin/Bayes.pm: Oops, cut/paste from another
+	section and forgot to set the bayes version. :|
+
+2003-04-23 07:31  jmason
+
+	* MANIFEST, rules/20_anti_ratware.cf, rules/20_fake_helo_tests.cf,
+	rules/20_head_tests.cf, rules/20_ratware.cf, rules/20_uri_tests.cf,
+	rules/70_cvs_rules_under_test.cf: the bi-weekly trawl through
+	T_land.   promoted a few good ones, dropped one or two bad ones
+
+2003-04-23 07:11  jmason
+
+	* lib/Mail/SpamAssassin/PerMsgStatus.pm: MIME decoder was
+	occasionally missing related parts
+
+2003-04-23 03:36  felicity
+
+	* lib/Mail/SpamAssassin/Bayes.pm: missed a magic token prefix
+	change during tokenization ... oops. :|
+
+2003-04-23 03:32  felicity
+
+	* lib/Mail/SpamAssassin/: Bayes.pm, BayesStore.pm: bugs 1523, 1666,
+	1775, and 1776: set a new bayes db format for 2.6x, version 1 (2.5x
+	had version 0).  atimes are now unsigned ints (32-bit) instead of a
+	short (16-bit) so we won't get overflow/expire issues.	code is now
+	included to automatically upgrade to v1 when the db is opened for
+	writing.  v0 is still supported for readonly mode.  bayes tokens
+	are now packed in little-endian (VAX) format.  this means that the
+	same DB will work on different endian platforms.
+	
+	at the moment, r/w access to the bayes db has been disabled pending
+	final resolution of bug 1776 and the "should atime be message count
+	or timestamp" question.  right now, the code assumes message count.
+
+2003-04-22 13:14  felicity
+
+	* USAGE: bug 1739: USAGE file says that a test message will have
+	the subject rewritten, but rewrite_subject is off by default in
+	2.5x.  change the docs to reflect this.
+
+2003-04-22 13:03  felicity
+
+	* lib/Mail/SpamAssassin/BayesStore.pm: bug 1706 updates
+
+2003-04-22 13:00  felicity
+
+	* lib/Mail/SpamAssassin/BayesStore.pm: bug 1706: fixed a small
+	issue where the code was expecting a shift but got a pop, so we
+	need to look at the end of the array, not the beginning. :(
+
+2003-04-22 12:54  felicity
+
+	* lib/Mail/SpamAssassin/BayesStore.pm: bug 1706: when bayes was
+	expiring tokens, it would check to see if there were enough tokens
+	left at the end and reprieve tokens if necessary.  however, the
+	reprieval was happening in a random order, so the oldest tokens
+	would likely be left in the DB.  the code will now sort the tokens
+	by atime and reprieval the most recently used tokens first.
+
+2003-04-22 08:31  jmason
+
+	* sa-learn.raw, lib/Mail/SpamAssassin.pm,
+	lib/Mail/SpamAssassin/Bayes.pm,
+	lib/Mail/SpamAssassin/BayesStore.pm,
+	lib/Mail/SpamAssassin/CmdLearn.pm: re-added journalled learning2
+
+2003-04-22 08:06  jmason
+
+	* lib/Mail/SpamAssassin/Dns.pm: bug 1784: IP_IN_RESERVED_RANGE out
+	of date2
+
+2003-04-22 08:03  jmason
+
+	* spamd/spamd.raw: bug 1799: REPORT verb ignores local config
+
+2003-04-22 08:01  jmason
+
+	* USAGE: bug 1739: USAGE doco incorrect
+
+2003-04-22 07:59  jmason
+
+	* MANIFEST: bug 1805: file was missing
+
+2003-04-22 07:56  jmason
+
+	* t/spamd_utf8.t: bug 1708: UTF-8 locale was used incorrectly2
+
+2003-04-22 07:53  jmason
+
+	* lib/Mail/SpamAssassin/Dns.pm, spamd/spamd.raw: couple of minor
+	tweaks to Net::DNS use2
+
+2003-04-22 07:05  jmason
+
+	* build/tag_nightly_mc: use rtag -a instead of tag
+
+2003-04-22 06:21  jmason
+
+	* rules/70_cvs_rules_under_test.cf: previous rule already caught by
+	_0 variant
+
+2003-04-22 02:15  quinlan
+
+	* lib/Mail/SpamAssassin/HTML.pm: add back T_HTML_IMAGE_WEB_BUGS_1
+
+2003-04-22 01:26  jmason
+
+	* rules/70_cvs_rules_under_test.cf: [no log message]
+
+2003-04-21 09:58  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: add case-insensitive version of
+	USERPASS
+
+2003-04-21 05:09  duncf
+
+	* debian/: README.CVS, control, spamassassin.templates,
+	po/POTFILES.in, po/pt_BR.po, po/templates.pot: Get the Debian stuff
+	to work on Debian woody.
+
+2003-04-20 10:14  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: add some more exploratory tests
+	for web bug images (based on area) add a few additional DNSBLs for
+	testing
+
+2003-04-20 10:12  quinlan
+
+	* lib/Mail/SpamAssassin/HTML.pm: add some more exploratory tests
+	for web bug images (based on area)
+
+2003-04-19 20:35  felicity
+
+	* lib/Mail/SpamAssassin/PerMsgStatus.pm: bug 1800: messages with
+	large positive scores (if they hit GTUBE at 1000 points for
+	instance), can have a X-Spam-Level header with more than the RFC
+	allowed number of chars.  so we now limit X-Spam-Level to show a
+	max score of 100.  that makes it obvious the message is really spam
+	while staying RFC compliant.
+
+2003-04-19 00:04  felicity
+
+	* lib/Mail/SpamAssassin/PerMsgStatus.pm: bug 1800: limit
+	X-Spam-Level to 100 chars.  Keeps high scores from becoming RFC
+	incompliant (997 char limit), and frankly at 100 you get the point
+	that it's spam.
+
+2003-04-18 22:54  jmason
+
+	* MANIFEST, spamd/spamd.raw: spamd: support kill -1 to restart and
+	reread config
+
+2003-04-18 22:08  jmason
+
+	* build/preprocessor: build/preprocessor: REMOVEFORINST was
+	rewritten to comment lines.  nope, REMOVE them ;)
+
+2003-04-18 17:17  jmason
+
+	* rules/70_cvs_rules_under_test.cf: added a bz URI test
+
+2003-04-18 05:43  jmason
+
+	* rules/70_cvs_rules_under_test.cf: added rd.yahoo rule
+
+2003-04-15 21:02  jmason
+
+	* lib/Mail/SpamAssassin/BayesStore.pm: bug 1782: bayes journal
+	writes may be split up by stdio, causing atime updates to be missed
+
+2003-04-15 18:21  jmason
+
+	* sa-learn.raw: FAQ on learning
+
+2003-04-15 06:29  quinlan
+
+	* lib/Mail/SpamAssassin/: Dns.pm, EvalTests.pm: bug 1778: remove
+	check_two_rbl_results() from EvalTests.pm bug 1781: TXT to
+	127.0.0.2 hack causes problems (changes dnscache to be
+	type-specific)
+
+2003-04-15 03:59  quinlan
+
+	* masses/freqdiff: add -b option
+
+2003-04-15 03:33  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: add tests for detecting
+	ultra-small web bug images remove Reynolds RBLs since they require
+	subscriptions for commercial use   and non-small sites
+
+2003-04-15 03:31  quinlan
+
+	* lib/Mail/SpamAssassin/HTML.pm: add test code for detecting
+	ultra-small web bug images
+
+2003-04-14 17:15  quinlan
+
+	* lib/Mail/SpamAssassin/EvalTests.pm,
+	rules/70_cvs_rules_under_test.cf: remove T_NO_DNS_FOR_RECIPS_*
+	(only tested well on older corpus email)
+
+2003-04-14 12:08  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: add missing net tflags
+
+2003-04-14 12:02  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: minor typo
+
+2003-04-14 12:01  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: add some fiveten tests back
+	since I didn't properly test them before (they're free anyway since
+	it's a multi-rbl)
+
+2003-04-14 11:37  quinlan
+
+	* rules/: 20_dnsbl_tests.cf, 70_cvs_rules_under_test.cf: fix a
+	DNSBL bug where the post-tests were not running after harvesting
+	because we weren't using rblreseval as necessary with the current
+	RBL code
+
+2003-04-14 10:03  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: add an A record version of
+	T_RCVD_IN_MONKEYS_UPL2 for testing fix a typo in the SORBS
+	definition
+
+2003-04-14 08:00  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: add some RBL results comments
+	add the best of the RBLs I've been testing (some are definitely
+	better than some of our current ones), note that I do not intend to
+	significantly increase the number of RBLs that we're using!
+
+2003-04-14 04:08  felicity
+
+	* lib/Mail/SpamAssassin/BayesStore.pm: bug 1775: initial work to
+	deal with bayes db upgrade
+
+2003-04-13 07:19  quinlan
+
+	* lib/Mail/SpamAssassin/EvalTests.pm: change
+	check_rbl_results_for() so it can also be used for bitmask tests
+	like opm.blitzed.org or regular expression tests (might come in
+	handy)
+
+2003-04-13 04:38  felicity
+
+	* lib/Mail/SpamAssassin/BayesStore.pm: bug 1706: slight
+	improvement, don't bother sorting and the like unless we actually
+	need to reprieve
+
+2003-04-13 04:28  felicity
+
+	* lib/Mail/SpamAssassin/BayesStore.pm: bug 1706: sort the deleted
+	tokens for reprieval so we get the newer ones first.  also,
+	reprieve all tokens from the same atime at once.
+
+2003-04-13 03:25  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: add some juno.com anti-forgery
+	rules
+
+2003-04-12 23:50  jmason
+
+	* rules/70_cvs_rules_under_test.cf: fixed T_FAKE_HELO_JUNO, should
+	be able to replace other juno-forgery rules
+
+2003-04-12 08:45  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: bug 1769, possible replacement
+	rules
+
+2003-04-12 04:44  quinlan
+
+	* lib/Mail/SpamAssassin/HTML.pm, rules/20_html_tests.cf,
+	rules/70_cvs_rules_under_test.cf: promote HTML_FONT_NEAR_INVISIBLE
+
+2003-04-11 08:33  quinlan
+
+	* lib/Mail/SpamAssassin/HTML.pm, rules/70_cvs_rules_under_test.cf:
+	narrow down number of invisible text rules
+
+2003-04-11 03:26  jmason
+
+	* rules/70_cvs_rules_under_test.cf: couple more T_FAKE_HELO rules
+
+2003-04-10 23:09  jmason
+
+	* rules/: 20_head_tests.cf, 20_phrases.cf, 20_uri_tests.cf,
+	70_cvs_rules_under_test.cf: promoted some 1.0-S/O rules
+
+2003-04-10 23:00  jmason
+
+	* lib/Mail/SpamAssassin/EvalTests.pm,
+	rules/70_cvs_rules_under_test.cf: fixed bugs with T_FAKE_HELO rules
+
+2003-04-10 22:43  jmason
+
+	* lib/Mail/SpamAssassin/: EvalTests.pm, Received.pm: deal with
+	Apple's Mail.app brokenness with HELO; recognize attbi.com REceived
+	hdrs
+
+2003-04-10 16:27  felicity
+
+	* lib/Mail/SpamAssassin/EvalTests.pm: bug 1524: EvalTests looking
+	for/storing IPs would sometimes catch extra chars that occur around
+	the IP address (such as [ in Received headers).  Use a new regexp
+	to only match IP addresses.
+
+2003-04-10 07:37  quinlan
+
+	* lib/Mail/SpamAssassin/Dns.pm: small indentation change
+
+2003-04-09 23:24  jmason
+
+	* lib/Mail/SpamAssassin/EvalTests.pm: updated T_FAKE_HELO tests to
+	avoid hotmail.com matching mail.com
+
+2003-04-09 23:20  jmason
+
+	* lib/Mail/SpamAssassin/EvalTests.pm,
+	rules/70_cvs_rules_under_test.cf: updated T_FAKE_HELO tests to
+	double-check possibly-forged rcvd lines
+
+2003-04-09 22:57  jmason
+
+	* MANIFEST, rules/30_text_sk.cf: added Slovak translation from
+	Peter Mann (peter DOT mann AT tuke DOT sk)
+
+2003-04-09 20:09  jmason
+
+	* spamd/spamc.pod: mention -x in -f section
+
+2003-04-09 11:02  quinlan
+
+	* lib/Mail/SpamAssassin/HTML.pm: improvements to invisible text
+	tests	- correctly track fgcolor   - only trigger if invisible
+	text is actually printed (thinking ahead to	possible Bayes
+	tweaks)   - don't retest tested color combinations   - weight R, G,
+	B based on perceived luminosity (Rec. 709 values)   - scale both
+	difference formulas to 0..765 for testing phase   - separate
+	near-invisibility from total-invisibility (near invisibility	
+	seems to have a better S/O since it is more likely to be
+	intentional)
+
+2003-04-08 20:03  jmason
+
+	* lib/Mail/SpamAssassin/Received.pm: duh, typo
+
+2003-04-08 08:25  jmason
+
+	* lib/Mail/SpamAssassin/EvalTests.pm,
+	lib/Mail/SpamAssassin/Received.pm, rules/20_dnsbl_tests.cf,
+	rules/70_cvs_rules_under_test.cf: T_FAKE_HELO rule-set added
+
+2003-04-08 06:11  jmason
+
+	* lib/Mail/SpamAssassin/Util.pm: netmask support not supporting
+	192.168/16
+
+2003-04-08 02:59  jmason
+
+	* lib/Mail/SpamAssassin/: Dns.pm, Received.pm: removed markup with
+	semi-trusted hdr; removed PTR lookup for reserved IPs
+
+2003-04-08 01:17  jmason
+
+	* MANIFEST, lib/Mail/SpamAssassin/Conf.pm,
+	lib/Mail/SpamAssassin/Dns.pm, lib/Mail/SpamAssassin/EvalTests.pm,
+	lib/Mail/SpamAssassin/Received.pm, rules/20_dnsbl_tests.cf,
+	rules/70_cvs_rules_under_test.cf: added 20_dnsbl_tests; implemented
+	notfirsthop and lastuntrusted set modifiers; fixed some warnings;
+	updated reserved-IP list; document trusted/untrusted relay
+	differentiation
+
+2003-04-08 00:14  jmason
+
+	* lib/Mail/SpamAssassin/EvalTests.pm: bug 1455: fix IP_ADDRESS
+	regexp
+
+2003-04-07 23:33  jmason
+
+	* lib/Mail/SpamAssassin/: Dns.pm, EvalTests.pm: removed
+	one-match-per-IP code, which seems like a bizarre idea; and fixed
+	an undef warning
+
+2003-04-07 23:27  jmason
+
+	* lib/Mail/SpamAssassin/Conf.pm, lib/Mail/SpamAssassin/Dns.pm,
+	lib/Mail/SpamAssassin/EvalTests.pm,
+	lib/Mail/SpamAssassin/PerMsgStatus.pm, rules/20_head_tests.cf,
+	rules/70_broken_rules.cf, rules/70_cvs_rules_under_test.cf: massive
+	DNS functionality improvement.	Some DNSBLs were being missed, due
+	to all of them sharing 'relay' for a zone id, fixed; DNSBL lookups
+	now use TXT records on the zones that support it, and log that in
+	the report; DNSBL lookup code simplified; removed obsolete
+	dialup_codes functionality; added lookups for formmail and
+	proxies.relays.monkeys.org.
+
+2003-04-07 08:55  quinlan
+
+	* lib/Mail/SpamAssassin/: HTML.pm, PerMsgStatus.pm: major
+	improvements to HTML bgcolor code add a few more named colors to
+	color hash also replace HTML_WITH_BGCOLOR with T_HTML_WITH_BGCOLOR
+
+2003-04-07 08:48  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: add T_HTML_FONT_COLOR_NAME as
+	possible replacement rule
+
+2003-04-07 03:08  duncf
+
+	* t/: mailing_lists.t, spamd_report.t, data/nice/007,
+	data/nice/ezmlm_message.txt, data/nice/mailman_reminder.txt: Bug
+	1721: make test fails. removed mailing list test, and data, since
+	we have no mailing list rules any more. Added t/data/nice/007 which
+	contains habeas mark (one of few ham signs)
+
+2003-04-07 02:29  felicity
+
+	* spamd/: utils.c, utils.c: bug 1755: a c++ comment slipped in, and
+	some compilers don't know what to do with it.
+
+2003-04-06 20:58  felicity
+
+	* lib/Mail/SpamAssassin/Util.pm: changed untaint_file_path to be
+	the same as the 2.54 version
+
+2003-04-06 20:56  felicity
+
+	* lib/Mail/SpamAssassin/Util.pm: bug 1741: allow ~ and space in
+	file path (good for Windows), return blank if blank passed in,
+	fixed return only if RE matches
+
+2003-04-06 20:52  felicity
+
+	* spamassassin.spec: bug 1754: typo in the new spec file.
+
+2003-04-06 02:27  jmason
+
+	* masses/corpora/mass-find-nonspam: added --single flag
+
+2003-04-06 00:30  jmason
+
+	* lib/Mail/SpamAssassin/Received.pm: slight reordering of logic in
+	Received.pm; now attempts to infer _some_ data at least before
+	giving up
+
+2003-04-06 00:06  jmason
+
+	* lib/Mail/SpamAssassin/Conf.pm: added little bit of doco
+
+2003-04-06 00:03  jmason
+
+	* lib/Mail/SpamAssassin/EvalTests.pm: bug 1740: remove dups from
+	check_rbl call
+
+2003-04-05 23:58  jmason
+
+	* lib/Mail/SpamAssassin/EvalTests.pm: bug 1455: better IP_ADDRESS
+	regexp
+
+2003-04-05 23:53  jmason
+
+	* lib/Mail/SpamAssassin/: Conf.pm, Received.pm, Util.pm: Received
+	parser: added 'trusted_networks' config param so users can specify
+	which relays are trusted, improves DNSBL accuracy and speed.  Still
+	need to come up with code to figure this out algorithmically, which
+	I think Dan plans to do
+
+2003-04-05 23:45  felicity
+
+	* rules/70_cvs_rules_under_test.cf: bug 1711: added a new
+	T_NIGERIAN_SUBJECT2 test rule to possibly replace the original one
+
+2003-04-05 23:24  felicity
+
+	* lib/Mail/SpamAssassin/Received.pm: postfix header parsing needed
+	an extra if statement
+
+2003-04-05 22:27  jmason
+
+	* lib/Mail/SpamAssassin/Received.pm: test failure with new Received
+	code, worked around
+
+2003-04-05 22:08  jmason
+
+	* lib/Mail/SpamAssassin/: EvalTests.pm, Received.pm: fixed some
+	eval tests to use new Received-header parser
+
+2003-04-05 21:15  jmason
+
+	* MANIFEST, lib/Mail/SpamAssassin/PerMsgStatus.pm,
+	lib/Mail/SpamAssassin/Received.pm: new Received header parser added
+
+2003-04-05 20:58  felicity
+
+	* lib/Mail/SpamAssassin/: Bayes.pm, BayesStore.pm: bug 1732: we
+	were looking for caller_will_untie in finish() which was a very bad
+	idea (it is the function that the caller is supposed to call...),
+	but sync_journal and expire_old_tokens were untieing whenever it
+	felt like it.
+
+2003-04-05 20:36  felicity
+
+	* lib/Mail/SpamAssassin/CmdLearn.pm: bug 1691: sa-learn was sending
+	non-error output to stderr instead of stdout (specifically the
+	"Learned # messages" string)
+
+2003-04-05 19:53  jmason
+
+	* rules/20_ratware.cf: removed a duplicate BAT_MSGID rule
+
+2003-04-05 04:23  duncf
+
+	* lib/Mail/SpamAssassin/Conf.pm: minor cleanup... hanging around in
+	my tree... should have been committed a while ago
+
+2003-04-05 02:05  felicity
+
+	* spamassassin.spec, spamd/redhat-rc-script.sh: Standardized the
+	RPM spec file and spamd rc script to be more RedHat-ish.  Merged in
+	some changes from the RH SA RPM.
+
+2003-04-05 01:11  jmason
+
+	* lib/Mail/SpamAssassin/Util.pm, rules/70_cvs_rules_under_test.cf:
+	added T_WALAA, still chuckling
+
+2003-04-04 23:22  jmason
+
+	* spamassassin.raw, sa-learn.raw: bug 1737: bayes doco is weak,
+	improved
+
+2003-04-04 20:28  felicity
+
+	* sa-learn.raw, lib/Mail/SpamAssassin.pm,
+	lib/Mail/SpamAssassin/Bayes.pm,
+	lib/Mail/SpamAssassin/BayesStore.pm,
+	lib/Mail/SpamAssassin/CmdLearn.pm: bug 1552: merged the
+	capabilities of check_bayes_db into sa-learn via the --dump
+	parameter.  also forward ported BayesStore::nspam_nham_get() from
+	2.5 which was missed.  doh.
+
+2003-04-04 19:22  felicity
+
+	* lib/Mail/SpamAssassin/Bayes.pm: bug 1723: X-Perlmx-Spam is the
+	PerlMX equiv of X-Spam-Status, so lets ignore it.
+
+2003-04-04 15:17  felicity
+
+	* lib/Mail/SpamAssassin/EvalTests.pm,
+	rules/70_cvs_rules_under_test.cf: rfc violations aren't necessarily
+	great spam indicators.	all of the header_count_bad rules suck,
+	except for the ctype one which seems to do a pretty decent job,
+	even though it's not an rfc violation.	to deal with fps, I added
+	code to treat multiple headers with the exact same content as a
+	single header.
+
+2003-04-04 14:58  felicity
+
+	* lib/Mail/SpamAssassin/HTML.pm, rules/70_cvs_rules_under_test.cf:
+	the blank comment rule didn't perform well, so it's gone.  the
+	alphanum comment rule is ok, but it looks like some versions of
+	Mozilla add in a spurious empty comment which triggers the rule, so
+	add a meta and see what happens. :)
+
+2003-04-04 14:35  felicity
+
+	* spamassassin.spec: update spec file to 2.54 version
+
+2003-04-04 03:45  jmason
+
+	* lib/Mail/SpamAssassin/EvalTests.pm,
+	rules/70_cvs_rules_under_test.cf: misspelling ratware detection
+	eval test added
+
+2003-04-04 02:48  duncf
+
+	* debian/: changelog.in, control, logcheck, spamassassin.default,
+	spamassassin.templates, watch, po/POTFILES.in, po/pt_BR.po,
+	po/templates.pot: Updated debian packaging for CVS builds; adds
+	po-debconf support
+
+2003-04-04 02:48  felicity
+
+	* spamassassin.spec: updated spec file since 2.51 prepared for 2.54
+	release
+
+2003-04-04 02:34  jmason
+
+	* build/preprocessor.pm: backport: preprocessor being indexed by
+	CPAN, avoid for next version
+
+2003-04-04 02:33  jmason
+
+	* lib/Mail/SpamAssassin.pm: Starting 2.54
+
+2003-04-04 02:22  duncf
+
+	* debian/: changelog.in, control, logcheck, spamassassin.default,
+	spamassassin.templates, watch, po/POTFILES.in, po/pt_BR.po,
+	po/templates.pot: Update packaging for Debian; notably, adds
+	po-debconf support
+
+2003-04-03 20:03  jmason
+
+	* MANIFEST, t/SATest.pm, t/spamd_protocol_10.t: spamd protocol 1.0
+	test added
+
+2003-04-03 04:32  quinlan
+
+	* rules/70_cvs_rules_under_test.cf,
+	lib/Mail/SpamAssassin/EvalTests.pm: remove
+	T_MIME_BASE64_SHORT_LINES since it doesn't work that well
+
+2003-04-02 20:20  jmason
+
+	* lib/Mail/SpamAssassin/EvalTests.pm, spamd/spamd.raw: iPlanet
+	rewrites msgids
+
+2003-04-02 18:40  climent
+
+	* rules/30_text_es.cf: 8 bits typo
+
+2003-04-02 09:24  quinlan
+
+	* lib/Mail/SpamAssassin/HTML.pm, rules/70_cvs_rules_under_test.cf:
+	add T_HTML_WITH_BGCOLOR which only tests background color change
+	HTML_FONT_INVISIBLE to only look at current bgcolor add
+	T_HTML_FONT_INVISIBLE* tests which allow varying degrees of color  
+	differences to be considered the same
+
+2003-04-02 04:31  felicity
+
+	* lib/Mail/SpamAssassin/PerMsgStatus.pm: bug 1649: remove the
+	required_hits safety thresholds.
+
+2003-04-02 02:03  jmason
+
+	* rules/: 20_ratware.cf, 30_text_fr.cf, 70_cvs_rules_under_test.cf:
+	promoted some 1.0-S/O testing rules.  deleted a couple of
+	non-performers
+
+2003-04-02 00:36  jmason
+
+	* lib/Mail/SpamAssassin/EvalTests.pm: bug 1254: avoid SUBJ_ALL_CAPS
+	on KOI8-R-encoded mail
+
+2003-04-01 03:06  jmason
+
+	* build/README, build/update_stable,
+	lib/Mail/SpamAssassin/CmdLearn.pm: output Learned message to stdout
+	instead of stderr
+
+2003-04-01 02:42  jmason
+
+	* Changes, build/README, lib/Mail/SpamAssassin/BayesStore.pm: ready
+	for release
+
+2003-04-01 01:43  jmason
+
+	* lib/Mail/SpamAssassin/BayesStore.pm: bug 1689: exists method does
+	not exist in NDBM_File for some reason.  worked around
+
+2003-04-01 01:08  jmason
+
+	* lib/Mail/SpamAssassin/Conf.pm: moved dialup_codes into more
+	privileged area
+
+2003-04-01 00:39  jmason
+
+	* lib/Mail/SpamAssassin/: Bayes.pm, BayesStore.pm: bug 1681: avoid
+	NDBM_File error by using defined instead of exists
+
+2003-03-30 14:16  msquadrat
+
+	* lib/Mail/SpamAssassin/Conf.pm: fix by Aaron Sherman
+	<ajs(at)ajs(dot)com>: don't word wrap the DUL examples
+
+2003-03-30 05:11  duncf
+
+	* lib/Mail/SpamAssassin/Conf.pm: Fixing allow_user_rules stuff
+
+2003-03-30 04:26  jmason
+
+	* lib/Mail/SpamAssassin.pm: ready to release
+
+2003-03-30 04:25  quinlan
+
+	* rules/: 20_anti_ratware.cf, 20_compensate.cf, 20_head_tests.cf,
+	20_html_tests.cf, 30_text_de.cf, 30_text_fr.cf, 30_text_it.cf,
+	50_scores.cf, 70_broken_rules.cf, regression_tests.cf: bug 1680:
+	phase out all nice rules that are abusable
+
+2003-03-30 03:42  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: remove T_GOOD_LIST_HEADERS,
+	just another nice rule we don't need...
+
+2003-03-30 02:52  felicity
+
+	* MANIFEST, Makefile.PL, t/SATest.pm, t/rule_tests.t,
+	t/zz_cleanup.t: bug 1703: Makefile.PL would set a razor1 test if
+	razor1 wasn't installed.  rule_tests.t was still trying to use
+	bytes.pm.  spamd tests were using user's preferences/bayes/etc.
+
+2003-03-30 02:42  felicity
+
+	* t/zz_cleanup.t: file zz_cleanup.t was initially added on branch
+	b2_5_0.
+
+2003-03-30 02:42  felicity
+
+	* MANIFEST, Makefile.PL, t/SATest.pm, t/rule_tests.t,
+	t/zz_cleanup.t: bug 1703: Makefile.PL would set a razor1 test if
+	razor1 wasn't installed.  rule_tests.t was still trying to use
+	bytes.pm.  spamd tests were using user's preferences/bayes/etc.
+
+2003-03-30 02:28  felicity
+
+	* lib/Mail/SpamAssassin/BayesStore.pm: bug 1707: When syncing the
+	journal, the code took advantage of a UNIX-ism where you can open a
+	file, then rename it, and still access the file data. 
+	Unfortunately, Windows doesn't let you do that.  So we now rename
+	before we open, and add a "can we read the file" check beforehand
+	to avoid messy cleanup.
+
+2003-03-30 02:10  felicity
+
+	* lib/Mail/SpamAssassin/Bayes.pm: bug 1699: a slight change to the
+	last patch, during tokenization, strip the extra chars before
+	skipping magic tokens.
+
+2003-03-30 00:58  felicity
+
+	* lib/Mail/SpamAssassin/BayesStore.pm: removed a redundant stat
+
+2003-03-29 21:24  felicity
+
+	* lib/Mail/SpamAssassin/BayesStore.pm: bug 1707: windows can't
+	handle the open then rename thing like UNIX does, so journal sync
+	is broken in 2.52 on windows. :(
+
+2003-03-29 16:45  felicity
+
+	* lib/Mail/SpamAssassin/Bayes.pm: We check to see if it's a magic
+	token, then modify the token to strip off some non-alphanum chars. 
+	This means that "**NSPAM" would still get through.
+
+2003-03-29 16:38  felicity
+
+	* lib/Mail/SpamAssassin/Bayes.pm: moved # of tokens check up a
+	little, skips unneeded probability check
+
+2003-03-29 01:33  jmason
+
+	* rules/20_phrases.cf: HGH has FP in common Japanese phrase; worked
+	around
+
+2003-03-29 00:19  jmason
+
+	* rules/: 20_head_tests.cf, 20_phrases.cf: oops, someone didn't run
+	make test ;)
+
+2003-03-28 23:53  jmason
+
+	* t/SATest.pm: bug 1703: fixed tests to use a copy of the rules
+	dir, instead of a -p user-prefs file -- which spamd does not
+	support
+
+2003-03-28 23:50  jmason
+
+	* spamd/: libspamc.c, libspamc.h, spamc.pod: libspamc: added a
+	'private' member to struct message, to solve bug 1595 (-B was
+	colliding with -c in terms of usage of struct message fields)
+
+2003-03-28 23:48  jmason
+
+	* lib/Mail/SpamAssassin/: BayesStore.pm, Conf.pm,
+	DBBasedAddrList.pm, Locker.pm, UnixLocker.pm, Win32Locker.pm:
+	updated lock-timeout code to match 2.53
+
+2003-03-28 21:28  jmason
+
+	* MANIFEST, spamd/libspamc.c, spamd/libspamc.h, t/spamc_B.t,
+	t/data/spam/bsmtp: bug 1595: BSMTP mode (spamc -B) fixed
+
+2003-03-28 20:26  felicity
+
+	* lib/Mail/SpamAssassin/: Bayes.pm, BayesStore.pm: bug 1699:
+	slightly better regex.	ignore actual magic token strings, not just
+	magic token prefixes.  this leaves more tokens able to be used.
+
+2003-03-28 20:23  felicity
+
+	* lib/Mail/SpamAssassin/: Bayes.pm, BayesStore.pm: slightly better
+	version for bug 1699.  keeps **No as valid token, but ignores magic
+	token **NO.
+
+2003-03-28 20:14  felicity
+
+	* lib/Mail/SpamAssassin/: Bayes.pm, BayesStore.pm, Bayes.pm,
+	BayesStore.pm: Bug 1699: The code wasn't protecting the Bayes DB
+	"magic" tokens (tracks num ham/spam, etc.) from being overwritten
+	if they occured in a message.  This allows mails to corrupt the DB
+	either maliciously or if they discuss the tokens.
+
+2003-03-28 09:24  quinlan
+
+	* rules/: 20_ratware.cf, 70_cvs_rules_under_test.cf: promote
+	RATWARE_STORM_URI remove some test rules that don't work very well
+
+2003-03-28 08:22  quinlan
+
+	* rules/: 20_head_tests.cf, 70_cvs_rules_under_test.cf: bug 1533:
+	new Received: header forgery tests using HELO
+
+2003-03-28 08:11  quinlan
+
+	* lib/Mail/SpamAssassin/EvalTests.pm, rules/20_head_tests.cf,
+	rules/70_cvs_rules_under_test.cf: bug 1581: new MSG_ID_ADDED_BY_MTA
+	tests are done
+
+2003-03-28 07:24  quinlan
+
+	* rules/: 70_cvs_rules_under_test.cf, 20_phrases.cf: promote
+	REMOVE_REMOVAL_*
+
+2003-03-28 06:41  jmason
+
+	* lib/Mail/: SpamAssassin.pm, SpamAssassin/BayesStore.pm,
+	SpamAssassin/CmdLearn.pm, SpamAssassin/DBBasedAddrList.pm,
+	SpamAssassin/Locker.pm, SpamAssassin/UnixLocker.pm,
+	SpamAssassin/Win32Locker.pm: bug 1690: now has different lock
+	timeouts for different bayes operations
+
+2003-03-28 03:25  felicity
+
+	* lib/Mail/SpamAssassin/: Bayes.pm, Bayes.pm: bug 1696: you could
+	continuously "forget" tokens from messages you've learned, and even
+	those you hadn't learned.
+
+2003-03-28 03:18  felicity
+
+	* spamassassin.raw, t/reportheader.t, spamassassin.raw,
+	t/reportheader.t: bug 1695: report_header was removed in 2.5x but
+	still was in the POD docs and a test config.
+
+2003-03-28 03:16  felicity
+
+	* sa-learn.raw, sa-learn.raw: bug 1502: sa-learn wasn't paying
+	attention to the compile-time paths for rules and the like.  The
+	problem was that the variables were declared my() which aren't
+	accessible by other packages.
+
+2003-03-28 01:27  jmason
+
+	* lib/Mail/: SpamAssassin.pm, SpamAssassin/BayesStore.pm,
+	SpamAssassin/CmdLearn.pm, SpamAssassin/Conf.pm,
+	SpamAssassin/DBBasedAddrList.pm, SpamAssassin/Locker.pm,
+	SpamAssassin/UnixLocker.pm, SpamAssassin/Win32Locker.pm: backing
+	out lock_timeout patch for redo
+
+2003-03-28 01:01  jmason
+
+	* lib/Mail/: SpamAssassin.pm, SpamAssassin/BayesStore.pm,
+	SpamAssassin/CmdLearn.pm, SpamAssassin/Conf.pm,
+	SpamAssassin/DBBasedAddrList.pm, SpamAssassin/Locker.pm,
+	SpamAssassin/UnixLocker.pm, SpamAssassin/Win32Locker.pm: bug 1690:
+	now has different lock timeouts for different bayes operations
+
+2003-03-28 00:49  jmason
+
+	* lib/Mail/SpamAssassin/: BayesStore.pm, Conf.pm,
+	DBBasedAddrList.pm: updated fix for multiple lock timeouts
+
+2003-03-28 00:26  jmason
+
+	* spamassassin.raw, spamassassin.raw: bug 1608: spamassassin.1
+	lists incorrect paths for config files
+
+2003-03-28 00:15  jmason
+
+	* spamd/: libspamc.c, spamc.c, spamc.pod: bug 1697: spamc fails to
+	dump message when running out of memory
+
+2003-03-28 00:00  jmason
+
+	* rules/70_cvs_rules_under_test.cf: tweaked the X_ORIG_IP_X2 rule
+
+2003-03-27 21:28  jmason
+
+	* spamd/: libspamc.c, spamc.c, spamc.pod: documented spamc -x arg,
+	fixed bug where mem shortage resulted in lost message
+
+2003-03-27 21:18  jmason
+
+	* spamd/spamd.raw: bug 1536: kernel reporting SIGWAIT problem on
+	recent Red Hat kernels
+
+2003-03-27 21:13  jmason
+
+	* lib/Mail/SpamAssassin/DBBasedAddrList.pm: bug 1661: user_prefs
+	was world-writable after AWL tie, due to failure to set umask
+	correctly
+
+2003-03-27 21:12  jmason
+
+	* lib/Mail/SpamAssassin/: EvalTests.pm, EvalTests.pm: bug 1401:
+	check_rbl was checking incorrect number of Received hdrs
+
+2003-03-27 20:58  jmason
+
+	* lib/Mail/: SpamAssassin.pm, SpamAssassin/BayesStore.pm,
+	SpamAssassin/CmdLearn.pm, SpamAssassin/Conf.pm,
+	SpamAssassin/DBBasedAddrList.pm, SpamAssassin/Locker.pm,
+	SpamAssassin/UnixLocker.pm, SpamAssassin/Win32Locker.pm: bug 1690:
+	now has different lock timeouts for different bayes operations
+
+2003-03-27 20:35  felicity
+
+	* lib/Mail/SpamAssassin/: Dns.pm, Reporter.pm, Dns.pm, Reporter.pm:
+	bug 1632: Razor modifies %ENV so we tried to use a local() to make
+	a temp version, which works, but kills %ENV for the Razor code as
+	well.  So now we'll let the helper_mode functions handle backing
+	up/restoring %ENV as appropriate.
+
+2003-03-27 20:11  jmason
+
+	* rules/70_cvs_rules_under_test.cf: new rule for test
+
+2003-03-27 17:54  felicity
+
+	* spamd/: spamd.raw, spamd.raw: bug 1514: spamd was trying to use
+	"../lib" which is ok most of the time, but during a "make test" on
+	perl 5.005 it errored out with the "bytes.pm" error.  so we now
+	check for a "../blib/lib" first and use it if it exists. 
+	otherwise, we continue with "../lib".
+
+2003-03-27 17:48  felicity
+
+	* lib/Mail/: SpamAssassin.pm, SpamAssassin.pm: bug 1685: we should
+	clean PATH when we start if we're in taint mode.  This fixes a
+	Sys::Hostname problem in 5.005, but it's a good idea anyway since
+	we won't be able to use PATH unless it's cleaned in taint mode
+	anyway.
+
+2003-03-27 08:56  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: narrow down to T_REMOV* some
+	possible replacements for MSG_ID_ADDED_BY_MTA_2
+
+2003-03-27 02:58  jmason
+
+	* rules/70_cvs_rules_under_test.cf: couple of rules for test
+
+2003-03-27 02:49  jmason
+
+	* rules/70_cvs_rules_under_test.cf, spamd/spamd.raw: let's try a
+	forged-Eudora variant by From address
+
+2003-03-27 01:53  jmason
+
+	* lib/Mail/: SpamAssassin.pm, SpamAssassin.pm: bug 1630:
+	add-all-addrs-to-blacklist was a no-op, due to > vs >= bug
+
+2003-03-27 01:04  jmason
+
+	* lib/Mail/SpamAssassin/DBBasedAddrList.pm,
+	rules/20_anti_ratware.cf, rules/20_body_tests.cf,
+	rules/20_head_tests.cf, rules/20_phrases.cf, rules/20_ratware.cf,
+	rules/70_cvs_rules_under_test.cf: fixed DBBasedAddrList umask issue
+	in HEAD; moved some 1.0-S/O T_ rules into the live set
+
+2003-03-26 21:10  jmason
+
+	* MANIFEST, spamd/libspamc.c, spamd/libspamc.h, t/spamc_B.t,
+	t/data/spam/bsmtp: bug 1595: BSMTP mode broken, fixed
+
+2003-03-26 20:18  jmason
+
+	* sa-learn.raw, lib/Mail/SpamAssassin/CmdLearn.pm, sa-learn.raw,
+	lib/Mail/SpamAssassin/CmdLearn.pm: bug 1572: sa-learn doco was
+	still talking about auto-whitelists, although this was never
+	implemented
+
+2003-03-26 20:07  jmason
+
+	* spamd/: README.spamd, README.spamd: bug 1674: README.spamd didn't
+	know that auto-learning had been implemented
+
+2003-03-26 20:06  jmason
+
+	* MANIFEST.SKIP, MANIFEST.SKIP: updated MANIFEST.SKIP likewise
+
+2003-03-26 20:05  jmason
+
+	* spamd/: .cvsignore, .cvsignore: updated cvsignore to ignore
+	sslspamc
+
+2003-03-26 20:04  jmason
+
+	* spamd/spamd.raw: bug 1684: syslog-socket had a typo, fixed
+
+2003-03-26 20:01  jmason
+
+	* spamd/libspamc.c, spamd/utils.c, spamd/utils.h, .cvsignore,
+	.cvsignore, spamd/libspamc.c, spamd/utils.c, spamd/utils.h: bug
+	1637: compilation of spamd/sslspamc broken, fixed
+
+2003-03-26 19:27  jmason
+
+	* .cvsignore, config.h.in, configure, configure.in: bug 1542:
+	configure doesn't detect SSL_CTX_free on NetBSD, fixed
+
+2003-03-26 19:13  jmason
+
+	* config.h.in, configure, configure.in, .cvsignore, .cvsignore: bug
+	1542: configure doesn't detect SSL_CTX_free on NetBSD, fixed
+
+2003-03-26 18:28  msquadrat
+
+	* configure, Makefile.PL, .cvsignore: bug 1542: configure wasn't
+	updated, so the fix for this bug didn't work per default
+
+2003-03-26 18:20  msquadrat
+
+	* configure, Makefile.PL, .cvsignore: bug 1542: configure wasn't
+	updated, so the fix for this bug didn't work per default
+
+2003-03-26 07:26  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: add a bunch of T_REMOV*_REMOV*
+	tests for further testing
+
+2003-03-26 02:55  jmason
+
+	* rules/70_cvs_rules_under_test.cf: one more forgery test, for IMS
+	this time
+
+2003-03-26 01:55  jmason
+
+	* rules/70_cvs_rules_under_test.cf: renamed some meta subrules
+
+2003-03-26 01:17  jmason
+
+	* rules/70_cvs_rules_under_test.cf: added some anti-Bat-forgery
+	rules based on excellent advice from the Bat developers
+
+2003-03-26 00:48  jmason
+
+	* build/README: added note about md5sums
+
+2003-03-25 17:29  msquadrat
+
+	* spamd/spamd.raw: bug: 1684					   
+			      : typo broke fix for --syslog-socket (doh\!)
+
+2003-03-25 01:22  jmason
+
+	* lib/Mail/SpamAssassin.pm: 2.53 devel cycle started
+
+2003-03-25 01:20  jmason
+
+	* Changes: 2.52 RELEASED
+
+2003-03-25 01:11  jmason
+
+	* INSTALL: DB_File recommended in INSTALL
+
+2003-03-25 01:11  jmason
+
+	* INSTALL: last-minute doco change: recommend using DB_File
+
+2003-03-24 22:39  msquadrat
+
+	* lib/Mail/SpamAssassin.pm: ready for release
+
+2003-03-24 22:21  msquadrat
+
+	* spamassassin.raw, spamassassin.raw: bug 1260: corrected
+	description of --nocreate-prefs option
+
+2003-03-24 22:17  msquadrat
+
+	* spamd/: netbsd-rc-script.sh, netbsd-rc-script.sh: bug 1656:
+	updated init script for NetBSD
+
+2003-03-24 21:38  felicity
+
+	* sa-learn.raw, lib/Mail/SpamAssassin/CmdLearn.pm: bug 1572: -a was
+	never implemented in sa-learn.	removing references to it.
+
+2003-03-24 21:28  msquadrat
+
+	* configure.in, configure.in: bug 1542: configure didn't detect
+	SSL_CTX_free on NetBSD
+
+2003-03-24 21:15  msquadrat
+
+	* spamd/spamd.raw: bug 1601: option --syslog-socket wasn't
+	implemented
+
+2003-03-24 21:11  msquadrat
+
+	* spamd/spamd.raw: bug 1601: option --syslog-socket wasn't
+	implemented
+
+2003-03-24 08:58  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: another
+	T_MSGID_ADDED_BY_HOTMAIL variation
+
+2003-03-24 08:46  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: add some
+	T_MSGID_ADDED_BY_HOTMAIL variants
+
+2003-03-24 07:43  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: merge T_FAKED_THEBAT2 and
+	T_FORGED_MUA_THEBAT into T_RATWARE_NOT_THEBAT add a bunch of MSGID
+	format rules
+
+2003-03-24 04:26  jmason
+
+	* rules/70_cvs_rules_under_test.cf: some new User-Agent rules
+	against forgery
+
+2003-03-24 03:22  jmason
+
+	* rules/20_body_tests.cf: note about Send-Safe ratware
+
+2003-03-24 01:14  quinlan
+
+	* lib/Mail/SpamAssassin/TextCat.pm: bug 692: some major performance
+	improvements from Sidney Markowitz plus a few additional tweaks
+
+2003-03-24 01:10  felicity
+
+	* lib/Mail/SpamAssassin/: Bayes.pm, BayesStore.pm: bug 1664: the
+	only entries in the bayes journal are token access time updates
+	(from scans).  we can exploit the fact that most of the tokens
+	appear multiple times by caching in memory the updates per token,
+	then just writing to db the end result times for all tokens.  
+	also, scan() tries to opportunistically do a journal sync and
+	expire which causes lots of contention if there is a lot of
+	messages for a single db (this is usually seen with site-wide dbs).
+	 so we flag when we are doing the sync and expire and let all other
+	pids not be so opportunistic.  this should greatly lower
+	contention.  we also let the db tie r/w happen before we try to
+	read from the journal, and also exploit the fact we can open the
+	journal before renaming it so the most common error occurs first,
+	and then a journal read failure means we don't need to rename the
+	temp file back.
+
+2003-03-24 00:52  felicity
+
+	* lib/Mail/SpamAssassin/Bayes.pm: bug 1672: a typo in a backported
+	patch for 2.51 caused bayes to sometimes not unlock the db.
+
+2003-03-23 23:04  felicity
+
+	* lib/Mail/SpamAssassin/: Bayes.pm, BayesStore.pm: Merging in patch
+	796 -- lowering opportunistic expiry contention
+
+2003-03-23 22:51  felicity
+
+	* lib/Mail/SpamAssassin/BayesStore.pm: Merging with patch 793
+
+2003-03-23 22:48  jmason
+
+	* rules/70_cvs_rules_under_test.cf: T_FORGED_MUA_THEBAT,
+	replacement for FORGED_MUA_THEBAT
+
+2003-03-23 11:40  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: fix T_FAKED_THEBAT2 add
+	T_JAPANESE_UCE_SUBJECT* add T_RUSSIAN_UCE_SUBJECT
+
+2003-03-23 09:50  quinlan
+
+	* rules/70_cvs_rules_under_test.cf: promote
+	T_MSGID_SPAMSIGN_99X9XX99, T_RCVD_6_CAPS_ESMTP_ID,
+	T_BASE64_ENC_TEXT,  T_MIME_BASE64_LATIN, T_PORN_15, T_OFFERS_ETC,
+	T_HOT_NASTY, T_CELEBRITY_PORN,	T_VACATION_SCAM, T_HAIR_LOSS
+	replace T_INVALID_DATE_HMS with T_INVALID_DATE_HMS2 tweak
+	T_REMOVE_REMOVAL*, T_ID*, add T_RATWARE_HASH_DASH, T_FAKED_THEBAT2,
+	T_MIME_HTML_NO_MAJOR_TAG a few other minor changes
+
+2003-03-23 09:44  quinlan
+
+	* rules/: 20_phrases.cf, 20_porn.cf: replace rules with faster
+	versions
+
+2003-03-23 09:43  quinlan
+
+	* rules/20_head_tests.cf: add MSGID_SPAMSIGN_99X9XX99 and
+	RCVD_6_CAPS_ESMTP_ID
+
+2003-03-23 09:43  quinlan
+
+	* rules/20_body_tests.cf: add MIME_BASE64_LATIN
+
+2003-03-23 09:41  quinlan
+
+	* lib/Mail/SpamAssassin/EvalTests.pm: replace BASE64_ENC_TEXT with
+	T_BASE64_ENC_TEXT promote T_MIME_BASE64_LATIN to MIME_BASE64_LATIN
+
+2003-03-22 19:13  jmason
+
+	* rules/70_cvs_rules_under_test.cf: new forged-Yahoo test added
+
+2003-03-22 15:10  felicity
+
+	* rules/: 20_head_tests.cf, 50_scores.cf,
+	70_cvs_rules_under_test.cf: Promoted accessdb.	still disabled by
+	default.
+
+2003-03-21 01:20  felicity
+
+	* lib/Mail/SpamAssassin/BayesStore.pm: another update for bug 1629
+
+2003-03-20 21:26  msquadrat
+
+	* build/preprocessor: add support for -Dfilename for later use (the
+	command line is getting too long)
+
+2003-03-20 20:51  jmason
+
+	* build/README: build process updated; new README
+
+2003-03-20 20:49  jmason
+
+	* Changes, build/update_devel,
+	lib/Mail/SpamAssassin/AuditMessage.pm,
+	lib/Mail/SpamAssassin/EncappedMessage.pm: build process update
+
+2003-03-20 20:38  msquadrat
+
+	* build/preprocessor: make the preprocessor use strict
+
+2003-03-20 20:31  jmason
+
+	* lib/Mail/SpamAssassin.pm: 2.51 devel cycle started
+
+2003-03-20 20:27  jmason
+
+	* Changes, build/update_devel, lib/Mail/SpamAssassin.pm: 2.51
+	RELEASED
+
+2003-03-20 20:07  jmason
+
+	* Changes, lib/Mail/SpamAssassin.pm: 2.5.1 RELEASED
+
+2003-03-20 19:38  jmason
+
+	* lib/Mail/SpamAssassin.pm: ready to release
+
+2003-03-20 18:55  felicity
+
+	* rules/70_cvs_rules_under_test.cf: added rule to catch pxlg.com
+	mails, works nicely for me. :)
+
+2003-03-20 06:53  jmason
+
+	* sa-learn.raw, lib/Mail/SpamAssassin/CmdLearn.pm: bug 1638:
+	--force-rebuild doco is unclear. fixed
+
+2003-03-20 06:51  quinlan
+
+	* lib/Mail/SpamAssassin/: Conf.pm, Conf.pm: trivial documentation
+	correction
+
 2003-03-19 22:26  msquadrat
 
 	* Makefile.PL: bug 1652: Perl 5.6.0 and 5.6.1 ship different
