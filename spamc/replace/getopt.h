@@ -15,8 +15,8 @@
  * </@LICENSE>
  */
 
-#ifndef GETOPT_H
-#define GETOPT_H
+#ifndef REPLACE_GETOPT_H
+#define REPLACE_GETOPT_H
 
 #ifdef WIN32
 
@@ -29,4 +29,5 @@ int getopt(int argc, char* const *argv, const char *optstr);
 
 #endif /* WIN32 */
 
-#endif /* GETOPT_H */
+#endif /* REPLACE_GETOPT_H */
+
