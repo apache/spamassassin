@@ -506,12 +506,6 @@ body T_HTML_P2_90_100		eval:html_percentage('90','100')
 
 body T_HTML_MAIL_ONLY             /HTML only email, sorry/i
 
-# catches stuff like "http://www.yahoo.com@0xD5.0xEF.0x8F.0x9D" - tvd
-# matches hardly any, but should never occur in non-spam.
-# 0.023   0.0596   0.0000    1.00    0.93    0.01  T_HEX_HOST
-uri T_HEX_HOST	/^https?:\/\/[^\/]*0x[0-9a-fA-F]{2}/
-describe T_HEX_HOST	Looks like an URL with obfuscated hex IP address
-
 # Most/all of these require that From addresses do not start with numbers.
 # let's see how this does... (jm)
 header T_FROM_NUM_AT_WEBMAIL    From:addr =~ /^\d\S+\@(?:msn\.com|flashmail\.com|mailexcite\.com|prodigy\.net|yahoo\.\S+|hotmail\.com|eudoramail\.com|aol\.com|excite\.com|email\.com|earthlink\.net|geocities\.com|hknetmail\.com|angelfire\.com)/i
@@ -586,12 +580,6 @@ header __T_MSGID_26	Message-Id =~ /^<?[A-Z0-9_-]*MAIL[a-zA-Z0-9_-]+0000[0-9a-f]{
 #header __T_MSGID_16	Message-Id =~ /^<?[A-Z]\d{10}\@/
 header __T_MSGID_32	Message-Id =~ /^<?auto-00000\d+\@/
 meta T_MSGID_S_1	( __T_MSGID_17 || __T_MSGID_10 || __T_MSGID_8 || __T_MSGID_20 || __T_MSGID_19 || __T_MSGID_11 || __T_MSGID_24 || __T_MSGID_26 || __T_MSGID_32 )
-
-# Another Message-Id off-shoot, this time it's a lyris comp rule: - tvd
-#  0.466    0.000    0.760    0.00    0.85   -1.00  T_MSGID_LYRIS
-header T_MSGID_LYRIS	Message-Id =~ /^<LYRIS-\d+-\d+-\d{4}(?:\.\d{2}){2}-\d{2}(?:\.\d{2}){2}--\S+\@lyris\.net>/
-score T_MSGID_LYRIS -0.5
-tflags T_MSGID_LYRIS nice
 
 # Matt Cline: New ratware and user-agent tests
 header T_RATWARE_BIXON       X-Mailer =~ /Bixon ThunderMail/
@@ -832,7 +820,17 @@ body __NIGERIAN_BODY_31	/\btotal acceptance and commitment\b/i
 body __NIGERIAN_BODY_32 /\blocate(?: .{1,20})? extended relative/i
 body __NIGERIAN_BODY_33 /\bhonest cooperation\b/i
 
-header T_NIGERIAN_SUBJECT	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*(?:URGENT|your assistance|i need your urgent|treat as urgent)\b/i
+
+meta T_NIGERIAN_SUBJECT	(__NIGERIAN_SUBJECT.+ +) > 0
+header __NIGERIAN_SUBJECT1	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*(?:(?:very )?URGENT|ATTENTION)\s*$/i
+header __NIGERIAN_SUBJECT2	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*(?:very )?urgent\s+(?:(?:and|&)\s+)?(?:confidential|assistance|business|attention|reply|response|help)\b/i
+header __NIGERIAN_SUBJECT3	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*your assistance\b/i
+header __NIGERIAN_SUBJECT4	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*i need your urgent\b/i
+header __NIGERIAN_SUBJECT5	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*treat as urgent\b/i
+header __NIGERIAN_SUBJECT6	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*(?:family )?assis?tance\s*$/i
+header __NIGERIAN_SUBJECT7	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*[!*_-]+\s*(?:business|urgent)/i
+header __NIGERIAN_SUBJECT8	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*(?:appeal|request) for urgent/i
+
 meta T_NIGERIAN_BODY	( __NIGERIAN_BODY_.+ + ) > 1
 meta T_NIGERIAN_5	(( __AFRICAN_COUNTRY.+ + ) > 0) && ( (( __NIGERIAN_BODY_.+ + ) > 1) || T_NIGERIAN_SUBJECT )
 meta T_NIGERIAN_9	T_NIGERIAN_SUBJECT || (( __NIGERIAN_BODY_.+ + ) > 1)
@@ -863,8 +861,3 @@ body __AFRICAN_COUNTRY_51	/\bLagos\b/i
 body __AFRICAN_COUNTRY_52	/\bcape town\b/i
 
 ##############################################################################
-
-# possible replacement for SEARCH_ENGINE_PROMO - tvd
-# bug 1191, the change doesn't do anything to my results, but does stop
-# the match of the first bug message
-body T_SEARCH_ENGINE_PROMO        /\b(?:(?:submitt?|list)(?:ed|ing|s)?|place(?:d|ment))\b.{1,15}\b(?:in|to)[\s_-]+.{0,15}\b(?:search(?:ing)?\s*(?:engine|site)|director(?:y|ies))s?\b/is
