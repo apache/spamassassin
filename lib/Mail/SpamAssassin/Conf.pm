@@ -261,7 +261,7 @@ sub _parse {
     $lang =~ s/[@.+,].*$//;    # Strip codeset, modifier/audience, etc. 
   }                            # (eg. .utf8 or @euro)
 
-  my $currentfile = '(no file)';
+  $self->{currentfile} = '(no file)';
   my $skipfile = 0;
 
   foreach (split (/\n/, $_[1])) {
@@ -273,9 +273,9 @@ sub _parse {
     if (s/^lang\s+(\S+)\s+//) { next if ($lang !~ /^$1/i); }
     
     # Versioning assertions
-    if (/^file\s+start\s+(.+)$/) { $currentfile = $1; next; }
+    if (/^file\s+start\s+(.+)$/) { $self->{currentfile} = $1; next; }
     if (/^file\s+end/) {
-      $currentfile = '(no file)';
+      $self->{currentfile} = '(no file)';
       $skipfile = 0;
       next;
     }
@@ -297,7 +297,7 @@ ignore it.
       my $req_version = $1;
       $req_version =~ s/^\@\@VERSION\@\@$/$Mail::SpamAssassin::VERSION/;
       if ($Mail::SpamAssassin::VERSION != $req_version) {
-        warn "configuration file \"$currentfile\" requires version ".
+        warn "configuration file \"$self->{currentfile}\" requires version ".
                 "$req_version of SpamAssassin, but this is code version ".
                 "$Mail::SpamAssassin::VERSION. Maybe you need to use ".
                 "the -c switch, or remove the old config files? ".
@@ -2035,6 +2035,7 @@ sub add_test {
   $self->{tests}->{$name} = $text;
   $self->{test_types}->{$name} = $type;
   $self->{tflags}->{$name} ||= '';
+  $self->{source_file}->{$name} = $self->{currentfile};
 
   # All scoresets should have a score defined, so if the one we're in doesn't, we need to set them all.
   if ( ! exists $self->{scores}->{$name} ) {
