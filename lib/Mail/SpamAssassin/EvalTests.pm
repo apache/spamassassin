@@ -2999,9 +2999,9 @@ sub html_tag_balance {
   $rawtag =~ /^([a-zA-Z0-9]+)$/; my $tag = $1;
   $rawexpr =~ /^([\<\>\=\!\-\+ 0-9]+)$/; my $expr = $1;
 
-  return 0 unless exists $self->{html}{"inside_$tag"};
+  return 0 unless exists $self->{html}{inside}{$tag};
 
-  $self->{html}{"inside_$tag"} =~ /^([\<\>\=\!\-\+ 0-9]+)$/;
+  $self->{html}{inside}{$tag} =~ /^([\<\>\=\!\-\+ 0-9]+)$/;
   my $val = $1;
   return eval "\$val $expr";
 }
@@ -3009,7 +3009,7 @@ sub html_tag_balance {
 sub html_image_only {
   my ($self, undef, $min, $max) = @_;
 
-  return (exists $self->{html}{"inside_img"} &&
+  return (exists $self->{html}{inside}{img} &&
 	  exists $self->{html}{length} &&
 	  $self->{html}{length} > $min &&
 	  $self->{html}{length} <= $max);
@@ -3048,7 +3048,7 @@ sub html_charset_faraway {
 
 sub html_tag_exists {
   my ($self, undef, $tag) = @_;
-  return exists $self->{html}{"inside_$tag"};
+  return exists $self->{html}{inside}{$tag};
 }
 
 sub html_test {
@@ -3166,19 +3166,19 @@ sub _multipart_alternative_difference {
       # in one part will be the same in other parts.
       #
       if ($type eq 'text/html') {
-        foreach my $w (grep(/\w/,split(/\s+/,$rnd))) {
+        foreach my $w (grep(/\w/, split(/\s+/, $rnd))) {
 	  #dbg("eval: HTML: $w");
           $html{$w}++;
         }
 
 	# If there are no words, mark if there's at least 1 image ...
-	if (keys %html == 0 && exists $self->{html}{"inside_img"}) {
+	if (keys %html == 0 && exists $self->{html}{inside}{img}) {
 	  # Use "\n" as the mark since it can't ever occur normally
 	  $html{"\n"}=1;
 	}
       }
       else {
-        foreach my $w (grep(/\w/,split(/\s+/,$rnd))) {
+        foreach my $w (grep(/\w/, split(/\s+/, $rnd))) {
 	  #dbg("eval: TEXT: $w");
           $text{$w}++;
         }
