@@ -511,10 +511,12 @@ sub _parse {
   }                            # (eg. .utf8 or @euro)
 
   $self->{currentfile} = '(no file)';
+  my @curfile_stack = ();
   my @if_stack = ();
   my $skip_parsing = 0;
+  my @conf_lines = split (/\n/, $_[1]);
 
-  foreach (split (/\n/, $_[1])) {
+  while (defined ($_ = shift @conf_lines)) {
     s/(?<!\\)#.*$//; # remove comments
     s/^\s+|\s+$//g;  # remove leading and trailing spaces (including newlines)
     next unless($_); # skip empty lines
@@ -522,8 +524,13 @@ sub _parse {
     # handle i18n
     if (s/^lang\s+(\S+)\s+//) { next if ($lang !~ /^$1/i); }
 
-    # Versioning assertions
-    if (/^file\s+start\s+(.+)$/) { $self->{currentfile} = $1; next; }
+    # File/line number assertions
+    if (/^file\s+start\s+(.+)$/) {
+      push (@curfile_stack, $self->{currentfile});
+      $self->{currentfile} = $1;
+      next;
+    }
+
     if (/^file\s+end/) {
       if (scalar @if_stack > 0) {
 	my $cond = pop @if_stack;
@@ -538,9 +545,14 @@ sub _parse {
 	$self->{errors}++;
 	@if_stack = ();
       }
-
-      $self->{currentfile} = '(no file)';
       $skip_parsing = 0;
+
+      my $curfile = pop @curfile_stack;
+      if (defined $curfile) {
+        $self->{currentfile} = $curfile;
+      } else {
+        $self->{currentfile} = '(no file)';
+      }
       next;
     }
 
@@ -556,7 +568,23 @@ sub _parse {
     $value =~ /^(.*)$/;
     $value = $1;
 
-=head2 CONDITIONAL-PARSING OPTIONS
+=head2 PREPROCESSING OPTIONS
+
+=over 4
+
+=item include filename
+
+Include configuration lines from C<filename>.   Relative paths are considered
+relative to the current configuration file or user preferences file.
+
+=cut
+
+    if ($key eq 'include') {
+      $value = $self->fix_path_relative_to_current_file($value);
+      my $text = $self->{main}->read_cf ($value, 'included file');
+      unshift (@conf_lines, split (/\n/, $text));
+      next;
+    }
 
 =item ifplugin PluginModuleName
 
@@ -602,6 +630,8 @@ For example:
       $skip_parsing = $cond->{skip_parsing};
       next;
     }
+
+=back
 
 =head2 VERSION OPTIONS
 
@@ -3366,7 +3396,19 @@ sub maybe_body_only {
 
 sub load_plugin {
   my ($self, $package, $path) = @_;
+  if ($path) { $path = $self->fix_path_relative_to_current_file($path); }
   $self->{main}->{plugins}->load_plugin ($package, $path);
+}
+
+sub fix_path_relative_to_current_file {
+  my ($self, $path) = @_;
+
+  if (!File::Spec->file_name_is_absolute ($path)) {
+    my ($vol, $dirs, $file) = File::Spec->splitpath ($self->{currentfile});
+    $path = File::Spec->catpath ($vol, $dirs, $path);
+    dbg ("plugin: fixed relative path: $path");
+  }
+  return $path;
 }
 
 sub load_plugin_succeeded {

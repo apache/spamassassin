@@ -59,12 +59,6 @@ sub load_plugin {
   my $ret;
   if ($path) {
     dbg ("plugin: loading $package from $path");
-
-    if (!File::Spec->file_name_is_absolute ($path)) {
-      my ($vol, $dirs, $file) = File::Spec->splitpath ($self->{currentfile});
-      $path = File::Spec->catpath ($vol, $dirs, $path);
-      dbg ("plugin: fixed relative path: $path");
-    }
     $ret = do $path;
   }
   else {
