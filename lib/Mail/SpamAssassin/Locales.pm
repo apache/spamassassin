@@ -74,3 +74,5 @@ sub is_charset_ok_for_locales {
 
   return 0;
 }
+
+1;

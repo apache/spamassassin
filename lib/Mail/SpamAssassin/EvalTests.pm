@@ -59,7 +59,7 @@ $WORD_OBFUSCATION_CHARS = '*_.,/|-+=';
 
 # Charsets which use capital letters heavily in their encoded representation.
 $CHARSETS_LIKELY_TO_FP_AS_CAPS = qr{[-_a-z0-9]*(?:
-	  koi|jp|jis|euc|gb|big5|isoir|cp1251
+	  koi|jp|jis|euc|gb|big5|isoir|cp1251|georgianps|pt154|tis
 	)[-_a-z0-9]*}ix;
 
 ###########################################################################
@@ -759,6 +759,23 @@ sub check_subject_for_lotsa_8bit_chars {
   s/[\[\]\* ]//g;
 
   return 1 if ($self->are_more_high_bits_set ($_));
+  return 0;
+}
+
+sub check_all_headers_for_8bit_chars {
+  my ($self) = @_;
+  local ($_);
+
+  $_ = $self->get('ALL');
+
+  s/\n[ \t]+/  /gs;	# continuation lines
+
+  # remove List-Id (often contains 8-bit chars for Chinese lists, duh)
+  s/^List-Id: .*$//gm;
+  # remove Subject -- checked by other test
+  s/^Subject: .*$//gm;
+
+  return 1 if (/[\200-\377]{3,}/s);
   return 0;
 }
 
@@ -1827,6 +1844,31 @@ sub message_is_habeas_swe {
 ###########################################################################
 # BODY TESTS:
 ###########################################################################
+  
+sub body_charset_is_likely_to_fp {
+  my ($self) = @_;
+
+  # check for charsets where this test will FP -- iso-2022-jp, gb2312,
+  # koi8-r etc.
+  #
+  $self->_check_attachments unless exists $self->{mime_checked_attachments};
+  my @charsets = ();
+  my $type = $self->get ('Content-Type');
+  $type = get_charset_from_ct_line ($type);
+  if (defined $type) {
+    push (@charsets, $type);
+  }
+  if (defined $self->{mime_html_charsets}) {
+    push (@charsets, split (' ', $self->{mime_html_charsets}));
+  }
+
+  foreach my $charset (@charsets) {
+    if ($charset =~ /^${CHARSETS_LIKELY_TO_FP_AS_CAPS}$/) {
+      return 1;
+    }
+  }
+  return 0;
+}
 
 sub check_for_uppercase {
   my ($self, $body, $min, $max) = @_;
@@ -1834,6 +1876,10 @@ sub check_for_uppercase {
 
   if (exists $self->{uppercase}) {
     return ($self->{uppercase} > $min && $self->{uppercase} <= $max);
+  }
+
+  if ($self->body_charset_is_likely_to_fp()) {
+    $self->{uppercase} = 0; return 0;
   }
 
   # Dec 20 2002 jm: trade off some speed for low memory footprint, by
@@ -1850,8 +1896,12 @@ sub check_for_uppercase {
     next if /^(?:[A-Za-z0-9+\/=]{60,76} ){2}/;
 
     my $line = $_;	# copy so we don't muck up the original
+
     # remove shift-JIS charset codes
     $line =~ s/\x1b\$B.*\x1b\(B//gs;
+
+    # remove URIs
+    $line =~ s/URI:\S+//gs;
 
     $len += length($line);
 
@@ -1880,6 +1930,9 @@ sub check_for_yelling {
     
   if (exists $self->{num_yelling_lines}) {
     return $self->{num_yelling_lines} > 0;
+  }
+  if ($self->body_charset_is_likely_to_fp()) {
+    $self->{num_yelling_lines} = 0; return 0;
   }
 
   # Dec 20 2002 jm: trade off some speed for low memory footprint, by
@@ -2095,13 +2148,21 @@ sub _check_mime_header {
     $self->{mime_html_no_charset} = 1;
   }
 
-  if ($charset =~ /[a-z]/i && ! $self->{mime_faraway_charset}) {
-    my @l = $self->get_my_locales();
+  if ($charset =~ /[a-z]/i) {
+    if (defined $self->{mime_html_charsets}) {
+      $self->{mime_html_charsets} .= " ".$charset;
+    } else {
+      $self->{mime_html_charsets} = $charset;
+    }
 
-    if (!(grep { $_ eq "all" } @l) &&
-	!Mail::SpamAssassin::Locales::is_charset_ok_for_locales($charset, @l))
-    {
-      $self->{mime_faraway_charset} = 1;
+    if (! $self->{mime_faraway_charset}) {
+      my @l = $self->get_my_locales();
+
+      if (!(grep { $_ eq "all" } @l) &&
+	  !Mail::SpamAssassin::Locales::is_charset_ok_for_locales($charset, @l))
+      {
+	$self->{mime_faraway_charset} = 1;
+      }
     }
   }
 
@@ -2161,6 +2222,9 @@ sub _check_attachments {
   my $re_ctype = qr/^Content-Type:\s*(.+?)(?:;|\s|$)/i;
   my $re_cte = qr/^Content-Transfer-Encoding:\s*(.+)/i;
   my $re_cd = qr/^Content-Disposition:\s*(.+)/i;
+
+  # indicate the scan has taken place
+  $self->{mime_checked_attachments} = 1;
 
   # results
   $self->{microsoft_executable} = 0;
