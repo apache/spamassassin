@@ -2289,21 +2289,20 @@ sub _check_language {
   }
 
   # map of languages that are very often mistaken for another, perhaps with
-  # more than 0.02% false positives.  only used for text < 2048 bytes in
-  # length
-  my %mistakable = ('sco' => 'en');
+  # more than 0.02% false positives.  This is used when we're less certain
+  # about the result.
   my $len = $self->{msg}->{metadata}->{languages_body_len};
+  my %mistakable;
+  if ($len < 1024 * (scalar @matches)) {
+    $mistakable{sco} = 'en';
+  }
 
   # see if any matches are okay
   foreach my $match (@matches) {
     $match =~ s/\..*//;
-    if ($len < 2048 && exists $mistakable{$match}) {
-      $match = $mistakable{$match};
-    }
+    $match = $mistakable{$match} if exists $mistakable{$match};
     foreach my $language (@languages) {
-      if ($len < 2048 && exists $mistakable{$language}) {
-	$language = $mistakable{$language};
-      }
+      $language = $mistakable{$language} if exists $mistakable{$language};
       if ($match eq $language) {
 	$self->{undesired_language_body} = 0;
 	return $self->{undesired_language_body};
