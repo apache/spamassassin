@@ -104,9 +104,9 @@ GetOptions("c=s", "p=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug",
 	   '<>' => \&target) or usage();
 
 if ($opt_f) {
-  open (F, $opt_f) || die $!;
-  push (@targets, map { chomp; $_ } <F>);
-  close (F);
+  open(F, $opt_f) || die $!;
+  push(@targets, map { chomp; $_ } <F>);
+  close(F);
 }
 
 if (scalar @targets == 0) { usage(); }
@@ -194,11 +194,11 @@ exit;
 sub target  {
   my ($target) = @_;
   if (!defined($opt_format)) {
-    push (@targets, $target);
+    push(@targets, $target);
   }
   else {
     $opt_o = 1;
-    push (@targets, "spam:$opt_format:$target");
+    push(@targets, "spam:$opt_format:$target");
   }
 }
 
@@ -250,10 +250,10 @@ sub wanted {
   my $ma = $spamtest->parse($dataref);
 
   # remove SpamAssassin markup, if present and the mail was spam
-  my $stat = $ma->get_header ("X-Spam-Status");
+  my $stat = $ma->get_header("X-Spam-Status");
   if ($stat && $stat =~ /^Yes,/) {
-    if (!$opt_deencap || message_should_be_deencapped ($ma)) {
-      my $new_ma = $spamtest->parse ($spamtest->remove_spamassassin_markup($ma), 1);
+    if (!$opt_deencap || message_should_be_deencapped($ma)) {
+      my $new_ma = $spamtest->parse($spamtest->remove_spamassassin_markup($ma), 1);
       $ma->finish();
       $ma = $new_ma;
     }
@@ -264,8 +264,8 @@ sub wanted {
   my $status;
   my @uris;
   if ($opt_loguris) {
-    my $pms = Mail::SpamAssassin::PerMsgStatus->new ($spamtest, $ma);
-    @uris = $pms->get_uri_list ();
+    my $pms = Mail::SpamAssassin::PerMsgStatus->new($spamtest, $ma);
+    @uris = $pms->get_uri_list();
     $pms->finish();
 
   } else {
@@ -303,7 +303,7 @@ sub wanted {
   if ($opt_loguris) {
     $yorn = '.';
     $score = 0;
-    $tests = join (" ", sort @uris);
+    $tests = join(" ", sort @uris);
     $extra = '';
   } else {
     $yorn = $status->is_spam() ? 'Y' : '.';
@@ -356,7 +356,7 @@ sub wanted {
 sub message_should_be_deencapped {
   my ($ma) = @_;
 
-  my $vers = $ma->get_header ("X-Spam-Checker-Version");
+  my $vers = $ma->get_header("X-Spam-Checker-Version");
   return 1 if (!$vers);     # no header? probably not SpamAssassin encapsulation.
   # return 1 so that old versions of SpamAssassin encapping are removed
 
