@@ -30,12 +30,18 @@
 
 int SAFE_FALLBACK=0;
 
+const int ESC_MSGTOOBIG = 666;
+
+char *msg_buf;
+int amount_read;
+
 void print_usage(void)
 {
   printf("Usage: spamc [-d host] [-p port] [-f] [-h]\n");
   printf("-d host: specify host to connect to  [default: localhost]\n");
   printf("-p port: specify port for connection [default: 22874]\n");
   printf("-f: fallback safely - in case of comms error, dump original message unchanges instead of setting exitcode\n");
+  printf("-s size: specify max message size, any bigger and it will be returned w/out processing [default: 250k]\n");
   printf("-h: print this help message\n");
 }
 
@@ -55,24 +61,35 @@ int dump_message(int in,int out)
   return (0==bytes)?EX_OK:EX_IOERR;
 }
 
-int send_message(int in,int out,char *username)
+int send_message(int in,int out,char *username, int max_size)
 {
   size_t bytes;
-  char buf[8192];
 
   if(NULL != username)
   {
-    bytes = snprintf(buf,8192,"PROCESS SPAMC/1.1\r\nUser: %s\r\n\r\n",username);
+    bytes = snprintf(msg_buf,1024,"PROCESS SPAMC/1.1\r\nUser: %s\r\n\r\n",username);
   }
   else
   {
-    bytes = snprintf(buf,8192,"PROCESS SPAMC/1.1\r\n\r\n");
+    bytes = snprintf(msg_buf,1024,"PROCESS SPAMC/1.1\r\n\r\n");
+  }
+
+  write(out,msg_buf,bytes);
+
+  /* Ok, now we'll read the message into the buffer up to the limit */
+  /* Hmm, wonder if this'll just work ;) */
+  if((bytes = read(in,msg_buf,max_size+1024)) > max_size)
+  {
+     /* Message is too big, so return so we can dump the message back out */
+     amount_read = bytes;
+     shutdown(out,SHUT_WR);
+     return ESC_MSGTOOBIG;
   }
 
   do
   {
-    write(out,buf,bytes);
-  } while((bytes=read(in,buf,8192)) > 0);
+    write(out,msg_buf,bytes);
+  } while((bytes=read(in,msg_buf,8192)) > 0);
 
   shutdown(out,SHUT_WR);
 
@@ -208,7 +225,7 @@ try_to_connect (const struct sockaddr *addr, int *sockptr)
   return EX_OK;
 }
 
-int process_message(const char *hostname, int port, char *username)
+int process_message(const char *hostname, int port, char *username, int max_size)
 {
   int exstatus;
   int mysock;
@@ -248,11 +265,20 @@ int process_message(const char *hostname, int port, char *username)
   exstatus = try_to_connect ((const struct sockaddr *) &addr, &mysock);
   if (0 == exstatus)
   {
-    exstatus = send_message(STDIN_FILENO,mysock,username);
+    msg_buf = malloc(max_size);
+    exstatus = send_message(STDIN_FILENO,mysock,username,max_size);
     if (0 == exstatus)
     {
       exstatus = read_message(mysock,STDOUT_FILENO);
     }
+    else if(ESC_MSGTOOBIG == exstatus)
+    {
+      /* Message was too big, so dump the buffer then bail */
+      write(STDOUT_FILENO,msg_buf,amount_read);
+      dump_message(STDIN_FILENO,STDOUT_FILENO);
+      exstatus = 0;
+    }
+    free(msg_buf);
   }
   else if(SAFE_FALLBACK) // If connection failed but SAFE_FALLBACK set then dump original message
   {
@@ -262,11 +288,11 @@ int process_message(const char *hostname, int port, char *username)
   return exstatus;	/* return the last failure code */
 }
 
-void read_args(int argc, char **argv, char **hostname, int *port)
+void read_args(int argc, char **argv, char **hostname, int *port, int *max_size)
 {
   int opt;
 
-  while(-1 != (opt = getopt(argc,argv,"d:p:u:hf")))
+  while(-1 != (opt = getopt(argc,argv,"d:p:u:hfs:")))
   {
     switch(opt)
     {
@@ -290,6 +316,11 @@ void read_args(int argc, char **argv, char **hostname, int *port)
 	syslog (LOG_WARNING, "usage: -u arg obsolete, ignored");
 	break;
       }
+    case 's':
+      {
+	*max_size = atoi(optarg);
+	break;
+      }
     case '?': {
 	syslog (LOG_ERR, "invalid usage");
 	/* NOTE: falls through to usage case below... */
@@ -306,6 +337,7 @@ void read_args(int argc, char **argv, char **hostname, int *port)
 int main(int argc,char **argv)
 {
   int port = 22874;
+  int max_size = 250*1024;
   char *hostname = "127.0.0.1";
   char *username = NULL;
   struct passwd *curr_user;
@@ -319,7 +351,7 @@ int main(int argc,char **argv)
   }
   username = curr_user->pw_name;
 
-  read_args(argc,argv,&hostname,&port);
+  read_args(argc,argv,&hostname,&port,&max_size);
 
-  return process_message(hostname,port,username);
+  return process_message(hostname,port,username,max_size);
 }
