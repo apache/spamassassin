@@ -26,16 +26,6 @@
 #
 ###########################################################################
 
-# http://bugzilla.spamassassin.org/show_bug.cgi?id=2088
-# low hit rate
-#   0.091   0.1174   0.0000    1.000   0.93    0.01  T_RATWARE_MIME_844412
-header T_RATWARE_MIME_844412	Content-Type =~ /boundary="[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}"/
-
-# http://bugzilla.spamassassin.org/show_bug.cgi?id=2087
-# low hit rate
-#   0.069   0.0895   0.0000    1.000   0.93    0.01  T_RATWARE_OE_DM
-header T_RATWARE_OE_DM	X-Mailer =~ /^Microsoft Outlook Express [\d\.]+ DM$/
-
 # reminder: develop these after 2.60
 # low hit rate
 #  0.093   0.1201   0.0000    1.000   0.93    0.01  T_SPRINTF_5X
@@ -518,9 +508,6 @@ body T_URGENT_BIZ /urgent.{0,16}(?:assistance|business|buy|confidential|notice|p
 # bug 2950
 uri T_GOOGLE_IMAGES	m{^http://images\.google(\.\S+)?\.[a-z]{2,3}/imgres\?}i
 uri T_GOOGLE_REDIR	m{^http://www\.google(\.\S+)?\.[a-z]{2,3}/url\?}i
-
-header T_RATWARE_FAKED_AOL_UA	User-Agent =~ /^AOL /
-describe T_RATWARE_FAKED_AOL_UA	AOL clients don't use the User-Agent header
 
 # bug 2996: HTML attribute testing
 body T_HTML_ATTR_00_10	eval:html_range('attr_bad','0.0','0.1')
