@@ -1968,7 +1968,7 @@ sub check_for_mime_excessive_qp_v1 {
     # then split up each trailing sequence into individual hex values,
     # *then* exclude the null strings caused by the null string before
     # the first "=" in a string
-    my @trailing =  ($body =~ m/((?:=09|=20)+)\s*$/gm);
+    my @trailing = ($body =~ m/((?:=09|=20)+)\s*$/gm);
     @trailing = map {split/=/} @trailing;
     @trailing = grep (!/^$/, @trailing);
     $qp -= scalar(@trailing);
@@ -1995,6 +1995,7 @@ sub check_for_mime_excessive_qp_v2 {
 
   # Note: We don't use rawbody because it removes MIME parts.  Instead,
   # we get the raw unfiltered body.  We must not change any lines.
+  my $header = 0;  
   my $len = 0;
   my $qp = 0;
   my $line;
@@ -2002,7 +2003,11 @@ sub check_for_mime_excessive_qp_v2 {
     $line = $_;
 
     if ($line =~ /^Content-Transfer-Encoding:\s+(\S+)/i) {
+      $header = 1;
       $cte = lc($1);
+    }
+    elsif ($header) {
+      $header = 0 if $line !~ /^[\w-]+:/;
     }
     elsif ($cte eq "quoted-printable") {
       $len += length($line);
@@ -2013,7 +2018,7 @@ sub check_for_mime_excessive_qp_v2 {
       # then split up each trailing sequence into individual hex values;
       # subtract one for the null string before the first "=" at the
       # begining of the string
-      my ($trailing) =  ($line =~ m/((?:=09|=20)+)\s*$/gm);
+      my ($trailing) = ($line =~ m/((?:=09|=20)+)\s*$/gm);
       next unless ($trailing);
 
       my @QPs = split(/=/, $trailing);
