@@ -442,3 +442,6 @@ body T_CATTLE_AND_SPAM_TELE_2	/\b(?:210|214|254|281|325|361|409|430|432|469|512|
 
 # bug 3557
 body T_STOCK_ALERT		/\bstock alert/i
+
+# bug 3141 - revert code if this has no improvement
+body T_MIME_HTML_ONLY		eval:check_for_mime_html_only2()

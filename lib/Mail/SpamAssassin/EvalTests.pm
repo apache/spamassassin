@@ -2301,6 +2301,19 @@ sub check_for_mime_html_only {
 	  $self->{mime_body_text_count} == 0);
 }
 
+# HTML without some other type of MIME text part
+# xxx, fixme, test rule, remove before release
+sub check_for_mime_html_only2 {
+  my ($self) = @_;
+
+  my $ctype = $self->get('Content-Type');
+  return 1 if (defined($ctype) && $ctype =~ m@^text/html@i);
+
+  $self->_check_attachments unless exists $self->{mime_body_html_count};
+  return ($self->{mime_body_html_count} > 0 &&
+	  $self->{mime_body_text_count} == 0);
+}
+
 sub check_for_mime_excessive_qp {
   my ($self, undef, $min) = @_;
 
