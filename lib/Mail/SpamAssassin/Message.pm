@@ -469,13 +469,18 @@ sub _parse_multipart {
       if ($part_array) {
         chomp( $part_array->[-1] );  # trim the CRLF that's part of the boundary
         splice @{$part_array}, -1 if ( $part_array->[-1] eq '' ); # blank line for the boundary only ...
-
-        my($p_boundary);
-	($part_msg->{'type'}, $p_boundary) = Mail::SpamAssassin::Util::parse_content_type($part_msg->header('content-type'));
-        $p_boundary ||= $boundary;
-	dbg("found part of type ".$part_msg->{'type'}.", boundary: ".(defined $p_boundary ? $p_boundary : ''));
-        $self->parse_body( $msg, $part_msg, $p_boundary, $part_array, 0 );
       }
+      else {
+        # Invalid parts can have no body, so fake in a blank body
+	# in that case.
+        $part_array = [];
+      }
+
+      my($p_boundary);
+      ($part_msg->{'type'}, $p_boundary) = Mail::SpamAssassin::Util::parse_content_type($part_msg->header('content-type'));
+      $p_boundary ||= $boundary;
+      dbg("found part of type ".$part_msg->{'type'}.", boundary: ".(defined $p_boundary ? $p_boundary : ''));
+      $self->parse_body( $msg, $part_msg, $p_boundary, $part_array, 0 );
 
       if (defined $boundary && $line =~ /^\-\-\Q${boundary}\E\-\-$/) {
 	# Make a note that we've seen the end boundary
