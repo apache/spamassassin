@@ -164,8 +164,9 @@ describe T_FROM_HAS_UNDERLINE_NUMS	From: contains an underline and numbers/lette
 #describe T_X_BEENTHERE	X-BeenThere header exists
 
 # 708
+# quinlan FP: "at some point you offered" (match on the last three words)
 body T_OFFER_1			/\b(?:free|trial|full|phone|points?|hottest|internet|great|of this|about this|dealer|responded|not an|pay|are able to|future|valuable|partner|receiv(?:e|ed|ing)|introductory|exclusive|promotional|coupon|bonus|further|following|product|proud to|additional|website|amazing|discounts?)\b.{0,9}(?:this|these|)\boffer(?:s|ings?|ed|)\b/i
-describe OFFER			Offers you Something
+describe T_OFFER_1		Offers you Something
 
 body T_OFFER_2			/\boffer(?:s|ings?|)\b.{0,9}\b(?:expires|subject|limited|ends|mailed|originator|contained|discounts?|confidential|is ood|available|valid|in error|!)\b/i
 describe T_OFFER_2		Offers you Something (2)
