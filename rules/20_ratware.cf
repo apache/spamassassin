@@ -274,5 +274,5 @@ describe RATWARE_ZERO_TZ	Bulk email fingerprint (+0000) found
 header RCVD_BONUS_SPC_DATE	Received =~ /with SMTP;  \d\d \S\S\S /
 describe RCVD_BONUS_SPC_DATE	Bulk email fingerprint (bonus space) found
 
-header X_MESSAGE_INFO		X-Message-Info =~ /\+/
+header X_MESSAGE_INFO		exists:X-Message-Info
 describe X_MESSAGE_INFO		Bulk email fingerprint (X-Message-Info) found
