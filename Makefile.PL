@@ -160,7 +160,7 @@ my %makefile = (
     'VERSION_FROM' => 'lib/Mail/SpamAssassin.pm', # finds $VERSION
 
     'EXE_FILES'	=> [
-        'sa-filter', 'sa-learn',
+        'sa-filter', 'sa-learn', 'spamassassin',
         'spamc/spamc$(EXE_EXT)', # must next to last one
         'spamd/spamd',	# must be the last one
     ],
