@@ -379,6 +379,13 @@ sub check_for_unique_subject_id {
   }
 }
 
+# IMO, ideally the check-for-dict code should *not* actually use a dict, it
+# should just use an algorithm which can recognise english-like
+# consonant-vowel strings and pass them.
+# 
+# Really, we just want to distinguish between (solved) (amusing) (funny)
+# (bug) (attn) (urgent) and (kdsjf) (ofdiax) (zkdwo) ID-type strings.
+
 sub word_is_in_dictionary {
   my ($self, $word) = @_;
   local ($_);
@@ -389,10 +396,19 @@ sub word_is_in_dictionary {
   $word =~ s/\s+$//;
   return 0 if ($word =~ /[^a-z]/);
 
+  study $word;
+
   # handle a few common "blah blah blah (comment)" styles
-  return 1 if ($word =~ /^(?:ot|off.?topic)$/);	# off-topic
-  return 1 if ($word =~ /ing$/);	# amusing
-  return 1 if ($word =~ /nny$/);	# funny
+  return 1 if ($word =~ /^ot$/);	# off-topic
+
+  # handle some common word bits that may not be in the dict.
+  return 1 if ($word =~ /(?:ness$|ion|ity$|ing$|ish|ed$|en$|est|ier)/);
+  return 1 if ($word =~ /(?:age|ify|ize|ise|ful|less|lly|like|nny$)/);
+  return 1 if ($word =~ /(?:bug|fixed|solve|ette|ble|ism|nce)/);
+  return 1 if ($word =~ /(?:ome|ent|ies|ain|end|ire|ong|arg)/);
+
+  return 1 if ($word =~ /(?:spam|linux|nix|bsd|win)/); # not in most dicts
+  return 1 if ($word =~ /(?:post|mail|topic|whew|phew)/);
 
   if (!open (DICT, "</usr/dict/words") &&
   	!open (DICT, "</usr/share/dict/words"))
@@ -400,6 +416,8 @@ sub word_is_in_dictionary {
     dbg ("failed to open /usr/dict/words, cannot check dictionary");
     return 1;		# fail safe
   }
+
+  dbg ("checking dictionary for \"$word\"");
 
   # use DICT as a file, rather than making a hash; keeps memory
   # usage down, and the OS should cache the file contents anyway

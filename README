@@ -157,7 +157,7 @@ If you're using procmail:
   - add the following lines to ~/.procmailrc, at the top of the file
     before any existing recipes:
 
-      :0fw
+      :0:fw
       | spamassassin -P
 
       :0e
