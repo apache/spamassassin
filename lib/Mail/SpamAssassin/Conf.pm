@@ -1805,12 +1805,14 @@ SpamAssassin use, you may want to share this across all users.
 =item bayes_path /path/to/file	(default: ~/.spamassassin/bayes)
 
 Path for Bayesian probabilities databases.  Several databases will be created,
-with this as the base, with C<_toks>, C<_seen> etc. appended to this filename.
+with this as the base, with C<_toks>, C<_seen> etc. appended to this filename;
+so the default setting results in files called C<~/.spamassassin/bayes_seen>,
+C<~/.spamassassin/bayes_toks> etc.
 
 By default, each user has their own, in their C<~/.spamassassin> directory
 with mode 0700, but for system-wide SpamAssassin use, you may want to share
-this across all users.  However it should be noted that Bayesian filtering will
-probably be more effective with an individual database per user.
+this across all users.  However it should be noted that Bayesian filtering
+appears to be more effective with an individual database per user.
 
 =cut
 
