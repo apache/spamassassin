@@ -363,6 +363,10 @@ header USER_IN_WHITELIST	eval:check_from_in_whitelist()
 describe USER_IN_WHITELIST	From: address is in the user's white-list
 tflags USER_IN_WHITELIST        userconf nice
 
+header USER_IN_DEF_WHITELIST	eval:check_from_in_default_whitelist()
+describe USER_IN_DEF_WHITELIST	From: address is in the default white-list
+tflags USER_IN_DEF_WHITELIST    userconf nice
+
 # noticed this implied in passing in Dan's CVS messages. ;)  no nonspam hits
 # but only a small number of spam ones, for me.
 header HTML_ALL_CAPS   		Content-Type =~ /TEXT\/HTML/
