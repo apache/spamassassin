@@ -1563,8 +1563,22 @@ sub header_all_caps {
   $all =~ s/\n\s+/ /g;
 
   for (split(/\n/, $all)) {
+    next unless /:.*[a-z]/i;	# needs at least one letter after colon
+
     next if /^X-WSS-ID:/;	# skip certain headers
-    next unless /:.*\S/;	# at least one non-space after colon
+    next if /^X-BFI:/;
+    next if /^X-UIDL?:/;
+    next if /^X-IMDB-MAILFILTER:/;
+    next if /^X-SMTP-\w+:/;
+    next if /^X-AUTH:/;
+    next if /^X-EPRI-ID:/;
+    next if /^X-FID:/;
+    next if /^X-BG:/;
+    next if /^X-AS[HN]:/;
+    next if /^X-AUTO:/;
+    next if /^X-A[DNP]:/;
+    next if /^X-\d+:/;
+
     s/[^a-zA-Z]//g;		# only look at letters
     return 1 if ($_ && ($_ eq uc($_)));
   }
