@@ -116,7 +116,7 @@ my $rank_hi = 0;
 my $rank_lo = 9999999;
 foreach my $test (keys %freq_spam, keys %freq_ham) {
   next unless (exists $rules{$test});           # only valid tests
-  next if ($rules{$test}->{issubrule});
+  next if (!$opt_a && $rules{$test}->{issubrule});
 
   next if $done{$test}; $done{$test} = 1;
   push (@tests, $test);
@@ -159,7 +159,7 @@ foreach $test (@tests) {
 
 foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
   next unless (exists $rules{$test});           # only valid tests
-  next if ($rules{$test}->{issubrule});
+  next if (!$opt_a && $rules{$test}->{issubrule});
 
   my $fs = $freq_spam{$test}; $fs ||= 0;
   my $fn = $freq_ham{$test}; $fn ||= 0;
