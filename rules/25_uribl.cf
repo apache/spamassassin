@@ -39,17 +39,17 @@ describe	URIBL_SBL	Contains a URL listed in the SBL blocklist
 tflags		URIBL_SBL	net
 
 urirhsbl	URIBL_SC_SURBL	sc.surbl.org.	A
-header		URIBL_SC_SURBL	eval:check_uridnsbl('T_URIBL_SC_SURBL')
+header		URIBL_SC_SURBL	eval:check_uridnsbl('URIBL_SC_SURBL')
 describe	URIBL_SC_SURBL	Contains a URL listed in the SC SURBL blocklist
 tflags		URIBL_SC_SURBL	net
 
 urirhsbl	URIBL_WS_SURBL	ws.surbl.org.	A
-header		URIBL_WS_SURBL	eval:check_uridnsbl('T_URIBL_WS_SURBL')
+header		URIBL_WS_SURBL	eval:check_uridnsbl('URIBL_WS_SURBL')
 describe	URIBL_WS_SURBL	Contains a URL listed in the WS SURBL blocklist
 tflags		URIBL_WS_SURBL	net
 
 urirhsbl	URIBL_BE_SURBL	be.surbl.org.	A
-header		URIBL_BE_SURBL	eval:check_uridnsbl('T_URIBL_BE_SURBL')
+header		URIBL_BE_SURBL	eval:check_uridnsbl('URIBL_BE_SURBL')
 describe	URIBL_BE_SURBL	Contains a URL listed in the BE SURBL blocklist
 tflags		URIBL_BE_SURBL	net
 
