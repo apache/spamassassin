@@ -2166,6 +2166,12 @@ sub check_dcc {
 
    $self->{already_checked_dcc} = 1;
 
+  # First check if there's already a X-DCC header with value of "bulk"
+  # and short-circuit if there is -- someone upstream might already have
+  # checked DCC for us.
+  $_ = $self->get('X-DCC[-A-Z]*');
+  return 1 if /bulk/;
+  
   # note: we don't use $fulltext. instead we get the raw message,
   # unfiltered, for DCC to check.  ($fulltext removes MIME
   # parts etc.)
