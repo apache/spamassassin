@@ -1,0 +1,68 @@
+#!/usr/bin/perl -w
+
+use lib '../lib';
+
+use strict;
+
+use Mail::SpamAssassin::ArchiveIterator;
+use Getopt::Std;
+use FileHandle;
+
+###########
+
+sub usage {
+  print STDERR "split-corpora [-n num_buckets] [-p outfile_prefix] ".
+    "folder1 ....\n";
+  exit(1);
+} # usage()
+
+###########
+
+our ($opt_n, $opt_p, $opt_h);
+
+getopt('n:p:h');
+
+usage() if ($opt_h);
+
+my $num_buckets = $opt_n || 2;
+my $prefix      = $opt_p || "bucket";
+my @IN_FILES    = @ARGV;
+
+usage() if (@IN_FILES == 0);
+
+my @bucket_fhs = ();
+
+foreach my $bucket (1 .. $num_buckets) {
+  my $bucket_fh = new FileHandle();
+
+  if (!$bucket_fh->open(">$prefix.$bucket")) {
+    die "Could not open '$prefix.$bucket' for writing: $!\n";
+  }
+
+  push(@bucket_fhs, $bucket_fh);
+} # foreach my $bucket (1 .. $num_buckets)
+
+my $current_bucket = 0;
+
+my $iter = new Mail::SpamAssassin::ArchiveIterator();
+$iter->set_function(\&wanted);
+$iter->run(@IN_FILES);
+
+foreach my $fh (@bucket_fhs) {
+  $fh->close();
+}
+
+#############################################
+
+sub wanted {
+  my ($msd_id, $data_ref) = @_;
+
+  # Make sure message can be used for outputing mbox format
+  if ($data_ref->[0] !~ /^From \S+ +... ... /) {
+    unshift(@$data_ref, "From abc\@xyz.com Mon Jan  1 00:00:00 2000\n");
+  }
+
+  $bucket_fhs[$current_bucket]->print( join("", @$data_ref) );
+
+  $current_bucket = ($current_bucket + 1) % $num_buckets;
+} # wanted()
