@@ -620,7 +620,7 @@ sub sync_journal_trapped {
   my $showdots = $opts->{showdots};
   my $retirepath = $path.".old";
 
-  if ( !stat($path) || !-r _ ) { # will we be able to read the file?
+  if (!-r $path) { # will we be able to read the file?
     warn "bayes: bad permissions on journal, can't read: $path\n";
     return 0;
   }
