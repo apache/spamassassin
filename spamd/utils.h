@@ -21,6 +21,7 @@ int ssl_timeout_read (SSL *ssl, void *, int );
 
 /* these are fd-only, no SSL support */
 int full_read(int fd, void *buf, int min, int len);
+int full_read_ssl(SSL *ssl, unsigned char *buf, int min, int len);
 int full_write(int fd, const void *buf, int len);
 
 #endif
