@@ -635,6 +635,22 @@ sub check_for_faraway_charset_in_body {
   0;
 }
 
+sub check_for_faraway_charset_in_headers {
+  my ($self) = @_;
+
+  my @locales = split (' ', $self->{conf}->{ok_locales});
+  push (@locales, $ENV{'LANG'});
+
+  for my $h (qw(From Subject)) {
+    my $hdr = $self->get($h);
+    while ($hdr =~ /=\?(.+?)\?.\?.*?\?=/g) {
+      Mail::SpamAssassin::Locales::is_charset_ok_for_locales($1, @locales)
+	  or return 1;
+    }
+  }
+  0;
+}
+
 sub get_charset_from_ct_line {
   my $type = shift;
   if ($type =~ /charset="([^"]+)"/i) { return $1; }
