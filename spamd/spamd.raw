@@ -380,6 +380,9 @@ if ( $log_facility eq 'stderr' ) {
 }
 
 my $already_done_syslog_failure_warning;
+my $syslog_disabled;
+my $syslog_consecutive_failures = 0;
+my $syslog_failure_threshold = 10;
 
 # Logging via syslog is requested. Falling back to INET and then STDERR
 # if opening a UNIX socket fails.
@@ -1841,12 +1844,14 @@ sub logmsg_file {
 sub logmsg_syslog {
   my $msg = shift;
 
+  return if $syslog_disabled;
+
   # install a new handler for SIGPIPE -- this signal has been
   # found to occur with syslog-ng after syslog-ng restarts.
   local $SIG{'PIPE'} = sub {
     $main::SIGPIPE_RECEIVED++;
-    # force a log-close.
-    closelog();
+    # force a log-close.   trap possible die() calls
+    eval { closelog(); };
   };
 
   # important: do not call syslog() from the SIGCHLD handler
@@ -1869,19 +1874,24 @@ sub logmsg_syslog {
         $already_done_syslog_failure_warning = 1;
       }
     }
+    syslog_incr_failure_counter();
   }
   else {
-    check_syslog_sigpipe($msg);       # check for SIGPIPE anyway (bug 3625)
+    $syslog_consecutive_failures = 0;
+    check_syslog_sigpipe($msg);     # check for SIGPIPE anyway (bug 3625)
   }
 
-  $SIG{PIPE} = 'IGNORE';
+  $SIG{PIPE} = 'IGNORE';            # this may have been reset (bug 4026)
 }
 
 sub check_syslog_sigpipe {
   my ($msg) = @_;
 
-  if ($main::SIGPIPE_RECEIVED)
-  {
+  if (!$main::SIGPIPE_RECEIVED) {
+    return 0;     # didn't have a SIGPIPE
+  }
+
+  eval {
     # SIGPIPE received when writing to syslog -- close and reopen
     # the log handle, then try again.
     closelog();
@@ -1898,17 +1908,31 @@ sub check_syslog_sigpipe {
     # still broken.
     if ( $main::SIGPIPE_RECEIVED > 1 ) {
       warn "logging failure: multiple SIGPIPEs received\n";
+      $syslog_disabled = 1;
     }
 
     $main::SIGPIPE_RECEIVED = 0;
     return 1;
-  }
+  };
 
-  return 0;     # didn't have a SIGPIPE
+  if ($@) {     # something died?  that's not good.
+    syslog_incr_failure_counter();
+  }
 }
 
+# NOTE: wrap calls to this in eval{ }!!
 sub openlog_for_spamd {
   openlog( 'spamd', 'cons,pid,ndelay', $log_facility );
+}
+
+sub syslog_incr_failure_counter {
+  if (++$syslog_consecutive_failures > $syslog_failure_threshold) {
+    warn "syslog() failed ".$syslog_consecutive_failures
+              ." times in a row, disabled\n";
+    $syslog_disabled = 1;
+    return 1;
+  }
+  return 0;
 }
 
 sub kill_handler {
