@@ -106,12 +106,7 @@ logmsg "server started on port $port";
 my $waitedpid = 0;
 my $paddr;
 
-sub REAPER {
-    $waitedpid = wait;
-    $SIG{CHLD} = \&REAPER;  # loathe sysV
-}
-
-$SIG{CHLD} = \&REAPER;
+$SIG{CHLD} = 'IGNORE';		# important: avoids perl sighandling bug on BSD
 
 for ( $waitedpid = 0;
       ($paddr = accept(Client,Server)) || $waitedpid;
