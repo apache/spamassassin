@@ -171,6 +171,9 @@ skipped.
     you will need to install the Mail::Audit module, and any modules it
     requires (there's lots of them, unfortunately).   This is no longer
     recommended.
+    
+    Additionally, Mail::Internet is required if you wish to use the "-r/-w"
+    options of the spamassassin program.
 
     If you use procmail, KMail, or you plan to use 'spamd', you will *not*
     need these.
