@@ -4,6 +4,8 @@
  * The text of this license is included in the SpamAssassin distribution in the file named "License"
  */
 
+#include <sysexits.h>
+#include <errno.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
@@ -13,32 +15,201 @@
 #include <fcntl.h>
 #include <stdlib.h>
 
-int main(int argc,char **argv)
+void print_usage(void)
 {
-  int port = 22874;
-  int mysock = socket(PF_INET,SOCK_STREAM,0);
-  ssize_t bytes;
+  printf("Usage: spamc [-d host] [-p port] [-h]\n");
+  printf("-d host: specify host to connect to  [default: localhost]\n");
+  printf("-p port: specify port for connection [default: 22874]\n");
+  printf("-h: print this help message\n");
+}
+
+int send_message(int in,int out)
+{
+  size_t bytes;
   char buf[8192];
+
+  bytes = snprintf(buf,"PROCESS SPAMC/1.0\r\n");
+
+  do
+  {
+    write(out,buf,bytes);
+  } while((bytes=read(in,buf,8192)) > 0);
+
+  shutdown(out,SHUT_WR);
+
+  return EX_OK;
+}
+
+int read_message(int in, int out)
+{
+  size_t bytes;
+  int flag=0;
+  char buf[8192];
+  float version; int response=EX_OK;
+
+  for(bytes=0;bytes<8192;bytes++)
+  {
+    if(read(in,&buf[bytes],1) == 0) // read header one byte at a time
+    {
+      // Read to end of message!  Must be because this is version <1.0 server
+      write(out,buf,bytes); // so write out the message
+      break; // if we break here, the while loop below will never be entered and we'll return properly
+    }
+    if('\n' == buf[bytes])
+    {
+      if(2 != sscanf(buf,"SPAMD/%f %d %*s",&version,&response))
+      {
+	exit(EX_PROTOCOL);
+      }
+      flag = -1; // Set flag to show we found a header
+      break;
+    }
+  }
+	
+  if(!flag)
+  {
+    // We never received a header, so it's a long message with version <1.0 server
+    write(out,buf,bytes); // so write out the message so far
+    // Now we'll fall into the while loop if there's more message left.
+  }
+
+  if(EX_OK == response)
+  {
+    while((bytes=read(in,buf,8192)) > 0)
+    {
+      write(out,buf,bytes);
+    }
+  }
+
+  shutdown(in,SHUT_RD);
+
+  return response;
+}
+
+int process_message(in_addr_t host, int port)
+{
+  int mysock;
   struct sockaddr_in addr;
   int value=1;
 
-  setsockopt(mysock,0,TCP_NODELAY,&value,sizeof(value));
-  addr.sin_family = AF_INET;
-  if(2==argc) port = atoi(argv[1]);
-  addr.sin_port = htons(port);
-  addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+  if(-1 == (mysock = socket(PF_INET,SOCK_STREAM,0)))
+  {
+    switch(errno)
+    {
+    case EPROTONOSUPPORT:
+    case EINVAL:
+      return EX_SOFTWARE;
+    case EACCES:
+      return EX_NOPERM;
+    case ENFILE:
+    case EMFILE:
+    case ENOBUFS:
+    case ENOMEM:
+      return EX_OSERR;
+    }
+  }
+  
+  if(-1 == setsockopt(mysock,0,TCP_NODELAY,&value,sizeof(value)))
+  {
+    switch(errno)
+    {
+    case EBADF:
+    case ENOTSOCK:
+    case ENOPROTOOPT:
+    case EFAULT:
+      return EX_SOFTWARE;
+    }
+  }
 
-  connect(mysock,(const struct sockaddr *)&addr,sizeof(addr));
-  while((bytes=read(STDIN_FILENO,buf,8192)) > 0)
+  addr.sin_family = AF_INET;
+  addr.sin_port = htons(port);
+  addr.sin_addr.s_addr = host;
+
+  if(-1 == connect(mysock,(const struct sockaddr *)&addr,sizeof(addr)))
   {
-    write(mysock,buf,bytes);
+    switch(errno)
+    {
+    case EBADF:
+    case EFAULT:
+    case ENOTSOCK:
+    case EISCONN:
+    case EADDRINUSE:
+    case EINPROGRESS:
+    case EALREADY:
+    case EAFNOSUPPORT:
+      return EX_SOFTWARE;
+    case ECONNREFUSED:
+    case ETIMEDOUT:
+    case ENETUNREACH:
+      return EX_UNAVAILABLE;
+    case EACCES:
+      return EX_NOPERM;
+    }
   }
-  shutdown(mysock,SHUT_WR);
-  while((bytes=read(mysock,buf,8192)) > 0)
+	
+  if(0 == (value = send_message(STDIN_FILENO,mysock)))
   {
-    write(STDOUT_FILENO,buf,bytes);
+    value = read_message(mysock,STDOUT_FILENO);
   }
-  shutdown(mysock,SHUT_RD);
-  return 0;
+
+  return value;
 }
 
+void read_args(int argc, char **argv, in_addr_t *host, int *port)
+{
+  int opt;
+  struct hostent *hent;
+	
+  while(-1 != (opt = getopt(argc,argv,"d:p:h")))
+  {
+    switch(opt)
+    {
+    case 'd':
+      {
+	if(hent = gethostbyname(optarg))
+	{
+	  *host = *((in_addr_t *)(hent->h_addr_list[0]));
+	}
+	else
+	{
+	  switch(h_errno)
+	  {
+	  case HOST_NOT_FOUND:
+	  case NO_ADDRESS:
+	  case NO_RECOVERY:
+	    exit(EX_NOHOST);
+	  case TRY_AGAIN:
+	    exit(EX_TEMPFAIL);
+	  }
+	}
+	break;
+      }
+    case 'p':
+      {
+	*port = atoi(optarg);
+	break;
+      }
+    case '?':
+    case 'h':
+      {
+	print_usage();
+	exit(EX_USAGE);
+      }
+    }
+  }
+}	
+
+int main(int argc,char **argv)
+{
+  int port = 22874;
+  in_addr_t host = (in_addr_t)0;
+
+  srand(time(NULL));
+
+  read_args(argc,argv,&host,&port);
+    
+  return process_message(host,port);
+}
+
+  
+  

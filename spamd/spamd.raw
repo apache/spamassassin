@@ -14,6 +14,24 @@ use Carp;
 use Mail::Audit;
 use Mail::SpamAssassin;
 my $spamtest = Mail::SpamAssassin->new({local_tests_only=>1});
+global %resphash = {
+    EX_OK => 0,
+    EX_USAGE => 64, # command line usage error
+    EX_DATAERR => 65, # data format error
+    EX_NOINPUT => 66, # cannot open input
+    EX_NOUSER => 67, # addressee unknown
+    EX_NOHOST => 68, # host name unknown
+    EX_UNAVAILABLE => 69, # service unavailable
+    EX_SOFTWARE => 70, # internal software error
+    EX_OSERR => 71, # system error (e.g., can't fork)
+    EX_OSFILE => 72, # critical OS file missing
+    EX_CANTCREAT => 73, # can't create (user) output file
+    EX_IOERR => 74, # input/output error
+    EX_TEMPFAIL => 75, # temp failure; user is invited to retry
+    EX_PROTOCOL => 76, # remote error in protocol
+    EX_NOPERM => 77, # permission denied
+    EX_CONFIG => 78, # configuration error
+};
 
 sub spawn;  # forward declaration
 sub logmsg { print "$0 $$: @_ at ", scalar localtime, "\n" }
@@ -48,13 +66,18 @@ for ( $waitedpid = 0;
 
     spawn sub {
 	$|=1; # always immediately flush output
-	# First read in message
+	# First request lines off stream
+	my $request;
+	chomp($request = <STDIN>);
+
+	my $resp = "EX_OK";
+	# Now read in message
 	my $mail = Mail::Audit->new();
 	# Now use copy-on-writed (hopefully) SA object
 	my $status = $spamtest->check($mail);
 	$status->rewrite_mail; #if $status->is_spam;
 
-	print $mail->header . "\n" . join '',@{$mail->body};
+	print "SPAMD/1.0 $resphash{$resp} $resp\r\n",$mail->header,"\n",(join '',@{$mail->body});
 
 	$status->finish();	# added by jm to allow GC'ing
     };

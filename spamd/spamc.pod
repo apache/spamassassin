@@ -5,7 +5,11 @@ spamc - client for spamd
 
 =head1 SYNOPSIS
 
-  spamc [port]
+  spamc [-d host] [-p port] [-h]
+
+  -h		Print this help message and terminate without action
+  -d host	Connect to spamd server on given host
+  -p port	Connect to spamd server listening on given port
 
 =head1 DESCRIPTION
 
