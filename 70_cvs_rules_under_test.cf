@@ -117,12 +117,17 @@ describe T_RATWARE_THEBAT	Sent from "The Bat"
 score T_RATWARE_THEBAT		1.0
 
 # Needs testing
-body T_QUOTE_TWICE              /> >\s/
-describe T_QUOTE_TWICE          Contains twice quoted reply
-score T_QUOTE_TWICE             -1.0
+body T_QUOTE_TWICE_1            /^> >\s/
+describe T_QUOTE_TWICE_1        Contains twice quoted reply
+score T_QUOTE_TWICE_1           -1.0
 
 # Needs testing
-body T_OUTLOOK_REPLY            /-----original message-----/i
+body T_QUOTE_TWICE_2            /^>>/
+describe T_QUOTE_TWICE_2        Contains twice quoted reply
+score T_QUOTE_TWICE_2           -1.0
+
+# Needs testing
+# Outlook Express has spaces around the text, Outlook doesn't
+body T_OUTLOOK_REPLY            /----- ?Original Message ?-----/s
 describe T_OUTLOOK_REPLY        Contains what looks like an outlook reply
 score T_OUTLOOK_REPLY           -1.0
-
