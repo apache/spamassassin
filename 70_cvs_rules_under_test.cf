@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.624 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.625 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -34,6 +34,15 @@
 ###full __END_HASHBUSTER_1		/\n\[[a-z0-9]+\]\n\s*\Z/
 ###meta T_RATWARE_2089		(NO_REAL_NAME && TO_ADDRESS_EQ_REAL && __END_HASHBUSTER_1)
 
+# this is really badly faked.  Also the spammer who uses "25250101"
+# for the build is a total hippie.
+###header T_RATWARE_GECKO_BUILD	User-Agent =~ /Gecko\/(?!200\d\d\d\d\d)\d/
+
+# another good way to catch mozilla fakery
+###header __UA_GECKO		User-Agent =~ /Gecko\//
+###header __EXISTS_ACCEPT_LANG	exists:X-Accept-Language
+###meta T_RATWARE_GECKO_NO_LANG	(__UA_GECKO && !__EXISTS_ACCEPT_LANG)
+
 # reminder: develop these after 2.60
 # full T_SPRINTF_5X	/[^-][A-F1-9][A-F0-9]{5,7}-[A-F1-9][A-F0-9]{5,7}-[A-F1-9][A-F0-9]{5,7}-[A-F1-9][A-F0-9]{5,7}-[A-F1-9][A-F0-9]{5,7}[^-]/
 
@@ -64,3 +73,4 @@
 # # also http://tlec.linux.or.jp/docs/user_prefs
 # meta T_LJ_MISYOUDAKUKOUKOKU T_LJ_MISYOUDAKU && T_LJ_KOUKOKU && T_LJ_STAR
 # describe T_LJ_MISYOUDAKUKOUKOKU T_LJ_MISYOUDAKU && T_LJ_KOUKOKU && T_LJ_STAR
+
