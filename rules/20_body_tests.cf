@@ -124,7 +124,7 @@ body BULK_EMAIL			/bulk e-*mail/i
 describe BULK_EMAIL		Talks about bulk email
 body DEAR_EMAIL			/Dear [A-Za-z0-9_-]+\@/
 describe DEAR_EMAIL		Dear you@you.com?
-body DEAR_FRIEND		/Dear (?:Friend|IT\W|Internet)/i
+body DEAR_FRIEND		/Dear (?:Friend|IT\b|Internet|candidate|sir|madam|investor|travell?er)/i
 describe DEAR_FRIEND		How dear can you be if you don't know my name?
 body CASHCASHCASH		/\${3,}/
 describe CASHCASHCASH		Contains at least 3 dollar signs in a row
@@ -716,7 +716,7 @@ describe NO_DISSAPOINTMENT      You won't be dissapointed.
 body     SERIOUS_ONLY           /Serious [IE]nquiries Only/i
 describe SERIOUS_ONLY           Serious Enquiries Only.
 
-body     RISK_FREE              /\b(?:risk free|no risk)/i
+body     RISK_FREE              /\b(?:risk\bfree|no\brisk)/i
 describe RISK_FREE              Risk free.  Suuurreeee....
 
 # "seen on TV", "seen on ABC/NBC/etc", "seen on XYZ TV", or
@@ -748,3 +748,450 @@ rawbody NUMERIC_COMMENT     /<!--\d{3,}-->/
 describe NUMERIC_COMMENT    Contains a comment with nothing but a number in it
 test NUMERIC_COMMENT     ok    Some text <!--34555--> followed by more
 test NUMERIC_COMMENT     fail  Something <!-- A comment --> and more
+
+
+## Contrib: Mark Perkel
+
+body OFFSHORE_SCAM		/offshore .{0,20}(?:credit card|companies|accounts?|financ|website)/i
+describe OFFSHORE_SCAM		Off Shore Scams
+
+body VACATION_SCAM
+/(?:free|mini-?|dream|special).{0,10}vacation|vacation (?:offer|promotion|package|for two|getaway)/i
+describe VACATION_SCAM		Vacation Offers
+
+body WHY_PAY_MORE		/why pay more/i
+describe WHY_PAY_MORE		Why Pay More?
+
+body CONGRATULATIONS		/congratulations/i
+describe CONGRATULATIONS	Congratulations - you been scammed!
+
+body SIGN_UP			/free sign up|sign up today/i
+describe SIGN_UP		Sign up Free Today
+
+body FREE_CELL_PHONE		/free .{0,12}cell phone/i
+describe FREE_CELL_PHONE	Free Cell Phone
+
+body FREE_PREVIEW		/free preview/i
+describe FREE_PREVIEW		Free Preview
+
+body FREE_ACCESS		/free access/i
+describe FREE_ACCESS		Free Access
+
+body FREE_LEADS			/free leads/i
+describe FREE_LEADS		Free Leads
+
+body FREE_TICKETS		/free ticket/i
+describe FREE_TICKETS		Free Tickets
+
+body OFFER			/(?:free|special|trial) offer/i
+describe OFFER			Free Offer
+
+body OFFER_EXPIRE		/offer expires/i
+describe OFFER_EXPIRE		Offer Expires
+
+body FREE_QUOTE			/free quote/i
+describe FREE_QUOTE		Free Quote
+
+body FREE_INSTALL		/free installation/i
+describe FREE_INSTALL		Free Installation
+
+body FREE_SAMPLE		/free sample/i
+describe FREE_SAMPLE		Free Sample
+
+body FREE_DVD			/free dvd/i
+describe FREE_DVD		Free DVD
+
+body FREE_INVESTMENT		/free investment/i
+describe FREE_INVESTMENT	Free Investment 
+
+body INVESTMENT			/investment decision/i
+describe INVESTMENT		/Investment Stuff
+
+body FREE_TRIAL			/free trial/i
+describe FREE_TRIAL		Try it for FREE!
+
+body FREE_MEMBERSHIP		/free membership/i
+describe FREE_MEMBERSHIP	Free Membership
+
+body FREE_FLAG			/free flag/i
+describe FREE_FLAG		Free Flag
+
+body FREE_HOSTING		/free hosting/i
+describe FREE_HOSTING		Free Hosting
+
+body FREE_WEBSITE		/free web/i
+describe FREE_WEBSITE		Free Website
+
+body CREDIT_CARD		/credit card.{1,10}(?:offer|debt|decision)/i
+describe CREDIT_CARD		Credit Card Offers
+
+body NO_CREDIT_CHECK		/no credit check/i
+describe NO_CREDIT_CHECK	No Credit Check
+
+body BANKRUPTCY			/(?:avoid|past) bankruptcy/i
+describe BANKRUPTCY		Avoid Bankruptcy
+
+body CREDIT_BUREAU		/all .{0,9} credit bureau/i
+describe CREDIT_BUREAU		Credit Bureaus
+
+body ACCEPT_CREDIT_CARDS	/accept.{1,15}credit card/i
+describe ACCEPT_CREDIT_CARDS	Accept Credit Cards
+
+body BAD_CREDIT			/(?:bad|poor|no|eliminate|repair|(?:re)establish|damag).{0,10} (?:credit|debt)/i
+describe BAD_CREDIT		Eliminate Bad Credit
+
+body UNSECURED_CREDIT		/unsecured.{0,10}(?:master card|visa|credit|loans|debt)/i
+describe UNSECURED_CREDIT	Unsecured Credit/Debt
+
+body LOW_INTEREST		/low.{0,20} interest rate/i
+describe LOW_INTEREST		Lower Interest Rates
+
+body LOW_PAYMENT		/(?:reduce|low).{0.12} payment/i
+describe LOW_PAYMENT		Lower Monthly Payment
+
+body CONSOLIDATE_DEBT		/consolidate .{0,9} (?:debt|credit)|debt (?:consolidation|elimination)/i
+describe CONSOLIDATE_DEBT	Consolidate Debt and Credit
+
+body CREDITORS_CALLING		/creditors calling/i
+describe CREDITORS_CALLINGS	Creditors Calling
+
+body REFINANCE			/refinance.{0,6} home|home loan/i
+describe REFINANCE		Refinance Home
+
+body LIFE_INSURANCE		/life insurance .{0,30} no .{0,15}exam/i
+describe LIFE_INSURANCE		No Examination life Insurance
+
+body SEARCH_ENGINE		/(?:submit|traffic|top).{0.10} search engines?|site ranking/i
+describe SEARCH_ENGINE		Search Engine Site Ranking
+
+body OPPORTUNITY		/opportunity (?:pass|of a lifetime|is knocking|for you)|(?:investment|unique) opportunity/i
+describe OPPOPTUNITY		What a deal!
+
+body MORE_TRAFFIC		/more (?:internet|web) traffic/i
+describe MORE_TRAFFIC		More Internet Traffic
+
+body NO_PURCHASE		/no purchase/i
+describe NO_PURCHASE		No Purchase Necessary
+
+body NO_MIDDLEMAN		/no middleman/i
+describe NO_MIDDLEMAN		No Middleman
+
+body NO_SPENDING		/no spending limits/i
+describe NO_SPENDING		No Spending Limits
+
+body NO_STRINGS			/no strings attached/i
+describe NO_STRINGS		No Strings Attached
+
+body NO_FEE			/no .{0,12} fee\B/i
+describe NO_FEE			No Fees
+
+body NO_MEDICAL			/no medical exam/i
+describe NO_MEDICAL		No Medical Exams
+
+body NO_AGE			/no age restrictions/i
+describe NO_AGE			No Age Restrictions
+
+body NO_FORMS			/no .{0,9}forms/i
+describe NO_FORMS		No Claim Forms
+
+body NO_REFUND			/no refund/i
+describe NO_REFUND		They keep your money
+
+body NO_GIMMICK			/no gimmick/i
+describe NO_GIMMICK		No Gimmick
+
+body NO_INVESTMENT		/no investment/i
+describe NO_INVESTMENT		No Investment
+
+body INITIAL_INVEST		/initial investment/i
+describe INITIAL_INVEST		Requires Initial Investment
+
+body NO_INVENTORY		/no inventory/i
+describe NO_INVENTORY		No Inventory
+
+body NO_RISK			/no risk|risk free/i
+describe NO_RISK		No Risk
+
+body BUY_DIRECT			/buy direct/i
+describe BUY_DIRECT		Buy Direct
+
+body PRICES_WONT_LAST		/prices.{0,11} last/i
+describe PRICES_WONT_LAST	Prices won't Last
+
+body SLASH_PRICE		/slash.{0,2} price/i
+describe SLASH_PRICE		Slashed Price
+
+body DRASTIC_REDUCED		/drastic.{0,4} reduc/i
+describe DRASTIC_REDUCED	Drastically Reduced
+
+body DO_IT_TODAY		/(?:join|register|order|apply) .{0,10}today/i
+describe DO_IT_TODAY		Do it Today
+
+body ACT_NOW			/act.{0,4} now|do.{0.5} hesitate|start now/i
+describe ACT_NOW		Act Now! Don't Hesitate!
+
+body WHY_WAIT			/why wait|what are you waiting for/i
+describe WHY_WAIT		What are you waiting for
+
+body SUPPLIES_LIMITED		/supplies are limited/i
+describe SUPPLIES_LIMITED	Supplies are Limited
+
+body SECRET_RECORD		/secretly record/i
+describe SECRET_RECORD		Secretly Recorded
+
+body INCREDIBLE			/incredible secrets/i
+describe INCREDIBLE		Things incredible
+
+body FIND_ANYTHING		/find out anything/i
+describe FIND_ANYTHING		Find out Anything abou Anyone
+
+body FARM_SEX			/(?:farm|animal) (?:sex|fucking|action)/i
+describe FARM_SEX		Sex with Animals
+
+body SEDUCTION			/(?:seduc|attract).{0,8} (?:ebook|opposite sex|women)/i
+describe SEDUCTION		Score with babes!
+
+body MARKET_SOLUTION		/market.{0,9} solution/i
+describe MARKET_SOLUTION	Marketing Solution
+
+body MARKETING			/direct marketing/i
+describe MARKETING		Direct Marketing
+
+body SAVE_MONEY			/save .{0,9}(?:money|thousands|millions|up to)/i
+describe SAVE_MONEY		Save big money
+
+body BREAKTHROUGH		/breakthrough price/i
+describe BREAKTHROUGH		Breakthrough Pricing
+
+body GUARANTEED_STUFF		/guarantee.{0,15}(?:income|money|monthly|you)/i
+describe GUARANTEED_STUFF	Guaranteed Stuff
+
+body INCOME			/additional income/i
+describe INCOME			Additional Income
+
+body EARNINGS			/potential (?:earnings|income)|income potential/i
+describe EARNINGS		Potential Earnings
+
+body SEE_FOR_YOURSELF		/see for yourself/i
+describe SEE_FOR_YOURSELF	See For Yourself
+
+body THE_BEST_RATE		/the best rate/i
+describe THE_BEST_RATE		The best Rate
+
+body BEST_PRICE			/best price/i
+describe BEST_PRICE		Best Prices
+
+body WE_PROMISE_YOU		/we promise .{0,9}you/i
+describe WE_PROMISE_YOU		Promise you anything!
+
+body OUTSTANDING_VALUE		/outstanding value/i
+describe OUTSTANDING_VALUE	Outstanding Value
+
+body AMAZING			/amazing (?:product|rates)/i
+describe AMAZING		Amazing Stuff
+
+body CASH_BONUS			/cash bonus/i
+describe CASH_BONUS		Cash Bonus
+
+body BONUS_PAYMENT		/bonus payment/i
+describe BONUS_PAYMENT		Bonus Payments
+
+body SHOPPING_SPREE		/shopping spree/i
+describe SHOPPING_SPREE		Shopping Spree
+
+body GIFT_CERTIFICATE		/gift certificate/i
+describe GIFT_CERTIFICATE	Gift Certificate
+
+body FANTASTIC			/fantastic {0,9}(?:price|deal|saving)/i
+describe FANTASTIC		Fantastic Deal
+
+body SIGNIFICANT		/significant savings/i
+describe SIGNIFICANT		Significant Savings
+
+body CENTS_ON_DOLLAR		/cents on the dollar/i
+describe CENTS_ON_DOLLAR	Cents on the Dollar
+
+body IRS			/irs .{0,15}secrets/i
+describe IRS			IRS Scams
+
+body COUPON			/off coupon/i
+describe COUPON			Offers Coupon
+
+body CANT_LIVE_WITHOUT		/can.{0,4} live without/i
+descrive CANT_LIVE_WITHOUT	I can live without
+
+body NAME_BRAND			/(?:famous name|major) brand|brand[- ]name/i
+describe NAME_BRAND		Name Brand
+
+body DIET			/no diet|weight loss (?:program|offer)|(?:extra|lose).{0,9} (?:pounds|weight)|burn fat/i
+describe DIET			Lose Weight Spam
+
+
+body LONG_DISTANCE		/(?:Unlimited|per minute|free).{1,9}Long Distance/i
+describe LONG_DISTANCE		Long Distance Phone Offer
+
+body REVERSE_AGING		/reverses? aging/i
+describe REVERSE_AGING		Reverses Aging
+
+body HAIR_LOSS			/(?:thining|restore|grow|new) hair|hair loss/i
+describe HAIR_LOSS		Cures Baldness
+
+body CABLE_CONVERTER		/cable converter/i
+describe CABLE_CONVERTER	Cable Converter
+
+body LUXURY_CAR			/luxury car/i
+describe LUXURY_CAR		Luxury Car
+
+body PROTECT_ASSETS		/(?:judgement|lein|divorce|seizure) proof/i
+describe PROTECT_ASSETS		Protect Assets
+
+body BREAKTHROUGH		/(?:revolutionary|medical) breakthrough/i
+describe BREAKTHROUGH		Breakthrough
+
+body WRINKLES			/wrinkle reduction/i
+describe WRINKLES		Removes Wrinkles
+
+body HARD_CASH			/hard cash/i
+describe HARD_CASH		Cash is soft
+
+body BIG_BUCKS			/big bucks/i
+describe BIG_BUCKS		They are all the same size
+
+body BUY_JUDGEMENTS		/(?:purchase|collect|divorce) {0,20} judgements/i
+describe BUY_JUDGEMENTS		Purchase Judgements
+
+body LYING_EYES			/believe your eyes/i
+describe LYING_EYES		Will not Belive your Eyes!
+
+body WHILE_YOU_SLEEP		/while you sleep/i
+describe WHILE_YOU_SLEEP	While you Sleep
+
+body WHILE_SUPPLIES		/while supplies last/i
+describe WHILE_SUPPLIES		While Supplies Last
+
+body RICH			/make you rich|get rich quick/i
+describe RICH			If only it were that easy
+
+body WINNING			/you.{0,4} (?:won|a winner)|register to win|sweepstakes/i
+describe WINNING		Who really wins?
+
+body PROMOTION			/special promotion/i
+describe PROMOTION		Special Promotion
+
+body PENNIES_A_DAY		/pennies a day/i
+describe PENNIES_A_DAY		Pennies a Day
+
+body HIDDEN_CHARGES		/hidden charges/i
+describe HIDDEN_CHARGES		Talks about Hidden Charges
+
+body GET_STARTED_NOW		/get started now/i
+describe GET_STARTED_NOW	Get Started Now
+
+body GET_IT_NOW			/get it now/i
+describe GET_IT_NOW		Get it now!
+
+body ONLY_COST			/only .{0,9}\$/i
+describe ONLY_COST		Only Costs $0.00
+
+body SAVE_BUCKS			/save \$/i
+describe SAVE_BUCKS		Save $0.00
+
+body FINANCIAL			/financial(ly) free/i
+describe FINANCIAL 		Financial Freedom
+
+body FORWARD_LOOKING		/contains forward-looking statements/i
+describe FORWARD_LOOKING	Stock Disclaimer Statement
+
+body DISCLAIMER			/disclaimer/i
+describe DISCLAIMER		Message contains disclaimer
+
+body SATISFACTION		/satisfaction .{0,9}gauranteed|not .{0,9}satisfied/i
+describe SATISFACTION		Satisfaction Guaranteed
+
+body PRIZE			/claim .{0,9} prize/i
+describe PRIZE			Talks about prizes
+
+body GETAWAY			/weekend getaway/i
+describe GETAWAY		Weekend Getaway
+
+body HGH			/human growth hormone/i
+describe HGH			Human Growth Hormone
+
+body WEALTH			/achieve .{0,15}wealth/i
+describe WEALTH			Achieve Wealth
+
+body GIVING_AWAY		/giving away/i
+describe GIVING_AWAY		They're just giving it away!
+
+body EASY_TERMS			/easy terms/i
+describe EASY_TERMS		Easy Terms
+
+body EXTRA_CASH			/extra cash/i
+describe EXTRA_CASH		Offers Extra Cash
+
+body GET_PAID			/get paid/i
+describe GET_PAID		Get Paid
+
+body BEEN_TURNED_DOWN		/been turned down/i
+describe BEEN_TURNED_DOWN	Have you been turned down?
+
+body ONE_TIME			/one time (?:charge|investment)/i
+describe ONE_TIME		Only rip you once
+
+body COMPTETE			/compete for your business/i
+describe COMPTETE		Compete for your business
+
+body CANCEL			/cancel at any time/i
+describe CANCEL			Cancel at any time!
+
+body SELECTED			/you.{0.9} been selected/i
+describe SELECTED		You've been selected! Lucky You!
+
+body CHANGE_TERMS		/terms and conditions/i
+describe CHANGE_TERMS		They can change the terms and conditions
+
+body RESERVES_RIGHT		/reserves the right/i
+describe RESERVES_RIGHT		Reserves the right to screw you
+
+body NO_COMBINE			/with any other offer/i
+describe NO_COMBINE		/Can not be combined with any other offer
+
+body NEW_CUSTOMER		/new customers only/i
+describe NEW_CUSTOMER		New Customers Only
+
+body PSYCHIC			/(?:caring|gifted|experienced) psychic/i
+describe PSYCHIC		Psychics Scam
+
+body PHONE_CANCER		/phone.{0,15}cancer/i
+describe PHONE_CANCER		Cell Phone Cancer Scam
+
+body MEET_SINGLES		/meet .{0,12}singles|thousands of personal/i
+describe MEET_SINGLES		Meet Singles
+
+body JOIN_MILLIONS		/join (?:millions|thousands)/i
+describe JOIN_MILLIONS		Join Millions of Americans
+
+body BACKED_BY			/backed by (?:millions|billions)/i
+describe BACKED_BY		Backed by Billions
+
+body EXPECT_TO_EARN		/expect to earn|earn up to/i
+describe EXPECT_TO_EARN		Expect to get ripped
+
+body BE_BOSS			/your own boss/i
+describe BE_BOSS		Be your own boss
+
+body SPY_ON_FRIENDS		/investigat.{0.15} (?:friend|employee|neighbor)/i
+describe SPY_ON_FRIENDS		/Investigate your Friends!
+
+body DIG_UP_INFO		/dig up information/i
+describe DIG_UP_INFO		Dig up Dirt on Friends
+
+body MLM			/MLM|multi[- ]level[- ]marketing/i
+describe MLM			Multi Level Marketing
+
+body UNCLAIMED_MONEY		/unclaimed (?:funds|money)/i
+describe UNCLAIMED_MONEY	People just leave money laying around
+
+body FREE_CAP			/FREE/
+describe FREE_CAP		FREE in Uppercase
+
