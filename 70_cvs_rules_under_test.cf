@@ -729,3 +729,8 @@ tflags T_USER_AGENT               nice
 # updated to find 'approval!' as well.
 #  0.511   1.3455   0.0000    1.00    1.00    0.01  T_SUBJECT_APPROVED2
 header T_SUBJECT_APPROVED      Subject =~ /approv(?:ed|al).?[.!*]/i
+
+# From bug 1166, possible replacement for EXCUSE_11 - tvd
+# 0.211   0.5428   0.0072    0.99    1.00    0.01  T_EXCUSE_11
+# 0.004   0.0000   0.0072    0.00    0.00    1.00  EXCUSE_11
+body T_EXCUSE_11 /you.{0,15}(?:name|mail).{0,15}(?:was|were|our).{0,15}list/i
