@@ -33,25 +33,37 @@ uri ADCLICK_URL		m,\Qhttp://www.adclick.ws/p\E,
 describe ADCLICK_URL	Contains adclick URL
 
 # Needs testing
-body T_QUOTE_TWICE_1            /^> >\s/
-describe T_QUOTE_TWICE_1        Contains twice quoted reply
-score T_QUOTE_TWICE_1           -1.0
+body T_QUOTE_TWICE_1		/^> >\s/
+describe T_QUOTE_TWICE_1	Contains twice quoted reply
+tflags T_QUOTE_TWICE_1		nice
+score T_QUOTE_TWICE_1		-1.0
 
 # Needs testing
 # Outlook Express has spaces around the text, Outlook doesn't
 # (jm comment: please add ^ anchor if possible.)
-body T_OUTLOOK_REPLY            /----- ?Original Message ?-----/s
-describe T_OUTLOOK_REPLY        Contains what looks like an outlook reply
-score T_OUTLOOK_REPLY           -1.0
+body T_OUTLOOK_REPLY		/----- ?Original Message ?-----/s
+describe T_OUTLOOK_REPLY	Contains what looks like an outlook reply
+tflags T_OUTLOOK_REPLY		nice
+score T_OUTLOOK_REPLY		-1.0
+#
+# anchored version of T_OUTLOOK_REPLY
+# T_OUTLOOK_REPLY gets some FPs and matches messages that are replies to
+# replies
+header __ORIGINAL_MESSAGE_AGENT	X-Mailer =~ /\b(?:Microsoft Outlook|Internet Mail Service|Mozilla|AOL)\b/
+rawbody __ORIGINAL_MESSAGE_LINE	/^-{5,8} ?Original Message ?-{5,8}$/
+meta T_ORIGINAL_MESSAGE		(__ORIGINAL_MESSAGE_AGENT && __ORIGINAL_MESSAGE_LINE)
+describe T_ORIGINAL_MESSAGE	Looks like a reply to a message
+tflags T_ORIGINAL_MESSAGE	nice
+score T_ORIGINAL_MESSAGE	-1.0
 
 # avoid an FP; good ones have a hostname after the @
-header T_MSGID_GOOD_EXCHANGE      Message-Id =~ /^<[A-Z]{28}\.\S+\@\S+>$/
-score T_MSGID_GOOD_EXCHANGE       -1.0
-tflags T_MSGID_GOOD_EXCHANGE      nice
+header T_MSGID_GOOD_EXCHANGE	Message-Id =~ /^<[A-Z]{28}\.\S+\@\S+>$/
+tflags T_MSGID_GOOD_EXCHANGE	nice
+score T_MSGID_GOOD_EXCHANGE	-1.0
 
 # Looks good, but should be tested first.  fixes current THIS_AINT_SPAM
-body T_THIS_AINT_SPAM             /This.{0,30}is.{1,10}not?.{0,15}spam/is
-describe T_THIS_AINT_SPAM         Claims "This is not spam"
+body T_THIS_AINT_SPAM		/This.{0,30}is.{1,10}not?.{0,15}spam/is
+describe T_THIS_AINT_SPAM	Claims "This is not spam"
 
 # four rules to possibly replace OPT_IN
 body T_OPT_IN			/\bopt-in\b/
@@ -123,6 +135,7 @@ header T_Q_YOUR_FAMILY		Subject =~ /Your Family/i
 header T_Q_YOUR_OWN		Subject =~ /Your Own/i
 header T_Q_YOUR_PENIS		Subject =~ /Your Penis/i
 
+# UNPRINTABLE is supposedly 5.6 specific so it will need to be fixed/delayed
 body T_Q_UNPRINTABLE		/[[:^print:]]{8,}/
 body T_Q_CREDIT_BODY		/Accept Credit Cards/i
 body T_Q_BURNING_FAT		/Aging While Burning Fat/i
