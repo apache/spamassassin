@@ -1106,7 +1106,10 @@ sub get_decoded_stripped_body_text_array {
 		],
 		marked_sections => 1);
 
-    $hp->parse($text);
+    # ALWAYS pack it into byte-representation, even if we're using 'use bytes',
+    # since the HTML::Parser object may use Unicode internally.
+    # (bug 1417, maybe)
+    $hp->parse(pack ('C0', $text));
     $hp->eof;
 
     $text = join('', $before, @{$self->{html_text}});
