@@ -3,9 +3,11 @@
 use lib '.'; use lib 't';
 use SATest; sa_t_init("spamd_utf8");
 my $am_running;
-my $testlocale = 'en_US.UTF-8';	# ensure we test in UTF-8 locale
+my $testlocale;
 
 use Test; BEGIN {
+  $testlocale = 'en_US.UTF-8';
+
   my $havelocale = 1;
   open (IN, "LANG=$testlocale perl -e 'exit 0' 2>&1 |");
   while (<IN>) {
