@@ -2,7 +2,7 @@ Welcome to SpamAssassin!
 ------------------------
 
 SpamAssassin is a mail filter which attempts to identify spam using
-a variety of mechanisms including text analysis, Bayesian filtering, 
+a variety of mechanisms including text analysis, Bayesian filtering,
 DNS blocklists, and collaborative filtering databases.
 
 Using its rule base, it uses a wide range of heuristic tests on mail
@@ -19,11 +19,9 @@ SpamAssassin has been shown to produce around 0.9% false negatives (spam
 that was missed) and around 0.1% false positives (ham incorrectly marked
 as spam).  See the rules/STATISTICS*.txt files for more information.
 
-SpamAssassin also includes support for reporting spam messages
-automatically, and/or manually, to collaborative filtering databases
-such as Vipul's Razor [1].
-
-	[1]: http://razor.sourceforge.net/
+SpamAssassin also includes plugins to support reporting spam messages
+automatically or manually to collaborative filtering databases such as
+Pyzor, DCC, and Vipul's Razor.
 
 The distribution provides "spamassassin", a command line tool to
 perform filtering, along with the "Mail::SpamAssassin" module set
@@ -91,9 +89,9 @@ default locations that SpamAssassin will look at the end.
 
         Plugin control file, installed from the distribution. This is used
         to control what plugins are loaded.  Modifications here will be
-        *prepended*, NOT appended, to the config loaded from the above
-        directory.   You may wish to modify this if you want to inhibit
-        use of a plugin that is enabled by default.
+        loaded before any configuration loaded from the above directories.
+        You want to modify this file if you want to load additional plugins
+        or inhibit loading a plugin that is enabled by default.
 
   - /usr/share/spamassassin/user_prefs.template:
 
@@ -140,7 +138,6 @@ default locations that SpamAssassin will look at the end.
 
 	See "perldoc sa-learn" for more documentation on how
 	to train this.
-
 
 File Locations:
 
@@ -252,35 +249,29 @@ lives at <spamassassin-users /at/ incubator.apache.org>.  See
 http://wiki.apache.org/spamassassin/MailingLists for the sign-up address
 and a link to the archive of past messages.
 
-Much more info is at http://wiki.apache.org/spamassassin/FrontPage
+Much more info is at http://wiki.apache.org/spamassassin/
 
-Commercial Tests
-----------------
+Disabled code
+-------------
 
-There are several tests in the spamassassin configuration file which are
-turned off by default, namely the mail-abuse.org tests.  The
-mail-abuse.org tests are RCVD_IN_MAPS_RBL, RCVD_IN_MAPS_DUL,
-RCVD_IN_MAPS_RSS, RCVD_IN_MAPS_NML, and RCVD_IN_MAPS_OPS.
+There are some tests and code in SpamAssassin that are turned off by
+default: experimental code, slow code, or code that depends on
+non-open-source software or services that are not always free.  These
+disabled tests include:
 
-These are commercial services, so you need to pay money to use them.
+  - DCC: depends on non-open-source software (disabled in init.pre)
+  - DomainKeys: experimental (disabled in init.pre)
+  - MAPS: commercial service (disabled in 50_scores.cf)
+  - MSExec: experimental (disabled in init.pre)
+  - Razor2: depends on service that is not always free (disabled in init.pre)
+  - TextCat: slow (disabled in init.pre)
 
-The mail-abuse.org tests are free, with caveats.  You must subscribe,
-asking for free access for personal use -- if you're using SpamAssassin as
-a personal mail filter you may turn them on.  More information on the
-mail-abuse.org services can be found here: http://mail-abuse.org/rbl+/ and
-http://www.mail-abuse.org/feestructure.html .
+To turn on tests disabled in 50_scores.cf, simply assign them a non-zero
+score, e.g. by adding score lines to your ~/.spamassassin/user_prefs file.
 
-To turn on the tests, simply assign them a non-zero score, e.g. by adding
-these lines to your ~/.spamassassin/user_prefs file:
-
-    score RCVD_IN_MAPS_RBL 3
-    score RCVD_IN_MAPS_DUL 1
-    score RCVD_IN_MAPS_RSS 2
-    score RCVD_IN_MAPS_NML 2
-    score RCVD_IN_MAPS_OPS 2
-
-To see how RBL checks work, use `spamassassin -D rbl=-3'. This will
-display all debug messages related to rbl checking.
+To turn on tests disabled by commenting out the required plugin in
+init.pre, you need to uncomment the loadplugin line and make sure the
+prerequisites for proper operation of the plugin are present.
 
 
 Automatic Whitelist System
@@ -314,7 +305,6 @@ Mail::SpamAssassin::DBBasedAddrList, uses Berkeley DB files to store
 the addresses.
 
 
-
-(end of README) 
+(end of README)
 
 // vim:tw=74:

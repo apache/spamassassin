@@ -79,15 +79,15 @@ These steps assume the following, so substitute as necessary:
 Many more details of this process are at
 http://wiki.apache.org/spamassassin/SingleUserUnixInstall
 
-1. Uncompress and extract the SpamAssassin archive, using "unzip" or "tar
-xvfz", in a temporary directory.
+1. Uncompress and extract the SpamAssassin archive, using "unzip" or
+   "tar xvfz", in a temporary directory.
 
 2. change directory into it:
 
 	cd Mail-SpamAssassin-*
 
 3. Make SpamAssassin as normal, but using your home directory as the
-target:
+   target:
 
 	perl Makefile.PL PREFIX=$HOME
 	make
@@ -98,16 +98,16 @@ and "Setting further options on the command line" for more informations
 on available command line variables.
 
 4. If you already use procmail, skip to step 6.  If not, ensure procmail
-is installed using "which procmail" or install it from www.procmail.org.
+   is installed using "which procmail" or install it from www.procmail.org.
 
 5. Create a .forward file in your home directory containing the below
-lines:
+   lines:
 
 "|IFS=' ' && exec /usr/bin/procmail -f- || exit 75 #user"
 
 6. Edit or create a .procmailrc file in your home directory containing the
-below lines.  If you already have a .procmailrc file, add the lines to the
-top of your .procmailrc file:
+   below lines.  If you already have a .procmailrc file, add the lines to
+   the top of your .procmailrc file:
 
 :0fw: spamassassin.lock
 | /home/user/bin/spamassassin
@@ -126,21 +126,23 @@ Also, see the file procmailrc.example and
 http://wiki.apache.org/spamassassin/UsedViaProcmail
 
 7. Now, you should be ready to send some test emails and ensure everything
-works as expected.  First, send yourself a test email that doesn't contain
-anything suspicious.  You should receive it normally, but there will be a
-header containing "X-Spam-Status: No".  If you are only tagging your spam,
-send yourself a copy of the GTUBE test string to check to be sure it is
-marked as spam.  GTUBE is located in the sample-spam.txt message
-distributed with SpamAssassin and also at:
+   works as expected.  First, send yourself a test email that doesn't
+   contain anything suspicious.  You should receive it normally, but there
+   will be a header containing "X-Spam-Status: No".  If you are only
+   tagging your spam, send yourself a copy of the GTUBE test string to
+   check to be sure it is marked as spam.  GTUBE is located in the
+   sample-spam.txt message distributed with SpamAssassin and also at:
 
-  http://spamassassin.apache.org/gtube/
+     http://spamassassin.apache.org/gtube/
 
-If your test emails don't get through to you, immediately rename your
-.forward file until you figure out cause of the the problem, so you don't
-lose incoming email.
+   If your test emails don't get through to you, immediately rename your
+   .forward file until you figure out cause of the the problem, so you
+   don't lose incoming email.
 
-Note: one possible cause for this is the use of smrsh on the MTA system;
-see http://wiki.spamassassin.org/w/ProcmailVsSmrsh for details.
+   Note: one possible cause for this is the use of smrsh on the MTA system;
+   see http://wiki.spamassassin.org/w/ProcmailVsSmrsh for details.
+
+8. You can now customize SpamAssassin.  See README for more information.
 
 
 CPAN
@@ -192,7 +194,7 @@ installed:
   - Digest::SHA1 (from CPAN)
 
     The Digest::SHA1 module is used as a cryptographic hash for some
-    tests and the Bayes subsystem.  It is also used by Razor2.
+    tests and the Bayes subsystem.
 
     Debian: apt-get install libdigest-sha1-perl
     Gentoo: emerge dev-perl/Digest-SHA1
@@ -243,6 +245,7 @@ version is too low for them to be used.
     This module is highly recommended to increase the speed with which
     Base64 encoded messages/mail parts are decoded.
 
+
   - DB_File (from CPAN, included in many distributions)
 
     Used to store data on-disk, for the Bayes-style logic and
@@ -286,24 +289,6 @@ version is too low for them to be used.
     Used by the RelayCountry plugin (not enabled by default) to determine
     the domain country codes of each relay in the path of an email.
 
-
-  - Razor (from http://razor.sourceforge.net/)
-
-    Used to check message signatures against Vipul's Razor collaborative
-    filtering network.  Razor is not available from CPAN -- you have to
-    download it from the URL above.
-
-    Note that Razor is not available for unlimited free use, so it is
-    commented out in init.pre.  It is currently free for personal use,
-    subject to capacity constraints. See the Cloudmark SpamNet Service
-    Policy for more details.
-
-    Razor has a large number of dependencies on CPAN modules.  Feel free
-    to skip installing it, if this makes you nervous; SpamAssassin will
-    still work well without it.
-
-    More info on installing and using Razor can be found
-    at http://wiki.apache.org/spamassassin/InstallingRazor .
 
   - Net::Ident (from CPAN)
 
@@ -349,114 +334,15 @@ version is too low for them to be used.
     Used by sa-update to expand update archives.
 
 
-Optional Programs
------------------
-
-These are non-Perl programs that can increase the overall effectiveness of
-SpamAssassin if they are installed.
-
-  - DCC (from http://www.rhyolite.com/anti-spam/dcc/)
-
-    DCC (Distributed Checksum Clearinghouse) is a system similar to Razor.
-    It supports fuzzy checksums and therefore detects some more spams than
-    Razor does at the moment.
-
-    To install it, perform the following steps:
-
-	wget http://www.dcc-servers.net/dcc/source/dcc-dccproc.tar.Z
-	tar xfvz dcc-dccproc.tar.Z
-	cd dcc-dccproc-*
-	./configure && make && make install
-
-    You might want to replace the configure call with something like this to
-    get an FHS compliant install:
-
-	./configure \
-	    --bindir=$(PREFIX)/bin \
-	    --libexecdir=$(PREFIX)/lib/dcc \
-	    --mandir=$(PREFIX)/man \
-	    --homedir=/var/lib/dcc
-
-    Finally call cdcc:
-
-	cdcc info
-
-    The last command will give some output. The output should contain lines
-    like this:
-
-	dcc1.dcc-servers.net,-         RTT+0 ms    anon
-	dcc2.dcc-servers.net,-         RTT+0 ms    anon
-	...
-
-    There should be *at least one*, preferably more than half a dozen, of
-    the public DCC servers listed.  If this is not the case, a likely
-    cause is an interfering firewall (see below).
-
-    Note that MIMEDefang users may need to set the 'dcc_path'
-    configuration setting, since MIMEDefang does not set a PATH by
-    default. See also 'perldoc Mail::SpamAssassin::Conf'.
-
-    Also note that DCC requires that you open your firewall for DCC reply
-    packets on UDP port 6277.   DCC uses UDP packets when replying, which
-    are blocked by most firewalls by default. As a result, it requires
-    that you open your firewall for DCC reply packets on UDP port 6277.
-    Here's sample firewall rules required:
-
-      allow udp local gt 1023 to remote 6277
-      allow udp remote 6277 to local gt 1023
-
-    If you're running a large site, processing upwards of tens of
-    thousands of messages a day, the DCC maintainers have requested that
-    you consider setting up your own DCC server as described in dccd(8),
-    and arrange to peer with the rest of the public servers, to reduce
-    their load.
-
-    More info is at http://wiki.apache.org/spamassassin/UsingDcc
-
-  - Pyzor (from http://pyzor.sourceforge.net/)
-
-    Used to check message signatures against the Pyzor collaborative
-    filtering network.  Pyzor was initially "a Python implementation of
-    Razor", but now also uses its own (free) server architecture and is
-    "based upon a new, lighter, more language-independent protocol."
-
-    Pyzor requires at least Python 2.2.1 which can be found at
-    http://www.python.org/ .
-
-    To install Pyzor, download the latest revision from
-    https://sourceforge.net/project/showfiles.php?group_id=50000 and
-    perform the following steps:
-
-	tar xvfj pyzor-*.tar.bz2
-	cd pyzor-*
-	python setup.py build
-	python setup.py install
-
-    For a single user installation, change the last line to
-	python setup.py install --home=$HOME
-
-    Note that your system might install the modules and scripts with
-    non-world-readable permissions.  Correct this with a command such as:
-
-	chmod -R a+rX /usr/share/doc/pyzor \
-		/usr/lib/python2.2/site-packages/pyzor \
-		/usr/bin/pyzor /usr/bin/pyzord
-
-    Read the INSTALL document if you want to setup your own Pyzor server and
-    signature store.  Otherwise, you can just use the public servers.
-
-    Note that MIMEDefang users may need to set the 'pyzor_path'
-    configuration setting, since MIMEDefang does not set a PATH by
-    default.
-
-    More info is at http://wiki.apache.org/spamassassin/UsingPyzor
-
-
 What Next?
 ----------
 
-Take a look at the USAGE document for more information on how to
-use SpamAssassin.
+Take a look at the USAGE document for more information on how to use
+SpamAssassin.
+
+The SpamAssassin Wiki <http://wiki.spamassassin.org/> contains
+information on custom plugins, extensions, and other optional modules
+included with SpamAssassin.
 
 
 (end of INSTALL)
