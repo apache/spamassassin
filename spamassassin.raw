@@ -101,7 +101,7 @@ my %resphash = (
 
 sub print_version {
   print "SpamAssassin version " . Mail::SpamAssassin::Version() . "\n"
-      . "  running on Perl version " . join(".", map { $_ * 1 } ($] =~ /(\d)\.(\d{3})(\d{3})/ )) . "\n";
+      . "  running on Perl version " . join(".", map { $_||=0; $_*1 } ($] =~ /(\d)\.(\d{3})(\d{3})?/ )) . "\n";
 }
 
 sub print_usage_and_exit {
