@@ -198,7 +198,10 @@ my %makefile = (
     'dist' => {
         COMPRESS => 'gzip -9f',
         SUFFIX => 'gz',
-        DIST_DEFAULT => 'tardist'
+        DIST_DEFAULT => 'tardist',
+
+        CI => 'svn commit',
+        RCS_LABEL => 'true',
     },
 
     'clean' => { FILES => join(' ' =>
