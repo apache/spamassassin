@@ -63,4 +63,9 @@ header		URIBL_AB_SURBL	eval:check_uridnsbl('URIBL_AB_SURBL')
 describe	URIBL_AB_SURBL	Contains an URL listed in the AB SURBL blocklist
 tflags		URIBL_AB_SURBL	net
 
+urirhssub	URIBL_JP_SURBL	multi.surbl.org.	A   64
+header		URIBL_JP_SURBL	eval:check_uridnsbl('URIBL_JP_SURBL')
+describe	URIBL_JP_SURBL	Contains an URL listed in the JP SURBL blocklist
+tflags		URIBL_JP_SURBL	net
+
 endif	# Mail::SpamAssassin::Plugin::URIDNSBL
