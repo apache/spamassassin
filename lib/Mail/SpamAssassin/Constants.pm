@@ -217,6 +217,6 @@ use constant ARITH_EXPRESSION_LEXER => qr/(?:
 # date makes the message useful or not, we need to mark it so that in the
 # second pass (when the message is actually read + processed) the received
 # date is calculated.  this value signifies "unknown" from the first pass.
-use constant AI_TIME_UNKNOWN => -1;
+use constant AI_TIME_UNKNOWN => 0;
 
 1;
