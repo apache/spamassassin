@@ -45,6 +45,15 @@ sub report {
       dbg ("SpamAssassin: spam reported to Razor.");
     }
   }
+  if (!$self->{main}->{local_tests_only}
+  	&& !$self->{options}->{dont_report_to_dcc}
+    && !$self->{main}->{stop_at_threshold}
+	&& $self->is_dcc_available())
+  {
+    if ($self->dcc_report($text)) {
+      dbg ("SpamAssassin: spam reported to DCC.");
+    }
+  }
 }
 
 ###########################################################################
@@ -136,6 +145,66 @@ sub razor_report {
   }
 }
 
+sub is_dcc_available {
+  my ($self) = @_;
+
+  if ($self->{main}->{local_tests_only}) {
+    dbg ("local tests only, ignoring DCC");
+    return 0;
+  }
+
+  if (!open(DCCHDL, "dccproc -V 2>&1 |")) {
+    close DCCHDL;
+    dbg ("DCC is not available");
+    return 0;
+  } 
+  else {
+    close DCCHDL;
+    dbg ("DCC is available");
+    return 1;
+  }
+}
+
+sub dcc_report {
+  my ($self, $fulltext) = @_;
+  my $timeout = 10;
+  my $response = undef;
+
+  eval {
+    use IPC::Open2;
+    my ($dccin, $dccout, $pid);
+
+    local $SIG{ALRM} = sub { die "alarm\n" };
+    local $SIG{PIPE} = sub { die "brokenpipe\n" };
+
+    alarm 10;
+
+    $pid = open2($dccout, $dccin, 'dccproc -t many '.$self->{conf}->{dcc_options}.' >/dev/null 2>&1');
+
+    print $dccin $fulltext;
+
+    close ($dccin);
+
+    waitpid ($pid, 0);
+
+    alarm(0);
+  };
+
+  if ($@) {
+    $response = undef;
+    if ($@ =~ /alarm/) {
+      dbg ("DCC report timed out after 10 secs.");
+      return 0;
+    } elsif ($@ =~ /brokenpipe/) {
+      dbg ("DCC report failed - Broken pipe.");
+      return 0;
+    } else {
+      warn ("DCC report skipped: $! $@");
+      return 0;
+    }
+  }
+  return 1;
+}
 ###########################################################################
 
 sub dbg { Mail::SpamAssassin::dbg (@_); }
