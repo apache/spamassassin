@@ -8,8 +8,8 @@
 #* create a file in /etc/spamassassin or /etc/mail/spamassassin instead.
 ###########################################################################
 
-# How many hits before a mail is considered spam.
-# required_hits		5
+# How many points before a mail is considered spam.
+# required_score		5
 
 # Whitelist and blacklist addresses are now file-glob-style patterns, so
 # "friend@somewhere.com", "*@isp.com", or "*.domain.net" will all work.
