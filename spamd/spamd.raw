@@ -639,7 +639,9 @@ sub check {
                     return 1;
                 }
 
-                $current_user = $1;
+		# REIMPLEMENT:
+		# set current user to the value in $1.  is this silly?
+
                 auth_ident($current_user) if $opt{'auth-ident'};
 
                 if (!$opt{'user-config'})
@@ -1034,8 +1036,7 @@ sub handle_virtual_user
 
 sub handle_user_sql
 {
-    my $username = shift;
-    $spamtest->load_scoreonly_sql ($username);
+    $spamtest->load_scoreonly_sql (@_);
     return 1;
 }
 
