@@ -395,3 +395,14 @@ tflags T_DNS_FROM_SECURITYSAGE	net
 # try EnvelopeFrom instead of From:
 header T_DNS_FROM_AHBL_RHSBL	eval:check_rbl_envfrom('t_ahbl', 'rhsbl.ahbl.org.')
 tflags T_DNS_FROM_AHBL_RHSBL	net
+
+# throw a few more on the stack
+uri      T_SPOOF_NET2COM	 m{^https?://(?:\w+\.)+?(?:net|org)\.(?:\w+\.)+?com}i
+describe T_SPOOF_NET2COM 	a.net.b.com
+
+uri      T_SPOOF_COM2NET	 m{^https?://(?:\w+\.)+?com\.(?:\w+\.)+?(?:net|org)}i
+describe T_SPOOF_COM2NET 	a.com.b.net
+
+# might be covered with T_SPOOF_OURI ?
+uri      T_SPOOF_NET2OTH 	m{^https?://(?:\w+\.)+?(?:net|org)\.(?:\w+\.){2,}}i
+describe T_SPOOF_NET2OTH	 a.net.b.c
