@@ -3,8 +3,6 @@
 cd /home/jm/ftp/spamassassin/masses
 
 set -x
-(
-
 date
 
 mv spam.log nonspam.log logs/old
@@ -14,7 +12,9 @@ cat logs/contrib/spam.log* > spam.log
 
 ./mass-check ./spamtrap/mbox >> spam.log
 ./mass-check /local2/mail-archives/crackmice >> nonspam.log
-./mass-check /local2/mail-archives/cm2/cmarc/* >> nonspam.log
+for f in /local2/mail-archives/cm2/cmarc/* ; do
+  ./mass-check $f >> nonspam.log
+done
 
 ./mass-check-for-jm ; sh commands.sh
 
@@ -24,6 +24,4 @@ cat logs/contrib/spam.log* > spam.log
 make
 date
 ./continual_evolve.sh -s 500 -b 8.0 -c 1.00
-
-) > LOG
 

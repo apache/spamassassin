@@ -7,9 +7,9 @@ readlogs();
 readscores();
 
   printf "%10s  %10s  %10s  %s\n",
-  	"OVERALL", "NONSPAM", "SPAM", "NAME";
+  	"OVERALL", "SPAM", "NONSPAM", "NAME";
 
-foreach my $test (sort { $freq{$b} <=> $freq{$a} } keys %freq) {
+foreach my $test (sort { $freq_spam{$b} <=> $freq_spam{$a} } keys %freq) {
   printf "%10d  %10d  %10d  %s\n",
   	$freq{$test}, $freq_spam{$test}, $freq_nonspam{$test}, $test;
 }
