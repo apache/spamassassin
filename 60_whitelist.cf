@@ -38,7 +38,7 @@ priority AWL                    1000
 # to accidentally blacklist someone's From address.
 header USER_IN_BLACKLIST	eval:check_from_in_blacklist()
 describe USER_IN_BLACKLIST	From: address is in the user's black-list
-tflags USER_IN_BLACKLIST	userconf
+tflags USER_IN_BLACKLIST	userconf noautolearn
 
 header USER_IN_WHITELIST	eval:check_from_in_whitelist()
 describe USER_IN_WHITELIST	From: address is in the user's white-list
