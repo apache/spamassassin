@@ -94,7 +94,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.174.2.1 2003/03/17 15:19:53 felicity Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.174.2.2 2003/03/18 22:11:22 felicity Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -1005,6 +1005,8 @@ sub compile_now {
   if ($dsn ne '') {
     Mail::SpamAssassin::ConfSourceSQL::load_modules();
   }
+
+  $self->{bayes_scanner}->sanity_check_is_untied();
 
   1;
 }
