@@ -699,7 +699,7 @@ sub secure_tmpfile {
     die "Cannot find a temporary directory! set TMP or TMPDIR in env";
   }
 
-  my $reportfile;
+  my ($reportfile,$tmpfile);
   my $umask = umask 077;
   do {
     # we do not rely on the obscurity of this name for security...
@@ -722,10 +722,10 @@ sub secure_tmpfile {
                   );
     # ...rather, we require O_EXCL|O_CREAT to guarantee us proper
     # ownership of our file; read the open(2) man page.
-  } while (! sysopen (TMPFILE, $reportfile, O_RDWR|O_CREAT|O_EXCL, 0600));
+  } while (! sysopen ($tmpfile, $reportfile, O_RDWR|O_CREAT|O_EXCL, 0600));
   umask $umask;
 
-  return ($reportfile, \*TMPFILE);
+  return ($reportfile, $tmpfile);
 }
 
 ###########################################################################
