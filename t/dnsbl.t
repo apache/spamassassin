@@ -36,10 +36,10 @@ my $bind = <<'EOF';
 ; third hop
 18.13.119.61.dnsbltest          A       127.0.0.12
 18.13.119.61.dnsbltest          TXT     "spam source, open relay"
-; fourth hop (trusted)
+; fourth hop
 226.149.120.193.dnsbltest       A       127.0.0.1
 226.149.120.193.dnsbltest       TXT     "whitelisted sender"
-; last hop (trusted)
+; fifth hop
 14.35.17.212.dnsbltest          A       127.0.0.1
 14.35.17.212.dnsbltest          TXT     "whitelisted sender"
 ; RHS
@@ -54,20 +54,20 @@ EOF
  q{ <dns:98.3.137.144.dnsbltest.spamassassin.org> [127.0.0.2] } => 'P_1',
  q{ <dns:134.88.73.210.dnsbltest.spamassassin.org> [127.0.0.4] } => 'P_2',
  q{ <dns:18.13.119.61.dnsbltest.spamassassin.org> [127.0.0.12] } => 'P_3',
- q{ <dns:226.149.120.193.dnsbltest.spamassassin.org> [127.0.0.1] } => 'P_4',
- q{ <dns:example.com.dnsbltest.spamassassin.org> [127.0.0.2] } => 'P_5',
- q{ DNSBL_TEST_TOP } => 'P_6',
- q{ DNSBL_TEST_WHITELIST } => 'P_7',
- q{ DNSBL_TEST_DYNAMIC } => 'P_8',
- q{ DNSBL_TEST_SPAM } => 'P_9',
- q{ DNSBL_TEST_RELAY } => 'P_10',
- q{ DNSBL_TXT_TOP } => 'P_11',
- q{ DNSBL_TXT_RE } => 'P_12',
- q{ DNSBL_RHS } => 'P_13',
+ q{ <dns:14.35.17.212.dnsbltest.spamassassin.org> [127.0.0.1, 127.0.0.1] } => 'P_4',
+ q{ <dns:226.149.120.193.dnsbltest.spamassassin.org> [127.0.0.1] } => 'P_5',
+ q{ <dns:example.com.dnsbltest.spamassassin.org> [127.0.0.2] } => 'P_6',
+ q{ DNSBL_TEST_TOP } => 'P_7',
+ q{ DNSBL_TEST_WHITELIST } => 'P_8',
+ q{ DNSBL_TEST_DYNAMIC } => 'P_9',
+ q{ DNSBL_TEST_SPAM } => 'P_10',
+ q{ DNSBL_TEST_RELAY } => 'P_11',
+ q{ DNSBL_TXT_TOP } => 'P_12',
+ q{ DNSBL_TXT_RE } => 'P_13',
+ q{ DNSBL_RHS } => 'P_14',
 );
 
 %anti_patterns = (
- q{ <dns:14.35.17.212.dnsbltest.spamassassin.org> [127.0.0.1] } => 'P_14',
  q{ DNSBL_TEST_MISS } => 'P_15',
  q{ DNSBL_TXT_MISS } => 'P_16',
 );
@@ -79,12 +79,14 @@ add_header all Untrusted _RELAYSUNTRUSTED_
 
 clear_trusted_networks
 trusted_networks 127.
+trusted_networks 10.
+trusted_networks 150.51.53.1
 
 header DNSBL_TEST_TOP	eval:check_rbl('test', 'dnsbltest.spamassassin.org.')
 describe DNSBL_TEST_TOP	DNSBL A record match
 tflags DNSBL_TEST_TOP	net
 
-header DNSBL_TEST_WHITELIST	eval:check_rbl_sub('test', '127.0.0.1')
+header DNSBL_TEST_WHITELIST	eval:check_rbl('white-firsttrusted', 'dnsbltest.spamassassin.org', '127.0.0.1')
 describe DNSBL_TEST_WHITELIST	DNSBL whitelist match
 tflags DNSBL_TEST_WHITELIST	net nice
 
