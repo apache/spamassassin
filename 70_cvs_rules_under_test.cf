@@ -443,6 +443,7 @@ body     T_RM_BPT_LONGWORDS_99 /\b(?:\w{9,}\s+){9}/
 describe T_RM_BPT_LONGWORDS_99 Long string of long words
 
 # "www" hidden as "%77%77%77", "ww%77", etc.
-rawbody	 T_HTTP_77	/http:\/\/.{0,2}\%77/
+# note: *not* anchored to start of string, to catch use of redirectors
+uri	 T_HTTP_77	/http:\/\/.{0,2}\%77/
 describe T_HTTP_77	Contains a URL-encoded hostname (HTTP77)
 
