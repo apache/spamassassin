@@ -619,9 +619,20 @@ sub tok_put {
   my ($self, $tok, $ts, $th, $atime) = @_;
   $ts ||= 0;
   $th ||= 0;
+
+  my $exists_already = exists $self->{db_toks}->{$tok};
+
   if ($ts == 0 && $th == 0) {
+    if ($exists_already) { # If the token exists, lower the token count
+      $self->{db_toks}->{$NTOKENS_MAGIC_TOKEN}--;
+    }
+
     delete $self->{db_toks}->{$tok};
   } else {
+    if (!$exists_already) { # If the token doesn't exist, raise the token count
+      $self->{db_toks}->{$NTOKENS_MAGIC_TOKEN}++;
+    }
+
     $self->{db_toks}->{$tok} = tok_pack ($ts, $th, $atime);
   }
 }

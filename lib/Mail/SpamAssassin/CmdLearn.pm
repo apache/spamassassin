@@ -48,7 +48,7 @@ sub cmdline_run {
              'auto-whitelist|a'                 => \$opt{'auto-whitelist'},
              'bias-scores|b'                    => \$opt{'bias-scores'},
 
-             'debug-level|D'                    => \$opt{'debug-level'},
+             'debug-level|D:s'                  => \$opt{'debug-level'},
              'version|V'                        => \$opt{'version'},
              'help|h|?'                         => \$opt{'help'},
 
