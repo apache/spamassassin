@@ -15,8 +15,8 @@ $numbuckets ||= 10;
 
 my %buckets = ();
 foreach my $i (1 .. $numbuckets) {
-  print "Creating out-$i.log\n";
-  open ($buckets{$i}, ">out-$i.log");
+  print "Creating split-$i.log\n";
+  open ($buckets{$i}, ">split-$i.log");
 }
 
 my $current = 0;
