@@ -857,6 +857,27 @@ sub _set_macro_CONFIGURE {
   set_macro('CONFIGURE', join(' ', macro_ref('PERL_BIN'), qq{spamc/configure.pl}));
 }
 
+# This routine sets the value for the SYMLINK command.
+#
+# There are no parameters.
+#
+# $(SYMLINK) calls Perl's symlink() function if available, else falls back 
+# to $(CP).
+sub _set_macro_SYMLINK {
+
+  return if get_macro('SYMLINK');
+  
+  if (eval { symlink("", "") or 1 }) {
+    my $code = q{symlink((splitpath($ARGV[0]))[2], $ARGV[1]) || die qq{$!\n}};
+    $code =~ s/(\$)/$1$1/g;
+    $code = qq{'$code'};
+    set_macro('SYMLINK', join(' ', macro_ref('PERL_BIN'), q{-MFile::Spec::Functions=splitpath}, q{-e}, $code));
+  }
+  else {
+    set_macro('SYMLINK', macro_ref('CP'));
+  }
+}
+
 
 # Override the libscan routine so it skips SVN/CVS stuff and some common
 # patch/backup extensions.
@@ -1010,22 +1031,31 @@ sub MY::constants {
   {
     _set_macro_PREPROCESS;
     _set_macro_CONFIGURE;
+    _set_macro_SYMLINK;
 
     # Add it to the Makefile.
     push(@code, qq{});
     push(@code, macro_def('PREPROCESS'));
     push(@code, macro_def('CONFIGURE'));
+    push(@code, macro_def('SYMLINK'));
   }
 
-  # Set some additional helper/shortcut macros.
+  # Set some additional helper/shortcut macros; the B_FOO are the ones which
+  # can be temporary locations if DESTDIR is used, I_FOO are the final 
+  # destinations.
   {
     my($repository);
     $repository = uc($SELF->{INSTALLDIRS}) || 'SITE';
 
+    # For these the install paths are needed only.
     foreach my $macro (qw(PREFIX SYSCONFDIR)) {
       push(@code, macro_def('I_' . $macro,
                     macro_ref($repository . $macro)));
     }
+    # The SCRIPTDIR is the same for each repository.  Luckily do we need only
+    # the I_-variant.
+    push(@code, macro_def('I_SCRIPTDIR', macro_ref('INSTALLSCRIPT')));
+    # For the following we need bot the B_- and the I_-variants.
     foreach my $macro (qw(DATA CONF LIB)) {
       push(@code, macro_def('I_' . $macro . 'DIR',
                     macro_ref('INSTALL' . repository($repository) . $macro)));
@@ -1148,15 +1178,10 @@ qmail/qmail-spamc$(EXE_EXT): spamc/qmail-spamc$(EXE_EXT)
 	$(MAKE_SPAMC_OLD)
 	$(CHMOD) $(PERM_RWX) $@
 
-# try to figure out where sa-filter is going to be installed
-ifeq "$(INSTALLDIRS)" "site"
-INSTALLSCRIPTREALLY = $(INSTALLSITEBIN)
-else
-INSTALLSCRIPTREALLY = $(INSTALLSCRIPT)
-endif
 
-bin__install:
-	$(PERL) -MFile::Copy -e 'chdir q{$(INSTALLSCRIPTREALLY)}; $$symlink_exists = eval { symlink("",""); 1 }; if ($$symlink_exists) { symlink(q{sa-filter}, q{spamassassin}); } else { copy(q{sa-filter}, q{spamassassin}); }'
+bin__install: $(INST_SCRIPT)/sa-filter
+	$(RM_F) $(I_SCRIPTDIR)/spamassassin
+	$(SYMLINK) $(INST_SCRIPT)/sa-filter $(I_SCRIPTDIR)/spamassassin
 
 conf__install:
 	-$(MKPATH) $(B_CONFDIR)
