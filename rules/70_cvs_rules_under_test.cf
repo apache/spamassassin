@@ -355,3 +355,15 @@ describe T_HTML_FONT_TINY	HTML has a tiny font
 header T_RCVD_NUMERIC_HELO	X-Spam-Relays-Untrusted =~ / helo=\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3} /
 describe T_RCVD_NUMERIC_HELO	Received: contains an IP address used for HELO
 
+# If the Message-Id claims to be added by one ISP, there should be a Received
+# header which mentions that ISP.
+header __MSGID_HAS_HOTMAIL	MESSAGEID =~ /hotmail\.com/
+header __RCVD_HAS_HOTMAIL	Received =~ /(?:hotmail|msn)\.com/
+meta T_MID_RCVD_DIFF_HOTMAIL	(__MSGID_HAS_HOTMAIL && !__RCVD_HAS_HOTMAIL)
+describe T_MID_RCVD_DIFF_HOTMAIL Message-Id does not match Received (hotmail.com)
+
+header __MSGID_HAS_AOL	MESSAGEID =~ /aol\.com/
+header __RCVD_HAS_AOL	Received =~ /aol\.com/
+meta T_MID_RCVD_DIFF_AOL	(__MSGID_HAS_AOL && !__RCVD_HAS_AOL)
+describe T_MID_RCVD_DIFF_AOL	Message-Id does not match Received (aol.com)
+
