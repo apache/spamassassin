@@ -93,7 +93,11 @@ GetOptions(
 
         'server-key=s' => \$opt{'server-key'},
         'server-cert=s' => \$opt{'server-cert'},
-        'ssl' => \$opt{'ssl'}
+        'ssl' => \$opt{'ssl'},
+
+        # will be stripped in future release
+	'add-from!' => sub { warn "The --add-from option has been removed\n" },
+        'F=i' => sub { warn "The -F option has been removed\n" },
 
 ) or pod2usage(-exitval => $resphash{'EX_USAGE'}, -verbose => 0);
 @ARGV = @OLD_ARGV;
