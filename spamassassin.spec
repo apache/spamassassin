@@ -1,8 +1,8 @@
 %define name spamassassin
 %define real_name Mail-SpamAssassin
-%define version 2.01
-%define real_version 2.01
-%define release 2
+%define version 2.1
+%define real_version 2.1
+%define release 1
 %define initdir %{_initrddir}
 
 Summary: This is SpamAssassin, a spam filter for email which can be invoked from mail delivery agents.
@@ -75,6 +75,9 @@ if [ -f /etc/mail/spamassassin.cf ]; then
 fi
 
 %changelog
+* Wed Feb 27 2002 Craig Hughes <craig@hughes-family.org>
+- Updated for 2.1 release
+
 * Sat Feb 02 2002 Theo Van Dinter <felicity@kluge.net>
 - Updates for 2.01 release
 - Fixed rc file

@@ -1,6 +1,6 @@
-diff -urN Mail-SpamAssassin-2.01.virgin/Makefile.PL Mail-SpamAssassin-2.01/Makefile.PL
---- Mail-SpamAssassin-2.01.virgin/Makefile.PL	Thu Jan 24 23:36:01 2002
-+++ Mail-SpamAssassin-2.01/Makefile.PL	Sat Feb  2 21:41:34 2002
+diff -urN Mail-SpamAssassin-2.1.virgin/Makefile.PL Mail-SpamAssassin-2.1/Makefile.PL
+--- Mail-SpamAssassin-2.1.virgin/Makefile.PL	Thu Jan 24 23:36:01 2002
++++ Mail-SpamAssassin-2.1/Makefile.PL	Sat Feb  2 21:41:34 2002
 @@ -111,7 +111,7 @@
  	$(CFCC) $(CFCCFLAGS) $(CFOPTIMIZE) spamd/spamc.c \
  			-o $@ $(CFLDFLAGS) $(CFLIBS)
