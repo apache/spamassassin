@@ -70,6 +70,14 @@ my %opt = (
   'ident-timeout' => 5.0,
 );
 
+# untaint all command-line options and ENV vars, since spamd is launched
+# as a daemon from a known-safe environment.
+@ARGV = map { /^(.*)$/ and $_ = $1; } @ARGV;
+foreach (keys %ENV) {
+  /^(.*)$/ and $_ = $1;
+  $ENV{$_} =~ /^(.*)$/ and $ENV{$_} = $1;
+}
+
 my @OLD_ARGV = @ARGV;    # Getopt::Long tends to clear @ARGV
 Getopt::Long::Configure ("bundling");
 GetOptions(
@@ -165,6 +173,11 @@ if ($opt{'create-prefs'}) { $dontcopy = 0; }
 my $extrapid = 5000;
 undef($opt{'max-children'}) unless defined($opt{'max-children'}) && $opt{'max-children'} > 0;
 $extrapid = $opt{'max-children'} if defined($opt{'max-children'});
+
+# Untaint the pidfile path before we use it
+if (defined $opt{'pidfile'}) {
+  $opt{'pidfile'} = Mail::SpamAssassin::Util::untaint_file_path($opt{'pidfile'});
+}
 
 my $orighome;
 if (defined $ENV{'HOME'}) {
