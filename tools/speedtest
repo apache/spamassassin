@@ -20,7 +20,6 @@ use strict;
 use FindBin;
 use lib "$FindBin::Bin/../lib";
 use Mail::SpamAssassin;
-use Mail::SpamAssassin::NoMailAudit;
 
 my $spamtest = Mail::SpamAssassin->new({
     rules_filename => 'rules',
@@ -32,13 +31,12 @@ my $spamtest = Mail::SpamAssassin->new({
 
 for($_=shift @ARGV; defined($_); $_=shift @ARGV)
 {
-	open (STDIN, "<$_");
-	    my @msglines = (<STDIN>);
-	    my $mail = Mail::SpamAssassin::NoMailAudit->new (
-                                data => \@msglines
-                         );
+	open (FILE, "<$_");
+	my $mail = Mail::SpamAssassin->parse (\*FILE);
+	close(FILE);
 
-	    my $status = $spamtest->check($mail);
-            print $status->get_hits," $_ ",$status->get_names_of_tests_hit,"\n";
-	    $status->finish();
+	my $status = $spamtest->check($mail);
+        print $status->get_hits," $_ ",$status->get_names_of_tests_hit,"\n";
+	$status->finish();
+	$mail->finish();
 }
