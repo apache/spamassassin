@@ -274,7 +274,10 @@ sub expire_old_tokens {
   };
   my $err = $@;
 
-  $self->untie_db();
+  if (!$self->{bayes}->{main}->{learn_caller_will_untie}) {
+    $self->untie_db();
+  }
+
   if ($err) {		# if we died, untie the dbs.
     warn "bayes expire_old_tokens: $err\n";
     return 0;
@@ -616,8 +619,10 @@ sub sync_journal {
   };
   my $err = $@;
 
-  # ok, untie from write-mode
-  $self->untie_db();
+  # ok, untie from write-mode if we can
+  if (!$self->{bayes}->{main}->{learn_caller_will_untie}) {
+    $self->untie_db();
+  }
 
   # handle any errors that may have occurred
   if ($err) {
