@@ -50,7 +50,7 @@ use Mail::SpamAssassin::ConfSourceSQL;
 use Mail::SpamAssassin::PerMsgStatus;
 use Mail::SpamAssassin::Reporter;
 use Mail::SpamAssassin::Replier;
-use Mail::SpamAssassin::MyMailAudit;
+use Mail::SpamAssassin::NoMailAudit;
 
 use File::Basename;
 use File::Path;
@@ -203,7 +203,7 @@ Otherwise identical to C<$f->check()> above.
 sub check_message_text {
   my ($self, $mailtext) = @_;
   my @lines = split (/\n/s, $mailtext);
-  my $mail_obj = Mail::SpamAssassin::MyMailAudit->new ('data' => \@lines);
+  my $mail_obj = Mail::SpamAssassin::NoMailAudit->new ('data' => \@lines);
   return $self->check ($mail_obj);
 }
 
@@ -470,7 +470,7 @@ sub compile_now {
 
   dbg ("ignore: test message to precompile patterns and load modules");
   $self->init(0);
-  my $mail = Mail::SpamAssassin::MyMailAudit->new(data => \@testmsg);
+  my $mail = Mail::SpamAssassin::NoMailAudit->new(data => \@testmsg);
   $self->check($mail)->finish();
 
   # load SQL modules now as well
