@@ -22,7 +22,7 @@ use ExtUtils::MakeMaker;
 # do this in perl, it's more portable
 my @rulesfiles = map { substr($_, 6) } (<rules/*.cf>);
 my $rulesfiles = join(' ', grep { /^[0-6][0-9]_/ } @rulesfiles); # Include only .cfs in the range 00-69
-$rulesfiles   .= " triplets.txt languages";
+$rulesfiles   .= " user_prefs.template triplets.txt languages";
 
 sub MY::libscan {
   my($self,$path) = @_;
@@ -140,14 +140,12 @@ spamd/spamc: spamd/spamc.c spamd/libspamc.c
 	$(CFCC) $(CFCCFLAGS) $(CFOPTIMIZE) spamd/spamc.c spamd/libspamc.c \
 			-o $@ $(CFLDFLAGS) $(CFLIBS)
 
-inst_cfs: $(LOCAL_RULES_DIR) $(DEF_RULES_DIR) $(DEF_RULES_DIR)/user_prefs.template $(LOCAL_RULES_DIR)/local.cf
+inst_cfs: $(LOCAL_RULES_DIR) $(DEF_RULES_DIR) $(LOCAL_RULES_DIR)/local.cf
+	$(RM_F) $(DEF_RULES_DIR)/*; \
 	for file in $(RULES) ; do \
 	  $(CP) rules/$$file $(DEF_RULES_DIR)/$$file; \
 	done; \
 	$(CHMOD) $(PERM_RW) $(DEF_RULES_DIR)/*
-
-$(DEF_RULES_DIR)/user_prefs.template: rules/user_prefs.template
-	$(CP) rules/user_prefs.template $(DEF_RULES_DIR)/user_prefs.template
 
 $(LOCAL_RULES_DIR)/local.cf: rules/local.cf
 	if [ ! -f $(LOCAL_RULES_DIR)/local.cf ] ; then \
@@ -155,8 +153,7 @@ $(LOCAL_RULES_DIR)/local.cf: rules/local.cf
 	else true ; fi
 
 $(DEF_RULES_DIR):
-	$(MKPATH) $(DEF_RULES_DIR); \
-	$(RM_F) $(DEF_RULES_DIR)/*
+	$(MKPATH) $(DEF_RULES_DIR)
 
 $(LOCAL_RULES_DIR):
 	if [ ! -d $(LOCAL_RULES_DIR) ] ; then \
