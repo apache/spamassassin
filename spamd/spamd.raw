@@ -641,7 +641,7 @@ sub check {
 
 	    if ($header eq 'User')
 	    {
-                if ($value !~ /^([\x20-\xFF]+)$/)
+                if ($value !~ /^([\x20-\xFF]*)$/)
                 {
 		    protocol_error ("(User header contains control chars)");
                     return 1;
@@ -669,7 +669,7 @@ sub check {
 	    }
 	    elsif ($header eq 'Content-length')
             {
-                if ($value !~ /^(\d+)$/)
+                if ($value !~ /^(\d*)$/)
                 {
 		    protocol_error ("(Content-Length contains non-numeric bytes)");
                     return 1;
