@@ -68,6 +68,12 @@ NOTE: Some users have reported problems using DBD::Pg v1.22. There appears
 to be a bug in how parameters are quoted in that version, we recommend you
 upgrade to at least v1.31.
 
+In addition, there appears to be a quote bug in some versions of PostgreSQL.
+It's unclear when the bug was fixed.  7.4.2 seems to work just fine, however
+some have reported problems with 7.3.6.  Your milage may vary with versions
+less than 7.4.2.  If you happen to know when the specific bug was fixed please
+feel free to notify the dev team so they can update this documentation.
+
 Database Schema
 ---------------
 
