@@ -79,6 +79,7 @@ GetOptions(
   'setuid-with-sql'             => \$opt{'setuid-with-sql'},
     'Q'                         => \$opt{'setuid-with-sql'},
   'virtual-config|V=s'          => \$opt{'virtual-config'},
+  'virtual-config-dir=s'        => \$opt{'virtual-config-dir'},
   'pidfile|r=s'                 => \$opt{'pidfile'},
   'syslog|s=s'                  => \$opt{'syslog'},
   'syslog-socket=s'             => \$opt{'syslog-socket'},
@@ -442,7 +443,7 @@ sub check {
 		{
 		  if ($opt{'sql-config'}) {
 		    handle_user_sql($current_user);
-		  } elsif ($opt{'virtual-config'}) {
+		  } elsif ($opt{'virtual-config'} || $opt{'virtual-config-dir'}) {
 		    handle_virtual_user($current_user);
 		  } elsif ($opt{'setuid-with-sql'}) {
 		    handle_user_setuid_with_sql($current_user);
@@ -722,35 +723,53 @@ sub handle_user
 # SQL database.
 sub handle_virtual_user
 {
-	my $username = shift;
+    my $username = shift;
 
-	# the virtual-config contains the path to a directory which will
-	# contain per-user preferences.
-	my $dir=$opt{'virtual-config'};
-	my $file="$dir/$username.prefs";
+    # the virtual-config contains the path to a directory which will
+    # contain per-user preferences.
+    my $dir=$opt{'virtual-config-dir'};
+    my $userdir;
+    my $prefsfile;
+
+    if (defined $dir) {
+        my $safename = $username; $safename =~ s/[^-A-Za-z0-9\+_\.\,\@\=]/_/gs;
+	$dir =~ s/\%u/${safename}/g;
+	$userdir = $dir;
+	$prefsfile = $dir.'/user_prefs';
+	# Log that the default configuration is being used for a user.
+	logmsg("Using default config for $username: $prefsfile");
+
+    } else {
+	$dir=$opt{'virtual-config'};
+        my $safename = $username; $safename =~ s/[^-A-Za-z0-9\+_\.\,\@\=]/_/gs;
+	$userdir = $dir.'/'.$safename;
+	$prefsfile = $dir.'/'.$safename.'.prefs';
 
 	# If the user file is not there, look for a default.prefs
-	if(! -f $file) {
-		$file="$dir/default.prefs";
-		# And if that isn't there, log that it's misconfigured.
-		if(! -f $file) {
-			logmsg("Couldn't find a virtual directory or defaults "
-				. "for $username in $dir");
-			return(0);
-		} else {
-			# Log that the default configuration is being used for a user.
-			logmsg("Using default config for $username");
-		}
+	if(! -f $prefsfile) {
+	    $prefsfile="$dir/default.prefs";
+	    # And if that isn't there, log that it's misconfigured.
+	    if(! -f $prefsfile) {
+		logmsg("Couldn't find a virtual directory or defaults "
+			. "for $username in $dir: $prefsfile");
+		return(0);
+	    } else {
+		# Log that the default configuration is being used for a user.
+		logmsg("Using default config for $username: $prefsfile");
+	    }
 	}
+    }
 
+    if (-f $prefsfile) {
 	# Found a config, load it.
-	$spamtest->read_scoreonly_config($file);
+	$spamtest->read_scoreonly_config($prefsfile);
+    }
 
-	# TODO: assume that $dir/$username will be a writable directory we can
-	# use for AWL, Bayes dbs etc.
-	$spamtest->signal_user_changed ({ username => $username,
-					    user_dir => "$dir/$username" });
-	return(1);
+    # assume that $userdir will be a writable directory we can
+    # use for AWL, Bayes dbs etc.
+    $spamtest->signal_user_changed ({ username => $username,
+					user_dir => $userdir });
+    return(1);
 }
 
 sub handle_user_sql
@@ -1019,6 +1038,7 @@ Options:
  -q, --sql-config                   Enable SQL config (only useful with -x)
  -Q, --setuid-with-sql              Enable SQL config (only useful with -x,
                                     enables use of -a and -H)
+ --virtual-config-dir=dir           Enable Virtual configs (needs -x)
  -V, --virtual-config=dir           Enable Virtual configs (needs -x)
  -r pidfile, --pidfile              Write the process id to pidfile
  -s facility, --syslog=facility     Specify the syslog facility (default: mail)
@@ -1113,18 +1133,55 @@ with B<-x> and also setuid to the user.  This is useful for spamd hosts
 which want to load user preferences from an SQL database but also wish to
 support the use of B<-a> (AWL) and B<-H> (Helper home directories.)
 
-=item B<-V>, B<--virtual-config>=I<directory>
+=item B<--virtual-config-dir>=I<pattern>
 
-This option specifies a directory which will contain per-user preference
-files.  The files are in the format of B<I<username>.prefs>.  A
-B<default.prefs> file will be used if an individual user config is not
-found.
+This option specifies where per-user preferences can be found for virtual
+users, for the B<-x> switch.  If this and the B<--virtual-config> switch are
+both used, this will take precedence.
+
+The I<pattern> is used as a base pattern for the directory name.  Any
+and all occurrences of C<%u> in this pattern will be replaced with the
+name of the current user, as sent by spamc.
+
+So for example, if C</vhome/users/%u/spamassassin> is specified, and spamc
+sends a virtual username of C<jm@example.com>, the directory
+C</vhome/users/jm@example.com/spamassassin> will be used.
+
+The set of characters allowed in the virtual username for this path are
+restricted to:
+
+	A-Z a-z 0-9 - + _ . , @ =
+
+All others will be replaced by underscores (C<_>).
+
+This path must be a writable directory.  It will be created if it does not
+already exist.  If a file called B<user_prefs> exists in this directory, it
+will be loaded as the user's preferences.  The auto-whitelist and/or Bayes
+databases for that user will be stored in this directory.
+
+Note that this B<requires> that B<-x> is used, and cannot be combined with
+SQL-based configuration.
+
+=item B<-V>=I<directory>, B<--virtual-config>=I<directory>
+
+This option specifies where per-user preferences can be found for virtual
+users, for the B<-x> switch.
+
+The files are in the format of B<I<username>.prefs>.  A B<default.prefs> file
+will be used if an individual user config is not found.
+
+The set of characters allowed in the virtual username for this path are
+restricted to:
+
+	A-Z a-z 0-9 - + _ . , @ =
+
+All others will be replaced by underscores (C<_>).
 
 Note that this B<requires> that B<-x> is used, and cannot be combined with
 SQL-based configuration.
 
 If a subdirectory is found in that directory, called B<I<username>>, and it is
-writable, it will be used to score auto-whitelist and/or Bayes databases for
+writable, it will be used to store auto-whitelist and/or Bayes databases for
 that user.
 
 =item B<-r> I<pidfile>, B<--pidfile>=I<pidfile>
