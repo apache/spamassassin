@@ -150,7 +150,7 @@ sub new {
   $self->{razor_config} = undef;
   $self->{razor_timeout} = 10;
 
-  $self->{rbl_timeout} = 10;
+  $self->{rbl_timeout} = 15;
 
   # this will be sedded by implementation code, so ~ is OK.
   # using "__userstate__" is recommended for defaults, as it allows
@@ -1378,12 +1378,25 @@ Whether to use the naive-Bayesian-style classifier built into SpamAssassin.
       $self->{use_bayes} = $1; next;
     }
 
-=item rbl_timeout n		(default 10)
+=item rbl_timeout n		(default 15)
 
-All RBL queries are started at the beginning and we try to read the results
-at the end. In case some of them are hanging or not returning, you can specify
-here how long you're willing to wait for them before deciding that they timed
-out
+All RBL queries are started at the beginning and we try to read the results at
+the end.  This value specifies the maximum period of time to wait for an RBL
+query.  If most of the RBL queries have succeeded for a particular message,
+then SpamAssassin will not wait for the full period to avoid wasting time on
+unresponsive server(s).  For the default 15 second timeout, here is a chart of
+queries remaining versus the effective timeout in seconds:
+
+  queries left    100%  90%  80%  70%  60%  50%  40%  30%  20%  10%  0%
+  timeout          15   15   14   14   13   11   10    8    5    3   0
+
+In addition, whenever the effective timeout is lowered due to additional query
+results returning, the remaining queries are always given at least one more
+second before timing out.
+
+For example, if 20 queries are made at the beginning of a message check and 16
+queries have returned (leaving 20%), the remaining 4 queries must finish
+within 5 seconds of the beginning of the check or they will be timed out.
 
 =cut
 

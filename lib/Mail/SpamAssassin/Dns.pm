@@ -171,8 +171,8 @@ sub register_rbl_subtest {
 sub dnsbl_hit {
   my ($self, $rule, $question, $answer) = @_;
 
+  my $log = "";
   if (substr($rule, 0, 2) ne "__") {
-    my $log = "";
     if ($answer->type eq 'TXT') {
       $log = $answer->rdatastr;
       $log =~ s/^"(.*)"$/$1/;
@@ -181,8 +181,8 @@ sub dnsbl_hit {
     elsif ($question->string =~ m/^(\d+)\.(\d+)\.(\d+)\.(\d+)\.(\S+\w)/) {
       $log = "$4.$3.$2.$1 listed in $5";
     }
-    $self->{dnsresult}->{$rule}->{$log} = 1;
   }
+  $self->{dnsresult}->{$rule}->{$log} = 1;
 }
 
 sub process_dnsbl_result {
@@ -253,38 +253,40 @@ sub harvest_dnsbl_queries {
   return if !defined $self->{rbl_launch};
 
   my $timeout = $self->{conf}->{rbl_timeout} + $self->{rbl_launch};
-  my $ready = 1;
   my @waiting = (values %{ $self->{dnscache}->{A} },
 		 values %{ $self->{dnscache}->{TXT} });
   my @left;
+  my $total;
 
   @waiting = grep { defined $_->[BGSOCK] } @waiting;
+  $total = scalar @waiting;
 
-  while ($ready && @waiting) {
-    my $rin = '';
+  while (@waiting) {
     @left = ();
     for my $query (@waiting) {
       if ($self->{res}->bgisready($query->[BGSOCK])) {
 	$self->process_dnsbl_result($query);
       }
       else {
-	vec($rin, fileno($query->[BGSOCK]), 1) = 1 unless @left;
 	push(@left, $query);
       }
     }
     last unless @left;
-    my $time = time;
-    last if $time >= $timeout;
+    last if time >= $timeout;
     @waiting = @left;
-    if (@left == 1) {
-      $ready = select($rin, undef, undef, ($timeout - $time));
-    }
-    else {
-      sleep 1;
-    }
+    # dynamic timeout
+    my $dynamic = (int($self->{conf}->{rbl_timeout}
+		       * (1 - (($total - @left) / $total) ** 2) + 0.5)
+		   + $self->{rbl_launch});
+    $timeout = $dynamic if ($dynamic < $timeout);
+    sleep 1;
   }
-  # TODO: add real timeout code
+  dbg("RBL: success for " . ($total - @left) . " of $total queries", "rbl", 0);
+  # timeouts
   for my $query (@left) {
+    my $rules = join(",", @{$query->[RULES]});
+    my $delay = time - $self->{rbl_launch};
+    dbg("RBL: timeout for $rules after $delay seconds", "rbl", 0);
     undef $query->[BGSOCK];
   }
   # register hits
