@@ -592,3 +592,11 @@ header __T_OPT_HEADER_ALL    ALL =~ /opt.?(?:in|out|oem|ion-in)(?:\b|\d|\@)/i
 meta T_OPT_HEADER            (__T_OPT_HEADER_ALL && !__T_OPT_HEADER_SUBJ)
 describe T_OPT_HEADER        Headers include an "opt"ed phrase
 
+# match the format of a legit X-Auth-Warning header, and hit on fake ones
+# normal: "e4e.oac.uci.edu: foo owned process doing -bs"
+# fake: "bzgrdag, upaeqehv"
+header __HAS_AUTHWARN	     X-Authentication-Warning =~ /^./
+header __NORMAL_AUTHWARN     X-Authentication-Warning !~ /^(\S+\.\S+): /
+meta T_FAKED_AUTHWARN	     (__HAS_AUTHWARN && !__NORMAL_AUTHWARN)
+describe T_FAKED_AUTHWARN    'X-Authentication-Warning' looks faked
+
