@@ -1,0 +1,139 @@
+# SpamAssassin rules file: compensation for common false positives.
+###########################################################################
+# Header compensation tests
+
+header GENUINE_EBAY_RCVD        eval:check_for_from_domain_in_received_headers('ebay.com', 'true')
+describe GENUINE_EBAY_RCVD      Message from eBay
+
+header   APPROVED_BY            Approved-By =~ /./
+describe APPROVED_BY            Has an Approved-By moderated list header
+
+header   EXCHANGE_SERVER        X-Mailer =~ /Internet Mail Service \([\d\.]+\)/
+describe EXCHANGE_SERVER        Came via Internet Mail Service plugin
+
+# This is a Bugzilla bug status report e-mail and probably OK
+header BUGZILLA_BUG             eval:message_from_bugzilla()
+describe BUGZILLA_BUG           Looks like a Bugzilla bug
+
+header DEBIAN_BTS_BUG           eval:message_from_debian_bts()
+describe DEBIAN_BTS_BUG         Looks like a Debian BTS bug
+
+# give a negative score to Majordomo results.
+header   MAJORDOMO              Subject =~ /Majordomo (?:request )?results/
+describe MAJORDOMO              From Majordomo
+
+# these headers have very low correlation with spam
+header CRON_ENV                 exists:X-Cron-Env
+header IN_REP_TO                exists:In-Reply-To
+header REFERENCES               exists:References
+header RESENT_TO                exists:Resent-To
+header USER_AGENT               exists:User-Agent
+header X_AUTH_WARNING           exists:X-Authentication-Warning
+header X_LOOP                   exists:X-Loop
+header X_MAILING_LIST           exists:X-Mailing-List
+header X_ACCEPT_LANG            exists:X-Accept-Language
+
+header PGP_SIGNATURE_2          Content-Type =~ /protocol=.?application\/pgp-signature.?;/i
+describe PGP_SIGNATURE_2        Contains a PGP-signed message (signature attached)
+
+header   KNOWN_MAILING_LIST     eval:detect_mailing_list()
+describe KNOWN_MAILING_LIST     Email came from some known mailing list software
+
+header NMS_CGI_NOT_BUGGY        X-Mailer =~ /^NMS FormMail.pl.*v\d/
+describe NMS_CGI_NOT_BUGGY      Not Matt's Scripts formmail.pl
+
+# some non-spam rules from http://www.darkmere.gen.nz/2002/0628.html
+header Q_FOR_SELLER             Subject =~ /Question.*(for|to|from eBay).*(seller|Member)/
+describe Q_FOR_SELLER           Subject is an eBay question
+
+header SUBJECT_HAS_DATE         Subject =~ /1?\d[-\/][1-3]?\d[-\/](20)?02/
+describe SUBJECT_HAS_DATE       Subject contains a date
+
+header FROM_NEWS_LIST           From =~ /(\@news|\@list)/i
+describe FROM_NEWS_LIST         From: has a news or list hostname in FQDN
+
+header FROM_US_PHONE            From =~ /^[2-9]\d{9}\@/
+describe FROM_US_PHONE          From: looks like US Telephone Number
+
+header SUBJECT_IS_NEWS          Subject =~ /(in review|news|list)/i
+describe SUBJECT_IS_NEWS        Subject contains news newsletter list daily, weekly or monthly
+
+header SUBJECT_FREQ             Subject =~ /(monday|daily|week|monthly)/i
+describe SUBJECT_FREQ           Subject contains monday daily week or monthly
+
+header SUBJECT_MONTH            Subject =~ /(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)/i
+describe SUBJECT_MONTH          Subject has month in it probable newsletter
+
+header FROM_EGROUPS     X-eGroups-Return =~ /^sentto-.*\@returns.groups.yahoo.com$/
+describe FROM_EGROUPS   Appears to be from yahoo groups
+test FROM_EGROUPS  ok   sentto-2537484-52529-1020428367-Sxm=olswang.com@returns.groups.yahoo.com
+test FROM_EGROUPS  fail spammer@returns.groups.yahoo.com
+
+header FWD_MSG                  Subject =~ /\[?Fwd?:?\s*/
+describe FWD_MSG                Forwarded email
+
+###########################################################################
+# Body compensation tests
+###########################################################################
+
+body HOTMAIL_FOOTER1             /Send and receive Hotmail on your mobile device: /
+describe HOTMAIL_FOOTER1        Common footer for Hotmail
+
+body HOTMAIL_FOOTER2            /Get your FREE download of MSN Explorer at /
+describe HOTMAIL_FOOTER2        Common footer for Hotmail
+
+body HOTMAIL_FOOTER3            /Get Your Private, Free E-mail from MSN Hotmail at http:\/\/www\.hotmail\.com\./
+describe HOTMAIL_FOOTER3        Common footer for Hotmail
+
+body HOTMAIL_FOOTER4            /Join the world's largest e-mail service with MSN Hotmail\./
+describe HOTMAIL_FOOTER4        Common footer for Hotmail
+
+body HOTMAIL_FOOTER5            /Chat with friends online, try MSN Messenger: /
+describe HOTMAIL_FOOTER5        Common footer for Hotmail
+
+body MSN_FOOTER1                /MSN Photos is the easiest way to share and print your photos: /
+describe MSN_FOOTER1            Common footer for MSN
+
+body MSN_FOOTER2                /Remove my e-mail address from Gaming Zone /
+describe MSN_FOOTER2            Common footer for MSN
+
+body MAILBITS_EMAIL             /This is a free service provided by MailBits\.com\./
+describe MAILBITS_EMAIL         recommended page from MailBits.com
+
+body GROUPS_YAHOO_1             /Your use of Yahoo! Groups is subject to the/
+describe GROUPS_YAHOO_1         Modified Yahoo! Groups test
+
+body GROUPS_MSN                 /http:\/\/communities\.msn\.com\/contact/
+describe GROUPS_MSN             MSN Communities
+
+# Evites trigger false positives
+body EVITE                      /(?:evite\.citysearch\.com|evite\.com)/
+describe EVITE                  Claw back some for evite
+
+# Has a proper .sig - probably clean
+body     SIGNATURE_DELIM        /^-- $/
+describe SIGNATURE_DELIM        Standard signature delimiter present
+
+body EGP_HTML_BANNER            /^<!-- \|\*\*\|begin egp html banner/
+describe EGP_HTML_BANNER        non-spam EGP banner found
+
+body MAILMAN_CONFIRM            /We have received a request .*subscription of your email address.* to the .* mailing list/
+describe MAILMAN_CONFIRM        A MailMan confirm-your-address message
+
+rawbody PGP_SIGNATURE           /-----BEGIN PGP SIGNATURE-----/
+describe PGP_SIGNATURE          Contains a PGP-signed message
+
+# the idea is that most legit newsletters will claim their copyright; spammers
+# do not seem to for some reason.  (Kevin Dangoor)
+body COPYRIGHT_CLAIMED          /copyright.{0,100}all rights reserved/is
+describe COPYRIGHT_CLAIMED      Contains a claim of copyright
+
+body BALANCE_FOR_LONG           eval:check_for_very_long_text()
+describe BALANCE_FOR_LONG       Message text is over 500 lines long
+
+rawbody UNIFIED_PATCH           /^\@\@ [-+0-9]+,[0-9]+ [-+0-9]+,[0-9]+ \@\@$/
+describe UNIFIED_PATCH          Contains what looks like a patch from diff -u
+
+rawbody DIFF_C_PATCH            /^[*]{3} \S+    \S{3} \S{3} .\d \d{2}:\d{2}:\d{2} \d+$/
+describe DIFF_C_PATCH           Contains what looks like a patch from diff -c
+

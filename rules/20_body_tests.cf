@@ -48,6 +48,13 @@ describe HTML_WITH_BGCOLOR	HTML mail with non-white background
 
 rawbody  BIG_FONT               /<\s*FONT\s[^>]*size\s*=(?:3D(?:\d{2,}|\+[2-9]|[3-9])|\s*["'](?:\d{2,}|\+[2-9]|[3-9]))/is
 describe BIG_FONT               FONT Size +2 and up or 3 and up
+test BIG_FONT ok   <font size="5"> foo </font>
+test BIG_FONT ok   <font size="+2"> foo </font>
+test BIG_FONT ok   <font size="3"> foo </font>
+test BIG_FONT fail <font size="2"> foo </font>
+test BIG_FONT fail <font size="+1"> foo </font>
+test BIG_FONT fail <font size="-1"> foo </font>
+test BIG_FONT fail <font size="1"> foo </font>
 
 rawbody SPAM_FORM		/CHANGE EMAIL ADDRESS IN ACTION OF FORM/
 describe SPAM_FORM		Form for changing email address
@@ -570,26 +577,6 @@ describe UNNEEDED_HTML_ENCODING	Unneeded encoding of HTML tags
 rawbody FRONTPAGE		/FrontPage.Editor/
 describe FRONTPAGE		Frontpage used to create the message
 
-###########################################################################
-# Compensation for signs that the mail is friendly.
-
-body BALANCE_FOR_LONG		eval:check_for_very_long_text()
-describe BALANCE_FOR_LONG	Message text is over 500 lines long
-
-rawbody UNIFIED_PATCH		/^\@\@ [-+0-9]+,[0-9]+ [-+0-9]+,[0-9]+ \@\@$/
-describe UNIFIED_PATCH		Contains what looks like a patch from diff -u
-
-rawbody DIFF_C_PATCH		/^[*]{3} \S+    \S{3} \S{3} .\d \d{2}:\d{2}:\d{2} \d+$/
-describe DIFF_C_PATCH		Contains what looks like a patch from diff -c
-
-rawbody PGP_SIGNATURE		/-----BEGIN PGP SIGNATURE-----/
-describe PGP_SIGNATURE		Contains a PGP-signed message
-
-# the idea is that most legit newsletters will claim their copyright; spammers
-# do not seem to for some reason.  (Kevin Dangoor)
-body COPYRIGHT_CLAIMED		/copyright.{0,100}all rights reserved/is
-describe COPYRIGHT_CLAIMED	Contains a claim of copyright
-
 # some very frequent spam subjects, based on statistical analysis
 body KIFF			/temple kiff/i
 describe KIFF			Contains "Temple Kiff"
@@ -630,12 +617,6 @@ describe ITS_EFFECTIVE		Something claims to be effective
 body RESISTANCE_IS_FUTILE	/Replying to this email will not unsubscribe you./i
 describe RESISTANCE_IS_FUTILE	Resistance to this spam is futile
 
-body MAILMAN_CONFIRM            /We have received a request .*subscription of your email address.* to the .* mailing list/
-describe MAILMAN_CONFIRM        A MailMan confirm-your-address message
-
-body EGP_HTML_BANNER            /^<!-- \|\*\*\|begin egp html banner/
-describe EGP_HTML_BANNER        non-spam EGP banner found
-
 # contrib: thelton /at/ donet.com
 body GREAT_OFFER                /\b(?:offer expires|see full offer for details|great offer)/i
 describe GREAT_OFFER            Trying to offer you something
@@ -672,14 +653,6 @@ describe MIME_NULL_BLOCK	Correct for MIME 'null block'
 # Unregistered spam tool
 body SAFEGUARD_NOTICE		/This safeguard is not inserted when using the registered version/
 describe SAFEGUARD_NOTICE	Contains signature of unregistered spam tool
-
-# Evites trigger false positives
-body EVITE			/(?:evite\.citysearch\.com|evite\.com)/
-describe EVITE			Claw back some for evite
-
-# Has a proper .sig - probably clean
-body     SIGNATURE_DELIM        /^-- $/
-describe SIGNATURE_DELIM        Standard signature delimiter present  
 
 body     READ_TO_END            /read this (?:e-?mail )?to the end/i
 describe READ_TO_END            You'd better read all of this spam!
