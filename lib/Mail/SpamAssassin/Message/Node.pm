@@ -321,18 +321,20 @@ sub decode {
 }
 
 # Look at a text scalar and determine whether it should be rendered
-# as text/html.  Based on a heuristic which simulates a certain
-# well-used/common mail client.
+# as text/html.
 #
-# We don't need to advertise this in the POD doc.
+# This is not a public function.
 # 
-sub _html_near_start {
-  my ($pad) = @_;
-
-  my $count = 0;
-  $count += ($pad =~ tr/\n//d) * 2;
-  $count += ($pad =~ tr/\n//cd);
-  return ($count < 24);
+sub _html_render {
+  if ($_[0] =~ m/^(.{0,18}?<(?:body|head|html|img|pre|table|title)(?:\s.{0,18}?)?>)/is)
+  {
+    my $pad = $1;
+    my $count = 0;
+    $count += ($pad =~ tr/\n//d) * 2;
+    $count += ($pad =~ tr/\n//cd);
+    return ($count < 24);
+  }
+  return 0;
 }
 
 =item rendered()
@@ -351,68 +353,35 @@ sub rendered {
   # We don't render anything except text
   return(undef,undef) unless ( $self->{'type'} =~ /^text\b/i );
 
-  if ( !exists $self->{rendered} ) {
+  if (!exists $self->{rendered}) {
     my $text = $self->decode();
     my $raw = length($text);
 
     # render text/html always, or any other text|text/plain part as text/html
     # based on a heuristic which simulates a certain common mail client
-    if ( $raw > 0 && (
-        $self->{'type'} =~ m@^text/html\b@i || (
-        $self->{'type'} =~ m@^text(?:$|/plain)@i &&
-	  $text =~ m/^(.{0,18}?<(?:$Mail::SpamAssassin::HTML::re_start)(?:\s.{0,18}?)?>)/ois &&
-	  _html_near_start($1))
-        )
-       ) 
+    if ($raw > 0 && ($self->{'type'} =~ m@^text/html\b@i ||
+		     ($self->{'type'} =~ m@^text(?:$|/plain)@i &&
+		      _html_render(substr($text, 0, 23)))))
     {
-      $self->{'rendered_type'} = 'text/html';
-      my $html = Mail::SpamAssassin::HTML->new(); # object
-      my @lines = @{$html->html_render($text)};
-      $self->{rendered} = join('', @lines);
-      $self->{html_results} = $html->get_results(); # needed in eval tests
+      $self->{rendered_type} = 'text/html';
 
-      # the visible text parts of the message; all invisible or low-contrast
-      # text removed.  TODO: wonder if we should just replace 
-      # $self->{rendered} with this?
-      $self->{invisible_rendered} = join('',
-                                @{$html->{html_invisible_text}});
-      $self->{visible_rendered} = join('',
-                                @{$html->{html_visible_text}});
+      my $html = Mail::SpamAssassin::HTML->new();	# object
+      $html->parse($text);				# parse+render text
+      $self->{rendered} = $html->get_rendered_text();
+      $self->{visible_rendered} = $html->get_rendered_text(invisible => 0);
+      $self->{invisible_rendered} = $html->get_rendered_text(invisible => 1);
+      $self->{html_results} = $html->get_results();
 
-      # some tests done after rendering
-      my $r = $self->{html_results}; # temporary reference for brevity
-      $r->{html_message} = 1;
-      $r->{html_length} = 0;
-      my $space = 0;
-      for my $line (@lines) {
-        $line = pack ('C0A*', $line);
-        $space += ($line =~ tr/ \t\n\r\x0b\xa0/ \t\n\r\x0b\xa0/);
-        $r->{html_length} += length($line);
-      }
+      # end-of-document result values that require looking at the text
+      my $r = $self->{html_results};	# temporary reference for brevity
+      my $space = ($self->{rendered} =~ tr/ \t\n\r\x0b\xa0/ \t\n\r\x0b\xa0/);
+      $r->{html_length} = length($self->{rendered});
       $r->{non_space_len} = $r->{html_length} - $space;
       $r->{ratio} = ($raw - $r->{html_length}) / $raw;
-      if (exists $r->{elements} && exists $r->{tags}) {
-	$r->{bad_tag_ratio} = ($r->{tags} - $r->{elements}) / $r->{tags};
-      }
-      if (exists $r->{elements_seen} && exists $r->{tags_seen}) {
-	$r->{non_element_ratio} =
-	    ($r->{tags_seen} - $r->{elements_seen}) / $r->{tags_seen};
-      }
-      if (exists $r->{tags} && exists $r->{obfuscation}) {
-	$r->{obfuscation_ratio} = $r->{obfuscation} / $r->{tags};
-      }
-      if (exists $r->{attr_bad} && exists $r->{attr_all}) {
-	$r->{attr_bad} = $r->{attr_bad} / $r->{attr_all};
-      }
-      if (exists $r->{attr_unique_bad} && exists $r->{attr_unique_all}) {
-	$r->{attr_unique_bad} = $r->{attr_unique_bad} / $r->{attr_unique_all};
-      }
     }
     else {
       $self->{rendered_type} = $self->{type};
       $self->{rendered} = $text;
-      $self->{invisible_rendered} = '';
-      $self->{visible_rendered} = $text;
     }
   }
 

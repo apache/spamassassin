@@ -23,18 +23,13 @@ use strict;
 use bytes;
 
 package Mail::SpamAssassin::HTML;
+use HTML::Parser 3.24 ();
+use vars qw($re_loose $re_strict $re_other @ISA @EXPORT @EXPORT_OK);
 
 require Exporter;
-my @ISA = qw(Exporter);
-my @EXPORT = qw($re_start $re_loose $re_strict get_results);
-my @EXPORT_OK = qw();
-
-use HTML::Parser 3.24 ();
-use vars qw($re_start $re_loose $re_strict $re_other);
-
-# elements that trigger HTML rendering in text/plain in some mail clients
-# (repeats ones listed in $re_strict)
-$re_start = 'body|head|html|img|pre|table|title';
+@ISA = qw(HTML::Parser Exporter);
+@EXPORT = qw($re_loose $re_strict get_results);
+@EXPORT_OK = qw();
 
 # elements defined by the HTML 4.01 and XHTML 1.0 DTDs (do not change them!)
 $re_loose = 'applet|basefont|center|dir|font|frame|frameset|iframe|isindex|menu|noframes|s|strike|u';
@@ -68,25 +63,31 @@ my %ok_attribute = (
 		 background => [qw(body marquee)],
 		 );
 
-my %tested_colors;
-
 sub new {
-  my $this = shift;
-  my $class = ref($this) || $this;
-  my $self = {};
-  bless($self, $class);
-
-  $self->html_start();
-
-  return $self;
+  my ($class) = @_;
+  my $self = $class->SUPER::new(
+		api_version => 3,
+		handlers => [
+			start_document => ["html_start", "self"],
+			start => ["html_tag", "self,tagname,attr,'+1'"],
+			end_document => ["html_end", "self"],
+			end => ["html_tag", "self,tagname,attr,'-1'"],
+			text => ["html_text", "self,dtext"],
+			comment => ["html_comment", "self,text"],
+			declaration => ["html_declaration", "self,text"],
+		],
+		marked_sections => 1);
+  $self;
 }
 
 sub html_start {
   my ($self) = @_;
 
-  $self->{basefont} = 3;
+  # trigger HTML_MESSAGE
+  $self->put_results(html => 1);
 
-  undef $self->{text_style};
+  # initial display attributes
+  $self->{basefont} = 3;
   my %default = (tag => "default",
 		 fgcolor => "#000000",
 		 bgcolor => "#ffffff",
@@ -97,43 +98,104 @@ sub html_start {
 sub html_end {
   my ($self) = @_;
 
-  $self->display_text();
+  delete $self->{text_style};
+
+  # final results scalars
+  $self->put_results(image_area => $self->{image_area});
+  $self->put_results(max_shouting => $self->{max_shouting});
+  $self->put_results(length => $self->{length});
+  $self->put_results(min_size => $self->{min_size});
+  $self->put_results(max_size => $self->{max_size});
+
+  # final result arrays
+  $self->put_results(comment => $self->{comment});
+  $self->put_results(title => $self->{title});
+  $self->put_results(anchor => $self->{anchor});
+
+  # final result hashes
+  $self->put_results(inside => $self->{inside});
+  $self->put_results(uri => $self->{uri});
+
+  # end-of-document result values that don't require looking at the text
+  if (exists $self->{backhair}) {
+    $self->put_results(backhair_count => scalar keys %{ $self->{backhair} });
+  }
+  if (exists $self->{elements} && exists $self->{tags}) {
+    $self->put_results(bad_tag_ratio =>
+		       ($self->{tags} - $self->{elements}) / $self->{tags});
+  }
+  if (exists $self->{elements_seen} && exists $self->{tags_seen}) {
+    $self->put_results(non_element_ratio =>
+		       ($self->{tags_seen} - $self->{elements_seen}) /
+		       $self->{tags_seen});
+  }
+  if (exists $self->{tags} && exists $self->{obfuscation}) {
+    $self->put_results(obfuscation_ratio =>
+		       $self->{obfuscation} / $self->{tags});
+  }
+  if (exists $self->{attr_bad} && exists $self->{attr_all}) {
+    $self->put_results(attr_bad => $self->{attr_bad} / $self->{attr_all});
+  }
+  if (exists $self->{attr_unique_bad} && exists $self->{attr_unique_all}) {
+    $self->put_results(attr_unique_bad =>
+		       $self->{attr_unique_bad} / $self->{attr_unique_all});
+  }
+}
+
+sub put_results {
+  my $self = shift;
+  my %results = @_;
+
+  while (my ($k, $v) = each %results) {
+    $self->{results}{$k} = $v;
+  }  
 }
 
 sub get_results {
   my ($self) = @_;
 
-  return $self->{html};
+  return $self->{results};
 }
 
-sub html_render {
-  my ($self, $text) = @_;
+sub get_rendered_text {
+  my $self = shift;
+  my %options = @_;
 
-  # clean this up later
-  for my $key (keys %{ $self->{html} }) {
-    delete $self->{html}{$key};
+  return join('', @{ $self->{text} }) unless keys %options;
+
+  my $mask;
+  while (my ($k, $v) = each %options) {
+    next if !defined $self->{"text_$k"};
+    if (!defined $mask) {
+      $mask |= $v ? $self->{"text_$k"} : ~ $self->{"text_$k"};
+    }
+    else {
+      $mask &= $v ? $self->{"text_$k"} : ~ $self->{"text_$k"};
+    }
   }
 
-  $self->{html}{ratio} = 0;
-  $self->{html}{image_area} = 0;
-  $self->{html}{shouting} = 0;
-  $self->{html}{max_shouting} = 0;
-  $self->{html}{anchor_index} = -1;
-  $self->{html}{title_index} = -1;
-  $self->{html}{max_size} = 3;	# start at default size
-  $self->{html}{min_size} = 3;	# start at default size
+  my $text = '';
+  my $i = 0;
+  for (@{ $self->{text} }) { $text .= $_ if vec($mask, $i++, 1); }
+  return $text;
+}
 
-  $self->{html_text} = [];
-  $self->{html_visible_text} = [];
-  $self->{html_invisible_text} = [];
-  $self->{last_text} = "";
-  $self->{last_visible_text} = "";
-  $self->{last_invisible_text} = "";
-  $self->{html_last_tag} = 0;
-  $self->{html}{closed_html} = 0;
-  $self->{html}{closed_body} = 0;
+sub parse {
+  my ($self, $text) = @_;
 
-  $self->{html}{length} += $1 if (length($text) =~ m/^(\d+)$/);	# untaint
+  $self->{image_area} = 0;
+  $self->{shouting} = 0;
+  $self->{max_shouting} = 0;
+  $self->{anchor_index} = -1;
+  $self->{title_index} = -1;
+  $self->{max_size} = 3;	# start at default size
+  $self->{min_size} = 3;	# start at default size
+  $self->{closed_html} = 0;
+  $self->{closed_body} = 0;
+  $self->{text} = [];		# rendered text
+  $self->{text_invisible} = '';	# vec of invisibility state in $self->{text}
+
+  $self->{length} += $1 if (length($text) =~ m/^(\d+)$/);	# untaint
 
   # NOTE: We *only* need to fix the rendering when we verify that it
   # differs from what people see in their MUA.  Testing is best done with
@@ -159,32 +221,17 @@ sub html_render {
     $text =~ s/<\/(?:\s.*?)?>//gs;
   }
 
-  # HTML::Parser 3.31, at least, converts &nbsp; into a question mark "?" for some reason.
-  # Let's convert them to spaces.
+  # HTML::Parser converts &nbsp; into a question mark ("?") for some
+  # reason, so convert them to spaces.  Confirmed in 3.31, at least.
   $text =~ s/&nbsp;/ /g;
-
-  my $hp = HTML::Parser->new(
-		api_version => 3,
-		handlers => [
-		  start_document => [sub { $self->html_start(@_) }],
-		  start => [sub { $self->html_tag(@_) }, "tagname,attr,'+1'"],
-		  end_document => [sub { $self->html_end(@_) }],
-		  end => [sub { $self->html_tag(@_) }, "tagname,attr,'-1'"],
-		  text => [sub { $self->html_text(@_) }, "dtext"],
-		  comment => [sub { $self->html_comment(@_) }, "text"],
-		  declaration => [sub { $self->html_declaration(@_) }, "text"],
-		],
-		marked_sections => 1);
 
   # ALWAYS pack it into byte-representation, even if we're using 'use bytes',
   # since the HTML::Parser object may use Unicode internally.
   # (bug 1417, maybe)
-  $hp->parse(pack ('C0A*', $text));
-  $hp->eof;
+  $self->SUPER::parse(pack('C0A*', $text));
+  $self->SUPER::eof;
 
-  delete $self->{html_last_tag};
-
-  return $self->{html_text};
+  return $self->{text};
 }
 
 sub html_tag {
@@ -194,22 +241,22 @@ sub html_tag {
 
   # general tracking
   if ($is_element) {
-    $self->{html}{elements}++;
-    $self->{html}{elements_seen}++ if !exists $self->{html}{"inside_$tag"};
+    $self->{elements}++;
+    $self->{elements_seen}++ if !exists $self->{inside}{$tag};
   }
-  $self->{html}{tags}++;
-  $self->{html}{tags_seen}++ if !exists $self->{html}{"inside_$tag"};
-  $self->{html}{"inside_$tag"} += $num;
-  $self->{html}{"inside_$tag"} = 0 if $self->{html}{"inside_$tag"} < 0;
+  $self->{tags}++;
+  $self->{tags_seen}++ if !exists $self->{inside}{$tag};
+  $self->{inside}{$tag} += $num;
+  $self->{inside}{$tag} = 0 if $self->{inside}{$tag} < 0;
 
   # check attributes
   for my $name (keys %$attr) {
     if ($name !~ /^(?:$re_attr|$re_attr_extra)$/io) {
-      $self->{html}{attr_bad}++;
-      $self->{html}{attr_unique_bad}++ if !exists $self->{"attr_seen_$name"};
+      $self->{attr_bad}++;
+      $self->{attr_unique_bad}++ if !exists $self->{"attr_seen_$name"};
     }
-    $self->{html}{attr_all}++;
-    $self->{html}{attr_unique_all}++ if !exists $self->{"attr_seen_$name"};
+    $self->{attr_all}++;
+    $self->{attr_unique_all}++ if !exists $self->{"attr_seen_$name"};
     $self->{"attr_seen_$name"} = 1;
   }
 
@@ -231,173 +278,32 @@ sub html_tag {
     }
     # end tags
     elsif ($num == -1) {
-      $self->{html}{closed_html} = 1 if $tag eq "html";
-      $self->{html}{closed_body} = 1 if $tag eq "body";
+      $self->{closed_html} = 1 if $tag eq "html";
+      $self->{closed_body} = 1 if $tag eq "body";
     }
     # shouting
     if ($tag =~ /^(?:b|i|u|strong|em|big|center|h\d)$/) {
-      $self->{html}{shouting} += $num;
-      if ($self->{html}{shouting} > $self->{html}{max_shouting}) {
-	$self->{html}{max_shouting} = $self->{html}{shouting};
+      $self->{shouting} += $num;
+      if ($self->{shouting} > $self->{max_shouting}) {
+	$self->{max_shouting} = $self->{shouting};
       }
     }
-
-    $self->{html_last_tag} = (($num < 0) ? "/" : "") . $tag;
   }
 }
 
 sub html_format {
   my ($self, $tag, $attr, $num) = @_;
 
-  # ordered by frequency of tag groups
+  # ordered by frequency of tag groups, note: whitespace is always "visible"
   if ($tag eq "br" || $tag eq "div") {
-    $self->display_text();
-    push @{$self->{html_visible_text}}, "\n";
-    push @{$self->{html_invisible_text}}, "\n";
-    push @{$self->{html_text}}, "\n";
+    $self->display_text("\n", whitespace => 1);
   }
   elsif ($tag =~ /^(?:li|t[hd]|d[td])$/) {
-    $self->display_text();
-    push @{$self->{html_visible_text}}, " ";
-    push @{$self->{html_invisible_text}}, " ";
-    push @{$self->{html_text}}, " ";
+    $self->display_text(" ", whitespace => 1);
   }
   elsif ($tag =~ /^(?:p|hr|blockquote|pre)$/) {
-    $self->display_text();
-    push @{$self->{html_visible_text}}, "\n\n";
-    push @{$self->{html_invisible_text}}, "\n\n";
-    push @{$self->{html_text}}, "\n\n";
+    $self->display_text("\n\n", whitespace => 1);
   }
-}
-
-use constant URI_STRICT => 0;
-
-# resolving relative URIs as defined in RFC 2396 (steps from section 5.2)
-# using draft http://www.gbiv.com/protocols/uri/rev-2002/rfc2396bis.html
-sub parse_uri {
-  my ($u) = @_;
-  my %u;
-  ($u{scheme}, $u{authority}, $u{path}, $u{query}, $u{fragment}) =
-    $u =~ m|^(?:([^:/?#]+):)?(?://([^/?#]*))?([^?#]*)(?:\?([^#]*))?(?:#(.*))?|;
-  return %u;
-}
-
-sub remove_dot_segments {
-  my ($input) = @_;
-  my $output = "";
-
-  $input =~ s@^(?:\.\.?/)@/@;
-
-  while ($input) {
-    if ($input =~ s@^/\.(?:$|/)@/@) {
-    }
-    elsif ($input =~ s@^/\.\.(?:$|/)@/@) {
-      $output =~ s@/?[^/]*$@@;
-    }
-    elsif ($input =~ s@(/?[^/]*)@@) {
-      $output .= $1;
-    }
-  }
-  return $output;
-}
-
-sub merge_uri {
-  my ($base_authority, $base_path, $r_path) = @_;
-
-  if (defined $base_authority && !$base_path) {
-    return "/" . $r_path;
-  }
-  else {
-    if ($base_path =~ m|/|) {
-      $base_path =~ s|(?<=/)[^/]*$||;
-    }
-    else {
-      $base_path = "";
-    }
-    return $base_path . $r_path;
-  }
-}
-
-sub target_uri {
-  my ($base, $r) = @_;
-
-  my %r = parse_uri($r);	# parsed relative URI
-  my %base = parse_uri($base);	# parsed base URI
-  my %t;			# generated temporary URI
-
-  if ((not URI_STRICT) and
-      (defined $r{scheme} && defined $base{scheme}) and
-      ($r{scheme} eq $base{scheme}))
-  {
-    undef $r{scheme};
-  }
-
-  if (defined $r{scheme}) {
-    $t{scheme} = $r{scheme};
-    $t{authority} = $r{authority};
-    $t{path} = remove_dot_segments($r{path});
-    $t{query} = $r{query};
-  }
-  else {
-    if (defined $r{authority}) {
-      $t{authority} = $r{authority};
-      $t{path} = remove_dot_segments($r{path});
-      $t{query} = $r{query};
-    }
-    else {
-      if ($r{path} eq "") {
-	$t{path} = $base{path};
-	if (defined $r{query}) {
-	  $t{query} = $r{query};
-	}
-	else {
-	  $t{query} = $base{query};
-	}
-      }
-      else {
-	if ($r{path} =~ m|^/|) {
-	  $t{path} = remove_dot_segments($r{path});
-	}
-	else {
-	  $t{path} = merge_uri($base{authority}, $base{path}, $r{path});
-	  $t{path} = remove_dot_segments($t{path});
-	}
-	$t{query} = $r{query};
-      }
-      $t{authority} = $base{authority};
-    }
-    $t{scheme} = $base{scheme};
-  }
-  $t{fragment} = $r{fragment};
-
-  # recompose URI
-  my $result = "";
-  if ($t{scheme}) {
-    $result .= $t{scheme} . ":";
-  }
-  elsif (defined $t{authority}) {
-    # this block is not part of the RFC
-    # TODO: figure out what MUAs actually do with unschemed URIs
-    # maybe look at URI::Heuristic
-    if ($t{authority} =~ /^www\d*\./i) {
-      # some spammers are using unschemed URIs to escape filters
-      $result .= "http:";
-    }
-    elsif ($t{authority} =~ /^ftp\d*\./i) {
-      $result .= "ftp:";
-    }
-  }
-  if ($t{authority}) {
-    $result .= "//" . $t{authority};
-  }
-  $result .= $t{path};
-  if ($t{query}) {
-    $result .= "?" . $t{query};
-  }
-  if ($t{fragment}) {
-    $result .= "#" . $t{fragment};
-  }
-  return $result;
 }
 
 sub push_uri {
@@ -409,8 +315,8 @@ sub push_uri {
   $uri =~ s/^\s+//;
   $uri =~ s/\s+$//;
 
-  my $target = target_uri($self->{html}{base_href} || "", $uri);
-  push @{$self->{html}{uri}}, $target if $target;
+  my $target = target_uri($self->{base_href} || "", $uri);
+  push @{ $self->{uri} }, $target if $target;
 }
 
 sub html_uri {
@@ -434,7 +340,7 @@ sub html_uri {
       # use <BASE HREF="URI"> to turn relative links into absolute links
 
       # even if it is a base URI, handle like a normal URI as well
-      push @{$self->{html}{uri}}, $uri;
+      push @{ $self->{uri} }, $uri;
 
       # a base URI will be ignored by browsers unless it is an absolute
       # URI of a standard protocol
@@ -445,11 +351,405 @@ sub html_uri {
 
 	# Make sure it ends in a slash
 	$uri .= "/" unless $uri =~ m@/$@;
-	$self->{html}{base_href} = $uri;
+	$self->{base_href} = $uri;
       }
     }
   }
 }
+
+# this might not be quite right, may need to pay attention to table nesting
+sub close_table_tag {
+  my ($self, $tag) = @_;
+
+  # don't close if never opened
+  return unless grep { $_->{tag} eq $tag } @{ $self->{text_style} };
+
+  my $top;
+  while (@{ $self->{text_style} } && ($top = $self->{text_style}[-1]->{tag})) {
+    if (($tag eq "td" && ($top eq "font" || $top eq "td")) ||
+	($tag eq "tr" && $top =~ /^(?:font|td|tr)$/))
+    {
+      pop @{ $self->{text_style} };
+    }
+    else {
+      last;
+    }
+  }
+}
+
+sub close_tag {
+  my ($self, $tag) = @_;
+
+  # don't close if never opened
+  return if !grep { $_->{tag} eq $tag } @{ $self->{text_style} };
+
+  # close everything up to and including tag
+  while (my %current = %{ pop @{ $self->{text_style} } }) {
+    last if $current{tag} eq $tag;
+  }
+}
+
+# process CSS style attribute
+sub css_style {
+  my ($self, $tag, $attr, $num) = @_;
+
+  # TODO: something here
+}
+
+# body, font, table, tr, th, td, big, small
+sub text_style {
+  my ($self, $tag, $attr, $num) = @_;
+
+  # treat <th> as <td>
+  $tag = "td" if $tag eq "th";
+
+  # open
+  if ($num == 1) {
+    # HTML browsers generally only use first <body> for colors,
+    # so only push if we haven't seen a body tag yet
+    if ($tag eq "body") {
+      # TODO: skip if we've already seen body
+    }
+
+    # change basefont (only change size)
+    if ($tag eq "basefont" &&
+	exists $attr->{size} && $attr->{size} =~ /^\s*(\d+)/)
+    {
+      $self->{basefont} = $1;
+      return;
+    }
+
+    # close elements with optional end tags
+    $self->close_table_tag($tag) if ($tag eq "td" || $tag eq "tr");
+
+    # copy current text state
+    my %new = %{ $self->{text_style}[-1] };
+
+    # change tag name!
+    $new{tag} = $tag;
+
+    # big and small tags
+    if ($tag eq "big") {
+      $new{size} += 1;
+      push @{ $self->{text_style} }, \%new;
+      return;
+    }
+    if ($tag eq "small") {
+      $new{size} -= 1;
+      push @{ $self->{text_style} }, \%new;
+      return;
+    }
+
+    # tag attributes
+    for my $name (keys %$attr) {
+      next unless (grep { $_ eq $tag } @{ $ok_attribute{$name} });
+      if ($name eq "text" || $name eq "color") {
+	# two different names for text color
+	$new{fgcolor} = _name_to_rgb($attr->{$name});
+      }
+      elsif ($name eq "size" && $attr->{size} =~ /^\s*([+-]\d+)/) {
+	# relative font size
+	$new{size} = $self->{basefont} + $1;
+      }
+      else {
+	if ($name eq "bgcolor") {
+	  # overwrite with hex value, $new{bgcolor} is set below
+	  $attr->{bgcolor} = _name_to_rgb($attr->{bgcolor});
+	}
+	if ($name eq "size" && $attr->{size} !~ /^\s*([+-])(\d+)/) {
+	  # attribute is malformed
+	}
+	else {
+	  # attribute is probably okay
+	  $new{$name} = $attr->{$name};
+	}
+      }
+      if ($new{size} > $self->{max_size}) {
+	$self->{max_size} = $new{size};
+      }
+      elsif ($new{size} < $self->{min_size}) {
+	$self->{min_size} = $new{size};
+      }
+    }
+    push @{ $self->{text_style} }, \%new;
+  }
+  # explicitly close a tag
+  else {
+    if ($tag ne "body") {
+      # don't close body since browsers seem to render text after </body>
+      $self->close_tag($tag);
+    }
+  }
+}
+
+sub html_font_invisible {
+  my ($self, $text) = @_;
+
+  my $fg = $self->{text_style}[-1]->{fgcolor};
+  my $bg = $self->{text_style}[-1]->{bgcolor};
+
+  # invisibility
+  if (substr($fg,-6) eq substr($bg,-6)) {
+    $self->put_results(font_invisible => 1);
+    return 1;
+  }
+  # near-invisibility
+  elsif ($fg =~ /^\#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/) {
+    my ($r1, $g1, $b1) = (hex($1), hex($2), hex($3));
+
+    if ($bg =~ /^\#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/) {
+      my ($r2, $g2, $b2) = (hex($1), hex($2), hex($3));
+
+      my $r = ($r1 - $r2);
+      my $g = ($g1 - $g2);
+      my $b = ($b1 - $b2);
+
+      # geometric distance weighted by brightness
+      # maximum distance is 191.151823601032
+      my $distance = ((0.2126*$r)**2 + (0.7152*$g)**2 + (0.0722*$b)**2)**0.5;
+
+      # the text is very difficult to read if the distance is under 12,
+      # a limit of 14 to 16 might be okay if the usage significantly
+      # increases (near-invisible text is at about 0.95% of spam and
+      # 1.25% of HTML spam right now), but please test any changes first
+      if ($distance < 12) {
+	$self->put_results(font_low_contrast => 1);
+	return 1;
+      }
+    }
+  }
+
+  return 0;
+}
+
+sub html_tests {
+  my ($self, $tag, $attr, $num) = @_;
+
+  if ($tag =~ /^(?:a|body|div|input|form|td|layer|area|img)$/i) {
+    for my $key (keys %$attr) {
+      if ($key =~ /\bon(?:contextmenu|load|resize|submit|unload)\b/i &&
+	  $attr->{$key})
+      {
+	$self->put_results(html_event_unsafe => 1);
+      }
+    }
+  }
+  if ($tag eq "font" && exists $attr->{size}) {
+    my $size = $attr->{size};
+    $self->put_results(tiny_font => 1) if (($size =~ /^\s*(\d+)/ && $1 < 1) ||
+					   ($size =~ /\-(\d+)/ && $1 >= 3));
+    $self->put_results(big_font => 1) if (($size =~ /^\s*(\d+)/ && $1 > 3) ||
+					  ($size =~ /\+(\d+)/ && $1 >= 1));
+  }
+  if ($tag eq "font" && exists $attr->{face}) {
+    if ($attr->{face} =~ /[A-Z]{3}/ && $attr->{face} !~ /M[ST][A-Z]|ITC/) {
+      $self->put_results(font_face_caps => 1);
+    }
+    if ($attr->{face} !~ /^[a-z][a-z -]*[a-z](?:,\s*[a-z][a-z -]*[a-z])*$/i) {
+      $self->put_results(font_face_bad => 1);
+    }
+  }
+  if (exists $attr->{style}) {
+    if ($attr->{style} =~ /font(?:-size)?:\s*(\d+(?:\.\d*)?|\.\d+)(p[tx])/i) {
+      $self->examine_text_style($1, $2);
+    }
+  }
+  if ($tag eq "img" && exists $attr->{width} && exists $attr->{height}) {
+    my $width = 0;
+    my $height = 0;
+    my $area = 0;
+
+    # assume 800x600 screen for percentage values
+    if ($attr->{width} =~ /^(\d+)(\%)?$/) {
+      $width = $1;
+      $width *= 8 if (defined $2 && $2 eq "%");
+    }
+    if ($attr->{height} =~ /^(\d+)(\%)?$/) {
+      $height = $1;
+      $height *= 6 if (defined $2 && $2 eq "%");
+    }
+    # guess size
+    $width = 200 if $width <= 0;
+    $height = 200 if $height <= 0;
+    if ($width > 0 && $height > 0) {
+      $area = $width * $height;
+      $self->{image_area} += $area;
+    }
+    # this is intended to match any width and height if they're specified
+    if (exists $attr->{src} &&
+	$attr->{src} =~ /\.(?:pl|cgi|php|asp|jsp|cfm)\b/i)
+    {
+      $self->put_results(web_bugs => 1);
+    }
+  }
+  if ($tag eq "form" && exists $attr->{action}) {
+    $self->put_results(form_action_mailto => 1) if $attr->{action} =~ /mailto:/i
+  }
+  if ($tag eq "object" || $tag eq "embed") {
+    $self->put_results(embeds => 1);
+  }
+
+  # special text delimiters - <a> and <title>
+  if ($tag eq "a") {
+    $self->{anchor_index}++;
+    $self->{anchor}->[$self->{anchor_index}] = "";
+  }
+  if ($tag eq "title") {
+    $self->{title_index}++;
+    $self->{title}->[$self->{title_index}] = "";
+  }
+
+  if ($tag eq "meta" &&
+      exists $attr->{'http-equiv'} &&
+      exists $attr->{content} &&
+      $attr->{'http-equiv'} =~ /Content-Type/i &&
+      $attr->{content} =~ /\bcharset\s*=\s*["']?([^"']+)/i)
+  {
+    $self->{charsets} .= exists $self->{charsets} ? " $1" : $1;
+  }
+}
+
+sub examine_text_style {
+  my ($self, $size, $type) = @_;
+  $type = lc $type;
+  $self->put_results(tiny_font => 1) if ($type eq "pt" && $size < 4);
+  $self->put_results(tiny_font => 1) if ($type eq "px" && $size < 4);
+  $self->put_results(big_font => 1) if ($type eq "pt" && $size > 14);
+  $self->put_results(big_font => 1) if ($type eq "px" && $size > 18);
+}
+
+sub display_text {
+  my $self = shift;
+  my $text = shift;
+  my %display = @_;
+
+  if ($display{whitespace}) {
+    # trim trailing whitespace from previous element if it was not whitespace
+    if (@{ $self->{text} } &&
+	(!defined $self->{text_whitespace} ||
+	 !vec($self->{text_whitespace}, $#{$self->{text}}, 1)))
+    {
+      $self->{text}->[-1] =~ s/ $//;
+    }
+  }
+  else {
+    $text =~ s/[ \t\n\r\f\x0b\xa0]+/ /g;
+    # trim leading whitespace if previous element was whitespace
+    if (@{ $self->{text} } &&
+	defined $self->{text_whitespace} &&
+	vec($self->{text_whitespace}, $#{$self->{text}}, 1))
+    {
+      $text =~ s/^ //;
+    }
+  }
+  push @{ $self->{text} }, $text;
+  while (my ($k, $v) = each %display) {
+    $self->{"text_$k"} ||= '';
+    vec($self->{"text_$k"}, $#{$self->{text}}, 1) = $v;
+  }
+}
+
+sub html_text {
+  my ($self, $text) = @_;
+
+  # note: this comes back from HTML::Parser as UTF-8-tainted.  Enforce byte
+  # mode by repacking the string in byte mode, to avoid 'Malformed UTF-8
+  # character (unexpected non-continuation byte)' warnings
+  $text = pack("C0A*", $text);
+
+  # text that is not part of body
+  if (exists $self->{inside}{script} && $self->{inside}{script} > 0)
+  {
+    if ($text =~ /\bon(?:blur|contextmenu|focus|load|resize|submit|unload)\b/i)
+    {
+      $self->put_results(html_event_unsafe => 1);
+    }
+    return;
+  }
+  if (exists $self->{inside}{style} && $self->{inside}{style} > 0) {
+    if ($text =~ /font(?:-size)?:\s*(\d+(?:\.\d*)?|\.\d+)(p[tx])/i) {
+      $self->examine_text_style($1, $2);
+    }
+    return;
+  }
+
+  # text that is part of body and also stored separately
+  if (exists $self->{inside}{a} && $self->{inside}{a} > 0) {
+    $self->{anchor}->[$self->{anchor_index}] .= $text;
+  }
+  if (exists $self->{inside}{title} && $self->{inside}{title} > 0) {
+    $self->{title}->[$self->{title_index}] .= $text;
+  }
+
+  my $invisible_for_bayes = 0;
+  if ($text =~ /[^ \t\n\r\f\x0b\xa0]/) {
+    $invisible_for_bayes = $self->html_font_invisible($text);
+    $self->put_results(text_after_body => 1) if $self->{closed_body};
+    $self->put_results(text_after_html => 1) if $self->{closed_html};
+  }
+
+  if (exists $self->{text}->[-1]) {
+    # ideas discarded since they would be easy to evade:
+    # 1. using \w or [A-Za-z] instead of \S or non-punctuation
+    # 2. exempting certain tags
+    if ($text =~ /^[^\s\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]/s &&
+	$self->{text}->[-1] =~ /[^\s\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]\z/s)
+    {
+      $self->{obfuscation}++;
+    }
+    if ($self->{text}->[-1] =~
+	/\b([^\s\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]{1,7})\z/s)
+    {
+      my $start = length($1);
+      if ($text =~ /^([^\s\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]{1,7})\b/s) {
+	$self->{backhair}->{$start . "_" . length($1)}++;
+      }
+    }
+  }
+
+  if ($invisible_for_bayes) {
+    $self->display_text($text, invisible => 1);
+  }
+  else {
+    $self->display_text($text);
+  }
+}
+
+# note: $text includes <!-- and -->
+sub html_comment {
+  my ($self, $text) = @_;
+
+  push @{ $self->{comment} }, $text;
+
+  if (exists $self->{inside}{script} && $self->{inside}{script} > 0)
+  {
+    if ($text =~ /\bon(?:blur|contextmenu|focus|load|resize|submit|unload)\b/i)
+    {
+      $self->put_results(html_event_unsafe => 1);
+    }
+    return;
+  }
+  if (exists $self->{inside}{style} && $self->{inside}{style} > 0) {
+    if ($text =~ /font(?:-size)?:\s*(\d+(?:\.\d*)?|\.\d+)(p[tx])/i) {
+      $self->examine_text_style($1, $2);
+    }
+    return;
+  }
+}
+
+sub html_declaration {
+  my ($self, $text) = @_;
+
+  if ($text =~ /^<!doctype/i) {
+    my $tag = "!doctype";
+
+    $self->{elements}++;
+    $self->{tags}++;
+    $self->{inside}{$tag} = 0;
+  }
+}
+
+###########################################################################
 
 my %html_color = (
   # HTML 4 defined 16 colors
@@ -619,7 +919,7 @@ my %html_color = (
   yellowgreen => 0x9acd32,
 );
 
-sub name_to_rgb {
+sub _name_to_rgb {
   my $color = lc $_[0];
   if (my $hex = $html_color{$color}) {
       return sprintf("#%06x", $hex);
@@ -627,416 +927,134 @@ sub name_to_rgb {
   return $color;
 }
 
-# this might not be quite right, may need to pay attention to table nesting
-sub close_table_tag {
-  my ($self, $tag) = @_;
+use constant URI_STRICT => 0;
 
-  # don't close if never opened
-  return unless grep { $_->{tag} eq $tag } @{ $self->{text_style} };
+# resolving relative URIs as defined in RFC 2396 (steps from section 5.2)
+# using draft http://www.gbiv.com/protocols/uri/rev-2002/rfc2396bis.html
+sub _parse_uri {
+  my ($u) = @_;
+  my %u;
+  ($u{scheme}, $u{authority}, $u{path}, $u{query}, $u{fragment}) =
+    $u =~ m|^(?:([^:/?#]+):)?(?://([^/?#]*))?([^?#]*)(?:\?([^#]*))?(?:#(.*))?|;
+  return %u;
+}
 
-  my $top;
-  while (@{ $self->{text_style} } && ($top = $self->{text_style}[-1]->{tag})) {
-    if (($tag eq "td" && $top =~ /^(?:font|td)$/) ||
-	($tag eq "tr" && $top =~ /^(?:font|td|tr)$/))
-    {
-      pop @{ $self->{text_style} };
+sub _remove_dot_segments {
+  my ($input) = @_;
+  my $output = "";
+
+  $input =~ s@^(?:\.\.?/)@/@;
+
+  while ($input) {
+    if ($input =~ s@^/\.(?:$|/)@/@) {
+    }
+    elsif ($input =~ s@^/\.\.(?:$|/)@/@) {
+      $output =~ s@/?[^/]*$@@;
+    }
+    elsif ($input =~ s@(/?[^/]*)@@) {
+      $output .= $1;
+    }
+  }
+  return $output;
+}
+
+sub _merge_uri {
+  my ($base_authority, $base_path, $r_path) = @_;
+
+  if (defined $base_authority && !$base_path) {
+    return "/" . $r_path;
+  }
+  else {
+    if ($base_path =~ m|/|) {
+      $base_path =~ s|(?<=/)[^/]*$||;
     }
     else {
-      last;
+      $base_path = "";
     }
+    return $base_path . $r_path;
   }
 }
 
-sub close_tag {
-  my ($self, $tag) = @_;
+sub target_uri {
+  my ($base, $r) = @_;
 
-  # don't close if never opened
-  return if !grep { $_->{tag} eq $tag } @{ $self->{text_style} };
+  my %r = _parse_uri($r);	# parsed relative URI
+  my %base = _parse_uri($base);	# parsed base URI
+  my %t;			# generated temporary URI
 
-  # close everything up to and including tag
-  while (my %current = %{ pop @{ $self->{text_style} } }) {
-    last if $current{tag} eq $tag;
+  if ((not URI_STRICT) and
+      (defined $r{scheme} && defined $base{scheme}) and
+      ($r{scheme} eq $base{scheme}))
+  {
+    undef $r{scheme};
   }
-}
 
-# process CSS style attribute
-sub css_style {
-  my ($self, $tag, $attr, $num) = @_;
-
-  # TODO: something here
-}
-
-# body, font, table, tr, th, td, big, small
-sub text_style {
-  my ($self, $tag, $attr, $num) = @_;
-
-  # treat <th> as <td>
-  $tag = "td" if $tag eq "th";
-
-  # open
-  if ($num == 1) {
-    # HTML browsers generally only use first <body> for colors,
-    # so only push if we haven't seen a body tag yet
-    if ($tag eq "body") {
-      # TODO: skip if we've already seen body
+  if (defined $r{scheme}) {
+    $t{scheme} = $r{scheme};
+    $t{authority} = $r{authority};
+    $t{path} = _remove_dot_segments($r{path});
+    $t{query} = $r{query};
+  }
+  else {
+    if (defined $r{authority}) {
+      $t{authority} = $r{authority};
+      $t{path} = _remove_dot_segments($r{path});
+      $t{query} = $r{query};
     }
-
-    # change basefont (only change size)
-    if ($tag eq "basefont" &&
-	exists $attr->{size} && $attr->{size} =~ /^\s*(\d+)/)
-    {
-      $self->{basefont} = $1;
-      return;
-    }
-
-    # close elements with optional end tags
-    $self->close_table_tag($tag) if ($tag eq "td" || $tag eq "tr");
-
-    # copy current text state
-    my %new = %{ $self->{text_style}[-1] };
-
-    # change tag name!
-    $new{tag} = $tag;
-
-    # big and small tags
-    if ($tag eq "big") {
-      $new{size} += 1;
-      push @{ $self->{text_style} }, \%new;
-      return;
-    }
-    if ($tag eq "small") {
-      $new{size} -= 1;
-      push @{ $self->{text_style} }, \%new;
-      return;
-    }
-
-    # tag attributes
-    for my $name (keys %$attr) {
-      next unless (grep { $_ eq $tag } @{ $ok_attribute{$name} });
-      if ($name =~ /^(?:text|color)$/) {
-	# two different names for text color
-	$new{fgcolor} = name_to_rgb(lc($attr->{$name}));
-      }
-      elsif ($name eq "size" && $attr->{size} =~ /^\s*([+-]\d+)/) {
-	# relative font size
-	$new{size} = $self->{basefont} + $1;
-      }
-      else {
-	if ($name eq "bgcolor") {
-	  # overwrite with hex value, $new{bgcolor} is set below
-	  $attr->{bgcolor} = name_to_rgb(lc($attr->{bgcolor}));
-	}
-	if ($name eq "size" && $attr->{size} !~ /^\s*([+-])(\d+)/) {
-	  # attribute is malformed
+    else {
+      if ($r{path} eq "") {
+	$t{path} = $base{path};
+	if (defined $r{query}) {
+	  $t{query} = $r{query};
 	}
 	else {
-	  # attribute is probably okay
-	  $new{$name} = $attr->{$name};
+	  $t{query} = $base{query};
 	}
       }
-      if ($new{size} > $self->{html}{max_size}) {
-	$self->{html}{max_size} = $new{size};
+      else {
+	if ($r{path} =~ m|^/|) {
+	  $t{path} = _remove_dot_segments($r{path});
+	}
+	else {
+	  $t{path} = _merge_uri($base{authority}, $base{path}, $r{path});
+	  $t{path} = _remove_dot_segments($t{path});
+	}
+	$t{query} = $r{query};
       }
-      elsif ($new{size} < $self->{html}{min_size}) {
-	$self->{html}{min_size} = $new{size};
-      }
+      $t{authority} = $base{authority};
     }
-    push @{ $self->{text_style} }, \%new;
+    $t{scheme} = $base{scheme};
   }
-  # explicitly close a tag
-  else {
-    if ($tag ne "body") {
-      # don't close body since browsers seem to render text after </body>
-      $self->close_tag($tag);
+  $t{fragment} = $r{fragment};
+
+  # recompose URI
+  my $result = "";
+  if ($t{scheme}) {
+    $result .= $t{scheme} . ":";
+  }
+  elsif (defined $t{authority}) {
+    # this block is not part of the RFC
+    # TODO: figure out what MUAs actually do with unschemed URIs
+    # maybe look at URI::Heuristic
+    if ($t{authority} =~ /^www\d*\./i) {
+      # some spammers are using unschemed URIs to escape filters
+      $result .= "http:";
     }
-  }
-}
-
-sub html_font_invisible {
-  my ($self, $text) = @_;
-
-  my $fg = $self->{text_style}[-1]->{fgcolor};
-  my $bg = $self->{text_style}[-1]->{bgcolor};
-  my $visible_for_bayes = 1;
-
-  # invisibility
-  if (substr($fg,-6) eq substr($bg,-6)) {
-    $self->{html}{font_invisible} = 1;
-    $visible_for_bayes = 0;
-  }
-  # near-invisibility
-  elsif ($fg =~ /^\#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/) {
-    my ($r1, $g1, $b1) = (hex($1), hex($2), hex($3));
-
-    if ($bg =~ /^\#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/) {
-      my ($r2, $g2, $b2) = (hex($1), hex($2), hex($3));
-
-      my $r = ($r1 - $r2);
-      my $g = ($g1 - $g2);
-      my $b = ($b1 - $b2);
-
-      # geometric distance weighted by brightness
-      # maximum distance is 191.151823601032
-      my $distance = ((0.2126*$r)**2 + (0.7152*$g)**2 + (0.0722*$b)**2)**0.5;
-
-      # the text is very difficult to read if the distance is under 12,
-      # a limit of 14 to 16 might be okay if the usage significantly
-      # increases (near-invisible text is at about 0.95% of spam and
-      # 1.25% of HTML spam right now), but please test any changes first
-      if ($distance < 12) {
-	$self->{html}{"font_low_contrast"} = 1;
-        $visible_for_bayes = 0;
-      }
+    elsif ($t{authority} =~ /^ftp\d*\./i) {
+      $result .= "ftp:";
     }
   }
-
-  return $visible_for_bayes;
-}
-
-sub html_tests {
-  my ($self, $tag, $attr, $num) = @_;
-  local ($_);
-
-  if ($tag eq "table" && exists $attr->{border} && $attr->{border} =~ /(\d+)/)
-  {
-    $self->{html}{thick_border} = 1 if $1 > 1;
+  if ($t{authority}) {
+    $result .= "//" . $t{authority};
   }
-  # if ($tag eq "script") {
-  # $self->{html}{javascript} = 1;
-  # }
-  if ($tag =~ /^(?:a|body|div|input|form|td|layer|area|img)$/i) {
-    for (keys %$attr) {
-      if (/\b(?:$events)\b/io)
-      {
-	$self->{html}{html_event} = 1;
-      }
-      if (/\bon(?:contextmenu|load|resize|submit|unload)\b/i &&
-	  $attr->{$_})
-      {
-	$self->{html}{html_event_unsafe} = 1;
-        # if ($attr->{$_} =~ /\.open\s*\(/) { $self->{html}{window_open} = 1; }
-      }
-    }
+  $result .= $t{path};
+  if ($t{query}) {
+    $result .= "?" . $t{query};
   }
-  if ($tag eq "font" && exists $attr->{size}) {
-    my $size = $attr->{size};
-    $self->{html}{tiny_font} = 1 if (($size =~ /^\s*(\d+)/ && $1 < 1) ||
-				     ($size =~ /\-(\d+)/ && $1 >= 3));
-    $self->{html}{big_font} = 1 if (($size =~ /^\s*(\d+)/ && $1 > 3) ||
-				    ($size =~ /\+(\d+)/ && $1 >= 1));
+  if ($t{fragment}) {
+    $result .= "#" . $t{fragment};
   }
-  if ($tag eq "font" && exists $attr->{face}) {
-    if ($attr->{face} =~ /[A-Z]{3}/ && $attr->{face} !~ /M[ST][A-Z]|ITC/) {
-      $self->{html}{font_face_caps} = 1;
-    }
-    if ($attr->{face} !~ /^[a-z][a-z -]*[a-z](?:,\s*[a-z][a-z -]*[a-z])*$/i) {
-      $self->{html}{font_face_bad} = 1;
-    }
-  }
-  if (exists($attr->{style})) {
-    if ($attr->{style} =~ /font(?:-size)?:\s*(\d+(?:\.\d*)?|\.\d+)(p[tx])/i) {
-      $self->examine_text_style ($1, $2);
-    }
-  }
-  if ($tag eq "img") {
-    push @{ $self->{html}{img_src} }, $attr->{src} if exists $attr->{src};
-  }
-  if ($tag eq "img" && exists $attr->{width} && exists $attr->{height}) {
-    my $width = 0;
-    my $height = 0;
-    my $area = 0;
-
-    # assume 800x600 screen for percentage values
-    if ($attr->{width} =~ /^(\d+)(\%)?$/) {
-      $width = $1;
-      $width *= 8 if (defined $2 && $2 eq "%");
-    }
-    if ($attr->{height} =~ /^(\d+)(\%)?$/) {
-      $height = $1;
-      $height *= 6 if (defined $2 && $2 eq "%");
-    }
-    # guess size
-    $width = 200 if $width <= 0;
-    $height = 200 if $height <= 0;
-    if ($width > 0 && $height > 0) {
-      $area = $width * $height;
-      $self->{html}{image_area} += $area;
-    }
-    # this is intended to match any width and height if they're specified
-    if (exists $attr->{src} &&
-	$attr->{src} =~ /\.(?:pl|cgi|php|asp|jsp|cfm)\b/i)
-    {
-      $self->{html}{web_bugs} = 1;
-    }
-  }
-  if ($tag eq "form" && exists $attr->{action}) {
-    $self->{html}{form_action_mailto} = 1 if $attr->{action} =~ /mailto:/i
-  }
-  if ($tag =~ /^(?:object|embed)$/) {
-    $self->{html}{embeds} = 1;
-  }
-
-  # special text delimiters - <a> and <title>
-  if ($tag eq "a") {
-    $self->{html}{anchor_index}++;
-    $self->{html}{anchor}->[$self->{html}{anchor_index}] = "";
-  }
-  if ($tag eq "title") {
-    $self->{html}{title_index}++;
-    $self->{html}{title}->[$self->{html}{title_index}] = "";
-
-    # $self->{html}{title_extra}++ if $self->{html}{title_index} > 0;
-  }
-
-  if ($tag eq "meta" &&
-      exists $attr->{'http-equiv'} &&
-      exists $attr->{content} &&
-      $attr->{'http-equiv'} =~ /Content-Type/i &&
-      $attr->{content} =~ /\bcharset\s*=\s*["']?([^"']+)/i)
-  {
-    $self->{html}{charsets} .= exists $self->{html}{charsets} ? " $1" : $1;
-  }
-}
-
-sub examine_text_style {
-  my ($self, $size, $type) = @_;
-  $type = lc $type;
-  $self->{html}{tiny_font} = 1 if ($type eq "pt" && $size < 4);
-  $self->{html}{tiny_font} = 1 if ($type eq "pt" && $size < 4);
-  $self->{html}{big_font} = 1 if ($type eq "pt" && $size > 14);
-  $self->{html}{big_font} = 1 if ($type eq "px" && $size > 18);
-}
-
-sub display_text {
-  my ($self) = @_;
-
-  for my $type ('text', 'visible_text', 'invisible_text') {
-    my $text = $self->{"last_$type"};
-    $text =~ s/[ \t\n\r\f\x0b\xa0]+/ /g;
-    $text =~ s/^ //;
-    $text =~ s/ $//;
-    push @{$self->{"html_$type"}}, $text;
-    $self->{"last_$type"} = "";
-  }
-}
-
-sub html_text {
-  my ($self, $text) = @_;
-
-  # note: this comes back from HTML::Parser as UTF-8-tainted.  Enforce byte
-  # mode by repacking the string in byte mode, to avoid 'Malformed UTF-8
-  # character (unexpected non-continuation byte)' warnings
-  $text = pack ("C0A*", $text);
-
-  # text that is not part of body
-  if (exists $self->{html}{inside_script} && $self->{html}{inside_script} > 0)
-  {
-    if ($text =~ /\bon(?:blur|contextmenu|focus|load|resize|submit|unload)\b/i)
-    {
-      $self->{html}{html_event_unsafe} = 1;
-    }
-    if ($text =~ /\b(?:$events)\b/io) { $self->{html}{html_event} = 1; }
-    # if ($text =~ /\.open\s*\(/) { $self->{html}{window_open} = 1; }
-    return;
-  }
-  if (exists $self->{html}{inside_style} && $self->{html}{inside_style} > 0) {
-    if ($text =~ /font(?:-size)?:\s*(\d+(?:\.\d*)?|\.\d+)(p[tx])/i) {
-      $self->examine_text_style ($1, $2);
-    }
-    return;
-  }
-
-  # text that is part of body and also stored separately
-  if (exists $self->{html}{inside_a} && $self->{html}{inside_a} > 0) {
-    $self->{html}{anchor}->[$self->{html}{anchor_index}] .= $text;
-  }
-  if (exists $self->{html}{inside_title} && $self->{html}{inside_title} > 0) {
-    $self->{html}{title}->[$self->{html}{title_index}] .= $text;
-  }
-
-  my $visible_for_bayes = 1;
-  if ($text =~ /[^ \t\n\r\f\x0b\xa0]/) {
-    $visible_for_bayes = $self->html_font_invisible($text);
-    $self->{html}{text_after_body} = 1 if $self->{html}{closed_body};
-    $self->{html}{text_after_html} = 1 if $self->{html}{closed_html};
-  }
-
-  if ($self->{last_text}) {
-    # ideas discarded since they would be easy to evade:
-    # 1. using \w or [A-Za-z] instead of \S or non-punctuation
-    # 2. exempting certain tags
-    if ($text =~ /^[^\s\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]/s &&
-	$self->{last_text} =~ /[^\s\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]\z/s)
-    {
-      $self->{html}{obfuscation}++;
-    }
-    if ($self->{last_text} =~
-	/\b([^\s\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]{1,7})\z/s)
-    {
-      my $start = length($1);
-      if ($text =~ /^([^\s\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]{1,7})\b/s) {
-	my $backhair = $start . "_" . length($1);
-	$self->{html}{backhair}->{$backhair}++;
-	$self->{html}{backhair_count} = keys %{ $self->{html}{backhair} };
-      }
-    }
-  }
-
-  if ($visible_for_bayes) {
-    $self->{last_visible_text} .= $text;
-  }
-  else {
-    $self->{last_invisible_text} .= $text;
-  }
-  $self->{last_text} .= $text;
-}
-
-# note: $text includes <!-- and -->
-sub html_comment {
-  my ($self, $text) = @_;
-
-  push @{ $self->{html}{comment} }, $text;
-
-  if ($self->{html_last_tag} eq "div" &&
-      $text =~ /Converted from text\/plain format/)
-  {
-    $self->{html}{div_converted} = 1;
-  }
-  if (exists $self->{html}{inside_script} && $self->{html}{inside_script} > 0)
-  {
-    if ($text =~ /\b(?:$events)\b/io)
-    {
-      $self->{html}{html_event} = 1;
-    }
-    if ($text =~ /\bon(?:blur|contextmenu|focus|load|resize|submit|unload)\b/i)
-    {
-      $self->{html}{html_event_unsafe} = 1;
-    }
-    # if ($text =~ /\.open\s*\(/) { $self->{html}{window_open} = 1; }
-    return;
-  }
-
-  if (exists $self->{html}{inside_style} && $self->{html}{inside_style} > 0) {
-    if ($text =~ /font(?:-size)?:\s*(\d+(?:\.\d*)?|\.\d+)(p[tx])/i) {
-      $self->examine_text_style ($1, $2);
-    }
-  }
-
-  if (exists $self->{html}{shouting} && $self->{html}{shouting} > 1) {
-    $self->{html}{comment_shouting} = 1;
-  }
-}
-
-sub html_declaration {
-  my ($self, $text) = @_;
-
-  if ($text =~ /^<!doctype/i) {
-    my $tag = "!doctype";
-
-    $self->{html}{elements}++;
-    $self->{html}{tags}++;
-    $self->{html}{"inside_$tag"} = 0;
-  }
+  return $result;
 }
 
 1;
