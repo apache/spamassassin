@@ -68,6 +68,11 @@ header   KNOWN_MOD_MAILING_LIST eval:detect_moderated_mailing_list()
 describe KNOWN_MOD_MAILING_LIST Email came from some known moderated list software
 tflags KNOWN_MOD_MAILING_LIST	nice
 
+# cf http://bugzilla.spamassassin.org/show_bug.cgi?id=587
+rawbody LISTBUILDER             eval:detect_ml_listbuilder()
+describe LISTBUILDER            Sent through Microsoft's ListBuilder service
+tflags LISTBUILDER        	nice
+
 # from Theo Van Dinter, see http://www.hughes-family.org/bugzilla/show_bug.cgi?id=591
 body MSN_GROUPS                 eval:check_for_msn_groups_headers()
 describe MSN_GROUPS             Came from MSN Communities

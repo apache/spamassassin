@@ -1,4 +1,4 @@
-# $Id: MailingList.pm,v 1.3 2002/08/06 11:36:39 jmason Exp $
+# $Id: MailingList.pm,v 1.4 2002/08/07 14:32:46 jmason Exp $
 
 # Eval Tests to detect genuine mailing lists.
 
@@ -12,6 +12,7 @@ sub detect_mailing_list {
     return 1 if $self->detect_ml_ezmlm();
     return 1 if $self->detect_ml_mailman();
     return 1 if $self->detect_ml_sympa();
+    return 1 if $self->detect_ml_listbuilder();
     return 0;
 }
 
@@ -81,6 +82,29 @@ sub detect_ml_sympa {
 # Lyris
 # Not implemented - need headers
 sub detect_ml_lyris {
+}
+
+# ListBuilder
+sub detect_ml_listbuilder {
+  my ($self, $full) = @_;
+
+  my $reply = $self->get ('Reply-To:addr');
+  if ($reply !~ /\@lb.bcentral.com/) { return 0; }
+
+  # Received: from unknown (HELO lbrout14.listbuilder.com) (204.71.191.9)
+  my $rcvd = $self->get('received');
+  return 0 unless ($rcvd =~ /\blbrout\d+\.listbuilder\.com\b/i);
+  return 0 unless ($rcvd =~ /\b204\.71\.191\.\d+\b/);
+
+# _______________________________________________________________________
+# Powered by List Builder
+# To unsubscribe follow the link:
+# http://lb.bcentral.com/ex/sp?c=19511&s=76CA511711046877&m=14
+  $full = join ("\n", @{$full});
+  if ($full !~ /Powered by List Builder/) { return 0; }
+  if ($full !~ /http:\/\/lb.bcentral.com\/ex\/sp\?c=[0-9]*&s=[0-9A-Z]*&m=[0-9]*/) { return 0; }
+
+  return 1;
 }
 
 1;
