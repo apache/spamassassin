@@ -54,9 +54,11 @@ void printhits (FILE *fout) {
 
 void writescores (FILE *fout) {
   int i;
+  float score;
 
   for (i = 0; i < num_scores-1; i++) {
-    fprintf (fout, "score %-30s %2.1f\n", score_names[i], scores[i]);
+    score = scores[i];
+    fprintf (fout, "score %-30s %2.1f\n", score_names[i], score);
   }
 }
 
@@ -76,6 +78,8 @@ void counthits (GARealGenome &genome) {
   for (i = 0; i < len; i++) {
     if (is_mutatable[i]) {
       scores[i] = genome[i];
+      if (scores[i] == 0.0) { scores[i] = 0.1; }
+
     } else {
       scores[i] = bestscores[i];	// use the standard one
     }
@@ -84,9 +88,12 @@ void counthits (GARealGenome &genome) {
   nn = ny = yn = yy = 0;
 
   for (file = 0; file < num_tests; file++) {
+    float score;
+
     hits = 0.0;
     for (i = num_tests_hit[file]-1; i >= 0; i--) {
-      hits += scores[tests_hit[file][i]];
+      score = scores[tests_hit[file][i]];
+      hits += score;
     }
 
     if (is_spam[file]) {
@@ -190,8 +197,8 @@ main (int argc, char **argv) {
 
   GARandomSeed();	// use time ^ $$
 
-  // allow scores from 0.1 to 5.0 inclusive, in jumps of 0.1
-  GARealAlleleSet alleles (0.1, 5.0, 0.1,
+  // allow scores from 0.1 to 4.0 inclusive, in jumps of 0.1
+  GARealAlleleSet alleles (0.1, 4.0, 0.1,
       		GAAllele::INCLUSIVE, GAAllele::INCLUSIVE);
 
   GARealGenome genome(num_scores, alleles, objective);
