@@ -8,8 +8,8 @@ use Mail::SpamAssassin::NoMailAudit;
 #use Mail::Audit;
 #use Mail::Internet;
 
-$cffile = '../spamassassin.cf';
-if (-f "spamassassin.cf") { $cffile = "spamassassin.cf"; }
+$cffile = '../rules';
+if (-d "rules") { $cffile = "rules"; }
 
 if (defined $ARGV[0] && $ARGV[0] eq '-c') {
   shift; $cffile = $ARGV[0]; shift;
