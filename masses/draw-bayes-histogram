@@ -60,6 +60,8 @@ foreach my $bucket (@buckets) {
 my $chars_in_line = 65;
 my $scale_sp = ($max_sp / $chars_in_line);
 my $scale_ns = ($max_ns / $chars_in_line);
+$scale_sp ||= 0.000001; $scale_ns ||= 0.000001;
+$tot_sp ||= 0.000001; $tot_ns ||= 0.000001;
 foreach my $bucket (@buckets) {
   my $numdots = $bux_ns{$bucket} / $scale_ns;
   my $line_ns = ('.' x $numdots);
@@ -67,9 +69,9 @@ foreach my $bucket (@buckets) {
   $numdots = $bux_sp{$bucket} / $scale_sp;
   my $line_sp = ('#' x $numdots);
 
-  printf STDOUT "%3.3f (%3d%%) %s\n", $bucket,
+  printf STDOUT "%3.3f (%6.3f%%) %s\n", $bucket,
 		(($bux_ns{$bucket} / $tot_ns) * 100.0), $line_ns;
-  printf STDOUT "      (%3d%%) %s\n",
+  printf STDOUT "      (%6.3f%%) %s\n",
 		(($bux_sp{$bucket} / $tot_sp) * 100.0), $line_sp;
 }
 
