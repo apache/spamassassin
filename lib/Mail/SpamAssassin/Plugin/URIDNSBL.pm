@@ -166,7 +166,10 @@ sub parsed_metadata {
   $scanstate->{active_rules_rhsbl} = { };
   $scanstate->{active_rules_revipbl} = { };
   foreach my $rulename (keys %{$scanner->{conf}->{uridnsbls}}) {
-    next unless ($scanner->{conf}->is_rule_active('body_evals',$rulename));
+    # handle both body and head_evals for now
+    # head_evals was 3.0.0, body_evals is 3.0.1 and beyond
+    next unless ($scanner->{conf}->is_rule_active('body_evals',$rulename) ||
+    		 $scanner->{conf}->is_rule_active('head_evals',$rulename));
 
     my $rulecf = $scanstate->{scanner}->{conf}->{uridnsbls}->{$rulename};
     if ($rulecf->{is_rhsbl}) {
