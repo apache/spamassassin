@@ -378,8 +378,11 @@ full S_1618			/S..{0,10}1618.{0,10}-.{0,10}SECTION.{0,10}301/i
 describe S_1618			Claims compliance with senate bill 1618
 full SECTION_301		/SECTION.{0,10}301/i
 describe SECTION_301		Claims compliance with SPAM regulations
-full EU_EMAIL_OPTOUT		/EU Email Opt.?out Directive/i
+
+full EU_EMAIL_OPTOUT		/EU (?:e-?mail opt.?out|e.?commerce) directive/i
 describe EU_EMAIL_OPTOUT	Claims compliance with SPAM regulations
+full EU_200_32_CE		/Directive 200.32.CE/i
+describe EU_200_32_CE		Claims compliance with SPAM regulations
 
 body POPLAUNCH			/StealthLaunch PopLaunch.\s/
 describe POPLAUNCH		SPAM software
@@ -658,7 +661,7 @@ body MAIL_IN_ORDER_FORM		/Mail-in Order Form/i
 describe MAIL_IN_ORDER_FORM	Contains mail-in order form
 
 # (contrib: skod)
-body FOR_INSTANT_ACCESS		/FOR INSTANT ACCESS CLICK HERE/i
+full FOR_INSTANT_ACCESS		/(?:CLICK HERE|).{0,20}\s+INSTANT\s+ACCESS.{0,20}\s+(?:|CLICK HERE)/i
 describe FOR_INSTANT_ACCESS	Instant Access button
 
 # (contrib: skod)
@@ -704,7 +707,7 @@ full WE_HATE_SPAM               /We .{0,60}oppose the use of SPAM/is
 describe WE_HATE_SPAM           Says "We strongly oppose the use of SPAM email"
 
 # (contrib: WW)
-body IN_ACCORDANCE_WITH_LAWS    /this e?-?mail.*in accordance with.*law/
+body IN_ACCORDANCE_WITH_LAWS    /has been sent in accordance with/
 describe IN_ACCORDANCE_WITH_LAWS Claims to be in accordance with some Spam law
 
 body HR_3113                    /H\.\s*R\.\s*3113/is

@@ -79,6 +79,8 @@ sub razor_report {
     open (STDOUT, ">&STDERR");
   }
 
+  my $oldslash = $/;
+
   eval {
     require Razor::Client;
     local ($^W) = 0;            # argh, warnings in Razor
@@ -105,6 +107,8 @@ sub razor_report {
     open (STDOUT, ">&OLDOUT");
     close OLDOUT;
   }
+
+  $/ = $oldslash;
 
   if (defined($response) && $response+0) {
     return 1;

@@ -57,6 +57,7 @@ my $total;
 my $totspam;
 my $totnonspam;
 readlogs();
+read_ranges();
 
 print "Writing logs and current scores as C code...\n";
 
@@ -121,23 +122,7 @@ sub readscores {
 }
 
 sub writescores_c {
-  %is_mutatable = ();
-  foreach my $t (@unmutated_tests) { $is_mutatable{$t} = 0; }
   my $size = (scalar keys %{$scores}) + 1;
-
-  if (!-f 'tmp/ranges.data') {
-    system ("make tmp/ranges.data");
-  }
-
-  open (IN, "<tmp/ranges.data")
-  	or die "need to run score-ranges-from-freqs first!";
-
-  while (<IN>) {
-    /^(\S+) (\S+) (\S+)$/ or next;
-    $range_lo{$3} = $1+0;
-    $range_hi{$3} = $2+0;
-  }
-  close IN;
 
   open (OUT, ">tmp/scores.h");
   print OUT "
@@ -229,6 +214,28 @@ unsigned short tests_hit[$total][$max_hits_per_msg];
     print DAT "n".$num_tests_hit."\n".$out;
   }
   close DAT;
+}
+
+sub read_ranges {
+  %is_mutatable = ();
+  foreach my $t (@unmutated_tests) { $is_mutatable{$t} = 0; }
+
+  if (!-f 'tmp/ranges.data') {
+    system ("make tmp/ranges.data");
+  }
+
+  # read ranges, and mutatableness, from ranges.data.
+  open (IN, "<tmp/ranges.data")
+  	or die "need to run score-ranges-from-freqs first!";
+
+  while (<IN>) {
+    /^(\S+) (\S+) (\d+) (\S+)$/ or next;
+    my $t = $4;
+    $range_lo{$t} = $1+0;
+    $range_hi{$t} = $2+0;
+    my $mut = $3+0; if (!$mut) { $is_mutatable{$t} = 0; }
+  }
+  close IN;
 }
 
 __DATA__
