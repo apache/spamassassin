@@ -16,7 +16,7 @@ BEGIN {
     unshift(@INC, '../blib/lib');
   }
 
-  plan tests => ((HAS_DB_FILE && !$RUNNING_ON_WINDOWS) ? 44 : 0);
+  plan tests => ((HAS_DB_FILE && !$RUNNING_ON_WINDOWS) ? 48 : 0);
 };
 
 exit unless (HAS_DB_FILE && !$RUNNING_ON_WINDOWS);
@@ -251,6 +251,12 @@ print "\treturned score: $score\n";
 ok($score != .5);
 
 }
+
+ok($sa->{bayes_scanner}->{store}->clear_database());
+
+ok(!-e 'log/user_state/bayes_journal');
+ok(!-e 'log/user_state/bayes_seen');
+ok(!-e 'log/user_state/bayes_toks');
 
 sub check_examined {
   local ($_);

@@ -5,7 +5,7 @@ use lib '.'; use lib 't';
 use SATest; sa_t_init("bayes");
 use Test;
 
-use constant HAS_DB_FILE => eval { require DB_File; };
+use constant HAS_SDBM_FILE => eval { require SDBM_File; };
 
 BEGIN { 
   if (-e 't/test_dir') {
@@ -16,12 +16,13 @@ BEGIN {
     unshift(@INC, '../blib/lib');
   }
 
-  plan tests => (HAS_DB_FILE ? 48 : 0);
+  plan tests => (HAS_SDBM_FILE ? 52 : 0);
 };
 
-exit unless HAS_DB_FILE;
+exit unless HAS_SDBM_FILE;
 
 tstlocalrules ("
+        bayes_store_module Mail::SpamAssassin::BayesStore::SDBM
         bayes_learn_to_journal 0
 ");
 
@@ -143,6 +144,7 @@ sa_t_init('bayes'); # this wipes out what is there and begins anew
 
 # make sure we learn to a journal
 tstlocalrules ("
+        bayes_store_module Mail::SpamAssassin::BayesStore::SDBM
         bayes_learn_to_journal 1
 ");
 
@@ -160,9 +162,11 @@ $sa->{bayes_scanner}->sync(1); # always returns 0, so no need to check return
 
 ok(!-e 'log/user_state/bayes_journal');
 
-ok(-e 'log/user_state/bayes_seen');
+ok(-e 'log/user_state/bayes_seen.pag');
+ok(-e 'log/user_state/bayes_seen.dir');
 
-ok(-e 'log/user_state/bayes_toks');
+ok(-e 'log/user_state/bayes_toks.pag');
+ok(-e 'log/user_state/bayes_toks.dir');
 
 undef $sa;
 
@@ -170,6 +174,7 @@ sa_t_init('bayes'); # this wipes out what is there and begins anew
 
 # make sure we learn to a journal
 tstlocalrules ("
+        bayes_store_module Mail::SpamAssassin::BayesStore::SDBM
 bayes_learn_to_journal 0
 bayes_min_spam_num 10
 bayes_min_ham_num 10
@@ -254,8 +259,10 @@ ok($score != .5);
 ok($sa->{bayes_scanner}->{store}->clear_database());
 
 ok(!-e 'log/user_state/bayes_journal');
-ok(!-e 'log/user_state/bayes_seen');
-ok(!-e 'log/user_state/bayes_toks');
+ok(!-e 'log/user_state/bayes_seen.pag');
+ok(!-e 'log/user_state/bayes_seen.dir');
+ok(!-e 'log/user_state/bayes_toks.pag');
+ok(!-e 'log/user_state/bayes_toks.dir');
 
 sub check_examined {
   local ($_);
