@@ -21,7 +21,7 @@
 package Mail::SpamAssassin::Constants;
 
 use vars qw (
-	@BAYES_VARS @IP_VARS
+	@BAYES_VARS @IP_VARS @SA_VARS
 );
 
 use base qw( Exporter );
@@ -32,14 +32,19 @@ use base qw( Exporter );
 @BAYES_VARS = qw(
 	DUMP_MAGIC DUMP_TOKEN DUMP_BACKUP 
 );
+# These are generic constants that may be used across several modules
+@SA_VARS = qw(
+	META_TEST_MIN_PRIORITY HARVEST_DNSBL_PRIORITY
+);
 
 %EXPORT_TAGS = (
 	bayes => [ @BAYES_VARS ],
         ip => [ @IP_VARS ],
-        all => [ @BAYES_VARS, @IP_VARS ],
+        sa => [ @SA_VARS ],
+        all => [ @BAYES_VARS, @IP_VARS, @SA_VARS ],
 );
 
-@EXPORT_OK = ( @BAYES_VARS, @IP_VARS );
+@EXPORT_OK = ( @BAYES_VARS, @IP_VARS, @SA_VARS );
 
 # BAYES_VARS
 use constant DUMP_MAGIC  => 1;
@@ -159,5 +164,8 @@ use constant IP_ADDRESS => qr/
 		  /oxi;
 
 # ---------------------------------------------------------------------------
+
+use constant META_TEST_MIN_PRIORITY => 500;
+use constant HARVEST_DNSBL_PRIORITY => 500;
 
 1;

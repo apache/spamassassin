@@ -58,7 +58,13 @@ foreach my $symbol ($sa->{conf}->regression_tests()) {
         if ($test_type == Mail::SpamAssassin::Conf::TYPE_HEAD_TESTS ||
             $test_type == Mail::SpamAssassin::Conf::TYPE_HEAD_EVALS)
         {
-            my $test_string = $sa->{conf}->{head_tests}->{$symbol} || $sa->{conf}->{head_evals}->{$symbol};
+  	    my $test_string;
+	    # Look through all of the priorities until we find our test
+  	    for my $priority (sort(keys %{$sa->{conf}->{priorities}})) {
+	      $test_string = $sa->{conf}->{head_tests}->{$priority}->{$symbol}
+		|| $sa->{conf}->{head_evals}->{$priority}->{$symbol};
+	      last if $test_string;
+            }
             my ($header_name) = $test_string =~ /^(\S+)/;
             # warn("got header name: $header_name - setting to: $string\n");
 	    $mail = $sa->parse(["${header_name}: $string\n","\n","\n"]);

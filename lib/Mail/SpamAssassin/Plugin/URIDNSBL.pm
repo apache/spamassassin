@@ -119,12 +119,9 @@ sub parsed_metadata {
     hits => { }
   };
 
-  # only hit DNSBLs for which score != 0
+  # only hit DNSBLs for active rules (defined and score != 0)
   foreach my $rulename (keys %{$scanner->{conf}->{uridnsbls}}) {
-    # trim_rules() will remove the head_evals entry for this
-    next unless ($scanner->{conf}->{head_evals}->{$rulename});
-    # set score to 0 should also block the rule
-    next unless ($scanner->{conf}->{scores}->{$rulename});
+    next unless ($scanner->{conf}->is_rule_active('head_evals',$rulename));
     $scanstate->{active_rules}->{$rulename} = 1;
   }
 

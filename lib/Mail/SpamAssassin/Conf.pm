@@ -101,6 +101,7 @@ SpamAssassin handles incoming email messages.
 package Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::NetSet;
+use Mail::SpamAssassin::Constants qw(:sa);
 use File::Spec;
 
 use strict;
@@ -2263,6 +2264,19 @@ The test will be ignored when calculating the score for learning systems.
       next;     # ignored in SpamAssassin modules
     }
 
+=item priority SYMBOLIC_TEST_NAME n
+
+Assign a specific priority to a test.  All tests, except for RBL and Meta
+tests, are run in priority order. The default test priority is 0 (zero).
+
+=cut
+
+    if ($key eq 'priority') {
+      my ($k, $v) = split(/\s+/, $value, 2);
+      $self->{priority}->{$k} = $v;
+      next;
+    }
+
 ###########################################################################
     # SECURITY: allow_user_rules is only in affect until here.
     #
@@ -2861,6 +2875,7 @@ sub add_test {
   $self->{tests}->{$name} = $text;
   $self->{test_types}->{$name} = $type;
   $self->{tflags}->{$name} ||= '';
+  $self->{priority}->{$name} ||= 0;
   $self->{source_file}->{$name} = $self->{currentfile};
 
   if ($self->{scoresonly}) {
@@ -2899,6 +2914,8 @@ sub finish_parsing {
 
   while (my ($name, $text) = each %{$self->{tests}}) {
     my $type = $self->{test_types}->{$name};
+    my $priority = $self->{priority}->{$name} || 0;
+    $self->{priorities}->{$priority}++;
 
     # eval type handling
     if (($type & 1) == 1) {
@@ -2909,22 +2926,23 @@ sub finish_parsing {
         }
 	unshift(@args, $function);
 	if ($type == TYPE_BODY_EVALS) {
-	  $self->{body_evals}->{$name} = \@args;
+	  $self->{body_evals}->{$priority}->{$name} = \@args;
 	}
 	elsif ($type == TYPE_HEAD_EVALS) {
-	  $self->{head_evals}->{$name} = \@args;
+	  $self->{head_evals}->{$priority}->{$name} = \@args;
 	}
 	elsif ($type == TYPE_RBL_EVALS) {
+	  # We don't do priorities for TYPE_RBL_EVALS
 	  $self->{rbl_evals}->{$name} = \@args;
 	}
 	elsif ($type == TYPE_RAWBODY_EVALS) {
-	  $self->{rawbody_evals}->{$name} = \@args;
+	  $self->{rawbody_evals}->{$priority}->{$name} = \@args;
 	}
 	elsif ($type == TYPE_FULL_EVALS) {
-	  $self->{full_evals}->{$name} = \@args;
+	  $self->{full_evals}->{$priority}->{$name} = \@args;
 	}
 	#elsif ($type == TYPE_URI_EVALS) {
-	#  $self->{uri_evals}->{$name} = \@args;
+	#  $self->{uri_evals}->{$priority}->{$name} = \@args;
 	#}
 	else {
 	  $self->{errors}++;
@@ -2939,22 +2957,31 @@ sub finish_parsing {
     # non-eval tests
     else {
       if ($type == TYPE_BODY_TESTS) {
-	$self->{body_tests}->{$name} = $text;
+	$self->{body_tests}->{$priority}->{$name} = $text;
       }
       elsif ($type == TYPE_HEAD_TESTS) {
-	$self->{head_tests}->{$name} = $text;
+	$self->{head_tests}->{$priority}->{$name} = $text;
       }
       elsif ($type == TYPE_META_TESTS) {
-	$self->{meta_tests}->{$name} = $text;
+	# Meta Tests must have a priority of at least META_TEST_MIN_PRIORITY,
+	# if it's lower then reset the value
+	if ($priority < META_TEST_MIN_PRIORITY) {
+	  # we need to lower the count of the old priority and raise the
+	  # count of the new priority
+	  $self->{priorities}->{$priority}--;
+	  $priority = META_TEST_MIN_PRIORITY;
+	  $self->{priorities}->{$priority}++;
+	}
+	$self->{meta_tests}->{$priority}->{$name} = $text;
       }
       elsif ($type == TYPE_URI_TESTS) {
-	$self->{uri_tests}->{$name} = $text;
+	$self->{uri_tests}->{$priority}->{$name} = $text;
       }
       elsif ($type == TYPE_RAWBODY_TESTS) {
-	$self->{rawbody_tests}->{$name} = $text;
+	$self->{rawbody_tests}->{$priority}->{$name} = $text;
       }
       elsif ($type == TYPE_FULL_TESTS) {
-	$self->{full_tests}->{$name} = $text;
+	$self->{full_tests}->{$priority}->{$name} = $text;
       }
       else {
 	$self->{errors}++;
@@ -2964,6 +2991,7 @@ sub finish_parsing {
   }
 
   delete $self->{tests};		# free it up
+  delete $self->{priority};             # free it up
 }
 
 sub add_to_addrlist {
@@ -3069,6 +3097,31 @@ sub register_eval_rule {
   my ($self, $pluginobj, $nameofsub) = @_;
   $self->{eval_plugins}->{$nameofsub} = $pluginobj;
 }
+
+sub is_rule_active {
+  my ($self, $test_type, $rulename, $priority) = @_;
+
+  # first determine if the rule is defined
+  if (defined($priority)) {
+    # we have a specific priority
+    return 0 unless ($self->{$test_type}->{$priority}->{$rulename});
+  }
+  else {
+    # no specific priority so we must loop over all currently defined
+    # priorities to see if the rule is defined
+    my $found_p = 0;
+    foreach my $priority (keys %{$self->{priorities}}) {
+      if ($self->{$test_type}->{$priority}->{$rulename}) {
+	$found_p = 1;
+	last;
+      }
+    }
+    return 0 unless ($found_p);
+  }
+
+  return ($self->{scores}->{$rulename});
+}
+
 
 sub finish {
   my ($self) = @_;

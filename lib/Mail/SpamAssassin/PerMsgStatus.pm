@@ -52,6 +52,7 @@ use Carp;
 
 use Text::Wrap ();
 
+use Mail::SpamAssassin::Constants qw(:sa);
 use Mail::SpamAssassin::EvalTests;
 use Mail::SpamAssassin::AutoWhitelist;
 use Mail::SpamAssassin::Conf;
@@ -139,59 +140,69 @@ sub check {
     # Here, we launch all the DNS RBL queries and let them run while we
     # inspect the message
     $self->run_rbl_eval_tests ($self->{conf}->{rbl_evals});
+    my $needs_dnsbl_harvest_p = 1; # harvest needs to be run
 
-    # do head tests
-    $self->do_head_tests();
+    my $decoded = $self->get_decoded_stripped_body_text_array();
 
-    $self->{main}->call_plugins ("check_tick", { permsgstatus => $self });
+    # TODO: this has been put on the metadata object.  should we
+    # use it directly there?
+    $self->{html} = $self->{msg}->{metadata}->{html};
 
-    # do body tests with decoded portions
-    {
-      my $decoded = $self->get_decoded_stripped_body_text_array();
+    my $bodytext = $self->get_decoded_body_text_array();
 
-      # TODO: this has been put on the metadata object.  should we
-      # use it directly there?
-      $self->{html} = $self->{msg}->{metadata}->{html};
+    my $fulltext = join ('', $self->{msg}->get_all_headers(1), "\n",
+			 $self->{msg}->get_pristine_body());
 
-      # warn "dbg ". join ("", @{$decoded}). "\n";
-      $self->do_body_tests($decoded);
-      $self->do_body_eval_tests($decoded);
-      undef $decoded;
+    # use $bodytext here because $decoded is too stripped
+    my @uris = $self->get_uri_list($bodytext);
+
+    foreach my $priority (sort { $a <=> $b } keys %{$self->{conf}->{priorities}}) {
+      # no need to run if there are no priorities at this level.  This can
+      # happen in Conf.pm when we switch a rules from one priority to another
+      next unless ($self->{conf}->{priorities}->{$priority} > 0);
+
+      dbg("Running tests for priority: $priority");
+
+      # only harvest the dnsbl queries once priority HARVEST_DNSBL_PRIORITY
+      # has been reached and then only run once
+      if ($priority >= HARVEST_DNSBL_PRIORITY && $needs_dnsbl_harvest_p) {
+	# harvest the DNS results
+	$self->harvest_dnsbl_queries();
+	$needs_dnsbl_harvest_p = 0;
+
+	# finish the DNS results
+	$self->rbl_finish();
+	$self->{main}->call_plugins ("check_post_dnsbl", { permsgstatus => $self });
+      }
+
+      # since meta tests must have a priority of META_TEST_MIN_PRIORITY or
+      # higher then there is no reason to even call the do_meta_tests method
+      # if we are less than that.
+      if ($priority >= META_TEST_MIN_PRIORITY) {
+	$self->do_meta_tests($priority);
+      }
+
+      # do head tests
+      $self->do_head_tests($priority);
+      $self->do_head_eval_tests($priority);
+
+      $self->do_body_tests($priority, $decoded);
+      $self->do_body_uri_tests($priority, @uris);
+      $self->do_body_eval_tests($priority, $decoded);
+  
+      # XXX - we may need to call this more often than once through the loop
+      $self->{main}->call_plugins ("check_tick", { permsgstatus => $self });
+
+      $self->do_rawbody_tests($priority, $bodytext);
+      $self->do_rawbody_eval_tests($priority, $bodytext);
+  
+      $self->do_full_tests($priority, \$fulltext);
+      $self->do_full_eval_tests($priority, \$fulltext);
     }
-    $self->{main}->call_plugins ("check_tick", { permsgstatus => $self });
 
-    # do rawbody tests with raw text portions
-    {
-      my $bodytext = $self->get_decoded_body_text_array();
-      $self->do_rawbody_tests($bodytext);
-      $self->do_rawbody_eval_tests($bodytext);
-      # NB: URI tests are here because "strip" removes too much
-      $self->do_body_uri_tests($bodytext);
-      undef $bodytext;
-    }
-    $self->{main}->call_plugins ("check_tick", { permsgstatus => $self });
-
-    # and do full tests: first with entire, full, undecoded message
-    # use get_all_headers instead of 
-    {
-      my $fulltext = join ('', $self->{msg}->get_all_headers(1), "\n",
-                                $self->{msg}->get_pristine_body());
-      $self->do_full_tests(\$fulltext);
-      $self->do_full_eval_tests(\$fulltext);
-      undef $fulltext;
-    }
-
-    $self->do_head_eval_tests();
-
-    # harvest the DNS results
-    $self->harvest_dnsbl_queries();
-
-    # finish the DNS results
-    $self->rbl_finish();
-    $self->{main}->call_plugins ("check_post_dnsbl", { permsgstatus => $self });
-
-    # Do meta rules second-to-last
-    $self->do_meta_tests();
+    undef $decoded;
+    undef $bodytext;
+    undef $fulltext;
 
     # auto-learning
     $self->learn();
@@ -1185,7 +1196,7 @@ sub hash_line_for_rule {
 ###########################################################################
 
 sub do_head_tests {
-  my ($self) = @_;
+  my ($self, $priority) = @_;
   local ($_);
 
   # note: we do this only once for all head pattern tests.  Only
@@ -1197,16 +1208,23 @@ sub do_head_tests {
   my $doing_user_rules = 
     $self->{conf}->{user_rules_to_compile}->{Mail::SpamAssassin::Conf::TYPE_HEAD_TESTS};
 
+  # clean up priority value so it can be used in a subroutine name
+  my $clean_priority;
+  ($clean_priority = $priority) =~ s/-/neg/;
+
   # speedup code provided by Matt Sergeant
-  if (defined &Mail::SpamAssassin::PerMsgStatus::_head_tests && !$doing_user_rules) {
-    Mail::SpamAssassin::PerMsgStatus::_head_tests($self);
+  if (defined &{'Mail::SpamAssassin::PerMsgStatus::_head_tests_'.$clean_priority}
+      && !$doing_user_rules) {
+    no strict "refs";
+    &{'Mail::SpamAssassin::PerMsgStatus::_head_tests_'.$clean_priority}($self);
+    use strict "refs";
     return;
   }
 
   my $evalstr = '';
   my $evalstr2 = '';
 
-  while (my($rulename, $rule) = each %{$self->{conf}{head_tests}}) {
+  while (my($rulename, $rule) = each %{$self->{conf}{head_tests}->{$priority}}) {
     my $def = '';
     my ($hdrname, $testtype, $pat) =
         $rule =~ /^\s*(\S+)\s*(\=|\!)\~\s*(\S.*?\S)\s*$/;
@@ -1246,7 +1264,11 @@ sub do_head_tests {
   }
 
   # clear out a previous version of this fn, if already defined
-  if (defined &_head_tests) { undef &_head_tests; }
+  if (defined &{'_head_tests_'.$clean_priority}) {
+    undef &{'_head_tests_'.$clean_priority};
+  }
+
+  return unless ($evalstr);
 
   $evalstr = <<"EOT";
 {
@@ -1254,7 +1276,7 @@ sub do_head_tests {
 
     $evalstr2
 
-    sub _head_tests {
+    sub _head_tests_$clean_priority {
         my (\$self) = \@_;
 
         $evalstr;
@@ -1271,12 +1293,14 @@ EOT
     $self->{rule_errors}++;
   }
   else {
-    Mail::SpamAssassin::PerMsgStatus::_head_tests($self);
+    no strict "refs";
+    &{'Mail::SpamAssassin::PerMsgStatus::_head_tests_'.$clean_priority}($self);
+    use strict "refs";
   }
 }
 
 sub do_body_tests {
-  my ($self, $textary) = @_;
+  my ($self, $priority, $textary) = @_;
   local ($_);
 
   dbg ("running body-text per-line regexp tests; score so far=".$self->{score});
@@ -1284,9 +1308,16 @@ sub do_body_tests {
   my $doing_user_rules = 
     $self->{conf}->{user_rules_to_compile}->{Mail::SpamAssassin::Conf::TYPE_BODY_TESTS};
 
+  # clean up priority value so it can be used in a subroutine name
+  my $clean_priority;
+  ($clean_priority = $priority) =~ s/-/neg/;
+
   $self->{test_log_msgs} = ();        # clear test state
-  if ( defined &Mail::SpamAssassin::PerMsgStatus::_body_tests && !$doing_user_rules) {
-    Mail::SpamAssassin::PerMsgStatus::_body_tests($self, @$textary);
+  if ( defined &{'Mail::SpamAssassin::PerMsgStatus::_body_tests_'.$clean_priority}
+       && !$doing_user_rules) {
+    no strict "refs";
+    &{'Mail::SpamAssassin::PerMsgStatus::_body_tests_'.$clean_priority}($self, @$textary);
+    use strict "refs";
     return;
   }
 
@@ -1294,7 +1325,7 @@ sub do_body_tests {
   my $evalstr = '';
   my $evalstr2 = '';
 
-  while (my($rulename, $pat) = each %{$self->{conf}{body_tests}}) {
+  while (my($rulename, $pat) = each %{$self->{conf}{body_tests}->{$priority}}) {
     $evalstr .= '
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
         # call procedurally as it is faster.
@@ -1323,7 +1354,11 @@ sub do_body_tests {
   }
 
   # clear out a previous version of this fn, if already defined
-  if (defined &_body_tests) { undef &_body_tests; }
+  if (defined &{'_body_tests_'.$clean_priority}) {
+    undef &{'_body_tests_'.$clean_priority};
+  }
+
+  return unless ($evalstr);
 
   # generate the loop that goes through each line...
   $evalstr = <<"EOT";
@@ -1332,7 +1367,7 @@ sub do_body_tests {
 
   $evalstr2
 
-  sub _body_tests {
+  sub _body_tests_$clean_priority {
     my \$self = shift;
     $evalstr;
   }
@@ -1349,7 +1384,9 @@ EOT
     $self->{rule_errors}++;
   }
   else {
-    Mail::SpamAssassin::PerMsgStatus::_body_tests($self, @$textary);
+    no strict "refs";
+    &{'Mail::SpamAssassin::PerMsgStatus::_body_tests_'.$clean_priority}($self, @$textary);
+    use strict "refs";
   }
 }
 
@@ -1421,11 +1458,11 @@ sub _uniq {
 }
 
 sub get_uri_list {
-  my ($self) = @_;
+  my ($self, $textary) = @_;
 
   #$self->{found_bad_uri_encoding} = 0;
 
-  my $textary = $self->get_decoded_body_text_array();
+  $textary ||= $self->get_decoded_body_text_array();
   my ($rulename, $pat, @uris);
   local ($_);
 
@@ -1517,18 +1554,24 @@ sub get_uri_list {
 }
 
 sub do_body_uri_tests {
-  my ($self, $textary) = @_;
+  my ($self, $priority, @uris) = @_;
   local ($_);
 
   dbg ("running uri tests; score so far=".$self->{score});
-  my @uris = $self->get_uri_list();
 
   my $doing_user_rules = 
     $self->{conf}->{user_rules_to_compile}->{Mail::SpamAssassin::Conf::TYPE_URI_TESTS};
 
+  # clean up priority value so it can be used in a subroutine name
+  my $clean_priority;
+  ($clean_priority = $priority) =~ s/-/neg/;
+
   $self->{test_log_msgs} = ();        # clear test state
-  if (defined &Mail::SpamAssassin::PerMsgStatus::_body_uri_tests && !$doing_user_rules) {
-    Mail::SpamAssassin::PerMsgStatus::_body_uri_tests($self, @uris);
+  if (defined &{'Mail::SpamAssassin::PerMsgStatus::_body_uri_tests_'.$clean_priority}
+      && !$doing_user_rules) {
+    no strict "refs";
+    &{'Mail::SpamAssassin::PerMsgStatus::_body_uri_tests_'.$clean_priority}($self, @uris);
+    use strict "refs";
     return;
   }
 
@@ -1536,8 +1579,7 @@ sub do_body_uri_tests {
   my $evalstr = '';
   my $evalstr2 = '';
 
-  while (my($rulename, $pat) = each %{$self->{conf}{uri_tests}}) {
-
+  while (my($rulename, $pat) = each %{$self->{conf}{uri_tests}->{$priority}}) {
     $evalstr .= '
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
         '.$rulename.'_uri_test($self, @_); # call procedurally for speed
@@ -1563,7 +1605,11 @@ sub do_body_uri_tests {
   }
 
   # clear out a previous version of this fn, if already defined
-  if (defined &_body_uri_tests) { undef &_body_uri_tests; }
+  if (defined &{'_body_uri_tests_'.$clean_priority}) {
+    undef &{'_body_uri_tests_'.$clean_priority};
+  }
+
+  return unless ($evalstr);
 
   # generate the loop that goes through each line...
   $evalstr = <<"EOT";
@@ -1572,7 +1618,7 @@ sub do_body_uri_tests {
 
   $evalstr2
 
-  sub _body_uri_tests {
+  sub _body_uri_tests_$clean_priority {
     my \$self = shift;
     $evalstr;
   }
@@ -1589,12 +1635,14 @@ EOT
     $self->{rule_errors}++;
   }
   else {
-    Mail::SpamAssassin::PerMsgStatus::_body_uri_tests($self, @uris);
+    no strict "refs";
+    &{'Mail::SpamAssassin::PerMsgStatus::_body_uri_tests_'.$clean_priority}($self, @uris);
+    use strict "refs";
   }
 }
 
 sub do_rawbody_tests {
-  my ($self, $textary) = @_;
+  my ($self, $priority, $textary) = @_;
   local ($_);
 
   dbg ("running raw-body-text per-line regexp tests; score so far=".$self->{score});
@@ -1602,9 +1650,16 @@ sub do_rawbody_tests {
   my $doing_user_rules = 
     $self->{conf}->{user_rules_to_compile}->{Mail::SpamAssassin::Conf::TYPE_RAWBODY_TESTS};
 
+  # clean up priority value so it can be used in a subroutine name
+  my $clean_priority;
+  ($clean_priority = $priority) =~ s/-/neg/;
+
   $self->{test_log_msgs} = ();        # clear test state
-  if (defined &Mail::SpamAssassin::PerMsgStatus::_rawbody_tests && !$doing_user_rules) {
-    Mail::SpamAssassin::PerMsgStatus::_rawbody_tests($self, @$textary);
+  if (defined &{'Mail::SpamAssassin::PerMsgStatus::_rawbody_tests_'.$clean_priority}
+      && !$doing_user_rules) {
+    no strict "refs";
+    &{'Mail::SpamAssassin::PerMsgStatus::_rawbody_tests_'.$clean_priority}($self, @$textary);
+    use strict "refs";
     return;
   }
 
@@ -1612,8 +1667,7 @@ sub do_rawbody_tests {
   my $evalstr = '';
   my $evalstr2 = '';
 
-  while (my($rulename, $pat) = each %{$self->{conf}{rawbody_tests}}) {
-
+  while (my($rulename, $pat) = each %{$self->{conf}{rawbody_tests}->{$priority}}) {
     $evalstr .= '
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
          '.$rulename.'_rawbody_test($self, @_); # call procedurally for speed
@@ -1639,7 +1693,11 @@ sub do_rawbody_tests {
   }
 
   # clear out a previous version of this fn, if already defined
-  if (defined &_rawbody_tests) { undef &_rawbody_tests; }
+  if (defined &{'_rawbody_tests_'.$clean_priority}) {
+    undef &{'_rawbody_tests_'.$clean_priority};
+  }
+
+  return unless ($evalstr);
 
   # generate the loop that goes through each line...
   $evalstr = <<"EOT";
@@ -1648,7 +1706,7 @@ sub do_rawbody_tests {
 
   $evalstr2
 
-  sub _rawbody_tests {
+  sub _rawbody_tests_$clean_priority {
     my \$self = shift;
     $evalstr;
   }
@@ -1665,12 +1723,14 @@ EOT
     $self->{rule_errors}++;
   }
   else {
-    Mail::SpamAssassin::PerMsgStatus::_rawbody_tests($self, @$textary);
+    no strict "refs";
+    &{'Mail::SpamAssassin::PerMsgStatus::_rawbody_tests_'.$clean_priority}($self, @$textary);
+    use strict "refs";
   }
 }
 
 sub do_full_tests {
-  my ($self, $fullmsgref) = @_;
+  my ($self, $priority, $fullmsgref) = @_;
   local ($_);
   
   dbg ("running full-text regexp tests; score so far=".$self->{score});
@@ -1678,17 +1738,24 @@ sub do_full_tests {
   my $doing_user_rules = 
     $self->{conf}->{user_rules_to_compile}->{Mail::SpamAssassin::Conf::TYPE_FULL_TESTS};
 
+  # clean up priority value so it can be used in a subroutine name
+  my $clean_priority;
+  ($clean_priority = $priority) =~ s/-/neg/;
+
   $self->{test_log_msgs} = ();        # clear test state
 
-  if (defined &Mail::SpamAssassin::PerMsgStatus::_full_tests && !$doing_user_rules) {
-    Mail::SpamAssassin::PerMsgStatus::_full_tests($self, $fullmsgref);
+  if (defined &{'Mail::SpamAssassin::PerMsgStatus::_full_tests_'.$clean_priority}
+      && !$doing_user_rules) {
+    no strict "refs";
+    &{'Mail::SpamAssassin::PerMsgStatus::_full_tests_'.$clean_priority}($self, $fullmsgref);
+    use strict "refs";
     return;
   }
 
   # build up the eval string...
   my $evalstr = '';
 
-  while (my($rulename, $pat) = each %{$self->{conf}{full_tests}}) {
+  while (my($rulename, $pat) = each %{$self->{conf}{full_tests}->{$priority}}) {
     $evalstr .= '
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
         '.$self->hash_line_for_rule($rulename).'
@@ -1700,14 +1767,18 @@ sub do_full_tests {
     ';
   }
 
-  if (defined &_full_tests) { undef &_full_tests; }
+  if (defined &{'_full_tests_'.$clean_priority}) {
+    undef &{'_full_tests_'.$clean_priority};
+  }
+
+  return unless ($evalstr);
 
   # and compile it.
   $evalstr = <<"EOT";
   {
     package Mail::SpamAssassin::PerMsgStatus;
 
-    sub _full_tests {
+    sub _full_tests_$clean_priority {
         my (\$self, \$fullmsgref) = \@_;
         study \$\$fullmsgref;
         $evalstr
@@ -1723,36 +1794,42 @@ EOT
               "\t($@)\n";
     $self->{rule_errors}++;
   } else {
-    Mail::SpamAssassin::PerMsgStatus::_full_tests($self, $fullmsgref);
+    no strict "refs";
+    &{'Mail::SpamAssassin::PerMsgStatus::_full_tests_'.$clean_priority}($self, $fullmsgref);
+    use strict "refs";
   }
 }
 
 ###########################################################################
 
 sub do_head_eval_tests {
-  my ($self) = @_;
-  $self->run_eval_tests ($self->{conf}->{head_evals}, '');
+  my ($self, $priority) = @_;
+  return unless (defined($self->{conf}->{head_evals}->{$priority}));
+  $self->run_eval_tests ($self->{conf}->{head_evals}->{$priority}, '');
 }
 
 sub do_body_eval_tests {
-  my ($self, $bodystring) = @_;
-  $self->run_eval_tests ($self->{conf}->{body_evals}, 'BODY: ', $bodystring);
+  my ($self, $priority, $bodystring) = @_;
+  return unless (defined($self->{conf}->{body_evals}->{$priority}));
+  $self->run_eval_tests ($self->{conf}->{body_evals}->{$priority}, 'BODY: ', $bodystring);
 }
 
 sub do_rawbody_eval_tests {
-  my ($self, $bodystring) = @_;
-  $self->run_eval_tests ($self->{conf}->{rawbody_evals}, 'RAW: ', $bodystring);
+  my ($self, $priority, $bodystring) = @_;
+  return unless (defined($self->{conf}->{rawbody_evals}->{$priority}));
+  $self->run_eval_tests ($self->{conf}->{rawbody_evals}->{$priority}, 'RAW: ', $bodystring);
 }
 
 sub do_full_eval_tests {
-  my ($self, $fullmsgref) = @_;
-  $self->run_eval_tests ($self->{conf}->{full_evals}, '', $fullmsgref);
+  my ($self, $priority, $fullmsgref) = @_;
+  return unless (defined($self->{conf}->{full_evals}->{$priority}));
+  $self->run_eval_tests ($self->{conf}->{full_evals}->{$priority}, '', $fullmsgref);
 }
 
 ###########################################################################
 
 sub do_meta_tests {
-  my ($self) = @_;
+  my ($self, $priority) = @_;
   local ($_);
 
   dbg( "running meta tests; score so far=" . $self->{score} );
@@ -1760,9 +1837,16 @@ sub do_meta_tests {
   my $doing_user_rules = 
     $self->{conf}->{user_rules_to_compile}->{Mail::SpamAssassin::Conf::TYPE_META_TESTS};
 
+  # clean up priority value so it can be used in a subroutine name
+  my $clean_priority;
+  ($clean_priority = $priority) =~ s/-/neg/;
+
   # speedup code provided by Matt Sergeant
-  if ( defined &Mail::SpamAssassin::PerMsgStatus::_meta_tests && !$doing_user_rules) {
-    Mail::SpamAssassin::PerMsgStatus::_meta_tests($self);
+  if ( defined &{'Mail::SpamAssassin::PerMsgStatus::_meta_tests_'.$clean_priority}
+       && !$doing_user_rules) {
+    no strict "refs";
+    &{'Mail::SpamAssassin::PerMsgStatus::_meta_tests_'.$clean_priority}($self);
+    use strict "refs";
     return;
   }
 
@@ -1770,11 +1854,11 @@ sub do_meta_tests {
   my $evalstr = '';
 
   # Get the list of meta tests
-  my @metas = keys %{ $self->{conf}{meta_tests} };
+  my @metas = keys %{ $self->{conf}{meta_tests}->{$priority} };
 
   # Go through each rule and figure out what we need to do
   foreach $rulename (@metas) {
-    my $rule   = $self->{conf}->{meta_tests}->{$rulename};
+    my $rule   = $self->{conf}->{meta_tests}->{$priority}->{$rulename};
     my $token;
 
     # Lex the rule into tokens using a rather simple RE method ...
@@ -1814,7 +1898,7 @@ sub do_meta_tests {
 
         # If the token is another meta rule, add it as a dependency
         push ( @{ $rule_deps{$rulename} }, $token )
-          if ( exists $self->{conf}{meta_tests}->{$token} );
+          if ( exists $self->{conf}{meta_tests}->{$priority}->{$token} );
       }
     }
   }
@@ -1852,14 +1936,18 @@ sub do_meta_tests {
         . join ( ", ", grep($metas{$_},@{ $rule_deps{$rulename} }) ) );
   }
 
-  if (defined &_meta_tests) { undef &_meta_tests; }
+  if (defined &{'_meta_tests_'.$clean_priority}) {
+    undef &{'_meta_tests_'.$clean_priority};
+  }
+
+  return unless ($evalstr);
 
   # setup the environment for meta tests
   $evalstr = <<"EOT";
 {
     package Mail::SpamAssassin::PerMsgStatus;
 
-    sub _meta_tests {
+    sub _meta_tests_$clean_priority {
         # note: cannot set \$^W here on perl 5.6.1 at least, it
         # crashes meta tests.
 
@@ -1879,7 +1967,9 @@ EOT
     $self->{rule_errors}++;
   }
   else {
-    Mail::SpamAssassin::PerMsgStatus::_meta_tests($self);
+    no strict "refs";
+    &{'Mail::SpamAssassin::PerMsgStatus::_meta_tests_'.$clean_priority}($self);
+    use strict "refs";
   }
 }    # do_meta_tests()
 
@@ -1893,6 +1983,7 @@ sub run_eval_tests {
 
   my $scoreset = $self->{conf}->get_score_set();
   while (my ($rulename, $test) = each %{$evalhash}) {
+
     # Score of 0, skip it.
     next unless ($self->{conf}->{scores}->{$rulename});
 
