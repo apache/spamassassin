@@ -70,23 +70,6 @@ unsafe_report it, it may be safer to save it to a file and open it with an edito
 #user_scores_sql_username	spam
 #user_scores_sql_password	spamfilter
 
-###########################################################################
-# Automatic-whitelist directory, for the default db-based whitelist
-# backend.  By default, each user has their own, in their ~/.spamassassin
-# directory with mode 0600, but for system-wide SpamAssassin use, you may
-# want to share this across all users; uncomment and customise the below
-# lines.  (Make sure the mode has --x bits set.)
-
-# auto_whitelist_factor   0.5
-
-# default: per-user whitelist:
-# auto_whitelist_path        ~/.spamassassin/auto-whitelist
-# auto_whitelist_file_mode   0600
-
-# use this for a system-wide whitelist:
-# auto_whitelist_path        /var/spool/spamassassin/auto-whitelist
-# auto_whitelist_file_mode   0666
-
 ##########################################################################
 # Headers to be added to mail (can be overriden by users in
 # ~/.spamassassin/user_prefs)
