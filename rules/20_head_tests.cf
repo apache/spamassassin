@@ -86,6 +86,9 @@ describe INVALID_DATE		Invalid Date: header (not RFC 822)
 header INVALID_DATE_TZ_ABSURD	Date =~ /[-+](?:1[4-9]\d\d|[2-9]\d\d\d)$/
 describe INVALID_DATE_TZ_ABSURD	Invalid Date: header (timezone does not exist)
 
+header DATE_YEAR_ZERO_FIRST	Date =~ /[a-z]\s+0\d\d\d(\s|$)/
+describe DATE_YEAR_ZERO_FIRST	Invalid Date: year begins with zero
+
 header DATE_IN_PAST_03_06	eval:check_for_shifted_date('-6', '-3')
 describe DATE_IN_PAST_03_06	Date: is 3 to 6 hours before Received: date
 
