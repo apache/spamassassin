@@ -648,13 +648,20 @@ score for this message. _REQD_ will be replaced with the threshold.
       $self->{subject_tag} = $1; next;
     }
 
-=item report_safe { 0 | 1 }	(default: 1)
+=item report_safe { 0 | 1 | 2 }	(default: 1)
 
 if this option is set to 1, if an incoming message is tagged as spam,
 instead of modifying the original message, SpamAssassin will create a
 new report message and attach the original message as a message/rfc822
 MIME part (ensuring the original message is completely preserved, not
 easily opened, and easier to recover).
+
+If this option is set to 2, then original messages will be attached with
+a content type of text/plain instead of message/rfc822.  This setting
+may be required for safety reasons on certain broken mail clients that
+automatically load attachments without any action by the user.  This
+setting may also make it somewhat more difficult to extract or view the
+original message.
 
 If this option is set to 0, incoming spam is only modified by adding
 some headers and no changes will be made to the body.

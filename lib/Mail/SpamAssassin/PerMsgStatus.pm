@@ -658,7 +658,15 @@ sub rewrite_as_spam {
     $disposition = "inline";
   }
 
+  my $type = "message/rfc822";
+  $type = "text/plain" if $self->{conf}->{report_safe} > 1;
+
   my $description = $self->{main}->{'encapsulated_content_description'};
+
+  # Note: the message should end in blank line since mbox format wants
+  # blank line at end and messages may be concatenated!  In addition, the
+  # x-spam-type parameter is fixed since we will use it later to recognize
+  # original messages that can be extracted.
   $newmsg .= <<"EOM";
 MIME-Version: 1.0
 Content-Type: multipart/mixed; boundary="$boundary"
@@ -673,13 +681,14 @@ Content-Transfer-Encoding: 8bit
 $report
 
 --$boundary
-Content-Type: message/rfc822
+Content-Type: $type; x-spam-type=original
 Content-Description: $description
 Content-Disposition: $disposition
 Content-Transfer-Encoding: 8bit
 
 $original
 --$boundary--
+
 EOM
   
   my @lines = split (/^/m,  $newmsg);
