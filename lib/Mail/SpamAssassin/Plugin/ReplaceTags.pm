@@ -90,7 +90,9 @@ sub finish_parsing_end {
 	# skip if not listed by replace_rules
 	next unless $opts->{conf}->{rules_to_replace}{$rule};
 
-	dbg("replacetags: replacing $rule: $re");
+	if (Mail::SpamAssassin::dbg_check('+replacetags')) {
+	  dbg("replacetags: replacing $rule: $re");
+	}
 
 	if ($re =~ s/${start}pre (.+?)${end}//) {
 	  my $pre_name = $1;
@@ -134,7 +136,9 @@ sub finish_parsing_end {
 	# do the actual replacement
 	$opts->{conf}->{$type}->{$priority}->{$rule} = $re;
 
-	dbg("replacetags: replaced $rule: $re");
+	if (Mail::SpamAssassin::dbg_check('+replacetags')) {
+	  dbg("replacetags: replaced $rule: $re");
+	}
       }
     }
   }
