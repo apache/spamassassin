@@ -365,7 +365,7 @@ set of headers:
 e.g.
 
   whitelist_from joe@example.com fred@example.com
-  whitelist_from simon@example.com
+  whitelist_from *@example.com
 
 =cut
 
@@ -378,11 +378,13 @@ e.g.
 Used to override a default whitelist_from entry, so for example a distribution
 whitelist_from can be overriden in a local.cf file, or an individual user can
 override a whitelist_from entry in their own C<user_prefs> file.
+The specified email address has to match exactly the address previously
+used in a whitelist_from line.
 
 e.g.
 
   unwhitelist_from joe@example.com fred@example.com
-  unwhitelist_from *@amazon.com
+  unwhitelist_from *@example.com
 
 =cut
 
@@ -390,17 +392,18 @@ e.g.
       $self->remove_from_addrlist ('whitelist_from', split (' ', $1)); next;
     }
 
-=item whitelist_from_rcvd lists.sourceforge.net sourceforge.net
+=item whitelist_from_rcvd addr@lists.sourceforge.net sourceforge.net
 
 Use this to supplement the whitelist_from addresses with a check against the
 Received headers. The first parameter is the address to whitelist, and the
-second is a domain to match in the Received headers.  This does not
-allow globbing, and must be followed by a numeric IP address in brackets.
+second is a domain to match in the Received headers.  This domain does not
+allow globbing, and must be followed by a numeric IP address in brackets
+in the Received headers.
 
 e.g.
 
   whitelist_from_rcvd joe@example.com  example.com
-  whitelist_from_rcvd axkit.org        sergeant.org
+  whitelist_from_rcvd *@axkit.org      sergeant.org
 
 =cut
 
@@ -415,15 +418,17 @@ Used to override a default whitelist_from_rcvd entry, so for example a
 distribution whitelist_from_rcvd can be overriden in a local.cf file,
 or an individual user can override a whitelist_from_rcvd entry in
 their own C<user_prefs> file.
+The specified email address has to match exactly the address previously
+used in a whitelist_from_rcvd line.
 
 e.g.
 
   unwhitelist_from_rcvd joe@example.com fred@example.com
-  unwhitelist_from_rcvd amazon.com
+  unwhitelist_from_rcvd *@axkit.org
 
 =cut
 
-    if (/^unwhitelist_from\s+(.+)$/) {
+    if (/^unwhitelist_from_rcvd\s+(.+)$/) {
       $self->remove_from_addrlist_rcvd('whitelist_from_rcvd', split (' ', $1));
       next;
     }
