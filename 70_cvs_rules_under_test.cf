@@ -436,10 +436,14 @@ describe T_HTTP_77	Contains a URL-encoded hostname (HTTP77)
 # dhcp024-210-034-053.columbus.rr.com [24.210.34.53]
 # c-66-176-16-108.se.client2.attbi.com [66.176.16.108]
 # c-67-168-174-61.client.comcast.net [67.168.174.61]
+# NNN-NNN-NNN-NNN.fibertel.com.ar
+# NN.NN.NNN.NNN.ap.yournet.ne.jp
+# NN.NNN.NN-NN.rev.gaoland.net
 # (require an alpha first, as legit HELO'ing-as-IP-address is hit otherwise)
 header T_HELO_DYNAMIC_IPADDR X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[a-z]\S*\d+\D\d+\D\d+\D\d+\D[^\.]*\.\S+\.\S+/i
+header T_HELO_DYNAMIC_IPADDR2 X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\d+\D\d+\D\d+\D\d+\D[^\.]*\.\S+\.\S+/i
 # dhcp024-210-034-053.columbus.rr.com [24.210.34.53]
-header T_HELO_DYNAMIC_RR   X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S*(?:docsis|cable|dsl|adsl|dhcp|cpe)\S*\d+\D+\d+/i
+header T_HELO_DYNAMIC_RR   X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S*(?:docsis|cable|dsl|dhcp|cpe)\S*\d+\D+\d+/i
 # fia83-8.dsl.hccnet.nl [62.251.8.83]
 # fia160-115-100.dsl.hccnet.nl [80.100.115.160]
 header T_HELO_DYNAMIC_HCC   X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S*\d+\D+\d+\S*\.(?:docsis|cable|dsl|adsl|dhcp|cpe)\./i
@@ -461,6 +465,11 @@ header T_HELO_DYNAMIC_ROGERS X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=CPE\d+\S+\
 header T_HELO_DYNAMIC_ADELPHIA X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[a-z]{2}-\S+-\d{1,3}\.[a-z]{3,8}\.adelphia\.net/i
 # pD9E4F89F.dip.t-dialin.net [217.228.248.159]
 header T_HELO_DYNAMIC_DIALIN X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[a-z][A-F0-9]+\.dip\./
+# 0xd5aaf40b.dhcp.kabelnettet.dk
+# 0x50a46949.virnxx11.adsl-dhcp.tele.dk
+header T_HELO_DYNAMIC_HEXIP X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=0x[a-f0-9]{8}\./
+# 118.Red-80-35-201.pooles.rima-tde.net
+header T_HELO_DYNAMIC_SPLIT_IP X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\d+\.\S+\d+\D\d+\D\d+\D/
 
 # TODO:
 # port-212-202-77-203.reverse.qsc.de [212.202.77.203]
