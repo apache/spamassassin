@@ -92,21 +92,23 @@ Getopt::Long::Configure(
 );
 
 GetOptions(
-  'forget'       => \$forget,
-  'ham|nonspam'  => sub { $isspam = 0; },
-  'spam'         => sub { $isspam = 1; },
-  'sync|rebuild' => \$synconly,
+  'forget'      => \$forget,
+  'ham|nonspam' => sub { $isspam = 0; },
+  'spam'        => sub { $isspam = 1; },
+  'sync'        => \$synconly,
+  'rebuild'     => sub { $synconly = 1; warn "The --rebuild option has been deprecated.  Please use --sync instead.\n" },
 
   'configpath|config-file|config-dir|c|C=s' => \$opt{'configpath'},
   'prefspath|prefs-file|p=s'                => \$opt{'prefspath'},
   'siteconfigpath=s'                        => \$opt{'siteconfigpath'},
 
-  'folders|f=s'                         => \$opt{'folders'},
-  'force-expire|expire'                 => \$opt{'force-expire'},
-  'local|L'                             => \$opt{'local'},
-  'no-sync|nosync|no-rebuild|norebuild' => \$opt{'nosync'},
-  'showdots'                            => \$opt{'showdots'},
-  'use-ignores'                         => \$opt{'use-ignores'},
+  'folders|f=s'          => \$opt{'folders'},
+  'force-expire|expire'  => \$opt{'force-expire'},
+  'local|L'              => \$opt{'local'},
+  'no-sync|nosync'       => \$opt{'nosync'},
+  'showdots'             => \$opt{'showdots'},
+  'use-ignores'          => \$opt{'use-ignores'},
+  'no-rebuild|norebuild' => sub { $opt{'nosync'} = 1; warn "The --no-rebuild option has been deprecated.  Please use --no-sync instead.\n" },
 
   'learnprob=f' => \$opt{'learnprob'},
   'randseed=i'  => \$opt{'randseed'},
