@@ -66,18 +66,6 @@ EOUSAGE
     exit $resphash{EX_USAGE};
 }
 
-use POSIX 'setsid';
-sub daemonize
-{
-    chdir '/' or die "Can't chdir to '/': $!";
-    open STDIN,'/dev/null' or die "Can't read '/dev/null': $!";
-    open STDOUT,'>/dev/null' or die "Can't write '/dev/null': $!";
-    defined(my $pid=fork) or die "Can't fork: $!";
-    exit if $pid;
-    setsid or die "Can't start new session: $!";
-    open STDERR,'>&STDOUT' or die "Can't duplicate stdout: $!";
-}
-
 use vars qw{
     $opt_d $opt_h $opt_L $opt_p $opt_A $opt_x $opt_s $opt_D $opt_u
 	$opt_P $opt_c $opt_a $opt_i $opt_q
@@ -146,20 +134,10 @@ my $proto = getprotobyname('tcp');
 ($port) = $port =~ /^(\d+)$/ or die "invalid port";
 
 # Be a well-behaved daemon
-chdir '/'                 or die "Can't chdir to /: $!";
-open STDIN,  '/dev/null'  or die "Can't read /dev/null: $!";
-open STDOUT, '>/dev/null' or die "Can't write to /dev/null: $!";
-# open STDERR, '>/dev/null' or die "Can't write to /dev/null: $!";
-
 socket(Server, PF_INET, SOCK_STREAM, $proto)            || die "socket: $!";
 setsockopt(Server,SOL_SOCKET,SO_REUSEADDR,pack("l",1))  || die "setsockopt: $!";
 bind(Server, sockaddr_in($port, $addr))                 || die "bind: $!";
 listen(Server,SOMAXCONN)                                || die "listen: $!";
-if ($opt_D) {
-    warn "server started on port $port\n";
-    warn "server pid: $$\n";
-}
-logmsg "server started on port $port";
 
 # support non-root use (after we bind to the port)
 my $setuid_to_user = 0;
@@ -190,6 +168,14 @@ my $paddr;
 $SIG{CHLD} = 'IGNORE';		# important: avoids perl sighandling bug on BSD
 $SIG{INT} = \&kill_handler;
 $SIG{TERM} = \&kill_handler;
+
+# now allow waiting processes to connect, if they're watching the log.
+# The test suite does this!
+if ($opt_D) {
+    warn "server started on port $port\n";
+    warn "server pid: $$\n";
+}
+logmsg "server started on port $port";
 
 for ( $waitedpid = 0;
       ($paddr = accept(Client,Server)) || $waitedpid;
@@ -558,6 +544,18 @@ sub kill_handler
     logmsg "server killed by SIG$sig, shutting down";
     close Server;
     exit 0;
+}
+
+use POSIX 'setsid';
+sub daemonize
+{
+    chdir '/' or die "Can't chdir to '/': $!";
+    open STDIN,'/dev/null' or die "Can't read '/dev/null': $!";
+    open STDOUT,'>/dev/null' or die "Can't write '/dev/null': $!";
+    defined(my $pid=fork) or die "Can't fork: $!";
+    exit if $pid;
+    setsid or die "Can't start new session: $!";
+    open STDERR,'>&STDOUT' or die "Can't duplicate stdout: $!";
 }
 
 =head1 NAME
