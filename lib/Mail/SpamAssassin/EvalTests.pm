@@ -419,12 +419,16 @@ sub word_is_in_dictionary {
 
   dbg ("checking dictionary for \"$word\"");
 
+  # make a search pattern that will match anywhere in the dict-line.
+  # we just want to see if the word is english-like...
+  my $wordre = qr/${word}/;
+
   # use DICT as a file, rather than making a hash; keeps memory
   # usage down, and the OS should cache the file contents anyway
   # if the system has enough memory.
   #
   while (<DICT>) {
-    chop; if ($word eq $_) { close DICT; return 1; }
+    if (/${wordre}/) { close DICT; return 1; }
   }
 
   close DICT; return 0;
