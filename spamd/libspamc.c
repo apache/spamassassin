@@ -558,7 +558,6 @@ static int _message_filter(const struct sockaddr *addr,
     if(flags&SPAMC_USE_SSL){
 #ifdef SPAMC_SSL
       len=SSL_read(ssl, m->out+m->out_len,
-		 m->max_len+EXPANSION_ALLOWANCE+1-m->out_len,
 		 m->max_len+EXPANSION_ALLOWANCE+1-m->out_len);
 #endif
     } else{

@@ -10,6 +10,8 @@ LDDLFLAGS = @LDDLFLAGS@
 EXE_EXT = @EXEEXT@
 SHLIBEXT = .so
 
+SSLCFLAGS = -DSPAMC_SSL
+
 SPAMC_FILES = spamd/spamc.c
 
 QMAIL_SPAMC_FILES = qmail/qmail-spamc.c
@@ -28,6 +30,14 @@ spamd/spamc$(EXE_EXT): $(SPAMC_FILES) $(LIBSPAMC_FILES)
 
 spamd/libspamc$(SHLIBEXT): $(LIBSPAMC_FILES)
 	$(CC) $(CCDLFLAGS) $(LIBSPAMC_FILES) -o $@ $(LDDLFLAGS) $(LIBS)
+
+spamd/sslspamc$(EXE_EXT): $(SPAMC_FILES) $(LIBSPAMC_FILES)
+	$(CC) $(SSLCFLAGS) $(CFLAGS) $(SPAMC_FILES) $(LIBSPAMC_FILES) \
+		-o $@ $(LDFLAGS) $(LIBS)
+
+spamd/libsslspamc$(SHLIBEXT): $(LIBSPAMC_FILES)
+	$(CC) $(SSLCFLAGS) $(CCDLFLAGS) $(LIBSPAMC_FILES) \
+		-o $@ $(LDDLFLAGS) $(LIBS)
 
 qmail/qmail-spamc: $(QMAIL_SPAMC_FILES)
 	$(CC) $(CFLAGS) $(QMAIL_SPAMC_FILES) \
