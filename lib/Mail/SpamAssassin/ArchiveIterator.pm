@@ -150,6 +150,11 @@ last 24 hours; or as parsed by Time::ParseDate (e.g. '-6 months')
 Same as opt_before, except the messages are only used if after the given
 time_t value.
 
+=item opt_want_date
+
+Set to 1 (default) if you want the received date to be filled in
+in the C<wanted_sub> callback below.
+
 =item wanted_sub
 
 Reference to a subroutine which will process message data.  Usually
@@ -158,12 +163,18 @@ set via set_functions().  The routine will be passed 5 values: class
 (array reference, one message line per element), and the message format
 key ('f' for file, 'm' for mbox, 'b' for mbx).
 
+Note that if C<opt_want_date> is set to 0, the received date scalar will be
+undefined.
+
 =item result_sub
 
 Reference to a subroutine which will process the results of the wanted_sub
 for each message processed.  Usually set via set_functions().
 The routine will be passed 3 values: class (scalar), result (scalar, returned
 from wanted_sub), and received date (scalar).
+
+Note that if C<opt_want_date> is set to 0, the received date scalar will be
+undefined.
 
 =back
 
@@ -179,11 +190,13 @@ sub new {
 
   $self->{opt_head} = 0 unless (defined $self->{opt_head});
   $self->{opt_tail} = 0 unless (defined $self->{opt_tail});
+  $self->{opt_want_date} = 1 unless (defined $self->{opt_want_date});
 
   # If any of these options are set, we need to figure out the message's
   # receive date at scan time.  opt_n == 0, opt_after, opt_before
   $self->{determine_receive_date} = !$self->{opt_n} ||
-  	defined $self->{opt_after} || defined $self->{opt_before};
+  	defined $self->{opt_after} || defined $self->{opt_before} ||
+        $self->{opt_want_date};
 
   $self->{s} = [ ];		# spam, of course
   $self->{h} = [ ];		# ham, as if you couldn't guess
@@ -449,7 +462,7 @@ sub run_file {
   }
   close INPUT;
 
-  if ($date == AI_TIME_UNKNOWN) {
+  if ($date == AI_TIME_UNKNOWN && $self->{determine_receive_date}) {
     $date = Mail::SpamAssassin::Util::receive_date($header);
   }
 
