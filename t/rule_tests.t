@@ -22,6 +22,8 @@ use vars qw($num_tests);
 
 $num_tests = 1;
 
+$Mail::SpamAssassin::Conf::COLLECT_REGRESSION_TESTS = 1;
+
 my $sa = Mail::SpamAssassin->new({
     rules_filename => "$prefix/t/log/test_rules_copy",
     site_rules_filename => "$prefix/t/log/test_default.cf",
