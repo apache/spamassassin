@@ -85,6 +85,11 @@ header T_RCVD_IN_SORBS_NOMAIL	eval:check_rbl_sub('sorbsrhs', '127.0.0.12')
 describe T_RCVD_IN_SORBS_NOMAIL	SORBS: sender is not expected to send mail
 tflags T_RCVD_IN_SORBS_NOMAIL	net
 
+# test XBL with -notfirsthop
+header T_RCVD_IN_XBL_NFH	eval:check_rbl_sub('sblxbl-notfirsthop', '(?i)/xbl')
+describe T_RCVD_IN_XBL_NFH	Received via a relay in Spamhaus XBL
+tflags T_RCVD_IN_XBL_NFH	net
+
 # SPF support.  "pass" is nice, "fail" is bad, "softfail" is bad, but
 # not as bad as "fail".
 header T_SPF_PASS	eval:check_for_spf_pass()
