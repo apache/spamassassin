@@ -125,3 +125,12 @@ describe T_DNS_FROM_SECURITYSAGE	Envelope sender in blackholes.securitysage.com
 tflags T_DNS_FROM_SECURITYSAGE	net
 
 ########################################################################
+
+header T_FORGED_IN_WHITELIST      eval:check_forged_in_whitelist()
+describe T_FORGED_IN_WHITELIST    Forged From: is in user's white-list
+tflags T_FORGED_IN_WHITELIST      userconf
+
+header T_FORGED_DEF_WHITELIST     eval:check_forged_in_default_whitelist()
+describe T_FORGED_DEF_WHITELIST   Forged From: is in default white-list
+tflags T_FORGED_DEF_WHITELIST     userconf
+
