@@ -160,3 +160,17 @@ endif	# Mail::SpamAssassin::Plugin::URIDNSBL
 body T_HTML_LINK_PUSH_HERE	eval:html_text_match('anchor', '(?i)(?:push|go|cl[1l]ck)\s*(?:here|this)')
 body T_HTML_LINK_OPT		eval:html_text_match('anchor', '(?i)opt.?(?:out|in)')
 body T_HTML_LINK_OPT_OUT	eval:html_text_match('anchor', '(?i)opt.?out')
+
+body T_HTML_EXTRA_CLOSE_0	eval:html_test('extra_close')
+body T_HTML_EXTRA_CLOSE_1	eval:html_eval('extra_close', '> 1')
+body T_HTML_EXTRA_CLOSE_2	eval:html_eval('extra_close', '> 2')
+body T_HTML_EXTRA_CLOSE_4	eval:html_eval('extra_close', '> 4')
+body T_HTML_EXTRA_CLOSE_8	eval:html_eval('extra_close', '> 8')
+body T_HTML_EXTRA_CLOSE_16	eval:html_eval('extra_close', '> 16')
+
+body T_HTML_EXTRA_CLOSE_A	eval:html_range('extra_close_ratio', '0.00', '0.01')
+body T_HTML_EXTRA_CLOSE_B	eval:html_range('extra_close_ratio', '0.01', '0.02')
+body T_HTML_EXTRA_CLOSE_C	eval:html_range('extra_close_ratio', '0.02', '0.04')
+body T_HTML_EXTRA_CLOSE_D	eval:html_range('extra_close_ratio', '0.04', '0.08')
+body T_HTML_EXTRA_CLOSE_E	eval:html_range('extra_close_ratio', '0.08', '0.16')
+body T_HTML_EXTRA_CLOSE_F	eval:html_range('extra_close_ratio', '0.16', '0.32')
