@@ -353,10 +353,10 @@ describe SUSPICIOUS_RECIPS      To: contains similar domains at least 10 times
 header SUSPICIOUS_CC_RECIPS	Cc =~ /(@[-a-z0-9_.]{2,}).*(?:\1.*){9,}/is
 describe SUSPICIOUS_CC_RECIPS	Cc: contains similar domains at least 10 times
 
-header VERY_SUSP_RECIPS		To =~ /\b([a-z][a-z])[^@]{0,20}(@[-a-z0-9_\.]{0,3}).{0,40}?(?:\1[^@]*\2.{0,20}?){4,}/is
+header VERY_SUSP_RECIPS		To =~ /\b([a-z][a-z])[^@,]{0,20}(@[-a-z0-9_\.]{0,3}).{0,40}?(?:\1[^@]*\2.{0,20}?){4,}/is
 describe VERY_SUSP_RECIPS       To: contains similar usernames at least 5 times
 
-header VERY_SUSP_CC_RECIPS	Cc =~ /\b([a-z][a-z])[^@]{0,20}(@[-a-z0-9_\.]{0,3}).{0,40}?(?:\1[^@]*\2.{0,20}?){4,}/is
+header VERY_SUSP_CC_RECIPS	Cc =~ /\b([a-z][a-z])[^@,]{0,20}(@[-a-z0-9_\.]{0,3}).{0,40}?(?:\1[^@]*\2.{0,20}?){4,}/is
 describe VERY_SUSP_CC_RECIPS	Cc: contains similar usernames at least 5 times
 
 header Q_FOR_SELLER		Subject =~ /Question.*(for|to|from eBay).*(seller|Member)/
