@@ -965,9 +965,8 @@ my %html_color = (
 sub name_to_rgb {
   my $color = lc $_[0];
 
-  # strip leading and trailing whitespace, but not interior whitespace
-  $color =~ s/^\s+//;
-  $color =~ s/\s+$//;
+  # note: Mozilla strips leading and trailing whitespace at this point,
+  # but IE does not
 
   # named colors
   my $hex = $html_color{$color};
@@ -978,8 +977,6 @@ sub name_to_rgb {
   # Flex Hex: John Graham-Cumming, http://www.jgc.org/pdf/lisa2004.pdf
   # strip optional # character
   $color =~ s/^#//;
-  # save off original 
-  my $original = $color;
   # pad right-hand-side to a multiple of three
   $color .= "0" x (3 - (length($color) % 3)) if (length($color) % 3);
   # split into triplets
