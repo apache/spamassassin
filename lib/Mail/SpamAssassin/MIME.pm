@@ -71,9 +71,10 @@ sub new {
   $class = ref($class) || $class;
 
   my $self = {
-    headers     => {},
-    raw_headers => {},
-    body_parts  => [],
+    headers		=> {},
+    raw_headers		=> {},
+    body_parts		=> [],
+    header_order	=> [],
     };
 
   bless($self,$class);
@@ -122,6 +123,7 @@ sub header {
   if (@_) {
     my ( $decoded_value, $raw_value ) = @_;
     $raw_value = $decoded_value unless defined $raw_value;
+    push @{ $self->{'header_order'} }, $rawkey;
     if ( exists $self->{'headers'}{$key} ) {
       push @{ $self->{'headers'}{$key} },     $decoded_value;
       push @{ $self->{'raw_headers'}{$key} }, $raw_value;

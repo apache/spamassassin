@@ -70,10 +70,8 @@ Mail::SpamAssassin - Mail::Audit spam detector plugin
 
   if ($status->is_spam ()) {
     $status->rewrite_mail ();
-    $mail->accept("spamfolder");
-
   } else {
-    $mail->accept();		# to default incoming mailbox
+    ...
   }
   ...
 

@@ -91,7 +91,6 @@ sub new {
 
   $self->{is_spamassassin_wrapper_object} = 1;
   $self->{has_spamassassin_methods} = 1;
-  $self->{headers_pristine} = '';
   $self->{headers} = { };
   $self->{header_order} = [ ];
 
@@ -109,7 +108,7 @@ sub new {
   }
 
   # Parse the message for MIME parts
-  $self->{mime_parts} = Mail::SpamAssassin::MIME::Parser->parse(join("", @{$self->{textarray}}));
+  $self->{mime_parts} = Mail::SpamAssassin::MIME::Parser->parse($self->{textarray});
 
   # Parse the message to get header information
   $self->parse_headers();
@@ -122,15 +121,11 @@ sub parse_headers {
   my ($self) = @_;
   local ($_);
 
-  $self->{headers_pristine} = '';
   $self->{headers} = { };
   $self->{header_order} = [ ];
   my ($prevhdr, $hdr, $val, $entry);
 
   while (defined ($_ = shift @{$self->{textarray}})) {
-    # absolutely unmodified!
-    $self->{headers_pristine} .= $_;
-
     # warn "parse_headers $_";
     if (/^\r*$/) { last; }
 
@@ -229,7 +224,7 @@ sub _get_header_list {
 
 sub get_pristine_header {
   my ($self, $hdr) = @_;
-  my(@ret) = $self->{headers_pristine} =~ /^(?:$hdr:[ ]+(.*\n(?:\s+\S.*\n)*))/mig;
+  my(@ret) = $self->{mime_parts}->{pristine_headers} =~ /^(?:$hdr:[ ]+(.*\n(?:\s+\S.*\n)*))/mig;
   if (@ret) {
     return wantarray ? @ret : $ret[0];
   }
@@ -359,11 +354,10 @@ sub replace_body {
 }
 
 # ---------------------------------------------------------------------------
-# bonus, not-provided-in-Mail::Audit methods.
 
 sub get_pristine {
   my ($self) = @_;
-  return join ('', $self->{headers_pristine}, @{ $self->{textarray} });
+  return join ('', $self->{mime_parts}->{pristine_headers}, @{ $self->{textarray} });
 }
 
 sub get_pristine_body {
@@ -415,121 +409,10 @@ sub ignore {
 
 # ---------------------------------------------------------------------------
 
-sub accept {
-  my $self = shift;
-  my $file = shift;
-
-  # we don't support maildir or qmail here yet. use the real Mail::Audit
-  # for those.
-
-  # note that we cannot use fcntl() locking portably from perl. argh!
-  # if this is an issue, we will have to enforce use of procmail for
-  # local delivery to mboxes.
-
-  {
-    my $gotlock = $self->dotlock_lock ($file);
-    my $nodotlocking = 0;
-
-    if (!defined $gotlock) {
-      # dot-locking not supported here (probably due to file permissions
-      # on the /var/spool/mail dir).  just use flock().
-      $nodotlocking = 1;
-    }
-
-    local $SIG{TERM} = sub { $self->dotlock_unlock (); die "killed"; };
-    local $SIG{INT} = sub { $self->dotlock_unlock (); die "killed"; };
-
-    if ($gotlock || $nodotlocking) {
-      my $umask = umask 077;
-      if (!open (MBOX, ">>$file")) {
-	umask $umask;
-        die "Couldn't open $file: $!";
-      }
-      umask $umask;
-
-      flock(MBOX, LOCK_EX) or warn "failed to lock $file: $!";
-      print MBOX $self->as_string()."\n";
-      flock(MBOX, LOCK_UN) or warn "failed to unlock $file: $!";
-      close MBOX;
-
-      if (!$nodotlocking) {
-        $self->dotlock_unlock ();
-      }
-
-      if (!$self->{noexit}) { exit 0; }
-      return;
-
-    } else {
-      die "Could not lock $file: $!";
-    }
-  }
-}
-
-sub dotlock_lock {
-  my ($self, $file) = @_;
-
-  my $lockfile = $file.".lock";
-  my $locktmp = $file.".lk.$$.".time();
-  my $gotlock = 0;
-  my $retrylimit = 30;
-
-  my $umask = 0;
-  if (!sysopen (LOCK, $locktmp, O_WRONLY | O_CREAT | O_EXCL, 0644)) {
-    umask $umask;
-    #die "lock $file failed: create $locktmp: $!";
-    $self->{dotlock_not_supported} = 1;
-    return;
-  }
-  umask $umask;
-
-  print LOCK "$$\n";
-  close LOCK or die "lock $file failed: write to $locktmp: $!";
-
-  for (my $retries = 0; $retries < $retrylimit; $retries++) {
-    if ($retries > 0) {
-      my $sleeptime = 2*$retries;
-      if ($sleeptime > 60) { $sleeptime = 60; }         # max 1 min
-      sleep ($sleeptime);
-    }
-
-    if (!link ($locktmp, $lockfile)) { next; }
-
-    # sanity: we should always be able to see this
-    my @tmpstat = lstat ($locktmp);
-    if (!defined $tmpstat[3]) { die "lstat $locktmp failed"; }
-
-    # sanity: see if the link() succeeded
-    my @lkstat = lstat ($lockfile);
-    if (!defined $lkstat[3]) { next; }	# link() failed
-
-    # sanity: if the lock succeeded, the dev/ino numbers will match
-    if ($tmpstat[0] == $lkstat[0] && $tmpstat[1] == $lkstat[1]) {
-      unlink $locktmp;
-      $self->{dotlock_locked} = $lockfile;
-      $gotlock = 1; last;
-    }
-  }
-
-  return $gotlock;
-}
-
-sub dotlock_unlock {
-  my ($self) = @_;
-
-  if ($self->{dotlock_not_supported}) { return; }
-
-  my $lockfile = $self->{dotlock_locked};
-  if (!defined $lockfile) { die "no dotlock_locked"; }
-  unlink $lockfile or warn "unlink $lockfile failed: $!";
-}
-
-# ---------------------------------------------------------------------------
-
 # does not need to be called it seems.  still, keep it here in case of
 # emergency.
 sub finish {
   my $self = shift;
-  delete $self->{headers_pristine};
   delete $self->{textarray};
   foreach my $key (keys %{$self->{headers}}) {
     delete $self->{headers}->{$key};

@@ -64,15 +64,15 @@ sub parse {
   }
 
   # trim mbox seperator if it exists
-  shift @message if ( scalar @message > 0 && $message[0] =~ /^From\s/ );
+  shift @message if ( @message > 0 && $message[0] =~ /^From\s/ );
 
   # Generate the main object and parse the appropriate MIME-related headers into it.
   my $msg = Mail::SpamAssassin::MIME->new();
   my $header = '';
 
   while ( my $last = shift @message ) {
-    $last =~ s/\r\n/\n/;
-    chomp($last);
+    $msg->{'pristine_headers'} .= $last;
+    $last =~ s/\r?\n//;
 
     # NB: Really need to figure out special folding rules here!
     if ( $last =~ s/^[ \t]+// ) {                    # if its a continuation
@@ -91,6 +91,7 @@ sub parse {
     last if ( $last =~ /^$/m );
   }
 
+  #$msg->{'pristine_body'} = \@message;
   my ($boundary);
   ($msg->{'type'}, $boundary) = Mail::SpamAssassin::Util::parse_content_type($msg->header('content-type'));
   dbg("main message type: ".$msg->{'type'});

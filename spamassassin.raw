@@ -85,7 +85,6 @@ eval {
 	     'siteconfigpath=s'                  => \$opt{'siteconfigpath'},
 	     'create-prefs!'                     => \$opt{'create-prefs'},
 	     'x'                                 => sub { $opt{'create-prefs'} = 0 },
-	     'log-to-mbox|l=s'                   => \$opt{'log-to-mbox'},
 	     'error-code|exit-code|e:i'          => \$opt{'error-code'},
 	     'test-mode|test|t'                  => \$opt{'test-mode'},
              'lint'                              => \$opt{'lint'},
@@ -102,6 +101,7 @@ eval {
 	     'whitelist-factory|M=s' => sub { warn "The -M option has been removed.\n" },
 	     'auto-whitelist|a' => sub { warn "The -a option has been removed.\n" },
 	     'warning-from|w=s' => sub { warn "The -w option has been removed.\n" },
+	     'log-to-mbox|l=s' => sub { warn "The -l option has been removed.\n" },
   ) or usage(0, "Unknown option!");
   if (defined $opt{'help'}) { usage(0, "For more information read the spamassassin man page"); }
   if (defined $opt{'version'}) {
@@ -123,31 +123,10 @@ eval {
 
   my $mail;
 
-# 1.
-# Standard Mail::Audit start.  No longer used due to bugs in M:A, regarding
-# handling of slightly misformatted input.
-#
-# require Mail::Audit;
-# $mail = Mail::Audit->new();
-
-# 2.
-# No use of Mail::Audit at all, apart from the accept(), reject() and
-# resend() methods (which are proxied transparently).  Lovely.
-#
   use Mail::SpamAssassin::NoMailAudit;
   if (!$opt{'lint'} && !$doing_address_only_whitelisting) {
     $mail = Mail::SpamAssassin::NoMailAudit->new ();
   }
-
-# For Mail::Audit users -- this is the magic. Just create a Mail::SpamAssassin
-# object like this, then run the check() method as below; if it returns a
-# non-undef value, then you've got spam, otherwise it's normal mail.
-#
-# You can then use the rewrite() method (passing in the Mail::Audit object) to
-# rewrite the spam.
-#
-# (This implementation does other stuff though, such as -t support; ignore that
-# stuff.)
 
 # create the tester factory
   my $spamtest = new Mail::SpamAssassin ({
@@ -172,13 +151,6 @@ eval {
     if ($levels !~ /^\s*$/) {
       usage(0, "bad areas in --debug option ($levels)!");
     }
-  }
-
-# handle logging of received mails
-  if ($opt{'log-to-mbox'}) {
-    $mail->{noexit} = 1;
-    $mail->accept ($opt{'log-to-mbox'});
-    $mail->{noexit} = 0;
   }
 
   if ($opt{'lint'}) {

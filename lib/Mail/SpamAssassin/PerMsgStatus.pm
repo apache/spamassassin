@@ -72,7 +72,6 @@ Mail::SpamAssassin::PerMsgStatus - per-message status (spam or not-spam)
   my $status = $spamtest->check ($mail);
   if ($status->is_spam()) {
     $status->rewrite_mail ();
-    $mail->accept("caught_spam");
   }
   ...
 
