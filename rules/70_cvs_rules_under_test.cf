@@ -480,7 +480,7 @@ describe T_PXE_LOGIC Spam URL pattern, usually made up domains
 # From addr, so whitelist_from_rcvd won't cut it
 # bug 1241
 header __GRADF_MSGID	Message-ID =~ /\@gradfinder.com>$/
-header __GRADF_RCVD	Received =~ /from \S+ (\S+.friendfinder.com \[216\.34\./
+header __GRADF_RCVD	Received =~ /from \S+ \(\S+.friendfinder.com \[216\.34\./
 meta T_VIA_GRADFINDER	(__GRADF_RCVD && __GRADF_MSGID)
 tflags T_VIA_GRADFINDER	nice
 
