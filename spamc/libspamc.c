@@ -948,7 +948,7 @@ int message_filter(struct transport *tp, const char *username,
 	free(m->out);
 	m->out = m->msg;
 	m->out_len = m->msg_len;
-	return EX_OSERR;
+	return rc;      /* use the error code try_to_connect_*() gave us. */
     }
 
     if (flags & SPAMC_USE_SSL) {
