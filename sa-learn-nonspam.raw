@@ -82,6 +82,9 @@ Simply run this command once for each of your mail folders, and it will
 non-spam when it is spam or vice versa, simply rescan it correctly and the
 mistake will be corrected.
 
+Note that I<globbing> in the mail folder names is supported; in other words,
+listing a folder name as C<*> will scan every folder that matches.
+
 SpamAssassin remembers which mail messages it's learnt already, and will not
 re-learn those messages again, unless you use the B<sa-forget> command.
 
@@ -337,7 +340,11 @@ sa-learn-spam(1)
 sa-learn-nonspam(1)
 sa-learn-rebuild(1)
 sa-forget(1)
-http:///www.paulgraham.com, "A Plan For Spam"
+
+http:///www.paulgraham.com, Paul Graham's "A Plan For Spam" paper
+
+http://radio.weblogs.com/0101454/stories/2002/09/16/spamDetection.html, Gary
+Robinson's f(x) and combining algorithms
 
 http://www.bgl.nu/~glouis/bogofilter/test6000.html, discussion of various Bayes
 training regimes, including 'train on error' and unsupervised training
