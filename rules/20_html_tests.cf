@@ -98,9 +98,6 @@ describe HTML_FONT_BIG		FONT Size +2 and up or 3 and up
 body HTML_FONT_BIG_B		eval:html_test('big_font_B')
 describe HTML_FONT_BIG_B	HTML has a big "font" and "B" tag combo
 
-body HTML_FONT_COLOR_NOHASH	eval:html_test('font_color_nohash')
-describe HTML_FONT_COLOR_NOHASH	HTML font color is missing hash (#) character
-
 body HTML_FONT_COLOR_UNSAFE	eval:html_test('font_color_unsafe')
 describe HTML_FONT_COLOR_UNSAFE	HTML font color not within safe 6x6x6 palette
 
