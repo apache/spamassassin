@@ -20,11 +20,11 @@
 # whatever the installer typed when running Makefile.PL.
 #      ........................................................................
 clear_report_template
-report Spam detection software (installed by you, your system administrator, or
-report your internet service provider) has identified an incoming email as
-report possible spam.  The original message has been attached to this report so
-report you can view it (if it isn't spam) or block similar future email.  If
-report you have any questions, see @@CONTACT_ADDRESS@@ for details.
+report Spam detection software, running on the system "_HOSTNAME_", has
+report identified this incoming email as possible spam.  The original message
+report has been attached to this so you can view it (if it isn't spam) or block
+report similar future email.  If you have any questions, see
+report _CONTACTADDRESS_ for details.
 report 
 report Content preview:  _PREVIEW_
 report 
@@ -174,4 +174,7 @@ bayes_auto_learn			1
 # skip_rbl_checks       0
 # check_mx_attempts     2
 # check_mx_delay        5
+
+# A 'contact address' users should contact for more info.
+report_contact	@@CONTACT_ADDRESS@@
 
