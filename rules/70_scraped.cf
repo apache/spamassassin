@@ -1,2 +1,23 @@
 # SpamAssassin rules file: bugzilla-scraped needs-mc rules
 
+## MC: bug 2584 cmt 1: start
+header T_MC_L_SUBJ_EXCESSIVE_PUNC_11_15_b2584_c1 Subject =~ /([A-Za-z0-9 ]+[^A-Za-z0-9 ]+){11,15}/
+describe T_MC_L_SUBJ_EXCESSIVE_PUNC_11_15_b2584_c1 Subject contains excessive punctuation
+score T_MC_L_SUBJ_EXCESSIVE_PUNC_11_15_b2584_c1 0.1
+header T_MC_L_SUBJ_EXCESSIVE_PUNC_16_20_b2584_c1 Subject =~ /([A-Za-z0-9 ]+[^A-Za-z0-9 ]+){16,20}/
+describe T_MC_L_SUBJ_EXCESSIVE_PUNC_16_20_b2584_c1 Subject contains excessive punctuation
+score T_MC_L_SUBJ_EXCESSIVE_PUNC_16_20_b2584_c1 0.1
+## MC: bug 2584 cmt 1: end
+
+## MC: bug 2903 cmt 2: start
+header T_MC_RM_fl_d6hotmail_b2903_c2 From =~ /\b[a-z]+\d{6,}\@hotmail.com/i
+describe T_MC_RM_fl_d6hotmail_b2903_c2 From contains apparent spammer email addr pattern
+score T_MC_RM_fl_d6hotmail_b2903_c2 3.000
+header T_MC_RM_fl_d9_b2903_c2 From =~ /\b[a-z]+\d{9,}\@/i
+describe T_MC_RM_fl_d9_b2903_c2 From contains apparent spammer email addr pattern
+score T_MC_RM_fl_d9_b2903_c2 3.000
+header T_MC_RM_fl_d8_b2903_c2 From =~ /\b[a-z]+\d{8,}\@/i
+describe T_MC_RM_fl_d8_b2903_c2 From contains apparent spammer email addr pattern
+score T_MC_RM_fl_d8_b2903_c2 3.000
+## MC: bug 2903 cmt 2: end
+
