@@ -607,6 +607,7 @@ sub get_raw_body_text_array {
   $self->{body_text_array} = [ ];
 
   my $line;
+  my $uu_region = 0;
   for ($line = 0; defined($_ = $bodyref->[$line]); $line++)
   {
     # we run into a perl bug if the lines are astronomically long (probably due
@@ -617,6 +618,18 @@ sub get_raw_body_text_array {
     while (length ($_) > 4096) {
       push (@{$self->{body_text_array}}, substr($_, 0, 4096));
       substr($_, 0, 4096) = '';
+    }
+
+    # look for uuencoded text
+    if ($uu_region == 0 && /^begin [0-7]{3} .*/) {
+      $uu_region = 1;
+    }
+    elsif ($uu_region == 1 && /^[\x21-\x60]{1,61}$/) {
+      $uu_region = 2;
+    }
+    elsif ($uu_region == 2 && /^end$/) {
+      $uu_region = 0;
+      $self->{found_encoding_uuencode} = 1;
     }
 
     push(@{$self->{body_text_array}}, $_);
@@ -725,6 +738,32 @@ sub get_decoded_body_text_array {
     my @ary = split (/^/, $_);
     return \@ary;
 
+  } elsif ($self->{found_encoding_uuencode}) {
+    # remove uuencoded regions
+    my $uu_region = 0;
+    $_ = '';
+    foreach my $line (@{$textary}) {
+      if ($uu_region == 0 && $line =~ /^begin [0-7]{3} .*/) {
+	$uu_region = 1;
+	next;
+      }
+      if ($uu_region) {
+	if ($line =~ /^[\x21-\x60]{1,61}$/) {
+	  # here is where we could uudecode text if we had a use for it
+	  # $decoded = unpack("%u", $line);
+	  next;
+	}
+	elsif ($line =~ /^end$/) {
+	  $uu_region = 0;
+	  next;
+	}
+	# any malformed lines get passed through
+      }
+      $_ .= $line;
+    }
+    s/\r//;
+    my @ary = split (/^/, $_);
+    return \@ary;
   } else {
     return $textary;
   }
