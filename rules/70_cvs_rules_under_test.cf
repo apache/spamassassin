@@ -467,7 +467,9 @@ body T_HTML_SHOUTING9            eval:html_range('max_shouting','8')
 
 # Dec  6 2002 jm:
 # 0 hits on all corpora!  Is this in a MIME header or something?
-body T_HTML_MAIL_ONLY             /HTML only email, sorry/i
+# Dec  9 2002 quinlan:
+# trying it as rawbody instead of body
+rawbody T_HTML_MAIL_ONLY             /HTML only email, sorry/i
 
 # actually, this looks really good!  Dec  6 2002 jm: except for rod's
 # corpus ;)
@@ -625,8 +627,19 @@ describe T_HTML_ALL_CAPS	Content type is "TEXT/HTML" in all caps
 # possible replacement for our current CTYPE_JUST_HTML
 # looks for messages with either text/html ctype or all mime parts that
 # are just text/html
-body __CTYPE_HTML_ONLY	eval:check_for_mime_html_text_only()
-meta T_CTYPE_JUST_HTML	( !__RCVD_BY_HOTMAIL && __CTYPE_HTML_ONLY )
+body __CTYPE_HTML_ONLY1	eval:check_for_mime_html_text_only()
+meta T_CTYPE_JUST_HTML1	(!__RCVD_BY_HOTMAIL && __CTYPE_HTML_ONLY1)
+
+body __CTYPE_HTML_ONLY2	eval:check_for_mime_html_without_plain()
+meta T_CTYPE_JUST_HTML2	(!__RCVD_BY_HOTMAIL && __CTYPE_HTML_ONLY2)
+
+body __CTYPE_HTML_ONLY3	eval:check_for_mime_html_images_only()
+meta T_CTYPE_JUST_HTML3	(!__RCVD_BY_HOTMAIL && __CTYPE_HTML_ONLY3)
+
+# quinlan: all of my false positives are Mozilla 4.7x
+meta T_CTYPE_JUST_HTML1B	(!(__MOZILLA_MUA && __MOZILLA_MSGID) && !__RCVD_BY_HOTMAIL && __CTYPE_HTML_ONLY1)
+meta T_CTYPE_JUST_HTML2B	(!(__MOZILLA_MUA && __MOZILLA_MSGID) && !__RCVD_BY_HOTMAIL && __CTYPE_HTML_ONLY2)
+meta T_CTYPE_JUST_HTML3B	(!(__MOZILLA_MUA && __MOZILLA_MSGID) && !__RCVD_BY_HOTMAIL && __CTYPE_HTML_ONLY3)
 
 # Good correlation between mutt msgids and nonspam.  Also provides
 # a good way to hammer those Mutt-forging spammers looking to

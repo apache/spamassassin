@@ -2055,6 +2055,7 @@ sub check_for_mime_faraway_charset {
   return $self->{mime_faraway_charset};
 }
 
+# HTML only 
 sub check_for_mime_html_text_only {
   my ($self) = @_;
 
@@ -2064,6 +2065,32 @@ sub check_for_mime_html_text_only {
   $self->_check_attachments unless exists $self->{mime_body_ctype_count};
   return ($self->{mime_body_ctype_count} > 0 &&
 	  $self->{mime_body_ctype_count} == $self->{mime_body_html_count});
+}
+
+# HTML without text/plain
+sub check_for_mime_html_without_plain {
+  my ($self) = @_;
+
+  my $ctype = $self->get('Content-Type');
+  return 1 if (defined($ctype) && $ctype =~ m@text/html@i);
+
+  $self->_check_attachments unless exists $self->{mime_body_ctype_count};
+  return ($self->{mime_body_ctype_count} > 0 &&
+	  $self->{mime_body_html_count} > 0 &&
+	  $self->{mime_body_text_count} == 0);
+}
+
+# HTML and images only
+sub check_for_mime_html_images_only {
+  my ($self) = @_;
+
+  my $ctype = $self->get('Content-Type');
+  return 1 if (defined($ctype) && $ctype =~ m@text/html@i);
+
+  $self->_check_attachments unless exists $self->{mime_body_ctype_count};
+  return ($self->{mime_body_ctype_count} > 0 &&
+	  ($self->{mime_body_html_count} + $self->{mime_body_image_count} ==
+	   $self->{mime_body_ctype_count}));
 }
 
 sub check_for_mime_html_no_charset {
@@ -2104,10 +2131,16 @@ sub check_for_microsoft_executable {
 sub _check_mime_header {
   my ($self, $ctype, $cte, $cd, $charset, $name) = @_;
 
-  $self->{mime_body_ctype_count}++;
+  $self->{mime_body_ctype_count}++ unless $ctype =~ m@^multipart/@i;
 
-  if ($ctype =~ m@text/html@i) {
+  if ($ctype =~ m@^text/html@i) {
     $self->{mime_body_html_count}++;
+  }
+  elsif ($ctype =~ m@^(?:text|message)@i) {
+    $self->{mime_body_text_count}++;
+  }
+  elsif ($ctype =~ m@^image/@i) {
+    $self->{mime_body_image_count}++;
   }
 
   if ($ctype =~ /^text/ &&
@@ -2188,6 +2221,8 @@ sub _check_attachments {
   $self->{mime_base64_encoded_text} = 0;
   $self->{mime_body_ctype_count} = 0;
   $self->{mime_body_html_count} = 0;
+  $self->{mime_body_image_count} = 0;
+  $self->{mime_body_text_count} = 0;
   $self->{mime_faraway_charset} = 0;
   $self->{mime_html_no_charset} = 0;
   $self->{mime_long_line_qp} = 0;
