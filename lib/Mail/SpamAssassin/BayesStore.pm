@@ -288,6 +288,9 @@ sub expire_old_tokens_trapped {
   my $num_lowfreq = 0;
   my $num_hapaxes = 0;
   my $started = time();
+  my $last = $self->{db_toks}->{$LAST_EXPIRE_MAGIC_TOKEN};
+  if (!$last || $last =~ /\D/) { $last = 0; }
+  my $current = $self->scan_count_get();
 
   # since DB_File will not shrink a database (!!), we need to *create*
   # a new one instead.
@@ -317,6 +320,14 @@ sub expire_old_tokens_trapped {
 	  || $tok eq $SCANCOUNT_BASE_MAGIC_TOKEN);
 
     my ($ts, $th, $atime) = $self->tok_get ($tok);
+
+    # If the current token atime is > than the current scan count,
+    # there was likely a DB expiry error.  Let's reset the atime to the
+    # last expire time.
+    if ($atime > $current) {
+      $atime = $last;
+    }
+
     if ($atime < $too_old) {
       push (@deleted_toks, [ $tok, $ts, $th, $atime ]);
       $deleted++;
