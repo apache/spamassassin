@@ -2069,6 +2069,10 @@ sub check_language {            # UNDESIRED_LANGUAGE_BODY
   }
 
   my @matches = Mail::SpamAssassin::TextCat::classify($self, $body);
+
+  # save matches for possible insertion into headers, etc.
+  $self->{tag_data}->{LANGUAGES} = join(', ', @matches);
+
   # not able to get a match, assume it's okay
   if (! @matches) {
     return 0;

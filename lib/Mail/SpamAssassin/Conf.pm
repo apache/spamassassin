@@ -34,6 +34,40 @@ Paths can use C<~> to refer to the user's home directory.
 
 Where appropriate, default values are listed in parentheses.
 
+=head1 TAGS
+
+The following C<tags> can be used as placeholders in certain options
+specified below. They will be replaced by the corresponding value when
+they are used.
+
+Some tags can take an argument (in parentheses). The argument is
+optional, and the default is shown below.
+
+ _YESNOCAPS_       "YES"/"NO" for is/isn't spam
+ _YESNO_           "Yes"/"No" for is/isn't spam
+ _HITS_            message score
+ _REQD_            message threshold
+ _VERSION_         version (eg. 2.55)
+ _SUBVERSION_      sub-version (eg. 1.187-2003-05-15-exp)
+ _HOSTNAME_        hostname
+ _BAYES_           bayes score
+ _AWL_             AWL modifier
+ _DATE_            rfc-2822 date of scan
+ _STARS(*)_        score represented in terms of * (any character can be chosen)
+ _RELAYSTRUSTED_   relays used and deemed to be trusted
+ _RELAYSUNTRUSTED_ relays used that can not be trusted
+ _AUTOLEARN_       autolearn status ("ham", "no", "spam")
+ _TESTS(,)_        tests hit separated by , (or other separator)
+ _TESTSSCORES(,)_  as above, except with scores appended (eg. AWL=-3.0,...)
+ _DCCB_            DCC's "Brand"
+ _DCCR_            DCC's results
+ _PYZOR_           Pyzor results
+ _LANGUAGES_       possible languages of mail
+ _TERSE_           terse report (as specified by the terse-report options)
+ _PREVIEW_         content preview
+ _SUMMARYT_        summary of tests hit for terse report
+ _SUMMARYL_        summary of tests hit for standard report
+
 =head1 USER PREFERENCES
 
 =over 4
@@ -129,8 +163,6 @@ sub new {
   $self->{auto_whitelist_factor} = 0.5;
 
   $self->{rewrite_subject} = 0;
-  $self->{spam_level_stars} = 1;
-  $self->{spam_level_char} = '*';
   $self->{subject_tag} = '*****SPAM*****';
   $self->{report_safe} = 1;
   $self->{use_terse_report} = 0;
@@ -143,22 +175,20 @@ sub new {
   $self->{allow_user_rules} = 0;
   $self->{user_rules_to_compile} = 0;
   $self->{fold_headers} = 1;
-  $self->{always_add_headers} = 1;
-  $self->{always_add_report} = 0;
+  $self->{headers_spam} = { };
+  $self->{headers_ham} = { };
 
   $self->{use_dcc} = 1;
   $self->{dcc_path} = undef; # Browse PATH
   $self->{dcc_body_max} = 999999;
   $self->{dcc_fuz1_max} = 999999;
   $self->{dcc_fuz2_max} = 999999;
-  $self->{dcc_add_header} = 0;
   $self->{dcc_timeout} = 10;
   $self->{dcc_options} = '-R';
 
   $self->{use_pyzor} = 1;
   $self->{pyzor_path} = undef; # Browse PATH
   $self->{pyzor_max} = 5;
-  $self->{pyzor_add_header} = 0;
   $self->{pyzor_timeout} = 10;
   $self->{pyzor_options} = '';
 
@@ -200,6 +230,25 @@ sub new {
   $self->{user_scores_sql_field_preference} = 'preference';
   $self->{user_scores_sql_field_value} = 'value';
   $self->{user_scores_sql_field_scope} = 'spamassassin'; # probably shouldn't change this
+
+  # for backwards compatibility, we need to set the default headers
+  # remove this for 2.70 (?)
+
+  # unfortunately this backwards compatibility isn't 100% functional.
+  # For example, if a user has the following config (consider user and
+  # site config...)
+  # always_add_headers 0
+  # always_add_headers 1
+  # Then the 2nd option will do nothing.
+
+  $self->{headers_spam}->{"Flag"} = "_YESNOCAPS_";
+  $self->{headers_spam}->{"Status"} = "_YESNO_, hits=_HITS_ required=_REQD_ tests=_TESTS_ autolearn=_AUTOLEARN_ version=_VERSION_";
+  $self->{headers_spam}->{"Level"} = "_STARS(*)_";
+  $self->{headers_spam}->{"Checker-Version"} = "SpamAssassin _VERSION_ (_SUBVERSION_)";
+
+  $self->{headers_ham}->{"Status"} = $self->{headers_spam}->{"Status"};
+  $self->{headers_ham}->{"Level"} = $self->{headers_spam}->{"Level"};
+  $self->{headers_ham}->{"Checker-Version"} = $self->{headers_spam}->{"Checker-Version"};
 
   $self;
 }
@@ -307,6 +356,9 @@ ignore it.
 
     if ($skipfile) { next; }
 
+    # note: no eval'd code should be loaded before the SECURITY line below.
+###########################################################################
+
 =item version_tag string
 
 This tag is appended to the SA version in the X-Spam-Status header. You should
@@ -332,9 +384,6 @@ e.g.
       push(@Mail::SpamAssassin::EXTRA_VERSION, $tag) if($tag);
       next;
     }
-
-    # note: no eval'd code should be loaded before the SECURITY line below.
-###########################################################################
 
 =item whitelist_from add@ress.com
 
@@ -580,9 +629,9 @@ be enabled here.
 
 =item fold_headers { 0 | 1 }        (default: 1)
 
-By default, the X-Spam-Status header will be whitespace folded, in other words,
-it will be broken up into multiple lines instead of one very long one.
-This can be disabled here.
+By default, headers added by SpamAssassin will be whitespace folded,
+in other words, they will be broken up into multiple lines instead of
+one very long one. This can be disabled here.
 
 =cut
 
@@ -590,18 +639,57 @@ This can be disabled here.
      $self->{fold_headers} = $1+0; next;
    }
 
-=item always_add_headers { 0 | 1 }      (default: 1)
+=item add_header header_name { ham | spam | all } string
 
-By default, B<X-Spam-Status>, B<X-Spam-Checker-Version>, (and optionally
-B<X-Spam-Level>) will be added to all messages scanned by SpamAssassin.  If you
-don't want to add the headers to non-spam, set this value to 0.  See also
-B<always_add_report>.
+Customized headers can be added to ham, spam or both, giving various
+bits of information. All headers added will begin with X-Spam- (so
+C<header_name> will be appended to X-Spam-).
+
+C<string> can contain tags as explained above. Headers will be folded
+if fold_headers is set to C<1>.
+
+For backwards compatibility, some headers are (still) added by
+default. Please use the clear_headers option before adding headers of
+your own.
+
+Examples (these were all default prior to 2.60):
+ add_header Flag spam _YESNOCAPS_
+ add_header Status all _YESNO_, hits=_HITS_ required=_REQD_ tests=_TESTS_ autolearn=_AUTOLEARN_ version=_VERSION_
+ add_header Level all _STARS(*)_
+ add_header Checker-Version all SpamAssassin _VERSION_ (_SUBVERSION_)
+
 
 =cut
 
-   if (/^always_add_headers\s+(\d+)$/) {
-     $self->{always_add_headers} = $1+0; next;
-   }
+    if (/^add_header\s+([A-Za-z_-]+)\s+(ham|spam|all)\s+(.*?)\s*$/) {
+      my ($name, $type, $line) = ($1, $2, $3);
+      if ($line =~ /^"(.*)"$/) {
+	$line = $1;
+      }
+      $line =~ s/\\t/\t/;
+      $line =~ s/\\n/\n/;
+      if (($type eq "ham") || ($type eq "all")) {
+	$self->{headers_ham}->{$name} = $line;
+      }
+      if (($type eq "spam") || ($type eq "all")) {
+	$self->{headers_spam}->{$name} = $line;
+      }
+      next;
+    }
+
+=item clear_headers
+
+Clear list of headers to be added to mail. You should use this before
+any add_header options to prevent all the default headers from being
+added to mail.
+
+=cut
+
+    if (/^clear_headers\s*$/) {
+      $self->{headers_ham} = { };
+      $self->{headers_spam} = { };
+      next;
+    }
 
 =item report_safe_copy_headers { header_name }
 
@@ -615,62 +703,16 @@ seperated by spaces, or you can just use multiple lines.
 
    if (/^report_safe_copy_headers\s+(.+?)\s*$/) {
      push(@{$self->{report_safe_copy_headers}}, split(/\s+/, $1));
-   }
-
-=item always_add_report { 0 | 1 }	(default: 0)
-
-By default, mail tagged as spam includes a report, either in the headers or in
-an attachment (report_safe). If you set this to option to C<1>, the report will
-be included in the B<X-Spam-Report> header, even if the message is not tagged
-as spam.  Note that the report text B<always> states that the mail is spam,
-since normally the report is only added if the mail B<is> spam.
-
-This can be useful if you want to know what rules the mail triggered, and why
-it was not tagged as spam.  See also B<always_add_headers>.
-
-=cut
-
-   if (/^always_add_report\s+(\d+)$/) {
-     $self->{always_add_report} = $1+0; next;
-   }
-
-=item spam_level_stars { 0 | 1 }        (default: 1)
-
-By default, a header field called "X-Spam-Level" will be added to the message,
-with its value set to a number of asterisks equal to the score of the message.
-In other words, for a message scoring 7.2 points:
-
-X-Spam-Level: *******
-
-This can be useful for MUA rule creation.
-
-=cut
-
-   if(/^spam_level_stars\s+(\d+)$/) {
-      $self->{spam_level_stars} = $1+0; next;
-   }
-
-=item spam_level_char { x (some character, unquoted) }        (default: *)
-
-By default, the "X-Spam-Level" header will use a '*' character with its length
-equal to the score of the message. Some people don't like escaping *s though, 
-so you can set the character to anything with this option.
-
-In other words, for a message scoring 7.2 points with this option set to .
-
-X-Spam-Level: .......
-
-=cut
-
-   if(/^spam_level_char\s+(.)$/) {
-      $self->{spam_level_char} = $1; next;
+     next;
    }
 
 =item subject_tag STRING ... 		(default: *****SPAM*****)
 
 Text added to the C<Subject:> line of mails that are considered spam,
-if C<rewrite_subject> is 1.  _HITS_ in the tag will be replace with the calculated
-score for this message. _REQD_ will be replaced with the threshold.
+if C<rewrite_subject> is 1. Tags can be used here as with the
+add_header option. If report_safe is not used (see below), you may
+only use the _HITS_ and _REQD_ tags, or SpamAssassin will not be able
+to remove this markup from your message.
 
 =cut
 
@@ -711,7 +753,8 @@ shorter reports, set this to C<1>.
 =cut
 
     if (/^use_terse_report\s+(\d+)$/) {
-      $self->{use_terse_report} = $1+0; next;
+      $self->{use_terse_report}=$1+0;
+      next;
     }
 
 =item skip_rbl_checks { 0 | 1 }   (default: 0)
@@ -1019,24 +1062,7 @@ If you change this, try to keep it under 78 columns. Each C<report>
 line appends to the existing template, so use C<clear_report_template>
 to restart.
 
-The following template items are supported, and will be filled out by
-SpamAssassin:
-
-=over 4
-
-=item  _HITS_: the number of hits the message triggered
-
-=item  _REQD_: the required hits to be considered spam
-
-=item  _SUMMARY_: the full details of what hits were triggered
-
-=item  _VER_: SpamAssassin version
-
-=item  _HOME_: SpamAssassin home URL
-
-=item  _PREVIEW_: a short cleaned snippet of the message contents
-
-=back
+Tags can be included as explained above.
 
 =cut
 
@@ -1069,6 +1095,8 @@ C</usr/share/spamassassin> for an example.
 Each C<unsafe-report> line appends to the existing template, so use
 C<clear_unsafe_report_template> to restart.
 
+Tags can be used in this template (see above for details).
+
 =cut
 
     if (/^unsafe_report\b\s*(.*?)$/) {
@@ -1096,6 +1124,9 @@ Set the report template which is attached to spam mail messages, for the
 terse-report format.  See the C<10_misc.cf> configuration file in
 C</usr/share/spamassassin> for an example.
 
+The terse-report format is also represented by the _TERSE_ tag for use
+in headers.
+
 =cut
 
     if (/^terse_report\b\s*(.*?)$/) {
@@ -1122,6 +1153,8 @@ A template for spam-trap responses.  If the first few lines begin with
 C<Xxxxxx: yyy> where Xxxxxx is a header and yyy is some text, they'll be used
 as headers.  See the C<10_misc.cf> configuration file in
 C</usr/share/spamassassin> for an example.
+
+Unfortunately tags can not be used with this option.
 
 =cut
 
@@ -1194,19 +1227,6 @@ The default is 999999 for all these options.
       $self->{dcc_fuz2_max} = $1+0; next;
     }
 
-=item dcc_add_header { 0 | 1 }   (default: 0)
-
-DCC processing creates a message header containing the statistics for the
-message.  This option sets whether SpamAssassin will add the heading to
-messages it processes.
-
-The default is to not add the header.
-
-=cut
-
-    if (/^dcc_add_header\s+(\d+)$/) {
-      $self->{dcc_add_header} = $1+0; next;
-    }
 
 =item use_pyzor ( 0 | 1 )		(default 1)
 
@@ -1241,20 +1261,6 @@ The default is 5.
 
     if (/^pyzor_max\s+(\d+)/) {
       $self->{pyzor_max} = $1+0; next;
-    }
-
-=item pyzor_add_header { 0 | 1 }   (default: 0)
-
-Pyzor processing creates a message header containing the statistics for the
-message.  This option sets whether SpamAssassin will add the heading to
-messages it processes.
-
-The default is to not add the header.
-
-=cut
-
-    if (/^pyzor_add_header\s+(\d+)$/) {
-      $self->{pyzor_add_header} = $1+0; next;
     }
 
 
@@ -1530,6 +1536,146 @@ this option to 0.
 
     if (/^bayes_learn_during_report\s+(.*)$/) {
       $self->{bayes_learn_during_report} = $1+0; next;
+    }
+
+
+=item always_add_headers { 0 | 1 }      (default: 1)
+
+By default, B<X-Spam-Status>, B<X-Spam-Checker-Version>, (and optionally
+B<X-Spam-Level>) will be added to all messages scanned by SpamAssassin.  If you
+don't want to add the headers to non-spam, set this value to 0.  See also
+B<always_add_report>.
+
+As of version 2.60 this is deprecated. It will be removed in a future
+version. (Use the add_header option to customize headers.)
+
+=cut
+
+   if (/^always_add_headers\s+(\d+)$/) {
+     if ($1 == 0){
+       delete $self->{headers_ham}->{"Status"};
+       delete $self->{headers_ham}->{"Checker-Version"};
+       delete $self->{headers_ham}->{"Level"};
+     }
+     next;
+   }
+
+
+=item always_add_report { 0 | 1 }	(default: 0)
+
+By default, mail tagged as spam includes a report, either in the
+headers or in an attachment (report_safe). If you set this to option
+to C<1>, the report will be included in the B<X-Spam-Report> header,
+even if the message is not tagged as spam. Note that the report text
+B<always> states that the mail is spam, since normally the report is
+only added if the mail B<is> spam, although you can change the text of
+the report with the terse_report option explained below.
+
+This can be useful if you want to know what rules the mail triggered, and why
+it was not tagged as spam.  See also B<always_add_headers>.
+
+This option is deprecated as of version 2.60. Please use the
+add_header option instead:
+
+add_header Report ham _TERSE_
+
+=cut
+
+  if (/^always_add_report\s+(\d+)$/) {
+    if ($1 == 1) {
+      $self->{headers_ham}->{"Report"} = "_TERSE_";
+    }
+    next;
+  }
+
+=item spam_level_stars { 0 | 1 }        (default: 1)
+
+By default, a header field called "X-Spam-Level" will be added to the message,
+with its value set to a number of asterisks equal to the score of the message.
+In other words, for a message scoring 7.2 points:
+
+X-Spam-Level: *******
+
+This can be useful for MUA rule creation.
+
+This is deprecated as of version 2.60. Please use the add_header
+option instead:
+
+add_header all Level _STARS(*)_
+
+=cut
+
+   if(/^spam_level_stars\s+(\d+)$/) {
+     if ($1 == 0) {
+       delete $self->{headers_ham}->{"Level"};
+     }
+     next;
+   }
+
+=item spam_level_char { x (some character, unquoted) }        (default: *)
+
+By default, the "X-Spam-Level" header will use a '*' character with
+its length equal to the score of the message. Some people don't like
+escaping *s though, so you can set the character to anything with this
+option.
+
+In other words, for a message scoring 7.2 points with this option set to .
+
+X-Spam-Level: .......
+
+This is deprecated as of version 2.60. Please use the add_header
+option instead:
+
+add_header all Level _STARS(.)_
+
+=cut
+
+   if(/^spam_level_char\s+(.)$/) {
+     $self->{headers_ham}->{"Level"} = "_STARS($1)_";
+     next;
+   }
+
+=item dcc_add_header { 0 | 1 }   (default: 0)
+
+DCC processing creates a message header containing the statistics for the
+message.  This option sets whether SpamAssassin will add the heading to
+messages it processes.
+
+The default is to not add the header.
+
+This is deprecated as of 2.60. Use the add_header option instead. For example:
+add_header DCC all _DCCB_: _DCCR_
+
+=cut
+
+    if (/^dcc_add_header\s+(\d+)$/) {
+      if ($1 == 1) {
+	$self->{headers_spam}->{"DCC"} = "_DCCB_: _DCCR_";
+	$self->{headers_ham}->{"DCC"} = $self->{headers_spam}->{"DCC"};
+      }
+      next;
+    }
+
+=item pyzor_add_header { 0 | 1 }   (default: 0)
+
+Pyzor processing creates a message header containing the statistics for the
+message.  This option sets whether SpamAssassin will add the heading to
+messages it processes.
+
+The default is to not add the header.
+
+This option is deprecated. Please use the add_header option instead:
+
+add_header all Pyzor _PYZOR_
+
+=cut
+
+    if (/^pyzor_add_header\s+(\d+)$/) {
+      if ($1 == 1) {
+	$self->{headers_spam}->{"Pyzor"} = "_PYZOR_";
+	$self->{headers_ham}->{"Pyzor"} = "_PYZOR_";
+      }
+      next;
     }
 
 ###########################################################################
@@ -2358,3 +2504,4 @@ C<Mail::SpamAssassin>
 C<spamassassin>
 C<spamd>
 
+=cut

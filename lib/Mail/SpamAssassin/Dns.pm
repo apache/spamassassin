@@ -517,8 +517,6 @@ sub dcc_lookup {
   my ($self, $fulltext) = @_;
   my $response = undef;
   my %count;
-  my $left;
-  my $right;
   my $timeout=$self->{conf}->{dcc_timeout};
 
   $count{body} = 0;
@@ -595,12 +593,9 @@ sub dcc_lookup {
     return 0;
   }
 
-  if ($self->{conf}->{dcc_add_header}) {
-    if ($response =~ /^X-DCC(.*): (.*)$/) {
-      $left  = $1;
-      $right = $2;
-      $self->{headers_to_add}->{"X-Spam-DCC$left"} = $right; # X-DCC headers ...
-    }
+  if ($response =~ /^X-DCC-(.*)-Metrics: (.*)$/) {
+    $self->{tag_data}->{DCCB} = $1;
+    $self->{tag_data}->{DCCR} = $2;
   }
  
   $response =~ s/many/999999/ig;
@@ -736,12 +731,10 @@ sub pyzor_lookup {
   }
 
   # moved this around a bit; no point in testing RE twice (jm)
-  if ($self->{conf}->{pyzor_add_header}) {
-    if ($pyzor_whitelisted) {
-      $self->{headers_to_add}->{'X-Spam-Pyzor'} = "Whitelisted.";
-    } else {
-      $self->{headers_to_add}->{'X-Spam-Pyzor'} = "Reported $pyzor_count times.";
-    }
+  if ($pyzor_whitelisted) {
+    $self->{tag_data}->{PYZOR} = "Whitelisted.";
+  } else {
+    $self->{tag_data}->{PYZOR} = "Reported $pyzor_count times.";
   }
 
   if ($pyzor_count >= $self->{conf}->{pyzor_max}) {
@@ -749,7 +742,7 @@ sub pyzor_lookup {
     timelog("Pyzor -> got hit", "pyzor", 2);
     return 1;
   }
-  
+
   timelog("Pyzor -> no match", "pyzor", 2);
   return 0;
 }

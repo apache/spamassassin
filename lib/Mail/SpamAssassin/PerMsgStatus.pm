@@ -50,7 +50,7 @@ use constant HAS_MIME_BASE64 =>		eval { require MIME::Base64; };
 use constant MAX_BODY_LINE_LENGTH =>	2048;
 
 use vars qw{
-  @ISA $base64alphabet
+  @ISA $base64alphabet %tags
 };
 
 @ISA = qw();
@@ -216,32 +216,26 @@ sub check {
                         " tests=".$self->get_names_of_tests_hit());
   $self->{is_spam} = $self->is_spam();
 
+  my $report;
   if ($self->{conf}->{use_terse_report}) {
-    $_ = $self->{conf}->{terse_report_template};
+    $report = $self->{conf}->{terse_report_template};
+    $report =~ s/_SUMMARY_/_SUMMARYT_/g; # Backwards compatibility
   } else {
-    $_ = $self->{conf}->{report_template};
+    $report = $self->{conf}->{report_template};
+    $report =~ s/_SUMMARY_/_SUMMARYL_/g; # Backwards compatibility
   }
-  $_ ||= '(no report template found)';
 
-  # avoid "0.199999999999 hits" ;)
-  my $hit = sprintf ("%1.2f", $self->{hits});
-  s/_HITS_/$hit/gs;
+  $report ||= '(no report template found)';
 
-  my $preview = $self->get_content_preview();
-
-  my $ver = Mail::SpamAssassin::Version();
-  s/_REQD_/$self->{conf}->{required_hits}/gs;
-  s/_SUMMARY_/$self->{test_logs}/gs;
-  s/_PREVIEW_/$preview/gs;
-  s/_VER_/$ver/gs;
-  s/_HOME_/$Mail::SpamAssassin::HOME_URL/gs;
+  $report = $self->_replace_tags($report);
 
   # now that we've finished checking the mail, clear out this cache
   # to avoid unforeseen side-effects.
   $self->{hdr_cache} = { };
 
-  s/\n*$/\n\n/s;
-  $self->{report} = $_;
+  $report =~ s/\n*$/\n\n/s;
+  $self->{report} = $report;
+
 }
 
 ###########################################################################
@@ -363,7 +357,7 @@ sub is_spam {
 
 =item $list = $status->get_names_of_tests_hit ()
 
-After a mail message has been checked, this method can be called.  It will
+After a mail message has been checked, this method can be called. It will
 return a comma-separated string, listing all the symbolic test names
 of the tests which were trigged by the mail.
 
@@ -626,18 +620,12 @@ sub rewrite_as_spam {
   $newmsg .= "Subject: $subject" if $subject;
   $newmsg .= "Date: $date" if $date;
   $newmsg .= "Message-Id: $msgid" if $msgid;
-  $newmsg .= "X-Spam-Flag: YES\n";
-  $newmsg .= "X-Spam-Status: " . $self->_build_status_line() . "\n";
-  if ($self->{main}->{conf}->{spam_level_stars} == 1) {
-    my $length = int($self->{hits});
-    if ( $length > 100 ) { $length = 100; }
 
-    $newmsg .= "X-Spam-Level: " .
-      $self->{main}->{conf}->{spam_level_char} x $length . "\n";
+  foreach my $header (keys %{$self->{conf}->{headers_spam}} ) {
+    my $data = $self->{conf}->{headers_spam}->{$header};
+    my $line = $self->_process_header($header,$data);
+    $newmsg .= "X-Spam-$header: $line\n" # add even if empty
   }
-  $newmsg .= "X-Spam-Checker-Version: SpamAssassin " .
-    Mail::SpamAssassin::Version() . " (" .
-    $Mail::SpamAssassin::SUB_VERSION . ")\n";
 
   if (defined $self->{conf}->{report_safe_copy_headers}) {
     foreach my $hdr ( @{$self->{conf}->{report_safe_copy_headers}} ) {
@@ -646,13 +634,6 @@ sub rewrite_as_spam {
       next unless $hdrtext;
       $self->{headers_to_add}->{$hdr} = $hdrtext;
     }
-  }
-
-  # now add any test-specific markup headers (X-Pyzor etc.)
-  foreach my $hdr (keys %{$self->{headers_to_add}}) {
-    my $text = $self->{headers_to_add}->{$hdr};
-    chomp $text;		# just in case
-    $newmsg .= "$hdr: $text\n";
   }
 
   # MIME boundary
@@ -668,7 +649,7 @@ sub rewrite_as_spam {
   my $ct = $self->{msg}->get_header("Content-Type");
   if (defined $ct && $ct ne '' && $ct !~ m{text/plain}i) {
     $disposition = "attachment";
-    $report .= $self->{conf}->{unsafe_report_template};
+    $report .= $self->_replace_tags($self->{conf}->{unsafe_report_template});
     # if we wanted to defang the attachment, this would be the place
   }
   else {
@@ -717,32 +698,7 @@ EOM
 sub rewrite_headers {
   my ($self) = @_;
 
-  # add headers?  always for spam, only if requested for nonspam
-  if ( $self->{is_spam} || $self->{main}->{conf}->{always_add_headers} == 1) {
-    $self->{msg}->put_header ("X-Spam-Status", $self->_build_status_line());
-    if($self->{main}->{conf}->{spam_level_stars} == 1) {
-      my $length = int($self->{hits});
-      if ( $length > 100 ) { $length = 100; }
-      $self->{msg}->put_header("X-Spam-Level", $self->{main}->{conf}->{spam_level_char} x $length);
-    }
-  }
-
-  # always add version (bug 1342)
-  $self->{msg}->put_header ("X-Spam-Checker-Version",
-			    "SpamAssassin " . Mail::SpamAssassin::Version() .
-			    " ($Mail::SpamAssassin::SUB_VERSION)");
-
-  # add version & report headers if spam, or if always_report is on
-  if ($self->{is_spam} || $self->{main}->{conf}->{always_add_report}) {
-    my $report = $self->{report};
-    $report =~ s/^\s*\n//gm;	# Empty lines not allowed in header.
-    $report =~ s/^\s*/  /gm;	# Ensure each line begins with whitespace.
-    $self->{msg}->put_header ("X-Spam-Report", $report);
-  }
-
-  # add spam headers if spam
-  if ($self->{is_spam}) {
-    $self->{msg}->put_header ("X-Spam-Flag", 'YES');
+  if($self->{is_spam}) {
 
     if ($self->{conf}->{rewrite_subject}) {
       my $subject = $self->{msg}->get_header("Subject") || '';
@@ -753,54 +709,142 @@ sub rewrite_headers {
       $subject =~ s/\n*$/\n/s;
       $self->{msg}->replace_header("Subject", $subject);
     }
-  }
 
-  # now add any test-specific markup headers (X-Pyzor etc.)
-  foreach my $hdr (keys %{$self->{headers_to_add}}) {
-    my $text = $self->{headers_to_add}->{$hdr};
-    chomp $text;		# just in case
-    $self->{msg}->put_header ($hdr, $text);
-  }
+    foreach my $header (keys %{$self->{conf}->{headers_spam}} ) {
+      my $data = $self->{conf}->{headers_spam}->{$header};
+      my $line = $self->_process_header($header,$data);
+      $self->{msg}->put_header ("X-Spam-$header", $line);
+    }
 
+
+  } else {
+
+    foreach my $header (keys %{$self->{conf}->{headers_ham}} ) {
+      my $data = $self->{conf}->{headers_ham}->{$header};
+      my $line = $self->_process_header($header,$data);
+      $self->{msg}->put_header ("X-Spam-$header", $line);
+    }
+
+
+  }
   $self->{msg}->get_mail_object;
 }
 
-sub _build_status_line {
-  my ($self) = @_;
-  my $line;
 
-  # Prepare Text::Wrap
-  $Text::Wrap::columns   = 74;
-  $Text::Wrap::huge      = 'overflow';
-  $Text::Wrap::break     = '(?<=,)';
+sub _process_header {
 
-  # Add summary (flag & hits)
-  $line  = sprintf("%s, hits=%2.1f required=%2.1f\n",
-             $self->is_spam() ? "Yes" : "No",
-             $self->{hits}, $self->{conf}->{required_hits}
-           );
+  my ($self, $hdr_name, $hdr_data) = @_;
 
-  # Add list of tests hit
-  $line .= Text::Wrap::wrap("\ttests=", "\t      ", 
-             $self->get_names_of_tests_hit() || "none"
-           ) . "\n";
+  $hdr_data = $self->_replace_tags($hdr_data);
 
-  # Add autolearn status and version
-  $line .= "\t";
-  if ( defined $self->{auto_learn_status} ) {
-    $line .= sprintf("autolearn=%s ", 
-               $self->{auto_learn_status} ? "spam" : "ham"
-             );
+  if ($self->{conf}->{fold_headers} ) {
+    my $hdr = "$hdr_name: $hdr_data";
+    $Text::Wrap::columns = 79;
+    $Text::Wrap::huge = 'overflow';
+    $Text::Wrap::break = '[\s,]';
+    $hdr = Text::Wrap::wrap('',"\t",$hdr);
+    return (split (/: /, $hdr, 2))[1]; # just return the data part
+  } else {
+    return $hdr_data;
   }
-  $line .= sprintf("version=%s", Mail::SpamAssassin::Version());
+}
 
-  # If the configuration says no folded headers, unfold what we have
-  if ( ! $self->{conf}->{fold_headers} ) {
-    $line =~ s/\n\t\s+//g;  # unfold the list of tests first
-    $line =~ s/\n\t/ /g;    # unfold all other lines
+sub _replace_tags {
+  my $self = shift;
+  my $text = shift;
+
+  $text =~ s/_(\w+?)(?:\((.*?)\)|)_/${\($self->_get_tag($1,$2 || ""))}/g;
+  return $text;
+}
+
+# references to sub (this is kinda ugly.. but elegant?)
+# tags can also refer to data in the $self->{tag_data} hash
+
+%tags = ( YESNOCAPS => sub { my $self = shift; $self->{is_spam} ? "YES" : "NO"; },
+
+	  YESNO => sub { my $self = shift; $self->{is_spam} ? "Yes" : "No"; },
+
+	  HITS => sub { my $self = shift; sprintf ("%2.1f", $self->{hits}); },
+
+	  REQD => sub { my $self = shift; sprintf ("%2.1f", $self->{conf}->{required_hits}); },
+
+	  VERSION => sub { return Mail::SpamAssassin::Version()},
+
+	  SUBVERSION => sub { $Mail::SpamAssassin::SUB_VERSION },
+
+	  HOSTNAME => sub { hostname() },
+
+	  BAYES => sub {
+	    my $self = shift;
+	    $self->{bayes_score} ? sprintf("%3.4f", $self->{bayes_score}) : "0.5"
+	  },
+
+	  DATE => sub {
+	    my $self = shift;
+	    strftime("%a, %d %b %Y %H:%M:%S ", localtime)
+	      . Mail::SpamAssassin::Util::local_tz();
+	  },
+
+	  STARS => sub {
+	    my $self = shift;
+	    my $arg = (shift || "*");
+	    my $length = int($self->{hits});
+	    $length = 100 if $length > 100;
+	    return $arg x $length;
+	  },
+
+	  AUTOLEARN => sub {
+	    my $self = shift;
+	    return "no" if !defined $self->{auto_learn_status};
+	    return "spam" if $self->{auto_learn_status};
+	    return "ham";
+	  },
+
+	  TESTS => sub {
+	    my $self = shift;
+	    my $arg = (shift || ',');
+	    return (join($arg, sort(@{$self->{test_names_hit}})) || "none");
+	  },
+
+	  TESTSSCORES => sub {
+	    my $self = shift;
+	    my $arg = (shift || ",");
+	    my $line = '';
+	    foreach my $test (sort @{$self->{test_names_hit}}) {
+	      if (!$line) {
+		$line .= $test . "=" . $self->{conf}->{scores}->{$test};
+	      } else {
+		$line .= $arg . $test . "=" . $self->{conf}->{scores}->{$test};
+	      }
+	    }
+	    return $line;
+	  },
+
+	  PREVIEW => sub { my $self = shift; $self->get_content_preview() },
+
+	  TERSE => sub {
+	    my $self = shift;
+	    my $hdr = $self->{conf}->{terse_report_template};
+	    $hdr =~ s/_SUMMARY_/_SUMMARYT_/; # backwards compat
+	    return $self->_replace_tags($hdr);
+	  },
+	);
+
+sub _get_tag {
+  my $self = shift;
+  my $tag = shift;
+
+  if (exists $tags{$tag}) {
+    if (@_) {
+      return $tags{$tag}($self, @_);
+    } else {
+      return $tags{$tag}($self);
+    }
+  } elsif ($self->{tag_data}->{$tag}) {
+    return $self->{tag_data}->{$tag};
+  } else {
+    return "";
   }
-
-  return $line;
 }
 
 ###########################################################################
@@ -1947,6 +1991,8 @@ sub do_awl_tests {
       if(defined($meanscore))
       {
           $delta = ($meanscore - $self->{hits}) * $self->{main}->{conf}->{auto_whitelist_factor};
+	  $self->{tag_data}->{AWL} = sprintf("%2.1f",$delta);
+	  # Save this for _AWL_ tag
       }
 
       # Update the AWL *before* adding the new score, otherwise
@@ -2235,14 +2281,12 @@ sub _handle_hit {
       $score = sprintf("%4.1f", $score);
     }
 
-    if ($self->{conf}->{use_terse_report}) {
-	$self->{test_logs} .= sprintf ("* %s -- %s%s\n%s",
+    # save both summaries
+    $self->{tag_data}->{SUMMARYT} .= sprintf ("* %s -- %s%s\n%s",
 				       $score, $area, $desc, $self->{test_log_msgs});
-    } else {
-        $self->{test_logs} .= sprintf ("%s %-22s %s%s\n%s",
+    $self->{tag_data}->{SUMMARYL} .= sprintf ("%s %-22s %s%s\n%s",
 				       $score, $rule, $area, $desc,
 				       $self->{test_log_msgs});
-    }
     $self->{test_log_msgs} = '';	# clear test logs
 }
 
@@ -2280,16 +2324,14 @@ sub test_log {
 
 sub _test_log_line {
   my ($self, $msg) = @_;
-  if ($self->{conf}->{use_terse_report}) {
-    $self->{test_log_msgs} .= sprintf ("%9s [%s]\n", "", $msg);
-  }
-  else {
-    if (length($msg) > 49) {
-      $self->{test_log_msgs} .= sprintf ("%78s\n", "[$msg]");
-    }
-    else {
-      $self->{test_log_msgs} .= sprintf ("%26s [%s]\n", "", $msg);
-    }
+
+# save for both SUMMARYT and SUMMARYL
+
+  $self->{tag_data}->{SUMMARYT} .= sprintf ("%9s [%s]\n", "", $msg);
+  if (length($msg) > 49) {
+    $self->{tag_data}->{SUMMARYL} .= sprintf ("%78s\n", "[$msg]");
+  } else {
+    $self->{tag_data}->{SUMMARYL} .= sprintf ("%26s [%s]\n", "", $msg);
   }
 }
 

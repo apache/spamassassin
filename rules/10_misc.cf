@@ -115,6 +115,30 @@ unsafe_report it, it may be safer to save it to a file and open it with an edito
 # auto_whitelist_path        /var/spool/spamassassin/auto-whitelist
 # auto_whitelist_file_mode   0666
 
+##########################################################################
+# Headers to be added to mail (can be overriden by users in
+# ~/.spamassassin/user_prefs)
+# Make sure the header stays entirely on one line here
+
+clear_headers
+
+#X-Spam-Checker-Version: SpamAssassin 2.60-cvs (1.188-2003-05-24-exp)
+add_header Checker-Version all SpamAssassin _VERSION_ (_SUBVERSION_)
+
+#X-Spam-Flag: YES
+add_header Flag spam _YESNOCAPS_
+
+#X-Spam-Level: *************
+add_header Level all _STARS(*)_
+
+#X-Spam-Status: Yes, hits=14.0 required=5.0 tests=BAYES_99,CALL_FREE
+#        DATE_IN_PAST_12_24,DCC_CHECK,DRASTIC_REDUCED,FROM_HAS_MIXED_NUMS
+#        FROM_HAS_MIXED_NUMS3,HOME_EMPLOYMENT,INVALID_DATE,INVALID_MSGID
+#        LINES_OF_YELLING,MSGID_HAS_NO_AT,NO_REAL_NAME,ONCE_IN_LIFETIME
+#        REMOVE_SUBJ,SMTPD_IN_RCVD,T_INVALID_DATE_2,T_INVALID_DATE_HMS
+#        UNDISC_RECIPS autolearn=spam version=2.60-cvs
+add_header Status all "_YESNO_, hits=_HITS_ required=_REQD_ tests=_TESTS_ autolearn=_AUTOLEARN_ version=_VERSION_"
+
 ###########################################################################
 # Default prefs values: users can override these in their 
 # ~/.spamassassin/user_prefs files.
