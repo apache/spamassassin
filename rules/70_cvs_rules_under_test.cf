@@ -782,3 +782,5 @@ header T_SUBJECT_APPROVED      Subject =~ /approv(?:ed|al).?[.!*]/i
 # 0.004   0.0000   0.0072    0.00    0.00    1.00  EXCUSE_11
 body T_EXCUSE_11 /you.{0,15}(?:name|mail).{0,15}(?:was|were|our).{0,15}list/i
 
+header   T_SENDER_NO_REVERSE    eval:check_for_sender_no_reverse()
+describe T_SENDER_NO_REVERSE    No reverse lookup for sender's IP

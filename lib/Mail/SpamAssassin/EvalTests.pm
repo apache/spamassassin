@@ -727,6 +727,33 @@ sub check_for_missing_to_header {
 
 ###########################################################################
 
+# Check if the apparent sender (in the last received header) had
+# no reverse lookup for it's IP
+#
+# Look for headers like:
+#
+#   Received: from mx1.eudoramail.com ([204.32.147.84])
+sub check_for_sender_no_reverse {
+  my ($self) = @_;
+
+  my @received = grep(/\S/, split(/\n/, $self->get ('Received')));
+
+  my $sender_rcvd = $received[$#received];
+
+  # Ignore if the from host is domainless (has no dot)
+  return 0 unless ($sender_rcvd =~
+                   /^from (\S+\.\S+) \(\[([\d.]+)\]\)/);
+
+  my $from = $1;
+  my $ip   = $2;
+
+  return 0 if ($ip =~ /${IP_IN_RESERVED_RANGE}/o);
+
+  return 1;
+} # check_for_sender_no_reverse()
+
+###########################################################################
+
 sub check_from_in_whitelist {
   my ($self) = @_;
   local ($_);
