@@ -193,7 +193,7 @@ sub tie_db_writable {
   } else {
     $tout = $main->{conf}->{bayes_opportunistic_lock_timeout};
   }
-  if ($main->{locker}->safe_lock ($path, $tout)) {
+  if ($main->{locker}->safe_lock ($tout, $path)) {
     $self->{locked_file} = $path;
     $self->{is_locked} = 1;
   } else {

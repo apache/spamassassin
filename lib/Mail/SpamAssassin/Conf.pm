@@ -1343,7 +1343,8 @@ mean; C<factor> = 0 mean just use the calculated score.
 
 SpamAssassin needs to lock the auto-whitelist database, in order to modify the
 values therein.  The operation will fail if it cannot get a lock within a given
-timeout.
+timeout.  Note that the value is I<roughly> in seconds, it's not exact, due to
+implementation details.
 
 =cut
 
@@ -1435,7 +1436,8 @@ spam, but you can tune these up or down with these two settings.
 SpamAssassin needs to lock the Bayes tokens database, in order to learn from
 new mails, or to expire old data from the database.  The lock will fail if it
 cannot get a lock within a given timeout.  This value is the lock timeout for
-manual operations, run from the command-line via C<sa-learn>.
+manual operations, run from the command-line via C<sa-learn>.  Note that the
+value is I<roughly> in seconds, it's not exact, due to implementation details.
 
 =cut
 
@@ -1450,7 +1452,8 @@ new mails, or to expire old data from the database.  The lock will fail if it
 cannot get a lock within a given timeout.  This value is the lock timeout for
 opportunistic operations, run from the scanner as it scans incoming mail,
 namely auto-learning, and opportunistic expiry (if C<sa-learn --rebuild> is not
-run from the command-line or from cron regularly).
+run from the command-line or from cron regularly).  Note that the value is
+I<roughly> in seconds, it's not exact, due to implementation details.
 
 =cut
 
