@@ -14,7 +14,6 @@ lang fr terse-report ---- Début des résultats de SpamAssassin
 lang fr terse-report _HITS_ points, _REQD_ points requis ;
 lang fr terse-report _SUMMARY_
 lang fr terse-report ---- Fin des résultats de SpamAssassin
-lang fr describe FREEMEGS_URL     Expression fréquement trouvée dans du spam
 lang fr describe ADDRESSES_ON_CD    Les adresse sur cédérom ne servent qu'aux spameurs
 lang fr describe ADVERT_CODE        Le Subject: contient l'identificateur 'ADV'
 lang fr describe ALL_CAPS_SUBJECT   Le SUBJECT: est en majuscules
@@ -50,7 +49,6 @@ lang fr describe CHARSET_FARAWAY        Mèl rédigé avec des caractères étrangers
 lang fr describe CHARSET_FARAWAY_BODY   Corps du mèl rédigé avec des caractères étrangers
 lang fr describe CHARSET_FARAWAY_HEADERS Entête du mèl rédigé avec des caractères étrangers
 lang fr describe CHECK_OR_MONEY_ORDER   Contient la formule 'check or money order'
-lang fr describe CLICKSFORMONEY_NET     Contient une URL vers clicksformoney.net
 lang fr describe CLICK_BELOW    Demande de cliquer là ou en dessous
 lang fr describe CLICK_HERE_LINK        Demande de cliquer sur un lien
 lang fr describe CLICK_TO_REMOVE_2      Demande de cliquer sur un lien pour être retiré de la liste
@@ -69,7 +67,6 @@ lang fr describe DIFF_C_PATCH   Contient quelque chose qui ressemble au contenu 
 lang fr describe DIRECT_EMAIL   Contient la formule 'direct emai
 lang fr describe EARN_PER_WEEK          Propose de gangner quelquechose chaque semaine
 lang fr describe EGP_HTML_BANNER        Contient la bannière EGP, ce n'est pas du spam
-lang fr describe EMAIL_HARVEST           Contient la formule 'email harvest'
 lang fr describe EMAIL_MARKETING        Contient la formule 'email marketing'
 lang fr describe EU_200_32_CE   Revendique la conformité avec l'arrêt européen 200.32.CE
 lang fr describe EU_EMAIL_OPTOUT        Revendique la conformité avec l'arrêt européen sur le spam
@@ -90,8 +87,6 @@ lang fr describe EXCUSE_5       Prétend que vous pouvez être retiré de la liste
 lang fr describe EXCUSE_6       Prétend que vous pouvez être retiré de la liste
 lang fr describe EXCUSE_7       Prétend que vous pouvez être retiré de la liste
 lang fr describe EXCUSE_8       Prétend que vous pouvez être retiré de la liste
-lang fr describe EXCUSE_9       Prétend que vous pouvez être retiré de la liste
-lang fr describe E_WEBHOSTCENTRAL_URL   Expression souvent présente dans du SPAM
 lang fr describe FAKED_IP_IN_RCVD       Le champ Received: contient un nom avec une adresse IP falsifiée
 lang fr describe FAKED_UNDISC_RECIPS    Le champ To: contient une adresse 'Undisclosed-Recipients:' falsifiée
 lang fr describe FILTERED_BY_WORLDREMOVE Prétend appliquer les demandes de désabonnement de la liste
@@ -104,10 +99,8 @@ lang fr describe FORM_W_MAILTO_ACTION   Contient un formulaire pour envoyer un m
 lang fr describe FOR_FREE       Contient la formule 'for free'
 lang fr describe FOR_INSTANT_ACCESS     Contient un bouton pour obtenir un accès immédiat
 lang fr describe FOR_JUST_SOME_AMT      Contient la formule 'for only' une certaine somme d'argent
-lang fr describe FREEWEBCO_NET_URL      Contient une formule souvent présente dans du SPAM
 lang fr describe FREEWEBHOSTINGCENTRAL  Contient une formule souvent présente dans du SPAM
 lang fr describe FREE_CONSULTATION      Offre de consulter gratuitement le service proposé
-lang fr describe FREE_PRIORITY_MAIL     Offre une expédition gratuite
 lang fr describe FREQ_SPAM_PHRASE       Contient des formules souvent présentes dans le SPAM
 lang fr describe FRIEND_AT_PUBLIC       Mèl envoye a you@you.com ou équivalent
 lang fr describe FROM_AND_TO_SAME       Les entêtes From: et To: comportent la même adresse
@@ -119,7 +112,6 @@ lang fr describe FROM_MALFORMED L'entête From: contient une adresse malformée
 lang fr describe FROM_MISSING   L'entête From: est absent
 lang fr describe FROM_NAME_EQ_FROM_ADDR L'adresse de l'entête From: est équivalent au nom de l'expéditeur
 lang fr describe FROM_NO_USER   L'entête From: n'a pas de nom d'utilisateur avant le signe @
-lang fr describe FROM_UGETMORE  Le mèl est orgininaire d'une adresse @ugetmore4less.net
 lang fr describe FULL_REFUND    Propose un remboursement intégral
 lang fr describe GAPPY_SUBJECT          L'entête Subject: contient du 't.e.x.t.e.e.s.p.a.c.é'
 lang fr describe GAPPY_TEXT             Le mèl contient du 't.e.x.t.e.e.s.p.a.c.é'
@@ -136,7 +128,6 @@ lang fr describe HTTP_ESCAPED_HOST      Utilise des séquences % dans le nom de l
 lang fr describe HTTP_NUMBER_WORD       Utilise des nombres écrits en toutes lettres dans le nom de la machine dans une URL
 lang fr describe HTTP_USERNAME_USED     Utilise une adresse mèl dans le nom de la machine dans une URL
 lang fr describe HTTP_WITH_EMAIL_IN_URL L'URL pour se désabonner contient une adresse mèl
-lang fr describe HUNZA_DIET_BREAD       Mentionne le pain HUNZA
 lang fr describe INCREASE_SALES Propose d'augmenter les ventes
 lang fr describe INCREASE_TRAFFIC       Propose d'augmenter le trafic
 lang fr describe INTERNET_TERROR_RANT   Message de Cyber FirePower!
@@ -181,7 +172,6 @@ lang fr describe MSGID_SPAMSIGN_1       L'entête Message-Id: a été généré par un
 lang fr describe MSG_ID_ADDED_BY_MTA    L'entête Message-Id: a été ajouté par un relai
 lang fr describe MSG_ID_ADDED_BY_MTA_2  L'entête Message-Id: a été ajouté par un relai
 lang fr describe MURKOWSKI_CRUFT        Contient le message d'avertissement à propos de l'arrêté anti-SPAM de Murkowski
-lang fr describe MYCASINOBUILDER        Mentionne mycasinobuilder.com
 lang fr describe NEW_DOMAIN_EXTENSIONS  Mentionne les nouveaux noms de domaine
 lang fr describe NIGERIAN_SCAM  Mentionne les combines nigériennes, voir http://www.snopes2.com/inboxer/scams/nigeria.htm
 lang fr describe NIGERIAN_SCAM_2        Mentionnes les combines nigériennes
@@ -306,17 +296,12 @@ lang fr describe VERY_SUSP_RECIPS       L'entête To: contient plus de dix fois l
 lang fr describe VIAGRA Mentionne le viagra
 lang fr describe VJESTIKA       Mentionne l'aphrodisiaque Vjestika
 lang fr describe WANTS_CREDIT_CARD      Réclame des information sur votre carte de crédit
-lang fr describe WEB4PORNO_URL  Expression fréquement trouvée dans du spam
 lang fr describe WEB_BUGS       Contient un marquer d'image avec un code pour vous identifier
 lang fr describe WE_HATE_SPAM           Contient une formule qui désapprouve le SPAM
 lang fr describe WE_HONOR_ALL   Prétent appliquer les demandes pour se retirer de la liste
 lang fr describe WORK_AT_HOME   Contient des informations sur le travail à domicile
-lang fr describe WWW_AUTOREMOVE_COM     Expression fréquement trouvée dans du spam
 lang fr describe WWW_CLIK4YOU_COM       Expression fréquement trouvée dans du spam
-lang fr describe WWW_DIRECTFORCEMARKETING_COM   Expression fréquement trouvée dans du spam
-lang fr describe WWW_NETSITESFORFREE_NET        Expression fréquement trouvée dans du spam
 lang fr describe WWW_REMOVEYOU_COM      Expression fréquement trouvée dans du spam
-lang fr describe WWW_TRAFFICWOW_NET             Expression fréquement trouvée dans du spam
 lang fr describe X_EM_VER_PRESENT       Contient un entête X-Em-Version:
 lang fr describe X_MAILER_GIBBERISH     L'entête X-Mailer: contient des informations incompréhensibles
 lang fr describe X_MSMAIL_PRIORITY_HIGH L'entête X-Msmail-Priority: défini une priorité élevée
@@ -392,7 +377,6 @@ lang fr describe ALL_CAPS_HEADER	Certains entêtes sont en majucules
 lang fr describe RCVD_IN_VISI		Ce mèl a été reçu par l'intermédiaire d'un relai qui figure dans la liste relays.visi.com
 lang fr describe FORGED_JUNO_RCVD	Contient un entête Received: falsifié comme venant de juno.com
 lang fr describe MSG_ID_ADDED_BY_MTA_3	Contient un entête Message-Id: rajouté par un relai
-lang fr describe FROM_TOPICA		L'entête From: vient de @email-publisher.com
 lang fr describe BUGZILLA_BUG		L'entête Subject ressemble à un bug publié dans Bugzilla
 lang fr describe MAJORDOMO              L'entête Subject: semble venir du gestionaire de listes Majordomo
 lang fr describe PLEASE_READ            L'entête Subject vous incite à lire ce mèl
@@ -405,7 +389,6 @@ lang fr describe X_X_PRESENT           Il y a un entête X-x:
 lang fr describe X_ENC_PRESENT         Il y a un entête X-Encoding:
 lang fr describe X_FIX_PRESENT         Il y a un entête X-Fix:
 lang fr describe MIME_ODD_CASE         Il y a un entête MiME-Version: (avec une 'i' minuscule)
-lang fr describe FREEMEGS_URL         Contient une référence à 25freemegs.com, fréquement trouvée dans du spam
 lang fr describe STAINLESS_STEEL        Contient une référence à www.BuyStainlessOnline.com, fréquement trouvée dans du spam
 lang fr describe JAVASCRIPT_URI	Contient un appel à Javascript dans un URI
 lang fr describe URI_IS_POUND	Le nom de fichier d'un URI contient uniquement \#, sans doute un truc de Javascript
