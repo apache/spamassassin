@@ -86,3 +86,6 @@ describe JAVASCRIPT_URI	Javascript protocol in a URI
 
 uri URI_IS_POUND	/^\#$/
 describe URI_IS_POUND	URI is just a '#'; probably a JS trick
+
+uri      WEIRD_PORT             m{https?://[^/]+:\d+/}
+describe WEIRD_PORT             Uses non-standard port number for HTTP
