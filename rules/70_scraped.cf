@@ -1,2 +1,28 @@
 # SpamAssassin rules file: bugzilla-scraped needs-mc rules
 
+## MC: bug 2166 cmt 0: start
+body T_MC_LEET_b2166_c0 /(s\@ve|medic\@tion|c\@st|ple\@se|pharm\@cies|p\@tients|rem0ve)/i
+## MC: bug 2166 cmt 0: end
+
+## MC: bug 2989 cmt 0: start
+body T_MC_DN_B_MIXSLOVA1_b2989_c0 /(?:m0ve|m0v3|mov3|r3move|pharm\@c|p\@tients|subrnit)/i
+body T_MC_DN_B_MIXSLOVA2_b2989_c0 /(?:pen[i1ìíîï]s|er[eèéêë]ct[i1i1ìíîï]on|[o0òóôõö]rgasm|ejaculat[ii1ìíîï]on|v[i1i1ìíîï]agra|[eèéêë]rect[i1i1ìíîï]on)/i
+body T_MC_DN_B_VIAGRA_b2989_c0 /(?:viagra|viarga|vagira|vigrex|virgaa|vigara|vagria|vegil|v.i.a.g.r.a|v1agara|v.i.\@.g.r.a)/i
+body T_MC_DN_B_LEKOVI_b2989_c0 /(va[1l]ium|val[il1]um|v.a.l.i.u.m|xanaxm|cialis)/i
+body T_MC_DN_B_PLSVISIT1_b2989_c0 /(follow|visit|click|push) the (site|link|url)(below|above|here) (for|4) more info/i
+body T_MC_DN_B_PLSVISIT2_b2989_c0 /(follow|visit|click|push) (for|4) more info/i
+body T_MC_DN_B_PLSHOLD1_b2989_c0 /you do not see a (picture|link|image|img)(below|above|here)/i
+body T_MC_DN_B_PLSHOLD2_b2989_c0 /(image|img|picture) not(loading|load|shown|missing)/i
+body T_MC_DN_B_PLSHOLD3_b2989_c0 /(email|message) (is|in)(loading|progress|open)/i
+## MC: bug 2989 cmt 0: end
+
+## MC: bug 4065 cmt 2: start
+header __OE_MSGID_3_b4065_c2 MESSAGEID =~ /^<BAY\d+-DAV\d+[A-Z0-9]{25}\@phx\.gbl>$/
+meta __FORGED_OE_b4065_c2 (__OE_MUA && !__OE_MSGID_1 && !__OE_MSGID_2 && !__OE_MSGID_3_b4065_c2 &&!__UNUSABLE_MSGID)
+## MC: bug 4065 cmt 2: end
+
+## MC: bug 4065 cmt 4: start
+header __OE_MSGID_3_b4065_c4 MESSAGEID =~ /^<BAY\d+-DAV\d+[A-Z0-9]{25}\@phx\.gbl>$/
+meta T_MC_NEW_FORGED_OE_b4065_c4 (__OE_MUA && !__OE_MSGID_1 && !__OE_MSGID_2 && !__OE_MSGID_3_b4065_c4&& !__UNUSABLE_MSGID)
+## MC: bug 4065 cmt 4: end
+
