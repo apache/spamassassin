@@ -31,6 +31,9 @@ problem.  Reporting unsolicited email also helps feed spam filtering
 systems, including, but not limited to, the SpamCop blacklist used in
 SpamAssassin as a DNSBL.
 
+Note that spam reports sent by this plugin to SpamCop each include the
+entire spam message.
+
 See http://www.spamcop.net/ for more information about SpamCop.
 
 =over 4
