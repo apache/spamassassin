@@ -241,14 +241,14 @@ sub handle_dnsbl_results {
     if (defined $txt) {
       $self->test_log ("RBL check: found ".$dom.":");
       $self->test_log ("\"".$txt."\"");
-
-    } elsif ($addr ne '127.0.0.2' and 
-	    !($addr eq '127.0.0.3' and $set =~ /^dialup/))
+    }
+    elsif ($addr ne '127.0.0.2' and 
+	   !($addr eq '127.0.0.3' and $set =~ /^dialup/))
     {
       $self->test_log ("RBL check: found ".$dom.", type: ".$addr);
       $txt ||= '';
-
-    } else {
+    }
+    else {
       $self->test_log ("RBL check: found ".$dom);
       $txt ||= '';
     }
