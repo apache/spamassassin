@@ -33,7 +33,7 @@ my $sa = Mail::SpamAssassin->new({
 });
 $sa->init(0); # parse rules
 
-open (IN, "<data/spam/001");
+open (IN, "<data/spam/006");
 my $mail = $sa->parse(\*IN);
 close IN;
 my $msg = Mail::SpamAssassin::PerMsgStatus->new($sa, $mail);
