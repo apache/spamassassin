@@ -4,7 +4,7 @@ use Getopt::Std;
 use Config;
 
 use FindBin;
-use lib 'lib';
+
 BEGIN {
   # This code will track down the directories where WebMake
   # keeps its modules, portably, so it'll work on Macs, UNIX and Win32,
@@ -44,6 +44,9 @@ BEGIN {
     }
   }
 }
+
+use lib 'lib';
+use lib '../lib';		# for testing in ./t
 
 @default_rules_path = qw(
 	./spamassassin.cf

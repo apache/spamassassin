@@ -72,9 +72,27 @@ sub check {
   my ($self) = @_;
   local ($_);
 
-  $self->do_head_tests();          # pretty quick, these ones
-  $self->do_body_tests();          # a bit more expensive than the heads
-  $self->do_head_eval_tests();     # most expensive of all; DNS lookups etc
+  # in order of slowness; fastest first, slowest last.
+  # we do ALL the tests, even if a spam triggers lots of them early on.
+  # this lets us see ludicrously spammish mails (score: 40) etc., which
+  # (TODO) we can then immediately submit to spamblocking services.
+
+  {
+    $self->{msg_body_array} = $self->{msg}->get_body();
+    $self->{full_msg_string} = $self->{msg}->get_all_headers()."\n".
+				  join ('', @{$self->{msg_body_array}});
+
+    $self->do_head_tests();
+    $self->do_body_tests();
+    $self->do_body_eval_tests();
+    $self->do_full_tests();
+    $self->do_full_eval_tests();
+    $self->do_head_eval_tests();
+
+    # these are big, so delete them now.
+    delete $self->{msg_body_array};
+    delete $self->{full_msg_string};
+  }
 
   $self->{required_hits} = $self->{conf}->{required_hits};
   $self->{is_spam} = ($self->{hits} >= $self->{required_hits});
@@ -275,20 +293,24 @@ sub get {
   $_;
 }
 
+###########################################################################
+
 sub do_head_tests {
   my ($self) = @_;
   local ($_);
 
+  dbg ("running header regexp tests");
+
   my ($rulename, $rule);
   while (($rulename, $rule) = each %{$self->{conf}->{head_tests}}) {
     my $hit = 0;
+    $self->clear_test_state();
 
     my ($hdrname, $testtype, $pat) = 
     		$rule =~ /^\s*(\S+)\s*(\=|\!)\~\s*(\S.*?\S)\s*$/;
 
     $_ = $self->get ($hdrname);
 
-    $self->clear_test_state();
     if (!eval 'if ($_ '.$testtype.'~ '.$pat.') { $hit = 1; } 1;') {
       warn "Failed to run $rulename SpamAssassin test, skipping:\n".
       		"\t$rule ($@)\n";
@@ -299,36 +321,15 @@ sub do_head_tests {
   }
 }
 
-sub do_head_eval_tests {
-  my ($self) = @_;
-  local ($_);
-
-  my ($rulename, $evalsub, $args);
-  while (($rulename, $evalsub) = each %{$self->{conf}->{head_evals}}) {
-    $evalsub =~ s/\s*\((.*?)\)\s*$//;
-    if (defined $1 && $1 ne '') {
-      $args = $1;
-    } else {
-      $args = '';
-    }
-    
-    $self->clear_test_state();
-    my $result;
-    if (!eval '$result = $self->'.$evalsub.'('.$args.'); 1;')
-    {
-      warn "Failed to run $rulename SpamAssassin test, skipping:\n".
-      		"\t($@)\n";
-      next;
-    }
-    if ($result) { $self->got_hit ($rulename); }
-  }
-}
-
 sub do_body_tests {
   my ($self) = @_;
+  my ($rulename, $pat);
   local ($_);
-  my ($rulename, $pat, $evalsub, $args);
+  $self->clear_test_state();
 
+  dbg ("running body-text per-line regexp tests");
+
+  # build up the eval string...
   my $evalstr = '';
   while (($rulename, $pat) = each %{$self->{conf}->{body_tests}}) {
     $evalstr .= '
@@ -336,52 +337,88 @@ sub do_body_tests {
     ';
   }
 
-  my $body = $self->{msg}->get_body();
-  while (($rulename, $evalsub) = each %{$self->{conf}->{body_evals}}) {
-    $evalsub =~ s/\s*\((.*?)\)\s*$//;
-    $args = ''; if (defined $1 && $1 ne '') { $args = ', '.$1; }
-
-    $self->clear_test_state();
-    my $result;
-    if (!eval '$result = $self->'.$evalsub.'($body'.$args.'); 1;')
-    {
-      warn "Failed to run $rulename SpamAssassin test, skipping:\n".
-      		"\t($@)\n";
-      next;
-    }
-    if ($result) { $self->got_body_hit ($rulename); }
-  }
-
-
-
-  my $full = $self->{msg}->get_all_headers()."\n".join ('', @{$body});
-  while (($rulename, $evalsub) = each %{$self->{conf}->{full_evals}}) {
-    $evalsub =~ s/\s*\((.*?)\)\s*$//;
-    $args = ''; if (defined $1 && $1 ne '') { $args = ', '.$1; }
-
-    $self->clear_test_state();
-    my $result;
-    if (!eval '$result = $self->'.$evalsub.'($full'.$args.'); 1;')
-    {
-      warn "Failed to run $rulename SpamAssassin test, skipping:\n".
-      		"\t($@)\n";
-      next;
-    }
-    if ($result) { $self->got_full_hit ($rulename); }
-  }
-
-
-
+  # generate the loop that goes through each line...
   my $textary = $self->get_body_text();
-  $self->clear_test_state();
-  $evalstr = 'foreach $_ (@{$textary}) { study; '.$evalstr.'; } 1;';
+  $evalstr = 'foreach $_ (@{$textary}) { study; '.$evalstr.'; }';
 
-  if (!eval $evalstr) {
+  # and run it.
+  if (!eval $evalstr.'1;') {
     warn "Failed to run body SpamAssassin tests, skipping:\n".
 	      "\t($@)\n";
-    return;
   }
 }
+
+sub do_full_tests {
+  my ($self) = @_;
+  my ($rulename, $pat);
+  local ($_);
+  $self->clear_test_state();
+
+  dbg ("running full-text regexp tests");
+
+  # build up the eval string...
+  my $evalstr = '';
+  while (($rulename, $pat) = each %{$self->{conf}->{full_tests}}) {
+    $evalstr .= '
+      if ('.$pat.') { $self->got_hit (q{'.$rulename.'}, q{}); }
+    ';
+  }
+
+  # and run it.
+  $_ = $self->{full_msg_string};
+  if (!eval 'study; '.$evalstr.'; 1;') {
+    warn "Failed to run full SpamAssassin tests, skipping:\n".
+	      "\t($@)\n";
+  }
+}
+
+###########################################################################
+
+sub do_head_eval_tests {
+  my ($self) = @_;
+  $self->run_eval_tests ($self->{conf}->{head_evals}, '');
+}
+
+sub do_body_eval_tests {
+  my ($self) = @_;
+  $self->run_eval_tests ($self->{conf}->{body_evals}, 'BODY: ', $self->{msg_body_array});
+}
+
+sub do_full_eval_tests {
+  my ($self) = @_;
+  $self->run_eval_tests ($self->{conf}->{full_evals}, '', $self->{full_msg_string});
+}
+
+###########################################################################
+
+sub run_eval_tests {
+  my ($self, $evalhash, $prepend2desc, @extraevalargs) = @_;
+  my ($rulename, $pat, $evalsub, @args);
+  local ($_);
+
+  while (($rulename, $evalsub) = each %{$evalhash}) {
+    my $result;
+    $self->clear_test_state();
+
+    @args = ();
+    if (scalar @extraevalargs >= 0) { push (@args, '@extraevalargs'); }
+
+    $evalsub =~ s/\s*\((.*?)\)\s*$//;
+    if (defined $1 && $1 ne '') { push (@args, $1); }
+
+    my $evalstr = '$result = $self->'.$evalsub.'('.join (', ', @args).');';
+    dbg ("running: $evalstr");
+    if (!eval $evalstr.'1;') {
+      warn "Failed to run $rulename SpamAssassin test, skipping:\n".
+      		"\t($@)\n";
+      next;
+    }
+
+    if ($result) { $self->got_hit ($rulename, $prepend2desc); }
+  }
+}
+
+###########################################################################
 
 sub got_body_pattern_hit {
   my ($self, $rulename) = @_;
@@ -390,7 +427,7 @@ sub got_body_pattern_hit {
   return if (defined $self->{tests_already_hit}->{$rulename});
   $self->{tests_already_hit}->{$rulename} = 1;
 
-  $self->got_body_hit ($rulename);
+  $self->got_hit ($rulename, 'BODY: ');
 }
 
 ###########################################################################
@@ -416,18 +453,13 @@ sub handle_hit {
 }
 
 sub got_hit {
-  my ($self, $rule) = @_;
-  $self->handle_hit ($rule, '', $self->{conf}->{head_tests}->{$rule});
-}
+  my ($self, $rule, $prepend2desc) = @_;
 
-sub got_body_hit {
-  my ($self, $rule) = @_;
-  $self->handle_hit ($rule, 'BODY: ', $self->{conf}->{body_tests}->{$rule});
-}
-
-sub got_full_hit {
-  my ($self, $rule) = @_;
-  $self->handle_hit ($rule, '', $self->{conf}->{full_evals}->{$rule});
+  my $txt = $self->{conf}->{full_tests}->{$rule};
+  $txt ||= $self->{conf}->{full_evals}->{$rule};
+  $txt ||= $self->{conf}->{head_tests}->{$rule};
+  $txt ||= $self->{conf}->{body_tests}->{$rule};
+  $self->handle_hit ($rule, $prepend2desc, $txt);
 }
 
 sub test_log {
@@ -455,6 +487,8 @@ sub work_out_local_domain {
     # 19 Apr 2001 08:28:50 +0100
 
 }
+
+sub dbg { Mail::SpamAssassin::dbg (@_); }
 
 ###########################################################################
 

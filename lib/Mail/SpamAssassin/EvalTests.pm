@@ -43,7 +43,8 @@ sub check_for_from_mx {
 
   # Try 5 times to protect against temporary outages
   for my $i (1..5) {
-    if (mx ($self->{res}, $_)) { return 0; }
+    my @mx = mx ($self->{res}, $_);
+    if (scalar @mx >= 0) { return 0; }
     sleep 10;
   }
 
@@ -325,7 +326,5 @@ done:
 }
 
 ###########################################################################
-
-sub dbg { Mail::SpamAssassin::dbg (@_); }
 
 1;
