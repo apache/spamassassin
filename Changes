@@ -1,3 +1,67 @@
+2002-03-03 17:23  hughescr
+
+	* Mail-SpamAssassin-2.1.zip: No ZIPfile in CVS
+
+2002-03-03 17:22  hughescr
+
+	* Mail-SpamAssassin-2.1.tar.gz: no tarball in CVS
+
+2002-03-03 17:22  hughescr
+
+	* lib/Mail/SpamAssassin.pm: Version number for 2.11
+
+2002-03-03 17:18  hughescr
+
+	* MANIFEST: Update manifest for post-ga-analysis
+
+2002-03-03 17:18  hughescr
+
+	* lib/Mail/SpamAssassin/PerMsgStatus.pm: Rollback PerMsgStatus
+	patch -- breaks tests
+
+2002-03-03 17:16  hughescr
+
+	* t/data/: nice/002, spam/004: Fixed tests for new AWL and scores
+
+2002-03-03 17:02  hughescr
+
+	* masses/post-ga-analysis.pl: Analyze new scores
+
+2002-03-03 17:02  hughescr
+
+	* rules/50_scores.cf: New scores from fixed GA, plus hand tweaks
+
+2002-03-03 16:19  hughescr
+
+	* masses/craig-evolve.cxx: Tighten requirements for scores
+
+2002-03-03 12:40  hughescr
+
+	* lib/Mail/SpamAssassin/PerMsgStatus.pm: Patch to fix spam report
+	before first MIME part bug
+
+2002-03-01 11:23  hughescr
+
+	* rules/: 20_head_tests.cf, 50_scores.cf: Fix subj_all_caps
+
+2002-03-01 11:02  hughescr
+
+	* lib/Mail/SpamAssassin/EvalTests.pm: Patch by Matthew Cline
+	<matt@nightrealms.com>
+
+2002-02-28 13:07  hughescr
+
+	* spamproxy/spamproxyd.raw: Switched to NoMailAudit
+
+2002-02-27 01:15  hughescr
+
+	* lib/Mail/SpamAssassin.pm: New 2.2 tree
+
+2002-02-27 01:13  hughescr
+
+	* Changes, Mail-SpamAssassin-2.1.tar.gz, Mail-SpamAssassin-2.1.zip:
+	2.1 release
+
 2002-02-27 01:10  hughescr
 
 	* spamassassin-migrate.patch, spamassassin.spec: Updates for RPM
