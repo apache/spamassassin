@@ -1,4 +1,4 @@
-# $Id: Parser.pm,v 1.6 2003/09/29 02:59:36 felicity Exp $
+# $Id: Parser.pm,v 1.7 2003/09/29 03:05:05 felicity Exp $
 
 package Mail::SpamAssassin::MIME::Parser;
 use strict;
@@ -9,7 +9,6 @@ use Mail::SpamAssassin;
 use Mail::SpamAssassin::MIME;
 use MIME::Base64;
 use MIME::QuotedPrint;
-use Carp;
 
 =head2 This is how mail messages can come in:
 
@@ -313,11 +312,11 @@ sub _decode_header {
     }
 
     # base 64 encoded
-    return decode_base64($data);
+    return MIME::Base64::decode_base64($data);
   }
   elsif ( $cte eq 'Q' ) {
     # quoted printable
-    return decode_qp($data);
+    return MIME::QuotedPrint::decode_qp($data);
   }
   else {
     die "Unknown encoding type '$cte' in RFC2047 header";
@@ -361,7 +360,7 @@ sub decode {
   if ( lc( $msg->header('content-transfer-encoding') ) eq 'quoted-printable' ) {
     dbg("decoding QP file\n");
     my @output =
-      map { s/\r\n/\n/; $_; } split ( /^/m, $self->decode_qp( join ( "", @{$body} ) ) );
+      map { s/\r\n/\n/; $_; } split ( /^/m, MIME::QuotedPrint::decode_qp( join ( "", @{$body} ) ) );
 
     my $type = $msg->header('content-type');
     my ($filename) =
@@ -389,7 +388,7 @@ sub decode {
     @{$body} = ( $data );
 
     # Generate the decoded output
-    my $output = [ decode_base64($data) ];
+    my $output = [ MIME::Base64::decode_base64($data) ];
 
     # If it has a filename, figure it out.
     my $type = $msg->header('content-type');
@@ -419,19 +418,6 @@ sub decode {
 
     return $type, \@output, $filename;
   }
-}
-
-# Just in case we want to do something with the data pre-decoding ...
-# Base64
-sub decode_base64 {
-    my ($data) = @_;
-    return MIME::Base64::decode_base64($data);
-}
-# Just in case we want to do something with the data pre-decoding ...
-# QuotedPrintable
-sub decode_qp {
-    my ($data) = @_;
-    return MIME::QuotedPrint::decode_qp($data);
 }
 
 sub dbg { Mail::SpamAssassin::dbg (@_); }
