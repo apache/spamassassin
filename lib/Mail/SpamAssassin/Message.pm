@@ -22,9 +22,17 @@ sub new {
   my $self = {
     'main'	=> shift,
     'audit'	=> shift,
+    'is_spamassassin_wrapper_object'	=> 1
   };
   bless ($self, $class);
   $self;
+}
+
+###########################################################################
+
+sub get_mail_audit {
+  my ($self) = @_;
+  return $self->{audit};
 }
 
 ###########################################################################
