@@ -25,27 +25,6 @@
 # </@LICENSE>
 #
 ###########################################################################
-
-# replacements for PORN_4; split out sub-patterns as some are more FP-prone
-# than others.
-# 0.268   0.3779   0.0045    0.988   0.91    0.01  T_PORN_URL_SEX
-uri T_PORN_URL_SEX	/^https?:\/\/[\w\.-]*(?<!es|ba)(?<!dle|sus)sex(?!press)[\w-]*\./i
-# 0.054   0.0771   0.0000    1.000   0.95    0.01  T_PORN_URL_SLUT
-uri T_PORN_URL_SLUT	/^https?:\/\/[\w\.-]*slut[\w-]*\./i
-# 0.012   0.0167   0.0000    1.000   0.95    0.01  T_PORN_URL_PANT
-uri T_PORN_URL_PANT	/^https?:\/\/[\w\.-]*pant(?:y|ies)[\w-]*\./i
-# 0.043   0.0604   0.0022    0.964   0.85    0.01  T_PORN_URL_TEEN
-uri T_PORN_URL_TEEN	/^https?:\/\/[\w\.-]*(?<!thir|four|eigh|nine)(?<!fif|six)(?<!seven)teen(?!th)[\w-]*\./i
-
-# split up MISC.
-# likely to get good hits
-uri T_PORN_URL_MISC_2	/^https?:\/\/[\w\.-]*(?:pussy|nympho|whore|voyeur|lolita|schoolgirl|erotic)[\w-]*\./i
-# crappier
-uri T_PORN_URL_MISC_3	/^https?:\/\/[\w\.-]*(?:porn|hard-?core|taboo|lesbian|naughty)[\w-]*\./i
-# and I think these will get 0
-uri T_PORN_URL_MISC_4	/^https?:\/\/[\w\.-]*(?:gurlpages|kooloffer)[\w-]*\./i
-
-########################################################################
 # SPF support.  "pass" is nice, "fail" is bad, "softfail" is bad, but
 # not as bad as "fail".
 
