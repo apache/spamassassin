@@ -1547,7 +1547,7 @@ sub get_uri_list {
 
     # deal with redirectors, push the redirect uri onto the uri array
     # so this loop deals with that one independently
-    if ($nuri =~ m{^https?://.+?(https?://.+)$}) {
+    while ($nuri =~ s{^https?://.+?(https?://.+)$}{$1}s) {
       push(@uris, $1);
     }
   }
