@@ -5,24 +5,3 @@
 # line in this file should be commented out.
 #
 ###########################################################################
-
-# These look to be all replaced by a more case sensitive version, but
-# since there's no clear reason why both were still in the rule files,
-# I'm moving them here for now. - tvd, bug 1191
-body T_FREE_INSTALL	        /\bfree installation\b/i
-describe T_FREE_INSTALL		Free Installation
-
-body T_FREE_PREVIEW		/\bfree preview\b/i
-describe T_FREE_PREVIEW		Free Preview
-
-body T_FREE_ACCESS		/\bfree access\b/i
-describe T_FREE_ACCESS		Free Access
-
-body T_FREE_SAMPLE	        /\bfree sample/i
-describe T_FREE_SAMPLE		Free Sample
-
-body T_GET_IT_NOW	        /\bget it now\b/i
-describe T_GET_IT_NOW		Get it now!
-
-body T_FREE_HOSTING             /(?-i:F)ree hosting/i
-describe T_FREE_HOSTING         Contains 'free hosting' with capitals

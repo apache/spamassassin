@@ -408,3 +408,6 @@ describe T_FROM_HAS_UNDERLINE_NUMS	From: contains an underline and numbers/lette
 header T_REPLY_TO_HAS_UNDERLINE_NUMS	Reply-To =~ /_\S?(?:[a-z]+\w*?\d+|\d+\w*?[a-z]+)\w*\@/i [if-unset: UNSET]
 describe T_REPLY_TO_HAS_UNDERLINE_NUMS	Reply-To: contains an underline and numbers/letters
 
+# from bug 725
+body T_PROMOTE_YOUR_BUSINESS     /\b(?:(?:advert|public)i[sz]e|promote|increase|grow|expand|boost)\s+.{0,15}\b(?:(?:web)?site|business|offer(?:ing)?|(?:down|power)line|exposure)/is
+describe T_PROMOTE_YOUR_BUSINESS  Wants to help promote your business
