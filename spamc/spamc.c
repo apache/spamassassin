@@ -94,7 +94,7 @@ void print_usage(void)
     printf("  -B                  Assume input is a single BSMTP-formatted message.\n");
     printf("  -c                  Just print the summary line and set an exit code.\n");
     printf("  -d host             Specify host to connect to.\n"
-           "                      [default: localhost]");
+           "                      [default: localhost]\n");
     printf("  -e command [args]   Pipe the output to the given command instead of stdout.\n"
            "                      This must be the last option.\n");
     printf("  -h                  Print this help message and exit.\n");
@@ -116,6 +116,7 @@ void print_usage(void)
 #endif
     printf("  -x                  Don't fallback safely.\n");
     printf("  -y                  Just print the names of the tests hit.\n");
+    printf("\n");
 }
 
 int
