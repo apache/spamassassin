@@ -583,6 +583,9 @@ describe THIS_AINT_SPAM         Claims "This is not spam"
 body WE_HATE_SPAM               /We .{0,30}oppose the use of SPAM/is
 describe WE_HATE_SPAM           Says "We strongly oppose the use of spam email"
 
+body THIS_IS_AN_AD		/this message is an advertisement/i
+describe THIS_IS_AN_AD		Says "this is an advertisement" (thanks!)
+
 # no hits
 #body IN_ACCORDANCE_WITH_LAWS    /has been sent in accordance with/
 #describe IN_ACCORDANCE_WITH_LAWS Claims to be in accordance with some Spam law
