@@ -559,3 +559,26 @@ header __BAT_XMSMP              X-MSMail-Priority =~ /\S/
 meta T_FORGED_MUA_THEBAT        (__BAT_MUA && __BAT_XMSMP)
 describe T_FORGED_MUA_THEBAT    Forged mail pretending to be from The Bat!
 
+# NOTE: uses __ANY_OUTLOOK_MUA.  This catches Send-Safe and a few others
+header __OL_STYLE_FROM		From =~ /^\".*\" <\S+>$/
+meta T_FORGED_MUA_OUTLOOK_FROM	(__ANY_OUTLOOK_MUA && !__OL_STYLE_FROM)
+describe T_FORGED_MUA_OUTLOOK_FROM Forged mail pretending to be from Outlook (by From)
+
+# let's see if this works... AOL MUAs add a Received line, and do not use
+# "real names" in From or To headers, as far as I can see.
+header __AOL8_MUA		X-Mailer =~ /AOL [78]\.\d for Windows/
+header __AOL8_FROM		From =~ /^\S+\@aol\.com$/
+header __AOL8_TO		To =~ /^\S+\@\S+\.\S+$/
+header __AOL8_RCVD		Received =~ /^from \S+\@aol\.com by\s+imo-\S+\.mx\.aol\.com\s+\(mail_out_\S+\)\s+id\s+\S+\s+\(\d+\)\s+for\s+<\S+\@\S+>;\s+/m
+
+meta T_FORGED_MUA_AOL_FROM	(__AOL8_MUA && !__AOL8_FROM)
+describe T_FORGED_MUA_AOL_FROM	Forged mail pretending to be from AOL 8.0 (by From)
+meta T_FORGED_MUA_AOL_TO	(__AOL8_MUA && !__AOL8_TO)
+describe T_FORGED_MUA_AOL_TO	Forged mail pretending to be from AOL 8.0 (by To)
+meta T_FORGED_MUA_AOL_RCVD	(__AOL8_MUA && !__AOL8_RCVD)
+describe T_FORGED_MUA_AOL_RCVD	Forged mail pretending to be from AOL 8.0 (by Received)
+
+meta T_USER_AGENT_AOL8		(__AOL8_MUA && __AOL8_FROM && __AOL8_RCVD && __AOL8_TO)
+describe T_USER_AGENT_AOL8	User-Agent header indicates a non-spam MUA (AOL 8)
+tflags T_USER_AGENT_AOL8	nice
+
