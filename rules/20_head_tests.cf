@@ -64,17 +64,14 @@ describe FROM_NO_USER		From: has no local-part before @ sign
 header TO_NO_USER		To =~ /(?:^\@|<\@| \@[^\)<]*$|<>)/ [if-unset: unset@unset.unset]
 describe TO_NO_USER		To: has no local-part before @ sign
 
-header TO_HAS_SPACES            To:addr =~ /\s/
-describe TO_HAS_SPACES          To: address contains spaces
-
 header TO_EMPTY			To =~ /^\s*$/ [if-unset: UNSET]
 describe TO_EMPTY		To: is empty
 
 header REPLY_TO_EMPTY		Reply-To =~ /^\s*$/ [if-unset: UNSET]
 describe REPLY_TO_EMPTY		Reply-To: is empty
 
-header REPLY_TO_ULINE_NUMS    Reply-To =~ /_\S?(?:[a-z]+\w*?\d+|\d+\w*?[a-z]+)\w*\@/i [if-unset: UNSET]
-describe REPLY_TO_ULINE_NUMS  Reply-To: has an underline and numbers/letters
+header REPLY_TO_ULINE_NUMS	Reply-To =~ /_\S?(?:[a-z]+\w*?\d+|\d+\w*?[a-z]+)\w*\@/i [if-unset: UNSET]
+describe REPLY_TO_ULINE_NUMS	Reply-To: has an underline and numbers/letters
 
 header TO_ADDRESS_EQ_REAL	To =~ /^\s*"([^"@]+\@[^"@]+)"\s+<\1>\s*$/i
 describe TO_ADDRESS_EQ_REAL	To: repeats address as real name
