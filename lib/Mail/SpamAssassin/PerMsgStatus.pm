@@ -86,6 +86,10 @@ sub new {
     $self->{pattern_hits} = { };
   }
 
+  # HTML parser stuff
+  $self->{html_mod} = Mail::SpamAssassin::HTML->new();
+  $self->{html} = {};
+
   bless ($self, $class);
   $self;
 }
@@ -1146,7 +1150,14 @@ sub get_decoded_stripped_body_text_array {
      $boundary = $1;
    }
 
-  my $text = $self->get('subject', '') . "\n\n";
+  my $text = "";
+
+  # subject should really be added after doing HTML, move this later
+  my $subject = $self->get('subject') || '';
+  if ($subject) {
+    $text = $subject . "\n\n" . $text;
+  }
+
   my $lastwasmime = 0;
   foreach $_ (@{$bodytext}) {
     /^SPAM: / and next;         # SpamAssassin markup
@@ -1167,68 +1178,14 @@ sub get_decoded_stripped_body_text_array {
   $text =~ s/=([A-F0-9]{2})/chr(hex($1))/ge;
   $text =~ s/=\n//g;
 
-  # reset variables used in HTML tests
-  $self->{html} = {};
-  $self->{html_inside} = {};
-  $self->{html}{ratio} = 0;
-  $self->{html}{image_area} = 0;
-  $self->{html}{shouting} = 0;
-  $self->{html}{max_shouting} = 0;
-  $self->{html}{total_comment_ratio} = 0;
-
   # do HTML conversions if necessary
-  if ($text =~ m/<(?:$re_strict|$re_loose|!--|!doctype)(?:\s|>)/ois) {
+  if ($text =~ m/<(?:$Mail::SpamAssassin::HTML::re_strict|$Mail::SpamAssassin::HTML::re_loose|!--|!doctype)(?:\s|>)/ois) {
     my $raw = length($text);
+    my $before = substr($text, 0, $-[0], '');
 
-    # NOTE: do another match instead of using $-[0]; not supported
-    # under old perls
-    $text =~ m/^(.*?)<(?:$re_strict|$re_loose|!--|!doctype)(?:\s|>)/ois;
-    my $before = substr($text, 0, length($1));
-    $text = substr($text, length($1));
-
-    # NOTE: We *only* need to fix the rendering when we verify that it
-    # differs from what people see in their MUA.  Testing is best done with
-    # the most common MUAs and browsers, if you catch my drift.
-
-    # NOTE: HTML::Parser can cope with: <?xml pis>, <? with space>, so we
-    # don't need to fix them here.
-
-    # bug #1551: HTML declarations, like <!foo>, are being used by spammers
-    # for obfuscation, and they aren't stripped out by HTML::Parser prior to
-    # version 3.28.  We have to modify these out *before* the parser is
-    # invoked, because otherwise a spammer could do "&lt;! body of message
-    # &gt;", which would get turned into "<! body of message >" by the
-    # parser, and then the whole body message would be stripped.
-
-    # convert <!foo> to <!--foo-->
-    if ($HTML::Parser::VERSION < 3.28) { 
-      $text =~ s/<!((?!--|doctype)[^>]*)>/<!--$1-->/gsi;
-    }
-
-    # remove empty close tags: </>, </ >, </ foo>
-    if ($HTML::Parser::VERSION < 3.29) { 
-      $text =~ s/<\/(?:\s.*?)?>//gs;
-    }
-
-    $self->{html_text} = [];
-    $self->{html_last_tag} = 0;
-    my $hp = HTML::Parser->new(
-		api_version => 3,
-		handlers => [
-		  start_document => [sub { $self->html_init(@_) }],
-		  start => [sub { $self->html_tag(@_) }, "tagname,attr,'+1'"],
-		  end => [sub { $self->html_tag(@_) }, "tagname,attr,'-1'"],
-		  text => [sub { $self->html_text(@_) }, "dtext"],
-		  comment => [sub { $self->html_comment(@_) }, "text"],
-		  declaration => [sub { $self->html_declaration(@_) }, "text"],
-		],
-		marked_sections => 1);
-
-    # ALWAYS pack it into byte-representation, even if we're using 'use bytes',
-    # since the HTML::Parser object may use Unicode internally.
-    # (bug 1417, maybe)
-    $hp->parse(pack ('C0A*', $text));
-    $hp->eof;
+    # render
+    $self->{html_text} = $self->{html_mod}->html_render($text);
+    $self->{html} = $self->{html_mod}->get_results();
 
     $text = join('', $before, @{$self->{html_text}});
 
@@ -1250,7 +1207,6 @@ sub get_decoded_stripped_body_text_array {
       }
     } # if ($raw > 0)
     delete $self->{html_last_tag};
-
   } # if HTML
 
   # whitespace handling (warning: small changes have large effects!)

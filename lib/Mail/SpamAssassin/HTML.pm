@@ -1,20 +1,20 @@
-# $Id: HTML.pm,v 1.97 2003/10/02 23:01:01 quinlan Exp $
+# $Id: HTML.pm,v 1.98 2003/10/06 00:19:34 quinlan Exp $
 
-package Mail::SpamAssassin::HTML;
-1;
-
-package Mail::SpamAssassin::PerMsgStatus;
-use HTML::Parser 3.24 ();
+# HTML decoding TODOs
+# - add URIs to list for faster URI testing
 
 use strict;
 use bytes;
 
-use vars qw{
-  $re_start $re_loose $re_strict $events
-};
+package Mail::SpamAssassin::HTML;
 
-# HTML decoding TODOs
-# - add URIs to list for faster URI testing
+require Exporter;
+my @ISA = qw(Exporter);
+my @EXPORT = qw($re_start $re_loose $re_strict get_results);
+my @EXPORT_OK = qw();
+
+use HTML::Parser 3.24 ();
+use vars qw($re_start $re_loose $re_strict);
 
 # elements that trigger HTML rendering in text/plain in some mail clients
 # (repeats ones listed in $re_strict)
@@ -25,9 +25,20 @@ $re_loose = 'applet|basefont|center|dir|font|frame|frameset|iframe|isindex|menu|
 $re_strict = 'a|abbr|acronym|address|area|b|base|bdo|big|blockquote|body|br|button|caption|cite|code|col|colgroup|dd|del|dfn|div|dl|dt|em|fieldset|form|h1|h2|h3|h4|h5|h6|head|hr|html|i|img|input|ins|kbd|label|legend|li|link|map|meta|noscript|object|ol|optgroup|option|p|param|pre|q|samp|script|select|small|span|strong|style|sub|sup|table|tbody|td|textarea|tfoot|th|thead|title|tr|tt|ul|var';
 
 # loose list of HTML events
-$events = 'on(?:activate|afterupdate|beforeactivate|beforecopy|beforecut|beforedeactivate|beforeeditfocus|beforepaste|beforeupdate|blur|change|click|contextmenu|controlselect|copy|cut|dblclick|deactivate|errorupdate|focus|focusin|focusout|help|keydown|keypress|keyup|load|losecapture|mousedown|mouseenter|mouseleave|mousemove|mouseout|mouseover|mouseup|mousewheel|move|moveend|movestart|paste|propertychange|readystatechange|reset|resize|resizeend|resizestart|select|submit|timeerror|unload)';
+my $events = 'on(?:activate|afterupdate|beforeactivate|beforecopy|beforecut|beforedeactivate|beforeeditfocus|beforepaste|beforeupdate|blur|change|click|contextmenu|controlselect|copy|cut|dblclick|deactivate|errorupdate|focus|focusin|focusout|help|keydown|keypress|keyup|load|losecapture|mousedown|mouseenter|mouseleave|mousemove|mouseout|mouseover|mouseup|mousewheel|move|moveend|movestart|paste|propertychange|readystatechange|reset|resize|resizeend|resizestart|select|submit|timeerror|unload)';
 
 my %tested_colors;
+
+sub new {
+  my $this = shift;
+  my $class = ref($this) || $this;
+  my $self = {};
+  bless($self, $class);
+
+  $self->html_init();
+
+  return $self;
+}
 
 sub html_init {
   my ($self) = @_;
@@ -37,12 +48,84 @@ sub html_init {
   push @{ $self->{fgcolor_color} }, "#000000";
   push @{ $self->{fgcolor_tag} }, "default";
   undef %tested_colors;
+
+  return $self;
+}
+
+sub get_results {
+  my ($self) = @_;
+
+  return $self->{html};
+}
+
+sub html_render {
+  my ($self, $text) = @_;
+
+  # clean this up later
+  for my $key (keys %{ $self->{html} }) {
+    delete $self->{html}{$key};
+  }
+
+  $self->{html}{ratio} = 0;
+  $self->{html}{image_area} = 0;
+  $self->{html}{shouting} = 0;
+  $self->{html}{max_shouting} = 0;
+  $self->{html}{total_comment_ratio} = 0;
+
+  $self->{html_text} = [];
+  $self->{html_last_tag} = 0;
+
+  # NOTE: We *only* need to fix the rendering when we verify that it
+  # differs from what people see in their MUA.  Testing is best done with
+  # the most common MUAs and browsers, if you catch my drift.
+
+  # NOTE: HTML::Parser can cope with: <?xml pis>, <? with space>, so we
+  # don't need to fix them here.
+
+  # bug #1551: HTML declarations, like <!foo>, are being used by spammers
+  # for obfuscation, and they aren't stripped out by HTML::Parser prior to
+  # version 3.28.  We have to modify these out *before* the parser is
+  # invoked, because otherwise a spammer could do "&lt;! body of message
+  # &gt;", which would get turned into "<! body of message >" by the
+  # parser, and then the whole body message would be stripped.
+
+  # convert <!foo> to <!--foo-->
+  if ($HTML::Parser::VERSION < 3.28) {
+    $text =~ s/<!((?!--|doctype)[^>]*)>/<!--$1-->/gsi;
+  }
+
+  # remove empty close tags: </>, </ >, </ foo>
+  if ($HTML::Parser::VERSION < 3.29) {
+    $text =~ s/<\/(?:\s.*?)?>//gs;
+  }
+
+  my $hp = HTML::Parser->new(
+		api_version => 3,
+		handlers => [
+		  start_document => [sub { $self->html_init(@_) }],
+		  start => [sub { $self->html_tag(@_) }, "tagname,attr,'+1'"],
+		  end => [sub { $self->html_tag(@_) }, "tagname,attr,'-1'"],
+		  text => [sub { $self->html_text(@_) }, "dtext"],
+		  comment => [sub { $self->html_comment(@_) }, "text"],
+		  declaration => [sub { $self->html_declaration(@_) }, "text"],
+		],
+		marked_sections => 1);
+
+  # ALWAYS pack it into byte-representation, even if we're using 'use bytes',
+  # since the HTML::Parser object may use Unicode internally.
+  # (bug 1417, maybe)
+  $hp->parse(pack ('C0A*', $text));
+  $hp->eof;
+
+  delete $self->{html_last_tag};
+
+  return $self->{html_text};
 }
 
 sub html_tag {
   my ($self, $tag, $attr, $num) = @_;
 
-  $self->{html_inside}{$tag} += $num;
+  $self->{html}{"inside_$tag"} += $num;
 
   $self->{html}{elements}++ if $tag =~ /^(?:$re_strict|$re_loose)$/io;
   $self->{html}{tags}++;
@@ -273,7 +356,7 @@ sub html_bgcolor {
     }
   }
 }
-  
+
 sub pop_fgcolor {
   my ($self) = @_;
 
@@ -501,11 +584,11 @@ sub html_tests {
 sub html_text {
   my ($self, $text) = @_;
 
-  if (exists $self->{html_inside}{a} && $self->{html_inside}{a} > 0) {
+  if (exists $self->{html}{"inside_a"} && $self->{html}{"inside_a"} > 0) {
     $self->{html}{anchor_text} .= " $text";
   }
 
-  if (exists $self->{html_inside}{script} && $self->{html_inside}{script} > 0)
+  if (exists $self->{html}{"inside_script"} && $self->{html}{"inside_script"} > 0)
   {
     if ($text =~ /\b(?:$events)\b/io)
     {
@@ -521,7 +604,7 @@ sub html_text {
     return;
   }
 
-  if (exists $self->{html_inside}{style} && $self->{html_inside}{style} > 0) {
+  if (exists $self->{html}{"inside_style"} && $self->{html}{"inside_style"} > 0) {
     if ($text =~ /font(?:-size)?:\s*(\d+(?:\.\d*)?|\.\d+)(p[tx])/i) {
       my $size = $1;
       my $type = $2;
@@ -531,8 +614,8 @@ sub html_text {
     return;
   }
 
-  if (!(exists $self->{html_inside}{body} && $self->{html_inside}{body} > 0) &&
-        exists $self->{html_inside}{title} && $self->{html_inside}{title} > 0)
+  if (!(exists $self->{html}{"inside_body"} && $self->{html}{"inside_body"} > 0) &&
+        exists $self->{html}{"inside_title"} && $self->{html}{"inside_title"} > 0)
   {
     $self->{html}{title_text} .= $text;
   }
@@ -553,7 +636,7 @@ sub html_comment {
   $self->{html}{comment_sky} = 1 if $text =~ /SKY-(?:Email-Address|Database|Mailing|List)/;
   $self->{html}{total_comment_length} += length($text) + 7; # "<!--" + "-->"
 
-  if (exists $self->{html_inside}{script} && $self->{html_inside}{script} > 0)
+  if (exists $self->{html}{"inside_script"} && $self->{html}{"inside_script"} > 0)
   {
     if ($text =~ /\b(?:$events)\b/io)
     {
@@ -569,7 +652,7 @@ sub html_comment {
     return;
   }
 
-  if (exists $self->{html_inside}{style} && $self->{html_inside}{style} > 0) { 
+  if (exists $self->{html}{"inside_style"} && $self->{html}{"inside_style"} > 0) {
     if ($text =~ /font(?:-size)?:\s*(\d+(?:\.\d*)?|\.\d+)(p[tx])/i) {
       my $size = $1;
       my $type = $2;
@@ -591,109 +674,7 @@ sub html_declaration {
 
     $self->{html}{elements}++;
     $self->{html}{tags}++;
-    $self->{html_inside}{$tag} = 0;
-  }
-}
-
-###########################################################################
-# HTML parser tests
-###########################################################################
-
-sub html_tag_balance {
-  my ($self, undef, $rawtag, $rawexpr) = @_;
-  $rawtag =~ /^([a-zA-Z0-9]+)$/; my $tag = $1;
-  $rawexpr =~ /^([\<\>\=\!\-\+ 0-9]+)$/; my $expr = $1;
-
-  return 0 unless exists $self->{html_inside}{$tag};
-
-  $self->{html_inside}{$tag} =~ /^([\<\>\=\!\-\+ 0-9]+)$/;
-  my $val = $1;
-  return eval "$val $expr";
-}
-
-sub html_image_only {
-  my ($self, undef, $min, $max) = @_;
-
-  return (exists $self->{html_inside}{'img'} &&
-	  exists $self->{html}{non_space_len} &&
-	  $self->{html}{non_space_len} > $min &&
-	  $self->{html}{non_space_len} <= $max &&
-	  $self->get('X-eGroups-Return') !~ /^sentto-.*\@returns\.groups\.yahoo\.com$/);
-}
-
-sub html_image_ratio {
-  my ($self, undef, $min, $max) = @_;
-
-  return 0 unless (exists $self->{html}{non_space_len} &&
-		   exists $self->{html}{image_area} &&
-		   $self->{html}{image_area} > 0);
-  my $ratio = $self->{html}{non_space_len} / $self->{html}{image_area};
-  return ($ratio > $min && $ratio <= $max);
-}
-
-sub html_charset_faraway {
-  my ($self) = @_;
-
-  return 0 unless exists $self->{html}{charsets};
-
-  my @locales = $self->get_my_locales();
-  return 0 if grep { $_ eq "all" } @locales;
-
-  my $okay = 0;
-  my $bad = 0;
-  for my $c (split(' ', $self->{html}{charsets})) {
-    if (Mail::SpamAssassin::Locales::is_charset_ok_for_locales($c, @locales)) {
-      $okay++;
-    }
-    else {
-      $bad++;
-    }
-  }
-  return ($bad && ($bad >= $okay));
-}
-
-sub html_tag_exists {
-  my ($self, undef, $tag) = @_;
-  return exists $self->{html_inside}{$tag};
-}
-
-sub html_test {
-  my ($self, undef, $test) = @_;
-  return $self->{html}{$test};
-}
-
-sub html_eval {
-  my ($self, undef, $test, $expr) = @_;
-  return exists $self->{html}{$test} && eval "qq{\Q$self->{html}{$test}\E} $expr";
-}
-
-sub html_message {
-  my ($self) = @_;
-
-  return (exists $self->{html}{elements} &&
-	  ($self->{html}{elements} >= 8 ||
-	   $self->{html}{elements} >= $self->{html}{tags} / 2));
-}
-
-sub html_range {
-  my ($self, undef, $test, $min, $max) = @_;
-
-  return 0 unless exists $self->{html}{$test};
-
-  $test = $self->{html}{$test};
-
-  # not all perls understand what "inf" means, so we need to do
-  # non-numeric tests!  urg!
-  if ( !defined $max || $max eq "inf" ) {
-    return ( $test eq "inf" ) ? 1 : ($test > $min);
-  }
-  elsif ( $test eq "inf" ) {
-    # $max < inf, so $test == inf means $test > $max
-    return 0;
-  }
-  else {
-    # if we get here everything should be a number
-    return ($test > $min && $test <= $max);
+    $self->{html}{"inside_$tag"} = 0;
   }
 }
 

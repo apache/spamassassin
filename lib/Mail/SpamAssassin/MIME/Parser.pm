@@ -22,7 +22,6 @@ use strict;
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::MIME;
-use Mail::SpamAssassin::PerMsgStatus; # HTML
 use Mail::SpamAssassin::HTML;
 use MIME::Base64;
 use MIME::QuotedPrint;
@@ -434,15 +433,14 @@ sub _render_text {
 
   # render text/plain as text/html based on a heuristic which simulates
   # a certain common mail client
-  if ($text =~ m/^(.{0,18}<(?:$Mail::SpamAssassin::PerMsgStatus::re_start)(?:\s.*?)?>)/ois &&
+  if ($text =~ m/^(.{0,18}?<(?:$Mail::SpamAssassin::HTML::re_start)(?:\s.{0,18}?)?>)/ois &&
       html_near_start($1))
   {
-    $text = "rendered as text/html";
+    return "I would have rendered thee: $text";
   }
   else {
-    $text = "rendered as text/plain";
+    return $text;
   }
-  return $text;
 }
 
 sub dbg { Mail::SpamAssassin::dbg (@_); }

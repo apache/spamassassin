@@ -3175,5 +3175,107 @@ sub check_for_all_relays_near_mxes {
 }
 
 ###########################################################################
+# HTML parser tests
+###########################################################################
+
+sub html_tag_balance {
+  my ($self, undef, $rawtag, $rawexpr) = @_;
+  $rawtag =~ /^([a-zA-Z0-9]+)$/; my $tag = $1;
+  $rawexpr =~ /^([\<\>\=\!\-\+ 0-9]+)$/; my $expr = $1;
+
+  return 0 unless exists $self->{html}{"inside_$tag"};
+
+  $self->{html}{"inside_$tag"} =~ /^([\<\>\=\!\-\+ 0-9]+)$/;
+  my $val = $1;
+  return eval "$val $expr";
+}
+
+sub html_image_only {
+  my ($self, undef, $min, $max) = @_;
+
+  return (exists $self->{html}{"inside_img"} &&
+	  exists $self->{html}{non_space_len} &&
+	  $self->{html}{non_space_len} > $min &&
+	  $self->{html}{non_space_len} <= $max &&
+	  $self->get('X-eGroups-Return') !~ /^sentto-.*\@returns\.groups\.yahoo\.com$/);
+}
+
+sub html_image_ratio {
+  my ($self, undef, $min, $max) = @_;
+
+  return 0 unless (exists $self->{html}{non_space_len} &&
+		   exists $self->{html}{image_area} &&
+		   $self->{html}{image_area} > 0);
+  my $ratio = $self->{html}{non_space_len} / $self->{html}{image_area};
+  return ($ratio > $min && $ratio <= $max);
+}
+
+sub html_charset_faraway {
+  my ($self) = @_;
+
+  return 0 unless exists $self->{html}{charsets};
+
+  my @locales = $self->get_my_locales();
+  return 0 if grep { $_ eq "all" } @locales;
+
+  my $okay = 0;
+  my $bad = 0;
+  for my $c (split(' ', $self->{html}{charsets})) {
+    if (Mail::SpamAssassin::Locales::is_charset_ok_for_locales($c, @locales)) {
+      $okay++;
+    }
+    else {
+      $bad++;
+    }
+  }
+  return ($bad && ($bad >= $okay));
+}
+
+sub html_tag_exists {
+  my ($self, undef, $tag) = @_;
+  return exists $self->{html}{"inside_$tag"};
+}
+
+sub html_test {
+  my ($self, undef, $test) = @_;
+  return $self->{html}{$test};
+}
+
+sub html_eval {
+  my ($self, undef, $test, $expr) = @_;
+  return exists $self->{html}{$test} && eval "qq{\Q$self->{html}{$test}\E} $expr";
+}
+
+sub html_message {
+  my ($self) = @_;
+
+  return (exists $self->{html}{elements} &&
+	  ($self->{html}{elements} >= 8 ||
+	   $self->{html}{elements} >= $self->{html}{tags} / 2));
+}
+
+sub html_range {
+  my ($self, undef, $test, $min, $max) = @_;
+
+  return 0 unless exists $self->{html}{$test};
+
+  $test = $self->{html}{$test};
+
+  # not all perls understand what "inf" means, so we need to do
+  # non-numeric tests!  urg!
+  if ( !defined $max || $max eq "inf" ) {
+    return ( $test eq "inf" ) ? 1 : ($test > $min);
+  }
+  elsif ( $test eq "inf" ) {
+    # $max < inf, so $test == inf means $test > $max
+    return 0;
+  }
+  else {
+    # if we get here everything should be a number
+    return ($test > $min && $test <= $max);
+  }
+}
+
+###########################################################################
 
 1;
