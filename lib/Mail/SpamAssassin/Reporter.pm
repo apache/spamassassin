@@ -152,6 +152,12 @@ sub razor_report {
         my $objects = $rc->prepare_objects( \@msg )
           or adie ("error in prepare_objects");
         $rc->get_server_info() or adie $rc->errprefix("reportit");
+
+	# let's reset the alarm since get_server_info() calls
+	# nextserver() which calls discover() which very likely will
+	# reset the alarm for us ... how polite.  :(  
+	alarm $timeout;
+
         my $sigs = $rc->compute_sigs($objects)
           or adie ("error in compute_sigs");
 
