@@ -1,9 +1,14 @@
-# spanish spamassassin header test.
+# SpamAssassin rules file: Spanish header tests
 #
-# please be aware that values are just my estimates
-# and could be wrong. Use with care.
-# contact info: <jesus.climent@hispalinux.es>
-# $Id: 25_head_tests_es.cf,v 1.7 2002/09/04 18:36:50 jmason Exp $
+# Contact: Jesus Climent <jesus.climent at hispalinux dot es>
+# Please be aware that values are just my estimates and could be wrong.
+# Use with care.
+#
+# Please don't modify this file as your changes will be overwritten with
+# the next update. Use @@LOCAL_RULES_DIR@@/local.cf instead.
+# See 'perldoc Mail::SpamAssassin::Conf' for details.
+#
+###########################################################################
 
 lang es header OFERTA_ES	ALL =~ /\b(?:ofertas?|publicidad|promoci[óo]n)\b/i
 lang es describe OFERTA_ES	Publicidad por e-mail

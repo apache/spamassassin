@@ -1,5 +1,9 @@
-# SpamAssassin rules file: scores.
-# $Id: 50_scores.cf,v 1.216 2002/09/10 14:31:28 jmason Exp $
+# SpamAssassin score file
+#
+# Please don't modify this file as your changes will be overwritten with
+# the next update. Use @@LOCAL_RULES_DIR@@/local.cf instead.
+# See 'perldoc Mail::SpamAssassin::Conf' for details.
+#
 ###########################################################################
 # Default scores.   Note that if a test is named in the files, but a score is
 # not assigned here, the default score will be set to 1.
