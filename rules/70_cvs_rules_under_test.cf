@@ -45,3 +45,7 @@
 # meta T_INVALID_DATE_2		(__INVALID_DATE && !__XM_FOXMAIL && !__XM_EARTHLINK)
 # describe T_INVALID_DATE_2	Invalid Date: header (not RFC 2822)
 
+# Wierd.  Can only assume this is caused by PEBKAC on the sending side...
+# header T_SEZ_HTML_BUT_NOT	(MIME_HTML_ONLY && !HTML_MESSAGE)
+# describe T_SEZ_HTML_BUT_NOT	Claims to be HTML, but is actually plain text
+

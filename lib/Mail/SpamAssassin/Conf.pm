@@ -588,8 +588,11 @@ B<always_add_report>.
 By default, mail tagged as spam includes a report, either in the headers or in
 an attachment (report_safe). If you set this to option to C<1>, the report will
 be included in the B<X-Spam-Report> header, even if the message is not tagged
-as spam.  This can be useful if you want to know what rules the mail triggered,
-and why it was not tagged as spam.  See also B<always_add_headers>.
+as spam.  Note that the report text B<always> states that the mail is spam,
+since normally the report is only added if the mail B<is> spam.
+
+This can be useful if you want to know what rules the mail triggered, and why
+it was not tagged as spam.  See also B<always_add_headers>.
 
 =cut
 
