@@ -22,9 +22,13 @@
 # QUICK HACK: some of our spamtraps are getting nonspam newsletters. ignore
 # those mails here...
 
-$skipped_list_message_ids = qr{
+my $killfile_message_ids = qr{(?:
     <\d\d\d\d\S+\@dev\.lifetimetv\.com>
-}x;
+)}x;
+
+my $killfile_receiveds = qr{(?:
+    from\s\S+\s\S+\sby\s(?:anclsmtp\d\d|myfamlsmtp\d\d)\.myfamily\.com
+)}x;
 
 ###########################################################################
 
@@ -93,10 +97,10 @@ sub wanted {
   my $ma = Mail::SpamAssassin::NoMailAudit->new ('data' => $dataref);
 
   # killfile for mass-checks
-  my $msgid = $ma->get_header("Message-Id");
-  if ($msgid =~ /${skipped_list_message_ids}/o) {
-    return;
-  }
+  $_ = $ma->get_header("Message-Id");
+  if (/${killfile_message_ids}/os) { logkilled($ma); return; }
+  $_ = join ('', $ma->get_header("Received"));
+  if (/${killfile_receiveds}/os) { logkilled($ma); return; }
 
   $ma->{noexit} = 1;
   $spamtest->remove_spamassassin_markup($ma);
@@ -135,6 +139,20 @@ sub wanted {
   undef $status;
 
 # system ("ps alxww | grep mass-check | grep perl | grep -v grep");#JMD
+}
+
+sub logkilled {
+  my ($ma) = shift;
+
+  my $from = $ma->get_header ("From");
+  my $to = $ma->get_header ("To");
+  my $subj = $ma->get_header ("Subject");
+  my $msgid = $ma->get_header ("Message-Id");
+  chop ($from);
+  chop ($to);
+  chop ($subj);
+  chop ($msgid);
+  warn "# skipped killfiled message: from=$from to=$to subj=$subj id=$msgid\n";
 }
 
 ###########################################################################

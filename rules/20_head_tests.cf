@@ -10,7 +10,7 @@ describe FROM_ENDS_IN_NUMS	From: ends in numbers
 header FROM_STARTS_WITH_NUMS	From =~ /^\d\d/
 describe FROM_STARTS_WITH_NUMS	From: starts with nums
 
-header FROM_HAS_MIXED_NUMS	From =~ /\d+[a-z]+\d+\S*@/i
+header FROM_HAS_MIXED_NUMS	From =~ /\d+[a-z]+\d+\S*\@/i
 describe FROM_HAS_MIXED_NUMS	From: contains numbers mixed in with letters
 
 # (contrib: David Hull - fixed to support "foo @ foo . com" <foo@foo.com>)
@@ -561,5 +561,29 @@ header EXTRA_MPART_TYPE         Content-Type =~ /(?:\s*multipart\/)?.* type=/i
 describe EXTRA_MPART_TYPE       Message with extraneous Content-type:...type= header
 
 header TO_RECIP_MARKER          To =~ /\#recipient\#/
-describe TO_RECIP_MARKER        To header contains '#recipient#' marker
+describe TO_RECIP_MARKER        To header contains 'recipient' marker
+
+# MIME boundary tests; spam tools use distinctive patterns.
+header MIME_BOUND_HASHES     Content-type =~ /boundary=\"\#\#\#\#\#\#\#\#\#\#\"/
+header MIME_BOUND_DIGITS_1   Content-Type =~ /boundary=\"----------=_\d\d\d\d\d\d\d\d\d\d-\d\d\d\d-\d\d\"/
+header MIME_BOUND_DIGITS_2   Content-Type =~ /boundary=\"----------=_\d\d\d\d\d\d\d\d\d\d-\d\d\d\d\d-\d\"/
+header MIME_BOUND_DIGITS_3   Content-Type =~ /boundary=\"----\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\"/
+header MIME_BOUND_DIGITS_4   Content-Type =~ /boundary=\"_----------=_\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\"/
+header MIME_BOUND_DIGITS_5   Content-Type =~ /boundary=\"\d-\d\d\d\d\d\d\d\d\d-\d\d\d\d\d\d\d\d\d\d=:\d\d\d\d\d\"/
+header MIME_BOUND_DIGITS_6   Content-Type =~ /boundary=\"\d-\d\d\d\d\d\d\d\d\d\d-\d\d\d\d\d\d\d\d\d\d=:\d\d\d\d\d\"/
+header MIME_BOUND_DIGITS_7   Content-Type =~ /boundary=\d\d\d\d\d\d\d\d\d.\d\d\d\d\d\d\d\d\d\d\d\d\d/
+header MIME_BOUND_DIGITS_8   Content-Type =~ /boundary=\"\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\"/
+header MIME_BOUND_NEXTPART_1 Content-Type =~ /boundary=\"_NextPart_\d\d_\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\"/
+header MIME_BOUND_NEXTPART_2 Content-Type =~ /boundary=\"_NextPart_\d\d_\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\"/
+header MIME_BOUND_NEXTPART_3 Content-Type =~ /boundary=\"_NextPart_\d\d\d_\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\"/
+header MIME_BOUND_NEXTPART_4 Content-Type =~ /boundary=\"_NextPart_\d\d\d_\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\"/
+header MIME_BOUND_MA         Content-Type =~ /boundary=\"----=_[A-Z0-9]{8}_[A-Z0-9]{8}_MA\"/
+header MIME_BOUND_SEP1       Content-Type =~ /boundary=\"--==--==_Separator1\"/
+header MIME_BOUND_HEX29      Content-Type =~ /boundary=\"[0-9A-F]{29}\"/
+header MIME_BOUND_OPTIN      Content-Type =~ /boundary=\"\d\d\d\d\d\d\d\d-\d\d\d\d-\d\d\d\d-\d\d\d\d-\d\d\d\d\d\d\d\d\d\d\d\dOPTIN\"/
+header MIME_BOUND_HEX14      Content-Type =~ /boundary=\"==[0-9a-f]{14}\"/
+header MIME_BOUND_EQS_DASHES Content-Type =~ /boundary=\"==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==\"/
+header MIME_BOUND_MIME_BOUND Content-Type =~ /boundary=\"MIME_BOUNDARY-\d\d\d\d\d-\d-\d\d\d\d\d\d\d\d\d\d\"/
+header MIME_BOUND_MAIL_BOUND Content-Type =~ /boundary=\"___MAIL_BOUNDARY____\"/
+
 
