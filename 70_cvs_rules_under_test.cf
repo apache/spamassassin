@@ -490,4 +490,9 @@ header T_MSGID_EVIL_SPAM_1	MESSAGEID =~ /<[a-z\d][a-z\d\$-]+[a-z\d]\@[a-z\d][a-z
 header T_MSGID_EVIL_SPAM_2	MESSAGEID =~ /<[a-z\d][a-z\d\$-]{10,29}[a-z\d]\@[a-z\d][a-z\d.]{3,12}[a-z\d]>/
 
 header T_SUBJ_XANAX		Subject =~ /x.{0,2}a.{0,2}n.{0,2}a.{0,2}x/i
+header T_SUBJ_VALIUM		Subject =~ /v.{0,2}a.{0,2}l.{0,2}i.{0,2}u.{0,2}m/i
+header T_SUBJ_VIAGRA		Subject =~ /v.{0,2}i.{0,2}a.{0,2}g.{0,2}r.{0,2}a/i
+header T_SUBJ_VICODIN		Subject =~ /v.{0,2}i.{0,2}c.{0,6}d.{0,2}i.{0,2}n/i
+header T_SUBJ_SOMA		Subject =~ /s.{0,2}o.{0,2}m.{0,2}a/i
+header T_SUBJ_PHENTER		Subject =~ /p.{0,2}h.{0,6}t.{0,2}e.{0,2}r.{0,2}m/i
 
