@@ -436,10 +436,13 @@ sub run_mailbox {
 sub fix_globs {
   my ($self, $path) = @_;
 
-  # fix home dir: ~ = /home/jm
-  $path =~ s/\~/$ENV{'HOME'}/g;
+  # replace leading tilde with home dir: ~/abc => /home/jm/abc
+  $path =~ s/^~/$ENV{'HOME'}/;
+  
+  # protect/escape spaces: ./Mail/My Letters => ./Mail/My\ Letters
+  $path =~ s/([^\\])(\s)/$1\\$2/g;
 
-  # fix csh-style globs: * = er, you know what it does ;)
+  # apply csh-style globs: ./corpus/*.mbox => er, you know what it does ;)
   my @paths = glob $path;
   return @paths;
 }
