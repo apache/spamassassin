@@ -1026,6 +1026,12 @@ sub got_hit {
 
 sub test_log {
   my ($self, $msg) = @_;
+  while ($msg =~ s/^(.{38,48})\s//) { $self->_test_log_line ($1); }
+  $self->_test_log_line ($msg);
+}
+
+sub _test_log_line {
+  my ($self, $msg) = @_;
   if ($self->{conf}->{use_terse_report}) {
     $self->{test_log_msgs} .= sprintf ("%9s [%s]\n", "", $msg);
   } else {
