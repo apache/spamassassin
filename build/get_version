@@ -1,9 +1,0 @@
-#!/usr/bin/perl
-
-open (IN, "< lib/Mail/SpamAssassin.pm")
-	or die "cannot open lib/Mail/SpamAssassin.pm\n";
-while (<IN>) {
-  /^\s*\$VERSION\s*=\s*\"(\S+)\"\;/ or next;
-  print "$1\n";
-}
-close IN;

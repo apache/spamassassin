@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.3 2002/08/20 10:07:44 quinlan Exp $
+# $Id: HTML.pm,v 1.3.2.2 2002/08/22 10:41:26 matt_sergeant Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -27,10 +27,10 @@ sub html_format {
   my ($self, $tag, $attr, $num) = @_;
 
   if ($tag eq "p" || $tag eq "hr") {
-    $self->{html_text} .= "\n\n";
+    push @{$self->{html_text}}, "\n\n";
   }
   elsif ($tag eq "br") {
-    $self->{html_text} .= "\n";
+    push @{$self->{html_text}}, "\n";
   }
 }
 
@@ -39,19 +39,35 @@ sub html_uri {
   my $uri;
 
   if ($tag =~ /^(?:a|area|link)$/) {
-    $self->{html_text} .= "URI:$uri " if $uri = $attr->{href};
+    push @{$self->{html_text}}, "URI:$uri " if $uri = $attr->{href};
   }
   elsif ($tag =~ /^(?:img|frame|iframe|embed|script)$/) {
-    $self->{html_text} .= "URI:$uri " if $uri = $attr->{src};
+    push @{$self->{html_text}}, "URI:$uri " if $uri = $attr->{src};
   }
   elsif ($tag =~ /^(?:body|table|tr|td)$/) {
-    $self->{html_text} .= "URI:$uri " if $uri = $attr->{background};
+    push @{$self->{html_text}}, "URI:$uri " if $uri = $attr->{background};
   }
   elsif ($tag eq "form") {
-    $self->{html_text} .= "URI:$uri " if $uri = $attr->{action};
+    push @{$self->{html_text}}, "URI:$uri " if $uri = $attr->{action};
   }
   elsif ($tag eq "base") {
-    $self->{html_text} .= "BASEURI:$uri " if $uri = $attr->{href};
+    if ($uri = $attr->{href}) {
+      # use <BASE HREF="URI"> to turn relative links into absolute links
+
+      # even if it is a base URI, handle like a normal URI as well
+      push @{$self->{html_text}}, "URI:$uri ";
+
+      # a base URI will be ignored by browsers unless it is an absolute
+      # URI of a standard protocol
+      if ($uri =~ m@^(?:ftp|https?)://@i) {
+	# remove trailing filename, if any; base URIs can have the
+	# form of "http://foo.com/index.html"
+	$uri =~ s@^([a-z]+://[^/]+/.*?)[^/\.]+\.[^/\.]{2,4}$@$1@i;
+	# Make sure it ends in a slash
+	$uri .= "/" unless $uri =~ m@/$@;
+	$self->{html}{base_href} = $uri;
+      }
+    }
   }
 }
 
@@ -211,7 +227,7 @@ sub html_text {
   return if (exists $self->{html_inside}{script} && $self->{html_inside}{script} > 0);
   return if (exists $self->{html_inside}{style} && $self->{html_inside}{style} > 0);
   $text =~ s/\n// if $self->{html_last_tag} eq "br";
-  $self->{html_text} .= $text;
+  push @{$self->{html_text}}, $text;
 }
 
 sub html_comment {

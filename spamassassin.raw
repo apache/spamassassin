@@ -12,15 +12,23 @@ BEGIN {
   # warnings and causes more trouble than its worth.  We don't need to be too
   # smart about this BTW.
   my @bin = File::Spec->splitpath($0);
-  my $bin = ($bin[0] ? File::Spec->joinpath(@bin[0..1]) : $bin[1]) # /home/jm/foo -> /home/jm
+  my $bin = ($bin[0] ? File::Spec->catpath(@bin[0..1]) : $bin[1])  # /home/jm/foo -> /home/jm
             || File::Spec->curdir;                                 # foo          -> .
 
-  # These are common paths where the SA libs might be found.
-  foreach (qw(lib ../lib ../lib/site_perl ../lib/spamassassin ../share/spamassassin/lib)) {
-    my $dir = File::Spec->catdir($bin, split('/', $_));
-    if(-f File::Spec->catfile($dir, "Mail", "SpamAssassin.pm")) {
-      unshift(@INC, $dir);
-      last;
+  # check to make sure it wasn't just installed in the normal way.
+  # note that ./lib/Mail/SpamAssassin.pm takes precedence, for
+  # building SpamAssassin on a machine where an old version is installed.
+  if (-e $bin.'/lib/Mail/SpamAssassin.pm'
+        || !-e '@@INSTALLSITELIB@@/Mail/SpamAssassin.pm')
+  {
+    # These are common paths where the SA libs might be found.
+    foreach (qw(lib ../lib/site_perl
+                ../lib/spamassassin ../share/spamassassin/lib))
+    {
+      my $dir = File::Spec->catdir($bin, split('/', $_));
+      if(-f File::Spec->catfile($dir, "Mail", "SpamAssassin.pm")) {
+        unshift(@INC, $dir); last;
+      }
     }
   }
 }
@@ -45,7 +53,9 @@ eval {
   require Mail::SpamAssassin;
   require Mail::SpamAssassin::NoMailAudit;
 
-  Getopt::Long::Configure(qw(gnu_getopt no_auto_abbrev no_ignore_case));
+  # gnu_getopt is not available in Getopt::Long 2.24, see bug 732
+  # gnu_compat neither.
+  Getopt::Long::Configure(qw(bundling no_getopt_compat no_auto_abbrev no_ignore_case));
   GetOptions(
 	     'whitelist-factory|M=s'             => \$opt{'whitelist-factory'},
 	     'auto-whitelist|a'                  => \$opt{'auto-whitelist'},
@@ -60,10 +70,11 @@ eval {
 	     'config-file|config-dir|c|C=s'      => \$opt{'config-file'},
 	     'prefs-file|p=s'                    => \$opt{'prefs-file'},
 	     'create-prefs!'                     => \$opt{'create-prefs'},
-	       'x'                               => sub { $opt{'create-prefs'} = 0 },
+	     'x'                                 => sub { $opt{'create-prefs'} = 0 },
 	     'log-to-mbox|l=s'                   => \$opt{'log-to-mbox'},
 	     'error-code|exit-code|e:i'          => \$opt{'error-code'},
 	     'test-mode|test|t'                  => \$opt{'test-mode'},
+             'lint'                              => \$opt{'lint'},
 	     'debug-level|debug|D:s'             => \$opt{'debug-level'},
 	     'version|V'                         => \$opt{'version'},
 	     'help|h|?'                          => \$opt{'help'},
@@ -81,19 +92,23 @@ eval {
     exit 0;
   }
 
+  my $mail;
+
 # 1.
 # Standard Mail::Audit start.  No longer used due to bugs in M:A, regarding
 # handling of slightly misformatted input.
 #
 # require Mail::Audit;
-# my $mail = Mail::Audit->new();
+# $mail = Mail::Audit->new();
 
 # 2.
 # No use of Mail::Audit at all, apart from the accept(), reject() and
 # resend() methods (which are proxied transparently).  Lovely.
 #
   use Mail::SpamAssassin::NoMailAudit;
-  my $mail = Mail::SpamAssassin::NoMailAudit->new ();
+  if (!$opt{'lint'}) {
+    $mail = Mail::SpamAssassin::NoMailAudit->new ();
+  }
 
 # For Mail::Audit users -- this is the magic. Just create a Mail::SpamAssassin
 # object like this, then run the check() method as below; if it returns a
@@ -110,12 +125,14 @@ eval {
     rules_filename	=> $opt{'config-file'},
     userprefs_filename => $opt{'prefs-file'},
     local_tests_only	=> $opt{'local'},
-    stop_at_threshold => $opt{'stop-at-threshold'},
     debug             => defined($opt{'debug-level'}),
     dont_copy_prefs   => ($opt{'create-prefs'} ? 0 : 1),
     DEF_RULES_DIR     => $DEF_RULES_DIR,
     LOCAL_RULES_DIR   => $LOCAL_RULES_DIR,
   });
+
+# currently offline:
+#stop_at_threshold => $opt{'stop-at-threshold'},
 
 # set debug levels, if any specified (only useful for this command-line
 # tool really)
@@ -134,6 +151,10 @@ eval {
     $mail->{noexit} = 1;
     $mail->accept ($opt{'log-to-mbox'});
     $mail->{noexit} = 0;
+  }
+
+  if ($opt{'lint'}) {
+    exit $spamtest->lint_rules ();
   }
 
 # handle removing reports
@@ -179,6 +200,8 @@ eval {
 
   $spamtest->set_persistent_address_list_factory ($addrlistfactory);
 };
+
+  if ($@) { warn $@; }
 
   if ($opt{'add-to-whitelist'}) {
     $spamtest->add_all_addresses_to_whitelist ($mail);
@@ -242,6 +265,12 @@ sub NEVERCALLED {
 
 # ---------------------------------------------------------------------------
 
+# currently offline:
+# -S, --stop-at-threshold           Stop tests when the threshold is reached
+# =item B<-S>, B<--stop-at-threshold>
+# Stop spam checking as soon as the spam threshold is reached, to increase
+# performance. This option also turns off Razor reporting.
+
 =head1 NAME
 
 spamassassin - mail filter to identify spam using text analysis
@@ -260,7 +289,6 @@ Options:
 
  -P, --pipe                        Deliver to STDOUT (now default)
  -L, --local                       Local tests only (no online tests)
- -S, --stop-at-threshold           Stop tests when the threshold is reached
  -a, --auto-whitelist              Use auto-whitelists
  -M, --whitelist-factory           Select whitelist factory
  -W, --add-to-whitelist            Add addresses in mail to whitelist
@@ -277,6 +305,7 @@ Options:
  -l filename, --log-to-mbox=file   Log messages to a mbox file
  -t, --test-mode                   Pipe message through and add extra
                                    report to the bottom
+ --lint                            Lint the rule set: report syntax errors
  -D, --debug [area=n,...]          Print debugging messages
  -V, --version                     Print version
  -h, --help                        Print usage message
@@ -288,7 +317,8 @@ Options:
 =item B<-P>, B<--pipe>
 
 The B<-P> parameter will cause SpamAssassin to pipe the output to STDOUT.
-This is now the default mode of operation.
+This is now the default mode of operation, so this switch is obsolete,
+and should not be used anymore.
 
 =item B<-a>, B<--auto-whitelist>, B<--whitelist>
 
@@ -309,7 +339,9 @@ Print help message and exit.
 
 =item B<-t>, B<--test-mode>
 
-Test mode.  Pipe message through and add extra report.
+Test mode.  Pipe message through and add extra report.  Note that the report
+text assumes that the message is spam, since in normal use it is only visible
+in this case.  Pay attention to the score instead.
 
 =item B<-r>, B<--report>
 
@@ -322,6 +354,12 @@ If the message contains SpamAssassin markup, this will be stripped out
 automatically before submission.  The support modules for DCC and Razor
 must be installed for spam to be reported to each service.
 
+=item B<--lint>
+
+Syntax check (lint) the rule set and configuration files, reporting
+typos and rules that do not compile correctly.  Exits immediately with
+0 if there are no errors, or greater than 0 if any errors are found.
+
 =item B<-W>, B<--add-to-whitelist>
 
 Add all email addresses, in the headers and body of the mail message read from
@@ -330,7 +368,11 @@ STDIN, to the automatic whitelist.
 =item B<-R>, B<--remove-from-whitelist>
 
 Remove all email addresses, in the headers and body of the mail message read
-from STDIN, from the automatic whitelist.
+from STDIN, from the automatic whitelist.  STDIN must get a full email message, so
+to remove a single address you have to get creative, eg:
+
+C<echo 'From: email@address.domain' | spamassassin -R> or
+C<echo -e '\r\nemail@address.domain' | spamassassin -R>
 
 =item B<-w> I<fromaddr>, B<--warning-from>=I<fromaddr>
 
@@ -349,11 +391,6 @@ Do only the ''local'' tests, ones that do not require an internet connection to
 operate.  Normally, SpamAssassin will try to detect whether you are connected
 to the net before doing these tests anyway, but for faster checks you may wish
 to use this.
-
-=item B<-S>, B<--stop-at-threshold>
-
-Stop spam checking as soon as the spam threshold is reached, to increase
-performance. This option also turns off Razor reporting.
 
 =item B<-d>, B<--remove-markup>
 

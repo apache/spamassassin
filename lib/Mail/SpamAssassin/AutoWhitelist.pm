@@ -163,12 +163,9 @@ sub remove_address {
 
   $addr = lc $addr;
   $addr =~ s/[\000\;\'\"\!\|]/_/gs;	# paranoia
-  my $entry = $self->{checker}->get_addr_entry ($addr);
 
-  if ($entry->{count} > 0) {
-    $self->{checker}->remove_entry ($entry);
-    return 1;
-  }
+  my $entry = $self->{checker}->get_addr_entry ($addr);
+  $self->{checker}->remove_entry ($entry) and return 1;
 
   return 0;
 }

@@ -1,0 +1,20 @@
+
+CC = @CC@
+CFLAGS = @CFLAGS@
+CCDLFLAGS = @CCDLFLAGS@
+
+LIBS = @LIBS@
+LDFLAGS = @LDFLAGS@
+LDDLFLAGS = @LDDLFLAGS@
+
+SPAMC_FILES = spamd/spamc.c
+
+LIBSPAMC_FILES = spamd/libspamc.c spamd/utils.c
+
+spamd/spamc: $(SPAMC_FILES) $(LIBSPAMC_FILES)
+	$(CC) $(CFLAGS) $(SPAMC_FILES) $(LIBSPAMC_FILES) \
+		-o $@ $(LDFLAGS) $(LIBS)
+
+spamd/libspamc.so: $(LIBSPAMC_FILES)
+	$(CC) $(CCDLFLAGS) $(LIBSPAMC_FILES) -o $@ $(LDDLFLAGS) $(LIBS)
+
