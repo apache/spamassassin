@@ -487,3 +487,15 @@ header T_SB_23_7_6_25_60 eval:check_rbl_sub('senderbase', 'S23 > 7.6 && (time - 
 header T_SB_23_7_6_25_90 eval:check_rbl_sub('senderbase', 'S23 > 7.6 && (time - S25 < 90*86400)')
 header T_SB_23_7_6_25_120 eval:check_rbl_sub('senderbase', 'S23 > 7.6 && (time - S25 < 120*86400)')
 header T_SB_23_7_6_25_180 eval:check_rbl_sub('senderbase', 'S23 > 7.6 && (time - S25 < 180*86400)')
+
+# test 
+ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
+
+uridnsbl_timeout 2
+
+uridnsbl T_URIBL_SC_SURBL	sc.surbl.org.	TXT
+header T_URIBL_SC_SURBL		eval:check_uridnsbl('T_URIBL_SC_SURBL')
+describe T_URIBL_SC_SURBL	Contains a URL listed in the SC SURBL blocklist
+tflags T_URIBL_SC_SURBL		net
+
+endif   # Mail::SpamAssassin::Plugin::URIDNSBL
