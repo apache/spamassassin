@@ -1,0 +1,176 @@
+#!/usr/bin/perl -w
+
+use Getopt::Std;
+
+use FindBin;
+BEGIN {
+  # This code will track down the directories where WebMake
+  # keeps its modules, portably, so it'll work on Macs, UNIX and Win32,
+  # with or without a UNIX-style "make install" installation.
+  # Sadly, we can't rely on File::Spec to do the slash-twiddling for us;
+  # it's not included with some versions of MacPerl. :(
+  #
+  my $bin = $FindBin::Bin;
+  my $slash = '/';              # between directories in a path
+  my $dirtrailer = '';          # at the end of a directory's path
+
+  if ($^O eq 'MacOS') {
+    $slash = ':'; $dirtrailer = ':';
+  } elsif ($^O =~ /(win|os2)/) {
+    $slash = '\\';
+  }
+
+  # first, find the common candidates: "lib" and "site_perl" in
+  # the same dir as the script. These are likely on all platforms.
+  $_ = $bin.$slash. "lib" . $dirtrailer;
+  push (@INC, $_);
+  $_ = $bin.$slash. "site_perl" . $dirtrailer;
+  push (@INC, $_);
+
+  # next, support UNIX-style /usr-based installation, where the
+  # script lives in /usr/*/bin and the support files in /usr/*/lib
+  # or /usr/*/share. This only happens on UNIX afaik.
+  if ($slash eq '/') {
+    $_ = $bin . "/../lib/spamassassin";
+    if (-d $_) {
+      push (@INC, "$_/lib"); push (@INC, "$_/site_perl");
+    }
+
+    $_ = $bin . "/../share/spamassassin";
+    if (-d $_) {
+      push (@INC, "$_/lib"); push (@INC, "$_/site_perl");
+    }
+  }
+}
+
+sub usage {
+  my $ver = Mail::SpamAssassin::Main::Version();
+  die <<EOUSAGE;
+
+Usage: spamassassin [option ...] < mailmessage > output
+
+Options:
+ 
+  -t               only testing
+  -c config        configuration file
+  -p prefs         user preferences file
+
+Version: $ver      Home: http://spamassassin.taint.org/
+
+EOUSAGE
+}
+
+
+require Mail::SpamAssassin::Main;
+require Mail::Audit;
+
+use vars qw{
+  $opt_t $opt_c $opt_p $opt_h $opt_V
+};
+
+getopts ('tc:p:hV') or usage();
+
+if (defined $opt_h) { usage(); }
+if (defined $opt_V) {
+  my $ver = Mail::SpamAssassin::Main::Version();
+  print <<EOVERSION;
+SpamAssassin version $ver
+EOVERSION
+  exit 0;
+}
+
+# For Mail::Audit users -- this is the magic. Just create a
+# Mail::SpamAssassin::Main object like this, then run the
+# check() method as below; if it returns a non-undef value,
+# then you've got spam, otherwise it's normal mail.
+#
+# This implementation does other stuff though; it tags it
+# nicely etc.
+#
+my $spamtest = new Mail::SpamAssassin::Main ({
+  'testing'		=> $opt_t,
+  'rules_filename'	=> $opt_c,
+  'userprefs_filename'	=> $opt_p
+});
+
+my $mail = Mail::Audit->new();
+my $isspam = $spamtest->check ($mail);
+$spamtest->rewrite ($mail);
+
+if ($opt_t) {
+  my $lines = $mail->{obj}->body();
+  push (@{$lines}, split (/$/, $spamtest->{report}));
+  $mail->{obj}->body ($lines);
+
+  $mail->{obj}->print (\*STDOUT);
+
+} else {
+  $mail->accept();
+}
+
+# ---------------------------------------------------------------------------
+
+=head1 NAME
+
+spamassassin - mail filter to identify spam using text analysis
+
+=head1 SYNOPSIS
+
+  spamassassin [option ...] < mailmessage > output
+
+  -t               only testing
+  -c config        configuration file
+  -p prefs         user preferences file
+
+=head1 DESCRIPTION
+
+TODO
+
+=head1 OPTIONS
+
+=over 4
+
+=item -t
+
+Test mode.
+
+=item -c config
+
+Read configuration from C<config>.
+
+=item -p prefs
+
+Read user score preferences from C<prefs>.
+
+=back
+
+=head1 INSTALLATION
+
+The B<spamassassin> command is part of the B<Mail::SpamAssassin> Perl module.
+Install this as a normal Perl module, using C<perl -MCPAN -e shell>, or by
+hand.
+
+=head1 ENVIRONMENT
+
+No environment variables, aside from those used by perl, are required to
+be set.
+
+=head1 SEE ALSO
+
+C<Mail::SpamAssassin>
+C<Mail::Audit>
+C<Mail::Internet>
+
+=head1 AUTHOR
+
+Justin Mason E<lt>jm /at/ jmason.orgE<gt>
+
+=head1 PREREQUISITES
+
+C<Mail::Audit>
+C<Mail::Internet>
+
+=head1 COREQUISITES
+
+=cut
+

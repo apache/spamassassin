@@ -1,0 +1,89 @@
+Return-Path: owner-vuln-dev@SECURITYFOCUS.COM
+Delivery-Date: Mon, 22 Jan 2001 07:35:19 +0000
+Return-Path: <owner-vuln-dev@SECURITYFOCUS.COM>
+Delivered-To: jm@netnoteinc.com
+Received: from lists.securityfocus.com (lists.securityfocus.com [207.126.127.68])
+	by mail.netnoteinc.com (Postfix) with ESMTP id C2FE011409A
+	for <jm@NETNOTEINC.COM>; Mon, 22 Jan 2001 07:33:18 +0000 (Eire)
+Received: from lists.securityfocus.com (lists.securityfocus.com [207.126.127.68])
+	by lists.securityfocus.com (Postfix) with ESMTP
+	id EEC1624CC64; Sun, 21 Jan 2001 19:42:49 -0800 (PST)
+Received: from LISTS.SECURITYFOCUS.COM by LISTS.SECURITYFOCUS.COM
+          (LISTSERV-TCP/IP release 1.8d) with spool id 23577530 for
+          VULN-DEV@LISTS.SECURITYFOCUS.COM; Sun, 21 Jan 2001 19:42:39 -0800
+Approved-By: BlueBoar@THIEVCO.COM
+Delivered-To: vuln-dev@lists.securityfocus.com
+Received: from securityfocus.com (mail.securityfocus.com [207.126.127.78]) by
+          lists.securityfocus.com (Postfix) with SMTP id 30D3024C47B for
+          <vuln-dev@lists.securityfocus.com>; Sat, 20 Jan 2001 04:19:36 -0800
+          (PST)
+Received: (qmail 13290 invoked by alias); 20 Jan 2001 12:19:40 -0000
+Delivered-To: VULN-DEV@SECURITYFOCUS.COM
+Received: (qmail 13287 invoked from network); 20 Jan 2001 12:19:39 -0000
+Received: from jaring.my (192.228.128.20) by mail.securityfocus.com with SMTP;
+          20 Jan 2001 12:19:39 -0000
+Received: from pc (j52.sgw32.jaring.my [161.142.28.186]) by jaring.my
+          (8.9.3/8.9.3) with SMTP id UAA27261; Sat, 20 Jan 2001 20:22:04 +0800
+          (MYT)
+X-Sender: lyeoh@192.228.128.13
+X-Mailer: QUALCOMM Windows Eudora Light Version 3.0.5 (32)
+Mime-Version: 1.0
+Content-Type: text/plain; charset="us-ascii"
+Message-ID:  <3.0.5.32.20010120202633.009cb940@192.228.128.13>
+Date:         Sat, 20 Jan 2001 20:26:33 +0800
+Reply-To: Lincoln Yeoh <lyeoh@POP.JARING.MY>
+Sender: VULN-DEV List <VULN-DEV@SECURITYFOCUS.COM>
+From: Lincoln Yeoh <lyeoh@POP.JARING.MY>
+Subject:      Re: Vlans
+X-To:         Tim Salus <tsalus@CBOSS.COM>
+To: VULN-DEV@SECURITYFOCUS.COM
+In-Reply-To:  <3A65D00B.6EAD9BC9@cboss.com>
+
+At 09:02 AM 1/17/01 -0800, you wrote:
+>I am not certain if this is the place to ask this and if not please let
+>me know where to send it.
+>
+>I have a client who has the following configuration
+>
+>Internet -> router -> firewall -> load balancer
+>
+>The connection from the router to the firewall is on a switch and the
+>connection from the inside interface of the firewall is on the same
+>switch. The separation is done using VLANS.
+
+Why not
+
+Internet
+|
+router
+|cross-over cable
+firewall
+|
+switch/hub
+
+That's similar to what we have here.
+
+How much does it cost to make/get a cross-over cable?
+
+It's a lot harder for a hacker subvert a cross-over cable remotely e.g.
+social engineering for instance but you should take care of that as well.
+
+Personally when secure network equipment is required I like cross-cables
+and really "dumb" hubs and switches.
+
+Putting those newfangled switches with built-in webservers on the
+"insecure" side sounds silly to me. Actually putting those particular type
+of switches anywhere sounds silly too, esp when you have curious people in
+your network.
+
+As for reliability and management: how often do "dumb" hubs fail? They're
+practically wires hooked together.
+
+Seems to me that it's the smart switches which fail. One of our ISPs
+apparently had a problem with their "advanced" switches and had to firmware
+patch it. International connectivity was < 22kbps at one point. Doh. And I
+had to point out the problem to them- doh^2.
+
+Cheerio,
+Link.
+
