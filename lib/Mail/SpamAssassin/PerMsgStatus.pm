@@ -812,7 +812,7 @@ sub rewrite_report_safe {
   my $boundary = "----------=_" . sprintf("%08X.%08X",time,int(rand(2 ** 32)));
 
   # ensure it's unique, so we can't be attacked this way
-  while ($original =~ /^\Q${boundary}\E$/m) {
+  while ($original =~ /^\Q${boundary}\E(?:--)?$/m) {
     $boundary .= "/".sprintf("%08X",int(rand(2 ** 32)));
   }
 
