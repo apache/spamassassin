@@ -2502,6 +2502,12 @@ sub clean_spamassassin_headers {
   $self->{msg}->delete_header ("X-Spam-Prev-Content-Type");
   $self->{msg}->delete_header ("X-Spam-Report");
   $self->{msg}->delete_header ("X-Spam-Status");
+  foreach my $header (keys %{$self->{conf}->{headers_spam}} ) {
+    $self->{msg}->delete_header ("X-Spam-$header");
+  }
+  foreach my $header (keys %{$self->{conf}->{headers_ham}} ) {
+    $self->{msg}->delete_header ("X-Spam-$header");
+  }
 }
 
 ###########################################################################
