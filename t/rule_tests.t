@@ -1,11 +1,9 @@
-# $Id: rule_tests.t,v 1.2 2002/04/03 15:10:28 matt_sergeant Exp $
+# $Id: rule_tests.t,v 1.3 2002/04/08 09:22:07 matt_sergeant Rel $
 use strict;
 use Test;
 use Mail::SpamAssassin;
 use Data::Dumper; $Data::Dumper::Indent=1;
 use vars qw($num_tests);
-$Test::planned = 1; # force this.
-END { print "1..$num_tests\n" }
 
 $num_tests = 1;
 
@@ -13,11 +11,19 @@ my $sa = Mail::SpamAssassin->new({
     rules_filename => "rules",
 });
 
-ok($sa);
-
 $sa->init(0); # parse rules
 
 my $mail = SATest::Message->new();
+
+foreach my $symbol ($sa->{conf}->regression_tests()) {
+    foreach my $test ($sa->{conf}->regression_tests($symbol)) {
+        $num_tests++;
+    }
+}
+
+plan tests => $num_tests;
+
+ok($sa);
 
 foreach my $symbol ($sa->{conf}->regression_tests()) {
     foreach my $test ($sa->{conf}->regression_tests($symbol)) {
@@ -51,8 +57,6 @@ foreach my $symbol ($sa->{conf}->regression_tests()) {
         $conf->{scores}->{$symbol} = 1;
         $msg->check();
         ok( $msg->get_hits, ($ok_or_fail eq 'ok' ? 1 : 0), "Test for $symbol against $string" );
-
-        $num_tests++;
     }
 }
 
