@@ -99,7 +99,7 @@ sub check_for_from_to_equivalence {
   my $to = $self->get ('To:addr');
 
   if ($from eq '' && $to eq '') { return 0; }
-  ($from eq $to);
+  return lc($from) eq lc($to);
 }
 
 ###########################################################################
@@ -256,7 +256,7 @@ sub check_subject_for_lotsa_8bit_chars {
   $_ = $self->get ('Subject');
 
   # cut [ and ] because 8-bit posts to mailing lists may not get
-  # hit otherwise. e.g.: Subject: [ILUG] 出售傳真號碼 .  Also cut
+  # hit otherwise. e.g.: Subject: [ILUG] X嚙線X .  Also cut
   # *, since mail that goes through spamassassin multiple times will
   # not be tagged on the second pass otherwise.
   s/\[\]\* //g;
@@ -265,7 +265,7 @@ sub check_subject_for_lotsa_8bit_chars {
   return 0;
 }
 
-sub are_more_high_bits_set { 
+sub are_more_high_bits_set {
   my ($self, $str) = @_;
 
   my @highbits = ($str =~ /[\200-\377]/g);
@@ -308,6 +308,18 @@ sub _check_whitelist {
   }
 
   return 0;
+}
+
+###########################################################################
+
+my $obfu_chars = '*_.,/|-+=';
+sub check_obfuscated_words {
+    my ($self, $body) = @_;
+
+    foreach my $line (@$body) {
+        while ($line =~ /[\w$obfu_chars]/) {
+        }
+    }
 }
 
 ###########################################################################
@@ -937,7 +949,7 @@ sub subject_is_all_caps {
    return 0 if subject_missing($self);
 
    $subject =~ s/[^a-zA-Z]//;
-   return $subject eq uc($subject);
+   return length($subject) && ($subject eq uc($subject));
 }
 
 sub subject_missing {
