@@ -310,7 +310,6 @@ int main(int argc,char **argv)
   char *username = NULL;
   struct passwd *curr_user;
 
-  srand(time(NULL));
   openlog ("spamc", LOG_CONS|LOG_PID, LOG_MAIL);
 
   curr_user = getpwuid(getuid());
