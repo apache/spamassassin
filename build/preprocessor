@@ -62,10 +62,14 @@ foreach (@ARGV) {
   elsif (/^-i(.+)$/)           { $infile = $1; }
   elsif (/^-o(.+)$/)           { $outfile = $1; }
   elsif (/^-I(.+)$/)           { $indir = $1; }
-  elsif (/^-m(.+)$/)           { $mode = '0'.$1; }
+  elsif (/^-m(.*)$/)           { $mode = '0'.$1; }
   elsif (/^-O(.+)$/)           { $outdir = $1; }
   elsif (/^(.+)$/)             { push (@infiles, $1); }
 }
+
+# On Windows, we get -m without an arg.  avoid problems with that
+# by just ignoring that switch.
+if (defined($mode) && $mode eq '0') { undef $mode; }
 
 my $l = 1;
 my $fname;
