@@ -749,7 +749,7 @@ sub _process_header {
       # use '!!' instead of ': ' so it doesn't wrap on the space
       $Text::Wrap::columns = 79;
       $Text::Wrap::huge = 'wrap';
-      $Text::Wrap::break = '[\s,]';
+      $Text::Wrap::break = '(?<=[\s,])';
       $hdr = Text::Wrap::wrap('',"\t",$hdr);
       return (split (/!!/, $hdr, 2))[1]; # just return the data part
     }
