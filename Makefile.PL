@@ -64,6 +64,8 @@ $ExtUtils::MakeMaker::Recognized_Att_Keys{'PERL_BIN'} = 1;
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'PERL_WARN'} = 1;
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'PERL_VERSION'} = 1;
 
+use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/oi);
+
 
 # See lib/ExtUtils/MakeMaker.pm for details of how to influence
 # the contents of the Makefile that is written.
@@ -74,14 +76,20 @@ my $mm_version = $ExtUtils::MakeMaker::VERSION;
 my @rulesfiles = map { s,^rules/,,; $_ } (<rules/*.cf>);
 my $rulesfiles = join(' ', (grep { /^[0-6][0-9]_/ } @rulesfiles), qw(user_prefs.template triplets.txt languages)); 
 
+# Only build spamd and spamc on non-Windows platforms
+my @SPAMD_EXE_FILES = ();
+if (!RUNNING_ON_WINDOWS) {
+  @SPAMD_EXE_FILES = ('spamd/spamc$(EXE_EXT)', 'spamd/spamd');
+}
 
 my %makefile = (
     'NAME'	=> 'Mail::SpamAssassin',
     'VERSION_FROM' => 'lib/Mail/SpamAssassin.pm', # finds $VERSION
 
-    'EXE_FILES'	=> [ 'spamassassin', 'spamd/spamc$(EXE_EXT)', 'spamd/spamd',
-			'sa-learn-spam', 'sa-learn-nonspam', 'sa-forget',
-			'sa-learn-rebuild'
+    'EXE_FILES'	=> [
+			'spamassassin', 'sa-learn-spam',
+			'sa-learn-nonspam', 'sa-forget',
+			'sa-learn-rebuild', @SPAMD_EXE_FILES
 		],
 
     'MAN1PODS' => { 
