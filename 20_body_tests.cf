@@ -249,7 +249,7 @@ body DEAR_SOMETHING		/\bDear (?:IT\W|Internet|candidate|sirs?|madam|investor|tra
 describe DEAR_SOMETHING		Contains 'Dear (something)'
 body DEAR_SOMEBODY              /Dear [A-Z][a-z]+/
 describe DEAR_SOMEBODY          Contains 'Dear Somebody'
-body CALL_NOW			/CALL NOW/i
+body CALL_NOW			/\bCALL NOW/i
 describe CALL_NOW		Urges you to call now
 body CALL_FREE			/\b(?:call|dial|toll free|order).{1,15}8(?:00|88|77|66|55|44|33|22)[\)\s-]*[\dA-Z]+[\s-]?[\dA-Z]+/i
 describe CALL_FREE		Contains a tollfree number
