@@ -983,11 +983,20 @@ describe WHILE_SUPPLIES		While Supplies Last
 body RICH		        /\b(?:make you rich|get rich quick)\b/i
 describe RICH			If only it were that easy
 
-body WINNING		        /\byou.{0,4} (?:won\b|a winner)|register to win|sweepstakes/i
-describe WINNING		Who really wins?
+body WINNING_CAP                /WINNING/
+describe WINNING_CAP            Winning in Caps
+
+body WINNER_CAP                 /WINNER/
+describe WINNER_CAP             Winner in Caps
+
+body WINNER                     /\byou.{0,4} a winner|register to win/i
+describe WINNER                 Claims you are a winner
+
+body YOU_WON                    /\byou(?:'ve| have)? won(?!'|\w)/i
+describe YOU_WON                Who really wins?
 
 body PROMOTION		        /\bspecial promotion\b/i
-describe PROMOTION		Special Promotion
+describe PROMOTION		Contains 'Special Promotion'
 
 body FREE_PASSWORD              /\bfree .{0,9}passwords?\b/i
 describe FREE_PASSWORD          Offers Free (often stolen) Passwords
