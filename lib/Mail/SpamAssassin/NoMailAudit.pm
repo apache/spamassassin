@@ -29,6 +29,7 @@ sub new {
 
   my $self = $class->SUPER::new();
 
+  $self->{is_spamassassin_wrapper_object} = 1;
   $self->{has_spamassassin_methods} = 1;
   $self->{headers} = { };
   $self->{header_order} = [ ];
@@ -42,6 +43,13 @@ sub new {
   }
 
   $self->parse_headers();
+  return $self;
+}
+
+# ---------------------------------------------------------------------------
+
+sub get_mail_object {
+  my ($self) = @_;
   return $self;
 }
 
