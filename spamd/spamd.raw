@@ -188,6 +188,8 @@ my $current_user;
 my $paddr;
 
 $SIG{CHLD} = 'IGNORE';		# important: avoids perl sighandling bug on BSD
+$SIG{INT} = \&kill_handler;
+$SIG{TERM} = \&kill_handler;
 
 for ( $waitedpid = 0;
       ($paddr = accept(Client,Server)) || $waitedpid;
@@ -437,6 +439,14 @@ sub logmsg
 {
     syslog('info',"@_");
     if ($opt_D) { warn "logmsg: @_\n"; }
+}
+
+sub kill_handler
+{
+  my ($sig) = @_;
+  logmsg "server killed by SIG$sig, shutting down";
+  close Server;
+  exit 0;
 }
 
 =head1 NAME
