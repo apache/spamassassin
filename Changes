@@ -1,4 +1,135 @@
 ------------------------------------------------------------------------
+r43619 | felicity | 2004-09-09 18:11:33 +0000 (Thu, 09 Sep 2004) | 1 line
+
+make the md5/sha1sum script spit out the filename too.  makes it a lot easier to do cut/paste, and standardizes it with the actual md5/sha1sum programs
+------------------------------------------------------------------------
+r43603 | felicity | 2004-09-09 14:25:43 +0000 (Thu, 09 Sep 2004) | 1 line
+
+try clearing up the opt_j tempfile/extra child distinction
+------------------------------------------------------------------------
+r43567 | parker | 2004-09-09 04:05:58 +0000 (Thu, 09 Sep 2004) | 1 line
+
+Answered some bayes sql questions that have come over the past week or so
+------------------------------------------------------------------------
+r43566 | felicity | 2004-09-09 03:45:18 +0000 (Thu, 09 Sep 2004) | 1 line
+
+'Contains a URL' should be 'Contains an URL'
+------------------------------------------------------------------------
+r43565 | jm | 2004-09-09 03:43:28 +0000 (Thu, 09 Sep 2004) | 1 line
+
+bug 3762: add a new plugin API: check_post_learn().  also fix a C<...->...> POD bug
+------------------------------------------------------------------------
+r43564 | jm | 2004-09-09 03:40:18 +0000 (Thu, 09 Sep 2004) | 1 line
+
+bug 3759: plugins loaded from the site config path were not getting their parse_config() methods called; fix by invalidating certain method caches when a new plugin is registered.  also, INHIBIT_CALLBACKS as a return type wasn't working, because it forces plugins to only support numeric return types. not good.  removed; implementors should use the alternative $self->inhibit_further_callbacks() API.  also removed a redundant sort() call
+------------------------------------------------------------------------
+r43563 | felicity | 2004-09-09 02:36:25 +0000 (Thu, 09 Sep 2004) | 1 line
+
+added POD for ArchiveIterator
+------------------------------------------------------------------------
+r43557 | felicity | 2004-09-09 01:22:31 +0000 (Thu, 09 Sep 2004) | 1 line
+
+uri_to_domain will now lowercase the domain before returning it, since domains are case-insensitive.
+------------------------------------------------------------------------
+r43555 | parker | 2004-09-09 01:13:53 +0000 (Thu, 09 Sep 2004) | 1 line
+
+Bug 3760: tok_touch_all produces invalid sql when called with no tokens
+------------------------------------------------------------------------
+r43550 | jm | 2004-09-08 22:42:46 +0000 (Wed, 08 Sep 2004) | 1 line
+
+doco fix: documentation sample used wrong var name. oops
+------------------------------------------------------------------------
+r43549 | jm | 2004-09-08 22:37:13 +0000 (Wed, 08 Sep 2004) | 1 line
+
+bug 3740: ignore legit bounces from Yahoo, if the correct rDNS and From are used
+------------------------------------------------------------------------
+r43545 | parker | 2004-09-08 21:59:35 +0000 (Wed, 08 Sep 2004) | 1 line
+
+Bug 3758: updating a tokens ham_count and atime did not trigger an update of newest_token_age
+------------------------------------------------------------------------
+r43544 | parker | 2004-09-08 17:19:09 +0000 (Wed, 08 Sep 2004) | 1 line
+
+Fix debug message
+------------------------------------------------------------------------
+r43537 | mss | 2004-09-08 14:29:43 +0000 (Wed, 08 Sep 2004) | 2 lines
+
+Removed some obsolete translations.
+
+------------------------------------------------------------------------
+r43495 | quinlan | 2004-09-08 03:49:02 +0000 (Wed, 08 Sep 2004) | 3 lines
+
+empty MIME boundary does not work now, but space before = should, so
+test that as the bad behavior instead
+
+------------------------------------------------------------------------
+r43493 | quinlan | 2004-09-08 03:24:29 +0000 (Wed, 08 Sep 2004) | 4 lines
+
+bug 3751: fix up boundary matching to more closely match MUA behavior
+and allow some malformed boundary definitions, however stop allowing
+blank boundaries
+
+------------------------------------------------------------------------
+r43492 | felicity | 2004-09-08 03:18:19 +0000 (Wed, 08 Sep 2004) | 1 line
+
+bug 3749: new version of the last patch -- certain rfc invalid mime parts were being ignored in the internal representation of the message.  we now make empty nodes appropriately.  the patch also standarizes the mime boundary REs and removes some cruft.  added some extra comments about the process because it's a little complex.
+------------------------------------------------------------------------
+r43448 | quinlan | 2004-09-07 04:45:42 +0000 (Tue, 07 Sep 2004) | 2 lines
+
+mention CLAs in list
+
+------------------------------------------------------------------------
+r43431 | mss | 2004-09-06 21:55:32 +0000 (Mon, 06 Sep 2004) | 2 lines
+
+The fix for bug 3690 was incomplete, it didn't always exit.
+
+------------------------------------------------------------------------
+r43421 | mss | 2004-09-06 18:17:58 +0000 (Mon, 06 Sep 2004) | 2 lines
+
+bug 3753: --helper-home-dir was missing in the SYNOPSIS
+
+------------------------------------------------------------------------
+r43418 | duncf | 2004-09-06 15:46:31 +0000 (Mon, 06 Sep 2004) | 1 line
+
+Doc fix: user-config defaults to on and has for a while...
+------------------------------------------------------------------------
+r43393 | felicity | 2004-09-05 17:40:25 +0000 (Sun, 05 Sep 2004) | 1 line
+
+revert of the bug 3749 patch.  fixes one issue, made a new set. :(
+------------------------------------------------------------------------
+r43387 | mss | 2004-09-05 12:00:42 +0000 (Sun, 05 Sep 2004) | 2 lines
+
+bug 3746: Document which __{def,local}_rules_dir__ is chosen for which __prefix__.
+
+------------------------------------------------------------------------
+r43364 | quinlan | 2004-09-05 04:31:48 +0000 (Sun, 05 Sep 2004) | 2 lines
+
+since this is serving as our current "Who we are" page, split out the PMC
+
+------------------------------------------------------------------------
+r43362 | felicity | 2004-09-05 03:22:55 +0000 (Sun, 05 Sep 2004) | 1 line
+
+bug 3749: MIME parts can have no actual body (following the RFC).  previously the parser would ignore that part, but not all mails are RFC compliant...  so now we fake an empty body if the body doesn't actually exist, and add a node in the tree for that part.
+------------------------------------------------------------------------
+r43361 | felicity | 2004-09-05 03:20:09 +0000 (Sun, 05 Sep 2004) | 1 line
+
+bug 3748: when subparsing a message/* type, if the part was empty, Message-new() would wait for STDIN input.  now only do a subparse if the part actually has decoded data in it.
+------------------------------------------------------------------------
+r43354 | felicity | 2004-09-04 23:13:51 +0000 (Sat, 04 Sep 2004) | 1 line
+
+trivial issue with dutch translation: rule is now HABEAS_USER, not HABEAS_SWE
+------------------------------------------------------------------------
+r43322 | felicity | 2004-09-04 05:06:05 +0000 (Sat, 04 Sep 2004) | 1 line
+
+started 3.0.0rc4 cycle
+------------------------------------------------------------------------
+r43320 | felicity | 2004-09-04 04:39:26 +0000 (Sat, 04 Sep 2004) | 1 line
+
+minor build script update: when doing the stable build, remove the files from the devel directory after copying over...
+------------------------------------------------------------------------
+r43319 | felicity | 2004-09-04 04:30:37 +0000 (Sat, 04 Sep 2004) | 1 line
+
+prep to release 3.0.0rc3
+------------------------------------------------------------------------
 r43318 | quinlan | 2004-09-04 04:22:59 +0000 (Sat, 04 Sep 2004) | 2 lines
 
 remove Sender ID mention from announcement :-(
