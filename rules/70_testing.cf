@@ -26,10 +26,6 @@
 #
 ########################################################################
 
-header T_RCVD_IN_BOGUSMX	eval:check_rbl_from_host('rfci-bmx', 'bogusmx.rfc-ignorant.org.')
-describe T_RCVD_IN_BOGUSMX	Received via a relay in BogusMX (rfc-ignorant.org)
-tflags T_RCVD_IN_BOGUSMX	net
-
 # partial messages; currently-theoretical attack
 # unsurprisingly this hits 0/0 right now.  But should we promote it anyway
 # to protect against the possibility?
@@ -731,15 +727,6 @@ tflags T_S41_S9_GT_5_4 net
 tflags T_S41_S9_GT_5_5 net
 
 ########################################################################
-
-# HELO hits we're losing due to bug fix in SPF module
-header __HELO_ONE_WORD_1_A	X-Spam-Relays-Untrusted =~ / helo=[^.]+(?:\s|$)/
-header __HELO_ONE_WORD_2_A	X-Spam-Relays-Trusted =~ / helo=[^.]+(?:\s|$)/
-meta HELO_ONE_WORD_A		(__HELO_ONE_WORD_1_A || __HELO_ONE_WORD_2_A)
-
-header __HELO_ONE_WORD_1_B	X-Spam-Relays-Untrusted !~ /helo=[^.]+\.[^.]+/ [if-unset: helo=foo.bar]
-header __HELO_ONE_WORD_2_B	X-Spam-Relays-Trusted !~ /helo=[^.]+\.[^.]+/ [if-unset: helo=foo.bar]
-meta HELO_ONE_WORD_B		(__HELO_ONE_WORD_1_B || __HELO_ONE_WORD_2_B)
 
 # let's see how this works
 meta T_SPF_PASS_NO_SBL		(SPF_PASS && !RCVD_IN_SBL)
