@@ -94,8 +94,9 @@ my $hdr_all = $num_spam + $num_ham;
 my $hdr_spam = $num_spam;
 my $hdr_ham = $num_ham;
 
+my $sorting = $opt_i ? "IG" : "RANK";
+
 if ($opt_p) {
-  my $sorting = $opt_i ? "IG" : "RANK";
   if ($opt_f) {
     printf "%7s %7s %7s  %6s  %6s  %6s  %s\n",
   	"OVERALL%", "FNEG%", "FPOS%", "S/O", $sorting, "SCORE", "NAME";
