@@ -37,6 +37,10 @@ describe MULTI_REMOVAL_1WORD	List removal information
 body REMOVE_POSTAL		/(?:Send(?:ing)? a (?:postal mail|postcard) to (?:Unsubscribe|Customer ?Service|remove)|unsubscribe by (?:postal mail|postcard))/i
 describe REMOVE_POSTAL		Send real mail to be unsubscribed
 
+# new way to phrase unsubscribe link
+body REMOVE_BEFORE_LINK		m{(?:no thanks|not interested|unsubscribe here).{0,5}http://}i
+describe REMOVE_BEFORE_LINK	Removal phrase right before a link
+
 ###########################################################################
 # CLICK rules
 # note HTML_LINK_CLICK* rules in HTML parser section
@@ -478,3 +482,10 @@ describe BANG_GUAR		Something is emphatically guaranteed
 
 body SEE_FOR_YOURSELF		/See (?:for|it|it for) yourself\b/i
 describe SEE_FOR_YOURSELF       See for yourself 
+
+body __RUDE_HTML_1	/Get a capable html e-mailer/i
+body __RUDE_HTML_2	/not support the display of HTML. Please view this message in a different/i
+body __RUDE_HTML_3	/This message contains an HTML formatted message but your email client does/i
+body __RUDE_HTML_4	/Your mailer do not support HTML messages. Switch to a better mailer/i
+meta RUDE_HTML		__RUDE_HTML_1 || __RUDE_HTML_2 || __RUDE_HTML_3 || __RUDE_HTML_4
+describe RUDE_HTML	Spammer message says you need an HTML mailer
