@@ -63,11 +63,11 @@ sub do_rbl_lookup {
 	dbg ("record found for $dom = $addr");
 
 	if ($addr ne '127.0.0.2' && $addr ne '127.0.0.3') {
-	  $self->test_log ("RBL check: found relay ".$dom.", type: ".$addr);
+	  $self->test_log ("RBL check: found ".$dom.", type: ".$addr);
 	} else {
 	  # 127.0.0.2 is the traditional boolean indicator, don't log it
 	  # 127.0.0.3 now also means "is a dialup IP"
-	  $self->test_log ("RBL check: found relay ".$dom);
+	  $self->test_log ("RBL check: found ".$dom);
 	}
 
 	$self->{$set}->{rbl_IN_As_found} .= $addr.' ';

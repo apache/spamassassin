@@ -133,6 +133,28 @@ describe RCVD_IN_RELAYS_ORDB_ORG Received via a relay in relays.ordb.org
 header RCVD_IN_OSIRUSOFT_COM	eval:check_rbl('relay', 'relays.osirusoft.com.')
 describe RCVD_IN_OSIRUSOFT_COM	Received via a relay in relays.osirusoft.com
 
+header RCVD_IN_ORBZ		eval:check_rbl('relay', 'inputs.orbz.org.')
+describe RCVD_IN_ORBZ		Received via a relay in inputs.orbz.org
+
+# These zones are in testing for now. we'll see how effective they are...
+header RCVD_IN_VISI		eval:check_rbl('relay', 'relays.visi.com.')
+describe RCVD_IN_VISI		Received via a relay in relays.visi.com
+
+header RCVD_IN_SPAMBAG		eval:check_rbl('relay', 'blacklist.spambag.org.')
+describe RCVD_IN_SPAMBAG	Received via a relay in blacklist.spambag.org
+
+header RCVD_IN_INTERSIL		eval:check_rbl('relay', 'blackholes.intersil.net.')
+describe RCVD_IN_INTERSIL	Received via a relay in blackholes.intersil.net
+
+header RCVD_IN_5_10		eval:check_rbl('relay', 'blackholes.five-ten-sg.com.')
+describe RCVD_IN_5_10		Received via a relay in blackholes.five-ten-sg.com
+
+header RCVD_IN_ZTL		eval:check_rbl('relay', 'ztl.dorkslayers.com.')
+describe RCVD_IN_ZTL		Received via a relay in ztl.dorkslayers.com
+
+header RCVD_IN_ORBS		eval:check_rbl('relay', 'orbs.dorkslayers.com.')
+describe RCVD_IN_ORBS		Received via a relay in orbs.dorkslayers.com
+
 # X prefix is so that these are run after RCVD_IN_OSIRUSOFT_COM. tests
 # are run in alphanumerically-sorted order.
 header X_OSIRU_SPAM_SRC		eval:check_rbl_results_for('relay', '127.0.0.4')
@@ -256,4 +278,16 @@ describe VERY_SUSP_CC_RECIPS	Cc: contains very similar addresses 10 times
 
 header Q_FOR_SELLER		Subject =~ /Question for seller/
 describe Q_FOR_SELLER		Subject is an eBay question
+
+header USER_IN_WHITELIST_TO     eval:check_to_in_whitelist()
+describe USER_IN_WHITELIST_TO   User is listed in 'whitelist_to'
+
+header USER_IN_MORE_SPAM_TO     eval:check_to_in_more_spam()
+describe USER_IN_MORE_SPAM_TO   User is listed in 'more_spam_to'
+
+header USER_IN_ALL_SPAM_TO      eval:check_to_in_all_spam()
+describe USER_IN_ALL_SPAM_TO    User is listed in 'all_spam_to'
+
+header ORDER_STATUS             Subject =~ / order\b/i
+describe ORDER_STATUS           Subject looks like order info
 
