@@ -711,6 +711,7 @@ sub spawn {
     sigprocmask( POSIX::SIG_UNBLOCK(), $sigset )
       or die "Can't unblock SIGINT for fork: $!\n";
     $children{$pid} = 1;
+    logmsg("server successfully spawned child process, pid $pid");
     return;
   }
   else {
