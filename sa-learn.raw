@@ -79,9 +79,10 @@ Options:
 
 =head1 DESCRIPTION
 
-Given a typical selection of your incoming mail classified as spam or non-spam,
-this tool will feed each mail to SpamAssassin, allowing it to 'learn' what
-signs are likely to mean spam, and which are likely to mean non-spam.
+Given a typical selection of your incoming mail classified as spam or ham
+(non-spam), this tool will feed each mail to SpamAssassin, allowing it
+to 'learn' what signs are likely to mean spam, and which are likely to
+mean ham.
 
 Simply run this command once for each of your mail folders, and it will
 ''learn'' from the mail therein.
@@ -92,7 +93,7 @@ listing a folder name as C<*> will scan every folder that matches.
 SpamAssassin remembers which mail messages it's learnt already, and will not
 re-learn those messages again, unless you use the B<--forget> option.
 
-If you make a mistake and scan a mail as non-spam when it is spam, or vice
+If you make a mistake and scan a mail as ham when it is spam, or vice
 versa, simply rerun this command with the correct classification, and the
 mistake will be corrected.  SpamAssassin will automatically 'forget' the
 previous indications.
@@ -161,7 +162,7 @@ First a high-level overview:
 
 =over 4
 
-=item Build a significant sample of both spam and non-spam.
+=item Build a significant sample of both ham and spam.
 
 I suggest several thousand of each, placed in SPAM and HAM directories or
 mailboxes.  Yes, you MUST hand-sort this - otherwise the results won't be much
@@ -176,13 +177,13 @@ Otherwise, the results may be pretty skewed.
 	sa-learn --ham /path/to/ham/folder
 	...
 
-Let SpamAssassin proceed, learning stuff. When it finds spam and non-spam
+Let SpamAssassin proceed, learning stuff. When it finds ham and spam
 it will add the "interesting tokens" to the database.
 
 =item If you need SpamAssassin to forget about specific messages, use
 the B<--forget> option.
 
-This can be applied to either spam or non-spam that has run through the
+This can be applied to either ham or spam that has run through the
 B<sa-learn> processes. It's a bit of a hammer, really, lowering the
 weighting of the specific tokens in that message (only if that message has
 been processed before).
@@ -220,7 +221,7 @@ should avoid scanning those messages if possible.  (An easy way to do this
 is to move them aside, into a folder which is not scanned.)
 
 Another thing to be aware of, is that typically you should aim to train
-with at least 1000 messages of spam, and 1000 non-spam messages, if
+with at least 1000 messages of spam, and 1000 ham messages, if
 possible.  More is better, but anything over about 5000 messages does not
 improve accuracy significantly in our tests.
 
