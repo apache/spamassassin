@@ -64,10 +64,9 @@ $type_rawbody_evals = 108;
 sub new {
   my $class = shift;
   $class = ref($class) || $class;
+  my $self = { }; bless ($self, $class);
 
-  my $self = {
-    'main' => shift,
-  }; bless ($self, $class);
+  my $main = shift;     # do not add to class, avoid circular ref
 
   $self->{tests} = { };
   $self->{descriptions} = { };
@@ -92,7 +91,7 @@ sub new {
   $self->{terse_report_template} = '';
   $self->{spamtrap_template} = '';
 
-  $self->{razor_config} = $self->{main}->sed_path ("~/razor.conf");
+  $self->{razor_config} = $main->sed_path ("~/razor.conf");
 
   # this will be sedded by whitelist implementations, so ~ is OK
   $self->{auto_whitelist_path} = "~/.spamassassin/auto-whitelist";

@@ -54,6 +54,8 @@ body BUGGY_CGI_ES		/Aqui esta el resultado de su formulario/i
 describe BUGGY_CGI_ES		Broken German CGI script message
 body BUGGY_CGI_DE_2		/Diese Mail wurde &uuml;bertragen von/i
 describe BUGGY_CGI_DE_2		Broken German CGI script message (2)
+body BUGGY_CGI_DE_3		/Diese Daten wurden Ihnen von Ihrem OnlineFormular/i
+describe BUGGY_CGI_DE_3		Broken German CGI script message (3)
 body BUGGY_CGI_PT		/Abaixo o resultado do preenchimento do Formulario/
 describe BUGGY_CGI_PT		Broken Portuguese CGI script message
 
@@ -250,7 +252,7 @@ body PORN_2			/\bwild\b.{0,15}\bhardcore\b/i
 describe PORN_2			Uses words and phrases which indicate porn (2)
 
 # updated by: skod & Craig & jm
-body PORN_3			/(?:(?:\bcum|\borg[iy]|\bwild|fuck|\bteen|\baction\b|spunk|\bpussy\b|\bpussies\b|suck\b|sucking\b|\bhot\b|\bhottest\b|\bvoyeur|\ble[sz]b(?:ian|o)|\banal\b|\binterracial|\basian\b|\bamateur|\bsex+\b|\bslut|explicit|xxx[^x]|\blive\b|celebrity|\blick|\bsuck|\bdorm\b|webcam|\bass\b|\bschoolgirl\b|\bstrip|\bhorny\b|\bhorniest\b|\berotic|\boral\b|\bhardcore\b|\bblow[ -]*job|\bnast(?:y|iest)\b).{0,15}){3,}/i
+body PORN_3			/(?:(?:\bcum|\borg[iy]|\bwild|fuck|\bteen|\baction\b|spunk|\bpussy\b|\bpussies\b|suck\b|sucking\b|\bhot\b|\bhottest\b|\bvoyeur|\ble[sz]b(?:ian|o)|\banal\b|\binterracial|\basian\b|\bamateur|\bsex+\b|\bslut|explicit|xxx[^x]|\blive\b|celebrity|\blick|\bsuck|\bdorm\b|webcam|\bass\b|\bschoolgirl\b|\bstrip|\bhorny\b|\bhorniest\b|\berotic|\boral\b|\bhardcore\b|\bblow[ -]*job|\bnast(?:y|iest)\b|\bporn).{0,15}){3,}/i
 describe PORN_3			Uses words and phrases which indicate porn (3)
 
 rawbody PORN_4 	/http:\/\/[\w\.]*(?:xxx|sex|anal|slut|pussy|cum|nympho|suck|porn|hardcore|taboo|whore|voyeur|lesbian|gurlpages|naughty|lolita|teen|schoolgirl|kooloffer|erotic)\w*\./
@@ -476,6 +478,9 @@ describe AOL_USERS_LINK		Includes a link for AOL users to click
 rawbody MAILTO_TO_SPAM_ADDR	/mailto:[a-z]+\d{2,}\@/is
 describe MAILTO_TO_SPAM_ADDR	Includes a link to a likely spammer email address
 
+rawbody MAILTO_TO_REMOVE	/remove\S*\@\S+\.\S\S/is
+describe MAILTO_TO_REMOVE	Includes a 'remove' email address
+
 rawbody WEB_BUGS		/<\s*img\s[^>]*src[^>]+\?/i
 describe WEB_BUGS		Image tag with an ID code to identify you
 
@@ -502,7 +507,7 @@ describe NIGERIAN_SCAM		Nigerian scam, cf http://www.snopes2.com/inboxer/scams/n
 body NIGERIAN_SCAM_2		/(?:Government of Nigeria|NIGERIAN? NATIONAL|Nigerian? Government)/
 describe NIGERIAN_SCAM_2	Mutated Nigerian scams
 
-body US_DOLLARS			/Million\b.{0,40}\bUnited States Dollars/i
+body US_DOLLARS			/Million\b.{0,40}\b(?:United States Dollars|USD)/i
 describe US_DOLLARS		Nigerian scam key phrase
 
 rawbody UNNEEDED_HTML_ENCODING	/font=3E/i

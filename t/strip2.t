@@ -27,13 +27,13 @@ sub diff {
 my $INPUT = 'data/spam/002';
 
 # create the -t output
-ok (sarun ("-t < $INPUT", \&patterns_run_cb));
+ok (sarun ("-L -t < $INPUT", \&patterns_run_cb));
 ok_all_patterns();
 clear_pattern_counters();
 copy ("log/strip2.1", "log/strip2_with-t.out");
 
 # create the -p output
-ok (sarun ("-P < $INPUT", \&patterns_run_cb));
+ok (sarun ("-L -P < $INPUT", \&patterns_run_cb));
 ok_all_patterns();
 clear_pattern_counters();
 copy ("log/strip2.4", "log/strip2_with-P.out");
