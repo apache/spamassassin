@@ -12,7 +12,7 @@ BEGIN {
   # warnings and causes more trouble than its worth.  We don't need to be too
   # smart about this BTW.
   my @bin = File::Spec->splitpath($0);
-  my $bin = ($bin[0] ? File::Spec->joinpath(@bin[0..1]) : $bin[1]) # /home/jm/foo -> /home/jm
+  my $bin = ($bin[0] ? File::Spec->catpath(@bin[0..1]) : $bin[1])  # /home/jm/foo -> /home/jm
             || File::Spec->curdir;                                 # foo          -> .
 
   # These are common paths where the SA libs might be found.
