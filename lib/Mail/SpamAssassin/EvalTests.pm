@@ -983,6 +983,8 @@ sub check_for_unique_subject_id {
 	|| /\s{3,}[-:\#\(\[]+([-a-z0-9]{4,})[\]\)]+$/
 	|| /\s{3,}[:\#\(\[]*([a-f0-9]{4,})[\]\)]*$/
 	|| /\s{3,}[-:\#]([a-z0-9]{5,})$/
+	|| /[\s._]{3,}([^0\s._]\d{3,})$/
+	|| /[\s._]{3,}\[(\S+)\]$/
 
         # (7217vPhZ0-478TLdy5829qicU9-0@26) and similar
         || /\(([-\w]{7,}\@\d+)\)$/
@@ -1417,10 +1419,10 @@ sub _check_date_diff {
 
   $self->{date_diff} = 0;
 
-  my $rcvd = $self->get ('Received');
+  my @received = grep(/\S/, split(/\n/, $self->get ('Received')));
   # if we have no Received: headers, chances are we're archived mail
   # with a limited set of headers
-  return if (!defined $rcvd || $rcvd eq '');
+  return if (! scalar @received);
 
   # a Resent-Date: header takes precedence over any Date: header
   my $date = $self->get ('Resent-Date');
@@ -1436,28 +1438,35 @@ sub _check_date_diff {
   # parse_rfc822_date failed
   return if !defined($time);
 
-  # use second date. otherwise fetchmail Received: hdrs will screw it up
-  my @rcvddatestrs = ($rcvd =~ /\s.?\d+ \S\S\S \d+ \d+:\d+:\d+ \S+/g);
-  my @rcvddates = ();
-  foreach $rcvd (@rcvddatestrs) {
-    dbg ("trying Received header date for real time: $rcvd", "datediff", -2);
-    $rcvd = $self->_parse_rfc822_date ($rcvd);
-    if (defined($rcvd)) {
-      push (@rcvddates, $rcvd);
-    }
+  # handle fetchmail headers
+  my @local;
+  if ($received[0] =~ /\bfrom (?:localhost\s|(\S+ ){1,2}\S*\b127\.0\.0\.1\b)|qmail \d+ invoked by uid \d+/) {
+    push @local, (shift @received);
   }
-
-  if ($#rcvddates <= 0) {
-    dbg ("no dates found in Received headers, not raising flag", "datediff", -1);
-    return;
+  if ($received[0] =~ /\bby localhost with \w+ \(fetchmail-[\d.]+/) {
+    push @local, (shift @received);
+  }
+  elsif (@local) {
+    unshift @received, (shift @local);
   }
 
   my @diffs;
+  for my $rcvd (@received) {
+    if ($rcvd =~ /(\s.?\d+ \S\S\S \d+ \d+:\d+:\d+ \S+)/) {
+      $rcvd = $1;
+      dbg ("trying Received header date for real time: $rcvd", "datediff", -2);
+      $rcvd = $self->_parse_rfc822_date($rcvd);
+      if (defined($rcvd)) {
+	my $diff = $time - $rcvd;
+	dbg ("time_t from date=$time, rcvd=$rcvd, diff=$diff", "datediff", -2);
+	push(@diffs, $diff);
+      }
+    }
+  }
 
-  foreach $rcvd (@rcvddates) {
-    my $diff = $time - $rcvd;
-    dbg ("time_t from date=$time, rcvd=$rcvd, diff=$diff", "datediff", -2);
-    push(@diffs, $diff);
+  if (! scalar @diffs) {
+    dbg ("no dates found in Received headers, returning", "datediff", -1);
+    return;
   }
 
   # if the last Received: header has no difference, then we choose to
@@ -1471,6 +1480,46 @@ sub _check_date_diff {
   @diffs = sort { abs($a) <=> abs($b) } @diffs;
   $self->{date_diff} = $diffs[0];
 }
+
+# timezone mappings: in case of conflicts, use RFC 2822, then most
+# common and least conflicting mapping
+my %TZ = (
+	# standard
+	'UT'   => '+0000',
+	'UTC'  => '+0000',
+	# US and Canada
+	'AST'  => '-0400',
+	'ADT'  => '-0300',
+	'EST'  => '-0500',
+	'EDT'  => '-0400',
+	'CST'  => '-0600',
+	'CDT'  => '-0500',
+	'MST'  => '-0700',
+	'MDT'  => '-0600',
+	'PST'  => '-0800',
+	'PDT'  => '-0700',
+	'HST'  => '-1000',
+	'AKST' => '-0900',
+	'AKDT' => '-0800',
+	# European
+	'GMT'  => '+0000',
+	'BST'  => '+0100',
+	'IST'  => '+0100',
+	'WET'  => '+0000',
+	'WEST' => '+0100',
+	'CET'  => '+0100',
+	'CEST' => '+0200',
+	'EET'  => '+0200',
+	'EEST' => '+0300',
+	'MSK'  => '+0300',
+	'MSD'  => '+0400',
+	# Australian
+	'AEST' => '+1000',
+	'AEDT' => '+1100',
+	'ACST' => '+0930',
+	'ACDT' => '+1030',
+	'AWST' => '+0800',
+	);
 
 sub _parse_rfc822_date {
   my ($self, $date) = @_;
@@ -1513,13 +1562,8 @@ sub _parse_rfc822_date {
     $tzoff = $1;
   }
   # UT, GMT, and North American timezones
-  elsif (s/ (UT|GMT|[ECMP][DS]T) / /) {
-    if    ($1 eq "UT"  || $1 eq "GMT") { $tzoff = "+0000"; }
-    elsif ($1 eq "EDT")                { $tzoff = "-0400"; }
-    elsif ($1 eq "EST" || $1 eq "CDT") { $tzoff = "-0500"; }
-    elsif ($1 eq "CST" || $1 eq "MDT") { $tzoff = "-0600"; }
-    elsif ($1 eq "MST" || $1 eq "PDT") { $tzoff = "-0700"; }
-    elsif ($1 eq "PST")                { $tzoff = "-0800"; }
+  elsif (s/\b([A-Z]{2,4})\b/ / && exists $TZ{$1}) {
+    $tzoff = $TZ{$1};
   }
   # all other timezones are considered equivalent to "-0000"
   $tzoff ||= '-0000';
@@ -1866,6 +1910,13 @@ sub check_for_mime_base64_encoded_text {
   return $self->{mime_base64_encoded_text};
 }
 
+sub check_for_mime_faraway_charset {
+  my ($self) = @_;
+
+  $self->_check_attachments unless exists $self->{mime_faraway_charset};
+  return $self->{mime_faraway_charset};
+}
+
 sub check_for_mime_html_no_charset {
   my ($self) = @_;
 
@@ -1916,6 +1967,16 @@ sub _check_mime_header {
       !($cd && $cd =~ /^(?:attachment|inline)/))
   {
     $self->{mime_html_no_charset} = 1;
+  }
+
+  if ($charset =~ /[a-z]/i && ! $self->{mime_faraway_charset}) {
+    my @l = $self->get_my_locales();
+
+    if (!(grep { $_ eq "all" } @l) &&
+	!Mail::SpamAssassin::Locales::is_charset_ok_for_locales($charset, @l))
+    {
+      $self->{mime_faraway_charset} = 1;
+    }
   }
 
   if ($name && $ctype ne "application/octet-stream") {
@@ -1969,6 +2030,7 @@ sub _check_attachments {
   # results
   $self->{microsoft_executable} = 0;
   $self->{mime_base64_encoded_text} = 0;
+  $self->{mime_faraway_charset} = 0;
   $self->{mime_html_no_charset} = 0;
   $self->{mime_long_line_qp} = 0;
   $self->{mime_missing_boundary} = 0;
