@@ -364,23 +364,23 @@ score T_IDENT_NOBODY		1.0
 # 0.334   0.8014   0.1375    0.854   0.60    0.01  T_MSGID_S_1:rODbegbie
 # I suggest breaking out the meta rule and see which ones are FPing
 
-header __T_MSGID_17	MESSAGEID =~ /^<?DGTBAD\S+\@/m
-header __T_MSGID_10	MESSAGEID =~ /^<?(?:\d+\$){3}\d+\@/m
-header __T_MSGID_8	MESSAGEID =~ /^<?\d{4}\$\w+\@/m
-header __T_MSGID_20	MESSAGEID =~ /^<?EXCH\S+\@/m
-header __T_MSGID_19	MESSAGEID =~ /^<?\w{7}-\w{6}-\w{2}\.\d{4}(?:-\d{2}){5}\@/m
-
 # jm: commented, this hits slist mail traffic, e.g.
 # the <mozilla-general@mozilla.org> list.   Note that the moz lists have a
 # very high spam load, which may explain why the resulting freqs look good
 #header __T_MSGID_11	MESSAGEID =~ /^<?\d\w+\$\w{4,}\@/m
-
-header __T_MSGID_24	MESSAGEID =~ /^<?[A-Z0-9_-]*SERV[A-Za-z0-9_-]+[0-9a-f]{8}\@/m
-header __T_MSGID_26	MESSAGEID =~ /^<?[A-Z0-9_-]*MAIL[a-zA-Z0-9_-]+0000[0-9a-f]{4}\@/m
+# tvd: these fp a bit, so they're disabled
 #header __T_MSGID_37	MESSAGEID =~ /^<?\d{13,}\.SM\d+\@[^>]/m
 #header __T_MSGID_16	MESSAGEID =~ /^<?[A-Z]\d{10}\@/m
-header __T_MSGID_32	MESSAGEID =~ /^<?auto-00000\d+\@/m
-meta T_MSGID_S_1	( __T_MSGID_17 || __T_MSGID_10 || __T_MSGID_8 || __T_MSGID_20 || __T_MSGID_19 || __T_MSGID_24 || __T_MSGID_26 || __T_MSGID_32 )
+
+header T_BAD_MSGID_17	MESSAGEID =~ /^<?DGTBAD\S+\@/m
+header T_BAD_MSGID_10	MESSAGEID =~ /^<?(?:\d+\$){3}\d+\@/m
+header T_BAD_MSGID_8	MESSAGEID =~ /^<?\d{4}\$\w+\@/m
+header T_BAD_MSGID_20	MESSAGEID =~ /^<?EXCH\S+\@/m
+header T_BAD_MSGID_19	MESSAGEID =~ /^<?\w{7}-\w{6}-\w{2}\.\d{4}(?:-\d{2}){5}\@/m
+header T_BAD_MSGID_24	MESSAGEID =~ /^<?[A-Z0-9_-]*SERV[A-Za-z0-9_-]+[0-9a-f]{8}\@/m
+header T_BAD_MSGID_26	MESSAGEID =~ /^<?[A-Z0-9_-]*MAIL[a-zA-Z0-9_-]+0000[0-9a-f]{4}\@/m
+header T_BAD_MSGID_32	MESSAGEID =~ /^<?auto-00000\d+\@/m
+meta T_MSGID_S_1	( T_BAD_MSGID_.+ + ) > 0
 
 # Matt Cline: New ratware and user-agent tests
 header T_RATWARE_BIXON       X-Mailer =~ /Bixon ThunderMail/
