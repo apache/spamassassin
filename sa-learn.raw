@@ -71,7 +71,6 @@ Options:
  -L, --local			   Operate locally, no network accesses
  -C file, --config-file=file       Path to standard configuration dir
  -p prefs, --prefs-file=file       Set user preferences file
- -a, --auto-whitelist              Use auto-whitelists
  --whitelist-factory               Select whitelist factory
  -D, --debug-level                 Print debugging messages
  -V, --version                     Print version
@@ -309,11 +308,6 @@ Forces an expiry run, regardless of whether it may be necessary or not.
 =item B<--forget>
 
 Forget a given message previously learnt.
-
-=item B<-a>, B<--auto-whitelist>
-
-Use auto-whitelists.  While learning, add addresses to the auto-whitelist
-as appropriate.
 
 =item B<-h>, B<--help>
 

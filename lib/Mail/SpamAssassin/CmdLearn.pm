@@ -45,7 +45,6 @@ sub cmdline_run {
 	     'learnprob=f'			=> \$opt{'learnprob'},
 	     'randseed=i'			=> \$opt{'randseed'},
 
-             'auto-whitelist|a'                 => \$opt{'auto-whitelist'},
              'bias-scores|b'                    => \$opt{'bias-scores'},
 
              'debug-level|D:s'                  => \$opt{'debug-level'},
@@ -93,7 +92,6 @@ sub cmdline_run {
   $spamtest->init (1);
 
   $spamtest->init_learner({
-      use_whitelist     => $opt{'auto-whitelist'},
       bias_scores       => $opt{'bias-scores'},
       force_expire	=> $opt{'force-expire'},
       caller_will_untie	=> 1
