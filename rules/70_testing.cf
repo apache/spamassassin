@@ -343,19 +343,27 @@ meta T_FROM_EXCESS_MIME_B	__FROM_MIME_ENCODED_B && !__FROM_NEEDS_MIME
 # hmmmm...
 header T_SUBJECT_MIME_ENCODED_TWICE	Subject:raw =~ /=\?\S+\?[BQ]\?.*=\?\S+\?[BQ]\?/i
 header __SUBJECT_RAW_LENGTH_60		Subject:raw =~ /.{60}/s
+header __SUBJECT_RAW_LENGTH_70		Subject:raw =~ /.{70}/s
 header __SUBJECT_RAW_LENGTH_80		Subject:raw =~ /.{80}/s
+header __SUBJECT_RAW_LENGTH_90		Subject:raw =~ /.{90}/s
 header __SUBJECT_RAW_LENGTH_100		Subject:raw =~ /.{100}/s
+header __SUBJECT_RAW_LENGTH_110		Subject:raw =~ /.{110}/s
 header __SUBJECT_RAW_LENGTH_120		Subject:raw =~ /.{120}/s
+header __SUBJECT_RAW_LENGTH_130		Subject:raw =~ /.{130}/s
 header __SUBJECT_RAW_LENGTH_140		Subject:raw =~ /.{140}/s
 header __SUBJECT_RAW_LENGTH_160		Subject:raw =~ /.{160}/s
 header __SUBJECT_RAW_LENGTH_180		Subject:raw =~ /.{180}/s
-meta T_SUBJECT_MIME_ENCODED_T60		T_SUBJECT_MIME_ENCODED_TWICE && __SUBJECT_RAW_LENGTH_60
-meta T_SUBJECT_MIME_ENCODED_T80		T_SUBJECT_MIME_ENCODED_TWICE && __SUBJECT_RAW_LENGTH_80
-meta T_SUBJECT_MIME_ENCODED_T100	T_SUBJECT_MIME_ENCODED_TWICE && __SUBJECT_RAW_LENGTH_100
-meta T_SUBJECT_MIME_ENCODED_T120	T_SUBJECT_MIME_ENCODED_TWICE && __SUBJECT_RAW_LENGTH_120
-meta T_SUBJECT_MIME_ENCODED_T140	T_SUBJECT_MIME_ENCODED_TWICE && __SUBJECT_RAW_LENGTH_140
-meta T_SUBJECT_MIME_ENCODED_T160	T_SUBJECT_MIME_ENCODED_TWICE && __SUBJECT_RAW_LENGTH_160
-meta T_SUBJECT_MIME_ENCODED_T180	T_SUBJECT_MIME_ENCODED_TWICE && __SUBJECT_RAW_LENGTH_180
+meta T_SUBJECT_MIME_ENCODED_T60		T_SUBJECT_MIME_ENCODED_TWICE && !__SUBJECT_RAW_LENGTH_60
+meta T_SUBJECT_MIME_ENCODED_T70		T_SUBJECT_MIME_ENCODED_TWICE && !__SUBJECT_RAW_LENGTH_70
+meta T_SUBJECT_MIME_ENCODED_T80		T_SUBJECT_MIME_ENCODED_TWICE && !__SUBJECT_RAW_LENGTH_80
+meta T_SUBJECT_MIME_ENCODED_T90		T_SUBJECT_MIME_ENCODED_TWICE && !__SUBJECT_RAW_LENGTH_90
+meta T_SUBJECT_MIME_ENCODED_T100	T_SUBJECT_MIME_ENCODED_TWICE && !__SUBJECT_RAW_LENGTH_100
+meta T_SUBJECT_MIME_ENCODED_T110	T_SUBJECT_MIME_ENCODED_TWICE && !__SUBJECT_RAW_LENGTH_110
+meta T_SUBJECT_MIME_ENCODED_T120	T_SUBJECT_MIME_ENCODED_TWICE && !__SUBJECT_RAW_LENGTH_120
+meta T_SUBJECT_MIME_ENCODED_T130	T_SUBJECT_MIME_ENCODED_TWICE && !__SUBJECT_RAW_LENGTH_130
+meta T_SUBJECT_MIME_ENCODED_T140	T_SUBJECT_MIME_ENCODED_TWICE && !__SUBJECT_RAW_LENGTH_140
+meta T_SUBJECT_MIME_ENCODED_T160	T_SUBJECT_MIME_ENCODED_TWICE && !__SUBJECT_RAW_LENGTH_160
+meta T_SUBJECT_MIME_ENCODED_T180	T_SUBJECT_MIME_ENCODED_TWICE && !__SUBJECT_RAW_LENGTH_180
 
 ########################################################################
 # ratware signs
@@ -393,3 +401,129 @@ meta T_RATWARE_ERROR_04 	!FRONTPAGE && __T_RATWARE_ERROR_03
 describe T_RATWARE_ERROR_04 	Made with Frontpage, but forgot to remove all entries.
 
 ########################################################################
+
+# bug 2903
+# the output of this exercise should replace the following rules:
+#   ADDR_NUMS_AT_BIGSITE
+#   FROM_NUM_AT_WEBMAIL
+#   FROM_WEBMAIL_END_NUMS6
+# maybe something like:
+#   rule for num at start for any non-big site
+#   rule for num at start for any big site
+#   rule for nums at end for any non-big site
+#   rule for nums at end for any big site
+header T_FROM_NUM_START_1_ANY		From:addr =~ /\b\d\S+\@/i
+header T_FROM_NUM_START_2_ANY		From:addr =~ /\b\d{2,}\S+\@/i
+header T_FROM_NUM_START_3_ANY		From:addr =~ /\b\d{3,}\S+\@/i
+header T_FROM_NUM_START_4_ANY		From:addr =~ /\b\d{4,}\S+\@/i
+#
+header T_FROM_NUM_END_5_ANY		From =~ /\b[a-z]+\d{5,}\@/i
+header T_FROM_NUM_END_6_ANY		From =~ /\b[a-z]+\d{6,}\@/i
+header T_FROM_NUM_END_7_ANY		From =~ /\b[a-z]+\d{7,}\@/i
+header T_FROM_NUM_END_8_ANY		From =~ /\b[a-z]+\d{8,}\@/i
+header T_FROM_NUM_END_9_ANY		From =~ /\b[a-z]+\d{9,}\@/i
+header T_FROM_NUM_END_10_ANY		From =~ /\b[a-z]+\d{10,}\@/i
+# per big ISP or webmail
+header T_FROM_NUM_END_5_ANGELFIRE	From:addr =~ /\d{5}\@angelfire\.(?:com|net|org)/
+header T_FROM_NUM_END_5_AOL	From:addr =~ /\d{5}\@aol\.(?:com|net|org)/
+header T_FROM_NUM_END_5_BIGFOOT	From:addr =~ /\d{5}\@bigfoot\.(?:com|net|org)/
+header T_FROM_NUM_END_5_COMPUSERVE	From:addr =~ /\d{5}\@compuserve\.(?:com|net|org)/
+header T_FROM_NUM_END_5_EARTHLINK	From:addr =~ /\d{5}\@earthlink\.(?:com|net|org)/
+header T_FROM_NUM_END_5_EMAIL	From:addr =~ /\d{5}\@email\.(?:com|net|org)/
+header T_FROM_NUM_END_5_EUDORAMAIL	From:addr =~ /\d{5}\@eudoramail\.(?:com|net|org)/
+header T_FROM_NUM_END_5_EXCITE	From:addr =~ /\d{5}\@excite\.(?:com|net|org)/
+header T_FROM_NUM_END_5_FLASHMAIL	From:addr =~ /\d{5}\@flashmail\.(?:com|net|org)/
+header T_FROM_NUM_END_5_GEOCITIES	From:addr =~ /\d{5}\@geocities\.(?:com|net|org)/
+header T_FROM_NUM_END_5_HKNETMAIL	From:addr =~ /\d{5}\@hknetmail\.(?:com|net|org)/
+header T_FROM_NUM_END_5_HOTMAIL	From:addr =~ /\d{5}\@hotmail\.(?:com|net|org)/
+header T_FROM_NUM_END_5_JUNO	From:addr =~ /\d{5}\@juno\.(?:com|net|org)/
+header T_FROM_NUM_END_5_MAILEXCITE	From:addr =~ /\d{5}\@mailexcite\.(?:com|net|org)/
+header T_FROM_NUM_END_5_MSN	From:addr =~ /\d{5}\@msn\.(?:com|net|org)/
+header T_FROM_NUM_END_5_PRODIGY	From:addr =~ /\d{5}\@prodigy\.(?:com|net|org)/
+header T_FROM_NUM_END_5_YAHOO	From:addr =~ /\d{5}\@yahoo\.(?:com|net|org)/
+header T_FROM_NUM_END_6_ANGELFIRE	From:addr =~ /\d{6}\@angelfire\.(?:com|net|org)/
+header T_FROM_NUM_END_6_AOL	From:addr =~ /\d{6}\@aol\.(?:com|net|org)/
+header T_FROM_NUM_END_6_BIGFOOT	From:addr =~ /\d{6}\@bigfoot\.(?:com|net|org)/
+header T_FROM_NUM_END_6_COMPUSERVE	From:addr =~ /\d{6}\@compuserve\.(?:com|net|org)/
+header T_FROM_NUM_END_6_EARTHLINK	From:addr =~ /\d{6}\@earthlink\.(?:com|net|org)/
+header T_FROM_NUM_END_6_EMAIL	From:addr =~ /\d{6}\@email\.(?:com|net|org)/
+header T_FROM_NUM_END_6_EUDORAMAIL	From:addr =~ /\d{6}\@eudoramail\.(?:com|net|org)/
+header T_FROM_NUM_END_6_EXCITE	From:addr =~ /\d{6}\@excite\.(?:com|net|org)/
+header T_FROM_NUM_END_6_FLASHMAIL	From:addr =~ /\d{6}\@flashmail\.(?:com|net|org)/
+header T_FROM_NUM_END_6_GEOCITIES	From:addr =~ /\d{6}\@geocities\.(?:com|net|org)/
+header T_FROM_NUM_END_6_HKNETMAIL	From:addr =~ /\d{6}\@hknetmail\.(?:com|net|org)/
+header T_FROM_NUM_END_6_HOTMAIL	From:addr =~ /\d{6}\@hotmail\.(?:com|net|org)/
+header T_FROM_NUM_END_6_JUNO	From:addr =~ /\d{6}\@juno\.(?:com|net|org)/
+header T_FROM_NUM_END_6_MAILEXCITE	From:addr =~ /\d{6}\@mailexcite\.(?:com|net|org)/
+header T_FROM_NUM_END_6_MSN	From:addr =~ /\d{6}\@msn\.(?:com|net|org)/
+header T_FROM_NUM_END_6_PRODIGY	From:addr =~ /\d{6}\@prodigy\.(?:com|net|org)/
+header T_FROM_NUM_END_6_YAHOO	From:addr =~ /\d{6}\@yahoo\.(?:com|net|org)/
+header T_FROM_NUM_END_7_ANGELFIRE	From:addr =~ /\d{7}\@angelfire\.(?:com|net|org)/
+header T_FROM_NUM_END_7_AOL	From:addr =~ /\d{7}\@aol\.(?:com|net|org)/
+header T_FROM_NUM_END_7_BIGFOOT	From:addr =~ /\d{7}\@bigfoot\.(?:com|net|org)/
+header T_FROM_NUM_END_7_COMPUSERVE	From:addr =~ /\d{7}\@compuserve\.(?:com|net|org)/
+header T_FROM_NUM_END_7_EARTHLINK	From:addr =~ /\d{7}\@earthlink\.(?:com|net|org)/
+header T_FROM_NUM_END_7_EMAIL	From:addr =~ /\d{7}\@email\.(?:com|net|org)/
+header T_FROM_NUM_END_7_EUDORAMAIL	From:addr =~ /\d{7}\@eudoramail\.(?:com|net|org)/
+header T_FROM_NUM_END_7_EXCITE	From:addr =~ /\d{7}\@excite\.(?:com|net|org)/
+header T_FROM_NUM_END_7_FLASHMAIL	From:addr =~ /\d{7}\@flashmail\.(?:com|net|org)/
+header T_FROM_NUM_END_7_GEOCITIES	From:addr =~ /\d{7}\@geocities\.(?:com|net|org)/
+header T_FROM_NUM_END_7_HKNETMAIL	From:addr =~ /\d{7}\@hknetmail\.(?:com|net|org)/
+header T_FROM_NUM_END_7_HOTMAIL	From:addr =~ /\d{7}\@hotmail\.(?:com|net|org)/
+header T_FROM_NUM_END_7_JUNO	From:addr =~ /\d{7}\@juno\.(?:com|net|org)/
+header T_FROM_NUM_END_7_MAILEXCITE	From:addr =~ /\d{7}\@mailexcite\.(?:com|net|org)/
+header T_FROM_NUM_END_7_MSN	From:addr =~ /\d{7}\@msn\.(?:com|net|org)/
+header T_FROM_NUM_END_7_PRODIGY	From:addr =~ /\d{7}\@prodigy\.(?:com|net|org)/
+header T_FROM_NUM_END_7_YAHOO	From:addr =~ /\d{7}\@yahoo\.(?:com|net|org)/
+
+header T_HEAD_NUM_END_5_ANGELFIRE	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@angelfire\.(?:com|net|org)/
+header T_HEAD_NUM_END_5_AOL	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@aol\.(?:com|net|org)/
+header T_HEAD_NUM_END_5_BIGFOOT	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@bigfoot\.(?:com|net|org)/
+header T_HEAD_NUM_END_5_COMPUSERVE	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@compuserve\.(?:com|net|org)/
+header T_HEAD_NUM_END_5_EARTHLINK	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@earthlink\.(?:com|net|org)/
+header T_HEAD_NUM_END_5_EMAIL	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@email\.(?:com|net|org)/
+header T_HEAD_NUM_END_5_EUDORAMAIL	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@eudoramail\.(?:com|net|org)/
+header T_HEAD_NUM_END_5_EXCITE	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@excite\.(?:com|net|org)/
+header T_HEAD_NUM_END_5_FLASHMAIL	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@flashmail\.(?:com|net|org)/
+header T_HEAD_NUM_END_5_GEOCITIES	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@geocities\.(?:com|net|org)/
+header T_HEAD_NUM_END_5_HKNETMAIL	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@hknetmail\.(?:com|net|org)/
+header T_HEAD_NUM_END_5_HOTMAIL	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@hotmail\.(?:com|net|org)/
+header T_HEAD_NUM_END_5_JUNO	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@juno\.(?:com|net|org)/
+header T_HEAD_NUM_END_5_MAILEXCITE	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@mailexcite\.(?:com|net|org)/
+header T_HEAD_NUM_END_5_MSN	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@msn\.(?:com|net|org)/
+header T_HEAD_NUM_END_5_PRODIGY	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@prodigy\.(?:com|net|org)/
+header T_HEAD_NUM_END_5_YAHOO	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@yahoo\.(?:com|net|org)/
+header T_HEAD_NUM_END_6_ANGELFIRE	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@angelfire\.(?:com|net|org)/
+header T_HEAD_NUM_END_6_AOL	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@aol\.(?:com|net|org)/
+header T_HEAD_NUM_END_6_BIGFOOT	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@bigfoot\.(?:com|net|org)/
+header T_HEAD_NUM_END_6_COMPUSERVE	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@compuserve\.(?:com|net|org)/
+header T_HEAD_NUM_END_6_EARTHLINK	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@earthlink\.(?:com|net|org)/
+header T_HEAD_NUM_END_6_EMAIL	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@email\.(?:com|net|org)/
+header T_HEAD_NUM_END_6_EUDORAMAIL	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@eudoramail\.(?:com|net|org)/
+header T_HEAD_NUM_END_6_EXCITE	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@excite\.(?:com|net|org)/
+header T_HEAD_NUM_END_6_FLASHMAIL	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@flashmail\.(?:com|net|org)/
+header T_HEAD_NUM_END_6_GEOCITIES	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@geocities\.(?:com|net|org)/
+header T_HEAD_NUM_END_6_HKNETMAIL	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@hknetmail\.(?:com|net|org)/
+header T_HEAD_NUM_END_6_HOTMAIL	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@hotmail\.(?:com|net|org)/
+header T_HEAD_NUM_END_6_JUNO	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@juno\.(?:com|net|org)/
+header T_HEAD_NUM_END_6_MAILEXCITE	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@mailexcite\.(?:com|net|org)/
+header T_HEAD_NUM_END_6_MSN	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@msn\.(?:com|net|org)/
+header T_HEAD_NUM_END_6_PRODIGY	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@prodigy\.(?:com|net|org)/
+header T_HEAD_NUM_END_6_YAHOO	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@yahoo\.(?:com|net|org)/
+header T_HEAD_NUM_END_7_ANGELFIRE	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@angelfire\.(?:com|net|org)/
+header T_HEAD_NUM_END_7_AOL	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@aol\.(?:com|net|org)/
+header T_HEAD_NUM_END_7_BIGFOOT	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@bigfoot\.(?:com|net|org)/
+header T_HEAD_NUM_END_7_COMPUSERVE	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@compuserve\.(?:com|net|org)/
+header T_HEAD_NUM_END_7_EARTHLINK	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@earthlink\.(?:com|net|org)/
+header T_HEAD_NUM_END_7_EMAIL	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@email\.(?:com|net|org)/
+header T_HEAD_NUM_END_7_EUDORAMAIL	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@eudoramail\.(?:com|net|org)/
+header T_HEAD_NUM_END_7_EXCITE	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@excite\.(?:com|net|org)/
+header T_HEAD_NUM_END_7_FLASHMAIL	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@flashmail\.(?:com|net|org)/
+header T_HEAD_NUM_END_7_GEOCITIES	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@geocities\.(?:com|net|org)/
+header T_HEAD_NUM_END_7_HKNETMAIL	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@hknetmail\.(?:com|net|org)/
+header T_HEAD_NUM_END_7_HOTMAIL	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@hotmail\.(?:com|net|org)/
+header T_HEAD_NUM_END_7_JUNO	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@juno\.(?:com|net|org)/
+header T_HEAD_NUM_END_7_MAILEXCITE	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@mailexcite\.(?:com|net|org)/
+header T_HEAD_NUM_END_7_MSN	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@msn\.(?:com|net|org)/
+header T_HEAD_NUM_END_7_PRODIGY	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@prodigy\.(?:com|net|org)/
+header T_HEAD_NUM_END_7_YAHOO	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@yahoo\.(?:com|net|org)/
