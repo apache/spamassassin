@@ -39,9 +39,11 @@ sub new_checker {
     'hostname'		=> hostname,
   };
 
+  my $path;
+
   if(defined($main->{conf}->{auto_whitelist_path})) # if undef then don't worry -- empty hash!
   {
-      my $path = $main->sed_path ($main->{conf}->{auto_whitelist_path});
+      $path = $main->sed_path ($main->{conf}->{auto_whitelist_path});
 
       #NFS Safe Lockng (I hope!)
       #Attempt to lock the dbfile, using NFS safe locking 
