@@ -214,9 +214,6 @@ uri T_ITSREMARKABLE_MAILTO	/mailto:\S+[.@]itsremarkable\.com/
 ########################################################################
 
 # bug 1308
-# somewhat less-expensive version
-# 12/24 - works well for allen and justin, horrible for me (S/O 0.7) - tvd
-header T_SUSPICIOUS_RECIPS	ToCc =~ /(@[-a-z0-9_.]{2,}).{0,64}(?:\1.{0,64}){8,}/is
 
 # fast replacement for SUSPICIOUS_RECIPS and VERY_SUSP_RECIPS
 # please don't hate me, I'm exploring the space now:
@@ -320,6 +317,22 @@ header T_SUSPECT_RECIPIENTS_L3C6_6	eval:check_recipients('1.2','1.4','3','6')
 header T_SUSPECT_RECIPIENTS_L3C6_7	eval:check_recipients('1.4','1.6','3','6')
 header T_SUSPECT_RECIPIENTS_L3C6_8	eval:check_recipients('1.6','1.8','3','6')
 header T_SUSPECT_RECIPIENTS_L3C6_9	eval:check_recipients('1.8','undef','3','6')
+
+# interesting offshoot of T_SUSPECT_RECIPIENTS* code
+# great S/O ratio starting at 6 or 7 for me - quinlan
+header T_SORTED_RECIPIENTS_04		eval:sorted_recipients('4')
+header T_SORTED_RECIPIENTS_05		eval:sorted_recipients('5')
+header T_SORTED_RECIPIENTS_06		eval:sorted_recipients('6')
+header T_SORTED_RECIPIENTS_07		eval:sorted_recipients('7')
+header T_SORTED_RECIPIENTS_08		eval:sorted_recipients('8')
+header T_SORTED_RECIPIENTS_09		eval:sorted_recipients('9')
+header T_SORTED_RECIPIENTS_10		eval:sorted_recipients('10')
+header T_SORTED_RECIPIENTS_11		eval:sorted_recipients('11')
+header T_SORTED_RECIPIENTS_12		eval:sorted_recipients('12')
+header T_SORTED_RECIPIENTS_13		eval:sorted_recipients('13')
+header T_SORTED_RECIPIENTS_14		eval:sorted_recipients('14')
+header T_SORTED_RECIPIENTS_15		eval:sorted_recipients('15')
+header T_SORTED_RECIPIENTS_16		eval:sorted_recipients('16')
 
 ########################################################################
 

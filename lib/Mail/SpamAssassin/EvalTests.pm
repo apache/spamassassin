@@ -122,12 +122,22 @@ sub check_for_from_to_same {
   }
 }
 
+sub sorted_recipients {
+  my ($self, $length) = @_;
+
+  my $test = "sorted.tocc.$length";
+  if (!exists $self->{$test}) {
+    $self->_check_recipients();
+  }
+  return $self->{$test};
+}
+
 sub check_recipients {
   my ($self, $min, $max, $length, $count) = @_;
 
   my $test = "similar.tocc.$length.$count";
   if (!exists $self->{$test}) {
-    $self->_check_recipients($length, $count);
+    $self->_check_recipients();
   }
   return (($min eq 'undef' || $self->{$test} >= $min) &&
 	  ($max eq 'undef' || $self->{$test} < $max));
@@ -140,20 +150,37 @@ sub _check_recipients {
   $to =~ s/\(.*?\)//g;		# strip out the (comments)
   my @address = ($to =~ m/([\w.=-]+\@\w+(?:[\w.-]+\.)+\w+)/g);
 
+  # T_SORTED_RECIPIENTS*
+  # this can be written much more efficiently, but I'm not sure a loop will
+  # even be needed (a single test might do fine), so I'm not bothering yet.
+  #
+  # Note: reverse sorted recipient lists aren't a good spam indicator and
+  # are also quite uncommon.
+  for (my $length = 4; $length <= 16; $length++) {
+    $self->{"sorted.tocc.$length"} = 0;
+    if (scalar(@address) >= $length &&
+	join(',', @address) eq (join(',', sort(@address))))
+    {
+      $self->{"sorted.tocc.$length"} = 1;
+    }
+  }
+
+  # T_SUSPECT_RECIPIENTS*
   # length of 1 is good, 2 or 3 may be needed
   for my $length ((1, 2, 3)) {
     # at least 5 addresses is good, 4 does not seem like enough
     for my $count ((4, 5, 6)) {
       $self->{"similar.tocc.$length.$count"} = 0;
       if (scalar (@address) >= $count) {
-	my @user = map { m/\@(.{0,$length})/ } @address;
-	my @host = map { substr($_,0,$length) } @address;
+	my @user = map { substr($_,0,$length) } @address;
+	my @fqhn = map { m/\@(.*)/ } @address;
+	my @host = map { substr($_,0,$length) } @fqhn;
 	my $hits = 0;
 	my $combinations = 0;
 	for (my $i = 0; $i <= $#address; $i++) {
 	  for (my $j = $i+1; $j <= $#address; $j++) {
 	    $hits++ if $user[$i] eq $user[$j];
-	    $hits++ if $host[$i] eq $host[$j];
+	    $hits++ if $host[$i] eq $host[$j] && $fqhn[$i] ne $fqhn[$j];
 	    $combinations++;
 	  }
 	}
