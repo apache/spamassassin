@@ -38,8 +38,7 @@ my $error = do {
 };
 
 print "# $error\n";
-ok($error, qr/cannot create tmp lockfile/, "Check we get the right error back");
-
+ok($error, qr/(cannot create tmp lockfile)|(unlink of lock file.*failed)/, "Check we get the right error back");
 
 # and this mail should *not* be whitelisted as a result.
 %patterns = %is_spam_patterns;
