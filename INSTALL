@@ -15,9 +15,10 @@ Using CPAN via CPAN.pm:
 	install Mail::SpamAssassin
 	quit
 
-Using Debian unstable:
+Using Linux:
 
-        apt-get install spamassassin
+	Debian unstable: apt-get install spamassassin
+	Gentoo: emerge mail-filter/spamassassin
 
 Alternatively download the tarfile, zipfile, or Fedora Core RPM from
 http://spamassassin.apache.org/ and install that, like so:
@@ -177,6 +178,7 @@ SpamAssassin to run:
     tests and the Bayes subsystem.  It is also used by Razor2.
 
     Debian: apt-get install libdigest-sha1-perl
+    Gentoo: emerge dev-perl/Digest-SHA1
 
   - HTML::Parser >= 3.24 (from CPAN)
 
@@ -186,6 +188,7 @@ SpamAssassin to run:
     is unavoidable.  Run "perldoc -q html" for additional information.
 
     Debian: apt-get install libhtml-parser-perl
+    Gentoo: emerge dev-perl/HTML-Parser
 
   - Storable             (from CPAN)
 
@@ -197,6 +200,7 @@ SpamAssassin to run:
     process switches between users.
 
     Debian: apt-get install libstorable-perl
+    Gentoo: emerge dev-perl/Storable
 
 Optional Additional Modules
 ---------------------------
