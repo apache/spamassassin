@@ -1047,6 +1047,7 @@ Clear the report template.
 =cut
 
     if (/^clear_report_template$/) {
+
       $self->{report_template} = ''; next;
     }
 
@@ -1062,7 +1063,12 @@ C<clear_unsafe_report_template> to restart.
 =cut
 
     if (/^unsafe_report\b\s*(.*?)$/) {
-      $self->{unsafe_report_template} .= $1."\n"; next;
+      my $report = $1;
+      if ( $report =~ /^"(.*?)"$/ ) {
+        $report = $1;
+      }
+
+      $self->{unsafe_report_template} .= "$report\n"; next;
     }
 
 =item clear_unsafe_report_template
@@ -1084,7 +1090,11 @@ C</usr/share/spamassassin> for an example.
 =cut
 
     if (/^terse_report\b\s*(.*?)$/) {
-      $self->{terse_report_template} .= $1."\n"; next;
+      my $report = $1;
+      if ( $report =~ /^"(.*?)"$/ ) {
+        $report = $1;
+      }
+      $self->{terse_report_template} .= "$report\n"; next;
     }
 
 =item clear_terse_report_template
@@ -1107,7 +1117,11 @@ C</usr/share/spamassassin> for an example.
 =cut
 
     if (/^spamtrap\s*(.*?)$/) {
-      $self->{spamtrap_template} .= $1."\n"; next;
+      my $report = $1;
+      if ( $report =~ /^"(.*?)"$/ ) {
+        $report = $1;
+      }
+      $self->{spamtrap_template} .= "$report\n"; next;
     }
 
 =item clear_spamtrap_template
