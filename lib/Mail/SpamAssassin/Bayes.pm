@@ -518,11 +518,14 @@ sub tokenize_headers {
   for (@hdrs) {
     next unless /\S/;
     my ($hdr, $val) = split(/:/, $_, 2);
-    $val ||= '';
 
     # remove user-specified headers here, after Received, in case they
     # want to ignore that too
     next if exists $user_ignore{$hdr};
+
+    # Prep the header value
+    $val ||= '';
+    chomp($val);
 
     # special tokenization for some headers:
     if ($hdr =~ /^(?:|X-|Resent-)Message-Id$/i) {
