@@ -4,9 +4,8 @@
 # and could be wrong. Use with care.
 # contact info: <jesus.climent@hispalinux.es>
 
-lang es header OFERTA_ES	ALL =~ /(?:oferta|publicidad|promoci(?:ó|o)n)/i
+lang es header OFERTA_ES	ALL =~ /\b(?:ofertas?|publicidad|promoci[óo]n)\b/i
 lang es describe OFERTA_ES	Publicidad por e-mail
-lang es score OFERTA_ES		1.5
 
-lang es header GRATIS_T_ES	ALL =~ /gratis/i
+lang es header GRATIS_T_ES	ALL =~ /\bgratis\b/i
 lang es describe GRATIS_T_ES	Contiene la palabra gratis en las cabeceras
