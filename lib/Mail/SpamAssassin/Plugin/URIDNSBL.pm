@@ -138,7 +138,6 @@ sub new {
 
 # this is just a placeholder; in fact the results are dealt with later
 sub check_uridnsbl {
-  my ($self, $permsgstatus, $rulename) = @_;
   return 0;
 }
 
@@ -167,7 +166,7 @@ sub parsed_metadata {
   $scanstate->{active_rules_rhsbl} = { };
   $scanstate->{active_rules_revipbl} = { };
   foreach my $rulename (keys %{$scanner->{conf}->{uridnsbls}}) {
-    next unless ($scanner->{conf}->is_rule_active('head_evals',$rulename));
+    next unless ($scanner->{conf}->is_rule_active('body_evals',$rulename));
 
     my $rulecf = $scanstate->{scanner}->{conf}->{uridnsbls}->{$rulename};
     if ($rulecf->{is_rhsbl}) {
