@@ -124,7 +124,7 @@ if ($opt{'auth-ident'}) {
   eval { require Net::Ident };
   die "fatal: ident-based authentication requested, but Net::Ident is unavailable\n" if ($@);
 
-  $opt{'ident-timeout'} = undef if $opt{'ident-timeout'} >= 0.0;
+  $opt{'ident-timeout'} = undef if $opt{'ident-timeout'} <= 0.0;
   import Net::Ident qw(ident_lookup);
 }
 
