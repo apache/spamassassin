@@ -24,6 +24,8 @@ use Sys::Syslog qw(:DEFAULT setlogsock);
 use POSIX qw(:sys_wait_h);
 use POSIX qw(setsid);
 use Errno;
+use File::Spec;
+use File::Path;
 # Load Time::HiRes if it's available
 BEGIN {
   eval { require Time::HiRes };
@@ -210,16 +212,6 @@ if ($opt{'username'}) {
     $setuid_to_user = 1;
 }
 
-
-# We should set $ENV{HOME} in /tmp.
-$ENV{'HOME'} = (-d '/tmp' ? '/tmp' : $ENV{TMP} || $ENV{TEMP})."/spamassassin-$$"; 
-mkdir("$ENV{'HOME'}",0700)
-    or die "fatal: Can't create $ENV{'HOME'}";
-mkdir("$ENV{'HOME'}/.spamassassin", 0700)
-    or die "fatal: Can't create $ENV{'HOME'}/.spamassassin";
-
-# This might be slightly paranoid. Good.
-
 $opt{'auto-whitelist'} and eval
 {
     require Mail::SpamAssassin::DBBasedAddrList;
@@ -229,23 +221,8 @@ $opt{'auto-whitelist'} and eval
     $spamtest->set_persistent_address_list_factory ($addrlistfactory);
 };
 
-$spamtest->compile_now(0);	# ensure all modules etc. are loaded
-$/ = "\n";			# argh, Razor resets this!  Bad Razor!
-
-# untaint $ENV{HOME}
-$ENV{HOME} =~ /^([^\;\'\"\0]+)$/; $ENV{HOME} = $1;
-
-unlink <$ENV{HOME}/.spamassassin/*>,<$ENV{HOME}/*>;
-rmdir "$ENV{HOME}/.spamassassin";
-rmdir $ENV{HOME};
-
-Mail::SpamAssassin::clean_path_in_taint_mode();
-
-system "/bin/rm -Rf /tmp/spamassassin-$$";
-delete $ENV{'HOME'};
-
-my $current_user;
-my $paddr;
+preload_modules_with_tmp_homedir();
+Mail::SpamAssassin::Util::clean_path_in_taint_mode();
 
 # Note: we now use a set of fds to track children, as using SIGCHLD
 # is unreliable on many versions of perl (sadly).  Thanks to
@@ -264,6 +241,9 @@ if ($opt{'debug'}) {
 
 logmsg ("server started on port $port (running version ".
 				Mail::SpamAssassin::Version().")");
+
+my $current_user;
+my $paddr;
 
 my $readvec = "";
 my %pipes = ();
@@ -870,6 +850,29 @@ sub ip_is_allowed {
 }
 sub my_inet_aton { unpack("N", pack("C4", split(/\./, $_[0]))) }
 
+sub preload_modules_with_tmp_homedir {
+  # set $ENV{HOME} in /tmp while we compile and preload everything.
+  # File::Spec->tmpdir uses TMPDIR, TMP, TEMP, C:/temp, /tmp etc.
+  my $tmphome = File::Spec->catfile (File::Spec->tmpdir, "spamassassin-$$");
+  $tmphome = Mail::SpamAssassin::Util::untaint_file_path ($tmphome);
+
+  mkdir($tmphome, 0700) or die "fatal: Can't create $tmphome";
+  mkdir($tmphome."/.spamassassin", 0700)
+      or die "fatal: Can't create $tmphome/.spamassassin";
+  $ENV{HOME} = $tmphome;
+
+  $spamtest->compile_now(0);	# ensure all modules etc. are loaded
+  $/ = "\n";			# argh, Razor resets this!  Bad Razor!
+
+  unlink <$tmphome/.spamassassin/*>, <$tmphome/*>;
+  rmdir $tmphome."/.spamassassin";
+  rmdir $tmphome or rmtree $tmphome;
+
+  # now clean up the stuff we just created, and make us taint-safe
+  delete $ENV{HOME};
+}
+
+__DATA__
 
 #-S, --stop-at-threshold            Stop tests after the threshold is reached
 #=item B<-S>, B<--stop-at-threshold>

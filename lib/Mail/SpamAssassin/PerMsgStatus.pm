@@ -2299,8 +2299,7 @@ use Fcntl;
 sub secure_tmpfile {
   my $tmpdir = '/tmp';
   if (defined $ENV{'TMPDIR'}) { $tmpdir = $ENV{'TMPDIR'}; }
-
-  $tmpdir =~ /^(.*)$/; $tmpdir = $1;	# untaint
+  $tmpdir = Mail::SpamAssassin::Util::untaint_file_path ($tmpdir);
 
   my $template = $tmpdir."/sa.$$.";
 

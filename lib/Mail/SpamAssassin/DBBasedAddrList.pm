@@ -11,8 +11,8 @@ eval "use bytes";
 use AnyDBM_File;
 
 use Mail::SpamAssassin::PersistentAddrList;
-use Fcntl ':DEFAULT',':flock';
-use Sys::Hostname;
+use Mail::SpamAssassin::Util;
+use Fcntl;
 
 use vars	qw{
   	@ISA
@@ -41,87 +41,33 @@ sub new_checker {
     'main'		=> $main,
     'accum'             => { },
     'is_locked'		=> 0,
-    'lock_file'		=> '',
-    'hostname'		=> hostname,
+    'lock_file'		=> ''
   };
 
   my $path;
 
   if(defined($main->{conf}->{auto_whitelist_path})) # if undef then don't worry -- empty hash!
   {
-      $path = $main->sed_path ($main->{conf}->{auto_whitelist_path});
+    $path = $main->sed_path ($main->{conf}->{auto_whitelist_path});
 
-      # untaint
-      $path =~ /^([-_\/\\\:A-Za-z0-9 \.]+)$/; $path = $1;
+    my $lock_file = Mail::SpamAssassin::Util::safe_lock ($path);
+    if (defined $lock_file) {
+      $self->{lock_file} = $lock_file;
+      $self->{is_locked} = 1;
+      dbg("Tie-ing to DB file R/W in $path");
+      tie %{$self->{accum}},"AnyDBM_File",$path,
+		  O_RDWR|O_CREAT,   #open rw w/lock
+		  (oct ($main->{conf}->{auto_whitelist_file_mode}) & 0666)
+	 or goto failed_to_tie;
 
-      #NFS Safe Lockng (I hope!)
-      #Attempt to lock the dbfile, using NFS safe locking 
-      #Locking code adapted from code by Alexis Rosen <alexis@panix.com>
-      #Kelsey Cummings <kgc@sonic.net>
-      my $lock_file = $self->{lock_file} = $path.'.lock';
-      my $lock_tmp = $lock_file . '.' . $self->{hostname} . '.'. $$;
-      my $max_lock_age = 300; #seconds 
-      my $lock_tries = 30;
-
-      # untaint the name of the lockfile
-      $lock_tmp =~ /^([-_\/\\\:A-Za-z0-9 \.]+)$/; $lock_tmp = $1;
-
-      open(LTMP, ">$lock_tmp") || die "Cannot create tmp lockfile $lock_file : $!\n";
-      my $old_fh = select(LTMP);
-      $|=1;
-      select($old_fh);
-
-
-      for (my $i = 0; $i < $lock_tries; $i++) #try $lock_tries (seconds) times to get lock
-      {
-         dbg("$$ Trying to get lock on $path pass $i");
-	 print LTMP $self->{hostname}.".$$\n"; #updates tmp lockfile to current time
-	 if ( link ($lock_tmp,$lock_file) )
-	 {
-	    
-	    $self->{is_locked} = 1;
-	    last;
-	 } 
-	 else
-	 {
-	    #link _may_ return false even if the link _is_ created
-
-	    if ( (stat($lock_tmp))[3] > 1 ) {
-	       $self->{is_locked} = 1;
-	       last;
-	    }
-	       
-	    #check to see how old the lockfile is
-	    my $lock_age = (stat($lock_file))[10];
-	    my $now = (stat($lock_tmp))[10];
-	    if ($lock_age < $now - $max_lock_age) {
-	       #we got a stale lock, break it
-	       dbg("$$ Breaking Stale Lockfile!");
-	       unlink "$lock_file";
-	    }
-	    sleep(1);
-	 }
-      }
-
-      # TODO: trap signals to unlock the db file here on SIGINT and SIGTERM
-
-      close(LTMP);
-      unlink($lock_tmp);
-
-      if ($self->{is_locked})
-      {
-	 dbg("Tie-ing to DB file R/W in $path");
-	 tie %{$self->{accum}},"AnyDBM_File",$path, O_RDWR|O_CREAT,   #open rw w/lock
-		       (oct ($main->{conf}->{auto_whitelist_file_mode}) & 0666)
-	     or goto failed_to_tie;
-      } 
-      else 
-      {
-	 dbg("Tie-ing to DB file R/O in $path");
-	 tie %{$self->{accum}},"AnyDBM_File",$path, O_RDONLY,         #open ro w/o lock
-		       (oct ($main->{conf}->{auto_whitelist_file_mode}) & 0666)
-	     or goto failed_to_tie;
-      } 
+    } else {
+      $self->{is_locked} = 0;
+      dbg("Tie-ing to DB file R/O in $path");
+      tie %{$self->{accum}},"AnyDBM_File",$path,
+		  O_RDONLY,         #open ro w/o lock
+		  (oct ($main->{conf}->{auto_whitelist_file_mode}) & 0666)
+	 or goto failed_to_tie;
+    }
   }
 
   bless ($self, $class);
@@ -136,15 +82,15 @@ failed_to_tie:
 ###########################################################################
 
 sub finish {
-    my $self = shift;
-    dbg("DB addr list: untie-ing and destroying lockfile.");
-    untie %{$self->{accum}};
-    if ($self->{is_locked}) {
-       dbg ("DB addr list: file locked, breaking lock.");
-       unlink($self->{lock_file}) ||
-          dbg ("Couldn't unlink " . $self->{lock_file} . ": $!\n");
-    }
-    # TODO: untrap signals to unlock the db file here
+  my $self = shift;
+  dbg("DB addr list: untie-ing and destroying lockfile.");
+  untie %{$self->{accum}};
+  if ($self->{is_locked}) {
+    dbg ("DB addr list: file locked, breaking lock.");
+    unlink($self->{lock_file}) or
+		dbg ("Couldn't unlink " . $self->{lock_file} . ": $!\n");
+  }
+  # TODO: untrap signals to unlock the db file here
 }
 
 ###########################################################################

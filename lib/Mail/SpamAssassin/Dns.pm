@@ -483,17 +483,10 @@ sub is_dcc_available {
 
   my $dccproc = $self->{conf}->{dcc_path} || '';
   unless ($dccproc) {
-    Mail::SpamAssassin::clean_path_in_taint_mode();
-    foreach my $path (File::Spec->path()) {
-      $dccproc = File::Spec->catfile ($path, 'dccproc');
-      if (-x $dccproc) {
-        dbg ("DCC was found at $dccproc");
-        $self->{conf}->{dcc_path} = $dccproc;
-        last;
-      }
-    }
+    $dccproc = Mail::SpamAssassin::Util::find_executable_in_env_path('dccproc');
+    if ($dccproc) { $self->{conf}->{dcc_path} = $dccproc; }
   }
-  unless (-x $dccproc) {
+  unless ($dccproc && -x $dccproc) {
     dbg ("DCC is not available: dccproc not found");
     return 0;
   }
@@ -532,12 +525,12 @@ sub dcc_lookup {
 
     alarm($timeout);
 
-    $self->{conf}->{dcc_path} =~ /^([^\;\'\"\0]+)$/;
-    my $untainted = $1;
+    # Note: not really tainted, these both come from system conf file.
+    my $path = Mail::SpamAssassin::Util::untaint_file_path ($self->{conf}->{dcc_path});
     $self->{conf}->{dcc_options} =~ /^([^\;\'\"\0]+)$/;
     my $opts = $1;
 
-    my $pid = open(DCC, join(' ', $untainted, '-H',
+    my $pid = open(DCC, join(' ', $path, '-H',
 				$opts, '< \''.$tmpf.'\' 2>&1 |'));
     $response = <DCC>;
     close DCC;
@@ -614,17 +607,10 @@ sub is_pyzor_available {
 
   my $pyzor = $self->{conf}->{pyzor_path} || '';
   unless ($pyzor) {
-    Mail::SpamAssassin::clean_path_in_taint_mode();
-    foreach my $path (File::Spec->path()) {
-      $pyzor = File::Spec->catfile ($path, 'pyzor');
-      if (-x $pyzor) {
-        dbg ("Pyzor was found at $pyzor");
-        $self->{conf}->{pyzor_path} = $pyzor;
-        last;
-      }
-    }
+    $pyzor = Mail::SpamAssassin::Util::find_executable_in_env_path('pyzor');
+    if ($pyzor) { $self->{conf}->{pyzor_path} = $pyzor; }
   }
-  unless (-x $pyzor) {
+  unless ($pyzor && -x $pyzor) {
     dbg ("Pyzor is not available: pyzor not found");
     return 0;
   }
@@ -661,10 +647,10 @@ sub pyzor_lookup {
 
     alarm($timeout);
 
-    $self->{conf}->{pyzor_path} =~ /^([^\;\'\"\0]+)$/;
-    my $untainted = $1;
+    # Note: not really tainted, this comes from system conf file.
+    my $path = Mail::SpamAssassin::Util::untaint_file_path ($self->{conf}->{pyzor_path});
 
-    my $pid = open(PYZOR, join(' ', $untainted,'check < \''.$tmpf.'\' 2>&1 |'));
+    my $pid = open(PYZOR, join(' ', $path, 'check < \''.$tmpf.'\' 2>&1 |'));
     $response = <PYZOR>;
     close PYZOR;
     dbg("Pyzor: got response: $response");
@@ -870,21 +856,17 @@ sub enter_helper_run_mode {
   $self->{old_slash} = $/;              # Razor pollutes this
   $self->{old_env_home} = $ENV{'HOME'}; # can be 'undef', e.g. spamd has no HOME
 
-  Mail::SpamAssassin::clean_path_in_taint_mode();
+  Mail::SpamAssassin::Util::clean_path_in_taint_mode();
 
-  if (defined $self->{main}->{home_dir_for_helpers}
-             && $self->{main}->{home_dir_for_helpers})
-  {
-    $self->{main}->{home_dir_for_helpers} =~ /^([^\;\'\"\0]+)$/;
-    $ENV{'HOME'} = $1;
+  my $newhome;
+  if ($self->{main}->{home_dir_for_helpers}) {
+    $newhome = $self->{main}->{home_dir_for_helpers};
+  } else {
+    $newhome = (getpwuid($>))[7];	# use spamd -u user's home dir
   }
-  else {
-    # use spamd -u user's home dir
-    my $hd = (getpwuid($>))[7];
-    if (defined $hd) { 
-      $hd =~ /^([^\;\'\"\0]+)$/;		# untaint this
-      $ENV{'HOME'} = $1;
-    }
+
+  if ($newhome) {
+    $ENV{'HOME'} = Mail::SpamAssassin::Util::untaint_file_path ($newhome);
   }
 }
 
