@@ -292,7 +292,10 @@ for ( $waitedpid = 0;
 
 	    # Now read in message
 	    my @msglines = (<STDIN>);
-	    my $actual_length = length (join '', @msglines);
+	    my $actual_length;
+	    for (@msglines) {
+		$actual_length += length;
+	    }
 	    my $mail = Mail::SpamAssassin::NoMailAudit->new (
                                 data => \@msglines,
                                 add_From_line => $opt_F
@@ -396,7 +399,10 @@ for ( $waitedpid = 0;
 
 	    # Now read in message
 	    my @msglines = (<STDIN>);
-	    my $actual_length = length (join '', @msglines);
+	    my $actual_length;
+	    for (@msglines) {
+		$actual_length += length;
+	    }
 	    my $mail = Mail::SpamAssassin::NoMailAudit->new (
                                 data => \@msglines,
                                 add_From_line => $opt_F
