@@ -136,6 +136,9 @@ meta T_HTML_FAKED_QUALCOMM	(__ANY_QUALCOMM_MUA && __MIME_HTML && !__TAG_EXISTS_H
 # bug 1261
 rawbody T_BASE64_ENC_TEXT		eval:check_for_mime('t_mime_base64_encoded_text')
 
+# MIME_BASE64 control rule
+rawbody T_MIME_BASE64			eval:check_for_mime('t_mime_base64_count')
+
 # 2003-03-06: quinlan
 rawbody T_MIME_BASE64_BLANKS		eval:check_for_mime('t_mime_base64_blanks')
 rawbody T_MIME_BASE64_ILLEGAL		eval:check_for_mime('t_mime_base64_illegal')
