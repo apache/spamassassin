@@ -567,8 +567,11 @@ sub dcc_lookup {
 
     # Note: not really tainted, these both come from system conf file.
     my $path = Mail::SpamAssassin::Util::untaint_file_path ($self->{conf}->{dcc_path});
-    $self->{conf}->{dcc_options} =~ /^([^\;\'\"\0]+)$/;
-    my $opts = $1; $opts ||= '';
+
+    my $opts = '';
+    if ( $self->{conf}->{dcc_options} =~ /^([^\;\'\"\0]+)$/ ) {
+      $opts = $1;
+    }
 
     dbg("DCC command: ".join(' ', $path, "-H", $opts, "< '$tmpf'", "2>&1"),'dcc',-1);
     my $pid = open(DCC, join(' ', $path, "-H", $opts, "< '$tmpf'", "2>&1", '|')) || die "$!\n";
@@ -693,8 +696,11 @@ sub pyzor_lookup {
 
     # Note: not really tainted, this comes from system conf file.
     my $path = Mail::SpamAssassin::Util::untaint_file_path ($self->{conf}->{pyzor_path});
-    $self->{conf}->{pyzor_options} =~ /^([^\;\'\"\0]+)$/;
-    my $opts = $1; $opts ||= '';
+
+    my $opts = '';
+    if ( $self->{conf}->{pyzor_options} =~ /^([^\;\'\"\0]+)$/ ) {
+      $opts = $1;
+    }
  
     dbg("Pyzor command: ".join(' ', $path, $opts, "check", "< '$tmpf'", "2>&1"),'pyzor',-1);
     my $pid = open(PYZOR, join(' ', $path, $opts, "check", "< '$tmpf'", "2>&1", '|')) || die "$!\n";

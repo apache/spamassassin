@@ -264,8 +264,11 @@ sub dcc_report {
 
     # Note: not really tainted, these both come from system conf file.
     my $path = Mail::SpamAssassin::Util::untaint_file_path ($self->{conf}->{dcc_path});
-    $self->{conf}->{dcc_options} =~ /^([^\;\'\"\0]+)$/;
-    my $opts = $1; $opts ||= '';
+
+    my $opts = '';
+    if ( $self->{conf}->{dcc_options} =~ /^([^\;\'\"\0]+)$/ ) {
+      $opts = $1;
+    }
 
     my $pid = open(DCC, join(' ', $path, "-t many", $opts, "< '$tmpf'", ">/dev/null 2>&1", '|')) || die "$!\n";
     close(DCC) || die "Received error code $?";
@@ -314,8 +317,11 @@ sub pyzor_report {
 
     # Note: not really tainted, this comes from system conf file.
     my $path = Mail::SpamAssassin::Util::untaint_file_path ($self->{conf}->{pyzor_path});
-    $self->{conf}->{pyzor_options} =~ /^([^\;\'\"\0]+)$/;
-    my $opts = $1; $opts ||= '';
+
+    my $opts = '';
+    if ( $self->{conf}->{pyzor_options} =~ /^([^\;\'\"\0]+)$/ ) {
+      $opts = $1;
+    }
 
     my $pid = open(PYZ, join(' ', $path, $opts, "report", "< '$tmpf'", ">/dev/null 2>&1", '|')) || die "$!\n";
     close(PYZ) || die "Received error code $?";
