@@ -54,7 +54,7 @@ sub get_addr_entry {
 	addr			=> $addr,
   };
 
-  $entry->{count} = $self->{accum}->{$addr}+0;
+  $entry->{count} = $self->{accum}->{$addr} || 1;
 
   dbg ("auto-whitelist (dir-based): $addr scores ".$entry->{count});
   return $entry;
