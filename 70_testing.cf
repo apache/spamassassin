@@ -566,3 +566,10 @@ uri T_LONG_HOSTNAME_40		/^https?:\/\/[a-z0-9]{40,}\./i
 header __USER_AGENT             exists:User-Agent
 meta T_PRIORITY_NO_NAME         ((__HAS_X_PRIORITY || __HAS_MSMAIL_PRI) && !__HAS_X_MAILER && !__IS_EXCH && !__USER_AGENT)
 
+# bug 2876: catch faked Reply messages
+header __HAS_THREAD_TOPIC	exists:Thread-Topic
+header __HAS_IRT		exists:In-Reply-To
+header __HAS_REFS		exists:References
+header __HAS_SUBJ_RE		Subject =~ /^re: /i
+meta T_REPLY_WITHOUT_HDRS	(__HAS_SUBJ_RE && !(__HAS_THREAD_TOPIC || __HAS_IRT || __HAS_REFS))
+
