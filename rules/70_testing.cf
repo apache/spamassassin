@@ -545,12 +545,6 @@ describe T_HTML_COMMENT_TAG	HTML comment probably contains HTML tag
 header T_FAKED_IP_IN_RCVD	Received =~ /from [-0-9a-z\._]+_\[\d+\.\d+\.\d+\.\d+\] /i
 describe T_FAKED_IP_IN_RCVD	Received: contains a name with a faked IP-address
 
-# back to the drawing board (demoted for development or deletion)
-# no legit mailer claims that their mailserver has no name
-header T_RCVD_BY_IP	Received =~ /\bby\s+\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/
-describe T_RCVD_BY_IP	Received by mail server with no name
-header T_RCVD_BY_IP_2	Received =~ /\bby\s+\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}(?<!127\.0\.0\.1)\b/
-
 # replaces VIAGRA
 # Cialis needs a leading \b
 body T_DRUG_ED_CAPS	/(?:\bCIALIS|LEVITRA|VIAGRA)/i
