@@ -558,7 +558,12 @@ sub check_for_faraway_charset {
   $type ||= $self->get ('Content-type');
 
   my @locales = split (' ', $self->{conf}->{ok_locales});
-  push (@locales, $ENV{'LANG'});
+
+  my $lang = $ENV{'LC_ALL'};
+  $lang ||= $ENV{'LANGUAGE'};
+  $lang ||= $ENV{'LC_MESSAGES'};
+  $lang ||= $ENV{'LANG'};
+  push (@locales, $lang);
 
   $type = get_charset_from_ct_line ($type);
   if (defined $type &&

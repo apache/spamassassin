@@ -29,7 +29,7 @@ use vars	qw{ %charsets_for_locale };
   # Thai
   'th' => 'TIS620',
   # Chinese (simplified and traditional)
-  'zh' => 'GB2312 GB231219800 GB18030 GBK BIG5HKSCS BIG5 EUCTW'
+  'zh' => 'GB2312 GB231219800 GB18030 GBK BIG5HKSCS BIG5 EUCTW',
 );
 
 ###########################################################################

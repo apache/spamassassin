@@ -365,6 +365,43 @@ Which locales (country codes) are considered OK to receive mail from.  Mail
 using character sets used by languages in these countries, will not be marked
 as possibly being spam in a foreign language.
 
+SpamAssassin will try to determine the local locale, in order to determine
+which charsets should be allowed by default, but on some OSes it may not be
+able to do this effectively, requiring customisation.
+
+All ISO-8859-* character sets, and Windows code page character sets, are
+already permitted by default.
+
+The following locales use additional character sets, and are supported:
+
+=over 4
+
+=item ja
+
+Japanese
+
+=item ko
+
+Korea
+
+=item ru
+
+Cyrillic charsets
+
+=item th
+
+Thai
+
+=item zh
+
+Chinese (both simplified and traditional)
+
+=back
+
+So to simply allow all character sets through, use
+
+	ok_locales	ja ko ru th zh
+
 =cut
 
     if (/^ok[-_]locales\s+(.+)$/) {
