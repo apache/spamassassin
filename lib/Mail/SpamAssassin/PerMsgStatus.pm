@@ -667,21 +667,21 @@ sub rewrite_report_safe {
   # possibilities right now, it's easier not to...
 
   if ($self->{conf}->{rewrite_header}->{Subject}) {
-    $subject ||= '';
+    $subject ||= "\n";
     my $tag = $self->_replace_tags($self->{conf}->{rewrite_header}->{Subject});
     $tag =~ s/\n/ /gs; # strip tag's newlines
     $subject =~ s/^(?:\Q${tag}\E )?/${tag} /g; # For some reason the tag may already be there!?
   }
 
   if ($self->{conf}->{rewrite_header}->{To}) {
-    $to ||= '';
+    $to ||= "\n";
     my $tag = $self->_replace_tags($self->{conf}->{rewrite_header}->{To});
     $tag =~ s/\n/ /gs; # strip tag's newlines
     $to =~ s/(?:\t\Q(${tag})\E)?$/\t(${tag})/
   }
 
   if ($self->{conf}->{rewrite_header}->{From}) {
-    $from ||= '';
+    $from ||= "\n";
     my $tag = $self->_replace_tags($self->{conf}->{rewrite_header}->{From});
     $tag =~ s/\n+//gs; # strip tag's newlines
     $from =~ s/(?:\t\Q(${tag})\E)?$/\t(${tag})/
