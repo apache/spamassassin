@@ -366,6 +366,7 @@ sub _upgrade_db {
           (oct ($main->{conf}->{bayes_file_mode}) & 0666);
     umask $umask;
     return 0 unless $res;
+    undef $res;
 
     # add the magic tokens to the new db.
     $new_toks{$NSPAM_MAGIC_TOKEN} = $self->{db_toks}->{$DB_NSPAM_MAGIC_TOKEN};
@@ -431,6 +432,7 @@ sub _upgrade_db {
 	 (oct ($main->{conf}->{bayes_file_mode}) & 0666);
     umask $umask;
     return 0 unless $res;
+    undef $res;
 
     dbg ("bayes: upgraded database format from v".$self->{db_version}." to v2 in ".(time - $started)." seconds");
     $self->{db_version} = 2; # need this for other functions which check
@@ -462,6 +464,7 @@ sub _upgrade_db {
           (oct ($main->{conf}->{bayes_file_mode}) & 0666);
     umask $umask;
     return 0 unless $res;
+    undef $res;
 
     # add the magic tokens to the new db.
     $new_toks{$NSPAM_MAGIC_TOKEN} = $self->{db_toks}->{$DB_NSPAM_MAGIC_TOKEN};
@@ -515,6 +518,7 @@ sub _upgrade_db {
 	 (oct ($main->{conf}->{bayes_file_mode}) & 0666);
     umask $umask;
     return 0 unless $res;
+    undef $res;
 
     dbg ("bayes: upgraded database format from v".$self->{db_version}." to v3 in ".(time - $started)." seconds");
 
