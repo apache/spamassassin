@@ -78,7 +78,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 $VERSION = "2.40";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.102 2002/07/18 15:18:39 jmason Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.103 2002/07/25 19:22:17 msquadrat Exp $';
 
 sub Version { $VERSION; }
 
@@ -754,7 +754,7 @@ sub expand_name ($) {
   my ($self, $name) = @_;
   my $home = $ENV{'HOME'} || '';
 
-  if ($^O =~ /mswin|dos|os2/oi) {
+  if ($^O =~ /mswin|(?<!bs)dos|os2/oi) {
 	  my $userprofile = $ENV{'USERPROFILE'} || '';
 
 	  return $userprofile if ($userprofile && $userprofile =~ m/^[a-z]\:[\/\\]/oi);
