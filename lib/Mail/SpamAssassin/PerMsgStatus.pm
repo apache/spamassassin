@@ -1430,27 +1430,6 @@ sub get {
 
 ###########################################################################
 
-sub decode_mime_bit {
-  my ($self, $encoding, $text) = @_;
-  local ($_) = $text;
-
-  $encoding = lc($encoding);
-
-  if ($encoding eq 'utf-16') {
-    # we just dump the high bits and keep the 8-bit characters
-    s/_/ /g;
-    s/=00//g;
-    s/\=([0-9A-F]{2})/chr(hex($1))/ge;
-  }
-  else {
-    # keep 8-bit stuff, forget mapping charsets though
-    s/_/ /g;
-    s/\=([0-9A-F]{2})/chr(hex($1))/ge;
-  }
-
-  return $_;
-}
-
 sub ran_rule_debug_code {
   my ($self, $rulename, $ruletype, $bit) = @_;
 
