@@ -461,6 +461,17 @@ uri T_HTTP_ESCAPED_URI_SUSPICIOUS	m@%(?:2[147-9a-e]|3[0-9]|4[1-9a-f]|[56][0-9a-f
 describe T_HTTP_ESCAPED_URI_SUSPICIOUS      Uses unnecessary %-escapes inside a URL's path
 score T_HTTP_ESCAPED_URI_SUSPICIOUS 0.01
 
+# conservative version of above rule, just look for 0-9, A-Z, a-z
+uri T_EXCESSIVE_URI_ESCAPES_V1		m/%(?:3[0-9]|[46][1-9a-f]|[57][\da])/i
+describe T_EXCESSIVE_URI_ESCAPES_V1	Unnecessary %-escapes inside a URL
+score T_EXCESSIVE_URI_ESCAPES_V1	0.01
+
+# somewhat conservative version, look for 0-9, A-Z, a-z plus the most common
+# non-letters that are 100% spam and no ham: '|', '-', ';', '(', and ')'
+uri T_EXCESSIVE_URI_ESCAPES_V2		m/%(?:2[89d]|3[0-9b]|[46][1-9a-f]|[57][\dac])/i
+describe T_EXCESSIVE_URI_ESCAPES_V2	Unnecessary %-escapes inside a URL
+score T_EXCESSIVE_URI_ESCAPES_V2	0.01
+
 # Most/all of these require that From addresses do not start with numbers.
 # let's see how this does... (jm)
 header T_FROM_NUM_AT_WEBMAIL    From:addr =~ /^\d\S+\@(?:msn\.com|flashmail\.com|mailexcite\.com|prodigy\.net|yahoo\.\S+|hotmail\.com|eudoramail\.com|aol\.com|excite\.com|email\.com|earthlink\.net|geocities\.com|hknetmail\.com|angelfire\.com)/i
