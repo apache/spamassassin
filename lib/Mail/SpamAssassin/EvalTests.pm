@@ -1231,7 +1231,9 @@ sub check_for_mime_missing_boundary {
     push (@boundary, "\Q$1\E");
   }
 
-  foreach my $line (@{$body}) {
+  # Note: We don't use $body because it removes MIME parts.  Instead, we
+  # get the raw unfiltered message.
+  foreach my $line (@{$self->{msg}->get_body()}) {
     if ($line =~ /^--/) {
       foreach my $boundary (@boundary) {
 	if ($line =~ /^--$boundary$/) {
