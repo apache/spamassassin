@@ -370,3 +370,24 @@ describe T_MID_RCVD_DIFF_AOL	Message-Id does not match Received (aol.com)
 uri	T_URI_UNPRINTABLE	/%0/
 describe T_URI_UNPRINTABLE	URI contains unprintable characters
 
+# These rules use a simple algorithm to determine if the text and html
+# parts of an multipart/alternative message are different...
+# Even with the simple algorithm, it's amazing!  - 2004.01.14, tvd
+#
+#OVERALL%   SPAM%     HAM%     S/O    RANK   SCORE  NAME
+# 140567    59829    80738    0.426   0.00    0.00  (all messages)
+#100.000  42.5626  57.4374    0.426   0.00    0.00  (all messages as %)
+# 29.308  68.8529   0.0050    1.000   1.00    0.01  T_MPART_ALT_DIFF_99
+# 29.353  68.9549   0.0074    1.000   1.00    0.01  T_MPART_ALT_DIFF_98
+# 29.429  69.1220   0.0149    1.000   1.00    0.01  T_MPART_ALT_DIFF_97
+# 29.470  69.2123   0.0198    1.000   1.00    0.01  T_MPART_ALT_DIFF_96
+# 29.483  69.2323   0.0285    1.000   1.00    0.01  T_MPART_ALT_DIFF_95
+# 29.771  69.8892   0.0421    0.999   1.00    0.01  T_MPART_ALT_DIFF_90
+#
+#
+body T_MPART_ALT_DIFF_90      eval:multipart_alternative_difference('90', '100')
+body T_MPART_ALT_DIFF_95      eval:multipart_alternative_difference('95', '100')
+body T_MPART_ALT_DIFF_96      eval:multipart_alternative_difference('96', '100')
+body T_MPART_ALT_DIFF_97      eval:multipart_alternative_difference('97', '100')
+body T_MPART_ALT_DIFF_98      eval:multipart_alternative_difference('98', '100')
+body T_MPART_ALT_DIFF_99      eval:multipart_alternative_difference('99', '100')

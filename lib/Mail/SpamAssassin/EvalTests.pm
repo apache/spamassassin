@@ -3541,4 +3541,71 @@ sub _check_hashcash_resource {
 
 ###########################################################################
 
+sub multipart_alternative_difference {
+  my($self, $fulltext, $min, $max) = @_;
+
+  $self->_multipart_alternative_difference() unless ( exists $self->{madiff} );
+
+  if (($min == 0 || $self->{madiff} > $min) &&
+      ($max eq "undef" || $self->{madiff} <= $max)) {
+      return 1;
+  }
+  return 0;
+}
+
+sub _multipart_alternative_difference {
+  my($self) = @_;
+
+  my @ma = $self->{msg}->{mime_parts}->find_parts(qr@^multipart/alternative\b@i);
+
+  $self->{madiff} = 0;
+
+  # Exchange meeting requests come in as m/a text/html text/calendar ...
+  # Ignore any messages without a multipart/alternative section as well ...
+  if ( !@ma || (@ma == 1 && @{$ma[0]->{body_parts}} == 2 &&
+  		$ma[0]->{body_parts}->[0]->{type} =~ m@^text/html\b@i && 
+		$ma[0]->{body_parts}->[1]->{type} =~ m@^text/calendar\b@i) ) {
+    return;
+  }
+
+  # Only deal with text/plain and text/html ...
+  foreach my $part ( @ma ) {
+    my %html = ();
+    my %text = ();
+
+    my @txt = $part->find_parts(qr@^text\b@i);
+    foreach my $text ( @txt ) {
+      my $rnd = $text->{'rendered'};
+
+      if ( $text->{'rendered_type'} =~ m@^text/html\b@i ) {
+        foreach my $w ( grep(/\w/,split(/\s+/,$rnd)) ) {
+          next if ( $w =~ /^URI:/ );
+          $html{$w}++;
+        }
+      }
+      else {
+        foreach my $w ( grep(/\w/,split(/\s+/,$rnd)) ) {
+          $text{$w}++;
+        }
+      }
+    }
+
+    my $orig = keys %html;
+    next if ( $orig == 0 );
+
+    while( my($k,$v) = each %text ) {
+      delete $html{$k} if ( exists $html{$k} && $html{$k}-$text{$k} < 1 );
+    }
+
+    my $diff = scalar(keys %html)/$orig*100;
+    $self->{madiff} = $diff if ( $diff > $self->{madiff} );
+
+    dbg(sprintf "madiff: left: %d, orig: %d, max-difference: %0.2f%%", scalar(keys %html), $orig, $self->{madiff});
+  }
+
+  return;
+}
+
+###########################################################################
+
 1;
