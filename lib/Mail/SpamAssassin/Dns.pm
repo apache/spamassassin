@@ -579,20 +579,17 @@ sub dcc_lookup {
   $self->leave_helper_run_mode();
 
   if ($@) {
-    $response = undef;
-    if ($@ eq 'alarm') {
+    if ($@ =~ /^alarm$/) {
       dbg ("DCC -> check timed out after $timeout secs.");
       timelog("DCC interrupted after $timeout secs", "dcc", 2);
-      return 0;
-    } elsif ($@ eq 'brokenpipe') {
+   } elsif ($@ =~ /^brokenpipe$/) {
       dbg ("DCC -> check failed: Broken pipe.");
       timelog("DCC check failed, broken pipe", "dcc", 2);
-      return 0;
     } else {
       warn ("DCC -> check failed: $@\n");
       timelog("DCC check failed", "dcc", 2);
-      return 0;
     }
+    return 0;
   }
 
   if (!defined($response) || $response !~ /^X-DCC/) {
@@ -699,20 +696,17 @@ sub pyzor_lookup {
   $self->leave_helper_run_mode();
 
   if ($@) {
-    $response = undef;
-    if ($@ eq 'alarm') {
+    if ($@ =~ /^alarm$/) {
       dbg ("Pyzor -> check timed out after $timeout secs.");
       timelog("Pyzor interrupted after $timeout secs", "pyzor", 2);
-      return 0;
-    } elsif ($@ eq 'brokenpipe') {
+    } elsif ($@ =~ /^brokenpipe$/) {
       dbg ("Pyzor -> check failed: Broken pipe.");
       timelog("Pyzor check failed, broken pipe", "pyzor", 2);
-      return 0;
     } else {
       warn ("Pyzor -> check failed: $@\n");
       timelog("Pyzor check failed", "pyzor", 2);
-      return 0;
     }
+    return 0;
   }
 
   # made regexp a little more forgiving (jm)
