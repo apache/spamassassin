@@ -313,3 +313,41 @@ body T_HTML_SCRIPT_EXPR_5	eval:html_text_match('script', ';.*;.*;.*;.*;')
 header T_NUMINTERUPTUS		Subject =~ /\b[a-z]{2,}\d+[a-z]{2,}/i
 header T_CRAZYCASE		Subject =~ /\b[a-z]{2,}[A-Z]+[a-z]{2,}/
 header T_PUNCTUSINTERUPTUS	Subject =~ m%\b[A-Z]{2,}[^/\sa-z0-9:+,@._=&'-]+[A-Z]{2,}%i
+header T_RATWARE_BOUND_PIECE	Content-Type =~ /boundary=\"?--Piece/
+header T_MSGID_RATWARE1		Message-Id =~ /<[A-Z]+\$[^\$]+\$.+@/
+header T_MSGID_RATWARE2		Message-Id =~ /<[A-Z]{4}\$[^\$]{13}\$.{4}@/
+
+# Get a ratio of hostnames per domain in relation to total URIs in the message
+# the best for my corpus seems to be:
+#  0.477   0.5408   0.0000    1.000   1.00    0.01  T_HOST_DOM_RATIO_90_5
+# but let's see how it works in general
+#
+body T_HOST_DOM_RATIO_10_5	eval:check_host_domain_ratio('10','5')
+body T_HOST_DOM_RATIO_20_5	eval:check_host_domain_ratio('20','5')
+body T_HOST_DOM_RATIO_30_5	eval:check_host_domain_ratio('30','5')
+body T_HOST_DOM_RATIO_40_5	eval:check_host_domain_ratio('40','5')
+body T_HOST_DOM_RATIO_50_5	eval:check_host_domain_ratio('50','5')
+body T_HOST_DOM_RATIO_60_5	eval:check_host_domain_ratio('60','5')
+body T_HOST_DOM_RATIO_70_5	eval:check_host_domain_ratio('70','5')
+body T_HOST_DOM_RATIO_80_5	eval:check_host_domain_ratio('80','5')
+body T_HOST_DOM_RATIO_90_5	eval:check_host_domain_ratio('90','5')
+
+body T_HOST_DOM_RATIO_10_10	eval:check_host_domain_ratio('10','10')
+body T_HOST_DOM_RATIO_20_10	eval:check_host_domain_ratio('20','10')
+body T_HOST_DOM_RATIO_30_10	eval:check_host_domain_ratio('30','10')
+body T_HOST_DOM_RATIO_40_10	eval:check_host_domain_ratio('40','10')
+body T_HOST_DOM_RATIO_50_10	eval:check_host_domain_ratio('50','10')
+body T_HOST_DOM_RATIO_60_10	eval:check_host_domain_ratio('60','10')
+body T_HOST_DOM_RATIO_70_10	eval:check_host_domain_ratio('70','10')
+body T_HOST_DOM_RATIO_80_10	eval:check_host_domain_ratio('80','10')
+body T_HOST_DOM_RATIO_90_10	eval:check_host_domain_ratio('90','10')
+
+body T_HOST_DOM_RATIO_10_20	eval:check_host_domain_ratio('10','20')
+body T_HOST_DOM_RATIO_20_20	eval:check_host_domain_ratio('20','20')
+body T_HOST_DOM_RATIO_30_20	eval:check_host_domain_ratio('30','20')
+body T_HOST_DOM_RATIO_40_20	eval:check_host_domain_ratio('40','20')
+body T_HOST_DOM_RATIO_50_20	eval:check_host_domain_ratio('50','20')
+body T_HOST_DOM_RATIO_60_20	eval:check_host_domain_ratio('60','20')
+body T_HOST_DOM_RATIO_70_20	eval:check_host_domain_ratio('70','20')
+body T_HOST_DOM_RATIO_80_20	eval:check_host_domain_ratio('80','20')
+body T_HOST_DOM_RATIO_90_20	eval:check_host_domain_ratio('90','20')
