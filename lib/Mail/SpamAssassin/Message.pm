@@ -48,6 +48,7 @@ use bytes;
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Message::Node;
 use Mail::SpamAssassin::Message::Metadata;
+use Mail::SpamAssassin::Constants qw(:sa);
 
 use vars qw(@ISA);
 
@@ -77,6 +78,13 @@ C<spamassassin -d>, which only needs the pristine header and body which
 is always handled when the object is created.
 
 =cut
+
+# month mappings (ripped from Util.pm)
+my %MONTH = (jan => 1, feb => 2, mar => 3, apr => 4, may => 5, jun => 6,
+	     jul => 7, aug => 8, sep => 9, oct => 10, nov => 11, dec => 12);
+
+# day of week mapping (starting from zero)
+my @DAY_OF_WEEK = qw/Sun Mon Tue Wed Thu Fri Sat/ ;
 
 sub new {
   my $class = shift;
@@ -116,10 +124,38 @@ sub new {
 
   # Go through all the headers of the message
   my $header = '';
+  my $mbxsep = MBX_SEPERATOR;
   while ( my $last = shift @message ) {
     if ( $last =~ /^From\s/ ) {
-      $self->{'mbox_sep'} = $last;
-      next;
+	# mbox formated mailbox
+	$self->{'mbox_sep'} = $last;
+	next;
+    } elsif ($last =~ /$mbxsep/) {
+	# Munge the mbx message seperator into mbox format as a sort of
+	# de facto portability standard in SA's internals.  We need to
+	# to this so that Mail::SpamAssassin::Util::parse_rfc822_date
+	# can parse the date string...
+	if (/([\s|\d]\d)-([a-zA-Z]{3})-(\d{4})\s(\d{2}):(\d{2}):(\d{2})/o) {
+	    # $1 = day of month
+	    # $2 = month (text)
+	    # $3 = year
+	    # $4 = hour
+	    # $5 = min
+	    # $6 = sec
+	    my @arr = localtime(timelocal($6,$5,$4,$1,$MONTH{lc($2)}-1,$3)) ;
+	    my $address ;
+	    foreach (@message) {
+		if (/From:\s[^<]+<([^>]+)>/) {
+		    $address = $1 ;
+		    last ;
+		} elsif (/From:\s([^<^>]+)/) {
+		    $address = $1 ;
+		    last ;
+		}
+	    }
+	    $self->{'mbox_sep'} = "From $address $DAY_OF_WEEK[$arr[6]] $2 $1 $4:$5:$6 $3\n" ;
+	    next;
+	}
     }
 
     # Store the non-modified headers in a scalar

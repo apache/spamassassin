@@ -57,6 +57,7 @@ usage: mass-check [options] target ...
   --dir         subsequent targets are directories
   --file        subsequent targets are files in RFC 822 format
   --mbox        subsequent targets are mbox files
+  --mbx         subsequent targets are mbx files
  
   Just left over functions we should remove at some point:
   --bayes       report score from Bayesian classifier
@@ -64,7 +65,7 @@ usage: mass-check [options] target ...
   non-option arguments are used as target names (mail files and folders),
   the target format is: <class>:<format>:<location>
   <class>       is "spam" or "ham"
-  <format>      is "dir", "file", or "mbox"
+  <format>      is "dir", "file", "mbx", or "mbox"
   <location>    is a file or directory name.  globbing of ~ and * is supported
 
 ENDOFUSAGE
@@ -103,6 +104,7 @@ GetOptions("c=s", "p=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug",
 	   "dir" => sub { $opt_format = "dir"; },
 	   "file" => sub { $opt_format = "file"; },
 	   "mbox" => sub { $opt_format = "mbox"; },
+	   "mbx" => sub { $opt_format = "mbx"; },
 	   '<>' => \&target) or usage();
 
 if ($opt_f) {

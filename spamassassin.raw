@@ -125,6 +125,7 @@ GetOptions(
   'version|V'                               => \$opt{'version'},
   'help|h|?'                                => \$opt{'help'},
   'mbox'                                    => sub { $opt{'format'} = 'mbox'; },
+  'mbx'                                     => sub { $opt{'format'} = 'mbx'; },
 
   # NOTE: ignored for backwards compatibility. will be stripped
   # in a future release.
@@ -231,12 +232,12 @@ $iter->set_functions( \&wanted, sub { } );
 push ( @ARGV, '-' ) if ( !@ARGV );
 @targets = map { join ( ":", '', $opt{'format'}, $_ ) } @ARGV;
 
-# mbox handling doesn't deal with STDIN, so make a temp file if they
+# mbox and mbx handling doesn't deal with STDIN, so make a temp file if they
 # want STDIN.  do it here since they may specify "-" on the commandline
 # instead of leaving it as the default.
 #
 my $tempfile;
-if ( $targets[0] =~ /:mbox:-$/ ) {
+if ( $targets[0] =~ /:mbo?x:-$/ ) {
   my $handle;
 
   local $/ = undef;    # go into slurp mode
@@ -406,6 +407,8 @@ Options:
  -e, --exit-code                   Exit with a non-zero exit code if the
                                    tested message was spam
  --mbox [filename]                 read in messages from a mbox file, given
+                                   by 'filename' or STDIN otherwise.
+ --mbx [filename]                  read in messages from a UW mbx file, given
                                    by 'filename' or STDIN otherwise.
  -t, --test-mode                   Pipe message through and add extra
                                    report to the bottom
@@ -593,6 +596,13 @@ Disable creation of user preferences file.
 
 Specify that the input message(s) are in mbox format.  If I<filename> is
 given, messages will be read in from that file.  Otherwise, STDIN is used.
+
+=item B<--mbx> [filename]
+
+Specify that the input message(s) are in UW .mbx format.  If I<filename> is
+given, messages will be read in from that file.  Otherwise, STDIN is used. mbx
+is the mailbox format used within the University of Washington's IMAP
+implementation; see http://www.washington.edu/imap/ .
 
 =back
 

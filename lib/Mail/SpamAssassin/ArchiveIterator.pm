@@ -24,6 +24,7 @@ use bytes;
 use IO::Select;
 use IO::Socket;
 use Mail::SpamAssassin::Util;
+use Mail::SpamAssassin::Constants qw(:sa);
 
 use constant BIG_BYTES => 256*1024;	# 256k is a big email
 use constant BIG_LINES => BIG_BYTES/65;	# 65 bytes/line is a good approximation
@@ -265,6 +266,9 @@ sub message_array {
 	}
 	elsif ($format eq "mbox") {
 	  $method = \&scan_mailbox;
+        }
+	elsif ($format eq "mbx") {
+	  $method = \&scan_mbx;
 	}
       }
 
@@ -400,7 +404,7 @@ sub mail_open {
     $expr = "$file";
   }
   if (!open (INPUT, $expr)) {
-    warn "unable to open $file: $!\n";
+    warn "Unable to open $file: $!\n";
     return 0;
   }
   return 1;
@@ -562,6 +566,70 @@ sub scan_mailbox {
   }
 }
 
+sub scan_mbx {
+    my ($self, $class, $folder) = @_ ;
+    my (@files, $fp) ;
+    
+    if ($folder ne '-' && -d $folder) {
+	# got passed a directory full of mbx folders.
+	$folder =~ s/\/\s*$//; # remove trailing slash, if there is one
+	opendir(DIR, $folder) || die "Can't open '$folder' dir: $!" ;
+	while($_ = readdir(DIR)) {
+	    if(/^[^\.]\S*$/ && ! -d "$folder/$_") {
+		push(@files, "$folder/$_");
+	    }
+	}
+	closedir(DIR);
+    } else {
+	push(@files, $folder) ;
+    }
+    
+    foreach my $file (@files) {
+	if ($folder =~ /\.(?:gz|bz2)$/) {
+	    die "compressed mbx folders are not supported at this time\n" ;
+	}
+	mail_open($file) or return ;
+
+	# check the mailbox is in mbx format
+	$fp = <INPUT> ;
+	if ($fp !~ /\*mbx\*/) {
+	    die "Error, mailbox not in mbx format!\n" ;
+	}
+	
+	# skip mbx headers to the first email...
+	seek(INPUT, 2048, 0) ;
+
+        my $sep = MBX_SEPERATOR;
+    
+	while (<INPUT>) {
+	    if ($_ =~ /$sep/) {
+		my $offset = tell INPUT ;
+		my $size = $2 ;
+
+		# gather up the headers...
+		my $header = '' ;
+		while (<INPUT>) {
+		    last if (/^$/) ;
+		    $header .= $_ ;
+		}
+
+		my $t;
+		if ($self->{opt_n}) {
+		    $t = $no++;
+		} else {
+		    $t = Mail::SpamAssassin::Util::receive_date($header);
+		    next if !$self->message_is_useful_by_date($t);
+		}
+		$self->{$class}->{index_pack($class, "b", $t, "$file.$offset")} = $t;
+		seek(INPUT, $offset + $size, 0) ;
+	    } else {
+		die "Error, failure to read message body!\n" ;
+	    }
+	}
+	close INPUT;
+    }
+}
+
 ############################################################################
 
 sub run_message {
@@ -574,6 +642,9 @@ sub run_message {
   }
   elsif ($format eq "m") {
     return $self->run_mailbox($class, $mail, $date);
+  }
+  elsif ($format eq "b") {
+    return $self->run_mbx($class, $mail, $date);
   }
 }
 
@@ -615,7 +686,30 @@ sub run_mailbox {
     push (@msg, $_);
   }
   close INPUT;
-  &{$self->{wanted_sub}}($class, "$file.$offset", $date, \@msg);
+  &{$self->{wanted_sub}}($class, $where, $date, \@msg);
+}
+
+sub run_mbx {
+    my ($self, $class, $where, $date) = @_ ;
+
+    my ($file, $offset) = ($where =~ m/(.*)\.(\d+)$/) ;
+    my @msg ;
+
+    mail_open($file) or return ;
+    seek(INPUT, $offset, 0) ;
+    
+    while (<INPUT>) {
+	last if ($_ =~ MBX_SEPERATOR) ;
+	
+	# skip mails that are too big
+	if (! $self->{opt_all} && @msg > BIG_LINES) {
+	    close INPUT ;
+	    return ;
+	}
+	push (@msg, $_) ;
+    }
+    close INPUT ;
+    &{$self->{wanted_sub}}($class, $where, $date, \@msg) ;
 }
 
 ############################################################################

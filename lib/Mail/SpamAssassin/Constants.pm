@@ -34,7 +34,7 @@ use base qw( Exporter );
 );
 # These are generic constants that may be used across several modules
 @SA_VARS = qw(
-	META_TEST_MIN_PRIORITY HARVEST_DNSBL_PRIORITY
+	META_TEST_MIN_PRIORITY HARVEST_DNSBL_PRIORITY MBX_SEPERATOR
 );
 
 %EXPORT_TAGS = (
@@ -167,5 +167,13 @@ use constant IP_ADDRESS => qr/
 
 use constant META_TEST_MIN_PRIORITY => 500;
 use constant HARVEST_DNSBL_PRIORITY => 500;
+
+# Regular expression that matches message sperators in The University of
+# Washington's MBX mailbox format...
+use constant MBX_SEPERATOR => qr/([\s|\d]\d-[a-zA-Z]{3}-\d{4}\s\d{2}:\d{2}:\d{2}.*),(\d+);([\da-f]{12})-(\w{8})/ ;
+# $1 = datestamp (str)
+# $2 = size of message in bytes (int)
+# $3 = message status - binary (hex)
+# $4 = message ID (hex)
 
 1;

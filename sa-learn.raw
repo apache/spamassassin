@@ -126,6 +126,7 @@ GetOptions(
   'dir'    => sub { $opt{'old_format'} = 'dir'; },
   'file'   => sub { $opt{'old_format'} = 'file'; },
   'mbox'   => sub { $opt{'format'}     = 'mbox'; },
+  'mbx'    => sub { $opt{'format'}     = 'mbx'; },
   'single' => sub { $opt{'old_format'} = 'single'; },
 
   'db|dbpath=s' => \$bayes_override_path,
@@ -171,7 +172,7 @@ if ( defined $forget && $opt{'nosync'} ) {
 
 if ( defined $opt{'old_format'} ) {
 
-  #Format specified in the 2.5x form of --dir, --file, --mbox or --single.
+  #Format specified in the 2.5x form of --dir, --file, --mbox, --mbx or --single.
   #Convert it to the new behavior:
   if ( $opt{'old_format'} eq 'single' ) {
     push ( @ARGV, '-' );
@@ -350,11 +351,11 @@ eval {
     target('-');
   }
 
-  # mbox doesn't deal with STDIN, so make a temp file if they want STDIN.
+  # mbox and mbx doesn't deal with STDIN, so make a temp file if they want STDIN.
   # do it here since they may specify "-" on the commandline
   #
   my $tempfile;
-  if ( $targets[0] =~ /:mbox:-$/ ) {
+  if ( $targets[0] =~ /:mbo?x:-$/ ) {
     my $handle;
 
     local $/ = undef;    # go into slurp mode
@@ -503,6 +504,7 @@ Options:
  --dir                             Ignored; historical compatability
  --file                            Ignored; historical compatability
  --mbox                            Input sources are in mbox format
+ --mbx                             Input sources are in mbx format
  --showdots                        Show progress using dots
  --no-sync                         Skip syncronizing the journal and
                                    databases after scan
