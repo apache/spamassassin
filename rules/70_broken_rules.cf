@@ -785,19 +785,6 @@ body T_FREE_WEBSITE               /(?-i:F)ree web/i
 describe T_FREE_WEBSITE           Contains 'free website' with capitals
 #
 #
-#   0.004    0.000    0.006    0.00    1.00  T_MEMBER_2
-#
-#
-#   0.002    0.000    0.003    0.00    1.00  T_MONTH_TRIAL
-#
-#
-#   0.031    0.041    0.024    0.63   -1.00  T_NASD_FINANCIAL
-body T_NASD_FINANCIAL           /\b(?:member\s+(?-i:NASD\/SIPC)|not\s+insured\s+.{0,10}(?-i:FDIC)|(?-i:FDIC)\s+insured)/i
-describe T_NASD_FINANCIAL       Message indicates a financial institute
-tflags   T_NASD_FINANCIAL           nice
-score T_NASD_FINANCIAL -1.0
-#
-#
 #
 #   0.033    0.013    0.045    0.22    1.00  URI_IS_POUND
 score URI_IS_POUND                   2.026

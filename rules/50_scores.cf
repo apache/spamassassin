@@ -1,5 +1,5 @@
 # SpamAssassin rules file: scores.
-# $Id: 50_scores.cf,v 1.197.2.14 2002/08/28 18:31:14 jmason Exp $
+# $Id: 50_scores.cf,v 1.197.2.15 2002/08/29 10:58:11 jmason Exp $
 ###########################################################################
 # Default scores.   Note that if a test is named in the files, but a score is
 # not assigned here, the default score will be set to 1.
@@ -580,7 +580,6 @@ score TO_RECIP_MARKER                4.638
 score TRACE_BY_SSN                   0.282
 score TRACKER_ID                     3.177
 score T_FREE_WEBSITE                 -1.014
-score T_NASD_FINANCIAL               0.995
 score UCE_MAIL_ACT                   2.189
 score UNCLAIMED_MONEY                2.736
 score UNDISC_RECIPS                  2.030
