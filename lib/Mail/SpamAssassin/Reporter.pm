@@ -45,17 +45,26 @@ sub report {
       dbg ("SpamAssassin: spam reported to Razor.");
       $return = 0;
     }
+    else {
+      dbg ("SpamAssassin: could not report spam to Razor.");
+    }
   }
   if (!$self->{options}->{dont_report_to_dcc} && $self->is_dcc_available()) {
     if ($self->dcc_report($text)) {
       dbg ("SpamAssassin: spam reported to DCC.");
       $return = 0;
     }
+    else {
+      dbg ("SpamAssassin: could not report spam to DCC.");
+    }
   }
   if (!$self->{options}->{dont_report_to_pyzor} && $self->is_pyzor_available()) {
     if ($self->pyzor_report($text)) {
       dbg ("SpamAssassin: spam reported to Pyzor.");
       $return = 0;
+    }
+    else {
+      dbg ("SpamAssassin: could not report spam to Pyzor.");
     }
   }
 
@@ -79,6 +88,9 @@ sub revoke {
     if ($self->razor_revoke($text)) {
       dbg ("SpamAssassin: spam revoked from Razor.");
       $return = 0;
+    }
+    else {
+      dbg ("SpamAssassin: could not revoke spam from Razor.");
     }
   }
 

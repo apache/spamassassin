@@ -192,7 +192,7 @@ eval {
 # handle unconditional reportage
   if ($opt{'report'}) {
     if ( $spamtest->report_as_spam ($mail) ) {
-      warn "Warning, unable to report spam\n";
+      warn "Warning, unable to report spam\nFor more information, re-run with -D option to see debug output.\n";
     }
     if ($opt{'warning-from'}) {
       $spamtest->reply_with_warning ($mail, $opt{'warning-from'});
