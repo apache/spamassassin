@@ -1,7 +1,7 @@
 #!/usr/bin/perl
 
 use lib '.'; use lib 't';
-use SATest; sa_t_init("spam");
+use SATest; sa_t_init("razor2");
 use Test; BEGIN { plan tests => 2 };
 
 # ---------------------------------------------------------------------------
@@ -23,6 +23,11 @@ if ($@) {
 q{ Listed in Razor }, 'spam',
 
 );
+
+system ("razor-report < data/spam/001");
+if (($? >> 8) != 0) {
+  warn "'razor-report < data/spam/001' failed. This may cause this test to fail.\n";
+}
 
 sarun ("-t < data/spam/001", \&patterns_run_cb);
 skip_all_patterns($razor_not_available);

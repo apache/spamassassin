@@ -58,8 +58,8 @@ sub new {
     'hits'              => 0,
     'test_logs'         => '',
     'test_names_hit'    => [ ],
-    'cache_ALL_hdrs_string' => undef,
     'tests_already_hit' => { },
+    'hdr_cache'         => { },
   };
 
   $self->{conf} = $self->{main}->{conf};
@@ -173,6 +173,10 @@ sub check {
   s/_VER_/$Mail::SpamAssassin::VERSION/gs;
   s/_HOME_/$Mail::SpamAssassin::HOME_URL/gs;
   s/^/SPAM: /gm;
+
+  # now that we've finished checking the mail, clear out this cache
+  # to avoid unforeseen side-effects.
+  $self->{hdr_cache} = { };
 
   $self->{report} = "\n".$_."\n";
 }
@@ -327,6 +331,9 @@ sub rewrite_mail {
   } else {
     $self->rewrite_as_non_spam();
   }
+
+  # invalidate the header cache, we've changed some of them.
+  $self->{hdr_cache} = { };
 }
 
 sub rewrite_as_spam {
@@ -925,10 +932,10 @@ sub get {
   local ($_);
 
   if ($hdrname eq 'ALL') {
-    if (!defined $self->{cache_ALL_hdrs_string}) {
-      $self->{cache_ALL_hdrs_string} = $self->{msg}->get_all_headers();
+    if (!defined $self->{hdr_cache}->{'ALL'}) {
+      $self->{hdr_cache}->{'ALL'} = $self->{msg}->get_all_headers();
     }
-    return $self->{cache_ALL_hdrs_string};
+    return $self->{hdr_cache}->{'ALL'};
   }
 
   my $getaddr = 0;
@@ -946,24 +953,32 @@ sub get {
     $_ .= join ("\n", $self->{msg}->get_header ('Cc'));
     if ($_ eq '') { undef $_; }
 
-  } else {
-    my @hdrs = $self->{msg}->get_header ($hdrname);
-    if ($#hdrs >= 0) {
-      $_ = join ("\n", @hdrs);
+  } else {              # a conventional header
+    if (!exists $self->{hdr_cache}->{$hdrname}) {
+      my @hdrs = $self->{msg}->get_header ($hdrname);
+      if ($#hdrs >= 0) {
+        $_ = join ("\n", @hdrs);
+      } else {
+        $_ = undef;
+      }
+
+      # try some fallbacks:
+      if ($hdrname eq 'Message-Id' && (!defined($_) || $_ eq '')) {
+        $_ = join ("\n", $self->{msg}->get_header ('Message-ID'));	# news-ish
+        if ($_ eq '') { undef $_; }
+      }
+
+      if ($hdrname eq 'Cc' && (!defined($_) || $_ eq '')) {
+        $_ = join ("\n", $self->{msg}->get_header ('CC'));		# common enough
+        if ($_ eq '') { undef $_; }
+      }
+
+      # cache the results
+      $self->{hdr_cache}->{$hdrname} = $_;
+
     } else {
-      $_ = undef;
+      $_ = $self->{hdr_cache}->{$hdrname};
     }
-  }
-
-  # try some fallbacks:
-  if ($hdrname eq 'Message-Id' && (!defined($_) || $_ eq '')) {
-    $_ = join ("\n", $self->{msg}->get_header ('Message-ID'));	# news-ish
-    if ($_ eq '') { undef $_; }
-  }
-
-  if ($hdrname eq 'Cc' && (!defined($_) || $_ eq '')) {
-    $_ = join ("\n", $self->{msg}->get_header ('CC'));		# common enough
-    if ($_ eq '') { undef $_; }
   }
 
   if (!defined $_) {
