@@ -491,6 +491,7 @@ sub rewrite_as_spam {
     $disposition = "inline";
   }
 
+  my $description = $self->{main}->{'encapsulated_content_description'};
   $newmsg .= <<"EOM";
 MIME-Version: 1.0
 Content-Type: multipart/mixed; boundary="$boundary"
@@ -506,7 +507,7 @@ $report
 
 --$boundary
 Content-Type: message/rfc822
-Content-Description: original message before SpamAssassin
+Content-Description: $description
 Content-Disposition: $disposition
 Content-Transfer-Encoding: 8bit
 
