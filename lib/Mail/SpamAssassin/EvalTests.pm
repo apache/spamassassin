@@ -556,6 +556,7 @@ sub check_for_spam_reply_to {
 
   my $rpto = $self->get ('Reply-To:addr');
   return 0 if ($rpto eq '');
+  return 0 if ($rpto =~ /,/);
 
   my $ratio1 = $self->get_address_commonality_ratio
   				($rpto, $self->get ('From:addr'));
