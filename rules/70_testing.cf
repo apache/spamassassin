@@ -362,170 +362,16 @@ body T_NO_SCRIP_NEEDED		/no.{1,10}P(?:er|re)scription.{1,10}(?:needed|require|ne
 
 ########################################################################
 
-# after separator, anywhere
-header T_FROM1_NOVOWEL_7_LC	From =~ /\@.*[bcdfghjklmnpqrstvwxyz]{7}/
-header T_FROM1_NOVOWEL_7_AC	From =~ /\@.*[bcdfghjklmnpqrstvwxyz]{7}/i
-header T_FROM1_NOVOWEL_8_LC	From =~ /\@.*[bcdfghjklmnpqrstvwxyz]{8}/
-header T_FROM1_NOVOWEL_8_AC	From =~ /\@.*[bcdfghjklmnpqrstvwxyz]{8}/i
-header T_FROM1_NOVOWEL_9_LC	From =~ /\@.*[bcdfghjklmnpqrstvwxyz]{9}/
-header T_FROM1_NOVOWEL_9_AC	From =~ /\@.*[bcdfghjklmnpqrstvwxyz]{9}/i
-# after separator, hostname only
-header T_FROM2_NOVOWEL_7_LC	From =~ /\@\S*[bcdfghjklmnpqrstvwxyz]{7}/
-header T_FROM2_NOVOWEL_7_AC	From =~ /\@\S*[bcdfghjklmnpqrstvwxyz]{7}/i
-header T_FROM2_NOVOWEL_8_LC	From =~ /\@\S*[bcdfghjklmnpqrstvwxyz]{8}/
-header T_FROM2_NOVOWEL_8_AC	From =~ /\@\S*[bcdfghjklmnpqrstvwxyz]{8}/i
-header T_FROM2_NOVOWEL_9_LC	From =~ /\@\S*[bcdfghjklmnpqrstvwxyz]{9}/
-header T_FROM2_NOVOWEL_9_AC	From =~ /\@\S*[bcdfghjklmnpqrstvwxyz]{9}/i
-# before separator, anywhere
-header T_FROM3_NOVOWEL_6_LC	From =~ /[bcdfghjklmnpqrstvwxyz]{6}.*\@/
-header T_FROM3_NOVOWEL_6_AC	From =~ /[bcdfghjklmnpqrstvwxyz]{6}.*\@/i
-header T_FROM3_NOVOWEL_7_LC	From =~ /[bcdfghjklmnpqrstvwxyz]{7}.*\@/
-header T_FROM3_NOVOWEL_7_AC	From =~ /[bcdfghjklmnpqrstvwxyz]{7}.*\@/i
-header T_FROM3_NOVOWEL_8_LC	From =~ /[bcdfghjklmnpqrstvwxyz]{8}.*\@/
-header T_FROM3_NOVOWEL_8_AC	From =~ /[bcdfghjklmnpqrstvwxyz]{8}.*\@/i
-header T_FROM3_NOVOWEL_9_LC	From =~ /[bcdfghjklmnpqrstvwxyz]{9}.*\@/
-header T_FROM3_NOVOWEL_9_AC	From =~ /[bcdfghjklmnpqrstvwxyz]{9}.*\@/i
-# before separator, username only
-header T_FROM4_NOVOWEL_6_LC	From =~ /[bcdfghjklmnpqrstvwxyz]{6}\S*\@/
-header T_FROM4_NOVOWEL_6_AC	From =~ /[bcdfghjklmnpqrstvwxyz]{6}\S*\@/i
-header T_FROM4_NOVOWEL_7_LC	From =~ /[bcdfghjklmnpqrstvwxyz]{7}\S*\@/
-header T_FROM4_NOVOWEL_7_AC	From =~ /[bcdfghjklmnpqrstvwxyz]{7}\S*\@/i
-header T_FROM4_NOVOWEL_8_LC	From =~ /[bcdfghjklmnpqrstvwxyz]{8}\S*\@/
-header T_FROM4_NOVOWEL_8_AC	From =~ /[bcdfghjklmnpqrstvwxyz]{8}\S*\@/i
-header T_FROM4_NOVOWEL_9_LC	From =~ /[bcdfghjklmnpqrstvwxyz]{9}\S*\@/
-header T_FROM4_NOVOWEL_9_AC	From =~ /[bcdfghjklmnpqrstvwxyz]{9}\S*\@/i
-
-########################################################################
-
-# before separator, anywhere
-header T_FROM3_HEX_8_LC		From =~ /[0-9a-f]{8}.*\@/
-header T_FROM3_HEX_8_AC		From =~ /[0-9a-f]{8}.*\@/i
-header T_FROM3_HEX_9_LC		From =~ /[0-9a-f]{9}.*\@/
-header T_FROM3_HEX_9_AC		From =~ /[0-9a-f]{9}.*\@/i
-header T_FROM3_HEX_10_LC	From =~ /[0-9a-f]{10}.*\@/
-header T_FROM3_HEX_10_AC	From =~ /[0-9a-f]{10}.*\@/i
-header T_FROM3_HEX_11_LC	From =~ /[0-9a-f]{11}.*\@/
-header T_FROM3_HEX_11_AC	From =~ /[0-9a-f]{11}.*\@/i
-header T_FROM3_HEX_12_LC	From =~ /[0-9a-f]{12}.*\@/
-header T_FROM3_HEX_12_AC	From =~ /[0-9a-f]{12}.*\@/i
-# before separator, username only
-header T_FROM4_HEX_8_LC		From =~ /[0-9a-f]{8}\S*\@/
-header T_FROM4_HEX_8_AC		From =~ /[0-9a-f]{8}\S*\@/i
-header T_FROM4_HEX_9_LC		From =~ /[0-9a-f]{9}\S*\@/
-header T_FROM4_HEX_9_AC		From =~ /[0-9a-f]{9}\S*\@/i
-header T_FROM4_HEX_10_LC	From =~ /[0-9a-f]{10}\S*\@/
-header T_FROM4_HEX_10_AC	From =~ /[0-9a-f]{10}\S*\@/i
-header T_FROM4_HEX_11_LC	From =~ /[0-9a-f]{11}\S*\@/
-header T_FROM4_HEX_11_AC	From =~ /[0-9a-f]{11}\S*\@/i
-header T_FROM4_HEX_12_LC	From =~ /[0-9a-f]{12}\S*\@/
-header T_FROM4_HEX_12_AC	From =~ /[0-9a-f]{12}\S*\@/i
-# before separator, anywhere with \b
-header T_FROM5_HEX_8_LC		From =~ /\b[0-9a-f]{8,}\b.*\@/
-header T_FROM5_HEX_8_AC		From =~ /\b[0-9a-f]{8,}\b.*\@/i
-header T_FROM5_HEX_9_LC		From =~ /\b[0-9a-f]{9,}\b.*\@/
-header T_FROM5_HEX_9_AC		From =~ /\b[0-9a-f]{9,}\b.*\@/i
-header T_FROM5_HEX_10_LC	From =~ /\b[0-9a-f]{10,}\b.*\@/
-header T_FROM5_HEX_10_AC	From =~ /\b[0-9a-f]{10,}\b.*\@/i
-header T_FROM5_HEX_11_LC	From =~ /\b[0-9a-f]{11,}\b.*\@/
-header T_FROM5_HEX_11_AC	From =~ /\b[0-9a-f]{11,}\b.*\@/i
-header T_FROM5_HEX_12_LC	From =~ /\b[0-9a-f]{12,}\b.*\@/
-header T_FROM5_HEX_12_AC	From =~ /\b[0-9a-f]{12,}\b.*\@/i
-# before separator, username only with \b
-header T_FROM6_HEX_8_LC		From =~ /\b[0-9a-f]{8,}\b\S*\@/
-header T_FROM6_HEX_8_AC		From =~ /\b[0-9a-f]{8,}\b\S*\@/i
-header T_FROM6_HEX_9_LC		From =~ /\b[0-9a-f]{9,}\b\S*\@/
-header T_FROM6_HEX_9_AC		From =~ /\b[0-9a-f]{9,}\b\S*\@/i
-header T_FROM6_HEX_10_LC	From =~ /\b[0-9a-f]{10,}\b\S*\@/
-header T_FROM6_HEX_10_AC	From =~ /\b[0-9a-f]{10,}\b\S*\@/i
-header T_FROM6_HEX_11_LC	From =~ /\b[0-9a-f]{11,}\b\S*\@/
-header T_FROM6_HEX_11_AC	From =~ /\b[0-9a-f]{11,}\b\S*\@/i
-header T_FROM6_HEX_12_LC	From =~ /\b[0-9a-f]{12,}\b\S*\@/
-header T_FROM6_HEX_12_AC	From =~ /\b[0-9a-f]{12,}\b\S*\@/i
-
-########################################################################
-
-# before separator, username only
-header T_FROM_DIGITS_9_LC	From =~ /\d{9}\S*\@/
-header T_FROM_DIGITS_9_AC	From =~ /\d{9}\S*\@/i
-header T_FROM_DIGITS_10_LC	From =~ /\d{10}\S*\@/
-header T_FROM_DIGITS_10_AC	From =~ /\d{10}\S*\@/i
-header T_FROM_DIGITS_11_LC	From =~ /\d{11}\S*\@/
-header T_FROM_DIGITS_11_AC	From =~ /\d{11}\S*\@/i
-header T_FROM_DIGITS_12_LC	From =~ /\d{12}\S*\@/
-header T_FROM_DIGITS_12_AC	From =~ /\d{12}\S*\@/i
-# before separator, username only with \b
-header T_FROM2_DIGITS_9_LC	From =~ /\b\d{9,}\b\S*\@/
-header T_FROM2_DIGITS_9_AC	From =~ /\b\d{9,}\b\S*\@/i
-header T_FROM2_DIGITS_10_LC	From =~ /\b\d{10,}\b\S*\@/
-header T_FROM2_DIGITS_10_AC	From =~ /\b\d{10,}\b\S*\@/i
-header T_FROM2_DIGITS_11_LC	From =~ /\b\d{11,}\b\S*\@/
-header T_FROM2_DIGITS_11_AC	From =~ /\b\d{11,}\b\S*\@/i
-header T_FROM2_DIGITS_12_LC	From =~ /\b\d{12,}\b\S*\@/
-header T_FROM2_DIGITS_12_AC	From =~ /\b\d{12,}\b\S*\@/i
-
-########################################################################
-
-# random URIs - vowels
-uri T_URI_NOVOWEL1_07_LC	m%^https?://[^/]*[bcdfghjklmnpqrstvwxyz]{7}%
-uri T_URI_NOVOWEL1_07_AC	m%^https?://[^/]*[bcdfghjklmnpqrstvwxyz]{7}%i
-uri T_URI_NOVOWEL1_08_LC	m%^https?://[^/]*[bcdfghjklmnpqrstvwxyz]{8}%
-uri T_URI_NOVOWEL1_08_AC	m%^https?://[^/]*[bcdfghjklmnpqrstvwxyz]{8}%i
-uri T_URI_NOVOWEL1_09_LC	m%^https?://[^/]*[bcdfghjklmnpqrstvwxyz]{9}%
-uri T_URI_NOVOWEL1_09_AC	m%^https?://[^/]*[bcdfghjklmnpqrstvwxyz]{9}%i
-uri T_URI_NOVOWEL1_10_LC	m%^https?://[^/]*[bcdfghjklmnpqrstvwxyz]{10}%
-uri T_URI_NOVOWEL1_10_AC	m%^https?://[^/]*[bcdfghjklmnpqrstvwxyz]{10}%i
-uri T_URI_NOVOWEL2_07_LC	m%^https?://[^/?]*[bcdfghjklmnpqrstvwxyz]{7}%
-uri T_URI_NOVOWEL2_07_AC	m%^https?://[^/?]*[bcdfghjklmnpqrstvwxyz]{7}%i
-uri T_URI_NOVOWEL2_08_LC	m%^https?://[^/?]*[bcdfghjklmnpqrstvwxyz]{8}%
-uri T_URI_NOVOWEL2_08_AC	m%^https?://[^/?]*[bcdfghjklmnpqrstvwxyz]{8}%i
-uri T_URI_NOVOWEL2_09_LC	m%^https?://[^/?]*[bcdfghjklmnpqrstvwxyz]{9}%
-uri T_URI_NOVOWEL2_09_AC	m%^https?://[^/?]*[bcdfghjklmnpqrstvwxyz]{9}%i
-uri T_URI_NOVOWEL2_10_LC	m%^https?://[^/?]*[bcdfghjklmnpqrstvwxyz]{10}%
-uri T_URI_NOVOWEL2_10_AC	m%^https?://[^/?]*[bcdfghjklmnpqrstvwxyz]{10}%i
-# random URIs - hexadecimal
-uri T_URI_HEX_06_LC	m%^https?://[^/?]*[0-9a-f]{6}%
-uri T_URI_HEX_06_AC	m%^https?://[^/?]*[0-9a-f]{6}%i
-uri T_URI_HEX_07_LC	m%^https?://[^/?]*[0-9a-f]{7}%
-uri T_URI_HEX_07_AC	m%^https?://[^/?]*[0-9a-f]{7}%i
-uri T_URI_HEX_08_LC	m%^https?://[^/?]*[0-9a-f]{8}%
-uri T_URI_HEX_08_AC	m%^https?://[^/?]*[0-9a-f]{8}%i
-uri T_URI_HEX_09_LC	m%^https?://[^/?]*[0-9a-f]{9}%
-uri T_URI_HEX_09_AC	m%^https?://[^/?]*[0-9a-f]{9}%i
-uri T_URI_HEX_10_LC	m%^https?://[^/?]*[0-9a-f]{10}%
-uri T_URI_HEX_10_AC	m%^https?://[^/?]*[0-9a-f]{10}%i
-# add \b
-uri T_URI_HEX2_06_LC	m%^https?://[^/?]*\b[0-9a-f]{6,}\b%
-uri T_URI_HEX2_06_AC	m%^https?://[^/?]*\b[0-9a-f]{6,}\b%i
-uri T_URI_HEX2_07_LC	m%^https?://[^/?]*\b[0-9a-f]{7,}\b%
-uri T_URI_HEX2_07_AC	m%^https?://[^/?]*\b[0-9a-f]{7,}\b%i
-uri T_URI_HEX2_08_LC	m%^https?://[^/?]*\b[0-9a-f]{8,}\b%
-uri T_URI_HEX2_08_AC	m%^https?://[^/?]*\b[0-9a-f]{8,}\b%i
-uri T_URI_HEX2_09_LC	m%^https?://[^/?]*\b[0-9a-f]{9,}\b%
-uri T_URI_HEX2_09_AC	m%^https?://[^/?]*\b[0-9a-f]{9,}\b%i
-uri T_URI_HEX2_10_LC	m%^https?://[^/?]*\b[0-9a-f]{10,}\b%
-uri T_URI_HEX2_10_AC	m%^https?://[^/?]*\b[0-9a-f]{10,}\b%i
-# random URIs - digits
-uri T_URI_DIGITS_06_LC	m%^https?://[^/?]*\d{6}%
-uri T_URI_DIGITS_06_AC	m%^https?://[^/?]*\d{6}%i
-uri T_URI_DIGITS_07_LC	m%^https?://[^/?]*\d{7}%
-uri T_URI_DIGITS_07_AC	m%^https?://[^/?]*\d{7}%i
-uri T_URI_DIGITS_08_LC	m%^https?://[^/?]*\d{8}%
-uri T_URI_DIGITS_08_AC	m%^https?://[^/?]*\d{8}%i
-uri T_URI_DIGITS_09_LC	m%^https?://[^/?]*\d{9}%
-uri T_URI_DIGITS_09_AC	m%^https?://[^/?]*\d{9}%i
-uri T_URI_DIGITS_10_LC	m%^https?://[^/?]*\d{10}%
-uri T_URI_DIGITS_10_AC	m%^https?://[^/?]*\d{10}%i
-uri T_URI_DIGITS_06_LC	m%^https?://[^/?]*\d{6}%
-# add \b
-uri T_URI_DIGITS2_06_AC	m%^https?://\b[^/?]*\d{6,}\b%i
-uri T_URI_DIGITS2_07_LC	m%^https?://\b[^/?]*\d{7,}\b%
-uri T_URI_DIGITS2_07_AC	m%^https?://\b[^/?]*\d{7,}\b%i
-uri T_URI_DIGITS2_08_LC	m%^https?://\b[^/?]*\d{8,}\b%
-uri T_URI_DIGITS2_08_AC	m%^https?://\b[^/?]*\d{8,}\b%i
-uri T_URI_DIGITS2_09_LC	m%^https?://\b[^/?]*\d{9,}\b%
-uri T_URI_DIGITS2_09_AC	m%^https?://\b[^/?]*\d{9,}\b%i
-uri T_URI_DIGITS2_10_LC	m%^https?://\b[^/?]*\d{10,}\b%
-uri T_URI_DIGITS2_10_AC	m%^https?://\b[^/?]*\d{10,}\b%i
+header T_FROM_DOMAIN_NOVOWEL	From =~ /\@\S*[bcdfghjklmnpqrstvwxyz]{7}/i
+header T_FROM_NAME_NOVOWEL	From =~ /[bcdfghjklmnpqrstvwxyz]{7}\S*\@/i
+header T_FROM_NAME_HEX		From =~ /[0-9a-f]{11}\S*\@/i
+header T_FROM_NAME_DIGITS	From =~ /\d{11}\S*\@/i
+uri T_URI_DIGITS_05		m%^https?://[^/?]*\b\d{5,}\b%i
+uri T_URI_DIGITS_06		m%^https?://[^/?]*\b\d{6,}\b%i
+uri T_URI_HEX_05		m%^https?://[^/?]*\b[0-9a-f]{5,}\b%i
+uri T_URI_HEX_06		m%^https?://[^/?]*\b[0-9a-f]{6,}\b%i
+uri T_URI_NOVOWEL_06		m%^https?://[^/?]*[bcdfghjklmnpqrstvwxyz]{6}%i
+uri T_URI_NOVOWEL_07		m%^https?://[^/?]*[bcdfghjklmnpqrstvwxyz]{7}%i
 
 ########################################################################
 
@@ -535,3 +381,5 @@ uri T_URI_DIGITS2_10_AC	m%^https?://\b[^/?]*\d{10,}\b%i
 full __ISO_VALID		/charset=\"?iso-(?:8859-\d{1,2}|2022-(?:jp|kr))\b/i
 full __ISO_CHARSET		/charset=\"?iso-\S+-\S+\b/i
 meta T_BAD_ISO_CHARSET		(__ISO_CHARSET && !__ISO_VALID)
+
+body T_NORMAL_HTTP_TO_IP	eval:check_numeric_http()
