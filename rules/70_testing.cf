@@ -288,6 +288,15 @@ body T_BACKHAIR_7_5		eval:html_test('backhair_7_5')
 body T_BACKHAIR_7_6		eval:html_test('backhair_7_6')
 body T_BACKHAIR_7_7		eval:html_test('backhair_7_7')
 
+body T_BACKHAIR_1		eval:html_eval('backhair_count', '>= 1')
+body T_BACKHAIR_2		eval:html_eval('backhair_count', '>= 2')
+body T_BACKHAIR_3		eval:html_eval('backhair_count', '>= 3')
+body T_BACKHAIR_4		eval:html_eval('backhair_count', '>= 4')
+body T_BACKHAIR_5		eval:html_eval('backhair_count', '>= 5')
+body T_BACKHAIR_6		eval:html_eval('backhair_count', '>= 6')
+body T_BACKHAIR_7		eval:html_eval('backhair_count', '>= 7')
+body T_BACKHAIR_8		eval:html_eval('backhair_count', '>= 8')
+
 # IADB
 header __RCVD_IN_IADB		eval:check_rbl('iadb', 'iadb.isipp.com.')
 tflags __RCVD_IN_IADB		net nice
@@ -783,3 +792,5 @@ header T_SUSPICIOUS_RECIPS_70	eval:similar_recipients('0.70','undef')
 header T_SUSPICIOUS_RECIPS_75	eval:similar_recipients('0.75','undef')
 header T_SUSPICIOUS_RECIPS_80	eval:similar_recipients('0.80','undef')
 
+header T_BAD_TIMEZONE_EST	ALL =~ /[+-]\d\d[30]0(?<!-0500|-0300|\+1000|\+1100) \(EST\)/
+header T_BAD_TIMEZONE_CST	ALL =~ /[+-]\d\d[30]0(?<!-0600|-0400|\+0800|\+0930) \(CST\)/
