@@ -157,7 +157,7 @@ sub result {
 }
 
 sub wanted {
-  my ($id, $dataref) = @_;
+  my ($id, $time, $dataref) = @_;
   my $out;
 
   my $ma = Mail::SpamAssassin::NoMailAudit->new('data' => $dataref);
@@ -174,12 +174,13 @@ sub wanted {
   my $yorn = $status->is_spam() ? 'Y' : '.';
   my $hits = $status->get_hits();
   my $tests = join(",", sort(grep(length,$status->get_names_of_tests_hit(),$status->get_names_of_subtests_hit())));
-  my $bayes = ($opt_bayes && defined $status->{bayes_score} ? " bayes=".$status->{bayes_score} : "");
+  my $bayes = ($opt_bayes && defined $status->{bayes_score} ? ",bayes=".$status->{bayes_score} : "");
   # print STDERR $status->get_full_message_as_text();
 
   $id =~ s/\s/_/g;
+  $time = "time=$time";
 
-  $out .= sprintf("%s %2d %s %s%s\n", $yorn, $hits, $id, $tests, $bayes);
+  $out .= sprintf("%s %2d %s %s %s%s\n", $yorn, $hits, $id, $tests, $time, $bayes);
 
   if ($tests =~ /MICROSOFT_EXECUTABLE|MIME_SUSPECT_NAME/) {
     $out .= logkilled($ma, $id, "possible virus");

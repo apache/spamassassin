@@ -172,7 +172,7 @@ sub target  {
 ###########################################################################
 
 sub wanted {
-  my ($id, $dataref) = @_;
+  my ($id, $time, $dataref) = @_;
 
   if (defined($learnprob)) {
     if (int (rand (1/$learnprob)) != 0) {
