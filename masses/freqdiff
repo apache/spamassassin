@@ -108,7 +108,7 @@ foreach my $elem (sort { $out{$b} <=> $out{$a} || $a cmp $b } keys %out) {
 	printf "%.3f\t%s\n", $out{$elem}, $name;
     }
     elsif ($opt_d) {
-	printf "$out{$elem}\t$name\n" if ($out{$elem} || $opt_a);
+	print "$out{$elem}\t$name\n" if ($out{$elem} || $opt_a);
     }
     else {
 	printf "%.2f\t%s\n", $out{$elem}, $name;
