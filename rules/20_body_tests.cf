@@ -255,6 +255,30 @@ describe PORN_7			Uses words and phrases which indicate porn (7)
 body PORN_8			/(?:video|movie|teen|ware|mp3)z/
 describe PORN_8			Uses words and phrases which indicate porn (8)
 
+# Words which will almost never be seen outside of porn spam
+body     PORN_9                 /(?:sex|gay|slut|whore|cum|f.ck|adult|xxx)[ -]?fest|cum[ -]?shot|cum[ -]?dumpster/i
+describe PORN_9                 Uses words and phrases which indicate porn (9)
+
+# Words which mainly show up in porn spam
+body     PORN_10                /\bslut|\bwhore|\bxxx\b|\bporn|\b(?:Asian|Japanese|oriental)\s+(?:girls|schoolgirls)\b|\bbabes\b|gang[ -]?bang|\bskank|\btits\b|\btitties\b|\bpussy\b|\bpussies\b/i
+describe PORN_10                Uses words and phrases which indicate porn (10)
+
+# Words which often show up in spam, but also show up somewhat often in
+# non-spam
+body     PORN_11                /hard[ -]?core|web[ -]?cam/i
+describe PORN_11                Uses words and phrases which indicate porn (11)
+
+# Like PORN_3, but it only needs to match two terms intead of three. To
+# compensate for only matching two terms, so as to not generate too many
+# false positives, there can only be up to seven characters between terms,
+# rather than the 15 for PORN_3; it also uses a shorter list of terms.
+body     PORN_12                /(?:(?:\bxxx|\bsex|\bslut|\bwhore|\bhottest\b|hard-?core|\bhorny\b|\bhorniest\b|\bvirgin|\bnaughty\b|\bnaughtiest\b|\bweb.?cam|\ble[sz]b(?:ian|o)|\bskank|\btits\b|\btitties\b|\bpussy\b|\bpussies\b|\badult\b|\bfuck).{0,7}){2,}/i
+describe PORN_12                Uses words and phrases which indicate porn (12)
+
+body     PORN_13                /must be (?:at least|over) 18/i
+describe PORN_13                Uses words and phrases which indicate porn (13)
+
+
 body SEXY_PICS                  /sexy pictures/i
 describe SEXY_PICS              Sexy pictures
 
