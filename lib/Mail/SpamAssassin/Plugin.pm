@@ -459,6 +459,50 @@ to receive specific events, or control the callback chain behaviour.
 
 Plugins that implement an eval test will need to call this, so that
 SpamAssassin calls into the object when that eval test is encountered.
+See the B<REGISTERING EVAL RULES> section for full details.
+
+=cut
+
+sub register_eval_rule {
+  my ($self, $nameofsub) = @_;
+  $self->{main}->{conf}->register_eval_rule ($self, $nameofsub);
+}
+
+=item $plugin->inhibit_further_callbacks()
+
+Tells the plugin handler to inhibit calling into other plugins in the plugin
+chain for the current callback.  Frequently used when parsing configuration
+settings using C<parse_config()>.
+
+=cut
+
+sub inhibit_further_callbacks {
+  my ($self) = @_;
+  $self->{_inhibit_further_callbacks} = 1;
+}
+
+=item dbg ($message)
+
+Output a debugging message C<$message>, if the SpamAssassin object is running
+with debugging turned on.
+
+I<NOTE:> This function is not available in the package namespace
+of general plugins and can't be called via $self->dbg().  If a
+plugin wishes to output debug information, it should call
+C<Mail::SpamAssassin::Plugin::dbg($msg)>.
+
+=cut
+
+sub dbg { Mail::SpamAssassin::dbg (@_); }
+
+1;
+
+=back
+
+=head1 REGISTERING EVAL RULES
+
+Plugins that implement an eval test must register the methods that can be
+called from rules in the configuration files, in the plugin class' constructor.
 
 For example,
 
@@ -503,7 +547,7 @@ State for a single message being scanned should be stored on the C<$checker>
 object, not on the C<$self> object, since C<$self> persists between scan
 operations.  See the 'lifecycle note' on the C<check_start()> method above.
 
-=head2 STANDARD ARGUMENTS FOR RULE TYPES
+=head1 STANDARD ARGUMENTS FOR RULE TYPES
 
 Plugins will be called with the same arguments as a standard EvalTest.
 Different rule types receive different information by default:
@@ -522,44 +566,6 @@ Different rule types receive different information by default:
 
 The configuration file arguments will be passed in after the standard
 arguments.
-
-=cut
-
-sub register_eval_rule {
-  my ($self, $nameofsub) = @_;
-  $self->{main}->{conf}->register_eval_rule ($self, $nameofsub);
-}
-
-=item $plugin->inhibit_further_callbacks()
-
-Tells the plugin handler to inhibit calling into other plugins in the plugin
-chain for the current callback.  Frequently used when parsing configuration
-settings using C<parse_config()>.
-
-=cut
-
-sub inhibit_further_callbacks {
-  my ($self) = @_;
-  $self->{_inhibit_further_callbacks} = 1;
-}
-
-=item dbg ($message)
-
-Output a debugging message C<$message>, if the SpamAssassin object is running
-with debugging turned on.
-
-I<NOTE:> This function is not available in the package namespace
-of general plugins and can't be called via $self->dbg().  If a
-plugin wishes to output debug information, it should call
-C<Mail::SpamAssassin::Plugin::dbg($msg)>.
-
-=cut
-
-sub dbg { Mail::SpamAssassin::dbg (@_); }
-
-1;
-
-=back
 
 =head1 SEE ALSO
 
