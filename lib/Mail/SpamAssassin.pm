@@ -78,7 +78,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 $VERSION = "2.30";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.94 2002/06/14 23:17:15 hughescr Rel $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.94.2.1 2002/06/16 19:45:52 hughescr Exp $';
 
 sub Version { $VERSION; }
 
@@ -725,11 +725,23 @@ sub create_default_prefs {
 
 sub expand_name ($) {
   my ($self, $name) = @_;
-  if ($name eq '') {
-      return $ENV{HOME} if ($ENV{HOME} && $ENV{HOME} =~ /\//);
-      return (getpwuid($>))[7];
-  } else {
-      return (getpwnam($name))[7];
+  my $home = $ENV{'HOME'} || '';
+
+  if ($^O =~ /mswin|dos|os2/oi) {
+	  my $userprofile = $ENV{'USERPROFILE'} || '';
+
+	  return $userprofile if ($userprofile && $userprofile =~ m/^[a-z]\:[\/\\]/oi);
+	  return $userprofile if ($userprofile =~ m/^\\\\/o);
+
+	  return $home if ($home && $home =~ m/^[a-z]\:[\/\\]/oi);
+	  return $home if ($home =~ m/^\\\\/o);
+
+	  return '';
+  }
+  else {
+	  return $home if ($home && $home =~ /\//o);
+	  return (getpwnam($name))[7] if ($name ne '');
+	  return (getpwuid($>))[7];
   }
 }
 
