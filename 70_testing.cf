@@ -242,3 +242,8 @@ describe  T_YAHOO_MSGID_CAPS          Message-ID has all-caps@yahoo.com
 # bug 3396
 header    T_CT_BOUND_DDNUM        Content-Type =~ /boundary="--\d+"/
 describe  T_CT_BOUND_DDNUM	  Content-Type header has boundary in ratware form
+
+# bug 3399
+header   T_MSGID_CAPS  Message-ID =~ /<[A-Z]+\@[a-z]+\.[a-z]{2,4}>/
+header   T_MSGID_CAPS2  Message-ID =~ /<[A-Z]+\@(?!mailcity\.com)[a-z]+\.[a-z]{2,4}>/
+header   T_MSGID_CAPS3		Message-ID =~ /^\s*<?[A-Z]+\@(?!mailcity\.com)/
