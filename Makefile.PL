@@ -221,7 +221,10 @@ my %makefile = (
     # Don't add META.yml to the MANIFEST for god's sake!
     'NO_META' => 1,
 );
-delete $makefile{'NO_META'} if $mm_version < 6.0;
+# That META.yml stuff was introduced with Perl 6.06_03, see
+# <http://archive.develooper.com/makemaker@perl.org/msg00922.html>
+# <http://archive.develooper.com/makemaker@perl.org/msg00984.html>
+delete $makefile{'NO_META'} if $mm_version < 6.06_03;
 
 
 if (bool($opt{'__cruft'}, 0) and not bool($opt{'ignore_cruft'}, 0)) {
