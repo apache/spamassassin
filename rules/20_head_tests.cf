@@ -39,32 +39,35 @@ describe MISSING_HB_SEP		Missing blank line between message header and body
 header NO_REAL_NAME		From =~ /^["\s]*\<?\S+\@\S+\>?\s*$/
 describe NO_REAL_NAME		From: does not include a real name
 
-header FROM_ENDS_IN_NUMS	From =~ /\d\d\@/
-describe FROM_ENDS_IN_NUMS	From: ends in numbers
-
-header FROM_STARTS_WITH_NUMS	From =~ /^\d\d/
-describe FROM_STARTS_WITH_NUMS	From: starts with nums
-
-# note: anchored for speed
-header FROM_HAS_MIXED_NUMS	From =~ /(?:^|\D)\d+[a-z]+\d+\S*\@/i
-describe FROM_HAS_MIXED_NUMS	From: contains numbers mixed in with letters
-
-# idea from Robert Menschel <RMSA@Menschel.net>
-header FROM_HAS_MIXED_NUMS3	From:addr =~ /^[a-z]+\d+[a-z]+\d+[a-z]+\w*\@/i
-describe FROM_HAS_MIXED_NUMS3	From: contains numbers mixed in with letters
-
 header FROM_BLANK_NAME		From =~ /(?:\s|^)"" <\S+>/i
 describe FROM_BLANK_NAME	From: contains empty name
 
-# Faked addresses tend to come from big public sites.  Stats show that
-# 5 digits is enough to get a 1.0 s/o ratio; 4 is too low (probably due
-# to folks called "jmason2002@yahoo.com" for example).
-header ADDR_NUMS_AT_BIGSITE	ALL =~ /^(To|From|Cc|Reply-To):\s*<?\S+\d{5,}\@(?:aol|bigfoot|compuserve|excite|hotmail|juno|prodigy|yahoo)\.(?:com|net|org)/mi
-describe ADDR_NUMS_AT_BIGSITE	Uses an address with lots of numbers, at a big ISP
+###########################################################################
+# numeric address rules, these are written to avoid overlap with each other
+
+header FROM_ENDS_IN_NUMS	From:addr =~ /\D\d{8,}\@/i
+describe FROM_ENDS_IN_NUMS	From: ends in many numbers
+
+header FROM_STARTS_WITH_NUMS	From:addr =~ /^\d{6,}\S+\@/i
+describe FROM_STARTS_WITH_NUMS	From: starts with many numbers
+
+# note: anchored for speed
+header FROM_HAS_MIXED_NUMS	From:addr =~ /^[a-z]+\d+[a-z]+\d+[a-z]+\w*\@/i
+describe FROM_HAS_MIXED_NUMS	From: contains numbers mixed in with letters
+
+header FROM_HAS_ULINE_NUMS	From =~ /_\S?(?:[a-z]+\w*?\d+|\d+\w*?[a-z]+)\w*\@/i
+describe FROM_HAS_ULINE_NUMS	From: contains an underline and numbers/letters
 
 # don't match US/Canada phone numbers: 10 digits optionally preceded by a "1"
 header FROM_ALL_NUMS		From:addr =~ /^(?:\d{1,9}|[02-9]\d{10}|\d{12,})@/
 describe FROM_ALL_NUMS		From numeric address (except US/Canada phones)
+
+# faked addresses tend to come from big public sites, but avoid overlap
+header __ADDR_NUMS_AT_BIGSITE	ALL =~ /^(?:To|From|Cc|Reply-To):\s{0,20}<?\S{0,20}\d{5,}\S{0,20}\@(?:bigfoot|email|excite|hotmail|juno|msn|yahoo)\.(?:com|net|org)/mi
+meta ADDR_NUMS_AT_BIGSITE	__ADDR_NUMS_AT_BIGSITE && !FROM_ENDS_IN_NUMS && !FROM_STARTS_WITH_NUMS && !FROM_HAS_MIXED_NUMS && !FROM_ALL_NUMS
+describe ADDR_NUMS_AT_BIGSITE	Has an address with lots of numbers at a big ISP
+
+###########################################################################
 
 header FROM_OFFERS		From:addr =~ /\@\S*offers(?![eo]n\b)/i
 describe FROM_OFFERS		From address is "at something-offers"
@@ -563,13 +566,6 @@ describe MIME_BOUND_RKFINDY     Spam tool pattern in MIME boundary (rfkindy)
 header TO_MALFORMED             To !~ /(?:^|[^\S"])(?:(?:\"[^\"]+\"|\S+)\@\S+\.\S+|^\s*.+:\s*;|^\s*\"[^\"]+\":\s*;|^\s*\([^\)]*\)\s*$|<\S+(?:\!\S+){1,}>|^\s*$)/ [if-unset: unset@unset.unset]
 describe TO_MALFORMED           To: has a malformed address
 
-# Most/all of these require that From addresses do not start with numbers.
-header FROM_NUM_AT_WEBMAIL	From:addr =~ /^\d\S+\@(?:msn\.com|flashmail\.com|mailexcite\.com|prodigy\.net|yahoo\.\S+|hotmail\.com|eudoramail\.com|aol\.com|excite\.com|email\.com|earthlink\.net|geocities\.com|hknetmail\.com|angelfire\.com)/i
-describe FROM_NUM_AT_WEBMAIL	From address is webmail, but starts with a number
-
-header FROM_WEBMAIL_END_NUMS6	From:addr =~ /\d\d\d\d\d\d\@(?:aol|msn|bigfoot|compuserve|excite|hotmail|juno|prodigy|yahoo)\.(?:com|net|org)/i
-describe FROM_WEBMAIL_END_NUMS6	From webmail service and address ends in numbers
-
 header ADDR_FREE              From =~ /\b(?-i:F)ree(?-i:[ A-Z]).*</i
 describe ADDR_FREE            From Address contains FREE
 
@@ -596,10 +592,6 @@ describe FROM_NO_LOWER		From address has no lower-case characters
 
 header SUBJ_BUY                 Subject =~ /^buy/i
 describe SUBJ_BUY               Subject line starts with Buy or Buying
-
-header __FROM_HAS_UNDERLINE_NUMS	From =~ /_\S?(?:[a-z]+\w*?\d+|\d+\w*?[a-z]+)\w*\@/i
-meta FROM_HAS_ULINE_NUMS		(!REPLY_TO_ULINE_NUMS && __FROM_HAS_UNDERLINE_NUMS)
-describe FROM_HAS_ULINE_NUMS	From: contains an underline and numbers/letters
 
 # this code uses an access database (sendmail, postfix, etc.)
 # Since you need to actively create an accessdb to use it, the rule is
