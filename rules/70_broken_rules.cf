@@ -912,9 +912,15 @@ describe T_FREE_WEBSITE           Contains 'free website' with capitals
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  T_FROM_ISO885915
-header T_FROM_ISO885915		From =~ /=\?ISO-8859-15?\?q\?(?:[a-z]*=[A-F][0-9A-F][a-z]*)+\?=/i
+header T_FROM_ISO885915		From:raw =~ /=\?ISO-8859-15?\?q\?(?:[a-z]*=[A-F][0-9A-F][a-z]*)+\?=/i
 describe T_FROM_ISO885915	From contains encoded ISO-8859-1(5) characters
 tflags T_FROM_ISO885915		nice
+#
+#
+#   0.000    0.000    0.000    0.00    1.00  T_SUBJ_ISO885915
+header T_SUBJ_ISO885915		Subject:raw =~ /=\?ISO-8859-15?\?q\?(?:[a-z]*=[A-F][0-9A-F][a-z]*)+\?=/i
+describe T_SUBJ_ISO885915	Subject contains encoded ISO-8859-1(5) characters
+tflags T_SUBJ_ISO885915		nice
 #
 #
 #   0.004    0.000    0.006    0.00    1.00  T_MEMBER_2
@@ -936,10 +942,7 @@ score T_NASD_FINANCIAL -1.0
 #   0.001    0.000    0.002    0.00    1.00  T_SUBJ_FREE_CAP
 #
 #
-#   0.000    0.000    0.000    0.00    1.00  T_SUBJ_ISO885915
-header T_SUBJ_ISO885915		Subject =~ /=\?ISO-8859-15?\?q\?(?:[a-z]*=[A-F][0-9A-F][a-z]*)+\?=/i
-describe T_SUBJ_ISO885915	Subject contains encoded ISO-8859-1(5) characters
-tflags T_SUBJ_ISO885915		nice
+
 #
 #
 #   0.018    0.000    0.028    0.00    1.00  T_TRADEMARK
