@@ -810,12 +810,6 @@ describe T_X_NJABL_DIALUP  NJABL: sender is on dialup/dynamic IP
 tflags T_X_NJABL_DIALUP    net
 score T_X_NJABL_DIALUP     0.5
 
-# I'm surprised we haven't added this one before:
-#   0.788    2.012    0.000    1.00    0.86    1.00  T_FORMMAIL
-body __FORMMAIL_MSG	/^Below is the result of your feedback form\./
-meta T_FORMMAIL		( __FORMMAIL_MSG && ! NMS_CGI_NOT_BUGGY )
-describe T_FORMMAIL	An old-looking formmail.pl message
-
 # Matt Cline: New ratware and user-agent tests
 header T_RATWARE_BIXON       X-Mailer =~ /Bixon ThunderMail/
 header T_RATWARE_BULK_MAILER X-Mailer =~ /BulkMailer/
