@@ -397,13 +397,18 @@ sub expiry_due {
   # is the database too small for expiry?  (Do *not* use "scalar keys",
   # as this will iterate through the entire db counting them!)
   my $ntoks = $self->{db_toks}->{$NTOKENS_MAGIC_TOKEN};
-  $ntoks ||= $self->{expiry_min_db_size} + 1;
+
+  # grr, wierd warning about non-numeric data. work around it
+  if (!$ntoks || $ntoks =~ /\D/) 
+		{ $ntoks = $self->{expiry_min_db_size} + 1; }
   if ($ntoks <= $self->{expiry_min_db_size}) {
     return 0;
   }
 
-  my $last = $self->{db_toks}->{$LAST_EXPIRE_MAGIC_TOKEN} || 0;
-  my $oldest = $self->{db_toks}->{$OLDEST_TOKEN_AGE_MAGIC_TOKEN} || 0;
+  my $last = $self->{db_toks}->{$LAST_EXPIRE_MAGIC_TOKEN};
+  if (!$last || $last =~ /\D/) { $last = 0; }
+  my $oldest = $self->{db_toks}->{$OLDEST_TOKEN_AGE_MAGIC_TOKEN};
+  if (!$oldest || $oldest =~ /\D/) { $oldest = 0; }
 
   my $limit = $self->{expiry_count};
   my $now = $self->scan_count_get();
@@ -637,9 +642,10 @@ sub scan_count_get {
   my ($self) = @_;
 
   my $count = $self->{db_toks}->{$SCANCOUNT_BASE_MAGIC_TOKEN};
-  $count ||= 0;
+  # avoid a wierd warning: non-numeric data in there
+  if (!$count || $count =~ /\D/) { $count = 0; }
   my $path = $self->{scan_count_little_file};
-  $count += (-s $path);
+  $count += (-e $path ? -s _ : 0);
   $count;
 }
 

@@ -98,9 +98,10 @@ test TRACKER_ID     ok          ofsknxxdqgtgqvsoiytkivajvtj
 test TRACKER_ID     fail        <!-- ADMINISTRIVIA -->
 test TRACKER_ID     fail        Donau-Dampfschifffahrts-Kapitaen
 
-test OBFUSCATING_COMMENT ok     This is a te<!--foo-->st
-test OBFUSCATING_COMMENT fail   Not a <!-- problem --> here
-test OBFUSCATING_COMMENT fail   This <tag><!-- neither --></tag> I hope
+test __OBFUSCATING_COMMENT ok     This is a te<!--foo-->st
+test __OBFUSCATING_COMMENT fail   Not a <!-- problem --> here
+test __OBFUSCATING_COMMENT fail   or<!--problem--> here
+test __OBFUSCATING_COMMENT fail   This <tag><!-- neither --></tag> I hope
 
 test NUMERIC_COMMENT     ok     Some text <!--34555--> followed by more
 test NUMERIC_COMMENT     fail   Something <!-- A comment --> and more
