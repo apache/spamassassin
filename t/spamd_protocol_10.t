@@ -5,7 +5,7 @@ use SATest; sa_t_init("spamd_protocol_10");
 use Test; BEGIN { plan tests => 10 };
 
 use File::Path;
-use IO::Socket;
+use Fcntl qw/:seek/;
 use IO::Socket::INET;
 use Mail::SpamAssassin::Conf;
 
