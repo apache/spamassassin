@@ -60,7 +60,7 @@ char **exec_argv;
 
 void print_usage(void)
 {
-  printf("Usage: spamc [-d host] [-p port] [-B] [-c] [-f] [-h] [-e command [args]]\n");
+  printf("Usage: spamc [-d host] [-p port] [-B] [-c] [-f] [-h] [-x] [-e command [args]]\n");
   printf("-B: BSMTP mode - expect input to be a single SMTP-formatted message\n");
   printf("-c: check only - print score/threshold and exit code set to 0 if message is not spam, 1 if spam\n");
   printf("-d host: specify host to connect to  [default: localhost]\n");
@@ -70,6 +70,7 @@ void print_usage(void)
   printf("-p port: specify port for connection [default: 783]\n");
   printf("-s size: specify max message size, any bigger and it will be returned w/out processing [default: 250k]\n");
   printf("-u username: specify the username for spamd to process this message under\n");
+  printf("-x: don't fallback safely - in a comms error, exit with an error code\n");
 }
 
 int
@@ -77,7 +78,7 @@ read_args(int argc, char **argv, char **hostname, int *port, int *max_size, char
 {
   int opt, i, j;
 
-  while(-1 != (opt = getopt(argc,argv,"-Bcd:e:fhp:t:s:u:")))
+  while(-1 != (opt = getopt(argc,argv,"-Bcd:e:fhp:t:s:u:x")))
   {
     switch(opt)
     {
@@ -114,6 +115,11 @@ read_args(int argc, char **argv, char **hostname, int *port, int *max_size, char
     case 'f':
       {
         flags |= SPAMC_SAFE_FALLBACK;
+	break;
+      }
+    case 'x':
+      {
+	flags &= (~SPAMC_SAFE_FALLBACK);
 	break;
       }
     case 'u':
@@ -231,7 +237,10 @@ FAIL:
         message_dump(STDIN_FILENO, out_fd, &m);
         if (ret == EX_TOOBIG) {
           return 0;
-        }
-        return ret;
+        } else if (flags & SPAMC_SAFE_FALLBACK) {
+	  return EX_OK;
+	} else {
+	  return ret;
+	}
     }
 }
