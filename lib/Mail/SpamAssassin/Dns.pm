@@ -760,8 +760,8 @@ sub lookup_mx {
     $ret = 1 if @mxrecords;
   };
   if ($@) {
-    # 71 == EX_OSERR.  MX lookups are not supposed to crash and burn!
-    sa_die (71, "MX lookup died: $@ $!\n");
+    dbg ("MX lookup failed horribly, perhaps bad resolv.conf setting?");
+    return undef;
   }
 
   dbg ("MX for '$dom' exists? $ret");
@@ -792,8 +792,8 @@ sub lookup_ptr {
 
   };
   if ($@) {
-    # 71 == EX_OSERR.  PTR lookups are not supposed to crash and burn!
-    sa_die (71, "PTR lookup died: $@ $!\n");
+    dbg ("PTR lookup failed horribly, perhaps bad resolv.conf setting?");
+    return undef;
   }
 
   dbg ("PTR for '$dom': '$name'");
@@ -838,10 +838,18 @@ sub is_dns_available {
   for(my $retry = 3; $retry > 0 and $#domains>-1; $retry--) {
     my $domain = splice(@domains, rand(@domains), 1);
     dbg ("trying ($retry) $domain...", "dnsavailable", -2);
-    if($self->lookup_mx($domain)) {
-      dbg ("MX lookup of $domain succeeded => Dns available (set dns_available to hardcode)", "dnsavailable", -1);
-      $IS_DNS_AVAILABLE = 1;
-      last;
+    my $result = $self->lookup_mx($domain);
+    if(defined $result) {
+      if ( $result ) {
+        dbg ("MX lookup of $domain succeeded => Dns available (set dns_available to hardcode)", "dnsavailable", -1);
+        $IS_DNS_AVAILABLE = 1;
+        last;
+      }
+    }
+    else {
+      dbg ("MX lookup of $domain failed horribly => Perhaps your resolv.conf isn't pointing at a valid server?", "dnsavailable", -1);
+      $IS_DNS_AVAILABLE = 0; # should already be 0, but let's be sure.
+      last; 
     }
   }
 
