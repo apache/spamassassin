@@ -552,3 +552,12 @@ describe T_PIPE_OBFU       Words dis|guised with a pipe sym|bol
 body T_APOSTROPHE_OBFU     /[a-z][a-z][a-z]'[a-z][a-z][a-z]/i
 describe T_APOSTROPHE_OBFU Words dis'guised with an apos'trophe
 
+# bug 2525: FORGED_IMS_HTML fp'ing because new IMS *DOES* use text/html
+# ctype.  ARGH.  This was noted in build 5.5.2656.59, so permit builds
+# after that to get away with it.
+
+header __IMS_HTML_BUILDS     X-Mailer =~ /^Internet Mail Service .(?:[6789]\.|5\.[6789]|5\.5\.(?:[3456789]|2[789]|26[6789]|265[6789]))/
+header __IMS_HTML_RCVD	     Received =~ /\bby \S+ with Internet Mail Service .(?:[6789]\.|5\.[6789]|5\.5\.(?:[3456789]|2[789]|26[6789]|265[6789]))/
+meta T_FORGED_IMS_HTML       (__IMS_MUA && MIME_HTML_ONLY && !(__IMS_HTML_BUILDS && __IMS_HTML_RCVD))
+describe T_FORGED_IMS_HTML   IMS can't send HTML message only
+
