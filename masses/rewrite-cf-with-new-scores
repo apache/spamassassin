@@ -18,12 +18,11 @@ while (<IN>) {
   /^m(.*)$/ and $muta = $1;
 
   if (/^\./ && defined($name)) {
-    if ($name =~ /^__/             # meta-test subrules
-        || $muta == 0)             # otherwise non-mutable
+    if ($name =~ /^__/)             # meta-test subrules
       { $skipped_scores{$name} = $base; }
   }
 }
-if ($muta == 0) { $skipped_scores{$name} = $base; }
+#if ($muta == 0) { $skipped_scores{$name} = $base; }
 close IN;
 
 system ("./parse-rules-for-masses") and die;
