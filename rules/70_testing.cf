@@ -139,6 +139,9 @@ uri T_HTTP_BAD_HOST_CHAR	m@^https?://[^/]*[\000-\037\200-\377]@i
 # not expecting any hits on this (yet)
 uri T_HIGH_CODEPAGE_URI         /^https?:\/\/[^\/]*\&\#(?:\d{4,}|[3456789]\d\d);/i
 
+header T_MISSING_MIME_HB_SEP		eval:check_for_missing_mime_hb_separator()
+describe T_MISSING_MIME_HB_SEP		Missing blank line between MIME header and body
+
 ########################################################################
 
 #### PHRASE OBFUSCATION RULES ####
