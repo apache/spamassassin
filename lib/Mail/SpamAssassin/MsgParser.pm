@@ -81,9 +81,6 @@ sub parse {
     @message = split ( /^/m, $message );
   }
 
-  # trim mbox seperator if it exists
-  shift @message if ( @message > 0 && $message[0] =~ /^From\s/ );
-
   # Generate the main object and parse the appropriate MIME-related headers into it.
   my $msg = Mail::SpamAssassin::MsgContainer->new();
   my $header = '';
@@ -92,6 +89,11 @@ sub parse {
   while ( my $last = shift @message ) {
     # Store the non-modified headers in a scalar
     $msg->{'pristine_headers'} .= $last;
+
+    if ( $last =~ /^From\s/ ) {
+      $msg->{'mbox_sep'} = $last;
+      next;
+    }
 
     # NB: Really need to figure out special folding rules here!
     if ( $last =~ /^[ \t]+/ ) {                    # if its a continuation
