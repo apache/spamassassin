@@ -133,11 +133,28 @@ default locations that SpamAssassin will look at the end.
 	See "perldoc sa-learn" for more documentation on how
 	to train this.
 
+
 File Locations:
+
 SpamAssassin will look in a number of areas to find the default
-configuration files that are used.  The "__*__" text are variables which
-get set during installation.  You can see their values by viewing the
-first several lines of the "spamassassin" or "spamd" scripts.
+configuration files that are used.  The "__*__" text are variables
+whose value you can see by looking at the first several lines of the
+"spamassassin" or "spamd" scripts.
+
+They are set on install time and can be overridden with the Makefile.PL
+command line options DATADIR (for __def_rules_dir__) and CONFDIR (for
+__local_rules_dir__).  If none of these options were given, FHS-compliant
+locations based on the PREFIX (which becomes __prefix__) are chosen.
+These are:
+
+  __prefix__    __def_rules_dir__              __local_rules_dir__
+  -------------------------------------------------------------------------
+  /usr          /usr/share/spamassassin        /etc/mail/spamassassin
+  /usr/local    /usr/local/share/spamassassin  /etc/mail/spamassassin
+  /opt/$DIR     /opt/$DIR/share/spamassassin   /etc/opt/mail/spamassassin
+  $DIR          $DIR/share/spamassassin        $DIR/etc/mail/spamassassin
+
+The files themselves are then looked for in these paths:
 
   - Distributed Configuration Files
         '__def_rules_dir__'
