@@ -57,7 +57,8 @@ qr(\bamateur)i, qr(\bsex+)i, qr(\bslut)i, qr(\bexplicit)i, qr(\bxxx(?:[^x]|\b))i
 qr(\blick)i, qr(\bsuck)i, qr(\bdorm)i, qr(\bwebcam)i, qr(\bass\b)i, qr(\bschoolgirl)i,
 qr(\bstrip)i, qr(\bhorn[yi])i, qr(\berotic)i, qr(\boral)i, qr(\bpenis)i, qr(\bhard.?core)i,
 qr(\bblow.?job)i, qr(\bnast[yi])i, qr(\bporn)i, qr(\bwhore)i, qr(\bnaked)i,
-qr(\bnude)i, qr(\bvirgin)i, qr(\bnaught[yi])i, qr(\bgirl)i, qr(\bceleb)i, qr(\bbabe)i,
+qr(\bnude)i, qr(\bvirgin)i, qr(\bnaught[yi])i, qr(\bgirl)i, qr(\bcelebrity\b)i,
+qr(\bcelebrities\b)i, qr(\bceleb\b)i, qr(\bbabes?\b)i,
 qr(\badult)i, qr(\bskank)i, qr(\btits?\b)i, qr(\btitties)i,
 # jm: catch "s*x", "f*ck" etc.
 qr(\bs[\*\.\-\?]ck)i, qr(\bf[\*\.\-\?]ck)i, qr(\bs[\*\.\-\?]x\b)i
