@@ -37,8 +37,8 @@ while (<>) {
       # a non-block form -- will be replaced with a block
       s{^(.+)\@LICENSE\s*$}{ license_with_prefix($1); }eg;
     }
+    print;
   }
-  print;
 }
 
 sub license_with_prefix {
