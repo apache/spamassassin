@@ -57,7 +57,6 @@ sub read_text_array_from_stdin {
 
   my @ary = ();
   while (<STDIN>) {
-    /^From / and $self->{from_line} = $_;
     push (@ary, $_);
     /^$/ and last;
   }
@@ -97,6 +96,10 @@ sub parse_headers {
 	$entry = $self->_get_or_create_header_object ($hdr);
 	$entry->{added} = 1;
       }
+
+    } elsif (/^From /) {
+      $self->{from_line} = $_;
+      next;
 
     } elsif (/^([^\x00-\x1f\x7f-\xff :]+): (.*)$/) {
       $hdr = $1; $val = $2;

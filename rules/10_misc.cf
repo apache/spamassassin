@@ -114,18 +114,19 @@ terse-report ---- End of SpamAssassin results
 # addresses of big companies with lots of lawyers, so if spammers
 # impersonate them, they'll get into big trouble, so it doesn't provide
 # a shortcut around SpamAssassin.
+#
+# Whitelist and blacklist addresses are now file-glob-style patterns, so
+# "friend@somewhere.com", "*@isp.com", or "*.domain.net" will all work.
 
 whitelist_from	billing@networksolutions.com
-whitelist_from  *@fatbrain.com
-whitelist_from  *@email.fatbrain.com
-whitelist_from  *@amazon.com
-whitelist_from  *@amazon.co.uk
-whitelist_from  *@ebay.com
-whitelist_from	*@ora-info.ora.com		# O'Reilly
+whitelist_from  *fatbrain.com
+whitelist_from  *amazon.com
+whitelist_from  *amazon.co.uk
+whitelist_from  *ebay.com
+whitelist_from	*ora.com		# O'Reilly
 whitelist_from  *@walmart.com
 whitelist_from  *@bn.com
 whitelist_from  *@yahoo-inc.com
-whitelist_from  monty@roscom.com
 
 ###########################################################################
 # Automatic-whitelist directory, for the default directory-based whitelist

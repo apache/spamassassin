@@ -197,12 +197,20 @@ sub check_for_missing_to_header {
 sub check_from_in_whitelist {
   my ($self) = @_;
   local ($_);
-  $_ = lc $self->get ('From:addr');
+  $_ = $self->get ('From:addr');
+  return $self->_check_whitelist ($self->{conf}->{whitelist_from}, $_);
+}
 
-  if (defined($self->{conf}->{whitelist_from}->{$_})) { return 1; }
+sub _check_whitelist {
+  my ($self, $list, $addr) = @_;
+  $addr = lc $addr;
 
-  s/[^\@]+\@//gs;	# jm@jmason.org => jmason.org
-  if (defined($self->{conf}->{whitelist_from_doms}->{$_})) { return 1; }
+  if (defined ($list->{$addr})) { return 1; }
+
+  study $addr;
+  foreach my $regexp (values %{$list->{$addr}}) {
+    if ($addr =~ /$regexp/) { return 1; }
+  }
 
   return 0;
 }
@@ -212,14 +220,8 @@ sub check_from_in_whitelist {
 sub check_from_in_blacklist {
   my ($self) = @_;
   local ($_);
-  $_ = lc $self->get ('From:addr');
-
-  if (defined($self->{conf}->{blacklist_from}->{$_})) { return 1; }
-
-  s/[^\@]+\@//gs;	# jm@jmason.org => jmason.org
-  if (defined($self->{conf}->{blacklist_from_doms}->{$_})) { return 1; }
-
-  return 0;
+  $_ = $self->get ('From:addr');
+  return $self->_check_whitelist ($self->{conf}->{blacklist_from}, $_);
 }
 
 ###########################################################################
@@ -228,14 +230,8 @@ sub check_from_in_blacklist {
 sub check_to_in_whitelist {
   my ($self) = @_;
   local ($_);
-  $_ = lc $self->get ('To:addr');
-
-  if (defined($self->{conf}->{whitelist_to}->{$_})) { return 1; }
-
-  s/[^\@]+\@//gs;     # jm@jmason.org => jmason.org
-  if (defined($self->{conf}->{whitelist_to_doms}->{$_})) { return 1; }
-
-  return 0;
+  $_ = $self->get ('To:addr');
+  return $self->_check_whitelist ($self->{conf}->{whitelist_to}, $_);
 }
 
 
@@ -245,14 +241,8 @@ sub check_to_in_whitelist {
 sub check_to_in_more_spam {
   my ($self) = @_;
   local ($_);
-  $_ = lc $self->get ('To:addr');
-
-  if (defined($self->{conf}->{more_spam_to}->{$_})) { return 1; }
-
-  s/[^\@]+\@//gs;     # jm@jmason.org => jmason.org
-  if (defined($self->{conf}->{more_spam_to_doms}->{$_})) { return 1; }
-
-  return 0;
+  $_ = $self->get ('To:addr');
+  return $self->_check_whitelist ($self->{conf}->{more_spam_to}, $_);
 }
 
 
@@ -262,14 +252,8 @@ sub check_to_in_more_spam {
 sub check_to_in_all_spam {
   my ($self) = @_;
   local ($_);
-  $_ = lc $self->get ('To:addr');
-
-  if (defined($self->{conf}->{all_spam_to}->{$_})) { return 1; }
-
-  s/[^\@]+\@//gs;     # jm@jmason.org => jmason.org
-  if (defined($self->{conf}->{all_spam_to_doms}->{$_})) { return 1; }
-
-  return 0;
+  $_ = $self->get ('To:addr');
+  return $self->_check_whitelist ($self->{conf}->{all_spam_to}, $_);
 }
 
 ###########################################################################

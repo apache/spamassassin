@@ -6,9 +6,6 @@
 #* create a file in /etc/spamassassin or /etc/mail/spamassassin instead.
 #* 
 ###########################################################################
-# First of all, the generally useful stuff; thresholds and the whitelist
-# of addresses which, for some reason or another, often trigger false
-# positives.
 
 # How many hits before a mail is considered spam.
 # required_hits		5
@@ -18,13 +15,10 @@
 # verify the spamminess of a mail before reporting it.
 # auto_report_threshold	30
 
-# Whitelist and blacklist addresses are *not* patterns; they're just normal
-# strings.  one exception is that "*@isp.com" is allowed.  They should be in
-# lower-case.  You can either add multiple addrs on one line,
-# whitespace-separated, or you can use multiple lines.
-#
-# JUST TO BE CLEAR: YOU CAN EITHER LIST INDIVIDUAL ADDRESSES, OR YOU CAN HAVE
-# *@domain.com -- NO OTHER WILDCARDS WILL WORK.
+# Whitelist and blacklist addresses are now file-glob-style patterns, so
+# "friend@somewhere.com", "*@isp.com", or "*.domain.net" will all work.  You
+# can either add multiple addrs on one line, whitespace-separated, or you can
+# use multiple lines.
 #
 # whitelist_from	someone@somewhere.com
 

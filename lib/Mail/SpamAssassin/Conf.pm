@@ -68,15 +68,10 @@ sub new {
 
   $self->{whitelist_from} = { };
   $self->{blacklist_from} = { };
-  $self->{whitelist_from_doms} = { };
-  $self->{blacklist_from_doms} = { };
 
   $self->{whitelist_to} = { };
-  $self->{whitelist_to_doms} = { };
   $self->{more_spam_to} = { };
-  $self->{more_spam_to_doms} = { };
   $self->{all_spam_to} = { };
-  $self->{all_spam_to_doms} = { };
 
   # this will hold the database connection params
   $self->{user_scores_dsn} = '';
@@ -119,31 +114,26 @@ sub _parse {
     # note: no eval'd code should be loaded before the SECURITY line below.
     #
     if (/^whitelist[-_]from\s+(.+)\s*$/) {
-      $self->add_to_addrlist ('whitelist_from',
-      	'whitelist_from_doms', split (' ', $1)); next;
+      $self->add_to_addrlist ('whitelist_from', split (' ', $1)); next;
     }
 
     if (/^blacklist[-_]from\s+(.+)\s*$/) {
-      $self->add_to_addrlist ('blacklist_from',
-      	'blacklist_from_doms', split (' ', $1)); next;
+      $self->add_to_addrlist ('blacklist_from', split (' ', $1)); next;
     }
 
     ###############################################
     # added by DJ
     #
     if (/^whitelist[-_]to\s+(.+)\s*$/) {
-      $self->add_to_addrlist ('whitelist_to',
-              'whitelist_to_doms', split (' ', $1)); next;
+      $self->add_to_addrlist ('whitelist_to', split (' ', $1)); next;
     }
 
     if (/^more[-_]spam[-_]to\s+(.+)\s*$/) {
-      $self->add_to_addrlist ('more_spam_to',
-              'more_spam_to_doms', split (' ', $1)); next;
+      $self->add_to_addrlist ('more_spam_to', split (' ', $1)); next;
     }
 
     if (/^all[-_]spam[-_]to\s+(.+)\s*$/) {
-      $self->add_to_addrlist ('all_spam_to',
-              'all_spam_to_doms', split (' ', $1)); next;
+      $self->add_to_addrlist ('all_spam_to', split (' ', $1)); next;
     }
 
     ###############################################
@@ -303,14 +293,14 @@ sub finish_parsing {
 }
 
 sub add_to_addrlist {
-  my ($self, $singlelist, $domlist, @addrs) = @_;
+  my ($self, $singlelist, @addrs) = @_;
 
   foreach my $addr (@addrs) {
-    if ($addr =~ /^\*\@(\S+)/) {
-      $self->{$domlist}->{lc $1} = 1;
-    } else {
-      $self->{$singlelist}->{lc $addr} = 1;
-    }
+    my $re = lc $addr;
+    $re =~ s/[\000\\\(]/_/gs;			# paranoia
+    $re =~ s/([^\*_a-zA-Z0-9])/\\$1/g;		# escape any possible metachars
+    $re =~ s/\*/\.\*/g;				# "*" -> "any string"
+    $self->{$singlelist}->{$addr} = qr/^${re}$/;
   }
 }
 
