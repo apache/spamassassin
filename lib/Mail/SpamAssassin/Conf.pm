@@ -116,7 +116,7 @@ sub new {
   $self->{razor_config} = undef;
   $self->{razor_timeout} = 10;
 
-  $self->{rbl_timeout} = 30;
+  $self->{rbl_timeout} = 10;
 
   # this will be sedded by implementation code, so ~ is OK.
   # using "__userstate__" is recommended for defaults, as it allows
@@ -1320,7 +1320,7 @@ Whether to use the naive-Bayesian-style classifier built into SpamAssassin.
       $self->{use_bayes} = $1; next;
     }
 
-=item rbl_timeout n		(default 30)
+=item rbl_timeout n		(default 10)
 
 All RBL queries are started at the beginning and we try to read the results
 at the end. In case some of them are hanging or not returning, you can specify
