@@ -844,7 +844,7 @@ int message_filter(struct transport *tp, const char *username,
 {
     char buf[8192];
     int bufsiz = (sizeof(buf) / sizeof(*buf)) - 4; /* bit of breathing room */
-    int len, i;
+    int len;
     int sock = -1;
     int rc;
     char versbuf[20];
@@ -1030,10 +1030,11 @@ int message_filter(struct transport *tp, const char *username,
     if(m->out_len!=m->content_length) {
 #ifndef _WIN32
         syslog(LOG_ERR, "failed sanity check, %d bytes claimed, %d bytes seen",
+				m->content_length, m->out_len);
 #else
         fprintf(stderr, "failed sanity check, %d bytes claimed, %d bytes seen\n",
-#endif
 				m->content_length, m->out_len);
+#endif
 	failureval = EX_PROTOCOL; goto failure;
     }
 

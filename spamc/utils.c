@@ -28,6 +28,7 @@ typedef int ssize_t;
 #include <errno.h>
 #include <signal.h>
 #include <sys/types.h>
+#include <sys/socket.h>
 #include <stdio.h>
 #include "utils.h"
 
