@@ -228,7 +228,7 @@ describe GREEN_EXCUSE_1		Claims SPAM helps the environment
 body GREEN_EXCUSE_2		/the trees, save the planet, use email!/i
 describe GREEN_EXCUSE_2		Claims SPAM helps the environment
 
-body VIAGRA			/VIAGRA/
+body VIAGRA			/VIAGRA/i
 describe VIAGRA			Plugs Viagra
 
 body YOU_HAVE_BEEN_SELECTED	/You have been selected as a (?:finalist|winner)/i
@@ -260,7 +260,7 @@ body PORN_2			/\bwild\b.{0,15}\bhardcore\b/i
 describe PORN_2			Uses words and phrases which indicate porn (2)
 
 # updated by: skod & Craig & jm
-body PORN_3			/(?:(?:\bcum|\borg[iy]|\bwild|fuck|\bteen|\baction\b|spunk|\bpussy\b|\bpussies\b|suck\b|sucking\b|\bhot\b|\bhottest\b|\bvoyeur|\ble[sz]b(?:ian|o)|\banal\b|\binterracial|\basian\b|\bamateur|\bsex+\b|\bslut|explicit|xxx[^x]|\blive\b|celebrity|\blick|\bsuck|\bdorm\b|webcam|\bass\b|\bschoolgirl\b|\bstrip|\bhorny\b|\bhorniest\b|\berotic|\boral\b|\bhardcore\b|\bblow[ -]*job|\bnast(?:y|iest)\b|\bporn).{0,15}){3,}/i
+body PORN_3			/(?:(?:\bcum|\borg[iy]|\bwild|fuck|\bteen|\baction\b|spunk|\bpussy\b|\bpussies\b|suck\b|sucking\b|\bhot\b|\bhottest\b|\bvoyeur|\ble[sz]b(?:ian|o)|\banal\b|\binterracial|\basian\b|\bamateur|\bsex+\b|\bslut|explicit|xxx[^x]|\blive\b|celebrity|\blick|\bsuck|\bdorm\b|webcam|\bass\b|\bschoolgirl\b|\bstrip|\bhorny\b|\bhorniest\b|\berotic|\boral\b|\bpenis\b|\bhardcore\b|\bblow[ -]*job|\bnast(?:y|iest)\b|\bporn).{0,15}){3,}/i
 describe PORN_3			Uses words and phrases which indicate porn (3)
 
 rawbody PORN_4 	/http:\/\/[\w\.]*(?:xxx|sex|anal|slut|pussy|cum|nympho|suck|porn|hardcore|taboo|whore|voyeur|lesbian|gurlpages|naughty|lolita|teen|schoolgirl|kooloffer|erotic)\w*\./
