@@ -14,10 +14,3 @@ for my $i (0..$highest) {
   $count ||= 0;
   print "$i $count\n";
 }
-
-print "
-
-gnuplot
-plot \"spam.score_freqs\"
-
-";
