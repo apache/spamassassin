@@ -66,6 +66,7 @@ describe FORGED_MUA_MOZILLA	Forged mail pretending to be from Mozilla
 header __PC_RND_HEADER		ALL =~ /%RA?ND(?:OM)?(?:_|\b|[A-Z]{3})/i
 rawbody __PC_RND_RAWBODY	/%RA?ND(?:OM)?(?:_|\b|[A-Z]{3})/i
 meta PERCENT_RANDOM		(__PC_RND_HEADER || __PC_RND_RAWBODY)
+describe PERCENT_RANDOM		Message has a random macro in it
 
 # __MIME_ATTACHMENT defined in 20_html_tests.cf
 body __NONEMPTY_BODY	/\S/
