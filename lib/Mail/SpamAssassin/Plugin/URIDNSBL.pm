@@ -295,6 +295,38 @@ sub parse_config {
   return 0;
 }
 
+sub handle_parser_error {
+  my($self, $opts, $ret_value) = @_;
+
+  my $conf = $opts->{conf};
+  my $key = $opts->{key};
+  my $value = $opts->{value};
+  my $line = $opts->{line};
+
+  my $msg = '';
+
+  if ($ret_value && $ret_value eq $Mail::SpamAssassin::Conf::INVALID_VALUE) {
+    $msg = "config: SpamAssassin failed to parse line, ".
+           "\"$value\" is not valid for \"$key\", ".
+           "skipping: $line";
+  }
+  elsif ($ret_value && $ret_value eq $Mail::SpamAssassin::Conf::MISSING_REQUIRED_VALUE) {
+    $msg = "config: SpamAssassin failed to parse line, ".
+           "no value provided for \"$key\", ".
+           "skipping: $line";
+  }
+
+  return unless $msg;
+
+  if ($conf->{lint_rules}) {
+    warn $msg."\n";
+  } else {
+    dbg($msg);
+  } 
+  $conf->{errors}++;
+  return;
+} 
+
 sub check_tick {
   my ($self, $opts) = @_;
 
