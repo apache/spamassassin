@@ -1003,49 +1003,24 @@ sub html_text {
   $text =~ s/^\n//s if $self->{html_last_tag} eq "br";
 
   if (defined $self->{html_text}[-1]) {
+    my $last = $self->{html_text}[-1];
+
     # ideas discarded since they would be easy to evade:
-    # 1. using \w instead of \S
+    # 1. using \w or [A-Za-z] instead of \S or non-punctuation
     # 2. exempting certain tags
-    if ($self->{html_text}[-1] =~ /\S$/s && $text =~ /^\S/s) {
+    if ($text =~ /^[^\s\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]/s &&
+	$last =~ /[^\s\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]\z/s)
+    {
       $self->{html}{obfuscation}++;
     }
-    if ($self->{html_text}[-1] =~ /\S\z/s &&
-	$text =~ /^\S/s)
-    {
-      $self->{html}{t_obfuscation1}++;
-    }
-    if ($self->{html_text}[-1] =~ /\S*[A-Za-z]\S*\z/ &&
-	$text =~ /^\S*[A-Za-z]\S*/)
-    {
-      $self->{html}{t_obfuscation2}++;
-    }
-    if ($self->{html_text}[-1] =~ /\S*\w\S*\z/ &&
-	$text =~ /^\S*\w\S*/)
-    {
-      $self->{html}{t_obfuscation3}++;
-    }
-    # maybe later
-    # m{ [^ \Q \s()<>[]$,";/# \E ] \z }sx
-    # m{ [^\Q  \s () <> [] $,";/#  \E] \z }sx too
-    if ($self->{html_text}[-1] =~ m{[^\s\(\)\<\>\[\]\$\,\"\;\/\#]\z}s &&
-	$text =~ m{^[^\s\(\)\<\>\[\]\$\,\"\;\/\#]}s) 
-    {
-      #"    -- shut up vim
-      $self->{html}{t_obfuscation4}++;
-    }
-    if ($self->{html_text}[-1] =~ /[^\s\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]\z/s &&
-	$text =~ /^[^\s\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]/s)
-    {
-      $self->{html}{t_obfuscation5}++;
-    }
-    if ($self->{html_text}[-1] =~ /\b(\w{1,7})$/s) {
+    if ($last =~ /\b(\w{1,7})$/s) {
       my $start = length($1);
       if ($text =~ /^(\w{1,7})\b/s) {
 	my $backhair = "backhair_" . $start . "_" . length($1);
 	$self->{html}{$backhair}++;
       }
     }
-    if ($self->{html_text}[-1] =~ /\b(\S{1,7})$/s) {
+    if ($last =~ /\b(\S{1,7})$/s) {
       my $start = length($1);
       if ($text =~ /^(\S{1,7})\b/s) {
 	my $backhair = "backhair2_" . $start . "_" . length($1);
@@ -1056,7 +1031,8 @@ sub html_text {
 
   if ($visible_for_bayes) {
     push @{$self->{html_visible_text}}, $text;
-  } else {
+  }
+  else {
     push @{$self->{html_invisible_text}}, $text;
   }
   push @{$self->{html_text}}, $text;
