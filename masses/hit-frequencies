@@ -65,6 +65,7 @@ my $cffile = $opt_c || "$FindBin::Bin/../rules";
 
 my %freq_spam = ();
 my %freq_ham = ();
+my %freq = ();
 my $num_spam = 0;
 my $num_ham = 0;
 my %ranking = ();
@@ -140,7 +141,11 @@ my %unwanted;
 my %wranks;
 my %uranks;
 
-foreach my $test (keys %freq_spam, keys %freq_ham) {
+# rules that we want to look at
+$freq{$_}++ for keys %freq_ham;
+$freq{$_}++ for keys %freq_spam;
+
+foreach my $test (keys %freq) {
   next unless (exists $rules{$test});           # only valid tests
   next if (!$opt_a && $rules{$test}->{issubrule});
 
@@ -314,52 +319,33 @@ sub readlogs {
   foreach my $file ($spam, $ham) {
     open (IN, "<$file") || die "Could not open file '$file': $!";
 
-    my $isspam = 0; ($file eq $spam) and $isspam = 1;
+    my $isspam = ($file eq $spam);
+    my $caught;
+    my $rules;
 
     while (<IN>) {
-      next if (/^#/);
       next unless (!$opt_M || /$opt_M/o);
       next if ($opt_X && /$opt_X/o);
 
-      /^(.)\s+(-?\d+)\s+(\S+)\s*(\S*)/ or next;
-      my $caught = ($1 eq 'Y');
-      my $hits = $2;
-      $_ = $4; s/,,+/,/g;
+      ($caught, undef, undef, $rules) = split;
+
+      next unless ($caught eq 'Y' || $caught eq '.') && $rules;
+      next if ($opt_f && !(($caught eq 'Y') xor $isspam));
 
       if ($isspam) {
-        if ($opt_f) {
-          if (!$caught) { $num_spam++; }
-        } else {
-          $num_spam++;
-        }
-      } else {
-        if ($opt_f) {
-          if ($caught) { $num_ham++; }
-        } else {
-          $num_ham++;
-        }
+	$num_spam++;
+	$freq_spam{$_}++ for split(/,/, $rules);
       }
-
-      my @tests = split (/,/, $_);
-      foreach my $t (@tests) {
-	next if ($t eq '');
-	if ($isspam) {
-          if ($opt_f) {
-            if (!$caught) { $freq_spam{$t}++; }
-          } else {
-            $freq_spam{$t}++;
-          }
-	} else {
-          if ($opt_f) {
-            if ($caught) { $freq_ham{$t}++; }
-          } else {
-            $freq_ham{$t}++;
-          }
-	}
+      else {
+	$num_ham++;
+	$freq_ham{$_}++ for split(/,/, $rules);
       }
     }
     close IN;
   }
+  # paranoia: remove zero length rules
+  undef $freq_spam{''};
+  undef $freq_ham{''};
 }
 
 
