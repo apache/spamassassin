@@ -18,9 +18,9 @@
 # limitations under the License.
 # </@LICENSE>
 
-use vars qw($opt_a $opt_h);
+use vars qw($opt_a $opt_h $opt_t);
 use Getopt::Std;
-getopts("ah");
+getopts("aht");
 
 my $prog = $0;
 $prog =~ s@.*/@@;
@@ -34,6 +34,7 @@ usage: $prog [options] [mass-check results files]
 
  -a    show all entries (normally, reverses of pairs are not shown)
  -h    print this help
+ -t    ignore T_ tests
 
 Do not abuse this tool.  Just because a test highly correlates with
 another test does not mean you can simply remove one or merge them
@@ -90,6 +91,7 @@ sub read_file {
 	next if /^#/;
 	if (/^[Y.]\s+-?\d+\s+\S+\s+(\S+)/) {
 	    my @tests = sort (split(/,/, $1));
+	    @tests = grep { !/^T_/ } @tests if $opt_t;
 	    for (my $i = 0; $i <= $#tests; $i++) {
 		$solo{$tests[$i]}++;
 		for (my $j = ($i + 1); $j <= $#tests; $j++) {
