@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.525 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.526 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -89,46 +89,29 @@ describe T_HTTP_EXCESSIVE_ENTITIES Completely unnecessary %-escapes inside a URL
 header T_RATWARE_RCVD_BONUS_SPC	Received =~ /\) by  [a-zA-Z0-9]/
 describe T_RATWARE_RCVD_BONUS_SPC Received headers forged (extra spaces)
 
-# 2003-05-25: quinlan
-# bug 1434: look for multipart/alternative that isn't
-# testing ideas for misbalanced multipart/alternative parts
-header __CTYPE_MULTIPART	Content-Type =~ /multipart/i
-meta T_MULTIPART_HTML_ONLY_01	(__CTYPE_MULTIPART && __MIME_HTML_ONLY)
-meta T_MULTIPART_HTML_ONLY_02	(__CTYPE_MULTIPART && MIME_HTML_ONLY)
-meta T_MULTIPART_HTML_ONLY_03	(__CTYPE_MULTIPART && __MIME_HTML)
-meta T_MULTIPART_HTML_ONLY_04	(__CTYPE_MULTIPART && HTML_MESSAGE)
+# 2003-05-26: quinlan
+# bug 1434: look for multipart/alternative imbalance
+body T_MULTIPART_TRICK_A_00_10	eval:check_for_mime_multipart_trick('.00','.10')
 #
-header __CTYPE_MULTIPART_A	Content-Type =~ /multipart\/alternative/i
-meta T_MULTIPART_HTML_ONLY_05	(__CTYPE_MULTIPART_A && __MIME_HTML_ONLY)
-meta T_MULTIPART_HTML_ONLY_06	(__CTYPE_MULTIPART_A && MIME_HTML_ONLY)
-meta T_MULTIPART_HTML_ONLY_07	(__CTYPE_MULTIPART_A && __MIME_HTML)
-meta T_MULTIPART_HTML_ONLY_08	(__CTYPE_MULTIPART_A && HTML_MESSAGE)
+body T_MULTIPART_TRICK_B_00_05	eval:check_for_mime_multipart_trick('.00','.05')
+body T_MULTIPART_TRICK_B_05_10	eval:check_for_mime_multipart_trick('.05','.10')
 #
-header __CTYPE_MULTIPART_M	Content-Type =~ /multipart\/mixed/i
-meta T_MULTIPART_HTML_ONLY_09	(__CTYPE_MULTIPART_M && __MIME_HTML_ONLY)
-meta T_MULTIPART_HTML_ONLY_10	(__CTYPE_MULTIPART_M && MIME_HTML_ONLY)
-meta T_MULTIPART_HTML_ONLY_11	(__CTYPE_MULTIPART_M && __MIME_HTML)
-meta T_MULTIPART_HTML_ONLY_12	(__CTYPE_MULTIPART_M && HTML_MESSAGE)
-#
-body T_MULTIPART_TRICK_00_10	eval:check_for_mime_multipart_trick('.0','.1')
-body T_MULTIPART_TRICK_10_20	eval:check_for_mime_multipart_trick('.1','.2')
-body T_MULTIPART_TRICK_20_30	eval:check_for_mime_multipart_trick('.2','.3')
-body T_MULTIPART_TRICK_30_40	eval:check_for_mime_multipart_trick('.3','.4')
-body T_MULTIPART_TRICK_40_50	eval:check_for_mime_multipart_trick('.4','.5')
-body T_MULTIPART_TRICK_50_60	eval:check_for_mime_multipart_trick('.5','.6')
-body T_MULTIPART_TRICK_60_70	eval:check_for_mime_multipart_trick('.6','.7')
-body T_MULTIPART_TRICK_70_80	eval:check_for_mime_multipart_trick('.7','.8')
-body T_MULTIPART_TRICK_80_90	eval:check_for_mime_multipart_trick('.8','.9')
-body T_MULTIPART_TRICK_90_100	eval:check_for_mime_multipart_trick('.9','1.0')
-#
-body T_MULTIPART_TRICK_B_00_05	eval:check_for_mime_multipart_trick('.0','.05')
-body T_MULTIPART_TRICK_B_05_10	eval:check_for_mime_multipart_trick('.05','.1')
-#
-body T_MULTIPART_TRICK_C_00_02	eval:check_for_mime_multipart_trick('.0','.02')
+body T_MULTIPART_TRICK_C_00_02	eval:check_for_mime_multipart_trick('.00','.02')
 body T_MULTIPART_TRICK_C_02_04	eval:check_for_mime_multipart_trick('.02','.04')
 body T_MULTIPART_TRICK_C_04_06	eval:check_for_mime_multipart_trick('.04','.06')
 body T_MULTIPART_TRICK_C_06_08	eval:check_for_mime_multipart_trick('.06','.08')
-body T_MULTIPART_TRICK_C_08_10	eval:check_for_mime_multipart_trick('.08','.1')
+body T_MULTIPART_TRICK_C_08_10	eval:check_for_mime_multipart_trick('.08','.10')
+#
+body T_MULTIPART_TRICK_D_00_01	eval:check_for_mime_multipart_trick('.00','.01')
+body T_MULTIPART_TRICK_D_01_02	eval:check_for_mime_multipart_trick('.01','.02')
+body T_MULTIPART_TRICK_D_02_03	eval:check_for_mime_multipart_trick('.02','.03')
+body T_MULTIPART_TRICK_D_03_04	eval:check_for_mime_multipart_trick('.03','.04')
+body T_MULTIPART_TRICK_D_04_05	eval:check_for_mime_multipart_trick('.04','.05')
+body T_MULTIPART_TRICK_D_05_06	eval:check_for_mime_multipart_trick('.05','.06')
+body T_MULTIPART_TRICK_D_06_07	eval:check_for_mime_multipart_trick('.06','.07')
+body T_MULTIPART_TRICK_D_07_08	eval:check_for_mime_multipart_trick('.07','.08')
+body T_MULTIPART_TRICK_D_08_09	eval:check_for_mime_multipart_trick('.08','.09')
+body T_MULTIPART_TRICK_D_09_10	eval:check_for_mime_multipart_trick('.09','.10')
 
 # 2003-02-23: quinlan
 # Message-Id: format tests
