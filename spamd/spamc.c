@@ -64,14 +64,59 @@ void print_usage(void)
   printf("-h: print this help message\n");
 }
 
+
+/* Dec 13 2001 jm: added safe full-read and full-write functions.  These
+ * can cope with networks etc., where a write or read may not read all
+ * the data that's there, in one call.
+ */
+int
+full_read (int fd, unsigned char *buf, int min, int len)
+{
+  int total;
+  int thistime;
+
+  for (total = 0; total < min; ) {
+    thistime = read (fd, buf+total, len-total);
+
+    if (thistime < 0) {
+      return -1;
+    } else if (thistime == 0) {
+      // EOF, but we didn't read the minimum.  return what we've read
+      // so far and next read (if there is one) will return 0.
+      return total;
+    }
+
+    total += thistime;
+  }
+  return total;
+}
+
+int
+full_write (int fd, const unsigned char *buf, int len)
+{
+  int total;
+  int thistime;
+
+  for (total = 0; total < len; ) {
+    thistime = write (fd, buf+total, len-total);
+
+    if (thistime < 0) {
+      return thistime;        // always an error for writes
+    }
+    total += thistime;
+  }
+  return total;
+}
+
+
 int dump_message(int in,int out)
 {
   size_t bytes;
   char buf[8192];
 
-  while((bytes=read(in,buf,8192)) > 0)
+  while((bytes=full_read(in, buf, 8192, 8192)) > 0)
   {
-    if(bytes != write(out,buf,bytes))
+    if(bytes != full_write (out,buf,bytes))
     {
       return EX_IOERR;
     }
@@ -94,7 +139,7 @@ int send_message(int in,int out,char *username, int max_size)
 
   /* Ok, now we'll read the message into the buffer up to the limit */
   /* Hmm, wonder if this'll just work ;) */
-  if((bytes = read(in,msg_buf,max_size+1024)) > max_size)
+  if((bytes = full_read (in, msg_buf, max_size+1024, max_size+1024)) > max_size)
   {
     /* Message is too big, so return so we can dump the message back out */
     ret = ESC_PASSTHROUGHRAW;
@@ -111,11 +156,11 @@ int send_message(int in,int out,char *username, int max_size)
       bytes2 = snprintf(header_buf,1024,"PROCESS %s\r\nContent-length: %d\r\n\r\n",PROTOCOL_VERSION,bytes);
     }
 
-    write(out,header_buf,bytes2);
+    full_write (out,header_buf,bytes2);
 
     free(header_buf);
 
-    write(out,msg_buf,bytes);
+    full_write (out,msg_buf,bytes);
   }
 
   amount_read = bytes;
@@ -192,7 +237,7 @@ int read_message(int in, int out, int max_size)
 	  }
 
 	  /* Ok, got here means we just read the content-length.  Now suck up the header/body separator.. */
-	  if(read(in,buf,2) != 2 || !('\r' == buf[0] && '\n' == buf[1]))
+	  if(full_read (in,buf,2,2) != 2 || !('\r' == buf[0] && '\n' == buf[1]))
 	  {
 	    /* Oops, bail */
 	    response = EX_PROTOCOL; break;
@@ -207,7 +252,7 @@ int read_message(int in, int out, int max_size)
 
   if(EX_OK == response)
   {
-    while((bytes=read(in,buf,8192)) > 0)
+    while((bytes=full_read (in,buf,8192, 8192)) > 0)
     {
       if (out_index+bytes >= max_size+EXPANSION_ALLOWANCE)
       {
@@ -234,7 +279,7 @@ int read_message(int in, int out, int max_size)
     }
     else
     {
-      write(out, out_buf, out_index);
+      full_write (out, out_buf, out_index);
     }
   }
 
@@ -374,7 +419,7 @@ int process_message(const char *hostname, int port, char *username, int max_size
     if(ESC_PASSTHROUGHRAW == exstatus || (SAFE_FALLBACK && EX_OK != exstatus))
     {
       /* Message was too big or corrupted, so dump the buffer then bail */
-      write(STDOUT_FILENO,msg_buf,amount_read);
+      full_write (STDOUT_FILENO,msg_buf,amount_read);
       dump_message(STDIN_FILENO,STDOUT_FILENO);
       exstatus = 0;
     }
@@ -384,7 +429,7 @@ int process_message(const char *hostname, int port, char *username, int max_size
   {
     if(amount_read > 0)
     {
-      write(STDOUT_FILENO,msg_buf,amount_read);
+      full_write(STDOUT_FILENO,msg_buf,amount_read);
     }
     return dump_message(STDIN_FILENO,STDOUT_FILENO);
   }
