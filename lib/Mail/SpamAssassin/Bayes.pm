@@ -649,9 +649,12 @@ sub forget_trapped {
     } elsif ($seen eq 'h') {
       $isspam = 0;
     } else {
-      dbg ("forget: message $msgid not learnt, ignored");
+      dbg ("forget: message $msgid seen entry is neither ham nor spam, ignored");
       return;
     }
+  } else {
+    dbg ("forget: message $msgid not learnt, ignored");
+    return;
   }
 
   if ($isspam) {
