@@ -30,9 +30,6 @@ require_version @@VERSION@@
 
 ###########################################################################
 
-body LARGE_COLLECTION           /\b(?:[0-9,]{5,9}|hundreds|thousands|millions|tons)\b.{0,15}(?:movies|videos?|xxx|streaming|pics?|photos?|of live|of images)\b/i
-describe LARGE_COLLECTION       Possible porn - Large Number of movies, pics
-
 body FREE_PORN                  /\bfree (?:porn|xxx|adult)/i
 describe FREE_PORN              Possible porn - Free Porn
 
@@ -82,24 +79,8 @@ describe ADULT_SITE             Possible porn - Adult Web Sites
 body MUST_BE_18                 /\bmust be (?:at least|over) 18\b/i
 describe MUST_BE_18             Possible porn - Must be 18
 
-body RAPE                       /\b(?:virgin|gang|teen|amateur) rape|\brape (?:sites?|sex)\b/i
-describe RAPE                   Possible porn - Rape
-
 body LESBIAN                    /\b(?:xxx|horny|hot|young) lesbian|lesbian (?:sites?|action|bitch)/i
 describe LESBIAN                Possible porn - Lesbian Site
-
-body  PORN_PASSWORD             /\bporn password/i
-describe PORN_PASSWORD          Possible porn - Porn Password
-
-# (contrib: skod)
-body PORN_6			/\b(?:\d+\+? xxx pictures|xxx photos?)\b/i
-describe PORN_6			Possible Porn - XXX Photos
-
-body PORN_MEMBERSHIP            /\b(?:vip|adult|porn|x.rated) membership/i
-describe PORN_MEMBERSHIP        Possible Porn - Porn membership
-
-body PORN_GALLERIES             /\bhuge galleries\b/i
-describe PORN_GALLERIES         Possible porn - Galleries of Pictures
 
 body PORN_15			/(?=[celstwvy])(?:college|eating|licking|spears|tight|wet|shaved|voyeur|young|teen(?:age)?).{0,16}pussy/i
 describe PORN_15		Possible porn - various types of feline
