@@ -483,6 +483,9 @@ while (1) {
       # perl 5.8.0, and some other platforms with -m.
       if ($! == &Errno::EINTR) {
         next;
+      } elsif ($! == 0 && $opt{'ssl'}) {
+        logmsg("SSL failure: " . &IO::Socket::SSL::errstr());
+        next;
       } else {
 	die "accept failed: $!";
       }
