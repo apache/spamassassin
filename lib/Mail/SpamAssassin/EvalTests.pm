@@ -1240,6 +1240,36 @@ sub check_for_very_long_text {
   return 0;
 }
 
+sub check_for_uppercase {
+  my ($self, $body, $min, $max) = @_;
+
+  if (exists $self->{uppercase}) {
+    return ($self->{uppercase} > $min && $self->{uppercase} <= $max);
+  }
+
+  # examine lines in the body that have an intermediate space
+  my @lines = grep(/\S\s+\S/, @{$body});
+
+  # strip out lingering base64 (currently possible for forwarded messages)
+  my @lines = grep(!/^([A-Za-z0-9+\/=]{60,76} ){2}/, @lines);
+
+  # join lines together
+  $body = join('', @lines);
+
+  # now count upper and lower case
+  my $upper = $body =~ s/([A-Z])/$1/sg;
+  my $lower = $body =~ s/([a-z])/$1/sg;
+
+  if (($upper + $lower) == 0) {
+    $self->{uppercase} = 0;
+  }
+  else {
+    $self->{uppercase} = ($upper / ($upper + $lower)) * 100;
+  }
+
+  return ($self->{uppercase} > $min && $self->{uppercase} <= $max);
+}
+
 sub check_for_yelling {
     my ($self, $body) = @_;
     
@@ -1283,6 +1313,22 @@ sub check_for_num_yelling_lines {
     $self->check_for_yelling($body);
     
     return ($self->{num_yelling_lines} >= $threshold);
+}
+
+sub check_for_mime_excessive_qp {
+  my ($self, $body) = @_;
+
+  my $length;
+  my $qp;
+
+  # Note: We don't use $body because it removes MIME parts.  Instead, we
+  # get the raw unfiltered body.
+  foreach my $line (@{$self->{msg}->get_body()}) {
+      $length += length($line);
+      $qp += $line =~ s/\=([0-9A-Fa-f]{2})/$1/g;
+  }
+  # this seems like a decent cutoff
+  return ($qp > ($length / 20));
 }
 
 # This test should be a nearly zero cost operation done during MIME
