@@ -202,7 +202,7 @@ if (defined $opt{'pidfile'}) {
 
 my $orighome;
 if (defined $ENV{'HOME'}) {
-  if ( exists $opt{'username'} ) {  # spamd is going to run as another user, so reset $HOME
+  if ( defined $opt{'username'} ) {  # spamd is going to run as another user, so reset $HOME
     if ( my $nh = (getpwnam($opt{'username'}))[7] ) {
       $ENV{'HOME'} = $nh;
     }
