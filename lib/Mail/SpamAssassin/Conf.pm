@@ -733,7 +733,7 @@ assigned a negative score.
 
 =cut
 
-    if (/^tflags\s+(.*)$/) {
+    if (/^tflags\s/) {
       next;     # ignored in SpamAssassin modules
     }
 
