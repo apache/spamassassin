@@ -42,8 +42,8 @@ describe MEGA_SITE              Possible porn - Mega Porn
 body CUM_SHOT                   /\bcum[ -]?shots?\b/i
 describe CUM_SHOT               Possible porn - Cum Shot
 
-body ALL_CAP_PORN               /\b(?:ORGY|FUCKING|FETISH|WEBCAM|VOYEUR|ANAL|CUM|SNATCH|COCK|CUNT|PORN)\b/
-describe ALL_CAP_PORN           Possible porn - in ALL CAPS
+body ALL_CAP_FOR_ADULTS         /\b(?:ORGY|FUCKING|FETISH|WEBCAM|VOYEUR|ANAL|CUM|SNATCH|COCK|CUNT|PORN)\b/
+describe ALL_CAP_FOR_ADULTS     Possible porn - in ALL CAPS
 
 body PAY_SITE                   /\bpay[ -]?sites?\b/i
 describe PAY_SITE               Possible porn - Pay Site
@@ -73,8 +73,8 @@ describe AMATEUR_PORN           Possible porn - Amateur Porn
 body PORN_CELEBRITY		/\bceleb(?:rity|rities|s).{0,15}(?=[cenps])(?:sex|porn|pics|caught|nude|exposed|content)|\b(?=[fhns])(?:steamy|hot|nude|shocking|free|h[a\@]rdcore) celeb(?:rity|rities|s)/i
 describe PORN_CELEBRITY		Possible porn - Celebrity Porn
 
-body ADULT_SITE                 /\badult.{0,9}(?:entertainment|sites?|industry|only|business|membership)/i
-describe ADULT_SITE             Possible porn - Adult Web Sites
+body SOMETHING_FOR_ADULTS       /\badult.{0,9}(?:entertainment|sites?|industry|only|business|membership)/i
+describe SOMETHING_FOR_ADULTS   Possible porn - Adult Web Sites
 
 body MUST_BE_18                 /\bmust be (?:at least|over) 18\b/i
 describe MUST_BE_18             Possible porn - Must be 18
