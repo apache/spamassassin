@@ -647,10 +647,13 @@ sub expire_old_tokens_trapped {
       }
     }
 
-    dbg("bayes: atime\ttoken reduction");
-    dbg("bayes: ========\t===============");
-    for( my $i = 1; $i<=$max_expire_mult; $i<<=1 ) {
-	dbg("bayes: ".$start*$i."\t".(exists $delta{$i} ? $delta{$i} : 0));
+    # This will skip the for loop if debugging isn't enabled ...
+    if ( $Mail::SpamAssassin::DEBUG->{'enabled'} ) {
+      dbg("bayes: atime\ttoken reduction");
+      dbg("bayes: ========\t===============");
+      for( my $i = 1; $i<=$max_expire_mult; $i<<=1 ) {
+	  dbg("bayes: ".$start*$i."\t".(exists $delta{$i} ? $delta{$i} : 0));
+      }
     }
 
     # Now figure out which max_expire_mult value gives the closest results to goal_reduction, without
