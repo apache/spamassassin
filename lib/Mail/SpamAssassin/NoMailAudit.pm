@@ -173,12 +173,15 @@ sub put_header {
 sub get_all_headers {
   my ($self) = @_;
 
-  if (!defined $self->{from_line}) {
-    $self->{from_line} = "From spamassassin\@localhost  ".
-    		(scalar localtime(time))."\n";
+  my @lines = ();
+
+  my $from = $self->{from_line};
+  if (defined $from) {
+    push (@lines, $from);
+  } else {
+    #$from = "From spamassassin\@localhost  ".(scalar localtime(time))."\n";
   }
 
-  my @lines = ($self->{from_line});
   foreach my $hdrcode (@{$self->{header_order}}) {
     $hdrcode =~ /^([^:]+):(\d+)$/ or next;
 
