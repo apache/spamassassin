@@ -1635,7 +1635,7 @@ sub copy_config {
     elsif ($i eq 'SCALAR' || $i eq 'ARRAY' || $i eq 'HASH') {
       # IMPORTANT: DO THIS BEFORE AFTER EVERYTHING ELSE!
       # If we don't do this at the end, any "special" object handling
-      # will be screwed.
+      # will be screwed.  See bugzilla ticket 3317 for more info.
 
       # Make a recursive copy of the reference.
       $dest->{$k} = Storable::dclone($v);
