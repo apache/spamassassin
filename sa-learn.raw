@@ -534,9 +534,9 @@ Simply run this command once for each of your mail folders, and it will
 Note that I<globbing> in the mail folder names is supported; in other
 words, listing a folder name as C<*> will scan every folder that matches.
 
-SpamAssassin remembers which mail messages it's learnt already, and will not
-re-learn those messages again, unless you use the B<--forget> option.
-Messages learnt as spam will have SpamAssassin markup removed, on the fly.
+SpamAssassin remembers which mail messages it has learnt already, and will not
+re-learn those messages again, unless you use the B<--forget> option. Messages
+learnt as spam will have SpamAssassin markup removed, on the fly.
 
 If you make a mistake and scan a mail as ham when it is spam, or vice
 versa, simply rerun this command with the correct classification, and the
@@ -554,8 +554,8 @@ readable, even if statistics make me break out in hives.
 The short semi-inaccurate version: Given training, a spam heuristics engine
 can take the most "spammy" and "hammy" words and apply probablistic
 analysis. Furthermore, once given a basis for the analysis, the engine can
-continue to learn iteratively by applying both it's non-Bayesian and Bayesian
-ruleset together to create evolving "intelligence".
+continue to learn iteratively by applying both the non-Bayesian and Bayesian
+rulesets together to create evolving "intelligence".
 
 SpamAssassin 2.50 and later supports Bayesian spam analysis, in
 the form of the BAYES rules. This is a new feature, quite powerful,
@@ -567,7 +567,7 @@ The pros of Bayesian spam analysis:
 
 =item Can greatly reduce false positives and false negatives.
 
-It learns from your mail, so it's tailored to your unique e-mail flow.
+It learns from your mail, so it is tailored to your unique e-mail flow.
 
 =item Once it starts learning, it can continue to learn from SpamAssassin
 and improve over time.
@@ -585,10 +585,10 @@ for ham/spam determination.
 
 i.e.: a straightforward rule, that matches, say, "VIAGRA" is
 easy to understand. If it generates a false positive or false negative,
-it's fairly easy to understand why.
+it is fairly easy to understand why.
 
 With Bayesian analysis, it's all probabilities - "because the past says
-it's likely as this falls into a probablistic distribution common to past
+it is likely as this falls into a probablistic distribution common to past
 spam in your systems". Tell that to your users!  Tell that to the client
 when he asks "what can I do to change this". (By the way, the answer in
 this case is "use whitelisting".)
@@ -613,7 +613,7 @@ I suggest several thousand of each, placed in SPAM and HAM directories or
 mailboxes.  Yes, you MUST hand-sort this - otherwise the results won't be much
 better than SpamAssassin on its own. Verify the spamminess/haminess of EVERY
 message.  You're urged to avoid using a publicly available corpus (sample) -
-this must be taken from YOUR mail server, if it's to be statistically useful.
+this must be taken from YOUR mail server, if it is to be statistically useful.
 Otherwise, the results may be pretty skewed.
 
 =item Use this tool to teach SpamAssassin about these samples, like so:
@@ -683,7 +683,7 @@ It's also worth noting that training with a very small quantity of
 ham, will produce atrocious results.  You should aim to train with at
 least the same amount (or more if possible!) of ham data than spam.
 
-On an on-going basis, it's best to keep training the filter to make
+On an on-going basis, it is best to keep training the filter to make
 sure it has fresh data to work from.  There are various ways to do
 this:
 
@@ -699,7 +699,7 @@ the best results, but requires more work from you, the user.
 'deleted' messages, and instead of deleting them from other folders,
 simply move them in there instead.  Then keep all spam in a separate
 folder and never delete it.  As long as you remember to move misclassified
-mails into the correct folder set, it's easy enough to keep up to date.)
+mails into the correct folder set, it is easy enough to keep up to date.)
 
 =item 2. Unsupervised learning from Bayesian classification
 
@@ -891,10 +891,10 @@ development releases, and 2 for all more recent databases.
 
 =item bayes_seen
 
-A map of message-ID to what that message was learnt as.  This is used
-so that SpamAssassin can avoid re-learning a message it's already seen,
-and so it can reverse the training if you later decide that message
-was previously learnt incorrectly.
+A map of message-ID to what that message was learnt as.  This is used so that
+SpamAssassin can avoid re-learning a message it has already seen, and so it can
+reverse the training if you later decide that message was previously learnt
+incorrectly.
 
 This is a database file, using C<DB_File>.
 
