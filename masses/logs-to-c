@@ -36,6 +36,7 @@ sub readlogs {
 
     while (<IN>) {
       next if /^#/;
+      next if /^$/;
       if($_ !~ /^.\s+([-\d]+)\s+\S+\s*/) { warn "bad line: $_"; next; }
       my $hits = $1;
 
