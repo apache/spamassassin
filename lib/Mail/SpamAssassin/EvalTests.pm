@@ -882,6 +882,31 @@ sub check_for_very_long_text {
   return 0;
 }
 
+sub check_for_yelling {
+    my ($self, $body) = @_;
+
+  # Make local copy of body.
+    my @lines = @{$body};
+
+  # Get rid of everything but upper AND lower case letters
+    map (s/[^A-Za-z]//sg, @lines);
+
+  # Now that we have a mixture of upper and lower case, see if it's
+  # 1) All upper case
+  # 2) 20 or more characters in length
+    my $num_lines = scalar grep(/^[A-Z]{20,}$/, @lines);
+
+    $self->{num_yelling_lines} = $num_lines;
+
+    return ($num_lines > 0);
+}
+
+sub check_for_num_yelling_lines {
+    my ($self, $body, $threshold) = @_;
+
+    return ($self->{num_yelling_lines} >= $threshold);
+}
+
 ###########################################################################
 # FULL-MESSAGE TESTS:
 ###########################################################################
