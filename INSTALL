@@ -221,7 +221,7 @@ skipped.
 Note: SpamAssassin will not warn you if these are installed, but the
 version is too low for them to be used.
 
-  - DB_File         (from CPAN, included in many distributions)
+  - DB_File (from CPAN, included in many distributions)
 
     Used to store data on-disk, for the Bayes-style logic and
     auto-whitelist.  *Much* more efficient than the other standard Perl
@@ -232,7 +232,7 @@ version is too low for them to be used.
     http://wiki.apache.org/spamassassin/DbFileSleepBug for details.
 
 
-  - Net::DNS        (from CPAN)
+  - Net::DNS (from CPAN)
 
     Used for all DNS-based tests (SBL, XBL, SpamCop, DSBL, etc.),
     perform MX checks, and is also used when manually reporting spam to
@@ -246,12 +246,12 @@ version is too low for them to be used.
       - version 0.46 or higher on Windows systems
 
 
-  - Net::SMTP        (from CPAN)
+  - Net::SMTP (from CPAN)
 
     Used when manually reporting spam to SpamCop.
 
 
-  - Mail::SPF::Query     (from CPAN)
+  - Mail::SPF::Query (from CPAN)
 
     Used to check DNS Sender Policy Framework (SPF) records to fight email
     address forgery and make it easier to identify spams.
@@ -259,13 +259,13 @@ version is too low for them to be used.
     Net::DNS version 0.34 or higher is required to use Mail::SPF::Query.
 
 
-  - IP::Country::Fast    (from CPAN)
+  - IP::Country::Fast (from CPAN)
 
     Used by the RelayCountry plugin (not enabled by default) to determine
     the domain country codes of each relay in the path of an email.
 
 
-  - Razor           http://razor.sourceforge.net/
+  - Razor (from http://razor.sourceforge.net/)
 
     Used to check message signatures against Vipul's Razor collaborative
     filtering network.  Razor is not available from CPAN -- you have to
@@ -290,7 +290,7 @@ version is too low for them to be used.
 
     More info is at http://wiki.apache.org/spamassassin/UsingRazor
 
-  - Net::Ident      (from CPAN)
+  - Net::Ident (from CPAN)
 
     If you plan to use the --auth-ident option to spamd, you will need
     to install this module.
@@ -305,13 +305,13 @@ version is too low for them to be used.
     compatibile spamc.)
 
 
-  - Time::HiRes    (from CPAN)
+  - Time::HiRes (from CPAN)
 
     If this module is installed, the processing times are logged/reported
     more precisely.
 
 
-  - DBI *and* DBD driver/modules for your database  (from CPAN)
+  - DBI *and* DBD driver/modules for your database (from CPAN)
 
     If you intend to use SpamAssassin with an SQL database backend for
     user configuration data, Bayes storage, or AWL storage, you will need
@@ -325,7 +325,7 @@ Optional Programs
 These are non-Perl programs that can increase the overall effectiveness of
 SpamAssassin if they are installed.
 
-  - DCC             http://www.rhyolite.com/anti-spam/dcc/
+  - DCC (from http://www.rhyolite.com/anti-spam/dcc/)
 
     DCC (Distributed Checksum Clearinghouse) is a system similar to Razor.
     It supports fuzzy checksums and therefore detects some more spams than
@@ -343,9 +343,9 @@ SpamAssassin if they are installed.
 
 	./configure \
 	    --bindir=$(PREFIX)/bin \
-            --libexecdir=$(PREFIX)/lib/dcc \
-            --mandir=$(PREFIX)/man \
-            --homedir=/var/lib/dcc
+	    --libexecdir=$(PREFIX)/lib/dcc \
+	    --mandir=$(PREFIX)/man \
+	    --homedir=/var/lib/dcc
 
     Finally call cdcc:
 
@@ -383,7 +383,7 @@ SpamAssassin if they are installed.
 
     More info is at http://wiki.apache.org/spamassassin/UsingDcc
 
-  - Pyzor           http://pyzor.sourceforge.net/
+  - Pyzor (from http://pyzor.sourceforge.net/)
 
     Used to check message signatures against the Pyzor collaborative
     filtering network.  Pyzor was initially "a Python implementation of
@@ -403,7 +403,7 @@ SpamAssassin if they are installed.
 	python setup.py install
 
     For a single user installation, change the last line to
-        python setup.py install --home=$HOME
+	python setup.py install --home=$HOME
 
     Note that your system might install the modules and scripts with
     non-world-readable permissions.  Correct this with a command such as:
