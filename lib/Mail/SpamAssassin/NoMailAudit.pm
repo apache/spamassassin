@@ -110,7 +110,7 @@ sub parse_headers {
       $self->{from_line} = $_;
       next;
 
-    } elsif (/^([\x31-\x39\x3B-\x7E]+):\s*(.*)$/s) {
+    } elsif (/^([\x21-\x39\x3B-\x7E]+):\s*(.*)$/s) {
       # format of a header, as defined by RFC 2822 section 3.6.8;
       # 'Any character except controls, SP, and ":".'
       $hdr = $1; $val = $2;
