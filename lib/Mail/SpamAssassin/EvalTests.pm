@@ -2524,7 +2524,7 @@ sub check_razor2_range {
     $self->razor2_lookup (\$full);
   }
 
-  return 1 if ( defined $self->{razor2_cf_score} && $self->{razor2_cf_score} >= $min && $self->{razor2_cf_score} <= $max );
+  return 1 if ( $self->{razor2_cf_score} >= $min && $self->{razor2_cf_score} <= $max );
   return 0;
 }
 
