@@ -13,7 +13,7 @@ echo "[Doing a scoreset $SCORESET score-generation run]"
 
 # Clean out old runs
 echo "[Cleaning up]"
-rm -rf spam-validate.log nonspam-validate.log ham-validate.log spam.log nonspam.log ham.log NSBASE SPBASE tmp make.output freqs perceptron.scores \
+rm -rf spam-validate.log ham-validate.log spam.log ham.log ham.log NSBASE SPBASE tmp make.output freqs perceptron.scores \
 	gen-$NAME.out gen-$NAME.scores gen-$NAME.validate
 make clean >/dev/null
 
@@ -22,9 +22,9 @@ echo "[Generating 90/10 split ham]"
 mkdir NSBASE SPBASE
 cd NSBASE
 ../tenpass/split-log-into-buckets 10 < ../ORIG/ham-$NAME.log > /dev/null
-cat split-[1-9].log > nonspam.log
+cat split-[1-9].log > ham.log
 rm -f split-[1-9].log
-mv split-10.log nonspam-validate.log
+mv split-10.log ham-validate.log
 
 echo "[Generating 90/10 split spam]"
 cd ../SPBASE
@@ -37,11 +37,9 @@ cd ..
 echo "[Setting up for gen run]"
 # Ok, setup for a run
 ln -s SPBASE/spam.log .
-ln -s NSBASE/nonspam.log .
-ln -s NSBASE/nonspam.log ham.log
+ln -s NSBASE/ham.log .
 ln -s SPBASE/spam-validate.log .
-ln -s NSBASE/nonspam-validate.log .
-ln -s NSBASE/nonspam-validate.log ham-validate.log
+ln -s NSBASE/ham-validate.log .
 
 # try to find number of processors
 numcpus=`cpucount 2>/dev/null || egrep -c '^processor\b' /proc/cpuinfo 2>/dev/null || echo 1`
@@ -60,7 +58,7 @@ else
 # This needs to have 50_scores.cf in place first ...
 echo "[gen validation results]"
 ./logs-to-c --spam=SPBASE/spam-validate.log \
-	--nonspam=NSBASE/nonspam-validate.log \
+	--nonspam=NSBASE/ham-validate.log \
 	--count --cffile=../rules --scoreset=$SCORESET | tee gen-$NAME.validate
 
 echo "[STATISTICS file generation]"
