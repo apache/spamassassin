@@ -348,6 +348,13 @@ describe T_EXPERTS_SHOW_HOW	Experts show you how
 body T_ENHANCE_WEBSITE		/E(?i:nhance any) W(?i:ebsite)/
 describe T_ENHANCE_WEBSITE	Enhance any Website
 
+#bug 631
+body T_INCREASE_SEX	/increased?.{0,9}(?:sex|stamina)/i
+
+#bug 652
+header T_SUBJ_BUY			Subject =~ /^buy/i
+describe T_SUBJ_BUY		Subject starts with Buy, Buying
+
 # bug 1014
 # from Allen
 uri T_MAILTO_TO_B2BMAIL		/^mailto:[^\s\@]{1,20}\@b2b-?mail\./is
@@ -376,3 +383,41 @@ meta T_HTML_CHARSET_FARAWAY	(__HTML_CHARSET_FARAWAY && __HIGHBITS)
 header T_ADDR_FREE		From =~ /\b(?-i:F)ree(?-i:[ A-Z]).*</i
 describe T_ADDR_FREE		From Address contains FREE
 
+# 663
+header T_ADDR_OFFER		ALL =~ /(?:to|from|reply-to):.*offer.*\n/i
+describe T_ADDR_OFFER		From address contains OFFER
+
+# 684
+body T_PRIZE_2	/\b(?:claim|grand|cash|money|guaranteed?|win|free).{0,9}\bprizes?\b|\bprizes?.{0,9}(?:notification|winnings|winner|payment|paid|drawing)\b/i
+describe T_PRIZE_2			Talks about prizes
+
+# 706
+body T_APPLY	/\bapply(?:ing|) (?:for|for a|)\b.{0,9}\b(?:now|today|online|credit|loans?|free|credit|car|visa|grants?)|(?:restrictions|credit|conditions|terms|coupons|first people to)\b.{0,10}\bapply\b/i
+describe T_APPLY		 Apply for Something
+
+# 707
+body T_JOIN_NOW			/\b(?:join|sign.?up|register|subscribe) (?:now|today)\b/i
+describe T_JOIN_NOW		Join Now
+
+# 708
+body T_MEMBERSHIP			/\b(?:trail|paid|pay|no.obligation|instant|lifetime|special|gold|silver|day)\b.{0,10}memberships?\b|\bmembership (?:confirmation|based website|privileges?|sites?|rewards?|today)\b/i
+describe T_MEMBERSHIP		Membership in something
+
+body T_YOUR_MEMBERSHIP		/\byour .{0,9}memberships?\b/i
+describe T_YOUR_MEMBERSHIP	Your Membership
+
+# 708
+body T_OFFER_1			/\b(?:free|trial|full|phone|points?|hottest|internet|great|of this|about this|dealer|responded|not an|pay|are able to|future|valuable|partner|receiv(?:e|ed|ing)|introductory|exclusive|promotional|coupon|bonus|further|following|product|proud to|additional|website|amazing|discounts?)\b.{0,9}(?:this|these|)\boffer(?:s|ings?|ed|)\b/i
+describe OFFER			Offers you Something
+
+body T_OFFER_2			/\boffer(?:s|ings?|)\b.{0,9}\b(?:expires|subject|limited|ends|mailed|originator|contained|discounts?|confidential|is ood|available|valid|in error|!)\b/i
+describe T_OFFER_2		Offers you Something (2)
+
+body T_OFFER_3			/this offer is|we offer (?:you|over)|offers?@/i
+describe T_OFFER_3		Offers you Something (3)
+
+body T_SPECIAL_OFFER		/\bspecial .{0,15}\boffer(?:s|ings?|ed|)/i
+describe T_SPECIAL_OFFER		Special Offer
+
+uri T_OFFER_URI			/^https?:\/\/.*?(?:offers?\.\w|[.\/]offer|offer=)/i 
+describe T_OFFER_URI		Offer in link address
