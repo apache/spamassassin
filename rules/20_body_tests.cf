@@ -216,9 +216,9 @@ describe HIDE_WIN_STATUS	Javascript to hide URLs in browser
 rawbody LINK_TO_NO_SCHEME	/\s+href=['"]?www\./i
 describe LINK_TO_NO_SCHEME	Contains link without http:// prefix
 
-rawbody HTML_WIN_OPEN		/(?:<script>.{0,200}|<[^>]+)window\.open\s*\(/i
+rawbody HTML_WIN_OPEN		eval:html_test('window_open')
 describe HTML_WIN_OPEN		Javascript to open a new window
-rawbody HTML_WIN_BLUR		/(?:<script>.{0,200}|<[^>]+)\.blur\s*\(\s*\)/i
+rawbody HTML_WIN_BLUR		eval:html_test('window_blur')
 describe HTML_WIN_BLUR		Javascript to move windows around
 
 rawbody HTML_TAG_MIXED_CASE	eval:check_for_mixed_case_html()

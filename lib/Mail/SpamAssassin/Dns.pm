@@ -422,10 +422,14 @@ sub razor2_lookup {
     if ($@) {
       $response = undef;
       if ( $@ =~ /alarm/ ) {
-        dbg("razor2 check timed out after $timeout secs.");
-        }
-        else {
-        warn("razor2 check skipped: $! $@");
+          dbg("razor2 check timed out after $timeout secs.");
+        } elsif ($@ =~ /could not connect/) {
+          # make this a dbg(); SpamAssassin will still continue,
+          # but without Razor checking.  otherwise there may be
+          # DSNs and errors in syslog etc., yuck
+          dbg("razor2 check could not connect to any servers");
+        } else {
+          warn("razor2 check skipped: $! $@");
         }
       }
 
