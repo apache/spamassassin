@@ -196,7 +196,7 @@ sub new {
   $self->{bayes_auto_learn} = 1;
   $self->{bayes_auto_learn_threshold_nonspam} = -2.0;
   $self->{bayes_auto_learn_threshold_spam} = 15.0;
-  $self->{bayes_auto_learn_journal} = 0;
+  $self->{bayes_learn_to_journal} = 0;
   $self->{bayes_path} = "__userstate__/bayes";
   $self->{bayes_file_mode} = "0700";
   $self->{bayes_use_hapaxes} = 1;
@@ -1549,18 +1549,18 @@ SpamAssassin's learning systems automatically as a spam message.
       $self->{bayes_auto_learn_threshold_spam} = $1+0; next;
     }
 
-=item bayes_auto_learn_journal  	(default 0)
+=item bayes_learn_to_journal  	(default 0)
 
-If this option is set, when SpamAssassin does Bayes autolearning, it
-will put the information into the journal instead of directly into the
-database.  This lowers contention for locking the database for a write,
-but will also cause more access to the journal and will cause new tokens
-to not be used until the journal is syncronized into the database.
+If this option is set, when SpamAssassin does Bayes learning, it will put
+the information into the journal instead of directly into the database.
+This lowers contention for locking the database for a write, but will
+also cause more access to the journal and cause a delay before the
+updates cause a change in the Bayes database.
 
 =cut
 
-    if (/^bayes_auto_learn_journal\s+(.*)$/) {
-      $self->{bayes_auto_learn_journal} = $1+0; next;
+    if (/^bayes_learn_to_journal\s+(.*)$/) {
+      $self->{bayes_learn_to_journal} = $1+0; next;
     }
 
 =item bayes_ignore_header	

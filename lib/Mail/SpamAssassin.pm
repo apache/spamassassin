@@ -94,7 +94,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.194 2003/06/30 01:15:58 felicity Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.195 2003/06/30 01:27:02 felicity Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -490,10 +490,10 @@ sub init_learner {
   my $self = shift;
   my $opts = shift;
   dbg ("Initialising learner");
-  if ($opts->{force_expire}) { $self->{learn_force_expire} = 1; }
-  if ($opts->{learn_to_journal}) { $self->{learn_to_journal} = 1; }
-  if ($opts->{caller_will_untie}) { $self->{learn_caller_will_untie} = 1; }
-  if ($opts->{wait_for_lock}) { $self->{learn_wait_for_lock} = 1; }
+  if (defined $opts->{force_expire}) { $self->{learn_force_expire} = $opts->{force_expire}; }
+  if (defined $opts->{learn_to_journal}) { $self->{learn_to_journal} = $opts->{learn_to_journal}; }
+  if (defined $opts->{caller_will_untie}) { $self->{learn_caller_will_untie} = $opts->{caller_will_untie}; }
+  if (defined $opts->{wait_for_lock}) { $self->{learn_wait_for_lock} = $opts->{wait_for_lock}; }
   1;
 }
 
@@ -1219,7 +1219,7 @@ sub init {
   $self->{conf}->set_score_set ($set);
 
   if ($self->{conf}->{bayes_auto_learn}) {
-    $self->init_learner({ 'learn_to_journal' => $self->{conf}->{bayes_auto_learn_journal} });
+    $self->init_learner({ 'learn_to_journal' => $self->{conf}->{bayes_learn_to_journal} });
   }
 
   if ($self->{only_these_rules}) {

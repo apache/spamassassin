@@ -21,7 +21,9 @@ use vars qw(
 sub cmdline_run {
   my ($opts) = shift;
 
-  %opt = ();
+  %opt = ( 'force-expire' => 0,
+  	   'norebuild'    => 0,
+	 );
 
   Getopt::Long::Configure(qw(bundling no_getopt_compat
                          permute no_auto_abbrev no_ignore_case));
@@ -74,8 +76,8 @@ sub cmdline_run {
   }
 
   # We need to make sure the journal syncs pre-forget...
-  if ( defined $forget && exists $opt{'norebuild'} ) {
-    delete $opt{'norebuild'};
+  if ( defined $forget && $opt{'norebuild'} ) {
+    $opt{'norebuild'} = 0;
     warn "sa-learn warning: --forget requires read/write access to the database, and is incompatible with --no-rebuild\n";
   }
 

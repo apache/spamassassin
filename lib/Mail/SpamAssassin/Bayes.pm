@@ -759,6 +759,7 @@ sub forget_trapped {
   }
 
   $self->{store}->seen_delete ($msgid);
+  $self->{store}->add_touches_to_journal();
   1;
 }
 
