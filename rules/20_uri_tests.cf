@@ -148,3 +148,10 @@ describe URI_UNSUBSCRIBE	URI contains suspicious unsubscribe link
 
 uri URI_UPPER_LOWER		m{(?i:https?)://([A-Z][a-z]+\.){2,}[A-Za-z\d-]+\.[a-z]{2,4}(?:[?/]|$)}
 describe URI_UPPER_LOWER	URI contains capitalized hostname parts ("Abcde")
+
+# bug 3896: URIs in various TLDs, other than 3rd level www
+uri URI_NO_WWW_INFO_CGI	/^(?:https?:\/\/)?[^\/]+(?<!\/www)\.[^.]{7,}\.info\/(?=\S{15,})\S*\?/i
+describe URI_NO_WWW_INFO_CGI	CGI in .info TLD other than third-level "www"
+
+uri URI_NO_WWW_BIZ_CGI	/^(?:https?:\/\/)?[^\/]+(?<!\/www)\.[^.]{7,}\.biz\/(?=\S{15,})\S*\?/i
+describe URI_NO_WWW_BIZ_CGI	CGI in .biz TLD other than third-level "www"
