@@ -7,7 +7,7 @@ spamc - client for spamd
 
 =over
 
-=item spamc [-d host] [-p port] [-u username] [-h] [-f]
+=item spamc [-d host] [-p port] [-s max_size] [-u username] [-h] [-f]
 
 =back
 
@@ -37,6 +37,10 @@ Print this help message and terminate without action
 =item B<-p> I<port>
 
 Connect to spamd server listening on given port
+
+=item B<-s> I<max_size>
+
+Set the maximum message size which will be sent to spamd -- any bigger than this threshold and the message will be returned unprocessed.  Note that the default size is 250k, so if spamc gets handed a message bigger than this, it won't be passed to spamd.  The size is specified in bytes, and if you send it a negative number, things are quite likely to break very hard.
 
 =item B<-u> I<username>
 
