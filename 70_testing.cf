@@ -28,14 +28,22 @@
 
 # replacements for PORN_4; split out sub-patterns as some are more FP-prone
 # than others.
-uri T_PORN_URL_SEX	/^https?:\/\/[\w\.-]*(?<!es|ba)(?<!dle|sus)sex(?!press)[\w-]*\./
-uri T_PORN_URL_ANAL	/^https?:\/\/[\w\.-]*anal(?!og|y[sz])[\w-]*\./
-uri T_PORN_URL_SLUT	/^https?:\/\/[\w\.-]*slut[\w-]*\./
-uri T_PORN_URL_CUM	/^https?:\/\/[\w\.-]*(?<!cir)(?<!\bdo)cum(?!ul|be?r|b?en)[\w-]*\./
-uri T_PORN_URL_LUST	/^https?:\/\/[\w\.-]*lust(?!(?<=illust)(?:rat|rious)|(?<=clust)er)[\w-]*\./
-uri T_PORN_URL_PANT	/^https?:\/\/[\w\.-]*pant(?:y|ies)[\w-]*\./
-uri T_PORN_URL_TEEN	/^https?:\/\/[\w\.-]*(?<!thir|four|eigh|nine)(?<!fif|six)(?<!seven)teen(?!th)[\w-]*\./
-uri T_PORN_URL_MISC	/^https?:\/\/[\w\.-]*(pussy|nympho|porn|hard-?core|taboo|whore|voyeur|lesbian|gurlpages|naughty|lolita|schoolgirl|kooloffer|erotic)[\w-]*\./
+# 0.268   0.3779   0.0045    0.988   0.91    0.01  T_PORN_URL_SEX
+uri T_PORN_URL_SEX	/^https?:\/\/[\w\.-]*(?<!es|ba)(?<!dle|sus)sex(?!press)[\w-]*\./i
+# 0.054   0.0771   0.0000    1.000   0.95    0.01  T_PORN_URL_SLUT
+uri T_PORN_URL_SLUT	/^https?:\/\/[\w\.-]*slut[\w-]*\./i
+# 0.012   0.0167   0.0000    1.000   0.95    0.01  T_PORN_URL_PANT
+uri T_PORN_URL_PANT	/^https?:\/\/[\w\.-]*pant(?:y|ies)[\w-]*\./i
+# 0.043   0.0604   0.0022    0.964   0.85    0.01  T_PORN_URL_TEEN
+uri T_PORN_URL_TEEN	/^https?:\/\/[\w\.-]*(?<!thir|four|eigh|nine)(?<!fif|six)(?<!seven)teen(?!th)[\w-]*\./i
+
+# split up MISC.
+# likely to get good hits
+uri T_PORN_URL_MISC_2	/^https?:\/\/[\w\.-]*(?:pussy|nympho|whore|voyeur|lolita|schoolgirl|erotic)[\w-]*\./i
+# crappier
+uri T_PORN_URL_MISC_3	/^https?:\/\/[\w\.-]*(?:porn|hard-?core|taboo|lesbian|naughty)[\w-]*\./i
+# and I think these will get 0
+uri T_PORN_URL_MISC_4	/^https?:\/\/[\w\.-]*(?:gurlpages|kooloffer)[\w-]*\./i
 
 ########################################################################
 # SPF support.  "pass" is nice, "fail" is bad, "softfail" is bad, but
@@ -62,51 +70,6 @@ tflags T_SPF_HELO_SOFTFAIL	net
 score T_SPF_HELO_SOFTFAIL	0.1
 
 ########################################################################
-# This ratware always uses a +0000 TZ in the Date header, and has a multiplicity
-# of From: header formats. ("From" header samples from Steven Champeon
-# <schampeo.hesketh.com> via the spamtools.lists.abuse.net and SPAM-L lists).
-#
-# Note that this ratware is also quite buggy -- it regularly sends out spam
-# mails with no subject line or body text!
-#
-# "First Last" <firstlast_[a-z][a-z]@somedomain>	1
-# "First Last" <firstlast[a-z][a-z]@somedomain>		1
-# "First Last" <first.last[a-z][a-z]@somedomain>	1
-# "First Last" <first_last[a-z][a-z]@somedomain>	1
-# "First Last" <first_last_[a-z][a-z]@somedomain>	1
-# "First Last" <flast_[a-z][a-z]@somedomain>		2
-# "First Last" <flast[a-z][a-z]@somedomain>		2
-# "First Last" <f.last_[a-z][a-z]@somedomain>		2
-# "First Last" <f.last[a-z][a-z]@somedomain>		2
-# "First Last" <f_last[a-z][a-z]@somedomain>		2
-# "First Last" <last[a-z][a-z]@somedomain>		3
-# "First M. Last" <firstlast_[a-z][a-z]@somedomain>	4
-# "First M. Last" <firstlast[a-z][a-z]@somedomain>	4
-# "First M. Last" <first.m.last[a-z][a-z]@somedomain>	5
-# "First M. Last" <firstmlast[a-z][a-z]@somedomain>	5
-# "First M. Last" <firstmlast_[a-z][a-z]@somedomain>	5
-# "First M. Last" <fmlast_[a-z][a-z]@somedomain>	6
-# "First M. Last" <mlast[a-z][a-z]@somedomain>		7
-# "First M. Last" <m.last[a-z][a-z]@somedomain>		7
-header __T_0_TZ_1	    From =~ /^\"(\w)(\w+) (\w+)\" <\1\2[\._]?\3_?[a-z][a-z]\@/i
-header __T_0_TZ_2	    From =~ /^\"(\w)(\w+) (\w+)\" <\1[\._]?\3_?[a-z][a-z]\@/i
-header __T_0_TZ_3	    From =~ /^\"(\w)(\w+) (\w+)\" <\3_?[a-z][a-z]\@/i
-header __T_0_TZ_4	    From =~ /^\"(\w)(\w+) (\w)\. (\w+)\" <\1\2[\._]?\4_?[a-z][a-z]\@/i
-header __T_0_TZ_5	    From =~ /^\"(\w)(\w+) (\w)\. (\w+)\" <\1\2[\._]?\3[\._]?\4_?[a-z][a-z]\@/i
-header __T_0_TZ_6	    From =~ /^\"(\w)(\w+) (\w)\. (\w+)\" <\1\3\4_?[a-z][a-z]\@/i
-header __T_0_TZ_7	    From =~ /^\"(\w)(\w+) (\w)\. (\w+)\" <\3[\._]?\4_?[a-z][a-z]\@/i
-
-header __T_RATWARE_0_TZ_DATE		Date =~ / \+0000$/
-
-meta T_RATWARE_0_TZ_1	(__T_RATWARE_0_TZ_DATE && __CTYPE_HTML && __T_0_TZ_1)
-meta T_RATWARE_0_TZ_2	(__T_RATWARE_0_TZ_DATE && __CTYPE_HTML && __T_0_TZ_2)
-meta T_RATWARE_0_TZ_3	(__T_RATWARE_0_TZ_DATE && __CTYPE_HTML && __T_0_TZ_3)
-meta T_RATWARE_0_TZ_4	(__T_RATWARE_0_TZ_DATE && __CTYPE_HTML && __T_0_TZ_4)
-meta T_RATWARE_0_TZ_5	(__T_RATWARE_0_TZ_DATE && __CTYPE_HTML && __T_0_TZ_5)
-meta T_RATWARE_0_TZ_6	(__T_RATWARE_0_TZ_DATE && __CTYPE_HTML && __T_0_TZ_6)
-meta T_RATWARE_0_TZ_7	(__T_RATWARE_0_TZ_DATE && __CTYPE_HTML && __T_0_TZ_7)
-
-########################################################################
 # rules to detect certain generally unnecessary encodings in HTML
 
 rawbody T_ENTITY_WHITESPACE_R	/\&\#(?:10|32)\;/
@@ -127,6 +90,8 @@ meta T_ENTITY_OTHER2_M		(T_ENTITY_OTHER2_R || T_ENTITY_OTHER2_B)
 
 # according to the postmaster at qualcomm, no mail is sent from
 # eudora.com, but it's heavily joe-jobbed ...
+# jm: maybe we should just collate these all into one "postmaster said
+# they're never used" rule, even if they're hitting 0/0 right now
 header T_FROM_EUDORA            From:addr =~ /\@eudora\.com/i
 
 # similar concept for Delphi.com.  Was an ISP, now a car company!
@@ -136,6 +101,7 @@ header T_FROM_DELPHI		From:addr =~ /\d[^\@]+\d[^\@]+\@delphi\.com/i
 header T_FROM_DELPHI_BASIC	From:addr =~ /\@delphi\.com/i
 
 # great Yahoo! forgery rule, but is it going to be stable?
+# hmm.  good question :(
 header __YAHOO_MSGID		Message-ID =~ /\@yahoo\.com>/i
 header __YAHOO_BEGINNING	Message-ID =~ /<\S+(?:\.\S+|\.\S+\.\S+\.\S+)\@/
 meta T_FORGED_YAHOO_MSGID	(__YAHOO_MSGID && !__YAHOO_BEGINNING)
@@ -171,16 +137,6 @@ score T_HASHCASH_2SPEND		0.1
 # -0800, on the spf-discuss at v2.listbox.com mailing list.  Let's see
 # what this results in!
 #
-header T_FAKE_FROM_ALTAVISTA	From:addr =~ /\@altavista\.com$/i
-header T_FAKE_TO_ALTAVISTA	To:addr =~ /\@altavista\.com$/i
-header T_FAKE_REPTO_ALTAVISTA	Reply-To:addr =~ /\@altavista\.com$/i
-header T_FAKE_ERRSTO_ALTAVISTA	Errors-To:addr =~ /\@altavista\.com$/i
-header T_FAKE_ENVFROM_ALTAVISTA	EnvelopeFrom =~ /\@altavista\.com$/i
-
-header T_FAKE_OUTBLAZE_RCVD	Received =~ /\.mr\.outblaze\.com/
-header T_FAKE_OUTBLAZE_MID_1	Message-Id =~ /\.mr\.outblaze\.com/
-header T_FAKE_OUTBLAZE_MID_2	MESSAGEID =~ /\.mr\.outblaze\.com/
-
 header T_ALL_TRUSTED		eval:check_all_trusted()
 describe T_ALL_TRUSTED		Did not pass through any untrusted hosts
 tflags T_ALL_TRUSTED		nice
@@ -226,14 +182,15 @@ header __RCVD_HAS_AOL	Received =~ /aol\.com/
 meta T_MID_RCVD_DIFF_AOL	(__MSGID_HAS_AOL && !__RCVD_HAS_AOL)
 describe T_MID_RCVD_DIFF_AOL	Message-Id does not match Received (aol.com)
 
+# 0.683   1.3791   0.0134    0.990   0.90    0.01  T_URI_UNPRINTABLE:quinlan
+# 0.956   1.1479   0.5948    0.659   0.26    0.01  T_URI_UNPRINTABLE:rODbegbie
+# 0.734   0.7756   0.0885    0.898   0.66    0.01  T_URI_UNPRINTABLE:theo
+# FPs?  wierd
 uri	T_URI_UNPRINTABLE	/%0/
 describe T_URI_UNPRINTABLE	URI contains unprintable characters
 
-# 0 nonspam hits, hundreds of spam hits.  Serious problems there
-uri T_TERRA_ES		/terra\.es\//i
-describe T_TERRA_ES	Contains URI to a document hosted at 'terra.es'
-
 # bug 2957
+# really not sure if this is a good idea
 uri T_INFO_TLD			/^(?:https?:\/\/|mailto:)[^\/]+\.info(?:\/|$)/i
 describe T_INFO_TLD		Contains a URL in the INFO top-level domain    
 
@@ -277,11 +234,6 @@ body     T_RM_BPT_LONGWORDS_10_7_A /\b(?:[a-z]{10,}\s+){7}/
 body     T_RM_BPT_LONGWORDS_10_8_A /\b(?:[a-z]{10,}\s+){8}/
 body     T_RM_BPT_LONGWORDS_10_9_A /\b(?:[a-z]{10,}\s+){9}/
 body     T_RM_BPT_LONGWORDS_10_10_A /\b(?:[a-z]{10,}\s+){10}/
-
-# "www" hidden as "%77%77%77", "ww%77", etc.
-# note: *not* anchored to start of string, to catch use of redirectors
-uri	 T_HTTP_77	/http:\/\/.{0,2}\%77/
-describe T_HTTP_77	Contains a URL-encoded hostname (HTTP77)
 
 # Interesting new feature; spamware HELO'ing, from a dialup IP addr,
 # using that IP's rDNS entry.  We can catch this easily.
@@ -361,23 +313,22 @@ header T_HELO_OPTONLINE X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=\S+\.dyn\.opton
 # 12-218-225-223.client.mchsi.com [12.218.225.223]
 
 # some simple subject rules to catch a persistent spammer
-header T_SUBJ_XANAX		Subject =~ /x.{0,2}a.{0,2}n.{0,2}a.{0,2}x/i
-header T_SUBJ_VALIUM		Subject =~ /v.{0,2}a.{0,2}l.{0,2}i.{0,2}u.{0,2}m/i
-header T_SUBJ_DRUG_ED_V		Subject =~ /v.{0,2}i.{0,2}a.{0,2}g.{0,2}r.{0,2}a/i
+
+# jm: the FP for me:
+# Subject: [RSS-DEV] Including Personal Contact Information In Feeds
+#                 ^  ^ ^  ^^^ ;)
+# I think it can be ignored, TBH
 header T_SUBJ_VICODIN		Subject =~ /v.{0,2}i.{0,2}c.{0,4}d.{0,2}i.{0,2}n/i
 header T_SUBJ_VICODIN_2		Subject =~ /v.{0,2}i.{0,2}c.{0,3}d.{0,2}i.{0,2}n/i
 header T_SUBJ_VICODIN_3		Subject =~ /v.{0,2}i.{0,2}c.{0,3}[0o].{0,2}d.{0,2}i.{0,2}n/i
 header T_SUBJ_VICODIN_4		Subject =~ /v.{0,2}i.{0,2}c.{0,2}[0o].{0,2}d.{0,2}i.{0,2}n/i
-header T_SUBJ_SOMA		Subject =~ /\bs.{0,1}o.{0,1}m.{0,1}a\b/i
-header T_SUBJ_PHENTER		Subject =~ /p.{0,2}h.{0,6}t.{0,2}e.{0,2}r.{0,2}m/i
 header T_SUBJ_DRUG_ED_C		Subject =~ /\bc.{0,2}i.{0,2}a.{0,2}l.{0,2}i.{0,2}s\b/i
 header T_SUBJ_DRUG_ED_L		Subject =~ /l.{0,2}e.{0,2}v.{0,2}i.{0,2}t.{0,2}r.{0,2}a/i
 
 # partial messages; currently-theoretical attack
+# unsurprisingly this hits 0/0 right now.  But should we promote it anyway
+# to protect against the possibility?
 header T_FRAGMENTED_MESSAGE	Content-Type =~ /message\/partial/i
-
-# affiliateid, aff_id, aff_sub_id etc.
-uri T_URI_AFFILIATE		/aff\w+id=/i
 
 # some HTML rules to try
 body T_HTML_TAG_BALANCE_FONT_0	eval:html_tag_balance('font', '!= 0')
@@ -408,8 +359,6 @@ body T_HTML_FONT_LARGE_SIZE_4	eval:html_eval('max_size', '> 8')
 
 ########################################################################
 
-header T_RCVD_BONUS_SPC_DATE	Received =~ /with SMTP;  \d\d \S\S\S /
-
 # bug 1985
 body T_URGENT_BIZ /urgent.{0,16}(?:assistance|business|buy|confidential|notice|proposal|reply|request|response)/i
 
@@ -434,33 +383,38 @@ body T_HTML_ATTR_UNIQUE_40_50	eval:html_range('attr_unique_bad','0.4','0.5')
 body T_HTML_ATTR_UNIQUE_50_75	eval:html_range('attr_unique_bad','0.5','0.75')
 body T_HTML_ATTR_UNIQUE_75_100	eval:html_range('attr_unique_bad','0.75','1.0')
 
-body     T_SILDENAFIL          /\bsildenafil\b/i
-describe T_SILDENAFIL          Talks about viagra using its chemical name
-
 # http://www.ahbl.org/using/spamassassin.txt :
 # SpamAssassin local.cf for AHBL BlackList / BlockList
 # "Old blackholes.2mbit.com resurrected as AHBL (dnsbl.ahbl.org)"
 # URL: http://www.ahbl.org
+# jm 03/07/2004: looks like it's dead again.
+# 0.000   0.0000   0.0000    0.500   0.11    0.00  __RCVD_IN_AHBL
 header __RCVD_IN_AHBL eval:check_rbl('ahbl', 'dnsbl.ahbl.org.')
 describe __RCVD_IN_AHBL AHBL: sender is in DNSbl dnsbl.ahbl.org
 tflags __RCVD_IN_AHBL net
 
+#  0.023   0.0315   0.0024    0.930   0.71    0.01  T_RCVD_IN_AHBL_UNKNOWN_1
 header T_RCVD_IN_AHBL_UNKNOWN_1 eval:check_rbl_sub('ahbl', '127.0.0.1')
 describe T_RCVD_IN_AHBL_UNKNOWN_1 AHBL: Unknown Category 1 (dnsbl.ahbl.org)
 tflags T_RCVD_IN_AHBL_UNKNOWN_1 net
 
+#  0.002   0.0029   0.0000    1.000   0.89    0.01  T_RCVD_IN_AHBL_SMTP
 header T_RCVD_IN_AHBL_SMTP eval:check_rbl_sub('ahbl', '127.0.0.2')
 describe T_RCVD_IN_AHBL_SMTP AHBL: Open SMTP relay (dnsbl.ahbl.org)
 tflags T_RCVD_IN_AHBL_SMTP net
 
+# 12.154  17.1401   0.0951    0.994   0.90    0.01  T_RCVD_IN_AHBL_PROXY
 header T_RCVD_IN_AHBL_PROXY eval:check_rbl_sub('ahbl', '127.0.0.3')
 describe T_RCVD_IN_AHBL_PROXY AHBL: Open Proxy server (dnsbl.ahbl.org)
 tflags T_RCVD_IN_AHBL_PROXY net
 
+# 3.956   5.5534   0.0927    0.984   0.85    0.01  T_RCVD_IN_AHBL_SPAM
+# jm: -1
 header T_RCVD_IN_AHBL_SPAM eval:check_rbl_sub('ahbl', '127.0.0.4')
 describe T_RCVD_IN_AHBL_SPAM AHBL: Spam Source (dnsbl.ahbl.org)
 tflags T_RCVD_IN_AHBL_SPAM net
 
+# these are all 0 or not so good:
 header T_RCVD_IN_AHBL_RTB eval:check_rbl_sub('ahbl', '127.0.0.5')
 describe T_RCVD_IN_AHBL_RTB AHBL: Real-Time Blocked (dnsbl.ahbl.org)
 tflags T_RCVD_IN_AHBL_RTB net
@@ -521,14 +475,19 @@ header T_RCVD_IN_AHBL_OTHER eval:check_rbl_sub('ahbl', '127.0.0.127')
 describe T_RCVD_IN_AHBL_OTHER AHBL: Other (dnsbl.ahbl.org)
 tflags T_RCVD_IN_AHBL_OTHER net
 
+# not so useful
+# 0.873   0.1278   2.6753    0.046   0.78   -0.01  T_RCVD_IN_AHBL_EXEMPT_T
 header T_RCVD_IN_AHBL_EXEMPT_T	eval:check_rbl('ahbl-ex-firsttrusted', 'exemptions.ahbl.org.')
 describe T_RCVD_IN_AHBL_EXEMPT_T AHBL: Sender is in Exempt zone (trusted)
 tflags T_RCVD_IN_AHBL_EXEMPT_T	net nice
 
+# 0.489   0.0600   1.5267    0.038   0.79   -0.01  T_RCVD_IN_AHBL_EXEMPT_O
 header T_RCVD_IN_AHBL_EXEMPT_O	eval:check_rbl('ahbl-ex-untrusted', 'exemptions.ahbl.org.')
 describe T_RCVD_IN_AHBL_EXEMPT_O AHBL: Sender is in Exempt zone (other)
 tflags T_RCVD_IN_AHBL_EXEMPT_O	net nice
 
+# 5.877   8.1040   0.4899    0.943   0.76    0.01  T_RCVD_IN_AHBL_RHSBL
+# jm: -1
 header T_RCVD_IN_AHBL_RHSBL	eval:check_rbl_from_host('ahbl-rhs', 'rhsbl.ahbl.org.')
 describe T_RCVD_IN_AHBL_RHSBL	AHBL: From sender in DNSbl dnsbl.ahbl.org
 tflags T_RCVD_IN_AHBL_RHSBL	net
@@ -541,53 +500,28 @@ body T_HTML_TEXT_CONTRAST_32	eval:html_test('text_contrast_32')
 
 # bug 2164
 # You must be joking, can you say "unix pipes" and "regular expressions"?
+# 10.263  14.0650   1.1050    0.927   0.77    0.01  T_PIPE_OBFU
+# ;)
 body T_PIPE_OBFU           /[a-z]\|[a-z]/i
 describe T_PIPE_OBFU       Words dis|guised with a pipe sym|bol
-
-# bug 2525: FORGED_IMS_HTML fp'ing because new IMS *DOES* use text/html
-# ctype.  ARGH.  This was noted in build 5.5.2656.59, so permit builds
-# after that to get away with it.
-# compare against FORGED_IMS_HTML
-header __IMS_HTML_BUILDS     X-Mailer =~ /^Internet Mail Service .(?:[6789]\.|5\.[6789]|5\.5\.(?:[3456789]|2[789]|26[6789]|265[6789]))/
-header __IMS_HTML_RCVD	     Received =~ /\bby \S+ with Internet Mail Service .(?:[6789]\.|5\.[6789]|5\.5\.(?:[3456789]|2[789]|26[6789]|265[6789]))/
-meta T_FORGED_IMS_HTML       (__IMS_MUA && MIME_HTML_ONLY && !(__IMS_HTML_BUILDS && __IMS_HTML_RCVD))
-describe T_FORGED_IMS_HTML   IMS can't send HTML message only
-
-# bug 2973: "opt2.com" is net a spammy domain.
-# compare against OPT_HEADER
-header __T_OPT_HEADER_SUBJ   ALL =~ /^(?:Resent-)?Subject:.*opt.?(in|out|oem|ion-in)(?:\b|\d|\@)/im
-header __T_OPT_HEADER_ALL    ALL =~ /opt.?(?:in|out|oem|ion-in)(?:\b|\d|\@)/i
-meta T_OPT_HEADER            (__T_OPT_HEADER_ALL && !__T_OPT_HEADER_SUBJ)
-describe T_OPT_HEADER        Headers include an "opt"ed phrase
 
 body T_HTML_COMMENT_TAG		eval:html_text('comment', '=~ /<.*?>/')
 describe T_HTML_COMMENT_TAG	HTML comment probably contains HTML tag
 
-# back to the drawing board (demoted for development or deletion)
-header T_FAKED_IP_IN_RCVD	Received =~ /from [-0-9a-z\._]+_\[\d+\.\d+\.\d+\.\d+\] /i
-describe T_FAKED_IP_IN_RCVD	Received: contains a name with a faked IP-address
-
 # Should catch Atriks, for one
-uri T_LONG_HOSTNAME_20		/^https?:\/\/[a-z0-9]{20,24}\./i
 uri T_LONG_HOSTNAME_25		/^https?:\/\/[a-z0-9]{25,29}\./i
 uri T_LONG_HOSTNAME_30		/^https?:\/\/[a-z0-9]{30,40}\./i
 uri T_LONG_HOSTNAME_40		/^https?:\/\/[a-z0-9]{40,}\./i
 
-# bug 2809: PRIORITY_NO_NAME FPs on mails with no X-Mailer but with a User-Agent
-header __USER_AGENT             exists:User-Agent
-meta T_PRIORITY_NO_NAME         ((__HAS_X_PRIORITY || __HAS_MSMAIL_PRI) && !__HAS_X_MAILER && !__IS_EXCH && !__USER_AGENT)
-
 # bug 2876: catch faked Reply messages
+# looks like it doesn't work!  
+# 6.971   7.2516   6.2943    0.535   0.16    0.01  T_REPLY_WITHOUT_HDRS
+# kill it?
 header __HAS_THREAD_TOPIC	exists:Thread-Topic
 header __HAS_IRT		exists:In-Reply-To
 header __HAS_REFS		exists:References
 header __HAS_SUBJ_RE		Subject =~ /^re: /i
 meta T_REPLY_WITHOUT_HDRS	(__HAS_SUBJ_RE && !(__HAS_THREAD_TOPIC || __HAS_IRT || __HAS_REFS))
-
-# a new test idea. most ratware uses message templates I would guess.
-# Here's two popular ones...
-header T_HDR_ORDER_TRIMRS	ALL =~ /\nTo: [^\n]+\nReferences: <\S+@\S+>\nIn-Reply-To: <\S+@\S+>\nMessage-ID: <\S+@\S+>\nReply-To: [^\n]+\nSender: /
-header T_HDR_ORDER_MTSRIX	ALL =~ /\nMessage-ID: <\S+@\S+>\nTo: [^\n]+ <\S+>\nSubject: [^\n]+\nReferences: <\S+@\S+>\nIn-Reply-To: <\S+@\S+>\nX-Mailer: /
 
 body T_DOMAIN_RATIO_001		eval:domain_ratio('0.001')
 body T_DOMAIN_RATIO_002		eval:domain_ratio('0.002')

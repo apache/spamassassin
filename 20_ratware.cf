@@ -175,7 +175,12 @@ describe FORGED_OUTLOOK_HTML	Outlook can't send HTML message only
 meta FORGED_AOL_HTML		(__AOL_MUA && MIME_HTML_ONLY)
 describe FORGED_AOL_HTML	AOL can't send HTML message only
 
-meta FORGED_IMS_HTML		(__IMS_MUA && MIME_HTML_ONLY)
+# bug 2525: FORGED_IMS_HTML fp'ing because new IMS *DOES* use text/html
+# ctype.  ARGH.  This was noted in build 5.5.2656.59, so permit builds
+# after that to get away with it.
+header __IMS_HTML_BUILDS	X-Mailer =~ /^Internet Mail Service .(?:[6789]\.|5\.[6789]|5\.5\.(?:[3456789]|2[789]|26[6789]|265[6789]))/
+header __IMS_HTML_RCVD		Received =~ /\bby \S+ with Internet Mail Service .(?:[6789]\.|5\.[6789]|5\.5\.(?:[3456789]|2[789]|26[6789]|265[6789]))/
+meta FORGED_IMS_HTML		(__IMS_MUA && MIME_HTML_ONLY && !(__IMS_HTML_BUILDS && __IMS_HTML_RCVD))
 describe FORGED_IMS_HTML	IMS can't send HTML message only
 
 meta FORGED_THEBAT_HTML		(__THEBAT_MUA && MIME_HTML_ONLY)
@@ -255,3 +260,52 @@ describe RATWARE_NETIP		Bulk email fingerprint (netIP) found
 # for the build is a total hippie.
 header RATWARE_GECKO_BUILD	User-Agent =~ /Gecko\/(?!200\d\d\d\d\d)\d/
 describe RATWARE_GECKO_BUILD	Bulk email fingerprint (Gecko faked) found
+
+########################################################################
+# Most ratware uses message templates I would guess.
+# Here's two popular ones...
+header HDR_ORDER_MTSRIX		ALL =~ /\nMessage-ID: <\S+@\S+>\nTo: [^\n]+ <\S+>\nSubject: [^\n]+\nReferences: <\S+@\S+>\nIn-Reply-To: <\S+@\S+>\nX-Mailer: /
+describe HDR_ORDER_MTSRIX	Headers are in order found in spam (MTSRIX)
+header HDR_ORDER_TRIMRS		ALL =~ /\nTo: [^\n]+\nReferences: <\S+@\S+>\nIn-Reply-To: <\S+@\S+>\nMessage-ID: <\S+@\S+>\nReply-To: [^\n]+\nSender: /
+describe HDR_ORDER_TRIMRS	Headers are in order found in spam (TRIMRS)
+
+########################################################################
+# This ratware always uses a +0000 TZ in the Date header, and has a multiplicity
+# of From: header formats. ("From" header samples from Steven Champeon
+# <schampeo.hesketh.com> via the spamtools.lists.abuse.net and SPAM-L lists).
+#
+# "First Last" <firstlast_[a-z][a-z]@somedomain>        1
+# "First Last" <firstlast[a-z][a-z]@somedomain>         1
+# "First Last" <first.last[a-z][a-z]@somedomain>        1
+# "First Last" <first_last[a-z][a-z]@somedomain>        1
+# "First Last" <first_last_[a-z][a-z]@somedomain>       1
+# "First Last" <flast_[a-z][a-z]@somedomain>            2
+# "First Last" <flast[a-z][a-z]@somedomain>             2
+# "First Last" <f.last_[a-z][a-z]@somedomain>           2
+# "First Last" <f.last[a-z][a-z]@somedomain>            2
+# "First Last" <f_last[a-z][a-z]@somedomain>            2
+# "First Last" <last[a-z][a-z]@somedomain>              3
+# "First M. Last" <firstlast_[a-z][a-z]@somedomain>     4
+# "First M. Last" <firstlast[a-z][a-z]@somedomain>      4
+# "First M. Last" <first.m.last[a-z][a-z]@somedomain>   5
+# "First M. Last" <firstmlast[a-z][a-z]@somedomain>     5
+# "First M. Last" <firstmlast_[a-z][a-z]@somedomain>    5
+# "First M. Last" <fmlast_[a-z][a-z]@somedomain>        6
+# "First M. Last" <mlast[a-z][a-z]@somedomain>          7
+# "First M. Last" <m.last[a-z][a-z]@somedomain>         7
+header __0_TZ_1      From =~ /^\"(\w)(\w+) (\w+)\" <\1\2[\._]?\3_?[a-z][a-z]\@/i
+header __0_TZ_2      From =~ /^\"(\w)(\w+) (\w+)\" <\1[\._]?\3_?[a-z][a-z]\@/i
+header __0_TZ_3      From =~ /^\"(\w)(\w+) (\w+)\" <\3_?[a-z][a-z]\@/i
+header __0_TZ_4      From =~ /^\"(\w)(\w+) (\w)\. (\w+)\" <\1\2[\._]?\4_?[a-z][a-z]\@/i
+header __0_TZ_5      From =~ /^\"(\w)(\w+) (\w)\. (\w+)\" <\1\2[\._]?\3[\._]?\4_?[a-z][a-z]\@/i
+header __0_TZ_6      From =~ /^\"(\w)(\w+) (\w)\. (\w+)\" <\1\3\4_?[a-z][a-z]\@/i
+header __0_TZ_7      From =~ /^\"(\w)(\w+) (\w)\. (\w+)\" <\3[\._]?\4_?[a-z][a-z]\@/i
+
+header __RATWARE_0_TZ_DATE	Date =~ / \+0000$/
+
+meta RATWARE_ZERO_TZ   		(__RATWARE_0_TZ_DATE && __CTYPE_HTML && (__0_TZ_1 || __0_TZ_2 || __0_TZ_3 || __0_TZ_4 || __0_TZ_5 || __0_TZ_6 || __0_TZ_7))
+describe RATWARE_ZERO_TZ	Bulk email fingerprint (+0000) found
+
+header RCVD_BONUS_SPC_DATE	Received =~ /with SMTP;  \d\d \S\S\S /
+describe RCVD_BONUS_SPC_DATE	Bulk email fingerprint (bonus space) found
+

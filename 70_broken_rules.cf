@@ -917,3 +917,15 @@
 #header T_RCVD_IN_FABEL		rbleval:check_rbl('fabel', 'spamsources.fabel.dk.')
 #describe T_RCVD_IN_FABEL	Received via a relay in spamsources.fabel.dk
 #tflags T_RCVD_IN_FABEL net
+
+
+# bug 2973: "opt2.com" is net a spammy domain.
+# compare against OPT_HEADER
+# crappy anyway ;)
+# 0.049   0.0566   0.0313    0.644   0.25    0.01  T_OPT_HEADER
+# 0.068   0.0752   0.0514    0.594   0.20    1.21  OPT_HEADER
+#header __T_OPT_HEADER_SUBJ   ALL =~ /^(?:Resent-)?Subject:.*opt.?(in|out|oem|ion-in)(?:\b|\d|\@)/im
+#header __T_OPT_HEADER_ALL    ALL =~ /opt.?(?:in|out|oem|ion-in)(?:\b|\d|\@)/i
+#meta T_OPT_HEADER            (__T_OPT_HEADER_ALL && !__T_OPT_HEADER_SUBJ)
+#describe T_OPT_HEADER        Headers include an "opt"ed phrase
+

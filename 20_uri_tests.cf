@@ -157,3 +157,16 @@ describe URI_FREEHT		Message has URI for freeht
 uri URI_4YOU			m@^(?:https?://|mailto:)[^\/]*4you@i
 describe URI_4YOU		Message has URI 4you
 
+# 0 nonspam hits, hundreds of spam hits.  Serious problems there
+uri TERRA_ES			/terra\.es\//i
+describe TERRA_ES		Contains URI to a document hosted at 'terra.es'
+
+# "www" hidden as "%77%77%77", "ww%77", etc.
+# note: *not* anchored to start of string, to catch use of redirectors
+uri HTTP_77			/http:\/\/.{0,2}\%77/
+describe HTTP_77		Contains a URL-encoded hostname (HTTP77)
+
+# affiliateid, aff_id, aff_sub_id etc.
+uri URI_AFFILIATE		/aff\w+id=/i
+describe URI_AFFILIATE		Contains a URI with an affiliate ID code
+
