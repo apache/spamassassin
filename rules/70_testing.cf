@@ -262,17 +262,17 @@ header T_SUBJECT_SEXUAL_3	Subject =~ /[s5].?[e3\xE8-\xEB].?x.?[u\xB5\xF9-\xFC].?
 # technique on most blacklists since it helps so much with XBL
 # (just prefixed set name with 'x' and added T_ to start of test name)
 
-header __T_RCVD_IN_NJABL	eval:check_rbl('xnjabl-firsttrusted', 'dnsbl.njabl.org.')
-describe __T_RCVD_IN_NJABL	Received via a relay in dnsbl.njabl.org
+header __T_RCVD_IN_NJABL	eval:check_rbl('xnjabl-firsttrusted', 'combined.njabl.org.')
+describe __T_RCVD_IN_NJABL	Received via a relay in combined.njabl.org
 tflags __T_RCVD_IN_NJABL	net
 
 header T_RCVD_IN_NJABL_RELAY	eval:check_rbl_sub('xnjabl-firsttrusted', '127.0.0.2')
 describe T_RCVD_IN_NJABL_RELAY	NJABL: sender is confirmed open relay
 tflags T_RCVD_IN_NJABL_RELAY	net
 
-header T_RCVD_IN_NJABL_DIALUP	eval:check_rbl('xnjabl-firsttrusted', 'dnsbl.njabl.org.', '127.0.0.3')
-describe T_RCVD_IN_NJABL_DIALUP	NJABL: dialup sender did non-local SMTP
-tflags T_RCVD_IN_NJABL_DIALUP	net
+header T_RCVD_IN_NJABL_DUL	eval:check_rbl('xnjabl-firsttrusted', 'combined.njabl.org.', '127.0.0.3')
+describe T_RCVD_IN_NJABL_DUL	NJABL: dialup sender did non-local SMTP
+tflags T_RCVD_IN_NJABL_DUL	net
 
 header T_RCVD_IN_NJABL_SPAM	eval:check_rbl_sub('xnjabl-firsttrusted', '127.0.0.4')
 describe T_RCVD_IN_NJABL_SPAM	NJABL: sender is confirmed spam source
