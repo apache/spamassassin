@@ -370,7 +370,7 @@ sub expire_old_tokens_trapped {
       my $oatime;
 
       # reprieve all tokens with a given atime at once
-      while ( $#deleted_toks > -1 && (!defined $oatime || $deleted_toks[0]->[3] == $oatime) ) {
+      while ( $#deleted_toks > -1 && (!defined $oatime || $deleted_toks[$#deleted_toks]->[3] == $oatime) ) {
         my $deld = pop @deleted_toks; # pull the token off the backside
         last unless defined $deld; # this shouldn't happen, but just in case ...
 
