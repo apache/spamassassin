@@ -143,10 +143,11 @@ header T_ADVERT_CODE2		Subject =~ /\bA\s*D\s*V\b/i
 body T_HTML_MESSAGE		eval:html_message()
 score T_HTML_MESSAGE		0.0000001
 
-# HTML input form tests
+# HTML input form tests (plus having an HTML form at all)
 body T_HTML_INPUT_TYPE_HIDDEN	eval:html_test('input_type_hidden')
 body T_HTML_INPUT_NAME_EMAIL	eval:html_test('input_name_email')
 body T_HTML_INPUT_VALUE_EMAIL	eval:html_test('input_value_email')
+body T_HTML_TAG_EXISTS_FORM     eval:html_tag_exists('form')
 # HTML image tricks
 body T_HTML_IMG_ALT_ONLY1	eval:html_test('img_alt_only1')
 body T_HTML_IMG_ALT_ONLY2	eval:html_test('img_alt_only2')
