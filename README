@@ -284,3 +284,31 @@ http://spamassassin.taint.org/lists.html for the sign-up address and a link to
 the archive of past messages.
 
 
+Commercial Tests
+----------------
+
+There are several tests in the spamassassin configuration file which are turned
+off by default, namely the mail-abuse.org and bl.spamcop.net tests.  The
+mail-abuse.org tests are RCVD_IN_RBL, RCVD_IN_RSS, and RCVD_IN_DUL; the
+bl.spamcop.net test is called RCVD_IN_BL_SPAMCOP_NET.
+
+These are both commercial services, so you need to pay money to use them.
+Having said that, the bl.spamcop.net service gets my vote as the most useful
+blacklisting DNS service I've found -- consider this a recommendation!  More
+information on the spamcop blacklisting service can be found at
+http://spamcop.net/bl.shtml .
+
+The mail-abuse.org tests are free for personal use -- at the moment, so if
+you're using SpamAssassin as a personal mail filter you may turn them on.  More
+information on the mail-abuse.org services can be found here:
+http://mail-abuse.org/rbl+/ and http://www.mail-abuse.org/feestructure.html .
+
+To turn on the tests, simply assign them a non-zero score, e.g. by adding
+these lines to your ~/.spamassassin.cf file:
+
+    score RCVD_IN_RBL               10
+    score RCVD_IN_RSS               1
+    score RCVD_IN_DUL               1
+    score RCVD_IN_BL_SPAMCOP_NET    4
+
+

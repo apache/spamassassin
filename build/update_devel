@@ -25,6 +25,6 @@ cp Mail-SpamAssassin-$vers.zip $WEBDIR/devel
 
 echo $vers > $WEBDIR/latest_version
 
-( cd $WEBDIR/devel ; cvs add *SpamAssassin* )
+( cd $WEBDIR/devel ; cvs add -kb *SpamAssassin* )
 
 ls -l $WEBDIR/devel
