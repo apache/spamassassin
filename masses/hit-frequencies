@@ -201,7 +201,7 @@ sub readscores {
   while (<IN>) {
     s/#.*$//g; s/^\s+//; s/\s+$//;
 
-    if (/^(header|rawbody|body|full|uri)\s+(\S+)\s+/) {
+    if (/^(header|rawbody|body|full|uri|meta)\s+(\S+)\s+/) {
       $freq_spam{$2} ||= 0;
       $freq_nonspam{$2} ||= 0;
       $tflags{$2} ||= '';

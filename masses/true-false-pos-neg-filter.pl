@@ -114,7 +114,7 @@ sub readscores {
 	s/^\s+//;
 	s/\s+$//;
 	
-	if (/^(header|body|full)\s+(\S+)\s+/) {
+	if (/^(header|rawbody|body|full|uri|meta)\s+(\S+)\s+/) {
 	    $scores{$2} ||= 1;
 	} elsif (/^score\s+(\S+)\s+(.+)$/) {
 	    $scores{$1} = $2;

@@ -87,7 +87,7 @@ sub readscores {
   while (<IN>) {
     s/#.*$//g; s/^\s+//; s/\s+$//;
 
-    if (/^(header|body|rawbody|full|uri)\s+(\S+)\s+/) {
+    if (/^(header|body|rawbody|full|uri|meta)\s+(\S+)\s+/) {
       $scores->{$2} ||= 1;
     } elsif (/^score\s+(\S+)\s+(.+)$/) {
       $scores->{$1} = $2;
