@@ -601,7 +601,13 @@ sub check_for_forward_date {
   my ($self) = @_;
   local ($_);
 
-  my $date = $self->get ('Date'); chomp ($date);
+  my $date = $self->get ('Date');
+
+  # don't barf here; just return an OK return value, as there's already
+  # a good test for this.
+  if (!defined $date || $date eq '') { return 0; }
+  
+  chomp ($date);
   my $time = $self->_parse_rfc822_date ($date);
 
   my $rcvd = $self->get ('Received');
@@ -653,16 +659,14 @@ sub _parse_rfc822_date {
   }
   $tzoff ||= '0000';
 
-  $hh ||= 0;
-  $mm ||= 0;
-  $ss ||= 0;
-
   if (!defined $mmm && defined $mon) {
     my @months = qw(Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec);
     my $i; for ($i = 0; $i < 12; $i++) {
       if ($mon eq $months[$i]) { $mmm = $i+1; last; }
     }
   }
+
+  $hh ||= 0; $mm ||= 0; $ss ||= 0; $dd ||= 0; $mmm ||= 0; $yyyy ||= 0;
 
   my $time;
   eval {		# could croak
