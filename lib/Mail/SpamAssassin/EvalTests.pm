@@ -822,7 +822,7 @@ sub check_for_content_type_just_html {
 ###########################################################################
 
 sub check_for_faraway_charset {
-  my ($self) = @_;
+  my ($self, $body) = @_;
 
   my $type = $self->get ('Content-Type');
   $type ||= $self->get ('Content-type');
@@ -841,7 +841,6 @@ sub check_for_faraway_charset {
     # 7-bit charset as well, so make sure we actually have a high
     # number of 8-bit chars in the body text first.
 
-    my $body = $self->get_decoded_stripped_body_text_array();
     $body = join ("\n", @$body);
 
     if ($self->are_more_high_bits_set ($body)) {
@@ -1216,14 +1215,58 @@ sub check_for_num_yelling_lines {
     return ($self->{num_yelling_lines} >= $threshold);
 }
 
+# This test should be a nearly zero cost operation done during MIME
+# decoding, but this works just fine for now.
+sub check_for_mime_missing_boundary {
+  my ($self, $body) = @_;
+  my $ctype = 0;
+  my $name;
+  my @boundary;
+  my %count;
+
+  # boundaries in header
+  my $header_ctype = $self->{msg}->get_header('Content-Type');
+  $header_ctype = '' unless defined $header_ctype;
+  if ($header_ctype =~ /\bboundary\s*=\s*["']?(.*?)["']?(?:;|$)/i) {
+    push (@boundary, "\Q$1\E");
+  }
+
+  foreach my $line (@{$self->{msg}->get_body()}) {
+    if ($line =~ /^--/) {
+      foreach my $boundary (@boundary) {
+	if ($line =~ /^--$boundary$/) {
+	  $count{$boundary} = 1;
+	}
+	if ($line =~ /^--$boundary--$/) {
+	  $count{$boundary}--;
+	}
+      }
+    }
+    if ($line =~ /^Content-[Tt]ype: (\S+?\/\S+?)(?:\;|\s|$)/) {
+      $ctype = 1;
+    }
+    if ($ctype) {
+      if ($line =~ /^$/) {
+	$ctype = 0;
+      }
+      elsif ($line =~ /\bboundary\s*=\s*["']?(.*?)["']?(?:;|$)/i) {
+        push (@boundary, "\Q$1\E");
+      }
+    }
+  }
+  foreach my $boundary (keys %count) {
+    return 1 if $count{$boundary} != 0;
+  }
+  return 0;
+}
+
 sub check_language {
-  my ($self) = @_;
+  my ($self, $body) = @_;
 
   my @languages = split (' ', $self->{conf}->{ok_languages});
 
   return 0 if grep { $_ eq "all" } @languages;
 
-  my $body = $self->get_decoded_stripped_body_text_array();
   $body = join ("\n", @$body);
   $body =~ s/^Subject://i;
 
