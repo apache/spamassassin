@@ -934,13 +934,25 @@ sub get {
   my $getname = 0;
   if ($hdrname =~ s/:name$//) { $getname = 1; }
 
-  my @hdrs = $self->{msg}->get_header ($hdrname);
-  if ($#hdrs >= 0) {
-    $_ = join ("\n", @hdrs);
+  # ToCc: the combined recipients list
+  if ($hdrname eq 'ToCc') {
+    $_ = join ("\n", $self->{msg}->get_header ('To'));
+    if ($_ ne '') {
+      chop $_; if ($_ =~ /\S/) { $_ .= ", "; }
+    }
+    $_ .= join ("\n", $self->{msg}->get_header ('Cc'));
+    if ($_ eq '') { undef $_; }
+
   } else {
-    $_ = undef;
+    my @hdrs = $self->{msg}->get_header ($hdrname);
+    if ($#hdrs >= 0) {
+      $_ = join ("\n", @hdrs);
+    } else {
+      $_ = undef;
+    }
   }
 
+  # try some fallbacks:
   if ($hdrname eq 'Message-Id' && (!defined($_) || $_ eq '')) {
     $_ = join ("\n", $self->{msg}->get_header ('Message-ID'));	# news-ish
     if ($_ eq '') { undef $_; }
