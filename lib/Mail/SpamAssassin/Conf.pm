@@ -100,6 +100,7 @@ SpamAssassin handles incoming email messages.
 package Mail::SpamAssassin::Conf;
 use Mail::SpamAssassin::Util;
 use Mail::SpamAssassin::NetSet;
+use File::Spec;
 
 use strict;
 use bytes;
@@ -2602,8 +2603,10 @@ This is the password used to connect to the LDAP server.
 =item loadplugin PluginModuleName /path/to/module.pm
 
 Load a SpamAssassin plugin module.  The C<PluginModuleName> is the perl module
-name, used to create the plugin object itself; C</path/to/module.pm> is the
-file to load, containing the module's perl code.
+name, used to create the plugin object itself.  C</path/to/module.pm> is the
+file to load, containing the module's perl code; if it's specified as a
+relative path, it's considered to be relative to the current configuration
+file.
 
 See C<Mail::SpamAssassin::Plugin> for more details on writing plugins.
 
@@ -2611,7 +2614,15 @@ See C<Mail::SpamAssassin::Plugin> for more details on writing plugins.
 
     # leave as RE right now
     if (/^loadplugin\s+(\S+)\s+(\S+)$/) {
-      $self->load_plugin ($1, $2); next;
+      my $mod = $1;
+      my $path = $2;
+
+      if (!File::Spec->file_name_is_absolute ($path)) {
+	my ($vol, $dirs, $file) = File::Spec->splitpath ($self->{currentfile});
+	$path = File::Spec->catpath ($vol, $dirs, $path);
+	dbg ("loadplugin: fixed relative path: $path");
+      }
+      $self->load_plugin ($mod, $path); next;
     }
 
 ###########################################################################
