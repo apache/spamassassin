@@ -745,8 +745,8 @@ sub is_in_subdelegated_cctld {
   return ($domain =~ /\.
 	  (?:ac| ae| ar| at| au| az| bb| bm| br| bs| ca| cn| co|
 	  cr| cu| cy| do| ec| eg| fj| ge| gg| gu| hk| hu| id| il| im|
-	  in| je| jo| jp| kr| la| lb| lc| lv| ly| mm| mo| mt| mx| my|
-	  na| nc| np| nz| pa| pe| ph| pl| py| ru| sg| sh| sv| sy| th|
+	  in| je| jo| jp| kh| kr| la| lb| lc| lv| ly| mm| mo| mt| mx| my|
+	  na| nc| ni| np| nz| pa| pe| ph| pl| py| ru| sg| sh| sv| sy| th|
 	  tn| tr| tw| ua| ug| uk| uy| ve| vi| yu| za)
 	$/ixo);
 }
