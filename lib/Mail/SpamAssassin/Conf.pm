@@ -1315,11 +1315,18 @@ mean; C<factor> = 0 mean just use the calculated score.
 =item auto_learn ( 0 | 1 )	(default: 1)
 
 Whether SpamAssassin should automatically feed high-scoring mails (or
-low-scoring mails, for non-spam) into its learning systems.  The only learning
-system supported currently is a naive-Bayesian-style classifier.
+low-scoring mails, for non-spam) into its learning systems.  The only
+learning system supported currently is a naive-Bayesian-style classifier.
 
-Note that tests with tflags set to 'learn' (the Bayesian rules) or 'userconf'
-(user whitelisting rules) are ignored for the purposes of auto-training.
+Note that certain tests are ignored when determining whether a message
+should be trained upon:
+ - auto-whitelist (AWL)
+ - rules with tflags set to 'learn' (the Bayesian rules)
+ - rules with tflags set to 'userconf' (user white/black-listing rules, etc)
+
+Also note that auto-training occurs using scores from either scoreset
+0 or 1, depending on what scoreset is used during message check.  It is
+likely that the message check and auto-train scores will be different.
 
 =cut
 
