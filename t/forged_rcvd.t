@@ -1,14 +1,14 @@
 #!/usr/bin/perl
 
 use lib '.'; use lib 't';
-use SATest; sa_t_init("spam");
-use Test; BEGIN { plan tests => 3 };
+use SATest; sa_t_init("forged_rcvd");
+use Test; BEGIN { plan tests => 5 };
 
 # ---------------------------------------------------------------------------
 
 %patterns = (
 
-# q{ Forged 'Received:' header found }, 'rcvdspotted',
+q{ Possibly-forged 'Received:' header found }, 'rcvdspotted',
 q{ BODY: /To Be Removed,? Please/i }, 'bodyspotted',
 
 );

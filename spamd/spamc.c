@@ -19,6 +19,7 @@
 #include <netinet/tcp.h>
 #include <netdb.h>
 #include <arpa/inet.h>
+#include <pwd.h>
 
 #ifndef INADDR_NONE
 #define       INADDR_NONE             ((in_addr_t) 0xffffffff)
@@ -31,11 +32,10 @@ int SAFE_FALLBACK=0;
 
 void print_usage(void)
 {
-  printf("Usage: spamc [-d host] [-p port] [-f] [-u user] [-h]\n");
+  printf("Usage: spamc [-d host] [-p port] [-f] [-h]\n");
   printf("-d host: specify host to connect to  [default: localhost]\n");
   printf("-p port: specify port for connection [default: 22874]\n");
   printf("-f: fallback safely - in case of comms error, dump original message unchanges instead of setting exitcode\n");
-  printf("-u user: specify username for spamd to use in loading per-user config options\n");
   printf("-h: print this help message\n");
 }
 
@@ -262,7 +262,7 @@ int process_message(const char *hostname, int port, char *username)
   return exstatus;	/* return the last failure code */
 }
 
-void read_args(int argc, char **argv, char **hostname, int *port, char **username)
+void read_args(int argc, char **argv, char **hostname, int *port)
 {
   int opt;
 
@@ -280,14 +280,14 @@ void read_args(int argc, char **argv, char **hostname, int *port, char **usernam
 	*port = atoi(optarg);
 	break;
       }
-    case 'u':
-      {
-	*username = optarg;
-	break;
-      }
     case 'f':
       {
 	SAFE_FALLBACK = -1;
+	break;
+      }
+    case 'u':
+      {
+	syslog (LOG_WARNING, "usage: -u arg obsolete, ignored");
 	break;
       }
     case '?': {
@@ -308,11 +308,19 @@ int main(int argc,char **argv)
   int port = 22874;
   char *hostname = "127.0.0.1";
   char *username = NULL;
+  struct passwd *curr_user;
 
   srand(time(NULL));
   openlog ("spamc", LOG_CONS|LOG_PID, LOG_MAIL);
 
-  read_args(argc,argv,&hostname,&port,&username);
+  curr_user = getpwuid(getuid());
+  if (curr_user == NULL) {
+    perror ("getpwuid failed");
+    return EX_OSERR;
+  }
+  username = curr_user->pw_name;
+
+  read_args(argc,argv,&hostname,&port);
 
   return process_message(hostname,port,username);
 }
