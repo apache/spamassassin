@@ -1,13 +1,11 @@
 
-[TODO: mark up with more details of what work each person did]
+Main SpamAssassin dev team: (and their Amazon wishlists! ;)
 
-Main SpamAssassin dev team:
-
-   - Theo Van Dinter
-   - Duncan Findlay
-   - Craig Hughes
-   - Justin Mason
-   - Dan Quinlan
+   - Theo Van Dinter	http://www.amazon.com/o/registry/2ET4XKZ3OEDQW
+   - Duncan Findlay	
+   - Craig Hughes	http://www.amazon.com/o/registry/1G97F2FF1AWCK
+   - Justin Mason	http://www.amazon.com/o/registry/1M0UDEXT6A3I7
+   - Dan Quinlan	http://www.amazon.com/o/registry/3B3ST4DS9DTL0
    - Matt Sergeant
    - Malte S. Stretz
 
@@ -26,149 +24,309 @@ Spamd:
   - Author: Craig Hughes
   - Parts by Malte S. Stretz
 
-Perceptron score optimizer:
-
-  - Author: Henry Stern
-  - supporting scripts by Dan Quinlan, Malte Stretz, Justin Mason
-
-- "TextCat" language classifier: Author: Gertjan van Noord
-
-Hosting:
-
-  First off, thanks to our mirrors: Peregrine Hardware, Inc. and
-  Kevin A. McGrail, Jeremy Zawodny, Mark Reynolds, RedIRIS,
-  Hagen Herrschaft, and PlanetMirror. In addition, Mark
-  Reynolds provides DNS for spamassassin.org.
-
-  SourceForge Logo SpamAssassin(tm) uses SourceForge for its CVS
-  hosting, and as a backup mirror.
-
-  Thanks to Kelsey Cummings and Sonic.net for significant
-  contributions with network services, and on the back-end; our
-  score-optimization systems would be significantly weedier without
-  their help.
 
 Algorithms:
 
-  The  Bayesian-style text classifier used by SpamAssassin's BAYES rules
-  is  based  on an approach outlined by Gary Robinson. Thanks, Gary!
+  The Bayesian-style text classifier used by SpamAssassin's BAYES rules is
+  based on an approach outlined by Gary Robinson. Thanks, Gary!
+
+	http://radio.weblogs.com/0101454/stories/2002/09/16/spamDetection.html
+
+
+Major contributions:
+
+  - Michael Bell, <mikebell90(at)yahoo.com>: Bayes documentation. 50 lines.
+
+  - Kelsey Cummings, <kgc(at)sonic.net>: client-ip-address security in spamd;
+    20 lines; 2001-10-30. sql-configs-with-setuid switch added to spamd;
+    2002-09-13.
+
+  - Justin England, <jengland(at)enetis.net>: SQL support.
+
+  - Steve Friedl, <steve(at)unixwiz.net>: UNIX domain socket support in
+    spamd/spamc.
+
+  - Ryan Finnie, <ryan(at)finnie.org>: bug 317; message encapsulation as
+    message/rfc822 attachment.
+
+  - Brad "anomie" Jorsch, <anomie(at)users.sourceforge.net>: one-line bug fix
+    to avoid losing mail from spamc. 2002-10-14. BSMTP and -e support; 200
+    lines; 2002-08-27. tracking of number of spamd processes; 2002-10-23.
+    several other mods.
+
+  - Sidney Markowitz, <sidney(at)sidney.com>: 1-line fix to DNS tests;
+    2001-11-18. message-size sanity-checking in spamc; 25 lines; 2001-12-02.
+    language identification. roughly 100 lines; 2003-03-23.  Win32 build
+    support; 2004-01.
+  
+  - Marc Merlin, <marc_soft(at)merlins.org>: RBL ordering/timeouts;
+    time-logging for debug speed testing. 2002-06-10.
+
+  - Eugene/Yevgeniy Miretsky, <eugene(at)invision.net>: 2-line bug fix for
+    spamc -c; 2003-02-14. Spamc timeout support; 20 lines; 2003-01-22. support
+    for REPORT; REPORT_IFSPAM and SYMBOLS methods in spamc; 35 lines.
+
+  - Gertjan van Noord, <vannoord(at)let.rug.nl>: TextCat language classifier
+    
+  - Michael Parker, <parkerm(at)pobox.com>: Bayes-in-SQL and AWL-in-SQL;
+    writing Bayes regression tests; 2003-10-09
+
+  - John Peacock, <jpeacock(at)rowman.com>: qmail-spamc; in contrib;
+    2002-11-20; patch to README file. 2003-02-19
+
+  - Marc Perkel, <marc(at)perkel.com>: 30-or-so rules; about 20 of which are
+    still in codebase.
+
+  - Dustin Sallings, <dustin+spamassassin(at)spy.net>: 25-line support for
+    virtual users in spamd.
+    
+  - Ed Allen Smith, <easmith(at)beatrice.rutgers.edu>: GA improvements; 6
+    rules.
+
+  - Henry Stern: perceptron score optimizer (replacing the GA).
+
+  - Liam Widdowson, <liam(at)inodes.org>: shared-library use of spamc.
+
+
+Translators:
+
+  - Michel Bouissou, <michel(at)bouissou.net>: French translations. 2003-06-16
+
+  - Alexander Litvinov, <lan(at)ac-sw.com>: Russian translation.
+
+  - Peter Mann, <peter.mann(at)tuke.sk>: Slovak translation.
+
+  - Daniel Roethlisberger, <daniel(at)roe.ch>: German translation and rules.
+
 
 Patch submitters:
 
-   - Adrian Bunk
-   - Al Smith
-   - Alan Barrett
-   - Alan Ford
-   - Alan Premselaar
-   - Alexander Kourakos
-   - Alexander Litvinov
-   - Andre Luis Lopes
-   - Andreas Kneib
-   - Andrew Wilson
-   - Andrey Chernov
-   - Anirvan Chatterjee
-   - Ask Bjoern Hansen
-   - Bart Schaefer
-   - Bob Apthorpe
-   - Bobby Rose
-   - Brad Rathbun
-   - Brett A. Thomas
-   - Cassandra Brockett
-   - Charlie Watts
-   - Chris Eykamp
-   - Christian Perrier
-   - Christopher Davis
-   - Daniel McDonald
-   - Daniel Rall
-   - Daniel Roethlisberger
-   - Daniel Rogers
-   - Dave Lugo
-   - David F. Skoll
-   - David Hull
-   - David M. Koppelman
-   - Derrick dman Hudson
-   - Dirk Mueller
-   - Dustin Sallings
-   - Ed Allen Smith
-   - Ed Henderson
-   - Eugene/Yevgeniy Miretsky
-   - Francesco Potorti
-   - Gertjan van Noord
-   - Greg Ward
-   - Gregor Lawatscheck
-   - Hans-Dieter Stich
-   - Henning P. Schmiedehausen
-   - Ian R. Justman
-   - Jean Charles Delepine
-   - Jeremy Zawodny
-   - Jesus Climent
-   - Johan Lindstrom
-   - John Girash
-   - John Levine
-   - John Morrissey
-   - John Peacock
-   - Juergen Kreileder
-   - Justin England
-   - Karl Fogel
-   - Kelsey Cummings
-   - Ken Causey
-   - Kenshi Muto
-   - Kevin McGrail
-   - Klaus Heinz
-   - Klaus Johannes Rusch
-   - Liam Widdowson
-   - Marc Fournier
-   - Marc Merlin
-   - Marc Perkel
-   - Mark Martinec
-   - Martin O"stlund
-   - Martin Radford
-   - Matt Kettler
-   - Matt Zimmerman
-   - Matthew Cline
-   - Michael Bell
-   - Michael Brown
-   - Michael Lemke
-   - Michael Moncur
-   - Michael Parker
-   - Michael Stenner
-   - Michel Bouissou
-   - Mike Nolan
-   - Miquel van Smoorenburg
-   - Morbus Iff
-   - Morgan Massena
-   - Nate Mueller
-   - Nathan Morris
-   - Nathan Neulinger
-   - Nick Nix Alcock
-   - Nick Alcock
-   - Peter Mann
-   - Reini Urban
-   - Richard Birkett
-   - Rob McMillin
-   - Rob Nagler
-   - Robert Bihlmeyer
-   - Robert J. Strickler
-   - Rod Begbie
-   - Ryan Finnie
-   - Sander Steffann
-   - Scott Griffith
-   - Sean Harding
-   - Sidney Markowitz
-   - Steve Friedl
-   - Steve Keay
-   - Tobias von Koch
-   - Tom Lipkis
-   - Tomasz Ostrowski
-   - Vince Delvecchio
-   - Vince Vielhaber
-   - Vivek Khera
-   - Xavier Renaut
+  - Michael Brown, <michaelb(at)opentext.com>: support to build libspamc.so
 
-If  your  name  is  not  here,  and  you've submitted a patch that was
-included,  it's just an oversight. Please mail me at the address below and
-I'll add you to the list.
+  - Nick "Nix" Alcock, <nix(at)esperi.org.uk>: 1 line DCC patch (bug 1060)
 
-Also,  thanks  to  Mike  Quinn,  owner  of The Little Rubber Ninja Homepage,
-where the ninjas in the SpamAssassin logo came from!
+  - Bob Apthorpe, <apthorpe+sa(at)cynistar.net>: tools/sa-stats.pl 
+
+  - Alan Barrett, <apb(at)cequrux.com>: base64 decoding code
+
+  - Rod Begbie, <rod(at)begbie.com> <rOD-spamassassin(at)arsecandle.org>: DCC
+    bugfixes; 5 lines; 2002-08-07
+
+  - Robert Bihlmeyer, <robbe(at)orcus.priv.at>: CHARSET_FARAWAY_HEADERS test
+
+  - Richard Birkett, <richard(at)birkett.com>: patch to a build script.
+    2002-10-19
+
+  - Cassandra Brockett, <cass(at)ophiuchi.net>: bring SQL checks and
+    documentation into line (bug 2013); 2003-06-03
+
+  - Adrian Bunk, <bunk(at)fs.tum.de>: bug 521: URI_IS_POUND
+
+  - Ken Causey, <ken(at)kencausey.com>: patch to remove reserved IPs;
+    2002-11-01; improve performance of network lookups; 6 lines; 2002-12-12.
+
+  - Jean Charles Delepine, <delepine(at)u-picardie.fr>: report_charset support;
+    10 lines. 2003-02-20 or so.
+
+  - Anirvan Chatterjee, <anirvan(at)chatterjee.net>:
+    <anirvan(at)chatterjee.net>; Bug #354 led to original TO_HAS_SPACES rule;
+    Bug #358 led to TO_ADDRESS_EQ_REAL
+
+  - Andrey Chernov, <ache(at)nagual.pp.ru>: 2-word bug fix; 2002-02-26; 5-line
+    bug fix to 1 rule; 2002-03-04.
+
+  - Christopher Davis, <ckd-spamassassin(at)ckdhr.com>: patch to
+    contrib/spamcheck.py. 2002-08-20
+
+  - Vince Delvecchio, <vince.delvecchio(at)analog.com>: negative look-behinds
+    PORN_4 (bug 1035; bug 1835)
+
+  - Chris Eykamp, <chris(at)eykamp.com>: 4 weight loss rules; 2003-05-12
+
+  - Alan Ford, <alan(at)whirlnet.co.uk>: Getting a list of symbols of tests hit
+    with spamd (bug 189); 3-line patch for spamd response headers (bug 1520)
+
+  - Scott Griffith, <skod(at)ises-llc.com>: 12 tests; 7 still in codebase;
+    2001-11-11.
+
+  - Ask Bjoern Hansen, <ask(at)develooper.com> <ask(at)apache.org>:
+    REPORT_IFSPAM in spamd (bug 660); 2002-08-06
+
+  - Sean Harding, <sharding(at)dogcow.org>: bug 1868; two line patch for
+    X-Spam-Checker-Version
+
+  - Klaus Heinz, <klaus.heinz(at)onlinehome.de>: change to 1 rule. 2002-06-14;
+    another; 2002-07-29; another 3; 2002-08-14. packaging fixes for UNIX
+    package; 2002-09-17
+
+  - Ed Henderson, <ed.henderson(at)certainty.net>: fix for vpopmail support in
+    spamd; 2-word fix; 2003-06-06
+
+  - David Hull, <hull(at)paracel.com> <hull(at)davidhull.org>: rewrite_subject;
+    report_header; 10 lines; 2001-10-31. 1 rule; 2001-10-31.
+
+  - Morbus Iff, <morbus(at)disobey.com>: don't create prefs patch (bug 283)
+
+  - David F. Skoll, <dfs(at)roaringpenguin.com>: one line change to
+    __OUTLOOK_MUA (bug 1822)
+
+  - Steve Keay, <steve-spamassassin-bugzilla(at)keay.com>: spamd -A network
+    ranges support; 13 lines; 2002-07-29.
+
+  - Matt Kettler, <mkettler_sa(at)comcast.net>: bug fix for list of reserved IP
+    addresses; 3 lines. 2002-08-13; other small changes
+
+  - Vivek Khera, <khera(at)kcilink.com>: contributed to Razor2 patch
+
+  - Alexander Kourakos, <awk(at)bnt.com>: one-line bug fix patch. 2002-02-06.
+
+  - Juergen Kreileder, <kreilede(at)issan.informatik.uni-dortmund.de>: 4 line
+    patch; Bayes ignore Gnus annotation
+
+  - David M. Koppelman, <koppel(at)ece.lsu.edu>: bayes_score report fix;
+    2003-07-24; bayes expiry time bugfix; 2003-07-24.
+
+  - Gregor Lawatscheck, <gpel(at)mpex.net>: some pattern from bug 249
+
+  - Michael Lemke, <lemkemch(at)t-online.de>: Win32Locker fix; 2003-06-12
+
+  - John Levine, <johnl(at)iecc.com>: added --syslog=stderr support; 4 lines.
+    2002-08-14 
+
+  - Tom Lipkis, <tal(at)pss.com>: SunOS 4.1.4 support; 3-line patch;
+    2002-01-13.
+
+  - Dave Lugo, <dlugo(at)etherboy.com>: 2 lines of documentation regarding use
+    of DCC in INSTALL file; 2003-10-06
+
+  - Mark Martinec, <Mark.Martinec(at)ijs.si>: contributed to Razor2 patch
+
+  - Morgan Massena, <mmassena(at)ipowerplant.com>: patch to SQL support to
+    allow installer to specify more table details. 5 lines. 2002-07-31
+
+  - Kevin McGrail, <kmcgrail(at)peregrinehw.com>: 10-line portability fix for
+    Red Hat 5 support; 2001-12-04.
+
+  - Rob McMillin, <rlm(at)pricegrabber.com> <rfm(at)scareduck.com>: bug fix to
+    1 rule; 2002-09-29
+
+  - Michael Moncur, <mgm(at)starlingtech.com>: rules. 2002-02-03. 5 new rules;
+    2002-07-27. one-word SQL fix; 2002-08-14.
+
+  - John Morrissey, <jwm(at)horde.net>: check_rbl() doesn't check $#ips
+    properly (bug 1401); 2003-01-21
+
+  - Dirk Mueller, <mueller(at)kde.org>: spamc low-memory bugfix (bug 1697);
+    2003-03-27
+
+  - Nate Mueller, <nate(at)cs.wisc.edu>: SSL support in spamd/spamc;
+    2002-12-18.
+
+  - Rob Nagler, <nagler(at)bivio.com>: 1-word speed-up bug fix. 2002-09-24
+
+  - Nathan Neulinger, <nneul(at)umr.edu>: security patch; moving code around;
+    no code added or removed. 2003-01-03. dccifd support; 30 lines; 2003-06-11.
+
+  - Mike Nolan, <nolan(at)naic.edu>: SunOS build directions
+
+  - Martin O"stlund, <mo(at)microsaft.nu>: Slackware 9.0 rc-script for spamd
+    (bug 2283); 2003-08-02
+
+  - Tomasz Ostrowski, <tometzky(at)batory.org.pl>: perl 5.005 support;
+    2003-06-11.
+
+  - Henning P. Schmiedehausen, <hps(at)intermeta.de> <henning(at)apache.org>:
+    adding ? to shell globs; bug 1278
+
+  - Francesco Potorti, <pot(at)gnu.org>: 12 lines of documentation
+
+  - Alan Premselaar, <alien(at)12inch.com>: see spamassassin-talk list 2003-03;
+    original for JAPANESE_UCE_SUBJECT
+
+  - Martin Radford, <martin-sabz(at)zamenhof.demon.co.uk>: 1 rule; 2002-12-17.
+    fixed typos in 8 rule descriptions; 2002-12-21.
+
+  - Daniel Rall, <dlr(at)finemaltcoding.com>: two lines; documentation fix
+    (bugs 374; 515)
+
+  - Brad Rathbun, <brad(at)computechnv.com>: tools/sa-stats.pl.
+
+  - Xavier Renaut, <node3667(at)users.sourceforge.net>: contrib/spamproxyd
+    bugfix (bug 339); 2002-05-20
+
+  - Bobby Rose, <brose(at)med.wayne.edu>: Pyzor support; 2002-08-12; dcc_path
+    etc. 2002-09-24 (bug 1021)
+
+  - Klaus Johannes Rusch, <KlausRusch(at)atmedia.net>: fix for
+    find_all_addrs_in_line(); bug 1091.
+
+  - Bart Schaefer, <schaefer(at)zanshin.com>: 7-line bug fix for DCC; Razor
+    support; 2002-07-09. 1 rule; 2002-12-17
+
+  - Al Smith, <al.smith(at)aeschi.ch.eu.org>: fix to SSL spamd bug; 10 lines;
+    2003-06-11.
+
+  - Sander Steffann, <sander(at)steffann.nl>: patch to contrib/spamcheck.py;
+    2002-10-03
+
+  - Michael Stenner, <mstenner(at)phy.duke.edu>: ident authentication support
+    in spamd; 10 lines. 2002-11-10.
+
+  - Hans-Dieter Stich, <hdstich(at)hdstich.com>: German translation; 2002-04-14
+
+  - Brett A. Thomas, <bthomas(at)vindicia.com>: bug 1646 -- better sa-learn
+    command-line API; 2003-03-15
+
+  - Reini Urban, <rurban(at)x-ray.at>: small patch to Makefile for cygwin (bug
+    1031)
+
+  - Tobias von Koch, <tvk(at)weltcharts.de>: DCC support fixes: 2002-06-04; PGP
+    recognition rule; 2002-06-10; test for TRACKER_ID rule; 2002-07-08.
+
+  - Vince Vielhaber, <vev(at)michvhf.com>: spamc -c bugfix patch; 1 word.
+    2002-09-06
+
+  - Charlie Watts, <cewatts(at)frontier.net>: 1-word patch to deal with perl
+    bug on BSD platforms; 2001-11-04. DNS timeouts; 2001-12-12
+
+  - Andrew Wilson, <andrew(at)rivendale.net>: support for MIME::Entity
+    contributed
+
+  - Jeremy Zawodny, <jeremy(at)zawodny.com>: minor patch to SQL support.
+    2001-12-25.
+
+
+
+If your name is not here, and you've submitted a patch that was included, it's
+just an oversight. Please mail me at <jm /at/ jmason.org> and I'll add you to
+the list.
+
+Hosting:
+
+  Thanks to our mirrors: Peregrine Hardware, Inc. and Kevin A.
+  McGrail, Jeremy Zawodny, Mark Reynolds, RedIRIS, Hagen Herrschaft, and
+  PlanetMirror. In addition, Mark Reynolds provides DNS for spamassassin.org.
+
+  SpamAssassin(tm) uses SourceForge for its CVS hosting, and as a backup
+  mirror.
+
+  Thanks to Kelsey Cummings and Sonic.net for significant contributions with
+  network services, and on the back-end; our score-optimization systems would
+  be significantly weedier without their help.
+
+	http://www.peregrinehw.com/
+	http://www.zawodny.com/
+	http://www.reynolds.net.au/
+	http://www.rediris.es/
+	http://www.hrxnet.de/
+	http://www.planetmirror.com/
+	http://sourceforge.net/
+	http://www.sonic.net/
+
+Finally:
+
+Thanks to Mike Quinn, owner of The Little Rubber Ninja Homepage, where the
+ninjas in the SpamAssassin logo came from!
+
+	http://www.unsuave.com/ninja/
 
