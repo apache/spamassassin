@@ -6,18 +6,22 @@
 # 0.5  = -limit ....[... 0 ...].... limit
 # 0.75 = -limit ......[. 0 .....].. limit
 # 1.0  = -limit ........ 0 [......] limit
-my $sliding_window_limits = 4.0; # limits = [-$range, +$range]
-my $sliding_window_size =   5.0; # scores have this range within limits
+my $sliding_window_limits = 4.8; # limits = [-$range, +$range]
+my $sliding_window_size =   5.5; # scores have this range within limits
 
 # 0.0  = -limit [......] 0 ........ limit
 # 0.25 = -limit ....[... 0 ]....... limit
 # 0.5  = -limit ......[. 0 .]...... limit (note: tighter)
 # 0.75 = -limit .......[ 0 ...].... limit
 # 1.0  = -limit ........ 0 [......] limit
-my $shrinking_window_lower_base =  -0.50; 
-my $shrinking_window_lower_range =  1.50; # *ratio, added to above
+my $shrinking_window_lower_base =   0.00; 
+my $shrinking_window_lower_range =  1.00; # *ratio, added to above
 my $shrinking_window_size_base =    1.00;
-my $shrinking_window_size_range =   2.00; # *ratio, added to above
+my $shrinking_window_size_range =   1.00; # *ratio, added to above
+#my $shrinking_window_lower_base =  -0.50; 
+#my $shrinking_window_lower_range =  1.30; # *ratio, added to above
+#my $shrinking_window_size_base =    1.00;
+#my $shrinking_window_size_range =   3.00; # *ratio, added to above
 
 my $use_sliding_window = 0;
 
@@ -47,6 +51,7 @@ my $num_total;
 my %mutable_tests = ();
 my %ranking = ();
 my %soratio = ();
+my %is_nice = ();
 
 if (!defined $argcffile) { $argcffile = "../rules"; }
 system ("./parse-rules-for-masses -d \"$argcffile\" -s $scoreset") and die;
@@ -80,16 +85,23 @@ while (<>) {
   $freq_nonspam{$test} = $nonspam;
 
   my $tflags = $rules{$test}->{tflags}; $tflags ||= '';
-  if ($tflags =~ /\buserconf\b/ || ( ($scoreset % 2) == 0 && $tflags =~ /\bnet\b/ )) {
+  if ($tflags =~ /\buserconf\b/ ||
+      ( ($scoreset % 2) == 0 && $tflags =~ /\bnet\b/ )) {
     $mutable_tests{$test} = 0;
   } else {
     $mutable_tests{$test} = 1;
+  }
+  if ($tflags =~ m/\bnice\b/i) {
+    $is_nice{$test} = 1;
+  } else {
+    $is_nice{$test} = 0;
   }
 
   if ($overall < 0.01) {        # less than 0.01% of messages were hit
     $mutable_tests{$test} = 0;
     $soratio{$test} = 0.5;
     $ranking{$test} = 0.0;
+    $rules{$test}->{score} = 0; # tvd - disable these rules automagically
 
   } else {
     $soratio{$test} = $soratio;
@@ -111,10 +123,9 @@ foreach my $test (sort { $ranking{$b} <=> $ranking{$a} } keys %freq) {
   my $nonspam = $freq_nonspam{$test};
   my $soratio = $soratio{$test};
   my $ranking = $ranking{$test};
-  my $mutatable = $mutable_tests{$test};
-  my $tflags = $rules{$test}->{tflags}; $tflags ||= '';
+  my $mutable = $mutable_tests{$test};
 
-  if (!$mutatable) {
+  if (!$mutable || $rules{$test}->{score} == 0) { # didn't look for score 0 - tvd
     printf OUT ("%3.3f %3.3f 0 $test\n",
                          $rules{$test}->{score},
                          $rules{$test}->{score});
@@ -122,7 +133,7 @@ foreach my $test (sort { $ranking{$b} <=> $ranking{$a} } keys %freq) {
   }
 
   # 0.0 = best nice, 1.0 = best nonnice
-  if ($tflags =~ /nice/) {
+  if ($is_nice{$test}) {
     $ranking = .5 - ($ranking / 2);
   } else {
     $ranking = .5 + ($ranking / 2);
@@ -134,7 +145,39 @@ foreach my $test (sort { $ranking{$b} <=> $ranking{$a} } keys %freq) {
   } else {
     ($lo, $hi) = shrinking_window_ratio_to_range($ranking);
   }
-  printf OUT ("%3.1f %3.1f 1 $test\n", $lo, $hi);
+
+  # tvd
+  my $tflags = $rules{$test}->{tflags}; $tflags ||= '';
+  if ( $is_nice{$test} && ( $ranking < .5 ) ) { # proper nice rule
+    $lo *= 2.2 if ( $soratio <= 0.05 && $nonspam > 0.4 ); # let good rules be larger if they want to
+    $hi =	($soratio == 0) ? $lo :
+    		($soratio <= 0.005 ) ? $lo/1.1 :
+    		($soratio <= 0.010 && $nonspam > 0.2) ? $lo/2.0 :
+		($soratio <= 0.025 && $nonspam > 1.5) ? $lo/10.0 :
+		0;
+
+    if ( $soratio >= 0.35 ) { # auto-disable bad rules
+      ($lo,$hi) = (0,0);
+    }
+  }
+  elsif ( !$is_nice{$test} && ( $ranking >= .5 ) ) { # proper spam rule
+    $hi *= 1.5 if ( $soratio >= 0.99 && $spam > 1.0 ); # let good rules be larger if they want to
+    $lo =	($soratio == 1) ? $hi:
+    		($soratio >= 0.995 ) ? $hi/4.0 :
+    		($soratio >= 0.990 && $spam > 1.0) ? $hi/8.0 :
+		($soratio >= 0.900 && $spam > 10.0) ? $hi/24.0 :
+		0;
+
+    if ( $soratio <= 0.65 ) { # auto-disable bad rules
+      ($lo,$hi) = (0,0);
+    }
+  }
+  else { # rule that has bad nice setting
+    ($lo,$hi) = (0,0);
+  }
+  $mutable = 0 if ( $hi == $lo );
+
+  printf OUT ("%3.1f %3.1f $mutable $test\n", $lo, $hi);
 }
 close OUT;
 exit;
@@ -143,6 +186,9 @@ sub sliding_window_ratio_to_range {
   my $ratio = shift;
   my $lo = -$sliding_window_limits + ($sliding_window_size * $ratio);
   my $hi = +$sliding_window_limits - ($sliding_window_size * (1-$ratio));
+  if ($lo > $hi) { # ???
+    ($lo,$hi) = ($hi,$lo);
+  }
   ($lo, $hi);
 }
 
@@ -152,13 +198,21 @@ sub shrinking_window_ratio_to_range {
   my $adjusted = ($ratio -.5) * 2;      # adj [0,1] to [-1,1]
   if ($adjusted < 0) { $is_nice = 1; $adjusted = -$adjusted; }
 
+#$adjusted /= 1.5 if ( $ratio < 0.95 && $ratio > 0.15 ); # tvd
+
   my $lower = $shrinking_window_lower_base 
                         + ($shrinking_window_lower_range * $adjusted);
   my $range = $shrinking_window_size_base 
                         + ($shrinking_window_size_range * $adjusted);
   my $lo = $lower;
   my $hi = $lower + $range;
-  if ($is_nice) { my $tmp = $hi; $hi = -$lo; $lo = -$tmp; }
+  if ($is_nice) {
+    my $tmp = $hi; $hi = -$lo; $lo = -$tmp;
+  }
+  if ($lo > $hi) { # ???
+    ($lo,$hi) = ($hi,$lo);
+  }
+
   ($lo, $hi);
 }
 
