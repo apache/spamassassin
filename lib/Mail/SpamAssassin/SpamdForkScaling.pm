@@ -118,8 +118,36 @@ sub main_server_poll {
     vec($rin, $self->{server_fileno}, 1) = 0;
   }
 
-  my ($rout, $eout);
-  my ($nfound, $timeleft) = select($rout=$rin, undef, $eout=$rin, $tout);
+  my ($rout, $eout, $nfound, $timeleft);
+
+  # use alarm to back up select()'s built-in alarm, to debug theo's bug
+  eval {
+    Mail::SpamAssassin::Util::trap_sigalrm_fully(sub {
+                          die "tcp timeout";
+                        });
+    alarm ($tout*2) if ($tout);
+    ($nfound, $timeleft) = select($rout=$rin, undef, $eout=$rin, $tout);
+  };
+  alarm 0;
+
+  if ($@) {
+    warn "prefork: select timeout failed! recovering\n";
+    sleep 1;        # avoid overload
+    return;
+  }
+
+  if (!defined $nfound) {
+    warn "prefork: select returned undef! recovering\n";
+    sleep 1;        # avoid overload
+    return;
+  }
+
+  # errors on the handle?
+  # return them immediately, they may be from a SIGHUP restart signal
+  if (vec ($eout, $self->{server_fileno}, 1)) {
+    warn "prefork: select returned error on server filehandle: $!\n";
+    return;
+  }
 
   # any action?
   return unless ($nfound);
@@ -328,7 +356,7 @@ sub adapt_num_children {
       $statestr .= '?';
     }
   }
-  dbg ("prefork: child states: ".$statestr);
+  warn ("prefork: child states: ".$statestr."\n");
 
   # just kill off/add one at a time, to avoid swamping stuff and
   # reacting too quickly; Apache emulation
@@ -375,8 +403,11 @@ sub need_to_del_server {
     die "oops! no idle kids in need_to_del_server?";
   }
 
-  kill 'INT' => $pid;
+  # warning: race condition if these two lines are the other way around.
+  # see bug 3983, comment 37 for details
   $self->set_child_state ($pid, PFSTATE_KILLED);
+  kill 'INT' => $pid;
+
   dbg ("prefork: adjust: decreasing, too many idle children ($num_idle > $self->{max_idle}), killed $pid");
 }
 
