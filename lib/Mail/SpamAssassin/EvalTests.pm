@@ -3070,6 +3070,15 @@ sub check_for_spf_softfail {
   $self->{spf_softfail};
 }
 
+sub check_all_trusted {
+  my ($self) = @_;
+  if ($self->{num_relays_untrusted} > 0) {
+    return 0;
+  } else {
+    return 1;
+  }
+}
+
 sub _check_spf {
   my ($self) = @_;
 
@@ -3081,51 +3090,65 @@ sub _check_spf {
   return unless $self->is_dns_available();
 
   my $lasthop;
-  if (scalar @{$self->{relays_trusted}} > 0) {
+  my $use_helo = 0;
+  if ($self->{num_relays_trusted} > 0)
+  {
     # we can't run the SPF test if the message has passed through
     # 1 or more trusted relays -- since they may have changed
     # the MAIL FROM: address, unfortunately (through .forwards).
+    # We may be lucky, though, and the outermost trusted relay recorded
+    # the envelope-from in the Received header.  Most don't, though.
+    # 
     # The SPF Sender Rewriting Scheme, http://spf.pobox.com/srs.html ,
     # will hopefully address this; we can detect if the sender has
     # been rewritten, and if so figure out what the sender *was*.
     #
     # Alternatively -- we may be able to use the HELO data recorded
-    # in the Received headers...
-    #
-    dbg ("SPF: message came through >0 trusted relays, cannot use");
+    # in the Received headers... although this is cheating on the SPF
+    # rules a little.
 
-    # ah, try it anyway -- using the HELO
-    #return;
     $lasthop = $self->{relays_untrusted}->[0];
 
+    if (defined $lasthop->{envfrom}) {
+      # excellent, we can use this
+    } else {
+      # fall back to using HELO
+      dbg ("SPF: came via >0 trusted relays, using HELO instead of Envelope-From");
+      $use_helo = 1;
+    }
+
   } else {
+    # OK, we can use this and trust current Received headers and EnvFrom
     $lasthop = $self->{relays_untrusted}->[0];
   }
 
   if (!defined $lasthop) {
     dbg ("SPF: message was delivered locally, not required");
-    # TODO: actually, this is a situation we should give a bonus
-    # for anyway -- but as another test.
     return;
   }
 
-  # Sep 29 2003 jm: try using just the HELO -- ignore MAIL FROM data
-  # since it's hard to get reliably.
-  my $sender = ''; #$self->get ("EnvelopeFrom");
-
   my $ip = $lasthop->{ip};
   my $helo = $lasthop->{helo};
-  my $query;
+  my $sender = $lasthop->{envfrom};
+
+  if (!$use_helo && !$sender) {
+    # we can (apparently) use whatever the current Envelope-From was,
+    # from the Return-Path, X-Envelope-From, or whatever header.
+    # it's better to get it from Received though, as that is updated
+    # hop-by-hop.
+    $sender = $self->get ("EnvelopeFrom");
+  }
+
+  # if $sender is undef or "", that's OK; Mail::SPF::Query will use
+  # the HELO domain instead, which we can get from the Received headers.
+  # it's bending the SPF rules though...
 
   if (!$ip || !$helo) {
     dbg ("SPF: cannot get IP or HELO, cannot use SPF");
     return;
   }
 
-  # if $sender is undef or "", that's OK; Mail::SPF::Query will use
-  # the HELO domain instead, which we can get from the Received headers.
-  # nice!
-
+  my $query;
   eval {
     require Mail::SPF::Query;
     $query = Mail::SPF::Query->new (ip => $ip, sender => $sender, helo => $helo);
@@ -3166,6 +3189,7 @@ sub check_for_all_relays_near_mxes {
   my ($self) = @_;
 
   return unless $self->is_dns_available();
+  return;
 
   # Allow a max 15-second timeout to do this test, looking up all MX and
   # A records.

@@ -15,9 +15,6 @@ usage: mass-check [options] target ...
   --showdots    print a dot for each scanned message
   --rules=RE    Only test rules matching the given regexp RE
   --restart=N   restart all of the children after processing N messages
-  --after=N     only test mails received after time_t N (negative values
-                are an offset from current time, e.g. -86400 = last day)
-                or after date as parsed by Time::ParseDate (e.g. '-6 months')
  
   log options
   -o            write all logs to stdout
@@ -27,6 +24,9 @@ usage: mass-check [options] target ...
  
   message selection options
   -n            no date sorting or spam/ham interleaving
+  --after=N     only test mails received after time_t N (negative values
+                are an offset from current time, e.g. -86400 = last day)
+                or after date as parsed by Time::ParseDate (e.g. '-6 months')
   --all         don't skip big messages
   --head=N      only check first N ham and N spam (N messages if -n used)
   --tail=N      only check last N ham and N spam (N messages if -n used)
@@ -87,6 +87,8 @@ if ($opt_f) {
   push (@targets, map { chomp; $_ } <F>);
   close (F);
 }
+
+if (scalar @targets == 0) { usage(); }
 
 #if ($opt_ms) {
 #find_missed($opt_spamlog);
