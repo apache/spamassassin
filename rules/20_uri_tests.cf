@@ -2,6 +2,7 @@
 
 uri NUMERIC_HTTP_ADDR   /^https?\:\/\/\d{7,}/is
 describe NUMERIC_HTTP_ADDR  Uses a numeric IP address in URL
+test NUMERIC_HTTP_ADDR ok http://123456789/foo/bar
 
 uri NORMAL_HTTP_TO_IP   /^https?\:\/\/\d+\.\d+\.\d+\.\d+/is
 describe NORMAL_HTTP_TO_IP  Uses a dotted-decimal IP address in URL

@@ -6,6 +6,8 @@ describe NO_REAL_NAME		From: does not include a real name
 
 header FROM_ENDS_IN_NUMS	From =~ /\d\d\@/
 describe FROM_ENDS_IN_NUMS	From: ends in numbers
+test FROM_ENDS_IN_NUMS     ok   matt1234@sergeant.org
+test FROM_ENDS_IN_NUMS     fail matt@sergeant.org
 
 header FROM_HAS_MIXED_NUMS	From =~ /\d+[a-z]+\d+\S*@/i
 describe FROM_HAS_MIXED_NUMS	From: contains numbers mixed in with letters
@@ -334,3 +336,7 @@ describe GAPPY_SUBJECT          'Subject' contains G.a.p.p.y-T.e.x.t
 # This is a Bugzilla bug status report e-mail and probably OK
 header BUGZILLA_BUG		Subject =~ /\[Bug \d+\]/
 describe BUGZILLA_BUG		Looks like a Bugzilla bug
+
+# give a negative score to Majordomo results.
+header   MAJORDOMO              Subject =~ /Majordomo (?:request )?results/
+describe MAJORDOMO              From Majordomo

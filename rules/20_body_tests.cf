@@ -638,3 +638,8 @@ describe SAFEGUARD_NOTICE	Contains signature of unregistered spam tool
 # Evites trigger false positives
 body EVITE			/evite.citysearch.com/
 describe EVITE			Claw back some for evite
+
+# Has a proper .sig - probably clean
+body     SIGNATURE_DELIM        /^-- $/
+describe SIGNATURE_DELIM        Standard signature delimiter present  
+
