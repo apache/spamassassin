@@ -295,13 +295,11 @@ meta T_HTML_50_70_IMGS3         (HTML_50_70 && __T_HTML_NUM_IMGS_3)
 
 ####################################################################
 
-body T_HTML_TAG_EXISTS_CENTER    eval:html_tag_exists('center')
-# T_HTML_TAG_EXISTS_HX has about the same accuracy as HTML_MESSAGE
-body T_HTML_TAG_EXISTS_HX        eval:html_test('header_tag')
+body T_HTML_TAG_EXISTS_CENTER	eval:html_tag_exists('center')
 
-body T_HTML_BIG_FONT_B           eval:html_test('big_font_B')
-body T_HTML_FONT_SIZE_PX         eval:html_test('font_px')
-body T_HTML_STYLE_LINE_HEIGHT    eval:html_test('line_height')
+body T_HTML_BIG_FONT_B		eval:html_test('big_font_B')
+body T_HTML_FONT_SIZE_PX	eval:html_test('font_px')
+body T_HTML_STYLE_LINE_HEIGHT	eval:html_test('line_height')
 
 body T_HTML_SHOUTING1            eval:html_range('max_shouting','0','1')
 body T_HTML_SHOUTING2            eval:html_range('max_shouting','1','2')
@@ -348,6 +346,7 @@ describe T_FROM_OFFERS          From address is "offers at something"
 header T_FROM_OFFERS_2          From:addr =~ /^offers/i
 header T_FROM_OFFERS_3          From:addr =~ /\@\S*offers/i
 
+# quinlan: these may overlap some existing CLICK rules, check before adding
 body     T_HTML_LINK_CLICK_HERE eval:html_eval('anchor_text', '=~ /click\s+here/i')
 body     T_HTML_LINK_CLICK_CAPS eval:html_eval('anchor_text', '=~ /CLICK/')
 body     T_HTML_LINK_MONEY      eval:html_eval('anchor_text', '=~/\s\$/')

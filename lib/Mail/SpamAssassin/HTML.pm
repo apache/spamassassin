@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.41 2002/12/08 03:18:57 quinlan Exp $
+# $Id: HTML.pm,v 1.42 2002/12/08 07:48:50 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -302,8 +302,6 @@ sub html_tests {
   }
 
   $self->{html}{anchor_text} ||= "" if ($tag eq "a");
-
-  $self->{html}{header_tag} = 1 if ($tag =~ /^h\d$/);
 }
 
 sub html_text {
