@@ -24,66 +24,70 @@
 
 require_version @@VERSION@@
 
-header __FRAUD_00	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*(?:very )?urgent\s+(?:(?:and|&)\s+)?(?:confidential|assistance|business|attention|reply|response|help)\b/i
+# predicate naming used to avoid renumbering
+# 1. assign new rules a random unique three letter sequence
+# 2. sort on rule definition, not rule name
 
-body __FRAUD_01	/(?:claim|concerning) (?:the|this) money/i
-body __FRAUD_02	/(?:finance|holding|securit(?:ies|y)) (?:company|firm|storage house)/i
-body __FRAUD_03	/(?:government|bank) of nigeria/i
-body __FRAUD_04	/(?:international|luckyday|overseas stake|promo|world) lott(?:o|ery)/i
-body __FRAUD_05	/(?:may i first|to) introduce my ?self/i
-body __FRAUD_06	/(?:negotiate|reasonable|acc?or?ding|certain|agg?ree).{1,20}percentage/i
-body __FRAUD_07	/(?:who was a|as a|an? honest|you being a|to any) foreigner/i
-body __FRAUD_08	/\b(?:International\b.{1,15}\bLottery|lottery\b.{1,15}\binternational)\b/i
-body __FRAUD_09	/\b(?:You may be sur?prised to receive this letter from me|this (?:letter|mail) (?:(?:may|will) come to you as|will be) a sur?prise)\b/i
-body __FRAUD_10	/\b(?:financial|confiden(?:tial|ce)|safe|mutual|secret|success|risk-?free|details|business).{1,30}\btransaction\b/i
-body __FRAUD_11	/\b(?:of|the) late president\b/i
-body __FRAUD_12	/\b(?:wife|son|brother|daughter) of the late\b/i
-body __FRAUD_13	/\bU\.?S\.?(?:D\.?)?\s*(?:\$\s*)?(?:\d+,\d+,\d+|\d+\.\d+\.\d+|\d+(?:\.\d+)?\s*milli?on)/i
-body __FRAUD_15	/\ball funds will be returned\b/i
-body __FRAUD_16	/\bass?ylum\b/i
-body __FRAUD_17	/\battached to ticket number\b/i
-body __FRAUD_19	/\bdisburs/i
-body __FRAUD_20	/\bforeign account\b/i
-body __FRAUD_21	/\bgive\s+you .{0,15}(?:fund|money|total|sum|contact|percent)\b/i
-body __FRAUD_22	/\bhonest cooperation\b/i
-body __FRAUD_23	/\blate .{0,15}(?:father|wife|husband|general|president|daughter|son|minister).{0,20}(?:wealthy|treasure|deposit|money|left|property|known|\$|US)/i
-body __FRAUD_24	/\blocate(?: .{1,20})? extended relative/i
-body __FRAUD_25	/\bmilli?on (?:.{1,25} thousand\s*)?(?:(?:united states|u\.?s\.?) dollars|(?i:U\.?S\.?D?))\b/i
-body __FRAUD_26	/\bnext of kin\b/i
-body __FRAUD_27	/\bnumbered time\b/i
-body __FRAUD_28	/\bsum of ?(?:million|US|\$)|\b(?:deposit|left|huge|discovered|abandoned).{0,15} sum of/i
-body __FRAUD_29	/\btop secret\b/i
-body __FRAUD_30	/\btransaction\b.{1,30}\b(?:magnitude|diplomatic|strict|absolute|secret|confiden(?:tial|ce)|guarantee)/i
-body __FRAUD_31	/\burgent and(?: very)? (?:profitable|confidential) business propos(?:al|ition)/i
-body __FRAUD_33	/\d+%.{0,15}\)? (?:of (?:the total|this|the) (?:amount|sum|money)|for you|for my investment|for (?:us|me)|.{0,15}\bfor your expenses)\b/i
-body __FRAUD_34	/as a minister/i
-body __FRAUD_35	/as the beneficiary/i
-body __FRAUD_36	/award notification/i
-body __FRAUD_37	/bequest/i
-body __FRAUD_38	/charity organization/i
-body __FRAUD_39	/computer ballot system/i
-body __FRAUD_40	/fiduciary agent/i
-body __FRAUD_41	/foreign (?:business partner|customer)/i
-body __FRAUD_42	/foreign (?:offshore )?(?:bank|account)/i
-body __FRAUD_43	/god gives .{1,10}second chance/i
-body __FRAUD_44	/i am contacting you/i
-body __FRAUD_45	/lott(?:o|ery) (?:co,?ordinator|international)/i
-body __FRAUD_46	/magnanimity/i
-body __FRAUD_47	/modalit(?:y|ies)/i
-body __FRAUD_48	/nigerian? (?:national|government)/i
-body __FRAUD_49	/over-invoice/i
-body __FRAUD_50	/percentage.{1,10}(?:indicat|previous|involved)/i
-body __FRAUD_51	/prize award dept/i
-body __FRAUD_52	/reliable person/i
-body __FRAUD_53	/the total sum/i
-body __FRAUD_54	/vital documents/i
-body __FRAUD_55	/you are.{0,8}winner/i
-body __FRAUD_56	/youre? country/i
+header __FRAUD_VQE	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*(?:very )?urgent\s+(?:(?:and|&)\s+)?(?:confidential|assistance|business|attention|reply|response|help)\b/i
 
-meta ADVANCE_FEE_1 (__FRAUD_00 + __FRAUD_01 + __FRAUD_02 + __FRAUD_03 + __FRAUD_04 + __FRAUD_05 + __FRAUD_06 + __FRAUD_07 + __FRAUD_08 + __FRAUD_09 + __FRAUD_10 + __FRAUD_11 + __FRAUD_12 + __FRAUD_13 + __FRAUD_14 + __FRAUD_15 + __FRAUD_16 + __FRAUD_17 + __FRAUD_18 + __FRAUD_19 + __FRAUD_20 + __FRAUD_21 + __FRAUD_22 + __FRAUD_23 + __FRAUD_24 + __FRAUD_25 + __FRAUD_26 + __FRAUD_27 + __FRAUD_28 + __FRAUD_29 + __FRAUD_30 + __FRAUD_31 + __FRAUD_32 + __FRAUD_33 + __FRAUD_34 + __FRAUD_35 + __FRAUD_36 + __FRAUD_37 + __FRAUD_38 + __FRAUD_39 + __FRAUD_40 + __FRAUD_41 + __FRAUD_42 + __FRAUD_43 + __FRAUD_44 + __FRAUD_45 + __FRAUD_46 + __FRAUD_47 + __FRAUD_48 + __FRAUD_49 + __FRAUD_50 + __FRAUD_51 + __FRAUD_52 + __FRAUD_53 + __FRAUD_54 + __FRAUD_55 + __FRAUD_56 > 1)
-meta ADVANCE_FEE_2 (__FRAUD_00 + __FRAUD_01 + __FRAUD_02 + __FRAUD_03 + __FRAUD_04 + __FRAUD_05 + __FRAUD_06 + __FRAUD_07 + __FRAUD_08 + __FRAUD_09 + __FRAUD_10 + __FRAUD_11 + __FRAUD_12 + __FRAUD_13 + __FRAUD_14 + __FRAUD_15 + __FRAUD_16 + __FRAUD_17 + __FRAUD_18 + __FRAUD_19 + __FRAUD_20 + __FRAUD_21 + __FRAUD_22 + __FRAUD_23 + __FRAUD_24 + __FRAUD_25 + __FRAUD_26 + __FRAUD_27 + __FRAUD_28 + __FRAUD_29 + __FRAUD_30 + __FRAUD_31 + __FRAUD_32 + __FRAUD_33 + __FRAUD_34 + __FRAUD_35 + __FRAUD_36 + __FRAUD_37 + __FRAUD_38 + __FRAUD_39 + __FRAUD_40 + __FRAUD_41 + __FRAUD_42 + __FRAUD_43 + __FRAUD_44 + __FRAUD_45 + __FRAUD_46 + __FRAUD_47 + __FRAUD_48 + __FRAUD_49 + __FRAUD_50 + __FRAUD_51 + __FRAUD_52 + __FRAUD_53 + __FRAUD_54 + __FRAUD_55 + __FRAUD_56 > 2)
-meta ADVANCE_FEE_3 (__FRAUD_00 + __FRAUD_01 + __FRAUD_02 + __FRAUD_03 + __FRAUD_04 + __FRAUD_05 + __FRAUD_06 + __FRAUD_07 + __FRAUD_08 + __FRAUD_09 + __FRAUD_10 + __FRAUD_11 + __FRAUD_12 + __FRAUD_13 + __FRAUD_14 + __FRAUD_15 + __FRAUD_16 + __FRAUD_17 + __FRAUD_18 + __FRAUD_19 + __FRAUD_20 + __FRAUD_21 + __FRAUD_22 + __FRAUD_23 + __FRAUD_24 + __FRAUD_25 + __FRAUD_26 + __FRAUD_27 + __FRAUD_28 + __FRAUD_29 + __FRAUD_30 + __FRAUD_31 + __FRAUD_32 + __FRAUD_33 + __FRAUD_34 + __FRAUD_35 + __FRAUD_36 + __FRAUD_37 + __FRAUD_38 + __FRAUD_39 + __FRAUD_40 + __FRAUD_41 + __FRAUD_42 + __FRAUD_43 + __FRAUD_44 + __FRAUD_45 + __FRAUD_46 + __FRAUD_47 + __FRAUD_48 + __FRAUD_49 + __FRAUD_50 + __FRAUD_51 + __FRAUD_52 + __FRAUD_53 + __FRAUD_54 + __FRAUD_55 + __FRAUD_56 > 3)
-meta ADVANCE_FEE_4 (__FRAUD_00 + __FRAUD_01 + __FRAUD_02 + __FRAUD_03 + __FRAUD_04 + __FRAUD_05 + __FRAUD_06 + __FRAUD_07 + __FRAUD_08 + __FRAUD_09 + __FRAUD_10 + __FRAUD_11 + __FRAUD_12 + __FRAUD_13 + __FRAUD_14 + __FRAUD_15 + __FRAUD_16 + __FRAUD_17 + __FRAUD_18 + __FRAUD_19 + __FRAUD_20 + __FRAUD_21 + __FRAUD_22 + __FRAUD_23 + __FRAUD_24 + __FRAUD_25 + __FRAUD_26 + __FRAUD_27 + __FRAUD_28 + __FRAUD_29 + __FRAUD_30 + __FRAUD_31 + __FRAUD_32 + __FRAUD_33 + __FRAUD_34 + __FRAUD_35 + __FRAUD_36 + __FRAUD_37 + __FRAUD_38 + __FRAUD_39 + __FRAUD_40 + __FRAUD_41 + __FRAUD_42 + __FRAUD_43 + __FRAUD_44 + __FRAUD_45 + __FRAUD_46 + __FRAUD_47 + __FRAUD_48 + __FRAUD_49 + __FRAUD_50 + __FRAUD_51 + __FRAUD_52 + __FRAUD_53 + __FRAUD_54 + __FRAUD_55 + __FRAUD_56 > 4)
+body __FRAUD_KJV	/(?:claim|concerning) (?:the|this) money/i
+body __FRAUD_IRJ	/(?:finance|holding|securit(?:ies|y)) (?:company|firm|storage house)/i
+body __FRAUD_NEB	/(?:government|bank) of nigeria/i
+body __FRAUD_ZFL	/(?:international|luckyday|overseas stake|promo|world) lott(?:o|ery)/i
+body __FRAUD_GVI	/(?:may i first|to) introduce my ?self/i
+body __FRAUD_QEU	/(?:negotiate|reasonable|acc?or?ding|certain|agg?ree).{1,20}percentage/i
+body __FRAUD_XJR	/(?:who was a|as a|an? honest|you being a|to any) foreigner/i
+body __FRAUD_IWJ	/\b(?:International\b.{1,15}\bLottery|lottery\b.{1,15}\binternational)\b/i
+body __FRAUD_YFW	/\b(?:You may be sur?prised to receive this letter from me|this (?:letter|mail) (?:(?:may|will) come to you as|will be) a sur?prise)\b/i
+body __FRAUD_NNO	/\b(?:financial|confiden(?:tial|ce)|safe|mutual|secret|success|risk-?free|details|business).{1,30}\btransaction\b/i
+body __FRAUD_EZY	/\b(?:of|the) late president\b/i
+body __FRAUD_ZFJ	/\b(?:wife|son|brother|daughter) of the late\b/i
+body __FRAUD_KDT	/\bU\.?S\.?(?:D\.?)?\s*(?:\$\s*)?(?:\d+,\d+,\d+|\d+\.\d+\.\d+|\d+(?:\.\d+)?\s*milli?on)/i
+body __FRAUD_ZTN	/\ball funds will be returned\b/i
+body __FRAUD_OMN	/\bass?ylum\b/i
+body __FRAUD_BGP	/\battached to ticket number\b/i
+body __FRAUD_FBI	/\bdisburs/i
+body __FRAUD_JBU	/\bforeign account\b/i
+body __FRAUD_JYG	/\bgive\s+you .{0,15}(?:fund|money|total|sum|contact|percent)\b/i
+body __FRAUD_XVW	/\bhonest cooperation\b/i
+body __FRAUD_NKS	/\blate .{0,15}(?:father|wife|husband|general|president|daughter|son|minister).{0,20}(?:wealthy|treasure|deposit|money|left|property|known|\$|US)/i
+body __FRAUD_SNT	/\blocate(?: .{1,20})? extended relative/i
+body __FRAUD_LTX	/\bmilli?on (?:.{1,25} thousand\s*)?(?:(?:united states|u\.?s\.?) dollars|(?i:U\.?S\.?D?))\b/i
+body __FRAUD_GIM	/\bnext of kin\b/i
+body __FRAUD_VUS	/\bnumbered time\b/i
+body __FRAUD_ZJT	/\bsum of ?(?:million|US|\$)|\b(?:deposit|left|huge|discovered|abandoned).{0,15} sum of/i
+body __FRAUD_PYA	/\btop secret\b/i
+body __FRAUD_MCQ	/\btransaction\b.{1,30}\b(?:magnitude|diplomatic|strict|absolute|secret|confiden(?:tial|ce)|guarantee)/i
+body __FRAUD_AGA	/\burgent and(?: very)? (?:profitable|confidential) business propos(?:al|ition)/i
+body __FRAUD_DIR	/\d+%.{0,15}\)? (?:of (?:the total|this|the) (?:amount|sum|money)|for you|for my investment|for (?:us|me)|.{0,15}\bfor your expenses)\b/i
+body __FRAUD_UMA	/as a minister/i
+body __FRAUD_PVN	/as the beneficiary/i
+body __FRAUD_FVU	/award notification/i
+body __FRAUD_WKA	/bequest/i
+body __FRAUD_USU	/charity organization/i
+body __FRAUD_CKF	/computer ballot system/i
+body __FRAUD_FCW	/fiduciary agent/i
+body __FRAUD_MQO	/foreign (?:business partner|customer)/i
+body __FRAUD_TCC	/foreign (?:offshore )?(?:bank|account)/i
+body __FRAUD_GBW	/god gives .{1,10}second chance/i
+body __FRAUD_NRG	/i am contacting you/i
+body __FRAUD_RLX	/lott(?:o|ery) (?:co,?ordinator|international)/i
+body __FRAUD_AXF	/magnanimity/i
+body __FRAUD_THJ	/modalit(?:y|ies)/i
+body __FRAUD_YQV	/nigerian? (?:national|government)/i
+body __FRAUD_YJA	/over-invoice/i
+body __FRAUD_PXQ	/percentage.{1,10}(?:indicat|previous|involved)/i
+body __FRAUD_MJL	/prize award dept/i
+body __FRAUD_ZEM	/reliable person/i
+body __FRAUD_YPO	/the total sum/i
+body __FRAUD_UOQ	/vital documents/i
+body __FRAUD_WRU	/you are.{0,8}winner/i
+body __FRAUD_EEX	/youre? country/i
+
+meta ADVANCE_FEE_1	(__FRAUD_VQE + __FRAUD_KJV + __FRAUD_IRJ + __FRAUD_NEB + __FRAUD_ZFL + __FRAUD_GVI + __FRAUD_QEU + __FRAUD_XJR + __FRAUD_IWJ + __FRAUD_YFW + __FRAUD_NNO + __FRAUD_EZY + __FRAUD_ZFJ + __FRAUD_KDT + __FRAUD_ZTN + __FRAUD_OMN + __FRAUD_BGP + __FRAUD_FBI + __FRAUD_JBU + __FRAUD_JYG + __FRAUD_XVW + __FRAUD_NKS + __FRAUD_SNT + __FRAUD_LTX + __FRAUD_GIM + __FRAUD_VUS + __FRAUD_ZJT + __FRAUD_PYA + __FRAUD_MCQ + __FRAUD_AGA + __FRAUD_DIR + __FRAUD_UMA + __FRAUD_PVN + __FRAUD_FVU + __FRAUD_WKA + __FRAUD_USU + __FRAUD_CKF + __FRAUD_FCW + __FRAUD_MQO + __FRAUD_TCC + __FRAUD_GBW + __FRAUD_NRG + __FRAUD_RLX + __FRAUD_AXF + __FRAUD_THJ + __FRAUD_YQV + __FRAUD_YJA + __FRAUD_PXQ + __FRAUD_MJL + __FRAUD_ZEM + __FRAUD_YPO + __FRAUD_UOQ + __FRAUD_WRU + __FRAUD_EEX > 1)
+meta ADVANCE_FEE_2	(__FRAUD_VQE + __FRAUD_KJV + __FRAUD_IRJ + __FRAUD_NEB + __FRAUD_ZFL + __FRAUD_GVI + __FRAUD_QEU + __FRAUD_XJR + __FRAUD_IWJ + __FRAUD_YFW + __FRAUD_NNO + __FRAUD_EZY + __FRAUD_ZFJ + __FRAUD_KDT + __FRAUD_ZTN + __FRAUD_OMN + __FRAUD_BGP + __FRAUD_FBI + __FRAUD_JBU + __FRAUD_JYG + __FRAUD_XVW + __FRAUD_NKS + __FRAUD_SNT + __FRAUD_LTX + __FRAUD_GIM + __FRAUD_VUS + __FRAUD_ZJT + __FRAUD_PYA + __FRAUD_MCQ + __FRAUD_AGA + __FRAUD_DIR + __FRAUD_UMA + __FRAUD_PVN + __FRAUD_FVU + __FRAUD_WKA + __FRAUD_USU + __FRAUD_CKF + __FRAUD_FCW + __FRAUD_MQO + __FRAUD_TCC + __FRAUD_GBW + __FRAUD_NRG + __FRAUD_RLX + __FRAUD_AXF + __FRAUD_THJ + __FRAUD_YQV + __FRAUD_YJA + __FRAUD_PXQ + __FRAUD_MJL + __FRAUD_ZEM + __FRAUD_YPO + __FRAUD_UOQ + __FRAUD_WRU + __FRAUD_EEX > 2)
+meta ADVANCE_FEE_3	(__FRAUD_VQE + __FRAUD_KJV + __FRAUD_IRJ + __FRAUD_NEB + __FRAUD_ZFL + __FRAUD_GVI + __FRAUD_QEU + __FRAUD_XJR + __FRAUD_IWJ + __FRAUD_YFW + __FRAUD_NNO + __FRAUD_EZY + __FRAUD_ZFJ + __FRAUD_KDT + __FRAUD_ZTN + __FRAUD_OMN + __FRAUD_BGP + __FRAUD_FBI + __FRAUD_JBU + __FRAUD_JYG + __FRAUD_XVW + __FRAUD_NKS + __FRAUD_SNT + __FRAUD_LTX + __FRAUD_GIM + __FRAUD_VUS + __FRAUD_ZJT + __FRAUD_PYA + __FRAUD_MCQ + __FRAUD_AGA + __FRAUD_DIR + __FRAUD_UMA + __FRAUD_PVN + __FRAUD_FVU + __FRAUD_WKA + __FRAUD_USU + __FRAUD_CKF + __FRAUD_FCW + __FRAUD_MQO + __FRAUD_TCC + __FRAUD_GBW + __FRAUD_NRG + __FRAUD_RLX + __FRAUD_AXF + __FRAUD_THJ + __FRAUD_YQV + __FRAUD_YJA + __FRAUD_PXQ + __FRAUD_MJL + __FRAUD_ZEM + __FRAUD_YPO + __FRAUD_UOQ + __FRAUD_WRU + __FRAUD_EEX > 3)
+meta ADVANCE_FEE_4	(__FRAUD_VQE + __FRAUD_KJV + __FRAUD_IRJ + __FRAUD_NEB + __FRAUD_ZFL + __FRAUD_GVI + __FRAUD_QEU + __FRAUD_XJR + __FRAUD_IWJ + __FRAUD_YFW + __FRAUD_NNO + __FRAUD_EZY + __FRAUD_ZFJ + __FRAUD_KDT + __FRAUD_ZTN + __FRAUD_OMN + __FRAUD_BGP + __FRAUD_FBI + __FRAUD_JBU + __FRAUD_JYG + __FRAUD_XVW + __FRAUD_NKS + __FRAUD_SNT + __FRAUD_LTX + __FRAUD_GIM + __FRAUD_VUS + __FRAUD_ZJT + __FRAUD_PYA + __FRAUD_MCQ + __FRAUD_AGA + __FRAUD_DIR + __FRAUD_UMA + __FRAUD_PVN + __FRAUD_FVU + __FRAUD_WKA + __FRAUD_USU + __FRAUD_CKF + __FRAUD_FCW + __FRAUD_MQO + __FRAUD_TCC + __FRAUD_GBW + __FRAUD_NRG + __FRAUD_RLX + __FRAUD_AXF + __FRAUD_THJ + __FRAUD_YQV + __FRAUD_YJA + __FRAUD_PXQ + __FRAUD_MJL + __FRAUD_ZEM + __FRAUD_YPO + __FRAUD_UOQ + __FRAUD_WRU + __FRAUD_EEX > 4)
 describe ADVANCE_FEE_1	Appears to be advance fee fraud (Nigerian 419)
 describe ADVANCE_FEE_2	Appears to be advance fee fraud (Nigerian 419)
 describe ADVANCE_FEE_3	Appears to be advance fee fraud (Nigerian 419)
