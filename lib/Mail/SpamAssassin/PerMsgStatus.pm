@@ -1146,13 +1146,13 @@ my $mark       = q(-_.!~*'());                                    #'; emacs
 my $unreserved = "A-Za-z0-9\Q$mark\E\x00-\x08\x0b\x0c\x0e-\x1f";
 my $uricSet = quotemeta($reserved) . $unreserved . "%";
 
-my $schemeRE = '[a-zA-Z][a-zA-Z0-9.+\-]*';
+my $schemeRE = qr/[a-zA-Z][a-zA-Z0-9.+\-]*/;
 
 my $uricCheat = $uricSet;
 $uricCheat =~ tr/://d;
 
 my $schemelessRE = qr/(?<!\.)(?:www\.|ftp\.)/;
-my $uriRe = qr/(?:$schemeRE:[$uricCheat]|$schemelessRE)[$uricSet#]*/;
+my $uriRe = qr/(?:\b$schemeRE:[$uricCheat]|\b$schemelessRE)[$uricSet#]*/o;
 
 # Taken from Email::Find (thanks Tatso!)
 # This is the BNF from RFC 822
@@ -1169,7 +1169,7 @@ my $dtext       = qq/[^$esc$nonASCII$cr_list$open_br$close_br]/;
 my $quoted_pair = qq<$esc>.qq<[^$nonASCII]>;
 my $atom_char   = qq/[^($space)<>\@,;:\".$esc$open_br$close_br$ctrl$nonASCII]/;
 #"
-my $atom        = qq<$atom_char+(?!$atom_char)>;
+my $atom        = qq{(?>$atom_char+)};
 my $quoted_str  = qq<\"$qtext*(?:$quoted_pair$qtext*)*\">; #"
 my $word        = qq<(?:$atom|$quoted_str)>;
 my $local_part  = qq<$word(?:$period$word)*>;
@@ -1183,7 +1183,7 @@ my $domain_lit  = qq<$open_br(?:$dtext|$quoted_pair)*$close_br>;
 my $domain      = qq<(?:$domain_ref|$domain_lit)>;
 
 # Finally, the address-spec regex (more or less)
-my $Addr_spec_re   = qr<$local_part\s*\@\s*$domain>;
+my $Addr_spec_re   = qr<\b$local_part\s*\@\s*$domain>o;
 
 sub do_body_uri_tests {
   my ($self, $textary) = @_;
@@ -1193,6 +1193,7 @@ sub do_body_uri_tests {
   dbg ("running uri tests; score so far=".$self->{hits});
   
   my $text = join('', @$textary);
+  study $text;
   # warn("spam: /$uriRe/ $text\n");
 
   my $base_uri = "http://";
@@ -1245,6 +1246,8 @@ sub do_body_uri_tests {
       # warn("Got URI: $uri\n");
       push @uris, $uri;
   }
+
+  dbg("uri tests: Done uriRE");
   
   while ($text =~ /\G.*?($Addr_spec_re)/gsoc) {
       my $uri = $1;
@@ -1253,6 +1256,8 @@ sub do_body_uri_tests {
       # warn("Got URI: $uri\n");
       push @uris, $uri;
   }
+
+
 
   $self->clear_test_state();
   if ( defined &Mail::SpamAssassin::PerMsgStatus::_body_uri_tests ) {
