@@ -300,13 +300,16 @@ sub run {
       die "archive-iterator: cannot fork: $!";
     }
 
-    # we now have a temp file with the messages to process
+    # we now have a temporary file with the messages to process
     # in theory, our file pointer is at the start of the file, but make sure.
     # NOTE: do this here, not in message_array, since that will only affect
     # the child.
-    seek ($self->{messageh}, 0, 0);
+    seek($self->{messageh}, 0, 0);
     $MESSAGES = $self->next_message();
 
+    if (!$MESSAGES) {
+      die "archive-iterator: no messages to process\n";
+    }
     # only do 1 process, message list in a temp file, no restarting
     if ($self->{opt_j} == 1 && !defined $self->{opt_restart}) {
       my $message;
@@ -453,7 +456,7 @@ sub run_file {
   }
   my @msg;
   my $header = '';
-  while(<INPUT>) {
+  while (<INPUT>) {
     if (!$header && /^\s*$/) {
       $header = join('', @msg);
     }
@@ -663,7 +666,7 @@ sub message_array {
 
   foreach my $target (@${targets}) {
     if (!defined $target) {
-      warn "Invalid (undef) value in target list";
+      warn "archive-iterator: invalid (undef) value in target list";
       next;
     }
 
@@ -671,12 +674,12 @@ sub message_array {
 
     # "class"
     if (!defined $format) {
-      warn "Invalid (undef) format in target list, $target";
+      warn "archive-iterator: invalid (undef) format in target list, $target";
       next;
     }
     # "class:format"
     if (!defined $rawloc) {
-      warn "Invalid (undef) raw location in target list, $target";
+      warn "archive-iterator: invalid (undef) raw location in target list, $target";
       next;
     }
 
@@ -859,7 +862,7 @@ sub scan_directory {
 
   my @files;
 
-  opendir(DIR, $folder) || die "archive-iterator: can't open '$folder' dir: $!";
+  opendir(DIR, $folder) || die "archive-iterator: can't open '$folder' dir: $!\n";
   if (-f "$folder/cyrus.header") {
     # cyrus metadata: http://unix.lsa.umich.edu/docs/imap/imap-lsa-srv_3.html
     @files = grep { /^\S+$/ && !/^cyrus\.(?:index|header|cache|seen)/ }
@@ -872,6 +875,11 @@ sub scan_directory {
   closedir(DIR);
 
   @files = grep { -f } map { "$folder/$_" } @files;
+
+  if (!@files) {
+    warn "archive-iterator: readdir found no mail in '$folder' directory\n";
+    return;
+  }
 
   foreach my $mail (@files) {
     $self->scan_file($class, $mail);
@@ -904,8 +912,8 @@ sub scan_mailbox {
   if ($folder ne '-' && -d $folder) {
     # passed a directory of mboxes
     $folder =~ s/\/\s*$//; #Remove trailing slash, if there
-    opendir(DIR, $folder) || die "archive-iterator: can't open '$folder' dir: $!";
-    while($_ = readdir(DIR)) {
+    opendir(DIR, $folder) || die "archive-iterator: can't open '$folder' dir: $!\n";
+    while ($_ = readdir(DIR)) {
       if(/^[^\.]\S*$/ && ! -d "$folder/$_") {
 	push(@files, "$folder/$_");
       }
@@ -964,67 +972,69 @@ sub scan_mailbox {
 }
 
 sub scan_mbx {
-    my ($self, $class, $folder) = @_;
-    my (@files, $fp);
-    
-    if ($folder ne '-' && -d $folder) {
-	# got passed a directory full of mbx folders.
-	$folder =~ s/\/\s*$//; # remove trailing slash, if there is one
-	opendir(DIR, $folder) || die "archive-iterator: can't open '$folder' dir: $!";
-	while($_ = readdir(DIR)) {
-	    if(/^[^\.]\S*$/ && ! -d "$folder/$_") {
-		push(@files, "$folder/$_");
-	    }
-	}
-	closedir(DIR);
-    } else {
-	push(@files, $folder);
+  my ($self, $class, $folder) = @_;
+  my (@files, $fp);
+
+  if ($folder ne '-' && -d $folder) {
+    # got passed a directory full of mbx folders.
+    $folder =~ s/\/\s*$//; # remove trailing slash, if there is one
+    opendir(DIR, $folder) || die "archive-iterator: can't open '$folder' dir: $!\n";
+    while ($_ = readdir(DIR)) {
+      if(/^[^\.]\S*$/ && ! -d "$folder/$_") {
+	push(@files, "$folder/$_");
+      }
     }
-    
-    foreach my $file (@files) {
-	if ($folder =~ /\.(?:gz|bz2)$/) {
-	    die "archive-iterator: compressed mbx folders are not supported at this time\n";
-	}
-	mail_open($file) or return;
+    closedir(DIR);
+  }
+  else {
+    push(@files, $folder);
+  }
 
-	# check the mailbox is in mbx format
-	$fp = <INPUT>;
-	if ($fp !~ /\*mbx\*/) {
-	    die "archive-iterator: error: mailbox not in mbx format!\n";
-	}
-	
-	# skip mbx headers to the first email...
-	seek(INPUT, 2048, 0);
+  foreach my $file (@files) {
+    if ($folder =~ /\.(?:gz|bz2)$/) {
+      die "archive-iterator: compressed mbx folders are not supported at this time\n";
+    }
+    mail_open($file) or return;
 
-        my $sep = MBX_SEPARATOR;
-    
+    # check the mailbox is in mbx format
+    $fp = <INPUT>;
+    if ($fp !~ /\*mbx\*/) {
+      die "archive-iterator: error: mailbox not in mbx format!\n";
+    }
+
+    # skip mbx headers to the first email...
+    seek(INPUT, 2048, 0);
+
+    my $sep = MBX_SEPARATOR;
+
+    while (<INPUT>) {
+      if ($_ =~ /$sep/) {
+	my $offset = tell INPUT;
+	my $size = $2;
+
+	# gather up the headers...
+	my $header = '';
 	while (<INPUT>) {
-	    if ($_ =~ /$sep/) {
-		my $offset = tell INPUT;
-		my $size = $2;
-
-		# gather up the headers...
-		my $header = '';
-		while (<INPUT>) {
-		    last if (/^\s*$/);
-		    $header .= $_;
-		}
-
-		my $date = Mail::SpamAssassin::Util::receive_date($header);
-
-		if ($self->{determine_receive_date}) {
-		  next if !$self->message_is_useful_by_date($date);
-		}
-
-		push(@{$self->{$class}}, scan_index_pack($date, $class, "b", "$file.$offset"));
-
-		seek(INPUT, $offset + $size, 0);
-	    } else {
-		die "archive-iterator: error: failure to read message body!\n";
-	    }
+	  last if (/^\s*$/);
+	  $header .= $_;
 	}
-	close INPUT;
+
+	my $date = Mail::SpamAssassin::Util::receive_date($header);
+
+	if ($self->{determine_receive_date}) {
+	  next if !$self->message_is_useful_by_date($date);
+	}
+
+	push(@{$self->{$class}}, scan_index_pack($date, $class, "b", "$file.$offset"));
+
+	seek(INPUT, $offset + $size, 0);
+      }
+      else {
+	die "archive-iterator: error: failure to read message body!\n";
+      }
     }
+    close INPUT;
+  }
 }
 
 ############################################################################
