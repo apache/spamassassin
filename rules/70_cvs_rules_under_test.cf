@@ -78,10 +78,6 @@ header T_FROM_NO_LOWER		From !~ /[a-z]/
 
 ###########################################################################
 
-body T_BANG_GUARANTEE		/\bguaranteed?\!/i
-
-##################################################################
-
 # Dec 18 2002 jm:
 # pretty good, will promote it tomorrow once Allen's had a look at
 # excluding his FPs
@@ -92,37 +88,6 @@ describe T_IDENT_NOBODY		Message was sent by nobody
 score T_IDENT_NOBODY		1.0
 # Allen's version
 meta T_IDENT_NOBODY2		(__IDENT_NOBODY && !__REGSITE_COM && !((FORGOTTEN_PASSWORD + SUBJECT_IS_LIST + T_X_BEENTHERE + KNOWN_MAILING_LIST) > 1))
-
-
-# jm: commented, this hits slist mail traffic, e.g.
-# the <mozilla-general@mozilla.org> list.   Note that the moz lists have a
-# very high spam load, which may explain why the resulting freqs look good
-#header __T_MSGID_11	MESSAGEID =~ /^<?\d\w+\$\w{4,}\@/m
-# tvd: these fp a bit, so they're disabled
-#header __T_MSGID_37	MESSAGEID =~ /^<?\d{13,}\.SM\d+\@[^>]/m
-#header __T_MSGID_16	MESSAGEID =~ /^<?[A-Z]\d{10}\@/m
-# percents are fp percent of spam hits ...
-# 52% fp for daf
-#header T_BAD_MSGID_19	MESSAGEID =~ /^<?\w{7}-\w{6}-\w{2}\.\d{4}(?:-\d{2}){5}\@/m
-# these are all message ids from exchange, the front part is a server name...
-# 10% for rod
-#header T_BAD_MSGID_20	MESSAGEID =~ /^<?EXCH\S+\@/m
-# 10% for dan, 7% for rod, <1% for tvd
-#header T_BAD_MSGID_24	MESSAGEID =~ /^<?[A-Z0-9_-]*SERV[A-Za-z0-9_-]+[0-9a-f]{8}\@/m
-# 40% for rod
-#header T_BAD_MSGID_26	MESSAGEID =~ /^<?[A-Z0-9_-]*MAIL[a-zA-Z0-9_-]+0000[0-9a-f]{4}\@/m
-#meta T_MSGID_S_1	( T_BAD_MSGID_.+ + ) > 0
-# only tvd
-#header T_BAD_MSGID_17	MESSAGEID =~ /^<?DGTBAD\S+\@/m
-
-# 10% justin, 16% for rod
-# jm: definite FPs: redhat-list ML, Palmgear.com monthly download stats
-header T_SPAM_MSGID_32	MESSAGEID =~ /^<?auto-00000\d+\@/m
-
-# Matt Cline: New ratware and user-agent tests
-header T_RATWARE_BIXON       X-Mailer =~ /Bixon ThunderMail/
-header T_RATWARE_BULK_MAILER X-Mailer =~ /BulkMailer/
-
 
 # Dec 20 2002 jm: let's try and catch these spammers out
 header __XIMIAN_MUA	     X-Mailer =~ /^(?:Ximian Evolution|Evolution\/\d+\.)/
@@ -143,31 +108,6 @@ tflags T_USER_AGENT_XIMIAN   nice
 #freqs: 11.817  22.1680   5.3554    0.805   0.53    0.01  T_SENDER_NO_REVERSE
 header   T_SENDER_NO_REVERSE    eval:check_for_sender_no_reverse()
 describe T_SENDER_NO_REVERSE    No reverse lookup for sender's IP
-
-# Matt Cline, Bug #1220 (all already in)
-
-# bug 1207:
-#
-# these do not work so well (daf+easmith+quinlan+rODbegbie+theo)
-# jm: agreed. :(
-#freqs:  0.039   0.0632   0.0237    0.728   0.37    0.01  T_DOUBLE_SQUOTES_1
-#freqs:  0.055   0.0682   0.0473    0.590   0.20    0.01  T_DOUBLE_SQUOTES_2
-#freqs:  0.046   0.0632   0.0347    0.645   0.26    0.01  T_DOUBLE_SQUOTES_3
-#
-header T_DOUBLE_SQUOTES_1 Subject =~ /''\w+''/
-describe T_DOUBLE_SQUOTES_1 Evading word tests with two single quotes
-test T_DOUBLE_SQUOTES_1 ok  ''this'' is ''spam''
-test T_DOUBLE_SQUOTES_1 fail 'this is quoted'
-
-header T_DOUBLE_SQUOTES_2 Subject =~ /''/
-describe T_DOUBLE_SQUOTES_2 Evading word tests with two single quotes
-test T_DOUBLE_SQUOTES_2	ok ''
-test T_DOUBLE_SQUOTES_2 fail 'hi'
-
-header T_DOUBLE_SQUOTES_3 Subject =~ /''.{0,15}''/
-describe T_DOUBLE_SQUOTES_3 Evading word tests with two single quotes
-test T_DOUBLE_SQUOTES_3 ok ''buy now''
-test T_DOUBLE_SQUOTES_3 fail 'asdfasdfasdf'
 
 # Here are some tests for weird double quoting in the body (I tried 37
 # variations, these are the best 10, in rough order best RANK to worst
@@ -195,12 +135,24 @@ describe T_CHECK_EMAIL_ISFREE Body contains an e-mail address listed by Email::I
 rawbody T_NUMERIC_MAILTO_ADDR	/\bmailto:[^\s\@]{1,20}\@\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/is
 
 #bug 652
+# 12/20 - looks very good for easmith, and pretty ok for everyone except rOD - tvd
+#easmith	0.536   2.4914   0.0000    1.000   0.93    0.01  T_SUBJ_BUY
+#jm		0.082   0.2365   0.0166    0.934   0.78    0.01  T_SUBJ_BUY
+#quinlan	0.056   0.1425   0.0000    1.000   0.92    0.01  T_SUBJ_BUY
+#rODbegbie	0.067   0.1658   0.0267    0.861   0.61    0.01  T_SUBJ_BUY
+#theo		0.120   0.2911   0.0135    0.956   0.81    0.01  T_SUBJ_BUY
 header T_SUBJ_BUY			Subject =~ /^buy/i
 describe T_SUBJ_BUY		Subject starts with Buy, Buying
 
 # bug 1014
 # from Allen
-
+# 12/20 - Not great, but looks ok, what say ye?  - tvd
+# daf		0.000   0.0000   0.0000    0.500   0.11    0.01  T_FROM_HAS_UNDERLINE_NUMS
+# easmith	0.107   0.4216   0.0210    0.953   0.80    0.01  T_FROM_HAS_UNDERLINE_NUMS
+# jm		0.460   1.2612   0.1220    0.912   0.73    0.01  T_FROM_HAS_UNDERLINE_NUMS
+# quinlan	0.484   1.2217   0.0130    0.989   0.90    0.01  T_FROM_HAS_UNDERLINE_NUMS
+# rODbegbie	0.471   1.4918   0.0600    0.961   0.86    0.01  T_FROM_HAS_UNDERLINE_NUMS
+# theo		0.540   1.2008   0.1308    0.902   0.68    0.01  T_FROM_HAS_UNDERLINE_NUMS
 header __FROM_HAS_UNDERLINE_NUMS	From =~ /_\S?(?:[a-z]+\w*?\d+|\d+\w*?[a-z]+)\w*\@/i
 meta T_FROM_HAS_UNDERLINE_NUMS		(!T_REPLY_TO_HAS_UNDERLINE_NUMS && __FROM_HAS_UNDERLINE_NUMS)
 describe T_FROM_HAS_UNDERLINE_NUMS	From: contains an underline and numbers/letters
@@ -258,8 +210,10 @@ body T_VISIT_OUR_SITE_2 /\b(?:visit|enter)\s+(?:my|our|this)\s+(?:web\s*)?site/i
 
 # bug 878
 # seems to inserted with s1618 rules VERY heavily
-body WE_HATE_SPAM2 /anti-spam policy/i
-describe WE_HATE_SPAM2 Spammer is against spam -- aren't we all?
+# 12/20 - not hit a lot, but no fps for anyone.  I added \b's around, if it looks good tomorrow I'll
+# promote it - tvd
+body T_WE_HATE_SPAM2 /\banti-spam policy\b/i
+describe T_WE_HATE_SPAM2 Spammer is against spam -- aren't we all?
 
 uri T_PXE_LOGIC /^http:\/\/(?:pxe|fx)\.[^\/]{1,50}\.com\/logic\/to\.pl\?/i
 test T_PXE_LOGIC ok http://pxe.highspeed-email.com/logic/to.pl?i=3399923cd33d
