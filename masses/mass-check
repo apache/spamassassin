@@ -69,7 +69,7 @@ $opt_spamlog = "spam.log";
 
 GetOptions("c=s", "f=s", "j=i", "n", "o", "all", "bayes", "debug",
 	   "hamlog=s", "head=i", "loghits", "mh", "mid", "ms", "net",
-	   "progress", "rewrite", "showdots", "spamlog=s", "tail=i",
+	   "progress", "rewrite:s", "showdots", "spamlog=s", "tail=i",
 	   "rules=s", "restart=i",
 	   "dir" => sub { $opt_format = "dir"; },
 	   "file" => sub { $opt_format = "file"; },
@@ -240,9 +240,9 @@ sub wanted {
   my $tests = join(",", sort(grep(length,$status->get_names_of_tests_hit(),$status->get_names_of_subtests_hit())));
   my $extra = join(",", @extra);
 
-  if ($opt_rewrite) {
+  if (defined $opt_rewrite) {
     $status->rewrite_mail();
-    open(REWRITE, "> /tmp/out");
+    open(REWRITE, "> " . ($opt_rewrite ? $opt_rewrite : "/tmp/out"));
     print REWRITE $status->get_full_message_as_text();
     close(REWRITE);
   }
