@@ -217,7 +217,7 @@ meta     OBFUSCATING_COMMENT2	__OBFUSCATING_COMMENT2 && MIME_HTML_ONLY
 describe OBFUSCATING_COMMENT2	HTML comments which obfuscate text (2)
 
 # duncf
-body EMAIL_ROT13     /\b[a-z(\]-]+\^[a-z-]+\((?:pbz|arg|bet|pn)\b/
+body EMAIL_ROT13     /\b[a-z(\]-]+\^[a-z-]+\([a-z]{2,3}\b/
 describe EMAIL_ROT13 Body contains a ROT13-encoded email address
 test EMAIL_ROT13 ok  qhabs^ebtref(pbz
 test EMAIL_ROT13 ok  zxrggyre^riv-vap(pbz
