@@ -985,7 +985,7 @@ sub compute_prob_for_token {
     return if ($s + $n < 2);
   }
 
-  return 0.5 if ( $ns == 0 || $nn == 0 );
+  return if ( $ns == 0 || $nn == 0 );
 
   my $ratios = ($s / $ns);
   my $ration = ($n / $nn);
@@ -994,7 +994,7 @@ sub compute_prob_for_token {
 
   if ($ratios == 0 && $ration == 0) {
     warn "oops? ratios == ration == 0";
-    return 0.5;
+    return;
   } else {
     $prob = ($ratios) / ($ration + $ratios);
   }
@@ -1043,6 +1043,7 @@ sub is_scan_available {
 
 sub scan {
   my ($self, $permsgstatus, $msg, $body) = @_;
+  my $score;
 
   if( $self->ignore_message($permsgstatus) ) {
     goto skip;
@@ -1112,13 +1113,14 @@ sub scan {
     goto skip;
   }
 
-  my $score;
-
   if ($self->{use_chi_sq_combining}) {
     $score = chi_squared_probs_combine (@sorted);
   } else {
     $score = robinson_naive_bayes_probs_combine (@sorted);
   }
+
+  # Couldn't come up with a probability?
+  goto skip unless defined $score;
 
   dbg ("bayes: score = $score");
 
@@ -1126,16 +1128,16 @@ sub scan {
     print "#Bayes-Raw-Counts: $self->{raw_counts}\n";
   }
 
-  $self->{store}->cleanup();
+skip:
+  if (!defined $score) {
+    dbg ("bayes: not scoring message, returning undef");
+  }
 
+  $self->{store}->cleanup();
   $self->opportunistic_calls();
   $self->{store}->untie_db();
-  return $score;
 
-skip:
-  dbg ("bayes: not scoring message, returning 0.5");
-  $self->{store}->untie_db() if ( $self->{store}->{already_tied} );
-  return 0.5;           # nice and neutral
+  return $score;
 }
 
 sub opportunistic_calls {
@@ -1169,6 +1171,8 @@ sub robinson_naive_bayes_probs_combine {
   my (@sorted) = @_;
 
   my $wc = scalar @sorted;
+  return unless $wc;
+
   my $P = 1;
   my $Q = 1;
 
@@ -1203,13 +1207,14 @@ sub chi2q {
 sub chi_squared_probs_combine  {
   my (@sorted) = @_;
   # @sorted contains an array of the probabilities
+  my $wc = scalar @sorted;
+  return unless $wc;
 
   my ($H, $S);
   my ($Hexp, $Sexp);
   $H = $S = 1.0;
   $Hexp = $Sexp = 0;
 
-  my $num_clues = @sorted;
   use POSIX qw(frexp);
 
   foreach my $prob (@sorted) {
@@ -1232,16 +1237,9 @@ sub chi_squared_probs_combine  {
   $S = log($S) + $Sexp * LN2;
   $H = log($H) + $Hexp * LN2;
 
-  my $result;
-  if ($num_clues) {
-    $S = 1.0 - chi2q(-2.0 * $S, 2 * $num_clues);
-    $H = 1.0 - chi2q(-2.0 * $H, 2 * $num_clues);
-    $result = (($S - $H) + 1.0) / 2.0;
-  } else {
-    $result = 0.5;
-  }
-
-  return $result;
+  $S = 1.0 - chi2q(-2.0 * $S, 2 * $wc);
+  $H = 1.0 - chi2q(-2.0 * $H, 2 * $wc);
+  return (($S - $H) + 1.0) / 2.0;
 }
 
 ###########################################################################

@@ -2762,7 +2762,8 @@ sub check_bayes {
 					  ($self, $self->{msg}, $fulltext);
   }
 
-  if (($min == 0 || $self->{bayes_score} > $min) &&
+  if (defined $self->{bayes_score} &&
+      ($min == 0 || $self->{bayes_score} > $min) &&
       ($max eq "undef" || $self->{bayes_score} <= $max))
   {
       if (exists ($self->{bayes_score})) {
