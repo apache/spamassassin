@@ -92,8 +92,6 @@ tflags T_SPF_HELO_PASS_NO_SBL	net nice
 # perceptron decide between these two before promoting one
 header T_MANY_MX_5	From:addr =~ /\@mx\d{2,4}\..{1,20}\./i
 header T_MANY_MX_10	From:addr =~ /\@\w\d+\..*\./i
-header T_MANY_MX_5_E	EnvelopeFrom =~ /\@mx\d{2,4}\..{1,20}\./i
-header T_MANY_MX_10_E	EnvelopeFrom =~ /\@\w\d+\..*\./i
 
 # Updated test rules for fraud, uses existing rules and updated rules
 body __T_FRAUD_92	/youre? country/i
