@@ -2,6 +2,13 @@
 
 Mail::SpamAssassin::Plugin::Razor2 - perform Razor2 check of messages
 
+Vipul's Razor is a distributed, collaborative, spam detection and
+filtering network based on user submissions of spam.  Detection is done
+with signatures that efficiently spot mutating spam content and user
+input is validated through reputation assignments.
+
+See http://razor.sourceforge.net/ for more information about Razor.
+
 =head1 SYNOPSIS
 
   loadplugin     Mail::SpamAssassin::Plugin::Razor2
@@ -126,8 +133,8 @@ sub razor2_access {
 
   # razor also debugs to stdout. argh. fix it to stderr...
   if (Mail::SpamAssassin::dbg_check($debug)) {
-    open (OLDOUT, ">&STDOUT");
-    open (STDOUT, ">&STDERR");
+    open(OLDOUT, ">&STDOUT");
+    open(STDOUT, ">&STDERR");
   }
 
   Mail::SpamAssassin::PerMsgStatus::enter_helper_run_mode($self);
@@ -161,7 +168,7 @@ sub razor2_access {
         }
 
         my @msg = ($fulltext);
-        my $objects = $rc->prepare_objects( \@msg )
+        my $objects = $rc->prepare_objects(\@msg)
           or die "$debug: error in prepare_objects";
         unless ($rc->get_server_info()) {
 	  my $error = $rc->errprefix("$debug: spamassassin") || "$debug: razor2 had unknown error during get_server_info";
@@ -170,7 +177,7 @@ sub razor2_access {
 
 	# let's reset the alarm since get_server_info() calls
 	# nextserver() which calls discover() which very likely will
-	# reset the alarm for us ... how polite.  :(  
+	# reset the alarm for us ... how polite.  :(
 	alarm $timeout;
 
         my $sigs = $rc->compute_sigs($objects)
@@ -180,7 +187,7 @@ sub razor2_access {
         # if mail isn't whitelisted, check it out
 	# see 'man razor-whitelist'
         #   
-        if ( $type ne 'check' || ! $rc->local_check($objects->[0]) ) {
+        if ($type ne 'check' || ! $rc->local_check($objects->[0])) {
           # provide a better error message when servers are unavailable,
           # than "Bad file descriptor Died".
           $rc->connect() or die "$debug: could not connect to any servers\n";
@@ -221,7 +228,7 @@ sub razor2_access {
 	    # undef the fd here (like the IO::Handle manpage says we can)
 	    # because it won't actually close, unfortunately. :(
             my $untie = 1;
-            foreach my $log ( *STDOUT{IO}, *STDERR{IO} ) {
+            foreach my $log (*STDOUT{IO}, *STDERR{IO}) {
               if ($log == $rc->{logref}->{fd}) {
                 $untie = 0;
                 last;
@@ -247,10 +254,10 @@ sub razor2_access {
 	    # $objects->[0]->{resp} vs $objects->[0]->{p}->[part #]->{resp}
 	    my $part = 0;
 	    my $arrayref = $objects->[0]->{p} || $objects;
-	    if ( defined $arrayref ) {
-	      foreach my $cf ( @{$arrayref} ) {
-	        if ( exists $cf->{resp} ) {
-	          for (my $response=0;$response<@{$cf->{resp}};$response++) {
+	    if (defined $arrayref) {
+	      foreach my $cf (@{$arrayref}) {
+	        if (exists $cf->{resp}) {
+	          for (my $response=0; $response<@{$cf->{resp}}; $response++) {
 	            my $tmp = $cf->{resp}->[$response];
 	      	    my $tmpcf = $tmp->{cf}; # Part confidence
 	      	    my $tmpct = $tmp->{ct}; # Part contested?
@@ -294,7 +301,7 @@ sub razor2_access {
 
     if ($err) {
       alarm $oldalarm;    # just in case
-      if ( $err =~ /alarm/ ) {
+      if ($err =~ /alarm/) {
         dbg("$debug: razor2 $type timed out after $timeout seconds");
       } elsif ($err =~ /(?:could not connect|network is unreachable)/) {
         # make this a dbg(); SpamAssassin will still continue,
@@ -315,7 +322,7 @@ sub razor2_access {
 
   # razor also debugs to stdout. argh. fix it to stderr...
   if (Mail::SpamAssassin::dbg_check($debug)) {
-    open (STDOUT, ">&OLDOUT");
+    open(STDOUT, ">&OLDOUT");
     close OLDOUT;
   }
 
