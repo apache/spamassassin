@@ -1,15 +1,17 @@
 #!/usr/bin/perl -w
 
+use FindBin;
 use Getopt::Std;
-getopts("fm:l:L:pxh");
+getopts("fm:l:L:pxhc:");
 
 use vars qw {
-  $opt_f $opt_m $opt_p $opt_x $opt_h $opt_l $opt_L
+  $opt_f $opt_m $opt_p $opt_x $opt_h $opt_l $opt_L $opt_c
 };
 
 sub usage {
-  die "hit-frequencies [-f] [-m RE] [-l LC] [-p] [-x] [spam log] [nonspam log]
+  die "hit-frequencies [-c rules dir] [-f] [-m RE] [-l LC] [-p] [-x] [spam log] [nonspam log]
 
+    -c p   use p as the rules directory
     -f     falses. count only false-negative or false-positive matches
     -m RE  print rules matching regular expression
     -l LC  also print language specific rules for lang code LC (or 'all')
@@ -31,6 +33,8 @@ if ($opt_p) {
   $opt_x = 1;
 }
 
+my $cffile = $opt_c || "$FindBin::Bin/../rules";
+
 my %freq_spam = ();
 my %freq_nonspam = ();
 my $num_spam = 0;
@@ -38,7 +42,7 @@ my $num_nonspam = 0;
 my %ranking = ();
 my $ok_lang = '';
 
-readscores();
+readscores($cffile);
 
 $ok_lang = lc ($opt_l || $opt_L || '');
 if ($ok_lang eq 'all') { $ok_lang = '.'; }
@@ -237,7 +241,8 @@ sub readlogs {
 
 
 sub readscores {
-  system ("./parse-rules-for-masses") and die;
+  my($cffile) = @_;
+  system ("./parse-rules-for-masses -d \"$cffile\"") and die;
   require "./tmp/rules.pl";
 }
 
