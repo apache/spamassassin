@@ -1339,6 +1339,14 @@ sub get {
 		$self->{msg}->get_header ('X-Original-Message-ID'), # bug 2122
 		$self->{msg}->get_header ('Message-Id'));
     }
+    # untrusted relays list, as string
+    elsif ($hdrname eq 'X-Spam-Relays-Untrusted') {
+      $_ = $self->{relays_untrusted_str};
+    }
+    # trusted relays list, as string
+    elsif ($hdrname eq 'X-Spam-Relays-Trusted') {
+      $_ = $self->{relays_trusted_str};
+    }
     # a conventional header
     else {
       my @hdrs = $self->{msg}->get_header ($hdrname);
