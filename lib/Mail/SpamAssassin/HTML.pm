@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.87 2003/05/18 01:36:42 quinlan Exp $
+# $Id: HTML.pm,v 1.88 2003/05/18 21:27:11 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -451,52 +451,61 @@ sub html_tests {
     {
       $self->{html}{web_bugs} = 1;
     }
-    if (/\?/ || (/\b[a-f\d]{4,}\b/i && !/\.(?:jpe?g|gif|png|bmp)$/i && !/^cid:/))
-    {
-      $self->{html}{t_web_bugs0} = 1;
+    if (/\?/ || !/\.(?:jpe?g|gif|png|bmp)\b/i) {
+      $self->{html}{t_web_bugs_0} = 1;
     }
-    if (/\?/ || (/\b[a-f\d]{6,}\b/i && !/\.(?:jpe?g|gif|png|bmp)$/i && !/^cid:/))
-    {
-      $self->{html}{t_web_bugs1} = 1;
+    if (/\?/ || (!/\.(?:jpe?g|gif|png|bmp)\b/i && !/^cid:/)) {
+      $self->{html}{t_web_bugs_1} = 1;
     }
-    if (/\?/ || (/\b[a-f\d]{8,}\b/i && !/\.(?:jpe?g|gif|png|bmp)$/i && !/^cid:/))
-    {
-      $self->{html}{t_web_bugs2} = 1;
+    if (/\?/ && !/\.(?:jpe?g|gif|png|bmp)\b/i) {
+      $self->{html}{t_web_bugs_2} = 1;
     }
-    if (/\?/ || (/\b[a-f\d]{12,}\b/i && !/\.(?:jpe?g|gif|png|bmp)$/i && !/^cid:/))
-    {
-      $self->{html}{t_web_bugs3} = 1;
-    }
-    if (/\?/ || (!/\.(?:jpe?g|gif|png|bmp)$/i && !/^cid:/))
-    {
-      $self->{html}{t_web_bugs4} = 1;
-    }
-    if (/\?/ || (!/\.(?:jpe?g|gif|png|bmp)\b/i && !/^cid:/))
-    {
-      $self->{html}{t_web_bugs5} = 1;
+    if (/\?/ && !/\.(?:jpe?g|gif|png|bmp)\b/i && !/^cid:/) {
+      $self->{html}{t_web_bugs_3} = 1;
     }
     if (/\.(?:pl|cgi|php|asp|jsp|cfm)\b/i) {
-      $self->{html}{'t_image_web_bugs_any0'} = 1;
+      $self->{html}{t_web_bugs_4} = 1;
     }
     if (/\.(?:aspx?|pl|php[34]?|jsp|cfm|cgi)\b/i) {
-      $self->{html}{'t_image_web_bugs_any1'} = 1;
+      $self->{html}{t_web_bugs_5} = 1;
     }
     if (/\?/ && /\.(?:pl|cgi|php|asp|jsp|cfm)\b/i) {
-      $self->{html}{'t_image_web_bugs_any2'} = 1;
+      $self->{html}{t_web_bugs_6} = 1;
     }
     if (/\?/ && /\.(?:aspx?|pl|php[34]?|jsp|cfm|cgi)\b/i) {
-      $self->{html}{'t_image_web_bugs_any3'} = 1;
+      $self->{html}{t_web_bugs_7} = 1;
     }
     if (/\?/ || /\.(?:pl|cgi|php|asp|jsp|cfm)\b/i) {
-      $self->{html}{'t_image_web_bugs_any4'} = 1;
+      $self->{html}{t_web_bugs_8} = 1;
     }
     if (/\?/ || /\.(?:aspx?|pl|php[34]?|jsp|cfm|cgi)\b/i) {
-      $self->{html}{'t_image_web_bugs_any5'} = 1;
+      $self->{html}{t_web_bugs_9} = 1;
+    }
+    if ((/\?/ && !/\.(?:jpe?g|gif|png|bmp)\b/i) ||
+	/\.(?:pl|cgi|php|asp|jsp|cfm)\b/i)
+    {
+      $self->{html}{t_web_bugs_10} = 1;
+    }
+    if ((/\?/ && !/\.(?:jpe?g|gif|png|bmp)\b/i && !/^cid:/) ||
+	/\.(?:pl|cgi|php|asp|jsp|cfm)\b/i)
+    {
+      $self->{html}{t_web_bugs_11} = 1;
+    }
+    if ((/\?/ && !/\.(?:jpe?g|gif|png|bmp)\b/i) ||
+	/\.(?:aspx?|pl|php[34]?|jsp|cfm|cgi)\b/i)
+    {
+      $self->{html}{t_web_bugs_12} = 1;
+    }
+    if ((/\?/ && !/\.(?:jpe?g|gif|png|bmp)\b/i && !/^cid:/) ||
+	/\.(?:aspx?|pl|php[34]?|jsp|cfm|cgi)\b/i)
+    {
+      $self->{html}{t_web_bugs_13} = 1;
     }
   }
   if ($tag eq "img" && exists $attr->{width} && exists $attr->{height}) {
     my $width = 0;
     my $height = 0;
+    my $area = 0;
 
     # assume 800x600 screen for percentage values
     if ($attr->{width} =~ /^(\d+)(\%)?$/) {
@@ -507,41 +516,44 @@ sub html_tests {
       $height = $1;
       $height *= 6 if (defined $2 && $2 eq "%");
     }
+    if ($width > 0 && $height > 0) {
+      $area = $width * $height;
+      $self->{html}{image_area} += $area;
+    }
     if ($width <= 1 && $height <= 1) {
       $self->{html}{image_web_bugs} = 1;
     }
-    if ($width < 2 && $height < 2 && exists $attr->{src}) {  
-      if ($attr->{src} =~ /\.(?:pl|cgi|php|asp|jsp|cfm)\b/i)
-      {
-	$self->{html}{'t_image_web_bugs0'} = 1;
-      }
-      if ($attr->{src} =~ /\.(?:aspx?|pl|php[34]?|jsp|cfm|cgi)\b/i)
-      {
-	$self->{html}{'t_image_web_bugs1'} = 1;
-      }
-    }
-    if ((($width < 2 && $height < 2) || ($width * $height <= 9)) &&
-	exists $attr->{src})
+    # test rules
+    if ((($width < 4 && $height < 4) || ($area <= 25)) && exists $attr->{src})
     {  
       if ($attr->{src} =~ /\.(?:pl|cgi|php|asp|jsp|cfm)\b/i)
       {
-	$self->{html}{'t_image_web_bugs2'} = 1;
+	$self->{html}{t_image_web_bugs_0} = 1;
       }
       if ($attr->{src} =~ /\.(?:aspx?|pl|php[34]?|jsp|cfm|cgi)\b/i)
       {
-	$self->{html}{'t_image_web_bugs3'} = 1;
+	$self->{html}{t_image_web_bugs_1} = 1;
       }
     }
-    if ((($width < 4 && $height < 4) || ($width * $height <= 25)) &&
-	exists $attr->{src})
+    if ((($width < 8 || $height < 8) || ($area <= 100)) && exists $attr->{src})
     {  
       if ($attr->{src} =~ /\.(?:pl|cgi|php|asp|jsp|cfm)\b/i)
       {
-	$self->{html}{'t_image_web_bugs4'} = 1;
+	$self->{html}{t_image_web_bugs_2} = 1;
       }
       if ($attr->{src} =~ /\.(?:aspx?|pl|php[34]?|jsp|cfm|cgi)\b/i)
       {
-	$self->{html}{'t_image_web_bugs5'} = 1;
+	$self->{html}{t_image_web_bugs_3} = 1;
+      }
+    }
+    if (exists $attr->{src}) {  
+      if ($attr->{src} =~ /\.(?:pl|cgi|php|asp|jsp|cfm)\b/i)
+      {
+	$self->{html}{t_image_web_bugs_4} = 1;
+      }
+      if ($attr->{src} =~ /\.(?:aspx?|pl|php[34]?|jsp|cfm|cgi)\b/i)
+      {
+	$self->{html}{t_image_web_bugs_5} = 1;
       }
     }
   }
