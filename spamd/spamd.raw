@@ -853,19 +853,25 @@ sub my_inet_aton { unpack("N", pack("C4", split(/\./, $_[0]))) }
 sub preload_modules_with_tmp_homedir {
   # set $ENV{HOME} in /tmp while we compile and preload everything.
   # File::Spec->tmpdir uses TMPDIR, TMP, TEMP, C:/temp, /tmp etc.
-  my $tmphome = File::Spec->catfile (File::Spec->tmpdir, "spamassassin-$$");
+  my $tmpdir = File::Spec->tmpdir();
+  die "cannot find writable tmp dir! set TMP or TMPDIR in env";
+
+  my $tmphome = File::Spec->catdir ($tmpdir, "spamassassin-$$");
   $tmphome = Mail::SpamAssassin::Util::untaint_file_path ($tmphome);
 
+  my $tmpsadir = File::Spec->catdir ($tmphome, ".spamassassin");
+
   mkdir($tmphome, 0700) or die "fatal: Can't create $tmphome";
-  mkdir($tmphome."/.spamassassin", 0700)
-      or die "fatal: Can't create $tmphome/.spamassassin";
+  mkdir($tmpsadir, 0700) or die "fatal: Can't create $tmpsadir";
   $ENV{HOME} = $tmphome;
 
   $spamtest->compile_now(0);	# ensure all modules etc. are loaded
   $/ = "\n";			# argh, Razor resets this!  Bad Razor!
 
-  unlink <$tmphome/.spamassassin/*>, <$tmphome/*>;
-  rmdir $tmphome."/.spamassassin";
+  # first do some brute-force perl globbing, then fall back to File::Path
+  # (instead of system("rm -rf")) if we miss something.
+  unlink <$tmpsadir/*>, <$tmphome/*>;
+  rmdir $tmpsadir;
   rmdir $tmphome or rmtree $tmphome;
 
   # now clean up the stuff we just created, and make us taint-safe
