@@ -275,7 +275,8 @@ header T_FAKE_ERRSTO_ALTAVISTA	Errors-To:addr =~ /\@altavista\.com$/i
 header T_FAKE_ENVFROM_ALTAVISTA	EnvelopeFrom =~ /\@altavista\.com$/i
 
 header T_FAKE_OUTBLAZE_RCVD	Received =~ /\.mr\.outblaze\.com/
-header T_FAKE_OUTBLAZE_MID	Message-Id =~ /\.mr\.outblaze\.com/
+header T_FAKE_OUTBLAZE_MID_1	Message-Id =~ /\.mr\.outblaze\.com/
+header T_FAKE_OUTBLAZE_MID_2	MESSAGEID =~ /\.mr\.outblaze\.com/
 
 header T_ALL_TRUSTED		eval:check_all_trusted()
 describe T_ALL_TRUSTED		Did not pass through any untrusted hosts
@@ -295,11 +296,21 @@ rawbody T_BAYESBUSTER_LINE_12	/^([a-z]{3,} ){12,}<[Bb][Rr]>$/
 rawbody T_BAYESBUSTER_LINE_15	/^([a-z]{3,} ){15,}<[Bb][Rr]>$/
 rawbody T_BAYESBUSTER_LINE_15I	/^([a-z]{3,} ){15,}<br>$/i
 
+# XBL+SBL
+header __RCVD_IN_SBL_XBL	eval:check_rbl_txt('sblxbl', 'sbl-xbl.spamhaus.org.')
+describe __RCVD_IN_SBL_XBL	Received via a relay in Spamhaus SBL+XBL
+tflags __RCVD_IN_SBL_XBL	net
+
+# SBL replacement
+header T_RCVD_IN_SBL	eval:check_rbl_sub('sblxbl', '(?i)/sbl')
+describe T_RCVD_IN_SBL	Received via a relay in Spamhaus SBL
+tflags T_RCVD_IN_SBL	net
+
 # XBL is the Exploits Block List: http://www.spamhaus.org/xbl/
 # contains data from the CBL, probably supercedes that.
-header T_RCVD_IN_XBL      eval:check_rbl_txt('xbl', 'xbl.spamhaus.org.')
-describe T_RCVD_IN_XBL    Received via a relay in Spamhaus XBL
-tflags T_RCVD_IN_XBL      net
+header T_RCVD_IN_XBL	eval:check_rbl_sub('sblxbl', '(?i)/xbl')
+describe T_RCVD_IN_XBL	Received via a relay in Spamhaus XBL
+tflags T_RCVD_IN_XBL	net
 
 # reported by Kurtis Rader, bug 2890
 uri T_MSN_REDIR		/^http:\/\/shopping\.msn\.com\/trackurl\.aspx\?/i
@@ -454,12 +465,17 @@ describe T_RCVD_DOUBLE_IP	Bulk email fingerprint (double IP) found
 header T_MIME_BOUND_DIGITS15	Content-Type =~ /boundary=\"\d{15,}\"/
 describe T_MIME_BOUND_DIGITS15	MIME boundary contains all digits
 
-header T_MSGID_SPAM_2		Message-Id =~ /<[A-Z]{7}-000[0-9]{10}\@[a-z]*>/
-describe T_MSGID_SPAM_2		Message-ID has known spammer pattern
+header T_MSGID_SPAM_2_A		Message-Id =~ /<[A-Z]{7}-000[0-9]{10}\@[a-z]*>/
+describe T_MSGID_SPAM_2_A	Message-ID has known spammer pattern
+header T_MSGID_SPAM_2_B		MESSAGEID =~ /<[A-Z]{7}-000[0-9]{10}\@[a-z]*>/
+describe T_MSGID_SPAM_2_B	Message-ID has known spammer pattern
 
 # Comment is a spam sign when following <DIV>
 rawbody T_HTML_CONVERTED	m{<DIV><!-- Converted from text/plain format -->}
 describe T_HTML_CONVERTED	HTML conversion tool used by spam
+
+body T_HTML_CONVERTED_2		eval:html_test('t_html_converted')
+describe T_HTML_CONVERTED_2	HTML conversion tool used by spam
 
 # another Message-Id format (pick one as MSGID_SPAM_3)
 header T_MSGID_SPAM_3_5		Message-Id =~ /<[a-z]{5,}\@(\S+\.)+\S+>/
