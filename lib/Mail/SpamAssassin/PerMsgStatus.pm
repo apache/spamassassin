@@ -981,13 +981,10 @@ sub get {
     # MESSAGEID: handle lists which move the real message-id to another
     # header for resending.
     elsif ($hdrname eq 'MESSAGEID') {
-      $_ = join ("\n", $self->{msg}->get_header ('X-Message-Id'));
-      if ($_ eq '') {
-	$_ = join ("\n", $self->{msg}->get_header ('Resent-Message-Id'));
-	if ($_ eq '') {
-	  $_ = join ("\n", $self->{msg}->get_header ('Message-Id'));
-	}
-      }
+      $_ = join ("\n", grep { defined($_) && length($_) > 0 }
+		$self->{msg}->get_header ('X-Message-Id'),
+		$self->{msg}->get_header ('Resent-Message-Id'),
+		$self->{msg}->get_header ('Message-Id'));
     }
     # a conventional header
     else {

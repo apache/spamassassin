@@ -11,8 +11,10 @@
 ###########################################################################
 
 # should be fixed now
+# updated per bug 1217
 # %%% INVALID_MSGID
-header T_INVALID_MSGID		MESSAGEID !~ /^<(?:[a-zA-Z0-9.,!\#\$%&'*\+\/=?\^_{}|~-]+|\".+\")\@(?:[a-zA-Z0-9_.-]+|\[\d{1,3}(?:\.\d{1,3}){3}\])>(?:\s*\(.*\))?\s*$/ [if-unset: <NO@MSGID>]
+header __VALID_MSGID MESSAGEID =~ /^<(?:[a-zA-Z0-9.,!\#\$%&'*\+\/=?\^_{}|~-]+|\".+\")\@(?:[a-zA-Z0-9_.-]+|\[\d{1,3}(?:\.\d{1,3}){3}\])>(?:\s*\(.*\))?\s*$/m [if-unset: <NO@MSGID>]
+meta T_INVALID_MSGID		!__VALID_MSGID
 describe T_INVALID_MSGID	Message-Id is not valid, according to RFC 2822
 
 # results for quinlan
@@ -167,7 +169,7 @@ meta T_MIME_HEADER_CTYPE_ONLY3	(!__CD && !__CTE && __CT && !__MIME_VERSION && !_
 
 # AOL
 header __AOL_MUA		X-Mailer =~ /\bAOL\b/
-header __AOL_MSGID		MESSAGEID =~ /^<[0-9a-f]{1,3}\.[0-9a-f]{6,8}\.[0-9a-f]{8}\@aol.com>$/
+header __AOL_MSGID		MESSAGEID =~ /^<[0-9a-f]{1,3}\.[0-9a-f]{6,8}\.[0-9a-f]{8}\@aol.com>$/m
 meta T_FORGED_MUA_AOL		(__AOL_MUA && !__AOL_MSGID)
 describe T_FORGED_MUA_AOL	Forged mail pretending to be from AOL
 score T_FORGED_MUA_AOL		1.0
@@ -181,37 +183,36 @@ score T_FORGED_MUA_MOZILLA	1.0
 
 # Internet Mail Service
 header __IMS_MUA		X-Mailer =~ /Internet Mail Service/
-header __IMS_MSGID		MESSAGEID =~ /^<[A-F\d]{36,40}\@\S+>$/
+header __IMS_MSGID		MESSAGEID =~ /^<[A-F\d]{36,40}\@\S+>$/m
 meta T_FORGED_MUA_IMS		(__IMS_MUA && !__IMS_MSGID)
 describe T_FORGED_MUA_IMS	Forged mail pretending to be from IMS
 score T_FORGED_MUA_IMS		1.0
 
 # Outlook
 # Note: this uses __IMS_MSGID from above
-header __OUTLOOK_MUA		X-Mailer =~ /\bOutlook\b(?! IMO)/
-header __OUTLOOK_MSGID_1	MESSAGEID =~ /^<[0-9a-f]{12}\$[0-9a-f]{8}\$[0-9a-f]{8}\@\S+>$/
-header __OUTLOOK_MSGID_2	MESSAGEID =~ /^<(?:OE[0-9A-Za-z]{25}|DAV[0-9A-Za-z]{24})\@hotmail\.com>$/
+header __OUTLOOK_MSGID_1	MESSAGEID =~ /^<[0-9a-f]{12}\$[0-9a-f]{8}\$[0-9a-f]{8}\@\S+>$/m
+header __OUTLOOK_MSGID_2	MESSAGEID =~ /^<(?:OE[0-9A-Za-z]{25}|DAV[0-9A-Za-z]{24})\@hotmail\.com>$/m
 meta T_FORGED_MUA_OUTLOOK	(__OUTLOOK_MUA && !(__OUTLOOK_MSGID_1 || __OUTLOOK_MSGID_2 || __IMS_MSGID))
 describe T_FORGED_MUA_OUTLOOK	Forged mail pretending to be from Outlook
 score T_FORGED_MUA_OUTLOOK	1.0
 
 # Outlook IMO (Internet Mail Only)
 header __OIMO_MUA		X-Mailer =~ /Outlook IMO/
-header __OIMO_MSGID		MESSAGEID =~ /^<[A-P]{26}AA\.[\w.-]+\@\S+>$/
+header __OIMO_MSGID		MESSAGEID =~ /^<[A-P]{26}AA\.[\w.-]+\@\S+>$/m
 meta T_FORGED_MUA_OIMO		(__OIMO_MUA && !__OIMO_MSGID)
 describe T_FORGED_MUA_OIMO	Forged mail pretending to be from Outlook IMO
 score T_FORGED_MUA_OIMO		1.0
 
 # QUALCOMM Eudora
 header __EUDORA_MUA		X-Mailer =~ /\b(?:QUALCOMM|Eudora)\b/
-header __EUDORA_MSGID		MESSAGEID =~ /^<(?:\d\d?\.){4,5}\d{14}\.[a-f0-9]{8}\@\S+>$/
+header __EUDORA_MSGID		MESSAGEID =~ /^<(?:\d\d?\.){4,5}\d{14}\.[a-f0-9]{8}\@\S+>$/m
 meta T_FORGED_MUA_EUDORA	(__EUDORA_MUA && !__EUDORA_MSGID)
 describe T_FORGED_MUA_EUDORA	Forged mail pretending to be from Eudora
 score T_FORGED_MUA_EUDORA	1.0
 
 # The Bat!
 header __THEBAT_MUA		X-Mailer =~ /The Bat!/
-header __THEBAT_MSGID		MESSAGEID =~ /^<\d+\.\d+\@\S+>$/
+header __THEBAT_MSGID		MESSAGEID =~ /^<\d+\.\d+\@\S+>$/m
 meta T_FORGED_MUA_THEBAT	(__THEBAT_MUA && !__THEBAT_MSGID)
 describe T_FORGED_MUA_THEBAT	Forged mail pretending to be from The Bat!
 score T_FORGED_MUA_THEBAT	1.0
@@ -466,22 +467,22 @@ score T_IDENT_NOBODY		1.0
 # stuff.  I found a few new regexps that works fairly well on my corpus
 # with no overlap of the current MSGID_* rules. - tvd
 #  1.222    3.058    0.066    0.98    0.63    1.00  T_MSGID_S_1
-header __T_MSGID_17	MESSAGEID =~ /^<?DGTBAD\S+\@/
-header __T_MSGID_10	MESSAGEID =~ /^<?(?:\d+\$){3}\d+\@/
-header __T_MSGID_8	MESSAGEID =~ /^<?\d{4}\$\w+\@/
-header __T_MSGID_20	MESSAGEID =~ /^<?EXCH\S+\@/
-header __T_MSGID_19	MESSAGEID =~ /^<?\w{7}-\w{6}-\w{2}\.\d{4}(?:-\d{2}){5}\@/
+header __T_MSGID_17	MESSAGEID =~ /^<?DGTBAD\S+\@/m
+header __T_MSGID_10	MESSAGEID =~ /^<?(?:\d+\$){3}\d+\@/m
+header __T_MSGID_8	MESSAGEID =~ /^<?\d{4}\$\w+\@/m
+header __T_MSGID_20	MESSAGEID =~ /^<?EXCH\S+\@/m
+header __T_MSGID_19	MESSAGEID =~ /^<?\w{7}-\w{6}-\w{2}\.\d{4}(?:-\d{2}){5}\@/m
 
 # jm: commented, this hits slist mail traffic, e.g.
 # the <mozilla-general@mozilla.org> list.   Note that the moz lists have a
 # very high spam load, which may explain why the resulting freqs look good
-#header __T_MSGID_11	MESSAGEID =~ /^<?\d\w+\$\w{4,}\@/
+#header __T_MSGID_11	MESSAGEID =~ /^<?\d\w+\$\w{4,}\@/m
 
-header __T_MSGID_24	MESSAGEID =~ /^<?[A-Z0-9_-]*SERV[A-Za-z0-9_-]+[0-9a-f]{8}\@/
-header __T_MSGID_26	MESSAGEID =~ /^<?[A-Z0-9_-]*MAIL[a-zA-Z0-9_-]+0000[0-9a-f]{4}\@/
-#header __T_MSGID_37	MESSAGEID =~ /^<?\d{13,}\.SM\d+\@[^>]/
-#header __T_MSGID_16	MESSAGEID =~ /^<?[A-Z]\d{10}\@/
-header __T_MSGID_32	MESSAGEID =~ /^<?auto-00000\d+\@/
+header __T_MSGID_24	MESSAGEID =~ /^<?[A-Z0-9_-]*SERV[A-Za-z0-9_-]+[0-9a-f]{8}\@/m
+header __T_MSGID_26	MESSAGEID =~ /^<?[A-Z0-9_-]*MAIL[a-zA-Z0-9_-]+0000[0-9a-f]{4}\@/m
+#header __T_MSGID_37	MESSAGEID =~ /^<?\d{13,}\.SM\d+\@[^>]/m
+#header __T_MSGID_16	MESSAGEID =~ /^<?[A-Z]\d{10}\@/m
+header __T_MSGID_32	MESSAGEID =~ /^<?auto-00000\d+\@/m
 meta T_MSGID_S_1	( __T_MSGID_17 || __T_MSGID_10 || __T_MSGID_8 || __T_MSGID_20 || __T_MSGID_19 || __T_MSGID_24 || __T_MSGID_26 || __T_MSGID_32 )
 
 # Matt Cline: New ratware and user-agent tests
@@ -769,7 +770,7 @@ body __AFRICAN_COUNTRY_53       /\bC[oô]te d'Ivoire/i
 # some meditation on outlookish Message-Id formats results in these.
 # easy ones first ;)
 
-header T_MSGID_NO_HOST		MESSAGEID =~ /\@>(?:$|\s)/
+header T_MSGID_NO_HOST		MESSAGEID =~ /\@>(?:$|\s)/m
 
 header T_MSGID_OE_LONG_14	MESSAGEID =~ /<[a-f0-9]{14}\$[a-f0-9]{8}\$[a-f0-9]{8}\@/
 header T_MSGID_OE_LONG_15	MESSAGEID =~ /<[a-f0-9]{15,}\$[a-f0-9]{8}\$[a-f0-9]{8}\@/
