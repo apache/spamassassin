@@ -26,7 +26,7 @@ use File::Spec;
 use vars qw(
   $spamtest %opt $isspam $forget
   $messagecount $learnedcount $messagelimit
-  $rebuildonly $learnprob @targets $bayes_override_path
+  $synconly $learnprob @targets $bayes_override_path
 );
 
 my $PREFIX = '@@PREFIX@@';  # substituted at 'make' time
@@ -83,7 +83,7 @@ use Mail::SpamAssassin::PerMsgLearner;
 %opt = (
   'force-expire' => 0,
   'use-ignores'  => 0,
-  'norebuild'    => 0,
+  'nosync'    => 0,
 );
 
 Getopt::Long::Configure(
@@ -94,7 +94,7 @@ Getopt::Long::Configure(
 GetOptions(
   'spam'        => sub { $isspam = 1; },
   'ham|nonspam' => sub { $isspam = 0; },
-  'rebuild' => \$rebuildonly,
+  'sync|rebuild' => \$synconly,
   'forget'  => \$forget,
 
   'configpath|config-file|config-dir|c|C=s' => \$opt{'configpath'},
@@ -103,7 +103,7 @@ GetOptions(
 
   'folders|f=s'          => \$opt{'folders'},
   'showdots'             => \$opt{'showdots'},
-  'no-rebuild|norebuild' => \$opt{'norebuild'},
+  'no-sync|nosync|no-rebuild|norebuild' => \$opt{'nosync'},
   'local|L'              => \$opt{'local'},
   'force-expire'         => \$opt{'force-expire'},
   'use-ignores'          => \$opt{'use-ignores'},
@@ -140,26 +140,26 @@ if ( defined $opt{'version'} ) {
 }
 
 if ( $opt{'force-expire'} ) {
-  $rebuildonly = 1;
+  $synconly = 1;
 }
 
 if ( !defined $isspam
-  && !defined $rebuildonly
+  && !defined $synconly
   && !defined $forget
   && !defined $opt{'dump'}
   && !defined $opt{'import'}
   && !defined $opt{'folders'} )
 {
   usage( 0,
-"Please select either --spam, --ham, --folders, --forget, --rebuild, --import or --dump"
+"Please select either --spam, --ham, --folders, --forget, --sync, --import or --dump"
   );
 }
 
 # We need to make sure the journal syncs pre-forget...
-if ( defined $forget && $opt{'norebuild'} ) {
-  $opt{'norebuild'} = 0;
+if ( defined $forget && $opt{'nosync'} ) {
+  $opt{'nosync'} = 0;
   warn
-"sa-learn warning: --forget requires read/write access to the database, and is incompatible with --no-rebuild\n";
+"sa-learn warning: --forget requires read/write access to the database, and is incompatible with --no-sync\n";
 }
 
 if ( defined $opt{'old_format'} ) {
@@ -243,7 +243,7 @@ if ( !$spamtest->{conf}->{use_bayes} ) {
 $spamtest->init_learner(
   {
     force_expire      => $opt{'force-expire'},
-    learn_to_journal  => $opt{'norebuild'},
+    learn_to_journal  => $opt{'nosync'},
     wait_for_lock     => 1,
     caller_will_untie => 1
   }
@@ -251,7 +251,7 @@ $spamtest->init_learner(
 
 $spamtest->{bayes_scanner}{use_ignores} = $opt{'use-ignores'};
 
-if ($rebuildonly) {
+if ($synconly) {
   $spamtest->rebuild_learner_caches(
     {
       verbose  => 1,
@@ -272,7 +272,7 @@ if ( defined $opt{'randseed'} ) {
 # sync the journal first if we're going to go r/w so we make sure to
 # learn everything before doing anything else.
 #
-if ( !$opt{norebuild} ) {
+if ( !$opt{nosync} ) {
   $spamtest->rebuild_learner_caches();
 }
 
@@ -444,8 +444,8 @@ Options:
  --spam				   Learn messages as spam
  --forget			   Forget a message
  --use-ignores                     Use bayes_ignore_from and bayes_ignore_to
- --rebuild			   Rebuild the database if needed
- --force-expire			   Force an expiry run, rebuild every time
+ --sync				   Syncronize the database and the journal if needed
+ --force-expire			   Force a database sync and expiry run
  --dbpath <path>                   Allows commandline override (in bayes_path form)
                                    for where to read the Bayes DB from
  --dump [all|data|magic]           Display the contents of the Bayes database
@@ -457,7 +457,8 @@ Options:
  --file                            Ignored; historical compatability
  --mbox                            Input sources are in mbox format
  --showdots                        Show progress using dots
- --no-rebuild                      Skip building databases after scan
+ --no-sync                         Skip syncronizing the journal and
+                                   databases after scan
  -L, --local			   Operate locally, no network accesses
  --import                          Upgrade data from an earlier database version
  -C path, --configpath=path, --config-file=path   Path to standard configuration dir
@@ -477,9 +478,8 @@ mean ham.
 Simply run this command once for each of your mail folders, and it will
 ''learn'' from the mail therein.
 
-Note that I<globbing> in the mail folder names is supported (except when
-using perl 5.005 in taint-mode); in other words, listing a folder name
-as C<*> will scan every folder that matches.
+Note that I<globbing> in the mail folder names is supported; in other
+words, listing a folder name as C<*> will scan every folder that matches.
 
 SpamAssassin remembers which mail messages it's learnt already, and will not
 re-learn those messages again, unless you use the B<--forget> option.
@@ -582,10 +582,10 @@ been processed before).
 
 =item Learning from single messages uses a command like this:
 
-	cat mailmessage | sa-learn --ham --no-rebuild
+	sa-learn --ham --no-sync mailmessage
 
 This is handy for binding to a key in your mail user agent.  It's very fast, as
-all the time-consuming stuff is deferred until you run with the C<--rebuild>
+all the time-consuming stuff is deferred until you run with the C<--sync>
 option.
 
 =item Autolearning is enabled by default
@@ -711,17 +711,18 @@ The option might be used when learning from a large file of messages
 from which the hammy spam messages or spammy ham messages have not
 been removed.
 
-=item B<--rebuild>
+=item B<--sync>
 
-Rebuild the databases, typically done after learning with B<--no-rebuild>,
-or if you wish to periodically clean the Bayes databases once a day on
-a busy server.
+Syncronize the journal and databases.
 
 =item B<--force-expire>
 
 Forces an expiry attempt, regardless of whether it may be necessary
 or not.  Note: This doesn't mean any tokens will actually expire.
 Please see the EXPIRATION section below.
+
+Note: C<--force-expire> also causes the journal data to be syncronized
+into the Bayes databases.
 
 =item B<--forget>
 
@@ -763,12 +764,12 @@ Read user score preferences from I<prefs> (usually C<$HOME/.spamassassin/user_pr
 
 Produce diagnostic output.
 
-=item B<--no-rebuild>
+=item B<--no-sync>
 
-Skip the slow rebuilding step which normally takes place after changing
+Skip the slow syncronization step which normally takes place after changing
 database entries.  If you plan to scan many folders in a batch, or to learn
 individual messages one-by-one, it is faster to use this switch and run
-C<sa-learn --rebuild> once all the folders have been scanned.
+C<sa-learn --sync> once all the folders have been scanned.
 
 =item B<-L>, B<--local>
 
@@ -802,16 +803,19 @@ use a set of persistent database files to store the learnt tokens, as follows.
 =item bayes_toks
 
 The database of tokens, containing the tokens learnt, their count of
-occurrences in ham and spam, and the message count of the last message
-they were seen in.
+occurrences in ham and spam, and the timestamp when the token was last
+seen in a message.
 
-This database also contains some 'magic' tokens, as follows: the number of ham
-and spam messages learnt, the number of tokens in the database, the
-message-count of the last expiry run, the message-count of the oldest token in
-the database, and the message-count of the current message (to the nearest
-5000).
+This database also contains some 'magic' tokens, as follows: the version
+number of the database, the number of ham and spam messages learnt, the
+number of tokens in the database, and timestamps of: the last journal
+sync, the last expiry run, the last expiry token reduction count, the
+last expiry timestamp delta, the oldest token timestamp in the database,
+and the newest token timestamp in the database.
 
-This is a database file, using C<DB_File>.
+This is a database file, using C<DB_File>.  The database 'version
+number' is 0 for databases from 2.5x, 1 for databases from certain 2.6x
+development releases, and 2 for all more recent databases.
 
 =item bayes_seen
 
@@ -824,13 +828,18 @@ This is a database file, using C<DB_File>.
 
 =item bayes_journal
 
-While SpamAssassin is scanning mails, it needs to track which tokens it uses in
-its calculations.  So that many processes can read the databases
-simultaneously, but only one can write at a time, this uses a 'journal' file.
+While SpamAssassin is scanning mails, it needs to track which tokens
+it uses in its calculations.  To avoid the contention of having each
+SpamAssassin process attempting to gain write access to the Bayes DB,
+the token timestamps are written to a 'journal' file which will later
+(either automatically or via C<sa-learn --sync>) be used to syncronize
+the Bayes DB.
 
-When you run C<sa-learn --rebuild>, the journal is read, and the tokens that
-were accessed during the journal's lifetime will have their last-access time
-updated in the C<bayes_toks> database.
+Also, through the use of C<bayes_learn_to_journal>, or when using the
+C<--no-sync> option with sa-learn, the actual learning data will take
+be placed into the journal for later syncronization.  This is typically
+useful for high-traffic sites to avoid the same contention as stated
+above.
 
 =back
 
@@ -842,7 +851,7 @@ SpamAssassin performs journal synchronization and bayes expiration
 periodically when certain criteria (listed below) are met.
 
 SpamAssassin can sync the journal and expire the DB tokens either
-manually or opportunistically.  A journal sync is due if I<--rebuild>
+manually or opportunistically.  A journal sync is due if I<--sync>
 is passed to sa-learn (manual), or if the following is true
 (opportunistic):
 
