@@ -158,3 +158,6 @@ describe URI_NO_WWW_BIZ_CGI	CGI in .biz TLD other than third-level "www"
 
 uri URI_NO_WWW_ANY_CGI	/^(?:https?:\/\/)?[^\/]+(?<!\/www)\.[^.]{3,}\.[^.]{3,}\.(?!biz|info)[a-z]{2,4}\/\?\S{14,}/i
 describe URI_NO_WWW_ANY_CGI	CGI with long hostname other fourth-level "www"
+
+uri URI_SCHEME_MIXED_CASE	/^(?![a-z]{3,6}:|[A-Z]{3,6})[A-Za-z]{3,6}:\//
+describe URI_SCHEME_MIXED_CASE	URI scheme has mixed uppercase and lowercase
