@@ -82,7 +82,7 @@ sub load_with_dbi {
       if($sth) {
          my $rv  = $sth->execute();
          if($rv) {
-            dbg("retreiving prefs from SQL server");
+            dbg("retrieving prefs for $username from SQL server");
             my @row;
             my $text = '';
             while(@row = $sth->fetchrow_array()) {
