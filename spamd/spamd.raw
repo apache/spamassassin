@@ -292,7 +292,7 @@ my $log_socket = lc( $opt{'syslog-socket'} ) || 'unix';
 my $log_file = "spamd.log";
 
 # A specific log file was given (--syslog=/path/to/file).
-if ( $log_facility =~ /\W/ ) {
+if ( $log_facility =~ /[^a-z0-9]/ ) {
   $log_file   = $log_facility;
   $log_socket = 'file';
 }
