@@ -28,8 +28,6 @@
 # user slip-up could result in scribbling side-effects in the bayes
 # db as a result -- which is hard to remedy.
 
-# we *do* allow the user to autolearn based on this, because it's hard
-# to accidentally blacklist someone's From address.
 header USER_IN_BLACKLIST	eval:check_from_in_blacklist()
 describe USER_IN_BLACKLIST	From: address is in the user's black-list
 tflags USER_IN_BLACKLIST	userconf noautolearn
