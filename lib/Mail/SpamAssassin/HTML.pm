@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.73 2003/04/04 13:58:31 felicity Exp $
+# $Id: HTML.pm,v 1.74 2003/04/07 07:55:35 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -23,6 +23,13 @@ $re_strict = 'a|abbr|acronym|address|area|b|base|bdo|big|blockquote|body|br|butt
 # loose list of HTML events
 $events = 'on(?:activate|afterupdate|beforeactivate|beforecopy|beforecut|beforedeactivate|beforeeditfocus|beforepaste|beforeupdate|blur|change|click|contextmenu|controlselect|copy|cut|dblclick|deactivate|errorupdate|focus|focusin|focusout|help|keydown|keypress|keyup|load|losecapture|mousedown|mouseenter|mouseleave|mousemove|mouseout|mouseover|mouseup|mousewheel|move|moveend|movestart|paste|propertychange|readystatechange|reset|resize|resizeend|resizestart|select|submit|timeerror|unload)';
 
+sub html_init {
+  my ($self) = @_;
+
+  push @{ $self->{bgcolor_color} }, "#ffffff";
+  push @{ $self->{bgcolor_tag} }, "default";
+}
+
 sub html_tag {
   my ($self, $tag, $attr, $num) = @_;
 
@@ -31,21 +38,16 @@ sub html_tag {
   $self->{html}{elements}++ if $tag =~ /^(?:$re_strict|$re_loose)$/io;
   $self->{html}{tags}++;
 
+  if ($tag =~ /^(?:body|table|tr|th|td)$/) {
+    $self->html_bgcolor($tag, $attr, $num);
+  }
+
   if ($num == 1) {
     $self->html_format($tag, $attr, $num);
     $self->html_uri($tag, $attr, $num);
     $self->html_tests($tag, $attr, $num);
 
     $self->{html_last_tag} = $tag;
-  }
-  elsif ($num == -1) {
-    # close colors
-    if ($tag ne "body" && defined $self->{html}{"bgcolor_$tag"}) {
-      undef $self->{html}{"bgcolor_$tag"};
-    }
-    if ($tag eq "font" && defined $self->{html}{color}) {
-      undef $self->{html}{color};
-    }
   }
 
   if ($tag =~ /^(?:b|i|u|strong|em|big|center|h\d)$/) {
@@ -150,30 +152,116 @@ sub rgb_to_hsv {
   return ($h, $s, $v);
 }
 
-# the most common HTML colors
-my %name_to_rgb = (
-  red           => '#ff0000',
-  black         => '#000000',
-  blue          => '#0000ff',
-  white         => '#ffffff',
-  navy          => '#000080',
-  green         => '#008000',
-  orange        => '#ffa500',
-  yellow        => '#ffff00',
-  fuchsia       => '#ff00ff',
-  lime          => '#00ff00',
-  maroon        => '#800000',
-  darkblue      => '#00008b',
-  gray          => '#808080',
-  purple        => '#800080',
-  magenta       => '#ff00ff',
-  pink          => '#ffc0cb',
+# HTML 4 defined 16 colors
+my %html_color = (
+  aqua		=> '#00ffff',
+  black		=> '#000000',
+  blue		=> '#0000ff',
+  fuchsia	=> '#ff00ff',
+  gray		=> '#808080',
+  green		=> '#008000',
+  lime		=> '#00ff00',
+  maroon	=> '#800000',
+  navy		=> '#000080',
+  olive		=> '#808000',
+  purple	=> '#800080',
+  red		=> '#ff0000',
+  silver	=> '#c0c0c0',
+  teal		=> '#008080',
+  white		=> '#ffffff',
+  yellow	=> '#ffff00',
+);
+
+# popular X11 colors specified in CSS3 color module
+my %name_color = (
+  aliceblue	=> '#f0f8ff',
+  cyan		=> '#00ffff',
+  darkblue	=> '#00008b',
+  darkcyan	=> '#008b8b',
+  darkgray	=> '#a9a9a9',
+  darkgreen	=> '#006400',
+  darkred	=> '#8b0000',
+  firebrick	=> '#b22222',
+  gold		=> '#ffd700',
+  lightslategray=> '#778899',
+  magenta	=> '#ff00ff',
+  orange	=> '#ffa500',
+  pink		=> '#ffc0cb',
+  whitesmoke	=> '#f5f5f5',
 );
 
 sub name_to_rgb {
-  return $name_to_rgb{$_[0]} || $_[0];
+  return $html_color{$_[0]} || $name_color{$_[0]} || $_[0];
 }
 
+sub pop_color {
+  my ($self) = @_;
+
+  pop @{ $self->{bgcolor_color} };
+  pop @{ $self->{bgcolor_tag} };
+}
+
+sub html_bgcolor {
+  my ($self, $tag, $attr, $num) = @_;
+
+  if ($num == 1) {
+    # close elements with optional end tags
+    if ($tag eq "body") {
+      # compromise between HTML browsers generally only using first
+      # body and some messages including multiple HTML attachments:
+      # pop everything except first body color
+      while ($self->{bgcolor_tag}[-1] !~ /^(?:default|body)$/) {
+	$self->pop_color();
+      }
+    }
+    if ($tag eq "tr") {
+      while ($self->{bgcolor_tag}[-1] =~ /^t[hd]$/) {
+	$self->pop_color();
+      }
+      $self->pop_color() if $self->{bgcolor_tag}[-1] eq "tr";
+    }
+    elsif ($tag =~ /^t[hd]$/) {
+      $self->pop_color() if $self->{bgcolor_tag}[-1] =~ /^t[hd]$/;
+    }
+    # figure out new bgcolor
+    my $bgcolor;
+    if (exists $attr->{bgcolor}) {
+      $bgcolor = name_to_rgb(lc($attr->{bgcolor}));
+    }
+    else {
+      $bgcolor = $self->{bgcolor_color}[-1];
+    }
+    # tests
+    if ($tag eq "body" && $bgcolor !~ /^\#?ffffff$/) {
+      $self->{html}{bgcolor_nonwhite} = 1;
+    }
+    # push new bgcolor
+    push @{ $self->{bgcolor_color} }, $bgcolor;
+    push @{ $self->{bgcolor_tag} }, $tag;
+  }
+  else {
+    # close elements
+    if ($tag eq "body") {
+      $self->pop_color() if $self->{bgcolor_tag}[-1] eq "body";
+    }
+    elsif ($tag eq "table") {
+      while ($self->{bgcolor_tag}[-1] =~ /^t[rhd]$/) {
+	$self->pop_color();
+      }
+      $self->pop_color() if $self->{bgcolor_tag}[-1] eq "table";
+    }
+    elsif ($tag eq "tr") {
+      while ($self->{bgcolor_tag}[-1] =~ /^t[hd]$/) {
+	$self->pop_color();
+      }
+      $self->pop_color() if $self->{bgcolor_tag}[-1] eq "tr";
+    }
+    elsif ($tag =~ /^t[hd]$/) {
+      $self->pop_color() if $self->{bgcolor_tag}[-1] =~ /^t[hd]$/;
+    }
+  }
+}
+  
 sub html_tests {
   my ($self, $tag, $attr, $num) = @_;
 
@@ -199,64 +287,60 @@ sub html_tests {
       }
     }
   }
-  # bgcolor handling
-  if (defined $self->{html}{"bgcolor_$tag"} && $tag ne "body") {
-    undef $self->{html}{"bgcolor_$tag"};
-  }
-  if (exists $attr->{bgcolor}) {
-    $self->{html}{"bgcolor_$tag"} = name_to_rgb(lc($attr->{bgcolor}));
-    if ($self->{html}{"bgcolor_$tag"} !~ /^\#?ffffff$/) {
-      $self->{html}{bgcolor_nonwhite} = 1;
-      $self->{html}{t_bgcolor_nonwhite_body} = 1 if $tag eq "body";
-    }
-  }
   if ($tag eq "font" && exists $attr->{size}) {
     $self->{html}{big_font} = 1 if (($attr->{size} =~ /^\s*(\d+)/ && $1 > 3) ||
 			    ($attr->{size} =~ /\+(\d+)/ && $1 >= 1));
   }
+  if ($tag eq "font" && defined $self->{html}{color}) {
+    # note: should also test for invisibility when bgcolor changes!
+    undef $self->{html}{color};
+  }
   if ($tag eq "font" && exists $attr->{color}) {
-    my $c = lc($attr->{color});
-    $self->{html}{font_color_unsafe} = 1 if ($c =~ /^\#?[0-9a-f]{6}$/ &&
-				     $c !~ /^\#?(?:00|33|66|80|99|cc|ff){3}$/);
-    $self->{html}{font_color_name} = 1 if ($c !~ /^\#?[0-9a-f]{6}$/ &&
-				   $c !~ /^(?:navy|gray|red|white)$/);
-    $c = name_to_rgb($c);
-    $self->{html}{color} = $c;
-    # invisible fonts
-    for my $where (("td", "th", "tr", "table", "body")) {
-      if (defined $self->{html}{"bgcolor_$where"} &&
-	  defined $self->{html_inside}{$where} &&
-	  $self->{html_inside}{$where} > 0)
-      {
-	if (substr($c,-6) eq substr($self->{html}{"bgcolor_$where"},-6)) {
-	  $self->{html}{font_invisible} = 1;
-	  for (my $delta = 16; $delta <= 256; $delta += 16) {
-	      $self->{html}{"t_font_invisible1_$delta"} = 1;
-	      $self->{html}{"t_font_invisible2_$delta"} = 1;
-	  }
-	}
-	elsif ($c =~ /^\#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/) {
-	  my ($r1, $g1, $b1) = (hex($1), hex($2), hex($3));
-	  if ($self->{html}{"bgcolor_$where"} =~
-	      /^\#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/)
-	  {
-	    my ($r2, $g2, $b2) = (hex($1), hex($2), hex($3));
-	    my $d1 = (($r1 - $r2)**2 + ($g1 - $g2)**2 + ($b1 - $b2)**2)**0.5;
-	    my $d2 = abs($r1 - $r2) + abs($g1 - $g2) + abs($b1 - $b2);
-	    for (my $delta = 16; $delta <= 256; $delta += 16) {
-	      if ($d1 < $delta) {
-		$self->{html}{"t_font_invisible1_$delta"} = 1;
-	      }
-	      if ($d2 < $delta) {
-		$self->{html}{"t_font_invisible2_$delta"} = 1;
-	      }
-	    }
-	  }
-	}
-	last;
+    my $bg = $self->{bgcolor_color}[-1];
+    my $fg = lc($attr->{color});
+    if ($fg =~ /^\#?[0-9a-f]{6}$/ && $fg !~ /^\#?(?:00|33|66|80|99|cc|ff){3}$/)
+    {
+      $self->{html}{font_color_unsafe} = 1;
+    }
+    if ($fg !~ /^\#?[0-9a-f]{6}$/ && $fg !~ /^(?:navy|gray|red|white)$/)
+    {
+      $self->{html}{font_color_name} = 1;
+    }
+    if ($fg !~ /^\#?[0-9a-f]{6}$/ && !exists $html_color{$fg})
+    {
+      $self->{html}{t_font_color_name} = 1;
+    }
+    $fg = name_to_rgb($fg);
+    $self->{html}{color} = $fg;
+    if (substr($fg,-6) eq substr($bg,-6)) {
+      $self->{html}{font_invisible} = 1;
+      for (my $delta = 16; $delta <= 256; $delta += 16) {
+	$self->{html}{"t_font_invisible1_$delta"} = 1;
+	$self->{html}{"t_font_invisible2_$delta"} = 1;
       }
     }
-    if ($c =~ /^\#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/) {
+    elsif ($fg =~ /^\#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/) {
+      my ($r1, $g1, $b1) = (hex($1), hex($2), hex($3));
+      my ($h1, $s1, $v1) = rgb_to_hsv(hex($r1), hex($g1), hex($b1));
+
+      if ($bg =~ /^\#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/) {
+	my ($r2, $g2, $b2) = (hex($1), hex($2), hex($3));
+	my ($h2, $s2, $v2) = rgb_to_hsv(hex($r2), hex($g2), hex($b2));
+
+	my $d1 = (($r1 - $r2)**2 + ($g1 - $g2)**2 + ($b1 - $b2)**2)**0.5;
+	my $d2 = abs($r1 - $r2) + abs($g1 - $g2) + abs($b1 - $b2);
+
+	for (my $delta = 16; $delta <= 256; $delta += 16) {
+	  if ($d1 < $delta) {
+	    $self->{html}{"t_font_invisible1_$delta"} = 1;
+	  }
+	  if ($d2 < $delta) {
+	    $self->{html}{"t_font_invisible2_$delta"} = 1;
+	  }
+	}
+      }
+    }
+    if ($fg =~ /^\#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/) {
       my ($h, $s, $v) = rgb_to_hsv(hex($1), hex($2), hex($3));
       if (!defined($h)) {
 	$self->{html}{font_gray} = 1 unless ($v == 0 || $v == 255);

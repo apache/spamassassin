@@ -1137,6 +1137,7 @@ sub get_decoded_stripped_body_text_array {
     my $hp = HTML::Parser->new(
 		api_version => 3,
 		handlers => [
+		  start_document => [sub { $self->html_init(@_) }],
 		  start => [sub { $self->html_tag(@_) }, "tagname,attr,'+1'"],
 		  end => [sub { $self->html_tag(@_) }, "tagname,attr,'-1'"],
 		  text => [sub { $self->html_text(@_) }, "dtext"],
