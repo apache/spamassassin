@@ -4,7 +4,7 @@
 # Leaving some of these without "lang es" because they show up in english language
 # inboxes
 
-body REMOVE_ES_01             /Si no (?:desea(?:s|) |quer(?:é|e)s )(?:seguir |)recibi(?:r|endo) (?:m.s |estos )?(?:correo(?:s)?|mensaje(?:s)?|publicidad|informaci.n|ofertas|emails promocionales)/
+body REMOVE_ES_01             /Si no (?:desea(?:s)?|quer(?:é|e)s) (?:seguir )?recibi(?:r|endo) (?:m.s |estos )?(?:correo(?:s)?|mensaje(?:s)?|publicidad|informaci.n|ofertas|emails promocionales)/
 describe REMOVE_ES_01         Claims you can be removed in Spanish
 
 body REMOVE_ES_02             /(Para ser (?:eliminado|removido)|Si quiere(?:s|) salir) de (?:nuestra|esta) lista(,?) (?:sera removido|responda el mail|solo tiene(?:s)? que marcar)/i
@@ -25,7 +25,7 @@ describe REMOVE_ES_06		Claims you can opt-out
 body REMOVE_ES_07		/Si esta publicidad no es de su inter.s por favor env.e un email/i
 describe REMOVE_ES_07		Claims you can opt-out
 
-body EXCUSE_ES_01             /(?:este e-mail|esta carta) no (?:puede ser|se) considera(?:d(?:o|a)) (?:\(|)SPAM(?:\)|) (?:ya que|mientras)/i
+body EXCUSE_ES_01             /(?:esto|este e-mail|esta carta) no (?:puede ser|se) considera(?:d(?:o|a))? (?:\()?SPAM(?:\))?(,)? (?:ya que|mientras)/i
 describe EXCUSE_ES_01         Claims not to be spam in Spanish
 
 body EXCUSE_ES_02             /Me he tomado la libertad de enviarle este mail por/
