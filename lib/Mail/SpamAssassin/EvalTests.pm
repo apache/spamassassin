@@ -867,6 +867,13 @@ sub _parse_rfc822_date {
   return $time;
 }
 
+sub subject_is_all_caps {
+   my ($self) = @_;
+   my $subject = $self->get('Subject');
+   $subject =~ s/[^a-zA-Z]//;
+   return $subject eq uc($subject);
+}
+
 ###########################################################################
 # BODY TESTS:
 ###########################################################################
