@@ -267,9 +267,9 @@ sub rendered {
 
     # render text/html always, or any other text part as text/html based
     # on a heuristic which simulates a certain common mail client
-    if ( $self->{'type'} =~ m@^text/html\b@i ||
+    if ( $raw > 0 && ($self->{'type'} =~ m@^text/html\b@i ||
         ($text =~ m/^(.{0,18}?<(?:$Mail::SpamAssassin::HTML::re_start)(?:\s.{0,18}?)?>)/ois &&
-	  _html_near_start($1)
+	  _html_near_start($1))
         )
        ) {
       $self->{'rendered_type'} = 'text/html';
