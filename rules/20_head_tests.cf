@@ -198,11 +198,15 @@ describe DATE_IN_FUTURE_48_96	Date: is 48 to 96 hours after Received: date
 header DATE_IN_FUTURE_96_XX	eval:check_for_shifted_date('96', 'undef')
 describe DATE_IN_FUTURE_96_XX	Date: is 96 hours or more after Received: date
 
-header ADVERT_CODE		Subject =~ /^\W*ADV\b/i
-describe ADVERT_CODE		Subject: starts with advertising tag
-
-header ADVERT_CODE2		Subject =~ /\w.*\b(?!ADV\.)A\s*D\s*V\b/i
-describe ADVERT_CODE2		Subject: contains advertising tag
+# REIMPLEMENT: ADVERT_CODE tests.
+#
+# ADVERT_CODE should be: match at start of subject, case insensitive, 0 or more
+# non-alphanum chars followed by "adv" and a word boundary.
+# 
+# ADVERT_CODE2: match anywhere in subject - require a word char followed by 0
+# or more any-chars, then word boundary, then a negative lookahead for the
+# string "ADV." (for some reason).  then "A" and 0 or more whitespace, "D" and
+# 0 or more whitespace, "V" and a word boundary.
 
 ###########################################################################
 # illegal characters that should be MIME encoded
