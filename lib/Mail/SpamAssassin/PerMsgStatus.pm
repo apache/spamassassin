@@ -419,6 +419,8 @@ sub get_content_preview {
   # now, some tidy-ups that make things look a bit prettier
   $str =~ s/-----Original Message-----.*$//gs;
   $str =~ s/This is a multi-part message in MIME format\.//gs;
+  $str =~ s/[-_\*\.]{10,}//gs;
+  $str =~ s/\s+/ /gs;
 
   # be paranoid -- there's a die() in there
   my $wrapped;
