@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.607 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.608 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -199,9 +199,6 @@ uri T_SUSPICIOUS_LINKS_09	m@(?:^https?://|^mailto:).{0,25}offer[sz]@i
 uri T_OFFERS_URL		m/offer([sz]|-\S+)?\.(?:com|bi?z)/i
 
 ######################################################################
-
-# tvd - US_DOLLARS and MILLION_USD overlap completely, remove the MILLION_USD part
-body T_NA_DOLLARS		/\b(?:\d{1,3})?Million\b.{0,40}\b(?:Canadian Dollar?s?|US\$|U\.? ?S\.? Dollar)/i
 
 # Hotmail's DAV interface uses this. heavily exploited right now, looks like.
 # as far as I can tell, it requires an msn.com or hotmail.com X-Originating-Email,
