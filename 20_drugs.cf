@@ -140,7 +140,7 @@ body __DRUGS_ERECTILE8 /\b_{0,3}T[_\W]?[a4\xE0-\xE6@][_\W]?d[_\W]?[a4\xE0-\xE6@]
 rawbody __DRUGS_ERECTILE10   /\b_{0,3}V[_\W]?(?:i|\&iuml\;)[_\W]?(?:a|\&agrave|\&aring)\;?[_\W]?g[_\W]?r[_\W]?(?:a|\&agrave|\&aring)\b/i
 #apcalis - a generic of cialis
 body __DRUGS_ERECTILE11 		/(?:\b|\s)_{0,3}[a4\xE0-\xE6@][_\W]{0,3}p[_\W]{0,3}c[_\W]{0,3}[a4\xE0-\xE6@][_\W]{0,3}[l!|1][_\W]{0,3}[i1!|l\xEC-\xEF][_\W]{0,3}s_{0,3}\b/i
-meta DRUGS_ERECTILE (__DRUGS_ERECTILE1 || __DRUGS_ERECTILE2 || __DRUGS_ERECTILE3 || __DRUGS_ERECTILE4 ||__DRUGS_ERECTILE5 ||__DRUGS_ERECTILE6 ||__DRUGS_ERECTILE7 ||__DRUGS_ERECTILE8 || __DRUGS_ERECTILE10 ||__DRUGS_ERECTILE11 )
+meta DRUGS_ERECTILE (__DRUGS_ERECTILE1 || __DRUGS_ERECTILE2 || __DRUGS_ERECTILE3 || __DRUGS_ERECTILE4 || __DRUGS_ERECTILE5 || __DRUGS_ERECTILE6 || __DRUGS_ERECTILE8 || __DRUGS_ERECTILE10 || __DRUGS_ERECTILE11 )
 describe DRUGS_ERECTILE 	Refers to an erectile drug
 meta DRUGS_ERECTILE_OBFU ( (__DRUGS_ERECTILE1 &&!__DRUGS_ERECTILE_V) || (__DRUGS_ERECTILE3 && !__DRUGS_ERECTILE_C) ||__DRUGS_ERECTILE2 || (__DRUGS_ERECTILE10 &&!__DRUGS_ERECTILE_V) || (__DRUGS_ERECTILE6 &&!__DRUGS_ERECTILE_L))
 describe DRUGS_ERECTILE_OBFU 	Obfuscated reference to an erectile drug

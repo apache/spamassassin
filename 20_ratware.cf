@@ -144,7 +144,7 @@ meta FORGED_MUA_THEBAT_BOUN     (__THEBAT_MUA && !__THEBAT_MUA_V2 && __CTYPE_HAS
 describe FORGED_MUA_THEBAT_CS	Mail pretending to be from The Bat! (charset)
 describe FORGED_MUA_THEBAT_BOUN Mail pretending to be from The Bat! (boundary)
 
-meta FORGED_OUTLOOK_HTML	(__OUTLOOK_MUA && MIME_HTML_ONLY)
+meta FORGED_OUTLOOK_HTML	(__ANY_OUTLOOK_MUA && MIME_HTML_ONLY)
 describe FORGED_OUTLOOK_HTML	Outlook can't send HTML message only
 
 meta FORGED_AOL_HTML		(__AOL_MUA && MIME_HTML_ONLY)
