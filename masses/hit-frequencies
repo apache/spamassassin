@@ -358,34 +358,76 @@ sub readlogs {
     my $caught;
     my $rules;
 
-    while (<IN>) {
-      next unless (!$opt_M || /$opt_M/o);
-      next if ($opt_X && /$opt_X/o);
+    # this is very speed-sensitive code.  remove all possible
+    # conditionals using an eval('..').
+    my $evalstr = '
+      while (<IN>) {
+    ';
 
-      ($caught, undef, undef, $rules) = split;
-
-      next unless ($caught eq 'Y' || $caught eq '.') && $rules;
-      next if ($opt_f && !(($caught eq 'Y') xor $isspam));
-
-      if ($isspam) {
-	$num_spam++;
-	foreach my $r (split(/,/, $rules)) {
-          $freq_spam{$r}++;
-          if ($opt_o) {
-            vec ($hmap_spam{$r}, $num_spam, 1) = 1;
-          }
-        }
-      }
-      else {
-	$num_ham++;
-	foreach my $r (split(/,/, $rules)) {
-          $freq_ham{$r}++;
-          if ($opt_o) {
-            vec ($hmap_ham{$r}, $num_ham, 1) = 1;
-          }
-        }
-      }
+    if ($opt_M) {
+      $evalstr .= '
+        next unless /$opt_M/o;
+      ';
     }
+    if ($opt_X) {
+      $evalstr .= '
+        next if /$opt_X/o;
+      ';
+    }
+
+    # note: doing the match with a regexp shaves off no less than
+    # 7 opcodes. nice!
+    $evalstr .= '
+        ($caught, undef, undef, $rules) = split(\' \', $_, 5);
+        next unless ($caught =~ /^[Y\.]$/ && $rules);
+    ';
+
+    if ($opt_f) {
+      $evalstr .= '
+        next if (!(($caught eq "Y") xor $isspam));
+      ';
+    }
+
+    my $hmapstr = '';
+    if ($isspam) {
+      if ($opt_o) {
+        $hmapstr = '
+          vec ($hmap_spam{$r}, $num_spam, 1) = 1;
+        ';
+      }
+
+      $evalstr .= '
+        $num_spam++;
+        foreach my $r (split(/,/, $rules)) {
+          $freq_spam{$r}++;
+          '.$hmapstr.'
+        }
+      ';
+    } else {
+      if ($opt_o) {
+        $hmapstr = '
+          vec ($hmap_ham{$r}, $num_ham, 1) = 1;
+        ';
+      }
+
+      $evalstr .= '
+        $num_ham++;
+        foreach my $r (split(/,/, $rules)) {
+          $freq_ham{$r}++;
+          '.$hmapstr.'
+        }
+      ';
+    }
+    $evalstr .= '
+      }
+    ';
+
+    eval $evalstr;
+
+    if ($@) {
+      die $@;
+    }
+
     close IN;
   }
   # paranoia: remove zero length rules
