@@ -29,9 +29,9 @@ in the next major release.  If you currently use these flags, please
 remove them.  The flags are: --add-from, --pipe, -F, -P
 
 SpamAssassin now runs in "taint mode" by default for improved
-security.  If you have Razor2 turned on and are using Vipul's Razor 2.22
-or higher (through at least 2.36), you will need to apply a small patch.
-The instructions are located in the Razor2.patch file.
+security.  If you want to enable usage of Razor v2, you will need to be
+using v2.40 of razor-agents or higher which fixes taint issues in previous
+versions.
 
 The 2.6x series has a new Bayes backend and database format (since 2.5x).
 Your old database(s) will automatically be upgraded the first time

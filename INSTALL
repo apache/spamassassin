@@ -52,10 +52,6 @@ included.
 The default mode of tagging (which used to be ***SPAM*** in the subject
 line) no longer takes place.  Instead the message is rewritten.
 
-Using Razor version 1 is no longer supported.  Please upgrade to Razor
-version 2 and also read the instructions located in the Razor2.patch
-file.
-
 
 Installing or Upgrading SpamAssassin
 ------------------------------------
@@ -292,10 +288,8 @@ skipped.
 	razor-admin -create   [creates the razor home]
 	razor-admin -register [registers an account]
 
-    If you want to use Razor and you are using Vipul's Razor 2.22 or higher
-    (until at least 2.36), you need to apply a small patch to use Razor in
-    "taint mode" which is now the default in SpamAssassin.  The instructions
-    are located in the Razor2.patch file.
+    To use Razor with SpamAssassin, you will need to be using v2.40 or
+    higher.
 
 
   - DCC             http://www.rhyolite.com/anti-spam/dcc/
