@@ -1231,7 +1231,7 @@ sub check_for_mime_missing_boundary {
     push (@boundary, "\Q$1\E");
   }
 
-  foreach my $line (@{$self->{msg}->get_body()}) {
+  foreach my $line (@{$body}) {
     if ($line =~ /^--/) {
       foreach my $boundary (@boundary) {
 	if ($line =~ /^--$boundary$/) {
@@ -1267,7 +1267,7 @@ sub check_language {
 
   return 0 if grep { $_ eq "all" } @languages;
 
-  $body = join ("\n", @$body);
+  $body = join ("\n", @{$body});
   $body =~ s/^Subject://i;
 
   # need about 256 bytes for reasonably accurate match (experimentally derived)
