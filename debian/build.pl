@@ -53,7 +53,7 @@ while (<CHANGELOG>) {
 	last;
     }
 	 
-    if (/spamassassin \((\d+\.\d+)-\d\) unstable; urgency=/) { # Should ignore cvs versions
+    if (/spamassassin \((\d+\.\d+)-\d\) (?:unstable|experimental); urgency=/) { # Should ignore cvs versions
 	$oldversion = $1;
 	print "Last Debian version: $oldversion\n";
 	$revisioncode = 1;
