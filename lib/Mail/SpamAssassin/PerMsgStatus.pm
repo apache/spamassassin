@@ -142,7 +142,7 @@ sub check {
     # inspect the message
     $self->run_rbl_eval_tests ($self->{conf}->{rbl_evals});
 
-    timelog("Finished launching RBL queries in the background", "rblbg", 22);
+    timelog("Finished launching RBL queries in the background", "rblbg", 2);
 
     timelog("Starting head tests", "headtest", 1);
     $self->do_head_tests();
