@@ -233,3 +233,15 @@ test NUMERIC_COMMENT     fail   Something <!-- A comment --> and more
 test FROM_EGROUPS  ok           sentto-2537484-52529-1020428367-Sxm=olswang.com@returns.groups.yahoo.com
 test FROM_EGROUPS  fail         spammer@returns.groups.yahoo.com
 
+test HIDE_WIN_STATUS ok <a href=foo onMouseOver="window.status='bar';>
+test HIDE_WIN_STATUS fail attributes like href=foo onMouseOver="window.status='bar'"
+test HIDE_WIN_STATUS fail attributes like href=foo onMouseOver="flashiness"
+
+test LINK_TO_NO_SCHEME ok <a href=www.foo.com/>foo</a>
+test LINK_TO_NO_SCHEME ok <a href='www.foo.com'>foo</a>
+test LINK_TO_NO_SCHEME ok <a href="www.geocities.com/somecrap">foo</a>
+test LINK_TO_NO_SCHEME fail <a href=http://www.foo.com/>foo</a>
+test LINK_TO_NO_SCHEME fail <a href="http://www.foo.com">foo</a>
+test LINK_TO_NO_SCHEME fail <a href="nextpage.html">foo</a>
+test LINK_TO_NO_SCHEME fail <a href="../index.html">foo</a>
+

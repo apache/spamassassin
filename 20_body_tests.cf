@@ -1389,3 +1389,9 @@ describe HTML_TEXT_FFFF00  Contains HTML text in bright yellow
 rawbody HTML_TEXT_0000FF   /<font[^>]* color=['"]?0000ff/i
 describe HTML_TEXT_0000FF  Contains HTML text in blue
 
+rawbody HIDE_WIN_STATUS    /<[^>]+onMouseOver=[^>]+window.status=/
+describe HIDE_WIN_STATUS   Contains Javascript to hide URLs in browser
+
+rawbody LINK_TO_NO_SCHEME /\s+href=['"]?www\./
+describe LINK_TO_NO_SCHEME Contains link without http:// prefix
+
