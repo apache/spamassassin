@@ -50,8 +50,8 @@ sub new {
   $self->{terse_report_template} = '';
   $self->{spamtrap_template} = '';
   $self->{razor_config} = $ENV{'HOME'}."/razor.conf";
-  $self->{auto_whitelist_dir} = $ENV{'HOME'}."/.spamassassin/auto-whitelist";
-  $self->{auto_whitelist_file_mode} = '0700';	# AS STRING
+  $self->{auto_whitelist_path} = $ENV{'HOME'}."/.spamassassin/auto-whitelist";
+  $self->{auto_whitelist_file_mode} = '0600';	# AS STRING
   $self->{rewrite_subject} = 1;
   $self->{report_header} = 0;
   $self->{use_terse_report} = 0;
@@ -105,13 +105,13 @@ sub _parse {
     # note: no eval'd code should be loaded before the SECURITY line below.
     #
     if (/^whitelist[-_]from\s+(.+)\s*$/) {
-      $self->add_to_addrlist ($self->{whitelist_from},
-      	$self->{whitelist_from_doms}, split (' ', $1)); next;
+      $self->add_to_addrlist ('whitelist_from',
+      	'whitelist_from_doms', split (' ', $1)); next;
     }
 
     if (/^blacklist[-_]from\s+(.+)\s*$/) {
-      $self->add_to_addrlist ($self->{blacklist_from},
-      	$self->{blacklist_from_doms}, split (' ', $1)); next;
+      $self->add_to_addrlist ('blacklist_from',
+      	'blacklist_from_doms', split (' ', $1)); next;
     }
 
     if (/^describe\s+(\S+)\s+(.*)$/) {
@@ -205,8 +205,8 @@ sub _parse {
       $self->{razor_config} = $1; next;
     }
 
-    if (/^auto[-_]whitelist[-_]dir\s*(.*)\s*$/) {
-      $self->{auto_whitelist_dir} = $1; next;
+    if (/^auto[-_]whitelist[-_]path\s*(.*)\s*$/) {
+      $self->{auto_whitelist_path} = $1; next;
     }
     if (/^auto[-_]whitelist[-_]file[-_]mode\s*(.*)\s*$/) {
       $self->{auto_whitelist_file_mode} = $1; next;
@@ -262,9 +262,9 @@ sub add_to_addrlist {
 
   foreach my $addr (@addrs) {
     if ($addr =~ /^\*\@(\S+)/) {
-      $domlist{lc $1} = 1;
+      $self->{$domlist}->{lc $1} = 1;
     } else {
-      $singlelist{lc $addr} = 1;
+      $self->{$singlelist}->{lc $addr} = 1;
     }
   }
 }

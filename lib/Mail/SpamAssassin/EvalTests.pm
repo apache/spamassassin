@@ -155,7 +155,7 @@ sub check_from_in_whitelist {
   local ($_);
   $_ = lc $self->get ('From:addr');
 
-  if (defined($self->{conf}->{whitelist_from}-{$_})) { return 1; }
+  if (defined($self->{conf}->{whitelist_from}->{$_})) { return 1; }
 
   s/[^\@]+\@//gs;	# jm@jmason.org => jmason.org
   if (defined($self->{conf}->{whitelist_from_doms}->{$_})) { return 1; }
@@ -170,7 +170,7 @@ sub check_from_in_blacklist {
   local ($_);
   $_ = lc $self->get ('From:addr');
 
-  if (defined($self->{conf}->{blacklist_from}-{$_})) { return 1; }
+  if (defined($self->{conf}->{blacklist_from}->{$_})) { return 1; }
 
   s/[^\@]+\@//gs;	# jm@jmason.org => jmason.org
   if (defined($self->{conf}->{blacklist_from_doms}->{$_})) { return 1; }

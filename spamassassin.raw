@@ -91,7 +91,7 @@ use vars qw{
 eval {
   require Mail::SpamAssassin;
   require Mail::SpamAssassin::MyMailAudit;
-  require Mail::SpamAssassin::DirBasedAddrList;
+  require Mail::SpamAssassin::DBBasedAddrList;
 
   getopts ('tc:p:hVDrPw:l:dLW') or usage();
 
@@ -148,7 +148,7 @@ EOVERSION
   }
 
 # create a factory for the persistent address list
-  my $addrlistfactory = Mail::SpamAssassin::DirBasedAddrList->new();
+  my $addrlistfactory = Mail::SpamAssassin::DBBasedAddrList->new();
   $spamtest->set_persistent_address_list_factory ($addrlistfactory);
 
   if ($opt_W) {
