@@ -5,41 +5,17 @@ use Fcntl;
 use AnyDBM_File ;
 use vars qw( %h $k $v ) ;
 
-my $dirbased = $ENV{HOME}."/.spamassassin/auto-whitelist";
 my $db = $ENV{HOME}."/.spamassassin/auto-whitelist";	# is this right?
 
 if (-f "$db.db") {
   tie %h, "AnyDBM_File",$db, O_RDWR|O_CREAT|O_EXCL,0600
       or die "Cannot open file $db: $!\n";
-  while (($k, $v) = each %h) { print "$k -> $v (DB)\n" }
+  my @k = grep(!/totscore$/,keys(%h));
+  for my $key (@k)
+  {
+	my $t = $h{"$key|totscore"};
+	my $v = $h{$key};
+	if(defined($t)) { printf "%-40.40s -> % 2.1f %s\n",$key,$t/$v,"($t/$v)"; };
+  }
   untie %h;
-}
-
-if (-d $dirbased) {
-  use File::Find;
-
-  File::Find::find (\&accwanted, "$dirbased/accumulator");
-  File::Find::find (\&permwanted, "$dirbased/permanent");
-
-  sub accwanted {
-    return unless (-f $_);
-
-    my $name = $File::Find::name; $name =~ s/[\\\/\:]//gs;
-    $name =~ s/^.*accumulator//gs;
-
-    my $count = 0;
-    open (IN, "<$_"); while (<IN>) { $count++; } close IN;
-    print "$name -> $count (dir-based)\n";
-  }
-
-  sub permwanted {
-    return unless (-f $_);
-
-    my $name = $File::Find::name; $name =~ s/[\\\/\:]//gs;
-    $name =~ s/^.*permanent//gs;
-
-    open (IN, "<$_"); while (<IN>) {
-      chomp; print "$_ -> 999 (dir-based)\n";
-    } close IN;
-  }
 }
