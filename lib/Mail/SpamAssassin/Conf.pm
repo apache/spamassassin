@@ -543,8 +543,11 @@ Note that test names which begin with '__' are reserved for meta-match
 sub-rules, and are not scored or listed in the 'tests hit' reports.
 
 If no score is given for a test, the default score is 1.0, or 0.01 for
-tests whose names begin with 'T_' (this is used to indicate a rule under
-test).
+tests whose names begin with 'T_' (this is used to indicate a rule in
+testing).
+
+By convention, rule names are be all uppercase and have a length of no
+more than 22 characters.
 
 =cut
 
@@ -947,6 +950,9 @@ Used to describe a test.  This text is shown to users in the detailed report.
 
 Note that test names which begin with '__' are reserved for meta-match
 sub-rules, and are not scored or listed in the 'tests hit' reports.
+
+Also note that by convention, rule descriptions should be limited in
+length to no more than 50 characters.
 
 =cut
 
