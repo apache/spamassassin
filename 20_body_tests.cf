@@ -146,8 +146,8 @@ body EMAIL_MARKETING		/e-*mail marketing/i
 describe EMAIL_MARKETING	Talks about email marketing
 body PRODUCED_AND_SENT_OUT	/This a.?d is produced and sent out by/i
 describe PRODUCED_AND_SENT_OUT	Tells you it's an ad
-body INCREASE_TRAFFIC		/increase.{1,15} traffic\b/i
-describe INCREASE_TRAFFIC	Instructions on how to boost traffic
+body INCREASE_SOMETHING		/\b(?:boost|increase|grow|larger|bigger|higher) (?:traffic|sales)\b/i
+describe INCREASE_SOMETHING	Instructions on how to increase something
 
 # contrib: Duncan
 body ONE_TIME_MAILING		/this\b.{0,20}\b(?:one|1).time\b.{0,20}\b(?:(?:e-?)?mail|offer)/i
@@ -230,7 +230,7 @@ describe YOU_HAVE_BEEN_SELECTED	"You have been selected as a finalist", sure
 # add .{0,10} as sometimes it's quoted as: "free" priority mail shipping ;)
 body FREE_PRIORITY_MAIL		/FREE.{0,10} PRIORITY MAIL SHIPPING/i
 describe FREE_PRIORITY_MAIL	There's no such thing as a free shipping
-body LIMITED_TIME_ONLY		/LIMITED TIME ONLY/i
+body LIMITED_TIME_ONLY		/LIMITED TIME (?:ONLY|offer)/i
 describe LIMITED_TIME_ONLY	Offers a limited time offer
 body STRONG_BUY			/strong buy/i
 describe STRONG_BUY		Tells you about a strong buy
@@ -320,8 +320,6 @@ describe INVESTOR_SPEC_SHEET	Standard investment opportunity spam
 
 body FREE_CONSULTATION		/FREE CONSULTATION/i
 describe FREE_CONSULTATION	Offers a free consultation
-body INCREASE_SALES		/INCREASE SALES/i
-describe INCREASE_SALES		Offers increased sales
 
 # (contrib: Matt Sergeant)
 body LARGE_HEX  		/[0-9a-fA-F]{70,}/
@@ -363,7 +361,7 @@ rawbody JUST_MAILED_PAGE	/\n\n.{0,160}<!-- saved from url=/s
 describe JUST_MAILED_PAGE	Saved web page
 rawbody CLICK_HERE_LINK		/click here.{0,100}<\/a>/is
 describe CLICK_HERE_LINK	Tells you to click on a URL
-body CLICK_BELOW		/click (?:here|below)/is
+body CLICK_BELOW		/click .{0,30}(?:here|below)/is
 describe CLICK_BELOW		Asks you to click below
 
 # (contrib: skod)
@@ -694,7 +692,7 @@ describe NO_DISSAPOINTMENT      You won't be dissapointed.
 body     SERIOUS_ONLY           /Serious [IE]nquiries Only/i
 describe SERIOUS_ONLY           Serious Enquiries Only.
 
-body     RISK_FREE              /risk free/i
+body     RISK_FREE              /\b(?:risk free|no risk)/i
 describe RISK_FREE              Risk free.  Suuurreeee....
 
 # "seen on TV", "seen on ABC/NBC/etc", "seen on XYZ TV", or
@@ -715,3 +713,6 @@ describe SEE_FOR_YOURSELF       See for yourself
 
 body DOUBLE_CAPSWORD		/\b([A-Z]{3,})\b.*\b\1\b/
 describe DOUBLE_CAPSWORD	A word in all caps repeated on the line
+
+body ORDER_NOW              /order (?:now|soon|fast|quickly|while)/i
+describe ORDER_NOW          Encourages you to waste no time in ordering
