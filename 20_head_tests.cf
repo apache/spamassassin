@@ -541,7 +541,7 @@ header USERNAME_IN_SUBJECT	eval:check_for_to_in_subject('user')
 describe USERNAME_IN_SUBJECT	To: username listed at front of Subject
 
 header ADDRESS_IN_SUBJECT	eval:check_for_to_in_subject('address')
-describe ADDRESS_IN_SUBJECT	To: address listed at front of Subject
+describe ADDRESS_IN_SUBJECT	To: address appears in Subject
 
 header SUBJECT_DIET		Subject =~ /\bLose .*(?:pounds|lbs|weight)/i
 describe SUBJECT_DIET		Subject talks about losing pounds
