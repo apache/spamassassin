@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.605 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.606 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -197,11 +197,6 @@ uri T_SUSPICIOUS_LINKS_10	m@(?:^https?://|^mailto:).{0,25}4you@i
 uri T_SUSPICIOUS_LINKS_09	m@(?:^https?://|^mailto:).{0,25}offer[sz]@i
 # new rule
 uri T_OFFERS_URL		m/offer([sz]|-\S+)?\.(?:com|bi?z)/i
-
-# try to do something interesting with this rule
-uri T_SUSPICIOUS_LINKS_04	m@(?:^https?://|^mailto:).{0,25}bargain[zs\-]@i
-# replacement rule
-uri T_BARGAIN_URL		/bargain([sz]|-\S+)?\.(?:com|bi?z)/i
 
 ######################################################################
 
