@@ -116,7 +116,7 @@ spamd/spamc: spamd/spamc.c
 	$(CFCC) $(CFCCFLAGS) $(CFOPTIMIZE) spamd/spamc.c \
 			-o $@ $(CFLDFLAGS) $(CFLIBS)
 
-inst_cfs: $(LOCAL_RULES_DIR) $(DEF_RULES_DIR) $(DEF_RULES_DIR)/user_prefs.template $(LOCAL_RULES_DIR)/local.cf migrate_cfs
+inst_cfs: $(LOCAL_RULES_DIR) $(DEF_RULES_DIR) $(DEF_RULES_DIR)/user_prefs.template $(LOCAL_RULES_DIR)/local.cf
 	for file in $(RULES) ; do \
 	  $(CP) rules/$$file $(DEF_RULES_DIR)/$$file; \
 	done
