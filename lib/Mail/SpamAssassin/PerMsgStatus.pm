@@ -154,7 +154,8 @@ sub check {
 			 $self->{msg}->get_pristine_body());
 
     # use $bodytext here because $decoded is too stripped
-    my @uris = $self->get_uri_list($bodytext);
+    # TVD: leave it up to get_uri_list to do the right thing ...
+    my @uris = $self->get_uri_list();
 
     foreach my $priority (sort { $a <=> $b } keys %{$self->{conf}->{priorities}}) {
       # no need to run if there are no priorities at this level.  This can
@@ -1466,14 +1467,20 @@ my $Addr_spec_re   = qr<$local_part\s*\@\s*$domain>o;
 
 # This really belongs in metadata
 sub get_uri_list {
-  my ($self, $textary) = @_;
+  my ($self) = @_;
 
   # use cached answer if available
   if (defined $self->{uri_list}) {
     return @{$self->{uri_list}};
   }
 
-  $textary ||= $self->get_decoded_body_text_array();
+  # TVD: we used to use decoded_body which is fine, except then we'll
+  # try parsing URLs out of HTML, which is what the HTML code is going
+  # to do (note: we know the HTML parsing occurs, because we call for the
+  # rendered text which does HTML parsing...)  trying to get URLs out of
+  # HTML w/out parsing causes issues, so let's not do it.
+  my $textary = $self->get_decoded_stripped_body_text_array();
+
   my ($rulename, $pat, @uris);
   local ($_);
 
@@ -1545,10 +1552,11 @@ sub get_uri_list {
       push(@nuris, $nuri);
     }
 
-    # deal with redirectors, push the redirect uri onto the uri array
-    # so this loop deals with that one independently
-    while ($nuri =~ s{^https?://.+?(https?://.+)$}{$1}s) {
-      push(@uris, $_);
+    # deal with http redirectors.  strip off one level of redirector
+    # and add back to the array.  the foreach loop will go over those
+    # and deal appropriately.
+    if ($nuri =~ m{^https?://.+?(https?://.+)$}) {
+      push(@uris, $1);
     }
   }
 
