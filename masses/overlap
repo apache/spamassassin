@@ -74,10 +74,10 @@ sub read_file {
 	next if /^#/;
 	if (/^[Y.]\s+-?\d+\s+\S+\s+(.*)/) {
 	    my @tests = sort (split(/,/, $1));
-	    for (my $i = 0; $i < $#tests; $i++) {
-		my $start = $opt_a ? 0 : $i + 1;
+	    for (my $i = 0; $i <= $#tests; $i++) {
+		my $start = $opt_a ? 0 : ($i + 1);
 		$solo{$tests[$i]}++;
-		for (my $j = $start; $j < $#tests; $j++) {
+		for (my $j = $start; $j <= $#tests; $j++) {
 		    next if $i == $j;
 		    $pair{$tests[$i] . " " . $tests[$j]}++;
 		}
