@@ -41,11 +41,7 @@ sub new {
 }
 
 ###########################################################################
-# NFS-safe locking (I hope!):
-# Attempt to create a file lock, using NFS-safe locking techniques.
-#
-# Locking code adapted from code by Alexis Rosen <alexis@panix.com>
-# by Kelsey Cummings <kgc@sonic.net>, with mods by jm and quinlan
+# Attempt to create a file lock, using NFS-UNsafe locking techniques.
 
 sub safe_lock {
   my ($self, $path, $max_retries) = @_;
