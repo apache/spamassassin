@@ -266,39 +266,10 @@ tflags T_NO_RELAYS      nice
 header __NO_RCVD        exists:Received
 meta T_NO_RCVD        (!__NO_RCVD)
 
-# header order
-header T_HEAD_01	ALL =~ /\nX-Priority:[^\n]{0,80}\nCC:/s
-header T_HEAD_02	ALL =~ /\nMessage-ID:[^\n]{0,80}\nFrom:[^\n]{0,80}\nSubject:/s
-header T_HEAD_03	ALL =~ /\nContent-Transfer-Encoding:[^\n]{0,80}\nX-MSMail-Priority:[^\n]{0,80}\nX-Mailer/s
-header T_HEAD_04	ALL =~ /\nContent-Type:[^\n]{0,80}\nContent-Transfer-Encoding:[^\n]{0,80}\nX-MSMail-Priority/s
-header T_HEAD_05	ALL =~ /\nMIME-Version:[^\n]{0,80}\nX-MessageOrder:[^\n]{0,80}/s
-header T_HEAD_06	ALL =~ /\nX-MessageOrder:[^\n]{0,80}\nContent-Type:[^\n]{0,80}/s
-header T_HEAD_06	ALL =~ /\nContent-Transfer-Encoding:[^\n]{0,80}\nX-MSMail-Priority:[^\n]{0,80}/s
-header T_HEAD_07	ALL =~ /\nDate:[^\n]{0,80}\nMIME-Version:[^\n]{0,80}\nX-MessageOrder/s
-header T_HEAD_09	ALL =~ /\nMIME-Version:[^\n]{0,80}\nX-MessageOrder:[^\n]{0,80}\nContent-Type/s
-header T_HEAD_10	ALL =~ /\nReply-To:[^\n]{0,80}\nDate:[^\n]{0,80}\nMIME-Version/s
-header T_HEAD_11	ALL =~ /\nSubject:[^\n]{0,160}\nReply-To:[^\n]{0,80}\nDate/s
-header T_HEAD_12	ALL =~ /\nX-MessageOrder:[^\n]{0,80}\nContent-Type:[^\n]{0,80}\nContent-Transfer-Encoding/s
-header T_HEADI_01	ALL =~ /\nX-Priority:[^\n]{0,80}\nCC:/si
-header T_HEADI_02	ALL =~ /\nX-MessageOrder:[^\n]{0,80}\nContent-Type:[^\n]{0,80}\nContent-Transfer-Encoding:/si
-header T_HEADI_03	ALL =~ /\nContent-Transfer-Encoding:[^\n]{0,80}\nX-MSMail-Priority:[^\n]{0,80}/si
-header T_HEADI_04	ALL =~ /\nContent-Transfer-Encoding:[^\n]{0,80}\nX-MSMail-Priority:[^\n]{0,80}\nX-Mailer_/si
-header T_HEADI_05	ALL =~ /\nContent-Type:[^\n]{0,80}\nContent-Transfer-Encoding:[^\n]{0,80}\nX-MSMail-Priority:/si
-header T_HEADI_06	ALL =~ /\nDate:[^\n]{0,80}\nMIME-Version:[^\n]{0,80}\nX-MessageOrder:/si
-header T_HEADI_07	ALL =~ /\nMIME-Version:[^\n]{0,80}\nX-MessageOrder:[^\n]{0,80}/si
-header T_HEADI_08	ALL =~ /\nMIME-Version:[^\n]{0,80}\nX-MessageOrder:[^\n]{0,80}\nContent-Type:/si
-header T_HEADI_09	ALL =~ /\nReply-To:[^\n]{0,80}\nDate:[^\n]{0,80}\nMIME-Version:/si
-header T_HEADI_10	ALL =~ /\nSubject:[^\n]{0,160}\nReply-To:[^\n]{0,80}\nDate:/si
-header T_HEADI_11	ALL =~ /\nX-MessageOrder:[^\n]{0,80}\nContent-Type:[^\n]{0,80}/si
-
 # I have a feeling these are well-caught already, better tests may exist
-header T_DM15_MID1	Message-ID =~ /<[0-9a-f]{4}01c4[0-9a-f]{4}\$[0-9a-f]{8}\$[0-9a-f]{8}@\S+>/
-header T_DM15_MID2	MESSAGEID =~ /<[0-9a-f]{4}01c4[0-9a-f]{4}\$[0-9a-f]{8}\$[0-9a-f]{8}@\S+>/
-header T_DM15_BOUND	Content-Type =~ /----=_NextPart_000_/
-meta T_RATWARE_DM15_1	T_DM15_MID1 && !__HAS_X_MAILER
-meta T_RATWARE_DM15_2	T_DM15_MID2 && !__HAS_X_MAILER
-meta T_RATWARE_DM15_3	T_DM15_MID1 && T_DM15_BOUND
-meta T_RATWARE_DM15_4	T_DM15_MID2 && T_DM15_BOUND
+# shouldn't these trigger MSGID_OUTLOOK_INVALID?
+header __DM15_MID	Message-ID =~ /<[0-9a-f]{4}01c4[0-9a-f]{4}\$[0-9a-f]{8}\$[0-9a-f]{8}@\S+>/
+meta T_RATWARE_DM15	__DM15_MID && !__HAS_X_MAILER
 
 # simple enough to test
 meta T_RATWARE_SOMETHING	__MSGID_DOLLARS_OK && !__HAS_X_MAILER

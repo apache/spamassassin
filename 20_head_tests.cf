@@ -670,3 +670,6 @@ describe X_MAILER_SPAM		X-Mailer: header is bulk email fingerprint
 header __TOCC_EXISTS		exists:ToCc
 meta TO_CC_NONE			!__TOCC_EXISTS
 describe TO_CC_NONE		No To: or Cc: header
+
+header X_PRIORITY_CC		ALL =~ /\nX-Priority:[^\n]{0,80}\nCc:/si
+describe X_PRIORITY_CC		Cc: after X-Priority: (bulk email fingerprint)
