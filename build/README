@@ -29,7 +29,7 @@ SPAMASSASSIN RELEASE PROCEDURE
 
   for HEAD:
 
-  TZ=UTC ./build/cvs2cl-branch -f Changes -l "-d'>2002-06-18'" --branch HEAD
+  TZ=UTC ./build/cvs2cl-branch -f Changes -l "-d'>2002-06-18'"
   
   Note that this requires 'cvs2cl-branch' in the 'build' subdir, since
   there are bugs in std cvs2cl.pl that otherwise result in revisions

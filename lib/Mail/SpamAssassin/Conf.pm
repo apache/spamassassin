@@ -1889,8 +1889,13 @@ Define a test.  C<SYMBOLIC_TEST_NAME> is a symbolic test name, such as
 'FROM_ENDS_IN_NUMS'.  C<header> is the name of a mail header, such as
 'Subject', 'To', etc.
 
-'ALL' can be used to mean the text of all the message's headers.  'ToCc' can
-be used to mean the contents of both the 'To' and 'Cc' headers.
+'ALL' can be used to mean the text of all the message's headers.
+
+'ToCc' can be used to mean the contents of both the 'To' and 'Cc' headers.
+
+'EnvelopeFrom' is the address used in the 'MAIL FROM:' phase of the
+SMTP transaction that delivered this message, if this data has been
+made available by the SMTP server.
 
 'MESSAGEID' is a symbol meaning all Message-Id's found in the message; some
 mailing list software moves the I<real> Message-Id to 'Resent-Message-Id' or

@@ -956,19 +956,39 @@ sub load_resolver {
 sub lookup_mx {
   my ($self, $dom) = @_;
 
-  return 0 unless $self->load_resolver();
-  my $ret = 0;
+  return unless $self->load_resolver();
 
+  my $mxrecords;
   dbg ("looking up MX for '$dom'");
 
-  eval {
-    my @mxrecords = Net::DNS::mx($self->{res}, $dom);
-    $ret = 1 if @mxrecords;
-  };
-  if ($@) {
-    dbg ("MX lookup failed horribly, perhaps bad resolv.conf setting?");
-    return undef;
+  if (exists $self->{dnscache}->{MX}->{$dom}) {
+    $mxrecords = $self->{dnscache}->{MX}->{$dom};
+
+  } else {
+    eval {
+      my @recs = Net::DNS::mx ($self->{res}, $dom);
+
+      # just keep the IPs, drop the preferences.
+      my @ips = map { $_->exchange } @recs;
+
+      $mxrecords = $self->{dnscache}->{MX}->{$dom} = [ @ips ];
+    };
+    if ($@) {
+      dbg ("MX lookup failed horribly, perhaps bad resolv.conf setting?");
+      return undef;
+    }
   }
+
+  $mxrecords;
+}
+
+sub lookup_mx_exists {
+  my ($self, $dom) = @_;
+
+  my $ret = 0;
+  my $recs = $self->lookup_mx ($dom);
+  if (!defined $recs) { return undef; }
+  if (scalar @{$recs}) { $ret = 1; }
 
   dbg ("MX for '$dom' exists? $ret");
   return $ret;
@@ -1053,7 +1073,7 @@ sub is_dns_available {
   for(my $retry = 3; $retry > 0 and $#domains>-1; $retry--) {
     my $domain = splice(@domains, rand(@domains), 1);
     dbg ("trying ($retry) $domain...", "dnsavailable", -2);
-    my $result = $self->lookup_mx($domain);
+    my $result = $self->lookup_mx_exists($domain);
     if(defined $result) {
       if ( $result ) {
         dbg ("MX lookup of $domain succeeded => Dns available (set dns_available to hardcode)", "dnsavailable", -1);

@@ -1,4 +1,4 @@
-# $Id: Received.pm,v 1.29 2003/09/10 04:54:29 felicity Exp $
+# $Id: Received.pm,v 1.30 2003/09/29 05:34:34 jmason Exp $
 
 # ---------------------------------------------------------------------------
 
@@ -28,7 +28,7 @@ use bytes;
 use Mail::SpamAssassin::Dns;
 
 use vars qw{
-  $LOCALHOST
+  $LOCALHOST $CCTLDS_WITH_SUBDELEGATION
 };
 
 $LOCALHOST = qr{(?:
@@ -36,6 +36,15 @@ $LOCALHOST = qr{(?:
 		  127\.0\.0\.1|
 		  ::ffff:127\.0\.0\.1
 		)}ixo;
+
+# http://www.bestregistrar.com/help/ccTLD.htm lists these
+$CCTLDS_WITH_SUBDELEGATION = qr{
+	(?:ac| ae| ar| at| au| az| bb| bm| br| bs| ca| cn| co|
+	cr| cu| cy| do| ec| eg| fj| ge| gg| gu| hk| hu| id| il| im|
+	in| je| jo| jp| kr| la| lb| lc| lv| ly| mm| mo| mt| mx| my|
+	na| nc| np| nz| pa| pe| ph| pl| py| ru| sg| sh| sv| sy| th|
+	tn| tr| tw| ua| ug| uk| uy| ve| vi| yu| za)
+}ixo;
 
 # ---------------------------------------------------------------------------
 
@@ -146,7 +155,9 @@ sub parse_received_headers {
       # if the 'from' IP addr shares the same class B mask (/16) as
       # the first relay found in the message, it's still on the
       # user's network.
-      elsif ($self->ips_match_in_16_mask ([ $relay->{ip} ], $first_by)) {
+      elsif (Mail::SpamAssassin::Util::ips_match_in_16_mask
+					([ $relay->{ip} ], $first_by))
+      {
 	dbg ("received-header: 'from' ".$relay->{ip}." is near to first 'by'");
 	$inferred_as_trusted = 1;
       }
@@ -182,6 +193,17 @@ sub parse_received_headers {
 
 	if ($found_rsvd && !$found_non_rsvd) {
 	  dbg ("received-header: 'by' ".$relay->{by}." has no public IPs");
+	  $inferred_as_trusted = 1;
+	}
+      }
+
+      # if the IP address used is close to an MX for the hostname used in
+      # the HELO, then it's likely to be incoming traffic.  Trust it.
+      # (TODO: not 100% sure about this yet)
+
+      if (!$inferred_as_trusted) {
+	if ($self->mx_of_helo_near_ip ($relay->{helo}, $relay->{ip})) {
+	  dbg ("received-header: helo $relay->{helo} is near $relay->{ip}");
 	  $inferred_as_trusted = 1;
 	}
       }
@@ -278,6 +300,56 @@ sub ips_match_in_16_mask {
     }
   }
 
+  return 0;
+}
+
+sub ips_match_in_24_mask {
+  my ($self, $ipset1, $ipset2) = @_;
+  my ($b1, $b2);
+
+  foreach my $ip1 (@{$ipset1}) {
+    foreach my $ip2 (@{$ipset2}) {
+      next unless defined $ip1;
+      next unless defined $ip2;
+      next unless ($ip1 =~ /^(\d+\.\d+\.\d+\.)/); $b1 = $1;
+      next unless ($ip2 =~ /^(\d+\.\d+\.\d+\.)/); $b2 = $1;
+
+      if ($b1 eq $b2) { return 1; }
+    }
+  }
+
+  return 0;
+}
+
+sub mx_of_helo_near_ip {
+  my ($self, $helo, $ip) = @_;
+
+  my $helodomain = $helo;
+
+  # TODO: should we just traverse down the chain instead of this;
+  # e.g. "foo.bar.baz.co.uk" would be "bar.baz.co.uk", "baz.co.uk",
+  # instead of just "baz.co.uk" straight away?
+  if ($helo =~ /\.${CCTLDS_WITH_SUBDELEGATION}$/) {
+    if ($helo =~ /\.([^\.]+\.[^\.]+\.${CCTLDS_WITH_SUBDELEGATION})$/) {
+      $helodomain = $1;
+    }
+  } else {
+    if ($helo =~ /\.([^\.]+\.[^\.]+)$/) {
+      $helodomain = $1;
+    }
+  }
+
+  my $mxes = $self->lookup_mx ($helodomain);
+  my @mxips = ();
+  foreach my $mx (@$mxes) {
+    push (@mxips, $self->lookup_all_ips ($mx));
+  }
+  if ($mxes && Mail::SpamAssassin::Util::ips_match_in_24_mask ([ $ip ], [ @mxips ]))
+  {
+    dbg ("IP address $ip is near to an MX (".join (', ', @mxips).
+					") for ".$helodomain);
+    return 1;
+  }
   return 0;
 }
 
@@ -482,8 +554,9 @@ sub parse_received_line {
     # Received: from cabbage.jmason.org [127.0.0.1]
     # by localhost with IMAP (fetchmail-5.9.0)
     # for jm@localhost (single-drop); Thu, 13 Mar 2003 20:39:56 -0800 (PST)
-    if (/^from (\S+) \[(${IP_ADDRESS})\] by (\S+) with IMAP \(fetchmail/) {
-      $rdns = $1; $ip = $2; $by = $3; goto enough; 
+    if (/^from (\S+) \[(${IP_ADDRESS})\] by (\S+) with \S+ \(fetchmail/) {
+      $self->found_pop_fetcher_sig();
+      return;		# skip fetchmail handovers
     }
 
     # Received: from pl653.nas927.o-tokyo.nttpc.ne.jp (HELO kaik)
@@ -809,8 +882,15 @@ enough:
     return;	# ignore IPv6 handovers
   }
 
-  if ($ip eq '127.0.0.1') {
-    return;	# ignore localhost handovers
+  # DISABLED: if we cut out localhost-to-localhost SMTP handovers,
+  # we will give FPs on SPF checks -- since the SMTP "MAIL FROM" addr
+  # will be recorded, but we won't have the relays handover recorded
+  # for that SMTP transaction, so we wind up checking the wrong IP
+  # for the addr.
+  if (0) {
+    if ($ip eq '127.0.0.1') {
+      return;	# ignore localhost handovers
+    }
   }
 
   if ($rdns =~ /^unknown$/i) {
@@ -880,6 +960,14 @@ enough:
 
   # add it to an internal array so Eval tests can use it
   push (@{$self->{relays}}, $relay);
+}
+
+# restart the parse if we find a fetchmail marker or similar.
+# spamcop does this, and it's a great idea ;)
+sub found_pop_fetcher_sig {
+  my ($self) = @_;
+  dbg ("found fetchmail marker, restarting parse");
+  $self->{relays} = [ ];
 }
 
 # ---------------------------------------------------------------------------

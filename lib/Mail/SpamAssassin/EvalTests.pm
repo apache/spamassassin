@@ -2992,4 +2992,134 @@ sub check_for_rdns_helo_mismatch {	# T_FAKE_HELO_*
   0;
 }
 
+###########################################################################
+
+# SPF support
+sub check_for_spf_pass {
+  my ($self) = @_;
+  $self->_check_spf() unless $self->{spf_checked};
+  $self->{spf_pass};
+}
+
+sub check_for_spf_fail {
+  my ($self) = @_;
+  $self->_check_spf() unless $self->{spf_checked};
+  if ($self->{spf_failure_comment}) {
+    $self->test_log ($self->{spf_failure_comment});
+  }
+  $self->{spf_fail};
+}
+
+sub check_for_spf_softfail {
+  my ($self) = @_;
+  $self->_check_spf() unless $self->{spf_checked};
+  if ($self->{spf_failure_comment}) {
+    $self->test_log ($self->{spf_failure_comment});
+  }
+  $self->{spf_softfail};
+}
+
+sub _check_spf {
+  my ($self) = @_;
+
+  $self->{spf_checked} = 1;
+  $self->{spf_pass} = 0;
+  $self->{spf_fail} = 0;
+  $self->{spf_softfail} = 0;
+  $self->{spf_failure_comment} = undef;
+  return unless $self->is_dns_available();
+
+  my $lasthop;
+  if (scalar @{$self->{relays_trusted}} > 0) {
+    # we can't run the SPF test if the message has passed through
+    # 1 or more trusted relays -- since they may have changed
+    # the MAIL FROM: address, unfortunately (through .forwards).
+    # The SPF Sender Rewriting Scheme, http://spf.pobox.com/srs.html ,
+    # will hopefully address this; we can detect if the sender has
+    # been rewritten, and if so figure out what the sender *was*.
+    #
+    # Alternatively -- we may be able to use the HELO data recorded
+    # in the Received headers...
+    #
+    dbg ("SPF: message came through >0 trusted relays, cannot use");
+    return;
+
+  } else {
+    $lasthop = $self->{relays_untrusted}->[0];
+  }
+
+  if (!defined $lasthop) {
+    dbg ("SPF: message was delivered locally, not required");
+    # TODO: actually, this is a situation we should give a bonus
+    # for anyway -- but as another test.
+    return;
+  }
+
+  my $sender = $self->get ("EnvelopeFrom");
+  my $ip = $lasthop->{ip};
+  my $helo = $lasthop->{helo};
+  my $query;
+
+  # if $sender is undef or "", that's OK; Mail::SPF::Query will use
+  # the HELO domain instead, which we can get from the Received headers.
+  # nice!
+
+  eval {
+    require Mail::SPF::Query;
+    $query = Mail::SPF::Query->new (ip => $ip, sender => $sender, helo => $helo);
+  };
+
+  if ($@) {
+    dbg ("SPF: cannot load or create Mail::SPF::Query module");
+    return;
+  }
+
+  my ($result, $comment) = $query->result();
+  $comment =~ s/\s+/ /gs;	# no newlines please
+
+  if ($result eq 'pass') {
+    $self->{spf_pass} = 1;
+  } elsif ($result eq 'fail') {
+    $self->{spf_fail} = 1;
+  } elsif ($result eq 'softfail') {
+    $self->{spf_softfail} = 1;
+  }
+
+  if ($self->{spf_fail} || $self->{spf_softfail}) {
+    $self->{spf_failure_comment} = "SPF forgery: $comment";
+    # there's a nice webpage at http://spf.pobox.com/why which provides
+    # a very nice explanation of why something might have failed; e.g.
+    # http://spf.pobox.com/why?sender=demospf%40jmason.org&ip=10.1.1.1
+    # maybe we should use that. we could nick the code from qpsmtpd;
+    # http://cvs.perl.org/viewcvs/qpsmtpd/plugins/sender_permitted_from?rev=1.4&content-type=text/vnd.viewcvs-markup
+    # TODO.
+  }
+
+  dbg ("SPF: query for $sender/$ip/$helo: result: $result, comment: $comment");
+}
+
+###########################################################################
+
+sub check_for_all_relays_near_mxes {
+  my ($self) = @_;
+
+  return unless $self->is_dns_available();
+  foreach my $relay (@{$self->{relays_untrusted}}) {
+    if (!$self->mx_of_helo_near_ip ($relay->{helo}, $relay->{ip})) {
+      dbg ("helo $relay->{helo} is not near $relay->{ip}");
+      return 0;
+    } else {
+      dbg ("helo $relay->{helo} is near $relay->{ip}");
+    }
+  }
+
+  # note: an empty @{$self->{relays_untrusted}} is fine -- it means
+  # either the message originating locally, or the trail was trusted
+  # all the way to the source.  Both are good news!
+
+  return 1;
+}
+
+###########################################################################
+
 1;

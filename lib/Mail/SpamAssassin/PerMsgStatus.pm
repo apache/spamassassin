@@ -861,7 +861,7 @@ sub get_full_message_as_text {
 Indicate that this C<$status> object is finished with, and can be destroyed.
 
 If you are using SpamAssassin in a persistent environment, or checking many
-mail messages from one L<Mail::SpamAssassin> factory, this method should be
+mail messages from one C<Mail::SpamAssassin> factory, this method should be
 called to ensure Perl's garbage collection will clean up old status objects.
 
 =cut
@@ -1280,6 +1280,13 @@ sub get {
 
     if ($hdrname eq 'ALL') {
       $_ = $self->{msg}->get_all_headers();
+    }
+    # EnvelopeFrom: the SMTP MAIL FROM: addr
+    elsif ($hdrname eq 'EnvelopeFrom') {
+      $getraw = 1;	# this will *not* be encoded unless it's a trick
+      $getname = 0;	# avoid other tricks
+      $getaddr = 0;
+      $_ = $self->get_envelope_from();
     }
     # ToCc: the combined recipients list
     elsif ($hdrname eq 'ToCc') {
@@ -2387,6 +2394,38 @@ sub generic_base64_decode {
     else {
         return $self->slow_base64_decode($to_decode);
     }
+}
+
+###########################################################################
+
+# helper for get().  Do not call directly, as get() caches its results
+# and this does not!
+sub get_envelope_from {
+  my ($self) = @_;
+  
+  # Get the SMTP MAIL FROM:, aka. the "envelope sender", if our
+  # calling app has helpfully marked up the source message
+  # with it.  Various MTAs and calling apps each have their
+  # own idea of what header to use for this!   see
+  # http://bugzilla.spamassassin.org/show_bug.cgi?id=2142 .
+
+  my $envf;
+
+  # procmailrc notes this, amavisd are adding it, we recommend it
+  if ($envf = $self->get ("X-Envelope-From")) { goto ok; }
+
+  # qmail, new-inject(1)
+  if ($envf = $self->get ("Envelope-Sender")) { goto ok; }
+
+  # Postfix, sendmail, also mentioned in RFC821
+  if ($envf = $self->get ("Return-Path")) { goto ok; }
+
+  # give up.
+  return undef;
+
+ok:
+  chomp $envf;	# remove newline
+  return $envf;
 }
 
 ###########################################################################

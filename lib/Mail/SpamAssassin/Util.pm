@@ -504,6 +504,42 @@ sub extract_ipv4_addr_from_string {
 
 ###########################################################################
 
+sub ips_match_in_16_mask {
+  my ($ipset1, $ipset2) = @_;
+  my ($b1, $b2);
+
+  foreach my $ip1 (@{$ipset1}) {
+    foreach my $ip2 (@{$ipset2}) {
+      next unless defined $ip1;
+      next unless defined $ip2;
+      next unless ($ip1 =~ /^(\d+\.\d+\.)/); $b1 = $1;
+      next unless ($ip2 =~ /^(\d+\.\d+\.)/); $b2 = $1;
+      if ($b1 eq $b2) { return 1; }
+    }
+  }
+
+  return 0;
+}
+
+sub ips_match_in_24_mask {
+  my ($ipset1, $ipset2) = @_;
+  my ($b1, $b2);
+
+  foreach my $ip1 (@{$ipset1}) {
+    foreach my $ip2 (@{$ipset2}) {
+      next unless defined $ip1;
+      next unless defined $ip2;
+      next unless ($ip1 =~ /^(\d+\.\d+\.\d+\.)/); $b1 = $1;
+      next unless ($ip2 =~ /^(\d+\.\d+\.\d+\.)/); $b2 = $1;
+      if ($b1 eq $b2) { return 1; }
+    }
+  }
+
+  return 0;
+}
+
+###########################################################################
+
 sub my_inet_aton { unpack("N", pack("C4", split(/\./, $_[0]))) }
 
 ###########################################################################

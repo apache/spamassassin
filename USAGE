@@ -168,6 +168,16 @@ Other Installation Notes
     checks to be more accurate.
 
 
+  - A very handy new feature is SPF support, which allows you to check
+    that the message sender is permitted by their domain to send from the
+    IP address used.  This has the potential to greatly cut down on mail
+    forgery.  (see http://spf.pobox.com/ for more details.)   However,
+    sendmail will not expose the MAIL FROM: sender address by default.  So
+    if you're using sendmail, please add this to /etc/sendmail.cf :
+
+      H?l?X-Envelope-From: $f
+
+
   - MDaemon users should add this line to their "local.cf" file:
 
       report_safe_copy_headers X-MDRcpt-To X-MDRemoteIP X-MDaemon-Deliver-To
