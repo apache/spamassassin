@@ -530,18 +530,6 @@ header T_USER_AGENT_XIMIAN   X-Mailer =~ /^Ximian Evolution \d+\.\d+\.\d+(?:\.\d
 score  T_USER_AGENT_XIMIAN   -0.5
 tflags T_USER_AGENT_XIMIAN   nice
 
-# Bug 1133
-# Dec  6 2002 jm: retry with support for more header formats
-# Dec  9 2002 quinlan: seems not so good
-#
-#  0.108   0.0460   0.1366    0.252   0.02    0.01  T_BAD_HELO2
-#  0.050   0.2241   0.0196    0.920   0.68    0.01  T_BAD_HELO2:daf
-#  0.008   0.0000   0.0141    0.000   0.00    0.01  T_BAD_HELO2:jm
-#  0.436   0.0407   0.6890    0.056   0.00    0.01  T_BAD_HELO2:quinlan
-#  0.020   0.0400   0.0115    0.777   0.45    0.01  T_BAD_HELO2:rODbegbie
-#
-header T_BAD_HELO2           eval:check_for_bad_helo2()
-
 ##############################################################################
 # bug 1163: image only test from mgm
 
