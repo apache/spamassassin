@@ -314,12 +314,6 @@ tflags T_RCVD_IN_SORBS_WEB net
 # dsn.rfc-ignorant.org
 header T_FROM_IN_RFCI_DSN	rbleval:check_rbl_from('rfci-dsn', 'dsn.rfc-ignorant.org.')
 tflags T_FROM_IN_RFCI_DSN net
-# bl.deadbeef.com
-header T_FROM_IN_DEADBEEF	rbleval:check_rbl_from('deadbeef', 'bl.deadbeef.com.')
-tflags T_FROM_IN_DEADBEEF net
-# bandwidth-pigs
-header T_FROM_IN_PIGS		rbleval:check_rbl_from('pigs', 'bandwidth-pigs.monkeys.com.')
-tflags T_FROM_IN_PIGS net
 
 # OK, a whole batch of faked-HELO detection rules.  These work by checking
 # for hosts HELOing in a certain domain, but without rDNS matching that.
@@ -553,7 +547,7 @@ body T_GAPPY_PORN_02                       /\b(?:s\.e\.x|p\.o\.r\.n|x\.x\.x|f\.u
 describe T_GAPPY_PORN_02           G.a.p.p.y - P.o.r.n
 
 # bug 1743
-header T_WS_PHRASE                To =~ /\s*"\s"\s/
+header T_WS_PHRASE                To =~ /\s*\"\s\"\s/
 describe T_WS_PHRASE              Phrase part of address is a space
 
 # bug 1876
