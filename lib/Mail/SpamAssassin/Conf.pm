@@ -142,7 +142,7 @@ sub new {
   $self->{dcc_add_header} = 0;
   $self->{dcc_timeout} = 10;
 
-  $self->{pyzor_max} = 20;
+  $self->{pyzor_max} = 5;
   $self->{pyzor_add_header} = 0;
   $self->{pyzor_timeout} = 10;
 
@@ -895,7 +895,7 @@ Pyzor is a system similar to Razor.  This option sets how often a message's
 body checksum must have been reported to the Pyzor server before SpamAssassin
 will consider the Pyzor check as matched.
 
-The default is 20.
+The default is 5.
 
 =cut
 
@@ -929,6 +929,17 @@ the results
     }
 
 
+=item razor_timeout n		(default 10)
+
+How many seconds you wait for razor to complete before you go on without 
+the results
+
+=cut
+
+    if (/^razor[-_]timeout\s*(\d+)\s*$/) {
+      $self->{razor_timeout} = $1; next;
+    }
+
 
 
 =item num_check_received { integer }   (default: 2)
@@ -952,6 +963,41 @@ See dialup_codes for more details and an example
     # SECURITY: no eval'd code should be loaded before this line.
     #
     if ($scoresonly && !$self->{allow_user_rules}) { goto failed_line; }
+
+=back
+
+=head1 SETTINGS
+
+These settings differ from the ones above, in that they are considered
+'privileged'.  Only users running C<spamassassin> from their procmailrc's or
+forward files, or sysadmins editing a file in C</etc/mail/spamassassin>, can
+use them.   C<spamd> users cannot use them in their C<user_prefs> files, for
+security and efficiency reasons, unless allow_user_rules is enabled (and
+then, they may only add rules from below).
+
+=over 4
+
+=item allow_user_rules { 0 | 1 }		(default: 0)
+
+This setting allows users to create rules (and only rules) in their
+C<user_prefs> files for use with C<spamd>. It defaults to off, because
+this could be a severe security hole. It may be possible for users to
+gain root level access if C<spamd> is run as root. It is NOT a good
+idea, unless you have some other way of ensuring that users' tests are
+safe. Don't use this unless you are certain you know what you are
+doing. Furthermore, this option causes spamassassin to recompile all
+the tests each time it processes a message for a user with a rule in
+his/her C<user_prefs> file, which could have a significant effect on
+server load. It is not recommended.
+
+=cut
+
+
+    if (/^allow[-_]user[-_]rules\s+(\d+)$/) {
+      $self->{allow_user_rules} = $1+0; 
+      dbg("Allowing user rules!"); next;
+    }
+
 
 
 # If you think, this is complex, you should have seen the four previous
@@ -1027,41 +1073,6 @@ score Z_FUDGE_DUL_OSIRU_FH	1.5
 
 
     if ($scoresonly) { dbg("Checking privileged commands in user config"); }
-
-=back
-
-=head1 SETTINGS
-
-These settings differ from the ones above, in that they are considered
-'privileged'.  Only users running C<spamassassin> from their procmailrc's or
-forward files, or sysadmins editing a file in C</etc/mail/spamassassin>, can
-use them.   C<spamd> users cannot use them in their C<user_prefs> files, for
-security and efficiency reasons, unless allow_user_rules is enabled (and
-then, they may only add rules from below).
-
-=over 4
-
-=item allow_user_rules { 0 | 1 }		(default: 0)
-
-This setting allows users to create rules (and only rules) in their
-C<user_prefs> files for use with C<spamd>. It defaults to off, because
-this could be a severe security hole. It may be possible for users to
-gain root level access if C<spamd> is run as root. It is NOT a good
-idea, unless you have some other way of ensuring that users' tests are
-safe. Don't use this unless you are certain you know what you are
-doing. Furthermore, this option causes spamassassin to recompile all
-the tests each time it processes a message for a user with a rule in
-his/her C<user_prefs> file, which could have a significant effect on
-server load. It is not recommended.
-
-=cut
-
-
-    if (/^allow[-_]user[-_]rules\s+(\d+)$/) {
-      $self->{allow_user_rules} = $1+0; 
-      dbg("Allowing user rules!"); next;
-    }
-
 
 
 =item header SYMBOLIC_TEST_NAME header op /pattern/modifiers	[if-unset: STRING]
@@ -1220,6 +1231,17 @@ Define a full-body eval test.  See above.
     #
     if ($scoresonly) { goto failed_line; }
 
+=back
+
+=head1 PRIVILEGED SETTINGS
+
+These settings differ from the ones above, in that they are considered 'more
+privileged' -- even more than the ones in the SETTINGS section.  No matter what
+C<allow_user_rules> is set to, these can never be set from a user's
+C<user_prefs> file.
+
+=over 4
+
 
 =item test SYMBOLIC_TEST_NAME (ok|fail) Some string to test against
 
@@ -1244,17 +1266,6 @@ Currently this is the same value Razor itself uses: C<~/razor.conf>.
 
     if (/^razor[-_]config\s*(.*)\s*$/) {
       $self->{razor_config} = $1; next;
-    }
-
-=item razor_timeout n		(default 10)
-
-How many seconds you wait for razor to complete before you go on without 
-the results
-
-=cut
-
-    if (/^razor[-_]timeout\s*(\d+)\s*$/) {
-      $self->{razor_timeout} = $1; next;
     }
 
 =item dcc_options options
