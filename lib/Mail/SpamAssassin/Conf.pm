@@ -1242,7 +1242,7 @@ Clear the spamtrap template.
       $self->{spamtrap_template} = ''; next;
     }
 
-=item use_dcc ( 0 | 1 )		(default 1)
+=item use_dcc ( 0 | 1 )		(default: 1)
 
 Whether to use DCC, if it is available.
 
@@ -1294,7 +1294,7 @@ The default is 999999 for all these options.
     }
 
 
-=item use_pyzor ( 0 | 1 )		(default 1)
+=item use_pyzor ( 0 | 1 )		(default: 1)
 
 Whether to use Pyzor, if it is available.
 
@@ -1425,7 +1425,7 @@ Empty the list of trusted networks.
       $self->{trusted_networks} = Mail::SpamAssassin::NetSet->new(); next;
     }
 
-=item use_razor2 ( 0 | 1 )		(default 1)
+=item use_razor2 ( 0 | 1 )		(default: 1)
 
 Whether to use Razor version 2, if it is available.
 
@@ -1435,7 +1435,7 @@ Whether to use Razor version 2, if it is available.
       $self->{use_razor2} = $1; next;
     }
 
-=item razor_timeout n		(default 10)
+=item razor_timeout n		(default: 10)
 
 How many seconds you wait for razor to complete before you go on without 
 the results
@@ -1446,7 +1446,7 @@ the results
       $self->{razor_timeout} = $1; next;
     }
 
-=item use_bayes ( 0 | 1 )		(default 1)
+=item use_bayes ( 0 | 1 )		(default: 1)
 
 Whether to use the naive-Bayesian-style classifier built into SpamAssassin.
 
@@ -1456,7 +1456,7 @@ Whether to use the naive-Bayesian-style classifier built into SpamAssassin.
       $self->{use_bayes} = $1; next;
     }
 
-=item rbl_timeout n		(default 15)
+=item rbl_timeout n		(default: 15)
 
 All RBL queries are made at the beginning of a check and we try to read the
 results at the end.  This value specifies the maximum period of time to wait
@@ -1493,7 +1493,7 @@ times, waiting 5 seconds each time.
       $self->{check_mx_attempts} = $1+0; next;
     }
 
-=item check_mx_delay n		(default 5)
+=item check_mx_delay n		(default: 5)
 
 How many seconds to wait before retrying an MX check.
 
@@ -1569,7 +1569,7 @@ likely that the message check and auto-train scores will be different.
       $self->{bayes_auto_learn} = $1+0; next;
     }
 
-=item bayes_auto_learn_threshold_nonspam n.nn	(default 0.1)
+=item bayes_auto_learn_threshold_nonspam n.nn	(default: 0.1)
 
 The score threshold below which a mail has to score, to be fed into
 SpamAssassin's learning systems automatically as a non-spam message.
@@ -1580,7 +1580,7 @@ SpamAssassin's learning systems automatically as a non-spam message.
       $self->{bayes_auto_learn_threshold_nonspam} = $1+0; next;
     }
 
-=item bayes_auto_learn_threshold_spam n.nn	(default 12.0)
+=item bayes_auto_learn_threshold_spam n.nn	(default: 12.0)
 
 The score threshold above which a mail has to score, to be fed into
 SpamAssassin's learning systems automatically as a spam message.
@@ -2362,7 +2362,7 @@ database surpasses the bayes_expiry_max_db_size value.
       $self->{bayes_auto_expire} = $1; next;
     }
 
-=item bayes_learn_to_journal  	(default 0)
+=item bayes_learn_to_journal  	(default: 0)
 
 If this option is set, whenever SpamAssassin does Bayes learning, it
 will put the information into the journal instead of directly into the
