@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.604 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.605 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -118,7 +118,6 @@ tflags T_RCVD_IN_BONDEDSENDER net
 # NOTE: these cannot simply be inverted for a "nice" rule; to do this would
 # require checking only the last untrusted line, rather than all of them.
 #
-header T_FAKE_HELO_YAHOO	eval:check_for_rdns_helo_mismatch("yahoo\.com","yahoo\.com")
 header T_FAKE_HELO_NETSCAPE_COM	eval:check_for_rdns_helo_mismatch("(?:netscape|netcenter|aol)\.(?:com|net)","netscape\.com")
 
 # Justin says Yahoo stopped using this hostname entirely (which makes me
@@ -127,37 +126,82 @@ header T_FAKE_HELO_NETSCAPE_COM	eval:check_for_rdns_helo_mismatch("(?:netscape|n
 uri T_YAHOO_REDIRECTOR		/^https?:\/\/rd\.yahoo\.com/i
 describe T_YAHOO_REDIRECTOR	Uses commonly-spammed redirector URL
 
-uri T_BIZ_LINKS			/(?:^https?\:\/\/|^mailto\:).{0,20}\.bi?z/i
-describe T_BIZ_LINKS		Links to .biz .bz
+# quinlan on 2003-06-12: one of these should be promotable
+uri T_BIZ_LINKS_1	/(?:^https?\:\/\/|^mailto\:).{0,20}\.bi?z/i
+uri T_BIZ_LINKS_2	/(?:^https?\:\/\/|^mailto\:).{0,20}\.bi?z\b/i
+uri T_BIZ_LINKS_3	/(?:^https?\:\/\/|^mailto\:).{0,20}\.bi?z(?:\/|$)/i
 
-uri T_STRANGE_CHAR_LINKS		/^https?\:\/\/.{0,20}(?:[%@]|=2E)/i
-describe T_STRANGE_CHAR_LINKS	Links with strange characters
+# spin on USERPASS (don't require username)
+uri T_USERPASS			m{https?://[^/\s]*?(?::[^/\s]+?)?\@}
+
+# @ appears in URI
+uri T_URI_LINK_AT_SIGN	/^https?\:\/\/.*?\/.*\@/
+
+# try to improve T_HTTP_EXCESSIVE_ESCAPES, test each good-looking escape
+# and see which ones could boost results of existing rule and by how much
+# S/O     count   hex     string
+# 100.00  2529    25      %
+uri __ESCAPE_25		/^https?:\/\/\S*%25/i
+meta T_HTTP_EXCESSIVE_ESCAPE_25	(!HTTP_EXCESSIVE_ESCAPES && __ESCAPE_25)
+# 99.55   1319    2f      /
+uri __ESCAPE_2F		/^https?:\/\/\S*%2F/i
+meta T_HTTP_EXCESSIVE_ESCAPE_2F	(!HTTP_EXCESSIVE_ESCAPES && __ESCAPE_2F)
+# 100.00  954     2e      .
+uri __ESCAPE_2E		/^https?:\/\/\S*%2E/i
+meta T_HTTP_EXCESSIVE_ESCAPE_2E	(!HTTP_EXCESSIVE_ESCAPES && __ESCAPE_2E)
+# 99.86   716     5f      _
+uri __ESCAPE_5F		/^https?:\/\/\S*%5F/i
+meta T_HTTP_EXCESSIVE_ESCAPE_5F	(!HTTP_EXCESSIVE_ESCAPES && __ESCAPE_5F)
+# 99.28   416     3a      :
+uri __ESCAPE_3A		/^https?:\/\/\S*%3A/i
+meta T_HTTP_EXCESSIVE_ESCAPE_3A	(!HTTP_EXCESSIVE_ESCAPES && __ESCAPE_3A)
+# 98.97   387     3d      =
+uri __ESCAPE_3D		/^https?:\/\/\S*%3D/i
+meta T_HTTP_EXCESSIVE_ESCAPE_3D	(!HTTP_EXCESSIVE_ESCAPES && __ESCAPE_3D)
+# 99.31   288     26      &
+uri __ESCAPE_26		/^https?:\/\/\S*%26/i
+meta T_HTTP_EXCESSIVE_ESCAPE_26	(!HTTP_EXCESSIVE_ESCAPES && __ESCAPE_26)
+# 95.02   241     3f      ?
+uri __ESCAPE_3F		/^https?:\/\/\S*%3F/i
+meta T_HTTP_EXCESSIVE_ESCAPE_3F	(!HTTP_EXCESSIVE_ESCAPES && __ESCAPE_3F)
+# 54.66   161     40      @
+uri __ESCAPE_40		/^https?:\/\/\S*%40/i
+meta T_HTTP_EXCESSIVE_ESCAPE_40	(!HTTP_EXCESSIVE_ESCAPES && __ESCAPE_40)
+# 96.15   52      7e      ~
+uri __ESCAPE_7E		/^https?:\/\/\S*%7E/i
+meta T_HTTP_EXCESSIVE_ESCAPE_7E	(!HTTP_EXCESSIVE_ESCAPES && __ESCAPE_7E)
+# 100.00  49      7c      |
+uri __ESCAPE_7C		/^https?:\/\/\S*%7C/i
+meta T_HTTP_EXCESSIVE_ESCAPE_7C	(!HTTP_EXCESSIVE_ESCAPES && __ESCAPE_7C)
+# 100.00  20      2d      -
+uri __ESCAPE_2D		/^https?:\/\/\S*%2D/i
+meta T_HTTP_EXCESSIVE_ESCAPE_2D	(!HTTP_EXCESSIVE_ESCAPES && __ESCAPE_2D)
+# 100.00  12      0a	NO-BREAK SPACE
+uri __ESCAPE_0A		/^https?:\/\/\S*%0A/i
+meta T_HTTP_EXCESSIVE_ESCAPE_0A	(!HTTP_EXCESSIVE_ESCAPES && __ESCAPE_0A)
 
 ######
 
-# 2, 3, 4, and 6 actually look semi-ok, but these really need to be split into multiple rules.
-# I actually don't like these rules since once we start looking for them, the spammers will just change
-# domains, but ...
+# 2, 3, 4, and 6 actually look semi-ok, but these really need to be
+# split into multiple rules.  I actually don't like these rules since
+# once we start looking for them, the spammers will just change domains,
+# but ...
 # tvd - 06/01
-uri T_BANNED_LINKS3_06	m@(?:^https?://|^mailto:).{0,20}yourvling@i
-uri T_BANNED_LINKS4_03	m@(?:^https?://|^mailto:).{0,20}rxmedical@i
 uri T_BANNED_LINKS4_04	m@(?:^https?://|^mailto:).{0,20}bannedcd@i
 uri T_BANNED_LINKS4_09	m@(?:^https?://|^mailto:).{0,20}freeht@i
 uri T_BANNED_LINKS4_11	m@(?:^https?://|^mailto:).{0,20}domainsforeveryone@i
-uri T_BANNED_LINKS5_05	m@(?:^https?://|^mailto:).{0,20}ew01@i
 uri T_BANNED_LINKS5_10	m@(?:^https?://|^mailto:).{0,20}faqchat@i
-uri T_SUSPICIOUS_LINKS_04	m@(?:^https?://|^mailto:).{0,25}bargain[zs\-]@i
-uri T_SUSPICIOUS_LINKS_09	m@(?:^https?://|^mailto:).{0,25}offer[sz]@i
 uri T_SUSPICIOUS_LINKS_10	m@(?:^https?://|^mailto:).{0,25}4you@i
 
-######
+# try to do something interesting with this rule
+uri T_SUSPICIOUS_LINKS_09	m@(?:^https?://|^mailto:).{0,25}offer[sz]@i
+# new rule
+uri T_OFFERS_URL		m/offer([sz]|-\S+)?\.(?:com|bi?z)/i
 
-body T_HTML_LINK_PUSH_HERE	eval:html_eval('anchor_text', '=~ /push\s*(?:here|this)/i')
-body T_HTML_LINK_GO_HERE	eval:html_eval('anchor_text', '=~ /go\s*here/i')
-body T_HTML_LINK_CEASE_MAIL	eval:html_eval('anchor_text', '=~ /cease.{1,10}mail/i')
-# replacement rules
-body T_HTML_LINK_CLICK_HERE_1	eval:html_eval('anchor_text', '=~ /click\s+(?:here|this)/i')
-body T_HTML_LINK_CLICK_HERE_2	eval:html_eval('anchor_text', '=~ /click\s*(?:here|this)/i')
+# try to do something interesting with this rule
+uri T_SUSPICIOUS_LINKS_04	m@(?:^https?://|^mailto:).{0,25}bargain[zs\-]@i
+# replacement rule
+uri T_BARGAIN_URL		/bargain([sz]|-\S+)?\.(?:com|bi?z)/i
 
 ######################################################################
 
