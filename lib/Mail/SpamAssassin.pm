@@ -95,7 +95,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.150 2002/12/21 22:48:00 felicity Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.151 2002/12/23 03:59:01 felicity Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -657,6 +657,62 @@ sub remove_spamassassin_markup {
   local ($_);
 
   $self->init(1);
+  my $ct = $mail_obj->get_header("Content-Type") || '';
+  if ( $ct
+    && $ct =~ m!^\s*multipart/mixed;\s+boundary\s*=\s*["']?(.+?)["']?(?:;|$)!i )
+  {
+
+    # Ok, this is a possible encapsulated message, search for the
+    # appropriate mime part and deal with it if necessary.
+    my $boundary = "\Q$1\E";
+    my @msg = split(/^/,$mail_obj->get_pristine());
+
+    my $flag = 0;
+    $ct   = '';
+    my $cd = '';
+    for ( my $i = 0 ; $i <= $#msg ; $i++ ) {
+      next
+        unless ( $msg[$i] =~ /^--$boundary$/ || $flag )
+        ;    # only look at mime headers
+      if ( $msg[$i] =~ /^\s*$/ ) {    # end of mime header
+
+        # Ok, we found the encapsulated piece ...
+        if ( $ct eq "message/rfc822" && $cd eq "spamassassin original message" )
+        {
+          splice @msg, 1, $i;
+            ;    # remove the front part, leave the 'From ' header.
+	  splice @msg, 0, 1 if ( $msg[0] !~ /^From / ); # not From?  remove it.
+          # find the end and chop it off
+          for ( $i = 0 ; $i <= $#msg ; $i++ ) {
+            if ( $msg[$i] =~ /^--$boundary/ ) {
+              splice @msg, ($msg[$i-1] =~ /\S/ ? $i : $i-1);
+	      # will remove the blank line (not sure it'll always be
+	      # there) and everything below.  don't worry, the splice
+	      # guarantees the for will stop ...
+            }
+          }
+
+	  # Ok, we're done.  Return the message.
+	  return join('',@msg);
+        }
+
+        $flag = 0;
+        $ct   = '';
+        $cd   = '';
+        next;
+      }
+
+      # Ok, we're in the mime header ...  Capture the appropriate headers...
+      $flag = 1;
+      if ( $msg[$i] =~ /^Content-Type:\s+(\S+)/i ) {
+        $ct = $1;
+      }
+      elsif ( $msg[$i] =~ /^Content-Description:\s+(.+?)\s*$/i ) {
+        $cd = $1;
+      }
+    }
+  }
+
   my $mail = $self->encapsulate_mail_object ($mail_obj);
   my $hdrs = $mail->get_all_headers();
 
