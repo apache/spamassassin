@@ -68,4 +68,31 @@ body		URIBL_JP_SURBL	eval:check_uridnsbl('URIBL_JP_SURBL')
 describe	URIBL_JP_SURBL	Contains an URL listed in the JP SURBL blocklist
 tflags		URIBL_JP_SURBL	net
 
+# Top 125 domains whitelisted by SURBL
+uridnsbl_skip_domain yahoo.com w3.org msn.com com.com yimg.com
+uridnsbl_skip_domain hotmail.com doubleclick.net flowgo.com ebaystatic.com aol.com
+uridnsbl_skip_domain akamai.net yahoogroups.com ebay.com classmates.com akamaitech.net
+uridnsbl_skip_domain incredimail.com tiscali.co.uk google.com chtah.com ediets.com
+uridnsbl_skip_domain directtrack.com microsoft.com paypal.com jexiste.fr amazon.com
+uridnsbl_skip_domain nytimes.com unitedoffers.com sitesolutions.it m0.net hyperpc.co.jp
+uridnsbl_skip_domain terra.com.br macromedia.com ed10.net earthlink.net citibank.com
+uridnsbl_skip_domain sourceforge.net marketwatch.com comcast.net messagelabs.com mcafee.com
+uridnsbl_skip_domain grisoft.com geocities.com yourfreedvds.com smileycentral.com ual.com
+uridnsbl_skip_domain monster.com e-trend.co.jp cnn.com cnet.com bfi0.com
+uridnsbl_skip_domain atdmt.com sportsline.com rs6.net rr.com redhat.com
+uridnsbl_skip_domain partner2profit.com joingevalia.com hotbar.com advertising.com topica.com
+uridnsbl_skip_domain rm04.net ed4.net dsbl.org extm.us edgesuite.net
+uridnsbl_skip_domain debian.org click-url.com bbc.co.uk adobe.com gte.net
+uridnsbl_skip_domain go.com weatherbug.com speedera.net sbcglobal.net ientrymail.com
+uridnsbl_skip_domain ibm.com att.net apple.com 5iantlavalamp.com verizon.net
+uridnsbl_skip_domain plaxo.com pandasoftware.com p0.com mediaplex.com gmail.com
+uridnsbl_skip_domain exacttarget.com constantcontact.com sf.net roving.com netflix.com
+uridnsbl_skip_domain moveon.org cc-dt.com xmr3.com spamcop.net postdirect.com
+uridnsbl_skip_domain norman.com netatlantic.com mail.com investorplace.com hitbox.com
+uridnsbl_skip_domain citizensbank.com chase.com bridgetrack.com apache.org washingtonpost.com
+uridnsbl_skip_domain si.com shockwave.com sears.com quickinspirations.com prserv.net
+uridnsbl_skip_domain ne.jp myweathercheck.com dsi-enews.net cheaptickets.com bravenet.com
+uridnsbl_skip_domain arcamax.com afa.net 4at1.com yahoo.co.uk uclick.com
+uridnsbl_skip_domain suntrust.com sun.com ups.com pcmag.com mycomicspage.com
+
 endif	# Mail::SpamAssassin::Plugin::URIDNSBL
