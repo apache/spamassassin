@@ -321,8 +321,22 @@ header T_MSGID_CHARS_BANG	MESSAGEID =~ /\!/
 header T_MSGID_CLOSE_TWICE_1	MESSAGEID =~ />.*>/
 header T_MSGID_CLOSE_TWICE_2	MESSAGEID =~ />>/
 
-# I've added a few different versions just in case the first hits ham to hard
-header T_MANY_MX_1 From =~ /\@mx\d{2,4}\..{1,30}\./i
-header T_MANY_MX_2 From =~ /\@mx\d{2,4}\..{1,30}\.(?:biz|us)/i
-header T_MANY_MX_3 From =~ /\@mx[2-9]\d{1,3}\..{1,30}\./i
+# Added a few more versions and removed some old ones
 header T_MANY_MX_4 From:addr =~ /\@mx\d{2,4}\..{1,30}\./i
+header T_MANY_MX_5 From:addr =~ /\@mx\d{2,4}\..{1,20}\./i
+header T_MANY_MX_6 From:addr =~ /\@mx\d+\..{1,30}\./i
+header T_MANY_MX_7 From:addr =~ /\@\w\d+\..{1,30}\./i
+header T_MANY_MX_8 From:addr =~ /\@\w\d+/i
+
+# Bug 3374
+body             T_DRUG_DOLLAR_DOSE    m{\$?\s*(?:\d|\.)+\s*\$?\s*(?:\\|/|per)\s*d.?o.?s.?e}i
+describe         T_DRUG_DOLLAR_DOSE    Talks about price per dose.
+lang nl describe T_DRUG_DOLLAR_DOSE    Heeft het over een prijs per dosis.
+# Safer alternative for 3374
+body T__DRUG_DOLLAR_DOSE_A m{\$\s*(?:\d|\.)+\s*(?:\\|/|per)\s*d.?o.?s.?e}i
+body T__DRUG_DOLLAR_DOSE_B m{(?:\d|\.)+\s*\$\s*(?:\\|/|per)\s*d.?o.?s.?e}i
+meta T_DRUG_DOLLAR_DOSE_C     T__DRUG_DOLLAR_DOSE_A || T__DRUG_DOLLAR_DOSE_B
+
+# Bug 3349, rule written by yackley
+header T_FAKE_MS_XMIME X-MimeOLE =~ /mircosoft/i
+
