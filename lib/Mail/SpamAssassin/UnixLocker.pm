@@ -33,7 +33,7 @@ sub new {
 # Locking code adapted from code by Alexis Rosen <alexis@panix.com>
 # by Kelsey Cummings <kgc@sonic.net>, with mods by jm and quinlan
 
-use constant LOCK_MAX_AGE => 300;	# seconds 
+use constant LOCK_MAX_AGE => 600;	# seconds 
 use constant LOCK_MAX_RETRIES => 30;	# average 1 per second
 
 sub safe_lock {
