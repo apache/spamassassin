@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.34 2002/10/12 06:28:18 zelgadis Exp $
+# $Id: HTML.pm,v 1.35 2002/10/12 11:17:58 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -247,55 +247,30 @@ sub html_tests {
     $self->{html}{line_height} = 1 if ($attr->{style} =~ /line-height/i);
   }
 
-  if (($tag eq "img" && exists $attr->{src} &&
-       $attr->{src} =~ /(?:\?|[a-f\d]{12,})/i) ||
-      ($tag =~ /^(?:body|table|tr|td)$/ && exists $attr->{background} &&
-       $attr->{background} =~ /(?:\?|[a-f\d]{12,})/i))
+  if (($tag eq "img" &&
+       exists $attr->{src} && ($_ = $attr->{src})) ||
+      ($tag =~ /^(?:body|table|tr|td|th)$/ && 
+       exists $attr->{background} && ($_ = $attr->{background})))
   {
-    $self->{html}{web_bugs} = 1;
+    if (/\?/ || (/[a-f\d]{12,}/i && ! /\.(?:jpe?g|gif|png)$/i)) {
+      $self->{html}{web_bugs} = 1;
+    }
   }
 
-  # TESTING
-  if (($tag eq "img" && exists $attr->{src} &&
-       $attr->{src} =~ /(?:\?|[a-f\d]{12,})/i &&
-       $attr->{src} !~ /\.(?:jpe?g|gif|png)$/i) ||
-      ($tag =~ /^(?:body|table|tr|td)$/ && exists $attr->{background} &&
-       $attr->{background} =~ /(?:\?|[a-f\d]{12,})/i &&
-       $attr->{background} !~ /\.(?:jpe?g|gif|png)$/i))
+  if ($tag =~ /^(?:body|table|tr|td|th)$/ && 
+      exists $attr->{background} && ($_ = $attr->{background}))
   {
-    $self->{html}{t_web_bugs1} = 1;
+    if (/\?/ || (/[a-f\d]{12,}/i && ! /\.(?:jpe?g|gif|png)$/i)) {
+      $self->{html}{web_bugs_background} = 1;
+    }
   }
 
-  # TESTING
-  if (($tag eq "img" && exists $attr->{src} &&
-       ($attr->{src} =~ /\?/ ||
-	($attr->{src} =~ /[a-f\d]{12,}/i &&
-	 $attr->{src} !~ /\.(?:jpe?g|gif|png)$/i))) ||
-      ($tag =~ /^(?:body|table|tr|td)$/ && exists $attr->{background} &&
-       ($attr->{background} =~ /\?/ ||
-	($attr->{background} =~ /[a-f\d]{12,}/i &&
-	 $attr->{background} !~ /\.(?:jpe?g|gif|png)$/i))))
-  {
-    $self->{html}{t_web_bugs2} = 1;
-  }
-
-  # TESTING
-  if ($tag eq "img" && exists $attr->{alt} && !exists $attr->{src}) {
-    $self->{html}{img_alt_only1} = 1;
-  }
-
-  # TESTING
-  if ($tag eq "img" && exists $attr->{alt} &&
-      !(exists $attr->{src} && $attr->{src} =~ /\.(?:jpe?g|gif|png)$/i))
-  {
-    $self->{html}{img_alt_only2} = 1;
-  }
-
-  # TESTING: this is too close to HTML_WEB_BUGS to justify both rules
   if ($tag eq "img" &&
-      exists $attr->{src} && $attr->{src} !~ /\.(?:jpe?g|gif|png)$/i)
+      exists $attr->{src} && ($_ = $attr->{src}))
   {
-    $self->{html}{img_src_no_image} = 1;
+    if (/\?/ || (/[a-f\d]{12,}/i && ! /\.(?:jpe?g|gif|png)$/i)) {
+      $self->{html}{web_bugs_src} = 1;
+    }
   }
 
   if ($tag eq "img") {
