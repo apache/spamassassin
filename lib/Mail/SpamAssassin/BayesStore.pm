@@ -305,6 +305,12 @@ sub expire_old_tokens_trapped {
   if (!$last || $last =~ /\D/) { $last = 0; }
   my $current = $self->scan_count_get();
 
+  # if $current is > 65535, we need to reset the atimes to 0
+  if ( $current > 65535 ) {
+    dbg("bayes: Current scan count $current > 65535, resetting atimes to 0");
+    $too_old = $last = 0;
+  }
+
   # since DB_File will not shrink a database (!!), we need to *create*
   # a new one instead.
   my $main = $self->{bayes}->{main};
@@ -334,6 +340,9 @@ sub expire_old_tokens_trapped {
     # last expire time.
     if ($atime > $current) {
       $atime = $last;
+    }
+    elsif ( $current > 65535 ) { # reset atime to 0
+      $atime = 0;
     }
 
     if ($atime < $too_old) {
@@ -391,8 +400,15 @@ sub expire_old_tokens_trapped {
   $deleted -= $reprieved;
 
   # and add the magic tokens.  don't add the expire_running token.
-  $new_toks{$SCANCOUNT_BASE_MAGIC_TOKEN} = $self->{db_toks}->{$SCANCOUNT_BASE_MAGIC_TOKEN};
-  $new_toks{$LAST_EXPIRE_MAGIC_TOKEN} = $self->scan_count_get();
+  if ( $current > 65535 ) {
+    $new_toks{$SCANCOUNT_BASE_MAGIC_TOKEN} = 0;
+    $new_toks{$LAST_EXPIRE_MAGIC_TOKEN} = 0;
+  }
+  else {
+    $new_toks{$SCANCOUNT_BASE_MAGIC_TOKEN} = $self->{db_toks}->{$SCANCOUNT_BASE_MAGIC_TOKEN};
+    $new_toks{$LAST_EXPIRE_MAGIC_TOKEN} = $self->scan_count_get();
+  }
+
   $new_toks{$OLDEST_TOKEN_AGE_MAGIC_TOKEN} = $oldest;
   $new_toks{$NSPAM_MAGIC_TOKEN} = $self->{db_toks}->{$NSPAM_MAGIC_TOKEN};
   $new_toks{$NHAM_MAGIC_TOKEN} = $self->{db_toks}->{$NHAM_MAGIC_TOKEN};
