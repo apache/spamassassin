@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.100 2003/10/15 07:53:11 quinlan Exp $
+# $Id: HTML.pm,v 1.101 2003/10/15 08:08:05 quinlan Exp $
 
 # HTML decoding TODOs
 # - add URIs to list for faster URI testing
@@ -653,7 +653,6 @@ sub html_text {
   {
     $self->{html}{title_text} .= $text if ($self->{html}{title_index} == 0);
     $self->{html}{t_title}->[$self->{html}{title_index}] .= $text;
-    print STDERR $self->{html}{title_index} . "\t" .  $self->{html}{t_title}->[$self->{html}{title_index}] . "\n";
   }
 
   $self->html_font_invisible($text) if $text =~ /[^ \t\n\r\f\x0b\xa0]/;
