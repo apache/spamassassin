@@ -1,5 +1,7 @@
-# Pipe the mail through spamassassin
+# Pipe the mail through spamassassin, unless it's over 256k
+# (SpamAssassin can take a long time to process large messages)
 :0fw
+* < 256000
 | spamassassin
 
 # Move it to the "caughtspam" mbox if it was tagged as spam
