@@ -140,6 +140,7 @@ sub untaint_file_path {
 #
 sub untaint_var {
   local ($_) = @_;
+  return undef unless defined;
 
   unless (ref) {
     /^(.*)$/;
@@ -151,7 +152,7 @@ sub untaint_var {
   }
   elsif (ref eq 'HASH') {
     foreach my $k (keys %{$_}) {
-      ${$_}{untaint_var($k)} = untaint_var(${$_}{$k});
+      ${$_}{untaint_var($k)} = defined($k) ? untaint_var(${$_}{$k}) : undef;
     }
     return %{$_} if wantarray;
   }
