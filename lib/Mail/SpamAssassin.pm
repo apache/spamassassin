@@ -91,7 +91,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.115.2.11 2002/09/24 18:51:37 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.115.2.12 2002/10/02 13:19:28 jmason Exp $'))[2 .. 5, 8]));
 
 # If you hacked up your SA, add a token to identify it here. Eg.: I use
 # "mss<number>", <number> increasing with every hack.
@@ -696,7 +696,13 @@ sub lint_rules {
 }
 
 ###########################################################################
-# non-public methods.
+
+=item $f->init ($use_user_prefs)
+
+Read and parse the current configuration. C<$use_user_prefs> can
+be C<0> (do not read user preferences) or C<1> (do).
+
+=cut
 
 sub init {
   my ($self, $use_user_pref) = @_;
@@ -767,6 +773,9 @@ sub init {
 
   # TODO -- open DNS cache etc. if necessary
 }
+
+###########################################################################
+# non-public methods.
 
 sub read_cf {
   my ($self, $path, $desc) = @_;

@@ -216,6 +216,9 @@ eval {
   if ($@) { warn $@; }
 
   if ($doing_whitelist_operation) {
+    # read the config!
+    $spamtest->init (1);
+
     if ($opt{'add-to-whitelist'}) {
       $spamtest->add_all_addresses_to_whitelist ($mail);
     } elsif ($opt{'remove-from-whitelist'}) {
