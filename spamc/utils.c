@@ -18,13 +18,13 @@
 #ifndef _WIN32
 #include <unistd.h>
 #include <sys/uio.h>
+#include <sys/types.h>
+#include <sys/socket.h>
 #else
 typedef int ssize_t;
 #endif
 #include <errno.h>
 #include <signal.h>
-#include <sys/types.h>
-#include <sys/socket.h>
 #include <stdio.h>
 #include "utils.h"
 

@@ -785,7 +785,7 @@ sub _set_macro_PERL_TAINT {
 sub _set_macro_PREPROCESS {
 
   return if get_macro('PREPROCESS');
-  set_macro('PREPROCESS', join(' ', macro_ref('PERLRUN'), qq{build/preprocessor}));
+  set_macro('PREPROCESS', join(' ', macro_ref('PERL_BIN'), qq{build/preprocessor}));
 }
 
 # This routine sets the value for CONFIGURE (spamc only).
@@ -797,7 +797,7 @@ sub _set_macro_PREPROCESS {
 sub _set_macro_CONFIGURE {
 
   return if get_macro('CONFIGURE');
-  set_macro('CONFIGURE', join(' ', macro_ref('PERLRUN'), qq{spamc/configure.pl}));
+  set_macro('CONFIGURE', join(' ', macro_ref('PERL_BIN'), qq{spamc/configure.pl}));
 }
 
 
