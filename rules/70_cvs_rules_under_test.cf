@@ -128,6 +128,13 @@ meta T_HTML_FAKED_IMS		(__ANY_IMS_MUA && __MIME_HTML && !(__TAG_EXISTS_BODY && _
 meta T_HTML_FAKED_AOL		(__ANY_AOL_MUA && __MIME_HTML && !__TAG_EXISTS_HTML)
 meta T_HTML_FAKED_QUALCOMM	(__ANY_QUALCOMM_MUA && __MIME_HTML && !__TAG_EXISTS_HTML)
 
+# 2003-02-28: quinlan
+# Note: I'll probably rename these later if they get added.
+header T_MSG_ID_ADDED_BY_MTA_SHORT	eval:mta_added_message_id('short')
+header T_MSG_ID_ADDED_BY_MTA_LATER	eval:mta_added_message_id('later')
+header T_MSG_ID_ADDED_BY_MTA_BACKUP	eval:mta_added_message_id('backup')
+tflags T_MSG_ID_ADDED_BY_MTA_BACKUP	net
+
 # bug 1416, possible replacement for AS_SEEN_ON
 body     T_AS_SEEN_ON             /seen on\b\s*(?:T\.?V\.?|ABC|NBC|CBS|CNN|Oprah|USA Today|48 Hours|New York Times|\w+\s+T\.?V\.?|:)/i
 
