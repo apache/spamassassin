@@ -173,7 +173,10 @@ sub razor_lookup {
 
     if ($Razor::Client::VERSION == "1.12") {
       my $respary = $rc->check ('spam' => \@msg);
-      for my $resp (@$respary) { $response .= $resp." "; }
+      # response can be "0" or "1". there can be many responses.
+      # so if we get 5 responses, and one of them's 1, we
+      # wind up with "00010", which +0 below turns to 10, ie. != 0.
+      for my $resp (@$respary) { $response .= $resp; }
 
     } else {
       $response = $rc->check (\@msg);
@@ -188,7 +191,7 @@ sub razor_lookup {
     }
   }
 
-  if ($response+0) { return 1; }
+  if ((defined $response) && ($response+0)) { return 1; }
   return 0;
 }
 
