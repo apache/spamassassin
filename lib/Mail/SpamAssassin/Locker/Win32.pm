@@ -14,7 +14,7 @@
 # limitations under the License.
 # </@LICENSE>
 
-package Mail::SpamAssassin::Win32Locker;
+package Mail::SpamAssassin::Locker::Win32;
 
 use strict;
 use bytes;

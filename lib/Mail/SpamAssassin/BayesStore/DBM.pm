@@ -787,6 +787,9 @@ sub get_running_expire_tok {
 
 sub set_running_expire_tok {
   my ($self) = @_;
+
+  # update the lock and and running expire magic token
+  $self->{bayes}->{main}->{locker}->refresh_lock ($self->{locked_file});
   $self->{db_toks}->{$RUNNING_EXPIRE_MAGIC_TOKEN} = time();
 }
 

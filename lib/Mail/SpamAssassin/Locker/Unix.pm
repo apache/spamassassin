@@ -14,7 +14,7 @@
 # limitations under the License.
 # </@LICENSE>
 
-package Mail::SpamAssassin::UnixLocker;
+package Mail::SpamAssassin::Locker::Unix;
 
 use strict;
 use bytes;

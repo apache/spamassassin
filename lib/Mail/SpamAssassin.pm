@@ -283,13 +283,13 @@ sub new {
   # for slow but safe, by keeping in quotes
   if (Mail::SpamAssassin::Util::am_running_on_windows()) {
     eval '
-      use Mail::SpamAssassin::Win32Locker;
-      $self->{locker} = new Mail::SpamAssassin::Win32Locker ($self);
+      use Mail::SpamAssassin::Locker::Win32;
+      $self->{locker} = new Mail::SpamAssassin::Locker::Win32 ($self);
     '; ($@) and die $@;
   } else {
     eval '
-      use Mail::SpamAssassin::UnixLocker;
-      $self->{locker} = new Mail::SpamAssassin::UnixLocker ($self);
+      use Mail::SpamAssassin::Locker::Unix;
+      $self->{locker} = new Mail::SpamAssassin::Locker::Unix ($self);
     '; ($@) and die $@;
   }
 
