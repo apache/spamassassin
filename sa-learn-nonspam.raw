@@ -68,21 +68,38 @@ this tool will feed each mail to SpamAssassin, allowing it to 'learn' what
 signs are likely to mean spam, and which are likely to mean non-spam.
 
 Simply run this command once for each of your mail folders, and it will
-''learn'' from the mail therein.  If you make a mistake and scan a mail
-as non-spam when it is spam, simply rescan it correctly and the mistake
-will be corrected.
+''learn'' from the mail therein.  If you make a mistake and scan a mail as
+non-spam when it is spam or vice versa, simply rescan it correctly and the
+mistake will be corrected.
 
 SpamAssassin remembers which mail messages it's learnt already, and will not
 re-learn those messages again, unless you use the C<sa-forget> command.
 
-Please note that if your mail folders contain things like forwarded spam,
-discussions of spam-catching rules, etc., this will cause trouble.  You
-should avoid scanning those messages if possible.
-
-Once the scan finishes, the probabilities database will be rebuilt; this can
-take around a minute to complete, so be patient.
-
 (Note: this command is not present in a released version of SpamAssassin yet.)
+
+=head1 EFFECTIVE TRAINING
+
+Learning filters (like the BAYES rules in SpamAssassin) require training to be
+effective.  If you don't train them, they won't work.  In addition, you need to
+train them with new messages regularly to keep them up-to-date, or their data
+will become stale and impact accuracy.
+
+You need to train with both spam I<and> non-spam mails.  One type of mail alone
+will not have any effect.
+
+Note that if your mail folders contain things like forwarded spam, discussions
+of spam-catching rules, etc., this will cause trouble.  You should avoid
+scanning those messages if possible.  (An easy way to do this is to move them
+aside, into a folder which is not scanned.)
+
+Another thing to be aware of, is that typically you should aim to train with at
+least 1000 messages of spam, and 1000 non-spam messages, if possible.  More is
+better, but anything over about 5000 messages does not improve accuracy
+significantly in our tests.
+
+It's also worth noting that training with a very small quantity of non-spam,
+will produce atrocious results.  You should aim to train with at least the same
+amount, or more, non-spam data than spam.
 
 =head1 OPTIONS
 
