@@ -83,7 +83,9 @@ setlogsock('unix');
 
 # jm: NOTE: this should probably just openlog() once, in parent pid, for
 # efficiency (TODO)
-sub logmsg { openlog('spamd','cons,pid','mail'); syslog('info',"@_"); closelog(); }
+sub logmsg {
+  openlog('spamd','cons,pid','mail'); syslog('info',"@_"); closelog();
+}
 
 my $port = $opt_p || 22874;
 my $proto = getprotobyname('tcp');
@@ -116,10 +118,13 @@ for ( $waitedpid = 0;
 
     my($port,$iaddr) = sockaddr_in($paddr);
     my $name = gethostbyaddr($iaddr,AF_INET);
+
     if ( allowed($iaddr) ) {
-       logmsg "connection from $name [",inet_ntoa($iaddr),"] at port $port";
+       logmsg "connection from $name [",
+       				inet_ntoa($iaddr),"] at port $port";
     } else {
-       logmsg "unauthorized connection from $name [",inet_ntoa($iaddr),"] at port $port";
+       logmsg "unauthorized connection from $name [",
+       				inet_ntoa($iaddr),"] at port $port";
        next;
     } 
 
@@ -149,6 +154,7 @@ for ( $waitedpid = 0;
 
 			# jm: refactored into own sub
 			create_default_cf_if_needed ($cf_file, $username);
+			$spamtest->set_username ($username);
 			$spamtest->read_scoreonly_config ($cf_file);
                     }
                 }	
@@ -161,7 +167,9 @@ for ( $waitedpid = 0;
 	    my $status = $spamtest->check($mail);
 	    $status->rewrite_mail; #if $status->is_spam;
 
-	    print "SPAMD/1.0 $resphash{$resp} $resp\r\n",$mail->header,"\n",(join '',@{$mail->body});
+	    print "SPAMD/1.0 $resphash{$resp} $resp\r\n",
+	    		$mail->header, "\n",
+			(join '',@{$mail->body});
 
 	    logmsg "processed successfully";
 
@@ -239,15 +247,11 @@ spamd - daemonized version of spamassassin
 
 =head1 SYNOPSIS
 
-spamd [-L] [-p port] [-h]
+spamd [-h] [-L] [-p port] [-A host,...]
 
 =head1 OPTIONS
 
 =over
-
-=item B<-A> I<host,...>
-
-Specify a list of authorized hosts which can connect to this spamd instance.  The list is one of valid IP addresses, separated by commas.
 
 =item B<-h>
 
@@ -255,7 +259,13 @@ Print a brief help message, then exit without further action
 
 =item B<-L>
 
-Perform only local test on all mail.  In other words, skip DNS and other network test.  Works the same as the -L flag to C<spamassassin(1)>
+Perform only local tests on all mail.  In other words, skip DNS and other
+network tests.  Works the same as the -L flag to C<spamassassin(1)>
+
+=item B<-A> I<host,...>
+
+Specify a list of authorized hosts which can connect to this spamd instance.
+The list is one of valid IP addresses, separated by commas.
 
 =item B<-p> I<port>
 
