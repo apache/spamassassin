@@ -78,7 +78,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 $VERSION = "2.21";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.88 2002/06/10 09:08:11 hughescr Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.89 2002/06/10 11:19:45 hughescr Exp $';
 
 sub Version { $VERSION; }
 
@@ -889,7 +889,7 @@ sub timelog {
     }
   }
 
-  $msg=sprintf("%.3f: $msg\n", $now - $tl->{start});
+  $msg=sprintf("%.3f: $msg\n", $now - ($tl->{start}||0));
 
   if (not ($tl->{logpath} and $tl->{mesgid})) {
     push (@{$tl->{keeplogs}}, $msg);
