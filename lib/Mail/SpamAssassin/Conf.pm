@@ -3178,6 +3178,9 @@ A line starting with the text C<lang xx> will only be interpreted
 if the user is in that locale, allowing test descriptions and
 templates to be set for that language.
 
+The locales string should specify either both the language and country, e.g.
+C<lang pt_BR>, or just the language, e.g. C<lang de>.
+
 =head1 SEE ALSO
 
 C<Mail::SpamAssassin>
