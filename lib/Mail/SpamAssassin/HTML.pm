@@ -190,10 +190,10 @@ sub html_format {
   if ($tag eq "br") {
     push @{$self->{html_text}}, "\n";
   }
-  elsif ($tag eq "li" || $tag eq "td") {
+  elsif ($tag eq "li" || $tag eq "td" || $tag eq "dd") {
     push @{$self->{html_text}}, " ";
   }
-  elsif ($tag eq "p" || $tag eq "hr") {
+  elsif ($tag =~ /^(?:p|hr|blockquote|pre)$/) {
     push @{$self->{html_text}}, "\n\n";
   }
   elsif ($tag eq "img" && exists $attr->{alt} && $attr->{alt} ne "") {
@@ -691,6 +691,25 @@ sub html_text {
   $self->html_font_invisible($text) if $text =~ /[^ \t\n\r\f\x0b\xa0]/;
 
   $text =~ s/^\n//s if $self->{html_last_tag} eq "br";
+
+  if (defined $self->{html_text}[-1]) {
+    my $before = $self->{html_text}[-1];
+    if ($before =~ /\S$/s && $text =~ /^\S/s) {
+      $self->{html}{t_obfu_nspc}++;
+      $self->{html}{t_obfu_nfmt}++ if $self->{html_last_tag} !~ /^(?:strong|b|em|font|a|u|span|sup|i)/;
+    }
+    else {
+      $self->{html}{t_nonobfu_nspc}++;
+    }
+    if ($before =~ /\w$/s && $text =~ /^\w/s) {
+      $self->{html}{t_obfu_word}++;
+      $self->{html}{t_obfu_wfmt}++ if $self->{html_last_tag} !~ /^(?:strong|b|em|font|a|u|span|sup|i)/;
+    }
+    else {
+      $self->{html}{t_nonobfu_word}++;
+    }
+  }
+
   push @{$self->{html_text}}, $text;
 }
 
