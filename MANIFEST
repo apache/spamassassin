@@ -56,6 +56,7 @@ lib/Mail/SpamAssassin/PerMsgLearner.pm
 lib/Mail/SpamAssassin/PerMsgStatus.pm
 lib/Mail/SpamAssassin/PersistentAddrList.pm
 lib/Mail/SpamAssassin/Plugin.pm
+lib/Mail/SpamAssassin/Plugin/DCC.pm
 lib/Mail/SpamAssassin/Plugin/DomainKeys.pm
 lib/Mail/SpamAssassin/Plugin/Hashcash.pm
 lib/Mail/SpamAssassin/Plugin/MSExec.pm
@@ -150,6 +151,7 @@ rules/20_ratware.cf
 rules/20_uri_tests.cf
 rules/23_bayes.cf
 rules/25_body_tests_es.cf
+rules/25_dcc.cf
 rules/25_domainkeys.cf
 rules/25_hashcash.cf
 rules/25_msexec.cf
