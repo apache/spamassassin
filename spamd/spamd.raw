@@ -345,10 +345,10 @@ while (1) {
 
     my $start = time;
 
-    my($port, $iaddr) = sockaddr_in($client->peername);
-    my $name = gethostbyaddr($iaddr, AF_INET);
+    my($port, $ip) = sockaddr_in($client->peername);
+    my $name = gethostbyaddr($ip, AF_INET);
 
-    my $ip = inet_ntoa($iaddr);
+    $ip = inet_ntoa($ip);
     if (ip_is_allowed($ip)) {
         logmsg("connection from $name [$ip] at port $port");
     } else {
