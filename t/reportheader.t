@@ -29,6 +29,7 @@ q{ Uses a dotted-decimal IP address in URL }, 'dotteddec',
 ); #'
 
 tstprefs ("
+        $default_cf_lines
 	report_header 1
         use_terse_report 0
 	");

@@ -20,6 +20,7 @@ print OUT "file created to block AWL from working; AWL expects a dir";
 close OUT;
 
 tstprefs ("
+        $default_cf_lines
         auto_whitelist_path ./log/awl/shouldbeinaccessible
         auto_whitelist_mode 0755
 ");

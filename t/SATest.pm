@@ -42,6 +42,10 @@ sub sa_t_init {
   $scr_cf_args = "-C ../rules -p log/test_default.cf";
   $scr_pref_args = "";
   $scr_test_args = "";
+  $default_cf_lines = "
+    bayes_path ./log/user_state/bayes
+    auto_whitelist_path ./log/user_state/auto-whitelist
+  ";
 
   (-f "t/test_dir") && chdir("t");        # run from ..
   rmtree ("log");
@@ -51,10 +55,7 @@ sub sa_t_init {
 	or die "user prefs copy failed";
 
   open (PREFS, ">>log/test_default.cf");
-  print PREFS "
-    bayes_path ./log/user_state/bayes
-    auto_whitelist_path ./log/user_state/auto-whitelist
-    ";
+  print PREFS $default_cf_lines;
   close PREFS;
 
   mkdir("log/user_state",0755);
