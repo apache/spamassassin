@@ -619,10 +619,10 @@ sub do_head_tests {
 
     if ($pat =~ s/\s+\[if-unset:\s+(.+)\]\s*$//i) { $def = $1; }
     $_ = $self->get ($hdrname, $def);
-    # warn "JMD $pat $def $hdrname $_\n";
+    s/#/[HASH]/gs;		# avoid probs with eval below
 
     $evalstr .= '
-      if (q['.$_.'] '.$testtype.'~ '.$pat.') {
+      if (q#'.$_.'# '.$testtype.'~ '.$pat.') {
 	$self->got_hit (q{'.$rulename.'}, q{});
       }
     ';
