@@ -1253,3 +1253,8 @@ describe MARKETING_PARTNERS     Claims you registered with some kind of partner
 body PRIORITY_MAIL              /\b[Aa]ll\b.{0,20}\b[Oo]rders\b.{1,20}\bPriority Mail\b/
 describe PRIORITY_MAIL          Orders shipped by priority mail
 
+# Selling insurance online
+body SAVE_ON_INSURANCE         /\bsave .{0,20}\bon (?:your\s+)?(?:auto|car|life|health|medical)? ?insurance\b/i
+descrive SAVE_ON_INSURANCE     Trying to sell insurance online
+test SAVE_ON_INSURANCE      ok Compare and Save Instantly On Your Auto Insurance
+
