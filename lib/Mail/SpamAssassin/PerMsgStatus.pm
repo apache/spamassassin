@@ -2370,9 +2370,9 @@ sub get_envelope_from {
   # Use the 'envelope-sender-header' header that the user has specified.
   # We assume this is correct, *even* if the fetchmail/X-Sender screwup
   # appears.
-  my $cfhdr = $self->{conf}->{envelope_sender_header};
-  if (defined $cfhdr) {
-    if ($self->get ($cfhdr) =~ /\@/) {
+  $envf = $self->{conf}->{envelope_sender_header};
+  if (defined $envf) {
+    if ($self->get ($envf) =~ /\@/) {
       goto ok;
     }
   }
