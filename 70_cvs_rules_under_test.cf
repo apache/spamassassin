@@ -217,18 +217,116 @@ uri T_MARINEDIGITAL_MAILTO	/mailto:\S+[.@]marinedigital\.com/
 # 12/22 - 0 hits for anyone - tvd
 uri T_ITSREMARKABLE_MAILTO	/mailto:\S+[.@]itsremarkable\.com/
 
+########################################################################
+
 # bug 1308
 # somewhat less-expensive version
 header T_SUSPICIOUS_RECIPS	ToCc =~ /(@[-a-z0-9_.]{2,}).{0,64}(?:\1.{0,64}){8,}/is
-#
-# maybe replace SUSPICIOUS_RECIPS and VERY_SUSP_RECIPS
-# needs some more work and thought, but this is the right idea
-# maybe have two front-end functions (one for domains and one for usernames)
-header T_SUSPECT_RECIPIENTS_1	eval:check_for_suspect_recipients('2.5','3')
-header T_SUSPECT_RECIPIENTS_2	eval:check_for_suspect_recipients('3','4')
-header T_SUSPECT_RECIPIENTS_3	eval:check_for_suspect_recipients('4','5')
-header T_SUSPECT_RECIPIENTS_4	eval:check_for_suspect_recipients('5','6')
-header T_SUSPECT_RECIPIENTS_5	eval:check_for_suspect_recipients('6','undef')
+
+# fast replacement for SUSPICIOUS_RECIPS and VERY_SUSP_RECIPS
+# please don't hate me, I'm exploring the space now:
+# - L is length of user or host required for similarity
+# - C is count of addresses required
+header T_SUSPECT_RECIPIENTS_L1C4_0	eval:check_recipients('0.0','0.2','1','4')
+header T_SUSPECT_RECIPIENTS_L1C4_1	eval:check_recipients('0.2','0.4','1','4')
+header T_SUSPECT_RECIPIENTS_L1C4_2	eval:check_recipients('0.4','0.6','1','4')
+header T_SUSPECT_RECIPIENTS_L1C4_3	eval:check_recipients('0.6','0.8','1','4')
+header T_SUSPECT_RECIPIENTS_L1C4_4	eval:check_recipients('0.8','1.0','1','4')
+header T_SUSPECT_RECIPIENTS_L1C4_5	eval:check_recipients('1.0','1.2','1','4')
+header T_SUSPECT_RECIPIENTS_L1C4_6	eval:check_recipients('1.2','1.4','1','4')
+header T_SUSPECT_RECIPIENTS_L1C4_7	eval:check_recipients('1.4','1.6','1','4')
+header T_SUSPECT_RECIPIENTS_L1C4_8	eval:check_recipients('1.6','1.8','1','4')
+header T_SUSPECT_RECIPIENTS_L1C4_9	eval:check_recipients('1.8','undef','1','4')
+
+header T_SUSPECT_RECIPIENTS_L1C5_0	eval:check_recipients('0.0','0.2','1','5')
+header T_SUSPECT_RECIPIENTS_L1C5_1	eval:check_recipients('0.2','0.4','1','5')
+header T_SUSPECT_RECIPIENTS_L1C5_2	eval:check_recipients('0.4','0.6','1','5')
+header T_SUSPECT_RECIPIENTS_L1C5_3	eval:check_recipients('0.6','0.8','1','5')
+header T_SUSPECT_RECIPIENTS_L1C5_4	eval:check_recipients('0.8','1.0','1','5')
+header T_SUSPECT_RECIPIENTS_L1C5_5	eval:check_recipients('1.0','1.2','1','5')
+header T_SUSPECT_RECIPIENTS_L1C5_6	eval:check_recipients('1.2','1.4','1','5')
+header T_SUSPECT_RECIPIENTS_L1C5_7	eval:check_recipients('1.4','1.6','1','5')
+header T_SUSPECT_RECIPIENTS_L1C5_8	eval:check_recipients('1.6','1.8','1','5')
+header T_SUSPECT_RECIPIENTS_L1C5_9	eval:check_recipients('1.8','undef','1','5')
+
+header T_SUSPECT_RECIPIENTS_L1C6_0	eval:check_recipients('0.0','0.2','1','6')
+header T_SUSPECT_RECIPIENTS_L1C6_1	eval:check_recipients('0.2','0.4','1','6')
+header T_SUSPECT_RECIPIENTS_L1C6_2	eval:check_recipients('0.4','0.6','1','6')
+header T_SUSPECT_RECIPIENTS_L1C6_3	eval:check_recipients('0.6','0.8','1','6')
+header T_SUSPECT_RECIPIENTS_L1C6_4	eval:check_recipients('0.8','1.0','1','6')
+header T_SUSPECT_RECIPIENTS_L1C6_5	eval:check_recipients('1.0','1.2','1','6')
+header T_SUSPECT_RECIPIENTS_L1C6_6	eval:check_recipients('1.2','1.4','1','6')
+header T_SUSPECT_RECIPIENTS_L1C6_7	eval:check_recipients('1.4','1.6','1','6')
+header T_SUSPECT_RECIPIENTS_L1C6_8	eval:check_recipients('1.6','1.8','1','6')
+header T_SUSPECT_RECIPIENTS_L1C6_9	eval:check_recipients('1.8','undef','1','6')
+
+header T_SUSPECT_RECIPIENTS_L2C4_0	eval:check_recipients('0.0','0.2','2','4')
+header T_SUSPECT_RECIPIENTS_L2C4_1	eval:check_recipients('0.2','0.4','2','4')
+header T_SUSPECT_RECIPIENTS_L2C4_2	eval:check_recipients('0.4','0.6','2','4')
+header T_SUSPECT_RECIPIENTS_L2C4_3	eval:check_recipients('0.6','0.8','2','4')
+header T_SUSPECT_RECIPIENTS_L2C4_4	eval:check_recipients('0.8','1.0','2','4')
+header T_SUSPECT_RECIPIENTS_L2C4_5	eval:check_recipients('1.0','1.2','2','4')
+header T_SUSPECT_RECIPIENTS_L2C4_6	eval:check_recipients('1.2','1.4','2','4')
+header T_SUSPECT_RECIPIENTS_L2C4_7	eval:check_recipients('1.4','1.6','2','4')
+header T_SUSPECT_RECIPIENTS_L2C4_8	eval:check_recipients('1.6','1.8','2','4')
+header T_SUSPECT_RECIPIENTS_L2C4_9	eval:check_recipients('1.8','undef','2','4')
+
+header T_SUSPECT_RECIPIENTS_L2C5_0	eval:check_recipients('0.0','0.2','2','5')
+header T_SUSPECT_RECIPIENTS_L2C5_1	eval:check_recipients('0.2','0.4','2','5')
+header T_SUSPECT_RECIPIENTS_L2C5_2	eval:check_recipients('0.4','0.6','2','5')
+header T_SUSPECT_RECIPIENTS_L2C5_3	eval:check_recipients('0.6','0.8','2','5')
+header T_SUSPECT_RECIPIENTS_L2C5_4	eval:check_recipients('0.8','1.0','2','5')
+header T_SUSPECT_RECIPIENTS_L2C5_5	eval:check_recipients('1.0','1.2','2','5')
+header T_SUSPECT_RECIPIENTS_L2C5_6	eval:check_recipients('1.2','1.4','2','5')
+header T_SUSPECT_RECIPIENTS_L2C5_7	eval:check_recipients('1.4','1.6','2','5')
+header T_SUSPECT_RECIPIENTS_L2C5_8	eval:check_recipients('1.6','1.8','2','5')
+header T_SUSPECT_RECIPIENTS_L2C5_9	eval:check_recipients('1.8','undef','2','5')
+
+header T_SUSPECT_RECIPIENTS_L2C6_0	eval:check_recipients('0.0','0.2','2','6')
+header T_SUSPECT_RECIPIENTS_L2C6_1	eval:check_recipients('0.2','0.4','2','6')
+header T_SUSPECT_RECIPIENTS_L2C6_2	eval:check_recipients('0.4','0.6','2','6')
+header T_SUSPECT_RECIPIENTS_L2C6_3	eval:check_recipients('0.6','0.8','2','6')
+header T_SUSPECT_RECIPIENTS_L2C6_4	eval:check_recipients('0.8','1.0','2','6')
+header T_SUSPECT_RECIPIENTS_L2C6_5	eval:check_recipients('1.0','1.2','2','6')
+header T_SUSPECT_RECIPIENTS_L2C6_6	eval:check_recipients('1.2','1.4','2','6')
+header T_SUSPECT_RECIPIENTS_L2C6_7	eval:check_recipients('1.4','1.6','2','6')
+header T_SUSPECT_RECIPIENTS_L2C6_8	eval:check_recipients('1.6','1.8','2','6')
+header T_SUSPECT_RECIPIENTS_L2C6_9	eval:check_recipients('1.8','undef','2','6')
+
+header T_SUSPECT_RECIPIENTS_L3C4_0	eval:check_recipients('0.0','0.2','3','4')
+header T_SUSPECT_RECIPIENTS_L3C4_1	eval:check_recipients('0.2','0.4','3','4')
+header T_SUSPECT_RECIPIENTS_L3C4_2	eval:check_recipients('0.4','0.6','3','4')
+header T_SUSPECT_RECIPIENTS_L3C4_3	eval:check_recipients('0.6','0.8','3','4')
+header T_SUSPECT_RECIPIENTS_L3C4_4	eval:check_recipients('0.8','1.0','3','4')
+header T_SUSPECT_RECIPIENTS_L3C4_5	eval:check_recipients('1.0','1.2','3','4')
+header T_SUSPECT_RECIPIENTS_L3C4_6	eval:check_recipients('1.2','1.4','3','4')
+header T_SUSPECT_RECIPIENTS_L3C4_7	eval:check_recipients('1.4','1.6','3','4')
+header T_SUSPECT_RECIPIENTS_L3C4_8	eval:check_recipients('1.6','1.8','3','4')
+header T_SUSPECT_RECIPIENTS_L3C4_9	eval:check_recipients('1.8','undef','3','4')
+
+header T_SUSPECT_RECIPIENTS_L3C5_0	eval:check_recipients('0.0','0.2','3','5')
+header T_SUSPECT_RECIPIENTS_L3C5_1	eval:check_recipients('0.2','0.4','3','5')
+header T_SUSPECT_RECIPIENTS_L3C5_2	eval:check_recipients('0.4','0.6','3','5')
+header T_SUSPECT_RECIPIENTS_L3C5_3	eval:check_recipients('0.6','0.8','3','5')
+header T_SUSPECT_RECIPIENTS_L3C5_4	eval:check_recipients('0.8','1.0','3','5')
+header T_SUSPECT_RECIPIENTS_L3C5_5	eval:check_recipients('1.0','1.2','3','5')
+header T_SUSPECT_RECIPIENTS_L3C5_6	eval:check_recipients('1.2','1.4','3','5')
+header T_SUSPECT_RECIPIENTS_L3C5_7	eval:check_recipients('1.4','1.6','3','5')
+header T_SUSPECT_RECIPIENTS_L3C5_8	eval:check_recipients('1.6','1.8','3','5')
+header T_SUSPECT_RECIPIENTS_L3C5_9	eval:check_recipients('1.8','undef','3','5')
+
+header T_SUSPECT_RECIPIENTS_L3C6_0	eval:check_recipients('0.0','0.2','3','6')
+header T_SUSPECT_RECIPIENTS_L3C6_1	eval:check_recipients('0.2','0.4','3','6')
+header T_SUSPECT_RECIPIENTS_L3C6_2	eval:check_recipients('0.4','0.6','3','6')
+header T_SUSPECT_RECIPIENTS_L3C6_3	eval:check_recipients('0.6','0.8','3','6')
+header T_SUSPECT_RECIPIENTS_L3C6_4	eval:check_recipients('0.8','1.0','3','6')
+header T_SUSPECT_RECIPIENTS_L3C6_5	eval:check_recipients('1.0','1.2','3','6')
+header T_SUSPECT_RECIPIENTS_L3C6_6	eval:check_recipients('1.2','1.4','3','6')
+header T_SUSPECT_RECIPIENTS_L3C6_7	eval:check_recipients('1.4','1.6','3','6')
+header T_SUSPECT_RECIPIENTS_L3C6_8	eval:check_recipients('1.6','1.8','3','6')
+header T_SUSPECT_RECIPIENTS_L3C6_9	eval:check_recipients('1.8','undef','3','6')
+
+########################################################################
 
 # a few random rules
 header T_RATWARE_MASS_SENDER		X-Mailer =~ /Advanced Mass Sender/i
