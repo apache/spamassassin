@@ -50,7 +50,7 @@ use MIME::QuotedPrint;
 sub new {
   my $class = shift;
   $class = ref($class) || $class;
-#  my %opts = @_;
+  my %opts = @_;
 
   my $self = {
     headers		=> {},
@@ -58,16 +58,50 @@ sub new {
     metadata		=> {},
     body_parts		=> [],
     header_order	=> [],
+    already_parsed	=> 1,
     };
 
-#  # allow callers to set certain options ...
-#  foreach ( 'noexit' ) {
-#    $self->{$_} = $opts{$_} if ( exists $opts{$_} );
-#  }
+  # allow callers to set certain options ...
+  foreach ( 'already_parsed' ) {
+    $self->{$_} = $opts{$_} if ( exists $opts{$_} );
+  }
 
   bless($self,$class);
 
   $self;
+}
+
+=item _do_parse()
+
+Non-Public function which will initiate a MIME part part (generates
+a tree) of the current message.  Typically called by find_parts()
+as necessary.
+
+=cut
+
+sub _do_parse {
+  my($self) = @_;
+
+  # If we're called when we don't need to be, then just go ahead and return.
+  return if ($self->{'already_parsed'});
+
+  my $toparse = $self->{'toparse'};
+  delete $self->{'toparse'};
+
+  dbg("---- MIME PARSER START ----");
+
+  # Figure out the boundary
+  my ($boundary);
+  ($self->{'type'}, $boundary) = Mail::SpamAssassin::Util::parse_content_type($self->header('content-type'));
+  dbg("main message type: ".$self->{'type'});
+
+  # Make the tree
+  Mail::SpamAssassin::MsgParser->parse_body( $self, $self, $boundary, $toparse, 1 );
+  $self->{'already_parsed'} = 1;
+
+  dbg("---- MIME PARSER END ----");
+
+  return;
 }
 
 =item find_parts()
@@ -86,10 +120,23 @@ sub find_parts {
 
   $onlyleaves = 0 unless defined $onlyleaves;
   $recursive = 1 unless defined $recursive;
+
+  # ok, we need to do the parsing now...
+  $self->_do_parse() if (!$self->{'already_parsed'});
+  
+  return $self->_find_parts($re, $onlyleaves, $recursive);
+}
+
+# We have 2 functions in find_parts() to optimize out the penalty of
+# 'already_parsed'...  It also lets us avoid checking $onlyleaves, $re,
+# and $recursive over and over again.
+#
+sub _find_parts {
+  my ($self, $re, $onlyleaves, $recursive) = @_;
   my @ret = ();
 
   # If this object matches, mark it for return.
-  my $amialeaf = !exists $self->{'body_parts'};
+  my $amialeaf = $self->is_leaf();
 
   if ( $self->{'type'} =~ /$re/ && (!$onlyleaves || $amialeaf) ) {
     push(@ret, $self);
@@ -99,7 +146,7 @@ sub find_parts {
     # This object is a subtree root.  Search all children.
     foreach my $parts ( @{$self->{'body_parts'}} ) {
       # Add the recursive results to our results
-      push(@ret, $parts->find_parts($re));
+      push(@ret, $parts->_find_parts($re));
     }
   }
 
@@ -183,10 +230,15 @@ sub add_body_part {
 
 =item is_leaf()
 
+Returns true if the tree node in question is a leaf of the tree (ie:
+has no children of its own).  Note: This function may return odd results
+unless the message has been mime parsed via _do_parse()!
+
 =cut
 
 sub is_leaf {
-  return exists $_[0]->{'raw'};
+  my($self) = @_;
+  return !exists $self->{'body_parts'};
 }
 
 =item raw()
@@ -333,6 +385,10 @@ sub rendered {
 }
 
 =item content_summary()
+
+Returns an array of scalars describing the mime parts of the message.
+Note: This function requires that the message be parsed first via
+_do_parse()!
 
 =cut
 

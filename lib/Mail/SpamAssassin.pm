@@ -308,22 +308,28 @@ simply call C<Mail::SpamAssassin->parse($msg)>, where $msg is either undef
 of the message with 1 line per array element, or a file glob with the
 entire contents of the message.
 
-The procedure used to parse a message is recursive and ends up
-generating a tree of M::SA::MsgContainer objects.  parse() will generate
-the parent node of the tree, then pass the body of the message to
-M::SA::MsgParser->parse_body() which begins the recursive process.
+This function will return a base MsgContainer object with just the headers
+being parsed.  M::SA::MsgContainer->find_parts() will end up doing a
+full recursive mime parse of the message as necessary.  That procedure is
+recursive and ends up generating a tree of M::SA::MsgContainer objects.
+parse() will generate the parent node of the tree, then pass the body of
+the message to M::SA::MsgParser->parse_body() which begins the recursive
+process.
 
 =cut
+
+# NOTE: This function is allowed (in bad OO form) to modify the
+# MsgContainer object directly as MsgContainer doesn't really have a
+# constructor in the traditional OO way of things.
 
 sub parse {
   my($self, $message) = @_;
   $message ||= \*STDIN;
 
-  dbg("---- MIME PARSER START ----");
-
   # protect it from abuse ...
   local $_;
 
+  # Figure out how the message was passed to us, and deal with it.
   my @message;
   if (ref $message eq 'ARRAY') {
      @message = @{$message};
@@ -338,7 +344,7 @@ sub parse {
   }
 
   # Generate the main object and parse the appropriate MIME-related headers into it.
-  my $msg = Mail::SpamAssassin::MsgContainer->new();
+  my $msg = Mail::SpamAssassin::MsgContainer->new(already_parsed => 0);
   my $header = '';
   $msg->{'pristine_headers'} = '';
 
@@ -371,7 +377,8 @@ sub parse {
     last if ( $last =~ /^\r?$/m );
   }
 
-  # Store the pristine body for later -- store as a copy since @message will get modified below
+  # Store the pristine body for later -- store as a copy since @message
+  # will get modified below
   $msg->{'pristine_body'} = join('', @message);
 
   # CRLF -> LF
@@ -379,15 +386,11 @@ sub parse {
     s/\r\n/\n/;
   }
 
-  # Figure out the boundary
-  my ($boundary);
-  ($msg->{'type'}, $boundary) = Mail::SpamAssassin::Util::parse_content_type($msg->header('content-type'));
-  dbg("main message type: ".$msg->{'type'});
-
-  # Make the tree
-  Mail::SpamAssassin::MsgParser->parse_body( $msg, $msg, $boundary, \@message, 1 );
-
-  dbg("---- MIME PARSER END ----");
+  # If the message does need to get parsed, save off a copy of the body
+  # in a format we can easily parse later so we don't have to rip from
+  # pristine_body ...
+  #
+  $msg->{'toparse'} = \@message;
 
   return $msg;
 }

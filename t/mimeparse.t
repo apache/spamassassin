@@ -90,6 +90,10 @@ foreach my $k ( sort keys %files ) {
   open(INP, $k) || die "Can't find $k:$!";
   my $mail = Mail::SpamAssassin->parse(\*INP);
   close(INP);
+
+  # We know it's not parsed, so deal with it!
+  $mail->_do_parse();
+
   my $res = join("\n",$mail->content_summary());
   #print "---\n$res\n---\n";
   ok( $res eq shift @{$files{$k}} );
