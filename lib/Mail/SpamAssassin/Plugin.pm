@@ -359,9 +359,23 @@ to the SHA1 hashed value.
 
 Reference to hash returned by call to tokenize.  The hash takes the
 format of:
+
 {
-  'SHA1 Hash Value' => { 'raw_token' => 'raw (original) value' }
+
+  'SHA1 Hash Value' => 'raw (original) value'
+
 }
+
+NOTE: This data structure has changed since it was originally introduced
+in version 3.0.0.  The values are no longer perl anonymous hashes, they
+are a single string containing the raw token value.  You can test for
+backwards compatability by checking to see if the value for a key is a
+reference to a perl HASH, for instance:
+
+if (ref($toksref->{$sometokenkey}) eq 'HASH') {...
+
+If it is, then you are using the old interface, otherwise you are using
+the current interface.
 
 =item isspam
 
@@ -414,16 +428,27 @@ called in case of error or if the message is otherwise skipped.
 =item toksref
 
 Reference to hash returned by call to tokenize.  See bayes_learn
-documentation for additional information on the format.  If the token
-was found in the database it will contain some additional information:
+documentation for additional information on the format.
+
+=item probsref
+
+Reference to hash of calculated probabilities for tokens found in
+the database.
 
 {
-  'SHA1 Hash Value' => { 'raw_token' => 'raw (original) value',
-                         'pw' => 'calculated probability',
+
+  'SHA1 Hash Value' => {
+
+                         'prob' => 'calculated probability',
+
                          'spam_count' => 'Total number of spam msgs w/ token',
+
                          'ham_count' => 'Total number of ham msgs w/ token',
+
                          'atime' => 'Atime value for token in database'
+
                        }
+
 }
 
 =item score

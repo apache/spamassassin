@@ -358,7 +358,7 @@ sub tokenize {
   my %tokens;
   foreach my $token (@tokens) {
     next unless length($token); # skip 0 length tokens
-    $tokens{substr(sha1($token), -5)} = { 'raw_token' => $token };
+    $tokens{substr(sha1($token), -5)} = $token;
   }
 
   # return the keys == tokens ...
@@ -1207,11 +1207,10 @@ sub scan {
     my ($token, $tok_spam, $tok_ham, $atime) = @{$tokendata};
     my $prob = $self->compute_prob_for_token($token, $ns, $nn, $tok_spam, $tok_ham);
     if (defined($prob)) {
-      $pw{$token} = $prob;
-      $msgtokens->{$token}->{pw} = $prob;
-      $msgtokens->{$token}->{spam_count} = $tok_spam;
-      $msgtokens->{$token}->{ham_count} = $tok_ham;
-      $msgtokens->{$token}->{atime} = $atime;
+      $pw{$token}->{prob} = $prob;
+      $pw{$token}->{spam_count} = $tok_spam;
+      $pw{$token}->{ham_count} = $tok_ham;
+      $pw{$token}->{atime} = $atime;
     }
   }
 
@@ -1245,21 +1244,21 @@ sub scan {
   my @touch_tokens;
 
   for (sort {
-              abs($pw{$b} - 0.5) <=> abs($pw{$a} - 0.5)
+              abs($pw{$b}->{prob} - 0.5) <=> abs($pw{$a}->{prob} - 0.5)
             } keys %pw)
   {
     if ($count-- < 0) { last; }
-    my $pw = $pw{$_};
+    my $pw = $pw{$_}->{prob};
     next if (abs($pw - 0.5) < $self->{robinson_min_prob_strength});
 
     # What's more expensive, scanning headers for HAMMYTOKENS and
     # SPAMMYTOKENS tags that aren't there or collecting data that
     # won't be used?  Just collecting the data is certainly simpler.
     #
-    my $raw_token = $msgtokens->{$_}->{raw_token} || "(unknown)";
-    my $s = $msgtokens->{$_}->{spam_count};
-    my $n = $msgtokens->{$_}->{ham_count};
-    my $a = $msgtokens->{$_}->{atime};
+    my $raw_token = $msgtokens->{$_} || "(unknown)";
+    my $s = $pw{$_}->{spam_count};
+    my $n = $pw{$_}->{ham_count};
+    my $a = $pw{$_}->{atime};
     push @$tinfo_spammy, [$raw_token,$pw,$s,$n,$a] if $pw >= 0.5 && ++$tcount_spammy;
     push @$tinfo_hammy,  [$raw_token,$pw,$s,$n,$a] if $pw <  0.5 && ++$tcount_hammy;
 
@@ -1302,6 +1301,7 @@ sub scan {
   }
 
   $self->{main}->call_plugins("bayes_scan", { toksref => $msgtokens,
+					      probsref => \%pw,
 					      score => $score,
 					      msgatime => $msgatime,
 					      significant_tokens => \@touch_tokens,
