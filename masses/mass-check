@@ -283,7 +283,7 @@ sub result {
 }
 
 sub wanted {
-  my (undef, $id, $time, $dataref) = @_;
+  my (undef, $id, $time, $dataref, $format) = @_;
   my $out;
 
   memory_track_start() if ($opt_logmem);
@@ -339,6 +339,7 @@ sub wanted {
     push(@extra, "mid=$mid");
   }
   push(@extra, "scantime=" . ($after - $before));
+  push(@extra, "format=$format");
 
   if ($opt_logmem) { 
     my $mem = memory_track_finish();
