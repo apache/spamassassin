@@ -119,6 +119,7 @@ sub new {
   $self->{auto_whitelist_factor} = 0.5;
 
   $self->{rewrite_subject} = 1;
+  $self->{detailed_phrase_score} = 0;
   $self->{spam_level_stars} = 1;
   $self->{spam_level_char} = '*';
   $self->{subject_tag} = '*****SPAM*****';
@@ -330,6 +331,18 @@ SpamAssassin as a handle for that test; for example, 'FROM_ENDS_IN_NUMS'.
 
     if (/^score\s+(\S+)\s+(\-*[\d\.]+)$/) {
       $self->{scores}->{$1} = $2+0.0; next;
+    }
+
+=item detailed_phrase_score { 0 | 1 }        (default: 0)
+
+This option displays all matches for "contains phrases frequently found in spam"
+Note that this is disabled by default because it can output huge headers (800
+words and more than 8KB in some cases)
+
+=cut
+
+    if (/^detailed[-_]phrase[-_]score\s+(\d+)$/) {
+      $self->{detailed_phrase_score} = $1+0; next;
     }
 
 =item rewrite_subject { 0 | 1 }        (default: 1)
