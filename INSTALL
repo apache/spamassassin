@@ -104,6 +104,11 @@ Required Modules
 
 These modules are required for spamassassin to run.
 
+  - File::Spec    (from CPAN, or included in Perl 5.6)
+  
+    The File::Spec module is required in version 0.8 (Mar 200) or later.
+    This is included in Perl versions 5.6 and later.
+
   - Pod::Usage    (from CPAN, or included in Perl 5.6)
 
     The Pod::Usage module is required.  This is included in Perl versions
@@ -146,7 +151,7 @@ skipped.
     Razor has a large number of dependencies on CPAN modules.  Feel free
     to skip installing it, if this makes you nervous; SpamAssassin will
     still work well without it.
-    
+
 
   - DCC    http://www.rhyolite.com/anti-spam/dcc/
 
@@ -178,7 +183,7 @@ skipped.
 
     Pyzor requires at least Python 2.2.1 which can be found at
     http://www.python.org/ .
- 
+
     To install Pyzor, download the latest revision from
     https://sourceforge.net/project/showfiles.php?group_id=50000 and
     perform the following steps:
@@ -204,7 +209,7 @@ skipped.
     If you want to use SpamAssassin with Mail::Audit, you will (obviously)
     require the Mail::Audit module, and any modules it requires (there's
     lots of them, unfortunately).
-    
+
     Additionally, Mail::Internet is required if you wish to use the
     "-r/-w" options of the spamassassin program (reporting and replying,
     for spam-trap mail accounts).

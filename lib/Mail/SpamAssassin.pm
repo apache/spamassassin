@@ -63,7 +63,7 @@ use Mail::SpamAssassin::NoMailAudit;
 
 use File::Basename;
 use File::Path;
-use File::Spec;
+use File::Spec 0.8;
 use File::Copy;
 use Cwd;
 use Config;
@@ -88,7 +88,7 @@ $TIMELOG->{dummy}=0;
 
 $VERSION = "2.41";
 # SUB_VERSION is now <revision>-<yyyy>-<mm>-<dd>-<state>
-$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.118 2002/09/02 18:24:12 jmason Exp $'))[2 .. 5, 8]));
+$SUB_VERSION = lc(join('-', (split(/[ \/]/, '$Id: SpamAssassin.pm,v 1.119 2002/09/03 11:13:24 msquadrat Exp $'))[2 .. 5, 8]));
 # If you hacked up your SA, add a token to identify it here. Eg.: I use "mss<number>",
 # <number> increasing with every hack. Deersoft might want to use "pro" :o)
 # "cvs" is added automatically if this file is tagged as 'Exp'erimental.
