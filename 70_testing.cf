@@ -274,6 +274,8 @@ describe T_DNS_FROM_RFC_WHOIS_A	Envelope sender listed in whois.rfc-ignorant.org
 tflags T_DNS_FROM_RFC_WHOIS_A	net
 
 # ratware: forging Postfix Receiveds
+# this doesn't seem to be working.  It works with pcregrep, though...
+# odd...
 header T_RATWARE_RCVD_PF_1  Received =~ / \(Postfix\) with ESMTP id .+\; \S+ \d+ \S+ \d+ \d+:\d+:\d+ \S+$/s
 
 header T_RATWARE_RCVD_AT    Received =~ / by \S+\@\S+ with Microsoft SMTPSVC/
