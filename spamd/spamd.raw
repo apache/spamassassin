@@ -1,5 +1,4 @@
 #!/usr/bin/perl -w
-
 ############################################################
 # The code in this file is copyright 2001 by Craig Hughes  #
 # It is licensed for use with the SpamAssassin distribution#
@@ -17,7 +16,12 @@ use Sys::Syslog qw(:DEFAULT setlogsock);
 use POSIX qw(setsid);
 use Getopt::Std;
 
-# load these now before we do any forks
+# change this to inlude the list of authorized client IP addresses.
+# TODO: cmdline args?
+my @allowed_clients = qw (127.0.0.1);
+
+# load these now before we do any forks; saves perl interpreter
+# from looking for them in each subprocess.
 eval '
   use Net::DNS;
   use Net::DNS::Resolver;
@@ -78,6 +82,9 @@ $spamtest->init();
 
 sub spawn;  # forward declaration
 setlogsock('unix');
+
+# jm: NOTE: this should probably just openlog() once, in parent pid, for
+# efficiency (TODO)
 sub logmsg { openlog('spamd','cons,pid','mail'); syslog('info',"@_"); closelog(); }
 
 my $port = $opt_p || 22874;
@@ -116,7 +123,12 @@ for ( $waitedpid = 0;
 
     my($port,$iaddr) = sockaddr_in($paddr);
     my $name = gethostbyaddr($iaddr,AF_INET);
-    logmsg "connection from $name [",inet_ntoa($iaddr),"] at port $port";
+    if ( allowed($iaddr) ) {
+       logmsg "connection from $name [",inet_ntoa($iaddr),"] at port $port";
+    } else {
+       logmsg "unauthorized connection from $name [",inet_ntoa($iaddr),"] at port $port";
+       next;
+    } 
 
     spawn sub {
 	$|=1; # always immediately flush output
@@ -167,6 +179,19 @@ for ( $waitedpid = 0;
 
 }
 
+}
+
+sub allowed {
+    my $iaaddr = shift;
+
+    #I'm sure this could be improved, but hey, it works.
+    foreach (@allowed_clients) {
+        if (inet_ntoa($iaaddr) eq $_) {
+	   return(1);
+	}
+    }
+    
+    return(0);
 sub spawn {
     my $coderef = shift;
 
