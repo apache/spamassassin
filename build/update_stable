@@ -20,14 +20,16 @@ for ext in tar.gz zip ; do
   cp $WEBDIR/devel/Mail-SpamAssassin-$vers.$ext \
 	$WEBDIR/released/Mail-SpamAssassin-$vers.$ext
 
-  # Note this will prompt for the passphrase ...
-  gpg --default-key 'SpamAssassin Signing Key' -bsa \
-	$WEBDIR/released/Mail-SpamAssassin-$vers.$ext
+  gpgsign=$HOME/bin/gpgsign
+  $gpgsign Mail-SpamAssassin-$vers.$ext
+  mv Mail-SpamAssassin-$vers.$ext.asc $WEBDIR/devel/Mail-SpamAssassin-$vers.$ext.asc
 done
+
 
 # cp WebMake-${vers}-1.noarch.rpm WebMake-${vers}-1.src.rpm $WEBDIR/released
 ( cd $WEBDIR/released && cvs add -kb *SpamAssassin* )
 
 echo "md5sum of tarball:"
 cat $WEBDIR/released/Mail-SpamAssassin-$vers.tar.gz.md5
+
 

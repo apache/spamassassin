@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.625 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.626 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -73,4 +73,19 @@
 # # also http://tlec.linux.or.jp/docs/user_prefs
 # meta T_LJ_MISYOUDAKUKOUKOKU T_LJ_MISYOUDAKU && T_LJ_KOUKOKU && T_LJ_STAR
 # describe T_LJ_MISYOUDAKUKOUKOKU T_LJ_MISYOUDAKU && T_LJ_KOUKOKU && T_LJ_STAR
+
+# replacements for PORN_4; split out sub-patterns as some are more FP-prone
+# than others.
+### uri T_PORN_URL_XXX         /^https?:\/\/[\w\.-]*xxx[\w-]*\./
+### uri T_PORN_URL_SEX         /^https?:\/\/[\w\.-]*(?<!es|ba)(?<!dle|sus)sex[\w-]*\./
+### uri T_PORN_URL_ANAL        /^https?:\/\/[\w\.-]*anal(?!og|y[sz])[\w-]*\./
+### uri T_PORN_URL_SLUT        /^https?:\/\/[\w\.-]*slut[\w-]*\./
+### uri T_PORN_URL_CUM         /^https?:\/\/[\w\.-]*(?<!cir)(?<!\bdo)cum(?!ul|be?r|b?en)[\w-]*\./
+### uri T_PORN_URL_LUST        /^https?:\/\/[\w\.-]*lust(?!(?<=illust)(?:rat|rious)|(?<=clust)er)[\w-]*\./
+### uri T_PORN_URL_PANT        /^https?:\/\/[\w\.-]*pant(?:y|ies)[\w-]*\./
+### uri T_PORN_URL_SUCK        /^https?:\/\/[\w\.-]*suck[\w-]*\./
+### uri T_PORN_URL_TEEN        /^https?:\/\/[\w\.-]*(?<!thir|four|eigh|nine)(?<!fif|six)(?<!seven)teen[\w-]*\./
+### uri T_PORN_URL_MISC        /^https?:\/\/[\w\.-]*(pussy|nympho|porn|hard-?core|taboo|whore|voyeur|lesbian|gurlpages|naughty|lolita|schoolgirl|kooloffer|erotic)[\w-]*\./
+
+### header T_DATE_DOUBLE_DASH	Date =~ /:\d\d --\d\d\d\d$/
 

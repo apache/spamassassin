@@ -26,6 +26,12 @@ md5sum Mail-SpamAssassin-$vers.tar.gz \
 md5sum Mail-SpamAssassin-$vers.zip \
 	> $WEBDIR/devel/Mail-SpamAssassin-$vers.zip.md5
 
+gpgsign=$HOME/bin/gpgsign
+$gpgsign Mail-SpamAssassin-$vers.tar.gz
+$gpgsign Mail-SpamAssassin-$vers.zip
+mv Mail-SpamAssassin-$vers.tar.gz.asc $WEBDIR/devel/Mail-SpamAssassin-$vers.tar.gz.asc
+mv Mail-SpamAssassin-$vers.zip.asc $WEBDIR/devel/Mail-SpamAssassin-$vers.zip.asc
+
 # ( cd $WEBDIR/devel && cvs add -kb *SpamAssassin* )
 
 ls -l $WEBDIR/devel
