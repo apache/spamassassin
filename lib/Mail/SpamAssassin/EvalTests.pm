@@ -1184,7 +1184,7 @@ sub _check_rbl {
     $self->{$set}->{rbl_matches_found} = ' ';
   }
 
-  my $already_matched_in_other_zones = ' '.$self->{$set}->{rbl_matches_found}.' ';
+  # my $already_matched_in_other_zones = ' '.$self->{$set}->{rbl_matches_found}.' ';
   my $found = 0;
 
   # First check that DNS is available. If not, do not perform this check.
@@ -1200,11 +1200,13 @@ sub _check_rbl {
       # and sets a negative score to compensate 
       # It's also useful to be able to flag mail that went through an IP that
       # is on two different blacklists  -- Marc
-      #next if ($already_matched_in_other_zones =~ / ${ip} /);
-      if ($already_matched_in_other_zones =~ / \Q${ip}\E /) {
-	dbg("Skipping $ip, already matched in other zones for $set", "rbl", -1);
-	next;
-      }
+      #
+      # Apr  7 2003 jm: I don't see how this is a good idea. :(
+      # if ($already_matched_in_other_zones =~ / \Q${ip}\E /) {
+      # dbg("Skipping $ip, already matched in other zones for $set", "rbl", -1);
+      # next;
+      # }
+
       next unless ($ip =~ /(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})/);
      ($b1, $b2, $b3, $b4) = ($1, $2, $3, $4);
 

@@ -246,9 +246,11 @@ sub handle_dnsbl_results {
 	    !($addr eq '127.0.0.3' and $set =~ /^dialup/))
     {
       $self->test_log ("RBL check: found ".$dom.", type: ".$addr);
+      $txt ||= '';
 
     } else {
       $self->test_log ("RBL check: found ".$dom);
+      $txt ||= '';
     }
 
     dbg("rbl: check found $dom, type: $addr", "rbl", -2);
