@@ -1,4 +1,4 @@
-# $Id: Parser.pm,v 1.12 2003/09/30 22:48:50 felicity Exp $
+# $Id: Parser.pm,v 1.13 2003/10/01 01:39:19 felicity Exp $
 
 package Mail::SpamAssassin::MIME::Parser;
 use strict;
@@ -91,7 +91,7 @@ sub parse {
 
     if ($header) {
       my ( $key, $value ) = split ( /:\s*/, $header, 2 );
-      if ( $key =~ /^content-type(?:-encoding)?$/i ) {
+      if ( $key =~ /^(?:MIME-Version|Content-)/i ) {
         $msg->header( $key, $self->decode_header($value), $value );
       }
     }
