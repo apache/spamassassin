@@ -325,16 +325,31 @@ sub check_for_forged_hotmail_received_headers {
 sub check_for_msn_groups_headers {
   my ($self) = @_;
 
+  return 0 unless ($self->get('To') =~ /<(\S+)\@groups\.msn\.com>/);
+  my $listname = $1;
+
   # from Theo Van Dinter, see
   # http://www.hughes-family.org/bugzilla/show_bug.cgi?id=591
-  $_ = $self->get ('X-Loop'); return 0 if ! /\@groups\.msn\.com\b/;
-  $_ = $self->get ('From'); return 0 if ! /\@groups\.msn\.com\b/;
-  $_ = $self->get ('To'); return 0 if ! /\@groups\.msn\.com\b/;
-  $_ = $self->get ('Return-Path'); return 0 if ! /-bounce\@groups\.msn\.com\b/;
+  return 0 unless $self->get('message-id') =~ /^<$listname-\S+\@groups\.msn\.com>/;
+  return 0 unless $self->get('x-loop') =~ /^notifications\@groups\.msn\.com/;
+  return 0 unless $self->get('return-path') =~ /<$listname-bounce\@groups\.msn\.com>/;
 
   $_ = $self->get ('Received');
   return 0 if ! /^\s+from mail pickup service by groups\.msn\.com\b/;
   return 1;
+
+# MSN Groups
+# Return-path: <ListName-bounce@groups.msn.com>
+# Received: from groups.msn.com (tk2dcpuba02.msn.com [65.54.195.210]) by
+#    dogma.slashnull.org (8.11.6/8.11.6) with ESMTP id g72K35v10457 for
+#    <zzzzzzzzzzzz@jmason.org>; Fri, 2 Aug 2002 21:03:05 +0100
+# Received: from mail pickup service by groups.msn.com with Microsoft
+#    SMTPSVC; Fri, 2 Aug 2002 13:01:30 -0700
+# Message-id: <ListName-1392@groups.msn.com>
+# X-loop: notifications@groups.msn.com
+# Reply-to: "List Full Name" <ListName@groups.msn.com>
+# To: "List Full Name" <ListName@groups.msn.com>
+
 }
 
 ###########################################################################
