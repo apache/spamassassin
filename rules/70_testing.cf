@@ -263,6 +263,37 @@ header T_MSGID_CAPS5	MESSAGEID =~ /<[A-Z]+\@(?!(?:mailcity|whowhere)\.com)[a-z]+
 header T_MSGID_CAPS6	MESSAGEID =~ /^\s*<?[A-Z]+\@(?!(?:mailcity|whowhere)\.com)/
 
 # bug 3410
-header T_DNS_FROM_RFCI_DSN	eval:check_rbl_envfrom('rfci-dsn2', 'dsn.rfc-ignorant.org.')
-describe T_DNS_FROM_RFCI_DSN	From: sender listed in dsn.rfc-ignorant.org
-tflags T_DNS_FROM_RFCI_DSN	net
+header __RFC_IGNORANT		eval:check_rbl_envfrom('rfci_envfrom', 'fulldom.rfc-ignorant.org.')
+tflags __RFC_IGNORANT		net
+
+header T_DNS_FROM_RFC_DSN	eval:check_rbl_sub('rfci_envfrom', '127.0.0.2')
+describe T_DNS_FROM_RFC_DSN	Envelope sender listed in dsn.rfc-ignorant.org
+tflags T_DNS_FROM_RFC_DSN	net
+
+header T_DNS_FROM_RFC_POST	eval:check_rbl_sub('rfci_envfrom', '127.0.0.3')
+describe T_DNS_FROM_RFC_POST	Envelope sender listed in postmaster.rfc-ignorant.org
+tflags T_DNS_FROM_RFC_POST	net
+
+header T_DNS_FROM_RFC_ABUSE	eval:check_rbl_sub('rfci_envfrom', '127.0.0.4')
+describe T_DNS_FROM_RFC_ABUSE	Envelope sender listed in abuse.rfc-ignorant.org
+tflags T_DNS_FROM_RFC_ABUSE	net
+
+header T_DNS_FROM_RFC_WHOIS_A	eval:check_rbl_sub('rfci_envfrom', '127.0.0.5')
+describe T_DNS_FROM_RFC_WHOIS_A	Envelope sender listed in whois.rfc-ignorant.org
+tflags T_DNS_FROM_RFC_WHOIS_A	net
+
+header T_DNS_FROM_RFC_WHOIS_B	eval:check_rbl_sub('rfci_envfrom', '127.0.0.7')
+describe T_DNS_FROM_RFC_WHOIS_B	Envelope sender TLD listed in whois.rfc-ignorant.org
+tflags T_DNS_FROM_RFC_WHOIS_B	net
+
+header T_DNS_FROM_RFC_BOGUSMX	eval:check_rbl_sub('rfci_envfrom', '127.0.0.8')
+describe T_DNS_FROM_RFC_BOGUSMX	Envelope sender listed in bogusmx.rfc-ignorant.org
+tflags T_DNS_FROM_RFC_BOGUSMX	net
+
+# double check that both are never listed
+meta T_DNS_FROM_RFC_WHOIS_C	(T_DNS_FROM_RFC_WHOIS_A && T_DNS_FROM_RFC_WHOIS_B)
+
+# test AHBL using envelope-from
+header T_DNS_FROM_AHBL_RHSBL	eval:check_rbl_envfrom('ahbl-rhs2', 'rhsbl.ahbl.org.')
+describe T_DNS_FROM_AHBL_RHSBL	Envelope sender listed in dnsbl.ahbl.org
+tflags T_DNS_FROM_AHBL_RHSBL	net
