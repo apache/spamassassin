@@ -22,13 +22,13 @@ const double nybias = 10.0;
 const int exhaustive_eval = 1;
 
 const double mutation_rate = 0.2;
-const double mutation_noise = 1.0;
+const double mutation_noise = 2.0;
 const double regression_coefficient = 0.5;
 
 const double crossover_rate = 0.0;
 
-const int pop_size = 100;
-const int replace_num = 25;
+const int pop_size = 2000;
+const int replace_num = 500;
 
 const int maxiter = 10000;
 
@@ -117,32 +117,32 @@ inline double score_msg(PGAContext *ctx, int p, int pop, int i)
        
   if(is_spam[i])
   {
-    if(msg_score > threshold)
+    if(msg_score >= threshold)
     {
       // Good positive
       ga_yy++;
-      yyscore += msg_score;
+      yyscore += msg_score; // Each true positive means yyscore += at least 5
     }
     else
     {
       // False negative
       ga_yn++;
-      ynscore += threshold - msg_score;
+      ynscore += msg_score; // Each false negative means that ynscore += less than 5
     }
   }
   else
   {
-    if(msg_score > threshold)
+    if(msg_score >= threshold)
     {
       // False positive
       ga_ny++;
-      nyscore += msg_score - threshold;
+      nyscore += msg_score; // Each false positive means nyscore += more than 0
     }
     else
     {
       // Good negative
       ga_nn++;
-      nnscore += msg_score;
+      nnscore += msg_score; // Each good negative means nnscore += less than 5
     }
   }
 
@@ -165,7 +165,7 @@ double evaluate(PGAContext *ctx, int p, int pop)
 //   nyscore = log(nyscore);
 //   nnscore = log(nnscore);
 
-  return (double) ((double)ga_yn)+ynscore + (((double)ga_ny)+nyscore)*nybias + (ynscore-nnscore)/1000.0;
+  return (double) ((double)ga_yn + (double)ga_ny*nybias) + (ynscore + nyscore*nybias - (ynscore+nnscore))/tot_score;
 }
 
 /*
@@ -202,6 +202,7 @@ void dump()
     printf ("# Correctly spam:     %6d  %3.2f%%  (%3.2f%% overall)\n", ga_yy, (ga_yy / (float) num_spam) * 100.0, (ga_yy / (float) num_tests) * 100.0);
     printf ("# False positives:    %6d  %3.2f%%  (%3.2f%% overall, %6.0f adjusted)\n", ga_ny, (ga_ny / (float) num_nonspam) * 100.0, (ga_ny / (float) num_tests) * 100.0, nyscore*nybias);
     printf ("# False negatives:    %6d  %3.2f%%  (%3.2f%% overall, %6.0f adjusted)\n", ga_yn, (ga_yn / (float) num_spam) * 100.0, (ga_yn / (float) num_tests) * 100.0, ynscore);
+    printf ("# Average score for spam:  %3.1f    nonspam: %3.1f\n",(ynscore+yyscore)/((double)(ga_yn+ga_yy)),(nyscore+nnscore)/((double)(ga_nn+ga_ny)));
     printf ("# TOTAL:              %6d  %3.2f%%\n#\n", num_tests, 100.0);
 }
 
@@ -218,7 +219,7 @@ void WriteString(PGAContext *ctx, FILE *fp, int p, int pop)
     dump();
     for(int i=0; i<num_scores; i++)
     {
-      fprintf(fp,"score %-30s %2.1f\n",score_names[i],PGAGetRealAllele(ctx, p, pop, i));
+      fprintf(fp,"score %-30s %2.3f\n",score_names[i],PGAGetRealAllele(ctx, p, pop, i));
     }
     fprintf ( fp,"\n" );
   }
