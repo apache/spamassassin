@@ -15,7 +15,7 @@ database or LDAP server.
 SpamAssassin will check the global configuration file (ie. any file matching
 /etc/mail/spamassassin/*.cf) for the following settings:
 
-user_scores_dsn ldap://host:port/dc=basedn,dc=de?scope?attr?uid=__USERNAME__
+user_scores_dsn ldap://host:port/dc=basedn,dc=de?attr?scope?uid=__USERNAME__
 user_scores_ldap_username	bind dn
 user_scores_ldap_password	password
 
