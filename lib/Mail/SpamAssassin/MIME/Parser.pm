@@ -1,4 +1,4 @@
-# $Id: Parser.pm,v 1.14 2003/10/01 01:49:42 felicity Exp $
+# $Id: Parser.pm,v 1.15 2003/10/01 04:36:21 felicity Exp $
 
 package Mail::SpamAssassin::MIME::Parser;
 use strict;
@@ -384,10 +384,8 @@ sub decode {
     return $type, $output, $filename;
   }
   else {
+    # Encoding is one of 7bit, 8bit, binary or x-something
     dbg("decoding other encoding\n");
-
-    # Encoding is one of 7bit, 8bit, binary or x-something - just save.
-    my @output = @{$body};
 
     my $type = $msg->header('content-type');
     my ($filename) =
@@ -396,7 +394,8 @@ sub decode {
       ($filename) = ( $type =~ /name="?([^\";]+)"?/i );
     }
 
-    return $type, \@output, $filename;
+    # No encoding, so just point to the raw data ...
+    return $type, $body, $filename;
   }
 }
 
