@@ -26,15 +26,16 @@ required_hits		5
 auto_report_threshold	30
 
 # Whitelist and blacklist addresses are *not* patterns; they're just normal
-# strings.  one exception is that "*@isp.com" is allowed.  They should be
-# in lower-case.
+# strings.  one exception is that "*@isp.com" is allowed.  They should be in
+# lower-case.  You can either add multiple addrs on one line,
+# whitespace-separated, or you can use multiple lines.
 #
 # Monty Solomon: he posts from an ISP that has often been the source of spam
 # (no fault of his own ;), and sometimes uses Bcc: when mailing.
 #
 whitelist_from		monty@roscom.com
 
-# Add your blacklist entries in the format below...
+# Add your blacklist entries in the same format...
 #
 # blacklist_from	friend@public.com
 

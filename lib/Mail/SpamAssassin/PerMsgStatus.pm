@@ -124,6 +124,8 @@ sub check {
     $self->do_head_eval_tests();
   }
 
+  dbg ("is spam? score=".$self->{hits}.
+  			" required=".$self->{conf}->{required_hits});
   $self->{is_spam} = ($self->{hits} >= $self->{conf}->{required_hits});
 
   $_ = $self->{conf}->{report_template};
