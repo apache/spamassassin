@@ -68,11 +68,6 @@ body T_PENIS_ENLARGE2		/\b(?:penis|male organ|pee[ -]?pee|dick|sc?hlong|wh?anger
 describe T_PENIS_ENLARGE2		Information on getting a larger penis or breasts (2)
 
 # 2003-02-23: quinlan
-# some useful meta rule sub-elements
-body __MIME_HTML		eval:check_for_mime_html()
-header __CTYPE_HTML		Content-Type =~ /text\/html/i
-
-# 2003-02-23: quinlan
 # bug 1376: HTML without <!DOCTYPE> from mailers that always use <!DOCTYPE>
 #
 # Note: some variations of this rule actually perform better, but they all
@@ -85,19 +80,12 @@ meta T_MIME_HTML_NO_DOCTYPE	(__MIME_HTML && !__HTML_TAG_EXISTS_DOCTYPE)
 # Whee... more HTML tests!
 # Note: these use __MIME_HTML, we might need to exempt MIME attachments from
 # that rule
-# Apr 10 2003 jm: AOL and IMO are ready to promote I reckon
+# Apr 22 2003 jm: removed __TAG_EXISTS_DIV from OUTLOOK, as 'MS Exchange
+# Server version 6.0.4630.0' does not insert that, causing FPs
 header __ANY_OUTLOOK_MUA	X-Mailer =~ /^Microsoft Outlook\b/
-header __ANY_IMS_MUA		X-Mailer =~ /^Internet Mail Service\b/
-header __ANY_AOL_MUA		X-Mailer =~ /^AOL\b/
 header __ANY_QUALCOMM_MUA	X-Mailer =~ /^QUALCOMM\b/
-body __TAG_EXISTS_BODY		eval:html_tag_exists('body')
-body __TAG_EXISTS_DIV		eval:html_tag_exists('div')
-body __TAG_EXISTS_HEAD		eval:html_tag_exists('head')
-body __TAG_EXISTS_HTML		eval:html_tag_exists('html')
-body __TAG_EXISTS_META		eval:html_tag_exists('meta')
-meta T_HTML_FAKED_OUTLOOK	(__ANY_OUTLOOK_MUA && __MIME_HTML && !(__TAG_EXISTS_BODY && __TAG_EXISTS_DIV && __TAG_EXISTS_HEAD && __TAG_EXISTS_HTML && __TAG_EXISTS_META))
-meta T_HTML_FAKED_IMS		(__ANY_IMS_MUA && __MIME_HTML && !(__TAG_EXISTS_BODY && __TAG_EXISTS_HEAD && __TAG_EXISTS_HTML && __TAG_EXISTS_META))
-meta T_HTML_FAKED_AOL		(__ANY_AOL_MUA && __MIME_HTML && !__TAG_EXISTS_HTML)
+meta T_HTML_FAKED_OUTLOOK	(__ANY_OUTLOOK_MUA && __MIME_HTML && !(__TAG_EXISTS_BODY && __TAG_EXISTS_HEAD && __TAG_EXISTS_HTML && __TAG_EXISTS_META))
+# my FPs for this should hopefully be fixed now
 meta T_HTML_FAKED_QUALCOMM	(__ANY_QUALCOMM_MUA && __MIME_HTML && !__TAG_EXISTS_HTML)
 
 # MIME Content-Transfer-Encoding control rules
@@ -135,29 +123,11 @@ uri T_CCPROD_ROVING_COM_URL		/\bccprod\.roving\.com\b/i
 uri T_ROVING_COM_URL			/\broving\.com\b/i
 uri T_RS6_NET_URL			/\brs6\.net\b/i
 
-# bug 1438, possible replacement for the current HOTMAIL_FOOTER* rules
-# rename current HOTMAIL_FOOTER# to __HOTMAIL_FOOTER#, and change these too.
-meta T_ABUSED_HOTMAIL_FOOTER	HOTMAIL_FOOTER1 + HOTMAIL_FOOTER2 + HOTMAIL_FOOTER3 + HOTMAIL_FOOTER4 + HOTMAIL_FOOTER5 > 1
-meta T_HOTMAIL_FOOTER1		HOTMAIL_FOOTER1 && !T_ABUSED_HOTMAIL_FOOTER
-meta T_HOTMAIL_FOOTER2		HOTMAIL_FOOTER2 && !T_ABUSED_HOTMAIL_FOOTER
-meta T_HOTMAIL_FOOTER3		HOTMAIL_FOOTER3 && !T_ABUSED_HOTMAIL_FOOTER
-meta T_HOTMAIL_FOOTER4		HOTMAIL_FOOTER4 && !T_ABUSED_HOTMAIL_FOOTER
-meta T_HOTMAIL_FOOTER5		HOTMAIL_FOOTER5 && !T_ABUSED_HOTMAIL_FOOTER
-
-# bug 1406, possible replacement for URI_IS_POUND
-# Apr  1 2003 jm: virtually useless hits.  I say let it die
-uri T_URI_IS_POUND		/^\#$/
-uri T_URI_ENDS_IN_POUND		/^[^?]+\#$/
-
 # bug 1394, possible replacement for ORDER_NOW
 body T_ORDER_NOW                  /\border (?:now|soon|fast|quickly|while|today)\b/i
 # Apr  1 2003 jm: not so good... more hits, but lower accuracy
 #  1.268   3.8907   0.0761    0.981   0.92    0.00  ORDER_NOW
 #  1.549   4.7343   0.1009    0.979   0.91    0.01  T_ORDER_NOW
-
-# Matt Cline
-uri      T_HTTP_ENTITIES_HOST m{https?://[^\s\">/]*\&\#[\da-f]+}i
-describe T_HTTP_ENTITIES_HOST URI obscured with character entities
 
 uri      T_HTTP_EXCESSIVE_ENTITIES m{^https?://\S*\&\#(?:0?3[0-9]|0?[46][1-9a-f]|0?[57][\da])}i
 describe T_HTTP_EXCESSIVE_ENTITIES Completely unnecessary %-escapes inside a URL
@@ -341,21 +311,6 @@ meta __USER_AGENT_XIMIAN	(__XIMIAN_MSGID && __XIMIAN_MUA)
 meta T_USER_AGENT_XIMIAN	__USER_AGENT_XIMIAN && !T_FORGED_USER_AGENT
 meta T_FORGED_MUA_XIMIAN	__XIMIAN_MUA && !__UNUSABLE_MSGID && !__USER_AGENT_XIMIAN
 
-# bug 1561
-# stronger version of USER_AGENT_APPLEMAIL
-# Apple Mail doesn't send text/html at all (unless it's an attachment)
-# It'll send text/plain, or multipart/alternative with text/plain and text/enriched parts (boundary of
-# "Apple-Mail-\d--\d+").  It can, however, send a multipart/mixed with a single text/html attachment, so
-# don't use MIME_HTML_ONLY.
-# perhaps limit CTYPE to "text/plain", "multipart/alternative" with "text/plain" and "text/enhanced", or
-# "multipart/mixed"?
-header __X_MAILER_APPLEMAIL	X-Mailer	=~ /^Apple Mail \(\d\.\d+\)$/
-header __MSGID_APPLEMAIL	Message-Id	=~ /^<[0-9A-F]{8}-(?:[0-9A-F]{4}-){3}[0-9A-F]{12}\@\S+>$/
-header __MIME_VERSION_APPLEMAIL	Mime-Version	=~ /^1\.0 \(Apple Message framework v\d+\)$/
-meta __USER_AGENT_APPLEMAIL	!__CTYPE_HTML && __X_MAILER_APPLEMAIL && ( __MSGID_APPLEMAIL || __MIME_VERSION_APPLEMAIL )
-meta T_USER_AGENT_APPLEMAIL	__USER_AGENT_APPLEMAIL && !T_FORGED_USER_AGENT
-meta T_FORGED_MUA_APPLEMAIL	__X_MAILER_APPLEMAIL && !__UNUSABLE_MSGID && !__USER_AGENT_APPLEMAIL
-
 # per bug 1373
 body __HTML_COMMENT_RATIO_00_10		eval:html_range('total_comment_ratio','0.00','0.10')
 body __HTML_COMMENT_RATIO_10_20		eval:html_range('total_comment_ratio','0.10','0.20')
@@ -453,23 +408,6 @@ meta T_HTML_WEB_BUGS_PLUS_9B	(T_HTML_IMAGE_WEB_BUGS_9B && HTML_WEB_BUGS)
 meta T_HTML_WEB_BUGS_PLUS_10B	(T_HTML_IMAGE_WEB_BUGS_10B && HTML_WEB_BUGS)
 meta T_HTML_WEB_BUGS_PLUS_11B	(T_HTML_IMAGE_WEB_BUGS_11B && HTML_WEB_BUGS)
 
-# alan premselaar <alien@12inch.com>, see SpamAssassin-talk list
-header T_JAPANESE_UCE_SUBJECT_3	Subject =~ /L\$\>5Bz9\-9p\"\(/
-describe T_JAPANESE_UCE_SUBJECT_3 Subject: contains Japanese mandatory unsolicited mail tag
-# quinlan: 2003-03-23 here are more generic Japanese iso-2022-jp codes
-# ("not yet acceptance" or "email") + "announcement"
-# FWIW, according to Peter Evans, this should be sufficient to catch the UCE tag
-# and a common attempt at evasion (using the "sue" instead of "mi" Chinese
-# character).
-header T_JAPANESE_UCE_SUBJECT_0	Subject =~ /\e\$B.*(?:L\$>5Bz|EE;R%a!<%k)9-9p/
-# "not yet acceptance announcement"
-header T_JAPANESE_UCE_SUBJECT_1	Subject =~ /\e\$B.*L\$>5Bz9-9p/
-# "email announcement"
-header T_JAPANESE_UCE_SUBJECT_2	Subject =~ /\e\$B.*EE;R%a!<%k9-9p/
-
-# quinlan: "advertisement" in Russian KOI8-R
-header T_RUSSIAN_UCE_SUBJECT	Subject =~ /\xf0\xe5\xea\xeb\xe0\xec\xf3/
-
 # 2003-02-23: quinlan
 # Message-Id: format tests
 # hotmail
@@ -494,7 +432,7 @@ meta T_FORGED_IMS_CTYPE		(__ANY_IMS_MUA && __CTYPE_HAS_BOUNDARY && !__IMS_BOUNDA
 describe T_FORGED_IMS_CTYPE	Forged mail pretending to be from IMS (boundary)
 
 # NOTE: uses __ANY_QUALCOMM_MUA, __VIA_FROM_MANGLER from above
-header __EUD_STYLE_FROM		From =~ /^[^\"].+[^\"] <[^>]+>$/
+header __EUD_STYLE_FROM		From =~ /^(?:[^\"][^']+[^\"]|\".*\'.*\") <[^>]+>$/
 meta T_FORGED_MUA_EUDORA_FROM	(__ANY_QUALCOMM_MUA && !__EUD_STYLE_FROM && !__VIA_FROM_MANGLER)
 describe T_FORGED_MUA_EUDORA_FROM Forged mail pretending to be from Eudora (by From)
 
@@ -504,6 +442,17 @@ header T_RATWARE_MIZSPEELING	eval:check_for_mizspeeling_ratware()
 describe T_RATWARE_MIZSPEELING	Sent using spammer tool (mizspeeling)
 
 # new version
+# Apr 22 2003 jm: not so good.  stick with the old one I say
+# 0.061   0.2360   0.0000    1.000   0.97    0.01  T_NIGERIAN_SUBJECT2
+# 0.087   0.5827   0.0000    1.000   0.96    0.01  T_NIGERIAN_SUBJECT2:jm
+# 0.040   0.0729   0.0000    1.000   0.94    0.01  T_NIGERIAN_SUBJECT2:lan
+# 0.034   0.0831   0.0000    1.000   0.93    0.01  T_NIGERIAN_SUBJECT2:quinlan
+# 0.022   0.0660   0.0000    1.000   0.97    0.01  T_NIGERIAN_SUBJECT2:rODbegbie
+# 0.065   0.2536   0.0000    1.000   0.97    2.40  NIGERIAN_SUBJECT2
+# 0.090   0.6051   0.0000    1.000   0.96    2.40  NIGERIAN_SUBJECT2:jm
+# 0.040   0.0729   0.0000    1.000   0.94    2.40  NIGERIAN_SUBJECT2:lan
+# 0.047   0.1163   0.0000    1.000   0.93    2.40  NIGERIAN_SUBJECT2:quinlan
+# 0.017   0.0495   0.0000    1.000   0.97    2.40  NIGERIAN_SUBJECT2:rODbegbie
 header T_NIGERIAN_SUBJECT2	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*(?:request\s+(?:for\s+)?)?(?:very )?urgent\s+(?:(?:and|&)\s+(?:(?:completely|100\%)\s+))?(?:confidential|assistance|business|attention|reply|responses?|help)\b/i
 
 # let's try rfg's DNSBLs, they seem to have been stable for a while now
@@ -618,6 +567,7 @@ header T_RCVD_IN_FIVETEN_FREE	rblreseval:check_rbl_results_for('fiveten', '127.0
 tflags T_RCVD_IN_FIVETEN_FREE net
 # should probably get notfirsthop etc. to work at any stage
 # (how about an optional third argument?)
+# Apr 22 2003 jm: eh? what's wrong with notfirsthop?  works for me (tm)
 header __FIVE10		rbleval:check_rbl('five10-notfirsthop', 'blackholes.five-ten-sg.com.')
 tflags __FIVE10 net
 header T_RCVD_IN_FIVETEN_DIALUP_NFH	rblreseval:check_rbl_results_for('five10-notfirsthop', '127.0.0.3')
@@ -665,54 +615,9 @@ tflags T_RCVD_IN_SORBS_WEB net
 # require checking only the last untrusted line, rather than all of them.
 #
 header T_FAKE_HELO_YAHOO	eval:check_for_rdns_helo_mismatch("yahoo\.com","yahoo\.com")
-header T_FAKE_HELO_HOTMAIL	eval:check_for_rdns_helo_mismatch("hotmail(?:\.msn|)\.com","hotmail\.com")
-header T_FAKE_HELO_AOL		eval:check_for_rdns_helo_mismatch("aol\.com","aol\.com")
-header T_FAKE_HELO_MSN		eval:check_for_rdns_helo_mismatch("msn\.com","msn\.com")
-header T_FAKE_HELO_EXCITE	eval:check_for_rdns_helo_mismatch("excite\S*","excite\.com")
-header T_FAKE_HELO_LYCOS	eval:check_for_rdns_helo_mismatch("lycos\S*","lycos\.com")
-header T_FAKE_HELO_MAIL_COM	eval:check_for_rdns_helo_mismatch("mail\.com","mail\.com")
-header T_FAKE_HELO_EUDORAMAIL	eval:check_for_rdns_helo_mismatch("eudoramail\.com","eudoramail\.com")
-header T_FAKE_HELO_EMAIL_COM	eval:check_for_rdns_helo_mismatch("email\.com","email\.com")
 header T_FAKE_HELO_NETSCAPE	eval:check_for_rdns_helo_mismatch("netscape\.net","netscape\.net")
-header T_FAKE_HELO_FLASHMAIL	eval:check_for_rdns_helo_mismatch("flashmail\.com","flashmail\.com")
-
-# urgh.  This could be a case of "forget about it".  Does earthlink really
-# relay for all these networks?
-header T_FAKE_HELO_EARTHLINK	eval:check_for_rdns_helo_mismatch("(?:earthlink\.net|teleport\.com|dialsprint\.net|charterpipeline\.net|mindsprint\.com|level3\.net)","earthlink\.net")
-
-header T_FAKE_HELO_JUNO		eval:check_for_rdns_helo_mismatch("(?:untd|juno)\.com","juno\.com")
-header T_FAKE_HELO_UNTD		eval:check_for_rdns_helo_mismatch("(?:untd|juno)\.com","untd\.com")
 header T_FAKE_HELO_YAHOO_CO_UK	eval:check_for_rdns_helo_mismatch("yahoo\.co\.uk","yahoo\.co\.uk")
-header T_FAKE_HELO_USA_NET	eval:check_for_rdns_helo_mismatch("usa\.net","usa\.net")
-header T_FAKE_HELO_FREEUK	eval:check_for_rdns_helo_mismatch("freeuk\.com","freeuk\.com")
-header T_FAKE_HELO_CARAMAIL	eval:check_for_rdns_helo_mismatch("caramail\.com","caramail\.com")
 header T_FAKE_HELO_NETSCAPE_COM	eval:check_for_rdns_helo_mismatch("(?:netscape|netcenter|aol)\.(?:com|net)","netscape\.com")
-header T_FAKE_HELO_MAIL_RU	eval:check_for_rdns_helo_mismatch("mail\.ru","mail\.ru")
-header T_FAKE_HELO_NETZERO	eval:check_for_rdns_helo_mismatch("netzero\.net","netzero\.net")
-header T_FAKE_HELO_USA_COM	eval:check_for_rdns_helo_mismatch("usa\.com","usa\.com")
-header T_FAKE_HELO_IBM_COM	eval:check_for_rdns_helo_mismatch("ibm\.com","ibm\.com")
-header T_FAKE_HELO_EUROPE	eval:check_for_rdns_helo_mismatch("europe\.com","europe\.com")
-header T_FAKE_HELO_MAILCITY	eval:check_for_rdns_helo_mismatch("(?:mailcity|lycos)\.com","mailcity\.com")
-header T_FAKE_HELO_BIGFOOT	eval:check_for_rdns_helo_mismatch("bigfoot\.com","bigfoot\.com")
-header T_FAKE_HELO_ATTBI	eval:check_for_rdns_helo_mismatch("attbi\.com","attbi\.com")
-header T_FAKE_HELO_YAHOO_CA	eval:check_for_rdns_helo_mismatch("yahoo\.ca","yahoo\.ca")
-header T_FAKE_HELO_HOTPOP	eval:check_for_rdns_helo_mismatch("hotpop\.com","hotpop\.com")
-header T_FAKE_HELO_SHAW_CA	eval:check_for_rdns_helo_mismatch("shaw(?:\.ca|cable\.net)","shaw\.ca")
-header T_FAKE_HELO_AMAZON	eval:check_for_rdns_helo_mismatch("amazon\.com","amazon\.com")
-
-# 2003-04-12
-# juno.com anti-forgery rule based on valid juno.com account names
-# reference: http://www.juno.com/legal/spam.html
-# quinlan: not a lot of hits for me, but maybe it will work better for others
-header __JUNO_FROM		From:addr =~ /\@juno\.com\b/i
-# my initial reading of their valid account name rules
-header __JUNO_FROM_VALID	From:addr =~ /^[a-z](?:[a-z0-9_-]|\.(?!\.)){0,62}[a-z0-9]\@juno\.com\b/i
-meta T_FORGED_JUNO_FROM		(__JUNO_FROM && !__JUNO_FROM_VALID)
-# more restrictive interpretation of their valid account name rules,
-# don't allow any of the permitted non-alphanumeric characters to be
-# repeated, this should probably be verified
-header __JUNO_FROM_VALID2	From:addr =~ /^[a-z](?:[a-z0-9]|[-._](?![-._])){0,62}[a-z0-9]\@juno\.com\b/i
-meta T_FORGED_JUNO_FROM2	(__JUNO_FROM && !__JUNO_FROM_VALID2)
 
 # 2003-04-11
 # bug 1769, possible replacement rules
@@ -728,9 +633,6 @@ body T_SEE_FOR_YOURSELF		/See (?:for|it|it for) yourself\b/i
 uri T_YAHOO_REDIRECTOR		/^http:\/\/rd\.yahoo\.com/i
 describe T_YAHOO_REDIRECTOR	Uses commonly-spammed redirector URL
 
-# I bet this will actually be effective.  What are they doing over there?
-uri T_BZ_TLD			/^http:\/\/[^\/]+\.bz(?:\/|$)/i
-describe T_BZ_TLD		Contains a URL in the BZ top-level domain
-
 # case-insenstive version
 uri T_USERPASS			m{https?://[^/\s]+?(?::[^/\s]+?)?\@}i
+
