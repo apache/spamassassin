@@ -516,6 +516,9 @@ header T_RATWARE_HASH_2_V2   X-Mailer =~ /^[A-Za-z0-9\._]{14,}$/
 header T_RATWARE_FLOAT       X-Mailer =~ /^\d\.\d\d/
 header T_RATWARE_CHARSET_V2  X-Mailer =~ /^normal \W \W\s*charset.*=\"/
 
+# bug 1285
+header T_RATWARE_SMTPIT		X-Mailer =~ /SMTPit - FileMaker Pro Email Plugin/
+
 header T_USER_AGENT_XIMIAN   X-Mailer =~ /^Ximian Evolution \d+\.\d+\.\d+(?:\.\d+)?\s$/
 score  T_USER_AGENT_XIMIAN   -0.5
 tflags T_USER_AGENT_XIMIAN   nice
