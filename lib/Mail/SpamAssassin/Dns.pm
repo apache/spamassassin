@@ -311,6 +311,8 @@ sub razor_lookup {
   
       alarm 0;
     };
+
+    alarm 0;    # just in case
   
     if ($@) {
       $response = undef;
@@ -361,6 +363,8 @@ sub razor_lookup {
       
       alarm 0;
     };
+  
+    alarm 0;    # just in case
 
     if ($@) {
       $response = undef;
