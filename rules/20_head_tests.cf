@@ -194,6 +194,9 @@ describe MSGID_FROM_MTA_HOTMAIL	Message-Id was added by a hotmail.com relay
 header MSGID_SHORT		MESSAGEID =~ /^.{1,15}$|<.{0,4}\@/m
 describe MSGID_SHORT		Message-ID is unusually short
 
+header MSGID_MULTIPLE_AT	MESSAGEID =~ /<[^>]*\@[^>]*\@/
+describe MSGID_MULTIPLE_AT	Message-ID contains multiple '@' characters
+
 ###########################################################################
 
 header DATE_SPAMWARE_Y2K	Date =~ /^[A-Z][a-z]{2}, \d\d [A-Z][a-z]{2} [0-6]\d \d\d:\d\d:\d\d [A-Z]{3}$/
