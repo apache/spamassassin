@@ -898,3 +898,12 @@ score SIRCAM_SIGNATURE		    10.0
 #user_scores_sql_username	spam
 #user_scores_sql_password	spamfilter
 
+###########################################################################
+# Default whitelists.  These should be addresses which send mail that
+# is often tagged (incorrectly) as spam; it also helps that they be
+# addresses of big companies with lots of lawyers, so if spammers
+# impersonate them, they'll get into big trouble, so it doesn't provide
+# a shortcut around SpamAssassin.
+
+whitelist_from	billing@networksolutions.com
+

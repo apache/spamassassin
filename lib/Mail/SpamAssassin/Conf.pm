@@ -52,6 +52,7 @@ sub new {
   $self->{rewrite_subject} = 1;
   $self->{report_header} = 0;
   $self->{defang_mime} = 1;
+  $self->{skip_rbl_checks} = 0;
   $self->{ok_locales} = '';
 
   $self->{whitelist_from} = [ ];
@@ -157,6 +158,10 @@ sub _parse {
 
     if (/^defang_mime\s+(\d+)$/) {
       $self->{defang_mime} = $1+0; next;
+    }
+
+    if (/^skip_rbl_checks\s+(\d+)$/) {
+      $self->{skip_rbl_checks} = $1+0; next;
     }
 
     if (/^ok_locales\s+(.+)$/) {

@@ -60,6 +60,11 @@ ok_locales		en
 #
 # defang_mime 0
 
+# By default, SpamAssassin will run RBL checks.  If your ISP already
+# does this, set this to 1.
+#
+# skip_rbl_checks 1
+
 ###########################################################################
 # Add your own customised scores for some tests below.  The default scores are
 # read from the installed "spamassassin.cf" file, but you can override them

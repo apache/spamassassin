@@ -56,11 +56,11 @@ sub is_razor_available {
   };
   if ($@) {
     dbg ( "Razor is not available" );
-    return;
+    return 0;
+  } else {
+    dbg ("Razor is available");
+    return 1;
   }
-
-  dbg ("Razor is available");
-  return 1;
 }
 
 sub razor_report {
@@ -84,12 +84,13 @@ sub razor_report {
     local ($^W) = 0;            # argh, warnings in Razor
 
     my $rc = Razor::Client->new ($config, %options);
+    die "undefined Razor::Client\n" if (!$rc);
 
     if ($Razor::Client::VERSION >= 1.12) {
       my $respary = $rc->report ('spam' => \@msg);
       for my $resp (@$respary) { $response .= $resp; }
     } else {
-      $response = $rc->report ([@msg]);
+      $response = $rc->report (\@msg);
     }
 
     dbg ("Razor: spam reported, response is \"$response\".");
