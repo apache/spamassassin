@@ -77,7 +77,7 @@ header INVALID_DATE_ODD_MONTH	Date =~ /\d+ [^A-Z]{3,} \d\d\d\d/i
 describe INVALID_DATE_ODD_MONTH Invalid Date: header (wierd month)
 
 header DATE_IN_FUTURE		eval:check_for_forward_date()
-describe DATE_IN_FUTURE		Date: is in the future or unparseable
+describe DATE_IN_FUTURE		Date: Differs by more than 4 days from current date
 
 header SUBJ_HAS_Q_MARK		Subject =~ /\?.{2,}$/
 describe SUBJ_HAS_Q_MARK	Subject: contains a question mark
