@@ -122,39 +122,44 @@ sub check_for_from_to_same {
   }
 }
 
-sub check_for_suspect_recipients {
-  my ($self, $min, $max) = @_;
+sub check_recipients {
+  my ($self, $min, $max, $length, $count) = @_;
 
-  if (!exists $self->{suspect_recipients}) {
-    $self->_check_suspect_recipients();
+  my $test = "similar.tocc.$length.$count";
+  if (!exists $self->{$test}) {
+    $self->_check_recipients($length, $count);
   }
-  return (($min eq 'undef' || $self->{suspect_recipients} >= $min) &&
-	  ($max eq 'undef' || $self->{suspect_recipients} < $max));
+  return (($min eq 'undef' || $self->{$test} >= $min) &&
+	  ($max eq 'undef' || $self->{$test} < $max));
 }
 
-sub _check_suspect_recipients {
+sub _check_recipients {
   my ($self) = @_;
 
-  $self->{suspect_recipients} = 0;
+  my $to = $self->get('ToCc');	# get all recipients
+  $to =~ s/\(.*?\)//g;		# strip out the (comments)
+  my @address = ($to =~ m/([\w.=-]+\@\w+(?:[\w.-]+\.)+\w+)/g);
 
-  my $to = $self->get('ToCc');
-  $to =~ s/\(.*?\)//g;            # strip out the (comments)
-
-  my @address = sort ($to =~ m/([\w.=-]+\@\w+(?:[\w.-]+\.)+\w+)/g);
-  my @host = sort map { m/\@(.*)/ } @address;
-
-  @address = map { substr($_, 0, 2) } @address;
-  @host = map { substr($_, 0, 2) } @host;
-
-  if ($#address > 6) {
-    my $count = 0;
-    for (my $i = 0; $i < $#address; $i++) {
-      for (my $j = $i+1; $j < $#address; $j++) {
-	$count++ if $address[$i] eq $address[$j];
-	$count++ if $host[$i] eq $host[$j];
+  # length of 1 is good, 2 or 3 may be needed
+  for my $length ((1, 2, 3)) {
+    # at least 5 addresses is good, 4 does not seem like enough
+    for my $count ((4, 5, 6)) {
+      $self->{"similar.tocc.$length.$count"} = 0;
+      if (scalar (@address) >= $count) {
+	my @user = map { m/\@(.{0,$length})/ } @address;
+	my @host = map { substr($_,0,$length) } @address;
+	my $hits = 0;
+	my $combinations = 0;
+	for (my $i = 0; $i <= $#address; $i++) {
+	  for (my $j = $i+1; $j <= $#address; $j++) {
+	    $hits++ if $user[$i] eq $user[$j];
+	    $hits++ if $host[$i] eq $host[$j];
+	    $combinations++;
+	  }
+	}
+	$self->{"similar.tocc.$length.$count"} = $hits / $combinations;
       }
     }
-    $self->{suspect_recipients} = $count / ($#address + 1);
   }
 }
 
