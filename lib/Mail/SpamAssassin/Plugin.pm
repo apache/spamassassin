@@ -36,7 +36,7 @@ Mail::SpamAssassin::Plugin - SpamAssassin plugin base class
     
     # the usual perlobj boilerplate to create a subclass object
     $class = ref($class) || $class;
-    my $self = $class->SUPER::new($mailsaobject);
+    my $self = $class->SUPER::new($mailsa);
     bless ($self, $class);
    
     # then register an eval rule, if desired...
