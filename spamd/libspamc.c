@@ -390,7 +390,7 @@ static int _message_filter(const struct sockaddr *addr,
                 const struct hostent *hent, int hent_port, char *username,
                 int flags, struct message *m)
 {
-    char *buf[8192], is_spam[6];
+    char buf[8192], is_spam[6];
     int bufsiz = (sizeof(buf) / sizeof(*buf)) - 4; /* bit of breathing room */
     int len, expected_len, i, header_read=0;
     int sock;
