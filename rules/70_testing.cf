@@ -31,12 +31,6 @@
 # will be pretty safe.  (lower rule as a baseline to see if we miss much)
 header T_FROM_DELPHI		From:addr =~ /\d[^\@]+\d[^\@]+\@delphi\.com/i
 
-# great Yahoo! forgery rule, but is it going to be stable?
-# hmm.  good question :(
-header __YAHOO_MSGID		Message-ID =~ /\@yahoo\.com>/i
-header __YAHOO_BEGINNING	Message-ID =~ /<\S+(?:\.\S+|\.\S+\.\S+\.\S+)\@/
-meta T_FORGED_YAHOO_MSGID	(__YAHOO_MSGID && !__YAHOO_BEGINNING)
-
 # more portable replacement for RCVD_NUMERIC_HELO that doesn't rely on
 # Received headers using "helo=" prefix.  exclude squirrelmail, which
 # records a perfectly-ok rcvd header for the HTTP step in this fmt
