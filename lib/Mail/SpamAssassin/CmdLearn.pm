@@ -301,7 +301,9 @@ sub target  {
 ###########################################################################
 
 sub wanted {
-  my ($id, $time, $dataref) = @_;
+  my ($class, $id, $time, $dataref) = @_;
+
+  my $spam = $class eq "s" ? 1 : 0;
 
   if (defined($learnprob)) {
     if (int (rand (1/$learnprob)) != 0) {
@@ -323,7 +325,7 @@ sub wanted {
     $ma = Mail::SpamAssassin->parse ($dataref);
   }
 
-  my $status = $spamtest->learn ($ma, undef, $isspam, $forget);
+  my $status = $spamtest->learn ($ma, undef, $spam, $forget);
   my $learned = $status->did_learn();
 
   if (!defined $learned) { # undef=learning unavailable

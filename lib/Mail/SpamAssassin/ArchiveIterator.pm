@@ -622,18 +622,18 @@ sub scan_mailbox {
 sub run_message {
   my ($self, $msg) = @_;
 
-  my (undef, $format, $date, $mail) = index_unpack($msg);
+  my ($class, $format, $date, $mail) = index_unpack($msg);
 
   if ($format eq "f") {
-    return $self->run_file($mail, $date);
+    return $self->run_file($class, $mail, $date);
   }
   elsif ($format eq "m") {
-    return $self->run_mailbox($mail, $date);
+    return $self->run_mailbox($class, $mail, $date);
   }
 }
 
 sub run_file {
-  my ($self, $where, $date) = @_;
+  my ($self, $class, $where, $date) = @_;
 
   mail_open($where) or return;
   # skip too-big mails
@@ -644,11 +644,11 @@ sub run_file {
   my @msg = (<INPUT>);
   close INPUT;
 
-  &{$self->{wanted_sub}}($where, $date, \@msg);
+  &{$self->{wanted_sub}}($class, $where, $date, \@msg);
 }
 
 sub run_mailbox {
-  my ($self, $where, $date) = @_;
+  my ($self, $class, $where, $date) = @_;
 
   my ($file, $offset) = ($where =~ m/(.*)\.(\d+)$/);
   my @msg;
@@ -670,7 +670,7 @@ sub run_mailbox {
     push (@msg, $_);
   }
   close INPUT;
-  &{$self->{wanted_sub}}("$file.$offset", $date, \@msg);
+  &{$self->{wanted_sub}}($class, "$file.$offset", $date, \@msg);
 }
 
 ############################################################################

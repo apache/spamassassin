@@ -147,7 +147,7 @@ sub get_or_empty {
 }
 
 sub wanted {
-  my ($id, $time, $dataref) = @_;
+  my (undef, $id, $time, $dataref) = @_;
 
   my $ma = Mail::SpamAssassin::NoMailAudit->new ('data' => $dataref);
   my $from = $ma->get_header ("From");

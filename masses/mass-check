@@ -238,7 +238,7 @@ sub result {
 }
 
 sub wanted {
-  my ($id, $time, $dataref) = @_;
+  my (undef, $id, $time, $dataref) = @_;
   my $out;
 
   my $ma = $spamtest->parse($dataref);

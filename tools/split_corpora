@@ -78,7 +78,7 @@ if ($opt_l && $messagecount < $opt_l) {
 #############################################
 
 sub wanted {
-  my ($msg_id, $time, $data_ref) = @_;
+  my (undef, $msg_id, $time, $data_ref) = @_;
 
   if ($opt_l && $messagecount++ > $opt_l) { die 'HITLIMIT'; }
 
