@@ -2722,33 +2722,6 @@ sub check_access_database {
   0;
 }
 
-sub check_for_mizspeeling_ratware {
-  my($self) = @_;
-
-  my $id = $self->get ('MESSAGEID');
-  return 0 unless ($id =~ /^<[0-9]{14}\.[0-9a-zA-Z]{12}\@([a-z\.]+\.[a-z]+)>/);
-
-  my $fakehost = $1;
-
-# Received: from pneumatology.com (204-117-69-71-dsl.etv.net [204.117.69.71])
-	# by zzzzzzzz.org (8.12.6/8.12.6) with SMTP id h13HQP6F095501
-	# for <zzz@zzzzzzzz.org>; Mon, 3 Feb 2003 12:26:25 -0500 (EST)
-	# (envelope-from lenarrazh@pneumatology.com)
-# Date: Mon, 03 Feb 2003 03:21:05 -0500
-# From: "Wendy Fairlane" <lenarrazh@pneumatology.com>
-# To: <zzz@zzzzzzz.org>
-# Content-type: text/plain
-# Message-ID: <20030203032105.EzH0a5mArsQB@pneumatology.com>
-
-  my $from = $self->get ("From:addr");
-  return 0 if ($from !~ /\@${fakehost}>/);
-
-  my $rcvd = $self->get ("Received");
-  return 0 if ($rcvd !~ /\W${fakehost}\W/);
-
-  return 1;
-}
-
 sub sent_by_applemail {
   my ($self) = @_;
 
