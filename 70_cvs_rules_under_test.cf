@@ -283,8 +283,6 @@ header T_X_OSIRU_OPEN_PROXY	rbleval:check_rbl_sub('osirusoft', '127.0.0.9')
 tflags T_X_OSIRU_OPT_IN net
 tflags T_X_OSIRU_OPEN_PROXY net
 # repeats?
-header T_RCVD_IN_OSRELAY	rbleval:check_rbl('osrelay', 'inputs.relays.osirusoft.com.')
-tflags T_RCVD_IN_OSRELAY net
 header T_RCVD_IN_OSSRC	rbleval:check_rbl('ossrc', 'spamsources.relays.osirusoft.com.')
 tflags T_RCVD_IN_OSSRC net
 header T_RCVD_IN_OSSOCKS	rbleval:check_rbl('ossocks', 'socks.relays.osirusoft.com.')
