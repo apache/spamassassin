@@ -2358,6 +2358,18 @@ sub check_for_mime_html {
   return ($self->{mime_body_html_count} > 0);
 }
 
+# Plain text without some other type of MIME text part
+sub check_for_mime_text_only {
+  my ($self) = @_;
+
+  my $ctype = $self->get('Content-Type');
+  return 1 if (defined($ctype) && $ctype =~ m@text/plain@i);
+
+  $self->_check_attachments unless exists $self->{mime_body_html_count};
+  return ($self->{mime_body_html_count} == 0 &&
+	  $self->{mime_body_text_count} > 0);
+}
+
 # HTML without some other type of MIME text part
 sub check_for_mime_html_only {
   my ($self) = @_;

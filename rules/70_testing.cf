@@ -701,3 +701,12 @@ header RCVD_IN_IADB_SPF		eval:check_rbl_sub('iadb', '127.0.0.3')
 describe RCVD_IN_IADB_SPF	Sender is in IADB as a publisher of SPF records
 tflags RCVD_IN_IADB_SPF		net nice
 
+# Bug 3153
+body __MIME_TEXT_ONLY           eval:check_for_mime_text_only()
+
+meta     T_HTML_PLAIN_TEXT      (__MIME_TEXT_ONLY && HTML_MESSAGE)
+describe T_HTML_PLAIN_TEXT      Message is HTML pretending to be plain text
+
+meta     T_TEXT_ONLY            (__MIME_TEXT_ONLY && !HTML_MESSAGE)
+describe T_TEXT_ONLY            Message is plain text only
+
