@@ -72,8 +72,20 @@ describe REMOVE_IN_QUOTES	List removal information
 body DISCONTINUE		/\"discontinue\".{1,15}no further notices/i
 describe DISCONTINUE		List removal information
 
+# bug 1022: MGM_POSTCARD #2 original
+body REMOVE_POSTAL		/(?:Send(?:ing|) a (?:postal mail|postcard) to (?:Unsubscribe|Customer ?Service|remove)|unsubscribe by (?:postal mail|postcard))/i
+describe REMOVE_POSTAL		Send real mail to be unsubscribed
+
 ###########################################################################
 # HTML parser tests
+#
+# please sort these by eval type then name
+
+body HTML_TITLE_UNTITLED	eval:html_eval('title_text', '=~ /Untitled/i')
+describe HTML_TITLE_UNTITLED	HTML title contains "Untitled"
+
+body HTML_TITLE_EMPTY		eval:html_eval('title_text', '!~ /\S/s')
+describe HTML_TITLE_EMPTY	HTML title contains no text
 
 body HTML_50_70			eval:html_percentage('50','70')
 describe HTML_50_70		Message is 50-70% HTML tags
@@ -86,6 +98,15 @@ describe HTML_90_100		Message is 90-100% HTML tags
 
 body TABLE_THICK_BORDER		eval:html_test('thick_border')
 describe TABLE_THICK_BORDER	HTML table has thick border
+
+body HTML_COMMENT_EMAIL		eval:html_test('comment_email')
+describe HTML_COMMENT_EMAIL	HTML comment contains email address
+
+body HTML_COMMENT_SKY		eval:html_test('comment_sky')
+describe HTML_COMMENT_SKY	HTML comment contains SKY database codes
+
+body HTML_COMMENT_UNIQUE_ID	eval:html_test('comment_unique_id')
+describe HTML_COMMENT_UNIQUE_ID	Contains a comment with nothing but unique ID
 
 body JAVASCRIPT			eval:html_test('javascript')
 describe JAVASCRIPT		JavaScript code
@@ -153,6 +174,12 @@ describe HTML_FONT_FACE_ODD	HTML font face is not a commonly used face
 body HTML_FONT_FACE_CAPS	eval:html_test('font_face_caps')
 describe HTML_FONT_FACE_CAPS	HTML font face has excess capital characters
 
+body HTML_WIN_BLUR		eval:html_test('window_blur')
+describe HTML_WIN_BLUR		Javascript to move windows around
+
+body HTML_WIN_OPEN		eval:html_test('window_open')
+describe HTML_WIN_OPEN		Javascript to open a new window
+
 body HTML_TAG_BALANCE_A		eval:html_tag_balance('a', '< 0')
 describe HTML_TAG_BALANCE_A	HTML has excess "a" close tags
 
@@ -215,11 +242,6 @@ describe HIDE_WIN_STATUS	Javascript to hide URLs in browser
 
 rawbody LINK_TO_NO_SCHEME	/\s+href=['"]?www\./i
 describe LINK_TO_NO_SCHEME	Contains link without http:// prefix
-
-rawbody HTML_WIN_OPEN		eval:html_test('window_open')
-describe HTML_WIN_OPEN		Javascript to open a new window
-rawbody HTML_WIN_BLUR		eval:html_test('window_blur')
-describe HTML_WIN_BLUR		Javascript to move windows around
 
 ###########################################################################
 
@@ -353,9 +375,8 @@ describe EXCUSE_16		I wonder how many emails they sent in error...
 body EXCUSE_18			/we do not (?:spam|send unsolicited)/i
 describe EXCUSE_18		Claims not to be spam
 
-# Please do *not* tweak this without solid frequencies to back it up.
-body EXCUSE_FUTURE              /be removed from future mailings/i
-describe EXCUSE_FUTURE          Talks about future mailings
+body EXCUSE_REMOVE		/to be removed from.{0,20}(?:mailings|offers)/i
+describe EXCUSE_REMOVE		Talks about how to be removed from mailings
 
 # jm: keep this case-sensitive, otherwise it FP's
 body VIAGRA			/VIAGRA/
@@ -581,6 +602,10 @@ describe TAKE_ACTION_NOW	Tells you to 'take action now!'
 body THE_FOLLOWING_FORM		/the following form\b/i
 describe THE_FOLLOWING_FORM	Asks you to fill out a form
 
+# this works best as rawbody
+# do not add "subscribe", "unsubscribe", or "help"
+rawbody MAILTO_WITH_SUBJ_REMOVE		/mailto:.{0,64}\@.{0,64}\?subject=(?:\"|3D)*(?:remove?|delete|please.?(?:delete|remove|unsubscribe)|abuse|off\b|stop|take.?me.?off)/i
+
 # include the \n\n so we don't match mailto's in the headers!  Some list software
 # uses these to handle auto-subscribe/unsubscribe features
 rawbody MAILTO_LINK		/=[3D=\s"']*mailto:/is
@@ -688,8 +713,8 @@ describe GREAT_OFFER            Trying to offer you something
 body SUBJ_2_CREDIT              /subject to credit approval/i
 describe SUBJ_2_CREDIT          Contains 'subject to credit approval'
 
-body URGENT_BIZ                 /URGENT BUSINESS/i
-describe URGENT_BIZ             Contains 'URGENT BUSINESS'
+body URGENT_BIZ			/urgent.{0,16}(?:assistance|business|buy|confidential|notice|proposal)/i
+describe URGENT_BIZ		Contains urgent matter
 
 body EARN_PER_WEEK              /\b(?:earn|make).{1,20}\d\d\d+.{1,30}(?:per week|per month|weekly|monthly)/i
 describe EARN_PER_WEEK          Contains 'earn $something per week'
@@ -843,8 +868,8 @@ describe SAVE_UP_TO             Save Up To
 body LOW_PAYMENT	        /\b(?:reduce|low).{0,12} payment/i
 describe LOW_PAYMENT		Lower Monthly Payment
 
-body CONSOLIDATE_DEBT	        /\b(?:consolidate .{0,9} (?:debt|credit)|debt (?:consolidation|elimination))\b/i
-describe CONSOLIDATE_DEBT	Consolidate Debt and Credit
+body CONSOLIDATE_DEBT		/(?:consolidate .{0,9} (?:debt|credit|bills)|debt[ -]?(?:consolidation|elimination))/i
+describe CONSOLIDATE_DEBT	Consolidate debt, credit, or bills
 
 body CREDITORS_CALLING	        /\bcreditors calling\b/i
 describe CREDITORS_CALLING 	Calling Creditors
@@ -1424,12 +1449,6 @@ describe GREEN_EXCUSE_1         Claims spam helps the environment
 lang fr describe GREEN_EXCUSE_2 Prétend que le spam est bon pour l'environement
 body GREEN_EXCUSE_2             /the trees, save the planet, use email!/i
 describe GREEN_EXCUSE_2         Claims spam helps the environment
-#
-#
-#   0.275    0.160    0.345    0.32    1.00  HTML_COMMENT_UNIQUE_ID
-body HTML_COMMENT_UNIQUE_ID     eval:html_test('comment_unique_id')
-describe HTML_COMMENT_UNIQUE_ID Contains a comment with nothing but unique ID
-#
 
 #   0.000    0.001    0.000    1.00    1.00  INCREDIBLE
 body INCREDIBLE                 /\bincredible secrets\b/i
