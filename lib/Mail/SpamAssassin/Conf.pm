@@ -242,9 +242,9 @@ unwhitelist_from *@amazon.com
 
 =cut
 
-	if(/^unwhitelist[-_]from\s+(.+)\s*$/ {
-		$self->remove_from_addrlist ('whitelist_from', split (' ', $1)); next;
-	}
+    if (/^unwhitelist[-_]from\s+(.+)\s*$/) {
+      $self->remove_from_addrlist ('whitelist_from', split (' ', $1)); next;
+    }
 
 =item blacklist_from add@ress.com
 
@@ -269,9 +269,9 @@ unblacklist_from *@spammer.com
 
 =cut
 
-	if(/^unblacklist[-_]from\s+(.+)\s*$/ {
-		$self->remove_from_addrlist ('blacklist_from', split (' ', $1)); next;
-	}
+    if (/^unblacklist[-_]from\s+(.+)\s*$/) {
+      $self->remove_from_addrlist ('blacklist_from', split (' ', $1)); next;
+    }
 
 
 =item whitelist_to add@ress.com
