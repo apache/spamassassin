@@ -224,8 +224,9 @@ sub check {
   $self->{score} = (sprintf "%0.3f", $self->{score}) + 0;
   
   dbg ("is spam? score=".$self->{score}.
-                        " required=".$self->{conf}->{required_score}.
-                        " tests=".$self->get_names_of_tests_hit());
+                        " required=".$self->{conf}->{required_score});
+  dbg ("tests=".$self->get_names_of_tests_hit());
+  dbg ("subtests=".$self->get_names_of_subtests_hit());
   $self->{is_spam} = $self->is_spam();
 
   $self->{main}->call_plugins ("check_end", { permsgstatus => $self });
