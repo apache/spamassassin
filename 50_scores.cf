@@ -634,10 +634,11 @@ score USERNAME_IN_SUBJECT_5     1.0
 score USERNAME_IN_SUBJECT_6     0.5
 
 # a common FP, believe it or not
-score SUBJ_MISSING                   0.399
+score SUBJ_MISSING              0.399
 
-score    FAILURE_NOTICE_1       -1.0
-score    FAILURE_NOTICE_2       -1.0
-score    MAILER_DAEMON          -1.0
+score FAILURE_NOTICE_1          -1.0
+score FAILURE_NOTICE_2          -1.0
+score MAILER_DAEMON             -1.0
 score FORGOTTEN_PASSWORD        -2.0
+score PRIVACY_STATEMENT         -1.0
 
