@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.80 2003/04/22 01:15:53 quinlan Exp $
+# $Id: HTML.pm,v 1.81 2003/05/02 21:41:23 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -390,13 +390,9 @@ sub html_tests {
     {
       $self->{html}{font_color_unsafe} = 1;
     }
-    if ($fg !~ /^\#?[0-9a-f]{6}$/ && $fg !~ /^(?:navy|gray|red|white)$/)
-    {
-      $self->{html}{font_color_name} = 1;
-    }
     if ($fg !~ /^\#?[0-9a-f]{6}$/ && !exists $html_color{$fg})
     {
-      $self->{html}{t_font_color_name} = 1;
+      $self->{html}{font_color_name} = 1;
     }
     if ($fg =~ /^\#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/) {
       my ($h, $s, $v) = rgb_to_hsv(hex($1), hex($2), hex($3));

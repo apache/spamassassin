@@ -363,11 +363,6 @@ meta T_MIME_HTML_NO_BODY_TAG	MIME_HTML_ONLY && !__TAG_EXISTS_BODY
 # but we'll try this anyway
 meta T_MIME_HTML_NO_MAJOR_TAG	MIME_HTML_ONLY && !__TAG_EXISTS_HTML && !__TAG_EXISTS_BODY
 
-# quinlan: 2003-04-07
-# color stuff
-body T_HTML_FONT_COLOR_NAME	eval:html_test('t_font_color_name')
-describe T_HTML_FONT_COLOR_NAME	HTML font color has unusual name
-
 # quinlan: 2003-04-14
 # 1x1 images
 body T_HTML_IMAGE_WEB_BUGS_1	eval:html_test('t_image_web_bugs_1')
