@@ -262,13 +262,12 @@ sub receive_date {
 
 ############################################################################
 
-# a1=class a1=format L=date a*=mail
 sub index_pack {
-  return pack("a1a1La*", @_);
+  return join("\000", @_);
 }
 
 sub index_unpack {
-  return unpack("a1a1La*", $_[0]);
+  return split(/\000/, $_[0]);
 }
 
 sub scan_directory {
