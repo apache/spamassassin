@@ -805,10 +805,11 @@ adding I<--no> (B<--noauto-whitelist>), however, this is usually unnecessary.
 
 =item B<-a>, B<--auto-whitelist>, B<--whitelist>
 
-Use auto-whitelists.  Auto-whitelists track the long-term average score for each sender
-and then shift the score of new messages toward that long-term average.  This can increase
-or decrease the score for messages, depending on the long-term behavior of the
-particular correspondent.  See the README file for more details.
+Use auto-whitelists.  Auto-whitelists track the long-term average score for
+each sender and then shift the score of new messages toward that long-term
+average.  This can increase or decrease the score for messages, depending on
+the long-term behavior of the particular correspondent.  See the README file
+for more details.
 
 =item B<-c>, B<--create-prefs>
 
@@ -816,7 +817,8 @@ Create user preferences files if they don't exist (default: don't).
 
 =item B<-C> I<path>, B<--configpath>=I<path>
 
-Use the specified path for locating configuration files.  Ignore the default directories.
+Use the specified path for locating configuration files.  Ignore the default
+directories.
 
 =item B<-d>, B<--daemonize>
 

@@ -434,9 +434,11 @@ describe FROM_BTAMAIL		From an address @btamail.net.cn
 
 header USER_IN_BLACKLIST	eval:check_from_in_blacklist()
 describe USER_IN_BLACKLIST	From: address is in the user's black-list
+tflags USER_IN_BLACKLIST        userconf
 
 header USER_IN_WHITELIST	eval:check_from_in_whitelist()
 describe USER_IN_WHITELIST	From: address is in the user's white-list
+tflags USER_IN_WHITELIST        userconf
 
 header FROM_MISSING		From =~ /^UNSET$/ [if-unset: UNSET]
 describe FROM_MISSING		Missing From: header
@@ -466,12 +468,15 @@ describe VERY_SUSP_RECIPS       To: and Cc: contain similar usernames at least 5
 
 header USER_IN_WHITELIST_TO     eval:check_to_in_whitelist()
 describe USER_IN_WHITELIST_TO   User is listed in 'whitelist_to'
+tflags USER_IN_WHITELIST_TO     userconf
 
 header USER_IN_MORE_SPAM_TO     eval:check_to_in_more_spam()
 describe USER_IN_MORE_SPAM_TO   User is listed in 'more_spam_to'
+tflags USER_IN_MORE_SPAM_TO     userconf
 
 header USER_IN_ALL_SPAM_TO      eval:check_to_in_all_spam()
 describe USER_IN_ALL_SPAM_TO    User is listed in 'all_spam_to'
+tflags USER_IN_ALL_SPAM_TO      userconf
 
 header GAPPY_SUBJECT            Subject =~ /\b(?:[a-z][-_\.\,\:\;\'\~\s]{1,3}){4,}/i
 describe GAPPY_SUBJECT          'Subject' contains G.a.p.p.y-T.e.x.t
