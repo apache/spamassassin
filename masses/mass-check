@@ -8,6 +8,7 @@
 # --mh          use mh-style folder (directory of messages named with numbers)
 # --mn          find_missed('nonspam.log')
 # --ms          find_missed('spam.log')
+# --single      folder is a single mail message
 #
 # options for maildir and mh-style folders
 # --head=N      only check first N messages
@@ -22,7 +23,8 @@ use Mail::SpamAssassin;
 use Mail::SpamAssassin::NoMailAudit;
 use Getopt::Long;
 
-GetOptions("c=s", "f", "all", "head=i", "mh", "ms", "mn", "sort", "tail=i");
+GetOptions("c=s", "f", "all", "head=i", "mh", "ms", "mn", "single", "sort",
+	   "tail=i");
 
 #use Devel::Peek;
 
@@ -107,6 +109,11 @@ sub mass_check_all_folders {
       # Maildir!
       mass_check_maildir($sub, $folder);
     }
+    elsif (-f $folder && $opt_single)
+    {
+      # single message (for testing that variables are cleared appropriately)
+      mass_check_single($sub, $folder);
+    }
     elsif (-f $folder) {
       mass_check_mailbox($sub, $folder);
     }
@@ -180,6 +187,26 @@ sub mass_check_maildir {
 
     &$sub ($mail, \@msg);
   }
+}
+
+sub mass_check_single {
+  my $sub = shift;
+  my $folder = shift;
+
+  if ($folder =~ /\.gz$/) {
+    open (STDIN, "gunzip -cd $folder |") or warn "gunzip $folder failed: $@";
+  } elsif ($folder =~ /\.bz2$/) {
+    open (STDIN, "bzip2 -cd $folder |") or warn "bunzip2 $folder failed: $@";
+  } else {
+    open (STDIN, "<$folder") or warn "open $folder failed: $@";
+  }
+
+  # skip too-big mails
+  if (! $opt_all && -s STDIN > 250*1024) { close STDIN; next; }
+  my @msg = (<STDIN>);
+  close STDIN;
+
+  &$sub ($folder, \@msg);
 }
 
 sub mass_check_mailbox {
