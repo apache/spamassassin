@@ -1,7 +1,7 @@
 # URI tests
-# $Id: 20_uri_tests.cf,v 1.26 2002/08/29 12:29:41 jmason Exp $
+# $Id: 20_uri_tests.cf,v 1.27 2002/09/02 18:24:14 jmason Exp $
 
-require_version 2.40
+require_version 2.41
 
 uri NUMERIC_HTTP_ADDR   /^https?\:\/\/\d{7,}/is
 describe NUMERIC_HTTP_ADDR  Uses a numeric IP address in URL
@@ -67,4 +67,38 @@ describe WEIRD_PORT             Uses non-standard port number for HTTP
 # freqs:  0.003    0.008    0.000    1.00    1.00  WWW_AUTOREMOVE_COM
 uri WWW_AUTOREMOVE_COM      /autoremove\.com/i   
 describe WWW_AUTOREMOVE_COM     Frequent SPAM content
+
+
+uri E_WEBHOSTCENTRAL_URL        /e-webhostcentral\.com/i
+describe E_WEBHOSTCENTRAL_URL       Frequent SPAM content
+
+uri FREEMEGS_URL          /25freemegs\.com/i
+describe FREEMEGS_URL         Frequent SPAM content   
+
+uri FREEWEBCO_NET_URL       /freewebco\.net/i
+describe FREEWEBCO_NET_URL      Frequent SPAM content
+
+uri FREEWEBHOSTINGCENTRAL       /freewebhostingcentral/i   
+describe FREEWEBHOSTINGCENTRAL      Frequent SPAM content  
+
+uri LONG_NUMERIC_HTTP_ADDR  /^https?\:\/\/000\d+/is
+describe LONG_NUMERIC_HTTP_ADDR Uses a long numeric IP address in URL
+
+uri             SPAM_REDIRECTOR /https?\:.*(?:rd\.yahoo\.com|wwp\.icq\.com)/is
+describe        SPAM_REDIRECTOR Uses open redirection service
+
+uri URI_IS_POUND        m{\#$}
+describe URI_IS_POUND   Filename is just a '\#'; probably a JS trick
+
+uri WEB4PORNO_URL           /web4porno\.com/i
+describe WEB4PORNO_URL          Frequent SPAM content
+
+uri WWW_NETSITESFORFREE_NET     /netsitesforfree\.net/i
+describe WWW_NETSITESFORFREE_NET    Frequent SPAM content
+
+uri WWW_REMOVEYOU_COM       /removeyou\.com/i
+describe WWW_REMOVEYOU_COM      Frequent SPAM content
+
+uri YELLOWSUN           /yellowsun01\.com/i   
+describe YELLOWSUN          Frequent SPAM content
 

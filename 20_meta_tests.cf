@@ -1,5 +1,5 @@
 # SpamAssassin rules file: meta tests.
-# $Id: 20_meta_tests.cf,v 1.4 2002/08/29 12:29:41 jmason Exp $
+# $Id: 20_meta_tests.cf,v 1.5 2002/09/02 18:24:14 jmason Exp $
 #
 # Add meta tests which cover *both* headers and body here.
 # 
@@ -8,7 +8,7 @@
 # search times.
 ###########################################################################
 
-require_version 2.40
+require_version 2.41
 
 # some tests that will trigger FPs on ISO-2022-JP mails.
 
