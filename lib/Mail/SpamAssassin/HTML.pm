@@ -631,7 +631,7 @@ sub html_tests {
     }
   }
   if ($tag eq "font" && exists $attr->{size}) {
-    $size = $size;
+    my $size = $attr->{size};
     $self->{html}{tiny_font} = 1 if (($size =~ /^\s*(\d+)/ && $1 < 1) ||
 				     ($size =~ /\-(\d+)/ && $1 >= 3));
     $self->{html}{big_font} = 1 if (($size =~ /^\s*(\d+)/ && $1 > 3) ||
