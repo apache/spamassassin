@@ -26,8 +26,9 @@ Mail::SpamAssassin::PerMsgLearner - per-message status (spam or not-spam)
   });
   my $mail = $spamtest->parse();
 
-  my $status = $spamtest->learn ($mail);
-  ...
+  my $status = $spamtest->learn($mail,$id,$isspam,$forget);
+  my $didlearn = $status->did_learn();
+  $status->finish();
 
 
 =head1 DESCRIPTION
@@ -81,15 +82,16 @@ sub new {
 
 ###########################################################################
 
-=item $status->learn_spam($id)
-
-Learn the message as spam.
-
-C<$id> is an optional message-identification string, used internally
-to tag the message.  If it is C<undef>, the Message-Id of the message
-will be used.  It should be unique to that message.
-
-=cut
+# $status->learn_spam($id)
+# 
+# Learn the message as spam.
+# 
+# C<$id> is an optional message-identification string, used internally
+# to tag the message.  If it is C<undef>, the Message-Id of the message
+# will be used.  It should be unique to that message.
+# 
+# This is a semi-private API; callers should use
+# C<$spamtest-E<gt>learn($mail,$id,$isspam,$forget)> instead.
 
 sub learn_spam {
   my ($self, $id) = @_;
@@ -106,15 +108,16 @@ sub learn_spam {
 
 ###########################################################################
 
-=item $status->learn_ham($id)
-
-Learn the message as ham.
-
-C<$id> is an optional message-identification string, used internally
-to tag the message.  If it is C<undef>, the Message-Id of the message
-will be used.  It should be unique to that message.
-
-=cut
+# $status->learn_ham($id)
+# 
+# Learn the message as ham.
+# 
+# C<$id> is an optional message-identification string, used internally
+# to tag the message.  If it is C<undef>, the Message-Id of the message
+# will be used.  It should be unique to that message.
+# 
+# This is a semi-private API; callers should use
+# C<$spamtest-E<gt>learn($mail,$id,$isspam,$forget)> instead.
 
 sub learn_ham {
   my ($self, $id) = @_;
@@ -128,15 +131,16 @@ sub learn_ham {
 
 ###########################################################################
 
-=item $status->forget($id)
-
-Forget about a previously-learned message.
-
-C<$id> is an optional message-identification string, used internally
-to tag the message.  If it is C<undef>, the Message-Id of the message
-will be used.  It should be unique to that message.
-
-=cut
+# $status->forget($id)
+# 
+# Forget about a previously-learned message.
+# 
+# C<$id> is an optional message-identification string, used internally
+# to tag the message.  If it is C<undef>, the Message-Id of the message
+# will be used.  It should be unique to that message.
+# 
+# This is a semi-private API; callers should use
+# C<$spamtest-E<gt>learn($mail,$id,$isspam,$forget)> instead.
 
 sub forget {
   my ($self, $id) = @_;
