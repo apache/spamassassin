@@ -247,7 +247,7 @@ sub wanted {
   my (undef, $id, $time, $dataref) = @_;
   my $out;
 
-  my $ma = $spamtest->parse($dataref);
+  my $ma = $spamtest->parse($dataref, 1);
 
   # remove SpamAssassin markup, if present and the mail was spam
   my $stat = $ma->get_header("X-Spam-Status");
@@ -353,24 +353,32 @@ sub wanted {
   return $out;
 }
 
+# ick.  We have to go grovelling through the body parts to see if a message
+# is a report_safe-marked-up message, because a local scanner will overwrite
+# any remote scanner's X-Spam-Checker-Version header.
+#
 sub message_should_be_deencapped {
   my ($ma) = @_;
 
-  my $vers = $ma->get_header("X-Spam-Checker-Version");
-  return 1 if (!$vers);     # no header? probably not SpamAssassin encapsulation.
-  # return 1 so that old versions of SpamAssassin encapping are removed
+  if (scalar @{$ma->{body_parts}} > 0) {
+    my $firstpart = $ma->{body_parts}->[0];
+    if (!$firstpart->{headers}->{'content-type'}
+        || $firstpart->{headers}->{'content-type'} ne 'text/plain')
+    {
+      return 0;     # not a 'report_safe' encapsulation
+    }
 
-  $vers =~ s/\s+/ /gs;
-  if ($vers !~ / on (\S+)\s*$/) {
-    # X-Spam-Checker-Version has no hostname.
-    # always remove the markup, it's probably not an encapsulated message
-    # in that case
-    return 1;
-  }
+    if (scalar @{$firstpart->{raw}} < 3) { return 0; } # too short to be a report
 
-  my $hname = $1;
-  if ($hname =~ /$opt_deencap/io) {
-    return 1;
+    # grab first 2 lines
+    my $text = $firstpart->{raw}->[0] . $firstpart->{raw}->[1];
+    $text =~ s/\s+/ /gs;
+    if ($text =~ /^Spam detection software, running on the system \"(\S+)\"/) {
+      my $hname = $1;
+      if ($hname =~ /$opt_deencap/io) {
+        return 1;
+      }
+    }
   }
 
   return 0;     # a different host marked it up.  pass it through!
