@@ -1427,9 +1427,8 @@ describe APPLY_ONLINE           Apply online (with capital O)
 body FREE_INSTALL               /(?-i:F)ree installation/i
 describe FREE_INSTALL           Contains 'free installation' with capitals
 
-body FREE_PREVIEW               /(?-i:F)ree preview/i
-describe FREE_PREVIEW           Contains 'free preview' with capitals
-
+body FREE_PREVIEW		/\bfree preview\b/i
+describe FREE_PREVIEW		Free Preview
 
 # http://www.hughes-family.org/bugzilla/show_bug.cgi?id=678
 body USER_4U2                   /\b\S{0,20}(?:[^0-9][42](?:yo)?u|for-*you)(?:[.-]\S{1,20})?\@\S{1,20}\.(?:net|com|org|info)\b/
