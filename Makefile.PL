@@ -966,7 +966,7 @@ spamd/binaries.mk: spamd/configure
 conf__install:
 	-$(MKPATH) $(B_CONFDIR)
 	$(PERL) -MFile::Spec -MFile::Copy \
-	  -e "copy(qw{rules/local.cf}, qw{$(B_CONFDIR)/local.cf}) unless -f qw{$(B_CONFDIR)/local.cf};"
+	  -e "copy(q{rules/local.cf}, q{$(B_CONFDIR)/local.cf}) unless -f q{$(B_CONFDIR)/local.cf};"
 
 data__install:
 	-$(MKPATH) $(B_DATADIR)
