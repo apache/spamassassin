@@ -1,4 +1,4 @@
-# $Id: Received.pm,v 1.28 2003/08/23 02:38:17 jmason Exp $
+# $Id: Received.pm,v 1.29 2003/09/10 04:54:29 felicity Exp $
 
 # ---------------------------------------------------------------------------
 
@@ -167,6 +167,7 @@ sub parse_received_headers {
       else {
 	my @ips = $self->lookup_all_ips ($relay->{by});
 	my $found_non_rsvd = 0;
+	my $found_rsvd = 0;
 	foreach my $ip (@ips) {
 	  next if ($ip =~ /^${LOCALHOST}$/o);
 
@@ -175,10 +176,11 @@ sub parse_received_headers {
 	    $found_non_rsvd = 1;
 	  } else {
 	    dbg ("received-header: 'by' ".$relay->{by}." has reserved IP $ip");
+	    $found_rsvd = 1;
 	  }
 	}
 
-	if (!$found_non_rsvd) {
+	if ($found_rsvd && !$found_non_rsvd) {
 	  dbg ("received-header: 'by' ".$relay->{by}." has no public IPs");
 	  $inferred_as_trusted = 1;
 	}
