@@ -183,6 +183,7 @@ my %makefile = (
     },
 
     # be quite explicit about this; afaik CPAN.pm is sensible using this
+    # also see CURRENT_PM below
     'PREREQ_PM' => {
         'Digest::SHA1'  => 0,             # 2.0 is oldest tested version
         'File::Spec'    => 0.8,           # older versions lack some routines we need
@@ -234,11 +235,18 @@ my %makefile = (
     # Don't add META.yml to the MANIFEST for god's sake!
     'NO_META' => 1,
 );
+
 # That META.yml stuff was introduced with Perl 6.06_03, see
 # <http://archive.develooper.com/makemaker@perl.org/msg00922.html>
 # <http://archive.develooper.com/makemaker@perl.org/msg00984.html>
 delete $makefile{'NO_META'} if $mm_version < 6.06_03;
 
+# make sure certain optional modules are up-to-date if they are installed
+# also see PREREQ_PM above
+my %CURRENT_PM = (
+    'Net::DNS' => (RUNNING_ON_WINDOWS ? 0.46 : 0.34),
+    'Razor2::Client::Agent' => 2.40,
+);
 
 if (bool($opt{'__cruft'}, 0) and not bool($opt{'ignore_cruft'}, 0)) {
   my $error = <<OLD_CRUFT;
@@ -411,6 +419,21 @@ if ($opt{'run_bayes_sql_tests'}) {
 }
 else {
   unlink("t/bayessql.cf");
+}
+
+# check optional module versions
+while (my ($module, $version) = each %CURRENT_PM) {
+  my $eval = "require $module";
+  eval $eval;
+
+  if ($@) {
+    next;
+  }
+  elsif ($module->VERSION < $version) {
+    warn("Warning: optional module $module $version not found (" .
+	 $module->VERSION .
+	 " currently installed)");
+  }
 }
 
 #######################################################################
