@@ -5,11 +5,11 @@ SpamAssassin Corpus Policy
 SpamAssassin relies on corpus data to generate good scores.  Here's the policy
 we use to judge if a corpus is "good" or not.  It should be:
 
-  - hand-verified as "spam" and "nonspam" piles -- *not* just classified using
-    existing spam-classification algorithms (such as SpamAssassin itself)
+  - hand-verified as "spam" and "ham" (non-spam) piles -- *not* just classified
+    using existing spam-classification algorithms (such as SpamAssassin itself)
 
-  - containing a representative mix of non-spam mail -- that includes
-    commercial-sounding-but-non-spam messages, legitimate business discussion
+  - containing a representative mix of ham mail -- that includes
+    commercial-sounding-but-not-spam messages, legitimate business discussion
     (which may include talk of "sales", "marketing", "offers" etc), or verified
     opt-in mail newsletters. This is a *very* important point!
 
@@ -18,13 +18,12 @@ we use to judge if a corpus is "good" or not.  It should be:
 
   - and finally, cleaned of discussion of spam or virus messages or signatures
     (such as SpamAssassin-talk or bugtraq mailing list messages).  Even though
-    they are non-spam, these often contain snippets of code that incorrectly
+    they are ham, these often contain snippets of code that incorrectly
     trigger tests, and again will skew the results.  (Rewriting the tests to
     avoid triggering on SpamAssassin-talk messages is not realistic!)
 
 Once you run "mass-check" on a corpus, see the instructions in "CORPUS_SUBMIT"
 for details of how to verify that the top scorers are not accidental spam that
 got through.
-
 
 lastmod: Aug 12 2002 jm 
