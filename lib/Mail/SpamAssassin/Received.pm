@@ -587,6 +587,12 @@ sub parse_received_line {
       goto enough;
     }
 
+    # Received: from x71-x56-x24-5.webspeed.dk (HELO niels) (69.96.3.15) by la.mx.develooper.com (qpsmtpd/0.27-dev) with SMTP; Fri, 02 Jan 2004 19:26:52 -0800
+    # Received: from sc8-sf-sshgate.sourceforge.net (HELO sc8-sf-netmisc.sourceforge.net) (66.35.250.220) by la.mx.develooper.com (qpsmtpd/0.27-dev) with ESMTP; Fri, 02 Jan 2004 14:44:41 -0800
+    if (/^from (\S+) \(HELO (\S+)\) \((${IP_ADDRESS})\) by (\S+) \(qpsmtpd\/(\S+)\) with (ESMTP|SMTP)/) {
+      $rdns = $1; $helo = $2; $ip = $3; $by = $4; goto enough;
+    }
+
     # MiB (Michel Bouissou, 2003/11/16)
     # Moved some tests up because they might match on qmail tests, where this
     # is not qmail
