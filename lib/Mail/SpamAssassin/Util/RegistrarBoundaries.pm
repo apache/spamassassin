@@ -41,6 +41,9 @@ $VALID_TLDS = qr{ (?:
   tc|td|tf|tg|th|tj|tk|tl|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|um|us|uy|uz|va|vc|
   ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw|
 
+  # Extra from http://www.iana.org/root-whois/
+  su|
+
   # http://www.iana.org/gtld/gtld.htm
   aero| biz| com| coop| info| museum| name| net| org| pro| gov| edu| mil| int|
   
