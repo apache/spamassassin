@@ -292,30 +292,41 @@ sub harvest_dnsbl_queries {
   @waiting = grep { defined $_->[BGSOCK] } @waiting;
   $total = scalar @waiting;
 
-  while (@waiting) {
-    @left = ();
-    for my $query (@waiting) {
-      if ($self->{res}->bgisready($query->[BGSOCK])) {
-	$self->process_dnsbl_result($query);
+  # trap this loop in an eval { } block, as Net::DNS could throw
+  # die()s our way; in particular, process_dnsbl_results() has
+  # thrown die()s before (bug 3794).
+  eval {
+    while (@waiting) {
+      @left = ();
+      for my $query (@waiting) {
+        if ($self->{res}->bgisready($query->[BGSOCK])) {
+          $self->process_dnsbl_result($query);
+        }
+        else {
+          push(@left, $query);
+        }
       }
-      else {
-	push(@left, $query);
-      }
+
+      $self->{main}->call_plugins ("check_tick", { permsgstatus => $self });
+
+      last unless @left;
+      last if time >= $timeout;
+      @waiting = @left;
+      # dynamic timeout
+      my $dynamic = (int($self->{conf}->{rbl_timeout}
+                        * (1 - (($total - @left) / $total) ** 2) + 0.5)
+                    + $self->{rbl_launch});
+      $timeout = $dynamic if ($dynamic < $timeout);
+      sleep 1;
     }
+    dbg("dns: success for " . ($total - @left) . " of $total queries");
+  };
 
-    $self->{main}->call_plugins ("check_tick", { permsgstatus => $self });
-
-    last unless @left;
-    last if time >= $timeout;
-    @waiting = @left;
-    # dynamic timeout
-    my $dynamic = (int($self->{conf}->{rbl_timeout}
-		       * (1 - (($total - @left) / $total) ** 2) + 0.5)
-		   + $self->{rbl_launch});
-    $timeout = $dynamic if ($dynamic < $timeout);
-    sleep 1;
+  if ($@) {
+    dbg("dns: DNS harvest failed: $@");
+    # carry on and clean up the BGSOCKs anyway.
   }
-  dbg("dns: success for " . ($total - @left) . " of $total queries");
+
   # timeouts
   for my $query (@left) {
     my $string = '';
