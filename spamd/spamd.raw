@@ -126,22 +126,15 @@ for ( $waitedpid = 0;
 			my $username = $1;
 			my @pw = getpwnam($username);
 			my $dir = $pw[7];
-			if(-f "$dir/.spamassassin.cf")
-			{
-			    open (PREFS,"<$dir/.spamassassin.cf");
-			    $spamtest->{conf}->parse_rules(join('',<PREFS>));
-			    close(PREFS);
-			}
+
+			# Parse user scores:
+			$spamtest->read_scoresonly_config ("$dir/.spamassassin.cf");
 		    }
 		}
 	    }
 	    my $resp = "EX_OK";
 	    # Now read in message
 	    my $mail = Mail::Audit->new();
-
-	    # Parse user scores:
-	    # $spamtest->read_scoresonly_config
-	    #			(username_to_prefs_file ($username));
 
 	    # Now use copy-on-writed (hopefully) SA object
 	    my $status = $spamtest->check($mail);
@@ -182,14 +175,6 @@ sub spawn {
     open(STDIN,  "<&Client")   || die "can't dup client to stdin";
     open(STDOUT, ">&Client")   || die "can't dup client to stdout";
     exit &$coderef();
-}
-
-# e.g. "jm" -> "/home/jm/.spamassassin.prefs"
-#
-sub username_to_prefs_file {
-  my $user = shift;
-  my ($name,$pwd,$uid,$gid,$quota,$cmt,$gcos,$dir,$etc) = getpwnam ($user);
-  return "$dir/.spamassassin.prefs";
 }
 
 =head1 NAME
