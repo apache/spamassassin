@@ -24,7 +24,6 @@ use vars qw(
 );
 
 my @nm;
-my $non_word_characters='0-9\s';
 
 # settings
 $opt_a = 10;
@@ -49,12 +48,12 @@ $opt_u = 1.05;
 #         values are 1.05 or 1.1.
 
 sub classify {
-  my ($self, $input, $languages_filename) = @_;
+  my ($self, $inputptr, $languages_filename) = @_;
   my %results;
   my $maxp = $opt_t;
 
   # create ngrams for input
-  my @unknown = create_lm($input);
+  my @unknown = create_lm($inputptr);
 
   # load language models once
   if (! @nm) {
@@ -123,20 +122,20 @@ sub create_lm {
   my %ngram;
   my @sorted;
 
-  ($_) = @_;
-
-  for (split("[$non_word_characters]+")) {
-    $_ = "\000" . $_ . "\000";
-    my $len = length($_);
+  # my $non_word_characters = qr/[0-9\s]/;
+  for my $word (split(/[0-9\s]+/, ${$_[0]}))
+  {
+    $word = "\000" . $word . "\000";
+    my $len = length($word);
     my $flen = $len;
     my $i;
     for ($i = 0; $i < $flen; $i++) {
       $len--;
-      $ngram{substr($_, $i, 1)}++;
-      ($len < 1) ? next : $ngram{substr($_, $i, 2)}++;
-      ($len < 2) ? next : $ngram{substr($_, $i, 3)}++;
-      ($len < 3) ? next : $ngram{substr($_, $i, 4)}++;
-      if ($len > 3) { $ngram{substr($_, $i, 5)}++ };
+      $ngram{substr($word, $i, 1)}++;
+      ($len < 1) ? next : $ngram{substr($word, $i, 2)}++;
+      ($len < 2) ? next : $ngram{substr($word, $i, 3)}++;
+      ($len < 3) ? next : $ngram{substr($word, $i, 4)}++;
+      if ($len > 3) { $ngram{substr($word, $i, 5)}++ };
     }
   }
 
