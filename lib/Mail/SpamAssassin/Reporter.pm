@@ -70,19 +70,33 @@ sub razor_report {
   my @msg = split (/^/m, $fulltext);
   my $config = $self->{main}->{conf}->{razor_config};
   my %options = (
-    # 'debug'	=> 1
+    'debug'     => $Mail::SpamAssassin::DEBUG
   );
   my $response;
 
   eval q{
-    use Razor::Client;
-    use Razor::Signature; 
-    my $client = new Razor::Client ($config, %options);
-    $response = $client->report ([@msg]);
-    dbg ("Razor: spam reported, response is \"$response\".");
-  1;} or warn "razor-report failed: $! $@";
+    require Razor::Client;
+    require Razor::Signature;
+    local ($^W) = 0;            # argh, warnings in Razor
 
-  if ($response) { return 1; }
+    my $rc = Razor::Client->new ($config, %options);
+
+    if ($Razor::Client::VERSION == "1.12") {
+      my $respary = $rc->report ('spam' => \@msg);
+      for my $resp (@$respary) { $response .= $resp." "; }
+    } else {
+      $response = $rc->report ([@msg]);
+    }
+
+    dbg ("Razor: spam reported, response is \"$response\".");
+  };
+  
+  if ($@) {
+    warn "razor-report failed: $! $@";
+  } elsif ($response+0) {
+    return 1;
+  }
+
   return 0;
 }
 
