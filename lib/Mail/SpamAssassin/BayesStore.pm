@@ -721,7 +721,10 @@ sub tok_put {
     return;
   }
 
-  my $exists_already = exists $self->{db_toks}->{$tok};
+  # use defined() rather than exists(); the latter is not supported
+  # by NDBM_File, believe it or not.  Using defined() did not
+  # indicate any noticeable speed hit in my testing. (Mar 31 2003 jm)
+  my $exists_already = defined $self->{db_toks}->{$tok};
 
   if ($ts == 0 && $th == 0) {
     if ($exists_already) { # If the token exists, lower the token count

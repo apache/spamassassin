@@ -216,7 +216,10 @@ sub new {
 sub finish {
   my $self = shift;
   if (!$self->{conf}->{use_bayes}) { return; }
-  $self->{store}->untie_db();
+
+  if (!$self->{main}->{learn_caller_will_untie}) {
+    $self->{store}->untie_db();
+  }
 }
 
 ###########################################################################
