@@ -479,6 +479,7 @@ int process_message(const char *hostname, int port, char *username, int max_size
 
     if(CHECK_ONLY && ESC_PASSTHROUGHRAW == exstatus)
     {
+	printf("0/0\n");
 	exstatus = EX_OK;
     }
 
