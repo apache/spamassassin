@@ -25,23 +25,228 @@
 # </@LICENSE>
 #
 ########################################################################
+
+########################################################################
 # rules to detect certain generally unnecessary encodings in HTML
 
-rawbody T_ENTITY_WHITESPACE_R	/\&\#(?:10|32)\;/
-body T_ENTITY_WHITESPACE_B	/\&\#(?:10|32)\;/
-meta T_ENTITY_WHITESPACE_M	(T_ENTITY_WHITESPACE_R || T_ENTITY_WHITESPACE_B)
+# newline, space
+rawbody T_ENTITY_SPACE_1	/\&\#(?:10|32)\;/
+rawbody T_ENTITY_SPACE_2	/\&\#0*(?:10|32)\;/
+# tab, newline, space
+rawbody T_ENTITY_SPACE_3	/\&\#(?:9|10|32)\;/
+rawbody T_ENTITY_SPACE_4	/\&\#0*(?:9|10|32)\;/
 
-rawbody T_ENTITY_ALPHANUM_R	/\&\#(?:4[89]|5[0-7]|6[5-9][78]\d|9[0789]|1[01]\d|12[012])\;/
-body T_ENTITY_ALPHANUM_B	/\&\#(?:4[89]|5[0-7]|6[5-9][78]\d|9[0789]|1[01]\d|12[012])\;/
-meta T_ENTITY_ALPHANUM_M	(T_ENTITY_ALPHANUM_R || T_ENTITY_ALPHANUM_B)
+# 0-9, A-Z, or a-z
+rawbody T_ENTITY_ALPHANUM_1	/\&\#(?:4[89]|5[0-7]|6[5-9][78]\d|9[0789]|1[01]\d|12[012])\;/
+rawbody T_ENTITY_ALPHANUM_2	/\&\#0*(?:4[89]|5[0-7]|6[5-9][78]\d|9[0789]|1[01]\d|12[012])\;/
 
-rawbody T_ENTITY_OTHER1_R	/\&\#(?:46|47)\;/
-body T_ENTITY_OTHER1_B		/\&\#(?:46|47)\;/
-meta T_ENTITY_OTHER1_M		(T_ENTITY_OTHER1_R || T_ENTITY_OTHER1_B)
+# . /
+rawbody T_ENTITY_OTHER_1	/\&\#(?:46|47)\;/
+rawbody T_ENTITY_OTHER_2	/\&\#0*(?:46|47)\;/
+# ! ' ( . / ]
+rawbody T_ENTITY_OTHER_3	/\&\#(?:33|39|40|46|47)\;/
+rawbody T_ENTITY_OTHER_4	/\&\#0*(?:33|39|40|46|47)\;/
 
-rawbody T_ENTITY_OTHER2_R	/\&\#(?:33|39|40|46|47)\;/
-body T_ENTITY_OTHER2_B		/\&\#(?:33|39|40|46|47)\;/
-meta T_ENTITY_OTHER2_M		(T_ENTITY_OTHER2_R || T_ENTITY_OTHER2_B)
+# test for leading zeroes
+rawbody T_ENTITY_ZEROES		/\&\#0+[1-9]\d*\;/
+
+# test all one byte characters except for 0-9 A-Z a-z
+rawbody T_ENTITY_DEC_0		/\&\#0\;/
+rawbody T_ENTITY_DEC_1		/\&\#1\;/
+rawbody T_ENTITY_DEC_2		/\&\#2\;/
+rawbody T_ENTITY_DEC_3		/\&\#3\;/
+rawbody T_ENTITY_DEC_4		/\&\#4\;/
+rawbody T_ENTITY_DEC_5		/\&\#5\;/
+rawbody T_ENTITY_DEC_6		/\&\#6\;/
+rawbody T_ENTITY_DEC_7		/\&\#7\;/
+rawbody T_ENTITY_DEC_8		/\&\#8\;/
+rawbody T_ENTITY_DEC_9		/\&\#9\;/
+rawbody T_ENTITY_DEC_10		/\&\#10\;/
+rawbody T_ENTITY_DEC_11		/\&\#11\;/
+rawbody T_ENTITY_DEC_12		/\&\#12\;/
+rawbody T_ENTITY_DEC_13		/\&\#13\;/
+rawbody T_ENTITY_DEC_14		/\&\#14\;/
+rawbody T_ENTITY_DEC_15		/\&\#15\;/
+rawbody T_ENTITY_DEC_16		/\&\#16\;/
+rawbody T_ENTITY_DEC_17		/\&\#17\;/
+rawbody T_ENTITY_DEC_18		/\&\#18\;/
+rawbody T_ENTITY_DEC_19		/\&\#19\;/
+rawbody T_ENTITY_DEC_20		/\&\#20\;/
+rawbody T_ENTITY_DEC_21		/\&\#21\;/
+rawbody T_ENTITY_DEC_22		/\&\#22\;/
+rawbody T_ENTITY_DEC_23		/\&\#23\;/
+rawbody T_ENTITY_DEC_24		/\&\#24\;/
+rawbody T_ENTITY_DEC_25		/\&\#25\;/
+rawbody T_ENTITY_DEC_26		/\&\#26\;/
+rawbody T_ENTITY_DEC_27		/\&\#27\;/
+rawbody T_ENTITY_DEC_28		/\&\#28\;/
+rawbody T_ENTITY_DEC_29		/\&\#29\;/
+rawbody T_ENTITY_DEC_30		/\&\#30\;/
+rawbody T_ENTITY_DEC_31		/\&\#31\;/
+rawbody T_ENTITY_DEC_32		/\&\#32\;/
+rawbody T_ENTITY_DEC_33		/\&\#33\;/
+rawbody T_ENTITY_DEC_34		/\&\#34\;/
+rawbody T_ENTITY_DEC_35		/\&\#35\;/
+rawbody T_ENTITY_DEC_36		/\&\#36\;/
+rawbody T_ENTITY_DEC_37		/\&\#37\;/
+rawbody T_ENTITY_DEC_38		/\&\#38\;/
+rawbody T_ENTITY_DEC_39		/\&\#39\;/
+rawbody T_ENTITY_DEC_40		/\&\#40\;/
+rawbody T_ENTITY_DEC_41		/\&\#41\;/
+rawbody T_ENTITY_DEC_42		/\&\#42\;/
+rawbody T_ENTITY_DEC_43		/\&\#43\;/
+rawbody T_ENTITY_DEC_44		/\&\#44\;/
+rawbody T_ENTITY_DEC_45		/\&\#45\;/
+rawbody T_ENTITY_DEC_46		/\&\#46\;/
+rawbody T_ENTITY_DEC_47		/\&\#47\;/
+rawbody T_ENTITY_DEC_58		/\&\#58\;/
+rawbody T_ENTITY_DEC_59		/\&\#59\;/
+rawbody T_ENTITY_DEC_60		/\&\#60\;/
+rawbody T_ENTITY_DEC_61		/\&\#61\;/
+rawbody T_ENTITY_DEC_62		/\&\#62\;/
+rawbody T_ENTITY_DEC_63		/\&\#63\;/
+rawbody T_ENTITY_DEC_64		/\&\#64\;/
+rawbody T_ENTITY_DEC_91		/\&\#91\;/
+rawbody T_ENTITY_DEC_92		/\&\#92\;/
+rawbody T_ENTITY_DEC_93		/\&\#93\;/
+rawbody T_ENTITY_DEC_94		/\&\#94\;/
+rawbody T_ENTITY_DEC_95		/\&\#95\;/
+rawbody T_ENTITY_DEC_96		/\&\#96\;/
+rawbody T_ENTITY_DEC_123		/\&\#123\;/
+rawbody T_ENTITY_DEC_124		/\&\#124\;/
+rawbody T_ENTITY_DEC_125		/\&\#125\;/
+rawbody T_ENTITY_DEC_126		/\&\#126\;/
+rawbody T_ENTITY_DEC_127		/\&\#127\;/
+rawbody T_ENTITY_DEC_128		/\&\#128\;/
+rawbody T_ENTITY_DEC_129		/\&\#129\;/
+rawbody T_ENTITY_DEC_130		/\&\#130\;/
+rawbody T_ENTITY_DEC_131		/\&\#131\;/
+rawbody T_ENTITY_DEC_132		/\&\#132\;/
+rawbody T_ENTITY_DEC_133		/\&\#133\;/
+rawbody T_ENTITY_DEC_134		/\&\#134\;/
+rawbody T_ENTITY_DEC_135		/\&\#135\;/
+rawbody T_ENTITY_DEC_136		/\&\#136\;/
+rawbody T_ENTITY_DEC_137		/\&\#137\;/
+rawbody T_ENTITY_DEC_138		/\&\#138\;/
+rawbody T_ENTITY_DEC_139		/\&\#139\;/
+rawbody T_ENTITY_DEC_140		/\&\#140\;/
+rawbody T_ENTITY_DEC_141		/\&\#141\;/
+rawbody T_ENTITY_DEC_142		/\&\#142\;/
+rawbody T_ENTITY_DEC_143		/\&\#143\;/
+rawbody T_ENTITY_DEC_144		/\&\#144\;/
+rawbody T_ENTITY_DEC_145		/\&\#145\;/
+rawbody T_ENTITY_DEC_146		/\&\#146\;/
+rawbody T_ENTITY_DEC_147		/\&\#147\;/
+rawbody T_ENTITY_DEC_148		/\&\#148\;/
+rawbody T_ENTITY_DEC_149		/\&\#149\;/
+rawbody T_ENTITY_DEC_150		/\&\#150\;/
+rawbody T_ENTITY_DEC_151		/\&\#151\;/
+rawbody T_ENTITY_DEC_152		/\&\#152\;/
+rawbody T_ENTITY_DEC_153		/\&\#153\;/
+rawbody T_ENTITY_DEC_154		/\&\#154\;/
+rawbody T_ENTITY_DEC_155		/\&\#155\;/
+rawbody T_ENTITY_DEC_156		/\&\#156\;/
+rawbody T_ENTITY_DEC_157		/\&\#157\;/
+rawbody T_ENTITY_DEC_158		/\&\#158\;/
+rawbody T_ENTITY_DEC_159		/\&\#159\;/
+rawbody T_ENTITY_DEC_160		/\&\#160\;/
+rawbody T_ENTITY_DEC_161		/\&\#161\;/
+rawbody T_ENTITY_DEC_162		/\&\#162\;/
+rawbody T_ENTITY_DEC_163		/\&\#163\;/
+rawbody T_ENTITY_DEC_164		/\&\#164\;/
+rawbody T_ENTITY_DEC_165		/\&\#165\;/
+rawbody T_ENTITY_DEC_166		/\&\#166\;/
+rawbody T_ENTITY_DEC_167		/\&\#167\;/
+rawbody T_ENTITY_DEC_168		/\&\#168\;/
+rawbody T_ENTITY_DEC_169		/\&\#169\;/
+rawbody T_ENTITY_DEC_170		/\&\#170\;/
+rawbody T_ENTITY_DEC_171		/\&\#171\;/
+rawbody T_ENTITY_DEC_172		/\&\#172\;/
+rawbody T_ENTITY_DEC_173		/\&\#173\;/
+rawbody T_ENTITY_DEC_174		/\&\#174\;/
+rawbody T_ENTITY_DEC_175		/\&\#175\;/
+rawbody T_ENTITY_DEC_176		/\&\#176\;/
+rawbody T_ENTITY_DEC_177		/\&\#177\;/
+rawbody T_ENTITY_DEC_178		/\&\#178\;/
+rawbody T_ENTITY_DEC_179		/\&\#179\;/
+rawbody T_ENTITY_DEC_180		/\&\#180\;/
+rawbody T_ENTITY_DEC_181		/\&\#181\;/
+rawbody T_ENTITY_DEC_182		/\&\#182\;/
+rawbody T_ENTITY_DEC_183		/\&\#183\;/
+rawbody T_ENTITY_DEC_184		/\&\#184\;/
+rawbody T_ENTITY_DEC_185		/\&\#185\;/
+rawbody T_ENTITY_DEC_186		/\&\#186\;/
+rawbody T_ENTITY_DEC_187		/\&\#187\;/
+rawbody T_ENTITY_DEC_188		/\&\#188\;/
+rawbody T_ENTITY_DEC_189		/\&\#189\;/
+rawbody T_ENTITY_DEC_190		/\&\#190\;/
+rawbody T_ENTITY_DEC_191		/\&\#191\;/
+rawbody T_ENTITY_DEC_192		/\&\#192\;/
+rawbody T_ENTITY_DEC_193		/\&\#193\;/
+rawbody T_ENTITY_DEC_194		/\&\#194\;/
+rawbody T_ENTITY_DEC_195		/\&\#195\;/
+rawbody T_ENTITY_DEC_196		/\&\#196\;/
+rawbody T_ENTITY_DEC_197		/\&\#197\;/
+rawbody T_ENTITY_DEC_198		/\&\#198\;/
+rawbody T_ENTITY_DEC_199		/\&\#199\;/
+rawbody T_ENTITY_DEC_200		/\&\#200\;/
+rawbody T_ENTITY_DEC_201		/\&\#201\;/
+rawbody T_ENTITY_DEC_202		/\&\#202\;/
+rawbody T_ENTITY_DEC_203		/\&\#203\;/
+rawbody T_ENTITY_DEC_204		/\&\#204\;/
+rawbody T_ENTITY_DEC_205		/\&\#205\;/
+rawbody T_ENTITY_DEC_206		/\&\#206\;/
+rawbody T_ENTITY_DEC_207		/\&\#207\;/
+rawbody T_ENTITY_DEC_208		/\&\#208\;/
+rawbody T_ENTITY_DEC_209		/\&\#209\;/
+rawbody T_ENTITY_DEC_210		/\&\#210\;/
+rawbody T_ENTITY_DEC_211		/\&\#211\;/
+rawbody T_ENTITY_DEC_212		/\&\#212\;/
+rawbody T_ENTITY_DEC_213		/\&\#213\;/
+rawbody T_ENTITY_DEC_214		/\&\#214\;/
+rawbody T_ENTITY_DEC_215		/\&\#215\;/
+rawbody T_ENTITY_DEC_216		/\&\#216\;/
+rawbody T_ENTITY_DEC_217		/\&\#217\;/
+rawbody T_ENTITY_DEC_218		/\&\#218\;/
+rawbody T_ENTITY_DEC_219		/\&\#219\;/
+rawbody T_ENTITY_DEC_220		/\&\#220\;/
+rawbody T_ENTITY_DEC_221		/\&\#221\;/
+rawbody T_ENTITY_DEC_222		/\&\#222\;/
+rawbody T_ENTITY_DEC_223		/\&\#223\;/
+rawbody T_ENTITY_DEC_224		/\&\#224\;/
+rawbody T_ENTITY_DEC_225		/\&\#225\;/
+rawbody T_ENTITY_DEC_226		/\&\#226\;/
+rawbody T_ENTITY_DEC_227		/\&\#227\;/
+rawbody T_ENTITY_DEC_228		/\&\#228\;/
+rawbody T_ENTITY_DEC_229		/\&\#229\;/
+rawbody T_ENTITY_DEC_230		/\&\#230\;/
+rawbody T_ENTITY_DEC_231		/\&\#231\;/
+rawbody T_ENTITY_DEC_232		/\&\#232\;/
+rawbody T_ENTITY_DEC_233		/\&\#233\;/
+rawbody T_ENTITY_DEC_234		/\&\#234\;/
+rawbody T_ENTITY_DEC_235		/\&\#235\;/
+rawbody T_ENTITY_DEC_236		/\&\#236\;/
+rawbody T_ENTITY_DEC_237		/\&\#237\;/
+rawbody T_ENTITY_DEC_238		/\&\#238\;/
+rawbody T_ENTITY_DEC_239		/\&\#239\;/
+rawbody T_ENTITY_DEC_240		/\&\#240\;/
+rawbody T_ENTITY_DEC_241		/\&\#241\;/
+rawbody T_ENTITY_DEC_242		/\&\#242\;/
+rawbody T_ENTITY_DEC_243		/\&\#243\;/
+rawbody T_ENTITY_DEC_244		/\&\#244\;/
+rawbody T_ENTITY_DEC_245		/\&\#245\;/
+rawbody T_ENTITY_DEC_246		/\&\#246\;/
+rawbody T_ENTITY_DEC_247		/\&\#247\;/
+rawbody T_ENTITY_DEC_248		/\&\#248\;/
+rawbody T_ENTITY_DEC_249		/\&\#249\;/
+rawbody T_ENTITY_DEC_250		/\&\#250\;/
+rawbody T_ENTITY_DEC_251		/\&\#251\;/
+rawbody T_ENTITY_DEC_252		/\&\#252\;/
+rawbody T_ENTITY_DEC_253		/\&\#253\;/
+rawbody T_ENTITY_DEC_254		/\&\#254\;/
+rawbody T_ENTITY_DEC_255		/\&\#255\;/
+
+########################################################################
 
 # similar concept for Delphi.com.  Was an ISP, now a car company!
 # I think their username format is "First.Last"; requiring 2 digits
