@@ -328,7 +328,6 @@ describe MISSING_HEADERS	Missing To: header
 header RATWARE ALL =~ /(?:4\.\.72\.1712\.3|ACE Contact Manager|Aristotle Mail|Avalanche|Calypso|clansoft|Cognigen|Cold Fusion|Cyber-Bomber|Crescent|DiffondiCool|Dynamic Mail Server|CTMailer|E-Broadcaster|E-mail Magnet|Ellipse Bulk Emailer|EmailBlaster|Emailer.Platinum|eMerge|Extractor|Floodgate|FlashSend|Goldrush|Group Mail|Internet Marketing|Mailcast|MailKing|MassE-Mail|massmail\.pl|Matchmaker|NetMailer|News Breaker|pop3.report|RamoMail|Ready Aim|Shopping.Planet|Stalker.s|TBBS\/TIGER|TOO BAD|TotalMailTURBO Mail|V3,1,6,1|V3,1,2,0|V3,2,2,0|V.null.\.1712\.3|WindoZ|WinNT.s.Blat|WorldMerge|YMR)/
 
 describe RATWARE 		Bulk email software fingerprints found in headers
-score RATWARE			2.0
 
 # contrib: Craig (total regexp wizardry here ;)
 header SUSPICIOUS_RECIPS        To =~ /(@[-a-z0-9_.]+).*(?:\1.*){9,}/is
@@ -606,6 +605,8 @@ body STOCK_PICK			/STOCK PICK/
 describe STOCK_PICK		Offers a stock pick
 body STOCK_ALERT		/stock alert/i
 describe STOCK_ALERT		Offers a stock alert
+body MICRO_CAP_WARNING		/Investing in micro-cap securities is highly speculative/i
+describe MICRO_CAP_WARNING	SEC-mandated penny-stock warning -- thanks SEC
 
 # some frequently-advertised URLs
 body E_WEBHOSTCENTRAL_URL	/http:\/\/.*e-webhostcentral\.com/i
@@ -637,7 +638,6 @@ describe INCREASE_SALES		Offers increased sales
 # (contrib: Matt Sergeant)
 body LARGE_HEX			/^\s*[0-9a-fA-F]{40,}/
 describe LARGE_HEX		Contains a large block of hexadecimal code
-score LARGE_HEX			2
 
 # somehow "/name.*\bcredit.?card\b/is" won't match, even if
 # it's there.  *boggle* (contrib: WW)
@@ -1109,6 +1109,9 @@ score TO_INVESTORS                   2.0
 score WWW_AUTOREMOVE_COM             3.0
 score WWW_DIRECTFORCEMARKETING_COM   4.0
 score WWW_NETSITESFORFREE_NET        2.9
+score RATWARE			     2.0
+score LARGE_HEX			     2.0
+score MICRO_CAP_WARNING		     2.0
 score WWW_REMOVEYOU_COM              2.1
 score X_EM_VER_PRESENT               0.4
 score X_MAILER_GIBBERISH             4.0
