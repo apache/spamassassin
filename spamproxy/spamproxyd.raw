@@ -28,6 +28,8 @@ my $maxperchild = 10;
 #
 # --Ian R. Justman <ianj@esper.net>, 11/21/2001
 
+use Sys::Syslog qw(:DEFAULT setlogsock);
+
 use Carp;
 use Net::SMTP::Server;
 use Net::SMTP::Server::Client;
@@ -64,10 +66,11 @@ GetOptions("children=n" => \$children,
 die $syntax unless @ARGV == 2;
 my ($srcaddr, $srcport) = split /:/, $ARGV[0];
 my ($dstaddr, $dstport) = split /:/, $ARGV[1];
+my $spamaddr;
 if(@ARGV == 3) {
-  my $spamaddr = $ARGV[2];
+  $spamaddr = $ARGV[2];
 } else {
-  my $spamaddr = "recipient";
+  $spamaddr = "recipient";
 }
 
 print "Trying to start using source $srcaddr port $srcport, " .
@@ -166,6 +169,7 @@ while($conn = $server->accept()) {
 
     my $status = $spamtest->check($mail);
     if ($status->is_spam ()) {
+        $msg = sprintf("    SPAM[%6.1f]: %s", $status->get_hits(), $status->get_names_of_tests_hit());
         $status->rewrite_mail ();
         $message = join ("",$mail->header(),@{$mail->body()});
         if($spamaddr ne "recipient") {
@@ -175,8 +179,14 @@ while($conn = $server->accept()) {
           $recips = $client->{TO};
         }
     } else {
+        $msg = sprintf("NOT_SPAM[%6.1f]: %s", $status->get_hits(), $status->get_names_of_tests_hit());
         $recips = $client->{TO};
     }
+
+    setlogsock 'unix';
+    openlog('spamassassin', 'nowait', 'local3');
+    syslog('notice', $msg);
+    closelog();
 
     $status->finish();
 
