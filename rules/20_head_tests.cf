@@ -484,9 +484,10 @@ describe MISSING_OUTLOOK_NAME	Message looks like Outlook, but isn't
 
 header __IS_EXCH		X-MimeOLE =~ /Produced By Microsoft Exchange V/
 
-header   __HAS_X_PRIORITY       exists:X-Priority
-meta     PRIORITY_NO_NAME	((__HAS_X_PRIORITY || __HAS_MSMAIL_PRI) && !__HAS_X_MAILER && !__IS_EXCH)
-describe PRIORITY_NO_NAME	Message has priority setting, but no X-Mailer
+header __HAS_X_PRIORITY 	exists:X-Priority
+header __USER_AGENT             exists:User-Agent
+meta PRIORITY_NO_NAME		((__HAS_X_PRIORITY || __HAS_MSMAIL_PRI) && !__HAS_X_MAILER && !__IS_EXCH && !__USER_AGENT)
+describe PRIORITY_NO_NAME	Message has priority, but no X-Mailer/User-Agent
 
 header SUBJ_AS_SEEN		Subject =~ /\bAs Seen/i
 describe SUBJ_AS_SEEN		Subject contains "As Seen"
@@ -606,11 +607,6 @@ describe SUBJECT_APPROVED	Subject talks about being approved
 
 header SUBJ_HAS_TIME_ID         Subject =~ /\sTime[: ]+\d+:\d+:\d+ [AP]M\s*$/i
 describe SUBJ_HAS_TIME_ID       Subject has a Time ID
-
-header __OPT_HEADER_SUBJ	ALL =~ /^(?:Resent-)?Subject:.*opt.?(in|out|oem|ed|ion-in|[\d@])(?:\b|\d|\@)/im
-header __OPT_HEADER_ALL		ALL =~ /opt.?(?:in|out|oem|ed|ion-in|[\d@])(?:\b|\d|\@)/i
-meta OPT_HEADER			(__OPT_HEADER_ALL && !__OPT_HEADER_SUBJ)
-describe OPT_HEADER		Headers include an "opt"ed phrase
 
 # Most/all of these require that From addresses do not start with numbers.
 header FROM_NUM_AT_WEBMAIL	From:addr =~ /^\d\S+\@(?:msn\.com|flashmail\.com|mailexcite\.com|prodigy\.net|yahoo\.\S+|hotmail\.com|eudoramail\.com|aol\.com|excite\.com|email\.com|earthlink\.net|geocities\.com|hknetmail\.com|angelfire\.com)/i
@@ -750,3 +746,16 @@ describe X_ORIG_IP_NOT_IPV4	X-Originating-IP doesn't look like IPv4 address
 # fake: "bzgrdag, upaeqehv"
 header X_AUTH_WARN_FAKED	X-Authentication-Warning !~ /^(\S+\.\S+): / [if-unset: host.example.net: foo owned process doing -bs]
 describe X_AUTH_WARN_FAKED	X-Authentication-Warning header looks faked
+
+# Domain no longer exists according to administrator
+header FAKE_OUTBLAZE_RCVD	Received =~ /\.mr\.outblaze\.com/
+describe FAKE_OUTBLAZE_RCVD	Received header contains faked 'mr.outblaze.com'
+
+# Domain no longer used for email according to administrator
+header FAKE_FROM_ALTAVISTA	From:addr =~ /\@altavista\.com$/i
+describe FAKE_FROM_ALTAVISTA	From header contains faked 'altavista.com'
+header FAKE_REPTO_ALTAVISTA	Reply-To:addr =~ /\@altavista\.com$/i
+describe FAKE_REPTO_ALTAVISTA	Reply-To header contains faked 'altavista.com'
+header FAKE_ENVFROM_ALTAVISTA	EnvelopeFrom =~ /\@altavista\.com$/i
+describe FAKE_ENVFROM_ALTAVISTA	Envelope sender contains faked 'altavista.com'
+

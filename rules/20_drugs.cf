@@ -34,6 +34,21 @@ require_version @@VERSION@@
 header SUBJECT_DRUG_ED		Subject =~ /viagra/i
 describe SUBJECT_DRUG_ED	Subject includes "viagra"
 
+header SUBJECT_DRUG_GAP_V	Subject =~ /v.{0,2}a.{0,2}l.{0,2}i.{0,2}u.{0,2}m/i
+describe SUBJECT_DRUG_GAP_V	Subject contains a gappy version of 'valium'
+
+header SUBJECT_DRUG_GAP_S	Subject =~ /\bs.{0,1}o.{0,1}m.{0,1}a\b/i
+describe SUBJECT_DRUG_GAP_S	Subject contains a gappy version of 'soma'
+
+header SUBJECT_DRUG_GAP_X	Subject =~ /x.{0,2}a.{0,2}n.{0,2}a.{0,2}x/i
+describe SUBJECT_DRUG_GAP_X	Subject contains a gappy version of 'xanax'
+
+header SUBJECT_GAP_DRUG_ED_V	Subject =~ /v.{0,2}i.{0,2}a.{0,2}g.{0,2}r.{0,2}a/i
+describe SUBJECT_GAP_DRUG_ED_V	Subject contains a gappy version of 'viagra'
+
+header SUBJECT_DRUG_GAP_P	Subject =~ /p.{0,2}h.{0,6}t.{0,2}e.{0,2}r.{0,2}m/i
+describe SUBJECT_DRUG_GAP_P	Subject contains a gappy version of 'phentermine'
+
 ###########################################################################
 # body rules
 
@@ -44,6 +59,9 @@ describe DRUG_ED_CAPS		Mentions an E.D. drug
 body DRUG_ED_COMBO		/\bviagra .{0,15}(?:phentermine|xenical|tenuate|zyban|propecia)\b/i
 describe DRUG_ED_COMBO		Viagra and other drugs
 
+body DRUG_ED_SILD		/\bsildenafil\b/i
+describe DRUG_ED_SILD		Talks about an E.D. drug using its chemical name
+
 body DRUG_ED_GENERIC		/Generic Viagra/
 describe DRUG_ED_GENERIC	Mentions Generic Viagra
 
@@ -51,10 +69,10 @@ body DRUG_ED_HERBAL		/\bherbal v(?:iagra)?\b/i
 describe DRUG_ED_HERBAL		Plugs "Herbal Viagra"
 
 body DRUG_ED_ONLINE		/\bviagra .{0,25}(?:express|online|overnight)/i
-describe DRUG_ED_ONLINE		Fast Viagra Delivery
-
+describe DRUG_ED_ONLINE		Fast Viagra Delivery 
 body DEEP_DISC_MEDS		/\bdeep discount med(?:s|ications)\b/i
 describe DEEP_DISC_MEDS		Deep discount medications
 
 body ONLINE_PHARMACY		/\bonline pharmacy|\b(?:drugs|medications) online/i
 describe ONLINE_PHARMACY	Online Pharmacy
+
