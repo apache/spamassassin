@@ -27,7 +27,7 @@ sub cmdline_run {
 
   GetOptions(
              'whitelist-factory=s'              => \$opt{'whitelist-factory'},
-             'config-file|config-dir|c|C=s'     => \$opt{'config-file'},
+             'config-file|C=s'                  => \$opt{'config-file'},
              'prefs-file|p=s'                   => \$opt{'prefs-file'},
 
              # arguments from mass-check.  don't add more unless you're
