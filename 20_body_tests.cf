@@ -231,13 +231,13 @@ describe BUGGY_CGI		Broken CGI script message
 
 # these are now full tests instead of body tests, to catch QP-encoded
 # split lines
-body SENT_IN_COMPLIANCE		/(e.?mail|message) .{0,10}sen[dt] in (\w{1,10} )?compliance (?:of|with)/i
+body SENT_IN_COMPLIANCE		/(?:e.?mail|message) .{0,10}sen[dt] in (?:\w{1,10} )?compliance (?:of|with)/i
 describe SENT_IN_COMPLIANCE	Claims compliance with spam regulations
-body PARA_A_2_C_OF_1618		/Paragraph *.a.{0,10}2.{0,10}C. of S. 1618/i
+body PARA_A_2_C_OF_1618		/Paragraph *.a.{0,10}2.{0,10}C\. of S\. 1618/i
 describe PARA_A_2_C_OF_1618	Claims compliance with Senate Bill 1618
-body BILL_1618			/Bill.{0,10}1618.{0,10}TITLE.{0,10}(III|\#3)/i
+body BILL_1618			/Bill.{0,10}1618.{0,10}TITLE.{0,10}(?:III|\#3)/i
 describe BILL_1618		Claims compliance with Senate Bill 1618
-body S_1618			/S..{0,10}1618.{0,10}-.{0,10}SECTION.{0,10}301/i
+body S_1618			/S\..{0,10}1618.{0,10}-.{0,10}SECTION.{0,10}301/i
 describe S_1618			Claims compliance with Senate Bill 1618
 body SECTION_301		/SECTION.{0,10}301/i
 describe SECTION_301		Claims compliance with spam regulations
@@ -1029,7 +1029,7 @@ describe WINNER_CAP             Winner in Caps
 body WINNER                     /\byou.{0,4} a winner|register to win/i
 describe WINNER                 Claims you are a winner
 
-body YOU_WON                    /\byou(?:'ve| have)? won(?!'|\w)/i
+body YOU_WON                    /\byou(?:\'ve| have)? won[^\'\w]/i
 describe YOU_WON                Who really wins?
 
 body PROMOTION		        /\bspecial promotion\b/i
