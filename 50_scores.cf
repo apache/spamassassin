@@ -822,14 +822,13 @@ score PSYCHIC 0
 score OUR_PUBLICATIONS 0
 score SUBJECT_IS_IN_REVIEW 0
 score RATWARE_BANG_HASH 0
+score EVITE -2.900 -0.488 -2.900 -2.900
 
 # End of GA-evolved scores.
 
 # Scores for tests that are scored manually or with isolated GA runs.  Most
 # are net tests, userconf tests, tests occuring with very low frequency, or
 # tests with many false positives.
-#
-# The scores from isolated GA runs have two digits after the decimal point.
 
 # GTUBE - Generic Test for Unsollicited Bulk Email
 score GTUBE 1000
@@ -837,14 +836,26 @@ score GTUBE 1000
 # HTML control test
 score HTML_MESSAGE 0.167 0.100 0.167 0.167
 
+#
 # miscellaneous network tests
+#
 
 score BAD_HELO_WARNING 0 2.290 0 0.001
 score NO_MX_FOR_FROM 0 1.265 0 0.001
 score ROUND_THE_WORLD 0 2.497 0 0.001
 
+#
 # message digest tests
+#
 
+## Vipul's Razor: http://razor.sourceforge.net/
+
+# Razor v1 is deprecated.  People should use Razor v2 instead.
+# This test will be removed in future versions of SpamAssassin.
+score RAZOR_CHECK 0
+
+# RAZOR2_CF had problems in the first mass-check run, so they're only
+# enabled for scoreset 3...
 score RAZOR2_CHECK 0 2.029 0 0.001
 score RAZOR2_CF_RANGE_01_10 0 0 0 0.001
 score RAZOR2_CF_RANGE_11_20 0 0 0 0.001
@@ -856,13 +867,17 @@ score RAZOR2_CF_RANGE_61_70 0 0 0 0.001
 score RAZOR2_CF_RANGE_71_80 0 0 0 0.001
 score RAZOR2_CF_RANGE_81_90 0 0 0 0.001
 score RAZOR2_CF_RANGE_91_100 0 0 0 0.001
+
+## Distributed Checksum Clearinghouse: http://www.rhyolite.com/anti-spam/dcc/
 score DCC_CHECK 0 3.126 0 0.001
+
+## Pyzor: http://pyzor.sourceforge.net/
 score PYZOR_CHECK 0 4.400 0 0.001
 
-# Razor v1 is no longer used by default
-score RAZOR_CHECK 0
 
-# DNS blacklists
+#
+# DNS Blacklists
+#
 
 score RCVD_IN_RELAYS_ORDB_ORG 0 0.001 0 0.001
 score RCVD_IN_OSIRUSOFT_COM 0 0.562 0 0.001
@@ -884,6 +899,22 @@ score RCVD_IN_NJABL 0 0.968 0 0.001
 score X_NJABL_OPEN_PROXY 0 0.866 0 0.001
 score X_NJABL_DIALUP 0 0.205 0 0.001
 
+# unscored by default -- commercial/donation services.  If you pay for
+# these, give them a score so they will be checked.
+#
+# 0.5 to 1.0 is probably good for the DUL scores
+# 1.5 to 2.0 is probably good for the rest
+
+score RCVD_IN_BL_SPAMCOP_NET	0
+score RCVD_IN_DUL		0
+score RCVD_IN_DUL_FH		0
+score RCVD_IN_RBL		0
+score RCVD_IN_RSS		0
+
+#
+# User Configured Tests
+#
+
 # ok_languages and ok_locales
 
 score CHARSET_FARAWAY 3.200
@@ -898,29 +929,6 @@ score BODY_8BITS 1.500
 score MICROSOFT_EXECUTABLE 0.100
 score MIME_SUSPECT_NAME 0.100
 
-# Habeas scores
-
-score HABEAS_SWE -6.400 -6.300 -6.400 -6.400
-score HABEAS_HIL 4.000
-score HABEAS_VIOLATOR 8.000
-
-# unscored by default -- commercial services.  If you pay for these,
-# give them a score so they will be checked.
-#
-# 0.5 to 1.0 is probably good for the DUL scores
-# 1.5 to 2.0 is probably good for the rest
-
-score RCVD_IN_BL_SPAMCOP_NET	0
-score RCVD_IN_DUL		0
-score RCVD_IN_DUL_FH		0
-score RCVD_IN_RBL		0
-score RCVD_IN_RSS		0
-
-###########################################################################
-# Compensation for common false positives.
-
-score EVITE -2.900 -0.488 -2.900 -2.900
-
 # GA never changes the whitelist/blacklist scores
 
 score USER_IN_BLACKLIST 100.000
@@ -932,9 +940,17 @@ score USER_IN_WHITELIST_TO -6.000
 score USER_IN_MORE_SPAM_TO -20.000
 score USER_IN_ALL_SPAM_TO -100.000
 
-###########################################################################
+#
+# Habeas: http://www.habeas.com/
+#
 
-# Bayes Scores
+score HABEAS_SWE -6.400 -6.300 -6.400 -6.400
+score HABEAS_HIL 4.000
+score HABEAS_VIOLATOR 8.000
+
+#
+# Bayesian Classifier
+#
 
 score BAYES_00 0 0 -4.0 -4.0
 score BAYES_01 0 0 -2.0 -2.0
