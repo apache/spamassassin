@@ -621,7 +621,7 @@ sub dccifd_lookup {
     $sock->print("0.0.0.0\n") || dbg("failed write") && die; #client
     $sock->print("\n") || dbg("failed write") && die; #HELO value
     $sock->print("\n") || dbg("failed write") && die; #sender
-    $sock->print("\r\n") || dbg("failed write") && die; # recipients
+    $sock->print("unknown\r\n") || dbg("failed write") && die; # recipients
     $sock->print("\n") || dbg("failed write") && die; # recipients
 
     $sock->print($$fulltext);
