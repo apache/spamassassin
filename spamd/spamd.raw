@@ -1651,7 +1651,7 @@ sub preload_modules_with_tmp_homedir {
   mkdir( $tmpsadir, 0700 ) or die "fatal: Can't create $tmpsadir: $!";
   $ENV{HOME} = $tmphome;
 
-  $spamtest->compile_now(0);    # ensure all modules etc. are loaded
+  $spamtest->compile_now(0,1);  # ensure all modules etc. are loaded
   $/ = "\n";                    # argh, Razor resets this!  Bad Razor!
 
   # now clean up the stuff we just created, and make us taint-safe

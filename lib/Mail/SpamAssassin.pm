@@ -1041,7 +1041,7 @@ sub set_persistent_address_list_factory {
 
 ###########################################################################
 
-=item $f->compile_now ($use_user_prefs)
+=item $f->compile_now ($use_user_prefs, $keep_userstate)
 
 Compile all patterns, load all configuration files, and load all
 possibly-required Perl modules.
@@ -1057,10 +1057,18 @@ If C<$use_user_prefs> is 0, this will initialise the SpamAssassin
 configuration without reading the per-user configuration file and it will
 assume that you will call C<read_scoreonly_config> at a later point.
 
+If C<$keep_userstate> is true, compile_now() will revert any configuration
+options which have a default with I<__userstate__> in it post-init(),
+and then re-change the option before returning.  This lets you change
+I<$ENV{'HOME'}> to a temp directory, have compile_now() and create any
+files there as necessary (auto-whitelist, etc,) without disturbing the
+actual files as changed by a configuration option.  By default, this
+is disabled.
+
 =cut
 
 sub compile_now {
-  my ($self, $use_user_prefs) = @_;
+  my ($self, $use_user_prefs, $deal_with_userstate) = @_;
 
   # note: this may incur network access. Good.  We want to make sure
   # as much as possible is preloaded!
@@ -1069,7 +1077,31 @@ sub compile_now {
     "I need to make this message body somewhat long so TextCat preloads\n"x20);
 
   dbg ("ignore: test message to precompile patterns and load modules");
+
+  # Backup default values which deal with userstate.
+  # This is done so we can create any new files in, presumably, a temp dir.
+  # see bug 2762 for more details.
+  my %backup = ();
+  if (defined $deal_with_userstate && $deal_with_userstate) {
+    while(my($k,$v) = each %{$self->{conf}}) {
+      $backup{$k} = $v if (!ref($v) && $v =~/__userstate__/);
+    }
+  }
+
   $self->init($use_user_prefs);
+
+  # if init() didn't change the value from default, forget about it.
+  # if the value is different, remember the new version, and reset the default.
+  while(my($k,$v) = each %backup) {
+    if ($self->{conf}->{$k} eq $v) {
+      delete $backup{$k};
+    }
+    else {
+      my $backup = $backup{$k};
+      $backup{$k} = $self->{conf}->{$k};
+      $self->{conf}->{$k} = $backup;
+    }
+  }
 
   my $mail = $self->parse(\@testmsg, 1);
   my $status = Mail::SpamAssassin::PerMsgStatus->new($self, $mail,
@@ -1090,6 +1122,11 @@ sub compile_now {
   }
 
   $self->{bayes_scanner}->sanity_check_is_untied();
+
+  # Reset any non-default values to the post-init() version.
+  while(my($k,$v) = each %backup) {
+    $self->{conf}->{$k} = $v;
+  }
 
   1;
 }
