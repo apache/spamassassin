@@ -1,3 +1,26 @@
+=head1 NAME
+
+Mail::SpamAssassin::AutoWhitelist - auto-whitelist handler for SpamAssassin
+
+=head1 SYNOPSIS
+
+  (see Mail::SpamAssassin)
+
+
+=head1 DESCRIPTION
+
+Mail::SpamAssassin is a module to identify spam using text analysis and
+several internet-based realtime blacklists.
+
+This class is used internally by SpamAssassin to manage the automatic
+whitelisting functionality.  Please refer to the C<Mail::SpamAssassin>
+documentation for public interfaces.
+
+=head1 METHODS
+
+=over 4
+
+=cut
 
 package Mail::SpamAssassin::AutoWhitelist;
 

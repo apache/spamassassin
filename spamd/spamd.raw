@@ -1107,7 +1107,7 @@ unambiguous.  (i.e. B<--dae> can be used instead of B<--daemonize>)
 Also, boolean options (like B<--auto-whitelist>) can be negated by
 adding I<--no> (B<--noauto-whitelist>), however, this is usually unnecessary.
 
-=over
+=over 4
 
 =item B<-a>, B<--auto-whitelist>, B<--whitelist>
 
@@ -1180,6 +1180,8 @@ sign.
 =item %d -- replaced with the 'domain' of the current username.  In other
 words, if the username is an email address, this is the part after the C<@>
 sign.
+
+=back
 
 So for example, if C</vhome/users/%u/spamassassin> is specified, and spamc
 sends a virtual username of C<jm@example.com>, the directory

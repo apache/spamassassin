@@ -1,4 +1,26 @@
-# Mail::SpamAssassin::ConfSourceSQL - load scores from SQL database
+=head1 NAME
+
+Mail::SpamAssassin::ConfSourceSQL - load SpamAssassin scores from SQL database
+
+=head1 SYNOPSIS
+
+  (see Mail::SpamAssassin)
+  
+
+=head1 DESCRIPTION
+
+Mail::SpamAssassin is a module to identify spam using text analysis and
+several internet-based realtime blacklists.
+
+This class is used internally by SpamAssassin to load scores from an SQL
+database.  Please refer to the C<Mail::SpamAssassin> documentation for public
+interfaces.
+
+=head1 METHODS
+
+=over 4
+
+=cut
 
 package Mail::SpamAssassin::ConfSourceSQL;
 
