@@ -148,40 +148,12 @@ body T_HOT_NASTY          /\b(?=[dehklnswxy])(?:horny|nasty|hot|wild|young(?!\s+
 # bug 2554
 body T_BEST_PORN           /\b(?:best|biggest|largest|most|free|ultimate)\b.{0,9}\b(?:virgins?\b|anal\b|lesbians?|incest|porno?|h[a\@]rdcore|sluts?|xxx+)/i
 
-# just fooling around
-meta T_META_01	(HTML_MESSAGE && MIME_BASE64_NO_NAME)
-meta T_META_02	(HTML_MESSAGE && MIME_BASE64_TEXT)
-meta T_META_03	(HTML_MESSAGE && MIME_BOUND_NEXTPART)
-meta T_META_05	(HTML_MESSAGE && MISSING_MIMEOLE)
-meta T_META_06	(MIME_BASE64_NO_NAME && MIME_BOUND_NEXTPART)
-meta T_META_07	(MIME_BASE64_NO_NAME && MIME_HTML_ONLY)
-meta T_META_08	(MIME_BASE64_NO_NAME && MIME_HTML_ONLY_MULTI)
-meta T_META_09	(MIME_BASE64_NO_NAME && MISSING_MIMEOLE)
-meta T_META_10	(MIME_BASE64_NO_NAME && NO_REAL_NAME)
-meta T_META_11	(MIME_BASE64_TEXT && MIME_BOUND_NEXTPART)
-meta T_META_12	(MIME_BASE64_TEXT && MIME_HTML_ONLY)
-meta T_META_13	(MIME_BASE64_TEXT && MIME_HTML_ONLY_MULTI)
-meta T_META_14	(MIME_BASE64_TEXT && MISSING_MIMEOLE)
-meta T_META_15	(MIME_BASE64_TEXT && NO_REAL_NAME)
-meta T_META_16	(MIME_BOUND_NEXTPART && MIME_HTML_ONLY)
-meta T_META_17	(MIME_BOUND_NEXTPART && MIME_HTML_ONLY_MULTI)
-meta T_META_18	(MIME_BOUND_NEXTPART && MISSING_MIMEOLE)
-meta T_META_19	(MIME_HTML_ONLY && MISSING_MIMEOLE)
-meta T_META_20	(MIME_HTML_ONLY && NO_REAL_NAME)
-meta T_META_21	(MIME_HTML_ONLY_MULTI && MISSING_MIMEOLE)
-meta T_META_22	(MIME_HTML_ONLY_MULTI && NO_REAL_NAME)
-meta T_META_23	(MISSING_MIMEOLE && NO_REAL_NAME)
-meta T_META_25	(HTML_MESSAGE && NO_REAL_NAME)
-meta T_META_26	(MIME_BASE64_NO_NAME && MIME_BASE64_TEXT)
-meta T_META_27	(MIME_BOUND_NEXTPART && NO_REAL_NAME)
-
 # testing for Jeff, do not use!!!
 ifplugin Mail::SpamAssassin::Plugin::URIDNSBL
-urirhsbl URIBL_MP fraud.rhs.mailpolice.com.   A
-body     URIBL_MP eval:check_uridnsbl('URIBL_MP')
-describe URIBL_MP URI's domain appears in MailPolice fraud list
-tflags   URIBL_MP net
-score    URIBL_MP 2.0
+urirhsbl T_URIBL_MP fraud.rhs.mailpolice.com.   A
+body     T_URIBL_MP eval:check_uridnsbl('URIBL_MP')
+describe T_URIBL_MP URI's domain appears in MailPolice fraud list
+tflags   T_URIBL_MP net
 endif	# Mail::SpamAssassin::Plugin::URIDNSBL
 
 # bug 3680: empty anchor, some others
