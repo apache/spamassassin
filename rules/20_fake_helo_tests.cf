@@ -48,6 +48,16 @@ header FAKE_HELO_YAHOO_CA	eval:check_for_rdns_helo_mismatch("yahoo\.ca","yahoo\.
 describe FAKE_HELO_YAHOO_CA	Host HELO did not match rDNS: yahoo.ca
 
 # ---------------------------------------------------------------------------
+
+# Suresh says: these will never be used as HELOs from real mail.com relays.
+# Just check the most recent handover; the connection to a trusted host.
+# This way a legit sender can send to their MSA using that HELO (quite a few
+# MUAs will do that), but a spammer gets caught.  (List of domains comes from
+# the drop-down list on the Mail.com signup page.)
+header FAKE_HELO_MAIL_COM_DOM  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=(?:\S+\.|)(?:(?:mail|email|iname|cheerful|consultant|europe|mindless|myself|post|techie|usa|writeme|2die4|artlover|bikerider|catlover|cliffhanger|cutey|doglover|gardener|hot-shot|inorbit|loveable|mad\.scientist|playful|poetic|popstar|saintly|seductive|soon|whoever|winning|witty|yours|africamail|arcticmail|asia|australiamail|europe|japan|samerica|usa|berlin|dublin|london|madrid|moscowmail|munich|nycmail|paris|rome|sanfranmail|singapore|tokyo|accountant|adexec|allergist|alumnidirector|archaeologist|chemist|clerk|columnist|comic|consultant|counsellor|deliveryman|diplomats|doctor|dr|engineer|execs|financier|geologist|graphic-designer|insurer|journalist|lawyer|legislator|lobbyist|minister|optician|pediatrician|presidency|priest|publicist|realtyagent|registerednurses|repairman|representative|rescueteam|scientist|sociologist|teacher|techietechnologist|umpire)\.com|(?:programmer|earthling|hairdresser)\.net|musician\.org) /i
+describe FAKE_HELO_MAIL_COM_DOM Relay HELO'd with suspicious hostname (mail.com)
+
+# ---------------------------------------------------------------------------
 # Interesting new feature; spamware HELO'ing, from a dialup IP addr,
 # using that IP's rDNS entry.  We can catch this easily.  There aren't
 # many legit mailservers calling themselves
@@ -186,4 +196,5 @@ describe HELO_DYNAMIC_NTL Relay HELO'd using suspicious hostname (NTL)
 # cp341468-b.venra1.lb.home.nl
 header HELO_DYNAMIC_HOME_NL  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=[a-z]{2}\d+-\S\.\S+\d\.[a-z]{2}\.home\.nl/i
 describe HELO_DYNAMIC_HOME_NL Relay HELO'd using suspicious hostname (Home.nl)
+
 

@@ -66,25 +66,32 @@ tflags T_RCVD_IN_IADB_LIST_T	net nice
 
 ########################################################################
 
-# let's see how this works
+# (looks good for T_SPF_PASS_NO_SBL, for everyone except Michael.
+# half of my FNs are misfiled hams! --j.)
+# 0.497   0.1446   2.5959    0.053   0.41   -0.00  SPF_PASS
+# 0.700   0.6002   0.8002    0.429   0.38   -0.00  SPF_PASS:jm
+# 0.880   1.1405   0.6428    0.640   0.23   -0.00  SPF_PASS:parkerm
+# 2.482   0.7534   4.2123    0.152   0.58   -0.00  SPF_PASS:quinlan
+# 0.078   0.0170  12.4542    0.001   0.34   -0.00  SPF_PASS:theo
+# 0.439   0.0774   2.5959    0.029   0.45   -0.01  T_SPF_PASS_NO_SBL
+# 0.425   0.0500   0.8002    0.059   0.54   -0.01  T_SPF_PASS_NO_SBL:jm
+# 0.845   1.0684   0.6428    0.624   0.23   -0.01  T_SPF_PASS_NO_SBL:parkerm
+# 2.285   0.3600   4.2123    0.079   0.65   -0.01  T_SPF_PASS_NO_SBL:quinlan
+# 0.064   0.0030  12.4542    0.000   0.50   -0.01  T_SPF_PASS_NO_SBL:theo
+
 meta T_SPF_PASS_NO_SBL		(SPF_PASS && !RCVD_IN_SBL)
-meta T_SPF_HELO_PASS_NO_SBL	(SPF_HELO_PASS && !RCVD_IN_SBL)
 tflags T_SPF_PASS_NO_SBL	net nice
+
+# I don't think this one is worth keeping though.  not much effect...
+# in fact, most of my hits for this are from forwarders.
+# 6.090   2.3287  28.4943    0.076   0.43   -0.01  T_SPF_HELO_PASS_NO_SBL
+meta T_SPF_HELO_PASS_NO_SBL	(SPF_HELO_PASS && !RCVD_IN_SBL)
 tflags T_SPF_HELO_PASS_NO_SBL	net nice
 
 # Carl Hutzler of AOL says: "block on sight" (mail sent 07 May 2004 to discuss
 # at lists.surbl.org).  not much hits for me, but let's see for everyone else
 uri T_REDIR_AOL_CLICKTHRU     /www\.aol\.com\/ams\/clickThruRedirect\.adp/i
 
-# Suresh says: these will never be used as HELOs from real mail.com relays.
-# Just check the most recent handover; the connection to a trusted host.
-# This way a legit sender can send to their MSA using that HELO (quite a few
-# MUAs will do that), but a spammer gets caught.  (List of domains comes from
-# the drop-down list on the Mail.com signup page.)
-header T_FAKE_HELO_MAIL_COM_DOM  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=(?:\S+\.|)(?:(?:mail|email|iname|cheerful|consultant|europe|mindless|myself|post|techie|usa|writeme|2die4|artlover|bikerider|catlover|cliffhanger|cutey|doglover|gardener|hot-shot|inorbit|loveable|mad\.scientist|playful|poetic|popstar|saintly|seductive|soon|whoever|winning|witty|yours|africamail|arcticmail|asia|australiamail|europe|japan|samerica|usa|berlin|dublin|london|madrid|moscowmail|munich|nycmail|paris|rome|sanfranmail|singapore|tokyo|accountant|adexec|allergist|alumnidirector|archaeologist|chemist|clerk|columnist|comic|consultant|counsellor|deliveryman|diplomats|doctor|dr|engineer|execs|financier|geologist|graphic-designer|insurer|journalist|lawyer|legislator|lobbyist|minister|optician|pediatrician|presidency|priest|publicist|realtyagent|registerednurses|repairman|representative|rescueteam|scientist|sociologist|teacher|techietechnologist|umpire)\.com|(?:programmer|earthling|hairdresser)\.net|musician\.org) /i
-header T_FAKE_HELO_MAIL_COM_DOM2  X-Spam-Relays-Untrusted =~ /^[^\]]+ helo=(?:(?:mail|email|iname|cheerful|consultant|europe|mindless|myself|post|techie|usa|writeme|2die4|artlover|bikerider|catlover|cliffhanger|cutey|doglover|gardener|hot-shot|inorbit|loveable|mad\.scientist|playful|poetic|popstar|saintly|seductive|soon|whoever|winning|witty|yours|africamail|arcticmail|asia|australiamail|europe|japan|samerica|usa|berlin|dublin|london|madrid|moscowmail|munich|nycmail|paris|rome|sanfranmail|singapore|tokyo|accountant|adexec|allergist|alumnidirector|archaeologist|chemist|clerk|columnist|comic|consultant|counsellor|deliveryman|diplomats|doctor|dr|engineer|execs|financier|geologist|graphic-designer|insurer|journalist|lawyer|legislator|lobbyist|minister|optician|pediatrician|presidency|priest|publicist|realtyagent|registerednurses|repairman|representative|rescueteam|scientist|sociologist|teacher|techietechnologist|umpire)\.com|(?:programmer|earthling|hairdresser)\.net|musician\.org) /i
-
-# worth it?
 body T_SAVE_BUCKS		/\bsave \$/i
 
 # after all that work, the best two (which are not great), maybe let the
