@@ -5,12 +5,41 @@ use Fcntl;
 use AnyDBM_File ;
 use vars qw( %h $k $v ) ;
 
-tie %h, "AnyDBM_File", $ENV{HOME}."/.spamassassin/auto_whitelist", O_RDWR|O_CREAT|O_EXCL,0600
-    or die "Cannot open file 'fruit': $!\n";
+my $dirbased = $ENV{HOME}."/.spamassassin/auto-whitelist";
+my $db = $ENV{HOME}."/.spamassassin/auto_whitelist";	# is this right?
 
-# print the contents of the file
-while (($k, $v) = each %h) {
-    print "$k -> $v\n"
+if (-f "$db.db") {
+  tie %h, "AnyDBM_File",$db, O_RDWR|O_CREAT|O_EXCL,0600
+      or die "Cannot open file $db: $!\n";
+  while (($k, $v) = each %h) { print "$k -> $v (DB)\n" }
+  untie %h;
 }
 
-untie %h ;
+if (-d $dirbased) {
+  use File::Find;
+
+  File::Find::find (\&accwanted, "$dirbased/accumulator");
+  File::Find::find (\&permwanted, "$dirbased/permanent");
+
+  sub accwanted {
+    return unless (-f $_);
+
+    my $name = $File::Find::name; $name =~ s/[\\\/\:]//gs;
+    $name =~ s/^.*accumulator//gs;
+
+    my $count = 0;
+    open (IN, "<$_"); while (<IN>) { $count++; } close IN;
+    print "$name -> $count (dir-based)\n";
+  }
+
+  sub permwanted {
+    return unless (-f $_);
+
+    my $name = $File::Find::name; $name =~ s/[\\\/\:]//gs;
+    $name =~ s/^.*permanent//gs;
+
+    open (IN, "<$_"); while (<IN>) {
+      chomp; print "$_ -> 999 (dir-based)\n";
+    } close IN;
+  }
+}
