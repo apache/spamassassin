@@ -488,12 +488,12 @@ B<sa-learn> [options] --dump [ all | data | magic ]
 
 Options:
 
- --ham				   Learn messages as ham (non-spam)
- --spam				   Learn messages as spam
- --forget			   Forget a message
+ --ham                             Learn messages as ham (non-spam)
+ --spam                            Learn messages as spam
+ --forget                          Forget a message
  --use-ignores                     Use bayes_ignore_from and bayes_ignore_to
- --sync				   Syncronize the database and the journal if needed
- --force-expire			   Force a database sync and expiry run
+ --sync                            Syncronize the database and the journal if needed
+ --force-expire                    Force a database sync and expiry run
  --dbpath <path>                   Allows commandline override (in bayes_path form)
                                    for where to read the Bayes DB from
  --dump [all|data|magic]           Display the contents of the Bayes database
@@ -508,7 +508,7 @@ Options:
  --showdots                        Show progress using dots
  --no-sync                         Skip syncronizing the journal and
                                    databases after scan
- -L, --local			   Operate locally, no network accesses
+ -L, --local                       Operate locally, no network accesses
  --import                          Migrate data from older version/non DB_File
                                    based databases
  --clear                           Wipe out existing database
