@@ -239,7 +239,7 @@ describe FROM_AND_TO_SAME	From and To are the same, but not exactly
 header SUBJ_FULL_OF_8BITS	eval:check_subject_for_lotsa_8bit_chars()
 describe SUBJ_FULL_OF_8BITS	Subject is full of 8-bit characters
 
-header HEADER_8BITS		ALL =~ /[\x80-\xff]{3,}/
+header HEADER_8BITS		eval:check_all_headers_for_8bit_chars()
 describe HEADER_8BITS		Headers include 3 consecutive 8-bit characters
 
 header MDAEMON_2_7_4		Received =~ /with SMTP .MDaemon.v2.7.SP4.R./
