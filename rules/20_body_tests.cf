@@ -339,7 +339,7 @@ describe CYBER_FIRE_POWER       mentions Cyber FirePower!, a spam-tool
 
 # (contrib: WW)
 # modified by jm to stop it matching on all-space lines
-rawbody LINE_OF_YELLING		/^[A-Z0-9\$\.,\'\!\?\s]{20,}[A-Z0-9\$\.,\'\!\?][A-Z0-9\$\.,\'\!\?\s]{20,}$/
+rawbody LINE_OF_YELLING		/^[A-Z0-9\$\.,\'\!\?\s]{20,}[A-Z\$\.,\'\!\?]{5,}[A-Z0-9\$\.,\'\!\?\s]{20,}$/
 describe LINE_OF_YELLING        A WHOLE LINE OF YELLING DETECTED
 
 ###########################################################################
@@ -626,4 +626,11 @@ describe URGENT_BIZ             Containts 'URGENT BUSINESS'
 
 body EARN_PER_WEEK              /earn.{1,20}\d\d\d+.{1,30}per week/i
 describe EARN_PER_WEEK          Contains 'earn $something per week'
+
+# contrib: Wayne A Tucker
+body PENNIES_A_DAY              /for (?:just|only) pennies a day/i
+describe PENNIES_A_DAY          Contains 'for only pennies a day'
+
+body FOR_JUST_SOME_AMT          /for (?:just|only) \$?\d+\.?\d*[^\.]*!/i
+describe FOR_JUST_SOME_AMT      Contains 'for only' some amount of cash
 
