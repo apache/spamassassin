@@ -468,7 +468,7 @@ EOM
     my $smtp;
     if ($smtp = Net::SMTP->new($exchange,
 			       Hello => $hello,
-			       Port => 25, # change to 587 before 3.0.0-final
+			       Port => 587,
 			       Timeout => 10))
     {
       if ($smtp->mail($from) && smtp_dbg("FROM $from", $smtp) &&
