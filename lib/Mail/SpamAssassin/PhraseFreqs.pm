@@ -88,7 +88,7 @@ sub check_phrase_freqs {
 
 sub extra_score_phrase_freqs {
   my ($self, $fulltext, $threshold) = @_;
-  if ($self->{phrase_score} > $threshold) { return 1; }
+  if (defined($self->{phrase_score}) and $self->{phrase_score} > $threshold) { return 1; }
   return 0;
 }
 
