@@ -964,9 +964,13 @@ sub remove_spamassassin_markup {
 
 =item $f->read_scoreonly_config ($filename)
 
-Read a configuration file and parse only scores from it.  This is used
-to safely allow multi-user daemons to read per-user config files
-without having to use C<setuid()>.
+Read a configuration file and parse user preferences from it.
+
+User preferences are as defined in the C<Mail::SpamAssassin::Conf> manual page.
+In other words, they include scoring options, scores, whitelists and
+blacklists, and so on, but do not include rule definitions, privileged
+settings, etc. unless C<allow_user_rules> is enabled; and they never include
+the administrator settings.
 
 =cut
 
