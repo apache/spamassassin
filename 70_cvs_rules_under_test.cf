@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.561 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.562 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -257,26 +257,86 @@ describe T_BIZ_LINKS		Links to .biz .bz
 uri T_STRANGE_CHAR_LINKS		/^https?\:\/\/.{0,20}(?:[%@]|=2E)/i
 describe T_STRANGE_CHAR_LINKS	Links with strange characters
 
-uri T_SUSPICIOUS_LINKS	/(?:^https?\:\/\/|^mailto\:).{0,25}(?:poker\.net|get-deal|bargain[zs\-]|clicks|spree|members\=|lotto|offer[sz]|4you)/i
-describe T_SUSPICIOUS_LINKS	Links containing suspicious phrases
+######
 
-uri T_BANNED_LINKS1	/(?:^https?\:\/\/|^mailto\:).{0,20}(?:needanewjob|valodata|jutan|bridgewater|youngblue|rocketfibre|shopnow|affistats|priceisright|compare-lender)/i
-describe T_BANNED_LINKS1		Links to Banned Companies 1
+# 2, 3, 4, and 6 actually look semi-ok, but these really need to be split into multiple rules.
+# I actually don't like these rules since once we start looking for them, the spammers will just change
+# domains, but ...
+# tvd - 06/01
+uri T_BANNED_LINKS1_01	m@(?:^https?://|^mailto:).{0,20}needanewjob@i
+uri T_BANNED_LINKS1_02	m@(?:^https?://|^mailto:).{0,20}valodata@i
+uri T_BANNED_LINKS1_03	m@(?:^https?://|^mailto:).{0,20}jutan@i
+uri T_BANNED_LINKS1_04	m@(?:^https?://|^mailto:).{0,20}bridgewater@i
+uri T_BANNED_LINKS1_05	m@(?:^https?://|^mailto:).{0,20}youngblue@i
+uri T_BANNED_LINKS1_06	m@(?:^https?://|^mailto:).{0,20}rocketfibre@i
+uri T_BANNED_LINKS1_07	m@(?:^https?://|^mailto:).{0,20}shopnow@i
+uri T_BANNED_LINKS1_08	m@(?:^https?://|^mailto:).{0,20}affistats@i
+uri T_BANNED_LINKS1_09	m@(?:^https?://|^mailto:).{0,20}priceisright@i
+uri T_BANNED_LINKS1_10	m@(?:^https?://|^mailto:).{0,20}compare-lender@i
 
-uri T_BANNED_LINKS2	/(?:^https?\:\/\/|^mailto\:).{0,20}(?:ientry|mybill|dyfyi|farmsex|affinitycommerce|unsecured-credit|e-centives|fyi01|clicktrack|emailads|zizi|vistaprint)/i
-describe T_BANNED_LINKS2		Links to Banned Companies 2
+uri T_BANNED_LINKS2_01	m@(?:^https?://|^mailto:).{0,20}ientry@i
+uri T_BANNED_LINKS2_02	m@(?:^https?://|^mailto:).{0,20}mybill@i
+uri T_BANNED_LINKS2_03	m@(?:^https?://|^mailto:).{0,20}dyfyi@i
+uri T_BANNED_LINKS2_04	m@(?:^https?://|^mailto:).{0,20}farmsex@i
+uri T_BANNED_LINKS2_05	m@(?:^https?://|^mailto:).{0,20}affinitycommerce@i
+uri T_BANNED_LINKS2_06	m@(?:^https?://|^mailto:).{0,20}unsecured-credit@i
+uri T_BANNED_LINKS2_07	m@(?:^https?://|^mailto:).{0,20}e-centives@i
+uri T_BANNED_LINKS2_08	m@(?:^https?://|^mailto:).{0,20}fyi01@i
+uri T_BANNED_LINKS2_09	m@(?:^https?://|^mailto:).{0,20}clicktrack@i
+uri T_BANNED_LINKS2_10	m@(?:^https?://|^mailto:).{0,20}emailads@i
+uri T_BANNED_LINKS2_11	m@(?:^https?://|^mailto:).{0,20}zizi@i
+uri T_BANNED_LINKS2_12	m@(?:^https?://|^mailto:).{0,20}vistaprint@i
 
-uri T_BANNED_LINKS3	/(?:^https?\:\/\/|^mailto\:).{0,20}(?:radarline|optilc|biosweep|dealnetwork|myobmail|yourvling|xeemo|incestuals|mnjmtech|escript|m0rtage)/i
-describe T_BANNED_LINKS3		Links to Banned Companies 3
+uri T_BANNED_LINKS3_01	m@(?:^https?://|^mailto:).{0,20}radarline@i
+uri T_BANNED_LINKS3_01	m@(?:^https?://|^mailto:).{0,20}optilc@i
+uri T_BANNED_LINKS3_01	m@(?:^https?://|^mailto:).{0,20}biosweep@i
+uri T_BANNED_LINKS3_01	m@(?:^https?://|^mailto:).{0,20}dealnetwork@i
+uri T_BANNED_LINKS3_01	m@(?:^https?://|^mailto:).{0,20}myobmail@i
+uri T_BANNED_LINKS3_01	m@(?:^https?://|^mailto:).{0,20}yourvling@i
+uri T_BANNED_LINKS3_01	m@(?:^https?://|^mailto:).{0,20}xeemo@i
+uri T_BANNED_LINKS3_01	m@(?:^https?://|^mailto:).{0,20}incestuals@i
+uri T_BANNED_LINKS3_01	m@(?:^https?://|^mailto:).{0,20}mnjmtech@i
+uri T_BANNED_LINKS3_01	m@(?:^https?://|^mailto:).{0,20}escript@i
+uri T_BANNED_LINKS3_01	m@(?:^https?://|^mailto:).{0,20}m0rtage@i
 
-uri T_BANNED_LINKS4	/(?:^https?\:\/\/|^mailto\:).{0,20}(?:ltracker|premiumsmail|rxmedical|bannedcd|raveonmail|postdirect|5moni|gammae|freeht|ns-hosting|domainsforeveryone)/i
-describe T_BANNED_LINKS4		Links to Banned Companies 4
+uri T_BANNED_LINKS4_01	m@(?:^https?://|^mailto:).{0,20}ltracker@i
+uri T_BANNED_LINKS4_01	m@(?:^https?://|^mailto:).{0,20}premiumsmail@i
+uri T_BANNED_LINKS4_01	m@(?:^https?://|^mailto:).{0,20}rxmedical@i
+uri T_BANNED_LINKS4_01	m@(?:^https?://|^mailto:).{0,20}bannedcd@i
+uri T_BANNED_LINKS4_01	m@(?:^https?://|^mailto:).{0,20}raveonmail@i
+uri T_BANNED_LINKS4_01	m@(?:^https?://|^mailto:).{0,20}postdirect@i
+uri T_BANNED_LINKS4_01	m@(?:^https?://|^mailto:).{0,20}5moni@i
+uri T_BANNED_LINKS4_01	m@(?:^https?://|^mailto:).{0,20}gammae@i
+uri T_BANNED_LINKS4_01	m@(?:^https?://|^mailto:).{0,20}freeht@i
+uri T_BANNED_LINKS4_01	m@(?:^https?://|^mailto:).{0,20}ns-hosting@i
+uri T_BANNED_LINKS4_01	m@(?:^https?://|^mailto:).{0,20}domainsforeveryone)@i
 
-uri T_BANNED_LINKS5	/(?:^https?\:\/\/|^mailto\:).{0,20}(?:freedigitalppv|fastbustzone|dailycomnet|zoanmail|ew01|executive-level|cyberforce|adserver|flipside.com|faqchat)/i
-describe T_BANNED_LINKS5		Links to Banned Companies 5
+uri T_BANNED_LINKS5_01	m@(?:^https?://|^mailto:).{0,20}freedigitalppv@i
+uri T_BANNED_LINKS5_01	m@(?:^https?://|^mailto:).{0,20}fastbustzone@i
+uri T_BANNED_LINKS5_01	m@(?:^https?://|^mailto:).{0,20}dailycomnet@i
+uri T_BANNED_LINKS5_01	m@(?:^https?://|^mailto:).{0,20}zoanmail@i
+uri T_BANNED_LINKS5_01	m@(?:^https?://|^mailto:).{0,20}ew01@i
+uri T_BANNED_LINKS5_01	m@(?:^https?://|^mailto:).{0,20}executive-level@i
+uri T_BANNED_LINKS5_01	m@(?:^https?://|^mailto:).{0,20}cyberforce@i
+uri T_BANNED_LINKS5_01	m@(?:^https?://|^mailto:).{0,20}adserver@i
+uri T_BANNED_LINKS5_01	m@(?:^https?://|^mailto:).{0,20}flipside.com@i
+uri T_BANNED_LINKS5_01	m@(?:^https?://|^mailto:).{0,20}faqchat@i
 
-uri T_BANNED_LINKS6	/(?:^https?\:\/\/|^mailto\:).{0,20}(?:dforyi|totemmail|addsaturation)/i
-describe T_BANNED_LINKS6		Links to Banned Companies 6
+uri T_BANNED_LINKS6_01	m@(?:^https?://|^mailto:).{0,20}dforyi@i
+uri T_BANNED_LINKS6_01	m@(?:^https?://|^mailto:).{0,20}totemmail@i
+uri T_BANNED_LINKS6_01	m@(?:^https?://|^mailto:).{0,20}addsaturation@i
+
+uri T_SUSPICIOUS_LINKS_01	m@(?:^https?://|^mailto:).{0,25}poker\.net@i
+uri T_SUSPICIOUS_LINKS_01	m@(?:^https?://|^mailto:).{0,25}get-deal@i
+uri T_SUSPICIOUS_LINKS_01	m@(?:^https?://|^mailto:).{0,25}bargain[zs\-]@i
+uri T_SUSPICIOUS_LINKS_01	m@(?:^https?://|^mailto:).{0,25}clicks@i
+uri T_SUSPICIOUS_LINKS_01	m@(?:^https?://|^mailto:).{0,25}spree@i
+uri T_SUSPICIOUS_LINKS_01	m@(?:^https?://|^mailto:).{0,25}members\=@i
+uri T_SUSPICIOUS_LINKS_01	m@(?:^https?://|^mailto:).{0,25}lotto@i
+uri T_SUSPICIOUS_LINKS_01	m@(?:^https?://|^mailto:).{0,25}offer[sz]@i
+uri T_SUSPICIOUS_LINKS_01	m@(?:^https?://|^mailto:).{0,25}4you@i
+
+######
 
 rawbody T_HREF_3D			/(?:href|src)=3D\"/i
 describe T_HREF_3D		Uses href=3D Trick
@@ -297,14 +357,6 @@ header T_FROM_OFFERS_07		From:addr =~ /\@\S*offers(?!en)(?:\b|.)/i
 header T_FROM_OFFERS_08		From:addr =~ /\@\S*offers(?!en\b)(?:\b|.)/i
 header T_FROM_OFFERS_09		From:addr =~ /\@\S*offers(?![eo]n)(?:\b|.)/i
 header T_FROM_OFFERS_10		From:addr =~ /\@\S*offers(?![eo]n\b)(?:\b|.)/i
-
-# bug 1914:
-# tvd - t_see_for_yourself gets the same hit rate, t_try_for_yourself
-# isn't great, and t_see_for_yourself2 ends up with a worse s/o overall.
-# but let's see how it works for everyone before deciding.
-body     T_SEE_FOR_YOURSELF       /\bsee (?:for|it|it for) yourself\b/i
-body     T_SEE_FOR_YOURSELF2      /\b(?:see|try) (?:for|it|it for) yourself\b/i
-body     T_TRY_FOR_YOURSELF       /\btry (?:for|it|it for) yourself\b/i
 
 # bug 1634:
 # needed to readd X_MAILING_LIST as dependency, modify T_MAC_EUDORA_MUA for new version
