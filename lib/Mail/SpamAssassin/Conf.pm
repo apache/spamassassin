@@ -706,10 +706,17 @@ Here are some examples (these are the defaults in 2.60):
       if ($line =~ /^"(.*)"$/) {
 	$line = $1;
       }
-      $line =~ s/\\t/\t/g;
-      $line =~ s/\\n/\n/g;
-      $line =~ s/\\[a-z0-9]//gi;
-      $line =~ s/\\\\/\\/g;
+      my @line = split(
+                   /\\\\/,    # split at backslashes,
+                   "$line\n"  # newline needed to make trailing backslashes work
+                 );
+      map {
+        s/\\t/\t/g; # expand tabs
+        s/\\n/\n/g; # expand newlines
+        s/\\.//g;   # purge all other escapes
+      } @line;
+      $line = join("\\", @line);
+      chop($line);  # remove dummy newline again
       if (($type eq "ham") || ($type eq "all")) {
 	$self->{headers_ham}->{$name} = $line;
       }
