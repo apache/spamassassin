@@ -13,7 +13,7 @@ use Pod::Usage;
 
 use vars qw(
   $spamtest %opt $isspam $forget $messagecount $messagelimit
-  $rebuildonly $learnprob @targets
+  $rebuildonly $learnprob @targets $bayes_override_path
 );
 
 ###########################################################################
@@ -52,7 +52,10 @@ sub cmdline_run {
 	     'dir'			=> sub { $opt{'format'} = 'dir'; },
 	     'file'			=> sub { $opt{'format'} = 'file'; },
 	     'mbox'			=> sub { $opt{'format'} = 'mbox'; },
-	      'single'			=> sub { $opt{'format'} = 'single'; },
+	     'single'			=> sub { $opt{'format'} = 'single'; },
+
+	     'db|dbpath=s'		=> \$bayes_override_path,
+	     're|regexp=s'		=> \$opt{'regexp'},
 
 	     '<>'			=> \&target,
   ) or usage(0, "Unknown option!");
@@ -113,7 +116,15 @@ sub cmdline_run {
       return 1;
     }
 
-    $spamtest->dump_bayes_db($magic, $toks);
+    # kluge to support old check_bayes_db operation
+    if ( defined $bayes_override_path ) {
+      # init() above ties to the db r/o and leaves it that way
+      # so we need to untie before dumping (it'll reopen)
+      $spamtest->finish_learner();
+      $spamtest->{conf}->{bayes_path} = $bayes_override_path;
+    }
+
+    $spamtest->dump_bayes_db($magic, $toks, $opt{'regexp'});
     $spamtest->finish_learner();
     return 0;
   }

@@ -1170,7 +1170,7 @@ sub chi_squared_probs_combine  {
 ###########################################################################
 
 sub dump_bayes_db {
-  my($self, $magic, $toks) = @_;
+  my($self, $magic, $toks, $regex) = @_;
 
   return 0 unless $self->{conf}->{use_bayes};
   return 0 unless $self->{store}->tie_db_readonly();
@@ -1201,6 +1201,7 @@ sub dump_bayes_db {
 
     foreach my $tok (keys %{$self->{store}->{db_toks}}) {
       next if ($tok =~ /$magic_re/); # skip magic tokens
+      next if (defined $regex && ($tok !~ /$regex/o));
 
       my $prob = $self->compute_prob_for_token($tok, $ns, $nh);
       $prob ||= 0.5;
