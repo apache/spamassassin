@@ -65,15 +65,17 @@ SPAMASSASSIN RELEASE PROCEDURE
 
       TZ=UTC svn log --non-interactive --stop-on-copy > Changes
 
-    This will output all of the changes since the .0 release in the current
-    branch.
+    This will output all of the changes since the .0 release in the
+    current branch (the last copy -- note, if a copy was done
+    afterwards (move between repositories, etc, you'll need to
+    modify that command).
 
   - For releases on the trunk (e.g. a .0 release):
 
-      TZ=UTC svn log -r HEAD:5810 --non-interactive --stop-on-copy > Changes
+      TZ=UTC svn log -r HEAD:5810 --non-interactive > Changes
 
-    r5810 was the start of the 3.0.0 work; replace with the correct rev
-    number for the point you want to start at.
+    r5810 was the start of the 3.0.0 (2.70 at the time) work; replace
+    with the correct rev number for the point you want to start at.
 
 - Check in the updated Changes file.
 
@@ -129,7 +131,7 @@ SPAMASSASSIN RELEASE PROCEDURE
   tree (e.g. 2.x1, 2.x2), you don't need to branch; for major updates
   (2.x0) you should use a new development branch, off the trunk.
 
-    repo=https://svn.apache.org/repos/asf/incubator/spamassassin
+    repo=https://svn.apache.org/repos/asf/spamassassin
     svn copy $repo/tags/spamassassin_release_3_0_0 \
            $repo/branches/b3_0_0
 
