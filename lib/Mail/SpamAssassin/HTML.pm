@@ -28,40 +28,58 @@ use vars qw($re_loose $re_strict $re_other @ISA @EXPORT @EXPORT_OK);
 
 require Exporter;
 @ISA = qw(HTML::Parser Exporter);
-@EXPORT = qw($re_loose $re_strict get_results);
+@EXPORT = qw(get_results);
 @EXPORT_OK = qw();
 
 # elements defined by the HTML 4.01 and XHTML 1.0 DTDs (do not change them!)
-$re_loose = 'applet|basefont|center|dir|font|frame|frameset|iframe|isindex|menu|noframes|s|strike|u';
-$re_strict = 'a|abbr|acronym|address|area|b|base|bdo|big|blockquote|body|br|button|caption|cite|code|col|colgroup|dd|del|dfn|div|dl|dt|em|fieldset|form|h1|h2|h3|h4|h5|h6|head|hr|html|i|img|input|ins|kbd|label|legend|li|link|map|meta|noscript|object|ol|optgroup|option|p|param|pre|q|samp|script|select|small|span|strong|style|sub|sup|table|tbody|td|textarea|tfoot|th|thead|title|tr|tt|ul|var';
+# does not include XML
+my %elements = map {; $_ => 1 }
+  # strict
+  qw( a abbr acronym address area b base bdo big blockquote body br button caption cite code col colgroup dd del dfn div dl dt em fieldset form h1 h2 h3 h4 h5 h6 head hr html i img input ins kbd label legend li link map meta noscript object ol optgroup option p param pre q samp script select small span strong style sub sup table tbody td textarea tfoot th thead title tr tt ul var ),
+  # loose
+  qw( applet basefont center dir font frame frameset iframe isindex menu noframes s strike u ),
+  # other non-standard tags
+  qw( x-sigsep x-tab ),
+;
 
-# loose list of HTML events
-my $events = 'on(?:activate|afterupdate|beforeactivate|beforecopy|beforecut|beforedeactivate|beforeeditfocus|beforepaste|beforeupdate|blur|change|click|contextmenu|controlselect|copy|cut|dblclick|deactivate|errorupdate|focus|focusin|focusout|help|keydown|keypress|keyup|load|losecapture|mousedown|mouseenter|mouseleave|mousemove|mouseout|mouseover|mouseup|mousewheel|move|moveend|movestart|paste|propertychange|readystatechange|reset|resize|resizeend|resizestart|select|submit|timeerror|unload)';
+# attributes
+my %attributes = map {; $_ => 1 }
+  # HTML 4.01 deprecated, loose DTD, frameset DTD
+  qw( abbr accept-charset accept accesskey action align alink alt archive axis background bgcolor border cellpadding cellspacing char charoff charset checked cite class classid clear code codebase codetype color cols colspan compact content coords data datetime declare defer dir disabled enctype face for frame frameborder headers height href hreflang hspace http-equiv id ismap label lang language link longdesc marginheight marginwidth maxlength media method multiple name nohref noresize noshade nowrap object onblur onchange onclick ondblclick onfocus onkeydown onkeypress onkeyup onload onmousedown onmousemove onmouseout onmouseover onmouseup onreset onselect onsubmit onunload profile prompt readonly rel rev rows rowspan rules scheme scope scrolling selected shape size span src standby start style summary tabindex target text title type usemap valign value valuetype version vlink vspace width ),
+  # attributes: additional attributes we accept
+  qw( family wrap / ),
+;
 
-# other non-standard tags
-$re_other = 'o:\w+/?|x-sigsep|x-tab';
+# elements that change text style
+my %elements_text_style = map {; $_ => 1 }
+  qw( body font table tr th td big small basefont marquee ),
+;
 
-# attributes: HTML 4.01 deprecated, loose DTD, frameset DTD
-my $re_attr = 'abbr|accept-charset|accept|accesskey|action|align|alink|alt|archive|axis|background|bgcolor|border|cellpadding|cellspacing|char|charoff|charset|checked|cite|class|classid|clear|code|codebase|codetype|color|cols|colspan|compact|content|coords|data|datetime|declare|defer|dir|disabled|enctype|face|for|frame|frameborder|headers|height|href|hreflang|hspace|http-equiv|id|ismap|label|lang|language|link|longdesc|marginheight|marginwidth|maxlength|media|method|multiple|name|nohref|noresize|noshade|nowrap|object|onblur|onchange|onclick|ondblclick|onfocus|onkeydown|onkeypress|onkeyup|onload|onmousedown|onmousemove|onmouseout|onmouseover|onmouseup|onreset|onselect|onsubmit|onunload|profile|prompt|readonly|rel|rev|rows|rowspan|rules|scheme|scope|scrolling|selected|shape|size|span|src|standby|start|style|summary|tabindex|target|text|title|type|usemap|valign|value|valuetype|version|vlink|vspace|width';
+# elements that insert whitespace
+my %elements_whitespace = map {; $_ => 1 }
+  qw( br div li th td dt dd p hr blockquote pre ),
+;
 
-# attributes: stuff we accept
-my $re_attr_extra = 'family|wrap|/';
+# elements that push URIs
+my %elements_uri = map {; $_ => 1 }
+  qw( body table tr td a area link img frame iframe embed script form base ),
+;
 
 # style attribute not accepted
-my $re_attr_no_style = 'base|basefont|head|html|meta|param|script|style|title';
+#my %elements_no_style = map {; $_ => 1 }
+#  qw( base basefont head html meta param script style title ),
+#;
 
-# style attributes
-my %ok_attribute = (
-		 text => [qw(body)],
-		 color => [qw(basefont font)],
-		 bgcolor => [qw(body table tr td th marquee)],
-		 face => [qw(basefont font)],
-		 size => [qw(basefont font)],
-		 link => [qw(body)],
-		 alink => [qw(body)],
-		 vlink => [qw(body)],
-		 background => [qw(body marquee)],
-		 );
+# permitted element attributes
+my %ok_attributes;
+$ok_attributes{basefont}{$_} = 1 for qw( color face size );
+$ok_attributes{body}{$_} = 1 for qw( text bgcolor link alink vlink background );
+$ok_attributes{font}{$_} = 1 for qw( color face size );
+$ok_attributes{marquee}{$_} = 1 for qw( bgcolor background );
+$ok_attributes{table}{$_} = 1 for qw( bgcolor );
+$ok_attributes{td}{$_} = 1 for qw( bgcolor );
+$ok_attributes{th}{$_} = 1 for qw( bgcolor );
+$ok_attributes{tr}{$_} = 1 for qw( bgcolor );
 
 sub new {
   my ($class) = @_;
@@ -77,6 +95,7 @@ sub new {
 			declaration => ["html_declaration", "self,text"],
 		],
 		marked_sections => 1);
+
   $self;
 }
 
@@ -184,7 +203,6 @@ sub parse {
   my ($self, $text) = @_;
 
   $self->{image_area} = 0;
-  $self->{shouting} = 0;
   $self->{max_shouting} = 0;
   $self->{anchor_index} = -1;
   $self->{title_index} = -1;
@@ -237,10 +255,7 @@ sub parse {
 sub html_tag {
   my ($self, $tag, $attr, $num) = @_;
 
-  my $is_element = ($tag =~ /^(?:$re_strict|$re_loose|$re_other)$/io);
-
-  # general tracking
-  if ($is_element) {
+  if (exists $elements{$tag} || $tag =~ m@^(?:o|st):[\w-]+/?$@) {
     $self->{elements}++;
     $self->{elements_seen}++ if !exists $self->{inside}{$tag};
   }
@@ -251,7 +266,7 @@ sub html_tag {
 
   # check attributes
   for my $name (keys %$attr) {
-    if ($name !~ /^(?:$re_attr|$re_attr_extra)$/io) {
+    if (!exists $attributes{$name}) {
       $self->{attr_bad}++;
       $self->{attr_unique_bad}++ if !exists $self->{"attr_seen_$name"};
     }
@@ -261,38 +276,25 @@ sub html_tag {
   }
 
   # ignore non-elements
-  if ($is_element) {
-    if ($tag =~ /^(?:body|font|table|tr|th|td|big|small|basefont|marquee)$/) {
-      $self->text_style($tag, $attr, $num);
-    }
-    # TODO: cover "style" and CSS
-    if ($tag !~ /^(?:$re_attr_no_style)$/ && exists $attr->{style}) {
-      $self->css_style($tag, $attr, $num);
-    }
+  if (exists $elements{$tag}) {
+    text_style(@_) if exists $elements_text_style{$tag};
 
     # start tags
     if ($num == 1) {
-      $self->html_format($tag, $attr, $num);
-      $self->html_uri($tag, $attr, $num);
-      $self->html_tests($tag, $attr, $num);
+      html_whitespace(@_) if exists $elements_whitespace{$tag};
+      html_uri(@_) if exists $elements_uri{$tag};
+      html_tests(@_);
     }
     # end tags
-    elsif ($num == -1) {
+    else {
       $self->{closed_html} = 1 if $tag eq "html";
       $self->{closed_body} = 1 if $tag eq "body";
-    }
-    # shouting
-    if ($tag =~ /^(?:b|i|u|strong|em|big|center|h\d)$/) {
-      $self->{shouting} += $num;
-      if ($self->{shouting} > $self->{max_shouting}) {
-	$self->{max_shouting} = $self->{shouting};
-      }
     }
   }
 }
 
-sub html_format {
-  my ($self, $tag, $attr, $num) = @_;
+sub html_whitespace {
+  my ($self, $tag) = @_;
 
   # ordered by frequency of tag groups, note: whitespace is always "visible"
   if ($tag eq "br" || $tag eq "div") {
@@ -320,7 +322,7 @@ sub push_uri {
 }
 
 sub html_uri {
-  my ($self, $tag, $attr, $num) = @_;
+  my ($self, $tag, $attr) = @_;
 
   # ordered by frequency of tag groups
   if ($tag =~ /^(?:body|table|tr|td)$/) {
@@ -389,13 +391,6 @@ sub close_tag {
   }
 }
 
-# process CSS style attribute
-sub css_style {
-  my ($self, $tag, $attr, $num) = @_;
-
-  # TODO: something here
-}
-
 # body, font, table, tr, th, td, big, small
 sub text_style {
   my ($self, $tag, $attr, $num) = @_;
@@ -442,7 +437,7 @@ sub text_style {
 
     # tag attributes
     for my $name (keys %$attr) {
-      next unless (grep { $_ eq $tag } @{ $ok_attribute{$name} });
+      next unless exists $ok_attributes{$tag}{$name};
       if ($name eq "text" || $name eq "color") {
 	# two different names for text color
 	$new{fgcolor} = _name_to_rgb($attr->{$name});
@@ -525,6 +520,15 @@ sub html_font_invisible {
 sub html_tests {
   my ($self, $tag, $attr, $num) = @_;
 
+  # HTML shouting
+  if ($tag =~ /^(?:b|i|u|strong|em|big|center|h[1-6])$/) {
+    my $level = 0;
+    for my $shout (qw( b i u strong em big center h1 h2 h3 h4 h5 h6 )) {
+      next unless exists $self->{inside}{$shout};
+      $level += $self->{inside}{$shout};
+    }
+    $self->{max_shouting} = $level if $level > $self->{max_shouting};
+  }      
   if ($tag =~ /^(?:a|body|div|input|form|td|layer|area|img)$/i) {
     for my $key (keys %$attr) {
       if ($key =~ /\bon(?:contextmenu|load|resize|submit|unload)\b/i &&
