@@ -76,7 +76,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 $VERSION = "2.40";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.105 2002/07/27 11:24:57 msquadrat Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.106 2002/07/29 13:30:40 jmason Exp $';
 
 sub Version { $VERSION; }
 
@@ -179,7 +179,7 @@ sub new {
   bless ($self, $class);
 
   $DEBUG->{enabled} = 0;
-  if (defined $self->{debug} and $self->{debug}) { $DEBUG->{enabled} = 1 }
+  if (defined $self->{debug} && $self->{debug} > 0) { $DEBUG->{enabled} = 1; }
 
   # This should be moved elsewhere, I know, but SA really needs debug sets 
   # I'm putting the intialization here for now, move it if you want

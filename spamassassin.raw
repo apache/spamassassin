@@ -22,7 +22,7 @@ eval {
   require Mail::SpamAssassin;
   require Mail::SpamAssassin::NoMailAudit;
 
-  #getopts ('atc:p:ehVDxrPw:l:dLSWRM:F:C:') or usage();
+  #getopts ('atc:p:ehVDxrPw:l:dLSWRM:F:C:Z:') or usage();
 
   Getopt::Long::Configure("bundling");
   GetOptions(
@@ -46,7 +46,8 @@ eval {
 	     'debug!' => \$opt{'debug'}, 'D' => \$opt{'debug'},
 	     'version|V' => \$opt{'version'},
 	     'create-prefs!', => \$opt{'create-prefs'}, 'x' => sub {$opt{'create-prefs'}=0},
-	     'whitelist-factory|M=s' => \$opt{'whitelist-factory'}
+	     'whitelist-factory|M=s' => \$opt{'whitelist-factory'},
+             'debug-level|Z=s' => \$opt{'debug-level'}
   ) or usage(0, "Unknown option!");
 
   if (defined $opt{'help'}) { usage(0, "For more information read the spamassassin man page"); }
@@ -101,6 +102,18 @@ my $mail = Mail::SpamAssassin::NoMailAudit->new ( add_From_line => ($opt{'add-fr
     'debug'		=> $opt{'debug'},
     'dont_copy_prefs'   => ($opt{'create-prefs'} ? 0 : 1)
   });
+
+# set debug levels, if any specified (only useful for this command-line
+# tool really)
+  if (defined $opt{'debug-level'} && $opt{'debug-level'} ne '') {
+    my $levels = $opt{'debug-level'};
+    while ($levels =~ s/^(\S+)=(-?\d+),*//s) {
+      $Mail::SpamAssassin::DEBUG->{$1} = $2 + 0;
+    }
+    if ($levels ne '') {
+      usage(0, "--debug-level option bad!");
+    }
+  }
 
 # handle logging of received mails
   if ($opt{'log-to-mbox'}) {
@@ -235,11 +248,9 @@ sub pre_chew_for_mail_audit {
 
 
 # this is never called, it's just used to shut up the warnings
-#sub NEVERCALLED {
-#  @Mail::SpamAssassin::default_rules_path =
-#  			@Mail::SpamAssassin::default_userprefs_path;
-#}
-# I get warnings with it!
+sub NEVERCALLED {
+  $Mail::SpamAssassin::DEBUG = { };
+}
 
 # ---------------------------------------------------------------------------
 
@@ -273,9 +284,10 @@ Options:
  -d, --remove-markup		    Remove spam reports from a message
  -C file, --config-file=file        Set configuration file
  -p prefs, --prefs-file=file        Set user preferences file
- -D, --debug		            Print debugging messages
  -x, --nouser-config                Disable user config files
  -M, --whitelist-factory            Select whitelist factory
+ -D, --debug		            Print debugging messages
+ -Z area=nn,... , --debug-level=area=nn,...   Set debugging levels
 
 =back
 
@@ -381,6 +393,15 @@ Read user score preferences from I<prefs>.
 =item B<-D>, B<--debug>
 
 Produce diagnostic output.
+
+=item B<-Z> I<area=nn,...>, B<--debug-level>=I<area=nn,...>
+
+Set level of diagnostic output to produce.  I<area> is the area of the code
+to instrument, and I<nn> is a positive or negative number indicating the
+debug level or bitmask for that area of code.  For example, to produce
+diagnostic output on all rules that hit, use:
+
+        spamassassin -D -Zrulesrun=255
 
 =item B<-x>, B<--nouser-config>
 
