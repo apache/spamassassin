@@ -196,7 +196,7 @@ int main(int argc, char **argv){
 
   if(NULL == username)
   {
-    curr_user = getpwuid(getuid());
+    curr_user = getpwuid(geteuid());
     if (curr_user == NULL) {
       perror ("getpwuid failed");
             if(flags&SPAMC_CHECK_ONLY) { printf("0/0\n"); return EX_NOTSPAM; } else { return EX_OSERR; }

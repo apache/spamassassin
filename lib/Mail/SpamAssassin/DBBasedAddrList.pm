@@ -168,6 +168,7 @@ sub get_addr_entry {
 sub add_score {
     my($self, $entry, $score) = @_;
 
+    if (!defined $entry->{count}) { $entry->{count} = 0; }
     $entry->{count}++;
     $entry->{totscore} += $score;
 

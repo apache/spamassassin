@@ -74,6 +74,7 @@ sub check_address {
     }
   }
 
+  if(!defined $self->{entry}->{count}) { return undef; }
   if($self->{entry}->{count} == 0) { return undef; }
 
   return $self->{entry}->{totscore}/$self->{entry}->{count};
@@ -98,6 +99,7 @@ sub add_score {
   # AWL blacklist by adding a factor for the count itself.
   # 5 seems to allow folks who get (3,4,3,2,4,5,...) to dig
   # themselves out, after 6 messages.
+  $self->{entry}->{count} ||= 0;
   $score = $score - ($self->{entry}->{count} * 5);
 
   $self->{checker}->add_score($self->{entry},$score);

@@ -66,6 +66,7 @@ GetOptions(
 	'virtual-config|V=s' => \$opt{'virtual-config'},
 	'pidfile|r=s' => \$opt{'pidfile'},
 	'syslog|s=s' => \$opt{'syslog'},
+	'syslog-socket=s' => \$opt{'syslog-socket'},
 	'username|u=s' => \$opt{'username'},
 	'vpopmail!' => \$opt{'vpopmail'}, 'v' => \$opt{'vpopmail'},
 	'configpath|C=s' => \$opt{'configpath'},
@@ -140,10 +141,19 @@ sub logmsg; # forward declaration
 sub cleanupchildren;
 
 if ($log_facility ne 'stderr') {
-  eval { setlogsock('unix'); };
+  eval {
+    setlogsock('unix');
+    syslog('debug', 'spamd starting');  # required to actually open the socket
+  };
 
-  # Solaris sometimes doesn't support UNIX-domain syslog sockets apparently
-  if ($@) { eval { setlogsock('inet'); }; }
+  # Solaris sometimes doesn't support UNIX-domain syslog sockets apparently;
+  # same is true for perl 5.6.0 build on an early version of Red Hat 7!
+  if ($@) {
+    eval {
+      setlogsock('inet');
+      syslog('debug', 'spamd starting');
+    };
+  }
 
   # fall back to stderr if all else fails
   if ($@) {
@@ -771,8 +781,14 @@ sub logmsg
 
     openlog('spamd','cons,pid',$log_facility);
     my $str = join ('', @_);
-    syslog('info', '%s', $str);
     if ($opt{'debug'}) { warn "logmsg: $str\n"; }
+
+    eval {
+      syslog('info', '%s', $str);
+    };
+    if ($@) {
+      warn "syslog() failed, try using --syslog-socket switch ($@)\n";
+    }
 
     if ($main::SIGPIPE_RECEIVED) {
        # SIGPIPE recieved when writing to syslog - this has been
@@ -887,6 +903,7 @@ Options:
  -V, --virtual-config=dir           Enable Virtual configs (needs -x)
  -r pidfile, --pidfile              Write the process id to pidfile
  -s facility, --syslog=facility     Specify the syslog facility (default: mail)
+ --syslog-socket=type               How to connect to syslogd (default: unix)
  -u username, --username=username   Run as username
  -v, --vpopmail                     Enable vpopmail config
  -x, --nouser-config                Disable user config files
@@ -976,6 +993,17 @@ own maildir.
 Specify the syslog facility to use (default: mail).  If C<stderr> is specified,
 output will be written to stderr.  This is useful if you're running C<spamd>
 under the C<daemontools> package.
+
+=item B<--syslog-socket>=I<type>
+
+Specify how spamd should send messages to syslogd.  The options are C<unix>,
+C<inet> or C<none>.   The default is to try C<unix> first, falling back to
+C<inet> if perl detects errors in its C<unix> support.
+
+Some platforms, or versions of perl, are shipped with dysfunctional versions of
+the B<Sys::Syslog> package which do not support some socket types, so you may
+need to set this.  If you get error messages regarding B<__PATH_LOG> or similar
+from spamd, try changing this setting.
 
 =item B<-u> I<username>, B<--username>=I<username>
 
