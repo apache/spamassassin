@@ -562,7 +562,7 @@ sub expire_old_tokens_trapped {
   #   if the two values are out of balance, estimating atime is going to be funky, recompute
   #
   if ( (time() - $magic[4] > 86400*30) || ($magic[8] < 43200) || ($magic[9] < 1000) || ($newdelta < 43200) || ($ratio > 1.5) ) {
-    dbg("bayes: something fishy, calculating atime (first pass)");
+    dbg("bayes: Can't use estimation method for expiry, something fishy, calculating optimal atime delta (first pass)");
     my $start = 43200; # exponential search starting at ...?  1/2 day, 1, 2, 4, 8, 16, ...
     my %delta = (); # use a hash since an array is going to be very sparse
     my $max_expire_mult = 512; # $max_expire_mult * $start = max expire time (256 days), power of 2.
@@ -586,6 +586,12 @@ sub expire_old_tokens_trapped {
 	  last;
 	}
       }
+    }
+
+    dbg("bayes: atime\ttoken reduction");
+    dbg("bayes: ========\t===============");
+    for( my $i = 1; $i<=$max_expire_mult; $i<<=1 ) {
+	dbg("bayes: ".$start*$i."\t".(exists $delta{$i} ? $delta{$i} : 0));
     }
 
     # Now figure out which max_expire_mult value gives the closest results to goal_reduction, without
@@ -618,6 +624,7 @@ sub expire_old_tokens_trapped {
     }
 
     $newdelta = $start * $max_expire_mult;
+    dbg("bayes: First pass decided on $newdelta for atime delta");
   }
   else { # use the estimation method
     dbg("bayes: Can do estimation method for expiry, skipping first pass.");
