@@ -95,6 +95,12 @@ hostname-base load balancing.
 
 Send log messages to stderr, instead of to the syslog.
 
+=item B<-L> I<learn type>
+
+Send message to spamd for learning.  The C<learn type> can be either spam,
+ham or forget.  The exitcode for spamc will be set to 5 if the message
+was learned, or 6 if it was already learned.
+
 =item B<-p> I<port>
 
 In TCP/IP mode, connect to spamd server listening on given port 

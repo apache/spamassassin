@@ -1146,7 +1146,26 @@ sub accept_a_conn {
     if ($@) {
       service_timeout("($timeout_child second timeout while trying to $method)");
       $client->close();
-      return 1;
+      return 0;
+    }
+  }
+
+  elsif (/(LEARN) SPAMC\/(.*)/) {
+    my $method = $1;
+    my $version = $2;
+    eval {
+      Mail::SpamAssassin::Util::trap_sigalrm_fully(sub {
+						     die "child processing timeout";
+						   });
+      alarm $timeout_child if ($timeout_child);
+      learn($method, $version, $start, $remote_hostname, $remote_hostaddr);
+    };
+    alarm 0;
+
+    if ($@) {
+      service_timeout("($timeout_child second timeout while trying to $method)");
+      $client->close();
+      return 0;
     }
   }
 
@@ -1167,6 +1186,67 @@ sub accept_a_conn {
   return 1;
 }
 
+sub handle_setuid_to_user {
+
+  if ( $spamtest->{paranoid} ) {
+    logmsg("PARANOID: still running as root, closing connection.");
+    die;
+  }
+  logmsg( "Still running as root: user not specified with -u, "
+	  . "not found, or set to root.  Fall back to nobody." );
+  my ( $uid, $gid ) = ( getpwnam('nobody') )[ 2, 3 ];
+  $uid =~ /^(\d+)$/ and $uid = $1;    # de-taint
+  $gid =~ /^(\d+)$/ and $gid = $1;    # de-taint
+  
+  $) = "$gid $gid";                   # eGID
+  $> = $uid;                          # eUID
+  if ( !defined($uid) || ( $> != $uid and $> != ( $uid - 2**32 ) ) ) {
+    logmsg("fatal: setuid to nobody failed");
+    die;
+  }
+
+}
+
+sub parse_body {
+  my ($client, $expected_length) = @_;
+
+  my @msglines;
+  my $actual_length = 0;
+
+  while ( $_ = $client->getline() ) {
+    $actual_length += length($_);
+    push(@msglines, $_);    
+    last if (defined $expected_length && $actual_length >= $expected_length);
+  }
+  
+  # Now parse *only* the message headers; the MIME tree won't be generated 
+  # yet, it will be done on demand later on.
+  my $mail = $spamtest->parse(\@msglines, 0);
+
+  return ($mail, $actual_length);
+}
+
+sub parse_msgids {
+  my ($mail) = @_;
+
+  # Extract the Message-Id(s) for logging purposes.
+  my $msgid  = $mail->get_pristine_header("Message-Id");
+  my $rmsgid = $mail->get_pristine_header("Resent-Message-Id");
+  foreach my $id ((\$msgid, \$rmsgid)) {
+    if ( $$id ) {
+      while ( $$id =~ s/\([^\(\)]*\)// )
+         { }                           # remove comments and
+      $$id =~ s/^\s+|\s+$//g;          # leading and trailing spaces
+      $$id =~ s/\s+/ /g;               # collapse whitespaces
+      $$id =~ s/^.*?<(.*?)>.*$/$1/;    # keep only the id itself
+      $$id =~ s/[^\x21-\x7e]/?/g;      # replace all weird chars
+      $$id =~ s/[<>]/?/g;              # plus all dangling angle brackets
+      $$id =~ s/^(.+)$/<$1>/;          # re-bracket the id (if not empty)
+    }
+  }
+  return ($msgid, $rmsgid);
+}
+
 sub check {
   my ( $method, $version, $start_time, $remote_hostname, $remote_hostaddr ) = @_;
   local ($_);
@@ -1178,42 +1258,17 @@ sub check {
   if ( $version > 1.0 ) {
     my $hdrs = {};
 
-    # parse_headers returns !=0 on failure
-    return 1
-      if parse_headers(
-      $hdrs, $client,
-      {
-        'Content-length' => \&got_clen_header,
-        'User'           => \&got_user_header
-      }
-      );
+    return 0 unless (parse_headers($hdrs, $client));
 
     $expected_length = $hdrs->{expected_length};
   }
 
-  if ( $setuid_to_user && $> == 0 ) {
-    if ( $spamtest->{paranoid} ) {
-      logmsg("PARANOID: still running as root, closing connection.");
-      die;
-    }
-    logmsg( "Still running as root: user not specified with -u, "
-        . "not found, or set to root.  Fall back to nobody." );
-    my ( $uid, $gid ) = ( getpwnam('nobody') )[ 2, 3 ];
-    $uid =~ /^(\d+)$/ and $uid = $1;    # de-taint
-    $gid =~ /^(\d+)$/ and $gid = $1;    # de-taint
-
-    $) = "$gid $gid";                   # eGID
-    $> = $uid;                          # eUID
-    if ( !defined($uid) || ( $> != $uid and $> != ( $uid - 2**32 ) ) ) {
-      logmsg("fatal: setuid to nobody failed");
-      die;
-    }
-  }
+  handle_setuid_to_user if ($setuid_to_user && $> == 0);
 
   if ( $opt{'sql-config'} && !defined($current_user) ) {
     unless ( handle_user_sql('nobody') ) {
       service_unavailable_error("Error fetching user preferences via SQL");
-      return 1;
+      return 0;
     }
   }
 
@@ -1223,36 +1278,11 @@ sub check {
 
   my $resp = "EX_OK";
 
-  # Now read in message
-  my @msglines;
-  my $actual_length = 0;
-  while ( $_ = $client->getline() ) {
-    $actual_length += length($_);
-    push(@msglines, $_);    
-    last if (defined $expected_length && $actual_length >= $expected_length);
-  }
-  
-  # Now parse *only* the message headers; the MIME tree won't be generated 
-  # yet, check() will do this on demand later on.
-  my $mail = $spamtest->parse(\@msglines, 0);
-  # Free some mem.
-  undef @msglines;
+  # generate mail object from input
+  my ($mail, $actual_length) = parse_body($client, $expected_length);
 
-  # Extract the Message-Id(s) for logging purposes.
-  my $msgid  = $mail->get_pristine_header("Message-Id");
-  my $rmsgid = $mail->get_pristine_header("Resent-Message-Id");
-  foreach my $id ((\$msgid, \$rmsgid)) {
-    if ( $$id ) {
-      while ( $$id =~ s/\([^\(\)]*\)// )
-         { }                            # remove comments and
-      $$id =~ s/^\s+|\s+$//g;          # leading and trailing spaces
-      $$id =~ s/\s+/ /g;               # collapse whitespaces
-      $$id =~ s/^.*?<(.*?)>.*$/$1/;    # keep only the id itself
-      $$id =~ s/[^\x21-\x7e]/?/g;      # replace all weird chars
-      $$id =~ s/[<>]/?/g;              # plus all dangling angle brackets
-      $$id =~ s/^(.+)$/<$1>/;          # re-bracket the id (if not empty)
-    }
-  }
+  # attempt to fetch the message ids
+  my ($msgid, $rmsgid) = parse_msgids($mail);
 
   $msgid        ||= "(unknown)";
   $current_user ||= "(unknown)";
@@ -1268,7 +1298,7 @@ sub check {
       "(Content-Length mismatch: Expected $expected_length bytes, got $actual_length bytes)"
     );
     $mail->finish();
-    return 1;
+    return 0;
   }
 
   # Go ahead and check the message
@@ -1388,41 +1418,144 @@ sub check {
 
   $status->finish();    # added by jm to allow GC'ing
   $mail->finish();
+  return 1;
+}
+
+sub learn {
+  my ($method, $version, $start_time, $remote_hostname, $remote_hostaddr) = @_;
+  local ($_);
+  my $expected_length;
+  my $learn_type;
+  my $forget = 0;
+  my $isspam = 1;
+
+  my $hdrs = {};
+
+  return 0 unless (parse_headers($hdrs, $client));
+
+  $expected_length = $hdrs->{expected_length};
+  $learn_type = $hdrs->{learn_type};
+
+  &handle_setuid_to_user if ($setuid_to_user && $> == 0);
+
+  if ($opt{'sql-config'} && !defined($current_user)) {
+    unless (handle_user_sql('nobody')) {
+      service_unavailable_error("Error fetching user preferences via SQL");
+      return 0;
+    }
+  }
+
+  if ($opt{'ldap-config'} && !defined($current_user)) {
+    handle_user_ldap('nobody');
+  }
+
+  my $resp = "EX_OK";
+
+  # generate mail object from input
+  my ($mail, $actual_length) = parse_body($client, $expected_length);
+
+  if ( $mail->get_header("X-Spam-Checker-Version") ) {
+    my $new_mail = $spamtest->parse($spamtest->remove_spamassassin_markup($mail), 1);
+    $mail->finish();
+    $mail = $new_mail;
+  }
+
+  # attempt to fetch the message ids
+  my ($msgid, $rmsgid) = parse_msgids($mail);
+
+  $msgid        ||= "(unknown)";
+  $current_user ||= "(unknown)";
+
+  my $learn_type_desc;
+  my $learn_type_desc_past;
+
+  if ($learn_type == 0) {
+    $learn_type_desc = "learning spam";
+    $learn_type_desc_past = "learned spam";
+    $isspam = 1;
+  }
+  elsif ($learn_type == 1) {
+    $learn_type_desc = "learning ham";
+    $learn_type_desc_past = "learned ham";
+    $isspam = 0;
+  }
+  elsif ($learn_type == 2) {
+    $learn_type_desc = "forgetting";
+    $learn_type_desc_past = "forgot";
+    $forget = 1;
+  }
+
+  logmsg($learn_type_desc
+      . " message $msgid"
+      . ( $rmsgid ? " aka $rmsgid" : "" )
+      . " for ${current_user}:$>"
+      . ".");
+
+  # Check length if we're supposed to.
+  if (defined $expected_length && $actual_length != $expected_length) {
+    protocol_error("(Content-Length mismatch: Expected $expected_length bytes, got $actual_length bytes)");
+    $mail->finish();
+    return 0;
+  }
+
+  my $status = $spamtest->learn($mail, undef, $isspam, $forget);
+  my $hdr;
+
+  if ($status->did_learn()) {
+    $hdr .= "Learned: Yes";
+  }
+  else {
+    $hdr .= "Learned: No";
+  }
+
+  print $client "SPAMD/1.1 $resphash{$resp} $resp\r\n",
+    $hdr . "\r\n\r\n";
+
+  my $scantime = sprintf( "%.1f", time - $start_time );
+
+  logmsg("$learn_type_desc_past message for $current_user:$> in"
+      . " $scantime seconds, $actual_length bytes.");
+  $status->finish();    # added by jm to allow GC'ing
+  $mail->finish();
+  return 1;
 }
 
 ###########################################################################
 
 # generalised header parser.  
 sub parse_headers {
-  my ( $hdrs, $client, $subs ) = @_;
+  my ($hdrs, $client) = @_;
 
   # max 255 headers
   for my $hcount ( 0 .. 255 ) {
     my $line = $client->getline;
-    if ( !defined $line ) {
+    unless (defined $line) {
       protocol_error("(EOF during headers)");
-      return 1;
+      return 0;
     }
     $line =~ s/\r\n$//;
-    if ( !$line ) {
+    return 1 unless ($line);
+
+    my ($header, $value) = split (/:\s*/, $line, 2);
+    unless (defined $value) {
+      protocol_error("(header not in 'Name: value' format)");
       return 0;
     }
 
-    my ( $header, $value ) = split ( /:\s*/, $line, 2 );
-    if ( !defined $value ) {
-      protocol_error("(header not in 'Name: value' format)");
-      return 1;
+    if ($header eq 'Content-length') {
+      return 0 unless &got_clen_header($hdrs, $header, $value);
     }
-
-    my $ent = $subs->{$header};
-    if ( $ent && &{$ent}( $hdrs, $header, $value ) ) {
-      return 1;
+    elsif ($header eq 'User') {
+      return 0 unless &got_user_header($hdrs, $header, $value);
+    }
+    elsif ($header eq 'Learn-type') {
+      return 0 unless &got_learn_type_header($hdrs, $header, $value);
     }
   }
 
   # avoid too-many-headers DOS attack
   protocol_error("(too many headers)");
-  return 1;
+  return 0;
 }
 
 # We'll run handle user unless we've been told not
@@ -1439,19 +1572,19 @@ sub got_user_header {
 
   if ( $value !~ /^([\x20-\xFF]*)$/ ) {
     protocol_error("(User header contains control chars)");
-    return 1;
+    return 0;
   }
 
   $current_user = $1;
   if ($opt{'auth-ident'} && !auth_ident($current_user)) {
-    return 1;
+    return 0;
   }
 
   if ( !$opt{'user-config'} ) {
     if ( $opt{'sql-config'} ) {
       unless ( handle_user_sql($current_user) ) {
         service_unavailable_error("Error fetching user preferences via SQL");
-	return 1;
+	return 0;
       }
     }
     elsif ( $opt{'ldap-config'} ) {
@@ -1463,7 +1596,7 @@ sub got_user_header {
     elsif ( $opt{'setuid-with-sql'} ) {
       unless ( handle_user_setuid_with_sql($current_user) ) {
         service_unavailable_error("Error fetching user preferences via SQL");
-	return 1;
+	return 0;
       }
       $setuid_to_user = 1;    #to benefit from any paranoia.
     }
@@ -1477,21 +1610,36 @@ sub got_user_header {
     if ( $opt{'sql-config'} ) {
       unless ( handle_user_sql($current_user) ) {
         service_unavailable_error("Error fetching user preferences via SQL");
-	return 1;
+	return 0;
       }
     }
   }
-  return 0;
+  return 1;
 }
 
 sub got_clen_header {
   my ( $hdrs, $header, $value ) = @_;
   if ( $value !~ /^(\d*)$/ ) {
     protocol_error("(Content-Length contains non-numeric bytes)");
-    return 1;
+    return 0;
   }
   $hdrs->{expected_length} = $1;
-  return 0;
+  return 1;
+}
+
+sub got_learn_type_header {
+  my ($hdrs, $header, $value) = @_;
+  if ($value !~ /^(\d*)$/) {
+    protocol_error("(Learn-type contains non-numeric bytes)");
+    return 0;
+  }
+  my $type = $1;
+  if ($type != 0 && $type != 1 && $type != 2) {
+    protocol_error("(Learn-type contains invalid type)");
+    return 0;
+  }
+  $hdrs->{learn_type} = $type;
+  return 1;
 }
 
 sub protocol_error {

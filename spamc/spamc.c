@@ -140,7 +140,10 @@ print_usage(void)
         "                      [default: 250k]\n");
     usg("  -u username         User for spamd to process this message under.\n"
         "                      [default: current user]\n");
-    
+
+    usg("  -L learntype        Learn message as spam, ham or forget to\n"
+	"                      forget or unlearn the message.\n");
+	
     usg("  -B                  Assume input is a single BSMTP-formatted\n"
         "                      message.\n");
     
@@ -173,13 +176,13 @@ print_usage(void)
  */
 int
 read_args(int argc, char **argv,
-          int *max_size, char **username,
+          int *max_size, char **username, int *learntype,
           struct transport *ptrn)
 {
 #ifndef _WIN32
-    const char *opts = "-BcrRd:e:fyp:t:s:u:xSHU:ElhV";
+    const char *opts = "-BcrRd:e:fyp:t:s:u:L:xSHU:ElhV";
 #else
-    const char *opts = "-BcrRd:fyp:t:s:u:xSHElhV";
+    const char *opts = "-BcrRd:fyp:t:s:u:L:xSHElhV";
 #endif
     int opt;
     int ret = EX_OK;
@@ -280,6 +283,24 @@ read_args(int argc, char **argv,
                 *username = optarg;
                 break;
             }
+            case 'L':
+	    {
+	        flags |= SPAMC_LEARN;
+		if (strcmp(optarg,"spam") == 0) {
+		    *learntype = 0;
+		}
+	        else if (strcmp(optarg,"ham") == 0) {
+		    *learntype = 1;
+		}
+		else if (strcmp(optarg,"forget") == 0) {
+		    *learntype = 2;
+		}
+		else {
+		    libspamc_log(flags, LOG_ERR, "Please specifiy a legal learn type");
+		    ret = EX_USAGE;
+		}
+		break;
+	    }
 #ifndef _WIN32
             case 'U':
             {
@@ -320,7 +341,26 @@ read_args(int argc, char **argv,
             }
         }
     }
-    
+
+    // learning action has to block some parameters //
+    if (flags & SPAMC_LEARN) {
+        if (flags & SPAMC_CHECK_ONLY) {
+	    libspamc_log(flags, LOG_ERR, "Learning excludes check only");
+	    ret = EX_USAGE;
+	}
+	if (flags & SPAMC_REPORT_IFSPAM) {
+	    libspamc_log(flags, LOG_ERR, "Learning excludes report if spam");
+	    ret = EX_USAGE;
+	}
+	if (flags & SPAMC_REPORT) {
+	    libspamc_log(flags, LOG_ERR, "Learning excludes report");
+	    ret = EX_USAGE;
+	}
+	if (flags & SPAMC_SYMBOLS) {
+	    libspamc_log(flags, LOG_ERR, "Learning excludes symbols");
+	    ret = EX_USAGE;
+	}
+    }
     return ret;
 }
 
@@ -460,6 +500,7 @@ main(int argc, char *argv[])
     int out_fd = -1;
     int result;
     int ret;
+    int learntype = 0;
 
     transport_init(&trans);
 
@@ -476,12 +517,12 @@ main(int argc, char *argv[])
    /* Now parse the command line arguments. First, set the defaults. */
    max_size = 250 * 1024;
    username = NULL;
-   if ((ret = read_args(argc, argv, &max_size, &username, &trans)) != EX_OK) {
+   if ((ret = read_args(argc, argv, &max_size, &username, &learntype, &trans)) != EX_OK) {
        if (ret == EX_TEMPFAIL )
            ret = EX_OK;
        goto finish;
    }
-   
+
    ret = get_current_user(&username);
    if (ret != EX_OK)
        goto finish;
@@ -512,30 +553,44 @@ main(int argc, char *argv[])
     setmode(STDOUT_FILENO, O_BINARY);
 #endif
     ret = transport_setup(&trans, flags);
+
     if (ret == EX_OK) {
-	
+
 	ret = message_read(STDIN_FILENO, flags, &m);
-	
+
 	if (ret == EX_OK) {
-	    
-	    ret = message_filter(&trans, username, flags, &m);
+
+	    ret = message_filter(&trans, username, learntype, flags, &m);
+
 	    free(username); username = NULL;
 	    
 	    if (ret == EX_OK) {
+
 		get_output_fd(&out_fd);
 
-		if (message_write(out_fd, &m) >= 0) {
-
+		if (flags & SPAMC_LEARN) {
+		    if (m.is_learned == 1) {
+  		        printf("Message successfully un/learned\n");
+			ret = EX_LEARNED;
+		    }
+		    else {
+		        printf("Message was already un/learned\n");
+			ret = EX_NOTLEARNED;
+		    }
+		    message_cleanup(&m);
+		    goto finish;
+		}
+		else if (message_write(out_fd, &m) >= 0) {
 		    result = m.is_spam;
-                    if ((flags & SPAMC_CHECK_ONLY) && result != EX_TOOBIG) {
-			message_cleanup(&m);
+		    if ((flags & SPAMC_CHECK_ONLY) && result != EX_TOOBIG) {
+		        message_cleanup(&m);
 			ret = result;
 		    }
 		    else {
-			message_cleanup(&m);
-                        if (use_exit_code && result != EX_TOOBIG) {
-                            ret = result;
-                        }
+		        message_cleanup(&m);
+			if (use_exit_code && result != EX_TOOBIG) {
+			    ret = result;
+			}
 		    }
 		    goto finish;
 		}
@@ -558,6 +613,10 @@ main(int argc, char *argv[])
 	full_write(out_fd, 1, "0/0\n", 4);
 	message_cleanup(&m);
 	ret = EX_NOTSPAM;
+    }
+    else if (flags & SPAMC_LEARN ) {
+        message_cleanup(&m);
+	ret = EX_UNAVAILABLE;
     }
     else {
 	message_dump(STDIN_FILENO, out_fd, &m);
