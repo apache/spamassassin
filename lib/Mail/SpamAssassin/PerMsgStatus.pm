@@ -39,8 +39,8 @@ use Text::Wrap qw();
 use Mail::SpamAssassin::EvalTests;
 use Mail::SpamAssassin::AutoWhitelist;
 
-use vars	qw{
-  	@ISA $base64alphabet 
+use vars qw{
+  @ISA $base64alphabet
 };
 
 @ISA = qw();
@@ -53,11 +53,11 @@ sub new {
   my ($main, $msg) = @_;
 
   my $self = {
-    'main'		=> $main,
-    'msg'		=> $msg,
-    'hits'		=> 0,
-    'test_logs'		=> '',
-    'test_names_hit'	=> '',
+    'main'              => $main,
+    'msg'               => $msg,
+    'hits'              => 0,
+    'test_logs'         => '',
+    'test_names_hit'    => [ ],
     'tests_already_hit' => { },
   };
 
@@ -205,8 +205,7 @@ of the tests which were trigged by the mail.
 sub get_names_of_tests_hit {
   my ($self) = @_;
 
-  $self->{test_names_hit} =~ s/,\s*$//;
-  return $self->{test_names_hit};
+  return join(',', sort(@{$self->{test_names_hit}}));
 }
 
 ###########################################################################
@@ -484,8 +483,6 @@ sub rewrite_as_spam {
 
 sub rewrite_as_non_spam {
   my ($self) = @_;
-
-  $self->{test_names_hit} =~ s/,$//;
 
   # Add some headers...
 
@@ -870,7 +867,7 @@ sub get_decoded_stripped_body_text_array {
 
   if ($html) {
     # Convert <Q> tags
-    $text =~ s/<\/?Q\b[^>]*>/"/gis;
+    $text =~ s/<\/?Q\b[^>]*>/"/gis; #dummy"# because KWrite's highlighting sucks
   }
 
   if ($entities) {    
@@ -1853,7 +1850,7 @@ sub _handle_hit {
 
     $score = sprintf("%2.1f",$score);
     $self->{hits} += $score;
-    $self->{test_names_hit} .= $rule.',';
+    push(@{$self->{test_names_hit}}, $rule);
 
     if ($self->{conf}->{use_terse_report}) {
 	$self->{test_logs} .= sprintf ("* % 2.1f -- %s%s\n%s",
