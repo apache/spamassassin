@@ -1,6 +1,6 @@
 #!/bin/bash
 
-WEBDIR=/home/jm/public_html_spamassassin
+WEBDIR=/home/jm/spamassassin.taint.org
 
 vers=`build/get_version`
 
@@ -14,7 +14,7 @@ make text_html_doc
 make distcheck
 
 echo "Creating 'Changes' file from CVS change log..."
-cvs2cl.pl -f Changes
+# cvs2cl.pl -f Changes
 
 rm -f Mail-SpamAssassin-$vers.tar.gz Mail-SpamAssassin-$vers.zip
 make tardist
@@ -23,12 +23,8 @@ cp Mail-SpamAssassin-$vers.tar.gz $WEBDIR/devel
 make zipdist
 cp Mail-SpamAssassin-$vers.zip $WEBDIR/devel
 
-echo "Copying distribution into /dist on site..."
-(
-  cd $WEBDIR
-  tar xfz devel/Mail-SpamAssassin-$vers.tar.gz	\
-		2>&1 | grep -v 'Archive contains future timestamp'
-  rm -rf dist ; mv Mail-SpamAssassin-$vers dist
-)
+echo $vers > $WEBDIR/latest_version
+
+( cd $WEBDIR/devel ; cvs add *SpamAssassin* )
 
 ls -l $WEBDIR/devel
