@@ -1648,7 +1648,7 @@ sub find_all_addrs_in_line {
 ###########################################################################
 
 sub _dbg_info_helper {
-  my($facility, $prefix, $message) = ("generic", @_);
+  my ($facility, $prefix, $message) = ("generic", @_);
 
   if ($message =~ /^(\S+?):\s*(.*)/s) {
     $facility = $1;
