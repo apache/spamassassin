@@ -1721,6 +1721,10 @@ sub copy_config {
   $source ||= $self->{conf};
   $dest ||= $self->{conf};
 
+  # if the destination sed_path_cache exists, destroy it and only copy
+  # back what should be there...
+  delete $dest->{sed_path_cache};
+
   # Copy the source array to the dest array
   while(my($k,$v) = each %{$source}) {
     # we know the main value doesn't need to get copied.
