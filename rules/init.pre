@@ -28,3 +28,7 @@ loadplugin Mail::SpamAssassin::Plugin::Hashcash
 #
 loadplugin Mail::SpamAssassin::Plugin::SPF
 
+# MSExec - do simple checks to see if the message includes a Microsoft
+# executable file
+#
+#loadplugin Mail::SpamAssassin::Plugin::MSExec
