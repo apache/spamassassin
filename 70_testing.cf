@@ -471,19 +471,6 @@ header T_RCVD_DOUBLE_IP_3F	Received =~ /\bby\b.{0,4}\b\d{1,3}\.\d{1,3}\.\d{1,3}\
 header T_MIME_BOUND_DIGITS15	Content-Type =~ /boundary=\"\d{15,}\"/
 describe T_MIME_BOUND_DIGITS15	MIME boundary contains all digits
 
-header T_MSGID_SPAM_2_A		Message-Id =~ /<[A-Z]{7}-000[0-9]{10}\@[a-z]*>/
-describe T_MSGID_SPAM_2_A	Message-ID has known spammer pattern
-header T_MSGID_SPAM_2_B		MESSAGEID =~ /<[A-Z]{7}-000[0-9]{10}\@[a-z]*>/
-describe T_MSGID_SPAM_2_B	Message-ID has known spammer pattern
-
-# another Message-Id format (pick one as MSGID_SPAM_3)
-header T_MSGID_SPAM_3_5		Message-Id =~ /<[a-z]{5,}\@(\S+\.)+\S+>/
-describe T_MSGID_SPAM_3_5	Message-ID has known spammer pattern
-header T_MSGID_SPAM_3_6		Message-Id =~ /<[a-z]{6,}\@(\S+\.)+\S+>/
-describe T_MSGID_SPAM_3_6	Message-ID has known spammer pattern
-header T_MSGID_SPAM_3_7		Message-Id =~ /<[a-z]{7,}\@(\S+\.)+\S+>/
-describe T_MSGID_SPAM_3_7	Message-ID has known spammer pattern
-
 # some simple subject rules to catch a persistent spammer
 header T_SUBJ_XANAX		Subject =~ /x.{0,2}a.{0,2}n.{0,2}a.{0,2}x/i
 header T_SUBJ_VALIUM		Subject =~ /v.{0,2}a.{0,2}l.{0,2}i.{0,2}u.{0,2}m/i
