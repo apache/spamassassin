@@ -1,6 +1,6 @@
 #!/usr/bin/perl
 
-# $Id: rule_tests.t,v 1.6 2002/07/22 12:19:57 jmason Exp $
+# $Id: rule_tests.t,v 1.7 2002/08/28 17:19:27 jmason Exp $
 
 my $prefix = '.';
 if (-e 'test_dir') {            # running from test directory, not ..
@@ -47,8 +47,8 @@ foreach my $symbol ($sa->{conf}->regression_tests()) {
         my $conf = $msg->{conf};
 
         # set all scores to 0 so that by default no tests run
-        foreach my $symbol (keys %{$conf->{scores}}) {
-            $conf->{scores}->{$symbol} = 0;
+        foreach my $offsym (keys %{$conf->{scores}}) {
+            $conf->{scores}->{$offsym} = 0;
         }
 
         my $test_type = $conf->{test_types}->{$symbol};
@@ -68,6 +68,7 @@ foreach my $symbol ($sa->{conf}->regression_tests()) {
         }
 
         $conf->{scores}->{$symbol} = 1;
+        $msg->{are_subrules_scored} = 1;        # ensure tests of meta rules work
         $msg->check();
         ok( $msg->get_hits, ($ok_or_fail eq 'ok' ? 1 : 0),
                 "Test for '$symbol' (type: $test_type) against '$string'" );
@@ -97,7 +98,7 @@ sub set_header {
 sub get_header {
     my $self = shift;
     my ($header) = @_;
-    # warn("get_header: $header\n");
+    #warn("get_header: $header\n");
     if (exists $self->{headers}->{$header}) {
         return $self->{headers}->{$header};
     }

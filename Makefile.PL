@@ -3,15 +3,10 @@ require 5.005;
 # RPM builders, or people building in their home dirs:
 # set PREFIX (default = /usr)
 # set SYSCONFDIR (default = /etc)
-#
 # e.g. "perl Makefile.PL PREFIX=/home/jm/sausr SYSCONFDIR=/home/jm/saetc"
-
-# this is a good place to put -g, -R/usr/local/lib etc.
-my $MYCFLAGS		= '';
-
-# we should really migrate to an autoconf configure script...
-# ExtUtils::MakeMaker just can't handle files outside of the site_perl
-# tree.
+#
+# You can also override the automatic ./configure step by just
+# running that yourself first.
 
 ###########################################################################
 
@@ -42,13 +37,12 @@ WriteMakefile(
     'VERSION_FROM' => 'lib/Mail/SpamAssassin.pm', # finds $VERSION
 
     'EXE_FILES'	=> [ 'spamassassin', 'spamd/spamc',
-    		'spamd/spamd', 'spamproxy/spamproxyd' ],
+    		'spamd/spamd', ],
 
     'MAN1PODS' => {
 	    'spamassassin' => '$(INST_MAN1DIR)/spamassassin.$(MAN1EXT)',
 	    'spamd/spamc.pod' => '$(INST_MAN1DIR)/spamc.$(MAN1EXT)',
 	    'spamd/spamd' => '$(INST_MAN1DIR)/spamd.$(MAN1EXT)',
-	    'spamproxy/spamproxyd' => '$(INST_MAN1DIR)/spamproxyd.$(MAN1EXT)',
     },
 
     'PL_FILES' => { },
@@ -63,7 +57,6 @@ WriteMakefile(
                         'HTML::Parser' => 0,
                         'Text::Wrap' => 0,
                         'Time::Local' => 0,
-                        'Symbol' => 0,
                   },
 
     'dist' => {
@@ -72,7 +65,8 @@ WriteMakefile(
 	      },
 
     'clean' => { FILES =>
-	'pod2htm* spamassassin spamd/spamc spamd/spamd spamproxy/spamproxyd doc'
+	'pod2htm* spamassassin spamd/spamc spamd/spamd doc '.
+        'binaries.mk spamd/libspamc.so'
     },
 
     'AUTHOR' => 'Justin Mason <jm@jmason.org>',
@@ -100,30 +94,21 @@ sub MY::postamble {
   my $self = shift;
 
   my $sysconfdir = $self->{SYSCONFDIR};
-  $sysconfdir ||= '$(DESTDIR)/etc';
+  $sysconfdir ||= '/etc';
 
 qq#
 
 RULES		= $rulesfiles
-
-CFCC		= $Config::Config{cc}
-CFCCFLAGS	= $Config::Config{ccflags} $MYCFLAGS
-CFCCDLFLAGS	= $Config::Config{ccdlflags} $MYCFLAGS
-CFOPTIMIZE	= $Config::Config{optimize}
-CFLIBS		= $Config::Config{libs}
-CFLDFLAGS	= $Config::Config{ldflags}
-CFLDDLFLAGS	= $Config::Config{lddlflags}
-
 SYSCONFDIR      = $sysconfdir
 
 #. q#
 
-DEF_RULES_DIR	= $(DESTDIR)$(PREFIX)/share/spamassassin
-LOCAL_RULES_DIR	= $(DESTDIR)$(SYSCONFDIR)/mail/spamassassin
+DEF_RULES_DIR	= $(PREFIX)/share/spamassassin
+LOCAL_RULES_DIR	= $(SYSCONFDIR)/mail/spamassassin
 
 FIXPATHFLAGS    = -DDEF_RULES_DIR="$(DEF_RULES_DIR)" \
-                  -DLOCAL_RULES_DIR="$(LOCAL_RULES_DIR)" \
-                  -DINSTALLSITELIB="$(INSTALLSITELIB)"
+		  -DLOCAL_RULES_DIR="$(LOCAL_RULES_DIR)" \
+		  -DINSTALLSITELIB="$(INSTALLSITELIB)"
 
 pm_to_blib: spamassassin doc/.made
 
@@ -135,17 +120,14 @@ spamd/spamd: spamd/spamd.raw
 	$(PERL) fixpath.pl $(FIXPATHFLAGS) spamd/spamd.raw $@
 	$(CHMOD) $(PERM_RWX) $@
 
-spamproxy/spamproxyd: spamproxy/spamproxyd.raw
-	$(PERL) fixpath.pl $(FIXPATHFLAGS) spamproxy/spamproxyd.raw $@
-	$(CHMOD) $(PERM_RWX) $@
+spamd/libspamc.so: binaries.mk
+	$(MAKE) -f binaries.mk $@
 
-spamd/libspamc.so: spamd/libspamc.c
-	$(CFCC) $(CFCCDLFLAGS) $(CFOPTIMIZE) spamd/libspamc.c \
-			-o $@ $(CFLDDLFLAGS) $(CFLIBS)
+spamd/spamc: binaries.mk
+	$(MAKE) -f binaries.mk $@
 
-spamd/spamc: spamd/spamc.c spamd/libspamc.c
-	$(CFCC) $(CFCCFLAGS) $(CFOPTIMIZE) spamd/spamc.c spamd/libspamc.c \
-			-o $@ $(CFLDFLAGS) $(CFLIBS)
+binaries.mk: configure
+	./configure
 
 inst_cfs: $(LOCAL_RULES_DIR) $(DEF_RULES_DIR) $(LOCAL_RULES_DIR)/local.cf
 	$(RM_F) $(DEF_RULES_DIR)/*; \

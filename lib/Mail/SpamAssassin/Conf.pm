@@ -73,6 +73,7 @@ sub new {
   $class = ref($class) || $class;
   my $self = { }; bless ($self, $class);
 
+  $self->{errors} = 0;
   $self->{tests} = { };
   $self->{descriptions} = { };
   $self->{test_types} = { };
@@ -240,6 +241,7 @@ ignore it.
                 "the -c switch, or remove the old config files? ".
                 "Skipping this file";
         $skipfile = 1;
+        $self->{errors}++;
       }
       next;
     }
@@ -395,7 +397,11 @@ See above.
 =item required_hits n.nn   (default: 5)
 
 Set the number of hits required before a mail is considered spam.  C<n.nn> can
-be an integer or a real number.
+be an integer or a real number.  5.0 is the default setting, and is quite
+aggressive; it would be suitable for a single-user setup, but if you're an ISP
+installing SpamAssassin, you should probably set the default to be something
+much more conservative, like 8.0 or 10.0.  Experience has shown that you
+B<will> get plenty of user complaints otherwise!
 
 =cut
 
@@ -1512,7 +1518,15 @@ The highest score of any of the spamphrases.  Used for scaling.
 ###########################################################################
 
 failed_line:
-    dbg ("Failed to parse line in SpamAssassin configuration, skipping: $_");
+    my $msg = "Failed to parse line in SpamAssassin configuration, ".
+                        "skipping: $_";
+
+    if ($self->{lint_rules}) {
+      warn $msg."\n";
+    } else {
+      dbg ($msg);
+    }
+    $self->{errors}++;
   }
 }
 
@@ -1571,6 +1585,7 @@ sub finish_parsing {
     elsif ($type == $type_meta_tests) { $self->{meta_tests}->{$name} = $text; }
     else {
       # 70 == SA_SOFTWARE
+      $self->{errors}++;
       sa_die (70, "unknown type $type for $name: $text");
     }
   }

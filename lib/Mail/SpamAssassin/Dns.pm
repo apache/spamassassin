@@ -249,7 +249,7 @@ sub razor1_lookup {
     open (STDOUT, ">&STDERR");
   }
 
-  my $oldslash = $/;
+  $self->enter_helper_run_mode();
 
   {
     eval {
@@ -304,7 +304,7 @@ sub razor1_lookup {
     }
   }
 
-  $/ = $oldslash;		# argh! pollution!
+  $self->leave_helper_run_mode();
 
   # razor also debugs to stdout. argh. fix it to stderr...
   if ($Mail::SpamAssassin::DEBUG) {
@@ -361,7 +361,7 @@ sub razor2_lookup {
     open (STDOUT, ">&STDERR");
   }
 
-  my $oldslash = $/;
+  $self->enter_helper_run_mode();
 
   {
     eval {
@@ -426,7 +426,7 @@ sub razor2_lookup {
       }
   }
 
-  $/ = $oldslash;		# argh! pollution!
+  $self->leave_helper_run_mode();
 
   # razor also debugs to stdout. argh. fix it to stderr...
   if ($Mail::SpamAssassin::DEBUG) {
@@ -473,8 +473,6 @@ sub is_dcc_available {
   return 1;
 }
 
-use Symbol qw(gensym);
-
 sub dcc_lookup {
   my ($self, $fulltext) = @_;
   my $response = undef;
@@ -493,32 +491,31 @@ sub dcc_lookup {
   }
 
   timelog("DCC -> Starting test ($timeout secs max)", "dcc", 1);
+  $self->enter_helper_run_mode();
+
+  # use a temp file here -- open2() is unreliable, buffering-wise,
+  # under spamd. :(
+  my $tmpf = $self->create_fulltext_tmpfile($fulltext);
 
   eval {
-    my ($dccin, $dccout, $pid);
-
     local $SIG{ALRM} = sub { die "alarm\n" };
     local $SIG{PIPE} = sub { die "brokenpipe\n" };
 
     alarm($timeout);
 
-    $dccin = gensym();
-    $dccout = gensym();
+    my $pid = open(DCC, join(' ',
+                        $self->{conf}->{dcc_path}, '-H', 
+                        $self->{conf}->{dcc_options}, '< \''.$tmpf.'\' 2>&1 |'));
+    $response = <DCC>;
+    close DCC;
 
-    $pid = open2($dccout, $dccin, join(' ', $self->{conf}->{dcc_path}, '-H', $self->{conf}->{dcc_options}, '2>&1'));
-
-    print $dccin $$fulltext;
-    
-    close ($dccin);
-
-    $response = <$dccout>;
-        
     dbg("DCC: got response: $response");
 
-    waitpid ($pid, 0);
-
     alarm(0);
+    waitpid ($pid, 0);
   };
+
+  $self->leave_helper_run_mode();
 
   if ($@) {
     $response = undef;
@@ -537,7 +534,7 @@ sub dcc_lookup {
     }
   }
 
-  if ($response !~ /^X-DCC/) {
+  if (!defined $response || $response !~ /^X-DCC/) {
     dbg ("DCC -> check failed - no X-DCC returned (did you create a map file?): $response");
     timelog("dcc check failed", "dcc", 2);
     return 0;
@@ -603,8 +600,6 @@ sub is_pyzor_available {
   return 1;
 }
 
-use Symbol qw(gensym);
-
 sub pyzor_lookup {
   my ($self, $fulltext) = @_;
   my $response = undef;
@@ -621,32 +616,29 @@ sub pyzor_lookup {
   }
 
   timelog("Pyzor -> Starting test ($timeout secs max)", "pyzor", 1);
+  $self->enter_helper_run_mode();
+
+  # use a temp file here -- open2() is unreliable, buffering-wise,
+  # under spamd. :(
+  my $tmpf = $self->create_fulltext_tmpfile($fulltext);
 
   eval {
-    my ($pyzorin, $pyzorout, $pid);
-
     local $SIG{ALRM} = sub { die "alarm\n" };
     local $SIG{PIPE} = sub { die "brokenpipe\n" };
 
     alarm($timeout);
 
-    $pyzorin = gensym();
-    $pyzorout = gensym();
-
-    $pid = open2($pyzorout, $pyzorin, join(' ', $self->{conf}->{pyzor_path}, 'check', '2>&1'));
-
-    print $pyzorin $$fulltext;
-    
-    close ($pyzorin);
-
-    $response = <$pyzorout>;
-        
+    my $pid = open(PYZOR, join(' ',
+                    $self->{conf}->{pyzor_path}, 'check < \''.$tmpf.'\' 2>&1 |'));
+    $response = <PYZOR>;
+    close PYZOR;
     dbg("Pyzor: got response: $response");
 
-    waitpid ($pid, 0);
-
     alarm(0);
+    waitpid ($pid, 0);
   };
+
+  $self->leave_helper_run_mode();
 
   if ($@) {
     $response = undef;
@@ -824,6 +816,29 @@ done:
   # jm: leaving this in!
   dbg ("is DNS available? $IS_DNS_AVAILABLE");
   return $IS_DNS_AVAILABLE;
+}
+
+###########################################################################
+
+sub enter_helper_run_mode {
+  my ($self) = @_;
+
+  dbg ("entering helper-app run mode");
+  $self->{old_slash} = $/;              # Razor pollutes this
+  $self->{old_env_home} = $ENV{'HOME'};
+  if (defined $self->{main}->{home_dir_for_helpers}) {
+    $ENV{'HOME'} = $self->{main}->{home_dir_for_helpers};
+  }
+}
+
+sub leave_helper_run_mode {
+  my ($self) = @_;
+
+  dbg ("leaving helper-app run mode");
+  $/ = $self->{old_slash};
+  if (defined $self->{old_env_home}) {
+    $ENV{'HOME'} = $self->{old_env_home};
+  }
 }
 
 ###########################################################################

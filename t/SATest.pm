@@ -122,7 +122,7 @@ sub sdrun {
   system ("$spamcargs > log/$testname.out");
 
   $sa_exitcode = ($?>>8);
-  if ($sa_exitcode != 0) { return undef; }
+  if ($sa_exitcode != 0) { stop_spamd(); return undef; }
   &checkfile ("$testname.out", $read_sub);
 
   stop_spamd ();
