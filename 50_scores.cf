@@ -369,7 +369,9 @@ score X_OSIRU_SPAMWARE_SITE	     5.0
 score ROUND_THE_WORLD		     3.0
 score RCVD_IN_RFCI		     0.5
 score RCVD_IN_ORBS                   1.0
-#score RCVD_IN_ORBZ                   1.0
+score RCVD_IN_DSBL                   3.0
+score RCVD_IN_MULTIHOP_DSBL          1.0
+score RCVD_IN_UNCONFIRMED_DSBL      0.5
 
 # the ok_language configuration option will need to be set correctly
 # across each corpus for this score to be GA evolved
