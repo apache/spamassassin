@@ -783,6 +783,10 @@ sub ip_is_allowed {
 sub my_inet_aton { unpack("N", pack("C4", split(/\./, $_[0]))) }
 
 
+#-S, --stop-at-threshold            Stop tests after the threshold is reached
+#=item B<-S>, B<--stop-at-threshold>
+#Stop spam checking as soon as the spam threshold is reached, to increase
+#performance. This option also turns off Razor reporting.
 
 =head1 NAME
 
@@ -813,7 +817,6 @@ Options:
  -D, --debug                        Print debugging messages
  -L, --local                        Use local tests only (no DNS)
  -P, --paranoid                     Die upon user errors
- -S, --stop-at-threshold            Stop tests after the threshold is reached
 
 
 =head1 OPTIONS
@@ -929,11 +932,6 @@ Print debugging messages
 
 Perform only local tests on all mail.  In other words, skip DNS and other
 network tests.  Works the same as the C<-L> flag to C<spamassassin(1)>.
-
-=item B<-S>, B<--stop-at-threshold>
-
-Stop spam checking as soon as the spam threshold is reached, to increase
-performance. This option also turns off Razor reporting.
 
 =item B<-P>, B<--paranoid>
 

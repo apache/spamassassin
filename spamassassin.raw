@@ -119,12 +119,14 @@ eval {
     rules_filename	=> $opt{'config-file'},
     userprefs_filename => $opt{'prefs-file'},
     local_tests_only	=> $opt{'local'},
-    stop_at_threshold => $opt{'stop-at-threshold'},
     debug             => defined($opt{'debug-level'}),
     dont_copy_prefs   => ($opt{'create-prefs'} ? 0 : 1),
     DEF_RULES_DIR     => $DEF_RULES_DIR,
     LOCAL_RULES_DIR   => $LOCAL_RULES_DIR,
   });
+
+# currently offline:
+#stop_at_threshold => $opt{'stop-at-threshold'},
 
 # set debug levels, if any specified (only useful for this command-line
 # tool really)
@@ -255,6 +257,12 @@ sub NEVERCALLED {
 
 # ---------------------------------------------------------------------------
 
+# currently offline:
+# -S, --stop-at-threshold           Stop tests when the threshold is reached
+# =item B<-S>, B<--stop-at-threshold>
+# Stop spam checking as soon as the spam threshold is reached, to increase
+# performance. This option also turns off Razor reporting.
+
 =head1 NAME
 
 spamassassin - mail filter to identify spam using text analysis
@@ -273,7 +281,6 @@ Options:
 
  -P, --pipe                        Deliver to STDOUT (now default)
  -L, --local                       Local tests only (no online tests)
- -S, --stop-at-threshold           Stop tests when the threshold is reached
  -a, --auto-whitelist              Use auto-whitelists
  -M, --whitelist-factory           Select whitelist factory
  -W, --add-to-whitelist            Add addresses in mail to whitelist
@@ -375,11 +382,6 @@ Do only the ''local'' tests, ones that do not require an internet connection to
 operate.  Normally, SpamAssassin will try to detect whether you are connected
 to the net before doing these tests anyway, but for faster checks you may wish
 to use this.
-
-=item B<-S>, B<--stop-at-threshold>
-
-Stop spam checking as soon as the spam threshold is reached, to increase
-performance. This option also turns off Razor reporting.
 
 =item B<-d>, B<--remove-markup>
 
