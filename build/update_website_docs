@@ -1,4 +1,5 @@
-#!/bin/bash
+#!/bin/sh
+
 WEBDIR=/www/spamassassin.apache.org
 vers=3.0.x
 find . -name '.#*' -print | xargs rm -f # delete old CVS files
