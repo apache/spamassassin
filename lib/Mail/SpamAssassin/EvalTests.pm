@@ -1383,14 +1383,31 @@ sub priority_no_name {
 sub partial_rfc_2369 {
   my ($self) = @_;
 
-  my $score = 0;
-  $score++ if $self->get('List-Archive');
-  $score++ if $self->get('List-Help');
-  $score++ if $self->get('List-Owner');
-  $score++ if $self->get('List-Post');
-  $score++ if $self->get('List-Subscribe');
-  $score++ if $self->get('List-Unsubscribe');
-  return ($score == 1 || $score == 2);
+  my $all = $self->get('ALL');
+  my @headers = ('List-Help', 'List-Subscribe', 'List-Unsubscribe',
+		 'List-Post', 'List-Owner', 'List-Archive');
+  my %count;
+
+  foreach my $header (@headers) {
+    while ($all =~ s/^$header://im) {
+      $count{$header}++;
+    }
+  }
+
+  # without RFC 2369 fields
+  return 0 unless %count;
+
+  # header appears more than once (violates RFC 2369)
+  foreach my $count (values %count) {
+    return 1 if $count > 1;
+  }
+
+  # List-Help field is used (good RFC 2369 practice)
+  return 0 if exists $count{'List-Help'};
+
+  # List-Unsubscribe without much else (spammer mind trick)
+  my @count = keys %count;
+  return (exists $count{'List-Unsubscribe'} && $#count < 2);
 }
 
 ###########################################################################
