@@ -4,6 +4,11 @@
 
 require_version 2.40
 
+# support for Habeas sender-warranted email: http://www.habeas.com/
+header HABEAS_SWE               X-Habeas-SWE-3 =~ /like Habeas SWE \(tm\)/
+describe HABEAS_SWE             Uses the Habeas warrant mark (http://www.habeas.com/)
+tflags HABEAS_SWE               nice
+
 header GENUINE_EBAY_RCVD        eval:check_for_from_domain_in_received_headers('ebay.com', 'true')
 describe GENUINE_EBAY_RCVD      Message from eBay
 tflags GENUINE_EBAY_RCVD	nice

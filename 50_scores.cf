@@ -632,6 +632,7 @@ score RATWARE_OE_PI		3.0
 score RATWARE_OE_MALFORMED	1.0
 score SUB_FREE_OFFER            1.0
 score SUB_HELLO                 0.5
+score RCVD_FAKE_HELO_DOTCOM	4.0
 
 # End of GA-evolved scores.
 
@@ -697,12 +698,13 @@ score GENUINE_EBAY_RCVD		   -10.0
 
 score PATCH_CONTEXT_DIFF	    -5.0
 score PATCH_UNIFIED_DIFF	    -5.0
+score HABEAS_SWE                   -20.0
 score BUGZILLA_BUG		    -2.0
 score DEBIAN_BTS_BUG		    -4.0
 score MAILMAN_CONFIRM               -4.0
 score EVITE			    -10.0
 score YAHOO_MSGID_ADDED             -2.4
-score Q_FOR_SELLER			-4.0
+score Q_FOR_SELLER                  -4.0
 
 
 # GA never changes the whitelist/blacklist scores
@@ -722,4 +724,3 @@ score USER_IN_ALL_SPAM_TO      -100.0  # they want all spam, go figure :)
 
 # Missed scores:
 
-score RCVD_FAKE_HELO_DOTCOM	4.0
