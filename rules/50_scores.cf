@@ -611,13 +611,11 @@ score RCVD_IN_WHOIS_HIJACKED 0 1.0 0 1.0
 
 # DomainKeys
 ifplugin Mail::SpamAssassin::Plugin::DomainKeys
-score DK_VERIFIED -0.001
-# <gen:mutable>
-score DK_SIGNED 0.001
+score DK_POLICY_SIGNALL 0.001
 score DK_POLICY_SIGNSOME 0.001
 score DK_POLICY_TESTING 0.001
-score DK_POLICY_SIGNALL 0.001
-# </gen:mutable>
+score DK_SIGNED 0.001
+score DK_VERIFIED -0.001
 endif # Mail::SpamAssassin::Plugin::DomainKeys
 
 # Hashcash
