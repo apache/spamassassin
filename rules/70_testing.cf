@@ -277,6 +277,12 @@ header T_FROM_NUM_START_1_ANY		From:addr =~ /\b\d\S+\@/i
 header T_FROM_NUM_START_2_ANY		From:addr =~ /\b\d{2,}\S+\@/i
 header T_FROM_NUM_START_3_ANY		From:addr =~ /\b\d{3,}\S+\@/i
 header T_FROM_NUM_START_4_ANY		From:addr =~ /\b\d{4,}\S+\@/i
+header T_FROM_NUM_START_5_ANY		From:addr =~ /\b\d{5,}\S+\@/i
+header T_FROM_NUM_START_6_ANY		From:addr =~ /\b\d{6,}\S+\@/i
+header T_FROM_NUM_START_7_ANY		From:addr =~ /\b\d{7,}\S+\@/i
+header T_FROM_NUM_START_8_ANY		From:addr =~ /\b\d{8,}\S+\@/i
+header T_FROM_NUM_START_9_ANY		From:addr =~ /\b\d{9,}\S+\@/i
+header T_FROM_NUM_START_10_ANY		From:addr =~ /\b\d{10,}\S+\@/i
 #
 header T_FROM_NUM_END_5_ANY		From =~ /\b[a-z]+\d{5,}\@/i
 header T_FROM_NUM_END_6_ANY		From =~ /\b[a-z]+\d{6,}\@/i
