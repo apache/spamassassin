@@ -3056,7 +3056,10 @@ sub _check_spf {
     # in the Received headers...
     #
     dbg ("SPF: message came through >0 trusted relays, cannot use");
-    return;
+
+    # ah, try it anyway -- using the HELO
+    #return;
+    $lasthop = $self->{relays_untrusted}->[0];
 
   } else {
     $lasthop = $self->{relays_untrusted}->[0];
@@ -3069,7 +3072,10 @@ sub _check_spf {
     return;
   }
 
+  # Sep 29 2003 jm: try using just the HELO -- ignore MAIL FROM data
+  # since it's hard to get reliably.
   my $sender = ''; #$self->get ("EnvelopeFrom");
+
   my $ip = $lasthop->{ip};
   my $helo = $lasthop->{helo};
   my $query;
