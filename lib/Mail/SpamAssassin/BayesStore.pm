@@ -626,6 +626,12 @@ sub sync_journal {
 sub tok_touch_token {
   my ($self, $atime, $tok) = @_;
   my ($ts, $th, $oldatime) = $self->tok_get ($tok);
+
+  # If the new atime is < the old atime, ignore the update
+  # We figure that we'll never want to lower a token atime, so abort if
+  # we try.  (journal out of sync, etc.)
+  return if ( $oldatime >= $atime );
+
   $self->tok_put ($tok, $ts, $th, $atime);
 }
 
