@@ -6,6 +6,8 @@ package Mail::SpamAssassin::ArchiveIterator;
 use strict;
 eval "use bytes";
 
+use vars qw{ @ISA };
+
 @ISA = qw();
 
 ###########################################################################
