@@ -207,6 +207,10 @@ sub check_for_forged_yahoo_received_headers {
 
   if ($rcvd =~ /by web\S+\.mail\.yahoo\.com via HTTP/) { return 0; }
   if ($rcvd =~ /by smtp\.\S+\.yahoo\.com with SMTP/) { return 0; }
+  if ($rcvd =~
+      /from \[\d+\.\d+\.\d+\.\d+\] by \S+\.(?:groups|grp\.scd)\.yahoo\.com with NNFMP/) {
+    return 0;
+  }
 
   return 1;
 }
