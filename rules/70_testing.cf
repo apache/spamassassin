@@ -464,4 +464,61 @@ body T_INT_XANAX2	/(?!xanax)<X><A><N><A><X>/i
 body T_INT_PILLS2	/(?!pills)<P><I><L><L><S>/i
 body T_INT_PRICES2	/(?!prices)<P><R><I><C><E><S>/i
 replace_rules T_INT_AFFORDABLE2 T_INT_ANXIETY2 T_INT_BILLION2 T_INT_CELEBREX2 T_INT_CIALIS2 T_INT_CREDIT2 T_INT_ERECT2 T_INT_FREE2 T_INT_HUNDREDS2 T_INT_LEVITRA2 T_INT_MILF2 T_INT_MILLION2 T_INT_MONEY2 T_INT_MORTGAGE2 T_INT_OBLIGATION2 T_INT_OFFERS2 T_INT_PENIS2 T_INT_PHARMACY2 T_INT_PHENT2 T_INT_PRESCRIPT2 T_INT_PROFIT2 T_INT_REFINANCE2 T_INT_ROLEX2 T_INT_SOFTWARE2 T_INT_THOUSANDS2 T_INT_VALIUM2 T_INT_VIAGRA2 T_INT_VICODIN2 T_INT_VIOXX2 T_INT_XANAX2 T_INT_PILLS2 T_INT_PRICES2
-endif
+
+# bug 2166
+body T_OBFU_COST	/(?!cost)<C><O><S><T>/i
+body T_OBFU_MEDICATION	/(?!medication)<M><E><D><I><C><A><T><I><O><N>/i
+body T_OBFU_PATIENTS	/(?!patients)<P><A><T><I><E><N><T><S>/i
+body T_OBFU_PHARMACIES	/(?!pharmacies)<P><H><A><R><M><A><C><I><E><S>/i
+body T_OBFU_PLEASE	/(?!please)<P><L><E><A><S><E>/i
+body T_OBFU_REMOVE	/(?!remove)<R><E><M><O><V><E>/i
+body T_OBFU_SAVE	/(?!save)<S><A><V><E>/i
+replace_rules T_OBFU_COST
+replace_rules T_OBFU_MEDICATION
+replace_rules T_OBFU_PATIENTS
+replace_rules T_OBFU_PHARMACIES
+replace_rules T_OBFU_PLEASE
+replace_rules T_OBFU_REMOVE
+replace_rules T_OBFU_SAVE
+
+# bug 2584
+body T_OBFU_DICK	/(?!dick)<D><I><C><K>/i
+body T_OBFU_DOCTORS	/(?!doctors)<D><O><C><T><O><R><S>/i
+body T_OBFU_ENLARGE	/(?!enlarge)<E><N><L><A><R><G><E>/i
+body T_OBFU_GUARANTEE	/(?!guarantee)<G><U><A><R><A><N><T><E><E>/i
+replace_rules T_OBFU_DICK
+replace_rules T_OBFU_DOCTORS
+replace_rules T_OBFU_ENLARGE
+replace_rules T_OBFU_GUARANTEE
+
+# bug 2886 and bug 3478
+body T_OBFU_AMBIEN	/(?!ambien)<A><M><B><I><E><N>/i
+body T_OBFU_PHENTER	/(?!phenter)<P><H><E><N><T><E><R>/i
+body T_OBFU_PHERENTERMINE	/(?!pherentermine)<P><H><E><R><E><N><T><E><R><M><I><N><E>/i
+body T_OBFU_SOMA	/(?!soma)<S><O><M><A>/i
+body T_OBFU_TRAMADOL	/(?!tramadol)<T><R><A><M><A><D><O><L>/i
+replace_rules T_OBFU_AMBIEN
+replace_rules T_OBFU_PHENTER
+replace_rules T_OBFU_PHERENTERMINE
+replace_rules T_OBFU_SOMA
+replace_rules T_OBFU_TRAMADOL
+
+# bug 2989
+body T_OBFU_CLICK	/(?!click)<C><L><I><C><K>/i
+body T_OBFU_FOLLOW	/(?!follow)<F><O><L><L><O><W>/i
+body T_OBFU_MOVE	/(?!move)<M><O><V><E>/i
+body T_OBFU_PHARMAC	/(?!pharmac)<P><H><A><R><M><A><C>/i
+body T_OBFU_PICTURE	/(?!picture)<P><I><C><T><U><R><E>/i
+body T_OBFU_PUSH	/(?!push)<P><U><S><H>/i
+body T_OBFU_SUBMIT	/(?!submit)<S><U><B><M><I><T>/i
+body T_OBFU_VISIT	/(?!visit)<V><I><S><I><T>/i
+replace_rules T_OBFU_CLICK
+replace_rules T_OBFU_FOLLOW
+replace_rules T_OBFU_MOVE
+replace_rules T_OBFU_PHARMAC
+replace_rules T_OBFU_PICTURE
+replace_rules T_OBFU_PUSH
+replace_rules T_OBFU_SUBMIT
+replace_rules T_OBFU_VISIT
+
+endif   #ifplugin Mail::SpamAssassin::Plugin::ReplaceTags
