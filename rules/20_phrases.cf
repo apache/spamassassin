@@ -469,7 +469,7 @@ describe ORDER_NOW              Encourages you to waste no time in ordering
 body OFFSHORE_SCAM		/\boffshore\b.{0,20}(?:credit card|companies|account|financ|websites?)/i
 describe OFFSHORE_SCAM		Off Shore Scams
 
-body VACATION_SCAM		/\b(?:free|mini-?|dream|special).{0,10}vacation|vacation (?:offer|promotion|package|for two|getaway)/i
+body VACATION_SCAM		/\b(?=[dfms])(?:free|mini-?|dream|special).{0,10}vacation|vacation (?=[fgop])(?:offer|promotion|package|for two|getaway)/i
 describe VACATION_SCAM		Vacation Offers
 
 body WHY_PAY_MORE		/\bwhy pay more\b/i
@@ -681,7 +681,7 @@ describe LONG_DISTANCE		Long Distance Phone Offer
 body REVERSE_AGING	        /\breverses? aging\b/i
 describe REVERSE_AGING		Reverses Aging
 
-body HAIR_LOSS			/\b(?:thinn?ing|restore|grow|new) hair|\bhair loss/i
+body HAIR_LOSS			/\b(?=[gnrt])(?:thinn?ing|restore|grow|new) hair|\bhair loss/i
 describe HAIR_LOSS		Cures Baldness
 
 body CABLE_CONVERTER	        /\bcable (?:converter|descrambler)/i
@@ -936,7 +936,7 @@ describe OUR_PRIVACY_POLICY 	Mentions where their privacy policy is
 body CELL_PHONE_BOOST		/\b(?:(?:boost|antenna|reception).{0,16}(?:cell|mobile|phone|cord.?less)|(?:cell|mobile|phone|cord.?less).{0,16}(?:boost|antenna|reception))/i
 describe CELL_PHONE_BOOST	Talks about cell-phone signal improvement
 
-body OFFERS_ETC			/\b(?:(?:wish|want|unsub|reward|receive|recurring|remove|permission|partner|further|future|e.?mail|continue|click).{0,64}){2}.{0,8}(?:special|offer|coupon|discount)s?\b/i
+body OFFERS_ETC			/\b(?:(?=[cefmpruw])(?:wish|want|unsub|reward|receive|recurring|remove|permission|partner|further|future|e.?mail|continue|click).{0,64}){2}.{0,8}(?=[cdos])(?:special|offer|coupon|discount)s?\b/i
 describe OFFERS_ETC		Stop with the offers, coupons, discounts etc!
 
 body BANG_BOSS        		/\bboss!/i
