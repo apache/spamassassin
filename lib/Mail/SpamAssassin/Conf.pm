@@ -121,15 +121,19 @@ sub new {
   $self->{razor_timeout} = 10;
   $self->{rbl_timeout} = 30;
 
-  # this will be sedded by whitelist implementations, so ~ is OK
-  $self->{auto_whitelist_path} = "~/.spamassassin/auto-whitelist";
+  # this will be sedded by implementation code, so ~ is OK.
+  # using "__userstate__" is recommended for defaults, as it allows
+  # Mail::SpamAssassin module users who set that configuration setting,
+  # to receive the correct values.
+
+  $self->{auto_whitelist_path} = "__userstate__/auto-whitelist";
   $self->{auto_whitelist_file_mode} = '0600';	# as string, with --x bits
   $self->{auto_whitelist_factor} = 0.5;
 
-  $self->{bayes_path} = "~/.spamassassin/bayes";
+  $self->{bayes_path} = "__userstate__/bayes";
   $self->{bayes_file_mode} = "0700";	# as string, with --x bits
 
-  $self->{auto_learn} = 1;
+  $self->{auto_learn} = 0;
 
   $self->{rewrite_subject} = 0;
   $self->{spam_level_stars} = 1;
@@ -1460,7 +1464,7 @@ running of SpamAssassin.
 =item razor_config filename
 
 Define the filename used to store Razor's configuration settings.
-Currently this is the same value Razor itself uses: C<~/razor.conf>.
+Currently this is left to Razor to decide.
 
 =cut
 

@@ -257,6 +257,10 @@ for ( ; 1; close Client)
         # Since the pipe is never written, it will only become readable when
         # the other end closes it (on exit) so we could read the EOF. Thus, if
         # the pipe is readable the kid has exited.
+	#
+	# This kludge is necessary due to bugs in perl's signal handling and
+	# reentrancy which mean we can't just catch SIGCHLD in the normal way.
+	#
         next unless vec($rd, $pipe->fileno(), 1);
         vec($readvec, $pipe->fileno(), 1) = 0;
         delete ($pipes{$kid});
@@ -318,7 +322,7 @@ for ( ; 1; close Client)
 
 	chomp;
 
-        # It may be s SKIP message, meaning that the client (spamc)
+        # It may be a SKIP message, meaning that the client (spamc)
         # thinks it is too big to check.  So we don't do any real work
         # in that case.
 
@@ -332,286 +336,12 @@ for ( ; 1; close Client)
 
 	# It might be a CHECK message, meaning that we should just check
 	# if it's spam or not, then return the appropriate response.
-
-	elsif (/(CHECK|SYMBOLS|REPORT|REPORT_IFSPAM) SPAMC\/(.*)/)
-	{
-	    my $method = $1;
-	    my $version = $2;
-	    my $expected_length;
-
-            # Protocol version 1.0 and greater may have "User:" and
-            # "Content-length:" headers.  But they're not required.
-
-	    if($version > 1.0)
-	    {
-		while(1)
-                {
-                    $_ = <STDIN>;
-                    if(!defined $_)
-                    {
-                        protocol_error ("(EOF during headers)");
-                        return 1;
-                    }
-
-                    if (/^\r\n/s) { last; }
-
-                    # We'll run handle user unless we've been told not
-                    # to process per-user config files.  Otherwise
-                    # we'll check and see if we need to try SQL
-                    # lookups.  If $opt{'user-config'} is true, we need to try
-                    # their config file and then do the SQL lookup.
-                    # If $opt{'user-config'} IS NOT true, we skip the conf file and
-                    # only need to do the SQL lookup if $opt{'sql-config'} IS
-                    # true.  (I got that wrong the first time.)
-
-                    if (/^User: (.*)\r\n/)
-                    {
-                        $current_user = $1;
-                        if (!$opt{'user-config'})
-                        {
-                          if ($opt{'sql-config'}) {
-                            handle_user_sql($current_user);
-                          } elsif ($opt{'virtual-config'}) {
-                            handle_virtual_user($current_user);
-                          } elsif ($opt{'setuid-with-sql'}) {
-                            handle_user_setuid_with_sql($current_user);
-                            $setuid_to_user = 1; #to benefit from any paranoia.
-                          }
-                        } else {
-                          handle_user($current_user);
-                        }
-                    }
-		    if (/^Content-length: ([0-9]*)\r\n/i) {
-			$expected_length = $1;
-		    }
-                }
-	    }
-
-           if ( $setuid_to_user && $> == 0 )
-           {
-               if ($spamtest->{'paranoid'}) {
-                   logmsg "PARANOID: still running as root, closing connection.";
-                   die;
-               }
-                logmsg "Still running as root: user not specified with -u, ".
-		    "not found, or set to root.  Fall back to nobody.";
-		my $uid = getpwnam('nobody');
-               $> = $uid;
-               if ( !defined($uid) || ($> != $uid and $> != ($uid-2**32))) {
-                   logmsg "fatal: setuid to nobody failed";
-                   die;
-               }
-            }
-
-	    my $resp = "EX_OK";
-
-	    # Now read in message
-            my @msglines;
-            my $actual_length;
-            my $in_header = 1;
-            my $msgid;
-            for (<STDIN>) {
-                if ($in_header) {
-                    if (/^$/) {
-                        $in_header = 0;
-                        $msgid = '(unknown)' unless($msgid);
-                    }
-                    elsif (/^Message-Id:\s+(.*)$/i) {
-                        $msgid = $1;
-                        while($msgid =~ s/\([^\(\)]*\)//) {};    # remove comments and
-                        $msgid =~ s/^\s+|\s+$//g;                # leading and trailing spaces
-                        $msgid =~ s/\s.*$/(...)/;                # keep only the first token
-                    }
-                }
-                push(@msglines, $_);
-                $actual_length += length;
-            }
-
-            logmsg "checking message $msgid for $current_user:$>" .
-              ($expected_length ? ", expecting $expected_length bytes" : "") . ".";
-
-	    my $mail = Mail::SpamAssassin::NoMailAudit->new (
-                                data => \@msglines
-                         );
-
-	    # Check length if we're supposed to
-	    if($expected_length)
-	    {
-		if($actual_length != $expected_length) { protocol_error ("(Content-length mismatch: $expected_length vs. $actual_length)"); return 1; }
-	    }
-
-	    # Now use copy-on-writed (hopefully) SA object
-	    my $status = $spamtest->check($mail);
-	    my $msg_score = sprintf("%.1f",$status->get_hits);
-	    my $msg_threshold = sprintf("%.1f",$status->get_required_hits);
-	    my $was_it_spam;
-            my $response_header = "SPAMD/1.1 $resphash{$resp} $resp\r\n"; 
-            my $response_spam_status = "";
-	    if ($status->is_spam) {
-                $response_spam_status = $method eq "REPORT_IFSPAM" ? "Yes" : "True";
-		$was_it_spam = 'identified spam';
-	    }
-	    else
-	    {
-                $response_spam_status = $method eq "REPORT_IFSPAM" ? "No" : "False";
-		$was_it_spam = 'clean message';
-	    }
-            if ($method eq "REPORT_IFSPAM") {
-                $response_header .= "X-Spam-Status: $response_spam_status, hits=$msg_score required=$msg_threshold tests="
-                    . $status->get_names_of_tests_hit
-                    . " version=" . Mail::SpamAssassin::Version();
-            }
-            else
-            {
-                $response_header .= "Spam: $response_spam_status ; $msg_score / $msg_threshold";
-	    }
-            print $response_header, "\r\n\r\n";
-	    print $status->get_names_of_tests_hit,"\r\n" if ($method eq "SYMBOLS");
-	    print $status->get_report,"\r\n" if ($method eq "REPORT" or $method eq "REPORT_IFSPAM" and $status->is_spam);
-	    $current_user ||= '(unknown)';
-	    logmsg "$was_it_spam ($msg_score/$msg_threshold) for $current_user:$> in ".
-		sprintf("%.1f", time - $start) ." seconds, $actual_length bytes.";
-
-	    $status->finish();	# added by jm to allow GC'ing
-	}
-
         # If we get the PROCESS command, the client is going to send a
-        # message that we need to filter.  This is were all the real
-        # work is one.
+        # message that we need to filter.
 
-        elsif (/PROCESS SPAMC\/(.*)/)
+	elsif (/(PROCESS|CHECK|SYMBOLS|REPORT|REPORT_IFSPAM) SPAMC\/(.*)/)
 	{
-	    my $version = $1;
-	    my $expected_length;
-
-            # Protocol version 1.0 and greater may have "User:" and
-            # "Content-length:" headers.  But they're not required.
-
-	    if($version > 1.0)
-	    {
-		while(1)
-                {
-                    $_ = <STDIN>;
-                    if(!defined $_)
-                    {
-                        protocol_error ("(EOF during headers)");
-                        return 1;
-                    }
-
-                    if (/^\r\n/s) { last; }
-
-                    # We'll run handle user unless we've been told not
-                    # to process per-user config files.  Otherwise
-                    # we'll check and see if we need to try SQL
-                    # lookups.  If $opt{'user-config'} is true, we need to try
-                    # their config file and then do the SQL lookup.
-                    # If $opt{'user-config'} IS NOT true, we skip the conf file and
-                    # only need to do the SQL lookup if $opt{'sql-config'} IS
-                    # true.  (I got that wrong the first time.)
-
-                    if (/^User: (.*)\r\n/)
-                    {
-                        $current_user = $1;
-                        if (!$opt{'user-config'})
-                        {
-                          if ($opt{'sql-config'}) {
-                            handle_user_sql($current_user);
-                          } elsif ($opt{'virtual-config'}) {
-                            handle_virtual_user($current_user);
-                          } elsif ($opt{'setuid-with-sql'}) {
-                            handle_user_setuid_with_sql($current_user);
-                            $setuid_to_user = 1; #to benefit from any paranoia.
-                          }
-                        } else {
-                          handle_user($current_user);
-                        }
-                    }
-		    if (/^Content-length: ([0-9]*)\r\n/i) {
-			$expected_length = $1;
-		    }
-                }
-	    }
-
-            if ( $setuid_to_user && $> == 0 )
-            {
-               if ($spamtest->{paranoid}) {
-                   logmsg "PARANOID: still running as root, closing connection.";
-                   die;
-               }
-                logmsg "Still running as root: user not specified, ".
-		    "not found, or set to root.  Fall back to nobody.";
-		my $uid = getpwnam('nobody');
-               $> = $uid;
-               if ( !defined($uid) || ($> != $uid and $> != ($uid-2**32))) {
-                   logmsg "fatal: setuid to nobody failed";
-                   die;
-               }
-            }
-
-	    my $resp = "EX_OK";
-
-	    # Now read in message
-            my @msglines;
-            my $actual_length;
-            my $in_header = 1;
-            my $msgid;
-            for (<STDIN>) {
-                if ($in_header) {
-                    if (/^$/) {
-                        $in_header = 0;
-                        $msgid = '(unknown)' unless($msgid);
-                    }
-                    elsif (/^Message-Id:\s+(.*)$/i) {
-                        $msgid = $1;
-                        while($msgid =~ s/\([^\(\)]*\)//) {};    # remove comments and
-                        $msgid =~ s/^\s+|\s+$//g;                # leading and trailing spaces
-                        $msgid =~ s/\s.*$/(...)/;                # keep only the first token
-                    }
-                }
-                push(@msglines, $_);
-                $actual_length += length;
-            }
-
-            logmsg "processing message $msgid for $current_user:$>" .
-              ($expected_length ? ", expecting $expected_length bytes" : "") . ".";
-
-	    my $mail = Mail::SpamAssassin::NoMailAudit->new (
-                                data => \@msglines
-                         );
-
-	    # Check length if we're supposed to
-	    if($expected_length)
-	    {
-		if($actual_length != $expected_length) { protocol_error ("(Content-length mismatch: $expected_length vs. $actual_length)"); return 1; }
-	    }
-
-	    # Now use copy-on-writed (hopefully) SA object
-	    my $status = $spamtest->check($mail);
-	    $status->rewrite_mail; #if $status->is_spam;
-
-	    # Build the message to send back and measure it
-	    my $msg_resp = join '',$mail->header,"\n",@{$mail->body};
-	    my $msg_resp_length = length($msg_resp);
-	    if($version >= 1.2) # Spamc protocol 1.2 means it accepts content-length
-	    {
-		print "SPAMD/1.1 $resphash{$resp} $resp\r\n",
-		"Content-length: $msg_resp_length\r\n\r\n",
-		$msg_resp;
-	    }
-	    else # Earlier than 1.2 didn't accept content-length
-	    {
-		print "SPAMD/1.0 $resphash{$resp} $resp\r\n",
-		$msg_resp;
-	    }
-	    my $was_it_spam;
-	    if($status->is_spam) { $was_it_spam = 'identified spam'; } else { $was_it_spam = 'clean message'; }
-            my $msg_score = sprintf("%.1f",$status->get_hits);
-            my $msg_threshold = sprintf("%.1f",$status->get_required_hits);
-	    $current_user ||= '(unknown)';
-	    logmsg "$was_it_spam ($msg_score/$msg_threshold) for $current_user:$> in ".
-	        sprintf("%.1f", time - $start) ." seconds, $actual_length bytes.";
-
-	    $status->finish();	# added by jm to allow GC'ing
+	    check ($1, $2, $start);
 	}
 
         # If it was none of the above, then we don't know what it was.
@@ -620,8 +350,175 @@ for ( ; 1; close Client)
 	{
 	    protocol_error ($_);
 	}
-    };
+      };
     }
+}
+
+sub check {
+    my ($method, $version, $start) = @_;
+    local ($_);
+    my $expected_length;
+
+    # Protocol version 1.0 and greater may have "User:" and
+    # "Content-length:" headers.  But they're not required.
+
+    if($version > 1.0)
+    {
+	while(1)
+	{
+	    $_ = <STDIN>;
+	    if(!defined $_)
+	    {
+		protocol_error ("(EOF during headers)");
+		return 1;
+	    }
+
+	    if (/^\r\n/s) { last; }
+
+	    # We'll run handle user unless we've been told not
+	    # to process per-user config files.  Otherwise
+	    # we'll check and see if we need to try SQL
+	    # lookups.  If $opt{'user-config'} is true, we need to try
+	    # their config file and then do the SQL lookup.
+	    # If $opt{'user-config'} IS NOT true, we skip the conf file and
+	    # only need to do the SQL lookup if $opt{'sql-config'} IS
+	    # true.  (I got that wrong the first time.)
+
+	    if (/^User: (.*)\r\n/)
+	    {
+		$current_user = $1;
+		if (!$opt{'user-config'})
+		{
+		  if ($opt{'sql-config'}) {
+		    handle_user_sql($current_user);
+		  } elsif ($opt{'virtual-config'}) {
+		    handle_virtual_user($current_user);
+		  } elsif ($opt{'setuid-with-sql'}) {
+		    handle_user_setuid_with_sql($current_user);
+		    $setuid_to_user = 1; #to benefit from any paranoia.
+		  }
+		} else {
+		  handle_user($current_user);
+		}
+	    }
+	    if (/^Content-length: ([0-9]*)\r\n/i) {
+		$expected_length = $1;
+	    }
+	}
+    }
+
+   if ( $setuid_to_user && $> == 0 )
+   {
+       if ($spamtest->{paranoid}) {
+	   logmsg "PARANOID: still running as root, closing connection.";
+	   die;
+       }
+	logmsg "Still running as root: user not specified with -u, ".
+	    "not found, or set to root.  Fall back to nobody.";
+	my $uid = getpwnam('nobody');
+       $> = $uid;
+       if ( !defined($uid) || ($> != $uid and $> != ($uid-2**32))) {
+	   logmsg "fatal: setuid to nobody failed";
+	   die;
+       }
+    }
+
+    my $resp = "EX_OK";
+
+    # Now read in message
+    my @msglines;
+    my $actual_length;
+    my $in_header = 1;
+    my $msgid;
+    for (<STDIN>) {
+	if ($in_header) {
+	    if (/^$/) {
+		$in_header = 0;
+		$msgid = '(unknown)' unless($msgid);
+	    }
+	    elsif (/^Message-Id:\s+(.*)$/i) {
+		$msgid = $1;
+		while($msgid =~ s/\([^\(\)]*\)//) {};    # remove comments and
+		$msgid =~ s/^\s+|\s+$//g;                # leading and trailing spaces
+		$msgid =~ s/\s.*$/(...)/;                # keep only the first token
+	    }
+	}
+	push(@msglines, $_);
+	$actual_length += length;
+    }
+
+    $current_user ||= '(unknown)';
+    logmsg (($method eq 'PROCESS') ? 'processing' : 'checking')
+		. " message $msgid for $current_user:$>"
+		. ($expected_length ? ", expecting $expected_length bytes" : "")
+		. ".";
+
+    my $mail = Mail::SpamAssassin::NoMailAudit->new (
+			data => \@msglines
+		 );
+
+    # Check length if we're supposed to
+    if($expected_length)
+    {
+	if($actual_length != $expected_length) { protocol_error ("(Content-length mismatch: $expected_length vs. $actual_length)"); return 1; }
+    }
+
+    # Now use copy-on-writed (hopefully) SA object
+    my $status = $spamtest->check($mail);
+
+    my $msg_score = sprintf("%.1f",$status->get_hits);
+    my $msg_threshold = sprintf("%.1f",$status->get_required_hits);
+
+    my $response_spam_status = "";
+    my $was_it_spam;
+    if ($status->is_spam) {
+	$response_spam_status = $method eq "REPORT_IFSPAM" ? "Yes" : "True";
+	$was_it_spam = 'identified spam';
+    } else {
+	$response_spam_status = $method eq "REPORT_IFSPAM" ? "No" : "False";
+	$was_it_spam = 'clean message';
+    }
+
+    if ($method eq 'PROCESS') {
+        $status->rewrite_mail; #if $status->is_spam;
+
+        # Build the message to send back and measure it
+        my $msg_resp = join '',$mail->header,"\n",@{$mail->body};
+        my $msg_resp_length = length($msg_resp);
+        if($version >= 1.2) # Spamc protocol 1.2 means it accepts content-length
+	{
+	    print "SPAMD/1.1 $resphash{$resp} $resp\r\n",
+	   		 "Content-length: $msg_resp_length\r\n\r\n",
+	    $msg_resp;
+        }
+        else # Earlier than 1.2 didn't accept content-length
+        {
+	    print "SPAMD/1.0 $resphash{$resp} $resp\r\n", $msg_resp;
+	}
+    }
+    else		# $method eq 'CHECK' et al
+    {
+	my $response_header = "SPAMD/1.1 $resphash{$resp} $resp\r\n"; 
+
+	if ($method eq "REPORT_IFSPAM") {
+	    $response_header .= "X-Spam-Status: $response_spam_status, hits=$msg_score required=$msg_threshold tests="
+		. $status->get_names_of_tests_hit()
+		. " version=" . Mail::SpamAssassin::Version();
+	}
+	else
+	{
+	    $response_header .= "Spam: $response_spam_status ; $msg_score / $msg_threshold";
+	}
+
+	print $response_header, "\r\n\r\n";
+	print $status->get_names_of_tests_hit,"\r\n" if ($method eq "SYMBOLS");
+	print $status->get_report,"\r\n" if ($method eq "REPORT" or ($method eq "REPORT_IFSPAM" and $status->is_spam));
+    }
+
+    logmsg "$was_it_spam ($msg_score/$msg_threshold) for $current_user:$> in ".
+	sprintf("%.1f", time - $start) ." seconds, $actual_length bytes.";
+
+    $status->finish();	# added by jm to allow GC'ing
 }
 
 sub protocol_error {
@@ -746,6 +643,11 @@ sub handle_virtual_user
 	my $dir=$opt{'virtual-config'};
 	my $file="$dir/$username.prefs";
 
+	# TODO: assume that $dir/$username will be a writable directory we can
+	# use for AWL, Bayes dbs etc.
+	$spamtest->signal_user_changed ({ username => $username,
+					    user_dir => "$dir/$username" });
+
 	# If the user file is not there, look for a default.prefs
 	if(! -f $file) {
 		$file="$dir/default.prefs";
@@ -803,19 +705,19 @@ sub handle_user_setuid_with_sql
 sub create_default_cf_if_needed {
     my ($cf_file, $username, $userdir) = @_;
 
+    $spamtest->signal_user_changed ({ username => $username,
+					user_dir => $userdir });
+
     # Parse user scores, creating default .cf if needed:
     if( ! -r $cf_file && ! $spamtest->{'dont_copy_prefs'})
     {
 	logmsg "Creating default_prefs [$cf_file]";
 
-	#
-	# If vpopmail config enabled then pass virtual homedir onto create_default_prefs
-	# via $userdir
-	#
+	# If vpopmail config enabled then pass virtual homedir onto
+	# create_default_prefs via $userdir
 	$spamtest->create_default_prefs ($cf_file,$username,$userdir);
 
-	if ( ! -r $cf_file )
-	{
+	if ( ! -r $cf_file ) {
 	    logmsg "Couldn't create readable default_prefs for [$cf_file]";
 	}
     }
@@ -1045,6 +947,10 @@ found.
 
 Note that this B<requires> that B<-x> is used, and cannot be combined with
 SQL-based configuration.
+
+If a subdirectory is found in that directory, called B<I<username>>, and it is
+writable, it will be used to score auto-whitelist and/or Bayes databases for
+that user.
 
 =item B<-r> I<pidfile>, B<--pidfile>=I<pidfile>
 
