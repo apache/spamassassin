@@ -581,14 +581,18 @@ Examples:
 sub split_domain {
   my ($domain) = @_;
 
-  # drop any hostname parts, if we can.
-  my @domparts = split (/\./, $domain);
-  my $numparts = scalar @domparts;
-
   # turn "host.dom.ain" into "dom.ain".
-  my $chopped = '';
-  if ($numparts > 0) {
+  my $hostname = '';
+
+  if ($domain) {
     my $partsreqd;
+
+    # www..spamassassin.org -> www.spamassassin.org
+    $domain =~ tr/././s;
+
+    # leading/trailing dots
+    $domain =~ s/^\.+//;
+    $domain =~ s/\.+$//;
 
     if ($domain =~ /${FOUR_LEVEL_DOMAINS}/io)     # Fire-Dept.CI.Los-Angeles.CA.US
     { $partsreqd = 5; }
@@ -599,15 +603,18 @@ sub split_domain {
     else                                          # com
     { $partsreqd = 2; }
 
-    while ($numparts > $partsreqd) {
-      $domain =~ s/^([^\.]+\.)//;
-      $chopped .= $1;
-      $numparts--;
+    # drop any hostname parts, if we can.
+    my @domparts = split (/\./, $domain);
+
+    if (@domparts >= $partsreqd) {
+      # reset the domain to the last $partsreqd parts
+      $domain = join(".", splice(@domparts, -$partsreqd));
+      # chopped is everything else ...
+      $hostname = join(".", @domparts);
     }
   }
 
-  $chopped =~ s/\.$//;
-  ($chopped, $domain);
+  ($hostname, $domain);
 }
 
 =item $domain = trim_domain ($fqdn)
