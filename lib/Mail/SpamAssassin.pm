@@ -455,6 +455,7 @@ sub add_meta_depends {
   # @tokens now only consists of sub-rules
 
   foreach my $token (@tokens) {
+    die "meta test $meta depends on itself\n" if $token eq $meta;
     push(@rules, $token);
 
     # If the sub-rule is a meta-test, recurse
