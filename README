@@ -245,6 +245,13 @@ Other installation notes:
     it will be fed into Razor.
 
 
+  - The distribution now includes 'spamd', a daemonized version of the
+    perl script, and 'spamc', a low-overhead C client for this,
+    contributed by Craig R. Hughes.  This greatly reduces the overhead of
+    checking large volumes of mail with SpamAssassin.  Take a look in the
+    'spamd' directory for more details.
+
+
 Customising
 -----------
 
