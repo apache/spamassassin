@@ -36,7 +36,6 @@ package Mail::SpamAssassin::SHA1;
 require 5.002;
 use strict;
 use integer;
-#no warnings "uninitialized";   # not good on Perl 5.005
 
 use vars qw(@ISA @EXPORT);
 require Exporter;
@@ -59,6 +58,7 @@ sub sha1 {
 
 sub SHA1($) {
 
+local $^W = 0;
 local $_;
 my @a = (16..19); my @b = (20..39); my @c = (40..59); my @d = (60..79);
 my $data = $_[0];
