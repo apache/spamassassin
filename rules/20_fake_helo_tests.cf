@@ -28,6 +28,8 @@ header FAKE_HELO_USA_NET	eval:check_for_rdns_helo_mismatch("usa\.net","usa\.net"
 describe FAKE_HELO_USA_NET	Host HELO did not match rDNS: usa.net
 header FAKE_HELO_SHAW_CA	eval:check_for_rdns_helo_mismatch("shaw(?:\.ca|cable\.net)","shaw\.ca")
 describe FAKE_HELO_SHAW_CA	Host HELO did not match rDNS: shaw.ca
+header FAKE_HELO_NETSCAPE_COM	eval:check_for_rdns_helo_mismatch("(?:netscape|netcenter|aol)\.(?:com|net)","netscape\.com")
+describe FAKE_HELO_NETSCAPE_COM	Host HELO did not match rDNS: netscape.com
 header FAKE_HELO_NETZERO	eval:check_for_rdns_helo_mismatch("netzero\.net","netzero\.net")
 describe FAKE_HELO_NETZERO	Host HELO did not match rDNS: netzero.net
 header FAKE_HELO_MSN		eval:check_for_rdns_helo_mismatch("msn\.com","msn\.com")
