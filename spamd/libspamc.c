@@ -347,7 +347,7 @@ long message_write(int fd, struct message *m){
       case MESSAGE_BSMTP:
         total=full_write(fd, (unsigned char *) m->pre, m->pre_len);
         for(i=0; i<m->out_len; ){
-	    jlimit = (off_t) (sizeof(buffer)/sizeof(*buffer)-1);
+	    jlimit = (off_t) (sizeof(buffer)/sizeof(*buffer)-4);
             for(j=0; i < (off_t) m->out_len &&
                                 j < jlimit;)
             {
