@@ -11,6 +11,7 @@
 # --ms          find_missed('spam.log')
 # --single      folder is a single mail message
 # --loghits     log the text hit for patterns (useful for debugging)
+# --showdots    print a dot for each scanned message
 # --nokillfile  don't use the "QUICK HACK"
 #
 # options for maildir and mh-style folders
@@ -37,8 +38,8 @@ my $killfile_receiveds = qr{(?:
 
 ###########################################################################
 
-use vars qw($opt_c $opt_fork $opt_all $opt_head $opt_mh $opt_ms $opt_mn
-	    $opt_single $opt_sort $opt_tail $opt_nokillfile);
+use vars qw($opt_c $opt_f $opt_fork $opt_all $opt_head $opt_mh $opt_ms $opt_mn
+	    $opt_single $opt_sort $opt_tail $opt_showdots $opt_nokillfile);
 
 use FindBin;
 use lib "$FindBin::Bin/lib";
@@ -52,7 +53,7 @@ use Getopt::Long;
 $|++;
 
 GetOptions("c=s", "f=s", "fork", "all", "head=i", "mh", "ms", "mn", "single", "sort",
-	   "tail=i", "loghits", "nokillfile");
+	   "tail=i", "loghits", "showdots", "nokillfile");
 
 #use Devel::Peek;
 
@@ -88,7 +89,7 @@ my $iter = new Mail::ArchiveIterator ({
         'opt_sort' => $opt_sort,
         'opt_head' => $opt_head,
         'opt_tail' => $opt_tail,
-        'opt_all' => $opt_all
+        'opt_all' => $opt_all,
   });
 
 my @targets = @ARGV;
@@ -107,6 +108,7 @@ print "# M:SA version ".$spamtest->Version()."\n";
 print '# CVS tag: $Name:  $',"\n";
 $iter->set_function (\&wanted);
 $iter->run (@targets);
+print STDERR "\n" if ($opt_showdots);
 exit;
 
 ###########################################################################
@@ -175,6 +177,8 @@ sub wanted {
   undef $ma;		# clean 'em up
   undef $status;
 
+  print STDERR '.' if ($opt_showdots);
+
   #system ("ps alxww | grep mass-check | grep perl | grep -v grep");#JMD
 }
 
@@ -191,6 +195,7 @@ sub logkilled {
   chop ($to);
   chop ($subj);
   chop ($msgid);
+  print STDERR "\n" if ($opt_showdots);
   warn "# skipped killfiled message ($reason): from=$from to=$to subj=$subj msgid=$msgid id=$id\n";
 }
 
