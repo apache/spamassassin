@@ -148,7 +148,7 @@ sub handle_parser_error {
 
 sub razor2_lookup {
   my ($self, $permsgstatus, $fulltext) = @_;
-  my $timeout=$self->{main}->{conf}->{razor_timeout};
+  my $timeout=$self->{main}->{conf}->{razor_timeout} || 10;
 
   # Set the score for the ranged checks
   $self->{razor2_cf_score} = 0;
