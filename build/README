@@ -85,9 +85,9 @@ SPAMASSASSIN RELEASE PROCEDURE
   For a maintainance release (x.y.1, x.y.2):
 
     repo=https://svn.apache.org/repos/asf/spamassassin
-    svn copy -m "creating tag for release 2.62" \
-	$repo/branches/b2_6_0 \
-	$repo/tags/spamassassin_release_2_6_2
+    svn copy -m "creating tag for release 3.0.1" \
+	$repo/branches/3.0 \
+	$repo/tags/spamassassin_release_3_0_1
 
   For a trunk release (x.y.0):
 
@@ -156,10 +156,10 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 - (for full release builds) copy the tarballs to www.apache.org/dist:
 
+        version=X.Y.Z
         cp ~/site/released/Mail-SpamAssassin-$version.* \
             /www/www.apache.org/dist/spamassassin/source
 
-        version=X.Y.Z
         (
           cd /www/www.apache.org/dist/spamassassin
           ln -s source/Mail-SpamAssassin-$version.* .
