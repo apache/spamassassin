@@ -2267,8 +2267,14 @@ sub _test_log_line {
   my ($self, $msg) = @_;
   if ($self->{conf}->{use_terse_report}) {
     $self->{test_log_msgs} .= sprintf ("%9s [%s]\n", "", $msg);
-  } else {
-    $self->{test_log_msgs} .= sprintf ("%78s\n", "[$msg]");
+  }
+  else {
+    if (length($msg) > 49) {
+      $self->{test_log_msgs} .= sprintf ("%78s\n", "[$msg]");
+    }
+    else {
+      $self->{test_log_msgs} .= sprintf ("%26s [%s]\n", "", $msg);
+    }
   }
 }
 
