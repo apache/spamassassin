@@ -76,7 +76,7 @@ uri BARGAIN_URL			/bargain([sz]|-\S+)?\.(?:com|biz)/
 describe BARGAIN_URL		Includes a link to a likely spammer domain
 
 # this is somewhat loose, but results are good
-uri BIZ_TLD  			/\.biz(?:\/|$)/i
+uri BIZ_TLD  			/\.biz(?::\d+)?(?:\/|$)/i
 describe BIZ_TLD		Contains an URL in the BIZ top-level domain    
 
 uri INFO_TLD			/^(?:https?:\/\/|mailto:)[^\/]+\.info(?:\/|$)/i
