@@ -155,6 +155,7 @@ sub new {
   $self->{user_rules_to_compile} = 0;
   $self->{fold_headers} = 1;
   $self->{always_add_headers} = 1;
+  $self->{always_add_report} = 1;
 
   $self->{use_dcc} = 1;
   $self->{dcc_path} = undef; # Browse PATH
@@ -551,14 +552,30 @@ This can be disabled here.
 
 =item always_add_headers { 0 | 1 }      (default: 1)
 
-By default, X-Spam-Status (and optionally X-Spam-Level) will be added
-to all messages scanned by SpamAssassin.  If you don't want to add the
-headers to non-spam, set this value to 0.
+By default, B<X-Spam-Status>, B<X-Spam-Checker-Version>, (and optionally
+B<X-Spam-Level>) will be added to all messages scanned by SpamAssassin.  If you
+don't want to add the headers to non-spam, set this value to 0.  See also
+B<always_add_report>.
 
 =cut
 
    if (/^always[-_]add[-_]headers\s+(\d+)$/) {
      $self->{always_add_headers} = $1+0; next;
+   }
+
+
+=item always_add_report { 0 | 1 }	(default: 0)
+
+By default, mail tagged as spam includes a report, either in the headers or in
+an attachment (report_safe). If you set this to option to C<1>, the report will
+be included in the B<X-Spam-Report> header, even if the message is not tagged
+as spam.  This can be useful if you want to know what rules the mail triggered,
+and why it was not tagged as spam.  See also B<always_add_headers>.
+
+=cut
+
+   if (/^always[-_]add[-_]report\s+(\d+)$/) {
+     $self->{always_add_report} = $1+0; next;
    }
 
 =item spam_level_stars { 0 | 1 }        (default: 1)
