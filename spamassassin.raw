@@ -193,22 +193,78 @@ spamassassin - mail filter to identify spam using text analysis
 
 =head1 SYNOPSIS
 
-  spamassassin [option ...] < mailmessage
-  spamassassin -P [option ...] < mailmessage > output
+=over
 
-  -h		   print this help and terminate without further action
-  -P               pipe message through, instead of delivering to mail spool
-  -t               only testing; pipe message through and add extra report
-  -r               report this message as verified spam
-  -w fromaddr	   send a warning mail back to the sender of the message,
-                   notifying them that their message has been marked as spam
-		   (only useful if -r is used)
-  -l filename      Log all mail messages to a mbox-format file
-  -L               Local tests only, do not do internet-based checks
-  -d		   Remove SpamAssassin reports from a mail message and print
-  -c config        configuration file
-  -p prefs         user preferences file
-  -D               produce diagnostic output
+=item spamassassin [option ...] < mailmessage
+
+=item spamassassin -P [option ...] < mailmessage > output
+
+=back
+
+=head1 OPTIONS
+
+=over 4
+
+=item B<-P>
+
+Normally SpamAssassin will write the rewritten message to the mail spool by
+default.  The B<-P> parameter will cause it to pipe the output to STDOUT
+instead.
+
+=item B<-h>
+
+Print help message and exit.
+
+=item B<-t>
+
+Test mode.  Pipe message through and add extra report.
+
+=item B<-r>
+
+Report this message as verified spam.  This will submit the mail message read
+from STDIN to various spam-blocker databases, such as Vipul's Razor (
+http://razor.sourceforge.net/ ).
+
+If the message contains SpamAssassin markup, this will be stripped out
+automatically before submission.
+
+=item B<-w> I<fromaddr>
+
+This flag is only useful in conjunction with B<-r>.  It will send a reply mail
+to the sender of the tested mail, notifying them that their message has been
+trapped as spam, from the address supplied in I<fromaddr>.  See L</SPAM TRAPPING>.
+
+=item B<-l> I<filename>
+
+Log all mail messages that pass through the filter, to an mbox-format file
+named by I<filename>.  Handy for use with B<-r> and B<-w>.
+
+=item B<-L>
+
+Do only the ''local'' tests, ones that do not require an internet connection to
+operate.  Normally, SpamAssassin will try to detect whether you are connected
+to the net before doing these tests anyway, but for faster checks you may wish
+to use this.
+
+=item B<-d>
+
+Remove SpamAssassin markup (the "SpamAssassin results" report, X-Spam-Status
+headers, etc.) from the mail message.  The resulting message, which will be
+identical to the original, pre-SpamAssassin input, will be output to stdout.
+
+=item B<-c> I<config>
+
+Read configuration from I<config>.
+
+=item B<-p> I<prefs>
+
+Read user score preferences from I<prefs>.
+
+=item B<-D>
+
+Product diagnostic output.
+
+=back
 
 =head1 DESCRIPTION
 
@@ -224,87 +280,28 @@ user's own mail user-agent application.
 SpamAssassin also includes support for reporting spam messages to collaborative
 filtering databases, such as Vipul's Razor ( http://razor.sourceforge.net/ ).
 
-The default tagging operations that take place are detailed in the C<TAGGING>
-section below.
+The default tagging operations that take place are detailed in L</TAGGING>.
 
 =head1 CONFIGURATION FILES
 
 The rule base, text templates, and rule description text are loaded from the
-configuration file.  The default configuration file, if C<-c> is not specified,
-is C<$Config{installsitelib}/spamassassin.cf>.
+configuration file.  The default configuration file, if B<-c> is not specified,
+is F<$Config{installsitelib}/spamassassin.cf>.
 
 The user preferences (such as scores to attach to each rule), are loaded from
-the file specified in the C<-p> argument.  If this is not specified,
-C<~/.spamassassin.cf> is used if it exists, otherwise
-C<$Config{installsitelib}/spamassassin.prefs> is used.
-
-=head1 OPTIONS
-
-=over 4
-
-=item -P
-
-Normally SpamAssassin will write the rewritten message to the mail spool by
-default.  The C<-P> parameter will cause it to pipe the output to STDOUT
-instead.
-
-=item -t
-
-Test mode.
-
-=item -r
-
-Report this message as verified spam.  This will submit the mail message read
-from STDIN to various spam-blocker databases, such as Vipul's Razor (
-http://razor.sourceforge.net/ ).
-
-If the message contains SpamAssassin markup, this will be stripped out
-automatically before submission.
-
-=item -w fromaddr
-
-This flag is only useful in conjunction with C<-r>.  It will send a reply mail
-to the sender of the tested mail, notifying them that their message has been
-trapped as spam, from the address supplied in C<fromaddr>.  See the L<SPAM
-TRAPPING> section below for more details.
-
-=item -l filename
-
-Log all mail messages that pass through the filter, to an mbox-format file
-named by C<filename>.  Handy for use with C<-r> and C<-w>.
-
-=item -L
-
-Do only the ''local'' tests, ones that do not require an internet connection to
-operate.  Normally, SpamAssassin will try to detect whether you are connected
-to the net before doing these tests anyway, but for faster checks you may wish
-to use this.
-
-=item -d
-
-Remove SpamAssassin markup (the "SpamAssassin results" report, X-Spam-Status
-headers, etc.) from the mail message.  The resulting message, which will be
-identical to the original, pre-SpamAssassin input, will be output to stdout.
-
-=item -c config
-
-Read configuration from C<config>.
-
-=item -p prefs
-
-Read user score preferences from C<prefs>.
-
-=back
+the file specified in the B<-p> argument.  If this is not specified,
+F<~/.spamassassin.cf> is used if it exists, otherwise
+F<$Config{installsitelib}/spamassassin.prefs> is used.
 
 =head1 TAGGING
 
 The following two sections detail the tagging that takes place for
 spam messages, first of all, and for non-spam messages.
 
-Note that if you use the C<-t> argument, all mails will be tagged
+Note that if you use the B<-t> argument, all mails will be tagged
 as if they are spam messages.
 
-=head1 TAGGING FOR SPAM MAILS
+=head2 TAGGING FOR SPAM MAILS
 
 The modifications made are as follows:
 
@@ -334,7 +331,7 @@ The SpamAssassin report is added to top of the mail message body.
 
 =back
 
-=head1 TAGGING FOR NON-SPAM MAILS
+=head2 TAGGING FOR NON-SPAM MAILS
 
 =over 4
 
@@ -361,7 +358,7 @@ SpamAssassin lets you set them up as aliases, as follows:
 
 This will add any incoming mail messages straight into spam-tracking databases,
 such as Vipul's Razor; send an explanatory reply message to the sender, from
-the C<spamtrap1> address; then drop the mail into the bit-bucket.
+the I<spamtrap1> address; then drop the mail into the bit-bucket.
 
 The explanatory reply text is taken from the SpamAssassin configuration file,
 where it is stored in the C<spamtrap> lines.
@@ -375,9 +372,9 @@ If you want to keep a copy of the mails, use something like this:
 =back
 
 It is suggested you familiarise yourself with how MTAs run programs specified
-in aliases, if you plan to do this; for one thing, C<spamassassin> will not run
+in aliases, if you plan to do this; for one thing, B<spamassassin> will not run
 under your user id in this case.  If you are nervous about this, create a user
-for spamtrapping, and set up spamassassin in it's C<.forward> file.
+for spamtrapping, and set up spamassassin in it's F<.forward> file.
 
 =head1 INSTALLATION
 
@@ -392,9 +389,9 @@ be set.
 
 =head1 SEE ALSO
 
-C<Mail::SpamAssassin>
-C<Mail::Audit>
-C<Razor>
+Mail::SpamAssassin(3)
+Mail::Audit(3)
+Razor(3)
 
 =head1 AUTHOR
 
