@@ -1,8 +1,6 @@
 #!/usr/bin/perl -w
 
-#my $cffile = shift @ARGV;
-#$cffile ||= "../spamassassin.cf";
-
+my $argcffile = shift @ARGV;
 
 my @unmutated_tests = qw(
 BALANCE_FOR_LONG
@@ -106,7 +104,16 @@ sub readlogs {
 
 sub readscores {
   $scores = { };
-  my @files = <../rules/[0-9]*.cf>;
+
+  my @files;
+  if (!defined $argcffile) { $argcffile = "../rules"; }
+
+  if (-d $argcffile ) {
+    @files = <$argcffile/[0-9]*.cf>;
+  } else {
+    @files = ($argcffile);
+  }
+
   foreach $cffile (@files) {
   print "Reading scores from \"$cffile\"...\n";
   open (IN, "<$cffile") or warn "cannot read $cffile\n";

@@ -77,7 +77,7 @@ void writescores (FILE *fout) {
 
   for (i = 0; i < num_scores-1; i++) {
     score = scores[i];
-    fprintf (fout, "score %-30s %2.1f\n", score_names[i], score);
+    fprintf (fout, "score %-30s %2.2f\n", score_names[i], score);
   }
 }
 
@@ -164,7 +164,7 @@ void copygenometoscores (GARealGenome &genome) {
   for (i = 0; i < num_scores; i++) {
     if (is_mutatable[i]) {
       scores[i] = genome[i];
-      if (scores[i] == 0.0) { scores[i] = 0.1; }
+      if (scores[i] == 0.0) { scores[i] = 0.01; }
       else if (scores[i] < range_lo[i]) { scores[i] = range_lo[i]; }
       else if (scores[i] > range_hi[i]) { scores[i] = range_hi[i]; }
 
@@ -348,7 +348,7 @@ main (int argc, char **argv) {
 
   GARandomSeed();	// use time ^ $$
 
-  // allow scores from -0.5 to 4.0 inclusive, in jumps of 0.1
+  // allow scores from -0.5 to 4.0 inclusive, in jumps of 0.01
   // each test has it's own range within this
   GARealAlleleSetArray allelesetarray;
   fill_allele_set (&allelesetarray);
