@@ -129,32 +129,6 @@ meta T_FAKED_AOL		(__AOL_MUA && __MIME_HTML_ONLY)
 meta T_FAKED_THEBAT		(__THEBAT_MUA && __MIME_HTML_ONLY)
 meta T_FAKED_IMS		(__IMS_MUA && __MIME_HTML_ONLY)
 
-# 2003-03-04: quinlan (my final attempt at this idea)
-# bug 821: test for "good" RFC2369 headers (was: reverse SUSPECT_LIST_HEADERS)
-#
-# good genomes             non-good genomes
-#    S/O HAM-SPAM HUSPOA      S/O HAM-SPAM HUSPOA
-# ------ -------- ------   ------ -------- ------
-#   0.00       40 111100    19.12       84 010000
-#   0.00       71 111110    44.18     2132 000000
-#   0.00       96 011011   100.00       -1 011010
-#   1.21     1372 111101   100.00       -4 111000
-# (Note: above S/O ratios are not adjusted to be a 50/50 mix)
-#
-# quinlan results:
-# OVERALL%   SPAM%     HAM%     S/O    RANK   SCORE  NAME
-#   20076     8138    11938    0.405   0.00    0.00  (all messages)
-# 100.000  40.5360  59.4640    0.405   0.00    0.00  (all messages as %)
-#   8.029   0.2089  13.3607    0.015   0.90   -0.01  T_GOOD_LIST_HEADERS
-header	__LIST_HELP		exists:List-Help
-header	__LIST_UNSUBSCRIBE	exists:List-Unsubscribe
-header	__LIST_SUBSCRIBE	exists:List-Subscribe
-header	__LIST_POST		exists:List-Post
-header	__LIST_OWNER		exists:List-Owner
-header	__LIST_ARCHIVE		exists:List-Archive
-meta T_GOOD_LIST_HEADERS	(__LIST_UNSUBSCRIBE && __LIST_SUBSCRIBE && ((__LIST_HELP && __LIST_POST && !(__LIST_OWNER && __LIST_ARCHIVE)) || (!__LIST_HELP && !__LIST_POST && __LIST_OWNER && __LIST_ARCHIVE)))
-tflags T_GOOD_LIST_HEADERS	nice
-
 # more ratware
 # Mar 26 2003 jm: I don't think it is, actually!
 header T_RATWARE_POWERMTA	Received =~ /PowerMTA\(TM\)/
