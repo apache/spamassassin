@@ -163,16 +163,23 @@ native formats (RPMs, as apt-gettable packages, etc.), so you should
 be able to find these through those mechanisms, too, if you prefer.
 
 
-Required Perl/Module Versions
------------------------------
+Required Perl Interpreter
+-------------------------
 
-Perl 5.6.1, and its associated modules, are required for SpamAssassin
-3.0.0 and later.
+Perl 5.6.1 or a later version is required.
 
-In additional, the following non-standard modules are also required for
-SpamAssassin to run:
 
-  - Digest::SHA1    (from CPAN)
+Required Perl Modules
+---------------------
+
+In addition to the modules associated with Perl, some additional modules
+need to be installed or upgraded depending on the version of Perl that you
+are running.
+
+The list of required modules that do not ship with Perl and must be
+installed:
+
+  - Digest::SHA1 (from CPAN)
 
     The Digest::SHA1 module is used as a cryptographic hash for some
     tests and the Bayes subsystem.  It is also used by Razor2.
@@ -190,7 +197,7 @@ SpamAssassin to run:
     Debian: apt-get install libhtml-parser-perl
     Gentoo: emerge dev-perl/HTML-Parser
 
-  - Storable             (from CPAN)
+  - Storable (from CPAN)
 
     This is a required module if you use spamd and allow user
     configurations to be used (ie: you don't use -x, -u, -q/--sql-config,
@@ -202,16 +209,19 @@ SpamAssassin to run:
     Debian: apt-get install libstorable-perl
     Gentoo: emerge dev-perl/Storable
 
-Optional Additional Modules
----------------------------
+Optional Modules
+----------------
 
 In addition, the following modules will be used for some checks, if
-available.  If they are not available, SpamAssassin will still work, just
-not as effectively -- some of the spam-detection tests will have to be
+available and the version is high enough.  If they are not available or if
+their version is too low, SpamAssassin will still work, just not as
+effectively because some of the spam-detection tests will have to be
 skipped.
 
+Note: SpamAssassin will not warn you if these are installed, but the
+version is too low for them to be used.
 
-  - DB_File         (from CPAN, included in many distributions)
+  - DB_File (from CPAN, included in many distributions)
 
     Used to store data on-disk, for the Bayes-style logic and
     auto-whitelist.  *Much* more efficient than the other standard Perl
@@ -222,7 +232,7 @@ skipped.
     http://wiki.apache.org/spamassassin/DbFileSleepBug for details.
 
 
-  - Net::DNS        (from CPAN)
+  - Net::DNS (from CPAN)
 
     Used for all DNS-based tests (SBL, XBL, SpamCop, DSBL, etc.),
     perform MX checks, and is also used when manually reporting spam to
@@ -236,12 +246,12 @@ skipped.
       - version 0.46 or higher on Windows systems
 
 
-  - Net::SMTP        (from CPAN)
+  - Net::SMTP (from CPAN)
 
     Used when manually reporting spam to SpamCop.
 
 
-  - Mail::SPF::Query     (from CPAN)
+  - Mail::SPF::Query (from CPAN)
 
     Used to check DNS Sender Policy Framework (SPF) records to fight email
     address forgery and make it easier to identify spams.
@@ -249,13 +259,13 @@ skipped.
     Net::DNS version 0.34 or higher is required to use Mail::SPF::Query.
 
 
-  - IP::Country::Fast    (from CPAN)
+  - IP::Country::Fast (from CPAN)
 
     Used by the RelayCountry plugin (not enabled by default) to determine
     the domain country codes of each relay in the path of an email.
 
 
-  - Razor           http://razor.sourceforge.net/
+  - Razor (from http://razor.sourceforge.net/)
 
     Used to check message signatures against Vipul's Razor collaborative
     filtering network.  Razor is not available from CPAN -- you have to
@@ -280,7 +290,42 @@ skipped.
 
     More info is at http://wiki.apache.org/spamassassin/UsingRazor
 
-  - DCC             http://www.rhyolite.com/anti-spam/dcc/
+  - Net::Ident (from CPAN)
+
+    If you plan to use the --auth-ident option to spamd, you will need
+    to install this module.
+
+
+  - IO::Socket::SSL (from CPAN)
+
+    If you wish to use SSL encryption to communicate between spamc and
+    spamd (the --ssl option to spamd), you need to install this
+    module. (You will need the OpenSSL libraries and use the
+    ENABLE_SSL="yes" argument to Makefile.PL to build and run an SSL
+    compatibile spamc.)
+
+
+  - Time::HiRes (from CPAN)
+
+    If this module is installed, the processing times are logged/reported
+    more precisely.
+
+
+  - DBI *and* DBD driver/modules for your database (from CPAN)
+
+    If you intend to use SpamAssassin with an SQL database backend for
+    user configuration data, Bayes storage, or AWL storage, you will need
+    to have these installed; both the basic DBI module and the driver for
+    your database.
+
+
+Optional Programs
+-----------------
+
+These are non-Perl programs that can increase the overall effectiveness of
+SpamAssassin if they are installed.
+
+  - DCC (from http://www.rhyolite.com/anti-spam/dcc/)
 
     DCC (Distributed Checksum Clearinghouse) is a system similar to Razor.
     It supports fuzzy checksums and therefore detects some more spams than
@@ -298,9 +343,9 @@ skipped.
 
 	./configure \
 	    --bindir=$(PREFIX)/bin \
-            --libexecdir=$(PREFIX)/lib/dcc \
-            --mandir=$(PREFIX)/man \
-            --homedir=/var/lib/dcc
+	    --libexecdir=$(PREFIX)/lib/dcc \
+	    --mandir=$(PREFIX)/man \
+	    --homedir=/var/lib/dcc
 
     Finally call cdcc:
 
@@ -338,7 +383,7 @@ skipped.
 
     More info is at http://wiki.apache.org/spamassassin/UsingDcc
 
-  - Pyzor           http://pyzor.sourceforge.net/
+  - Pyzor (from http://pyzor.sourceforge.net/)
 
     Used to check message signatures against the Pyzor collaborative
     filtering network.  Pyzor was initially "a Python implementation of
@@ -347,7 +392,7 @@ skipped.
 
     Pyzor requires at least Python 2.2.1 which can be found at
     http://www.python.org/ .
- 
+
     To install Pyzor, download the latest revision from
     https://sourceforge.net/project/showfiles.php?group_id=50000 and
     perform the following steps:
@@ -358,7 +403,7 @@ skipped.
 	python setup.py install
 
     For a single user installation, change the last line to
-        python setup.py install --home=$HOME
+	python setup.py install --home=$HOME
 
     Note that your system might install the modules and scripts with
     non-world-readable permissions.  Correct this with a command such as:
@@ -375,34 +420,6 @@ skipped.
     default.
 
     More info is at http://wiki.apache.org/spamassassin/UsingPyzor
-
-  - Net::Ident      (from CPAN)
-
-    If you plan to use the --auth-ident option to spamd, you will need
-    to install this module.
-
-
-  - IO::Socket::SSL (from CPAN)
-
-    If you wish to use SSL encryption to communicate between spamc and
-    spamd (the --ssl option to spamd), you need to install this
-    module. (You will need the OpenSSL libraries and use the
-    ENABLE_SSL="yes" argument to Makefile.PL to build and run an SSL
-    compatibile spamc.)
-
-
-  - Time::HiRes    (from CPAN)
-
-    If this module is installed, the processing times are logged/reported
-    more precisely.
-
-
-  - DBI *and* DBD driver/modules for your database  (from CPAN)
-
-    If you intend to use SpamAssassin with an SQL database backend for
-    user configuration data, Bayes storage, or AWL storage, you will need
-    to have these installed; both the basic DBI module and the driver for
-    your database.
 
 
 What Next?
