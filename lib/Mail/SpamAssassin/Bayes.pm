@@ -392,6 +392,7 @@ sub tokenize_line {
 	$wc += scalar @toks;
       }
       elsif (CHEW_BODY_URIS && $token =~ /\S\.[a-z]/i) {
+	push (@{$self->{tokens}}, "UD:".$token); $wc++; # the full token
 	my $bit = $token; while ($bit =~ s/^[^\.]+\.(.+)$/$1/gs) {
 	  push (@{$self->{tokens}}, "UD:".$1); $wc++;	# UD = URL domain
 	}
