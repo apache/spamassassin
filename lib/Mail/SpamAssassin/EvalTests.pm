@@ -2054,14 +2054,15 @@ sub _check_mime_header {
     $name =~ s/.*\.//;
     $ctype =~ s@/(x-|vnd\.)@/@;
     if (   ($name =~ /^html?$/ && $ctype !~ m@^text/(?:html|xml|plain)@)
-	|| ($name =~ /^jpe?g$/ && $ctype !~ m@^image/p?jpeg@
-                               && $ctype !~ m@^application/mac-binhex@)
+	|| ($name =~ /^jpe?g$/ && $ctype !~ m@^image/p?jpe?g@
+	    && $ctype !~ m@^application/mac-binhex@)
 	|| ($name eq "pdf" && $ctype ne "application/pdf")
 	|| ($name eq "gif" && $ctype ne "image/gif"
-                               && $ctype !~ m@^application/mac-binhex@)
-	|| ($name eq "txt" && $ctype !~ m@^text/@)      # text/english is OK, it seems
+	    && $ctype !~ m@^application/mac-binhex@)
+	|| ($name eq "txt" && $ctype !~ m@^text/@)	# text/english is OK
 	|| ($name eq "vcf" && $ctype ne "text/vcard")
-	|| ($name =~ /^(?:bat|com|exe|pif|scr|swf|vbs)$/ && $ctype !~ m@^application/@)
+	|| ($name =~ /^(?:bat|com|exe|pif|scr|swf|vbs)$/
+	    && $ctype !~ m@^application/@)
 	|| ($name eq "doc" && $ctype !~ m@^application/.*word$@)
 	|| ($name eq "ppt" && $ctype !~ m@^application/.*(?:powerpoint|ppt)$@)
 	|| ($name eq "xls" && $ctype !~ m@^application/.*excel$@)
