@@ -1,43 +1,4 @@
-# SpamAssassin rules file.
-#
-# The format is easy to grok:
-#
-#   report line-of-spam-report-text
-#       (some template items supported are:)
-#       _HITS_: the number of hits the message triggered
-#       _REQD_: the required hits to be considered spam
-#       _SUMMARY_: the full details of what hits were triggered
-#       _VER_: SpamAssassin version
-#       _HOME_: SpamAssassin home URL
-#
-#   header SYMBOLIC_TEST_NAME	header op pattern
-#	(The operations allowed (so far) are: =~  and: !~)
-#       (header can be 'ALL', which returns the text of all headers)
-#       (note that non-appearing headers are returned as the string 'undef')
-#
-#   header SYMBOLIC_TEST_NAME	eval:name_of_eval_method([args])
-#
-#   body SYMBOLIC_TEST_NAME	/pattern/modifiers
-#	(Evaluated for each text or HTML line in the message body.
-#       If you plan to use the default weight (1), you can omit the
-#       SYMBOLIC_TEST_NAME and just use "." instead.
-#
-#   body SYMBOLIC_TEST_NAME	eval:name_of_eval_method([args])
-#	(this is evaluated for the entire message body, not for each line)
-#
-#   full SYMBOLIC_TEST_NAME	/pattern/modifiers
-#	(Evaluated for the entire message body as one string.
-#       If you plan to use the default weight (1), you can omit the
-#       SYMBOLIC_TEST_NAME and just use "." instead.
-#
-#   full SYMBOLIC_TEST_NAME	eval:name_of_eval_method([args])
-#	(this is evaluated for the entire message, headers and all)
-#
-#   describe SYMBOLIC_TEST_NAME Textual description of test
-#       (body pattern tests don't require a description.)
-#
-# # starts a comment, whitespace is not significant.
-#
+# SpamAssassin rules file.  See 'man Mail::SpamAssassin::Conf' for details.
 ###########################################################################
 
 # Default template. Try to keep it under 76 columns (inside the the dots below).
@@ -137,7 +98,7 @@ whitelist_from  *@yahoo-inc.com
 
 # auto_whitelist_threshold   3
 
-# default: per-user whitelist.  (~ will be replaced by user's home dir.)
+# default: per-user whitelist:
 # auto_whitelist_path        ~/.spamassassin/auto-whitelist
 # auto_whitelist_file_mode   0700
 

@@ -69,7 +69,7 @@ use vars	qw{
 @ISA = qw();
 
 $VERSION = "2.0";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.50 2001/12/19 04:12:19 jmason Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.51 2001/12/19 05:20:44 jmason Exp $';
 
 sub Version { $VERSION; }
 
@@ -344,7 +344,9 @@ sub remove_spamassassin_markup {
 
   # remove the headers we added
   1 while $hdrs =~ s/\nX-Spam-[^\n]*?\n/\n/gs;
-  1 while $hdrs =~ s/^Subject: \*+SPAM\*+ /Subject: /gm;
+
+  my $tag = $self->{conf}->{subject_tag};
+  1 while $hdrs =~ s/^Subject: \Q${tag}\E /Subject: /gm;
 
   # ok, next, the report.
   # This is a little tricky since we can have either 0, 1 or 2 reports;
