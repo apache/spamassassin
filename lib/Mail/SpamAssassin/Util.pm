@@ -585,6 +585,7 @@ sub parse_content_type {
   $ct =~ s/;.*$//;                    # strip everything after first semi-colon
   $ct =~ s@^([^/]+(?:/[^/]*)?).*$@$1@;	# only something/something ...
   $ct =~ tr/\000-\040\177-\377\042\050\051\054\056\072-\077\100\133-\135//d;    # strip inappropriate chars
+  $ct = lc $ct;
 
   return wantarray ? ($ct,$boundary) : $ct;
 }
