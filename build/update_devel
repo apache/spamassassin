@@ -2,7 +2,7 @@
 set -x
 
 WEBDIR=$SA_WEBDIR
-test -n "$WEBDIR"  || WEBDIR=$HOME/spamassassin.taint.org
+test -n "$WEBDIR"  || WEBDIR=$HOME/site
 
 GPGSIGN=$SA_GPGSIGN
 test -x "$GPGSIGN" || GPGSIGN=$HOME/bin/gpgsign
@@ -65,7 +65,7 @@ done
 
 test -f Makefile && make distclean
 
-# ( cd $DEVDIR && cvs add -kb *SpamAssassin* )
+# ( cd $DEVDIR && svn add *SpamAssassin* )
 
 ls -l $DEVDIR
 
