@@ -7,7 +7,9 @@ require 5.005;
 # PREFIX               *  /usr
 # INST_PREFIX          +  $PREFIX
 # SYSCONFDIR           *  /etc
+#                         or $(PREFIX)/etc if $(INST_PREFIX) is not "/usr"
 # INST_SYSCONFDIR      +  $SYSCONFDIR
+#                         or $(INST_PREFIX)/etc if $(INST_PREFIX) is not "/usr"
 # PKG_DEF_RULES_DIR    *  $DEF_RULES_DIR or $(PREFIX)/share/spamassassin
 # DEF_RULES_DIR        +  $(INST_PREFIX)/share/spamassassin
 # PKG_LOCAL_RULES_DIR  *  $LOCAL_RULES_DIR
@@ -251,8 +253,15 @@ sub MY::postamble {
   my $self = shift;
 
   my $instprefix = $self->{INST_PREFIX} || $self->{PREFIX};
-  my $sysconfdir  = $self->{SYSCONFDIR}      || '/etc';
+
+  my $sysconfdir  = $self->{SYSCONFDIR} || '/etc';
   my $instsysconfdir = $self->{INST_SYSCONFDIR} || $sysconfdir;
+
+  if ($instprefix && $instprefix ne '/usr') {
+    $sysconfdir = $self->{PREFIX}.'/etc';
+    $instsysconfdir = $self->{INST_PREFIX}.'/etc';
+  }
+
   my $pkgdefrulesdir = $self->{PKG_DEF_RULES_DIR} || $self->{DEF_RULES_DIR}
     || '$(PREFIX)/share/spamassassin';
   my $defrulesdir = $self->{DEF_RULES_DIR}
