@@ -15,14 +15,11 @@
 
 # Scoreset 0
 # SUMMARY for threshold 5.0:
-# Correctly non-spam: 129117  74.66%  (99.72% of non-spam corpus)
-# Correctly spam:      41226  23.84%  (94.86% of spam corpus)
-# False positives:       360  0.21%  (0.28% of nonspam,   6849 (1208.4) weighted)
-# False negatives:      2235  1.29%  (5.14% of spam,   6408 weighted)
-# Average score for spam:  16.6    nonspam: -3.6
-# Average for true-pos:    17.4   true-neg: -3.6
-# Average for false-pos:   5.7  false-neg: 2.9
-# TOTAL:              172938  100.00%
+# Correctly non-spam:  14331  74.59%  (99.62% of non-spam corpus)
+# Correctly spam:       4573  23.80%  (94.72% of spam corpus)
+# False positives:        55  0.29%  (0.38% of nonspam,   1130 weighted)
+# False negatives:       255  1.33%  (5.28% of spam,    752 weighted)
+# TCR: 9.109434  SpamRecall: 94.718%  SpamPrec: 98.812%  FP: 0.29%  FN: 1.33%
 
 # Start of GA-evolved scores
 
@@ -68,7 +65,7 @@ score BILL_1618 1.389
 score BODY_8BITS 3.184
 score BTAMAIL_HEADER 2.623
 score BTAMAIL_URL 1.725
-score BUGGY_CGI 4.989
+score BUGGY_CGI 4.0
 score BUGZILLA_BUG -4.147
 score BULK_EMAIL 2.390
 score BUY_DIRECT -0.168
@@ -82,7 +79,7 @@ score CBYI -0.609
 score CELEBRITY_PORN -0.478
 score CELL_PHONE_BOOST 1.652
 score CENTS_ON_DOLLAR 4.073
-score CHINA_HEADER 5.529
+score CHINA_HEADER 4.0
 score CHINA_URL 1.873
 score CLICK_BELOW 0.333
 score CLICK_BELOW_CAPS 0.603
@@ -96,7 +93,7 @@ score COMPLETELY_FREE 0.613
 score CONFIRMED_FORGED 2.250
 score CONGRATULATIONS -0.898
 score CONSOLIDATE_DEBT 1.744
-score COPY_ACCURATELY 5.544
+score COPY_ACCURATELY 4.0
 score CREDIT_CARD -0.264
 score CRON_ENV -1.193
 score CUM_SHOT 2.691
@@ -165,7 +162,7 @@ score FAKED_IP_IN_RCVD 1.490
 score FAKED_UNDISC_RECIPS 4.381
 score FALLING_INTEREST 2.954
 score FANTASTIC -0.609
-score FINANCIAL 6.280
+score FINANCIAL 4.0
 score FIND_ANYTHING 0.910
 score FORGED_AOL_RCVD 3.627
 score FORGED_EUDORAMAIL_RCVD 3.461
@@ -177,7 +174,7 @@ score FORGED_MUA_EUDORA 3.674
 score FORGED_MUA_IMS 4.199
 score FORGED_MUA_MOZILLA 3.273
 score FORGED_MUA_MUTT 1.602
-score FORGED_MUA_OIMO 4.879
+score FORGED_MUA_OIMO 4.0
 score FORGED_MUA_OUTLOOK 4.005
 score FORGED_MUA_THEBAT 4.711
 score FORGED_MX_HOTMAIL 2.914
@@ -346,17 +343,17 @@ score IMPOTENCE 3.473
 score INCOME 3.553
 score INCREASE_SEX 1.695
 score INCREASE_SOMETHING -0.175
-score INITIAL_INVEST 6.051
+score INITIAL_INVEST 4.0
 score INSTANT_ACCESS -0.469
 score INTL_DRIVERS_LICENSE 2.140
 score INVALID_DATE 1.425
 score INVALID_DATE_TZ_ABSURD 1.121
 score INVALID_MSGID -0.134
-score INVALUABLE_MARKETING 5.727
+score INVALUABLE_MARKETING 4.0
 score IN_REP_TO -0.870
 score ITS_LEGAL 1.568
 score JAVASCRIPT_URI 0.689
-score JODY 5.526
+score JODY 4.0
 score JOIN_MILLIONS 2.240
 score KIFF 2.764
 score KNOWN_MAILING_LIST -0.190
@@ -425,7 +422,7 @@ score MLM 3.142
 score MONEY_BACK 2.196
 score MONEY_MAKING 1.444
 score MORTGAGE_BEST 1.366
-score MORTGAGE_NETWORK 4.929
+score MORTGAGE_NETWORK 4.0
 score MORTGAGE_PITCH 0.914
 score MORTGAGE_RATES 0.025
 score MORTGAGE_WAITING 1.250
@@ -458,7 +455,7 @@ score NOT_ADVISOR 2.950
 score NOT_INTENDED 3.558
 score NOT_MLM 3.191
 score NO_AGE 3.808
-score NO_CATCH 5.646
+score NO_CATCH 4.0
 score NO_COST 1.399
 score NO_CREDIT_CHECK 1.441
 score NO_DISAPPOINTMENT -0.267
@@ -492,7 +489,7 @@ score OPT_IN_CAPS 1.348
 score OPT_OUT 1.657
 score OPT_OUT_CAPS 1.339
 score ORDER_NOW -0.932
-score ORDER_REPORT 5.792
+score ORDER_REPORT 4.0
 score ORIGINAL_MESSAGE -3.824
 score OUR_AFFILIATE_PARTNERS 1.827
 score OUR_OVERWHELMING_GROWTH 0.808
@@ -513,14 +510,14 @@ score PORN_15 2.586
 score PORN_16 4.134
 score PORN_4 1.748
 score PORN_6 2.699
-score PORN_MEMBERSHIP 5.159
+score PORN_MEMBERSHIP 4.0
 score PORN_PASSWORD 2.090
 score PREST_NON_ACCREDITED 2.455
 score PRINT_FORM_SIGNATURE 2.090
 score PRIORITY_NO_NAME 0.897
 score PRIZE -0.329
 score PROMOTION 2.389
-score PURE_PROFIT 5.880
+score PURE_PROFIT 4.0
 score QUOTED_EMAIL_TEXT -0.805
 score QUOTE_TWICE_1 0.220
 score Q_FOR_SELLER -2.936
@@ -657,7 +654,7 @@ score UNSUB_SCRIPT 0.577
 score UPPERCASE_25_50 1.078
 score UPPERCASE_50_75 1.036
 score UPPERCASE_75_100 0.422
-score UP_TO_OR_MORES 5.513
+score UP_TO_OR_MORES 4.0
 score URGENT_BIZ 3.312
 score URI_IS_POUND 2.015
 score USERNAME_IN_SUBJECT 4.195
