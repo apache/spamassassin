@@ -428,6 +428,10 @@ sub tokenize_headers {
   my ($self, $msg) = @_;
 
   my $hdrs = $msg->get_all_headers();
+  if ($msg->can ("get_all_metadata")) {
+    $hdrs .= $msg->get_all_metadata();
+  }
+
   my %parsed = ();
 
   # we don't care about whitespace; so fix continuation lines to make the next

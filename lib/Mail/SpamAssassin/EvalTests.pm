@@ -2023,6 +2023,16 @@ sub check_for_num_yelling_lines {
 
 sub check_language {            # UNDESIRED_LANGUAGE_BODY
   my ($self, $body) = @_;
+  $self->_check_language();
+  return $self->{undesired_language_body};
+}
+
+sub _check_language {            # UNDESIRED_LANGUAGE_BODY
+  my ($self, $body) = @_;
+
+  if (defined $self->{undesired_language_body}) {
+    return $self->{undesired_language_body};
+  }
 
   my @languages = split (' ', $self->{conf}->{ok_languages});
 
@@ -2030,7 +2040,10 @@ sub check_language {            # UNDESIRED_LANGUAGE_BODY
   # more than 0.02% false positives, we only map if length is < 2048 bytes
   my %mistakable = ('sco' => 'en');
 
-  return 0 if grep { $_ eq "all" } @languages;
+  if (grep { $_ eq "all" } @languages) {
+    $self->{undesired_language_body} = 0;
+    return $self->{undesired_language_body};
+  }
 
   $body = join ("\n", @{$body});
   $body =~ s/^Subject://i;
@@ -2038,8 +2051,9 @@ sub check_language {            # UNDESIRED_LANGUAGE_BODY
   # need about 256 bytes for reasonably accurate match (experimentally derived)
   if (length($body) < 256)
   {
-     dbg("Message too short for language analysis");
-     return 0;
+    dbg("Message too short for language analysis");
+    $self->{undesired_language_body} = 0;
+    return $self->{undesired_language_body};
   }
 
   my @matches = Mail::SpamAssassin::TextCat::classify($self, $body);
@@ -2047,9 +2061,13 @@ sub check_language {            # UNDESIRED_LANGUAGE_BODY
   # save matches for possible insertion into headers, etc.
   $self->{tag_data}->{LANGUAGES} = join(', ', @matches);
 
+  # add to metadata, too, so Bayes gets to take a look
+  $self->{msg}->put_metadata ("X-Languages", $self->{tag_data}->{LANGUAGES});
+
   # not able to get a match, assume it's okay
   if (! @matches) {
-    return 0;
+    $self->{undesired_language_body} = 0;
+    return $self->{undesired_language_body};
   }
 
   # see if any matches are okay
@@ -2063,11 +2081,13 @@ sub check_language {            # UNDESIRED_LANGUAGE_BODY
 	$language = $mistakable{$language};
       }
       if ($match eq $language) {
-	return 0;
+	$self->{undesired_language_body} = 0;
+	return $self->{undesired_language_body};
       }
     }
   }
-  return 1;
+  $self->{undesired_language_body} = 1;
+  return $self->{undesired_language_body};
 }
 
 sub check_for_body_8bits {

@@ -14,6 +14,8 @@ tar cf - --exclude=CVS --exclude='.#*' doc | ( cd $WEBDIR ; tar xf - )
 for ext in tar.gz zip tar.gz.md5 zip.md5 ; do
   cp $WEBDIR/devel/Mail-SpamAssassin-$vers.$ext \
 	$WEBDIR/released/Mail-SpamAssassin-$vers.$ext
+  gpg --default-key 'SpamAssassin Development Team' -bsa \
+	$WEBDIR/released/Mail-SpamAssassin-$vers.$ext
 done
 
 # cp WebMake-${vers}-1.noarch.rpm WebMake-${vers}-1.src.rpm $WEBDIR/released

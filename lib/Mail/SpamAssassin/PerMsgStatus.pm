@@ -125,6 +125,14 @@ sub check {
   # pre-chew Received headers
   $self->parse_received_headers();
 
+  # and identify the language (if we're going to do that), before we
+  # run any Bayes tests, so they can use that as a token
+  {
+    my $decoded = $self->get_decoded_stripped_body_text_array();
+    $self->_check_language ($decoded);
+    undef $decoded;		# this is cached anyway for the main set
+  }
+
   {
     # If you run timelog from within specified rules, prefix the message with
     # "Rulename -> " so that it's easy to pick out details from the overview

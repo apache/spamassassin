@@ -1,4 +1,4 @@
-# $Id: Received.pm,v 1.20 2003/06/08 00:21:03 jmason Exp $
+# $Id: Received.pm,v 1.21 2003/06/10 01:41:28 jmason Exp $
 
 # ---------------------------------------------------------------------------
 
@@ -189,24 +189,21 @@ sub parse_received_headers {
   # OK, we've now split the relay list into trusted and untrusted.
 
   # add the stringified representation to the message object, so Bayes
-  # and rules can use it.  Note that rule_tests.t does not impl put_header,
-  # so protect against that here.
+  # and rules can use it.  Note that rule_tests.t does not impl put_metadata,
+  # so protect against that here.  These will not appear in the final
+  # message; they're just used internally.
 
-  # this really doesnt feel right - duncf. 
-#   if ($self->{msg}->can ("delete_header")) {
-#     $self->{msg}->delete_header ("X-Spam-Relays-Trusted");
-#     $self->{msg}->delete_header ("X-Spam-Relays-Untrusted");
-#     # $self->{msg}->delete_header ("X-Spam-Relays-Semitrusted");
+  if ($self->{msg}->can ("delete_header")) {
+    $self->{msg}->delete_header ("X-Spam-Relays-Trusted");
+    $self->{msg}->delete_header ("X-Spam-Relays-Untrusted");
 
-#     if ($self->{msg}->can ("put_header")) {
-#       $self->{msg}->put_header ("X-Spam-Relays-Trusted",
-# 				  $self->{relays_trusted_str});
-#       $self->{msg}->put_header ("X-Spam-Relays-Untrusted",
-# 				  $self->{relays_untrusted_str});
-#       # $self->{msg}->put_header ("X-Spam-Relays-Semitrusted",
-# 				# $self->{relays_semitrusted_str});
-#     }
-#   }
+    if ($self->{msg}->can ("put_metadata")) {
+      $self->{msg}->put_metadata ("X-Spam-Relays-Trusted",
+				$self->{relays_trusted_str});
+      $self->{msg}->put_metadata ("X-Spam-Relays-Untrusted",
+				$self->{relays_untrusted_str});
+    }
+  }
 
   $self->{tag_data}->{RELAYSTRUSTED} = $self->{relays_trusted_str};
   $self->{tag_data}->{RELAYSUNTRUSTED} = $self->{relays_untrusted_str};
