@@ -269,35 +269,25 @@ sub is_dcc_available {
   return 1;
 }
 
-use Symbol qw(gensym);
-
 sub dcc_report {
   my ($self, $fulltext) = @_;
   my $timeout=$self->{main}->{conf}->{dcc_timeout};
 
   eval {
-    use IPC::Open2;
-    my ($dccin, $dccout, $pid);
-
     local $SIG{ALRM} = sub { die "alarm\n" };
     local $SIG{PIPE} = sub { die "brokenpipe\n" };
 
     alarm $timeout;
 
-    $dccin  = gensym();
-    $dccout = gensym();
-
-    $pid = open2($dccout, $dccin, $self->{main}->{conf}->{dcc_path},
-	'-t many '.$self->{main}->{conf}->{dcc_options}.' >/dev/null 2>&1');
-
-    print $dccin $fulltext;
-
-    close ($dccin);
-
-    waitpid ($pid, 0);
+    my $cmd = join(" ", $self->{main}->{conf}->{dcc_path},'-t many',$self->{main}->{conf}->{dcc_options});
+    open(DCC, "| $cmd > /dev/null 2>&1") || die "Couldn't fork \"$cmd\"";
+    print DCC $fulltext;
+    close(DCC) || die "Received error code $? from \"$cmd\"";
 
     alarm(0);
   };
+
+  alarm 0;
 
   if ($@) {
     if ($@ =~ /alarm/) {
@@ -342,35 +332,25 @@ sub is_pyzor_available {
   return 1;
 }
 
-use Symbol qw(gensym);
-
 sub pyzor_report {
   my ($self, $fulltext) = @_;
   my $timeout=$self->{main}->{conf}->{pyzor_timeout};
 
   eval {
-    use IPC::Open2;
-    my ($pyzorin, $pyzorout, $pid);
-
     local $SIG{ALRM} = sub { die "alarm\n" };
     local $SIG{PIPE} = sub { die "brokenpipe\n" };
 
     alarm $timeout;
 
-    $pyzorin  = gensym();
-    $pyzorout = gensym();
-
-    $pid = open2($pyzorout, $pyzorin, $self->{main}->{conf}->{pyzor_path},
-	'report >/dev/null 2>&1');
-
-    print $pyzorin $fulltext;
-
-    close ($pyzorin);
-
-    waitpid ($pid, 0);
+    my $cmd = join(" ", $self->{main}->{conf}->{pyzor_path},'report');
+    open(PYZ, "| $cmd > /dev/null 2>&1") || die "Couldn't fork \"$cmd\"";
+    print PYZ $fulltext;
+    close(PYZ) || die "Received error code $? from \"$cmd\"";
 
     alarm(0);
   };
+
+  alarm 0;
 
   if ($@) {
     if ($@ =~ /alarm/) {
