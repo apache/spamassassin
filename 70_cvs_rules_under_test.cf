@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.522 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.523 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -396,3 +396,10 @@ header T_GAPPY_SUBJECT5		Subject =~ /\b(?:[a-z]([-_. =~\/])\1{0,2}){4,}/i
 header T_GAPPY_SUBJECT6		Subject =~ /\b(?:[a-z]([-_. =~\/:,*])\1{0,2}){4,}/i
 header T_GAPPY_SUBJECT7		Subject =~ /\b(?:[a-z]([-_. =~\/:,*!\@\#\$\%\^&+;\"\'<>\\])\1{0,2}){4,}/i
 header T_GAPPY_SUBJECT8		Subject =~ /\b(?:[a-z]([-_. =~\/:,*!\@\#\$\%\^&+;<>\\])\1{0,2}){4,}/i
+
+# bug 1634:
+# needed to readd X_MAILING_LIST as dependency, modify T_MAC_EUDORA_MUA for new version
+header __HAS_X_MAILING_LIST     exists:X-Mailing-List
+header __T_MAC_EUDORA_MUA         X-Mailer =~ /Eudora for (?:Macintosh|Mac OS X)/
+meta T_FORGED_MUA_EUDORA          (__EUDORA_MUA && !__EUDORA_MSGID && !__UNUSABLE_MSGID && !X_LOOP && !__HAS_X_MAILING_LIST && !__T_MAC_EUDORA_MUA && !__OLD_EUDORA1 && !(__OLD_EUDORA2 && !__QUALCOMM))
+
