@@ -343,10 +343,16 @@ describe ASKS_BILLING_ADDRESS   Asks for a billing address
 body CYBER_FIRE_POWER           /(?:by|for) Cyber FirePower\!/
 describe CYBER_FIRE_POWER       mentions Cyber FirePower!, a spam-tool
 
-# (contrib: WW)
-# modified by jm to stop it matching on all-space lines
-rawbody LINE_OF_YELLING		/^[A-Z0-9\$\.,\'\!\?\s]{20,}[A-Z\$\.,\'\!\?]{5,}[A-Z0-9\$\.,\'\!\?\s]{20,}$/
-describe LINE_OF_YELLING        A WHOLE LINE OF YELLING DETECTED
+# converted to use eval method by Matthew Cline
+body LINES_OF_YELLING		eval:check_for_yelling()
+describe LINES_OF_YELLING        A WHOLE LINE OF YELLING DETECTED
+
+body     LINES_OF_YELLING_2     eval:check_for_num_yelling_lines("2")
+describe LINES_OF_YELLING_2     2 WHOLE LINES OF YELLING DETECTED
+
+body     LINES_OF_YELLING_3     eval:check_for_num_yelling_lines("3")
+describe LINES_OF_YELLING_3     3 WHOLE LINES OF YELLING DETECTED
+
 
 ###########################################################################
 # some full-text matches; note the [3D=\s"']* bits of the patterns, which
