@@ -172,7 +172,9 @@ if ( defined $opt{'debug-level'} && $opt{'debug-level'} ne '' ) {
 
 if ( $opt{'lint'} ) {
   $spamtest->debug_diagnostics();
-  exit $spamtest->lint_rules();
+  my $res = $spamtest->lint_rules();
+  warn "lint: $res issues detected.  please rerun with debug enabled for more information.\n" if ($res);
+  exit $res ? 1: 0;
 }
 
 if ( $opt{'remove-addr-from-whitelist'}

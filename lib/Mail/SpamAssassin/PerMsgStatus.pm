@@ -2025,6 +2025,7 @@ sub do_meta_tests {
   # If there are any rules left, we can't solve the dependencies so complain
   my %metas = map { $_ => 1 } @metas; # keep a small cache for fast lookups
   foreach $rulename (@metas) {
+    $self->{rule_errors}++; # flag to --lint that there was an error ...
     dbg( "Excluding meta test $rulename; unsolved meta dependencies: "
         . join ( ", ", grep($metas{$_},@{ $rule_deps{$rulename} }) ) );
   }
