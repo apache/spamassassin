@@ -27,6 +27,7 @@ require Exporter;
 
 use Mail::SpamAssassin;
 
+use Config;
 use File::Spec;
 use Time::Local;
 use Sys::Hostname (); # don't import hostname() into this namespace!
@@ -46,7 +47,7 @@ use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/oi);
 
     clean_path_in_taint_mode();
     if ( !$displayed_path++ ) {
-      dbg("Current PATH is: ".join(":",File::Spec->path()));
+      dbg("Current PATH is: ".join($Config{'path_sep'},File::Spec->path()));
     }
     foreach my $path (File::Spec->path()) {
       my $fname = File::Spec->catfile ($path, $filename);
@@ -78,7 +79,34 @@ use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/oi);
     dbg("Running in taint mode, removing unsafe env vars, and resetting PATH");
 
     delete @ENV{qw(IFS CDPATH ENV BASH_ENV)};
-    $ENV{'PATH'} = '/bin:/usr/bin:/usr/local/bin';
+
+    # Go through and clean the PATH out
+    my @path = ();
+    foreach my $dir (File::Spec->path()) {
+      next unless $dir;
+
+      $dir =~ /^(.+)$/; # untaint, then clean ( 'foo/./bar' -> 'foo/bar', etc. )
+      $dir = File::Spec->canonpath($1);
+
+      if (!File::Spec->file_name_is_absolute($dir)) {
+	dbg("PATH included '$dir', which is not absolute, dropping.");
+	next;
+      }
+      elsif (!stat($dir)) {
+	dbg("PATH included '$dir', which doesn't exist, dropping.");
+	next;
+      }
+      elsif (!-d _) {
+	dbg("PATH included '$dir', which isn't a directory, dropping.");
+	next;
+      }
+
+      dbg("PATH included '$dir', keeping.");
+      push(@path, $dir);
+    }
+
+    $ENV{'PATH'} = join($Config{'path_sep'}, @path);
+    dbg("Final PATH set to: ".$ENV{'PATH'});
   }
 }
 
