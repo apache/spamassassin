@@ -599,7 +599,7 @@ sub scan_mbx {
 	# skip mbx headers to the first email...
 	seek(INPUT, 2048, 0) ;
 
-        my $sep = MBX_SEPARATOR;
+        my $sep = MBX_SEPERATOR;
     
 	while (<INPUT>) {
 	    if ($_ =~ /$sep/) {
@@ -699,7 +699,7 @@ sub run_mbx {
     seek(INPUT, $offset, 0) ;
     
     while (<INPUT>) {
-	last if ($_ =~ MBX_SEPARATOR) ;
+	last if ($_ =~ MBX_SEPERATOR) ;
 	
 	# skip mails that are too big
 	if (! $self->{opt_all} && @msg > BIG_LINES) {

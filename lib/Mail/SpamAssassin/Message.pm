@@ -129,8 +129,8 @@ sub new {
 	# mbox formated mailbox
 	$self->{'mbox_sep'} = $last;
 	next;
-    } elsif ($last =~ MBX_SEPARATOR) {
-	# Munge the mbx message separator into mbox format as a sort of
+    } elsif ($last =~ MBX_SEPERATOR) {
+	# Munge the mbx message seperator into mbox format as a sort of
 	# de facto portability standard in SA's internals.  We need to
 	# to this so that Mail::SpamAssassin::Util::parse_rfc822_date
 	# can parse the date string...
@@ -303,14 +303,14 @@ sub get_pristine_header {
   }
 }
 
-=item get_mbox_separator()
+=item get_mbox_seperator()
 
-Returns the mbox separator found in the message, or undef if there
+Returns the mbox seperator found in the message, or undef if there
 wasn't one.
 
 =cut
 
-sub get_mbox_separator {
+sub get_mbox_seperator {
   return $_[0]->{mbox_sep};
 }
 

@@ -577,7 +577,7 @@ sub get_header {
 Retrieve all headers.  Each header will have a newline at the end and
 will be unfolded.  The first parameter (optional) is whether or not to
 return the raw headers, and the second parameter (optional) is whether
-or not to include the mbox separator.
+or not to include the mbox seperator.
 
 If get_all_header() is called in an array context, an array will be
 returned with each header entry in a different element.  In a scalar
