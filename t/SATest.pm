@@ -179,7 +179,15 @@ sub start_spamd {
 }
 
 sub stop_spamd {
-  print ("Killed ",kill (15, $spamd_pid)," spamd instances\n");
+  if ($spamd_pid <= 1) {
+    print ("Invalid pid. Is spamd running?");
+    return -1;
+  } else {
+    my $killed = kill (15, $spamd_pid);
+    print ("Killed $killed spamd instances\n");
+    $spamd_pid = 0;
+    return $killed;
+  }
 }
 
 # ---------------------------------------------------------------------------
