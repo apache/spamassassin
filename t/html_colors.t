@@ -20,7 +20,7 @@ use Test;
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::HTML;
 
-plan tests => 21;
+plan tests => 24;
 
 sub try {
   my ($data, $want) = @_;
@@ -35,12 +35,16 @@ sub try {
 
 # normal colors with various whitespace
 ok(try('black', '#000000'));
-ok(try(' white ', '#ffffff'));
-ok(try(' peachpuff', '#ffdab9'));
-ok(try('#abcdef ', '#abcdef'));
+ok(try('white', '#ffffff'));
+ok(try('peachpuff', '#ffdab9'));
+ok(try('#abcdef', '#abcdef'));
 ok(try('123456', '#123456'));
 
 # Flex Hex
+ok(try('black ', '#b0ac00'));
+ok(try(' white ', '#000000'));
+ok(try(' peachpuff', '#00c0ff'));
+ok(try('#peachpuff', '#0ec00f'));
 ok(try('#0f0', '#000f00'));
 ok(try('0f0f', '#0f0f00'));
 ok(try('#1234567890abcde1234567890abcde', '#34cd89'));
@@ -56,4 +60,3 @@ ok(try('fffff', '#fffff0'));
 ok(try('fxfefu', '#f0fef0'));
 ok(try('fafufb', '#faf0fb'));
 ok(try('fofcff', '#f0fcff'));
-ok(try('#peachpuff', '#0ec00f'));
