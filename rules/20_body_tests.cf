@@ -251,7 +251,7 @@ describe PORN_2			Uses words and phrases which indicate porn (2)
 body PORN_3			/(?:(?:\bcum|\borg[iy]|\bwild|fuck|\bteen|\baction\b|spunk|\bpussy\b|\bpussies\b|suck\b|sucking\b|\bhot\b|\bhottest\b|\bvoyeur|\ble[sz]b(?:ian|o)|\banal\b|\binterracial|\basian\b|\bamateur|\bsex+\b|\bslut|explicit|xxx[^x]|\blive\b|celebrity|\blick|\bsuck|\bdorm\b|webcam|\bass\b|\bschoolgirl\b|\bstrip|\bhorny\b|\bhorniest\b|\berotic|\boral\b|\bhardcore\b|\bblow[ -]*job|\bnast(?:y|iest)\b).{0,15}){3,}/i
 describe PORN_3			Uses words and phrases which indicate porn (3)
 
-rawbody PORN_4 	/http:\/\/[\w\.]*(?:xxx|sex|anal|slut|pussy|cum|nympho|suck|porn|hardcore|taboo|whore|voyeur|lesbian|gurlpages|naughty|lolita|teen|schoolgirl|fetish|kooloffer|erotic)\w*\./
+rawbody PORN_4 	/http:\/\/[\w\.]*(?:xxx|sex|anal|slut|pussy|cum|nympho|suck|porn|hardcore|taboo|whore|voyeur|lesbian|gurlpages|naughty|lolita|teen|schoolgirl|kooloffer|erotic)\w*\./
 describe PORN_4			Uses words and phrases which indicate porn (4)
 
 # (contrib: skod)
@@ -308,7 +308,7 @@ body INCREASE_SALES		/INCREASE SALES/i
 describe INCREASE_SALES		Offers increased sales
 
 # (contrib: Matt Sergeant)
-rawbody LARGE_HEX		/^\s*[0-9a-fA-F]{40,}/
+rawbody LARGE_HEX		/^\s*[0-9a-fA-F]{70,}/
 describe LARGE_HEX		Contains a large block of hexadecimal code
 
 # somehow "/name.*\bcredit.?card\b/is" won't match, even if
