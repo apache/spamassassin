@@ -526,3 +526,6 @@ describe T_RATWARE_MIZSPEELING	Sent using spammer tool (mizspeeling)
 body T_WALAA		/instructions and walaa\b/i
 describe T_WALAA	Illiterate spammer cannot spell 'voila'
 
+# new version
+header T_NIGERIAN_SUBJECT2	Subject =~ /^(?:Re:|\[.{1,10}\])?\s*(?:request\s+(?:for\s+)?)?(?:very )?urgent\s+(?:(?:and|&)\s+(?:(?:completely|100\%)\s+))?(?:confidential|assistance|business|attention|reply|responses?|help)\b/i
+
