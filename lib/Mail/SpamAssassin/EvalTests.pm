@@ -925,31 +925,74 @@ sub check_to_in_list {
 
 sub check_from_in_whitelist {
   my ($self) = @_;
-  local ($_);
-  foreach $_ ($self->all_from_addrs()) {
-    if ($self->_check_whitelist ($self->{conf}->{whitelist_from}, $_)) {
-      return 1;
-    }
-    if ($self->_check_whitelist_rcvd ($self->{conf}->{whitelist_from_rcvd}, $_)) {
-      return 1;
-    }
-  }
+  $self->_check_from_in_whitelist unless exists $self->{from_in_whitelist};
+  return ($self->{from_in_whitelist} > 0);
+}
 
-  return 0;
+sub check_forged_in_whitelist {
+  my ($self) = @_;
+  $self->_check_from_in_whitelist unless exists $self->{from_in_whitelist};
+  $self->_check_from_in_default_whitelist unless exists $self->{from_in_default_whitelist};
+  return ($self->{from_in_whitelist} < 0) && ($self->{from_in_default_whitelist} == 0);
+}
+
+sub check_from_in_default_whitelist {
+  my ($self) = @_;
+  $self->_check_from_in_default_whitelist unless exists $self->{from_in_default_whitelist};
+  return ($self->{from_in_default_whitelist} > 0);
+}
+
+sub check_forged_in_default_whitelist {
+  my ($self) = @_;
+  $self->_check_from_in_default_whitelist unless exists $self->{from_in_default_whitelist};
+  $self->_check_from_in_whitelist unless exists $self->{from_in_whitelist};
+  return ($self->{from_in_default_whitelist} < 0) && ($self->{from_in_whitelist} == 0);
 }
 
 ###########################################################################
 
-sub check_from_in_default_whitelist {
+sub _check_from_in_whitelist {
   my ($self) = @_;
+  my $found_match = 0;
   local ($_);
   foreach $_ ($self->all_from_addrs()) {
-    if ($self->_check_whitelist_rcvd ($self->{conf}->{def_whitelist_from_rcvd}, $_)) {
-      return 1;
+    if ($self->_check_whitelist ($self->{conf}->{whitelist_from}, $_)) {
+      $self->{from_in_whitelist} = 1;
+      return;
+    }
+    my $wh = $self->_check_whitelist_rcvd ($self->{conf}->{whitelist_from_rcvd}, $_);
+    if ($wh == 1) {
+      $self->{from_in_whitelist} = 1;
+      return;
+    }
+    elsif ($wh == -1) {
+      $found_match = -1;
     }
   }
 
-  return 0;
+  $self->{from_in_whitelist} = $found_match;
+  return;
+}
+
+###########################################################################
+
+sub _check_from_in_default_whitelist {
+  my ($self) = @_;
+  my $found_match = 0;
+  local ($_);
+  foreach $_ ($self->all_from_addrs()) {
+    my $wh = $self->_check_whitelist_rcvd ($self->{conf}->{def_whitelist_from_rcvd}, $_);
+    if ($wh == 1) {
+      $self->{from_in_default_whitelist} = 1;
+      return;
+    }
+    elsif ($wh == -1) {
+      $found_match = -1;
+    }
+  }
+
+  $self->{from_in_default_whitelist} = $found_match;
+  return;
 }
 
 ###########################################################################
@@ -1027,11 +1070,13 @@ sub check_from_in_auto_whitelist {
 
 ###########################################################################
 
+# look up $addr and trusted relays in a whitelist with rcvd
+# note if it appears to be a forgery and $addr is not in any-relay list
 sub _check_whitelist_rcvd {
   my ($self, $list, $addr) = @_;
 
   # we can only match this if we have at least 1 trusted or untrusted header
-  return unless ($self->{num_relays_untrusted}+$self->{num_relays_trusted} > 0);
+  return 0 unless ($self->{num_relays_untrusted}+$self->{num_relays_trusted} > 0);
 
   my @relays = ();
   # try the untrusted one first
@@ -1045,19 +1090,31 @@ sub _check_whitelist_rcvd {
   }
 
   $addr = lc $addr;
+  my $found_forged = 0;
   foreach my $white_addr (keys %{$list}) {
     my $regexp = $list->{$white_addr}{re};
-    my $domain = $list->{$white_addr}{domain};
-
-    if ($addr =~ /${regexp}/i) {
-      foreach my $lastunt (@relays) {
-	my $rdns = $lastunt->{lc_rdns};
-	if ($rdns =~ /(?:^|\.)\Q${domain}\E$/) { return 1; }
+    foreach my $domain (@{$list->{$white_addr}{domain}}) {
+      
+      if ($addr =~ /${regexp}/i) {
+        foreach my $lastunt (@relays) {
+          my $rdns = $lastunt->{lc_rdns};
+          if ($rdns =~ /(?:^|\.)\Q${domain}\E$/) { return 1; }
+        }
+        # found address match but no relay match. note as possible forgery
+        $found_forged = -1;
       }
     }
   }
-
-  return 0;
+  if ($found_forged) { # might be forgery. check if in list of exempted
+    my $wlist = $self->{conf}->{whitelist_allows_relays};
+    foreach my $fuzzy_addr (values %{$wlist}) {
+      if ($addr =~ /$fuzzy_addr/i) {
+        $found_forged = 0;
+        last;
+      }
+    }
+  }
+  return $found_forged;
 }
 
 ###########################################################################

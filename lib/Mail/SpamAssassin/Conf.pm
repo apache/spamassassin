@@ -255,6 +255,7 @@ sub new {
   $self->{bayes_sql_override_username} = '';
 
   $self->{whitelist_from} = { };
+  $self->{whitelist_allows_relays} = { };
   $self->{blacklist_from} = { };
 
   $self->{blacklist_to} = { };
@@ -574,7 +575,7 @@ mapped to 'sendinghost.spamassassin.org', you should specify
 C<sendinghost.spamassassin.org> or just C<spamassassin.org> here.
 
 Note that this requires that C<internal_networks> be correct.  For simple cases,
-it will be, but for a complex network, or if you're running with DNS checks off
+it will be, but for a complex network, or running with DNS checks off
 or with C<-L>, you may get better results by setting that parameter.
 
 e.g.
@@ -597,6 +598,37 @@ these are often targets for spammer spoofing.
     if ( $key eq 'def_whitelist_from_rcvd' ) {
       $self->add_to_addrlist_rcvd ('def_whitelist_from_rcvd', split(/\s+/, $value));
       next;
+    }
+
+=item whitelist_allows_relays add@ress.com
+
+Specify addresses which are in C<whitelist_from_rcvd> that sometimes
+send through a mail relay other than the listed ones. By default mail
+with a From address that is in C<whitelist_from_rcvd> that does not match
+the relay will trigger a forgery rule. Including the address in
+C<whitelist_allows_relay> prevents that.
+
+Whitelist and blacklist addresses are now file-glob-style patterns, so
+C<friend@somewhere.com>, C<*@isp.com>, or C<*.domain.net> will all work.
+Specifically, C<*> and C<?> are allowed, but all other metacharacters are not.
+Regular expressions are not used for security reasons.
+
+Multiple addresses per line, separated by spaces, is OK.  Multiple
+C<whitelist_allows_relays> lines is also OK.
+
+The specified email address does not have to match exactly the address
+previously used in a whitelist_from_rcvd line as it is compared to the
+address in the header.
+
+e.g.
+
+  whitelist_allows_relays joe@example.com fred@example.com
+  whitelist_allows_relays *@example.com
+
+=cut
+
+    if ( $key eq 'whitelist_allows_relays' ) {
+      $self->add_to_addrlist ('whitelist_allows_relays', split (/\s+/, $value)); next;
     }
 
 =item unwhitelist_from_rcvd add@ress.com
@@ -3012,13 +3044,18 @@ sub add_to_addrlist_rcvd {
   my ($self, $listname, $addr, $domain) = @_;
 
   $addr = lc $addr;
-  my $re = $addr;
-  $re =~ s/[\000\\\(]/_/gs;			# paranoia
-  $re =~ s/([^\*\?_a-zA-Z0-9])/\\$1/g;		# escape any possible metachars
-  $re =~ tr/?/./;				# "?" -> "."
-  $re =~ s/\*/\.\*/g;				# "*" -> "any string"
-  $self->{$listname}->{$addr}{re} = qr/^${re}$/;
-  $self->{$listname}->{$addr}{domain} = $domain;
+  if ($self->{$listname}->{$addr}) {
+    push @{$self->{$listname}->{$addr}{domain}}, $domain;
+  }
+  else {
+    my $re = $addr;
+    $re =~ s/[\000\\\(]/_/gs;			# paranoia
+    $re =~ s/([^\*\?_a-zA-Z0-9])/\\$1/g;		# escape any possible metachars
+    $re =~ tr/?/./;				# "?" -> "."
+    $re =~ s/\*/\.\*/g;				# "*" -> "any string"
+    $self->{$listname}->{$addr}{re} = qr/^${re}$/;
+    $self->{$listname}->{$addr}{domain} = [ $domain ];
+  }
 }
 
 sub remove_from_addrlist {
