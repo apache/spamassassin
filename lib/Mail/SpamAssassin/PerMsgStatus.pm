@@ -1421,19 +1421,20 @@ sub _get {
   return $result;
 }
 
+# heavily optimized for speed
+# $_[0] is self
+# $_[1] is request
+# $_[2] is defval
 sub get {
-  my ($self, $request, $defval) = @_;
+  # fill in cache entry if it is empty
+  $_[0]->{c}->{$_[1]} = _get(@_) unless exists $_[0]->{c}->{$_[1]};
 
-  if (!exists $self->{hdr_cache}->{$request}) {
-    $self->{hdr_cache}->{$request} = _get(@_);
-  }
+  # return cache entry if it is defined
+  return $_[0]->{c}->{$_[1]} if defined $_[0]->{c}->{$_[1]};
 
-  my $result = $self->{hdr_cache}->{$request};
-  return $result if defined $result;
-
-  # If the requested header wasn't found, we should return either
-  # a default value as specified by the caller, or the blank string ''.
-  return $defval || '';
+  # if the requested header wasn't found, we should return either
+  # a default value as specified by the caller, or the blank string ''
+  return $_[2] || '';
 }
 
 ###########################################################################
