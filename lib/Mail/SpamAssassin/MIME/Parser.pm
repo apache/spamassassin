@@ -33,23 +33,29 @@ object of the same type, but rather a Mail::SpamAssassin::MIME object.
 To use it, simply call C<Mail::SpamAssassin::MIME::Parser->parse($msg)>,
 where $msg is a scalar with the entire contents of the mesage.
 
-More information should go here. ;)
+The procedure used to parse a message is recursive and ends up generating
+a tree of M::SA::MIME objects.  parse() will generate the parent node
+of the tree, then pass the body of the message to _parse_body() which begins
+the recursive process.
+
+This is the only public method available!
 
 =cut
 
-# constructor
 sub parse {
   my($self,$message) = @_;
 
-  # now go generate stuff
+  # protect it from abuse ...
+  local $_;
+
+  # Split the scalar into an array of lines
   my @message = split ( /^/m, $message );
-  # trim mbox seperator
+
+  # trim mbox seperator if it exists
   shift @message if ( scalar @message > 0 && $message[0] =~ /^From\s/ );
 
+  # Generate the main object and parse the appropriate MIME-related headers into it.
   my $msg = Mail::SpamAssassin::MIME->new();
-
-  local $_;                                          # protect from abuse
-
   my $header = '';
 
   while ( my $last = shift @message ) {
@@ -75,27 +81,27 @@ sub parse {
     last if ( $last =~ /^$/m );
   }
 
-  # Parse out the body ...
-  # the actual ABNF, BTW:
-  # boundary := 0*69<bchars> bcharsnospace
-  # bchars := bcharsnospace / " "
-  # bcharsnospace :=    DIGIT / ALPHA / "'" / "(" / ")" / "+" /"_"
-  #               / "," / "-" / "." / "/" / ":" / "=" / "?"
-  #
-  my ($boundary) =
-    $msg->header('content-type') =~ /boundary\s*=\s*["']?([^"';]+)["']?/i;
+  my ($boundary);
+  ($msg->{'type'}, $boundary) = Mail::SpamAssassin::Util::parse_content_type($msg->header('content-type'));
   $self->_parse_body( $msg, $msg, $boundary, \@message, 1 );
-
-  unless ( $msg->{'type'} ) {
-    $msg->{'type'} = $msg->header('content-type');
-    $msg->{'type'} ||= 'text/plain';
-    $msg->{'type'} =~ s/;.*$//;                    # strip everything after first semi-colon
-    $msg->{'type'} =~ s@^([^/]+/[^/]+).*$@$1@;     # only something/something ...
-    $msg->{'type'} =~ tr!\000-\040\177-\377\042\050\051\054\056\072-\077\100\133-\135!!d;    # strip inappropriate chars
-  }
 
   return $msg;
 }
+
+=item _parse_body()
+
+_parse_body() passes the body part that was passed in onto the
+correct part parser, either _parse_multipart() for multipart/* parts,
+or _parse_normal() for everything else.  Multipart sections become the
+root of sub-trees, while everything else becomes a leaf in the tree.
+
+For multipart messages, the first call to _parse_body() doesn't create a
+new sub-tree and just uses the parent node to contain children.  All other
+calls to _parse_body() will cause a new sub-tree root to be created and
+children will exist underneath that root.  (this is just so the tree
+doesn't have a root node which points at the actual root node ...)
+
+=cut
 
 sub _parse_body {
   my($self, $msg, $_msg, $boundary, $body, $initial) = @_;
@@ -105,45 +111,45 @@ sub _parse_body {
     s/\r\n/\n/;
   }
 
+  # Figure out the simple content-type, or set it to text/plain
   my $type = $_msg->header('Content-Type') || 'text/plain; charset=us-ascii';
 
-  #    warn "Parsing message of type: $type\n";
-
-  if ( $type =~ /^text\/plain/i ) {
-    dbg("Parse text/plain");
-    $self->_parse_normal( $msg, $_msg, $boundary, $body );
-  }
-  elsif ( $type =~ /^text\/html/i ) {
-    dbg("Parse text/html");
-    $self->_parse_normal( $msg, $_msg, $boundary, $body );
-  }
-  elsif ( $type =~ /^multipart\//i ) {
-    dbg("Parse $type");
+  if ( $type =~ /^multipart\//i ) {
+    # Treat an initial multipart parse differently.  This will keep the tree:
+    # obj(multipart->[ part1, part2 ]) instead of
+    # obj(obj(multipart ...))
+    #
     if ( $initial ) {
       $self->_parse_multipart( $msg, $_msg, $boundary, $body );
     }
     else {
       $self->_parse_multipart( $_msg, $_msg, $boundary, $body );
-      $msg->add_body_part( $type, $_msg );
+      $msg->add_body_part( $_msg );
     }
   }
   else {
-    dbg("Regular attachment");
-    $self->_decode_body( $msg, $_msg, $boundary, $body );
+    # If it's not multipart, go ahead and just deal with it.
+    $self->_parse_normal( $msg, $_msg, $boundary, $body );
   }
 
   if ( !$msg->body() ) {
     dbg("No message body found. Reparsing as blank.");
     my $part_msg = Mail::SpamAssassin::MIME->new();
-    $self->_decode_body( $msg, $part_msg, $boundary, [] );
+    $self->_parse_normal( $msg, $part_msg, $boundary, [] );
   }
 }
+
+=item _parse_multipart()
+
+Generate a root node, and for each child part call _parse_body().
+
+=cut
 
 sub _parse_multipart {
   my($self, $msg, $_msg, $boundary, $body) = @_;
 
   $boundary ||= '';
-  dbg("m/m got boundary: $boundary");
+  dbg("parsing multipart, got boundary: $boundary");
 
   # ignore preamble per RFC 1521, unless there's no boundary ...
   if ( $boundary ) {
@@ -173,8 +179,9 @@ sub _parse_multipart {
     if ( --$line_count == 0 || ($boundary && /^\-\-\Q$boundary\E/) ) {
 
       # end of part
-      dbg("Got end of MIME section: $_");
       my $line = $_;
+      chomp;
+      dbg("Got end of MIME section: $_");
 
       # per rfc 1521, the CRLF before the boundary is part of the boundary ...
       # NOTE: The CRLF preceding the encapsulation line is conceptually
@@ -189,9 +196,8 @@ sub _parse_multipart {
         splice @{$part_array}, -1
           if ( $part_array->[ scalar @{$part_array} - 1 ] eq '' );
 
-        my ($p_boundary) =
-          $part_msg->header('content-type') =~
-          /boundary\s*=\s*["']?([^"';]+)["']?/i;
+        my($p_boundary);
+	($part_msg->{'type'}, $p_boundary) = Mail::SpamAssassin::Util::parse_content_type($part_msg->header('content-type'));
         $p_boundary ||= $boundary;
         $self->_parse_body( $msg, $part_msg, $p_boundary, $part_array, 0 );
       }
@@ -232,11 +238,34 @@ sub _parse_multipart {
 
 }
 
-sub _parse_normal {
-  my($self, $msg, $_msg, $boundary, $body) = @_;
+=item _parse_normal()
 
-  # extract body, store it in $msg
-  $self->_decode_body( $msg, $_msg, $boundary, $body );
+Generate a leaf node and add it to the parent.
+
+=cut
+
+sub _parse_normal {
+  my ($self, $msg, $part_msg, $boundary, $body) = @_;
+
+  dbg("parsing normal".(defined $boundary ? ", got boundary: $boundary":""));
+  delete $part_msg->{body_parts}; # single parts don't need a body_parts piece ...
+
+  dbg("decoding attachment");
+  my ($type, $decoded, $name) = $self->_decode($part_msg, $body);
+  dbg("decoded $type");
+
+  $part_msg->{'type'} = $type;
+  $part_msg->{'decoded'} = $decoded;
+  $part_msg->{'raw'} = $body;
+  $part_msg->{'boundary'} = $boundary;
+  $part_msg->{'name'} = $name if $name;
+
+  # If the message is a text/* type, then try rendering it...
+  if ( $type =~ /^text\b/i ) {
+    ($part_msg->{'rendered'}, $part_msg->{'rendered_type'}) = _render_text($type, $decoded);
+  }
+
+  $msg->add_body_part($part_msg);
 }
 
 sub __decode_header {
@@ -255,7 +284,12 @@ sub __decode_header {
   }
 }
 
-# decode according to RFC2047
+=item _decode_header()
+
+Decode base64 and quoted-printable in headers according to RFC2047.
+
+=cut
+
 sub _decode_header {
   my($self, $header) = @_;
 
@@ -267,42 +301,26 @@ sub _decode_header {
   return $header;
 }
 
-sub _decode_body {
-  my ($self, $msg, $part_msg, $boundary, $body) = @_;
+=item _decode()
 
-  dbg("decoding attachment");
+Decode base64 and quoted-printable parts.
 
-  my ($type, $decoded, $name) = $self->_decode($part_msg, $body);
-
-  dbg("decoded attachment type: $type");
-
-  my $opts = {
-  	decoded => $decoded,
-	raw => $body,
-	boundary => $boundary,
-	headers => $part_msg->{headers},
-	raw_headers => $part_msg->{raw_headers},
-  };
-  $opts->{name} = $name if $name;
-  $opts->{rendered} = _render_text($type, $decoded) if $type =~ /^text/i;
-
-  $msg->add_body_part( $type, $opts );
-}
+=cut
 
 sub _decode {
   my($self, $msg, $body ) = @_;
+
+  my($type) = Mail::SpamAssassin::Util::parse_content_type($msg->header('content-type'));
+  my ($filename) =
+    ( $msg->header('content-disposition') =~ /name="?([^\";]+)"?/i );
+  if ( !$filename ) {
+    ($filename) = ( $type =~ /name="?([^\";]+)"?/i );
+  }
 
   if ( lc( $msg->header('content-transfer-encoding') ) eq 'quoted-printable' ) {
     dbg("decoding QP file");
     my @output =
       map { s/\r\n/\n/; $_; } split ( /^/m, Mail::SpamAssassin::Util::qp_decode( join ( "", @{$body} ) ) );
-
-    my $type = $msg->header('content-type');
-    my ($filename) =
-      ( $msg->header('content-disposition') =~ /name="?([^\";]+)"?/i );
-    if ( !$filename ) {
-      ($filename) = ( $type =~ /name="?([^\";]+)"?/i );
-    }
 
     return $type, \@output, $filename;
   }
@@ -311,14 +329,6 @@ sub _decode {
 
     # Generate the decoded output
     my $output = [ Mail::SpamAssassin::Util::base64_decode(join("", @{$body})) ];
-
-    # If it has a filename, figure it out.
-    my $type = $msg->header('content-type');
-    my ($filename) =
-      ( $msg->header('content-disposition') =~ /name="?([^\";]+)"?/i );
-    if ( !$filename ) {
-      ($filename) = ( $type =~ /name="?([^\";]+)"?/i );
-    }
 
     # If it's a type text or message, split it into an array of lines
     $output = [ map { s/\r\n/\n/; $_; } split(/^/m, $output->[0]) ] if ( $type =~ m@^(?:text|message)/@ );
@@ -329,21 +339,20 @@ sub _decode {
     # Encoding is one of 7bit, 8bit, binary or x-something
     dbg("decoding other encoding");
 
-    my $type = $msg->header('content-type');
-    my ($filename) =
-      ( $msg->header('content-disposition') =~ /name="?([^\";]+)"?/i );
-    if ( !$filename ) {
-      ($filename) = ( $type =~ /name="?([^\";]+)"?/i );
-    }
-
     # No encoding, so just point to the raw data ...
     return $type, $body, $filename;
   }
 }
 
-# render text/plain as text/html based on a heuristic which simulates
-# a certain common mail client
-sub html_near_start {
+=item _html_near_start()
+
+Look at a text scalar and determine whether it should be rendered
+as text/html.  Based on a heuristic which simulates a certain common
+mail client.
+
+=cut
+
+sub _html_near_start {
   my ($pad) = @_;
 
   my $count = 0;
@@ -351,6 +360,19 @@ sub html_near_start {
   $count += ($pad =~ tr/\n//cd);
   return ($count < 24);
 }
+
+=item _render_text()
+
+_render_text() takes the given text/* type MIME part, and attempt
+to render it into a text scalar.  It will always render text/html,
+and will use a heuristic to determine if other text/* parts should be
+considered text/html.
+
+Pass in the content-type and the decoded part array.  Returns a scalar
+with the rendered data and the "rendered_as" content-type (same as passed
+in for no rendering, "text/html" for HTML).
+
+=cut
 
 sub _render_text {
   my ($type, $decoded) = @_;
@@ -361,16 +383,16 @@ sub _render_text {
   # on a heuristic which simulates a certain common mail client
   if ( $type =~ m@^text/html\b@i ||
       ($text =~ m/^(.{0,18}?<(?:$Mail::SpamAssassin::HTML::re_start)(?:\s.{0,18}?)?>)/ois &&
-	html_near_start($1)
+	_html_near_start($1)
       )
      ) {
     my $html = Mail::SpamAssassin::HTML->new();		# object
     my $html_rendered = $html->html_render($text);	# rendered text
     my $html_results = $html->get_results();		# needed in eval tests
-    return join('', @{ $html_rendered });
+    return ( join('', @{ $html_rendered }), 'text/html' );
   }
   else {
-    return $text;
+    return ( $text, $type );
   }
 }
 

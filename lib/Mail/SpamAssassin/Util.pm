@@ -598,6 +598,33 @@ sub my_inet_aton { unpack("N", pack("C4", split(/\./, $_[0]))) }
 
 ###########################################################################
 
+sub parse_content_type {
+  # This routine is typically called by passing a
+  # get_header("content-type") which passes all content-type headers
+  # (array context).  If there are multiple Content-type headers (invalid,
+  # but it happens), MUAs seem to take the last one and so that's what we
+  # should do here.
+  #
+  my $ct = $_[-1] || 'text/plain; charset=us-ascii';
+
+  # This could be made a bit more rigid ...
+  # the actual ABNF, BTW:
+  # boundary := 0*69<bchars> bcharsnospace
+  # bchars := bcharsnospace / " "
+  # bcharsnospace :=    DIGIT / ALPHA / "'" / "(" / ")" / "+" /"_"
+  #               / "," / "-" / "." / "/" / ":" / "=" / "?"
+  #
+  my ($boundary) = $ct =~ /boundary\s*=\s*["']?([^"';]+)["']?/i;
+
+  # Get the type out ...
+  $ct =~ s/;.*$//;                    # strip everything after first semi-colon
+  $ct =~ s@^([^/]+(?:/[^/]*)?).*$@$1@;	# only something/something ...
+  $ct =~ tr!\000-\040\177-\377\042\050\051\054\056\072-\077\100\133-\135!!d;    # strip inappropriate chars
+
+  return ($ct,$boundary);
+}
+
+###########################################################################
 sub dbg { Mail::SpamAssassin::dbg (@_); }
 
 1;

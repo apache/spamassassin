@@ -64,6 +64,8 @@ use strict;
 use MIME::Base64;
 use Mail::SpamAssassin;
 
+# M::SA::MIME is an object method used to encapsulate a message's MIME part
+#
 sub new {
   my $class = shift;
   $class = ref($class) || $class;
@@ -79,6 +81,35 @@ sub new {
   $self;
 }
 
+# Used to find any MIME parts whose simple content-type matches a given regexp
+# Searches it's own and any children parts.  Returns an array of MIME
+# objects which match.
+#
+sub find_parts {
+  my ($self, $re) = @_;
+
+  # Didn't pass an RE?  Just abort.
+  return () unless $re;
+
+  my @ret = ();
+
+  # If this object matches, mark it for return.
+  if ( $self->{'type'} =~ /$re/ ) {
+    push(@ret, $self);
+  }
+  elsif ( $self->{'type'} =~ m@^multipart/@i ) {
+    # This object is a multipart container.  Search all children.
+    foreach my $parts ( @{$self->{'body_parts'}} ) {
+      # Add the recursive results to our results
+      push(@ret, $parts->find_parts($re));
+    }
+  }
+
+  return @ret;
+}
+
+# Store or retrieve headers from a given MIME object
+#
 sub header {
   my $self   = shift;
   my $rawkey = shift;
@@ -91,30 +122,32 @@ sub header {
   if (@_) {
     my ( $decoded_value, $raw_value ) = @_;
     $raw_value = $decoded_value unless defined $raw_value;
-    if ( exists $self->{headers}{$key} ) {
-      push @{ $self->{headers}{$key} },     $decoded_value;
-      push @{ $self->{raw_headers}{$key} }, $raw_value;
+    if ( exists $self->{'headers'}{$key} ) {
+      push @{ $self->{'headers'}{$key} },     $decoded_value;
+      push @{ $self->{'raw_headers'}{$key} }, $raw_value;
     }
     else {
-      $self->{headers}{$key}     = [$decoded_value];
-      $self->{raw_headers}{$key} = [$raw_value];
+      $self->{'headers'}{$key}     = [$decoded_value];
+      $self->{'raw_headers'}{$key} = [$raw_value];
     }
-    return $self->{headers}{$key}[-1];
+    return $self->{'headers'}{$key}[-1];
   }
 
   my $want = wantarray;
   if ( defined($want) ) {
     if ($want) {
-      return unless exists $self->{headers}{$key};
-      return @{ $self->{headers}{$key} };
+      return unless exists $self->{'headers'}{$key};
+      return @{ $self->{'headers'}{$key} };
     }
     else {
-      return '' unless exists $self->{headers}{$key};
-      return $self->{headers}{$key}[-1];
+      return '' unless exists $self->{'headers'}{$key};
+      return $self->{'headers'}{$key}[-1];
     }
   }
 }
 
+# Retrieve raw headers from a given MIME object
+#
 sub raw_header {
   my $self = shift;
   my $key  = lc(shift);
@@ -124,36 +157,21 @@ sub raw_header {
   $key       =~ s/\s+$//;
 
   if (wantarray) {
-    return unless exists $self->{raw_headers}{$key};
-    return @{ $self->{raw_headers}{$key} };
+    return unless exists $self->{'raw_headers'}{$key};
+    return @{ $self->{'raw_headers'}{$key} };
   }
   else {
-    return '' unless exists $self->{raw_headers}{$key};
-    return $self->{raw_headers}{$key}[-1];
+    return '' unless exists $self->{'raw_headers'}{$key};
+    return $self->{'raw_headers'}{$key}[-1];
   }
 }
 
+# Add a MIME child part to ourselves
 sub add_body_part {
-  my($self, $raw_type, $opts) = @_;
+  my($self, $part) = @_;
 
-  my $type = $raw_type;
-  $type     ||= 'text/plain';
-  $type =~ s/;.*$//;            	# strip everything after first semi-colon
-  $type =~ s@^([^/]+/[^/]+).*$@$1@;	# only something/something ...
-  $type =~ tr!\000-\040\177-\377\042\050\051\054\056\072-\077\100\133-\135!!d;    # strip inappropriate chars
-
-  my $part = {
-    type     => $type,
-  };
-
-  while( my($k,$v) = each %{$opts} ) {
-    $part->{$k} = $v;
-  }
-
-  dbg("added part, type: $type");
-
-  # Add the part to body_parts
-  push @{ $self->{body_parts} }, $part;
+  dbg("added part, type: ".$part->{'type'});
+  push @{ $self->{'body_parts'} }, $part;
 }
 
 sub body {
@@ -176,11 +194,6 @@ sub body {
     # return first body part
     return $self->{body_parts}[0];
   }
-}
-
-sub bodies {
-  my $self = shift;
-  return @{ $self->{body_parts} };
 }
 
 sub dbg { Mail::SpamAssassin::dbg (@_); }
