@@ -232,7 +232,7 @@ describe BUGGY_CGI		Broken CGI script message
 # these are now full tests instead of body tests, to catch QP-encoded
 # split lines
 body SENT_IN_COMPLIANCE		/(e.?mail|message) .{0,10}sen[dt] in (\w{1,10} )?compliance (?:of|with)/i
-describe SENT_IN_COMPLIANCE	Claims compliance with SPAM regulations
+describe SENT_IN_COMPLIANCE	Claims compliance with spam regulations
 body PARA_A_2_C_OF_1618		/Paragraph *.a.{0,10}2.{0,10}C. of S. 1618/i
 describe PARA_A_2_C_OF_1618	Claims compliance with Senate Bill 1618
 body BILL_1618			/Bill.{0,10}1618.{0,10}TITLE.{0,10}(III|\#3)/i
@@ -240,7 +240,7 @@ describe BILL_1618		Claims compliance with Senate Bill 1618
 body S_1618			/S..{0,10}1618.{0,10}-.{0,10}SECTION.{0,10}301/i
 describe S_1618			Claims compliance with Senate Bill 1618
 body SECTION_301		/SECTION.{0,10}301/i
-describe SECTION_301		Claims compliance with SPAM regulations
+describe SECTION_301		Claims compliance with spam regulations
 body HR_4176			/H\.?R\.? *4176.{0,10}SECTION.{0,10}101/i
 describe HR_4176		Claims compliance with House Bill 4176
 
@@ -317,12 +317,12 @@ describe SOCIAL_SEC_NUMBER	Talks about social security numbers
 
 
 body ADDRESSES_ON_CD		/addresses on cd/i
-describe ADDRESSES_ON_CD	Only thing addresses on CD are useful for is SPAM
+describe ADDRESSES_ON_CD	Only thing addresses on CD are useful for is spam
 
 body EXCUSE_1			/\b(?:You (?:were sent|have received|are receiving)|You're receiving).{0,15}(?:message|e-?mail)s? because/i
-describe EXCUSE_1		Gives a lame excuse about why you were sent this SPAM
+describe EXCUSE_1		Gives a lame excuse about why you were sent this spam
 body EXCUSE_2			/If you did not opt.in/i
-describe EXCUSE_2		Claims you actually asked for this SPAM
+describe EXCUSE_2		Claims you actually asked for this spam
 body EXCUSE_3			/to (?:be removed|be deleted|no longer receive th(?:is|ese) messages?) (?:from|send|reply|[e-]*mail)/i
 describe EXCUSE_3		Claims you can be removed from the list
 body EXCUSE_4			/To Be Removed,? Please/i
@@ -348,13 +348,13 @@ describe EXCUSE_12		Nobody's perfect
 body EXCUSE_13			/mail was sent to you because /i
 describe EXCUSE_13		Gives an excuse for why message was sent
 body EXCUSE_14			/you (?:do not|no longer) wish to receive/i
-describe EXCUSE_14		Tells you how to stop further SPAM
+describe EXCUSE_14		Tells you how to stop further spam
 body EXCUSE_15			/this\s*(?:e?-?mail|message)? (?:is|was) (?:not|never) (?:spam|(?:sent )?unsolicited)/i
 describe EXCUSE_15		Claims to be legitimate email
 body EXCUSE_16			/received this.{1,10}in error/i
 describe EXCUSE_16		I wonder how many emails they sent in error...
 body EXCUSE_18			/we do not (?:spam|send unsolicited)/i
-describe EXCUSE_18		Claims not to be SPAM
+describe EXCUSE_18		Claims not to be spam
 
 # Please do *not* tweak this without solid frequencies to back it up.
 body EXCUSE_FUTURE              /be removed from future mailings/i
@@ -529,7 +529,7 @@ describe THIS_AINT_SPAM         Claims "This is not spam"
 
 # (contrib: WW)
 body WE_HATE_SPAM               /We .{0,30}oppose the use of SPAM/is
-describe WE_HATE_SPAM           Says "We strongly oppose the use of SPAM email"
+describe WE_HATE_SPAM           Says "We strongly oppose the use of spam email"
 
 # no hits
 #body IN_ACCORDANCE_WITH_LAWS    /has been sent in accordance with/
@@ -1357,7 +1357,7 @@ describe UNCLAIMED_MONEY        People just leave money laying around
 rawbody SPAM_FORM_INPUT         /<input name=.{0,5}submit.{0,99} Submit By E-Mail /i
 describe SPAM_FORM_INPUT        Form for verifying email address
 body INTL_EXEC_GUILD            /International Executive Guild/
-describe INTL_EXEC_GUILD        Well known SPAM senders
+describe INTL_EXEC_GUILD        Well known spam senders
 body IN_ACCORDANCE_WITH_LAWS    /has been sent in accordance with/
 describe IN_ACCORDANCE_WITH_LAWS Claims to be in accordance with some Spam law
 
@@ -1381,12 +1381,12 @@ lang fr describe DONT_DELETE            Contient une formule incitant é ne pas d
 #   0.000    0.000    0.000    0.00    1.00  EU_200_32_CE
 lang fr describe EU_200_32_CE   Revendique la conformité avec l'arrêt européen 200.32.CE
 body EU_200_32_CE               /Directive 200.32.CE/i
-describe EU_200_32_CE           Claims compliance with SPAM regulations
+describe EU_200_32_CE           Claims compliance with spam regulations
 
 #   0.001    0.000    0.001    0.00    1.80  EU_EMAIL_OPTOUT
 lang fr describe EU_EMAIL_OPTOUT        Revendique la conformité avec l'arrêt européen sur le spam
 body EU_EMAIL_OPTOUT            /EU (?:e-?mail opt.?out|e.?commerce) directive/i
-describe EU_EMAIL_OPTOUT        Claims compliance with SPAM regulations
+describe EU_EMAIL_OPTOUT        Claims compliance with spam regulations
 #
 #
 #   0.000    0.000    0.000    0.00    1.00  EXCUSE_8
@@ -1412,15 +1412,15 @@ describe FREE_HOSTING           Free Hosting
 
 
 #   0.000    0.001    0.000    1.00    1.00  GREEN_EXCUSE_1
-lang fr describe GREEN_EXCUSE_1 Prétend que le SPAM est bon pour l'environement
+lang fr describe GREEN_EXCUSE_1 Prétend que le spam est bon pour l'environement
 body GREEN_EXCUSE_1             /using email instead can significantly reduce this/i
-describe GREEN_EXCUSE_1         Claims SPAM helps the environment
+describe GREEN_EXCUSE_1         Claims spam helps the environment
 #
 #
 #   0.000    0.001    0.000    1.00    1.00  GREEN_EXCUSE_2
-lang fr describe GREEN_EXCUSE_2 Prétend que le SPAM est bon pour l'environement
+lang fr describe GREEN_EXCUSE_2 Prétend que le spam est bon pour l'environement
 body GREEN_EXCUSE_2             /the trees, save the planet, use email!/i
-describe GREEN_EXCUSE_2         Claims SPAM helps the environment
+describe GREEN_EXCUSE_2         Claims spam helps the environment
 #
 #
 #   0.275    0.160    0.345    0.32    1.00  HTML_COMMENT_UNIQUE_ID
@@ -1442,7 +1442,7 @@ body NO_SELLING                 /absolutely NO selling/i
 describe NO_SELLING             Claims not to be selling anything
 
 body POPLAUNCH                  /StealthLaunch PopLaunch.\s/
-describe POPLAUNCH              SPAM software
+describe POPLAUNCH              spam software: PopLaunch
 
 body PSYCHIC                    /\b(?:caring|gifted|experienced) psychic/i
 describe PSYCHIC                Psychics Scam

@@ -30,7 +30,11 @@ while (<>) {
     $test{$2} = $3;
 
   } elsif (/^describe\s+(\S+)\s+(.+)$/) {
-    if (!defined $desc{$1}) { $desc{$1} = $2; }
+
+    # use the test's "native" locale
+    if ($lang eq '' || $lang{$1} eq $lang) {
+      if (!defined $desc{$1}) { $desc{$1} = $2; }
+    }
 
   } elsif (/^score\s+(\S+)\s+(.+)$/) {
     $score{$1} = $2;
