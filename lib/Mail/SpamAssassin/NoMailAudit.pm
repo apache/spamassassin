@@ -16,7 +16,7 @@
 package Mail::SpamAssassin::NoMailAudit;
 
 use Mail::SpamAssassin::Message;
-use Fcntl ':flock';
+use Fcntl qw(:DEFAULT :flock);
 
 @Mail::SpamAssassin::NoMailAudit::ISA = (
   	'Mail::SpamAssassin::Message'
@@ -298,15 +298,98 @@ sub accept {
   # we don't support maildir or qmail here yet. use the real Mail::Audit
   # for those.
 
-  if (!open (MBOX, ">>$file")) {
-    die "Couldn't open $file: $!";
-  }
-  flock(MBOX, LOCK_EX) or warn "failed to lock $file: $!";
-  print MBOX $self->as_string();
-  flock(MBOX, LOCK_UN) or warn "failed to unlock $file: $!";
-  close MBOX;
+  # note that we cannot use fcntl() locking portably from perl. argh!
+  # if this is an issue, we will have to enforce use of procmail for
+  # local delivery to mboxes.
 
-  if (!$self->{noexit}) { exit 0; }
+  {
+    my $gotlock = $self->dotlock_lock ($file);
+    my $nodotlocking = 0;
+
+    if (!defined $gotlock) {
+      # dot-locking not supported here (probably due to file permissions
+      # on the /var/spool/mail dir).  just use flock().
+      $nodotlocking = 1;
+    }
+
+    local $SIG{TERM} = sub { $self->dotlock_unlock (); die "killed"; };
+    local $SIG{INT} = sub { $self->dotlock_unlock (); die "killed"; };
+
+    if ($gotlock || $nodotlocking) {
+      if (!open (MBOX, ">>$file")) {
+	die "Couldn't open $file: $!";
+      }
+
+      flock(MBOX, LOCK_EX) or warn "failed to lock $file: $!";
+      print MBOX $self->as_string();
+      flock(MBOX, LOCK_UN) or warn "failed to unlock $file: $!";
+      close MBOX;
+
+      if (!$nodotlocking) {
+	$self->dotlock_unlock ();
+      }
+
+      if (!$self->{noexit}) { exit 0; }
+      return;
+
+    } else {
+      die "Could not lock $file: $!";
+    }
+  }
+}
+
+sub dotlock_lock {
+  my ($self, $file) = @_;
+
+  my $lockfile = $file.".lock";
+  my $locktmp = $file.".lk.$$.".time();
+  my $gotlock = 0;
+  my $retrylimit = 10;
+
+  if (!sysopen (LOCK, $locktmp, O_WRONLY | O_CREAT | O_EXCL, 0644)) {
+    #die "lock $file failed: create $locktmp: $!";
+    $self->{dotlock_not_supported} = 1;
+    return;
+  }
+
+  print LOCK "$$\n";
+  close LOCK or die "lock $file failed: write to $locktmp: $!";
+
+  for ($retries = 0; $retries < $retrylimit; $retries++) {
+    if ($retries > 0) {
+      my $sleeptime = $retries > 12 ? 60 : 5*$retries;
+      sleep ($sleeptime);
+    }
+
+    if (!link ($locktmp, $lockfile)) { next; }
+
+    # sanity: we should always be able to see this
+    my @tmpstat = lstat ($locktmp);
+    if (!defined $tmpstat[3]) { die "lstat $locktmp failed"; }
+
+    # sanity: see if the link() succeeded
+    @lkstat = lstat ($lockfile);
+    if (!defined $lkstat[3]) { next; }	# link() failed
+
+    # sanity: if the lock succeeded, the dev/ino numbers will match
+    if ($tmpstat[0] == $lkstat[0] && $tmpstat[1] == $lkstat[1]) {
+      unlink $locktmp;
+      $self->{dotlock_locked} = $lockfile;
+      $gotlock = 1; last;
+    }
+  }
+
+  return $gotlock;
+}
+
+sub dotlock_unlock {
+  my ($self) = @_;
+
+  if ($self->{dotlock_not_supported}) { return; }
+
+  my $lockfile = $self->{dotlock_locked};
+  if (!defined $lockfile) { die "no dotlock_locked"; }
+  unlink $lockfile or warn "unlink $lockfile failed: $!";
 }
 
 # ---------------------------------------------------------------------------
