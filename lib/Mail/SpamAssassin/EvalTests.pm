@@ -969,10 +969,10 @@ sub _check_whitelist_rcvd {
   $addr = lc $addr;
   my $found_forged = 0;
   foreach my $white_addr (keys %{$list}) {
-    my $regexp = $list->{$white_addr}{re};
+    my $regexp = qr/$list->{$white_addr}{re}/i;
     foreach my $domain (@{$list->{$white_addr}{domain}}) {
       
-      if ($addr =~ qr/${regexp}/i) {
+      if ($addr =~ $regexp) {
         foreach my $lastunt (@relays) {
           my $rdns = $lastunt->{lc_rdns};
           if ($rdns =~ /(?:^|\.)\Q${domain}\E$/) { return 1; }
@@ -1149,13 +1149,8 @@ sub _check_unique_words {
       $count{$token}++;
     }
   }
-  my $unique = 0;
-  my $repeat = 0;
-  for my $count (values %count) {
-    $count == 1 ? $unique++ : $repeat++;
-  }
-  $self->{unique_words_repeat} = $repeat;
-  $self->{unique_words_unique} = $unique;
+  $self->{unique_words_unique} = scalar grep { $_ == 1 } values(%count);
+  $self->{unique_words_repeat} = scalar keys(%count) - $self->{unique_words_unique};
 }
 
 ###########################################################################
