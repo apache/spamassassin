@@ -26,8 +26,8 @@ resilient and requires less resources than the other on-disk database
 modules supported by Perl.
 
 
-Installing SpamAssassin
------------------------
+Installing or Upgrading SpamAssassin
+------------------------------------
 
 The easiest way to do this is using CPAN.pm, like so:
 
@@ -62,6 +62,10 @@ SITELIBEXP.
 
 This will install the SpamAssassin modules and rules into the ~/sausr
 and ~/saetc directories off your home directory.
+
+Note that you can upgrade SpamAssassin using these instructions, as long
+as you take care to read the caveats at the top of this file.   Upgrading
+will not delete your learnt Bayes data or local rule modifications.
 
 
 SunOS Note
