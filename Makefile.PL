@@ -55,6 +55,7 @@ $ExtUtils::MakeMaker::Recognized_Att_Keys{'LOCAL_RULES_DIR'} = 1;
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'PKG_LOCAL_RULES_DIR'} = 1;
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'INST_SITELIB'} = 1;
 
+$ExtUtils::MakeMaker::Recognized_Att_Keys{'RUN_RAZOR_TESTS'}  = 1;
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'RUN_RAZOR2_TESTS'} = 1;
 
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'PERL_BIN'} = 1;
@@ -174,27 +175,25 @@ WriteMakefile(%makefile);
 # again....
 my $argv = join (' ', @ARGV);
 
-for (my $v = 2; $v <= 2; $v++) {
+{
   my $do;
 
-  $do = ($argv =~ /\bRUN_RAZOR${v}_TESTS?=(.)/)[0];
+  $do = ($argv =~ /\bRUN_RAZOR2?_TESTS?=(.)/)[0];
 
   if (!defined($do)) {
-    if ($v == 2) {
-      $do = ! eval { require Razor2::Client::Agent };
-    }
+    $do = ! eval { require Razor2::Client::Agent };
 
     if (!$do) {
-      prompt("Run Razor v${v} tests (these may fail due to network problems)? (y/n)", 'n') =~ /^(.)/;
+      prompt("Run Razor v2 tests (these may fail due to network problems)? (y/n)", 'n') =~ /^(.)/;
       $do = $1;
     }
   }
   
   $do =~ tr/y1/0/c;
  
-  unlink("t/do_razor${v}"); 
+  unlink("t/do_razor2"); 
   if ($do) {
-    open(FLAG, ">t/do_razor${v}") && close(FLAG);
+    open(FLAG, ">t/do_razor2") && close(FLAG);
   }
 }
 
@@ -236,7 +235,7 @@ sub MY::postamble {
     || $self->{LOCAL_RULES_DIR} || '$(SYSCONFDIR)/mail/spamassassin';
   my $localrulesdir = $self->{LOCAL_RULES_DIR} || '$(INST_SYSCONFDIR)/mail/spamassassin';
   my $instsitelib = $self->{INST_SITELIB} || '$(INSTALLSITELIB)';
-  
+ 
   my $perl_bin     = $self->{PERL_BIN}     || 'this';
   my $perl_warn    = $self->{PERL_WARN}    || 'auto';
   my $perl_version = $self->{PERL_VERSION} || 'this';
