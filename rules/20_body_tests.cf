@@ -408,7 +408,7 @@ describe UCE_MAIL_ACT           Mentions Spam Law "UCE-Mail Act"
 full PENIS_ENLARGE		/(?:(?:\bpenis\b|\benlarge).{0,50}){2,}/is
 describe PENIS_ENLARGE		Information on getting a larger penis
 
-body WORK_AT_HOME		/WORK (?:AT|FROM) HOME/
+body WORK_AT_HOME		/(?:WORK (?:AT|FROM) HOME|HOME.?WORKER)/
 describe WORK_AT_HOME		Information on how to work at home
 
 body HOME_EMPLOYMENT		/HOME EMPLOYMENT/i
@@ -525,4 +525,8 @@ describe PGP_SIGNATURE		Contains a PGP-signed message
 # do not seem to for some reason.  (Kevin Dangoor)
 full COPYRIGHT_CLAIMED		/copyright.{0,100}all rights reserved/is
 describe COPYRIGHT_CLAIMED	Contains a claim of copyright
+
+# one spamhaus uses servers numbered like this:
+body HTTP_NUMBER_WORD		/http\:\/\/(?:zero|one|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|thirteen|fourteen|fifteen|sixteen|seventeen|eighteen|nineteen|twenty)\./i
+describe HTTP_NUMBER_WORD	URL contains spamhaus signature: numbered servers
 
