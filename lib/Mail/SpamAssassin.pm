@@ -76,7 +76,7 @@ $TIMELOG->{dummy}=0;
 @ISA = qw();
 
 $VERSION = "2.40";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.108 2002/07/29 16:25:10 jmason Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.109 2002/08/13 22:50:44 jmason Exp $';
 
 sub Version { $VERSION; }
 
@@ -487,7 +487,8 @@ sub read_scoreonly_config {
   my ($self, $filename) = @_;
 
   if (!open(IN,"<$filename")) {
-    warn "read_scoreonly_config: cannot open \"$filename\": $!\n";
+    # the file may not exist; this should not be verbose
+    dbg ("read_scoreonly_config: cannot open \"$filename\": $!");
     return;
   }
   my $text = join ('',<IN>);
