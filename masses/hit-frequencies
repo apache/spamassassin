@@ -27,7 +27,7 @@ use vars qw {
 
 sub usage {
   die "hit-frequencies [-c rules dir] [-f] [-m RE] [-M RE] [-X RE] [-l LC]
-                [-s SC] [-a] [-p] [-x] [-g] [spam log] [ham log]
+                [-s SC] [-a] [-p] [-x] [spam log] [ham log]
 
     -c p   use p as the rules directory
     -f     falses. count only false-negative or false-positive matches
@@ -40,7 +40,6 @@ sub usage {
     -a     display all tests
     -p     percentages. implies -x
     -x     extended output, with S/O ratio and scores
-    -g     use Information Gain ranking
     -s SC  which scoreset to use
 
     options -l and -L are mutually exclusive.
@@ -68,7 +67,6 @@ my %freq_ham = ();
 my $num_spam = 0;
 my $num_ham = 0;
 my %ranking = ();
-my %infogain = ();
 my $ok_lang = '';
 
 readscores($cffile);
@@ -208,22 +206,24 @@ foreach my $test (keys %freq_spam, keys %freq_ham) {
     my $safe_px0cch = ($px0cch || 0.0000001);
     my $safe_px1ccs = ($px1ccs || 0.0000001);
     my $safe_px1cch = ($px1cch || 0.0000001);
-    my $infogain = ( $px0ccs * log2($safe_px0ccs / $safe_px0_dot_pccs) ) +
+    $rank = ( $px0ccs * log2($safe_px0ccs / $safe_px0_dot_pccs) ) +
                     ( $px0cch * log2($safe_px0cch / $safe_px0_dot_pcch) ) +
                     ( $px1ccs * log2($safe_px1ccs / $safe_px1_dot_pccs) ) +
                     ( $px1cch * log2($safe_px1cch / $safe_px1_dot_pcch) );
 
-    $ranking{$test} = $infogain;
+    $ranking{$test} = $rank;
+    $rank_hi = $rank if ($rank > $rank_hi);
+    $rank_lo = $rank if ($rank < $rank_lo);
   }
 }
 
-# {
-# # now normalise the rankings to [0, 1]
-# $rank_hi -= $rank_lo;
-# foreach $test (@tests) {
-# $ranking{$test} = $rank_hi == 0 ? 0.001 : ($ranking{$test} - $rank_lo) / $rank_hi;
-# }
-# }
+{
+  # now normalise the rankings to [0, 1]
+  $rank_hi -= $rank_lo;
+  foreach $test (@tests) {
+  $ranking{$test} = $rank_hi == 0 ? 0.001 : ($ranking{$test} - $rank_lo) / ($rank_hi);
+  }
+}
 
 foreach $test (sort { $ranking{$b} <=> $ranking{$a} } @tests) {
   next unless (exists $rules{$test});           # only valid tests
