@@ -1,11 +1,39 @@
 #!/usr/bin/perl -w
 
-# use this to  debug the SORatio -> score-range mapping:
-#for $rat (0.1, 0.3, 0.5, 0.7, 1.0) {
-#my ($lo, $hi) = ratio_in_0to1_to_range($rat); warn "JMD $rat $lo $hi";
-#} die;
+# (rough) graphic demo of this algorithm:
+# 0.0  = -limit [......] 0 ........ limit
+# 0.25 = -limit ..[..... 0 .]...... limit
+# 0.5  = -limit ....[... 0 ...].... limit
+# 0.75 = -limit ......[. 0 .....].. limit
+# 1.0  = -limit ........ 0 [......] limit
+my $sliding_window_limits = 4.0; # limits = [-$range, +$range]
+my $sliding_window_size =   5.0; # scores have this range within limits
+
+# 0.0  = -limit [......] 0 ........ limit
+# 0.25 = -limit ....[... 0 ]....... limit
+# 0.5  = -limit ......[. 0 .]...... limit (note: tighter)
+# 0.75 = -limit .......[ 0 ...].... limit
+# 1.0  = -limit ........ 0 [......] limit
+my $shrinking_window_lower_base =  -0.50; 
+my $shrinking_window_lower_range =  1.50; # *ratio, added to above
+my $shrinking_window_size_base =    1.00;
+my $shrinking_window_size_range =   2.00; # *ratio, added to above
+
+my $use_sliding_window = 0;
 
 my $argcffile = shift @ARGV;
+
+if (defined ($argcffile) && $argcffile eq '-test') {
+  # use this to debug the ranking -> score-range mapping:
+  for $rat (0.0, 0.25, 0.5, 0.75, 1.0) {
+    my ($lo, $hi); if ($use_sliding_window) {
+      ($lo, $hi) = sliding_window_ratio_to_range($rat);
+    } else {
+      ($lo, $hi) = shrinking_window_ratio_to_range($rat);
+    }
+    warn "test: $rat => [ $lo $hi ]\n";
+  } exit;
+}
 
 my %freq_spam = ();
 my %freq_nonspam = ();
@@ -15,17 +43,22 @@ my $num_nonspam;
 my $num_total;
 
 my %mutable_tests = ();
-my $tflags;
-readtflags();
+my %ranking = ();
+my %soratio = ();
+
+if (!defined $argcffile) { $argcffile = "../rules"; }
+system ("./parse-rules-for-masses -d \"$argcffile\"") and die;
+require "./tmp/rules.pl";
 
 while (<>) {
-  /^\s*([\d\.]+)\s+([\d\.]+)\s+([\d\.]+)\s+([\d\.]+)\s+\S+\s+(.+)\s*$/ or next;
+  /^\s*([\d\.]+)\s+([\d\.]+)\s+([\d\.]+)\s+([\d\.]+)\s+([\d\.]+)\s+\S+\s+(.+)\s*$/ or next;
 
   my $overall = $1+0;
   my $spam = $2+0;
   my $nonspam = $3+0;
   my $soratio = $4+0;
-  my $test = $5;
+  my $ranking = $5+0;
+  my $test = $6;
 
   if ($test eq '(all messages)') {
     $num_spam = $spam;
@@ -35,11 +68,16 @@ while (<>) {
   }
   next if ($test eq '(all messages as %)');
 
+  if (!defined ($rules{$test})) {
+    warn "rule $test no longer exists; ignoring\n";
+    next;
+  }
+
   $freq{$test} = $overall;
   $freq_spam{$test} = $spam;
   $freq_nonspam{$test} = $nonspam;
 
-  my $tflags = $tflags->{$test}; $tflags ||= '';
+  my $tflags = $rules{$test}->{tflags}; $tflags ||= '';
   if ($tflags =~ /\b(?:net|userconf)\b/) {
     $mutable_tests{$test} = 0;
   } else {
@@ -48,103 +86,77 @@ while (<>) {
 
   if ($overall < 0.01) {        # less than 0.01% of messages were hit
     $mutable_tests{$test} = 0;
-    $soratio{$test} = 0;
+    $soratio{$test} = 0.5;
+    $ranking{$test} = 0.0;
 
   } else {
-    if ($nonspam == 0) {
-      $nonspam = 0.001;	# avoid / by 0
-      $spam *= 20;	# give the spam score a bonus to make up
-    }
-
-    # "nice" tests should always match more nonspam than spam. 
-    # the figure so that 0.0 = bad, 1.0 = good, instead of the reverse.
-    #
-    if ($tflags =~ /\bnice\b/) {
-      $soratio = 1.0 - $soratio;
-    }
-
     $soratio{$test} = $soratio;
+    $ranking{$test} = $ranking;
   }
 }
 
 system ("mkdir tmp >/dev/null 2>&1");
 open (OUT, ">tmp/ranges.data");
-foreach my $test (sort { $soratio{$b} <=> $soratio{$a} } keys %freq) {
+foreach my $test (sort { $ranking{$b} <=> $ranking{$a} } keys %freq) {
+  if (!defined ($rules{$test})) {
+    warn "no rule $test";
+    print OUT ("0 0 0 $test\n");
+    next;
+  }
+
   my $overall = $freq{$test};
   my $spam = $freq_spam{$test};
   my $nonspam = $freq_nonspam{$test};
   my $soratio = $soratio{$test};
+  my $ranking = $ranking{$test};
   my $mutatable = $mutable_tests{$test};
+  my $tflags = $rules{$test}->{tflags}; $tflags ||= '';
 
   if (!$mutatable) {
-    printf OUT ("%3.1f %3.1f 0 $test\n", 0, 0);
+    printf OUT ("%3.3f %3.3f 0 $test\n",
+                         $rules{$test}->{score},
+                         $rules{$test}->{score});
     next;
   }
 
-  # now we have a number between 0.0 and 1.0 indicating how
-  # effective the test is. Come up with a reasonable range
-  # for scores based on this.
-  my ($lo, $hi) = ratio_in_0to1_to_range($soratio);
-
-  my $tflags = $tflags->{$test}; $tflags ||= '';
-  if ($tflags =~ /\bnice\b/) {
-    # "nice" scores are negative, for obvious reasons. make
-    # it so, and swap around so lo < hi.
-    my $tmp = $lo;
-    $lo = -$hi;
-    $hi = -$tmp;
+  # 0.0 = best nice, 1.0 = best nonnice
+  if ($tflags =~ /nice/) {
+    $ranking = .5 - ($ranking / 2);
+  } else {
+    $ranking = .5 + ($ranking / 2);
   }
 
+  my ($lo, $hi);
+  if ($use_sliding_window) {
+    ($lo, $hi) = sliding_window_ratio_to_range($ranking);
+  } else {
+    ($lo, $hi) = shrinking_window_ratio_to_range($ranking);
+  }
   printf OUT ("%3.1f %3.1f 1 $test\n", $lo, $hi);
-  #printf "range: %3.1f %3.1f $test ($spam / $nonspam = $soratio)\n",
-  #$lo, $hi;
 }
 close OUT;
 exit;
 
-sub ratio_in_0to1_to_range {
+sub sliding_window_ratio_to_range {
   my $ratio = shift;
-
-  # the current algo maps 1.0 to a range between 0.0001 and 4.0,
-  # and 0.01 to a range between 0.0001 and 1.0.
-
-  my $hi_lo = 1.0 / 0.0001;
-  my $hi_hi = 1.0 / 4.0;
-  my $lo_lo = 0.1 / 0.0001;
-  my $lo_hi = 0.1 / 1.0;
-
-  my $lo_diff = abs($lo_lo - $hi_lo);
-  my $hi_diff = abs($lo_hi - $hi_hi);
-
-  my $lo = ($ratio / ($ratio * $lo_diff + $lo_lo));
-  my $hi = ($ratio / ($ratio * $hi_diff + $lo_hi));
-  
-  if ($hi == 0) {
-    $hi = 1.0;          # some "wiggle room"
-  }
+  my $lo = -$sliding_window_limits + ($sliding_window_size * $ratio);
+  my $hi = +$sliding_window_limits - ($sliding_window_size * (1-$ratio));
   ($lo, $hi);
 }
 
-sub readtflags {
-  $tflags = { };
+sub shrinking_window_ratio_to_range {
+  my $ratio = shift;
+  my $is_nice = 0;
+  my $adjusted = ($ratio -.5) * 2;      # adj [0,1] to [-1,1]
+  if ($adjusted < 0) { $is_nice = 1; $adjusted = -$adjusted; }
 
-  my @files;
-  if (!defined $argcffile) { $argcffile = "../rules"; }
-
-  if (-d $argcffile ) {
-    @files = <$argcffile/[0-9]*.cf>;
-  } else {
-    @files = ($argcffile);
-  }
-
-  foreach $cffile (@files) {
-    print "Reading tflags from \"$cffile\"...\n";
-    open (IN, "<$cffile") or warn "cannot read $cffile\n";
-    while (<IN>) {
-      s/#.*$//g; s/^\s+//; s/\s+$//;
-      if (/^tflags\s+(\S+)\s+(.+)$/) { $tflags->{$1} = $2; }
-    }
-    close IN;
-  }
+  my $lower = $shrinking_window_lower_base 
+                        + ($shrinking_window_lower_range * $adjusted);
+  my $range = $shrinking_window_size_base 
+                        + ($shrinking_window_size_range * $adjusted);
+  my $lo = $lower;
+  my $hi = $lower + $range;
+  if ($is_nice) { my $tmp = $hi; $hi = -$lo; $lo = -$tmp; }
+  ($lo, $hi);
 }
 

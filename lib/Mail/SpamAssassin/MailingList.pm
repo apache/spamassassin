@@ -1,4 +1,3 @@
-# $Id: MailingList.pm,v 1.8 2002/08/17 16:06:16 jmason Exp $
 
 # Eval Tests to detect genuine mailing lists.
 

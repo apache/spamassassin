@@ -24,8 +24,11 @@ SpamAssassin is configured using some traditional UNIX-style configuration
 files, loaded from the /usr/share/spamassassin and /etc/mail/spamassassin
 directories.
 
-The C<#> character starts a comment, which continues until end of line,
-and whitespace in the files is not significant.
+The C<#> character starts a comment, which continues until end of line.
+
+Whitespace in the files is not significant, but please note that starting a
+line with whitespace is deprecated, as we reserve its use for multi-line rule
+definitions, at some point in the future.
 
 Paths can use C<~> to refer to the user's home directory.
 
@@ -39,7 +42,6 @@ Where appropriate, default values are listed in parentheses.
 
 package Mail::SpamAssassin::Conf;
 
-use Carp;
 use strict;
 
 use vars	qw{
@@ -48,6 +50,7 @@ use vars	qw{
 	$type_rawbody_tests $type_rawbody_evals 
 	$type_uri_tests $type_uri_evals
 	$type_rbl_evals $type_rbl_res_evals $type_meta_tests
+        $VERSION
 };
 
 @ISA = qw();
@@ -66,6 +69,8 @@ $type_rbl_evals  = 120;
 $type_rbl_res_evals  = 121;
 $type_meta_tests = 122;
 
+$VERSION = 'bogus';     # avoid CPAN.pm picking up version strings later
+
 ###########################################################################
 
 sub new {
@@ -73,6 +78,7 @@ sub new {
   $class = ref($class) || $class;
   my $self = { }; bless ($self, $class);
 
+  $self->{errors} = 0;
   $self->{tests} = { };
   $self->{descriptions} = { };
   $self->{test_types} = { };
@@ -138,6 +144,7 @@ sub new {
   $self->{user_rules_to_compile} = 0;
   $self->{fold_headers} = 1;
 
+  $self->{dcc_path} = undef; # Browse PATH
   $self->{dcc_body_max} = 999999;
   $self->{dcc_fuz1_max} = 999999;
   $self->{dcc_fuz2_max} = 999999;
@@ -145,6 +152,7 @@ sub new {
   $self->{dcc_timeout} = 10;
   $self->{dcc_options} = '-R';
 
+  $self->{pyzor_path} = undef; # Browse PATH
   $self->{pyzor_max} = 5;
   $self->{pyzor_add_header} = 0;
   $self->{pyzor_timeout} = 10;
@@ -207,17 +215,15 @@ sub _parse {
   my $skipfile = 0;
 
   foreach (split (/\n/, $_[1])) {
-    s/^\s+|\s+$//g;  # remove leading and trailing spaces (including newlines)
     s/(?<!\\)#.*$//; # remove comments
-    s/\s+$//g;       # remove spaces before comments
+    s/^\s+|\s+$//g;  # remove leading and trailing spaces (including newlines)
     next unless($_); # skip empty lines
 
     # handle i18n
-    if (s/^lang\s+(\S\S_\S\S)\s+//) { next if ($lang ne $1); }
-    if (s/^lang\s+(\S\S)\s+//) { my $l = $1; next if ($lang !~ /${l}$/i); }
-
+    if (s/^lang\s+(\S+)\s+//) { next if ($lang !~ /^$1/i); }
+    
     # Versioning assertions
-    if (/^file\s+start\s+(.+)\s*$/) { $currentfile = $1; next; }
+    if (/^file\s+start\s+(.+)$/) { $currentfile = $1; next; }
     if (/^file\s+end/) {
       $currentfile = '(no file)';
       $skipfile = 0;
@@ -233,8 +239,9 @@ ignore it.
 
 =cut
 
-    if (/^require[-_]version\s+(.*)\s*$/) {
-      my $req_version = $1 + 0.0;
+    if (/^require[-_]version\s+(.*)$/) {
+      my $req_version = $1;
+      $req_version =~ s/^\@\@VERSION\@\@$/$Mail::SpamAssassin::VERSION/;
       if ($Mail::SpamAssassin::VERSION != $req_version) {
         warn "configuration file \"$currentfile\" requires version ".
                 "$req_version of SpamAssassin, but this is code version ".
@@ -242,11 +249,38 @@ ignore it.
                 "the -c switch, or remove the old config files? ".
                 "Skipping this file";
         $skipfile = 1;
+        $self->{errors}++;
       }
       next;
     }
 
     if ($skipfile) { next; }
+
+=item version_tag string
+
+This tag is appended to the SA version in the X-Spam-Status header. You should
+include it when modify your ruleset, especially if you plan to distribute it.
+A good choice for I<string> is your last name or your initials followed by a
+number which you increase with each change.
+
+e.g.
+
+  version_tag myrules1    # version=2.41-myrules1
+
+=cut
+
+    if(/^version[-_]tag\s+(.*)$/) {
+      my $tag = lc($1);
+      $tag =~ tr/a-z0-9./_/c;
+      foreach (@Mail::SpamAssassin::EXTRA_VERSION) {
+        if($_ eq $tag) {
+          $tag = undef;
+          last;
+        }
+      }
+      push(@Mail::SpamAssassin::EXTRA_VERSION, $tag) if($tag);
+      next;
+    }
 
     # note: no eval'd code should be loaded before the SECURITY line below.
 ###########################################################################
@@ -265,14 +299,14 @@ Regular expressions are not used for security reasons.
 Multiple addresses per line, separated by spaces, is OK.  Multiple C<whitelist_from> lines is also
 OK.
 
-eg.
+e.g.
 
   whitelist_from joe@example.com fred@example.com
   whitelist_from simon@example.com
 
 =cut
 
-    if (/^whitelist[-_]from\s+(.+)\s*$/) {
+    if (/^whitelist[-_]from\s+(.+)$/) {
       $self->add_to_addrlist ('whitelist_from', split (' ', $1)); next;
     }
 
@@ -289,7 +323,7 @@ e.g.
 
 =cut
 
-    if (/^whitelist[-_]from[-_]rcvd\s+(\S+)\s+(\S+)\s*$/) {
+    if (/^whitelist[-_]from[-_]rcvd\s+(\S+)\s+(\S+)$/) {
       $self->add_to_addrlist_rcvd ('whitelist_from_rcvd', $1, $2);
       next;
     }
@@ -298,15 +332,16 @@ e.g.
 
 Used to override a default whitelist_from entry, so for example a distribution whitelist_from
 can be overriden in a local.cf file, or an individual user can override a whitelist_from entry
-in their own .user_prefs file.
+in their own C<user_prefs> file.
 
-eg.
-unwhitelist_from joe@example.com fred@example.com
-unwhitelist_from *@amazon.com
+e.g.
+
+  unwhitelist_from joe@example.com fred@example.com
+  unwhitelist_from *@amazon.com
 
 =cut
 
-    if (/^unwhitelist[-_]from\s+(.+)\s*$/) {
+    if (/^unwhitelist[-_]from\s+(.+)$/) {
       $self->remove_from_addrlist ('whitelist_from', split (' ', $1)); next;
     }
 
@@ -317,7 +352,7 @@ non-spam, but which the user doesn't want.  Same format as C<whitelist_from>.
 
 =cut
 
-    if (/^blacklist[-_]from\s+(.+)\s*$/) {
+    if (/^blacklist[-_]from\s+(.+)$/) {
       $self->add_to_addrlist ('blacklist_from', split (' ', $1)); next;
     }
 
@@ -325,15 +360,16 @@ non-spam, but which the user doesn't want.  Same format as C<whitelist_from>.
 
 Used to override a default blacklist_from entry, so for example a distribution blacklist_from
 can be overriden in a local.cf file, or an individual user can override a blacklist_from entry
-in their own .user_prefs file.
+in their own C<user_prefs> file.
 
-eg.
-unblacklist_from joe@example.com fred@example.com
-unblacklist_from *@spammer.com
+e.g.
+
+  unblacklist_from joe@example.com fred@example.com
+  unblacklist_from *@spammer.com
 
 =cut
 
-    if (/^unblacklist[-_]from\s+(.+)\s*$/) {
+    if (/^unblacklist[-_]from\s+(.+)$/) {
       $self->remove_from_addrlist ('blacklist_from', split (' ', $1)); next;
     }
 
@@ -358,20 +394,24 @@ See above.
 
 =cut
 
-    if (/^whitelist[-_]to\s+(.+)\s*$/) {
+    if (/^whitelist[-_]to\s+(.+)$/) {
       $self->add_to_addrlist ('whitelist_to', split (' ', $1)); next;
     }
-    if (/^more[-_]spam[-_]to\s+(.+)\s*$/) {
+    if (/^more[-_]spam[-_]to\s+(.+)$/) {
       $self->add_to_addrlist ('more_spam_to', split (' ', $1)); next;
     }
-    if (/^all[-_]spam[-_]to\s+(.+)\s*$/) {
+    if (/^all[-_]spam[-_]to\s+(.+)$/) {
       $self->add_to_addrlist ('all_spam_to', split (' ', $1)); next;
     }
 
 =item required_hits n.nn   (default: 5)
 
 Set the number of hits required before a mail is considered spam.  C<n.nn> can
-be an integer or a real number.
+be an integer or a real number.  5.0 is the default setting, and is quite
+aggressive; it would be suitable for a single-user setup, but if you're an ISP
+installing SpamAssassin, you should probably set the default to be something
+much more conservative, like 8.0 or 10.0.  Experience has shown that you
+B<will> get plenty of user complaints otherwise!
 
 =cut
 
@@ -447,13 +487,13 @@ This can be useful for MUA rule creation.
 
 =item spam_level_char { x (some character, unquoted) }        (default: *)
 
-By default, the "X-Spam-Level" header will use a '*' character
-with its length equal to the score of the message.
+By default, the "X-Spam-Level" header will use a '*' character with its length
+equal to the score of the message. Some people don't like escaping *s though, 
+so you can set the character to anything with this option.
+
 In other words, for a message scoring 7.2 points with this option set to .
 
 X-Spam-Level: .......
-
-Some people don't like escaping *'s though, so you can set the character to anything with this option.
 
 =cut
 
@@ -469,7 +509,7 @@ score for this message. _REQD_ will be replaced with the threshold.
 
 =cut
 
-    if (/^subject[-_]tag\s+(.+?)\s*$/) {
+    if (/^subject[-_]tag\s+(.+)$/) {
       $self->{subject_tag} = $1; next;
     }
 
@@ -539,10 +579,10 @@ for you, set this to 1.
       $self->{skip_rbl_checks} = $1+0; next;
     }
 
-=item check_mx_attempts n	(default: 3)
+=item check_mx_attempts n	(default: 2)
 
-By default, SpamAssassin checks the From: address for a valid MX three times,
-waiting 5 seconds each time.
+By default, SpamAssassin checks the From: address for a valid MX this many
+times, waiting 5 seconds each time.
 
 =cut
 
@@ -781,7 +821,7 @@ If C<factor> = 0.3, then we'll move about 1/3 of the way from the score toward t
 C<factor> = 1 means just use the long-term mean; C<factor> = 0 mean just use the calculated score.
 
 =cut
-    if (/^auto[-_]whitelist[-_]factor\s*(.*)\s*$/) {
+    if (/^auto[-_]whitelist[-_]factor\s+(.*)$/) {
       $self->{auto_whitelist_factor} = $1; next;
     }
 
@@ -915,6 +955,17 @@ Clear the spamtrap template.
       $self->{spamtrap_template} = ''; next;
     }
 
+=item dcc_path STRING
+
+This option tells SpamAssassin specifically where to find the pyzor client
+instead of relying on SpamAssassin to find it in the current PATH.
+
+=cut
+
+    if (/^dcc[-_]path\s+(.+)$/) {
+      $self->{dcc_path} = $1; next;
+    }
+
 =item dcc_body_max NUMBER
 
 =item dcc_fuz1_max NUMBER
@@ -933,15 +984,15 @@ The default is 999999 for all these options.
 
 =cut
 
-    if (/^dcc_body_max\s+(\d+)/) {
+    if (/^dcc[-_]body[-_]max\s+(\d+)/) {
       $self->{dcc_body_max} = $1+0; next;
     }
 
-    if (/^dcc_fuz1_max\s+(\d+)/) {
+    if (/^dcc[-_]fuz1[-_]max\s+(\d+)/) {
       $self->{dcc_fuz1_max} = $1+0; next;
     }
 
-    if (/^dcc_fuz2_max\s+(\d+)/) {
+    if (/^dcc[-_]fuz2[-_]max\s+(\d+)/) {
       $self->{dcc_fuz2_max} = $1+0; next;
     }
 
@@ -955,7 +1006,7 @@ The default is to not add the header.
 
 =cut
 
-    if (/^dcc_add_header\s+(\d+)$/) {
+    if (/^dcc[-_]add[-_]header\s+(\d+)$/) {
       $self->{dcc_add_header} = $1+0; next;
     }
 
@@ -966,10 +1017,20 @@ the results
 
 =cut
 
-    if (/^dcc[-_]timeout\s*(\d+)\s*$/) {
+    if (/^dcc[-_]timeout\s+(\d+)$/) {
       $self->{dcc_timeout} = $1+0; next;
     }
 
+=item pyzor_path STRING
+
+This option tells SpamAssassin specifically where to find the pyzor client
+instead of relying on SpamAssassin to find it in the current PATH.
+
+=cut
+
+    if (/^pyzor[-_]path\s+(.+)$/) {
+      $self->{pyzor_path} = $1; next;
+    }
 
 =item pyzor_max NUMBER
 
@@ -1006,7 +1067,7 @@ the results
 
 =cut
 
-    if (/^pyzor[-_]timeout\s*(\d+)\s*$/) {
+    if (/^pyzor[-_]timeout\s+(\d+)$/) {
       $self->{pyzor_timeout} = $1+0; next;
     }
 
@@ -1018,7 +1079,7 @@ the results
 
 =cut
 
-    if (/^razor[-_]timeout\s*(\d+)\s*$/) {
+    if (/^razor[-_]timeout\s+(\d+)$/) {
       $self->{razor_timeout} = $1; next;
     }
 
@@ -1095,14 +1156,14 @@ Default:
   "relays.osirusoft.com." => "127.0.0.3" };
 
 WARNING!!! When passing a reference to a hash, you need to put the whole hash in
-one line for the parser to read it correctly (you can check with spamassassin -D
-< mesg)
+one line for the parser to read it correctly (you can check with 
+C<< spamassassin -D < mesg >>)
 
 Set this to what your RBLs return for dialup IPs
 It is used by dialup-firsthop and relay-firsthop rules so that you can match
 DUL codes and compensate DUL checks with a negative score if the IP is a dialup
 IP the mail originated from and it was properly relayed by a hop before reaching
-you (hopefully not your secondary MX :-D)
+you (hopefully not your secondary MX :-)
 The trailing "-firsthop" is magic, it's what triggers the RBL to only be run
 on the originating hop
 The idea is to not penalize (or penalize less) people who properly relayed
@@ -1148,7 +1209,7 @@ score Z_FUDGE_DUL_OSIRU_FH	1.5
 
 =cut
 
-    if (/^dialup_codes\s+(.*)$/) {
+    if (/^dialup[-_]codes\s+(.*)$/) {
 	$self->{dialup_codes} = eval $1;
 	next;
     }
@@ -1161,8 +1222,10 @@ score Z_FUDGE_DUL_OSIRU_FH	1.5
 
 Define a test.  C<SYMBOLIC_TEST_NAME> is a symbolic test name, such as
 'FROM_ENDS_IN_NUMS'.  C<header> is the name of a mail header, such as
-'Subject', 'To', etc. 'ALL' can be used to mean the text of all the message's
-headers.
+'Subject', 'To', etc.
+
+'ALL' can be used to mean the text of all the message's headers.  'ToCc' can be
+used to mean the contents of both the 'To' and 'Cc' headers.
 
 C<op> is either C<=~> (contains regular expression) or C<!~> (does not contain
 regular expression), and C<pattern> is a valid Perl regular expression, with
@@ -1373,7 +1436,7 @@ Currently this is the same value Razor itself uses: C<~/razor.conf>.
 
 =cut
 
-    if (/^razor[-_]config\s*(.*)\s*$/) {
+    if (/^razor[-_]config\s+(.*)$/) {
       $self->{razor_config} = $1; next;
     }
 
@@ -1382,11 +1445,11 @@ Currently this is the same value Razor itself uses: C<~/razor.conf>.
 Specify additional options to the dccproc(8) command. Please note that only
 [A-Z -] is allowed (security).
 
-The default is '-R'
+The default is C<-R>
 
 =cut
 
-    if (/^dcc_options\s+[A-Z -]+/) {
+    if (/^dcc[-_]options\s+[A-Z -]+/) {
       $self->{dcc_options} = $1; next;
     }
 
@@ -1398,7 +1461,7 @@ SpamAssassin use, you may want to share this across all users.
 
 =cut
 
-    if (/^auto[-_]whitelist[-_]path\s*(.*)\s*$/) {
+    if (/^auto[-_]whitelist[-_]path\s+(.*)$/) {
       $self->{auto_whitelist_path} = $1; next;
     }
 
@@ -1414,7 +1477,7 @@ needed, make the log directory chmod'ed 1777, and adjust later.
 
 =cut
 
-    if (/^timelog[-_]path\s*(.*)\s*$/) {
+    if (/^timelog[-_]path\s+(.*)$/) {
       $Mail::SpamAssassin::TIMELOG->{logpath}=$1; next;
     }
 
@@ -1425,7 +1488,7 @@ Make sure this has the relevant execute-bits set (--x), otherwise
 things will go wrong.
 
 =cut
-    if (/^auto[-_]whitelist[-_]file[-_]mode\s*(.*)\s*$/) {
+    if (/^auto[-_]whitelist[-_]file[-_]mode\s+(.*)$/) {
       $self->{auto_whitelist_file_mode} = $1; next;
     }
 
@@ -1488,7 +1551,15 @@ The highest score of any of the spamphrases.  Used for scaling.
 ###########################################################################
 
 failed_line:
-    dbg ("Failed to parse line in SpamAssassin configuration, skipping: $_");
+    my $msg = "Failed to parse line in SpamAssassin configuration, ".
+                        "skipping: $_";
+
+    if ($self->{lint_rules}) {
+      warn $msg."\n";
+    } else {
+      dbg ($msg);
+    }
+    $self->{errors}++;
   }
 }
 
@@ -1547,6 +1618,7 @@ sub finish_parsing {
     elsif ($type == $type_meta_tests) { $self->{meta_tests}->{$name} = $text; }
     else {
       # 70 == SA_SOFTWARE
+      $self->{errors}++;
       sa_die (70, "unknown type $type for $name: $text");
     }
   }

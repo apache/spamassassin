@@ -6,7 +6,7 @@ The tools in this directory are used to optimise the scoring system used for
 incoming mails, using a genetic algorithm to search for optimal values.
 
 Since this works best with a very large dataset, it would be *great* if you
-(as a user) could run this and mail the results back to me.
+(as a user) could run this and submit the results.
 
 The analysis script will not include text from the mails themselves, so
 it will not give away private details from your mail spool.  The only
@@ -30,6 +30,15 @@ need to be sure you know which set is which!
 The latter is most important.  If you have occasional spams scattered through
 your mailboxes, or occasional non-spam messages in your trapped spam folder,
 the analysis will be useless.
+
+See the CORPUS_POLICY file for more details.
+
+
+
+HOW TO SUBMIT RESULTS BACK TO US
+--------------------------------
+
+See the file CORPUS_SUBMIT in this directory.
 
 
 HOW IT WORKS
@@ -87,6 +96,9 @@ mk-baseline-results :
   provide the name of a config directory as the first argument, it'll use that
   instead.
 
+  It will output statistics on the current ruleset to ../rules/STATISTICS.txt,
+  suitable for a release build of SpamAssassin.
+
 
 continual_evolve.sh :
 
@@ -95,4 +107,4 @@ continual_evolve.sh :
   Handy for running overnight.
 
 
--- EOF -- lastmod: Jul 11 2002 jm 
+-- EOF -- lastmod: Aug 23 2002 jm

@@ -2,25 +2,34 @@
 
 use File::Spec;
 
-my $DEF_RULES_DIR = '@@DEF_RULES_DIR@@';  # substituted at install time
-my $LOCAL_RULES_DIR = '@@LOCAL_RULES_DIR@@';  # substituted at install time
+my $PREFIX = '@@PREFIX@@';  # substituted at 'make' time
+my $DEF_RULES_DIR = '@@DEF_RULES_DIR@@';  # substituted at 'make' time
+my $LOCAL_RULES_DIR = '@@LOCAL_RULES_DIR@@';  # substituted at 'make' time
 
-use lib '@@INSTALLSITELIB@@';  # substituted at install time
+use lib '@@INSTALLSITELIB@@';  # substituted at 'make' time
 
 BEGIN {
   # Locate locally installed SA libraries *without* using FindBin, which generates
   # warnings and causes more trouble than its worth.  We don't need to be too
   # smart about this BTW.
   my @bin = File::Spec->splitpath($0);
-  my $bin = ($bin[0] ? File::Spec->joinpath(@bin[0..1]) : $bin[1]) # /home/jm/foo -> /home/jm
+  my $bin = ($bin[0] ? File::Spec->catpath(@bin[0..1]) : $bin[1])  # /home/jm/foo -> /home/jm
             || File::Spec->curdir;                                 # foo          -> .
 
-  # These are common paths where the SA libs might be found.
-  foreach (qw(lib ../lib ../lib/site_perl ../lib/spamassassin ../share/spamassassin/lib)) {
-    my $dir = File::Spec->catdir($bin, split('/', $_));
-    if(-f File::Spec->catfile($dir, "Mail", "SpamAssassin.pm")) {
-      unshift(@INC, $dir);
-      last;
+  # check to make sure it wasn't just installed in the normal way.
+  # note that ./lib/Mail/SpamAssassin.pm takes precedence, for
+  # building SpamAssassin on a machine where an old version is installed.
+  if (-e $bin.'/lib/Mail/SpamAssassin.pm'
+        || !-e '@@INSTALLSITELIB@@/Mail/SpamAssassin.pm')
+  {
+    # These are common paths where the SA libs might be found.
+    foreach (qw(lib ../lib/site_perl
+                ../lib/spamassassin ../share/spamassassin/lib))
+    {
+      my $dir = File::Spec->catdir($bin, split('/', $_));
+      if(-f File::Spec->catfile($dir, "Mail", "SpamAssassin.pm")) {
+        unshift(@INC, $dir); last;
+      }
     }
   }
 }
@@ -45,13 +54,18 @@ eval {
   require Mail::SpamAssassin;
   require Mail::SpamAssassin::NoMailAudit;
 
-  Getopt::Long::Configure(qw(gnu_getopt no_auto_abbrev no_ignore_case));
+  # gnu_getopt is not available in Getopt::Long 2.24, see bug 732
+  # gnu_compat neither.
+  Getopt::Long::Configure(qw(bundling no_getopt_compat no_auto_abbrev no_ignore_case));
   GetOptions(
 	     'whitelist-factory|M=s'             => \$opt{'whitelist-factory'},
 	     'auto-whitelist|a'                  => \$opt{'auto-whitelist'},
-	     'add-to-whitelist|W'                => \$opt{'add-to-whitelist'},
 	     'remove-from-whitelist|R'           => \$opt{'remove-from-whitelist'},
+	     'add-to-whitelist|W'                => \$opt{'add-to-whitelist'},
 	     'add-to-blacklist'                  => \$opt{'add-to-blacklist'},
+	     'remove-addr-from-whitelist=s'      => \$opt{'remove-addr-from-whitelist'},
+	     'add-addr-to-whitelist=s'           => \$opt{'add-addr-to-whitelist'},
+	     'add-addr-to-blacklist=s'           => \$opt{'add-addr-to-blacklist'},
 	     'warning-from|w=s'                  => \$opt{'warning-from'},
 	     'local-only|local|L'                => \$opt{'local'},
 	     'stop-at-threshold|S'               => \$opt{'stop-at-threshold'},
@@ -60,10 +74,11 @@ eval {
 	     'config-file|config-dir|c|C=s'      => \$opt{'config-file'},
 	     'prefs-file|p=s'                    => \$opt{'prefs-file'},
 	     'create-prefs!'                     => \$opt{'create-prefs'},
-	       'x'                               => sub { $opt{'create-prefs'} = 0 },
+	     'x'                                 => sub { $opt{'create-prefs'} = 0 },
 	     'log-to-mbox|l=s'                   => \$opt{'log-to-mbox'},
 	     'error-code|exit-code|e:i'          => \$opt{'error-code'},
 	     'test-mode|test|t'                  => \$opt{'test-mode'},
+             'lint'                              => \$opt{'lint'},
 	     'debug-level|debug|D:s'             => \$opt{'debug-level'},
 	     'version|V'                         => \$opt{'version'},
 	     'help|h|?'                          => \$opt{'help'},
@@ -81,19 +96,35 @@ eval {
     exit 0;
   }
 
+  my $doing_whitelist_operation = 0;
+  my $doing_address_only_whitelisting = 0;
+
+  if ($opt{'remove-from-whitelist'} or $opt{'add-to-whitelist'} or $opt{'add-to-blacklist'}) {
+    $doing_whitelist_operation = 1;
+  }
+
+  if ($opt{'remove-addr-from-whitelist'} or $opt{'add-addr-to-whitelist'} or $opt{'add-addr-to-blacklist'}) {
+    $doing_whitelist_operation = 1;
+    $doing_address_only_whitelisting = 1;
+  }
+
+  my $mail;
+
 # 1.
 # Standard Mail::Audit start.  No longer used due to bugs in M:A, regarding
 # handling of slightly misformatted input.
 #
 # require Mail::Audit;
-# my $mail = Mail::Audit->new();
+# $mail = Mail::Audit->new();
 
 # 2.
 # No use of Mail::Audit at all, apart from the accept(), reject() and
 # resend() methods (which are proxied transparently).  Lovely.
 #
   use Mail::SpamAssassin::NoMailAudit;
-  my $mail = Mail::SpamAssassin::NoMailAudit->new ();
+  if (!$opt{'lint'} && !$doing_address_only_whitelisting) {
+    $mail = Mail::SpamAssassin::NoMailAudit->new ();
+  }
 
 # For Mail::Audit users -- this is the magic. Just create a Mail::SpamAssassin
 # object like this, then run the check() method as below; if it returns a
@@ -110,12 +141,15 @@ eval {
     rules_filename	=> $opt{'config-file'},
     userprefs_filename => $opt{'prefs-file'},
     local_tests_only	=> $opt{'local'},
-    stop_at_threshold => $opt{'stop-at-threshold'},
     debug             => defined($opt{'debug-level'}),
     dont_copy_prefs   => ($opt{'create-prefs'} ? 0 : 1),
+    PREFIX            => $PREFIX,
     DEF_RULES_DIR     => $DEF_RULES_DIR,
     LOCAL_RULES_DIR   => $LOCAL_RULES_DIR,
   });
+
+# currently offline:
+#stop_at_threshold => $opt{'stop-at-threshold'},
 
 # set debug levels, if any specified (only useful for this command-line
 # tool really)
@@ -136,6 +170,10 @@ eval {
     $mail->{noexit} = 0;
   }
 
+  if ($opt{'lint'}) {
+    exit $spamtest->lint_rules ();
+  }
+
 # handle removing reports
   if ($opt{'remove-markup'}) {
     print $spamtest->remove_spamassassin_markup ($mail);
@@ -148,65 +186,59 @@ eval {
     if ($opt{'warning-from'}) {
       $spamtest->reply_with_warning ($mail, $opt{'warning-from'});
     }
-    if ($opt{'log-to-mbox'}) {
-      $mail->{noexit} = 1;
-      $mail->accept ($opt{'log-to-mbox'});
-      $mail->{noexit} = 0;
-    }
     $mail->ignore();		# will exit
   }
 
-($opt{'auto-whitelist'} or $opt{'remove-from-whitelist'} or $opt{'add-to-whitelist'} or $opt{'add-to-blacklist'}) and eval
-{
-  # create a factory for the persistent address list.
-  # choose one of these implementations!
-  # The -M "Mail::SpamAssassin::ImplClassAddrList" flag can be used
-  # to switch between them.
+  if ($opt{'auto-whitelist'} || $doing_whitelist_operation) {
+    # create a factory for the persistent address list.
+    # choose one of these implementations!
+    # The -M "Mail::SpamAssassin::ImplClassAddrList" flag can be used
+    # to switch between them.
 
-  my $addrlistfactory;
-  if ($opt{'whitelist-factory'}) {
-    eval '
-      require '.$opt{'whitelist-factory'}.'; $addrlistfactory = '.$opt{'whitelist-factory'}.'->new();
-    ';
-    if ($@) { warn $@; undef $addrlistfactory; }
+    my $addrlistfactory;
+    if ($opt{'whitelist-factory'}) {
+      eval '
+        require '.$opt{'whitelist-factory'}.';
+        $addrlistfactory = '.$opt{'whitelist-factory'}.'->new();
+      ';
+      if ($@) { warn $@; undef $addrlistfactory; }
 
-  } else {
+    } else {
 
-    require Mail::SpamAssassin::DBBasedAddrList;
-    $addrlistfactory = Mail::SpamAssassin::DBBasedAddrList->new();
+      require Mail::SpamAssassin::DBBasedAddrList;
+      $addrlistfactory = Mail::SpamAssassin::DBBasedAddrList->new();
 
-  }
-
-  $spamtest->set_persistent_address_list_factory ($addrlistfactory);
-};
-
-  if ($opt{'add-to-whitelist'}) {
-    $spamtest->add_all_addresses_to_whitelist ($mail);
-    if ($opt{'log-to-mbox'}) {
-      $mail->{noexit} = 1;
-      $mail->accept ($opt{'log-to-mbox'});
-      $mail->{noexit} = 0;
     }
-    $mail->ignore();		# will exit
-  }
 
-  if ($opt{'remove-from-whitelist'}) {
-    $spamtest->remove_all_addresses_from_whitelist ($mail);
-    if ($opt{'log-to-mbox'}) {
-      $mail->{noexit} = 1;
-      $mail->accept ($opt{'log-to-mbox'});
-      $mail->{noexit} = 0;
-    }
-    $mail->ignore();		# will exit
-  }
+    $spamtest->set_persistent_address_list_factory ($addrlistfactory);
+  };
 
-  if ($opt{'add-to-blacklist'}) {
-    $spamtest->add_all_addresses_to_blacklist ($mail);
-    if ($opt{'log-to-mbox'}) {
-      $mail->{noexit} = 1;
-      $mail->accept ($opt{'log-to-mbox'});
-      $mail->{noexit} = 0;
+  if ($@) { warn $@; }
+
+  if ($doing_whitelist_operation) {
+    # read the config!
+    $spamtest->init (1);
+
+    if ($opt{'add-to-whitelist'}) {
+      $spamtest->add_all_addresses_to_whitelist ($mail);
+    } elsif ($opt{'remove-from-whitelist'}) {
+      $spamtest->remove_all_addresses_from_whitelist ($mail);
+    } elsif ($opt{'add-to-blacklist'}) {
+      $spamtest->add_all_addresses_to_blacklist ($mail);
+    } elsif ($opt{'add-addr-to-whitelist'}) {
+      $spamtest->add_address_to_whitelist ($opt{'add-addr-to-whitelist'});
+      exit;
+    } elsif ($opt{'remove-addr-from-whitelist'}) {
+      $spamtest->remove_address_from_whitelist ($opt{'remove-addr-from-whitelist'});
+      exit;
+    } elsif ($opt{'add-addr-to-blacklist'}) {
+      $spamtest->add_address_to_blacklist ($opt{'add-addr-to-blacklist'});
+      exit;
+    } else {
+      die "oops! unhandled whitelist operation";
     }
+
+    # don't need to log here -- it's already been done
     $mail->ignore();		# will exit
   }
 
@@ -242,6 +274,12 @@ sub NEVERCALLED {
 
 # ---------------------------------------------------------------------------
 
+# currently offline:
+# -S, --stop-at-threshold           Stop tests when the threshold is reached
+# =item B<-S>, B<--stop-at-threshold>
+# Stop spam checking as soon as the spam threshold is reached, to increase
+# performance. This option also turns off Razor reporting.
+
 =head1 NAME
 
 spamassassin - mail filter to identify spam using text analysis
@@ -260,12 +298,6 @@ Options:
 
  -P, --pipe                        Deliver to STDOUT (now default)
  -L, --local                       Local tests only (no online tests)
- -S, --stop-at-threshold           Stop tests when the threshold is reached
- -a, --auto-whitelist              Use auto-whitelists
- -M, --whitelist-factory           Select whitelist factory
- -W, --add-to-whitelist            Add addresses in mail to whitelist
- -R, --remove-from-whitelist       Remove all addresses found in mail
-                                   from whitelist
  -r, --report                      Report message as spam
  -w addr, --warning-from=addr      Send a warning mail to sender from addr
  -d, --remove-markup               Remove spam reports from a message
@@ -277,6 +309,16 @@ Options:
  -l filename, --log-to-mbox=file   Log messages to a mbox file
  -t, --test-mode                   Pipe message through and add extra
                                    report to the bottom
+ --lint                            Lint the rule set: report syntax errors
+ -a, --auto-whitelist              Use auto-whitelists
+ -W, --add-to-whitelist            Add addresses in mail to whitelist
+ --add-to-blacklist                Add addresses in mail to blacklist
+ -R, --remove-from-whitelist       Remove all addresses found in mail
+                                   from whitelist
+ --add-addr-to-whitelist=addr      Add addr to whitelist
+ --add-addr-to-blacklist=addr      Add addr to blacklist
+ --remove-addr-from-whitelist=addr Remove addr from whitelist
+ -M, --whitelist-factory           Select whitelist factory
  -D, --debug [area=n,...]          Print debugging messages
  -V, --version                     Print version
  -h, --help                        Print usage message
@@ -288,7 +330,8 @@ Options:
 =item B<-P>, B<--pipe>
 
 The B<-P> parameter will cause SpamAssassin to pipe the output to STDOUT.
-This is now the default mode of operation.
+This is now the default mode of operation, so this switch is obsolete,
+and should not be used anymore.
 
 =item B<-a>, B<--auto-whitelist>, B<--whitelist>
 
@@ -309,7 +352,12 @@ Print help message and exit.
 
 =item B<-t>, B<--test-mode>
 
-Test mode.  Pipe message through and add extra report.
+Test mode.  Pipe message through and add extra report.  Note that the report
+text assumes that the message is spam, since in normal use it is only visible
+in this case.  Pay attention to the score instead.
+
+If you run tests with the B<-a> option, the scores will be added to the AWL.
+This may not be what you want to do.  If it is not, then don't use B<-a -t>.
 
 =item B<-r>, B<--report>
 
@@ -322,15 +370,49 @@ If the message contains SpamAssassin markup, this will be stripped out
 automatically before submission.  The support modules for DCC and Razor
 must be installed for spam to be reported to each service.
 
+=item B<--lint>
+
+Syntax check (lint) the rule set and configuration files, reporting
+typos and rules that do not compile correctly.  Exits immediately with
+0 if there are no errors, or greater than 0 if any errors are found.
+
 =item B<-W>, B<--add-to-whitelist>
 
 Add all email addresses, in the headers and body of the mail message read from
-STDIN, to the automatic whitelist.
+STDIN, to the automatic whitelist.  Note that you must be running C<spamassassin>
+or C<spamd> with the B<-a> switch for this to work.
+
+=item B<--add-to-blacklist>
+
+Add all email addresses, in the headers and body of the mail message read from
+STDIN, to the automatic whitelist with a high score (ensuring they will be
+''blacklisted'').  Note that you must be running C<spamassassin> or C<spamd>
+with the B<-a> switch.
 
 =item B<-R>, B<--remove-from-whitelist>
 
 Remove all email addresses, in the headers and body of the mail message read
-from STDIN, from the automatic whitelist.
+from STDIN, from the automatic whitelist. STDIN must contain a full email
+message, so to remove a single address you should use
+B<--remove-addr-from-whitelist> instead.
+
+Note that you must be running C<spamassassin> or C<spamd> with the B<-a> switch.
+
+=item B<--add-addr-to-whitelist>
+
+Add the named email address to the automatic whitelist.  Note that you must be
+running C<spamassassin> or C<spamd> with the B<-a> switch.
+
+=item B<--add-addr-to-blacklist>
+
+Add the named email address to the automatic whitelist with a high score
+(ensuring they will be ''blacklisted'').  Note that you must be running
+C<spamassassin> or C<spamd> with the B<-a> switch.
+
+=item B<--remove-addr-from-whitelist>
+
+Remove the named email address from the automatic whitelist.  Note that you
+must be running C<spamassassin> or C<spamd> with the B<-a> switch.
 
 =item B<-w> I<fromaddr>, B<--warning-from>=I<fromaddr>
 
@@ -349,11 +431,6 @@ Do only the ''local'' tests, ones that do not require an internet connection to
 operate.  Normally, SpamAssassin will try to detect whether you are connected
 to the net before doing these tests anyway, but for faster checks you may wish
 to use this.
-
-=item B<-S>, B<--stop-at-threshold>
-
-Stop spam checking as soon as the spam threshold is reached, to increase
-performance. This option also turns off Razor reporting.
 
 =item B<-d>, B<--remove-markup>
 

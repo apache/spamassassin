@@ -149,6 +149,8 @@ sub concat_rule_lang {
   }
 }
 
+# note: do not use parse-rules-for-masses here, we need to do linting instead
+# of your average parse
 sub readrules {
   my @files = <../rules/[0-9]*.cf>;
   my $file;
