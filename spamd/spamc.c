@@ -182,7 +182,7 @@ int process_message(const char *hostname, int port)
   /* first, try to mangle it directly into an addr.  This will work
    * for numeric IP addresses, but not for hostnames...
    */
-  if (!inet_aton(hostname, &addr.sin_addr)) {
+  if (!inet_pton(hostname, &addr.sin_addr)) {
     /* If that failed, we can use gethostbyname() to resolve it.
      */
     if (NULL == (hent = gethostbyname(hostname))) {
