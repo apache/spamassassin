@@ -179,6 +179,11 @@ sub new {
   $self->{opt_head} = 0 unless (defined $self->{opt_head});
   $self->{opt_tail} = 0 unless (defined $self->{opt_tail});
 
+  # If any of these options are set, we need to figure out the message's
+  # receive date at scan time.  opt_n == 0, opt_after, opt_before
+  $self->{determine_receive_date} = !$self->{opt_n} ||
+  	defined $self->{opt_after} || defined $self->{opt_before};
+
   $self->{s} = [ ];		# spam, of course
   $self->{h} = [ ];		# ham, as if you couldn't guess
 
@@ -577,10 +582,11 @@ sub start_children {
 	my($class, $format, $date, $where, $result) = $self->run_message($line);
 	$result ||= '';
 
-	# If opt_n is set, the original input date wasn't known,
-	# but run_message would have calculated it, so reset the packed
-	# version if possible ...
-        if ($self->{opt_n} && $class && $format && defined $date && $where) {
+	# If determine_receive_date is not set, the original input date
+	# wasn't calculated, but run_message would have done so, so reset
+	# the packed version if possible ...  use defined for date since
+	# it could == 0.
+        if (!$self->{determine_receive_date} && $class && $format && defined $date && $where) {
 	  $line = run_index_pack($date, $class, $format, $where);
         }
 
@@ -686,6 +692,8 @@ sub message_array {
 
   my @messages;
   if ($self->{opt_n}) {
+    # OPT_N == 1 means don't bother sorting on message receive date
+
     # head or tail > 0 means crop each list
     if ($self->{opt_head} > 0) {
       splice(@{$self->{s}}, $self->{opt_head});
@@ -701,6 +709,8 @@ sub message_array {
     undef $self->{h};
   }
   else {
+    # OPT_N == 0 means sort on message receive date
+
     # Sort the spam and ham groups by date
     my @s = sort { $a cmp $b } @{$self->{s}};
     undef $self->{s};
@@ -736,7 +746,7 @@ sub message_array {
 
   # Convert scan index format to run index format
   # TODO: figure out a better scan index format which doesn't include newlines
-  # so readline() works ...
+  # so readline() works (or replace readline with something else ...?)
   foreach (@messages) {
     $_ = run_index_pack(scan_index_unpack($_));
   }
@@ -797,8 +807,9 @@ sub message_is_useful_by_date  {
 # 2 m				format
 # 3 ./ham/goodmsgs.0		path
 
+# put the date in first, big-endian packed format
+# this format lets cmp easily sort by date, then class, format, and path.
 sub scan_index_pack {
-  # with opt_n, put the date first, and pack it.  faster for sorting...
   return pack("NAAA*", @_);
 }
 
@@ -835,7 +846,7 @@ sub scan_directory {
 sub scan_file {
   my ($self, $class, $mail) = @_;
 
-  if ($self->{opt_n}) {
+  if (!$self->{determine_receive_date}) {
     push(@{$self->{$class}}, scan_index_pack(AI_TIME_UNKNOWN, $class, "f", $mail));
     return;
   }
@@ -906,7 +917,7 @@ sub scan_mailbox {
       if ($header) {
 	my $date = Mail::SpamAssassin::Util::receive_date($header);
 
-	if (!$self->{opt_n}) {
+	if ($self->{determine_receive_date}) {
 	  next if !$self->message_is_useful_by_date($date);
 	}
 
@@ -966,7 +977,7 @@ sub scan_mbx {
 
 		my $date = Mail::SpamAssassin::Util::receive_date($header);
 
-		if (!$self->{opt_n}) {
+		if ($self->{determine_receive_date}) {
 		  next if !$self->message_is_useful_by_date($date);
 		}
 
