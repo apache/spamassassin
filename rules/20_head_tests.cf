@@ -113,8 +113,8 @@ describe TO_EMPTY		To: is empty
 header REPLY_TO_EMPTY		Reply-To =~ /^(?:\@|\s*$)/ [if-unset: UNSET]
 describe REPLY_TO_EMPTY		Reply-To: is empty
 
-header ALL_CAPS_SUBJECT		ALL =~ /\nSUBJECT: /s
-describe ALL_CAPS_SUBJECT	SUBJECT: header found
+header ALL_CAPS_HEADER		ALL =~ /\n(?:TO|FROM|SUBJECT|DATE):/s
+describe ALL_CAPS_HEADER	Header with all capitals found
 
 header X_EM_VER_PRESENT		X-Em-Version =~ /\S/
 describe X_EM_VER_PRESENT	Found an X-Em-Version: header
