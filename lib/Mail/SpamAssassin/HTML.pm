@@ -995,12 +995,25 @@ sub html_text {
     if ($self->{html_text}[-1] =~ /\S*[A-Za-z]\S*\z/ &&
 	$text =~ /^\S*[A-Za-z]\S*/)
     {
-	$self->{html}{t_obfuscation2}++;
+      $self->{html}{t_obfuscation2}++;
     }
     if ($self->{html_text}[-1] =~ /\S*\w\S*\z/ &&
 	$text =~ /^\S*\w\S*/)
     {
-	$self->{html}{t_obfuscation3}++;
+      $self->{html}{t_obfuscation3}++;
+    }
+    # maybe later
+    # m{ [^ \Q \s()<>[]$,";/# \E ] \z }sx
+    # m{ [^\Q  \s () <> [] $,";/#  \E] \z }sx too
+    if ($self->{html_text}[-1] =~ m{[^\s\(\)\<\>\[\]\$\,\"\;\/\#]\z}s &&
+	$text =~ m{^[^\s\(\)\<\>\[\]\$\,\"\;\/\#]}s)
+    {
+      $self->{html}{t_obfuscation4}++;
+    }
+    if ($self->{html_text}[-1] =~ /[^\s\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]\z/s &&
+	$text =~ /^[^\s\x21-\x2f\x3a-\x40\x5b-\x60\x7b-\x7e]/s)
+    {
+      $self->{html}{t_obfuscation5}++;
     }
     if ($self->{html_text}[-1] =~ /\b(\w{1,7})$/s) {
       my $start = length($1);

@@ -392,6 +392,12 @@ sub rendered {
       if (exists $r->{tags} && exists $r->{t_obfuscation3}) {
 	  $r->{t_obfuscation3_ratio} = $r->{t_obfuscation3} / $r->{tags};
       }
+      if (exists $r->{tags} && exists $r->{t_obfuscation4}) {
+	  $r->{t_obfuscation4_ratio} = $r->{t_obfuscation4} / $r->{tags};
+      }
+      if (exists $r->{tags} && exists $r->{t_obfuscation5}) {
+	  $r->{t_obfuscation5_ratio} = $r->{t_obfuscation5} / $r->{tags};
+      }
       if (exists $r->{attr_bad} && exists $r->{attr_all}) {
 	$r->{attr_bad} = $r->{attr_bad} / $r->{attr_all};
       }
