@@ -113,7 +113,10 @@ header INVALID_DATE_NO_TZ	Date =~ /^..., .. ... .... ..:..:..$/
 describe INVALID_DATE_NO_TZ	Invalid Date: header (no timezone)
 
 header SUBJ_HAS_Q_MARK		Subject =~ /\?/
-describe SUBJ_HAS_Q_MARK	Subject: ends in a question mark
+describe SUBJ_HAS_Q_MARK	Subject: has a question mark
+
+header SUBJ_ENDS_IN_Q_MARK	Subject =~ /\?\s*$/
+describe SUBJ_ENDS_IN_Q_MARK	Subject: ends in a question mark
 
 header ADVERT_CODE		Subject =~ /(^\s*|\s+)ADV:/i
 describe ADVERT_CODE		Subject: contains advertising tag
@@ -189,6 +192,9 @@ describe X_PRIORITY_HIGH	Sent with 'X-Priority' set to high
 
 header X_MSMAIL_PRIORITY_HIGH	X-Msmail-Priority =~ /^High/
 describe X_MSMAIL_PRIORITY_HIGH	Sent with 'X-Msmail-Priority' set to high
+
+header MAY_BE_FORGED            Received =~ /\(may be forged\)/i
+describe MAY_BE_FORGED          'Received:' has 'may be forged' warning
 
 ###########################################################################
 
@@ -284,6 +290,24 @@ body PURE_PROFIT		/PURE PROFIT/
 body FREE_CONSULTATION		/FREE CONSULTATION/i
 body INCREASE_SALES		/INCREASE SALES/i
 
+# oftentimes spammers have paper drop boxes (contrib: WW)
+body FILL_OUT_HERE              /\w+[ :\#]_{25,}\s*$/
+describe FILL_OUT_HERE          Looks like something to fill out
+
+# somehow "/name.*\bcredit.?card\b/is" won't match, even if
+# it's there.  *boggle* (contrib: WW)
+body WANTS_CREDIT_CARD          /\bcredit.?card\b/i
+describe WANTS_CREDIT_CARD      Asks for credit card details
+score WANTS_CREDIT_CARD         2
+
+# (contrib: WW)
+body ASKS_BILLING_ADDRESS       /\bbilling address\b/i
+describe ASKS_BILLING_ADDRESS   Asks for a billing address
+
+# (contrib: WW)
+body CYBER_FIRE_POWER           /(?:by|for) Cyber FirePower\!/
+describe CYBER_FIRE_POWER       mentions Cyber FirePower!, a spam-tool
+
 ###########################################################################
 # some full-text matches; note the [3D=\s"']* bits of the patterns, which
 # match some gibberish produced by quoted-printable encoding of HTML, often
@@ -308,6 +332,11 @@ full AOL_USERS_LINK		/AOL\s+Users\s+Click\s+Here/is
 
 full WEB_BUGS			/<\s*img\s[^>]*src[^>]+\?/i
 describe WEB_BUGS		Image tag with an ID code to identify you
+
+# Cyber FirePower! rants about 'Internet terrorists' aka spam fighters
+# (contrib: WW)
+full INTERNET_TERROR_RANT       /At the time of this mailing the return email address is a bonafide.*legitimate return email address that was signed up for with the express purpose .*Internet terrorists\./si
+describe INTERNET_TERROR_RANT   Cyber FirePower! rant about losing dropboxes
 
 ###########################################################################
 # Compensation for common false positives.
