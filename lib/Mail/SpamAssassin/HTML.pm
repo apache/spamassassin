@@ -908,6 +908,9 @@ sub html_tests {
       $height = $1;
       $height *= 6 if (defined $2 && $2 eq "%");
     }
+    # guess size
+    $width = 200 if $width <= 0;
+    $height = 200 if $height <= 0;
     if ($width > 0 && $height > 0) {
       $area = $width * $height;
       $self->{html}{image_area} += $area;
