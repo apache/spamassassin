@@ -2230,9 +2230,9 @@ sub _handle_hit {
     $area ||= '';
 
     if ($score >= 10 || $score <= -10) {
-      $score = sprintf("%- 4f", $score);
+      $score = sprintf("%4.0f", $score);
     } else {
-      $score = sprintf("% 3.1f", $score);
+      $score = sprintf("%4.1f", $score);
     }
 
     if ($self->{conf}->{use_terse_report}) {
