@@ -221,7 +221,6 @@ sub check {
 
   $report =~ s/\n*$/\n\n/s;
   $self->{report} = $report;
-  $self->{msg}->finish_metadata();
 
   $self->{main}->call_plugins ("check_end", { permsgstatus => $self });
 }
@@ -973,7 +972,10 @@ sub finish {
 	  permsgstatus => $self
 	});
 
-  delete $self->{body_text_array};
+  # tell the message object to clean up its metadata, we won't need
+  # it any more
+  $self->{msg}->finish_metadata();
+
   delete $self->{main};
   delete $self->{msg};
   delete $self->{conf};
