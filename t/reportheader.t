@@ -28,7 +28,7 @@ q{ Says: "to be removed, reply via email" }, 'removesubj',
 q{ BODY: Nobody's perfect }, 'remove',
 q{ Message-Id is not valid, according to RFC-2822 }, 'msgidnotvalid',
 q{ Message-Id has no @ sign }, 'msgidnoat',
-q{ BODY: Uses a dotted-decimal IP address in URL }, 'dotteddec',
+q{ URI: Uses a dotted-decimal IP address in URL }, 'dotteddec',
 
 ); #'
 

@@ -90,6 +90,7 @@ sub check {
       # warn "JMD ". join ("", @{$decoded}). "\n";
       $self->do_body_tests($decoded);
       $self->do_body_eval_tests($decoded);
+      $self->do_body_uri_tests($decoded);
       undef $decoded;
     }
 
@@ -115,7 +116,7 @@ sub check {
 
     # Do AWL tests last, since these need the score to have already been calculated
     $self->do_awl_tests();
-}
+  }
 
   dbg ("is spam? score=".$self->{hits}.
   			" required=".$self->{conf}->{required_hits});
@@ -684,10 +685,20 @@ sub get_decoded_stripped_body_text_array {
   $text =~ s/(?:\&\#0147;|\&\#0148;|\&quot;)/"/gs;
   $text =~ s/\&\#0146;/'/gs;
   $text =~ s/\&\#82(?:16|17|20|11);//gs;
+  
+  # convert decimal and hex entities to their characters
+  $text =~ s/\&\#(\d+);/chr($1)/eg;
+  $text =~ s/\&\#x([a-f0-9]+);/chr(hex($1))/eg;
+  
+  # no idea what this is meant to do? Strip broken entities perhaps?
   $text =~ s/\&[-_a-zA-Z0-9]+;/ /gs;
+  
+  # join all consecutive whitespace into a single space
   $text =~ s/\s+/ /gs;
 
   $text =~ s/<p>/\n\n/gis;	# reinsert para breaks
+  
+  $text =~ s/<a\s+href\s*=\s*["']?(.*?)["']\s*>/URI:$1 /gis;
 
   $text =~ s/<[?!\s]*[:a-z0-9]+\b[^>]*>//gis;
   $text =~ s/<\/[:a-z0-9]+>//gis;
@@ -915,6 +926,123 @@ EOT
   }
 }
 
+# Taken from URI and URI::Find
+my $reserved   = q(;/?:@&=+$,[]);
+my $mark       = q(-_.!~*'());                                    #'; emacs
+my $unreserved = "A-Za-z0-9\Q$mark\E";
+my $uricSet = quotemeta($reserved) . $unreserved . "%";
+
+my $schemeRE = '[a-zA-Z][a-zA-Z0-9.+\-]*';
+
+my $uricCheat = $uricSet;
+$uricCheat =~ tr/://d;
+
+my $schemelessRE = qr/(?<!\.)(?:www\.|ftp\.)/;
+my $uriRe = qr/(?:$schemeRE:[$uricCheat]|$schemelessRE)[$uricSet#]*/;
+
+# Taken from Email::Find (thanks Tatso!)
+# This is the BNF from RFC 822
+my $esc         = '\\\\';
+my $period      = '\.';
+my $space       = '\040';
+my $open_br     = '\[';
+my $close_br    = '\]';
+my $nonASCII    = '\x80-\xff';
+my $ctrl        = '\000-\037';
+my $cr_list     = '\n\015';
+my $qtext       = qq/[^$esc$nonASCII$cr_list\"]/; #"
+my $dtext       = qq/[^$esc$nonASCII$cr_list$open_br$close_br]/;
+my $quoted_pair = qq<$esc>.qq<[^$nonASCII]>;
+my $atom_char   = qq/[^($space)<>\@,;:\".$esc$open_br$close_br$ctrl$nonASCII]/;
+#"
+my $atom        = qq<$atom_char+(?!$atom_char)>;
+my $quoted_str  = qq<\"$qtext*(?:$quoted_pair$qtext*)*\">; #"
+my $word        = qq<(?:$atom|$quoted_str)>;
+my $local_part  = qq<$word(?:$period$word)*>;
+
+# This is a combination of the domain name BNF from RFC 1035 plus the
+# domain literal definition from RFC 822, but allowing domains starting
+# with numbers.
+my $label       = q/[A-Za-z\d](?:[A-Za-z\d-]*[A-Za-z\d])?/;
+my $domain_ref  = qq<$label(?:$period$label)*>;
+my $domain_lit  = qq<$open_br(?:$dtext|$quoted_pair)*$close_br>;
+my $domain      = qq<(?:$domain_ref|$domain_lit)>;
+
+# Finally, the address-spec regex (more or less)
+my $Addr_spec_re   = qr<$local_part\s*\@\s*$domain>;
+
+sub do_body_uri_tests {
+  my ($self, $textary) = @_;
+  my ($rulename, $pat, @uris);
+  local ($_);
+
+  dbg ("running uri tests; score so far=".$self->{hits});
+  
+  my $text = join('', @$textary);
+  # warn("spam: /$uriRe/ $text\n");
+  
+  while ($text =~ /\G.*?(<$uriRe>|$uriRe)/gsoc) {
+      my $uri = $1;
+      $uri =~ s/^<(.*)>$/$1/;
+      $uri =~ s/^URI://i;
+      $uri = "http://$uri" unless $uri =~ /^[a-z]+:/i;
+      # warn("Got URI: $uri\n");
+      push @uris, $uri;
+  }
+  
+  while ($text =~ /\G.*?($Addr_spec_re)/gsoc) {
+      my $uri = $1;
+      $uri =~ s/^URI://i;
+      $uri = "mailto:$uri";
+      # warn("Got URI: $uri\n");
+      push @uris, $uri;
+  }
+  
+  $self->clear_test_state();
+  if ( defined &Mail::SpamAssassin::PerMsgStatus::_body_uri_tests ) {
+    # ok, we've compiled this before.
+    Mail::SpamAssassin::PerMsgStatus::_body_uri_tests($self, @uris);
+    return;
+  }
+  
+  # otherwise build up the eval string...
+  my $evalstr = '';
+  while (($rulename, $pat) = each %{$self->{conf}->{uri_tests}}) {
+    $evalstr .= '
+      if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
+    if ('.$pat.') { $self->got_uri_pattern_hit (q{'.$rulename.'}); }
+      }
+    ';
+  }
+
+  # generate the loop that goes through each line...
+  $evalstr = <<"EOT";
+{
+  package Mail::SpamAssassin::PerMsgStatus;
+
+  sub _body_uri_tests {
+    my \$self = shift;
+    foreach (\@_) {
+        $evalstr
+    ;
+    }
+  }
+
+  1;
+}
+EOT
+
+  # and run it.
+  eval $evalstr;
+  if ($@) {
+      warn("Failed to compile URI SpamAssassin tests, skipping:\n".
+          "\t($@)\n");
+  }
+  else {
+    Mail::SpamAssassin::PerMsgStatus::_body_uri_tests($self, @uris);
+  }
+}
+
 sub do_rawbody_tests {
   my ($self, $textary) = @_;
   my ($rulename, $pat);
@@ -1125,6 +1253,17 @@ sub got_body_pattern_hit {
   $self->{tests_already_hit}->{$rulename} = 1;
 
   $self->got_hit ($rulename, 'BODY: ');
+}
+
+sub got_uri_pattern_hit {
+  my ($self, $rulename) = @_;
+
+  # only allow each test to hit once per mail
+  # TODO: Move this into the rule matcher
+  return if (defined $self->{tests_already_hit}->{$rulename});
+  $self->{tests_already_hit}->{$rulename} = 1;
+
+  $self->got_hit ($rulename, 'URI: ');
 }
 
 ###########################################################################

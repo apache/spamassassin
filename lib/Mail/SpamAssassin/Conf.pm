@@ -46,6 +46,7 @@ use vars	qw{
   	@ISA $type_body_tests $type_head_tests $type_head_evals
 	$type_body_evals $type_full_tests $type_full_evals
 	$type_rawbody_tests $type_rawbody_evals
+    $type_uri_tests $type_uri_evals
 };
 
 @ISA = qw();
@@ -58,6 +59,8 @@ $type_full_tests = 105;
 $type_full_evals = 106;
 $type_rawbody_tests = 107;
 $type_rawbody_evals = 108;
+$type_uri_tests  = 109;
+$type_uri_evals  = 110;
 
 ###########################################################################
 
@@ -77,6 +80,8 @@ sub new {
   # this allows e.g. a full-text test to be rewritten as a body test in
   # the user's ~/.spamassassin.cf file.
   $self->{body_tests} = { };
+  $self->{uri_tests}  = { };
+  $self->{uri_evals}  = { }; # not used/implemented yet
   $self->{head_tests} = { };
   $self->{head_evals} = { };
   $self->{body_evals} = { };
@@ -593,6 +598,25 @@ Define a body eval test.  See above.
       $self->add_test ($1, $2, $type_body_tests); next;
     }
 
+=item uri SYMBOLIC_TEST_NAME /pattern/modifiers
+
+Define a uri pattern test.  C<pattern> is a Perl regular expression.
+
+The 'uri' in this case is a list of all the URIs in the body of the email,
+and the test will be run on each and every one of those URIs, adjusting the
+score if a match is found. Use this test instead of one of the body tests
+when you need to match a URI, as it is more accurately bound to the start/end
+points of the URI, and will also be faster.
+
+=cut
+# we don't do URI evals yet - maybe later
+#    if (/^uri\s+(\S+)\s+eval:(.*)$/) {
+#      $self->add_test ($1, $2, $type_uri_evals); next;
+#    }
+    if (/^uri\s+(\S+)\s+(.*)$/) {
+      $self->add_test ($1, $2, $type_uri_tests); next;
+    }
+
 =item rawbody SYMBOLIC_TEST_NAME /pattern/modifiers
 
 Define a raw-body pattern test.  C<pattern> is a Perl regular expression.
@@ -744,6 +768,8 @@ sub finish_parsing {
     elsif ($type == $type_rawbody_evals) { $self->{rawbody_evals}->{$name} = $text; }
     elsif ($type == $type_full_tests) { $self->{full_tests}->{$name} = $text; }
     elsif ($type == $type_full_evals) { $self->{full_evals}->{$name} = $text; }
+    elsif ($type == $type_uri_tests)  { $self->{uri_tests}->{$name} = $text; }
+    # elsif ($type == $type_uri_evals)  { $self->{uri_evals}->{$name} = $text; }
     else {
       # 70 == SA_SOFTWARE
       sa_die (70, "unknown type $type for $name: $text");
