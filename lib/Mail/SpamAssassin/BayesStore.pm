@@ -339,11 +339,16 @@ sub expire_old_tokens_trapped {
   # some of the toks we deleted.
   my $reprieved = 0;
 
-  while ($kept+$reprieved < $self->{expiry_min_db_size} && $deleted > 0) {
+  while ($kept+$reprieved < $self->{expiry_min_db_size} && $deleted-$reprieved > 0) {
     my $deld = shift @deleted_toks;
-    $new_toks{$deld->[0]} = tok_pack ($deld->[1], $deld->[2], $deld->[3]);
-    if (defined($deld->[3]) && (!defined($oldest) || $deld->[3] < $oldest)) {
-      $oldest = $deld->[3];
+    last unless defined $deld;
+
+    my ($tok, $ts, $th, $atime) = @{$deld};
+    next unless (defined $tok && defined $ts && defined $th);
+
+    $new_toks{$tok} = tok_pack ($ts, $th, $atime);
+    if (defined($atime) && (!defined($oldest) || $atime < $oldest)) {
+      $oldest = $atime;
     }
     $reprieved++;
   }
@@ -749,7 +754,7 @@ sub scan_count_increment_big_counter {
 
     if ($self->tie_db_writable()) {
       my $count = $self->{db_toks}->{$SCANCOUNT_BASE_MAGIC_TOKEN};
-      $count ||= 0;
+      if (!$count || $count =~ /\D/) { $count = 0; }
       $count += MAX_SIZE_FOR_SCAN_COUNT_FILE;
       $self->{db_toks}->{$SCANCOUNT_BASE_MAGIC_TOKEN} = $count;
     }
@@ -761,10 +766,10 @@ sub scan_count_increment_big_counter {
   }
 
   if ($need_to_untie || $need_to_retie_ro) {
-    $self->{store}->untie_db();
+    $self->untie_db();
   }
   if ($need_to_retie_ro) {
-    $self->{store}->tie_db_readonly();
+    $self->tie_db_readonly();
   }
 
   if ($failure) {
