@@ -612,7 +612,8 @@ subset of messages will be changed).
 
 See also C<clear_headers> for removing headers.
 
-Here are some examples (these are the defaults):
+Here are some examples (these are the defaults, note that Checker-Version can
+not be changed or removed):
 
   add_header spam Flag _YESNOCAPS_
   add_header all Status _YESNO_, score=_SCORE_ required=_REQD_ tests=_TESTS_ autolearn=_AUTOLEARN_ version=_VERSION_
