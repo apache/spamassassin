@@ -595,7 +595,7 @@ header MIME_BOUND_DIGITS_1	Content-Type =~ /boundary=\"----------=_\d{10}-\d{4}-
 describe MIME_BOUND_DIGITS_1	Spam tool pattern in MIME boundary
 header MIME_BOUND_DIGITS_2	Content-Type =~ /boundary=\"----------=_\d{10}-\d{5}-\d\"/
 describe MIME_BOUND_DIGITS_2	Spam tool pattern in MIME boundary
-header MIME_BOUND_DIGITS_3	Content-Type =~ /boundary=\"----\d{63}\"/
+header MIME_BOUND_DIGITS_3	Content-Type =~ /boundary=\"----0{63}\"/
 describe MIME_BOUND_DIGITS_3	Spam tool pattern in MIME boundary
 header MIME_BOUND_DIGITS_4	Content-Type =~ /boundary=\"_----------=_\d{18}\"/
 describe MIME_BOUND_DIGITS_4	Spam tool pattern in MIME boundary
@@ -605,27 +605,21 @@ header MIME_BOUND_DIGITS_6	Content-Type =~ /boundary=\"\d-\d{10}-\d{10}=:\d{5}\"
 describe MIME_BOUND_DIGITS_6	Spam tool pattern in MIME boundary
 header MIME_BOUND_DIGITS_7	Content-Type =~ /boundary=\d{9}\.\d{13}/
 describe MIME_BOUND_DIGITS_7	Spam tool pattern in MIME boundary
-header MIME_BOUND_DIGITS_8	Content-Type =~ /boundary=\"\d{24}"/
-describe MIME_BOUND_DIGITS_8	Spam tool pattern in MIME boundary
-header MIME_BOUND_NEXTPART_1	Content-Type =~ /boundary=\"_NextPart_\d{2}_\d{31}\"/
-describe MIME_BOUND_NEXTPART_1	Spam tool pattern in MIME boundary
-header MIME_BOUND_NEXTPART_2	Content-Type =~ /boundary=\"_NextPart_\d{3}_\d{30}\"/
-describe MIME_BOUND_NEXTPART_2	Spam tool pattern in MIME boundary
-header MIME_BOUND_MA		Content-Type =~ /boundary=\"----=_[A-Z0-9]{8}_[A-Z0-9]{8}_MA\"/
+header MIME_BOUND_HEX_24	Content-Type =~ /boundary=\"[\dA-F]{24}\"/
+describe MIME_BOUND_HEX_24	Spam tool pattern in MIME boundary
+header MIME_BOUND_MA		Content-Type =~ /boundary=\"----=_[a-zA-Z0-9]{8}_[a-zA-Z0-9]{8}_MA\"/
 describe MIME_BOUND_MA		Spam tool pattern in MIME boundary
 header MIME_BOUND_SEP1		Content-Type =~ /boundary=\"--==--==_Separator1\"/
 describe MIME_BOUND_SEP1	Spam tool pattern in MIME boundary
-header MIME_BOUND_HEX29		Content-Type =~ /boundary=\"[0-9A-F]{29}\"/
-describe MIME_BOUND_HEX29	Spam tool pattern in MIME boundary
 header MIME_BOUND_HEX14		Content-Type =~ /boundary=\"==[0-9a-f]{14}\"/
 describe MIME_BOUND_HEX14	Spam tool pattern in MIME boundary
-header MIME_BOUND_OPTIN		Content-Type =~ /boundary=\"\d{8}-\d{4}-\d{4}-\d{4}-\d{12}OPTIN\"/
+header MIME_BOUND_OPTIN		Content-Type =~ /boundary=\"[A-F\d]{8}-[A-F\d]{4}-[A-F\d]{4}-[A-F\d]{4}-[A-F\d]{12}OPTIN\"/
 describe MIME_BOUND_OPTIN	Spam tool pattern in MIME boundary
 header MIME_BOUND_EQS_DASHES	Content-Type =~ /boundary=\"==-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-==\"/
 describe MIME_BOUND_EQS_DASHES	Spam tool pattern in MIME boundary
 header MIME_BOUND_MIME_BOUND	Content-Type =~ /boundary=\"MIME_BOUNDARY-\d{4}-\d-\d{10}\"/
 describe MIME_BOUND_MIME_BOUND	Spam tool pattern in MIME boundary
-header MIME_BOUND_MAIL_BOUND	Content-Type =~ /boundary=\"___MAIL_BOUNDARY____\"/
+header MIME_BOUND_MAIL_BOUND	Content-Type =~ /boundary=\"____MAIL_BOUNDARY____\"/
 describe MIME_BOUND_MAIL_BOUND	Spam tool pattern in MIME boundary
 
 # http://www.hughes-family.org/bugzilla/show_bug.cgi?id=699
