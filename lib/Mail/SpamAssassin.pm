@@ -279,27 +279,46 @@ sub new {
   # Make sure that we clean $PATH if we're tainted
   Mail::SpamAssassin::Util::clean_path_in_taint_mode();
 
-  # this could probably be made a little faster; for now I'm going
-  # for slow but safe, by keeping in quotes
-  if (Mail::SpamAssassin::Util::am_running_on_windows()) {
-    eval '
-      use Mail::SpamAssassin::Locker::Win32;
-      $self->{locker} = new Mail::SpamAssassin::Locker::Win32 ($self);
-    '; ($@) and die $@;
-  } else {
-    eval '
-      use Mail::SpamAssassin::Locker::Unix;
-      $self->{locker} = new Mail::SpamAssassin::Locker::Unix ($self);
-    '; ($@) and die $@;
-  }
-
+  # TODO: this should be in Conf!
   $self->{encapsulated_content_description} = 'original message before SpamAssassin';
 
   if (!defined $self->{username}) {
     $self->{username} = (Mail::SpamAssassin::Util::portable_getpwuid ($>))[0];
   }
 
+  $self->create_locker();
+
   $self;
+}
+
+sub create_locker {
+  my ($self) = @_;
+
+  my $class;
+  my $m = $self->{conf}->{lock_method};
+
+  # let people choose what they want -- even if they may not work on their
+  # OS.  (they could be using cygwin!)
+  if ($m eq 'win32') { $class = 'Win32'; }
+  elsif ($m eq 'flock') { $class = 'Flock'; }
+  elsif ($m eq 'nfssafe') { $class = 'UnixNFSSafe'; }
+  else {
+    # OS-specific defaults
+    if (Mail::SpamAssassin::Util::am_running_on_windows()) {
+      $class = 'Win32';
+    } else {
+      $class = 'UnixNFSSafe';
+    }
+  }
+
+  # this could probably be made a little faster; for now I'm going
+  # for slow but safe, by keeping in quotes
+  eval '
+    use Mail::SpamAssassin::Locker::'.$class.';
+    $self->{locker} = new Mail::SpamAssassin::Locker::'.$class.' ($self);
+  '; ($@) and die $@;
+
+  if (!defined $self->{locker}) { die "oops! no locker"; }
 }
 
 ###########################################################################

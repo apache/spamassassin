@@ -46,7 +46,8 @@ lib/Mail/SpamAssassin/EvalTests.pm
 lib/Mail/SpamAssassin/HTML.pm
 lib/Mail/SpamAssassin/Locales.pm
 lib/Mail/SpamAssassin/Locker.pm
-lib/Mail/SpamAssassin/Locker/Unix.pm
+lib/Mail/SpamAssassin/Locker/UnixNFSSafe.pm
+lib/Mail/SpamAssassin/Locker/Flock.pm
 lib/Mail/SpamAssassin/Locker/Win32.pm
 lib/Mail/SpamAssassin/MailingList.pm
 lib/Mail/SpamAssassin/Message.pm
@@ -341,3 +342,4 @@ build/update_website_docs
 t/spamd_syslog.t
 t/prefs_include.t
 t/body_mod.t
+t/bayesdbm_flock.t

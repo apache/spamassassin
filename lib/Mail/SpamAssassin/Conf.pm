@@ -282,6 +282,7 @@ sub new {
   $self->{check_mx_delay} = 5;
   $self->{ok_locales} = 'all';
   $self->{ok_languages} = 'all';
+  $self->{lock_method} = '';
   $self->{allow_user_rules} = 0;
   $self->{user_rules_to_compile} = { };
   $self->{fold_headers} = 1;
@@ -2249,8 +2250,9 @@ this option to 0.
 
 Used by BayesStore::SQL storage implementation.
 
-If this options is set the BayesStore::SQL module will override the set username with
-the value given.  This could be useful for implementing global or group bayes databases.
+If this options is set the BayesStore::SQL module will override the set
+username with the value given.  This could be useful for implementing global or
+group bayes databases.
 
 =cut
 
@@ -2270,6 +2272,46 @@ only characters in the ranges A-Z, a-z, 0-9, -, _ and / are permitted.
     # leave as RE for now?
     if (/^pyzor_options\s+([-A-Za-z0-9_\/ ]+)$/) {
       $self->{pyzor_options} = $1;
+      next;
+    }
+
+=item lock_method type
+
+Select the file-locking method used to protect database files on-disk. By
+default, SpamAssassin uses an NFS-safe locking method on UNIX; however, if you
+are sure that the database files you'll be using for Bayes and AWL storage will
+never be accessed over NFS, a non-NFS-safe locking system can be selected.
+
+This will be quite a bit faster, but may risk file corruption if the files are
+ever accessed by multiple clients at once, and one or more of them is accessing
+them through an NFS filesystem.
+
+Note that different platforms require different locking systems.
+
+The supported locking systems for C<type> are as follows:
+
+=over 4
+
+=item nfssafe - an NFS-safe locking system, UNIX-only, default
+
+=item flock - simple UNIX C<flock()> locking.  NFS-unsafe, UNIX only
+
+=item win32 - Win32 locking using C<sysopen (..., O_CREAT|O_EXCL)>.  Windows-only, default
+
+=back
+
+=cut
+
+    if ($key eq 'lock_method') {
+      if ($value !~ /^(nfssafe|flock|win32)$/) {
+        warn "invalid value for lock_method: $value\n";
+        goto failed_line;
+
+      } else {
+        $self->{lock_method} = $value;
+        # recreate the locker
+        $self->{main}->create_locker();
+      }
       next;
     }
 

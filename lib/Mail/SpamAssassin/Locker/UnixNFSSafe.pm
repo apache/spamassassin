@@ -14,11 +14,10 @@
 # limitations under the License.
 # </@LICENSE>
 
-package Mail::SpamAssassin::Locker::Win32;
+package Mail::SpamAssassin::Locker::UnixNFSSafe;
 
 use strict;
 use bytes;
-use Fcntl;
 
 use Mail::SpamAssassin;
 use Mail::SpamAssassin::Locker;
@@ -27,7 +26,7 @@ use File::Spec;
 use Time::Local;
 
 use vars qw{
-  @ISA 
+  @ISA
 };
 
 @ISA = qw(Mail::SpamAssassin::Locker);
@@ -41,43 +40,67 @@ sub new {
 }
 
 ###########################################################################
+# NFS-safe locking (I hope!):
+# Attempt to create a file lock, using NFS-safe locking techniques.
+#
+# Locking code adapted from code by Alexis Rosen <alexis@panix.com>
+# by Kelsey Cummings <kgc@sonic.net>, with mods by jm and quinlan
 
-use constant LOCK_MAX_AGE => 600;       # seconds 
+use constant LOCK_MAX_AGE => 600;	# seconds 
 
 sub safe_lock {
   my ($self, $path, $max_retries) = @_;
+  my $is_locked = 0;
   my @stat;
 
   $max_retries ||= 30;
 
+  my $hname = Mail::SpamAssassin::Util::fq_hostname();
   my $lock_file = "$path.lock";
+  my $lock_tmp = Mail::SpamAssassin::Util::untaint_file_path
+					("$path.lock.$hname.$$");
 
-  if (-e $lock_file && -M $lock_file > (LOCK_MAX_AGE / 86400)) {
-    dbg("lock: $$ breaking stale lock: $lock_file");
-    unlink($lock_file) || warn "lock: $$ unlink of lock file $lock_file failed: $!\n";
+  my $umask = umask 077;
+  if (!open(LTMP, ">$lock_tmp")) {
+      umask $umask; # just in case
+      die "lock: $$ cannot create tmp lockfile $lock_tmp for $lock_file: $!\n";
   }
+  umask $umask;
+  autoflush LTMP 1;
+  dbg("lock: $$ created $lock_tmp");
+
   for (my $retries = 0; $retries < $max_retries; $retries++) {
-    if ($retries > 0) {
-      sleep(1);
-      # TODO: $self->jittery_one_second_sleep();?
-    }
+    if ($retries > 0) { $self->jittery_one_second_sleep(); }
+    print LTMP "$hname.$$\n";
     dbg("lock: $$ trying to get lock on $path with $retries retries");
-    if (sysopen(LOCKFILE, $lock_file, O_RDWR|O_CREAT|O_EXCL)) {
-      dbg("lock: $$ link to $lock_file: sysopen ok");
-      close(LOCKFILE);
-      return 1;
+    if (link($lock_tmp, $lock_file)) {
+      dbg("lock: $$ link to $lock_file: link ok");
+      $is_locked = 1;
+      last;
     }
-    my @stat = stat($lock_file);
+    # link _may_ return false even if the link _is_ created
+    @stat = stat($lock_tmp);
+    if ($stat[3] > 1) {
+      dbg("lock: $$ link to $lock_file: stat ok");
+      $is_locked = 1;
+      last;
+    }
     # check age of lockfile ctime
-    my $age = ($#stat < 11 ? undef : $stat[10]);
-    if ((!defined($age) && $retries > $max_retries / 2) ||
-	(defined($age) && (time - $age > LOCK_MAX_AGE)))
-    {
-      dbg("lock: $$ breaking stale lock: $lock_file");
+    my $now = ($#stat < 11 ? undef : $stat[10]);
+    @stat = stat($lock_file);
+    my $lock_age = ($#stat < 11 ? undef : $stat[10]);
+    if (!defined($lock_age) || ($now - $lock_age) > LOCK_MAX_AGE) {
+      # we got a stale lock, break it
+      dbg("lock: $$ breaking stale $lock_file: age=" .
+	  (defined $lock_age ? $lock_age : "undef") . " now=$now");
       unlink ($lock_file) || warn "lock: $$ unlink of lock file $lock_file failed: $!\n";
     }
   }
-  return 0;
+
+  close(LTMP);
+  unlink ($lock_tmp) || warn "lock: $$ unlink of temp lock $lock_tmp failed: $!\n";
+
+  return $is_locked;
 }
 
 ###########################################################################
@@ -104,7 +127,6 @@ sub refresh_lock {
 }
 
 ###########################################################################
-
 
 sub dbg { Mail::SpamAssassin::dbg (@_); }
 

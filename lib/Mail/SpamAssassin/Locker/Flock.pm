@@ -14,7 +14,7 @@
 # limitations under the License.
 # </@LICENSE>
 
-package Mail::SpamAssassin::Locker::Unix;
+package Mail::SpamAssassin::Locker::Flock;
 
 use strict;
 use bytes;
@@ -23,7 +23,8 @@ use Mail::SpamAssassin;
 use Mail::SpamAssassin::Locker;
 use Mail::SpamAssassin::Util;
 use File::Spec;
-use Time::Local;
+use IO::File;
+use Fcntl qw(:DEFAULT :flock);
 
 use vars qw{
   @ISA
@@ -46,8 +47,6 @@ sub new {
 # Locking code adapted from code by Alexis Rosen <alexis@panix.com>
 # by Kelsey Cummings <kgc@sonic.net>, with mods by jm and quinlan
 
-use constant LOCK_MAX_AGE => 600;	# seconds 
-
 sub safe_lock {
   my ($self, $path, $max_retries) = @_;
   my $is_locked = 0;
@@ -55,53 +54,37 @@ sub safe_lock {
 
   $max_retries ||= 30;
 
-  my $hname = Mail::SpamAssassin::Util::fq_hostname();
   my $lock_file = "$path.lock";
-  my $lock_tmp = Mail::SpamAssassin::Util::untaint_file_path
-					("$path.lock.$hname.$$");
-
   my $umask = umask 077;
-  if (!open(LTMP, ">$lock_tmp")) {
+  my $fh = new IO::File();
+
+  if (!$fh->open ("$lock_file", O_RDWR|O_CREAT)) {
       umask $umask; # just in case
-      die "lock: $$ cannot create tmp lockfile $lock_tmp for $lock_file: $!\n";
+      die "lock: $$ cannot create lockfile $lock_file: $!\n";
   }
-  umask $umask;
-  autoflush LTMP 1;
-  dbg("lock: $$ created $lock_tmp");
+
+  dbg("lock: $$ created $lock_file");
 
   for (my $retries = 0; $retries < $max_retries; $retries++) {
-    if ($retries > 0) {
-      select(undef, undef, undef, (rand(1.0) + 0.5));
-    }
-    print LTMP "$hname.$$\n";
+    if ($retries > 0) { $self->jittery_one_second_sleep(); }
     dbg("lock: $$ trying to get lock on $path with $retries retries");
-    if (link($lock_tmp, $lock_file)) {
+
+    # HELLO!?! IO::File doesn't have a flock() method?!
+    if (flock ($fh, LOCK_EX|LOCK_NB)) {
       dbg("lock: $$ link to $lock_file: link ok");
       $is_locked = 1;
       last;
     }
-    # link _may_ return false even if the link _is_ created
-    @stat = stat($lock_tmp);
-    if ($stat[3] > 1) {
-      dbg("lock: $$ link to $lock_file: stat ok");
-      $is_locked = 1;
-      last;
-    }
-    # check age of lockfile ctime
-    my $now = ($#stat < 11 ? undef : $stat[10]);
-    @stat = stat($lock_file);
-    my $lock_age = ($#stat < 11 ? undef : $stat[10]);
-    if (!defined($lock_age) || ($now - $lock_age) > LOCK_MAX_AGE) {
-      # we got a stale lock, break it
-      dbg("lock: $$ breaking stale $lock_file: age=" .
-	  (defined $lock_age ? $lock_age : "undef") . " now=$now");
-      unlink ($lock_file) || warn "lock: $$ unlink of lock file $lock_file failed: $!\n";
-    }
   }
 
-  close(LTMP);
-  unlink ($lock_tmp) || warn "lock: $$ unlink of temp lock $lock_tmp failed: $!\n";
+  # just to be nice: let people know when it was locked
+  $fh->print ("$$\n");
+  $fh->flush ();
 
+  # keep the FD around - we need to keep the lockfile open or the lock
+  # is unlocked!
+  $self->{lock_fhs} ||= { };
+  $self->{lock_fhs}->{$path} = $fh;
   return $is_locked;
 }
 
@@ -110,8 +93,29 @@ sub safe_lock {
 sub safe_unlock {
   my ($self, $path) = @_;
 
-  unlink ("$path.lock") || warn "unlock: $$ unlink failed: $path.lock\n";
-  dbg("unlock: $$ unlink $path.lock");
+  if (!exists $self->{lock_fhs} || !defined $self->{lock_fhs}->{$path}) {
+    warn "unlock: $$ no lock handle for $path\n";
+    return;
+  }
+
+  my $fh = $self->{lock_fhs}->{$path};
+  delete $self->{lock_fhs}->{$path};
+
+  flock ($fh, LOCK_UN);
+  $fh->close();
+
+  dbg("unlock: $$ unlocked $path.lock");
+
+  # do NOT unlink! this would open a race, whereby:
+  # procA: ....unlock                           (unlocked lockfile)
+  # procB:            lock                      (gets lock on lockfile)
+  # procA:                 unlink               (deletes lockfile)
+  # (procB's lock is now deleted as well!)
+  # procC:                        create, lock  (gets lock on new file)
+  #
+  # unlink ("$path.lock"); 
+  #
+  # side-effect: we leave a .lock file around. but hey!
 }
 
 ###########################################################################
@@ -121,9 +125,14 @@ sub refresh_lock {
 
   return unless $path;
 
-  # this could arguably read the lock and make sure the same process
-  # owns it, but this shouldn't, in theory, be an issue.
-  utime time, time, "$path.lock";
+  if (!exists $self->{lock_fhs} || !defined $self->{lock_fhs}->{$path}) {
+    warn "refresh_lock: $$ no lock handle for $path\n";
+    return;
+  }
+
+  my $fh = $self->{lock_fhs}->{$path};
+  $fh->print ("$$\n");
+  $fh->flush ();
 
   dbg("refresh: $$ refresh $path.lock");
 }
