@@ -69,8 +69,8 @@ masses/tmp
 masses/uniq-scores
 ninjalogo.png
 ninjalogo.xcf
-old.cf
-out
+old.cf$
+out$
 pm_to_blib
 pod2htm.*
 pod2html-.*
@@ -90,9 +90,9 @@ t/log/.*
 t/rule_tests.t
 testmails
 tmon.out
-tst
+^tst$
 wordfreqs/.*
-x
+^x$
 rules/70_broken_rules.cf
 t/data/whitelists/.*
 lib/Mail/SpamAssassin/SMTP/SmartHost.pm
@@ -102,8 +102,8 @@ masses/tmon.nonspam
 masses/dprof.spam
 masses/dprof.nonspam
 masses/jm-mass-check-rules/.*
-o
-todo
+^o$
+todo$
 t/data/nice/cjk/.*
 masses/bayes-testing/.*
 stuff/.*
@@ -111,6 +111,6 @@ lm/.*
 tasks/.*
 build/2.60_change_summary
 build/replace_license_blocks
-sa-learn
+sa-learn$
 t/bayessql.cf
 t/sql_based_whitelist.cf
