@@ -1215,15 +1215,25 @@ sub init {
     # even the system config.
     my $siterules = $self->{site_rules_filename};
     $siterules ||= $self->first_existing_path (@site_rules_path);
+
+    my $sysrules = $self->{rules_filename};
+    $sysrules ||= $self->first_existing_path (@default_rules_path);
+
     if ($siterules) {
       $fname = File::Spec->catfile ($siterules, "init.pre");
+
       if (-f $fname) {
         $self->{config_text} .= $self->read_cf ($fname, 'site rules init.pre');
+
+      } else {
+        $fname = File::Spec->catfile ($sysrules, "init.pre");
+        if (-f $fname) {
+          $self->{config_text} .= $self->read_cf ($fname, 'sys rules init.pre');
+        }
       }
     }
 
-    $fname = $self->{rules_filename};
-    $fname ||= $self->first_existing_path (@default_rules_path);
+    $fname = $sysrules;
     if ($fname) {
       $self->{config_text} .= $self->read_cf ($fname, 'default rules dir');
       if (-f "$fname/languages") {
