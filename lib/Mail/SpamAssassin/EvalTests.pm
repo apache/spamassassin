@@ -2394,7 +2394,7 @@ sub _check_mime_header {
   if ($ctype eq 'text/html') {
     $self->{mime_body_html_count}++;
   }
-  elsif ($ctype =~ m@^(?:text|message)@i) {
+  elsif ($ctype =~ m@^text@i) {
     $self->{mime_body_text_count}++;
   }
 

@@ -55,7 +55,7 @@ my %files = (
 	],
 
 	"$prefix/t/data/nice/mime8" => [
-	  join("\n",'multipart/mixed','application/postscript','binary','message/rfc822'),
+	  join("\n",'multipart/mixed','application/postscript','binary','message/rfc822,multipart/mixed,text/plain,multipart/parallel,image/gif,audio/basic,application/atomicmail,message/rfc822,audio/x-sun'),
 	  '07fdde1c24f216b05813f6a1ae0c7c1c0f84c42b',
 	  '03e5acb518e8aca0b3a7b18f2d94b5efe73495b2'
 	],

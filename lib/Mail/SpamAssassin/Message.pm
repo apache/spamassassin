@@ -491,6 +491,13 @@ sub _parse_normal {
 
   $msg->add_body_part($part_msg);
 
+  # Parse message/* parts into their own tree...
+  if ($part_msg->{'type'} =~ m@^message/@) {
+    my $childmsg = Mail::SpamAssassin::Message->new({message=>$body, parsenow=>1});
+    $part_msg->add_body_part($childmsg);
+    return;
+  }
+
   # now that we've added the leaf node, let's go ahead and kill
   # body_parts (used for sub-trees).  it could end up being recursive,
   # and well, let's avoid that. ;)
