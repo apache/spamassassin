@@ -18,5 +18,8 @@ q{ VIAGRA } => 'VIAGRA',
 q{ OPPORTUNITY } => 'OPPORTUNITY',
 );
 
+tstlocalrules ("
+        score OUR_AFFILIATE_PARTNERS 1
+");
 sarun ("-L -t < data/spam/011", \&patterns_run_cb);
 ok_all_patterns();
