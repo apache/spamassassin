@@ -78,7 +78,7 @@ GetOptions("children=n" => \$children,
            "minperchild=n" => \$minperchild,
            "maxperchild=n" => \$maxperchild) or &stop("can't get the options !\n");
 
-&stop("Numbers of arguments must be at least two !\n") unless @ARGV == 2;
+&stop("Numbers of arguments must be at least two !\n") unless @ARGV >= 2;
 
 my ($srcaddr, $srcport) = split /:/, $ARGV[0];
 my ($dstaddr, $dstport) = split /:/, $ARGV[1];
