@@ -1927,11 +1927,36 @@ sub _check_attachments {
 # FULL-MESSAGE TESTS:
 ###########################################################################
 
-sub check_razor {
+sub check_razor1 {
   my ($self, $fulltext) = @_;
 
-  return 0 unless ($self->is_razor_available());
-  return 0 if ($self->{already_checked_razor});
+  return 0 unless ($self->is_razor1_available());
+  return 0 if ($self->{already_checked_razor1});
+
+  $self->{already_checked_razor1} = 1;
+
+  # note: we don't use $fulltext. instead we get the raw message,
+  # unfiltered, for razor1 to check.  ($fulltext removes MIME
+  # parts etc.)
+  my $full = $self->get_full_message_as_text();
+  return $self->razor1_lookup (\$full);
+}
+
+sub check_razor2 {
+  my ($self, $fulltext) = @_;
+
+  return 0 unless ($self->is_razor2_available());
+  return 0 if ($self->{already_checked_razor2});
+
+  $self->{already_checked_razor2} = 1;
+
+  # note: we don't use $fulltext. instead we get the raw message,
+  # unfiltered, for razor2 to check.  ($fulltext removes MIME
+  # parts etc.)
+  my $full = $self->get_full_message_as_text();
+  return $self->razor2_lookup (\$full);
+}
+
 sub check_pyzor {
   my ($self, $fulltext) = @_;
 
@@ -1945,16 +1970,6 @@ sub check_pyzor {
   # parts etc.)
   my $full = $self->get_full_message_as_text();
   return $self->pyzor_lookup (\$full);
-}
-
-
-  $self->{already_checked_razor} = 1;
-
-  # note: we don't use $fulltext. instead we get the raw message,
-  # unfiltered, for razor to check.  ($fulltext removes MIME
-  # parts etc.)
-  my $full = $self->get_full_message_as_text();
-  return $self->razor_lookup (\$full);
 }
 
 sub check_dcc {
