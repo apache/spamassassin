@@ -170,13 +170,13 @@ describe HTML_IMAGE_RATIO_14	HTML has a low ratio of text to image area
 body HTML_JAVASCRIPT		eval:html_test('javascript')
 describe HTML_JAVASCRIPT	JavaScript code
 
-body HTML_LINK_PUSH_HERE	eval:html_eval('anchor_text', '=~ /(?:push|go)\s*(?:here|this)/i')
+body HTML_LINK_PUSH_HERE	eval:html_text('anchor', '=~ /(?:push|go)\s*(?:here|this)/i')
 describe HTML_LINK_PUSH_HERE	HTML link text says "push here" or similar
 
-body HTML_LINK_CLICK_HERE	eval:html_eval('anchor_text', '=~ /click\s*(?:here|this)/i')
+body HTML_LINK_CLICK_HERE	eval:html_text('anchor', '=~ /click\s*(?:here|this)/i')
 describe HTML_LINK_CLICK_HERE	HTML link text says "click here"
 
-body HTML_LINK_CLICK_CAPS	eval:html_eval('anchor_text', '=~ /CLICK/')
+body HTML_LINK_CLICK_CAPS	eval:html_text('anchor', '=~ /CLICK/')
 describe HTML_LINK_CLICK_CAPS	HTML link text says "CLICK"
 
 # HTML obfuscation

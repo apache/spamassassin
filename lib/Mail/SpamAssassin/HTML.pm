@@ -112,6 +112,7 @@ sub html_render {
   $self->{html}{image_area} = 0;
   $self->{html}{shouting} = 0;
   $self->{html}{max_shouting} = 0;
+  $self->{html}{anchor_index} = -1;
   $self->{html}{title_index} = -1;
   $self->{html}{max_size} = 3;	# start at default size
   $self->{html}{min_size} = 3;	# start at default size
@@ -859,16 +860,19 @@ sub html_tests {
   if ($tag =~ /^(?:object|embed)$/) {
     $self->{html}{embeds} = 1;
   }
+
+  # special text delimiters - <a> and <title>
+  if ($tag eq "a") {
+    $self->{html}{anchor_index}++;
+    $self->{html}{anchor}->[$self->{html}{anchor_index}] = "";
+  }
   if ($tag eq "title") {
     $self->{html}{title_index}++;
     $self->{html}{title}->[$self->{html}{title_index}] = "";
 
-    # begin test code
-    if ($self->{html}{title_index} > 0) {
-      $self->{html}{title_extra}++;
-    }
-    # end test code
+    $self->{html}{title_extra}++ if $self->{html}{title_index} > 0;
   }
+
   if ($tag eq "meta" &&
       exists $attr->{'http-equiv'} &&
       exists $attr->{content} &&
@@ -877,8 +881,6 @@ sub html_tests {
   {
     $self->{html}{charsets} .= exists $self->{html}{charsets} ? " $1" : $1;
   }
-
-  $self->{html}{anchor_text} ||= "" if ($tag eq "a");
 }
 
 sub examine_text_style {
@@ -893,24 +895,17 @@ sub examine_text_style {
 sub html_text {
   my ($self, $text) = @_;
 
-  if (exists $self->{html}{inside_a} && $self->{html}{inside_a} > 0) {
-    $self->{html}{anchor_text} .= " $text";
-  }
-
+  # text that is not part of body
   if (exists $self->{html}{inside_script} && $self->{html}{inside_script} > 0)
   {
-    if ($text =~ /\b(?:$events)\b/io)
-    {
-      $self->{html}{html_event} = 1;
-    }
     if ($text =~ /\bon(?:blur|contextmenu|focus|load|resize|submit|unload)\b/i)
     {
       $self->{html}{html_event_unsafe} = 1;
     }
+    if ($text =~ /\b(?:$events)\b/io) { $self->{html}{html_event} = 1; }
     if ($text =~ /\.open\s*\(/) { $self->{html}{window_open} = 1; }
     return;
   }
-
   if (exists $self->{html}{inside_style} && $self->{html}{inside_style} > 0) {
     if ($text =~ /font(?:-size)?:\s*(\d+(?:\.\d*)?|\.\d+)(p[tx])/i) {
       $self->examine_text_style ($1, $2);
@@ -918,8 +913,11 @@ sub html_text {
     return;
   }
 
-  if (exists $self->{html}{inside_title} && $self->{html}{inside_title} > 0)
-  {
+  # text that is part of body and also stored separately
+  if (exists $self->{html}{inside_a} && $self->{html}{inside_a} > 0) {
+    $self->{html}{anchor}->[$self->{html}{anchor_index}] .= $text;
+  }
+  if (exists $self->{html}{inside_title} && $self->{html}{inside_title} > 0) {
     $self->{html}{title}->[$self->{html}{title_index}] .= $text;
   }
 
