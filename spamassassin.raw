@@ -169,6 +169,11 @@ my $mail = Mail::SpamAssassin::NoMailAudit->new ( add_From_line => $opt_F );
     if ($opt_w) {
       $spamtest->reply_with_warning ($mail, $opt_w);
     }
+    if ($opt_l) {
+      $mail->{noexit} = 1;
+      $mail->accept ($opt_l);
+      $mail->{noexit} = 0;
+    }
     $mail->ignore();		# will exit
   }
 
@@ -198,11 +203,21 @@ my $mail = Mail::SpamAssassin::NoMailAudit->new ( add_From_line => $opt_F );
 
   if ($opt_W) {
     $spamtest->add_all_addresses_to_whitelist ($mail);
+    if ($opt_l) {
+      $mail->{noexit} = 1;
+      $mail->accept ($opt_l);
+      $mail->{noexit} = 0;
+    }
     $mail->ignore();		# will exit
   }
 
   if ($opt_R) {
     $spamtest->remove_all_addresses_from_whitelist ($mail);
+    if ($opt_l) {
+      $mail->{noexit} = 1;
+      $mail->accept ($opt_l);
+      $mail->{noexit} = 0;
+    }
     $mail->ignore();		# will exit
   }
 
