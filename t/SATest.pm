@@ -325,7 +325,13 @@ sub pattern_to_re {
 
 sub patterns_run_cb {
   local ($_);
-  $_ = join ('', <IN>);
+  my $string = shift;
+
+  if (defined $string) {
+    $_ = $string;
+  } else {
+    $_ = join ('', <IN>);
+  }
 
   foreach my $pat (sort keys %patterns) {
     my $safe = pattern_to_re ($pat);

@@ -189,6 +189,7 @@ t/data/spam/010
 t/data/spam/011
 t/data/spam/badmime.txt
 t/data/spam/base64.txt
+t/data/spam/bsmtp
 t/data/spam/gtube.eml
 t/db_awl_path.t
 t/db_based_whitelist.t
@@ -204,12 +205,14 @@ t/reportheader.t
 t/rule_tests.t
 t/spam.t
 t/spamc.t
+t/spamc_B.t
 t/spamc_c.t
 t/spamd.t
 t/spamd_maxchildren.t
 t/spamd_maxsize.t
 t/spamd_parallel.t
 t/spamd_port.t
+t/spamd_protocol_10.t
 t/spamd_report.t
 t/spamd_report_ifspam.t
 t/spamd_stop.t
@@ -221,6 +224,7 @@ t/test_dir
 t/utf8.t
 t/whitelist_addrs.t
 t/whitelist_to.t
+t/zz_cleanup.t
 tools/README.speedtest
 tools/check_bayes_db
 tools/check_whitelist
@@ -231,6 +235,3 @@ tools/test_extract
 tools/translation_prep.pl
 tools/triplets.pl
 windows_install.pl
-t/spamc_B.t
-t/data/spam/bsmtp
-t/zz_cleanup.t
