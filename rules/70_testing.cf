@@ -279,16 +279,6 @@ describe T_INTERRUPTUS          Hypertextus Interruptus - HTML-obfuscated text
 
 ##########################################################################
 
-# try From: instead of EnvelopeFrom
-header T_DNS_FROM_SECURITYSAGE	eval:check_rbl_from_host('t_securitysage', 'blackhole.securitysage.com.')
-tflags T_DNS_FROM_SECURITYSAGE	net
-
-# try EnvelopeFrom instead of From:
-header T_DNS_FROM_AHBL_RHSBL	eval:check_rbl_envfrom('t_ahbl', 'rhsbl.ahbl.org.')
-tflags T_DNS_FROM_AHBL_RHSBL	net
-
-##########################################################################
-
 # bug 2397 - CLA requested
 body T_DISGUISE_PORN_MUNDANE	/\b(?:h[0*]t|y[0*][uv]ng|b[0*]ys?|g[1*]r[1l]s?|g[1l]rls?|w[1*]ves|w[1*]fe|s3xy?|p[0*]rn[o0*]?)\b/i
 describe T_DISGUISE_PORN_MUNDANE	Attempts to disguise mundane words used in porn
