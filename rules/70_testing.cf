@@ -404,3 +404,7 @@ meta     T_FRAUD_X5 ((__T_FRAUD_BADTHINGS + __T_FRAUD_DPTCOMPNY + __T_FRAUD_INTR
 describe T_FRAUD_X5 Matches 5+ phrases commonly used in fraud spam
 meta     T_FRAUD_X6 ((__T_FRAUD_BADTHINGS + __T_FRAUD_DPTCOMPNY + __T_FRAUD_INTRO + __T_FRAUD_LOC + __T_FRAUD_MONEY + __T_FRAUD_PAPERWORK + __T_FRAUD_VIPS + __T_FRAUD_RELIGION + __T_FRAUD_TINHORN + __T_FRAUD_TRUST + __T_FRAUD_AGREE + __T_FRAUD_REPLY + __T_FRAUD_FAMILY + __T_FRAUD_LOTTERY + __T_FRAUD_BARRISTR + __T_FRAUD_FOREIGN + __T_FRAUD_PROPOSE + __T_FRAUD_CONTACT + __T_FRAUD_FUNWORDS + __T_FRAUD_LOTTERY2 + __T_FRAUD_REFNUM) > 5)
 describe T_FRAUD_X6 Matches 6+ phrases commonly used in fraud spam
+
+# bug 3395
+header    T_YAHOO_MSGID_CAPS          Message-ID =~ /<[A-Z]+\@yahoo.com>/
+describe  T_YAHOO_MSGID_CAPS          Message-ID has all-caps@yahoo.com
