@@ -372,3 +372,6 @@ body T_MPART_ALT_DIFF4_20   eval:multipart_alternative_difference_count('4','20'
 body T_MPART_ALT_DIFF5_20   eval:multipart_alternative_difference_count('5','20')
 body T_MPART_ALT_DIFF8_20   eval:multipart_alternative_difference_count('8','20')
 body T_MPART_ALT_DIFF10_20  eval:multipart_alternative_difference_count('10','20')
+
+# bug 3186
+uri T_BIZ_TLD		/^(?:https?:\/\/|mailto:)[^\/]+\.biz(?![-a-z0-9])/i
