@@ -1156,7 +1156,9 @@ sub get_decoded_stripped_body_text_array {
       $self->{html}{ratio} = ($raw - $self->{html}{non_uri_len}) / $raw;
     } # if ($raw > 0)
     delete $self->{html_last_tag};
-  }
+
+    $text =~ s/<![^>]*>//g;
+  } # if HTML
 
   # whitespace handling (warning: small changes have large effects!)
   $text =~ s/\n+\s*\n+/\f/gs;		# double newlines => form feed
