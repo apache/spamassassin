@@ -113,13 +113,13 @@ unsafe_report it, it may be safer to save it to a file and open it with an edito
 clear_headers
 
 #X-Spam-Checker-Version: SpamAssassin 2.60-cvs (1.188-2003-05-24-exp)
-add_header Checker-Version all SpamAssassin _VERSION_ (_SUBVERSION_)
+add_header all Checker-Version SpamAssassin _VERSION_ (_SUBVERSION_) on _HOSTNAME_
 
 #X-Spam-Flag: YES
-add_header Flag spam _YESNOCAPS_
+add_header spam Flag _YESNOCAPS_
 
 #X-Spam-Level: *************
-add_header Level all _STARS(*)_
+add_header all Level _STARS(*)_
 
 #X-Spam-Status: Yes, hits=14.0 required=5.0 tests=BAYES_99,CALL_FREE
 #        DATE_IN_PAST_12_24,DCC_CHECK,DRASTIC_REDUCED,FROM_HAS_MIXED_NUMS
@@ -127,7 +127,7 @@ add_header Level all _STARS(*)_
 #        LINES_OF_YELLING,MSGID_HAS_NO_AT,NO_REAL_NAME,ONCE_IN_LIFETIME
 #        REMOVE_SUBJ,SMTPD_IN_RCVD,T_INVALID_DATE_2,T_INVALID_DATE_HMS
 #        UNDISC_RECIPS autolearn=spam version=2.60-cvs
-add_header Status all "_YESNO_, hits=_HITS_ required=_REQD_ tests=_TESTS_ autolearn=_AUTOLEARN_ version=_VERSION_"
+add_header all Status "_YESNO_, hits=_HITS_ required=_REQD_ tests=_TESTS_ autolearn=_AUTOLEARN_ version=_VERSION_"
 
 ###########################################################################
 # Default prefs values: users can override these in their 
@@ -156,7 +156,7 @@ bayes_auto_learn			1
 # report_safe controls the markup of spam. If you set it to 0, you
 # will want to add a header to show the tests hit by a message marked
 # as spam. For your convenience, one is suggested below.
-# add_header Report spam _REPORT_
+# add_header spam Report _REPORT_
 # report_safe           1
 
 # Some common prefs settings can be set here, to take effect site-wide
