@@ -67,17 +67,6 @@ Received: from helene8.i.pinwand.net (helene.cats.ms) [10.0.8.6.13219] (mail)
 },
 q{
 
-Received: from helene8.i.pinwand.net (helene.cats.ms) [10.0.8.6.13219] (mail)
-     by lisbeth.i.pinwand.net with esmtp (Exim 3.35 #1 (Debian))
-     id 1CO5y7-0001vC-00; Sun, 31 Oct 2004 04:01:23 +0100
-
-} => q{
-
-[ ip=10.0.8.6 rdns=helene8.i.pinwand.net helo=helene.cats.ms by=lisbeth.i.pinwand.net ident= envfrom= intl=0 id=1CO5y7-0001vC-00 ]
-
-},
-q{
-
       Received: from inet-vrs-05.redmond.corp.microsoft.com ([157.54.6.157])
         by INET-IMC-05.redmond.corp.microsoft.com with Microsoft
         SMTPSVC(5.0.2195.6624); Thu, 6 Mar 2003 12:02:35 -0800
