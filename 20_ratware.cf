@@ -138,6 +138,7 @@ meta FORGED_MUA_AOL_FROM	(__AOL8_MUA && !__AOL8_FROM)
 describe FORGED_MUA_AOL_FROM	Forged mail pretending to be from AOL 8.0 (by From)
 
 # From private mail with developers.  Some top tips here!
+header __THEBAT_MUA		X-Mailer =~ /The Bat!/
 header __BAT_MSGID		MESSAGEID =~ /^<\d{2,12}\.\d{14}\@\S+>$/
 header __CTYPE_CHARSET_QUOTED	Content-Type =~ /charset=\"/i
 header __CTYPE_HAS_BOUNDARY	Content-Type =~ /boundary/i
@@ -157,6 +158,9 @@ describe FORGED_AOL_HTML	AOL can't send HTML message only
 
 meta FORGED_IMS_HTML		(__IMS_MUA && __MIME_HTML_ONLY)
 describe FORGED_IMS_HTML	IMS can't send HTML message only
+
+meta FORGED_THEBAT_HTML		(__THEBAT_MUA && __MIME_HTML_ONLY)
+describe FORGED_THEBAT_HTML	The Bat! can't send HTML message only
 
 # bug 1561
 # stronger version of USER_AGENT_APPLEMAIL

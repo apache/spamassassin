@@ -75,11 +75,6 @@ meta T_MIME_HTML_NO_DOCTYPE	(__MIME_HTML && !__HTML_TAG_EXISTS_DOCTYPE)
 header __ANY_QUALCOMM_MUA	X-Mailer =~ /^QUALCOMM\b/
 meta T_FORGED_QUALCOMM_TAGS	(__ANY_QUALCOMM_MUA && __MIME_HTML && !__TAG_EXISTS_HTML)
 
-# bug 1380
-# 2003-05-09 quinlan: fixed rule
-header __THEBAT_MUA		X-Mailer =~ /The Bat!/
-meta T_FORGED_THEBAT_HTML	(__THEBAT_MUA && __MIME_HTML_ONLY)
-
 # MIME Content-Transfer-Encoding control rules
 rawbody T_MIME_BASE64			eval:check_for_mime('t_mime_base64_count')
 rawbody T_MIME_QP			eval:check_for_mime('t_mime_qp_count')
