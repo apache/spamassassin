@@ -212,27 +212,35 @@ header T_PC_CUR_DATE_TIME_2	ALL =~ /[%\#\[\$]CURRENT_DATE_TIME/
 # RAND rules
 header T_PC_RND_HEADER_1	ALL =~ /%RA?ND_[A-Z]/
 body T_PC_RND_BODY_1		/%RA?ND_[A-Z]/
+rawbody T_PC_RND_RAWBODY_1	/%RA?ND_[A-Z]/
 
 header T_PC_RND_HEADER_2	ALL =~ /[%\#\[\$]RA?ND_[A-Z]/
 body T_PC_RND_BODY_2		/[%\#\[\$]RA?ND_[A-Z]/
+rawbody T_PC_RND_RAWBODY_2	/[%\#\[\$]RA?ND_[A-Z]/
 
 header T_PC_RND_HEADER_3	ALL =~ /%RA?ND(?:OM)?_[A-Z]/
 body T_PC_RND_BODY_3		/%RA?ND(?:OM)?_[A-Z]/
+rawbody T_PC_RND_RAWBODY_3	/%RA?ND(?:OM)?_[A-Z]/
 
 header T_PC_RND_HEADER_4	ALL =~ /[%\#\[\$]RA?ND(?:OM)?_[A-Z]/
 body T_PC_RND_BODY_4		/[%\#\[\$]RA?ND(?:OM)?_[A-Z]/
+rawbody T_PC_RND_RAWBODY_4	/[%\#\[\$]RA?ND(?:OM)?_[A-Z]/
 
 header T_PC_RND_HEADER_5	ALL =~ /%RA?ND_[A-Z]/i
 body T_PC_RND_BODY_5		/%RA?ND_[A-Z]/i
+rawbody T_PC_RND_RAWBODY_5	/%RA?ND_[A-Z]/i
 
 header T_PC_RND_HEADER_6	ALL =~ /[%\#\[\$]RA?ND_[A-Z]/i
 body T_PC_RND_BODY_6		/[%\#\[\$]RA?ND_[A-Z]/i
+rawbody T_PC_RND_RAWBODY_6	/[%\#\[\$]RA?ND_[A-Z]/i
 
 header T_PC_RND_HEADER_7	ALL =~ /%RA?ND(?:OM)?_[A-Z]/i
 body T_PC_RND_BODY_7		/%RA?ND(?:OM)?_[A-Z]/i
+rawbody T_PC_RND_RAWBODY_7	/%RA?ND(?:OM)?_[A-Z]/i
 
 header T_PC_RND_HEADER_8	ALL =~ /[%\#\[\$]RA?ND(?:OM)?_[A-Z]/i
 body T_PC_RND_BODY_8		/[%\#\[\$]RA?ND(?:OM)?_[A-Z]/i
+rawbody T_PC_RND_RAWBODY_8	/[%\#\[\$]RA?ND(?:OM)?_[A-Z]/i
 
 # Matt Kettler's antidrug.cf ruleset.  bug 3009
 # should probably move good ones from here directly into 20_drugs.cf?
