@@ -1195,6 +1195,26 @@ sub compile_now {
 
 ###########################################################################
 
+=item $f->debug_diagnostics ()
+
+Output some diagnostic information, useful for debugging SpamAssassin
+problems.
+
+=cut
+
+sub debug_diagnostics {
+  my ($self) = @_;
+
+  # load this class lazily, to avoid overhead when this method isn't
+  # called.
+  eval {
+    require Mail::SpamAssassin::Util::DependencyInfo;
+    dbg(Mail::SpamAssassin::Util::DependencyInfo::debug_diagnostics($self));
+  };
+}
+
+###########################################################################
+
 =item $failed = $f->lint_rules ()
 
 Syntax-check the current set of rules.  Returns the number of 
