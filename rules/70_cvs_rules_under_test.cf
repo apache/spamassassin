@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.628 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.629 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -87,6 +87,8 @@ uri T_PORN_URL_SUCK        /^https?:\/\/[\w\.-]*suck[\w-]*\./
 uri T_PORN_URL_TEEN        /^https?:\/\/[\w\.-]*(?<!thir|four|eigh|nine)(?<!fif|six)(?<!seven)teen[\w-]*\./
 uri T_PORN_URL_MISC        /^https?:\/\/[\w\.-]*(pussy|nympho|porn|hard-?core|taboo|whore|voyeur|lesbian|gurlpages|naughty|lolita|schoolgirl|kooloffer|erotic)[\w-]*\./
 
+header T_KOREAN_UCE_SUBJECT	/\?B\?KLGksO0p/
+
 header T_DATE_DOUBLE_DASH	Date =~ /:\d\d --\d\d\d\d$/
 
 # new blacklist!  very good one!
@@ -94,3 +96,4 @@ header T_RCVD_IN_CBL	eval:check_rbl_txt('cbl', 'cbl.abuseat.org.')
 describe T_RCVD_IN_CBL	Received via a relay in cbl.abuseat.org
 tflags T_RCVD_IN_CBL	net
 score T_RCVD_IN_CBL	0.1
+
