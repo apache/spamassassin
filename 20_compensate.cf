@@ -138,9 +138,13 @@ test FROM_EGROUPS  ok           sentto-2537484-52529-1020428367-Sxm=olswang.com@
 test FROM_EGROUPS  fail         spammer@returns.groups.yahoo.com
 
 # thanks Rod, these work better
-header FWD_MSG                  Subject =~ /\[?Fwd:?\s/
+header FWD_MSG                  Subject =~ /Fwd:\s/
 describe FWD_MSG                Forwarded email
 tflags FWD_MSG		        nice
+
+header FWD_MSG_2                Subject =~ /\s\(fwd\)\s*$/
+describe FWD_MSG_2              Forwarded email
+tflags FWD_MSG_2	        nice
 
 header OUTLOOK_FW_MSG           Subject =~ /\[?F[Ww]:\s/
 describe OUTLOOK_FW_MSG         Forwarded email (Outlook style)
