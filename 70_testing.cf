@@ -264,7 +264,7 @@ describe T_DNS_FROM_RFC_DSN	Envelope sender listed in dsn.rfc-ignorant.org
 tflags T_DNS_FROM_RFC_DSN	net
 
 header T_DNS_FROM_RFC_POST	eval:check_rbl_sub('rfci_envfrom', '127.0.0.3')
-describe T_DNS_FROM_RFC_POST	Envelope sender listed in postmaster.rfc-ignorant.org
+describe T_DNS_FROM_RFC_POST	Envelope sender in postmaster.rfc-ignorant.org
 tflags T_DNS_FROM_RFC_POST	net
 
 header T_DNS_FROM_RFC_ABUSE	eval:check_rbl_sub('rfci_envfrom', '127.0.0.4')
@@ -276,7 +276,7 @@ describe T_DNS_FROM_RFC_WHOIS_A	Envelope sender listed in whois.rfc-ignorant.org
 tflags T_DNS_FROM_RFC_WHOIS_A	net
 
 header T_DNS_FROM_RFC_WHOIS_B	eval:check_rbl_sub('rfci_envfrom', '127.0.0.7')
-describe T_DNS_FROM_RFC_WHOIS_B	Envelope sender TLD listed in whois.rfc-ignorant.org
+describe T_DNS_FROM_RFC_WHOIS_B	Envelope sender TLD in whois.rfc-ignorant.org
 tflags T_DNS_FROM_RFC_WHOIS_B	net
 
 header T_DNS_FROM_RFC_BOGUSMX	eval:check_rbl_sub('rfci_envfrom', '127.0.0.8')
