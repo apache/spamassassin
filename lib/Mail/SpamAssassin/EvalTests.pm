@@ -1228,7 +1228,11 @@ sub check_language {
   $body =~ s/^Subject://i;
 
   # need about 256 bytes for reasonably accurate match (experimentally derived)
-  return 0 if (length($body) < 256);
+  if (length($body) < 256)
+  {
+     dbg("Message too short for language analysis");
+     return 0;
+  }
 
   my @matches = Mail::SpamAssassin::TextCat::classify($self, $body);
   # not able to get a match, assume it's okay

@@ -69,7 +69,7 @@ use vars	qw{
 @ISA = qw();
 
 $VERSION = "2.21";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.84 2002/06/02 07:06:22 hughescr Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.85 2002/06/05 18:11:12 hughescr Exp $';
 
 sub Version { $VERSION; }
 
@@ -493,7 +493,7 @@ sub compile_now {
   # note: this may incur network access. Good.  We want to make sure
   # as much as possible is preloaded!
   my @testmsg = ("From: ignore\@compiling.spamassassin.taint.org\n",
-  			"\n", "x\n");
+  			"\n", "I need to make this message body somewhat long so TextCat preloads\n"x20);
 
   dbg ("ignore: test message to precompile patterns and load modules");
   $self->init($use_user_prefs);
