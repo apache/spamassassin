@@ -271,6 +271,7 @@ eg.
         }
       }
       push(@Mail::SpamAssassin::EXTRA_VERSION, $tag) if($tag);
+      next;
     }
 
     # note: no eval'd code should be loaded before the SECURITY line below.
