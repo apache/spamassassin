@@ -197,9 +197,20 @@ describe HABEAS_VIOLATOR	Has Habeas warrant mark and on Infringer List
 tflags HABEAS_VIOLATOR		net
 
 # bondedsender.org provides an RBL-style whitelist for trusted relays
-header RCVD_IN_BONDEDSENDER	rbleval:check_rbl('bondedsender', 'query.bondedsender.org.')
-describe RCVD_IN_BONDEDSENDER	See http://www.bondedsender.org/referred.html
-tflags RCVD_IN_BONDEDSENDER	net nice
+header __BONDEDSENDER		rbleval:check_rbl_txt('bondedsender', 'sa.bondedsender.org.')
+tflags __BONDEDSENDER		net nice
+
+# the query type and zone should be the same as __BONDEDSENDER to avoid
+# duplicate DNS queries
+header RCVD_IN_BSP_TRUSTED	rbleval:check_rbl_txt('bondedsender-lastuntrusted', 'sa.bondedsender.org.')
+describe RCVD_IN_BSP_TRUSTED	Sender is in Bonded Sender Program (trusted relay)
+tflags RCVD_IN_BSP_TRUSTED	net nice
+
+# this uses untrusted headers; helps find BSP forgeries, can be used
+# to identify additional trusted relays that should be listed, etc.
+meta RCVD_IN_BSP_OTHER		(__BONDEDSENDER && !RCVD_IN_BSP_TRUSTED)
+describe RCVD_IN_BSP_OTHER	Sender is in Bonded Sender Program (other relay)
+tflags RCVD_IN_BSP_OTHER	net nice
 
 # SenderBase provides information about senders
 # sa.senderbase.org for SpamAssassin queries
