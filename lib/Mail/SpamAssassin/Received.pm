@@ -1,4 +1,4 @@
-# $Id: Received.pm,v 1.9 2003/04/08 07:25:51 jmason Exp $
+# $Id: Received.pm,v 1.10 2003/04/08 19:03:59 jmason Exp $
 
 # ---------------------------------------------------------------------------
 
@@ -685,7 +685,7 @@ enough:
   # e.g. "ip" comes before "helo" will still work.
   #
   my $asstr = "[ ip=$ip rdns=$rdns helo=$helo by=$by ident=$ident ]";
-  $relay->{as_string} = $rdns;
+  $relay->{as_string} = $asstr;
 
   my $isrsvd = ($ip =~ /^${IP_IN_RESERVED_RANGE}$/o);
   $relay->{ip_is_reserved} = $rdns;
