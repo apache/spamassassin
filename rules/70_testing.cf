@@ -98,11 +98,6 @@ describe T_RCVD_NUMERIC_HELO_LASTUNT	Received: contains IP for HELO (not first l
 uri	T_URI_UNPRINTABLE	/\%0/
 describe T_URI_UNPRINTABLE	URI contains unprintable characters
 
-# bug 2957
-# really not sure if this is a good idea
-uri T_INFO_TLD			/^(?:https?:\/\/|mailto:)[^\/]+\.info(?:\/|$)/i
-describe T_INFO_TLD		Contains a URL in the INFO top-level domain    
-
 header T_RCVD_IN_BOGUSMX	rbleval:check_rbl_from_host('rfci-bmx', 'bogusmx.rfc-ignorant.org.')
 describe T_RCVD_IN_BOGUSMX	Received via a relay in BogusMX (rfc-ignorant.org)
 tflags T_RCVD_IN_BOGUSMX	net
@@ -477,6 +472,14 @@ describe T_X_MESSAGE_INFO       Ratware signature (X-Message-Info)
 # looser
 uri T_BIZ_TLD_1			/^(?:https?:\/\/|mailto:)\S+\.biz(?:\/|$)/i
 uri T_BIZ_TLD_2			/\.biz(?:\/|$)/i
+
+# bug 2957
+# really not sure if this is a good idea
+uri T_INFO_TLD			/^(?:https?:\/\/|mailto:)[^\/]+\.info(?:\/|$)/i
+describe T_INFO_TLD		Contains a URL in the INFO top-level domain    
+# see how these fare too...
+uri T_INFO_TLD_1		/^(?:https?:\/\/|mailto:)\S+\.info(?:\/|$)/i
+uri T_INFO_TLD_2		/\.info(?:\/|$)/i
 
 # REIMPLEMENT: ADVERT_CODE tests.
 header T_ADVERT_CODE	Subject =~ /^[^0-9a-z]*adv(?:ert)?\b/i
