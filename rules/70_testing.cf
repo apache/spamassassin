@@ -249,7 +249,7 @@ meta T_NIGERIAN_BODY_4	( __NIGERIAN_BODY_1 + __NIGERIAN_BODY_2 + __NIGERIAN_BODY
 # header T_FORGED_IN_WHITELIST      eval:check_forged_in_whitelist()
 # describe T_FORGED_IN_WHITELIST    Forged From: is in user's white-list
 # tflags T_FORGED_IN_WHITELIST      userconf
-# 
+#
 # header T_FORGED_DEF_WHITELIST     eval:check_forged_in_default_whitelist()
 # describe T_FORGED_DEF_WHITELIST   Forged From: is in default white-list
 # tflags T_FORGED_DEF_WHITELIST     userconf
@@ -284,7 +284,7 @@ header    T_WORTHCASH        Subject =~ /\b(?:Worth|Win|take|extra|earn|dollars|
 describe  T_WORTHCASH        Subject mentions something is worth cash
 
 header    T_IMPROVE   Subject =~ /improve your/i
-describe  T_IMPROVE   Subject suggests you improve something 
+describe  T_IMPROVE   Subject suggests you improve something
 
 header    T_SUBJBOOST         Subject =~ /[b8\xDF][\W_]?(?:\[\]|\(\)|[o0\*\xD2-\xD6\xF2-\xF6])[\W_]?(?:\[\]|\(\)|[o0\*\xD2-\xD6\xF2-\xF6])[\W_]?[s5\$\xA7][\W_]?t/i
 describe  T_SUBJBOOST         boost in Subject
@@ -303,14 +303,14 @@ describe  T_INVESTORS         Subject mentions investors
 
 header    T_PAYING            Subject =~ /Paying/i
 describe  T_PAYING            Subject mentions Paying for something
-                                          
+
 header    T_SUBJDRUGS       Subject =~ /[vu][\W_]?[il1:\|\*\xCC-\xCF\xEC-\xEF][\W_]?[a4\*\@\xC0-\xC5\xAA\xE0-\xE5][\W_]?[g6][\W_]?[r\xAE][\W_]?[a4\*\@\xC0-\xC5\xAA\xE0-\xE5]/i
 describe  T_SUBJDRUGS       Subject mentions known spam subject
 
 header    T_MEDICATION   Subject =~ /(?:\/\\\/\\|\/V\\|rn|[m])[\W_]?[e3\*\xC8-\xCB\xE8-\xEB][\W_]?[d\xD0][\W_]?[il1:\|\*\xCC-\xCF\xEC-\xEF][\W_]?[c\xC7\xE7\xA2\xA9][\W_]?[a4\*\@\xC0-\xC5\xAA\xE0-\xE5][\W_]?t[\W_]?[il1:\|\*\xCC-\xCF\xEC-\xEF][\W_]?(?:\[\]|\(\)|[o0\*\xD2-\xD6\xF2-\xF6])[\W_]?[n\xD1\xF1]/i
 describe  T_MEDICATION   Subject mentions medication
 
-header    T_MEDS          Subject =~ /m(e|3)ds/i  
+header    T_MEDS          Subject =~ /m(e|3)ds/i
 describe  T_MEDS          Meds in subject
 
 header    T_YOUNGER       Subject =~ /\b[y\xA5\xDD\xFD][\W_]?(?:\[\]|\(\)|[o0\*\xD2-\xD6\xF2-\xF6])[\W_]?[uv\*\xB5\xD9-\xDC\xF9-\xFC][\W_]?[n\xD1\xF1][\W_]?[g6][\W_]?[e3\*\xC8-\xCB\xE8-\xEB][\W_]?[r\xAE]\b/i
@@ -321,7 +321,7 @@ describe  T_CONSONANTS        Subject contains consecutive consonants in "word"
 
 header    T_SPAMWORDS      Subject =~ /(?!tion)t[\W_]?[il1:\|\*\xCC-\xCF\xEC-\xEF][\W_]?(?:\[\]|\(\)|[o0\*\xD2-\xD6\xF2-\xF6])[\W_]?[n\xD1\xF1]/i
 describe  T_SPAMWORDS      masked spam word(s) in subject
-                                          
+
 header    T_SPAMWORDS2      Subject =~ /(?!\bcheap(er)?)\b[c\xC7\xE7\xA2\xA9][\W_]?h[\W_]?[e3\*\xC8-\xCB\xE8-\xEB][\W_]?[a4\*\@\xC0-\xC5\xAA\xE0-\xE5][\W_]?p([e3\*\xC8-\xCB\xE8-\xEB][\W_]?[r\xAE])?/i
 describe  T_SPAMWORDS2      masked spam word(s) in subject
 
@@ -330,7 +330,7 @@ describe  T_SPAMWORDS3      masked spam word(s) in subject
 
 header    T_PENIS          Subject =~ /\bpenis\b/i
 describe  T_PENIS          masked spam word(s) in subject
- 
+
 header    T_SPAMWORDS4      Subject =~ /(?!\bpenis\b)\bp[\W_]?[e3\*\xC8-\xCB\xE8-\xEB][\W_]?[n\xD1\xF1][\W_]?[il1:\|\*\xCC-\xCF\xEC-\xEF][\W_]?[s5\$\xA7]\b/i
 describe  T_SPAMWORDS4      masked spam word(s) in subject
 
@@ -348,13 +348,13 @@ describe  T_RNDSPM7   Subject contains random-text spamsign
 
 header    T_RNDSPM9      Subject =~ /\b[bcdfghjklmnpqrstvwxz]{7}\b/i
 describe  T_RNDSPM9      Subject contains random-text spamsign
-                                         
+
 header    T_LONGSUBJ       Subject =~ /.{170,}/
 describe  T_LONGSUBJ       Subject is excessively long -- more than 169 chars
 
 header   T_TELESPRLY            Received =~ /dsl\.telesp\.net\.br/
 describe T_TELESPRLY            Spam passed through known spam relay domain
-	
+
 header   T_INDYLIB       X-Library=~ /Indy 10.00.14-B/
 describe T_INDYLIB       Uses spam-only version of Indy library
 
@@ -451,3 +451,38 @@ body T_HTML_COLOR_FLEX_HEX_3	eval:html_test('flex_hex3')
 body T_HTML_TAG_EXIST_BGSOUND	eval:html_tag_exists('bgsound')
 
 body T_HTML_IMAGE_SIZE_ZERO	eval:html_test('image_size_zero')
+
+# title trickery
+body __MIME_ATTACHMENT		eval:check_for_mime('mime_attachment')
+
+body T_HTML_TITLE_80		eval:html_text_match('title', '.{80}')
+body T_HTML_TITLE_90		eval:html_text_match('title', '.{90}')
+body T_HTML_TITLE_100		eval:html_text_match('title', '.{100}')
+body T_HTML_TITLE_110		eval:html_text_match('title', '.{110}')
+body T_HTML_TITLE_120		eval:html_text_match('title', '.{120}')
+body T_HTML_TITLE_140		eval:html_text_match('title', '.{140}')
+body T_HTML_TITLE_160		eval:html_text_match('title', '.{160}')
+body T_HTML_TITLE_180		eval:html_text_match('title', '.{180}')
+body T_HTML_TITLE_200		eval:html_text_match('title', '.{200}')
+
+body T_TITLE_SUBJECT_RATIO_20	eval:html_title_subject_ratio('2.0')
+body T_TITLE_SUBJECT_RATIO_25	eval:html_title_subject_ratio('2.5')
+body T_TITLE_SUBJECT_RATIO_30	eval:html_title_subject_ratio('3.0')
+body T_TITLE_SUBJECT_RATIO_35	eval:html_title_subject_ratio('3.5')
+body T_TITLE_SUBJECT_RATIO_40	eval:html_title_subject_ratio('4.0')
+
+meta T_HTML_TITLE_80B		T_HTML_TITLE_80 && !__MIME_ATTACHMENT
+meta T_HTML_TITLE_90B		T_HTML_TITLE_90 && !__MIME_ATTACHMENT
+meta T_HTML_TITLE_100B		T_HTML_TITLE_100 && !__MIME_ATTACHMENT
+meta T_HTML_TITLE_110B		T_HTML_TITLE_110 && !__MIME_ATTACHMENT
+meta T_HTML_TITLE_120B		T_HTML_TITLE_120 && !__MIME_ATTACHMENT
+meta T_HTML_TITLE_140B		T_HTML_TITLE_140 && !__MIME_ATTACHMENT
+meta T_HTML_TITLE_160B		T_HTML_TITLE_160 && !__MIME_ATTACHMENT
+meta T_HTML_TITLE_180B		T_HTML_TITLE_180 && !__MIME_ATTACHMENT
+meta T_HTML_TITLE_200B		T_HTML_TITLE_200 && !__MIME_ATTACHMENT
+
+meta T_TITLE_SUBJECT_RATIO_20B	T_TITLE_SUBJECT_RATIO_20 && !__MIME_ATTACHMENT
+meta T_TITLE_SUBJECT_RATIO_25B	T_TITLE_SUBJECT_RATIO_25 && !__MIME_ATTACHMENT
+meta T_TITLE_SUBJECT_RATIO_30B	T_TITLE_SUBJECT_RATIO_30 && !__MIME_ATTACHMENT
+meta T_TITLE_SUBJECT_RATIO_35B	T_TITLE_SUBJECT_RATIO_35 && !__MIME_ATTACHMENT
+meta T_TITLE_SUBJECT_RATIO_40B	T_TITLE_SUBJECT_RATIO_40 && !__MIME_ATTACHMENT
