@@ -337,7 +337,7 @@ describe YR_MEMBERSHIP_EXCH	Subject contains 'Your Membership Exchange'
 header LOTS_OF_CC_LINES		eval:check_lots_of_cc_lines()
 describe LOTS_OF_CC_LINES	Lots and lots of Cc: headers
 
-header FROM_NAME_EQ_FROM_ADDR	eval:check_from_name_eq_from_address()
+header FROM_NAME_EQ_FROM_ADDR	From =~ /^\s*"([^"@]+\@[^"@]+)"\s+<\1>\s*$/i
 describe FROM_NAME_EQ_FROM_ADDR	'From:' address also used as sender's real name
 
 header FORGED_HOTMAIL_RCVD	eval:check_for_forged_hotmail_received_headers()

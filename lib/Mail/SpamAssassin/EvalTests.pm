@@ -655,18 +655,6 @@ sub check_lots_of_cc_lines {
 
 ###########################################################################
 
-sub check_from_name_eq_from_address {
-  my ($self) = @_;
-  local ($_);
-  $_ = $self->get ('From');
-
-  /\"(\S+)\" <(\S+)>/ or return 0;
-  if ($1 eq $2) { return 1; }
-  return 0;
-}
-
-###########################################################################
-
 sub check_rbl {
   my ($self, $set, $rbl_domain, $needresult) = @_;
   local ($_);

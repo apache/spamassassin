@@ -408,7 +408,7 @@ sub rewrite_as_spam {
 
     my $cte = $srcmsg->get_header ("Content-Transfer-Encoding");
 
-    if (defined $cte && $cte ne '' && $ct !~ /7bit/i) {
+    if (defined $cte && $cte ne '' && $cte !~ /7bit/i) {
       $self->{msg}->replace_header ("Content-Transfer-Encoding", "7bit");
       $self->{msg}->replace_header ("X-Spam-Prev-Content-Transfer-Encoding", $cte);
     }
