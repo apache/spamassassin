@@ -4,12 +4,12 @@
 #
 # -c=file       set $cffile
 # -f            use fork-based model to save RAM (used for mailbox files)
+# --all         don't skip big messages
+# --mh          use mh-style folder (directory of messages named with numbers)
 # --mn          find_missed('nonspam.log')
 # --ms          find_missed('spam.log')
 #
 # options for maildir and mh-style folders
-# --all         don't skip big messages
-# --mh          use mh-style folder (directory of messages named with numbers)
 # --head=N      only check first N messages
 # --sort        sort contents of folders
 # --tail=N      only check last N messages
@@ -45,10 +45,10 @@ if ($opt_f) { $FORK = 1; }
 
 $spamtest = new Mail::SpamAssassin ({
   'rules_filename'      => $cffile,
-  'userprefs_filename'  => "../spamassassin.prefs",
+  'userprefs_filename'  => "$FindBin::Bin/spamassassin.prefs",
   'local_tests_only'    => 1
 });
-$spamtest->compile_now();
+$spamtest->compile_now(1);
 
 my $count = 0;
 
@@ -106,7 +106,8 @@ sub mass_check_all_folders {
     {
       # Maildir!
       mass_check_maildir($sub, $folder);
-    } elsif (-f $folder) {
+    }
+    elsif (-f $folder) {
       mass_check_mailbox($sub, $folder);
     }
   }
@@ -181,7 +182,6 @@ sub mass_check_maildir {
   }
 }
 
-
 sub mass_check_mailbox {
   my $sub = shift;
   my $folder = shift;
@@ -216,7 +216,7 @@ sub mass_check_mailbox {
       push (@msg, $_);
     }
 
-    if (scalar @msg > 1000) { next; }	# too big
+    if (! $opt_all && scalar @msg > 1000) { next; }	# too big
 
     # switch to a fork-based model to save RAM
     if ($FORK && fork()) { wait; next; }
