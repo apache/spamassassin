@@ -813,14 +813,16 @@ sub parse_received_line {
     }
 
     # Received: from ironport.com (10.1.1.5) by a50.ironport.com with ESMTP; 01 Apr 2003 12:00:51 -0800
+    # Received: from dyn-81-166-39-132.ppp.tiscali.fr (81.166.39.132) by cpmail.dk.tiscali.com (6.7.018)
     # note: must be before 'Content Technologies SMTPRS' rule, cf. bug 2787
-    if (/^from (\S+) \((${IP_ADDRESS})\) by (\S+) with /) {
+    if (/^from ([^\d]\S+) \((${IP_ADDRESS})\) by (\S+) /) {
       $helo = $1; $ip = $2; $by = $3; goto enough;
     }
 
     # Received: from scv3.apple.com (scv3.apple.com) by mailgate2.apple.com (Content Technologies SMTPRS 4.2.1) with ESMTP id <T61095998e1118164e13f8@mailgate2.apple.com>; Mon, 17 Mar 2003 17:04:54 -0800
     if (/^from (\S+) \((\S+)\) by (\S+) \(/) {
-      $helo = $1; $rdns = $2; $by = $3; goto enough;
+      return;		# useless without the $ip anyway!
+      #$helo = $1; $rdns = $2; $by = $3; goto enough;
     }
 
     # Received: from 01al10015010057.ad.bls.com ([90.152.5.141] [90.152.5.141])
@@ -828,7 +830,7 @@ sub parse_received_line {
     if (/^from (\S+) \(\[(\S+)\] \[(\S+)\]\) by (\S+) with /) {
       # not sure what $3 is ;)
       $helo = $1; $ip = $2; $by = $4;
-	goto enough;
+      goto enough;
     }
 
     # Received: from 206.47.0.153 by dm3cn8.bell.ca with ESMTP (Tumbleweed MMS
@@ -991,9 +993,15 @@ sub parse_received_line {
 
 enough:
 
+  # flag handovers we couldn't get an IP address from at all
+  if ($ip eq '') {
+    dbg ("received-header: could not parse IP address from: $_");
+  }
+
   $ip = Mail::SpamAssassin::Util::extract_ipv4_addr_from_string ($ip);
-  if (!defined $ip) {
-    return;	# ignore IPv6 handovers
+  if (!$ip) {
+    dbg ("received-header: could not parse IPv4 address, assuming IPv6");
+    return;   # ignore IPv6 handovers
   }
 
   # DISABLED: if we cut out localhost-to-localhost SMTP handovers,
@@ -1003,7 +1011,8 @@ enough:
   # for the addr.
   if (0) {
     if ($ip eq '127.0.0.1') {
-      return;	# ignore localhost handovers
+      dbg ("received-header: ignoring localhost handover");
+      return;   # ignore localhost handovers
     }
   }
 
