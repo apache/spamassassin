@@ -811,3 +811,7 @@ body T_SALE                       /\bsales? (?:price|system|department|technolog
 body T_FREE_HOSTING2             /Free hosting/i
 body T_BANG_MORE2                /\bMore!/i
 body T_BANG_QUOTE2               /\bQuotes?\!/i
+
+# this seems to be a good sign, according to my bayes db
+header T_CTE_QP		Content-Transfer-Encoding =~ /quoted-printable/i
+
