@@ -234,13 +234,9 @@ sub replace_header {
   # Get all the headers that might match
   my @entries = $self->_get_header_list($hdr);
 
-  if (scalar(@entries) < 1) {
-    return $self->put_header($hdr, $text);
-  }
-
-  foreach my $entry (@entries)
-  {
-      if($entry->{count} > 0) { $entry->{0} = $text; return; }
+  # remove all of them if there's more than 1 line
+  if (scalar(@entries) >= 1) {
+    $self->delete_header ($hdr);
   }
 
   return $self->put_header($hdr, $text);
