@@ -24,7 +24,7 @@ describe T_MEMBER_2       Being a Member
 # bug 637
 # more specific FROM_HAS_MIXED_NUMS, less FPs
 header FROM_HAS_MIXED_NUMS2        From =~ /\w{2,}\d{4,}[a-z]{1,2}\d{2,}\@/i
-description FROM_HAS_MIXED_NUMS2 From address matches known spammer format
+describe FROM_HAS_MIXED_NUMS2 From address matches known spammer format
 
 # bug 510. modified so that descs don't trigger the tests
 body T_GET_PAID                   /get (?-i:P)aid/i  
@@ -59,7 +59,7 @@ describe T_FREE_WEBSITE           Contains 'free website' with capitals
 
 # bug 646: compensate rule
 body T_TRADEMARK            /\bregistered\s+trademark/i
-description T_TRADEMARK     Message specifies a registered trademark
+describe T_TRADEMARK     Message specifies a registered trademark
 tflags T_TRADEMARK          nice
 score T_TRADEMARK           -1.0
 
