@@ -54,6 +54,8 @@ for ( $waitedpid = 0;
 	$status->rewrite_mail; #if $status->is_spam;
 
 	print $mail->header . "\n" . join '',@{$mail->body};
+
+	$status->finish();	# added by jm to allow GC'ing
     };
 
 }
