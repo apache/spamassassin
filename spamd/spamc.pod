@@ -7,7 +7,7 @@ spamc - client for spamd
 
 =over
 
-=item spamc [-d host] [-p port] [-h]
+=item spamc [-d host] [-p port] [-h] [-f]
 
 =back
 
@@ -15,13 +15,24 @@ spamc - client for spamd
 
 =over
 
-=item B<-h>
-
-Print this help message and terminate without action
-
 =item B<-d> I<host>
 
 Connect to spamd server on given host
+
+=item B<-f>
+
+Cause spamc to safe-failover if it can't connect to spamd -- what this means
+is that in case spamc fails to connect to spamd, it will not return with an
+exitcode set, it will instead dump the original message to stdout, allowing
+the message to be delivered, albeit unscanned for spam.  Without this flag,
+connection failures to spamd will cause message delivery failures.
+Even with this flag set however, if spamc connects successfully, and then
+encounters an error at a later stage of communication, it will still return
+an exitcode.
+
+=item B<-h>
+
+Print this help message and terminate without action
 
 =item B<-p> I<port>
 
