@@ -592,14 +592,6 @@ score T_IDENT_NOBODY		1.0
 body T_EXCUSE_25		/you have been included (?:mistakenly|by mistake)/i
 body T_LEAVE_ADDR		/leave your address/i
 
-# This doesn't do terrifically on my corpus, but it's not bad, want to
-# see how it works in a larger arena: - tvd
-#  0.249    0.586    0.037    0.94    0.54    1.00  T_TURN
-body __T_TURN_INVEST /\bturn\s+.{1,15}\s+investment\s+into\b/i
-body __T_TURN_HOBBY /\bturn\s+(?:\w+)\s+hobby\s+into\b/i
-body __T_TURN_MONEY /\bturn\s+.{0,15}(?:\$\s*\d+|dollars?|euros?|pennies|pounds?).{1,15}\binto\b/i
-meta T_TURN ( __T_TURN_INVEST || __T_TURN_HOBBY || __T_TURN_MONEY)
-
 # I spent the better part of a day hacking around with the Message-Id
 # stuff.  I found a few new regexps that works fairly well on my corpus
 # with no overlap of the current MSGID_* rules. - tvd
