@@ -1,4 +1,4 @@
-# SpamAssassin rules file: CVS rules under test, $Revision: 1.636 $
+# SpamAssassin rules file: CVS rules under test, $Revision: 1.637 $
 #
 # This file is a placeholder for rules "under probation", ie. checked into
 # CVS for testing. It should not be distributed; if the rules have good
@@ -139,6 +139,7 @@ tflags T_RCVD_IN_RSL		net
 
 ########################################################################
 # rules to detect certain generally unnecessary encodings in HTML
+
 rawbody T_ENTITY_WHITESPACE_R	/\&\#(?:10|32)\;/
 body T_ENTITY_WHITESPACE_B	/\&\#(?:10|32)\;/
 meta T_ENTITY_WHITESPACE_M	(T_ENTITY_WHITESPACE_R || T_ENTITY_WHITESPACE_B)
@@ -156,3 +157,13 @@ body T_ENTITY_OTHER2_B		/\&\#(?:33|39|40|46|47)\;/
 meta T_ENTITY_OTHER2_M		(T_ENTITY_OTHER2_R || T_ENTITY_OTHER2_B)
 
 ########################################################################
+# some test rules
+
+body T_HTML_TITLE_MISPLACED_1	eval:html_test('t_title_misplaced_1')
+body T_HTML_TITLE_MISPLACED_2	eval:html_test('t_title_misplaced_2')
+body T_HTML_TITLE_MISPLACED_3	eval:html_test('t_title_misplaced_3')
+body T_HTML_TITLE_MISPLACED_4	eval:html_test('t_title_misplaced_4')
+meta T_HTML_TITLE_MISPLACED_M1	(T_HTML_TITLE_MISPLACED_1 && T_HTML_TITLE_MISPLACED_2)
+meta T_HTML_TITLE_MISPLACED_M2	(T_HTML_TITLE_MISPLACED_1 || T_HTML_TITLE_MISPLACED_2)
+
+body T_HTML_TITLE_EXTRA		eval:html_test('t_title_extra')
