@@ -3297,4 +3297,21 @@ sub check_for_http_redirector {
 
 ###########################################################################
 
+sub check_for_numeric_helo {
+  my ($self) = @_;
+
+  my $rcvd = $self->{relays_untrusted_str};
+
+  if ($rcvd) {
+    my $IP_ADDRESS = IPV4_ADDRESS;
+    my $IP_IN_RESERVED_RANGE = IP_IN_RESERVED_RANGE;
+    if ($rcvd =~ /helo=($IP_ADDRESS)\b/i && $1 !~ /^$IP_IN_RESERVED_RANGE/) {
+      return 1;
+    }
+  }
+  return 0;
+}
+
+###########################################################################
+
 1;
