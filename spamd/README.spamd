@@ -53,20 +53,14 @@ which passes through it , you may want to keep security in mind. Depending
 on the nature of your set-up. If you are installing it on a site-wide
 basis at least some caution is advisable. 
 
-System-level security:
+System-level security
+---------------------
 
 Spamd has the facility to run as a non-root user, this has potential security
 payoffs. If a fault is found in spamd or spamassassin code, any third party
 linked-libraries or imported perl modules there is the potential for abuse of
 both the running uid of spamd, and the uid of the username supplied by spamc
 (and this could be any user).
-
-If you do not need to let your users define their own rules, maintain their own
-whitelists, or have non-world-readable home and ~/.spamassassin directories,
-then just set spamd up to run with the "-u username" option.  Since spamd can
-use auto-whitelisting, which requires it maintain a database of email addresses
-on-disk, you should use a non-"root" but non-"nobody" user: "mailnull" or
-"mail" are good choices, or even create a "spamd" user.
 
 When run as root, spamd will change uid's to the user invoking spamc in 
 order to read and write to their configurations. This functionality
@@ -75,13 +69,40 @@ you rely on this. If you use mysql for per-user configuration there
 is no reason in the world to run as root, and this remains fully
 functional.
 
-If you plan to use Razor or Pyzor, please note that they both rely on their
-external configuration files in ~/.razor and ~/.pyzor being readable, and Razor
-will try to write to a log file in ~/.razor/razor-agent.log that must be
-writable (Razor will complain about 'unblessed references' in this case).  You
-may find the -H switch to spamd to be useful; it allows you to set a 'helper
-home directory' that will be used as $HOME when external helpers like Razor,
-Pyzor and DCC are run.
+If you do not need to let your users define their own rules, maintain
+their own whitelists, or have non-world-readable home and ~/.spamassassin
+directories, then just set spamd up to run with the "-u username" option.
+Since spamd can use auto-whitelisting, which requires it maintain a
+database of email addresses on-disk, you should use a non-"root" but
+non-"nobody" user: "mailnull" or "mail" are good choices, or even create a
+"spamd" user.
+
+If you plan to use Razor or Pyzor, please note that they both rely on
+their external configuration files in ~/.razor and ~/.pyzor being
+readable, and Razor will try to write to a log file in
+~/.razor/razor-agent.log that must be writable (Razor will complain about
+'unblessed references' in this case).  You may find the -H switch to spamd
+to be useful; it allows you to set a 'helper home directory' that will be
+used as $HOME when external helpers like Razor, Pyzor and DCC are run.
+
+The Bayesian Classifier
+-----------------------
+
+If you plan to use Bayesian classification (the BAYES rules) with spamd,
+you will need to either
+
+  1. modify /etc/mail/spamassassin/local.cf to use a shared database of
+  tokens, by setting the 'bayes_path' setting to a path all users can read
+  and write to.  You will also need to set the 'bayes_file_mode' setting
+  to 0666 so that created files are shared, too.
+
+  2. Alternatively, get the users to train a Bayes database individually,
+  for each user.  Not quite so easy (at least until we implement
+  auto-training in SpamAssassin at some future point).
+
+
+Security And User-Spoofing Clients
+----------------------------------
 
 Since spamd makes no effort to authenticate the username supplied by
 spamc, it is easily possible for malicious users invoking modified 
@@ -110,14 +131,13 @@ can users connect?      yes      no           yes     no
                                           |
                                   some deprecation
 
-Network security:
+If you use spamd across a network and spamc connects from other hosts, you
+should ensure (as with all services) the security of your network segments.
+Mail is sent as plaintext, and is prone to packet sniffing and spoofing
+techniques if you are on an insecure network. If you cannot avoid this consider
+using an encrypted transport layer, such as a VPN, ssh tunnel or similar, or
+using an SSL-enabled spamc (see 'SSL Support' below).
 
-If you use spamd across a network and spamc connects from other hosts,
-you should ensure (as with all services) the security of your network
-segments. Mail is sent as plaintext, and is prone to packet sniffing and
-spoofing techniques if you are on an insecure network. If you cannot avoid
-this consider using an encrypted transport layer, such as a VPN, ssh
-tunnel or similar. 
 
 Performance
 -----------
@@ -219,4 +239,12 @@ Shared Library
 
 spamc can now be used as libspamc.so; simply run "make spamd/libspamc.so" at
 the top level.  Thanks to Liam Widdowson <liam@inodes.org> for this patch.
+
+SSL Support
+-----------
+
+If you have the OpenSSL headers and libraries installed, you can build an
+SSL-enabled version of spamc or the spamc shared library by running "make
+spamd/sslspamc" or "make spamd/libsslspamc.so".  Thanks to Nate
+<nate@cs.wisc.edu> for this patch.
 

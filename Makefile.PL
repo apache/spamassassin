@@ -112,6 +112,7 @@ my %makefile = (
     'clean' => { FILES =>
 	'pod2htm* spamassassin sa-forget sa-learn-spam sa-learn-nonspam '.
 	'spamd/spamc$(EXE_EXT) spamd/libspamc.so spamd/spamd doc '.
+	'spamd/sslspamc$(EXE_EXT) spamd/libsslspamc.so '.
 	'binaries.mk config.h config.status config.cache config.log '.
 	'qmail/qmail-spamc sa-learn-rebuild '
     },
@@ -261,6 +262,15 @@ spamd/libspamc.dll: binaries.mk
 	$(MAKE) -f binaries.mk $@
 
 spamd/spamc$(EXE_EXT): binaries.mk
+	$(MAKE) -f binaries.mk $@
+
+spamd/libsslspamc.so: binaries.mk
+	$(MAKE) -f binaries.mk $@
+
+spamd/libsslspamc.dll: binaries.mk
+	$(MAKE) -f binaries.mk $@
+
+spamd/sslspamc$(EXE_EXT): binaries.mk
 	$(MAKE) -f binaries.mk $@
 
 qmail/qmail-spamc: binaries.mk
