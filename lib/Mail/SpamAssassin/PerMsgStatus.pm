@@ -34,18 +34,27 @@ package Mail::SpamAssassin::PerMsgStatus;
 use Carp;
 use strict;
 
+use HTML::Parser 3.00 ();
 use Text::Wrap qw();
 
 use Mail::SpamAssassin::EvalTests;
 use Mail::SpamAssassin::AutoWhitelist;
 
 use vars qw{
-  @ISA $base64alphabet
+  @ISA $base64alphabet $html_border $html_ratio
 };
 
 @ISA = qw();
 
 ###########################################################################
+
+my $hp = HTML::Parser->new(
+			api_version => 3,
+			handlers => [start => [\&html_tag, "tagname,attr,'+1'"],
+				     end   => [\&html_tag, "tagname,attr,'-1'"],
+				     text  => [\&html_text, "dtext"],
+				     ],
+			marked_sections => 1);
 
 sub new {
   my $class = shift;
@@ -576,6 +585,68 @@ sub finish {
 ###########################################################################
 # Non-public methods from here on.
 
+my %html_inside;
+my $html_text;
+my $html_last_tag;
+
+# HTML decoding TODOs
+# - add URIs to list for faster URI testing
+
+sub html_tag
+{
+  my ($tag, $attr, $num) = @_;
+
+  $html_inside{$tag} += $num;
+
+#  foreach (keys %{ $attr }) {
+#    my $value = $attr->{$_};
+#    $value =~ s/\s+/ /g;
+#    print STDERR "TAG\t$tag\t$_\t$value\n";
+#  }
+  if ($num == 1) {
+    my $uri;
+
+    if ($tag =~ /^(?:p|hr)$/) {
+      $html_text .= "\n\n";
+    }
+    elsif ($tag eq "br") {
+      $html_text .= "\n";
+    }
+    elsif ($tag =~ /^(?:a|area|link)$/) {
+      $html_text .= "URI:$uri " if $uri = $attr->{href};
+    }
+    elsif ($tag =~ /^(?:img|frame|iframe|embed|script)$/) {
+      $html_text .= "URI:$uri " if $uri = $attr->{src};
+    }
+    elsif ($tag eq "table") {
+      $html_text .= "URI:$uri " if $uri = $attr->{background};
+      if (exists $attr->{border} && $attr->{border} =~ /(\d+)/) {
+	$html_border = $1 if $html_border < $1;
+      }
+    }
+    elsif ($tag eq "td") {
+      $html_text .= "URI:$uri " if $uri = $attr->{background};
+    }
+    elsif ($tag eq "form") {
+      $html_text .= "URI:$uri " if $uri = $attr->{action};
+    }
+    elsif ($tag eq "base") {
+      $html_text .= "BASEURI:$uri " if $uri = $attr->{href};
+    }
+    $html_last_tag = $tag;
+  }
+}
+
+sub html_text
+{
+  my ($text) = @_;
+
+  return if (exists $html_inside{script} && $html_inside{script} > 0);
+  return if (exists $html_inside{style} && $html_inside{style} > 0);
+  $text =~ s/\n// if $html_last_tag eq "br";
+  $html_text .= $text;
+}
+
 sub get_raw_body_text_array {
   my ($self) = @_;
   local ($_);
@@ -839,94 +910,40 @@ sub get_decoded_stripped_body_text_array {
     $text .= $_;
   }
 
-  # do we need to do HTML conversions?
-  my $html = ($text =~ m/<.*>/s);
-  my $entities = ($text =~ m/\&[-_a-zA-Z0-9]+;/s);
-
-  if ($html) {
-    # Get rid of comments.
-    #
-    # There might be things in comments we'd want to look at, like
-    # SCRIPT and STYLE content, but that can be taken care of with
-    # rawbody tests.
-    $text =~ s/<!--.*?--\s*>//gs;
-
-    # Try to put paragraph breaks where'd they'd be in HTML.  There's
-    # an optional "/" before the ends of some tags in case it's XML style.
-    $text =~ s/<BR\/?>\s*<BR\/?>/\n\n/gis; # Two line breaks
-    $text =~ s/<HR\/?>/\n\n/gis;           # Horizontal line
-  }
-
-  # Keep paragraph breaks
-  $text =~ s/\n\n+/<p>/gs;
-
-  if ($entities) {
-    # Convert hex entities to decimal equivalents, so that the specific
-    # decimal regexps will match
-    $text =~ s/\&\#x([a-f0-9]+);/"&#" . hex($1) . ";"/ieg;
-
-    # Convert specific HTML entities
-    $text =~ s/(?:\&nbsp;|\&\#0?160;)/ /gis;
-    $text =~ s/(?:\&reg;|\&\#0?174;)/(R)/gis;
-    $text =~ s/(?:\&copy;|\&\#0?169;)/(C)/gis;
-    $text =~ s/\&\#0?153;/(TM)/gs;
-    $text =~ s/(?:\&\#0?147;|\&\#0?148;|\&\#0?132|\&quot;)/"/gis;
-    $text =~ s/\&\#0?146;/'/gs;
-    $text =~ s/\&\#0?145;/`/gs;
-    $text =~ s/\&\#0?150;/-/gs;  # En-dash
-    $text =~ s/\&\#0?151;/--/gs; # Em-dash
-    $text =~ s/\&\#0?152;/~/gs;
-    $text =~ s/\&\#82(?:16|17|20|11);//gs;
-  }
-
-  if ($html) {
-    # Convert <Q> tags
-    $text =~ s/<\/?Q\b[^>]*>/"/gis; #dummy"# because KWrite's highlighting sucks
-  }
-
-  if ($entities) {    
-    # Convert decimal entities to their characters
-    $text =~ s/\&\#(\d+);/chr($1)/eg;
-  
-    # Strip all remaining HTML entities
-    $text =~ s/\&[-_a-zA-Z0-9]+;/ /gs;
-  }
-
   # turn off utf8-ness to fix a warn "bug" on 5.6.1
   $text = pack("C0A*", $text);
 
   # Convert =xx and =\n into chars
   $text =~ s/=([a-fA-F0-9]{2})/chr(hex($1))/ge;
   $text =~ s/=\n//g;
-  
-  # join all consecutive whitespace into a single space
-  $text =~ s/\s+/ /sg;
-
-  # reinsert para breaks
-  $text =~ s/<p>/\n\n/gis;
 
   # Get rid of "BASEURI:" in case spammers insert it raw to try to
   # mess us up
   $text =~ s/BASEURI://sg;
 
-  if ($html) {
-    # Extract URIs from various HTML tags, so that they'll still be there
-    # when the URI tests are done.
-    # <A>, <AREA>, <BASE> and <LINK> use "href=URI".
-    # <IMG>, <FRAME>, <IFRAME>, <EMBED> and <SCRIPT> use "src=URI"
-    # <FORM> uses "action=URI"
-    # <TABLE> and <TD> use "background=URI"
-    $text =~ s/<base\s[^>]*\bhref$URI_in_tag>/BASEURI:$1 /ogis;
-    $text =~ s/<(?:a|area|link)\s[^>]*\bhref$URI_in_tag>/URI:$1 /ogis;
-    $text =~ s/<(?:img|i?frame|embed|script)\s[^>]*\bsrc$URI_in_tag>/URI:$1 /ogis;
-    $text =~ s/<form\s[^>]*\baction$URI_in_tag>/URI:$1 /ogis;
-    $text =~ s/<(?:table|td)\s[^>]*\bbackground$URI_in_tag>/URI:$1 /ogis;
-  
-    # Get rid of all remaing HTML and XML tags
-    $text =~ s/<[a-z][:a-z0-9]+\b[^>]*>//gis;
-    $text =~ s/<\/\s*[a-z][:a-z0-9]+\s*>//gis;
+  # do HTML conversions if necessary
+  $html_border = 0;
+  $html_ratio = 0;
+  if (($text =~ m/<.*>/s) || ($text =~ m/\&[-_a-zA-Z0-9]+;/s)) {
+    my $raw = length($text);
+
+    $html_text = '';
+    $html_last_tag = 0;
+    $hp->parse($text);
+    $hp->eof;
+    $html_ratio = ($raw - length($html_text)) / $raw if $raw;
+    $text = $html_text;
+    undef %html_inside;
+    undef $html_last_tag;
   }
 
+  # whitespace handling (warning: small changes have large effects!)
+  $text =~ s/\n+\s*\n+/\f/gs;		# double newlines => form feed
+  $text =~ s/[ \t\n\r\x0b\xa0]+/ /gs;	# whitespace => space
+  $text =~ s/\f/\n/gs;			# form feeds => newline
+
+#  print STDERR "@@@" . $text . "###";
+  
   my @textary = split (/^/, $text);
   return \@textary;
 }
