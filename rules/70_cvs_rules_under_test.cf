@@ -584,6 +584,17 @@ tflags T_RCVD_IN_SORBS_SPAM net
 header T_RCVD_IN_SORBS_WEB	rbleval:check_rbl_sub('sorbs', '127.0.0.7')
 tflags T_RCVD_IN_SORBS_WEB net
 
+# bug 1017: domain-based blacklists, experimental
+# dsn.rfc-ignorant.org
+header T_FROM_IN_RFCI_DSN	rbleval:check_rbl_from('rfci-dsn', 'dsn.rfc-ignorant.org.')
+tflags T_FROM_IN_RFCI_DSN net
+# bl.deadbeef.com
+header T_FROM_IN_DEADBEEF	rbleval:check_rbl_from('deadbeef', 'bl.deadbeef.com.')
+tflags T_FROM_IN_DEADBEEF net
+# bandwidth-pigs
+header T_FROM_IN_PIGS		rbleval:check_rbl_from('pigs', 'bandwidth-pigs.monkeys.com.')
+tflags T_FROM_IN_PIGS net
+
 # OK, a whole batch of faked-HELO detection rules.  These work by checking
 # for hosts HELOing in a certain domain, but without rDNS matching that.
 # these are the most frequently-impersonated headers in my recent corpora...
