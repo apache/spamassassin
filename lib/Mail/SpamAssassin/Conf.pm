@@ -1945,7 +1945,14 @@ why the IP is listed, typically a hyperlink to a database entry.
       next;
     }
     if (/^header\s+(\S+)\s+eval:(.*)$/) {
-      $self->add_test ($1, $2, TYPE_HEAD_EVALS);
+      my ($name, $fn) = ($1, $2);
+
+      if ($fn =~ /^check_rbl/) {
+	dbg ("deprecated: 'eval:check_rbl...(..)', use rbleval instead: $_");
+	$self->add_test ($name, $fn, TYPE_RBL_EVALS);
+      } else {
+	$self->add_test ($name, $fn, TYPE_HEAD_EVALS);
+      }
       next;
     }
     if (/^header\s+(\S+)\s+exists:(.*)$/) {
