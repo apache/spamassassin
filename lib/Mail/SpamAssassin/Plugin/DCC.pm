@@ -67,7 +67,6 @@ sub new {
     dbg("dcc: local tests only, disabling DCC");
   }
   else {
-    $self->{dcc_disabled} = 0;
     dbg("dcc: network tests on, registering DCC");
   }
 
@@ -220,6 +219,11 @@ The default is C<-R>.
 sub is_dccifd_available {
   my ($self) = @_;
 
+  $self->{dccifd_available} = 0;
+  if ($self->{main}->{conf}->{use_dcc} == 0) {
+    dbg("dcc: dccifd is not available: use_dcc is set to 0");
+    return 0;
+  }
   my $dcchome = $self->{main}->{conf}->{dcc_home} || '';
   my $dccifd = $self->{main}->{conf}->{dcc_dccifd_path} || '';
 
@@ -236,12 +240,18 @@ sub is_dccifd_available {
   $self->{main}->{conf}->{dcc_dccifd_path} = $dccifd;
 
   dbg("dcc: dccifd is available: " . $self->{main}->{conf}->{dcc_dccifd_path});
+  $self->{dccifd_available} = 1;
   return 1;
 }
 
 sub is_dccproc_available {
   my ($self) = @_;
 
+  $self->{dccproc_available} = 0;
+  if ($self->{main}->{conf}->{use_dcc} == 0) {
+    dbg("dcc: dccproc is not available: use_dcc is set to 0");
+    return 0;
+  }
   my $dcchome = $self->{main}->{conf}->{dcc_home} || '';
   my $dccproc = $self->{main}->{conf}->{dcc_path} || '';
 
@@ -261,17 +271,14 @@ sub is_dccproc_available {
   $self->{main}->{conf}->{dcc_path} = $dccproc;
 
   dbg("dcc: dccproc is available: " . $self->{main}->{conf}->{dcc_path});
+  $self->{dccproc_available} = 1;
   return 1;
 }
 
 sub get_dcc_interface {
   my ($self) = @_;
 
-  if (!$self->{main}->{conf}->{use_dcc}) {
-    dbg("dcc: use_dcc option not enabled, disabling DCC");
-    $self->{dcc_disabled} = 1;
-  }
-  elsif ($self->is_dccifd_available()) {
+  if ($self->is_dccifd_available()) {
     $self->{dcc_interface} = "dccifd";
   }
   elsif ($self->is_dccproc_available()) {
@@ -286,20 +293,21 @@ sub get_dcc_interface {
 sub check_dcc {
   my ($self, $permsgstatus, $full) = @_;
 
+  # short-circuit if there's already a X-DCC header with value of
+  # "bulk" from an upstream DCC check
+  if ($permsgstatus->get('ALL') =~ /^X-DCC-(?:[^:]{1,80}-)?Metrics:.*bulk/m) {
+    return 1;
+  }
+
   return 0 if $self->{dcc_disabled};
   $self->get_dcc_interface() unless $self->{dcc_interface};
-
-  # First check if there's already a X-DCC header with value of "bulk"
-  # and short-circuit if there is -- someone upstream might already have
-  # checked DCC for us.
-  return 1 if (grep(/^X-DCC-(?:[^:]{1,80}-)?Metrics:.*bulk/m, $permsgstatus->get('ALL')));
 
   if ($$full eq '') {
     dbg("dcc: empty message, skipping dcc check");
     return 0;
   }
 
-  if ($self->{dcc_interface} eq "dccifd") {
+  if ($self->{dccifd_available}) {
     return $self->dccifd_lookup($permsgstatus, $full);
   }
   else {
@@ -552,8 +560,11 @@ sub plugin_report {
 
   return if $self->{dcc_disabled};
 
-  if (!$self->{options}->{dont_report_to_dcc} && $self->is_dccproc_available())
-  {
+  if (!defined $self->{dccproc_available}) {
+    $self->is_dccproc_available();
+  }
+
+  if ($self->{dccproc_available} && !$self->{options}->{dont_report_to_dcc}) {
     # use temporary file: open2() is unreliable due to buffering under spamd
     my $tmpf = $options->{report}->create_fulltext_tmpfile($options->{text});
     if ($self->dcc_report($options, $tmpf)) {
