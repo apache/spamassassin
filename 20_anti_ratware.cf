@@ -1,0 +1,29 @@
+
+# Non-spam mailers
+
+header USER_AGENT_PINE       Message-id =~ /^<Pine\./
+describe USER_AGENT_PINE     Message-id indicates a non-spam MUA
+header USER_AGENT_MUTT       User-Agent =~ /^mutt\b/i
+describe USER_AGENT_MUTT     User-Agent header indicates a non-spam MUA
+header USER_AGENT_GNUS       User-Agent =~ /^gnus\b/i
+describe USER_AGENT_GNUS     User-Agent header indicates a non-spam MUA
+header USER_AGENT_MOZILLA    User-Agent =~ /^mozilla\b/i
+describe USER_AGENT_MOZILLA  User-Agent header indicates a non-spam MUA
+header USER_AGENT_OE         User-Agent =~ /^Microsoft.Outlook.Express\b/i
+describe USER_AGENT_OE       User-Agent header indicates a non-spam MUA
+header USER_AGENT_ENTOURAGE  User-Agent =~ /^Microsoft.Entourage\b/i
+describe USER_AGENT_ENTOURAGE User-Agent header indicates a non-spam MUA
+header USER_AGENT_KMAIL      User-Agent =~ /^kmail\b/i
+describe USER_AGENT_KMAIL    User-Agent header indicates a non-spam MUA
+header USER_AGENT_IMP        User-Agent =~ /^Internet Messaging Program\b/i
+describe USER_AGENT_IMP      User-Agent header indicates a non-spam MUA
+
+tflags USER_AGENT_PINE       nice
+tflags USER_AGENT_MUTT       nice
+tflags USER_AGENT_GNUS       nice
+tflags USER_AGENT_MOZILLA    nice
+tflags USER_AGENT_OE         nice
+tflags USER_AGENT_ENTOURAGE  nice
+tflags USER_AGENT_KMAIL      nice
+tflags USER_AGENT_IMP        nice
+
