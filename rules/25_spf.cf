@@ -30,29 +30,29 @@ ifplugin Mail::SpamAssassin::Plugin::SPF
 # not as bad as "fail". ;)   These are more trustworthy results than
 # the SPF_HELO rules.
 
-header __SPF_PASS		eval:check_for_spf_pass()
+header SPF_PASS		        eval:check_for_spf_pass()
 header SPF_FAIL			eval:check_for_spf_fail()
 header SPF_SOFTFAIL		eval:check_for_spf_softfail()
 
-# NOTE: __SPF_HELO_PASS is not incredibly hard to fake, so shouldn't
+# NOTE: SPF_HELO_PASS is not incredibly hard to fake, so shouldn't
 # provide much in the way of points compared to SPF_PASS et al.
 # However, a *failure* is still a very good spamsign.
 
-header __SPF_HELO_PASS		eval:check_for_spf_helo_pass()
+header SPF_HELO_PASS		eval:check_for_spf_helo_pass()
 header SPF_HELO_FAIL		eval:check_for_spf_helo_fail()
 header SPF_HELO_SOFTFAIL	eval:check_for_spf_helo_softfail()
 
-describe __SPF_PASS		SPF: sender matches SPF record
+describe SPF_PASS		SPF: sender matches SPF record
 describe SPF_FAIL		SPF: sender does not match SPF record (fail)
 describe SPF_SOFTFAIL		SPF: sender does not match SPF record (softfail)
-describe __SPF_HELO_PASS	SPF: HELO matches SPF record
+describe SPF_HELO_PASS	        SPF: HELO matches SPF record
 describe SPF_HELO_FAIL		SPF: HELO does not match SPF record (fail)
 describe SPF_HELO_SOFTFAIL	SPF: HELO does not match SPF record (softfail)
 
-tflags __SPF_PASS		net nice
+tflags SPF_PASS		        net nice
 tflags SPF_FAIL			net
 tflags SPF_SOFTFAIL		net
-tflags __SPF_HELO_PASS		net nice
+tflags SPF_HELO_PASS		net nice
 tflags SPF_HELO_FAIL		net
 tflags SPF_HELO_SOFTFAIL	net
 

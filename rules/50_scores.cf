@@ -812,10 +812,15 @@ endif # Mail::SpamAssassin::Plugin::Hashcash
 
 #
 # SPF
+# note that the benefit from a valid SPF record is minimal; it's likely
+# that spammers will quickly move to setting valid SPF records otherwise.
+# the penalties for an *incorrect* record, however, are large ;)
 #
 ifplugin Mail::SpamAssassin::Plugin::SPF
+score SPF_PASS                -0.001
 score SPF_FAIL                1.0
 score SPF_SOFTFAIL            0.5
+score SPF_HELO_PASS           -0.001
 score SPF_HELO_FAIL           1.0
 score SPF_HELO_SOFTFAIL       0.5
 endif # Mail::SpamAssassin::Plugin::SPF
