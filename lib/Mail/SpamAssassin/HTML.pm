@@ -143,6 +143,7 @@ sub html_end {
     else {
       $self->push_uri('a_empty', $self->{anchor_last});
     }
+    push(@{$self->{anchor_uri_index}->{$self->{anchor_last}}}, $self->{anchor_index});
   }
 
 #  my @uri;
@@ -163,6 +164,7 @@ sub html_end {
 #  $self->put_results(uri => \@uri);
   $self->put_results(uri_raw => $self->{uri});
   $self->put_results(uri_canon => $self->{uri_cooked});
+  $self->put_results(uri_anchor_index => $self->{anchor_uri_index});
 
   # final results scalars
   $self->put_results(image_area => $self->{image_area});
@@ -685,6 +687,7 @@ sub html_tests {
       else {
         $self->push_uri('a_empty', $self->{anchor_last});
       }
+      push(@{$self->{anchor_uri_index}->{$self->{anchor_last}}}, $self->{anchor_index});
     }
     $self->{anchor_last} = (exists $attr->{href} ? $attr->{href} : "");
     $self->{anchor_index}++;
