@@ -55,7 +55,6 @@ $ExtUtils::MakeMaker::Recognized_Att_Keys{'LOCAL_RULES_DIR'} = 1;
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'PKG_LOCAL_RULES_DIR'} = 1;
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'INST_SITELIB'} = 1;
 
-$ExtUtils::MakeMaker::Recognized_Att_Keys{'RUN_RAZOR_TESTS'}  = 1;
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'RUN_RAZOR2_TESTS'} = 1;
 
 $ExtUtils::MakeMaker::Recognized_Att_Keys{'PERL_BIN'} = 1;
@@ -129,7 +128,7 @@ my %makefile = (
 	'spamd/sslspamc$(EXE_EXT) spamd/libsslspamc.so '.
 	'binaries.mk config.h config.status config.cache config.log '.
 	'autom4te.cache qmail/qmail-spamc'.
-	't/do_razor t/do_razor1 t/do_razor2 t/log'
+	't/do_razor2 t/log'
     },
 
     'AUTHOR' => 'Justin Mason <jm@jmason.org>',
@@ -191,9 +190,12 @@ my $argv = join (' ', @ARGV);
   if (!defined($do)) {
     $do = eval { require Razor2::Client::Agent };
 
-    if ($do) {
+    if (defined $do) {
       prompt("Run Razor v2 tests (these may fail due to network problems)? (y/n)", 'n') =~ /^(.)/;
       $do = $1;
+    }
+    else {
+      $do = '';
     }
   }
   
