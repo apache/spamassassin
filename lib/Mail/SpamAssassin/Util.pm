@@ -34,28 +34,49 @@ use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/oi);
 ###########################################################################
 
 # find an executable in the current $PATH (or whatever for that platform)
-sub find_executable_in_env_path {
-  my ($filename) = @_;
+{
+  # Show the PATH we're going to explore only once.
+  my $displayed_path = 0;
 
-  clean_path_in_taint_mode();
-  foreach my $path (File::Spec->path()) {
-    my $fname = File::Spec->catfile ($path, $filename);
-    if (-x $fname) {
-      dbg ("executable for $filename was found at $fname");
-      return $fname;
+  sub find_executable_in_env_path {
+    my ($filename) = @_;
+
+    clean_path_in_taint_mode();
+    if ( !$displayed_path++ ) {
+      dbg("Current PATH is: ".join(":",File::Spec->path()));
     }
+    foreach my $path (File::Spec->path()) {
+      my $fname = File::Spec->catfile ($path, $filename);
+      if ( -f $fname ) {
+        if (-x $fname) {
+          dbg ("executable for $filename was found at $fname");
+          return $fname;
+        }
+        else {
+          dbg("$filename was found at $fname, but isn't executable");
+        }
+      }
+    }
+    return undef;
   }
-  return undef;
 }
 
 ###########################################################################
 
 # taint mode: delete more unsafe vars for exec, as per perlsec
-sub clean_path_in_taint_mode {
-  return unless am_running_in_taint_mode();
+{
+  # We only need to clean the environment once, it stays clean ...
+  my $cleaned_taint_path = 0;
 
-  delete @ENV{qw(IFS CDPATH ENV BASH_ENV)};
-  $ENV{'PATH'} = '/bin:/usr/bin:/usr/local/bin';
+  sub clean_path_in_taint_mode {
+    return if ( $cleaned_taint_path++ );
+    return unless am_running_in_taint_mode();
+
+    dbg("Running in taint mode, removing unsafe env vars, and resetting PATH");
+
+    delete @ENV{qw(IFS CDPATH ENV BASH_ENV)};
+    $ENV{'PATH'} = '/bin:/usr/bin:/usr/local/bin';
+  }
 }
 
 # taint mode: are we running in taint mode? 1 for yes, undef for no.
