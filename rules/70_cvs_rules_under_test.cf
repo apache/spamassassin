@@ -404,3 +404,7 @@ describe T_REPLY_TO_HAS_UNDERLINE_NUMS	Reply-To: contains an underline and numbe
 # from bug 725
 body T_PROMOTE_YOUR_BUSINESS     /\b(?:(?:advert|public)i[sz]e|promote|increase|grow|expand|boost)\s+.{0,15}\b(?:(?:web)?site|business|offer(?:ing)?|(?:down|power)line|exposure)/is
 describe T_PROMOTE_YOUR_BUSINESS  Wants to help promote your business
+
+# from bug 1173
+header T_X_BEENTHERE		exists:X-BeenThere
+describe T_X_BEENTHERE	X-BeenThere header exists
