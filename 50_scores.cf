@@ -1,5 +1,5 @@
 # SpamAssassin rules file: scores.
-# $Id: 50_scores.cf,v 1.206 2002/08/28 17:18:42 jmason Exp $
+# $Id: 50_scores.cf,v 1.207 2002/08/28 17:33:18 jmason Exp $
 ###########################################################################
 # Default scores.   Note that if a test is named in the files, but a score is
 # not assigned here, the default score will be set to 1.
@@ -887,7 +887,7 @@ score RCVD_IN_BL_SPAMCOP_NET	     0.0
 ###########################################################################
 # Compensation for common false positives.
 
-score HABEAS_SWE                     20
+score HABEAS_SWE                     -20
 score EVITE			     -10
 score NMS_CGI_NOT_BUGGY              -10
 
