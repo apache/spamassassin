@@ -1,12 +1,12 @@
 =head1 NAME
 
-Mail::SpamAssassin::Plugin::DomainKeys
+Mail::SpamAssassin::Plugin::DomainKeys - perform DomainKeys verification tests
 
 =head1 SYNOPSIS
 
  loadplugin Mail::SpamAssassin::Plugin::DomainKeys [/path/to/DomainKeys.pm]
 
- full DOMAINKEY_DOMAIN eval:check_domainkeys_senderdomain()
+ full DOMAINKEY_DOMAIN eval:check_domainkeys_verified()
 
 =head1 DESCRIPTION
 
@@ -39,6 +39,9 @@ use bytes;
 use Mail::DomainKeys::Message;
 use Mail::DomainKeys::Policy;
 
+# Make the main dbg() accessible in our package w/o an extra function
+*dbg=\&Mail::SpamAssassin::Plugin::dbg;
+
 use vars qw(@ISA);
 @ISA = qw(Mail::SpamAssassin::Plugin);
 
@@ -51,9 +54,9 @@ sub new {
   my $self = $class->SUPER::new($mailsaobject);
   bless ($self, $class);
 
-  $self->register_eval_rule ("check_domainkeys_senderdomain");
+  $self->register_eval_rule ("check_domainkeys_signed");
   $self->register_eval_rule ("check_domainkeys_verified");
-  $self->register_eval_rule ("check_domainkeys_notsignedok");
+  $self->register_eval_rule ("check_domainkeys_signsome");
   $self->register_eval_rule ("check_domainkeys_testing");
   $self->register_eval_rule ("check_domainkeys_signall");
 
@@ -61,92 +64,147 @@ sub new {
 }
 
 
-sub check_domainkeys_senderdomain {
-  my ($self, $permsgstatus) = @_;
+sub check_domainkeys_signed {
+  my ($self, $scan) = @_;
 
-  $self->_check_domainkeys($permsgstatus) unless $permsgstatus->{domainkeys_checked};
+  $self->_check_domainkeys($scan) unless $scan->{domainkeys_checked};
   
-  return $permsgstatus->{domainkeys_found};
+  return $scan->{domainkeys_signed};
 }
 
 sub check_domainkeys_verified {
-  my ($self, $permsgstatus) = @_;
+  my ($self, $scan) = @_;
 
-  $self->_check_domainkeys($permsgstatus) unless $permsgstatus->{domainkeys_checked};
+  $self->_check_domainkeys($scan) unless $scan->{domainkeys_checked};
   
-  return $permsgstatus->{domainkeys_verified};
+  return $scan->{domainkeys_verified};
 }
 
-sub check_domainkeys_notsignedok {
-  my ($self, $permsgstatus) = @_;
+sub check_domainkeys_signsome {
+  my ($self, $scan) = @_;
 
-  $self->_check_domainkeys($permsgstatus) unless $permsgstatus->{domainkeys_checked};
-  
-  return $permsgstatus->{domainkeys_notsignedok};
+  $self->_check_domainkeys($scan) unless $scan->{domainkeys_checked};
+  return $scan->{domainkeys_signsome};
 }
 
 sub check_domainkeys_testing {
-  my ($self, $permsgstatus) = @_;
+  my ($self, $scan) = @_;
 
-  $self->_check_domainkeys($permsgstatus) unless $permsgstatus->{domainkeys_checked};
+  $self->_check_domainkeys($scan) unless $scan->{domainkeys_checked};
   
-  return $permsgstatus->{domainkeys_testing};
+  return $scan->{domainkeys_testing};
 }
 
 sub check_domainkeys_signall {
-  my ($self, $permsgstatus) = @_;
+  my ($self, $scan) = @_;
 
-  $self->_check_domainkeys($permsgstatus) unless $permsgstatus->{domainkeys_checked};
+  $self->_check_domainkeys($scan) unless $scan->{domainkeys_checked};
   
-  return $permsgstatus->{domainkeys_signall};
+  return $scan->{domainkeys_signall};
 }
 
 
 
 sub _check_domainkeys {
-  my ($self, $permsgstatus) = @_;
+  my ($self, $scan) = @_;
 
-  my $header = $permsgstatus->{msg}->get_pristine_header();
-  my $body = $permsgstatus->{msg}->get_body();
+  $scan->{domainkeys_checked} = 0;
+  $scan->{domainkeys_signed} = 0;
+  $scan->{domainkeys_verified} = 0;
+  $scan->{domainkeys_signsome} = 0;
+  $scan->{domainkeys_testing} = 0;
+  $scan->{domainkeys_signall} = 0;
+
+  my $header = $scan->{msg}->get_pristine_header();
+  my $body = $scan->{msg}->get_body();
 
   my $message = Mail::DomainKeys::Message->load(HeadString => $header,
 						 BodyReference => $body);
 
-  return unless $message;
-
-  $permsgstatus->{domainkeys_checked} = 1;
-
-  # does a sender domain header exist?
-  return unless $message->senderdomain();
-
-  $permsgstatus->{domainkeys_found} = 1;
-
-  # verified
-  if ($message->signed() && $message->verify()) {
-    $permsgstatus->{domainkeys_verified} = 1;
+  if (!$message) {
+    dbg("dk: cannot load message using Mail::DomainKeys::Message");
+    return;
   }
 
-  my $policy = Mail::DomainKeys::Policy->fetch(Policy => 'dns',
-					       Domain => $message->senderdomain());
+  $scan->{domainkeys_checked} = 1;
+
+  # does a sender domain header exist?
+  my $domain = $message->senderdomain();
+  if (!$domain) {
+    dbg("dk: no sender domain");
+    return;
+  }
+
+  my $timeout = 5;              # TODO: tunable timeout
+  my $oldalarm;
+
+  eval {
+    local $SIG{ALRM} = sub { die "__alarm__\n" };
+    $oldalarm = alarm($timeout);
+    $self->_dk_lookup_trapped($scan, $message, $domain);
+    alarm $oldalarm;
+  };
+
+  my $err = $@;
+
+  if ($err) {
+    alarm $oldalarm;
+    if ($err =~ /^__alarm__$/) {
+      dbg("dk: lookup timed out after $timeout seconds");
+    } else {
+      warn("dk: lookup failed: $err\n");
+    }
+    return 0;
+  }
+
+  my $comment = $self->_dkmsg_hdr($message);
+  $comment ||= '';
+  $comment =~ s/\s+/ /gs;       # no newlines please
+
+  $scan->{dk_comment} = "DomainKeys status: $comment";
+}
+
+# perform DK lookups.  This method is trapped within a timeout alarm() scope
+sub _dk_lookup_trapped {
+  my ($self, $scan, $message, $domain) = @_;
+
+  # verified
+  if ($message->signed()) {
+    $scan->{domainkeys_signed} = 1;
+    if ($message->verify()) {
+      $scan->{domainkeys_verified} = 1;
+    }
+  }
+
+  my $policy = Mail::DomainKeys::Policy->fetch(Protocol => 'dns',
+					       Domain => $domain);
 
   return unless $policy;
+  dbg ("dk: fetched policy");
 
   # not signed and domain doesn't sign all
-  if ($policy->signsome() && !$message->signed()) {
-    $permsgstatus->{domainkeys_notsignedok} = 1;
+  if ($policy->signsome()) {
+    $scan->{domainkeys_signsome} = 1;
   }
 
   # domain or key testing
   if ($message->testing() || $policy->testing()) {
-    $permsgstatus->{domainkeys_testing} = 1;
+    $scan->{domainkeys_testing} = 1;
   }
 
   # does policy require all mail to be signed
   if ($policy->signall()) {
-    $permsgstatus->{domainkeys_signall} = 1;
+    $scan->{domainkeys_signall} = 1;
   }
 
-  return;
+  my $comment = $self->_dkmsg_hdr($message);
+  dbg("dk: comment is '$comment'");
+}
+
+# get the DK status "header" from the Mail::DomainKeys::Message object
+sub _dkmsg_hdr {
+  my ($self, $message) = @_;
+  return $message->header->value();
 }
 
 1;
