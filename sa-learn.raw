@@ -4,9 +4,13 @@ use strict;
 
 use File::Spec;
 
-my $PREFIX = '@@PREFIX@@';  # substituted at 'make' time
-my $DEF_RULES_DIR = '@@DEF_RULES_DIR@@';  # substituted at 'make' time
-my $LOCAL_RULES_DIR = '@@LOCAL_RULES_DIR@@';  # substituted at 'make' time
+# Do 'use vars' instead of my() since CmdLearn looks for these and my()
+# makes them non-exportable.  Doh.
+use vars qw/ $PREFIX $DEF_RULES_DIR $LOCAL_RULES_DIR /;
+
+$PREFIX = '@@PREFIX@@';  # substituted at 'make' time
+$DEF_RULES_DIR = '@@DEF_RULES_DIR@@';  # substituted at 'make' time
+$LOCAL_RULES_DIR = '@@LOCAL_RULES_DIR@@';  # substituted at 'make' time
 
 use lib '@@INSTALLSITELIB@@';  # substituted at 'make' time
 
