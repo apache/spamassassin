@@ -63,7 +63,7 @@ sub init {
 
 sub update {
     chdir $opt{corpus};
-    system "rsync -CPcvuzbt --timeout=300 $opt{username}" . '@rsync.spamassassin.org::corpus/*.log .';
+    system "rsync -CPcvuzt --timeout=300 $opt{username}" . '@rsync.spamassassin.org::corpus/*.log .';
     if (-f "rsync.last") {
 	open(FIND, "find . -type f -newer rsync.last |");
 	my $files = "";
@@ -78,6 +78,7 @@ sub update {
     }
     open(RSYNC, "> rsync.last");
     close(RSYNC);
+    system "chmod +r *.log";
 }
 
 sub locate {
