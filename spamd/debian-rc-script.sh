@@ -1,15 +1,10 @@
 #! /bin/sh
-#
-# skeleton	example file to build /etc/init.d/ scripts.
-#		This file should be used to construct scripts for /etc/init.d.
-#
-#		Written by Miquel van Smoorenburg <miquels@cistron.nl>.
-#		Modified for Debian GNU/Linux
-#		by Ian Murdock <imurdock@gnu.ai.mit.edu>.
-#
-# Version:	@(#)skeleton  1.8  03-Mar-1998  miquels@cistron.nl
-#
-# This file was automatically customized by dh-make on Sun, 25 Nov 2001 19:39:16 -0500
+
+# Spamd init script
+# November 2001
+# Duncan Findlay
+
+# Based on skeleton by Miquel van Smoorenburg and Ian Murdock
 
 PATH=/sbin:/bin:/usr/sbin:/usr/bin
 DAEMON=/usr/bin/spamd
@@ -17,7 +12,7 @@ PNAME=spamd
 NAME=spamd
 DESC="SpamAssasin Mail Filter Daemon"
 
-test -r /etc/spamd.conf && source /etc/spamd.conf
+test -r /etc/spamd.conf && . /etc/spamd.conf
 
 test "$ENABLED" != "0" || exit 0
 
@@ -30,6 +25,10 @@ case "$1" in
 	echo -n "Starting $DESC: "
 	start-stop-daemon --start --quiet --background --name $PNAME \
 		--oknodo --startas $DAEMON
+
+	test $SLEEP && sleep $SLEEP
+	# Lets load before fetchmail rams stuff down spamd's throat!
+
 	echo "$NAME."
 	;;
   stop)
@@ -37,24 +36,7 @@ case "$1" in
 	start-stop-daemon --stop --quiet --oknodo --name $PNAME
 	echo "$NAME."
 	;;
-  #reload)
-	#
-	#	If the daemon can reload its config files on the fly
-	#	for example by sending it SIGHUP, do it here.
-	#
-	#	If the daemon responds to changes in its config file
-	#	directly anyway, make this a do-nothing entry.
-	#
-	# echo "Reloading $DESC configuration files."
-	# start-stop-daemon --stop --signal 1 --quiet --pidfile \
-	#	/var/run/$NAME.pid --exec $DAEMON
-  #;;
   restart|force-reload)
-	#
-	#	If the "reload" option is implemented, move the "force-reload"
-	#	option to the "reload" entry above. If not, "force-reload" is
-	#	just the same as "restart".
-	#
 	echo -n "Restarting $DESC: "
 	start-stop-daemon --stop --quiet --name $PNAME --oknodo
 	sleep 1
@@ -64,7 +46,6 @@ case "$1" in
 	;;
   *)
 	N=/etc/init.d/$NAME
-	# echo "Usage: $N {start|stop|restart|reload|force-reload}" >&2
 	echo "Usage: $N {start|stop|restart|force-reload}" >&2
 	exit 1
 	;;
