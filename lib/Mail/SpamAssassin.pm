@@ -69,7 +69,7 @@ use vars	qw{
 @ISA = qw();
 
 $VERSION = "2.20";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.75 2002/03/26 01:28:29 hughescr Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.76 2002/03/27 00:24:37 hughescr Exp $';
 
 sub Version { $VERSION; }
 
@@ -361,6 +361,12 @@ sub remove_spamassassin_markup {
   1 while $hdrs =~ s/\nX-Spam-[^\n]*?\n/\n/gs;
 
   my $tag = $self->{conf}->{subject_tag};
+
+  while ( $tag =~ /(_HITS_|_REQD_)/g ) {
+       my $typeoftag = $1;
+       $hdrs =~ s/^Subject: (\D*)\d\d\.\d\d/Subject: $1$typeoftag/m;
+  } # Wow. Very Hackish.
+
   1 while $hdrs =~ s/^Subject: \Q${tag}\E /Subject: /gm;
 
   # ok, next, the report.
