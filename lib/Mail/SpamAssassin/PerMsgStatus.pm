@@ -972,6 +972,17 @@ sub get {
       $_ .= join ("\n", $self->{msg}->get_header ('Cc'));
       undef $_ if $_ eq '';
     }
+    # MESSAGEID: handle lists which move the real message-id to another
+    # header for resending.
+    elsif ($hdrname eq 'MESSAGEID') {
+      $_ = join ("\n", $self->{msg}->get_header ('X-Message-Id'));
+      if ($_ eq '') {
+	$_ = join ("\n", $self->{msg}->get_header ('Resent-Message-Id'));
+	if ($_ eq '') {
+	  $_ = join ("\n", $self->{msg}->get_header ('Message-Id'));
+	}
+      }
+    }
     # a conventional header
     else {
       my @hdrs = $self->{msg}->get_header ($hdrname);
@@ -982,6 +993,7 @@ sub get {
 	$_ = undef;
       }
     }
+
     if (defined) {
       if ($getaddr) {
 	chomp; s/\r?\n//gs;

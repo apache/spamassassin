@@ -1228,8 +1228,12 @@ Define a test.  C<SYMBOLIC_TEST_NAME> is a symbolic test name, such as
 'FROM_ENDS_IN_NUMS'.  C<header> is the name of a mail header, such as
 'Subject', 'To', etc.
 
-'ALL' can be used to mean the text of all the message's headers.  'ToCc' can be
-used to mean the contents of both the 'To' and 'Cc' headers.
+'ALL' can be used to mean the text of all the message's headers.  'ToCc' can
+be used to mean the contents of both the 'To' and 'Cc' headers.
+
+'MESSAGEID' is a symbol meaning the original Message-Id, which for some
+mailing list software is moved to 'Resent-Message-Id' or 'X-Message-Id',
+instead of the traditional 'Message-Id' header.
 
 C<op> is either C<=~> (contains regular expression) or C<!~> (does not contain
 regular expression), and C<pattern> is a valid Perl regular expression, with
