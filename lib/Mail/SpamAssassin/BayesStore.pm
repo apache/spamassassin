@@ -351,10 +351,15 @@ sub expire_old_tokens_trapped {
   # some of the toks we deleted.
   my $reprieved = 0;
 
-  while ($kept+$reprieved < $self->{expiry_min_db_size} && $deleted > 0) {
+  while ($kept+$reprieved < $self->{expiry_min_db_size}
+			&& $deleted-$reprieved > 0)
+  {
     my $deld = shift @deleted_toks;
+    last unless defined $deld;
+
     my ($tok, $ts, $th, $atime) = @{$deld};
     next unless (defined $tok && defined $ts && defined $th);
+
     $new_toks{$tok} = tok_pack ($ts, $th, $atime);
     if (defined($atime) && (!defined($oldest) || $atime < $oldest)) {
       $oldest = $atime;
