@@ -1871,7 +1871,7 @@ increases database size by about a factor of 8 to 10.
       $self->{bayes_use_hapaxes} = $1; next;
     }
 
-=item bayes_use_chi2_combining		(default: 1)
+=item bayes_use_chi2_combining		(default: 0)
 
 Should the Bayesian classifier use chi-squared combining, instead of
 Robinson/Graham-style naive Bayesian combining?  Chi-squared produces
