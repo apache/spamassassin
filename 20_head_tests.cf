@@ -258,8 +258,8 @@ describe SUBJ_ILLEGAL_CHARS	Subject contains too many raw illegal characters
 header FROM_ILLEGAL_CHARS	eval:check_illegal_chars('From','0.20','2')
 describe FROM_ILLEGAL_CHARS	From contains too many raw illegal characters
 
-header HEAD_ILLEGAL_CHARS	eval:check_illegal_chars('ALL','0.005','2')
-describe HEAD_ILLEGAL_CHARS	Header contains too many raw illegal characters
+header HEAD_ILLEGAL_CHARS	eval:check_illegal_chars('ALL','0.010','2')
+describe HEAD_ILLEGAL_CHARS	Headers contain too many raw illegal characters
 
 ###########################################################################
 # ADV tags in various languages
@@ -431,6 +431,10 @@ describe X_IP			Message has X-IP header
 header X_LIBRARY		exists:X-Library
 describe X_LIBRARY		Message has X-Library header
 
+# this rule is case-sensitive
+header X_MESSAGE_FLAG_ODD	ALL =~ /^X-Message-flag:/m
+describe X_MESSAGE_FLAG_ODD	Message has X-Message-flag header (odd case)
+
 header   __HAS_MIMEOLE          exists:X-MimeOLE
 header   __HAS_MSMAIL_PRI       exists:X-MSMail-Priority
 header   __HAS_SQUIRRELMAIL_IN_MAILER	X-Mailer =~ /SquirrelMail\b/
@@ -487,6 +491,9 @@ describe RCVD_FAKE_HELO_DOTCOM  Received contains a faked HELO hostname
 
 header ADDRESS_IN_SUBJECT	eval:check_for_to_in_subject('address')
 describe ADDRESS_IN_SUBJECT	To: address appears in Subject
+
+header LOCALPART_IN_SUBJECT	eval:check_for_to_in_subject('user')
+describe LOCALPART_IN_SUBJECT	Local part of To: address appears in Subject
 
 header SUBJECT_DIET		Subject =~ /\bLose .*(?:pounds|lbs|weight)/i
 describe SUBJECT_DIET		Subject talks about losing pounds
