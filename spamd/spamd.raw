@@ -859,7 +859,11 @@ if ($scaling) {
 
 while (1) {
   if (!$scaling) {
-    sleep;    # wait for a signal (ie: child's death)
+    # wait for a signal (ie: child's death)
+    # bug 4190: use a time-limited sleep, and call child_handler() even
+    # if haven't received a SIGCHLD, due to inherent race condition
+    sleep 10;
+    child_handler();
   } else {
     $scaling->main_server_poll($opt{'server-scale-period'});
   }
