@@ -138,9 +138,8 @@ sub new {
   $self->{spam_level_stars} = 1;
   $self->{spam_level_char} = '*';
   $self->{subject_tag} = '*****SPAM*****';
-  $self->{report_header} = 1;
+  $self->{report_safe} = 1;
   $self->{use_terse_report} = 1;
-  $self->{defang_mime} = 0;
   $self->{skip_rbl_checks} = 0;
   $self->{dns_available} = "test";
   $self->{check_mx_attempts} = 2;
@@ -553,16 +552,21 @@ score for this message. _REQD_ will be replaced with the threshold.
       $self->{subject_tag} = $1; next;
     }
 
-=item report_header { 0 | 1 }	(default: 1)
+=item report_safe { 0 | 1 }	(default: 1)
 
-By default, SpamAssassin will include its report in the headers of suspected
-spam.  Disabling this causes the report to go in the body instead. Using
-'use_terse_report' when this is enabled, is recommended.
+if this option is set to 1, if an incoming message is tagged as spam,
+instead of modifying the original message, SpamAssassin will create a
+new report message and attach the original message as a message/rfc822
+MIME part (ensuring the original message is completely preserved, not
+easily opened, and easier to recover).
+
+If this option is set to 0, incoming spam is only modified by adding
+some headers and no changes will be made to the body.
 
 =cut
 
-    if (/^report[-_]header\s+(\d+)$/) {
-      $self->{report_header} = $1+0; next;
+    if (/^report[-_]safe\s+(\d+)$/) {
+      $self->{report_safe} = $1+0; next;
     }
 
 =item use_terse_report { 0 | 1 }   (default: 1)
@@ -575,17 +579,6 @@ with the addition of some explanations and formatting.
 
     if (/^use[-_]terse[-_]report\s+(\d+)$/) {
       $self->{use_terse_report} = $1+0; next;
-    }
-
-=item defang_mime { 0 | 1 }   (default: 0)
-
-If this is enabled, SpamAssassin will change the Content-type: header of
-suspected spam to "text/plain". This is a safety feature.
-
-=cut
-
-    if (/^defang[-_]mime\s+(\d+)$/) {
-      $self->{defang_mime} = $1+0; next;
     }
 
 =item dns_available { yes | test[: name1 name2...] | no }   (default: test)

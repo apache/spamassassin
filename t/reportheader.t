@@ -10,13 +10,10 @@ $ENV{'LC_ALL'} = 'C';             # a cheat, but we need the patterns to work
 
 %patterns = (
 
-q{ X-Spam-Report: Detailed Report
-SPAM: -------------------- Start SpamAssassin results ----------------------
-SPAM: This mail is probably spam.  The original message has been altered
-SPAM: so you can recognise or block similar unwanted mail in future.
-SPAM: See http://spamassassin.org/tag/ for more details.  },
-	'x-spam-report-header',
-
+q{ This mail is probably spam.  The original message has been attached
+along with this report, so you can recognize or block similar unwanted
+mail in future.  See http://spamassassin.org/tag/ for more details. },
+	'spam-report-body',
 q{ Subject: There yours for FREE!}, 'subj',
 q{ X-Spam-Status: Yes, hits=}, 'status',
 q{ X-Spam-Flag: YES}, 'flag',

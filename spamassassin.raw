@@ -527,14 +527,34 @@ as if they are spam messages.
 
 =head2 TAGGING FOR SPAM MAILS
 
-The modifications made are as follows:
+If an incoming message is tagged as spam, instead of modifying the
+original message, SpamAssassin will create a new report message and
+attach the original message as a message/rfc822 MIME part (ensuring
+the original message is completely preserved and easier to recover).
+
+The new report message inherits the following headers (if they are
+present) from the original spam message:
 
 =over 4
 
 =item Subject: header
 
-The string C<*****SPAM*****> is prepended to the subject,
+The string C<*****SPAM*****> is also prepended to the subject,
 unless the C<rewrite_subject 0> configuration option is given.
+
+=item From: header
+
+=item To: header
+
+=item Cc: header
+
+=item Date: header
+
+=back
+
+And these headers are added:
+
+=over 4
 
 =item X-Spam-Status: header
 
@@ -550,16 +570,10 @@ Set to C<YES>.
 The SpamAssassin report is added to the mail header if
 the C<report_header 1> configuration option is given.
 
-=item Content-Type: header
-
-Set to C<text/plain>, in order to defang HTML mail or other active
-content that could "call back" to the spammer.
-
 =item spam mail body text
 
 The SpamAssassin report is added to top of the mail message body,
-unless the C<report_header 1> configuration option is given.
-
+if the message is marked as spam.
 
 =back
 
