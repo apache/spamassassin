@@ -769,6 +769,7 @@ sub check_illegal_chars {
     $illegal-- if $exempt == 1;
   }
 
+  return 0 if !$length($str);
   return (($illegal / length($str)) >= $ratio && $illegal >= $count);
 }
 
