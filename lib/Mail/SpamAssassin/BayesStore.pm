@@ -392,18 +392,17 @@ sub expire_old_tokens_trapped {
 
   # do we need to reprieve any tokens?
   if ( $kept < $self->{expiry_min_db_size} ) {
-    # sort the deleted tokens so the newest ones are at the front
-    @deleted_toks = sort { $b->[3] <=> $a->[3] } @deleted_toks;
-
-    while ($kept+$reprieved < $self->{expiry_min_db_size}
-			  && $deleted-$reprieved > 0)
-    {
+    # sort the deleted tokens so the most recent ones are at the end of the array
+    @deleted_toks = sort { $a->[3] <=> $b->[3] } @deleted_toks;
+  
+    # Go through until the DB is at least min_db_size, and there are still tokens to reprieve
+    while ($kept+$reprieved < $self->{expiry_min_db_size} && $#deleted_toks > -1) {
       my $oatime;
 
       # reprieve all tokens with a given atime at once
-      while ( $#deleted_toks > -1 && (!defined $oatime || $deleted_toks[0]->[3] == $oatime) ) {
-        my $deld = shift @deleted_toks;
-        last unless defined $deld;
+      while ( $#deleted_toks > -1 && (!defined $oatime || $deleted_toks[$#deleted_toks]->[3] == $oatime) ) {
+        my $deld = pop @deleted_toks; # pull the token off the backside
+        last unless defined $deld; # this shouldn't happen, but just in case ...
 
         my ($tok, $ts, $th, $atime) = @{$deld};
         next unless (defined $tok && defined $ts && defined $th);
