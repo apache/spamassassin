@@ -164,6 +164,13 @@ print_usage(void)
     usg("\n");
 }
 
+/**
+ * Does the command line parsing for argv[].
+ *
+ * Returns EX_OK or EX_NOTSPAM if successful. EX_NOTSPAM is a kludge for
+ * the cases where we want in main to return immediately; we can't exit()
+ * because on Windows WSACleanup() needs to be called.
+ */
 int
 read_args(int argc, char **argv,
           int *max_size, char **username,
@@ -202,11 +209,8 @@ read_args(int argc, char **argv,
             {
                 int i, j;
                 
-                /* FIXME: The sizeof on a yet uninitialized value looks 
-                 *        strange -- or is this supposed to be sizeof(char)?
-                 *        sizeof(char) is always 1 though so all this does is
-                 *        causing confusion (if I see this correct)
-                 *  -- mss 2004-05-27
+                /* Allocate memory for the necessary pointers needed to 
+                 * store the remaining arguments.
                  */
                 exec_argv = malloc(sizeof(*exec_argv) * (argc - optind + 2));
                 if (exec_argv == NULL)
@@ -304,13 +308,15 @@ read_args(int argc, char **argv,
             }
             case 'h':
             {
+                if (ret == EX_OK)
+                    ret = EX_NOTSPAM;
                 print_usage();
-                exit(ret);
+                return(ret);
             }
             case 'V':
             {
                 print_version();
-                exit(ret);
+                return(EX_NOTSPAM);
             }
         }
     }
@@ -463,9 +469,12 @@ main(int argc, char *argv[])
    /* Now parse the command line arguments. First, set the defaults. */
    max_size = 250 * 1024;
    username = NULL;
-   if ((ret = read_args(argc, argv, &max_size, &username, &trans)) != EX_OK)
-       return ret;
-
+   if ((ret = read_args(argc, argv, &max_size, &username, &trans)) != EX_OK) {
+       if (ret == EX_NOTSPAM )
+           ret = EX_OK;
+       goto finish;
+   }
+   
    if (username == NULL) {
        ret = get_current_user(&username);
        if ( ret != EX_OK )
