@@ -20,8 +20,7 @@
 #             START_SPAMD=yes
 #          5. You can configure spamd with two more options in rc.config:
 #             SPAMD_OPTS="..."  add these options to the spamd command line
-#                               (read `man spamd`). If this switch isn't
-#                               defined, it will default to "-F 0".
+#                               (read `man spamd`).
 #             SPAMD_AWL=yes     Enable the autowhitelist. The same as adding
 #                               "-a" to SPAMD_OPTS.
 #             SPAMD_NICE=<prio> Set the scheduling priority to <prio>; keeps
@@ -59,7 +58,6 @@ done
 test -x $SPAMD_BIN || exit 5
 
 # Some options
-test -z "$SPAMD_OPTS"       && SPAMD_OPTS="-F 0"
 test "$SPAMD_AWL" == "yes"  && SPAMD_OPTS="$SPAMD_OPTS -a"
 test "$SPAMD_NICE" == "yes" && SPAMD_NICE=5
 test -n "$SPAMD_NICE"       && SPAMD_NICE="-n $SPAMD_NICE"
