@@ -127,14 +127,20 @@ sub new {
 
     # NB: Really need to figure out special folding rules here!
     if ( $last =~ /^[ \t]+/ ) {                    # if its a continuation
-      $header .= $last;                            # fold continuations
+      if ($header) {
+        $header .= $last;                            # fold continuations
+      }
       next;
     }
 
     # Ok, there's a header here, let's go ahead and add it in.
     if ($header) {
       my ( $key, $value ) = split ( /:\s*/, $header, 2 );
-      $self->header( $key, $value );
+
+      # If it's not a valid header (aka: not in the form "foo: bar"), skip it.
+      if (defined $value) {
+        $self->header( $key, $value );
+      }
     }
 
     # not a continuation...

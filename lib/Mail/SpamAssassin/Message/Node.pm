@@ -161,6 +161,8 @@ sub header {
 
   if (@_) {
     my $raw_value = shift;
+    return unless defined $raw_value;
+
     push @{ $self->{'header_order'} }, $rawkey;
     if ( !exists $self->{'headers'}->{$key} ) {
       $self->{'headers'}->{$key} = [];
@@ -560,19 +562,25 @@ sub get_header {
   # And now pick up all the entries into a list
   # This is assumed to include a newline at the end ...
   # This is also assumed to have removed continuation bits ...
+
+  # Deal with the possibility that header() or raw_header() returns undef
   my @hdrs;
   if ( $raw ) {
-    @hdrs = map { s/\r?\n\s+/ /g; $_; } $self->raw_header($hdr);
+    if (@hdrs = $self->raw_header($hdr)) {
+      @hdrs = map { s/\r?\n\s+/ /g; $_; } @hdrs;
+    }
   }
   else {
-    @hdrs = map { "$_\n" } $self->header($hdr);
+    if (@hdrs = $self->header($hdr)) {
+      @hdrs = map { "$_\n" } @hdrs;
+    }
   }
 
   if (wantarray) {
     return @hdrs;
   }
   else {
-    return $hdrs[-1];
+     return @hdrs ? $hdrs[-1] : undef;
   }
 }
 
@@ -597,6 +605,8 @@ sub get_all_headers {
   my %cache = ();
   my @lines = ();
 
+  # we're guaranteed that get_header() will return a non-undef value here,
+  # so don't bother trying to deal with that possibility.
   foreach ( @{$self->{header_order}} ) {
     push(@lines, "$_: ".($self->get_header($_,$raw))[$cache{$_}++]);
   }
