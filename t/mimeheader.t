@@ -17,7 +17,7 @@ $ENV{'LC_ALL'} = 'C';             # a cheat, but we need the patterns to work
 
 tstprefs ("
 
-  loadplugin Mail::SpamAssassin::Plugin::MIMEHeader
+  # loadplugin Mail::SpamAssassin::Plugin::MIMEHeader
   mimeheader MIMEHEADER_TEST1 content-type =~ /application\/msword/
   mimeheader MIMEHEADER_TEST2 content-type =~ m!APPLICATION/MSWORD!i
 
