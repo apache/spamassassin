@@ -2979,7 +2979,9 @@ sub helo_ip_mismatch {
 
 sub check_all_trusted {
   my ($self) = @_;
-  return $self->{num_relays_trusted} && !$self->{num_relays_untrusted};
+  return $self->{num_relays_trusted} 
+        && !$self->{num_relays_untrusted}
+        && !$self->{num_relays_unparseable};
 }
 
 ###########################################################################

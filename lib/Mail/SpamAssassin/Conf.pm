@@ -551,10 +551,16 @@ comment following the address in parantheses. For the Subject header,
 this will be prepended to the original subject. Note that you should
 only use the _REQD_ and _SCORE_ tags when rewriting the Subject header
 unless C<report_safe> is 0. Otherwise, you may not be able to remove
-the SpamAssassin markup via the normal methods.  Parentheses are not
-permitted in STRING if rewriting the From or To headers. (They will be
-converted to square brackets.)  A null value for C<STRING> will remove
-any existing rewrite for the specified header.
+the SpamAssassin markup via the normal methods.  
+
+Parentheses are not permitted in STRING if rewriting the From or To headers.
+(They will be converted to square brackets.)
+
+If C<rewrite_header subject> is used, but the message being rewritten
+does not already contain a C<Subject> header, one will be created.
+
+A null value for C<STRING> will remove any existing rewrite for the specified
+header.
 
 =cut
 

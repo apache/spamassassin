@@ -873,7 +873,19 @@ sub rewrite_no_report_safe {
   my(@pristine_headers) = grep(!/^X-Spam-(?!Prev-)/i, $self->{msg}->get_pristine_header() =~ /^([^:]+:[ \t]*(?:.*\n(?:\s+\S.*\n)*))/mig);
   my $addition = 'headers_ham';
 
-  if($self->{is_spam}) {
+  if($self->{is_spam})
+  {
+      # special-case: Subject lines.  ensure one exists, if we're
+      # supposed to mark it up.
+      my $created_subject = 0;
+      my $subject = $self->{msg}->get_pristine_header('Subject');
+      if (!defined($subject) && $self->{is_spam}
+            && exists $self->{conf}->{rewrite_header}->{'Subject'})
+      {
+        push(@pristine_headers, "Subject: \n");
+        $created_subject = 1;
+      }
+
       # Deal with header rewriting
       foreach (@pristine_headers) {
         # if we're not going to do a rewrite, skip this header!
@@ -882,7 +894,11 @@ sub rewrite_no_report_safe {
 	next if (!exists $self->{conf}->{rewrite_header}->{$hdr});
 
 	# pop the original version onto the end of the header array
-	push(@pristine_headers, "X-Spam-Prev-$_");
+        if ($created_subject) {
+          push(@pristine_headers, "X-Spam-Prev-Subject: (nonexistent)\n");
+        } else {
+          push(@pristine_headers, "X-Spam-Prev-$_");
+        }
 
 	# Figure out the rewrite piece
         my $tag = $self->_replace_tags($self->{conf}->{rewrite_header}->{$hdr});
@@ -1217,6 +1233,7 @@ sub extract_message_metadata {
   foreach my $item (qw(
 	relays_trusted relays_trusted_str num_relays_trusted
 	relays_untrusted relays_untrusted_str num_relays_untrusted
+        num_relays_unparseable
 	))
   {
     $self->{$item} = $self->{msg}->{metadata}->{$item};
