@@ -441,9 +441,9 @@ describe T_SILDENAFIL          Talks about viagra using its chemical name
 # SpamAssassin local.cf for AHBL BlackList / BlockList
 # "Old blackholes.2mbit.com resurrected as AHBL (dnsbl.ahbl.org)"
 # URL: http://www.ahbl.org
-header T_RCVD_IN_AHBL eval:check_rbl('ahbl', 'dnsbl.ahbl.org.')
-describe T_RCVD_IN_AHBL AHBL: sender is in DNSbl dnsbl.ahbl.org
-tflags T_RCVD_IN_AHBL net
+header __RCVD_IN_AHBL eval:check_rbl('ahbl', 'dnsbl.ahbl.org.')
+describe __RCVD_IN_AHBL AHBL: sender is in DNSbl dnsbl.ahbl.org
+tflags __RCVD_IN_AHBL net
 
 header T_RCVD_IN_AHBL_UNKNOWN_1 eval:check_rbl_sub('ahbl', '127.0.0.1')
 describe T_RCVD_IN_AHBL_UNKNOWN_1 AHBL: Unknown Category 1 (dnsbl.ahbl.org)
@@ -496,6 +496,30 @@ tflags T_RCVD_IN_AHBL_5XXI net
 header T_RCVD_IN_AHBL_RFCI_MISC eval:check_rbl_sub('ahbl', '127.0.0.13')
 describe T_RCVD_IN_AHBL_RFCI_MISC AHBL: Other Non-RFC Compliant (dnsbl.ahbl.org)
 tflags T_RCVD_IN_AHBL_RFCI_MISC net
+
+header T_RCVD_IN_AHBL_CMPR_DDOS eval:check_rbl_sub('ahbl', '127.0.0.14')
+describe T_RCVD_IN_AHBL_CMPR_DDOS AHBL: Compromised System - DDoS (dnsbl.ahbl.org)
+tflags T_RCVD_IN_AHBL_CMPR_DDOS net
+
+header T_RCVD_IN_AHBL_CMPR_RELAY eval:check_rbl_sub('ahbl', '127.0.0.15')
+describe T_RCVD_IN_AHBL_CMPR_RELAY AHBL: Compromised System - Relay (dnsbl.ahbl.org)
+tflags T_RCVD_IN_AHBL_CMPR_RELAY net
+
+header T_RCVD_IN_AHBL_CMPR_SCAN eval:check_rbl_sub('ahbl', '127.0.0.16')
+describe T_RCVD_IN_AHBL_CMPR_SCAN AHBL: Compromised System - Autorooter/Scanner (dnsbl.ahbl.org)
+tflags T_RCVD_IN_AHBL_CMPR_SCAN net
+
+header T_RCVD_IN_AHBL_CMPR_WORM eval:check_rbl_sub('ahbl', '127.0.0.17')
+describe T_RCVD_IN_AHBL_CMPR_WORM AHBL: Compromised System - Worm or mass mailing virus (dnsbl.ahbl.org)
+tflags T_RCVD_IN_AHBL_CMPR_WORM net
+
+header T_RCVD_IN_AHBL_CMPR_VIRUS eval:check_rbl_sub('ahbl', '127.0.0.18')
+describe T_RCVD_IN_AHBL_CMPR_VIRUS AHBL: Compromised System - Other virus (dnsbl.ahbl.org)
+tflags T_RCVD_IN_AHBL_CMPR_VIRUS net
+
+header T_RCVD_IN_AHBL_OTHER eval:check_rbl_sub('ahbl', '127.0.0.127')
+describe T_RCVD_IN_AHBL_OTHER AHBL: Other (dnsbl.ahbl.org)
+tflags T_RCVD_IN_AHBL_OTHER net
 
 header T_RCVD_IN_AHBL_EXEMPT_T	eval:check_rbl('ahbl-ex-firsttrusted', 'exemptions.ahbl.org.')
 describe T_RCVD_IN_AHBL_EXEMPT_T AHBL: Sender is in Exempt zone (trusted)
