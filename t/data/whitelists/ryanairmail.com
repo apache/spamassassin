@@ -1,14 +1,14 @@
 From webster@ryanairmail.com  Fri Aug 16 12:59:01 2002
 Return-Path: <webster@ryanairmail.com>
-Delivered-To: jm@localhost.netnoteinc.com
+Delivered-To: zzzz@localhost.foofoofoofoo.com
 Received: from localhost (localhost [127.0.0.1])
-	by phobos.labs.netnoteinc.com (Postfix) with ESMTP id E163743C32
-	for <jm@localhost>; Fri, 16 Aug 2002 07:58:59 -0400 (EDT)
+	by phobos.labs.foofoofoofoo.com (Postfix) with ESMTP id E163743C32
+	for <zzzz@localhost>; Fri, 16 Aug 2002 07:58:59 -0400 (EDT)
 Received: from phobos [127.0.0.1]
 	by localhost with IMAP (fetchmail-5.9.0)
-	for jm@localhost (single-drop); Fri, 16 Aug 2002 12:58:59 +0100 (IST)
+	for zzzz@localhost (single-drop); Fri, 16 Aug 2002 12:58:59 +0100 (IST)
 Received: from mail.ryanair2.ie ([193.120.152.8]) by dogma.slashnull.org
-    (8.11.6/8.11.6) with SMTP id g7GBwca16137 for <jm-ryanair@jmason.org>;
+    (8.11.6/8.11.6) with SMTP id g7GBwca16137 for <xxxxx@yyyyyy.zzz>;
     Fri, 16 Aug 2002 12:58:38 +0100
 From: webster@ryanairmail.com
 To: "Customers" <customers@mail.ryanairmail.com>
@@ -16,21 +16,14 @@ Subject: Incredible Autumn Fares
 Date: Fri, 16 Aug 2002 08:41:00 +0100
 X-Assembled-BY: XWall v3.21
 X-Mailer: MailBeamer v3.28
-Message-Id: <LISTMANAGER-949326-16680-2002.08.16-08.51.02--jm-ryanair#jmason.org@mail.ryanairmail.com>
+Message-Id: <LISTMANAGER-123546-16680-2002.08.16-08.51.02--xxxxx@yyyyyy.zzz@mail.ryanairmail.com>
 MIME-Version: 1.0
 Content-Type: text/plain; charset="iso-8859-1"
-List-Unsubscribe: <mailto:leave-customers-949326K@mail.ryanairmail.com>
+List-Unsubscribe: <mailto:leave-customers-123546K@mail.ryanairmail.com>
 Reply-To: webster@ryanairmail.com
 Content-Transfer-Encoding: 8bit
 X-MIME-Autoconverted: from quoted-printable to 8bit by dogma.slashnull.org
     id g7GBwca16137
-X-Pyzor: Reported 0 times.
-X-Spam-Status: No, hits=4.9 required=7.0
-	tests=DATE_IN_PAST_03_06,DISCLAIMER,EXCUSE_16,NO_REAL_NAME,
-	      SPAM_PHRASE_02_03,SUSPECT_LIST_HEADERS,TO_BE_REMOVED_REPLY,
-	      TO_LOCALPART_EQ_REAL
-	version=2.40
-X-Spam-Level: ****
 
 Massive seat sale this weekend on Ryanair.com
 Fares from £ 6.25 one way including taxes
@@ -167,6 +160,6 @@ or contact Ryanair Holdings plc, Dublin Airport, Co Dublin, Ireland.
 
 
 ---
-You are currently subscribed to customers as: jm-ryanair@jmason.org
-To unsubscribe send a blank email to leave-customers-949326K@mail.ryanairmail.com
+You are currently subscribed to customers as: xxxxx@yyyyyy.zzz
+To unsubscribe send a blank email to leave-customers-123546K@mail.ryanairmail.com
 

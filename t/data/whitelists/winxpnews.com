@@ -1,12 +1,12 @@
-Received: from timhunt.net (ns1.timhunt.net [216.27.147.130])
+Received: from ooooooooo.net (ns1.ooooooooo.net [216.27.147.130])
 	by dogma.slashnull.org (8.11.6/8.11.6) with ESMTP id g6J6AZJ25232
-	for <tim_timhunt_net@spamtraps.taint.org>; Fri, 19 Jul 2002 07:10:35 +0100
+	for <aaaaaa@yyyyyy.zzz>; Fri, 19 Jul 2002 07:10:35 +0100
 Received: from bounce.winxpnews.com (dal21037lyr001.datareturn.com [216.46.238.20])
-	by timhunt.net (8.11.3/8.11.1) with SMTP id g6J6ABS16827
-	for <cncnvc@fsg.com>; Fri, 19 Jul 2002 02:10:12 -0400 (EDT)
+	by ooooooooo.net (8.11.3/8.11.1) with SMTP id g6J6ABS16827
+	for <zzzz@zzzzzzzz.com>; Fri, 19 Jul 2002 02:10:12 -0400 (EDT)
 	(envelope-from do_not_reply@bounce.winxpnews.com)
 Importance: Normal
-To: cncnvc@fsg.com
+To: zzzz@zzzzzzzz.com
 Reply-To: "WinXPnews"<do_not_reply@bounce.winxpnews.com>
 Content-Type: text/html;
 	 charset="us-ascii"
@@ -25,7 +25,7 @@ X-MSMail-Priority: Normal
  
                  Please read the following instructions!
  
-  This is a posting from WinXPnews for cncnvc@fsg.com
+  This is a posting from WinXPnews for zzzz@zzzzzzzz.com
   To manage your profile, click on the following customized link:
  
          http://www.winxpnews.com/login.cfm?id=9665862091709486
@@ -65,8 +65,8 @@ Feel free to forward this newsletter to other WinXP enthusiasts.</b><br>
 <a href="http://www.winxpnews.com/?id=33">
 http://www.winxpnews.com/?id=33</a><br>
 For a quick unsubscribe (gasp!) click here:<br>
-<a href="http://www.winxpnews.com/unsubscribe.cfm?email=cncnvc@fsg.com">
-http://www.winxpnews.com/unsubscribe.cfm?email=cncnvc@fsg.com</a></b>
+<a href="http://www.winxpnews.com/unsubscribe.cfm?email=zzzz@zzzzzzzz.com">
+http://www.winxpnews.com/unsubscribe.cfm?email=zzzz@zzzzzzzz.com</a></b>
 </font>
 <img src='http://www.winxpnews.com/tr/tr.cfm?mid=9665862091709486&xid=33'
 width='0' height='0' border='0'>
@@ -97,7 +97,7 @@ width='0' height='0' border='0'>
 <font face='verdana, sans-serif' size='2'>
 <ol>
 <li>EDITOR'S CORNER
-<code1=cncnvc>
+<code1=zzzz@zzzzzzzz.c
 <ul type='square'>
 <li>How to Publish Your Windows XP FTP Server to the Internet
 </ul>
@@ -511,14 +511,14 @@ About Your Subscription to WinXPnews&#153;</b></font>
 <tr>
 <td>
 <font size="2" face="arial, verdana, sans-serif">
-This is a posting from WinXPnews. You are subscribed as cncnvc@fsg.com
+This is a posting from WinXPnews. You are subscribed as zzzz@zzzzzzzz.com
 <p>
 To manage your profile, please visit our site by clicking on the following link:<br>
 <a href="http://www.winxpnews.com/login.cfm?id=9665862091709486">
 http://www.winxpnews.com/login.cfm?id=9665862091709486</a><br>
 For a quick unsubscribe (gasp!), click here:<br>
-<a href="http://www.winxpnews.com/unsubscribe.cfm?email=cncnvc@fsg.com">
-http://www.winxpnews.com/unsubscribe.cfm?email=cncnvc@fsg.com</a>
+<a href="http://www.winxpnews.com/unsubscribe.cfm?email=zzzz@zzzzzzzz.com">
+http://www.winxpnews.com/unsubscribe.cfm?email=zzzz@zzzzzzzz.com</a>
 </font>
 </td>
 </tr>
