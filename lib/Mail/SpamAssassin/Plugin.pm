@@ -477,7 +477,9 @@ Note that eval rules are passed the following arguments:
 
 =item The C<Mail::SpamAssassin::PerMsgStatus> object calling the rule
 
-=item any and all arguments specified in the configuration file
+=item standard arguments for the rule type in use
+
+=item any and all arguments as specified in the configuration file
 
 =back
 
@@ -500,6 +502,26 @@ is not hit.
 State for a single message being scanned should be stored on the C<$checker>
 object, not on the C<$self> object, since C<$self> persists between scan
 operations.  See the 'lifecycle note' on the C<check_start()> method above.
+
+=head2 STANDARD ARGUMENTS FOR RULE TYPES
+
+Plugins will be called with the same arguments as a standard EvalTest.
+Different rule types receive different information by default:
+
+=over 4
+
+=item header tests, no extra arguments
+
+=item body tests, fully rendered message as array reference
+
+=item rawbody tests, fully decoded message as array reference
+
+=item full tests, pristine message as scalar reference
+
+=back
+
+The configuration file arguments will be passed in after the standard
+arguments.
 
 =cut
 
