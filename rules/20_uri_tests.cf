@@ -1,7 +1,7 @@
 # URI tests
-# $Id: 20_uri_tests.cf,v 1.22.2.4 2002/08/29 17:07:10 jmason Exp $
+# $Id: 20_uri_tests.cf,v 1.22.2.5 2002/09/02 21:34:48 jmason Exp $
 
-require_version 2.40
+require_version 2.41
 
 uri NUMERIC_HTTP_ADDR   /^https?\:\/\/\d{7,}/is
 describe NUMERIC_HTTP_ADDR  Uses a numeric IP address in URL

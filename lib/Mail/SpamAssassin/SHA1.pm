@@ -71,7 +71,7 @@ do {
   $_ = substr $data, $l, 64;
   $l += ($r = length);
   $r++, $_.="\x80" if ($r<64 && !$p++);	# handle padding, but once only ($p)
-  @W = unpack N16, $_."\0"x7;		# unpack block into array of 16 ints
+  @W = unpack "N16", $_."\0"x7;		# unpack block into array of 16 ints
   $W[15] = $l*8 if ($r<57);		# bit length of file in final block
 
 	# initialize working vars from the accumulators

@@ -1,12 +1,12 @@
 # SpamAssassin rules file: tests.
-# $Id: 20_body_tests.cf,v 1.237.2.6 2002/08/29 17:07:10 jmason Exp $
+# $Id: 20_body_tests.cf,v 1.237.2.7 2002/09/02 21:34:48 jmason Exp $
 # 
 # note: body tests are run with long lines, so be sure to limit the
 # size of searches; use ".{0,30}" instead of ".*" to avoid huge
 # search times.
 ###########################################################################
 
-require_version 2.40
+require_version 2.41
 
 full RAZOR_CHECK	eval:check_razor1()
 describe RAZOR_CHECK	Listed in Razor1, see http://razor.sf.net/
