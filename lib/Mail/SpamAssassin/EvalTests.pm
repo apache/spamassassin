@@ -300,7 +300,7 @@ sub check_for_forged_received_trail {
 
       # valid: bouncing around inside 1 machine, via the localhost interface.
       # freshmeat newsletter does this.
-      if ($from[$i] eq 'localhost.localdomain') {
+      if (defined ($from[$i]) && $from[$i] eq 'localhost.localdomain') {
         $from[$i] = undef;
       }
     }
