@@ -69,7 +69,7 @@ use vars	qw{
 @ISA = qw();
 
 $VERSION = "2.0";
-$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.57 2002/01/15 04:30:12 jmason Exp $';
+$SUB_VERSION = 'devel $Id: SpamAssassin.pm,v 1.58 2002/01/23 07:49:27 jmason Exp $';
 
 sub Version { $VERSION; }
 
@@ -520,12 +520,15 @@ sub init {
 
       # user prefs file
       $fname = $self->{userprefs_filename};
-      $fname ||= $self->first_existing_path (@default_userprefs_path);
 
-      if (defined $old_prefs_name && -f $old_prefs_name) {
-	dbg ("migrating $old_prefs_name to $fname");
-	rename ($old_prefs_name, $fname) or
-			warn "rename $old_prefs_name to $fname failed: $!\n";
+      if (!defined $fname) {
+        $fname ||= $self->first_existing_path (@default_userprefs_path);
+
+        if (defined $old_prefs_name && -f $old_prefs_name) {
+          dbg ("migrating $old_prefs_name to $fname");
+          rename ($old_prefs_name, $fname) or
+                        warn "rename $old_prefs_name to $fname failed: $!\n";
+        }
       }
 
       if (defined $fname) {
