@@ -68,6 +68,9 @@ body		URIBL_JP_SURBL	eval:check_uridnsbl('URIBL_JP_SURBL')
 describe	URIBL_JP_SURBL	Contains an URL listed in the JP SURBL blocklist
 tflags		URIBL_JP_SURBL	net
 
+# Don't bother looking for example.com -- it's an example.
+uridnsbl_skip_domain example.com
+
 # (roughly) top 200 domains not blacklisted by SURBL
 uridnsbl_skip_domain 126.com 163.com 2o7.net 4at1.com
 uridnsbl_skip_domain 5iantlavalamp.com about.com adelphia.net adobe.com
