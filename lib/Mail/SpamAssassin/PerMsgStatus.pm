@@ -107,6 +107,8 @@ sub check {
 
   $self->clean_spamassassin_headers();
   $self->{learned_hits} = 0;
+  $self->{body_only_hits} = 0;
+  $self->{head_only_hits} = 0;
   $self->{hits} = 0;
 
   {
@@ -241,12 +243,40 @@ sub learn {
   if (!$self->{conf}->{auto_learn}) { return; }
   if ($self->{disable_auto_learning}) { return; }
 
+  # require that hits be *both* above/below the auto_learn_threshold
+  # *and* above/below the required_hits threshold plus/minus a "safety"
+  # zone.
+  my $auto_learn_safety = 4;
+
+  dbg ("auto-learn? safety=+/-$auto_learn_safety, ".
+		"body-hits=".$self->{body_only_hits}.", ".
+		"head-hits=".$self->{head_only_hits});
+
   my $isspam;
-  if ($self->{hits} < $self->{conf}->{auto_learn_threshold_nonspam}) {
+  if (     $self->{hits} < $self->{conf}->{auto_learn_threshold_nonspam}
+	&& $self->{hits} < $self->{conf}->{required_hits} - $auto_learn_safety)
+  {
     $isspam = 0;
-  } elsif ($self->{hits} > $self->{conf}->{auto_learn_threshold_spam}) {
+  } elsif ($self->{hits} >= $self->{conf}->{auto_learn_threshold_spam}
+	&& $self->{hits} >= $self->{conf}->{required_hits} - $auto_learn_safety)
+  {
     $isspam = 1;
   } else {
+    dbg ("auto-learn? no: inside auto-learn thresholds or safety zone around required_hits");
+    return;
+  }
+
+  my $required_body_hits = 3;
+  my $required_head_hits = 3;
+
+  if ($self->{body_only_hits} < $required_body_hits) {
+    dbg ("auto-learn? no: too few body hits (".
+		$self->{body_only_hits}." < ".$required_body_hits.")");
+    return;
+  }
+  if ($self->{head_only_hits} < $required_head_hits) {
+    dbg ("auto-learn? no: too few head hits (".
+		$self->{head_only_hits}." < ".$required_head_hits.")");
     return;
   }
 
@@ -2024,8 +2054,15 @@ sub _handle_hit {
     # Bayesian auto-learning
     if ($tflags =~ /\b(?:learn|userconf)\b/i) {
       $self->{learned_hits} += $score;
+
     } else {
       $self->{hits} += $score;
+      if (!$self->{conf}->maybe_header_only ($rule)) {
+	$self->{body_only_hits} += $score;
+      }
+      if (!$self->{conf}->maybe_body_only ($rule)) {
+	$self->{head_only_hits} += $score;
+      }
     }
 
     push(@{$self->{test_names_hit}}, $rule);
@@ -2040,7 +2077,6 @@ sub _handle_hit {
 				       $area, $desc, $self->{test_log_msgs});
     }
 }
-
 
 sub handle_hit {
   my ($self, $rule, $area, $deffallbackdesc) = @_;
