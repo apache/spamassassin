@@ -624,6 +624,13 @@ sub rewrite_as_spam {
     Mail::SpamAssassin::Version() . " " .
     $Mail::SpamAssassin::SUB_VERSION . "\n";
 
+  # now add any test-specific markup headers (X-Pyzor etc.)
+  foreach my $hdr (keys %{$self->{headers_to_add}}) {
+    my $text = $self->{headers_to_add}->{$hdr};
+    chomp $text;		# just in case
+    $newmsg .= "$hdr: $text\n";
+  }
+
   # MIME boundary
   my $boundary = "----------=_" . sprintf("%08X.%08X",time,int(rand(2 ** 32)));
 
