@@ -23,6 +23,8 @@ use Sys::Hostname;
 use File::Spec;
 use Time::Local;
 
+use constant CAN_USE_SELECT_FOR_MS_SLEEP => 1;
+
 use constant RUNNING_ON_WINDOWS => ($^O =~ /^(?:mswin|dos|os2)/oi);
 
 ###########################################################################
@@ -40,7 +42,6 @@ sub safe_lock {
   my $lock_file = $path.'.lock';
   my $lock_tmp = $lock_file . '.' . $HOSTNAME . '.'. $$;
   my $max_lock_age = 300;	# seconds 
-  my $lock_tries = 30;
   my $is_locked = 0;
   my @s;
   $lock_tmp = untaint_file_path ($lock_tmp);
@@ -49,9 +50,9 @@ sub safe_lock {
 	  die "Cannot create tmp lockfile $lock_tmp for $lock_file: $!\n";
   dbg ("lock: created $lock_tmp");
 
-  my $old_fh = select(LTMP);
-  $|=1;
-  select($old_fh);
+  my $old_fh = select(LTMP); $|=1; select($old_fh);
+
+  my $lock_tries = 60;
 
   for (my $i = 0; $i < $lock_tries; $i++) {
     dbg("lock: $$ trying to get lock on $path pass $i");
@@ -61,27 +62,26 @@ sub safe_lock {
       dbg ("lock: link to $lock_file ok");
       $is_locked = 1;
       last;
-
-    } else {
-      #link _may_ return false even if the link _is_ created
-      if ( (stat($lock_tmp))[3] > 1 ) {
-        dbg ("lock: link to $lock_file: stat ok");
-        $is_locked = 1;
-        last;
-      }
-
-      #check to see how old the lockfile is
-      @s = stat($lock_file); my $lock_age = ($#s < 11 ? undef : $s[10]);
-      @s = stat($lock_tmp);  my $now = ($#s < 11 ? undef : $s[10]);
-
-      if (!defined($lock_age) || $lock_age < $now - $max_lock_age) {
-        #we got a stale lock, break it
-        dbg("lock: breaking stale lockfile: age=".(defined $lock_age?$lock_age:"undef")." now=$now");
-        unlink $lock_file;
-      }
-
-      sleep(1);
     }
+
+    #link _may_ return false even if the link _is_ created
+    if ( (stat($lock_tmp))[3] > 1 ) {
+      dbg ("lock: link to $lock_file: stat ok");
+      $is_locked = 1;
+      last;
+    }
+
+    #check to see how old the lockfile is
+    @s = stat($lock_file); my $lock_age = ($#s < 11 ? undef : $s[10]);
+    @s = stat($lock_tmp);  my $now = ($#s < 11 ? undef : $s[10]);
+
+    if (!defined($lock_age) || $lock_age < $now - $max_lock_age) {
+      #we got a stale lock, break it
+      dbg("lock: breaking stale lockfile: age=".(defined $lock_age?$lock_age:"undef")." now=$now");
+      unlink $lock_file;
+    }
+
+    sa_usleep (1.5 + (rand (2.0) - 1.0));
   }
 
   close(LTMP);
@@ -92,6 +92,15 @@ sub safe_lock {
     return $lock_file;
   } else {
     return undef;
+  }
+}
+
+sub sa_usleep {
+  my ($secs) = @_;	# can be a float
+  if (CAN_USE_SELECT_FOR_MS_SLEEP) {
+    select(undef, undef, undef, $secs);
+  } else {			# if win32 can't do that
+    sleep (int ($secs + 0.5));	# round up
   }
 }
 
