@@ -261,6 +261,8 @@ FIXBANG		= -Msharpbang \
 		  -DPERL_BIN="$(PERL_BIN)" \
 		  -DPERL_WARN="$(PERL_WARN)"
 
+SPAMC_SOURCES = spamd/spamc.c qmail/qmail-spamc.c spamd/libspamc.c spamd/utils.c
+
 # . ($mm_version < 5.45 ? q#
 pm_to_blib: $(TO_INST_PM)
 	@ $(PERL) "-I$(INST_ARCHLIB)" "-I$(INST_LIB)" \
@@ -292,25 +294,25 @@ spamd/spamd: spamd/spamd.raw
 	$(PERL) build/preprocessor $(FIXBYTES) $(FIXVARS) $(FIXBANG) -i$? -o$@
 	$(CHMOD) $(PERM_RWX) $@
 
-spamd/libspamc.so: binaries.mk
+spamd/libspamc.so: binaries.mk $(SPAMC_SOURCES)
 	$(MAKE) -f binaries.mk $@
 
-spamd/libspamc.dll: binaries.mk
+spamd/libspamc.dll: binaries.mk $(SPAMC_SOURCES)
 	$(MAKE) -f binaries.mk $@
 
-spamd/spamc$(EXE_EXT): binaries.mk
+spamd/spamc$(EXE_EXT): binaries.mk $(SPAMC_SOURCES)
 	$(MAKE) -f binaries.mk $@
 
-spamd/libsslspamc.so: binaries.mk
+spamd/libsslspamc.so: binaries.mk $(SPAMC_SOURCES)
 	$(MAKE) -f binaries.mk $@
 
-spamd/libsslspamc.dll: binaries.mk
+spamd/libsslspamc.dll: binaries.mk $(SPAMC_SOURCES)
 	$(MAKE) -f binaries.mk $@
 
-spamd/sslspamc$(EXE_EXT): binaries.mk
+spamd/sslspamc$(EXE_EXT): binaries.mk $(SPAMC_SOURCES)
 	$(MAKE) -f binaries.mk $@
 
-qmail/qmail-spamc: binaries.mk
+qmail/qmail-spamc: binaries.mk $(SPAMC_SOURCES)
 	$(MAKE) -f binaries.mk $@
 
 binaries.mk: configure
