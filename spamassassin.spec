@@ -153,8 +153,11 @@ mkdir -p %{buildroot}/etc/mail/spamassassin
 
 %post
 /sbin/chkconfig --add spamassassin
+
+# older versions used /etc/sysconfig/spamd whereas it should have been
+# spamassassin, so fix it here
 if [ -f /etc/sysconfig/spamd ]; then
-  %{__sed} -e 's/^OPTIONS=/SPAMDOPTIONS=/' /etc/sysconfig/spamassassin > /etc/sysconfig/spamassassin
+  %{__sed} -e 's/^OPTIONS=/SPAMDOPTIONS=/' /etc/sysconfig/spamd > /etc/sysconfig/spamassassin
   %{__mv} /etc/sysconfig/spamd /etc/sysconfig/spamassassin.rpmold
 fi
 /sbin/service spamassassin condrestart
