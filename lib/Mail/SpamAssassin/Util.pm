@@ -85,7 +85,7 @@ sub am_running_in_taint_mode {
   
   my $blank = substr ($ENV{PATH}, 0, 0);
   $AM_TAINTED = not eval { eval "1 || $blank" || 1 };
-  dbg ("running in taint mode? $AM_TAINTED");
+  dbg ("running in taint mode? ".(defined($AM_TAINTED)?"yes":"no"));
   return $AM_TAINTED;
 }
 
