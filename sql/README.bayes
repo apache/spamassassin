@@ -64,6 +64,10 @@ perl v5.8.0
 But older versions should work fine as the SQL code in SpamAssassin is as 
 simple as could be.
 
+NOTE: Some users have reported problems using DBD::Pg v1.22. There appears
+to be a bug in how parameters are quoted in that version, we recommend you
+upgrade to at least v1.31.
+
 Database Schema
 ---------------
 
