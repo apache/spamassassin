@@ -166,6 +166,13 @@ sub tie_db_readonly {
 
 failed_to_tie:
   warn "Cannot open bayes databases ${path}_* R/O: tie failed: $!\n";
+  foreach my $dbname (@DBNAMES) {
+    my $db_var = 'db_'.$dbname;
+    next unless exists $self->{$db_var};
+    dbg("bayes: $$ untie-ing DB file $dbname");
+    untie %{$self->{$db_var}};
+  }
+
   return 0;
 }
 
@@ -259,6 +266,14 @@ sub tie_db_writable {
 failed_to_tie:
   my $err = $!;
   umask $umask;
+
+  foreach my $dbname (@DBNAMES) {
+    my $db_var = 'db_'.$dbname;
+    next unless exists $self->{$db_var};
+    dbg("bayes: $$ untie-ing DB file $dbname");
+    untie %{$self->{$db_var}};
+  }       
+
   if ($self->{is_locked}) {
     $self->{bayes}->{main}->{locker}->safe_unlock ($self->{locked_file});
     $self->{is_locked} = 0;

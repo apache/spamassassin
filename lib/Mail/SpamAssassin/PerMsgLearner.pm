@@ -174,6 +174,7 @@ sub finish {
   delete $self->{main};
   delete $self->{msg};
   delete $self->{conf};
+  delete $self->{bayes_scanner};
 }
 
 ###########################################################################
