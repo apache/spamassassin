@@ -199,6 +199,13 @@ if ( $opt{'remove-from-whitelist'}
   $spamtest->init(1);
 }
 
+# if we're doing things in test mode, force disable long-term memory
+# functions like autowhitelist and bayes autolearn.
+if ($opt{'test-mode'}) {
+  $spamtest->{'conf'}->{'use_auto_whitelist'} = 0;
+  $spamtest->{'conf'}->{'bayes_auto_learn'} = 0;
+}
+
 ###########################################################################
 
 # Everything below here needs ArchiveIterator ...
