@@ -2577,11 +2577,12 @@ sub check_pyzor {
 
 sub check_dcc {
   my ($self, $fulltext) = @_;
+  my $have_dccifd = $self->is_dccifd_available();
 
-  return 0 unless ($self->is_dcc_available());
+  return 0 unless ($have_dccifd || $self->is_dcc_available() );
   return 0 if ($self->{already_checked_dcc});
 
-   $self->{already_checked_dcc} = 1;
+  $self->{already_checked_dcc} = 1;
 
   # First check if there's already a X-DCC header with value of "bulk"
   # and short-circuit if there is -- someone upstream might already have
@@ -2593,7 +2594,11 @@ sub check_dcc {
   # unfiltered, for DCC to check.  ($fulltext removes MIME
   # parts etc.)
   my $full = $self->{msg}->get_pristine();
-  return $self->dcc_lookup (\$full);
+  if ( $have_dccifd ) {
+    return $self->dccifd_lookup (\$full);
+  } else {
+    return $self->dcc_lookup (\$full);
+  }
 }
 
 ###########################################################################

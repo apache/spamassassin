@@ -2063,6 +2063,32 @@ use this, as the current PATH will have been cleared.
       $self->{pyzor_path} = $1; next;
     }
 
+=item dcc_home STRING
+
+This option tells SpamAssassin specifically where to find the dcc homedir.
+If C<dcc_path> is not specified, it will default to looking in C<dcc_home/bin>
+for dcc client instead of relying on SpamAssassin to find it in the current PATH.
+If it isn't found there, it will look in the current PATH. If a C<dccifd> socket
+is found in C<dcc_home>, it will use that interface that instead of C<dccproc>.
+
+=cut
+
+    if (/^dcc[-_]home\s+(.+)$/) {
+      $self->{dcc_home} = $1; next;
+    }
+
+=item dcc_dccifd_path STRING
+
+This option tells SpamAssassin specifically where to find the dccifd socket.
+If C<dcc_dccifd_path> is not specified, it will default to looking in C<dcc_home>
+If a C<dccifd> socket is found, it will use it instead of C<dccproc>.
+
+=cut
+
+    if (/^dcc[-_]dccifd[-_]path\s+(.+)$/) {
+      $self->{dcc_dccifd_path} = $1; next;
+    }
+
 =item dcc_path STRING
 
 This option tells SpamAssassin specifically where to find the C<dccproc>

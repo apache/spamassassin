@@ -124,6 +124,9 @@ BEGIN {
   eval {
     require MIME::Base64;
   };
+  eval {
+	require IO::Socket::UNIX;
+  };
 };
 
 ###########################################################################
@@ -491,6 +494,31 @@ sub razor2_lookup {
 
 ###########################################################################
 
+sub is_dccifd_available {
+  my ($self) = @_;
+
+  if ($self->{main}->{local_tests_only}) {
+    dbg ("local tests only, ignoring DCCifd");
+    return 0;
+  }
+
+  my $dcchome = $self->{conf}->{dcc_home};
+  my $dccifd_path = $self->{conf}->{dcc_dccifd_path};
+
+  if ( !$dccifd_path && $dcchome && -S "$dcchome/dccifd" && -w _ && -r _ ) {
+    $dccifd_path = "$dcchome/dccifd";
+    $self->{conf}->{dcc_dccifd_path} = $dccifd_path;
+  }
+
+  unless ( $dccifd_path && -S "$dccifd_path" && -w _ && -r _ ) {
+    dbg ("DCCifd is not available.");
+    return 0;
+  }
+
+  dbg ("DCCifd is available: $dccifd_path");
+  return 1;
+}
+
 sub is_dcc_available {
   my ($self) = @_;
 
@@ -500,7 +528,13 @@ sub is_dcc_available {
   }
   if (!$self->{conf}->{use_dcc}) { return 0; }
 
+  my $dcchome = $self->{conf}->{dcc_home};
   my $dccproc = $self->{conf}->{dcc_path} || '';
+
+  if ( $dcchome && !$dccproc && -x "$dcchome/bin/dccproc" ) {
+	$dccproc = "$dcchome/bin/dccproc";
+  }
+
   unless ($dccproc) {
     $dccproc = Mail::SpamAssassin::Util::find_executable_in_env_path('dccproc');
     if ($dccproc) { $self->{conf}->{dcc_path} = $dccproc; }
@@ -512,6 +546,122 @@ sub is_dcc_available {
 
   dbg ("DCC is available: ".$self->{conf}->{dcc_path});
   return 1;
+}
+
+sub dccifd_lookup {
+  my ($self, $fulltext) = @_;
+  my $response = "";
+  my %count;
+  my $left;
+  my $right;
+  my $timeout=$self->{conf}->{dcc_timeout};
+  my $sockpath;
+
+  $count{body} = 0;
+  $count{fuz1} = 0;
+  $count{fuz2} = 0;
+
+  if ($self->{main}->{local_tests_only}) {
+    dbg ("local tests only, ignoring DCCifd");
+    return 0;
+  }
+
+  if ( ! $self->{conf}->{dcc_home} ) {
+	dbg ("dcc_home not defined, should not get here");
+    return 0;
+  }
+
+  $sockpath = $self->{conf}->{dcc_dccifd_path};
+  if ( ! -S $sockpath || ! -w _ || ! -r _ ) {
+	dbg ("dccifd not a socket, should not get here");
+    return 0;
+  }
+
+  timelog("DCCifd -> Starting test ($timeout secs max)", "dcc", 1);
+  $self->enter_helper_run_mode();
+
+  eval {
+    local $SIG{ALRM} = sub { die "alarm\n" };
+
+    alarm($timeout);
+
+    my $sock = IO::Socket::UNIX->new(Type => SOCK_STREAM,
+      Peer => $sockpath) || dbg("failed to open socket") && die;
+
+    # send the options and other parameters to the daemon
+    $sock->print("header\n") || dbg("failed write") && die; # options
+    $sock->print("0.0.0.0\n") || dbg("failed write") && die; #client
+    $sock->print("\n") || dbg("failed write") && die; #HELO value
+    $sock->print("\n") || dbg("failed write") && die; #sender
+    $sock->print("\r\n") || dbg("failed write") && die; # recipients
+    $sock->print("\n") || dbg("failed write") && die; # recipients
+
+    $sock->print($$fulltext);
+
+    $sock->shutdown(1) || dbg("failed socket shutdown: $!") && die;
+	
+    $sock->getline() || dbg("failed read status") && die;
+    $sock->getline() || dbg("failed read multistatus") && die;
+
+    $response = $sock->getline() || dbg("failed read header") && die;
+    chomp($response);
+	
+    my @null = $sock->getlines(); # flush rest of output if any
+
+    dbg("DCCifd: got response: $response");
+  };
+  alarm(0); # if we die'd above, need to reset here
+
+  $self->leave_helper_run_mode();
+
+  if ($@) {
+    $response = undef;
+    if ($@ =~ /alarm/) {
+      dbg ("DCCifd check timed out after $timeout secs.");
+      timelog("DCCifd -> interrupted after $timeout secs", "dcc", 2);
+      return 0;
+    } else {
+      warn ("DCCifd -> check skipped: $! $@");
+      timelog("dcc check skipped", "dcc", 2);
+      return 0;
+    }
+  }
+
+  if (!defined $response || $response !~ /^X-DCC/) {
+    dbg ("DCCifd -> check failed - no X-DCC returned: $response");
+    timelog("dcc check failed", "dcc", 2);
+    return 0;
+  }
+
+  if ($self->{conf}->{dcc_add_header}) {
+    if ($response =~ /^(X-DCC.*): (.*)$/) {
+      $left  = $1;
+      $right = $2;
+      $self->{headers_to_add}->{$left} = $right;
+    }
+  }
+ 
+  $response =~ s/many/999999/ig;
+  $response =~ s/ok\d?/0/ig;
+
+  if ($response =~ /Body=(\d+)/) {
+    $count{body} = $1+0;
+  }
+  if ($response =~ /Fuz1=(\d+)/) {
+    $count{fuz1} = $1+0;
+  }
+  if ($response =~ /Fuz2=(\d+)/) {
+    $count{fuz2} = $1+0;
+  }
+
+  if ($count{body} >= $self->{conf}->{dcc_body_max} || $count{fuz1} >= $self->{conf}->{dcc_fuz1_max} || $count{fuz2} >= $self->{conf}->{dcc_fuz2_max}) {
+    dbg ("DCCifd: Listed! BODY: $count{body} of $self->{conf}->{dcc_body_max} FUZ1: $count{fuz1} of $self->{conf}->{dcc_fuz1_max} FUZ2: $count{fuz2} of $self->{conf}->{dcc_fuz2_max}");
+    timelog("DCCifd -> got hit", "dcc", 2);
+    return 1;
+  }
+  
+  timelog("DCCifd -> no match", "dcc", 2);
+  return 0;
 }
 
 sub dcc_lookup {
