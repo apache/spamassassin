@@ -564,3 +564,456 @@ score BAYES_70 0.001 0.001 2.637 2.188
 score BAYES_80 0.001 0.001 4.300 2.807
 score BAYES_90 0.001 0.001 4.126 2.854
 score BAYES_99 0.001 0.001 4.300 2.791
+
+#header   APPROVED_BY            exists:Approved-By
+#describe APPROVED_BY            Has an Approved-By moderated list header
+#tflags APPROVED_BY		nice
+#score APPROVED_BY -1.434 -0.534 -0.344 -0.275
+
+# This is a Bugzilla bug status report e-mail and probably OK
+#header BUGZILLA_BUG             eval:message_from_bugzilla()
+#describe BUGZILLA_BUG           Looks like a Bugzilla bug
+#tflags BUGZILLA_BUG		nice
+#lang fr describe BUGZILLA_BUG		L'entête Subject ressemble à un bug publié dans Bugzilla
+#lang it describe BUGZILLA_BUG		Sembrerebbe un bug di Bugzilla
+#score BUGZILLA_BUG -6.400 -6.300 -2.900 -6.300
+
+#header CRON_ENV                 exists:X-Cron-Env
+#describe CRON_ENV		Has a X-Cron-Env header
+#tflags CRON_ENV                 nice
+#score CRON_ENV -6.400 -6.300 -5.701 -5.701
+
+#header DEBIAN_BTS_BUG           eval:message_from_debian_bts()
+#describe DEBIAN_BTS_BUG         Looks like a Debian BTS bug
+#tflags DEBIAN_BTS_BUG		nice
+#score DEBIAN_BTS_BUG -5.701 -5.801 0 -2.900
+
+#body DISCLAIMER_LEGALESE        /This e?-?mail.{1,20}confidential.{1,20}legally privileged/i
+#describe DISCLAIMER_LEGALESE    Contains what looks like an 'E-Mail Disclaimer'
+#tflags DISCLAIMER_LEGALESE	nice
+#score DISCLAIMER_LEGALESE 0 0 -2.601 0
+
+# The regexp begins with "(?:\"|--- )?" because, in addition to
+# possibly begining with a double quote, it might also begin with
+# "--- ", which is used by the Yahoo! groups web form when
+# doing attribution.
+#
+# The regexp ends with "\s*(?:$|>)" rather than "$" because, by
+# the time the "body" tests are done, this:
+#
+#   foo@bar.com writes:
+#   > blah blah blah
+#
+# becomes
+#
+#   foo@bar.com writes: > blah blah blah
+#
+#body EMAIL_ATTRIBUTION          /^(?:\"|--- )?\w.{4,80} (?:wrote|writes):\s*(?:$|>)/
+#describe EMAIL_ATTRIBUTION	Contains what looks like an email attribution
+#tflags EMAIL_ATTRIBUTION	nice
+#score EMAIL_ATTRIBUTION -6.600 -6.500 -6.500 -6.500
+#test EMAIL_ATTRIBUTION ok At 15:43 2/26/2002 +0000, Rich Webster wrote:
+#test EMAIL_ATTRIBUTION ok On Tue, 2001-12-04 at 04:45, Matthew Cline wrote:
+#test EMAIL_ATTRIBUTION ok foo@bar.com writes:
+#test EMAIL_ATTRIBUTION ok --- In FruityGroup@y..., hopefuldreamer13@a... wrote:
+#test EMAIL_ATTRIBUTION fail foo@bar.com writed:
+#test EMAIL_ATTRIBUTION fail wrote:
+
+#header __EVITE_CTYPE		Content-Type =~ /(?:multipart\/alternative|text\/(?:plain|html));/
+#header __EVITE_RCVD		Received =~ /\b(?:evite|evt\S*\.citysearch)\.com/
+#uri __EVITE_URI			/\bevite(?:\.citysearch)?\.com\/.*iid=[A-Z]{20}/
+#meta EVITE			((__EVITE_RCVD && __EVITE_URI) || (__EVITE_CTYPE && (__EVITE_RCVD || __EVITE_URI)))
+#describe EVITE			Message looks like an Evite
+#tflags EVITE			nice
+#lang fr describe EVITE			Contient une référence à evite.citysearch.com
+#lang it describe EVITE			Contiene un riferimento a 'evite.citysearch.com'
+# Message from evite.com
+#score EVITE -2.900 -0.488 -2.696 -2.796
+
+#header   FAILURE_NOTICE_1       Subject =~ /^(?:failure notice|returned mail:|Delivery Status Notification|Undeliverable:)/i
+#describe FAILURE_NOTICE_1       Mailer daemon failure notice (1)
+#tflags   FAILURE_NOTICE_1       nice
+#score FAILURE_NOTICE_1 0 -0.018 0 0
+
+#body     FAILURE_NOTICE_2       /\b(?:Delivery to the following recipients failed|This Message was undeliverable|The following addresses had permanent fatal errors|did not reach the following recipient)\b/i
+#describe FAILURE_NOTICE_2       Mailer daemon failure notice (2)
+#tflags   FAILURE_NOTICE_2       nice
+#score FAILURE_NOTICE_2 0 -1.559 0 0
+
+# spamassassin@davidgreenaway.com (David Greenaway)
+#body     FORGOTTEN_PASSWORD     /[fF]org[oe]t.{0,25}[pP]assword/
+#describe FORGOTTEN_PASSWORD     Contains a password retrieval system
+#tflags   FORGOTTEN_PASSWORD     nice
+#score FORGOTTEN_PASSWORD -0.620 -0.981 -0.217 -0.563
+
+#header FROM_EGROUPS             X-eGroups-Return =~ /^sentto-.*\@returns\.groups\.yahoo\.com$/
+#describe FROM_EGROUPS           Appears to be from yahoo groups
+#tflags FROM_EGROUPS		nice
+#score FROM_EGROUPS -0.614 -3.100 -0.600 -0.600
+#test FROM_EGROUPS  ok           sentto-2537484-52529-1020428367-Sxm=olswang.com@returns.groups.yahoo.com
+#test FROM_EGROUPS  fail         spammer@returns.groups.yahoo.com
+
+#header FWD_MSG                  Subject =~ /Fwd:\s/
+#describe FWD_MSG                Forwarded email
+#tflags FWD_MSG                  nice
+#test FWD_MSG ok Subject: Fwd: Dracula
+#test FWD_MSG ok Subject: [landho] Fwd: tell rod
+#test FWD_MSG fail Subject: Fwd:Pure Opt-In for half the price
+#test FWD_MSG fail Subject: Re: RE: FWD: search results        .       .       .
+#score FWD_MSG 0 -0.145 0 0
+
+#header GENUINE_EBAY_RCVD        eval:check_for_from_domain_in_received_headers('ebay.com', 'true')
+#describe GENUINE_EBAY_RCVD      Message from eBay
+#tflags GENUINE_EBAY_RCVD	nice
+#score GENUINE_EBAY_RCVD -2.600 -2.900 -1.401 -2.900
+
+#body GROUPS_YAHOO_1             /^Your use of Yahoo! Groups is subject to http:\/\/\Qdocs.yahoo.com\E\/info\/terms\//
+#describe GROUPS_YAHOO_1         Yahoo! Groups message
+#tflags GROUPS_YAHOO_1		nice
+#score GROUPS_YAHOO_1 -5.801
+
+# Till now no spammer told me where he's working at :o)
+#   -- Malte
+# freqs:  2.273    0.383    3.416    0.10    1.00  HAS_ORGANIZATION
+#header HAS_ORGANIZATION         exists:Organization
+#describe HAS_ORGANIZATION       Where are you working at?
+#tflags HAS_ORGANIZATION         nice
+
+#body HOTMAIL_FOOTER1             /Send and receive Hotmail on your mobile device\b/
+#describe HOTMAIL_FOOTER1        Common footer for Hotmail
+#tflags HOTMAIL_FOOTER1		nice
+#score HOTMAIL_FOOTER1 0 0 0 -1.401
+
+#body HOTMAIL_FOOTER2            /Get your FREE download of MSN Explorer at\b/
+#describe HOTMAIL_FOOTER2        Common footer for Hotmail
+#tflags HOTMAIL_FOOTER2		nice
+
+#body HOTMAIL_FOOTER3            /Get Your Private, Free E-mail from MSN Hotmail at http:\/\/www\.hotmail\.com\./
+#describe HOTMAIL_FOOTER3        Common footer for Hotmail
+#tflags HOTMAIL_FOOTER3		nice
+
+#body HOTMAIL_FOOTER4            /Join the world's largest e-mail service with MSN Hotmail\./
+#describe HOTMAIL_FOOTER4        Common footer for Hotmail
+#tflags HOTMAIL_FOOTER4          nice
+#score HOTMAIL_FOOTER4 -2.900 -2.900 0 0
+
+#body HOTMAIL_FOOTER5            /Chat with friends online, try MSN Messenger\b/
+#describe HOTMAIL_FOOTER5        Common footer for Hotmail
+#tflags HOTMAIL_FOOTER5		nice
+#score HOTMAIL_FOOTER5 -0.122 0 0 0
+
+#body HTML_COMMENT_EGP		eval:html_test('comment_egp')
+#describe HTML_COMMENT_EGP	HTML comment contains non-spam Yahoo! Groups banner
+#tflags HTML_COMMENT_EGP		nice
+
+#header IN_REP_TO                exists:In-Reply-To
+#describe IN_REP_TO		Has a In-Reply-To header
+#tflags IN_REP_TO                nice
+#lang de describe IN_REP_TO                'In-Reply-To' Zeile gefunden
+#lang fr describe IN_REP_TO      Contient l'entête In-Reply-To:
+#lang it describe IN_REP_TO      Presente l'header In-Reply-To:
+#score IN_REP_TO -3.300 -3.301 -0.600 -3.201
+
+# came from a known mailing list system -- but one which does *not* have
+# built-in (or working!) spam filtering.
+#header   KNOWN_MAILING_LIST     eval:detect_mailing_list()
+#describe KNOWN_MAILING_LIST     Email came from some known mailing list software
+#tflags KNOWN_MAILING_LIST	nice
+#score KNOWN_MAILING_LIST -0.600 -0.912 -0.017 -0.601
+
+#header MAILER_DAEMON            From =~ /^(?:Mail Delivery \w+ )?<?mailer.?daemon\@\S+>?(?: \(Mail Delivery \w+\))?$/i
+#describe MAILER_DAEMON          From the Mailer-Daemon
+#tflags MAILER_DAEMON            nice
+#score MAILER_DAEMON -0.189 0 0 -2.596
+
+#body MAILMAN_CONFIRM            /^We have received a request from \S+ for subscription of your email address, \S+, to the \S+ mailing list\./
+#describe MAILMAN_CONFIRM        A MailMan confirm-your-address message
+#tflags MAILMAN_CONFIRM		nice
+
+# mailman list reminder mails are getting tagged in 2.41, adding a rule to check for these
+#header __FROM_MAILMAN_OWNER     From:addr =~ /^mailman-owner@/
+#header __SUBJECT_MAILMAN_REMIND Subject =~ /\bmailing list memberships reminder\b/
+#meta MAILMAN_REMINDER		(__FROM_MAILMAN_OWNER && __SUBJECT_MAILMAN_REMIND)
+#describe MAILMAN_REMINDER	Mail headers indicate a mailman membership reminder
+#tflags MAILMAN_REMINDER		nice
+#score MAILMAN_REMINDER -1.505 0 0 -2.900
+
+# give a negative score to Majordomo results.
+#header   MAJORDOMO              Subject =~ /Majordomo (?:request )?results/
+#describe MAJORDOMO              From Majordomo
+#tflags MAJORDOMO		nice
+#lang fr describe MAJORDOMO              L'entête Subject: semble venir du gestionaire de listes Majordomo
+#lang it describe MAJORDOMO             	Mail generata da Majordomo (gestore mailing-list)
+#score MAJORDOMO -2.900 0 -2.900 0
+
+#  3.351   0.0060   4.5117    0.001   0.97   -1.00  T_MSGID_GOOD_EXCHANGE
+#header MSGID_GOOD_EXCHANGE	Message-Id =~ /^<[A-Z]{28}\.\S+\@\S+>$/
+#describe MSGID_GOOD_EXCHANGE	Message-Id indicates the message was sent from MS Exchange
+#tflags MSGID_GOOD_EXCHANGE	nice
+#score MSGID_GOOD_EXCHANGE -5.801 -5.701 -5.701 -5.701
+
+# from Theo Van Dinter, see http://www.hughes-family.org/bugzilla/show_bug.cgi?id=591
+#body MSN_GROUPS                 eval:check_for_msn_groups_headers()
+#describe MSN_GROUPS             Came from MSN Communities
+#tflags MSN_GROUPS               nice
+
+#body MSN_FOOTER1                /MSN Photos is the easiest way to share and print your photos\b/
+#describe MSN_FOOTER1            Common footer for MSN
+#tflags MSN_FOOTER1		nice
+#score MSN_FOOTER1 0 0 0 -1.401
+
+#header __ORIG_MESSAGE_AGENT	X-Mailer =~ /\b(?:Microsoft Outlook|Internet Mail Service|Mozilla|AOL)\b/
+#rawbody __ORIG_MESSAGE_LINE	/^-{5,8} ?Original Message ?-{5,8}$/
+#meta ORIGINAL_MESSAGE		(__ORIG_MESSAGE_AGENT && __ORIG_MESSAGE_LINE)
+#describe ORIGINAL_MESSAGE	Looks like a reply to a message
+#tflags ORIGINAL_MESSAGE		nice
+#score ORIGINAL_MESSAGE -3.101 -3.101 -6.300 -6.300
+
+#rawbody PATCH_CONTEXT_DIFF	/^\*{3} \S+\s+.{10,}\b\d{2}:\d{2}:\d{2}\s/
+#describe PATCH_CONTEXT_DIFF	Contains what looks like a patch from diff -c
+#tflags PATCH_CONTEXT_DIFF	nice
+#score PATCH_CONTEXT_DIFF -2.900 -2.900 0 0
+
+#rawbody PATCH_UNIFIED_DIFF	/^\@\@ [-+0-9]+,[0-9]+ [-+0-9]+,[0-9]+ \@\@$/
+#describe PATCH_UNIFIED_DIFF	Contains what looks like a patch from diff -u
+#tflags PATCH_UNIFIED_DIFF	nice
+#score PATCH_UNIFIED_DIFF -6.027 -6.027 -2.900 -6.300
+
+#rawbody __PGP_BEGIN		/^-----BEGIN PGP SIGNATURE-----$/
+#rawbody __PGP_MIDDLE		/^[0-9A-Za-z+\/]{64}$/
+#rawbody __PGP_END		/^-----END PGP SIGNATURE-----$/
+#meta PGP_SIGNATURE		(__PGP_BEGIN && __PGP_MIDDLE && __PGP_END)
+#describe PGP_SIGNATURE		Contains a PGP-signed message
+#tflags PGP_SIGNATURE		nice
+#lang fr describe PGP_SIGNATURE  Contient un message avec une signature PGP
+#lang it describe PGP_SIGNATURE  Contiene un messaggio con firma PGP
+#score PGP_SIGNATURE -6.400 -6.300 -5.701 -5.701
+
+#header PGP_SIGNATURE_2		Content-Type =~ /protocol=.?application\/pgp-signature.?;/i
+#describe PGP_SIGNATURE_2	Contains a PGP-signed message (signature attached)
+#tflags PGP_SIGNATURE_2		nice
+#lang fr describe PGP_SIGNATURE_2       Contient une signature PGP attachée au message
+#lang it describe PGP_SIGNATURE_2       Contiene un messaggio con firma PGP
+#score PGP_SIGNATURE_2 -6.400 -6.300 -6.300 -6.300
+#test PGP_SIGNATURE_2 ok Content-Type: multipart/signed; micalg=pgp-sha1;protocol="application/pgp-signature"; boundary="n8g4imXOkfNTN/H1"
+#test PGP_SIGNATURE_2 fail Content-Type: text/plain; charset=us-ascii
+
+#rawbody QUOTED_EMAIL_TEXT       /^>+\s+.{60,72}$/
+#describe QUOTED_EMAIL_TEXT	Contains what looks like a quoted email text
+#tflags QUOTED_EMAIL_TEXT	nice
+#score QUOTED_EMAIL_TEXT -3.301 -3.201 -3.201 -3.201
+
+#body QUOTE_TWICE_1              /^> >\s/
+#describe QUOTE_TWICE_1          Contains twice quoted reply
+#tflags QUOTE_TWICE_1            nice
+#score QUOTE_TWICE_1 -0.600 -0.600 -0.601 -0.600
+
+# some non-spam rules from http://www.darkmere.gen.nz/2002/0628.html
+#header Q_FOR_SELLER             Subject =~ /Question.*(?:for|to|from eBay).*(?:seller|Member)/
+#describe Q_FOR_SELLER           Subject is an eBay question
+#tflags Q_FOR_SELLER		nice
+#lang de describe Q_FOR_SELLER             Betreff ist eine eBay Frage
+#lang fr describe Q_FOR_SELLER   L'entête Subject: est une question issue d'eBay
+#lang it describe Q_FOR_SELLER   Il soggetto contiene una domanda di eBay
+#score Q_FOR_SELLER -1.124 -0.176 -1.643 -2.275
+
+#header REFERENCES		References =~ /^(<(?:[a-zA-Z0-9.!\#\$%&'*\+\/=?\^_{}|~-]+|\".+\")\@(?:[a-zA-Z0-9.-]+|\[\d{1,3}(?:\.\d{1,3}){3}\])>\s*)+$/
+#describe REFERENCES		Has a valid-looking References header
+#tflags REFERENCES               nice
+#score REFERENCES -6.600 -6.600 -6.500 -6.500
+
+#meta REPLY_WITH_QUOTES		((IN_REP_TO + REFERENCES + EMAIL_ATTRIBUTION + QUOTED_EMAIL_TEXT) > 2)
+#describe REPLY_WITH_QUOTES	Reply with quoted text
+#tflags REPLY_WITH_QUOTES	nice
+#score REPLY_WITH_QUOTES -6.600 -6.500 -6.400 -6.500
+
+#header RESENT_TO                exists:Resent-To
+#describe RESENT_TO		Has a Resent-To header
+#tflags RESENT_TO                nice
+#score RESENT_TO -2.444 -0.753 -1.683 0
+
+#header __SMIME_SIGNED_HDR       Content-Type =~ /multipart\/signed;.*protocol=/i
+#full __SMIME_SIGNED_BODY        /\nContent-Type: application\/x-pkcs7-signature;/
+#meta SMIME_SIGNATURE            (__SMIME_SIGNED_HDR && __SMIME_SIGNED_BODY)
+#describe SMIME_SIGNATURE        Contains an S/MIME-signed message
+#tflags SMIME_SIGNATURE          nice
+
+# signature tests
+#full SIGNATURE_SHORT_DENSE	eval:check_signature('1', '7', '0')
+#describe SIGNATURE_SHORT_DENSE	Short signature present (no empty lines)
+#tflags SIGNATURE_SHORT_DENSE	nice
+
+#full SIGNATURE_LONG_DENSE	eval:check_signature('8', '15', '0')
+#describe SIGNATURE_LONG_DENSE	Long signature present (no empty lines)
+#tflags SIGNATURE_LONG_DENSE	nice
+#score SIGNATURE_LONG_DENSE -6.400 -6.300 -6.300 -6.300
+
+#full SIGNATURE_LONG_SPARSE	eval:check_signature('8', '15', '1')
+#describe SIGNATURE_LONG_SPARSE	Long signature present (empty lines)
+#tflags SIGNATURE_LONG_SPARSE	nice
+#score SIGNATURE_LONG_SPARSE -5.801 -5.801 -3.101 -5.801
+
+#full SIGNATURE_SHORT_SPARSE	eval:check_signature('1', '7', '1')
+#describe SIGNATURE_SHORT_SPARSE	Short signature present (empty lines)
+#tflags SIGNATURE_SHORT_SPARSE	nice
+#score SIGNATURE_SHORT_SPARSE 0 0 0 -0.601
+
+#header SUBJECT_IS_IN_REVIEW     Subject =~ /\bin review\b/i
+#describe SUBJECT_IS_IN_REVIEW   Subject contains newsletter header (in review)
+#tflags SUBJECT_IS_IN_REVIEW	nice
+
+## If a USER_AGENT rule is added, make sure to modify the USER_AGENT
+## rule to counter.
+
+# User-Agent isn't usually found with spam, but ignore it if we already
+# account with a compensate rule
+#header __USER_AGENT		exists:User-Agent
+#meta USER_AGENT			( __USER_AGENT && !USER_AGENT_PINE && !USER_AGENT_MUTT && !USER_AGENT_MOZILLA_UA && !USER_AGENT_MOZILLA_XM && !USER_AGENT_MACOE && !USER_AGENT_ENTOURAGE && !USER_AGENT_KMAIL && !USER_AGENT_IMP && !USER_AGENT_TONLINE && !USER_AGENT_APPLEMAIL && !USER_AGENT_GNUS_UA && !USER_AGENT_GNUS_XM && !USER_AGENT_VM && !USER_AGENT_MSN && !USER_AGENT_FORTE && !USER_AGENT_XIMIAN )
+#describe USER_AGENT		Has a User-Agent header
+#tflags USER_AGENT               nice
+
+# NOTE: uses rules from 20_ratware.cf
+#meta USER_AGENT_AOL8            (__AOL8_MUA && __AOL8_FROM && __AOL8_RCVD && __AOL8_TO)
+#describe USER_AGENT_AOL8        Headers indicates a non-spam MUA (AOL 7 or 8)
+#tflags USER_AGENT_AOL8		nice
+
+#header USER_AGENT_APPLEMAIL	X-Mailer   =~ /^Apple Mail \(\d\.\d+\)$/
+#describe USER_AGENT_APPLEMAIL	X-Mailer header indicates a non-spam MUA (Apple Mail)
+#tflags USER_AGENT_APPLEMAIL	nice
+#lang fr describe USER_AGENT_APPLEMAIL 	En-tête X-Mailer provennant d'un MUA non-spammeur (Apple Mail)
+#score USER_AGENT_APPLEMAIL 0 -2.092 0 -3.101
+
+#header USER_AGENT_ENTOURAGE	User-Agent =~ /^Microsoft-Entourage\/\d{1,2}(?:\.\d){1,2}\.\d{4}$/
+#describe USER_AGENT_ENTOURAGE	User-Agent header indicates a non-spam MUA (Entourage)
+#tflags USER_AGENT_ENTOURAGE	nice
+#lang fr describe USER_AGENT_ENTOURAGE 	En-tête User-Agent provennant d'un MUA non-spammeur (Entourage)
+#score USER_AGENT_ENTOURAGE 0 0 0 -5.701
+
+#header USER_AGENT_FORTE		X-Mailer =~ /^Forte Agent \d\.\d+\/\d+\.\d+$/
+#describe USER_AGENT_FORTE	X-Mailer header indicates a non-spam MUA (Forte)
+#tflags USER_AGENT_FORTE		nice
+#lang fr describe USER_AGENT_FORTE 	En-tête X-Mailer provennant d'un MUA non spammeur MUA (Forte)
+#score USER_AGENT_FORTE -2.900
+
+#header USER_AGENT_GNUS_UA	User-Agent =~ /^Gnus\/\d\.\d+ /
+#describe USER_AGENT_GNUS_UA	User-Agent header indicates a non-spam MUA (Gnus)
+#tflags USER_AGENT_GNUS_UA	nice
+#lang fr describe USER_AGENT_GNUS_UA 	En-tête User-Agent provennant d'un MUA non-spammeur (Gnus)
+#score USER_AGENT_GNUS_UA -6.400 -6.300 -2.900 -6.300
+
+#header USER_AGENT_GNUS_XM	X-Mailer   =~ /^Gnus v\d(?:\.\d+){1,2}\/X?Emacs \d+\.\d+/
+#describe USER_AGENT_GNUS_XM	X-Mailer header indicates a non-spam MUA (Gnus)
+#tflags USER_AGENT_GNUS_XM	nice
+#lang fr describe USER_AGENT_GNUS_XM 	En-tête X-Mailer provennant d'un MUA non-spammeur (Gnus)
+#score USER_AGENT_GNUS_XM -1.897 -1.997 -1.240 -1.808
+
+#header USER_AGENT_IMP		User-Agent =~ /^Internet Messaging Program \(IMP\) [34]\.\d/
+#describe USER_AGENT_IMP		User-Agent header indicates a non-spam MUA (IMP)
+#tflags USER_AGENT_IMP		nice
+#lang fr describe USER_AGENT_IMP 	En-tête User-Agent provennant d'un MUA non-spammeur (IMP)
+#score USER_AGENT_IMP 0 -1.401 0 -0.475
+
+#header USER_AGENT_KMAIL		User-Agent =~ /^KMail\/1\.\d\.\d+$/
+#describe USER_AGENT_KMAIL	User-Agent header indicates a non-spam MUA (KMail)
+#tflags USER_AGENT_KMAIL		nice
+#lang fr describe USER_AGENT_KMAIL 	En-tête User-Agent provennant d'un MUA non-spammeur (KMail)
+#score USER_AGENT_KMAIL -5.800 -5.801 -6.300 -6.400
+
+#header USER_AGENT_MACOE		User-Agent =~ /^Microsoft[ -]Outlook[ -]Express[ -]Macintosh[ -]Edition/
+#describe USER_AGENT_MACOE	User-Agent header indicates a non-spam MUA (Outlook Express)
+#tflags USER_AGENT_MACOE		nice
+#lang fr describe USER_AGENT_MACOE 	En-tête User-Agent provennant d'un MUA non-spammeur Outlook Express)
+#score USER_AGENT_MACOE -3.101 -3.101 0 -3.101
+
+#header USER_AGENT_MOZILLA_UA	User-Agent =~ /^Mozilla\/5\.\d+ \(.*\) Gecko\/\d{8}(?: |$)/
+#describe USER_AGENT_MOZILLA_UA	User-Agent header indicates a non-spam MUA (Mozilla)
+#tflags USER_AGENT_MOZILLA_UA	nice
+#lang fr describe USER_AGENT_MOZILLA_UA 	En-tête User-Agent provennant d'un MUA non-spammeur (Mozilla)
+#score USER_AGENT_MOZILLA_UA -5.801 -5.800 -5.701 -6.300
+
+#header USER_AGENT_MOZILLA_XM	X-Mailer   =~ /^Mozilla 4\.\d{2} \[[a-z]{2}\]/
+#describe USER_AGENT_MOZILLA_XM	X-Mailer header indicates a non-spam MUA (Netscape)
+#tflags USER_AGENT_MOZILLA_XM	nice
+#lang fr describe USER_AGENT_MOZILLA_XM 	En-tête X-Mailer provennant d'un MUA non-spammeur Netscape)
+#score USER_AGENT_MOZILLA_XM -0.236 0 0 0
+
+# frequently forged, needs some correlation meta checks with other headers.
+#header __USER_AGENT_MSN		X-Mailer =~ /^MSN Explorer /
+#header __HAS_XOAT		X-Originalarrivaltime =~ /FILETIME/
+#header __HAS_XOIP		X-Originating-Ip =~ /^\[/
+#meta USER_AGENT_MSN		(__USER_AGENT_MSN && __HAS_XOAT && __HAS_XOIP)
+#describe USER_AGENT_MSN		Headers indicate valid mail from MSN
+#tflags USER_AGENT_MSN		nice
+#lang fr describe USER_AGENT_MSN 	En-têtes indiquants un mail valide provenant de MSN
+#score USER_AGENT_MSN -2.900
+
+# From 0.93.2 - 1.2.5.1, message-id is:
+#  snprintf (buf, sizeof (buf), "<%d%02d%02d%02d%02d%02d.%c%d@%s>",
+#            tm->tm_year + 1900, tm->tm_mon + 1, tm->tm_mday, tm->tm_hour,
+#            tm->tm_min, tm->tm_sec, MsgIdPfx, getpid (), fqdn);
+#  MsgIdPfx = (MsgIdPfx == 'Z') ? 'A' : MsgIdPfx + 1;
+# The code from mutt 1.4 is adds a 'G' for some reason:
+#  snprintf (buf, sizeof (buf), "<%d%02d%02d%02d%02d%02d.G%c%d@%s>",
+#header __VALID_MUTT_MSGID	Message-Id =~ /^<[1-9]\d{3}[01]\d[0-3]\d[0-2]\d(?:[0-5]\d){2}\.G?[A-Z]\d+\@[a-zA-Z0-9._-]+>$/
+#header __USER_AGENT_MUTT	User-Agent =~ m@^Mutt/\d(?:\.\d+){1,4}@
+#meta USER_AGENT_MUTT		__USER_AGENT_MUTT && __VALID_MUTT_MSGID
+#describe USER_AGENT_MUTT	User-Agent header indicates a non-spam MUA (Mutt)
+#tflags USER_AGENT_MUTT		nice
+#lang fr describe USER_AGENT_MUTT 	En-tête User-Agent provennant d'un MUA non-spammeur (Mutt)
+#score USER_AGENT_MUTT -6.400 -6.400 -6.300 -6.300
+
+#header USER_AGENT_PINE		Message-Id =~ /^<Pine\.[A-Z]{3}\.\d\.[0-9A-Z]+\./
+#describe USER_AGENT_PINE	Message-Id indicates a non-spam MUA (Pine)
+#tflags USER_AGENT_PINE		nice
+#lang fr describe USER_AGENT_PINE 	En-tête Message-Id indiquant un MUA non-spammeur (Pine)
+#score USER_AGENT_PINE -5.801 -5.801 -5.701 -5.701
+
+#header USER_AGENT_TONLINE	X-Mailer   =~ /^T-Online (?:e|Web)Mail \d\.\d+$/
+#describe USER_AGENT_TONLINE	X-Mailer header indicates a non-spam MUA (T-Offline)
+#tflags USER_AGENT_TONLINE	nice
+#lang fr describe USER_AGENT_TONLINE 	En-tête X-Mailer provennant d'un MUA non-spammeur (T-Offline)
+#score USER_AGENT_TONLINE -2.900
+
+#header USER_AGENT_VM		X-Mailer =~ /^\s*VM\s+\d+\.\d+\s+under\s+.{0,30}?[Ee]macs\b/
+#describe USER_AGENT_VM		X-Mailer header indicates a non-spam MUA (VM)
+#tflags USER_AGENT_VM		nice
+#lang fr describe USER_AGENT_VM 		En-tête X-Mailer provennant d'un MUA non-spammeur (VM)
+#score USER_AGENT_VM -5.801 -5.701 -5.701 -5.701
+
+#header __XIMIAN_MUA		X-Mailer =~ /^(?:Ximian Evolution|Evolution\/\d+\.)/
+# interestingly the last word (\S+) always seems to be 'camel' ;)
+#header __XIMIAN_MSGID		MESSAGEID =~ /^<\d{10}\.\d+\.\d+\.\S+\@/
+#meta USER_AGENT_XIMIAN		(__XIMIAN_MSGID && __XIMIAN_MUA && !__UNUSABLE_MSGID)
+#describe USER_AGENT_XIMIAN	Headers indicate a non-spam MUA (Ximian)
+#tflags USER_AGENT_XIMIAN	nice
+#lang fr describe USER_AGENT_XIMIAN 	En-tête indiquants un MUA non-spammeur (Ximian)
+#score USER_AGENT_XIMIAN -6.400 -6.300 -6.300 -6.300
+
+# compensate for common false pos on above rule: Yahoo! webmail
+#header YAHOO_MSGID_ADDED        ALL =~ /Message-Id: <\S+\.mail\.yahoo\.com>\nReceived: .*by \S+mail\.yahoo\.com via HTTP;/s
+#describe YAHOO_MSGID_ADDED      'Message-Id' was added by yahoo.com, that's OK
+#tflags YAHOO_MSGID_ADDED        nice
+
+#header X_ACCEPT_LANG            exists:X-Accept-Language
+#describe X_ACCEPT_LANG		Has a X-Accept-Language  header
+#tflags X_ACCEPT_LANG            nice
+
+#header X_AUTH_WARNING           exists:X-Authentication-Warning
+#describe X_AUTH_WARNING		Has a X-Authentication-Warning header
+#tflags X_AUTH_WARNING           nice
+#lang fr describe X_AUTH_WARNING         L'entête X-Authentication-Warning: est présent
+#lang it describe X_AUTH_WARNING        	Presente header X-Authentication-Warning:
+#score X_AUTH_WARNING -1.008 -1.513 -0.137 -1.409
+
+#header X_LOOP                   exists:X-Loop
+#describe X_LOOP			Has a X-Loop header
+#tflags X_LOOP                   nice
+
+#header X_MAILING_LIST           exists:X-Mailing-List
+#describe X_MAILING_LIST		Has a X-Mailing-List header
+#tflags X_MAILING_LIST           nice
+#score X_MAILING_LIST -0.001 -0.001 -0.001 -3.101
+
+#header X_OSIRU_DUL_FH		rbleval:check_rbl('osirusoft-dul-firsthop', 'relays.osirusoft.com.')
+#describe X_OSIRU_DUL_FH		Received from first hop dialup listed in relays.osirusoft.com
+#tflags X_OSIRU_DUL_FH           net nice

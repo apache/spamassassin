@@ -284,11 +284,6 @@ header X_OSIRU_SPAMWARE_SITE	rbleval:check_rbl_results_for('osirusoft', '127.0.0
 describe X_OSIRU_SPAMWARE_SITE	DNSBL: sender is a Spamware site or vendor
 tflags X_OSIRU_SPAMWARE_SITE    net
 
-header X_OSIRU_DUL_FH		rbleval:check_rbl('osirusoft-dul-firsthop', 'relays.osirusoft.com.')
-describe X_OSIRU_DUL_FH		Received from first hop dialup listed in relays.osirusoft.com
-tflags X_OSIRU_DUL_FH           net nice
-
-
 # Now, single zone BLs follow:
 # the new first arg for check_rbl() indicates what type of check it is;
 # each type of check is stored in a separate set, and if an IP has already
@@ -358,11 +353,9 @@ describe HABEAS_VIOLATOR	On Habeas Infringer List and using Habeas warrant mark
 tflags HABEAS_VIOLATOR		net
 
 # bondedsender.org provides an RBL-style whitelist for trusted relays
-
 header RCVD_IN_BONDEDSENDER	rbleval:check_rbl('relay', 'query.bondedsender.org.')
 describe RCVD_IN_BONDEDSENDER	Bonded sender, see http://www.bondedsender.org/referred.html
 tflags RCVD_IN_BONDEDSENDER	net nice
-
 
 # NOTE: commercial test, see README file for details
 header RCVD_IN_BL_SPAMCOP_NET	rbleval:check_rbl('spamcop', 'bl.spamcop.net.')

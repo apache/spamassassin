@@ -81,22 +81,6 @@ lang fr unsafe-report conseillé de l'enregistrer, puis de le lire avec un éditeu
 
 ####################
 # 20_anti_ratware.cf
-lang fr describe USER_AGENT_PINE 	En-tête Message-Id indiquant un MUA non-spammeur (Pine)
-lang fr describe USER_AGENT_MUTT 	En-tête User-Agent provennant d'un MUA non-spammeur (Mutt)
-lang fr describe USER_AGENT_MOZILLA_UA 	En-tête User-Agent provennant d'un MUA non-spammeur (Mozilla)
-lang fr describe USER_AGENT_MOZILLA_XM 	En-tête X-Mailer provennant d'un MUA non-spammeur Netscape)
-lang fr describe USER_AGENT_MACOE 	En-tête User-Agent provennant d'un MUA non-spammeur Outlook Express)
-lang fr describe USER_AGENT_ENTOURAGE 	En-tête User-Agent provennant d'un MUA non-spammeur (Entourage)
-lang fr describe USER_AGENT_KMAIL 	En-tête User-Agent provennant d'un MUA non-spammeur (KMail)
-lang fr describe USER_AGENT_IMP 	En-tête User-Agent provennant d'un MUA non-spammeur (IMP)
-lang fr describe USER_AGENT_TONLINE 	En-tête X-Mailer provennant d'un MUA non-spammeur (T-Offline)
-lang fr describe USER_AGENT_APPLEMAIL 	En-tête X-Mailer provennant d'un MUA non-spammeur (Apple Mail)
-lang fr describe USER_AGENT_GNUS_UA 	En-tête User-Agent provennant d'un MUA non-spammeur (Gnus)
-lang fr describe USER_AGENT_GNUS_XM 	En-tête X-Mailer provennant d'un MUA non-spammeur (Gnus)
-lang fr describe USER_AGENT_VM 		En-tête X-Mailer provennant d'un MUA non-spammeur (VM)
-lang fr describe USER_AGENT_MSN 	En-têtes indiquants un mail valide provenant de MSN
-lang fr describe USER_AGENT_FORTE 	En-tête X-Mailer provennant d'un MUA non spammeur MUA (Forte)
-lang fr describe USER_AGENT_XIMIAN 	En-tête indiquants un MUA non-spammeur (Ximian)
 
 ##################
 # 20_body_tests.cf 
@@ -230,7 +214,6 @@ lang fr describe INVALID_DATE   L'entête Date: est incorrect (il contient AM/PM)
 #lang fr describe INVALID_DATE_ODD_MONTH L'entête Date: est incorrect (il contient un mois incorrect)
 lang fr describe INVALID_DATE_TZ_ABSURD L'entête Date: est incorrect (la zone de temps n'existe pas)
 #lang fr describe IN_ACCORDANCE_WITH_LAWS Préten être en conformité avec une loi sur le SPAM
-lang fr describe IN_REP_TO      Contient l'entête In-Reply-To:
 lang fr describe JODY   Contient le témoignage de 'ma femme Jody'
 lang fr describe KIFF   Contient la formule 'temple kiff'
 lang fr describe LIMITED_TIME_ONLY      Le mèl propose une ofrre a durée limitée
@@ -266,7 +249,6 @@ lang fr describe OPPORTUNITY    Contient des informations a propos d'une opportu
 lang fr describe OPT_IN Metionne la possibilité d'opter pour un service
 lang fr describe PENIS_ENLARGE  Contient des informations pour augmenter la taile du pénis
 lang fr describe PENNIES_A_DAY         Contient la formule 'for only pennies a day'
-lang fr describe PGP_SIGNATURE  Contient un message avec une signature PGP
 lang fr describe PLING_PLING    L'entête Subject: contient plusieurs points d'exclamation
 lang fr describe PORN_4 Utilise des mots ou des phrases à caractère pornographique
 lang fr describe PORN_6 Utilise des mots ou des phrases à caractère pornographique
@@ -275,7 +257,6 @@ lang fr describe PREST_NON_ACCREDITED   Fait référence a une prestigieuse univer
 lang fr describe PRINT_FORM_SIGNATURE   Demande votre signature sur un formulaire
 lang fr describe PRODUCED_AND_SENT_OUT  Contient une formule mentionnant que ce mèl est une publicité
 lang fr describe PURE_PROFIT    Contient la formule 'pure profit'
-lang fr describe Q_FOR_SELLER   L'entête Subject: est une question issue d'eBay
 lang fr describe RCVD_IN_BL_SPAMCOP_NET Ce mèl a été reçu par l'intermédiaire d'un relai qui figure dans la liste bl.spamcom.net
 lang fr describe RCVD_IN_DUL    Ce mèl a été reçu par l'intermédiaire d'un relai qui figure dans la liste dialup, voir http://www.mail-abuse.org/
 lang fr describe RCVD_IN_ORBS   Ce mèl a été reçu par l'intermédiaire d'un relai qui figure dans la liste orbs.dorkslayers.com
@@ -361,7 +342,6 @@ lang fr describe US_DOLLARS_2           Combine nigérienne, version modifiée, ph
 lang fr describe US_DOLLARS_3           Combine nigérienne, version modifiée, phrase clé ($NN,NNN,NNN.NN)
 lang fr describe FRONTPAGE		Mèl créé avec l'éditeur Frontpage
 lang fr describe SAFEGUARD_NOTICE	Contient la signature d'un outil de spam sans licence
-lang fr describe EVITE			Contient une référence à evite.citysearch.com
 lang fr describe READ_TO_END            Contient une formule incitant é lire le message jusqu'à la fin
 lang fr describe ALL_NATURAL            Offre un produit 100% naturel
 lang fr describe MONEY_BACK             Assure le remboursement
@@ -379,9 +359,6 @@ lang fr describe MSGID_CHARS_SPAM	L'entête Message-Id: contient des caractères q
 lang fr describe DOMAIN_SUBJECT		L'entête Subject: fait référence aux nouveaux noms de domaine Internet
 lang fr describe RCVD_IN_VISI		Ce mèl a été reçu par l'intermédiaire d'un relai qui figure dans la liste relays.visi.com
 lang fr describe FORGED_JUNO_RCVD	Contient un entête Received: falsifié comme venant de juno.com
-lang fr describe BUGZILLA_BUG		L'entête Subject ressemble à un bug publié dans Bugzilla
-lang fr describe MAJORDOMO              L'entête Subject: semble venir du gestionaire de listes Majordomo
-lang fr describe X_AUTH_WARNING         L'entête X-Authentication-Warning: est présent
 lang fr describe X_MAIL_ID_PRESENT     L'entête X-MailingID: est présent
 lang fr describe X_SERV_HOST_PRESENT   L'entête X-ServerHost: est présent
 lang fr describe X_X_PRESENT           Il y a un entête X-x:
@@ -416,7 +393,6 @@ lang fr describe RCVD_IN_DSBL          Reçu par l'intermédiaire d'un relai référ
 lang fr describe RCVD_IN_MULTIHOP_DSBL Reçu par l'intermédiaire d'un relai référencé par multihop.dsbl.org
 lang fr describe RCVD_IN_UNCONFIRMED_DSBL      Reçu par l'intermédiaire d'un relai référencé par unconfirmed.dsbl.org
 #lang fr describe OE_PI                 L'entête X-Mailer: contient 'OutLook Express 3.14159'
-lang fr describe PGP_SIGNATURE_2       Contient une signature PGP attachée au message
 lang fr describe DONT_DELETE            Contient une formule incitant à ne pas détruire ce message
 
 lang fr describe TO_INVESTORS   L'entête To: est adressé à Inverstors
