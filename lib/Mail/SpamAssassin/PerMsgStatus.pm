@@ -610,12 +610,9 @@ sub rewrite_as_spam {
   my $newmsg = '';
 
   # remove first line if it is "From "
-  if ($original =~ s/^(From (.*?)\n)//s) {
-    # jm: surely do not add it again? we wind up with a bad header
-    #$newmsg .= $1;
-  }
+  $original =~ s/^From .*\n//;
 
-    # the report charset
+  # the report charset
   my $report_charset = "";
   if ($self->{conf}->{report_charset}) {
     $report_charset = "; charset=" . $self->{conf}->{report_charset};
@@ -758,8 +755,6 @@ EOM
   
   my @lines = split (/^/m,  $newmsg);
   $self->{msg}->replace_original_message(\@lines);
-
-  $self->{msg}->get_mail_object;
 }
 
 sub rewrite_headers {
@@ -797,7 +792,6 @@ sub rewrite_headers {
       }
 
   }
-  $self->{msg}->get_mail_object;
 }
 
 sub _process_header {

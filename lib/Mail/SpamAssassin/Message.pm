@@ -88,18 +88,6 @@ sub new {
 
 ###########################################################################
 
-sub get_mail_object {
-  my ($self) = @_;
-  return $self->{mail_object};
-}
-
-###########################################################################
-
-sub create_new {
-  my ($self, @args) = @_;
-  die "unimplemented base method";
-}
-
 sub get_pristine_header {
   my ($self, $hdr) = @_;
   die "unimplemented base method";

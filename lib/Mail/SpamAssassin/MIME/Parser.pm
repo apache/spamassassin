@@ -50,8 +50,18 @@ sub parse {
   # protect it from abuse ...
   local $_;
 
-  # Split the scalar into an array of lines
-  my @message = split ( /^/m, $message );
+  my @message;
+  if (ref $message eq 'ARRAY') {
+     @message = @{$message};
+  }
+  elsif (ref $message eq 'GLOB') {
+    if (defined fileno $message) {
+      @message = <$message>;
+    }
+  }
+  else {
+    @message = split ( /^/m, $message );
+  }
 
   # trim mbox seperator if it exists
   shift @message if ( scalar @message > 0 && $message[0] =~ /^From\s/ );

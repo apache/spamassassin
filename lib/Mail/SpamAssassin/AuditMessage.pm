@@ -82,11 +82,6 @@ sub new {
   $self;
 }
 
-sub create_new {
-  my ($self, @args) = @_;
-  return Mail::SpamAssassin::NoMailAudit->new(@args);
-}
-
 sub put_header {
   my ($self, $hdr, $text) = @_;
   $self->{mail_object}->put_header ($hdr, $text);

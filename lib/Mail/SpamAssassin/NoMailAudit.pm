@@ -118,20 +118,6 @@ sub new {
 
 # ---------------------------------------------------------------------------
 
-sub create_new {
-  my ($self, @args) = @_;
-  return Mail::SpamAssassin::NoMailAudit->new(@args);
-}
-
-# ---------------------------------------------------------------------------
-
-sub get_mail_object {
-  my ($self) = @_;
-  return $self;
-}
-
-# ---------------------------------------------------------------------------
-
 sub parse_headers {
   my ($self) = @_;
   local ($_);
@@ -427,11 +413,6 @@ sub ignore {
   exit (0) unless $self->{noexit};
 }
 
-sub print {
-  my ($self, $fh) = @_;
-  print $fh $self->as_string();
-}
-
 # ---------------------------------------------------------------------------
 
 sub accept {
@@ -540,55 +521,6 @@ sub dotlock_unlock {
   my $lockfile = $self->{dotlock_locked};
   if (!defined $lockfile) { die "no dotlock_locked"; }
   unlink $lockfile or warn "unlink $lockfile failed: $!";
-}
-
-# ---------------------------------------------------------------------------
-
-sub reject {
-  my $self = shift;
-  $self->_proxy_to_mail_audit ('reject', @_);
-}
-
-sub resend {
-  my $self = shift;
-  $self->_proxy_to_mail_audit ('resend', @_);
-}
-
-# ---------------------------------------------------------------------------
-
-sub _proxy_to_mail_audit {
-  my $self = shift;
-  my $method = shift;
-  my $ret;
-
-  my @textary = split (/^/m, $self->as_string());
-
-  eval {
-    require Mail::Audit;
-
-    my %opts = ( 'data' => \@textary );
-    if (exists $self->{noexit}) { $opts{noexit} = $self->{noexit}; }
-    if (exists $self->{loglevel}) { $opts{loglevel} = $self->{loglevel}; }
-    if (exists $self->{log}) { $opts{log} = $self->{log}; }
-
-    my $audit = new Mail::Audit (%opts);
-
-    if ($method eq 'accept') {
-      $ret = $audit->accept (@_);
-    } elsif ($method eq 'reject') {
-      $ret = $audit->reject (@_);
-    } elsif ($method eq 'resend') {
-      $ret = $audit->resend (@_);
-    }
-  };
-
-  if ($@) {
-    warn "spamassassin: $method() failed, Mail::Audit ".
-            "module could not be loaded: $@";
-    return undef;
-  }
-
-  return $ret;
 }
 
 # ---------------------------------------------------------------------------
