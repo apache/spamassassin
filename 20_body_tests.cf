@@ -537,33 +537,67 @@ describe UNDESIRED_LANGUAGE_BODY	Written in an undesired language
 body NIGERIAN_SCAM		/BASED ON INFORMATION GATHERED ABOUT YOU, WE BELIEVE\s*YOU WOULD BE IN A POSITION TO HELP US IN TRANSFER/i
 describe NIGERIAN_SCAM		Nigerian scam, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
 
-body NIGERIAN_SCAM_2 /\b(?:(?:bank|government|republic).{1,10}(?:nigeria|sierra leone|zimbabwe|botswana)|(?:nigeria|sierra leone|zimbabwe|botswana).{1,10}(?:national|government|embassy|chamber|bank|petroleum))/i
-describe NIGERIAN_SCAM_2	Mutated Nigerian scams, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
+body NIGERIAN_SCAM_2  /\b(?:(?:bank|government|republic).{1,15}(?:nigeria|sierra(-| )leone|zimbabwe|botswana|ivoire?|ivory|angola|gabon|lome|benin|africa)|(?:nigeria|sierra(-¦ )leone|zimbabwe|botswana|ivoire?|ivory|angola|gabon|lome|benin|africa).{0,15}(?:national|government|embassy|chamber|bank|petroleum|electric|gold|diamond))/i
+describe NIGERIAN_SCAM_2      Mutated Nigerian 419 scams, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
 
-body NIGERIAN_SCAM_4 /\b(?:wife|widow|son|husband)\b.{0,60}\b(?:Abacha|Kabila|Sekou?|Stojiljkovic|Bangura)\b/i
-describe NIGERIAN_SCAM_4        Nigerian widow needs your help, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
+body NIGERIAN_SCAM_4  /\b(?:wife|widow|married|son|husband|daughter)\b.{0,50}\b(?:Abacha|Kabila|Sekou?|Stojiljkovic|Bangura|Saro Wiwa|black Farmer|general|king|chief|president|leader)/i
+describe NIGERIAN_SCAM_4        Nigerian (4) widow needs your help, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
 
-body NIGERIAN_SCAM_5 /\b(?:Abacha|Kabila|Sekou?|Stojiljkovic|Bangura)\b.{0,60}\b(?:wife|widow|son|husband)\b/i
-describe NIGERIAN_SCAM_5        Nigerian widow needs your help, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
+body NIGERIAN_SCAM_5  /\b(?:Abacha|Kabila|Sekou?|Stojiljkovic|Bangura|Saro Wiwa|black Farmer|general|king|chief|president|leader)\b.{0,50}\b(?:wife|widow|married|son|husband|daughter)/i
+describe NIGERIAN_SCAM_5      Nigerian (5) widow needs your help, cf http://www.snopes2.com/inboxer/scams/nigeria.htm
 
-body NIGERIAN_SCAM_6 /\b(?:late|former|past|new|Nigerian|military)\b.{0,20}\bhead of state/i
-describe NIGERIAN_SCAM_6        Mutated Nigerian scams (6)
+body NIGERIAN_SCAM_6  /\b(?:late|former|new|past|Nigerian|military)\b.{0,20}\b(?:(head|minister)\b of \b(state|finance)|general|commander)\b/i
+describe NIGERIAN_SCAM_6      Mutated Nigerian 419 scams (6)
 
-body NIGERIAN_SCAM_7 /\b(?:late|former|past)\b.{0,40}\b(?:Abacha|Kabila|Sekou?|Stojiljkovic|Bangura)\b|\b(?:Abacha|Kabila|Sekou?|Stojiljkovic|Bangura)\b.{0,40}\b(?:late|former|past)\b/i
-describe NIGERIAN_SCAM_7        Mutated Nigerian scams (7)
+body NIGERIAN_SCAM_7  /\b(?:late|former|past)\b.{0,40}\b(?:Abacha|Kabila|Sekou?|Stojiljkovic|Bangura)\b|\b(?:Abacha|Kabila|Sekou?|Stojiljkovic|Bangura)\b.{0,40}\b(?:late|former|past)\b/i
+describe NIGERIAN_SCAM_7        Mutated Nigerian 419 scams (7)
 
-body NIGERIAN_SCAM_8 /\b(?:Tribunal|War Crimes|Hague)\b.{0,60}\b(?:Vlajko|Stojiljkovic)\b|\b(?:Vlajko|Stojiljkovic)\b.{0,60}\b(?:Tribunal|War Crimes|Hague)\b/i 
-describe NIGERIAN_SCAM_8        Mutated Nigerian scams (8)
+body NIGERIAN_SCAM_8  /\b(?:Tribunal|War Crimes|Hague)\b.{0,60}\b(?:Vlajko|Stojiljkovic)\b|\b(?:Vlajko|Stojiljkovic)\b.{0,60}\b(?:Tribunal|War Crimes|Hague)\b/i
+describe NIGERIAN_SCAM_8      Mutated Nigerian 419 scams, Bosnian version (8)
 
-body US_DOLLARS			/Million\b.{0,40}\b(?:United States? Dollars|USD\b|U\.? ?S\.? Dollar)/i
-describe US_DOLLARS		Nigerian scam key phrase
+body NIGERIAN_SCAM_9  /\b(?:private|trust).{1,10}(?:security|banking|treasury).{1,10}(?:company|firm|sector)/i
+describe NIGERIAN_SCAM_9      Mutated Nigerian 419 scams (9)
 
-# use {2,3} to avoid matching iso-2022-jp charset items
-body US_DOLLARS_2               /\b(?:\$|usd).?\d{2,3}(?:\.\d)?.?m\b/i
-describe US_DOLLARS_2           Nigerian scam key phrase ($NNN.N m/USDNNN.N m)
+body NIGERIAN_SCAM_10 /\bnext[ ,-]of[ ,-]kin\b/i
+describe NIGERIAN_SCAM_10     Nigerian 419 scam key phrase (... kin)
 
-body US_DOLLARS_3               /\b(?:\$|usd).?\d{1,3}[,.]\d{3}[,.]\d{3}(?:[,.]\d\d)?\b/i
+body NIGERIAN_SCAM_11 /\bwork(ed)? (in|for) a bank/i
+describe NIGERIAN_SCAM_11     Nigerian 419 scam key phrase (work ... bank)
+
+body NIGERIAN_SCAM_12 /\b(?:first|second|third|only|eldest|youngest).{1,10}(?:child|son|daughter)/i
+describe NIGERIAN_SCAM_12     Nigerian 419 scam key phrase (first ... son)
+
+body NIGERIAN_SCAM_13 /\b(?:gold|cocoa|diamond|oil).{0,10}(?:merchant|dealer)/i
+describe NIGERIAN_SCAM_13     Nigerian 419 scam key phrase (merchant)
+
+body NIGERIAN_SCAM_14 /\bfor(?:ei|ie)g?n.{1,10}(?:account|contractor|invest(?:or|ment)|partner|customer|assistan(?:t|ce)|national|firm)/i
+describe NIGERIAN_SCAM_14     'foreign' topics in Nigerian 419 scams
+
+body NIGERIAN_SCAM_15 /\b(?:esteem|mutual|confident|reputable|trust|sincer|honest|respect|virtue|reliable|grace|impressive|capab(?:le|ility)|humbly).{1,15}(?:person|business|proposition|relationship|nature|person|mind|assistanc|humility|peace|honesty|information|reliability|benefit|sincer|secret|worthy)/i
+describe NIGERIAN_SCAM_15     Introduction in Nigerian 419 scams
+
+body NIGERIAN_SCAM_16 /\b(plane|air|car|automobile|motor).{1,10}(crash|accident)/i
+describe NIGERIAN_SCAM_16     strange accidents in Nigerian 419 scams
+
+body NIGERIAN_TRANSACTION_1   /\b(?:financial|confiden(?:tial|ce)|safe(?:ty)?|mutual|secret|success(?:ful)?|risk-?free|details).{1,30}\btransaction\b/i
+describe NIGERIAN_TRANSACTION_1       illegal Nigerian transactions (1)
+
+body NIGERIAN_TRANSACTION_2   /\btransaction\b.{1,30}\b(?:magnitude|diplomatic|strict|absolute|secret|confiden(?:tial|ce)|guarantee)/i
+describe NIGERIAN_TRANSACTION_2       illegal Nigerian transactions (2)
+
+body US_DOLLARS               /\b(?:\d{1,3})?Million\b.{0,40}\b(?:(?:United States?|Canadian) Dollar?s?|US(?:D|\$)|U\.? ?S\.? Dollar)/i
+describe US_DOLLARS           Nigerian scam key phrase (million dollars)
+
+# jm: use {2,3} to avoid matching iso-2022-jp charset items. split into US_DOLLARS_4
+# to still match all test cases
+body US_DOLLARS_2               /\s(?:\$|US\$|usd?).?\d{2,3}(?:\.\d)?.?(?:m|millions?)\b/i
+describe US_DOLLARS_2           Nigerian scam key phrase ($NNN.N m/USDNNN.N m/US$NN.N m)
+
+body US_DOLLARS_3               /(?:\$|usd).?\d{1,3}[,.]\d{3}[,.]\d{3}(?:[,.]\d\d)?/i
 describe US_DOLLARS_3           Nigerian scam key phrase ($NN,NNN,NNN.NN)
+
+body US_DOLLARS_4               /\s(?:\$|US\$|usd?).?\d{1,3}\.\d+.?(?:m|millions?)\b/i
+describe US_DOLLARS_4           Nigerian scam key phrase ($NNN.N m/USDNNN.N m/US$NN.N m)
 
 rawbody UNNEEDED_HTML_ENCODING	/font=3E/i
 describe UNNEEDED_HTML_ENCODING	Unneeded encoding of HTML tags
