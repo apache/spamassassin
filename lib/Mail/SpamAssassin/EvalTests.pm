@@ -344,8 +344,8 @@ sub _mta_added_message_id {
   # Postfix adds the Message-ID on the second local hop.  Note: this is not
   # an exemption, this is a special case to classify these hits correctly.
   if ($#received > 0 &&
-      $received[$#received] =~ /\(Postfix.*?\)/i &&
-      $received[$#received - 1] =~ /\(Postfix.*?\)/i)
+      $received[$#received] =~ /\[127\.0\.0\.1\].+\(Postfix.*?\)/i &&
+      $received[$#received - 1] =~ /\(Postfix, from userid \d+\)/i)
   {
     $local = 2;
   }
