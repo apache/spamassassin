@@ -542,3 +542,5 @@ header T_FRAGMENTED_MESSAGE	Content-Type =~ /message\/partial/i
 # affiliateid, aff_id, aff_sub_id etc.
 uri T_URI_AFFILIATE		/aff\w+id=/i
 
+body T_DEEP_DISC_MEDS		/\bdeep discount med(?:s|ications)\b/i
+
