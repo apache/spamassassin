@@ -3360,4 +3360,17 @@ sub check_ratware_name_id {
   return 0;
 }
 
+sub check_phish_mismatch {
+  my ($self) = @_;
+
+  while (my($k,$v) = each %{$self->{html}->{uri_anchor_index}}) {
+    next unless ($k =~ m%^https?:/*(?:[^@]+@)?[0-9.]+%i);
+    foreach (@{$v}) {
+      return 1 if ($self->{html}->{anchor}->[$_] =~ m%^https:/*(?:[^@]+@)?\D%i);
+    }
+  }
+
+  return 0;
+}
+
 1;
