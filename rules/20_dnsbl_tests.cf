@@ -45,26 +45,32 @@ tflags __RCVD_IN_NJABL		net
 header RCVD_IN_NJABL_RELAY	eval:check_rbl_sub('njabl', '127.0.0.2')
 describe RCVD_IN_NJABL_RELAY	NJABL: sender is confirmed open relay
 tflags RCVD_IN_NJABL_RELAY	net
+#reuse RCVD_IN_NJABL_RELAY
 
 header RCVD_IN_NJABL_DUL	eval:check_rbl('njabl-notfirsthop', 'combined.njabl.org.', '127.0.0.3')
 describe RCVD_IN_NJABL_DUL	NJABL: dialup sender did non-local SMTP
 tflags RCVD_IN_NJABL_DUL	net
+#reuse RCVD_IN_NJABL_DUL
 
 header RCVD_IN_NJABL_SPAM	eval:check_rbl_sub('njabl', '127.0.0.4')
 describe RCVD_IN_NJABL_SPAM	NJABL: sender is confirmed spam source
 tflags RCVD_IN_NJABL_SPAM	net
+#reuse RCVD_IN_NJABL_SPAM
 
 header RCVD_IN_NJABL_MULTI	eval:check_rbl_sub('njabl', '127.0.0.5')
 describe RCVD_IN_NJABL_MULTI	NJABL: sent through multi-stage open relay
 tflags RCVD_IN_NJABL_MULTI	net
+#reuse RCVD_IN_NJABL_MULTI
 
 header RCVD_IN_NJABL_CGI	eval:check_rbl_sub('njabl', '127.0.0.8')
 describe RCVD_IN_NJABL_CGI	NJABL: sender is an open formmail
 tflags RCVD_IN_NJABL_CGI	net
+#reuse RCVD_IN_NJABL_CGI
 
 header RCVD_IN_NJABL_PROXY	eval:check_rbl_sub('njabl', '127.0.0.9')
 describe RCVD_IN_NJABL_PROXY	NJABL: sender is an open proxy
 tflags RCVD_IN_NJABL_PROXY	net
+#reuse RCVD_IN_NJABL_PROXY
 
 # ---------------------------------------------------------------------------
 # SORBS
@@ -80,39 +86,48 @@ tflags __RCVD_IN_SORBS		net
 header RCVD_IN_SORBS_HTTP	eval:check_rbl_sub('sorbs', '127.0.0.2')
 describe RCVD_IN_SORBS_HTTP	SORBS: sender is open HTTP proxy server
 tflags RCVD_IN_SORBS_HTTP	net
+#reuse RCVD_IN_SORBS_HTTP
 
 header RCVD_IN_SORBS_MISC	eval:check_rbl_sub('sorbs', '127.0.0.3')
 describe RCVD_IN_SORBS_MISC	SORBS: sender is open proxy server
 tflags RCVD_IN_SORBS_MISC	net
+#reuse RCVD_IN_SORBS_MISC
 
 header RCVD_IN_SORBS_SMTP	eval:check_rbl_sub('sorbs', '127.0.0.4')
 describe RCVD_IN_SORBS_SMTP	SORBS: sender is open SMTP relay
 tflags RCVD_IN_SORBS_SMTP	net
+#reuse RCVD_IN_SORBS_SMTP
 
 header RCVD_IN_SORBS_SOCKS	eval:check_rbl_sub('sorbs', '127.0.0.5')
 describe RCVD_IN_SORBS_SOCKS	SORBS: sender is open SOCKS proxy server
 tflags RCVD_IN_SORBS_SOCKS	net
+#reuse RCVD_IN_SORBS_SOCKS
 
 # delist: $50 fee
 #header RCVD_IN_SORBS_SPAM	eval:check_rbl_sub('sorbs', '127.0.0.6')
 #describe RCVD_IN_SORBS_SPAM	SORBS: sender is a spam source
 #tflags RCVD_IN_SORBS_SPAM	net
+#reuse RCVD_IN_SORBS_SPAM
 
 header RCVD_IN_SORBS_WEB	eval:check_rbl_sub('sorbs', '127.0.0.7')
 describe RCVD_IN_SORBS_WEB	SORBS: sender is a abuseable web server
 tflags RCVD_IN_SORBS_WEB	net
+#reuse RCVD_IN_SORBS_WEB
 
 header RCVD_IN_SORBS_BLOCK	eval:check_rbl_sub('sorbs', '127.0.0.8')
 describe RCVD_IN_SORBS_BLOCK	SORBS: sender demands to never be tested
 tflags RCVD_IN_SORBS_BLOCK	net
+#reuse RCVD_IN_SORBS_BLOCK
 
 header RCVD_IN_SORBS_ZOMBIE	eval:check_rbl_sub('sorbs', '127.0.0.9')
 describe RCVD_IN_SORBS_ZOMBIE	SORBS: sender is on a hijacked network
 tflags RCVD_IN_SORBS_ZOMBIE	net
+#reuse RCVD_IN_SORBS_ZOMBIE
 
 header RCVD_IN_SORBS_DUL	eval:check_rbl('sorbs-notfirsthop', 'dnsbl.sorbs.net.', '127.0.0.10')
 describe RCVD_IN_SORBS_DUL	SORBS: sent directly from dynamic IP address
 tflags RCVD_IN_SORBS_DUL	net
+#reuse RCVD_IN_SORBS_DUL
 
 # ---------------------------------------------------------------------------
 # Spamhaus SBL+XBL
@@ -128,11 +143,13 @@ tflags __RCVD_IN_SBL_XBL	net
 header RCVD_IN_SBL		eval:check_rbl_sub('sblxbl', '127.0.0.2')
 describe RCVD_IN_SBL		Received via a relay in Spamhaus SBL
 tflags RCVD_IN_SBL		net
+#reuse RCVD_IN_SBL
 
 # XBL is the Exploits Block List: http://www.spamhaus.org/xbl/
 header RCVD_IN_XBL		eval:check_rbl('sblxbl-notfirsthop', 'sbl-xbl.spamhaus.org.', '127.0.0.[456]')
 describe RCVD_IN_XBL		Received via a relay in Spamhaus XBL
 tflags RCVD_IN_XBL		net
+#reuse RCVD_IN_XBL
 
 # ---------------------------------------------------------------------------
 # RFC-Ignorant blacklists (both name and IP based)
@@ -143,22 +160,27 @@ tflags __RFC_IGNORANT_ENVFROM	net
 header DNS_FROM_RFC_DSN		eval:check_rbl_sub('rfci_envfrom', '127.0.0.2')
 describe DNS_FROM_RFC_DSN	Envelope sender in dsn.rfc-ignorant.org
 tflags DNS_FROM_RFC_DSN		net
+#reuse DNS_FROM_RFC_DSN
 
 header DNS_FROM_RFC_POST	eval:check_rbl_sub('rfci_envfrom', '127.0.0.3')
 describe DNS_FROM_RFC_POST	Envelope sender in postmaster.rfc-ignorant.org
 tflags DNS_FROM_RFC_POST	net
+#reuse DNS_FROM_RFC_POST
 
 header DNS_FROM_RFC_ABUSE	eval:check_rbl_sub('rfci_envfrom', '127.0.0.4')
 describe DNS_FROM_RFC_ABUSE	Envelope sender in abuse.rfc-ignorant.org
 tflags DNS_FROM_RFC_ABUSE	net
+#reuse DNS_FROM_RFC_ABUSE
 
 header DNS_FROM_RFC_WHOIS	eval:check_rbl_sub('rfci_envfrom', '127.0.0.5')
 describe DNS_FROM_RFC_WHOIS	Envelope sender in whois.rfc-ignorant.org
 tflags DNS_FROM_RFC_WHOIS	net
+#reuse DNS_FROM_RFC_WHOIS
 
 header DNS_FROM_RFC_BOGUSMX	eval:check_rbl_sub('rfci_envfrom', '127.0.0.8')
 describe DNS_FROM_RFC_BOGUSMX	Envelope sender in bogusmx.rfc-ignorant.org
 tflags DNS_FROM_RFC_BOGUSMX	net
+#reuse DNS_FROM_RFC_BOGUSMX
 
 # ---------------------------------------------------------------------------
 # CompleteWhois blacklists
@@ -177,6 +199,7 @@ tflags RCVD_IN_WHOIS_HIJACKED	net
 header RCVD_IN_WHOIS_INVALID	eval:check_rbl('whois-notfirsthop', 'combined-HIB.dnsiplists.completewhois.com.', '127.0.0.4')
 describe RCVD_IN_WHOIS_INVALID	CompleteWhois: sender on invalid IP block
 tflags RCVD_IN_WHOIS_INVALID	net
+#reuse RCVD_IN_WHOIS_INVALID	RCVD_IN_RFC_IPWHOIS
 
 # ---------------------------------------------------------------------------
 # Now, single zone BLs follow:
@@ -192,6 +215,7 @@ tflags RCVD_IN_WHOIS_INVALID	net
 header RCVD_IN_DSBL		eval:check_rbl_txt('dsbl-notfirsthop', 'list.dsbl.org.')
 describe RCVD_IN_DSBL		Received via a relay in list.dsbl.org
 tflags RCVD_IN_DSBL		net
+#reuse RCVD_IN_DSBL
 
 ########################################################################
 
@@ -199,50 +223,37 @@ tflags RCVD_IN_DSBL		net
 header DNS_FROM_AHBL_RHSBL	eval:check_rbl_envfrom('ahbl', 'rhsbl.ahbl.org.')
 describe DNS_FROM_AHBL_RHSBL	From: sender listed in dnsbl.ahbl.org
 tflags DNS_FROM_AHBL_RHSBL	net
+#reuse DNS_FROM_AHBL_RHSBL
 
 # another domain-based blacklist
 header DNS_FROM_SECURITYSAGE	eval:check_rbl_envfrom('securitysage', 'blackhole.securitysage.com.')
 describe DNS_FROM_SECURITYSAGE	Envelope sender in blackholes.securitysage.com
 tflags DNS_FROM_SECURITYSAGE	net
+#reuse DNS_FROM_SECURITYSAGE
 
 # sa-hil.habeas.com for SpamAssassin queries
 # hil.habeas.com for other queries
 header HABEAS_INFRINGER		eval:check_rbl_swe('hil', 'sa-hil.habeas.com.')
 describe HABEAS_INFRINGER	Has Habeas warrant mark and on Infringer List
 tflags HABEAS_INFRINGER		net
+#reuse HABEAS_INFRINGER
 
 # sa-hul.habeas.com for SpamAssassin queries
 # hul.habeas.com for other queries
 header HABEAS_USER		eval:check_rbl_swe('hul', 'sa-hul.habeas.com.')
 describe HABEAS_USER		Has Habeas warrant mark and on User List
 tflags HABEAS_USER		net nice
+#reuse HABEAS_USER
 
 header RCVD_IN_BSP_TRUSTED	eval:check_rbl_txt('bsp-firsttrusted', 'sa-trusted.bondedsender.org.')
 describe RCVD_IN_BSP_TRUSTED	Sender is in Bonded Sender Program (trusted relay)
 tflags RCVD_IN_BSP_TRUSTED	net nice
+#reuse RCVD_IN_BSP_TRUSTED
 
 header RCVD_IN_BSP_OTHER	eval:check_rbl_txt('bsp-untrusted', 'sa-other.bondedsender.org.')
 describe RCVD_IN_BSP_OTHER	Sender is in Bonded Sender Program (other relay)
 tflags RCVD_IN_BSP_OTHER	net nice
-
-# SenderBase information <http://www.senderbase.org/dnsresponses.html>
-# these are experimental example rules
-
-# sa.senderbase.org for SpamAssassin queries
-# query.senderbase.org for other queries
-header __SENDERBASE eval:check_rbl_txt('sb', 'sa.senderbase.org.')
-tflags __SENDERBASE net
-
-# S23 = domain daily magnitude, S25 = date of first message from this domain
-header SB_NEW_BULK		eval:check_rbl_sub('sb', 'sb:S23 > 6.2 && (time - S25 < 120*86400)')
-describe SB_NEW_BULK		Sender domain is new and very high volume
-tflags SB_NEW_BULK		net
-
-# S5 = category, S40 = IP daily magnitude, S41 = IP monthly magnitude
-# note: accounting for rounding, "> 0.3" means at least a 59% volume spike
-header SB_NSP_VOLUME_SPIKE	eval:check_rbl_sub('sb', 'sb:S5 =~ /NSP/ && S41 > 3.8 && S40 - S41 > 0.3')
-describe SB_NSP_VOLUME_SPIKE	Sender IP hosted at NSP has a volume spike
-tflags SB_NSP_VOLUME_SPIKE	net
+#reuse RCVD_IN_BSP_OTHER
 
 # ---------------------------------------------------------------------------
 # NOTE: donation tests, see README file for details
@@ -250,6 +261,7 @@ tflags SB_NSP_VOLUME_SPIKE	net
 header RCVD_IN_BL_SPAMCOP_NET	eval:check_rbl_txt('spamcop', 'bl.spamcop.net.')
 describe RCVD_IN_BL_SPAMCOP_NET	Received via a relay in bl.spamcop.net
 tflags RCVD_IN_BL_SPAMCOP_NET	net
+#reuse RCVD_IN_BL_SPAMCOP_NET
 
 # ---------------------------------------------------------------------------
 # NOTE: commercial tests, see README file for details
@@ -279,10 +291,3 @@ tflags RCVD_IN_MAPS_NML		net
 #header RCVD_IN_MAPS_OPS	eval:check_rbl_sub('rblplus', '8')
 #describe RCVD_IN_MAPS_OPS	Relay in OPS, http://www.mail-abuse.org/ops/
 #tflags RCVD_IN_MAPS_OPS	net
-
-# ---------------------------------------------------------------------------
-# Other DNS tests
-
-header NO_DNS_FOR_FROM		eval:check_dns_sender()
-describe NO_DNS_FOR_FROM	Envelope sender has no MX or A DNS records
-tflags NO_DNS_FOR_FROM		net
