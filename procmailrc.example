@@ -1,5 +1,12 @@
-# Pipe the mail through spamassassin, unless it's over 256k
-# (SpamAssassin can take a long time to process large messages)
+# SpamAssassin sample procmailrc
+# $Id: procmailrc.example,v 1.3.2.2 2002/08/29 14:27:14 msquadrat Exp $
+#
+# Pipe the mail through spamassassin (replace 'spamassassin' with 'spamc'
+# if you use the spamc/spamd combination)
+# The condition line enshures that only messages smaller than 250 kB
+# (250 * 1024 = 256000 bytes) are processed by SpamAssassin. Most spam
+# isn't bigger than a few k and working with big messages can bring
+# SpamAssassin to its knees.
 :0fw
 * < 256000
 | spamassassin
