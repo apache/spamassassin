@@ -859,8 +859,10 @@ sub uri_list_canonify {
     $nuri =~ s/\&\#0*(3[3-9]|[4-9]\d|1[01]\d|12[0-6]);/sprintf "%c",$1/ge;
     $nuri =~ s/\&\#x0*(2[1-9]|[3-6][a-f0-9]|7[0-9a-e]);/sprintf "%c",hex($1)/gei;
 
-    # deal with the %## encoding
-    $nuri = Mail::SpamAssassin::Util::url_encode($nuri);
+    # deal with the %## encoding if necessary
+    if ($nuri =~ /\%[0-9a-fA-F]{2}/) {
+      $nuri = Mail::SpamAssassin::Util::url_encode($nuri);
+    }
 
     # put the new URI on the new list if it's different
     if ($nuri ne $uri) {
