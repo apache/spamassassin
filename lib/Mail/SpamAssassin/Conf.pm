@@ -111,7 +111,7 @@ sub new {
 
   $self->{num_check_received} = 2;
 
-  $self->{razor_config} = $main->sed_path ("~/razor.conf");
+  $self->{razor_config} = undef;
   $self->{razor_timeout} = 10;
   $self->{rbl_timeout} = 30;
 
