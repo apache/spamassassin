@@ -144,11 +144,16 @@ SPAMASSASSIN RELEASE PROCEDURE
 
 	(where X.Y.N is the new version number)
 
+- copy the tarballs to the website.
+
+        cp ~/site/released/Mail-SpamAssassin-[VERSION].* \
+            /www/spamassassin.apache.org/released/
+
 - edit SpamAssassin site through WebMake, change released_version item
   at top of file to be X.Y.Z, then run "webmake" or hit "Build Fully"
   in the Web interface
 
-- run this to update the mirrors:
+- run this to update the mirrors: (NO LONGER REQUIRED FOR APACHE SITE)
 
     ~/lib/html_spamassassin_put.rsync
 

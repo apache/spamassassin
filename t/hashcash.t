@@ -6,7 +6,7 @@ use SATest; sa_t_init("hashcash");
 # we need DB_File to support the double-spend db.
 use constant HAS_DB_FILE => eval { require DB_File; };
 
-use Test; BEGIN { plan tests => HAS_DB_FILE ? 3 : 0 };
+use Test; BEGIN { plan tests => HAS_DB_FILE ? 4 : 0 };
 
 exit unless HAS_DB_FILE;
 
@@ -17,9 +17,16 @@ q{ HASHCASH_24 }, 'hashcash24',
 );
 
 tstprefs ('
-    hashcash_accept test@example.com test2@example.com
+    hashcash_accept test@example.com test2@example.com jm@jmason.org
     hashcash_doublespend_path log/user_state/hashcash_seen
     ');
+
+sarun ("-L -t < data/nice/001", \&patterns_run_cb);
+ok_all_patterns();
+
+%patterns = (
+q{ HASHCASH_21 }, 'hashcash21',
+);
 
 sarun ("-L -t < data/nice/001", \&patterns_run_cb);
 ok_all_patterns();
