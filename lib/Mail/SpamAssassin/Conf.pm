@@ -34,6 +34,8 @@ Mail::SpamAssassin::Conf - SpamAssassin configuration file
 
   lang es describe FROM_FORGED_HOTMAIL Forzado From: simula ser de hotmail.com
 
+  lang pt_BR report O programa detetor de Spam ZOE [...]
+
 =head1 DESCRIPTION
 
 SpamAssassin is configured using traditional UNIX-style configuration files,
@@ -1229,18 +1231,9 @@ Whether SpamAssassin should automatically feed high-scoring mails (or
 low-scoring mails, for non-spam) into its learning systems.  The only
 learning system supported currently is a naive-Bayesian-style classifier.
 
-Note that certain tests are ignored when determining whether a message
-should be trained upon:
-
- - rules with tflags set to 'learn' (the Bayesian rules)
-
- - rules with tflags set to 'userconf' (user white/black-listing rules, etc)
-
- - rules with tflags set to 'noautolearn'
-
-Also note that auto-training occurs using scores from either scoreset
-0 or 1, depending on what scoreset is used during message check.  It is
-likely that the message check and auto-train scores will be different.
+See the documentation for the
+C<Mail::SpamAssassin::Plugin::DefaultAutoLearnDiscriminator> plugin module
+for details on how Bayes auto-learning is implemented by default.
 
 =cut
 
@@ -1248,36 +1241,6 @@ likely that the message check and auto-train scores will be different.
     setting => 'bayes_auto_learn',
     default => 1,
     type => $CONF_TYPE_BOOL
-  });
-
-=item bayes_auto_learn_threshold_nonspam n.nn	(default: 0.1)
-
-The score threshold below which a mail has to score, to be fed into
-SpamAssassin's learning systems automatically as a non-spam message.
-
-=cut
-
-  push (@cmds, {
-    setting => 'bayes_auto_learn_threshold_nonspam',
-    default => 0.1,
-    type => $CONF_TYPE_NUMERIC
-  });
-
-=item bayes_auto_learn_threshold_spam n.nn	(default: 12.0)
-
-The score threshold above which a mail has to score, to be fed into
-SpamAssassin's learning systems automatically as a spam message.
-
-Note: SpamAssassin requires at least 3 points from the header, and 3
-points from the body to auto-learn as spam.  Therefore, the minimum
-working value for this option is 6.
-
-=cut
-
-  push (@cmds, {
-    setting => 'bayes_auto_learn_threshold_spam',
-    default => 12.0,
-    type => $CONF_TYPE_NUMERIC
   });
 
 =item bayes_ignore_header header_name
