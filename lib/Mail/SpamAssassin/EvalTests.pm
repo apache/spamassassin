@@ -1461,7 +1461,7 @@ sub message_from_debian_bts {
   my ($self)    = @_;
 
   my $all       = $self->get('ALL');
-  if ($all      =~ /^X-\w+-PR-\w+:\s+/m) {
+  if ($all      =~ /^X-[A-Za-z0-9]+-PR-[MP][a-z]+: /m) { # X-Project-PR-(Message|Package)
     return 1 if $all =~ /^Subject:\s+Bug#\d+: /m;
   }
   elsif ($all   =~ /^From:\s+owner\@/mi and
@@ -1553,8 +1553,7 @@ sub porn_word_test {
 }
 
 sub check_for_very_long_text {
-  my ($self, $body, $len) = @_;
-
+  my ($self, $body, $len) = (@_, 0);
   my $count = 0;
   foreach my $line (@{$body}) { $count += length($line); }
   dbg ("check_for_very_long_text: found $count bytes");
