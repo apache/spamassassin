@@ -1,13 +1,16 @@
-#!/usr/bin/perl
+#!/usr/local/bin/perl
 
 if ($#ARGV!=0) {
-    print stderr "Usage: $0 <lang> where <lang> is the two letter suffix for the language\n";
+    print stderr "Usage: $0 <lang>
+where <lang> is the two letters suffix for the language
+";
     exit;
 }
 
 $lang=$ARGV[0];
 
-link "30_text_$lang.cf", "orig_30_text_$lang.cf";
+unlink "orig_30_text_$lang.cf" if -f "orig_30_text_$lang.cf";
+system "cp 30_text_$lang.cf orig_30_text_$lang.cf";
 
 open IN, "30_text_$lang.cf";
 while (<IN>) {
@@ -20,6 +23,12 @@ open IN, "cat *|grep '^describe'|";
 open OUT, ">>30_text_$lang.cf";
 while (<IN>) {
     next unless /^describe\s([^\s]+)\s/;
-    next if $rule{$1};
-    print OUT "lang $lang $_";
+    $r=$1;
+    next if $rule{$r};
+    $rule{$r}=1;
+    $expr=`cat * |grep $r|grep -v describe|grep -v score|grep -v -e '^test'|grep -v '\#'`;
+    $expr=~s/^.*$r\s+//;
+    chomp;
+    # print "$_+++$expr";
+    print OUT "lang $lang $_ $expr";
 }
