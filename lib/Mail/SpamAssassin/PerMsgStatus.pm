@@ -1186,13 +1186,14 @@ sub do_body_tests {
     $evalstr .= '
       return if ('.$score.' > 0) && $self->{stop_at_threshold} && $self->is_spam();
       if ($self->{conf}->{scores}->{q{'.$rulename.'}}) {
-        '.$rulename.'_body_test($self, $_); # call procedurally as it is faster
+        # call procedurally as it is faster. also note $_ is passed implicitly as a global
+        '.$rulename.'_body_test($self);
       }
     ';
     $evalstr2 .= '
     sub '.$rulename.'_body_test {
            my $self = shift;
-           $_ = shift;
+           # note: $_ must be the current line being checked.
            if ('.$pat.') { 
 	       $self->got_body_pattern_hit (q{'.$rulename.'}); 
 	       dbg("Ran body-text regex rule '.$rulename.' ======> got hit", "rulesrun", 2) if $Mail::SpamAssassin::DEBUG->{enabled};
