@@ -2,8 +2,6 @@
 
 cd /home/jm/ftp/spamassassin/masses
 (
-tar xvfz logs.gz && rm -f logs.gz
-
 make clean
 make evolve && ./continual_evolve.sh -s 30000 -b 20.0 -c 1.001
 )  > log 2>&1
