@@ -437,3 +437,24 @@ describe T_X_HEADER_PITCHID Has X-Header-Pitchid header
 header T_WS_PHRASE                To =~ /\s*"\s"\s/
 describe T_WS_PHRASE              Phrase part of address is a space
 
+# bug 1876
+body 		T_GREATGIFT		/Makes a great.{1,20}gift/i
+describe	T_GREATGIFT		This spam makes a great gift!
+
+body 		T_WEHAVEASOLUTION		/We have a solution/i
+describe	T_WEHAVEASOLUTION		Claims to have a solution
+
+body		T_WSDOMAIN		/YourDomain\.ws/i
+describe	T_WSDOMAIN		Selling ".ws" domains
+
+rawbody		T_PUSHHERELINK		/<a[^>]*>[^<]*((push|go)\s(here|this) |cease.{1,10}mail)[^<]*<\/a>/i
+describe	T_PUSHHERELINK		Link asks you to "push here" or "go here" or "cease mail" or the like
+
+rawbody		T_MULTIPLEIMAGES		/<a[^>]*>[^<]*<img[^>]*>[^>]*<\/a>.*<a [^>]*>[^<]*<img[^>]*>[^>]*<\/a>.*<a[^>]*>[^<]*<img[^>]*>[^>]*<\/a>/si
+describe	T_MULTIPLEIMAGES		Contains 3 or more hyperlinked images
+
+uri 		T_OFFER888 		/Offer888/i
+uri 		T_PERMISSIONPASS 		/PermissionPass/i
+uri 		T_EQUALAMAIL 		/EqualaMAIL/i
+uri 		T_DOLLARMACHINE 		/dollar.?machine/i
+uri 		T_HITBOX 			/hitbox\.com/i
