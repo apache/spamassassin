@@ -397,6 +397,14 @@ sub base64_decode {
   return $out;
 }
 
+sub qp_decode {
+  local $_ = shift;
+
+  s/\=\r?\n//gs;
+  s/\=([0-9A-F]{2})/chr(hex($1))/ge;
+  return $_;
+}
+
 ###########################################################################
 
 sub portable_getpwuid {
