@@ -485,7 +485,7 @@ sub check_for_from_domain_in_received_headers {
       return ($desired eq 'true');
   }
 
-  $self->{from_domain_in_received}->{$domain} = '0e0';
+  $self->{from_domain_in_received}->{$domain} = 0;
   return ($desired ne 'true');   
 }
 
