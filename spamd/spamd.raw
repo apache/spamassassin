@@ -71,6 +71,9 @@ my %opt = (
   'ident-timeout' => 5.0,
 );
 
+# testing for taintedness only works before detainting @ENV
+Mail::SpamAssassin::Util::am_running_in_taint_mode();
+
 # untaint all command-line options and ENV vars, since spamd is launched
 # as a daemon from a known-safe environment.
 @ARGV = map { /^(.*)$/ and $_ = $1; } @ARGV;
