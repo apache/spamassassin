@@ -555,7 +555,6 @@ Dump the contents of the Bayes DB
 sub dump_bayes_db {
   my($self,@opts) = @_;
   $self->{bayes_scanner}->dump_bayes_db(@opts);
-  1;
 }
 
 =item $f->signal_user_changed ( [ { opt => val, ... } ] )

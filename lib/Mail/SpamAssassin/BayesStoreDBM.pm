@@ -154,7 +154,7 @@ sub tie_db_readonly {
   dbg("bayes: found bayes db version ".$self->{db_version});
 
   # If the DB version is one we don't understand, abort!
-  if ( $self->_check_db_version() ) {
+  if ( !$self->_check_db_version() ) {
     dbg("bayes: bayes db version ".$self->{db_version}." is newer than we understand, aborting!");
     $self->untie_db();
     return 0;
@@ -241,7 +241,7 @@ sub tie_db_writable {
   # DB version update and do it if necessary if either has a problem,
   # fail immediately
   #
-  if ( $found && $self->_upgrade_db() ) {
+  if ( $found && !$self->_upgrade_db() ) {
     $self->untie_db();
     return 0;
   }
@@ -272,20 +272,20 @@ sub _check_db_version {
 
   if ( $db_ver > $self->DB_VERSION ) { # current DB is newer, ignore the DB!
     warn "bayes: Found DB Version $db_ver, but can only handle up to version ".$self->DB_VERSION."\n";
-    return 1;
+    return;
   }
 
-  return 0;
+  return 1;
 }
 
 # Check to see if we need to upgrade the DB, and do so if necessary
 sub _upgrade_db {
   my ($self) = @_;
 
-  return 0 if ( $self->{db_version} == $self->DB_VERSION );
+  return 1 if ( $self->{db_version} == $self->DB_VERSION );
   if ( $self->_check_db_version() ) {
     dbg("bayes: bayes db version ".$self->{db_version}." is newer than we understand, aborting!");
-    return 1;
+    return 0;
   }
 
   # If the current DB version is lower than the new version, upgrade!
@@ -341,7 +341,7 @@ sub _upgrade_db {
     my %new_toks;
     my $umask = umask 0;
     tie %new_toks, "DB_File", "${name}.new", O_RDWR|O_CREAT|O_EXCL,
-          (oct ($main->{conf}->{bayes_file_mode}) & 0666) or return 1;
+          (oct ($main->{conf}->{bayes_file_mode}) & 0666) or return 0;
     umask $umask;
 
     # add the magic tokens to the new db.
@@ -394,13 +394,13 @@ sub _upgrade_db {
       next unless (-f $newf);
       if (!rename ($newf, $oldf)) {
         warn "rename $newf to $oldf failed: $!\n";
-        return 1;
+        return 0;
       }
     }
 
     # re-tie to the new db in read-write mode ...
     tie %{$self->{db_toks}},"DB_File", $name, O_RDWR|O_CREAT,
-	 (oct ($main->{conf}->{bayes_file_mode}) & 0666) or return 1;
+	 (oct ($main->{conf}->{bayes_file_mode}) & 0666) or return 0;
 
     dbg ("bayes: upgraded database format from v".$self->{db_version}." to v2 in ".(time - $started)." seconds");
     $self->{db_version} = 2; # need this for other functions which check
@@ -412,13 +412,16 @@ sub _upgrade_db {
   # }
   # ... and so on.
 
-  return 0;
+  return 1;
 }
 
 ###########################################################################
 
 sub untie_db {
   my $self = shift;
+
+  return if (!$self->{already_tied});
+
   dbg("bayes: $$ untie-ing");
 
   foreach my $dbname (@DBNAMES) {
@@ -439,6 +442,8 @@ sub untie_db {
 
   $self->{already_tied} = 0;
   $self->{db_version} = undef;
+
+  return 1;
 }
 
 ###########################################################################
@@ -1064,7 +1069,7 @@ sub _sync_journal_trapped {
   }
 
   # else, that's the lot, we're synced.  return
-  1;
+  return 1;
 }
 
 sub tok_touch_token {
@@ -1167,7 +1172,7 @@ sub scan_count_get {
     return $count;
   }
 
-  0;
+  return 0;
 }
 
 ###########################################################################

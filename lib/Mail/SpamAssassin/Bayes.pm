@@ -257,7 +257,7 @@ sub new {
 
 sub finish {
   my $self = shift;
-  if (!$self->{conf}->{use_bayes}) { return; }
+  #if (!$self->{conf}->{use_bayes}) { return; }
 
   # if we're untying too much, uncomment this...
   # use Carp qw(cluck); cluck "stack trace at untie";
@@ -1269,7 +1269,8 @@ sub chi_squared_probs_combine  {
 sub dump_bayes_db {
   my($self, $magic, $toks, $regex) = @_;
 
-  return 0 unless $self->{conf}->{use_bayes};
+  # allow dump to occur even if use_bayes disables everything else ...
+  #return 0 unless $self->{conf}->{use_bayes};
   return 0 unless $self->{store}->tie_db_readonly();
   
   my @vars = $self->{store}->get_storage_variables();
