@@ -2,7 +2,8 @@
 
 use lib '.'; use lib 't';
 use SATest; sa_t_init("db_awl_path");
-use Test; BEGIN { plan tests => 2 };
+use Test; BEGIN { plan tests => 4 };
+use IO::File;
 
 # ---------------------------------------------------------------------------
 
@@ -23,10 +24,21 @@ tstprefs ("
         auto_whitelist_mode 0755
 ");
 
-warn "\tExpecting a 'cannot create tmp lockfile' warning here...\n";
+my $fh = IO::File->new_tmpfile();
+ok($fh);
+open(STDERR, ">&=".fileno($fh)) || die "Cannot reopen STDERR";
 ok (!sarun (
 "--add-addr-to-whitelist whitelist_test\@whitelist.spamassassin.taint.org",
                 \&patterns_run_cb));
+seek($fh, 0, 0);
+my $error = do {
+  local $/;
+  <$fh>;
+};
+
+print "# $error\n";
+ok($error, qr/Cannot create tmp lockfile/, "Check we get the right error back");
+
 
 # and this mail should *not* be whitelisted as a result.
 %patterns = %is_spam_patterns;
