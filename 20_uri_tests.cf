@@ -19,10 +19,10 @@ uri HTTP_ESCAPED_HOST       /^https?\:\/\/[^\/]*%/
 describe HTTP_ESCAPED_HOST      Uses %-escapes inside a URL's hostname
 
 # note: do not match \r or \n
-uri HTTP_CTRL_CHARS_HOST    /^https\:\/\/[^\/]*[\x00-\x08\x0b\x0c\x0e-\x1f]/
+uri HTTP_CTRL_CHARS_HOST    /^https?\:\/\/[^\/]*[\x00-\x08\x0b\x0c\x0e-\x1f]/
 describe HTTP_CTRL_CHARS_HOST   Uses control sequences inside a URL's hostname
 
-uri PORN_4  /^https:\/\/[\w\.]*(?:xxx|sex|anal|slut|pussy|cum|nympho|suck|porn|hardcore|taboo|whore|voyeur|lesbian|gurlpages|naughty|lolita|teen|schoolgirl|kooloffer|erotic)\w*\./
+uri PORN_4  /^https?:\/\/[\w\.]*(?:xxx|sex|anal|slut|pussy|cum|nympho|suck|porn|hardcore|taboo|whore|voyeur|lesbian|gurlpages|naughty|lolita|teen|schoolgirl|kooloffer|erotic)\w*\./
 describe PORN_4         Uses words and phrases which indicate porn (4)
 
 # some frequently-advertised URLs
@@ -53,13 +53,13 @@ describe WWW_TRAFFICWOW_NET         Frequent SPAM content
 uri WWW_NETSITESFORFREE_NET     /netsitesforfree\.net/i
 describe WWW_NETSITESFORFREE_NET    Frequent SPAM content
 
-uri UNSUB_SCRIPT        /^https?:\/\/.*cgi.*(unsubscribe|remove)/i
+uri UNSUB_SCRIPT        /^https?:\/\/.*?cgi.*?(unsubscribe|remove)/i
 describe UNSUB_SCRIPT       URL of CGI script called "unsubscribe" or "remove"
 
-uri UNSUB_PAGE      /^https?:\/\/.*(?!cgi).*unsubscribe/i
+uri UNSUB_PAGE      /^https?:\/\/.*?(?!cgi).*?unsubscribe/i
 describe UNSUB_PAGE     URL of page called "unsubscribe"
 
-uri REMOVE_PAGE     /^https?:\/\/[^\/]+\/remove/
+uri REMOVE_PAGE     /^https?:\/\/[^\/]+\/.*?remove/
 describe REMOVE_PAGE        URL of page called "remove"
 
 uri MAILTO_WITH_SUBJ_REMOVE /^mailto:\S+\?subject=[3D=\s"']*remove/is
@@ -71,7 +71,7 @@ describe MAILTO_WITH_SUBJ   Includes a link to send a mail with a subject
 uri MAILTO_TO_SPAM_ADDR /^mailto:[a-z]+\d{2,}\@/is
 describe MAILTO_TO_SPAM_ADDR    Includes a link to a likely spammer email address
 
-uri MAILTO_TO_REMOVE    /^mailto:.*remove/is
+uri MAILTO_TO_REMOVE    /^mailto:.*?remove/is
 describe MAILTO_TO_REMOVE   Includes a 'remove' email address
 
 # one spamhaus uses servers numbered like this:
