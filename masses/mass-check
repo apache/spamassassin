@@ -7,7 +7,7 @@ use Mail::SpamAssassin::NoMailAudit;
 #use Mail::Audit;
 #use Devel::Peek;
 
-$cffile = '../rules/50_scores.cf';
+$cffile = '../rules';
 
 if (defined $ARGV[0] && $ARGV[0] eq '-c') {
   shift; $cffile = $ARGV[0]; shift;
@@ -155,10 +155,12 @@ sub mass_check_mailbox {
   while (!eof MBOX) {
     my @msg = ();
     my $msgid = undef;
+    my $hits = '';
     $count++;
 
     while (<MBOX>) {
       /^Message-[Ii][Dd]: (.*)\s*$/ and $msgid = $1;
+      /^X-Spam-Status: .* tests=(.*)$/ and $hits = $1;
 
       if (/^$/) {
 	if (!defined ($msgid)) {
@@ -226,7 +228,11 @@ sub readscores {
   my $scores = { };
 
   print "Reading scores from \"$cffile\"...\n";
-  open (IN, "<$cffile") or warn "cannot read $cffile\n";
+  if (-d $cffile) {
+    open (IN, "<$cffile/*scores*.cf") or warn "cannot read $cffile\n";
+  } else {
+    open (IN, "<$cffile") or warn "cannot read $cffile\n";
+  }
   while (<IN>) {
     s/#.*$//g; s/^\s+//; s/\s+$//;
 
