@@ -2256,15 +2256,15 @@ Define a raw-body eval test.  See above.
 
 =item full SYMBOLIC_TEST_NAME /pattern/modifiers
 
-Define a full-body pattern test.  C<pattern> is a Perl regular expression.
+Define a full message pattern test.  C<pattern> is a Perl regular expression.
 
-The 'full body' of a message is the fully pristine message body, including
-all parts (including images or other attachments), MIME boundaries,
-etc.
+The full message is the pristine message headers plus the pristine message
+body, including all MIME data such as images, other attachments, MIME
+boundaries, etc.
 
 =item full SYMBOLIC_TEST_NAME eval:name_of_eval_method([args])
 
-Define a full-body eval test.  See above.
+Define a full message eval test.  See above.
 
 =cut
 
