@@ -25,7 +25,7 @@ use Mail::SpamAssassin::Constants qw(:ip);
 use File::Spec;
 use IO::Socket;
 use IPC::Open2;
-use POSIX ":sys_wait_h";        # sorry Craig ;)
+use POSIX ":sys_wait_h";
 
 use strict;
 use bytes;
@@ -35,21 +35,18 @@ use vars qw{
   $KNOWN_BAD_DIALUP_RANGES @EXISTING_DOMAINS $IS_DNS_AVAILABLE $VERSION
 };
 
-# don't lookup SpamAssassin.org -- use better-connected sites
-# instead ;)
+# use very well-connected domains
 @EXISTING_DOMAINS = qw{
-  kernel.org
-  slashdot.org
+  bbc.co.uk
+  cnn.com
+  doubleclick.com
+  ebay.com
+  etrade.com
   google.com
-  google.de
-  microsoft.com
+  kernel.org
+  msn.com
   yahoo.com
-  yahoo.de
-  amazon.com
-  amazon.de
-  nytimes.com
-  leo.org
-  gwdg.de
+  akamai.com
 };
 
 $IS_DNS_AVAILABLE = undef;
