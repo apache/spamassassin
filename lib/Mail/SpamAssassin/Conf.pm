@@ -44,8 +44,8 @@ sub new {
   $self->{full_tests} = { };
   $self->{full_evals} = { };
 
-  $self->{required_hits} = 5;
-  $self->{auto_report_threshold} = 20;
+  $self->{required_hits} = 5.0;
+  $self->{auto_report_threshold} = 25.0;
   $self->{report_template} = '';
   $self->{terse_report_template} = '';
   $self->{spamtrap_template} = '';
@@ -153,7 +153,7 @@ sub _parse {
     }
 
     if (/^required[-_]hits\s+(\S+)$/) {
-      $self->{required_hits} = $1+0; next;
+      $self->{required_hits} = $1+0.0; next;
     }
 
     if (/^score\s+(\S+)\s+(\-*[\d\.]+)$/) {
@@ -184,7 +184,7 @@ sub _parse {
       $self->{spamtrap_template} .= $1."\n"; next;
     }
 
-    if (/^auto[-_]report[-_]threshold\s+(\d+)$/) {
+    if (/^auto[-_]report[-_]threshold\s+(\S+)$/) {
       $self->{auto_report_threshold} = $1+0; next;
     }
 

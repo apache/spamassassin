@@ -582,8 +582,8 @@ sub check_for_round_the_world_received {
   #     (Lotus Domino Release 5.0.8) with ESMTP id 2001113008574773:260 ;
   #     Fri, 30 Nov 2001 08:57:47 +1000
   if ($rcvd =~ /
-  	\nfrom\s(\S+\.${CCTLDS_WITH_LOTS_OF_OPEN_RELAYS})\s\(.{0,200}
-  	\nfrom\s(\S+)\s.{0,30}\[(\d+\.\d+\.\d+\.\d+)\]
+  	\nfrom.{0,20}\b(\S+\.${CCTLDS_WITH_LOTS_OF_OPEN_RELAYS})\s\(.{0,200}
+  	\nfrom.{0,20}\b(\S+\.\S+\.\S+)\b.{0,30}\[(\d+\.\d+\.\d+\.\d+)\]
   /osix) { $relay = $1; $relayer = $2; $relayerip = $3; goto gotone; }
 
   return 0;
