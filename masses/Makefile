@@ -9,7 +9,7 @@ PGALIB = pgapack
 
 #GALIB = galib245
 
-all: evolve
+all: evolve tmp/scores.data
 #echo "Either do  make evolve  or  make craig-evolve"
 
 #evolve: tmp/tests.h evolve.o
@@ -21,7 +21,7 @@ evolve: tmp/tests.h craig-evolve.cxx
 	$(CC) -Wall $(OPT) -Dlinux -DWL=2 -DOPTIMIZE -L$(PGALIB)/lib/linux -I$(PGALIB)/include craig-evolve.cxx -o evolve -lpgaO -lm
 	strip evolve
 
-tmp/tests.h: spam.log nonspam.log tmp/ranges.data logs-to-c
+tmp/scores.data tmp/tests.h: spam.log nonspam.log tmp/ranges.data logs-to-c
 	./logs-to-c
 
 tmp/ranges.data: freqs score-ranges-from-freqs

@@ -23,7 +23,7 @@ void WriteString(PGAContext *ctx, FILE *fp, int p, int pop);
 void showSummary(PGAContext *ctx);
 
 const double threshold = 5.0;
-double nybias = 10.0;
+double nybias = 5.0;
 const int exhaustive_eval = 1;
 
 const double mutation_rate = 0.01;
@@ -130,8 +130,13 @@ int main(int argc, char **argv) {
 
      //PGASetMutationOrCrossoverFlag(ctx, PGA_TRUE);
 
+     // jm: try out using ranges instead of our own mutator
+     //PGASetMutationBoundedFlag(ctx, PGA_FALSE);
+     //PGASetUserFunction(ctx, PGA_USERFUNCTION_MUTATION, (void *)myMutation);
+
      PGASetMutationBoundedFlag(ctx, PGA_FALSE);
-     PGASetUserFunction(ctx, PGA_USERFUNCTION_MUTATION, (void *)myMutation);
+     PGASetMutationType(ctx, PGA_MUTATION_RANGE);
+     PGASetRealInitRange (ctx, range_lo, range_hi);
 
      //PGASetCrossoverType(ctx, PGA_CROSSOVER_ONEPT);
      PGASetCrossoverProb(ctx, crossover_rate);
@@ -233,9 +238,12 @@ double evaluate(PGAContext *ctx, int p, int pop)
 
   double ynweight,nyweight;
 
+#if 1
+
   // just count how far they were from the threshold, in each case
-  ynweight = ynscore - (ga_yn * threshold);
+  ynweight = (ga_yn * threshold) - ynscore;
   nyweight = nyscore - (ga_ny * threshold);
+  //printf ("JMD %f %d  %f %d\n", nyscore, ga_ny, ynscore, ga_yn);
 
   if (justCount) {
     dump(stdout);
@@ -245,7 +253,7 @@ double evaluate(PGAContext *ctx, int p, int pop)
   return  ynweight +            /* all FNs' points from threshold */
 	  nyweight*nybias;      /* all FPs' points from threshold */
 
-#if 0
+#else
   // Craig's: use log(score).
   //
   // off for now, let's see how the more aggressive FP-reducing algo
@@ -265,6 +273,8 @@ double evaluate(PGAContext *ctx, int p, int pop)
  * This mutation function tosses a weighted coin for each allele.  If the allele is to be mutated,
  * then the way it's mutated is to regress it toward the mean of the population for that allele,
  * then add a little gaussian noise.
+ *
+ * Aug 21 2002 jm: we now use ranges and allow PGA to take care of it.
  */
 int myMutation(PGAContext *ctx, int p, int pop, double mr) {
     int         count=0;
