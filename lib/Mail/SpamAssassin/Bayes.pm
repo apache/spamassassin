@@ -169,8 +169,8 @@ use constant ROBINSON_MIN_PROB_STRENGTH => 0.346;
 
 # note: these seem to work well for Gary-combining.
 #use constant ROBINSON_X_CONSTANT => 0.6;
-#use constant ROBINSON_S_CONSTANT => 0.14;
-#use constant ROBINSON_MIN_PROB_STRENGTH => 0.352;
+#use constant ROBINSON_S_CONSTANT => 0.16;
+#use constant ROBINSON_MIN_PROB_STRENGTH => 0.43;
 
 # Precompute S * X
 use constant ROBINSON_S_TIMES_X => ROBINSON_S_CONSTANT * ROBINSON_X_CONSTANT;
