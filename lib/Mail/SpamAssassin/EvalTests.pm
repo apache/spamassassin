@@ -3,7 +3,7 @@
 package Mail::SpamAssassin::EvalTests;
 1;
 
-package Mail::SpamAssassin::Msg;
+package Mail::SpamAssassin::PerMsgStatus;
 
 use Mail::SpamAssassin::Conf;
 use Carp;

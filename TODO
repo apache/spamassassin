@@ -1,0 +1,28 @@
+TODO (ALTERNATIVE UI'S)
+-----------------------
+
+- Make it windows-friendly, esp. for integration with Outlook etc. This should
+  be possible, using MAPI to access and rewrite the messages (volunteers needed
+  for this one!)
+
+- Provide an interface for use on a system-wide basis, integrating it with the
+  MTA.  This should be easy enough, if the overhead of forking a perl
+  interpreter per-message is acceptable.
+
+- For systems with a high mail volume, this overhead may be too high.  In this
+  case, provide a POE-based daemon which processes messages, and a low-overhead
+  C client which provides the interface to that daemon.
+
+- For POP users, write a POE-based daemon which allows POP users to connect and
+  retrieve their mail from their ISP, with spam filtering provided by
+  SpamAssassin.  In effect, this is a spam-filtering POP proxy.
+
+
+
+TODO (BETTER SPAM-BLOCKING)
+---------------------------
+
+- Add ban-file support
+
+- Add a whitelist system (cf. mjd's site) for "public" addresses
+

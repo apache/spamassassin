@@ -31,6 +31,7 @@ sub new {
 
   $self->{scores} = { };
   $self->{required_hits} = 5;
+  $self->{report_template} = '';
 
   $self;
 }
@@ -40,6 +41,8 @@ sub new {
 sub parse_rules {
   my ($self, $rules) = @_;
   local ($_);
+
+  my $counter = 'aaaaa';
 
   foreach $_ (split (/\n/, $rules)) {
     s/\r//g; s/(?<!\\)\#.*$//; s/^\s+//; s/\s+$//; /^$/ and next;
@@ -72,6 +75,7 @@ sub parse_rules {
 
     if (/^body\s+(\S+)\s+(.*)$/) {
       my $name = $1; my $tst = $2;
+      if ($name eq '.') { $name = ($counter++); }
       $self->{body_tests}->{$name} = $tst;
       $self->{scores}->{$name} ||= 1;
       next;
@@ -84,6 +88,11 @@ sub parse_rules {
 
     if (/^score\s+(\S+)\s+(\d+)$/) {
       $self->{scores}->{$1} = $2+0;
+      next;
+    }
+
+    if (/^report\s*(.*)$/) {
+      $self->{report_template} .= $1."\n";
       next;
     }
 
