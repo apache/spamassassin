@@ -34,12 +34,13 @@ sub new {
 # by Kelsey Cummings <kgc@sonic.net>, with mods by jm and quinlan
 
 use constant LOCK_MAX_AGE => 600;	# seconds 
-use constant LOCK_MAX_RETRIES => 30;	# average 1 per second
 
 sub safe_lock {
-  my ($self, $path) = @_;
+  my ($self, $path, $max_retries) = @_;
   my $is_locked = 0;
   my @stat;
+
+  $max_retries ||= 30;
 
   my $lock_file = "$path.lock";
   my $lock_tmp = Mail::SpamAssassin::Util::untaint_file_path
@@ -54,7 +55,7 @@ sub safe_lock {
   autoflush LTMP 1;
   dbg("lock: $$ created $lock_tmp");
 
-  for (my $retries = 0; $retries < LOCK_MAX_RETRIES; $retries++) {
+  for (my $retries = 0; $retries < $max_retries; $retries++) {
     if ($retries > 0) {
       select(undef, undef, undef, (rand(1.0) + 0.5));
     }

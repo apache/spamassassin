@@ -187,7 +187,13 @@ sub tie_db_writable {
     };
   }
 
-  if ($main->{locker}->safe_lock ($path)) {
+  my $tout;
+  if ($main->{learn_wait_for_lock}) {
+    $tout = 300;	# TODO: Dan to write better lock code
+  } else {
+    $tout = 10;
+  }
+  if ($main->{locker}->safe_lock ($path, $tout)) {
     $self->{locked_file} = $path;
     $self->{is_locked} = 1;
   } else {
@@ -486,7 +492,9 @@ sub nspam_nham_get {
 
 sub get_running_expire_tok {
   my ($self) = @_;
-  return $self->{db_toks}->{$RUNNING_EXPIRE_MAGIC_TOKEN};
+  my $running = $self->{db_toks}->{$RUNNING_EXPIRE_MAGIC_TOKEN};
+  if (!$running || $running =~ /\D/) { return undef; }
+  return $running;
 }
 
 sub set_running_expire_tok {
