@@ -248,8 +248,9 @@ The modifications made are as follows:
 
 =item Subject: header for spam mails
 
-The string C<*****SPAM*****> is prepended to the subject,
-unless the C<rewrite_subject 0> configuration option is given.
+The string C<*****SPAM*****> (changeable with C<subject_tag> config option) is
+prepended to the subject, unless the C<rewrite_subject 0> configuration option
+is given.
 
 =item X-Spam-Status: header for spam mails
 
@@ -351,8 +352,9 @@ sub rewrite_as_spam {
 
   # First, rewrite the subject line.
   if ($self->{conf}->{rewrite_subject}) {
+    my $tag = $self->{conf}->{subject_tag};
     $_ = $srcmsg->get_header ("Subject"); $_ ||= '';
-    s/^/\*\*\*\*\*SPAM\*\*\*\*\* /g;
+    s/^/${tag} /g;
     $self->{msg}->replace_header ("Subject", $_);
   }
 
