@@ -431,3 +431,14 @@ meta T_HTML_COMMENT_RATIO_60_70_HTML_MESSAGE		__HTML_COMMENT_RATIO_60_70 && HTML
 meta T_HTML_COMMENT_RATIO_70_80_HTML_MESSAGE		__HTML_COMMENT_RATIO_70_80 && HTML_MESSAGE
 meta T_HTML_COMMENT_RATIO_80_90_HTML_MESSAGE		__HTML_COMMENT_RATIO_80_90 && HTML_MESSAGE
 meta T_HTML_COMMENT_RATIO_90_100_HTML_MESSAGE		__HTML_COMMENT_RATIO_90_100 && HTML_MESSAGE
+
+# a new spamware tool; catch it
+header T_FORGED_RCVD_FROM_NUM	Received =~ /from \S+ \(\d+ \[/
+describe T_FORGED_RCVD_FROM_NUM	Received headers forged (numeric hostname)
+
+header T_RATWARE_EMPTY_HELO	Received =~ /from  \(\) by /
+describe T_RATWARE_EMPTY_HELO	Received headers forged (empty HELO)
+
+header T_RATWARE_RCVD_BONUS_SPC	Received =~ /\) by  [a-zA-Z0-9]/
+describe T_RATWARE_RCVD_BONUS_SPC Received headers forged (extra spaces)
+
