@@ -27,27 +27,13 @@ http://spamassassin.org/ , and install that, like so:
 	make
 	make install                            [as root]
 
-To install as non-root into a directory named "sausr" under your home
-directory, do something like this:
-
-	[unzip/untar the archive]
-	cd Mail-SpamAssassin-*
-	perl Makefile.PL PREFIX=~/sausr SYSCONFDIR=~/saetc
-	[option: add -DSPAMC_SSL to $CFLAGS to build an SSL-enabled spamc]
-	make
-	make install
+To install as non-root, see the directions below.
 
 If you are running AFS, you may also need to specify INSTALLSITELIB and
 SITELIBEXP.
 
-This will install the SpamAssassin modules and rules below the ~/sausr
-and ~/saetc directories off your home directory. Please see the file
-PACKAGING, sections "Changing paths in the Makefile" and "Setting further
-options on the command line" for more informations on available command
-line variables.
-
 Note that you can upgrade SpamAssassin using these instructions, as long
-as you take care to read the caveats at the top of this file.   Upgrading
+as you take care to read the caveats in the file UPGRADES.   Upgrading
 will not delete your learnt Bayes data or local rule modifications.
 
 If you're using SunOS 4.1.x, see
@@ -82,6 +68,9 @@ These steps assume the following, so substitute as necessary:
   - Your home directory is /home/user
   - The location of the procmail executable is /usr/bin/procmail
 
+Many more details of this process are at
+http://wiki.apache.org/spamassassin/SingleUserUnixInstall
+
 1. Uncompress and extract the SpamAssassin archive, using "unzip" or "tar
 xvfz", in a temporary directory.
 
@@ -92,7 +81,7 @@ xvfz", in a temporary directory.
 3. Make SpamAssassin as normal, but using your home directory as the
 target:
 
-	perl Makefile.PL PREFIX=~/sausr SYSCONFDIR=~/saetc
+	perl Makefile.PL PREFIX=$HOME
 	make
 	make install
 
@@ -113,7 +102,7 @@ below lines.  If you already have a .procmailrc file, add the lines to the
 top of your .procmailrc file:
 
 :0fw: spamassassin.lock
-| /home/user/sausr/bin/spamassassin
+| /home/user/bin/spamassassin
 
 The above line filters all incoming mail through SpamAssassin and tags
 probable spam with a unique header.  If you would prefer to have spam
@@ -124,6 +113,9 @@ lines:
 :0:
 * ^X-Spam-Status: Yes
 caughtspam
+
+Also, see the file procmailrc.example and
+http://wiki.apache.org/spamassassin/UsedViaProcmail
 
 7. Now, you should be ready to send some test emails and ensure everything
 works as expected.  First, send yourself a test email that doesn't contain
@@ -168,22 +160,14 @@ native formats (RPMs, as apt-gettable packages, etc.), so you should
 be able to find these through those mechanisms, too, if you prefer.
 
 
-Required Modules
-----------------
+Required Perl/Module Versions
+-----------------------------
 
-These modules are required for SpamAssassin to build and run:
+Perl 5.6.1, and its associated modules, are required for SpamAssassin
+3.0.0 and later.
 
-  - ExtUtils::MakeMaker >= 5.45 (included in Perl 5.6.1 and later)
-
-    The ExtUtils::MakeMaker module is required in version 5.45 or later.
-    Without the proper version the build will fail to create the Makefile.
-    This is included in Perl versions 5.6.1 and later.
-
-    Version 6.16 or later is recommended (which is included in Perl 5.8.1
-    and 5.6.2).
-
-
-These additional modules are required for SpamassAssin to run:
+In additional, the following non-standard modules are also required for
+SpamAssassin to run:
 
   - Digest::SHA1    (from CPAN)
 
@@ -195,7 +179,7 @@ These additional modules are required for SpamassAssin to run:
 
   - HTML::Parser >= 3.24 (from CPAN)
 
-    Version 3.29 or later is recommended.
+    Version 3.31 or later is recommended.
 
     HTML is used for an ever-increasing amount of email so this dependency
     is unavoidable.  Run "perldoc -q html" for additional information.
@@ -218,7 +202,10 @@ These additional modules are required for SpamassAssin to run:
 
     This is a required module if you use spamd, and allow user
     configurations to be used (ie: you don't use -x, -u, -q/--sql-config,
-    -Q/--setuid-with-sql, --ldap-config, or --setuid-with-ldap).
+    -Q/--setuid-with-sql, --ldap-config, or --setuid-with-ldap).  Third
+    party utilities may also require this module for the same
+    functionality.  Storable is used to backup/restore the SpamAssassin
+    configuration in between message processing.
 
 
 Optional Additional Modules
@@ -236,8 +223,8 @@ skipped.
     auto-whitelist.  *Much* more efficient than the other standard Perl
     database packages.  Strongly recommended.
 
-    There seems to be a bug in libdb 4.1.25, which is distributed by
-    default on some versions of Linux.  See
+    There seems to be a bug in libdb 4.1.25, which is
+    distributed by default on some versions of Linux.  See
     http://wiki.apache.org/spamassassin/DbFileSleepBug for details.
 
 
@@ -284,6 +271,7 @@ skipped.
     To use Razor with SpamAssassin, you will need to be using v2.40 or
     higher.  v2.61 or higher is recommended.
 
+    More info is at http://wiki.apache.org/spamassassin/UsingRazor
 
   - DCC             http://www.rhyolite.com/anti-spam/dcc/
 
@@ -341,6 +329,7 @@ skipped.
     and arrange to peer with the rest of the public servers, to reduce
     their load.
 
+    More info is at http://wiki.apache.org/spamassassin/UsingDcc
 
   - Pyzor           http://pyzor.sourceforge.net/
 
@@ -361,6 +350,9 @@ skipped.
 	python setup.py build
 	python setup.py install
 
+    For a single user installation, change the last line to
+        python setup.py install --home=$HOME
+
     Note that your system might install the modules and scripts with
     non-world-readable permissions.  Correct this with a command such as:
 
@@ -374,6 +366,8 @@ skipped.
     Note that MIMEDefang users may need to set the 'pyzor_path'
     configuration setting, since MIMEDefang does not set a PATH by
     default.
+
+    More info is at http://wiki.apache.org/spamassassin/UsingPyzor
 
   - Net::Ident      (from CPAN)
 
