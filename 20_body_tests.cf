@@ -110,7 +110,10 @@ body NO_QS_ASKED		/NO QUESTIONS ASKED/i
 describe NO_QS_ASKED		Doesn't ask any questions
 body FULL_REFUND		/FULL REFUND/i
 describe FULL_REFUND		Offers a full refund
-body FOR_FREE			/\bfor FREE\b/i
+
+# note Marc Perkel's fix: require capital-F Free.  better -- less FPs
+body FOR_FREE			/\bfor (?-i:F)ree\b/i
+
 describe FOR_FREE		No such thing as a free lunch (1)
 body ONE_HUNDRED_PC_FREE	/\b(?:100%|completely|totally|absolutely) FREE/i
 describe ONE_HUNDRED_PC_FREE	No such thing as a free lunch (2)
