@@ -1,4 +1,4 @@
-# $Id: HTML.pm,v 1.64 2003/02/14 21:50:14 jmason Exp $
+# $Id: HTML.pm,v 1.65 2003/02/23 12:15:48 quinlan Exp $
 
 package Mail::SpamAssassin::HTML;
 1;
@@ -386,6 +386,19 @@ sub html_comment {
 
       $self->{html}{big_font_B} = 1 if (lc($type) eq "pt" && $size > 12);
     }
+  }
+}
+
+sub html_declaration {
+  my ($self, $text) = @_;
+
+  # yeah, I know it's not really a tag
+  if ($text =~ /^!doctype/i) {
+    my $tag = "!doctype";
+
+    $self->{html}{elements}++;
+    $self->{html}{tags}++;
+    $self->{html_inside}{$tag} = 0;
   }
 }
 

@@ -1127,6 +1127,7 @@ sub get_decoded_stripped_body_text_array {
 		  end => [sub { $self->html_tag(@_) }, "tagname,attr,'-1'"],
 		  text => [sub { $self->html_text(@_) }, "dtext"],
 		  comment => [sub { $self->html_comment(@_) }, "text"],
+		  declaration => [sub { $self->html_declaration(@_) }, "text"],
 		],
 		marked_sections => 1);
 
