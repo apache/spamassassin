@@ -343,9 +343,8 @@ body T_HTML_BADTAGS_U_80_90	eval:html_range('t_bad_tag_unique_ratio','0.80','0.9
 body T_HTML_BADTAGS_U_90_100	eval:html_range('t_bad_tag_unique_ratio','0.90','1.00')
 
 # possible HTML_MESSAGE replacements
-body T_HTML_MESSAGE_1		eval:html_eval('html_text','!= undef')
-body T_HTML_MESSAGE_2		eval:html_eval('html_text','ne ""')
-body T_HTML_MESSAGE_3		eval:html_eval('tags','> 0')
+body T_HTML_MESSAGE_1		eval:html_test('ratio')
+body T_HTML_MESSAGE_2		eval:html_test('tags')
 
 # more portable replacement for RCVD_NUMERIC_HELO that doesn't rely on
 # Received headers using "helo=" prefix
