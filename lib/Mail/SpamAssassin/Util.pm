@@ -736,9 +736,11 @@ sub parse_content_type {
   # Note: the header content may not be whitespace unfolded, so make sure the
   # REs do /s when appropriate.
   #
-  $ct =~ s/;.*$//s;                     # strip everything after first semi-colon
+  $ct =~ s/^\s+//;			# strip leading whitespace
+  $ct =~ s/;.*$//s;			# strip everything after first ';'
   $ct =~ s@^([^/]+(?:/[^/]*)?).*$@$1@s;	# only something/something ...
-  $ct =~ tr/\000-\040\177-\377\042\050\051\054\056\072-\077\100\133-\135//d;    # strip inappropriate chars
+  # strip inappropriate chars
+  $ct =~ tr/\000-\040\177-\377\042\050\051\054\056\072-\077\100\133-\135//d;
   $ct = lc $ct;
 
   # Now that the header has been parsed, return the requested information.
