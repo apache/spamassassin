@@ -155,7 +155,8 @@ sub new {
   # this will hold the database connection params
   $self->{user_scores_dsn} = '';
   $self->{user_scores_sql_username} = '';
-  $self->{user_scores_sql_passowrd} = '';
+  $self->{user_scores_sql_password} = '';
+  $self->{user_scores_sql_table} = 'userpref'; # Morgan - default to userpref for backwords compatibility
 
   $self->{_unnamed_counter} = 'aaaaa';
 
@@ -1291,6 +1292,15 @@ The password for the database username, for the above DSN.
 =cut
     if(/^user[-_]scores[-_]sql[-_]password\s+(\S+)$/) {
       $self->{user_scores_sql_password} = $1; next;
+    }
+
+=item user_scores_sql_table tablename
+
+The table user preferences are stored in, for the above DSN.
+
+=cut
+    if(/^user[-_]scores[-_]sql[-_]table\s+(\S+)$/) {
+      $self->{user_scores_sql_table} = $1; next;
     }
 
 =item spamphrase score phrase ...

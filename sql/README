@@ -18,6 +18,7 @@ SpamAssassin will check the global configuration file (ie. any file matching
 user_scores_dsn			DBI:driver:database:hostname[:port]
 user_scores_sql_username	dbusername
 user_scores_sql_password	dbpassword
+user_scores_sql_table           tablename
 
 The first option, user_scores_dsn, describes the data source name that will be
 used to create the connection to your SQL server.  It MUST be in the format
@@ -61,7 +62,9 @@ simple as could be.
 Database Schema
 ---------------
 
-The database must contain a table named "userpref" with at least three fields:
+The database must contain a table named by 'user_scores_sql_table' (default
+setting: "userpref") with at least three fields:
+
 username varchar(8)	# this is the username whose e-mail is being filtered
 preference varchar(30) 	# the preference (whitelist_from, required_hits, etc.)
 value varchar(100)	# the value of the named preference
