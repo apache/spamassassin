@@ -5,6 +5,7 @@ package main;
 
 use Cwd;
 use File::Path;
+use Config;
 
 # Set up for testing. Exports (as global vars):
 # out: $home: $HOME env variable
@@ -14,8 +15,19 @@ use File::Path;
 sub sa_t_init {
   my $tname = shift;
 
+  my $perl_path;
+  if ($config{PERL_PATH}) {
+    $perl_path = $config{PERL_PATH};
+  }
+  elsif ($^X =~ m|^/|) {
+    $perl_path = $^X;
+  }
+  else {
+    $perl_path = $Config{perlpath};
+    $perl_path =~ s|/[^/]*$|/$^X|;
+  }
   $scr = $ENV{'SCRIPT'};
-  $scr ||= "perl -w ../spamassassin";
+  $scr ||= "$perl_path -w ../spamassassin";
 
   $spamd = $ENV{'SPAMD_SCRIPT'};
   $spamd ||= "../spamd/spamd -x";
